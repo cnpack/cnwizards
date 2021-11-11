@@ -3118,6 +3118,8 @@
   {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
+  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
+  {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
 {$ENDIF}
 
 {$IFDEF BDS2010}
@@ -3175,6 +3177,7 @@
   {$DEFINE OTA_CODE_TEMPLATE_API} // 2006 and above Provides CodeTemplateAPI.
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
+  {$DEFINE SUPPORT_CLASS_VAR}     // 2006 and above Supports class var
 {$ENDIF}
 
 {$IFDEF BDS2005_UP}
