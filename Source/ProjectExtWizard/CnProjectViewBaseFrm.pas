@@ -337,7 +337,10 @@ end;
 { TCnProjectViewBaseForm }
 
 procedure TCnProjectViewBaseForm.FormCreate(Sender: TObject);
+var
+  OldC: TCursor;
 begin
+  OldC := Screen.Cursor;
   Screen.Cursor := crHourGlass;
   try
     FRegExpr := TRegExpr.Create;
@@ -363,7 +366,7 @@ begin
 {$ENDIF}
     UpdateComboBox;
   finally
-    Screen.Cursor := crDefault;
+    Screen.Cursor := OldC;
   end;
 end;
 
