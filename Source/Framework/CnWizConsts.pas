@@ -339,7 +339,7 @@ resourcestring
   // CnUsesTools
   SCnUsesToolsCleaner = 'CnUsesToolsCleaner';
   SCnUsesToolsInitTree = 'CnUsesToolsInitTree';
-  ScnUsesToolsFromIdent = 'ScnUsesToolsFromIdent';
+  SCnUsesToolsFromIdent = 'CnUsesToolsFromIdent';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCommand = 'CnIdeEnhanceMenu';
