@@ -68,7 +68,7 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
       Hint = 'Add Selected Frame to Form'
     end
     inherited actAttribute: TAction
-      Hint = 'Show Property of Selected Frame File'
+      Hint = 'Show Attribute of Selected Frame File'
     end
     inherited actCopy: TAction
       Hint = 'Copy Selected Frame Name to Clipboard'

@@ -291,8 +291,8 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
       OnExecute = actOpenExecute
     end
     object actAttribute: TAction
-      Caption = 'P&roperty'
-      Hint = 'Show Property of Selected Form File'
+      Caption = 'Att&ribute'
+      Hint = 'Show Attribute of Selected Form File'
       ImageIndex = 19
       OnExecute = actAttributeExecute
     end

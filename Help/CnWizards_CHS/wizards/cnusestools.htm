@@ -86,7 +86,7 @@ IDE 仍会自动添加上去。另外还可能包含工程中其它的窗体单元，这些窗体上的部分组件被
 </ul>
 <p class="text" align="left"></p>
 <p class="title">　</p>
-<p class="title">引用单元初始化顺序</p>
+<p class="title">分析初始化顺序</p>
 <p class="text" align="left">本功能能够分析当前工程中所有 Unit 的初始化顺序，并将其列为树状显示，同时可区分单元类型与引用类型等。</p>
 <p class="text" align="left">本功能执行后界面如下图。左边是初始化树显示区域，右边是显示过滤设置，以及文件详细信息。</p>
 <p class="text" align="center">　<img src="usesinittree.png"></p>
@@ -114,6 +114,30 @@ IDE 仍会自动添加上去。另外还可能包含工程中其它的窗体单元，这些窗体上的部分组件被
 <p class="text"><b>显示工程搜索路径中的单元</b>：是否在初始化树中显示处于工程搜索路径中的单元。</p></li>
 	<li>
 <p class="text"><b>显示系统搜索路径中的单元</b>：是否在初始化树中显示处于系统搜索路径中的单元。</p></li>
+</ul>
+<p class="title">　</p>
+<p class="title">根据标识符查找引用单元</p>
+<p class="text" align="left">本功能能够分析系统中所有的 dcu 库文件、获取其内部符号表，并允许根据输入的标识符进行搜索与引用。引用单元时允许选择添加至 interface 部分还是 implementation 部分。</p>
+<p class="text" align="left">本功能执行后界面如下图。</p>
+<p class="text" align="center"><img src="usesfromident.png"></p>
+<p class="text" align="left">
+<ul>
+  <li>
+<p class="text"><b>引用所选单元</b>：当前单元引用所选择的单元。</p></li>
+  <li>
+<p class="text"><b>复制单元名</b>：复制所选择的单元名称到剪贴板。</p></li>
+  <li>
+<p class="text"><b>按标识符开头匹配</b>：查找的时候，输入的字符从标识符的头部开始匹配，标识符头部含有输入字符的才能显示。</p></li>
+  <li>
+<p class="text"><b>按标识符的所有位置匹配</b>：查找的时候，输入的字符匹配标识符的任何部分，标识符含有输入字符的才能显示。</p></li>
+  <li>
+<p class="text"><b>标识符模糊匹配</b>：查找的时候，标识符模糊匹配输入的字符即能显示。</p></li>
+  <li>
+<p class="text"><b>字体</b>：更改列表框字体。</p></li>
+  <li>
+<p class="text"><b>帮助</b>：显示此帮助。</p></li>
+  <li>
+<p class="text"><b>关闭</b>：关闭此窗口。</p></li>
 </ul>
 <p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
 <a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">

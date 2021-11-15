@@ -65,6 +65,7 @@ type
   protected
     procedure UpdateStatusBar; override;
     procedure OpenSelect; override;
+    function GetHelpTopic: string; override;
   public
     function GetDataList: TStringList;
   end;
@@ -196,6 +197,11 @@ begin
   if lvList.Selected <> nil then
     if lvList.Selected.SubItems.Count > 0 then
       Clipboard.AsText := lvList.Selected.SubItems[0];
+end;
+
+function TCnUsesIdentForm.GetHelpTopic: string;
+begin
+  Result := 'CnUsesTools';
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

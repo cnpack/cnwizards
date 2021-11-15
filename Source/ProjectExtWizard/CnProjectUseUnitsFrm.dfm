@@ -96,7 +96,7 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Hint = 'Use Selected Unit'
     end
     inherited actAttribute: TAction
-      Hint = 'Show Property of Selected Unit File'
+      Hint = 'Show Attribute of Selected Unit File'
     end
     inherited actCopy: TAction
       Hint = 'Copy Selected Unit Name to Clipboard'
