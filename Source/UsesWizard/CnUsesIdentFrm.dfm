@@ -62,6 +62,7 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
         Caption = 'Path'
         Width = 320
       end>
+    MultiSelect = False
     OwnerData = True
     OnData = lvListData
   end
@@ -87,8 +88,15 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
     end
   end
   inherited ActionList: TActionList
+    inherited actOpen: TAction
+      Caption = '&Use'
+      Hint = 'Use Selected Unit'
+    end
     inherited actAttribute: TAction
       Visible = False
+    end
+    inherited actCopy: TAction
+      Hint = 'Copy Selected Unit Name to Clipboard'
     end
     inherited actSelectAll: TAction
       Visible = False
@@ -98,6 +106,17 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
     end
     inherited actSelectInvert: TAction
       Visible = False
+    end
+    inherited actMatchStart: TAction
+      Caption = 'Match Identifier &Start'
+      Hint = 'Match Identifier Start'
+    end
+    inherited actMatchAny: TAction
+      Caption = 'Match &All Parts of Identifier'
+      Hint = 'Match All Parts of Identifier'
+    end
+    inherited actMatchFuzzy: TAction
+      Hint = 'Fuzzy Match of Identifier'
     end
     inherited actHookIDE: TAction
       Visible = False

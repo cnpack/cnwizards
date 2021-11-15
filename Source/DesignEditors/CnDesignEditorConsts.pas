@@ -80,17 +80,17 @@ var
   SCnStringsPropEditorComment: string = 'Editor for String List.';
   SCnFileNamePropEditorComment: string = 'Use OpenFile Dialog to Select FileName.';
   SCnSizeConstraintsPropEditorComment: string = 'Editor for Constraints.';
-  SCnFontPropEditorComment: string = 'Editor for Font with more Information.';
-  SCnControlScrollBarPropEditorComment: string = 'Editor for Scrollbar with more Information.';
+  SCnFontPropEditorComment: string = 'Editor for Font with Nore Information.';
+  SCnControlScrollBarPropEditorComment: string = 'Editor for Scrollbar with More Information.';
   SCnBooleanPropEditorComment: string = 'Editor for Bool Property with a Checkbox.';
   SCnSetPropEditorComment: string = 'Editor for Set Property with Checkboxs in Dropdown List, Direct Input Supported.';
-  SCnAlignPropEditorComment: string = 'Editor for Align Property with a bitmap.';
+  SCnAlignPropEditorComment: string = 'Editor for Align Property with a Bitmap.';
   SCnNamePropEditorComment: string = 'Editor for Component Name Property used Component Prefix Rules.';
   SCnImageListCompEditorComment: string = 'Editor for TImageList, XP Style Image and Online Search Supported.';
 
   // TCnMultiLineEditorForm
   SCnPropEditorNoMatch: string = 'No Matched Text!';
-  SCnPropEditorReplaceOK: string = 'Replace OK, %D actions total.';
+  SCnPropEditorReplaceOK: string = 'Replace OK, Totally Count %D.';
   SCnPropEditorCursorPos: string = 'Caret [%D:%D]';
   SCnPropEditorSaveText: string = 'Text Changed. Save it Now?';
 
@@ -102,17 +102,17 @@ var
   SCnPrefixWizardNotExist: string = 'Component Prefix Wizard NOT Exists, Please Enable It.';
 
   // TCnImageListEditor
-  SCnImageListChangeSize: string = 'Do you want to change the image dimensions?';
-  SCnImageListChangeXPStyle: string = 'Do you want to change the image style?';
+  SCnImageListChangeSize: string = 'Do You Want to Change the Image Dimensions?';
+  SCnImageListChangeXPStyle: string = 'Do You Want to Change the Image Style?';
   SCnImageListSearchFailed: string = 'Search image failed!';
-  SCnImageListInvalidFile: string = 'The file is not a valid image file: ';
-  SCnImageListSepBmp: string = 'Image dimensions for %s are greater than imagelist dimensions. Separate into %d separate bitmaps?';
-  SCnImageListNoPngLib: string = 'CnPngLib.dll NOT found! Please Reinstall CnWizards.';
-  SCnImageListExportFailed: string = 'Export images failed!';
-  SCnImageListXPStyleNotSupport: string = 'The ImageList uses XP Style images, but your IDE doesn''t support XPManifest! Do you want to convert images to normal style?';
-  SCnImageListSearchIconsetFailed: string = 'Search icon set failed!';
+  SCnImageListInvalidFile: string = 'The File is NOT a Valid Image File: ';
+  SCnImageListSepBmp: string = 'Image Dimensions for %s are Greater than Imagelist Dimensions. Split it into %d Separated Bitmaps?';
+  SCnImageListNoPngLib: string = 'CnPngLib.dll NOT Found! Please Reinstall CnWizards.';
+  SCnImageListExportFailed: string = 'Export Images Failed!';
+  SCnImageListXPStyleNotSupport: string = 'The ImageList Uses XP Style images, but Your IDE doesn''t Support XPManifest! Do You Want to Convert Images to Normal Style?';
+  SCnImageListSearchIconsetFailed: string = 'Search Icon Set Failed!';
   SCnImageListGotoPage: string = 'Goto Page';
-  SCnImageListGotoPagePrompt: string = 'Enter new page number:';
+  SCnImageListGotoPagePrompt: string = 'Enter New Page Number:';
 
 implementation
 

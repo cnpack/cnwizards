@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnProjectViewBaseFrm, ActnList, ComCtrls, ToolWin, StdCtrls, ExtCtrls,
-  ToolsAPI, CnWizConsts, CnCommon, CnWizUtils, CnWizIdeUtils;
+  Clipbrd, ToolsAPI, CnWizConsts, CnCommon, CnWizUtils, CnWizIdeUtils;
 
 type
   TCnIdentUnitInfo = class(TCnBaseElementInfo)
@@ -59,6 +59,7 @@ type
       Shift: TShiftState);
     procedure rbIntfDblClick(Sender: TObject);
     procedure edtMatchSearchChange(Sender: TObject);
+    procedure actCopyExecute(Sender: TObject);
   private
 
   protected
@@ -187,6 +188,14 @@ begin
     Exit;
 
   inherited;
+end;
+
+procedure TCnUsesIdentForm.actCopyExecute(Sender: TObject);
+begin
+  // 复制单元名
+  if lvList.Selected <> nil then
+    if lvList.Selected.SubItems.Count > 0 then
+      Clipboard.AsText := lvList.Selected.SubItems[0];
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}
