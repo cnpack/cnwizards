@@ -186,6 +186,7 @@ type
       Shift: TShiftState);
     procedure actMatchFuzzyExecute(Sender: TObject);
   private
+    FOutDataListRef: TStringList; // 外部 DataList 临时存储的地方
     FSortIndex: Integer;
     FSortDown: Boolean;
     FUpArrow: TBitmap;
@@ -269,6 +270,9 @@ type
     procedure LoadProjectSettings(Ini: TCustomIniFile; aSection: string);
     procedure SaveProjectSettings(Ini: TCustomIniFile; aSection: string);
   public
+    constructor Create(AOwner: TComponent; ADataList: TStringList = nil); reintroduce;
+    procedure AfterConstruction; override;
+
     procedure SelectOpenedItem;
     procedure LoadSettings(Ini: TCustomIniFile; aSection: string); virtual;
     procedure SaveSettings(Ini: TCustomIniFile; aSection: string); virtual;
@@ -1198,8 +1202,9 @@ procedure TCnProjectViewBaseForm.ClearDataList;
 var
   I: Integer;
 begin
-  for I := 0 to DataList.Count - 1 do
-    DataList.Objects[I].Free;
+  if FOutDataListRef = nil then // 有外部的 List 存在时则不能释放 Object
+    for I := 0 to DataList.Count - 1 do
+      DataList.Objects[I].Free;
   DataList.Clear;
 end;
 
@@ -1426,6 +1431,20 @@ begin
 end;
 
 {$ENDIF}
+
+constructor TCnProjectViewBaseForm.Create(AOwner: TComponent;
+  ADataList: TStringList);
+begin
+  FOutDataListRef := ADataList;
+  inherited Create(AOwner);
+end;
+
+procedure TCnProjectViewBaseForm.AfterConstruction;
+begin
+  inherited; // 这里 DataList 才会 Create
+  if FOutDataListRef <> nil then
+    DataList.Assign(FOutDataListRef);
+end;
 
 { TCnBaseElementInfo }
 

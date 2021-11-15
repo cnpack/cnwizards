@@ -67,11 +67,8 @@ type
     procedure OpenSelect; override;
     function GetHelpTopic: string; override;
   public
-    function GetDataList: TStringList;
-  end;
 
-var
-  CnUsesIdentForm: TCnUsesIdentForm;
+  end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}
 
@@ -82,11 +79,6 @@ implementation
 {$R *.DFM}
 
 { TCnUsesIdentForm }
-
-function TCnUsesIdentForm.GetDataList: TStringList;
-begin
-  Result := DataList;
-end;
 
 procedure TCnUsesIdentForm.lvListData(Sender: TObject; Item: TListItem);
 var

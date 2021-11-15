@@ -108,13 +108,12 @@ type
     FCleanList: TStringList;
     FRegExpr: TRegExpr;
     FUnitsMap: TCnStrToStrHashMap; // 用来去重
-    FUnitIdents: TStringList;
-    FUnitNames: TStringList; // 存储搜索出来的不重复的完整 dcu 们的路径文件名供中间使用
+    FUnitIdents: TStringList; // 存储分析出来的结果供赋值给 DataList
+    FUnitNames: TStringList;  // 存储搜索出来的不重复的完整 dcu 们的路径文件名供中间使用
     FSysPath: string;
 {$IFDEF SUPPORT_CROSS_PLATFORM}
     FCurrPlatform: string;    // 工程的 Platform 发生变化时 lib 库会变，需要重新解析
 {$ENDIF}
-    FJustCreated: Boolean;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
@@ -1434,7 +1433,6 @@ var
   S: string;
 begin
   ToReload := False;
-  FJustCreated := False;
 
   if FUnitsMap = nil then
   begin
@@ -1493,16 +1491,15 @@ begin
 
   if ToReload then
   begin
-    if CnUsesIdentForm <> nil then
-      FreeAndNil(CnUsesIdentForm);
-
-    CnUsesIdentForm := TCnUsesIdentForm.Create(Application);
-    FJustCreated := True;
-
     Screen.Cursor := crHourGlass;
     try
       ShowProgress(SCnUsesUnitAnalyzeWaiting);
-      LoadSysUnitsToList(CnUsesIdentForm.GetDataList);
+      if FUnitIdents = nil then
+        FUnitIdents := TStringList.Create
+      else
+        FUnitIdents.Clear;
+
+      LoadSysUnitsToList(FUnitIdents);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('LoadSysUnitsToList Complete.');
 {$ENDIF}
@@ -1654,11 +1651,6 @@ begin
   else
     FUnitNames.Clear;
 
-  if FUnitIdents = nil then
-    FUnitIdents := TStringList.Create
-  else
-    FUnitIdents.Clear;
-
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Prepare to Call IdeEnumUsesIncludeUnits');
 {$ENDIF}
@@ -1752,37 +1744,46 @@ begin
   if CurrentIsSource and CnOtaGeneralGetCurrPosToken(Token, Idx) then
     S := string(Token);
 
-  if FJustCreated then // 如果上面 CheckReLoadUnitsMap 刚创建了 Form，则加载设置
+  with TCnUsesIdentForm.Create(Application, FUnitIdents) do
   begin
     Ini := CreateIniFile;
     try
-      CnUsesIdentForm.LoadSettings(Ini, '');
+      LoadSettings(Ini, '');
     finally
       Ini.Free;
     end;
-  end;
 
-  if S <> '' then
-  begin
-    CnUsesIdentForm.edtMatchSearch.Text := S;
-    CnUsesIdentForm.edtMatchSearch.SelStart := Length(S);
+    if S <> '' then
+    begin
+      edtMatchSearch.Text := S;
+      edtMatchSearch.SelStart := Length(S);
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Set Text %s to Search, Got Result %d',
-      [S, CnUsesIdentForm.lvList.Items.Count]);
+      CnDebugger.LogFmt('Set Text %s to Search, Got Result %d',
+        [S, lvList.Items.Count]);
 {$ENDIF}
 
-    if CnUsesIdentForm.lvList.Items.Count = 0 then
-    begin
-      ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
-      Exit;
+      if lvList.Items.Count = 0 then
+      begin
+        ErrorDlg(Format(SCNUsesUnitFromIdentErrorFmt, [S]));
+        Exit;
+      end
     end
-  end
-  else
-    CnUsesIdentForm.edtMatchSearch.Text := '';
+    else
+      edtMatchSearch.Text := '';
 
-  if CnUsesIdentForm.ShowModal = mrOk then
-  begin
+    if ShowModal = mrOk then
+    begin
+      // uses 动作已在窗体内处理
+      BringIdeEditorFormToFront;
+    end;
 
+    Ini := CreateIniFile;
+    try
+      SaveSettings(Ini, '');
+    finally
+      Ini.Free;
+    end;
+    Free;
   end;
 end;
 
