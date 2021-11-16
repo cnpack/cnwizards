@@ -204,6 +204,7 @@ type
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
+    procedure DoOpenSelect;
 {$IFNDEF STAND_ALONE}
     procedure FirstUpdate(Sender: TObject);
     procedure ChangeIconToIDEImageList;
@@ -499,7 +500,7 @@ end;
 
 procedure TCnProjectViewBaseForm.actOpenExecute(Sender: TObject);
 begin
-  OpenSelect;
+  DoOpenSelect;
 end;
 
 procedure TCnProjectViewBaseForm.actHookIDEExecute(Sender: TObject);
@@ -610,7 +611,7 @@ end;
 
 procedure TCnProjectViewBaseForm.lvListDblClick(Sender: TObject);
 begin
-  OpenSelect;
+  DoOpenSelect;
 end;
 
 procedure TCnProjectViewBaseForm.cbbProjectListChange(Sender: TObject);
@@ -1444,6 +1445,11 @@ begin
   inherited; // 这里 DataList 才会 Create
   if FOutDataListRef <> nil then
     DataList.Assign(FOutDataListRef);
+end;
+
+procedure TCnProjectViewBaseForm.DoOpenSelect;
+begin
+  OpenSelect;
 end;
 
 { TCnBaseElementInfo }

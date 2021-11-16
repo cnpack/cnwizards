@@ -138,32 +138,36 @@ var
   EditView: IOTAEditView;
   HasUses: Boolean;
   LinearPos: LongInt;
-  Sl: TStrings;
+  Sl: TStringList;
   I: Integer;
 begin
-  if lvList.SelCount > 0 then
+  if lvList.Selected <> nil then
   begin
     ModalResult := mrOk;
     Sl := TStringList.Create;
-    for I := 0 to lvList.Items.Count - 1 do
-      if lvList.Items[I].Selected then
-        Sl.Add(lvList.Items[I].SubItems[0]);
+    try
+      Sl.Text := lvList.Selected.SubItems[0];
+      if Sl.Text = '' then
+        Exit;
 
-    IsIntfOrH := rbIntf.Checked;
-    EditView := CnOtaGetTopMostEditView;
-    if EditView = nil then
-      Exit;
+      IsIntfOrH := rbIntf.Checked;
+      EditView := CnOtaGetTopMostEditView;
+      if EditView = nil then
+        Exit;
 
-    // Pascal 只需要使用当前文件的 EditView 插入 uses，还得处理无 uses 的情况
-    if not SearchUsesInsertPosInCurrentPas(IsIntfOrH, HasUses, CharPos) then
-    begin
-      ErrorDlg(SCnProjExtUsesNoPasPosition);
-      Exit;
+      // Pascal 只需要使用当前文件的 EditView 插入 uses，还得处理无 uses 的情况
+      if not SearchUsesInsertPosInCurrentPas(IsIntfOrH, HasUses, CharPos) then
+      begin
+        ErrorDlg(SCnProjExtUsesNoPasPosition);
+        Exit;
+      end;
+
+      // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
+      LinearPos := EditView.CharPosToPos(CharPos);
+      CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(False, HasUses, False, Sl), LinearPos);
+    finally
+      Sl.Free;
     end;
-
-    // 已经得到行 1 列 0 开始的 CharPos，用 EditView.CharPosToPos(CharPos) 转换为线性;
-    LinearPos := EditView.CharPosToPos(CharPos);
-    CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(False, HasUses, False, Sl), LinearPos);
   end;
 end;
 
