@@ -1791,7 +1791,7 @@ end;
 
 function TCnUsesCleanerForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesTools';
+  Result := 'CnUsesUnitsTools';
 end;
 
 procedure TCnUsesCleanerForm.btnHelpClick(Sender: TObject);

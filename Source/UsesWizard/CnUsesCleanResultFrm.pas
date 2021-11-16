@@ -344,7 +344,7 @@ end;
 
 function TCnUsesCleanResultForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesTools';
+  Result := 'CnUsesUnitsTools';
 end;
 
 procedure TCnUsesCleanResultForm.btnHelpClick(Sender: TObject);

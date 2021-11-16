@@ -197,7 +197,7 @@ end;
 
 function TCnUsesIdentForm.GetHelpTopic: string;
 begin
-  Result := 'CnUsesTools';
+  Result := 'CnUsesUnitsTools';
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}
