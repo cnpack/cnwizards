@@ -120,7 +120,6 @@ USEFORMNS("ProjectExtWizard\CnProjectViewBaseFrm.pas", Cnprojectviewbasefrm, CnP
 USEUNIT("ReopenWizard\CnFilesSnapshot.pas");
 USEFORMNS("ReopenWizard\CnFilesSnapshotManageFrm.pas", Cnfilessnapshotmanagefrm, CnProjectFilesSnapshotManageForm);
 USEUNIT("ReopenWizard\CnRoClasses.pas");
-USEUNIT("ReopenWizard\CnRoConst.pas");
 USEUNIT("ReopenWizard\CnRoFilesList.pas");
 USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, RecentFilesFrame); /* TFrame: File Type */
 USEUNIT("ReopenWizard\CnRoInterfaces.pas");

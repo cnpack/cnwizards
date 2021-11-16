@@ -59,7 +59,7 @@
       ..\Dcu\CnExploreFilter.obj ..\Dcu\CnExploreFilterEditor.obj 
       ..\Dcu\CnProjectViewBaseFrm.obj ..\Dcu\CnFilesSnapshot.obj 
       ..\Dcu\CnFilesSnapshotManageFrm.obj ..\Dcu\CnRoClasses.obj 
-      ..\Dcu\CnRoConst.obj ..\Dcu\CnRoFilesList.obj ..\Dcu\CnRoFrmFileList.obj 
+      ..\Dcu\CnRoFilesList.obj ..\Dcu\CnRoFrmFileList.obj 
       ..\Dcu\CnRoInterfaces.obj ..\Dcu\CnRoOptions.obj ..\Dcu\CnRoWizard.obj 
       ..\Dcu\CnWinTopRoller.obj ..\Dcu\CnAlignPropEditor.obj 
       ..\Dcu\CnPasCodeParser.obj ..\Dcu\CnCppCodeParser.obj 
@@ -330,7 +330,6 @@
       <FILE FILENAME="ReopenWizard\CnFilesSnapshot.pas" FORMNAME="" UNITNAME="CnFilesSnapshot" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnFilesSnapshotManageFrm.pas" FORMNAME="CnProjectFilesSnapshotManageForm" UNITNAME="Cnfilessnapshotmanagefrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoClasses.pas" FORMNAME="" UNITNAME="CnRoClasses" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="ReopenWizard\CnRoConst.pas" FORMNAME="" UNITNAME="CnRoConst" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoFilesList.pas" FORMNAME="" UNITNAME="CnRoFilesList" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoFrmFileList.pas" FORMNAME="RecentFilesFrame" UNITNAME="Cnrofrmfilelist" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoInterfaces.pas" FORMNAME="" UNITNAME="CnRoInterfaces" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -62,7 +62,7 @@
       ..\Dcu\CnExploreFilter.obj ..\Dcu\CnExploreFilterEditor.obj 
       ..\Dcu\CnProjectViewBaseFrm.obj ..\Dcu\CnFilesSnapshot.obj 
       ..\Dcu\CnFilesSnapshotManageFrm.obj ..\Dcu\CnRoClasses.obj 
-      ..\Dcu\CnRoConst.obj ..\Dcu\CnRoFilesList.obj ..\Dcu\CnRoFrmFileList.obj 
+      ..\Dcu\CnRoFilesList.obj ..\Dcu\CnRoFrmFileList.obj 
       ..\Dcu\CnRoInterfaces.obj ..\Dcu\CnRoOptions.obj ..\Dcu\CnRoWizard.obj 
       ..\Dcu\CnWinTopRoller.obj ..\Dcu\CnAlignPropEditor.obj 
       ..\Dcu\CnPasCodeParser.obj ..\Dcu\CnCppCodeParser.obj 
