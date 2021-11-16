@@ -4,8 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, {$IFNDEF UNICODE}mwBCBTokenList, mPasLex {$ELSE}
-  CnPasWideLex, CnBCBWideTokenList {$ENDIF},
+  StdCtrls, mwBCBTokenList, mPasLex, CnPasWideLex, CnBCBWideTokenList,
   Contnrs;
 
 type
