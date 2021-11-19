@@ -272,8 +272,13 @@ const
   csSortByClassName = 'SortByClassName';
   csSizeSpace = 'NonArrangeSizeSpace';
   csNonVisualSize = 28;
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+  csNonVisualCaptionSize = 18;  // D110 下不可视组件的文字高度有变化
+{$ELSE}
   csNonVisualCaptionSize = 14;
+{$ENDIF}
   csNonVisualCaptionV = 30;
+  csNonVisualMiddleGap = 4; 
 
   csSpaceIncStep = 1;
 
@@ -1128,7 +1133,7 @@ begin
     for i := CompList.Count - 1 downto 0 do
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('%d. %s: %s, X %d, Y %d.', [ I,
+      CnDebugger.LogFmt('Component #%d. %s: %s, X %d, Y %d.', [ I,
         TComponent(CompList.Items[i]).ClassName,
         TComponent(CompList.Items[i]).Name,
         CompPosArray[i].X + OffSetX,
@@ -1229,18 +1234,18 @@ var
 
   // 此函数目前已支持 DataModule
   procedure GetComponentContainerHandle(AForm: TCustomForm; L, T: Integer;
-    var H1, H2: HWND; var Offset: TPoint);
+    var InternalH1, InternalH2: HWND; var Offset: TPoint);
   var
     R1, R2: TRect;
     P: TPoint;
     ParentHandle: HWND;
     AControl: TWinControl;
-    I: Integer;
+    I, NVSize, CapV, CapSize, MidGap: Integer;
   begin
     ParentHandle := AForm.Handle;
     AControl := AForm;
 {$IFDEF DEBUG}
-    CnDebugger.LogComponent(AForm);
+//    CnDebugger.LogComponent(AForm);
 {$ENDIF}
 
 {$IFDEF COMPILER5}
@@ -1288,35 +1293,46 @@ var
     end;
 {$ENDIF}
 
-    H2 := 0;
-    H1 := GetWindow(ParentHandle, GW_CHILD);
-    H1 := GetWindow(H1, GW_HWNDLAST);
+    InternalH2 := 0;
+    InternalH1 := GetWindow(ParentHandle, GW_CHILD);
+    InternalH1 := GetWindow(InternalH1, GW_HWNDLAST);
 
-    while H1 <> 0 do
+    NVSize := IdeGetScaledPixelsFromOrigin(csNonVisualSize, AControl); // 有 HDPI 放大
+    CapV := IdeGetScaledPixelsFromOrigin(csNonVisualCaptionV, AControl);
+    CapSize := IdeGetScaledPixelsFromOrigin(csNonVisualCaptionSize, AControl);
+    MidGap := IdeGetScaledPixelsFromOrigin(csNonVisualMiddleGap, AControl);
+
+    while InternalH1 <> 0 do
     begin
-      if HWndIsNonvisualComponent(H1) and GetWindowRect(H1, R1) then
+      if HWndIsNonvisualComponent(InternalH1) and GetWindowRect(InternalH1, R1) then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogInteger(H1, 'H1: ');
+        CnDebugger.LogInteger(InternalH1, 'GetComponentContainerHandle InternalH1: ');
+        CnDebugger.LogRect(R1, 'GetComponentContainerHandle Rect1: ');
 {$ENDIF}
         P.x := R1.Left;
         P.y := R1.Top;
         P := AControl.ScreenToClient(P);
 
         // 此处取得组件对应的窗体句柄
-        if (P.x = L) and (P.y = T) and (R1.Right - R1.Left = csNonVisualSize) and
-          (R1.Bottom - R1.Top = csNonVisualSize) then
+        if (P.x = L) and (P.y = T) and (R1.Right - R1.Left = NVSize) and
+          (R1.Bottom - R1.Top = NVSize) then
         begin
-          H2 := GetWindow(ParentHandle, GW_CHILD);
-          H2 := GetWindow(H2, GW_HWNDLAST);
-          while H2 <> 0 do
+          InternalH2 := GetWindow(ParentHandle, GW_CHILD);
+          InternalH2 := GetWindow(InternalH2, GW_HWNDLAST);
+
+          while InternalH2 <> 0 do
           begin
-            if HWndIsNonvisualComponent(H2) and GetWindowRect(H2, R2) then
+            if HWndIsNonvisualComponent(InternalH2) and GetWindowRect(InternalH2, R2) then
             begin
+{$IFDEF DEBUG}
+              CnDebugger.LogInteger(InternalH2, 'GetComponentContainerHandle InternalH2: ');
+              CnDebugger.LogRect(R2, 'GetComponentContainerHandle Rect2: ');
+{$ENDIF}
               // 此处取得组件标题对应的窗体句柄
-              if (R2.Top - R1.Top = csNonVisualCaptionV) and
-                (Abs(R2.Left + R2.Right - R1.Left - R1.Right) <= 1) and
-                (R2.Bottom - R2.Top = csNonVisualCaptionSize) then
+              if (R2.Top - R1.Top = CapV) and
+                (Abs(R2.Left + R2.Right - R1.Left - R1.Right) <= MidGap) and // 居中
+                (R2.Bottom - R2.Top = CapSize) then
               begin
                 Offset.x := R2.Left - R1.Left;
                 Offset.y := R2.Top - R1.Top;
@@ -1324,14 +1340,14 @@ var
               end;
             end;
 
-            H2 := GetWindow(H2, GW_HWNDPREV);
+            InternalH2 := GetWindow(InternalH2, GW_HWNDPREV);
           end;
 
           Exit;
         end;
       end;
 
-      H1 := GetWindow(H1, GW_HWNDPREV);
+      InternalH1 := GetWindow(InternalH1, GW_HWNDPREV);
     end;
   end;
 begin
@@ -1347,15 +1363,20 @@ begin
   Component.DesignInfo := Integer(PointToSmallPoint(Point(X, Y)));
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('H1 %d, H2 %d', [H1, H2]);
+  CnDebugger.LogFmt('NonVisualArrange Get Handles H1 %d, H2 %d', [H1, H2]);
 {$ENDIF}
 
   // 设置组件窗体位置
   if H1 <> 0 then
+  begin
     SetWindowPos(H1, 0, X, Y, 0, 0, SWP_NOSIZE or SWP_NOZORDER);
+  end;
+
   // 如果有组件标题，设置标题位置
   if H2 <> 0 then
+  begin
     SetWindowPos(H2, 0, X + Offset.x, Y + Offset.y, 0, 0, SWP_NOSIZE or SWP_NOZORDER);
+  end;
 end;
 
 //------------------------------------------------------------------------------
