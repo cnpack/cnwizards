@@ -1998,7 +1998,11 @@ procedure TCnInputHelper.ClearList;
 begin
   FSymbols.Clear;
   FItems.Clear;
-  List.SetCount(0);
+  try
+    List.SetCount(0); // 退出时有可能出 No Parent 错，屏蔽
+  except
+    ;
+  end;
 end;
 
 function TCnInputHelper.GetIsShowing: Boolean;
