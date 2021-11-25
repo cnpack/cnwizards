@@ -273,7 +273,7 @@ const
   csSizeSpace = 'NonArrangeSizeSpace';
   csNonVisualSize = 28;
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
-  csNonVisualCaptionSize = 18;  // D110 下不可视组件的文字高度有变化
+  csNonVisualCaptionSize = 18;  // D110 下不可视组件的文字高度有变化且不固定
 {$ELSE}
   csNonVisualCaptionSize = 14;
 {$ENDIF}
@@ -1332,7 +1332,7 @@ var
               // 此处取得组件标题对应的窗体句柄
               if (R2.Top - R1.Top = CapV) and
                 (Abs(R2.Left + R2.Right - R1.Left - R1.Right) <= MidGap) and // 居中
-                (R2.Bottom - R2.Top = CapSize) then
+                ((R2.Bottom - R2.Top = CapSize) {$IFDEF DELPHI110_ALEXANDRIA_UP} or ((R1.Bottom - R2.Top) in [1..4]){$ENDIF}) then
               begin
                 Offset.x := R2.Left - R1.Left;
                 Offset.y := R2.Top - R1.Top;
