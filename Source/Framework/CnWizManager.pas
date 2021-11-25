@@ -448,6 +448,14 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('DoLaterLoad');
 {$ENDIF}
+
+{$IFDEF DEBUG}
+  {$IFDEF IDE_SUPPORT_HDPI}
+    if Application.MainForm <> nil then
+      CnDebugger.LogInteger(Application.MainForm.CurrentPPI, 'Application MainForm PPI: ');
+  {$ENDIF}
+{$ENDIF}
+
   FLaterLoadTimer.Enabled := False;
   for I := 0 to WizardCount - 1 do
   try
