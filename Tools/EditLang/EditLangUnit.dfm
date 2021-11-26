@@ -58,6 +58,9 @@ object EditLangForm: TEditLangForm
       BevelInner = bvRaised
       BevelOuter = bvLowered
       TabOrder = 0
+      DesignSize = (
+        441
+        33)
       object cbbLeftDir: TComboBox
         Left = 8
         Top = 6
@@ -73,6 +76,7 @@ object EditLangForm: TEditLangForm
         Width = 209
         Height = 21
         Style = csDropDownList
+        Anchors = [akLeft, akTop, akRight]
         TabOrder = 1
         OnChange = cbbLeftFileChange
       end
@@ -86,6 +90,9 @@ object EditLangForm: TEditLangForm
       BevelInner = bvRaised
       BevelOuter = bvLowered
       TabOrder = 1
+      DesignSize = (
+        448
+        33)
       object cbbRightDir: TComboBox
         Left = 8
         Top = 6
@@ -101,6 +108,7 @@ object EditLangForm: TEditLangForm
         Width = 209
         Height = 21
         Style = csDropDownList
+        Anchors = [akLeft, akTop, akRight]
         TabOrder = 1
         OnChange = cbbRightFileChange
       end
@@ -127,6 +135,8 @@ object EditLangForm: TEditLangForm
     BorderWidth = 1
     Caption = 'tlbEdit'
     Images = ilMain
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 3
     object btnNextDiff: TToolButton
       Left = 0
@@ -174,6 +184,60 @@ object EditLangForm: TEditLangForm
       Top = 0
       Action = actTSortRight
     end
+    object btn3: TToolButton
+      Left = 154
+      Top = 0
+      Width = 8
+      Caption = 'btn3'
+      ImageIndex = 6
+      Style = tbsSeparator
+    end
+    object btnCopyRightEmpty: TToolButton
+      Left = 162
+      Top = 0
+      Action = actCopyRightEmpty
+    end
+    object btnCopyLeftEmpty: TToolButton
+      Left = 185
+      Top = 0
+      Action = actCopyLeftEmpty
+    end
+    object btn4: TToolButton
+      Left = 208
+      Top = 0
+      Width = 8
+      Caption = 'btn4'
+      ImageIndex = 0
+      Style = tbsSeparator
+    end
+    object btnSearchLeftToRight: TToolButton
+      Left = 216
+      Top = 0
+      Action = actSearchLeftToRight
+    end
+    object btnSearchRightToLeft: TToolButton
+      Left = 239
+      Top = 0
+      Action = actSearchRightToLeft
+    end
+    object btn5: TToolButton
+      Left = 262
+      Top = 0
+      Width = 8
+      Caption = 'btn5'
+      ImageIndex = 0
+      Style = tbsSeparator
+    end
+    object btnSearchAllLeftToRight: TToolButton
+      Left = 270
+      Top = 0
+      Action = actSearchAllLeftToRight
+    end
+    object btnSearchAllRightPartToLeft: TToolButton
+      Left = 293
+      Top = 0
+      Action = actSearchAllRightPartToLeft
+    end
   end
   object actlstMain: TActionList
     Images = ilMain
@@ -181,40 +245,76 @@ object EditLangForm: TEditLangForm
     Top = 224
     object actNextDiff: TAction
       Caption = 'Next Different Line'
+      Hint = 'Next Different Line'
       ImageIndex = 0
       OnExecute = actNextDiffExecute
     end
     object actPrevDiff: TAction
       Caption = 'Previous Different Line'
+      Hint = 'Previous Different Line'
       ImageIndex = 1
       OnExecute = actPrevDiffExecute
     end
     object actSaveLeft: TAction
-      Caption = 'actSaveLeft'
+      Caption = 'Save Left File'
+      Hint = 'Save Left File'
       ImageIndex = 2
       OnExecute = actSaveLeftExecute
     end
     object actSaveRight: TAction
-      Caption = 'actSaveRight'
+      Caption = 'Save Right File'
+      Hint = 'Save Right File'
       ImageIndex = 3
       OnExecute = actSaveRightExecute
     end
     object actTSortLeft: TAction
-      Caption = 'actTSortLeft'
+      Caption = 'Sort Left'
+      Hint = 'Sort Left'
       ImageIndex = 4
       OnExecute = actTSortLeftExecute
     end
     object actTSortRight: TAction
-      Caption = 'actTSortRight'
+      Caption = 'Sort Right'
+      Hint = 'Sort Right'
       ImageIndex = 5
       OnExecute = actTSortRightExecute
+    end
+    object actCopyLeftEmpty: TAction
+      Caption = 'Copy Left Empty Lines'
+      Hint = 'Copy Right Lines when Left is Empty'
+      OnExecute = actCopyLeftEmptyExecute
+    end
+    object actCopyRightEmpty: TAction
+      Caption = 'Copy Right Empty Lines'
+      Hint = 'Copy Left Lines whe Right is Empty'
+      OnExecute = actCopyRightEmptyExecute
+    end
+    object actSearchLeftToRight: TAction
+      Caption = 'Search Left Part To Right'
+      Hint = 'Search Left Part To Right'
+      OnExecute = actSearchLeftToRightExecute
+    end
+    object actSearchRightToLeft: TAction
+      Caption = 'Search Right Part To Left'
+      Hint = 'Search Right Part To Left'
+      OnExecute = actSearchRightToLeftExecute
+    end
+    object actSearchAllLeftToRight: TAction
+      Caption = 'Search All Left Part To Right'
+      Hint = 'Search All Left Part To Right'
+      OnExecute = actSearchAllLeftToRightExecute
+    end
+    object actSearchAllRightPartToLeft: TAction
+      Caption = 'Search All Right Part To Left'
+      Hint = 'Search All Right Part To Left'
+      OnExecute = actSearchAllRightPartToLeftExecute
     end
   end
   object ilMain: TImageList
     Left = 160
     Top = 320
     Bitmap = {
-      494C010106000B00040010001000FFFFFFFFFF00FFFFFFFFFFFFFFFF424D3600
+      494C010106000800080010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -482,6 +582,7 @@ object EditLangForm: TEditLangForm
       FC3FFC3F80018001F81FFC3F80018001F00FFC3F00018000E007FC3F00018000
       FC3FFC3F80018001FC3FFC3F80018001FC3FFC3F80018001FC3FFC3F80018001
       FC3FE00780018001FC3FF00F80018001FC3FF81F80018001FC3FFC3F80038003
-      FFFFFE7F80078007FFFFFFFF800F800F}
+      FFFFFE7F80078007FFFFFFFF800F800F00000000000000000000000000000000
+      000000000000}
   end
 end

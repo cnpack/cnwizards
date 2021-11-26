@@ -7,7 +7,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   FileCtrl, CnCommon, ExtCtrls, StdCtrls, ComCtrls, Grids, ToolWin, ImgList,
-  ActnList;
+  ActnList, Clipbrd;
 
 type
   TEditLangForm = class(TForm)
@@ -38,6 +38,21 @@ type
     actTSortRight: TAction;
     btnTSortLeft: TToolButton;
     btnTSortRight: TToolButton;
+    btn3: TToolButton;
+    actCopyLeftEmpty: TAction;
+    actCopyRightEmpty: TAction;
+    actSearchLeftToRight: TAction;
+    actSearchRightToLeft: TAction;
+    btnCopyLeftEmpty: TToolButton;
+    btnCopyRightEmpty: TToolButton;
+    btn4: TToolButton;
+    btnSearchLeftToRight: TToolButton;
+    btnSearchRightToLeft: TToolButton;
+    actSearchAllLeftToRight: TAction;
+    actSearchAllRightPartToLeft: TAction;
+    btn5: TToolButton;
+    btnSearchAllLeftToRight: TToolButton;
+    btnSearchAllRightPartToLeft: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -54,6 +69,12 @@ type
       var CanSelect: Boolean);
     procedure actTSortLeftExecute(Sender: TObject);
     procedure actTSortRightExecute(Sender: TObject);
+    procedure actCopyLeftEmptyExecute(Sender: TObject);
+    procedure actCopyRightEmptyExecute(Sender: TObject);
+    procedure actSearchLeftToRightExecute(Sender: TObject);
+    procedure actSearchRightToLeftExecute(Sender: TObject);
+    procedure actSearchAllLeftToRightExecute(Sender: TObject);
+    procedure actSearchAllRightPartToLeftExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -61,10 +82,10 @@ type
     FRightFileName: string;
     FLeftLangFiles: TStrings;
     FRightLangFiles: TStrings;
-    FLeftContent: TStrings;
-    FRightContent: TStrings;
-    FLeftDisplay: TStrings;
-    FRightDisplay: TStrings;
+    FLeftContent: TStrings;  // 左边文件的内容
+    FRightContent: TStrings; // 右边文件的内容
+    FLeftDisplay: TStrings;  // 左边文件的内容插入对齐后的空行的内容，用于塞入 Grid，Grid 编辑后不一致
+    FRightDisplay: TStrings; // 右边文件的内容插入对齐后的空行的内容，用于塞入 Grid，Grid 编辑后不一致
     function SaveLinesToFile(Lines: TStrings; const FileName: string): Boolean;
     procedure SyncLeftGridToDisplay;
     procedure SyncRightGridToDisplay;
@@ -72,9 +93,11 @@ type
     function LineEqual(const S1: string; const S2: string): Boolean;
     procedure SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
     procedure RearrangeDisplays;
-    // 根据 LeftContent/RightContent实施对比，把对齐结果放到 LeftDisplay/RightDisplay中
+    // 根据 LeftContent/RightContent 实施对比，把对齐结果放到 LeftDisplay/RightDisplay 中
     procedure UpdateToGrid;
     procedure StringsTSort(Lines: TStrings);
+    procedure SearchLeftToRight(Line: Integer);
+    procedure SearchRightToLeft(Line: Integer);
   public
     { Public declarations }
   end;
@@ -139,6 +162,18 @@ begin
     if L < J then QuickSortStrings(Lines, L, J);
     L := I;
   until I >= R;
+end;
+
+function EndWithStr(const S, SubFix: string): Boolean;
+var
+  P: Integer;
+begin
+  Result := False;
+  if (S = '') or (SubFix = '') then
+    Exit;
+
+  P := Pos(SubFix, S);
+  Result := (P > 0) and (P + Length(SubFix) - 1 = Length(S));
 end;
 
 procedure TEditLangForm.FormCreate(Sender: TObject);
@@ -245,6 +280,92 @@ begin
     F := FindNext(SearchRec);
   end;
   FindClose(SearchRec);
+end;
+
+procedure TEditLangForm.SearchLeftToRight(Line: Integer);
+var
+  I, L, P: Integer;
+  Left, Right, Root: string;
+begin
+  // 针对选中的左侧条目，找等号后原文在其他地方的索引，找对应译文的等号后的部分，拼起来
+  if Line < 0 then
+    Exit;
+
+  Left := StringGrid.Cells[LEFT_EDITING_COL, Line];
+  Right := StringGrid.Cells[RIGHT_EDITING_COL, Line];
+
+  if (Right <> '') and (Right[Length(Right)] <> '=') then
+    Exit;
+  L := Pos('=', Left);
+  if L < 0 then
+    Exit;
+
+  Root := Copy(Left, 1, L - 1); // 不要 =
+  Left := Copy(Left, L + 1, MaxInt); // 也不要 =
+  if Left = '' then
+    Exit;
+
+  // 在 StringGrid.Cols[LEFT_EDITING_COL] 里找 Left 结尾的序号
+  for L := 0 to StringGrid.RowCount - 1 do
+  begin
+    if EndWithStr(StringGrid.Cells[LEFT_EDITING_COL, L], Left) then // 找到了原文
+    begin
+      Right := StringGrid.Cells[RIGHT_EDITING_COL, L];
+      P := Pos('=', Right);
+      if P < 0 then
+        Continue;
+
+      Right := Copy(Right, P + 1, MaxInt); // 找到了译文
+      if Right <> '' then
+      begin
+        StringGrid.Cells[RIGHT_EDITING_COL, Line] := Root + '=' + Right;
+        Exit;
+      end;
+    end;
+  end;
+end;
+
+procedure TEditLangForm.SearchRightToLeft(Line: Integer);
+var
+  I, L, P: Integer;
+  Left, Right, Root: string;
+begin
+  // 针对选中的右侧条目，找等号后原文在其他地方的索引，找对应译文的等号后的部分，拼起来
+  if Line < 0 then
+    Exit;
+
+  Left := StringGrid.Cells[LEFT_EDITING_COL, Line];
+  Right := StringGrid.Cells[RIGHT_EDITING_COL, Line];
+
+  if (Left <> '') and (Left[Length(Left)] <> '=') then
+    Exit;
+  L := Pos('=', Right);
+  if L < 0 then
+    Exit;
+
+  Root := Copy(Right, 1, L - 1); // 不要 =
+  Right := Copy(Right, L + 1, MaxInt); // 也不要 =
+  if Right = '' then
+    Exit;
+
+  // 在 StringGrid.Cols[RIGHT_EDITING_COL] 里找 Left 结尾的序号
+  for L := 0 to StringGrid.RowCount - 1 do
+  begin
+    if EndWithStr(StringGrid.Cells[RIGHT_EDITING_COL, L], Right) then // 找到了原文
+    begin
+      Left := StringGrid.Cells[LEFT_EDITING_COL, L];
+      P := Pos('=', Left);
+      if P < 0 then
+        Continue;
+
+      Left := Copy(Left, P + 1, MaxInt); // 找到了译文
+      if Left <> '' then
+      begin
+        StringGrid.Cells[LEFT_EDITING_COL, Line] := Root + '=' + Left;
+        Exit;
+      end;
+    end;
+  end;
 end;
 
 procedure TEditLangForm.spl1Moved(Sender: TObject);
@@ -384,6 +505,7 @@ procedure TEditLangForm.FormResize(Sender: TObject);
 const
   MARGIN = 10;
 begin
+  pnlLeftTop.Width := pnlTop.Width div 2 - 10;
   ChangeGridColumnSize;
   statMain.Panels[0].Width := Width div 2 - MARGIN;
 end;
@@ -410,7 +532,7 @@ end;
 
 procedure TEditLangForm.RearrangeDisplays;
 var
-  I, J, L, R, LS, RS, LAC, RAC: Integer;
+  I, L, R, LS, RS, LAC, RAC: Integer;
   Matched: Boolean;
 begin
   FLeftDisplay.Clear;
@@ -460,7 +582,7 @@ begin
 
       if Matched then
       begin
-        // 左不动，右边找到了，左边加RAC个空行后加L，右边加R一直加到RS
+        // 左不动，右边找到了，左边加 RAC 个空行后加L，右边加 R 一直加到 RS
         for I := 1 to RAC do
           FLeftDisplay.Add('');
         FLeftDisplay.Add(FLeftContent[L]);
@@ -492,7 +614,7 @@ begin
 
       if Matched then
       begin
-        // 右不动，左边找到了，右边加LAC个空行后加R，左边加L一直加到LS
+        // 右不动，左边找到了，右边加 LAC 个空行后加 R，左边加L一直加到 LS
         for I := 1 to LAC do
           FRightDisplay.Add('');
         FRightDisplay.Add(FRightContent[R]);
@@ -517,6 +639,62 @@ begin
       end;
       Break;
     end;
+  end;
+end;
+
+procedure TEditLangForm.actCopyLeftEmptyExecute(Sender: TObject);
+var
+  I: Integer;
+  List: TStringList;
+begin
+  // Copy Right Lines that has NO Corresponding Lines at Left Side to Clipboard.
+  List := TStringList.Create;
+  try
+    for I := 0 to StringGrid.RowCount - 1 do
+    begin
+      if (StringGrid.Cells[LEFT_EDITING_COL, I] = '') or
+        EndWithStr(StringGrid.Cells[LEFT_EDITING_COL, I], '=') then
+        if StringGrid.Cells[RIGHT_EDITING_COL, I] <> '' then
+          List.Add(StringGrid.Cells[RIGHT_EDITING_COL, I]);
+    end;
+
+    if List.Count > 0 then
+    begin
+      Clipboard.AsText := List.Text;
+      ShowMessage(IntToStr(List.Count) + ' Line(s) Copied.');
+    end
+    else
+      ShowMessage('No Content to Copy.');
+  finally
+    List.Free;
+  end;
+end;
+
+procedure TEditLangForm.actCopyRightEmptyExecute(Sender: TObject);
+var
+  I: Integer;
+  List: TStringList;
+begin
+  // Copy Left Lines that has NO Corresponding Lines at Right Side to Clipboard.
+  List := TStringList.Create;
+  try
+    for I := 0 to StringGrid.RowCount - 1 do
+    begin
+      if (StringGrid.Cells[RIGHT_EDITING_COL, I] = '') or
+        EndWithStr(StringGrid.Cells[RIGHT_EDITING_COL, I], '=') then
+        if StringGrid.Cells[LEFT_EDITING_COL, I] <> '' then
+          List.Add(StringGrid.Cells[LEFT_EDITING_COL, I]);
+    end;
+
+    if List.Count > 0 then
+    begin
+      Clipboard.AsText := List.Text;
+      ShowMessage(IntToStr(List.Count) + ' Line(s) Copied.');
+    end
+    else
+      ShowMessage('No Content to Copy.');
+  finally
+    List.Free;
   end;
 end;
 
@@ -566,6 +744,32 @@ procedure TEditLangForm.actSaveRightExecute(Sender: TObject);
 begin
   if SaveLinesToFile(StringGrid.Cols[RIGHT_EDITING_COL], FRightFileName) then
     InfoDlg('Save Success. ' + FRightFileName);
+end;
+
+procedure TEditLangForm.actSearchAllLeftToRightExecute(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to StringGrid.RowCount - 1 do
+    SearchLeftToRight(I);
+end;
+
+procedure TEditLangForm.actSearchAllRightPartToLeftExecute(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to StringGrid.RowCount - 1 do
+    SearchRightToLeft(I);
+end;
+
+procedure TEditLangForm.actSearchLeftToRightExecute(Sender: TObject);
+begin
+  SearchLeftToRight(StringGrid.Row);
+end;
+
+procedure TEditLangForm.actSearchRightToLeftExecute(Sender: TObject);
+begin
+  SearchRightToLeft(StringGrid.Row);
 end;
 
 procedure TEditLangForm.actTSortLeftExecute(Sender: TObject);
