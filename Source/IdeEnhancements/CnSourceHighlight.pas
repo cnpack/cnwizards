@@ -215,11 +215,11 @@ type
     FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens 的引用
 
     // *LineList 容纳快速访问结果
-    FKeyLineList: TCnObjectList;      // 容纳按行方式存储的快速访问的关键字内容
-    FIdLineList: TCnObjectList;       // 容纳按行方式存储的快速访问的标识符内容
-    FFlowLineList: TCnObjectList;     // 容纳按行方式存储的快速访问的流程控制符内容
-    FSeparateLineList: TCnList;       // 容纳行方式存储的快速访问的分界空行信息
-    FCompDirectiveLineList: TCnObjectList;  // 容纳行方式存储的快速访问的编译指令信息
+    FKeyLineList: TCnFastObjectList;      // 容纳按行方式存储的快速访问的关键字内容
+    FIdLineList: TCnFastObjectList;       // 容纳按行方式存储的快速访问的标识符内容
+    FFlowLineList: TCnFastObjectList;     // 容纳按行方式存储的快速访问的流程控制符内容
+    FSeparateLineList: TCnList;           // 容纳行方式存储的快速访问的分界空行信息
+    FCompDirectiveLineList: TCnFastObjectList;  // 容纳行方式存储的快速访问的编译指令信息
 
     FLineInfo: TCnBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCnCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
@@ -381,8 +381,8 @@ type
      TCnBlockLinePair.}
   private
     FControl: TControl;
-    FPairList: TCnObjectList;        // 容纳解析出来的 Pair 对象并管理
-    FKeyLineList: TCnObjectList;     // 容纳按行方式存储的快速访问的 Pair 对象并管理
+    FPairList: TCnFastObjectList;        // 容纳解析出来的 Pair 对象并管理
+    FKeyLineList: TCnFastObjectList;     // 容纳按行方式存储的快速访问的 Pair 对象并管理
     FCurrentPair: TCnBlockLinePair;
     FCurrentToken: TCnGeneralPasToken;
     function GetCount: Integer;
@@ -2402,11 +2402,11 @@ begin
   FFlowTokenList := TCnList.Create;
   FCompDirectiveTokenList := TCnList.Create;
 
-  FKeyLineList := TCnObjectList.Create;
-  FIdLineList := TCnObjectList.Create;
-  FFlowLineList := TCnObjectList.Create;
+  FKeyLineList := TCnFastObjectList.Create;
+  FIdLineList := TCnFastObjectList.Create;
+  FFlowLineList := TCnFastObjectList.Create;
   FSeparateLineList := TCnList.Create;
-  FCompDirectiveLineList := TCnObjectList.Create;
+  FCompDirectiveLineList := TCnFastObjectList.Create;
 
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
@@ -5607,8 +5607,8 @@ constructor TCnBlockLineInfo.Create(AControl: TControl);
 begin
   inherited Create;
   FControl := AControl;
-  FPairList := TCnObjectList.Create;
-  FKeyLineList := TCnObjectList.Create;
+  FPairList := TCnFastObjectList.Create;
+  FKeyLineList := TCnFastObjectList.Create;
 end;
 
 destructor TCnBlockLineInfo.Destroy;

@@ -103,7 +103,7 @@ type
     procedure Assign(Source: TCnList); virtual;
   end;
 
-  TCnObjectList = class(TCnBaseList)
+  TCnFastObjectList = class(TCnBaseList)
   public
     constructor Create;
   end;
@@ -333,7 +333,7 @@ end;
 
 { TCnObjectList }
 
-constructor TCnObjectList.Create;
+constructor TCnFastObjectList.Create;
 begin
   inherited Create(True);
 end;
