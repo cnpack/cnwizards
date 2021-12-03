@@ -49,7 +49,7 @@ type
     btnSearchLeftToRight: TToolButton;
     btnSearchRightToLeft: TToolButton;
     actSearchAllLeftToRight: TAction;
-    actSearchAllRightPartToLeft: TAction;
+    actSearchAllRightToLeft: TAction;
     btn5: TToolButton;
     btnSearchAllLeftToRight: TToolButton;
     btnSearchAllRightPartToLeft: TToolButton;
@@ -74,7 +74,7 @@ type
     procedure actSearchLeftToRightExecute(Sender: TObject);
     procedure actSearchRightToLeftExecute(Sender: TObject);
     procedure actSearchAllLeftToRightExecute(Sender: TObject);
-    procedure actSearchAllRightPartToLeftExecute(Sender: TObject);
+    procedure actSearchAllRightToLeftExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -754,7 +754,7 @@ begin
     SearchLeftToRight(I);
 end;
 
-procedure TEditLangForm.actSearchAllRightPartToLeftExecute(Sender: TObject);
+procedure TEditLangForm.actSearchAllRightToLeftExecute(Sender: TObject);
 var
   I: Integer;
 begin
