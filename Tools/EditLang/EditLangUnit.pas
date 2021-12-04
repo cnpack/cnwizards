@@ -301,8 +301,8 @@ begin
     Exit;
 
   Root := Copy(Left, 1, L - 1); // 不要 =
-  Left := Copy(Left, L + 1, MaxInt); // 也不要 =
-  if Left = '' then
+  Left := Copy(Left, L, MaxInt); // 要 =
+  if Left = '=' then
     Exit;
 
   // 在 StringGrid.Cols[LEFT_EDITING_COL] 里找 Left 结尾的序号
@@ -344,11 +344,11 @@ begin
     Exit;
 
   Root := Copy(Right, 1, L - 1); // 不要 =
-  Right := Copy(Right, L + 1, MaxInt); // 也不要 =
-  if Right = '' then
+  Right := Copy(Right, L, MaxInt); // 要 =
+  if Right = '=' then
     Exit;
 
-  // 在 StringGrid.Cols[RIGHT_EDITING_COL] 里找 Left 结尾的序号
+  // 在 StringGrid.Cols[RIGHT_EDITING_COL] 里找 Right 结尾的序号
   for L := 0 to StringGrid.RowCount - 1 do
   begin
     if EndWithStr(StringGrid.Cells[RIGHT_EDITING_COL, L], Right) then // 找到了原文
