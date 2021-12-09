@@ -2448,6 +2448,7 @@ TCnUsesIdentForm.actMatchFuzzy.Caption=нечеткий матч
 TCnUsesIdentForm.actOpen.Hint=Подключить выбранный модуль
 TCnUsesIdentForm.lblAddTo.Caption=добавить в:
 TCnUsesIdentForm.lblSearch.Caption=Поиск:
+TCnUsesIdentForm.lvList.Columns.Item0.Caption=идентификатор
 TCnUsesIdentForm.lvList.Columns.Item1.Caption=Модуль
 TCnUsesIdentForm.lvList.Columns.Item2.Caption=Путь
 TCnSourceHighlightForm.Caption=Настройки Подсветки Синтаксиса
