@@ -238,6 +238,24 @@ object EditLangForm: TEditLangForm
       Top = 0
       Action = actSearchAllRightToLeft
     end
+    object btn7: TToolButton
+      Left = 316
+      Top = 0
+      Width = 8
+      Caption = 'btn7'
+      ImageIndex = 16
+      Style = tbsSeparator
+    end
+    object btnPastToLeftByRight: TToolButton
+      Left = 324
+      Top = 0
+      Action = actPastToLeftByRight
+    end
+    object btnPasteToRightByLeft: TToolButton
+      Left = 347
+      Top = 0
+      Action = actPasteToRightByLeft
+    end
   end
   object actlstMain: TActionList
     Images = ilMain
@@ -315,12 +333,22 @@ object EditLangForm: TEditLangForm
       ImageIndex = 14
       OnExecute = actSearchAllRightToLeftExecute
     end
+    object actPastToLeftByRight: TAction
+      Caption = 'Paste Content from Clipboard to Left Align with Right'
+      Hint = 'Paste Content from Clipboard to Left Align with Right'
+      OnExecute = actPastToLeftByRightExecute
+    end
+    object actPasteToRightByLeft: TAction
+      Caption = 'Paste Content from Clipboard to Right Align with Right'
+      Hint = 'Paste Content from Clipboard to Right Align with Right'
+      OnExecute = actPasteToRightByLeftExecute
+    end
   end
   object ilMain: TImageList
     Left = 160
     Top = 320
     Bitmap = {
-      494C01010F0050003C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010F004400440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       00000000000000000000000000000000000000000000000000000000F0000000
       F000A5A5A50063636300636363000000F0000000F0006363630063636300A5A5

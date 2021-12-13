@@ -53,6 +53,11 @@ type
     btn5: TToolButton;
     btnSearchAllLeftToRight: TToolButton;
     btnSearchAllRightPartToLeft: TToolButton;
+    actPastToLeftByRight: TAction;
+    actPasteToRightByLeft: TAction;
+    btnPastToLeftByRight: TToolButton;
+    btn7: TToolButton;
+    btnPasteToRightByLeft: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -75,6 +80,8 @@ type
     procedure actSearchRightToLeftExecute(Sender: TObject);
     procedure actSearchAllLeftToRightExecute(Sender: TObject);
     procedure actSearchAllRightToLeftExecute(Sender: TObject);
+    procedure actPastToLeftByRightExecute(Sender: TObject);
+    procedure actPasteToRightByLeftExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -284,7 +291,7 @@ end;
 
 procedure TEditLangForm.SearchLeftToRight(Line: Integer);
 var
-  I, L, P: Integer;
+  L, P: Integer;
   Left, Right, Root: string;
 begin
   // 针对选中的左侧条目，找等号后原文在其他地方的索引，找对应译文的等号后的部分，拼起来
@@ -327,7 +334,7 @@ end;
 
 procedure TEditLangForm.SearchRightToLeft(Line: Integer);
 var
-  I, L, P: Integer;
+  L, P: Integer;
   Left, Right, Root: string;
 begin
   // 针对选中的右侧条目，找等号后原文在其他地方的索引，找对应译文的等号后的部分，拼起来
@@ -714,6 +721,88 @@ begin
     InfoDlg('No Next Different Line.')
   else
     StringGrid.Row := I;
+end;
+
+procedure TEditLangForm.actPasteToRightByLeftExecute(Sender: TObject);
+var
+  I, J, P, Sum: Integer;
+  Sl: TStringList;
+  S: string;
+begin
+  Sl := TStringList.Create;
+  try
+    Sl.Text := Clipboard.AsText;
+    if Sl.Count = 0 then
+      Exit;
+
+    Sum := 0;
+    for I := 0 to Sl.Count - 1 do
+    begin
+      S := Sl[I];
+      P := Pos('=', S);
+      if P > 0 then
+      begin
+        Delete(S, P + 1, MaxInt); // 只留=和左边的，拿着在左侧搜索
+
+        for J := 0 to StringGrid.RowCount - 1 do
+        begin
+          if Pos(S, StringGrid.Cells[LEFT_EDITING_COL, J]) = 1  then
+          begin
+            if (StringGrid.Cells[RIGHT_EDITING_COL, J] = '') or
+              EndWithStr(StringGrid.Cells[RIGHT_EDITING_COL, J], '=') then
+            begin
+              StringGrid.Cells[RIGHT_EDITING_COL, J] := Sl[I];
+              Inc(Sum);
+            end;
+          end;
+        end;
+      end;
+    end;
+    ShowMessage('Paste ' + IntToStr(Sum) + ' Lines into Right.');
+  finally
+    Sl.Free;
+  end;
+end;
+
+procedure TEditLangForm.actPastToLeftByRightExecute(Sender: TObject);
+var
+  I, J, P, Sum: Integer;
+  Sl: TStringList;
+  S: string;
+begin
+  Sl := TStringList.Create;
+  try
+    Sl.Text := Clipboard.AsText;
+    if Sl.Count = 0 then
+      Exit;
+
+    Sum := 0;
+    for I := 0 to Sl.Count - 1 do
+    begin
+      S := Sl[I];
+      P := Pos('=', S);
+      if P > 0 then
+      begin
+        Delete(S, P + 1, MaxInt); // 只留=和左边的，拿着在右侧搜索
+
+        for J := 0 to StringGrid.RowCount - 1 do
+        begin
+          if Pos(S, StringGrid.Cells[RIGHT_EDITING_COL, J]) = 1  then
+          begin
+            if (StringGrid.Cells[LEFT_EDITING_COL, J] = '') or
+              EndWithStr(StringGrid.Cells[LEFT_EDITING_COL, J], '=') then
+            begin
+              StringGrid.Cells[LEFT_EDITING_COL, J] := Sl[I];
+              Inc(Sum);
+            end;
+          end;
+        end;
+      end;
+    end;
+    ShowMessage('Paste ' + IntToStr(Sum) + ' Lines into Left.');
+  finally
+    Sl.Free;
+  end;
 end;
 
 procedure TEditLangForm.actPrevDiffExecute(Sender: TObject);
