@@ -83,4 +83,4 @@ SCnIDERunning=O IDE está em execução. Saia do IDE e execute-me novamente!
 SCnCleaned=Histórico do IDE limpo com sucesso!
 SCnHelpOpenError=Erro ao abrir arquivo de ajuda!
 SCnAboutCaption=Sobre
-SCnIDEAbout=IDE Config Backup/Restore Tool<BR><BR>Autor:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyright 2001-2021 CnPack Team
+SCnIDEAbout=IDE Config Backup/Restore Tool<BR><BR>Autor:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyright 2001-2022 CnPack Team
