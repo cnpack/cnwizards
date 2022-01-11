@@ -180,6 +180,9 @@ type
     FActives: array of Boolean;
     FEditorActives: array of Boolean;
     FDrawTextHeight: Integer;
+{$IFDEF IDE_SUPPORT_HDPI}
+    FIconBmp: TBitmap; // 用于拉伸绘制图标
+{$ENDIF}
     function CalcSelectedWizardIndex(Wizard: TCnBaseWizard = nil): Integer;
     function CalcSelectedEditorIndex(Editor: TCnDesignEditorInfo = nil): Integer;
     procedure ToggleWizardActive;
@@ -211,6 +214,7 @@ const
 
 type
   TCnActionWizardHack = class(TCnActionWizard);
+  TControlHack = class(TControl);
 
 {$R *.DFM}
 
@@ -240,6 +244,14 @@ var
   I: Integer;
 begin
   PageControl.ActivePageIndex := 0;
+{$IFDEF IDE_SUPPORT_HDPI}
+  FIconBmp := TBitmap.Create;  // 32x32
+  FIconBmp.PixelFormat := pf24bit;
+  FIconBmp.Width := 32;
+  FIconBmp.Height := 32;
+  FIconBmp.Canvas.Brush.Style := bsSolid;
+{$ENDIF}
+
   // 专家设置页面
   SetLength(FShortCuts, CnWizardMgr.WizardCount);
   SetLength(FActives, CnWizardMgr.WizardCount);
@@ -323,6 +335,10 @@ var
   Changes: DWORD;
   OldUseLargeIcon: Boolean;
 begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  FIconBmp.Free;
+{$ENDIF}
+
   if ModalResult = mrOK then
   begin
     if FWizardsActiveChanged then
@@ -472,12 +488,17 @@ begin
     if Wizard.Icon <> nil then
     begin
 {$IFDEF IDE_SUPPORT_HDPI}
+      ARect := Classes.Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
+      FIconBmp.Canvas.Brush.Color := Canvas.Brush.Color;
+      FIconBmp.Canvas.FillRect(ARect);
+      FIconBmp.Canvas.Draw(0, 0, Wizard.Icon); // 把 32x32 没法拉伸的图标，原封不动绘制到 32x32 的位图上
+
       ARect.Left := R.Left + 4;
       ARect.Top := R.Top + (R.Bottom - R.Top - IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards)) div 2;
       ARect.Right := ARect.Left + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Width, lbWizards);
       ARect.Bottom := ARect.Top + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards);
 
-      Canvas.StretchDraw(ARect, Wizard.Icon);
+      Canvas.StretchDraw(ARect, FIconBmp);
 {$ELSE}
       Canvas.Draw(R.Left + 4, R.Top + (R.Bottom - R.Top - Wizard.Icon.Height) div 2, Wizard.Icon);
 {$ENDIF}
@@ -519,6 +540,9 @@ var
   Wizard: TCnBaseWizard;
   AName, Author, Email, Comment: string;
   Idx: Integer;
+{$IFDEF IDE_SUPPORT_HDPI}
+  R: TRect;
+{$ENDIF}
 begin
   if (lbWizards.Items.Count = 0) or (lbWizards.ItemIndex < 0) then
   begin
@@ -535,7 +559,17 @@ begin
   Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
   Idx := CalcSelectedWizardIndex(Wizard);
 
+{$IFDEF IDE_SUPPORT_HDPI}
+  R := Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
+  FIconBmp.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
+  FIconBmp.Canvas.FillRect(R);
+  FIconBmp.Canvas.Draw(0, 0, Wizard.Icon);  // 把 32x32 没法拉伸的图标，原封不动绘制到 32x32 的位图上
+  R := Rect(0, 0, imgIcon.Width, imgIcon.Height);
+  imgIcon.Canvas.StretchDraw(R, FIconBmp);
+{$ELSE}
   imgIcon.Picture.Graphic := Wizard.Icon;
+{$ENDIF}
+
   Wizard.GetWizardInfo(AName, Author, Email, Comment);
   lblWizardName.Caption := AName;
   lblWizardAuthor.Caption := CnAuthorEmailToStr(Author, '');
