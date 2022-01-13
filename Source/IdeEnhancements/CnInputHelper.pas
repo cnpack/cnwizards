@@ -417,6 +417,8 @@ uses
   CnInputHelperFrm, CnWizCompilerConst, mwBCBTokenList;
 
 const
+  MY_VK_DOT_KEY = 190;
+
   // BCB 下出错框的地址
   SCppKibitzManagerCCError = '@Cppcodcmplt@TCppKibitzManager@CCError$qqrp20System@TResStringRec';
 
@@ -1372,7 +1374,7 @@ var
   Option: IOTAEnvironmentOptions;
 begin
   Result := False;
-  if DispOnIDECompDisabled and ((Key = VK_DECIMAL) or (Key = 190)) then
+  if DispOnIDECompDisabled and ((Key = VK_DECIMAL) or (Key = MY_VK_DOT_KEY)) then
   begin
     Option := CnOtaGetEnvironmentOptions;
     if not Option.GetOptionValue(csKeyCodeCompletion) then
@@ -1449,17 +1451,17 @@ begin
           SendSymbolToIDE(False, True, False, #0, Result);
           Result := True;
         end;
-      VK_TAB, VK_DECIMAL, 190: // '.'
+      VK_TAB, VK_DECIMAL, MY_VK_DOT_KEY: // '.'
         begin
           ShouldIgnore := ((Key = VK_TAB) and not FTabComplete) or
-            ((Key = 190) and FIgnoreDot);
+            ((Key = MY_VK_DOT_KEY) and FIgnoreDot);
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
           // 块编辑模式时，Tab 用于输入后应该吃掉，免得造成额外跳转
           ShouldEatTab := (Key = VK_TAB) and IsCurrentEditorInSyncMode;
 {$ENDIF}
 
 {$IFDEF SUPPORT_UNITNAME_DOT}
-          if (Key = 190) and CurrentIsDelphiSource then
+          if (Key = MY_VK_DOT_KEY) and CurrentIsDelphiSource then
           begin
             // if IndexStr(FToken, csUnitDotPrefixes, CurrentIsDelphiSource) >= 0 then
             // 支持 Unit 名的 IDE 下，uses 区的点号应该忽略，而不是之前查找固定前缀

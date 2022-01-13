@@ -407,7 +407,7 @@ var
 
 {$IFDEF DEBUG}
         if not FAsyncResultGot then
-          CnDebugger.LogMsg('Async Result Time out. Fail to get Symbol List.');
+          CnDebugger.LogMsg('Async Result Time out. Fail to Get Symbol List.');
         if FSymbolListIntf = nil then
           CnDebugger.LogMsg('Async Result Error. Symbol List not Got.');
 {$ENDIF}
@@ -1169,8 +1169,8 @@ begin
   if FKeepUnique and FHashList.Find(AName, Res) then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('IDE SymbolList Found Duplicated: %s. Do NOT Add.',
-      [AName]);
+//    CnDebugger.LogFmt('IDE SymbolList Found Duplicated: %s. Do NOT Add.',
+//      [AName]);
 {$ENDIF}
     Exit;
   end;
