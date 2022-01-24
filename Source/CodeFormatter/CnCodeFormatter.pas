@@ -4727,21 +4727,21 @@ begin
   if Scaner.Token in [tokKeywordConst, tokKeywordResourcestring] then
     Match(Scaner.Token, PreSpaceCount);
 
-  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
-  Scaner.KeepOneBlankLine := True;
-  try
-    while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
-    begin
-      // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
-      if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
-        Exit;
+  while Scaner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+  begin
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
+      Exit;
 
-      Writeln;
+    Writeln;
+    OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+    Scaner.KeepOneBlankLine := True;
+    try
       FormatConstantDecl(Tab(PreSpaceCount));
-      Match(tokSemicolon);
+    finally
+      Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
     end;
-  finally
-    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
+    Match(tokSemicolon);
   end;
 end;
 
@@ -5268,22 +5268,21 @@ begin
   if Scaner.Token in [tokKeywordVar, tokKeywordThreadvar] then
     Match(Scaner.Token, PreSpaceCount);
 
-  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
-  Scaner.KeepOneBlankLine := True;
+  while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
+  begin
+    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
+    if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
+      Exit;
 
-  try
-    while Scaner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
-    begin
-      // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
-      if (Scaner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
-        Exit;
-
-      Writeln;
+    Writeln;
+    OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+    Scaner.KeepOneBlankLine := True;
+    try
       FormatVarDecl(Tab(PreSpaceCount));
-      Match(tokSemicolon);
+    finally
+      Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
     end;
-  finally
-    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
+    Match(tokSemicolon); // 分号放在 KeepOneBlankLine 设为 True 之外，避免分号后的空一行导致输出空两行
   end;
 end;
 
@@ -5687,24 +5686,26 @@ procedure TCnBasePascalFormatter.FormatClassMemberList(
 var
   OldKeepOneBlankLine: Boolean;
 begin
-  OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
-  Scaner.KeepOneBlankLine := True;
-  try
-    while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
+  while Scaner.Token in ClassVisibilityTokens + ClassMemberSymbolTokens do
+  begin
+    if Scaner.Token in ClassVisibilityTokens then
     begin
-      if Scaner.Token in ClassVisibilityTokens then
-      begin
-        FormatClassVisibility(PreSpaceCount);
-        // 应该：如果下一个还是，就空一行
-        // if Scaner.Token in ClassVisibilityTokens + [tokKeywordEnd] then
-        //  Writeln;
-      end;
-
-      if Scaner.Token in ClassMemberSymbolTokens then
-        FormatClassMember(Tab(PreSpaceCount));
+      FormatClassVisibility(PreSpaceCount);
+      // 应该：如果下一个还是，就空一行
+      // if Scaner.Token in ClassVisibilityTokens + [tokKeywordEnd] then
+      //  Writeln;
     end;
-  finally
-    Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
+
+    if Scaner.Token in ClassMemberSymbolTokens then
+    begin
+      OldKeepOneBlankLine := Scaner.KeepOneBlankLine;
+      Scaner.KeepOneBlankLine := True;
+      try
+        FormatClassMember(Tab(PreSpaceCount));
+      finally
+        Scaner.KeepOneBlankLine := OldKeepOneBlankLine;
+      end;
+    end;
   end;
 end;
 

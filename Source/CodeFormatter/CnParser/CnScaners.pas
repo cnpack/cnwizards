@@ -211,7 +211,7 @@ type
 
     property KeepOneBlankLine: Boolean read FKeepOneBlankLine write FKeepOneBlankLine;
     {* 由外界设置是否在格式化的过程中保持语句间的空行，无须用 Bookmark 保存
-       注意该标志并不等于保留换行}
+       目的：源语句中有多于一个的连续换行就只输出一个换行，注意该标志并不等于保留换行}
 
     property IdentContainsDot: Boolean read FIdentContainsDot write FIdentContainsDot;
     {* 由外界设置是否允许标识符里含有点号，用于单元名，无须用 Bookmark 保存}
