@@ -1126,43 +1126,58 @@ begin
 
         if (Lex.TokenID = tkSemicolon) and not FIfStack.IsEmpty then
         begin
-          AIfObj := TCnIfStatement(FIfStack.Peek);
-          // 碰到分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
-          // 分号的 ItemLayer 目前没有靠谱值，因此不能依赖 ItemLayer 和 if 的 Level 比较。
-          // 分号如果在额外的圆括号里头，说明不能作为结束用，因此加入了 CurrBracketLevel 的判断
-          // FList.Count 为分号假想的 ItemIndex
-          // 情况一，如果 CurrBlock 存在，且没有后于 if 的 else 且 else 无 begin，说明分号紧接 else 同级
-          // 情况二，如果 CurrBlock 存在，且没有后于最后一个 else if 的 if，且无 begin，说明分号紧接最后一个 else if 同级
-          // 情况三，如果 CurrBlock 存在，且没有后于 if，且 if 没 begin，说明分号紧接 if 同级
-          if CurrBlock <> nil then
-          begin
-            if AIfObj.HasElse and (AIfObj.ElseBegin = nil) and
-              (CurrBlock.ItemIndex <= AIfObj.ElseToken.ItemIndex) and
-              (CurrBracketLevel = AIfObj.ElseToken.BracketLayer) then  // 分号结束不带 begin 的 else
-            begin
-              AIfObj.EndElseBlock;
-              AIfObj.EndIfAll;
-            end
-            else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil)
-              and (AIfObj.LastElseIfIf <> nil) and
-              (CurrBlock.ItemIndex <= AIfObj.LastElseIfIf.ItemIndex) and
-              (CurrBracketLevel = AIfObj.LastElseIfIf.BracketLayer) then
-            begin
-              AIfObj.EndLastElseIfBlock;       // 分号结束不带 begin 的最后一个 else if
-              AIfObj.EndIfAll;
-            end
-            else if (AIfObj.IfBegin = nil) and
-              (CurrBlock.ItemIndex <= AIfObj.IfStart.ItemIndex) and
-              (CurrBracketLevel = AIfObj.IfStart.BracketLayer) then  // 分号结束不带 begin 的 if 本身
-            begin
-              AIfObj.EndIfBlock;
-              AIfObj.EndIfAll;
-            end;
+          repeat
+            if FIfStack.Count <= 0 then
+               Break;
+            AIfObj := TCnIfStatement(FIfStack.Peek);
+            if AIfObj = nil then
+              Break;
 
-            // 分号结束了整个 if 语句，可以从堆栈中弹出了
-            if AIfObj.IfAllEnded then
-              FIfStack.Pop.Free;
-          end;
+            // 碰到分号，查查它结束了谁，注意不能用 Token，因为没针对分号创建 Token
+            // 分号的 ItemLayer 目前没有靠谱值，因此不能依赖 ItemLayer 和 if 的 Level 比较。
+            // 分号如果在额外的圆括号里头，说明不能作为结束用，因此加入了 CurrBracketLevel 的判断
+            // FList.Count 为分号假想的 ItemIndex
+            // 情况一，如果 CurrBlock 存在，且没有后于 if 的 else 且 else 无 begin，说明分号紧接 else 同级
+            // 情况二，如果 CurrBlock 存在，且没有后于最后一个 else if 的 if，且无 begin，说明分号紧接最后一个 else if 同级
+            // 情况三，如果 CurrBlock 存在，且没有后于 if，且 if 没 begin，说明分号紧接 if 同级
+            if CurrBlock <> nil then
+            begin
+              if AIfObj.HasElse and (AIfObj.ElseBegin = nil) and
+                (CurrBlock.ItemIndex <= AIfObj.ElseToken.ItemIndex) and
+                (CurrBracketLevel = AIfObj.ElseToken.BracketLayer) then  // 分号结束不带 begin 的 else
+              begin
+                AIfObj.EndElseBlock;
+                AIfObj.EndIfAll;
+              end
+              else if (AIfObj.ElseIfCount > 0) and (AIfObj.LastElseIfBegin = nil)
+                and (AIfObj.LastElseIfIf <> nil) and
+                (CurrBlock.ItemIndex <= AIfObj.LastElseIfIf.ItemIndex) and
+                (CurrBracketLevel = AIfObj.LastElseIfIf.BracketLayer) then
+              begin
+                AIfObj.EndLastElseIfBlock;       // 分号结束不带 begin 的最后一个 else if
+                AIfObj.EndIfAll;
+              end
+              else if (AIfObj.IfBegin = nil) and
+                (CurrBlock.ItemIndex <= AIfObj.IfStart.ItemIndex) and
+                (CurrBracketLevel = AIfObj.IfStart.BracketLayer) then  // 分号结束不带 begin 的 if 本身
+              begin
+                AIfObj.EndIfBlock;
+                AIfObj.EndIfAll;
+              end;
+
+              // 分号结束了整个 if 语句，可以从堆栈中弹出了
+              if AIfObj.IfAllEnded then
+                FIfStack.Pop.Free
+              else // 分号未能结束当前 if 语句，说明不是结束的，跳出循环
+                Break;
+
+              // 注意，分号结束的整个 if 语句如果又是上一个 if 语句的尾巴，则也结束了上一个 if 语句
+              // 典型的例子就是 if True then if True then Test; 最后的分号实际上结束了两个 if
+              // 暂时用这种循环的方式处理，不确定副作用多大
+            end
+            else
+              Break;
+          until False;
         end;
 
         if (CurrMethod <> nil) and // forward, external 无实现部分，前面必须是分号
