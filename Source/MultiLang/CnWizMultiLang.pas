@@ -802,7 +802,7 @@ procedure TCnTranslateForm.Translate;
 begin
 {$IFNDEF TEST_APP}
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('TCnTranslateForm.Translate');
+  CnDebugger.LogEnter(ClassName + '|TCnTranslateForm.Translate');
 {$ENDIF DEBUG}
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
@@ -824,7 +824,7 @@ begin
     Font.Charset := DEFAULT_CHARSET;
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('TCnTranslateForm.Translate');
+  CnDebugger.LogLeave(ClassName + '|TCnTranslateForm.Translate');
 {$ENDIF DEBUG}
 {$ENDIF TEST_APP}
 end;
