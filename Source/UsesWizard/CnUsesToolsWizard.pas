@@ -119,15 +119,16 @@ type
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
     function ProcessUnits(AKind: TCnUsesCleanKind; List: TObjectList): Boolean;
-    {* 总体的单元解析查找处理函数}
+    {* 编译后的总体的单元解析查找处理函数，处理 dcu 与源码}
     procedure ParseUnitKind(const FileName: string; var Kinds: TCnUsesKinds);
     {* 解析各 unit 源码获取其有无 init、有无 Register 函数等信息}
     procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units:
       TStrings);
     procedure CheckUnits(List: TObjectList);
-    {* 总体的单元清理函数}
+    {* 总体的单元分析清理函数，List 来自 ProcessUnits，存储了所有工程的所有引用信息}
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
     procedure CleanUnitUses(List: TObjectList);
+    {* 根据用户的选择，做源码的实际清理工作}
 
     procedure UsesEnumCallback(const AUnitFullName: string; Exists: Boolean;
       FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
@@ -255,8 +256,23 @@ begin
         end;
 
         CheckUnits(List);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('UsesCleaner CheckUnits OK. To Show Results.');
+{$ENDIF}
+
         if ShowUsesCleanResultForm(List) then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('UsesCleaner ShowUsesCleanResultForm OK. To Clean Unit Uses.');
+{$ENDIF}
           CleanUnitUses(List);
+        end;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('UsesCleaner ProcessUnits Fail.');
+{$ENDIF}
       end;
     finally
       List.Free;
