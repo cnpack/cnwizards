@@ -119,7 +119,7 @@ type
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
     function ProcessUnits(AKind: TCnUsesCleanKind; List: TObjectList): Boolean;
-    {* 编译后的总体的单元解析查找处理函数，处理 dcu 与源码}
+    {* 编译后的总体的单元解析查找处理函数，处理 dcu 与源码，结果为 TCnProjectUsesInfo 实例，放 List 里}
     procedure ParseUnitKind(const FileName: string; var Kinds: TCnUsesKinds);
     {* 解析各 unit 源码获取其有无 init、有无 Register 函数等信息}
     procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units:
@@ -127,8 +127,9 @@ type
     procedure CheckUnits(List: TObjectList);
     {* 总体的单元分析清理函数，List 来自 ProcessUnits，存储了所有工程的所有引用信息}
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
+    {* 做单个源码文件的实际清理工作}
     procedure CleanUnitUses(List: TObjectList);
-    {* 根据用户的选择，做源码的实际清理工作}
+    {* 根据用户的选择，开始做源码的实际清理工作}
 
     procedure UsesEnumCallback(const AUnitFullName: string; Exists: Boolean;
       FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
@@ -263,7 +264,7 @@ begin
         if ShowUsesCleanResultForm(List) then
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('UsesCleaner ShowUsesCleanResultForm OK. To Clean Unit Uses.');
+          CnDebugger.LogMsg('UsesCleaner ShowUsesCleanResultForm OK. To Clean Unit Uses. Project Count: ' + IntToStr(List.Count));
 {$ENDIF}
           CleanUnitUses(List);
         end;
@@ -1262,23 +1263,32 @@ begin
   Logs := nil;
   UCnt := 0;
   Cnt := 0;
+
   try
     Intf := TStringList.Create;
     Impl := TStringList.Create;
     Logs := TStringList.Create;
+
     for i := 0 to List.Count - 1 do
     begin
       for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
       begin
+        // 开始处理单个文件
         UsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]);
         Intf.Clear;
         Impl.Clear;
+
         for k := 0 to UsesInfo.IntfCount - 1 do
           if UsesInfo.IntfItems[k].Checked then
             Intf.Add(UsesInfo.IntfItems[k].Name);
         for k := 0 to UsesInfo.ImplCount - 1 do
           if UsesInfo.ImplItems[k].Checked then
             Impl.Add(UsesInfo.ImplItems[k].Name);
+
+{$IFDEF DEBUG}
+        Cndebugger.LogFmt('CleanUnitUses Source %s Intf %d, Impl %d',
+          [UsesInfo.SourceFileName, Intf.Count, Impl.Count]);
+{$ENDIF}
 
         if (Intf.Count > 0) or (Impl.Count > 0) then
         begin
@@ -1323,6 +1333,12 @@ begin
         Logs.SaveToFile(FileName);
         RunFile(FileName);
       end;
+    end
+    else
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Clean Result 0');
+{$ENDIF}
     end;
     Logs.Free;
   end;
