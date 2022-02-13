@@ -119,8 +119,8 @@ type
   end;
 
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
-{* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式，尾部 #0。
-  原始格式：BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
+{* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式（Ansi、Ansi/Utf8、Utf8），尾部 #0。
+  原始格式：BDS 2005 到 2007 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
   Unicode 环境下会忽略 CheckUtf8，Stream 中固定为 Utf16，D5/6/7 中只支持 Ansi，都可以直接  PChar(Stream.Memory) 使用}
 
 procedure EditFilerReadStreamToFile(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);

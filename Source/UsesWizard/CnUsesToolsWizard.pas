@@ -51,8 +51,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, CnHashMap, mPasLex, Math, TypInfo, RegExpr, ActnList
-  {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
+  CnWizOptions, CnHashMap, mPasLex, {$IFDEF UNICODE} CnPasWideLex, {$ENDIF}
+  Math, TypInfo, RegExpr, ActnList {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
 
 type
 
@@ -726,16 +726,27 @@ procedure TCnUsesToolsWizard.ParseUnitKind(const FileName: string;
   var Kinds: TCnUsesKinds);
 var
   Stream: TMemoryStream;
+{$IFDEF UNICODE}
+  Lex: TCnPasWideLex;
+{$ELSE}
   Lex: TmwPasLex;
+{$ENDIF}
   Token: TTokenKind;
   RegDecl: Boolean;
 begin
   Stream := TMemoryStream.Create;
   try
-    EditFilerSaveFileToStream(FileName, Stream);
+    EditFilerSaveFileToStream(FileName, Stream); // Ansi/Ansi/Utf16
+
+{$IFDEF UNICODE}
+    Lex := TCnPasWideLex.Create;
+    Lex.Origin := PWideChar(Stream.Memory);
+{$ELSE}
     Lex := TmwPasLex.Create;
+    Lex.Origin := PAnsiChar(Stream.Memory);
+{$ENDIF}
+
     try
-      Lex.Origin := PAnsiChar(Stream.Memory);
       RegDecl := False;
       Token := Lex.TokenID;
       while not (Lex.TokenID in [tkImplementation, tkNull]) do
@@ -996,12 +1007,16 @@ function TCnUsesToolsWizard.DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl:
 var
   SrcStream: TMemoryStream;
   Writer: IOTAEditWriter;
+{$IFDEF UNICODE}
+  Lex: TCnPasWideLex;
+{$ELSE}
   Lex: TmwPasLex;
+{$ENDIF}
   Source: string;
 
   // 以下代码部分参考了 GExperts 的 GX_UsesManager 单元
   // liuxiao 加入对带点号文件名的支持
-  function GetUsesSource(List: TStrings): AnsiString;
+  function GetUsesSource(List: TStrings): string;
   var
     UsesList: TObjectList;
     Item: TPrvUsesItem;
@@ -1089,7 +1104,8 @@ var
       if Lex.TokenID <> tkNull then
         Lex.Next;
       SetLength(Result, Lex.TokenPos - CPos);
-      CopyMemory(Pointer(Result), Pointer(Integer(Lex.Origin) + CPos), Lex.TokenPos - CPos);
+      Move((Pointer(Integer(Lex.Origin) + CPos * SizeOf(Char)))^, Result[1],
+        (Lex.TokenPos - CPos) * SizeOf(Char));
 
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('GetUsesSource First Copy Result %s.', [Result]);
@@ -1169,10 +1185,15 @@ begin
     Lex := nil;
     try
       SrcStream := TMemoryStream.Create;
-      EditFilerSaveFileToStream(Buffer.FileName, SrcStream);
-      // CnOtaSaveEditorToStream(Buffer, SrcStream, False, False);
+      EditFilerSaveFileToStream(Buffer.FileName, SrcStream); // Ansi/Ansi/Utf16
+
+{$IFDEF UNICODE}
+      Lex := TCnPasWideLex.Create;
+      Lex.Origin := PWideChar(SrcStream.Memory);
+{$ELSE}
       Lex := TmwPasLex.Create;
       Lex.Origin := PAnsiChar(SrcStream.Memory);
+{$ENDIF}
 
       Writer := Buffer.CreateUndoableWriter;
       
