@@ -29,12 +29,14 @@ unit CnInputSymbolList;
 * 开发平台：PWin2000Pro + Delphi 7.1
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2016.03.15 by liuxiao
+* 修改记录：2022.02.13 by liuxiao
+*               模板输出允许用两个连续的 || 代表一个 | 号，而单个 | 号仍代表光标位置
+*           2016.03.15 by liuxiao
 *               TUnitNameList 增加路径机制与 h/hpp 支持供外部使用
 *           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
 *           2012.03.26
-*               增加对XE/XE2独有的XML格式的模板的支持，有部分内容兼容问题
+*               增加对 XE/XE2 独有的 XML 格式的模板的支持，有部分内容兼容问题
 *           2004.11.05
 *               移植而来
 ================================================================================
@@ -101,6 +103,8 @@ type
     procedure SetScopeRate(const Value: Integer);
     function GetAllowMultiLine: Boolean;
     function GetDescription: string;
+    function PipesCursorPosition(var S: string): Integer;
+    {* 处理输入文本中的 | 号，返回第一个单独 | 号的偏移量，无则返回 -1。并将 S 中的连续 || 替换成单独 |}
   protected
     procedure CalcHashCode; virtual;
     procedure OutputLines(Editor: IOTAEditBuffer; Lines: TStrings);
@@ -630,9 +634,9 @@ var
   OrgPos: TOTAEditPos;
   EditPos: TOTAEditPos;
   Relocate: Boolean;
-  OffsetX: Integer;
+  OffsetX, Idx: Integer;
   OffsetY: Integer;
-  i: Integer;
+  I: Integer;
 begin
   if not AutoIndent then
   begin
@@ -644,25 +648,25 @@ begin
     OffsetY := 0;
     Relocate := False;
     OrgPos := Editor.TopView.CursorPos;
-    for i := 0 to Lines.Count - 1 do
+    for I := 0 to Lines.Count - 1 do
     begin
-      if i > 0 then
+      if I > 0 then
       begin
         EditPos.Col := OrgPos.Col;
-        EditPos.Line := OrgPos.Line + i;
+        EditPos.Line := OrgPos.Line + I;
         Editor.TopView.CursorPos := EditPos;
       end;
 
-      Line := Lines[i];
-      if not Relocate and (Pos('|', Line) > 0) then
+      Line := Lines[I];
+      Idx := PipesCursorPosition(Line); // 处理该行中的双 || 与单 |，返回的 Idx 是最开始一个单 | 的位置
+      if not Relocate and (Idx > 0) then
       begin
-        OffsetX := Pos('|', Line) - 1;
-        OffsetY := i;
+        OffsetX := Idx - 1;
+        OffsetY := I;
         Relocate := True;
       end;
 
-      Line := StringReplace(Line, '|', '', [rfReplaceAll]);
-      if i < Lines.Count - 1 then
+      if I < Lines.Count - 1 then
         Line := Line + #13#10;
       CnOtaInsertTextToCurSource(Line);
     end;
@@ -688,7 +692,7 @@ begin
   OutText := Text;
   if (OutText <> '') and Assigned(Editor) and Assigned(Editor.TopView) then
   begin
-    OutText := StringReplace(OutText, GetMacroEx(cwmCursor), '|', [rfReplaceAll]);
+    // OutText := StringReplace(OutText, GetMacroEx(cwmCursor), '|', [rfReplaceAll]);
     MacroText := TCnWizMacroText.Create(OutText);
     try
       if MacroText.Macros.Count > 0 then
@@ -711,7 +715,7 @@ begin
   end;
 end;
 
-procedure TSymbolItem.Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle: 
+procedure TSymbolItem.Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
   TCnKeywordStyle);
 var
   S: string;
@@ -722,13 +726,13 @@ begin
     if not AllowMultiLine then
     begin
       S := GetKeywordText(KeywordStyle);
-      Idx := Pos('|', S);
-      S := StringReplace(S, '|', '', [rfReplaceAll]);
-    {$IFDEF UNICODE}
+      Idx := PipesCursorPosition(S);
+      // || means an actual | and first single | means cursor position
+{$IFDEF UNICODE}
       Editor.EditPosition.InsertText(ConvertTextToEditorUnicodeText(S));
-    {$ELSE}
+{$ELSE}
       Editor.EditPosition.InsertText(ConvertTextToEditorText(S));
-    {$ENDIF}
+{$ENDIF}
       Editor.TopView.Paint;
       if Idx > 0 then
         Editor.EditPosition.MoveRelative(0, -(Length(S) - Idx + 1));
@@ -741,15 +745,86 @@ begin
   end;
 end;
 
-//==============================================================================
-// 符号列表基类
-//==============================================================================
-
 destructor TSymbolItem.Destroy;
 begin
   FFuzzyMatchIndexes.Free;
   inherited;
 end;
+
+function TSymbolItem.PipesCursorPosition(var S: string): Integer;
+const
+  RPC = #0;
+var
+  I, Dif: Integer;
+begin
+  Result := -1;
+  if  Pos('|', S) <= 0 then
+    Exit;
+
+  if Length(S) <= 0 then
+    Exit
+  else if (Length(S) = 1) and (S[1] = '|') then // 单 | 表示插入位置
+  begin
+    S := '';
+    Result := 1;
+    Exit;
+  end;
+
+  // 预处理双 ||，把第二个 | 替换成 #0
+  for I := 1 to Length(S) - 1 do
+  begin
+    if S[I] = '|' then
+    begin
+      if S[I + 1] = '|' then
+      begin
+        // 是双 |，先替换第二个成 #0
+        S[I + 1] := RPC;
+      end;
+    end;
+  end;
+
+  // 然后记录第一个单 | 出现的位置并替换成 #0
+  for I := 1 to Length(S) do
+  begin
+    if S[I] = '|' then
+    begin
+      if ((I = 1) or (S[I - 1] <> '|')) and         // 无前或前非 |，并且
+        ((I = Length(S)) or ((S[I + 1] <> '|') and (S[I + 1] <> RPC))) then  // 无后或后非 | 且非 #0
+      begin
+        Result := I;  // 都表示是第一个单 |，先替换成 #0
+        S[I] := RPC;
+        Break;
+      end;
+    end;
+  end;
+
+  Dif := 0;
+  for I := 1 to Length(S) - 1 do
+  begin
+    if S[I] = '|' then
+    begin
+      if S[I + 1] = RPC then
+      begin
+        // 是已经处理后的双 |
+        if I < Result then // 如果双 || 的位置在单 | 前，则替换双 | 为单 | 时要减去相应的字符数
+          Inc(Dif);
+      end
+      else
+      begin
+        // 还有后续的单个 |，不记录位置，只替换成 #0
+        S[I] := RPC;
+      end;
+    end;
+  end;
+
+  S := ReplaceAllInString(S, RPC, ''); // 替换掉所有的 #0
+  if (Result > 0) and (Dif > 0) then
+    Dec(Result, Dif);
+end;
+
+//==============================================================================
+// 符号列表基类
+//==============================================================================
 
 { TSymbolList }
 

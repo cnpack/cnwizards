@@ -258,9 +258,9 @@ type
     procedure HookCodeParamWindow(Wnd: TWinControl);
     procedure AdjustCodeParamWindowPos;
 {$ENDIF}
-    function HandleKeyDown(var Msg: TMsg): Boolean;
-    function HandleKeyUp(var Msg: TMsg): Boolean;
-    function HandleKeyPress(Key: AnsiChar): Boolean;
+    function HandleKeyDown(var Msg: TMsg): Boolean;  // 通过 Application.OnMessage 拦截 WM_KEYDOWN 消息
+    function HandleKeyUp(var Msg: TMsg): Boolean;    // 通过 Application.OnMessage 拦截 WM_KEYUP 消息
+    function HandleKeyPress(Key: AnsiChar): Boolean; // 并非控件事件拦截，而是 HandleKeyDown 转换来的
     procedure SortSymbolList;
     procedure SortCurrSymbolList;
     function UpdateCurrList(ForcePopup: Boolean): Boolean;
@@ -1400,6 +1400,8 @@ begin
   end;
 end;
 
+// 处理 KeyDown 事件，如果已有列表显示则判断并输入，如未输入则转换成 KeyPress 处理列表即时过滤
+// 如列表未显示，则记录按键状态准备触发显示
 function TCnInputHelper.HandleKeyDown(var Msg: TMsg): Boolean;
 var
   Shift: TShiftState;
@@ -1534,17 +1536,17 @@ begin
         end;
     end;
 
-    if not Result then
+    if not Result then // 如果显示列表状态没有键能输入当前条目或者取消条目，则调用 HandleKeyPress 处理输入字符与过滤
     begin
       Result := HandleKeyPress(KeyDownChar);
     end;
   end
-  else
+  else // 如果未显示列表，则记录按键准备弹出条件
   begin
     Timer.Enabled := False;
     if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
       (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
-       or IsValidCppPopupKey(Key, ScanCode)) then
+       or IsValidCppPopupKey(Key, ScanCode)) then // 判断是否满足弹出条件积累
     begin
       // 为了解决增量查找及其它兼容问题，此处保存当前行文本与信息
       CnNtaGetCurrLineText(FCurrLineText, FCurrLineNo, FCurrIndex);
@@ -1555,7 +1557,7 @@ begin
       FKeyDownTick := GetTickCount;
       SetKeyDownValid(True);
     end
-    else
+    else // 重置弹出条件
     begin
       SetKeyDownValid(False);
       FKeyCount := 0;
@@ -2286,6 +2288,9 @@ begin
 //    CnDebugger.LogFmt('Input Helper To Reload %s. PosKind %s', [SymbolList.ClassName,
 //      GetEnumName(TypeInfo(TCodePosKind), Ord(FPosInfo.PosKind))]);
 {$ENDIF}
+
+      // 注意：LSP 模式下的 IDESymbolList 调用 Reload 时内部会异步等待，也就是主线程可能
+      // 先去处理其他键处理函数如 KeyDown/KeyPress/KeyUp 等，从而打乱顺序造成混乱
       if SymbolList.Active and SymbolList.Reload(Editor, FMatchStr, FPosInfo) then
       begin
 {$IFDEF DEBUG}
@@ -2690,8 +2695,8 @@ begin
           CnOtaDeleteCurrToken(CalcFirstSet(FirstSet, FPosInfo.IsPascal), CalcCharSet(CharSet, @FPosInfo));
       end;
 
-      // 如果是Pascal编译指令并且光标后有个}则要把}删掉
-      // 不能简单地在上面的Charset中加}，因为还会有其他判断
+      // 如果是 Pascal 编译指令并且光标后有个}则要把}删掉
+      // 不能简单地在上面的 Charset 中加 }，因为还会有其他判断
       if FPosInfo.IsPascal and (Item.Kind = skCompDirect) then
       begin
         C := CnOtaGetCurrChar();
@@ -2703,7 +2708,7 @@ begin
           EditPos := CnOtaGetEditPosition;
           if Assigned(EditPos) then
           begin
-            EditPos.MoveRelative(0, 1);  // 退格删掉这个}
+            EditPos.MoveRelative(0, 1);  // 退格删掉这个 }
             EditPos.BackspaceDelete(1);
           end;
         end;
