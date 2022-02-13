@@ -30,6 +30,10 @@ GetText 方法                Tab 未展开             Tab 未展开               Tab 
 IOTAEditWriter 接口的       AnsiString             AnsiString + Utf8        AnsiString + Utf8
 Insert 方法的 PChar 参数
 -----------------------------------------------------------------------------------------------------
+IOTAEditReader 与           Ansi、0 开始           Utf8、0 开始             Utf8、0 开始
+IOTAEditWriter 接口的       Tab 未展开、算 1       Tab 未展开、算 1         Tab 未展开、算 1
+线性偏移 Position
+-----------------------------------------------------------------------------------------------------
 IOTAEditBlock 接口的        AnsiString             AnsiString + Utf8        UnicodeString（Utf16）
 Text 属性/GetText 方法      Tab 未展开             Tab 未展开               Tab 未展开
 -----------------------------------------------------------------------------------------------------
