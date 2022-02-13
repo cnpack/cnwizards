@@ -1170,7 +1170,7 @@ var
       if UsesList.Count = 0 then
         Result := '';
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('GetUsesSource Return: ' + string(Result));
+      CnDebugger.LogMsg('GetUsesSource Return: ' + Result);
 {$ENDIF}
     finally
       UsesList.Free;
@@ -1202,9 +1202,17 @@ begin
 
       if (Intf.Count > 0) and (Lex.TokenID = tkUses) then
       begin
+{$IFDEF UNICODE}
+        // TokenPos 之前的，因而得 -1，但函数内部偏移以 1 开始，TokenPos 又 0 开始，因而得加 1。抵消
+        Writer.CopyTo(CalcUtf8LengthFromWideStringOffset(Lex.Origin, Lex.TokenPos));   // Utf16 CharPos to Utf8 Offset
+        Source := GetUsesSource(Intf);
+        Writer.DeleteTo(CalcUtf8LengthFromWideStringOffset(Lex.Origin, Lex.TokenPos));
+{$ELSE}
         Writer.CopyTo(Lex.TokenPos);
-        Source := string(ConvertEditorTextToText(GetUsesSource(Intf)));
+        Source := ConvertEditorTextToText(GetUsesSource(Intf));
         Writer.DeleteTo(Lex.TokenPos);
+{$ENDIF}
+
         if Source <> '' then
         begin
           Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF UNICODE}AnsiString{$ENDIF}(Source))));
@@ -1216,7 +1224,11 @@ begin
       
       // 跳过当前的符号，避免在 impl 区处理 intf 的 uses
       Lex.Next;
+{$IFDEF UNICODE}
+      Writer.CopyTo(CalcUtf8LengthFromWideStringOffset(Lex.Origin, Lex.TokenPos)); // Utf16 CharPos to Utf8 Offset
+{$ELSE}
       Writer.CopyTo(Lex.TokenPos);
+{$ENDIF}
 
       if Impl.Count > 0 then
       begin
@@ -1225,9 +1237,16 @@ begin
 
         if Lex.TokenID = tkUses then
         begin
+{$IFDEF UNICODE}
+          Writer.CopyTo(CalcUtf8LengthFromWideStringOffset(Lex.Origin, Lex.TokenPos));   // Utf16 CharPos to Utf8 Offset
+          Source := GetUsesSource(Impl);
+          Writer.DeleteTo(CalcUtf8LengthFromWideStringOffset(Lex.Origin, Lex.TokenPos));
+{$ELSE}
           Writer.CopyTo(Lex.TokenPos);
-          Source := string(ConvertEditorTextToText(GetUsesSource(Impl)));
+          Source := ConvertEditorTextToText(GetUsesSource(Impl));
           Writer.DeleteTo(Lex.TokenPos);
+{$ENDIF}
+
           if Source <> '' then
           begin
             Writer.Insert(PAnsiChar(ConvertTextToEditorText({$IFDEF UNICODE}AnsiString{$ENDIF}(Source))));
