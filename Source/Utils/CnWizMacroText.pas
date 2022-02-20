@@ -517,7 +517,7 @@ begin
     begin
     {$IFDEF DEBUG}
       CnDebugger.LogFmt('FindNextMacro Macro (%s). APos %d, AllPos %d.',
-        [Macro, Value, APos, AllPos]);
+        [Macro, APos, AllPos]);
     {$ENDIF}
       Value := GetMacroValue(Macro, APos, AllPos, CursorPos);
     {$IFDEF DEBUG}

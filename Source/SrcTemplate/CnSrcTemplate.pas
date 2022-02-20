@@ -165,7 +165,6 @@ type
       Change: TItemChange);
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
     FWizard: TCnSrcTemplate;
     FItemChanged: Boolean;
     procedure UpdateListViewItem(Index: Integer);
@@ -174,7 +173,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property ItemChanged: Boolean read FItemChanged write FItemChanged;
     {* 条目是否改变过？供保存时使用}
   end;

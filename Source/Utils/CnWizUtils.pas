@@ -150,7 +150,7 @@ const
 var
   CnNoIconList: TStrings;
   IdeClosing: Boolean;
-  CnLoadIconProc: TCnLoadIconProc = nil;
+  CnLoadIconProc: TCnLoadIconProc = nil; // 加载完每一个图标后调用，给外部一个机会修改图标内容
 
 //==============================================================================
 // 公共信息函数
@@ -177,7 +177,7 @@ function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
   UseDefault: Boolean = False; IgnoreDisabled: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为 AIcon 图标装载成功标志。参数 ResName 请不要带 .ico 扩展名。
-   AIcon 加载系统默认尺寸一般是32*32，ASmallIcon 加载 16*16 如果有的话，否则为空}
+   AIcon 加载系统默认尺寸一般是 32*32，ASmallIcon 加载 16*16 如果有的话，否则为空}
 function CnWizLoadBitmap(ABitmap: TBitmap; const ResName: string): Boolean;
 {* 从资源或文件中装载位图，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为位图装载成功标志。参数 ResName 请不要带 .bmp 扩展名}
@@ -736,7 +736,7 @@ function CnOtaIsModuleModified(AModule: IOTAModule): Boolean;
 function CnOtaModuleIsShowingFormSource(Module: IOTAModule): Boolean;
 {* 指定模块是否以文本窗体方式显示, Lines 为转到指定行，<= 0 忽略}
 function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer = 0): Boolean;
-{* 让指定文件可见}
+{* 让指定文件可见。如果 Lines 参数大于 0，则滚动到让第 Lines 行垂直居中}
 function CnOtaIsDebugging: Boolean;
 {* 当前是否在调试状态}
 function CnOtaGetBaseModuleFileName(const FileName: string): string;
@@ -1008,14 +1008,16 @@ procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Intege
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
-{* 移动光标到指定位置，如果 EditView 为空使用当前值。}
+{* 移动光标到指定位置，如果 EditView 为空使用当前值。
+  Middle 为 True 时表示垂直方向上滚动至居中，False 表示仅滚动到最近可见，如本来可见就不滚动}
 
 function CnOtaGetEditPos(EditView: IOTAEditView): TOTAEditPos;
 {* 返回当前光标位置，如果 EditView 为空使用当前值。 }
 
 procedure CnOtaGotoEditPos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
-{* 移动光标到指定位置，BDS 以上的列使用 Utf8 的列值。如果 EditView 为空使用当前值。}
+{* 移动光标到指定位置，BDS 以上的列使用 Utf8 的列值。如果 EditView 为空使用当前值。
+  Middle 为 True 时表示垂直方向上滚动至居中，False 表示仅滚动到最近可见，如本来可见就不滚动}
 
 function CnOtaGetCharPosFromPos(Position: LongInt; EditView: IOTAEditView): TOTACharPos;
 {* 转换一个线性位置到 TOTACharPos，因为在 D5/D6 下 IOTAEditView.PosToCharPos
@@ -1322,6 +1324,7 @@ var
       CnLoadIconProc(AIcon, ASmallIcon, ResName);
   end;
 
+  // 专门只加载 16x16 小图标
   procedure LoadAndCheckSmallIcon;
   begin
     // 指定小尺寸再加载图标
@@ -1397,7 +1400,7 @@ begin
         Exit;
       end;
     end
-    else if ASmallIcon <> nil then
+    else if ASmallIcon <> nil then // 只装载小尺寸的
     begin
       Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
       if Handle <> 0 then
@@ -1410,26 +1413,27 @@ begin
     end;
   end;
 
+  // 以上未加载成功才到这里
   if UseDefault then
   begin
     FileName := WizOptions.IconPath + CNWIZARDDEFAULT_ICO + SCnIcoFileExt;
-    if FileExists(FileName) then
+    if FileExists(FileName) then // 找默认的 ico 文件
     begin
       if AIcon <> nil then
       begin
-      AIcon.LoadFromFile(FileName);
-      if not AIcon.Empty then
-      begin
-        Result := True;
-        // 指定小尺寸再加载图标
-        if ASmallIcon <> nil then
+        AIcon.LoadFromFile(FileName);
+        if not AIcon.Empty then
         begin
-          ASmallIcon.Height := 16;
-          ASmallIcon.Width := 16;
-          ASmallIcon.LoadFromFile(FileName);
+          Result := True;
+          // 指定小尺寸再加载图标
+          if ASmallIcon <> nil then
+          begin
+            ASmallIcon.Height := 16;
+            ASmallIcon.Width := 16;
+            ASmallIcon.LoadFromFile(FileName);
+          end;
+          Exit;
         end;
-        Exit;
-      end;
       end
       else if ASmallIcon <> nil then
       begin
@@ -1442,24 +1446,24 @@ begin
     end;
   end;
 
-  if UseDefault then
+  if UseDefault then // 再找默认图标资源
   begin
     if AIcon <> nil then
     begin
-    Handle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
-    if Handle <> 0 then
-    begin
-      AIcon.Handle := Handle;
-      Result := True;
-      // 再指定小尺寸加载
-      if ASmallIcon <> nil then
+      Handle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
+      if Handle <> 0 then
       begin
-        Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-        if Handle <> 0 then
-          ASmallIcon.Handle := Handle;
+        AIcon.Handle := Handle;
+        Result := True;
+        // 再指定小尺寸加载
+        if ASmallIcon <> nil then
+        begin
+          Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+          if Handle <> 0 then
+            ASmallIcon.Handle := Handle;
+        end;
+        Exit;
       end;
-      Exit;
-    end;
     end
     else if ASmallIcon <> nil then
     begin
@@ -7454,13 +7458,28 @@ begin
 
   if EditPos.Line < 1 then
     EditPos.Line := 1;
-  TopRow := EditPos;
-  if Middle then
-    TopRow.Line := TopRow.Line - (EditView.ViewSize.cy div 2) + 1;
-  if TopRow.Line < 1 then
-    TopRow.Line := 1;
+
   TopRow.Col := 1;
-  EditView.TopPos := TopRow;
+  if Middle then
+  begin
+    TopRow.Line := TopRow.Line - (EditView.ViewSize.cy div 2) + 1;
+    if TopRow.Line < 1 then
+      TopRow.Line := 1;
+    EditView.TopPos := TopRow;
+  end
+  else
+  begin
+    if EditView.TopPos.Line > EditPos.Line then
+    begin
+      TopRow.Line := EditPos.Line;
+      EditView.TopPos := TopRow;
+    end
+    else if (EditView.TopPos.Line + EditView.ViewSize.cy) < EditPos.Line then
+    begin
+      TopRow.Line := EditPos.Line - EditView.ViewSize.cy;
+      EditView.TopPos := TopRow;
+    end;
+  end;
 
   EditView.CursorPos := EditPos;
   Application.ProcessMessages;
