@@ -11,8 +11,8 @@ const
   T<#IniClassName> = class(TObject)
   private
 <#IniFields>  public
-    procedure LoadSettings(Ini: TIniFile);
-    procedure SaveSettings(Ini: TIniFile);
+    procedure LoadSettings(Ini: TMemIniFile);
+    procedure SaveSettings(Ini: TMemIniFile);
     
     procedure LoadFromFile(const FileName: string);
     procedure SaveToFile(const FileName: string);
@@ -24,14 +24,14 @@ var
 
 implementation
 
-procedure T<#IniClassName>.LoadSettings(Ini: TIniFile);
+procedure T<#IniClassName>.LoadSettings(Ini: TMemIniFile);
 begin
   if Ini <> nil then
   begin
 <#IniReaders>  end;
 end;
 
-procedure T<#IniClassName>.SaveSettings(Ini: TIniFile);
+procedure T<#IniClassName>.SaveSettings(Ini: TMemIniFile);
 begin
   if Ini <> nil then
   begin
@@ -40,9 +40,9 @@ end;
 
 procedure T<#IniClassName>.LoadFromFile(const FileName: string);
 var
-  Ini: TIniFile;
+  Ini: TMemIniFile;
 begin
-  Ini := TIniFile.Create(FileName);
+  Ini := TMemIniFile.Create(FileName);
   try
     LoadSettings(Ini);
   finally
@@ -52,9 +52,9 @@ end;
 
 procedure T<#IniClassName>.SaveToFile(const FileName: string);
 var
-  Ini: TIniFile;
+  Ini: TMemIniFile;
 begin
-  Ini := TIniFile.Create(FileName);
+  Ini := TMemIniFile.Create(FileName);
   try
     SaveSettings(Ini);
   finally

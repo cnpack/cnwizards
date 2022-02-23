@@ -10,14 +10,14 @@ T<#IniClassName> *<#IniClassName>;
 <#IniSections>
 <#IniNames>//---------------------------------------------------------------------------
 
-void T<#IniClassName>::LoadSettings(TIniFile *Ini)
+void T<#IniClassName>::LoadSettings(TMemIniFile *Ini)
 {
   if (Ini != NULL)
   {
 <#IniReaders>  }
 }
 
-void T<#IniClassName>::SaveSettings(TIniFile *Ini)
+void T<#IniClassName>::SaveSettings(TMemIniFile *Ini)
 {
   if (Ini != NULL)
   {
@@ -26,8 +26,8 @@ void T<#IniClassName>::SaveSettings(TIniFile *Ini)
 
 void T<#IniClassName>::LoadFromFile(const AnsiString FileName)
 {
-  TIniFile *Ini;
-  Ini = new TIniFile(FileName);
+  TMemIniFile *Ini;
+  Ini = new TMemIniFile(FileName);
     
   __try
   {
@@ -41,8 +41,8 @@ void T<#IniClassName>::LoadFromFile(const AnsiString FileName)
 
 void T<#IniClassName>::SaveToFile(const AnsiString FileName)
 {
-  TIniFile *Ini;
-  Ini = new TIniFile(FileName);
+  TMemIniFile *Ini;
+  Ini = new TMemIniFile(FileName);
   
   __try
   {

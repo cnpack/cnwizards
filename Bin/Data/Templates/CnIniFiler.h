@@ -10,8 +10,8 @@ class T<#IniClassName> : public TObject
 {
 private:
 <#IniFields>public:
-  void LoadSettings(TIniFile *Ini);
-  void SaveSettings(TIniFile *Ini);
+  void LoadSettings(TMemIniFile *Ini);
+  void SaveSettings(TMemIniFile *Ini);
   
   void LoadFromFile(const AnsiString FileName);
   void SaveToFile(const AnsiString FileName);
