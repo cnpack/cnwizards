@@ -276,7 +276,7 @@ type
     property SizeEnlarge: TCnWizSizeEnlarge read FSizeEnlarge write FSizeEnlarge;
     {* 窗体的字号与尺寸放大倍数枚举}
     property DisableIcons: Boolean read FDisableIcons write FDisableIcons;
-    {* 禁用图标以减少 GDI 资源占用}
+    {* 禁用图标以减少 GDI 资源占用，暂未对外开放因为工具栏图标不好整}
 
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     {* 是否使用指定的 User 目录}
