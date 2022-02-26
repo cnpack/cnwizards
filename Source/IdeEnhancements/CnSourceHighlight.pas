@@ -483,6 +483,7 @@ type
     FBlockMatchLineHori: Boolean;
     FBlockMatchLineHoriDot: Boolean;
     FBlockExtendLeft: Boolean;
+    FBlockMatchLineSolidCurrent: Boolean;
     FBlockMatchLineStyle: TCnLineStyle;
     FKeywordHighlight: THighlightItem;
     FIdentifierHighlight: THighlightItem;
@@ -645,7 +646,8 @@ type
     {* 画横线时是否使用虚线 TinyDot 的线型}
     property BlockExtendLeft: Boolean read FBlockExtendLeft write FBlockExtendLeft;
     {* 是否将行首第一个关键字作为画线起始点，以减少部分竖线可能从代码中穿过的情况}
-
+    property BlockMatchLineSolidCurrent: Boolean read FBlockMatchLineSolidCurrent write FBlockMatchLineSolidCurrent;
+    {* 是否对于光标下的标识符所对应的配对画线，强制使用实线绘制以突出当前块}
     property BlockMatchLineClass: Boolean read FBlockMatchLineClass write SetBlockMatchLineClass;
     {* Pascal 中是否画线匹配 class/record/interface 等的声明}
     property BlockMatchLineNamespace: Boolean read FBlockMatchLineNamespace write SetBlockMatchLineNamespace;
@@ -781,6 +783,7 @@ const
   csBlockMatchLineEnd = 'BlockMatchLineEnd';
   csBlockMatchLineHori = 'BlockMatchLineHori';
   csBlockMatchLineHoriDot = 'BlockMatchLineHoriDot';
+  csBlockMatchLineSolidCurrent = 'BlockMatchLineSolidCurrent';
   csBlockMatchHighlight = 'BlockMatchHighlight';
   csBlockMatchBackground = 'BlockMatchBackground';
 
@@ -2665,6 +2668,7 @@ begin
   FBlockMatchLineNamespace := True;
   FBlockMatchLineHori := True;
   FBlockExtendLeft := True;
+  FBlockMatchLineSolidCurrent := True;
   // FBlockMatchLineStyle := lsTinyDot;
   FBlockMatchLineHoriDot := True;
 
@@ -5041,6 +5045,7 @@ begin
     FBlockMatchLineWidth := ReadInteger('', csBlockMatchLineWidth, 1);
     FBlockMatchLineHori := ReadBool('', csBlockMatchLineHori, True);
     FBlockMatchLineHoriDot := ReadBool('', csBlockMatchLineHoriDot, True);
+    FBlockMatchLineSolidCurrent := ReadBool('', csBlockMatchLineSolidCurrent, True);
 
     for I := Low(FHighLightColors) to High(FHighLightColors) do
       FHighLightColors[I] := ReadColor('', csBlockMatchHighlightColor + IntToStr(I),
@@ -5105,6 +5110,7 @@ begin
     WriteBool('', csBlockMatchLineEnd, FBlockMatchLineEnd);
     WriteBool('', csBlockMatchLineHori, FBlockMatchLineHori);
     WriteBool('', csBlockMatchLineHoriDot, FBlockMatchLineHoriDot);
+    WriteBool('', csBlockMatchLineSolidCurrent, FBlockMatchLineSolidCurrent);
   finally
     Free;
   end;
@@ -5970,7 +5976,7 @@ end;
 
 function TCnSourceHighlight.CanSolidCurrentLineBlock: Boolean;
 begin
-  Result := FBlockMatchLineStyle <> lsSolid; // 其他画线风格时，允许当前块画线用实线
+  Result := FBlockMatchLineSolidCurrent and (FBlockMatchLineStyle <> lsSolid); // 其他画线风格时，允许当前块画线用实线
 end;
 
 initialization
@@ -5983,3 +5989,4 @@ finalization
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 end.
+
