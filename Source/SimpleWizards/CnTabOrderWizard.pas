@@ -114,7 +114,6 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
   private
-    { Private declarations }
     FWizard: TCnTabOrderWizard;
     function GetBoolean(const Index: Integer): Boolean;
     function GetTabOrderStyle: TTabOrderStyle;
@@ -129,7 +128,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property TabOrderStyle: TTabOrderStyle read GetTabOrderStyle write SetTabOrderStyle;
     property DispPos: TDispPos read GetDispPos write SetDispPos;
     property DispFont: TFont read GetDispFont write SetDispFont;
@@ -250,6 +248,10 @@ uses
 
 const
   csTimerDelay = 100;
+
+var
+  HoriTolerance: Integer = 0;
+  VertTolerance: Integer = 0;
 
 //==============================================================================
 // Tab Order 设置工具配置窗体
@@ -627,14 +629,14 @@ begin
   end;
 
   if ATabOrderStyle = tsHorz then
-  begin                                // 先水平方向，考虑BidiMode的情况
-    if X1 > X2 then
+  begin                                // 先水平方向，考虑 BidiMode 的情况
+    if X1 > X2 + HoriTolerance then
     begin
       Result := 1;
       if InvertBidiMode then
         Result := -Result;
     end
-    else if X1 < X2 then
+    else if X1 < X2 - HoriTolerance then
     begin
       Result := -1;
       if InvertBidiMode then
@@ -642,9 +644,9 @@ begin
     end
     else
     begin                              // 再按垂直方向
-      if Y1 > Y2 then
+      if Y1 > Y2 + VertTolerance then
         Result := 1
-      else if Y1 < Y2 then
+      else if Y1 < Y2 - VertTolerance then
         Result := -1
       else
         Result := 0;
@@ -652,19 +654,19 @@ begin
   end
   else
   begin
-    if Y1 > Y2 then                    // 先垂直方向
+    if Y1 > Y2 + VertTolerance then                    // 先垂直方向
       Result := 1
-    else if Y1 < Y2 then
+    else if Y1 < Y2 - VertTolerance then
       Result := -1
     else
-    begin                              // 再按水平方向，考虑BidiMode的情况
-      if X1 > X2 then
+    begin                              // 再按水平方向，考虑 BidiMode 的情况
+      if X1 > X2 + HoriTolerance then
       begin
         Result := 1;
         if InvertBidiMode then
           Result := -Result;
       end
-      else if X1 < X2 then
+      else if X1 < X2 - HoriTolerance then
       begin
         Result := -1;
         if InvertBidiMode then
@@ -711,6 +713,7 @@ var
     ARect.Rect := Rect(AL, AT, AR, AB);
     AList.Add(ARect);
   end;
+
 begin
   if not Active then Exit;
   if not Assigned(WinControl) or (WinControl.ControlCount = 0) then Exit;
@@ -758,6 +761,7 @@ begin
             Match := False;
             // 将控件分组，左右相同或上下相同的控件归为一组
             for j := 0 to Rects.Count - 1 do
+            begin
               with PCnRectRec(Rects[j])^.Rect do
               begin
                 if FTabOrderStyle = tsHorz then
@@ -807,6 +811,7 @@ begin
                   end;
                 end;
               end;
+            end;
 
             if not Match then
             begin
