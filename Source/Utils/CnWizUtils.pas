@@ -7482,6 +7482,7 @@ begin
   end;
 
   EditView.CursorPos := EditPos;
+  EditView.MoveViewToCursor; // FIXME: TopPos 赋值似乎有问题？
   Application.ProcessMessages;
   EditView.Paint;
 end;
