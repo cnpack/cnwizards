@@ -37,7 +37,9 @@ unit CnSourceHighlight;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2021.09.03
+* 修改记录：2022.02.26
+*               光标下的高亮关键字块，其配对使用实线绘制。
+*           2021.09.03
 *               加入对区域折叠标记的高亮配对显示。
 *           2016.05.22
 *               修正纯英文环境下 Unicode IDE 内的宽字节字符转换成 Ansi 有误的问题
@@ -574,6 +576,7 @@ type
     procedure SetHighlightCompDirective(const Value: Boolean);
     procedure SetBlockMatchLineNamespace(const Value: Boolean);
   protected
+    function CanSolidCurrentLineBlock: Boolean;
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -3760,17 +3763,30 @@ begin
           begin
             if OldPair <> nil then
             begin
-              EditorMarkLineDirty(OldPair.Top);
-              EditorMarkLineDirty(OldPair.Bottom);
-              for I := 0 to OldPair.MiddleCount - 1 do
-                EditorMarkLineDirty(OldPair.MiddleToken[I].EditLine);
+              if CanSolidCurrentLineBlock then // 高亮当前光标下的配对关键字块时，需要重画所影响的块
+                for I := OldPair.Top to OldPair.Bottom do
+                  EditorMarkLineDirty(I)
+              else
+              begin
+                EditorMarkLineDirty(OldPair.Top);
+                EditorMarkLineDirty(OldPair.Bottom);
+                for I := 0 to OldPair.MiddleCount - 1 do
+                  EditorMarkLineDirty(OldPair.MiddleToken[I].EditLine);
+              end;
             end;
+
             if NewPair <> nil then
             begin
-              EditorMarkLineDirty(NewPair.Top);
-              EditorMarkLineDirty(NewPair.Bottom);
-              for I := 0 to NewPair.MiddleCount - 1 do
-                EditorMarkLineDirty(NewPair.MiddleToken[I].EditLine);
+              if CanSolidCurrentLineBlock then // 高亮当前光标下的配对关键字块时，需要重画所影响的块
+              for I := NewPair.Top to NewPair.Bottom do
+                EditorMarkLineDirty(I)
+              else
+              begin
+                EditorMarkLineDirty(NewPair.Top);
+                EditorMarkLineDirty(NewPair.Bottom);
+                for I := 0 to NewPair.MiddleCount - 1 do
+                  EditorMarkLineDirty(NewPair.MiddleToken[I].EditLine);
+              end;
             end;
           end;
         end;
@@ -4082,7 +4098,7 @@ begin
             else
               ColorFg := FKeywordHighlight.ColorFg;
 
-            ColorBk := clNone; // 只有当前Token在当前KeyPair内才高亮背景
+            ColorBk := clNone; // 只有当前 Token 在当前 KeyPair 内才高亮背景
             if KeyPair <> nil then
             begin
               if (KeyPair.StartToken = Token) or (KeyPair.EndToken = Token) or
@@ -4513,6 +4529,7 @@ var
   EditorCanvas: TCanvas;
   LineFirstToken: TCnGeneralPasToken;
   EndLineStyle: TCnLineStyle;
+  PairIsInKeyPair: Boolean;
 
   function EditorGetEditPoint(APos: TOTAEditPos; var ARect: TRect): Boolean;
   begin
@@ -4542,7 +4559,7 @@ begin
       else
         Info := nil;
 
-      if LineInfo.Count > 0 then
+      if (LineInfo <> nil) and (LineInfo.Count > 0) then
       begin
         EditorCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
         SavePenColor := EditorCanvas.Pen.Color;
@@ -4555,11 +4572,18 @@ begin
           begin
             EditorCanvas.Pen.Width := FBlockMatchLineWidth; // 线宽
 
+            // 开始循环画当前行所涉及到的每个 Pair 在当前行里的线条
             for I := 0 to LineInfo.Lines[LogicLineNum].Count - 1 do
             begin
               // 一个 EditControl 的 LineInfo 中有多个配对画线的信息 LinePair
               Pair := TCnBlockLinePair(LineInfo.Lines[LogicLineNum][I]);
               EditorCanvas.Pen.Color := GetColorFg(Pair.Layer);
+
+              // 判断当前要画的 Pair 是否受光标下的 KeyPair 影响，如果受影响，要改变画线风格
+              PairIsInKeyPair := False;
+              if (LineInfo.CurrentPair <> nil) and CanSolidCurrentLineBlock then
+                PairIsInKeyPair := (Pair.Top >= LineInfo.CurrentPair.Top) and (Pair.Bottom <= LineInfo.CurrentPair.Bottom)
+                  and (Pair.Left = LineInfo.CurrentPair.Left);
 
               if FBlockExtendLeft and (Info <> nil) and (LogicLineNum = Pair.Top)
                 and (Pair.EndToken.EditLine > Pair.StartToken.EditLine) then
@@ -4611,6 +4635,8 @@ begin
                 begin
                   if FBlockMatchLineHoriDot and (Pair.StartLeft <> Pair.Left) then
                     EndLineStyle := lsTinyDot // 和主竖线不同列时，用虚线画框
+                  else if PairIsInKeyPair then
+                    EndLineStyle := lsSolid
                   else
                     EndLineStyle := FBlockMatchLineStyle;
 
@@ -4643,6 +4669,8 @@ begin
                 begin
                   if FBlockMatchLineHoriDot and (Pair.EndLeft <> Pair.Left) then
                     EndLineStyle := lsTinyDot // 和主竖线不同列时，用虚线画框
+                  else if PairIsInKeyPair then
+                    EndLineStyle := lsSolid
                   else
                     EndLineStyle := FBlockMatchLineStyle;
 
@@ -4674,8 +4702,14 @@ begin
               begin
                 // 在不画 [ 时，有时候不需要画配对中的竖线，竖向画 Left 线
                 if not Pair.DontDrawVert or FBlockMatchLineEnd then
-                  HighlightCanvasLine(EditorCanvas, R1.Left, R1.Top, R1.Left,
-                    R1.Bottom, FBlockMatchLineStyle);
+                begin
+                  if PairIsInKeyPair then // 光标下当前配对的，画实线
+                    HighlightCanvasLine(EditorCanvas, R1.Left, R1.Top, R1.Left,
+                      R1.Bottom, lsSolid)
+                  else
+                    HighlightCanvasLine(EditorCanvas, R1.Left, R1.Top, R1.Left,
+                      R1.Bottom, FBlockMatchLineStyle);
+                end;
 
                 if FBlockMatchLineHori and (Pair.MiddleCount > 0) then
                 begin
@@ -5932,6 +5966,11 @@ begin
       end;
     end;
   end;
+end;
+
+function TCnSourceHighlight.CanSolidCurrentLineBlock: Boolean;
+begin
+  Result := FBlockMatchLineStyle <> lsSolid; // 其他画线风格时，允许当前块画线用实线
 end;
 
 initialization
