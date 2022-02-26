@@ -27,10 +27,14 @@ unit CnUsesToolsWizard;
 * 备    注：原理：编译好的 DCU 文件里记录了 interface 部分以及 implementation 部
 *           分导入的每一个单元名，以及对应的单元导入标识符，如果某个单元的标识符
 *           数量为 0，表示没有用到其内容，可以考虑修改源码剔除之。
+*           注意分析 DCU 得到的单元名在 XE2 或以上支持命名空间的编译器里会带点号
+*           源码中则不一定带，目前以尾部匹配点号加单元名的模式支持。
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2021.08.26 V1.3
+* 修改记录：2022.02.26 V1.2
+*               清理时继续完善对 XE2 风格的带点的单元名的支持
+*           2021.08.26 V1.3
 *               改成子菜单专家以添加引用树功能
 *           2016.08.02 V1.2
 *               加入自动保存并关闭处理结果的选项以应对大项目
@@ -1024,9 +1028,38 @@ var
     CPos, BegPos, EndPos: Integer;
     I, UnitStartPos, UnitEndPos: Integer;
     S: string;
+
+    function SourceUsesListContainsUnitName(const ACleanUnitName: string): Boolean;
+    var
+      J, L1, L2: Integer;
+      U: string;
+    begin
+      Result := List.IndexOf(Item.Name) >= 0;
+{$IFDEF SUPPORT_UNITNAME_DOT}
+      if not Result then
+      begin
+        U := '.' + ACleanUnitName;
+        L1 := Length(U);
+
+        for J := 0 to List.Count - 1 do
+        begin
+          L2 := Length(List[J]);
+          if L2 > L1 then
+          begin
+            if StrIComp(PChar(Copy(List[J], L2 - L1 + 1, MaxInt)), PChar(U)) = 0 then
+            begin
+              Result := True;
+              Exit;
+            end;
+          end;
+        end;
+      end;
+{$ENDIF}
+    end;
+
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('GetUsesSource List: %s.', [List.Text]);
+    CnDebugger.LogFmt('GetUsesSource To Clean List: %s.', [List.Text]);
 {$ENDIF}
     Result := '';
     CPos := Lex.TokenPos;
@@ -1091,14 +1124,14 @@ var
         if LastCommaPos <> 0 then
           Item.CommaBeforePos := LastCommaPos - 1;
         Item.CommaAfterPos := 0;
-        UsesList.Add(Item);
+        UsesList.Add(Item);  // UsesList 里拿到了源文件中的引用单元名，注意可能没有 WinApi 等前缀
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('GetUsesSource UsesList Add Last: %s.', [Item.Name]);
 {$ENDIF}
       end;
 
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('GetUsesSource UsesList Count: %d. List Count %d.',
+      CnDebugger.LogFmt('GetUsesSource UsesList Count: %d. To Clean List Count %d.',
         [UsesList.Count, List.Count]);
 {$ENDIF}
       if Lex.TokenID <> tkNull then
@@ -1113,7 +1146,7 @@ var
       for I := UsesList.Count - 1 downto 0 do
       begin
         Item := TPrvUsesItem(UsesList[I]);
-        if List.IndexOf(Item.Name) >= 0 then
+        if SourceUsesListContainsUnitName(Item.Name) then
         begin
 {$IFDEF DEBUG}
 //        CnDebugger.LogFmt('GetUsesSource Has Name %s.', [Item.Name]);
