@@ -247,11 +247,13 @@ var
 begin
   // 处理当前文件的话，即使不处理 Project Source，但当前文件是 Project Source，
   // 还是照常处理。
-  if not Self.CropProjectSrc and not IsCurrent then
+  if not FCropProjectSrc and not IsCurrent then
     if IsDpr(FileName) or IsBpr(FileName) or IsBpg(FileName) then
       Exit;
 
-  EditFiler := nil; InStream := nil; OutStream := nil;
+  EditFiler := nil;
+  InStream := nil;
+  OutStream := nil;
   try
     EditFiler := TCnEditFiler.Create(FileName);
     InStream := TMemoryStream.Create;
@@ -264,9 +266,9 @@ begin
       Exit;
     end;
 
-    Self.CropStream(InStream, OutStream, IsDelphiSourceModule(FileName));
+    CropStream(InStream, OutStream, IsDelphiSourceModule(FileName));
 
-    if Self.MergeBlank then
+    if FMergeBlank then
       MergeBlankStream(OutStream);
 
     EditFiler.ReadFromStream(OutStream, True);
@@ -280,10 +282,10 @@ end;
 
 procedure TCnCommentCropperWizard.CropComments;
 begin
-  Self.CropCount := 0;
+  FCropCount := 0;
   Screen.Cursor := crHourGlass;
   try
-    case Self.CropStyle of
+    case FCropStyle of
       csCropSelected:       CropSelected;
       csCropCurrent:        CropCurrentUnit;
       csCropOpened:         CropOpenedUnits;
@@ -295,14 +297,14 @@ begin
     Screen.Cursor := crDefault;
   end;
 
-  if Self.CropCount > 0 then
-    InfoDlg(Format(SCnCommentCropperCountFmt, [Self.CropCount]));
+  if FCropCount > 0 then
+    InfoDlg(Format(SCnCommentCropperCountFmt, [FCropCount]));
 end;
 
 procedure TCnCommentCropperWizard.CropCurrentUnit;
 begin
   if IsSourceModule(CnOtaGetCurrentSourceFile) then
-    Self.CropAUnit(CnOtaGetCurrentSourceFile, True);
+    CropAUnit(CnOtaGetCurrentSourceFile, True);
 end;
 
 procedure TCnCommentCropperWizard.CropOpenedUnits;
@@ -378,15 +380,15 @@ begin
 
         Cropper.InStream := InStream;
         Cropper.OutStream := OutStream;
-        Cropper.CropOption := Self.CropOption;
-        Cropper.CropDirective := Self.CropDirective;
-        Cropper.CropTodoList := Self.CropTodoList;
-        Cropper.Reserve := Self.Reserve;
-        Cropper.ReserveItems.Text := StringReplace(Self.FReserveStr, ',',
+        Cropper.CropOption := FCropOption;
+        Cropper.CropDirective := FCropDirective;
+        Cropper.CropTodoList := FCropTodoList;
+        Cropper.Reserve := FReserve;
+        Cropper.ReserveItems.Text := StringReplace(FReserveStr, ',',
           #13#10, [rfReplaceAll]);
 
         Cropper.Parse;
-        if Self.MergeBlank then
+        if FMergeBlank then
           MergeBlankStream(OutStream);
 {$IFDEF DEBUG}
 //      CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size); 
@@ -414,38 +416,38 @@ procedure TCnCommentCropperWizard.Execute;
 begin
   with TCnCommentCropForm.Create(nil) do
   begin
-    CropOption := Self.CropOption;
-    CropDirective := Self.CropDirective;
-    CropTodoList := Self.CropTodoList;
-    CropProjectSrc := Self.CropProjectSrc;
-    Reserve := Self.Reserve;
-    ReserveStr := Self.ReserveStr;
-    Dir := Self.Dir;
-    FileMask := Self.FileMask;
-    if Self.FDirsHistory.Text <> '' then
-      cbbDir.Items.Text := Self.FDirsHistory.Text;
-    if Self.FFileMasksHistory.Text <> '' then
-      cbbMask.Items.Text := Self.FFileMasksHistory.Text;
+    CropOption := FCropOption;
+    CropDirective := FCropDirective;
+    CropTodoList := FCropTodoList;
+    CropProjectSrc := FCropProjectSrc;
+    Reserve := FReserve;
+    ReserveStr := FReserveStr;
+    Dir := FDir;
+    FileMask := FFileMask;
+    if FDirsHistory.Text <> '' then
+      cbbDir.Items.Text := FDirsHistory.Text;
+    if FFileMasksHistory.Text <> '' then
+      cbbMask.Items.Text := FFileMasksHistory.Text;
 
     try
       ShowModal;
       if ModalResult = mrOK then
       begin
-        Self.CropOption := CropOption;
-        Self.CropDirective := CropDirective;
-        Self.CropTodoList := CropTodoList;
-        Self.CropProjectSrc := CropProjectSrc;
-        Self.CropStyle := CropStyle;
-        Self.MergeBlank := MergeBlank;
-        Self.Reserve := Reserve;
-        Self.ReserveStr := ReserveStr;
-        Self.Dir := Dir;
-        Self.FileMask := FileMask;
-        Self.FDirsHistory.Text := cbbDir.Items.Text;
-        Self.FFileMasksHistory.Text := cbbMask.Items.Text;
+        FCropOption := CropOption;
+        FCropDirective := CropDirective;
+        FCropTodoList := CropTodoList;
+        FCropProjectSrc := CropProjectSrc;
+        FCropStyle := CropStyle;
+        FMergeBlank := MergeBlank;
+        FReserve := Reserve;
+        FReserveStr := ReserveStr;
+        FDir := Dir;
+        FFileMask := FileMask;
+        FDirsHistory.Text := cbbDir.Items.Text;
+        FFileMasksHistory.Text := cbbMask.Items.Text;
 
         // 进行总处理。
-        Self.CropComments;
+        CropComments;
 
         DoSaveSettings;
       end;
@@ -494,14 +496,14 @@ begin
   inherited;
   with TCnIniFile.Create(Ini) do
   begin
-    Self.CropTodoList := ReadBool('', csCropTodoList, False);
-    Self.CropDirective := ReadBool('', csCropDirective, False);
-    Self.CropProjectSrc := ReadBool('', csCropProjectSrc, False);
-    Self.MergeBlank := ReadBool('', csMergeBlank, False);
-    Self.IncludeSubDirs := ReadBool('', csIncludeSub, True);
-    Self.Reserve := ReadBool('', csReserve, True);
-    Self.ReserveStr := ReadString('', csReserveStr, csDefReserveStr);
-    Self.CropOption := TCropOption(ReadInteger('', csCropOption, 0));
+    CropTodoList := ReadBool('', csCropTodoList, False);
+    CropDirective := ReadBool('', csCropDirective, False);
+    CropProjectSrc := ReadBool('', csCropProjectSrc, False);
+    MergeBlank := ReadBool('', csMergeBlank, False);
+    IncludeSubDirs := ReadBool('', csIncludeSub, True);
+    Reserve := ReadBool('', csReserve, True);
+    ReserveStr := ReadString('', csReserveStr, csDefReserveStr);
+    CropOption := TCropOption(ReadInteger('', csCropOption, 0));
     ReadStrings('', csDirsHistory, FDirsHistory);
     ReadStrings('', csFileMasksHistory, FFileMasksHistory);
     Free;
@@ -513,13 +515,13 @@ begin
   inherited;
   with TCnIniFile.Create(Ini) do
   try
-    WriteBool('', csCropTodoList, Self.CropTodoList);
-    WriteBool('', csCropDirective, Self.CropDirective);
-    WriteBool('', csCropProjectSrc, Self.CropProjectSrc);
-    WriteBool('', csMergeBlank, Self.MergeBlank);
-    WriteBool('', csReserve, Self.Reserve);
-    WriteString('', csReserveStr, Self.ReserveStr);
-    WriteInteger('', csCropOption, Ord(Self.CropOption));
+    WriteBool('', csCropTodoList, FCropTodoList);
+    WriteBool('', csCropDirective, FCropDirective);
+    WriteBool('', csCropProjectSrc, FCropProjectSrc);
+    WriteBool('', csMergeBlank, FMergeBlank);
+    WriteBool('', csReserve, FReserve);
+    WriteString('', csReserveStr, FReserveStr);
+    WriteInteger('', csCropOption, Ord(FCropOption));
     if FDirsHistory.Text <> '' then
       WriteStrings('', csDirsHistory, FDirsHistory);
     if FFileMasksHistory.Text <> '' then
@@ -533,27 +535,27 @@ end;
 
 function TCnCommentCropForm.GetCropDirective: Boolean;
 begin
-  Result := Self.chkCropDirective.Checked;
+  Result := chkCropDirective.Checked;
 end;
 
 function TCnCommentCropForm.GetCropOption: TCropOption;
 begin
-  if Self.rbExAscii.Checked then
+  if rbExAscii.Checked then
     Result := coExAscii
   else Result := coAll;
 end;
 
 function TCnCommentCropForm.GetCropStyle: TCropStyle;
 begin
-  if Self.rbSelEdit.Checked then
+  if rbSelEdit.Checked then
     Result := csCropSelected
-  else if Self.rbCurrUnit.Checked then
+  else if rbCurrUnit.Checked then
     Result := csCropCurrent
-  else if Self.rbOpenedUnits.Checked then
+  else if rbOpenedUnits.Checked then
     Result := csCropOpened
-  else if Self.rbCurrProject.Checked then
+  else if rbCurrProject.Checked then
     Result := csCropProject
-  else if Self.rbDirectory.Checked then
+  else if rbDirectory.Checked then
     Result := csDirectory
   else
     Result := csCropProjectGroup;
@@ -561,19 +563,19 @@ end;
 
 function TCnCommentCropForm.GetCropTodoList: Boolean;
 begin
-  Result := Self.chkCropTodo.Checked;
+  Result := chkCropTodo.Checked;
 end;
 
 procedure TCnCommentCropForm.SetCropDirective(const Value: Boolean);
 begin
-  Self.chkCropDirective.Checked := Value;
+  chkCropDirective.Checked := Value;
 end;
 
 procedure TCnCommentCropForm.SetCropOption(const Value: TCropOption);
 begin
   case Value of
-    coAll:     Self.rbCropComment.Checked := True;
-    coExAscii: Self.rbExAscii.Checked := True;
+    coAll:     rbCropComment.Checked := True;
+    coExAscii: rbExAscii.Checked := True;
   end;
 end;
 
@@ -591,28 +593,28 @@ end;
 
 procedure TCnCommentCropForm.SetCropTodoList(const Value: Boolean);
 begin
-  Self.chkCropTodo.Checked := Value;
+  chkCropTodo.Checked := Value;
 end;
 
 procedure TCnCommentCropForm.FormCreate(Sender: TObject);
 begin
-  Self.rbSelEdit.Enabled := False;
+  rbSelEdit.Enabled := False;
   if CurrentIsSource then
     if CnOtaGetTopMostEditView <> nil then
       if CnOtaGetTopMostEditView.Block <> nil then
         if CnOtaGetTopMostEditView.Block.Size > 0 then
         begin
-          Self.rbSelEdit.Enabled := True;
-          Self.rbSelEdit.Checked := True;
+          rbSelEdit.Enabled := True;
+          rbSelEdit.Checked := True;
         end;
 
-  Self.chkCropDirective.Enabled := IsDelphiRuntime;
-  Self.rbCurrUnit.Enabled := CnOtaGetTopMostEditView <> nil;
-  Self.rbOpenedUnits.Enabled := Self.rbCurrUnit.Enabled;
-  Self.rbCurrProject.Enabled := CnOtaGetCurrentProject <> nil;
-  Self.rbProjectGroup.Enabled := CnOtaGetProjectGroup <> nil;
-  Self.edReserveStr.Enabled := Self.chkReserve.Checked;
-  Self.chkCropProjectSrc.Enabled := rbCurrProject.Checked or rbProjectGroup.Checked;
+  chkCropDirective.Enabled := IsDelphiRuntime;
+  rbCurrUnit.Enabled := CnOtaGetTopMostEditView <> nil;
+  rbOpenedUnits.Enabled := rbCurrUnit.Enabled;
+  rbCurrProject.Enabled := CnOtaGetCurrentProject <> nil;
+  rbProjectGroup.Enabled := CnOtaGetProjectGroup <> nil;
+  edReserveStr.Enabled := chkReserve.Checked;
+  chkCropProjectSrc.Enabled := rbCurrProject.Checked or rbProjectGroup.Checked;
 
   if (CnOtaGetCurrentProject = nil) and (CnOtaGetCurrentSourceFile = '') then
     rbDirectory.Checked := True;
@@ -636,11 +638,11 @@ begin
   Cropper.InStream := InStream;
   Cropper.OutStream := OutStream;
 
-  Cropper.CropOption := Self.CropOption;
-  Cropper.CropDirective := Self.CropDirective;
-  Cropper.CropTodoList := Self.CropTodoList;
-  Cropper.Reserve := Self.Reserve;
-  Cropper.ReserveItems.Text := StringReplace(Self.FReserveStr, ',',
+  Cropper.CropOption := FCropOption;
+  Cropper.CropDirective := FCropDirective;
+  Cropper.CropTodoList := FCropTodoList;
+  Cropper.Reserve := FReserve;
+  Cropper.ReserveItems.Text := StringReplace(FReserveStr, ',',
     #13#10, [rfReplaceAll]);
   try
     Cropper.Parse;
@@ -661,12 +663,12 @@ end;
 
 function TCnCommentCropForm.GetReserve: Boolean;
 begin
-  Result := Self.chkReserve.Checked;
+  Result := chkReserve.Checked;
 end;
 
 procedure TCnCommentCropForm.SetReserve(const Value: Boolean);
 begin
-  Self.chkReserve.Checked := Value;
+  chkReserve.Checked := Value;
 end;
 
 function TCnCommentCropForm.GetReserveStr: string;
@@ -676,22 +678,22 @@ end;
 
 procedure TCnCommentCropForm.SetReserveStr(const Value: string);
 begin
-  Self.edReserveStr.Text := Value;
+  edReserveStr.Text := Value;
 end;
 
 procedure TCnCommentCropForm.chkReserveClick(Sender: TObject);
 begin
-  Self.edReserveStr.Enabled := Self.chkReserve.Checked;
+  edReserveStr.Enabled := chkReserve.Checked;
 end;
 
 function TCnCommentCropForm.GetCropProjectSrc: Boolean;
 begin
-  Result := Self.chkCropProjectSrc.Checked;
+  Result := chkCropProjectSrc.Checked;
 end;
 
 procedure TCnCommentCropForm.SetCropProjectSrc(const Value: Boolean);
 begin
-  Self.chkCropProjectSrc.Checked := Value;
+  chkCropProjectSrc.Checked := Value;
 end;
 
 procedure TCnCommentCropForm.UpdateClick(Sender: TObject);
