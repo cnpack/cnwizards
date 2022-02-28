@@ -372,9 +372,9 @@ begin
 {$ENDIF}
 
         if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
-          Cropper := TCnPasCropper.Create(nil)
+          Cropper := TCnPasCropper.Create
         else
-          Cropper := TCnCPPCropper.Create(nil);
+          Cropper := TCnCPPCropper.Create;
 
         Cropper.InStream := InStream;
         Cropper.OutStream := OutStream;
@@ -629,9 +629,9 @@ begin
   Assert((InStream <> nil) and (OutStream <> nil));
 
   if IsDelphi then
-    Cropper := TCnPasCropper.Create(nil)
+    Cropper := TCnPasCropper.Create
   else
-    Cropper := TCnCPPCropper.Create(nil);
+    Cropper := TCnCPPCropper.Create;
 
   Cropper.InStream := InStream;
   Cropper.OutStream := OutStream;
