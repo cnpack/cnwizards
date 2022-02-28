@@ -29,7 +29,9 @@ unit CnCommentCropper;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2014.12.29 V1.3
+* 修改记录：2022.02.28 V1.4
+*               修正 BDS 下可能漏了 dpr 文件的问题
+*           2014.12.29 V1.3
 *               修正一些对末尾空行以及字符串结束符处理失误的问题
 *           2009.01.26 V1.2
 *               增加目录搜索的功能，增加一合并空行的选项
@@ -305,38 +307,44 @@ end;
 
 procedure TCnCommentCropperWizard.CropOpenedUnits;
 var
-  i: Integer;
+  I: Integer;
   iModuleServices: IOTAModuleServices;
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
-  for i := 0 to iModuleServices.GetModuleCount - 1 do
-    if IsSourceModule(CnOtaGetFileNameOfModule(iModuleServices.GetModule(i))) then
-      CropAUnit(CnOtaGetFileNameOfModule(iModuleServices.GetModule(i)));
+  for I := 0 to iModuleServices.GetModuleCount - 1 do
+    if IsSourceModule(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I))) then
+      CropAUnit(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I)));
 end;
 
 procedure TCnCommentCropperWizard.CropAProject(Project: IOTAProject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if Project <> nil then
   begin
+    // 这里 BDS 后会拿到 dproj，而不是 dpr，需要额外处理
     if IsSourceModule(Project.FileName) then
       CropAUnit(Project.FileName);
-    for i := 0 to Project.GetModuleCount - 1 do
+{$IFDEF BDS}
+    if not IsDpr(Project.FileName) then
+      CropAUnit(_CnChangeFileExt(Project.FileName, '.dpr'));
+{$ENDIF}
+
+    for I := 0 to Project.GetModuleCount - 1 do
     begin
-      if IsSourceModule(Project.GetModule(i).FileName) then
-        CropAUnit(Project.GetModule(i).FileName);
+      if IsSourceModule(Project.GetModule(I).FileName) then
+        CropAUnit(Project.GetModule(I).FileName);
     end;
   end;
 end;
 
 procedure TCnCommentCropperWizard.CropAProjectGroup(ProjectGroup: IOTAProjectGroup);
 var
-  i: Integer;
+  I: Integer;
 begin
   if ProjectGroup <> nil then
-    for i := 0 to ProjectGroup.ProjectCount - 1 do
-      CropAProject(ProjectGroup.Projects[i]);
+    for I := 0 to ProjectGroup.ProjectCount - 1 do
+      CropAProject(ProjectGroup.Projects[I]);
 end;
 
 procedure TCnCommentCropperWizard.CropSelected;
