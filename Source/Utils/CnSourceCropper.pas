@@ -81,8 +81,9 @@ type
     function NextChar(Value: Integer = 1): AnsiChar;
     function PrevChar(Value: Integer = 1): AnsiChar;
     procedure WriteChar(Value: AnsiChar);
-    
-    procedure ProcessToLineEnd;
+    procedure BackspaceChars(Values: Integer = 1);
+
+    procedure ProcessToLineEnd(SpCount: Integer = 0); // 传入的参数是该行注释前的连续空格数
     procedure DoDefaultProcess;
     procedure DoBlockEndProcess;
   public
@@ -91,9 +92,9 @@ type
     destructor Destroy; override;
   published
     property InStream: TStream read FInStream write SetInStream;
-    {* 输入要求是 Ansi 形式的 AnsiString }
+    {* 输入要求是 Ansi 或 Utf8 形式的 AnsiString}
     property OutStream: TStream read FOutStream write SetOutStream;
-    {* 输出会是 Ansi 形式的 AnsiString }
+    {* 输出会是对应的 Ansi 或 Utf8 形式的 AnsiString}
     property CropOption: TCropOption read FCropOption write FCropOption;
     property CropDirective: Boolean read FCropDirective write FCropDirective;
     property CropTodoList: Boolean read FCropTodoList write FCropTodoList;
@@ -141,11 +142,19 @@ const
   SCnToDo = 'TODO';
   SCnToDoDone = 'DONE';
   SCnNeedSepChars: set of AnsiChar = [#0, #9, ' ', #13, #10];
+  SCnSpacesChars: set of AnsiChar = [#9, ' '];
 
 constructor TCnSourceCropper.Create;
 begin
   inherited;
   FReserveItems := TStringList.Create;
+end;
+
+procedure TCnSourceCropper.BackspaceChars(Values: Integer);
+begin
+  if (OutStream <> nil) and (Values > 0) then
+    if OutStream.Size > Values then
+      OutStream.Size := OutStream.Size - Values;
 end;
 
 destructor TCnSourceCropper.Destroy;
@@ -356,22 +365,33 @@ begin
   end;
 end;
 
-procedure TCnSourceCropper.ProcessToLineEnd;
+procedure TCnSourceCropper.ProcessToLineEnd(SpCount: Integer);
 begin
-  while not (FCurChar in [#0, #13, #10]) do
+  if (FCropOption = coAll) and (FCurTokenKind <> skTodoList) then
   begin
-    if ((FCropOption = coExAscii) and (FCurChar < #128))
-      or (FCurTokenKind = skTodoList) then
-        WriteChar(FCurChar);
-    FCurChar := GetCurChar;
+    BackspaceChars(SpCount);
+    while not (FCurChar in [#0, #13, #10]) do
+      FCurChar := GetCurChar;
+  end
+  else
+  begin
+    while not (FCurChar in [#0, #13, #10]) do
+    begin
+      if ((FCropOption = coExAscii) and (FCurChar < #128))
+        or (FCurTokenKind = skTodoList) then
+          WriteChar(FCurChar);
+      FCurChar := GetCurChar;
+    end;
   end;
 
   // 当前是 #13 或 #10
   if FCurChar = #13 then
+  begin
     repeat
       WriteChar(FCurChar);   // 回车总是要写的。
       FCurChar := GetCurChar;
     until FCurChar in [#0, #10];
+  end;
 
   if FCurChar = #10 then
     WriteChar(FCurChar);
@@ -411,8 +431,13 @@ end;
 { TCnCPPCropper }
 
 procedure TCnCPPCropper.DoParse;
+var
+  IsSpace: Boolean;
+  SpCount: Integer;
 begin
   FCurChar := GetCurChar;
+  SpCount := 0;
+
   while FCurChar <> #0 do
   begin
     case FCurChar of
@@ -425,7 +450,7 @@ begin
           else
             FCurTokenKind := skLineComment;
           // 接着处理到行尾。
-          ProcessToLineEnd;
+          ProcessToLineEnd(SpCount);
         end
         else
         if (FCurTokenKind in [skCode, skUndefined]) and (NextChar = '*') then
@@ -465,6 +490,12 @@ begin
       DoDefaultProcess;
     end;
 
+    IsSpace := FCurChar in SCnSpacesChars;
+    if IsSpace then
+      Inc(SpCount)
+    else
+      SpCount := 0;
+
     FCurChar := GetCurChar;
   end;
   WriteChar(#0);
@@ -500,8 +531,13 @@ end;
 { TCnPasCropper }
 
 procedure TCnPasCropper.DoParse;
+var
+  IsSpace: Boolean;
+  SpCount: Integer;
 begin
   FCurChar := GetCurChar;
+  SpCount := 0;
+
   while FCurChar <> #0 do
   begin
     case FCurChar of
@@ -514,7 +550,7 @@ begin
           else
             FCurTokenKind := skLineComment;
           // 接着处理到行尾。
-          ProcessToLineEnd;
+          ProcessToLineEnd(SpCount);
         end
         else
           DoDefaultProcess;
@@ -570,6 +606,12 @@ begin
     else
       DoDefaultProcess;
     end;
+
+    IsSpace := FCurChar in SCnSpacesChars;
+    if IsSpace then
+      Inc(SpCount)
+    else
+      SpCount := 0;
 
     FCurChar := GetCurChar;
   end;

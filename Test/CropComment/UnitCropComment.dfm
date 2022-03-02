@@ -55,11 +55,11 @@ object FormCrop: TFormCrop
           '  Forms,'
           '  UnitCropComment{bbb}in '#39'UnitCropComment.pas'#39' {Form1};'
           ''
-          '{$R *.RES}'
+          '{$R *.RES}  // kkk'
           ''
           'begin'
-          '  Applic{aaa}ation.Initialize;'
-          '  Application.CreateForm(TForm1, Form1);'
+          '  Applic{aaa}ation.Initialize;//'
+          '  Application.CreateForm(TForm1, Form1); //mmmmm'
           '  Application.Run;'
           'end.')
         ParentFont = False
