@@ -65,10 +65,10 @@ type
     FOutStream: TStream;
     FReserve: Boolean;
     FReserveItems: TStringList;
+    FRemoveSingleLineSlashes: Boolean;
     procedure SetInStream(const Value: TStream);
     procedure SetOutStream(const Value: TStream);
     procedure SetReserveItems(const Value: TStringList);
-
   protected
     procedure DoParse; virtual; abstract;
     procedure ProcessToBlockEnd; virtual; abstract;
@@ -81,9 +81,10 @@ type
     function NextChar(Value: Integer = 1): AnsiChar;
     function PrevChar(Value: Integer = 1): AnsiChar;
     procedure WriteChar(Value: AnsiChar);
-    procedure BackspaceChars(Values: Integer = 1);
+    procedure BackspaceChars(Values: Integer = 1); // 退格删掉输出中的 n 个字符
+    procedure BackspaceOneCRLF; // 如果输出中的末俩字符是 CRLF 则删掉
 
-    procedure ProcessToLineEnd(SpCount: Integer = 0); // 传入的参数是该行注释前的连续空格数
+    procedure ProcessToLineEnd(SpCount: Integer = 0; IsWholeLineSpace: Boolean = False); // 传入的参数是该行注释前的连续空格数
     procedure DoDefaultProcess;
     procedure DoBlockEndProcess;
   public
@@ -98,6 +99,8 @@ type
     property CropOption: TCropOption read FCropOption write FCropOption;
     property CropDirective: Boolean read FCropDirective write FCropDirective;
     property CropTodoList: Boolean read FCropTodoList write FCropTodoList;
+    property RemoveSingleLineSlashes: Boolean read FRemoveSingleLineSlashes write FRemoveSingleLineSlashes;
+    {* 当 // 注释占据整个单行时，是否将该行一并删除。只在全删除时有效}
     property Reserve: Boolean read FReserve write FReserve;
     property ReserveItems: TStringList read FReserveItems write SetReserveItems;
     {* 是否保留特定格式的注释 }
@@ -141,8 +144,9 @@ implementation
 const
   SCnToDo = 'TODO';
   SCnToDoDone = 'DONE';
-  SCnNeedSepChars: set of AnsiChar = [#0, #9, ' ', #13, #10];
+  SCnCRLFSpacesChars: set of AnsiChar = [#0, #9, ' ', #13, #10];
   SCnSpacesChars: set of AnsiChar = [#9, ' '];
+  SCnCRLFChars: set of AnsiChar = [#13, #10];
 
 constructor TCnSourceCropper.Create;
 begin
@@ -365,11 +369,14 @@ begin
   end;
 end;
 
-procedure TCnSourceCropper.ProcessToLineEnd(SpCount: Integer);
+procedure TCnSourceCropper.ProcessToLineEnd(SpCount: Integer; IsWholeLineSpace: Boolean);
 begin
   if (FCropOption = coAll) and (FCurTokenKind <> skTodoList) then
   begin
     BackspaceChars(SpCount);
+    if IsWholeLineSpace and FRemoveSingleLineSlashes then
+      BackspaceOneCRLF;
+
     while not (FCurChar in [#0, #13, #10]) do
       FCurChar := GetCurChar;
   end
@@ -428,15 +435,41 @@ begin
   end;
 end;
 
+procedure TCnSourceCropper.BackspaceOneCRLF;
+var
+  C: AnsiChar;
+begin
+  if (OutStream.Size <= 0) or (OutStream.Position <= 0) then // 前面没东西
+    Exit;
+
+  OutStream.Seek(-1, soFromCurrent);
+  OutStream.Read(C, SizeOf(AnsiChar));
+  OutStream.Seek(1, soFromCurrent);
+
+  if C = #10 then
+  begin
+    OutStream.Size := OutStream.Size - 1;
+    if (OutStream.Size <= 0) or (OutStream.Position <= 0) then // 前面没东西
+      Exit;
+
+    OutStream.Seek(-1, soFromCurrent);
+    OutStream.Read(C, SizeOf(AnsiChar));
+    OutStream.Seek(1, soFromCurrent);
+    if C = #13 then
+      OutStream.Size := OutStream.Size - 1;
+  end;
+end;
+
 { TCnCPPCropper }
 
 procedure TCnCPPCropper.DoParse;
 var
-  IsSpace: Boolean;
+  IsSpace, WholeLineSpace: Boolean;
   SpCount: Integer;
 begin
   FCurChar := GetCurChar;
   SpCount := 0;
+  WholeLineSpace := True;
 
   while FCurChar <> #0 do
   begin
@@ -450,7 +483,7 @@ begin
           else
             FCurTokenKind := skLineComment;
           // 接着处理到行尾。
-          ProcessToLineEnd(SpCount);
+          ProcessToLineEnd(SpCount, WholeLineSpace);
         end
         else
         if (FCurTokenKind in [skCode, skUndefined]) and (NextChar = '*') then
@@ -494,7 +527,14 @@ begin
     if IsSpace then
       Inc(SpCount)
     else
+    begin
       SpCount := 0;
+      if not (FCurChar in SCnCRLFSpacesChars) then
+        WholeLineSpace := False;
+    end;
+
+    if FCurChar in SCnCRLFChars then
+      WholeLineSpace := True;
 
     FCurChar := GetCurChar;
   end;
@@ -505,7 +545,7 @@ procedure TCnCPPCropper.ProcessToBlockEnd;
 var
   NeedSep: Boolean;
 begin
-  NeedSep := not (PrevChar in SCnNeedSepChars);    // 记录块前有无空白
+  NeedSep := not (PrevChar in SCnCRLFSpacesChars);    // 记录块前有无空白
 
   while ((FCurChar <> '*') or (NextChar <> '/')) and (FCurChar <> #0) do
   begin
@@ -524,7 +564,7 @@ begin
   FCurTokenKind := skUndefined;
   // 该字符已经经过了写处理。
 
-  if NeedSep and not (FCurChar in SCnNeedSepChars) then // 如果块前块后都没空白，就写个空格做分离
+  if NeedSep and not (FCurChar in SCnCRLFSpacesChars) then // 如果块前块后都没空白，就写个空格做分离
     WriteChar(' ');
 end;
 
@@ -532,11 +572,12 @@ end;
 
 procedure TCnPasCropper.DoParse;
 var
-  IsSpace: Boolean;
+  IsSpace, WholeLineSpace: Boolean;
   SpCount: Integer;
 begin
   FCurChar := GetCurChar;
   SpCount := 0;
+  WholeLineSpace := True;
 
   while FCurChar <> #0 do
   begin
@@ -550,7 +591,7 @@ begin
           else
             FCurTokenKind := skLineComment;
           // 接着处理到行尾。
-          ProcessToLineEnd(SpCount);
+          ProcessToLineEnd(SpCount, WholeLineSpace);
         end
         else
           DoDefaultProcess;
@@ -611,7 +652,14 @@ begin
     if IsSpace then
       Inc(SpCount)
     else
+    begin
       SpCount := 0;
+      if not (FCurChar in SCnCRLFSpacesChars) then
+        WholeLineSpace := False;
+    end;
+
+    if FCurChar in SCnCRLFChars then
+      WholeLineSpace := True;
 
     FCurChar := GetCurChar;
   end;
@@ -622,7 +670,7 @@ procedure TCnPasCropper.ProcessToBlockEnd;
 var
   NeedSep: Boolean;
 begin
-  NeedSep := not (PrevChar in SCnNeedSepChars);  // 记录块前有无空白
+  NeedSep := not (PrevChar in SCnCRLFSpacesChars);  // 记录块前有无空白
 
   while not (FCurChar in [#0, '}']) do
   begin
@@ -635,7 +683,7 @@ begin
   FCurTokenKind := skUndefined;
   // 该字符已经经过了写处理。
 
-  if NeedSep and not (FCurChar in SCnNeedSepChars) then // 如果块前块后都没空白，就写个空格做分离
+  if NeedSep and not (FCurChar in SCnCRLFSpacesChars) then // 如果块前块后都没空白，就写个空格做分离
     WriteChar(' ');
 end;
 
@@ -643,7 +691,7 @@ procedure TCnPasCropper.ProcessToBracketBlockEnd;
 var
   NeedSep: Boolean;
 begin
-  NeedSep := not (PrevChar in SCnNeedSepChars);  // 记录块前有无空白
+  NeedSep := not (PrevChar in SCnCRLFSpacesChars);  // 记录块前有无空白
 
   while ((FCurChar <> '*') or (NextChar <> ')')) and (FCurChar <> #0) do
   begin
@@ -662,7 +710,7 @@ begin
   FCurTokenKind := skUndefined;
   // 该字符已经经过了写处理。
 
-  if NeedSep and not (FCurChar in SCnNeedSepChars) then // 如果块前块后都没空白，就写个空格做分离
+  if NeedSep and not (FCurChar in SCnCRLFSpacesChars) then // 如果块前块后都没空白，就写个空格做分离
     WriteChar(' ');
 end;
 

@@ -45,6 +45,7 @@ begin
 
   Cropper.InStream := InStr;
   Cropper.OutStream := OutStr;
+  Cropper.RemoveSingleLineSlashes := True;
   Cropper.Parse;
 
   mmoPasRes.Lines.Clear;
