@@ -985,7 +985,7 @@ begin
 
           ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
           CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
-            SourceLine));
+            SourceLine), nil, False);
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
             ConvertToVisibleCol(ErrLine, SourceCol),
             GetErrorStr(ErrCode), CurrentToken]));
