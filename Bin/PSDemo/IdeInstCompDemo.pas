@@ -16,7 +16,9 @@ program IdeInstCompDemo;
 // 不过如果 uses 他们，在 IDE 代码编辑器中编辑脚本时，可以使用 IDE 的代码自动完成。
 // 不将 IdeInstComp 直接导入，是因为当 IDE 安装了很多包时，导入的速度可能较慢
 
+// 注意：
 // 编译本脚本时出现未声明的组件类名错误时，可能是 IDE 内未安装此组件或无法访问此组件。
+// 譬如高版本 Delphi 中去除了 BDE，因而 TDatabase 这类组件无法使用
 
 uses
   Windows, SysUtils, IdeInstComp; // uses IdeInstComp is needed.
