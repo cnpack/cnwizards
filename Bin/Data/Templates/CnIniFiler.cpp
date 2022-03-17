@@ -47,6 +47,7 @@ void T<#IniClassName>::SaveToFile(const AnsiString FileName)
   __try
   {
     SaveSettings(Ini);
+    Ini->UpdateFile();
   }
   __finally
   {

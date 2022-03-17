@@ -57,6 +57,7 @@ begin
   Ini := TMemIniFile.Create(FileName);
   try
     SaveSettings(Ini);
+    Ini.UpdateFile;
   finally
     Ini.Free;
   end;
