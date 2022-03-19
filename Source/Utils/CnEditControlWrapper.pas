@@ -2439,6 +2439,9 @@ begin
   CnDebugger.LogMsg('TCnEditControlWrapper.DoEditorChange: ' + EditorChangeTypesToStr(ChangeType));
 {$ENDIF}
 
+  if Editor = nil then // 某些古怪情况下 Editor 为 nil？
+    Exit;
+
   if ChangeType * [ctView, ctWindow{$IFDEF BDS}, ctLineDigit{$ENDIF}] <> [] then
   begin
     Editor.FGutterChanged := True;  // 行位数发生变化时，会触发 Gutter 宽度变化
