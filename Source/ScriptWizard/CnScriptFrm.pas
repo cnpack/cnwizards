@@ -900,7 +900,7 @@ end;
 
 procedure TCnScriptForm.OnReadln(const Prompt: string; var Text: string);
 begin
-  Text := CnInputBox('Script', Prompt, '');
+  Text := CnWizInputBox('Script', Prompt, '');
 end;
 
 procedure TCnScriptForm.OnWriteln(const Text: string);

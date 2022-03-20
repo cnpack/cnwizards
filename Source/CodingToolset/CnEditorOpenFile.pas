@@ -137,7 +137,7 @@ var
 begin
   Ini := CreateIniFile;
   try
-    F := CnInputBox(SCnEditorOpenFileDlgCaption,
+    F := CnWizInputBox(SCnEditorOpenFileDlgCaption,
       SCnEditorOpenFileDlgHint, '', Ini);
   finally
     Ini.Free;

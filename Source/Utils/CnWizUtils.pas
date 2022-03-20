@@ -1172,7 +1172,11 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile = nil;
   const Section: string = csDefComboBoxSection): Boolean;
-{* 封装的输入对话框，允许回调设置放大等}
+{* 封装的输入对话框，内部允许回调设置放大等}
+
+function CnWizInputBox(const ACaption, APrompt, ADefault: string;
+   Ini: TCustomIniFile = nil; const Section: string = csDefComboBoxSection): string;
+{* 封装的输入对话框，内部允许回调设置放大等}
 
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
@@ -8379,10 +8383,16 @@ begin
 end;
 
 function CnWizInputQuery(const ACaption, APrompt: string;
-  var Value: string; Ini: TCustomIniFile = nil;
-  const Section: string = csDefComboBoxSection): Boolean;
+  var Value: string; Ini: TCustomIniFile; const Section: string): Boolean;
 begin
   Result := CnInputQuery(ACaption, APrompt, Value, Ini, Section, False, FormCallBack);
+end;
+
+function CnWizInputBox(const ACaption, APrompt, ADefault: string;
+   Ini: TCustomIniFile; const Section: string): string;
+begin
+  Result := ADefault;
+  CnInputBox(ACaption, APrompt, Result, Ini, Section, FormCallBack);
 end;
 
 // 封装 Assert 判断
