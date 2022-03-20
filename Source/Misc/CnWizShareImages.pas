@@ -88,8 +88,8 @@ type
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
     FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
-    FCopied: Boolean;       // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
-    FLargeCopied: Boolean;  // 记录 IDE 的 ImageList 有无复制一份大的
+    FCopied: Boolean;         // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
+    FLargeCopied: Boolean;    // 记录 IDE 的 ImageList 有无复制一份大的
     FLargeCopiedCount: Integer; // 记录 IDE 的 ImageList 复制一份大的数量
 {$ENDIF}
     function GetIdxUnknownInIDE: Integer;
