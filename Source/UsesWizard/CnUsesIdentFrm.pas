@@ -134,12 +134,10 @@ procedure TCnUsesIdentForm.OpenSelect;
 var
   CharPos: TOTACharPos;
   IsIntfOrH: Boolean;
-  IsFromSystem: Boolean;
   EditView: IOTAEditView;
   HasUses: Boolean;
   LinearPos: LongInt;
   Sl: TStringList;
-  I: Integer;
 begin
   if lvList.Selected <> nil then
   begin

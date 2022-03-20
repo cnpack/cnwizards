@@ -2796,8 +2796,9 @@ var
   I, TotalLeftWidth: Integer;
 {$IFNDEF IDE_STRING_ANSI_UTF8}
   TotalLen: Integer;
-{$ENDIF}
+{$ELSE}
   Size: TSize;
+{$ENDIF}
 {$IFDEF UNICODE}
   UCol: Integer;
   U: string;

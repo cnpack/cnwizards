@@ -1262,8 +1262,10 @@ end;
 // 取得当前是否是嵌入式设计窗体模式
 function IdeGetIsEmbeddedDesigner: Boolean;
 {$IFDEF BDS}
+{$IFNDEF DELPHI104_SYDNEY_UP}
 var
   S: string;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF BDS}

@@ -766,7 +766,7 @@ const
 var
   Text, Tmp, Prev, FirstLine, LastToken: string;
   EditControl: TControl;
-  I, Idx, LineNo, CharIndex, PasteCol, Indent: Integer;
+  I, LineNo, CharIndex, PasteCol, Indent: Integer;
   List: TStrings;
   EndIsCRLF, IsSingleLine, IsCppFile: Boolean;
   FirstLineSpaceCount, LineSpaceCount, MinLineSpaceCount: Integer;

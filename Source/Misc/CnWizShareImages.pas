@@ -240,8 +240,8 @@ var
   Ico: TIcon;
 {$ELSE}
   Bmp: TBitmap;
-{$ENDIF}
   Save: TColor;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}

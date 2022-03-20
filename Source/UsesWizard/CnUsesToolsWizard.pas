@@ -1841,7 +1841,7 @@ procedure TCnUsesToolsWizard.FromIdentExecute;
 var
   Token: TCnIdeTokenString;
   Idx: Integer;
-  S, UnitName: string;
+  S: string;
   Ini: TCustomIniFile;
 begin
   CheckReLoadUnitsMap;
