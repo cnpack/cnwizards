@@ -711,7 +711,7 @@ var
     S: string;
   begin
     S := IntToStr(DefValue);
-    if CnInputQuery(ACaption, APrompt, S) then
+    if CnWizInputQuery(ACaption, APrompt, S) then
       Value := StrToIntDef(S, 0)
     else
       Value := 0;

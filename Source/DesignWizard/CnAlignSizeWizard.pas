@@ -538,7 +538,7 @@ begin
           ControlListSortByPos(ControlList, AlignSizeStyle = asSpaceEquVY);
 
           S := '4';
-          if not CnInputQuery(SCnInformation, SCnSpacePrompt, S) then
+          if not CnWizInputQuery(SCnInformation, SCnSpacePrompt, S) then
             Exit;
 
           if IsInt(S) then

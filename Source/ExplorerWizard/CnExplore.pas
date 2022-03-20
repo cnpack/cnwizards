@@ -967,7 +967,7 @@ var
   aPath: string;
 begin
   aPath := SCnNewFolderDefault;
-  if CnInputQuery(SCnNewFolder, SCnNewFolderHint, aPath) then
+  if CnWizInputQuery(SCnNewFolder, SCnNewFolderHint, aPath) then
   begin
     if aPath <> '' then
     begin

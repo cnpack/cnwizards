@@ -282,7 +282,7 @@ begin
   end;
 end;
 
-// CnLanguageManager 的简略封装，保证返回的管理器不为nil且能进行翻译
+// CnLanguageManager 的简略封装，保证返回的管理器不为 nil 且能进行翻译
 function CnLangMgr: TCnCustomLangManager;
 begin
   if CnLanguageManager = nil then
@@ -581,6 +581,7 @@ begin
 end;
 
 {$ENDIF CREATE_PARAMS_BUG}
+
 procedure TCnTranslateForm.OnHelp(Sender: TObject);
 var
   Topic: string;

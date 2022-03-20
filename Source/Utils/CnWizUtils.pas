@@ -1169,6 +1169,11 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {* 加载指定的语言文件翻译窗体}
 {$ENDIF}
 
+function CnWizInputQuery(const ACaption, APrompt: string;
+  var Value: string; Ini: TCustomIniFile = nil;
+  const Section: string = csDefComboBoxSection): Boolean;
+{* 封装的输入对话框，允许回调设置放大等}
+
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
@@ -1181,7 +1186,7 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnWizEditFiler, CnGraphUtils
+  Math, CnWizOptions, CnWizEditFiler, CnWizScaler, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
   CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut
@@ -8366,6 +8371,19 @@ begin
   end;
 end;
 {$ENDIF}
+
+procedure FormCallBack(Sender: TObject);
+begin
+  if Sender is TForm then
+    ScaleForm(Sender as TForm, IdeGetScaledFactor);
+end;
+
+function CnWizInputQuery(const ACaption, APrompt: string;
+  var Value: string; Ini: TCustomIniFile = nil;
+  const Section: string = csDefComboBoxSection): Boolean;
+begin
+  Result := CnInputQuery(ACaption, APrompt, Value, Ini, Section, False, FormCallBack);
+end;
 
 // 封装 Assert 判断
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');

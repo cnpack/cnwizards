@@ -776,7 +776,7 @@ var
 begin
   Ini := InputHelper.CreateIniFile;
   try
-    if CnInputQuery(SCnInputHelperUserMacroCaption, SCnInputHelperUserMacroPrompt,
+    if CnWizInputQuery(SCnInputHelperUserMacroCaption, SCnInputHelperUserMacroPrompt,
       Macro, Ini, 'UserMacroHis') then
     begin
       Macro := GetMacro(Macro);

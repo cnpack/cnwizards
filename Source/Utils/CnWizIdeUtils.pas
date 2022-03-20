@@ -694,6 +694,9 @@ function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl = nil
   也就是说：Windows 缩放比是 100% 也就是原始大小时，无论 IDE 运行模式如何都返回原始数据
   缩放比不为 100% 时，DPI Ware 才返回 APixels * HDPI 比例，Unware 无论啥设置仍返回原始数据}
 
+function IdeGetScaledFactor(AControl: TControl = nil): Single;
+{* 获得 IDE 中某控件的应该放大的比例}
+
 procedure IdeSetReverseScaledFontSize(AControl: TControl);
 {* IDE 中根据 DPI 与缩放设置，反推计算某字号的原始尺寸，以便 Scale 时恢复原始尺寸。暂不使用。}
 
@@ -3646,6 +3649,24 @@ begin
 {$ELSE}
   Result := APixels; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
 {$ENDIF}
+end;
+
+function IdeGetScaledFactor(AControl: TControl = nil): Single;
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  if AControl = nil then
+    AControl := Application.MainForm;
+
+  if AControl = nil then
+    Result := 1.0
+  else
+  begin
+    Result := AControl.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
+  end;
+{$ELSE}
+  Result := 1.0; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
+{$ENDIF}
+
 end;
 
 procedure IdeSetReverseScaledFontSize(AControl: TControl);

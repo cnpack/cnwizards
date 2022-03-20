@@ -226,7 +226,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizIdeUtils, CnProjectDirImportFrm;
+  CnWizUtils, CnWizIdeUtils, CnProjectDirImportFrm;
 
 var
   CnProjectDirBuilderForm: TCnProjectDirBuilderForm = nil;
@@ -656,7 +656,7 @@ begin
     NeedConfirm := True;     // 覆盖的话也需要确认
   end;
 
-  if NeedInput and not CnInputQuery(SCnProjExtSaveTempletCaption, SCnProjExtInputTempletName,
+  if NeedInput and not CnWizInputQuery(SCnProjExtSaveTempletCaption, SCnProjExtInputTempletName,
     TempletName) then
     Exit;
 

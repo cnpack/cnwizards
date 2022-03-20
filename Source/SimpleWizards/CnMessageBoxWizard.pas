@@ -476,7 +476,7 @@ begin
     Inc(I);
   until cbbProjects.Items.IndexOf(Project) < 0;
 
-  if CnInputQuery(SCnMsgBoxProjectCaption, SCnMsgBoxProjectPrompt, Project) and
+  if CnWizInputQuery(SCnMsgBoxProjectCaption, SCnMsgBoxProjectPrompt, Project) and
     (Project <> '') then               // 要求用户输入模板名
   begin
     if (cbbProjects.Items.IndexOf(Project) < 0) or QueryDlg(SCnMsgBoxProjectExists) then

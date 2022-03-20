@@ -42,8 +42,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
-  CnImageProviderMgr, CnCommon, CommCtrl, ActnList, Math, Contnrs,
-  CnDesignEditorConsts, CnPngUtilsIntf, ExtDlgs, Menus, Buttons;
+  CommCtrl, ActnList, Math, Contnrs, ExtDlgs, Menus, Buttons, CnWizUtils,
+  CnImageProviderMgr, CnCommon, CnDesignEditorConsts, CnPngUtilsIntf;
 
 type
   TCnImageOption = (ioCrop, ioStrech, ioCenter);
@@ -1855,7 +1855,7 @@ var
   s: string;
 begin
   s := IntToStr(FReq.Page + 1);
-  if (FProvider <> nil) and CnInputQuery(SCnImageListGotoPage,
+  if (FProvider <> nil) and CnWizInputQuery(SCnImageListGotoPage,
     SCnImageListGotoPagePrompt, s) then
   begin
     DoSearch(StrToIntDef(s, FReq.Page + 1) - 1);

@@ -418,7 +418,7 @@ var
   NewExt: string;
   Idx: Integer;
 begin
-  if CnInputQuery(SCnProjExtAddExtension, SCnProjExtAddNewText, NewExt) then
+  if CnWizInputQuery(SCnProjExtAddExtension, SCnProjExtAddNewText, NewExt) then
   begin
     if chklstExtensions.Items.IndexOf(NewExt) < 0 then
     begin

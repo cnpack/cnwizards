@@ -430,7 +430,7 @@ var
 begin
   SavePage;
   NewLabel := GetNewLabel('');
-  if CnInputQuery(SCnEditorCollectorInputCaption, SCnEditorCollectorInputCaption,
+  if CnWizInputQuery(SCnEditorCollectorInputCaption, SCnEditorCollectorInputCaption,
     NewLabel) then
   begin
     Updating := True;
@@ -465,7 +465,7 @@ var
 begin
   OldLabel := TabSet.Tabs[TabSet.TabIndex];
   NewLabel := OldLabel;
-  if CnInputQuery(SCnEditorCollectorInputCaption, SCnEditorCollectorInputCaption,
+  if CnWizInputQuery(SCnEditorCollectorInputCaption, SCnEditorCollectorInputCaption,
     NewLabel) then
   begin
     Updating := True;
