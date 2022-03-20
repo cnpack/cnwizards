@@ -47,6 +47,7 @@ uses
 
 type
   TFlatButtonState = (bsHide, bsNormal, bsEnter, bsDropdown);
+                   // 不显示、显示、鼠标移入、点击下拉
 
   TCnWizFlatButton = class(TCustomControl)
   private
@@ -59,6 +60,9 @@ type
     FShowColor: Boolean;
     FDisplayColor: TColor;
     FAlpha: Boolean;
+{$IFDEF IDE_SUPPORT_HDPI}
+    FIconBmp: TBitmap;
+{$ENDIF}
     procedure SetImage(Value: TGraphic);
     procedure ImageChange(Sender: TObject);
     procedure OnTimer(Sender: TObject);
@@ -115,6 +119,9 @@ const
     ($006A240A, $006A240A, $006A240A, $666666);
   csArrowColor = clBlack;
   csColorWidth = 10;
+  csColorUpdownMargin = 5;
+  csColorRightMargin = 4;
+  csColorLeftMargin = 2;
 
 { TCnWizFlatButton }
 
@@ -128,11 +135,21 @@ begin
   FTimer.Interval := 500;
   FTimer.OnTimer := OnTimer;
 
+{$IFDEF IDE_SUPPORT_HDPI}
+  FIconBmp := TBitmap.Create;
+  FIconBmp.PixelFormat := pf24bit;
+  FIconBmp.Width := 16;
+  FIconBmp.Height := 16;
+  FIconBmp.Canvas.Brush.Style := bsSolid;
+{$ENDIF}
   UpdateSize;
 end;
 
 destructor TCnWizFlatButton.Destroy;
 begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  FIconBmp.Free;
+{$ENDIF}
   inherited;
 end;
 
@@ -234,8 +251,21 @@ begin
         Bmp.Canvas.FrameRect(ClientRect);
         Bmp.Canvas.Brush.Style := bsClear;
         if (FImage <> nil) and not FImage.Empty then
+        begin
+{$IFDEF IDE_SUPPORT_HDPI}
+          Rc := Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
+          FIconBmp.Canvas.Brush.Color := csBkColors[State];
+          FIconBmp.Canvas.FillRect(Rc);
+          FIconBmp.Canvas.Draw(0, 0, FImage);  // 把 16x16 没法拉伸的图标，原封不动绘制到 32x32 的位图上
+          Rc := Rect(IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
+            IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
+            IdeGetScaledPixelsFromOrigin(FIconBmp.Width, Self),
+            IdeGetScaledPixelsFromOrigin(FIconBmp.Height, Self));
+          Bmp.Canvas.StretchDraw(Rc, FIconBmp);
+{$ELSE}
           Bmp.Canvas.Draw(csBorderWidths[State], csBorderWidths[State], FImage);
-
+{$ENDIF}
+        end;
         BitBlt(Handle, 0, 0, Width, Height, Bmp.Canvas.Handle, 0, 0, SRCCOPY);
       finally
         Bmp.Free;
@@ -251,16 +281,33 @@ begin
       Brush.Color := csBorderColors[State];
       FrameRect(ClientRect);
       if (FImage <> nil) and not FImage.Empty then
+      begin
+{$IFDEF IDE_SUPPORT_HDPI}
+        Rc := Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
+        FIconBmp.Canvas.Brush.Color := csBkColors[State];
+        FIconBmp.Canvas.FillRect(Rc);
+        FIconBmp.Canvas.Draw(0, 0, FImage);  // 把 16x16 没法拉伸的图标，原封不动绘制到 32x32 的位图上
+        Rc := Rect(IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
+            IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
+          IdeGetScaledPixelsFromOrigin(FIconBmp.Width, Self),
+          IdeGetScaledPixelsFromOrigin(FIconBmp.Height, Self));
+        StretchDraw(Rc, FIconBmp);
+{$ELSE}
         Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+{$ENDIF}
+      end;
     end;
 
     // 画小色块
     if FShowColor and (State in [bsHide, bsNormal]) then
     begin
-      Rc.Left := Width - csBorderWidths[State] - (csArrowWidths[State] div 2) - csColorWidth + 2;
-      Rc.Top := 5;
-      Rc.Bottom := ClientRect.Bottom - 5;
-      Rc.Right := Rc.Left + csColorWidth - 4;
+      Rc.Left := Width - csBorderWidths[State] - (csArrowWidths[State] div 2) -
+        IdeGetScaledPixelsFromOrigin(csColorWidth, Self) +
+        IdeGetScaledPixelsFromOrigin(csColorLeftMargin, Self);
+      Rc.Top := IdeGetScaledPixelsFromOrigin(csColorUpdownMargin, Self);
+      Rc.Bottom := ClientRect.Bottom - IdeGetScaledPixelsFromOrigin(csColorUpdownMargin, Self);
+      Rc.Right := Rc.Left + IdeGetScaledPixelsFromOrigin(csColorWidth, Self) -
+        IdeGetScaledPixelsFromOrigin(csColorRightMargin, Self);
 
       OldColor := Brush.Color;
       Brush.Color := FDisplayColor;
@@ -272,13 +319,13 @@ begin
     if csArrowWidths[State] > 0 then
     begin
       Pen.Color := csArrowColor;
-      X := Width - csBorderWidths[State] - csArrowWidths[State] div 2;
+      X := Width - IdeGetScaledPixelsFromOrigin(csBorderWidths[State] + csArrowWidths[State] div 2, Self);
       Y := Height div 2;
-      MoveTo(X - 2, Y - 1);
-      LineTo(X + 3, Y - 1);
-      MoveTo(X - 1, Y);
-      LineTo(X + 2, Y);
-      Pixels[X, Y + 1] := csArrowColor;
+      MoveTo(X - IdeGetScaledPixelsFromOrigin(2, Self), Y - IdeGetScaledPixelsFromOrigin(1, Self));
+      LineTo(X + IdeGetScaledPixelsFromOrigin(3, Self), Y - IdeGetScaledPixelsFromOrigin(1, Self));
+      MoveTo(X - IdeGetScaledPixelsFromOrigin(1, Self), Y);
+      LineTo(X + IdeGetScaledPixelsFromOrigin(2, Self), Y);
+      Pixels[X, Y + IdeGetScaledPixelsFromOrigin(1, Self)] := csArrowColor;
     end;
   end;
 end;
@@ -309,10 +356,12 @@ var
   State: TFlatButtonState;
 begin
   State := GetState;
-  Width := csBorderWidths[State] * 2 + csArrowWidths[State] + IdeGetScaledPixelsFromOrigin(csImageWidth, Self);
+  Width := IdeGetScaledPixelsFromOrigin(csBorderWidths[State] * 2 + csArrowWidths[State], Self)
+    + IdeGetScaledPixelsFromOrigin(csImageWidth, Self);
   if FShowColor and (State in [bsHide, bsNormal]) then
     Width := Width + IdeGetScaledPixelsFromOrigin(csColorWidth, Self);
-  Height := csBorderWidths[State] * 2 + IdeGetScaledPixelsFromOrigin(csImageHeight, Self);
+  Height := IdeGetScaledPixelsFromOrigin(csBorderWidths[State] * 2, Self)
+    + IdeGetScaledPixelsFromOrigin(csImageHeight, Self);
 
   if Visible then
     Repaint;

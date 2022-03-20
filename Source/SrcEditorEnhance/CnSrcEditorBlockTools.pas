@@ -977,7 +977,7 @@ var
   IsColor: Boolean;
   AColor: TColor;
   Button: TCnWizFlatButton;
-  X, Y, E: Integer;
+  X, Y, E, Idx: Integer;
   StartingRow, EndingRow: Integer;
   S: string;
   PosChanged: Boolean;
@@ -987,6 +987,29 @@ var
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
   SyncBtn: TControl;
 {$ENDIF}
+
+  function StringIsColor(const ColorStr: string; out AColor: TColor): Boolean;
+  begin
+    Result := False;
+    if IdentToColor(ColorStr, Longint(AColor)) then
+      Result := True
+    else
+    begin
+      if (Length(ColorStr) = 6) or (Length(ColorStr) = 8) then
+      begin
+        Val('$' + ColorStr, Integer(AColor), E);
+        if E = 0 then
+          Result := True;
+      end
+      else if (Length(ColorStr) = 7) or (Length(ColorStr) = 9) and (ColorStr[1] = '$') then
+      begin
+        Val(ColorStr, Integer(AColor), E);
+        if E = 0 then
+          Result := True;
+      end;
+    end;
+  end;
+
 begin
   Button := TCnWizFlatButton(FindComponentByClass(EditWindow, TCnWizFlatButton,
     SCnSrcEditorBlockButton));
@@ -1095,28 +1118,19 @@ begin
     // 判断选择区是否有颜色，有则设置预览
     if FShowColor then
     begin
-      IsColor := False;
       S := Trim(EditView.Block.Text);
-      if IdentToColor(S, Longint(AColor)) then
-        IsColor := True
+      IsColor := StringIsColor(S, AColor);
+      if IsColor then
+        Button.DisplayColor := AColor
       else
       begin
-        if (Length(S) = 6) or (Length(S) = 8) then
+        if CnOtaGetCurrPosToken(S, Idx) then
         begin
-          Val('$' + S, Integer(AColor), E);
-          if E = 0 then
-            IsColor := True;
-        end
-        else if (Length(S) = 7) or (Length(S) = 9) and (S[1] = '$') then
-        begin
-          Val(S, Integer(AColor), E);
-          if E = 0 then
-            IsColor := True;
+          IsColor := StringIsColor(S, AColor);
+          if IsColor then
+            Button.DisplayColor := AColor;
         end;
       end;
-
-      if IsColor then
-        Button.DisplayColor := AColor;
       Button.ShowColor := IsColor;
     end
     else
