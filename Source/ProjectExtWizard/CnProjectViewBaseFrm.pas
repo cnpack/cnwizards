@@ -50,7 +50,7 @@ uses
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
 {$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
-  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
+  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings, System.Actions;
 
 type
 
@@ -304,6 +304,8 @@ const
   csWidth = 'Width';
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
+
+  csDrawIconMargin = 1;
 
   {CommCtrl Constants For Windows >= XP }
   HDF_SORTUP              = $0400;
@@ -1329,10 +1331,19 @@ begin
       Bmp.Width, LV.Height));
 
     if (Item.ImageIndex >= 0) and (LV.SmallImages <> nil) then
-      LV.SmallImages.Draw(Bmp.Canvas, 1, (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
-                                         // 图标在竖直方向上在 Bmp 中居中
+    begin
+{$IFDEF IDE_SUPPORT_HDPI}
+      // TODO: 拉伸绘制
+      LV.SmallImages.Draw(Bmp.Canvas, IdeGetScaledPixelsFromOrigin(csDrawIconMargin, LV),
+        (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
+{$ELSE}
+      // 图标在竖直方向上在 Bmp 中居中
+      LV.SmallImages.Draw(Bmp.Canvas, csDrawIconMargin, (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
+{$ENDIF}
+    end;
+
     if LV.SmallImages <> nil then
-      X := LV.SmallImages.Width + 2
+      X := IdeGetScaledPixelsFromOrigin(LV.SmallImages.Width, LV) + 2
     else
       X := Bmp.Height + 2;
 

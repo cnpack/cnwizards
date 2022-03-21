@@ -497,6 +497,7 @@ const
   CN_SPLITTER_WIDTH = 3;
   CN_INIT_CLASSCOMBO_WIDTH = 250;
   CN_INIT_PROCCOMBO_WIDTH = 350;
+  CN_ICON_WIDTH = 22;
 
   csDefHistoryCount = 8;
   csDefPreviewLineCount = 4;
@@ -4050,6 +4051,7 @@ var
   Info: TCnElementInfo;
   MatchedIndexesRef: TList;
   ColorFont, ColorBrush: TColor;
+  M: Integer;
 
   function GetListImageIndex(Info: TCnElementInfo): Integer;
   begin
@@ -4091,8 +4093,12 @@ begin
 
     Info := TCnElementInfo(FDisplayItems.Objects[Index]);
     Canvas.FillRect(Rect);
-    dmCnSharedImages.Images.Draw(Canvas, Rect.Left + 2, Rect.Top,
-      GetListImageIndex(Info));
+    M := (Rect.Bottom - Rect.Top - dmCnSharedImages.Images.Height) div 2;
+    if M < 0 then
+      M := 0;
+
+    dmCnSharedImages.Images.Draw(Canvas, Rect.Left + M + 2,
+      Rect.Top + M, GetListImageIndex(Info));
     Canvas.Brush.Style := bsClear;
     Canvas.Font.Style := [fsBold];
 
@@ -4105,7 +4111,8 @@ begin
         MatchedIndexesRef := Info.MatchIndexes;
     end;
 
-    DrawMatchText(Canvas, MatchStr, FDisplayItems[Index], Rect.Left + 22, Rect.Top,
+    DrawMatchText(Canvas, MatchStr, FDisplayItems[Index], Rect.Left +
+      IdeGetScaledPixelsFromOrigin(CN_ICON_WIDTH, Control), Rect.Top,
       MatchColor, MatchedIndexesRef);
   end;
 end;
