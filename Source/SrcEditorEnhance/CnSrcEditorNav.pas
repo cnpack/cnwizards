@@ -539,12 +539,19 @@ begin
         if Assigned(BackButton) and (BackButton.Action <> FBackAction) then
         begin
           FOldImageList := TToolBar(BackButton.Parent).Images;
+{$IFDEF IDE_SUPPORT_HDPI}
+          TToolBar(BackButton.Parent).Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.ilBackForwardBDS);
+{$ELSE}
           TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForwardBDS;
+{$ENDIF}
 
           FOldBackAction := BackButton.Action;
           FOldBackMenu := BackButton.DropdownMenu;
           BackButton.Action := FBackAction;
           BackButton.DropdownMenu := FBackMenu;
+{$IFDEF IDE_SUPPORT_HDPI}
+          BackButton.ImageIndex := FBackAction.ImageIndex;
+{$ENDIF}
         end;
 
         if Assigned(ForwardButton) and (ForwardButton.Action <> FForwardAction) then
@@ -553,6 +560,9 @@ begin
           FOldForwardMenu := ForwardButton.DropdownMenu;
           ForwardButton.Action := FForwardAction;
           ForwardButton.DropdownMenu := FForwardMenu;
+{$IFDEF IDE_SUPPORT_HDPI}
+          ForwardButton.ImageIndex := FForwardAction.ImageIndex;
+{$ENDIF}
         end;
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnSrcEditorNav.Install. Buttons Hooked.');
