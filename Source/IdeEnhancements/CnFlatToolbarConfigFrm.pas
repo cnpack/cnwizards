@@ -55,7 +55,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   StdCtrls, ExtCtrls, ComCtrls, ActnList, Buttons, IniFiles,
   {$IFDEF DelphiXE3_UP}Actions,{$ENDIF}
-  CnSpin, CnWizUtils, CnCommon, CnWizConsts, CnWizOptions, CnWizMultiLang;
+  CnSpin, CnWizUtils, CnCommon, CnWizConsts, CnWizOptions, CnWizMultiLang,
+  CnWizIdeUtils;
 
 const
   csOptions = 'Options';
@@ -160,6 +161,7 @@ implementation
 
 const
   csSeparatorCaption = '-';
+  csListItemIconWidth = 22;
 
 resourcestring
   SNoButtonCategory = '(None)';
@@ -470,9 +472,9 @@ begin
   if not lbAvailable.Enabled then
     LbCanvas.Font.Color := clGrayText;
   if ListBox.Items[Index] = csSeparatorCaption then
-    LbCanvas.TextOut(Rect.Left + 22, Rect.Top + FTextOffSet, SSeparator)
+    LbCanvas.TextOut(Rect.Left + IdeGetScaledPixelsFromOrigin(csListItemIconWidth, ListBox), Rect.Top + FTextOffSet, SSeparator)
   else
-    LbCanvas.TextOut(Rect.Left + 22, Rect.Top + FTextOffSet, Listbox.Items[Index]);
+    LbCanvas.TextOut(Rect.Left + IdeGetScaledPixelsFromOrigin(csListItemIconWidth, ListBox), Rect.Top + FTextOffSet, Listbox.Items[Index]);
 end;
 
 procedure TCnFlatToolbarConfigForm.lbAvailableDragOver(Sender, Source: TObject; X,

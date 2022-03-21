@@ -1,10 +1,11 @@
 inherited CnFlatToolbarConfigForm: TCnFlatToolbarConfigForm
-  Left = 284
+  Left = 305
   Top = 184
-  Width = 695
-  Height = 485
+  AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'Toolbar Settings'
+  ClientHeight = 458
+  ClientWidth = 687
   Constraints.MinHeight = 340
   Constraints.MinWidth = 450
   Icon.Data = {
