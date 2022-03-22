@@ -8391,8 +8391,7 @@ end;
 function CnWizInputBox(const ACaption, APrompt, ADefault: string;
    Ini: TCustomIniFile; const Section: string): string;
 begin
-  Result := ADefault;
-  CnInputBox(ACaption, APrompt, Result, Ini, Section, FormCallBack);
+  Result := CnInputBox(ACaption, APrompt, ADefault, Ini, Section, FormCallBack);
 end;
 
 // ·â×° Assert ÅÐ¶Ï
