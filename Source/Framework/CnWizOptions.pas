@@ -142,7 +142,8 @@ type
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
-    {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，不用于编辑器工具栏}
+    {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，也可用于编辑器工具栏
+      前提是 AToolbar 已经设好了 Parent 并且 Scale 过}
 
     // 参数读写方法
     function CreateRegIniFile: TCustomIniFile; overload;

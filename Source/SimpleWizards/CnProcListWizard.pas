@@ -1143,8 +1143,6 @@ begin
   Obj.MatchFrame := TCnMatchButtonFrame.Create(ToolBar);
 {$ENDIF}
 
-  WizOptions.ResetToolbarWithLargeIcons(Obj.MatchFrame.tlb1);
-
 {$IFNDEF IDE_SUPPORT_HDPI}
   if WizOptions.UseLargeIcon then
   begin
@@ -1155,11 +1153,14 @@ begin
 
   with Obj.MatchFrame do
   begin
-    Parent := ToolBar;
+    Parent := ToolBar;  // HDPI 下，这里会放大
     Top := 0;
     Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + Obj.FSplitter1.Width + 2;
     OnModeChange := Obj.MatchChange;
   end;
+
+  // 注意必须设置完 Parent 后再调用此函数
+  WizOptions.ResetToolbarWithLargeIcons(Obj.MatchFrame.tlb1);
 
   FProcToolBarObjects.Add(Obj);
 {$IFDEF DEBUG}
