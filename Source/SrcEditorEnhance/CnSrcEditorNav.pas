@@ -316,7 +316,7 @@ begin
       CnOtaMakeSourceVisible(AFileName);
       EditPos.Col := 1;
       EditPos.Line := ALine;
-      CnOtaGotoEditPos(EditPos, nil, True);
+      CnOtaGotoEditPos(EditPos, nil, False);
       FFileName := AFileName;
       FLine := ALine;
     finally
