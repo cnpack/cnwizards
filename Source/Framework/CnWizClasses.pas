@@ -305,7 +305,7 @@ type
   private
     FList: TList;
     FPopupMenu: TPopupMenu;
-    FPopupAction: TCnWizAction;
+    FPopupAction: TCnWizAction; // 用于放置到工具栏上时弹出的按钮对应的 Action，和主 Action 图标重复
     FExecuting: Boolean;
     FRefreshing: Boolean;
     procedure FreeSubMenus;
@@ -1100,7 +1100,7 @@ begin
   FPopupMenu := TPopupMenu.Create(nil);
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   FPopupMenu.Images := Svcs40.ImageList;
-  // 用于关联到工具栏上按钮的 Action
+  // 用于关联到工具栏上按钮的 Action，图标和主 Action 图标重复
   FPopupAction := WizActionMgr.AddAction(GetIDStr + '1', GetCaption, 0, OnPopup,
     GetIconName, GetHint);
   FPopupAction.OnUpdate := OnActionUpdate;
@@ -1150,7 +1150,7 @@ end;
 // 创建专家 Action 项
 function TCnSubMenuWizard.CreateAction: TCnWizAction;
 begin
-  Result := inherited CreateAction;
+  Result := inherited CreateAction;  // 该主 Action 图标和 FPopupAction 重复，但影响不大
   Assert(Result is TCnWizMenuAction);
   Result.ActionList := nil; // 防止该 Action 被自动允许加载到 ToolBar 中
   TCnWizMenuAction(Result).Menu.ImageIndex := -1; // 带子菜单的项不显示位图

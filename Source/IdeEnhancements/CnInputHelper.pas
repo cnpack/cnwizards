@@ -2950,7 +2950,7 @@ var
 
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
-  Menu.Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.SymbolImages);
+  Menu.Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.SymbolImages, nil, True);
 {$ELSE}
   Menu.Images := dmCnSharedImages.SymbolImages;
 {$ENDIF}
