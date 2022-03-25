@@ -210,6 +210,9 @@ uses
 
 {$R *.DFM}
 
+type
+  TControlHack = class(TControl);
+
 var
   CnEditorClassList: TList = nil; // 编辑器工具类引用列表
 
@@ -732,7 +735,15 @@ begin
   begin
     Idx := lvTools.Selected.Index;
     FWizard.EditorTools[Idx].GetEditorInfo(AName, AAuthor, AEmail);
+{$IFDEF IDE_SUPPORT_HDPI}
+    imgIcon.Canvas.Brush.Style := bsSolid;
+    imgIcon.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
+    imgIcon.Canvas.FillRect(Rect(0, 0, imgIcon.Width, imgIcon.Height));
+    DrawIconEx(imgIcon.Canvas.Handle, 0, 0, FWizard.EditorTools[Idx].FAction.Icon.Handle,
+      imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
+{$ELSE}
     imgIcon.Picture.Assign(FWizard.EditorTools[Idx].FAction.Icon);
+{$ENDIF}
     lblToolName.Caption := AName;
     lblToolAuthor.Caption := CnAuthorEmailToStr(AAuthor, AEmail);
     HotKey.HotKey := FWizard.EditorTools[Idx].FAction.ShortCut;
