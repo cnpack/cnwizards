@@ -190,13 +190,14 @@ function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
   DstVirtual: TVirtualImageList; const ANamePrefix: string = '';
   Disabled: Boolean = False);
-{* 将传统的 ImageList 复制进 TVirtualImageList}
+{* 将传统的 ImageList 复制进 TVirtualImageList，内部会先往 ImageCollection 中塞}
 function AddGraphicToVirtualImageList(Graphic: TGraphic; DstVirtual: TVirtualImageList;
   const ANamePrefix: string = ''; Disabled: Boolean = False): Integer;
-{* 将普通的 TGraphic 复制进 TVirtualImageList}
+{* 将普通的 TGraphic 复制进 TVirtualImageList，内部会先往 ImageCollection 中塞}
 procedure CopyVirtualImageList(SrcVirtual, DstVirtual: TVirtualImageList;
   Disabled: Boolean = False);
-{* 将 TVirtualImageListImageList 复制进 TVirtualImageList}
+{* 将 TVirtualImageList 复制进 TVirtualImageList，源和目标可以共用一个 ImageCollection
+  如不共用，则内部先复制 ImageCollection 内容。后面复制 ImageList 引用内容再内部绘图}
 
 {$ENDIF}
 
@@ -1692,14 +1693,19 @@ begin
   if (SrcVirtual = nil) or (DstVirtual = nil) then
     Exit;
 
-  if (SrcVirtual.ImageCollection = nil) or (DstVirtual.ImageCollection = nil) then
+  if SrcVirtual.ImageCollection = nil then
     Exit;
 
-  if SrcVirtual.ImageCollection = DstVirtual.ImageCollection then
-    Exit;
+  // 如果目标没有，则共用源的
+  if DstVirtual.ImageCollection = nil then
+    DstVirtual.ImageCollection := SrcVirtual.ImageCollection;
 
-  DstVirtual.ImageCollection.Assign(SrcVirtual.ImageCollection);
-  DstVirtual.Add('', -1, -1, Disabled);
+  // 如果目标有且不同于源，则复制
+  if SrcVirtual.ImageCollection <> DstVirtual.ImageCollection then
+    DstVirtual.ImageCollection.Assign(SrcVirtual.ImageCollection);
+
+  // 再复制内容，内部引用全 Assign 完成
+  DstVirtual.Images := SrcVirtual.Images;
 end;
 
 {$ENDIF}
