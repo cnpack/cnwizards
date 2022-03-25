@@ -540,7 +540,7 @@ begin
         begin
           FOldImageList := TToolBar(BackButton.Parent).Images;
 {$IFDEF IDE_SUPPORT_HDPI}
-          TToolBar(BackButton.Parent).Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.ilBackForwardBDS);
+          TToolBar(BackButton.Parent).Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.ilBackForwardBDS, nil, True);
 {$ELSE}
           TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForwardBDS;
 {$ENDIF}

@@ -706,8 +706,9 @@ procedure IdeScaleToolbarComboFontSize(Combo: TControl);
 {$IFDEF IDE_SUPPORT_HDPI}
 
 function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
-  AControl: TControl = nil): TVirtualImageList;
-{* 统一根据当前 HDPI 与缩放设置等，从原始 TImageList 创建一个 TVirtualImageList，无需释放}
+  AControl: TControl = nil; IgnoreWizLargeOption: Boolean = False): TVirtualImageList;
+{* 统一根据当前 HDPI 与缩放设置等，从原始 TImageList 创建一个 TVirtualImageList，无需释放
+  IgnoreWizLargeOption 表示不处理专家包设置中的使用大图标}
 
 {$ENDIF}
 
@@ -3694,7 +3695,7 @@ end;
 {$IFDEF IDE_SUPPORT_HDPI}
 
 function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
-  AControl: TControl): TVirtualImageList;
+  AControl: TControl; IgnoreWizLargeOption: Boolean): TVirtualImageList;
 var
   Idx: Integer;
   AVL: TVirtualImageList;
@@ -3725,7 +3726,7 @@ begin
   FVirtualImages.Add(AVL);
   FImageCollections.Add(AIC);
 
-  if WizOptions.UseLargeIcon then
+  if WizOptions.UseLargeIcon and not IgnoreWizLargeOption then
   begin
     AVL.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth, AControl);
     AVL.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight, AControl);
