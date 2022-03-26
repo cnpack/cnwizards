@@ -63,7 +63,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
-  Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl,
+  Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
@@ -1174,6 +1174,9 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
   LangID: Cardinal);
 {* 加载指定的语言文件翻译窗体}
 {$ENDIF}
+
+procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
+{* 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn}
 
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile = nil;
@@ -8400,6 +8403,58 @@ begin
   end;
 end;
 {$ENDIF}
+
+// 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn
+procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
+var
+  SB: TSpeedButton;
+  BB: TBitBtn;
+  N: Integer;
+  Bmp: TBitmap;
+  S: Single;
+begin
+  if Button = nil then
+    Exit;
+
+  S := IdeGetScaledFactor(Button);
+  if S < 1.2 then // 太小了不缩放
+    Exit;
+
+  Bmp := nil;
+  try
+    if Button is TSpeedButton then
+    begin
+      SB := Button as TSpeedButton;
+      N := SB.NumGlyphs;
+      if SB.Glyph.Empty then
+        Exit;
+
+      Bmp := TBitmap.Create;
+      Bmp.Width := Trunc(N * SB.Glyph.Width * S);
+      Bmp.Height := Trunc(SB.Glyph.Height * S);
+
+      Bmp.Canvas.StretchDraw(Rect(0, 0, Bmp.Width, Bmp.Height), SB.Glyph);
+      SB.Glyph.Assign(Bmp);
+    end
+    else if Button is TBitBtn then
+    begin
+      BB := Button as TBitBtn;
+      N := BB.NumGlyphs;
+
+      if BB.Glyph.Empty then
+        Exit;
+
+      Bmp := TBitmap.Create;
+      Bmp.Width := Trunc(N * BB.Glyph.Width * S);
+      Bmp.Height := Trunc(BB.Glyph.Height * S);
+
+      Bmp.Canvas.StretchDraw(Rect(0, 0, Bmp.Width, Bmp.Height), BB.Glyph);
+      BB.Glyph.Assign(Bmp);
+    end;
+  finally
+    Bmp.Free;
+  end;
+end;
 
 procedure FormCallBack(Sender: TObject);
 begin

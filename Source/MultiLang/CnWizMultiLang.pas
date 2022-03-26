@@ -120,6 +120,7 @@ type
     procedure AdjustRightBottomMargin;
 
     procedure ProcessSizeEnlarge;
+    procedure ProcessGlyphForHDPI(AControl: TControl);
 {$IFNDEF STAND_ALONE}
     function GetEnlarged: Boolean;
 {$ENDIF}
@@ -195,7 +196,6 @@ uses
   CnDebug;
 {$ENDIF}
 {$ENDIF}
-
 
 type
   TControlHack = class(TControl);
@@ -464,6 +464,7 @@ begin
 {$ENDIF}
 
   ProcessSizeEnlarge;
+  ProcessGlyphForHDPI(Self);
   AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
 end;
 
@@ -916,6 +917,26 @@ begin
 end;
 
 {$ENDIF}
+
+procedure TCnTranslateForm.ProcessGlyphForHDPI(AControl: TControl);
+{$IFDEF IDE_SUPPORT_HDPI}
+var
+  I: Integer;
+  W: TWinControl;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  if AControl.ClassNameIs('TSpeedButton') or AControl.ClassNameIs('TBitBtn') then
+    CnEnlargeButtonGlyphForHDPI(AControl);
+
+  if AControl is TWinControl then
+  begin
+    W := AControl as TWinControl;
+    for I := 0 to W.ControlCount - 1 do
+      ProcessGlyphForHDPI(W.Controls[I]);
+  end;
+{$ENDIF}
+end;
 
 initialization
 {$IFDEF STAND_ALONE}
