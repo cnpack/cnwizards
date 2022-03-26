@@ -50,7 +50,7 @@ uses
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
 {$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
-  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings, System.Actions;
+  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
 
 type
 
