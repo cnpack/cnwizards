@@ -205,6 +205,7 @@ type
     procedure UpdateItemPosition;
     procedure FontChanged(AFont: TFont); override;
 
+    function DisableLargeIcons: Boolean; override;
     procedure RestorePreviewWidth;
     procedure RestorePreviewHeight;
     procedure PrepareSearchRange; override;
@@ -4717,6 +4718,11 @@ procedure TCnProcListForm.RestorePreviewWidth;
 begin
   if FPreviewWidth > 0 then
     mmoContent.Width := FPreviewWidth;
+end;
+
+function TCnProcListForm.DisableLargeIcons: Boolean;
+begin
+  Result := True; // 大图标会引发工具栏按钮混乱
 end;
 
 initialization

@@ -85,7 +85,6 @@ inherited CnProcListForm: TCnProcListForm
       Left = 378
       Top = 0
       Width = 8
-      ImageIndex = 31
       Style = tbsSeparator
     end
     object btnShowPreview: TToolButton
