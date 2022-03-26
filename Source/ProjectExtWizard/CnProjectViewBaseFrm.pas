@@ -151,6 +151,7 @@ type
     dlgFont: TFontDialog;
     btnMatchFuzzy: TToolButton;
     actMatchFuzzy: TAction;
+    pnlMain: TPanel;
     procedure lvListDblClick(Sender: TObject);
     procedure edtMatchSearchKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);

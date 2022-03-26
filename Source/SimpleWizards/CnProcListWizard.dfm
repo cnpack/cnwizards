@@ -1,22 +1,11 @@
 inherited CnProcListForm: TCnProcListForm
-  Left = 211
-  Top = 120
+  Left = 310
+  Top = 129
   Caption = 'Procedure List'
   ClientHeight = 501
   ClientWidth = 681
   PixelsPerInch = 96
   TextHeight = 13
-  object Splitter: TSplitter [0]
-    Left = 0
-    Top = 400
-    Width = 681
-    Height = 3
-    Cursor = crVSplit
-    Align = alBottom
-    AutoSnap = False
-    MinSize = 60
-    OnMoved = SplitterMoved
-  end
   inherited pnlHeader: TPanel
     Width = 681
     inherited lblSearch: TLabel
@@ -69,29 +58,6 @@ inherited CnProcListForm: TCnProcListForm
       OnDropDown = cbbFilesDropDown
     end
   end
-  inherited lvList: TListView
-    Width = 681
-    Height = 334
-    Columns = <
-      item
-        Caption = 'Name'
-        Width = 318
-      end
-      item
-        Caption = 'Type'
-        Width = 152
-      end
-      item
-        Caption = 'Line'
-        Width = 60
-      end
-      item
-        Caption = 'Unit'
-        Width = 130
-      end>
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Top = 482
     Width = 681
@@ -131,27 +97,65 @@ inherited CnProcListForm: TCnProcListForm
       OnClick = btnShowPreviewClick
     end
   end
-  object mmoContent: TMemo [5]
-    Left = 0
-    Top = 403
+  inherited pnlMain: TPanel
     Width = 681
-    Height = 79
-    Hint = 'Content Preview'
-    Align = alBottom
-    Constraints.MinHeight = 30
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Courier New'
-    Font.Style = []
-    HideSelection = False
-    ParentFont = False
-    ParentShowHint = False
-    ReadOnly = True
-    ScrollBars = ssVertical
-    ShowHint = True
-    TabOrder = 4
-    WordWrap = False
+    Height = 416
+    object Splitter: TSplitter [0]
+      Left = 0
+      Top = 334
+      Width = 681
+      Height = 3
+      Cursor = crVSplit
+      Align = alBottom
+      AutoSnap = False
+      MinSize = 60
+      OnMoved = SplitterMoved
+    end
+    inherited lvList: TListView
+      Width = 681
+      Height = 334
+      Columns = <
+        item
+          Caption = 'Name'
+          Width = 318
+        end
+        item
+          Caption = 'Type'
+          Width = 152
+        end
+        item
+          Caption = 'Line'
+          Width = 60
+        end
+        item
+          Caption = 'Unit'
+          Width = 130
+        end>
+      OwnerData = True
+      OnData = lvListData
+    end
+    object mmoContent: TMemo
+      Left = 0
+      Top = 337
+      Width = 681
+      Height = 79
+      Hint = 'Content Preview'
+      Align = alBottom
+      Constraints.MinHeight = 30
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Courier New'
+      Font.Style = []
+      HideSelection = False
+      ParentFont = False
+      ParentShowHint = False
+      ReadOnly = True
+      ScrollBars = ssVertical
+      ShowHint = True
+      TabOrder = 1
+      WordWrap = False
+    end
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction

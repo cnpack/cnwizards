@@ -146,13 +146,13 @@ type
 {$ENDIF}
 
   TCnProcListForm = class(TCnProjectViewBaseForm)
-    mmoContent: TMemo;
-    Splitter: TSplitter;
     btnShowPreview: TToolButton;
     btnSep9: TToolButton;
     cbbMatchSearch: TComboBox;
     lblFiles: TLabel;
     cbbFiles: TComboBox;
+    Splitter: TSplitter;
+    mmoContent: TMemo;
     procedure FormDestroy(Sender: TObject);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure btnShowPreviewClick(Sender: TObject);
@@ -170,7 +170,6 @@ type
     procedure lvListKeyPress(Sender: TObject; var Key: Char);
     procedure SplitterMoved(Sender: TObject);
   private
-    { Private declarations }
     FFileName: string;
 {$IFNDEF STAND_ALONE}
     FFiler: TCnEditFiler;
@@ -179,7 +178,9 @@ type
     FCurrentFile: string;
     FSelIsCurFile: Boolean;
     FWizard: TCnProcListWizard;
+    FPreviewIsRight: Boolean;
     FPreviewHeight: Integer;
+    FPreviewWidth: Integer;
     FObjName: string;
     FIsObjAll: Boolean;
     FIsObjNone: Boolean;
@@ -204,16 +205,17 @@ type
     procedure UpdateItemPosition;
     procedure FontChanged(AFont: TFont); override;
 
+    procedure RestorePreviewWidth;
+    procedure RestorePreviewHeight;
     procedure PrepareSearchRange; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
-    { Public declarations }
     procedure LoadSettings(Ini: TCustomIniFile; aSection: string); override;
     procedure SaveSettings(Ini: TCustomIniFile; aSection: string); override;
-    procedure UpdateMemoHeight(Sender: TObject);
+    procedure UpdateMemoSize(Sender: TObject);
     property FileName: string read FFileName write SetFileName;
     //property Language: TCnSourceLanguageType read FLanguage write FLanguage;
     //property IsCurrentFile: Boolean read FIsCurrentFile write SetIsCurrentFile;
@@ -224,7 +226,9 @@ type
     {* 选中的条目的文件名 }
 
     property PreviewHeight: Integer read FPreviewHeight;
-    {* 预览窗口的高度}
+    {* 预览窗口在下方时的高度}
+    property PreviewWidth: Integer read FPreviewWidth;
+    {* 预览窗口在右方时的宽度}
     property ObjectList: TStringList read FObjectList;
     {* 存储类名的字符串列表，供外界使用}
     property Wizard: TCnProcListWizard read FWizard write FWizard;
@@ -518,6 +522,8 @@ type
 const
   csShowPreview = 'ShowPreview';
   csPreviewHeight = 'PreviewHeight';
+  csPreviewWidth = 'PreviewWidth';
+  csPreviewIsRight = 'PreviewIsRight';
   csDropDown = 'DropDown';
   csClassComboWidth = 'ClassComboWidth';
   csProcComboWidth = 'ProcComboWidth';
@@ -1713,7 +1719,14 @@ procedure TCnProcListForm.FormShow(Sender: TObject);
 begin
   inherited;
   UpdateItemPosition;
-  UpdateMemoHeight(nil);
+
+  if FPreviewIsRight then
+  begin
+    mmoContent.Align := alRight;
+    Splitter.Align := alRight;
+  end;
+
+  UpdateMemoSize(nil);
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
   btnClose.Down := False;
   btnQuery.Visible := False;
@@ -2961,8 +2974,9 @@ begin
 {$ENDIF}
 
   btnShowPreview.Down := Ini.ReadBool(aSection, csShowPreview, True);
+  FPreviewIsRight := Ini.ReadBool(aSection, csPreviewIsRight, False);
   FPreviewHeight := Ini.ReadInteger(aSection, csPreviewHeight, 0);
-
+  FPreviewWidth := Ini.ReadInteger(aSection, csPreviewWidth, 0);
   mmoContent.Visible := btnShowPreview.Down;
   Splitter.Visible := btnShowPreview.Down;
 end;
@@ -3057,8 +3071,11 @@ begin
   S := StringReplace(cbbMatchSearch.Items.Text, csCRLF, csSep, [rfReplaceAll, rfIgnoreCase]);
   Ini.WriteString(aSection, csDropDown, S);
   Ini.WriteBool(aSection, csShowPreview, btnShowPreview.Down);
+  Ini.WriteBool(aSection, csPreviewIsRight, FPreviewIsRight);
   if FPreviewHeight > 0 then
     Ini.WriteInteger(aSection, csPreviewHeight, FPreviewHeight);
+  if FPreviewWidth > 0 then
+    Ini.WriteInteger(aSection, csPreviewWidth, FPreviewWidth);
 end;
 
 procedure TCnProcListForm.UpdateComboBox;
@@ -3368,8 +3385,33 @@ end;
 
 procedure TCnProcListForm.btnShowPreviewClick(Sender: TObject);
 begin
-  mmoContent.Visible := btnShowPreview.Down;
-  Splitter.Visible := btnShowPreview.Down;
+  if btnShowPreview.Down then
+  begin
+    if FPreviewIsRight then
+    begin
+      mmoContent.Align := alRight;
+      Splitter.Align := alRight;
+    end
+    else
+    begin
+      mmoContent.Align := alBottom;
+      Splitter.Align := alBottom;
+    end;
+
+    mmoContent.Visible := True;
+    Splitter.Visible := True;
+  end
+  else
+  begin
+    mmoContent.Visible := False;
+    Splitter.Visible := False;
+
+    if FPreviewIsRight then
+      FPreviewWidth := mmoContent.Width
+    else
+      FPreviewHeight := mmoContent.Height;
+  end;
+
   UpdateStatusBar;
 end;
 
@@ -3831,27 +3873,37 @@ end;
 
 procedure TCnProcListForm.SplitterMoved(Sender: TObject);
 begin
-  FPreviewHeight := mmoContent.Height;
+  if FPreviewIsRight then
+    FPreviewWidth := mmoContent.Width
+  else
+    FPreviewHeight := mmoContent.Height;
   UpdateStatusBar;
 end;
 
-procedure TCnProcListForm.UpdateMemoHeight(Sender: TObject);
+procedure TCnProcListForm.UpdateMemoSize(Sender: TObject);
 const
   csStep = 5;
 var
   I, Steps, Distance: Integer;
 begin
-  if FPreviewHeight > 0 then
+  if FPreviewIsRight then
   begin
-    Distance := mmoContent.Height - FPreviewHeight;
-    Steps := Abs(Distance div csStep);
-    if Distance > 0 then
-      for I := 1 to Steps do
-        mmoContent.Height := mmoContent.Height - csStep
-    else
-      for I := 1 to Steps do
-        mmoContent.Height := mmoContent.Height + csStep;
-   end;
+    RestorePreviewWidth;
+  end
+  else
+  begin
+    if FPreviewHeight > 0 then
+    begin
+      Distance := mmoContent.Height - FPreviewHeight;
+      Steps := Abs(Distance div csStep);
+      if Distance > 0 then
+        for I := 1 to Steps do
+          mmoContent.Height := mmoContent.Height - csStep
+      else
+        for I := 1 to Steps do
+          mmoContent.Height := mmoContent.Height + csStep;
+    end;
+  end;
 end;
 
 { TCnProcListWizard }
@@ -4653,6 +4705,18 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
+end;
+
+procedure TCnProcListForm.RestorePreviewHeight;
+begin
+  if FPreviewHeight > 0 then
+    mmoContent.Height := FPreviewHeight;
+end;
+
+procedure TCnProcListForm.RestorePreviewWidth;
+begin
+  if FPreviewWidth > 0 then
+    mmoContent.Width := FPreviewWidth;
 end;
 
 initialization
