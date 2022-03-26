@@ -228,6 +228,7 @@ type
     FStream: TStream;
     FCodeGen: TCnCodeGenerator;
     FCompDirectiveMode: TCompDirectiveMode;
+    FNestedIsComment: Boolean;
   protected
     procedure OnMoreBlankLinesWhenSkip; override;    
   public
@@ -1467,7 +1468,9 @@ begin
             FCodeGen.BackSpaceLastSpaces;
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+            // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
+            // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
+            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) and not FNestedIsComment then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1513,7 +1516,10 @@ begin
       end;
 
       FPreviousIsComment := True;
+      FNestedIsComment := Result in [tokBlockComment, tokLineComment, tokCompDirective];
       Result := NextToken;
+      FNestedIsComment := False;
+
       // 进入递归寻找下一个 Token，
       // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
       FPreviousIsComment := False;
@@ -1529,7 +1535,7 @@ begin
         // 代表最后一块注释后的空行数
         FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
       end
-      else // 上一个不是 Comment，当前也不是 Comment。全清0
+      else // 上一个不是 Comment，当前也不是 Comment。全清 0
       begin
         FBlankLinesAfter := 0;
         FBlankLinesBefore := 0;
@@ -1569,7 +1575,9 @@ begin
             FCodeGen.BackSpaceLastSpaces;
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+            // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
+            // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
+            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) and not FNestedIsComment then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1615,16 +1623,19 @@ begin
       end;
 
       FPreviousIsComment := True;
+      FNestedIsComment := Result in [tokBlockComment, tokLineComment, tokCompDirective];
       Result := NextToken;
+      FNestedIsComment := False;
+
       // 进入递归寻找下一个 Token，
       // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
       FPreviousIsComment := False;
     end
     else if (Result = tokCompDirective) and (Pos('{$ELSE', UpperCase(TokenString)) = 1) then // include ELSEIF
     begin
-      // 如果本处是IF/IFEND或其他，可以不管，
-      // 如果是ELSEIF，则找对应的IFEND，并跳过两者之间的
-      // 但找的过程中要忽略中间其他配对的IFDEF/IFNDEF/IFOPT与ENDIF以及同级的ELSE/ELSEIF
+      // 如果本处是 IF/IFEND 或其他，可以不管，
+      // 如果是 ELSEIF，则找对应的 IFEND，并跳过两者之间的
+      // 但找的过程中要忽略中间其他配对的 IFDEF/IFNDEF/IFOPT 与 ENDIF 以及同级的 ELSE/ELSEIF
 
       if FInDirectiveNestSearch then // In a Nested search for ENDIF/IFEND
         Exit;
