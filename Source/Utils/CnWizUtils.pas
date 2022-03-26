@@ -221,6 +221,10 @@ function GetCaptionOrgStr(const Caption: string): string;
 {* 删除标题中热键信息}
 function GetIDEImageList: TCustomImageList;
 {* 取得 IDE 主 ImageList}
+{$IFDEF IDE_SUPPORT_HDPI}
+function GetIDEImagecollection: TCustomImageCollection;
+{* 取得 IDE 主 ImageList 且是 VirtualImageList 时对应的 ImageCollection}
+{$ENDIF}
 procedure SaveIDEImageListToPath(ImgList: TCustomImageList; const Path: string);
 {* 保存 IDE ImageList 中的图像到指定目录下}
 procedure SaveMenuNamesToFile(AMenu: TMenuItem; const FileName: string);
@@ -1958,6 +1962,20 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ImageList;
 end;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+
+// 取得 IDE 主 ImageList 且是 VirtualImageList 时对应的 ImageCollection
+function GetIDEImagecollection: TCustomImageCollection;
+var
+  IL: TCustomImageList;
+begin
+  IL := GetIDEImageList;
+  if (IL <> nil) and (IL is TVirtualImageList) then
+    Result := (IL as TVirtualImageList).ImageCollection;
+end;
+
+{$ENDIF}
 
 // 保存 IDE ImageList 中的图像到指定目录下}
 procedure SaveIDEImageListToPath(ImgList: TCustomImageList; const Path: string);
