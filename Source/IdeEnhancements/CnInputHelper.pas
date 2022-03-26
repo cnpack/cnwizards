@@ -235,6 +235,7 @@ type
     FRemoveSame: Boolean;
     FKeywordStyle: TCnKeywordStyle;
     FUseEditorColor: Boolean;
+    FSymbolReloading: Boolean;
 {$IFNDEF SUPPORT_IDESymbolList}
     // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
     FCCErrorHook: TCnMethodHook;
@@ -1414,6 +1415,15 @@ var
 {$ENDIF}
 begin
   Result := False;
+{$IFDEF IDE_SUPPORT_LSP}
+  if FSymbolReloading then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnInputHelper.HandleKeyDown. SymbolReloading Exit.');
+{$ENDIF}
+    Exit;
+  end;
+{$ENDIF}
 
   Key := Msg.wParam;
   Shift := KeyDataToShiftState(Msg.lParam);
@@ -1639,6 +1649,15 @@ var
   ScanCode: Word;
 begin
   Result := False;
+{$IFDEF IDE_SUPPORT_LSP}
+  if FSymbolReloading then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnInputHelper.HandleKeyUp. SymbolReloading Exit.');
+{$ENDIF}
+    Exit;
+  end;
+{$ENDIF}
   Key := Msg.wParam;
   ScanCode := (Msg.lParam and $00FF0000) shr 16;
   
@@ -2290,9 +2309,11 @@ begin
 {$ENDIF}
 
       // 注意：LSP 模式下的 IDESymbolList 调用 Reload 时内部会异步等待，也就是主线程可能
-      // 先去处理其他键处理函数如 KeyDown/KeyPress/KeyUp 等，从而打乱顺序造成混乱
+      // 先去处理其他键处理函数如 KeyDown/KeyPress/KeyUp 等，从而打乱顺序造成混乱，需要标记处理
+      FSymbolReloading := True;  // 记录标记，但仍无法阻止 IDE 按点号弹出自身的代码自动完成
       if SymbolList.Active and SymbolList.Reload(Editor, FMatchStr, FPosInfo) then
       begin
+        FSymbolReloading := False; // 及时恢复标记
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('Input Helper Reload %s Success: %d', [SymbolList.ClassName, SymbolList.Count]);
 {$ENDIF}
@@ -2343,6 +2364,7 @@ begin
           end;
         end;
       end;
+      FSymbolReloading := False; // 也恢复标记
     end;
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('UpdateSymbolList. Get Symbols %d.', [FSymbols.Count]);

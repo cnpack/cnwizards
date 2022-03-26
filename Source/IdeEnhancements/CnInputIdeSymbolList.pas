@@ -402,7 +402,7 @@ var
           EditView.CursorPos.Col, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
-        while not FAsyncResultGot and (GetTickCount - Tick < 1000) do //
+        while not FAsyncResultGot and (GetTickCount - Tick < 1000) do // µÃÒì²½µÈ´ý
           Application.ProcessMessages;
 
 {$IFDEF DEBUG}
@@ -414,6 +414,9 @@ var
 
         if FAsyncResultGot and (FSymbolListIntf <> nil) then
         begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('Async Result Got Symbol List Interfaces.');
+{$ENDIF}
           try
             for I := 0 to FSymbolListIntf.Count - 1 do
             begin
