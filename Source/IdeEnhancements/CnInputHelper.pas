@@ -485,6 +485,14 @@ const
 {$ENDIF COMPILER6_UP}
   csKibitzWindowName = 'KibitzWindow';
 
+  // 代码参数提示小黄框的类名与组件名
+  csCodeParamWindowClassName = 'TTokenWindow';
+{$IFDEF DELPHI104_SYDNEY_UP}
+  csCodeParamWindowName = 'TokenWindow';
+{$ELSE}
+  csCodeParamWindowName = 'CodeParamWindow';
+{$ENDIF}
+
   csKeyCodeCompletion = 'CodeCompletion';
 
   // 图标集合设置
@@ -2032,6 +2040,7 @@ begin
 end;
 
 {$IFDEF ADJUST_CODEPARAMWINDOW}
+
 procedure TCnInputHelper.CodeParamWndProc(var Message: TMessage);
 var
   Msg: TWMWindowPosChanging;
@@ -2045,8 +2054,8 @@ begin
     Msg := TWMWindowPosChanging(Message);
     if Msg.WindowPos.flags and SWP_NOMOVE = 0 then
     begin
-      ParaComp := Application.FindComponent('CodeParamWindow');
-      if (ParaComp <> nil) and ParaComp.ClassNameIs('TTokenWindow') and
+      ParaComp := Application.FindComponent(csCodeParamWindowName);
+      if (ParaComp <> nil) and ParaComp.ClassNameIs(csCodeParamWindowClassName) and
         (ParaComp is TWinControl) then
       begin
         ParaWnd := TWinControl(ParaComp);
@@ -2087,8 +2096,8 @@ begin
   // BDS 下函数参数提示窗口在当前行的下方，挡住了助手窗口，需要移到当前行上方去
   if IsShowing then
   begin
-    ParaComp := Application.FindComponent('CodeParamWindow');
-    if (ParaComp <> nil) and ParaComp.ClassNameIs('TTokenWindow') and
+    ParaComp := Application.FindComponent(csCodeParamWindowName);
+    if (ParaComp <> nil) and ParaComp.ClassNameIs(csCodeParamWindowClassName) and
       (ParaComp is TWinControl) then
     begin
       ParaWnd := TWinControl(ParaComp);
