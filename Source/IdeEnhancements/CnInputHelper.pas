@@ -44,12 +44,10 @@ interface
 
 {$DEFINE SUPPORT_INPUTHELPER}
 
-//{$IFDEF DELPHI}
-  {$DEFINE SUPPORT_IDESymbolList}
-//{$ENDIF}
+{$DEFINE SUPPORT_IDESYMBOLLIST}
 
 {$IFDEF BDS}
-  {$DEFINE ADJUST_CodeParamWindow}
+  {$DEFINE ADJUST_CODEPARAMWINDOW}
 {$ENDIF}
 
 uses
@@ -236,11 +234,11 @@ type
     FKeywordStyle: TCnKeywordStyle;
     FUseEditorColor: Boolean;
     FSymbolReloading: Boolean;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
     // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
     FCCErrorHook: TCnMethodHook;
 {$ENDIF}
-{$IFDEF ADJUST_CodeParamWindow}
+{$IFDEF ADJUST_CODEPARAMWINDOW}
     FCodeWndProc: TWndMethod;
 {$ENDIF}
     function AcceptDisplay: Boolean;
@@ -254,7 +252,7 @@ type
     procedure HideList;                       // 隐藏列表
     procedure ClearList;                      // 清除列表内容
     procedure HideAndClearList;
-{$IFDEF ADJUST_CodeParamWindow}
+{$IFDEF ADJUST_CODEPARAMWINDOW}
     procedure CodeParamWndProc(var Message: TMessage);
     procedure HookCodeParamWindow(Wnd: TWinControl);
     procedure AdjustCodeParamWindowPos;
@@ -568,7 +566,7 @@ const
 //  );
 //{$ENDIF}
 
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
 
   TSCppKibitzManagerCCError = procedure (Rec: PResStringRec); // TResStringRec
 
@@ -1084,7 +1082,7 @@ end;
 { TCnInputHelper }
 
 constructor TCnInputHelper.Create;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
 var
   DphIdeModule: HMODULE;
 {$ENDIF}
@@ -1125,7 +1123,7 @@ begin
   FDispKindSet := csAllSymbolKind;
   AutoPopup := True;
 
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
   DphIdeModule := LoadLibrary(DphIdeLibName);
   if DphIdeModule <> 0 then
@@ -1145,7 +1143,7 @@ begin
   CnWizNotifierServices.RemoveActiveControlNotifier(ActiveControlChanged);
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
 
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   FCCErrorHook.Free;
 {$ENDIF}
 
@@ -1912,7 +1910,7 @@ var
   CurrPos: Integer;
   AForm: TCustomForm;
   WorkRect: TRect;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   AToken: string;
 {$ENDIF}
 begin
@@ -1976,14 +1974,14 @@ begin
         // 判断是否需要根据放大倍数修正显示字号
         UpdateListFont;
         List.Popup;   // 真正显示
-      {$IFDEF ADJUST_CodeParamWindow}
+      {$IFDEF ADJUST_CODEPARAMWINDOW}
         AdjustCodeParamWindowPos;
       {$ENDIF}
       end
       else if not (FPosInfo.PosKind in [pkUnknown, pkFlat, pkComment, pkIntfUses,
         pkImplUses, pkResourceString, pkCompDirect, pkString]) then // 这个判断，Pascal 和 C++ 通用
       begin
-      {$IFNDEF SUPPORT_IDESymbolList}
+      {$IFNDEF SUPPORT_IDESYMBOLLIST}
         // 如果不支持 IDE 符号列表，只在非标识的地方显示外挂列表
         if not FPosInfo.IsPascal then
         begin
@@ -2033,7 +2031,7 @@ begin
   Result := List.Visible;
 end;
 
-{$IFDEF ADJUST_CodeParamWindow}
+{$IFDEF ADJUST_CODEPARAMWINDOW}
 procedure TCnInputHelper.CodeParamWndProc(var Message: TMessage);
 var
   Msg: TWMWindowPosChanging;
@@ -2077,7 +2075,7 @@ begin
   begin
     FCodeWndProc := Wnd.WindowProc;
     Wnd.WindowProc := CodeParamWndProc;
-  end;  
+  end;
 end;
 
 procedure TCnInputHelper.AdjustCodeParamWindowPos;
@@ -2094,7 +2092,7 @@ begin
       (ParaComp is TWinControl) then
     begin
       ParaWnd := TWinControl(ParaComp);
-      // Hook参数窗口，阻止其自动恢复位置
+      // Hook 参数窗口，阻止其自动恢复位置
       HookCodeParamWindow(ParaWnd);
       // 判断并调整参数窗口的位置
       GetWindowRect(ParaWnd.Handle, R1);
@@ -2380,7 +2378,7 @@ var
   I, Idx: Integer;
   Symbol: string;
 begin
-{$IFDEF ADJUST_CodeParamWindow}
+{$IFDEF ADJUST_CODEPARAMWINDOW}
   AdjustCodeParamWindowPos;
 {$ENDIF}
 
@@ -2529,7 +2527,7 @@ end;
 function TCnInputHelper.UpdateListBox(ForcePopup, InitPopup: Boolean): Boolean;
 var
   CurrPos: Integer;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   AToken: string;
 {$ENDIF}
 begin
@@ -2547,7 +2545,7 @@ begin
 //    CnDebugger.LogFmt('InputHelper UpdateCurrList Returns %d', [Integer(Result)]);
 {$ENDIF}
 
-  {$IFNDEF SUPPORT_IDESymbolList}
+  {$IFNDEF SUPPORT_IDESYMBOLLIST}
     // 如果不支持 IDE 符号列表，只有从前面匹配的才有效
     if Result then
     begin
@@ -2562,7 +2560,7 @@ begin
   if not Result then
   begin
     HideAndClearList;
-  {$IFNDEF SUPPORT_IDESymbolList}
+  {$IFNDEF SUPPORT_IDESYMBOLLIST}
     // 如果不支持 IDE 符号列表，则在无匹配项时切换成 IDE 的自动完成
     if not InitPopup and not (FPosInfo.PosKind in [pkUnknown, pkFlat, pkComment,
       pkIntfUses, pkImplUses, pkResourceString, pkCompDirect, pkString]) then
@@ -3103,7 +3101,7 @@ begin
   AutoMenuItem.Checked := Value;
   if not FAutoPopup and IsShowing then
     HideAndClearList;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
     if Value and Active then
@@ -3168,7 +3166,7 @@ end;
 procedure TCnInputHelper.Config;
 begin
   HideAndClearList;
-  if CnInputHelperConfig(Self{$IFNDEF SUPPORT_IDESymbolList}, True{$ENDIF}) then
+  if CnInputHelperConfig(Self{$IFNDEF SUPPORT_IDESYMBOLLIST}, True{$ENDIF}) then
     ConfigChanged;
 end;
 
@@ -3319,7 +3317,7 @@ end;
 procedure TCnInputHelper.SetActive(Value: Boolean);
 begin
   inherited;
-{$IFNDEF SUPPORT_IDESymbolList}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
     if Value and FAutoPopup then

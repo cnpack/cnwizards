@@ -46,10 +46,10 @@ uses
   CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
 
 {$IFDEF DELPHI}
-  {$DEFINE SUPPORT_IDESymbolList}
+  {$DEFINE SUPPORT_IDESYMBOLLIST}
 {$ENDIF}
 
-{$IFDEF SUPPORT_IDESymbolList}
+{$IFDEF SUPPORT_IDESYMBOLLIST}
 {$IFDEF COMPILER7_UP}
   {$DEFINE SUPPORT_IOTACodeInsightManager}  // D7 及以上支持 IOTACodeInsightManager
 {$ENDIF}
@@ -64,7 +64,7 @@ uses
   {$ENDIF}
 {$ENDIF}
 
-{$ENDIF SUPPORT_IDESymbolList}
+{$ENDIF SUPPORT_IDESYMBOLLIST}
 
 {$IFDEF IDE_WIDECONTROL}
   {$IFNDEF UNICODE_STRING}
@@ -1135,7 +1135,7 @@ end;
 function TIDESymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-{$IFDEF SUPPORT_IDESymbolList}
+{$IFDEF SUPPORT_IDESYMBOLLIST}
 
 {$IFDEF SUPPORT_MULTI_IDESymbolList}
   if UseCodeInsightMgr then
@@ -1156,7 +1156,7 @@ begin
 
 {$ELSE}
   Result := False;
-{$ENDIF SUPPORT_IDESymbolList}
+{$ENDIF SUPPORT_IDESYMBOLLIST}
 end;
 
 function TIDESymbolList.Add(const AName: string; AKind: TSymbolKind;
@@ -1194,8 +1194,8 @@ begin
 end;
 
 initialization
-{$IFDEF SUPPORT_IDESymbolList}
-{$IFNDEF BCB5}  // 支持BCB5/6的IDE符号列表差异较大，放另外一个单元。
+{$IFDEF SUPPORT_IDESYMBOLLIST}
+{$IFNDEF BCB5}  // 支持 BCB5/6 的 IDE 符号列表差异较大，放另外一个单元。
 {$IFNDEF BCB6}
   RegisterSymbolList(TIDESymbolList);
 
