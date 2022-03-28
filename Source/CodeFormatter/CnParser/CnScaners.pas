@@ -185,6 +185,7 @@ type
     procedure ClearBookmark(var Bookmark: TScannerBookmark);
 
     function ForwardToken(Count: Integer = 1): TPascalToken; virtual;
+    {* 不产生实际作用地往前提前找一个 Token，找完后所有状态均保持现状不动}
 
     property FloatType: Char read FFloatType;
     property SourceLine: Integer read FSourceLine;  // 行，以 1 开始
@@ -833,11 +834,11 @@ end;
 function TAbstractScaner.IsInStatement: Boolean;
 begin
   // 判定当前位置是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
-  // 下一个是 end/else 的条件暂无需处理，外面似乎已代劳
+  // 下一个是 end/else 的条件也得处理，似乎外面没代劳的
   if not FIsForwarding then
     Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
       tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens)
-      // or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
+      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
   else
     Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
