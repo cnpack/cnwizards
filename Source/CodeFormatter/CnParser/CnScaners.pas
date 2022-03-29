@@ -53,35 +53,20 @@ uses
   CnParseConsts, CnTokens, CnCodeGenerators, CnCodeFormatRules;
 
 type
-  TScannerBookmark = class(TObject)
-  private
-    FOriginBookmark: Longint;
-    FTokenBookmark: TPascalToken;
-    FTokenPtrBookmark: PChar;
-    FSourcePtrBookmark: PChar;
-    FSourceLineBookmark: Integer;
-    FBlankLinesBeforeBookmark: Integer;
-    FBlankLinesAfterBookmark: Integer;
-    FPrevBlankLinesBookmark: Boolean;
-    FSourceColBookmark: Integer;
-    FInIgnoreAreaBookmark: Boolean;
-    FNewSourceColBookmark: Integer;
-    FOldSourceColPtrBookmark: PChar;
-    FPrevTokenBookmark: TPascalToken;
-  protected
-    property OriginBookmark: Longint read FOriginBookmark write FOriginBookmark;
-    property PrevTokenBookmark: TPascalToken read FPrevTokenBookmark write FPrevTokenBookmark;
-    property TokenBookmark: TPascalToken read FTokenBookmark write FTokenBookmark;
-    property TokenPtrBookmark: PChar read FTokenPtrBookmark write FTokenPtrBookmark;
-    property SourcePtrBookmark: PChar read FSourcePtrBookmark write FSourcePtrBookmark;
-    property OldSourceColPtrBookmark: PChar read FOldSourceColPtrBookmark write FOldSourceColPtrBookmark;
-    property SourceLineBookmark: Integer read FSourceLineBookmark write FSourceLineBookmark;
-    property SourceColBookmark: Integer read FSourceColBookmark write FSourceColBookmark;
-    property NewSourceColBookmark: Integer read FNewSourceColBookmark write FNewSourceColBookmark;
-    property BlankLinesBeforeBookmark: Integer read FBlankLinesBeforeBookmark write FBlankLinesBeforeBookmark;
-    property BlankLinesAfterBookmark: Integer read FBlankLinesAfterBookmark write FBlankLinesAfterBookmark;
-    property PrevBlankLinesBookmark: Boolean read FPrevBlankLinesBookmark write FPrevBlankLinesBookmark;
-    property InIgnoreAreaBookmark: Boolean read FInIgnoreAreaBookmark write FInIgnoreAreaBookmark;
+  TScannerBookmark = packed record
+    OriginBookmark: Longint;
+    TokenBookmark: TPascalToken;
+    TokenPtrBookmark: PChar;
+    SourcePtrBookmark: PChar;
+    SourceLineBookmark: Integer;
+    BlankLinesBeforeBookmark: Integer;
+    BlankLinesAfterBookmark: Integer;
+    PrevBlankLinesBookmark: Boolean;
+    SourceColBookmark: Integer;
+    InIgnoreAreaBookmark: Boolean;
+    NewSourceColBookmark: Integer;
+    OldSourceColPtrBookmark: PChar;
+    PrevTokenBookmark: TPascalToken;
   end;
 
   TAbstractScaner = class(TObject)
@@ -181,8 +166,7 @@ type
     function TokenSymbolIs(const S: string): Boolean;
 
     procedure SaveBookmark(var Bookmark: TScannerBookmark);
-    procedure LoadBookmark(var Bookmark: TScannerBookmark; Clear: Boolean = True);
-    procedure ClearBookmark(var Bookmark: TScannerBookmark);
+    procedure LoadBookmark(var Bookmark: TScannerBookmark);
 
     function ForwardToken(Count: Integer = 1): TPascalToken; virtual;
     {* 不产生实际作用地往前提前找一个 Token，找完后所有状态均保持现状不动}
@@ -674,44 +658,34 @@ begin
     Result := #0;
 end;
 
-procedure TAbstractScaner.LoadBookmark(var Bookmark: TScannerBookmark; Clear:
-  Boolean = True);
+procedure TAbstractScaner.LoadBookmark(var Bookmark: TScannerBookmark);
 begin
-  if FBookmarks.IndexOf(Bookmark) >= 0 then
+  with Bookmark do
   begin
-    with Bookmark do
+    if Assigned(SourcePtrBookmark) and Assigned(TokenPtrBookmark) then
     begin
-      if Assigned(SourcePtrBookmark) and Assigned(TokenPtrBookmark) then
-      begin
-        if OriginBookmark <> FOrigin then
-          SetOrigin(OriginBookmark);
-        FSourcePtr := SourcePtrBookmark;
-        FTokenPtr := TokenPtrBookmark;
-        FOldSourceColPtr := OldSourceColPtrBookmark;
-        FPrevToken := PrevTokenBookmark;
-        FToken := TokenBookmark;
-        FSourceLine := SourceLineBookmark;
-        FSourceCol := SourceColBookmark;
-        FNewSourceCol := NewSourceColBookmark;
-        FBlankLinesBefore := BlankLinesBeforeBookmark;
-        FBlankLinesAfter := BlankLinesAfterBookmark;
-        FPrevBlankLines := PrevBlankLinesBookmark;
-        FInIgnoreArea := InIgnoreAreaBookmark;
-      end
-      else
-        Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
-    end;
-  end
-  else
-    Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
-
-  if Clear then
-    ClearBookmark(Bookmark);
+      if OriginBookmark <> FOrigin then
+        SetOrigin(OriginBookmark);
+      FSourcePtr := SourcePtrBookmark;
+      FTokenPtr := TokenPtrBookmark;
+      FOldSourceColPtr := OldSourceColPtrBookmark;
+      FPrevToken := PrevTokenBookmark;
+      FToken := TokenBookmark;
+      FSourceLine := SourceLineBookmark;
+      FSourceCol := SourceColBookmark;
+      FNewSourceCol := NewSourceColBookmark;
+      FBlankLinesBefore := BlankLinesBeforeBookmark;
+      FBlankLinesAfter := BlankLinesAfterBookmark;
+      FPrevBlankLines := PrevBlankLinesBookmark;
+      FInIgnoreArea := InIgnoreAreaBookmark;
+    end
+    else
+      Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
+  end;
 end;
 
 procedure TAbstractScaner.SaveBookmark(var Bookmark: TScannerBookmark);
 begin
-  Bookmark := TScannerBookmark.Create;
   with Bookmark do
   begin
     OriginBookmark := FOrigin;
@@ -728,14 +702,6 @@ begin
     PrevBlankLinesBookmark := FPrevBlankLines;
     InIgnoreAreaBookmark := FInIgnoreArea;
   end;
-  FBookmarks.Add(Bookmark);
-end;
-
-procedure TAbstractScaner.ClearBookmark(var Bookmark: TScannerBookmark);
-begin
-  Bookmark := TScannerBookmark(FBookmarks.Extract(Bookmark));
-  if Assigned(Bookmark) then
-    FreeAndNil(Bookmark);
 end;
 
 function TAbstractScaner.ForwardToken(Count: Integer): TPascalToken;
@@ -838,7 +804,7 @@ begin
   if not FIsForwarding then
     Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
       tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens)
-      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse])
+      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]) // 这句对性能有所影响
   else
     Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
@@ -1471,7 +1437,7 @@ begin
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
-            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) and not FNestedIsComment then
+            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1578,7 +1544,7 @@ begin
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
-            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) and not FNestedIsComment then
+            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1657,7 +1623,7 @@ begin
             FCodeGen.BackSpaceLastSpaces;
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-            if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1693,7 +1659,7 @@ begin
                 FCodeGen.BackSpaceLastSpaces;
                 // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
                 // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-                if FKeepOneBlankLine and not IsInStatement and IsStringStartWithSpacesCRLF(BlankStr) then
+                if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
                 begin
                   Idx := Pos(#13#10, BlankStr);
                   if Idx > 0 then

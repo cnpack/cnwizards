@@ -2117,7 +2117,7 @@ begin
 
           if not IsDesignator then
           begin
-            //Match(tokLB);  优化不用的括号
+            // Match(tokLB);  优化不用的括号
             Scaner.NextToken;
 
             FormatSimpleStatement(PreSpaceCount);
@@ -2537,7 +2537,7 @@ begin
           ALabel := ALabel + ':';
         end;
 
-        // 如果是label，那么ALabel里头已经放入label了，所以不需要LoadBookmark了
+        // 如果是 label，那么 ALabel 里头已经放入 label 了，所以不需要 LoadBookmark 了
         if IsLabel then
         begin
           // Match(Scaner.Token);
@@ -2580,7 +2580,7 @@ begin
 
         if Scaner.Token <> tokCRLF then
         begin
-          if AfterKeyword then // 手工写入ASM关键字后面的内容，不用 Pascal 的空格规则
+          if AfterKeyword then // 手工写入 ASM 关键字后面的内容，不用 Pascal 的空格规则
           begin
             CodeGen.Write(Scaner.TokenString);
             FLastToken := Scaner.Token;
@@ -2615,7 +2615,7 @@ begin
         end;
       end;
 
-      //if not OnlyKeyword then
+      // if not OnlyKeyword then
       NewLine := False;
 
       if (T = tokSemicolon) or (Scaner.Token = tokCRLF) or
@@ -2832,29 +2832,6 @@ begin
     Match(Scaner.Token);
 
   FormatClassBody(PreSpaceCount);
-
-{
-  while Scaner.Token <> tokKeywordEnd do
-  begin
-    // skip ClassVisibilityTokens ( private public ... )
-    Scaner.SaveBookmark;
-    while (Scaner.Token in ClassVisibilityTokens + [tokKeywordEnd, tokEOF]) do
-    begin
-      Scaner.NextToken;
-    end;
-    Token := Scaner.Token;
-    Scaner.LoadBookmark;
-
-    if Token = tokKeywordProperty then
-      FormatClassPropertyList(Tab(PreSpaceCount))
-    else if Token in MethodListTokens then
-      FormatMethodList(Tab(PreSpaceCount))
-    else
-      FormatClassFieldList(Tab(PreSpaceCount));
-  end;
-
-  Match(tokKeywordEnd);
-}
 end;
 
 { ClassVisibility -> [PUBLIC | PROTECTED | PRIVATE | PUBLISHED] }
@@ -4336,7 +4313,7 @@ begin
     end;
   end;
 
-  // 加入对<>泛型的支持
+  // 加入对 <> 泛型的支持
   if Scaner.Token = tokLess then
   begin
     FormatTypeParams;
@@ -4377,8 +4354,8 @@ begin
         end;
       end;
     tokLB:
-      begin // 是括号的，表示是组合的Type
-        if Scaner.ForwardToken = tokLB then // 如果后面还是括号，则说明本大类是常量或array
+      begin // 是括号的，表示是组合的 Type
+        if Scaner.ForwardToken = tokLB then // 如果后面还是括号，则说明本大类是常量或 array
         begin
           Scaner.SaveBookmark(Bookmark);
           OldLastToken := FLastToken;
