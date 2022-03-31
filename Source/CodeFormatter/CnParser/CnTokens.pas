@@ -355,6 +355,8 @@ const
   NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor,
     tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto, tokKeywordUntil];
 
+  NonEffectiveTokens = [tokBlank, tokCRLF, tokLineComment, tokBlockComment, tokCompDirective];
+
 function TokenToString(Token: TPascalToken): string;
 
 function StringToToken(TokenStr: string): TPascalToken;

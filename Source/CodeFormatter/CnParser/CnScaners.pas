@@ -67,7 +67,10 @@ type
     NewSourceColBookmark: Integer;
     OldSourceColPtrBookmark: PChar;
     PrevTokenBookmark: TPascalToken;
+    PrevEffectiveeTokenBookmark: TPascalToken;
   end;
+
+  TGetBooleanEvent = function(Sender: TObject): Boolean of object;
 
   TAbstractScaner = class(TObject)
   private
@@ -88,7 +91,8 @@ type
     FStringPtr: PChar;
     FSourceLine: Integer;
     FSaveChar: Char;
-    FPrevToken: TPascalToken;
+    FPrevToken: TPascalToken;              // 保存步进时上一个 Token
+    FPrevEffectiveToken: TPascalToken;     // 保存步进时上一个有效 Token，也就是非空白非注释 Token
     FToken: TPascalToken;
     FFloatType: Char;
     FWideStr: WideString;
@@ -112,6 +116,7 @@ type
     FOnLineBreak: TNotifyEvent;
     FIdentContainsDot: Boolean;
     FIsForwarding: Boolean;
+    FOnGetCanLineBreak: TGetBooleanEvent;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks; // 越过空白和回车换行
@@ -119,13 +124,13 @@ type
     {* SkipBlanks 时遇到连续换行时被调用}
     function ErrorTokenString: string;
     procedure NewLine(ImmediatelyDoBreak: Boolean = True);
-    function IsInStatement: Boolean;
 {$IFDEF UNICODE}
     procedure FixStreamBom;
 {$ENDIF}
   protected
     procedure OnMoreBlankLinesWhenSkip; virtual; abstract;
     procedure DoLineBreak; virtual;
+    function GetCanLineBreakFromOut: Boolean; virtual;
   public
     constructor Create(Stream: TStream); virtual;
     destructor Destroy; override;
@@ -135,6 +140,9 @@ type
     procedure ErrorFmt(const Ident: Integer; const Args: array of const);
     procedure ErrorStr(const Message: string);
     procedure HexToBinary(Stream: TStream);
+
+    function IsInStatement: Boolean;
+    {* 判断当前是否在语句内部}
 
     function NextToken: TPascalToken; virtual; abstract;
     function SourcePos: LongInt;
@@ -169,7 +177,10 @@ type
     procedure LoadBookmark(var Bookmark: TScannerBookmark);
 
     function ForwardToken(Count: Integer = 1): TPascalToken; virtual;
-    {* 不产生实际作用地往前提前找一个 Token，找完后所有状态均保持现状不动}
+    {* 不产生实际作用地往前提前找一个 Token，包括注释，找完后所有状态均保持现状不动}
+    function ForwardActualToken(Count: Integer = 0): TPascalToken; virtual;
+    {* 不产生实际作用地往前提前找一个除注释、空白外的有效 Token，找完后所有状态均保持现状不动
+      这里 Count 可以是 0，表示当前如果是有效 Token 就返回当前 Token，否则找下一个 Token}
 
     property FloatType: Char read FFloatType;
     property SourceLine: Integer read FSourceLine;  // 行，以 1 开始
@@ -206,6 +217,8 @@ type
 
     property OnLineBreak: TNotifyEvent read FOnLineBreak write FOnLineBreak;
     {* 遇到源文件换行时的事件}
+    property OnGetCanLineBreak: TGetBooleanEvent read FOnGetCanLineBreak write FOnGetCanLineBreak;
+    {* 需要获取 Formatter 的当前位置是否允许保留换行的标志事件}
   end;
 
   TScaner = class(TAbstractScaner)
@@ -214,6 +227,7 @@ type
     FCodeGen: TCnCodeGenerator;
     FCompDirectiveMode: TCompDirectiveMode;
     FNestedIsComment: Boolean;
+    procedure StorePrevEffectiveToken(AToken: TPascalToken);
   protected
     procedure OnMoreBlankLinesWhenSkip; override;    
   public
@@ -223,7 +237,7 @@ type
     destructor Destroy; override;
     function NextToken: TPascalToken; override;
     function ForwardToken(Count: Integer = 1): TPascalToken; override;
-
+    function ForwardActualToken(Count: Integer = 1): TPascalToken; override;
     property CompDirectiveMode: TCompDirectiveMode read FCompDirectiveMode;
   end;
 
@@ -670,6 +684,7 @@ begin
       FTokenPtr := TokenPtrBookmark;
       FOldSourceColPtr := OldSourceColPtrBookmark;
       FPrevToken := PrevTokenBookmark;
+      FPrevEffectiveToken := PrevEffectiveeTokenBookmark;
       FToken := TokenBookmark;
       FSourceLine := SourceLineBookmark;
       FSourceCol := SourceColBookmark;
@@ -691,6 +706,7 @@ begin
     OriginBookmark := FOrigin;
     SourcePtrBookmark := FSourcePtr;
     PrevTokenBookmark := FPrevToken;
+    PrevEffectiveeTokenBookmark := FPrevEffectiveToken;
     TokenBookmark := FToken;
     TokenPtrBookmark := FTokenPtr;
     OldSourceColPtrBookmark := FOldSourceColPtr;
@@ -720,6 +736,40 @@ begin
       if Result = tokEOF then
         Exit;
     end;
+  finally
+    FIsForwarding := False;
+  end;
+
+  LoadBookmark(Bookmark);
+end;
+
+function TAbstractScaner.ForwardActualToken(Count: Integer): TPascalToken;
+var
+  Bookmark: TScannerBookmark;
+  I: Integer;
+begin
+  Result := Token;
+  // 0 时如果当前 Token 有效，直接返回
+  if (Count = 0) and not (Result in NonEffectiveTokens + [tokEOF]) then
+    Exit;
+
+  SaveBookmark(Bookmark);
+  FIsForwarding := True;
+
+  // 此时 Result 在注释等 Token 上
+  try
+    I := 0;
+
+    repeat
+      repeat
+        Result := NextToken;
+      until (Result = tokEOF) or not (Result in NonEffectiveTokens);
+
+      if Result = tokEOF then
+        Exit;
+
+      Inc(I);
+    until I >= Count;
   finally
     FIsForwarding := False;
   end;
@@ -799,15 +849,24 @@ end;
 
 function TAbstractScaner.IsInStatement: Boolean;
 begin
-  // 判定当前位置是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
-  // 下一个是 end/else 的条件也得处理，似乎外面没代劳的
+  // 判定当前 Token 是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
+  // 当前 Token 可能是空白注释之类的，此时前一个有效 Token 是分号或一些关键字，就说明当前位置已在语句外
+  // 如果前一个有效 Token 是标识符，就得判断当前或靠后（如果当前的是注释）的有效 Token 是不是 End 和 Else
+  // 如果靠后一个是，表示语句已经结束，现状已经在语句外了。以应对 End 或 Else 前的语句无分号的问题
   if not FIsForwarding then
-    Result := (FPrevToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
+    Result := (FPrevEffectiveToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
       tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens)
-      or (ForwardToken() in [tokKeywordEnd, tokKeywordElse]) // 这句对性能有所影响
+      or not (ForwardActualToken() in [tokKeywordEnd, tokKeywordElse]) // 这句对性能有所影响
   else
-    Result := FPrevToken in [tokSemicolon] + StructStmtTokens;
+    Result := FPrevEffectiveToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
+end;
+
+function TAbstractScaner.GetCanLineBreakFromOut: Boolean;
+begin
+  Result := False;
+  if Assigned(FOnGetCanLineBreak) then
+    Result := FOnGetCanLineBreak(Self);
 end;
 
 { TScaner }
@@ -825,13 +884,25 @@ end;
 
 constructor TScaner.Create(AStream: TStream);
 begin
-  Create(AStream, nil, CnPascalCodeForRule.CompDirectiveMode); //TCnCodeGenerator.Create);
+  Create(AStream, nil, CnPascalCodeForRule.CompDirectiveMode);
 end;
 
 destructor TScaner.Destroy;
 begin
 
   inherited;
+end;
+
+function TScaner.ForwardActualToken(Count: Integer): TPascalToken;
+begin
+  if FCodeGen <> nil then
+    FCodeGen.LockOutput;
+  try
+    Result := inherited ForwardActualToken(Count);
+  finally
+    if FCodeGen <> nil then
+      FCodeGen.UnLockOutput;
+  end;
 end;
 
 function TScaner.ForwardToken(Count: Integer): TPascalToken;
@@ -1407,6 +1478,7 @@ begin
 
   FSourcePtr := P;
   FPrevToken := FToken;
+  StorePrevEffectiveToken(FToken);
   FToken := Result;
 
   Inc(FNewSourceCol, FSourcePtr - FOldSourceColPtr);
@@ -1437,7 +1509,8 @@ begin
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
-            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
+            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
+              and GetCanLineBreakFromOut and not IsInStatement then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1519,6 +1592,7 @@ begin
         Result := StringToToken(TokenString);
 
       FPrevToken := FToken;
+      StorePrevEffectiveToken(FToken);
       FToken := Result;
       FBackwardToken := FToken;
     end;
@@ -1544,7 +1618,8 @@ begin
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
-            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
+            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
+              and GetCanLineBreakFromOut and not IsInStatement then
             begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
@@ -1716,6 +1791,7 @@ begin
         end;
         Result := tokEOF;
         FPrevToken := FToken;
+        StorePrevEffectiveToken(FToken);
         FToken := Result;
       finally
         FInDirectiveNestSearch := False;
@@ -1749,6 +1825,7 @@ begin
         Result := StringToToken(TokenString);
 
       FPrevToken := FToken;
+      StorePrevEffectiveToken(FToken);
       FToken := Result;
       FBackwardToken := FToken;
     end;
@@ -1760,6 +1837,12 @@ begin
   if FCodeGen <> nil then
     if not FCodeGen.KeepLineBreak then // 保留换行时，这里调整空行的机制不起作用
       FCodeGen.Writeln;
+end;
+
+procedure TScaner.StorePrevEffectiveToken(AToken: TPascalToken);
+begin
+  if not (AToken in NonEffectiveTokens) then
+    FPrevEffectiveToken := AToken;
 end;
 
 end.

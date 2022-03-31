@@ -385,6 +385,8 @@ type
 
     procedure ScanerLineBreak(Sender: TObject);
     {* Scaner 扫描到源文件中的换行时触发的事件，根据需要写回车到输出中}
+    function ScanerGetCanLineBreak(Sender: TObject): Boolean;
+    {* 向 Scaner 返回当前是否保持换行}
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
@@ -5941,6 +5943,7 @@ constructor TCnBasePascalFormatter.Create(AStream: TStream; AMatchedInStart,
 begin
   inherited;
   FScaner.OnLineBreak := ScanerLineBreak;
+  FScaner.OnGetCanLineBreak := ScanerGetCanLineBreak;
 end;
 
 { TCnPascalCodeFormatter }
@@ -6296,6 +6299,12 @@ begin
     Writeln
   else // 啥都没有就写俩
     WriteLine;
+end;
+
+function TCnBasePascalFormatter.ScanerGetCanLineBreak(
+  Sender: TObject): Boolean;
+begin
+  Result := CanKeepLineBreak;
 end;
 
 initialization
