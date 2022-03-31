@@ -255,7 +255,7 @@ end;
 
 procedure TMainForm.ToolButton7Click(Sender: TObject);
 var
-  Scaner: TScaner;
+  Scanner: TScanner;
   Bookmark: TScannerBookmark;
   MemStr: TMemoryStream;
   I: Integer;
@@ -263,7 +263,7 @@ begin
   MemStr := TMemoryStream.Create;
   SrcMemo.Lines.SaveToStream(MemStr);
 
-  Scaner := TScaner.Create(MemStr);
+  Scanner := TScanner.Create(MemStr);
 
   try
     Memo2.Lines.Add('Normal Scan 20 Token');
@@ -271,39 +271,39 @@ begin
 
     for I := 1 to 100 do
     begin
-      Memo2.Lines.Add(Scaner.TokenString);
-      Scaner.NextToken;
-      if Scaner.Token = tokEOF then
+      Memo2.Lines.Add(Scanner.TokenString);
+      Scanner.NextToken;
+      if Scanner.Token = tokEOF then
         Break;
     end;
 
-    Scaner.SaveBookmark(Bookmark);
+    Scanner.SaveBookmark(Bookmark);
     Memo2.Lines.Add('');
     Memo2.Lines.Add('Save Bookmark Scan 10 Token');
     Memo2.Lines.Add('----------------------------------------');
 
     for I := 1 to 10 do
     begin
-      Memo2.Lines.Add(Scaner.TokenString);
-      Scaner.NextToken;
-      if Scaner.Token = tokEOF then
+      Memo2.Lines.Add(Scanner.TokenString);
+      Scanner.NextToken;
+      if Scanner.Token = tokEOF then
         Break;
     end;
 
-    Scaner.LoadBookmark(Bookmark);
+    Scanner.LoadBookmark(Bookmark);
     Memo2.Lines.Add('');
     Memo2.Lines.Add('Restore Bookmark Scan 10 Token');
     Memo2.Lines.Add('----------------------------------------');
 
     for I := 1 to 10 do
     begin
-      Memo2.Lines.Add(Scaner.TokenString);
-      Scaner.NextToken;
-      if Scaner.Token = tokEOF then
+      Memo2.Lines.Add(Scanner.TokenString);
+      Scanner.NextToken;
+      if Scanner.Token = tokEOF then
         Break;
     end;
   finally
-    Scaner.Free;
+    Scanner.Free;
     MemStr.Free;
   end;
 end;
