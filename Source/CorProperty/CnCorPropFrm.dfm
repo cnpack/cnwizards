@@ -1,9 +1,10 @@
 inherited CnCorPropForm: TCnCorPropForm
   Left = 316
   Top = 52
-  Width = 701
-  Height = 556
+  AutoScroll = False
   Caption = 'Property Corrector'
+  ClientHeight = 517
+  ClientWidth = 685
   Constraints.MinHeight = 488
   Constraints.MinWidth = 554
   Icon.Data = {
