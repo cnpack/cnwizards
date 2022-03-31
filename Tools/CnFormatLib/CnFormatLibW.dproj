@@ -57,7 +57,7 @@
 			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnScaners.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnScanners.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnTokens.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>

@@ -30,7 +30,7 @@ uses
   CnCodeGenerators in '..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas',
   CnParseConsts in '..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas',
   CnPascalGrammar in '..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas',
-  CnScaners in '..\..\Source\CodeFormatter\CnParser\CnScaners.pas',
+  CnScanners in '..\..\Source\CodeFormatter\CnParser\CnScanners.pas',
   CnTokens in '..\..\Source\CodeFormatter\CnParser\CnTokens.pas';
 
 {$R *.RES}

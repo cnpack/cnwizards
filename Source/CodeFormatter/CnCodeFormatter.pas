@@ -41,7 +41,7 @@ interface
 
 uses
   Classes, SysUtils, Windows, Dialogs, Contnrs, CnHashMap,
-  CnTokens, CnScaners, CnCodeGenerators, CnCodeFormatRules, CnFormatterIntf;
+  CnTokens, CnScanners, CnCodeGenerators, CnCodeFormatRules, CnFormatterIntf;
 
 const
   CN_MATCHED_INVALID = -1;
