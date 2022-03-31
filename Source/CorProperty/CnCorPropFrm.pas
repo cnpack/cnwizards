@@ -50,13 +50,13 @@ uses
   Windows, Messages, SysUtils, Classes, CnWizConsts, Menus, ImgList,
   Controls, ActnList, ComCtrls, StdCtrls, ExtCtrls, CnCommon,
   Graphics, Forms, Dialogs, CnCorPropWizard, contnrs, ToolsApi, TypInfo,
-  {$IFDEF COMPILER5}Dsgnintf, {$ELSE}DesignIntf, Variants, {$ENDIF}
+  {$IFDEF COMPILER5} Dsgnintf, {$ELSE} DesignIntf, Variants, {$ENDIF}
   CnConsts, CnWizManager, CnWizUtils, CnWizIdeUtils, CnLangMgr, CnWizMultiLang,
   CnPopupMenu;
 
 type
-  //修正项目
-  TCorrectItem = class(TPersistent)
+  // 修正项目
+  TCnCorrectItem = class(TPersistent)
   private
     FCorrComp: TComponent;
     FFileName: string;
@@ -76,7 +76,7 @@ type
     property OldValue: string read FOldValue write SetOldValue;
   end;
 
-  TCorrectRange=(crCurrent, crOpened, crProject, crGroup);
+  TCnCorrectRange = (crCurrent, crOpened, crProject, crGroup);
 
   TCnCorPropForm = class(TCnTranslateForm)
     GroupBox1: TGroupBox;
@@ -126,32 +126,30 @@ type
     FCorrectItemList: TObjectList;
     FHasForm: Boolean;
     procedure SetPropDefList(const Value: TObjectList);
-    //将修正属性的结果添加到ListView中，返回是否修改
+    // 将修正属性的结果添加到 ListView 中，返回是否修改
     function CorrectProp(FileName: string; AComp: IOTAComponent): Boolean;
     function ValidateProp(APropDef: TCnPropDef; AValue: Variant;
       PropInfo: PPropInfo): Boolean;
-    procedure AddCorrItem(AItem: TCorrectItem);
-    procedure SetCorrectItemList(const Value: TObjectList); //添加修正项目
+    procedure AddCorrItem(AItem: TCnCorrectItem);
+    procedure SetCorrectItemList(const Value: TObjectList); // 添加修正项目
     procedure ClearItems;
     procedure UpdateView;
-    function GetCorrectRange: TCorrectRange;
-    procedure SetCorrectRange(const Value: TCorrectRange);
-    { Private declarations }
+    function GetCorrectRange: TCnCorrectRange;
+    procedure SetCorrectRange(const Value: TCnCorrectRange);
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
-    procedure CorrectGroup;//更新项目组中的全部的窗体
-    procedure CorrectProject(Project:IOTAProject); //更新项目中的全部窗体
-    procedure CorrectCurrentForm; //更新当前窗体
-    procedure CorrectOpenedForm; // 更新所有打开窗体
-    procedure CorrectModule(Module: IOTAModule); //更新模块
+    procedure CorrectGroup;                        // 更新项目组中的全部的窗体
+    procedure CorrectProject(Project:IOTAProject); // 更新项目中的全部窗体
+    procedure CorrectCurrentForm;                  // 更新当前窗体
+    procedure CorrectOpenedForm;                   // 更新所有打开窗体
+    procedure CorrectModule(Module: IOTAModule);   //更新模块
     property CorrectItemList: TObjectList read FCorrectItemList write
-      SetCorrectItemList; //修正项目列表
+      SetCorrectItemList;                          // 修正项目列表
     property PropDefList: TObjectList read FPropDefList write SetPropDefList;
-    property CorrectRange:TCorrectRange read GetCorrectRange write SetCorrectRange;
-    //是修改全部，还是只是当前
+    property CorrectRange:TCnCorrectRange read GetCorrectRange write SetCorrectRange;
+    // 是修改全部，还是只是当前
   end;
 
   TValueType = (vtInt, vtFloat, vtIdent, vtObject, vtOther);
@@ -181,10 +179,10 @@ procedure TCnCorPropForm.actCorrectExecute(Sender: TObject);
 begin
   BeginWait;
   try
-    //检查
+    // 检查
     Assert(FPropDefList <> nil);
     ClearItems;
-    //判断是更新整个Project还是单单只是当前窗体
+    // 判断是更新整个 Project 还是单单只是当前窗体
     FHasForm := True;
     case CorrectRange of
       crCurrent:
@@ -210,7 +208,7 @@ begin
     end;
 
     if FCorrectItemList.Count > 0 then
-      UpdateView //更新视图
+      UpdateView // 更新视图
     else if (CorrectRange in [crProject, crGroup]) or not FHasForm then
       ErrorDlg(SCnCorrectPropertyErrNoResult);
   finally
@@ -227,7 +225,7 @@ var
   PropName: string;
   V: Variant;
   AValue: Variant;
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   PropInfo: PPropInfo;
   ClassType: TClass;
 begin
@@ -257,15 +255,15 @@ begin
     if PropInfo = nil then
       Continue;
 
-    // 检查该控件有无该属性名并且检查是否有Font.Color这样的级连属性。
+    // 检查该控件有无该属性名并且检查是否有 Font.Color 这样的级连属性。
     AValue := GetPropValueIncludeSub(ANTAComp, PropName);
-    // 对象是 Nil 值时 GetPropValueIncludeSub 返回 0，改作空值
+    // 对象是 nil 值时 GetPropValueIncludeSub 返回 0，改作空值
     if (PropInfo^.PropType^.Kind = tkClass) and (VarToStr(AValue) = '0') then
       AValue := '';
 
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('AValue: ' + VarToStr(AValue));
-  {$ENDIF}
+{$ENDIF}
 
     if not ValidateProp(APropDef, AValue, PropInfo) then
       Continue;
@@ -276,9 +274,9 @@ begin
       SetPropValueIncludeSub(ANTAComp, PropName, V, ANTAComp.Owner);
       Result := True;
     end;
-    //添加到查找修正列表
+    // 添加到查找修正列表
 
-    AItem := TCorrectItem.Create;
+    AItem := TCnCorrectItem.Create;
     AItem.FileName := FileName;
     AItem.PropDef := APropDef;
     AItem.PropName := PropName;
@@ -289,7 +287,7 @@ begin
   end;
 end;
 
-//检查属性是否满足条件
+// 检查属性是否满足条件
 function TCnCorPropForm.ValidateProp(APropDef: TCnPropDef;
   AValue: Variant; PropInfo: PPropInfo): Boolean;
 var
@@ -302,7 +300,7 @@ begin
   Result := False;
   I1 := 0; I2 := 0; F1 := 0.0; F2 := 0.0;
   try
-    //todo:用VarType检查 AValue类型,如果是TObject等类型就退出
+    // TODO: 用 VarType 检查 AValue 类型，如果是 TObject 等类型就退出
     if IsInt(APropDef.Value) then
     begin
       I1 := StrToInt(APropDef.Value);
@@ -414,7 +412,7 @@ begin
     CnDebugger.LogBoolean(Result, 'ValidateProp');
 {$ENDIF}
   except
-
+    ;
   end;
 end;
 
@@ -519,29 +517,29 @@ begin
     Editor := Module.GetModuleFileEditor(J);
     if Editor.QueryInterface(IOTAFormEditor, FormEditor) = S_OK then
     begin
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogFmt('Successfully Get %s.FormEditor', [Editor.FileName]);
-    {$ENDIF}
+{$ENDIF}
       RootComp := FormEditor.GetRootComponent;
       CorResultCount := FCorrectItemList.Count;
-      //先判断Form本身
+      // 先判断 Form 本身
       CorrectProp(FormEditor.GetFileName, RootComp);
 
-      //然后判断Form或DataModule上的控件
+      // 然后判断 Form 或 DataModule 上的控件
       for K := 0 to RootComp.GetComponentCount - 1 do
       begin
         AComp := RootComp.GetComponent(K);
         CorrectProp(FormEditor.GetFileName, AComp);
       end;
 
-      // 有修改属性则刷新Object Inspector
+      // 有修改属性则刷新 Object Inspector
       if FCorrectItemList.Count > CorResultCount then
         CnOtaNotifyFormDesignerModified(FormEditor);
     end;
   end;
 end;
 
-procedure TCnCorPropForm.AddCorrItem(AItem: TCorrectItem);
+procedure TCnCorPropForm.AddCorrItem(AItem: TCnCorrectItem);
 begin
   FCorrectItemList.Add(AItem);
 end;
@@ -562,14 +560,14 @@ end;
 procedure TCnCorPropForm.UpdateView;
 var
   I: Integer;
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   AViewItem: TListItem;
 begin
   lvResult.Items.BeginUpdate;
-  //将Item添加到ListView中去
+  // 将 Item 添加到 ListView 中去
   for I := 0 to FCorrectItemList.Count - 1 do
   begin
-    AItem := TCorrectItem(FCorrectItemList.Items[I]);
+    AItem := TCnCorrectItem(FCorrectItemList.Items[I]);
     AViewItem := lvResult.Items.Add;
     if AItem.PropDef.Action = paCorrect then
     begin
@@ -585,10 +583,9 @@ begin
     AViewItem.SubItems.Add(AItem.CorrComp.Name + '.' + AItem.PropDef.PropName);
     with AItem do
     begin
-     {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(PropDef.PropName);
-      CnDebugger.LogMsgWithTag(PropDef.PropName, 'PropName');
-     {$ENDIF}
+{$ENDIF}
 
       AViewItem.SubItems.Add(OldValue);
       AViewItem.SubItems.Add(PropDef.ToValue);
@@ -597,7 +594,7 @@ begin
   lvResult.Items.EndUpdate;
 end;
 
-function TCnCorPropForm.GetCorrectRange: TCorrectRange;
+function TCnCorPropForm.GetCorrectRange: TCnCorrectRange;
 begin
   if rbForm.Checked then
     Result := crCurrent
@@ -609,7 +606,7 @@ begin
     Result := crGroup;
 end;
 
-procedure TCnCorPropForm.SetCorrectRange(const Value: TCorrectRange);
+procedure TCnCorPropForm.SetCorrectRange(const Value: TCnCorrectRange);
 begin
   case Value of
     crCurrent: rbForm.Checked:=true;
@@ -622,35 +619,35 @@ procedure TCnCorPropForm.CorrectGroup;
 var
   CurrentGroup: IOTAProjectGroup;
   Project:IOTAProject;
-  i: Integer;
+  I: Integer;
 begin
   CurrentGroup := CnOtaGetProjectGroup;
   Assert(Assigned(CurrentGroup));
-  for I:=0 to CurrentGroup.GetProjectCount-1 do
+  for I := 0 to CurrentGroup.GetProjectCount - 1 do
   begin
-    Project:=CurrentGroup.GetProject(i);
+    Project:=CurrentGroup.GetProject(I);
     CorrectProject(Project);
   end;
 end;
 
 { TCorrectItem }
 
-procedure TCorrectItem.SetCorrComp(const Value: TComponent);
+procedure TCnCorrectItem.SetCorrComp(const Value: TComponent);
 begin
   FCorrComp := Value;
 end;
 
-procedure TCorrectItem.SetFileName(const Value: string);
+procedure TCnCorrectItem.SetFileName(const Value: string);
 begin
   FFileName := Value;
 end;
 
-procedure TCorrectItem.SetOldValue(const Value: string);
+procedure TCnCorrectItem.SetOldValue(const Value: string);
 begin
   FOldValue := Value;
 end;
 
-procedure TCorrectItem.SetPropDef(const Value: TCnPropDef);
+procedure TCnCorrectItem.SetPropDef(const Value: TCnPropDef);
 begin
   FPropDef := Value;
 end;
@@ -666,14 +663,14 @@ begin
   FreeAndNil(FCorrectItemList);
 end;
 
-procedure TCorrectItem.SetPropName(const Value: string);
+procedure TCnCorrectItem.SetPropName(const Value: string);
 begin
   FPropName := Value;
 end;
 
 procedure TCnCorPropForm.actCorrectCompUpdate(Sender: TObject);
 begin
-  //如果已经更新过了
+  // 如果已经更新过了
   if Assigned(lvResult.Selected) then
     (Sender as TAction).Enabled := lvResult.Selected.ImageIndex <> 0
   else
@@ -687,15 +684,15 @@ end;
 
 procedure TCnCorPropForm.actCorrectCompExecute(Sender: TObject);
 var
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   I: Integer;
 begin
-  //更新属性
+  // 更新属性
   for I := 0 to lvResult.Items.Count - 1 do
   begin
     if lvResult.Items[I].Selected and (lvResult.Items[I].ImageIndex > 0) then
     begin
-      AItem := TCorrectItem(FCorrectItemList.Items[lvResult.Items[I].Index]);
+      AItem := TCnCorrectItem(FCorrectItemList.Items[lvResult.Items[I].Index]);
       if SetPropValueIncludeSub(AItem.CorrComp, AItem.PropName, AItem.PropDef.ToValue, AItem.CorrComp.Owner) then
       begin
         lvResult.Items[I].ImageIndex := 0;
@@ -707,7 +704,7 @@ end;
 
 procedure TCnCorPropForm.actLocateCompExecute(Sender: TObject);
 var
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   Module: IOTAModule;
   I: Integer;
   Editor: IOTAEditor;
@@ -715,7 +712,7 @@ var
   NTAComp: INTAComponent;
 begin
   with lvResult.Selected do
-    AItem := TCorrectItem(FCorrectItemList.Items[Index]);
+    AItem := TCnCorrectItem(FCorrectItemList.Items[Index]);
 
   if IsDelphiRuntime then
     Module := CnOtaGetModule(_CnChangeFileExt(AItem.FileName, '.pas'))
@@ -741,7 +738,7 @@ begin
         NTAComp := FormEditor.GetRootComponent as INTAComponent;
 
         if NTAComp.GetComponent.Name = AItem.CorrComp.Name then
-          //如果是Form或DataModule
+          // 如果是 Form 或 DataModule
           FormEditor.GetRootComponent.Select(False)
         else
           FormEditor.FindComponent(AItem.CorrComp.Name).Select(False);
@@ -755,13 +752,13 @@ end;
 
 procedure TCnCorPropForm.btnAllClick(Sender: TObject);
 var
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   I: Integer;
 begin
   //更新属性
   for I := 0 to lvResult.Items.Count - 1 do
   begin
-    AItem := TCorrectItem(FCorrectItemList.Items[I]);
+    AItem := TCnCorrectItem(FCorrectItemList.Items[I]);
     if lvResult.Items[I].ImageIndex <> 0 then
     begin
       if SetPropValueIncludeSub(AItem.CorrComp, AItem.PropName, AItem.PropDef.ToValue, AItem.CorrComp.Owner) then
@@ -807,13 +804,13 @@ end;
 
 procedure TCnCorPropForm.lvResultDblClick(Sender: TObject);
 begin
-  if Self.lvResult.Selected <> nil then
-    Self.actLocateComp.Execute;
+  if lvResult.Selected <> nil then
+    actLocateComp.Execute;
 end;
 
 procedure TCnCorPropForm.actUndoCorrectUpdate(Sender: TObject);
 begin
-  //如果已经更新过了
+  // 如果已经更新过了
   if Assigned(lvResult.Selected) then
     (Sender as TAction).Enabled := lvResult.Selected.ImageIndex = 0
   else
@@ -822,15 +819,15 @@ end;
 
 procedure TCnCorPropForm.actUndoCorrectExecute(Sender: TObject);
 var
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   I: Integer;
 begin
-  //更新属性
+  // 更新属性
   for I := 0 to lvResult.Items.Count - 1 do
   begin
     if lvResult.Items[I].Selected and (lvResult.Items[I].ImageIndex = 0) then
     begin
-      AItem := TCorrectItem(FCorrectItemList.Items[lvResult.Items[I].Index]);
+      AItem := TCnCorrectItem(FCorrectItemList.Items[lvResult.Items[I].Index]);
       if SetPropValueIncludeSub(AItem.CorrComp, AItem.PropName, AItem.OldValue, AItem.CorrComp.Owner) then
       begin
         lvResult.Items[I].ImageIndex := 1;
@@ -842,13 +839,13 @@ end;
 
 procedure TCnCorPropForm.actConfirmSelectedExecute(Sender: TObject);
 var
-  AItem: TCorrectItem;
+  AItem: TCnCorrectItem;
   I: Integer;
 begin
-  //更新选中的属性
+  // 更新选中的属性
   for I := 0 to lvResult.Items.Count - 1 do
   begin
-    AItem := TCorrectItem(FCorrectItemList.Items[I]);
+    AItem := TCnCorrectItem(FCorrectItemList.Items[I]);
     if (lvResult.Items[I].ImageIndex <> 0) and lvResult.Items[I].Selected then
     begin
       if SetPropValueIncludeSub(AItem.CorrComp, AItem.PropName, AItem.PropDef.ToValue, AItem.CorrComp.Owner) then

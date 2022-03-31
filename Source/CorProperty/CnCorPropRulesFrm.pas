@@ -112,12 +112,12 @@ begin
   for I := Ord(Low(ActionStr)) to Ord(High(ActionStr)) do
     cbbAction.Items.Add(ActionStr[TPropAction(I)]);
 
-  {$IFDEF COMPILER6_UP}
+{$IFDEF COMPILER6_UP}
   cbbComponent.AutoComplete := True;
   cbbProperty.AutoComplete := True;
   cbbValue.AutoComplete := True;
   cbbDestValue.AutoComplete := True;
-  {$ENDIF}
+{$ENDIF}
 
   cbbCondition.ItemIndex := 0;
   cbbAction.ItemIndex := 0;
@@ -125,7 +125,8 @@ end;
 
 procedure TCnCorPropRuleForm.SetPropDef(const Value: TCnPropDef);
 begin
-  if not Assigned(Value) then Exit;
+  if not Assigned(Value) then
+    Exit;
   with Value do
   begin
     cbbComponent.Text := CompName;

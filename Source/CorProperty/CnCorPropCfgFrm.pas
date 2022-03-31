@@ -94,7 +94,7 @@ type
     FInitialing: Boolean;
     FSortDown: Boolean;
     FSortIndex: Integer;
-    // todo: 换成TComponentList，因为TComponentList会在Component Free后自动删除列表项
+    // TODO: 换成 TComponentList，因为 TComponentList 会在 Component Free 后自动删除列表项
     procedure SetPropDefList(const Value: TObjectList);
     function GetCheckCloseFile: Boolean;
     function GetCheckNewComp: Boolean;
@@ -102,14 +102,12 @@ type
     procedure SetCheckCloseFile(const Value: Boolean);
     procedure SetCheckNewComp(const Value: Boolean);
     procedure SetCheckOpenFile(const Value: Boolean);
-    procedure UpdateDefines; //更新Defines
-    procedure UpdateView; //更新视图
+    procedure UpdateDefines; // 更新 Defines
+    procedure UpdateView;    // 更新视图
     procedure UpdateCheckState(Item: TListItem);
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property PropDefList: TObjectList read FPropDefList write SetPropDefList;
     property CheckOpenFile: Boolean read GetCheckOpenFile write
       SetCheckOpenFile;
@@ -192,7 +190,7 @@ var
   DefCount: Integer;
   PropDef: TCnPropDef;
 begin
-  //加载修正属性定义
+  // 加载修正属性定义
   if not OpenDialog.Execute then
     Exit;
 {$IFDEF DEBUG}
@@ -202,17 +200,17 @@ begin
   AReader := TReader.Create(FS, 4096);
   try
     DefCount := AReader.ReadInteger;
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogInteger(DefCount, 'DefCount');
-  {$ENDIF}
+{$ENDIF}
     FPropDefList.Clear;
     for I := 0 to DefCount - 1 do
     begin
-      RegisterClass(TCnPropDef); //必须的
+      RegisterClass(TCnPropDef); // 必须的
       PropDef := TCnPropDef(AReader.ReadRootComponent(nil));
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogComponent(PropDef);
-    {$ENDIF}
+{$ENDIF}
       FPropDefList.Add(PropDef);
     end;
     UpdateView;
@@ -228,7 +226,7 @@ var
   FS: TFileStream;
   I: Integer;
 begin
-  //保存属性修正定义
+  // 保存属性修正定义
   if not SaveDialog.Execute then
     Exit;
 
@@ -239,9 +237,9 @@ begin
     AWriter.WriteInteger(FPropDefList.Count);
     for I := 0 to FPropDefList.Count - 1 do
       AWriter.WriteRootComponent(TCnPropDef(FPropDefList.Items[I]));
-    //不能使用Writer.WriteComponent
-//而只能使用WriteRootComponent，实际上TStream的WriteComponent就是调用的Writer.WriteRootComponent
-//同理，读取也应该用ReadRootComponent
+// 不能使用 Writer.WriteComponent
+// 而只能使用 WriteRootComponent，实际上 TStream 的 WriteComponent 就是调用的Writer.WriteRootComponent
+// 同理，读取也应该用 ReadRootComponent
   finally
     AWriter.Free;
     FS.Free;
@@ -251,21 +249,21 @@ end;
 procedure TCnCorPropCfgForm.UpdateDefines;
 var
   APropDef: TCnPropDef;
-  i: Integer;
+  I: Integer;
 begin
-  //保存属性修正定义
+  // 保存属性修正定义
   Assert(FPropDefList <> nil);
   FPropDefList.Clear;
-  for i := 0 to Self.ListView.Items.Count - 1 do
+  for I := 0 to ListView.Items.Count - 1 do
   begin
     APropDef := TCnPropDef.Create(nil);
-    APropDef.Active := ListView.Items.Item[i].Checked;
-    APropDef.CompName := Trim(ListView.Items.Item[i].Caption);
-    APropDef.PropName := Trim(ListView.Items.Item[i].SubItems[0]);
-    APropDef.Compare := StrToCompare(Trim(ListView.Items.Item[i].SubItems[1]));
-    APropDef.Value := ListView.Items.Item[i].SubItems[2];
-    APropDef.Action := StrToAction(Trim(ListView.Items.Item[i].SubItems[3]));
-    APropDef.ToValue := ListView.Items.Item[i].SubItems[4];
+    APropDef.Active := ListView.Items.Item[I].Checked;
+    APropDef.CompName := Trim(ListView.Items.Item[I].Caption);
+    APropDef.PropName := Trim(ListView.Items.Item[I].SubItems[0]);
+    APropDef.Compare := StrToCompare(Trim(ListView.Items.Item[I].SubItems[1]));
+    APropDef.Value := ListView.Items.Item[I].SubItems[2];
+    APropDef.Action := StrToAction(Trim(ListView.Items.Item[I].SubItems[3]));
+    APropDef.ToValue := ListView.Items.Item[I].SubItems[4];
     FPropDefList.Add(APropDef);
   end;
 end;
@@ -279,15 +277,15 @@ begin
   CnDebugger.LogMsg('UpdateView');
 {$ENDIF}
   Assert(PropDefList <> nil);
-  // 以下在Listview中更新内容。
-  Self.ListView.Items.BeginUpdate;
-  Self.ListView.OnChange := nil;
+  // 以下在 Listview 中更新内容。
+  ListView.Items.BeginUpdate;
+  ListView.OnChange := nil;
   try
-    Self.ListView.Items.Clear;
-    for i := 0 to PropDefList.Count - 1 do
+    ListView.Items.Clear;
+    for I := 0 to PropDefList.Count - 1 do
     begin
-      AProp := TCnPropDef(PropDefList.Items[i]);
-      with Self.ListView.Items.Add do
+      AProp := TCnPropDef(PropDefList.Items[I]);
+      with ListView.Items.Add do
       begin
         Caption := AProp.CompName;
         SubItems.Add(AProp.PropName);
@@ -298,24 +296,24 @@ begin
         Checked := AProp.Active;
       end;
     end;
-    Self.lblCount.Caption := Format(SCnCorrectPropertyRulesCountFmt,
-      [Self.FPropDefList.Count]);
+    lblCount.Caption := Format(SCnCorrectPropertyRulesCountFmt,
+      [FPropDefList.Count]);
   finally
-    Self.ListView.OnChange := Self.ListViewChange;
-    Self.ListView.Items.EndUpdate;
+    ListView.OnChange := ListViewChange;
+    ListView.Items.EndUpdate;
   end;
 end;
 
 procedure TCnCorPropCfgForm.ListViewDblClick(Sender: TObject);
 begin
-  Self.ActionEdit.Execute;
+  ActionEdit.Execute;
 end;
 
 procedure TCnCorPropCfgForm.ListViewKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
   if Key = VK_DELETE then
-    Self.ActionDel.Execute;
+    ActionDel.Execute;
 end;
 
 procedure TCnCorPropCfgForm.ActionListUpdate(Action: TBasicAction;
@@ -323,13 +321,13 @@ procedure TCnCorPropCfgForm.ActionListUpdate(Action: TBasicAction;
 var
   b1, b2: Boolean;
 begin
-  b1 := Self.ListView.Items.Count > 0;
-  b2 := Self.ListView.SelCount > 0;
-  if Action = Self.ActionAdd then
+  b1 := ListView.Items.Count > 0;
+  b2 := ListView.SelCount > 0;
+  if Action = ActionAdd then
     (Action as TAction).Enabled := True
-  else if (Action = Self.ActionDel) or (Action = Self.ActionEdit) then
+  else if (Action = ActionDel) or (Action = ActionEdit) then
     (Action as TAction).Enabled := b2
-  else if Action = Self.ActionSave then
+  else if Action = ActionSave then
     (Action as TAction).Enabled := b1
   else
     (Action as TAction).Enabled := True;
@@ -339,11 +337,11 @@ end;
 
 procedure TCnCorPropCfgForm.ActionDelExecute(Sender: TObject);
 begin
-  if Self.ListView.Selected = nil then Exit;
+  if ListView.Selected = nil then Exit;
   if QueryDlg(SCnCorrectPropertyAskDel) then
   begin
-    Self.FPropDefList.Delete(Self.ListView.Selected.Index);
-    Self.UpdateView;
+    FPropDefList.Delete(ListView.Selected.Index);
+    UpdateView;
   end;
 end;
 
@@ -351,16 +349,16 @@ procedure TCnCorPropCfgForm.ActionEditExecute(Sender: TObject);
 var
   APropDef: TCnPropDef;
 begin
-  if Self.ListView.Selected <> nil then
+  if ListView.Selected <> nil then
   begin
     if not Assigned(CorPropRuleForm) then
       CorPropRuleForm := TCnCorPropRuleForm.Create(nil);
     with CorPropRuleForm do
     begin
-      PropDef := TCnPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
+      PropDef := TCnPropDef(FPropDefList[ListView.Selected.Index]);
       if ShowModal = mrOK then
       begin
-        APropDef := TCnPropDef(Self.FPropDefList[Self.ListView.Selected.Index]);
+        APropDef := TCnPropDef(FPropDefList[ListView.Selected.Index]);
         APropDef.CompName := PropDef.CompName;
         APropDef.PropName := PropDef.PropName;
         APropDef.Compare := PropDef.Compare;
@@ -369,7 +367,7 @@ begin
         APropDef.ToValue := PropDef.ToValue;
         APropDef.Active := PropDef.Active;
 
-        Self.UpdateView;
+        UpdateView;
       end;
     end;
   end;
@@ -394,8 +392,8 @@ begin
       APropDef.Action := PropDef.Action;
       APropDef.ToValue := PropDef.ToValue;
       APropDef.Active := PropDef.Active;
-      Self.FPropDefList.Add(APropDef);
-      Self.UpdateView;
+      FPropDefList.Add(APropDef);
+      UpdateView;
     end;
   end;
 end;
@@ -403,24 +401,24 @@ end;
 procedure TCnCorPropCfgForm.ListViewChange(Sender: TObject; Item: TListItem;
   Change: TItemChange);
 begin
-  Self.lblCount.Caption := Format(SCnCorrectPropertyRulesCountFmt,
-    [Self.FPropDefList.Count]);
+  lblCount.Caption := Format(SCnCorrectPropertyRulesCountFmt,
+    [FPropDefList.Count]);
   if Change = ctState then
-    Self.UpdateCheckState(Item);
+    UpdateCheckState(Item);
 end;
 
 procedure TCnCorPropCfgForm.UpdateCheckState(Item: TListItem);
 begin
-  if not Self.Initialing then
+  if not Initialing then
   begin
     if Item <> nil then
     begin
-      if Self.FPropDefList.Count >= Item.Index then
-        TCnPropDef(Self.FPropDefList[Item.Index]).Active := Item.Checked;
+      if FPropDefList.Count >= Item.Index then
+        TCnPropDef(FPropDefList[Item.Index]).Active := Item.Checked;
     end;
   end
   else
-    Self.Initialing := False;
+    Initialing := False;
 end;
 
 procedure TCnCorPropCfgForm.btnHelpClick(Sender: TObject);
