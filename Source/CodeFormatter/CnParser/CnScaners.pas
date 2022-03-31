@@ -72,7 +72,7 @@ type
 
   TGetBooleanEvent = function(Sender: TObject): Boolean of object;
 
-  TAbstractScaner = class(TObject)
+  TAbstractScanner = class(TObject)
   private
     FStream: TStream;
     FBookmarks: TObjectList;
@@ -221,7 +221,7 @@ type
     {* 需要获取 Formatter 的当前位置是否允许保留换行的标志事件}
   end;
 
-  TScaner = class(TAbstractScaner)
+  TScanner = class(TAbstractScanner)
   private
     FStream: TStream;
     FCodeGen: TCnCodeGenerator;
@@ -353,7 +353,7 @@ end;}
 
 { TAbstractScaner }
 
-constructor TAbstractScaner.Create(Stream: TStream);
+constructor TAbstractScanner.Create(Stream: TStream);
 begin
   FStream := Stream;
 {$IFDEF UNICODE}
@@ -386,7 +386,7 @@ end;
 
 {$IFDEF UNICODE}
 
-procedure TAbstractScaner.FixStreamBom;
+procedure TAbstractScanner.FixStreamBom;
 var
   Bom: array[0..1] of AnsiChar;
   TS: TMemoryStream;
@@ -414,7 +414,7 @@ end;
 
 {$ENDIF}
 
-destructor TAbstractScaner.Destroy;
+destructor TAbstractScanner.Destroy;
 begin
   if FBuffer <> nil then
   begin
@@ -425,7 +425,7 @@ begin
   FBookmarks.Free;
 end;
 
-procedure TAbstractScaner.CheckToken(T: TPascalToken);
+procedure TAbstractScanner.CheckToken(T: TPascalToken);
 begin
   if Token <> T then
     case T of
@@ -440,12 +440,12 @@ begin
     end;
 end;
 
-procedure TAbstractScaner.CheckTokenSymbol(const S: string);
+procedure TAbstractScanner.CheckTokenSymbol(const S: string);
 begin
   if not TokenSymbolIs(S) then ErrorFmt(CN_ERRCODE_PASCAL_SYMBOL_EXP, [S]);
 end;
 
-procedure TAbstractScaner.Error(const Ident: Integer);
+procedure TAbstractScanner.Error(const Ident: Integer);
 begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
@@ -457,7 +457,7 @@ begin
   ErrorStr(RetrieveFormatErrorString(Ident));
 end;
 
-procedure TAbstractScaner.ErrorFmt(const Ident: Integer; const Args: array of const);
+procedure TAbstractScanner.ErrorFmt(const Ident: Integer; const Args: array of const);
 begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
@@ -469,12 +469,12 @@ begin
   ErrorStr(Format(RetrieveFormatErrorString(Ident), Args));
 end;
 
-procedure TAbstractScaner.ErrorStr(const Message: string);
+procedure TAbstractScanner.ErrorStr(const Message: string);
 begin
   raise EParserError.CreateFmt(SParseError, [Message, FSourceLine, SourcePos]);
 end;
 
-procedure TAbstractScaner.HexToBinary(Stream: TStream);
+procedure TAbstractScanner.HexToBinary(Stream: TStream);
 var
   Count: Integer;
   Buffer: array[0..255] of Char;
@@ -491,7 +491,7 @@ begin
   NextToken;
 end;
 
-procedure TAbstractScaner.ReadBuffer;
+procedure TAbstractScanner.ReadBuffer;
 var
   Count: Integer;
 begin
@@ -515,7 +515,7 @@ begin
   FSourceEnd[0] := #0;
 end;
 
-procedure TAbstractScaner.SetOrigin(AOrigin: Integer);
+procedure TAbstractScanner.SetOrigin(AOrigin: Integer);
 var
   Count: Integer;
 begin
@@ -541,7 +541,7 @@ begin
   end;
 end;
 
-procedure TAbstractScaner.SkipBlanks;
+procedure TAbstractScanner.SkipBlanks;
 var
   EmptyLines: Integer;
 begin
@@ -592,17 +592,17 @@ begin
   end;
 end;
 
-function TAbstractScaner.SourcePos: Longint;
+function TAbstractScanner.SourcePos: Longint;
 begin
   Result := FOrigin + (FTokenPtr - FBuffer);
 end;
 
-function TAbstractScaner.BlankStringPos: Longint;
+function TAbstractScanner.BlankStringPos: Longint;
 begin
   Result := FOrigin + (FBlankStringBegin - FBuffer);
 end;
 
-function TAbstractScaner.TokenFloat: Extended;
+function TAbstractScanner.TokenFloat: Extended;
 begin
   if FFloatType <> #0 then Dec(FSourcePtr);
   Result := StrToFloat(TokenString);
@@ -610,18 +610,18 @@ begin
 end;
 
 {$IFDEF DELPHI5}
-function TAbstractScaner.TokenInt: Integer;
+function TAbstractScanner.TokenInt: Integer;
 begin
   Result := StrToInt(TokenString);
 end;
 {$ELSE}
-function TAbstractScaner.TokenInt: Int64;
+function TAbstractScanner.TokenInt: Int64;
 begin
   Result := StrToInt64(TokenString);
 end;
 {$ENDIF}
 
-function TAbstractScaner.TokenString: string;
+function TAbstractScanner.TokenString: string;
 var
   L: Integer;
 begin
@@ -632,7 +632,7 @@ begin
   SetString(Result, FTokenPtr, L);
 end;
 
-function TAbstractScaner.TokenWideString: WideString;
+function TAbstractScanner.TokenWideString: WideString;
 begin
   if FToken = tokString then
     Result := TokenString
@@ -640,12 +640,12 @@ begin
     Result := FWideStr;
 end;
 
-function TAbstractScaner.TokenSymbolIs(const S: string): Boolean;
+function TAbstractScanner.TokenSymbolIs(const S: string): Boolean;
 begin
   Result := SameText(S, TokenString);
 end;
 
-function TAbstractScaner.TokenComponentIdent: string;
+function TAbstractScanner.TokenComponentIdent: string;
 var
   P: PChar;
 begin
@@ -664,7 +664,7 @@ begin
   Result := TokenString;
 end;
 
-function TAbstractScaner.TokenChar: Char;
+function TAbstractScanner.TokenChar: Char;
 begin
   if Length(TokenString) > 0 then
     Result := TokenString[1]
@@ -672,7 +672,7 @@ begin
     Result := #0;
 end;
 
-procedure TAbstractScaner.LoadBookmark(var Bookmark: TScannerBookmark);
+procedure TAbstractScanner.LoadBookmark(var Bookmark: TScannerBookmark);
 begin
   with Bookmark do
   begin
@@ -699,7 +699,7 @@ begin
   end;
 end;
 
-procedure TAbstractScaner.SaveBookmark(var Bookmark: TScannerBookmark);
+procedure TAbstractScanner.SaveBookmark(var Bookmark: TScannerBookmark);
 begin
   with Bookmark do
   begin
@@ -720,7 +720,7 @@ begin
   end;
 end;
 
-function TAbstractScaner.ForwardToken(Count: Integer): TPascalToken;
+function TAbstractScanner.ForwardToken(Count: Integer): TPascalToken;
 var
   Bookmark: TScannerBookmark;
   I: Integer;
@@ -743,7 +743,7 @@ begin
   LoadBookmark(Bookmark);
 end;
 
-function TAbstractScaner.ForwardActualToken(Count: Integer): TPascalToken;
+function TAbstractScanner.ForwardActualToken(Count: Integer): TPascalToken;
 var
   Bookmark: TScannerBookmark;
   I: Integer;
@@ -777,7 +777,7 @@ begin
   LoadBookmark(Bookmark);
 end;
 
-function TAbstractScaner.BlankString: string;
+function TAbstractScanner.BlankString: string;
 var
   L: Integer;
 begin
@@ -785,14 +785,14 @@ begin
   SetString(Result, FBlankStringBegin, L);
 end;
 
-function TAbstractScaner.ErrorTokenString: string;
+function TAbstractScanner.ErrorTokenString: string;
 begin
   Result := TokenToString(Token);
   if Result = '' then
     Result := TokenString;
 end;
 
-procedure TAbstractScaner.DoBlankLinesWhenSkip(BlankLines: Integer);
+procedure TAbstractScanner.DoBlankLinesWhenSkip(BlankLines: Integer);
 begin
   if FKeepOneBlankLine and (BlankLines > 1) then
   begin
@@ -805,13 +805,13 @@ begin
   end;
 end;
 
-procedure TAbstractScaner.DoLineBreak;
+procedure TAbstractScanner.DoLineBreak;
 begin
   if Assigned(FOnLineBreak) then
     FOnLineBreak(Self);
 end;
 
-function TAbstractScaner.TrimBlank(const Str: string): string;
+function TAbstractScanner.TrimBlank(const Str: string): string;
 begin
   Result := Str;
   if PrevBlankLines and (Length(Str) >= 2) then
@@ -823,7 +823,7 @@ begin
   end;
 end;
 
-procedure TAbstractScaner.NewLine(ImmediatelyDoBreak: Boolean);
+procedure TAbstractScanner.NewLine(ImmediatelyDoBreak: Boolean);
 begin
   Inc(FSourceLine);
 {$IFDEF DEBUG}
@@ -834,7 +834,7 @@ begin
     DoLineBreak;
 end;
 
-function TAbstractScaner.TokenStringLength: Integer;
+function TAbstractScanner.TokenStringLength: Integer;
 begin
   if FToken = tokString then
     Result := FStringPtr - FTokenPtr
@@ -842,12 +842,12 @@ begin
     Result := FSourcePtr - FTokenPtr;
 end;
 
-function TAbstractScaner.BlankStringLength: Integer;
+function TAbstractScanner.BlankStringLength: Integer;
 begin
   Result := FBlankStringEnd - FBlankStringBegin;
 end;
 
-function TAbstractScaner.IsInStatement: Boolean;
+function TAbstractScanner.IsInStatement: Boolean;
 begin
   // 判定当前 Token 是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
   // 当前 Token 可能是空白注释之类的，此时前一个有效 Token 是分号或一些关键字，就说明当前位置已在语句外
@@ -862,7 +862,7 @@ begin
   // 在 ForwardToken 调用中不要再重入了
 end;
 
-function TAbstractScaner.GetCanLineBreakFromOut: Boolean;
+function TAbstractScanner.GetCanLineBreakFromOut: Boolean;
 begin
   Result := False;
   if Assigned(FOnGetCanLineBreak) then
@@ -871,7 +871,7 @@ end;
 
 { TScaner }
 
-constructor TScaner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
+constructor TScanner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
   ACompDirectiveMode: TCompDirectiveMode);
 begin
   AStream.Seek(0, soFromBeginning);
@@ -882,18 +882,18 @@ begin
   inherited Create(AStream);
 end;
 
-constructor TScaner.Create(AStream: TStream);
+constructor TScanner.Create(AStream: TStream);
 begin
   Create(AStream, nil, CnPascalCodeForRule.CompDirectiveMode);
 end;
 
-destructor TScaner.Destroy;
+destructor TScanner.Destroy;
 begin
 
   inherited;
 end;
 
-function TScaner.ForwardActualToken(Count: Integer): TPascalToken;
+function TScanner.ForwardActualToken(Count: Integer): TPascalToken;
 begin
   if FCodeGen <> nil then
     FCodeGen.LockOutput;
@@ -905,7 +905,7 @@ begin
   end;
 end;
 
-function TScaner.ForwardToken(Count: Integer): TPascalToken;
+function TScanner.ForwardToken(Count: Integer): TPascalToken;
 begin
   if FCodeGen <> nil then
     FCodeGen.LockOutput;
@@ -917,7 +917,7 @@ begin
   end;
 end;
 
-function TScaner.NextToken: TPascalToken;
+function TScanner.NextToken: TPascalToken;
 var
   BlankStr: string;
   S: string;
@@ -1832,14 +1832,14 @@ begin
   end;
 end;
 
-procedure TScaner.OnMoreBlankLinesWhenSkip;
+procedure TScanner.OnMoreBlankLinesWhenSkip;
 begin
   if FCodeGen <> nil then
     if not FCodeGen.KeepLineBreak then // 保留换行时，这里调整空行的机制不起作用
       FCodeGen.Writeln;
 end;
 
-procedure TScaner.StorePrevEffectiveToken(AToken: TPascalToken);
+procedure TScanner.StorePrevEffectiveToken(AToken: TPascalToken);
 begin
   if not (AToken in NonEffectiveTokens) then
     FPrevEffectiveToken := AToken;

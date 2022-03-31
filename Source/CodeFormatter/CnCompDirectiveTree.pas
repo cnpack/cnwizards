@@ -134,7 +134,7 @@ type
 
   TCnCompDirectiveTree = class(TCnTree)
   private
-    FScaner: TAbstractScaner;
+    FScanner: TAbstractScanner;
     function GetItems(AbsoluteIndex: Integer): TCnSliceNode;
 
     procedure SyncTexts;
@@ -264,13 +264,13 @@ end;
 constructor TCnCompDirectiveTree.Create(AStream: TStream);
 begin
   inherited Create(TCnSliceNode);
-  FScaner := TScaner.Create(AStream, nil, cdmNone);
-  FScaner.NextToken;
+  FScanner := TScanner.Create(AStream, nil, cdmNone);
+  FScanner.NextToken;
 end;
 
 destructor TCnCompDirectiveTree.Destroy;
 begin
-  FScaner.Free;
+  FScanner.Free;
   inherited;
 end;
 
@@ -306,30 +306,30 @@ var
     Blank: string;
   begin
     if (CurNode.CompDirectiveStream = nil) and (CurNode.NormalCodeStream = nil) then
-      CurNode.StartOffset := FScaner.SourcePos;
+      CurNode.StartOffset := FScanner.SourcePos;
       
     if CurNode.NormalCodeStream = nil then
       CurNode.NormalCodeStream := TMemoryStream.Create;
 
-    if FScaner.BlankStringLength > 0 then
+    if FScanner.BlankStringLength > 0 then
     begin
-      Blank := FScaner.BlankString;
-      CurNode.NormalCodeStream.Write((PChar(Blank))^, FScaner.BlankStringLength * SizeOf(Char));
+      Blank := FScanner.BlankString;
+      CurNode.NormalCodeStream.Write((PChar(Blank))^, FScanner.BlankStringLength * SizeOf(Char));
     end;
-    CurNode.NormalCodeStream.Write(FScaner.TokenPtr^, FScaner.TokenStringLength * SizeOf(Char));
+    CurNode.NormalCodeStream.Write(FScanner.TokenPtr^, FScanner.TokenStringLength * SizeOf(Char));
   end;
 
   procedure PutBlankToNode;
   var
     Blank: string;
   begin
-    if FScaner.BlankStringLength > 0 then
+    if FScanner.BlankStringLength > 0 then
     begin
-      CurNode.EndBlankLength := FScaner.BlankStringLength;
-      Blank := FScaner.BlankString;
+      CurNode.EndBlankLength := FScanner.BlankStringLength;
+      Blank := FScanner.BlankString;
       if CurNode.NormalCodeStream = nil then
         CurNode.NormalCodeStream := TMemoryStream.Create;
-      CurNode.NormalCodeStream.Write((PChar(Blank))^, FScaner.BlankStringLength * SizeOf(Char));
+      CurNode.NormalCodeStream.Write((PChar(Blank))^, FScanner.BlankStringLength * SizeOf(Char));
     end;
   end;
 
@@ -338,23 +338,23 @@ var
     if CurNode.CompDirectiveStream = nil then
     begin
       CurNode.CompDirectiveStream := TMemoryStream.Create;
-      CurNode.StartOffset := FScaner.SourcePos;
+      CurNode.StartOffset := FScanner.SourcePos;
     end;
     // 之前的空白与回车由 PutBlankToNode 写入上一个末尾，保证节点是 CompDirective 开头
-    CurNode.CompDirectiveStream.Write(FScaner.TokenPtr^, FScaner.TokenStringLength * SizeOf(Char));
+    CurNode.CompDirectiveStream.Write(FScanner.TokenPtr^, FScanner.TokenStringLength * SizeOf(Char));
   end;
 
 begin
   Clear;
   CurNode := nil;
-  if FScaner.Token <> tokEOF then
+  if FScanner.Token <> tokEOF then
     CurNode := TCnSliceNode(AddChildFirst(Root));
 
-  while FScaner.Token <> tokEOF do
+  while FScanner.Token <> tokEOF do
   begin
-    if FScaner.Token = tokCompDirective then
+    if FScanner.Token = tokCompDirective then
     begin
-      TokenStr := UpperCase(FScaner.TokenString);
+      TokenStr := UpperCase(FScanner.TokenString);
       CompDirectType := CalcPascalCompDirectiveType;
 
       case CompDirectType of
@@ -393,7 +393,7 @@ begin
     else
       PutNormalCodeToNode;
 
-    FScaner.NextToken;
+    FScanner.NextToken;
   end;
   SyncTexts;
 end;

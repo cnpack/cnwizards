@@ -65,7 +65,7 @@ type
 
   TCnAbstractCodeFormatter = class
   private
-    FScaner: TAbstractScaner;
+    FScanner: TAbstractScanner;
     FCodeGen: TCnCodeGenerator;
     FLastToken: TPascalToken;
     FLastNonBlankToken: TPascalToken;
@@ -166,7 +166,7 @@ type
     {* 返回首字母大写的字符串}
     property CodeGen: TCnCodeGenerator read FCodeGen;
     {* 目标代码生成器}
-    property Scaner: TAbstractScaner read FScaner;
+    property Scaner: TAbstractScanner read FScanner;
     {* 词法扫描器}
     property ElementType: TCnPascalFormattingElementType read FElementType;
     {* 标识当前区域的一个辅助变量}
@@ -517,18 +517,18 @@ begin
   FCodeGen := TCnCodeGenerator.Create;
   FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
-  FScaner := TScaner.Create(AStream, FCodeGen, ACompDirectiveMode);
+  FScanner := TScanner.Create(AStream, FCodeGen, ACompDirectiveMode);
 
   FOldElementTypes := TCnElementStack.Create;
   FLineBreakKeepStack := TStack.Create;
-  FScaner.NextToken;
+  FScanner.NextToken;
 end;
 
 destructor TCnAbstractCodeFormatter.Destroy;
 begin
   FLineBreakKeepStack.Free;
   FOldElementTypes.Free;
-  FScaner.Free;
+  FScanner.Free;
   FCodeGen.Free;
   FNamesMap.Free;
   FOutputLineMarks.Free;
@@ -540,9 +540,9 @@ procedure TCnAbstractCodeFormatter.Error(const Ident: Integer);
 begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
-  PascalErrorRec.SourceLine := FScaner.SourceLine;
-  PascalErrorRec.SourceCol := FScaner.SourceCol;
-  PascalErrorRec.SourcePos := FScaner.SourcePos;
+  PascalErrorRec.SourceLine := FScanner.SourceLine;
+  PascalErrorRec.SourceCol := FScanner.SourceCol;
+  PascalErrorRec.SourcePos := FScanner.SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
 
   ErrorStr(RetrieveFormatErrorString(Ident));
@@ -553,9 +553,9 @@ procedure TCnAbstractCodeFormatter.ErrorFmt(const Ident: Integer;
 begin
   // 出错入口
   PascalErrorRec.ErrorCode := Ident;
-  PascalErrorRec.SourceLine := FScaner.SourceLine;
-  PascalErrorRec.SourceCol := FScaner.SourceCol;
-  PascalErrorRec.SourcePos := FScaner.SourcePos;
+  PascalErrorRec.SourceLine := FScanner.SourceLine;
+  PascalErrorRec.SourceCol := FScanner.SourceCol;
+  PascalErrorRec.SourcePos := FScanner.SourcePos;
   PascalErrorRec.CurrentToken := ErrorTokenString;
 
   ErrorStr(Format(RetrieveFormatErrorString(Ident), Args));
@@ -570,7 +570,7 @@ procedure TCnAbstractCodeFormatter.ErrorStr(const Message: string);
 begin
   raise EParserError.CreateFmt(
         SParseError,
-        [ Message, FScaner.SourceLine, FScaner.SourcePos ]
+        [ Message, FScanner.SourceLine, FScanner.SourcePos ]
   );
 end;
 
@@ -778,7 +778,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.EnsureWriteln;
 begin
-  if not FCodeGen.IsLastLineEmpty and not FScaner.InIgnoreArea then // 忽略区不主动写换行
+  if not FCodeGen.IsLastLineEmpty and not FScanner.InIgnoreArea then // 忽略区不主动写换行
     FCodeGen.Writeln;
 end;
 
@@ -5942,8 +5942,8 @@ constructor TCnBasePascalFormatter.Create(AStream: TStream; AMatchedInStart,
   AMatchedInEnd: Integer; ACompDirectiveMode: TCompDirectiveMode);
 begin
   inherited;
-  FScaner.OnLineBreak := ScanerLineBreak;
-  FScaner.OnGetCanLineBreak := ScanerGetCanLineBreak;
+  FScanner.OnLineBreak := ScanerLineBreak;
+  FScanner.OnGetCanLineBreak := ScanerGetCanLineBreak;
 end;
 
 { TCnPascalCodeFormatter }
@@ -6001,13 +6001,13 @@ begin
 
   if IsWriteBlank then
   begin
-    StartPos := FScaner.BlankStringPos;
-    EndPos := FScaner.BlankStringPos + FScaner.BlankStringLength;
+    StartPos := FScanner.BlankStringPos;
+    EndPos := FScanner.BlankStringPos + FScanner.BlankStringLength;
   end
   else
   begin
-    StartPos := FScaner.SourcePos;
-    EndPos := FScaner.SourcePos + FScaner.TokenStringLength;
+    StartPos := FScanner.SourcePos;
+    EndPos := FScanner.SourcePos + FScanner.TokenStringLength;
   end;
 
   // 写出不属于代码本身的空行时超出标记的话，不算
@@ -6263,7 +6263,7 @@ procedure TCnBasePascalFormatter.ScanerLineBreak(Sender: TObject);
 var
   LineBreak: Boolean;
 begin
-  if FScaner.IsForwarding then
+  if FScanner.IsForwarding then
     Exit;
 
   LineBreak := CanKeepLineBreak;
@@ -6289,7 +6289,7 @@ end;
 
 procedure TCnAbstractCodeFormatter.EnsureWriteLine;
 begin
-  if FScaner.InIgnoreArea then
+  if FScanner.InIgnoreArea then
     Exit;
 
   // 如果已经连续俩空行了就不写
