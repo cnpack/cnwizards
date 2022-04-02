@@ -50,7 +50,7 @@ unit CnSourceHighlight;
 *           2014.12.25
 *               增加高亮光标下配对的条件编译指令功能
 *           2014.09.17
-*               优化高亮当前标识符的绘制性能，感谢vitaliyg2
+*               优化高亮当前标识符的绘制性能，感谢 vitaliyg2
 *           2013.07.08
 *               加入绘制流程控制标识符背景的功能
 *           2012.12.24
@@ -5624,11 +5624,13 @@ var
 begin
   Result := False;
   for I := 0 to FMiddleTokens.Count - 1 do
-    if MiddleToken[I].EditLine = LineNum then
+  begin
+    if (MiddleToken[I] <> nil) and (MiddleToken[I].EditLine = LineNum) then
     begin
       Result := True;
       Exit;
     end;
+  end;
 end;
 
 { TBlockLineInfo }
