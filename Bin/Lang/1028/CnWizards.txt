@@ -3679,6 +3679,7 @@ SCnInputHelperSymbolNameIsEmpty=符號名稱不能為空！
 SCnInputHelperSymbolKindError=請選擇符號類型！
 SCnInputHelperUserMacroCaption=自定義宏
 SCnInputHelperUserMacroPrompt=輸入自定義宏名稱：
+SCnInputHelperDisableCodeCompletionSucc=IDE自身的代碼自動完成功能已禁用
 SCnKeywordDefault=默認
 SCnKeywordLower=小寫關鍵字
 SCnKeywordUpper=大寫關鍵字

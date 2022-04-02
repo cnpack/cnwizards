@@ -1491,7 +1491,7 @@ var
   SCnInputHelperSymbolNameIsEmpty: string = 'Symbol Name can NOT be Empty!';
   SCnInputHelperSymbolKindError: string = 'Please Select the Symbol Type!';
   SCnInputHelperUserMacroCaption: string = 'User-defined Macro';
-  SCnInputHelperUserMacroPrompt: string = 'Please Input Macro Name:';
+  SCnInputHelperUserMacroPrompt: string = 'Please Enter Macro Name:';
   SCnInputHelperDisableCodeCompletionSucc: string = 'IDE Code Completion Disabled.';
   SCnKeywordDefault: string = 'Unchange';
   SCnKeywordLower: string = 'Lower Case';

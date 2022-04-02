@@ -3679,6 +3679,7 @@ SCnInputHelperSymbolNameIsEmpty=Symbol Name darf nicht leer sein!
 SCnInputHelperSymbolKindError=Bitte wählen Sie den Symbol Typ!
 SCnInputHelperUserMacroCaption=benutzer-definiertes Makro
 SCnInputHelperUserMacroPrompt=Bitte geben Sie einen Makro Namen ein:
+SCnInputHelperDisableCodeCompletionSucc=IDE-Code-Vervollständigung Deaktiviert
 SCnKeywordDefault=zurück
 SCnKeywordLower=Kleinschrift
 SCnKeywordUpper=Großschrift

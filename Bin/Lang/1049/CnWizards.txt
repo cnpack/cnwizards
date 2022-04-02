@@ -3679,6 +3679,7 @@ SCnInputHelperSymbolNameIsEmpty=Имя идентификатора не мож�
 SCnInputHelperSymbolKindError=Пожалуйста, выберите тип идентификатора!
 SCnInputHelperUserMacroCaption=Пользовательский макрос
 SCnInputHelperUserMacroPrompt=Введите имя макроса:
+SCnInputHelperDisableCodeCompletionSucc=Завершение кода IDE отключено
 SCnKeywordDefault=Не изменять
 SCnKeywordLower=Нижний регистр
 SCnKeywordUpper=Верхний регистр

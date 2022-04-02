@@ -3679,6 +3679,7 @@ SCnInputHelperSymbolNameIsEmpty=Le nom du symbole ne peut PAS être vide!
 SCnInputHelperSymbolKindError=Veuillez sélectionner le type de symbole!
 SCnInputHelperUserMacroCaption=Macro définie par l'utilisateur
 SCnInputHelperUserMacroPrompt=Veuillez saisir le nom de la macro:
+SCnInputHelperDisableCodeCompletionSucc=Achèvement du code IDE désactivé
 SCnKeywordDefault=Annuler
 SCnKeywordLower=Minuscules
 SCnKeywordUpper=Majuscules
