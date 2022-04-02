@@ -25,8 +25,9 @@ library CnSampleWizard;
 * 单元名称：CnWizard 专家包示例工程，不与正式工程共用
 * 单元作者：刘啸 (liuxiao@cnpack.org)
 * 备    注：
-*          !!! 打开此 dpr 后请自行将 $(DELPHI)\Source\Toolsapi 加入搜索路径 !!!
-*          !!! 并勾选 Build with Runtime Package !!!
+*           !!! 打开此 dpr 后请自行将 $(DELPHI)\Source\Toolsapi 加入搜索路径 !!!
+*           !!! 并勾选 Build with Runtime Package !!!
+*           !!! 如是高版本 Delphi，还需要自行设置 Vcl 项目类型 ！！！
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin7 + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
