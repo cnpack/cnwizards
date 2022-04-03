@@ -715,22 +715,22 @@ begin
   Result := False;
   try
     DphIdeModule := LoadLibrary(DphIdeLibName);
-    Assert(DphIdeModule <> 0, 'Failed to load DphIdeModule');
+    CnWizAssert(DphIdeModule <> 0, 'Load DphIdeModule');
 
     DoKibitzCompile := GetProcAddress(DphIdeModule, DoKibitzCompileName);
-    Assert(Assigned(DoKibitzCompile), 'Failed to load DoKibitzCompile from DphIdeModule');
+    CnWizAssert(Assigned(DoKibitzCompile), 'Load DoKibitzCompile from DphIdeModule');
 
     dccModule := LoadLibrary(dccLibName);
-    Assert(dccModule <> 0, 'Failed to load dccModule');
+    CnWizAssert(dccModule <> 0, 'Load dccModule');
 
     KibitzGetValidSymbols := GetProcAddress(dccModule, KibitzGetValidSymbolsName);
-    Assert(Assigned(KibitzGetValidSymbols), 'Failed to load KibitzGetValidSymbols from dccModule');
+    CnWizAssert(Assigned(KibitzGetValidSymbols), 'Load KibitzGetValidSymbols from dccModule');
 
     CorIdeModule := LoadLibrary(CorIdeLibName);
-    Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
+    CnWizAssert(CorIdeModule <> 0, 'Load CorIdeModule');
 
     CompGetSymbolText := GetProcAddress(CorIdeModule, CompGetSymbolTextName);
-    Assert(Assigned(CompGetSymbolText), 'Failed to load CompGetSymbolText');
+    CnWizAssert(Assigned(CompGetSymbolText), 'Load CompGetSymbolText');
 
     Result := True;
   {$IFDEF Debug}
