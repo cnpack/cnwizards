@@ -668,6 +668,7 @@ begin
     SpeedBtn.Hint := StripHotkey(SCnInputButtonHints[Btn]^);
     SpeedBtn.OnClick := OnBtnClick;
     dmCnSharedImages.ilInputHelper.GetBitmap(Ord(Btn), SpeedBtn.Glyph);
+    CnEnlargeButtonGlyphForHDPI(SpeedBtn);
   end;
 
   FHintForm := TCnFloatWindow.Create(Self);
