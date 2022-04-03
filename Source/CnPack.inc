@@ -3299,6 +3299,7 @@
 {$P+ Open string parameters}
 {$J+ Writeable typed constants}
 {$R- No Range checking}
+{$OVERFLOWCHECKS OFF}
 
 {$IFDEF COMPILER6_UP}
   {$WARN SYMBOL_PLATFORM OFF}
