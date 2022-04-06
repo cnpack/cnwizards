@@ -70,6 +70,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure cbbComponentChange(Sender: TObject);
   private
     FPropDef: TCnPropDef;
     procedure SetPropDef(const Value: TCnPropDef);
@@ -247,7 +248,25 @@ begin
     GetInstalledComponents(nil, Items);
     for I := 0 to CnNoIconList.Count - 1 do
       Items.Add(CnNoIconList[I]);
+    OnChange(cbbComponent);
     SetFocus;
+  end;
+end;
+
+procedure TCnCorPropRuleForm.cbbComponentChange(Sender: TObject);
+var
+  AClass: TClass;
+begin
+  try
+    cbbProperty.Items.Clear;
+
+    AClass := FindClass(cbbComponent.Text);
+    if AClass <> nil then
+    begin
+      GetAllPropNamesFromClass(AClass, cbbProperty.Items); // 如果能找到类，把属性列表找出来
+    end;
+  except
+    ;
   end;
 end;
 

@@ -93,6 +93,7 @@ inherited CnCorPropRuleForm: TCnCorPropRuleForm
     ItemHeight = 13
     Sorted = True
     TabOrder = 0
+    OnChange = cbbComponentChange
   end
   object cbbProperty: TComboBox
     Left = 144
