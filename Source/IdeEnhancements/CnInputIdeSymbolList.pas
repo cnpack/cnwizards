@@ -438,8 +438,8 @@ var
         FAsyncIsPascal := PosInfo.IsPascal;
 
         FKeepUnique := True;
-        AsyncManager.AsyncInvokeCodeCompletion(itManual, Filter, EditView.CursorPos.Line,
-          EditView.CursorPos.Col, AsyncCodeCompletionCallBack);
+        AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, EditView.CursorPos.Line,
+          EditView.CursorPos.Col - 1, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
         while not FAsyncResultGot and (GetTickCount - Tick < 1000) do // µÃÒì²½µÈ´ý
