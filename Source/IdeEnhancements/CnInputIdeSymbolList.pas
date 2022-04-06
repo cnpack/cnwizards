@@ -1166,7 +1166,7 @@ var
 begin
 {$IFDEF IDE_SUPPORT_LSP}
   Result := -1;
-  if FKeepUnique and FHashList.Find(AName, Res) then
+  if FKeepUnique and FHashList.Find(AName + ADescription, Res) then
   begin
 {$IFDEF DEBUG}
 //    CnDebugger.LogFmt('IDE SymbolList Found Duplicated: %s. Do NOT Add.',
@@ -1174,7 +1174,7 @@ begin
 {$ENDIF}
     Exit;
   end;
-  FHashList.Add(AName, AName);
+  FHashList.Add(AName + ADescription, AName);
 {$ENDIF}
 
   Result := inherited Add(AName, AKind, AScope, ADescription, AText, AAutoIndent,
