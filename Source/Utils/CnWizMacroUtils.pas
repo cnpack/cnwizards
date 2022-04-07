@@ -535,6 +535,10 @@ begin
     begin
       // 空行，需要纠正，也就是增加空格。注意不能加 Position，会跑到下一行去
       S := Spc(EditPos.Col - 1) + S;
+
+      // 光标位置也要相应往后移
+      if PosInText > 0 then
+        Inc(PosInText, EditPos.Col - 1);
     end;
   end;
 
