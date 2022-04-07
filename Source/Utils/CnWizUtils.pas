@@ -106,22 +106,25 @@ type
 {$ENDIF}
   PCnIdeTokenInt = ^TCnIdeTokenInt;
 
+  // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
   TCnGeneralPasToken = TCnWidePasToken;
   TCnGeneralCppToken = TCnWideCppToken;
   TCnGeneralPasStructParser = TCnWidePasStructParser;
   TCnGeneralCppStructParser = TCnWideCppStructParser;
+  TCnGeneralWidePasLex = TCnPasWideLex;
 {$ELSE}                               // 5 6 7
   TCnGeneralPasToken = TCnPasToken;
   TCnGeneralCppToken = TCnCppToken;
   TCnGeneralPasStructParser = TCnPasStructureParser;
   TCnGeneralCppStructParser = TCnCppStructureParser;
+  TCnGeneralWidePasLex = TmwPasLex;
 {$ENDIF}
 
 {$IFDEF UNICODE}
-  TCnGeneralPasLex = TCnPasWideLex; // 2005~2007 下仍用 TmwPasLex
+  TCnGeneralPasLex = TCnPasWideLex; // TCnGeneralPasLex 在 2005~2007 下仍用 TmwPasLex
 {$ELSE}
-  TCnGeneralPasLex = TmwPasLex;
+  TCnGeneralPasLex = TmwPasLex;     // 配合 EditFilerSaveFileToStream 系列使用，Ansi/Ansi/Utf16
 {$ENDIF}
 
   TCnBookmarkObject = class
@@ -883,7 +886,7 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-{* 保存 EditReader 内容到流中，流中的内容默认为 Ansi 格式，带末尾 #0 字符，
+{* 保存 EditReader 内容到流中，流中的内容 CheckUtf8 为默认 True 时为 Ansi 格式，否则为 Ansi/Utf8/Utf8，均带末尾 #0 字符，
    AlternativeWideChar 表示 CheckUtf8 为 True 时，在纯英文 OS 的 Unicode 环境下，
    是否将转换成的 Ansi 中的每个宽字符手动替换成两个空格。此选项用于躲过纯英文 OS
    的 Unicode 环境下 UnicodeString 直接转 Ansi 时的丢字符问题}
@@ -891,22 +894,23 @@ procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
 procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-{* 保存编辑器文本到流中}
+{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
   FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存编辑器文本到流中}
+{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
   Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存当前编辑器文本到流中}
+{* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
 
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
-{* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8}
+{* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
+  也就是 Ansi/Utf16/Utf16}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -6820,6 +6824,8 @@ begin
   finally
     FreeMem(Buffer);
   end;
+
+  // 此时读到的内容是 Ansi/Utf8/Utf8，CheckUtf8 如果是 True，则全转 Ansi
 
 {$IFDEF IDE_WIDECONTROL}
   if CheckUtf8 then
