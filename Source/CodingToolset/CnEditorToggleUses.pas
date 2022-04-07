@@ -61,7 +61,7 @@ type
   private
     FUsesPosition: TCnUsesPosition;
     FJumpTime: DWORD;
-    FParser: TmwPasLex;
+    FParser: TCnGeneralWidePasLex;
     FUsesAdded: Boolean;
     FColumn: Integer;
     FSkipImplementUses: Boolean;
@@ -157,13 +157,13 @@ begin
   else
   begin
     if FParser = nil then
-      FParser := TmwPasLex.Create;
+      FParser := TCnGeneralWidePasLex.Create;
 
     S := CnOtaGetCurrentSourceFileName;
 
     MemStream := TMemoryStream.Create;
     try
-      CnOtaSaveCurrentEditorToStream(MemStream, False);
+      CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
       FParser.Origin := MemStream.Memory;
 
       CurLine := CnOtaGetCurrCharPos.Line;
@@ -186,13 +186,24 @@ begin
           tkInterface:
             begin
               if IntfLine = 0 then
+              begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER} // WidePasLex 的 LineNumber 从 1 开始，mwPasLex 则 0 开始
+                IntfLine := FParser.LineNumber;
+{$ELSE}
                 IntfLine := FParser.LineNumber + 1;
+{$ENDIF}
+              end;
             end;
           tkImplementation:
             begin
               InImplement := True;
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+              CursorInImplement := (CurLine >= FParser.LineNumber);
+              ImplLine := FParser.LineNumber;
+{$ELSE}
               CursorInImplement := (CurLine >= FParser.LineNumber + 1);
               ImplLine := FParser.LineNumber + 1;
+{$ENDIF}
             end;
           tkUses:
             begin
@@ -208,11 +219,19 @@ begin
               begin
                 if InImplement then
                 begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+                  Use2Line := FParser.LineNumber;
+{$ELSE}
                   Use2Line := FParser.LineNumber + 1;
+{$ENDIF}
                 end
                 else
                 begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+                  Use1Line := FParser.LineNumber;
+{$ELSE}
                   Use1Line := FParser.LineNumber + 1;
+{$ENDIF}
                 end;
               end;  
             end;  

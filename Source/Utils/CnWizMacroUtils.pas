@@ -90,6 +90,8 @@ function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
 
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
+{* AContent 是待插入的内容；InsertPos是待插入的位置
+   ASavePos 是否插入后光标回到原处，如为 False，则根据 PosInText 调整光标位置}
 
 implementation
 
@@ -107,7 +109,7 @@ end;
 procedure GetNameArgsResult(var Name, Args, ResultType: string;
   RetEmpty: Boolean = False; IgnoreCompDir: Boolean = False);
 var
-  Parser: TmwPasLex;
+  Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
   MemStream: TMemoryStream;
 begin
   if RetEmpty then
@@ -125,8 +127,8 @@ begin
 
   MemStream := TMemoryStream.Create;
   try
-    CnOtaSaveCurrentEditorToStream(MemStream, True);
-    Parser := TmwPasLex.Create;
+    CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
+    Parser := TCnGeneralWidePasLex.Create;
     try
       Parser.Origin := MemStream.Memory;
       while not (Parser.TokenID in [tkNull, tkProcedure, tkFunction, tkConstructor, tkDestructor]) do
@@ -461,14 +463,15 @@ var
   label BeginFindProcHead;
 
   var
-    Parser: TmwPasLex;
+    Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16;
     MemStream: TMemoryStream;
     ClassPos: Integer;
   begin
     MemStream := TMemoryStream.Create;
     try
       CnOtaSaveCurrentEditorToStream(MemStream, True);
-      Parser := TmwPasLex.Create;
+      CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
+      Parser := TCnGeneralWidePasLex.Create;
       try
         Parser.Origin := MemStream.Memory;
 

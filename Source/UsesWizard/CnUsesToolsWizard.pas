@@ -740,7 +740,7 @@ var
 begin
   Stream := TMemoryStream.Create;
   try
-    EditFilerSaveFileToStream(FileName, Stream); // Ansi/Ansi/Utf16
+    EditFilerSaveFileToStream(FileName, Stream, True); // Ansi/Ansi/Utf16
 
 {$IFDEF UNICODE}
     Lex := TCnPasWideLex.Create;
@@ -1218,7 +1218,7 @@ begin
     Lex := nil;
     try
       SrcStream := TMemoryStream.Create;
-      EditFilerSaveFileToStream(Buffer.FileName, SrcStream); // Ansi/Ansi/Utf16
+      EditFilerSaveFileToStream(Buffer.FileName, SrcStream, True); // Ansi/Ansi/Utf16
 
 {$IFDEF UNICODE}
       Lex := TCnPasWideLex.Create;

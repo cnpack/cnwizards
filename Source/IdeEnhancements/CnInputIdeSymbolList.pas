@@ -830,7 +830,7 @@ end;
 function ParseProjectBegin(var FileName: AnsiString; var X, Y: Integer): Boolean;
 var
   Stream: TMemoryStream;
-  Lex: TCnGeneralPasLex;
+  Lex: TCnGeneralPasLex; // Ansi/Ansi/Utf16
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('ParseProjectBegin');
@@ -843,7 +843,7 @@ begin
 
   try
     Stream := TMemoryStream.Create;
-    EditFilerSaveFileToStream(FileName, Stream, False);
+    EditFilerSaveFileToStream(FileName, Stream, True); // Ansi/Ansi/Utf16£¬·ûºÏ Lex
 
     Lex := TCnGeneralPasLex.Create;
     Lex.Origin := PChar(Stream.Memory);
