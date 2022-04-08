@@ -58,6 +58,7 @@ type
   TModuleMode = (mmModule, mmFile);
 
   TCnEditFiler = class(TObject)
+  {* 只支持 Module 级别的编辑器文件，不支持 dfm 之类的}
   private
     FSourceInterfaceAllocated: Boolean;
     FModuleNotifier: IOTAModuleNotifier;

@@ -876,11 +876,11 @@ function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
 
 function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
-{* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8混合Ansi
+{* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
    在 Unicode 环境下该位置之前有宽字符时其值不靠谱}
 
 function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
-{* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8混合Ansi
+{* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
    在 Unicode 环境下该位置之前有宽字符时传参没法靠谱}
 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
@@ -1231,13 +1231,13 @@ procedure CnRegisterNoIconProc(const ComponentClasses: array of TComponentClass)
 procedure CnRegisterNoIconProc(ComponentClasses: array of TComponentClass);
 {$ENDIF COMPILER7_UP}
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(ComponentClasses) to High(ComponentClasses) do
+  for I := Low(ComponentClasses) to High(ComponentClasses) do
   begin
-    if CnNoIconList.IndexOf(ComponentClasses[i].ClassName) < 0 then
+    if CnNoIconList.IndexOf(ComponentClasses[I].ClassName) < 0 then
     begin
-      CnNoIconList.Add(ComponentClasses[i].ClassName);
+      CnNoIconList.Add(ComponentClasses[I].ClassName);
     end;
   end;
 
@@ -1732,7 +1732,7 @@ var
   P, P1, P2, P3: PRGBArray;
   R: PRGBColor;
   C: array[0..3] of PRGBColor;
-  x, y, i: Integer;
+  x, y, I: Integer;
   IsEdge: Boolean;
 begin
   Result := TBitmap.Create;
@@ -1766,8 +1766,8 @@ begin
             C[1] := @P3^[x];
             C[2] := @P2^[Max(x - 1, 0)];
             C[3] := @P2^[Min(x + 1, Result.Width - 1)];
-            for i := 0 to 3 do
-              if (C[i]^.r = tr) and (C[i]^.g = tg) and (C[i]^.b = tb) then
+            for I := 0 to 3 do
+              if (C[I]^.r = tr) and (C[I]^.g = tg) and (C[I]^.b = tb) then
               begin
                 IsEdge := True;
                 Break;
@@ -1859,7 +1859,7 @@ end;
 // 压缩字符串中间的空白字符
 function CompressWhiteSpace(const Str: string): string;
 var
-  i: Integer;
+  I: Integer;
   Len: Integer;
   NextResultChar: Integer;
   CheckChar: Char;
@@ -1869,10 +1869,10 @@ begin
   NextResultChar := 1;
   SetLength(Result, Len);
 
-  for i := 1 to Len do
+  for I := 1 to Len do
   begin
-    CheckChar := Str[i];
-    NextChar := Str[i + 1];
+    CheckChar := Str[I];
+    NextChar := Str[I + 1];
     case CheckChar of
       #9, #10, #13, #32:
         begin
@@ -1886,7 +1886,7 @@ begin
         end;
       else
         begin
-          Result[NextResultChar] := Str[i];
+          Result[NextResultChar] := Str[I];
           Inc(NextResultChar);
         end;
     end;
@@ -1945,12 +1945,12 @@ end;
 // 删除标题中热键信息
 function GetCaptionOrgStr(const Caption: string): string;
 var
-  i, l: Integer;
+  I, l: Integer;
 begin
   Result := Caption;
-  for i := Length(Result) downto 1 do
-    if Result[i] = '.' then
-      Delete(Result, i, 1);
+  for I := Length(Result) downto 1 do
+    if Result[I] = '.' then
+      Delete(Result, I, 1);
 
   l := Length(Result);
   if l > 4 then
@@ -2013,13 +2013,13 @@ end;
 // 保存菜单名称列表到文件
 procedure SaveMenuNamesToFile(AMenu: TMenuItem; const FileName: string);
 var
-  i: Integer;
+  I: Integer;
   List: TStrings;
 begin
   List := TStringList.Create;
   try
-    for i := 0 to AMenu.Count - 1 do
-      List.Add(AMenu.Items[i].Name + ' | ' + AMenu.Items[i].Caption);
+    for I := 0 to AMenu.Count - 1 do
+      List.Add(AMenu.Items[I].Name + ' | ' + AMenu.Items[I].Caption);
     List.SaveToFile(FileName);
   finally
     List.Free;
@@ -2039,15 +2039,15 @@ end;
 function GetIDEToolsMenu: TMenuItem;
 var
   MainMenu: TMainMenu;
-  i: Integer;
+  I: Integer;
 begin
   MainMenu := GetIDEMainMenu; // IDE主菜单
   if MainMenu <> nil then
   begin
-    for i := 0 to MainMenu.Items.Count - 1 do
-      if AnsiCompareText(SToolsMenuName, MainMenu.Items[i].Name) = 0 then
+    for I := 0 to MainMenu.Items.Count - 1 do
+      if AnsiCompareText(SToolsMenuName, MainMenu.Items[I].Name) = 0 then
       begin
-        Result := MainMenu.Items[i];
+        Result := MainMenu.Items[I];
         Exit;
       end
   end;
@@ -2176,18 +2176,18 @@ end;
 procedure SaveIDEActionListToFile(const FileName: string);
 var
   ActionList: TCustomActionList;
-  i: Integer;
+  I: Integer;
   List: TStrings;
 begin
   ActionList := GetIDEActionList;
   List := TStringList.Create;
   try
-    for i := 0 to ActionList.ActionCount - 1 do
-      if ActionList.Actions[i] is TCustomAction then
-        with ActionList.Actions[i] as TCustomAction do
+    for I := 0 to ActionList.ActionCount - 1 do
+      if ActionList.Actions[I] is TCustomAction then
+        with ActionList.Actions[I] as TCustomAction do
           List.Add(Name + ' | ' + Caption)
       else
-        List.Add(ActionList.Actions[i].Name);
+        List.Add(ActionList.Actions[I].Name);
     List.SaveToFile(FileName);
   finally
     List.Free;
@@ -2435,13 +2435,13 @@ end;
 function FindComponentByClass(AWinControl: TWinControl;
   AClass: TClass; const AComponentName: string = ''): TComponent;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to AWinControl.ComponentCount - 1 do
-    if (AWinControl.Components[i] is AClass) and ((AComponentName = '') or
-      (SameText(AComponentName, AWinControl.Components[i].Name))) then
+  for I := 0 to AWinControl.ComponentCount - 1 do
+    if (AWinControl.Components[I] is AClass) and ((AComponentName = '') or
+      (SameText(AComponentName, AWinControl.Components[I].Name))) then
     begin
-      Result := AWinControl.Components[i];
+      Result := AWinControl.Components[I];
       Exit;
     end;
   Result := nil;
@@ -2451,13 +2451,13 @@ end;
 function FindComponentByClassName(AWinControl: TWinControl;
   const AClassName: string; const AComponentName: string = ''): TComponent;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to AWinControl.ComponentCount - 1 do
-    if AWinControl.Components[i].ClassNameIs(AClassName) and ((AComponentName =
-      '') or (SameText(AComponentName, AWinControl.Components[i].Name))) then
+  for I := 0 to AWinControl.ComponentCount - 1 do
+    if AWinControl.Components[I].ClassNameIs(AClassName) and ((AComponentName =
+      '') or (SameText(AComponentName, AWinControl.Components[I].Name))) then
     begin
-      Result := AWinControl.Components[i];
+      Result := AWinControl.Components[I];
       Exit;
     end;
   Result := nil;
@@ -2466,10 +2466,10 @@ end;
 // 存在模式窗口
 function ScreenHasModalForm: Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Screen.CustomFormCount - 1 do
-    if fsModal in Screen.CustomForms[i].FormState then
+  for I := 0 to Screen.CustomFormCount - 1 do
+    if fsModal in Screen.CustomForms[I].FormState then
     begin
       Result := True;
       Exit;
@@ -2664,13 +2664,13 @@ end;
 procedure RemoveListViewSubImages(ListView: TListView); overload;
 {$IFDEF BDS}
 var
-  i, j: Integer;
+  I, j: Integer;
 {$ENDIF}
 begin
 {$IFDEF BDS}
-  for i := 0 to ListView.Items.Count - 1 do
-    for j := 0 to ListView.Items[i].SubItems.Count - 1 do
-      ListView.Items[i].SubItemImages[j] := -1;
+  for I := 0 to ListView.Items.Count - 1 do
+    for j := 0 to ListView.Items[I].SubItems.Count - 1 do
+      ListView.Items[I].SubItemImages[j] := -1;
 {$ENDIF}
 end;
 
@@ -2737,11 +2737,11 @@ end;
 // ListView 当前选择项是否允许上移
 function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
-  for i := 1 to AListView.Items.Count - 1 do
-    if AListView.Items[i].Selected and not AListView.Items[i - 1].Selected then
+  for I := 1 to AListView.Items.Count - 1 do
+    if AListView.Items[I].Selected and not AListView.Items[I - 1].Selected then
     begin
       Result := True;
       Exit;
@@ -2751,11 +2751,11 @@ end;
 // ListView 当前选择项是否允许下移
 function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
-  for i := AListView.Items.Count - 2 downto 0 do
-    if AListView.Items[i].Selected and not AListView.Items[i + 1].Selected then
+  for I := AListView.Items.Count - 2 downto 0 do
+    if AListView.Items[I].Selected and not AListView.Items[I + 1].Selected then
     begin
       Result := True;
       Exit;
@@ -2765,15 +2765,15 @@ end;
 // 修改 ListView 当前选择项
 procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to AListView.Items.Count - 1 do
+  for I := 0 to AListView.Items.Count - 1 do
     if Mode = smAll then
-      AListView.Items[i].Selected := True
+      AListView.Items[I].Selected := True
     else if Mode = smNothing then
-      AListView.Items[i].Selected := False
+      AListView.Items[I].Selected := False
     else
-      AListView.Items[i].Selected := not AListView.Items[i].Selected;
+      AListView.Items[I].Selected := not AListView.Items[I].Selected;
 end;
 
 //==============================================================================
@@ -3320,15 +3320,15 @@ end;
 // 取窗体编辑器 (来自 GExperts Src 1.12)
 function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
 var
-  i: Integer;
+  I: Integer;
   Editor: IOTAEditor;
   FormEditor: IOTAFormEditor;
 begin
   if Assigned(Module) then
   begin
-      for i := 0 to Module.GetModuleFileCount - 1 do
+      for I := 0 to Module.GetModuleFileCount - 1 do
       begin
-        Editor := CnOtaGetFileEditorForModule(Module, i);
+        Editor := CnOtaGetFileEditorForModule(Module, I);
         if Supports(Editor, IOTAFormEditor, FormEditor) then
         begin
           Result := FormEditor;
@@ -3420,7 +3420,7 @@ var
   FormEditor: IOTAFormEditor;
   IComponent: IOTAComponent;
   Component: TComponent;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if List = nil then
@@ -3430,9 +3430,9 @@ begin
   FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
   if not Assigned(FormEditor) then Exit;
 
-  for i := 0 to FormEditor.GetSelCount - 1 do
+  for I := 0 to FormEditor.GetSelCount - 1 do
   begin
-    IComponent := FormEditor.GetSelComponent(i);
+    IComponent := FormEditor.GetSelComponent(I);
     if Assigned(IComponent) and Assigned(IComponent.GetComponentHandle) and
       (TObject(IComponent.GetComponentHandle) is TComponent) then
     begin
@@ -3708,7 +3708,7 @@ var
   IModuleServices: IOTAModuleServices;
 {$IFNDEF BDS}
   IModule: IOTAModule;
-  i: Integer;
+  I: Integer;
 {$ENDIF}
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
@@ -3716,9 +3716,9 @@ begin
   Result := IModuleServices.MainProjectGroup;
 {$ELSE}
   if IModuleServices <> nil then
-    for i := 0 to IModuleServices.ModuleCount - 1 do
+    for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
-      IModule := IModuleServices.Modules[i];
+      IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProjectGroup, Result) then
         Exit;
     end;
@@ -3732,16 +3732,16 @@ var
   IModuleServices: IOTAModuleServices;
   IModule: IOTAModule;
   IProjectGroup: IOTAProjectGroup;
-  i: Integer;
+  I: Integer;
 begin
   Result := '';
   IModuleServices := BorlandIDEServices as IOTAModuleServices;
   if IModuleServices = nil then Exit;
 
   IProjectGroup := nil;
-  for i := 0 to IModuleServices.ModuleCount - 1 do
+  for I := 0 to IModuleServices.ModuleCount - 1 do
   begin
-    IModule := IModuleServices.Modules[i];
+    IModule := IModuleServices.Modules[I];
     if IModule.QueryInterface(IOTAProjectGroup, IProjectGroup) = S_OK then
       Break;
   end;
@@ -4030,7 +4030,7 @@ procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;
   IncludeType: Boolean = True);
 var
   Names: TOTAOptionNameArray;
-  i: Integer;
+  I: Integer;
 begin
   List.Clear;
   Names := nil;
@@ -4038,12 +4038,12 @@ begin
 
   Names := Options.GetOptionNames;
   try
-    for i := Low(Names) to High(Names) do
+    for I := Low(Names) to High(Names) do
       if IncludeType then
-        List.Add(Names[i].Name + ': ' + GetEnumName(TypeInfo(TTypeKind),
-          Ord(Names[i].Kind)))
+        List.Add(Names[I].Name + ': ' + GetEnumName(TypeInfo(TTypeKind),
+          Ord(Names[I].Kind)))
       else
-        List.Add(Names[i].Name);
+        List.Add(Names[I].Name);
   finally
     Names := nil;
   end;
@@ -4069,13 +4069,13 @@ function CnOtaGetProject: IOTAProject;
 var
   IModuleServices: IOTAModuleServices;
   IModule: IOTAModule;
-  i: Integer;
+  I: Integer;
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
   if IModuleServices <> nil then
-    for i := 0 to IModuleServices.ModuleCount - 1 do
+    for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
-      IModule := IModuleServices.Modules[i];
+      IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProject, Result) then
         Exit;
     end;
@@ -4144,16 +4144,16 @@ var
   IModuleServices: IOTAModuleServices;
   IModule: IOTAModule;
   IProject: IOTAProject;
-  i: Integer;
+  I: Integer;
 begin
   if not Assigned(List) then
     Exit;
 
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
   if IModuleServices <> nil then
-    for i := 0 to IModuleServices.ModuleCount - 1 do
+    for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
-      IModule := IModuleServices.Modules[i];
+      IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProject, IProject) then
         List.Add(IProject);
     end;
@@ -4260,7 +4260,7 @@ end;
 function CnOtaGetFileNameOfModule(Module: IOTAModule;
   GetSourceEditorFileName: Boolean): string;
 var
-  i: Integer;
+  I: Integer;
   Editor: IOTAEditor;
   SourceEditor: IOTASourceEditor;
 begin
@@ -4269,9 +4269,9 @@ begin
     if not GetSourceEditorFileName then
       Result := Module.FileName
     else
-      for i := 0 to Module.GetModuleFileCount - 1 do
+      for I := 0 to Module.GetModuleFileCount - 1 do
       begin
-        Editor := Module.GetModuleFileEditor(i);
+        Editor := Module.GetModuleFileEditor(I);
         if Supports(Editor, IOTASourceEditor, SourceEditor) then
         begin
           Result := Editor.FileName;
@@ -4448,13 +4448,13 @@ end;
 // 返回指定模块指定文件名的编辑器
 function CnOtaGetEditorFromModule(Module: IOTAModule; const FileName: string): IOTAEditor;
 var
-  i: Integer;
+  I: Integer;
   Editor: IOTAEditor;
 begin
   Assert(Assigned(Module));
-  for i := 0 to Module.GetModuleFileCount - 1 do
+  for I := 0 to Module.GetModuleFileCount - 1 do
   begin
-    Editor := CnOtaGetFileEditorForModule(Module, i);
+    Editor := CnOtaGetFileEditorForModule(Module, I);
     if SameFileName(Editor.FileName, FileName) then
     begin
       Result := Editor;
@@ -5879,19 +5879,20 @@ var
   ModuleServices: IOTAModuleServices;
   Module: IOTAModule;
   FileEditor: IOTAEditor;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
 
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
-  if ModuleServices = nil then Exit;
+  if ModuleServices = nil then
+    Exit;
 
   Module := ModuleServices.FindModule(FileName);
   if Assigned(Module) then
   begin
-    for i := 0 to Module.GetModuleFileCount-1 do
+    for I := 0 to Module.GetModuleFileCount-1 do
     begin
-      FileEditor := CnOtaGetFileEditorForModule(Module, i);
+      FileEditor := CnOtaGetFileEditorForModule(Module, I);
       Assert(Assigned(FileEditor));
 
       Result := CompareText(FileName, FileEditor.FileName) = 0;
@@ -5908,7 +5909,8 @@ var
   Module: IOTAModule;
 begin
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
-  if ModuleServices = nil then Exit;
+  if ModuleServices = nil then
+    Exit;
 
   Module := ModuleServices.FindModule(FileName);
   if Assigned(Module) then
@@ -5922,7 +5924,8 @@ var
   Module: IOTAModule;
 begin
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
-  if ModuleServices = nil then Exit;
+  if ModuleServices = nil then
+    Exit;
 
   Module := ModuleServices.FindModule(FileName);
   if Assigned(Module) then
@@ -5935,35 +5938,30 @@ var
   ModuleServices: IOTAModuleServices;
   Module: IOTAModule;
   FormEditor: IOTAFormEditor;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
 
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
-  if ModuleServices = nil then Exit;
+  if ModuleServices = nil then
+    Exit;
 
   Module := ModuleServices.FindFormModule(FormName);
   if Assigned(Module) then
   begin
-    for i := 0 to Module.GetModuleFileCount-1 do
-    begin
-      FormEditor := CnOtaGetFormEditorFromModule(Module);
-
-      Result := Assigned(FormEditor);
-      if Result then
-        Exit;
-    end;
+    FormEditor := CnOtaGetFormEditorFromModule(Module);
+    Result := Assigned(FormEditor);
   end;
 end;
 
 // 判断模块是否已被修改
 function CnOtaIsModuleModified(AModule: IOTAModule): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
-  for i := 0 to AModule.GetModuleFileCount - 1 do
-    if AModule.GetModuleFileEditor(i).Modified then
+  for I := 0 to AModule.GetModuleFileCount - 1 do
+    if AModule.GetModuleFileEditor(I).Modified then
     begin
       Result := True;
       Exit;
@@ -6008,7 +6006,7 @@ var
   FormEditor: IOTAFormEditor;
   SourceEditor: IOTASourceEditor;
   FileEditor: IOTAEditor;
-  i: Integer;
+  I: Integer;
   BaseFileName: string;
 begin
   Result := False;
@@ -6067,9 +6065,9 @@ begin
     Module := CnOtaGetModule(BaseFileName);
     if Module <> nil then
     begin
-      for i := 0 to Module.GetModuleFileCount-1 do
+      for I := 0 to Module.GetModuleFileCount-1 do
       begin
-        FileEditor := Module.GetModuleFileEditor(i);
+        FileEditor := Module.GetModuleFileEditor(I);
         Assert(Assigned(FileEditor));
 
         if CompareText(FileEditor.FileName, FileName) = 0 then
@@ -6155,7 +6153,7 @@ function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
   Wrap: Boolean; MaxLen: Integer): string;
 var
   Strings: TStrings;
-  i, J: Integer;
+  I, J: Integer;
   s, Line, SingleLine: string;
 {$IFDEF UNICODE}
   TmpLine: string;
@@ -6183,9 +6181,9 @@ begin
       s := '';
         
     Strings.Text := Str;
-    for i := 0 to Strings.Count - 1 do
+    for I := 0 to Strings.Count - 1 do
     begin
-      Line := Strings[i];
+      Line := Strings[I];
 
       if MaxLen <= 1 then
       begin
@@ -6234,7 +6232,7 @@ begin
 
       if IsDelphi then
       begin
-        if i = Strings.Count - 1 then  // 最后一行不加换行符
+        if I = Strings.Count - 1 then  // 最后一行不加换行符
         begin
           if Line <> '' then
             Result := Format('%s''%s''', [Result, Line])
@@ -6262,7 +6260,7 @@ begin
       end
       else
       begin
-        if i = Strings.Count - 1 then
+        if I = Strings.Count - 1 then
           Result := Format('%s"%s"', [Result, Line])
         else
           Result := Format('%s"%s%s" %s', [Result , Line, ACReturn, s]);
@@ -6278,7 +6276,7 @@ function CodeAutoWrap(Code: string; Width, Indent: Integer;
   IndentOnceOnly: Boolean): string;
 var
   Strings: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   if Length(Code) <= Width then
   begin
@@ -6293,11 +6291,11 @@ begin
   try
     Strings.Text := WrapText(Code, #13#10, [' '], Width - Indent);
     Result := Result + Strings[0] + #13#10;
-    for i := 1 to Strings.Count - 1 do
-      if (i = 1) or not IndentOnceOnly then
-        Result := Result + Spc(Indent) + Trim(Strings[i]) + #13#10  // 考虑缩进
+    for I := 1 to Strings.Count - 1 do
+      if (I = 1) or not IndentOnceOnly then
+        Result := Result + Spc(Indent) + Trim(Strings[I]) + #13#10  // 考虑缩进
       else
-        Result := Result + Strings[i] + #13#10;
+        Result := Result + Strings[I] + #13#10;
     Delete(Result, Length(Result) - 1, 2); // 删除后面的换行符
   finally
     Strings.Free;
@@ -6308,7 +6306,7 @@ end;
 // 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串
 function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
 var
-  i, l, Len: Cardinal;
+  I, l, Len: Cardinal;
   IsMultiBytes: Boolean;
   P: PDWORD;
 begin
@@ -6318,7 +6316,7 @@ begin
     l := Len and $FFFFFFFC;
     P := PDWORD(@Text[1]);
     IsMultiBytes := False;
-    for i := 0 to l div 4 do
+    for I := 0 to l div 4 do
     begin
       if P^ and $80808080 <> 0 then
       begin
@@ -6330,9 +6328,9 @@ begin
     
     if not IsMultiBytes then
     begin
-      for i := l + 1 to Len do
+      for I := l + 1 to Len do
       begin
-        if Ord(Text[i]) and $80 <> 0 then
+        if Ord(Text[I]) and $80 <> 0 then
         begin
           IsMultiBytes := True;
           Break;
@@ -7871,7 +7869,7 @@ end;
 function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
   ExcludeForm: Boolean): Boolean;
 var
-  i: Integer;
+  I: Integer;
   AObj: TPersistent;
   FormDesigner: IDesigner;
   AList: IDesignerSelections;
@@ -7892,12 +7890,12 @@ begin
       Selections.Clear;
       AList := CreateSelectionList;
       FormDesigner.GetSelections(AList);
-      for i := 0 to AList.Count - 1 do
+      for I := 0 to AList.Count - 1 do
       begin
       {$IFDEF COMPILER6_UP}
-        AObj := TPersistent(AList[i]);
+        AObj := TPersistent(AList[I]);
       {$ELSE}
-        AObj := TryExtractPersistent(AList[i]);
+        AObj := TryExtractPersistent(AList[I]);
       {$ENDIF}
         if AObj <> nil then // perhaps is nil when disabling packages in the IDE
           Selections.Add(AObj);
@@ -7972,13 +7970,13 @@ end;
 // 判断设计期控件的指定属性是否存在
 function CnOtaPropertyExists(const Component: IOTAComponent; const PropertyName: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   Assert(Assigned(Component));
-  for i := 0 to Component.GetPropCount - 1 do
+  for I := 0 to Component.GetPropCount - 1 do
   begin
-    Result := SameText(Component.GetPropName(i), PropertyName);
+    Result := SameText(Component.GetPropName(I), PropertyName);
     if Result then
       Break;
   end;

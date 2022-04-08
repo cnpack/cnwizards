@@ -1030,9 +1030,11 @@ var
     S: string;
 
     function SourceUsesListContainsUnitName(const ACleanUnitName: string): Boolean;
+{$IFDEF SUPPORT_UNITNAME_DOT}
     var
       J, L1, L2: Integer;
       U: string;
+{$ENDIF}
     begin
       Result := List.IndexOf(Item.Name) >= 0;
 {$IFDEF SUPPORT_UNITNAME_DOT}
@@ -1535,7 +1537,9 @@ procedure TCnUsesToolsWizard.CheckReLoadUnitsMap;
 var
   ToReload: Boolean;
   Paths: TStringList;
+{$IFDEF SUPPORT_CROSS_PLATFORM}
   S: string;
+{$ENDIF}
 begin
   ToReload := False;
 
@@ -1689,7 +1693,7 @@ var
     while Pos('<', Result) > 0 do
     begin
       C := 0;
-      Front := 0;
+      // Front := 0;
       Back := 0;
       Deled := False;
 
