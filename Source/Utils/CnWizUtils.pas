@@ -5938,7 +5938,6 @@ var
   ModuleServices: IOTAModuleServices;
   Module: IOTAModule;
   FormEditor: IOTAFormEditor;
-  I: Integer;
 begin
   Result := False;
 

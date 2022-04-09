@@ -779,6 +779,11 @@ var
   SCnEditorExtendingSelectMenuHint: string = 'Select Content with Extending Mode';
   SCnEditorExtendingSelectName: string = 'Extending Select Tool';
 
+  // CnEditorDuplicateUnit
+  SCnEditorDuplicateUnitMenuCaption: string = 'Duplicate Current Unit';
+  SCnEditorDuplicateUnitMenuHint: string = 'Duplicate Current Unit/Form/Frame to a New One';
+  SCnEditorDuplicateUnitName: string = 'Duplicate Current Unit Tool';
+
   // CnSrcTemplate
   SCnSrcTemplateMenuCaption: string = 'Source Te&mplates';
   SCnSrcTemplateMenuHint: string = 'Source and Comment Templates';
