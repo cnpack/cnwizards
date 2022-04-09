@@ -65,6 +65,7 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
   end;
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
@@ -296,6 +297,13 @@ begin
   inherited;
 end;
 
+function TCnEditorDuplicateUnit.GetState: TWizardState;
+begin
+  Result := inherited GetState;
+  if (wsEnabled in Result) and (CnOtaGetCurrentModule = nil) then
+    Result := [];
+end;
+
 { TCnDuplicateCreator }
 
 constructor TCnDuplicateCreator.Create;
@@ -306,9 +314,7 @@ end;
 
 destructor TCnDuplicateCreator.Destroy;
 begin
-//  FIntf.Free;
-//  FImpl.Free;
-//  FForm.Free;
+
   inherited;
 end;
 
@@ -419,11 +425,13 @@ end;
 
 function TCnDuplicateCreator.ReplaceNames(const Str: string): string;
 begin
-  Result := StringReplace(Str, FOldFormName, NewFormName, [rfIgnoreCase, rfReplaceAll]);
+  Result := Str;
+  if NewFormName <> '' then
+    Result := StringReplace(Result, FOldFormName, NewFormName, [rfIgnoreCase, rfReplaceAll]);
   if NewUnitName <> '' then
     Result := StringReplace(Result, FOldUnitName, NewUnitName, [rfIgnoreCase, rfReplaceAll]);
 
-  // 优化点：Form1 整字替换成 Form2，TForm1 整字替换成 TForm2，Unit1 整字替换成 Unit2
+  // TODO: 优化：Form1 整字替换成 Form2，TForm1 整字替换成 TForm2，Unit1 整字替换成 Unit2，UnitH 整字替换成 Unit2H
 end;
 
 procedure TCnDuplicateCreator.SetFormSource(const Value: AnsiString);

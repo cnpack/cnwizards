@@ -511,7 +511,7 @@ begin
   // CnEditorDuplicateUnit
   TranslateStr(SCnEditorDuplicateUnitMenuCaption, 'SCnEditorDuplicateUnitMenuCaption');
   TranslateStr(SCnEditorDuplicateUnitMenuHint, 'SCnEditorDuplicateUnitMenuHint');
-  TranslateStr(SCnEditorDuplicateUnitName, 'SCnEditorDuplicateUnitName';
+  TranslateStr(SCnEditorDuplicateUnitName, 'SCnEditorDuplicateUnitName');
 
   // CnSrcTemplate
   TranslateStr(SCnSrcTemplateMenuCaption, 'SCnSrcTemplateMenuCaption');
