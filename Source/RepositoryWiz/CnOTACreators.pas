@@ -635,7 +635,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Unnamed true.');
 {$ENDIF}
-  Result := False;
+  Result := True;
 end;
 
 end.
