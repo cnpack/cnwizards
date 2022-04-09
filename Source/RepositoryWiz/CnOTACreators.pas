@@ -75,7 +75,28 @@ type
     function GetAge: TDateTime; virtual;
   end;
 
-  TCnBaseCreator = class(TInterfacedObject, IOTACreator)
+  TCnRawCreator = class(TInterfacedObject, IOTACreator)
+  {* 实现 IOTACreator 接口的原始生成代码的类，内部返回原始内容}
+  private
+
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    // IOTACreator 接口实现
+    function GetCreatorType: string; virtual;
+    {* 默认返回空串，表示由子类提供信息 }
+    function GetExisting: Boolean; virtual;
+    {* 默认返回 False，表示新建文件 }
+    function GetFileSystem: string; virtual;
+    {* 默认返回空串，表示默认 }
+    function GetOwner: IOTAModule; virtual;
+    {* 默认返回当前项目，表示新建的 }
+    function GetUnnamed: Boolean; virtual;
+    {* 默认返回 True，表示未曾命名 }
+  end;
+
+  TCnBaseCreator = class(TCnRawCreator, IOTACreator)
   {* 实现 IOTACreator 接口和 TCnTemplateParser 生成代码的基础类 }
   private
     FTemplateFile: string;
@@ -96,19 +117,8 @@ type
     function GetNeedBaseProcess: Boolean;
     {* 子类可重载，决定是否让基类进行基本的标签替换 }
   public
-    constructor Create; virtual;
-
-    // IOTACreator 接口实现
-    function GetCreatorType: string; virtual;
-    {* 默认返回空串，表示由子类提供信息 }
-    function GetExisting: Boolean; virtual;
-    {* 默认返回 False，表示新建文件 }
-    function GetFileSystem: string; virtual;
-    {* 默认返回空串，表示默认 }
-    function GetOwner: IOTAModule; virtual;
-    {* 默认返回当前项目，表示新建的 }
-    function GetUnnamed: Boolean; virtual;
-    {* 默认返回 True，表示未曾命名 }
+    constructor Create; override;
+    destructor Destroy; override;
 
     property TemplateFile: string read FTemplateFile write FTemplateFile;
     {* 当前模板文件名 }
@@ -345,35 +355,8 @@ end;
 
 constructor TCnBaseCreator.Create;
 begin
+  inherited;
 
-end;
-
-function TCnBaseCreator.GetCreatorType: string;
-begin
-  Result := '';
-end;
-
-function TCnBaseCreator.GetExisting: Boolean;
-begin
-  Result := False;
-end;
-
-function TCnBaseCreator.GetFileSystem: string;
-begin
-  Result := '';
-end;
-
-function TCnBaseCreator.GetOwner: IOTAModule;
-begin
-  Result := CnOtaGetCurrentProject;
-end;
-
-function TCnBaseCreator.GetUnnamed: Boolean;
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('Unnamed true.');
-{$ENDIF}
-  Result := False;
 end;
 
 procedure TCnBaseCreator.OnReplaceTagsSource(Sender: TObject; const TagString: 
@@ -414,6 +397,12 @@ procedure TCnBaseCreator.InternalReplaceTagSource(const TagString: string;
   TagParams: TStrings; var ReplaceText: string);
 begin
   // 进行其他的标准宏替换
+end;
+
+destructor TCnBaseCreator.Destroy;
+begin
+
+  inherited;
 end;
 
 { TCnTemplateModuleCreator }
@@ -606,6 +595,47 @@ procedure TCnTemplateProjectCreator.DoReplaceTagsSource(const
     ASourceType: TCnSourceType; ProjectName: string);
 begin
   // 基类也不进行有特色的替换
+end;
+
+{ TCnRawCreator }
+
+constructor TCnRawCreator.Create;
+begin
+
+end;
+
+destructor TCnRawCreator.Destroy;
+begin
+
+  inherited;
+end;
+
+function TCnRawCreator.GetCreatorType: string;
+begin
+  Result := '';
+end;
+
+function TCnRawCreator.GetExisting: Boolean;
+begin
+  Result := False;
+end;
+
+function TCnRawCreator.GetFileSystem: string;
+begin
+  Result := '';
+end;
+
+function TCnRawCreator.GetOwner: IOTAModule;
+begin
+  Result := CnOtaGetCurrentProject;
+end;
+
+function TCnRawCreator.GetUnnamed: Boolean;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Unnamed true.');
+{$ENDIF}
+  Result := False;
 end;
 
 end.
