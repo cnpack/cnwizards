@@ -84,9 +84,9 @@ type
     FImpl: TCnOTAFile;
     FForm: TCnOTAFile;
     FIntfSource: string;
-    FFormSource: string;
+    FFormSource: AnsiString;
     FImplSource: string;
-    procedure SetFormSource(const Value: string);
+    procedure SetFormSource(const Value: AnsiString);
     procedure SetImplSource(const Value: string);
     procedure SetIntfSource(const Value: string);
   public
@@ -109,7 +109,7 @@ type
     // 自有属性方法
     property CreatorType: string read FCreatorType write FCreatorType;
     {* 创建的模块类型}
-    property FormSource: string read FFormSource write SetFormSource;
+    property FormSource: AnsiString read FFormSource write SetFormSource;
     {* 窗体文件内容}
     property IntfSource: string read FIntfSource write SetIntfSource;
     {* h 文件内容（C++Builder 中）}
@@ -134,7 +134,7 @@ var
   FormEditor: IOTAFormEditor;
   Root: IOTAComponent;
   Comp: TComponent;
-  C: Char;
+  C: AnsiChar;
 begin
   // 获取当前单元信息，并生成新 Creator 并调用
   Module := CnOtaGetCurrentModule;
@@ -217,12 +217,15 @@ begin
             TS.WriteComponent(Comp);
             TS.Position := 0;
             ObjectBinaryToText(TS, Stream);
+            // 注意这里出来的是 AnsiString 格式
+
+            Stream.Seek(0, soFromEnd);
             C := #0;
-            Stream.Write(C, SizeOf(Char));
+            Stream.Write(C, SizeOf(AnsiChar)); // 要手工写 #0 结尾
           finally
             TS.Free;
           end;
-          Creator.FormSource := PChar(Stream.Memory);
+          Creator.FormSource := PAnsiChar(Stream.Memory);
         end;
       end;
     end;
@@ -230,7 +233,7 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogRawString(Creator.IntfSource);
     CnDebugger.LogRawString(Creator.ImplSource);
-    CnDebugger.LogRawString(Creator.FormSource);
+    CnDebugger.LogRawAnsiString(Creator.FormSource);
 {$ENDIF}
 
     // (BorlandIDEServices as IOTAModuleServices).CreateModule(Creator);
@@ -334,7 +337,7 @@ begin
 
 end;
 
-procedure TCnDuplicateCreator.SetFormSource(const Value: string);
+procedure TCnDuplicateCreator.SetFormSource(const Value: AnsiString);
 begin
   FFormSource := Value;
 end;
