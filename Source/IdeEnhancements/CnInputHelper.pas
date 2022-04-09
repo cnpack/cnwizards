@@ -501,11 +501,11 @@ const
   csCompDirectSymbolKind = [skCompDirect];
   csCommentSymbolKind = [skComment];
   csUnitSymbolKind = [skUnit, skCompDirect];
-  csDeclearSymbolKind = csAllSymbolKind - [skUnknown, skLabel];
-  csDefineSymbolKind = csAllSymbolKind - [skUnknown, skUnit, skLabel];
+  csDeclareSymbolKind = csAllSymbolKind - [skUnknown, skLabel];
+  csDefineSymbolKind = csAllSymbolKind - [skUnknown, {skUnit,} skLabel]; // 声明区也允许输入单元名
   csCodeSymbolKind = csAllSymbolKind;
   csFieldSymbolKind = csAllSymbolKind - [skUnknown,
-    skUnit, skLabel, skInterface, skKeyword, skClass, skUser];
+    {skUnit,} skLabel, skInterface, skKeyword, skClass, skUser];
   // 2005 后支持 class constant 和 class type，所以不能去除 skConstant, skType,
 
   // BCB 中不易区分 Field，干脆就等同于Code。
@@ -517,8 +517,8 @@ const
     csCommentSymbolKind,       // 注释块内部
     csUnitSymbolKind,          // interface 的 uses 内部
     csUnitSymbolKind,          // implementation 的 uses 内部
-    csDeclearSymbolKind,       // class 声明内部
-    csDeclearSymbolKind,       // interface 声明内部
+    csDeclareSymbolKind,       // class 声明内部
+    csDeclareSymbolKind,       // interface 声明内部
     csDefineSymbolKind,        // type 定义区
     csDefineSymbolKind,        // const 定义区
     csDefineSymbolKind,        // resourcestring 定义区
@@ -540,8 +540,8 @@ const
     csCommentSymbolKind,       // 注释块内部
     csUnitSymbolKind,          // interface 的 uses 内部
     csUnitSymbolKind,          // implementation 的 uses 内部
-    csDeclearSymbolKind,       // class 声明内部
-    csDeclearSymbolKind,       // interface 声明内部
+    csDeclareSymbolKind,       // class 声明内部
+    csDeclareSymbolKind,       // interface 声明内部
     csDefineSymbolKind,        // type 定义区
     csDefineSymbolKind,        // const 定义区
     csDefineSymbolKind,        // resourcestring 定义区
