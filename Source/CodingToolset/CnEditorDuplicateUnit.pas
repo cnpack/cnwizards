@@ -147,7 +147,7 @@ var
   Editor: IOTAEditor;
   I: Integer;
   Creator: TCnDuplicateCreator;
-  IntfFile, ImplFile, FormFile: string;
+  IntfFile, ImplFile, FormFile, S: string;
   Stream, TS: TMemoryStream;
   FormEditor: IOTAFormEditor;
   Root: IOTAComponent;
@@ -234,6 +234,15 @@ begin
           Creator.OldFormName := Comp.Name;
           try
             Creator.NewFormName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(Comp.Name);
+            // 这句除了加 1 这种行为之外，可能会删去 NewFormName 前面的 T，补回来
+
+            if (Length(Creator.OldFormName) > 1) and (Creator.OldFormName[1] = 'T') then
+            begin
+              S := Creator.OldFormName;
+              Delete(S, 1, 1);
+              if Pos(S, Creator.NewFormName) = 1 then
+                Creator.NewFormName := 'T' + Creator.NewFormName;
+            end;
           except
             Creator.NewFormName :=  Comp.Name + '1';
           end;
