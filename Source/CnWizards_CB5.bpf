@@ -162,6 +162,8 @@ USEFORMNS("SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas", Cnsrceditorreplacein
 USEUNIT("CodingToolset\CnEditorSortLines.pas");
 USEUNIT("CodingToolset\CnEditorToggleUses.pas");
 USEUNIT("CodingToolset\CnEditorJumpMessage.pas");
+USEUNIT("CodingToolset\CnEditorFontZoom.pas");
+USEUNIT("CodingToolset\CnEditorDuplicateUnit.pas");
 USEUNIT("SrcEditorEnhance\CnSrcEditorKey.pas");
 USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);
 USEUNIT("IdeEnhancements\CnIdeEnhanceMenu.pas");

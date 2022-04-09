@@ -150,6 +150,7 @@
       <Form>CnEditorCollectorForm</Form>
     </DCCReference>
     <DCCReference Include="CodingToolset\CnEditorFontZoom.pas" />
+    <DCCReference Include="CodingToolset\CnEditorDuplicateUnit.pas" />
     <DCCReference Include="CodingToolset\CnEditorInsertColor.pas" />
     <DCCReference Include="CodingToolset\CnEditorInsertTime.pas">
       <Form>CnEditorInsertTimeForm</Form>
