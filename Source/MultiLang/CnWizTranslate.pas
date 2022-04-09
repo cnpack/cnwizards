@@ -508,6 +508,11 @@ begin
   TranslateStr(SCnEditorExtendingSelectMenuHint, 'SCnEditorExtendingSelectMenuHint');
   TranslateStr(SCnEditorExtendingSelectName, 'SCnEditorExtendingSelectName');
 
+  // CnEditorDuplicateUnit
+  TranslateStr(SCnEditorDuplicateUnitMenuCaption, 'SCnEditorDuplicateUnitMenuCaption');
+  TranslateStr(SCnEditorDuplicateUnitMenuHint, 'SCnEditorDuplicateUnitMenuHint');
+  TranslateStr(SCnEditorDuplicateUnitName, 'SCnEditorDuplicateUnitName';
+
   // CnSrcTemplate
   TranslateStr(SCnSrcTemplateMenuCaption, 'SCnSrcTemplateMenuCaption');
   TranslateStr(SCnSrcTemplateMenuHint, 'SCnSrcTemplateMenuHint');
