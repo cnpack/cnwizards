@@ -28,7 +28,9 @@ unit CnIniFilerWizard;
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.12.06 V1.0
+* 修改记录：2022.04.10 V1.1
+*               支持独立 Section 模式
+*           2003.12.06 V1.0
 *               LiuXiao 创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -55,7 +57,6 @@ type
     FCodeName: string;
     FLineValue: string;
     procedure SetRawName(const Value: string);
-
   public
     property LineType: TCnIniLineType read FLineType write FLineType;
     property RawName: string read FRawName write SetRawName;
@@ -80,8 +81,11 @@ type
     procedure SynchronizeLines(EnableBool: Boolean = False);
 
     property SectionName: string read FSectionName;
+    {* 符号标识符格式的 Section 名字}
     property RawSection: string read FRawSection write SetRawSection;
+    {* Section 原始名字，用于注释}
     property NameValues: TStrings read FNameValues write SetNameValues;
+    {* 本 Section 内的字段名列表}
     property Lines: TObjectList read FLines;
     {* 保存多个 TCnIniLineDescriptor，由 SynchronizeLines 生成 }
   end;
@@ -93,7 +97,6 @@ type
     FConstPrefix: string;
     FIsAllStr: Boolean;
     FCheckBool: Boolean;
-
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -109,16 +112,29 @@ type
 
   TCnIniFilerCreator = class(TCnTemplateModuleCreator)
   private
+    FSectionMode: Boolean;
     FIniWizard: TCnIniFilerWizard;
 {$IFDEF BDS}
     FFileName: string;
 {$ENDIF}
+    function GenerateIniSectionTypes(const Prefix: string; List: TObjectList): string;
+    {* 生成子类 Section 声明，FSectionMode 为 True 时使用}
     function GenerateIniSections(const Prefix: string; List: TObjectList): string;
+    {* 生成 Section 常量声明}
     function GenerateIniNames(const Prefix: string; List: TObjectList): string;
+    {* 生成字段常量声明}
     function GenerateIniFields(List: TObjectList): string;
+    {* 生成字段 Field 声明}
     function GenerateIniProperties(List: TObjectList): string;
+    {* 生成字段属性}
     function GenerateIniReaders(const Prefix: string; List: TObjectList): string;
+    {* 生成读属性部分}
     function GenerateIniWriters(const Prefix: string; List: TObjectList): string;
+    {* 生成写属性部分}
+    function GenerateIniSectionsCreate(const Prefix: string; List: TObjectList): string;
+    {* 生成 Section 对象创建，FSectionMode 为 True 时使用}
+    function GenerateIniSectionsFree(const Prefix: string; List: TObjectList): string;
+    {* 生成 Section 对象释放，FSectionMode 为 True 时使用}
   protected
     function GetTemplateFile(FileType: TCnSourceType): string; override;
     procedure DoReplaceTagsSource(const TagString: string; TagParams: TStrings;
@@ -137,6 +153,9 @@ type
     {* BDS 返回实际的完整文件名 }
 {$ENDIF}
 
+    property SectionMode: Boolean read FSectionMode write FSectionMode;
+    {* 是否将每个 Section 独立成对象}
+
     property IniWizard: TCnIniFilerWizard read FIniWizard write FIniWizard;
 
 {$IFDEF BDS}
@@ -149,9 +168,15 @@ const
   SCnIniFilerModuleTemplateCppFile: string = 'CnIniFiler.cpp';
   SCnIniFilerModuleTemplateHeadFile: string = 'CnIniFiler.h';
 
+  SCnIniFilerModuleSectionTemplatePasFile: string = 'CnIniFiler_Section.pas';
+  SCnIniFilerModuleSectionTemplateCppFile: string = 'CnIniFiler_Section.cpp';
+  SCnIniFilerModuleSectionTemplateHeadFile: string = 'CnIniFiler_Section.h';
+
 function CropIniName(const RawName: string): string;
+{* 删除掉字符串中的非标识符字符，如果是纯数字则前面加 S}
 
 function GetTypeString(const AType: TCnIniLineType; const IsStr: Boolean): string;
+{* 得到一个 Field 的声明字符串}
 
 function GetReadFunctionStr(const AType: TCnIniLineType; const IsStr: Boolean): string;
 
@@ -170,12 +195,15 @@ uses
 
 const
   csIniSections = 'IniSections';
+  csIniSectionTypes = 'IniSectionTypes';
   csIniNames = 'IniNames';
   csIniClassName = 'IniClassName';
   csIniFields = 'IniFields';
   csIniProperties = 'IniProperties';
   csIniReaders = 'IniReaders';
   csIniWriters = 'IniWriters';
+  csIniSectionsCreate = 'IniSectionsCreate';
+  csIniSectionsFree = 'IniSectionsFree';
 
   csPasBoolean = 'Boolean';
   csPasInteger = 'Integer';
@@ -213,14 +241,14 @@ end;
 constructor TCnIniSection.Create;
 begin
   inherited;
-  Self.FNameValues := TStringList.Create;
-  Self.FLines := TObjectList.Create;
+  FNameValues := TStringList.Create;
+  FLines := TObjectList.Create;
 end;
 
 destructor TCnIniSection.Destroy;
 begin
-  Self.FLines.Free;
-  Self.FNameValues.Free;
+  FLines.Free;
+  FNameValues.Free;
   inherited;
 end;
 
@@ -228,8 +256,8 @@ procedure TCnIniSection.Assign(Source: TPersistent);
 begin
   if Source is TCnIniSection then
   begin
-    Self.FSectionName := (Source as TCnIniSection).SectionName;
-    Self.FNameValues.Assign((Source as TCnIniSection).NameValues);
+    FSectionName := (Source as TCnIniSection).SectionName;
+    FNameValues.Assign((Source as TCnIniSection).NameValues);
   end
   else
     inherited;
@@ -241,16 +269,16 @@ var
   I: Integer;
   S: string;
 begin
-  Self.FLines.Clear;
-  for I := 0 to Self.FNameValues.Count - 1 do
+  FLines.Clear;
+  for I := 0 to FNameValues.Count - 1 do
   begin
     if Pos('=', FNameValues[I]) < 1 then
       Continue; // 不处理不包含等号的行
 
     Descriptor := TCnIniLineDescriptor.Create;
-    S := Self.FNameValues.Names[I];
+    S := FNameValues.Names[I];
     Descriptor.RawName := S;
-    S := Self.FNameValues.Values[S];
+    S := FNameValues.Values[S];
     Descriptor.LineValue := S;
     if EnableBool and ((S = '0') or (S = '1')) then
       Descriptor.LineType := ltBoolean
@@ -263,7 +291,7 @@ begin
     else
       Descriptor.LineType := ltString;
 
-    Self.FLines.Add(Descriptor);
+    FLines.Add(Descriptor);
   end;
 end;
 
@@ -282,7 +310,7 @@ var
   I: Integer;
   Sec: TCnIniSection;
 begin
-  Self.FIniSections.Clear;
+  FIniSections.Clear;
 
   if IsCSharpRuntime then
   begin
@@ -352,7 +380,8 @@ begin
     end;
   end;
 
-  Ini := nil; SlSecs := nil;
+  Ini := nil;
+  SlSecs := nil;
   try
     SlSecs := TStringList.Create;
     Ini := TMemIniFile.Create(IniFile);
@@ -370,7 +399,7 @@ begin
       Sec.RawSection := SlSecs.Strings[I];
       Ini.ReadSectionValues(SlSecs.Strings[I], Sec.NameValues);
       Sec.SynchronizeLines(CheckBool);
-      Self.IniSections.Add(Sec);
+      FIniSections.Add(Sec);
     end;
   finally
     Ini.Free;
@@ -400,7 +429,7 @@ end;
 
 destructor TCnIniFilerWizard.Destroy;
 begin
-  Self.FIniSections.Free;
+  FIniSections.Free;
   inherited;
 end;
 
@@ -412,23 +441,32 @@ begin
     Exit;
 
   if TagString = csIniSections then
-    ReplaceText := Self.GenerateIniSections(Self.FIniWizard.ConstPrefix,
-      Self.FIniWizard.IniSections)
+    ReplaceText := GenerateIniSections(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
   else if TagString = csIniNames then
-    ReplaceText := Self.GenerateIniNames(Self.FIniWizard.ConstPrefix,
-      Self.FIniWizard.IniSections)
+    ReplaceText := GenerateIniNames(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
   else if TagString = csIniClassName then
-    ReplaceText := Self.FIniWizard.IniClassName
+    ReplaceText := FIniWizard.IniClassName
   else if TagString = csIniFields then
-    ReplaceText := Self.GenerateIniFields(Self.FIniWizard.IniSections)
+    ReplaceText := GenerateIniFields(FIniWizard.IniSections)
   else if TagString = csIniProperties then
-    ReplaceText := Self.GenerateIniProperties(Self.FIniWizard.IniSections)
+    ReplaceText := GenerateIniProperties(FIniWizard.IniSections)
   else if TagString = csIniReaders then
-    ReplaceText := Self.GenerateIniReaders(Self.FIniWizard.ConstPrefix,
-      Self.FIniWizard.IniSections)
+    ReplaceText := GenerateIniReaders(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
   else if TagString = csIniWriters then
-    ReplaceText := Self.GenerateIniWriters(Self.FIniWizard.ConstPrefix,
-      Self.FIniWizard.IniSections);
+    ReplaceText := GenerateIniWriters(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
+  else if TagString = csIniSectionTypes then
+    ReplaceText := GenerateIniSectionTypes(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
+  else if TagString = csIniSectionsCreate then
+    ReplaceText := GenerateIniSectionsCreate(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections)
+  else if TagString = csIniSectionsFree then
+    ReplaceText := GenerateIniSectionsFree(FIniWizard.ConstPrefix,
+      FIniWizard.IniSections);
 end;
 
 function TCnIniFilerCreator.GetTemplateFile(FileType: TCnSourceType): string;
@@ -437,16 +475,31 @@ begin
   if FileType = stImplSource then
   begin
     if FIsDelphi then
-      Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplatePasFile
+    begin
+      if FSectionMode then
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleSectionTemplatePasFile
+      else
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplatePasFile;
+    end
     else
-      Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplateCppFile;
+    begin
+      if FSectionMode then
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleSectionTemplateCppFile
+      else
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplateCppFile;
+    end;
   end
   else if FileType = stIntfSource then
   begin
     if FIsDelphi then
       Result := ''
     else
-      Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplateHeadFile;
+    begin
+      if FSectionMode then
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleSectionTemplateHeadFile
+      else
+        Result := MakePath(WizOptions.TemplatePath) + SCnIniFilerModuleTemplateHeadFile;
+    end;
   end;
 end;
 
@@ -527,22 +580,35 @@ begin
       else
         Result := Result + Format('    // Section: %s%s', [Sec.SectionName, CRLF]);
 
-      for J := 0 to Sec.Lines.Count - 1 do
+      if FSectionMode then
       begin
-        Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
-        ATypeStr := GetTypeString(Descriptor.LineType, Self.IniWizard.IsAllStr);
-
+        // SectionMode 下只需添加一个对象
         if FIsDelphi then
-          ALine := Format('    F%s%s: %s;%s', [Sec.SectionName,
-            Descriptor.CodeName, ATypeStr, CRLF])
+          Result := Result + Format('    F%sSection: T%sSection;%s',
+            [Sec.SectionName, Sec.SectionName, CRLF])
         else
-          ALine := Format('  %s F%s%s;%s', [ATypeStr, Sec.SectionName,
-            Descriptor.CodeName, CRLF]);
+          Result := Result + Format('    T%sSection F%sSection;%s',
+            [Sec.SectionName, Sec.SectionName, CRLF]); // TODO:
+      end
+      else
+      begin
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, FIniWizard.IsAllStr);
 
-        Result := Result + ALine;
+          if FIsDelphi then
+            ALine := Format('    F%s%s: %s;%s', [Sec.SectionName,
+              Descriptor.CodeName, ATypeStr, CRLF])
+          else
+            ALine := Format('  %s F%s%s;%s', [ATypeStr, Sec.SectionName,
+              Descriptor.CodeName, CRLF]);
+
+          Result := Result + ALine;
+        end;
+        if I <> List.Count - 1 then
+          Result := Result + CRLF;
       end;
-      if I <> List.Count - 1 then
-        Result := Result + CRLF;
     end;
   end;
 end;
@@ -565,24 +631,37 @@ begin
       else
         Result := Result + Format('    // Section: %s%s', [Sec.SectionName, CRLF]);
 
-      for J := 0 to Sec.Lines.Count - 1 do
+      if FSectionMode then
       begin
-        Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
-        ATypeStr := GetTypeString(Descriptor.LineType, Self.IniWizard.IsAllStr);
-
+        // SectionMode 下只需添加一个属性
         if FIsDelphi then
-          ALine := Format('    property %s%s: %s read F%s%s write F%s%s;%s',
-            [Sec.SectionName, Descriptor.CodeName, ATypeStr, Sec.SectionName,
-            Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF])
+          Result := Result + Format('    property %sSection: T%sSection read F%sSection;%s',
+            [Sec.SectionName, Sec.SectionName, Sec.SectionName, CRLF])
         else
-          ALine := Format('  __property %s %s%s ={read=F%s%s, write=F%s%s};%s',
-            [ATypeStr, Sec.SectionName, Descriptor.CodeName, Sec.SectionName,
-            Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF]);
+          Result := Result + Format('    __property T%sSection %sSection ={read F%sSection};%s',
+             [Sec.SectionName, Sec.SectionName, Sec.SectionName, CRLF]); // TODO:
+      end
+      else
+      begin
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, Self.IniWizard.IsAllStr);
 
-        Result := Result + ALine;
+          if FIsDelphi then
+            ALine := Format('    property %s%s: %s read F%s%s write F%s%s;%s',
+              [Sec.SectionName, Descriptor.CodeName, ATypeStr, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF])
+          else
+            ALine := Format('  __property %s %s%s ={read=F%s%s, write=F%s%s};%s',
+              [ATypeStr, Sec.SectionName, Descriptor.CodeName, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF]);
+
+          Result := Result + ALine;
+        end;
+        if I <> List.Count - 1 then
+          Result := Result + CRLF;
       end;
-      if I <> List.Count - 1 then
-        Result := Result + CRLF;
     end;
   end;
 end;
@@ -609,18 +688,32 @@ begin
       for J := 0 to Sec.Lines.Count - 1 do
       begin
         Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
-        AFuncStr := GetReadFunctionStr(Descriptor.LineType, Self.IniWizard.IsAllStr);
+        AFuncStr := GetReadFunctionStr(Descriptor.LineType, FIniWizard.IsAllStr);
         DefaultStr := GetDefaultStr(Descriptor.LineType, Descriptor.LineValue,
-          Self.IniWizard.IsAllStr);
+          FIniWizard.IsAllStr);
 
         if FIsDelphi then
-          ALine := Format('    F%s%s := Ini.%s(%s%sSection, %s%s%s, %s);%s',
-            [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
-             Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF])
+        begin
+          if FSectionMode then
+            ALine := Format('    F%sSection.%s := Ini.%s(%s%sSection, %s%s%s, %s);%s',
+              [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
+              Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF])
+          else
+            ALine := Format('    F%s%s := Ini.%s(%s%sSection, %s%s%s, %s);%s',
+              [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
+              Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF]);
+        end
         else
-          ALine := Format('    F%s%s = Ini->%s(%s%sSection, %s%s%s, %s);%s',
-            [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
-            Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF]);
+        begin
+          if FSectionMode then
+            ALine := Format('    F%sSection->%s = Ini->%s(%s%sSection, %s%s%s, %s);%s',
+              [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
+              Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF])
+          else
+            ALine := Format('    F%s%s = Ini->%s(%s%sSection, %s%s%s, %s);%s',
+              [Sec.SectionName, Descriptor.CodeName, AFuncStr, Prefix, Sec.SectionName,
+              Prefix, Sec.SectionName, Descriptor.CodeName, DefaultStr, CRLF]);
+        end;
 
         Result := Result + ALine;
       end;
@@ -649,20 +742,33 @@ begin
       else
         Result := Result + Format('    // Section: %s%s', [Sec.SectionName, CRLF]);
 
-
       for J := 0 to Sec.Lines.Count - 1 do
       begin
         Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
         AFuncStr := GetWriteFunctionStr(Descriptor.LineType, Self.IniWizard.IsAllStr);
 
         if FIsDelphi then
-          ALine := Format('    Ini.%s(%s%sSection, %s%s%s, F%s%s);%s',
-            [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
-            Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF])
+        begin
+          if FSectionMode then
+            ALine := Format('    Ini.%s(%s%sSection, %s%s%s, F%sSection.%s);%s',
+              [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF])
+          else
+            ALine := Format('    Ini.%s(%s%sSection, %s%s%s, F%s%s);%s',
+              [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF]);
+        end
         else
-          ALine := Format('    Ini->%s(%s%sSection, %s%s%s, F%s%s);%s',
-            [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
-            Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF]);
+        begin
+          if FSectionMode then
+            ALine := Format('    Ini->%s(%s%sSection, %s%s%s, F%sSection->%s);%s',
+              [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF])
+          else
+            ALine := Format('    Ini->%s(%s%sSection, %s%s%s, F%s%s);%s',
+              [AFuncStr, Prefix, Sec.SectionName, Prefix, Sec.SectionName,
+              Descriptor.CodeName, Sec.SectionName, Descriptor.CodeName, CRLF]);
+        end;
 
         Result := Result + ALine;
       end;
@@ -835,6 +941,98 @@ begin
 end;
 
 {$ENDIF}
+
+function TCnIniFilerCreator.GenerateIniSectionsCreate(const Prefix: string;
+  List: TObjectList): string;
+var
+  I: Integer;
+  Sec: TCnIniSection;
+begin
+  Result := '';
+  if (List <> nil) and FSectionMode then
+  begin
+    for I := 0 to List.Count - 1 do
+    begin
+      Sec := TCnIniSection(List.Items[I]);
+      if FIsDelphi then
+        Result := Result + Format('  F%sSection := T%sSection.Create;%s',
+          [Sec.SectionName, Sec.SectionName, CRLF])
+      else
+        Result := Result + Format('  F%sSection = new T%sSection();%s',
+          [Sec.SectionName, Sec.SectionName, CRLF])
+    end;
+  end;
+end;
+
+function TCnIniFilerCreator.GenerateIniSectionsFree(const Prefix: string;
+  List: TObjectList): string;
+var
+  I: Integer;
+  Sec: TCnIniSection;
+begin
+  Result := '';
+  if (List <> nil) and FSectionMode then
+  begin
+    for I := 0 to List.Count - 1 do
+    begin
+      Sec := TCnIniSection(List.Items[I]);
+      if FIsDelphi then
+        Result := Result + Format('  F%sSection.Free;%s',
+          [Sec.SectionName, CRLF])
+      else
+        Result := Result + Format('  delete F%sSection;%s',
+          [Sec.SectionName, CRLF])
+    end;
+  end;
+end;
+
+function TCnIniFilerCreator.GenerateIniSectionTypes(const Prefix: string;
+  List: TObjectList): string;
+var
+  I, J: Integer;
+  Sec: TCnIniSection;
+  Descriptor: TCnIniLineDescriptor;
+  ATypeStr: string;
+begin
+  Result := '';
+  if (List <> nil) and FSectionMode then
+  begin
+    for I := 0 to List.Count - 1 do
+    begin
+      Sec := TCnIniSection(List.Items[I]);
+      if FIsDelphi then
+      begin
+        // 生成一个 Section 的子类声明
+        Result := Result + Format('  T%sSection = class%s', [Sec.SectionName, CRLF]);
+        Result := Result + Format('  private%s', [CRLF]);
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, FIniWizard.IsAllStr);
+          Result := Result + Format('    F%s: %s;%s', [Descriptor.CodeName, ATypeStr, CRLF]);
+        end;
+        Result := Result + Format('  public%s', [CRLF]);
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, FIniWizard.IsAllStr);
+          Result := Result + Format('    property %s: %s read F%s write F%s;%s',
+            [Descriptor.CodeName, ATypeStr, Descriptor.CodeName, Descriptor.CodeName, CRLF]);
+        end;
+        Result := Result + Format('  end;%s', [CRLF]);
+      end
+      else
+      begin
+        // TODO:
+        Result := Result + Format('const AnsiString %s%sSection = "%s";%s', [Prefix,
+          Sec.SectionName, Sec.RawSection, CRLF]);
+      end;
+
+      if I <> List.Count - 1 then
+        Result := Result + CRLF;
+    end;
+  end;
+end;
 
 initialization
   RegisterCnWizard(TCnIniFilerWizard)

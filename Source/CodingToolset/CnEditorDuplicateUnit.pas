@@ -81,9 +81,6 @@ type
   TCnDuplicateCreator = class(TCnRawCreator, IOTAModuleCreator)
   private
     FCreatorType: string;
-    FIntf: TCnOTAFile;
-    FImpl: TCnOTAFile;
-    FForm: TCnOTAFile;
     FIntfSource: string;
     FFormSource: AnsiString;
     FImplSource: string;
@@ -97,7 +94,7 @@ type
   protected
     function ReplaceNames(const Str: string): string;
   public
-    constructor Create; virtual;
+    constructor Create; override;
     destructor Destroy; override;
 
     // IOTACreator 接口部分实现
@@ -162,9 +159,8 @@ begin
   IntfFile := '';
   ImplFile := '';
   FormFile := '';
-
   Stream := nil;
-  Creator := nil;
+
   try
     Creator := TCnDuplicateCreator.Create;
 
