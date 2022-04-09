@@ -74,7 +74,7 @@ implementation
 {$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 uses
-  CnWizIdeUtils, CnOTACreators, CnWizEditFiler {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizIdeUtils, CnOTACreators, CnWizEditFiler, RegExpr {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   TCnDuplicateCreator = class(TCnRawCreator, IOTAModuleCreator)
@@ -86,10 +86,19 @@ type
     FIntfSource: string;
     FFormSource: AnsiString;
     FImplSource: string;
+    FNewFormName: string;
+    FOldFormName: string;
+    FOldUnitName: string;
+    FNewUnitName: string;
     procedure SetFormSource(const Value: AnsiString);
     procedure SetImplSource(const Value: string);
     procedure SetIntfSource(const Value: string);
+  protected
+    function ReplaceNames(const Str: string): string;
   public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
     // IOTACreator 接口部分实现
     function GetCreatorType: string; override;
 
@@ -115,6 +124,14 @@ type
     {* h 文件内容（C++Builder 中）}
     property ImplSource: string read FImplSource write SetImplSource;
     {* Pas 或 Cpp 文件内容}
+    property NewFormName: string read FNewFormName write FNewFormName;
+    {* 新 Form 名称}
+    property OldFormName: string read FOldFormName write FOldFormName;
+    {* 旧 Form 名称，供替换用}
+    property NewUnitName: string read FNewUnitName write FNewUnitName;
+    {* 新单元名称}
+    property OldUnitName: string read FOldUnitName write FOldUnitName;
+    {* 旧单元名称，供替换用}
   end;
 
 //==============================================================================
@@ -173,6 +190,7 @@ begin
     else if ImplFile <> '' then
       Creator.CreatorType := sUnit;
 
+    Creator.OldUnitName := ChangeFileExt(ExtractFileName(ImplFile), '');
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('Impl: ' + ImplFile);
     CnDebugger.LogMsg('Intf: ' + IntfFile);
@@ -199,7 +217,7 @@ begin
     if FormEditor <> nil then
     begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('FormEditor: ' + FormEditor.FileName);
+      CnDebugger.LogMsg('FormEditor: ' + FormEditor.FileName);
 {$ENDIF}
 
       if FormEditor.FileName <> FormFile then
@@ -211,6 +229,14 @@ begin
         Comp := TComponent(Root.GetComponentHandle);
         if Comp <> nil then
         begin
+          // 拿到根 Name，并生成一个新的
+          Creator.OldFormName := Comp.Name;
+          try
+            Creator.NewFormName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(Comp.Name);
+          except
+            Creator.NewFormName :=  Comp.Name + '1';
+          end;
+
           Stream.Clear;
           TS := TMemoryStream.Create;
           try
@@ -231,15 +257,14 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogRawString(Creator.IntfSource);
-    CnDebugger.LogRawString(Creator.ImplSource);
-    CnDebugger.LogRawAnsiString(Creator.FormSource);
+    CnDebugger.LogMsg('OldUnitName: ' + Creator.OldUnitName);
+    CnDebugger.LogMsg('OldFormName: ' + Creator.OldFormName);
 {$ENDIF}
 
-    // (BorlandIDEServices as IOTAModuleServices).CreateModule(Creator);
+    (BorlandIDEServices as IOTAModuleServices).CreateModule(Creator);
   finally
     Stream.Free;
-    Creator.Free;
+    // Creator.Free; 由 CreateModule 内部作为接口释放
   end;
 end;
 
@@ -273,6 +298,20 @@ end;
 
 { TCnDuplicateCreator }
 
+constructor TCnDuplicateCreator.Create;
+begin
+  inherited;
+
+end;
+
+destructor TCnDuplicateCreator.Destroy;
+begin
+//  FIntf.Free;
+//  FImpl.Free;
+//  FForm.Free;
+  inherited;
+end;
+
 procedure TCnDuplicateCreator.FormCreated(
   const FormEditor: IOTAFormEditor);
 begin
@@ -281,7 +320,7 @@ end;
 
 function TCnDuplicateCreator.GetAncestorName: string;
 begin
-
+  Result := '';
 end;
 
 function TCnDuplicateCreator.GetCreatorType: string;
@@ -291,50 +330,100 @@ end;
 
 function TCnDuplicateCreator.GetFormName: string;
 begin
-
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('DuplicateCreator.GetFormName: %s', [FNewFormName]);
+{$ENDIF}
+  Result := FNewFormName;
 end;
 
 function TCnDuplicateCreator.GetImplFileName: string;
 begin
-
+  Result := '';
 end;
 
 function TCnDuplicateCreator.GetIntfFileName: string;
 begin
-
+  Result := '';
 end;
 
 function TCnDuplicateCreator.GetMainForm: Boolean;
 begin
-
+  Result := False;
 end;
 
 function TCnDuplicateCreator.GetShowForm: Boolean;
 begin
-
+  Result := True;
 end;
 
 function TCnDuplicateCreator.GetShowSource: Boolean;
 begin
-
+  Result := True;
 end;
 
 function TCnDuplicateCreator.NewFormFile(const FormIdent,
   AncestorIdent: string): IOTAFile;
+var
+  SL: TStrings;
+  S: string;
+  Spc, Colon: Integer;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('DuplicateCreator.NewFormFile: FormIdent %s AncestorIdent %s: ',
+    [FormIdent, AncestorIdent]);
+{$ENDIF}
+  SL := TStringList.Create;
+  SL.Text := string(FFormSource);
+  if (SL.Count > 1) and (Length(SL[0]) > 1) then
+  begin
+    // 第一行，第一个空格和后面第一个分号之前的部分换成 FormIdent，分号后换成 T + FormIdent
+    S := SL[0];
+    Spc := Pos(' ', S);
+    Colon := Pos(': ', S);
 
+    if (Spc > 0) and (Colon > 0) and (Colon > Spc) then
+      SL[0] := Copy(S, 1, Spc) + FormIdent + ': T' + FormIdent;
+  end;
+
+  FFormSource := SL.Text;
+  SL.Free;
+
+  Result := TCnOTAFile.Create(FFormSource);
 end;
 
 function TCnDuplicateCreator.NewImplSource(const ModuleIdent, FormIdent,
   AncestorIdent: string): IOTAFile;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('DuplicateCreator.NewImplSource: ModuleIdent %s FormIdent %s AncestorIdent %s: ',
+    [ModuleIdent, FormIdent, AncestorIdent]);
+{$ENDIF}
 
+  // 替换 FImplSource 中的内容
+  FNewUnitName := ModuleIdent;
+  Result := TCnOTAFile.Create(ReplaceNames(FImplSource));
 end;
 
 function TCnDuplicateCreator.NewIntfSource(const ModuleIdent, FormIdent,
   AncestorIdent: string): IOTAFile;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('DuplicateCreator.NewIntfSource: ModuleIdent %s FormIdent %s AncestorIdent %s: ',
+    [ModuleIdent, FormIdent, AncestorIdent]);
+{$ENDIF}
 
+  // 替换 FIntfSource 中的内容
+  FNewUnitName := ModuleIdent;
+  Result := TCnOTAFile.Create(ReplaceNames(FIntfSource));
+end;
+
+function TCnDuplicateCreator.ReplaceNames(const Str: string): string;
+begin
+  Result := StringReplace(Str, FOldFormName, NewFormName, [rfIgnoreCase, rfReplaceAll]);
+  if NewUnitName <> '' then
+    Result := StringReplace(Result, FOldUnitName, NewUnitName, [rfIgnoreCase, rfReplaceAll]);
+
+  // 优化点：Form1 整字替换成 Form2，TForm1 整字替换成 TForm2，Unit1 整字替换成 Unit2
 end;
 
 procedure TCnDuplicateCreator.SetFormSource(const Value: AnsiString);
