@@ -61,6 +61,7 @@ type
     chkIsAllStr: TCheckBox;
     chkBool: TCheckBox;
     dlgSave: TSaveDialog;
+    chkSectionMode: TCheckBox;
     procedure btnOpenClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -76,7 +77,8 @@ type
     procedure SetIsAllStr(const Value: Boolean);
     function GetCheckBool: Boolean;
     procedure SetCheckBool(const Value: Boolean);
-    { Private declarations }
+    function GetSectionMode: Boolean;
+    procedure SetSectionMode(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
   public
@@ -84,12 +86,9 @@ type
     property IniClassName: string read GetIniClassName write SetIniClassName;
     property IniFileName: string read GetIniFileName write SetIniFileName;
     property IsAllStr: Boolean read GetIsAllStr write SetIsAllStr;
-    property CheckBool: Boolean read GetCheckBool write SetCheckBool; 
-    { Public declarations }
+    property CheckBool: Boolean read GetCheckBool write SetCheckBool;
+    property SectionMode: Boolean read GetSectionMode write SetSectionMode;
   end;
-
-var
-  CnIniFilerForm: TCnIniFilerForm;
 
 {$ENDIF CNWIZARDS_CNINIFILERWIZARD}
 
@@ -101,38 +100,38 @@ implementation
 
 function TCnIniFilerForm.GetConstPrefix: string;
 begin
-  Result := Self.edtPrefix.Text;
+  Result := edtPrefix.Text;
 end;
 
 procedure TCnIniFilerForm.SetConstPrefix(const Value: string);
 begin
-  Self.edtPrefix.Text := Value;
+  edtPrefix.Text := Value;
 end;
 
 function TCnIniFilerForm.GetIniClassName: string;
 begin
-  Result := Self.edtClassName.Text;
+  Result := edtClassName.Text;
 end;
 
 procedure TCnIniFilerForm.SetIniClassName(const Value: string);
 begin
-  Self.edtClassName.Text := Value;
+  edtClassName.Text := Value;
 end;
 
 procedure TCnIniFilerForm.btnOpenClick(Sender: TObject);
 begin
-  if Self.dlgOpen.Execute then
-    Self.IniFileName := Self.dlgOpen.FileName;
+  if dlgOpen.Execute then
+    IniFileName := dlgOpen.FileName;
 end;
 
 function TCnIniFilerForm.GetIniFileName: string;
 begin
-  Result := Self.edtIniFile.Text;
+  Result := edtIniFile.Text;
 end;
 
 procedure TCnIniFilerForm.SetIniFileName(const Value: string);
 begin
-  Self.edtIniFile.Text := Value;
+  edtIniFile.Text := Value;
 end;
 
 procedure TCnIniFilerForm.btnHelpClick(Sender: TObject);
@@ -144,19 +143,19 @@ procedure TCnIniFilerForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   CanClose := True;
-  if Self.ModalResult = mrOK then
+  if ModalResult = mrOK then
   begin
-    if (Self.IniFileName = '') or not FileExists(Self.IniFileName) then
+    if (IniFileName = '') or not FileExists(IniFileName) then
     begin
       ErrorDlg(SCnIniErrorNoFile);
       CanClose := False;
     end
-    else if (Self.IniClassName = '') or (Pos(' ', Self.IniClassName) > 0) then
+    else if (IniClassName = '') or (Pos(' ', IniClassName) > 0) then
     begin
       ErrorDlg(SCnIniErrorClassName);
       CanClose := False;
     end
-    else if (Self.ConstPrefix = '') or (Pos(' ', Self.ConstPrefix) > 0) then
+    else if (ConstPrefix = '') or (Pos(' ', ConstPrefix) > 0) then
     begin
       ErrorDlg(SCnIniErrorPrefix);
       CanClose := False;
@@ -176,24 +175,34 @@ end;
 
 procedure TCnIniFilerForm.SetIsAllStr(const Value: Boolean);
 begin
-  Self.chkIsAllStr.Checked := not Value;
+  chkIsAllStr.Checked := not Value;
   if Assigned(chkIsAllStr.OnClick) then
     chkIsAllStr.OnClick(chkIsAllStr);
 end;
 
 function TCnIniFilerForm.GetCheckBool: Boolean;
 begin
-  Result := Self.chkBool.Checked;
+  Result := chkBool.Checked;
 end;
 
 procedure TCnIniFilerForm.SetCheckBool(const Value: Boolean);
 begin
-  Self.chkBool.Checked := Value;
+  chkBool.Checked := Value;
 end;
 
 procedure TCnIniFilerForm.chkIsAllStrClick(Sender: TObject);
 begin
   chkBool.Enabled := chkIsAllStr.Checked;
+end;
+
+function TCnIniFilerForm.GetSectionMode: Boolean;
+begin
+  Result := chkSectionMode.Checked;
+end;
+
+procedure TCnIniFilerForm.SetSectionMode(const Value: Boolean);
+begin
+  chkSectionMode.Checked := Value;
 end;
 
 {$ENDIF CNWIZARDS_CNINIFILERWIZARD}

@@ -1,38 +1,41 @@
 inherited CnIniFilerForm: TCnIniFilerForm
-  Left = 309
-  Top = 173
+  Left = 441
+  Top = 229
   BorderStyle = bsDialog
   Caption = 'INI Reader and Writer Settings'
-  ClientHeight = 223
-  ClientWidth = 269
+  ClientHeight = 251
+  ClientWidth = 339
   OnCloseQuery = FormCloseQuery
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 11
-    Top = 189
+    Left = 81
+    Top = 217
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 97
-    Top = 189
+    Left = 167
+    Top = 217
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 182
-    Top = 189
+    Left = 252
+    Top = 217
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
@@ -40,8 +43,9 @@ inherited CnIniFilerForm: TCnIniFilerForm
   object grp1: TGroupBox
     Left = 12
     Top = 8
-    Width = 245
-    Height = 169
+    Width = 315
+    Height = 197
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'INI Reader and Writer Settings'
     TabOrder = 0
     object lblIni: TLabel
@@ -75,10 +79,11 @@ inherited CnIniFilerForm: TCnIniFilerForm
       ParentColor = False
     end
     object btnOpen: TSpeedButton
-      Left = 212
+      Left = 274
       Top = 20
       Width = 20
       Height = 20
+      Anchors = [akTop, akRight]
       Flat = True
       Glyph.Data = {
         F6000000424DF600000000000000760000002800000010000000100000000100
@@ -94,29 +99,33 @@ inherited CnIniFilerForm: TCnIniFilerForm
     object edtIniFile: TEdit
       Left = 80
       Top = 20
-      Width = 129
+      Width = 191
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 0
     end
     object edtPrefix: TEdit
       Left = 80
       Top = 52
-      Width = 153
+      Width = 215
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
     end
     object edtClassName: TEdit
       Left = 88
       Top = 84
-      Width = 145
+      Width = 207
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 2
     end
     object chkIsAllStr: TCheckBox
       Left = 16
       Top = 114
-      Width = 225
+      Width = 281
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Auto Detect the Type of Items in INI File.'
       Checked = True
       State = cbChecked
@@ -126,12 +135,23 @@ inherited CnIniFilerForm: TCnIniFilerForm
     object chkBool: TCheckBox
       Left = 36
       Top = 138
-      Width = 205
+      Width = 261
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Treat 0 and 1 as Boolean Type.'
       Checked = True
       State = cbChecked
       TabOrder = 4
+    end
+    object chkSectionMode: TCheckBox
+      Left = 16
+      Top = 162
+      Width = 281
+      Height = 17
+      Anchors = [akLeft, akTop, akRight]
+      Caption = 'Combine Items in Sections.'
+      TabOrder = 5
+      OnClick = chkIsAllStrClick
     end
   end
   object dlgOpen: TOpenDialog

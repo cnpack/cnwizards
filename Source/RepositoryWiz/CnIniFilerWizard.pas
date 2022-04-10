@@ -97,6 +97,7 @@ type
     FConstPrefix: string;
     FIsAllStr: Boolean;
     FCheckBool: Boolean;
+    FSectionMode: Boolean;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -108,6 +109,7 @@ type
     property ConstPrefix: string read FConstPrefix write FConstPrefix;
     property IsAllStr: Boolean read FIsAllStr write FIsAllStr;
     property CheckBool: Boolean read FCheckBool write FCheckBool;
+    property SectionMode: Boolean read FSectionMode write FSectionMode;
   end;
 
   TCnIniFilerCreator = class(TCnTemplateModuleCreator)
@@ -350,16 +352,20 @@ begin
       ConstPrefix := Self.ConstPrefix;
       IsAllStr := Self.IsAllStr;
       CheckBool := Self.CheckBool;
+      SectionMode := Self.SectionMode;
+
       if ShowModal = mrOK then
       begin
         Self.IniClassName := IniClassName;
         Self.ConstPrefix := ConstPrefix;
         Self.IsAllStr := IsAllStr;
         Self.CheckBool := CheckBool;
+        Self.SectionMode := SectionMode;
         IniFile := IniFileName;
 
         ModuleCreator := TCnIniFilerCreator.Create;
         ModuleCreator.IniWizard := Self;
+        ModuleCreator.SectionMode := Self.SectionMode;
 
 {$IFDEF BDS}
         if FIsDelphi then
@@ -542,7 +548,7 @@ begin
       if FIsDelphi then
         Result := Result + Format('  {Section: %s}%s', [Sec.SectionName, CRLF])
       else
-        Result := Result + Format('  // Section: %s%s', [Sec.SectionName, CRLF]);
+        Result := Result + Format('// Section: %s%s', [Sec.SectionName, CRLF]);
 
       for J := 0 to Sec.Lines.Count - 1 do
       begin
@@ -578,7 +584,7 @@ begin
       if FIsDelphi then
         Result := Result + Format('    {Section: %s}%s', [Sec.SectionName, CRLF])
       else
-        Result := Result + Format('    // Section: %s%s', [Sec.SectionName, CRLF]);
+        Result := Result + Format('  // Section: %s%s', [Sec.SectionName, CRLF]);
 
       if FSectionMode then
       begin
@@ -587,8 +593,8 @@ begin
           Result := Result + Format('    F%sSection: T%sSection;%s',
             [Sec.SectionName, Sec.SectionName, CRLF])
         else
-          Result := Result + Format('    T%sSection F%sSection;%s',
-            [Sec.SectionName, Sec.SectionName, CRLF]); // TODO:
+          Result := Result + Format('  T%sSection * F%sSection;%s',
+            [Sec.SectionName, Sec.SectionName, CRLF]);
       end
       else
       begin
@@ -629,7 +635,7 @@ begin
       if FIsDelphi then
         Result := Result + Format('    {Section: %s}%s', [Sec.SectionName, CRLF])
       else
-        Result := Result + Format('    // Section: %s%s', [Sec.SectionName, CRLF]);
+        Result := Result + Format('  // Section: %s%s', [Sec.SectionName, CRLF]);
 
       if FSectionMode then
       begin
@@ -638,8 +644,8 @@ begin
           Result := Result + Format('    property %sSection: T%sSection read F%sSection;%s',
             [Sec.SectionName, Sec.SectionName, Sec.SectionName, CRLF])
         else
-          Result := Result + Format('    __property T%sSection %sSection ={read F%sSection};%s',
-             [Sec.SectionName, Sec.SectionName, Sec.SectionName, CRLF]); // TODO:
+          Result := Result + Format('  __property T%sSection * %sSection ={read=F%sSection};%s',
+             [Sec.SectionName, Sec.SectionName, Sec.SectionName, CRLF]);
       end
       else
       begin
@@ -948,9 +954,9 @@ var
   I: Integer;
   Sec: TCnIniSection;
 begin
-  Result := '';
   if (List <> nil) and FSectionMode then
   begin
+    Result := '';
     for I := 0 to List.Count - 1 do
     begin
       Sec := TCnIniSection(List.Items[I]);
@@ -961,7 +967,9 @@ begin
         Result := Result + Format('  F%sSection = new T%sSection();%s',
           [Sec.SectionName, Sec.SectionName, CRLF])
     end;
-  end;
+  end
+  else
+    Result := CRLF;
 end;
 
 function TCnIniFilerCreator.GenerateIniSectionsFree(const Prefix: string;
@@ -970,9 +978,9 @@ var
   I: Integer;
   Sec: TCnIniSection;
 begin
-  Result := '';
   if (List <> nil) and FSectionMode then
   begin
+    Result := '';
     for I := 0 to List.Count - 1 do
     begin
       Sec := TCnIniSection(List.Items[I]);
@@ -983,7 +991,9 @@ begin
         Result := Result + Format('  delete F%sSection;%s',
           [Sec.SectionName, CRLF])
     end;
-  end;
+  end
+  else
+    Result := CRLF;
 end;
 
 function TCnIniFilerCreator.GenerateIniSectionTypes(const Prefix: string;
@@ -1023,9 +1033,25 @@ begin
       end
       else
       begin
-        // TODO:
-        Result := Result + Format('const AnsiString %s%sSection = "%s";%s', [Prefix,
-          Sec.SectionName, Sec.RawSection, CRLF]);
+        // 生成一个 Section 的子类声明
+        Result := Result + Format('class T%sSection : public TObject%s', [Sec.SectionName, CRLF]);
+        Result := Result + Format('{%s', [CRLF]);
+        Result := Result + Format('private:%s', [CRLF]);
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, FIniWizard.IsAllStr);
+          Result := Result + Format('  %s F%s;%s', [ATypeStr, Descriptor.CodeName, CRLF]);
+        end;
+        Result := Result + Format('public:%s', [CRLF]);
+        for J := 0 to Sec.Lines.Count - 1 do
+        begin
+          Descriptor := TCnIniLineDescriptor(Sec.Lines.Items[J]);
+          ATypeStr := GetTypeString(Descriptor.LineType, FIniWizard.IsAllStr);
+          Result := Result + Format('  __property %s %s ={read=F%s, write=F%s};%s',
+            [ATypeStr, Descriptor.CodeName, Descriptor.CodeName, Descriptor.CodeName, CRLF]);
+        end;
+        Result := Result + Format('};%s', [CRLF]);
       end;
 
       if I <> List.Count - 1 then

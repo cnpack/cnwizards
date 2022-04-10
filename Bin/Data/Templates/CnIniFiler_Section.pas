@@ -67,12 +67,12 @@ begin
   end;
 end;
 
-constructor TIniOptions.Create;
+constructor T<#IniClassName>.Create;
 begin
   inherited;
 <#IniSectionsCreate>end;
 
-destructor TIniOptions.Destroy;
+destructor T<#IniClassName>.Destroy;
 begin
 <#IniSectionsFree>  inherited;
 end;
