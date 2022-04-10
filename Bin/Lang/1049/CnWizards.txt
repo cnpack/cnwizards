@@ -1874,6 +1874,7 @@ TCnIniFilerForm.btnHelp.Caption=Справка
 TCnIniFilerForm.btnOK.Caption=&OK
 TCnIniFilerForm.chkBool.Caption=Считать 0 и 1 как тип Boolean
 TCnIniFilerForm.chkIsAllStr.Caption=Автоопределние типов в INI-файле
+TCnIniFilerForm.chkSectionMode.Caption=Объединяйте элементы в каждом разделе
 TCnIniFilerForm.dlgOpen.Filter=INI-файлы (*.ini)|*.ini
 TCnIniFilerForm.grp1.Caption=Настройки INI-мастера
 TCnIniFilerForm.lblConstPrefix.Caption=Префикс:

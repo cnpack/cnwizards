@@ -1874,6 +1874,7 @@ TCnIniFilerForm.btnHelp.Caption=說明(&H)
 TCnIniFilerForm.btnOK.Caption=確定(&O)
 TCnIniFilerForm.chkBool.Caption=將 0 和 1 作為布林類型處理
 TCnIniFilerForm.chkIsAllStr.Caption=自動判斷 INI 檔中各項的類型
+TCnIniFilerForm.chkSectionMode.Caption=內部條目分段組合
 TCnIniFilerForm.dlgOpen.Filter=INI 文件(*.ini)|*.ini
 TCnIniFilerForm.grp1.Caption=讀寫單元生成設置
 TCnIniFilerForm.lblConstPrefix.Caption=常量首碼：

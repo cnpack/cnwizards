@@ -1874,6 +1874,7 @@ TCnIniFilerForm.btnHelp.Caption=&Aide
 TCnIniFilerForm.btnOK.Caption=&OK
 TCnIniFilerForm.chkBool.Caption=Traitez 0 et 1 comme type booléen.
 TCnIniFilerForm.chkIsAllStr.Caption=Détecter auto. type éléments dans fichier INI
+TCnIniFilerForm.chkSectionMode.Caption=Combiner les éléments dans chaque section
 TCnIniFilerForm.dlgOpen.Filter=fichier INI (*.INI)|*.ini
 TCnIniFilerForm.grp1.Caption=Paramètres INI Reader et Writer
 TCnIniFilerForm.lblConstPrefix.Caption=Préfix:

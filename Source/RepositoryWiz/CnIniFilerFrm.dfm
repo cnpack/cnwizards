@@ -149,7 +149,7 @@ inherited CnIniFilerForm: TCnIniFilerForm
       Width = 281
       Height = 17
       Anchors = [akLeft, akTop, akRight]
-      Caption = 'Combine Items in Sections.'
+      Caption = 'Combine Items in Each Section.'
       TabOrder = 5
       OnClick = chkIsAllStrClick
     end
