@@ -309,6 +309,10 @@
 				<param name="Name" value="缩小字体工具">
 				<param name="Local" value="wizards\editors\editorfontdec.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="复制当前单元工具">
+				<param name="Local" value="wizards\editors\editorduplicateunit.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="代码编辑器扩展">

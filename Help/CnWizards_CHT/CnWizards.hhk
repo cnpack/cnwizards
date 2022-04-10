@@ -234,6 +234,10 @@
 		<param name="Local" value="cnpack\about.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="複製當前單元工具">
+		<param name="Local" value="wizards\editors\editorduplicateunit.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="函數過程列表">
 		<param name="Local" value="wizards\cnproclistwizard.htm">
 		</OBJECT>

@@ -309,6 +309,10 @@
 				<param name="Name" value="Decrease Font Size Tool">
 				<param name="Local" value="wizards\editors\editorfontdec.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Duplicate Current Unit Tool">
+				<param name="Local" value="wizards\editors\editorduplicateunit.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Editor Enhancements Wizard">
