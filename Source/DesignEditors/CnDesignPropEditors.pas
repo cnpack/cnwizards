@@ -22,7 +22,7 @@ unit CnDesignPropEditors;
 {* |<PRE>
 ================================================================================
 * 软件名称：开发包属性、组件编辑器库
-* 单元名称：由Chinbo创建的属性编辑器单元
+* 单元名称：由 Chinbo 创建的属性编辑器单元
 * 单元作者：Chinbo(Shenloqi@hotmail.com)
 * 备    注：
 * 开发平台：PWin98SE + Delphi 5.0
@@ -31,10 +31,10 @@ unit CnDesignPropEditors;
 * 修改记录：2003.04.28 V1.3 by 周劲羽
 *               使用编辑器映射的方法，现在可以动态卸载属性编辑器了
 *           2003.03.14 V1.2 by chinbo
-*               为支持使用Delphi的Editor进行了较大的改动
-*               为Font属性增加了自画功能（更改了color，style，没有更改name,size）
+*               为支持使用 Delphi 的 Editor 进行了较大的改动
+*               为 Font 属性增加了自画功能（更改了 Color、Style，没有更改 Name、Size）
 *           2002.08.09 V1.1 by 周劲羽
-*               新增TCnCaptionPropEditor类，用于编辑Caption时提供自动更新属性
+*               新增 TCnCaptionPropEditor 类，用于编辑 Caption 时提供自动更新属性
 *           2002.07.19 V1.0
 *               创建单元
 ================================================================================
@@ -61,7 +61,6 @@ type
   { TCnStringPropEditor }
   TCnStringPropEditor = class(TStringProperty)
   public
-    { Public desclarations }
     function GetAttributes: TPropertyAttributes; override;
     procedure Edit; override;
     class procedure GetInfo(var Name, Author, Email, Comment: String);
@@ -72,7 +71,6 @@ type
 
   TCnCaptionPropEditor = class(TCnStringPropEditor)
   public
-    { Public desclarations }
     function GetAttributes: TPropertyAttributes; override;
   end;
 
@@ -129,16 +127,15 @@ type
   end;
 
   TCnControlScrollBarPropEditor = class(TClassProperty)
+  public
     function GetValue: string; override;
     function GetAttributes: TPropertyAttributes; override;
     class procedure GetInfo(var Name, Author, Email, Comment: String);
     class procedure Register;
   end;
 
-function CnPropertyGetStrings(aList: TStrings;
-  Ident: string;
-  Component: TComponent;
-  Name: string): Boolean; overload;
+function CnPropertyGetStrings(AList: TStrings; Ident: string; Component: TComponent;
+  Name: string): Boolean;
 
 {$ENDIF CNWIZARDS_DESIGNEDITOR}
 
@@ -149,13 +146,11 @@ implementation
 {$IFDEF DELPHI}
 uses
   StFilSys, CnDesignStringModule;
-{$ENDIF DELPHI}
+{$ENDIF}
 
 { TCnStringPropEditor }
 
-function CnPropertyGetStrings(aList: TStrings;
-  Ident: string;
-  Component: TComponent;
+function CnPropertyGetStrings(AList: TStrings; Ident: string; Component: TComponent;
   Name: string): Boolean;
 var
   FEditor: TCnMultiLineEditorForm;
@@ -164,10 +159,10 @@ var
   Editor: IOTAEditor;
   Stream: TStringStream;
   Age: TDateTime;
-{$ENDIF DELPHI}
+{$ENDIF}
 begin
   Result := False;
-  if not Assigned(aList) then
+  if not Assigned(AList) then
     Exit;
   FEditor := TCnMultiLineEditorForm.Create(nil);
   with FEditor do
@@ -175,12 +170,12 @@ begin
     LoadFormSize;
     if Ident <> '' then
       Caption := Ident;
-    memEdit.Lines.Assign(TStrings(aList));
+    memEdit.Lines.Assign(TStrings(AList));
     memEdit.Modified := False;
     case ShowModal of
       mrOK:
         begin
-          aList.Assign(TStrings(memEdit.Lines));
+          AList.Assign(TStrings(memEdit.Lines));
           Result := True
         end;
       {$IFDEF DELPHI}
@@ -206,7 +201,7 @@ begin
             Editor.Show;
           end;
         end;
-      {$ENDIF DELPHI}
+      {$ENDIF}
     end;
   finally
     Free;
@@ -240,13 +235,15 @@ begin
   end
   else
   begin
-    S := Self.Designer.GetRoot.Name  + '.' + Component.GetNamePath + '.' + GetName;
+    if (Designer <> nil) and (Component <> nil) and (Designer.GetRoot <> nil) then
+      S := Self.Designer.GetRoot.Name  + '.' + Component.GetNamePath + '.' + GetName;
     Module := nil;
   end;
 
   if (Module <> nil) and (Module.GetModuleFileCount > 0) then
     Module.GetModuleFileEditor(0).Show
   else
+  begin
     with TCnMultiLineEditorForm.Create(nil) do
     try
       LoadFormSize;
@@ -261,6 +258,7 @@ begin
     finally
       Free;
     end;
+  end;
 end;
 
 class procedure TCnStringPropEditor.GetInfo(var Name, Author, Email,
@@ -310,7 +308,7 @@ end;
 
 procedure TCnStringsPropEditor.Edit;
 var
-  aList: TStringList;
+  AList: TStringList;
   Ident: string;
   Component: TComponent;
   Module: IOTAModule;
@@ -342,13 +340,13 @@ begin
     Module.GetModuleFileEditor(0).Show
   else
   begin
-    aList := TStringList.Create;
+    AList := TStringList.Create;
     try
-      aList.Assign(TStringList(Pointer(GetOrdValue)));
-      if CnPropertyGetStrings(aList, Ident, Component, GetName) then
-        SetOrdValue(Longint(Pointer(aList)));
+      AList.Assign(TStringList(Pointer(GetOrdValue)));
+      if CnPropertyGetStrings(AList, Ident, Component, GetName) then
+        SetOrdValue(Longint(Pointer(AList)));
     finally
-      aList.Free;
+      AList.Free;
     end;
   end;
 end;
@@ -383,7 +381,7 @@ end;
 
 procedure TCnHintPropEditor.Edit;
 var
-  S, tmp: string;
+  S, Tmp: string;
 {$IFDEF DELPHI2009_UP}
   I, Index, ImgIndex: Integer;
   Images: TImageList;
@@ -406,25 +404,25 @@ begin
       S := '';
     if S <> '' then
       Caption := S;
-    tmp := GetStrValue;
-    Memos[0].Text := GetShortHint(tmp);
+    Tmp := GetStrValue;
+    Memos[0].Text := GetShortHint(Tmp);
 {$IFDEF DELPHI2009_UP}
     Images := nil;
     ImgIndex := 0;
     if (GetComponent(0) is TControl) and
       Assigned(TControl(GetComponent(0)).CustomHint) then
       Images := TControl(GetComponent(0)).CustomHint.Images;
-    if AnsiPos('|', tmp) > 0 then
-      tmp := GetLongHint(tmp)
+    if AnsiPos('|', Tmp) > 0 then
+      Tmp := GetLongHint(Tmp)
     else
-      tmp := '';
-    Index := AnsiPos('|', tmp);
+      Tmp := '';
+    Index := AnsiPos('|', Tmp);
     if Index <> 0 then
     begin
-      ImgIndex := StrToIntDef(Copy(tmp, Index + 1, MaxInt), -1) + 1;
-      tmp := Copy(tmp, 0, Index - 1);
+      ImgIndex := StrToIntDef(Copy(Tmp, Index + 1, MaxInt), -1) + 1;
+      Tmp := Copy(Tmp, 0, Index - 1);
     end;
-    Memos[1].Text := tmp;
+    Memos[1].Text := Tmp;
     tshImageIndex.TabVisible := Assigned(Images);
     if Assigned(Images) then
     begin
@@ -462,8 +460,8 @@ begin
         SetStrValue(Memos[0].Text);
     end;
 {$ELSE}
-    if AnsiPos('|', tmp) > 0 then
-      Memos[1].Text := GetLongHint(tmp);
+    if AnsiPos('|', Tmp) > 0 then
+      Memos[1].Text := GetLongHint(Tmp);
     if ShowModal = mrOK then
       if Trim(Memos[1].Text) <> '' then
         SetStrValue(Memos[0].Text + '|' + Memos[1].Text)
