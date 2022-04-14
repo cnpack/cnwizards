@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, IniFiles, ToolsAPI, CnConsts, CnWizUtils, CnEditorToolsetWizard, CnWizConsts,
-  CnCommon, CnWizOptions;
+  StdCtrls, IniFiles, ToolsAPI, {$IFDEF COMPILER6_UP}
+  DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}
+  CnConsts, CnWizUtils, CnEditorToolsetWizard, CnWizConsts, CnCommon, CnWizOptions;
 
 type
 
@@ -147,8 +148,9 @@ var
   IntfFile, ImplFile, FormFile, S: string;
   Stream, TS: TMemoryStream;
   FormEditor: IOTAFormEditor;
+  Designer: IDesigner;
   Root: IOTAComponent;
-  Comp: TComponent;
+  Comp, Anc: TComponent;
   C: AnsiChar;
 begin
   // 获取当前单元信息，并生成新 Creator 并调用
@@ -228,8 +230,13 @@ begin
         begin
           // 拿到根 Name，并生成一个新的
           Creator.OldFormName := Comp.Name;
+          Designer := (FormEditor as INTAFormEditor).FormDesigner;
+
           try
-            Creator.NewFormName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(Comp.Name);
+            if Designer <> nil then
+              Creator.NewFormName := Designer.UniqueName(Comp.Name)
+            else
+              Creator.NewFormName := Comp.Name + '1';
             // 这句除了加 1 这种行为之外，可能会删去 NewFormName 前面的 T，补回来
 
             if (Length(Creator.OldFormName) > 1) and (Creator.OldFormName[1] = 'T') then
@@ -246,7 +253,15 @@ begin
           Stream.Clear;
           TS := TMemoryStream.Create;
           try
-            TS.WriteComponent(Comp);
+            Anc := nil;
+            if Designer.GetAncestorDesigner <> nil then
+              Anc := Designer.GetAncestorDesigner.GetRoot;
+{$IFDEF DEBUG}
+            if Anc <> nil then
+              CnDebugger.LogMsg('Ancestor: ' + Anc.ClassName);
+{$ENDIF}
+
+            TS.WriteDescendent(Comp, Anc);
             TS.Position := 0;
             ObjectBinaryToText(TS, Stream);
             // 注意这里出来的是 AnsiString 格式
