@@ -42,7 +42,8 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, CnIni,
   ComCtrls, ToolWin, ToolsAPI, IniFiles, CnEditControlWrapper, CnWizNotifier,
-  CnWizManager, CnWizMenuAction, CnWizClasses, CnWizIni, CnWizIdeUtils, CnPopupMenu;
+  CnWizManager, CnWizMenuAction, CnWizClasses, CnWizIni, CnWizIdeUtils, CnPopupMenu,
+  CnConsts;
 
 type
 
@@ -771,6 +772,7 @@ var
   List: TStringList;
   FileName: string;
 begin
+{$IFDEF CNWIZARDS_CNFORMENHANCEWIZARD}
   with TCnFlatToolbarConfigForm.Create(nil) do
   try
     if AType = tbtCode then
@@ -796,6 +798,9 @@ begin
   finally
     Free;
   end;
+{$ELSE}
+  ErrorDlg(SCnError);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorToolBarMgr.CheckToolBarEnable;
