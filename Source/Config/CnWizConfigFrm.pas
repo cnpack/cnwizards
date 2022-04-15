@@ -428,6 +428,9 @@ var
   Idx, x, y: Integer;
   Bmp: TBitmap;
   EnableIndex, EnableIconMargin: Integer;
+{$IFDEF IDE_SUPPORT_HDPI}
+  XIcon: TIcon;
+{$ENDIF}
 begin
   if not (Control is TListBox) then Exit;
   ListBox := TListBox(Control);
@@ -508,11 +511,30 @@ begin
     else
       EnableIndex := 1;
 
+{$IFDEF IDE_SUPPORT_HDPI}
+    EnableIconMargin := (Rect.Bottom - Rect.Top
+      - IdeGetScaledPixelsFromOrigin(ilEnable.Height, lbWizards)) div 2;
+    if EnableIconMargin < 0 then
+      EnableIconMargin := 0;
+
+    XIcon := TIcon.Create;
+    try
+      ilEnable.GetIcon(EnableIndex, XIcon);
+      DrawIconEx(ListBox.Canvas.Handle, Rect.Right - EnableIconMargin
+        - IdeGetScaledPixelsFromOrigin(ilEnable.Width, lbWizards) - 6,
+        Rect.Top + EnableIconMargin + 1, XIcon.Handle,
+        IdeGetScaledPixelsFromOrigin(ilEnable.Width, lbWizards),
+        IdeGetScaledPixelsFromOrigin(ilEnable.Height, lbWizards), 0, 0, DI_NORMAL);
+    finally
+      XIcon.Free;
+    end;
+{$ELSE}
     EnableIconMargin := (Rect.Bottom - Rect.Top - ilEnable.Height) div 2;
     if EnableIconMargin < 0 then
       EnableIconMargin := 0;
     ilEnable.Draw(ListBox.Canvas, Rect.Right - EnableIconMargin - ilEnable.Width - 6,
       Rect.Top + EnableIconMargin + 1, EnableIndex);
+{$ENDIF}
   finally
     Bmp.Free;
   end;
