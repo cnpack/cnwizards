@@ -268,7 +268,7 @@ end;
 
 function TCnEditorCollection.LoadFromFile(const FileName: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   try
@@ -276,11 +276,11 @@ begin
       Exit;
 
     TOmniXMLReader.LoadFromFile(Self, FileName);
-    // 弥补 XML 读入字符串的时候#13#10变成#10的问题。LiuXiao
-    for i := 0 to Count - 1 do
+    // 弥补 XML 读入字符串的时候 #13#10 变成 #10 的问题。LiuXiao
+    for I := 0 to Count - 1 do
     begin
-      Items[i].Content := StringReplace(Items[i].Content, #10, #13#10, [rfReplaceAll]);
-      Items[i].Content := StringReplace(Items[i].Content, #13#13, #13, [rfReplaceAll]);
+      Items[I].Content := StringReplace(Items[I].Content, #10, #13#10, [rfReplaceAll]);
+      Items[I].Content := StringReplace(Items[I].Content, #13#13, #13, [rfReplaceAll]);
     end;
     Result := True;
   except
@@ -409,7 +409,8 @@ procedure TCnSrcTemplate.LanguageChanged(Sender: TObject);
 begin
   inherited;
   LoadCollection;
-  UpdateActions;
+  if Active then
+    UpdateActions;
 end;
 
 procedure TCnSrcTemplate.LoadCollection;
@@ -449,7 +450,7 @@ end;
 
 procedure TCnSrcTemplate.SubActionExecute(Index: Integer);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   if Index = FConfigIndex then
@@ -458,11 +459,11 @@ begin
   end
   else
   begin
-    for i := 0 to FCollection.Count - 1 do
-      if FCollection[i].FEnabled and (FCollection[i].FActionIndex
+    for I := 0 to FCollection.Count - 1 do
+      if FCollection[I].FEnabled and (FCollection[I].FActionIndex
         = Index) then
       begin
-        DoExecute(FCollection[i]);
+        DoExecute(FCollection[I]);
         Exit;
       end;
   end;
@@ -489,7 +490,7 @@ end;
 
 procedure TCnSrcTemplate.UpdateActions;
 var
-  i: Integer;
+  I: Integer;
 
   function ItemCanShow(Item: TCnEditorItem): Boolean;
   begin
@@ -512,22 +513,22 @@ begin
   try
     while SubActionCount > FConfigIndex + 1 do
       DeleteSubAction(FConfigIndex + 1);
-    for i := 0 to FCollection.Count - 1 do
+    for I := 0 to FCollection.Count - 1 do
     begin
 {$IFDEF DEBUG}
-      CnDebugger.TraceObject(FCollection[i]);
+      CnDebugger.TraceObject(FCollection[I]);
 {$ENDIF}
-      if ItemCanShow(FCollection[i]) then
+      if ItemCanShow(FCollection[I]) then
       begin
-        with FCollection[i] do
+        with FCollection[I] do
         begin
-          FActionIndex := RegisterASubAction(SCnSrcTemplateItem + IntToStr(i),
+          FActionIndex := RegisterASubAction(SCnSrcTemplateItem + IntToStr(I),
             FCaption, FShortCut, FHint, FIconName);
           SubActions[FActionIndex].ShortCut := FShortCut;
         end;
       end
       else
-        FCollection[i].FActionIndex := -1;
+        FCollection[I].FActionIndex := -1;
     end;
   finally
     WizShortCutMgr.EndUpdate;
@@ -536,7 +537,7 @@ end;
 
 function TCnSrcTemplate.GetSearchContent: string;
 begin
-  Result := inherited GetSearchContent + '宏,macro';
+  Result := inherited GetSearchContent + '宏,macro,template';
 end;
 
 { TCnSrcTemplateForm }
@@ -566,13 +567,13 @@ end;
 
 procedure TCnSrcTemplateForm.UpdateListView;
 var
-  i: Integer;
+  I: Integer;
 begin
   ListView.Items.Clear;
-  for i := 0 to FWizard.FCollection.Count - 1 do
+  for I := 0 to FWizard.FCollection.Count - 1 do
   begin
     ListView.Items.Add;
-    UpdateListViewItem(i);
+    UpdateListViewItem(I);
   end;
   ListView.Selected := ListView.TopItem;
   UpdateButtons;
