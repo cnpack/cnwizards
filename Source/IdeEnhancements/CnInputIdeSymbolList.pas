@@ -88,10 +88,6 @@ uses
   {$UNDEF SYMBOL_LOCKHOOK}
 {$ENDIF}
 
-{$IFDEF BDS}
-  {$DEFINE IDE_SYMBOL_HAS_SYSTEM} // 2005 或以上，符号列表中有 System 单元
-{$ENDIF}
-
 type
 
 //==============================================================================

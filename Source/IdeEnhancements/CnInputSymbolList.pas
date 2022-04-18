@@ -48,6 +48,10 @@ interface
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
 
+{$IFDEF BDS}
+  {$DEFINE IDE_SYMBOL_HAS_SYSTEM} // 2005 或以上，符号列表中有 System 单元
+{$ENDIF}
+
 uses
   Windows, SysUtils, Classes, Controls, IniFiles, ToolsApi, Psapi, Math,
   Forms, Graphics, Contnrs, TypInfo,
