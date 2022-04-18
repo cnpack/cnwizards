@@ -952,7 +952,7 @@ var
   Symbols: PSymbols;
   CharPos: TOTACharPos;
   Text: string;
-  i, Offset: Integer;
+  I, Offset: Integer;
 
   procedure AddItem(const AText: string; Index: Integer);
   var
@@ -1023,6 +1023,7 @@ var
       Add(AName, AKind, Round(MaxInt / SymbolCount * Index), ADesc);
     end;
   end;
+
 begin
   Result := False;
   if not KibitzEnabled or (PosInfo.PosKind in csNonCodePosKinds)
@@ -1059,20 +1060,16 @@ begin
 
       // Ôö¼Ó·ûºÅÏî
       List.Capacity := SymbolCount;
-      for i := 0 to SymbolCount - 1 do
+      for I := 0 to SymbolCount - 1 do
       begin
-        CompGetSymbolText(Symbols^[i], Text, 1);
-        AddItem(Text, i);
+        CompGetSymbolText(Symbols^[I], Text, 1);
+        AddItem(Text, I);
       end;
 
-{$IFNDEF IDE_SYMBOL_HAS_SYSTEM}
-      Add('System', skUnit, 0, '');
-{$ENDIF}
-
       Result := Count > 0;
-    {$IFDEF Debug}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(Format('TIDESymbolList.Reload, Count: %d', [Count]));
-    {$ENDIF}
+{$ENDIF}
     finally
       if Unknowns <> nil then
         FreeMem(Unknowns);

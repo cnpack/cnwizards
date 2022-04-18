@@ -1664,12 +1664,15 @@ end;
 function TUnitUsesList.Reload(Editor: IOTAEditBuffer; const InputText: string;
   PosInfo: TCodePosInfo): Boolean;
 const
-  csMaxProcessLines = 2048;
+  csMaxProcessLines = 30000;
 var
   View: IOTAEditView;
   Stream: TMemoryStream;
   UsesList: TStringList;
-  i: Integer;
+  I: Integer;
+{$IFNDEF IDE_SYMBOL_HAS_SYSTEM}
+  SysAdded: Boolean;
+{$ENDIF}
 begin
   Result := False;
   try
@@ -1685,8 +1688,22 @@ begin
         UsesList := TStringList.Create;
         try
           ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
-          for i := 0 to UsesList.Count - 1 do
-            Add(UsesList[i], skUnit, csUsesScope);
+
+{$IFNDEF IDE_SYMBOL_HAS_SYSTEM}
+          SysAdded := False;
+{$ENDIF}
+          for I := 0 to UsesList.Count - 1 do
+          begin
+            Add(UsesList[I], skUnit, csUsesScope);
+
+{$IFNDEF IDE_SYMBOL_HAS_SYSTEM}
+            if not SysAdded and (UsesList[I] = 'SysUtils') then
+            begin
+              Add('System', skUnit, csUsesScope, '');
+              SysAdded := True;
+            end;
+{$ENDIF}
+          end;
           AdjustSymbolListScope(Self);
         finally
           UsesList.Free;
