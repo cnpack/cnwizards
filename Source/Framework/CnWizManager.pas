@@ -881,8 +881,8 @@ var
   frmBoot: TCnWizBootForm;
   KeyState: TKeyboardState;
 {$ENDIF}
-  bUserBoot: boolean;
-  BootList: array of boolean;
+  bUserBoot: Boolean;
+  BootList: array of Boolean;
 begin
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin

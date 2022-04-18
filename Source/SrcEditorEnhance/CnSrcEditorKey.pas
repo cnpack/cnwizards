@@ -3217,6 +3217,7 @@ begin
   Position.SearchOptions.CaseSensitive := FCaseSense;
   Position.SearchOptions.WordBoundary := FWholeWords;
   Position.SearchOptions.RegularExpression := FRegExp;
+  Position.SearchOptions.FromCursor := True; // 补上这一句以弥补 SearchAgain 失败的问题
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('F3 Search: Set Options: Case %d, Word %d, Reg %d.',
     [Integer(FCaseSense), Integer(FWholeWords), Integer(FRegExp)]);
@@ -3227,56 +3228,75 @@ begin
 {$ENDIF}
   Found := False;
   FOldSearchText := Position.SearchOptions.SearchText;
+
   if Shift = [] then
   begin
     Position.SearchOptions.Direction := sdForward;
-    Found := Position.SearchAgain;
+    Found := Position.SearchAgain; // 这句经常返回 False，原因未知
+{$IFDEF DEBUG}
+    CnDebugger.LogBoolean(Found, 'F3 Search Forward. Found Value?');
+{$ENDIF}
+
     if not Found and FSearchWrap then // 是否回绕查找
     begin
       Found := Position.Move(1, 1);
       if not Found then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogBoolean(Found, 'F3 Search Move to BOF.');
+        CnDebugger.LogBoolean(Found, 'F3 Search Forward. Move to BOF?');
 {$ENDIF}
         Exit;
       end;
 
-      Found := Position.SearchAgain;
+      Found := Position.SearchAgain; // 这句经常返回 False，原因未知
 {$IFDEF DEBUG}
-      CnDebugger.LogBoolean(Found, 'F3 Search Found Value after Move to BOF.');
+      CnDebugger.LogBoolean(Found, 'F3 Search Forward Found Value after Move to BOF?');
 {$ENDIF}
+
       if not Found then
+      begin
         Position.Move(ARow, ACol);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('F3 Search Forward NOT Found Anything. Return to Old Place.');
+{$ENDIF}
+      end;
     end;
   end
   else if Shift = [ssShift] then
   begin
     Position.SearchOptions.Direction := sdBackward;
-    Found := Position.SearchAgain;
+    Found := Position.SearchAgain; // 这句经常返回 False，原因未知
+{$IFDEF DEBUG}
+    CnDebugger.LogBoolean(Found, 'F3 Search Backward. Found Value?');
+{$ENDIF}
     if not Found and FSearchWrap then // 是否回绕查找
     begin
       Found := Position.MoveEOF;
       if not Found then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogBoolean(Found, 'F3 Search Move to EOF.');
+        CnDebugger.LogBoolean(Found, 'F3 Search Backward. Move to EOF?');
 {$ENDIF}
         Exit;
       end;
 
-      Found := Position.SearchAgain;
+      Found := Position.SearchAgain; // 这句经常返回 False，原因未知
 {$IFDEF DEBUG}
-      CnDebugger.LogBoolean(Found, 'F3 Search Found Value after Move to EOF.');
+      CnDebugger.LogBoolean(Found, 'F3 Search Backword Found Value after Move to EOF?');
 {$ENDIF}
       if not Found then
+      begin
         Position.Move(ARow, ACol);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('F3 Search Backward NOT Found Anything. Return to Old Place.');
+{$ENDIF}
+      end;
     end;
   end;
 
-  {$IFDEF DEBUG}
-     CnDebugger.LogBoolean(Found, 'F3 Search Found Value at Last.');
-  {$ENDIF}
+{$IFDEF DEBUG}
+  CnDebugger.LogBoolean(Found, 'F3 Search Found Value at Last?');
+{$ENDIF}
 
   if Found then
   begin
@@ -3284,11 +3304,17 @@ begin
     begin
       Position.MoveRelative(0, - Len);
       Block.ExtendRelative(0, Len);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('F3 Search Move Left %d and Select to Right %d.', [Len, Len]);
+{$ENDIF}
     end
     else
     begin
       Position.MoveRelative(0, Len);
       Block.ExtendRelative(0, - Len);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('F3 Search Move Right %d and Select to Left %d.', [Len, Len]);
+{$ENDIF}
     end;
   end;
 
