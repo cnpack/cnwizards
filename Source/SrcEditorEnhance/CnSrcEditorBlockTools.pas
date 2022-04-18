@@ -243,7 +243,7 @@ begin
   FShowColor := True;
 
   FIcon := TIcon.Create;
-  CnWizLoadIcon(nil, FIcon, 'CnSrcEditorBlockTools', False, False); // 强制加载成小图标
+  CnWizLoadIcon(nil, FIcon, 'CnSrcEditorBlockTools', False, True); // 强制加载成小图标
 
   FCodeWrap := TCnSrcEditorCodeWrapTool.Create;
   FGroupReplace := TCnSrcEditorGroupReplaceTool.Create;

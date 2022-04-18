@@ -479,7 +479,7 @@ end;
   
 procedure TCnSrcEditorToolBar.RecreateButtons;
 var
-  i: Integer;
+  I: Integer;
   Btn: TCnSrcEditorToolButton;
   IDEBtn: TToolButton;
   MenuObj: TObject;
@@ -491,25 +491,34 @@ var
   // 查找 IDE 中的相应的 ToolButton
   function FindIDEToolButton(AAction: TBasicAction): TToolButton;
   var
-    i, j: Integer;
+    I, J: Integer;
   begin
     Result := nil;
     if IDEToolBarParent <> nil then
     begin
-      for i := 0 to IDEToolBarParent.ControlCount - 1 do
-        if IDEToolBarParent.Controls[i] is TToolBar then
-        with IDEToolBarParent.Controls[i] as TToolBar do
-          for j := 0 to ButtonCount - 1 do
-            if Buttons[j].Action = AAction then
+      for I := 0 to IDEToolBarParent.ControlCount - 1 do
+      begin
+        if IDEToolBarParent.Controls[I] is TToolBar then
+        begin
+          with IDEToolBarParent.Controls[I] as TToolBar do
+          begin
+            for J := 0 to ButtonCount - 1 do
             begin
-              Result := Buttons[j];
-              Exit;
+              if Buttons[J].Action = AAction then
+              begin
+                Result := Buttons[J];
+                Exit;
+              end;
             end;
+          end;
+        end;
+      end;
     end;
   end;
+
 begin
-  for i := ButtonCount - 1 downto 0 do
-    Buttons[i].Free;
+  for I := ButtonCount - 1 downto 0 do
+    Buttons[I].Free;
 
   if FToolBarType = tbtCode then
     Actions := FToolBarMgr.FToolBarActions
@@ -518,9 +527,10 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   if Svcs40.ToolBar[sStandardToolBar] <> nil then
     IDEToolBarParent := Svcs40.ToolBar[sStandardToolBar].Parent;
-  for i := Actions.Count - 1 downto 0 do
+
+  for I := Actions.Count - 1 downto 0 do
   begin
-    if Actions[i] = '-' then
+    if Actions[I] = '-' then
     begin
       Btn := TCnSrcEditorToolButton.Create(Self);
       Btn.Style := tbsSeparator;
@@ -532,13 +542,14 @@ begin
     end
     else
     begin
-      Act := FindIDEAction(Actions[i]);
+      Act := FindIDEAction(Actions[I]);
       if Act <> nil then
       begin
         Btn := TCnSrcEditorToolButton.Create(Self);
         Btn.Action := Act;
         if Btn.ImageIndex < 0 then
-          Btn.ImageIndex := dmCnSharedImages.IdxUnknownInIDE;
+          Btn.ImageIndex := dmCnSharedImages.IdxUnknownInIDE; // 确保有个图标
+
         if Btn.Caption = '' then
           Btn.Caption := Btn.Name;
         if Btn.Hint = '' then
@@ -733,18 +744,18 @@ procedure TCnSrcEditorToolBarMgr.LoadToolBarActions(Actions: TStrings;
   const FileName: string);
 var
   Value: string;
-  i: Integer;
+  I: Integer;
 begin
   Actions.Clear;
   with TMemIniFile.Create(FileName) do
   try
-    i := 0;
-    while ValueExists(csToolBar, csButton + IntToStr(i)) do
+    I := 0;
+    while ValueExists(csToolBar, csButton + IntToStr(I)) do
     begin
-      Value := Trim(ReadString(csToolBar, csButton + IntToStr(i), ''));
+      Value := Trim(ReadString(csToolBar, csButton + IntToStr(I), ''));
       if Value <> '' then
         Actions.Add(Value);
-      Inc(i);
+      Inc(I);
     end;
   finally
     Free;
@@ -754,13 +765,13 @@ end;
 procedure TCnSrcEditorToolBarMgr.SaveToolBarActions(Actions: TStrings;
   const FileName: string);
 var
-  i: Integer;
+  I: Integer;
 begin
   with TMemIniFile.Create(FileName) do
   try
     EraseSection(csToolBar);
-    for i := 0 to Actions.Count - 1 do
-      WriteString(csToolBar, csButton + IntToStr(i), Actions[i]);
+    for I := 0 to Actions.Count - 1 do
+      WriteString(csToolBar, csButton + IntToStr(I), Actions[I]);
   finally
     UpdateFile;
     Free;

@@ -1396,6 +1396,11 @@ begin
   Obj.ToolBtnListUsed.Action := FindIDEAction('act' + SCnProjExtListUsed);
   Obj.ToolBtnListUsed.Visible := Action <> nil;
 
+  if Obj.ToolBtnProcList.ImageIndex < 0 then
+    Obj.ToolBtnProcList.ImageIndex := dmCnSharedImages.IdxUnknownInIDE; // 确保有个图标
+  if Obj.ToolBtnListUsed.ImageIndex < 0 then
+    Obj.ToolBtnListUsed.ImageIndex := dmCnSharedImages.IdxUnknownInIDE;
+
   Obj.ToolBtnSep1.Visible := (Obj.ToolBtnProcList.Visible or Obj.ToolBtnListUsed.Visible);
   Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
 
