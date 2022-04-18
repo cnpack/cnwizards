@@ -141,6 +141,7 @@ type
     chkUseLargeIcon: TCheckBox;
     chkEnlarge: TCheckBox;
     cbbEnlarge: TComboBox;
+    chkDisableIcons: TCheckBox;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);

@@ -2,10 +2,10 @@ inherited CnWizConfigForm: TCnWizConfigForm
   Left = 351
   Top = 66
   ClientWidth = 521
-  ClientHeight = 501
+  ClientHeight = 523
   BorderIcons = [biSystemMenu]
   Caption = 'CnPack IDE Wizards Settings'
-  Constraints.MinHeight = 540
+  Constraints.MinHeight = 562
   Constraints.MinWidth = 537
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -16,7 +16,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Left = 8
     Top = 8
     Width = 504
-    Height = 449
+    Height = 471
     ActivePage = tsWizards
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -28,7 +28,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 313
         Top = 0
         Width = 181
-        Height = 419
+        Height = 441
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -169,7 +169,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnConfig: TButton
           Left = 7
-          Top = 389
+          Top = 411
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -179,7 +179,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnRestoreSetting: TButton
           Left = 99
-          Top = 389
+          Top = 411
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -192,7 +192,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 0
         Top = 0
         Width = 313
-        Height = 419
+        Height = 441
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
@@ -200,7 +200,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Left = 0
           Top = 33
           Width = 313
-          Height = 386
+          Height = 408
           Align = alClient
           ItemHeight = 51
           Style = lbOwnerDrawFixed
@@ -245,7 +245,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 313
         Top = 0
         Width = 181
-        Height = 419
+        Height = 441
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -392,7 +392,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorConfig: TButton
           Left = 7
-          Top = 389
+          Top = 411
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -402,7 +402,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnDesignEditorCustomize: TButton
           Left = 99
-          Top = 389
+          Top = 411
           Width = 75
           Height = 21
           Anchors = [akRight, akBottom]
@@ -415,7 +415,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 0
         Top = 0
         Width = 313
-        Height = 419
+        Height = 441
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
@@ -423,7 +423,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Left = 0
           Top = 33
           Width = 313
-          Height = 386
+          Height = 408
           Align = alClient
           ItemHeight = 36
           Style = lbOwnerDrawFixed
@@ -467,7 +467,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         Left = 8
         Top = 230
         Width = 479
-        Height = 181
+        Height = 202
         Caption = 'Othe&rs'
         TabOrder = 3
         object Label2: TLabel
@@ -478,7 +478,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object btnUserDir: TSpeedButton
           Left = 450
-          Top = 144
+          Top = 165
           Width = 23
           Height = 22
           Anchors = [akRight, akBottom]
@@ -530,20 +530,20 @@ inherited CnWizConfigForm: TCnWizConfigForm
         end
         object chkUserDir: TCheckBox
           Left = 8
-          Top = 121
+          Top = 144
           Width = 273
           Height = 17
           Caption = 'Customize User Data Folder (Need Restart):'
-          TabOrder = 6
+          TabOrder = 7
           OnClick = UpdateControls
         end
         object edtUserDir: TEdit
           Left = 24
-          Top = 144
+          Top = 166
           Width = 422
           Height = 21
           Anchors = [akLeft, akTop, akRight]
-          TabOrder = 7
+          TabOrder = 8
         end
         object chkFixThreadLocale: TCheckBox
           Left = 8
@@ -592,6 +592,14 @@ inherited CnWizConfigForm: TCnWizConfigForm
             'x 2'
             'x 2.5'
             'x 3')
+        end
+        object chkDisableIcons: TCheckBox
+          Left = 8
+          Top = 122
+          Width = 457
+          Height = 17
+          Caption = 'Diable All Icons to Free GDI Resource (Need Restart).'
+          TabOrder = 6
         end
       end
       object gbHintWnd: TGroupBox
@@ -717,7 +725,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnOK: TButton
     Left = 277
-    Top = 470
+    Top = 492
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -728,7 +736,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnCancel: TButton
     Left = 357
-    Top = 470
+    Top = 492
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -739,7 +747,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnHelp: TButton
     Left = 437
-    Top = 470
+    Top = 492
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -749,7 +757,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   end
   object btnSort: TButton
     Left = 8
-    Top = 470
+    Top = 492
     Width = 75
     Height = 21
     Anchors = [akLeft, akBottom]
@@ -760,12 +768,12 @@ inherited CnWizConfigForm: TCnWizConfigForm
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'
     Filter = 'Text Files(*.txt)|*.txt|Any File(*.*)|*.*'
-    Left = 16
-    Top = 403
+    Left = 456
+    Top = 395
   end
   object ilEnable: TImageList
     Left = 456
-    Top = 343
+    Top = 359
     Bitmap = {
       494C010102000400040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
