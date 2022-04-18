@@ -313,6 +313,7 @@ begin
     cbbEnlarge.ItemIndex := Ord(WizOptions.SizeEnlarge) - 1
   else
     cbbEnlarge.ItemIndex := 0;
+  chkDisableIcons.Checked := WizOptions.DisableIcons;
 
   UpdateControls(nil);
 
@@ -390,6 +391,7 @@ begin
       WizOptions.SizeEnlarge := TCnWizSizeEnlarge(cbbEnlarge.ItemIndex + 1)
     else
       WizOptions.SizeEnlarge := wseOrigin;
+    WizOptions.DisableIcons := chkDisableIcons.Checked;
     
     WizOptions.WriteInteger(SCnOptionSection, csLastSelectedItem, lbWizards.ItemIndex);
 
