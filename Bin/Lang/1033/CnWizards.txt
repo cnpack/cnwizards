@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=Show ToolTips
 TCnWizConfigForm.cbShowWizComment.Caption=Show Hint Form for the First Time
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=Ignore Beta Version
 TCnWizConfigForm.cbWizardActive.Caption=Enabled
+TCnWizConfigForm.chkDisableIcons.Caption=Disable All Icons to Reduce GDI Resource Occupation (Need Restart).
 TCnWizConfigForm.chkEnlarge.Caption=Scale All CnWizards Forms by:
 TCnWizConfigForm.chkFixThreadLocale.Caption=Use SetThreadLocale to Fix Encoding Problem under Vista / Win7.
 TCnWizConfigForm.chkUseLargeIcon.Caption=Use Large Icons(Need Restart).

@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=允许显示工具提示信息。
 TCnWizConfigForm.cbShowWizComment.Caption=允许专家第一次执行时显示功能提示窗口。
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=检测时忽略测试版的程序。
 TCnWizConfigForm.cbWizardActive.Caption=允许该专家为活动状态。
+TCnWizConfigForm.chkDisableIcons.Caption=禁用所有图标以减少 GDI 资源占用（需要重启 IDE)。
 TCnWizConfigForm.chkEnlarge.Caption=按此倍数放大专家包窗体：
 TCnWizConfigForm.chkFixThreadLocale.Caption=使用 SetThreadLocale 修正 Vista / Win7 下乱码问题。
 TCnWizConfigForm.chkUseLargeIcon.Caption=使用大尺寸图标（需要重启 IDE）。

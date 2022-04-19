@@ -598,7 +598,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 122
           Width = 457
           Height = 17
-          Caption = 'Diable All Icons to Free GDI Resource (Need Restart).'
+          Caption = 'Diable All Icons to Reduce GDI Resource Occupation (Need Restart).'
           TabOrder = 6
         end
       end

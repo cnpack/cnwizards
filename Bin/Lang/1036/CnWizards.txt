@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=Afficher les infobulles
 TCnWizConfigForm.cbShowWizComment.Caption=Afficher le formulaire d'indication pour la première fois
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=Ignore Version Beta
 TCnWizConfigForm.cbWizardActive.Caption=Activée
+TCnWizConfigForm.chkDisableIcons.Caption=Désactiver toutes les icônes pour réduire l'occupation des ressources GDI (besoin de redémarrer).
 TCnWizConfigForm.chkEnlarge.Caption=Mettre à  l'échelle tous les formulaires CnWizards par:
 TCnWizConfigForm.chkFixThreadLocale.Caption=Utilisez SetThreadLocale pour résoudre le problème d'encodage sous Vista / Win7.
 TCnWizConfigForm.chkUseLargeIcon.Caption=Utilisez de grandes icônes (besoin de redémarrer).

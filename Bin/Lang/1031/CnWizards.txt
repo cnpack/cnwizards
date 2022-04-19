@@ -99,6 +99,7 @@ TCnWizConfigForm.cbShowHint.Caption=Zeige ToolTips
 TCnWizConfigForm.cbShowWizComment.Caption=Zeige Hinweise beim ersten Starten
 TCnWizConfigForm.cbUpgradeReleaseOnly.Caption=ignoriere Beta Versionen
 TCnWizConfigForm.cbWizardActive.Caption=aktiviert
+TCnWizConfigForm.chkDisableIcons.Caption=Deaktivieren Sie alle Symbole, um die Belegung von GDI-Ressourcen zu reduzieren(benötigt Neustart).
 TCnWizConfigForm.chkEnlarge.Caption=Skaliere alle CnWizards-Formulare nach:
 TCnWizConfigForm.chkFixThreadLocale.Caption=Benutze SetThreadLocale um Verschlüsselungsproblem unter Vista / Win7 zu vermeiden.
 TCnWizConfigForm.chkUseLargeIcon.Caption=Verwenden Sie große Symbole(benötigt Neustart).
