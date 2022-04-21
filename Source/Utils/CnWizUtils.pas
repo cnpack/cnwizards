@@ -1194,6 +1194,9 @@ function CnWizInputBox(const ACaption, APrompt, ADefault: string;
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
+var
+  CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
+
 implementation
 
 uses
@@ -1383,6 +1386,8 @@ begin
         if not AIcon.Empty then
         begin
           Result := True;
+          Inc(CnLoadedIconCount);
+
           LoadAndCheckSmallIcon;
           AfterIconLoad;
           Exit;
@@ -1391,6 +1396,8 @@ begin
       else
       begin
         Result := True;
+        Inc(CnLoadedIconCount);
+
         LoadAndCheckSmallIcon;
         AfterIconLoad;
         Exit;
@@ -1418,6 +1425,8 @@ begin
           if Handle <> 0 then
             ASmallIcon.Handle := Handle;
         end;
+
+        Inc(CnLoadedIconCount);
         AfterIconLoad;
         Exit;
       end;
@@ -1429,6 +1438,8 @@ begin
       begin
         ASmallIcon.Handle := Handle;
         Result := True;
+
+        Inc(CnLoadedIconCount);
         AfterIconLoad;
         Exit;
       end;
@@ -1447,6 +1458,8 @@ begin
         if not AIcon.Empty then
         begin
           Result := True;
+          Inc(CnLoadedIconCount);
+
           // 指定小尺寸再加载图标
           if ASmallIcon <> nil then
           begin
@@ -1463,6 +1476,8 @@ begin
         ASmallIcon.Width := 16;
         ASmallIcon.LoadFromFile(FileName);
         Result := True;
+
+        Inc(CnLoadedIconCount);
         Exit;
       end;
     end;
@@ -1484,6 +1499,8 @@ begin
           if Handle <> 0 then
             ASmallIcon.Handle := Handle;
         end;
+
+        Inc(CnLoadedIconCount);
         Exit;
       end;
     end
@@ -1494,6 +1511,7 @@ begin
       begin
         ASmallIcon.Handle := Handle;
         Result := True;
+        Inc(CnLoadedIconCount);
         Exit;
       end;
     end;

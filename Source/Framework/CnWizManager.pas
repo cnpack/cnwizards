@@ -281,8 +281,11 @@ uses
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
   csMaxWaitFreeTick = 5000;
+
   SCN_DBG_CMD_SEARCH = 'search';
   SCN_DBG_CMD_DUMP = 'dump';
+  SCN_DBG_CMD_OPTION = 'option';
+  SCN_DBG_CMD_STATE = 'state';
 
 var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
@@ -1465,20 +1468,17 @@ end;
 
 // 分发处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用
 procedure TCnWizardMgr.DispatchDebugComand(Cmd: string; Results: TStrings);
-{$IFDEF DEBUG}
 var
   LocalCmd, ID: string;
   Cmds: TStrings;
   I: Integer;
   Wizard: TCnBaseWizard;
   Matched: Boolean;
-{$ENDIF}
 begin
   if (Cmd = '') or (Results = nil) then
     Exit;
   Results.Clear;
 
-{$IFDEF DEBUG}
   Cmds := TStringList.Create;
   try
     ExtractStrings([' '], [], PChar(Cmd), Cmds);
@@ -1524,17 +1524,24 @@ begin
             Results.Add('');
           end;
         end;
-      end;
-
-      // No Wizard can process this debug command, do other stuff
-      Results.Add('Unknown Debug Command ' + Cmd);
+      end
+      else if LowerCase(Cmds[0]) = SCN_DBG_CMD_OPTION then
+      begin
+        WizOptions.DumpToStrings(Results);
+        Results.Add('');
+      end
+      else if  LowerCase(Cmds[0]) = SCN_DBG_CMD_STATE then
+      begin
+        // 打印内部状态
+        Results.Add('Loaded Icons: ' + IntToStr(CnLoadedIconCount));
+        Results.Add('');
+      end
+      else  // No Wizard can process this debug command, do other stuff
+        Results.Add('Unknown Debug Command ' + Cmd);
     end;
   finally
     Cmds.Free;
   end;
-{$ELSE}
-  Results.Add('CnPack IDE Wizards Debug Command Disabled.');
-{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------

@@ -194,6 +194,9 @@ type
     class function CalcIntUnEnlargedValue(AEnlarge: TCnWizSizeEnlarge;Value: Integer): Integer;
     {* 根据放大后的尺寸与放大倍数计算原始尺寸，给子类用的，得保证和上面对应}
 
+    procedure DumpToStrings(Infos: TStrings);
+    {* 打印内部信息}
+
     // 专家 DLL 属性
     property DllName: string read FDllName;
     {* 专家 DLL 完整文件名}
@@ -945,6 +948,28 @@ begin
 
   if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
+end;
+
+procedure TCnWizOptions.DumpToStrings(Infos: TStrings);
+begin
+  Infos.Add('DllName: ' + DllName);
+  Infos.Add('DllPath: ' + DllPath);
+  Infos.Add('CompilerPath: ' + CompilerPath);
+  Infos.Add('CurrentLangID: ' + IntToStr(CurrentLangID));
+  Infos.Add('LangPath: ' + LangPath);
+  Infos.Add('IconPath: ' + IconPath);
+  Infos.Add('DataPath: ' + DataPath);
+  Infos.Add('TemplatePath: ' + TemplatePath);
+  Infos.Add('UserPath: ' + UserPath);
+  Infos.Add('HelpPath: ' + HelpPath);
+  Infos.Add('RegBase: ' + RegBase);
+  Infos.Add('RegPath: ' + RegPath);
+  Infos.Add('PropEditorRegPath: ' + PropEditorRegPath);
+  Infos.Add('CompEditorRegPath: ' + CompEditorRegPath);
+  Infos.Add('IdeEhnRegPath: ' + IdeEhnRegPath);
+  Infos.Add('CompilerName: ' + CompilerName);
+  Infos.Add('CompilerID: ' + CompilerID);
+  Infos.Add('CompilerRegPath: ' + CompilerRegPath);
 end;
 
 {$ENDIF}
