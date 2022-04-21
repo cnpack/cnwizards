@@ -1417,16 +1417,20 @@ begin
       if Handle <> 0 then
       begin
         AIcon.Handle := Handle;
+        Inc(CnLoadedIconCount);
         Result := True;
+
         // 再指定小尺寸加载
         if ASmallIcon <> nil then
         begin
           Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
           if Handle <> 0 then
+          begin
             ASmallIcon.Handle := Handle;
+            Inc(CnLoadedIconCount);
+          end;
         end;
 
-        Inc(CnLoadedIconCount);
         AfterIconLoad;
         Exit;
       end;
@@ -1466,6 +1470,7 @@ begin
             ASmallIcon.Height := 16;
             ASmallIcon.Width := 16;
             ASmallIcon.LoadFromFile(FileName);
+            Inc(CnLoadedIconCount);
           end;
           Exit;
         end;
@@ -1491,16 +1496,20 @@ begin
       if Handle <> 0 then
       begin
         AIcon.Handle := Handle;
+        Inc(CnLoadedIconCount);
         Result := True;
+
         // 再指定小尺寸加载
         if ASmallIcon <> nil then
         begin
           Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
           if Handle <> 0 then
+          begin
             ASmallIcon.Handle := Handle;
+            Inc(CnLoadedIconCount);
+          end;
         end;
 
-        Inc(CnLoadedIconCount);
         Exit;
       end;
     end
@@ -1511,6 +1520,7 @@ begin
       begin
         ASmallIcon.Handle := Handle;
         Result := True;
+
         Inc(CnLoadedIconCount);
         Exit;
       end;

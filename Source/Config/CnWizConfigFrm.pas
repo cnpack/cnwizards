@@ -477,20 +477,20 @@ begin
       Canvas.Font.Color := clGray;
     end;
     Canvas.RoundRect(R.Left, R.Top, R.Right, R.Bottom, 8, 8);
-    if Wizard.Icon <> nil then
+    if Wizard.BigIcon <> nil then
     begin
 {$IFDEF IDE_SUPPORT_HDPI}
       ARect.Left := R.Left + 4;
-      ARect.Top := R.Top + (R.Bottom - R.Top - IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards)) div 2;
-      ARect.Right := ARect.Left + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Width, lbWizards);
-      ARect.Bottom := ARect.Top + IdeGetScaledPixelsFromOrigin(Wizard.Icon.Height, lbWizards);
+      ARect.Top := R.Top + (R.Bottom - R.Top - IdeGetScaledPixelsFromOrigin(Wizard.BigIcon.Height, lbWizards)) div 2;
+      ARect.Right := ARect.Left + IdeGetScaledPixelsFromOrigin(Wizard.BigIcon.Width, lbWizards);
+      ARect.Bottom := ARect.Top + IdeGetScaledPixelsFromOrigin(Wizard.BigIcon.Height, lbWizards);
 
-      DrawIconEx(Canvas.Handle, ARect.Left, ARect.Top, Wizard.Icon.Handle,
+      DrawIconEx(Canvas.Handle, ARect.Left, ARect.Top, Wizard.BigIcon.Handle,
         ARect.Width, ARect.Height, 0, 0, DI_NORMAL);
 
       // 把 32x32 没法拉伸的图标，原封不动绘制到 32x32 被 HDPI 拉伸过的控件的画板上
 {$ELSE}
-      Canvas.Draw(R.Left + 4, R.Top + (R.Bottom - R.Top - Wizard.Icon.Height) div 2, Wizard.Icon);
+      Canvas.Draw(R.Left + 4, R.Top + (R.Bottom - R.Top - Wizard.BigIcon.Height) div 2, Wizard.BigIcon);
 {$ENDIF}
     end;
 
@@ -569,11 +569,11 @@ begin
   imgIcon.Canvas.Brush.Style := bsSolid;
   imgIcon.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
   imgIcon.Canvas.FillRect(Rect(0, 0, imgIcon.Width, imgIcon.Height));
-  DrawIconEx(imgIcon.Canvas.Handle, 0, 0, Wizard.Icon.Handle,
+  DrawIconEx(imgIcon.Canvas.Handle, 0, 0, Wizard.BigIcon.Handle,
     imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
   // 把 32x32 没法拉伸的图标，原封不动绘制到 32x32 被 HDPI 拉伸过的控件的画板上
 {$ELSE}
-  imgIcon.Picture.Graphic := Wizard.Icon;
+  imgIcon.Picture.Graphic := Wizard.BigIcon;
 {$ENDIF}
 
   Wizard.GetWizardInfo(AName, Author, Email, Comment);

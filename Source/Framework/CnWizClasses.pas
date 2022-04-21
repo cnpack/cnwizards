@@ -107,6 +107,8 @@ type
     {* HasConfig 属性读方法，子类重载该方法返回是否存在可配置内容 }
     function GetIcon: TIcon; virtual; abstract;
     {* Icon 属性读方法，子类重载该方法返回返回专家图标，用户专家通常不需自己处理 }
+    function GetBigIcon: TIcon; virtual; abstract;
+    {* 大尺寸 Icon 属性读方法，子类重载该方法返回返回专家图标，用户专家通常不需自己处理 }
 
     // IOTAWizard methods
     function GetIDString: string;
@@ -183,7 +185,9 @@ type
     property WizardIndex: Integer read FWizardIndex write FWizardIndex;
     {* 专家注册后由 IDE 返回的索引号，在释放专家时使用，请不要修改该值 }
     property Icon: TIcon read GetIcon;
-    {* 专家图标属性 }
+    {* 专家图标属性，大小由子类决定，比如 ActionWizard 及以下是 16x16，而 IconWizard 默认 32x32 }
+    property BigIcon: TIcon read GetBigIcon;
+    {* 专家大图标，如果有的话}
   end;
   
 {$M-}
@@ -201,11 +205,12 @@ type
   {* IDE 带图标属性的基础类 }
   private
     FIcon: TIcon;
-    FSmallIcon: TIcon;
   protected
     function GetIcon: TIcon; override;
     {* 返回该类专家的图标，子类可重载此过程返回其它的 Icon 对象
        FIcon 使用系统默认尺寸，一般是 32 * 32 的}
+    function GetBigIcon: TIcon; override;
+    {* 返回该类专家的大图标，32 * 32 的}
     procedure InitIcon(AIcon, ASmallIcon: TIcon); virtual;
     {* 根据类名初始化图标，对象创建时调用，子类可重载此过程重新处理 FIcon }
     class function GetIconName: string; virtual;
@@ -233,7 +238,7 @@ type
 { TCnActionWizard }
 
   TCnActionWizard = class(TCnIDEEnhanceWizard)
-  {* 带 Action 和快捷键的 CnWizard 专家抽象基类 }
+  {* 带 Action 和快捷键的 CnWizard 专家抽象基类，从该类起，Icon 是 16x16 }
   private
     FAction: TCnWizAction;
     function GetImageIndex: Integer;
@@ -894,19 +899,23 @@ begin
   inherited;
   FActive := True;
   FIcon := TIcon.Create;
-  FSmallIcon := TIcon.Create;
-  InitIcon(FIcon, FSmallIcon);
+  InitIcon(FIcon, nil);
 end;
 
 destructor TCnIconWizard.Destroy;
 begin
   inherited;
-  FSmallIcon.Free;
   FIcon.Free;
 end;
 
-// 返回 Icon 属性，如使用其他图标，可重载。
+// 返回 Icon 属性，如使用其他图标，可重载
 function TCnIconWizard.GetIcon: TIcon;
+begin
+  Result := FIcon;
+end;
+
+// 返回大 Icon 属性，不建议重载
+function TCnIconWizard.GetBigIcon: TIcon;
 begin
   Result := FIcon;
 end;
@@ -917,7 +926,7 @@ begin
   Result := ClassName;
 end;
 
-// 根据类名初始化图标，可重载。
+// 根据类名初始化图标，可重载
 procedure TCnIconWizard.InitIcon(AIcon, ASmallIcon: TIcon);
 begin
   if AIcon <> nil then
