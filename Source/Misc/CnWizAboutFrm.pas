@@ -44,7 +44,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, CnConsts, CnWizFeedbackFrm, CnWizMultiLang, CnLangMgr,
-  CnWaterImage;
+  CnWaterImage, CnWizIdeUtils;
 
 type
   TCnWizAboutForm = class(TCnTranslateForm)
@@ -213,8 +213,8 @@ begin
     DbgFrm := TForm.Create(Application);
     with DbgFrm do
     begin
-      Width := 550;
-      Height := 400;
+      Width := IdeGetScaledPixelsFromOrigin(550);
+      Height := IdeGetScaledPixelsFromOrigin(400);
       Position := poScreenCenter;
       BorderStyle := bsSizeToolWin;
       Caption := 'CnPack IDE Wizard Debug Command Window';
