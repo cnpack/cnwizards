@@ -1100,9 +1100,12 @@ begin
   FPopupMenu := TPopupMenu.Create(nil);
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   FPopupMenu.Images := Svcs40.ImageList;
-  // 用于关联到工具栏上按钮的 Action，图标和主 Action 图标重复
+
+  // 用于关联到工具栏上按钮的 Action，图标应和主 Action 图标一样，为避免重复创建
   FPopupAction := WizActionMgr.AddAction(GetIDStr + '1', GetCaption, 0, OnPopup,
-    GetIconName, GetHint);
+    '', GetHint);
+  // 先传空的图标名，再复制 ImageIndex 值，能省下所有 SubMenuWizard 中的每一个 Icon
+  FPopupAction.ImageIndex := Action.ImageIndex;
   FPopupAction.OnUpdate := OnActionUpdate;
 end;
 
