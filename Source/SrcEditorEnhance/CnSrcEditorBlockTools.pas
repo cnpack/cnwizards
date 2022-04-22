@@ -1019,7 +1019,7 @@ begin
     begin
       Button := TCnWizFlatButton.Create(EditWindow);
       Button.Name := SCnSrcEditorBlockButton;
-      Button.Image := FIcon;
+      Button.Icon := FIcon;
       Button.DropdownMenu := FPopupMenu;
       Button.AutoDropdown := False;
       Button.Hint := SCnSrcBlockToolsHint;

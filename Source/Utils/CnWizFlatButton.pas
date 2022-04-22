@@ -52,7 +52,7 @@ type
   TCnWizFlatButton = class(TCustomControl)
   private
     FDropdownMenu: TPopupMenu;
-    FImage: TGraphic;
+    FIcon: TIcon;
     FIsMouseEnter: Boolean;
     FIsDropdown: Boolean;
     FTimer: TTimer;
@@ -60,10 +60,7 @@ type
     FShowColor: Boolean;
     FDisplayColor: TColor;
     FAlpha: Boolean;
-{$IFDEF IDE_SUPPORT_HDPI}
-    FIconBmp: TBitmap;
-{$ENDIF}
-    procedure SetImage(Value: TGraphic);
+    procedure SetIcon(Value: TIcon);
     procedure ImageChange(Sender: TObject);
     procedure OnTimer(Sender: TObject);
     procedure SetIsDropdown(const Value: Boolean);
@@ -91,8 +88,8 @@ type
 
     property DropdownMenu: TPopupMenu read FDropdownMenu write FDropdownMenu;
     {* 下拉菜单，需要由用户自己创建及设置 }
-    property Image: TGraphic read FImage write SetImage;
-    {* 按钮图标，需要由用户自己创建及设置 }
+    property Icon: TIcon read FIcon write SetIcon;
+    {* 按钮图标，需要由用户自己创建及设置，此处只是引用 }
     property AutoDropdown: Boolean read FAutoDropdown write FAutoDropdown;
     {* 是否鼠标移入后自动下拉}
     property ShowColor: Boolean read FShowColor write SetShowColor;
@@ -135,21 +132,12 @@ begin
   FTimer.Interval := 500;
   FTimer.OnTimer := OnTimer;
 
-{$IFDEF IDE_SUPPORT_HDPI}
-  FIconBmp := TBitmap.Create;
-  FIconBmp.PixelFormat := pf24bit;
-  FIconBmp.Width := 16;
-  FIconBmp.Height := 16;
-  FIconBmp.Canvas.Brush.Style := bsSolid;
-{$ENDIF}
   UpdateSize;
 end;
 
 destructor TCnWizFlatButton.Destroy;
 begin
-{$IFDEF IDE_SUPPORT_HDPI}
-  FIconBmp.Free;
-{$ENDIF}
+
   inherited;
 end;
 
@@ -250,20 +238,14 @@ begin
         Bmp.Canvas.Brush.Color := csBorderColors[State];
         Bmp.Canvas.FrameRect(ClientRect);
         Bmp.Canvas.Brush.Style := bsClear;
-        if (FImage <> nil) and not FImage.Empty then
+        if (FIcon <> nil) and not FIcon.Empty then
         begin
 {$IFDEF IDE_SUPPORT_HDPI}
-          Rc := Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
-          FIconBmp.Canvas.Brush.Color := csBkColors[State];
-          FIconBmp.Canvas.FillRect(Rc);
-          FIconBmp.Canvas.Draw(0, 0, FImage);  // 把 16x16 没法拉伸的图标，原封不动绘制到 32x32 的位图上
-          Rc := Rect(IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
-            IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
-            IdeGetScaledPixelsFromOrigin(FIconBmp.Width, Self),
-            IdeGetScaledPixelsFromOrigin(FIconBmp.Height, Self));
-          Bmp.Canvas.StretchDraw(Rc, FIconBmp);
+          DrawIconEx(Bmp.Canvas.Handle, csBorderWidths[State], csBorderWidths[State],
+            FIcon.Handle, IdeGetScaledPixelsFromOrigin(FIcon.Width, Self),
+            IdeGetScaledPixelsFromOrigin(FIcon.Height, Self), 0, 0, DI_NORMAL);
 {$ELSE}
-          Bmp.Canvas.Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+          Bmp.Canvas.Draw(, , FIcon);
 {$ENDIF}
         end;
         BitBlt(Handle, 0, 0, Width, Height, Bmp.Canvas.Handle, 0, 0, SRCCOPY);
@@ -280,20 +262,14 @@ begin
       // 自己画边框与图标
       Brush.Color := csBorderColors[State];
       FrameRect(ClientRect);
-      if (FImage <> nil) and not FImage.Empty then
+      if (FIcon <> nil) and not FIcon.Empty then
       begin
 {$IFDEF IDE_SUPPORT_HDPI}
-        Rc := Rect(0, 0, FIconBmp.Width, FIconBmp.Height);
-        FIconBmp.Canvas.Brush.Color := csBkColors[State];
-        FIconBmp.Canvas.FillRect(Rc);
-        FIconBmp.Canvas.Draw(0, 0, FImage);  // 把 16x16 没法拉伸的图标，原封不动绘制到 32x32 的位图上
-        Rc := Rect(IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
-            IdeGetScaledPixelsFromOrigin(csBorderWidths[State], Self),
-          IdeGetScaledPixelsFromOrigin(FIconBmp.Width, Self),
-          IdeGetScaledPixelsFromOrigin(FIconBmp.Height, Self));
-        StretchDraw(Rc, FIconBmp);
+        DrawIconEx(Handle, csBorderWidths[State], csBorderWidths[State],
+          FIcon.Handle, IdeGetScaledPixelsFromOrigin(FIcon.Width, Self),
+          IdeGetScaledPixelsFromOrigin(FIcon.Height, Self), 0, 0, DI_NORMAL);
 {$ELSE}
-        Draw(csBorderWidths[State], csBorderWidths[State], FImage);
+        Draw(csBorderWidths[State], csBorderWidths[State], FIcon);
 {$ENDIF}
       end;
     end;
@@ -391,13 +367,13 @@ end;
 // 属性读写
 //------------------------------------------------------------------------------
 
-procedure TCnWizFlatButton.SetImage(Value: TGraphic);
+procedure TCnWizFlatButton.SetIcon(Value: TIcon);
 begin
-  if FImage <> Value then
+  if FIcon <> Value then
   begin
-    FImage := Value;
-    if FImage <> nil then
-      FImage.OnChange := ImageChange;
+    FIcon := Value;
+    if FIcon <> nil then
+      FIcon.OnChange := ImageChange;
     UpdateSize;
   end;
 end;
