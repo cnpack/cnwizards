@@ -245,7 +245,7 @@ begin
             FIcon.Handle, IdeGetScaledPixelsFromOrigin(FIcon.Width, Self),
             IdeGetScaledPixelsFromOrigin(FIcon.Height, Self), 0, 0, DI_NORMAL);
 {$ELSE}
-          Bmp.Canvas.Draw(, , FIcon);
+          Bmp.Canvas.Draw(csBorderWidths[State], csBorderWidths[State], FIcon);
 {$ENDIF}
         end;
         BitBlt(Handle, 0, 0, Width, Height, Bmp.Canvas.Handle, 0, 0, SRCCOPY);
