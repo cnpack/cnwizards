@@ -212,13 +212,12 @@ procedure TCnVerEnhanceWizard.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 var
   Options: IOTAProjectOptions;
-  //Project: IOTAProject;
 begin
   if IsCodeInsight or not Active then
     Exit;
 
-  //注意build project是在编译后才增加buildno的
-  //如果不将版本信息加入可执行文件，退出
+  // 注意 build project 是在编译后才增加 buildno 的
+  // 如果不将版本信息加入可执行文件，退出
   if not FIncludeVer then
     Exit;
 
@@ -292,8 +291,8 @@ begin
   CnDebugger.LogMsg('VerEnhance BeforeCompile');
 {$ENDIF}
 
-  //Hubdog: 注意：通过检查dof文件来获得版本信息是没有用的，因为只有在save project后，才会将内存中的
-  //Hubdog: 这些信息写进dof
+  // Hubdog: 注意：通过检查 dof 文件来获得版本信息是没有用的，因为只有在 save project 后，才会将内存中的
+  //H ubdog: 这些信息写进 dof
   Options := CnOtaGetActiveProjectOptions(Project);
   if not Assigned(Options) then
     Exit;
@@ -313,7 +312,12 @@ begin
   if not FIncludeVer then
     Exit;
 
-  FBeforeBuildNo := Options.GetOptionValue('Build');
+  try
+    FBeforeBuildNo := Options.GetOptionValue('Build');
+  except
+    FBeforeBuildNo := 0; // 如果值非法，则改成 0
+  end;
+
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   {$IFNDEF PROJECT_VERSION_NUMBER_BUG}
   // 2009/2010/XE has a bug that below got a wrong value.
@@ -325,9 +329,9 @@ begin
     + IntToStr(FBeforeBuildNo));
 {$ENDIF}
 
-  //先增加文件版本信息, 修改OptionValue的值就可以了
-  //Hubdog:SetProjectOptionValue在D5下无法修改Build, Release等版本信息
-  //（这是D5/BCB5/BCB6的一个Bug)，但在D6下有效
+  //先增加文件版本信息, 修改 OptionValue 的值就可以了
+  // Hubdog: SetProjectOptionValue 在 D5 下无法修改 Build, Release 等版本信息
+  //（这是 D5/BCB5/BCB6 的一个Bug)，但在 D6 下又能修改成功
   if FIncBuild then
   begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
@@ -365,7 +369,7 @@ begin
 
 {$IFDEF COMPILER6_UP} // D6 及以上才处理编译时间
 
-  //添加LastCompileTime信息
+  // 添加 LastCompileTime 信息
   if Active and FLastCompiled then
   begin
 {$IFDEF DEBUG}
@@ -379,9 +383,9 @@ begin
     Exit;
   end;
 
-  //Hubdog: 注意不管是编译还是build，都会生成版本信息，只不过一个增加build no ,一个不增加
-  //Hubdog: 注意：即便是Auto-inc Build No，也只是将当前的版本号编译进EXE，然后才增加BuildNo
-  //LiuXiao: 再注意：以下对 BDS 2005/20006 无效，它们的 Bug 导致无法获得 Resource接口，但似乎没影响。
+  // Hubdog: 注意不管是编译还是 build，都会生成版本信息，只不过一个增加 build no ,一个不增加
+  // Hubdog: 注意：即便是 Auto-inc Build No，也只是将当前的版本号编译进 EXE，然后才增加 BuildNo
+  // LiuXiao: 再注意：以下对 BDS 2005/20006 无效，它们的 Bug 导致无法获得 Resource接口，但似乎没影响。
   for I := 0 to Project.GetModuleFileCount - 1 do
   begin
     ModuleFileEditor := CnOtaGetFileEditorForModule(Project, I);
