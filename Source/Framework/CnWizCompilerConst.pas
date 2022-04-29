@@ -727,7 +727,8 @@ const
   DphIdeLibName = 'delphicoreide270.bpl';
   dccLibName = 'dcc32270.dll';
 
-  IdeLspLibName = 'IDELSP270.bpl'; // 10.4 后支持 LSP
+  IdeLspLibName = 'IDELSP270.bpl'; // 10.4 后支持 LSP，Delphi 的
+  IdeBcbLspLibName = 'bcbide270.bpl'; // BCB 的 LSP 是独立的
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER27}
 
@@ -738,6 +739,7 @@ const
   dccLibName = 'dcc32280.dll';
 
   IdeLspLibName = 'IDELSP280.bpl';
+  IdeBcbLspLibName = 'bcbide280.bpl';
   {$DEFINE LibNamesDefined}
 {$ENDIF COMPILER28}
 
