@@ -5642,6 +5642,9 @@ end;
 
 procedure TCnBlockLineInfo.Clear;
 begin
+  FCurrentPair := nil;
+  FCurrentToken := nil;
+
   FPairList.Clear;
   FKeyLineList.Clear;
 end;
