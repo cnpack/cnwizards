@@ -1314,21 +1314,21 @@ var
   FResInited: Boolean;
   HResModule: HMODULE;
 
-// 加载资源DLL文件
+// 加载资源 DLL 文件
 function LoadResDll: Boolean;
 begin
   if not FResInited then
   begin
     HResModule := LoadLibrary(PChar(WizOptions.DllPath + SCnWizResDllName));
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogInteger(HResModule, 'HResModule');
-  {$ENDIF}
+{$ENDIF}
     FResInited := True;
   end;
   Result := HResModule <> 0;
 end;
 
-// 释放资源DLL文件
+// 释放资源 DLL 文件
 procedure FreeResDll;
 begin
   if HResModule <> 0 then
@@ -1341,7 +1341,7 @@ function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
   UseDefault: Boolean; IgnoreDisabled: Boolean): Boolean;
 var
   FileName: string;
-  Handle: HICON;
+  AHandle: HICON;
 
   procedure AfterIconLoad;
   begin
@@ -1413,20 +1413,20 @@ begin
     if AIcon <> nil then
     begin
       // 先装载最匹配尺寸 32 * 32
-      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 32, 32, 0);
-      if Handle <> 0 then
+      AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 32, 32, 0);
+      if AHandle <> 0 then
       begin
-        AIcon.Handle := Handle;
+        AIcon.Handle := AHandle;
         Inc(CnLoadedIconCount);
         Result := True;
 
         // 再指定小尺寸加载
         if ASmallIcon <> nil then
         begin
-          Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-          if Handle <> 0 then
+          AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+          if AHandle <> 0 then
           begin
-            ASmallIcon.Handle := Handle;
+            ASmallIcon.Handle := AHandle;
             Inc(CnLoadedIconCount);
           end;
         end;
@@ -1437,10 +1437,10 @@ begin
     end
     else if ASmallIcon <> nil then // 只装载小尺寸的
     begin
-      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-      if Handle <> 0 then
+      AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+      if AHandle <> 0 then
       begin
-        ASmallIcon.Handle := Handle;
+        ASmallIcon.Handle := AHandle;
         Result := True;
 
         Inc(CnLoadedIconCount);
@@ -1492,20 +1492,20 @@ begin
   begin
     if AIcon <> nil then
     begin
-      Handle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
-      if Handle <> 0 then
+      AHandle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 0, 0, 0);
+      if AHandle <> 0 then
       begin
-        AIcon.Handle := Handle;
+        AIcon.Handle := AHandle;
         Inc(CnLoadedIconCount);
         Result := True;
 
         // 再指定小尺寸加载
         if ASmallIcon <> nil then
         begin
-          Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-          if Handle <> 0 then
+          AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+          if AHandle <> 0 then
           begin
-            ASmallIcon.Handle := Handle;
+            ASmallIcon.Handle := AHandle;
             Inc(CnLoadedIconCount);
           end;
         end;
@@ -1515,10 +1515,10 @@ begin
     end
     else if ASmallIcon <> nil then
     begin
-      Handle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
-      if Handle <> 0 then
+      AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+      if AHandle <> 0 then
       begin
-        ASmallIcon.Handle := Handle;
+        ASmallIcon.Handle := AHandle;
         Result := True;
 
         Inc(CnLoadedIconCount);
@@ -1572,14 +1572,21 @@ const
 var
   SrcBmp, DstBmp: TBitmap;
   PSrc1, PSrc2, PDst: PRGBArray;
-  x, y: Integer;
+  X, Y: Integer;
 begin
   Assert(Assigned(AIcon));
   Assert(Assigned(ImageList));
+
+{$IFDEF DEBUG}
+  if not AIcon.Empty then
+    CnDebugger.LogFmt('AddIcon %dx%d To ImageList %dx%d', [AIcon.Width, AIcon.Height,
+      ImageList.Width, ImageList.Height]);
+{$ENDIF}
+
   if (ImageList.Width = 16) and (ImageList.Height = 16) and not AIcon.Empty and
     (AIcon.Width = 32) and (AIcon.Height = 32) then
   begin
-    if Stretch then // 指定拉伸的情况下，使用平滑处理
+    if Stretch then // ImageList 尺寸比图标大，指定拉伸的情况下，使用平滑处理
     begin
       SrcBmp := nil;
       DstBmp := nil;
@@ -1587,19 +1594,19 @@ begin
         SrcBmp := CreateEmptyBmp24(32, 32, MaskColor);
         DstBmp := CreateEmptyBmp24(16, 16, MaskColor);
         SrcBmp.Canvas.Draw(0, 0, AIcon);
-        for y := 0 to DstBmp.Height - 1 do
+        for Y := 0 to DstBmp.Height - 1 do
         begin
-          PSrc1 := SrcBmp.ScanLine[y * 2];
-          PSrc2 := SrcBmp.ScanLine[y * 2 + 1];
-          PDst := DstBmp.ScanLine[y];
-          for x := 0 to DstBmp.Width - 1 do
+          PSrc1 := SrcBmp.ScanLine[Y * 2];
+          PSrc2 := SrcBmp.ScanLine[Y * 2 + 1];
+          PDst := DstBmp.ScanLine[Y];
+          for X := 0 to DstBmp.Width - 1 do
           begin
-            PDst^[x].b := (PSrc1^[x * 2].b + PSrc1^[x * 2 + 1].b + PSrc2^[x * 2].b
-              + PSrc2^[x * 2 + 1].b) shr 2;
-            PDst^[x].g := (PSrc1^[x * 2].g + PSrc1^[x * 2 + 1].g + PSrc2^[x * 2].g
-              + PSrc2^[x * 2 + 1].g) shr 2;
-            PDst^[x].r := (PSrc1^[x * 2].r + PSrc1^[x * 2 + 1].r + PSrc2^[x * 2].r
-              + PSrc2^[x * 2 + 1].r) shr 2;
+            PDst^[X].b := (PSrc1^[X * 2].b + PSrc1^[X * 2 + 1].b + PSrc2^[X * 2].b
+              + PSrc2^[X * 2 + 1].b) shr 2;
+            PDst^[X].g := (PSrc1^[X * 2].g + PSrc1^[X * 2 + 1].g + PSrc2^[X * 2].g
+              + PSrc2^[X * 2 + 1].g) shr 2;
+            PDst^[X].r := (PSrc1^[X * 2].r + PSrc1^[X * 2 + 1].r + PSrc2^[X * 2].r
+              + PSrc2^[X * 2 + 1].r) shr 2;
           end;
         end;
         Result := ImageList.AddMasked(DstBmp, MaskColor);
@@ -8530,9 +8537,9 @@ initialization
 {$ENDIF}
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizUtils finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 {$IFDEF UNICODE}
@@ -8544,9 +8551,9 @@ finalization
   FreeAndNil(CnNoIconList);
   
   FreeResDll;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizUtils finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
 end.
 

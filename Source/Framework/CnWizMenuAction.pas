@@ -88,7 +88,7 @@ type
     property Command: string read FCommand;
     {* Action 命令字符串，用来唯一标识一个 Action，同时也是快捷键对象的名字}
     property Icon: TIcon read FIcon;
-    {* Action 关联的图标，可在其它地方使用，但请不要更改图标内容}
+    {* Action 关联的图标，加载时 16x16，可在其它地方使用，但请不要更改图标内容}
     property ShortCut: TShortCut read GetShortCut write {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
     {* Action 关联的快捷键}
   end;
@@ -468,6 +468,11 @@ begin
   AWizAction.ActionList := Svcs40.ActionList;
   if CnWizLoadIcon(nil, AWizAction.FIcon, IcoName, UseDefaultIcon) then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Load Icon %s OK with %dx%d', [IcoName, AWizAction.FIcon.Width,
+      AWizAction.FIcon.Height]);
+{$ENDIF}
+
 {$IFDEF IDE_SUPPORT_HDPI}
     AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList)
 {$ELSE}
