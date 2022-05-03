@@ -180,7 +180,8 @@ function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
   UseDefault: Boolean = False; IgnoreDisabled: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为 AIcon 图标装载成功标志。参数 ResName 请不要带 .ico 扩展名。
-   AIcon 加载系统默认尺寸一般是 32*32，ASmallIcon 加载 16*16 如果有的话，否则为空}
+   AIcon 加载系统默认尺寸一般是 32*32，ASmallIcon 加载 16*16 如果有的话，否则为空
+   注意 ASmallIcon 本身的尺寸仍可能是 32*32，只是左上角 16*16 有内容}
 function CnWizLoadBitmap(ABitmap: TBitmap; const ResName: string): Boolean;
 {* 从资源或文件中装载位图，执行时先从图标目录中查找，如果失败再从资源中查找，
    返回结果为位图装载成功标志。参数 ResName 请不要带 .bmp 扩展名}

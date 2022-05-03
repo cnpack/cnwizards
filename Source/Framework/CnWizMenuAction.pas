@@ -476,7 +476,7 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
     AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList)
 {$ELSE}
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList)
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False)
 {$ENDIF}
   end
   else
