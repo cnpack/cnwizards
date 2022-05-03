@@ -1502,7 +1502,7 @@ begin
         // 再指定小尺寸加载
         if ASmallIcon <> nil then
         begin
-          AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+          AHandle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 16, 16, 0);
           if AHandle <> 0 then
           begin
             ASmallIcon.Handle := AHandle;
@@ -1515,7 +1515,7 @@ begin
     end
     else if ASmallIcon <> nil then
     begin
-      AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
+      AHandle := LoadImage(HResModule, PChar(UpperCase(CNWIZARDDEFAULT_ICO)), IMAGE_ICON, 16, 16, 0);
       if AHandle <> 0 then
       begin
         ASmallIcon.Handle := AHandle;
