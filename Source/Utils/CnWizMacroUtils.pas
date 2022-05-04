@@ -39,7 +39,7 @@ unit CnWizMacroUtils;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 修改记录：2003.09.26 V1.1 何清(QSoft)
-*               修正编码工具集中的加入过程头时，对Class methods处理错误的BUG 
+*               修正编码工具集中的加入过程头时，对 Class methods 处理错误的 BUG 
 *           2002.12.04 V1.0
 *               创建单元，实现功能
 ================================================================================
@@ -87,6 +87,7 @@ function EdtGetCodeLines: string;
 
 function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
   var ResultType: string): Boolean;
+{* 从当前光标往后找第一个函数的声明内容}
 
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
@@ -127,7 +128,7 @@ begin
 
   MemStream := TMemoryStream.Create;
   try
-    CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
+    CnGeneralSaveEditorToStream(nil, MemStream, True); // Ansi/Utf16/Utf16
     Parser := TCnGeneralWidePasLex.Create;
     try
       Parser.Origin := MemStream.Memory;
@@ -469,8 +470,7 @@ var
   begin
     MemStream := TMemoryStream.Create;
     try
-      CnOtaSaveCurrentEditorToStream(MemStream, True);
-      CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
+      CnGeneralSaveEditorToStream(nil, MemStream, True); // Ansi/Utf16/Utf16
       Parser := TCnGeneralWidePasLex.Create;
       try
         Parser.Origin := MemStream.Memory;
