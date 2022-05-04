@@ -42,7 +42,7 @@ uses
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
   FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
   Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics, Vcl.Controls, System.TypInfo,
-  CnFmxUtils, CnVclToFmxMap, CnWizDfmParser;
+  CnFmxUtils, CnVclToFmxMap, CnWizDfmParser, CnStrings;
 
 type
   // === 属性转换器 ===
@@ -140,7 +140,24 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
+function ReplaceVclUsesToFmx(const OldUses: string; UsesList: TStrings): string;
+{* 处理较为通用的 Vcl. 或无前缀单元到 FMX. 引用单元的转换}
+
 implementation
+
+const
+  UNIT_NAMES_PREFIX: array[0..5] of string = (
+    'Graphics', 'Controls', 'Forms', 'Dialogs', 'StdCtrls', 'ExtCtrls'
+  );
+
+  UNIT_NAMES_DELETE: array[0..0] of string = (
+    'ComCtrls'
+  );
+
+  FMX_PURE_UNIT_PAIRS: array[0..0] of string = (
+    'Clipbrd:FMX.Clipboard'
+    // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
+  );
 
 type
   TVclGraphicAccess = class(Vcl.Graphics.TGraphic);
@@ -178,6 +195,52 @@ begin
 
   Result := '[' + InElements.CommaText + ']';
   Result := StringReplace(Result, ',', ', ', [rfReplaceAll]);
+end;
+
+function ReplaceVclUsesToFmx(const OldUses: string; UsesList: TStrings): string;
+var
+  I, L: Integer;
+  OS, NS: string;
+begin
+  Result := OldUses;
+
+  // 删除，用于 FMX 中无同名单元的场合。如果对应有新的不同名单元，则由后面的组件映射而新增。
+  for I := Low(UNIT_NAMES_DELETE) to High(UNIT_NAMES_DELETE) do
+  begin
+    Result := StringReplace(Result, ', ' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, ',' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
+  end;
+
+  // 先把有 Vcl 前缀的统统替换成带 FMX 前缀的
+  Result := StringReplace(Result, ' Vcl.', ' FMX.', [rfIgnoreCase, rfReplaceAll]);
+  Result := StringReplace(Result, ',Vcl.', ', FMX.', [rfIgnoreCase, rfReplaceAll]);
+
+  // 再把指定无 Vcl 前缀的替换成带 FMX 前缀的
+  for I := Low(UNIT_NAMES_PREFIX) to High(UNIT_NAMES_PREFIX) do
+  begin
+    Result := StringReplace(Result, ' ' + UNIT_NAMES_PREFIX[I], ' FMX.' + UNIT_NAMES_PREFIX[I], [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, ',' + UNIT_NAMES_PREFIX[I], ', FMX.' + UNIT_NAMES_PREFIX[I], [rfIgnoreCase, rfReplaceAll]);
+  end;
+
+  // 整字替换掉无组件的改名了的单元名，如 'Clipbrd' 替换为 'FMX.Clipboard'
+  for I := Low(FMX_PURE_UNIT_PAIRS) to High(FMX_PURE_UNIT_PAIRS) do
+  begin
+    L := Pos(':', FMX_PURE_UNIT_PAIRS[I]);
+    if L > 0 then
+    begin
+      OS := Copy(FMX_PURE_UNIT_PAIRS[I], 1, L - 1);
+      NS := Copy(FMX_PURE_UNIT_PAIRS[I], L + 1, MaxInt);
+      if (OS <> '') and (NS <> '') then
+        Result := CnStringReplace(Result, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
+    end;
+  end;
+
+  // 再把新增的合并进去
+  for I := 0 to UsesList.Count - 1 do
+  begin
+    if Pos(UsesList[I], Result) <= 0 then
+      Result := Result + ', ' + UsesList[I];
+  end;
 end;
 
 function SearchPropertyValueAndRemoveFromStrings(List: TStrings; const PropertyName: string): string;

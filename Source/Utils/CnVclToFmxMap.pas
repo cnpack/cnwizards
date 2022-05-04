@@ -48,7 +48,8 @@ type
   public
     class procedure GetProperties(OutProperties: TStrings); virtual;
     class procedure ProcessProperties(const PropertyName, TheClassName,
-      PropertyValue: string; InProperties, OutProperties: TStrings; Tab: Integer = 0); virtual;
+      PropertyValue: string; InProperties, OutProperties: TStrings;
+      Tab: Integer = 0); virtual;
     {* 处理指定属性。如果同时处理了其他属性，要删掉其他属性行}
   end;
 
@@ -65,12 +66,16 @@ type
   TCnComponentConverterClass = class of TCnComponentConverter;
 
 function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventIntf,
-  OutEventImpl, OutUnits: TStringList): Boolean;
-{* 转换一棵 DFM 树，输入为 SourceTree，输出为 DestTree，同时还输出事件代码与单元列表}
+  OutEventImpl, OutUnits, OutSinglePropMap: TStringList): Boolean;
+{* 转换一棵 DFM 树，输入为 SourceTree，输出为 DestTree，同时还输出事件代码与单元列表
+        OutUnits 只输出 FMX 所需，外部需和原始的 uses 内容拼接
+        OutEventIntf 只输出 TForm 内定义的事件声明，外部需和单元内容拼接
+        OutSinglePropMap 用于输出简单的一对一的属性名变动映射，供外部替换处理源文件
+  TODO: OutEvenetImpl 可不输出，由外界检查后拼接 private 及之后的原始文件内容，同时替换掉 $R *.dfm 为 xfm}
 
-function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
+function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass, InComponentName: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
-  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer = 0): Boolean;
+  OutEventsImpl, OutSinglePropMap: TStrings; IsContainer: Boolean; Tab: Integer = 0): Boolean;
 {* 将一个 VCL 组件的属性包括事件转换成 FMX 属性与事件代码，返回成功与否}
 
 function CnGetFmxUnitNameFromClass(const ComponentClass: string): string;
@@ -124,7 +129,7 @@ var
   {* 存储各种属性转换器供外界注册}
 
   FComponentConverterClasses: TList<TCnComponentConverterClass> = nil;
-  {* 存储各种属性转换器供外界注册}
+  {* 存储各种组件转换器供外界注册}
 
   FVclPropertyConverterMap: TDictionary<string, TCnPropertyConverterClass> = nil;
   {* 存储属性名与各种属性转换器的关系}
@@ -919,6 +924,18 @@ const
     'WindowState'
   );
 
+  // 特定类或非特定类的属性名前后对应关系，供源码中替换用
+  // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..6] of string = (
+    'TPageControl.ActivePage:ActiveTab',
+    'TPageControl.PageIndex:Index',
+    'TRadioButton.Checked:IsChecked',
+    'TCheckBox.Checked:IsChecked',
+    'TStringGrid.DefaultRowHeight:RowHeight',
+    'TToolBar.ButtonWidth:ItemWidth',
+    'TToolBar.ButtonHeight:ItemHeight'
+  );
+
 function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
 begin
   if not FVclFmxClassMap.TryGetValue(ComponentClass, Result) then
@@ -1162,7 +1179,7 @@ begin
 end;
 
 function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventIntf,
-  OutEventImpl, OutUnits: TStringList): Boolean;
+  OutEventImpl, OutUnits, OutSinglePropMap: TStringList): Boolean;
 var
   I: Integer;
   OutClass: string;
@@ -1197,16 +1214,16 @@ begin
 
   DestTree.Items[1].Text := SourceTree.Items[1].Text;
   CnConvertPropertiesFromVclToFmx(SourceTree.Items[1].ElementClass,
-    SourceTree.Items[1].ElementClass, OutClass, SourceTree.Items[1].Properties,
-    DestTree.Items[1].Properties, OutEventIntf, OutEventImpl, True, 2);
+    SourceTree.Items[1].ElementClass, SourceTree.Items[1].Text, OutClass, SourceTree.Items[1].Properties,
+    DestTree.Items[1].Properties, OutEventIntf, OutEventImpl, OutSinglePropMap, True, 2);
   // FCloneTree.Items[1].ElementClass := OutClass; 容器的类名不变，无需赋值
 
   CompsToConvert := TList<Integer>.Create;
   for I := 2 to SourceTree.Count - 1 do
   begin
     CnConvertPropertiesFromVclToFmx(SourceTree.Items[I].ElementClass,
-      SourceTree.Items[1].ElementClass, OutClass, SourceTree.Items[I].Properties,
-      DestTree.Items[I].Properties, OutEventIntf, OutEventImpl, False,
+      SourceTree.Items[1].ElementClass, SourceTree.Items[I].Text, OutClass, SourceTree.Items[I].Properties,
+      DestTree.Items[I].Properties, OutEventIntf, OutEventImpl, OutSinglePropMap, False,
       SourceTree.Items[I].Level * 2);
     DestTree.Items[I].ElementClass := OutClass;
 
@@ -1239,13 +1256,13 @@ begin
   Result := True;
 end;
 
-function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass: string;
+function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass, InComponentName: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
-  OutEventsImpl: TStrings; IsContainer: Boolean; Tab: Integer): Boolean;
+  OutEventsImpl, OutSinglePropMap: TStrings; IsContainer: Boolean; Tab: Integer): Boolean;
 var
-  P: Integer;
+  P, L, I: Integer;
   Converter: TCnPropertyConverterClass;
-  S, PropName, PropValue, Decl: string;
+  S, PropName, PropValue, Decl, MapStr: string;
 
   function IsPropNameEvent(const AProp: string): Boolean;
   begin
@@ -1271,6 +1288,29 @@ begin
   // 非容器组件无对应组件，退出
   if (InComponentClass <> InContainerClass) and (OutComponentClass = '') then
     Exit;
+
+  // 先根据属性名映射关系，输出要更改的属性名
+  for I := Low(VCL_FMX_SINGLE_PROPNAME_PAIRS) to High(VCL_FMX_SINGLE_PROPNAME_PAIRS) do
+  begin
+    MapStr := VCL_FMX_SINGLE_PROPNAME_PAIRS[I];
+    L := Pos('.', MapStr);
+    if L > 1 then
+    begin
+      MapStr := Trim(Copy(MapStr, 1, L - 1));
+      if MapStr = InComponentClass then
+      begin
+        // 这类有映射关系
+        MapStr := Trim(Copy(VCL_FMX_SINGLE_PROPNAME_PAIRS[I], L + 1, MaxInt));
+        // 得到旧属性名:新属性名
+        L := Pos(':', MapStr);
+        if L > 1 then
+        begin
+          OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
+            + InComponentName + '.' + Trim(Copy(MapStr, L + 1, MaxInt)));
+        end;
+      end;
+    end;
+  end;
 
   if OutProperties <> nil then
     OutProperties.Clear;
@@ -1368,8 +1408,24 @@ begin
     begin
       // 属性有无全匹配的转换器
       if FVclPropertyConverterMap.TryGetValue(PropName, Converter) then
+      begin
         Converter.ProcessProperties(PropName, InComponentClass, PropValue,
-        InProperties, OutProperties)
+          InProperties, OutProperties);
+
+          // DFM 中未保存的属性咋办？
+//        if IsSingle then
+//        begin
+//          // 记录单个属性名的转换，以备源码替换，别的复杂的管不着了
+//          MapStr := OutProperties[OutProperties.Count - 1];
+//          if Pos('=', MapStr) > 0 then
+//          begin
+//            MapStr := Trim(Copy(MapStr, 1, Pos('=', MapStr) - 1)); // 新属性名
+//            if MapStr <> PropName then
+//              OutSinglePropMap.Add(InComponentName + '.' + PropName + '='
+//                + InComponentName + '.' + MapStr);
+//          end;
+//        end;
+      end
       else
       begin
         P := Pos('.', PropName); // 带点的属性，查是否有匹配点前的转换器

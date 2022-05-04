@@ -100,7 +100,7 @@ type
     property Items[Index: Integer]: TCnDfmLeaf read GetItems write SetItems; default;
     property Tree: TCnDfmTree read GetTree;
 
-    // 用父类的 Text 属性当作 Name
+    // 注意：解析过程中，用父类的 Text 属性当作 Name
     property ElementClass: string read FElementClass write FElementClass;
     {* ClassName 类名}
     property ElementKind: TDfmKind read FElementKind write FElementKind;
