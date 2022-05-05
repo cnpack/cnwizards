@@ -181,14 +181,15 @@ const
   SDelphiLspGetCount = '@Lspcodcmplt@TLSPKibitzManager@GetCount$qqrv';
   SDelphiLspGetCodeCompEntry = '@Lspcodcmplt@TLSPKibitzManager@GetCodeCompEntry$qqri';
 
-  SBcbLspGetCount = '@Cppcodcmplt@TCppKibitzManager@GetCount$qqrv';
-  SBcbLspGetCount2 = '@Cppcodcmplt2@TCppKibitzManager2@GetCount$qqrv';
+  SBcbLspGetCount = '@Cppcodcmplt2@TCppKibitzManager2@GetCount$qqrv';
+  SBcbLspGetCodeCompEntry = '@Cppcodcmplt2@TCppKibitzManager2@GetCodeCompEntry$qqri';
 
 type
   TDelphiLSPKibitzManagerGetCount = function (ASelf: TObject): Integer;
   TBcbLSPKibitzManagerGetCount = function (ASelf: TObject): Integer;
 
   TDelphiLSPKibitzManagerGetCodeCompEntry = function (ASelf: TObject; Index: Integer): Pointer;
+  TBcbLSPKibitzManagerGetCodeCompEntry = function (ASelf: TObject; Index: Integer): Pointer;
 
   TCnDelphiLspCodeCompEntry = packed record
   {* 反编译而来，LSPKibitzManager 每一项是一个结构，一个结构共 12 个四字节内容}
@@ -207,6 +208,17 @@ type
   end;
   PCnDelphiLspCodeCompEntry = ^TCnDelphiLspCodeCompEntry;
 
+  TCnBcbLspCodeCompEntry = packed record
+  {* 反编译而来，CppKibitzManager2 每一项是一个结构，一个结构共 7 个四字节内容}
+    SymbolName: PAnsiChar;        // 名称
+    SymbolLength: LongWord;       // 名称长度
+    SymbolTypeFlag: LongWord;
+    SymbolParam: PAnsiChar;       // 详情字符串
+    SymbolParamLength: LongWord;  // 详情字符串长度
+    SymbolDummy6: PAnsiChar;
+  end;
+  PCnBcbLspCodeCompEntry = ^TCnBcbLspCodeCompEntry;
+
 var
   FDelphiLspHandle: THandle = 0;
   FBcbLspHandle: THandle = 0;
@@ -215,6 +227,7 @@ var
   DelphiLspGetCodeCompEntry: TDelphiLSPKibitzManagerGetCodeCompEntry = nil;
 
   BcbLspGetCount: TBcbLSPKibitzManagerGetCount = nil;
+  BcbLspGetCodeCompEntry: TBcbLSPKibitzManagerGetCodeCompEntry = nil;
 {$ENDIF}
 
 //==============================================================================
@@ -315,60 +328,130 @@ procedure TIDESymbolList.AsyncCodeCompletionCallBack(Sender: TObject; AId: Integ
   AError: Boolean; const AMessage: string);
 var
   I, C, Idx: Integer;
-  S1, S2, S3: string;
-  Entry: PCnDelphiLspCodeCompEntry;
-begin
-  FAsyncResultGot := True;
-  if not Assigned(FAsyncManagerObj) then
-    Exit;
+  SName, SDesc, S3: string;
+  PasEntry: PCnDelphiLspCodeCompEntry;
+  CppEntry: PCnBcbLspCodeCompEntry;
 
-  if FAsyncIsPascal then
+  function ExtractStr(CppPtr: PAnsiChar; Len: Integer): string;
+  const
+    MAX_LEN = 128;
+  var
+    S: AnsiString;
   begin
-    if Assigned(DelphiLspGetCount) and Assigned(DelphiLspGetCodeCompEntry) then
-    begin
-      // Delphi 下 FAsyncManagerObj 似乎是个 TLSPKibitzManager 实例，有俩方法获得个数与元素
-      C := DelphiLspGetCount(FAsyncManagerObj);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('Callback DelphiLspGetCount %s Returns Count %d',
-        [FAsyncManagerObj.ClassName, C]);
-{$ENDIF}
-      if C <= 0 then
-        Exit;
+    // 从 CppStr 扫描 " 号，把前面的拿出来返回为 string
+    Result := '';
+    if (CppPtr = nil) or (Len <= 0) then
+      Exit;
 
-      for I := 0 to C - 1 do
-      begin
-        Entry := DelphiLspGetCodeCompEntry(FAsyncManagerObj, I);
-        if (Entry <> nil) and (Entry^.SymbolName <> nil) then
+    if Len > MAX_LEN then
+      Len := MAX_LEN;
+
+    SetLength(S, Len);
+    Move(CppPtr^, S[1], Len);
+    Result := string(S);
+  end;
+
+  function CppTypeToKind(V: Integer; const SName: string): TSymbolKind;
+  begin
+    case V of
+      1: Result := skKeyword;
+      2,3: Result := skFunction; // method & global function
+      4:
         begin
-          Idx := Add(Entry^.SymbolName, SymbolClassTextToKind(Entry^.SymbolType),
-            Round(MaxInt / C * I), Entry^.SymbolParam, '', True, False, False, False);
+          if SName[1] = '~' then
+            Result := skDestructor
+          else
+            Result := skConstructor
+        end;
+      5: Result := skVariable;
+      6: Result := skConstant;
+      7: Result := skType;
+      8: Result := skConstant;
+      9: Result := skUnit;
+      10: Result := skProperty;
+      13,20: Result := skConstant; // enum
+      22: Result := skType;
+    else
+      Result := skUnknown;
+    end;
+  end;
 
-          // 根据源文件的类型设置符号项的适用范围
-          if Idx >= 0 then
+begin
+  try
+    if not Assigned(FAsyncManagerObj) then
+      Exit;
+
+    if FAsyncIsPascal then
+    begin
+      if Assigned(DelphiLspGetCount) and Assigned(DelphiLspGetCodeCompEntry) then
+      begin
+        // Delphi 下 FAsyncManagerObj 似乎是个 TLSPKibitzManager 实例，有俩方法获得个数与元素
+        C := DelphiLspGetCount(FAsyncManagerObj);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Callback DelphiLspGetCount %s Returns Count %d',
+          [FAsyncManagerObj.ClassName, C]);
+{$ENDIF}
+
+        if C <= 0 then
+          Exit;
+
+        for I := 0 to C - 1 do
+        begin
+          PasEntry := DelphiLspGetCodeCompEntry(FAsyncManagerObj, I);
+          if (PasEntry <> nil) and (PasEntry^.SymbolName <> nil) then
           begin
-            Items[Idx].ForPascal := True;
-            Items[Idx].ForCpp := False;
+            Idx := Add(PasEntry^.SymbolName, SymbolClassTextToKind(PasEntry^.SymbolType),
+              Round(MaxInt / C * I), PasEntry^.SymbolParam, '', True, False, False, False);
+
+            // 根据源文件的类型设置符号项的适用范围
+            if Idx >= 0 then
+            begin
+              Items[Idx].ForPascal := True;
+              Items[Idx].ForCpp := False;
+            end;
+          end;
+        end;
+      end;
+    end
+    else
+    begin
+      // BCB 下，FAsyncManagerObj 是一个 TCppKibitzManager2 实例，处理方式完全不同
+      if Assigned(BcbLspGetCount) and Assigned(BcbLspGetCodeCompEntry) then
+      begin
+        C := BcbLspGetCount(FAsyncManagerObj);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Callback BcbLspGetCount %s Returns Count %d',
+          [FAsyncManagerObj.ClassName, C]);
+{$ENDIF}
+
+        if C <= 0 then
+          Exit;
+
+        for I := 0 to C - 1 do
+        begin
+          CppEntry := BcbLspGetCodeCompEntry(FAsyncManagerObj, I);
+          if (CppEntry <> nil) and (CppEntry^.SymbolName <> nil) then
+          begin;
+            SName := ExtractStr(CppEntry^.SymbolName, CppEntry^.SymbolLength);
+            if SName = '' then
+              Continue;
+
+            SDesc := ExtractStr(CppEntry^.SymbolParam, CppEntry^.SymbolParamLength);
+            Idx := Add(SName, CppTypeToKind(CppEntry^.SymbolTypeFlag, SName),
+              Round(MaxInt / C * I), SDesc, '', True, False, False, False);
+
+            // 根据源文件的类型设置符号项的适用范围
+            if Idx >= 0 then
+            begin
+              Items[Idx].ForPascal := False;
+              Items[Idx].ForCpp := True;
+            end;
           end;
         end;
       end;
     end;
-  end
-  else
-  begin
-    // BCB 下，FAsyncManagerObj 是一个 TCppKibitzManager2 实例，处理方式完全不同
-    if Assigned(BcbLspGetCount) then
-    begin
-      C := BcbLspGetCount(FAsyncManagerObj);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('Callback BcbLspGetCount %s Returns Count %d',
-        [FAsyncManagerObj.ClassName, C]);
-{$ENDIF}
-      if C <= 0 then
-        Exit;
-
-      // TODO: 从 ThreadList 的 LockList 里拿元素
-    end;
-
+  finally
+    FAsyncResultGot := True; // 最后才放，比较保险
   end;
 end;
 
@@ -465,7 +548,9 @@ var
         FAsyncResultGot := False;
         FAsyncManagerObj := AsyncManager as TObject;
         FAsyncIsPascal := PosInfo.IsPascal;
-
+    {$IFDEF DEBUG}
+        CnDebugger.LogFmt('To Async Invoke %s.', [FAsyncManagerObj.ClassName]);
+    {$ENDIF}
         FKeepUnique := True;
         AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, EditView.CursorPos.Line,
           EditView.CursorPos.Col - 1, AsyncCodeCompletionCallBack);
@@ -1234,9 +1319,8 @@ initialization
   if FBcbLspHandle <> 0 then
   begin
     BcbLspGetCount := TBcbLSPKibitzManagerGetCount(GetProcAddress(FBcbLspHandle, SBcbLspGetCount));
-
+    BcbLspGetCodeCompEntry := TBcbLSPKibitzManagerGetCodeCompEntry(GetProcAddress(FBcbLspHandle, SBcbLspGetCodeCompEntry));
   end;
-
   {$ENDIF}
 {$ENDIF}
 {$ENDIF}
