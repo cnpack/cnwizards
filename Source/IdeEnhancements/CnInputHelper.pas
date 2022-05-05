@@ -1914,8 +1914,8 @@ end;
 procedure TCnInputHelper.ShowList(ForcePopup: Boolean);
 var
   Pt: TPoint;
-  i: Integer;
-  Left, Top: Integer;
+  I: Integer;
+  ALeft, ATop: Integer;
   CurrPos: Integer;
   AForm: TCustomForm;
   WorkRect: TRect;
@@ -1949,8 +1949,8 @@ begin
         // 判断是否需要显示
         if not ForcePopup and SmartDisplay then
         begin
-          for i := 0 to FItems.Count - 1 do
-            with TSymbolItem(FItems.Objects[i]) do
+          for I := 0 to FItems.Count - 1 do
+            with TSymbolItem(FItems.Objects[I]) do
             if not AlwaysDisp and ((Kind = skKeyword) and
               (CompareStr(GetKeywordText(KeywordStyle), FToken) = 0) or
               (Kind <> skKeyword) and (CompareStr(Name, Text) = 0) and
@@ -1970,27 +1970,36 @@ begin
             WorkRect := Bounds(Left, Top, Width, Height)
         else
           WorkRect := Bounds(0, 0, Screen.Width, Screen.Height);
+
         if Pt.x + List.Width <= WorkRect.Right then
-          Left := Pt.x
+          ALeft := Pt.x
         else
-          Left := Max(Pt.x - List.Width, WorkRect.Left);
+          ALeft := Max(Pt.x - List.Width, WorkRect.Left);
         if Pt.y + csLineHeight + List.Height <= WorkRect.Bottom then
-          Top := Pt.y + csLineHeight
+        begin
+          ATop := Pt.y + csLineHeight;
+{$IFDEF IDE_SUPPORT_HDPI}
+          // 加边框高度，免得边框占位置
+          if (List.Height - List.ClientHeight > 8) and (List.Height - List.ClientHeight < 64) then
+            ATop := ATop + (List.Height - List.ClientHeight) div 2;
+{$ENDIF}
+        end
         else
-          Top := Max(Pt.y - List.Height - csLineHeight div 2, WorkRect.Top);
-        List.SetPos(Left, Top);
+          ATop := Max(Pt.y - List.Height - csLineHeight div 2, WorkRect.Top);
+        List.SetPos(ALeft, ATop);
 
         // 判断是否需要根据放大倍数修正显示字号
         UpdateListFont;
         List.Popup;   // 真正显示
-      {$IFDEF ADJUST_CODEPARAMWINDOW}
+
+{$IFDEF ADJUST_CODEPARAMWINDOW}
         AdjustCodeParamWindowPos;
-      {$ENDIF}
+{$ENDIF}
       end
       else if not (FPosInfo.PosKind in [pkUnknown, pkFlat, pkComment, pkIntfUses,
         pkImplUses, pkResourceString, pkCompDirect, pkString]) then // 这个判断，Pascal 和 C++ 通用
       begin
-      {$IFNDEF SUPPORT_IDESYMBOLLIST}
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
         // 如果不支持 IDE 符号列表，只在非标识的地方显示外挂列表
         if not FPosInfo.IsPascal then
         begin
@@ -2004,7 +2013,7 @@ begin
               ShowIDECodeCompletion;
           end;
         end;
-      {$ENDIF}
+{$ENDIF}
       end;
     end;
   end;
