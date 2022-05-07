@@ -2,8 +2,8 @@ object FormConvert: TFormConvert
   Left = 0
   Top = 0
   Caption = 'Convert VCL DFM to FMX -- XE4 or above'
-  ClientHeight = 480
-  ClientWidth = 809
+  ClientHeight = 492
+  ClientWidth = 821
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -50,12 +50,12 @@ object FormConvert: TFormConvert
   object edtDfmFile: TEdit
     Left = 74
     Top = 29
-    Width = 623
+    Width = 559
     Height = 21
     TabOrder = 0
   end
   object btnBrowse: TButton
-    Left = 712
+    Left = 639
     Top = 27
     Width = 75
     Height = 25
@@ -93,6 +93,24 @@ object FormConvert: TFormConvert
     TabOrder = 5
     OnDblClick = tvDfmDblClick
   end
+  object btnBrowse2: TButton
+    Left = 720
+    Top = 27
+    Width = 49
+    Height = 25
+    Caption = #25171#24320
+    TabOrder = 6
+    OnClick = btnBrowse2Click
+  end
+  object btnSave2: TButton
+    Left = 769
+    Top = 27
+    Width = 49
+    Height = 25
+    Caption = #20445#23384
+    TabOrder = 7
+    OnClick = btnSave2Click
+  end
   object dlgOpen: TOpenDialog
     Filter = '*.dfm|*.dfm'
     Left = 312
@@ -101,6 +119,6 @@ object FormConvert: TFormConvert
   object dlgSave: TSaveDialog
     Filter = '*.pas|*.pas'
     Left = 384
-    Top = 184
+    Top = 112
   end
 end

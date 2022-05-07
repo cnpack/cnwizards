@@ -140,12 +140,26 @@ type
     class procedure ProcessComponents(SourceLeaf, DestLeaf: TCnDfmLeaf; Tab: Integer = 0); override;
   end;
 
-function ReplaceVclUsesToFmx(const OldUses: string; UsesList: TStrings): string;
-{* 处理较为通用的 Vcl. 或无前缀单元到 FMX. 引用单元的转换}
+function CnVclToFmxConvert(const InDfmFile: string; var OutFmx, OutPas: string; const NewFileName: string = ''): Boolean;
+{* 转换总入口，输入 dfm，输出 fmx 文件内容，如果有对应的 Vcl 的 Pas，则也转换输出对应 FMX 的 Pas 文件内容
+  其中 NewFileName 可传空，让 OutPas 内容中的 UnitName 未定}
+
+function CnVclToFmxReplaceUnitName(const PasName, InPas: string): string;
+{* 经过 CnConvertVclToFmx 转换得到的 OutPas，如果 NewFileName 是空，则内部 UnitName 未定
+  外界确定保存文件名后，替换 InPas 中的真实文件名}
+
+function CnVclToFmxSaveContent(const FileName, InFile: string; SourceUtf8: Boolean = False): Boolean;
+{* 将文件内容保存至文件，fmx 文件默认 Ansi 编码，内部本来就有 Unicode 转义
+  源码文件默认 Utf8 编码}
 
 implementation
 
+uses
+  mPasLex, CnPasWideLex, CnWidePasParser;
+
 const
+  UNIT_NAME_TAG = '<@#UnitName@>';
+
   UNIT_NAMES_PREFIX: array[0..5] of string = (
     'Graphics', 'Controls', 'Forms', 'Dialogs', 'StdCtrls', 'ExtCtrls'
   );
@@ -197,6 +211,7 @@ begin
   Result := StringReplace(Result, ',', ', ', [rfReplaceAll]);
 end;
 
+// 处理较为通用的 Vcl. 或无前缀单元到 FMX. 引用单元的转换
 function ReplaceVclUsesToFmx(const OldUses: string; UsesList: TStrings): string;
 var
   I, L: Integer;
@@ -887,7 +902,6 @@ class procedure TCnToolBarConverter.ProcessComponents(SourceLeaf,
 var
   I: Integer;
   S: string;
-  Leaf: TCnDfmLeaf;
 begin
   I := IndexOfHead('Images = ', DestLeaf.Properties);
   if I >= 0 then
@@ -901,6 +915,357 @@ begin
       if IndexOfHead('Images = ', DestLeaf.Items[I].Properties) < 0 then
         DestLeaf.Items[I].Properties.Add('Images = ' + S);
     end;
+  end;
+end;
+
+function MergeSource(const SourceFile, FormClass, NewFileName: string;
+  UsesList, FormDecl: TStrings): string;
+var
+  SrcStream, ResStream: TMemoryStream;
+  SrcStr, S, ANewFileName: string;
+  SrcList: TStringList;
+  C: Char;
+  P: PByteArray;
+  L, L1: Integer;
+  Lex: TCnPasWideLex;
+  UnitNamePos, UnitNameLen, UsesPos, UsesEndPos, FormTokenPos, PrivatePos: Integer;
+  InImpl, InUses, UnitGot, UsesGot, TypeGot, InForm: Boolean;
+  FormGot, FormGot1, FormGot2, FormGot3: Boolean;
+begin
+  // 1、从源 Pas 头到非 implementation 部分的第一个 uses 关键字，复制
+  // 2、分析该 uses 中的内容，把 Units 合并进去或替换原始的
+  // 3、再到 type 区的原始 Form 声明，TFormXXX = class(TForm) 均要识别到，从 TFormXXX 到第一个 private/protected/public 之前，替换
+  // 4、复制到文件尾，并寻找 implementation 后的 {$R *.dfm}，替换成 {$R *.fmx}
+
+  SrcList := nil;
+  SrcStream := nil;
+  ResStream := nil;
+  Lex := nil;
+
+  try
+    SrcList := TStringList.Create;
+    SrcList.LoadFromFile(SourceFile);
+
+    SrcStr := SrcList.Text;
+    SrcStream := TMemoryStream.Create;
+
+    SrcStream.Write(SrcStr[1], Length(SrcStr) * SizeOf(Char));
+    C := #0;
+    SrcStream.Write(C, SizeOf(Char));
+
+    Lex := TCnPasWideLex.Create(True);
+    Lex.Origin := PWideChar(SrcStream.Memory);
+
+    InImpl := False;
+    UnitGot := False;
+    UsesGot := False;
+    TypeGot := False;
+    InForm := False;
+    FormGot1 := False;
+    FormGot2 := False;
+    FormGot3 := False;
+    FormGot := False;
+
+    UnitNamePos := 0;
+    UnitNameLen := 0;
+    UsesPos := 0;
+    UsesEndPos := 0;
+    FormTokenPos := 0;
+    PrivatePos := 0;
+
+    while Lex.TokenID <> tkNull do
+    begin
+      case Lex.TokenID of
+        tkUnit:
+          begin
+            UnitGot := True;
+          end;
+        tkUses:
+          begin
+            if not UsesGot and not InImpl then
+            begin
+              UsesGot := True;
+              InUses := True;
+              // 记录 uses 的位置
+              UsesPos := Lex.TokenPos;
+            end;
+          end;
+        tkSemiColon:
+          begin
+            if InUses then
+            begin
+              InUses := False;
+              // 记录 uses 结尾的分号的位置
+              UsesEndPos := Lex.TokenPos;
+            end;
+          end;
+        tkType:
+          begin
+            if not InImpl then
+              TypeGot := True;
+          end;
+        tkImplementation:
+          begin
+            InImpl := True;
+          end;
+        tkPrivate, tkProtected, tkPublic:
+          begin
+            if InForm then
+            begin
+              // 记录当前 private 首位置
+              PrivatePos := Lex.TokenPos;
+              InForm := False;
+            end;
+          end;
+        tkIdentifier:
+          begin
+            if UnitGot then
+            begin
+              // 当前标识符是单元名
+              UnitNamePos := Lex.TokenPos;
+              UnitNameLen := Lex.TokenLength;
+              UnitGot := False;
+            end;
+
+            if TypeGot and not FormGot and (Lex.Token = FormClass) then
+            begin
+              FormGot1 := True;
+              FormGot2 := False;
+              FormGot3 := False;
+              InForm := False;
+
+              FormTokenPos := Lex.TokenPos;
+            end;
+          end;
+        tkEqual:
+          begin
+            if FormGot1 then
+            begin
+              FormGot2 := True;
+              FormGot1 := False;
+              FormGot3 := False;
+            end;
+          end;
+        tkClass:
+          begin
+            if FormGot2 then
+            begin
+              FormGot3 := True;
+              FormGot1 := False;
+              FormGot2 := False;
+            end;
+          end;
+        tkRoundOpen:
+          begin
+            if FormGot3 then
+            begin
+              InForm := True;  // 终于能确认是声明了，之前记录的 FormTokenPos 有效
+              FormGot := True;
+
+              FormGot1 := False;
+              FormGot2 := False;
+              FormGot3 := False;
+            end;
+          end;
+      end;
+
+      if not (Lex.TokenID in [tkIdentifier, tkClass, tkEqual, tkRoundOpen,
+        tkCompDirect, tkAnsiComment, tkBorComment]) then
+      begin
+        FormGot1 := False;
+        FormGot2 := False;
+        FormGot3 := False;
+      end;
+
+      Lex.NextNoJunk;
+    end;
+
+    // 从头写到 uses 及其后面的回车
+    // 写新的 uses 列表
+    // 从 usesEndPos 写到 FormTokenPos
+    // 写新 Form 声明与组件、事件列表
+    // 写 privatePos 到尾
+    // 最后替换 {$R *.dfm}
+    if (UsesPos = 0) or (UsesEndPos = 0) or (FormTokenPos = 0) or (PrivatePos = 0) then
+      Exit;
+
+    P := PByteArray(SrcStream.Memory);
+    ResStream := TMemoryStream.Create;
+
+    L := UnitNamePos;
+    SetLength(S, L);
+    Move(P^[0], S[1], UnitNamePos * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 从头写到 unit
+    if NewFileName = '' then
+      ANewFileName := UNIT_NAME_TAG
+    else
+      ANewFileName := ChangeFileExt(ExtractFileName(NewFileName), '');
+
+    ResStream.Write(UNIT_NAME_TAG[1], Length(UNIT_NAME_TAG) * SizeOf(Char)); // 写单元名标识
+
+    L := UsesPos - (UnitNamePos + UnitNameLen) + Length('uses');
+    SetLength(S, L);
+    Move(P^[(UnitNamePos + UnitNameLen) * SizeOf(Char)], S[1], L * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 从 UnitName 尾写到 uses
+
+    L := UsesPos + Length('uses'); // 恢复 L
+    L1 := UsesEndPos - L;
+    SetLength(S, L1);
+    Move(P^[L * SizeOf(Char)], S[1], L1 * SizeOf(Char));
+    S := ReplaceVclUsesToFmx(S, UsesList);
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 写 uses 单元列表
+
+    L := FormTokenPos - UsesEndPos;
+    SetLength(S, L);
+    Move(P^[UsesEndPos * SizeOf(Char)], S[1], L * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 写 uses 单元列表后到 Form 声明部分
+
+    S := FormDecl.Text;
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 写 Form 声明
+
+    C := ' ';
+    ResStream.Write(C, SizeOf(Char));
+    ResStream.Write(C, SizeOf(Char));   // private 前加俩空格缩进
+
+    L := (SrcStream.Size div SizeOf(Char)) - PrivatePos;
+    SetLength(S, L);
+    Move(P^[PrivatePos * SizeOf(Char)], S[1], L * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 写到尾
+
+    ResStream.Size := ResStream.Size - SizeOf(Char); // 去掉末尾的 #0
+
+    // 替换 OutStream 中的 {$R *.dfm}
+    SetLength(Result, ResStream.Size div SizeOf(Char));
+    Move(ResStream.Memory^, Result[1], ResStream.Size);
+    Result := StringReplace(Result, '{$R *.dfm}', '{$R *.fmx}', [rfIgnoreCase]);
+  finally
+    SetLength(S, 0);
+    Lex.Free;
+    SrcStream.Free;
+    ResStream.Free;
+    SrcList.Free;
+  end;
+end;
+
+function CnVclToFmxConvert(const InDfmFile: string; var OutFmx, OutPas: string;
+  const NewFileName: string): Boolean;
+var
+  ATree, ACloneTree: TCnDfmTree;
+  I, L: Integer;
+  OutClass, OS, NS: string;
+  List, FormDecl, EventIntf, EventImpl, Units, SinglePropMap: TStringList;
+begin
+  Result := False;
+  if not FileExists(InDfmFile) then
+    Exit;
+
+  ATree := nil;
+  ACloneTree := nil;
+  List := nil;
+  FormDecl := nil;
+  EventIntf := nil;
+  EventImpl := nil;
+  SinglePropMap := nil;
+  Units := nil;
+
+  try
+    ATree := TCnDfmTree.Create;
+    if LoadDfmFileToTree(InDfmFile, ATree) then
+    begin
+      ACloneTree := TCnDfmTree.Create;
+      ACloneTree.Assign(ATree);
+    end;
+
+    if (ATree.Count <> ACloneTree.Count) or (ATree.Count < 2) then
+      Exit;
+
+    FormDecl := TStringList.Create;
+    EventIntf := TStringList.Create;
+    EventImpl := TStringList.Create;
+    SinglePropMap := TStringList.Create;
+    Units := TStringList.Create;
+
+    Units.Sorted := True;
+    Units.Duplicates := dupIgnore;
+
+    CnConvertTreeFromVclToFmx(ATree, ACloneTree, EventIntf, EventImpl, Units, SinglePropMap);
+
+    OutClass := '  ' + Units[0];
+    for I := 1 to Units.Count - 1 do
+      OutClass := OutClass + ', ' + Units[I];
+    OutClass := OutClass + ';';
+
+    with FormDecl do
+    begin
+      Add(ACloneTree.Items[1].ElementClass + ' = class(TForm)');
+      for I := 2 to ACloneTree.Count - 1 do
+        if ACloneTree.Items[I].ElementClass <> '' then
+          Add('    ' + ACloneTree.Items[I].Text + ': '
+            + ACloneTree.Items[I].ElementClass + ';');
+      AddStrings(EventIntf);
+    end;
+
+    List := TStringList.Create;
+    SaveTreeToStrings(List, ACloneTree);
+    OutFmx := List.Text;
+
+    // 此时 FormDecl 是 FMX 的 published 部分的声明，
+    // 需要和原始文件的 private 后的内容拼合起来
+    OutPas := MergeSource(ChangeFileExt(InDfmFile, '.pas'),
+      ACloneTree.Items[1].ElementClass, NewFileName, Units, FormDecl);
+
+    // 替换源码中的标识符
+    for I := 0 to SinglePropMap.Count - 1 do
+    begin
+      L := Pos('=', SinglePropMap[I]);
+      if L > 0 then
+      begin
+        OS := Copy(SinglePropMap[I], 1, L - 1);
+        NS := Copy(SinglePropMap[I], L + 1, MaxInt);
+        if (OS <> '') and (NS <> '') then
+          OutPas := CnStringReplace(OutPas, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
+      end;
+    end;
+
+    Result := True;
+  finally
+    FormDecl.Free;
+    EventIntf.Free;
+    EventImpl.Free;
+    SinglePropMap.Free;
+    Units.Free;
+    List.Free;
+    ACloneTree.Free;
+    ATree.Free;
+  end;
+end;
+
+function CnVclToFmxReplaceUnitName(const PasName, InPas: string): string;
+var
+  UName: string;
+begin
+  UName := ChangeFileExt(ExtractFileName(PasName), '');
+  Result := StringReplace(InPas, UNIT_NAME_TAG, UName, []);
+end;
+
+// 将文件内容保存至文件，fmx 文件默认 Ansi 编码，内部有 Unicode 转义，源码文件默认 Utf8 编码
+function CnVclToFmxSaveContent(const FileName, InFile: string; SourceUtf8: Boolean): Boolean;
+var
+  M: TBytesStream;
+  T: TBytes;
+begin
+  Result := False;
+  if SourceUtf8 then
+    T := TEncoding.UTF8.GetBytes(InFile)
+  else
+    T := TEncoding.ANSI.GetBytes(InFile);
+
+  M := TBytesStream.Create(T);
+  try
+    M.SaveToFile(FileName);
+    Result := True;
+  finally
+    M.Free;
   end;
 end;
 

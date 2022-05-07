@@ -152,6 +152,9 @@ function LoadDfmFileToTree(const FileName: string; Tree: TCnDfmTree): Boolean;
 function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;
 {* 将树的内容存成 DFM 文本文件}
 
+function SaveTreeToStrings(const List: TStrings; Tree: TCnDfmTree): Boolean;
+{* 将树的内容存成字符串列表}
+
 function ConvertWideStringToDfmString(const W: WideString): WideString;
 {* 将宽字符串转换为 Delphi 7 或以上版本中的 DFM 字符串}
 
@@ -1013,6 +1016,11 @@ begin
   except
     Result := False;
   end;
+end;
+
+function SaveTreeToStrings(const List: TStrings; Tree: TCnDfmTree): Boolean;
+begin
+  Result := Tree.SaveToStrings(List);
 end;
 
 function SaveTreeToDfmFile(const FileName: string; Tree: TCnDfmTree): Boolean;

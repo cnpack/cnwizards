@@ -21,14 +21,19 @@ type
     btnConvertTree: TSpeedButton;
     btnSaveCloneTree: TSpeedButton;
     dlgSave: TSaveDialog;
+    btnBrowse2: TButton;
+    btnSave2: TButton;
     procedure btnBrowseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnConvertTreeClick(Sender: TObject);
     procedure tvDfmDblClick(Sender: TObject);
     procedure btnSaveCloneTreeClick(Sender: TObject);
+    procedure btnBrowse2Click(Sender: TObject);
+    procedure btnSave2Click(Sender: TObject);
   private
     FTree, FCloneTree: TCnDfmTree;
+    FOutPas, FOutFmx: string;
     procedure TreeSaveNode(ALeaf: TCnLeaf; ATreeNode: TTreeNode;
       var Valid: Boolean);
   public
@@ -45,6 +50,34 @@ uses
   CnVclToFmxMap, CnStrings, CnVclToFmxConverter, mPasLex, CnPasWideLex, CnWidePasParser;
 
 {$R *.dfm}
+
+const
+  UNIT_NAME_TAG = '<@#UnitName@>';
+
+  UNIT_NAMES_PREFIX: array[0..5] of string = (
+    'Graphics', 'Controls', 'Forms', 'Dialogs', 'StdCtrls', 'ExtCtrls'
+  );
+
+  UNIT_NAMES_DELETE: array[0..0] of string = (
+    'ComCtrls'
+  );
+
+  FMX_PURE_UNIT_PAIRS: array[0..0] of string = (
+    'Clipbrd:FMX.Clipboard'
+    // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
+  );
+
+procedure TFormConvert.btnBrowse2Click(Sender: TObject);
+
+begin
+  if dlgOpen.Execute then
+  begin
+    FOutPas := '';
+    FOutFmx := '';
+    if not CnVclToFmxConvert(dlgOpen.FileName, FOutFmx, FOutPas) then
+      ShowMessage('Error Converting');
+  end;
+end;
 
 procedure TFormConvert.btnBrowseClick(Sender: TObject);
 begin
@@ -172,6 +205,19 @@ begin
   SinglePropMap.Free;
 end;
 
+procedure TFormConvert.btnSave2Click(Sender: TObject);
+begin
+  if (FOutFmx <> '') and dlgSave.Execute then
+  begin
+    CnVclToFmxSaveContent(ChangeFileExt(dlgSave.FileName, '.fmx'), FOutFmx);
+    if FOutPas <> '' then
+    begin
+      FOutPas := CnVclToFmxReplaceUnitName(dlgSave.FileName, FOutPas);
+      CnVclToFmxSaveContent(ChangeFileExt(dlgSave.FileName, '.pas'), FOutPas);
+    end;
+  end;
+end;
+
 procedure TFormConvert.btnSaveCloneTreeClick(Sender: TObject);
 var
   S: string;
@@ -199,6 +245,52 @@ begin
   FTree.Free;
 end;
 
+function ReplaceVclUsesToFmx(const OldUses: string; UsesList: TStrings): string;
+var
+  I, L: Integer;
+  OS, NS: string;
+begin
+  Result := OldUses;
+
+  // 删除，用于 FMX 中无同名单元的场合。如果对应有新的不同名单元，则由后面的组件映射而新增。
+  for I := Low(UNIT_NAMES_DELETE) to High(UNIT_NAMES_DELETE) do
+  begin
+    Result := StringReplace(Result, ', ' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, ',' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
+  end;
+
+  // 先把有 Vcl 前缀的统统替换成带 FMX 前缀的
+  Result := StringReplace(Result, ' Vcl.', ' FMX.', [rfIgnoreCase, rfReplaceAll]);
+  Result := StringReplace(Result, ',Vcl.', ', FMX.', [rfIgnoreCase, rfReplaceAll]);
+
+  // 再把指定无 Vcl 前缀的替换成带 FMX 前缀的
+  for I := Low(UNIT_NAMES_PREFIX) to High(UNIT_NAMES_PREFIX) do
+  begin
+    Result := StringReplace(Result, ' ' + UNIT_NAMES_PREFIX[I], ' FMX.' + UNIT_NAMES_PREFIX[I], [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, ',' + UNIT_NAMES_PREFIX[I], ', FMX.' + UNIT_NAMES_PREFIX[I], [rfIgnoreCase, rfReplaceAll]);
+  end;
+
+  // 整字替换掉无组件的改名了的单元名，如 'Clipbrd' 替换为 'FMX.Clipboard'
+  for I := Low(FMX_PURE_UNIT_PAIRS) to High(FMX_PURE_UNIT_PAIRS) do
+  begin
+    L := Pos(':', FMX_PURE_UNIT_PAIRS[I]);
+    if L > 0 then
+    begin
+      OS := Copy(FMX_PURE_UNIT_PAIRS[I], 1, L - 1);
+      NS := Copy(FMX_PURE_UNIT_PAIRS[I], L + 1, MaxInt);
+      if (OS <> '') and (NS <> '') then
+        Result := CnStringReplace(Result, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
+    end;
+  end;
+
+  // 再把新增的合并进去
+  for I := 0 to UsesList.Count - 1 do
+  begin
+    if Pos(UsesList[I], Result) <= 0 then
+      Result := Result + ', ' + UsesList[I];
+  end;
+end;
+
 function TFormConvert.MergeSource(const SourceFile, FormClass: string;
   UsesList, FormDecl: TStrings): string;
 var
@@ -209,8 +301,8 @@ var
   P: PByteArray;
   L, L1: Integer;
   Lex: TCnPasWideLex;
-  UsesPos, UsesEndPos, FormTokenPos, PrivatePos: Integer;
-  InImpl, InUses, UsesGot, TypeGot, InForm: Boolean;
+  UnitNamePos, UnitNameLen, UsesPos, UsesEndPos, FormTokenPos, PrivatePos: Integer;
+  InImpl, InUses, UnitGot, UsesGot, TypeGot, InForm: Boolean;
   FormGot, FormGot1, FormGot2, FormGot3: Boolean;
 begin
   // 1、从源 Pas 头到非 implementation 部分的第一个 uses 关键字，复制
@@ -238,6 +330,7 @@ begin
     Lex.Origin := PWideChar(SrcStream.Memory);
 
     InImpl := False;
+    UnitGot := False;
     UsesGot := False;
     TypeGot := False;
     InForm := False;
@@ -246,6 +339,8 @@ begin
     FormGot3 := False;
     FormGot := False;
 
+    UnitNamePos := 0;
+    UnitNameLen := 0;
     UsesPos := 0;
     UsesEndPos := 0;
     FormTokenPos := 0;
@@ -254,6 +349,10 @@ begin
     while Lex.TokenID <> tkNull do
     begin
       case Lex.TokenID of
+        tkUnit:
+          begin
+            UnitGot := True;
+          end;
         tkUses:
           begin
             if not UsesGot and not InImpl then
@@ -293,6 +392,14 @@ begin
           end;
         tkIdentifier:
           begin
+            if UnitGot then
+            begin
+              // 当前标识符是单元名
+              UnitNamePos := Lex.TokenPos;
+              UnitNameLen := Lex.TokenLength;
+              UnitGot := False;
+            end;
+
             if TypeGot and not FormGot and (Lex.Token = FormClass) then
             begin
               FormGot1 := True;
@@ -358,11 +465,18 @@ begin
     P := PByteArray(SrcStream.Memory);
     ResStream := TMemoryStream.Create;
 
-    L := UsesPos + Length('uses');
+    L := UnitNamePos;
     SetLength(S, L);
-    Move(P^[0], S[1], L * SizeOf(Char));
-    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 从头写到 uses
+    Move(P^[0], S[1], UnitNamePos * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 从头写到 unit
+    ResStream.Write(UNIT_NAME_TAG[1], Length(UNIT_NAME_TAG) * SizeOf(Char)); // 写单元名标识
 
+    L := UsesPos - (UnitNamePos + UnitNameLen) + Length('uses');
+    SetLength(S, L);
+    Move(P^[(UnitNamePos + UnitNameLen) * SizeOf(Char)], S[1], L * SizeOf(Char));
+    ResStream.Write(S[1], Length(S) * SizeOf(Char)); // 从 UnitName 尾写到 uses
+
+    L := UsesPos + Length('uses'); // 恢复 L
     L1 := UsesEndPos - L;
     SetLength(S, L1);
     Move(P^[L * SizeOf(Char)], S[1], L1 * SizeOf(Char));
