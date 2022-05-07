@@ -81,8 +81,9 @@ function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClas
 function CnGetFmxUnitNameFromClass(const ComponentClass: string): string;
 {* 返回 FMX 组件所在的单元名}
 
-function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
-{* 返回 VCL 组件类名对应的 FMX 组件类名}
+function CnGetFmxClassFromVclClass(const ComponentClass: string;
+  InProperties: TStrings): string;
+{* 返回 VCL 组件类名对应的 FMX 组件类名，InProperties 供额外判断用}
 
 function CnIsVclEnumPropertyNeedConvert(const PropertyName: string): Boolean;
 {* 判断某 VCL 属性名的属性值是否需要转换}
@@ -161,7 +162,7 @@ const
     'TCheckBox:TCheckBox',
     'TColorBox:TColorBox',
     'TColorListBox:TColorListBox',
-    'TComboBox:TComboBox',
+    'TComboBox:TComboEdit',
     'TEdit:TEdit',
     'TGroupBox:TGroupBox',
     'THeader:THeader',
@@ -943,7 +944,8 @@ const
     'TSpinEdit.MaxValue:TSpinBox.Max'
   );
 
-function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
+function CnGetFmxClassFromVclClass(const ComponentClass: string;
+  InProperties: TStrings): string;
 begin
   if not FVclFmxClassMap.TryGetValue(ComponentClass, Result) then
     Result := '';
@@ -1290,7 +1292,7 @@ var
 begin
   Result := False;
   CheckInitConverterMap;
-  OutComponentClass := CnGetFmxClassFromVclClass(InComponentClass);
+  OutComponentClass := CnGetFmxClassFromVclClass(InComponentClass, InProperties);
 
   // 非容器组件无对应组件，退出
   if (InComponentClass <> InContainerClass) and (OutComponentClass = '') then

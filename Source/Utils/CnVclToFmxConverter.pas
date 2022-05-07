@@ -298,7 +298,7 @@ var
   V, OutClassName: string;
   Cls: TClass;
 begin
-  OutClassName := CnGetFmxClassFromVclClass(TheClassName);
+  OutClassName := CnGetFmxClassFromVclClass(TheClassName, InProperties);
   if not CnIsSupportFMXControl(OutClassName) then
   begin
     // 目标类不是 FMX.TControl 的子类，直接使用原始 Left/Top，不走 Position.X/Y
