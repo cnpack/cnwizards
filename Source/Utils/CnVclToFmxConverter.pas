@@ -168,8 +168,10 @@ const
     'ComCtrls'
   );
 
-  FMX_PURE_UNIT_PAIRS: array[0..0] of string = (
-    'Clipbrd:FMX.Clipboard'
+  FMX_PURE_UNIT_PAIRS: array[0..2] of string = (
+    'Clipbrd:FMX.Clipboard',
+    'Sample.Spin:FMX.SpinBox',
+    'Spin:FMX.SpinBox'
     // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
   );
 
@@ -538,6 +540,10 @@ begin
     OutProperties.Add('TabPosition = ' + CnConvertEnumValue(PropertyValue));
     Exit;    // 属性值变了，写完后退出，不能再写 PropertyValue 了
   end
+  else if (PropertyName = 'MinValue') and (TheClassName = 'TSpinEdit') then
+    NewPropName := 'Min'
+  else if (PropertyName = 'MaxValue') and (TheClassName = 'TSpinEdit') then
+    NewPropName := 'Max'
   else
     NewPropName := PropertyName;
 

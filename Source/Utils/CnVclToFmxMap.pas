@@ -154,7 +154,7 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..44] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..45] of string = (
     'TButton:TButton',        // 可视组件们
     'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
@@ -179,6 +179,7 @@ const
     'TScrollBar:TScrollBar',
     'TScrollBox:TScrollBox',
     'TSpeedButton:TSpeedButton',
+    'TSpinEdit:TSpinBox',
     'TSplitter:TSplitter',
     'TStatusBar:TStatusBar',
     'TStringGrid:TStringGrid',
@@ -927,7 +928,7 @@ const
   // 特定类或非特定类的属性名前后对应关系，供源码中替换用
   // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
   // 注意，冒号后可能类名有变化。如果对应的新名字里有"."，则需要写明全类名
-  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..9] of string = (
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..11] of string = (
     'TPageControl.ActivePage:TTabControl.ActiveTab',
     'TPageControl.ActivePageIndex:TTabControl.TabIndex',
     'TRadioButton.Checked:IsChecked',
@@ -937,7 +938,9 @@ const
     'TToolBar.ButtonHeight:ItemHeight',
     'TLabel.Caption:Text',
     'TTreeView.Items.Count:GlobalCount',
-    'TMemo.Clear:TMemo.Lines.Clear'
+    'TMemo.Clear:TMemo.Lines.Clear',
+    'TSpinEdit.MinValue:TSpinBox.Min',
+    'TSpinEdit.MaxValue:TSpinBox.Max'
   );
 
 function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
