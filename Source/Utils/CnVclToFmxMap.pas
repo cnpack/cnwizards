@@ -926,14 +926,15 @@ const
 
   // 特定类或非特定类的属性名前后对应关系，供源码中替换用
   // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
-  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..6] of string = (
-    'TPageControl.ActivePage:ActiveTab',
-    'TPageControl.PageIndex:Index',
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..7] of string = (
+    'TPageControl.ActivePage:TTabControl.ActiveTab',
+    'TPageControl.ActivePageIndex:TTabControl.TabIndex',
     'TRadioButton.Checked:IsChecked',
     'TCheckBox.Checked:IsChecked',
     'TStringGrid.DefaultRowHeight:RowHeight',
     'TToolBar.ButtonWidth:ItemWidth',
-    'TToolBar.ButtonHeight:ItemHeight'
+    'TToolBar.ButtonHeight:ItemHeight',
+    'TLabel.Caption:Text'
   );
 
 function CnGetFmxClassFromVclClass(const ComponentClass: string): string;
@@ -1260,9 +1261,9 @@ function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClas
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,
   OutEventsImpl, OutSinglePropMap: TStrings; IsContainer: Boolean; Tab: Integer): Boolean;
 var
-  P, L, I: Integer;
+  P, L, K, I: Integer;
   Converter: TCnPropertyConverterClass;
-  S, PropName, PropValue, Decl, MapStr: string;
+  S, PropName, PropValue, Decl, MapStr, DestStr: string;
 
   function IsPropNameEvent(const AProp: string): Boolean;
   begin
@@ -1305,8 +1306,19 @@ begin
         L := Pos(':', MapStr);
         if L > 1 then
         begin
-          OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
-            + InComponentName + '.' + Trim(Copy(MapStr, L + 1, MaxInt)));
+          DestStr := Trim(Copy(MapStr, L + 1, MaxInt));
+          K := Pos('.', DestStr);
+          if K > 1 then // 可能更换了目的类
+          begin
+            if (OutComponentClass <> '') and (OutComponentClass <> Trim(Copy(DestStr, 1, K - 1))) then
+              Continue;
+            DestStr := Trim(Copy(DestStr, K + 1, MaxInt));
+             OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
+              + InComponentName + '.' + DestStr);
+          end
+          else // 没更换目的类
+            OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
+              + InComponentName + '.' + Trim(Copy(MapStr, L + 1, MaxInt)));
         end;
       end;
     end;
@@ -1411,20 +1423,6 @@ begin
       begin
         Converter.ProcessProperties(PropName, InComponentClass, PropValue,
           InProperties, OutProperties);
-
-          // DFM 中未保存的属性咋办？
-//        if IsSingle then
-//        begin
-//          // 记录单个属性名的转换，以备源码替换，别的复杂的管不着了
-//          MapStr := OutProperties[OutProperties.Count - 1];
-//          if Pos('=', MapStr) > 0 then
-//          begin
-//            MapStr := Trim(Copy(MapStr, 1, Pos('=', MapStr) - 1)); // 新属性名
-//            if MapStr <> PropName then
-//              OutSinglePropMap.Add(InComponentName + '.' + PropName + '='
-//                + InComponentName + '.' + MapStr);
-//          end;
-//        end;
       end
       else
       begin
