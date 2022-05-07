@@ -205,13 +205,14 @@ const
   );
 
   // 所支持的 FMX 的 TControl 子类，用于 Position 判断
-  FMX_CONTROLS_LIST: array[0..30] of string = (
+  FMX_CONTROLS_LIST: array[0..32] of string = (
     'TButton',        // 可视组件们
     'TCalendar',
     'TCheckBox',
     'TColorBox',
     'TColorListBox',
     'TComboBox',
+    'TComboEdit',
     'TEdit',
     'TGroupBox',
     'TGridLayout',
@@ -231,6 +232,7 @@ const
     'TScrollBar',
     'TScrollBox',
     'TSpeedButton',
+    'TSpinBox',
     'TSplitter',
     'TStatusBar',
     'TStringGrid',
@@ -982,6 +984,7 @@ function CnIsSupportFMXControl(const FMXClass: string): Boolean;
 var
   I: Integer;
 begin
+  // TODO: 改成从 FMX 实际类中通过 ClassParent 判断
   Result := False;
   for I := Low(FMX_CONTROLS_LIST) to High(FMX_CONTROLS_LIST) do
   begin
