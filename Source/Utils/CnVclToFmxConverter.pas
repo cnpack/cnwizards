@@ -226,6 +226,8 @@ begin
   begin
     Result := StringReplace(Result, ', ' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
     Result := StringReplace(Result, ',' + UNIT_NAMES_DELETE[I], '', [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, UNIT_NAMES_DELETE[I] + ', ', '', [rfIgnoreCase, rfReplaceAll]);
+    Result := StringReplace(Result, UNIT_NAMES_DELETE[I] + ',', '', [rfIgnoreCase, rfReplaceAll]);
   end;
 
   // 先把有 Vcl 前缀的统统替换成带 FMX 前缀的
