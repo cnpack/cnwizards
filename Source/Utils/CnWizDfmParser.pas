@@ -86,6 +86,7 @@ type
     function GetItems(Index: Integer): TCnDfmLeaf;
     procedure SetItems(Index: Integer; const Value: TCnDfmLeaf);
     function GetTree: TCnDfmTree;
+    function GetPropertyValue(const PropertyName: string): string;
   protected
     procedure AssignTo(Dest: TPersistent); override;
   public
@@ -106,7 +107,10 @@ type
     property ElementKind: TDfmKind read FElementKind write FElementKind;
     {* 元素类型}
     property Properties: TStrings read FProperties;
-    {* 存储文本属性，格式为 PropName = PropValue，注意 Objects 属性里可能存 TMemoryStream 的二进制数据}
+    {* 存储文本属性，格式为 PropName = PropValue，对于复杂属性，PropValue 里可能包含回车
+      注意 Objects 属性里可能存 TMemoryStream 的二进制数据}
+    property PropertyValue[const PropertyName: string]: string read GetPropertyValue;
+    {* 根据某属性名拿到属性值，注意不支持多行属性}
   end;
 
   TCnDfmTree = class(TCnTree)
@@ -1183,6 +1187,25 @@ end;
 function TCnDfmLeaf.GetItems(Index: Integer): TCnDfmLeaf;
 begin
   Result := TCnDfmLeaf(inherited GetItems(Index));
+end;
+
+function TCnDfmLeaf.GetPropertyValue(const PropertyName: string): string;
+var
+  I, D: Integer;
+begin
+  Result := '';
+  for I := 0 to FProperties.Count - 1 do
+  begin
+    D := Pos('=', FProperties[I]);
+    if D > 1 then
+    begin
+      if PropertyName = Trim(Copy(FProperties[I], 1, D - 1)) then
+      begin
+        Result := Trim(Copy(FProperties[I], D + 1, MaxInt));
+        Exit;
+      end;
+    end;
+  end;
 end;
 
 function TCnDfmLeaf.GetTree: TCnDfmTree;

@@ -42,7 +42,7 @@ uses
   FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
   FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
   Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics, Vcl.Controls, System.TypInfo,
-  CnFmxUtils, CnVclToFmxMap, CnWizDfmParser, CnStrings;
+  CnFmxUtils, CnVclToFmxMap, CnWizDfmParser, CnStrings, CnCommon;
 
 type
   // === 属性转换器 ===
@@ -175,6 +175,8 @@ const
     // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
   );
 
+  CRLF = #13#10;
+
 type
   TVclGraphicAccess = class(Vcl.Graphics.TGraphic);
 
@@ -259,6 +261,49 @@ begin
   begin
     if Pos(UsesList[I], Result) <= 0 then
       Result := Result + ', ' + UsesList[I];
+  end;
+end;
+
+// 针对转换后的 fmx 的 Tree 做特殊处理，如给 TabControl 加 Sizes 属性值
+procedure HandleTreeSpecial(ATree: TCnDfmTree);
+var
+  I, J: Integer;
+  W, H, S: string;
+  Leaf: TCnDfmLeaf;
+
+  function ConvertToSingle(const V: string): string;
+  begin
+    Result := V;
+    if Pos('.', V) > 0 then
+      Result := Copy(V, 1, Pos('.', V) - 1) + 's';
+  end;
+
+begin
+  for I := 0 to ATree.Count - 1 do
+  begin
+    Leaf := ATree.Items[I];
+    if (Leaf.ElementClass = 'TTabControl') and (Leaf.Count > 0) then
+    begin
+      // 是有子 Item 的 TTabControl，找 Width 和 Height
+      W := Leaf.PropertyValue['Size.Width'];
+      H := Leaf.PropertyValue['Size.Height'];
+      W := ConvertToSingle(W);
+      H := ConvertToSingle(H);
+
+      if (W <> '') and (H <> '') then
+      begin
+        S := 'Sizes = (';
+        for J := 0 to Leaf.Count - 1 do
+        begin
+          S := S + CRLF + '  ' + W;
+          if J = Leaf.Count - 1 then
+            S := S + CRLF + '  ' + H + ')'
+          else
+            S := S + CRLF + '  ' + H;
+        end;
+        Leaf.Properties.Add(S);
+      end;
+    end;
   end;
 end;
 
@@ -1197,6 +1242,9 @@ begin
     Units.Duplicates := dupIgnore;
 
     CnConvertTreeFromVclToFmx(ATree, ACloneTree, EventIntf, EventImpl, Units, SinglePropMap);
+
+    // 针对 ACloneTree 做特殊处理，如给 TabControl 加 Sizes 属性值
+    HandleTreeSpecial(ACloneTree);
 
     OutClass := '  ' + Units[0];
     for I := 1 to Units.Count - 1 do
