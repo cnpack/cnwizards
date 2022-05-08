@@ -67,8 +67,50 @@ const
     // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
   );
 
-procedure TFormConvert.btnBrowse2Click(Sender: TObject);
+// 针对转换后的 fmx 的 Tree 做特殊处理，如给 TabControl 加 Sizes 属性值
+procedure HandleTreeSpecial(ATree: TCnDfmTree);
+var
+  I, J: Integer;
+  W, H, S: string;
+  Leaf: TCnDfmLeaf;
 
+  function ConvertToSingle(const V: string): string;
+  begin
+    Result := V;
+    if Pos('.', V) > 0 then
+      Result := Copy(V, 1, Pos('.', V) - 1) + 's';
+  end;
+
+begin
+  for I := 0 to ATree.Count - 1 do
+  begin
+    Leaf := ATree.Items[I];
+    if (Leaf.ElementClass = 'TTabControl') and (Leaf.Count > 0) then
+    begin
+      // 是有子 Item 的 TTabControl，找 Width 和 Height
+      W := Leaf.PropertyValue['Size.Width'];
+      H := Leaf.PropertyValue['Size.Height'];
+      W := ConvertToSingle(W);
+      H := ConvertToSingle(H);
+
+      if (W <> '') and (H <> '') then
+      begin
+        S := 'Sizes = (';
+        for J := 0 to Leaf.Count - 1 do
+        begin
+          S := S + #13#10 + '  ' + W;
+          if J = Leaf.Count - 1 then
+            S := S + #13#10 + H + ')'
+          else
+            S := S + #13#10 + H;
+        end;
+        Leaf.Properties.Add(S);
+      end;
+    end;
+  end;
+end;
+
+procedure TFormConvert.btnBrowse2Click(Sender: TObject);
 begin
   if dlgOpen.Execute then
   begin
@@ -123,6 +165,8 @@ begin
   Units.Duplicates := dupIgnore;
 
   CnConvertTreeFromVclToFmx(FTree, FCloneTree, EventIntf, EventImpl, Units, SinglePropMap);
+  // 针对 ACloneTree 做特殊处理，如给 TabControl 加 Sizes 属性值
+  HandleTreeSpecial(FCloneTree);
 
   // 理论上 FCloneTree 转换完毕了，写到树里
   FCloneTree.OnSaveANode := TreeSaveNode;

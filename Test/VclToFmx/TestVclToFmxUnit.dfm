@@ -68,6 +68,7 @@ object FormConvert: TFormConvert
     Top = 64
     Width = 354
     Height = 145
+    ScrollBars = ssVertical
     TabOrder = 2
   end
   object mmoEventIntf: TMemo
