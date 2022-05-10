@@ -931,7 +931,7 @@ const
   // 特定类或非特定类的属性或方法名的前后对应关系，供源码中替换用
   // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
   // 注意，冒号后可能类名有变化。如果对应的新名字里有 "."，则需要写明全类名
-  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..13] of string = (
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..14] of string = (
     'TPageControl.ActivePage:TTabControl.ActiveTab',
     'TPageControl.ActivePageIndex:TTabControl.TabIndex',
     'TRadioButton.Checked:IsChecked',
@@ -940,12 +940,13 @@ const
     'TToolBar.ButtonWidth:ItemWidth',
     'TToolBar.ButtonHeight:ItemHeight',
     'TLabel.Caption:Text',
-    'TTreeView.Items.Count:GlobalCount',
     'TMemo.Clear:TMemo.Lines.Clear',
     'TSpinEdit.MinValue:TSpinBox.Min',
     'TSpinEdit.MaxValue:TSpinBox.Max',
+    'TTreeView.Items.Count:GlobalCount',
     'TTreeView.FullCollapse:CollapseAll',
-    'TTreeView.FullExpand:ExpandAll'
+    'TTreeView.FullExpand:ExpandAll',
+    'TTreeView.Items.Clear:Clear'
   );
 
 function CnGetFmxClassFromVclClass(const ComponentClass: string;

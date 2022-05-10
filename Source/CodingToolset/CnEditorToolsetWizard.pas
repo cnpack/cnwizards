@@ -735,15 +735,14 @@ begin
   begin
     Idx := lvTools.Selected.Index;
     FWizard.EditorTools[Idx].GetEditorInfo(AName, AAuthor, AEmail);
-{$IFDEF IDE_SUPPORT_HDPI}
+
+    // Action.Icon 改为 16x16 后，不能再直接 Assign 了否则过小，需放大绘制
     imgIcon.Canvas.Brush.Style := bsSolid;
     imgIcon.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
     imgIcon.Canvas.FillRect(Rect(0, 0, imgIcon.Width, imgIcon.Height));
     DrawIconEx(imgIcon.Canvas.Handle, 0, 0, FWizard.EditorTools[Idx].FAction.Icon.Handle,
       imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
-{$ELSE}
-    imgIcon.Picture.Assign(FWizard.EditorTools[Idx].FAction.Icon);
-{$ENDIF}
+
     lblToolName.Caption := AName;
     lblToolAuthor.Caption := CnAuthorEmailToStr(AAuthor, AEmail);
     HotKey.HotKey := FWizard.EditorTools[Idx].FAction.ShortCut;

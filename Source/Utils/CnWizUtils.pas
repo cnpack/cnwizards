@@ -8504,7 +8504,7 @@ end;
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile; const Section: string): Boolean;
 begin
-  Result := CnInputQuery(ACaption, APrompt, Value, Ini, Section, False, FormCallBack);
+  Result := CnCommon.CnInputQuery(ACaption, APrompt, Value, Ini, Section, False, FormCallBack);
 end;
 
 function CnWizInputBox(const ACaption, APrompt, ADefault: string;
