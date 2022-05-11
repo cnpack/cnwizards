@@ -82,8 +82,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,tools,makeinst" if="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,cnvcltofmx,tools,makehelp,makeinst" unless="lite" />
+  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,cnvcltofmx,tools,makeinst" if="lite" />
 
   <property name="install_lite"   value=""          unless="lite"/>
   <property name="install_lite"   value="/DLITE"    if="lite"/>
@@ -215,6 +215,7 @@ Usage: want [target-name] [-Dname=value]
     cnpnglib   - Compile CnPngLib DLL.
     cnformatlib - Compile CnFormatLib DLL.
     cnformatlibw - Compile CnFormatLibW DLL for Unicode.
+    cnvcltofmx - Compile CnVclToFmx DLL.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndfm6to5  - Compile CnDfm6To5.
@@ -1177,6 +1178,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnFormatLib/CnFormatLibW.res" >
        <include name="${tools}/CnFormatLib/CnFormatLibW.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnVclToFmx DLL -->
+  <target name="cnvcltofmx" depends="-prepare" description="Compile CnVclToFmx DLL." >
+    <property name="Ver.FileDescription"  value="CnVclToFmx DLL" />
+    <property name="Ver.InternalName"     value="CnVclToFmx" />
+    <property name="Ver.OriginalFilename" value="CnVclToFmx.DLL" />
+    <copy tofile="${tools}/CnVclToFmx/CnVclToFmx.res.old" >
+       <include name="${tools}/CnVclToFmx/CnVclToFmx.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnVclToFmx/CnVclToFmx.rc" />
+    <brcc file="${tools}/CnVclToFmx/CnVclToFmx.rc" output="${tools}/CnVclToFmx/CnVclToFmx.res" />
+    <dcc basedir="${tools}/CnVclToFmx" source="CnVclToFmx.dpr" exename="${exe.D103R}"  usecfg="true" />
+    <delete dir="${tools}/CnVclToFmx">
+       <include name="CnVclToFmx.res" />
+       <include name="CnVclToFmx.rc" />
+       <include name="CnVclToFmx.drc" />
+    </delete>
+    <move tofile="${tools}/CnVclToFmx/CnVclToFmx.res" >
+       <include name="${tools}/CnVclToFmx/CnVclToFmx.res.old" />
     </move>
   </target>
 
