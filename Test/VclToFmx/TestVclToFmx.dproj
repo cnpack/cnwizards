@@ -107,8 +107,8 @@
             <Form>FormConvert</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="..\..\Source\Utils\CnVclToFmxMap.pas"/>
-        <DCCReference Include="..\..\Source\Utils\CnVclToFmxConverter.pas"/>
+        <DCCReference Include="..\..\Source\VclToFmx\CnVclToFmxMap.pas"/>
+        <DCCReference Include="..\..\Source\VclToFmx\CnVclToFmxConverter.pas"/>
         <DCCReference Include="..\..\Source\Utils\CnWizDfmParser.pas"/>
         <DCCReference Include="..\..\..\cnvcl\Source\Common\CnTree.pas"/>
         <BuildConfiguration Include="Release">

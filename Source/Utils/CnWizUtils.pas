@@ -1436,7 +1436,7 @@ begin
         Exit;
       end;
     end
-    else if ASmallIcon <> nil then // 只装载小尺寸的
+    else if ASmallIcon <> nil then // 只装载小尺寸的，对于只有 32x32 的图标文件来说可能不成功
     begin
       AHandle := LoadImage(HResModule, PChar(UpperCase(ResName)), IMAGE_ICON, 16, 16, 0);
       if AHandle <> 0 then
