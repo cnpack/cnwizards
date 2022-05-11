@@ -39,8 +39,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
-  Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
-  Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics, Vcl.Controls, System.TypInfo,
+  FMX.Graphics, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg, Vcl.Imaging.pngimage,
+  Vcl.Imaging.GIFImg,  Vcl.Controls, System.TypInfo,
   CnFmxUtils, CnVclToFmxMap, CnWizDfmParser, CnStrings, CnCommon;
 
 type
@@ -670,11 +670,13 @@ begin
   Stream.Read(ClzName[0], 1);
   Stream.Read(ClzName[1], Ord(ClzName[0]));
 
+  // 注意这里要根据无前缀的类名如 'TBitmap' 找到 Vcl.Graphics 里的 TBitmap
+  // 因此得保证 uses 中要先 FMX.Graphics，再 Vcl.Graphics
   Clz := Vcl.Graphics.TGraphicClass(FindClass(ClzName));
   if Clz <> nil then
   begin
     Result := Vcl.Graphics.TGraphic(Clz.NewInstance);
-    Result.Create;
+    Result.Create; // 似乎会出错，上面先针对 TBitmap 特殊处理
     TVclGraphicAccess(Result).ReadData(Stream);
   end;
 end;
@@ -1226,7 +1228,9 @@ begin
     begin
       ACloneTree := TCnDfmTree.Create;
       ACloneTree.Assign(ATree);
-    end;
+    end
+    else
+      Exit; // dfm 不合法
 
     if (ATree.Count <> ACloneTree.Count) or (ATree.Count < 2) then
       Exit;
