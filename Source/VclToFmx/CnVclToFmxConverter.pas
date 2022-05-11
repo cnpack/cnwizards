@@ -39,8 +39,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, Winapi.Windows,
-  FMX.Types, FMX.Edit, FMX.ListBox, FMX.ListView, FMX.StdCtrls, FMX.ExtCtrls,
-  FMX.TabControl, FMX.Memo, FMX.Dialogs, Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
+  Vcl.ComCtrls, Vcl.Graphics, Vcl.Imaging.jpeg,
   Vcl.Imaging.pngimage, Vcl.Imaging.GIFImg, FMX.Graphics, Vcl.Controls, System.TypInfo,
   CnFmxUtils, CnVclToFmxMap, CnWizDfmParser, CnStrings, CnCommon;
 

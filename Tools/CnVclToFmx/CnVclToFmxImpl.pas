@@ -50,7 +50,10 @@ type
     function SaveNewFile(InNewFile: PWideChar): Boolean;
   end;
 
-function GetVclToFmxConverter: ICnVclToFmxIntf;
+function GetVclToFmxConverter: ICnVclToFmxIntf; stdcall;
+
+exports
+  GetVclToFmxConverter;
 
 implementation
 
