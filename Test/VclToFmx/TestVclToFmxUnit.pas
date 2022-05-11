@@ -23,6 +23,7 @@ type
     dlgSave: TSaveDialog;
     btnBrowse2: TButton;
     btnSave2: TButton;
+    btnAll: TSpeedButton;
     procedure btnBrowseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -31,6 +32,7 @@ type
     procedure btnSaveCloneTreeClick(Sender: TObject);
     procedure btnBrowse2Click(Sender: TObject);
     procedure btnSave2Click(Sender: TObject);
+    procedure btnAllClick(Sender: TObject);
   private
     FTree, FCloneTree: TCnDfmTree;
     FOutPas, FOutFmx: string;
@@ -47,7 +49,8 @@ var
 implementation
 
 uses
-  CnVclToFmxMap, CnStrings, CnVclToFmxConverter, mPasLex, CnPasWideLex, CnWidePasParser;
+  CnVclToFmxMap, CnStrings, CnVclToFmxIntf, CnVclToFmxImpl,
+  CnVclToFmxConverter, mPasLex, CnPasWideLex, CnWidePasParser;
 
 {$R *.dfm}
 
@@ -108,6 +111,31 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TFormConvert.btnAllClick(Sender: TObject);
+var
+  Cter: ICnVclToFmxIntf;
+begin
+  if dlgOpen.Execute then
+  begin
+    Cter := GetVclToFmxConverter;
+    if Cter <> nil then
+    begin
+      if Cter.OpenAndConvertFile(PChar(dlgOpen.FileName)) then
+      begin
+        if dlgSave.Execute() then
+        begin
+          if Cter.SaveNewFile(PChar(dlgSave.FileName)) then
+          begin
+            ShowMessage('Convert OK');
+            Exit;
+          end;
+        end;
+      end;
+    end;
+  end;
+  ShowMessage('Convert Failed');
 end;
 
 procedure TFormConvert.btnBrowse2Click(Sender: TObject);

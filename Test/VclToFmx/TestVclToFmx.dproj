@@ -111,6 +111,8 @@
         <DCCReference Include="..\..\Source\VclToFmx\CnVclToFmxConverter.pas"/>
         <DCCReference Include="..\..\Source\Utils\CnWizDfmParser.pas"/>
         <DCCReference Include="..\..\..\cnvcl\Source\Common\CnTree.pas"/>
+        <DCCReference Include="..\..\Source\VclToFmx\CnVclToFmxIntf.pas"/>
+        <DCCReference Include="..\..\Tools\CnVclToFmx\CnVclToFmxImpl.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

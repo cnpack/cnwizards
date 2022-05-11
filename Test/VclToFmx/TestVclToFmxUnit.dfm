@@ -47,6 +47,14 @@ object FormConvert: TFormConvert
     Caption = 'S'
     OnClick = btnSaveCloneTreeClick
   end
+  object btnAll: TSpeedButton
+    Left = 384
+    Top = 283
+    Width = 23
+    Height = 22
+    Caption = 'A'
+    OnClick = btnAllClick
+  end
   object edtDfmFile: TEdit
     Left = 74
     Top = 29

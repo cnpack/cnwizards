@@ -18,13 +18,13 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnVclToFmxIntf;
+unit CnVclToFmxImpl;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：VCL 至 FMX 转换功能的对外接口
+* 单元名称：VCL 至 FMX 转换功能的接口实现
 * 单元作者：CnPack开发组
-* 备    注：该单元声明 VCL 至 FMX 转换功能的对外接口
+* 备    注：该单元是 VCL 至 FMX 转换功能的接口实现
 * 开发平台：Win7 + Delphi 5.0
 * 兼容测试：各种平台
 * 本 地 化：不需要
@@ -38,20 +38,63 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Windows;
+  System.SysUtils, System.Classes, CnVclToFmxIntf;
 
 type
-  ICnVclToFmxIntf = interface
-    ['{E4ED753F-A196-4815-B366-BD44213EDEE8}']
+  TCnVclToFmxImpl = class(TInterfacedObject, ICnVclToFmxIntf)
+  private
+    FFmx: string;
+    FPas: string;
+  public
     function OpenAndConvertFile(InDfmFile: PWideChar): Boolean;
-    {* 传入 DFM 窗体文件名供转换，返回转换是否成功}
     function SaveNewFile(InNewFile: PWideChar): Boolean;
-    {* 转换成功后调用此方法保存新文件}
   end;
 
-  TCnGetVclToFmxConverter = function: ICnVclToFmxIntf; stdcall;
-  {* DLL 中输出的函数类型}
+function GetVclToFmxConverter: ICnVclToFmxIntf;
 
 implementation
+
+uses
+  CnVclToFmxConverter;
+
+var
+  FImpl: ICnVclToFmxIntf = nil;
+
+function GetVclToFmxConverter: ICnVclToFmxIntf;
+begin
+  if FImpl = nil then
+    FImpl := TCnVclToFmxImpl.Create;
+  Result := FImpl;
+end;
+
+{ TCnVclToFmxImpl }
+
+function TCnVclToFmxImpl.OpenAndConvertFile(InDfmFile: PWideChar): Boolean;
+begin
+  FFmx := '';
+  FPas := '';
+  Result := CnVclToFmxConvert(InDfmFile, FFmx, FPas);
+end;
+
+function TCnVclToFmxImpl.SaveNewFile(InNewFile: PWideChar): Boolean;
+var
+  F: string;
+begin
+  if (FFmx <> '') and (InNewFile <> nil) then
+  begin
+    F := InNewFile;
+    Result := CnVclToFmxSaveContent(ChangeFileExt(F, '.fmx'), FFmx);
+    if Result and (FPas <> '') then
+    begin
+      FPas := CnVclToFmxReplaceUnitName(F, FPas);
+      Result := CnVclToFmxSaveContent(ChangeFileExt(F, '.pas'), FPas);
+    end;
+  end;
+end;
+
+initialization
+
+finalization
+  FImpl := nil;
 
 end.
