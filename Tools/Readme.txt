@@ -1,7 +1,7 @@
 Tools 辅助工具目录
 =================
 
-该目录存放由CnPack开发组编写的辅助工具源码。
+该目录存放由CnPack开发组编写的辅助工具源码。其中目录名以 Cn 开头的是打包供外发的，反之为内部工具。
 
 CnAsciiChart
 ------
@@ -11,16 +11,6 @@ CnAsciiChart
 使用：直接运行使用。
 作者：刘啸（LiuXiao） liuxiao@cnpack.org
 时间：2005.02.20
-
-CnCleanIDE(-)
-------
-类型：专家包工具
-功能：IDE 历史记录清理工具
-版本：V1.0
-使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
-时间：2005.02.20
-备注：此功能已整合入 IDE 辅助备份/恢复工具，故不再使用。
 
 CnConfigIO
 ------
@@ -57,6 +47,15 @@ CnDfm6To5
 使用：直接运行使用，支持文件和目录转换。
 作者：周劲羽 (zjy@cnpack.org)
 时间：2003.04.03
+
+CnFixStart
+---------
+类型：专家包工具
+功能：专家包启动修复工具
+版本：V1.0
+使用：直接运行使用，修复部分 RAD Studio 中 Key Mapping 问题
+作者：刘啸（LiuXiao） liuxiao@cnpack.org
+时间：2021.01.26
 
 CnFormatLib
 ---------
@@ -105,9 +104,54 @@ CnSelectLang
 作者：刘啸（LiuXiao） liuxiao@cnpack.org
 时间：2008
 
+CnSMR
+-----------
+类型：专家包工具
+功能：分析源码模块引用关系
+版本：V1.0
+使用：直接运行使用。
+作者：沈龙强
+时间：2008
+
+CnVclToFmx
+-----------
+类型：专家包工具
+功能：将 VCL 窗体转换为 FMX 的实现封装
+版本：V1.0
+使用：直接运行使用。
+作者：刘啸（LiuXiao） liuxiao@cnpack.org
+时间：2022
+
+CnVclToFmx
+-----------
+类型：专家包工具
+功能：将 VCL 窗体转换为 FMX 的实现封装
+版本：V1.0
+使用：由专家包加载使用。
+作者：刘啸（LiuXiao） liuxiao@cnpack.org
+时间：2022
+
+CnWizHelper
+--------
+类型：专家包 DLL
+功能：封装一些常用功能以备跨版本 Delphi 使用
+版本：V1.0
+使用：由专家包加载使用。
+作者：周劲羽 (zjy@cnpack.org)
+时间：2008
+
+CnWizLoader
+--------
+类型：专家包 DLL
+功能：专家包统一 DLL 入口，根据 Delphi 版本不同动态加载不同的专家 DLL
+版本：V1.0
+使用：由专家包加载使用。
+作者：刘啸（LiuXiao） liuxiao@cnpack.org
+时间：2020.5
+
 CnWizRes
 --------
-类型：专家包工具
+类型：专家包 DLL
 功能：将专家包使用到的图标转换成资源文件
 版本：V1.0
 使用：直接运行加参数使用。
@@ -117,8 +161,18 @@ CnWizRes
 CnWizSetup
 ----------
 类型：辅助安装
-功能：安装/反安装CnWizards IDE专家包，支持D5/6/7、BCB5/6
+功能：安装/反安装CnWizards IDE专家包，支持D5/6/7、BCB5/6以及以上所有版本
 版本：V1.1
 使用：第一次运行安装专家包，再次运行反安装，也可带参数 /i 进行安装，/u 反安装。
 作者：周劲羽 (zjy@cnpack.org)
 时间：2002.10.03
+
+CnZipUtils
+--------
+类型：专家包 DLL
+功能：封装 Zip 的压缩功能以备跨版本 Delphi 使用
+版本：V1.0
+使用：由专家包加载使用。
+作者：刘啸（LiuXiao） liuxiao@cnpack.org
+时间：2018.08
+
