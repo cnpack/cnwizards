@@ -1268,6 +1268,12 @@ begin
     SaveTreeToStrings(List, ACloneTree);
     OutFmx := List.Text;
 
+    if not FileExists(ChangeFileExt(InDfmFile, '.pas')) then
+    begin
+      Result := True;
+      Exit;
+    end;
+
     // 此时 FormDecl 是 FMX 的 published 部分的声明，
     // 需要和原始文件的 private 后的内容拼合起来
     OutPas := MergeSource(ChangeFileExt(InDfmFile, '.pas'),
@@ -1282,7 +1288,8 @@ begin
         OS := Copy(SinglePropMap[I], 1, L - 1);
         NS := Copy(SinglePropMap[I], L + 1, MaxInt);
         if (OS <> '') and (NS <> '') then
-          OutPas := CnStringReplace(OutPas, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
+          OutPas := CnStringReplace(OutPas, OS, NS, [crfReplaceAll,
+            crfIgnoreCase, crfWholeWord]);
       end;
     end;
 

@@ -249,25 +249,28 @@ begin
     Add('end.');
   end;
 
-  OutClass := MergeSource(ChangeFileExt(edtDfmFile.Text, '.pas'),
-    FCloneTree.Items[1].ElementClass, Units, FormDecl);
-
-  // 替换源码中的标识符
-  for I := 0 to SinglePropMap.Count - 1 do
+  if FileExists(ChangeFileExt(edtDfmFile.Text, '.pas')) then
   begin
-    L := Pos('=', SinglePropMap[I]);
-    if L > 0 then
-    begin
-      OS := Copy(SinglePropMap[I], 1, L - 1);
-      NS := Copy(SinglePropMap[I], L + 1, MaxInt);
-      if (OS <> '') and (NS <> '') then
-        OutClass := CnStringReplace(OutClass, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
-    end;
-  end;
+    OutClass := MergeSource(ChangeFileExt(edtDfmFile.Text, '.pas'),
+      FCloneTree.Items[1].ElementClass, Units, FormDecl);
 
-  mmoEventImpl.Lines.Clear;
-  if OutClass <> '' then
-    mmoEventImpl.Lines.Add(OutClass);
+    // 替换源码中的标识符
+    for I := 0 to SinglePropMap.Count - 1 do
+    begin
+      L := Pos('=', SinglePropMap[I]);
+      if L > 0 then
+      begin
+        OS := Copy(SinglePropMap[I], 1, L - 1);
+        NS := Copy(SinglePropMap[I], L + 1, MaxInt);
+        if (OS <> '') and (NS <> '') then
+          OutClass := CnStringReplace(OutClass, OS, NS, [crfReplaceAll, crfIgnoreCase, crfWholeWord]);
+      end;
+    end;
+
+    mmoEventImpl.Lines.Clear;
+    if OutClass <> '' then
+      mmoEventImpl.Lines.Add(OutClass);
+  end;
 
   mmoEventIntf.Lines.AddStrings(SinglePropMap);
 

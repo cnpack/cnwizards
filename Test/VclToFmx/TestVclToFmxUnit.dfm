@@ -49,7 +49,7 @@ object FormConvert: TFormConvert
   end
   object btnAll: TSpeedButton
     Left = 384
-    Top = 283
+    Top = 291
     Width = 23
     Height = 22
     Caption = 'A'
