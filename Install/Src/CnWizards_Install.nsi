@@ -628,6 +628,7 @@ InitOk:
   File "..\..\Bin\CnPngLib.dll"
   File "..\..\Bin\CnFormatLib.dll"
   File "..\..\Bin\CnFormatLibW.dll"
+  File "..\..\Bin\CnVclToFmx.dll"
 !ifndef LITE_VERSION
   File "..\..\Bin\CnWizHelper.dll"
   File "..\..\Bin\CnZipUtils.dll"
