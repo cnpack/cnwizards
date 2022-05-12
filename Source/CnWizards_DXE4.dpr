@@ -141,6 +141,7 @@ uses
   CnProjectFramesFrm in 'ProjectExtWizard\CnProjectFramesFrm.pas' {CnProjectFramesForm},
   CnProjectListUsedFrm in 'ProjectExtWizard\CnProjectListUsedFrm.pas' {CnProjectListUsedForm},
   CnWizDfmParser in 'Utils\CnWizDfmParser.pas',
+  CnVclToFmxIntf in 'VclToFmx\CnVclToFmxIntf.pas',
   CnCommentCropper in 'SimpleWizards\CnCommentCropper.pas' {CnCommentCropForm},
   CnSourceCropper in 'Utils\CnSourceCropper.pas',
   CnCpuWinEnhancements in 'IdeEnhancements\CnCpuWinEnhancements.pas',

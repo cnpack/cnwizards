@@ -346,6 +346,7 @@
         <DCCReference Include="ProjectExtWizard\CnProjectListUsedFrm.pas">
             <Form>CnProjectListUsedForm</Form>
         </DCCReference>
+        <DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>
         <DCCReference Include="Utils\CnWizDfmParser.pas"/>
         <DCCReference Include="SimpleWizards\CnCommentCropper.pas">
             <Form>CnCommentCropForm</Form>
