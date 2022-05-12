@@ -235,6 +235,7 @@ resourcestring
   SCnProjExtBackup = 'CnProjExtBackup';
   SCnProjExtDelTemp = 'CnProjExtDelTemp';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
+  SCnProjExtVclToFmx = 'SCnProjExtVclToFmx';
 
   SCnProjExtPasIntf = 'interface';
   SCnProjExtPasImpl = 'implementation';
@@ -1336,6 +1337,10 @@ var
   SCnProjExtDirNameHasInvalidChar: string = 'The Directory Name can NOT Contain Following Char:'' + #10#13 + '' \ / :  * ? " < > | ';
   SCnProjExtDirCreateSucc: string = 'Directories Built Succeed.';
   SCnProjExtDirCreateFail: string = 'Directories Built Failed! Perhaps the Destination is Readonly.';
+  SCnProjExtVclToFmxCaption: string = 'Convert Delphi VCL Form to FMX...';
+  SCnProjExtVclToFmxHint: string = 'Convert Delphi VCL Form and Unit to FMX Form';
+  SCnProjExtVclToFmxConvertOK: string = 'Convert OK. File(s) Saved.';
+  SCnProjExtVclToFmxConvertError: string = 'Convert Failed!';
 
   // CnFilesSnapshotWizard
   SCnFilesSnapshotWizardName: string = 'Historical Files Snapshot';

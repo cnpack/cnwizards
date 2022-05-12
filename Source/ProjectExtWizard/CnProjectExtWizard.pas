@@ -108,7 +108,9 @@ type
     IdProjBackup: Integer;
     IdDelTemp: Integer;
     IdDirBuilder: Integer;
-
+  {$IFDEF SUPPORT_FMX}
+    IdConvertVclToFmx: Integer;
+  {$ENDIF}
     FUnitsListAction: TContainedAction;
     FFormsListAction: TContainedAction;
     FUseUnitAction: TContainedAction;
@@ -174,10 +176,14 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
+  {$IFDEF SUPPORT_FMX} CnVclToFmxIntf, {$ENDIF}
   CnWizIdeUtils, CnWizOptions, CnWizMenuAction, CnProjectUseUnitsFrm;
 
 const
   SCnViewDialogExecuteName = '@Viewdlg@TViewDialog@Execute$qqrv';
+{$IFDEF SUPPORT_FMX}
+  SCnVclToFmxDllName = 'CnVclToFmx.dll';
+{$ENDIF}
 
 //==============================================================================
 // 工程扩展专家
@@ -188,7 +194,7 @@ const
 constructor TCnProjectExtWizard.Create;
 begin
   inherited;
-  FCorIdeModule := LoadLibrary(CorIdeLibName);
+  FCorIdeModule := GetModuleHandle(CorIdeLibName);
   if FCorIdeModule <> 0 then
   begin
     FOldViewDialogExecute := GetProcAddress(FCorIdeModule, SCnViewDialogExecuteName);
@@ -213,8 +219,7 @@ begin
   FPasUnitNameList.Free;
   FCppUnitNameList.Free;
   FMethodHook.Free;
-  if FCorIdeModule <> 0 then
-    FreeLibrary(FCorIdeModule);
+
   inherited;
 end;
 
@@ -476,11 +481,26 @@ begin
   IdDirBuilder := RegisterASubAction(SCnProjExtDirBuilder,
     SCnProjExtDirBuilderCaption, 0,
     SCnProjExtDirBuilderHint, SCnProjExtDirBuilder);
+
+{$IFDEF SUPPORT_FMX}
+  AddSepMenu;
+
+  IdConvertVclToFmx := RegisterASubAction(SCnProjExtVclToFmx,
+    SCnProjExtVclToFmxCaption, 0,
+    SCnProjExtVclToFmxHint, SCnProjExtVclToFmx);;
+{$ENDIF}
 end;
 
 procedure TCnProjectExtWizard.SubActionExecute(Index: Integer);
 var
   Ini: TCustomIniFile;
+{$IFDEF SUPPORT_FMX}
+  VFHandle: HModule;
+  VFProc: TCnGetVclToFmxConverter;
+  VFIntf: ICnVclToFmxIntf;
+  DlgOpen: TOpenDialog;
+  DlgSave: TSaveDialog;
+{$ENDIF}
 begin
   if not Active then
     Exit;
@@ -570,6 +590,62 @@ begin
     Ini := CreateIniFile;
     // 由内部释放，此处无需再 Free
     ShowProjectDirBuilder(Ini);
+  end
+  else
+  begin
+{$IFDEF SUPPORT_FMX}
+    if Index = IdConvertVclToFmx then
+    begin
+      VFHandle := Loadlibrary(PChar(MakePath(WizOptions.DllPath) + SCnVclToFmxDllName));
+      if VFHandle <> 0 then
+      begin
+        DlgOpen := nil;
+        DlgSave := nil;
+
+        try
+          VFProc := TCnGetVclToFmxConverter(GetProcAddress(VFHandle, 'GetVclToFmxConverter'));
+          if Assigned(VFProc) then
+          begin
+            VFIntf := VFProc();
+            if VFIntf <> nil then
+            begin
+              DlgOpen := TOpenDialog.Create(nil);
+              DlgOpen.Filter := '*.dfm|*.dfm';
+              DlgOpen.DefaultExt := '*.dfm';
+
+              if DlgOpen.Execute then
+              begin
+                try
+                  if VFIntf.OpenAndConvertFile(PChar(DlgOpen.FileName)) then
+                  begin
+                    DlgSave := TSaveDialog.Create(nil);
+                    DlgSave.Filter := '*.fmx|*.fmx';
+                    DlgSave.DefaultExt := '*.fmx';
+
+                    if DlgSave.Execute then
+                    begin
+                      if VFIntf.SaveNewFile(PChar(DlgSave.FileName)) then
+                        InfoDlg(SCnProjExtVclToFmxConvertOK)
+                      else
+                        ErrorDlg(SCnProjExtVclToFmxConvertError);
+                    end;
+                  end
+                  else
+                    ErrorDlg(SCnProjExtVclToFmxConvertError);
+                except
+                  ErrorDlg(SCnProjExtVclToFmxConvertError);
+                end;
+              end;
+            end;
+          end;
+        finally
+          DlgSave.Free;
+          DlgOpen.Free;
+          FreeLibrary(VFHandle);
+        end;
+      end;
+    end;
+{$ENDIF}
   end;
 end;
 
