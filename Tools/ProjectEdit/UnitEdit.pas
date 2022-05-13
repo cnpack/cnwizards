@@ -44,18 +44,32 @@ type
     mmoDprojAdd: TMemo;
     bvl3: TBevel;
     mmoDprojBefore: TMemo;
+    btnDprTemplate: TButton;
+    lblBpf: TLabel;
+    edtBpfBefore: TEdit;
+    edtBpfAdd: TEdit;
+    lbl1: TLabel;
+    btnBpfAdd: TButton;
+    bvl4: TBevel;
+    lblBprAdd: TLabel;
+    edtBprBefore: TEdit;
+    edtBprAdd: TEdit;
+    lbl2: TLabel;
+    btnBprAdd: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnBrowseClick(Sender: TObject);
     procedure btnDprAddClick(Sender: TObject);
     procedure btnDprojAddClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btnBpfAddClick(Sender: TObject);
+    procedure btnBprAddClick(Sender: TObject);
   private
     FCount: Integer;
     FSingleBefore, FSingleAdd: string;
     FBefores, FAdds: TStrings;
-    procedure DprFound(const FileName: string; const Info: TSearchRec;
+    procedure SingleLineFound(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
-    procedure ProjFound(const FileName: string; const Info: TSearchRec;
+    procedure MultiLineFound(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   public
 
@@ -70,9 +84,9 @@ implementation
 
 {
   批量修改以下内容：
-  CB5 BPF  - 未实现
-  CB6 BPF  - 未实现
-  CB6 BPR  - 未实现
+  CB5 BPF  - 已实现 USEUNIT/USEFORMNS
+  CB6 BPF  - 已实现 USEFORMNS
+  CB6 BPR  - 未实现 <FILE FILENAME=
   DPR                 - 已实现
   BDSPROJ/DPROJ       - 已实现
 
@@ -110,13 +124,13 @@ begin
   FCount := 0;
   FSingleBefore := Trim(edtDprBefore.Text);
   FSingleAdd := Trim(edtDprAdd.Text);
-  FindFile(edtRootDir.Text, '*.dpr', DprFound, nil, False, False);
+  FindFile(edtRootDir.Text, '*.dpr', SingleLineFound, nil, False, False);
 
   if FCount > 0 then
     InfoDlg('处理文件数：' + IntToStr(FCount));
 end;
 
-procedure TFormProjectEdit.DprFound(const FileName: string;
+procedure TFormProjectEdit.SingleLineFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
   L: TStrings;
@@ -164,13 +178,13 @@ begin
   if Trim(FAdds[FAdds.Count - 1]) = '' then
     FAdds.Delete(FAdds.Count - 1);
 
-  FindFile(edtRootDir.Text, '*.*proj', ProjFound, nil, False, False);
+  FindFile(edtRootDir.Text, '*.*proj', MultiLineFound, nil, False, False);
 
   if FCount > 0 then
     InfoDlg('处理文件数：' + IntToStr(FCount));
 end;
 
-procedure TFormProjectEdit.ProjFound(const FileName: string;
+procedure TFormProjectEdit.MultiLineFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
   L: TStrings;
@@ -238,6 +252,40 @@ procedure TFormProjectEdit.FormDestroy(Sender: TObject);
 begin
   FBefores.Free;
   FAdds.Free;
+end;
+
+procedure TFormProjectEdit.btnBpfAddClick(Sender: TObject);
+begin
+  if not DirectoryExists(edtRootDir.Text) then
+    Exit;
+
+  if (Trim(edtBpfBefore.Text) = '') or (Trim(edtBpfAdd.Text) = '') then
+    Exit;
+
+  FCount := 0;
+  FSingleBefore := Trim(edtBpfBefore.Text);
+  FSingleAdd := Trim(edtBpfAdd.Text);
+  FindFile(edtRootDir.Text, '*.bpf', SingleLineFound, nil, False, False);
+
+  if FCount > 0 then
+    InfoDlg('处理文件数：' + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnBprAddClick(Sender: TObject);
+begin
+  if not DirectoryExists(edtRootDir.Text) then
+    Exit;
+
+  if (Trim(edtBprBefore.Text) = '') or (Trim(edtBprAdd.Text) = '') then
+    Exit;
+
+  FCount := 0;
+  FSingleBefore := Trim(edtBprBefore.Text);
+  FSingleAdd := Trim(edtBprAdd.Text);
+  FindFile(edtRootDir.Text, '*.bpr', SingleLineFound, nil, False, False);
+
+  if FCount > 0 then
+    InfoDlg('处理文件数：' + IntToStr(FCount));
 end;
 
 end.

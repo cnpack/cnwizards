@@ -1,9 +1,9 @@
 object FormProjectEdit: TFormProjectEdit
-  Left = 286
-  Top = 138
+  Left = 296
+  Top = 175
   BorderStyle = bsDialog
   Caption = '批量处理 CnPack IDE 专家包工程文件'
-  ClientHeight = 536
+  ClientHeight = 482
   ClientWidth = 832
   Color = clBtnFace
   Font.Charset = GB2312_CHARSET
@@ -73,6 +73,41 @@ object FormProjectEdit: TFormProjectEdit
     Height = 17
     Shape = bsTopLine
   end
+  object lblBpf: TLabel
+    Left = 16
+    Top = 320
+    Width = 90
+    Height = 12
+    Caption = '在所有bpf文件的'
+  end
+  object lbl1: TLabel
+    Left = 744
+    Top = 320
+    Width = 48
+    Height = 12
+    Caption = '下面增加'
+  end
+  object bvl4: TBevel
+    Left = 16
+    Top = 384
+    Width = 801
+    Height = 17
+    Shape = bsTopLine
+  end
+  object lblBprAdd: TLabel
+    Left = 16
+    Top = 408
+    Width = 90
+    Height = 12
+    Caption = '在所有bpr文件的'
+  end
+  object lbl2: TLabel
+    Left = 744
+    Top = 408
+    Width = 48
+    Height = 12
+    Caption = '下面增加'
+  end
   object edtRootDir: TEdit
     Left = 144
     Top = 12
@@ -140,5 +175,72 @@ object FormProjectEdit: TFormProjectEdit
     Lines.Strings = (
       '<DCCReference Include="Utils\CnWizDfmParser.pas"/>')
     TabOrder = 7
+  end
+  object btnDprTemplate: TButton
+    Left = 16
+    Top = 96
+    Width = 75
+    Height = 22
+    Caption = '模板'
+    TabOrder = 8
+    Visible = False
+  end
+  object edtBpfBefore: TEdit
+    Left = 144
+    Top = 316
+    Width = 577
+    Height = 20
+    TabOrder = 9
+    Text = 'USEUNIT("Misc\CnWizAbout.pas");'
+  end
+  object edtBpfAdd: TEdit
+    Left = 144
+    Top = 348
+    Width = 577
+    Height = 20
+    TabOrder = 10
+    Text = 
+      'USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard' +
+      ', CnBookmarkForm);'
+  end
+  object btnBpfAdd: TButton
+    Left = 744
+    Top = 348
+    Width = 75
+    Height = 22
+    Caption = '做！'
+    TabOrder = 11
+    OnClick = btnBpfAddClick
+  end
+  object edtBprBefore: TEdit
+    Left = 144
+    Top = 404
+    Width = 577
+    Height = 20
+    TabOrder = 12
+    Text = 
+      '<FILE FILENAME="CodingToolset\CnEditorZoomFullScreen.pas" FORMNA' +
+      'ME="CnEditorZoomFullScreenForm" UNITNAME="Cneditorzoomfullscreen' +
+      '" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>'
+  end
+  object edtBprAdd: TEdit
+    Left = 144
+    Top = 436
+    Width = 577
+    Height = 20
+    TabOrder = 13
+    Text = 
+      '<FILE FILENAME="Utils\CnWizSearch.pas" FORMNAME="" UNITNAME="CnW' +
+      'izSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMA' +
+      'ND=""/>'
+  end
+  object btnBprAdd: TButton
+    Left = 744
+    Top = 436
+    Width = 75
+    Height = 22
+    Caption = '做！'
+    TabOrder = 14
+    OnClick = btnBprAddClick
   end
 end

@@ -1089,6 +1089,10 @@ begin
   TranslateStr(SCnProjExtDirNameHasInvalidChar, 'SCnProjExtDirNameHasInvalidChar');
   TranslateStr(SCnProjExtDirCreateSucc, 'SCnProjExtDirCreateSucc');
   TranslateStr(SCnProjExtDirCreateFail, 'SCnProjExtDirCreateFail');
+  TranslateStr(SCnProjExtVclToFmxCaption, 'SCnProjExtVclToFmxCaption');
+  TranslateStr(SCnProjExtVclToFmxHint, 'SCnProjExtVclToFmxHint');
+  TranslateStr(SCnProjExtVclToFmxConvertOK, 'SCnProjExtVclToFmxConvertOK');
+  TranslateStr(SCnProjExtVclToFmxConvertError, 'SCnProjExtVclToFmxConvertError');
 
   // CnFilesSnapshotWizard
   TranslateStr(SCnFilesSnapshotWizardName, 'SCnFilesSnapshotWizardName');
