@@ -235,7 +235,7 @@ resourcestring
   SCnProjExtBackup = 'CnProjExtBackup';
   SCnProjExtDelTemp = 'CnProjExtDelTemp';
   SCnProjExtDirBuilder = 'CnProjExtDirBuilder';
-  SCnProjExtVclToFmx = 'SCnProjExtVclToFmx';
+  SCnProjExtVclToFmx = 'CnProjExtVclToFmx';
 
   SCnProjExtPasIntf = 'interface';
   SCnProjExtPasImpl = 'implementation';
