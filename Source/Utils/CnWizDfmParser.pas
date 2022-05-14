@@ -1104,6 +1104,7 @@ function DecodeDfmStr(const QuotedStr: string): string;
 var
   Stream: TMemoryStream;
   Parser: TParser;
+  Reparse: Boolean;
 {$IFDEF UNICODE}
   A: AnsiString;
 {$ENDIF}
@@ -1112,30 +1113,58 @@ begin
   if QuotedStr = '' then
     Exit;
 
-  Stream := nil;
-  Parser := nil;
+  Reparse := True;
+  if Pos('#', Result) > 0 then
+  begin
+    Stream := nil;
+    Parser := nil;
 
-  try
-    // 通过 Parser 处理掉 #12345 这种 Unicode 转义字符
-    Stream := TMemoryStream.Create;
-{$IFDEF UNICODE}  // Parser 只接受 AnsiString 内容
-    A := AnsiString(QuotedStr);
-    Stream.Write(A[1], Length(A));
-{$ELSE}
-    Stream.Write(QuotedStr[1], Length(QuotedStr));
-{$ENDIF}
-    Stream.Position := 0;
+    try
+      // 通过 Parser 处理掉 #12345 这种 Unicode 转义字符
+      Stream := TMemoryStream.Create;
+  {$IFDEF UNICODE}  // Parser 只接受 AnsiString 内容
+      A := AnsiString(QuotedStr);
+      Stream.Write(A[1], Length(A));
+  {$ELSE}
+      Stream.Write(QuotedStr[1], Length(QuotedStr));
+  {$ENDIF}
+      Stream.Position := 0;
 
-    Parser := TParser.Create(Stream);
-    Parser.NextToken;
+      Parser := TParser.Create(Stream);
+      Parser.NextToken;
 
-    Result := string(Parser.TokenWideString);
-  finally
-    Parser.Free;
-    Stream.Free;
+      Result := string(Parser.TokenWideString);
+
+      Reparse := Result = ''; // # 如果解析成功，则 Reparse 设为 False，无需重解析
+    finally
+      Parser.Free;
+      Stream.Free;
+    end;
   end;
 
-  // 以上经过 Parser，大概已经没引号了
+  // 以上经过 Parser，如果原始内容有 #，则会解析通过，大概已经没引号了
+  // 但如果原始内容没 #，会解析出空字符串，相当于失败了，重新手工去引号
+  if Reparse then
+  begin
+    Result := QuotedStr;
+    if Length(Result) > 1 then
+    begin
+      if Result[1] = '''' then // 删头引号
+        Delete(Result, 1, 1)
+      else
+        Exit;
+
+      if Length(Result) > 0 then
+      begin
+        if Result[Length(Result)] = '''' then // 删尾引号
+          Delete(Result, Length(Result), 1)
+        else
+          Exit;
+
+        Result := StringReplace(Result, '''''', '''', [rfReplaceAll]); // 双引号替换成单引号
+      end;
+    end;
+  end;
 end;
 
 { TCnDfmTree }
