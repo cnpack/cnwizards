@@ -899,6 +899,9 @@ begin
 {$IFDEF DEBUG}
           CnDebugger.LogMsg('GetRuleComponentName. 3 Clipboard New Name: ' + NewName);
 {$ENDIF}
+          // 如果 NewName 没有正确的前缀名，找到也没意义，重新还原前缀
+          if not HasPrefix(Prefix, NewName) then
+            NewName := Prefix;
         end;
 
         UniqueOld := NewName;
@@ -1256,9 +1259,26 @@ begin
     // 取一个唯一的名字
     I := 1;
     if SameText(NewBase, Prefix) then
-      NewName := NewBase + '1'
+    begin
+      NewName := NewBase;
+      if Clipboard.AsText <> '' then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('AddCompToList. To Search Clipboard for %s:%s with OldName %s: ',
+          [Component.Name, Component.ClassName, NewBase]);
+{$ENDIF}
+        NewName := SearchClipboardGetNewName(Component, NewBase);
+        if HasPrefix(Prefix, NewName) then
+          NewBase := NewName    // 找到个合法的，作为 NewBase
+        else
+          NewName := NewBase + '1';   // 不合法，恢复 NewName 为 NewBase 这个前缀并加 1
+      end;
+    end
     else
       NewName := NewBase;
+
+    // 到这里，NewBase 可能是上述组合的合法的，也可能是剪贴板里搜出的合法的新的
+    // 而 NewName 是从 NewBase 衍生出来的，通过加整数找合法值
     while Assigned(FormEditor.FindComponent(NewName)) or
       (List.IndexOfNewName(FormEditor, NewName) >= 0) do
     begin
@@ -1266,6 +1286,11 @@ begin
       Inc(I);
     end;
   end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('AddCompToList. Add a Component %s:%s with Recommend NewName %s',
+    [Component.Name, Component.ClassName, NewName]);
+{$ENDIF}
 
   // 增加新记录
   List.Add(ProjectName, FormEditor, Component, Prefix, OldName, NewName);
@@ -1278,7 +1303,8 @@ var
   AProjectName: string;
   AComponent: IOTAComponent;
 begin
-  if not Assigned(FormEditor) then Exit;
+  if not Assigned(FormEditor) then
+    Exit;
 
   // 判断是否重复处理的窗体
   for I := 0 to List.Count - 1 do
@@ -1621,13 +1647,16 @@ begin
     if not LoadMultiTextStreamToTree(Stream, Tree) then
       Exit;
 
-    GridOffset.X := 8;
-    GridOffset.Y := 8;
+    GridOffset := CnOtaGetFormDesignerGridOffset;
     S := GetComponentCaptionText(AComp);
 
     for I := 0 to Tree.Count - 1 do
     begin
       Leaf := Tree.Items[I];
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SearchClipboardGetNewName: Search %d %s:%s for %s',
+        [I, Leaf.Text, Leaf.ElementClass, S]);
+{$ENDIF}
       if (Leaf.ElementClass = AComp.ClassName) and (Leaf.Text <> '') then
       begin
         // 找到一个匹配的类，找其 Caption/Text 或位置之类的
@@ -1635,6 +1664,9 @@ begin
         if S <> '' then
         begin
           T := DecodeDfmStr(Leaf.PropertyValue['Caption']);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('SearchClipboardGetNewName: ClassMatched. Get Caption %s', [T]);
+{$ENDIF}
           if T = S then
           begin
             // Caption 匹配，是它
@@ -1644,6 +1676,9 @@ begin
           else
           begin
             T := DecodeDfmStr(Leaf.PropertyValue['Text']);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('SearchClipboardGetNewName: ClassMatched. Get Text %s', [T]);
+{$ENDIF}
             if T = S then
             begin
               Result := Leaf.Text;
