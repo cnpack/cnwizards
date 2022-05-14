@@ -6,22 +6,22 @@ object ParseForm: TParseForm
   ClientHeight = 590
   ClientWidth = 424
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Font.Charset = GB2312_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'MS Sans Serif'
+  Font.Height = -12
+  Font.Name = 'ÀŒÃÂ'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 12
   object lblForm: TLabel
     Left = 24
     Top = 24
-    Width = 181
-    Height = 13
+    Width = 234
+    Height = 12
     Caption = 'Form File (dfm/xfm/fmx Binary or Text):'
   end
   object Bevel1: TBevel
@@ -35,13 +35,13 @@ object ParseForm: TParseForm
     Left = 24
     Top = 64
     Width = 281
-    Height = 21
+    Height = 20
     TabOrder = 0
   end
   object btnParse: TButton
     Left = 24
     Top = 104
-    Width = 217
+    Width = 73
     Height = 25
     Caption = 'Parse'
     TabOrder = 1
@@ -66,7 +66,7 @@ object ParseForm: TParseForm
     OnDblClick = tvDfmDblClick
   end
   object btnClone: TButton
-    Left = 248
+    Left = 104
     Top = 104
     Width = 75
     Height = 25
@@ -75,13 +75,22 @@ object ParseForm: TParseForm
     OnClick = btnCloneClick
   end
   object btnSave: TButton
-    Left = 328
+    Left = 184
     Top = 104
     Width = 75
     Height = 25
     Caption = 'Save'
     TabOrder = 5
     OnClick = btnSaveClick
+  end
+  object btnClipboard: TButton
+    Left = 272
+    Top = 104
+    Width = 129
+    Height = 25
+    Caption = 'Search‘€√«µƒClipboard'
+    TabOrder = 6
+    OnClick = btnClipboardClick
   end
   object dlgOpen: TOpenDialog
     Left = 256

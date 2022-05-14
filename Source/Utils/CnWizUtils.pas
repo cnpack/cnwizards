@@ -500,6 +500,8 @@ function CnOtaGetEditor(const FileName: string): IOTAEditor;
 {* 根据文件名返回编辑器接口}
 function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
 {* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例}
+function CnOtaGetFormDesignerGridOffset: TPoint;
+{* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
 function CnOtaGetCurrentEditWindow: TCustomForm;
 {* 取当前的 EditWindow}
 function CnOtaGetCurrentEditControl: TWinControl;
@@ -3692,6 +3694,25 @@ begin
     end;
   end;
   Result := nil;
+end;
+
+// 返回窗体设计器的格点也就是 Grid 的横竖步进像素数
+function CnOtaGetFormDesignerGridOffset: TPoint;
+var
+  Svcs: IOTAServices;
+begin
+  Result.x := 0;
+  Result.y := 0;
+  try
+    QuerySvcs(BorlandIDEServices, IOTAServices, Svcs);
+    if Assigned(Svcs) then
+    begin
+      Result.x := Svcs.GetEnvironmentOptions.GetOptionValue('GridSizeX');
+      Result.y := Svcs.GetEnvironmentOptions.GetOptionValue('GridSizeY');
+    end;
+  except
+    ;
+  end;
 end;
 
 // 取当前的 EditWindow

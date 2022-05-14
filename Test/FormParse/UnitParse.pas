@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, ExtCtrls, CnTree, CnWizDfmParser;
+  StdCtrls, ComCtrls, ExtCtrls, CnTree, TypInfo, Clipbrd, CnWizDfmParser;
 
 type
   TParseForm = class(TForm)
@@ -18,6 +18,7 @@ type
     btnClone: TButton;
     btnSave: TButton;
     dlgSave1: TSaveDialog;
+    btnClipboard: TButton;
     procedure btnBrowseClick(Sender: TObject);
     procedure btnParseClick(Sender: TObject);
     procedure tvDfmDblClick(Sender: TObject);
@@ -25,6 +26,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure btnCloneClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
+    procedure btnClipboardClick(Sender: TObject);
   private
     FTree, FCloneTree: TCnDfmTree;
     procedure TreeSaveNode(ALeaf: TCnLeaf; ATreeNode: TTreeNode;
@@ -120,6 +122,95 @@ procedure TParseForm.btnSaveClick(Sender: TObject);
 begin
   if dlgSave1.Execute then
     SaveTreeToDfmFile(dlgSave1.FileName, FCloneTree);
+end;
+
+function SearchClipboardGetNewName(AComp: TComponent;
+  const ANewName: string): string;
+var
+  Stream: TMemoryStream;
+  S, T: string;
+  I: Integer;
+  Tree: TCnDfmTree;
+  Leaf: TCnDfmLeaf;
+  GridOffset: TPoint;
+
+  function GetComponentCaptionText(C: TComponent): string;
+  begin
+    // 拿一个组件的 Caption 属性或 Text 字符串属性
+    Result := GetStrProp(C, 'Caption');
+    if Result = '' then
+      Result := GetStrProp(C, 'Text');
+
+    if Result = '' then
+    begin
+      // TODO: FMX 组件的属性？
+    end;
+  end;
+
+begin
+  Result := ANewName;
+  if (AComp = nil) or (Clipboard.AsText = '') then
+    Exit;
+
+  Tree := nil;
+  Stream := nil;
+
+  try
+    S := Clipboard.AsText;
+    Stream := TMemoryStream.Create;
+    Stream.Write(S[1], Length(S) * SizeOf(Char));
+
+    Stream.Position := 0;
+    Tree := TCnDfmTree.Create;
+
+    if not LoadMultiTextStreamToTree(Stream, Tree) then
+      Exit;
+
+    GridOffset.X := 8;
+    GridOffset.Y := 8;
+    S := GetComponentCaptionText(AComp);
+
+    for I := 0 to Tree.Count - 1 do
+    begin
+      Leaf := Tree.Items[I];
+      if (Leaf.ElementClass = AComp.ClassName) and (Leaf.Text <> '') then
+      begin
+        // 找到一个匹配的类，找其 Caption/Text 或位置之类的
+        // 如果位置差一个 Grid 点，则表示匹配，否则 Caption/Text 有一个相同也匹配
+        if S <> '' then
+        begin
+          T := DfmDequoteStr(Leaf.PropertyValue['Caption']);
+          if T = S then
+          begin
+            // Caption 匹配，是它
+            Result := Leaf.Text;
+            Exit;
+          end
+          else
+          begin
+            T := DfmDequoteStr(Leaf.PropertyValue['Text']);
+            if T = S then
+            begin
+              Result := Leaf.Text;
+              Exit;
+            end;
+          end;
+        end
+        else // TODO: 新组件无 Caption/Text 属性，以位置来判断
+        begin
+
+        end;
+      end;
+    end;
+  finally
+    Stream.Free;
+    Tree.Free;
+  end;
+end;
+
+procedure TParseForm.btnClipboardClick(Sender: TObject);
+begin
+  ShowMessage(SearchClipboardGetNewName(btnClipboard, 'btnClipboard'));
 end;
 
 end.
