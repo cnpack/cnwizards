@@ -1259,12 +1259,20 @@ begin
     not IsInIncreSearch and not IsInMacroOp and not GetCodeTemplateListBoxVisible;
 end;
 
-procedure TCnInputHelper.ApplicationMessage(var Msg: TMsg;
-  var Handled: Boolean);
+procedure TCnInputHelper.ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
 begin
   if ((Msg.message >= WM_KEYFIRST) and (Msg.message <= WM_KEYLAST)) or
     (Msg.message = WM_MOUSEWHEEL) then
   begin
+{$IFDEF IDE_SUPPORT_LSP}
+    if FSymbolReloading then
+    begin
+      // 如果在异步加载符号表，则将相关键盘信息滞后处理，待测试
+      PostMessage(Msg.hwnd, Msg.message, Msg.wParam, Msg.lParam);
+      Handled := True;
+      Exit;
+    end;
+{$ENDIF}
     if AcceptDisplay then
     begin
       case Msg.message of
