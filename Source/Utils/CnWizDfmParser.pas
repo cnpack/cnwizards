@@ -148,7 +148,8 @@ function ParseDfmFile(const FileName: string; Info: TDfmInfo): Boolean;
 {* 简单解析 DFM 文件读出最外层 Container 的信息}
 
 function LoadMultiTextStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
-{* 将字符串流解析成树，允许多次调用以应对剪贴板内那种无根的多个组件}
+{* 将字符串流解析成树，允许多次调用以应对剪贴板内那种无根的多个组件
+  注意 Stream 内的内容需要是 AnsiString，因为 TParser 没法处理 UTF16 流}
 
 function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
 {* 将 DFM 流解析成树}
@@ -168,7 +169,7 @@ function ConvertWideStringToDfmString(const W: WideString): WideString;
 function ConvertStreamToHexDfmString(Stream: TStream; Tab: Integer = 2): string;
 {* 将二进制数据转换为 DFM 字符串，不带前后大括号}
 
-function DfmDequoteStr(const QuotedStr: string): string;
+function DecodeDfmStr(const QuotedStr: string): string;
 {* 把 Caption 里那种带引号的转码后的字符转换为正常字符串}
 
 implementation
@@ -985,7 +986,7 @@ begin
 
     Parser := TParser.Create(Stream);
     try
-      while True do
+      while Parser.Token <> #0 do
       begin
         StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
         try
@@ -1099,26 +1100,42 @@ begin
   end;
 end;
 
-function DfmDequoteStr(const QuotedStr: string): string;
+function DecodeDfmStr(const QuotedStr: string): string;
+var
+  Stream: TMemoryStream;
+  Parser: TParser;
+{$IFDEF UNICODE}
+  A: AnsiString;
+{$ENDIF}
 begin
   Result := QuotedStr;
-  if Length(Result) > 1 then
-  begin
-    if Result[1] = '''' then // 删头引号
-      Delete(Result, 1, 1)
-    else
-      Exit;
+  if QuotedStr = '' then
+    Exit;
 
-    if Length(Result) > 0 then
-    begin
-      if Result[Length(Result)] = '''' then // 删尾引号
-        Delete(Result, Length(Result), 1)
-      else
-        Exit;
+  Stream := nil;
+  Parser := nil;
 
-      Result := StringReplace(Result, '''''', '''', [rfReplaceAll]); // 双引号替换成单引号
-    end;
+  try
+    // 通过 Parser 处理掉 #12345 这种 Unicode 转义字符
+    Stream := TMemoryStream.Create;
+{$IFDEF UNICODE}  // Parser 只接受 AnsiString 内容
+    A := AnsiString(QuotedStr);
+    Stream.Write(A[1], Length(A));
+{$ELSE}
+    Stream.Write(QuotedStr[1], Length(QuotedStr));
+{$ENDIF}
+    Stream.Position := 0;
+
+    Parser := TParser.Create(Stream);
+    Parser.NextToken;
+
+    Result := string(Parser.TokenWideString);
+  finally
+    Parser.Free;
+    Stream.Free;
   end;
+
+  // 以上经过 Parser，大概已经没引号了
 end;
 
 { TCnDfmTree }

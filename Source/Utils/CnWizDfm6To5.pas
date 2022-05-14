@@ -24,7 +24,8 @@ unit CnWizDfm6To5;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：转换高版本的 DFM 文件到 D5 支持的格式
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：读时，D5 的 TParser 里有将 #12345 这种字符串转换为普通字符串的机制
+*           （TokenWideString），但写的时候没有，所以得自己修改后写
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -301,9 +302,9 @@ type
 
 function Utf8ToUnicode(Dest: PWideChar; MaxDestChars: Cardinal; Source: PChar; SourceBytes: Cardinal): Cardinal;
 var
-  i, Count: Cardinal;
-  c: Byte;
-  wc: Cardinal;
+  I, Count: Cardinal;
+  C: Byte;
+  WC: Cardinal;
 begin
   if Source = nil then
   begin
@@ -312,33 +313,33 @@ begin
   end;
   Result := Cardinal(-1);
   Count := 0;
-  i := 0;
+  I := 0;
   if Dest <> nil then
   begin
-    while (i < SourceBytes) and (Count < MaxDestChars) do
+    while (I < SourceBytes) and (Count < MaxDestChars) do
     begin
-      wc := Cardinal(Source[i]);
-      Inc(i);
-      if (wc and $80) <> 0 then
+      WC := Cardinal(Source[I]);
+      Inc(I);
+      if (WC and $80) <> 0 then
       begin
-        if i >= SourceBytes then Exit;          // incomplete multibyte char
-        wc := wc and $3F;
-        if (wc and $20) <> 0 then
+        if I >= SourceBytes then Exit;          // incomplete multibyte char
+        WC := WC and $3F;
+        if (WC and $20) <> 0 then
         begin
-          c := Byte(Source[i]);
-          Inc(i);
-          if (c and $C0) <> $80 then Exit;      // malformed trail byte or out of range char
-          if i >= SourceBytes then Exit;        // incomplete multibyte char
-          wc := (wc shl 6) or (c and $3F);
+          C := Byte(Source[I]);
+          Inc(I);
+          if (C and $C0) <> $80 then Exit;      // malformed trail byte or out of range char
+          if I >= SourceBytes then Exit;        // incomplete multibyte char
+          WC := (WC shl 6) or (C and $3F);
         end;
-        c := Byte(Source[i]);
-        Inc(i);
-        if (c and $C0) <> $80 then Exit;       // malformed trail byte
+        C := Byte(Source[I]);
+        Inc(I);
+        if (C and $C0) <> $80 then Exit;       // malformed trail byte
 
-        Dest[Count] := WideChar((wc shl 6) or (c and $3F));
+        Dest[Count] := WideChar((WC shl 6) or (C and $3F));
       end
       else
-        Dest[Count] := WideChar(wc);
+        Dest[Count] := WideChar(WC);
       Inc(Count);
     end;
     if Count >= MaxDestChars then Count := MaxDestChars-1;
@@ -346,24 +347,24 @@ begin
   end
   else
   begin
-    while (i < SourceBytes) do
+    while (I < SourceBytes) do
     begin
-      c := Byte(Source[i]);
-      Inc(i);
-      if (c and $80) <> 0 then
+      C := Byte(Source[I]);
+      Inc(I);
+      if (C and $80) <> 0 then
       begin
-        if i >= SourceBytes then Exit;          // incomplete multibyte char
-        c := c and $3F;
-        if (c and $20) <> 0 then
+        if I >= SourceBytes then Exit;          // incomplete multibyte char
+        C := C and $3F;
+        if (C and $20) <> 0 then
         begin
-          c := Byte(Source[i]);
-          Inc(i);
-          if (c and $C0) <> $80 then Exit;      // malformed trail byte or out of range char
-          if i >= SourceBytes then Exit;        // incomplete multibyte char
+          C := Byte(Source[I]);
+          Inc(I);
+          if (C and $C0) <> $80 then Exit;      // malformed trail byte or out of range char
+          if I >= SourceBytes then Exit;        // incomplete multibyte char
         end;
-        c := Byte(Source[i]);
-        Inc(i);
-        if (c and $C0) <> $80 then Exit;       // malformed trail byte
+        C := Byte(Source[I]);
+        Inc(I);
+        if (C and $C0) <> $80 then Exit;       // malformed trail byte
       end;
       Inc(Count);
     end;
@@ -380,7 +381,7 @@ begin
   if S = '' then Exit;
   SetLength(Temp, Length(S));
 
-  L := Utf8ToUnicode(PWideChar(Temp), Length(Temp)+1, PChar(S), Length(S));
+  L := Utf8ToUnicode(PWideChar(Temp), Length(Temp) + 1, PChar(S), Length(S));
   if L > 0 then
     SetLength(Temp, L-1)
   else
@@ -802,7 +803,7 @@ begin
           MyObjectTextToBinary(InStrm, OutStrm); // 用修改后的过程将文本转换成二进制流
           InStrm.Clear;
           OutStrm.Position := 0;
-          ObjectBinaryToText(OutStrm, InStrm);   // 用Delphi自己的方法重新将二进制流转换成文本
+          ObjectBinaryToText(OutStrm, InStrm);   // 用 Delphi 自己的方法重新将二进制流转换成文本
         except
           Result := crInvalidFormat;
           Exit;

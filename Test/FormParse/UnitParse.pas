@@ -129,6 +129,9 @@ function SearchClipboardGetNewName(AComp: TComponent;
 var
   Stream: TMemoryStream;
   S, T: string;
+{$IFDEF UNICODE}
+  A: AnsiString;
+{$ENDIF}
   I: Integer;
   Tree: TCnDfmTree;
   Leaf: TCnDfmLeaf;
@@ -158,7 +161,13 @@ begin
   try
     S := Clipboard.AsText;
     Stream := TMemoryStream.Create;
-    Stream.Write(S[1], Length(S) * SizeOf(Char));
+
+{$IFDEF UNICODE}
+    A := AnsiString(S);
+    Stream.Write(A[1], Length(A));
+{$ELSE}
+    Stream.Write(S[1], Length(S));
+{$ENDIF}
 
     Stream.Position := 0;
     Tree := TCnDfmTree.Create;
@@ -179,7 +188,7 @@ begin
         // 如果位置差一个 Grid 点，则表示匹配，否则 Caption/Text 有一个相同也匹配
         if S <> '' then
         begin
-          T := DfmDequoteStr(Leaf.PropertyValue['Caption']);
+          T := DecodeDfmStr(Leaf.PropertyValue['Caption']);
           if T = S then
           begin
             // Caption 匹配，是它
@@ -188,7 +197,7 @@ begin
           end
           else
           begin
-            T := DfmDequoteStr(Leaf.PropertyValue['Text']);
+            T := DecodeDfmStr(Leaf.PropertyValue['Text']);
             if T = S then
             begin
               Result := Leaf.Text;
