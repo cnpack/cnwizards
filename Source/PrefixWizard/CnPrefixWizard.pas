@@ -1612,9 +1612,19 @@ var
   function GetComponentCaptionText(C: TComponent): string;
   begin
     // 拿一个组件的 Caption 属性或 Text 字符串属性
-    Result := GetStrProp(C, 'Caption');
+    Result := '';
+    try
+      Result := GetStrProp(C, 'Caption');
+    except
+      ;
+    end;
+
     if Result = '' then
+    try
       Result := GetStrProp(C, 'Text');
+    except
+      ;
+    end;
 
     if Result = '' then
     begin
