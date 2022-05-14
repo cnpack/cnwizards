@@ -36,9 +36,9 @@ unit CnPrefixWizard;
 *           2004.03.24 V1.4 刘啸(LiuXiao)
 *               修正设计期可能会吞吃 WM_LBUTTONUP 消息从而产生拖动状态的缺陷
 *           2003.09.27 V1.3 何清(QSoft)
-*               修正添加一个新控件时多次被加入TObjectList中的BUG
+*               修正添加一个新控件时多次被加入 TObjectList 中的 BUG
 *           2003.05.11 V1.2
-*               LiuXiao:增加下划线选项
+*               LiuXiao 增加下划线选项
 ×          2003.04.28 V1.1
 *               使用新的窗体通知器，去掉了大量代码
 *           2003.04.26 V1.0
@@ -59,7 +59,7 @@ uses
   {$ELSE}
   DsgnIntf,
   {$ENDIF}
-  ToolsAPI, TypInfo, IniFiles, Menus, Contnrs, CnWizClasses, CnWizUtils,
+  ToolsAPI, TypInfo, IniFiles, Menus, Contnrs, Clipbrd, CnWizClasses, CnWizUtils,
   CnWizConsts, CnWizMethodHook, CnPrefixList, CnConsts, CnWizOptions, CnCommon,
   CnWizNotifier, CnPrefixExecuteFrm, CnWizShortCut, CnWizMenuAction;
 
@@ -87,7 +87,7 @@ type
     FCompKind: TPrefixCompKind;
     FUpdating: Boolean;
 
-    FPrefixList: TPrefixList;
+    FPrefixList: TCnPrefixList;
     FRenameList: TList;
     FOnRenameListAdded: TNotifyEvent;
     FInModify: Boolean;
@@ -101,13 +101,13 @@ type
     FEditDialogHeight: Integer;
     procedure OnConfig(Sender: TObject);
     procedure AddFormToList(const ProjectName: string; FormEditor: IOTAFormEditor;
-      List: TCompList);
-    procedure AddProjectToList(Project: IOTAProject; List: TCompList);
-    procedure CreateSelCompList(List: TCompList);
-    procedure CreateCurrFormList(List: TCompList);
-    procedure CreateOpenedFormList(List: TCompList);
-    procedure CreateCurrProjectList(List: TCompList);
-    procedure CreateProjectGroupList(List: TCompList);
+      List: TCnPrefixCompList);
+    procedure AddProjectToList(Project: IOTAProject; List: TCnPrefixCompList);
+    procedure CreateSelCompList(List: TCnPrefixCompList);
+    procedure CreateCurrFormList(List: TCnPrefixCompList);
+    procedure CreateOpenedFormList(List: TCnPrefixCompList);
+    procedure CreateCurrProjectList(List: TCnPrefixCompList);
+    procedure CreateProjectGroupList(List: TCnPrefixCompList);
     function GetNewName(const ComponentType, Prefix,
       OldName: string): string;
     function IsUnnamed(APrefix, AName: string): Boolean;
@@ -120,6 +120,9 @@ type
     function ExtractIdentName(const AName: string): string;
     procedure SetF2Rename(const Value: Boolean);
     procedure OnRenameShortCutExec(Sender: TObject);
+    function SearchClipboardGetNewName(AComp: TComponent; const ANewName: string): string;
+    {* 根据剪贴板上的内容搜寻有无和本组件匹配 ClassName 和 Caption/Text 的，
+       如其 Name 符合前缀，则拿来做新名字，调用者再 +1}
   protected
     procedure DoRenameComponent(Component: TComponent; const NewName: string;
       FormEditor: IOTAFormEditor);
@@ -134,12 +137,12 @@ type
     function GetActionName(Action: TBasicAction): string;
     function GetFieldName(Component: TComponent): string;
 
-    procedure RenameList(AList: TCompList);
+    procedure RenameList(AList: TCnPrefixCompList);
     procedure RenameComponent(Component: TComponent; FormEditor: IOTAFormEditor);
     property Updating: Boolean read FUpdating;
   public
     procedure AddCompToList(const ProjectName: string; FormEditor: IOTAFormEditor;
-      Component: TComponent; List: TCompList);
+      Component: TComponent; List: TCnPrefixCompList);
     constructor Create; override;
     destructor Destroy; override;
 
@@ -175,7 +178,7 @@ type
     property EditDialogHeight: Integer read FEditDialogHeight write FEditDialogHeight;
     {* 弹出的改名框的窗体高度，注意是存缩放之前的}
 
-    property PrefixList: TPrefixList read FPrefixList;
+    property PrefixList: TCnPrefixList read FPrefixList;
     property FormNotifierList: TStringList read FFormNotifierList;
     property ModNotifierList: TStringList read FModNotifierList;
   end;
@@ -188,7 +191,8 @@ implementation
 
 uses
   {$IFDEF DEBUG}CnDebug, {$ENDIF}
-  CnWizManager, CnPrefixNewFrm, CnPrefixEditFrm, CnPrefixConfigFrm, CnPrefixCompFrm;
+  CnWizManager, CnWizDfmParser,
+  CnPrefixNewFrm, CnPrefixEditFrm, CnPrefixConfigFrm, CnPrefixCompFrm;
 
 const
   csDataField = 'DataField';
@@ -262,7 +266,7 @@ end;
 // Hook 的 TStringProperty.SetValue 方法
 procedure MySetValue(Self: TStringProperty; const Value: string);
 var
-  i: Integer;
+  I: Integer;
   Client: TComponent;
 begin
 {$IFDEF DEBUG}
@@ -287,11 +291,11 @@ begin
     FWizard.FAutoPrefix and FWizard.FUseFieldName and FWizard.FWatchFieldLink and
     AnsiSameStr(Self.GetName, csDataField) then
   begin
-    for i := 0 to Self.PropCount - 1 do
+    for I := 0 to Self.PropCount - 1 do
     begin
-      if Self.GetComponent(i) is TComponent then
+      if Self.GetComponent(I) is TComponent then
       begin
-        Client := TComponent(Self.GetComponent(i));
+        Client := TComponent(Self.GetComponent(I));
         if FWizard.NeedRename(Client) and
           FWizard.NeedFieldRename(Client) then
         begin
@@ -336,23 +340,23 @@ const
 
 function GenDefPrefix(const CName: string): string;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(DefPreInfo) to High(DefPreInfo) do
-    if AnsiContainsText(CName, DefPreInfo[i].Contain) and
-      InheritsFromClassName(GetClass(CName), DefPreInfo[i].ClassName) then
+  for I := Low(DefPreInfo) to High(DefPreInfo) do
+    if AnsiContainsText(CName, DefPreInfo[I].Contain) and
+      InheritsFromClassName(GetClass(CName), DefPreInfo[I].ClassName) then
     begin
-      Result := DefPreInfo[i].Prefix;
+      Result := DefPreInfo[I].Prefix;
       Exit;
     end;
 
   Result := LowerCase(RemoveClassPrefix(Trim(CName)));
-  for i := Length(Result) downto 2 do
-    if CharInSet(Result[i], ['a', 'e', 'o', 'i', 'u']) then
-      Delete(Result, i, 1);
-  for i := Length(Result) downto 2 do
-    if Result[i] = Result[i - 1] then
-      Delete(Result, i, 1);
+  for I := Length(Result) downto 2 do
+    if CharInSet(Result[I], ['a', 'e', 'o', 'i', 'u']) then
+      Delete(Result, I, 1);
+  for I := Length(Result) downto 2 do
+    if Result[I] = Result[I - 1] then
+      Delete(Result, I, 1);
 end;
 
 //==============================================================================
@@ -364,7 +368,7 @@ end;
 constructor TCnPrefixWizard.Create;
 begin
   inherited;
-  FPrefixList := TPrefixList.Create;
+  FPrefixList := TCnPrefixList.Create;
   FRenameList := TList.Create;
   CnWizNotifierServices.AddFormEditorNotifier(OnComponentRenamed);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
@@ -425,7 +429,7 @@ end;
 function TCnPrefixWizard.GetNewName(const ComponentType, Prefix, OldName: string): string;
 var
   CName: string;
-  i: Integer;
+  I: Integer;
 
   function RemoveAfterNum(const Value: string): string;
   begin
@@ -448,17 +452,17 @@ begin
     Result := OldName
   else if FDelOldPrefix then
   begin
-    i := 1;
+    I := 1;
     // 检查是否有大写字母
-    while (i <= Length(OldName)) and CharInSet(OldName[i], ['a'..'z']) do
-      Inc(i);
+    while (I <= Length(OldName)) and CharInSet(OldName[I], ['a'..'z']) do
+      Inc(I);
     // 删除原来的前缀
-    if (i <= Length(OldName)) and CharInSet(OldName[i], ['A'..'Z', '_']) then
+    if (I <= Length(OldName)) and CharInSet(OldName[I], ['A'..'Z', '_']) then
     begin
       if Self.FUseUnderLine then
-        Result := Prefix + '_' + Copy(OldName, i, MaxInt)
+        Result := Prefix + '_' + Copy(OldName, I, MaxInt)
       else
-        Result := Prefix + Copy(OldName, i, MaxInt)
+        Result := Prefix + Copy(OldName, I, MaxInt)
     end
     else
     begin
@@ -513,8 +517,8 @@ var
   FormEditor: IOTAFormEditor;
   ProjectName: string;
   Comp: TComponent;
-  List: TCompList;
-  i: Integer;
+  List: TCnPrefixCompList;
+  I: Integer;
 begin
   if FInModify or (FRenameList.Count = 0) then
     Exit;
@@ -534,14 +538,14 @@ begin
         else
           ProjectName := '';
 
-        List := TCompList.Create;
+        List := TCnPrefixCompList.Create;
         try
           // 处理选择的控件
-          for i := 0 to FRenameList.Count - 1 do
+          for I := 0 to FRenameList.Count - 1 do
           begin
             // 只有当前窗体上存在的组件才处理
-            if Assigned(FormEditor.GetComponentFromHandle(FRenameList[i])) then
-              AddCompToList(ProjectName, FormEditor, TComponent(FRenameList[i]), List);
+            if Assigned(FormEditor.GetComponentFromHandle(FRenameList[I])) then
+              AddCompToList(ProjectName, FormEditor, TComponent(FRenameList[I]), List);
           end;
 
           if List.Count > 0 then
@@ -576,7 +580,7 @@ var
   Comp: TComponent;
 begin
   Result := False;
-  // 粘贴的控件包含csLoading，因此此处不能加它，否则会被忽略
+  // 粘贴的控件包含 csLoading，因此此处不能加它，否则会被忽略
   // 但是控件的 Owner 不应该包括 csLoading，否则可能是窗体在加载期
   if (AObj <> nil) and (AObj is TComponent) then
   begin
@@ -638,13 +642,13 @@ end;
 
 function TCnPrefixWizard.ExtractIdentName(const AName: string): string;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := '';
-  for i := 1 to Length(AName) do
-    if CharInSet(AName[i], Alpha) or (Result <> '') and
-      CharInSet(AName[i], AlphaNumeric) then
-      Result := Result + AName[i]; 
+  for I := 1 to Length(AName) do
+    if CharInSet(AName[I], Alpha) or (Result <> '') and
+      CharInSet(AName[I], AlphaNumeric) then
+      Result := Result + AName[I]; 
 end;
 
 function TCnPrefixWizard.NeedFieldRename(Component: TComponent): Boolean;
@@ -772,7 +776,8 @@ var
 
 begin
   Result := False;
-  if not (Component is TComponent) then Exit;
+  if not (Component is TComponent) then
+    Exit;
 
   OldName := Component.Name;
   AClassName := Component.ClassName;
@@ -804,7 +809,7 @@ begin
   Prefix := PrefixList.Prefixs[AClassName];
   if (Prefix = '') and (PopPrefixDefine or UserMode) then
   begin
-    DisableDesignerDrag; // 弥补设计期可能会吞吃WM_LBUTTONUP消息从而产生拖动状态的缺陷
+    DisableDesignerDrag; // 弥补设计期可能会吞吃 WM_LBUTTONUP 消息从而产生拖动状态的缺陷
     // 如果未定义弹出定义前缀的界面
 
     if Prefix = '' then
@@ -859,7 +864,7 @@ begin
       // 取新的名称
       NewName := GetNewName(AClassName, Prefix, OldName);
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('GetRuleComponentName. Has Prefix. Get New Name: ' + NewName);
+      CnDebugger.LogMsg('GetRuleComponentName. 1 Has Prefix. Get New Name: ' + NewName);
 {$ENDIF}
 
       if NeedFieldRename(Component) then
@@ -882,6 +887,20 @@ begin
       // 取一个唯一的名字
       if NewName = Prefix then
       begin
+        // 根据剪贴板上的内容搜寻有无和本组件匹配 ClassName 和 Caption/Text 的，
+        // 如其 Name 符合前缀，则拿来 +1 做新名字
+        if Clipboard.AsText <> '' then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('GetRuleComponentName. 2 Search Clipboard for %s:%s with OldName %s: ',
+            [Component.Name, Component.ClassName, NewName]);
+{$ENDIF}
+          NewName := SearchClipboardGetNewName(Component, NewName);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('GetRuleComponentName. 3 Clipboard New Name: ' + NewName);
+{$ENDIF}
+        end;
+
         UniqueOld := NewName;
         NewName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(NewName);
         // 这句除了加 1 这种行为之外，可能会删去 NewName 前面的 T，补回来
@@ -922,7 +941,7 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('GetRuleComponentName. Calc New Name: ' + NewName);
+    CnDebugger.LogMsg('GetRuleComponentName. 4 Calc New Name: ' + NewName);
 {$ENDIF}
 
     // 弹出改名窗口
@@ -1036,14 +1055,14 @@ end;
 procedure TCnPrefixWizard.DoRenameComponent(Component: TComponent; const
   NewName: string; FormEditor: IOTAFormEditor);
 begin
-  // todo: 修改名称时同时修改源代码
+  // TODO: 修改名称时同时修改源代码
   Component.Name := NewName;
   
   // PopupMenu 等某些控件的设计器在设计结束后并没有调用 Modified 方法，需要手工调用一下
   CnOtaNotifyFormDesignerModified(FormEditor);
 end;
 
-procedure TCnPrefixWizard.RenameList(AList: TCompList);
+procedure TCnPrefixWizard.RenameList(AList: TCnPrefixCompList);
 var
   IniFile: TCustomIniFile;
   APrefix, ANewName: string;
@@ -1114,13 +1133,13 @@ end;
 procedure TCnPrefixWizard.Execute;
 var
   Kind: TPrefixExeKind;
-  List: TCompList;
+  List: TCnPrefixCompList;
 begin
   if Updating then Exit;
 
   if Active and ShowPrefixExecuteForm(OnConfig, Kind, FCompKind) then
   begin
-    List := TCompList.Create;
+    List := TCnPrefixCompList.Create;
     try
       // 创建要更名的组件列表
       case Kind of
@@ -1159,13 +1178,13 @@ begin
 end;
 
 procedure TCnPrefixWizard.AddCompToList(const ProjectName: string; FormEditor:
-  IOTAFormEditor; Component: TComponent; List: TCompList);
+  IOTAFormEditor; Component: TComponent; List: TCnPrefixCompList);
 var
   Ignore, Succ: Boolean;
   Prefix: string;
   CompType: string;
   OldName, NewBase, NewName: string;
-  i: Integer;
+  I: Integer;
 begin
   if not Assigned(FormEditor) or not IsValidComponent(Component) then Exit;
 
@@ -1235,7 +1254,7 @@ begin
     end;
 
     // 取一个唯一的名字
-    i := 1;
+    I := 1;
     if SameText(NewBase, Prefix) then
       NewName := NewBase + '1'
     else
@@ -1243,8 +1262,8 @@ begin
     while Assigned(FormEditor.FindComponent(NewName)) or
       (List.IndexOfNewName(FormEditor, NewName) >= 0) do
     begin
-      NewName := NewBase + IntToStr(i);
-      Inc(i);
+      NewName := NewBase + IntToStr(I);
+      Inc(I);
     end;
   end;
 
@@ -1253,17 +1272,17 @@ begin
 end;
 
 procedure TCnPrefixWizard.AddFormToList(const ProjectName: string;
-  FormEditor: IOTAFormEditor; List: TCompList);
+  FormEditor: IOTAFormEditor; List: TCnPrefixCompList);
 var
-  i: Integer;
+  I: Integer;
   AProjectName: string;
   AComponent: IOTAComponent;
 begin
   if not Assigned(FormEditor) then Exit;
 
   // 判断是否重复处理的窗体
-  for i := 0 to List.Count - 1 do
-    if SameText(List[i].FormEditor.FileName, FormEditor.FileName) then
+  for I := 0 to List.Count - 1 do
+    if SameText(List[I].FormEditor.FileName, FormEditor.FileName) then
       Exit;
 
   // 取工程名
@@ -1275,15 +1294,15 @@ begin
 
   // 处理窗体上所有组件
   AComponent := FormEditor.GetRootComponent;
-  for i := 0 to AComponent.GetComponentCount - 1 do
+  for I := 0 to AComponent.GetComponentCount - 1 do
     AddCompToList(AProjectName, FormEditor,
-      TComponent(AComponent.GetComponent(i).GetComponentHandle), List);
+      TComponent(AComponent.GetComponent(I).GetComponentHandle), List);
 end;
 
 procedure TCnPrefixWizard.AddProjectToList(Project: IOTAProject;
-  List: TCompList);
+  List: TCnPrefixCompList);
 var
-  i: Integer;
+  I: Integer;
   FormEditor: IOTAFormEditor;
   ProjectName: string;
   ModuleInfo: IOTAModuleInfo;
@@ -1292,9 +1311,9 @@ begin
   if not Assigned(Project) then Exit;
 
   ProjectName := _CnExtractFileName(Project.FileName);
-  for i := 0 to Project.GetModuleCount - 1 do
+  for I := 0 to Project.GetModuleCount - 1 do
   begin
-    ModuleInfo := Project.GetModule(i);
+    ModuleInfo := Project.GetModule(I);
     if not Assigned(ModuleInfo) then
       Continue;
 
@@ -1312,38 +1331,38 @@ begin
   end;
 end;
 
-procedure TCnPrefixWizard.CreateCurrFormList(List: TCompList);
+procedure TCnPrefixWizard.CreateCurrFormList(List: TCnPrefixCompList);
 begin
   List.Clear;
   AddFormToList('', CnOtaGetCurrentFormEditor, List);
 end;
 
-procedure TCnPrefixWizard.CreateCurrProjectList(List: TCompList);
+procedure TCnPrefixWizard.CreateCurrProjectList(List: TCnPrefixCompList);
 begin
   List.Clear;
   AddProjectToList(CnOtaGetCurrentProject, List);
 end;
 
-procedure TCnPrefixWizard.CreateOpenedFormList(List: TCompList);
+procedure TCnPrefixWizard.CreateOpenedFormList(List: TCnPrefixCompList);
 var
-  i: Integer;
+  I: Integer;
   FormEditor: IOTAFormEditor;
   ModuleServices: IOTAModuleServices;
 begin
   List.Clear;
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
 
-  for i := 0 to ModuleServices.GetModuleCount - 1 do
+  for I := 0 to ModuleServices.GetModuleCount - 1 do
   begin
-    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(i));
+    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(I));
     if Assigned(FormEditor) then
       AddFormToList('', FormEditor, List);
   end;
 end;
 
-procedure TCnPrefixWizard.CreateProjectGroupList(List: TCompList);
+procedure TCnPrefixWizard.CreateProjectGroupList(List: TCnPrefixCompList);
 var
-  i: Integer;
+  I: Integer;
   ProjectGroup: IOTAProjectGroup;
 begin
   List.Clear;
@@ -1351,15 +1370,15 @@ begin
   ProjectGroup := CnOtaGetProjectGroup;
   if not Assigned(ProjectGroup) then Exit;
 
-  for i := 0 to ProjectGroup.ProjectCount - 1 do
-    AddProjectToList(ProjectGroup.Projects[i], List);
+  for I := 0 to ProjectGroup.ProjectCount - 1 do
+    AddProjectToList(ProjectGroup.Projects[I], List);
 end;
 
-procedure TCnPrefixWizard.CreateSelCompList(List: TCompList);
+procedure TCnPrefixWizard.CreateSelCompList(List: TCnPrefixCompList);
 var
   FormEditor: IOTAFormEditor;
   ProjectName: string;
-  i: Integer;
+  I: Integer;
 begin
   List.Clear;
   FormEditor := CnOtaGetCurrentFormEditor;
@@ -1374,9 +1393,9 @@ begin
       ProjectName := '';
 
     // 处理选择的控件
-    for i := 0 to FormEditor.GetSelCount - 1 do
+    for I := 0 to FormEditor.GetSelCount - 1 do
       AddCompToList(ProjectName, FormEditor,
-        TComponent(FormEditor.GetSelComponent(i).GetComponentHandle), List);
+        TComponent(FormEditor.GetSelComponent(I).GetComponentHandle), List);
   end;
 end;
 
@@ -1549,6 +1568,99 @@ end;
 function TCnPrefixWizard.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '批量,重命名,batch,rename,';
+end;
+
+function TCnPrefixWizard.SearchClipboardGetNewName(AComp: TComponent;
+  const ANewName: string): string;
+var
+  Stream: TMemoryStream;
+  S, T: string;
+{$IFDEF UNICODE}
+  A: AnsiString;
+{$ENDIF}
+  I: Integer;
+  Tree: TCnDfmTree;
+  Leaf: TCnDfmLeaf;
+  GridOffset: TPoint;
+
+  function GetComponentCaptionText(C: TComponent): string;
+  begin
+    // 拿一个组件的 Caption 属性或 Text 字符串属性
+    Result := GetStrProp(C, 'Caption');
+    if Result = '' then
+      Result := GetStrProp(C, 'Text');
+
+    if Result = '' then
+    begin
+      // TODO: FMX 组件的属性？
+    end;
+  end;
+
+begin
+  Result := ANewName;
+  if (AComp = nil) or (Clipboard.AsText = '') then
+    Exit;
+
+  Tree := nil;
+  Stream := nil;
+
+  try
+    S := Clipboard.AsText;
+    Stream := TMemoryStream.Create;
+
+{$IFDEF UNICODE}
+    A := AnsiString(S);
+    Stream.Write(A[1], Length(A));
+{$ELSE}
+    Stream.Write(S[1], Length(S));
+{$ENDIF}
+
+    Stream.Position := 0;
+    Tree := TCnDfmTree.Create;
+
+    if not LoadMultiTextStreamToTree(Stream, Tree) then
+      Exit;
+
+    GridOffset.X := 8;
+    GridOffset.Y := 8;
+    S := GetComponentCaptionText(AComp);
+
+    for I := 0 to Tree.Count - 1 do
+    begin
+      Leaf := Tree.Items[I];
+      if (Leaf.ElementClass = AComp.ClassName) and (Leaf.Text <> '') then
+      begin
+        // 找到一个匹配的类，找其 Caption/Text 或位置之类的
+        // 如果位置差一个 Grid 点，则表示匹配，否则 Caption/Text 有一个相同也匹配
+        if S <> '' then
+        begin
+          T := DecodeDfmStr(Leaf.PropertyValue['Caption']);
+          if T = S then
+          begin
+            // Caption 匹配，是它
+            Result := Leaf.Text;
+            Exit;
+          end
+          else
+          begin
+            T := DecodeDfmStr(Leaf.PropertyValue['Text']);
+            if T = S then
+            begin
+              Result := Leaf.Text;
+              Exit;
+            end;
+          end;
+        end
+        else // TODO: 新组件无 Caption/Text 属性，以位置来判断
+        begin
+
+        end;
+      end;
+    end;
+  finally
+    Stream.Free;
+    Tree.Free;
+  end;
 end;
 
 initialization

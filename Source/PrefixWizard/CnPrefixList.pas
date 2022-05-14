@@ -44,9 +44,9 @@ uses
 
 type
 
-{ TPrefixItem }
+{ TCnPrefixItem }
 
-  TPrefixItem = class(TObject)
+  TCnPrefixItem = class(TObject)
   private
     FIgnore: Boolean;
     FPrefix: string;
@@ -58,14 +58,14 @@ type
     property Ignore: Boolean read FIgnore write FIgnore;
   end;
 
-{ TPrefixList }
+{ TCnPrefixList }
 
-  TPrefixList = class(TObject)
+  TCnPrefixList = class(TObject)
   private
     FList: TObjectList;
     function GetCount: Integer;
     function GetIgnore(ComponentClass: string): Boolean;
-    function GetItem(Index: Integer): TPrefixItem;
+    function GetItem(Index: Integer): TCnPrefixItem;
     function GetPrefix(ComponentClass: string): string;
     procedure SetIgnore(ComponentClass: string; const Value: Boolean);
     procedure SetPrefix(ComponentClass: string; const Value: string);
@@ -81,15 +81,15 @@ type
     function LoadFromFile(const FileName: string): Boolean;
     function SaveToFile(const FileName: string): Boolean;
 
-    property Items[Index: Integer]: TPrefixItem read GetItem; default;
+    property Items[Index: Integer]: TCnPrefixItem read GetItem; default;
     property Count: Integer read GetCount;
     property Prefixs[ComponentClass: string]: string read GetPrefix write SetPrefix;
     property Ignore[ComponentClass: string]: Boolean read GetIgnore write SetIgnore;
   end;
 
-{ TCompItem }
+{ TCnPrefixCompItem }
 
-  TCompItem = class(TObject)
+  TCnPrefixCompItem = class(TObject)
   private
     FActive: Boolean;
     FFormEditor: IOTAFormEditor;
@@ -108,13 +108,13 @@ type
     property NewName: string read FNewName write FNewName;
   end;
 
-{ TCompList }
+{ TCnPrefixCompList }
 
-  TCompList = class(TObject)
+  TCnPrefixCompList = class(TObject)
   private
     FList: TObjectList;
     function GetCount: Integer;
-    function GetItem(Index: Integer): TCompItem;
+    function GetItem(Index: Integer): TCnPrefixCompItem;
   public
     constructor Create;
     destructor Destroy; override;
@@ -127,7 +127,7 @@ type
     function IndexOfComponent(AFormEditor: IOTAFormEditor; AComponent: TComponent): Integer;
 
     property Count: Integer read GetCount;
-    property Items[Index: Integer]: TCompItem read GetItem; default;
+    property Items[Index: Integer]: TCnPrefixCompItem read GetItem; default;
   end;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
@@ -138,7 +138,7 @@ implementation
 
 { TPrefixItem }
 
-procedure TPrefixItem.SetPrefix(const Value: string);
+procedure TCnPrefixItem.SetPrefix(const Value: string);
 begin
   if (Value <> '') and IsValidIdent(Value) then
   begin
@@ -150,15 +150,15 @@ end;
 
 { TPrefixList }
 
-function TPrefixList.Add(const ComponentClass, Prefix: string;
+function TCnPrefixList.Add(const ComponentClass, Prefix: string;
   Ignore: Boolean): Integer;
 var
-  Item: TPrefixItem;
+  Item: TCnPrefixItem;
 begin
   Result := IndexOf(ComponentClass);
   if Result < 0 then
   begin
-    Item := TPrefixItem.Create;
+    Item := TCnPrefixItem.Create;
     Result := FList.Add(Item);
   end
   else
@@ -169,33 +169,33 @@ begin
   Item.Ignore := Ignore;
 end;
 
-procedure TPrefixList.Clear;
+procedure TCnPrefixList.Clear;
 begin
   FList.Clear;
 end;
 
-constructor TPrefixList.Create;
+constructor TCnPrefixList.Create;
 begin
   FList := TObjectList.Create;
 end;
 
-procedure TPrefixList.Delete(Index: Integer);
+procedure TCnPrefixList.Delete(Index: Integer);
 begin
   FList.Delete(Index);
 end;
 
-destructor TPrefixList.Destroy;
+destructor TCnPrefixList.Destroy;
 begin
   FList.Free;
   inherited;
 end;
 
-function TPrefixList.GetCount: Integer;
+function TCnPrefixList.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TPrefixList.GetIgnore(ComponentClass: string): Boolean;
+function TCnPrefixList.GetIgnore(ComponentClass: string): Boolean;
 var
   Idx: Integer;
 begin
@@ -206,12 +206,12 @@ begin
     Result := False;
 end;
 
-function TPrefixList.GetItem(Index: Integer): TPrefixItem;
+function TCnPrefixList.GetItem(Index: Integer): TCnPrefixItem;
 begin
-  Result := TPrefixItem(FList[Index]);
+  Result := TCnPrefixItem(FList[Index]);
 end;
 
-function TPrefixList.GetPrefix(ComponentClass: string): string;
+function TCnPrefixList.GetPrefix(ComponentClass: string): string;
 var
   Idx: Integer;
 begin
@@ -222,14 +222,14 @@ begin
     Result := '';
 end;
 
-function TPrefixList.IndexOf(const ComponentClass: string): Integer;
+function TCnPrefixList.IndexOf(const ComponentClass: string): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    if SameText(Items[i].ComponentClass, ComponentClass) then
+  for I := 0 to Count - 1 do
+    if SameText(Items[I].ComponentClass, ComponentClass) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
@@ -239,9 +239,9 @@ const
   csPrefix = 'Prefix';
   csIgnore = 'Ignore';
 
-function TPrefixList.LoadFromFile(const FileName: string): Boolean;
+function TCnPrefixList.LoadFromFile(const FileName: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
   Strs: TStrings;
 begin
   Result := False;
@@ -254,9 +254,9 @@ begin
     try
       ReadSection(csPrefix, Strs);
 
-      for i := 0 to Strs.Count - 1 do
-        Add(Strs[i], ReadString(csPrefix, Strs[i], ''),
-          ReadBool(csIgnore, Strs[i], False));
+      for I := 0 to Strs.Count - 1 do
+        Add(Strs[I], ReadString(csPrefix, Strs[I], ''),
+          ReadBool(csIgnore, Strs[I], False));
       Result := True;
     finally
       Strs.Free;
@@ -266,23 +266,23 @@ begin
   end;
 end;
 
-function TPrefixList.SaveToFile(const FileName: string): Boolean;
+function TCnPrefixList.SaveToFile(const FileName: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   try
     with TMemIniFile.Create(FileName) do
     try
-      for i := 0 to Count - 1 do
+      for I := 0 to Count - 1 do
       begin
-        if (Items[i].Prefix <> '') or Items[i].Ignore then
+        if (Items[I].Prefix <> '') or Items[I].Ignore then
         begin
-          if Items[i].Prefix <> '' then
-            WriteString(csPrefix, Items[i].ComponentClass, Items[i].Prefix);
-          if Items[i].Ignore then
-            WriteBool(csIgnore, Items[i].ComponentClass, Items[i].Ignore)
+          if Items[I].Prefix <> '' then
+            WriteString(csPrefix, Items[I].ComponentClass, Items[I].Prefix);
+          if Items[I].Ignore then
+            WriteBool(csIgnore, Items[I].ComponentClass, Items[I].Ignore)
           else
-            DeleteKey(csIgnore, Items[i].ComponentClass);
+            DeleteKey(csIgnore, Items[I].ComponentClass);
         end;
       end;
 
@@ -296,7 +296,7 @@ begin
   end;
 end;
 
-procedure TPrefixList.SetIgnore(ComponentClass: string;
+procedure TCnPrefixList.SetIgnore(ComponentClass: string;
   const Value: Boolean);
 var
   Idx: Integer;
@@ -308,7 +308,7 @@ begin
     Add(ComponentClass, '', Value);
 end;
 
-procedure TPrefixList.SetPrefix(ComponentClass: string;
+procedure TCnPrefixList.SetPrefix(ComponentClass: string;
   const Value: string);
 var
   Idx: Integer;
@@ -322,12 +322,12 @@ end;
 
 { TCompList }
 
-function TCompList.Add(const AProjectName: string; AFormEditor: IOTAFormEditor;
+function TCnPrefixCompList.Add(const AProjectName: string; AFormEditor: IOTAFormEditor;
   AComponent: TComponent; const APrefix, AOldName, ANewName: string): Integer;
 var
-  Item: TCompItem;
+  Item: TCnPrefixCompItem;
 begin
-  Item := TCompItem.Create;
+  Item := TCnPrefixCompItem.Create;
   Item.FActive := True;
   Item.FProjectName := AProjectName;
   Item.FFormEditor := AFormEditor;
@@ -338,62 +338,62 @@ begin
   Result := FList.Add(Item);
 end;
 
-procedure TCompList.Clear;
+procedure TCnPrefixCompList.Clear;
 begin
   FList.Clear;
 end;
 
-constructor TCompList.Create;
+constructor TCnPrefixCompList.Create;
 begin
   FList := TObjectList.Create;
 end;
 
-procedure TCompList.Delete(Index: Integer);
+procedure TCnPrefixCompList.Delete(Index: Integer);
 begin
   FList.Delete(Index);
 end;
 
-destructor TCompList.Destroy;
+destructor TCnPrefixCompList.Destroy;
 begin
   FList.Free;
   inherited;
 end;
 
-function TCompList.GetCount: Integer;
+function TCnPrefixCompList.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TCompList.GetItem(Index: Integer): TCompItem;
+function TCnPrefixCompList.GetItem(Index: Integer): TCnPrefixCompItem;
 begin
-  Result := TCompItem(FList[Index]);
+  Result := TCnPrefixCompItem(FList[Index]);
 end;
 
-function TCompList.IndexOfComponent(AFormEditor: IOTAFormEditor;
+function TCnPrefixCompList.IndexOfComponent(AFormEditor: IOTAFormEditor;
   AComponent: TComponent): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    if (Items[i].FFormEditor = AFormEditor) and (Items[i].FComponent = AComponent) then
+  for I := 0 to Count - 1 do
+    if (Items[I].FFormEditor = AFormEditor) and (Items[I].FComponent = AComponent) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
 
 end;
 
-function TCompList.IndexOfNewName(AFormEditor: IOTAFormEditor;
+function TCnPrefixCompList.IndexOfNewName(AFormEditor: IOTAFormEditor;
   ANewName: string): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    if (Items[i].FFormEditor = AFormEditor) and SameText(Items[i].FNewName,
+  for I := 0 to Count - 1 do
+    if (Items[I].FFormEditor = AFormEditor) and SameText(Items[I].FNewName,
       ANewName) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;

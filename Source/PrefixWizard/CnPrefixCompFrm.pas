@@ -73,8 +73,7 @@ type
       Selected: Boolean);
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
-    FList: TCompList;
+    FList: TCnPrefixCompList;
     FSortIndex: Integer;
     FSortDown: Boolean;
     procedure SetListToListView;
@@ -84,10 +83,10 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
-function ShowPrefixCompForm(List: TCompList; IniFile: TCustomIniFile;
+function ShowPrefixCompForm(List: TCnPrefixCompList; IniFile: TCustomIniFile;
   var UpdateTrigger: TNotifyEvent): Boolean;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
@@ -107,7 +106,7 @@ const
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
 
-function ShowPrefixCompForm(List: TCompList; IniFile: TCustomIniFile;
+function ShowPrefixCompForm(List: TCnPrefixCompList; IniFile: TCustomIniFile;
   var UpdateTrigger: TNotifyEvent): Boolean;
 var
   Frm: TCnPrefixCompForm;
@@ -164,24 +163,24 @@ end;
 
 procedure TCnPrefixCompForm.SetListToListView;
 var
-  i: Integer;
+  I: Integer;
 begin
   ListView.Items.BeginUpdate;
   try
     ListView.Items.Clear;
-    for i := 0 to FList.Count - 1 do
+    for I := 0 to FList.Count - 1 do
     begin
       with ListView.Items.Add do
       begin
-        Checked := FList[i].Active;
-        Caption := FList[i].ProjectName;
-        SubItems.Add(_CnExtractFileName(FList[i].FormEditor.FileName));
-        SubItems.Add(FList[i].OldName);
-        SubItems.Add(FList[i].Component.ClassName);
-        SubItems.Add(CnGetComponentText(FList[i].Component));
-        SubItems.Add(FList[i].Prefix);
-        SubItems.Add(FList[i].NewName);
-        Data := FList[i];
+        Checked := FList[I].Active;
+        Caption := FList[I].ProjectName;
+        SubItems.Add(_CnExtractFileName(FList[I].FormEditor.FileName));
+        SubItems.Add(FList[I].OldName);
+        SubItems.Add(FList[I].Component.ClassName);
+        SubItems.Add(CnGetComponentText(FList[I].Component));
+        SubItems.Add(FList[I].Prefix);
+        SubItems.Add(FList[I].NewName);
+        Data := FList[I];
       end;
     end;
   finally
@@ -191,14 +190,16 @@ end;
 
 procedure TCnPrefixCompForm.GetListFromListView;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to ListView.Items.Count - 1 do
-    with TCompItem(ListView.Items[i].Data) do
+  for I := 0 to ListView.Items.Count - 1 do
+  begin
+    with TCnPrefixCompItem(ListView.Items[I].Data) do
     begin
-      NewName := ListView.Items[i].SubItems[5];
-      Active := (NewName <> '') and ListView.Items[i].Checked;
+      NewName := ListView.Items[I].SubItems[5];
+      Active := (NewName <> '') and ListView.Items[I].Checked;
     end;
+  end;
 end;
 
 procedure TCnPrefixCompForm.UpdateNameEdit;
@@ -261,7 +262,7 @@ var
 begin
   if (ListView.Selected <> nil) and (edtNewName.Text <> '') then
   begin
-    Prefix := TCompItem(ListView.Selected.Data).Prefix;
+    Prefix := TCnPrefixCompItem(ListView.Selected.Data).Prefix;
     if (Prefix <> '') and (AnsiPos(Prefix, edtNewName.Text) = 1) then
     begin
       edtNewName.SelStart := Length(Prefix);
@@ -327,7 +328,7 @@ var
 begin
   if Sender <> nil then
   begin
-    // 如果Sender不为空，说明是被迟来的调用的，为一 RenameList，
+    // 如果 Sender 不为空，说明是被迟来的调用的，为一 RenameList，
     // 在此用 RenameList 更新 FList
     RenameList := Sender as TList;
     FormEditor := CnOtaGetCurrentFormEditor;
@@ -341,12 +342,12 @@ begin
     else
       ProjectName := '';
 
-    for i := 0 to RenameList.Count - 1 do
+    for I := 0 to RenameList.Count - 1 do
     begin
       // 只有当前窗体上存在的组件才处理
-      if FList.IndexOfComponent(FormEditor, TComponent(RenameList[i])) < 0 then
-        if Assigned(FormEditor.GetComponentFromHandle(RenameList[i])) then
-          Wizard.AddCompToList(ProjectName, FormEditor, TComponent(RenameList[i]), FList);
+      if FList.IndexOfComponent(FormEditor, TComponent(RenameList[I])) < 0 then
+        if Assigned(FormEditor.GetComponentFromHandle(RenameList[I])) then
+          Wizard.AddCompToList(ProjectName, FormEditor, TComponent(RenameList[I]), FList);
     end;
 
     SetListToListView;

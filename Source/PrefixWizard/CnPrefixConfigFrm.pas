@@ -92,12 +92,11 @@ type
       Change: TItemChange);
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
-    FList: TPrefixList;
+    FList: TCnPrefixList;
     FSortIndex: Integer;
     FSortDown: Boolean;
-    procedure GetListFromListView(List: TPrefixList);
-    procedure SetListToListView(List: TPrefixList);
+    procedure GetListFromListView(List: TCnPrefixList);
+    procedure SetListToListView(List: TCnPrefixList);
   protected
     function GetHelpTopic: string; override;
   public
@@ -165,7 +164,7 @@ begin
   SetListToListView(FList);
 end;
 
-procedure TCnPrefixConfigForm.GetListFromListView(List: TPrefixList);
+procedure TCnPrefixConfigForm.GetListFromListView(List: TCnPrefixList);
 var
   i: Integer;
 begin
@@ -176,7 +175,7 @@ begin
   end;
 end;
 
-procedure TCnPrefixConfigForm.SetListToListView(List: TPrefixList);
+procedure TCnPrefixConfigForm.SetListToListView(List: TCnPrefixList);
 var
   CompList: TStringList;
   i: Integer;
@@ -254,13 +253,13 @@ end;
 
 procedure TCnPrefixConfigForm.btnExportClick(Sender: TObject);
 var
-  AList: TPrefixList;
+  AList: TCnPrefixList;
 begin
   if SaveDialog.FileName = '' then
     SaveDialog.FileName := WizOptions.GetUserFileName(SCnPrefixDataName, False);
   if SaveDialog.Execute then
   begin
-    AList := TPrefixList.Create;
+    AList := TCnPrefixList.Create;
     try
       GetListFromListView(AList);
       AList.SaveToFile(SaveDialog.FileName);
@@ -272,13 +271,13 @@ end;
 
 procedure TCnPrefixConfigForm.btnImportClick(Sender: TObject);
 var
-  AList: TPrefixList;
+  AList: TCnPrefixList;
 begin
   if OpenDialog.FileName = '' then
     OpenDialog.FileName := WizOptions.GetUserFileName(SCnPrefixDataName, True);
   if OpenDialog.Execute then
   begin
-    AList := TPrefixList.Create;
+    AList := TCnPrefixList.Create;
     try
       AList.LoadFromFile(OpenDialog.FileName);
       SetListToListView(AList);
