@@ -29,7 +29,7 @@ unit CnWizDfmParser;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2012.09.19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2005.03.23 V1.0
 *               创建单元
 ================================================================================
@@ -110,11 +110,11 @@ type
     {* 存储文本属性，格式为 PropName = PropValue，对于复杂属性，PropValue 里可能包含回车
       注意 Objects 属性里可能存 TMemoryStream 的二进制数据}
     property PropertyValue[const PropertyName: string]: string read GetPropertyValue;
-    {* 根据某属性名拿到属性值，注意不支持多行属性}
+    {* 根据某属性名拿到属性值，如果是字符串，会带 DFM 中的单引号与转码，注意不支持多行属性}
   end;
 
   TCnDfmTree = class(TCnTree)
-  {* 代表 DFM 树，其中 Root 的第一个子节点是根容器}
+  {* 代表 DFM 树，其中 Root 的第一个子节点是根容器，不代表实际组件}
   private
     FDfmFormat: TDfmFormat;
     FDfmKind: TDfmKind;
@@ -147,6 +147,9 @@ function ParseDfmStream(Stream: TStream; Info: TDfmInfo): Boolean;
 function ParseDfmFile(const FileName: string; Info: TDfmInfo): Boolean;
 {* 简单解析 DFM 文件读出最外层 Container 的信息}
 
+function LoadMultiTextStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+{* 将字符串流解析成树，允许多次调用以应对剪贴板内那种无根的多个组件}
+
 function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
 {* 将 DFM 流解析成树}
 
@@ -164,6 +167,9 @@ function ConvertWideStringToDfmString(const W: WideString): WideString;
 
 function ConvertStreamToHexDfmString(Stream: TStream; Tab: Integer = 2): string;
 {* 将二进制数据转换为 DFM 字符串，不带前后大括号}
+
+function DfmDequoteStr(const QuotedStr: string): string;
+{* 把 Caption 里那种带引号的转码后的字符转换为正常字符串}
 
 implementation
 
@@ -957,16 +963,60 @@ begin
   end;
 end;
 
+function LoadMultiTextStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
+var
+  Pos: Integer;
+  Signature: Integer;
+  SaveSeparator: Char;
+  Parser: TParser;
+  StartLeaf: TCnDfmLeaf;
+begin
+  Result := False;
+  Pos := Stream.Position;
+  Signature := 0;
+  Stream.Read(Signature, SizeOf(Signature));
+  Stream.Position := Pos;
+
+  if AnsiChar(Signature) in ['o','O','i','I',' ',#13,#11,#9] then
+  begin
+    Tree.DfmFormat := dfText;
+    SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
+    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+
+    Parser := TParser.Create(Stream);
+    try
+      while True do
+      begin
+        StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
+        try
+          ParseTextObjectToLeaf(Parser, Tree, StartLeaf as TCnDfmLeaf);
+        except
+          // StartLeaf 解析失败，可能到尾巴了，要删掉
+          StartLeaf.Delete;
+          Result := Tree.Count > 1;
+          Exit;
+        end;
+      end;
+      Result := True;
+    finally
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
+      Parser.Free;
+    end;
+  end;
+end;
+
 function LoadDfmStreamToTree(Stream: TStream; Tree: TCnDfmTree): Boolean;
 var
   Pos: Integer;
   Signature: Integer;
   BOM: array[1..3] of AnsiChar;
 begin
+  Result := False;
   Pos := Stream.Position;
   Signature := 0;
   Stream.Read(Signature, SizeOf(Signature));
   Stream.Position := Pos;
+
   if AnsiChar(Signature) in ['o','O','i','I',' ',#13,#11,#9] then
   begin
     Tree.DfmFormat := dfText;
@@ -987,7 +1037,12 @@ begin
     end
     else
     begin
-      Stream.ReadResHeader;
+      try
+        Stream.ReadResHeader;
+      except
+        Exit; // 如果内容异常就退出
+      end;
+
       Pos := Stream.Position;
       Signature := 0;
       Stream.Read(Signature, SizeOf(Signature));
@@ -1040,6 +1095,28 @@ begin
       List.SaveToFile(FileName);
     finally
       List.Free;
+    end;
+  end;
+end;
+
+function DfmDequoteStr(const QuotedStr: string): string;
+begin
+  Result := QuotedStr;
+  if Length(Result) > 1 then
+  begin
+    if Result[1] = '''' then // 删头引号
+      Delete(Result, 1, 1)
+    else
+      Exit;
+
+    if Length(Result) > 0 then
+    begin
+      if Result[Length(Result)] = '''' then // 删尾引号
+        Delete(Result, Length(Result), 1)
+      else
+        Exit;
+
+      Result := StringReplace(Result, '''''', '''', [rfReplaceAll]); // 双引号替换成单引号
     end;
   end;
 end;
