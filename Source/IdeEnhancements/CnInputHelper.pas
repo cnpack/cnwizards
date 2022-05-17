@@ -1268,7 +1268,9 @@ begin
 //    if FSymbolReloading then
 //    begin
 //      // 如果在异步加载符号表，本应该将相关键盘信息滞后处理以避免漏消息
-//      // 但容易引起莫名其妙的失去响应，得注掉
+//      // 但容易因为消息队列空而陷入死循环。如果存储消息， Reloading 结束后再处理
+//      // 又会引起键盘消息间隔太长导致多输入大量字符的问题，
+//      所以最终还是得注释掉！！！
 //      PostMessage(Msg.hwnd, Msg.message, Msg.wParam, Msg.lParam);
 //      Handled := True;
 //      Exit;
