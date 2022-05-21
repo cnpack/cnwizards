@@ -1604,24 +1604,49 @@ var
 {$IFDEF UNICODE}
   A: AnsiString;
 {$ENDIF}
-  I: Integer;
+  I, CLeft, CTop, SLeft, STop, MatchCount, MatchIndex: Integer;
   Tree: TCnDfmTree;
   Leaf: TCnDfmLeaf;
   GridOffset: TPoint;
+
+  function GetComponentLeftTop(C: TComponent; var ALeft, ATop: Integer): Boolean;
+  begin
+    Result := False;
+    ALeft := 0;
+    ATop := 0;
+
+    try
+      // 拿一个组件的 Left 与 Top 的 Integer 属性
+      if GetPropInfo(C, 'Left') <> nil then
+        ALeft := GetOrdProp(C, 'Left');
+      if GetPropInfo(C, 'Top') <> nil then
+        ATop := GetOrdProp(C, 'Top');
+      Result := True;
+    except
+      ;
+    end;
+
+    if (ALeft = 0) or (ATop = 0) then
+    begin
+      // 拿不可视组件的位置属性？估计拿不到
+    end;
+  end;
 
   function GetComponentCaptionText(C: TComponent): string;
   begin
     // 拿一个组件的 Caption 属性或 Text 字符串属性
     Result := '';
     try
-      Result := GetStrProp(C, 'Caption');
+      if GetPropInfo(C, 'Caption') <> nil then
+        Result := GetStrProp(C, 'Caption');
     except
       ;
     end;
 
     if Result = '' then
     try
-      Result := GetStrProp(C, 'Text');
+      if GetPropInfo(C, 'Text') <> nil then
+        Result := GetStrProp(C, 'Text');
     except
       ;
     end;
@@ -1659,6 +1684,13 @@ begin
 
     GridOffset := CnOtaGetFormDesignerGridOffset;
     S := GetComponentCaptionText(AComp);
+    GetComponentLeftTop(AComp, CLeft, CTop);
+    MatchCount := 0;
+    MatchIndex := -1;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('SearchClipboardGetNewName: Component Left %d Top %d with Text %s',
+      [CLeft, CTop, S]);
+{$ENDIF}
 
     for I := 0 to Tree.Count - 1 do
     begin
@@ -1669,6 +1701,9 @@ begin
 {$ENDIF}
       if (Leaf.ElementClass = AComp.ClassName) and (Leaf.Text <> '') then
       begin
+        Inc(MatchCount);
+        MatchIndex := I;
+
         // 找到一个匹配的类，找其 Caption/Text 或位置之类的
         // 如果位置差一个 Grid 点，则表示匹配，否则 Caption/Text 有一个相同也匹配
         if S <> '' then
@@ -1696,11 +1731,28 @@ begin
             end;
           end;
         end
-        else // TODO: 新组件无 Caption/Text 属性，以位置来判断
+        else if (CLeft > 0) and (CTop > 0) then // 新组件无 Caption/Text 属性，以位置来判断
         begin
-
+          // 拿剪贴板当前组件的 Left 和 Top 属性，可能包括不可视的
+          SLeft := StrToIntDef(Leaf.PropertyValue['Left'], 0);
+          STop := StrToIntDef(Leaf.PropertyValue['Top'], 0);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('SearchClipboardGetNewName: Position Left %d Top %d', [SLeft, STop]);
+{$ENDIF}
+          if (CLeft - SLeft = GridOffset.X) and (CTop - STop = GridOffset.Y) then
+          begin
+            Result := Leaf.Text;
+            Exit;
+          end;
         end;
       end;
+    end;
+
+    // 如果剪贴板中仅只有一个与本组件类型匹配，就自动用它
+    if MatchCount = 1 then
+    begin
+      Leaf := Tree.Items[MatchIndex];
+      Result := Leaf.Text;
     end;
   finally
     Stream.Free;
