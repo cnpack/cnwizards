@@ -1739,7 +1739,8 @@ begin
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('SearchClipboardGetNewName: Position Left %d Top %d', [SLeft, STop]);
 {$ENDIF}
-          if (CLeft - SLeft = GridOffset.X) and (CTop - STop = GridOffset.Y) then
+          if ((CLeft - SLeft = GridOffset.X) and (CTop - STop = GridOffset.Y))
+            or ((CLeft = SLeft) and (CTop = STop)) then // 同一个容器的偏移粘贴，或不同容器的同位置粘贴
           begin
             Result := Leaf.Text;
             Exit;
