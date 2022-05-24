@@ -642,8 +642,8 @@ begin
 
     while Lex.TokenID <> tkNull do
     begin
-      // 根据上一轮的结束条件判断是否能结束整个 if 语句
-      if ExpectElse and (Lex.TokenID <> tkElse) and not FIfStack.IsEmpty then
+      // 根据上一轮的结束条件判断是否能结束整个 if 语句，注意编译指令不能算
+      if ExpectElse and not (Lex.TokenID in [tkElse, tkCompDirect]) and not FIfStack.IsEmpty then
         FIfStack.Pop.Free;
       ExpectElse := False;
 
@@ -1277,9 +1277,12 @@ begin
       else if Lex.TokenID = tkRoundClose then
         Dec(CurrBracketLevel);
 
-      PrevTokenID := Lex.TokenID;
-      PrevTokenStr := Lex.Token;
-      //LexNextNoJunkWithoutCompDirect(Lex);
+      if Lex.TokenID <> tkCompDirect then // 会遍历到编译指令，不应该由编译指令影响这里的解析结果
+      begin
+        PrevTokenID := Lex.TokenID;
+        PrevTokenStr := Lex.Token;
+      end;
+
       Lex.NextNoJunk;
     end;
   finally
