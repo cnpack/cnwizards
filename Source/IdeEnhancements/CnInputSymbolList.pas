@@ -1621,7 +1621,8 @@ function TUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
 begin
   Result := False;
   try
-    if PosInfo.IsPascal and (PosInfo.PosKind in [pkIntfUses, pkImplUses, pkVar]) then
+    if PosInfo.IsPascal and (PosInfo.PosKind in [pkIntfUses, pkImplUses, pkVar,
+      pkProcedure, pkFunction, pkConstructor, pkDestructor]) then
     begin
       DoInternalLoad;
       AdjustSymbolListScope(Self);
