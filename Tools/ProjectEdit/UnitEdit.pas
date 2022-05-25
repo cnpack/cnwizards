@@ -88,6 +88,18 @@ type
     btnCVSortDprojOne: TButton;
     btnCVSortBpkOne: TButton;
     lbl1: TLabel;
+    bvl211: TBevel;
+    lblCVBpk: TLabel;
+    edtCVBpkAdd: TEdit;
+    edtCVBpkBefore: TEdit;
+    btnCVBpkAdd: TButton;
+    lblCVBpkAdd: TLabel;
+    bvl6: TBevel;
+    lblCVBpk1: TLabel;
+    edtCVBpkBefore1: TEdit;
+    edtCVBpkAdd1: TEdit;
+    btnCVBpkAdd1: TButton;
+    lblCVBpkAdd1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure btnCWBrowseClick(Sender: TObject);
     procedure btnCWDprAddClick(Sender: TObject);
@@ -106,6 +118,8 @@ type
     procedure btnCVSortDprojAll1Click(Sender: TObject);
     procedure btnCVDprojAddClick(Sender: TObject);
     procedure btnCVSortBpkOneClick(Sender: TObject);
+    procedure btnCVBpkAddClick(Sender: TObject);
+    procedure btnCVBpkAdd1Click(Sender: TObject);
   private
     FCount: Integer;
     FSingleBefore, FSingleAdd: string;
@@ -244,7 +258,7 @@ end;
 procedure TFormProjectEdit.MultiLineFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
-  L: TStrings;
+  L: TStringList;
   I, K: Integer;
   S: string;
   IsTab: Boolean;
@@ -266,6 +280,18 @@ var
     Result := True;
   end;
 
+  procedure PutToList(List: TStringList; FoundPos: Integer; const Str: string);
+  begin
+    if FoundPos >= List.Count then
+      List.Add(Str)
+    else
+    begin
+      if FoundPos < 0 then
+        FoundPos := 0;
+      List.Insert(FoundPos + 1, Str);
+    end;
+  end;
+
 begin
   L := TStringList.Create;
   try
@@ -281,18 +307,18 @@ begin
 
         IsTab := (Length(S) > 0) and (S[1] = #9);
 
-        for K := FAdds.Count - 1 downto 0 do
+        for K := FAdds.Count - 1 downto 0 do // 暂不支持最后
         begin // 挨个插入
           if IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            L.Insert(I, S + #9 + FAdds[K]);
+            PutToList(L, I, S + #9 + FAdds[K]);
           end
           else if not IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            L.Insert(I, S + '    ' + FAdds[K]); // 没法判断几个空格，只能先用四个代替
+            PutToList(L, I, S + '    ' + FAdds[K]); // 没法判断几个空格，只能先用四个代替
           end
           else
-            L.Insert(I, S + FAdds[K]);
+            PutToList(L, I, S + FAdds[K]);
         end;
 
         L.SaveToFile(FileName);
@@ -715,6 +741,40 @@ begin
     L2.Free;
     L1.Free;
   end;
+end;
+
+procedure TFormProjectEdit.btnCVBpkAddClick(Sender: TObject);
+begin
+  if not DirectoryExists(edtCVRootDir.Text) then
+    Exit;
+
+  if (Trim(edtCVBpkBefore.Text) = '') or (Trim(edtCVBpkAdd.Text) = '') then
+    Exit;
+
+  FCount := 0;
+  FSingleBefore := Trim(edtCVBpkBefore.Text) + ' ';
+  FSingleAdd := Trim(edtCVBpkAdd.Text) + ' '; // obj 文件后有一个空格
+  FindFile(edtCVRootDir.Text, '*.bpk', SingleLineFound, nil, True, False);
+
+  if FCount > 0 then
+    InfoDlg(FILE_COUNT + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnCVBpkAdd1Click(Sender: TObject);
+begin
+  if not DirectoryExists(edtCVRootDir.Text) then
+    Exit;
+
+  if (Trim(edtCVBpkBefore1.Text) = '') or (Trim(edtCVBpkAdd1.Text) = '') then
+    Exit;
+
+  FCount := 0;
+  FSingleBefore := Trim(edtCVBpkBefore1.Text);
+  FSingleAdd := Trim(edtCVBpkAdd1.Text); // obj 文件后有一个空格
+  FindFile(edtCVRootDir.Text, '*.bpk', SingleLineFound, nil, True, False);
+
+  if FCount > 0 then
+    InfoDlg(FILE_COUNT + IntToStr(FCount));
 end;
 
 end.

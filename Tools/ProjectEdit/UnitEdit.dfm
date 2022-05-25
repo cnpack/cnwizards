@@ -306,6 +306,48 @@ object FormProjectEdit: TFormProjectEdit
         Height = 12
         Caption = '下面增加'
       end
+      object bvl211: TBevel
+        Left = 16
+        Top = 288
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCVBpk: TLabel
+        Left = 16
+        Top = 312
+        Width = 90
+        Height = 12
+        Caption = '在所有bpk文件的'
+      end
+      object lblCVBpkAdd: TLabel
+        Left = 744
+        Top = 312
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object bvl6: TBevel
+        Left = 16
+        Top = 368
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCVBpk1: TLabel
+        Left = 16
+        Top = 392
+        Width = 90
+        Height = 12
+        Caption = '在所有bpk文件的'
+      end
+      object lblCVBpkAdd1: TLabel
+        Left = 744
+        Top = 392
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
       object edtCVRootDir: TEdit
         Left = 144
         Top = 12
@@ -373,6 +415,62 @@ object FormProjectEdit: TFormProjectEdit
         Caption = '做！'
         TabOrder = 7
         OnClick = btnCVDprojAddClick
+      end
+      object edtCVBpkAdd: TEdit
+        Left = 144
+        Top = 332
+        Width = 577
+        Height = 20
+        TabOrder = 8
+        Text = '..\..\Source\Crypto\CnOTP.obj '
+      end
+      object edtCVBpkBefore: TEdit
+        Left = 144
+        Top = 308
+        Width = 577
+        Height = 20
+        TabOrder = 9
+        Text = '..\..\Source\Crypto\CnNativeDecl.obj '
+      end
+      object btnCVBpkAdd: TButton
+        Left = 744
+        Top = 332
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 10
+        OnClick = btnCVBpkAddClick
+      end
+      object edtCVBpkBefore1: TEdit
+        Left = 144
+        Top = 388
+        Width = 577
+        Height = 20
+        TabOrder = 11
+        Text = 
+          '<FILE FILENAME="..\..\Source\Crypto\CnNativeDecl.pas" FORMNAME="' +
+          '" UNITNAME="CnNativeDecl" CONTAINERID="PascalCompiler" DESIGNCLA' +
+          'SS="" LOCALCOMMAND=""/>'
+      end
+      object edtCVBpkAdd1: TEdit
+        Left = 144
+        Top = 412
+        Width = 577
+        Height = 20
+        TabOrder = 12
+        Text = 
+          '<FILE FILENAME="..\..\Source\Crypto\CnOTP.pas" FORMNAME="" UNITN' +
+          'AME="CnOTP" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOM' +
+          'MAND=""/>'
+      end
+      object btnCVBpkAdd1: TButton
+        Left = 744
+        Top = 412
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 13
+        OnClick = btnCVBpkAdd1Click
       end
     end
     object tsCVSort: TTabSheet
