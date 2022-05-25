@@ -387,10 +387,17 @@ object FormProjectEdit: TFormProjectEdit
       end
       object bvl5: TBevel
         Left = 16
-        Top = 112
+        Top = 168
         Width = 801
         Height = 17
         Shape = bsTopLine
+      end
+      object lbl1: TLabel
+        Left = 512
+        Top = 144
+        Width = 150
+        Height = 12
+        Caption = '注：cpp中的排序可手工进行'
       end
       object edtCVSortRootDir: TEdit
         Left = 144
@@ -461,6 +468,15 @@ object FormProjectEdit: TFormProjectEdit
         Caption = 'proj 单独排序'
         TabOrder = 7
         OnClick = btnCVSortDprojOneClick
+      end
+      object btnCVSortBpkOne: TButton
+        Left = 512
+        Top = 108
+        Width = 209
+        Height = 22
+        Caption = 'bpk 单独排序'
+        TabOrder = 8
+        OnClick = btnCVSortBpkOneClick
       end
     end
   end

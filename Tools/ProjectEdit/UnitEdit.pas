@@ -86,6 +86,8 @@ type
     btnCVSortDprojAll: TButton;
     btnCVSortDprojAll1: TButton;
     btnCVSortDprojOne: TButton;
+    btnCVSortBpkOne: TButton;
+    lbl1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure btnCWBrowseClick(Sender: TObject);
     procedure btnCWDprAddClick(Sender: TObject);
@@ -103,6 +105,7 @@ type
     procedure btnCVSortDprojAllClick(Sender: TObject);
     procedure btnCVSortDprojAll1Click(Sender: TObject);
     procedure btnCVDprojAddClick(Sender: TObject);
+    procedure btnCVSortBpkOneClick(Sender: TObject);
   private
     FCount: Integer;
     FSingleBefore, FSingleAdd: string;
@@ -116,8 +119,9 @@ type
       var Abort: Boolean);
     procedure SortDprojFileFound(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
-    procedure SortOneDpr(const Dpr: string);
-    procedure SortOneDproj(const Proj: string); // 不完整排序，只排部分
+    function SortOneDpr(const Dpr: string): Boolean;
+    function SortOneDproj(const Proj: string): Boolean; // 不完整排序，只排部分
+    function SortOneBpk(const Bpk: string): Boolean; // 排 obj 和 <FILENAME 段
   end;
 
 var
@@ -429,11 +433,12 @@ begin
     Result := CompareStr(UpperCase(F1), UpperCase(F2));
 end;
 
-procedure TFormProjectEdit.SortOneDpr(const Dpr: string);
+function TFormProjectEdit.SortOneDpr(const Dpr: string): Boolean;
 var
   I, F1, F2: Integer;
   L1, L2: TStringList;
 begin
+  Result := False;
   L1 := nil;
   L2 := nil;
 
@@ -462,6 +467,7 @@ begin
         L1[I] := L2[I - F1];
 
       L1.SaveToFile(Dpr);
+      Result := True;
     end;
   finally
     L2.Free;
@@ -484,8 +490,8 @@ end;
 procedure TFormProjectEdit.SortDprFileFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
-  SortOneDpr(FileName);
-  Inc(FCount);
+  if SortOneDpr(FileName) then
+    Inc(FCount);
 end;
 
 procedure TFormProjectEdit.btnCVSortDprAll1Click(Sender: TObject);
@@ -526,16 +532,17 @@ begin
   end;
 end;
 
-function DprojCompare(List: TStringList; Index1, Index2: Integer): Integer;
+function SimpleCompare(List: TStringList; Index1, Index2: Integer): Integer;
 begin
   Result := CompareStr(UpperCase(Trim(List[Index1])), UpperCase(Trim(List[Index2])));
 end;
 
-procedure TFormProjectEdit.SortOneDproj(const Proj: string);
+function TFormProjectEdit.SortOneDproj(const Proj: string): Boolean;
 var
   I, F1, F2: Integer;
   L1, L2: TStringList;
 begin
+  Result := False;
   L1 := nil;
   L2 := nil;
 
@@ -559,11 +566,12 @@ begin
       for I := F1 to F2 do
         L2.Add(L1[I]);
 
-      L2.CustomSort(DprojCompare);
+      L2.CustomSort(SimpleCompare);
       for I := F1 to F2 do
         L1[I] := L2[I - F1];
 
       L1.SaveToFile(Proj);
+      Result := True;
     end;
   finally
     L2.Free;
@@ -574,8 +582,8 @@ end;
 procedure TFormProjectEdit.SortDprojFileFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
-  SortOneDproj(FileName);
-  Inc(FCount);
+  if SortOneDproj(FileName) then
+    Inc(FCount);
 end;
 
 procedure TFormProjectEdit.btnCVSortDprojAllClick(Sender: TObject);
@@ -623,6 +631,90 @@ begin
 
   if FCount > 0 then
     InfoDlg(FILE_COUNT + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnCVSortBpkOneClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+  begin
+    SortOneBpk(dlgOpen1.FileName);
+    ShowMessage(FILE_OK + dlgOpen1.FileName);
+  end;
+end;
+
+function TFormProjectEdit.SortOneBpk(const Bpk: string): Boolean;
+var
+  I, F1, F2: Integer;
+  L1, L2: TStringList;
+  Found: Boolean;
+begin
+  Result := False;
+  L1 := nil;
+  L2 := nil;
+  Found := False;
+
+  try
+    L1 := TStringList.Create;
+    L1.LoadFromFile(Bpk);
+
+    // 找 bpk 中的 obj 部分
+    F1 := -1;
+    F2 := -1;
+    for I := 0 to L1.Count - 1 do
+    begin
+      if (F1 < 0) and (Pos('..\..\Source\', Trim(L1[I])) = 1) and StrEndWith(Trim(L1[I]), '.obj') then
+        F1 := I;
+      if (F1 > 0) and (F2 < 0) and StrEndWith(Trim(L1[I]), '"/>') then
+        F2 := I - 1;
+    end;
+
+    if (F1 > 1) and (F2 > F1) then
+    begin
+      L2 := TStringList.Create;
+      for I := F1 to F2 do
+        L2.Add(L1[I]);
+
+      L2.CustomSort(SimpleCompare);
+      for I := F1 to F2 do
+        L1[I] := L2[I - F1];
+
+      Found := True;
+    end;
+
+    // 找 <FILENAME 部分
+    F1 := -1;
+    F2 := -1;
+    for I := 0 to L1.Count - 1 do
+    begin
+      if (F1 < 0) and (Pos('<FILE FILENAME="..\..\', Trim(L1[I])) = 1) then
+        F1 := I;
+      if (F1 > 0) and (F2 < 0) and (Pos('<FILE FILENAME="', Trim(L1[I])) = 1)
+        and (Pos('<FILE FILENAME="..\..\', Trim(L1[I])) <> 1) then
+        F2 := I - 1;
+    end;
+
+    if (F1 > 1) and (F2 > F1) then
+    begin
+      L2 := TStringList.Create;
+      for I := F1 to F2 do
+        L2.Add(L1[I]);
+
+      L2.CustomSort(SimpleCompare);
+      for I := F1 to F2 do
+        L1[I] := L2[I - F1];
+
+      Found := True;
+    end;
+
+    if Found then
+    begin
+      L1.SaveToFile(Bpk);
+      Result := True;
+    end;
+  finally
+    L2.Free;
+    L1.Free;
+  end;
 end;
 
 end.
