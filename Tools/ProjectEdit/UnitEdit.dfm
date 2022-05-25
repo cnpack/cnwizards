@@ -1,10 +1,10 @@
 object FormProjectEdit: TFormProjectEdit
-  Left = 296
-  Top = 175
+  Left = 228
+  Top = 119
   BorderStyle = bsDialog
   Caption = '批量处理 CnPack IDE 专家包工程文件'
-  ClientHeight = 482
-  ClientWidth = 832
+  ClientHeight = 524
+  ClientWidth = 862
   Color = clBtnFace
   Font.Charset = GB2312_CHARSET
   Font.Color = clWindowText
@@ -17,230 +17,373 @@ object FormProjectEdit: TFormProjectEdit
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 12
-  object lblRoot: TLabel
-    Left = 16
-    Top = 16
-    Width = 120
-    Height = 12
-    Caption = '专家包工程文件目录：'
-  end
-  object bvl1: TBevel
-    Left = 16
-    Top = 48
-    Width = 801
-    Height = 17
-    Shape = bsTopLine
-  end
-  object lblDpr: TLabel
-    Left = 16
-    Top = 72
-    Width = 90
-    Height = 12
-    Caption = '在所有dpr文件的'
-  end
-  object lblDprAdd: TLabel
-    Left = 744
-    Top = 72
-    Width = 48
-    Height = 12
-    Caption = '下面增加'
-  end
-  object bvl2: TBevel
-    Left = 16
-    Top = 128
-    Width = 801
-    Height = 17
-    Shape = bsTopLine
-  end
-  object lblDproj: TLabel
-    Left = 16
-    Top = 148
-    Width = 126
-    Height = 12
-    Caption = '在所有bds/dproj文件的'
-  end
-  object lblDprojAdd: TLabel
-    Left = 744
-    Top = 148
-    Width = 48
-    Height = 12
-    Caption = '下面增加'
-  end
-  object bvl3: TBevel
-    Left = 16
-    Top = 296
-    Width = 801
-    Height = 17
-    Shape = bsTopLine
-  end
-  object lblBpf: TLabel
-    Left = 16
-    Top = 320
-    Width = 90
-    Height = 12
-    Caption = '在所有bpf文件的'
-  end
-  object lbl1: TLabel
-    Left = 744
-    Top = 320
-    Width = 48
-    Height = 12
-    Caption = '下面增加'
-  end
-  object bvl4: TBevel
-    Left = 16
-    Top = 384
-    Width = 801
-    Height = 17
-    Shape = bsTopLine
-  end
-  object lblBprAdd: TLabel
-    Left = 16
-    Top = 408
-    Width = 90
-    Height = 12
-    Caption = '在所有bpr文件的'
-  end
-  object lbl2: TLabel
-    Left = 744
-    Top = 408
-    Width = 48
-    Height = 12
-    Caption = '下面增加'
-  end
-  object edtRootDir: TEdit
-    Left = 144
-    Top = 12
-    Width = 577
-    Height = 20
+  object PageControl1: TPageControl
+    Left = 8
+    Top = 8
+    Width = 847
+    Height = 509
+    ActivePage = tsCWProject
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
+    object tsCWProject: TTabSheet
+      Caption = 'CnWizards 工程文件'
+      object lblCWRoot: TLabel
+        Left = 16
+        Top = 16
+        Width = 120
+        Height = 12
+        Caption = '专家包工程文件目录：'
+      end
+      object bvl1: TBevel
+        Left = 16
+        Top = 48
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCWDpr: TLabel
+        Left = 16
+        Top = 72
+        Width = 90
+        Height = 12
+        Caption = '在所有dpr文件的'
+      end
+      object lblCWDprAdd: TLabel
+        Left = 744
+        Top = 72
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object bvl2: TBevel
+        Left = 16
+        Top = 128
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCWDproj: TLabel
+        Left = 16
+        Top = 148
+        Width = 126
+        Height = 12
+        Caption = '在所有bds/dproj文件的'
+      end
+      object lblCWDprojAdd: TLabel
+        Left = 744
+        Top = 148
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object bvl3: TBevel
+        Left = 16
+        Top = 296
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCWBpf: TLabel
+        Left = 16
+        Top = 320
+        Width = 90
+        Height = 12
+        Caption = '在所有bpf文件的'
+      end
+      object lblCWBpfAdd: TLabel
+        Left = 744
+        Top = 320
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object bvl4: TBevel
+        Left = 16
+        Top = 384
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCWBpr: TLabel
+        Left = 16
+        Top = 408
+        Width = 90
+        Height = 12
+        Caption = '在所有bpr文件的'
+      end
+      object lblCWBprAdd: TLabel
+        Left = 744
+        Top = 408
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object edtCWRootDir: TEdit
+        Left = 144
+        Top = 12
+        Width = 577
+        Height = 20
+        TabOrder = 0
+      end
+      object btnCWBrowse: TButton
+        Left = 744
+        Top = 12
+        Width = 75
+        Height = 22
+        Caption = '选择目录'
+        TabOrder = 1
+        OnClick = btnCWBrowseClick
+      end
+      object edtCWDprBefore: TEdit
+        Left = 144
+        Top = 68
+        Width = 577
+        Height = 20
+        TabOrder = 2
+        Text = 'CnWizDfmParser in '#39'Utils\CnWizDfmParser.pas'#39','
+      end
+      object edtCWDprAdd: TEdit
+        Left = 144
+        Top = 92
+        Width = 577
+        Height = 20
+        TabOrder = 3
+        Text = 'CnVclToFmxIntf in '#39'VclToFmx\CnVclToFmxIntf.pas'#39','
+      end
+      object btnCWDprAdd: TButton
+        Left = 744
+        Top = 92
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 4
+        OnClick = btnCWDprAddClick
+      end
+      object btnCWDprojAdd: TButton
+        Left = 744
+        Top = 172
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 5
+        OnClick = btnCWDprojAddClick
+      end
+      object mmoCWDprojAdd: TMemo
+        Left = 144
+        Top = 208
+        Width = 577
+        Height = 65
+        Lines.Strings = (
+          '<DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>')
+        TabOrder = 6
+      end
+      object mmoCWDprojBefore: TMemo
+        Left = 144
+        Top = 144
+        Width = 577
+        Height = 57
+        Lines.Strings = (
+          '<DCCReference Include="Utils\CnWizDfmParser.pas"/>')
+        TabOrder = 7
+      end
+      object btnCWDprTemplate: TButton
+        Left = 16
+        Top = 96
+        Width = 75
+        Height = 22
+        Caption = '模板'
+        TabOrder = 8
+        Visible = False
+      end
+      object edtCWBpfBefore: TEdit
+        Left = 144
+        Top = 316
+        Width = 577
+        Height = 20
+        TabOrder = 9
+        Text = 'USEUNIT("Misc\CnWizAbout.pas");'
+      end
+      object edtCWBpfAdd: TEdit
+        Left = 144
+        Top = 348
+        Width = 577
+        Height = 20
+        TabOrder = 10
+        Text = 
+          'USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard' +
+          ', CnBookmarkForm);'
+      end
+      object btnCWBpfAdd: TButton
+        Left = 744
+        Top = 348
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 11
+        OnClick = btnCWBpfAddClick
+      end
+      object edtCWBprBefore: TEdit
+        Left = 144
+        Top = 404
+        Width = 577
+        Height = 20
+        TabOrder = 12
+        Text = 
+          '<FILE FILENAME="CodingToolset\CnEditorZoomFullScreen.pas" FORMNA' +
+          'ME="CnEditorZoomFullScreenForm" UNITNAME="Cneditorzoomfullscreen' +
+          '" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>'
+      end
+      object edtCWBprAdd: TEdit
+        Left = 144
+        Top = 436
+        Width = 577
+        Height = 20
+        TabOrder = 13
+        Text = 
+          '<FILE FILENAME="Utils\CnWizSearch.pas" FORMNAME="" UNITNAME="CnW' +
+          'izSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMA' +
+          'ND=""/>'
+      end
+      object btnCWBprAdd: TButton
+        Left = 744
+        Top = 436
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 14
+        OnClick = btnCWBprAddClick
+      end
+    end
+    object tsCVProject: TTabSheet
+      Caption = 'CnVcl 工程文件'
+      ImageIndex = 1
+      object lblCVRoot: TLabel
+        Left = 16
+        Top = 16
+        Width = 120
+        Height = 12
+        Caption = '组件包工程文件目录：'
+      end
+      object Bevel1: TBevel
+        Left = 16
+        Top = 48
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCVDpr: TLabel
+        Left = 16
+        Top = 72
+        Width = 90
+        Height = 12
+        Caption = '在所有dpk文件的'
+      end
+      object lblCVDprAdd: TLabel
+        Left = 744
+        Top = 72
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
+      object edtCVRootDir: TEdit
+        Left = 144
+        Top = 12
+        Width = 577
+        Height = 20
+        TabOrder = 0
+      end
+      object btnCVBrowse: TButton
+        Left = 744
+        Top = 12
+        Width = 75
+        Height = 22
+        Caption = '选择目录'
+        TabOrder = 1
+        OnClick = btnCVBrowseClick
+      end
+      object edtCVDprBefore: TEdit
+        Left = 144
+        Top = 68
+        Width = 577
+        Height = 20
+        TabOrder = 2
+        Text = 'CnNativeDecl in '#39'..\..\Source\Crypto\CnNativeDecl.pas'#39','
+      end
+      object edtCVDprAdd: TEdit
+        Left = 144
+        Top = 92
+        Width = 577
+        Height = 20
+        TabOrder = 3
+        Text = 'CnOTP in '#39'..\..\Source\Crypto\CnOTP.pas'#39','
+      end
+      object btnCVDprAdd: TButton
+        Left = 744
+        Top = 92
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 4
+        OnClick = btnCVDprAddClick
+      end
+    end
+    object tsCVSort: TTabSheet
+      Caption = 'CnVcl组件工程排序'
+      ImageIndex = 2
+      object lblCVSortRoot: TLabel
+        Left = 16
+        Top = 16
+        Width = 120
+        Height = 12
+        Caption = '组件包工程文件目录：'
+      end
+      object edtCVSortRootDir: TEdit
+        Left = 144
+        Top = 12
+        Width = 577
+        Height = 20
+        TabOrder = 0
+      end
+      object btnCVSortBrowse: TButton
+        Left = 744
+        Top = 12
+        Width = 75
+        Height = 22
+        Caption = '选择目录'
+        TabOrder = 1
+        OnClick = btnCVSortBrowseClick
+      end
+      object btnCVSortAll: TButton
+        Left = 144
+        Top = 44
+        Width = 129
+        Height = 22
+        Caption = '运行期 dpr 全部排序'
+        TabOrder = 2
+        OnClick = btnCVSortAllClick
+      end
+      object btnCVSortOne: TButton
+        Left = 512
+        Top = 44
+        Width = 209
+        Height = 22
+        Caption = 'dpr 单独排序'
+        TabOrder = 3
+        OnClick = btnCVSortOneClick
+      end
+      object btnCVSortAll1: TButton
+        Left = 296
+        Top = 44
+        Width = 129
+        Height = 22
+        Caption = '设计期 dpr 全部排序'
+        TabOrder = 4
+        OnClick = btnCVSortAll1Click
+      end
+    end
   end
-  object btnBrowse: TButton
-    Left = 744
-    Top = 12
-    Width = 75
-    Height = 22
-    Caption = '选择目录'
-    TabOrder = 1
-    OnClick = btnBrowseClick
-  end
-  object edtDprBefore: TEdit
-    Left = 144
-    Top = 68
-    Width = 577
-    Height = 20
-    TabOrder = 2
-    Text = 'CnWizDfmParser in '#39'Utils\CnWizDfmParser.pas'#39','
-  end
-  object edtDprAdd: TEdit
-    Left = 144
-    Top = 92
-    Width = 577
-    Height = 20
-    TabOrder = 3
-    Text = 'CnVclToFmxIntf in '#39'VclToFmx\CnVclToFmxIntf.pas'#39','
-  end
-  object btnDprAdd: TButton
-    Left = 744
-    Top = 92
-    Width = 75
-    Height = 22
-    Caption = '做！'
-    TabOrder = 4
-    OnClick = btnDprAddClick
-  end
-  object btnDprojAdd: TButton
-    Left = 744
-    Top = 172
-    Width = 75
-    Height = 22
-    Caption = '做！'
-    TabOrder = 5
-    OnClick = btnDprojAddClick
-  end
-  object mmoDprojAdd: TMemo
-    Left = 144
-    Top = 208
-    Width = 577
-    Height = 65
-    Lines.Strings = (
-      '<DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>')
-    TabOrder = 6
-  end
-  object mmoDprojBefore: TMemo
-    Left = 144
-    Top = 144
-    Width = 577
-    Height = 57
-    Lines.Strings = (
-      '<DCCReference Include="Utils\CnWizDfmParser.pas"/>')
-    TabOrder = 7
-  end
-  object btnDprTemplate: TButton
-    Left = 16
-    Top = 96
-    Width = 75
-    Height = 22
-    Caption = '模板'
-    TabOrder = 8
-    Visible = False
-  end
-  object edtBpfBefore: TEdit
-    Left = 144
-    Top = 316
-    Width = 577
-    Height = 20
-    TabOrder = 9
-    Text = 'USEUNIT("Misc\CnWizAbout.pas");'
-  end
-  object edtBpfAdd: TEdit
-    Left = 144
-    Top = 348
-    Width = 577
-    Height = 20
-    TabOrder = 10
-    Text = 
-      'USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard' +
-      ', CnBookmarkForm);'
-  end
-  object btnBpfAdd: TButton
-    Left = 744
-    Top = 348
-    Width = 75
-    Height = 22
-    Caption = '做！'
-    TabOrder = 11
-    OnClick = btnBpfAddClick
-  end
-  object edtBprBefore: TEdit
-    Left = 144
-    Top = 404
-    Width = 577
-    Height = 20
-    TabOrder = 12
-    Text = 
-      '<FILE FILENAME="CodingToolset\CnEditorZoomFullScreen.pas" FORMNA' +
-      'ME="CnEditorZoomFullScreenForm" UNITNAME="Cneditorzoomfullscreen' +
-      '" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>'
-  end
-  object edtBprAdd: TEdit
-    Left = 144
-    Top = 436
-    Width = 577
-    Height = 20
-    TabOrder = 13
-    Text = 
-      '<FILE FILENAME="Utils\CnWizSearch.pas" FORMNAME="" UNITNAME="CnW' +
-      'izSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMA' +
-      'ND=""/>'
-  end
-  object btnBprAdd: TButton
-    Left = 744
-    Top = 436
-    Width = 75
-    Height = 22
-    Caption = '做！'
-    TabOrder = 14
-    OnClick = btnBprAddClick
+  object dlgOpen1: TOpenDialog
+    Left = 756
+    Top = 71
   end
 end
