@@ -72,10 +72,20 @@ type
     lblCVSortRoot: TLabel;
     edtCVSortRootDir: TEdit;
     btnCVSortBrowse: TButton;
-    btnCVSortAll: TButton;
-    btnCVSortOne: TButton;
+    btnCVSortDprAll: TButton;
+    btnCVSortDprOne: TButton;
     dlgOpen1: TOpenDialog;
-    btnCVSortAll1: TButton;
+    btnCVSortDprAll1: TButton;
+    bvl21: TBevel;
+    lblCVDproj: TLabel;
+    mmoCVDprojBefore: TMemo;
+    mmoCVDprojAdd: TMemo;
+    btnCVDprojAdd: TButton;
+    lblCVDprojAdd: TLabel;
+    bvl5: TBevel;
+    btnCVSortDprojAll: TButton;
+    btnCVSortDprojAll1: TButton;
+    btnCVSortDprojOne: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnCWBrowseClick(Sender: TObject);
     procedure btnCWDprAddClick(Sender: TObject);
@@ -85,10 +95,14 @@ type
     procedure btnCWBprAddClick(Sender: TObject);
     procedure btnCVBrowseClick(Sender: TObject);
     procedure btnCVSortBrowseClick(Sender: TObject);
-    procedure btnCVSortOneClick(Sender: TObject);
-    procedure btnCVSortAllClick(Sender: TObject);
-    procedure btnCVSortAll1Click(Sender: TObject);
+    procedure btnCVSortDprOneClick(Sender: TObject);
+    procedure btnCVSortDprAllClick(Sender: TObject);
+    procedure btnCVSortDprAll1Click(Sender: TObject);
     procedure btnCVDprAddClick(Sender: TObject);
+    procedure btnCVSortDprojOneClick(Sender: TObject);
+    procedure btnCVSortDprojAllClick(Sender: TObject);
+    procedure btnCVSortDprojAll1Click(Sender: TObject);
+    procedure btnCVDprojAddClick(Sender: TObject);
   private
     FCount: Integer;
     FSingleBefore, FSingleAdd: string;
@@ -98,9 +112,12 @@ type
     procedure MultiLineFound(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   public
-    procedure SortFileFound(const FileName: string; const Info: TSearchRec;
+    procedure SortDprFileFound(const FileName: string; const Info: TSearchRec;
+      var Abort: Boolean);
+    procedure SortDprojFileFound(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
     procedure SortOneDpr(const Dpr: string);
+    procedure SortOneDproj(const Proj: string); // 不完整排序，只排部分
   end;
 
 var
@@ -123,6 +140,7 @@ implementation
 
 const
   FILE_COUNT = '处理文件数：';
+  FILE_OK = '文件已处理：';
 
 procedure TFormProjectEdit.FormCreate(Sender: TObject);
 var
@@ -339,12 +357,12 @@ begin
     edtCVRootDir.Text := S;
 end;
 
-procedure TFormProjectEdit.btnCVSortOneClick(Sender: TObject);
+procedure TFormProjectEdit.btnCVSortDprOneClick(Sender: TObject);
 begin
   if dlgOpen1.Execute then
   begin
     SortOneDpr(dlgOpen1.FileName);
-    ShowMessage('文件处理完毕：' + dlgOpen1.FileName);
+    ShowMessage(FILE_OK + dlgOpen1.FileName);
   end;
 end;
 
@@ -418,6 +436,7 @@ var
 begin
   L1 := nil;
   L2 := nil;
+
   try
     L1 := TStringList.Create;
     L1.LoadFromFile(Dpr);
@@ -450,32 +469,32 @@ begin
   end;
 end;
 
-procedure TFormProjectEdit.btnCVSortAllClick(Sender: TObject);
+procedure TFormProjectEdit.btnCVSortDprAllClick(Sender: TObject);
 begin
   if not DirectoryExists(edtCVSortRootDir.Text) then
     Exit;
 
   FCount := 0;
-  FindFile(edtCVSortRootDir.Text, 'CnPack*.dpk', SortFileFound, nil, True, False);
+  FindFile(edtCVSortRootDir.Text, 'CnPack*.dpk', SortDprFileFound, nil, True, False);
 
   if FCount > 0 then
     InfoDlg(FILE_COUNT + IntToStr(FCount));
 end;
 
-procedure TFormProjectEdit.SortFileFound(const FileName: string;
+procedure TFormProjectEdit.SortDprFileFound(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
   SortOneDpr(FileName);
   Inc(FCount);
 end;
 
-procedure TFormProjectEdit.btnCVSortAll1Click(Sender: TObject);
+procedure TFormProjectEdit.btnCVSortDprAll1Click(Sender: TObject);
 begin
   if not DirectoryExists(edtCVSortRootDir.Text) then
     Exit;
 
   FCount := 0;
-  FindFile(edtCVSortRootDir.Text, 'dclCnPack*.dpk', SortFileFound, nil, True, False);
+  FindFile(edtCVSortRootDir.Text, 'dclCnPack*.dpk', SortDprFileFound, nil, True, False);
 
   if FCount > 0 then
     InfoDlg(FILE_COUNT + IntToStr(FCount));
@@ -493,6 +512,114 @@ begin
   FSingleBefore := Trim(edtCVDprBefore.Text);
   FSingleAdd := Trim(edtCVDprAdd.Text);
   FindFile(edtCVRootDir.Text, '*.dpk', SingleLineFound, nil, True, False);
+
+  if FCount > 0 then
+    InfoDlg(FILE_COUNT + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnCVSortDprojOneClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+  begin
+    SortOneDproj(dlgOpen1.FileName);
+    ShowMessage(FILE_OK + dlgOpen1.FileName);
+  end;
+end;
+
+function DprojCompare(List: TStringList; Index1, Index2: Integer): Integer;
+begin
+  Result := CompareStr(UpperCase(Trim(List[Index1])), UpperCase(Trim(List[Index2])));
+end;
+
+procedure TFormProjectEdit.SortOneDproj(const Proj: string);
+var
+  I, F1, F2: Integer;
+  L1, L2: TStringList;
+begin
+  L1 := nil;
+  L2 := nil;
+
+  try
+    L1 := TStringList.Create;
+    L1.LoadFromFile(Proj);
+
+    F1 := -1;
+    F2 := -1;
+    for I := 0 to L1.Count - 1 do
+    begin
+      if (F1 < 0) and (Pos('<DCCReference Include="..\..\', Trim(L1[I])) = 1) then
+        F1 := I;
+      if (F1 > 0) and (F2 < 0) and StrEndWith(Trim(L1[I]), '">') then // 碰到个 Form，只处理以前的
+        F2 := I - 1;
+    end;
+
+    if (F1 > 1) and (F2 > F1) then
+    begin
+      L2 := TStringList.Create;
+      for I := F1 to F2 do
+        L2.Add(L1[I]);
+
+      L2.CustomSort(DprojCompare);
+      for I := F1 to F2 do
+        L1[I] := L2[I - F1];
+
+      L1.SaveToFile(Proj);
+    end;
+  finally
+    L2.Free;
+    L1.Free;
+  end;
+end;
+
+procedure TFormProjectEdit.SortDprojFileFound(const FileName: string;
+  const Info: TSearchRec; var Abort: Boolean);
+begin
+  SortOneDproj(FileName);
+  Inc(FCount);
+end;
+
+procedure TFormProjectEdit.btnCVSortDprojAllClick(Sender: TObject);
+begin
+  if not DirectoryExists(edtCVSortRootDir.Text) then
+    Exit;
+
+  FCount := 0;
+  FindFile(edtCVSortRootDir.Text, 'CnPack*.*proj', SortDprojFileFound, nil, True, False);
+
+  if FCount > 0 then
+    InfoDlg(FILE_COUNT + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnCVSortDprojAll1Click(Sender: TObject);
+begin
+  if not DirectoryExists(edtCVSortRootDir.Text) then
+    Exit;
+
+  FCount := 0;
+  FindFile(edtCVSortRootDir.Text, 'dclCnPack*.*proj', SortDprojFileFound, nil, True, False);
+
+  if FCount > 0 then
+    InfoDlg(FILE_COUNT + IntToStr(FCount));
+end;
+
+procedure TFormProjectEdit.btnCVDprojAddClick(Sender: TObject);
+begin
+  if not DirectoryExists(edtCVRootDir.Text) then
+    Exit;
+
+  if (Trim(mmoCVDprojBefore.Lines.Text) = '') or (Trim(mmoCVDprojAdd.Lines.Text) = '') then
+    Exit;
+
+  FCount := 0;
+  FBefores.Assign(mmoCVDprojBefore.Lines);
+  FAdds.Assign(mmoCVDprojAdd.Lines);
+
+  if Trim(FBefores[FBefores.Count - 1]) = '' then
+    FBefores.Delete(FBefores.Count - 1);
+  if Trim(FAdds[FAdds.Count - 1]) = '' then
+    FAdds.Delete(FAdds.Count - 1);
+
+  FindFile(edtCVRootDir.Text, '*.*proj', MultiLineFound, nil, True, False);
 
   if FCount > 0 then
     InfoDlg(FILE_COUNT + IntToStr(FCount));

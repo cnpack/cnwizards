@@ -285,6 +285,27 @@ object FormProjectEdit: TFormProjectEdit
         Height = 12
         Caption = '下面增加'
       end
+      object bvl21: TBevel
+        Left = 16
+        Top = 128
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
+      end
+      object lblCVDproj: TLabel
+        Left = 16
+        Top = 148
+        Width = 126
+        Height = 12
+        Caption = '在所有bds/dproj文件的'
+      end
+      object lblCVDprojAdd: TLabel
+        Left = 744
+        Top = 148
+        Width = 48
+        Height = 12
+        Caption = '下面增加'
+      end
       object edtCVRootDir: TEdit
         Left = 144
         Top = 12
@@ -326,6 +347,33 @@ object FormProjectEdit: TFormProjectEdit
         TabOrder = 4
         OnClick = btnCVDprAddClick
       end
+      object mmoCVDprojBefore: TMemo
+        Left = 144
+        Top = 144
+        Width = 577
+        Height = 57
+        Lines.Strings = (
+          '<DCCReference Include="..\..\Source\Crypto\CnNativeDecl.pas"/>')
+        TabOrder = 5
+      end
+      object mmoCVDprojAdd: TMemo
+        Left = 144
+        Top = 208
+        Width = 577
+        Height = 65
+        Lines.Strings = (
+          '<DCCReference Include="..\..\Source\Crypto\CnOTP.pas"/>')
+        TabOrder = 6
+      end
+      object btnCVDprojAdd: TButton
+        Left = 744
+        Top = 172
+        Width = 75
+        Height = 22
+        Caption = '做！'
+        TabOrder = 7
+        OnClick = btnCVDprojAddClick
+      end
     end
     object tsCVSort: TTabSheet
       Caption = 'CnVcl组件工程排序'
@@ -336,6 +384,13 @@ object FormProjectEdit: TFormProjectEdit
         Width = 120
         Height = 12
         Caption = '组件包工程文件目录：'
+      end
+      object bvl5: TBevel
+        Left = 16
+        Top = 112
+        Width = 801
+        Height = 17
+        Shape = bsTopLine
       end
       object edtCVSortRootDir: TEdit
         Left = 144
@@ -353,32 +408,59 @@ object FormProjectEdit: TFormProjectEdit
         TabOrder = 1
         OnClick = btnCVSortBrowseClick
       end
-      object btnCVSortAll: TButton
+      object btnCVSortDprAll: TButton
         Left = 144
         Top = 44
         Width = 129
         Height = 22
         Caption = '运行期 dpr 全部排序'
         TabOrder = 2
-        OnClick = btnCVSortAllClick
+        OnClick = btnCVSortDprAllClick
       end
-      object btnCVSortOne: TButton
+      object btnCVSortDprOne: TButton
         Left = 512
         Top = 44
         Width = 209
         Height = 22
         Caption = 'dpr 单独排序'
         TabOrder = 3
-        OnClick = btnCVSortOneClick
+        OnClick = btnCVSortDprOneClick
       end
-      object btnCVSortAll1: TButton
+      object btnCVSortDprAll1: TButton
         Left = 296
         Top = 44
         Width = 129
         Height = 22
         Caption = '设计期 dpr 全部排序'
         TabOrder = 4
-        OnClick = btnCVSortAll1Click
+        OnClick = btnCVSortDprAll1Click
+      end
+      object btnCVSortDprojAll: TButton
+        Left = 144
+        Top = 76
+        Width = 129
+        Height = 22
+        Caption = '运行期 proj 全部排序'
+        TabOrder = 5
+        OnClick = btnCVSortDprojAllClick
+      end
+      object btnCVSortDprojAll1: TButton
+        Left = 296
+        Top = 76
+        Width = 129
+        Height = 22
+        Caption = '设计期 proj 全部排序'
+        TabOrder = 6
+        OnClick = btnCVSortDprojAll1Click
+      end
+      object btnCVSortDprojOne: TButton
+        Left = 512
+        Top = 76
+        Width = 209
+        Height = 22
+        Caption = 'proj 单独排序'
+        TabOrder = 7
+        OnClick = btnCVSortDprojOneClick
       end
     end
   end
