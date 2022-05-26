@@ -118,15 +118,6 @@ CnVclToFmx
 类型：专家包工具
 功能：将 VCL 窗体转换为 FMX 的实现封装
 版本：V1.0
-使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
-时间：2022
-
-CnVclToFmx
------------
-类型：专家包工具
-功能：将 VCL 窗体转换为 FMX 的实现封装
-版本：V1.0
 使用：由专家包加载使用。
 作者：刘啸（LiuXiao） liuxiao@cnpack.org
 时间：2022
