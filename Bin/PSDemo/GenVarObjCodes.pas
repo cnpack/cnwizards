@@ -40,18 +40,23 @@ begin
         Idx := Pos(':', S);
         if Idx > 1 then
         begin
-          AType := Copy(S, Idx + 1, MaxInt);
+          AType := Trim(Copy(S, Idx + 1, MaxInt));
           S := Copy(S, 1, Idx - 1);
 
           if Length(AType) > 1 then
           begin
             if AType[Length(AType)] = ';' then
               Delete(AType, Length(AType), 1); // Get Type Name
-          end;
+          end
+          else
+            Continue;
 
-          if AType = 'TStrings' then // 换成可实例化的
+          if (AType[1] <> 'T') and (AType[1] <> 't') then // 不是 T 开头的不要
+            Continue;
+
+          if LowerCase(AType) = 'tstrings' then // 换成可实例化的
             AType := 'TStringLis'
-          else if AType = 'TStream' then
+          else if LowerCase(AType) = 'tstream' then
             AType := 'TMemoryStream';
 
           // 以逗号劈开 S
