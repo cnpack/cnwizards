@@ -1921,8 +1921,8 @@ initialization
   CnDebugger.LogMsg('CnLoadIconProc To get Active Theme');
   CnDebugger.LogMsg('CnLoadIconProc get Active Theme: ' + CnOtaGetActiveThemeName);
 {$ENDIF}
-  if CnOtaGetActiveThemeName = 'Dark' then // 暗黑主题下注册图标处理事件，不支持动态切换主题
-    CnLoadIconProc := CnAfterLoadIcon;
+  // if CnOtaGetActiveThemeName = 'Dark' then // 暗黑主题下注册图标处理事件，不支持动态切换主题
+  //  CnLoadIconProc := CnAfterLoadIcon;      // 效果不佳，暂时禁用
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
