@@ -1549,9 +1549,9 @@ var
       Result := True;
       View.Paint;
     end
-    else // TODO: 找最后一个不是注释的地方
+    else // 找最后一个不是注释且不是空白的地方
     begin
-      while (Element in [atComment]) and (EditPos.Col > 0) do
+      while (Element in [atComment, atWhiteSpace]) and (EditPos.Col > 0) do
       begin
         Dec(EditPos.Col);
         EditControlWrapper.GetAttributeAtPos(EditControl, EditPos, False, Element, LineFlag);
@@ -1560,6 +1560,7 @@ var
       if EditPos.Col > 0 then
       begin
         // 找到了最后一个不是注释的地方
+        Inc(EditPos.Col);
 {$IFDEF UNICODE}
         // 从 UTF8 的 Pos，转换回 Ansi 的
         EditPos.Col := Length(CnUtf8ToAnsi({$IFDEF UNICODE}AnsiString{$ENDIF}(Copy(Text, 1, EditPos.Col))));
