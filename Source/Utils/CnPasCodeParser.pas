@@ -1634,6 +1634,10 @@ begin
       if (Lex.LastNoSpace = tkPoint) and (Lex.TokenID in [tkTo, tkIn, tkOf, tkOn, tkIs, tkDo]) then
         MyTokenID := tkIdentifier;
 
+      // 小修补 (. 和 .) 会被语法当成左右中括号，后者对弹出有影响
+      if (Lex.TokenID = tkSquareClose) and (Lex.Token = '.)') then
+        MyTokenID := tkPoint;
+
       case MyTokenID of
         tkUnit:
           begin
