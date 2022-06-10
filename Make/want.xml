@@ -1262,7 +1262,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnDebugViewer/CnDebugViewer64.rc" />
     <brcc file="${tools}/CnDebugViewer/CnDebugViewer64.rc" output="${tools}/CnDebugViewer/CnDebugViewer64.res" />
-    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer64.dpr" exename="${exe.D104S_64}" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer64.dpr" exename="${exe.D104S_64}" usecfg="true" />
     <delete dir="${tools}/CnDebugViewer">
        <include name="CnDebugViewer64.res" />
        <include name="CnDebugViewer64.rc" />
