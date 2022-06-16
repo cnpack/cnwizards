@@ -144,6 +144,7 @@ type
     procedure InitTreeExecute;
     procedure FromIdentExecute;
   protected
+    function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
   public
@@ -153,6 +154,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetState: TWizardState; override;
+    procedure Config; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -1445,6 +1447,17 @@ begin
   Ini.WriteBool('', csSaveAndClose, FSaveAndClose);
   WizOptions.SaveUserFile(FIgnoreList, csIgnoreList);
   WizOptions.SaveUserFile(FCleanList, csCleanList);
+end;
+
+function TCnUsesToolsWizard.GetHasConfig: Boolean;
+begin
+  Result := True;
+end;
+
+procedure TCnUsesToolsWizard.Config;
+begin
+  if ShowShortCutDialog(SCnUsesToolsName) then
+    DoSaveSettings;
 end;
 
 function TCnUsesToolsWizard.GetCaption: string;
