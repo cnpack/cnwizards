@@ -3084,6 +3084,10 @@
   {$DEFINE IDE_SWITCH_BUG}              // Sydney 10.4.2 存在打开文件时莫名其妙切换到后台的 Bug
 {$ENDIF}
 
+{$IFDEF DELPHI103_RIO_UP}
+  {$DEFINE SUPPORT_MACOS64}             // Rio 10.3.2 或以上支持 64 位 MacOS
+{$ENDIF}
+
 {$IFDEF DELPHI102_TOKYO_UP}
   {$DEFINE SUPPORT_LINUX64}             // Tokyo 10.2 或以上支持 Linux 64 位 Server
   {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 或以上支持 IDE 主题切换
