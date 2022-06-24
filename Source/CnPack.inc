@@ -3119,7 +3119,8 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
-  {$DEFINE TSTRINGS_HAS_WRITEBOM} // XE TStrings has WriteBOM property.
+  {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property.
+  {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE ToolsAPI has Debugger Visualizer Interfaces.
 {$ENDIF}
 
 {$IFDEF BDS2012_UP}               // 2012 = XE2
