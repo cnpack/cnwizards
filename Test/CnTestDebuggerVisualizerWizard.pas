@@ -57,6 +57,8 @@ type
   protected
     function GetHasConfig: Boolean; override;
   public
+    destructor Destroy; override;
+
     function GetState: TWizardState; override;
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -68,8 +70,26 @@ type
     procedure Execute; override;
   end;
 
-  TCnTestDebuggerVisualizerValueReplacer = class(TInterfacedObject, IOTADebuggerVisualizerValueReplacer)
+  TCnTestDebuggerVisualizerValueReplacer = class(TInterfacedObject,
+    IOTAThreadNotifier, IOTADebuggerVisualizerValueReplacer)
+  private
+    FRes: array[0..1023] of Char;
+    FNotifierIndex: Integer;
+    FEvalComplete: Boolean;
+    FEvalSuccess: Boolean;
+    FCanModify: Boolean;
+    FEvalResult: string;
   public
+    procedure AfterSave;
+    procedure BeforeSave;
+    procedure Destroyed;
+    procedure Modified;
+
+    procedure ThreadNotify(Reason: TOTANotifyReason);
+    procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
+     procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
+
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
       var AllDescendants: Boolean);
@@ -85,6 +105,13 @@ implementation
 uses
   CnDebug;
 
+type
+  TCnVisualClasses = (vcBigNumber, vcBigNumberPolynomial, vcEccPoint, vcEcc3Point);
+
+const
+  SCnVisualClasses: array[Low(TCnVisualClasses)..High(TCnVisualClasses)] of string =
+    ('TCnBigNumber', 'TCnBigNumberPolynomial', 'TCnEccPoint', 'TCnEcc3Point');
+
 //==============================================================================
 // 测试 DebuggerVisualizer 的菜单专家
 //==============================================================================
@@ -94,6 +121,21 @@ uses
 procedure TCnTestDebuggerVisualizerWizard.Config;
 begin
   ShowMessage('No option for this test case.');
+end;
+
+destructor TCnTestDebuggerVisualizerWizard.Destroy;
+var
+  ID: IOTADebuggerServices;
+begin
+  if FRegistered and (FVisualizer <> nil) then
+  begin
+    if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+      Exit;
+    ID.UnregisterDebugVisualizer(FVisualizer);
+    FVisualizer := nil;
+  end;
+
+  inherited;
 end;
 
 procedure TCnTestDebuggerVisualizerWizard.Execute;
@@ -165,29 +207,121 @@ end;
 
 { TCnTestDebuggerVisualizerValueReplacer }
 
+procedure TCnTestDebuggerVisualizerValueReplacer.AfterSave;
+begin
+
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.BeforeSave;
+begin
+
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.Destroyed;
+begin
+
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.EvaluteComplete(const ExprStr,
+  ResultStr: string; CanModify: Boolean; ResultAddress, ResultSize: LongWord;
+  ReturnCode: Integer);
+begin
+  // Defer 的结果 Evaluate 完毕，如果 ReturnCode 不等于 0，ResultStr 里可能是出错信息
+  CnDebugger.LogFmt('DebuggerVisualizerValueReplacer EvaluteComplete for %s: %d, %s',
+    [ExprStr, ReturnCode, ResultStr]);
+  FEvalSuccess := ReturnCode = 0;
+
+  if FEvalSuccess then
+  begin
+    FEvalResult := ResultStr;
+  end
+  else
+    FEvalResult := '';
+
+  FEvalComplete := True;
+end;
+
 function TCnTestDebuggerVisualizerValueReplacer.GetReplacementValue(
   const Expression, TypeName, EvalResult: string): string;
+var
+  ID: IOTADebuggerServices;
+  CP: IOTAProcess;
+  CT: IOTAThread;
+  NewExpr: string;
+  EvalRes: TOTAEvaluateResult;
+  ResultAddr: TOTAAddress;
+  ResultSize, ResultVal: Cardinal;
 begin
   CnDebugger.LogFmt('DebuggerVisualizerValueReplacer get %s: %s, Display %s',
     [Expression, TypeName, EvalResult]);
-  Result := EvalResult + ' - From CnPack';
+  Result := EvalResult;
+
+  if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+    Exit;
+  CP := ID.CurrentProcess;
+  if CP = nil then
+    Exit;
+
+  CT := CP.CurrentThread;
+  if CT = nil then
+    Exit;
+
+  if TypeName = SCnVisualClasses[vcBigNumber] then
+  begin
+    NewExpr := Expression + '.ToDec';
+  end
+  else if TypeName = SCnVisualClasses[vcBigNumberPolynomial] then
+  begin
+    NewExpr := Expression + '.ToString';
+  end
+  else if TypeName = SCnVisualClasses[vcEccPoint] then
+  begin
+    NewExpr := Expression + '.ToString';
+  end
+  else if TypeName = SCnVisualClasses[vcEcc3Point] then
+  begin
+    NewExpr := Expression + '.ToString';
+  end;
+
+  EvalRes := CT.Evaluate(NewExpr, @FRes[0], SizeOf(FRes), FCanModify, True,
+    '', ResultAddr, ResultSize, ResultVal);
+
+  case EvalRes of
+    erError: CnDebugger.LogMsg('Evaluate Error');
+    erBusy: CnDebugger.LogMsg('Evaluate Busy');
+    erOK: Result := EvalResult + ': ' + FRes;
+    erDeferred:
+      begin
+        CnDebugger.LogMsg('Evaluate Deferred. Wait for Events.');
+        FEvalComplete := False;
+        FEvalSuccess := False;
+        FEvalResult := '';
+
+        FNotifierIndex := CT.AddNotifier(Self);
+        while not FEvalComplete do
+          ID.ProcessDebugEvents;
+        CT.RemoveNotifier(FNotifierIndex);
+
+        if FEvalSuccess then
+        begin
+          CnDebugger.LogMsg('Evaluate Deferred Success.');
+          Result := EvalResult + ': ' + FEvalResult;
+        end;
+      end;
+  end;
+
 end;
 
 procedure TCnTestDebuggerVisualizerValueReplacer.GetSupportedType(
   Index: Integer; var TypeName: string; var AllDescendants: Boolean);
 begin
   AllDescendants := False;
-  case Index of
-    0: TypeName := 'TCnBigNumber';
-    1: TypeName := 'TCnBigNumberPolynomial';
-    2: TypeName := 'TCnEccPoint';
-    3: TypeName := 'TCnEcc3Point';
-  end;
+  TypeName := SCnVisualClasses[TCnVisualClasses(Index)];
 end;
 
 function TCnTestDebuggerVisualizerValueReplacer.GetSupportedTypeCount: Integer;
 begin
-  Result := 4;
+  Result := 1 + Ord(High(TCnVisualClasses)) - Ord(Low(TCnVisualClasses));
 end;
 
 function TCnTestDebuggerVisualizerValueReplacer.GetVisualizerDescription: string;
@@ -203,6 +337,23 @@ end;
 function TCnTestDebuggerVisualizerValueReplacer.GetVisualizerName: string;
 begin
   Result := 'CnPack CnVcl Visualizer'
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.Modified;
+begin
+
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.ModifyComplete(const ExprStr,
+  ResultStr: string; ReturnCode: Integer);
+begin
+
+end;
+
+procedure TCnTestDebuggerVisualizerValueReplacer.ThreadNotify(
+  Reason: TOTANotifyReason);
+begin
+
 end;
 
 initialization
