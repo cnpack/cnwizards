@@ -102,15 +102,19 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
 uses
   CnDebug;
+{$ENDIF}
 
 type
-  TCnVisualClasses = (vcBigNumber, vcBigNumberPolynomial, vcEccPoint, vcEcc3Point);
+  TCnVisualClasses = (vcBigNumber, vcBigNumberPolynomial, vcBigNumberRationalPolynomial,
+    vcEccPoint, vcEcc3Point);
 
 const
   SCnVisualClasses: array[Low(TCnVisualClasses)..High(TCnVisualClasses)] of string =
-    ('TCnBigNumber', 'TCnBigNumberPolynomial', 'TCnEccPoint', 'TCnEcc3Point');
+    ('TCnBigNumber', 'TCnBigNumberPolynomial', 'TCnBigNumberRationalPolynomial',
+     'TCnEccPoint', 'TCnEcc3Point');
 
 //==============================================================================
 // 测试 DebuggerVisualizer 的菜单专家
@@ -227,13 +231,16 @@ procedure TCnTestDebuggerVisualizerValueReplacer.EvaluteComplete(const ExprStr,
   ReturnCode: Integer);
 begin
   // Defer 的结果 Evaluate 完毕，如果 ReturnCode 不等于 0，ResultStr 里可能是出错信息
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('DebuggerVisualizerValueReplacer EvaluteComplete for %s: %d, %s',
     [ExprStr, ReturnCode, ResultStr]);
+{$ENDIF}
+
   FEvalSuccess := ReturnCode = 0;
 
   if FEvalSuccess then
   begin
-    FEvalResult := ResultStr;
+    FEvalResult := AnsiDequotedStr(ResultStr, '''');
   end
   else
     FEvalResult := '';
@@ -252,8 +259,10 @@ var
   ResultAddr: TOTAAddress;
   ResultSize, ResultVal: Cardinal;
 begin
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('DebuggerVisualizerValueReplacer get %s: %s, Display %s',
     [Expression, TypeName, EvalResult]);
+{$ENDIF}
   Result := EvalResult;
 
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
@@ -274,6 +283,10 @@ begin
   begin
     NewExpr := Expression + '.ToString';
   end
+  else if TypeName = SCnVisualClasses[vcBigNumberRationalPolynomial] then
+  begin
+    NewExpr := Expression + '.ToString';
+  end
   else if TypeName = SCnVisualClasses[vcEccPoint] then
   begin
     NewExpr := Expression + '.ToString';
@@ -287,12 +300,16 @@ begin
     '', ResultAddr, ResultSize, ResultVal);
 
   case EvalRes of
+{$IFDEF DEBUG}
     erError: CnDebugger.LogMsg('Evaluate Error');
     erBusy: CnDebugger.LogMsg('Evaluate Busy');
+{$ENDIF}
     erOK: Result := EvalResult + ': ' + FRes;
     erDeferred:
       begin
+{$IFDEF DEBUG}
         CnDebugger.LogMsg('Evaluate Deferred. Wait for Events.');
+{$ENDIF}
         FEvalComplete := False;
         FEvalSuccess := False;
         FEvalResult := '';
@@ -304,7 +321,9 @@ begin
 
         if FEvalSuccess then
         begin
+{$IFDEF DEBUG}
           CnDebugger.LogMsg('Evaluate Deferred Success.');
+{$ENDIF}
           Result := EvalResult + ': ' + FEvalResult;
         end;
       end;
