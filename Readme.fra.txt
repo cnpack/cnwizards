@@ -5,9 +5,9 @@
 **********************************************************************
 
                          CnPack IDE Wizards
-                           Version 1.2.3
+                           Version 1.2.4
                        =======================
-                         CnPack Team 2022.06
+                         CnPack Team 2022.07
 
 
 =====================================================
@@ -24,7 +24,8 @@ XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
 10.3 Rio, 10.4 Sydney, 11 Alexandria.
 
     La version officielle de CnWizards comprend les langues suivantes:
-Chinois simplifié, chinois traditionnel, anglais, russe, allemand et Français.
+Chinois simplifié, chinois traditionnel, anglais, russe, allemand, Français
+et portugais.
 
 =====================================================
 2. Déclaration de copyright du logiciel
