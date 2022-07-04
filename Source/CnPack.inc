@@ -3094,6 +3094,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE5_UP}
+  {$DEFINE SUPPORT_MOBILE}              // XE5 开始支持移动开发
   {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
 {$ENDIF}
 
