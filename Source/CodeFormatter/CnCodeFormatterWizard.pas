@@ -762,7 +762,7 @@ var
   Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
   StartRec, EndRec: TOTACharPos;
-  EP: TOTAEditPos;
+  EP, ErrPos: TOTAEditPos;
   ErrLine: string;
   BpBmLineMarks: array of DWORD;
   OutLineMarks: PDWORD;
@@ -982,7 +982,9 @@ begin
           ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
             SourcePos, CurrentToken);
           Screen.Cursor := crDefault;
-
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Format Error at Line %d, Col %d', [SourceLine, SourceCol]);
+{$ENDIF}
           ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
           CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
             SourceLine), nil, False);
@@ -1069,7 +1071,7 @@ begin
               View);
 
 {$IFDEF DEBUG}
-            CnDebugger.LogRawString('Format Selection To Process: ' + Src);
+//          CnDebugger.LogRawString('Format Selection To Process: ' + Src);
 {$ENDIF}
             // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
 {$IFDEF UNICODE}
@@ -1135,10 +1137,16 @@ begin
               ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
                 SourcePos, CurrentToken);
               Screen.Cursor := crDefault;
-
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Format Error at Line %d, Col %d', [SourceLine, SourceCol]);
+{$ENDIF}
               ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
-              CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
-                SourceLine));
+              ErrPos := OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine);
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Format Error Converted EditPos is Line %d, Col %d', [ErrPos.Line, ErrPos.Col]);
+{$ENDIF}
+
+              CnOtaGotoEditPos(ErrPos);
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
                 ConvertToVisibleCol(ErrLine, SourceCol),
                 GetErrorStr(ErrCode), CurrentToken]));

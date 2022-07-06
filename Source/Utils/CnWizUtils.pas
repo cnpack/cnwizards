@@ -1030,7 +1030,8 @@ procedure CnOtaGotoEditPos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil;
   Middle: Boolean = True);
 {* 移动光标到指定位置，BDS 以上的列使用 Utf8 的列值。如果 EditView 为空使用当前值。
   Middle 为 True 时表示垂直方向上滚动至居中，但似乎有问题
-  False 表示仅滚动到最近可见，如本来可见就不滚动}
+  False 表示仅滚动到最近可见，如本来可见就不滚动
+  另外高版本 Delphi 如 10.x 以上，有选择区时可能会造成跳转与绘制偏差}
 
 function CnOtaGetCharPosFromPos(Position: LongInt; EditView: IOTAEditView): TOTACharPos;
 {* 转换一个线性位置到 TOTACharPos，因为在 D5/D6 下 IOTAEditView.PosToCharPos
@@ -7549,7 +7550,7 @@ var
 begin
   if not Assigned(EditView) then
     EditView := CnOtaGetTopMostEditView;
-//  Assert(Assigned(EditView));
+
   if EditView = nil then
     Exit;
 
@@ -7557,12 +7558,17 @@ begin
     EditPos.Line := 1;
 
   TopRow.Col := 1;
+  TopRow.Line := EditPos.Line;
+
   if Middle then
   begin
     TopRow.Line := TopRow.Line - (EditView.ViewSize.cy div 2) + 1;
     if TopRow.Line < 1 then
       TopRow.Line := 1;
     EditView.TopPos := TopRow;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnOtaGotoEditPos Set Middle TopPos Line %d Col %d', [TopRow.Line, TopRow.Col]);
+{$ENDIF}
   end
   else
   begin
@@ -7576,6 +7582,9 @@ begin
       TopRow.Line := EditPos.Line - EditView.ViewSize.cy;
       EditView.TopPos := TopRow;
     end;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnOtaGotoEditPos Set Non-Middle TopPos Line %d Col %d', [TopRow.Line, TopRow.Col]);
+{$ENDIF}
   end;
 
   EditView.CursorPos := EditPos;
