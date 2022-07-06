@@ -1817,26 +1817,26 @@ begin
           end;
         tkColon:
           begin
-            if Result.PosKind = pkVar then
-              Result.PosKind := pkVarType
-            else if Result.PosKind = pkConst then
-              Result.PosKind := pkConstTypeValue;
+            if PosInfo.PosKind = pkVar then
+              PosInfo.PosKind := pkVarType
+            else if PosInfo.PosKind = pkConst then
+              PosInfo.PosKind := pkConstTypeValue;
           end;
         tkEqual:
           begin
-            if Result.PosKind = pkConst then
-              Result.PosKind := pkConstTypeValue
-            else if Result.PosKind = pkType then
-              Result.PosKind := pkTypeDecl;
+            if PosInfo.PosKind = pkConst then
+              PosInfo.PosKind := pkConstTypeValue
+            else if PosInfo.PosKind = pkType then
+              PosInfo.PosKind := pkTypeDecl;
           end;
         tkSemiColon:
           begin
-            if Result.PosKind = pkVarType then
-              Result.PosKind := pkVar
-            else if Result.PosKind = pkConstTypeValue then
-              Result.PosKind := pkConst
-            else if Result.PosKind = pkTypeDecl then
-              Result.PosKind := pkType;
+            if PosInfo.PosKind = pkVarType then
+              PosInfo.PosKind := pkVar
+            else if PosInfo.PosKind = pkConstTypeValue then
+              PosInfo.PosKind := pkConst
+            else if PosInfo.PosKind = pkTypeDecl then
+              PosInfo.PosKind := pkType;
           end;
       else
         if PosInfo.PosKind in [pkCompDirect, pkComment, pkString, pkField,
