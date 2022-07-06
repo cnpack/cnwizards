@@ -676,7 +676,7 @@ var
 
     CanExit := CParser.RunPosition = OldPosition;
     // 当 Next 再也前进不了的时候，就是该撤了
-    // 这样做的原因是，CParser 在结尾时，有时候不会进行到ctknull，而一直打转
+    // 这样做的原因是，CParser 在结尾时，有时候不会进行到 ctknull，而一直打转
   end;
 
 begin
@@ -705,7 +705,7 @@ begin
     if FullSource then
     begin
       Result.AreaKind := akHead; // 未使用
-      Result.PosKind := pkField; // 常规空白区，以pkField
+      Result.PosKind := pkField; // 常规空白区，以 pkField 为准
     end
     else
     begin
@@ -755,7 +755,7 @@ begin
           end;
         ctkUnknown:
           begin
-            // #后的编译指令未完成时
+            // # 后的编译指令未完成时
             if (Length(CParser.RunToken) >= 1 ) and (CParser.RunToken[1] = '#') then
             begin
               Result.PosKind := pkCompDirect;

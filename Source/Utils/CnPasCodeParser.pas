@@ -258,10 +258,13 @@ type
     pkImplUses,        // Pascal implementation 的 uses 内部
     pkClass,           // Pascal class 声明内部
     pkInterface,       // Pascal interface 声明内部
-    pkType,            // Pascal type 定义区
-    pkConst,           // Pascal const 定义区
+    pkType,            // Pascal type 定义区等号前的部分
+    pkTypeDecl,        // Pascal type 定义区等号后的部分
+    pkConst,           // Pascal const 定义区，冒号或 = 前的部分
+    pkConstTypeValue,  // Pascal const 定义区，冒号或 = 后的部分
     pkResourceString,  // Pascal resourcestring 定义区
-    pkVar,             // Pascal var 定义区
+    pkVar,             // Pascal var 定义区，冒号前的部分
+    pkVarType,         // Pascal var 定义区，冒号后的部分
     pkCompDirect,      // 编译指令内部{$...}，C/C++ 则是指 #include 等内部
     pkString,          // 字符串内部，Pascal 和 C/C++ 都有效
     pkField,           // 标识符. 后面的域内部，属性、方法、事件、记录项等，Pascal 和 C/C++ 都有效
@@ -1663,7 +1666,7 @@ begin
               Result.PosKind := pkInterface;
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                Result.PosKind := pkType
+                Result.PosKind := pkTypeDecl
               else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
               begin
                 while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
@@ -1673,7 +1676,7 @@ begin
                 begin
                   DoNext(True);
                   if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                    Result.PosKind := pkType;
+                    Result.PosKind := pkTypeDecl;
                 end;
               end;
               if Result.PosKind = pkInterface then
@@ -1763,7 +1766,7 @@ begin
               Result.PosKind := pkClass;
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                Result.PosKind := pkType
+                Result.PosKind := pkTypeDecl
               else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
               begin
                 while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
@@ -1773,7 +1776,7 @@ begin
                 begin
                   DoNext(True);
                   if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                    Result.PosKind := pkType
+                    Result.PosKind := pkTypeDecl
                   else
                   begin
                     InClass := True;
@@ -1860,6 +1863,29 @@ begin
                 Result.PosKind := pkFlat;
               end;
             end;
+          end;
+        tkColon:
+          begin
+            if Result.PosKind = pkVar then
+              Result.PosKind := pkVarType
+            else if Result.PosKind = pkConst then
+              Result.PosKind := pkConstTypeValue;
+          end;
+        tkEqual:
+          begin
+            if Result.PosKind = pkConst then
+              Result.PosKind := pkConstTypeValue
+            else if Result.PosKind = pkType then
+              Result.PosKind := pkTypeDecl;
+          end;
+        tkSemiColon:
+          begin
+            if Result.PosKind = pkVarType then
+              Result.PosKind := pkVar
+            else if Result.PosKind = pkConstTypeValue then
+              Result.PosKind := pkConst
+            else if Result.PosKind = pkTypeDecl then
+              Result.PosKind := pkType;
           end;
       else
         if Result.PosKind in [pkCompDirect, pkComment, pkString, pkField,

@@ -519,10 +519,13 @@ const
     csUnitSymbolKind,          // implementation 的 uses 内部
     csDeclareSymbolKind,       // class 声明内部
     csDeclareSymbolKind,       // interface 声明内部
-    csDefineSymbolKind,        // type 定义区
-    csDefineSymbolKind,        // const 定义区
+    [],                        // type 定义区等号前部分
+    csDefineSymbolKind,        // type 定义区等号后部分
+    [],                        // const 定义区冒号等号前部分
+    csDefineSymbolKind,        // const 定义区冒号等号后部分
     csDefineSymbolKind,        // resourcestring 定义区
-    csDefineSymbolKind,        // var 定义区
+    [],                        // var 定义区冒号前部分
+    csDefineSymbolKind,        // var 定义区冒号后部分
     csCompDirectSymbolKind,    // 编译指令内部
     csNoneSymbolKind,          // 字符串内部
     csFieldSymbolKind,         // 标识符. 后面的域内部，属性、方法、事件、记录项等，C/C++源文件大部分都在此
@@ -543,8 +546,11 @@ const
     csDeclareSymbolKind,       // class 声明内部
     csDeclareSymbolKind,       // interface 声明内部
     csDefineSymbolKind,        // type 定义区
+    csDefineSymbolKind,        // type 定义区
+    csDefineSymbolKind,        // const 定义区
     csDefineSymbolKind,        // const 定义区
     csDefineSymbolKind,        // resourcestring 定义区
+    csDefineSymbolKind,        // var 定义区
     csDefineSymbolKind,        // var 定义区
     csCompDirectSymbolKind,    // 编译指令内部
     csNoneSymbolKind,          // 字符串内部

@@ -1617,7 +1617,7 @@ begin
               PosInfo.PosKind := pkInterface;
               DoNext(True);
               if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
-                PosInfo.PosKind := pkType
+                PosInfo.PosKind := pkTypeDecl
               else if LexStillBeforeCursor and (Lex.TokenID = tkRoundOpen) then
               begin
                 while LexStillBeforeCursor and not (Lex.TokenID in
@@ -1627,7 +1627,7 @@ begin
                 begin
                   DoNext(True);
                   if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
-                    PosInfo.PosKind := pkType;
+                    PosInfo.PosKind := pkTypeDecl;
                 end;
               end;
               if PosInfo.PosKind = pkInterface then
@@ -1717,7 +1717,7 @@ begin
               PosInfo.PosKind := pkClass;
               DoNext(True);
               if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
-                PosInfo.PosKind := pkType
+                PosInfo.PosKind := pkTypeDecl
               else if LexStillBeforeCursor and (Lex.TokenID = tkRoundOpen) then
               begin
                 while LexStillBeforeCursor and not (Lex.TokenID in
@@ -1727,7 +1727,7 @@ begin
                 begin
                   DoNext(True);
                   if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
-                    PosInfo.PosKind := pkType
+                    PosInfo.PosKind := pkTypeDecl
                   else
                   begin
                     InClass := True;
@@ -1814,6 +1814,29 @@ begin
                 PosInfo.PosKind := pkFlat;
               end;
             end;
+          end;
+        tkColon:
+          begin
+            if Result.PosKind = pkVar then
+              Result.PosKind := pkVarType
+            else if Result.PosKind = pkConst then
+              Result.PosKind := pkConstTypeValue;
+          end;
+        tkEqual:
+          begin
+            if Result.PosKind = pkConst then
+              Result.PosKind := pkConstTypeValue
+            else if Result.PosKind = pkType then
+              Result.PosKind := pkTypeDecl;
+          end;
+        tkSemiColon:
+          begin
+            if Result.PosKind = pkVarType then
+              Result.PosKind := pkVar
+            else if Result.PosKind = pkConstTypeValue then
+              Result.PosKind := pkConst
+            else if Result.PosKind = pkTypeDecl then
+              Result.PosKind := pkType;
           end;
       else
         if PosInfo.PosKind in [pkCompDirect, pkComment, pkString, pkField,

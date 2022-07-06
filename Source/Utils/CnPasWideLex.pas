@@ -372,6 +372,11 @@ type
     {* 当前 Token 的 Unicode 字符串地址}
     property TokenLength: Integer read GetTokenLength;
     {* 当前 Token 的 Unicode 字符长度}
+
+    property RoundCount: Integer read FRoundCount;
+    {* 左小括号数目，开放出来供外界使用}
+    property SquareCount: Integer read FSquareCount;
+    {* 左中括号数目，开放出来供外界使用}
   end;
 
 implementation
