@@ -330,7 +330,12 @@ begin
       Continue;
     end;
 
+{$IFDEF WIN64}
+    Desc := PCnMsgDesc(Front + PHeader^.DataOffset + NativeInt(PBase));
+{$ELSE}
     Desc := PCnMsgDesc(Front + PHeader^.DataOffset + Integer(PBase));
+{$ENDIF}
+
     if not Paused then
     begin
       FillChar(ADesc, SizeOf(ADesc), 0);
@@ -350,12 +355,18 @@ begin
       end;
       
       if Front + Len < QueueSize then
-        CopyMemory(@ADesc, Desc ,Len)
+        Move(Desc^, ADesc, Len)
       else
       begin
         RestLen := QueueSize - Front;
-        CopyMemory(@ADesc, Desc ,RestLen);
-        CopyMemory(Pointer(Integer(@ADesc) + RestLen), Pointer(PHeader^.DataOffset + Integer(PBase)), Len - RestLen);
+        Move(Desc^, ADesc, RestLen);
+{$IFDEF WIN64}
+        Move(Pointer(PHeader^.DataOffset + NativeInt(PBase))^,
+          Pointer(NativeInt(@ADesc) + RestLen)^, Len - RestLen);
+{$ELSE}
+        Move(Pointer(PHeader^.DataOffset + Integer(PBase))^,
+          Pointer(Integer(@ADesc) + RestLen)^, Len - RestLen);
+{$ENDIF}
       end;
 
       EnterCriticalSection(CSMsgStore);
@@ -432,7 +443,11 @@ begin
 
     FillChar(ADesc, SizeOf(ADesc), 0);
     PPid := PDWORD(PSysDbgBase);
+{$IFDEF WIN64}
+    PStr := PChar(NativeInt(PSysDbgBase) + SizeOf(DWORD));
+{$ELSE}
     PStr := PChar(Integer(PSysDbgBase) + SizeOf(DWORD));
+{$ENDIF}
 
     ADesc.Annex.ProcessId := PPid^;
     
@@ -447,7 +462,8 @@ begin
     Len := StrLen(PStr);
     if Len >= DbWinBufferSize - SizeOf(DWORD) then
       Len := DbWinBufferSize - SizeOf(DWORD);
-    CopyMemory(@(ADesc.Msg[0]), PStr, Len);
+    Move(PStr^, ADesc.Msg[0], Len);
+
     ADesc.Length := Len + SizeOf(TCnMsgAnnex) + SizeOf(Integer) + 1;
 
     EnterCriticalSection(CSMsgStore);
