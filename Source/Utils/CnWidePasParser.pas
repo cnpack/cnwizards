@@ -1841,6 +1841,9 @@ begin
           end;
         tkSemiColon:
           begin
+            if Result.PosKind in [pkString, pkCompDirect, pkComment] then // 先还原
+              Result.PosKind := SavePos;
+
             if PosInfo.PosKind = pkVarType then
             begin
               // 判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
