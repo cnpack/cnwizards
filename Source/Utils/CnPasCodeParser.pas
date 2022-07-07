@@ -1566,6 +1566,7 @@ function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
 var
   IsProgram: Boolean;
   InClass: Boolean;
+  IsAfterProcBegin: Boolean;
   ProcStack: TStack;
   ProcIndent: Integer;
   SavePos: TCodePosKind;
@@ -1627,7 +1628,9 @@ begin
     SavePos := pkUnknown;
     IsProgram := False;
     InClass := False;
+    IsAfterProcBegin := False;
     ProcIndent := 0;
+
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
       // CnDebugger.LogFmt('Token ID %d, Pos %d, %s',[Integer(Lex.TokenID), Lex.TokenPos, Lex.Token]);
@@ -1836,6 +1839,7 @@ begin
               else
                 Result.PosKind := pkDestructor;
               ProcStack.Push(Pointer(Result.PosKind));
+              IsAfterProcBegin := False;
             end;
             // todo: 处理单独声明的函数
           end;
@@ -1845,6 +1849,7 @@ begin
             begin
               Inc(ProcIndent);
               Result.PosKind := TCodePosKind(ProcStack.Peek);
+              IsAfterProcBegin := True;
             end;
           end;
         tkEnd:
@@ -1861,6 +1866,7 @@ begin
               begin
                 ProcStack.Pop;
                 Result.PosKind := pkFlat;
+                IsAfterProcBegin := False;
               end;
             end;
           end;
@@ -1881,7 +1887,13 @@ begin
         tkSemiColon:
           begin
             if Result.PosKind = pkVarType then
-              Result.PosKind := pkVar
+            begin
+              // 判断是否就地 var，也就是判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
+              if IsAfterProcBegin and (ProcStack.Count > 0) then
+                Result.PosKind := TCodePosKind(ProcStack.Peek)
+              else
+                Result.PosKind := pkVar;
+            end
             else if Result.PosKind = pkConstTypeValue then
               Result.PosKind := pkConst
             else if Result.PosKind = pkTypeDecl then
