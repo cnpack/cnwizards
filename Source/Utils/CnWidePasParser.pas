@@ -1834,11 +1834,22 @@ begin
             else if PosInfo.PosKind = pkType then
               PosInfo.PosKind := pkTypeDecl;
           end;
+        tkAssign:
+          begin
+            if PosInfo.PosKind = pkVarType then
+            begin
+              // 判断是否就地 var K := 1 这种推断声明，也就是判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
+              if IsAfterProcBegin and (ProcStack.Count > 0) then
+                PosInfo.PosKind := TCodePosKind(ProcStack.Peek)
+              else
+                PosInfo.PosKind := pkVar;
+            end;
+          end;
         tkSemiColon:
           begin
             if PosInfo.PosKind = pkVarType then
             begin
-              // 判断是否就地 var，也就是判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
+              // 判断是否就地 var Str: string 这种类型声明，也就是判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
               if IsAfterProcBegin and (ProcStack.Count > 0) then
                 PosInfo.PosKind := TCodePosKind(ProcStack.Peek)
               else
