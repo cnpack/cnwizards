@@ -1841,8 +1841,8 @@ begin
           end;
         tkSemiColon:
           begin
-            if Result.PosKind in [pkString, pkCompDirect, pkComment] then // 先还原
-              Result.PosKind := SavePos;
+            if PosInfo.PosKind in [pkString, pkCompDirect, pkComment] then // 先还原
+              PosInfo.PosKind := SavePos;
 
             if PosInfo.PosKind = pkVarType then
             begin
