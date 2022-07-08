@@ -14652,7 +14652,7 @@ procedure TBaseVirtualTree.SetChildCount(Node: PVirtualNode; NewChildCount: Card
 var
   Remaining: Cardinal;
   Index, AbsIndex: Cardinal; // Added by LiuXiao
-  Child: PVirtualNode;
+  LChild, Child: PVirtualNode;
   Count: Integer;
   NewHeight: Integer;
 begin
@@ -14677,17 +14677,23 @@ begin
           NewHeight := Node.TotalHeight;
 
           // New nodes to add.
-          if Assigned(Node.LastChild) then
+          // Adjusted by LiuXiao
+          LChild := Node.LastChild;
+          if Assigned(LChild) then
           begin
-            Index := Node.LastChild.Index + 1;
-            AbsIndex := Node.LastChild.AbsoluteIndex + 1;  // Added by LiuXiao
+            Index := LChild.Index + 1;
+            while LChild.LastChild <> nil do
+              LChild := LChild.LastChild;
+            AbsIndex := LChild.AbsoluteIndex + 1;
           end
           else
           begin
             Index := 0;
-            AbsIndex := Node^.AbsoluteIndex + 1; // Added by LiuXiao
+            AbsIndex := Node^.AbsoluteIndex + 1;
             Include(Node.States, vsHasChildren);
           end;
+          // Adjusted by LiuXiao
+
           Node.States := Node.States - [vsAllChildrenHidden, vsHeightMeasured];
           if (vsExpanded in Node.States) and FullyVisible[Node] then
             Inc(FVisibleCount, Count); // Do this before a possible init of the sub-nodes in DoMeasureItem()

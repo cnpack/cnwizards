@@ -841,7 +841,7 @@ begin
     end
     else
     begin
-      // FStore已由读写线程更新，此处复制可见Item到ViewStore中。
+      // FStore 已由读写线程更新，此处复制可见 Item 到 ViewStore 中。
       if FViewStore.MsgCount > 0 then
         OldIndent := FViewStore.Msgs[FViewStore.MsgCount - 1].Indent
       else
@@ -866,9 +866,23 @@ begin
         end;
       end;
 
-      // FMsgTree. 向下滚
+      // FMsgTree 向下滚
       if CnViewerOptions.AutoScroll then
+      begin
+{$IFDEF WIN64}
+        if FMsgTree.GetLast <> nil then
+        begin
+          if FMsgTree.FocusedNode <> nil then
+            FMsgTree.Selected[FMsgTree.FocusedNode] := False;
+
+          FMsgTree.FocusedNode := FMsgTree.GetLast;
+          FMsgTree.Selected[FMsgTree.GetLast] := True;
+          FMsgTree.ScrollIntoView(FMsgTree.GetLast, False);
+        end;
+{$ELSE}
         PostMessage(FMsgTree.Handle, WM_KEYDOWN, VK_END, 0);
+{$ENDIF}
+      end;
     end;
   end;
 end;
@@ -905,6 +919,9 @@ begin
           FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
           FMsgTree.FocusedNode := FoundNode;
           FMsgTree.Selected[FoundNode] := True;
+{$IFDEF WIN64}
+          FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
           Exit;
         end;
       end;
@@ -918,6 +935,9 @@ begin
             FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
             FMsgTree.FocusedNode := FoundNode;
             FMsgTree.Selected[FoundNode] := True;
+{$IFDEF WIN64}
+            FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
             Exit;
           end;
         end;
@@ -934,6 +954,9 @@ begin
             FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
             FMsgTree.FocusedNode := FoundNode;
             FMsgTree.Selected[FoundNode] := True;
+{$IFDEF WIN64}
+            FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
             Exit;
           end;
         end;
@@ -946,6 +969,9 @@ begin
           FoundNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
           FMsgTree.FocusedNode := FoundNode;
           FMsgTree.Selected[FoundNode] := True;
+{$IFDEF WIN64}
+          FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
           Exit;
         end;
       end;
@@ -1204,6 +1230,9 @@ begin
     begin
       FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
       FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
+{$IFDEF WIN64}
+      FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
       Exit;
     end;
   end;
@@ -1226,6 +1255,9 @@ begin
     begin
       FMsgTree.Selected[FMsgTree.GetNodeByAbsoluteIndex(I + 1)] := True;
       FMsgTree.FocusedNode := FMsgTree.GetNodeByAbsoluteIndex(I + 1);
+{$IFDEF WIN64}
+      FMsgTree.ScrollIntoView(FMsgTree.FocusedNode, False);
+{$ENDIF}
       Exit;
     end;
   end;
