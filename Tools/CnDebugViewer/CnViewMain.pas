@@ -778,6 +778,9 @@ begin
       Tree.Selected[Tree.FocusedNode] := False;
     Tree.Selected[Node] := True;
     Tree.FocusedNode := Node;
+{$IFDEF WIN64}
+    Tree.ScrollIntoView(Node, False);
+{$ENDIF}
   end;
 end;
 

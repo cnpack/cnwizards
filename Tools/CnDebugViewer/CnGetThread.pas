@@ -185,9 +185,9 @@ begin
   begin
     FillChar(AMsg, SizeOf(AMsg), 0);
     Size := ADesc.Length - SizeOf(ADesc.Annex) - SizeOf(DWord);
-    CopyMemory(@AMsg, @(ADesc.Msg), Size);
-    SplitterIdx := Pos('|', AMsg);
+    Move(ADesc.Msg[0], AMsg, Size);
 
+    SplitterIdx := Pos('|', AMsg);
     if SplitterIdx > 1 then // Clear Ê±Ã»ÊúÏß
       VarName := Copy(AMsg, 1, SplitterIdx - 1)
     else
