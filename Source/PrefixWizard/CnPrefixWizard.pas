@@ -904,15 +904,18 @@ begin
             NewName := Prefix;
         end;
 
-        UniqueOld := NewName;
-        NewName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(NewName);
-        // 这句除了加 1 这种行为之外，可能会删去 NewName 前面的 T，补回来
-
-        if (Length(UniqueOld) > 1) and (UniqueOld[1] = 'T') then
+        if NewName = Prefix then // 只有前缀的情况下，用 IDE 生成一个带 1 的
         begin
-          Delete(UniqueOld, 1, 1);
-          if Pos(UniqueOld, NewName) = 1 then
-            NewName := 'T' + NewName;
+          UniqueOld := NewName;
+          NewName := (FormEditor as INTAFormEditor).FormDesigner.UniqueName(NewName);
+          // 这句除了加 1 这种行为之外，可能会删去 NewName 前面的 T，补回来
+
+          if (Length(UniqueOld) > 1) and (UniqueOld[1] = 'T') then
+          begin
+            Delete(UniqueOld, 1, 1);
+            if Pos(UniqueOld, NewName) = 1 then
+              NewName := 'T' + NewName;
+          end;
         end;
       end;
 
