@@ -138,10 +138,11 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
       Anchors = [akTop, akRight]
     end
     object bvlWizard: TBevel
-      Left = 312
+      Left = 384
       Top = 48
-      Width = 169
+      Width = 140
       Height = 10
+      Anchors = [akTop, akRight]
       Shape = bsBottomLine
     end
     object lbl3: TLabel
