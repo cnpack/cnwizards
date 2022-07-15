@@ -4,7 +4,7 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
   BorderIcons = [biSystemMenu]
   Caption = 'Code Editor Wizard Settings'
   ClientHeight = 510
-  ClientWidth = 538
+  ClientWidth = 578
   Constraints.MinHeight = 540
   Constraints.MinWidth = 586
   Icon.Data = {
@@ -140,7 +140,7 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
     object bvlWizard: TBevel
       Left = 384
       Top = 48
-      Width = 140
+      Width = 169
       Height = 10
       Anchors = [akTop, akRight]
       Shape = bsBottomLine
