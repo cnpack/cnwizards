@@ -1198,7 +1198,7 @@ end;
 
 procedure TCnCodeFormatterForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if seNewLine.Value < seWrapLine.Value then
+  if (ModalResult = mrOK) and (seNewLine.Value < seWrapLine.Value) then
   begin
     ErrorDlg(SCnCodeFormatterWizardErrLineWidth);
     CanClose := False;
