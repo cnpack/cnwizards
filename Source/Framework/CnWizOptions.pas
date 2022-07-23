@@ -305,7 +305,7 @@ uses
 {$IFNDEF STAND_ALONE}
   CnWizUtils, CnWizIdeUtils, CnWizManager, CnWizShareImages,
 {$ENDIF}
-  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNativeDecl;
+  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNative;
 
 {$IFNDEF STAND_ALONE}
 

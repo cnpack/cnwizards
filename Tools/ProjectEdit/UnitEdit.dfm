@@ -370,7 +370,7 @@ object FormProjectEdit: TFormProjectEdit
         Width = 577
         Height = 20
         TabOrder = 2
-        Text = 'CnNativeDecl in '#39'..\..\Source\Crypto\CnNativeDecl.pas'#39','
+        Text = 'CnNative in '#39'..\..\Source\Crypto\CnNative.pas'#39','
       end
       object edtCVDprAdd: TEdit
         Left = 144
@@ -395,7 +395,7 @@ object FormProjectEdit: TFormProjectEdit
         Width = 577
         Height = 57
         Lines.Strings = (
-          '<DCCReference Include="..\..\Source\Crypto\CnNativeDecl.pas"/>')
+          '<DCCReference Include="..\..\Source\Crypto\CnNative.pas"/>')
         TabOrder = 5
       end
       object mmoCVDprojAdd: TMemo
@@ -430,7 +430,7 @@ object FormProjectEdit: TFormProjectEdit
         Width = 577
         Height = 20
         TabOrder = 9
-        Text = '..\..\Source\Crypto\CnNativeDecl.obj '
+        Text = '..\..\Source\Crypto\CnNative.obj '
       end
       object btnCVBpkAdd: TButton
         Left = 744
@@ -448,8 +448,8 @@ object FormProjectEdit: TFormProjectEdit
         Height = 20
         TabOrder = 11
         Text = 
-          '<FILE FILENAME="..\..\Source\Crypto\CnNativeDecl.pas" FORMNAME="' +
-          '" UNITNAME="CnNativeDecl" CONTAINERID="PascalCompiler" DESIGNCLA' +
+          '<FILE FILENAME="..\..\Source\Crypto\CnNative.pas" FORMNAME="' +
+          '" UNITNAME="CnNative" CONTAINERID="PascalCompiler" DESIGNCLA' +
           'SS="" LOCALCOMMAND=""/>'
       end
       object edtCVBpkAdd1: TEdit

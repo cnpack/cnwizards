@@ -215,7 +215,7 @@ uses
   Rtti,
 {$ENDIF}
   CnSrcEditorEnhance, {$IFDEF CNWIZARDS_CNPROCLISTWIZARD} CnProcListWizard, {$ENDIF}
-  CnWizOptions, CnWizShortCut, CnNativeDecl;
+  CnWizOptions, CnWizShortCut, CnNative;
 
 const
   SCnCodeCompletion = 'CnCodeCompletion';
