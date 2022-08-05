@@ -868,12 +868,20 @@ end;
 
 function TAbstractScanner.IsInOpStatement: Boolean;
 const
-  OpTokens = RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens + [tokAssign];
+  OpTokens = RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens
+    + [tokAssign];
 begin
-  Result := FPrevEffectiveToken in OpTokens; // 双目运算符后
+  if FPrevEffectiveToken = tokSemicolon then // 分号说明不在语句内
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  Result := FPrevEffectiveToken in OpTokens + [tokLB, tokSLB]; // 双目运算符后，或左括号后
 
   if not Result and not FIsForwarding then
-    Result := ForwardActualToken() in OpTokens;  // 或者下一个是双目运算符
+    Result := ForwardActualToken() in OpTokens + [tokSemicolon, tokRB, tokSRB,
+      tokKeywordDo, tokKeywordOf, tokKeywordThen];  // 或者下一个是双目运算符或分号或右括号几个其他语句结束关键字
   // 可能还有其他判断
 end;
 
@@ -1524,22 +1532,17 @@ begin
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
-            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
-              and GetCanLineBreakFromOut and not IsInStatement then
+            if (FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
+              and GetCanLineBreakFromOut and not IsInStatement)
+              or (IsInOpStatement and GetCanLineBreakFromOut) then
             begin
+              // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
+
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
                 Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
               FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
-            end
-            else if IsInOpStatement and GetCanLineBreakFromOut then
-            begin
-              // 如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
-              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行
-              Idx := Pos(#13#10, BlankStr);
-              if Idx > 0 then
-                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
-              FCodeGen.WriteBlank(BlankStr);  // 也要省略前面的空格与回车
             end
             else
               FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
@@ -1643,21 +1646,16 @@ begin
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
             // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
             if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
-              and GetCanLineBreakFromOut and not IsInStatement then
+              and GetCanLineBreakFromOut and not IsInStatement
+              or (IsInOpStatement and GetCanLineBreakFromOut) then
             begin
+              // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
+
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
                 Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
               FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
-            end
-            else if IsInOpStatement and GetCanLineBreakFromOut then
-            begin
-              // 如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
-              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行
-              Idx := Pos(#13#10, BlankStr);
-              if Idx > 0 then
-                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
-              FCodeGen.WriteBlank(BlankStr);  // 也要省略前面的空格与回车
             end
             else
               FCodeGen.WriteBlank(BlankStr);  // 把上回内容尾巴，到现在注释开头的空白部分写入
