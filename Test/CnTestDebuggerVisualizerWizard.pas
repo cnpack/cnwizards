@@ -277,7 +277,7 @@ begin
 
   if TypeName = SCnVisualClasses[vcBigNumber] then
   begin
-    NewExpr := Expression + '.ToDec';
+    NewExpr := Expression + '.ToHex';
   end
   else if TypeName = SCnVisualClasses[vcBigNumberPolynomial] then
   begin

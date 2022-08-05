@@ -24,7 +24,7 @@ uses
   Forms,
   CnCodeFormatterTest in 'CnCodeFormatterTest.pas' {MainForm},
   CnFormatterIntf in '..\..\Source\CodeFormatter\CnFormatterIntf.pas',
-  CnScaners in '..\..\Source\CodeFormatter\CnParser\CnScaners.pas',
+  CnScanners in '..\..\Source\CodeFormatter\CnParser\CnScanners.pas',
   CnTokens in '..\..\Source\CodeFormatter\CnParser\CnTokens.pas',
   CnCodeFormatter in '..\..\Source\CodeFormatter\CnCodeFormatter.pas',
   CnParseConsts in '..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas',
