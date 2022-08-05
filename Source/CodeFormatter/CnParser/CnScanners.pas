@@ -144,6 +144,9 @@ type
     function IsInStatement: Boolean;
     {* 判断当前是否在语句内部}
 
+    function IsInOpStatement: Boolean;
+    {* 判断当前是否在语句内部，不包括开头，大概算是开区间}
+
     function NextToken: TPascalToken; virtual; abstract;
     function SourcePos: LongInt;
     // 当前 Token 在整个源码中的偏移量，0 开始
@@ -849,17 +852,29 @@ end;
 
 function TAbstractScanner.IsInStatement: Boolean;
 begin
-  // 判定当前 Token 是否语句内部，上一个是分号或组合语句，作为语句内换行的额外判断补充。
+  // 判定当前 Token 是否语句内部，上一个是分号或组合语句或双目运算符（真正的语句内部），作为语句内换行的额外判断补充。
   // 当前 Token 可能是空白注释之类的，此时前一个有效 Token 是分号或一些关键字，就说明当前位置已在语句外
   // 如果前一个有效 Token 是标识符，就得判断当前或靠后（如果当前的是注释）的有效 Token 是不是 End 和 Else
   // 如果靠后一个是，表示语句已经结束，现状已经在语句外了。以应对 End 或 Else 前的语句无分号的问题
   if not FIsForwarding then
     Result := (FPrevEffectiveToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
-      tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens)
+      tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens +
+      RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens)
       or not (ForwardActualToken() in [tokKeywordEnd, tokKeywordElse]) // 这句对性能有所影响
   else
     Result := FPrevEffectiveToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
+end;
+
+function TAbstractScanner.IsInOpStatement: Boolean;
+const
+  OpTokens = RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens + [tokAssign];
+begin
+  Result := FPrevEffectiveToken in OpTokens; // 双目运算符后
+
+  if not Result and not FIsForwarding then
+    Result := ForwardActualToken() in OpTokens;  // 或者下一个是双目运算符
+  // 可能还有其他判断
 end;
 
 function TAbstractScanner.GetCanLineBreakFromOut: Boolean;
@@ -1515,7 +1530,16 @@ begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
                 Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
-              FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+              FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
+            end
+            else if IsInOpStatement and GetCanLineBreakFromOut then
+            begin
+              // 如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行
+              Idx := Pos(#13#10, BlankStr);
+              if Idx > 0 then
+                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              FCodeGen.WriteBlank(BlankStr);  // 也要省略前面的空格与回车
             end
             else
               FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
@@ -1624,10 +1648,19 @@ begin
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
                 Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
-              FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
+              FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
+            end
+            else if IsInOpStatement and GetCanLineBreakFromOut then
+            begin
+              // 如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行
+              Idx := Pos(#13#10, BlankStr);
+              if Idx > 0 then
+                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              FCodeGen.WriteBlank(BlankStr);  // 也要省略前面的空格与回车
             end
             else
-              FCodeGen.WriteBlank(BlankStr); // 把上回内容尾巴，到现在注释开头的空白部分写入
+              FCodeGen.WriteBlank(BlankStr);  // 把上回内容尾巴，到现在注释开头的空白部分写入
           end;
         end;
 
