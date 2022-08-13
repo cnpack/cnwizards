@@ -774,10 +774,9 @@ begin
       Inc(I);
     until I >= Count;
   finally
+    LoadBookmark(Bookmark);
     FIsForwarding := False;
   end;
-
-  LoadBookmark(Bookmark);
 end;
 
 function TAbstractScanner.BlankString: string;
@@ -1248,7 +1247,7 @@ begin
               FOldSourceColPtr := P;
             end;
           end
-          else
+          else if P^ <> #0 then
             Error(CN_ERRCODE_PASCAL_ENDCOMMENT_EXP);
         end
         else
