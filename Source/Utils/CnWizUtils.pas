@@ -1272,19 +1272,19 @@ begin
   Result := TObject(AInt);
 end;
 
-// 供 Pascal Script 使用的将 TObject 转换成整型值的函数}\
+// 供 Pascal Script 使用的将 TObject 转换成整型值的函数
 function CnObjectToInt(AObject: TObject): Integer;
 begin
   Result := Integer(AObject);
 end;
 
-// 供 Pascal Script 使用的将整型值转换成 TObject 的函数
+// 供 Pascal Script 使用的将整型值转换成 Interface 的函数
 function CnIntToInterface(AInt: Integer): IUnknown;
 begin
   Result := IUnknown(AInt);
 end;
 
-// 供 Pascal Script 使用的将 TObject 转换成整型值的函数
+// 供 Pascal Script 使用的将 Interface 转换成整型值的函数
 function CnInterfaceToInt(Intf: IUnknown): Integer;
 begin
   Result := Integer(Intf);

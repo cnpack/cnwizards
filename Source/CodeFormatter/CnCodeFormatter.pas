@@ -67,8 +67,8 @@ type
   private
     FScanner: TAbstractScanner;
     FCodeGen: TCnCodeGenerator;
-    FLastToken: TPascalToken;
-    FLastNonBlankToken: TPascalToken;
+    FLastToken: TPascalToken;           // 上一个 Token，不包括注释
+    FLastNonBlankToken: TPascalToken;   // 上一个非空 Token
     FInternalRaiseException: Boolean;
     FSliceMode: Boolean;
     FMatchedInStart: Integer;
@@ -671,6 +671,10 @@ begin
     if After <= 0 then
       After := 1;
   end;
+
+  // 双目运算符前面如果是注释则要删除空格。现在姑且强行全删，副作用未知
+  FCodeGen.BackSpaceLastSpaces;
+
   Match(Token, Before, After);
 end;
 
@@ -871,7 +875,7 @@ begin
   NeedPadding := CalcNeedPadding;
   NeedUnIndent := CalcNeedPaddingAndUnIndent;
 
-  //标点符号的设置
+  // 标点符号的设置
   case Token of
     tokComma:
       CodeGen.Write(Scanner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
@@ -932,7 +936,7 @@ begin
     end;
   end;
 
-  // 关键字如果之前有&，则不算关键字
+  // 关键字如果之前有 &，则不算关键字
   if (FLastToken = tokAmpersand) and (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then
     FLastToken := tokSymbol
   else
