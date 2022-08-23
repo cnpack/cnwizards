@@ -4196,13 +4196,13 @@ begin
   begin
     if Owner.Name = csProcComboName then
     begin
-      FWizard.ProcComboHeight := Height;
-      FWizard.ProcComboWidth := Width;
+      FWizard.ProcComboHeight := IdeGetOriginPixelsFromScaled(Height, Self);
+      FWizard.ProcComboWidth := IdeGetOriginPixelsFromScaled(Width, Self);
     end
     else if Owner.Name = csClassComboName then
     begin
-      FWizard.ClassComboHeight := Height;
-      FWizard.ClassComboWidth := Width;
+      FWizard.ClassComboHeight := IdeGetOriginPixelsFromScaled(Height, Self);
+      FWizard.ClassComboWidth := IdeGetOriginPixelsFromScaled(Width, Self);
     end;
   end;
 end;
@@ -4596,21 +4596,21 @@ begin
   begin
     if Owner.Name = csProcComboName then
     begin
-      if FWizard.ProcComboWidth > 100 then
-        Width := FWizard.ProcComboWidth;
-      if FWizard.ProcComboHeight > AHeight then
+      if IdeGetScaledPixelsFromOrigin(FWizard.ProcComboWidth, Self) > 100 then
+        Width := IdeGetScaledPixelsFromOrigin(FWizard.ProcComboWidth, Self);
+      if IdeGetScaledPixelsFromOrigin(FWizard.ProcComboHeight, Self) > AHeight then
       begin
-        Height := FWizard.ProcComboHeight;
+        Height := IdeGetScaledPixelsFromOrigin(FWizard.ProcComboHeight, Self);
         HeightSet := True;
       end;
     end
     else if Owner.Name = csClassComboName then
     begin
-      if FWizard.ClassComboWidth > 100 then
-        Width := FWizard.ClassComboWidth;
-      if FWizard.ClassComboHeight > AHeight then
+      if IdeGetScaledPixelsFromOrigin(FWizard.ClassComboWidth, Self) > 100 then
+        Width := IdeGetScaledPixelsFromOrigin(FWizard.ClassComboWidth, Self);
+      if IdeGetScaledPixelsFromOrigin(FWizard.ClassComboHeight, Self) > AHeight then
       begin
-        Height := FWizard.ClassComboHeight;
+        Height := IdeGetScaledPixelsFromOrigin(FWizard.ClassComboHeight, Self);
         HeightSet := True;
       end;
     end;
