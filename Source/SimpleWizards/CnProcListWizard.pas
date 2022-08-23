@@ -873,14 +873,14 @@ begin
       begin
         AClassCombo := AComp as TCnProcListComboBox;
         if AClassCombo.Parent <> nil then
-          FToolbarClassComboWidth := AClassCombo.Width;
+          FToolbarClassComboWidth := IdeGetOriginPixelsFromScaled(AClassCombo.Width, AClassCombo);
       end;
       AComp := AToolbar.FindComponent(csProcComboName);
       if (AComp <> nil) and (AComp is TCnProcListComboBox) then
       begin
         AProcCombo := AComp as TCnProcListComboBox;
         if AProcCombo.Parent <> nil then
-          FToolbarProcComboWidth := AProcCombo.Width;
+          FToolbarProcComboWidth := IdeGetOriginPixelsFromScaled(AProcCombo.Width, AProcCombo);
       end;
     end;
   end;
@@ -981,8 +981,8 @@ begin
     Parent := ToolBar;
     Left := 108;
     Top := 0;
-    if FToolbarClassComboWidth > 50 then
-      Width := FToolbarClassComboWidth
+    if IdeGetScaledPixelsFromOrigin(FToolbarClassComboWidth, Obj.ClassCombo) > 50 then
+      Width := IdeGetScaledPixelsFromOrigin(FToolbarClassComboWidth, Obj.ClassCombo)
     else
       Width := IdeGetScaledPixelsFromOrigin(CN_INIT_CLASSCOMBO_WIDTH, Obj.ClassCombo);
     Height := 21;
@@ -1010,8 +1010,8 @@ begin
     Parent := ToolBar;
     Left := Obj.FSplitter1.Left + Obj.FSplitter1.Width + 1;
     Top := 0;
-    if FToolbarProcComboWidth > 50 then
-      Width := FToolbarProcComboWidth
+    if IdeGetScaledPixelsFromOrigin(FToolbarProcComboWidth, Obj.ProcCombo) > 50 then
+      Width := IdeGetScaledPixelsFromOrigin(FToolbarProcComboWidth, Obj.ProcCombo)
     else
       Width := IdeGetScaledPixelsFromOrigin(CN_INIT_CLASSCOMBO_WIDTH, Obj.ProcCombo);
     Height := 21;
