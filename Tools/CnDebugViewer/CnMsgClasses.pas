@@ -294,6 +294,8 @@ function GetTimeDesc(AMsgItem: TCnMsgItem): string;
 
 function GetLongTimeDesc(AMsgItem: TCnMsgItem): string;
 
+procedure DebugDebuggerLog(const S: string);
+
 implementation
 
 uses
@@ -1037,6 +1039,33 @@ begin
   if FMemDumpAddr <> nil then
     FreeMemory(FMemDumpAddr);
   inherited;
+end;
+
+procedure DebugDebuggerLog(const S: string);
+{$IFDEF DEBUGDEBUGGER}
+const
+  DEBUG_FILE = 'DebugDebugger.txt';
+  CRLF: AnsiString = #13#10;
+var
+  F: TFileStream;
+  B: TBytes;
+{$ENDIF}
+begin
+{$IFDEF DEBUGDEBUGGER}
+  if not FileExists(DEBUG_FILE) then
+    F := TFileStream.Create(DEBUG_FILE, fmCreate)
+  else
+    F := TFileStream.Create(DEBUG_FILE, fmOpenWrite);
+
+  try
+    F.Seek(0, soEnd);
+    B := TEncoding.Default.GetBytes(S);
+    F.Write(B, Length(B));
+    F.Write(CRLF[1], 2);
+  finally
+    F.Free;
+  end;
+{$ENDIF}
 end;
 
 initialization
