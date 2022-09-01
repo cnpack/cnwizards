@@ -673,7 +673,7 @@ begin
   end;
 
   // 双目运算符前面如果是块注释且在本行，则要删除空格
-  if FCodeGen.IsLastLineSpaces and Scanner.JustWroteBlockComment then
+  if not FCodeGen.IsLastLineSpaces and Scanner.JustWroteBlockComment then
     FCodeGen.BackSpaceLastSpaces;
 
   Match(Token, Before, After);
