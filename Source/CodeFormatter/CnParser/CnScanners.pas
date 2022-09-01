@@ -117,6 +117,7 @@ type
     FIdentContainsDot: Boolean;
     FIsForwarding: Boolean;
     FOnGetCanLineBreak: TGetBooleanEvent;
+    FJustWroteBlockComment: Boolean;
     procedure ReadBuffer;
     procedure SetOrigin(AOrigin: Longint);
     procedure SkipBlanks; // 越过空白和回车换行
@@ -217,6 +218,9 @@ type
 
     property InIgnoreArea: Boolean read FInIgnoreArea write FInIgnoreArea;
     {* 由内部前进 Token 时解析设置当前是否忽略格式化标记，供外界使用}
+
+    property JustWroteBlockComment: Boolean read FJustWroteBlockComment;
+    {* 是否刚输出块注释}
 
     property OnLineBreak: TNotifyEvent read FOnLineBreak write FOnLineBreak;
     {* 遇到源文件换行时的事件}
@@ -944,6 +948,7 @@ var
   BlankStr: string;
   S: string;
   Idx: Integer;
+  LocalJustWroteBlockComment: Boolean;
 
   procedure SkipTo(var P: PChar; TargetChar: Char);
   begin
@@ -985,6 +990,7 @@ var
   TmpToken: string;
 begin
   FOldSourceColPtr := FSourcePtr;
+  LocalJustWroteBlockComment := False;
 
   SkipBlanks;
   FSourceCol := FNewSourceCol;
@@ -1573,6 +1579,7 @@ begin
         begin
           FCodeGen.Write(S);
         end;
+        LocalJustWroteBlockComment := True;
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1585,6 +1592,9 @@ begin
       FNestedIsComment := Result in [tokBlockComment, tokLineComment, tokCompDirective];
       Result := NextToken;
       FNestedIsComment := False;
+
+      // 记录这次写了块注释，不记录递归结果
+      FJustWroteBlockComment := LocalJustWroteBlockComment;
 
       // 进入递归寻找下一个 Token，
       // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
@@ -1686,6 +1696,7 @@ begin
         begin
           FCodeGen.Write(S);
         end;
+        LocalJustWroteBlockComment := True;
       end;
 
       if not FFirstCommentInBlock then // 第一次碰到 Comment 时设置这个
@@ -1698,6 +1709,9 @@ begin
       FNestedIsComment := Result in [tokBlockComment, tokLineComment, tokCompDirective];
       Result := NextToken;
       FNestedIsComment := False;
+
+      // 记录这次写了块注释，不记录递归结果
+      FJustWroteBlockComment := LocalJustWroteBlockComment;
 
       // 进入递归寻找下一个 Token，
       // 进入后 FFirstCommentInBlock 为 True，因此不会重新记录 FBlankLinesBefore
@@ -1741,6 +1755,7 @@ begin
         end;
 
         FCodeGen.Write(TokenString); // Write ELSE/ELSEIF itself
+        LocalJustWroteBlockComment := True;
       end;
 
       FInDirectiveNestSearch := True;
@@ -1750,6 +1765,9 @@ begin
       Directive := NextToken;
       FPreviousIsComment := False;
       TmpToken := TokenString;
+
+      // 记录这次写了块注释，不记录递归结果
+      FJustWroteBlockComment := LocalJustWroteBlockComment;
 
       try
         while Directive <> tokEOF do

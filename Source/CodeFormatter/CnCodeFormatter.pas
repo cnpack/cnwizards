@@ -672,8 +672,9 @@ begin
       After := 1;
   end;
 
-  // 双目运算符前面如果是注释则要删除空格。现在姑且强行全删，副作用未知
-  FCodeGen.BackSpaceLastSpaces;
+  // 双目运算符前面如果是块注释且在本行，则要删除空格
+  if FCodeGen.IsLastLineSpaces and Scanner.JustWroteBlockComment then
+    FCodeGen.BackSpaceLastSpaces;
 
   Match(Token, Before, After);
 end;
