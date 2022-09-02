@@ -272,6 +272,10 @@ begin
   if not Active or not FShowThumbnail or (Editor.EditControl <> CnOtaGetCurrentEditControl) then
     Exit;
 
+{$IFDEF DEBUG}
+   CnDebugger.LogMsg('CnSrcEditorThumbnail.EditControlMouseLeave');
+{$ENDIF}
+
   FInScroll := False;
   FShowTimer.Enabled := False; // 离开了的话，准备显示的就停了
   FHideTimer.Enabled := True;  // 准备隐藏
@@ -401,16 +405,19 @@ begin
   P.x := P.x - FThumbWindow.Width - 20;
   P.y := P.y - FThumbWindow.Height div 2;
 
-  // 避免超出屏幕
-  if P.x < 0 then
-    P.x := 0;
-  if P.y < 0 then
-    P.y := 0;
+  // 避免超出主屏幕
+  if Screen.MonitorCount <= 1 then
+  begin
+    if P.x < 0 then
+      P.x := 0;
+    if P.y < 0 then
+      P.y := 0;
 
-  if P.x + FThumbWindow.Width > Screen.Width then
-    P.x := Screen.Width - FThumbWindow.Width;
-  if P.y + FThumbWindow.Height > Screen.Height then
-    P.y := Screen.Height - FThumbWindow.Height;
+    if P.x + FThumbWindow.Width > Screen.Width then
+      P.x := Screen.Width - FThumbWindow.Width;
+    if P.y + FThumbWindow.Height > Screen.Height then
+      P.y := Screen.Height - FThumbWindow.Height;
+  end;
 
   FThumbWindow.SetPos(P.x, P.y) ;
 

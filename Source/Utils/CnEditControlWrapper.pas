@@ -478,7 +478,7 @@ type
     {* 删除编辑器鼠标移动通知 }
 
     procedure AddEditorMouseLeaveNotifier(Notifier: TEditorMouseLeaveNotifier);
-    {* 增加编辑器鼠标离开通知 }
+    {* 增加编辑器鼠标离开通知，注意鼠标离开通知经常无效，不能太依赖之 }
     procedure RemoveEditorMouseLeaveNotifier(Notifier: TEditorMouseLeaveNotifier);
     {* 删除编辑器鼠标离开通知 }
 
