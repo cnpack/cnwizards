@@ -24,7 +24,7 @@ unit CnScanners;
 * 软件名称：CnPack 代码格式化专家
 * 单元名称：Object Pascal 词法分析器
 * 单元作者：CnPack开发组
-* 备    注：该单元实现了Object Pascal 词法分析器
+* 备    注：该单元实现了 Object Pascal 词法分析器
 *    缓冲区机制：一块固定长度的缓冲区，读入代码内容后找到最后一个换行，以此为结尾。
 *    扫描至结尾后，重新 ReadBuffer，把本区域结尾到缓冲区尾的内容重新填回缓冲区首，
 *    再在其后跟读满缓冲区，再找最后一个换行并标记结尾。
@@ -32,13 +32,14 @@ unit CnScanners;
 *    即使在处理注释块内部碰到 #0 时加入 ReadBuffer 的处理，也会因为可能的
 *    ”整个缓冲区全是注释“导致 FSourcePtr 没有步进从而无法读入新内容的情况。
 *           唯一办法：使用足够大的单块缓冲区！
+*           另外，Unicode 编译器中，才支持 Unicode 标识符和全角空格
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
 * 修改记录：2007-10-13 V1.0
 *               完善一些功能
 *           2004-1-14 V0.5
-*               加入标签(Bookmark)功能，可以方便的向前看N个TOKEN
+*               加入标签(Bookmark)功能，可以方便的向前看 N 个 Token
 *           2003-12-16 V0.4
 *               建立。目前自动跳过空格和注释。注释不应该跳过，但是还需要处理。
 ================================================================================
@@ -559,6 +560,15 @@ begin
   EmptyLines := 0;
   while True do
   begin
+{$IFDEF UNICODE}  // Unicode 版本下，支持将全角空格作为空格来处理
+    if FSourcePtr^ = '　' then
+    begin
+      Inc(FSourcePtr);
+      FBackwardToken := tokBlank;
+      Continue;
+    end;
+{$ENDIF}
+
     case FSourcePtr^ of
       #0:
         begin
@@ -1009,13 +1019,13 @@ begin
         if FIdentContainsDot then // 如果外部要求标识符包括点号如单元名等
         begin
           while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.'])
-            {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
+            {$IFDEF UNICODE} or ((P^ >= #$0100) and (P^ <> '　')) {$ENDIF} do
             Inc(P);
         end
-        else
+        else  // 注意 Unicode 环境下，Unicode 标识符不包括全角空格，全角空格做半角空格用
         begin
           while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
-            {$IFDEF UNICODE} or (P^ >= #$0100) {$ENDIF} do
+            {$IFDEF UNICODE} or ((P^ >= #$0100) and (P^ <> '　')) {$ENDIF} do
             Inc(P);
         end;
         Result := tokSymbol;
@@ -1852,7 +1862,7 @@ begin
 
       if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
       begin
-        // 最后一块注释的在递归最外层赋值，因此FBlankLinesAfter会被层层覆盖，
+        // 最后一块注释的在递归最外层赋值，因此 FBlankLinesAfter 会被层层覆盖，
         // 代表最后一块注释后的空行数
         FBlankLinesAfter := FBlankLines + FBlankLinesAfterComment;
       end
