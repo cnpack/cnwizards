@@ -96,15 +96,17 @@ unit CnPasWideLex;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：mwPasLex 的 Unicode 版本实现
+* 单元名称：mwPasLex 的 Unicode 版本实现，专门解析 UTF16 字符串
 * 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
 * 备    注：此单元自 mwPasLex 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 *           当 SupportUnicodeIdent 为 False 时，Unicode 字符挨个作为 tkUnknown 解析
-*           为 True 时整个作为 Identifier 解析。支持 Unicode/非Unicode 编译器。
+*           为 True 时整个作为 Identifier 解析。支持 Unicode/非 Unicode 编译器。
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2021.08.20 V1.5
+* 修改记录：2022.09.09 V1.6
+*               Unicode 标识符模式下增加对全角空格的识别
+*           2021.08.20 V1.5
 *               增加对 dpk 中 requires 与 contains 的识别
 *           2019.03.16 V1.4
 *               增加 LastNoSpaceCRLF 属性以指明上一个非空格非换行的 Token
@@ -599,7 +601,7 @@ function TCnPasWideLex.KeyHash(ToHash: PWideChar): Integer;
 begin
   Result := 0;
   while (_WideCharInSet(ToHash^, ['a'..'z', 'A'..'Z'])) or
-    (FSupportUnicodeIdent and (Ord(ToHash^) > 127)) do
+    (FSupportUnicodeIdent and (Ord(ToHash^) > 127) and (ToHash^ <> '　')) do
   begin
     Inc(Result, GetHashTableValue(ToHash^));
     Inc(ToHash);
@@ -1649,7 +1651,7 @@ begin
   FTokenID := IdentKind((FOrigin + FRun));
   StepRun(FStringLen, True);
   while Identifiers[_IndexChar(FOrigin[FRun])] or
-    (FSupportUnicodeIdent and (Ord(_IndexChar(FOrigin[FRun])) > 127)) do
+    (FSupportUnicodeIdent and (Ord(_IndexChar(FOrigin[FRun])) > 127) and (FOrigin[FRun] <> '　')) do
     StepRun(1, FSupportUnicodeIdent); // 支持宽字符标识符时需要计算步进
 end;
 
@@ -1952,7 +1954,8 @@ procedure TCnPasWideLex.SpaceProc;
 begin
   StepRun;
   FTokenID := tkSpace;
-  while _WideCharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32]) do
+  while _WideCharInSet(FOrigin[FRun], [#1..#9, #11, #12, #14..#32])
+    or (FOrigin[FRun] = '　') do
     StepRun;
 end;
 
@@ -2082,8 +2085,10 @@ begin
       C := _IndexChar(W);
       if FSupportUnicodeIdent then
       begin
-        if Ord(W) > 127 then
+        if (Ord(W) > 127) and (W <> '　') then
           IdentProc
+        else if W = '　' then
+          SpaceProc
         else
           FProcTable[C];
       end
