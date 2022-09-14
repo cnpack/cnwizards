@@ -1045,7 +1045,7 @@ begin
 end;
 
 {
-  Designator -> QualId ['.' Ident | '[' ExprList ']' | '^']...
+  Designator -> QualId ['.' Ident<ExprList> | '[' ExprList ']' | '^']...
 
   注：虽然有 Designator -> '(' Designator ')' 的情况，但已经包含在 QualId 的处理中了。
 }
@@ -1127,12 +1127,12 @@ begin
               RestoreElementType;
           end;
         end;
-      tokHat: // ^
+      tokHat: // ^ 这里支持多个指针连续指
         begin
           { DONE: deal with pointer derefrence }
           Match(tokHat);
         end;
-      tokPlus, tokMinus:
+      tokPlus, tokMinus: // 这里的加减号是啥目的？照理应该算 Term 之间的二元运算符才对
         begin
           MatchOperator(Scanner.Token);
           FormatExpression(0, PreSpaceCount);
@@ -1171,15 +1171,15 @@ begin
         FormatSimpleExpression;
       end;
 
-      // 这几处额外的内容，不知道有啥副作用
+      // 虽然理论上一部分已经在 Designator 中处理掉了走不到这里，但仍有作用
 
       // pchar(ch)^
       if Scanner.Token = tokHat then
         Match(tokHat)
-      else if Scanner.Token = tokSLB then  // PString(PStr)^[1]
+      else if Scanner.Token = tokSLB then  // PString(PStr)^[1]  FunctionCall 返回的指针数组内容再下标时会走这里
       begin
         Match(tokSLB);
-        FormatExprList(0, PreSpaceCount);
+        FormatExprList(0, PreSpaceCount);  // 数组下标
         Match(tokSRB);
       end
       else if Scanner.Token = tokDot then // typecase
@@ -1976,11 +1976,11 @@ begin
 end;
 
 {
-  SimpleStatement -> Designator ['(' ExprList ')']
-                  -> Designator ':=' Expression
-                  -> INHERITED
+  SimpleStatement -> Designator<ExprList> ['(' ExprList ')']
+                  -> Designator<ExprList> ':=' Expression
+                  -> INHERITED [SimpleStatement]
                   -> GOTO LabelId
-                  -> '(' SimpleStatement ')'
+                  -> '(' Statement ')'
 
   argh this doesn't take brackets into account
   as far as I can tell, typecasts like "(lcFoo as TComponent)" is a designator
@@ -1996,8 +1996,8 @@ end;
 
   补充：
   1. Designator 如果是以 ( 开头，比如 (a)^ := 1; 的情况，
-     则难以和 '(' SimpleStatement ')' 区分。而且 Designator 自身也可能是括号嵌套
-     现在的处理方法是，先关闭输出，按 Designator 处理（FormatDesignator内部加了
+     则难以和 '(' Statement ')' 区分。而且 Designator 自身也可能是括号嵌套
+     现在的处理方法是，先关闭输出，按 Designator 处理（FormatDesignator 内部加了
      括号嵌套的处理机制），扫描处理完毕后看后续的符号以决定是 Designator 还是
      Simplestatement，然后再次回到起点打开输出继续处理。
 }
@@ -2007,6 +2007,7 @@ var
   OldLastToken: TPascalToken;
   IsDesignator, OldInternalRaiseException: Boolean;
 
+  // 包括 := 和函数调用以及泛型的情形，函数调用后还有利用返回值进行 ^. 的
   procedure FormatDesignatorAndOthers(PreSpaceCount: Byte);
   begin
     FormatDesignator(PreSpaceCount, PreSpaceCount);
@@ -2020,14 +2021,14 @@ var
             FormatExpression(0, PreSpaceCount);
           end;
 
-        tokLB:
+        tokLB: // 这里似乎很难进来，FormatDesignator 里都搞定了左小括号
           begin
             { DONE: deal with function call, save to symboltable }
             Match(tokLB);
             FormatExprList(0, PreSpaceCount);
             Match(tokRB);
 
-            if Scanner.Token = tokHat then
+            if Scanner.Token = tokHat then // 也进不了这里的指针，所以未处理连续指针也没事
               Match(tokHat);
 
             if Scanner.Token = tokDot then
@@ -2083,13 +2084,13 @@ begin
           FormatLabel;
         end;
 
-      tokLB: // 括号开头的未必是 (SimpleStatement)，还可能是 (a)^ := 1 这种 Designator
+      tokLB: // 括号开头的未必是 (Statement)，还可能是 (a)^ := 1 这种 Designator
         begin
-          // found in D9 surpport: if ... then (...)
+          // found in D9 support: if ... then (...)
 
           // can delete the LB & RB, code optimize ??
           // 先当做 Designator 来看，处理完毕看后续有无 := ( 来判断是否结束
-          // 如果是结束了，则 Designator 的处理是对的，否则按 Simplestatement 来。
+          // 如果是结束了，则 Designator 的处理是对的，否则按 Statement 来。
 
           Scanner.SaveBookmark(Bookmark);
           OldLastToken := FLastToken;
@@ -2127,14 +2128,12 @@ begin
             // Match(tokLB);  优化不用的括号
             Scanner.NextToken;
 
-            FormatSimpleStatement(PreSpaceCount);
+            FormatStatement(PreSpaceCount);
 
-            if Scanner.Token = tokRB then
+            if Scanner.Token = tokRB then // 跳过且优化不用的括号
               Scanner.NextToken
             else
               ErrorToken(tokRB);
-
-            //Match(tokRB);
           end
           else
           begin
