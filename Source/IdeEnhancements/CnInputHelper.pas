@@ -2118,7 +2118,8 @@ procedure TCnInputHelper.AdjustCodeParamWindowPos;
 var
   ParaComp: TComponent;
   ParaWnd: TWinControl;
-  R1, R2, R3: TRect;
+  RectPara, RectList, RectInter: TRect;
+  D, OldTop: Integer;
 begin
   // BDS 下函数参数提示窗口在当前行的下方，挡住了助手窗口，需要移到当前行上方去
   if IsShowing then
@@ -2130,14 +2131,30 @@ begin
       ParaWnd := TWinControl(ParaComp);
       // Hook 参数窗口，阻止其自动恢复位置
       HookCodeParamWindow(ParaWnd);
+
       // 判断并调整参数窗口的位置
-      GetWindowRect(ParaWnd.Handle, R1);
-      GetWindowRect(List.Handle, R2);
-      if IntersectRect(R3, R1, R2) and not IsRectEmpty(R3) then
+      GetWindowRect(ParaWnd.Handle, RectPara);
+      GetWindowRect(List.Handle, RectList);
+      if IntersectRect(RectInter, RectPara, RectList) and not IsRectEmpty(RectInter) then
       begin
-        ParaWnd.Top := List.Top - ParaWnd.Height - IdeGetScaledPixelsFromOrigin(EditControlWrapper.GetCharHeight, ParaWnd);
-        OffsetRect(R1, 0, - IdeGetScaledPixelsFromOrigin(EditControlWrapper.GetCharHeight, ParaWnd) * 2);
-        SetWindowPos(ParaWnd.Handle, 0, R1.Left, R1.Top, 0, 0,
+        D := EditControlWrapper.GetCharHeight;
+{$IFDEF IDE_SUPPORT_HDPI}
+        // 加边框高度，免得边框占位置，注意此处和 ShowList 中调整位置对应
+        if (List.Height - List.ClientHeight > 8) and (List.Height - List.ClientHeight < 64) then
+          D := D + (List.Height - List.ClientHeight) div 2;
+        if D < 25 then
+          D := 25; // 太小，扩大一点点
+{$ENDIF}
+{$IFDEF DEBUG}
+        CnDebugger.LogRect(ParaWnd.BoundsRect, 'Code Param Window Rect');
+        CnDebugger.LogInteger(EditControlWrapper.GetCharHeight, 'Code Param Window CharHeight');
+        CnDebugger.LogInteger(D, 'Code Param Window Top Offset');
+{$ENDIF}
+        OldTop := ParaWnd.Top;
+        ParaWnd.Top := List.Top - ParaWnd.Height - D;
+        OffsetRect(RectPara, 0, ParaWnd.Top - OldTop);
+
+        SetWindowPos(ParaWnd.Handle, 0, RectPara.Left, RectPara.Top, 0, 0,
           SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
       end;
     end;
