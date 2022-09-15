@@ -2135,8 +2135,8 @@ begin
       GetWindowRect(List.Handle, R2);
       if IntersectRect(R3, R1, R2) and not IsRectEmpty(R3) then
       begin
-        ParaWnd.Top := List.Top - ParaWnd.Height - EditControlWrapper.GetCharHeight;
-        OffsetRect(R1, 0, - EditControlWrapper.GetCharHeight * 2);
+        ParaWnd.Top := List.Top - ParaWnd.Height - IdeGetScaledPixelsFromOrigin(EditControlWrapper.GetCharHeight);
+        OffsetRect(R1, 0, - IdeGetScaledPixelsFromOrigin(EditControlWrapper.GetCharHeight) * 2);
         SetWindowPos(ParaWnd.Handle, 0, R1.Left, R1.Top, 0, 0,
           SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
       end;
