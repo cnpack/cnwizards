@@ -132,7 +132,8 @@ type
     procedure MatchOperator(Token: TPascalToken); //操作符
     procedure WriteToken(Token: TPascalToken; BeforeSpaceCount: Byte = 0;
       AfterSpaceCount: Byte = 0; IgnorePreSpace: Boolean = False;
-      SemicolonIsLineStart: Boolean = False; NoSeparateSpace: Boolean = False);
+      SemicolonIsLineStart: Boolean = False; NoSeparateSpace: Boolean = False;
+      const AlterativeStr: string = '');
 
     function CheckIdentifierName(const S: string): string;
     {* 检查给定字符串是否是一个外部指定的标识符，如果是则返回正确的格式 }
@@ -839,10 +840,11 @@ end;
 
 procedure TCnAbstractCodeFormatter.WriteToken(Token: TPascalToken;
   BeforeSpaceCount, AfterSpaceCount: Byte; IgnorePreSpace: Boolean;
-  SemicolonIsLineStart: Boolean; NoSeparateSpace: Boolean);
+  SemicolonIsLineStart: Boolean; NoSeparateSpace: Boolean; const AlterativeStr: string);
 var
   NeedPadding: Boolean;
   NeedUnIndent: Boolean;
+  S: string;
 begin
   if CnPascalCodeForRule.UseIgnoreArea and Scanner.InIgnoreArea then
   begin
@@ -876,63 +878,68 @@ begin
   NeedPadding := CalcNeedPadding;
   NeedUnIndent := CalcNeedPaddingAndUnIndent;
 
+  if AlterativeStr = '' then
+    S := Scanner.TokenString
+  else
+    S := AlterativeStr;
+
   // 标点符号的设置
   case Token of
     tokComma:
-      CodeGen.Write(Scanner.TokenString, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+      CodeGen.Write(S, 0, 1, NeedPadding);   // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
     tokColon:
       begin
         if IgnorePreSpace then
-          CodeGen.Write(Scanner.TokenString, 0, 0, NeedPadding)
+          CodeGen.Write(S, 0, 0, NeedPadding)
         else
-          CodeGen.Write(Scanner.TokenString, 0, 1, NeedPadding);  // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
+          CodeGen.Write(S, 0, 1, NeedPadding);  // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除
       end;
     tokSemiColon:
       begin
         if IgnorePreSpace then
-          CodeGen.Write(Scanner.TokenString)
+          CodeGen.Write(S)
         else if SemicolonIsLineStart then
-          CodeGen.Write(Scanner.TokenString, BeforeSpaceCount, 0, NeedPadding)
+          CodeGen.Write(S, BeforeSpaceCount, 0, NeedPadding)
         else
         begin
           if FTrimAfterSemicolon then
-            CodeGen.Write(Scanner.TokenString, 0, 0, NeedPadding)
+            CodeGen.Write(S, 0, 0, NeedPadding)
           else
-            CodeGen.Write(Scanner.TokenString, 0, 1, NeedPadding);
+            CodeGen.Write(S, 0, 1, NeedPadding);
         end;
           // 1 也会导致行尾注释后退，现多出的空格已由 Generator 删除，
           // 但分号后如果本行又有其他内容则会出现多一个空格的问题，如 record 的可变部分
       end;
     tokAssign:
-      CodeGen.Write(Scanner.TokenString, BeforeSpaceCount, AfterSpaceCount, NeedPadding);
+      CodeGen.Write(S, BeforeSpaceCount, AfterSpaceCount, NeedPadding);
   else
     if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
     begin
       if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字，并且挨着，无须 Padding
       begin
-        CodeGen.Write(CheckIdentifierName(Scanner.TokenString), BeforeSpaceCount, AfterSpaceCount);
+        CodeGen.Write(CheckIdentifierName(S), BeforeSpaceCount, AfterSpaceCount);
       end
       else if CheckOutOfKeywordsValidArea(Token, ElementType) then
       begin
         // 关键字有效作用域外均在此原样输出
-        CodeGen.Write(CheckIdentifierName(Scanner.TokenString),
+        CodeGen.Write(CheckIdentifierName(S),
           BeforeSpaceCount, AfterSpaceCount, NeedPadding);
       end
       else // 真正的关键字场合
       begin
-        CodeGen.Write(FormatString(Scanner.TokenString,
+        CodeGen.Write(FormatString(S,
           CnPascalCodeForRule.KeywordStyle), BeforeSpaceCount,
           AfterSpaceCount, NeedPadding);
       end;
     end
     else if FIsTypeID then // 如果是类型名，则按规则处理 Scaner.TokenString
     begin
-      CodeGen.Write(CheckIdentifierName(Scanner.TokenString), BeforeSpaceCount,
+      CodeGen.Write(CheckIdentifierName(S), BeforeSpaceCount,
         AfterSpaceCount, NeedPadding);
     end
     else // 目前只有右括号部分
     begin
-      CodeGen.Write(CheckIdentifierName(Scanner.TokenString), BeforeSpaceCount,
+      CodeGen.Write(CheckIdentifierName(S), BeforeSpaceCount,
         AfterSpaceCount, NeedPadding, NeedUnIndent);
     end;
   end;
@@ -1172,6 +1179,7 @@ begin
       end;
 
       // 虽然理论上一部分已经在 Designator 中处理掉了走不到这里，但仍有作用
+      // 譬如在 Factor 里碰到小括号时
 
       // pchar(ch)^
       if Scanner.Token = tokHat then
@@ -1631,7 +1639,11 @@ begin
     FormatTypeParamDeclList(PreSpaceCount);
     if AllowFixEndGreateEqual and (Scanner.Token = tokGreatOrEqu) then
     begin
-      Match(tokGreatOrEqu, 0, 1); // TODO: 拆开 > 与 =
+      // Match(tokGreatOrEqu, 0, 1); // 拆开 > 与 =
+      WriteToken(tokGreat, 0, 1, False, False, False, '>');
+      WriteToken(tokEQUAL, 0, 1, False, False, False, '=');
+      Scanner.NextToken;
+
       Result := True;
     end
     else
@@ -4531,7 +4543,7 @@ begin
   FirstType := True;
   while Scanner.Token in IsTypeStartTokens do // Attribute will use [
   begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 type，如果不是，就跳出
+    // 如果是 [，就要越过其属性，找到 ] 后的第一个，确定它是否还是 type，如果不是，就跳出
     if (Scanner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsTypeStartTokens) then
       Exit;
 
