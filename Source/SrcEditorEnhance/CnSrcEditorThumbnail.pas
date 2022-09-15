@@ -96,6 +96,7 @@ type
     FPoint: TPoint; // 根据这儿存储的鼠标位置来显示窗体，x、y 是 FEditControl 内的坐标
     FShowTimer: TTimer;
     FHideTimer: TTimer;
+    FCheckHideTimer: TTimer;
     FAppEvents: TApplicationEvents;
     FShowThumbnail: Boolean;
     procedure EditControlMouseMove(Editor: TEditorObject; Shift: TShiftState;
@@ -104,6 +105,7 @@ type
 
     procedure OnShowTimer(Sender: TObject);
     procedure OnHideTimer(Sender: TObject);
+    procedure OnCheckHideTimer(Sender: TObject);
     procedure AppDeactivate(Sender: TObject);
 
     procedure CheckCreateForm;
@@ -143,6 +145,7 @@ const
   SHOW_INTERVAL = 1000;
   csHintWidth = 90;
   csHintHeight = 24;
+  csGap = 20;
 
   csThumbnail = 'Thumbnail';                   
   csShowThumbnail = 'ShowThumbnail';
@@ -156,7 +159,10 @@ const
 procedure TCnSrcEditorThumbnail.AppDeactivate(Sender: TObject);
 begin
   if FThumbWindow <> nil then
+  begin
     FThumbWindow.Visible := False;
+    FCheckHideTimer.Enabled := False;
+  end;
 end;
 
 procedure TCnSrcEditorThumbnail.ApplicationMessage(var Msg: TMsg;
@@ -244,6 +250,11 @@ begin
   FHideTimer.Interval := SHOW_INTERVAL;
   FHideTimer.OnTimer := OnHideTimer;
 
+  FCheckHideTimer := TTimer.Create(nil);
+  FCheckHideTimer.Enabled := False;
+  FCheckHideTimer.Interval := SHOW_INTERVAL;
+  FCheckHideTimer.OnTimer := OnCheckHideTimer;
+
   FAppEvents := TApplicationEvents.Create(nil);
   FAppEvents.OnDeactivate := AppDeactivate;
 
@@ -259,6 +270,7 @@ begin
   EditControlWrapper.REmoveEditorMouseLeaveNotifier(EditControlMouseLeave);
 
   FAppEvents.Free;
+  FCheckHideTimer.Free;
   FHideTimer.Free;
   FShowTimer.Free;
 
@@ -335,6 +347,41 @@ begin
   ShowThumbnail := Ini.ReadBool(csThumbnail, csShowThumbnail, FShowThumbnail);
 end;
 
+procedure TCnSrcEditorThumbnail.OnCheckHideTimer(Sender: TObject);
+var
+  P: TPoint;
+  InPreview, InScroll: Boolean;
+  SW: Integer;
+  EditControl: TWinControl;
+  R: TRect;
+begin
+  if FThumbWindow.Visible then
+  begin
+    // 如果鼠标在窗口外，则启动 HideTimer
+    P := FThumbWindow.ScreenToClient(Mouse.CursorPos);
+    InPreview := PtInRect(FThumbWindow.ClientRect, P);
+
+    // 鼠标在滚动条上时也要算进去，不能隐藏
+    InScroll := False;
+    SW := GetSystemMetrics(SM_CXVSCROLL);
+    EditControl := CnOtaGetCurrentEditControl;
+    if EditControl <> nil then
+    begin
+      P := EditControl.ScreenToClient(Mouse.CursorPos);
+      R := EditControl.ClientRect;
+      R.Left := R.Right - csGap;
+      R.Right := R.Left + SW + csGap;
+      InScroll := PtInRect(R, P);
+    end;
+
+    FHideTimer.Enabled := not InPreview and not InScroll;
+{$IFDEF DEBUG}
+//  CnDebugger.LogBoolean(InPreview, 'Check Hide Timer. Mouse In Preview?');
+//  CnDebugger.LogBoolean(InScroll, 'Check Hide Timer. Mouse In Editor Scrollbar?');
+{$ENDIF}
+  end;
+end;
+
 procedure TCnSrcEditorThumbnail.OnHideTimer(Sender: TObject);
 begin
   FHideTimer.Enabled := False;
@@ -342,6 +389,8 @@ begin
   begin
     FThumbWindow.Visible := False;
     FThumbWindow.LineHintWindow.Visible := False;
+
+    FCheckHideTimer.Enabled := False;
   end;
 end;
 
@@ -402,7 +451,7 @@ begin
   P.x := FEditControl.Width;
   P := FEditControl.ClientToScreen(P);
 
-  P.x := P.x - FThumbWindow.Width - 20;
+  P.x := P.x - FThumbWindow.Width - csGap;
   P.y := P.y - FThumbWindow.Height div 2;
 
   // 避免超出主屏幕
@@ -431,7 +480,8 @@ begin
     // FThumbWindow.LineHintWindow.Visible := True;
     // TODO: 暂时禁用，因为会出现内容出不来，原因未知
     
-    FThumbWindow.SetPos(P.x, P.y) ;
+    FThumbWindow.SetPos(P.x, P.y);
+    FCheckHideTimer.Enabled := True;
   end;
 end;
 
