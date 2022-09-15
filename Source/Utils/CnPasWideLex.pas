@@ -337,8 +337,8 @@ type
     procedure NextNoJunk;
     procedure NextClass;
 
-    procedure SaveToBookMark(out Bookmark: TCnPasWideBookmark);
-    procedure LoadFromBookMark(var Bookmark: TCnPasWideBookmark);
+    procedure SaveToBookmark(out Bookmark: TCnPasWideBookmark);
+    procedure LoadFromBookmark(var Bookmark: TCnPasWideBookmark);
 
     property IsClass: Boolean read FIsClass;
     property IsInterface: Boolean read FIsInterface;
@@ -1685,7 +1685,7 @@ begin
   FLineStartOffset := FRun;
 end;
 
-procedure TCnPasWideLex.LoadFromBookMark(var Bookmark: TCnPasWideBookmark);
+procedure TCnPasWideLex.LoadFromBookmark(var Bookmark: TCnPasWideBookmark);
 begin
   if Bookmark <> nil then
     with Bookmark do
@@ -1893,7 +1893,7 @@ begin
   end;
 end;
 
-procedure TCnPasWideLex.SaveToBookMark(out Bookmark: TCnPasWideBookmark);
+procedure TCnPasWideLex.SaveToBookmark(out Bookmark: TCnPasWideBookmark);
 begin
   Bookmark := TCnPasWideBookmark.Create;
   with Bookmark do

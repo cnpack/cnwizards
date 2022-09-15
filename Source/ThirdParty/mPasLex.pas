@@ -114,6 +114,30 @@ type
   PAnsiChar = PChar;
 {$ENDIF}
 
+  TmwPasLexBookmark = packed record
+  {* 书签，保存 Lex 的临时状态供恢复，为了简便起见使用 record，Added by LiuXiao}
+    SupportWideCharIdentBookmark: Boolean;
+    CommentBookmark: TCommentState;
+    OriginBookmark: PAnsiChar;
+    RunBookmark: LongInt;
+    TempBookmark: PAnsiChar;
+    RoundCountBookmark: Integer;
+    SquareCountBookmark: Integer;
+    StringLenBookmark: Integer;
+    ToIdentBookmark: PAnsiChar;
+    TokenPosBookmark: Integer;
+    LineNumberBookmark: Integer;
+    TokenIDBookmark: TTokenKind;
+    LastIdentPosBookmark: Integer;
+    LastNoSpaceBookmark: TTokenKind;
+    LastNoSpacePosBookmark: Integer;
+    LastNoSpaceCRLFBookmark: TTokenKind;
+    LastNoSpaceCRLFPosBookmark: Integer;
+    LinePosBookmark: Integer;
+    IsInterfaceBookmark: Boolean;
+    IsClassBookmark: Boolean;
+  end;
+
   TmwPasLex=class(TObject)
   private
     FSupportWideCharIdent: Boolean;
@@ -264,6 +288,10 @@ type
     procedure NextID(ID: TTokenKind);
     procedure NextNoJunk;
     procedure NextClass;
+
+    procedure SaveToBookmark(var Bookmark: TmwPasLexBookmark);
+    procedure LoadFromBookmark(var Bookmark: TmwPasLexBookmark);
+
     property IsClass: Boolean read fIsClass;
     property IsInterface: Boolean read fIsInterface;
     property LastIdentPos: Integer read fLastIdentPos;
@@ -1531,6 +1559,54 @@ end;
 function TmwPasLex.GetTokenLength: Integer;
 begin
   Result := Run - fTokenPos;
+end;
+
+procedure TmwPasLex.LoadFromBookmark(var Bookmark: TmwPasLexBookmark);
+begin
+  FSupportWideCharIdent := Bookmark.SupportWideCharIdentBookmark;
+  FComment := Bookmark.CommentBookmark;
+  FOrigin := Bookmark.OriginBookmark;
+  Run := Bookmark.RunBookmark;
+  Temp := Bookmark.TempBookmark;
+  FRoundCount := Bookmark.RoundCountBookmark;
+  FSquareCount := Bookmark.SquareCountBookmark;
+  FStringLen := Bookmark.StringLenBookmark;
+  FToIdent := Bookmark.ToIdentBookmark;
+  FTokenPos := Bookmark.TokenPosBookmark;
+  FLineNumber := Bookmark.LineNumberBookmark;
+  FTokenID := Bookmark.TokenIDBookmark;
+  FLastIdentPos := Bookmark.LastIdentPosBookmark;
+  FLastNoSpace := Bookmark.LastNoSpaceBookmark;
+  FLastNoSpacePos := Bookmark.LastNoSpacePosBookmark;
+  FLastNoSpaceCRLF := Bookmark.LastNoSpaceCRLFBookmark;
+  FLastNoSpaceCRLFPos := Bookmark.LastNoSpaceCRLFPosBookmark;
+  FLinePos := Bookmark.LinePosBookmark;
+  FIsInterface := Bookmark.IsInterfaceBookmark;
+  FIsClass := Bookmark.IsClassBookmark;
+end;
+
+procedure TmwPasLex.SaveToBookmark(var Bookmark: TmwPasLexBookmark);
+begin
+  Bookmark.SupportWideCharIdentBookmark := FSupportWideCharIdent;
+  Bookmark.CommentBookmark := FComment;
+  Bookmark.OriginBookmark := FOrigin;
+  Bookmark.RunBookmark := Run;
+  Bookmark.TempBookmark := Temp;
+  Bookmark.RoundCountBookmark := FRoundCount;
+  Bookmark.SquareCountBookmark := FSquareCount;
+  Bookmark.StringLenBookmark := FStringLen;
+  Bookmark.ToIdentBookmark := FToIdent;
+  Bookmark.TokenPosBookmark := FTokenPos;
+  Bookmark.LineNumberBookmark := FLineNumber;
+  Bookmark.TokenIDBookmark := FTokenID;
+  Bookmark.LastIdentPosBookmark := FLastIdentPos;
+  Bookmark.LastNoSpaceBookmark := FLastNoSpace;
+  Bookmark.LastNoSpacePosBookmark := FLastNoSpacePos;
+  Bookmark.LastNoSpaceCRLFBookmark := FLastNoSpaceCRLF;
+  Bookmark.LastNoSpaceCRLFPosBookmark := FLastNoSpaceCRLFPos;
+  Bookmark.LinePosBookmark := FLinePos;
+  Bookmark.IsInterfaceBookmark := FIsInterface;
+  Bookmark.IsClassBookmark := FIsClass;
 end;
 
 initialization
