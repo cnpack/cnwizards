@@ -749,9 +749,9 @@ begin
               if IsRecord then
               begin
                 // 处理 record helper for 的情形，但在implementation部分其end会被
-                // record内部的function/procedure给干掉，暂无解决方案。
+                // record 内部的 function/procedure 给干掉，暂无解决方案。
                 IsRecordHelper := False;
-                Lex.SaveToBookMark(Bookmark);
+                Lex.SaveToBookmark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier] then
@@ -760,12 +760,12 @@ begin
                     IsRecordHelper := True;
                 end;
 
-                Lex.LoadFromBookMark(Bookmark);
+                Lex.LoadFromBookmark(Bookmark);
               end;
 
               // of object 的 object 不应该高亮，但不在此处剔除
 
-              // 不处理 of object 的字样；不处理前面是 @@ 型的label的情形
+              // 不处理 of object 的字样；不处理前面是 @@ 型的 label 的情形
               // 额外用 IsRecord 变量因为 Lex.RunPos 恢复后，TokenID 可能会变
               if ((Lex.TokenID <> tkObject) or (PrevTokenID <> tkOf))
                 and not (PrevTokenID in [tkAt, tkDoubleAddressOp])
@@ -845,7 +845,7 @@ begin
               // 处理不是 classdef 但是 class helper for TObject 的情形
               if not IsClassDef and (Lex.TokenID = tkClass) and not Lex.IsClass then
               begin
-                Lex.SaveToBookMark(Bookmark);
+                Lex.SaveToBookmark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID in [tkSymbol, tkIdentifier, tkSealed, tkAbstract] then
@@ -867,14 +867,14 @@ begin
                   end;
                 end;
 
-                Lex.LoadFromBookMark(Bookmark);
+                Lex.LoadFromBookmark(Bookmark);
               end;
 
               IsClassOpen := False;
               if IsClassDef then
               begin
                 IsClassOpen := True;
-                Lex.SaveToBookMark(Bookmark);
+                Lex.SaveToBookmark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
                 if Lex.TokenID = tkSemiColon then // 是个 class; 不需要 end;
@@ -895,7 +895,7 @@ begin
                 else if Lex.TokenID = tkFor then
                   IsClassOpen := True;
 
-                Lex.LoadFromBookMark(Bookmark);
+                Lex.LoadFromBookmark(Bookmark);
               end;
 
               if IsClassOpen then // 有后续内容，需要一个 end
