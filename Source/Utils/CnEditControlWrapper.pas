@@ -901,7 +901,7 @@ begin
     WM_MBUTTONDOWN, WM_MBUTTONUP, WM_NCLBUTTONDOWN, WM_NCLBUTTONUP, WM_NCRBUTTONDOWN,
     WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
-    [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE]);
+    [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE {$IFDEF IDE_SUPPORT_HDPI}, WM_DPICHANGED {$ENDIF}]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
@@ -2513,6 +2513,16 @@ begin
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[i]));
     end;
   end
+{$IFDEF IDE_SUPPORT_HDPI}
+  else if (Msg.Msg = WM_DPICHANGED) and (Control = Application.MainForm) then
+  begin
+    ChangeType := [ctOptionChanged];
+    // 将系统 DPI 改变的通知转化为字体大小选项变化，并且为了避免多次调用，只判断主窗体
+    FOptionChanged := True;
+    for I := 0 to EditorCount - 1 do
+      DoEditorChange(Editor, ChangeType + CheckEditorChanges(Editors[i]));
+  end
+{$ENDIF}
   else if (Msg.Msg = WM_NCPAINT) and IsEditControl(Control) then
   begin
     Editor := nil;
