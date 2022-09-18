@@ -1838,6 +1838,10 @@ begin
           begin
             if PosInfo.PosKind = pkVar then    // 判断是否就地 var K := 1 这种推断声明
               PosInfo.PosKind := pkVarType;
+
+            // Field 等内容如果碰到赋值，也要结束掉
+            if Result.PosKind in [pkCompDirect, pkComment, pkField] then
+              Result.PosKind := SavePos;
           end;
         tkSemiColon:
           begin
