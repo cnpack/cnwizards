@@ -4266,9 +4266,10 @@ begin
     else
     // StringType
     if (Scanner.Token = tokKeywordString) or
-      Scanner.TokenSymbolIs('String')  or
+      Scanner.TokenSymbolIs('String')     or
       Scanner.TokenSymbolIs('AnsiString') or
-      Scanner.TokenSymbolIs('WideString') then
+      Scanner.TokenSymbolIs('WideString') or
+      Scanner.TokenSymbolIs('UnicodeString') then
     begin
       FormatStringType; // ÎÞÐè»»ÐÐ
     end
@@ -4279,7 +4280,7 @@ begin
     end
     else
     begin
-      //TypeID, SimpleType, VariantType
+      // TypeID, SimpleType, VariantType
       { SubrangeType -> ConstExpr '..' ConstExpr }
       { TypeId -> [UnitId '.'] <type-identifier> }
 

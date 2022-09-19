@@ -64,7 +64,7 @@ type
     FParser: TCnGeneralWidePasLex;
     FUsesAdded: Boolean;
     FColumn: Integer;
-    FSkipImplementUses: Boolean;
+    FSkipImplementUses: Boolean; // 该设置暂不开放，默认 False
     procedure CursorReturnBack;
   protected
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
@@ -172,7 +172,7 @@ begin
       Use2Line := 0;
       IntfLine := 0;
       ImplLine := 0;
-      Uses1 := False;
+      Uses1 := False;    // Use1 和 Use2 分别表示 interface 部分和 implementation 部分是否有 uses 关键字
       Uses2 := False;
       InImplement := False;
       CursorInImplement := False;
