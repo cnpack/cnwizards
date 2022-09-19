@@ -161,7 +161,6 @@ type
     procedure actAddOpenedExecute(Sender: TObject);
     procedure actAddDirExecute(Sender: TObject);
   private
-    { Private declarations }
     CustomFiles: TCnBackupProjectInfo;
     ProjectList: TCnBackupProjectList;
     FExt: string;
@@ -174,6 +173,7 @@ type
     FPassword: string;
     FSavePath: string;
     FCurrentName: string;
+    FIncludeVer: Boolean;
     FTimeFormatIndex: Integer;
     FUseExternal: Boolean;
     FCompressor: string;
@@ -231,6 +231,7 @@ const
   csShowPass = 'ShowPass';
   csZipPass = 'ZipPass';
   csTimeFormatIndex = 'TimeFormatIndex';
+  csIncludeVer = 'IncludeVer';
   
   csUseExternal = 'UseExternal';
   csCompressor = 'Compressor';
@@ -480,6 +481,7 @@ begin
   FRemovePath := Ini.ReadBool(csBackupSection, csRemovePath, False);
   FSavePath := Ini.ReadString(csBackupSection, csSavePath, '');
   FTimeFormatIndex := Ini.ReadInteger(csBackupSection, csTimeFormatIndex, 0);
+  FIncludeVer := Ini.ReadBool(csBackupSection, csIncludeVer, False);
   FPassword := Ini.ReadString(csBackupSection, csZipPass, '');
   FUseExternal := Ini.ReadBool(csBackupSection, csUseExternal, False);
   FCompressor := Ini.ReadString(csBackupSection, csCompressor, '');
@@ -512,6 +514,7 @@ begin
   Ini.WriteBool(csBackupSection, csRemovePath, FRemovePath);
   Ini.WriteString(csBackupSection, csSavePath, FSavePath);
   Ini.WriteInteger(csBackupSection, csTimeFormatIndex, FTimeFormatIndex);
+  Ini.WriteBool(csBackupSection, csIncludeVer, FIncludeVer);
   Ini.WriteBool(csBackupSection, csUseExternal, FUseExternal);
   Ini.WriteString(csBackupSection, csCompressor, FCompressor);
   Ini.WriteString(csBackupSection, csCompressCmd, FCompressCmd);
@@ -897,8 +900,10 @@ begin
         Password := FPassword;
 
       cbbTimeFormat.ItemIndex := FTimeFormatIndex;
+      IncludeVer := FIncludeVer;
       SavePath := MakePath(FSavePath);
       CurrentName := _CnChangeFileExt(_CnExtractFileName(FCurrentName), '');
+      Version := CnOtaGetProjectVersion;
 
       if not FUseExternal then
         SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
@@ -933,6 +938,7 @@ begin
 
         FSavePath := _CnExtractFilePath(SaveFileName);
         FTimeFormatIndex := cbbTimeFormat.ItemIndex;
+        FIncludeVer := IncludeVer;
 
         SaveFileName := LinkPath(_CnExtractFilePath(FCurrentName), SaveFileName);
 

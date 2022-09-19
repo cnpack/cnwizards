@@ -89,6 +89,7 @@ type
     chkShowPass: TCheckBox;
     lblComments: TLabel;
     mmoComments: TMemo;
+    chkIncludeVer: TCheckBox;
     procedure btnSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -107,6 +108,7 @@ type
     FConfirmed: Boolean;
     FSavePath: string;
     FCurrentName: string;
+    FVersion: string;
     FExt: string;
     function GetPassword: string;
     function GetRemovePath: Boolean;
@@ -134,14 +136,16 @@ type
     procedure SetShowPass(const Value: Boolean);
     function GetComments: string;
     procedure SetComments(const Value: string);
+    function GetIncludeVer: Boolean;
+    procedure SetIncludeVer(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
     procedure UpdateContent;
     procedure CheckShowPass;
   public
-    { Public declarations }
     function GetExtFromCompressor(Compressor: string): string;
 
+    property IncludeVer: Boolean read GetIncludeVer write SetIncludeVer;
     property UsePassword: Boolean read GetUsePassword write SetUsePassword;
     property Password: string read GetPassword write SetPassword;
     property RemovePath: Boolean read GetRemovePath write SetRemovePath;
@@ -160,6 +164,7 @@ type
 
     property SavePath: string read FSavePath write FSavePath;
     property CurrentName: string read FCurrentName write FCurrentName;
+    property Version: string read FVersion write FVersion;
   end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
@@ -280,14 +285,6 @@ begin
       CanClose := QueryDlg(SCnProjExtBackupMustZip);
       Exit;
     end;
-
-//    if chkPassword.Checked and (edtPass.Text = '') or (edtPass.Text <> edtSecond.Text) then
-//    begin
-//      ErrorDlg(SCnDoublePasswordError);
-//      CanClose := False;
-//      edtPass.SetFocus;
-//      Exit;
-//    end;
   end;
 end;
 
@@ -316,8 +313,12 @@ begin
   if FExt = '' then
     FExt := '.zip';
 
-  edtFile.Text := SavePath + CurrentName
-    + FormatDateTime('_' + Trim(cbbTimeFormat.Items[cbbTimeFormat.ItemIndex]), Date + Time) + FExt;
+  if IncludeVer and (FVersion <> '') then
+    edtFile.Text := SavePath + CurrentName + '_' + FVersion
+      + FormatDateTime('_' + Trim(cbbTimeFormat.Items[cbbTimeFormat.ItemIndex]), Date + Time) + FExt
+  else
+    edtFile.Text := SavePath + CurrentName
+      + FormatDateTime('_' + Trim(cbbTimeFormat.Items[cbbTimeFormat.ItemIndex]), Date + Time) + FExt;
 
   FConfirmed := False;
 end;
@@ -391,7 +392,8 @@ begin
   lblPreCmd.Enabled := chkExecAfter.Checked;
   mmoAfterCmd.Enabled := chkExecAfter.Checked;
   
-  if not chkUseExternal.Checked then Exit;
+  if not chkUseExternal.Checked then
+    Exit;
   FExt := GetExtFromCompressor(edtCompressor.Text);
   edtFile.Text := _CnChangeFileExt(edtFile.Text, FExt);
 end;
@@ -519,6 +521,17 @@ end;
 procedure TCnProjectBackupSaveForm.SetComments(const Value: string);
 begin
   mmoComments.Lines.Text := Value;
+end;
+
+function TCnProjectBackupSaveForm.GetIncludeVer: Boolean;
+begin
+  Result := chkIncludeVer.Checked;
+end;
+
+procedure TCnProjectBackupSaveForm.SetIncludeVer(const Value: Boolean);
+begin
+  chkIncludeVer.Checked := Value;
+  UpdateContent;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
