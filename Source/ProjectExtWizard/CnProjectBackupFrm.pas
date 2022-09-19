@@ -903,16 +903,31 @@ begin
       IncludeVer := FIncludeVer;
       SavePath := MakePath(FSavePath);
       CurrentName := _CnChangeFileExt(_CnExtractFileName(FCurrentName), '');
-      Version := CnOtaGetProjectVersion;
+
+      VerStr := CnOtaGetProjectVersion;
+      Version := VerStr;
 
       if not FUseExternal then
-        SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
+      begin
+        if FIncludeVer and (VerStr <> '') then
+          SaveFileName := SavePath + CurrentName + '_' + VerStr +
+            FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip'
+        else
+          SaveFileName := SavePath + CurrentName +
+            FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + '.zip';
+      end
       else
       begin
         FExt := GetExtFromCompressor(FCompressor);
         if FExt = '' then
           FExt := '.zip';
-        SaveFileName := SavePath + CurrentName + FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + FExt;
+
+        if FIncludeVer and (VerStr <> '') then
+          SaveFileName := SavePath + CurrentName + '_' + VerStr +
+            FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + FExt
+        else
+          SaveFileName := SavePath + CurrentName +
+            FormatDateTime('_' + cbbTimeFormat.Items[FTimeFormatIndex], Date + Time) + FExt;
       end;
 
       if ShowModal = mrOK then
@@ -947,7 +962,6 @@ begin
             Exit;
 
         // 处理 Version 信息来生成 VerStr
-        VerStr := CnOtaGetProjectVersion;
         if FUseExternal then
         begin
           ListFileName := MakePath(GetWindowsTempPath) + 'BackupList.txt';
