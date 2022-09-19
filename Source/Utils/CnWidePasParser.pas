@@ -1840,8 +1840,8 @@ begin
               PosInfo.PosKind := pkVarType;
 
             // Field 等内容如果碰到赋值，也要结束掉
-            if Result.PosKind in [pkCompDirect, pkComment, pkField] then
-              Result.PosKind := SavePos;
+            if PosInfo.PosKind in [pkCompDirect, pkComment, pkField] then
+              PosInfo.PosKind := SavePos;
           end;
         tkSemiColon:
           begin
