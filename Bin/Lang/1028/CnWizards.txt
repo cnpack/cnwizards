@@ -2574,6 +2574,7 @@ TCnProjectBackupSaveForm.btnHelp.Caption=說明(&H)
 TCnProjectBackupSaveForm.btnOK.Caption=保存(&S)
 TCnProjectBackupSaveForm.btnSelect.Hint=選擇保存的目標檔
 TCnProjectBackupSaveForm.chkExecAfter.Caption=備份完畢後執行命令
+TCnProjectBackupSaveForm.chkIncludeVer.Caption=文件名中包含工程版本號
 TCnProjectBackupSaveForm.chkPassword.Caption=加密壓縮檔
 TCnProjectBackupSaveForm.chkRememberPass.Caption=記住密碼
 TCnProjectBackupSaveForm.chkRemovePath.Caption=刪除壓縮檔中的路徑資訊（可能導致同名檔無法保存）。

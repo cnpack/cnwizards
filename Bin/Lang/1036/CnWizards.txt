@@ -2574,6 +2574,7 @@ TCnProjectBackupSaveForm.btnHelp.Caption=&Aide
 TCnProjectBackupSaveForm.btnOK.Caption=&Sauver
 TCnProjectBackupSaveForm.btnSelect.Hint=Sélectionnez le fichier à  enregistrer
 TCnProjectBackupSaveForm.chkExecAfter.Caption=Exécuter la commande après la sauvegarde
+TCnProjectBackupSaveForm.chkIncludeVer.Caption=Inclure la version du projet
 TCnProjectBackupSaveForm.chkPassword.Caption=Utiliser un mot de passe
 TCnProjectBackupSaveForm.chkRememberPass.Caption=Se souvenir du MDP
 TCnProjectBackupSaveForm.chkRemovePath.Caption=Supprimer le chemin ( erreur si les noms de fichiers sont = ).

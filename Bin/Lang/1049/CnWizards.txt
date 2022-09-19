@@ -2574,6 +2574,7 @@ TCnProjectBackupSaveForm.btnHelp.Caption=Справка
 TCnProjectBackupSaveForm.btnOK.Caption=Сохранить
 TCnProjectBackupSaveForm.btnSelect.Hint=Выбрать файл для сохранения
 TCnProjectBackupSaveForm.chkExecAfter.Caption=Выполнить команду после создания РК
+TCnProjectBackupSaveForm.chkIncludeVer.Caption=Включить версию проекта
 TCnProjectBackupSaveForm.chkPassword.Caption=Установить пароль
 TCnProjectBackupSaveForm.chkRememberPass.Caption=Запомнить пароль
 TCnProjectBackupSaveForm.chkRemovePath.Caption=Удалять путь (возм. ошибка для файлов с один. именами)

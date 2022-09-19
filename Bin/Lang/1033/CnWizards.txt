@@ -2574,6 +2574,7 @@ TCnProjectBackupSaveForm.btnHelp.Caption=&Help
 TCnProjectBackupSaveForm.btnOK.Caption=&Save
 TCnProjectBackupSaveForm.btnSelect.Hint=Select File to Save
 TCnProjectBackupSaveForm.chkExecAfter.Caption=Execute Command After Backup
+TCnProjectBackupSaveForm.chkIncludeVer.Caption=Include Project Version
 TCnProjectBackupSaveForm.chkPassword.Caption=Use Password
 TCnProjectBackupSaveForm.chkRememberPass.Caption=Remember Password
 TCnProjectBackupSaveForm.chkRemovePath.Caption=Remove Path (May Cause Error when File Names are Equal).
