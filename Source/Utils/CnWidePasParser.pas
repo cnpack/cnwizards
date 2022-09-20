@@ -1806,17 +1806,17 @@ begin
             begin
               PosInfo.PosKind := pkClass; // Record 也复用 class 标记，后续的判断类似于 class
               DoNext(True);
-              if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
+              if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
                 PosInfo.PosKind := pkTypeDecl
-              else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
+              else if LexStillBeforeCursor and (Lex.TokenID = tkRoundOpen) then
               begin
-                while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
+                while LexStillBeforeCursor and not (Lex.TokenID in
                   [tkNull, tkRoundClose]) do
                   DoNext;
-                if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundClose) then
+                if LexStillBeforeCursor and (Lex.TokenID = tkRoundClose) then
                 begin
                   DoNext(True);
-                  if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
+                  if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
                     PosInfo.PosKind := pkTypeDecl
                   else
                   begin
