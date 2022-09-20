@@ -256,7 +256,7 @@ type
     pkComment,         // 注释块内部，Pascal 和 C/C++ 都有效
     pkIntfUses,        // Pascal interface 的 uses 内部
     pkImplUses,        // Pascal implementation 的 uses 内部
-    pkClass,           // Pascal class 声明内部
+    pkClass,           // Pascal class 声明内部，也包括 record 内部
     pkInterface,       // Pascal interface 声明内部
     pkType,            // Pascal type 定义区等号前的部分
     pkTypeDecl,        // Pascal type 定义区等号后的部分
@@ -265,14 +265,14 @@ type
     pkResourceString,  // Pascal resourcestring 定义区
     pkVar,             // Pascal var 定义区，冒号前的部分
     pkVarType,         // Pascal var 定义区，冒号后的部分
-    pkCompDirect,      // 编译指令内部{$...}，C/C++ 则是指 #include 等内部
+    pkCompDirect,      // 编译指令内部 {$...}，C/C++ 则是指 #include 等内部
     pkString,          // 字符串内部，Pascal 和 C/C++ 都有效
     pkField,           // 标识符. 后面的域内部，属性、方法、事件、记录项等，Pascal 和 C/C++ 都有效
     pkProcedure,       // 过程内部
     pkFunction,        // 函数内部
     pkConstructor,     // 构造器内部
     pkDestructor,      // 析构器内部
-    pkFieldDot,        // 连接域的点，包括C/C++的->
+    pkFieldDot,        // 连接域的点，包括 C/C++ 的 ->
 
     pkDeclaration);    // C中的变量声明区，指类型之后的变量名部分，一般无需弹出
 
@@ -1836,6 +1836,36 @@ begin
               Inc(ProcIndent);
               Result.PosKind := TCodePosKind(ProcStack.Peek);
               IsAfterProcBegin := True;
+            end;
+
+            if MyTokenID = tkRecord then
+            begin
+              Result.PosKind := pkClass; // Record 也复用 class 标记，后续的判断类似于 class
+              DoNext(True);
+              if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
+                Result.PosKind := pkTypeDecl
+              else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
+              begin
+                while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
+                  [tkNull, tkRoundClose]) do
+                  DoNext;
+                if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundClose) then
+                begin
+                  DoNext(True);
+                  if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
+                    Result.PosKind := pkTypeDecl
+                  else
+                  begin
+                    InClass := True;
+                    Continue;
+                  end;
+                end;
+              end
+              else
+              begin
+                InClass := True;
+                Continue;
+              end;
             end;
           end;
         tkEnd:
