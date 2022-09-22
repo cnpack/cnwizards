@@ -1184,7 +1184,11 @@ begin
         begin
           if P^ = #10 then
           begin
-            NewLine;
+            if not FKeepOneBlankLine then // 保持语句间的空行时，块注释中间的换行要忽略，
+              NewLine
+            else
+              NewLine(False);             // 但也必须参与换行计数，否则源目标行数对应会错乱
+
             FOldSourceColPtr := P;
             Inc(FOldSourceColPtr);
           end;
@@ -1299,7 +1303,11 @@ begin
                   // ASM 模式下，换行作为语句结束符，不在注释内处理，所以这也不加
                   if not FASMMode then
                   begin
-                    NewLine;
+                    if not FKeepOneBlankLine then // 保持语句间的空行时，块注释中间的换行要忽略，
+                      NewLine
+                    else
+                      NewLine(False);             // 但也必须参与换行计数，否则源目标行数对应会错乱
+
                     Inc(FBlankLinesAfterComment);
                     Inc(P);
                     FOldSourceColPtr := P;
@@ -1313,7 +1321,11 @@ begin
             begin
               if P^ = #10 then
               begin
-                NewLine;
+                if not FKeepOneBlankLine then // 保持语句间的空行时，块注释中间的换行要忽略，
+                  NewLine
+                else
+                  NewLine(False);             // 但也必须参与换行计数，否则源目标行数对应会错乱
+
                 FOldSourceColPtr := P;
                 Inc(FOldSourceColPtr);
               end;
