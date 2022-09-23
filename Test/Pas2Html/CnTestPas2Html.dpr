@@ -2,7 +2,7 @@ program CnTestPas2Html;
 
 uses
   Forms,
-  CnTestPas2HtmlFrm in 'CnTestPas2HtmlFrm.pas' {Form1},
+  CnTestPas2HtmlFrm in 'CnTestPas2HtmlFrm.pas' {FormPasConvert},
   CnPasConvert in '..\..\Source\Utils\CnPasConvert.pas';
 
 {$R *.res}
@@ -10,6 +10,6 @@ uses
 begin
   Application.Initialize;
   //Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormPasConvert, FormPasConvert);
   Application.Run;
 end.

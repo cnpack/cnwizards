@@ -44,7 +44,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Top = 8
     Width = 313
     Height = 249
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Normal &Options'

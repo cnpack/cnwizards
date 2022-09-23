@@ -112,11 +112,9 @@ type
     procedure SetFonts(const Index: Integer; const Value: TFont);
     procedure DispFontText;
     procedure ResetFontsFromBasic(ABasicFont: TFont);
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property CopySelectedShortCut: TShortCut index 0 read GetShortCut write SetShortCut;
     property ExportUnitShortCut: TShortCut index 1 read GetShortCut write SetShortCut;
     property ExportOpenedShortCut: TShortCut index 2 read GetShortCut write SetShortCut;

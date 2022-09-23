@@ -39,6 +39,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, CnPasConvert, Clipbrd, ToolsAPI,
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizIdeUtils,
@@ -60,13 +62,16 @@ type
     chkOpenAfterConvert: TCheckBox;
     lblEncode: TLabel;
     cbbEncoding: TComboBox;
+    btnHelp: TButton;
     procedure rgConvertTypeClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     function GetConvertType: TCnPasConvertType;
     procedure SetConvertType(const Value: TCnPasConvertType);
     function GetHTMLEncode: string;
     procedure SetHTMLEncode(const Value: string);
-    { Private declarations }
+  protected
+    function GetHelpTopic: string; override;
   public
     function Open: Boolean;
     property ConvertType: TCnPasConvertType read GetConvertType write SetConvertType;
@@ -84,7 +89,11 @@ const
     'RTF Files (*.rtf)|*.rtf'
   );
 
+{$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 {$R *.dfm}
 
@@ -120,6 +129,17 @@ begin
   cbbEncoding.Enabled := rgConvertType.ItemIndex = 0;
 end;
 
+function TCnPasConvertTypeForm.GetHelpTopic: string;
+begin
+  Result := 'CnPas2HtmlWizard';
+end;
+
+procedure TCnPasConvertTypeForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
+end;
+
+{$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
 end.
 
 

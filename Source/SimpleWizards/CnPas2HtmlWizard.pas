@@ -28,10 +28,12 @@ unit CnPas2HtmlWizard;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.04.15 V1.3
+* 修改记录：2022.09.23 V1.4
+*               支持 Unicode
+*           2003.04.15 V1.3
 *               修改 Action 更新部分代码（by yygw）
 *           2003.03.09 V1.2
-*               改用TEditReader，加入处理打开文件的功能。
+*               改用 TEditReader，加入处理打开文件的功能。
 *           2003.02.28 V1.1
 *               加入字体处理，修改小Bug，加入安装条件、标题设置和TXT格式复制。
 *           2003.02.23 V1.0
@@ -244,11 +246,11 @@ end;
 
 constructor TCnPas2HtmlWizard.Create;
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
-  for i := Low(FFontArray) to High(FFontArray) do
-    FFontArray[i] := TFont.Create;
+  for I := Low(FFontArray) to High(FFontArray) do
+    FFontArray[I] := TFont.Create;
 end;
 
 procedure TCnPas2HtmlWizard.AcquireSubActions;
@@ -270,12 +272,12 @@ end;
 
 destructor TCnPas2HtmlWizard.Destroy;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := Low(FFontArray) to High(FFontArray) do
+  for I := Low(FFontArray) to High(FFontArray) do
   begin
-    if Assigned(FFontArray[i]) then
-      FFontArray[i].Free;
+    if Assigned(FFontArray[I]) then
+      FFontArray[I].Free;
   end;
   inherited;
 end;
@@ -324,7 +326,7 @@ end;
 
 function TCnPas2HtmlWizard.GetSearchContent: string;
 begin
-  Result := inherited GetSearchContent + '富文本,rtf,';
+  Result := inherited GetSearchContent + '富文本,rtf,htm,html';
 end;
 
 procedure TCnPas2HtmlWizard.SubActionExecute(Index: Integer);
@@ -337,8 +339,12 @@ var
   ProjectGroup: IOTAProjectGroup;
   iModuleServices: IOTAModuleServices;
   sName, sGroupDir: string;
+{$IFDEF UNICODE}
+  S: string;
+{$ELSE}
   S: AnsiString;
-  i: Integer;
+{$ENDIF}
+  I: Integer;
   SourceType: TCnConvertSourceType;
 begin
   if Index = FIdCopySelected then
@@ -360,13 +366,12 @@ begin
         tmpOutMStream := TMemoryStream.Create;
         OutMStream := TMemoryStream.Create;
         try
-          S := AnsiString(Block.Text);
-{$IFDEF IDE_WIDECONTROL}
-  {$IFNDEF BDS2010_UP} // Delphi 2010 以及以上版本，Block的Text已经不是UTF8而是Ansi了
-          S := CnUtf8ToAnsi(S);
-  {$ENDIF}
+          // Block.Text 是 Ansi/Utf8/Utf16，需要转成 Ansi/Ansi/Utf16
+          S := Block.Text;
+{$IFDEF IDE_STRING_ANSI_UTF8} // 只有 2005~2007 需要将 Utf8 转换成 Ansi
+          S := CnUtf8ToAnsi(Block.Text);
 {$ENDIF}
-          InMStream.Write(S[1], Length(S));
+          InMStream.Write(S[1], (Length(S) + 1)* SizeOf(Char));
 
           if CurrentIsDelphiSource or IsDpk(CnOtaGetCurrentSourceFile) then
             SourceType := stPas
@@ -374,9 +379,9 @@ begin
             SourceType := stCpp;
 
           ConvertStream(SourceType, '', InMStream, tmpOutMStream);
-          // 此时tmpOutStream中已经是HTML字符串了。
+          // 此时 tmpOutStream 中已经是 HTML 字符串了。
           ConvertHTMLToClipBoardHtml(tmpOutMStream, OutMStream);
-          // 此时OutStream中已经是HTML剪贴板字符串了。
+          // 此时 OutStream 中已经是 HTML 剪贴板字符串了。
           CopyHTMLToClipBoard(PAnsiChar(OutMStream.Memory), OutMStream.Size,
             PAnsiChar(InMStream.Memory), InMStream.Size);
         finally
@@ -453,8 +458,11 @@ begin
         CnPas2HtmlForm.SaveDialog.FileName := sName;
         if CnPas2HtmlForm.SaveDialog.Execute then
         begin
+{$IFDEF UNICODE}
+          CnOtaSaveEditorToStreamW(SrcEditor, InMStream);
+{$ELSE}
           CnOtaSaveEditorToStream(SrcEditor, InMStream);
-
+{$ENDIF}
           ConvertStream(SourceType, SrcEditor.FileName, InMStream, OutMStream);
           OutMStream.SaveToFile(CnPas2HtmlForm.SaveDialog.FileName);
           if FOpenAfterConvert then
@@ -662,7 +670,7 @@ begin
   Clipboard.Open;
   EmptyClipboard;
   try
-    if (HtmlStrBuf <> nil) and (SizeH > 0) then   // 先复制HTML格式
+    if (HtmlStrBuf <> nil) and (SizeH > 0) then   // 先复制 HTML 格式
     begin
       Fmt := RegisterClipboardFormat('HTML Format');
       DataH := GlobalAlloc(GMEM_MOVEABLE + GMEM_DDESHARE, SizeH + 1);
@@ -685,7 +693,7 @@ begin
         raise;
       end;
     end;
-    if (StrBuf <> nil) and (SizeT > 0) then   // 再复制TXT格式
+    if (StrBuf <> nil) and (SizeT > 0) then   // 再复制 TXT 格式
     begin
       DataT := GlobalAlloc(GMEM_MOVEABLE + GMEM_DDESHARE, SizeT + 1);
       try
@@ -780,7 +788,7 @@ end;
 
 procedure TCnPas2HtmlWizard.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   with TCnIniFile.Create(Ini) do
@@ -789,8 +797,8 @@ begin
     WriteBool('', csAutoSave, FAutoSave);
     WriteBool('', csOpenAfterConvert, FOpenAfterConvert);
 
-    for i := Low(FFontArray) to High(FFontArray) do
-      WriteFont('', CnTCnPasConvertFontName[i], FFontArray[i]);
+    for I := Low(FFontArray) to High(FFontArray) do
+      WriteFont('', CnTCnPasConvertFontName[I], FFontArray[I]);
 
     // 这里写其余设置数据
   finally
@@ -815,7 +823,11 @@ begin
     OutMStream := TMemoryStream.Create;
     EReader := TCnEditFiler.Create(Filename);
     try
+{$IFDEF UNICODE}
+      EReader.SaveToStreamW(InMStream);
+{$ELSE}
       EReader.SaveToStream(InMStream, True);
+{$ENDIF}
     except
       Result := False;
       Exit;
@@ -907,7 +919,8 @@ begin
         ErrorDlg(Format(SCnPas2HtmlErrorConvert, [Project.GetModule(I).FileName]));
         Continue;
       end;
-    end;                                // end of for
+    end;
+
     if OpenDir then
       ExploreDir(sOutPutDir);
   finally
@@ -942,23 +955,23 @@ end;
 
 procedure TCnPas2HtmlWizard.SetConversionFonts(Conversion: TCnSourceConversion);
 var
-  i: Integer;
+  I: Integer;
 begin
   with Conversion do
   begin
-    for i := Low(FFontArray) to High(FFontArray) do
+    for I := Low(FFontArray) to High(FFontArray) do
     begin
-      case i of
+      case I of
         0: ;
-        1: AssemblerFont := FFontArray[i];
-        2: CommentFont := FFontArray[i];
-        3: DirectiveFont := FFontArray[i];
-        4: IdentifierFont := FFontArray[i];
-        5: KeyWordFont := FFontArray[i];
-        6: NumberFont := FFontArray[i];
-        7: SpaceFont := FFontArray[i];
-        8: StringFont := FFontArray[i];
-        9: SymbolFont := FFontArray[i];
+        1: AssemblerFont := FFontArray[I];
+        2: CommentFont := FFontArray[I];
+        3: DirectiveFont := FFontArray[I];
+        4: IdentifierFont := FFontArray[I];
+        5: KeyWordFont := FFontArray[I];
+        6: NumberFont := FFontArray[I];
+        7: SpaceFont := FFontArray[I];
+        8: StringFont := FFontArray[I];
+        9: SymbolFont := FFontArray[I];
       end;
     end;
   end;

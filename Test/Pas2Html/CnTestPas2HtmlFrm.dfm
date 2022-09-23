@@ -1,4 +1,4 @@
-object Form1: TForm1
+object FormPasConvert: TFormPasConvert
   Left = 161
   Top = 150
   BorderStyle = bsDialog
@@ -22,32 +22,32 @@ object Form1: TForm1
     Height = 13
     Caption = 'Should Run OK both in Delphi 5 ~ Delphi 2009'
   end
-  object Button1: TButton
+  object btnPas2Html: TButton
     Left = 40
     Top = 32
     Width = 233
     Height = 25
     Caption = 'Open PAS and Convert to HTML'
     TabOrder = 0
-    OnClick = Button1Click
+    OnClick = btnPas2HtmlClick
   end
-  object Button2: TButton
+  object btnPas2Rtf: TButton
     Left = 40
     Top = 88
     Width = 233
     Height = 25
     Caption = 'Open PAS and Convert to RTF'
     TabOrder = 1
-    OnClick = Button2Click
+    OnClick = btnPas2RtfClick
   end
-  object Button3: TButton
+  object btnHtmlClipboard: TButton
     Left = 40
     Top = 144
     Width = 233
     Height = 25
     Caption = 'Construct HTML Clipboard String'
     TabOrder = 2
-    OnClick = Button3Click
+    OnClick = btnHtmlClipboardClick
   end
   object btn1: TButton
     Left = 40

@@ -6,8 +6,8 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Export Format Type'
-  ClientHeight = 187
-  ClientWidth = 209
+  ClientHeight = 199
+  ClientWidth = 302
   PixelsPerInch = 96
   TextHeight = 13
   object lblEncode: TLabel
@@ -18,10 +18,11 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
     Caption = 'HTML Encode:'
   end
   object btnOK: TButton
-    Left = 46
-    Top = 155
+    Left = 54
+    Top = 164
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = 'OK'
     Default = True
     ModalResult = 1
@@ -30,7 +31,7 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
   object rgConvertType: TRadioGroup
     Left = 8
     Top = 8
-    Width = 193
+    Width = 281
     Height = 73
     Caption = 'Please Select Convert Option'
     ItemIndex = 0
@@ -41,10 +42,11 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
     OnClick = rgConvertTypeClick
   end
   object btnCancel: TButton
-    Left = 126
-    Top = 155
+    Left = 134
+    Top = 164
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -53,7 +55,7 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
   object chkOpenAfterConvert: TCheckBox
     Left = 8
     Top = 128
-    Width = 193
+    Width = 281
     Height = 17
     Caption = 'Open File/Dir after Converting.'
     TabOrder = 2
@@ -61,7 +63,7 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
   object cbbEncoding: TComboBox
     Left = 80
     Top = 96
-    Width = 121
+    Width = 209
     Height = 21
     ItemHeight = 13
     TabOrder = 1
@@ -70,5 +72,15 @@ inherited CnPasConvertTypeForm: TCnPasConvertTypeForm
       'big5'
       'iso-8859-1'
       'utf-8')
+  end
+  object btnHelp: TButton
+    Left = 214
+    Top = 164
+    Width = 75
+    Height = 21
+    Anchors = [akRight, akBottom]
+    Caption = '&Help'
+    TabOrder = 5
+    OnClick = btnHelpClick
   end
 end
