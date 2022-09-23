@@ -38,12 +38,30 @@ var
   Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
+{$IFDEF UNICODE}
+  Strs: TStringList;
+  S: string;
+{$ENDIF}
 begin
   // 测试转 HTML
   if dlgOpen1.Execute then
   begin
     Con := TCnSourceToHtmlConversion.Create;
+{$IFDEF UNICODE}
+    // Unicode 环境，读入成 UTF16
+    Strs := TStringList.Create;
+    Strs.LoadFromFile(dlgOpen1.FileName);
+    S := Strs.Text;
+    InStream := TMemoryStream.Create;
+    InStream.Write(S[1], (Length(S) + 1) * SizeOf(Char));
+
+    Strs.Free;
+
+    (Con as TCnSourceToHtmlConversion).HTMLEncode := 'utf-8';
+{$ELSE}
+    // 非 Unicode 环境，只支持 Ansi 的文件格式
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
+{$ENDIF}
     OutStream := TMemoryStream.Create;
 
     Con.InStream := InStream;
@@ -64,12 +82,29 @@ var
   Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
+{$IFDEF UNICODE}
+  Strs: TStringList;
+  S: string;
+{$ENDIF}
 begin
   // 测试转 RTF
   if dlgOpen1.Execute then
   begin
     Con := TCnSourceToRtfConversion.Create;
+{$IFDEF UNICODE}
+    // Unicode 环境，读入成 UTF16
+    Strs := TStringList.Create;
+    Strs.LoadFromFile(dlgOpen1.FileName);
+    S := Strs.Text;
+    InStream := TMemoryStream.Create;
+    InStream.Write(S[1], (Length(S) + 1) * SizeOf(Char));
+
+    Strs.Free;
+{$ELSE}
+    // 非 Unicode 环境，只支持 Ansi 的文件格式
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
+{$ENDIF}
+
     OutStream := TMemoryStream.Create;
 
     Con.InStream := InStream;
@@ -93,12 +128,31 @@ var
   Fmt: UINT;
   DataH: THandle;
   DataHPtr: Pointer;
+{$IFDEF UNICODE}
+  Strs: TStringList;
+  S: string;
+{$ENDIF}
 begin
   // 测试转 HTML
   if dlgOpen1.Execute then
   begin
     Con := TCnSourceToHtmlConversion.Create;
+
+{$IFDEF UNICODE}
+    // Unicode 环境，读入成 UTF16
+    Strs := TStringList.Create;
+    Strs.LoadFromFile(dlgOpen1.FileName);
+    S := Strs.Text;
+    InStream := TMemoryStream.Create;
+    InStream.Write(S[1], (Length(S) + 1) * SizeOf(Char));
+
+    Strs.Free;
+
+    (Con as TCnSourceToHtmlConversion).HTMLEncode := 'utf-8';
+{$ELSE}
+    // 非 Unicode 环境，只支持 Ansi 的文件格式
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
+{$ENDIF}
     OutStream1 := TMemoryStream.Create;
     OutStream2 := TMemoryStream.Create;
 
@@ -148,7 +202,7 @@ begin
     InStream.LoadFromFile(dlgOpen1.FileName);
 
     tmpoutStream := TMemoryStream.Create;
-    WideStringToUTF8(PChar(InStream.Memory), InStream.Size, tmpoutStream);
+    //WideStringToUTF8(PChar(InStream.Memory), InStream.Size, tmpoutStream);
     //WideStringToUTF8(PChar('a啊'), 2, tmpoutStream);
     InStream.Free;
     tmpoutStream.Free;

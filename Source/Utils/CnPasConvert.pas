@@ -22,7 +22,7 @@ unit CnPasConvert;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：PAS/CPP语法分析、转换及高亮单元
+* 单元名称：PAS/CPP 语法分析、转换及高亮单元
 * 单元作者：Pan Ying  panying@sina.com
 *           小冬 (kendling)
 *           LiuXiao
@@ -30,14 +30,16 @@ unit CnPasConvert;
 * 开发平台：PWin98SE + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2006.09.08 v1.04
+* 修改记录：2022.09.23 v1.07
+                增加对 Unicode 的支持，输入 Ansi/Utf16，输出 Ansi/Utf8
+            2006.09.08 v1.04
 ================================================================================
 |</PRE>}
 
 {
   Unit:         CnPasConvert
-  Project Name: CNPack
-  Original Unit:PasToHtml(01.2002)
+  Project Name: CnPack
+  Original Unit:CnPasConvert(01.2002)
   Compatibility:Delphi 5 and Delphi 6 is perfect,others support Object Pascal can be also.
   Author:       Pan Ying
   Contact:      E-Mail:panying@sina.com or MSN:panying2000@hotmail.com
@@ -46,8 +48,8 @@ unit CnPasConvert;
   Description:  Pascal file Conversion for syntax highlighting etc.
 
   Feedback:
-     If u have trouble in using this unit,try view FAQ of Project CNPack
-  or visit the Project CNPack's website.If u find any bug, just feel free
+     If u have trouble in using this unit,try view FAQ of Project CnPack
+  or visit the Project CnPack's website.If u find any bug, just feel free
   to write e-mail to me in Chinese or English.If You alert this unit's
   code to make it better, please remember to tell me about it , i will add
   it in next version.
@@ -124,7 +126,7 @@ uses
 {$IFDEF DEBUG}
   {$DEFINE CNPASCONVERT_DEBUG}
 {this conditional directive should be disalbed in release version}
-{$ENDIF DEBUG}
+{$ENDIF}
 
 const
   {key words list here}
@@ -195,14 +197,13 @@ type
 
   TCnSourceConversion = class(TObject)
   private
-    {private varible}
     bDiffer: Boolean;
     bAssembler: Boolean;
 
     FTokenType: TCnPasConvertTokenType;
 
-    FCurrentChar: AnsiChar;
-    FNextChar: AnsiChar;
+    FCurrentChar: Char;
+    FNextChar: Char;
 
     {prefix and postfix}
     FPreFixList, FPostFixList: array[ttAssembler..ttUnknown] of string;
@@ -219,9 +220,9 @@ type
     FSize: Integer;
 
     {the token function}
-    FToken, FTokenCur, FTokenEnd: PAnsiChar;
+    FToken, FTokenCur, FTokenEnd: PChar;
     FTokenStr: string;
-    FTokenLength: Integer;
+    FTokenLength: Integer;  // Char 为单位的 Token 长度
     FNumberFont: TFont;
     FSymbolFont: TFont;
     FStringFont: TFont;
@@ -238,7 +239,7 @@ type
     FSourceType: TCnConvertSourceType;
 
     procedure NewToken;
-    procedure TokenAdd(AChar: AnsiChar);
+    procedure TokenAdd(AChar: Char);
     procedure TokenDeleteLast;
     function TokenLength: Integer;
     procedure EndToken;
@@ -250,9 +251,9 @@ type
     function IsDirectiveKeyWord(AToken: string): Boolean;
 
     {extract one char from the stream}
-    function ExtractChar: AnsiChar;
-    function RollBackChar: AnsiChar;
-    function CheckNextChar: AnsiChar;
+    function ExtractChar: Char;
+    function RollBackChar: Char;
+    function CheckNextChar: Char;
 
     procedure WriteStringToStream(const AString: string);
 
@@ -298,8 +299,9 @@ type
 
     property StatusFont[ATokenType: TCnPasConvertTokenType]: TFont read
       GetStatusFont;
-    property InStream: TStream read FInStream write SetInStream;
-    property OutStream: TStream read FOutStream write SetOutStream;
+    property InStream: TStream read FInStream write SetInStream;     // 输入流 Ansi/Utf16
+    property OutStream: TStream read FOutStream write SetOutStream;  // 输出流 Ansi 或 utf8
+
     property Size: Integer read FSize;
     property AssemblerFont: TFont read FAssemblerFont write SetAssemblerFont;
     property CommentFont: TFont read FCommentFont write SetCommentFont;
@@ -389,7 +391,7 @@ const
   SCnHtmlClipStart = '<!--StartFragment-->';
   SCnHtmlClipEnd = '<!--EndFragment-->';
 
-  // 以下是SCnHtmlClipHead中各个标签数据的起始位置，开始为0。
+  // 以下是 SCnHtmlClipHead 中各个标签数据的起始位置，开始为 0。
   PosStartHTML = 22;
   PosEndHTML = 40;
   PosStartFragment = 64;
@@ -478,7 +480,7 @@ end;
   日期:      2003.02.20
   参数:      inStream, outStream: TMemoryStream
   返回值:    无
-  功能:      将输入的HTML流转换成能放置到剪贴板上的流。
+  功能:      将输入的 HTML 流转换成能放置到剪贴板上的流。
 -------------------------------------------------------------------------------}
 procedure ConvertHTMLToClipBoardHtml(inStream, outStream: TMemoryStream);
 
@@ -502,9 +504,9 @@ begin
     inStream.Write(Zero, 1); // Write #0 after string;
     S := WideString(PAnsiChar(inStream.Memory));
     WideStringToUTF8(S, Length(S), tmpoutStream);
-    // 先转UTF8
+    // 先转 UTF8
 
-   { 接着处理tmpoutStream，变换成HTML剪贴板形式写入OutStream}
+   { 接着处理 tmpoutStream，变换成 HTML 剪贴板形式写入 OutStream}
     Headlen := Length(SCnHtmlClipHead);
     outStream.Write(AnsiString(SCnHtmlClipHead), Headlen);
     bodyPos := Pos(AnsiString('<span '), PAnsiChar(tmpoutStream.Memory));
@@ -517,40 +519,40 @@ begin
     outStream.Write((Pointer(Integer(tmpoutStream.Memory) + bodyEndPos - 1))^,
       tmpoutStream.Size - bodyEndPos + 1);
 
-{    // 写StartHTML
+{    // 写 StartHTML
     outStream.Seek(PosStartHTML, soFromBeginning);
     PCh := PChar(ToStrofPosLength(Pos('<!DOCTYPE ', PAnsiChar(outStream.Memory)) - 1));
-    // 减1是因为Pos返回的以1为基准，以下同。
+    // 减 1 是因为 Pos 返回的以 1 为基准，以下同。
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh, PosLength);}
 
-    // 写EndHTML
+    // 写 EndHTML
     outStream.Seek(PosEndHTML, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(outStream.Size - 1));
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
-    // 写StartFragMent
+    // 写 StartFragMent
     outStream.Seek(PosStartFragment, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipStart), PAnsiChar(outStream.Memory)) +
       Length(SCnHtmlClipStart) - 1));
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
-    // 写EndFragment
+    // 写 EndFragment
     outStream.Seek(PosEndFragment, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipEnd), PAnsiChar(outStream.Memory)) -
       1));
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
-    // 用StartFragMent的值写StartSelection
+    // 用 StartFragMent 的值写 StartSelection
     outStream.Seek(PosStartSelection, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipStart), PAnsiChar(outStream.Memory)) +
       Length(SCnHtmlClipStart) - 1));
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
-    // 用EndFragMent的值写EndSelection
+    // 用 EndFragMent 的值写 EndSelection
     outStream.Seek(PosEndSelection, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipEnd), PAnsiChar(outStream.Memory)) -
       1));
@@ -563,7 +565,7 @@ end;
 
 { TCnPasConversion }
 
-function TCnSourceConversion.CheckNextChar: AnsiChar;
+function TCnSourceConversion.CheckNextChar: Char;
 begin
   Result := ExtractChar;
 
@@ -641,7 +643,7 @@ begin
   {start process}
   NewToken;
 
-  FInStream.ReadBuffer(FNextChar, 1);
+  FInStream.ReadBuffer(FNextChar, SizeOf(Char));
 
   while FNextChar <> #0 do
   begin
@@ -693,7 +695,7 @@ begin
             begin
               if IsDirectiveKeyWord(FTokenStr) then
               begin
-                { v1.03: 不区分Property后的KeyWord }
+                { v1.03: 不区分 Property 后的 KeyWord }
                 if bDiffer then
                   FTokenType := ttKeyWord;
               end
@@ -767,7 +769,8 @@ begin
             '~'] do
           begin
             case FNextChar of
-              '/': if CheckNextChar = '/' then
+              '/':
+                if CheckNextChar = '/' then
                 begin
                   EndToken;
 
@@ -976,13 +979,13 @@ begin
   {change the TokenLength if has problem}
   FTokenLength := 1024;
   try
-    GetMem(FToken, FTokenLength);
+    GetMem(FToken, FTokenLength * SizeOf(Char));
   except
     on EOutOfMemory do
       raise
       ECnSourceConversionException.Create('SourceConversion Error : Can not maintain the Token Memory');
   end;
-  FTokenEnd := FToken + FTokenLength;
+  FTokenEnd := FToken + FTokenLength; // PChar 加减是针对 Char 的，无需乘以 SizeOf(Char)
 
   {here i set the font's initial value}
   TempFont := TFont.Create;
@@ -1054,11 +1057,11 @@ begin
   TakeTokenStr;
 end;
 
-function TCnSourceConversion.ExtractChar: AnsiChar;
+function TCnSourceConversion.ExtractChar: Char;
 begin
   FCurrentChar := FNextChar;
   if FInStream.Position < FInStream.Size then
-    FInStream.ReadBuffer(FNextChar, 1)
+    FInStream.ReadBuffer(FNextChar, SizeOf(Char))
   else
     FNextChar := #0;
 
@@ -1374,7 +1377,7 @@ end;
 
 function TCnSourceConversion.IsDiffKey(AToken: string): Boolean;
 var
-  First, Last, i, Compare: Integer;
+  First, Last, I, Compare: Integer;
   Token: string;
 begin
   First := Low(CnPasConvertDiffKeys);
@@ -1383,17 +1386,17 @@ begin
   Token := UpperCase(AToken);
   while First <= Last do
   begin
-    i := (First + Last) shr 1;
-    Compare := CompareStr(CnPasConvertDiffKeys[i], Token);
+    I := (First + Last) shr 1;
+    Compare := CompareStr(CnPasConvertDiffKeys[I], Token);
     if Compare = 0 then
     begin
       Result := True;
       Break;
     end
     else if Compare < 0 then
-      First := i + 1
+      First := I + 1
     else
-      Last := i - 1;
+      Last := I - 1;
   end;
 end;
 
@@ -1413,7 +1416,7 @@ begin
   while First <= Last do
   begin
     I := (First + Last) shr 1;
-    Compare := CompareStr(CnPasConvertDirectives[i], Token);
+    Compare := CompareStr(CnPasConvertDirectives[I], Token);
     if Compare = 0 then
     begin
       Result := True;
@@ -1441,7 +1444,7 @@ function TCnSourceConversion.IsKeyWord(AToken: string): Boolean;
 { Use ??? to find string}
 { Maybe use hash code is more effcient.}
 var
-  First, Last, i, Compare: Integer;
+  First, Last, I, Compare: Integer;
   Token: string;
 begin
   if FSourceType = stPas then
@@ -1452,8 +1455,8 @@ begin
     Token := UpperCase(AToken);
     while First <= Last do
     begin
-      i := (First + Last) shr 1;
-      Compare := CompareStr(CnPasConvertKeywords[i], Token);
+      I := (First + Last) shr 1;
+      Compare := CompareStr(CnPasConvertKeywords[I], Token);
       if Compare = 0 then
       begin
         {We get it}
@@ -1461,9 +1464,9 @@ begin
         Break;
       end
       else if Compare < 0 then
-        First := i + 1
+        First := I + 1
       else
-        Last := i - 1;
+        Last := I - 1;
     end;
   end
   else
@@ -1474,8 +1477,8 @@ begin
     Token := AToken; // 区分大小写
     while First <= Last do
     begin
-      i := (First + Last) shr 1;
-      Compare := CompareStr(CnCppConvertKeywords[i], Token);
+      I := (First + Last) shr 1;
+      Compare := CompareStr(CnCppConvertKeywords[I], Token);
       if Compare = 0 then
       begin
         {We get it}
@@ -1483,9 +1486,9 @@ begin
         Break;
       end
       else if Compare < 0 then
-        First := i + 1
+        First := I + 1
       else
-        Last := i - 1;
+        Last := I - 1;
     end;
   end;
 end;
@@ -1499,15 +1502,15 @@ begin
   {$ENDIF}
 end;
 
-function TCnSourceConversion.RollBackChar: AnsiChar;
+function TCnSourceConversion.RollBackChar: Char;
 begin
   {this maybe slow, i should use cache here maybe}
   FNextChar := FCurrentChar;
 
   if (FInStream.Position > 1) then
   begin
-    FInStream.Position := FInStream.Position - 2;
-    FInStream.ReadBuffer(FCurrentChar, 1);
+    FInStream.Position := FInStream.Position - 2 * SizeOf(Char);
+    FInStream.ReadBuffer(FCurrentChar, SizeOf(Char));
 
     {no forget to delete char from token}
     TokenDeleteLast;
@@ -1599,7 +1602,7 @@ begin
   Result := FTokenStr;
 end;
 
-procedure TCnSourceConversion.TokenAdd(AChar: AnsiChar);
+procedure TCnSourceConversion.TokenAdd(AChar: Char);
 begin
   FTokenCur^ := AChar;
 
@@ -1608,7 +1611,7 @@ begin
   if FTokenCur >= FTokenEnd then
   begin
     try
-      ReallocMem(FToken, (FTokenEnd - FToken) + FTokenLength);
+      ReallocMem(FToken, ((FTokenEnd - FToken) + FTokenLength)* SizeOf(Char)); // PChar 的加减结果针对 Char，FTokenLength 也是针对 Char
     except
       on EOutOfMemory do
         raise
@@ -1634,7 +1637,7 @@ procedure TCnSourceConversion.WriteStringToStream(const AString: string);
 {$IFDEF UNICODE}
 var
   TempStr: AnsiString;
-{$ENDIF}  
+{$ENDIF}
 begin
 {$IFDEF UNICODE}
   TempStr := AnsiString(AString);
@@ -1733,8 +1736,12 @@ end;
 procedure TCnSourceToHtmlConversion.WriteTokenToStream;
 var
   StartPtr, CurPtr: PAnsiChar;
-  i, j, Len, nCount: Integer;
-  Utf8Str, AnsiStr: AnsiString;
+  I, J, Len, nCount: Integer;
+  Utf8Str: AnsiString;
+{$IFDEF UNICODE}
+  U16Str: string;
+{$ENDIF}
+  AnsiStr: AnsiString;
 begin
   {v0.96: Optimized, sure not call StrLen ,call TokenLength instead}
   Len := TokenLength;
@@ -1743,7 +1750,28 @@ begin
 
   nCount := 0;
 
-  if FIsUtf8 then
+{$IFDEF UNICODE}
+  SetLength(U16Str, Len);
+  CopyMemory(@(U16Str[1]), FToken, Len * SizeOf(Char));
+
+  if FIsUtf8 then // UTF8 时，要把 Utf16 的 Token 转成 UTF8
+  begin
+    Utf8Str := UTF8Encode(U16Str);
+    Len := Length(Utf8Str);
+
+    StartPtr := @(Utf8Str[1]);
+    CurPtr := StartPtr;
+  end
+  else // 要把 Utf16 的 Token 转为 Ansi
+  begin
+    AnsiStr := AnsiString(U16Str);
+    Len := Length(AnsiStr);
+
+    StartPtr := @(AnsiStr[1]);
+    CurPtr := StartPtr;
+  end;
+{$ELSE}
+  if FIsUtf8 then    // UTF8 时，要把 Ansi 的 Token 转成 UTF8
   begin
     SetLength(AnsiStr, Len);
     CopyMemory(@(AnsiStr[1]), FToken, Len);
@@ -1753,13 +1781,14 @@ begin
     StartPtr := @(Utf8Str[1]);
     CurPtr := StartPtr;
   end
-  else
+  else // 原始处理 Ansi 的 Token
   begin
     StartPtr := FToken;
     CurPtr := FToken;
   end;
+{$ENDIF}
 
-  for i := 1 to Len do
+  for I := 1 to Len do  // 姑且认为 UTF8 字符串里不会出现以下要转码的内容
   begin
     case (CurPtr^) of
       '<':
@@ -1815,7 +1844,7 @@ begin
 
           if (CurPtr^) = #9 {tab} then
           begin
-            for j := 1 to FTabSpace do
+            for J := 1 to FTabSpace do
               FOutStream.WriteBuffer(AnsiString('&nbsp;'), 6);
             Inc(FSize, 6 * FTabSpace);
           end
@@ -1851,7 +1880,7 @@ var
   AYear, AMonth, ADay, AHour, AMin, ASec, AMiSec: Word;
 begin
   inherited;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('Create Font Table');
 {$ENDIF}
   for TokenType := Low(TCnPasConvertTokenType) to High(TCnPasConvertTokenType) do
@@ -1859,7 +1888,7 @@ begin
     FontTable := FontTable + ConvertFontToRTFFontTable(TokenType, StatusFont[TokenType]);
     ColorTable := ColorTable + ConvertFontToRTFColorTable(StatusFont[TokenType]);
   end;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('End Font Table');
 {$ENDIF}
 
@@ -1879,16 +1908,15 @@ begin
   WriteStringToStream(Format('{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\lang%d', [GetSystemDefaultLangID]));
 end;
 
-function TCnSourceToRTFConversion.ConvertChineseToRTF(const AString: string):
-    string;
+function TCnSourceToRTFConversion.ConvertChineseToRTF(const AString: string): string;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 1 to Length(AString) do
-    if Ord(AString[i]) > 128 then
-      Result := Result + '\''' + IntToHex(Ord(AString[i]), 2)
+  for I := 1 to Length(AString) do
+    if Ord(AString[I]) > 128 then
+      Result := Result + '\''' + IntToHex(Ord(AString[I]), 2)
     else
-      Result := Result + AString[i];
+      Result := Result + AString[I];
 end;
 
 procedure TCnSourceToRTFConversion.ConvertEnd;
@@ -1929,7 +1957,7 @@ begin
         FPreFixList[ATokenType] := '';
         FPostFixList[ATokenType] := '';
       end;
-    else
+  else
     begin
       tmpString := Format('\cf%d\f%d\fs%d |\f0\cf0', [Ord(ATokenType) + 1, Ord(ATokenType), AFont.Size * 2]);
       if fsBold in AFont.Style then tmpString := '\b' + tmpString + '\b0';
@@ -1941,7 +1969,7 @@ begin
       FPreFixList[ATokenType] := Copy(tmpString, 1, Pos('|', tmpString) - 1);
       FPostFixList[ATokenType] := Copy(tmpString, Pos('|', tmpString) + 1, Length(tmpString));
 
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogMsg('[' + tmpString + ']');
       CnDebugger.LogMsg('PreFixList [' + FPreFixList[ATokenType] + ']');
       CnDebugger.LogMsg('PostFixList [' + FPostFixList[ATokenType] + ']');
@@ -1954,9 +1982,31 @@ procedure TCnSourceToRTFConversion.WriteTokenToStream;
 var
   tmpStr: AnsiString;
   tmpWide: WideString;
-  StartPtr, CurPtr: PAnsiChar;
-  i, j, Len, nCount: Integer;
-{$DEFINE WriteUnicode}
+  StartPtr, CurPtr: PChar;
+  I, J, Len, nCount: Integer;
+
+  procedure WriteAnsiToStream;
+{$IFDEF UNICODE}
+  var
+    AnsiStr: AnsiString;
+    Utf16Str: string;
+{$ENDIF}
+  begin
+    if nCount <= 0 then
+      Exit;
+{$IFDEF UNICODE}
+    SetLength(Utf16Str, nCount);
+    Move(StartPtr^, Utf16Str[1], nCount * SizeOf(Char));
+    AnsiStr := AnsiString(Utf16Str);
+    FOutStream.WriteBuffer(AnsiStr[1], nCount);
+{$ELSE}
+    FOutStream.WriteBuffer(StartPtr^, nCount);
+{$ENDIF}
+
+    Inc(FSize, nCount);
+    nCount := 0;
+  end;
+
 begin
   StartPtr := FToken;
   CurPtr := FToken;
@@ -1965,25 +2015,17 @@ begin
   Len := TokenLength;
   nCount := 0;
 
-{$IFDEF WriteUnicode}
-  i := 1;
-  while i <= Len do
-{$ELSE}
-  for i := 1 to Len do
-{$ENDIF}
+  I := 1;
+  while I <= Len do
   begin
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogFmt('CurPtr[0x%x], StartPtr[0x%x]', [Integer(CurPtr), Integer(StartPtr)]);
     CnDebugger.LogFmt('CurPtr[%s], StartPtr[%s]', [CurPtr^, StartPtr^]);
   {$ENDIF}
-    case (CurPtr^) of
+    case CurPtr^ of
       '{':
         begin
-          if (nCount > 0) then
-            FOutStream.WriteBuffer(StartPtr^, nCount);
-
-          Inc(FSize, nCount);
-          nCount := 0;
+          WriteAnsiToStream;
 
           FOutStream.WriteBuffer(AnsiString('\{'), 2);
           Inc(FSize, 2);
@@ -1991,11 +2033,7 @@ begin
         end;
       '}':
         begin
-          if (nCount > 0) then
-            FOutStream.WriteBuffer(StartPtr^, nCount);
-
-          Inc(FSize, nCount);
-          nCount := 0;
+          WriteAnsiToStream;
 
           FOutStream.WriteBuffer(AnsiString('\}'), 2);
           Inc(FSize, 2);
@@ -2003,11 +2041,7 @@ begin
         end;
       '\':
         begin
-          if (nCount > 0) then
-            FOutStream.WriteBuffer(StartPtr^, nCount);
-
-          Inc(FSize, nCount);
-          nCount := 0;
+          WriteAnsiToStream;
 
           FOutStream.WriteBuffer(AnsiString('\\'), 2);
           Inc(FSize, 2);
@@ -2016,19 +2050,12 @@ begin
       #1..#9, #11, #12, #14..#32:
           {space here}
         begin
-          if (nCount > 0) then
-            FOutStream.WriteBuffer(StartPtr^, nCount);
-
-          Inc(FSize, nCount);
-          nCount := 0;
+          WriteAnsiToStream;
 
           if (CurPtr^) = #9 {tab} then
           begin
-            // Write tab char
-//            FOutStream.WriteBuffer(AnsiString('\tab'), 4);
-//            Inc(FSize, 4);
             // Write space char
-            for j := 1 to FTabSpace do
+            for J := 1 to FTabSpace do
               FOutStream.WriteBuffer(AnsiString(' ' + ''), 1);
             Inc(FSize, 1 * FTabSpace);
           end
@@ -2042,46 +2069,36 @@ begin
         end;
     else
       if Ord(CurPtr^) > 128 {chinese} then
-        begin
-          if (nCount > 0) then
-            FOutStream.WriteBuffer(StartPtr^, nCount);
+      begin
+        WriteAnsiToStream;
 
-          Inc(FSize, nCount);
-          nCount := 0;
-      {$IFDEF WriteUnicode}
-          // Convert chinese to unicode
-          tmpStr := CurPtr^;
-          Inc(CurPtr);
-          tmpStr := tmpStr + CurPtr^;
-          tmpWide := WideString(tmpStr);
-        {$IFDEF Debug}
-          CnDebugger.LogMsg(tmpWide);
-        {$ENDIF}
-          tmpStr := AnsiString(Format('\u%d?', [Ord(tmpWide[1])]));
-          FOutStream.WriteBuffer(tmpStr[1], Length(tmpStr));
-          Inc(FSize, Length(tmpStr));
-          Inc(i);
-          StartPtr := CurPtr + 1;
-      {$ELSE}
-          // Convert chinese to code
-          tmpStr := '\''' + IntToHex(Ord(CurPtr^), 2);
-          FOutStream.WriteBuffer(tmpStr[1], 4);
-          Inc(FSize, 4);
-          StartPtr := CurPtr + 1;
-      {$ENDIF}
-        end
+        // Convert chinese to unicode
+{$IFDEF UNICODE}
+        tmpWide := CurPtr^;
+{$ELSE}
+        tmpStr := CurPtr^;
+        Inc(CurPtr);
+        tmpStr := tmpStr + CurPtr^;
+        tmpWide := WideString(tmpStr);
+{$ENDIF}
+
+        tmpStr := AnsiString(Format('\u%d?', [Ord(tmpWide[1])]));
+        FOutStream.WriteBuffer(tmpStr[1], Length(tmpStr));
+        Inc(FSize, Length(tmpStr));
+{$IFNDEF UNICODE}
+        Inc(I);
+{$ENDIF}
+        StartPtr := CurPtr + 1;
+      end
       else
         Inc(nCount);
     end;
 
     Inc(CurPtr);
-  {$IFDEF WriteUnicode}
-    Inc(i);
-  {$ENDIF}
+    Inc(I);
   end;
 
-  if (nCount > 0) then
-    FOutStream.WriteBuffer(StartPtr^, nCount);
+  WriteAnsiToStream;
 end;
 
 {$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
