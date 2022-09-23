@@ -1,9 +1,9 @@
 inherited CnStatForm: TCnStatForm
-  Left = 233
-  Top = 180
+  Left = 391
+  Top = 255
   BorderStyle = bsDialog
   Caption = 'Select Target for Statistic'
-  ClientHeight = 221
+  ClientHeight = 242
   ClientWidth = 376
   OnClose = FormClose
   OnCreate = FormCreate
@@ -13,7 +13,7 @@ inherited CnStatForm: TCnStatForm
     Left = 8
     Top = 8
     Width = 361
-    Height = 73
+    Height = 89
     Caption = 'T&arget'
     Columns = 2
     ItemIndex = 2
@@ -28,9 +28,9 @@ inherited CnStatForm: TCnStatForm
   end
   object gbDir: TGroupBox
     Left = 8
-    Top = 88
+    Top = 104
     Width = 361
-    Height = 97
+    Height = 100
     Caption = 'Specify Fo&lder'
     TabOrder = 1
     object Label3: TLabel
@@ -89,9 +89,10 @@ inherited CnStatForm: TCnStatForm
   end
   object btnStat: TButton
     Left = 133
-    Top = 192
+    Top = 213
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = 'Ca&lculate'
     Default = True
     ModalResult = 1
@@ -99,9 +100,10 @@ inherited CnStatForm: TCnStatForm
   end
   object btnCancel: TButton
     Left = 213
-    Top = 192
+    Top = 213
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -109,9 +111,10 @@ inherited CnStatForm: TCnStatForm
   end
   object btnHelp: TButton
     Left = 293
-    Top = 192
+    Top = 213
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
