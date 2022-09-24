@@ -76,14 +76,13 @@ type
     procedure lvToolsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
   private
-    { Private declarations }
     FWizard: TCnEditorToolsetWizard;
     procedure InitTools;
     procedure UpdateToolItem(Index: Integer);
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 { TCnBaseCodingToolset }

@@ -119,19 +119,20 @@ type
     chkMoveToNextLine: TCheckBox;
     btnOK: TButton;
     btnCancel: TButton;
-    rgIndentMode: TRadioGroup;private
-    { Private declarations }
+    rgIndentMode: TRadioGroup;
+  private
+
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 
 implementation
 
-{$R *.dfm}
-
 {$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+
+{$R *.dfm}
 
 var
   InternalIndentMode: TCnIndentMode = imInsertToHead;
