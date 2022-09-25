@@ -288,13 +288,15 @@ begin
     CnStatResultForm := TCnStatResultForm.Create(nil);
   if CnStatResultForm.WindowState = wsMinimized then
     CnStatResultForm.WindowState := wsNormal;
+
   if not CnStatResultForm.Visible then
   begin
     CnStatResultForm.Show;
     CnStatResultForm.BringtoFront;
   end;
 
-  if Trim(FileName) = '' then Exit;
+  if Trim(FileName) = '' then
+    Exit;
 
   // 不处理工程组文件（D5下无法处理）及 BCB 工程文件，只生成一个记录。
   if (CnStatResultForm.StatStyle = ssProjectGroup) and (Level = 0) or
@@ -541,13 +543,17 @@ begin
     CnStatResultForm.TreeView.Items.BeginUpdate;
     try
 {$IFDEF BDS}
-      if IsBdsProject(Project.FileName) or IsDProject(Project.FileName)
-        or IsCbProject(Project.FileName) then
+      if IsBdsProject(Project.FileName) or IsDProject(Project.FileName) then
       begin
         if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
           ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 0)
         else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
           ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 0);
+      end
+      else if IsCbProject(Project.FileName) then // BCB 工程的主文件
+      begin
+        if FileExists(_CnChangeFileExt(Project.FileName, '.cpp')) then
+          ProcessAFile(_CnChangeFileExt(Project.FileName, '.cpp'), 0);
       end;
 {$ELSE}
       Self.ProcessAFile(Project.FileName, 0);
