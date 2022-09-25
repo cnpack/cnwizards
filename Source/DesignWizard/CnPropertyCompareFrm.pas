@@ -687,7 +687,9 @@ end;
 
 procedure TCnPropertyCompareForm.FormCreate(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   WizOptions.ResetToolbarWithLargeIcons(tlbMain);
+{$ENDIF}
 
   FLeftProperties := TObjectList.Create(True);
   FRightProperties := TObjectList.Create(True);

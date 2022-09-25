@@ -208,6 +208,7 @@ type
     function DisableLargeIcons: Boolean; override;
     procedure RestorePreviewWidth;
     procedure RestorePreviewHeight;
+
     procedure PrepareSearchRange; override;
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
@@ -3894,7 +3895,9 @@ var
 begin
   if FPreviewIsRight then
   begin
+{$IFNDEF STAND_ALONE}
     RestorePreviewWidth;
+{$ENDIF}
   end
   else
   begin
@@ -3910,6 +3913,23 @@ begin
           mmoContent.Height := mmoContent.Height + csStep;
     end;
   end;
+end;
+
+procedure TCnProcListForm.RestorePreviewHeight;
+begin
+  if FPreviewHeight > 0 then
+    mmoContent.Height := FPreviewHeight;
+end;
+
+procedure TCnProcListForm.RestorePreviewWidth;
+begin
+  if FPreviewWidth > 0 then
+    mmoContent.Width := FPreviewWidth;
+end;
+
+function TCnProcListForm.DisableLargeIcons: Boolean;
+begin
+  Result := True; // 大图标会引发工具栏按钮混乱
 end;
 
 { TCnProcListWizard }
@@ -4711,23 +4731,6 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
-end;
-
-procedure TCnProcListForm.RestorePreviewHeight;
-begin
-  if FPreviewHeight > 0 then
-    mmoContent.Height := FPreviewHeight;
-end;
-
-procedure TCnProcListForm.RestorePreviewWidth;
-begin
-  if FPreviewWidth > 0 then
-    mmoContent.Width := FPreviewWidth;
-end;
-
-function TCnProcListForm.DisableLargeIcons: Boolean;
-begin
-  Result := True; // 大图标会引发工具栏按钮混乱
 end;
 
 initialization

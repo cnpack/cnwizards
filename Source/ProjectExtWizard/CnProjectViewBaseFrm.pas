@@ -1343,10 +1343,17 @@ begin
 {$ENDIF}
     end;
 
+{$IFDEF STAND_ALONE}
+    if LV.SmallImages <> nil then
+      X := LV.SmallImages.Width + 2
+    else
+      X := Bmp.Height + 2;
+{$ELSE}
     if LV.SmallImages <> nil then
       X := IdeGetScaledPixelsFromOrigin(LV.SmallImages.Width, LV) + 2
     else
       X := Bmp.Height + 2;
+{$ENDIF}
 
     Y := (Bmp.Height - Bmp.Canvas.TextHeight(Item.Caption)) div 2;
 

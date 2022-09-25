@@ -42,7 +42,10 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, CnWizMultiLang, ExtCtrls, StdCtrls, ImgList, ComCtrls, IniFiles,
-  CommCtrl, ActnList, Math, Contnrs, ExtDlgs, Menus, Buttons, CnWizUtils,
+  CommCtrl, ActnList, Math, Contnrs, ExtDlgs, Menus, Buttons,
+{$IFNDEF STAND_ALONE}
+  CnWizUtils,
+{$ENDIF}
   CnImageProviderMgr, CnCommon, CnDesignEditorConsts, CnPngUtilsIntf;
 
 type
@@ -339,7 +342,7 @@ end;
 
 procedure TCnImageListEditorForm.FormShow(Sender: TObject);
 var
-  s: string;
+  S: string;
   i: Integer;
   XpStyle: Boolean;
 begin
@@ -349,9 +352,9 @@ begin
   begin
     if cbbProvider.Items.Count > 0 then
     begin
-      s := FIni.ReadString(csImageListEditor, csProvider, ImageProviderMgr.Items[0].ClassName);
+      S := FIni.ReadString(csImageListEditor, csProvider, ImageProviderMgr.Items[0].ClassName);
       for i := 0 to ImageProviderMgr.Count - 1 do
-        if SameText(s, ImageProviderMgr.Items[i].ClassName) then
+        if SameText(S, ImageProviderMgr.Items[i].ClassName) then
         begin
           cbbProvider.ItemIndex := i;
           Break;
@@ -372,9 +375,9 @@ begin
 
   FChanging := True;
   try
-    s := Format('%dx%d', [FComponent.Width, FComponent.Height]);
-    if cbbSize.Items.IndexOf(s) >= 0 then
-      cbbSize.ItemIndex := cbbSize.Items.IndexOf(s)
+    S := Format('%dx%d', [FComponent.Width, FComponent.Height]);
+    if cbbSize.Items.IndexOf(S) >= 0 then
+      cbbSize.ItemIndex := cbbSize.Items.IndexOf(S)
     else
     begin
       AddSize(FComponent.Width, FComponent.Height);
@@ -1852,14 +1855,16 @@ end;
 
 procedure TCnImageListEditorForm.mniGotoPageClick(Sender: TObject);
 var
-  s: string;
+  S: string;
 begin
-  s := IntToStr(FReq.Page + 1);
+  S := IntToStr(FReq.Page + 1);
+{$IFNDEF STAND_ALONE}
   if (FProvider <> nil) and CnWizInputQuery(SCnImageListGotoPage,
-    SCnImageListGotoPagePrompt, s) then
+    SCnImageListGotoPagePrompt, S) then
   begin
-    DoSearch(StrToIntDef(s, FReq.Page + 1) - 1);
+    DoSearch(StrToIntDef(S, FReq.Page + 1) - 1);
   end;
+{$ENDIF}
 end;
 
 procedure TCnImageListEditorForm.btnGetColorClick(Sender: TObject);
