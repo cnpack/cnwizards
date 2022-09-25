@@ -235,9 +235,9 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnResize = pnlResize
       object gridLeft: TStringGrid
         Left = 0
-        Top = 0
+        Top = 21
         Width = 465
-        Height = 577
+        Height = 556
         Align = alClient
         ColCount = 2
         DefaultRowHeight = 18
@@ -253,6 +253,16 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         OnSelectCell = gridSelectCell
         OnTopLeftChanged = gridTopLeftChanged
       end
+      object pnlLeftName: TPanel
+        Left = 0
+        Top = 0
+        Width = 465
+        Height = 21
+        Align = alTop
+        BevelOuter = bvNone
+        Color = clInfoBk
+        TabOrder = 1
+      end
     end
     object pnlRight: TPanel
       Left = 468
@@ -265,9 +275,9 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       OnResize = pnlResize
       object gridRight: TStringGrid
         Left = 0
-        Top = 0
+        Top = 21
         Width = 467
-        Height = 577
+        Height = 556
         Align = alClient
         ColCount = 2
         DefaultRowHeight = 18
@@ -282,6 +292,16 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
         OnDrawCell = gridDrawCell
         OnSelectCell = gridSelectCell
         OnTopLeftChanged = gridTopLeftChanged
+      end
+      object pnlRightName: TPanel
+        Left = 0
+        Top = 0
+        Width = 467
+        Height = 21
+        Align = alTop
+        BevelOuter = bvNone
+        Color = clInfoBk
+        TabOrder = 1
       end
     end
     object pnlDisplay: TPanel

@@ -207,6 +207,8 @@ type
     N4: TMenuItem;
     OnlyShowDifferentProperties1: TMenuItem;
     btnOnlyDiff: TToolButton;
+    pnlLeftName: TPanel;
+    pnlRightName: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -931,6 +933,19 @@ end;
 
 procedure TCnPropertyCompareForm.ShowProperties(IsRefresh: Boolean);
 begin
+  pnlLeft.Caption := '';
+  pnlRight.Caption := '';
+
+  if LeftObject is TComponent then
+    pnlLeftName.Caption := Format('%s: %s', [(LeftObject as TComponent).Name, LeftObject.ClassName])
+  else
+    pnlLeftName.Caption := Format('$%p: %s', [Pointer(LeftObject), LeftObject.ClassName]);
+
+  if RightObject is TComponent then
+    pnlRightName.Caption := Format('%s: %s', [(RightObject as TComponent).Name, RightObject.ClassName])
+  else
+    pnlRightName.Caption := Format('$%p: %s', [Pointer(RightObject), RightObject.ClassName]);
+
   FillGridWithProperties(gridLeft, FLeftProperties, IsRefresh);
   FillGridWithProperties(gridRight, FRightProperties, IsRefresh);
 
