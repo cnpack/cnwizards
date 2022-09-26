@@ -3142,6 +3142,13 @@ begin
       if Scanner.Token in ClassVisibilityTokens then
         FormatClassVisibility(BackTab(PreSpaceCount));
 
+      // 可能先出现属性，不能错误地留到 FormatFieldDecl 里去处理
+      if Scanner.Token = tokSLB then
+      begin
+        FormatSingleAttribute(PreSpaceCount);
+        Writeln;
+      end;
+
       if Scanner.Token = tokKeywordCase then // 如果出现 public case 的场合，要跳出处理 case
         Break;
 
