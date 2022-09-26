@@ -2,8 +2,11 @@ unit CnTestWizIniUnit;
 
 interface
 
+{$I CnWizards.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   StdCtrls, CnWizIni, CnHashMap, CnWizConsts, CnConsts, ComCtrls;
 
 type
@@ -33,7 +36,7 @@ type
     FShowing: Boolean;
     procedure ShowValues;
   public
-    { Public declarations }
+
   end;
 
 var

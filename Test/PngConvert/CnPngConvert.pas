@@ -177,7 +177,7 @@ begin
     begin
       S := AnsiString(edtPng.Text);
       D := AnsiString(dlgSave.FileName);
-      if CnConvertPngToBmp(PAnsiChar(S), PAnsiChar(D), CN_PNG_BMP_MODE_AUTO) then
+      if CnConvertPngToBmp(PAnsiChar(S), PAnsiChar(D)) then
         ShowMessage('PNG Convert OK.')
       else
         ShowMessage('PNG Convert Fail.');
