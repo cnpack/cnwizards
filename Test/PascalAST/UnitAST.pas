@@ -29,6 +29,11 @@ type
     btnArrayType: TButton;
     btnSetType: TButton;
     btnFileType: TButton;
+    btnPointerType: TButton;
+    btnStringType: TButton;
+    btnSubrangeType: TButton;
+    btnRecordType: TButton;
+    btnPropety: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -42,6 +47,12 @@ type
     procedure btnExpressionListClick(Sender: TObject);
     procedure btnArrayTypeClick(Sender: TObject);
     procedure btnSetTypeClick(Sender: TObject);
+    procedure btnFileTypeClick(Sender: TObject);
+    procedure btnPointerTypeClick(Sender: TObject);
+    procedure btnStringTypeClick(Sender: TObject);
+    procedure btnSubrangeTypeClick(Sender: TObject);
+    procedure btnRecordTypeClick(Sender: TObject);
+    procedure btnPropetyClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -93,7 +104,7 @@ end;
 
 procedure TFormAST.btnTypeDeclClick(Sender: TObject);
 begin
-  ReInitAst('TTest = (1...3)');
+  ReInitAst('TTest = 1..3');
   FAST.BuildTypeDecl;
   SynTree;
 end;
@@ -167,6 +178,62 @@ procedure TFormAST.btnSetTypeClick(Sender: TObject);
 begin
   ReInitAst('set of (tkBegin, tkEnd)');
   FAST.BuildSetType;
+  SynTree;
+end;
+
+procedure TFormAST.btnFileTypeClick(Sender: TObject);
+begin
+  ReInitAst('file of TRec');
+  FAST.BuildFileType;
+  SynTree;
+end;
+
+procedure TFormAST.btnPointerTypeClick(Sender: TObject);
+begin
+  ReInitAst('^Test');
+  FAST.BuildPointerType;
+  SynTree;
+end;
+
+procedure TFormAST.btnStringTypeClick(Sender: TObject);
+begin
+  ReInitAst('AnsiString[255]');
+  FAST.BuildStringType;
+  SynTree;
+end;
+
+procedure TFormAST.btnSubrangeTypeClick(Sender: TObject);
+begin
+  ReInitAst('3..5');
+  FAST.BuildSubrangeType;
+  SynTree;
+end;
+
+procedure TFormAST.btnRecordTypeClick(Sender: TObject);
+begin
+  ReInitAst(
+  'TFileRec = packed record (* must match the size the compiler generates: 332 bytes *)' + #13#10 +
+    'Handle: Integer;' + #13#10 +
+    'Mode,UI: Integer;' + #13#10 +
+    'RecSize: Cardinal;' + #13#10 +
+    'Private: array[1..28] of Byte;' + #13#10 +
+    'UserData: array[1..32] of Byte;' + #13#10 +
+    'Name: array[0..259] of Char;' + #13#10 +
+    'case Integer of' + #13#10 +
+    '0: (' + #13#10 +
+      'LowPart: DWORD;' + #13#10 +
+      'HighPart: Longint);' + #13#10 +
+    '1: (' + #13#10 +
+      'QuadPart: LONGLONG);' + #13#10 +
+  'end;');
+  FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnPropetyClick(Sender: TObject);
+begin
+  ReInitAst('property NameFromLCID[const ID: string]: string read GetNameFromLCID write SetNameFromLCID; default;');
+  FAST.BuildClassProperty;
   SynTree;
 end;
 

@@ -77,6 +77,17 @@ type
     cntString,
     cntIdent,
 
+    cntConst,
+    cntIndex,
+    cntRead,
+    cntWrite,
+    cntImplements,
+    cntDefault,
+    cntStored,
+    cntNodefault,
+    cntReadonly,
+    cntWriteonly,
+
     cntUsesClause,
     cntUsesDecl,
     cntTypeSection,
@@ -88,15 +99,32 @@ type
 
     cntEnumeratedList,
     cntEmumeratedIdent,
+    cntVariantSection,
 
     cntArrayType,
     cntOrdinalType,
     cntSubrangeType,
     cntSetType,
-    cntSetOf,
+    cntFileType,
+    cntOf,
+    cntStringType,
+    cntProcedureType,
+
+    cntRecord,
+    cntFieldList,
+    cntFieldDecl,
+    cntRecVariant,
+    cntIdentList,
 
     cntSetConstructor,
     cntSetElement,
+
+    cntProcedureHeading,
+    cntFunctionHeading,
+    cntProperty,
+    cntPropertyInterface,
+    cntPropertySpecifiers,
+    cntPropertyParameterList,
 
     cntLabelId,
     cntSimpleStatement,
@@ -108,7 +136,9 @@ type
     cntDesignator,
     cntQualId,
     cntTerm,
-    cntFactor
+    cntFactor,
+
+    cntEnd
   );
 
   TCnPasAstLeaf = class(TCnLeaf)
@@ -146,6 +176,8 @@ type
     // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点
     procedure NextToken;
     // Lex 往前行进到下一个有效 Token，如果有注释，自行跳过（先不处理条件编译指令）
+    function ForwardToken: TTokenKind;
+    // 取下一个有效 Token 但不往前行进，内部使用书签进行恢复
   public
     constructor Create(const Source: string); virtual;
     destructor Destroy; override;
@@ -192,6 +224,24 @@ type
     procedure BuildObjectType;
     procedure BuildInterfaceType;
 
+    procedure BuildFieldList;
+    procedure BuildClassVisibility;
+    procedure BuildClassMethod;
+    procedure BuildClassProperty;
+    procedure BuildClassTypeSection;
+    procedure BuildClassConstSection;
+    procedure BuildVarSection;
+    procedure BuildRecVariant;
+    procedure BuildFieldDecl;
+    procedure BuildVariantSection;
+
+    procedure BuildPropertyInterface;
+    procedure BuildPropertyParameterList;
+    procedure BuildPropertySpecifiers;
+
+    procedure BuildFunctionHeading;
+    procedure BuildProcedureHeading;
+
     procedure BuildUsesClause;
     {* 碰上 uses 关键字时被调用，新建 uses 节点，其下是多个 usesdecl 加逗号，每个 uses 是新节点}
     procedure BuildUsesDecl;
@@ -227,6 +277,7 @@ type
     procedure BuildQualId;
     {* 组装一个 QualId，主要是 Ident 以及 (Designator as Type)，作为 Designator 的起始部分}
 
+    procedure BuildIdentList;
     procedure BuildIdent;
     {* 组装一个标识符，可以带点号}
 
@@ -248,6 +299,10 @@ const
     tkEqual, tkIn, tkAs, tkIs];
   AddOPTokens = [tkPlus, tkMinus, tkOr, tkXor];
   MulOpTokens = [tkStar, tkDiv, tkSlash, tkMod, tkAnd, tkShl, tkShr];
+  VisibilityTokens = [tkPublic, tkPublished, tkProtected, tkPrivate];
+  ProcedureTokens = [tkProcedure, tkFunction, tkConstructor, tkDestructor];
+  PropertySpecifiersTokens = [tkDispid, tkRead, tkIndex, tkWrite, tkStored,
+    tkImplements, tkDefault, tkNodefault, tkReadonly, tkWriteonly];
 
 function PascalAstNodeTypeToString(AType: TCnPasNodeType): string;
 begin
@@ -268,6 +323,7 @@ begin
     tkType: Result := cntTypeSection;
 
     // 语句块
+    tkEnd: Result := cntEnd;
 
     // 元素：注释
     tkBorComment, tkAnsiComment: Result := cntBlockComment;
@@ -282,6 +338,7 @@ begin
     // 元素：符号与运算符等
     tkComma: Result := cntComma;
     tkSemiColon: Result := cntSemiColon;
+    tkColon: Result := cntColon;
     tkDotDot: Result := cntRange;
     tkPoint: Result := cntDot;
     tkPointerSymbol: Result := cntHat;
@@ -300,7 +357,22 @@ begin
     // 类型
     tkArray: Result := cntArrayType;
     tkSet: Result := cntSetType;
-    tkOf: Result := cntSetOf;
+    tkFile: Result := cntFileType;
+    tkOf: Result := cntOf;
+    tkRecord, tkPacked: Result := cntRecord;
+
+    // 属性
+    tkProperty: Result := cntProperty;
+    tkConst: Result := cntConst;
+    tkIndex: Result := cntIndex;
+    tkRead: Result := cntRead;
+    tkWrite: Result := cntWrite;
+    tkImplements: Result := cntImplements;
+    tkDefault: Result := cntDefault;
+    tkStored: Result := cntStored;
+    tkNodefault: Result := cntNodefault;
+    tkReadonly: Result := cntReadonly;
+    tkWriteonly: Result := cntWriteonly;
   else
     raise ECnPascalAstException.Create(SCnErrorNoMatchNodeType + ' '
       + GetEnumName(TypeInfo(TTokenKind), Ord(AToken)));
@@ -323,12 +395,13 @@ begin
     begin
       MatchCreateLeafAndPush(tkSquareOpen);
       try
-        BuildOrdinalType;
-        while FLex.TokenID = tkComma do
-        begin
-          MatchCreateLeaf(tkComma);
+        repeat
           BuildOrdinalType;
-        end;
+          if FLex.TokenID = tkComma then
+            MatchCreateLeaf(tkComma)
+          else
+            Break;
+        until False;
       finally
         PopLeaf;
       end;
@@ -608,7 +681,17 @@ end;
 
 procedure TCnPasAstGenerator.BuildFileType;
 begin
+  MatchCreateLeafAndPush(tkFile);
 
+  try
+    if FLex.TokenID = tkOf then
+    begin
+      MatchCreateLeaf(FLex.TokenID);
+      BuildTypeID;
+    end;
+  finally
+    PopLeaf;
+  end;
 end;
 
 procedure TCnPasAstGenerator.BuildIdent;
@@ -616,12 +699,11 @@ var
   T: TCnPasAstLeaf;
 begin
   T := MatchCreateLeaf(tkIdentifier);
-  if T = nil then  // 可能在锁着
-    Exit;
 
   while FLex.TokenID in [tkPoint, tkIdentifier] do
   begin
-    T.Text := T.Text + FLex.Token;
+    if T <> nil then
+      T.Text := T.Text + FLex.Token;
     NextToken;
   end;
 end;
@@ -665,7 +747,7 @@ begin
       if IsRange then
         BuildSubrangeType
       else
-        BuildIdent;
+        BuildOrdIdentType;
     end;
   finally
     PopLeaf;
@@ -674,7 +756,26 @@ end;
 
 procedure TCnPasAstGenerator.BuildProcedureType;
 begin
+  MatchCreateLeafAndPush(tkNone, cntProcedureType);
 
+  try
+    if FLex.TokenID = tkProcedure then
+    begin
+      BuildProcedureHeading;
+    end
+    else if FLex.TokenID = tkFunction then
+    begin
+      BuildFunctionHeading;
+    end;
+    if FLex.TokenID = tkOf then
+    begin
+      MatchCreateLeaf(tkOf);
+      MatchCreateLeaf(tkObject);
+    end;
+
+  finally
+    PopLeaf;
+  end;
 end;
 
 procedure TCnPasAstGenerator.BuildQualId;
@@ -711,7 +812,15 @@ end;
 
 procedure TCnPasAstGenerator.BuildRecordType;
 begin
+  MatchCreateLeafAndPush(tkRecord);
 
+  try
+    if FLex.TokenID <> tkEnd then
+      BuildFieldList;
+    MatchCreateLeaf(tkEnd);
+  finally
+    PopLeaf;
+  end;
 end;
 
 procedure TCnPasAstGenerator.BuildSetConstructor;
@@ -876,7 +985,37 @@ end;
 
 procedure TCnPasAstGenerator.BuildStringType;
 begin
+  MatchCreateLeafAndPush(tkNone, cntStringType);
 
+  try
+    if FLex.TokenID = tkString then
+      MatchCreateLeaf(FLex.TokenID)
+    else
+      BuildIdent;
+
+    if FLex.TokenID = tkRoundOpen then
+    begin
+      MatchCreateLeafAndPush(FLex.TokenID);
+      try
+        BuildExpression;
+      finally
+        PopLeaf;
+      end;
+      MatchCreateLeaf(tkRoundClose);
+    end
+    else if FLex.TokenID = tkSquareOpen then
+    begin
+      MatchCreateLeafAndPush(FLex.TokenID);
+      try
+        BuildConstExpression;
+      finally
+        PopLeaf;
+      end;
+      MatchCreateLeaf(tkSquareClose);
+    end
+  finally
+    PopLeaf;
+  end;
 end;
 
 procedure TCnPasAstGenerator.BuildStructType;
@@ -1120,6 +1259,20 @@ begin
   until not (FLex.TokenID in SpaceTokens + CommentTokens);
 end;
 
+function TCnPasAstGenerator.ForwardToken: TTokenKind;
+var
+  Bookmark: TCnGeneralLexBookmark;
+begin
+  FLex.SaveToBookmark(Bookmark);
+
+  try
+    NextToken;
+    Result := FLex.TokenID;
+  finally
+    FLex.LoadFromBookmark(Bookmark);
+  end;
+end;
+
 procedure TCnPasAstGenerator.PopLeaf;
 begin
   if FLocked > 0 then // 锁着时不 Pop，因为 Push 也锁了
@@ -1154,7 +1307,7 @@ end;
 
 procedure TCnPasAstGenerator.BuildOrdIdentType;
 begin
-
+  BuildIdent;
 end;
 
 procedure TCnPasAstGenerator.BuildSubrangeType;
@@ -1186,13 +1339,293 @@ begin
   MatchCreateLeafAndPush(tkNone, cntTypeID);
 
   try
-    BuildIdent;
+    if FLex.TokenID = tkString then // 和 BuildIdent 内部不认关键字
+      MatchCreateLeaf(FLex.TokenID)
+    else
+      BuildIdent;
     if FLex.TokenID = tkRoundOpen then
     begin
       MatchCreateLeaf(FLex.TokenID);
       BuildExpression;
       MatchCreateLeaf(tkRoundClose)
     end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildFieldList;
+begin
+  MatchCreateLeafAndPush(tkNone, cntFieldList);
+
+  try
+    while not (FLex.TokenID in [tkEnd, tkCase, tkRoundClose]) do
+    begin
+      if FLex.TokenID in VisibilityTokens then
+        BuildClassVisibility;
+
+      if FLex.TokenID = tkCase then
+        Break
+      else if FLex.TokenID in ProcedureTokens then
+        BuildClassMethod
+      else if FLex.TokenID = tkProperty then
+        BuildClassProperty
+      else if FLex.TokenID = tkType then
+        BuildClassTypeSection
+      else if FLex.TokenID = tkConst then
+        BuildClassConstSection
+      else if FLex.TokenID in [tkVar, tkThreadVar] then
+        BuildVarSection
+      else if FLex.TokenID <> tkEnd then
+      begin
+        BuildFieldDecl;
+        if FLex.TokenID = tkSemiColon then
+          MatchCreateLeaf(tkSemiColon);
+      end;
+    end;
+
+    // 处理 case 可变体
+    if FLex.TokenID = tkCase then
+      BuildVariantSection;
+
+    if FLex.TokenID = tkSemiColon then
+      MatchCreateLeaf(tkSemiColon);
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildIdentList;
+begin
+  MatchCreateLeafAndPush(tkNone, cntIdentList);
+
+  try
+    repeat
+      BuildIdent;
+      if FLex.TokenID = tkComma then
+        MatchCreateLeaf(tkComma)
+      else
+        Break;
+    until False;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildFunctionHeading;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildProcedureHeading;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildClassConstSection;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildClassMethod;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildClassTypeSection;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildClassVisibility;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildVariantSection;
+var
+  Bookmark: TCnGeneralLexBookmark;
+  HasColon: Boolean;
+begin
+  MatchCreateLeafAndPush(tkCase, cntVariantSection);
+
+  try
+    Lock;
+    FLex.SaveToBookmark(Bookmark);
+
+    try
+      BuildIdent;
+      HasColon := FLex.TokenID = tkColon;
+    finally
+      FLex.LoadFromBookmark(Bookmark);
+      Unlock;
+    end;
+
+    if HasColon then
+    begin
+      BuildIdent;
+      MatchCreateLeaf(tkColon);
+      BuildTypeID;
+    end
+    else
+      BuildTypeID;
+
+    MatchCreateLeaf(tkOf);
+    repeat
+      BuildRecVariant;
+      if FLex.TokenID = tkSemiColon then
+      begin
+        MatchCreateLeaf(FLex.TokenID);
+        if FLex.TokenID in [tkEnd, tkRoundClose] then
+          Break;
+      end
+      else
+        Break;
+    until False;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildVarSection;
+begin
+
+end;
+
+procedure TCnPasAstGenerator.BuildFieldDecl;
+begin
+  MatchCreateLeafAndPush(tkNone, cntFieldDecl);
+
+  try
+    BuildIdentList;
+    MatchCreateLeaf(tkColon);
+    BuildCommonType;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildClassProperty;
+begin
+  MatchCreateLeafAndPush(tkProperty);
+
+  try
+    BuildIdent;
+    if FLex.TokenID in [tkSquareOpen, tkColon] then
+      BuildPropertyInterface;
+    BuildPropertySpecifiers;
+    MatchCreateLeaf(tkSemiColon);
+
+    if FLex.TokenID = tkDefault then
+    begin
+      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeaf(tkSemiColon);
+    end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildRecVariant;
+begin
+  MatchCreateLeafAndPush(tkNone, cntRecVariant);
+
+  try
+    repeat
+      BuildConstExpression;
+      if FLex.TokenID = tkComma then
+        MatchCreateLeaf(tkComma)
+      else
+        Break;
+    until False;
+
+    MatchCreateLeaf(tkColon);
+    if FLex.TokenID = tkRoundOpen then
+    begin
+      MatchCreateLeafAndPush(tkRoundOpen);
+
+      try
+        BuildFieldList;
+      finally
+        PopLeaf;
+      end;
+      MatchCreateLeaf(tkRoundClose);
+    end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildPropertyInterface;
+begin
+  MatchCreateLeafAndPush(tkNone, cntPropertyInterface);
+
+  try
+    if FLex.TokenID <> tkColon then
+      BuildPropertyParameterList;
+    MatchCreateLeaf(tkColon);
+    BuildCommonType;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildPropertySpecifiers;
+var
+  ID: TTokenKind;
+begin
+  MatchCreateLeafAndPush(tkNone, cntPropertySpecifiers);
+
+  try
+    while FLex.TokenID in PropertySpecifiersTokens do
+    begin
+      ID := FLex.TokenID;
+      MatchCreateLeaf(FLex.TokenID);
+      case ID of
+        tkDispid:
+          begin
+            BuildExpression;
+          end;
+        tkIndex, tkStored, tkDefault:
+          begin
+            BuildConstExpression;
+          end;
+        tkRead, tkWrite:
+          begin
+            BuildDesignator;
+          end;
+        tkImplements:
+          begin
+            BuildTypeID;
+          end;
+        // tkNodefault, tkReadonly, tkWriteonly 直接 Match 掉
+      end;
+    end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildPropertyParameterList;
+begin
+  MatchCreateLeafAndPush(tkNone, cntPropertyParameterList);
+
+  try
+    MatchCreateLeafAndPush(tkSquareOpen);
+
+    repeat
+      if FLex.TokenID in [tkVar, tkConst, tkOut] then
+        MatchCreateLeaf(FLex.TokenID);
+
+      BuildIdentList;
+      MatchCreateLeaf(tkColon);
+      BuildTypeID;
+
+      if FLex.TokenID <> tkSemiColon then
+        Break;
+    until False;
+
+    MatchCreateLeaf(tkSquareClose);
   finally
     PopLeaf;
   end;

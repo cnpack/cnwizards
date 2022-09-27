@@ -163,8 +163,8 @@ object FormAST: TFormAST
     object grpType: TGroupBox
       Left = 232
       Top = 24
-      Width = 169
-      Height = 209
+      Width = 185
+      Height = 225
       Caption = 'Type'
       TabOrder = 10
       object btnArrayType: TButton
@@ -192,6 +192,52 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'File'
         TabOrder = 2
+        OnClick = btnFileTypeClick
+      end
+      object btnPointerType: TButton
+        Left = 16
+        Top = 120
+        Width = 75
+        Height = 25
+        Caption = 'Pointer'
+        TabOrder = 3
+        OnClick = btnPointerTypeClick
+      end
+      object btnStringType: TButton
+        Left = 16
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'String'
+        TabOrder = 4
+        OnClick = btnStringTypeClick
+      end
+      object btnSubrangeType: TButton
+        Left = 16
+        Top = 184
+        Width = 75
+        Height = 25
+        Caption = 'Subrange'
+        TabOrder = 5
+        OnClick = btnSubrangeTypeClick
+      end
+      object btnRecordType: TButton
+        Left = 96
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Record'
+        TabOrder = 6
+        OnClick = btnRecordTypeClick
+      end
+      object btnPropety: TButton
+        Left = 96
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'Property'
+        TabOrder = 7
+        OnClick = btnPropetyClick
       end
     end
   end
