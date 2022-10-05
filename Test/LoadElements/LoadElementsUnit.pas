@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, mwBCBTokenList, mPasLex, CnPasWideLex, CnBCBWideTokenList,
-  Contnrs;
+  Contnrs, ComCtrls;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -14,10 +14,15 @@ type
     etIntfMember, etRecord, etClass, etInterface, etProperty, etIntfProperty, etNamespace);
 
   TCnLoadElementForm = class(TForm)
+    pgc1: TPageControl;
+    tsPascal: TTabSheet;
     mmoPas: TMemo;
     btnLoadPasElements: TButton;
+    tsCPP: TTabSheet;
     mmoCpp: TMemo;
     btnLoadCppElement: TButton;
+    mmoPasRes: TMemo;
+    mmoCppRes: TMemo;
     procedure btnLoadPasElementsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -1382,10 +1387,13 @@ begin
   FLanguage := ltPas;
   LoadElements;
 
+  mmoPasRes.Lines.Clear;
   for I := 0 to FElementList.Count - 1 do
   begin
     Info := TCnElementInfo(FElementList.Objects[I]);
-    ShowMessage(GetMethodName(Info.DisplayName));
+    // ShowMessage(GetMethodName(Info.DisplayName));
+    mmoPasRes.Lines.Add(Format('DisplayName %s, LineNo %d, Name %s, ElementTypeStr %s, ProcArgs %s, ProcName %s, OwnerClass %s, ProcReturnType %s, FileName %s, AllName %s, BeginIndex %d, EndIndex %d, IsForward %d, ElementType %d',
+      [Info.DisplayName, Info.LineNo, Info.Name, Info.ElementTypeStr, Info.ProcArgs, Info.ProcName, Info.OwnerClass, Info.ProcReturnType, Info.FileName, Info.AllName, Info.BeginIndex, Info.EndIndex, Ord(Info.IsForward), Ord(Info.ElementType)]));
   end;
 
   MessageBox(Handle, PChar(FElementList.Text), 'LoadElements', MB_OK);
@@ -1414,10 +1422,13 @@ begin
   FLanguage := ltCpp;
   LoadElements;
 
+  mmoCppRes.Lines.Clear;
   for I := 0 to FElementList.Count - 1 do
   begin
     Info := TCnElementInfo(FElementList.Objects[I]);
-    ShowMessage(GetMethodName(Info.DisplayName));
+    // ShowMessage(GetMethodName(Info.DisplayName));
+    mmoCppRes.Lines.Add(Format('DisplayName %s, LineNo %d, Name %s, ElementTypeStr %s, ProcArgs %s, ProcName %s, OwnerClass %s, ProcReturnType %s, FileName %s, AllName %s, BeginIndex %d, EndIndex %d, IsForward %d, ElementType %d',
+      [Info.DisplayName, Info.LineNo, Info.Name, Info.ElementTypeStr, Info.ProcArgs, Info.ProcName, Info.OwnerClass, Info.ProcReturnType, Info.FileName, Info.AllName, Info.BeginIndex, Info.EndIndex, Ord(Info.IsForward), Ord(Info.ElementType)]));
   end;
 
   MessageBox(Handle, PChar(FElementList.Text), 'LoadElements', MB_OK);
