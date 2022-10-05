@@ -82,7 +82,7 @@ type
     etIntfMember, etRecord, etClass, etInterface, etProperty, etIntfProperty, etNamespace);
 
   TCnElementInfo = class(TCnBaseElementInfo)
-  {* 一元素包含的信息，从过程扩展而来 }
+  {* 一元素包含的信息，从过程扩展而来}
   private
     FElementType: TCnElementType;
     FLineNo: Integer;
@@ -99,18 +99,31 @@ type
     FIsForward: Boolean;
   public
     property LineNo: Integer read FLineNo write FLineNo;
+    {* 元素开始所在行号，1 开始}
     property Name: string read FName write FName;
+    {* 记录函数的完整声明，其他类型记录名字，以备状态栏上显示}
     property ElementTypeStr: string read FElementTypeStr write FElementTypeStr;
+    {* 额外的类型修饰用的说明性字符串}
     property ProcArgs: string read FProcArgs write FProcArgs;
+    {* 函数参数列表}
     property ProcName: string read FProcName write FProcName;
+    {* 单纯的函数名}
     property OwnerClass: string read FOwnerClass write FOwnerClass;
+    {* 元素所属的类或接口}
     property ProcReturnType: string read FProcReturnType write FProcReturnType;
+    {* 函数返回值}
     property FileName: string read FFileName write FFileName;
+    {* 文件名，不包括路径}
     property AllName: string read FAllName write FAllName;
+    {* 完整的路径文件名}
     property BeginIndex: Integer read FBeginIndex write FBeginIndex;
+    {* 起始行}
     property EndIndex: Integer read FEndIndex write FEndIndex;
+    {* 结束行}
     property IsForward: Boolean read FIsForward write FIsForward;
+    {* 是否前向声明}
     property ElementType: TCnElementType read FElementType write FElementType;
+    {* 元素类型}
   end;
 
   TCnProcListWizard = class;
@@ -2410,6 +2423,7 @@ var
 
                   ElementInfo.Text := CurClassForNotKnown;
                   ElementInfo.OwnerClass := CurClassForNotKnown;
+                  ElementInfo.Name := ElementInfo.Text;
                   AddElement(ElementList, ElementInfo);
 
                   IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
@@ -2432,6 +2446,7 @@ var
                 ElementInfo.ElementTypeStr := 'class';
                 ElementInfo.Text := CurClass;
                 ElementInfo.OwnerClass := CurClass;
+                ElementInfo.Name := ElementInfo.Text;
                 AddElement(ElementList, ElementInfo);
 
                 IsClassForForward := True; // 以备后面判断是否是 class; 的前向声明
@@ -2459,6 +2474,7 @@ var
                 ElementInfo.ElementTypeStr := 'interface';
                 ElementInfo.Text := CurIntf;
                 ElementInfo.OwnerClass := CurIntf;
+                ElementInfo.Name := ElementInfo.Text;
                 AddElement(ElementList, ElementInfo);
               end
               else if (PasParser.TokenID = tkRecord) or
@@ -2479,6 +2495,7 @@ var
                 else
                   ElementInfo.ElementTypeStr := 'record object';
                 ElementInfo.Text := CurIdent;
+                ElementInfo.Name := ElementInfo.Text;
                 // ElementInfo.OwnerClass := CurIntf;
                 AddElement(ElementList, ElementInfo);
               end
@@ -2513,6 +2530,7 @@ var
                     ElementInfo.OwnerClass := CurClass;
                     ElementInfo.Text := CurClass + '.' + string(PasParser.Token);
                   end;
+                  ElementInfo.Name := ElementInfo.Text;
                   AddElement(ElementList, ElementInfo);
                 end;
               end
@@ -4123,6 +4141,12 @@ begin
   EditorToolBarEnable(Active and FUseEditorToolBar);
 end;
 
+//==============================================================================
+// 查找下拉列表框
+//==============================================================================
+
+{ TCnProcDrowDownBox }
+
 procedure TCnProcDropDownBox.ListDrawItem(Control: TWinControl;
   Index: Integer; Rect: TRect; State: TOwnerDrawState);
 var
@@ -4195,12 +4219,6 @@ begin
       MatchColor, MatchedIndexesRef);
   end;
 end;
-
-//==============================================================================
-// 查找下拉列表框
-//==============================================================================
-
-{ TCnProcDrowDownBox }
 
 procedure TCnProcDropDownBox.CloseUp;
 begin
