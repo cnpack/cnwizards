@@ -192,6 +192,7 @@ begin
   CL.AddDelphiFunction('Function IsCapsLockDown : Boolean');
   CL.AddDelphiFunction('Function IsNumLockDown : Boolean');
   CL.AddDelphiFunction('Function IsScrollLockDown : Boolean');
+  CL.AddDelphiFunction('Function HandleEditShortCut( AControl : TWinControl; AShortCut : TShortCut) : Boolean');
   CL.AddDelphiFunction('Function RemoveClassPrefix( const ClassName : string) : string');
   CL.AddDelphiFunction('Procedure InfoDlg( Mess : string)');
   CL.AddDelphiFunction('Function InfoOk( Mess : string) : Boolean');
@@ -436,6 +437,7 @@ begin
   S.RegisterDelphiFunction(@IsCapsLockDown, 'IsCapsLockDown', cdRegister);
   S.RegisterDelphiFunction(@IsNumLockDown, 'IsNumLockDown', cdRegister);
   S.RegisterDelphiFunction(@IsScrollLockDown, 'IsScrollLockDown', cdRegister);
+  S.RegisterDelphiFunction(@HandleEditShortCut, 'HandleEditShortCut', cdRegister);
   S.RegisterDelphiFunction(@RemoveClassPrefix, 'RemoveClassPrefix', cdRegister);
   S.RegisterDelphiFunction(@InfoDlg_P, 'InfoDlg', cdRegister);
   S.RegisterDelphiFunction(@InfoOk_P, 'InfoOk', cdRegister);

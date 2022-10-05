@@ -344,7 +344,6 @@ begin
   CL.AddDelphiFunction('Procedure GetCursorList( List : TStrings)');
   CL.AddDelphiFunction('Procedure GetCharsetList( List : TStrings)');
   CL.AddDelphiFunction('Procedure GetColorList( List : TStrings)');
-  CL.AddDelphiFunction('Function HandleEditShortCut( AControl : TWinControl; AShortCut : TShortCut) : Boolean');
   CL.AddTypeS('TCnSelectMode', '( smAll, smNone, smInvert )');
   CL.AddDelphiFunction('Function CnGetComponentText( Component : TComponent) : string');
   CL.AddDelphiFunction('Function CnGetComponentAction( Component : TComponent) : TBasicAction');
@@ -618,7 +617,6 @@ begin
   S.RegisterDelphiFunction(@GetCursorList, 'GetCursorList', cdRegister);
   S.RegisterDelphiFunction(@GetCharsetList, 'GetCharsetList', cdRegister);
   S.RegisterDelphiFunction(@GetColorList, 'GetColorList', cdRegister);
-  S.RegisterDelphiFunction(@HandleEditShortCut, 'HandleEditShortCut', cdRegister);
   S.RegisterDelphiFunction(@CnGetComponentText, 'CnGetComponentText', cdRegister);
   S.RegisterDelphiFunction(@CnGetComponentAction, 'CnGetComponentAction', cdRegister);
   S.RegisterDelphiFunction(@RemoveListViewSubImages, 'RemoveListViewSubImages', cdRegister);
