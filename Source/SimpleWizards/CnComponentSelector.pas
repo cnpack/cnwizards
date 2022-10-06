@@ -24,7 +24,8 @@ unit CnComponentSelector;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：组件选择工具专家单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：WizOptions.UseSearchCombo 为 True 时，cbbByClass 和 cbbByEvent
+*           会被 SearchComboBox 替之
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
@@ -54,7 +55,7 @@ uses
   DsgnIntf,
   {$ENDIF}
   ActnList, TypInfo, Contnrs, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils,
-  CnCommon, CnSpin, CnWizOptions, CnWizMultiLang, CnWizManager;
+  CnCommon, CnSpin, CnSearchCombo, CnWizOptions, CnWizMultiLang, CnWizManager;
 
 type
 
@@ -144,6 +145,8 @@ type
     FSourceList, FDestList: IDesignerSelections;
     FContainerWindow: TWinControl;
     FCurrList: TStrings;
+    FCbbByClass: TCnSearchComboBox;
+    FCbbByEvent: TCnSearchComboBox;
     procedure GetEventList(AObj: TObject; AList: TStringList);
     procedure BeginUpdateList;
     procedure EndUpdateList;
@@ -303,7 +306,7 @@ begin
   end;
 end;
 
-// 初始化控件
+// 初始化控件，只会被调用一次
 procedure TCnComponentSelectorForm.InitControls;
 var
   I: Integer;
@@ -316,12 +319,13 @@ begin
   SelIsEmpty := True;
   for I := 0 to SourceList.Count - 1 do
   begin
-  {$IFDEF COMPILER6_UP}
+{$IFDEF COMPILER6_UP}
     Component := TComponent(SourceList[I]);
-  {$ELSE}
+{$ELSE}
     Component := TryExtractComponent(SourceList[I]);
-  {$ENDIF}
-    if Component = ContainerWindow then Break; // 选择部分包含窗体本身
+{$ENDIF}
+    if Component = ContainerWindow then
+      Break; // 选择部分包含窗体本身
     if (Component is TWinControl) and (TWinControl(Component).ControlCount > 0) then
     begin
       SelIsEmpty := False;
@@ -331,6 +335,7 @@ begin
   rbCurrControl.Enabled := not SelIsEmpty;
   if rbCurrControl.Checked and SelIsEmpty then
     rbCurrForm.Checked := True;
+
   // 初始化容器控件列表
   cbbFilterControl.Items.Clear;
   for I := 0 to ContainerWindow.ComponentCount - 1 do
@@ -345,28 +350,58 @@ begin
     end;
   end;
   rbSpecControl.Enabled := cbbFilterControl.Items.Count > 0;
-  // 初始化类列表
-  cbbByClass.Items.Clear;
-  for I := 0 to ContainerWindow.ComponentCount - 1 do
-    with ContainerWindow.Components[I] do
-      if cbbByClass.Items.IndexOf(ClassName) < 0 then
-        cbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
-  cbbByEvent.Items.Clear;
-  List := TStringList.Create;
-  try
-    List.Sorted := True;
+
+  if WizOptions.UseSearchCombo then
+  begin
+    CloneSearchCombo(FCbbByClass, cbbByClass);
+    CloneSearchCombo(FCbbByEvent, cbbByEvent);
+
+    // 初始化类列表
+    FCbbByClass.Items.Clear;
     for I := 0 to ContainerWindow.ComponentCount - 1 do
-      GetEventList(ContainerWindow.Components[I], List);
-    cbbByEvent.Items.Assign(List);
-  finally
-    List.Free;
-  end;          
+      with ContainerWindow.Components[I] do
+        if FCbbByClass.Items.IndexOf(ClassName) < 0 then
+          FCbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
+
+    // 初始化事件列表
+    FCbbByEvent.Items.Clear;
+    List := TStringList.Create;
+    try
+      List.Sorted := True;
+      for I := 0 to ContainerWindow.ComponentCount - 1 do
+        GetEventList(ContainerWindow.Components[I], List);
+      FCbbByEvent.Items.Assign(List);
+    finally
+      List.Free;
+    end;
+  end
+  else
+  begin
+    // 初始化类列表
+    cbbByClass.Items.Clear;
+    for I := 0 to ContainerWindow.ComponentCount - 1 do
+      with ContainerWindow.Components[I] do
+        if cbbByClass.Items.IndexOf(ClassName) < 0 then
+          cbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
+
+    // 初始化事件列表
+    cbbByEvent.Items.Clear;
+    List := TStringList.Create;
+    try
+      List.Sorted := True;
+      for I := 0 to ContainerWindow.ComponentCount - 1 do
+        GetEventList(ContainerWindow.Components[I], List);
+      cbbByEvent.Items.Assign(List);
+    finally
+      List.Free;
+    end;
+  end;
 end;
 
 // 更新当前过滤列表
 procedure TCnComponentSelectorForm.UpdateList;
 var
-  I, j: Integer;
+  I, J: Integer;
   SelStrs: TStrings;
   Component: TComponent;
   WinControl: TWinControl;
@@ -381,25 +416,37 @@ var
   // 类型是否匹配
   function MatchClass(AObject: TObject): Boolean;
   begin
-    Result := not cbByClass.Checked or (cbbByClass.Text = '') or
-      AObject.ClassNameIs(cbbByClass.Text) or
+    if WizOptions.UseSearchCombo then
+      Result := not cbByClass.Checked or (FcbbByClass.Text = '') or
+      AObject.ClassNameIs(FcbbByClass.Text) or
       (cbSubClass.Checked and AObject.InheritsFrom(
-      TClass(cbbByClass.Items.Objects[cbbByClass.ItemIndex])));
+      TClass(FcbbByClass.Items.Objects[FcbbByClass.ItemIndex])))
+    else
+      Result := not cbByClass.Checked or (cbbByClass.Text = '') or
+        AObject.ClassNameIs(cbbByClass.Text) or
+        (cbSubClass.Checked and AObject.InheritsFrom(
+        TClass(cbbByClass.Items.Objects[cbbByClass.ItemIndex])));
   end;
 
   // 事件是否匹配
   function MatchEvent(AObject: TObject): Boolean;
   var
     List: TStringList;
+    EvtTxt: string;
   begin
     Result := True;
-    if not chkByEvent.Checked or (cbbByEvent.Text = '') then
+    if WizOptions.UseSearchCombo then
+      EvtTxt := FcbbByEvent.Text
+    else
+      EvtTxt := cbbByEvent.Text;
+
+    if not chkByEvent.Checked or (EvtTxt = '') then
       Exit;
 
     List := TStringList.Create;
     try
       GetEventList(AObject, List);
-      Result := List.IndexOf(cbbByEvent.Text) >= 0;
+      Result := List.IndexOf(EvtTxt) >= 0;
     finally
       List.Free;
     end;   
@@ -476,8 +523,8 @@ begin
           if Component is TWinControl then
           begin
             WinControl := TWinControl(Component);
-            for j := 0 to WinControl.ControlCount - 1 do
-              AddItem(WinControl.Controls[j], cbIncludeChildren.Checked);
+            for J := 0 to WinControl.ControlCount - 1 do
+              AddItem(WinControl.Controls[J], cbIncludeChildren.Checked);
           end;
         end;
       end
@@ -503,11 +550,13 @@ end;
 
 // 更新控件状态
 procedure TCnComponentSelectorForm.UpdateControls;
+
   procedure InitComboBox(Combo: TComboBox);
   begin
     if (Combo.Items.Count > 0) and (Combo.ItemIndex < 0) then
       Combo.ItemIndex := 0;
-  end;  
+  end;
+
 begin
   InitComboBox(cbbFilterControl);
   InitComboBox(cbbByClass);
@@ -526,6 +575,12 @@ begin
   seTagEnd.Enabled := cbByTag.Checked;
   seTagEnd.Visible := cbbByTag.ItemIndex = 3;
   lblTag.Visible := cbbByTag.ItemIndex = 3;
+
+  if WizOptions.UseSearchCombo then
+  begin
+    FcbbByClass.Enabled := cbByClass.Checked;
+    FcbbByEvent.Enabled := chkByEvent.Checked;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -670,10 +725,19 @@ begin
   Ini.WriteBool(Section, csByName, cbByName.Checked);
   Ini.WriteString(Section, csByNameText, edtByName.Text);
   Ini.WriteBool(Section, csByClass, cbByClass.Checked);
-  Ini.WriteString(Section, csByClassText, cbbByClass.Text);
+
+  if WizOptions.UseSearchCombo then
+    Ini.WriteString(Section, csByClassText, FcbbByClass.Text)
+  else
+    Ini.WriteString(Section, csByClassText, cbbByClass.Text);
   Ini.WriteBool(Section, csSubClass, cbSubClass.Checked);
   Ini.WriteBool(Section, csByEvent, chkByEvent.Checked);
-  Ini.WriteInteger(Section, csByEvent, cbbByEvent.ItemIndex);
+
+  if WizOptions.UseSearchCombo then
+    Ini.WriteInteger(Section, csByEvent, FcbbByEvent.ItemIndex)
+  else
+    Ini.WriteInteger(Section, csByEvent, cbbByEvent.ItemIndex);
+
   Ini.WriteBool(Section, csByTag, cbByTag.Checked);
   Ini.WriteInteger(Section, csByTagIndex, cbbByTag.ItemIndex);
   Ini.WriteInteger(Section, csTagStart, StrToIntDef(seTagStart.Text, 0));
@@ -851,17 +915,17 @@ end;
 // 移动到顶部
 procedure TCnComponentSelectorForm.actMoveToTopExecute(Sender: TObject);
 var
-  I, j: Integer;
+  I, J: Integer;
 begin
   BeginUpdateList;
   try
-    j := 0;
+    J := 0;
     for I := 0 to lbDest.Items.Count - 1 do
       if lbDest.Selected[I] then
       begin
-        lbDest.Items.Move(I, j);
-        lbDest.Selected[j] := True;
-        Inc(j);
+        lbDest.Items.Move(I, J);
+        lbDest.Selected[J] := True;
+        Inc(J);
       end;
   finally
     EndUpdateList;
@@ -871,17 +935,17 @@ end;
 // 移动到底部
 procedure TCnComponentSelectorForm.actMoveToBottomExecute(Sender: TObject);
 var
-  I, j: Integer;
+  I, J: Integer;
 begin
   BeginUpdateList;
   try
-    j := lbDest.Items.Count - 1;
+    J := lbDest.Items.Count - 1;
     for I := lbDest.Items.Count - 1 downto 0 do
       if lbDest.Selected[I] then
       begin
-        lbDest.Items.Move(I, j);
-        lbDest.Selected[j] := True;
-        Dec(j);
+        lbDest.Items.Move(I, J);
+        lbDest.Selected[J] := True;
+        Dec(J);
       end;
   finally
     EndUpdateList;

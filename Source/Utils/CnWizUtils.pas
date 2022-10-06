@@ -70,9 +70,10 @@ uses
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
-  mPasLex, mwBCBTokenList, CnPasWideLex, CnBCBWideTokenList,
-  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, RegExpr, CnWizCompilerConst,
-  CnWizConsts, CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
+  RegExpr, mPasLex, mwBCBTokenList,
+  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs,
+  CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
+  CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni, CnSearchCombo,
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
 type
@@ -1158,6 +1159,9 @@ function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
 
 function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 {* 判断一控件窗口是否是非可视化控件}
+
+procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
+{* 将一个 Combo 复制为 CnSearchCombo，供调用者替换掉}
 
 function FileExists(const Filename: string): Boolean;
 {* Tests for file existance, a lot faster than the RTL implementation }
@@ -8180,6 +8184,23 @@ begin
   //FillChar(AClassName, SizeOf(AClassName), #0);
   AClassName[GetClassName(hWnd, @AClassName, SizeOf(AClassName) - 1)] := #0;
   Result := string(AClassName) = NonvisualClassNamePattern;
+end;
+
+procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
+begin
+  ASearchCombo := TCnSearchComboBox.Create(ACombo.Owner);
+  ASearchCombo.MatchMode := mmAnywhere;
+
+  ASearchCombo.Parent := ACombo.Parent;
+  ASearchCombo.Top := ACombo.Top;
+  ASearchCombo.Left := ACombo.Left;
+  ASearchCombo.Width := ACombo.Width;
+  ASearchCombo.Height := ACombo.Height;
+  ASearchCombo.DropDownList.Width := ASearchCombo.Width;
+  ASearchCombo.OnSelect := ACombo.OnChange;
+
+  ASearchCombo.Visible := True;
+  ACombo.Visible := False;
 end;
 
 // Tests for file existance, a lot faster than the RTL implementation

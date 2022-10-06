@@ -119,6 +119,7 @@ type
     FSizeEnlarge: TCnWizSizeEnlarge;
     FDisableIcons: Boolean;
     FTempForceDisableIco: Boolean;
+    FUseSearchCombo: Boolean;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -282,7 +283,10 @@ type
     property UseCustomUserDir: Boolean read FUseCustomUserDir write SetUseCustomUserDir;
     {* 是否使用指定的 User 目录}
     property CustomUserDir: string read FCustomUserDir write SetCustomUserDir;
-    {* Vista / Win7 下使用指定的 User 目录来避免权限问题 }
+    {* Vista / Win7 下使用指定的 User 目录来避免权限问题}
+
+    property UseSearchCombo: Boolean read FUseSearchCombo write FUseSearchCombo;
+    {* 部分使用 ComboBox 进行下拉选择的场合，是否改用 CnSearchCombo}
   end;
 
 var
@@ -359,6 +363,7 @@ const
 
   csUseCustomUserDir = 'UseCustomUserDir';
   csCustomUserDir = 'CustomUserDir';
+  csUseSearchCombo = 'UseSearchCombo';
 
 {$IFNDEF COMPILER6_UP}
 const
@@ -483,6 +488,7 @@ begin
       if (FCustomUserDir = '') or not DirectoryExists(FCustomUserDir) then
         FCustomUserDir := DefDir;
     end;
+    FUseSearchCombo := ReadBool(SCnOptionSection, csUseSearchCombo, False);
 
     FUpgradeReleaseOnly := ReadBool(SCnUpgradeSection, csUpgradeReleaseOnly, True);
     FUpgradeContent := [];
@@ -547,6 +553,7 @@ begin
     if not FUseCmdUserDir then // 不是命令行中指定目录时才保存目录名，避免命令行指定的目录覆盖掉设置目录
       WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 
+    WriteBool(SCnOptionSection, csUseSearchCombo, FUseSearchCombo);
     WriteBool(SCnUpgradeSection, csUpgradeReleaseOnly, FUpgradeReleaseOnly);
     WriteBool(SCnUpgradeSection, csNewFeature, ucNewFeature in FUpgradeContent);
     WriteBool(SCnUpgradeSection, csBigBugFixed, ucBigBugFixed in FUpgradeContent);
