@@ -42,8 +42,9 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CheckLst, StdCtrls, ComCtrls, ExtCtrls, Menus, CnConsts, CnCommon, IniFiles,
-  ToolsAPI, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper, CnInputSymbolList,
-  CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText, CnWizUtils, CnWizOptions;
+  ToolsAPI, CnStrings, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper,
+  CnInputSymbolList, CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText,
+  CnWizUtils, CnWizOptions;
 
 type
 
