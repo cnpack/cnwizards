@@ -520,7 +520,8 @@ begin
   TranslateStr(SCnSrcTemplateComment, 'SCnSrcTemplateComment');
   TranslateStr(SCnSrcTemplateConfigCaption, 'SCnSrcTemplateConfigCaption');
   TranslateStr(SCnSrcTemplateConfigHint, 'SCnSrcTemplateConfigHint');
-
+  TranslateStr(SCnSrcTemplateInsertToProcCaption, 'SCnSrcTemplateInsertToProcCaption');
+  TranslateStr(SCnSrcTemplateInsertToProcHint, 'SCnSrcTemplateInsertToProcHint');
   TranslateStr(SCnSrcTemplateCaptionIsEmpty, 'SCnSrcTemplateCaptionIsEmpty');
   TranslateStr(SCnSrcTemplateContentIsEmpty, 'SCnSrcTemplateContentIsEmpty');
   TranslateStr(SCnSrcTemplateReadDataError, 'SCnSrcTemplateReadDataError');

@@ -497,9 +497,8 @@ begin
   FLastIndexRef := FConfigIndex;
 
 //  AddSepMenu;
-//  FInsertToProcIndex := RegisterASubAction('CnSrcTemplateInsertToProc',
-//    'Insert Code to Procedures...', 0, 'Insert Code to Procedures in Current Unit',
-//    SCnSrcTemplateIconName);
+//  FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
+//    SCnSrcTemplateInsertToProcCaption, 0, SCnSrcTemplateInsertToProcHint);
 //
 //  FLastIndexRef := FInsertToProcIndex;
 

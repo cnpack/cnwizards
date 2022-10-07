@@ -198,6 +198,7 @@ resourcestring
 
   // CnSrcTemplate
   SCnSrcTemplateConfigName = 'CnSrcTemplateConfig';
+  SCnSrcTemplateInsertToProcName = 'CnSrcTemplateInsertToProc';
   SCnSrcTemplateIconName = 'TCnSrcTemplate';
   SCnSrcTemplateItem = 'CnEditorItem';
 
@@ -792,6 +793,8 @@ var
   SCnSrcTemplateComment: string = 'Source and Comment Templates.';
   SCnSrcTemplateConfigCaption: string = '&Options...';
   SCnSrcTemplateConfigHint: string = 'Source Templates Options';
+  SCnSrcTemplateInsertToProcCaption: string = '&Insert Code to Procedures...';
+  SCnSrcTemplateInsertToProcHint: string = 'Insert Code to All Procedures/Functions in Current Unit';
   SCnSrcTemplateCaptionIsEmpty: string = 'Template''s Menu Caption can''t be Empty!';
   SCnSrcTemplateContentIsEmpty: string = 'Template''s Content can''t be Empty!';
   SCnSrcTemplateReadDataError: string = 'Error Reading Data Files.';
