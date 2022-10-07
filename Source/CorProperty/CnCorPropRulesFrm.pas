@@ -29,7 +29,9 @@ unit CnCorPropRulesFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2004.05.15 V1.1 by LiuXiao
+* 修改记录：2022.10.06 V1.2 by LiuXiao
+*               允许使用 CnSearchComboBox 替换部分 ComboBox
+*           2004.05.15 V1.1 by LiuXiao
 *               修改 PropDef 引用的重复释放导致出错的问题
 *           2003.05.17 V1.0 by LiuXiao
 *               创建单元
@@ -45,7 +47,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, TypInfo, CnCommon, CnWizConsts, CnWizUtils, CnCorPropWizard,
-  CnWizMultiLang;
+  CnWizMultiLang, CnSearchCombo;
 
 type
   TCnCorPropRuleForm = class(TCnTranslateForm)
@@ -73,6 +75,8 @@ type
     procedure cbbComponentChange(Sender: TObject);
   private
     FPropDef: TCnPropDef;
+    FcbbComponent: TCnSearchComboBox;
+    FcbbProperty: TCnSearchComboBox;
     procedure SetPropDef(const Value: TCnPropDef);
     function GetPropDef: TCnPropDef;
   protected
@@ -94,7 +98,7 @@ implementation
 {$IFDEF CNWIZARDS_CNCORPROPWIZARD}
 
 uses
-  CnCorPropCfgFrm, CnCorPropFrm, CnWizIdeUtils;
+  CnCorPropCfgFrm, CnCorPropFrm, CnWizIdeUtils, CnWizOptions;
 
 {$R *.DFM}
 
@@ -122,16 +126,32 @@ begin
 
   cbbCondition.ItemIndex := 0;
   cbbAction.ItemIndex := 0;
+
+  if WizOptions.UseSearchCombo then
+  begin
+    CloneSearchCombo(FcbbComponent, cbbComponent);
+    CloneSearchCombo(FcbbProperty, cbbProperty);
+  end;
 end;
 
 procedure TCnCorPropRuleForm.SetPropDef(const Value: TCnPropDef);
 begin
   if not Assigned(Value) then
     Exit;
+
   with Value do
   begin
-    cbbComponent.Text := CompName;
-    cbbProperty.Text := PropName;
+    if WizOptions.UseSearchCombo then
+    begin
+      FcbbComponent.SetTextWithoutChange(CompName);
+      FcbbProperty.SetTextWithoutChange(PropName);
+    end
+    else
+    begin
+      cbbComponent.Text := CompName;
+      cbbProperty.Text := PropName;
+    end;
+
     cbbCondition.ItemIndex := Ord(Compare);
     cbbValue.Text := Value;
     cbbAction.ItemIndex := Ord(Action);
@@ -150,8 +170,17 @@ function TCnCorPropRuleForm.GetPropDef: TCnPropDef;
 begin
   if FPropDef <> nil then with FPropDef do
   begin
-    CompName := cbbComponent.Text;
-    PropName := cbbProperty.Text;
+    if WizOptions.UseSearchCombo then
+    begin
+      CompName := FcbbComponent.Text;
+      PropName := FcbbProperty.Text;
+    end
+    else
+    begin
+      CompName := cbbComponent.Text;
+      PropName := cbbProperty.Text;
+    end;
+
     Compare := TCompareOper(cbbCondition.ItemIndex);
     Value := cbbValue.Text;
     Action := TPropAction(cbbAction.ItemIndex);
@@ -163,8 +192,17 @@ end;
 
 procedure TCnCorPropRuleForm.ClearAll;
 begin
-  cbbComponent.Text := '';
-  cbbProperty.Text := '';
+  if WizOptions.UseSearchCombo then
+  begin
+    FcbbComponent.Text := '';
+    FcbbProperty.Text := '';
+  end
+  else
+  begin
+    cbbComponent.Text := '';
+    cbbProperty.Text := '';
+  end;
+
   cbbValue.Text := '';
   cbbDestValue.Text := '';
   chkActive.Checked := True;
@@ -186,19 +224,31 @@ procedure TCnCorPropRuleForm.FormCloseQuery(Sender: TObject;
 var
   AClass: TPersistentClass;
   AComponent: TComponent;
+  CompText, PropText: string;
 begin
   if ModalResult = mrOK then
   begin
     CanClose := True;
-    AClass := GetClass(cbbComponent.Text);
-    if AClass = nil then
+    if WizOptions.UseSearchCombo then
     begin
-      CanClose := QueryDlg(Format(SCnCorrectPropertyErrClassFmt,
-        [cbbComponent.Text]));
+      CompText := FcbbComponent.Text;
+      PropText := FcbbProperty.Text;
     end
     else
     begin
-      if GetPropInfo(AClass, cbbProperty.Text) = nil then
+      CompText := cbbComponent.Text;
+      PropText := cbbProperty.Text;
+    end;
+
+    AClass := GetClass(CompText);
+    if AClass = nil then
+    begin
+      CanClose := QueryDlg(Format(SCnCorrectPropertyErrClassFmt,
+        [CompText]));
+    end
+    else
+    begin
+      if GetPropInfo(AClass, PropText) = nil then
       begin
         AComponent := nil;
         try
@@ -208,15 +258,15 @@ begin
           except
             AComponent := nil;
             CanClose := QueryDlg(Format(SCnCorrectPropertyErrClassCreate,
-              [cbbComponent.Text, cbbProperty.Text]));
+              [CompText, PropText]));
           end;
 
-          if (AComponent <> nil) and (GetPropInfoIncludeSub(AComponent, cbbProperty.Text) = nil) then
+          if (AComponent <> nil) and (GetPropInfoIncludeSub(AComponent, PropText) = nil) then
             CanClose := QueryDlg(Format(SCnCorrectPropertyErrPropFmt,
-              [cbbComponent.Text, cbbProperty.Text]));
+              [CompText, PropText]));
         except
           CanClose := QueryDlg(Format(SCnCorrectPropertyErrPropFmt,
-              [cbbComponent.Text, cbbProperty.Text]));
+            [CompText, PropText]));
         end;
 
         try
@@ -231,6 +281,7 @@ begin
   begin
     CanClose := True;
   end;
+
   if CanClose then
   begin
     AddUniqueToCombo(cbbProperty);
@@ -243,13 +294,27 @@ procedure TCnCorPropRuleForm.FormShow(Sender: TObject);
 var
   I: Integer;
 begin
-  with cbbComponent do
+  if WizOptions.UseSearchCombo then
   begin
-    GetInstalledComponents(nil, Items);
-    for I := 0 to CnNoIconList.Count - 1 do
-      Items.Add(CnNoIconList[I]);
-    OnChange(cbbComponent);
-    SetFocus;
+    with FcbbComponent do
+    begin
+      GetInstalledComponents(nil, Items);
+      for I := 0 to CnNoIconList.Count - 1 do
+        Items.Add(CnNoIconList[I]);
+      OnSelect(FcbbComponent);
+      SetFocus;
+    end;
+  end
+  else
+  begin
+    with cbbComponent do
+    begin
+      GetInstalledComponents(nil, Items);
+      for I := 0 to CnNoIconList.Count - 1 do
+        Items.Add(CnNoIconList[I]);
+      OnChange(cbbComponent);
+      SetFocus;
+    end;
   end;
 end;
 
@@ -258,12 +323,21 @@ var
   AClass: TClass;
 begin
   try
-    cbbProperty.Items.Clear;
-
-    AClass := FindClass(cbbComponent.Text);
-    if AClass <> nil then
+    if WizOptions.UseSearchCombo then
     begin
-      GetAllPropNamesFromClass(AClass, cbbProperty.Items); // 如果能找到类，把属性列表找出来
+      FcbbProperty.Items.Clear;
+
+      AClass := FindClass(FcbbComponent.Text);
+      if AClass <> nil then
+        GetAllPropNamesFromClass(AClass, FcbbProperty.Items); // 如果能找到类，把属性列表找出来
+    end
+    else
+    begin
+      cbbProperty.Items.Clear;
+
+      AClass := FindClass(cbbComponent.Text);
+      if AClass <> nil then
+        GetAllPropNamesFromClass(AClass, cbbProperty.Items); // 如果能找到类，把属性列表找出来
     end;
   except
     ;
