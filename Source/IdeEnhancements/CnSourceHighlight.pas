@@ -1277,7 +1277,7 @@ var
   EditView: IOTAEditView;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
-  i: Integer;
+  I: Integer;
   StartIndex, EndIndex: Integer;
 
   function IsHighlightKeywords(Parser: TCnGeneralPasStructParser; Idx: Integer): Boolean;
@@ -1462,7 +1462,7 @@ begin
 
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
-        // 解析当前显示的源文件，需要高亮当前标识符时不设置KeyOnly
+        // 解析当前显示的源文件，需要高亮当前标识符时不设置 KeyOnly
         CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
           not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
       finally
@@ -2957,12 +2957,12 @@ end;
 
 function TCnSourceHighlight.IndexOfBracket(EditControl: TControl): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FBracketList.Count - 1 do
-    if TCnBracketInfo(FBracketList[i]).Control = EditControl then
+  for I := 0 to FBracketList.Count - 1 do
+    if TCnBracketInfo(FBracketList[I]).Control = EditControl then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
@@ -2975,7 +2975,7 @@ function TCnSourceHighlight.GetBracketMatch(EditView: IOTAEditView;
   EditBuffer: IOTAEditBuffer; EditControl: TControl; AInfo: TCnBracketInfo):
   Boolean;
 var
-  i: Integer;
+  I: Integer;
   CL, CR: AnsiChar;
   LText: AnsiString;
   PL, PR: TOTAEditPos;
@@ -3376,27 +3376,27 @@ begin
 //      CnDebugger.LogFmt('GetBracketMatch Chars Left and Right to Cursor: ''%s'', ''%s''', [CL, CR]);
 {$ENDIF}
         PR := EditView.CursorPos;
-        for i := 0 to BracketCount - 1 do
+        for I := 0 to BracketCount - 1 do
         begin
-          if CL = BracketChars^[i][0] then
+          if CL = BracketChars^[I][0] then
           begin
             AInfo.TokenStr := CL;
             AInfo.TokenLine := LText;
             AInfo.TokenPos := PL;
             CharPos := OTACharPos(PL.Col - 1, PL.Line);
-            AInfo.TokenMatchStr := BracketChars^[i][1];
+            AInfo.TokenMatchStr := BracketChars^[I][1];
             AInfo.TokenMatchPos := ForwardFindMatchToken(AInfo.TokenStr,
               AInfo.TokenMatchStr, AInfo.FTokenMatchLine);
             Result := True;
             Break;
           end
-          else if CR = BracketChars^[i][1] then
+          else if CR = BracketChars^[I][1] then
           begin
             AInfo.TokenStr := CR;
             AInfo.TokenLine := LText;
             AInfo.TokenPos := PR;
             CharPos := OTACharPos(PR.Col - 1, PR.Line);
-            AInfo.TokenMatchStr := BracketChars^[i][0];
+            AInfo.TokenMatchStr := BracketChars^[I][0];
             AInfo.TokenMatchPos := BackFindMatchToken(AInfo.TokenStr,
               AInfo.TokenMatchStr, AInfo.FTokenMatchLine);
             Result := True;
@@ -3527,12 +3527,12 @@ end;
 
 function TCnSourceHighlight.IndexOfBlockMatch(EditControl: TControl): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FBlockMatchList.Count - 1 do
-    if TCnBlockMatchInfo(FBlockMatchList[i]).Control = EditControl then
+  for I := 0 to FBlockMatchList.Count - 1 do
+    if TCnBlockMatchInfo(FBlockMatchList[I]).Control = EditControl then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
@@ -5443,7 +5443,7 @@ var
   I: Integer;
 begin
   for I := 0 to FCurLineList.Count - 1 do
-    if TCnCurLineInfo(FCurLineList[i]).Control = EditControl then
+    if TCnCurLineInfo(FCurLineList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;

@@ -28,7 +28,9 @@ unit CnSrcTemplate;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串符合本地化处理方式
-* 修改记录：2005.08.22 V1.0
+* 修改记录：2022.10.07 V1.1
+*               加入给当前 Pascal 单元每个函数增加代码片段的功能，入口未开放
+*           2005.08.22 V1.0
 *               从 CnEditorToolsetWizard 中分离出来
 ================================================================================
 |</PRE>}
@@ -41,9 +43,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  CnWizMultiLang, StdCtrls, ComCtrls, IniFiles, OmniXML, OmniXMLPersistent,
-  ToolsAPI, CnWizMacroUtils, CnWizClasses, CnConsts, CnWizConsts, CnWizUtils,
-  CnWizManager, Menus;
+  StdCtrls, ComCtrls, IniFiles, ToolsAPI, Menus, OmniXML, OmniXMLPersistent,
+  CnWizMultiLang, CnWizMacroUtils, CnWizClasses, CnConsts, CnWizConsts, CnWizUtils,
+  CnWizManager {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
 
 type
 
@@ -106,6 +108,8 @@ type
   TCnSrcTemplate = class(TCnSubMenuWizard)
   private
     FConfigIndex: Integer;
+    FInsertToProcIndex: Integer;
+    FLastIndexRef: Integer;
     FCollection: TCnEditorCollection;
     FExecuting: Boolean;
 
@@ -117,6 +121,8 @@ type
     procedure SubActionUpdate(Index: Integer); override;
     procedure LoadCollection;
     procedure SaveCollection;
+
+    procedure InsertCodeToProc;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -191,7 +197,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnSrcTemplateEditFrm, CnWizOptions, CnWizShortCut, CnCommon,
+  mPasLex, CnSrcTemplateEditFrm, CnWizOptions, CnWizShortCut, CnCommon,
   CnWizMacroFrm, CnWizMacroText, CnWizCommentFrm;
 
 {$R *.DFM}
@@ -457,6 +463,10 @@ begin
   begin
     Config;
   end
+  else if Index = FInsertToProcIndex then
+  begin
+    InsertCodeToProc;
+  end
   else
   begin
     for I := 0 to FCollection.Count - 1 do
@@ -484,6 +494,15 @@ begin
   FConfigIndex := RegisterASubAction(SCnSrcTemplateConfigName,
     SCnSrcTemplateConfigCaption, 0, SCnSrcTemplateConfigHint,
     SCnSrcTemplateIconName);
+  FLastIndexRef := FConfigIndex;
+
+//  AddSepMenu;
+//  FInsertToProcIndex := RegisterASubAction('CnSrcTemplateInsertToProc',
+//    'Insert Code to Procedures...', 0, 'Insert Code to Procedures in Current Unit',
+//    SCnSrcTemplateIconName);
+//
+//  FLastIndexRef := FInsertToProcIndex;
+
   AddSepMenu;
   UpdateActions;
 end;
@@ -495,8 +514,10 @@ var
   function ItemCanShow(Item: TCnEditorItem): Boolean;
   begin
     Result := False;
-    if Item = nil then Exit;
-    if not Item.Enabled then Exit;
+    if Item = nil then
+      Exit;
+    if not Item.Enabled then
+      Exit;
 
 {$IFDEF BDS}
    Result := Item.ForDelphi or Item.ForBcb;
@@ -511,8 +532,9 @@ var
 begin
   WizShortCutMgr.BeginUpdate;
   try
-    while SubActionCount > FConfigIndex + 1 do
-      DeleteSubAction(FConfigIndex + 1);
+    while SubActionCount > FLastIndexRef + 1 do
+      DeleteSubAction(FLastIndexRef + 1);
+
     for I := 0 to FCollection.Count - 1 do
     begin
 {$IFDEF DEBUG}
@@ -538,6 +560,121 @@ end;
 function TCnSrcTemplate.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '宏,macro,template';
+end;
+
+procedure TCnSrcTemplate.InsertCodeToProc;
+const
+  PROC_NAME = '%ProcName%';
+  DEF_CODE = '  CnDebugger.LogMsg(''%ProcName%'');';
+var
+  I, J: Integer;
+  S, T, ProcName: string;
+  EditView: IOTAEditView;
+  Stream: TMemoryStream;
+  PasParser: TCnGeneralPasStructParser;
+  CharPos: TOTACharPos;
+  AfterToken, Token: TCnGeneralPasToken;
+  ProcNames: TStringList;
+  Lines: TList;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
+    Exit;
+
+  S := CnInputMultiLineBox('Hint', 'Insert Below Codes into Every Proedure/Functions:', DEF_CODE);
+  if S = '' then
+    Exit;
+
+  PasParser := nil;
+  Stream := nil;
+  ProcNames := nil;
+  Lines := nil;
+
+  try
+    PasParser := TCnGeneralPasStructParser.Create;
+    Stream := TMemoryStream.Create;
+    ProcNames := TStringList.Create;
+    Lines := TList.Create;
+
+{$IFDEF BDS}
+    PasParser.UseTabKey := True;
+    PasParser.TabWidth := EditControlWrapper.GetTabWidth;;
+{$ENDIF}
+
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+
+    // 解析当前显示的源文件
+    CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName), False);
+    CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+    PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+
+    // 找要插入的内容和位置
+    for I := 0 to PasParser.Count - 1 do
+    begin
+      Token := PasParser.Tokens[I];
+      if Token.IsMethodStart and (Token.TokenID <> tkBegin)then
+      begin
+        // 是 Procedure/Function 等
+        ProcName := '';
+        if I < PasParser.Count - 1 then
+        begin
+          J := 1;
+          AfterToken := PasParser.Tokens[I + J];
+          while AfterToken.TokenID in [tkIdentifier, tkPoint] do
+          begin
+            ProcName := ProcName + AfterToken.Token;
+            Inc(J);
+            if I + J >= PasParser.Count - 1 then
+              Break;
+            AfterToken := PasParser.Tokens[I + J];
+          end;
+        end;
+
+        if ProcName = '' then // 匿名函数的情况
+          ProcName := '<Unknown>';
+
+        // ProceNames 不能超过 Lines
+        if ProcNames.Count = Lines.Count then // 如果数量相等，则先加一
+          ProcNames.Add(ProcName)
+        else if ProcNames.Count > Lines.Count then
+        begin
+          if ProcNames.Count = 0 then
+            ProcNames.Add(ProcName)
+          else // 如果 ProcNames 大于 Lines 数量，说明出现 IFDEF 时多个 procedure 对应一个 begin end 的情形
+            ProcNames[ProcNames.Count - 1] := ProcName;
+            // 应将当前 ProcName 取代最后一个
+        end;
+        Continue;
+      end;
+
+      if Token.IsMethodStart and (Token.TokenID = tkBegin) then
+      begin
+        Lines.Add(Pointer(Token.LineNumber + 2)); // 加 2 是因为 0 开始且下一行
+
+        // Lines 数量此时应等于 ProcNames，如果大于，则 ProcNames 要重复最末个
+        // 以备出现 IFDEF 时一个 procedure 对应多个 begin end 的情形
+        if Lines.Count > ProcNames.Count then
+          ProcNames.Add(ProcNames[ProcNames.Count - 1]);
+        Continue;
+      end;
+    end;
+
+    for I := Lines.Count - 1 downto 0 do
+    begin
+      T := StringReplace(S, PROC_NAME, ProcNames[I], [rfReplaceAll]);
+
+      // 把 T 插入 Token 所在的行的下一行
+      CnOtaInsertSingleLine(Integer(Lines[I]), T);
+    end;
+  finally
+    Lines.Free;
+    ProcNames.Free;
+    Stream.Free;
+    PasParser.Free;
+  end;
 end;
 
 { TCnSrcTemplateForm }
