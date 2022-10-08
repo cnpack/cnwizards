@@ -1197,6 +1197,13 @@ function CnWizInputBox(const ACaption, APrompt, ADefault: string;
    Ini: TCustomIniFile = nil; const Section: string = csDefComboBoxSection): string;
 {* 封装的输入对话框，内部允许回调设置放大等}
 
+function CnWizInputMultiLineQuery(const ACaption, APrompt: string;
+  var Value: string): Boolean;
+{* 封装的输入多行字符串的对话框，内部允许回调设置放大等}
+
+function CnWizInputMultiLineBox(const ACaption, APrompt, ADefault: string): string;
+{* 封装的输入多行字符串的对话框，内部允许回调设置放大等}
+
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
@@ -8519,6 +8526,17 @@ function CnWizInputBox(const ACaption, APrompt, ADefault: string;
    Ini: TCustomIniFile; const Section: string): string;
 begin
   Result := CnInputBox(ACaption, APrompt, ADefault, Ini, Section, FormCallBack);
+end;
+
+function CnWizInputMultiLineQuery(const ACaption, APrompt: string;
+  var Value: string): Boolean;
+begin
+  Result := CnInputMultiLineQuery(ACaption, APrompt, Value, FormCallBack);
+end;
+
+function CnWizInputMultiLineBox(const ACaption, APrompt, ADefault: string): string;
+begin
+  Result := CnInputMultiLineBox(ACaption, APrompt, ADefault, FormCallBack);
 end;
 
 // 封装 Assert 判断

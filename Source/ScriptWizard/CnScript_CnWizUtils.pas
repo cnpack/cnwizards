@@ -551,6 +551,11 @@ begin
   CL.AddDelphiFunction('Function SameCharPos( Pos1, Pos2 : TOTACharPos) : Boolean');
   CL.AddDelphiFunction('Function HWndIsNonvisualComponent( hWnd : HWND) : Boolean');
   CL.AddDelphiFunction('Procedure TranslateFormFromLangFile( AForm: TCustomForm; const ALangDir, ALangFile: string; LangID: Cardinal)');
+  CL.AddDelphiFunction('Function CnWizInputQuery( const ACaption, APrompt: string; var Value: string; Ini: TCustomIniFile; const Section: string): Boolean');
+  CL.AddDelphiFunction('Function CnWizInputBox( const ACaption, APrompt, ADefault: string; Ini: TCustomIniFile; const Section: string): string');
+  CL.AddDelphiFunction('Function CnWizInputMultiLineQuery( const ACaption, APrompt: string; var Value: string): Boolean');
+  CL.AddDelphiFunction('Function CnWizInputMultiLineBox( const ACaption, APrompt, ADefault: string): string');
+
   // CnWizSearch
   CL.AddDelphiFunction('Function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer) : Boolean');
   CL.AddDelphiFunction('Function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer) : Boolean');
@@ -818,6 +823,11 @@ begin
   S.RegisterDelphiFunction(@SameCharPos, 'SameCharPos', cdRegister);
   S.RegisterDelphiFunction(@HWndIsNonvisualComponent, 'HWndIsNonvisualComponent', cdRegister);
   S.RegisterDelphiFunction(@TranslateFormFromLangFile, 'TranslateFormFromLangFile', cdRegister);
+  S.RegisterDelphiFunction(@CnWizInputQuery, 'CnWizInputQuery', cdRegister);
+  S.RegisterDelphiFunction(@CnWizInputBox, 'CnWizInputBox', cdRegister);
+  S.RegisterDelphiFunction(@CnWizInputMultiLineQuery, 'CnWizInputMultiLineQuery', cdRegister);
+  S.RegisterDelphiFunction(@CnWizInputMultiLineBox, 'CnWizInputMultiLineBox', cdRegister);
+
   // CnWizSearch
   S.RegisterDelphiFunction(@CheckFileCRLF, 'CheckFileCRLF', cdRegister);
   S.RegisterDelphiFunction(@CorrectFileCRLF, 'CorrectFileCRLF', cdRegister);

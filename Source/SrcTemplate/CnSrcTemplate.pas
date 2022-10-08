@@ -586,7 +586,7 @@ begin
     Exit;
   end;
 
-  S := CnInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, DEF_CODE);
+  S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, DEF_CODE);
   if S = '' then
     Exit;
 
