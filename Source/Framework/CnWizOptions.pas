@@ -488,7 +488,7 @@ begin
       if (FCustomUserDir = '') or not DirectoryExists(FCustomUserDir) then
         FCustomUserDir := DefDir;
     end;
-    FUseSearchCombo := ReadBool(SCnOptionSection, csUseSearchCombo, False);
+    FUseSearchCombo := ReadBool(SCnOptionSection, csUseSearchCombo, True);
 
     FUpgradeReleaseOnly := ReadBool(SCnUpgradeSection, csUpgradeReleaseOnly, True);
     FUpgradeContent := [];
