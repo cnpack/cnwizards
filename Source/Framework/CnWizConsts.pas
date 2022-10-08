@@ -795,13 +795,17 @@ var
   SCnSrcTemplateConfigHint: string = 'Source Templates Options';
   SCnSrcTemplateInsertToProcCaption: string = '&Insert Code to Procedures...';
   SCnSrcTemplateInsertToProcHint: string = 'Insert Code to All Procedures/Functions in Current Unit';
+  SCnSrcTemplateInsertToProcPrompt: string = 'Insert Below Code to All Procedures/Functions in Current Unit:';
+  SCnSrcTemplateInsertToProcCountFmt: string = '%d Inserted.';
   SCnSrcTemplateCaptionIsEmpty: string = 'Template''s Menu Caption can''t be Empty!';
   SCnSrcTemplateContentIsEmpty: string = 'Template''s Content can''t be Empty!';
+  SCnSrcTemplateSourceTypeNotSupport: string = 'Current Source Type NOT Supported.';
   SCnSrcTemplateReadDataError: string = 'Error Reading Data Files.';
   SCnSrcTemplateWriteDataError: string = 'Error Saving Data Files.';
   SCnSrcTemplateImportAppend: string = 'Append the Data to Templates?';
   SCnSrcTemplateWizardDelete: string = 'Sure to Delete the Template?';
   SCnSrcTemplateWizardClear: string = 'Sure to Delete All the Templates?';
+
   SCnSrcTemplateDataDefName: string = 'Editor_ENU.cdt';
   SCnSrcTemplateDataDefName_CB: string = 'Editor_CB_ENU.cdt';
   SCnEIPCurrPos: string = 'Current Position';

@@ -496,11 +496,11 @@ begin
     SCnSrcTemplateIconName);
   FLastIndexRef := FConfigIndex;
 
-//  AddSepMenu;
-//  FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
-//    SCnSrcTemplateInsertToProcCaption, 0, SCnSrcTemplateInsertToProcHint);
-//
-//  FLastIndexRef := FInsertToProcIndex;
+  AddSepMenu;
+  FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
+    SCnSrcTemplateInsertToProcCaption, 0, SCnSrcTemplateInsertToProcHint);
+
+  FLastIndexRef := FInsertToProcIndex;
 
   AddSepMenu;
   UpdateActions;
@@ -574,16 +574,19 @@ var
   CharPos: TOTACharPos;
   AfterToken, Token: TCnGeneralPasToken;
   ProcNames: TStringList;
-  Lines: TList;
+  Lines, Cols: TList;
 begin
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
     Exit;
 
   if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
+  begin
+    ErrorDlg(SCnSrcTemplateSourceTypeNotSupport);
     Exit;
+  end;
 
-  S := CnInputMultiLineBox('Hint', 'Insert Below Codes into Every Proedure/Functions:', DEF_CODE);
+  S := CnInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, DEF_CODE);
   if S = '' then
     Exit;
 
@@ -591,12 +594,14 @@ begin
   Stream := nil;
   ProcNames := nil;
   Lines := nil;
+  Cols := nil;
 
   try
     PasParser := TCnGeneralPasStructParser.Create;
     Stream := TMemoryStream.Create;
     ProcNames := TStringList.Create;
     Lines := TList.Create;
+    Cols := TList.Create;
 
 {$IFDEF BDS}
     PasParser.UseTabKey := True;
@@ -652,6 +657,7 @@ begin
       if Token.IsMethodStart and (Token.TokenID = tkBegin) then
       begin
         Lines.Add(Pointer(Token.LineNumber + 2)); // 加 2 是因为 0 开始且下一行
+        Cols.Add(Pointer(Token.CharIndex));
 
         // Lines 数量此时应等于 ProcNames，如果大于，则 ProcNames 要重复最末个
         // 以备出现 IFDEF 时一个 procedure 对应多个 begin end 的情形
@@ -665,10 +671,16 @@ begin
     begin
       T := StringReplace(S, PROC_NAME, ProcNames[I], [rfReplaceAll]);
 
+      if Integer(Cols[I]) > 0 then      // 和 begin 的缩进相同
+        T := Spc(Integer(Cols[I])) + T;
+
       // 把 T 插入 Token 所在的行的下一行
       CnOtaInsertSingleLine(Integer(Lines[I]), T);
     end;
+
+    InfoDlg(Format(SCnSrcTemplateInsertToProcCountFmt, [Lines.Count]));
   finally
+    Cols.Free;
     Lines.Free;
     ProcNames.Free;
     Stream.Free;

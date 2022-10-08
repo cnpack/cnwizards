@@ -522,8 +522,11 @@ begin
   TranslateStr(SCnSrcTemplateConfigHint, 'SCnSrcTemplateConfigHint');
   TranslateStr(SCnSrcTemplateInsertToProcCaption, 'SCnSrcTemplateInsertToProcCaption');
   TranslateStr(SCnSrcTemplateInsertToProcHint, 'SCnSrcTemplateInsertToProcHint');
+  TranslateStr(SCnSrcTemplateInsertToProcPrompt, 'SCnSrcTemplateInsertToProcPrompt');
+  TranslateStr(SCnSrcTemplateInsertToProcCountFmt, 'SCnSrcTemplateInsertToProcCountFmt');
   TranslateStr(SCnSrcTemplateCaptionIsEmpty, 'SCnSrcTemplateCaptionIsEmpty');
   TranslateStr(SCnSrcTemplateContentIsEmpty, 'SCnSrcTemplateContentIsEmpty');
+  TranslateStr(SCnSrcTemplateSourceTypeNotSupport, 'SCnSrcTemplateSourceTypeNotSupport');
   TranslateStr(SCnSrcTemplateReadDataError, 'SCnSrcTemplateReadDataError');
   TranslateStr(SCnSrcTemplateWriteDataError, 'SCnSrcTemplateWriteDataError');
   TranslateStr(SCnSrcTemplateImportAppend, 'SCnSrcTemplateImportAppend');
@@ -531,6 +534,7 @@ begin
   TranslateStr(SCnSrcTemplateWizardClear, 'SCnSrcTemplateWizardClear');
 
   TranslateStr(SCnSrcTemplateDataDefName, 'SCnSrcTemplateDataDefName');
+  TranslateStr(SCnSrcTemplateDataDefName_CB, 'SCnSrcTemplateDataDefName_CB');
 
   TranslateStr(SCnEIPCurrPos, 'SCnEIPCurrPos');
   TranslateStr(SCnEIPBOL, 'SCnEIPBOL');

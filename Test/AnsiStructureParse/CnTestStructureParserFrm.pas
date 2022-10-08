@@ -2,6 +2,10 @@ unit CnTestStructureParserFrm;
 
 interface
 
+{$IFDEF UNICODE}
+  {$MESSAGE ERROR 'This Test Case is only for Non-Unicode Compiler.'}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, TypInfo, ExtCtrls, CnPasCodeParser, mPasLex, CnPasWideLex,
