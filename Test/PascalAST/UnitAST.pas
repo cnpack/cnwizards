@@ -33,7 +33,10 @@ type
     btnStringType: TButton;
     btnSubrangeType: TButton;
     btnRecordType: TButton;
+    grpClass: TGroupBox;
     btnPropety: TButton;
+    btnVarSection: TButton;
+    btnInterfaceType: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -53,6 +56,8 @@ type
     procedure btnSubrangeTypeClick(Sender: TObject);
     procedure btnRecordTypeClick(Sender: TObject);
     procedure btnPropetyClick(Sender: TObject);
+    procedure btnVarSectionClick(Sender: TObject);
+    procedure btnInterfaceTypeClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -234,6 +239,34 @@ procedure TFormAST.btnPropetyClick(Sender: TObject);
 begin
   ReInitAst('property NameFromLCID[const ID: string]: string read GetNameFromLCID write SetNameFromLCID; default;');
   FAST.BuildClassProperty;
+  SynTree;
+end;
+
+procedure TFormAST.btnVarSectionClick(Sender: TObject);
+begin
+  ReInitAst(
+'var' + #13#10 +
+  'Identifiers: array[#0..#255]of ByteBool;' + #13#10 +
+  'S, K: string;' + #13#10 +
+  'I: Integer = 0;'
+  );
+  FAST.BuildVarSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnInterfaceTypeClick(Sender: TObject);
+begin
+  ReInitAst(
+  'IReadWriteSync = interface' + #13#10 +
+    '[''{7B108C52-1D8F-4CDB-9CDF-57E071193D3F}'']' + #13#10 +
+    'procedure BeginRead;' + #13#10 +
+    'procedure EndRead(const B: string; var K: Integer = 0);' + #13#10 +
+    'function BeginWrite: Boolean;' + #13#10 +
+    'procedure EndWrite;' + #13#10 +
+    'property BW: Boolean read BeginWrite;' + #13#10 +
+  'end;'
+  );
+  FAST.BuildTypeDecl;
   SynTree;
 end;
 

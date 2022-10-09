@@ -113,7 +113,7 @@ object FormAST: TFormAST
       Left = 104
       Top = 24
       Width = 113
-      Height = 209
+      Height = 193
       Caption = 'Simple Statement'
       TabOrder = 8
       object btnAssign: TButton
@@ -164,7 +164,7 @@ object FormAST: TFormAST
       Left = 232
       Top = 24
       Width = 185
-      Height = 225
+      Height = 193
       Caption = 'Type'
       TabOrder = 10
       object btnArrayType: TButton
@@ -213,8 +213,8 @@ object FormAST: TFormAST
         OnClick = btnStringTypeClick
       end
       object btnSubrangeType: TButton
-        Left = 16
-        Top = 184
+        Left = 96
+        Top = 56
         Width = 75
         Height = 25
         Caption = 'Subrange'
@@ -230,14 +230,40 @@ object FormAST: TFormAST
         TabOrder = 6
         OnClick = btnRecordTypeClick
       end
-      object btnPropety: TButton
+      object btnInterfaceType: TButton
         Left = 96
-        Top = 56
+        Top = 88
+        Width = 75
+        Height = 25
+        Caption = 'Interface'
+        TabOrder = 7
+        OnClick = btnInterfaceTypeClick
+      end
+    end
+    object grpClass: TGroupBox
+      Left = 104
+      Top = 232
+      Width = 225
+      Height = 105
+      Caption = 'Class'
+      TabOrder = 11
+      object btnPropety: TButton
+        Left = 16
+        Top = 24
         Width = 75
         Height = 25
         Caption = 'Property'
-        TabOrder = 7
+        TabOrder = 0
         OnClick = btnPropetyClick
+      end
+      object btnVarSection: TButton
+        Left = 16
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'Var Section'
+        TabOrder = 1
+        OnClick = btnVarSectionClick
       end
     end
   end
