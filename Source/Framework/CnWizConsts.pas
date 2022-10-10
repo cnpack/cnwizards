@@ -799,7 +799,7 @@ var
   SCnSrcTemplateInsertToProcCountFmt: string = '%d Inserted.';
   SCnSrcTemplateCaptionIsEmpty: string = 'Template''s Menu Caption can''t be Empty!';
   SCnSrcTemplateContentIsEmpty: string = 'Template''s Content can''t be Empty!';
-  SCnSrcTemplateSourceTypeNotSupport: string = 'Current Source Type NOT Supported.';
+  SCnSrcTemplateSourceTypeNotSupport: string = 'Current Source Type NOT Supported!';
   SCnSrcTemplateReadDataError: string = 'Error Reading Data Files.';
   SCnSrcTemplateWriteDataError: string = 'Error Saving Data Files.';
   SCnSrcTemplateImportAppend: string = 'Append the Data to Templates?';

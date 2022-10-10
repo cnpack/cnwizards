@@ -110,6 +110,7 @@ type
     FConfigIndex: Integer;
     FInsertToProcIndex: Integer;
     FLastIndexRef: Integer;
+    FBatchCode: string;
     FCollection: TCnEditorCollection;
     FExecuting: Boolean;
 
@@ -586,9 +587,13 @@ begin
     Exit;
   end;
 
-  S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, DEF_CODE);
+  if FBatchCode = '' then
+    FBatchCode := DEF_CODE;
+  S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, FBatchCode);
   if S = '' then
     Exit;
+
+  FBatchCode := S;
 
   PasParser := nil;
   Stream := nil;
