@@ -55,9 +55,9 @@ type
     edtCReturn: TEdit;
     cbSkipSpace: TCheckBox;
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 //==============================================================================
@@ -116,7 +116,7 @@ function TCnEditorCodeToString.ProcessText(const Text: string): string;
 var
   AdjustRet: Boolean;
   Strings: TStrings;
-  i, SpcCount: Integer;
+  I, SpcCount: Integer;
   c: Char;
   s: string;
 begin
@@ -129,9 +129,9 @@ begin
     try
       Strings.Text := Result;
       SpcCount := 0;
-      for i := 0 to Strings.Count - 1 do
+      for I := 0 to Strings.Count - 1 do
       begin
-        s := Strings[i];
+        s := Strings[I];
         if Length(s) > 2 then
           if s[2] = ' ' then            // 带空格的行
           begin
@@ -142,11 +142,11 @@ begin
               Inc(SpcCount);
             s[SpcCount + 1] := c;
             
-            Strings[i] := s;
+            Strings[I] := s;
           end
           else
           begin                         // 不带空格的行
-            Strings[i] := Spc(SpcCount) + s;
+            Strings[I] := Spc(SpcCount) + s;
           end;
       end;
       Result := Strings.Text;

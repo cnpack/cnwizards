@@ -4732,7 +4732,7 @@ begin
 
   while Scanner.Token in IsConstStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 const，如果不是，就跳出
+    // 如果是 [，就要越过其属性，找到 ] 后的第一个，确定它是否还是 const，如果不是，就跳出
     if (Scanner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsConstStartTokens) then
       Exit;
 
@@ -4849,7 +4849,7 @@ begin
 
   if Scanner.Token = tokColon then
   begin
-      Match(tokColon);
+    Match(tokColon);
 
     if Scanner.Token = tokKeywordString then
       Match(Scanner.Token)

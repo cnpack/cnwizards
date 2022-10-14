@@ -37,6 +37,10 @@ type
     btnPropety: TButton;
     btnVarSection: TButton;
     btnInterfaceType: TButton;
+    btnClassType: TButton;
+    btnConstSection: TButton;
+    btnTypeSection: TButton;
+    btnExports: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -58,6 +62,10 @@ type
     procedure btnPropetyClick(Sender: TObject);
     procedure btnVarSectionClick(Sender: TObject);
     procedure btnInterfaceTypeClick(Sender: TObject);
+    procedure btnClassTypeClick(Sender: TObject);
+    procedure btnConstSectionClick(Sender: TObject);
+    procedure btnTypeSectionClick(Sender: TObject);
+    procedure btnExportsClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -267,6 +275,81 @@ begin
   'end;'
   );
   FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnClassTypeClick(Sender: TObject);
+begin
+  ReInitAst(
+  'TCnEditorCodeToStringForm = class(TCnTranslateForm)' + #13#10 +
+    'btnOK: TButton;' + #13#10 +
+    'btnCancel: TButton;' + #13#10 + 
+  'private' + #13#10 + 
+    'F1, F2: Integer;' + #13#10 + 
+    'F3: string;' + #13#10 +
+    'function GetStr: string;' + #13#10 +
+  'public' + #13#10 + 
+    'constructor Create(Owner: TComponent); virtual;' + #13#10 + 
+    'destructor Destroy; override;' + #13#10 + 
+    '' + #13#10 +
+    'property OnEdit: TNotifyEvent read FOnEdit write FOnEdit;' + #13#10 +
+  'end;'
+  );
+  FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnConstSectionClick(Sender: TObject);
+begin
+  ReInitAst(
+'const' + #13#10 +
+  'SCN_TEST = ''test'';' + #13#10 +
+  'K: Integer = 2;' + #13#10 +
+  'KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];' + #13#10 +
+  'SM3Padding: array[0..63] of Byte =' + #13#10 +
+    '(' + #13#10 +
+      '$80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
+        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
+        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 + 
+        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0' + #13#10 +
+    ');' + #13#10 +
+    '' + #13#10 +
+  'MAX_FILE_SIZE = 512 * 1024 * 1024;'
+  );
+  FAST.BuildConstSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnTypeSectionClick(Sender: TObject);
+begin
+  ReInitAst(
+'type' + #13#10 +
+  'TCnSM2PrivateKey = TCnEccPrivateKey;' + #13#10 +
+  '' + #13#10 +
+  'TCnSM2 = class(TCnEcc)' + #13#10 +
+  'public' + #13#10 +
+    'constructor Create; override;' + #13#10 +
+    '' + #13#10 +
+    'procedure AffineMultiplePoint(K: TCnBigNumber; Point: TCnEcc3Point); override;' + #13#10 +
+    '{* 使用预计算的仿射坐标点进行加速}' + #13#10 + 
+  'end;' + #13#10 +
+  'TAnsiCharSet = set of AnsiChar;' + #13#10 +
+  'TCnSM2Signature = class(TCnEccSignature);' + #13#10 +
+  'TCnSM2CryptSequenceType = (cstC1C3C2, cstC1C2C3);'
+  );
+  FAST.BuildTypeSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnExportsClick(Sender: TObject);
+begin
+  ReInitAst(
+'exports' + #13#10 +
+  'Proc1,' + #13#10 + 
+  'Subroutine index OneConstant,' + #13#10 +
+  'InitWizard name WizardEntryPoint;'
+  );
+  FAST.BuildExportsSection;
   SynTree;
 end;
 

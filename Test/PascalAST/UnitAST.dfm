@@ -1,6 +1,6 @@
 object FormAST: TFormAST
   Left = 192
-  Top = 107
+  Top = 49
   Width = 887
   Height = 672
   Caption = 'Pascal AST'
@@ -239,11 +239,29 @@ object FormAST: TFormAST
         TabOrder = 7
         OnClick = btnInterfaceTypeClick
       end
+      object btnClassType: TButton
+        Left = 96
+        Top = 120
+        Width = 75
+        Height = 25
+        Caption = 'Class'
+        TabOrder = 8
+        OnClick = btnClassTypeClick
+      end
+      object btnTypeSection: TButton
+        Left = 96
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'Type Section'
+        TabOrder = 9
+        OnClick = btnTypeSectionClick
+      end
     end
     object grpClass: TGroupBox
       Left = 104
       Top = 232
-      Width = 225
+      Width = 217
       Height = 105
       Caption = 'Class'
       TabOrder = 11
@@ -265,6 +283,24 @@ object FormAST: TFormAST
         TabOrder = 1
         OnClick = btnVarSectionClick
       end
+      object btnConstSection: TButton
+        Left = 112
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Const Section'
+        TabOrder = 2
+        OnClick = btnConstSectionClick
+      end
+    end
+    object btnExports: TButton
+      Left = 16
+      Top = 312
+      Width = 75
+      Height = 25
+      Caption = 'Exports'
+      TabOrder = 12
+      OnClick = btnExportsClick
     end
   end
 end

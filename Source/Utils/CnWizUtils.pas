@@ -6179,7 +6179,7 @@ function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
 var
   Strings: TStrings;
   I, J: Integer;
-  s, Line, SingleLine: string;
+  S, Line, SingleLine: string;
 {$IFDEF UNICODE}
   TmpLine: string;
 {$ELSE}
@@ -6201,9 +6201,9 @@ begin
   Strings := TStringList.Create;
   try
     if Wrap then                     // ÊÇ·ñ²åÈë»»ÐÐ·û
-      s := CRLF
+      S := CRLF
     else
-      s := '';
+      S := '';
         
     Strings.Text := Str;
     for I := 0 to Strings.Count - 1 do
@@ -6262,24 +6262,24 @@ begin
           if Line <> '' then
             Result := Format('%s''%s''', [Result, Line])
           else
-            Delete(Result, Length(Result) - Length(' + ' + s) + 1,
-              Length(' + ' + s));
+            Delete(Result, Length(Result) - Length(' + ' + S) + 1,
+              Length(' + ' + S));
         end
         else
         begin
           if Trim(ADelphiReturn) <> '' then
           begin
             if Wrap or (Line <> '') then
-              Result := Format('%s''%s'' + %s + %s', [Result, Line, ADelphiReturn, s])
+              Result := Format('%s''%s'' + %s + %s', [Result, Line, ADelphiReturn, S])
             else
-              Result := Result + ADelphiReturn + ' + ' + s;
+              Result := Result + ADelphiReturn + ' + ' + S;
           end
           else
           begin
             if Wrap or (Line <> '') then
-              Result := Format('%s''%s'' + %s', [Result, Line, s])
+              Result := Format('%s''%s'' + %s', [Result, Line, S])
             else
-              Result := Result + s;
+              Result := Result + S;
           end;
         end;
       end
@@ -6288,7 +6288,7 @@ begin
         if I = Strings.Count - 1 then
           Result := Format('%s"%s"', [Result, Line])
         else
-          Result := Format('%s"%s%s" %s', [Result , Line, ACReturn, s]);
+          Result := Format('%s"%s%s" %s', [Result , Line, ACReturn, S]);
       end;
     end;
   finally
