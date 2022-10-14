@@ -5714,8 +5714,6 @@ end;
 
 { ClassMethod -> [CLASS] MethodHeading ';' [(DIRECTIVE ';')...] }
 procedure TCnBasePascalFormatter.FormatClassMethod(PreSpaceCount: Byte);
-var
-  IsFirst: Boolean;
 begin
   if Scanner.Token = tokKeywordClass then
   begin
@@ -5735,27 +5733,14 @@ begin
     FormatMethodHeading(PreSpaceCount);
 
   if Scanner.Token = tokSemicolon then // class property already processed ;
-    Match(tokSemicolon);
+    Match(tokSemicolon, 0, 0, True);
 
-  IsFirst := True;
   while Scanner.Token in DirectiveTokens do
   begin
-    FormatDirective(PreSpaceCount, IsFirst);
-    IsFirst := False;
+    FormatDirective;
     if Scanner.Token = tokSemicolon then
       Match(tokSemicolon, 0, 0, True);
   end;
-
-//  begin
-//    if Scaner.Token = tokDirectiveMESSAGE then
-//    begin
-//      Match(Scaner.Token); // message MESSAGE_ID;
-//      FormatConstExpr;
-//    end
-//    else
-//      Match(Scaner.Token);
-//    Match(tokSemicolon);
-//  end;
 end;
 
 { ClassProperty -> PROPERTY Ident [PropertyInterface]  PropertySpecifiers ';' [DEFAULT ';']}
