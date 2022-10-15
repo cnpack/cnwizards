@@ -1,6 +1,6 @@
 object FormAST: TFormAST
-  Left = 192
-  Top = 49
+  Left = 226
+  Top = 107
   Width = 887
   Height = 672
   Caption = 'Pascal AST'
@@ -275,7 +275,7 @@ object FormAST: TFormAST
         OnClick = btnPropetyClick
       end
       object btnVarSection: TButton
-        Left = 16
+        Left = 112
         Top = 56
         Width = 75
         Height = 25
@@ -301,6 +301,50 @@ object FormAST: TFormAST
       Caption = 'Exports'
       TabOrder = 12
       OnClick = btnExportsClick
+    end
+    object grpConst: TGroupBox
+      Left = 336
+      Top = 232
+      Width = 113
+      Height = 161
+      Caption = 'Const'
+      TabOrder = 13
+      object btnConst: TButton
+        Left = 16
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Set Const'
+        TabOrder = 0
+        OnClick = btnConstClick
+      end
+      object btnArrayConst: TButton
+        Left = 16
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'Array Const'
+        TabOrder = 1
+        OnClick = btnArrayConstClick
+      end
+      object btnRecordConst: TButton
+        Left = 16
+        Top = 88
+        Width = 75
+        Height = 25
+        Caption = 'Record Const'
+        TabOrder = 2
+        OnClick = btnRecordConstClick
+      end
+      object btnConstExpression: TButton
+        Left = 16
+        Top = 120
+        Width = 75
+        Height = 25
+        Caption = 'Expr Const'
+        TabOrder = 3
+        OnClick = btnConstExpressionClick
+      end
     end
   end
 end

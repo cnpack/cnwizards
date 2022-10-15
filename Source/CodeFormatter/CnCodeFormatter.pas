@@ -4433,7 +4433,7 @@ begin
             // 括号后有常量后有冒号表示是 recordfield
             TypedConstantType := tcRecord;
           end
-          else // 匹配一下 ( ConstExpr)  然后看后续是否是;结束，来判断是否是数组
+          else // 匹配一下 ( ConstExpr ) 然后看后续是否是;结束，来判断是否是数组
           begin
             try
               try
@@ -4857,7 +4857,7 @@ begin
       FormatSimpleType;
   end;
 
-  while Scanner.Token in DirectiveTokens do
+  while Scanner.Token in DirectiveTokens do  // 注意此处不用处理分号，免得吃掉尾部的分号
     FormatDirective;
 end;
 

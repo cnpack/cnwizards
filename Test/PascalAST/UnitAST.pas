@@ -41,6 +41,11 @@ type
     btnConstSection: TButton;
     btnTypeSection: TButton;
     btnExports: TButton;
+    grpConst: TGroupBox;
+    btnConst: TButton;
+    btnArrayConst: TButton;
+    btnRecordConst: TButton;
+    btnConstExpression: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -66,6 +71,10 @@ type
     procedure btnConstSectionClick(Sender: TObject);
     procedure btnTypeSectionClick(Sender: TObject);
     procedure btnExportsClick(Sender: TObject);
+    procedure btnConstClick(Sender: TObject);
+    procedure btnArrayConstClick(Sender: TObject);
+    procedure btnRecordConstClick(Sender: TObject);
+    procedure btnConstExpressionClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -328,8 +337,9 @@ begin
   '' + #13#10 +
   'TCnSM2 = class(TCnEcc)' + #13#10 +
   'public' + #13#10 +
+    'function Tee: Boolean;' + #13#10 +
     'constructor Create; override;' + #13#10 +
-    '' + #13#10 +
+    'procedure MyMessage(var Msg: TMessage); message WM_USER;' + #13#10 +
     'procedure AffineMultiplePoint(K: TCnBigNumber; Point: TCnEcc3Point); override;' + #13#10 +
     '{* 使用预计算的仿射坐标点进行加速}' + #13#10 + 
   'end;' + #13#10 +
@@ -345,11 +355,42 @@ procedure TFormAST.btnExportsClick(Sender: TObject);
 begin
   ReInitAst(
 'exports' + #13#10 +
-  'Proc1,' + #13#10 + 
+  'Proc1,' + #13#10 +
   'Subroutine index OneConstant,' + #13#10 +
-  'InitWizard name WizardEntryPoint;'
+  'InitWizard index 3 name WizardEntryPoint;'
   );
   FAST.BuildExportsSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnConstClick(Sender: TObject);
+begin
+  ReInitAst('AA: set of TAnchorKind = [akLeft, akRight]');
+  FAST.BuildConstDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnArrayConstClick(Sender: TObject);
+begin
+  ReInitAst('BB: array[0..1] of Char = (#3, ''o'')');
+  FAST.BuildConstDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnRecordConstClick(Sender: TObject);
+begin
+  ReInitAst('CC: TLUIDAndAttributes = (Luid:0;Attributes:0)');
+  FAST.BuildConstDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnConstExpressionClick(Sender: TObject);
+begin
+  ReInitAst(
+'const' + #13#10 +
+  'MAX_FILE_SIZE = 512 * 1024 * 1024;'
+  );
+  FAST.BuildConstSection;
   SynTree;
 end;
 

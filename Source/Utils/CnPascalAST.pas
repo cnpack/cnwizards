@@ -161,6 +161,10 @@ type
     cntExpressionList,
     cntConstExpression,
     cntConstExpressionInType,
+    cntArrayConstant,
+    cntRecordConstant,
+    cntRecordFieldConstant,
+
     cntExpression,
     cntSimpleExpression,
     cntDesignator,
@@ -321,9 +325,11 @@ type
     procedure BuildConstDecl;
     {* 组装一个常量声明，不包括分号}
 
-    procedure BuildDirectives;
+    procedure BuildDirectives(NeedSemicolon: Boolean = True);
+    {* 循环组装完 Diretives，NeedSemicolon 表示内部是否处理分号}
 
     procedure BuildDirective;
+    {* 组装一个 Directive，后面可能跟一个表达式}
 
     procedure BuildUsesClause;
     {* 碰上 uses 关键字时被调用，新建 uses 节点，其下是多个 usesdecl 加逗号，每个 uses 是新节点}
@@ -355,6 +361,10 @@ type
     {* 组装一常量表达式，类似于表达式}
     procedure BuildConstExpressionInType;
     {* 组装一类型声明中的常量表达式，类似于表达式，但不能出现等号等}
+    procedure BuildArrayConstant;
+    procedure BuildRecordConstant;
+    procedure BuildRecordFieldConstant;
+
     procedure BuildSimpleExpression;
     {* 组装一个简单表达式，主要由 Term 组成，Term 之间用 AddOp 连接}
     procedure BuildTerm;
@@ -512,7 +522,9 @@ begin
     tkWriteonly: Result := cntWriteonly;
 
     tkPrivate, tkProtected, tkPublic, tkPublished: Result := cntVisibility;
-    tkVirtual, tkOverride, tkAbstract, tkReintroduce, tkStdcall, tkCdecl, tkInline, tkName:
+    tkVirtual, tkOverride, tkAbstract, tkReintroduce, tkStdcall, tkCdecl, tkInline, tkName,
+    tkOverload, tkPascal, tkRegister, tkExternal, tkAssembler, tkDynamic, tkAutomated,
+    tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall:
       Result := cntDirective;
   else
     raise ECnPascalAstException.Create(SCnErrorNoMatchNodeType + ' '
@@ -1065,7 +1077,7 @@ begin
       MatchCreateLeaf(FLex.TokenID);
 
     BuildTerm;
-    if FLex.TokenID in AddOpTokens then
+    while FLex.TokenID in AddOpTokens do
     begin
       MatchCreateLeaf(FLex.TokenID);
       BuildTerm;
@@ -1216,7 +1228,7 @@ begin
 
   try
     BuildFactor;
-    if FLex.TokenID in MulOpTokens then
+    while FLex.TokenID in MulOpTokens do
     begin
       MatchCreateLeaf(FLex.TokenID);
       BuildFactor;
@@ -1687,9 +1699,11 @@ begin
     tkDestructor:
       BuildDestructorHeading;
   end;
-  MatchCreateLeaf(tkSemiColon);
 
-  BuildDirectives;
+  if FLex.TokenID = tkSemiColon then
+    MatchCreateLeaf(tkSemiColon); // 声明后的分号
+
+  BuildDirectives; // 这里要求把分号也吃掉
 end;
 
 procedure TCnPasAstGenerator.BuildClassTypeSection;
@@ -1943,6 +1957,7 @@ type
   TCnTypedConstantType = (tcConst, tcArray, tcRecord);
 var
   TypedConstantType: TCnTypedConstantType;
+  Bookmark: TCnGeneralLexBookmark;
 begin
   MatchCreateLeafAndPush(tkNone, cntTypedConstant);
 
@@ -1959,14 +1974,68 @@ begin
     else if FLex.TokenID = tkRoundOpen then
     begin
       // TODO: 判断是数组常量还是结构常量
-      if ForwardToken = tkRoundOpen then
+      TypedConstantType := tcConst;
+      if ForwardToken = tkRoundOpen then 
       begin
+        // 如果后面还是括号，则说明本大类是常量或 array，继续判断
+        Lock;
+        FLex.SaveToBookmark(Bookmark);
 
+        try
+          try
+            BuildConstExpression;
+
+            if FLex.TokenID = tkComma then
+              TypedConstantType := tcArray
+            else if FLex.TokenID = tkSemiColon then
+              TypedConstantType := tcConst;
+          except
+            // 当做常量出错则是数组
+            TypedConstantType := tcArray;
+          end;
+        finally
+          FLex.LoadFromBookmark(Bookmark);
+          Unlock;
+        end;
       end
-      else
+      else // 如果就一个括号
       begin
+        // 判断括号后是否 a: 0 这种形式，括号后常量后冒号表示是结构
+        if (ForwardToken() = tkIdentifier) and (ForwardToken(2) = tkColon) then
+          TypedConstantType := tcRecord
+        else
+        begin
+          // 否则再判断 ( ConstExpr[, ConstExpr] ); 这种，有逗号、或没逗号但有右括号和分号，都算数组
+          Lock;
+          FLex.SaveToBookmark(Bookmark);
 
+          try
+            MatchCreateLeaf(tkRoundOpen);
+            try
+              BuildConstExpression;
+              if FLex.TokenID = tkComma then // (1, 1) 的情形
+                TypedConstantType := tcArray;
+              if FLex.TokenID = tkRoundClose then
+                MatchCreateLeaf(FLex.TokenID);
+
+              if FLex.TokenID = tkSemicolon then // (1) 的情形
+                TypedConstantType := tcArray;
+            except
+              ;
+            end;
+          finally
+            FLex.LoadFromBookmark(Bookmark);
+            Unlock;
+          end;
+        end;
       end;
+
+      if TypedConstantType = tcArray then
+        BuildArrayConstant
+      else if TypedConstantType = tcRecord then
+        BuildRecordConstant
+      else
+        BuildConstExpression;
     end
     else
       BuildConstExpression;
@@ -2268,10 +2337,15 @@ begin
   end;
 end;
 
-procedure TCnPasAstGenerator.BuildDirectives;
+procedure TCnPasAstGenerator.BuildDirectives(NeedSemicolon: Boolean);
 begin
   while FLex.TokenID in DirectiveTokens do
+  begin
     BuildDirective;
+
+    if NeedSemicolon and (FLex.TokenID = tkSemiColon) then
+      MatchCreateLeaf(FLex.TokenID);
+  end;
 end;
 
 procedure TCnPasAstGenerator.BuildConstExpressionInType;
@@ -2482,7 +2556,8 @@ begin
       MatchCreateLeaf(FLex.TokenID);
       BuildSimpleType;
     end;
-    BuildDirectives;
+
+    BuildDirectives(False); // Export 声明里不要处理分号，原因不太明确
   finally
     PopLeaf;
   end;
@@ -2519,6 +2594,57 @@ begin
 
     if CanExpr and not (FLex.TokenID in DirectiveTokens + [tkSemiColon]) then
       BuildConstExpression;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildRecordConstant;
+begin
+  MatchCreateLeafAndPush(tkRoundOpen, cntRecordConstant);
+
+  try
+    repeat
+      BuildRecordFieldConstant;
+      if FLex.TokenID = tkSemiColon then  // 末尾的分号可要可不要，不能把没分号作为结束的标记，只能用右括号
+        MatchCreateLeaf(FLex.TokenID);
+
+      if FLex.TokenID = tkRoundClose then
+        Break;
+    until False;
+
+    MatchCreateLeaf(tkRoundClose);
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildArrayConstant;
+begin
+  MatchCreateLeafAndPush(tkRoundOpen, cntArrayConstant);
+
+  try
+    repeat
+      BuildTypedConstant;
+      if FLex.TokenID = tkComma then
+        MatchCreateLeaf(FLex.TokenID)
+      else
+        Break;
+    until False;
+    MatchCreateLeaf(tkRoundClose);
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildRecordFieldConstant;
+begin
+  MatchCreateLeafAndPush(tkNone, cntRecordFieldConstant);
+
+  try
+    BuildIdent;
+    MatchCreateLeaf(tkColon);
+    BuildTypedConstant;
+  finally
+    PopLeaf;
   end;
 end;
 
