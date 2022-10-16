@@ -82,8 +82,8 @@ uses
   SysUtils, Classes, Controls;
 
 var
-  Identifiers: array[#0..#255]of ByteBool;
-  mHashTable: array[#0..#255]of Integer;
+  Identifiers: array[#0..#255] of ByteBool;
+  mHashTable: array[#0..#255] of Integer;
 
 type
   TTokenKind=(tkAbsolute, tkAbstract, tkAddressOp, tkAmpersand, tkAnd, tkAnsiComment,
@@ -93,8 +93,8 @@ type
     tkDestructor, tkDispid, tkDispinterface, tkDiv, tkDo, tkDoubleAddressOp,
     tkDotDot, tkDownto, tkDynamic, tkElse, tkEnd, tkEqual, tkError, tkExcept,
     tkExport, tkExports, tkExternal, tkFar, tkFile, tkFinalization, tkFinally,
-    tkFloat, tkFor, tkForward, tkFunction, tkGoto, tkGreater, tkGreaterEqual,
-    tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,
+    tkFloat, tkFor, tkForward, tkFunction, tkGoto, tkGreater, tkGreaterEqual, tkKeywordString,
+    tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,        // tkKeywordString Added by Liu Xiao
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
     tkMod, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
@@ -107,6 +107,13 @@ type
     tkSpace, tkStar, tkStdcall, tkStored, tkString, tkStringresource, tkSymbol,
     tkThen, tkThreadvar, tkTo, tkTry, tkType, tkUnit, tkUnknown, tkUntil, tkUses,
     tkVar, tkVirtual, tkWhile, tkWith, tkWrite, tkWriteonly, tkXor);
+
+  {***
+    原有问题一：Pascal 字符串和 string 关键字混为一谈了，都是 tkString，
+      解决方案：已将后者修改成 tkKeywordString
+    原有问题二：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
+      解决方案：暂时没有
+  ***}
 
   TCommentState=(csAnsi, csBor, csNo);
 
@@ -734,7 +741,7 @@ end;
 
 function TmwPasLex.Func87: TTokenKind;
 begin
-  if KeyComp('String')then Result:=tkString else Result:=tkIdentifier;
+  if KeyComp('String')then Result:=tkKeywordString else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func88: TTokenKind;

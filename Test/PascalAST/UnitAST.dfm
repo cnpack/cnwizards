@@ -27,6 +27,7 @@ object FormAST: TFormAST
     Top = 128
     Width = 377
     Height = 505
+    Anchors = [akLeft, akTop, akBottom]
     Indent = 19
     ReadOnly = True
     TabOrder = 1
@@ -36,6 +37,7 @@ object FormAST: TFormAST
     Top = 8
     Width = 473
     Height = 625
+    Anchors = [akLeft, akTop, akBottom]
     Caption = 'Test Part'
     TabOrder = 2
     object btnUsesClause: TButton
@@ -49,20 +51,21 @@ object FormAST: TFormAST
     end
     object btnUsesDecl: TButton
       Left = 16
-      Top = 54
+      Top = 48
       Width = 75
       Height = 25
       Caption = 'Uses Decl'
       TabOrder = 1
       OnClick = btnUsesDeclClick
     end
-    object btnTypeSeletion: TButton
+    object btnInitSeletion: TButton
       Left = 16
-      Top = 84
+      Top = 72
       Width = 75
       Height = 25
-      Caption = 'Type Seletion'
+      Caption = 'Init Seletion'
       TabOrder = 2
+      OnClick = btnInitSeletionClick
     end
     object btnTypeDecl: TButton
       Left = 16
@@ -102,7 +105,7 @@ object FormAST: TFormAST
     end
     object btnDesignator: TButton
       Left = 16
-      Top = 232
+      Top = 264
       Width = 75
       Height = 25
       Caption = 'Designator'
@@ -153,7 +156,7 @@ object FormAST: TFormAST
     end
     object btnExpressionList: TButton
       Left = 16
-      Top = 260
+      Top = 292
       Width = 75
       Height = 25
       Caption = 'Expression List'
@@ -295,7 +298,7 @@ object FormAST: TFormAST
     end
     object btnExports: TButton
       Left = 16
-      Top = 312
+      Top = 344
       Width = 75
       Height = 25
       Caption = 'Exports'
@@ -345,6 +348,129 @@ object FormAST: TFormAST
         TabOrder = 3
         OnClick = btnConstExpressionClick
       end
+    end
+    object btnTerm: TButton
+      Left = 16
+      Top = 234
+      Width = 75
+      Height = 25
+      Caption = 'Term'
+      TabOrder = 14
+      OnClick = btnTermClick
+    end
+    object grpStructStatement: TGroupBox
+      Left = 104
+      Top = 352
+      Width = 217
+      Height = 233
+      Caption = 'Struct Statement'
+      TabOrder = 15
+      object btnExceptionHandler: TButton
+        Left = 16
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Except Handler'
+        TabOrder = 0
+        OnClick = btnExceptionHandlerClick
+      end
+      object btnIf: TButton
+        Left = 112
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'If'
+        TabOrder = 1
+        OnClick = btnIfClick
+      end
+      object btnWith: TButton
+        Left = 16
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'With Do'
+        TabOrder = 2
+      end
+      object btnWhile: TButton
+        Left = 112
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'While Do'
+        TabOrder = 3
+      end
+      object btnRepeat: TButton
+        Left = 16
+        Top = 88
+        Width = 75
+        Height = 25
+        Caption = 'Repeat Until'
+        TabOrder = 4
+      end
+      object btnTry: TButton
+        Left = 112
+        Top = 88
+        Width = 75
+        Height = 25
+        Caption = 'Try'
+        TabOrder = 5
+      end
+      object btnFor: TButton
+        Left = 16
+        Top = 120
+        Width = 75
+        Height = 25
+        Caption = 'For To/Downto'
+        TabOrder = 6
+      end
+      object btnRaise: TButton
+        Left = 112
+        Top = 120
+        Width = 75
+        Height = 25
+        Caption = 'Raise'
+        TabOrder = 7
+      end
+      object btnCase: TButton
+        Left = 16
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'Case'
+        TabOrder = 8
+      end
+      object btnCaseSelector: TButton
+        Left = 112
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'Case Selector'
+        TabOrder = 9
+      end
+      object btnLabel: TButton
+        Left = 16
+        Top = 184
+        Width = 75
+        Height = 25
+        Caption = 'Label'
+        TabOrder = 10
+      end
+    end
+    object btnInterface: TButton
+      Left = 16
+      Top = 368
+      Width = 75
+      Height = 25
+      Caption = 'Interface'
+      TabOrder = 16
+    end
+    object btnImplementation: TButton
+      Left = 16
+      Top = 392
+      Width = 75
+      Height = 25
+      Caption = 'Implementation'
+      TabOrder = 17
     end
   end
 end

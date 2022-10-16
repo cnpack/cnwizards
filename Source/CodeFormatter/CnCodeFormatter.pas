@@ -4930,7 +4930,7 @@ begin
       Writeln;
     end;
 
-    if ((not IsExternal)  and (not IsForward))and
+    if ((not IsExternal)  and (not IsForward)) and
        (Scanner.Token in BlockStmtTokens + DeclSectionTokens) then
     begin
       FormatBlock(PreSpaceCount, True);

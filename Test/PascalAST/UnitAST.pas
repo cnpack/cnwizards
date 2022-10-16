@@ -13,7 +13,7 @@ type
     grpTest: TGroupBox;
     btnUsesClause: TButton;
     btnUsesDecl: TButton;
-    btnTypeSeletion: TButton;
+    btnInitSeletion: TButton;
     btnTypeDecl: TButton;
     btnSetElement: TButton;
     btnSetConstructor: TButton;
@@ -46,6 +46,21 @@ type
     btnArrayConst: TButton;
     btnRecordConst: TButton;
     btnConstExpression: TButton;
+    btnTerm: TButton;
+    grpStructStatement: TGroupBox;
+    btnExceptionHandler: TButton;
+    btnIf: TButton;
+    btnWith: TButton;
+    btnWhile: TButton;
+    btnRepeat: TButton;
+    btnTry: TButton;
+    btnFor: TButton;
+    btnRaise: TButton;
+    btnCase: TButton;
+    btnCaseSelector: TButton;
+    btnInterface: TButton;
+    btnImplementation: TButton;
+    btnLabel: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -75,6 +90,10 @@ type
     procedure btnArrayConstClick(Sender: TObject);
     procedure btnRecordConstClick(Sender: TObject);
     procedure btnConstExpressionClick(Sender: TObject);
+    procedure btnInitSeletionClick(Sender: TObject);
+    procedure btnTermClick(Sender: TObject);
+    procedure btnExceptionHandlerClick(Sender: TObject);
+    procedure btnIfClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -234,20 +253,21 @@ end;
 procedure TFormAST.btnRecordTypeClick(Sender: TObject);
 begin
   ReInitAst(
-  'TFileRec = packed record (* must match the size the compiler generates: 332 bytes *)' + #13#10 +
-    'Handle: Integer;' + #13#10 +
-    'Mode,UI: Integer;' + #13#10 +
-    'RecSize: Cardinal;' + #13#10 +
-    'Private: array[1..28] of Byte;' + #13#10 +
-    'UserData: array[1..32] of Byte;' + #13#10 +
-    'Name: array[0..259] of Char;' + #13#10 +
-    'case Integer of' + #13#10 +
-    '0: (' + #13#10 +
-      'LowPart: DWORD;' + #13#10 +
-      'HighPart: Longint);' + #13#10 +
-    '1: (' + #13#10 +
-      'QuadPart: LONGLONG);' + #13#10 +
-  'end;');
+    'TFileRec = packed record (* must match the size the compiler generates: 332 bytes *)' + #13#10 +
+      'Handle: Integer;' + #13#10 +
+      'Mode,UI: Integer;' + #13#10 +
+      'RecSize: Cardinal;' + #13#10 +
+      'Private: array[1..28] of Byte;' + #13#10 +
+      'UserData: array[1..32] of Byte;' + #13#10 +
+      'Name: array[0..259] of Char;' + #13#10 +
+      'case Integer of' + #13#10 +
+      '0: (' + #13#10 +
+        'LowPart: DWORD;' + #13#10 +
+        'HighPart: Longint);' + #13#10 +
+      '1: (' + #13#10 +
+        'QuadPart: LONGLONG);' + #13#10 +
+    'end;'
+  );
   FAST.BuildTypeDecl;
   SynTree;
 end;
@@ -262,10 +282,10 @@ end;
 procedure TFormAST.btnVarSectionClick(Sender: TObject);
 begin
   ReInitAst(
-'var' + #13#10 +
-  'Identifiers: array[#0..#255]of ByteBool;' + #13#10 +
-  'S, K: string;' + #13#10 +
-  'I: Integer = 0;'
+    'var' + #13#10 +
+      'Identifiers: array[#0..#255]of ByteBool;' + #13#10 +
+      'S, K: string;' + #13#10 +
+      'I: Integer = 0;'
   );
   FAST.BuildVarSection;
   SynTree;
@@ -274,14 +294,14 @@ end;
 procedure TFormAST.btnInterfaceTypeClick(Sender: TObject);
 begin
   ReInitAst(
-  'IReadWriteSync = interface' + #13#10 +
-    '[''{7B108C52-1D8F-4CDB-9CDF-57E071193D3F}'']' + #13#10 +
-    'procedure BeginRead;' + #13#10 +
-    'procedure EndRead(const B: string; var K: Integer = 0);' + #13#10 +
-    'function BeginWrite: Boolean;' + #13#10 +
-    'procedure EndWrite;' + #13#10 +
-    'property BW: Boolean read BeginWrite;' + #13#10 +
-  'end;'
+    'IReadWriteSync = interface' + #13#10 +
+      '[''{7B108C52-1D8F-4CDB-9CDF-57E071193D3F}'']' + #13#10 +
+      'procedure BeginRead;' + #13#10 +
+      'procedure EndRead(const B: string; var K: Integer = 0);' + #13#10 +
+      'function BeginWrite: Boolean;' + #13#10 +
+      'procedure EndWrite;' + #13#10 +
+      'property BW: Boolean read BeginWrite;' + #13#10 +
+    'end;'
   );
   FAST.BuildTypeDecl;
   SynTree;
@@ -290,19 +310,19 @@ end;
 procedure TFormAST.btnClassTypeClick(Sender: TObject);
 begin
   ReInitAst(
-  'TCnEditorCodeToStringForm = class(TCnTranslateForm)' + #13#10 +
-    'btnOK: TButton;' + #13#10 +
-    'btnCancel: TButton;' + #13#10 + 
-  'private' + #13#10 + 
-    'F1, F2: Integer;' + #13#10 + 
-    'F3: string;' + #13#10 +
-    'function GetStr: string;' + #13#10 +
-  'public' + #13#10 + 
-    'constructor Create(Owner: TComponent); virtual;' + #13#10 + 
-    'destructor Destroy; override;' + #13#10 + 
-    '' + #13#10 +
-    'property OnEdit: TNotifyEvent read FOnEdit write FOnEdit;' + #13#10 +
-  'end;'
+    'TCnEditorCodeToStringForm = class(TCnTranslateForm)' + #13#10 +
+      'btnOK: TButton;' + #13#10 +
+      'btnCancel: TButton;' + #13#10 +
+    'private' + #13#10 +
+      'F1, F2: Integer;' + #13#10 + 
+      'F3: string;' + #13#10 +
+      'function GetStr: string;' + #13#10 +
+    'public' + #13#10 +
+      'constructor Create(Owner: TComponent); virtual;' + #13#10 +
+      'destructor Destroy; override;' + #13#10 + 
+      '' + #13#10 +
+      'property OnEdit: TNotifyEvent read FOnEdit write FOnEdit;' + #13#10 +
+    'end;'
   );
   FAST.BuildTypeDecl;
   SynTree;
@@ -311,19 +331,19 @@ end;
 procedure TFormAST.btnConstSectionClick(Sender: TObject);
 begin
   ReInitAst(
-'const' + #13#10 +
-  'SCN_TEST = ''test'';' + #13#10 +
-  'K: Integer = 2;' + #13#10 +
-  'KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];' + #13#10 +
-  'SM3Padding: array[0..63] of Byte =' + #13#10 +
-    '(' + #13#10 +
-      '$80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
-        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
-        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 + 
-        '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0' + #13#10 +
-    ');' + #13#10 +
-    '' + #13#10 +
-  'MAX_FILE_SIZE = 512 * 1024 * 1024;'
+    'const' + #13#10 +
+      'SCN_TEST = ''test'';' + #13#10 +
+      'K: Integer = 2;' + #13#10 +
+      'KeywordTokens = [tokKeyword_BEGIN .. tokKeyword_END];' + #13#10 +
+      'SM3Padding: array[0..63] of Byte =' + #13#10 +
+        '(' + #13#10 +
+          '$80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
+            '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
+            '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,' + #13#10 +
+            '0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0' + #13#10 +
+        ');' + #13#10 +
+        '' + #13#10 +
+      'MAX_FILE_SIZE = 512 * 1024 * 1024;'
   );
   FAST.BuildConstSection;
   SynTree;
@@ -332,20 +352,20 @@ end;
 procedure TFormAST.btnTypeSectionClick(Sender: TObject);
 begin
   ReInitAst(
-'type' + #13#10 +
-  'TCnSM2PrivateKey = TCnEccPrivateKey;' + #13#10 +
-  '' + #13#10 +
-  'TCnSM2 = class(TCnEcc)' + #13#10 +
-  'public' + #13#10 +
-    'function Tee: Boolean;' + #13#10 +
-    'constructor Create; override;' + #13#10 +
-    'procedure MyMessage(var Msg: TMessage); message WM_USER;' + #13#10 +
-    'procedure AffineMultiplePoint(K: TCnBigNumber; Point: TCnEcc3Point); override;' + #13#10 +
-    '{* 使用预计算的仿射坐标点进行加速}' + #13#10 + 
-  'end;' + #13#10 +
-  'TAnsiCharSet = set of AnsiChar;' + #13#10 +
-  'TCnSM2Signature = class(TCnEccSignature);' + #13#10 +
-  'TCnSM2CryptSequenceType = (cstC1C3C2, cstC1C2C3);'
+    'type' + #13#10 +
+      'TCnSM2PrivateKey = TCnEccPrivateKey;' + #13#10 +
+      '' + #13#10 +
+      'TCnSM2 = class(TCnEcc)' + #13#10 +
+      'public' + #13#10 +
+        'function Tee: Boolean;' + #13#10 +
+        'constructor Create; override;' + #13#10 +
+        'procedure MyMessage(var Msg: TMessage); message WM_USER;' + #13#10 +
+        'procedure AffineMultiplePoint(K: TCnBigNumber; Point: TCnEcc3Point); override;' + #13#10 +
+        '{* 使用预计算的仿射坐标点进行加速}' + #13#10 + 
+      'end;' + #13#10 +
+      'TAnsiCharSet = set of AnsiChar;' + #13#10 +
+      'TCnSM2Signature = class(TCnEccSignature);' + #13#10 +
+      'TCnSM2CryptSequenceType = (cstC1C3C2, cstC1C2C3);'
   );
   FAST.BuildTypeSection;
   SynTree;
@@ -354,10 +374,10 @@ end;
 procedure TFormAST.btnExportsClick(Sender: TObject);
 begin
   ReInitAst(
-'exports' + #13#10 +
-  'Proc1,' + #13#10 +
-  'Subroutine index OneConstant,' + #13#10 +
-  'InitWizard index 3 name WizardEntryPoint;'
+    'exports' + #13#10 +
+      'Proc1,' + #13#10 +
+      'Subroutine index OneConstant,' + #13#10 +
+      'InitWizard index 3 name WizardEntryPoint;'
   );
   FAST.BuildExportsSection;
   SynTree;
@@ -387,10 +407,64 @@ end;
 procedure TFormAST.btnConstExpressionClick(Sender: TObject);
 begin
   ReInitAst(
-'const' + #13#10 +
-  'MAX_FILE_SIZE = 512 * 1024 * 1024;'
+    'const' + #13#10 +
+      'MAX_FILE_SIZE = 512 * 1024 * 1024;'
   );
   FAST.BuildConstSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnInitSeletionClick(Sender: TObject);
+begin
+  ReInitAst(
+    'initialization' + #13#10 +
+    '' + #13#10 +
+    'finalization'
+  );
+  FAST.BuildInitSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnTermClick(Sender: TObject);
+begin
+  ReInitAst('@variable[1, 2, 3].abc^');
+  FAST.BuildTerm;
+  SynTree;
+end;
+
+procedure TFormAST.btnExceptionHandlerClick(Sender: TObject);
+begin
+  ReInitAst(
+    'on E: Exception do' + #13#10 +
+      'Application.HandleException(E);' + #13#10 +
+    'end;'
+  );
+  FAST.BuildExceptionHandler;
+  SynTree;
+end;
+
+procedure TFormAST.btnIfClick(Sender: TObject);
+begin
+  ReInitAst(
+    'if Token.IsBlockClose then' + #13#10 +
+    'begin' + #13#10 +
+      'if EndInner and (Level = 0) then' + #13#10 +
+      'begin' + #13#10 +
+        'FInnerBlockCloseToken := Token;' + #13#10 +
+        'EndInner := False;' + #13#10 +
+      'end;' + #13#10 +
+      '' + #13#10 +
+      'if Level = 0 then' + #13#10 +
+        'FBlockCloseToken := Token' + #13#10 + 
+      'else' + #13#10 +
+        'Dec(Level);' + #13#10 +
+    'end' + #13#10 + 
+    'else if Token.IsBlockStart then' + #13#10 +
+    'begin' + #13#10 +
+      'Inc(Level);' + #13#10 +
+    'end;'
+  );
+  FAST.BuildIfStatement;
   SynTree;
 end;
 
