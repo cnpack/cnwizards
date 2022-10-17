@@ -1,7 +1,7 @@
 object FormAST: TFormAST
-  Left = 226
-  Top = 107
-  Width = 887
+  Left = 98
+  Top = 106
+  Width = 1278
   Height = 672
   Caption = 'Pascal AST'
   Color = clBtnFace
@@ -309,7 +309,7 @@ object FormAST: TFormAST
       Left = 336
       Top = 232
       Width = 113
-      Height = 161
+      Height = 201
       Caption = 'Const'
       TabOrder = 13
       object btnConst: TButton
@@ -347,6 +347,15 @@ object FormAST: TFormAST
         Caption = 'Expr Const'
         TabOrder = 3
         OnClick = btnConstExpressionClick
+      end
+      object btnRecordConst1: TButton
+        Left = 16
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'Record Const2'
+        TabOrder = 4
+        OnClick = btnRecordConst1Click
       end
     end
     object btnTerm: TButton
@@ -390,6 +399,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'With Do'
         TabOrder = 2
+        OnClick = btnWithClick
       end
       object btnWhile: TButton
         Left = 112
@@ -398,6 +408,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'While Do'
         TabOrder = 3
+        OnClick = btnWhileClick
       end
       object btnRepeat: TButton
         Left = 16
@@ -406,6 +417,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Repeat Until'
         TabOrder = 4
+        OnClick = btnRepeatClick
       end
       object btnTry: TButton
         Left = 112
@@ -414,6 +426,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Try'
         TabOrder = 5
+        OnClick = btnTryClick
       end
       object btnFor: TButton
         Left = 16
@@ -422,6 +435,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'For To/Downto'
         TabOrder = 6
+        OnClick = btnForClick
       end
       object btnRaise: TButton
         Left = 112
@@ -430,6 +444,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Raise'
         TabOrder = 7
+        OnClick = btnRaiseClick
       end
       object btnCase: TButton
         Left = 16
@@ -438,6 +453,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Case'
         TabOrder = 8
+        OnClick = btnCaseClick
       end
       object btnCaseSelector: TButton
         Left = 112
@@ -446,6 +462,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Case Selector'
         TabOrder = 9
+        OnClick = btnCaseSelectorClick
       end
       object btnLabel: TButton
         Left = 16
@@ -454,6 +471,7 @@ object FormAST: TFormAST
         Height = 25
         Caption = 'Label'
         TabOrder = 10
+        OnClick = btnLabelClick
       end
     end
     object btnInterface: TButton
@@ -463,6 +481,7 @@ object FormAST: TFormAST
       Height = 25
       Caption = 'Interface'
       TabOrder = 16
+      OnClick = btnInterfaceClick
     end
     object btnImplementation: TButton
       Left = 16
@@ -471,6 +490,34 @@ object FormAST: TFormAST
       Height = 25
       Caption = 'Implementation'
       TabOrder = 17
+      OnClick = btnImplementationClick
     end
+    object btnProgram: TButton
+      Left = 16
+      Top = 432
+      Width = 75
+      Height = 25
+      Caption = 'Program'
+      TabOrder = 18
+      OnClick = btnProgramClick
+    end
+    object btnUnit: TButton
+      Left = 16
+      Top = 464
+      Width = 75
+      Height = 25
+      Caption = 'Unit'
+      TabOrder = 19
+      OnClick = btnUnitClick
+    end
+  end
+  object mmoPasRes: TMemo
+    Left = 880
+    Top = 16
+    Width = 377
+    Height = 617
+    Anchors = [akTop, akRight, akBottom]
+    ScrollBars = ssBoth
+    TabOrder = 3
   end
 end

@@ -61,6 +61,10 @@ type
     btnInterface: TButton;
     btnImplementation: TButton;
     btnLabel: TButton;
+    btnRecordConst1: TButton;
+    btnProgram: TButton;
+    mmoPasRes: TMemo;
+    btnUnit: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -94,6 +98,20 @@ type
     procedure btnTermClick(Sender: TObject);
     procedure btnExceptionHandlerClick(Sender: TObject);
     procedure btnIfClick(Sender: TObject);
+    procedure btnWithClick(Sender: TObject);
+    procedure btnWhileClick(Sender: TObject);
+    procedure btnRepeatClick(Sender: TObject);
+    procedure btnTryClick(Sender: TObject);
+    procedure btnForClick(Sender: TObject);
+    procedure btnRaiseClick(Sender: TObject);
+    procedure btnCaseClick(Sender: TObject);
+    procedure btnLabelClick(Sender: TObject);
+    procedure btnCaseSelectorClick(Sender: TObject);
+    procedure btnInterfaceClick(Sender: TObject);
+    procedure btnImplementationClick(Sender: TObject);
+    procedure btnRecordConst1Click(Sender: TObject);
+    procedure btnProgramClick(Sender: TObject);
+    procedure btnUnitClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -127,6 +145,8 @@ begin
   FAST.Tree.OnSaveANode := SaveANode;
   FAST.Tree.SaveToTreeView(tvPas);
   tvPas.FullExpand;
+
+  mmoPasRes.Lines.Text := FAST.Tree.ReConstructPascalCode;
 end;
 
 procedure TFormAST.btnUsesClauseClick(Sender: TObject);
@@ -458,13 +478,255 @@ begin
         'FBlockCloseToken := Token' + #13#10 + 
       'else' + #13#10 +
         'Dec(Level);' + #13#10 +
-    'end' + #13#10 + 
+    'end' + #13#10 +
     'else if Token.IsBlockStart then' + #13#10 +
     'begin' + #13#10 +
       'Inc(Level);' + #13#10 +
     'end;'
   );
   FAST.BuildIfStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnWithClick(Sender: TObject);
+begin
+  ReInitAst(
+    'with PCnWizNotifierRecord(AList[I])^ do' + #13#10 +
+    'begin' + #13#10 +
+      'CnCallBack(Address);' + #13#10 +
+    'end;'
+  );
+  FAST.BuildWithStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnWhileClick(Sender: TObject);
+begin
+  ReInitAst('while Tail^ in WhiteSpace + [#13, #10] do Inc(Tail);');
+  FAST.BuildWhileStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnRepeatClick(Sender: TObject);
+begin
+  ReInitAst(
+    'repeat' + #13#10 + 
+      'while Tail^ in WhiteSpace + [#13, #10] do Inc(Tail);' + #13#10 + 
+      'Head := Tail;' + #13#10 + 
+      'while True do' + #13#10 + 
+      'begin' + #13#10 + 
+        'while (InQuote and not (Tail^ in ['''''''', ''"'', #0])) or' + #13#10 + 
+          'not (Tail^ in Separators + [#0, #13, #10, '''''''', ''"'']) do Inc(Tail);' + #13#10 + 
+        'if Tail^ in ['''''''', ''"''] then' + #13#10 + 
+        'begin' + #13#10 +
+          'if (QuoteChar <> #0) and (QuoteChar = Tail^) then' + #13#10 + 
+            'QuoteChar := #0' + #13#10 + 
+          'else QuoteChar := Tail^;' + #13#10 + 
+          'InQuote := QuoteChar <> #0;' + #13#10 + 
+          'Inc(Tail);' + #13#10 + 
+        'end else Break;' + #13#10 + 
+      'end;' + #13#10 +
+      'EOS := Tail^ = #0;' + #13#10 + 
+      'if (Head <> Tail) and (Head^ <> #0) then' + #13#10 +
+      'begin' + #13#10 +
+        'if Strings <> nil then' + #13#10 +
+        'begin' + #13#10 +
+          'SetString(Item, Head, Tail - Head);' + #13#10 +
+          'Strings.Add(Item);' + #13#10 +
+        'end;' + #13#10 +
+        'Inc(Result);' + #13#10 +
+      'end;' + #13#10 + 
+      'Inc(Tail);' + #13#10 + 
+    'until EOS;'
+  );
+  FAST.BuildRepeatStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnTryClick(Sender: TObject);
+begin
+  ReInitAst(
+    'try' + #13#10 +
+      'Clear;' + #13#10 +
+      'while not Reader.EndOfList do Add(Reader.ReadString);' + #13#10 +
+    'finally' + #13#10 + 
+      'EndUpdate;' + #13#10 +
+    'end;'
+  );
+  FAST.BuildTryStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnForClick(Sender: TObject);
+begin
+  ReInitAst('for I := 0 to Count - 1 do Inc(Size, Length(Get(I)) + 2);');
+  FAST.BuildForStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnRaiseClick(Sender: TObject);
+begin
+  ReInitAst('raise EReadError.CreateRes(@SReadError);');
+  FAST.BuildRaiseStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnCaseClick(Sender: TObject);
+begin
+  ReInitAst(
+    'case Origin of' + #13#10 +
+      'soFromBeginning: FPosition := Offset;' + #13#10 + 
+      'soFromCurrent: Inc(FPosition, Offset);' + #13#10 + 
+      'soFromEnd: FPosition := FSize + Offset;' + #13#10 +
+    'else' + #13#10 +
+    'end;'
+  );
+  FAST.BuildCaseStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnLabelClick(Sender: TObject);
+begin
+  ReInitAst('label aaa;');
+  FAST.BuildLabelDeclSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnCaseSelectorClick(Sender: TObject);
+begin
+  ReInitAst('''A''..''Z'', ''a''..''z'', ''_'': begin end;');
+  FAST.BuildCaseSelector;
+  SynTree;
+end;
+
+procedure TFormAST.btnInterfaceClick(Sender: TObject);
+begin
+  ReInitAst(
+    'interface' + #13#10 +
+    '' + #13#10 +
+    'uses' + #13#10 +
+      'Classes, SysUtils;' + #13#10 +
+      'const' + #13#10 + 
+      'SCN = 1;' + #13#10 +
+      'type' + #13#10 +
+      'TCnOK = (coBegin, coEnd);' + #13#10 +
+      'var' + #13#10 +
+      'Form1: TForm1;' + #13#10 +
+      'procedure T; stdcall;' + #13#10 +
+      'function TE: Boolean;'
+  );
+  FAST.BuildInterfaceSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnImplementationClick(Sender: TObject);
+begin
+  ReInitAst(
+    'implementation' + #13#10 +
+        'uses Consts, TypInfo;' + #13#10 +
+        '' + #13#10 +
+        'resourcestring' + #13#10 +
+      'FS = ''TPF0'';' + #13#10 +
+      '' + #13#10 +
+      'threadvar' + #13#10 +
+      'ClassList: TThreadList;' + #13#10 +
+      '' + #13#10 +
+      'procedure TFormAST.FormDestroy(Sender: TObject);' + #13#10 +
+      'begin' + #13#10 +
+      'FreeAndNil(FAST);' + #13#10 +
+      'end;'
+  );
+  FAST.BuildImplementationSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnRecordConst1Click(Sender: TObject);
+begin
+  ReInitAst(
+    'const' + #13#10 +
+      'TokenMap: array[TPascalToken] of TIdentMapEntry = (' + #13#10 +
+        '(Value: Integer(tokNoToken);        Name: ''''),' + #13#10 +
+        '(Value: Integer(tokUnknown);        Name: '''')' + #13#10 +
+      ');'
+  );
+  FAST.BuildConstSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnProgramClick(Sender: TObject);
+begin
+  ReInitAst(
+    'program TestAST;' + #13#10 +
+    '' + #13#10 +
+    'uses' + #13#10 +
+      'Forms,' + #13#10 +
+      'UnitAST in ''UnitAST.pas'' {FormAST},' + #13#10 + 
+      'mPasLex in ''..\..\Source\ThirdParty\mPasLex.pas'',' + #13#10 +
+      'CnPasWideLex in ''..\..\Source\Utils\CnPasWideLex.pas'',' + #13#10 +
+      'CnPascalAST in ''..\..\Source\Utils\CnPascalAST.pas'';' + #13#10 + 
+      '' + #13#10 + 
+      '{$R *.RES}' + #13#10 +
+      '' + #13#10 +
+      'begin' + #13#10 + 
+      'Application.Initialize;' + #13#10 + 
+      'Application.CreateForm(TFormAST, FormAST);' + #13#10 +
+      'Application.Run;' + #13#10 +
+      'end.'
+  );
+  FAST.Build;
+  SynTree;
+end;
+
+procedure TFormAST.btnUnitClick(Sender: TObject);
+begin
+  ReInitAst(
+'{******************************************************************************}' + #13#10 +
+'{                       CnPack For Delphi/C++Builder                           }' + #13#10 + 
+'{                     中国人自己的开放源码第三方开发包                         }' + #13#10 + 
+'{                   (C)Copyright 2001-2022 CnPack 开发组                       }' + #13#10 + 
+'{                   ------------------------------------                       }' + #13#10 + 
+'{******************************************************************************}' + #13#10 + 
+'unit CnCodeFormaterTest;' + #13#10 + 
+'{* |<PRE>' + #13#10 + 
+'================================================================================' + #13#10 + 
+'* 软件名称：CnPack 代码格式化专家' + #13#10 +
+'* 单元名称：格式化专家测试程序 CnCodeFormaterTest' + #13#10 + 
+'* 单元作者：CnPack开发组' + #13#10 + 
+'================================================================================' + #13#10 + 
+'|</PRE>}' + #13#10 + 
+'' + #13#10 + 
+'interface// HERE is a comment' + #13#10 + 
+'{I CnPack.inc}' + #13#10 + 
+'uses' + #13#10 + 
+  'Classes, SysUtils{$IFDEF DEBUG},CnDebug {$ELSE},  NDebug{$ENDIF};' + #13#10 + 
+  'const' + #13#10 + 
+  'PathDelim  = {$IFDEF MSWINDOWS} ''\''; (*{$ELSE} ''/'';*) {$ENDIF}' + #13#10 + 
+  'implementation' + #13#10 + 
+  'procedure Test;' + #13#10 + 
+  'begin' + #13#10 + 
+  '// Do nothing' + #13#10 + 
+  'end;' + #13#10 + 
+  'type' + #13#10 + 
+  'TWMTest=class' + #13#10 + 
+  'private' + #13#10 + 
+    'FCurrentThread: TThread;' + #13#10 + 
+  'public type' + #13#10 + 
+    'TSystemTimes = record' + #13#10 + 
+      'IdleTime, UserTime, KernelTime, NiceTime: UInt64;' + #13#10 + 
+    'end;' + #13#10 + 
+    'end;' + #13#10 + 
+    'threadvar' + #13#10 + 
+  'SafeCallExceptionMsg: string;' + #13#10 + 
+  'SafeCallExceptionAddr: Pointer;' + #13#10 + 
+  '' + #13#10 + 
+  'function TGraphic.DefineProperties(Filer: TFiler; const Buffer): TObject;' + #13#10 + 
+  'begin' + #13#10 + 
+  'while I<Count do begin end;' + #13#10 + 
+  'Result := TObject.Create;' + #13#10 + 
+  'end;' + #13#10 + 
+  'end.'
+  );
+  FAST.Build;
   SynTree;
 end;
 

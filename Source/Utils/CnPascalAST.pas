@@ -25,7 +25,10 @@ unit CnPascalAST;
 * 单元名称：Pascal 代码抽象语法树生成单元
 * 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; http://www.cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
-* 开发平台：2022.09.24 V1.0
+*           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
+* 开发平台：2022.10.16 V1.1
+*               基本完成解析
+*           2022.09.24 V1.0
 *               创建单元，离完整实现功能还早
 ================================================================================
 |</PRE>}
@@ -54,10 +57,12 @@ type
     cntSpace,
     cntLineComment,
     cntBlockComment,
+    cntCompDirective,
 
     cntComma,
     cntSemiColon,
     cntColon,
+    cntSingleOps,
     cntRelOps,
     cntAddOps,
     cntMulOps,
@@ -93,6 +98,10 @@ type
     cntProgram,
     cntLibrary,
     cntUnit,
+    cntInterfaceSection,
+    cntImplementationSection,
+    cntInitializationSection,
+    cntFinalizationSection,
 
     cntIf,
     cntCase,
@@ -110,6 +119,7 @@ type
     cntFinally,
     cntOn,
     cntThen,
+    cntUntil,
     cntCaseSelector,
     cntCaseLabel,
 
@@ -207,6 +217,8 @@ type
     FNodeType: TCnPasNodeType;
     FTokenKind: TTokenKind;
   public
+    function GetPascalCode: string;
+
     property NodeType: TCnPasNodeType read FNodeType write FNodeType;
     {* 语法树节点类型}
     property TokenKind: TTokenKind read FTokenKind write FTokenKind;
@@ -214,7 +226,8 @@ type
   end;
 
   TCnPasAstTree = class(TCnTree)
-
+  public
+    function ReConstructPascalCode: string;
   end;
 
   TCnPasAstGenerator = class
@@ -226,16 +239,21 @@ type
     FLocked: Integer;
     procedure Lock;
     procedure Unlock;
+    function MatchCreateLeaf(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
+    procedure MatchLeafStep(AToken: TTokenKind);
   protected
     procedure PushLeaf(ALeaf: TCnPasAstLeaf);
     procedure PopLeaf;
 
     procedure MatchCreateLeafAndPush(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid);
     // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点，再把 FCurrentRef 推入堆栈，自身取代 FCurrentRef
-    function MatchCreateLeaf(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
-    // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点
+    function MatchCreateLeafAndStep(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
+    // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点，解析器步进至下一个有效节点
     procedure NextToken;
     // Lex 往前行进到下一个有效 Token，如果有注释，自行跳过（先不处理条件编译指令）
+    procedure SkipComments;
+    // 开始时调用，跳过注释到达有效 Token
+
     function ForwardToken(Step: Integer = 1): TTokenKind;
     // 取下 Step 个有效 Token 但不往前行进，内部使用书签进行恢复
   public
@@ -395,7 +413,7 @@ type
     procedure BuildTryStatement;
     procedure BuildRaiseStatement;
 
-    procedure BulidCaseSelector;
+    procedure BuildCaseSelector;
     {* 组装 case 语句中的选择区}
     procedure BuildCaseLabel;
     {* 组装 case 语句中的选择区单个 Label}
@@ -521,7 +539,9 @@ begin
     tkType: Result := cntTypeSection;
     tkExports: Result := cntExportsSection;
     tkVar, tkThreadvar: Result := cntVarSection;
-    // tkConst: Result := cntConstSection;
+    tkImplementation: Result := cntImplementationSection;
+    tkInitialization: Result := cntInitializationSection;
+    tkFinalization: Result := cntFinalizationSection;
 
     // 语句块
     tkBegin: Result := cntBegin;
@@ -548,13 +568,15 @@ begin
     tkFinally: Result := cntFinally;
     tkOn: Result := cntOn;
     tkThen: Result := cntThen;
+    tkUntil: Result := cntUntil;
 
-    // 元素：注释
+    // 元素：注释、编译指令
     tkBorComment, tkAnsiComment: Result := cntBlockComment;
     tkSlashesComment: Result := cntLineComment;
+    tkCompDirect: Result := cntCompDirective;
 
     // 元素：标识符和数字、字符串等
-    tkIdentifier: Result := cntIdent;
+    tkIdentifier, tkNil: Result := cntIdent;
     tkInteger, tkNumber: Result := cntInt; // 十六进制整数和普通整数
     tkFloat: Result := cntFloat;
     tkAsciiChar, tkString: Result := cntString;
@@ -573,6 +595,7 @@ begin
     tkStar, tkDiv, tkSlash, tkMod, tkAnd, tkShl, tkShr: Result := cntMulOps;
     tkGreater, tkLower, tkGreaterEqual, tkLowerEqual, tkNotEqual, tkEqual, tkIn, tkAs, tkIs:
       Result := cntRelOps;
+    tkNot: Result := cntSingleOps;
 
     tkSquareOpen: Result := cntSquareOpen;
     tkSquareClose: Result := cntSquareClose;
@@ -583,6 +606,7 @@ begin
     tkArray: Result := cntArrayType;
     tkSet: Result := cntSetType;
     tkFile: Result := cntFileType;
+    tkKeyString: Result := cntStringType;
     tkOf: Result := cntOf;
     tkRecord, tkPacked: Result := cntRecord;
     tkInterface, tkDispinterface: Result := cntInterfaceType; // interface section 由外界指定
@@ -616,6 +640,8 @@ end;
 
 procedure TCnPasAstGenerator.Build;
 begin
+  SkipComments;
+
   case FLex.TokenID of
     tkProgram:
       BuildProgram;
@@ -640,17 +666,17 @@ begin
         repeat
           BuildOrdinalType;
           if FLex.TokenID = tkComma then
-            MatchCreateLeaf(tkComma)
+            MatchCreateLeafAndStep(tkComma)
           else
             Break;
         until False;
       finally
         PopLeaf;
       end;
-      MatchCreateLeaf(tkSquareClose);
+      MatchCreateLeafAndStep(tkSquareClose);
     end;
 
-    MatchCreateLeaf(tkOf);
+    MatchCreateLeafAndStep(tkOf);
     BuildCommonType; // Array 后的类型只能是 Common Type，不支持 class 等
   finally
     PopLeaf;
@@ -664,19 +690,19 @@ begin
   try
     if FLex.TokenID = tkSemiColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       Exit;
     end;
 
     if FLex.TokenID = tkOf then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildIdent;
       Exit;
     end;
 
     if FLex.TokenID in [tkAbstract, tkSealed] then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
 
     BuildClassBody; // 分号在 TypeDecl 中处理
   finally
@@ -696,14 +722,14 @@ begin
     begin
       if FLex.TokenID in RelOpTokens then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildSimpleExpression;
       end
       else if FLex.TokenID = tkPointerSymbol then // 注意，这 . ^ [] 是扩展而来，原始语法里没有
-        MatchCreateLeaf(FLex.TokenID)
+        MatchCreateLeafAndStep(FLex.TokenID)
       else if FLex.TokenID = tkPoint then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildIdent;
       end
       else if FLex.TokenID = tkSquareOpen then
@@ -714,7 +740,7 @@ begin
         finally
           PopLeaf;
         end;
-        MatchCreateLeaf(tkSquareClose);
+        MatchCreateLeafAndStep(tkSquareClose);
       end;
     end;
   finally
@@ -742,7 +768,7 @@ begin
             finally
               PopLeaf;
             end;
-            MatchCreateLeaf(tkSquareClose); // 子节点整完后回退一层，再放上配套的右中括号
+            MatchCreateLeafAndStep(tkSquareClose); // 子节点整完后回退一层，再放上配套的右中括号
           end;
         tkRoundOpen: // Function Call
           begin
@@ -754,15 +780,15 @@ begin
             finally
               PopLeaf;
             end;
-            MatchCreateLeaf(tkRoundClose); // 子节点整完后回退一层，再放上配套的右中括号
+            MatchCreateLeafAndStep(tkRoundClose); // 子节点整完后回退一层，再放上配套的右中括号
           end;
         tkPointerSymbol:
           begin
-            MatchCreateLeaf(FLex.TokenID);
+            MatchCreateLeafAndStep(FLex.TokenID);
           end;
         tkPoint:
           begin
-            MatchCreateLeaf(FLex.TokenID);
+            MatchCreateLeafAndStep(FLex.TokenID);
             BuildIdent;
           end;
       end;
@@ -780,7 +806,7 @@ begin
     BuildIdent;
     if FLex.TokenID = tkEqual then
     begin
-      MatchCreateLeaf(tkEqual);
+      MatchCreateLeafAndStep(tkEqual);
       BuildConstExpression;
     end;
   finally
@@ -796,7 +822,7 @@ begin
     repeat
       BuildEmumeratedIdent;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(tkComma)
+        MatchCreateLeafAndStep(tkComma)
       else
         Break;
     until False;
@@ -814,7 +840,7 @@ begin
   finally
     PopLeaf;
   end;
-  MatchCreateLeaf(tkRoundClose);
+  MatchCreateLeafAndStep(tkRoundClose);
 end;
 
 procedure TCnPasAstGenerator.BuildExpression;
@@ -828,14 +854,14 @@ begin
     begin
       if FLex.TokenID in RelOpTokens then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildSimpleExpression;
       end
       else if FLex.TokenID = tkPointerSymbol then // 注意，这 . ^ [] 是扩展而来，原始语法里没有
-        MatchCreateLeaf(FLex.TokenID)
+        MatchCreateLeafAndStep(FLex.TokenID)
       else if FLex.TokenID = tkPoint then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildIdent;
       end
       else if FLex.TokenID = tkSquareOpen then
@@ -846,7 +872,7 @@ begin
         finally
           PopLeaf;
         end;
-        MatchCreateLeaf(tkSquareClose);
+        MatchCreateLeafAndStep(tkSquareClose);
       end;
     end;
   finally
@@ -863,7 +889,7 @@ begin
     repeat
       BuildExpression;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(tkComma)
+        MatchCreateLeafAndStep(tkComma)
       else
         Break;
     until False;
@@ -890,21 +916,21 @@ begin
             PopLeaf;
           end;
         end;
-      tkIdentifier:
+      tkIdentifier, tkNil: // TODO: 还有部分关键字可以做变量名
         begin
           BuildDesignator;
           if FLex.TokenID = tkRoundOpen then
           begin
-            MatchCreateLeaf(tkRoundOpen);
+            MatchCreateLeafAndStep(tkRoundOpen);
             BuildExpressionList;
-            MatchCreateLeaf(tkRoundClose)
+            MatchCreateLeafAndStep(tkRoundClose)
           end;
         end;
       tkAsciiChar, tkString, tkNumber, tkInteger, tkFloat: // AsciiChar 是 #12 这种
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
       tkNot:
         begin
-          MatchCreateLeaf(FLex.TokenID);
+          MatchCreateLeafAndStep(FLex.TokenID);
           BuildFactor;
         end;
       tkSquareOpen:
@@ -932,10 +958,10 @@ begin
           finally
             PopLeaf;
           end;
-          MatchCreateLeaf(tkRoundClose); // 子节点整完后回退一层，再放上配套的右小括号
+          MatchCreateLeafAndStep(tkRoundClose); // 子节点整完后回退一层，再放上配套的右小括号
 
           while FLex.TokenID = tkPointerSymbol do
-            MatchCreateLeaf(tkPointerSymbol)
+            MatchCreateLeafAndStep(tkPointerSymbol)
         end;
     end;
   finally
@@ -950,7 +976,7 @@ begin
   try
     if FLex.TokenID = tkOf then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildTypeID;
     end;
   finally
@@ -962,7 +988,7 @@ procedure TCnPasAstGenerator.BuildIdent;
 var
   T: TCnPasAstLeaf;
 begin
-  T := MatchCreateLeaf(tkIdentifier);
+  T := MatchCreateLeafAndStep(tkIdentifier);
 
   while FLex.TokenID in [tkPoint, tkIdentifier] do
   begin
@@ -975,9 +1001,9 @@ end;
 procedure TCnPasAstGenerator.BuildLabelId;
 begin
   if FLex.TokenID = tkInteger then
-    MatchCreateLeaf(tkInteger)
+    MatchCreateLeafAndStep(tkInteger)
   else
-    MatchCreateLeaf(tkIdentifier);
+    MatchCreateLeafAndStep(tkIdentifier);
 end;
 
 procedure TCnPasAstGenerator.BuildOrdinalType;
@@ -1037,8 +1063,8 @@ begin
     end;
     if FLex.TokenID = tkOf then
     begin
-      MatchCreateLeaf(tkOf);
-      MatchCreateLeaf(tkObject);
+      MatchCreateLeafAndStep(tkOf);
+      MatchCreateLeafAndStep(tkObject);
     end;
 
     // TODO: Directives
@@ -1054,6 +1080,8 @@ begin
 
   try
     case FLex.TokenID of
+      tkNil:
+        MatchCreateLeafAndStep(FLex.TokenID);
       tkIdentifier:
         BuildIdent;
       tkRoundOpen:
@@ -1065,13 +1093,13 @@ begin
             BuildDesignator;
             if FLex.TokenID = tkAs then
             begin
-              MatchCreateLeaf(tkAs);
+              MatchCreateLeafAndStep(tkAs);
               BuildIdent; // TypeId 沿用 Ident
             end;
           finally
             PopLeaf;
           end;
-          MatchCreateLeaf(tkRoundClose); // 子节点整完后回退一层，再放上配套的右小括号
+          MatchCreateLeafAndStep(tkRoundClose); // 子节点整完后回退一层，再放上配套的右小括号
         end;
     end;
   finally
@@ -1086,7 +1114,7 @@ begin
   try
     if FLex.TokenID <> tkEnd then
       BuildFieldList;
-    MatchCreateLeaf(tkEnd);
+    MatchCreateLeafAndStep(tkEnd);
   finally
     PopLeaf;
   end;
@@ -1106,14 +1134,14 @@ begin
       begin
         BuildSetElement;
         if FLex.TokenID = tkComma then
-          MatchCreateLeaf(tkComma)
+          MatchCreateLeafAndStep(tkComma)
         else
           Break;
       end;
     finally
       PopLeaf;
     end;
-    MatchCreateLeaf(tkSquareClose); // 子节点整完后回退一层，再放上配套的右中括号
+    MatchCreateLeafAndStep(tkSquareClose); // 子节点整完后回退一层，再放上配套的右中括号
   finally
     PopLeaf;
   end;
@@ -1128,7 +1156,7 @@ begin
     BuildExpression;
     if FLex.TokenID = tkDotDot then
     begin
-      MatchCreateLeaf(tkDotDot);
+      MatchCreateLeafAndStep(tkDotDot);
       BuildExpression;
     end;
   finally
@@ -1142,8 +1170,8 @@ begin
   // Pop 之前，内部添加的节点均为抽象的 SetType 节点之子
 
   try
-    MatchCreateLeaf(tkSet);
-    MatchCreateLeaf(tkOf);
+    MatchCreateLeafAndStep(tkSet);
+    MatchCreateLeafAndStep(tkOf);
     BuildOrdinalType;
   finally
     PopLeaf;
@@ -1157,12 +1185,12 @@ begin
 
   try
     if FLex.TokenID in [tkPlus, tkMinus, tkPointerSymbol] then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
 
     BuildTerm;
     while FLex.TokenID in AddOpTokens do
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildTerm;
     end;
   finally
@@ -1181,12 +1209,12 @@ begin
   try
     if FLex.TokenID = tkGoto then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildLabelId;
     end
     else if FLex.TokenID = tkInherited then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       // 后面可能没了，也可能是另一个 SimpleStatement
       if not (FLex.TokenID in [tkSemicolon, tkEnd, tkElse]) then
         BuildSimpleStatement;
@@ -1221,7 +1249,7 @@ begin
         BuildDesignator;
         if FLex.TokenID = tkAssign then
         begin
-          MatchCreateLeaf(FLex.TokenID);
+          MatchCreateLeafAndStep(FLex.TokenID);
           BuildExpression;
         end;
       end
@@ -1235,7 +1263,7 @@ begin
         finally
           PopLeaf;
         end;
-        MatchCreateLeaf(tkRoundClose);
+        MatchCreateLeafAndStep(tkRoundClose);
       end;
     end
     else // 非 ( 开头，也是 Designator，处理后面可能有的赋值
@@ -1243,7 +1271,7 @@ begin
       BuildDesignator;
       if FLex.TokenID = tkAssign then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildExpression;
       end;
     end;
@@ -1257,8 +1285,8 @@ begin
   MatchCreateLeafAndPush(tkNone, cntStringType);
 
   try
-    if FLex.TokenID = tkKeywordString then
-      MatchCreateLeaf(FLex.TokenID)
+    if FLex.TokenID = tkKeyString then
+      MatchCreateLeafAndStep(FLex.TokenID)
     else
       BuildIdent;
 
@@ -1270,7 +1298,7 @@ begin
       finally
         PopLeaf;
       end;
-      MatchCreateLeaf(tkRoundClose);
+      MatchCreateLeafAndStep(tkRoundClose);
     end
     else if FLex.TokenID = tkSquareOpen then
     begin
@@ -1280,7 +1308,7 @@ begin
       finally
         PopLeaf;
       end;
-      MatchCreateLeaf(tkSquareClose);
+      MatchCreateLeafAndStep(tkSquareClose);
     end
   finally
     PopLeaf;
@@ -1290,7 +1318,7 @@ end;
 procedure TCnPasAstGenerator.BuildStructType;
 begin
   if FLex.TokenID = tkPacked then
-    MatchCreateLeaf(tkPacked);
+    MatchCreateLeafAndStep(tkPacked);
 
   case FLex.TokenID of
     tkArray:
@@ -1313,7 +1341,7 @@ begin
     BuildFactor;
     while FLex.TokenID in MulOpTokens do
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildFactor;
     end;
   finally
@@ -1347,7 +1375,7 @@ begin
           BuildPointerType;
         end;
     else
-      if (FLex.TokenID = tkKeywordString) or SameText(FLex.Token, 'String')
+      if (FLex.TokenID = tkKeyString) or SameText(FLex.Token, 'String')
         or SameText(FLex.Token, 'AnsiString') or SameText(FLex.Token, 'WideString')
         or SameText(FLex.Token, 'UnicodeString') then
         BuildStringType
@@ -1383,9 +1411,9 @@ begin
 
   try
     BuildIdent;
-    MatchCreateLeaf(tkEqual);
+    MatchCreateLeafAndStep(tkEqual);
     if FLex.TokenID = tkType then
-      MatchCreateLeaf(tkNone, cntTypeKeyword);
+      MatchCreateLeafAndStep(tkNone, cntTypeKeyword);
 
     // 要分开 RestrictType 和普通 Type，前者包括 class/object/interface，部分场合不允许出现
     if FLex.TokenID in [tkClass, tkObject, tkInterface, tkDispInterface] then
@@ -1406,7 +1434,7 @@ begin
     while FLex.TokenID = tkIdentifier do
     begin
       BuildTypeDecl;
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
     end;
   finally
     PopLeaf;
@@ -1425,12 +1453,12 @@ begin
     begin
       BuildUsesDecl;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(tkComma)
+        MatchCreateLeafAndStep(tkComma)
       else
         Break;
     end;
 
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
   finally
     PopLeaf;
   end;
@@ -1441,8 +1469,8 @@ begin
   BuildIdent;
   if FLex.TokenID = tkIn then
   begin
-    MatchCreateLeaf(tkIn);
-    MatchCreateLeaf(tkString);
+    MatchCreateLeafAndStep(tkIn);
+    MatchCreateLeafAndStep(tkString);
   end;
 end;
 
@@ -1488,6 +1516,13 @@ begin
   Inc(FLocked);
 end;
 
+function TCnPasAstGenerator.MatchCreateLeafAndStep(AToken: TTokenKind;
+  NodeType: TCnPasNodeType): TCnPasAstLeaf;
+begin
+  Result := MatchCreateLeaf(AToken, NodeType);
+  MatchLeafStep(AToken);
+end;
+
 function TCnPasAstGenerator.MatchCreateLeaf(AToken: TTokenKind;
   NodeType: TCnPasNodeType): TCnPasAstLeaf;
 begin
@@ -1510,14 +1545,16 @@ begin
 
     Result.TokenKind := AToken;
     Result.NodeType := NodeType;
-  end;
 
-  if AToken <> tkNone then // 有内容的实际节点，才步进一下
-  begin
-    if FLocked = 0 then               // 未锁才处理
+    if AToken <> tkNone then      // 未锁才赋值
       Result.Text := FLex.Token;
-    NextToken;                        // 锁不锁都要前进
   end;
+end;
+
+procedure TCnPasAstGenerator.MatchLeafStep(AToken: TTokenKind);
+begin
+  if AToken <> tkNone then // 有内容的实际节点，才步进一下，且锁不锁都要前进
+    NextToken;
 end;
 
 procedure TCnPasAstGenerator.MatchCreateLeafAndPush(AToken: TTokenKind;
@@ -1525,7 +1562,7 @@ procedure TCnPasAstGenerator.MatchCreateLeafAndPush(AToken: TTokenKind;
 var
   T: TCnPasAstLeaf;
 begin
-  T := MatchCreateLeaf(AToken, NodeType);
+  T := MatchCreateLeafAndStep(AToken, NodeType);
   if T <> nil then
   begin
     PushLeaf(FCurrentRef);
@@ -1537,7 +1574,11 @@ procedure TCnPasAstGenerator.NextToken;
 begin
   repeat
     FLex.Next;
-  until not (FLex.TokenID in SpaceTokens + CommentTokens);
+
+    if FLex.TokenID in CommentTokens + [tkCompDirect] then
+      MatchCreateLeaf(FLex.TokenID); // 不步进，由本循环步进
+
+  until not (FLex.TokenID in SpaceTokens + CommentTokens + [tkCompDirect]);
 end;
 
 function TCnPasAstGenerator.ForwardToken(Step: Integer): TTokenKind;
@@ -1592,7 +1633,7 @@ begin
   try
     if FLex.TokenID = tkSemiColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       Exit;
     end;
 
@@ -1611,7 +1652,7 @@ begin
       else if Flex.TokenID = tkProperty then
         BuildProperty;
     end;
-    MatchCreateLeaf(tkEnd);
+    MatchCreateLeafAndStep(tkEnd);
   finally
     PopLeaf;
   end;
@@ -1633,7 +1674,7 @@ begin
 
   try
     BuildConstExpression;
-    MatchCreateLeaf(tkDotDot);
+    MatchCreateLeafAndStep(tkDotDot);
     BuildConstExpression;
   finally
     PopLeaf;
@@ -1656,16 +1697,16 @@ begin
   MatchCreateLeafAndPush(tkNone, cntTypeID);
 
   try
-    if FLex.TokenID = tkKeywordString then // BuildIdent 内部不认关键字 string
-      MatchCreateLeaf(FLex.TokenID)
+    if FLex.TokenID = tkKeyString then // BuildIdent 内部不认关键字 string
+      MatchCreateLeafAndStep(FLex.TokenID)
     else
       BuildIdent;
 
     if FLex.TokenID = tkRoundOpen then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildExpression;
-      MatchCreateLeaf(tkRoundClose)
+      MatchCreateLeafAndStep(tkRoundClose)
     end;
   finally
     PopLeaf;
@@ -1698,7 +1739,7 @@ begin
       begin
         BuildFieldDecl;
         if FLex.TokenID = tkSemiColon then
-          MatchCreateLeaf(tkSemiColon);
+          MatchCreateLeafAndStep(tkSemiColon);
       end;
     end;
 
@@ -1707,7 +1748,7 @@ begin
       BuildVariantSection;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
   finally
     PopLeaf;
   end;
@@ -1721,7 +1762,7 @@ begin
     repeat
       BuildIdent;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(tkComma)
+        MatchCreateLeafAndStep(tkComma)
       else
         Break;
     until False;
@@ -1739,7 +1780,7 @@ begin
     if FLex.TokenID = tkRoundOpen then
       BuildFormalParameters;
 
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     BuildCommonType;
   finally
     PopLeaf;
@@ -1758,7 +1799,7 @@ begin
 
     if FLex.TokenID = tkEqual then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildIdent;
     end;
   finally
@@ -1774,7 +1815,7 @@ begin
     while FLex.TokenID = tkIdentifier do
       BuildClassConstantDecl;
 
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
   finally
     PopLeaf;
   end;
@@ -1794,7 +1835,7 @@ begin
   end;
 
   if FLex.TokenID = tkSemiColon then
-    MatchCreateLeaf(tkSemiColon); // 声明后的分号
+    MatchCreateLeafAndStep(tkSemiColon); // 声明后的分号
 
   BuildDirectives; // 这里要求把分号也吃掉
 end;
@@ -1807,7 +1848,7 @@ begin
     while FLex.TokenID = tkIdentifier do
     begin
       BuildTypeDecl; // 类似于 BuildTypeSection，复用之
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
     end;
   finally
     PopLeaf;
@@ -1816,7 +1857,7 @@ end;
 
 procedure TCnPasAstGenerator.BuildClassVisibility;
 begin
-  MatchCreateLeaf(FLex.TokenID);
+  MatchCreateLeafAndStep(FLex.TokenID);
 end;
 
 procedure TCnPasAstGenerator.BuildVariantSection;
@@ -1841,18 +1882,18 @@ begin
     if HasColon then
     begin
       BuildIdent;
-      MatchCreateLeaf(tkColon);
+      MatchCreateLeafAndStep(tkColon);
       BuildTypeID;
     end
     else
       BuildTypeID;
 
-    MatchCreateLeaf(tkOf);
+    MatchCreateLeafAndStep(tkOf);
     repeat
       BuildRecVariant;
       if FLex.TokenID = tkSemiColon then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         if FLex.TokenID in [tkEnd, tkRoundClose] then
           Break;
       end
@@ -1866,13 +1907,14 @@ end;
 
 procedure TCnPasAstGenerator.BuildVarSection;
 begin
-  MatchCreateLeafAndPush(tkVar);
+  if FLex.TokenID in [tkVar, tkThreadvar] then
+    MatchCreateLeafAndPush(FLex.TokenID);
 
   try
     while FLex.TokenID in [tkIdentifier] do
     begin
       BuildVarDecl;
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
     end;
   finally
     PopLeaf;
@@ -1885,7 +1927,7 @@ begin
 
   try
     BuildIdentList;
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     BuildCommonType;
   finally
     PopLeaf;
@@ -1901,12 +1943,12 @@ begin
     if FLex.TokenID in [tkSquareOpen, tkColon] then
       BuildPropertyInterface;
     BuildPropertySpecifiers;
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
 
     if FLex.TokenID = tkDefault then
     begin
-      MatchCreateLeaf(FLex.TokenID);
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(FLex.TokenID);
+      MatchCreateLeafAndStep(tkSemiColon);
     end;
   finally
     PopLeaf;
@@ -1921,12 +1963,12 @@ begin
     repeat
       BuildConstExpression;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(tkComma)
+        MatchCreateLeafAndStep(tkComma)
       else
         Break;
     until False;
 
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     if FLex.TokenID = tkRoundOpen then
     begin
       MatchCreateLeafAndPush(tkRoundOpen);
@@ -1936,7 +1978,7 @@ begin
       finally
         PopLeaf;
       end;
-      MatchCreateLeaf(tkRoundClose);
+      MatchCreateLeafAndStep(tkRoundClose);
     end;
   finally
     PopLeaf;
@@ -1950,7 +1992,7 @@ begin
   try
     if FLex.TokenID <> tkColon then
       BuildPropertyParameterList;
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     BuildCommonType;
   finally
     PopLeaf;
@@ -1967,7 +2009,7 @@ begin
     while FLex.TokenID in PropertySpecifiersTokens do
     begin
       ID := FLex.TokenID;
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       case ID of
         tkDispid:
           begin
@@ -2002,17 +2044,17 @@ begin
 
     repeat
       if FLex.TokenID in [tkVar, tkConst, tkOut] then
-        MatchCreateLeaf(FLex.TokenID); // TODO: 区分 var/const 修饰的内容与 VarSection、ConstSection
+        MatchCreateLeafAndStep(FLex.TokenID); // TODO: 区分 var/const 修饰的内容与 VarSection、ConstSection
 
       BuildIdentList;
-      MatchCreateLeaf(tkColon);
+      MatchCreateLeafAndStep(tkColon);
       BuildTypeID;
 
       if FLex.TokenID <> tkSemiColon then
         Break;
     until False;
 
-    MatchCreateLeaf(tkSquareClose);
+    MatchCreateLeafAndStep(tkSquareClose);
   finally
     PopLeaf;
   end;
@@ -2026,18 +2068,18 @@ begin
     BuildIdentList;
     if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildCommonType;
     end;
 
     if FLex.TokenID = tkEqual then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildTypedConstant;
     end
     else if FLex.TokenID = tkAbsolute then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildConstExpression; // 包括 Ident 的情形
     end;
   finally
@@ -2060,7 +2102,7 @@ begin
       BuildSetConstructor;
       while FLex.TokenID in (AddOPTokens + MulOPTokens) do
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildSetConstructor;
       end;
     end
@@ -2103,13 +2145,13 @@ begin
           FLex.SaveToBookmark(Bookmark);
 
           try
-            MatchCreateLeaf(tkRoundOpen);
+            MatchCreateLeafAndStep(tkRoundOpen);
             try
               BuildConstExpression;
               if FLex.TokenID = tkComma then // (1, 1) 的情形
                 TypedConstantType := tcArray;
               if FLex.TokenID = tkRoundClose then
-                MatchCreateLeaf(FLex.TokenID);
+                MatchCreateLeafAndStep(FLex.TokenID);
 
               if FLex.TokenID = tkSemicolon then // (1) 的情形
                 TypedConstantType := tcArray;
@@ -2148,7 +2190,7 @@ begin
     finally
       PopLeaf;
     end;
-    MatchCreateLeaf(tkRoundClose);
+    MatchCreateLeafAndStep(tkRoundClose);
   finally
     PopLeaf;
   end;
@@ -2161,11 +2203,11 @@ begin
   try
     MatchCreateLeafAndPush(tkSquareOpen);
     try
-      MatchCreateLeaf(tkString); // 内容是一个字符串
+      MatchCreateLeafAndStep(tkString); // 内容是一个字符串
     finally
       PopLeaf;
     end;
-    MatchCreateLeaf(tkSquareClose);
+    MatchCreateLeafAndStep(tkSquareClose);
   finally
     PopLeaf;
   end;
@@ -2174,14 +2216,14 @@ end;
 procedure TCnPasAstGenerator.BuildClassMethod;
 begin
   if FLex.TokenID = tkClass then
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
   BuildMethod;
 end;
 
 procedure TCnPasAstGenerator.BuildClassProperty;
 begin
   if FLex.TokenID = tkClass then
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
   BuildProperty;
 end;
 
@@ -2224,7 +2266,7 @@ begin
         repeat
           BuildFormalParam;
           if FLex.TokenID = tkSemiColon then
-            MatchCreateLeaf(FLex.TokenID)
+            MatchCreateLeafAndStep(FLex.TokenID)
           else
             Break;
         until False;
@@ -2232,7 +2274,7 @@ begin
     finally
       PopLeaf;
     end;
-    MatchCreateLeaf(tkRoundClose);
+    MatchCreateLeafAndStep(tkRoundClose);
   finally
     PopLeaf;
   end;
@@ -2244,16 +2286,16 @@ begin
 
   try
     if FLex.TokenID in [tkVar, tkConst, tkOut] then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
     BuildIdentList;
 
     if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID = tkArray then
       begin
-        MatchCreateLeaf(tkArray);
-        MatchCreateLeaf(tkOf);
+        MatchCreateLeafAndStep(tkArray);
+        MatchCreateLeafAndStep(tkOf);
 
         if FLex.TokenID = tkRoundOpen then
         begin
@@ -2263,24 +2305,24 @@ begin
           finally
             PopLeaf;
           end;
-          MatchCreateLeaf(tkRoundClose);
+          MatchCreateLeafAndStep(tkRoundClose);
         end
         else
         begin
           BuildConstExpression;
           if FLex.TokenID = tkDotDot then
           begin
-            MatchCreateLeaf(Flex.TokenID);
+            MatchCreateLeafAndStep(Flex.TokenID);
             BuildConstExpression;
           end;
         end;
       end
-      else if FLex.TokenID in [tkIdentifier, tkKeywordString, tkFile] then
+      else if FLex.TokenID in [tkIdentifier, tkKeyString, tkFile] then
         BuildCommonType;
 
       if FLex.TokenID = tkEqual then
       begin
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
         BuildConstExpression;
       end;
     end;
@@ -2300,7 +2342,7 @@ begin
     finally
       PopLeaf;
     end;
-    MatchCreateLeaf(tkRoundClose);
+    MatchCreateLeafAndStep(tkRoundClose);
   finally
     PopLeaf;
   end;
@@ -2317,7 +2359,7 @@ begin
     if FLex.TokenID <> tkSemiColon then
     begin
       BuildClassMemberList;
-      MatchCreateLeaf(tkEnd);
+      MatchCreateLeafAndStep(tkEnd);
     end;
   finally
     PopLeaf;
@@ -2372,14 +2414,14 @@ begin
 
     try
       BuildIdentList;
-      MatchCreateLeaf(tkColon);
+      MatchCreateLeafAndStep(tkColon);
       BuildCommonType;
     finally
       PopLeaf;
     end;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
 
     if FLex.TokenID = tkIdentifier then
       Continue
@@ -2399,7 +2441,7 @@ begin
     while FLex.TokenID = tkIdentifier do
     begin
       BuildConstDecl;
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
     end;
   finally
     PopLeaf;
@@ -2414,15 +2456,15 @@ begin
     BuildIdent;
     if FLex.TokenID = tkEqual then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildConstExpression;
     end
     else if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildCommonType;
 
-      MatchCreateLeaf(tkEqual);
+      MatchCreateLeafAndStep(tkEqual);
       BuildTypedConstant;
     end;
   finally
@@ -2437,7 +2479,7 @@ begin
     BuildDirective;
 
     if NeedSemicolon and (FLex.TokenID = tkSemiColon) then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
   end;
 end;
 
@@ -2449,7 +2491,7 @@ begin
     BuildSimpleExpression;
     while FLex.TokenID in RelOpTokens - [tkEqual, tkGreater, tkLower] do
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildSimpleExpression;
     end;
   finally
@@ -2471,15 +2513,15 @@ begin
 
     if FLex.TokenID = tkRoundOpen then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildIdentList;
-      MatchCreateLeaf(tkRoundClose);
+      MatchCreateLeafAndStep(tkRoundClose);
     end;
 
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
     BuildProgramBlock;
 
-    MatchCreateLeaf(tkPoint);
+    MatchCreateLeafAndStep(tkPoint);
   finally
     PopLeaf;
   end;
@@ -2492,7 +2534,7 @@ begin
   try
     BuildIdent; // 不支持单元名后 platform 这种
 
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
 
     BuildInterfaceSection;
 
@@ -2501,8 +2543,8 @@ begin
     if FLex.TokenID in [tkInitialization, tkBegin] then
       BuildInitSection;
 
-    MatchCreateLeaf(tkEnd);
-    MatchCreateLeaf(tkPoint);
+    MatchCreateLeafAndStep(tkEnd);
+    MatchCreateLeafAndStep(tkPoint);
   finally
     PopLeaf;
   end;
@@ -2536,7 +2578,7 @@ end;
 
 procedure TCnPasAstGenerator.BuildInterfaceSection;
 begin
-  MatchCreateLeafAndPush(tkInterface);
+  MatchCreateLeafAndPush(tkInterface, cntInterfaceSection);
 
   try
     while FLex.TokenID = tkUses do
@@ -2618,9 +2660,9 @@ begin
   MatchCreateLeafAndPush(tkNone, cntCompoundStatement);
 
   try
-    MatchCreateLeaf(tkBegin); // ASM 不支持
+    MatchCreateLeafAndStep(tkBegin); // ASM 不支持
     BuildStatementList;
-    MatchCreateLeaf(tkEnd);
+    MatchCreateLeafAndStep(tkEnd);
   finally
     PopLeaf;
   end;
@@ -2629,13 +2671,13 @@ end;
 procedure TCnPasAstGenerator.BuildStatementList;
 begin
   while FLex.TokenID = tkSemiColon do
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
 
   repeat
     BuildStatement;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
 
     if not (FLex.TokenID in StatementTokens) then
       Break;
@@ -2647,12 +2689,9 @@ begin
   repeat
     BuildexportsDecl;
     if FLex.TokenID = tkComma then
-    begin
-      MatchCreateLeaf(Flex.TokenID);
-      Continue;
-    end
+      MatchCreateLeafAndStep(FLex.TokenID)
     else
-      Exit;
+      Break;
   until False;
 end;
 
@@ -2662,7 +2701,7 @@ begin
 
   try
     BuildExportsList;
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
   finally
     PopLeaf;
   end;
@@ -2679,7 +2718,7 @@ begin
 
     if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildSimpleType;
     end;
 
@@ -2698,7 +2737,7 @@ begin
     BuildConstExpressionInType;
     if FLex.TokenID = tkDotdot then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildConstExpressionInType;
     end;
   end;
@@ -2712,7 +2751,7 @@ begin
     BuildFunctionHeading;
 
   if FLex.TokenID = tkSemiColon then
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
 
   BuildDirectives;
 end;
@@ -2724,7 +2763,7 @@ begin
   if FLex.TokenID in DirectiveTokens then
   begin
     CanExpr := FLex.TokenID in DirectiveTokensWithExpressions;
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
 
     if CanExpr and not (FLex.TokenID in DirectiveTokens + [tkSemiColon]) then
       BuildConstExpression;
@@ -2739,16 +2778,15 @@ begin
     repeat
       BuildRecordFieldConstant;
       if FLex.TokenID = tkSemiColon then  // 末尾的分号可要可不要，不能把没分号作为结束的标记，只能用右括号
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
 
       if FLex.TokenID = tkRoundClose then
         Break;
     until False;
-
-    MatchCreateLeaf(tkRoundClose);
   finally
     PopLeaf;
   end;
+  MatchCreateLeafAndStep(tkRoundClose);
 end;
 
 procedure TCnPasAstGenerator.BuildArrayConstant;
@@ -2759,14 +2797,14 @@ begin
     repeat
       BuildTypedConstant;
       if FLex.TokenID = tkComma then
-        MatchCreateLeaf(FLex.TokenID)
+        MatchCreateLeafAndStep(FLex.TokenID)
       else
         Break;
     until False;
-    MatchCreateLeaf(tkRoundClose);
   finally
     PopLeaf;
   end;
+  MatchCreateLeafAndStep(tkRoundClose);
 end;
 
 procedure TCnPasAstGenerator.BuildRecordFieldConstant;
@@ -2775,7 +2813,7 @@ begin
 
   try
     BuildIdent;
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     BuildTypedConstant;
   finally
     PopLeaf;
@@ -2790,7 +2828,7 @@ begin
     if ForwardToken() = tkColon then
     begin
       BuildLabelId;
-      MatchCreateLeaf(tkColon);
+      MatchCreateLeafAndStep(tkColon);
     end;
 
     if FLex.TokenID in SimpleStatementTokens then
@@ -2823,28 +2861,28 @@ begin
 
   try
     BuildExpression;
-    MatchCreateLeaf(tkOf);
+    MatchCreateLeafAndStep(tkOf);
 
     repeat
-      BulidCaseSelector;
+      BuildCaseSelector;
 
       if FLex.TokenID = tkSemiColon then
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID in [tkElse, tkSemiColon] then
         Break;
     until False;
 
     if FLex.TokenID = tkElse then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID <> tkEnd then
         BuildStatementList;
     end;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(tkSemiColon);
+      MatchCreateLeafAndStep(tkSemiColon);
 
-    MatchCreateLeaf(tkEnd);
+    MatchCreateLeafAndStep(tkEnd);
   finally
     PopLeaf;
   end;
@@ -2857,14 +2895,14 @@ begin
   try
     BuildQualId; // 不支持现场申明 var
 
-    MatchCreateLeaf(tkAssign); // 不支持 in
+    MatchCreateLeafAndStep(tkAssign); // 不支持 in
     BuildExpression;
 
     if FLex.TokenID in [tkTo, tkDownto] then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildExpression;
-      MatchCreateLeaf(tkDo);
+      MatchCreateLeafAndStep(tkDo);
       BuildStatement;
     end;
   finally
@@ -2878,12 +2916,12 @@ begin
 
   try
     BuildExpression;
-    MatchCreateLeaf(tkThen);
+    MatchCreateLeafAndStep(tkThen);
     BuildStatement;
 
     if FLex.TokenID = tkElse then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID = tkIf then
         BuildIfStatement
       else
@@ -2903,7 +2941,7 @@ begin
 
     if FLex.TokenID = tkAt then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildExpression;
     end;
   finally
@@ -2917,7 +2955,7 @@ begin
 
   try
     BuildStatementList;
-    MatchCreateLeaf(tkUntil);
+    MatchCreateLeafAndStep(tkUntil);
     BuildExpression;
   finally
     PopLeaf;
@@ -2935,13 +2973,13 @@ begin
 
     if FLex.TokenID = tkFinally then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildStatementList;
-      MatchCreateLeaf(tkEnd);
+      MatchCreateLeafAndStep(tkEnd);
     end
     else if FLex.TokenID = tkExcept then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID <> tkEnd then
       begin
         if FLex.TokenID in [tkOn, tkElse] then
@@ -2953,13 +2991,13 @@ begin
             BuildStatementList;
 
           if FLex.TokenID = tkSemiColon then
-            MatchCreateLeaf(tkSemiColon);
+            MatchCreateLeafAndStep(tkSemiColon);
         end
         else
           BuildStatementList;
       end;
 
-      MatchCreateLeaf(tkEnd);
+      MatchCreateLeafAndStep(tkEnd);
     end;
   finally
     PopLeaf;
@@ -2972,7 +3010,7 @@ begin
 
   try
     BuildExpression;
-    MatchCreateLeaf(tkDo);
+    MatchCreateLeafAndStep(tkDo);
     BuildStatement;
   finally
     PopLeaf;
@@ -2985,7 +3023,7 @@ begin
 
   try
     BuildExpressionList;
-    MatchCreateLeaf(tkDo);
+    MatchCreateLeafAndStep(tkDo);
     BuildStatement;
   finally
     PopLeaf;
@@ -3000,32 +3038,34 @@ begin
     BuildIdent;
     if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildIdent;
     end;
 
-    MatchCreateLeaf(tkDo);
+    MatchCreateLeafAndStep(tkDo);
     BuildStatement;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
   finally
     PopLeaf;
   end;
 end;
 
-procedure TCnPasAstGenerator.BulidCaseSelector;
+procedure TCnPasAstGenerator.BuildCaseSelector;
 begin
   MatchCreateLeafAndPush(tkNone, cntCaseSelector);
 
   try
     repeat
       BuildCaseLabel;
-      if FLex.TokenID <> tkComma then
+      if FLex.TokenID = tkComma then
+        MatchCreateLeafAndStep(FLex.TokenID)
+      else
         Break;
     until False;
 
-    MatchCreateLeaf(tkColon);
+    MatchCreateLeafAndStep(tkColon);
     BuildStatement;
   finally
     PopLeaf;
@@ -3039,7 +3079,10 @@ begin
   try
     BuildConstExpression;
     if FLex.TokenID = tkDotdot then
+    begin
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildConstExpression;
+    end;
   finally
     PopLeaf;
   end;
@@ -3056,7 +3099,7 @@ begin
         Break;
     until False;
 
-    MatchCreateLeaf(tkSemiColon);
+    MatchCreateLeafAndStep(tkSemiColon);
   finally
     PopLeaf;
   end;
@@ -3065,7 +3108,7 @@ end;
 procedure TCnPasAstGenerator.BuildProcedureDeclSection;
 begin
   if FLex.TokenID = tkClass then
-    MatchCreateLeaf(FLex.TokenID);
+    MatchCreateLeafAndStep(FLex.TokenID);
 
   case FLex.TokenID of
     tkProcedure, tkConstructor, tkDestructor, tkFunction:
@@ -3087,7 +3130,7 @@ begin
       BuildProcedureHeading;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
 
     IsExternal := False;
     IsForward := False;
@@ -3101,7 +3144,7 @@ begin
 
       BuildDirective;
       if FLex.TokenID = tkSemiColon then
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
     end;
 
     if ((not IsExternal)  and (not IsForward)) and
@@ -3109,7 +3152,7 @@ begin
     begin
       BuildBlock;
       if FLex.TokenID = tkSemicolon then
-        MatchCreateLeaf(FLex.TokenID);
+        MatchCreateLeafAndStep(FLex.TokenID);
     end;
   finally
     PopLeaf;
@@ -3133,21 +3176,57 @@ begin
 
     if FLex.TokenID = tkEqual then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildConstExpression;
     end
     else if FLex.TokenID = tkColon then
     begin
-      MatchCreateLeaf(FLex.TokenID);
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildCommonType;
 
-      MatchCreateLeaf(tkEqual);
+      MatchCreateLeafAndStep(tkEqual);
       BuildTypedConstant;
     end;
 
     BuildDirectives(False);
   finally
     PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.SkipComments;
+begin
+  while FLex.TokenID in SpaceTokens + CommentTokens do
+  begin
+    if FLex.TokenID in CommentTokens then
+      MatchCreateLeaf(FLex.TokenID); // 里头没有 NextToken
+
+    FLex.Next;
+  end;
+end;
+
+{ TCnPasAstTree }
+
+function TCnPasAstTree.ReConstructPascalCode: string;
+begin
+  Result := (FRoot as TCnPasAstLeaf).GetPascalCode;
+end;
+
+{ TCnPasAstLeaf }
+
+function TCnPasAstLeaf.GetPascalCode: string;
+var
+  I: Integer;
+  S: string;
+begin
+  Result := Text;
+  for I := 0 to Count - 1 do
+  begin
+    S := (Items[I] as TCnPasAstLeaf).GetPascalCode;
+    if Result = '' then
+      Result := S
+    else if S <> '' then
+      Result := Result + ' ' + S;
   end;
 end;
 
