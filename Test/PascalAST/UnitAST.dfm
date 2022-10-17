@@ -473,6 +473,15 @@ object FormAST: TFormAST
         TabOrder = 10
         OnClick = btnLabelClick
       end
+      object btnAsm: TButton
+        Left = 112
+        Top = 184
+        Width = 75
+        Height = 25
+        Caption = 'Asm'
+        TabOrder = 11
+        OnClick = btnAsmClick
+      end
     end
     object btnInterface: TButton
       Left = 16
@@ -510,6 +519,15 @@ object FormAST: TFormAST
       TabOrder = 19
       OnClick = btnUnitClick
     end
+    object btnOpen: TButton
+      Left = 16
+      Top = 560
+      Width = 75
+      Height = 25
+      Caption = 'Open'
+      TabOrder = 20
+      OnClick = btnOpenClick
+    end
   end
   object mmoPasRes: TMemo
     Left = 880
@@ -519,5 +537,10 @@ object FormAST: TFormAST
     Anchors = [akTop, akRight, akBottom]
     ScrollBars = ssBoth
     TabOrder = 3
+  end
+  object dlgOpen1: TOpenDialog
+    Filter = 'Pascal File|*.pas'
+    Left = 616
+    Top = 304
   end
 end

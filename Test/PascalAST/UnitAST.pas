@@ -65,6 +65,9 @@ type
     btnProgram: TButton;
     mmoPasRes: TMemo;
     btnUnit: TButton;
+    btnAsm: TButton;
+    btnOpen: TButton;
+    dlgOpen1: TOpenDialog;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -112,6 +115,8 @@ type
     procedure btnRecordConst1Click(Sender: TObject);
     procedure btnProgramClick(Sender: TObject);
     procedure btnUnitClick(Sender: TObject);
+    procedure btnAsmClick(Sender: TObject);
+    procedure btnOpenClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -728,6 +733,41 @@ begin
   );
   FAST.Build;
   SynTree;
+end;
+
+procedure TFormAST.btnAsmClick(Sender: TObject);
+begin
+  ReInitAst(
+    'asm' + #13#10 +
+            'PUSH    EBX' + #13#10 +
+            'MOV     EBX,EDX' + #13#10 +
+            'MOV     EDX,EAX' + #13#10 +
+            'SHR     EDX,16' + #13#10 +
+            'DIV     BX' + #13#10 +
+            'MOV     EBX,Remainder' + #13#10 +
+            'MOV     [ECX],AX' + #13#10 +
+            'MOV     [EBX],DX' + #13#10 +
+            'POP     EBX' + #13#10 +
+            'end;'
+  );
+  FAST.BuildCompoundStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnOpenClick(Sender: TObject);
+var
+  Sl: TStrings;
+begin
+  if dlgOpen1.Execute then
+  begin
+    Sl := TStringList.Create;
+    Sl.LoadFromFile(dlgOpen1.FileName);
+    ReInitAst(Sl.Text);
+    Sl.Free;
+
+    FAST.Build;
+    SynTree;
+  end;
 end;
 
 end.

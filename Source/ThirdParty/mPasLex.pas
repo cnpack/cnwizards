@@ -111,7 +111,9 @@ type
   {***
     原有问题一：Pascal 字符串和 string 关键字混为一谈了，都是 tkString，
       解决方案：已将后者修改成 tkKeyString
-    原有问题二：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
+    原有问题二：字符串不支持内部的单引号，会错误拆分解析成连续字符串
+      解决方案：已修复 StringProc 中的问题
+    原有问题三：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：暂时没有
   ***}
 
@@ -1437,8 +1439,8 @@ end;
 procedure TmwPasLex.StringProc;
 begin
   fTokenID:=tkString;
-  if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)then inc(Run, 2);
   repeat
+    if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)then inc(Run, 2); // Moved by Liu Xiao
     case FOrigin[Run]of
       #0, #10, #13: break;
     end;

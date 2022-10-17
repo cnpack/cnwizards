@@ -2003,9 +2003,10 @@ end;
 procedure TCnPasWideLex.StringProc;
 begin
   FTokenID := tkString;
-  if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) then
-    StepRun(2);
   repeat
+    if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) then
+      StepRun(2);
+
     case FOrigin[FRun] of
       #0, #10, #13:
         Break;

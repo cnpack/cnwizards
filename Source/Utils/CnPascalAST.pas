@@ -26,6 +26,7 @@ unit CnPascalAST;
 * 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; http://www.cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
+*           不支持 asm（仅跳过），注释还原度较低
 * 开发平台：2022.10.16 V1.1
 *               基本完成解析
 *           2022.09.24 V1.0
@@ -58,6 +59,8 @@ type
     cntLineComment,
     cntBlockComment,
     cntCompDirective,
+
+    cntAsm,
 
     cntComma,
     cntSemiColon,
@@ -216,6 +219,7 @@ type
   private
     FNodeType: TCnPasNodeType;
     FTokenKind: TTokenKind;
+    FReturn: Boolean;
   public
     function GetPascalCode: string;
 
@@ -223,6 +227,8 @@ type
     {* 语法树节点类型}
     property TokenKind: TTokenKind read FTokenKind write FTokenKind;
     {* Pascal Token 类型，注意有的节点本身没有实际对应的 Token，用 tkNone 代替}
+    property Return: Boolean read FReturn write FReturn;
+    {* 该 Token 后是否应换行}
   end;
 
   TCnPasAstTree = class(TCnTree)
@@ -236,16 +242,18 @@ type
     FTree: TCnPasAstTree;
     FStack: TCnObjectStack;
     FCurrentRef: TCnPasAstLeaf;
+    FReturnRef: TCnPasAstLeaf;
     FLocked: Integer;
     procedure Lock;
     procedure Unlock;
     function MatchCreateLeaf(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
     procedure MatchLeafStep(AToken: TTokenKind);
+    procedure MarkReturnFlag(ALeaf: TCnPasAstLeaf);
   protected
     procedure PushLeaf(ALeaf: TCnPasAstLeaf);
     procedure PopLeaf;
 
-    procedure MatchCreateLeafAndPush(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid);
+    function MatchCreateLeafAndPush(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
     // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点，再把 FCurrentRef 推入堆栈，自身取代 FCurrentRef
     function MatchCreateLeafAndStep(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
     // 将当前 Token 创建一个节点，作为 FCurrentRef 的最后一个子节点，解析器步进至下一个有效节点
@@ -392,6 +400,9 @@ type
     procedure BuildSetElement;
     {* 组装一个集合元素}
 
+    procedure BulidAsmBlock;
+    {* 组装汇编语句}
+
     procedure BuildCompoundStatement;
     {* 组装一个复合语句，也就是 begin、end 括起来的语句}
     procedure BuildStatementList;
@@ -533,6 +544,8 @@ begin
     tkProgram: Result := cntProgram;
     tkLibrary: Result := cntLibrary;
     tkUnit: Result := cntUnit;
+
+    tkAsm: Result := cntAsm;
 
     // Section
     tkUses: Result := cntUsesClause;
@@ -1427,14 +1440,14 @@ end;
 
 procedure TCnPasAstGenerator.BuildTypeSection;
 begin
-  MatchCreateLeafAndPush(tkType);
+  MarkReturnFlag(MatchCreateLeafAndPush(tkType));
   // Pop 之前，内部添加的节点均为 type 节点之子
 
   try
     while FLex.TokenID = tkIdentifier do
     begin
       BuildTypeDecl;
-      MatchCreateLeafAndStep(tkSemiColon);
+      MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
     end;
   finally
     PopLeaf;
@@ -1444,7 +1457,7 @@ end;
 procedure TCnPasAstGenerator.BuildUsesClause;
 begin
   if FLex.TokenID in [tkUses, tkRequires, tkContains] then
-    MatchCreateLeafAndPush(FLex.TokenID);
+    MarkReturnFlag(MatchCreateLeafAndPush(FLex.TokenID));
 
   // Pop 之前，内部添加的节点均为 Uses 节点之子
 
@@ -1458,7 +1471,7 @@ begin
         Break;
     end;
 
-    MatchCreateLeafAndStep(tkSemiColon);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
   finally
     PopLeaf;
   end;
@@ -1557,16 +1570,14 @@ begin
     NextToken;
 end;
 
-procedure TCnPasAstGenerator.MatchCreateLeafAndPush(AToken: TTokenKind;
-  NodeType: TCnPasNodeType);
-var
-  T: TCnPasAstLeaf;
+function TCnPasAstGenerator.MatchCreateLeafAndPush(AToken: TTokenKind;
+  NodeType: TCnPasNodeType): TCnPasAstLeaf;
 begin
-  T := MatchCreateLeafAndStep(AToken, NodeType);
-  if T <> nil then
+  Result := MatchCreateLeafAndStep(AToken, NodeType);
+  if Result <> nil then
   begin
     PushLeaf(FCurrentRef);
-    FCurrentRef := T;  // Pop 之前，内部添加的节点均为该节点之子
+    FCurrentRef := Result;  // Pop 之前，内部添加的节点均为该节点之子
   end;
 end;
 
@@ -1835,20 +1846,20 @@ begin
   end;
 
   if FLex.TokenID = tkSemiColon then
-    MatchCreateLeafAndStep(tkSemiColon); // 声明后的分号
+    MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon)); // 声明后的分号
 
   BuildDirectives; // 这里要求把分号也吃掉
 end;
 
 procedure TCnPasAstGenerator.BuildClassTypeSection;
 begin
-  MatchCreateLeafAndPush(tkType);
+  MarkReturnFlag(MatchCreateLeafAndPush(tkType));
 
   try
     while FLex.TokenID = tkIdentifier do
     begin
       BuildTypeDecl; // 类似于 BuildTypeSection，复用之
-      MatchCreateLeafAndStep(tkSemiColon);
+      MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
     end;
   finally
     PopLeaf;
@@ -1908,13 +1919,13 @@ end;
 procedure TCnPasAstGenerator.BuildVarSection;
 begin
   if FLex.TokenID in [tkVar, tkThreadvar] then
-    MatchCreateLeafAndPush(FLex.TokenID);
+    MarkReturnFlag(MatchCreateLeafAndPush(FLex.TokenID));
 
   try
     while FLex.TokenID in [tkIdentifier] do
     begin
       BuildVarDecl;
-      MatchCreateLeafAndStep(tkSemiColon);
+      MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
     end;
   finally
     PopLeaf;
@@ -1943,13 +1954,14 @@ begin
     if FLex.TokenID in [tkSquareOpen, tkColon] then
       BuildPropertyInterface;
     BuildPropertySpecifiers;
-    MatchCreateLeafAndStep(tkSemiColon);
+    FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
 
     if FLex.TokenID = tkDefault then
     begin
       MatchCreateLeafAndStep(FLex.TokenID);
-      MatchCreateLeafAndStep(tkSemiColon);
+      FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
     end;
+    FReturnRef.Return := True;
   finally
     PopLeaf;
   end;
@@ -2190,7 +2202,7 @@ begin
     finally
       PopLeaf;
     end;
-    MatchCreateLeafAndStep(tkRoundClose);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkRoundClose));
   finally
     PopLeaf;
   end;
@@ -2342,7 +2354,7 @@ begin
     finally
       PopLeaf;
     end;
-    MatchCreateLeafAndStep(tkRoundClose);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkRoundClose));
   finally
     PopLeaf;
   end;
@@ -2421,11 +2433,9 @@ begin
     end;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeafAndStep(FLex.TokenID);
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
-    if FLex.TokenID = tkIdentifier then
-      Continue
-    else
+    if FLex.TokenID <> tkIdentifier then
       Break;
   until False;
 end;
@@ -2433,15 +2443,15 @@ end;
 procedure TCnPasAstGenerator.BuildConstSection;
 begin
   if FLex.TokenID = tkConst then
-    MatchCreateLeafAndPush(tkConst)
+    MarkReturnFlag(MatchCreateLeafAndPush(tkConst))
   else if FLex.TokenID = tkResourcestring then
-    MatchCreateLeafAndPush(tkResourcestring);
+    MarkReturnFlag(MatchCreateLeafAndPush(tkResourcestring));
 
   try
     while FLex.TokenID = tkIdentifier do
     begin
       BuildConstDecl;
-      MatchCreateLeafAndStep(tkSemiColon);
+      MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
     end;
   finally
     PopLeaf;
@@ -2474,13 +2484,17 @@ end;
 
 procedure TCnPasAstGenerator.BuildDirectives(NeedSemicolon: Boolean);
 begin
+  FReturnRef := nil;
   while FLex.TokenID in DirectiveTokens do
   begin
     BuildDirective;
 
     if NeedSemicolon and (FLex.TokenID = tkSemiColon) then
-      MatchCreateLeafAndStep(FLex.TokenID);
+      FReturnRef := MatchCreateLeafAndStep(FLex.TokenID);
   end;
+
+  if FReturnRef <> nil then
+    FReturnRef.Return := True;
 end;
 
 procedure TCnPasAstGenerator.BuildConstExpressionInType;
@@ -2518,7 +2532,7 @@ begin
       MatchCreateLeafAndStep(tkRoundClose);
     end;
 
-    MatchCreateLeafAndStep(tkSemiColon);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
     BuildProgramBlock;
 
     MatchCreateLeafAndStep(tkPoint);
@@ -2534,7 +2548,7 @@ begin
   try
     BuildIdent; // 不支持单元名后 platform 这种
 
-    MatchCreateLeafAndStep(tkSemiColon);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
 
     BuildInterfaceSection;
 
@@ -2544,7 +2558,7 @@ begin
       BuildInitSection;
 
     MatchCreateLeafAndStep(tkEnd);
-    MatchCreateLeafAndStep(tkPoint);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkPoint));
   finally
     PopLeaf;
   end;
@@ -2578,7 +2592,7 @@ end;
 
 procedure TCnPasAstGenerator.BuildInterfaceSection;
 begin
-  MatchCreateLeafAndPush(tkInterface, cntInterfaceSection);
+  MarkReturnFlag(MatchCreateLeafAndPush(tkInterface, cntInterfaceSection));
 
   try
     while FLex.TokenID = tkUses do
@@ -2660,9 +2674,18 @@ begin
   MatchCreateLeafAndPush(tkNone, cntCompoundStatement);
 
   try
-    MatchCreateLeafAndStep(tkBegin); // ASM 不支持
-    BuildStatementList;
-    MatchCreateLeafAndStep(tkEnd);
+    if FLex.TokenID = tkBegin then
+    begin
+      MatchCreateLeafAndStep(FLex.TokenID); // ASM 不支持
+      BuildStatementList;
+      MatchCreateLeafAndStep(tkEnd);
+    end
+    else if FLex.TokenID = tkAsm then
+    begin
+      MatchCreateLeafAndStep(FLex.TokenID);
+      BulidAsmBlock;
+      MatchCreateLeafAndStep(tkEnd);
+    end;
   finally
     PopLeaf;
   end;
@@ -2677,7 +2700,7 @@ begin
     BuildStatement;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeafAndStep(FLex.TokenID);
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
     if not (FLex.TokenID in StatementTokens) then
       Break;
@@ -2843,7 +2866,7 @@ end;
 procedure TCnPasAstGenerator.BuildStructStatement;
 begin
   case FLex.TokenID of
-    tkBegin:  BuildCompoundStatement;
+    tkBegin, tkAsm:  BuildCompoundStatement;
     tkIf:     BuildIfStatement;
     tkCase:   BuildCaseStatement;
     tkRepeat: BuildRepeatStatement;
@@ -3130,7 +3153,7 @@ begin
       BuildProcedureHeading;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeafAndStep(FLex.TokenID);
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
     IsExternal := False;
     IsForward := False;
@@ -3152,7 +3175,7 @@ begin
     begin
       BuildBlock;
       if FLex.TokenID = tkSemicolon then
-        MatchCreateLeafAndStep(FLex.TokenID);
+        MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
     end;
   finally
     PopLeaf;
@@ -3205,6 +3228,19 @@ begin
   end;
 end;
 
+procedure TCnPasAstGenerator.BulidAsmBlock;
+begin
+  // 跳过 ASM
+  while FLex.TokenID <> tkEnd do
+    FLex.Next;
+end;
+
+procedure TCnPasAstGenerator.MarkReturnFlag(ALeaf: TCnPasAstLeaf);
+begin
+  if ALeaf <> nil then
+    ALeaf.Return := True;
+end;
+
 { TCnPasAstTree }
 
 function TCnPasAstTree.ReConstructPascalCode: string;
@@ -3218,15 +3254,29 @@ function TCnPasAstLeaf.GetPascalCode: string;
 var
   I: Integer;
   S: string;
+  Son: TTokenKind;
 begin
-  Result := Text;
+  if FReturn or (FTokenKind in [tkSlashesComment, tkBegin, tkThen, tkDo, tkRepeat,
+    tkExcept, tkExports, tkFinally, tkInitialization, tkFinalization, tkAsm,
+    tkImplementation, tkRecord, tkPrivate, tkProtected, tkPublic, tkPublished]) then
+    Result := Text + #13#10
+  else
+    Result := Text;
+
   for I := 0 to Count - 1 do
   begin
+    Son := (Items[I] as TCnPasAstLeaf).TokenKind;
     S := (Items[I] as TCnPasAstLeaf).GetPascalCode;
     if Result = '' then
       Result := S
     else if S <> '' then
-      Result := Result + ' ' + S;
+    begin
+      if Son in [tkPoint, tkDotdot, tkAddressOp, tkSemiColon, tkColon] then
+        Result := Result + S
+      else
+        Result := Result + ' ' + S;
+    end;
+      
   end;
 end;
 
