@@ -193,7 +193,7 @@ end;
 
 procedure TFormAST.btnSetConstructorClick(Sender: TObject);
 begin
-  ReInitAst('[(2 + 3) / 2, $FF, -8*n, #3, ''a'', 1..100]');
+  ReInitAst('[(2 + 3) / 2, $FF, -8*n, #3, ''aaa'', 1..100]');
   FAST.BuildSetConstructor;
   SynTree;
 end;

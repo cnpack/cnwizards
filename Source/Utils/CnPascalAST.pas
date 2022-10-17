@@ -86,6 +86,7 @@ type
     cntString,
     cntIdent,
     cntGuid,
+    cntInherited,
 
     cntConst,
     cntIndex,
@@ -475,7 +476,7 @@ resourcestring
   SCnNotImplemented = 'NOT Implemented';
   SCnErrorStack = 'Stack Empty';
   SCnErrorNoMatchNodeType = 'No Matched Node Type';
-  SCnErrorTokenNotMatchFmt = 'Token NOT Matched. Should %s, but meet %s: %s';
+  SCnErrorTokenNotMatchFmt = 'Token NOT Matched. Should %s, but meet %s: %s  Line %d Column %d';
 
 const
   SpaceTokens = [tkCRLF, tkCRLFCo, tkSpace];
@@ -593,6 +594,7 @@ begin
     tkInteger, tkNumber: Result := cntInt; // 十六进制整数和普通整数
     tkFloat: Result := cntFloat;
     tkAsciiChar, tkString: Result := cntString;
+    tkInherited: Result := cntInherited;
 
     // 元素：符号与运算符等
     tkComma: Result := cntComma;
@@ -939,7 +941,12 @@ begin
             MatchCreateLeafAndStep(tkRoundClose)
           end;
         end;
-      tkAsciiChar, tkString, tkNumber, tkInteger, tkFloat: // AsciiChar 是 #12 这种
+      tkAsciiChar, tkString: // AsciiChar 是 #12 这种，可以和 string 组合
+        begin
+          while FLex.TokenID in [tkAsciiChar, tkString] do
+            MatchCreateLeafAndStep(FLex.TokenID);
+        end;
+      tkNumber, tkInteger, tkFloat:
         MatchCreateLeafAndStep(FLex.TokenID);
       tkNot:
         begin
@@ -1544,7 +1551,7 @@ begin
     raise ECnPascalAstException.CreateFmt(SCnErrorTokenNotMatchFmt,
       [GetEnumName(TypeInfo(TTokenKind), Ord(AToken)),
        GetEnumName(TypeInfo(TTokenKind), Ord(FLex.TokenID)),
-       FLex.Token]);
+       FLex.Token, FLex.LineNumber, FLex.TokenPos - FLex.LinePos]);
 
   if NodeType = cntInvalid then
     NodeType := NodeTypeFromToken(AToken);
@@ -2891,7 +2898,8 @@ begin
 
       if FLex.TokenID = tkSemiColon then
         MatchCreateLeafAndStep(FLex.TokenID);
-      if FLex.TokenID in [tkElse, tkSemiColon] then
+
+      if FLex.TokenID in [tkElse, tkEnd] then
         Break;
     until False;
 
@@ -3271,7 +3279,8 @@ begin
       Result := S
     else if S <> '' then
     begin
-      if Son in [tkPoint, tkDotdot, tkAddressOp, tkSemiColon, tkColon] then
+      if Son in [tkPoint, tkDotdot, tkAddressOp, tkSemiColon, tkColon, tkRoundOpen,
+        tkRoundClose, tkSquareOpen, tkSquareClose] then
         Result := Result + S
       else
         Result := Result + ' ' + S;
