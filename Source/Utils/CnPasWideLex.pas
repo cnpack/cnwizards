@@ -1076,7 +1076,7 @@ end;
 function TCnPasWideLex.Func87: TTokenKind;
 begin
   if KeyComp('String') then
-    Result := tkKeywordString
+    Result := tkKeyString
   else
     Result := tkIdentifier;
 end;

@@ -93,8 +93,8 @@ type
     tkDestructor, tkDispid, tkDispinterface, tkDiv, tkDo, tkDoubleAddressOp,
     tkDotDot, tkDownto, tkDynamic, tkElse, tkEnd, tkEqual, tkError, tkExcept,
     tkExport, tkExports, tkExternal, tkFar, tkFile, tkFinalization, tkFinally,
-    tkFloat, tkFor, tkForward, tkFunction, tkGoto, tkGreater, tkGreaterEqual, tkKeywordString,
-    tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,        // tkKeywordString Added by Liu Xiao
+    tkFloat, tkFor, tkForward, tkFunction, tkGoto, tkGreater, tkGreaterEqual,
+    tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
     tkMod, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
@@ -110,7 +110,7 @@ type
 
   {***
     原有问题一：Pascal 字符串和 string 关键字混为一谈了，都是 tkString，
-      解决方案：已将后者修改成 tkKeywordString
+      解决方案：已将后者修改成 tkKeyString
     原有问题二：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：暂时没有
   ***}
@@ -741,7 +741,7 @@ end;
 
 function TmwPasLex.Func87: TTokenKind;
 begin
-  if KeyComp('String')then Result:=tkKeywordString else Result:=tkIdentifier;
+  if KeyComp('String')then Result:=tkKeyString else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func88: TTokenKind;

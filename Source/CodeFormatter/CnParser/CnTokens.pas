@@ -566,7 +566,6 @@ const
      { DONE: !! new directive after D5!! }
        // automated platform experimental near deprecated
   );
-                                            
 
 function TokenToIdent(Token: TPascalToken; var Ident: string): Boolean;
 begin
