@@ -1,6 +1,6 @@
 object FormAST: TFormAST
-  Left = 98
-  Top = 106
+  Left = 208
+  Top = 103
   Width = 1278
   Height = 672
   Caption = 'Pascal AST'
@@ -153,6 +153,15 @@ object FormAST: TFormAST
         Caption = 'inherited'
         TabOrder = 3
       end
+      object btnStringConvert: TButton
+        Left = 16
+        Top = 152
+        Width = 75
+        Height = 25
+        Caption = 'String Convert'
+        TabOrder = 4
+        OnClick = btnStringConvertClick
+      end
     end
     object btnExpressionList: TButton
       Left = 16
@@ -166,7 +175,7 @@ object FormAST: TFormAST
     object grpType: TGroupBox
       Left = 232
       Top = 24
-      Width = 185
+      Width = 217
       Height = 193
       Caption = 'Type'
       TabOrder = 10
@@ -181,7 +190,7 @@ object FormAST: TFormAST
       end
       object btnSetType: TButton
         Left = 16
-        Top = 56
+        Top = 48
         Width = 75
         Height = 25
         Caption = 'Set'
@@ -190,7 +199,7 @@ object FormAST: TFormAST
       end
       object btnFileType: TButton
         Left = 16
-        Top = 88
+        Top = 72
         Width = 75
         Height = 25
         Caption = 'File'
@@ -199,7 +208,7 @@ object FormAST: TFormAST
       end
       object btnPointerType: TButton
         Left = 16
-        Top = 120
+        Top = 96
         Width = 75
         Height = 25
         Caption = 'Pointer'
@@ -208,7 +217,7 @@ object FormAST: TFormAST
       end
       object btnStringType: TButton
         Left = 16
-        Top = 152
+        Top = 120
         Width = 75
         Height = 25
         Caption = 'String'
@@ -217,7 +226,7 @@ object FormAST: TFormAST
       end
       object btnSubrangeType: TButton
         Left = 96
-        Top = 56
+        Top = 48
         Width = 75
         Height = 25
         Caption = 'Subrange'
@@ -235,7 +244,7 @@ object FormAST: TFormAST
       end
       object btnInterfaceType: TButton
         Left = 96
-        Top = 88
+        Top = 72
         Width = 75
         Height = 25
         Caption = 'Interface'
@@ -244,7 +253,7 @@ object FormAST: TFormAST
       end
       object btnClassType: TButton
         Left = 96
-        Top = 120
+        Top = 96
         Width = 75
         Height = 25
         Caption = 'Class'
@@ -253,12 +262,21 @@ object FormAST: TFormAST
       end
       object btnTypeSection: TButton
         Left = 96
-        Top = 152
+        Top = 120
         Width = 75
         Height = 25
         Caption = 'Type Section'
         TabOrder = 9
         OnClick = btnTypeSectionClick
+      end
+      object btnProcedureType: TButton
+        Left = 16
+        Top = 144
+        Width = 75
+        Height = 25
+        Caption = 'Procedure'
+        TabOrder = 10
+        OnClick = btnProcedureTypeClick
       end
     end
     object grpClass: TGroupBox

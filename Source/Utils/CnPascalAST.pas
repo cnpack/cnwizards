@@ -126,6 +126,8 @@ type
     cntUntil,
     cntCaseSelector,
     cntCaseLabel,
+    cntOut,
+    cntObject,
 
     cntUsesClause,
     cntUsesDecl,
@@ -527,6 +529,8 @@ const
 
   StatementTokens = [tkLabel] + SimpleStatementTokens + StructStatementTokens;
 
+  CanBeIdentifierTokens = DirectiveTokens + []; // 部分关键字可以做变量名，待补充
+
 function PascalAstNodeTypeToString(AType: TCnPasNodeType): string;
 begin
   Result := GetEnumName(TypeInfo(TCnPasNodeType), Ord(AType));
@@ -583,6 +587,9 @@ begin
     tkOn: Result := cntOn;
     tkThen: Result := cntThen;
     tkUntil: Result := cntUntil;
+
+    tkOut: Result := cntOut;
+    tkObject: Result := cntObject;
 
     // 元素：注释、编译指令
     tkBorComment, tkAnsiComment: Result := cntBlockComment;
@@ -931,7 +938,7 @@ begin
             PopLeaf;
           end;
         end;
-      tkIdentifier, tkNil: // TODO: 还有部分关键字可以做变量名
+      tkIdentifier, tkNil, tkKeyString: // TODO: 还有部分关键字可以做变量名
         begin
           BuildDesignator;
           if FLex.TokenID = tkRoundOpen then
@@ -1008,9 +1015,15 @@ procedure TCnPasAstGenerator.BuildIdent;
 var
   T: TCnPasAstLeaf;
 begin
+  if FLex.TokenID = tkNil then
+  begin
+    MatchCreateLeafAndStep(FLex.TokenID);
+    Exit;
+  end;
+
   T := MatchCreateLeafAndStep(tkIdentifier);
 
-  while FLex.TokenID in [tkPoint, tkIdentifier] do
+  while FLex.TokenID in [tkPoint, tkIdentifier] + CanBeIdentifierTokens do
   begin
     if T <> nil then
       T.Text := T.Text + FLex.Token;
@@ -1087,7 +1100,7 @@ begin
       MatchCreateLeafAndStep(tkObject);
     end;
 
-    // TODO: Directives
+    BuildDirectives;
   finally
     PopLeaf;
   end;
@@ -1100,9 +1113,9 @@ begin
 
   try
     case FLex.TokenID of
-      tkNil:
-        MatchCreateLeafAndStep(FLex.TokenID);
-      tkIdentifier:
+      tkKeyString:
+        MatchCreateLeafAndStep(FLex.TokenID); // TODO: 还有一些关键字可以做强制类型转换或函数调用名
+      tkNil, tkIdentifier:
         BuildIdent;
       tkRoundOpen:
         begin
@@ -1580,12 +1593,13 @@ end;
 function TCnPasAstGenerator.MatchCreateLeafAndPush(AToken: TTokenKind;
   NodeType: TCnPasNodeType): TCnPasAstLeaf;
 begin
-  Result := MatchCreateLeafAndStep(AToken, NodeType);
+  Result := MatchCreateLeaf(AToken, NodeType);
   if Result <> nil then
   begin
     PushLeaf(FCurrentRef);
     FCurrentRef := Result;  // Pop 之前，内部添加的节点均为该节点之子
   end;
+  MatchLeafStep(AToken);    // 设 FCurrent 后再步进，避免 Step 里的注释挂错节点
 end;
 
 procedure TCnPasAstGenerator.NextToken;
@@ -1794,7 +1808,9 @@ begin
   MatchCreateLeafAndPush(tkFunction);
 
   try
-    BuildIdent;
+    if FLex.TokenID = tkIdentifier then
+      BuildIdent;
+
     if FLex.TokenID = tkRoundOpen then
       BuildFormalParameters;
 
@@ -1811,7 +1827,9 @@ begin
     MatchCreateLeafAndPush(FLex.TokenID);
 
   try
-    BuildIdent;
+    if FLex.TokenID = tkIdentifier then
+      BuildIdent;
+
     if FLex.TokenID = tkRoundOpen then
       BuildFormalParameters;
 
@@ -2926,12 +2944,21 @@ begin
   try
     BuildQualId; // 不支持现场申明 var
 
-    MatchCreateLeafAndStep(tkAssign); // 不支持 in
-    BuildExpression;
-
-    if FLex.TokenID in [tkTo, tkDownto] then
+    if FLex.TokenID = tkAssign then
     begin
-      MatchCreateLeafAndStep(FLex.TokenID);
+      MatchCreateLeafAndStep(tkAssign);
+      BuildExpression;
+
+      if FLex.TokenID in [tkTo, tkDownto] then
+      begin
+        MatchCreateLeafAndStep(FLex.TokenID);
+        BuildExpression;
+        MatchCreateLeafAndStep(tkDo);
+        BuildStatement;
+      end;
+    end
+    else if FLex.TokenID = tkIn then
+    begin
       BuildExpression;
       MatchCreateLeafAndStep(tkDo);
       BuildStatement;

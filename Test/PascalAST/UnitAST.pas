@@ -68,6 +68,8 @@ type
     btnAsm: TButton;
     btnOpen: TButton;
     dlgOpen1: TOpenDialog;
+    btnProcedureType: TButton;
+    btnStringConvert: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -117,6 +119,8 @@ type
     procedure btnUnitClick(Sender: TObject);
     procedure btnAsmClick(Sender: TObject);
     procedure btnOpenClick(Sender: TObject);
+    procedure btnProcedureTypeClick(Sender: TObject);
+    procedure btnStringConvertClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -444,7 +448,10 @@ begin
   ReInitAst(
     'initialization' + #13#10 +
     '' + #13#10 +
-    'finalization'
+    'finalization' + #13#10 +
+    '{$IFDEF DEBUG}' + #13#10 +
+      'CnDebugger.LogEnter(''CnWizUtils finalization.'');' + #13#10 +
+    '{$ENDIF}'
   );
   FAST.BuildInitSection;
   SynTree;
@@ -768,6 +775,20 @@ begin
     FAST.Build;
     SynTree;
   end;
+end;
+
+procedure TFormAST.btnProcedureTypeClick(Sender: TObject);
+begin
+  ReInitAst('TCnLoadIconProc = procedure(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);');
+  FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnStringConvertClick(Sender: TObject);
+begin
+  ReInitAst('Result := string(PasParser.CurrentChildMethod)');
+  FAST.BuildStatement;
+  SynTree;
 end;
 
 end.
