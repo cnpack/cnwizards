@@ -70,6 +70,8 @@ type
     dlgOpen1: TOpenDialog;
     btnProcedureType: TButton;
     btnStringConvert: TButton;
+    btnForward: TButton;
+    btnMessage: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -121,6 +123,8 @@ type
     procedure btnOpenClick(Sender: TObject);
     procedure btnProcedureTypeClick(Sender: TObject);
     procedure btnStringConvertClick(Sender: TObject);
+    procedure btnForwardClick(Sender: TObject);
+    procedure btnMessageClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -382,6 +386,7 @@ procedure TFormAST.btnTypeSectionClick(Sender: TObject);
 begin
   ReInitAst(
     'type' + #13#10 +
+      'TTest = class;' + #13#10 +
       'TCnSM2PrivateKey = TCnEccPrivateKey;' + #13#10 +
       '' + #13#10 +
       'TCnSM2 = class(TCnEcc)' + #13#10 +
@@ -788,6 +793,20 @@ procedure TFormAST.btnStringConvertClick(Sender: TObject);
 begin
   ReInitAst('Result := string(PasParser.CurrentChildMethod)');
   FAST.BuildStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnForwardClick(Sender: TObject);
+begin
+  ReInitAst('TTest = class;');
+  FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnMessageClick(Sender: TObject);
+begin
+  ReInitAst('Msg.Msg := PCWPStruct(lParam)^.message;');
+  FAST.BuildSimpleStatement;
   SynTree;
 end;
 

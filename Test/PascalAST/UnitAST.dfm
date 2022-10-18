@@ -1,5 +1,5 @@
 object FormAST: TFormAST
-  Left = 208
+  Left = 62
   Top = 103
   Width = 1278
   Height = 672
@@ -11,6 +11,7 @@ object FormAST: TFormAST
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
@@ -130,7 +131,7 @@ object FormAST: TFormAST
       end
       object btnFunctionCall: TButton
         Left = 16
-        Top = 56
+        Top = 48
         Width = 75
         Height = 25
         Caption = 'Function Call'
@@ -139,7 +140,7 @@ object FormAST: TFormAST
       end
       object btnGoto: TButton
         Left = 16
-        Top = 88
+        Top = 72
         Width = 75
         Height = 25
         Caption = 'Goto'
@@ -147,7 +148,7 @@ object FormAST: TFormAST
       end
       object btnInherited: TButton
         Left = 16
-        Top = 120
+        Top = 96
         Width = 75
         Height = 25
         Caption = 'inherited'
@@ -155,12 +156,21 @@ object FormAST: TFormAST
       end
       object btnStringConvert: TButton
         Left = 16
-        Top = 152
+        Top = 120
         Width = 75
         Height = 25
         Caption = 'String Convert'
         TabOrder = 4
         OnClick = btnStringConvertClick
+      end
+      object btnMessage: TButton
+        Left = 16
+        Top = 144
+        Width = 75
+        Height = 25
+        Caption = 'Use Message'
+        TabOrder = 5
+        OnClick = btnMessageClick
       end
     end
     object btnExpressionList: TButton
@@ -179,6 +189,15 @@ object FormAST: TFormAST
       Height = 193
       Caption = 'Type'
       TabOrder = 10
+      object btnRecordType: TButton
+        Left = 96
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Record'
+        TabOrder = 6
+        OnClick = btnRecordTypeClick
+      end
       object btnArrayType: TButton
         Left = 16
         Top = 24
@@ -233,15 +252,6 @@ object FormAST: TFormAST
         TabOrder = 5
         OnClick = btnSubrangeTypeClick
       end
-      object btnRecordType: TButton
-        Left = 96
-        Top = 24
-        Width = 75
-        Height = 25
-        Caption = 'Record'
-        TabOrder = 6
-        OnClick = btnRecordTypeClick
-      end
       object btnInterfaceType: TButton
         Left = 96
         Top = 72
@@ -277,6 +287,15 @@ object FormAST: TFormAST
         Caption = 'Procedure'
         TabOrder = 10
         OnClick = btnProcedureTypeClick
+      end
+      object btnForward: TButton
+        Left = 96
+        Top = 144
+        Width = 75
+        Height = 25
+        Caption = 'Forward'
+        TabOrder = 11
+        OnClick = btnForwardClick
       end
     end
     object grpClass: TGroupBox

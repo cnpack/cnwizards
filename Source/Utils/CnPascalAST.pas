@@ -529,7 +529,7 @@ const
 
   StatementTokens = [tkLabel] + SimpleStatementTokens + StructStatementTokens;
 
-  CanBeIdentifierTokens = DirectiveTokens + []; // 部分关键字可以做变量名，待补充
+  CanBeIdentifierTokens = DirectiveTokens + [tkIdentifier]; // 部分关键字可以做变量名，待补充
 
 function PascalAstNodeTypeToString(AType: TCnPasNodeType): string;
 begin
@@ -710,11 +710,8 @@ begin
   MatchCreateLeafAndPush(FLex.TokenID);
 
   try
-    if FLex.TokenID = tkSemiColon then
-    begin
-      MatchCreateLeafAndStep(FLex.TokenID);
+    if FLex.TokenID = tkSemiColon then // 前向声明结束
       Exit;
-    end;
 
     if FLex.TokenID = tkOf then
     begin
@@ -1015,19 +1012,35 @@ procedure TCnPasAstGenerator.BuildIdent;
 var
   T: TCnPasAstLeaf;
 begin
-  if FLex.TokenID = tkNil then
+  if FLex.TokenID = tkNil then // nil 单独处理
   begin
     MatchCreateLeafAndStep(FLex.TokenID);
     Exit;
   end;
 
-  T := MatchCreateLeafAndStep(tkIdentifier);
-
-  while FLex.TokenID in [tkPoint, tkIdentifier] + CanBeIdentifierTokens do
+  if FLex.TokenID in CanBeIdentifierTokens then // 其他可以做变量名的关键字
   begin
-    if T <> nil then
+    T := MatchCreateLeafAndStep(FLex.TokenID);   // 头一个变量名
+    if FLex.TokenID <> tkPoint then              // 后面没点就退出
+      Exit;
+
+    if T <> nil then                             // 有点就加点并步进
       T.Text := T.Text + FLex.Token;
     NextToken;
+
+    while FLex.TokenID in CanBeIdentifierTokens do
+    begin
+      if T <> nil then                           // 又有变量名
+        T.Text := T.Text + FLex.Token;
+      NextToken;
+
+      if FLex.TokenID <> tkPoint then            // 后面没点就退出
+        Exit;
+
+      if T <> nil then                           // 有点就加点并步进
+        T.Text := T.Text + FLex.Token;
+      NextToken;
+    end;
   end;
 end;
 
