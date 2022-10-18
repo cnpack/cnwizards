@@ -113,7 +113,9 @@ type
       解决方案：已将后者修改成 tkKeyString
     原有问题二：字符串不支持内部的单引号，会错误拆分解析成连续字符串
       解决方案：已修复 StringProc 中的问题
-    原有问题三：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
+    原有问题三：#$0A 这种本应是 tkAsciiChar 的会被解析成一个井号的 tkAsciiChar 加上 $0A 的 tkInteger
+      解决方案：已修复 AsciiCharProc 中的问题
+    原有问题四：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：暂时没有
   ***}
 
@@ -1029,7 +1031,13 @@ procedure TmwPasLex.AsciiCharProc;
 begin
   fTokenID:=tkAsciiChar;
   inc(Run);
-  while FOrigin[Run]in ['0'..'9']do inc(Run);
+  if FOrigin[Run] = '$' then
+  begin
+    inc(Run);
+    while FOrigin[Run]in ['0'..'9', 'A'..'F', 'a'..'f']do inc(Run);
+  end
+  else
+    while FOrigin[Run]in ['0'..'9']do inc(Run);
 end;
 
 procedure TmwPasLex.BraceCloseProc;

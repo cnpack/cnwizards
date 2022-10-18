@@ -40,10 +40,10 @@ interface
 uses
   Windows, SysUtils, Classes,
 {$IFDEF CN_USE_MSXML}
-  ActiveX, ComObj, msxml;
+  ActiveX, ComObj, msxml
 {$ELSE}
-  OmniXML, OmniXMLUtils;
-{$ENDIF}
+  OmniXML, OmniXMLUtils
+{$ENDIF};
 
 {$IFDEF CN_USE_MSXML}
 type

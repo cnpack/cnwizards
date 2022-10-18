@@ -1481,8 +1481,16 @@ procedure TCnPasWideLex.AsciiCharProc;
 begin
   FTokenID := tkAsciiChar;
   StepRun;
-  while _WideCharInSet(FOrigin[FRun], ['0'..'9']) do
+
+  if FOrigin[FRun] = '$' then
+  begin
     StepRun;
+    while _WideCharInSet(FOrigin[FRun], ['0'..'9', 'A'..'F', 'a'..'f']) do
+      StepRun;
+  end
+  else
+    while _WideCharInSet(FOrigin[FRun], ['0'..'9']) do
+      StepRun;
 end;
 
 procedure TCnPasWideLex.BraceCloseProc;
