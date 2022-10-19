@@ -115,6 +115,7 @@ type
     cntWith,
     cntTry,
     cntRaise,
+    cntGoto,
 
     cntElse,
     cntTo,
@@ -508,7 +509,8 @@ const
     tkCdecl, tkInline, tkName, tkIndex, tkLibrary, tkDefault, tkNoDefault,
     tkRead, tkReadonly, tkWrite, tkWriteonly, tkStored, tkImplements, tkOverload,
     tkPascal, tkRegister, tkExternal, tkAssembler, tkDynamic, tkAutomated,
-    tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall];
+    tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall,
+    tkPlatform, tkDeprecated];
     // 还有 platform, deprecated, unsafe, varargs 等一堆
 
   DirectiveTokensWithExpressions = [tkDispID, tkExternal, tkMessage, tkName,
@@ -550,8 +552,6 @@ begin
     tkLibrary: Result := cntLibrary;
     tkUnit: Result := cntUnit;
 
-    tkAsm: Result := cntAsm;
-
     // Section
     tkUses: Result := cntUsesClause;
     tkType: Result := cntTypeSection;
@@ -562,6 +562,7 @@ begin
     tkFinalization: Result := cntFinalizationSection;
 
     // 语句块
+    tkAsm: Result := cntAsm;
     tkBegin: Result := cntBegin;
     tkEnd: Result := cntEnd;
     tkProcedure, tkConstructor, tkDestructor: Result := cntProcedure;
@@ -576,6 +577,7 @@ begin
     tkWith: Result := cntWith;
     tkTry: Result := cntTry;
     tkRaise: Result := cntRaise;
+    tkGoto: Result := cntGoto;
 
     // 结构化语句内部
     tkLabel: Result := cntLabel;
@@ -650,7 +652,8 @@ begin
     tkPrivate, tkProtected, tkPublic, tkPublished: Result := cntVisibility;
     tkVirtual, tkOverride, tkAbstract, tkReintroduce, tkStdcall, tkCdecl, tkInline, tkName,
     tkOverload, tkPascal, tkRegister, tkExternal, tkAssembler, tkDynamic, tkAutomated,
-    tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall:
+    tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall,
+    tkPlatform, tkDeprecated:
       Result := cntDirective;
   else
     raise ECnPascalAstException.Create(SCnErrorNoMatchNodeType + ' '
@@ -1742,7 +1745,7 @@ begin
   MatchCreateLeafAndPush(tkNone, cntTypeID);
 
   try
-    if FLex.TokenID = tkKeyString then // BuildIdent 内部不认关键字 string
+    if FLex.TokenID in [tkKeyString, tkFile, tkConst, tkProcedure, tkFunction] then // BuildIdent 内部不认关键字 string、File
       MatchCreateLeafAndStep(FLex.TokenID)
     else
       BuildIdent;
@@ -2344,8 +2347,11 @@ begin
       MatchCreateLeafAndStep(FLex.TokenID);
       if FLex.TokenID = tkArray then
       begin
-        MatchCreateLeafAndStep(tkArray);
+        MatchCreateLeafAndStep(tkArray); // 参数的类型中不允许出现 array[0..1] 这种
         MatchCreateLeafAndStep(tkOf);
+
+        if FLex.TokenID in [tkKeyString, tkFile, tkConst] then // array of const 这种
+          MatchCreateLeafAndStep(FLex.TokenID);
 
         if FLex.TokenID = tkRoundOpen then
         begin
@@ -2812,7 +2818,7 @@ begin
     BuildFunctionHeading;
 
   if FLex.TokenID = tkSemiColon then
-    MatchCreateLeafAndStep(FLex.TokenID);
+    MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
   BuildDirectives;
 end;
@@ -3219,7 +3225,7 @@ begin
     end;
 
     if ((not IsExternal)  and (not IsForward)) and
-       (FLex.TokenID in [tkBegin] + DeclSectionTokens) then
+       (FLex.TokenID in [tkBegin, tkAsm] + DeclSectionTokens) then
     begin
       BuildBlock;
       if FLex.TokenID = tkSemicolon then
@@ -3304,7 +3310,8 @@ var
   S: string;
   Son: TTokenKind;
 begin
-  if FReturn or (FTokenKind in [tkSlashesComment, tkBegin, tkThen, tkDo, tkRepeat,
+  if FReturn or (FTokenKind in [tkBorComment, tkAnsiComment, tkSlashesComment, // 注释都暂且先换行
+    tkBegin, tkThen, tkDo, tkRepeat,
     tkExcept, tkExports, tkFinally, tkInitialization, tkFinalization, tkAsm,
     tkImplementation, tkRecord, tkPrivate, tkProtected, tkPublic, tkPublished]) then
     Result := Text + #13#10
@@ -3325,7 +3332,6 @@ begin
       else
         Result := Result + ' ' + S;
     end;
-      
   end;
 end;
 

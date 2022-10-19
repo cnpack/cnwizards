@@ -41,6 +41,12 @@ object FormAST: TFormAST
     Anchors = [akLeft, akTop, akBottom]
     Caption = 'Test Part'
     TabOrder = 2
+    object lblCount: TLabel
+      Left = 16
+      Top = 600
+      Width = 3
+      Height = 13
+    end
     object btnUsesClause: TButton
       Left = 16
       Top = 24
@@ -565,6 +571,32 @@ object FormAST: TFormAST
       TabOrder = 20
       OnClick = btnOpenClick
     end
+    object grpDecls: TGroupBox
+      Left = 336
+      Top = 448
+      Width = 113
+      Height = 137
+      Caption = 'Decls'
+      TabOrder = 21
+      object btnProcedure: TButton
+        Left = 16
+        Top = 24
+        Width = 75
+        Height = 25
+        Caption = 'Procedure'
+        TabOrder = 0
+        OnClick = btnProcedureClick
+      end
+      object btnFunction: TButton
+        Left = 16
+        Top = 56
+        Width = 75
+        Height = 25
+        Caption = 'Function'
+        TabOrder = 1
+        OnClick = btnFunctionClick
+      end
+    end
   end
   object mmoPasRes: TMemo
     Left = 880
@@ -577,7 +609,7 @@ object FormAST: TFormAST
   end
   object dlgOpen1: TOpenDialog
     Filter = 'Pascal File|*.pas'
-    Left = 616
+    Left = 512
     Top = 304
   end
 end

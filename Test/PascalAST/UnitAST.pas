@@ -72,6 +72,10 @@ type
     btnStringConvert: TButton;
     btnForward: TButton;
     btnMessage: TButton;
+    grpDecls: TGroupBox;
+    btnProcedure: TButton;
+    lblCount: TLabel;
+    btnFunction: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -125,6 +129,8 @@ type
     procedure btnStringConvertClick(Sender: TObject);
     procedure btnForwardClick(Sender: TObject);
     procedure btnMessageClick(Sender: TObject);
+    procedure btnProcedureClick(Sender: TObject);
+    procedure btnFunctionClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -160,6 +166,7 @@ begin
   tvPas.FullExpand;
 
   mmoPasRes.Lines.Text := FAST.Tree.ReConstructPascalCode;
+  lblCount.Caption := Format('Count %d', [FAST.Tree.Count]);
 end;
 
 procedure TFormAST.btnUsesClauseClick(Sender: TObject);
@@ -807,6 +814,36 @@ procedure TFormAST.btnMessageClick(Sender: TObject);
 begin
   ReInitAst('Msg.Msg := PCWPStruct(lParam)^.message;');
   FAST.BuildSimpleStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnProcedureClick(Sender: TObject);
+begin
+  ReInitAst(
+    'procedure Int64DivInt32Mod(A: Int64; B: Integer; var DivRes, ModRes: Integer); assembler;' + #13#10 +
+    'asm' + #13#10 +
+            'PUSH    RCX                           // RCX 是 A' + #13#10 +
+            'MOV     RCX, RDX                      // 除数 B 放入 RCX' + #13#10 +
+            'POP     RAX                           // 被除数 A 放入 RAX' + #13#10 +
+            'XOR     RDX, RDX                      // 被除数高 64 位清零' + #13#10 +
+            'IDIV    RCX' + #13#10 +
+            'MOV     [R8], EAX                     // 商放入 R8 所指的 DivRes' + #13#10 +
+            'MOV     [R9], EDX                     // 余数放入 R9 所指的 ModRes' + #13#10 +
+    'end;'
+  );
+  FAST.BuildDeclSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnFunctionClick(Sender: TObject);
+begin
+  ReInitAst(
+    'function Help(A: Int64; B: array of const; var DivRes: Integer): Boolean; assembler;' + #13#10 +
+    'asm' + #13#10 +
+            'PUSH    RCX    ' + #13#10 +
+    'end;'
+  );
+  FAST.BuildDeclSection;
   SynTree;
 end;
 
