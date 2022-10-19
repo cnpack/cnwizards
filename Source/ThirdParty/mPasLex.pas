@@ -116,7 +116,7 @@ type
     原有问题三：#$0A 这种本应是 tkAsciiChar 的会被解析成一个井号的 tkAsciiChar 加上 $0A 的 tkInteger
       解决方案：已修复 AsciiCharProc 中的问题
     原有问题四：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
-      解决方案：暂时没有
+      解决方案：都加上了
   ***}
 
   TCommentState=(csAnsi, csBor, csNo);
@@ -192,6 +192,7 @@ type
     function Func39: TTokenKind;
     function Func40: TTokenKind;
     function Func41: TTokenKind;
+    function Func42: TTokenKind;
     function Func44: TTokenKind;
     function Func45: TTokenKind;
     function Func46: TTokenKind;
@@ -211,6 +212,7 @@ type
     function Func66: TTokenKind;
     function Func69: TTokenKind;
     function Func71: TTokenKind;
+    function Func72: TTokenKind;
     function Func73: TTokenKind;
     function Func75: TTokenKind;
     function Func76: TTokenKind;
@@ -220,6 +222,7 @@ type
     function Func85: TTokenKind;
     function Func87: TTokenKind;
     function Func88: TTokenKind;
+    function Func89: TTokenKind;
     function Func91: TTokenKind;
     function Func92: TTokenKind;
     function Func94: TTokenKind;
@@ -234,6 +237,7 @@ type
     function Func103: TTokenKind;
     function Func105: TTokenKind;
     function Func106: TTokenKind;
+    function Func108: TTokenKind; // Added by LiuXiao
     function Func112: TTokenKind; // Added by LiuXiao
     function Func117: TTokenKind;
     function Func126: TTokenKind;
@@ -378,6 +382,7 @@ begin
       39: fIdentFuncTable[I]:=Func39;
       40: fIdentFuncTable[I]:=Func40;
       41: fIdentFuncTable[I]:=Func41;
+      42: fIdentFuncTable[I]:=Func42;
       44: fIdentFuncTable[I]:=Func44;
       45: fIdentFuncTable[I]:=Func45;
       46: fIdentFuncTable[I]:=Func46;
@@ -397,6 +402,7 @@ begin
       66: fIdentFuncTable[I]:=Func66;
       69: fIdentFuncTable[I]:=Func69;
       71: fIdentFuncTable[I]:=Func71;
+      72: fIdentFuncTable[I]:=Func72;
       73: fIdentFuncTable[I]:=Func73;
       75: fIdentFuncTable[I]:=Func75;
       76: fIdentFuncTable[I]:=Func76;
@@ -406,6 +412,7 @@ begin
       85: fIdentFuncTable[I]:=Func85;
       87: fIdentFuncTable[I]:=Func87;
       88: fIdentFuncTable[I]:=Func88;
+      89: fIdentFuncTable[I]:=Func89;
       91: fIdentFuncTable[I]:=Func91;
       92: fIdentFuncTable[I]:=Func92;
       94: fIdentFuncTable[I]:=Func94;
@@ -420,6 +427,7 @@ begin
       103: fIdentFuncTable[I]:=Func103;
       105: fIdentFuncTable[I]:=Func105;
       106: fIdentFuncTable[I]:=Func106;
+      108: fIdentFuncTable[I]:=Func108;
       112: fIdentFuncTable[I]:=Func112;
       117: fIdentFuncTable[I]:=Func117;
       126: fIdentFuncTable[I]:=Func126;
@@ -574,6 +582,11 @@ begin
     if KeyComp('Var')then Result:=tkVar else Result:=tkIdentifier;
 end;
 
+function TmwPasLex.Func42: TTokenKind;
+begin
+  if KeyComp('Final')then Result:=tkFinal else Result:=tkIdentifier;
+end;
+
 function TmwPasLex.Func44: TTokenKind;
 begin
   if KeyComp('Set')then Result:=tkSet else Result:=tkIdentifier;
@@ -671,7 +684,8 @@ end;
 function TmwPasLex.Func64: TTokenKind;
 begin
   if KeyComp('Uses')then Result:=tkUses else
-    if KeyComp('Unit')then Result:=tkUnit else Result:=tkIdentifier;
+    if KeyComp('Unit')then Result:=tkUnit else
+      if KeyComp('Helper')then Result:=tkHelper else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func65: TTokenKind;
@@ -695,6 +709,11 @@ function TmwPasLex.Func71: TTokenKind;
 begin
   if KeyComp('Stdcall')then Result:=tkStdcall else
     if KeyComp('Const')then Result:=tkConst else Result:=tkIdentifier;
+end;
+
+function TmwPasLex.Func72: TTokenKind;
+begin
+  if KeyComp('Static')then Result:=tkStatic else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func73: TTokenKind;
@@ -729,7 +748,8 @@ begin
     if fLastNoSpace=tkEqual then
       fIsInterface:=True else fIsInterface:=False;
   end else
-    if KeyComp('Stored')then Result:=tkStored else Result:=tkIdentifier;
+    if KeyComp('Stored')then Result:=tkStored
+      else if KeyComp('Deprecated')then Result:=tkDeprecated else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func84: TTokenKind;
@@ -751,6 +771,11 @@ end;
 function TmwPasLex.Func88: TTokenKind;
 begin
   if KeyComp('Program')then Result:=tkProgram else Result:=tkIdentifier;
+end;
+
+function TmwPasLex.Func89: TTokenKind;
+begin
+  if KeyComp('Strict')then Result:=tkStrict else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func91: TTokenKind;
@@ -824,7 +849,9 @@ end;
 
 function TmwPasLex.Func101: TTokenKind;
 begin
-  if KeyComp('Register')then Result:=tkRegister else Result:=tkIdentifier;
+  if KeyComp('Register')then Result:=tkRegister
+  else if KeyComp('Platform')then Result:=tkPlatform
+  else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func102: TTokenKind;
@@ -852,6 +879,11 @@ begin
 end;
 
 // Added by LiuXiao
+function TmwPasLex.Func108: TTokenKind;
+begin
+  if KeyComp('Operator')then Result:=tkOperator else Result:=tkIdentifier;
+end;
+
 function TmwPasLex.Func112: TTokenKind;
 begin
   if KeyComp('Requires')then Result:=tkRequires else Result:=tkIdentifier;
