@@ -104,7 +104,10 @@ unit CnPasWideLex;
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2022.09.09 V1.6
+* 修改记录：2022.10.19 V1.7
+*               增加几个关键字的支持，修正 tkKeyString 和 tkString 的混淆
+*               修正 #$0A 的判断错误，修正字符串内单引号的判断错误，均同步 mPasLex
+*           2022.09.09 V1.6
 *               Unicode 标识符模式下增加对全角空格的识别
 *           2021.08.20 V1.5
 *               增加对 dpk 中 requires 与 contains 的识别
@@ -227,6 +230,7 @@ type
     function Func39: TTokenKind;
     function Func40: TTokenKind;
     function Func41: TTokenKind;
+    function Func42: TTokenKind;
     function Func44: TTokenKind;
     function Func45: TTokenKind;
     function Func46: TTokenKind;
@@ -246,6 +250,7 @@ type
     function Func66: TTokenKind;
     function Func69: TTokenKind;
     function Func71: TTokenKind;
+    function Func72: TTokenKind;
     function Func73: TTokenKind;
     function Func75: TTokenKind;
     function Func76: TTokenKind;
@@ -255,6 +260,7 @@ type
     function Func85: TTokenKind;
     function Func87: TTokenKind;
     function Func88: TTokenKind;
+    function Func89: TTokenKind;
     function Func91: TTokenKind;
     function Func92: TTokenKind;
     function Func94: TTokenKind;
@@ -269,6 +275,7 @@ type
     function Func103: TTokenKind;
     function Func105: TTokenKind;
     function Func106: TTokenKind;
+    function Func108: TTokenKind;
     function Func112: TTokenKind;
     function Func117: TTokenKind;
     function Func126: TTokenKind;
@@ -484,6 +491,8 @@ begin
         FIdentFuncTable[I] := Func40;
       41:
         FIdentFuncTable[I] := Func41;
+      42:
+        FIdentFuncTable[I] := Func42;
       44:
         FIdentFuncTable[I] := Func44;
       45:
@@ -522,6 +531,8 @@ begin
         FIdentFuncTable[I] := Func69;
       71:
         FIdentFuncTable[I] := Func71;
+      72:
+        FIdentFuncTable[I] := Func72;
       73:
         FIdentFuncTable[I] := Func73;
       75:
@@ -540,6 +551,8 @@ begin
         FIdentFuncTable[I] := Func87;
       88:
         FIdentFuncTable[I] := Func88;
+      89:
+        FIdentFuncTable[I] := Func89;
       91:
         FIdentFuncTable[I] := Func91;
       92:
@@ -568,6 +581,8 @@ begin
         FIdentFuncTable[I] := Func105;
       106:
         FIdentFuncTable[I] := Func106;
+      108:
+        FIdentFuncTable[I] := Func108;
       112:
         FIdentFuncTable[I] := Func112;
       117:
@@ -806,6 +821,14 @@ begin
     Result := tkIdentifier;
 end;
 
+function TCnPasWideLex.Func42: TTokenKind;
+begin
+  if KeyComp('Final') then
+    Result := tkElse
+  else
+    Result := tkIdentifier;
+end;
+
 function TCnPasWideLex.Func44: TTokenKind;
 begin
   if KeyComp('Set') then
@@ -960,6 +983,8 @@ begin
     Result := tkUses
   else if KeyComp('Unit') then
     Result := tkUnit
+  else if KeyComp('Helper') then
+    Result := tkHelper
   else
     Result := tkIdentifier;
 end;
@@ -998,6 +1023,14 @@ begin
     Result := tkStdcall
   else if KeyComp('Const') then
     Result := tkConst
+  else
+    Result := tkIdentifier;
+end;
+
+function TCnPasWideLex.Func72: TTokenKind;
+begin
+  if KeyComp('Static') then
+    Result := tkStatic
   else
     Result := tkIdentifier;
 end;
@@ -1051,6 +1084,8 @@ begin
   end
   else if KeyComp('Stored') then
     Result := tkStored
+  else if KeyComp('Deprecated') then
+    Result := tkDeprecated
   else
     Result := tkIdentifier;
 end;
@@ -1085,6 +1120,14 @@ function TCnPasWideLex.Func88: TTokenKind;
 begin
   if KeyComp('Program') then
     Result := tkProgram
+  else
+    Result := tkIdentifier;
+end;
+
+function TCnPasWideLex.Func89: TTokenKind;
+begin
+  if KeyComp('Strict') then
+    Result := tkStrict
   else
     Result := tkIdentifier;
 end;
@@ -1194,6 +1237,8 @@ function TCnPasWideLex.Func101: TTokenKind;
 begin
   if KeyComp('Register') then
     Result := tkRegister
+  else if KeyComp('Platform') then
+    Result := tkPlatform
   else
     Result := tkIdentifier;
 end;
@@ -1231,6 +1276,14 @@ begin
     else
       Result := tkProtected
   end
+  else
+    Result := tkIdentifier;
+end;
+
+function TCnPasWideLex.Func108: TTokenKind;
+begin
+  if KeyComp('Operator') then
+    Result := tkOperator
   else
     Result := tkIdentifier;
 end;
