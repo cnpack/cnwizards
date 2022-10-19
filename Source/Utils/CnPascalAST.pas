@@ -224,6 +224,8 @@ type
     FNodeType: TCnPasNodeType;
     FTokenKind: TTokenKind;
     FReturn: Boolean;
+    FNoSpaceBehind: Boolean;
+    FNoSpaceBefore: Boolean;
   public
     function GetPascalCode: string;
 
@@ -233,6 +235,10 @@ type
     {* Pascal Token 类型，注意有的节点本身没有实际对应的 Token，用 tkNone 代替}
     property Return: Boolean read FReturn write FReturn;
     {* 该 Token 后是否应换行}
+    property NoSpaceBehind: Boolean read FNoSpaceBehind write FNoSpaceBehind;
+    {* 该 Token 后是否无空格}
+    property NoSpaceBefore: Boolean read FNoSpaceBefore write FNoSpaceBefore;
+    {* 该 Token 前是否无空格}
   end;
 
   TCnPasAstTree = class(TCnTree)
@@ -252,8 +258,11 @@ type
     procedure Unlock;
     function MatchCreateLeaf(AToken: TTokenKind; NodeType: TCnPasNodeType = cntInvalid): TCnPasAstLeaf;
     procedure MatchLeafStep(AToken: TTokenKind);
-    procedure MarkReturnFlag(ALeaf: TCnPasAstLeaf);
   protected
+    procedure MarkReturnFlag(ALeaf: TCnPasAstLeaf);
+    procedure MarkNoSpaceBehindFlag(ALeaf: TCnPasAstLeaf);
+    procedure MarkNoSpaceBeforeFlag(ALeaf: TCnPasAstLeaf);
+
     procedure PushLeaf(ALeaf: TCnPasAstLeaf);
     procedure PopLeaf;
 
@@ -751,7 +760,7 @@ begin
         MatchCreateLeafAndStep(FLex.TokenID)
       else if FLex.TokenID = tkPoint then
       begin
-        MatchCreateLeafAndStep(FLex.TokenID);
+        MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
         BuildIdent;
       end
       else if FLex.TokenID = tkSquareOpen then
@@ -810,7 +819,7 @@ begin
           end;
         tkPoint:
           begin
-            MatchCreateLeafAndStep(FLex.TokenID);
+            MarkNoSpaceBehindFlag(MatchCreateLeafAndStep(FLex.TokenID));
             BuildIdent;
           end;
       end;
@@ -929,7 +938,7 @@ begin
     case FLex.TokenID of
       tkAddressOp:
         begin
-          MatchCreateLeafAndPush(FLex.TokenID);
+          MarkNoSpaceBehindFlag(MatchCreateLeafAndPush(FLex.TokenID));
           // Pop 之前，内部添加的节点均为 @ 节点之子
 
           try
@@ -3295,6 +3304,18 @@ begin
     ALeaf.Return := True;
 end;
 
+procedure TCnPasAstGenerator.MarkNoSpaceBehindFlag(ALeaf: TCnPasAstLeaf);
+begin
+  if ALeaf <> nil then
+    ALeaf.NoSpaceBehind := True;
+end;
+
+procedure TCnPasAstGenerator.MarkNoSpaceBeforeFlag(ALeaf: TCnPasAstLeaf);
+begin
+  if ALeaf <> nil then
+    ALeaf.NoSpaceBefore := True;
+end;
+
 { TCnPasAstTree }
 
 function TCnPasAstTree.ReConstructPascalCode: string;
@@ -3326,8 +3347,10 @@ begin
       Result := S
     else if S <> '' then
     begin
-      if Son in [tkPoint, tkDotdot, tkAddressOp, tkSemiColon, tkColon, tkRoundOpen,
-        tkRoundClose, tkSquareOpen, tkSquareClose] then
+      if FNoSpaceBehind or (Items[I] as TCnPasAstLeaf).NoSpaceBefore or // 如果本节点后面不要空格，或子节点前面不要空格
+        (FTokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or         // 本节点这些后面不要空格
+        (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 子节点这些前面不要空格
+        tkRoundClose, tkSquareClose]) then
         Result := Result + S
       else
         Result := Result + ' ' + S;
