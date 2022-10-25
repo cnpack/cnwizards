@@ -1,9 +1,10 @@
 inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
   Left = 369
   Top = 86
-  Width = 424
-  Height = 466
+  AutoScroll = False
   Caption = 'Compress and Save Settings'
+  ClientHeight = 439
+  ClientWidth = 416
   Constraints.MinHeight = 436
   Constraints.MinWidth = 396
   Icon.Data = {
@@ -478,11 +479,29 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           TabOrder = 2
           OnClick = btnAfterCmdClick
         end
+        object chkSendMailTo: TCheckBox
+          Left = 16
+          Top = 306
+          Width = 129
+          Height = 17
+          Caption = 'Send by Email To:'
+          TabOrder = 5
+          Visible = False
+          OnClick = chkSendMailToClick
+        end
+        object edtMailAddress: TEdit
+          Left = 150
+          Top = 304
+          Width = 209
+          Height = 21
+          TabOrder = 6
+          Visible = False
+        end
         object mmoAfterCmd: TMemo
           Left = 16
           Top = 144
           Width = 343
-          Height = 180
+          Height = 177
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 4
         end

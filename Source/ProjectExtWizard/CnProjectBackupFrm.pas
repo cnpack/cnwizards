@@ -181,6 +181,8 @@ type
     FExecCmdAfterBackup: Boolean;
     FExecCmdFile: string;
     FExecCmdString: string;
+    FSendMail: Boolean;
+    FMailAddr: string;
     FDialogWidth: Integer;
     FDialogHeight: Integer;
     procedure OnAppMessage(var Msg: Tmsg; var Handled: Boolean);
@@ -239,6 +241,8 @@ const
   csExecCmdAfterBackup = 'ExecCmdAfterBackup';
   csExecCmdFile = 'ExecCmdFile';
   csExecCmdString = 'ExecCmdString';
+  csSendMail = 'SendMail';
+  csMailAddr = 'MailAddr';
 
   csWidth = 'Width';
   csHeight = 'Height';
@@ -489,6 +493,9 @@ begin
   FExecCmdAfterBackup := Ini.ReadBool(csBackupSection, csExecCmdAfterBackup, False);
   FExecCmdFile := Ini.ReadString(csBackupSection, csExecCmdFile, '');
   FExecCmdString := Ini.ReadString(csBackupSection, csExecCmdString, '');
+  FSendMail := Ini.ReadBool(csBackupSection, csSendMail, False);
+  FMailAddr := Ini.ReadString(csBackupSection, csMailAddr, '');
+
   try
     SimpleDecode(FPassword);
   except
@@ -521,6 +528,9 @@ begin
   Ini.WriteBool(csBackupSection, csExecCmdAfterBackup, FExecCmdAfterBackup);
   Ini.WriteString(csBackupSection, csExecCmdFile, FExecCmdFile);
   Ini.WriteString(csBackupSection, csExecCmdString, FExecCmdString);
+  Ini.WriteBool(csBackupSection, csSendMail, FSendMail);
+  Ini.WriteString(csBackupSection, csMailAddr, FMailAddr);
+
   if FRememberPass then
   begin
     try
@@ -549,15 +559,15 @@ end;
 
 function TCnProjectBackupForm.FindBackupFile(const FileName: string): Integer;
 var
-  i: Integer;
+  I: Integer;
   FileInfo: TCnBackupFileInfo;
 begin
-  for i := 0 to lvFileView.Items.Count - 1 do
+  for I := 0 to lvFileView.Items.Count - 1 do
   begin
-    FileInfo := TCnBackupFileInfo(lvFileView.Items[i].Data);
+    FileInfo := TCnBackupFileInfo(lvFileView.Items[I].Data);
     if CompareText(FileName, FileInfo.FullFileName) = 0 then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   end;
@@ -582,7 +592,8 @@ begin
     // 取当前拖放的文件数
     FileIndex := $FFFFFFFF;
     QtyDroppedFiles := DragQueryFile(Msg.WParam, FileIndex,
-                                     pDroppedFilename, BufferLength);
+      pDroppedFilename, BufferLength);
+
     for FileIndex := 0 to (QtyDroppedFiles - 1) do
     begin
       // 先计算文件名所需内存大小
@@ -601,7 +612,7 @@ begin
 
       DroppedFilename := StrPas(pDroppedFilename);
 
-      //TODO: 暂时不支持目录拖放，将在之后版本中给予支持...
+      // TODO: 暂时不支持目录拖放，将在之后版本中给予支持...
       if DirectoryExists( DroppedFilename ) then
         Continue;
         
@@ -636,7 +647,7 @@ var
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
   IEditor: IOTAEditor;
-  i, j: Integer;
+  I, J: Integer;
   ProjectInterfaceList: TInterfaceList;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
@@ -705,16 +716,16 @@ end;
 procedure TCnProjectBackupForm.InitComboBox;
 var
   ProjectInfo: TCnBackupProjectInfo;
-  i: Integer;
+  I: Integer;
 begin
   cbbProjectList.Clear;
 
   cbbProjectList.Items.Add(SCnProjExtProjectAll);
   cbbProjectList.Items.Add(SCnProjExtCurrentProject);
 
-  for i := 0 to ProjectList.Count - 1 do
+  for I := 0 to ProjectList.Count - 1 do
   begin
-    ProjectInfo := ProjectList.Items[i];
+    ProjectInfo := ProjectList.Items[I];
     cbbProjectList.Items.Add(ProjectInfo.Name);
   end;
 
@@ -895,6 +906,8 @@ begin
       ExecAfterFile := FExecCmdFile;
       ExecAfter := FExecCmdAfterBackup;
       AfterCmd := FExecCmdString;
+      SendMail := FSendMail;
+      MailAddr := FMailAddr;
 
       if RememberPass then
         Password := FPassword;
@@ -945,6 +958,9 @@ begin
         FExecCmdAfterBackup := ExecAfter;
         FExecCmdFile := ExecAfterFile;
         FExecCmdString := AfterCmd;
+
+        FSendMail := SendMail;
+        FMailAddr := MailAddr;
 
         if FRememberPass then
           FPassword := Password
@@ -1074,6 +1090,12 @@ begin
 
             WinExec(PAnsiChar(AnsiString(ExecCommand)), SW_SHOW);
           end;
+        end;
+
+        if FSendMail and IsValidEmail(FMailAddr) then
+        begin
+          ShellExecute(0, 'open', PChar('mailto:?to=' + FMailAddr + '&subject=' + CurrentName + ' ' + VerStr),
+            PChar(SaveFileName), nil, SW_SHOWNORMAL);
         end;
       end;
     end;

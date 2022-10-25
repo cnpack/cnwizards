@@ -90,6 +90,8 @@ type
     lblComments: TLabel;
     mmoComments: TMemo;
     chkIncludeVer: TCheckBox;
+    chkSendMailTo: TCheckBox;
+    edtMailAddress: TEdit;
     procedure btnSelectClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -104,6 +106,7 @@ type
     procedure btnAfterCmdClick(Sender: TObject);
     procedure cbbParamsChange(Sender: TObject);
     procedure chkShowPassClick(Sender: TObject);
+    procedure chkSendMailToClick(Sender: TObject);
   private
     FConfirmed: Boolean;
     FSavePath: string;
@@ -138,6 +141,10 @@ type
     procedure SetComments(const Value: string);
     function GetIncludeVer: Boolean;
     procedure SetIncludeVer(const Value: Boolean);
+    function GetMailAddr: string;
+    function GetSendMail: Boolean;
+    procedure SetMailAddr(const Value: string);
+    procedure SetSendMail(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
     procedure UpdateContent;
@@ -161,6 +168,9 @@ type
     property ExecAfter: Boolean read GetExecAfter write SetExecAfter;
     property ExecAfterFile: string read GetExecAfterFile write SetExecAfterFile;
     property AfterCmd: string read GetAfterCmd write SetAfterCmd;
+
+    property SendMail: Boolean read GetSendMail write SetSendMail;
+    property MailAddr: string read GetMailAddr write SetMailAddr;
 
     property SavePath: string read FSavePath write FSavePath;
     property CurrentName: string read FCurrentName write FCurrentName;
@@ -391,7 +401,8 @@ begin
   cbbParams.Enabled := chkExecAfter.Checked;
   lblPreCmd.Enabled := chkExecAfter.Checked;
   mmoAfterCmd.Enabled := chkExecAfter.Checked;
-  
+  edtMailAddress.Enabled := chkSendMailTo.Checked;
+
   if not chkUseExternal.Checked then
     Exit;
   FExt := GetExtFromCompressor(edtCompressor.Text);
@@ -532,6 +543,31 @@ procedure TCnProjectBackupSaveForm.SetIncludeVer(const Value: Boolean);
 begin
   chkIncludeVer.Checked := Value;
   UpdateContent;
+end;
+
+procedure TCnProjectBackupSaveForm.chkSendMailToClick(Sender: TObject);
+begin
+  UpdateContent;
+end;
+
+function TCnProjectBackupSaveForm.GetMailAddr: string;
+begin
+  Result := edtMailAddress.Text;
+end;
+
+function TCnProjectBackupSaveForm.GetSendMail: Boolean;
+begin
+  Result := chkSendMailTo.Checked;
+end;
+
+procedure TCnProjectBackupSaveForm.SetMailAddr(const Value: string);
+begin
+  edtMailAddress.Text := Value;
+end;
+
+procedure TCnProjectBackupSaveForm.SetSendMail(const Value: Boolean);
+begin
+  chkSendMailTo.Checked := Value;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
