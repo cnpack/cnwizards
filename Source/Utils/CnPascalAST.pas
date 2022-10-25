@@ -930,6 +930,8 @@ begin
 end;
 
 procedure TCnPasAstGenerator.BuildFactor;
+var
+  T: TCnPasAstLeaf;
 begin
   MatchCreateLeafAndPush(tkNone, cntFactor);
   // Pop 之前，内部添加的节点均为抽象的 Factor 节点之子
@@ -957,10 +959,15 @@ begin
             MatchCreateLeafAndStep(tkRoundClose)
           end;
         end;
-      tkAsciiChar, tkString: // AsciiChar 是 #12 这种，可以和 string 组合
+      tkAsciiChar, tkString: // AsciiChar 是 #12 这种，可以和 string 组合，因而需要拼凑成一个
         begin
+          T := MatchCreateLeafAndStep(FLex.TokenID);
           while FLex.TokenID in [tkAsciiChar, tkString] do
-            MatchCreateLeafAndStep(FLex.TokenID);
+          begin
+            if T <> nil then
+              T.Text := T.Text + FLex.Token;
+            NextToken;
+          end;
         end;
       tkNumber, tkInteger, tkFloat:
         MatchCreateLeafAndStep(FLex.TokenID);
@@ -2943,7 +2950,7 @@ begin
       BuildCaseSelector;
 
       if FLex.TokenID = tkSemiColon then
-        MatchCreateLeafAndStep(FLex.TokenID);
+        MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
       if FLex.TokenID in [tkElse, tkEnd] then
         Break;
@@ -2957,7 +2964,7 @@ begin
     end;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeafAndStep(tkSemiColon);
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
     MatchCreateLeafAndStep(tkEnd);
   finally
@@ -3077,7 +3084,7 @@ begin
             BuildStatementList;
 
           if FLex.TokenID = tkSemiColon then
-            MatchCreateLeafAndStep(tkSemiColon);
+            MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
         end
         else
           BuildStatementList;
@@ -3132,7 +3139,7 @@ begin
     BuildStatement;
 
     if FLex.TokenID = tkSemiColon then
-      MatchCreateLeafAndStep(FLex.TokenID);
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
   finally
     PopLeaf;
   end;
@@ -3151,7 +3158,7 @@ begin
         Break;
     until False;
 
-    MatchCreateLeafAndStep(tkColon);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkColon));
     BuildStatement;
   finally
     PopLeaf;
@@ -3185,7 +3192,7 @@ begin
         Break;
     until False;
 
-    MatchCreateLeafAndStep(tkSemiColon);
+    MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
   finally
     PopLeaf;
   end;
@@ -3347,8 +3354,8 @@ begin
       Result := S
     else if S <> '' then
     begin
-      if FNoSpaceBehind or (Items[I] as TCnPasAstLeaf).NoSpaceBefore or // 如果本节点后面不要空格，或子节点前面不要空格
-        (FTokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or         // 本节点这些后面不要空格
+      if FNoSpaceBehind or (Items[I] as TCnPasAstLeaf).NoSpaceBefore or    // 如果本节点后面不要空格，或子节点前面不要空格
+        (FTokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or            // 本节点这些后面不要空格
         (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 子节点这些前面不要空格
         tkRoundClose, tkSquareClose]) then
         Result := Result + S

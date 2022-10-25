@@ -8,9 +8,13 @@ uses
 
 type
   TFormAST = class(TForm)
+    dlgOpen1: TOpenDialog;
+    pgc1: TPageControl;
+    tsPascalAst: TTabSheet;
     mmoPas: TMemo;
     tvPas: TTreeView;
     grpTest: TGroupBox;
+    lblCount: TLabel;
     btnUsesClause: TButton;
     btnUsesDecl: TButton;
     btnInitSeletion: TButton;
@@ -18,34 +22,37 @@ type
     btnSetElement: TButton;
     btnSetConstructor: TButton;
     btnFactor: TButton;
-    btnDesignator: TButton;
     grpSimpleStatement: TGroupBox;
     btnAssign: TButton;
     btnFunctionCall: TButton;
     btnGoto: TButton;
     btnInherited: TButton;
-    btnExpressionList: TButton;
+    btnStringConvert: TButton;
+    btnMessage: TButton;
     grpType: TGroupBox;
+    btnRecordType: TButton;
     btnArrayType: TButton;
     btnSetType: TButton;
     btnFileType: TButton;
     btnPointerType: TButton;
     btnStringType: TButton;
     btnSubrangeType: TButton;
-    btnRecordType: TButton;
-    grpClass: TGroupBox;
-    btnPropety: TButton;
-    btnVarSection: TButton;
     btnInterfaceType: TButton;
     btnClassType: TButton;
-    btnConstSection: TButton;
     btnTypeSection: TButton;
+    btnProcedureType: TButton;
+    btnForward: TButton;
+    grpClass: TGroupBox;
+    btnPropety: TButton;
+    btnConstSection: TButton;
+    btnVarSection: TButton;
     btnExports: TButton;
     grpConst: TGroupBox;
     btnConst: TButton;
     btnArrayConst: TButton;
     btnRecordConst: TButton;
     btnConstExpression: TButton;
+    btnRecordConst1: TButton;
     btnTerm: TButton;
     grpStructStatement: TGroupBox;
     btnExceptionHandler: TButton;
@@ -58,24 +65,28 @@ type
     btnRaise: TButton;
     btnCase: TButton;
     btnCaseSelector: TButton;
+    btnLabel: TButton;
+    btnAsm: TButton;
     btnInterface: TButton;
     btnImplementation: TButton;
-    btnLabel: TButton;
-    btnRecordConst1: TButton;
     btnProgram: TButton;
-    mmoPasRes: TMemo;
     btnUnit: TButton;
-    btnAsm: TButton;
     btnOpen: TButton;
-    dlgOpen1: TOpenDialog;
-    btnProcedureType: TButton;
-    btnStringConvert: TButton;
-    btnForward: TButton;
-    btnMessage: TButton;
     grpDecls: TGroupBox;
     btnProcedure: TButton;
-    lblCount: TLabel;
     btnFunction: TButton;
+    btnDesignator: TButton;
+    btnExpressionList: TButton;
+    btnParse: TButton;
+    pgcRes: TPageControl;
+    tsPascal: TTabSheet;
+    mmoPasRes: TMemo;
+    tsCpp: TTabSheet;
+    mmoCppRes: TMemo;
+    tsCppConvert: TTabSheet;
+    grpElement: TGroupBox;
+    btnString: TButton;
+    btnStrings: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -131,6 +142,9 @@ type
     procedure btnMessageClick(Sender: TObject);
     procedure btnProcedureClick(Sender: TObject);
     procedure btnFunctionClick(Sender: TObject);
+    procedure btnParseClick(Sender: TObject);
+    procedure btnStringClick(Sender: TObject);
+    procedure btnStringsClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -316,6 +330,13 @@ procedure TFormAST.btnPropetyClick(Sender: TObject);
 begin
   ReInitAst('property NameFromLCID[const ID: string]: string read GetNameFromLCID write SetNameFromLCID; default;');
   FAST.BuildClassProperty;
+  SynTree;
+end;
+
+procedure TFormAST.btnStringsClick(Sender: TObject);
+begin
+  ReInitAst('Caption := ''Test''#14#$0A''Me''');
+  FAST.BuildStatement;
   SynTree;
 end;
 
@@ -845,6 +866,18 @@ begin
   );
   FAST.BuildDeclSection;
   SynTree;
+end;
+
+procedure TFormAST.btnParseClick(Sender: TObject);
+begin
+  ReInitAst(mmoPas.Lines.Text);
+  FAST.Build;
+  SynTree;
+end;
+
+procedure TFormAST.btnStringClick(Sender: TObject);
+begin
+  // 把 Pascal 格式的字符串转换为 C
 end;
 
 end.
