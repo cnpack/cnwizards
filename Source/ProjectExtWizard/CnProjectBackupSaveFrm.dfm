@@ -501,7 +501,7 @@ inherited CnProjectBackupSaveForm: TCnProjectBackupSaveForm
           Left = 16
           Top = 144
           Width = 343
-          Height = 177
+          Height = 180
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 4
         end
