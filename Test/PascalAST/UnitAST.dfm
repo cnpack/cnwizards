@@ -604,6 +604,15 @@ object FormAST: TFormAST
             TabOrder = 1
             OnClick = btnFunctionClick
           end
+          object btnAsmBlock: TButton
+            Left = 16
+            Top = 72
+            Width = 75
+            Height = 25
+            Caption = 'Asm Block'
+            TabOrder = 2
+            OnClick = btnAsmBlockClick
+          end
         end
         object btnDesignator: TButton
           Left = 16

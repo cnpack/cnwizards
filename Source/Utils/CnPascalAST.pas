@@ -106,6 +106,7 @@ type
     cntImplementationSection,
     cntInitializationSection,
     cntFinalizationSection,
+    cntAsmBlock,
 
     cntIf,
     cntCase,
@@ -2736,7 +2737,7 @@ begin
   try
     if FLex.TokenID = tkBegin then
     begin
-      MatchCreateLeafAndStep(FLex.TokenID); // ASM 不支持
+      MatchCreateLeafAndStep(FLex.TokenID);
       BuildStatementList;
       MatchCreateLeafAndStep(tkEnd);
     end
@@ -3299,10 +3300,23 @@ begin
 end;
 
 procedure TCnPasAstGenerator.BulidAsmBlock;
+var
+  T: TCnPasAstLeaf;
 begin
-  // 跳过 ASM
-  while FLex.TokenID <> tkEnd do
-    FLex.Next;
+  if FLex.TokenID = tkEnd then
+    Exit;
+
+  T := MatchCreateLeafAndPush(tkNone, cntAsmBlock);
+  try
+    while FLex.TokenID <> tkEnd do
+    begin
+      if T <> nil then
+        T.Text := T.Text + FLex.Token;
+      FLex.Next;
+    end;
+  finally
+    PopLeaf;
+  end;
 end;
 
 procedure TCnPasAstGenerator.MarkReturnFlag(ALeaf: TCnPasAstLeaf);

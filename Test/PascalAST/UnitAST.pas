@@ -87,6 +87,7 @@ type
     grpElement: TGroupBox;
     btnString: TButton;
     btnStrings: TButton;
+    btnAsmBlock: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -145,6 +146,7 @@ type
     procedure btnParseClick(Sender: TObject);
     procedure btnStringClick(Sender: TObject);
     procedure btnStringsClick(Sender: TObject);
+    procedure btnAsmBlockClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -335,7 +337,7 @@ end;
 
 procedure TFormAST.btnStringsClick(Sender: TObject);
 begin
-  ReInitAst('Caption := ''Test''#14#$0A''Me''');
+  ReInitAst('Caption := #9''Test''#14#$0A''Me''');
   FAST.BuildStatement;
   SynTree;
 end;
@@ -878,6 +880,24 @@ end;
 procedure TFormAST.btnStringClick(Sender: TObject);
 begin
   // 把 Pascal 格式的字符串转换为 C
+end;
+
+procedure TFormAST.btnAsmBlockClick(Sender: TObject);
+begin
+  ReInitAst(
+    'procedure Int64DivInt32Mod (A: Int64;B: Integer;var DivRes , ModRes: Integer); assembler;' + #13#10 + 
+    'asm' + #13#10 + 
+          'PUSH    RCX                           // RCX 是 A' + #13#10 + 
+          'MOV     RCX, RDX                      // 除数 B 放入 RCX' + #13#10 + 
+          'POP     RAX                           // 被除数 A 放入 RAX' + #13#10 + 
+          'XOR     RDX, RDX                      // 被除数高 64 位清零' + #13#10 + 
+          'IDIV    RCX' + #13#10 + 
+          'MOV     [R8], EAX                     // 商放入 R8 所指的 DivRes' + #13#10 + 
+          'MOV     [R9], EDX                     // 余数放入 R9 所指的 ModRes' + #13#10 + 
+    'end;'
+  );
+  FAST.BuildDeclSection;
+  SynTree;
 end;
 
 end.
