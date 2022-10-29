@@ -13,4 +13,11 @@
     <ShortCut>32819</ShortCut>
     <RelFileName>..\PSDemo\GenVarObjCodes.pas</RelFileName>
   </o>
+  <o>
+    <Name>Reload Current File</Name>
+    <Confirm>0</Confirm>
+    <Mode>[smEditorFlatButton]</Mode>
+    <ShortCut>32819</ShortCut>
+    <RelFileName>..\PSDemo\ReloadCurrentFile.pas</RelFileName>
+  </o>
 </TCnScriptCollection>
