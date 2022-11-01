@@ -81,7 +81,7 @@ Trace Compiled := IF<font color="#ff0000">N</font>DEF NDEBUG
 <p class="text">&nbsp;</p>
 <p class="title" align="left">CnDebugger Exception Handler</p>
 
-<p class="text">CnDebugger can install an Exception handler for the application. When unhandled exception occurred, CnDebugger can record the stack information and the error line number (The application needs to be compiled with debug information). Here CnDebugger uses JCL library to capture the exception. To enable this function, you need to install JCL library and define USE_JCL condition. If no JCL library installed, you need to copy the files listed in the header of CnDebug.pas from JCL source package to your application to compile. "Include TD32 debug Info" or generating Map file option should be opened in compiling to obtain more information when exception raises.
+<p class="text">CnDebugger can install an Exception handler for the application. When unhandled exception occurred, CnDebugger can record the stack information and the error line number (The application needs to be compiled with debug information). Here CnDebugger uses cnvcl to capture the exception. To enable this feature, you need to define CAPTURE_STACK condition. "Include TD32 debug Info" or generating Map file option should be enabled in compiling to obtain more stack information when exception raises.
 
 <p class="text">&nbsp;</p>
 <p class="title" align="left">CnDebugger Timing</p>

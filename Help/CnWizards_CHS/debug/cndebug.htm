@@ -82,8 +82,8 @@ Trace 有效 := IF<font color="#ff0000">N</font>DEF NDEBUG
 <p class="text">　</p>
 <p class="title" align="left">CnDebugger 异常拦截机制</p>
 
-<p class="text">CnDebugger 可自动替应用程序安装一异常拦截功能，当发生未捕捉的异常时，可捕捉下来并且记录当时程序的运行期信息，如堆栈内容、带调试信息编译时的出错代码行数等。这里，CnDebugger 采用的是 JCL 库的运行期拦截机制，添加了 CnDebugger 自身的异常通知处理过程来记录当时信息。打开此选项的编译条件名为 USE_JCL。
-<p class="text">注意，打开 USE_JCL 编译条件后，CnDebug.pas 需要 JCL 库才能顺利编译，如果未安装 JCL 库，则需要从 JCL 库中复制 CnDebug.pas 头部注释中列出的一批 JCL 单元后才能编译。编译时打开编译选项 Include TD32 debug Info 或生成 MapFile 可在异常截获时获得更多信息。
+<p class="text">CnDebugger 可自动替应用程序安装一异常拦截功能，当发生未捕捉的异常时，可捕捉下来并且记录当时程序的运行期信息，如堆栈内容、带调试信息编译时的出错代码行数等。这里，CnDebugger 采用的是 cnvcl 库自身实现的运行期拦截与堆栈分析机制，添加了 CnDebugger 自身的异常通知处理过程来记录当时信息。打开此选项的编译条件名为 CAPTURE_STACK。
+<p class="text">注意：编译时需打开编译选项 Include TD32 debug Info 或生成 MapFile，这样可在异常截获时获得更多信息。
 
 <p class="text">　</p>
 <p class="title" align="left">CnDebugger 的计时功能</p>
