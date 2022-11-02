@@ -72,13 +72,15 @@ type
     property BlockMustNotEmpty: Boolean read FBlockMustNotEmpty write
       FBlockMustNotEmpty;
     {* 只有当选择块不为空时有效 }
+    procedure PrePreocessLine(const Str: string); virtual;
+    {* 子类如果选择 Style 为 csLine 行方式，该方法会被调用，可对每一行进行预处理}
     function ProcessLine(const Str: string): string; virtual;
     {* 子类如果选择 Style 为 csLine 行方式，建议使用该方法，处理每一行代码，
        此时可不重载 ProcessText 方法}
     function ProcessText(const Text: string): string; virtual;
     {* 子类如果选择 Style 为 csSelText/csAllText 全文本方式，或者希望自己处理文
        本，应重载该方法，此时不用重载 ProcessLine 方法。
-       D5~D2007下 Text 与返回结果是 AnsiString（2005～2007 的 Text 由UTF8转换而来，可能丢字符），
+       D5~D2007下 Text 与返回结果是 AnsiString（2005～2007 的 Text 由 UTF8 转换而来，可能丢字符），
        D2009 以上 Text 与返回结果都是 UnicodeString}
     function GetStyle: TCnCodeToolStyle; virtual; abstract;
     {* 处理方式，如果为 csLine，ProcessText 处理 Text 将会把用户选择
@@ -116,6 +118,11 @@ begin
   BlockMustNotEmpty := False;
 end;
 
+procedure TCnEditorCodeTool.PrePreocessLine(const Str: string);
+begin
+  { do nothing }
+end;
+
 function TCnEditorCodeTool.ProcessLine(const Str: string): string;
 begin
   { do nothing }
@@ -124,7 +131,7 @@ end;
 function TCnEditorCodeTool.ProcessText(const Text: string): string;
 var
   Lines: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   Lines := TStringList.Create;
   try
@@ -132,8 +139,12 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('TCnEditorCodeTool.ProcessText Default %d Lines.', [Lines.Count]);
 {$ENDIF}
-    for i := 0 to Lines.Count - 1 do
-      Lines[i] := ProcessLine(Lines[i]);
+
+    for I := 0 to Lines.Count - 1 do  // 预处理一下
+      PrePreocessLine(Lines[I]);
+
+    for I := 0 to Lines.Count - 1 do
+      Lines[I] := ProcessLine(Lines[I]);
     Result := Lines.Text;
   finally
     Lines.Free;
@@ -235,7 +246,7 @@ begin
       Stream := TMemoryStream.Create;
       CnOtaSaveCurrentEditorToStream(Stream, False);
       EndPos := Stream.Size - 1; // 用笨办法得到编辑的长度，
-      // 减一是为了去掉 SaveToStream 时尾部加的#0的一
+      // 减一是为了去掉 SaveToStream 时尾部加的 #0 的一
       Stream.Free;
     end;
 

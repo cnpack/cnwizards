@@ -91,13 +91,13 @@ type
 
   TCnEditorCodeToggleComment = class(TCnEditorCodeTool)
   private
-    Inited: Boolean;
-    FirstIsCommented: Boolean;
+    FAllIsCommented: Boolean;
     FMoveToNextLine: Boolean;
     FIndentMode: TCnIndentMode;
     procedure SetIndentMode(const Value: TCnIndentMode);
   protected
     function GetHasConfig: Boolean; override;
+    procedure PrePreocessLine(const Str: string); override;
     function ProcessLine(const Str: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
     function GetDefShortCut: TShortCut; override;
@@ -270,27 +270,16 @@ end;
 
 procedure TCnEditorCodeToggleComment.Execute;
 begin
-  Inited := False;
-  FirstIsCommented := False;
+  FAllIsCommented := True;
   inherited;
 end;
 
 function TCnEditorCodeToggleComment.ProcessLine(const Str: string): string;
 begin
-  // 判断首行是否已注释
-  if not Inited then
-  begin
-    FirstIsCommented := IsCommentStr(Str);
-    Inited := True;
-  end;
-
-  // 使用 BDS 2005 的规则处理
-  if not FirstIsCommented then
-    Result := GetCommentStr(Str)    // 首行未注释时全部增加注释
-  else if IsCommentStr(Str) then
-    Result := GetUnCommentStr(Str)  // 注释过的取消注释
+  if FAllIsCommented then
+    Result := GetUnCommentStr(Str)  // 全注释过的才都取消注释
   else
-    Result := GetCommentStr(Str);   // 未注释的增加注释
+    Result := GetCommentStr(Str);   // 只要不是全注释的，就统统增加注释
 end;
 
 function TCnEditorCodeToggleComment.GetStyle: TCnCodeToolStyle;
@@ -359,12 +348,16 @@ begin
   InternalIndentMode := Value;
 end;
 
+procedure TCnEditorCodeToggleComment.PrePreocessLine(const Str: string);
+begin
+  if not IsCommentStr(Str) then  // 判断所有行是否全是注释 // 开头
+    FAllIsCommented := False;
+end;
+
 initialization
   RegisterCnCodingToolset(TCnEditorCodeComment);
   RegisterCnCodingToolset(TCnEditorCodeUnComment);
-//{$IFNDEF COMPILER9_UP}
   RegisterCnCodingToolset(TCnEditorCodeToggleComment);
-//{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
 end.
