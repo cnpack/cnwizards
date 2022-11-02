@@ -777,7 +777,7 @@ function CodeAutoWrap(Code: string; Width, Indent: Integer;
 
 {$IFDEF COMPILER6_UP}
 function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
-{* 快速转换 Utf8 到 Ansi 字符串，适用于长度短且主要是 Ansi 字符的字符串 }
+{* 快速转换 Utf8 到 Ansi 字符串，适用于长度短且主要是 Ansi 字符的字符串}
 {$ENDIF}
 
 {$IFDEF UNICODE}
@@ -786,27 +786,29 @@ function ConvertTextToEditorUnicodeText(const Text: string): string;
 {$ENDIF}
 
 function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
-{* 转换字符串为编辑器使用的字符串 }
+{* 转换字符串为编辑器使用的字符串}
 
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
-{* 转换编辑器使用的字符串为普通字符串 }
+{* 转换编辑器使用的字符串为普通字符串}
 
 {$IFDEF IDE_WIDECONTROL}
 
 function ConvertWTextToEditorText(const Text: WideString): AnsiString;
-{* 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用}
+{* 转换宽字符串为编辑器使用的字符串（Utf8），D2005~2007 版本使用}
 
 function ConvertEditorTextToWText(const Text: AnsiString): WideString;
-{* 转换编辑器使用的字符串(UTF8)为宽字符串，D2005~2007 版本使用 }
+{* 转换编辑器使用的字符串（Utf8）为宽字符串，D2005~2007 版本使用}
 
 {$ENDIF}
 
 {$IFDEF UNICODE}
+
 function ConvertTextToEditorTextW(const Text: string): AnsiString;
-{* 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用 }
+{* 转换字符串为编辑器使用的字符串（Utf8），D2009 以上版本使用}
 
 function ConvertEditorTextToTextW(const Text: AnsiString): string;
-{* 转换编辑器使用的字符串(UTF8)为 Unicode 字符串，D2009 以上版本使用 }
+{* 转换编辑器使用的字符串（Utf8）为 Unicode 字符串，D2009 以上版本使用}
+
 {$ENDIF}
 
 function CnOtaGetCurrentSourceFile: string;
@@ -6409,13 +6411,13 @@ end;
 
 {$IFDEF IDE_WIDECONTROL}
 
-// 转换宽字符串为编辑器使用的字符串(UTF8)，D2005~2007 版本使用
+// 转换宽字符串为编辑器使用的字符串（Utf8），D2005~2007 版本使用
 function ConvertWTextToEditorText(const Text: WideString): AnsiString;
 begin
   Result := Utf8Encode(Text);
 end;
 
-// 转换编辑器使用的字符串(UTF8)为宽字符串，D2005~2007 版本使用
+// 转换编辑器使用的字符串（Utf8）为宽字符串，D2005~2007 版本使用
 function ConvertEditorTextToWText(const Text: AnsiString): WideString;
 begin
   Result := UTF8Decode(Text);
@@ -6425,13 +6427,13 @@ end;
 
 {$IFDEF UNICODE}
 
-// 转换字符串为编辑器使用的字符串(UTF8)，D2009 以上版本使用
+// 转换字符串为编辑器使用的字符串（Utf8），D2009 以上版本使用
 function ConvertTextToEditorTextW(const Text: string): AnsiString;
 begin
   Result := Utf8Encode(Text);
 end;
 
-// 转换编辑器使用的字符串(UTF8)为 Unicode 字符串，D2009 以上版本使用
+// 转换编辑器使用的字符串（Utf8）为 Unicode 字符串，D2009 以上版本使用
 function ConvertEditorTextToTextW(const Text: AnsiString): string;
 begin
   Result := UTF8ToUnicodeString(Text);

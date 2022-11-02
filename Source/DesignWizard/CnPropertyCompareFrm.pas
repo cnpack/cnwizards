@@ -86,6 +86,7 @@ type
     FSelection: TList;
     FSameType: Boolean;
     FIgnoreProperties: TStringList;
+    FOnlyShowDiff: Boolean;
     procedure SetLeftComponent(const Value: TComponent);
     procedure SetRightComponent(const Value: TComponent);
     function GetSelectionCount: Integer;
@@ -106,6 +107,8 @@ type
     property RightObject: TComponent read FRightObject write SetRightComponent;
     property SelectionCount: Integer read GetSelectionCount;
 
+    property OnlyShowDiff: Boolean read FOnlyShowDiff write FOnlyShowDiff;
+    {* 记住的只显示不同属性的选项}
     property SameType: Boolean read FSameType write FSameType;
     {* 比较时是否要属性名与类型都相同才算相同，否则类型名相同即可}
     property IgnoreProperties: TStringList read FIgnoreProperties write SetIgnoreProperties;
@@ -312,6 +315,7 @@ const
   PROP_NAME_MIN_WIDTH = 60;
   DEF_IGNORE_PROP = 'Name,Left,Top,TabOrder';
 
+  csOnlyShowDiff = 'OnlyShowDiff';
   csSameType = 'SameType';
   csIgnoreProperties = 'IgnoreProperties';
 
@@ -330,6 +334,12 @@ var
   CompareForm: TCnPropertyCompareForm;
 begin
   CompareForm := TCnPropertyCompareForm.Create(Application);
+  if FManager <> nil then
+  begin
+    CompareForm.FOnlyDiff := FManager.OnlyShowDiff;
+    CompareForm.actOnlyDiff.Checked := FManager.OnlyShowDiff;
+  end;
+
   CompareForm.LeftObject := ALeft;
   CompareForm.RightObject := ARight;
   CompareForm.LoadListProperties;
@@ -457,6 +467,7 @@ end;
 
 procedure TCnPropertyCompareManager.LoadSettings(Ini: TCustomIniFile);
 begin
+  FOnlyShowDiff := Ini.ReadBool('', csOnlyShowDiff, FOnlyShowDiff);
   FSameType := Ini.ReadBool('', csSameType, FSameType);
   FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
 end;
@@ -486,6 +497,7 @@ end;
 
 procedure TCnPropertyCompareManager.SaveSettings(Ini: TCustomIniFile);
 begin
+  Ini.WriteBool('', csOnlyShowDiff, FOnlyShowDiff);
   Ini.WriteBool('', csSameType, FSameType);
   Ini.WriteString('', csIgnoreProperties, FIgnoreProperties.CommaText);
 end;
@@ -1395,7 +1407,6 @@ end;
 
 procedure TCnPropertyCompareForm.actRefreshExecute(Sender: TObject);
 begin
-  FOnlyDiff := False;
   actOnlyDiff.Checked := FOnlyDiff;
 
   LoadListProperties;
@@ -1960,6 +1971,8 @@ procedure TCnPropertyCompareForm.actOnlyDiffExecute(Sender: TObject);
 begin
   FOnlyDiff := not FOnlyDiff;
   actOnlyDiff.Checked := FOnlyDiff;
+  if FManager <> nil then
+    FManager.OnlyShowDiff := FOnlyDiff;
 
   LoadListProperties;
   ShowProperties;
