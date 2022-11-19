@@ -1831,10 +1831,13 @@ begin
           end;
         tkBegin, tkTry, tkCase, tkAsm, tkRecord:
           begin
-            if ProcStack.Count > 0 then
+            if (ProcStack.Count > 0) or ((ProcStack.Count = 0) and IsProgram and (MyTokenID = tkBegin)) then
             begin
               Inc(ProcIndent);
-              Result.PosKind := TCodePosKind(ProcStack.Peek);
+              if ProcStack.Count = 0 then // 表示是 program 或 library 里的主 begin
+                Result.PosKind := pkProcedure
+              else
+                Result.PosKind := TCodePosKind(ProcStack.Peek);
               IsAfterProcBegin := True;
             end;
 
