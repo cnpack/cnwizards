@@ -121,6 +121,24 @@ const
 type
   TControlHack = class(TControl);
 
+procedure AdjustShadowParam(var Params: TCreateParams; const AName: string);
+begin
+  if {$IFDEF DELPHI104_SYDNEY_UP} True or {$ENDIF} CheckWin8 or CheckWindowsNT then
+  begin
+    Params.WindowClass.style := CS_DBLCLKS;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('%s Create with NO Shadow.', [AName]);
+{$ENDIF}
+  end
+  else // 高低版本都不阴影
+  begin
+    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('%s Create with Shadow.', [AName]);
+{$ENDIF}
+  end;
+end;
+
 //==============================================================================
 // 浮动窗体
 //==============================================================================
@@ -133,20 +151,7 @@ begin
   Params.Style := Params.Style or WS_CHILDWINDOW or WS_MAXIMIZEBOX;
   Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
 
-  if {$IFDEF DELPHI104_SYDNEY_UP} True or {$ENDIF} CheckWin8 then
-  begin
-    Params.WindowClass.style := CS_DBLCLKS;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('%s Create with NO Shadow.', [ClassName]);
-{$ENDIF}
-  end
-  else
-  begin
-    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('%s Create with Shadow.', [ClassName]);
-{$ENDIF}
-  end;
+  AdjustShadowParam(Params, ClassName);
 end;
 
 procedure TCnFloatWindow.CreateWnd;
@@ -246,20 +251,7 @@ begin
     or LBS_NODATA or LBS_OWNERDRAWFIXED) and not (LBS_SORT or LBS_HASSTRINGS);
   Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
 
-  if {$IFDEF DELPHI104_SYDNEY_UP} True or {$ENDIF} CheckWin8 then
-  begin
-    Params.WindowClass.style := CS_DBLCLKS;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('%s Create with NO Shadow.', [ClassName]);
-{$ENDIF}
-  end
-  else
-  begin
-    Params.WindowClass.style := CS_DBLCLKS or CS_DROPSHADOW;
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('%s Create with Shadow.', [ClassName]);
-{$ENDIF}
-  end;
+  AdjustShadowParam(Params, ClassName);
 end;
 
 procedure TCnFloatListBox.CreateWnd;
