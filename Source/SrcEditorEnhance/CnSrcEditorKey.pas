@@ -540,7 +540,7 @@ var
   LineNo, CharIndex, ACount, LeftBracketIndex, MaxLen: Integer;
   NeedAutoMatch: Boolean;
   EditControl: TControl;
-  I, Element, LineFlag: Integer;
+  I, Element, LineFlag, C: Integer;
   KeyIsLeft: Boolean;
   ACharSet: TAnsiCharSet;
 begin
@@ -564,8 +564,19 @@ begin
         if ((AChar = '''') and (Char1 = '''')) or
           ((AChar = '"') and (Char1 = '"')) then
           KeyIsLeft := False
-        else
-          KeyIsLeft := True;
+        else // 判断本行的单引号数是否 0 或偶数个，是则 KeyIsLeft 为 True
+        begin
+          C := 0;
+          for I := 1 to CharIndex do
+          begin
+            if Char(AnsiLine[I]) = '''' then
+              Inc(C);
+          end;
+          KeyIsLeft := (C and 1) = 0;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('DoAutoMatch Quota Count %d. IsLeft %d', [C, Integer(KeyIsLeft)]);
+{$ENDIF}
+        end;
       end
       else
         KeyIsLeft := True;
