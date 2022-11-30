@@ -1591,6 +1591,9 @@ begin
 
   if (AChar = ';') and (Shift = []) then
   begin
+    if (View.Block <> nil) and (View.Block.IsValid) then // 有选择区则不动
+      Exit;
+
     EditPos := View.CursorPos;
 {$IFDEF UNICODE}
     // GetAttributeAtPos 需要的是 UTF8 的Pos，因此 D2009 下进行 Col 的 UTF8 转换
