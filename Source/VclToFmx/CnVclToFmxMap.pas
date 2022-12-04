@@ -931,11 +931,12 @@ const
   // 特定类或非特定类的属性或方法名的前后对应关系，供源码中替换用
   // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
   // 注意，冒号后可能类名有变化。如果对应的新名字里有 "."，则需要写明全类名
-  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..14] of string = (
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..15] of string = (
     'TPageControl.ActivePage:TTabControl.ActiveTab',
     'TPageControl.ActivePageIndex:TTabControl.TabIndex',
     'TRadioButton.Checked:IsChecked',
     'TCheckBox.Checked:IsChecked',
+    'TButton.Caption:Text',
     'TStringGrid.DefaultRowHeight:RowHeight',
     'TToolBar.ButtonWidth:ItemWidth',
     'TToolBar.ButtonHeight:ItemHeight',
