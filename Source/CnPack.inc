@@ -3093,6 +3093,10 @@
   {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 或以上支持 IDE 主题切换
 {$ENDIF}
 
+{$IFDEF DELPHIXE8_UP}
+  {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
+{$ENDIF}
+
 {$IFDEF DELPHIXE5_UP}
   {$DEFINE SUPPORT_MOBILE}              // XE5 开始支持移动开发
   {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
