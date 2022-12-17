@@ -155,11 +155,12 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..45] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..46] of string = (
     'TButton:TButton',        // 可视组件们
     'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
     'TCheckBox:TCheckBox',
+    'TCheckListBox:TListBox',
     'TColorBox:TColorBox',
     'TColorListBox:TColorListBox',
     'TComboBox:TComboEdit',
@@ -1379,6 +1380,12 @@ begin
       InProperties.Add('ButtonWidth = 23');
     if not ContainsHead('ButtonHeight', InProperties) then
       InProperties.Add('ButtonHeight = 22');
+  end
+  else if InComponentClass = 'TCheckListBox' then
+  begin
+    // TCheckListBox 映射成 TListBox，要把 ShowCheckboxes 置为 True
+    if not ContainsHead('ShowCheckboxes', InProperties) then
+      InProperties.Add('ShowCheckboxes = True');
   end;
 
   while InProperties.Count > 0 do
