@@ -163,8 +163,8 @@ const
     'Graphics', 'Controls', 'Forms', 'Dialogs', 'StdCtrls', 'ExtCtrls'
   );
 
-  UNIT_NAMES_DELETE: array[0..1] of string = (
-    'ComCtrls', 'Buttons'
+  UNIT_NAMES_DELETE: array[0..2] of string = (
+    'ComCtrls', 'Buttons', 'CheckLst'
   );
 
   FMX_PURE_UNIT_PAIRS: array[0..2] of string = (
@@ -224,7 +224,10 @@ begin
 
   // 删除，用于 FMX 中无同名单元的场合。如果对应有新的不同名单元，则由后面的组件映射而新增。
   for I := Low(UNIT_NAMES_DELETE) to High(UNIT_NAMES_DELETE) do
+  begin
+    Result := CnStringReplace(Result, UNIT_NAMES_DELETE[I] + ',', '', [crfIgnoreCase, crfReplaceAll, crfWholeWord]);
     Result := CnStringReplace(Result, UNIT_NAMES_DELETE[I], '', [crfIgnoreCase, crfReplaceAll, crfWholeWord]);
+  end;
 
   // 先把有 Vcl 前缀的统统替换成带 FMX 前缀的
   Result := StringReplace(Result, ' Vcl.', ' FMX.', [rfIgnoreCase, rfReplaceAll]);

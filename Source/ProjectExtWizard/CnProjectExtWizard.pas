@@ -622,7 +622,7 @@ begin
                     DlgSave.Filter := '*.fmx|*.fmx';
                     DlgSave.DefaultExt := '*.fmx';
 
-                    DlgSave.FileName := ChangeFileExt(DlgOpen.FileName, '.fmx');
+                    DlgSave.FileName := _CnChangeFileExt(_CnExtractFileName(DlgOpen.FileName), '.fmx');
                     if DlgSave.Execute then
                     begin
                       if VFIntf.SaveNewFile(PChar(DlgSave.FileName)) then
