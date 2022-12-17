@@ -155,7 +155,7 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..46] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..50] of string = (
     'TButton:TButton',        // 可视组件们
     'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
@@ -164,6 +164,10 @@ const
     'TColorBox:TColorBox',
     'TColorListBox:TColorListBox',
     'TComboBox:TComboEdit',
+    'TCnBitBtn:TButton',         // 几个 CnVcl 组件
+    'TCnButton:TButton',
+    'TCnEdit:TEdit',
+    'TCnSpeedButton:TSpeedButton',
     'TEdit:TEdit',
     'TGroupBox:TGroupBox',
     'THeader:THeader',
@@ -1384,8 +1388,7 @@ begin
   else if InComponentClass = 'TCheckListBox' then
   begin
     // TCheckListBox 映射成 TListBox，要把 ShowCheckboxes 置为 True
-    if not ContainsHead('ShowCheckboxes', InProperties) then
-      InProperties.Add('ShowCheckboxes = True');
+    OutProperties.Add('ShowCheckboxes = True');
   end;
 
   while InProperties.Count > 0 do
