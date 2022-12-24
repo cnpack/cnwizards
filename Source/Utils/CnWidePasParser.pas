@@ -601,7 +601,7 @@ begin
       ExpectElse := False;
 
       if {IsImpl and } (Lex.TokenID in [tkCompDirect]) or // Allow CompDirect
-        ((PrevTokenID <> tkAmpersand) and (Lex.TokenID in
+        ((not (PrevTokenID in [tkAmpersand, tkAddressOp])) and (Lex.TokenID in
         [tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,

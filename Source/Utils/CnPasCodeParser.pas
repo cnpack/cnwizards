@@ -651,7 +651,7 @@ begin
       ExpectElse := False;
 
       if (Lex.TokenID in [tkCompDirect]) // Allow CompDirect
-        or ((PrevTokenID <> tkAmpersand) and (Lex.TokenID in
+        or ((not (PrevTokenID in [tkAmpersand, tkAddressOp])) and (Lex.TokenID in
         [tkProcedure, tkFunction, tkConstructor, tkDestructor,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,
@@ -803,8 +803,8 @@ begin
                 ((PrevTokenID = tkSymbol) and (PrevTokenStr = '&'));
               if IsRecord then
               begin
-                // 处理 record helper for 的情形，但在implementation部分其end会被
-                // record内部的function/procedure给干掉，暂无解决方案。
+                // 处理 record helper for 的情形，但在 implementation 部分其 end 会被
+                // record 内部的 function/procedure 给干掉，暂无解决方案。
                 IsRecordHelper := False;
                 Lex.SaveToBookmark(Bookmark);
 
