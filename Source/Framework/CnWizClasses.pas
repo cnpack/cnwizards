@@ -1367,11 +1367,15 @@ end;
 procedure TCnSubMenuWizard.OnExecute(Sender: TObject);
 var
   I: Integer;
+  S: string;
 begin
-  if not Active or FExecuting then Exit;
+  if not Active or FExecuting then
+    Exit;
+
   FExecuting := True;
   try
     for I := 0 to FList.Count - 1 do
+    begin
       if TObject(FList[I]) = Sender then
       begin
         // 防止通过快捷键调用无效的工具
@@ -1386,13 +1390,18 @@ begin
               SubActionExecute(I);
           except
             on E: Exception do
-              DoHandleException(Format('%s.SubActions[%d].Execute: %s - %s',
-                [ClassName, I, E.ClassName, E.Message]));
+            begin
+              S := Format('%s.SubActions[%d].Execute: %s - %s',
+                [ClassName, I, E.ClassName, E.Message]);
+              ErrorDlg(S);
+              DoHandleException(S);
+            end;
           end;
         end;
 
         Exit;
       end;
+    end;
   finally
     FExecuting := False;
   end;
