@@ -302,7 +302,7 @@ begin
       if StringsMatch(I, L, FBefores) then
       begin
         S := L[I + FBefores.Count - 1];
-        Delete(S, Pos(FBefores[0], S), MaxInt);
+        Delete(S, Pos(FBefores[FBefores.Count - 1], S), MaxInt);
         // S 是目标行第一行的前导空格数或 Tab 数
 
         IsTab := (Length(S) > 0) and (S[1] = #9);
@@ -311,14 +311,14 @@ begin
         begin // 挨个插入
           if IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            PutToList(L, I, S + #9 + FAdds[K]);
+            PutToList(L, I + FBefores.Count - 1, S + #9 + FAdds[K]);
           end
           else if not IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            PutToList(L, I, S + '    ' + FAdds[K]); // 没法判断几个空格，只能先用四个代替
+            PutToList(L, I + FBefores.Count - 1, S + '    ' + FAdds[K]); // 没法判断几个空格，只能先用四个代替
           end
           else
-            PutToList(L, I, S + FAdds[K]);
+            PutToList(L, I + FBefores.Count - 1, S + FAdds[K]);
         end;
 
         L.SaveToFile(FileName);
