@@ -1103,8 +1103,13 @@ var
           BigImg.Draw(Btn.Glyph.Canvas, 0, 0, (Actn as TCustomAction).ImageIndex);
         end;
 
-        dmCnSharedImages.GetSpeedButtonGlyph(Btn, dmCnSharedImages.Images,
-          dmCnSharedImages.IdxUnknown);
+        if WizOptions.UseLargeIcon then
+          dmCnSharedImages.GetSpeedButtonGlyph(Btn, dmCnSharedImages.LargeImages,
+            dmCnSharedImages.IdxUnknown)
+        else
+          dmCnSharedImages.GetSpeedButtonGlyph(Btn, dmCnSharedImages.Images,
+            dmCnSharedImages.IdxUnknown);
+
         ShowHint := True;
         PopupMenu := Self.PopupMenu;
         if Hint = '' then
@@ -1492,16 +1497,26 @@ begin
   FFreqButton.AllowAllUp := True;
   FFreqButton.ShowHint := True;
   FFreqButton.Hint := SCnFloatPropBarFilterCaption;
-  dmCnSharedImages.GetSpeedButtonGlyph(FFreqButton, dmCnSharedImages.Images,
-    IdxFreq);
+
+  if WizOptions.UseLargeIcon then
+    dmCnSharedImages.GetSpeedButtonGlyph(FFreqButton, dmCnSharedImages.LargeImages,
+      IdxFreq)
+  else
+    dmCnSharedImages.GetSpeedButtonGlyph(FFreqButton, dmCnSharedImages.Images,
+      IdxFreq);
 
   FRenameButton := TSpeedButton.Create(Self);
   FRenameButton.Parent := Panel;
   FRenameButton.OnClick := OnRename;
   FRenameButton.ShowHint := True;
   FRenameButton.Hint := SCnFloatPropBarRenameCaption;
-  dmCnSharedImages.GetSpeedButtonGlyph(FRenameButton, dmCnSharedImages.Images,
-    IdxRename);
+
+  if WizOptions.UseLargeIcon then
+    dmCnSharedImages.GetSpeedButtonGlyph(FRenameButton, dmCnSharedImages.LargeImages,
+      IdxRename)
+  else
+    dmCnSharedImages.GetSpeedButtonGlyph(FRenameButton, dmCnSharedImages.Images,
+      IdxRename);
 
   if WizOptions.UseLargeIcon then
   begin
