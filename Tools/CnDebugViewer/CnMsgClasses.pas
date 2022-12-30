@@ -37,7 +37,7 @@ unit CnMsgClasses;
 interface
 
 uses
-  SysUtils, Classes, Windows, Messages, Contnrs, CnHashMap, CnDebugIntf;
+  SysUtils, Classes, Windows, Messages, Forms, Contnrs, CnHashMap, CnDebugIntf;
 
 const
   WM_USER_UPDATE_STORE = WM_USER + $C;
@@ -1049,17 +1049,20 @@ const
 var
   F: TFileStream;
   B: TBytes;
+  T, FN: string;
 {$ENDIF}
 begin
 {$IFDEF DEBUGDEBUGGER}
-  if not FileExists(DEBUG_FILE) then
-    F := TFileStream.Create(DEBUG_FILE, fmCreate)
+  FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
+  if not FileExists(FN) then
+    F := TFileStream.Create(FN, fmCreate)
   else
-    F := TFileStream.Create(DEBUG_FILE, fmOpenWrite);
+    F := TFileStream.Create(FN, fmOpenWrite);
 
   try
     F.Seek(0, soEnd);
-    B := TEncoding.Default.GetBytes(S);
+    T := DateTimeToStr(Now) + ': ' + S;
+    B := TEncoding.Default.GetBytes(T);
     F.Write(B, Length(B));
     F.Write(CRLF[1], 2);
   finally
