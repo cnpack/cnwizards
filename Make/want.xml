@@ -346,7 +346,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="d102t" depends="-d102t,-cw_final" description="Compile CnWizards for RAD Studio 10.2 Tokyo." />
   <target name="d103r1" depends="-d103r1,-cw_final" description="Compile CnWizards for RAD Studio 10.3.1 Rio or below." />
   <target name="d103r" depends="-d103r,-cw_final" description="Compile CnWizards for RAD Studio 10.3 Rio." />
-  <target name="d104s1" depends="-d104s,-cw_final" description="Compile CnWizards for RAD Studio 10.4.0 Sydney or below." />
+  <target name="d104s1" depends="-d104s1,-cw_final" description="Compile CnWizards for RAD Studio 10.4.0 Sydney or below." />
   <target name="d104s" depends="-d104s,-cw_final" description="Compile CnWizards for RAD Studio 10.4 Sydney." />
   <target name="d110a" depends="-d110a,-cw_final" description="Compile CnWizards for RAD Studio 11.0 Alexandria." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
