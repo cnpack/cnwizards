@@ -1456,7 +1456,8 @@ begin
           except
             on E: Exception do
             begin
-              if Item <> nil then Item.Free;
+              if Item <> nil then
+                Item.Free;
               DoHandleException(E.Message);
             end;
           end;

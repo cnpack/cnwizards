@@ -341,13 +341,13 @@ end;
 
 function TCnUsesToolsWizard.GetProjectFromModule(AModule: IOTAModule): IOTAProject;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := AModule.GetOwner(0);
-  for i := 1 to AModule.OwnerCount - 1 do
-    if AModule.GetOwner(i) = CnOtaGetCurrentProject then
+  for I := 1 to AModule.OwnerCount - 1 do
+    if AModule.GetOwner(I) = CnOtaGetCurrentProject then
     begin
-      Result := AModule.GetOwner(i);
+      Result := AModule.GetOwner(I);
       Break;
     end;
 end;
@@ -357,7 +357,7 @@ var
   Module: IOTAModule;
   Project: IOTAProject;
   ProjectGroup: IOTAProjectGroup;
-  i: Integer;
+  I: Integer;
 
   function DoBuildProjectAction: Boolean;
   var
@@ -438,9 +438,9 @@ begin
         begin
           ProjectGroup := CnOtaGetProjectGroup;
           Assert(Assigned(ProjectGroup));
-          for i := 0 to ProjectGroup.ProjectCount - 1 do
+          for I := 0 to ProjectGroup.ProjectCount - 1 do
           begin
-            Result := CompileProject(ProjectGroup.Projects[i]);
+            Result := CompileProject(ProjectGroup.Projects[I]);
             if not Result then
               Break;
           end;
@@ -463,21 +463,27 @@ var
   DcuName: string;
   ProjectInfo: TCnProjectUsesInfo;
   UsesInfo: TCnEmptyUsesInfo;
-  i: Integer;
+  I: Integer;
 
   function ModuleExists(const FileName: string): Boolean;
   var
-    i, j: Integer;
+    I, J: Integer;
   begin
-    for i := 0 to List.Count - 1 do
-      with TCnProjectUsesInfo(List[i]) do
-        for j := 0 to Units.Count - 1 do
-          if SameFileName(TCnEmptyUsesInfo(Units[i]).SourceFileName,
+    for I := 0 to List.Count - 1 do
+    begin
+      with TCnProjectUsesInfo(List[I]) do
+      begin
+        for J := 0 to Units.Count - 1 do
+        begin
+          if SameFileName(TCnEmptyUsesInfo(Units[I]).SourceFileName,
             FileName) then
           begin
             Result := True;
             Exit;
           end;
+        end;
+      end;
+    end;
     Result := False;
   end;
 
@@ -517,7 +523,7 @@ var
       UnitUsesInfo: TCnUnitUsesInfo;
       DcuName: string;
       SourceFileName: string;
-      i: Integer;
+      I: Integer;
     begin
       Result := True;
       if ProcessedUnitNames.IndexOf(LowerCase(AUnitName)) <> -1 then
@@ -551,16 +557,16 @@ var
 
       UnitUsesInfo := TCnUnitUsesInfo.Create(DcuName);
       try
-        for i := 0 to UnitUsesInfo.IntfUsesCount - 1 do
+        for I := 0 to UnitUsesInfo.IntfUsesCount - 1 do
         begin
-          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[i]);
+          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[I]);
           if not Result then
             Exit;
         end;
 
-        for i := 0 to UnitUsesInfo.ImplUsesCount - 1 do
+        for I := 0 to UnitUsesInfo.ImplUsesCount - 1 do
         begin
-          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[i]);
+          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[I]);
           if not Result then
             Exit;
         end;
@@ -573,20 +579,20 @@ var
     function ProcessModuleDependencies(const ADcuName: string): Boolean;
     var
       UnitUsesInfo: TCnUnitUsesInfo;
-      i: Integer;
+      I: Integer;
     begin
       UnitUsesInfo := TCnUnitUsesInfo.Create(ADcuName);
       try
-        for i := 0 to UnitUsesInfo.IntfUsesCount - 1 do
+        for I := 0 to UnitUsesInfo.IntfUsesCount - 1 do
         begin
-          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[i]);
+          Result := RecursiveProcessUnit(UnitUsesInfo.IntfUses[I]);
           if not Result then
             Exit;
         end;
 
-        for i := 0 to UnitUsesInfo.ImplUsesCount - 1 do
+        for I := 0 to UnitUsesInfo.ImplUsesCount - 1 do
         begin
-          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[i]);
+          Result := RecursiveProcessUnit(UnitUsesInfo.ImplUses[I]);
           if not Result then
             Exit;
         end;
@@ -595,8 +601,9 @@ var
       end;
       Result := True;
     end;
+
   var
-    i: Integer;
+    I: Integer;
     ModuleInfo: IOTAModuleInfo;
     Opened: Boolean;
   begin
@@ -605,9 +612,9 @@ var
     ProjectInfo := TCnProjectUsesInfo.Create;
     ProjectInfo.Project := AProject;
     try
-      for i := 0 to AProject.GetModuleCount - 1 do
+      for I := 0 to AProject.GetModuleCount - 1 do
       begin
-        ModuleInfo := AProject.GetModule(i);
+        ModuleInfo := AProject.GetModule(I);
         if not Assigned(ModuleInfo) or not IsPas(ModuleInfo.FileName) or
           ModuleExists(ModuleInfo.FileName) then
           Continue;
@@ -647,9 +654,9 @@ var
       begin
         ProcessedUnitNames := TStringList.Create;
         try
-          for i := 0 to AProject.GetModuleCount - 1 do
+          for I := 0 to AProject.GetModuleCount - 1 do
           begin
-            ModuleInfo := AProject.GetModule(i);
+            ModuleInfo := AProject.GetModule(I);
             if not Assigned(ModuleInfo) or not IsPas(ModuleInfo.FileName) then
               Continue;
 
@@ -671,8 +678,9 @@ var
     finally
       if not Result then
         ProjectInfo.Free;
-    end;                
+    end;
   end;
+
 begin
   Result := False;
   try
@@ -713,9 +721,9 @@ begin
       begin
         ProjectGroup := CnOtaGetProjectGroup;
         Assert(Assigned(ProjectGroup));
-        for i := 0 to ProjectGroup.ProjectCount - 1 do
+        for I := 0 to ProjectGroup.ProjectCount - 1 do
         begin
-          Project := ProjectGroup.GetProject(i);
+          Project := ProjectGroup.GetProject(I);
           Result := ProcessAProject(Project, AKind = ukOpenedUnits, FProcessDependencies);
           if not Result then
             Break;
@@ -790,7 +798,7 @@ procedure TCnUsesToolsWizard.GetCompRefUnits(AModule: IOTAModule; AProject:
 var
   FormEditor: IOTAFormEditor;
   Root: TComponent;
-  i: Integer;
+  I: Integer;
 
   // 添加组件及其父类的定义单元
   procedure DoAddCompRef(ACls: TClass);
@@ -810,7 +818,7 @@ var
   procedure DoAddPropRef(AObj: TPersistent);
   var
     PropList: PPropList;
-    Count, i, j: Integer;
+    Count, I, J: Integer;
     Obj: TObject;
     FormName, UnitName: string;
   begin
@@ -825,7 +833,7 @@ var
       GetMem(PropList, Count * SizeOf(PPropInfo));
       try
         GetPropList(AObj.ClassInfo, [tkClass], PropList);
-        for i := 0 to Count - 1 do
+        for I := 0 to Count - 1 do
         begin
           Obj := TObject(GetOrdProp(AObj, PropList[I]));
           if Obj <> nil then
@@ -835,11 +843,11 @@ var
               if (TComponent(Obj).Owner <> nil) and (TComponent(Obj).Owner <> Root) then
               begin
                 FormName := TComponent(Obj).Owner.Name;
-                for j := 0 to AProject.GetModuleCount - 1 do
-                  if SameText(AProject.GetModule(j).FormName, FormName) then
+                for J := 0 to AProject.GetModuleCount - 1 do
+                  if SameText(AProject.GetModule(J).FormName, FormName) then
                   begin
                     UnitName := _CnChangeFileExt(_CnExtractFileName(
-                      AProject.GetModule(j).FileName), '');
+                      AProject.GetModule(J).FileName), '');
                     if Units.IndexOf(UnitName) < 0 then
                       Units.Add(UnitName);
                   end;
@@ -847,8 +855,8 @@ var
             end
             else if Obj is TCollection then
             begin
-              for j := 0 to TCollection(Obj).Count - 1 do
-                DoAddPropRef(TCollection(Obj).Items[j]);
+              for J := 0 to TCollection(Obj).Count - 1 do
+                DoAddPropRef(TCollection(Obj).Items[J]);
             end
             else if Obj is TPersistent then
             begin
@@ -870,10 +878,10 @@ begin
       Root := CnOtaGetRootComponentFromEditor(FormEditor);
       if Assigned(Root) then
       begin
-        for i := 0 to Root.ComponentCount - 1 do
+        for I := 0 to Root.ComponentCount - 1 do
         begin
-          DoAddCompRef(Root.Components[i].ClassType);
-          DoAddPropRef(Root.Components[i]);
+          DoAddCompRef(Root.Components[I].ClassType);
+          DoAddPropRef(Root.Components[I]);
         end;
       end;
     end;
@@ -886,7 +894,7 @@ end;
 procedure TCnUsesToolsWizard.CheckUnits(List: TObjectList);
 var
   UnitList, CompRef: TStringList;
-  i, j, k, u: Integer;
+  I, J, K, U: Integer;
   FileName: string;
   Kinds: TCnUsesKinds;
   Checked: Boolean;
@@ -896,32 +904,32 @@ begin
   try
     // 取得所有引用到的单元
     UnitList.Sorted := True;
-    for i := 0 to List.Count - 1 do
-      for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
-        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
+    for I := 0 to List.Count - 1 do
+      for J := 0 to TCnProjectUsesInfo(List[I]).Units.Count - 1 do
+        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[I]).Units[J]) do
         begin
-          for k := 0 to IntfCount - 1 do
-            if UnitList.IndexOf(IntfItems[k].Name) < 0 then
-              UnitList.AddObject(IntfItems[k].Name, TObject(Pointer(Project)));
-          for k := 0 to ImplCount - 1 do
-            if UnitList.IndexOf(ImplItems[k].Name) < 0 then
-              UnitList.AddObject(ImplItems[k].Name, TObject(Pointer(Project)));
+          for K := 0 to IntfCount - 1 do
+            if UnitList.IndexOf(IntfItems[K].Name) < 0 then
+              UnitList.AddObject(IntfItems[K].Name, TObject(Pointer(Project)));
+          for K := 0 to ImplCount - 1 do
+            if UnitList.IndexOf(ImplItems[K].Name) < 0 then
+              UnitList.AddObject(ImplItems[K].Name, TObject(Pointer(Project)));
         end;
 
     // 分析单元类型
-    for u := 0 to UnitList.Count - 1 do
+    for U := 0 to UnitList.Count - 1 do
     begin
       Kinds := [];
 
-      if MatchInListWithExpr(FCleanList, UnitList[u]) then
+      if MatchInListWithExpr(FCleanList, UnitList[U]) then
         Include(Kinds, ukInCleanList);
-      if MatchInListWithExpr(FIgnoreList, UnitList[u]) then
+      if MatchInListWithExpr(FIgnoreList, UnitList[U]) then
         Include(Kinds, ukInIgnoreList);
 
-      FileName := GetFileNameFromModuleName(UnitList[u],
-        IOTAProject(Pointer(UnitList.Objects[u])));
+      FileName := GetFileNameFromModuleName(UnitList[U],
+        IOTAProject(Pointer(UnitList.Objects[U])));
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Check Unit ' + UnitList[u] + ': ' + FileName);
+      CnDebugger.LogMsg('Check Unit ' + UnitList[U] + ': ' + FileName);
     {$ENDIF}
 
       if FileName = '' then
@@ -943,23 +951,27 @@ begin
       else
         Checked := True;
 
-      for i := 0 to List.Count - 1 do
-        for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
-          with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
+      for I := 0 to List.Count - 1 do
+      begin
+        for J := 0 to TCnProjectUsesInfo(List[I]).Units.Count - 1 do
+        begin
+          with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[I]).Units[J]) do
           begin
-            for k := 0 to IntfCount - 1 do
-              if SameText(UnitList[u], IntfItems[k].Name) then
+            for K := 0 to IntfCount - 1 do
+              if SameText(UnitList[U], IntfItems[K].Name) then
               begin
-                IntfItems[k].Kinds := Kinds;
-                IntfItems[k].Checked := Checked;
+                IntfItems[K].Kinds := Kinds;
+                IntfItems[K].Checked := Checked;
               end;
-            for k := 0 to ImplCount - 1 do
-              if SameText(UnitList[u], ImplItems[k].Name) then
+            for K := 0 to ImplCount - 1 do
+              if SameText(UnitList[U], ImplItems[K].Name) then
               begin
-                ImplItems[k].Kinds := Kinds;
-                ImplItems[k].Checked := Checked;
+                ImplItems[K].Kinds := Kinds;
+                ImplItems[K].Checked := Checked;
               end;
           end;
+        end;
+      end;
     end;
 
   finally
@@ -969,30 +981,39 @@ begin
   // 分析每个单元的组件引用单元
   CompRef := TStringList.Create;
   try
-    for i := 0 to List.Count - 1 do
-      for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
-        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]) do
+    for I := 0 to List.Count - 1 do
+    begin
+      for J := 0 to TCnProjectUsesInfo(List[I]).Units.Count - 1 do
+      begin
+        with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[I]).Units[J]) do
         begin
           CompRef.Clear;
           GetCompRefUnits(CnOtaGetModule(SourceFileName), Project, CompRef);
           if CompRef.Count > 0 then
           begin
-            for k := 0 to IntfCount - 1 do
-              if CompRef.IndexOf(IntfItems[k].Name) >= 0 then
+            for K := 0 to IntfCount - 1 do
+            begin
+              if CompRef.IndexOf(IntfItems[K].Name) >= 0 then
               begin
-                IntfItems[k].Kinds := IntfItems[k].Kinds + [tkCompRef];
-                if FIgnoreCompRef and not (ukInCleanList in IntfItems[k].Kinds) then
-                  IntfItems[k].Checked := False;
+                IntfItems[K].Kinds := IntfItems[K].Kinds + [tkCompRef];
+                if FIgnoreCompRef and not (ukInCleanList in IntfItems[K].Kinds) then
+                  IntfItems[K].Checked := False;
               end;
-            for k := 0 to ImplCount - 1 do
-              if CompRef.IndexOf(ImplItems[k].Name) >= 0 then
+            end;
+
+            for K := 0 to ImplCount - 1 do
+            begin
+              if CompRef.IndexOf(ImplItems[K].Name) >= 0 then
               begin
-                ImplItems[k].Kinds := ImplItems[k].Kinds + [tkCompRef];
-                if FIgnoreCompRef and not (ukInCleanList in ImplItems[k].Kinds) then
-                  ImplItems[k].Checked := False;
+                ImplItems[K].Kinds := ImplItems[K].Kinds + [tkCompRef];
+                if FIgnoreCompRef and not (ukInCleanList in ImplItems[K].Kinds) then
+                  ImplItems[K].Checked := False;
               end;
+            end;
           end;
         end;
+      end;
+    end;
   finally
     CompRef.Free;
   end;
@@ -1328,7 +1349,7 @@ procedure TCnUsesToolsWizard.CleanUnitUses(List: TObjectList);
 
 var
   Intf, Impl, Logs: TStringList;
-  i, j, k: Integer;
+  I, J, K: Integer;
   UCnt, Cnt: Integer;
   FileName: string;
   Buffer: IOTAEditBuffer;
@@ -1346,21 +1367,21 @@ begin
     Impl := TStringList.Create;
     Logs := TStringList.Create;
 
-    for i := 0 to List.Count - 1 do
+    for I := 0 to List.Count - 1 do
     begin
-      for j := 0 to TCnProjectUsesInfo(List[i]).Units.Count - 1 do
+      for J := 0 to TCnProjectUsesInfo(List[I]).Units.Count - 1 do
       begin
         // 开始处理单个文件
-        UsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[i]).Units[j]);
+        UsesInfo := TCnEmptyUsesInfo(TCnProjectUsesInfo(List[I]).Units[J]);
         Intf.Clear;
         Impl.Clear;
 
-        for k := 0 to UsesInfo.IntfCount - 1 do
-          if UsesInfo.IntfItems[k].Checked then
-            Intf.Add(UsesInfo.IntfItems[k].Name);
-        for k := 0 to UsesInfo.ImplCount - 1 do
-          if UsesInfo.ImplItems[k].Checked then
-            Impl.Add(UsesInfo.ImplItems[k].Name);
+        for K := 0 to UsesInfo.IntfCount - 1 do
+          if UsesInfo.IntfItems[K].Checked then
+            Intf.Add(UsesInfo.IntfItems[K].Name);
+        for K := 0 to UsesInfo.ImplCount - 1 do
+          if UsesInfo.ImplItems[K].Checked then
+            Impl.Add(UsesInfo.ImplItems[K].Name);
 
 {$IFDEF DEBUG}
         Cndebugger.LogFmt('CleanUnitUses Source %s Intf %d, Impl %d',

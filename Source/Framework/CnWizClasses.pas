@@ -1367,7 +1367,6 @@ end;
 procedure TCnSubMenuWizard.OnExecute(Sender: TObject);
 var
   I: Integer;
-  S: string;
 begin
   if not Active or FExecuting then
     Exit;
@@ -1391,10 +1390,8 @@ begin
           except
             on E: Exception do
             begin
-              S := Format('%s.SubActions[%d].Execute: %s - %s',
-                [ClassName, I, E.ClassName, E.Message]);
-              ErrorDlg(S);
-              DoHandleException(S);
+              DoHandleException(Format('%s.SubActions[%d].Execute: %s - %s',
+                [ClassName, I, E.ClassName, E.Message]));
             end;
           end;
         end;

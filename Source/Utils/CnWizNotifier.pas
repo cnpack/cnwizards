@@ -1003,9 +1003,9 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FFormEditorIntfs.Count, 'Remove FormEditorNotifiers');
 {$ENDIF}
-  for i := FFormEditorIntfs.Count - 1 downto 0 do
+  for I := FFormEditorIntfs.Count - 1 downto 0 do
   begin
-    with TCnFormEditorNotifier(FFormEditorIntfs[i]) do
+    with TCnFormEditorNotifier(FFormEditorIntfs[I]) do
     begin
       if Assigned(FormEditor) then
       begin
@@ -1021,9 +1021,9 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FSourceEditorIntfs.Count, 'Remove SourceEditorNotifiers');
 {$ENDIF}
-  for i := FSourceEditorIntfs.Count - 1 downto 0 do
+  for I := FSourceEditorIntfs.Count - 1 downto 0 do
   begin
-    with TCnSourceEditorNotifier(FSourceEditorIntfs[i]) do
+    with TCnSourceEditorNotifier(FSourceEditorIntfs[I]) do
     begin
       if Assigned(SourceEditor) then
       begin
@@ -1101,13 +1101,13 @@ end;
 function TCnWizNotifierServices.IndexOf(List: TList;
   Notifier: TMethod): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to List.Count - 1 do
-    if CompareMem(List[i], @Notifier, SizeOf(TMethod)) then
+  for I := 0 to List.Count - 1 do
+    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -1131,7 +1131,7 @@ end;
 procedure TCnWizNotifierServices.FileNotification(
   NotifyCode: TOTAFileNotification; const FileName: string);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('FileNotification: %s (%s)',
@@ -1145,12 +1145,12 @@ begin
   FormEditorFileNotification(NotifyCode, FileName);
   if FFileNotifiers <> nil then
   begin
-    for i := FFileNotifiers.Count - 1 downto 0 do
+    for I := FFileNotifiers.Count - 1 downto 0 do
     try
-      with PCnWizNotifierRecord(FFileNotifiers[i])^ do
+      with PCnWizNotifierRecord(FFileNotifiers[I])^ do
         TCnWizFileNotifier(Notifier)(NotifyCode, FileName);
     except
-      DoHandleException('TCnWizNotifierServices.FileNotification[' + IntToStr(i) + ']');
+      DoHandleException('TCnWizNotifierServices.FileNotification[' + IntToStr(I) + ']');
     end;
   end;
 
@@ -1225,7 +1225,7 @@ end;
 procedure TCnWizNotifierServices.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('AfterCompile: Succedded: %d IsCodeInsight: %d',
@@ -1236,12 +1236,12 @@ begin
 
   if FAfterCompileNotifiers <> nil then
   begin
-    for i := FAfterCompileNotifiers.Count - 1 downto 0 do
+    for I := FAfterCompileNotifiers.Count - 1 downto 0 do
     try
-      with PCnWizNotifierRecord(FAfterCompileNotifiers[i])^ do
+      with PCnWizNotifierRecord(FAfterCompileNotifiers[I])^ do
         TCnWizAfterCompileNotifier(Notifier)(Succeeded, IsCodeInsight);
     except
-      DoHandleException('TCnWizNotifierServices.AfterCompile[' + IntToStr(i) + ']');
+      DoHandleException('TCnWizNotifierServices.AfterCompile[' + IntToStr(I) + ']');
     end;
   end;
 
@@ -1252,7 +1252,7 @@ end;
 procedure TCnWizNotifierServices.BeforeCompile(const Project: IOTAProject;
   IsCodeInsight: Boolean; var Cancel: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   if Project = nil then
@@ -1270,12 +1270,12 @@ begin
 
   if FBeforeCompileNotifiers <> nil then
   begin
-    for i := FBeforeCompileNotifiers.Count - 1 downto 0 do
+    for I := FBeforeCompileNotifiers.Count - 1 downto 0 do
     try
-      with PCnWizNotifierRecord(FBeforeCompileNotifiers[i])^ do
+      with PCnWizNotifierRecord(FBeforeCompileNotifiers[I])^ do
         TCnWizBeforeCompileNotifier(Notifier)(Project, IsCodeInsight, Cancel);
     except
-      DoHandleException('TCnWizNotifierServices.BeforeCompile[' + IntToStr(i) + ']');
+      DoHandleException('TCnWizNotifierServices.BeforeCompile[' + IntToStr(I) + ']');
     end;
   end;
 end;
@@ -1299,7 +1299,7 @@ end;
 procedure TCnWizNotifierServices.SourceEditorNotify(SourceEditor: IOTASourceEditor;
   NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView = nil);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('SourceEditorNotifier: %s (%s)',
@@ -1308,12 +1308,12 @@ begin
 {$ENDIF}
   if FSourceEditorNotifiers <> nil then
   begin
-    for i := FSourceEditorNotifiers.Count - 1 downto 0 do
+    for I := FSourceEditorNotifiers.Count - 1 downto 0 do
     try
-      with PCnWizNotifierRecord(FSourceEditorNotifiers[i])^ do
+      with PCnWizNotifierRecord(FSourceEditorNotifiers[I])^ do
         TCnWizSourceEditorNotifier(Notifier)(SourceEditor, NotifyType, EditView);
     except
-      DoHandleException('TCnWizNotifierServices.SourceEditorNotify[' + IntToStr(i) + ']');
+      DoHandleException('TCnWizNotifierServices.SourceEditorNotify[' + IntToStr(I) + ']');
     end;
   end;
 end;
@@ -1360,7 +1360,7 @@ end;
 procedure TCnWizNotifierServices.SourceEditorFileNotification(
   NotifyCode: TOTAFileNotification; const FileName: string);
 var
-  i, j: Integer;
+  I, J: Integer;
   Module: IOTAModule;
   Editor: IOTAEditor;
   SourceEditor: IOTASourceEditor;
@@ -1368,12 +1368,14 @@ begin
   if (NotifyCode = ofnFileOpened) or (NotifyCode = ofnFileClosing) then
   begin
     Module := CnOtaGetModule(FileName);
-    if not Assigned(Module) then Exit;
-    for i := 0 to Module.GetModuleFileCount - 1 do
+    if not Assigned(Module) then
+      Exit;
+
+    for I := 0 to Module.GetModuleFileCount - 1 do
     begin
       Editor := nil;
       try
-        Editor := Module.GetModuleFileEditor(i);
+        Editor := Module.GetModuleFileEditor(I);
         // BCB 5 中调用此函数可能会出访问冲突，故以此来屏蔽，以下类似。
       except
         ;
@@ -1394,14 +1396,14 @@ begin
           CnDebugger.LogMsg('SourceEditorClosing');
         {$ENDIF}
           SourceEditorNotify(SourceEditor, setClosing);
-          for j := 0 to FSourceEditorIntfs.Count - 1 do
-            if TCnSourceEditorNotifier(FSourceEditorIntfs[j]).SourceEditor =
+          for J := 0 to FSourceEditorIntfs.Count - 1 do
+            if TCnSourceEditorNotifier(FSourceEditorIntfs[J]).SourceEditor =
               SourceEditor then
             begin
             {$IFDEF DEBUG}
               CnDebugger.LogMsg('Remove SourceEditorNotifier in FileNotification');
             {$ENDIF}
-              TCnSourceEditorNotifier(FSourceEditorIntfs[j]).ClosingNotified := True;
+              TCnSourceEditorNotifier(FSourceEditorIntfs[J]).ClosingNotified := True;
               Break;
             end;
         end;
@@ -1429,7 +1431,7 @@ end;
 procedure TCnWizNotifierServices.FormEditorNotify(FormEditor: IOTAFormEditor;
   NotifyType: TCnWizFormEditorNotifyType);
 var
-  i: Integer;
+  I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('FormEditorNotify: %s (%s)',
@@ -1452,7 +1454,7 @@ procedure TCnWizNotifierServices.FormEditorComponentRenamed(
   FormEditor: IOTAFormEditor; ComponentHandle: TOTAHandle; const OldName,
   NewName: string);
 var
-  i: Integer;
+  I: Integer;
   NotifyType: TCnWizFormEditorNotifyType;
   Comp: TComponent;
   NotifyObj: TCnWizCompNotifyObj;
@@ -1514,7 +1516,7 @@ end;
 
 procedure TCnWizNotifierServices.CheckCompNotifyObj;
 var
-  i: Integer;
+  I: Integer;
   NotifyObj: TCnWizCompNotifyObj;
 begin
   if FFormEditorNotifiers <> nil then
@@ -1553,7 +1555,7 @@ var
   Module: IOTAModule;
   Editor: IOTAEditor;
   FormEditor: IOTAFormEditor;
-  i, j, k: Integer;
+  I, J, k: Integer;
   Exists: Boolean;
 begin
   Assert(Assigned(BorlandIDEServices));
@@ -1561,14 +1563,14 @@ begin
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
   Assert(Assigned(ModuleServices));
 
-  for i := 0 to ModuleServices.ModuleCount - 1 do
+  for I := 0 to ModuleServices.ModuleCount - 1 do
   begin
-    Module := ModuleServices.Modules[i];
-    for j := 0 to Module.GetModuleFileCount - 1 do
+    Module := ModuleServices.Modules[I];
+    for J := 0 to Module.GetModuleFileCount - 1 do
     begin
       Editor := nil;
       try
-        Editor := Module.GetModuleFileEditor(j);
+        Editor := Module.GetModuleFileEditor(J);
       except
         ;
       end;
