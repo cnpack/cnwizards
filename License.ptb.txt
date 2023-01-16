@@ -1,6 +1,6 @@
 Contrato de Licença CnWizards
 
-CnPack IDE Wizards (CnWizards) tem Copyright 2001-2022 pela equipe CnPack e vários outros autores que enviaram seus códigos para inclusão. Este contrato de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores a respeito de seus respectivos direitos autorais e termos.
+CnPack IDE Wizards (CnWizards) tem Copyright 2001-2023 pela equipe CnPack e vários outros autores que enviaram seus códigos para inclusão. Este contrato de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores a respeito de seus respectivos direitos autorais e termos.
 
 As regras que regem o uso do código-fonte CnWizards e CnWizards são derivadas da definição oficial de Código Aberto, disponível em http://www.opensource.org. As condições e limitações são as seguintes:
 

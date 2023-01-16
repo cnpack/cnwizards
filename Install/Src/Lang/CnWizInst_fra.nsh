@@ -1,7 +1,7 @@
 ;******************************************************************************
 ;                        CnPack For Delphi/C++Builder
 ;                   A Free, Open Source Project from China
-;                     (C)Copyright 2001-2022 CnPack Team
+;                     (C)Copyright 2001-2023 CnPack Team
 ;******************************************************************************
 ; Fichier en anglais pour le script d'installation de CnWizards
 ; Veuillez utiliser le format ANSI pour enregistrer le fichier de langue.
