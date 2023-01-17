@@ -155,7 +155,7 @@ var
 
 const
   // VCL 与 FMX 组件的对应转换关系，同名优先
-  VCL_FMX_CLASS_PAIRS: array[0..50] of string = (
+  VCL_FMX_CLASS_PAIRS: array[0..51] of string = (
     'TButton:TButton',        // 可视组件们
     'TBitBtn:TButton',           // 图片会丢失
     'TCalendar:TCalendar',
@@ -182,6 +182,7 @@ const
     'TPanel:TPanel',
     'TProgressBar:TProgressBar',
     'TRadioButton:TRadioButton',
+    'TRichEdit:TMemo',
     'TScrollBar:TScrollBar',
     'TScrollBox:TScrollBox',
     'TSpeedButton:TSpeedButton',
@@ -1223,6 +1224,8 @@ begin
   OutUnits.Clear;
   OutUnits.Sorted := True;
   OutUnits.Duplicates := dupIgnore;
+  OutUnits.Add('System.Types');
+  OutUnits.Add('System.UITypes');
   OutUnits.Add('FMX.Types');
   OutUnits.Add('FMX.Controls');
   OutUnits.Add('FMX.Forms');
