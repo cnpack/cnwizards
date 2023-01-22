@@ -253,6 +253,15 @@ begin
     end;
   end;
 
+  // 如果 Result 末尾是逗号或者逗号加空格，则需要去除
+  if Length(Result) > 1 then
+  begin
+    if Result[Length(Result)] = ',' then
+      Delete(Result, Length(Result), 1)
+    else if (Result[Length(Result)] = ' ') and (Result[Length(Result) - 1] = ',') then
+      Delete(Result, Length(Result) - 1, 2);
+  end;
+
   // 再把新增的合并进去
   for I := 0 to UsesList.Count - 1 do
   begin
