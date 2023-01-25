@@ -1498,7 +1498,7 @@ end;
 
 function TCnUsesToolsWizard.GetState: TWizardState;
 begin
-  if CnOtaGetProjectGroup <> nil then
+  if Active then
     Result := [wsEnabled]
   else
     Result := [];
