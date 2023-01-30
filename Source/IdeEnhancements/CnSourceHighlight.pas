@@ -141,11 +141,11 @@ const
   csCppFlowTokenKinds: TIdentDirect = [ctkgoto, ctkreturn, ctkcontinue, ctkbreak];
   // If change here, CppCodeParser also need change.
 
-  csPasCompDirectiveTokenStr: array[0..7] of TCnIdeTokenString = // 并非全匹配而是开头匹配
-    ('{$IF ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND', '{$REGION', '{$ENDREGION');
+  csPasCompDirectiveTokenStr: array[0..8] of TCnIdeTokenString = // 并非全匹配而是开头匹配
+    ('{$IF ', '{$IFOPT ', '{$IFDEF ', '{$IFNDEF ', '{$ELSE', '{$ENDIF', '{$IFEND', '{$REGION', '{$ENDREGION');
 
-  csPasCompDirectiveTypes: array[0..7] of TCnCompDirectiveType =
-    (ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd, ctRegion, ctEndRegion);
+  csPasCompDirectiveTypes: array[0..8] of TCnCompDirectiveType =
+    (ctIf, ctIfOpt, ctIfDef, ctIfNDef, ctElse, ctEndIf, ctIfEnd, ctRegion, ctEndRegion);
 
   csCppCompDirectiveKinds: TIdentDirect = [ctkdirif, ctkdirifdef, ctkdirifndef,
     ctkdirelif, ctkdirelse, ctkdirendif];
@@ -154,7 +154,7 @@ const
   csCppCompDirectiveRegionTokenStr: array[0..1] of TCnIdeTokenString =
     ('region', 'end_region');
 
-  CPP_PAS_REGION_TYPE_OFFSET = 6;
+  CPP_PAS_REGION_TYPE_OFFSET = 7; // 对应 ctRegion 的位置
 
 type
   TCnLineStyle = (lsSolid, lsDot, lsSmallDot, lsTinyDot);
@@ -2280,7 +2280,7 @@ begin
   end
   else
   begin
-    // Pascal 代码，IF/IFDEF/IFNDEF 与 ENDIF/IFEND 配对，ELSE 在中间
+    // Pascal 代码，IF/IFOPT/IFDEF/IFNDEF 与 ENDIF/IFEND 配对，ELSE 在中间
     try
       for I := 0 to FCompDirectiveTokenList.Count - 1 do
       begin
@@ -2288,7 +2288,7 @@ begin
 {$IFDEF DEBUG}
 //      CnDebugger.LogFmt('CompDirectiveInfo Check CompDirectivtType: %d', [Ord(PToken.CompDirectivtType)]);
 {$ENDIF}
-        if PToken.CompDirectiveType in [ctIf, ctIfDef, ctIfNDef, ctRegion] then
+        if PToken.CompDirectiveType in [ctIf, ctIfOpt, ctIfDef, ctIfNDef, ctRegion] then
         begin
           Pair := TCnCompDirectivePair.Create;
           Pair.StartToken := PToken;

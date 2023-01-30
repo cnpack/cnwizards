@@ -55,7 +55,7 @@ const
   CN_TOKEN_MAX_SIZE = 63;
 
 type
-  TCnCompDirectiveType = (ctNone, ctIf, ctIfDef, ctIfNDef, ctElse, ctEndIf,
+  TCnCompDirectiveType = (ctNone, ctIf, ctIfOpt, ctIfDef, ctIfNDef, ctElse, ctEndIf,
     ctIfEnd, ctRegion, ctEndRegion);
 
   TCnUseToken = class(TObject)
