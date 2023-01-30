@@ -4466,7 +4466,9 @@ begin
                     Font.Style := Font.Style + [fsUnderline];
 {$IFDEF BDS}
                   // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
+                  Brush.Style := bsClear;
                   EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
+
                   for J := 0 to Length(Token.Token) - 1 do
                   begin
                     EditPos.Col := EditPosColBaseForAttribute + J;
