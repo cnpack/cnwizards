@@ -163,8 +163,8 @@ const
     'Graphics', 'Controls', 'Forms', 'Dialogs', 'StdCtrls', 'ExtCtrls'
   );
 
-  UNIT_NAMES_DELETE: array[0..2] of string = (
-    'ComCtrls', 'Buttons', 'CheckLst'
+  UNIT_NAMES_DELETE: array[0..3] of string = (
+    'ComCtrls', 'Buttons', 'CheckLst', 'FileCtrl'
   );
 
   FMX_PURE_UNIT_PAIRS: array[0..3] of string = (
