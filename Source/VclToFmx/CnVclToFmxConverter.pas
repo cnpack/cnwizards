@@ -167,10 +167,11 @@ const
     'ComCtrls', 'Buttons', 'CheckLst'
   );
 
-  FMX_PURE_UNIT_PAIRS: array[0..2] of string = (
+  FMX_PURE_UNIT_PAIRS: array[0..3] of string = (
     'Clipbrd:FMX.Clipboard',
     'Sample.Spin:FMX.SpinBox',
-    'Spin:FMX.SpinBox'
+    'Spin:FMX.SpinBox',
+    'Grids:FMX.Grid'
     // 'Vcl.Clipbrd:FMX.Clipboard' // 无需 Vcl 前缀，已先替换过了
   );
 

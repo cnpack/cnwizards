@@ -937,7 +937,7 @@ const
   // 特定类或非特定类的属性或方法名的前后对应关系，供源码中替换用
   // 类似于 TCnGeneralConverter.ProcessProperties 中的处理
   // 注意，冒号后可能类名有变化。如果对应的新名字里有 "."，则需要写明全类名
-  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..15] of string = (
+  VCL_FMX_SINGLE_PROPNAME_PAIRS: array[0..18] of string = (
     'TPageControl.ActivePage:TTabControl.ActiveTab',
     'TPageControl.ActivePageIndex:TTabControl.TabIndex',
     'TRadioButton.Checked:IsChecked',
@@ -953,7 +953,10 @@ const
     'TTreeView.Items.Count:GlobalCount',
     'TTreeView.FullCollapse:CollapseAll',
     'TTreeView.FullExpand:ExpandAll',
-    'TTreeView.Items.Clear:Clear'
+    'TTreeView.Items.Clear:Clear',
+    'TStringGrid.ColCount:ColumnCount',
+    'TStringGrid.FixedCols:FixedSize.cx',
+    'TStringGrid.FixedRows:FixedSize.cy'
   );
 
 function CnGetFmxClassFromVclClass(const ComponentClass: string;
@@ -1331,13 +1334,20 @@ begin
         begin
           DestStr := Trim(Copy(MapStr, L + 1, MaxInt));
           K := Pos('.', DestStr);
-          if K > 1 then // 可能更换了目的类
+          if K > 1 then // 可能更换了目的类，或者新属性有子属性
           begin
             if (OutComponentClass <> '') and (OutComponentClass <> Trim(Copy(DestStr, 1, K - 1))) then
-              Continue;
-            DestStr := Trim(Copy(DestStr, K + 1, MaxInt));
-             OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
-              + InComponentName + '.' + DestStr);
+            begin
+              // 目的类名不同，说明是新属性有子属性
+              OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
+                + InComponentName + '.' + DestStr);
+            end
+            else
+            begin
+              DestStr := Trim(Copy(DestStr, K + 1, MaxInt));
+              OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
+                + InComponentName + '.' + DestStr);
+            end;
           end
           else // 没更换目的类
             OutSinglePropMap.Add(InComponentName + '.' + Trim(Copy(MapStr, 1, L - 1)) + '='
