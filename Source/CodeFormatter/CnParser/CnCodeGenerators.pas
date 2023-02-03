@@ -56,7 +56,7 @@ type
     FLock: Word;
     FColumnPos: Integer;            // 当前列值，注意它和实际情况不一定一致，因为 FCode 中的字符串可能带回车换行
     FActualColumn: Integer;         // 当前实际列值，等于 FCode 最后一行最后一个 #13#10 后的内容
-    FCodeWrapMode: TCodeWrapMode;
+    FCodeWrapMode: TCnCodeWrapMode;
     FPrevStr: string;
     FPrevRow: Integer;
     FPrevColumn: Integer;
@@ -146,7 +146,7 @@ type
     {* 当前行最前面的空格数}
     property LastIndentSpaceWithOutComments: Integer read GetLastIndentSpaceWithOutComments;
     {* 上一个非自动换以及非注释的行的最前面的空格数}
-    property CodeWrapMode: TCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
+    property CodeWrapMode: TCnCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
     property KeepLineBreak: Boolean read FKeepLineBreak write FKeepLineBreak;
     {* 由外界设置的保留换行标记，为 True 时无需处理自动换行}

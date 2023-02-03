@@ -43,26 +43,26 @@ type
 
   TCnCodeStyles = set of TCnCodeStyle;
 
-  TKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword, ksNoChange);
+  TCnKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword, ksNoChange);
 
-  TBeginStyle = (bsNextLine, bsSameLine);
+  TCnBeginStyle = (bsNextLine, bsSameLine);
 
-  TCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
+  TCnCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
   {* 代码换行的设置，不自动换行、简单的超过就换行，高级的超过多了才从少的地方换行}
 
-  TTypeIDStyle = (tisUpperFirst, tisNoChange); // 类型标识符的处理方式，首字母大写或不变
+  TCnTypeIDStyle = (tisUpperFirst, tisNoChange); // 类型标识符的处理方式，首字母大写或不变
 
-  TCompDirectiveMode = (cdmAsComment, cdmOnlyFirst, cdmNone); // None 表示扔给外面处理
+  TCnCompDirectiveMode = (cdmAsComment, cdmOnlyFirst, cdmNone); // None 表示扔给外面处理
 
   TCnPascalCodeFormatRule = record
     ContinueAfterError: Boolean;
     CodeStyle: TCnCodeStyles;
 
-    CompDirectiveMode: TCompDirectiveMode;  // 此项不开放
-    KeywordStyle: TKeywordStyle;
-    BeginStyle: TBeginStyle;
-    CodeWrapMode: TCodeWrapMode;
-    TypeIDStyle: TTypeIDStyle;    // 此项无法处理标识符内的分词，意义不大，暂不对外开放
+    CompDirectiveMode: TCnCompDirectiveMode;  // 此项不开放
+    KeywordStyle: TCnKeywordStyle;
+    BeginStyle: TCnBeginStyle;
+    CodeWrapMode: TCnCodeWrapMode;
+    TypeIDStyle: TCnTypeIDStyle;    // 此项无法处理标识符内的分词，意义不大，暂不对外开放
     TabSpaceCount: Byte;
     SpaceBeforeOperator: Byte;
     SpaceAfterOperator: Byte;

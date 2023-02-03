@@ -161,7 +161,7 @@ type
     {* 根据上一次是否输出了批量空行来决定本次输出单个回车还是双回车的空行，某些场合用来取代 WriteLine}
     procedure WriteLineFeedByPrevCondition;
     {* 根据上一次是否输出了批量空行来决定本次输出不换行还是单个回车，某些场合用来取代 Writeln}
-    function FormatString(const KeywordStr: string; KeywordStyle: TKeywordStyle): string;
+    function FormatString(const KeywordStr: string; KeywordStyle: TCnKeywordStyle): string;
     {* 返回指定关键字风格的字符串}
     function UpperFirst(const KeywordStr: string): string;
     {* 返回首字母大写的字符串}
@@ -176,7 +176,7 @@ type
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
-      ACompDirectiveMode: TCompDirectiveMode = cdmAsComment); virtual;
+      ACompDirectiveMode: TCnCompDirectiveMode = cdmAsComment); virtual;
     {* 构造函数，Stream 内部不需要字符串末尾的#0，这点不同于代码高亮解析等}
     destructor Destroy; override;
 
@@ -391,7 +391,7 @@ type
   public
     constructor Create(AStream: TStream; AMatchedInStart: Integer = CN_MATCHED_INVALID;
       AMatchedInEnd: Integer = CN_MATCHED_INVALID;
-      ACompDirectiveMode: TCompDirectiveMode = cdmAsComment); override;
+      ACompDirectiveMode: TCnCompDirectiveMode = cdmAsComment); override;
 
     procedure FormatCode(PreSpaceCount: Byte = 0); override;
   end;
@@ -504,7 +504,7 @@ end;
 
 constructor TCnAbstractCodeFormatter.Create(AStream: TStream;
    AMatchedInStart, AMatchedInEnd: Integer;
-   ACompDirectiveMode: TCompDirectiveMode);
+   ACompDirectiveMode: TCnCompDirectiveMode);
 begin
   FMatchedInStart := AMatchedInStart;
   FMatchedInEnd := AMatchedInEnd;
@@ -601,7 +601,7 @@ begin
 end;
 
 function TCnAbstractCodeFormatter.FormatString(const KeywordStr: string;
-  KeywordStyle: TKeywordStyle): string;
+  KeywordStyle: TCnKeywordStyle): string;
 begin
   case KeywordStyle of
     ksPascalKeyword:    Result := UpperFirst(KeywordStr);
@@ -2496,7 +2496,7 @@ var
   OldLastToken: TPascalToken;
   LabelLen, InstrucLen: Integer;
   ALabel: string;
-  OldKeywordStyle: TKeywordStyle;
+  OldKeywordStyle: TCnKeywordStyle;
 begin
   Match(tokKeywordAsm, PreSpaceCount);
   Writeln;
@@ -5125,7 +5125,7 @@ end;
 procedure TCnProgramBlockFormatter.FormatUsesList(PreSpaceCount: Byte;
   const CanHaveUnitQual: Boolean; const NeedCRLF: Boolean);
 var
-  OldWrapMode: TCodeWrapMode;
+  OldWrapMode: TCnCodeWrapMode;
   OldAuto: Boolean;
 begin
   FormatUsesDecl(PreSpaceCount, CanHaveUnitQual);
@@ -5948,7 +5948,7 @@ begin
 end;
 
 constructor TCnBasePascalFormatter.Create(AStream: TStream; AMatchedInStart,
-  AMatchedInEnd: Integer; ACompDirectiveMode: TCompDirectiveMode);
+  AMatchedInEnd: Integer; ACompDirectiveMode: TCnCompDirectiveMode);
 begin
   inherited;
   FScanner.OnLineBreak := ScanerLineBreak;

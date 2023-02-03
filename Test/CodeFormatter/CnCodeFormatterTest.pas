@@ -23,7 +23,7 @@ unit CnCodeFormatterTest;
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
 * 单元名称：格式化专家测试程序 CnCodeFormaterTest
-* 单元作者：CnPack开发组
+* 单元作者：CnPack 开发组
 * 备    注：该单元实现了代码格式化的核心类
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
@@ -117,9 +117,9 @@ type
     procedure tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView; Node:
       TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 var
@@ -154,7 +154,7 @@ var
 begin
   CnPascalCodeForRule.CompDirectiveMode := cdmOnlyFirst;
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
-  CnPascalCodeForRule.KeywordStyle := TKeywordStyle(ComboBox1.ItemIndex);
+  CnPascalCodeForRule.KeywordStyle := TCnKeywordStyle(ComboBox1.ItemIndex);
   CnPascalCodeForRule.KeepUserLineBreak := chkKeepUserBreakLine.Checked;
 
   if chkAutoWrap.Checked then

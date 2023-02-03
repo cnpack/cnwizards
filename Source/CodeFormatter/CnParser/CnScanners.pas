@@ -233,7 +233,7 @@ type
   private
     FStream: TStream;
     FCodeGen: TCnCodeGenerator;
-    FCompDirectiveMode: TCompDirectiveMode;
+    FCompDirectiveMode: TCnCompDirectiveMode;
     FNestedIsComment: Boolean;
     procedure StorePrevEffectiveToken(AToken: TPascalToken);
   protected
@@ -241,12 +241,12 @@ type
   public
     constructor Create(AStream: TStream); overload; override;
     constructor Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
-      ACompDirectiveMode: TCompDirectiveMode); reintroduce; overload;
+      ACompDirectiveMode: TCnCompDirectiveMode); reintroduce; overload;
     destructor Destroy; override;
     function NextToken: TPascalToken; override;
     function ForwardToken(Count: Integer = 1): TPascalToken; override;
     function ForwardActualToken(Count: Integer = 1): TPascalToken; override;
-    property CompDirectiveMode: TCompDirectiveMode read FCompDirectiveMode;
+    property CompDirectiveMode: TCnCompDirectiveMode read FCompDirectiveMode;
   end;
 
 implementation
@@ -908,7 +908,7 @@ end;
 { TScaner }
 
 constructor TScanner.Create(AStream: TStream; ACodeGen: TCnCodeGenerator;
-  ACompDirectiveMode: TCompDirectiveMode);
+  ACompDirectiveMode: TCnCompDirectiveMode);
 begin
   AStream.Seek(0, soFromBeginning);
   FStream := AStream;
