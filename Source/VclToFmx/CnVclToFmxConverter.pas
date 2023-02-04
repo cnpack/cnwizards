@@ -756,33 +756,33 @@ class procedure TCnGridConverter.ProcessComponents(SourceLeaf,
   DestLeaf: TCnDfmLeaf; Tab: Integer);
 var
   I, Count: Integer;
-  OptionString, Value: string;
+  OptionStr, WidthStr, Value: string;
   Options: TStringList;
   Leaf: TCnDfmLeaf;
 begin
   I := IndexOfHead('Options = ', SourceLeaf.Properties);
   if I >= 0 then
-    OptionString := SourceLeaf.Properties[I]
+    OptionStr := SourceLeaf.Properties[I]
   else // 默认属性
-    OptionString := '[goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect]';
+    OptionStr := '[goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect]';
 
-  Delete(OptionString, 1, Length('Options = '));
+  Delete(OptionStr, 1, Length('Options = '));
   Options := TStringList.Create;
   try
-    ConvertSetStringToElements(OptionString, Options);
+    ConvertSetStringToElements(OptionStr, Options);
 
     // 转换集合元素，不存在对应关系的则删除
     for I := Options.Count - 1 downto 0 do
     begin
-      OptionString := CnConvertEnumValueIfExists(Options[I]);
-      if OptionString <> '' then
-        Options[I] := OptionString
+      OptionStr := CnConvertEnumValueIfExists(Options[I]);
+      if OptionStr <> '' then
+        Options[I] := OptionStr
       else
         Options.Delete(I);
     end;
 
-    OptionString := ConvertSetElementsToString(Options);
-    DestLeaf.Properties.Add('Options = ' + OptionString);
+    OptionStr := ConvertSetElementsToString(Options);
+    DestLeaf.Properties.Add('Options = ' + OptionStr);
   finally
     Options.Free;
   end;
@@ -796,12 +796,27 @@ begin
     Count := StrToIntDef(Value ,0);
     if Count > 0 then
     begin
+      I := IndexOfHead('DefaultColWidth = ', SourceLeaf.Properties);
+      if I >= 0 then
+      begin
+        Value := SourceLeaf.Properties[I];
+        Delete(Value, 1, Length('DefaultColWidth = '));
+
+        WidthStr := GetFloatStringFromInteger(StrToIntDef(Value ,64));
+      end
+      else
+        WidthStr := '';
+
       for I := 1 to Count do
       begin
         // 给 DestLeaf 添加一个子节点，没其他属性
         Leaf := DestLeaf.Tree.AddChild(DestLeaf) as TCnDfmLeaf;
         Leaf.ElementClass := 'TStringColumn';
         Leaf.ElementKind := dkObject;
+
+        // 有指定宽度就写出
+        if WidthStr <> '' then
+          Leaf.Properties.Add('Size.Width = ' + WidthStr);
         Leaf.Text := 'StringColumn' + IntToStr(Leaf.Tree.GetSameClassIndex(Leaf) + 1);
       end;
     end;
