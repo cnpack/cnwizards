@@ -59,7 +59,7 @@ type
     FGetProvider: TCnGetFormatterProvider;
 
     // Pascal Format Settings
-    FDirectiveMode: TCompDirectiveMode;
+    FDirectiveMode: TCnCompDirectiveMode;
     FUsesUnitSingleLine: Boolean;
     FUseIgnoreArea: Boolean;
     FKeepUserLineBreak: Boolean;
@@ -69,9 +69,9 @@ type
     FTabSpaceCount: Byte;
     FSpaceTabASMKeyword: Byte;
     FWrapWidth: Integer;
-    FBeginStyle: TBeginStyle;
-    FKeywordStyle: TKeywordStyle;
-    FWrapMode: TCodeWrapMode;
+    FBeginStyle: TCnBeginStyle;
+    FKeywordStyle: TCnKeywordStyle;
+    FWrapMode: TCnCodeWrapMode;
     FWrapNewLineWidth: Integer;
     FUseIDESymbols: Boolean;
     FBreakpoints: TObjectList;
@@ -122,10 +122,10 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure AcquireSubActions; override;
-    property DirectiveMode: TCompDirectiveMode read FDirectiveMode write FDirectiveMode;
-    property KeywordStyle: TKeywordStyle read FKeywordStyle write FKeywordStyle;
-    property BeginStyle: TBeginStyle read FBeginStyle write FBeginStyle;
-    property WrapMode: TCodeWrapMode read FWrapMode write FWrapMode;
+    property DirectiveMode: TCnCompDirectiveMode read FDirectiveMode write FDirectiveMode;
+    property KeywordStyle: TCnKeywordStyle read FKeywordStyle write FKeywordStyle;
+    property BeginStyle: TCnBeginStyle read FBeginStyle write FBeginStyle;
+    property WrapMode: TCnCodeWrapMode read FWrapMode write FWrapMode;
     property TabSpaceCount: Byte read FTabSpaceCount write FTabSpaceCount;
     property SpaceBeforeOperator: Byte read FSpaceBeforeOperator write
       FSpaceBeforeOperator;
@@ -358,8 +358,8 @@ begin
 
     if ShowModal = mrOK then
     begin
-      FKeywordStyle := TKeywordStyle(cbbKeywordStyle.ItemIndex);
-      FBeginStyle := TBeginStyle(cbbBeginStyle.ItemIndex);
+      FKeywordStyle := TCnKeywordStyle(cbbKeywordStyle.ItemIndex);
+      FBeginStyle := TCnBeginStyle(cbbBeginStyle.ItemIndex);
       FTabSpaceCount := seTab.Value;
       FWrapWidth := seWrapLine.Value;
       FWrapNewLineWidth := seNewLine.Value;
@@ -377,7 +377,7 @@ begin
       FSpaceBeforeASM := seASMHeadIndent.Value;
       FSpaceTabASMKeyword := seAsmTab.Value;
       FUseIgnoreArea := chkIgnoreArea.Checked;
-      FDirectiveMode := TCompDirectiveMode(cbbDirectiveMode.ItemIndex);
+      FDirectiveMode := TCnCompDirectiveMode(cbbDirectiveMode.ItemIndex);
       FKeepUserLineBreak := chkKeepUserLineBreak.Checked;
     end;
 
@@ -530,10 +530,10 @@ begin
   FWrapWidth := Ini.ReadInteger('', csWrapWidth, CnPascalCodeForVCLRule.WrapWidth);
   FWrapNewLineWidth := Ini.ReadInteger('', csWrapNewLineWidth,
     CnPascalCodeForVCLRule.WrapNewLineWidth);
-  FWrapMode := TCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
-  FBeginStyle := TBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
-  FKeywordStyle := TKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
-  FDirectiveMode := TCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode, Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
+  FWrapMode := TCnCodeWrapMode(Ini.ReadInteger('', csWrapMode, Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
+  FBeginStyle := TCnBeginStyle(Ini.ReadInteger('', csBeginStyle, Ord(CnPascalCodeForVCLRule.BeginStyle)));
+  FKeywordStyle := TCnKeywordStyle(Ini.ReadInteger('', csKeywordStyle, Ord(CnPascalCodeForVCLRule.KeywordStyle)));
+  FDirectiveMode := TCnCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode, Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
   FKeepUserLineBreak := Ini.ReadBool('', csKeepUserLineBreak,
     CnPascalCodeForVCLRule.KeepUserLineBreak);
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
