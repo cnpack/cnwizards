@@ -11,6 +11,7 @@ object FormExtract: TFormExtract
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object btnConvertIdent: TButton
@@ -30,9 +31,9 @@ object FormExtract: TFormExtract
     Lines.Strings = (
       'mmoStrings'
       'I am CnPack Team Member.'
-      'OK! 吃饭了！'
+      'OK! 吃饭了！有不少菜'
       '3.1415926'
-      '纯文本看看')
+      '纯文本，看看')
     TabOrder = 1
   end
   object chkUnderLine: TCheckBox
@@ -49,5 +50,18 @@ object FormExtract: TFormExtract
     Width = 385
     Height = 233
     TabOrder = 3
+  end
+  object cbbStyle: TComboBox
+    Left = 256
+    Top = 32
+    Width = 145
+    Height = 21
+    Style = csDropDownList
+    ItemHeight = 13
+    TabOrder = 4
+    Items.Strings = (
+      'UpperCase'
+      'LowerCase'
+      'UpperFirst')
   end
 end

@@ -12,7 +12,9 @@ type
     mmoStrings: TMemo;
     chkUnderLine: TCheckBox;
     mmoIdent: TMemo;
+    cbbStyle: TComboBox;
     procedure btnConvertIdentClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -37,9 +39,15 @@ begin
   mmoIdent.Lines.Clear;
   for I := 0 to mmoStrings.Lines.Count - 1 do
   begin
-    S := ConvertStringToIdent(mmoStrings.Lines[I], 'SCN', chkUnderLine.Checked);
+    S := ConvertStringToIdent(mmoStrings.Lines[I], 'SCN', chkUnderLine.Checked,
+      TCnIdentWordStyle(cbbStyle.ItemIndex));
     mmoIdent.Lines.Add(S);
   end;
+end;
+
+procedure TFormExtract.FormCreate(Sender: TObject);
+begin
+  cbbStyle.ItemIndex := 0;
 end;
 
 end.
