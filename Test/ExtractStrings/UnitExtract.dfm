@@ -26,7 +26,7 @@ object FormExtract: TFormExtract
   object mmoStrings: TMemo
     Left = 16
     Top = 72
-    Width = 385
+    Width = 401
     Height = 185
     Lines.Strings = (
       'mmoStrings'
@@ -47,14 +47,14 @@ object FormExtract: TFormExtract
   object mmoIdent: TMemo
     Left = 16
     Top = 272
-    Width = 385
+    Width = 401
     Height = 233
     TabOrder = 3
   end
   object cbbStyle: TComboBox
-    Left = 256
+    Left = 336
     Top = 32
-    Width = 145
+    Width = 81
     Height = 21
     Style = csDropDownList
     ItemHeight = 13
@@ -63,5 +63,13 @@ object FormExtract: TFormExtract
       'UpperCase'
       'LowerCase'
       'UpperFirst')
+  end
+  object chkFullPinYin: TCheckBox
+    Left = 232
+    Top = 32
+    Width = 89
+    Height = 17
+    Caption = 'Full PinYin'
+    TabOrder = 5
   end
 end

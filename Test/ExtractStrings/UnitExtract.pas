@@ -13,6 +13,7 @@ type
     chkUnderLine: TCheckBox;
     mmoIdent: TMemo;
     cbbStyle: TComboBox;
+    chkFullPinYin: TCheckBox;
     procedure btnConvertIdentClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -40,7 +41,7 @@ begin
   for I := 0 to mmoStrings.Lines.Count - 1 do
   begin
     S := ConvertStringToIdent(mmoStrings.Lines[I], 'SCN', chkUnderLine.Checked,
-      TCnIdentWordStyle(cbbStyle.ItemIndex));
+      TCnIdentWordStyle(cbbStyle.ItemIndex), chkFullPinYin.Checked);
     mmoIdent.Lines.Add(S);
   end;
 end;
