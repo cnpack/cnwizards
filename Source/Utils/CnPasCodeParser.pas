@@ -182,11 +182,16 @@ type
     FIfStack: TCnObjectStack;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+  protected
+    function CalcCharIndex(Lex: TmwPasLex; Source: PAnsiChar): Integer;
+    function NewToken(Lex: TmwPasLex; Source: PAnsiChar; CurrBlock, CurrMethod: TCnPasToken;
+      CurrBracketLevel: Integer): TCnPasToken;
   public
     constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
+    {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
        要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
@@ -521,6 +526,67 @@ begin
   Result := TCnPasToken(FList[Index]);
 end;
 
+function TCnPasStructureParser.CalcCharIndex(Lex: TmwPasLex; Source: PAnsiChar): Integer;
+{$IFDEF BDS2009_UP}
+var
+  I, Len: Integer;
+{$ENDIF}
+begin
+{$IFDEF BDS2009_UP}
+  if FUseTabKey and (FTabWidth >= 2) then
+  begin
+    // 遍历当前行内容进行 Tab 键展开
+    I := Lex.LinePos;
+    Len := 0;
+    while ( I < Lex.TokenPos ) do
+    begin
+      if (Source[I] = #09) then
+        Len := ((Len div FTabWidth) + 1) * FTabWidth
+      else
+        Inc(Len);
+      Inc(I);
+    end;
+    Result := Len;
+  end
+  else
+{$ENDIF}
+    Result := Lex.TokenPos - Lex.LinePos;
+end;
+
+function TCnPasStructureParser.NewToken(Lex: TmwPasLex; Source: PAnsiChar;
+  CurrBlock, CurrMethod: TCnPasToken; CurrBracketLevel: Integer): TCnPasToken;
+var
+  Len: Integer;
+begin
+  Result := CreatePasToken;
+  Result.FTokenPos := Lex.TokenPos;
+
+  Len := Lex.TokenLength;
+  if Len > CN_TOKEN_MAX_SIZE then
+    Len := CN_TOKEN_MAX_SIZE;
+  // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
+  CopyMemory(@Result.FToken[0], Lex.TokenAddr, Len);
+  Result.FToken[Len] := #0;
+
+  Result.FLineNumber := Lex.LineNumber;
+  Result.FCharIndex := CalcCharIndex(Lex, Source);
+  Result.FTokenID := Lex.TokenID;
+  Result.FItemIndex := FList.Count;
+  if CurrBlock <> nil then
+    Result.FItemLayer := CurrBlock.FItemLayer;
+
+  // CurrBlock 的 ItemLayer 包含了 MethodLayer，但如果没有 CurrBlock，
+  // 就得考虑用 CurrMethod 的 MethodLayer 来初始化 Token 的 ItemLayer。
+  if CurrMethod <> nil then
+  begin
+    Result.FMethodLayer := CurrMethod.FMethodLayer;
+    if CurrBlock = nil then
+      Result.FItemLayer := CurrMethod.FMethodLayer;
+  end;
+  Result.FBracketLayer := CurrBracketLevel;
+  FList.Add(Result);
+end;
+
 procedure TCnPasStructureParser.ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly:
   Boolean);
 var
@@ -535,66 +601,6 @@ var
   PrevTokenStr: AnsiString;
   AProcObj, PrevProcObj: TCnProcObj;
   AIfObj: TCnIfStatement;
-
-  function CalcCharIndex(): Integer;
-{$IFDEF BDS2009_UP}
-  var
-    I, Len: Integer;
-{$ENDIF}
-  begin
-{$IFDEF BDS2009_UP}
-    if FUseTabKey and (FTabWidth >= 2) then
-    begin
-      // 遍历当前行内容进行 Tab 键展开
-      I := Lex.LinePos;
-      Len := 0;
-      while ( I < Lex.TokenPos ) do
-      begin
-        if (ASource[I] = #09) then
-          Len := ((Len div FTabWidth) + 1) * FTabWidth
-        else
-          Inc(Len);
-        Inc(I);
-      end;
-      Result := Len;
-    end
-    else
-{$ENDIF}
-      Result := Lex.TokenPos - Lex.LinePos;
-  end;
-
-  procedure NewToken;
-  var
-    Len: Integer;
-  begin
-    Token := CreatePasToken;
-    Token.FTokenPos := Lex.TokenPos;
-    
-    Len := Lex.TokenLength;
-    if Len > CN_TOKEN_MAX_SIZE then
-      Len := CN_TOKEN_MAX_SIZE;
-    // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len);
-    Token.FToken[Len] := #0;
-
-    Token.FLineNumber := Lex.LineNumber;
-    Token.FCharIndex := CalcCharIndex();
-    Token.FTokenID := Lex.TokenID;
-    Token.FItemIndex := FList.Count;
-    if CurrBlock <> nil then
-      Token.FItemLayer := CurrBlock.FItemLayer;
-
-    // CurrBlock 的 ItemLayer 包含了 MethodLayer，但如果没有 CurrBlock，
-    // 就得考虑用 CurrMethod 的 MethodLayer 来初始化 Token 的 ItemLayer。
-    if CurrMethod <> nil then
-    begin
-      Token.FMethodLayer := CurrMethod.FMethodLayer;
-      if CurrBlock = nil then
-        Token.FItemLayer := CurrMethod.FMethodLayer;
-    end;
-    Token.FBracketLayer := CurrBracketLevel;
-    FList.Add(Token);
-  end;
 
   procedure DiscardToken(Forced: Boolean = False);
   begin
@@ -633,7 +639,6 @@ begin
     Lex.Origin := PAnsiChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要 end 的定义层数
-    Token := nil;
     CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
     CurrBlock := nil;         // 当前 Token 所在的块。
     CurrMidBlock := nil;
@@ -661,7 +666,7 @@ begin
         tkExcept, tkFinally, tkElse,
         tkEnd, tkUntil, tkThen, tkDo])) then
       begin
-        NewToken;
+        Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
         case Lex.TokenID of
           tkProcedure, tkFunction, tkConstructor, tkDestructor:
             begin
@@ -1258,7 +1263,7 @@ begin
 
         // 需要时，普通标识符加，& 后的标识符也加
         if not AKeyOnly and ((PrevTokenID <> tkAmpersand) or (Lex.TokenID = tkIdentifier)) then
-          NewToken;
+          Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
       end;
 
       if Lex.TokenID = tkRoundOpen then

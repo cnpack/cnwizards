@@ -168,11 +168,17 @@ type
     FIfStack: TCnObjectStack;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWidePasToken;
+  protected
+    procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer;
+      Lex: TCnPasWideLex; Source: PWideChar);
+    function NewToken(Lex: TCnPasWideLex; Source: PWideChar; CurrBlock, CurrMethod: TCnWidePasToken;
+      CurrBracketLevel: Integer): TCnWidePasToken;
   public
     constructor Create(SupportUnicodeIdent: Boolean = True);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
+    {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
     function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer): CnWideString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
        但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
@@ -458,6 +464,81 @@ begin
   Result := TCnWidePasToken(FList[Index]);
 end;
 
+procedure TCnWidePasStructParser.CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer;
+  Lex: TCnPasWideLex; Source: PWideChar);
+var
+  I, AnsiLen, WideLen: Integer;
+begin
+  if FUseTabKey and (FTabWidth >= 2) then
+  begin
+    // 遍历当前行内容进行 Tab 键展开
+    I := Lex.LineStartOffset;
+    AnsiLen := 0;
+    WideLen := 0;
+    while I < Lex.TokenPos do
+    begin
+      if (Source[I] = #09) then
+      begin
+        AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
+        WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
+        // TODO: Wide 字符串的 Tab 展开规则是否是这样？
+      end
+      else
+      begin
+        Inc(WideLen);
+        if Ord(Source[I]) > $900 then
+          Inc(AnsiLen, SizeOf(WideChar))
+        else
+          Inc(AnsiLen, SizeOf(AnsiChar));
+      end;
+      Inc(I);
+    end;
+    ACharIndex := WideLen;
+    AnAnsiIndex := AnsiLen;
+  end
+  else
+  begin
+    ACharIndex := Lex.TokenPos - Lex.LineStartOffset;
+    AnAnsiIndex := Lex.ColumnNumber - 1;
+  end;
+end;
+
+function TCnWidePasStructParser.NewToken(Lex: TCnPasWideLex; Source: PWideChar;
+  CurrBlock, CurrMethod: TCnWidePasToken; CurrBracketLevel: Integer): TCnWidePasToken;
+var
+  Len: Integer;
+begin
+  Result := CreatePasToken;
+  Result.FTokenPos := Lex.TokenPos;
+
+  Len := Lex.TokenLength;
+  if Len > CN_TOKEN_MAX_SIZE then
+    Len := CN_TOKEN_MAX_SIZE;
+  // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
+  CopyMemory(@Result.FToken[0], Lex.TokenAddr, Len * SizeOf(WideChar));
+  Result.FToken[Len] := #0;
+
+  Result.FLineNumber := Lex.LineNumber - 1;              // 1 开始变成 0 开始
+  CalcCharIndexes(Result.FCharIndex, Result.FAnsiIndex, Lex, Source);
+  // 不直接使用 Column 直观列号属性，而是据需 Tab 展开，俩也都会由 1 开始变成 0 开始
+
+  Result.FTokenID := Lex.TokenID;
+  Result.FItemIndex := FList.Count;
+  if CurrBlock <> nil then
+    Result.FItemLayer := CurrBlock.FItemLayer;
+
+  // CurrBlock 的 ItemLayer 包含了 MethodLayer，但如果没有 CurrBlock，
+  // 就得考虑用 CurrMethod 的 MethodLayer 来初始化 Token 的 ItemLayer。
+  if CurrMethod <> nil then
+  begin
+    Result.FMethodLayer := CurrMethod.FMethodLayer;
+    if CurrBlock = nil then
+      Result.FItemLayer := CurrMethod.FMethodLayer;
+  end;
+  Result.FBracketLayer := CurrBracketLevel;
+  FList.Add(Result);
+end;
+
 procedure TCnWidePasStructParser.ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly:
   Boolean);
 var
@@ -472,79 +553,6 @@ var
   PrevTokenStr: CnWideString;
   AProcObj, PrevProcObj: TCnProcObj;
   AIfObj: TCnIfStatement;
-
-  procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
-  var
-    I, AnsiLen, WideLen: Integer;
-  begin
-    if FUseTabKey and (FTabWidth >= 2) then
-    begin
-      // 遍历当前行内容进行 Tab 键展开
-      I := Lex.LineStartOffset;
-      AnsiLen := 0;
-      WideLen := 0;
-      while I < Lex.TokenPos do
-      begin
-        if (ASource[I] = #09) then
-        begin
-          AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
-          WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
-          // TODO: Wide 字符串的 Tab 展开规则是否是这样？
-        end
-        else
-        begin
-          Inc(WideLen);
-          if Ord(ASource[I]) > $900 then
-            Inc(AnsiLen, SizeOf(WideChar))
-          else
-            Inc(AnsiLen, SizeOf(AnsiChar));
-        end;
-        Inc(I);
-      end;
-      ACharIndex := WideLen;
-      AnAnsiIndex := AnsiLen;
-    end
-    else
-    begin
-      ACharIndex := Lex.TokenPos - Lex.LineStartOffset;
-      AnAnsiIndex := Lex.ColumnNumber - 1;
-    end;
-  end;
-
-  procedure NewToken;
-  var
-    Len: Integer;
-  begin
-    Token := CreatePasToken;
-    Token.FTokenPos := Lex.TokenPos;
-
-    Len := Lex.TokenLength;
-    if Len > CN_TOKEN_MAX_SIZE then
-      Len := CN_TOKEN_MAX_SIZE;
-    // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], Lex.TokenAddr, Len * SizeOf(WideChar));
-    Token.FToken[Len] := #0;
-
-    Token.FLineNumber := Lex.LineNumber - 1;              // 1 开始变成 0 开始
-    CalcCharIndexes(Token.FCharIndex, Token.FAnsiIndex);
-    // 不直接使用 Column 直观列号属性，而是据需 Tab 展开，俩也都会由 1 开始变成 0 开始
-
-    Token.FTokenID := Lex.TokenID;
-    Token.FItemIndex := FList.Count;
-    if CurrBlock <> nil then
-      Token.FItemLayer := CurrBlock.FItemLayer;
-
-    // CurrBlock 的 ItemLayer 包含了 MethodLayer，但如果没有 CurrBlock，
-    // 就得考虑用 CurrMethod 的 MethodLayer 来初始化 Token 的 ItemLayer。
-    if CurrMethod <> nil then
-    begin
-      Token.FMethodLayer := CurrMethod.FMethodLayer;
-      if CurrBlock = nil then
-        Token.FItemLayer := CurrMethod.FMethodLayer;
-    end;
-    Token.FBracketLayer := CurrBracketLevel;
-    FList.Add(Token);
-  end;
 
   procedure DiscardToken(Forced: Boolean = False);
   begin
@@ -583,7 +591,6 @@ begin
     Lex.Origin := PWideChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
-    Token := nil;
     CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
     CurrBlock := nil;         // 当前 Token 所在的块。
     CurrMidBlock := nil;
@@ -611,7 +618,7 @@ begin
         tkExcept, tkFinally, tkElse,
         tkEnd, tkUntil, tkThen, tkDo])) then
       begin
-        NewToken;
+        Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
         case Lex.TokenID of
           tkProcedure, tkFunction, tkConstructor, tkDestructor:
             begin
@@ -1203,7 +1210,7 @@ begin
 
         // 需要时，普通标识符加，& 后的标识符也加
         if not AKeyOnly and ((PrevTokenID <> tkAmpersand) or (Lex.TokenID = tkIdentifier)) then
-          NewToken;
+          Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
       end;
 
       if Lex.TokenID = tkRoundOpen then
