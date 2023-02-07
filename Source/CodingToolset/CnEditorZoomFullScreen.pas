@@ -43,12 +43,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, ToolsAPI, CnWizIdeUtils, CnConsts, CnCommon,
-  CnWizConsts, CnEditorToolsetWizard, CnWizUtils, CnWizMultiLang;
+  CnWizConsts, CnCodingToolsetWizard, CnWizUtils, CnWizMultiLang;
 
 type
   TCnEditorZoomFullScreenForm = class(TCnTranslateForm)
@@ -93,7 +93,7 @@ type
     function GetHasConfig: Boolean; override;
     function NeedAutoHide: Boolean;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     function GetState: TWizardState; override;
     function GetCaption: string; override;
@@ -111,11 +111,11 @@ type
     property RestoreNormal: Boolean read FRestoreNormal write FRestoreNormal default False;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$IFDEF DEBUG}
 uses
@@ -134,7 +134,7 @@ const
   csZoomFullScreen = 'ZoomFullScreen';
   csBarWidth = 4;
 
-constructor TCnEditorZoomFullScreen.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorZoomFullScreen.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   FAutoZoom := False;
@@ -487,5 +487,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorZoomFullScreen); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

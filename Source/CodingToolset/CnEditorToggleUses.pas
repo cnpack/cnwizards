@@ -39,12 +39,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, Menus,
-  CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
+  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
   CnWizConsts, CnEditorCodeTool, CnIni, mPasLex;
 
 type
@@ -69,7 +69,7 @@ type
   protected
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -81,11 +81,11 @@ type
     procedure Execute; override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   CnEditControlWrapper;
@@ -115,7 +115,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorToggleUses.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorToggleUses.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
@@ -419,5 +419,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorToggleUses);
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

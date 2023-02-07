@@ -37,11 +37,11 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
+  StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
   CnWizConsts, CnEditorCodeTool, CnIni;
 
 type
@@ -57,21 +57,21 @@ type
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
   
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 { TCnEditorSortLines }
 
-constructor TCnEditorSortLines.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorSortLines.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   ValidInSource := False;
@@ -122,5 +122,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorSortLines);
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

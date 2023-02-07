@@ -41,7 +41,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, Menus, ToolsAPI,
   CnWizUtils, CnConsts, CnCommon, CnWizManager, CnWizEditFiler,
-  CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
+  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
   CnCppCodeParser, mwBCBTokenList;
 
@@ -61,7 +61,7 @@ type
   protected
     function GetDefShortCut: TShortCut; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
 
     function GetCaption: string; override;
@@ -261,7 +261,7 @@ begin
   end;
 end;
 
-constructor TCnEditorExtendingSelect.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorExtendingSelect.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   FTimer := TTimer.Create(nil);

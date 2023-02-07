@@ -39,11 +39,11 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
+  StdCtrls, IniFiles, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
   CnWizConsts, CnEditorCodeTool, CnIni, CnWizIdeDock, ComCtrls, Menus, Clipbrd,
   StdActns, ActnList, ToolWin, Tabs, CnWizShareImages, CnDesignEditorConsts,
   CnWizOptions;
@@ -55,7 +55,7 @@ type
     function GetHint: string; override;
     procedure SetActive(Value: Boolean); override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
 
     procedure Execute; override;
@@ -162,11 +162,11 @@ type
     { Public declarations }
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -187,7 +187,7 @@ var
 
 { TCnEditorCollector }
 
-constructor TCnEditorCollector.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorCollector.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   Collector := Self;
@@ -738,5 +738,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorCollector); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

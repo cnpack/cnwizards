@@ -43,11 +43,11 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, IniFiles, ToolsAPI, CnConsts, CnWizUtils, CnEditorToolsetWizard, CnWizConsts,
+  StdCtrls, IniFiles, ToolsAPI, CnConsts, CnWizUtils, CnCodingToolsetWizard, CnWizConsts,
   CnEditorOpenFileFrm, CnCommon, CnWizOptions;
 
 type
@@ -82,11 +82,11 @@ type
     {* 包含式地模糊搜索文件，返回多个可能的结果}
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   CnWizIdeUtils;
@@ -321,5 +321,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorOpenFile); // 注册专家
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

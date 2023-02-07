@@ -163,7 +163,7 @@
     <DCCReference Include="CodingToolset\CnEditorSortLines.pas" />
     <DCCReference Include="CodingToolset\CnEditorToggleUses.pas" />
     <DCCReference Include="CodingToolset\CnEditorToggleVar.pas" />
-    <DCCReference Include="CodingToolset\CnEditorToolsetWizard.pas">
+    <DCCReference Include="CodingToolset\CnCodingToolsetWizard.pas">
       <Form>CnEditorToolsForm</Form>
     </DCCReference>
     <DCCReference Include="CodingToolset\CnEditorZoomFullScreen.pas">

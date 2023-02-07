@@ -21,7 +21,7 @@ USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnW
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);
 USEUNIT("Utils\CnWizUtils.pas");
 USEFORMNS("DesignWizard\CnAlignSizeWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
-USEFORMNS("CodingToolset\CnEditorToolsetWizard.pas", Cneditortoolsetwizard, CnEditorToolsForm);
+USEFORMNS("CodingToolset\CnCodingToolsetWizard.pas", Cncodingtoolsetwizard, CnEditorToolsForm);
 USEFORMNS("DesignWizard\CnListCompFrm.pas", Cnlistcompfrm, CnListCompForm);
 USEFORMNS("DesignWizard\CnPropertyCompareFrm.pas", Cnpropertycomparefrm, CnPropertyCompareForm);
 USEFORMNS("DesignWizard\CnPropertyCompConfigFrm.pas", Cnpropertycompconfigfrm, CnPropertyCompConfigForm);

@@ -37,12 +37,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
+  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
 
 type
   TCnDelBlankForm = class(TCnTranslateForm)
@@ -89,11 +89,11 @@ type
     property DelStyle: TCnDelBlankStyle read FDelStyle write FDelStyle;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -227,5 +227,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorCodeDelBlank); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

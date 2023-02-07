@@ -37,13 +37,13 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
   StdCtrls, IniFiles, ToolsAPI, {$IFDEF COMPILER6_UP}
   DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}
-  CnConsts, CnWizUtils, CnEditorToolsetWizard, CnWizConsts, CnCommon, CnWizOptions;
+  CnConsts, CnWizUtils, CnCodingToolsetWizard, CnWizConsts, CnCommon, CnWizOptions;
 
 type
 
@@ -69,11 +69,11 @@ type
     function GetState: TWizardState; override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   CnWizIdeUtils, CnOTACreators, CnWizEditFiler, RegExpr {$IFDEF DEBUG}, CnDebug {$ENDIF};
@@ -472,5 +472,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorDuplicateUnit); // ×¢²á±àÂë¹¤¾ß
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

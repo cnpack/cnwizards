@@ -39,12 +39,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  Menus, CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang,
+  Menus, CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang,
   ExtCtrls;
 
 type
@@ -103,7 +103,7 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure GetNewPos(var ARow: Integer; var ACol: Integer); override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -126,11 +126,11 @@ type
 
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.dfm}
 
@@ -262,7 +262,7 @@ end;
 
 { TCnEditorCodeToggleComment }
 
-constructor TCnEditorCodeToggleComment.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorCodeToggleComment.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   FMoveToNextLine := True;
@@ -359,5 +359,5 @@ initialization
   RegisterCnCodingToolset(TCnEditorCodeUnComment);
   RegisterCnCodingToolset(TCnEditorCodeToggleComment);
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

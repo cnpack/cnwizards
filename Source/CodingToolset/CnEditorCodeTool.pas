@@ -41,12 +41,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnEditorToolsetWizard, CnWizConsts;
+  CnCodingToolsetWizard, CnWizConsts;
 
 type
 
@@ -89,16 +89,16 @@ type
     procedure GetNewPos(var ARow: Integer; var ACol: Integer); virtual;
     {* 执行完毕后，子类可通过重载此函数来确定光标所在的位置}
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     procedure Execute; override;
     function GetState: TWizardState; override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$IFDEF DEBUG}
 uses
@@ -111,7 +111,7 @@ uses
 
 { TCnEditorCodeTool }
 
-constructor TCnEditorCodeTool.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorCodeTool.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   ValidInSource := True;
@@ -368,5 +368,5 @@ begin
 // 基类啥都不做，不改变值
 end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

@@ -351,13 +351,13 @@ begin
   TranslateStr(SCnBookmarkCurrentUnit, 'SCnBookmarkCurrentUnit');
   TranslateStr(SCnBookmarkFileCount, 'SCnBookmarkFileCount');
   
-  // CnEditorToolsetWizard
-  TranslateStr(SCnEditorToolsetWizardMenuCaption, 'SCnEditorToolsetWizardMenuCaption');
-  TranslateStr(SCnEditorToolsetWizardMenuHint, 'SCnEditorToolsetWizardMenuHint');
-  TranslateStr(SCnEditorToolsetWizardName, 'SCnEditorToolsetWizardName');
-  TranslateStr(SCnEditorToolsetWizardComment, 'SCnEditorToolsetWizardComment');
-  TranslateStr(SCnEditorToolsetWizardConfigCaption, 'SCnEditorToolsetWizardConfigCaption');
-  TranslateStr(SCnEditorToolsetWizardConfigHint, 'SCnEditorToolsetWizardConfigHint');
+  // CnCodingToolsetWizard
+  TranslateStr(SCnCodingToolsetWizardMenuCaption, 'SCnCodingToolsetWizardMenuCaption');
+  TranslateStr(SCnCodingToolsetWizardMenuHint, 'SCnCodingToolsetWizardMenuHint');
+  TranslateStr(SCnCodingToolsetWizardName, 'SCnCodingToolsetWizardName');
+  TranslateStr(SCnCodingToolsetWizardComment, 'SCnCodingToolsetWizardComment');
+  TranslateStr(SCnCodingToolsetWizardConfigCaption, 'SCnCodingToolsetWizardConfigCaption');
+  TranslateStr(SCnCodingToolsetWizardConfigHint, 'SCnCodingToolsetWizardConfigHint');
 
   // CnEditorCodeTool
   TranslateStr(SCnEditorCodeToolSelIsEmpty, 'SCnEditorCodeToolSelIsEmpty');

@@ -41,16 +41,16 @@ interface
 
 // 独立程序时应该定义此使能的条件
 {$IFDEF STAND_ALONE}
-{$DEFINE CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$DEFINE CNWIZARDS_CNCODINGTOOLSETWIZARD}
 {$ENDIF}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Grids, CnConsts, ExtCtrls, StdCtrls, ComCtrls, Clipbrd, Buttons, ActnList,
 {$IFNDEF STAND_ALONE}
-  CnEditorToolsetWizard, CnWizIdeDock, CnWizUtils,
+  CnCodingToolsetWizard, CnWizIdeDock, CnWizUtils,
 {$ENDIF}
   CnSpin, CnWizConsts, CnWizMultiLang;
 
@@ -64,7 +64,7 @@ type
     function GetHint: string; override;
     procedure SetActive(Value: Boolean); override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
 
     procedure Execute; override;
@@ -143,11 +143,11 @@ type
 var
   CnAsciiForm: TCnAsciiForm = nil;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$IFDEF DEBUG}
 uses
@@ -173,7 +173,7 @@ const
 
 { TCnAsciiChart }
 
-constructor TCnAsciiChart.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnAsciiChart.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
@@ -561,5 +561,5 @@ initialization
   RegisterCnCodingToolset(TCnAsciiChart); // 注册专家
 {$ENDIF}
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

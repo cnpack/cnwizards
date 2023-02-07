@@ -18,8 +18,8 @@
 {                                                                              }
 {******************************************************************************}
 
-// Wizard: CnEditorToolsetWizard
-{$DEFINE CNWIZARDS_CNEDITORTOOLSETWIZARD}
+// Wizard: CnCodingToolsetWizard
+{$DEFINE CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 // Wizard: CnSrcEditorEnhance
 {$DEFINE CNWIZARDS_CNSRCEDITORENHANCE}

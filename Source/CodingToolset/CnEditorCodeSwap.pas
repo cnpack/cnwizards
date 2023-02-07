@@ -42,12 +42,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool;
+  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool;
 
 type
 
@@ -69,11 +69,11 @@ type
     procedure GetEditorInfo(var Name, Author, Email: string); override;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 //==============================================================================
 // 赋值交换工具类
@@ -207,5 +207,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorCodeSwap); // 注册专家
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

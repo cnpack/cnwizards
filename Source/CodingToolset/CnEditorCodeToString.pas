@@ -37,12 +37,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
+  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
 
 type
   TCnEditorCodeToStringForm = class(TCnTranslateForm)
@@ -76,7 +76,7 @@ type
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
@@ -87,11 +87,11 @@ type
     property SkipSpace: Boolean read FSkipSpace write FSkipSpace default True;
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -104,7 +104,7 @@ const
 
 { TCnEditorCodeToString }
 
-constructor TCnEditorCodeToString.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorCodeToString.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   FDelphiReturn := '#13#10';
@@ -209,6 +209,6 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorCodeToString); // ×¢²á×¨¼Ò
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.
 

@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnEditorToolsetWizard;
+unit CnCodingToolsetWizard;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
@@ -49,7 +49,7 @@ type
 
 { TCnEditorToolsForm }
 
-  TCnEditorToolsetWizard = class;
+  TCnCodingToolsetWizard = class;
 
   TCnEditorToolsForm = class(TCnTranslateForm)
     btnHelp: TButton;
@@ -76,7 +76,7 @@ type
     procedure lvToolsChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
   private
-    FWizard: TCnEditorToolsetWizard;
+    FWizard: TCnCodingToolsetWizard;
     procedure InitTools;
     procedure UpdateToolItem(Index: Integer);
   protected
@@ -92,7 +92,7 @@ type
   TCnBaseCodingToolset = class(TObject)
   private
     FActive: Boolean;
-    FOwner: TCnEditorToolsetWizard;
+    FOwner: TCnCodingToolsetWizard;
     FAction: TCnWizMenuAction;  // 对菜单 Action 的引用
     FDefaultsMap: TCnStrToVariantHashMap;
   protected
@@ -110,9 +110,9 @@ type
        只需要返回默认的就行了。}
     function CreateIniFile: TCustomIniFile;
     {* 返回一个用于存取工具设置参数的 INI 对象，用户使用后须自己释放}
-    property Owner: TCnEditorToolsetWizard read FOwner;
+    property Owner: TCnCodingToolsetWizard read FOwner;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); virtual;
+    constructor Create(AOwner: TCnCodingToolsetWizard); virtual;
     destructor Destroy; override;
     function GetEditorName: string;
     procedure LoadSettings(Ini: TCustomIniFile); virtual;
@@ -148,9 +148,9 @@ type
 
   TCnCodingToolsetClass = class of TCnBaseCodingToolset;
 
-{ TCnEditorToolsetWizard }
+{ TCnCodingToolsetWizard }
 
-  TCnEditorToolsetWizard = class(TCnSubMenuWizard)
+  TCnCodingToolsetWizard = class(TCnSubMenuWizard)
   private
     FConfigIndex: Integer;
     FEditorIndex: Integer;
@@ -195,11 +195,11 @@ function GetCnEditorToolClassCount: Integer;
 function GetCnEditorToolClassByIndex(const Index: Integer): TCnCodingToolsetClass;
 {* 根据索引号取指定的编辑器工具类引用}
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
 {$IFDEF DEBUG}
@@ -257,7 +257,7 @@ begin
 
 end;
 
-constructor TCnBaseCodingToolset.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnBaseCodingToolset.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited Create;
   Assert(Assigned(AOwner));
@@ -362,9 +362,9 @@ begin
 
 end;
 
-{ TCnEditorToolsetWizard }
+{ TCnCodingToolsetWizard }
 
-procedure TCnEditorToolsetWizard.Config;
+procedure TCnCodingToolsetWizard.Config;
 begin
   inherited;
   with TCnEditorToolsForm.Create(nil) do
@@ -377,7 +377,7 @@ begin
   UpdateActions;
 end;
 
-constructor TCnEditorToolsetWizard.Create;
+constructor TCnCodingToolsetWizard.Create;
 var
   I: Integer;
   Editor: TCnBaseCodingToolset;
@@ -414,7 +414,7 @@ begin
   end;
 end;
 
-destructor TCnEditorToolsetWizard.Destroy;
+destructor TCnCodingToolsetWizard.Destroy;
 var
   I: Integer;
   ActiveIni: TCustomIniFile;
@@ -434,12 +434,12 @@ begin
   inherited;
 end;
 
-procedure TCnEditorToolsetWizard.Execute;
+procedure TCnCodingToolsetWizard.Execute;
 begin
 
 end;
 
-procedure TCnEditorToolsetWizard.Loaded;
+procedure TCnCodingToolsetWizard.Loaded;
 var
   I: Integer;
 begin
@@ -448,22 +448,22 @@ begin
     EditorTools[I].Loaded;
 end;
 
-function TCnEditorToolsetWizard.GetCaption: string;
+function TCnCodingToolsetWizard.GetCaption: string;
 begin
-  Result := SCnEditorToolsetWizardMenuCaption;
+  Result := SCnCodingToolsetWizardMenuCaption;
 end;
 
-function TCnEditorToolsetWizard.GetHasConfig: Boolean;
+function TCnCodingToolsetWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnEditorToolsetWizard.GetHint: string;
+function TCnCodingToolsetWizard.GetHint: string;
 begin
-  Result := SCnEditorToolsetWizardMenuHint;
+  Result := SCnCodingToolsetWizardMenuHint;
 end;
 
-function TCnEditorToolsetWizard.GetState: TWizardState;
+function TCnCodingToolsetWizard.GetState: TWizardState;
 begin
   if Active then 
     Result := [wsEnabled]
@@ -471,26 +471,26 @@ begin
     Result := [];
 end;
 
-class procedure TCnEditorToolsetWizard.GetWizardInfo(var Name, Author, Email,
+class procedure TCnCodingToolsetWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := SCnEditorToolsetWizardName;
+  Name := SCnCodingToolsetWizardName;
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
-  Comment := SCnEditorToolsetWizardComment;
+  Comment := SCnCodingToolsetWizardComment;
 end;
 
-function TCnEditorToolsetWizard.GetEditorTools(Index: Integer): TCnBaseCodingToolset;
+function TCnCodingToolsetWizard.GetEditorTools(Index: Integer): TCnBaseCodingToolset;
 begin
   Result := TCnBaseCodingToolset(FEditorTools[Index]);
 end;
 
-function TCnEditorToolsetWizard.GetEditorToolCount: Integer;
+function TCnCodingToolsetWizard.GetEditorToolCount: Integer;
 begin
   Result := FEditorTools.Count;
 end;
 
-procedure TCnEditorToolsetWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnCodingToolsetWizard.LoadSettings(Ini: TCustomIniFile);
 var
   I: Integer;
   AIni: TCustomIniFile;
@@ -508,7 +508,7 @@ begin
   end;
 end;
 
-procedure TCnEditorToolsetWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnCodingToolsetWizard.SaveSettings(Ini: TCustomIniFile);
 var
   I: Integer;
   AIni: TCustomIniFile;
@@ -526,7 +526,7 @@ begin
   end;
 end;
 
-procedure TCnEditorToolsetWizard.SubActionExecute(Index: Integer);
+procedure TCnCodingToolsetWizard.SubActionExecute(Index: Integer);
 var
   I: Integer;
 begin
@@ -547,7 +547,7 @@ begin
   end;
 end;
 
-procedure TCnEditorToolsetWizard.SubActionUpdate(Index: Integer);
+procedure TCnCodingToolsetWizard.SubActionUpdate(Index: Integer);
 var
   I: Integer;
   State: TWizardState;
@@ -566,15 +566,15 @@ begin
   inherited;
 end;
 
-procedure TCnEditorToolsetWizard.AcquireSubActions;
+procedure TCnCodingToolsetWizard.AcquireSubActions;
 var
   I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
-    FConfigIndex := RegisterASubAction(SCnEditorToolsetWizardConfigName,
-      SCnEditorToolsetWizardConfigCaption, 0, SCnEditorToolsetWizardConfigHint,
-      SCnEditorToolsetWizardConfigName);
+    FConfigIndex := RegisterASubAction(SCnCodingToolsetWizardConfigName,
+      SCnCodingToolsetWizardConfigCaption, 0, SCnCodingToolsetWizardConfigHint,
+      SCnCodingToolsetWizardConfigName);
     if EditorToolCount > 0 then
       AddSepMenu;
     FEditorIndex := FConfigIndex + 1;
@@ -590,7 +590,7 @@ begin
   UpdateActions;
 end;
 
-procedure TCnEditorToolsetWizard.RefreshSubActions;
+procedure TCnCodingToolsetWizard.RefreshSubActions;
 var
   I: Integer;
 begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
@@ -601,7 +601,7 @@ begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
   UpdateActions;
 end;
 
-procedure TCnEditorToolsetWizard.UpdateActions;
+procedure TCnCodingToolsetWizard.UpdateActions;
 var
   I: Integer;
 begin
@@ -610,7 +610,7 @@ begin
       EditorTools[I].FAction.Visible := Active and EditorTools[I].Active;
 end;
 
-procedure TCnEditorToolsetWizard.SetActive(Value: Boolean);
+procedure TCnCodingToolsetWizard.SetActive(Value: Boolean);
 var
   I: Integer;
 begin
@@ -622,7 +622,7 @@ begin
   end;
 end;
 
-procedure TCnEditorToolsetWizard.ClearSubActions;
+procedure TCnCodingToolsetWizard.ClearSubActions;
 var
   I: Integer;
 begin
@@ -637,7 +637,7 @@ end;
 
 procedure TCnEditorToolsForm.FormCreate(Sender: TObject);
 begin
-  FWizard := TCnEditorToolsetWizard(CnWizardMgr.WizardByClass(TCnEditorToolsetWizard));
+  FWizard := TCnCodingToolsetWizard(CnWizardMgr.WizardByClass(TCnCodingToolsetWizard));
   Assert(Assigned(FWizard));
   EnlargeListViewColumns(lvTools);
   InitTools;
@@ -721,7 +721,7 @@ end;
 
 function TCnEditorToolsForm.GetHelpTopic: string;
 begin
-  Result := 'CnEditorToolsetWizard';
+  Result := 'CnCodingToolsetWizard';
 end;
 
 procedure TCnEditorToolsForm.lvToolsChange(Sender: TObject; Item: TListItem;
@@ -753,18 +753,18 @@ end;
 
 initialization
   CnEditorClassList := TList.Create;
-  RegisterCnWizard(TCnEditorToolsetWizard); // 注册专家
+  RegisterCnWizard(TCnCodingToolsetWizard); // 注册专家
 
 finalization
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('CnEditorToolsetWizard finalization.');
+  CnDebugger.LogEnter('CnCodingToolsetWizard finalization.');
 {$ENDIF}
 
   FreeAndNil(CnEditorClassList);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('CnEditorToolsetWizard finalization.');
+  CnDebugger.LogLeave('CnCodingToolsetWizard finalization.');
 {$ENDIF}
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

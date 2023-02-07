@@ -191,8 +191,8 @@ resourcestring
   // CnFormEnhancements
   SCnFlatToolBarDataExt = 'ini';
 
-  // CnEditorToolsetWizard
-  SCnEditorToolsetWizardConfigName = 'CnEditorToolsetWizardConfig';
+  // CnCodingToolsetWizard
+  SCnCodingToolsetWizardConfigName = 'CnCodingToolsetWizardConfig';
   SCnEditorToolsetCollectorDir = 'Collector';
   SCnEditorToolsetCollectorData = 'Collector.dat';
 
@@ -624,13 +624,13 @@ var
   SCnBookmarkCurrentUnit: string = '<Current Unit>';
   SCnBookmarkFileCount: string = 'Units Count: %d';
 
-  // CnEditorToolsetWizard
-  SCnEditorToolsetWizardMenuCaption: string = 'Coding Tools&et';
-  SCnEditorToolsetWizardMenuHint: string = 'Code Editor Toolset';
-  SCnEditorToolsetWizardName: string = 'Coding Toolset';
-  SCnEditorToolsetWizardComment: string = 'Code Editor Toolset.';
-  SCnEditorToolsetWizardConfigCaption: string = '&Options...';
-  SCnEditorToolsetWizardConfigHint: string = 'Configurate the Coding Toolset';
+  // CnCodingToolsetWizard
+  SCnCodingToolsetWizardMenuCaption: string = 'Coding Tools&et';
+  SCnCodingToolsetWizardMenuHint: string = 'Code Editor Toolset';
+  SCnCodingToolsetWizardName: string = 'Coding Toolset';
+  SCnCodingToolsetWizardComment: string = 'Code Editor Toolset.';
+  SCnCodingToolsetWizardConfigCaption: string = '&Options...';
+  SCnCodingToolsetWizardConfigHint: string = 'Configurate the Coding Toolset';
 
   // CnEditorCodeTool
   SCnEditorCodeToolSelIsEmpty: string = 'Please Select the Code Block to Process.';

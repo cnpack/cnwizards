@@ -37,11 +37,11 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnEditorToolsetWizard,
+  StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
   CnWizConsts, CnEditorCodeTool, CnIni, CnWizMultiLang;
 
 type
@@ -56,7 +56,7 @@ type
   private
     FDateTimeFmt: string;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -82,17 +82,17 @@ type
     { Public declarations }
   end;
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.dfm}
 
 { TCnEditorInsertTime }
 
-constructor TCnEditorInsertTime.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorInsertTime.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -166,5 +166,5 @@ end;
 initialization
   RegisterCnCodingToolset(TCnEditorInsertTime);
   
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

@@ -47,12 +47,12 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnWizManager,
-  CnWizEditFiler, CnEditorToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
+  CnWizEditFiler, CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
   CnCppCodeParser, mwBCBTokenList, CnFastList {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
 
@@ -70,7 +70,7 @@ type
   protected
     function GetDefShortCut: TShortCut; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -86,7 +86,7 @@ type
   protected
     function GetDefShortCut: TShortCut; override;
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -98,7 +98,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -114,7 +114,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -134,7 +134,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -150,7 +150,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -166,7 +166,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -184,7 +184,7 @@ type
   private
 
   public
-    constructor Create(AOwner: TCnEditorToolsetWizard); override;
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -200,11 +200,11 @@ type
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$IFDEF DEBUG}
 uses
@@ -220,7 +220,7 @@ end;
 
 { TCnEditorJumpMessage }
 
-constructor TCnEditorNextMessage.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorNextMessage.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -279,7 +279,7 @@ end;
 
 { TCnEditorPrevMessage }
 
-constructor TCnEditorPrevMessage.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorPrevMessage.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -412,7 +412,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpIntf.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpIntf.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -475,7 +475,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpImpl.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpImpl.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -542,7 +542,7 @@ begin
   Email := SCnPack_LiuXiaoEmail;
 end;
 
-constructor TCnEditorJumpMatchedKeyword.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpMatchedKeyword.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -1013,7 +1013,7 @@ end;
 
 { TCnEditorJumpPrevIdent }
 
-constructor TCnEditorJumpPrevIdent.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpPrevIdent.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -1077,7 +1077,7 @@ end;
 
 { TCnEditorJumpNextIdent }
 
-constructor TCnEditorJumpNextIdent.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpNextIdent.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -1143,7 +1143,7 @@ end;
 
 { TCnEditorJumpIDEInsight }
 
-constructor TCnEditorJumpIDEInsight.Create(AOwner: TCnEditorToolsetWizard);
+constructor TCnEditorJumpIDEInsight.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
 
@@ -1241,5 +1241,5 @@ initialization
   RegisterCnCodingToolset(TCnEditorJumpIDEInsight);
 {$ENDIF}
 
-{$ENDIF CNWIZARDS_CNEDITORTOOLSETWIZARD}
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.
