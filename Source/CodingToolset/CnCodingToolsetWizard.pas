@@ -104,7 +104,7 @@ type
     function GetCaption: string; virtual; abstract;
     {* 返回工具的标题}
     function GetHint: string; virtual;
-    {* 返回工具的Hint提示}
+    {* 返回工具的 Hint 提示}
     function GetDefShortCut: TShortCut; virtual;
     {* 返回工具的默认快捷键，实际使用时工具的快捷键会可能由管理器来设定，这里
        只需要返回默认的就行了。}

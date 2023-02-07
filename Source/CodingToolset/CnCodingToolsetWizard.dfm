@@ -2,7 +2,7 @@ inherited CnEditorToolsForm: TCnEditorToolsForm
   Left = 359
   Top = 144
   BorderIcons = [biSystemMenu]
-  Caption = 'Code Editor Wizard Settings'
+  Caption = 'Coding Toolset Settings'
   ClientHeight = 510
   ClientWidth = 578
   Constraints.MinHeight = 540
