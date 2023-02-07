@@ -28,7 +28,9 @@ unit CnWidePasParser;
 * 开发平台：Win7 + Delphi 2009
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2019.03.16 V1.2
+* 修改记录：2022.02.06 V1.3
+*               重构部分函数并增加对仅解析字符串 Token 的方法
+*           2019.03.16 V1.2
 *               优化对换行后的点号的支持以及点号后输入的内容恰好是关键字时的支持
 *           2015.04.25 V1.1
 *               增加 WideString 实现
@@ -46,12 +48,6 @@ uses
   Contnrs, CnFastList, CnPasCodeParser, CnContainers;
 
 type
-{$IFDEF UNICODE}
-  CnWideString = string;
-{$ELSE}
-  CnWideString = WideString;
-{$ENDIF}
-
   TCnWidePasToken = class(TPersistent)
   {* 描述一 Token 的结构高亮信息}
   private
@@ -171,12 +167,13 @@ type
   protected
     procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer;
       Lex: TCnPasWideLex; Source: PWideChar);
-    function NewToken(Lex: TCnPasWideLex; Source: PWideChar; CurrBlock, CurrMethod: TCnWidePasToken;
-      CurrBracketLevel: Integer): TCnWidePasToken;
+    function NewToken(Lex: TCnPasWideLex; Source: PWideChar; CurrBlock: TCnWidePasToken = nil;
+      CurrMethod: TCnWidePasToken = nil; CurrBracketLevel: Integer = 0): TCnWidePasToken;
   public
     constructor Create(SupportUnicodeIdent: Boolean = True);
     destructor Destroy; override;
     procedure Clear;
+
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
     {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
     function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer): CnWideString;
@@ -191,6 +188,10 @@ type
        Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
        再转成 WideChar 的偏移}
+
+    procedure ParseString(ASource: PWideChar);
+    {* 对代码进行针对字符串的解析，只生成字符串内容}
+
     function IndexOfToken(Token: TCnWidePasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnWidePasToken read GetToken;
@@ -226,14 +227,10 @@ type
     {* Tab 键的宽度}
   end;
 
-{$IFDEF UNICODE}
-
-procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
+procedure ParsePasCodePosInfoW(const Source: CnWideString; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
 {* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
   Line/Col 对应 View 的 CursorPos，均为 1 开始}
-
-{$ENDIF}
 
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
   SupportUnicodeIdent: Boolean = False);
@@ -590,9 +587,9 @@ begin
     Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
     Lex.Origin := PWideChar(ASource);
 
-    DeclareWithEndLevel := 0; // 嵌套的需要end的定义层数
+    DeclareWithEndLevel := 0; // 嵌套的需要 end 的定义层数
     CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
-    CurrBlock := nil;         // 当前 Token 所在的块。
+    CurrBlock := nil;         // 当前 Token 所在的块
     CurrMidBlock := nil;
     CurrBracketLevel := 0;
     IsImpl := AIsDpr;
@@ -1496,9 +1493,32 @@ begin
   end;
 end;
 
-{$IFDEF UNICODE}
+procedure TCnWidePasStructParser.ParseString(ASource: PWideChar);
+var
+  Lex: TCnPasWideLex;
+begin
+  Clear;
+  Lex := nil;
 
-procedure ParsePasCodePosInfoW(const Source: string; Line, Col: Integer;
+  try
+    FSource := ASource;
+
+    Lex := TCnPasWideLex.Create(FSupportUnicodeIdent);
+    Lex.Origin := PWideChar(ASource);
+
+    while Lex.TokenID <> tkNull do
+    begin
+      if Lex.TokenID in [tkString] then
+        NewToken(Lex, ASource);
+
+      Lex.NextNoJunk;
+    end;
+  finally
+    Lex.Free;
+  end;
+end;
+
+procedure ParsePasCodePosInfoW(const Source: CnWideString; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer; FullSource: Boolean);
 var
   IsProgram: Boolean;
@@ -1771,7 +1791,7 @@ begin
           end;
         tkString:
           begin
-            if not SameText(string(Lex.Token), 'String') and (PosInfo.PosKind <> pkString) then
+            if PosInfo.PosKind <> pkString then
             begin
               SavePos := PosInfo.PosKind;
               PosInfo.PosKind := pkString;
@@ -1914,8 +1934,6 @@ begin
     ProcStack.Free;
   end;
 end;
-
-{$ENDIF}
 
 // 分析源代码中引用的单元
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;

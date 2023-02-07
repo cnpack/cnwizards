@@ -28,7 +28,9 @@ unit CnPasCodeParser;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2019.03.16 V1.2
+* 修改记录：2022.02.06 V1.3
+*               重构部分函数并增加对仅解析字符串 Token 的方法
+*           2019.03.16 V1.2
 *               优化对换行后的点号的支持以及点号后输入的内容恰好是关键字时的支持
 *           2012.02.07
 *               UTF8 的位置转换去除后仍有问题，恢复之
@@ -184,12 +186,13 @@ type
     function GetToken(Index: Integer): TCnPasToken; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   protected
     function CalcCharIndex(Lex: TmwPasLex; Source: PAnsiChar): Integer;
-    function NewToken(Lex: TmwPasLex; Source: PAnsiChar; CurrBlock, CurrMethod: TCnPasToken;
-      CurrBracketLevel: Integer): TCnPasToken;
+    function NewToken(Lex: TmwPasLex; Source: PAnsiChar; CurrBlock: TCnPasToken = nil;
+      CurrMethod: TCnPasToken = nil; CurrBracketLevel: Integer = 0): TCnPasToken;
   public
     constructor Create(SupportUnicodeIdent: Boolean = False);
     destructor Destroy; override;
     procedure Clear;
+
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
     {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
     function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
@@ -199,6 +202,10 @@ type
     {* 根据当前光标位置查找当前块与当前嵌套/外层函数等。
        LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
        要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
+
+    procedure ParseString(ASource: PAnsiChar);
+    {* 对代码进行针对字符串的解析，只生成字符串内容}
+
     function IndexOfToken(Token: TCnPasToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnPasToken read GetToken;
@@ -624,7 +631,7 @@ begin
   Clear;
   Lex := nil;
   PrevTokenID := tkProgram;
-  
+
   try
     FSource := ASource;
     FKeyOnly := AKeyOnly;
@@ -639,7 +646,7 @@ begin
     Lex.Origin := PAnsiChar(ASource);
 
     DeclareWithEndLevel := 0; // 嵌套的需要 end 的定义层数
-    CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形 
+    CurrMethod := nil;        // 当前 Token 所在的方法 procedure/function，包括匿名函数的情形
     CurrBlock := nil;         // 当前 Token 所在的块。
     CurrMidBlock := nil;
     CurrBracketLevel := 0;
@@ -1548,6 +1555,31 @@ begin
   end;
 end;
 
+procedure TCnPasStructureParser.ParseString(ASource: PAnsiChar);
+var
+  Lex: TmwPasLex;
+begin
+  Clear;
+  Lex := nil;
+
+  try
+    FSource := ASource;
+
+    Lex := TmwPasLex.Create(FSupportUnicodeIdent);
+    Lex.Origin := PAnsiChar(ASource);
+
+    while Lex.TokenID <> tkNull do
+    begin
+      if Lex.TokenID in [tkString] then
+        NewToken(Lex, ASource);
+
+      Lex.NextNoJunk;
+    end;
+  finally
+    Lex.Free;
+  end;
+end;
+
 //==============================================================================
 // Pascal 源码位置信息分析
 //==============================================================================
@@ -1805,7 +1837,7 @@ begin
           end;
         tkString:
           begin
-            if not SameText(string(Lex.Token), 'String') and (Result.PosKind <> pkString) then
+            if Result.PosKind <> pkString then
             begin
               SavePos := Result.PosKind;
               Result.PosKind := pkString;

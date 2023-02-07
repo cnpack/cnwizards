@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
+SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils;..\..\Source\ThirdParty
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=
 DebugSourceDirs=
@@ -85,9 +85,12 @@ Item0=DEBUG;USE_JCL
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=5
-Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
-Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics
-Item2=..\..\..\Source\Common;..\..\..\Source\Graphics
-Item3=..\..\..\Source\Common;..\..\..\Source\Crypto;..\..\..\cnwizards\Source\ThirdParty\JCL
-Item4=..\..\..\Source\Common;..\..\..\Source\Crypto
+Count=8
+Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto;..\..\Source;..\..\Source\Utils;..\..\Source\ThirdParty
+Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto;..\..\Source\Utils;..\..\Source
+Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto;..\..\Source\Utils
+Item3=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
+Item4=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics
+Item5=..\..\..\Source\Common;..\..\..\Source\Graphics
+Item6=..\..\..\Source\Common;..\..\..\Source\Crypto;..\..\..\cnwizards\Source\ThirdParty\JCL
+Item7=..\..\..\Source\Common;..\..\..\Source\Crypto
