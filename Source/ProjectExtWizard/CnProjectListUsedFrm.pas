@@ -249,7 +249,7 @@ begin
             {$IFDEF SUPPORT_UNITNAME_DOT}, Prefixes {$ENDIF}) then
           begin
             Error := True;
-            ErrorDlg(SCnEditorOpenFileNotFind);
+            ErrorDlg(SCnEditorOpenFileNotFound);
           end;
         end;
       end;

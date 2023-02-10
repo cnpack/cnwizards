@@ -373,6 +373,12 @@ begin
   TranslateStr(SCnEditorCodeToStringName, 'SCnEditorCodeToStringName');
   TranslateStr(SCnEditorCodeToStringMenuHint, 'SCnEditorCodeToStringMenuHint');
 
+   // CnEditorExtractString
+  TranslateStr(SCnEditorExtractStringMenuCaption, 'SCnEditorExtractStringMenuCaption');
+  TranslateStr(SCnEditorExtractStringName, 'SCnEditorExtractStringName');
+  TranslateStr(SCnEditorExtractStringMenuHint, 'SCnEditorExtractStringMenuHint');
+  TranslateStr(SCnEditorExtractStringNotFound, 'SCnEditorExtractStringNotFound');
+
   // CnEditorCodeDelBlank
   TranslateStr(SCnEditorCodeDelBlankMenuCaption, 'SCnEditorCodeDelBlankMenuCaption');
   TranslateStr(SCnEditorCodeDelBlankName, 'SCnEditorCodeDelBlankName');
@@ -384,7 +390,7 @@ begin
   TranslateStr(SCnEditorOpenFileMenuHint, 'SCnEditorOpenFileMenuHint');
   TranslateStr(SCnEditorOpenFileDlgCaption, 'SCnEditorOpenFileDlgCaption');
   TranslateStr(SCnEditorOpenFileDlgHint, 'SCnEditorOpenFileDlgHint');
-  TranslateStr(SCnEditorOpenFileNotFind, 'SCnEditorOpenFileNotFind');
+  TranslateStr(SCnEditorOpenFileNotFound, 'SCnEditorOpenFileNotFound');
   
   // CnEditorZoomFullScreen
   TranslateStr(SCnEditorZoomFullScreenMenuCaption, 'SCnEditorZoomFullScreenMenuCaption');

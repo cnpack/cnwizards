@@ -646,6 +646,12 @@ var
   SCnEditorCodeToStringName: string = 'Code to String Converter';
   SCnEditorCodeToStringMenuHint: string = 'Convert Code Block Selected to String';
 
+  // CnEditorExtractString
+  SCnEditorExtractStringMenuCaption: string = '&Extract Strings...';
+  SCnEditorExtractStringName: string = 'Extract String Tool';
+  SCnEditorExtractStringMenuHint: string = 'Search and Extract Strings in Source.';
+  SCnEditorExtractStringNotFound: string = 'NO String Found in Source!';
+
   // CnEditorCodeDelBlank
   SCnEditorCodeDelBlankMenuCaption: string = '&Delete Blank Lines...';
   SCnEditorCodeDelBlankName: string = 'Delete Blank Lines Tool';
@@ -657,7 +663,7 @@ var
   SCnEditorOpenFileMenuHint: string = 'Search and Open File in Search Path.';
   SCnEditorOpenFileDlgCaption: string = 'Open File';
   SCnEditorOpenFileDlgHint: string = 'Enter Filename:';
-  SCnEditorOpenFileNotFind: string = 'File not Found in Search Path!';
+  SCnEditorOpenFileNotFound: string = 'File not Found in Search Path!';
 
   // CnEditorZoomFullScreen
   SCnEditorZoomFullScreenMenuCaption: string = 'Editor &FullScreen Switch';

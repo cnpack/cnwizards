@@ -169,7 +169,7 @@ begin
             ShowOpenFileResultList(FFileList);
         end
         else
-          ErrorDlg(SCnEditorOpenFileNotFind);
+          ErrorDlg(SCnEditorOpenFileNotFound);
       end;
     end;
   end;

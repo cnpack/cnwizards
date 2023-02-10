@@ -30,21 +30,6 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
       Visible = False
     end
   end
-  inherited lvList: TListView
-    Width = 527
-    Height = 301
-    Columns = <
-      item
-        Caption = 'Unit Name'
-        Width = 350
-      end
-      item
-        Caption = 'Uses Type'
-        Width = 150
-      end>
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Top = 367
     Width = 527
@@ -71,6 +56,25 @@ inherited CnProjectListUsedForm: TCnProjectListUsedForm
     end
     inherited btnHookIDE: TToolButton
       Visible = False
+    end
+  end
+  inherited pnlMain: TPanel
+    Width = 527
+    Height = 301
+    inherited lvList: TListView
+      Width = 527
+      Height = 301
+      Columns = <
+        item
+          Caption = 'Unit Name'
+          Width = 350
+        end
+        item
+          Caption = 'Uses Type'
+          Width = 150
+        end>
+      OwnerData = True
+      OnData = lvListData
     end
   end
   inherited ActionList: TActionList
