@@ -876,6 +876,11 @@ function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor = nil): Integer;
   本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
 
+function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
+{* 返回 SourceEditor 指定编辑位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
+  本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
+  做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
+
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
 
@@ -6683,9 +6688,28 @@ end;
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
 function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor): Integer;
 var
-  CharPos: TOTACharPos;
   IEditView: IOTAEditView;
   EditPos: TOTAEditPos;
+begin
+  if not Assigned(SourceEditor) then
+    SourceEditor := CnOtaGetCurrentSourceEditor;
+  if SourceEditor.EditViewCount > 0 then
+  begin
+    IEditView := CnOtaGetTopMostEditView(SourceEditor);
+    Assert(IEditView <> nil);
+    EditPos := IEditView.CursorPos;
+
+    Result := CnOtaGetLinePosFromEditPos(EditPos, SourceEditor);
+  end
+  else
+    Result := 0;
+end;
+
+function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos;
+  SourceEditor: IOTASourceEditor): Integer;
+var
+  CharPos: TOTACharPos;
+  IEditView: IOTAEditView;
 {$IFDEF UNICODE}
   Text: string;
   LineNo: Integer;
@@ -6699,7 +6723,7 @@ begin
   begin
     IEditView := CnOtaGetTopMostEditView(SourceEditor);
     Assert(IEditView <> nil);
-    EditPos := IEditView.CursorPos;
+
 {$IFDEF UNICODE}
     CharPos.Line := EditPos.Line;
     CharPos.CharIndex := 0;

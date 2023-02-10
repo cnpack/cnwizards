@@ -511,7 +511,8 @@ begin
   CL.AddDelphiFunction('Function CnOtaSetCurSourceCol( Col : Integer) : Boolean');
   CL.AddDelphiFunction('Function CnOtaSetCurSourceRow( Row : Integer) : Boolean');
   CL.AddDelphiFunction('Function CnOtaMovePosInCurSource( Pos : TInsertPos; OffsetRow, OffsetCol : Integer) : Boolean');
-  CL.AddDelphiFunction('Function CnOtaGetCurrPos( SourceEditor : IOTASourceEditor) : Integer');
+  CL.AddDelphiFunction('Function CnOtaGetCurrLinePos( SourceEditor : IOTASourceEditor) : Integer');
+  CL.AddDelphiFunction('Function CnOtaGetLinePosFromEditPos( EditPos : TOTAEditPos; SourceEditor : IOTASourceEditor) : Integer');
   CL.AddDelphiFunction('Function CnOtaGetCurrCharPos( SourceEditor : IOTASourceEditor) : TOTACharPos');
   CL.AddDelphiFunction('Function CnOtaEditPosToLinePos( EditPos : TOTAEditPos; EditView : IOTAEditView) : Integer');
   CL.AddDelphiFunction('Function CnOtaLinePosToEditPos( LinePos : Integer; EditView : IOTAEditView) : TOTAEditPos');
@@ -783,7 +784,8 @@ begin
   S.RegisterDelphiFunction(@CnOtaSetCurSourceCol, 'CnOtaSetCurSourceCol', cdRegister);
   S.RegisterDelphiFunction(@CnOtaSetCurSourceRow, 'CnOtaSetCurSourceRow', cdRegister);
   S.RegisterDelphiFunction(@CnOtaMovePosInCurSource, 'CnOtaMovePosInCurSource', cdRegister);
-  S.RegisterDelphiFunction(@CnOtaGetCurrPos, 'CnOtaGetCurrPos', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetCurrLinePos, 'CnOtaGetCurrLinePos', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaGetLinePosFromEditPos, 'CnOtaGetLinePosFromEditPos', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrCharPos, 'CnOtaGetCurrCharPos', cdRegister);
   S.RegisterDelphiFunction(@CnOtaEditPosToLinePos, 'CnOtaEditPosToLinePos', cdRegister);
   S.RegisterDelphiFunction(@CnOtaLinePosToEditPos, 'CnOtaLinePosToEditPos', cdRegister);
