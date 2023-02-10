@@ -287,10 +287,10 @@ begin
 {$ENDIF}
 
   lstInfo.Items.Add(SEP);
-  CurrPos := CnOtaGetCurrPos; // 取到的线性偏移基本准确
+  CurrPos := CnOtaGetCurrLinePos; // 取到的线性偏移基本准确
   lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CurrPos]));
 {$IFDEF UNICODE}
-  CurrPos := CnOtaOldGetCurrPos;
+  CurrPos := CnOtaOldGetCurrLinePos;
   lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d from ToolsAPI.', [CurrPos]));
 {$ENDIF}
 

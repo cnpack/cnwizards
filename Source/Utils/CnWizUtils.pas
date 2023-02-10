@@ -871,7 +871,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
-function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
   本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
@@ -914,7 +914,7 @@ function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-  也就是 Ansi/Utf16/Utf16}
+  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -926,15 +926,15 @@ procedure CnOtaSaveReaderToWideStream(EditReader: IOTAEditReader; Stream:
 procedure CnOtaSaveEditorToWideStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0);
-{* 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+{* 保存编辑器文本到流中，Utf8 内容转为 WideString，带末尾 #0 字符，2005 ~ 2007 中使用}
 
 function CnOtaSaveEditorToWideStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
   FromCurrPos: Boolean = False): Boolean;
-{* 保存编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+{* 保存编辑器文本到流中，Utf8 内容转为 WideString，带末尾 #0 字符，2005 ~ 2007 中使用}
 
 function CnOtaSaveCurrentEditorToWideStream(Stream: TMemoryStream; FromCurrPos:
   Boolean): Boolean;
-{* 保存当前编辑器文本到流中，Utf8 内容转为 WideString，2005 ~ 2007 中使用}
+{* 保存当前编辑器文本到流中，Utf8 内容转为 WideString，带末尾 #0 字符，2005 ~ 2007 中使用}
 
 {$ENDIF}
 
@@ -948,15 +948,15 @@ procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
 procedure CnOtaSaveEditorToStreamWEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0);
-{* 保存编辑器文本到流中，Unicode 版本，2009 以上使用}
+{* 保存编辑器文本到流中，Unicode 版本，带末尾 #0 字符，2009 以上使用}
 
 function CnOtaSaveEditorToStreamW(Editor: IOTASourceEditor; Stream: TMemoryStream;
   FromCurrPos: Boolean = False): Boolean;
-{* 保存编辑器文本到流中，Unicode 版本，2009 以上使用}
+{* 保存编辑器文本到流中，Unicode 版本，带末尾 #0 字符，2009 以上使用}
 
 function CnOtaSaveCurrentEditorToStreamW(Stream: TMemoryStream; FromCurrPos:
   Boolean): Boolean;
-{* 保存当前编辑器文本到流中，Unicode 版本，2009 以上使用}
+{* 保存当前编辑器文本到流中，Unicode 版本，带末尾 #0 字符，2009 以上使用}
 
 function CnOtaGetCurrentEditorSourceW: string;
 {* 取得当前编辑器源代码，Unicode 版本，2009 以上使用}
@@ -1068,6 +1068,10 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
 {* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
+
+procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream);
+{* 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理}
 
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer = 0;
@@ -6677,7 +6681,7 @@ begin
 end;
 
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
-function CnOtaGetCurrPos(SourceEditor: IOTASourceEditor): Integer;
+function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor): Integer;
 var
   CharPos: TOTACharPos;
   IEditView: IOTAEditView;
@@ -6916,7 +6920,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrPos(Editor)
+      IPos := CnOtaGetCurrLinePos(Editor)
     else
       IPos := 0;
 
@@ -7074,7 +7078,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrPos(Editor)
+      IPos := CnOtaGetCurrLinePos(Editor)
     else
       IPos := 0;
 
@@ -7235,7 +7239,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrPos(Editor)
+      IPos := CnOtaGetCurrLinePos(Editor)
     else
       IPos := 0;
 
@@ -7746,6 +7750,20 @@ begin
   Parser.ParseSource(PWideChar(Stream.Memory), AIsDpr, AKeyOnly);
 {$ELSE}
   Parser.ParseSource(PAnsiChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ENDIF}
+end;
+
+// 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理
+procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseString(PWideChar(Stream.Memory));
+{$ELSE}
+  Parser.ParseString(PAnsiChar(Stream.Memory));
 {$ENDIF}
 end;
 
