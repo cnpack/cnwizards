@@ -142,7 +142,7 @@ uses
 {$ENDIF}
 
 const
-  SHOW_INTERVAL = 1000;
+  SHOW_INTERVAL = 600;
   csHintWidth = 90;
   csHintHeight = 24;
   csGap = 20;
@@ -306,7 +306,7 @@ begin
   FEditControl := TWinControl(Editor.EditControl);
 
   CheckCreateForm;
-  if not FInScroll and InRightScroll then // 第一次进入了滚动条区
+  if not FInScroll and InRightScroll then // 原先不在滚动条区，本次头一回进入了滚动条区
   begin
     // 只有第一次进入了滚动条区，才要求捕获 MouseLeave
     FPoint.x := X;
@@ -375,6 +375,7 @@ begin
     end;
 
     FHideTimer.Enabled := not InPreview and not InScroll;
+    FInScroll := InScroll;
 {$IFDEF DEBUG}
 //  CnDebugger.LogBoolean(InPreview, 'Check Hide Timer. Mouse In Preview?');
 //  CnDebugger.LogBoolean(InScroll, 'Check Hide Timer. Mouse In Editor Scrollbar?');
@@ -397,7 +398,8 @@ end;
 procedure TCnSrcEditorThumbnail.OnShowTimer(Sender: TObject);
 begin
   FShowTimer.Enabled := False;
-  UpdateThumbnailForm(True, False);
+  if FInScroll then
+    UpdateThumbnailForm(True, False);
 end;
 
 procedure TCnSrcEditorThumbnail.ResetSettings(Ini: TCustomIniFile);

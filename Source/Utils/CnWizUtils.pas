@@ -886,7 +886,7 @@ function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 
 function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
 {* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
-   在 Unicode 环境下该位置之前有宽字符时其值不靠谱}
+   在 Unicode 环境下该位置之前有宽字符时其值不靠谱，不推荐使用}
 
 function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
 {* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
