@@ -736,7 +736,7 @@ begin
 end;
 
 initialization
-  RegisterCnCodingToolset(TCnEditorCollector); // 注册专家
+  RegisterCnCodingToolset(TCnEditorCollector); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

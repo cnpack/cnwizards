@@ -233,7 +233,8 @@ object FormExtract: TFormExtract
           'I am CnPack Team Member.'
           'OK! 吃饭了！有不少菜'
           '3.1415926'
-          '纯文本，看看')
+          '纯文本，看看'
+          #39'0123456789ABCDEF'#39)
         TabOrder = 1
       end
       object chkUnderLine: TCheckBox

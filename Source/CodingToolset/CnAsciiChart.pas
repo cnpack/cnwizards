@@ -558,7 +558,7 @@ end;
 
 {$IFNDEF STAND_ALONE}
 initialization
-  RegisterCnCodingToolset(TCnAsciiChart); // 注册专家
+  RegisterCnCodingToolset(TCnAsciiChart); // 注册工具
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}

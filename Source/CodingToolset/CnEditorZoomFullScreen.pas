@@ -485,7 +485,7 @@ begin
 end;
 
 initialization
-  RegisterCnCodingToolset(TCnEditorZoomFullScreen); // 注册专家
+  RegisterCnCodingToolset(TCnEditorZoomFullScreen); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

@@ -225,7 +225,7 @@ begin
 end;
 
 initialization
-  RegisterCnCodingToolset(TCnEditorCodeDelBlank); // 注册专家
+  RegisterCnCodingToolset(TCnEditorCodeDelBlank); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

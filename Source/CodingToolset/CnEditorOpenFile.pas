@@ -319,7 +319,7 @@ begin
 end;
 
 initialization
-  RegisterCnCodingToolset(TCnEditorOpenFile); // 注册专家
+  RegisterCnCodingToolset(TCnEditorOpenFile); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

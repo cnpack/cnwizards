@@ -52,6 +52,7 @@ begin
   begin
     S := ConvertStringToIdent(mmoStrings.Lines[I], 'SCN', chkUnderLine.Checked,
       TCnIdentWordStyle(cbbStyle.ItemIndex), chkFullPinYin.Checked);
+//    S := ConvertStringToIdent(mmoStrings.Lines[I]);
     mmoIdent.Lines.Add(S);
   end;
 end;
@@ -120,7 +121,6 @@ begin
     Parser.ParseString(Stream.Memory);
 
     // 得到一批 Token 后，逐个找其位置，存在 Tag 里
-
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
