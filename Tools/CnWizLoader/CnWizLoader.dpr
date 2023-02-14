@@ -110,6 +110,9 @@ begin
   V := GetFileVersionNumber(Application.ExeName);
   Exe := LowerCase(ExtractFileName(Application.ExeName));
 
+  OutputDebugString(PChar(Format('CnWizards Loader Get Exe Version: %d.%d.%d.%d',
+    [V.Major, V.Minor, V.Release, V.Build])));
+
   case V.Major of
     5:
       begin
@@ -206,13 +209,13 @@ begin
         Terminate := LoaderTerminate;
       end
       else
-        MessageBox(0, PChar(Format('DLL %s Corrupted!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
+        OutputDebugString(PChar(Format('DLL %s Corrupted!', [Dll])));
     end
     else
-      MessageBox(0, PChar(Format('DLL %s Loading Error!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
+      OutputDebugString(PChar(Format('DLL %s Loading Error!', [Dll])));
   end
   else
-    MessageBox(0, PChar(Format('DLL %s NOT Found!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
+    OutputDebugString(PChar(Format('DLL %s NOT Found!', [Dll])));
 end;
 
 exports
