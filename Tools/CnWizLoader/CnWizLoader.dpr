@@ -204,9 +204,15 @@ begin
         Result := Entry(BorlandIDEServices, RegisterProc, LoaderTerminateProc);
         // IDE 的卸载过程则指给我们的
         Terminate := LoaderTerminate;
-      end;
-    end;
-  end;
+      end
+      else
+        MessageBox(0, PChar(Format('DLL %s Corrupted!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
+    end
+    else
+      MessageBox(0, PChar(Format('DLL %s Loading Error!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
+  end
+  else
+    MessageBox(0, PChar(Format('DLL %s NOT Found!', [Dll])), 'Error', MB_OK + MB_ICONSTOP);
 end;
 
 exports
