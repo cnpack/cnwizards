@@ -85,11 +85,11 @@ type
 
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
-    Indexes: array of Integer;
+    FIndexes: array of Integer;
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
-    class procedure OnLanguageChanged(Sender: TObject);
+    class procedure LanguageChanged(Sender: TObject);
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -111,7 +111,7 @@ type
 {$ENDIF}
     FActionList: TActionList;
     FHelpAction: TAction;
-    procedure OnLanguageChanged(Sender: TObject);
+    procedure LanguageChanged(Sender: TObject);
     procedure OnHelp(Sender: TObject);
     procedure CheckDefaultFontSize;
     // 部分 Win7 主题会出现右下角超出窗体的现象，原因是 ClientHeight/ClientWidth
@@ -242,6 +242,8 @@ end;
 procedure InitLangManager;
 var
   LangID: Cardinal;
+  Idx: Integer;
+  Item: TCnLanguageItem;
 begin
   CnLanguageManager.AutoTranslate := False;
   CnLanguageManager.TranslateTreeNode := True;
@@ -261,6 +263,17 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsgError('Language Storage Initialization Error.');
 {$ENDIF DEBUG}
+  end;
+
+  // 将 2052 调整至首位
+  Idx := FStorage.Languages.Find(2052);
+  if Idx > 0 then
+  begin
+    Item := FStorage.Languages.Add;
+    Item.Assign(FStorage.Languages.Items[Idx]);
+    FStorage.Languages.Items[Idx].Assign(FStorage.Languages.Items[0]);
+    FStorage.Languages.Items[0].Assign(Item);
+    Item.Free;
   end;
   CnLanguageManager.LanguageStorage := FStorage;
 
@@ -306,7 +319,7 @@ end;
 constructor TCnWizMultiLang.Create;
 begin
   if CnLanguageManager <> nil then
-    CnLanguageManager.OnLanguageChanged := Self.OnLanguageChanged;
+    CnLanguageManager.OnLanguageChanged := LanguageChanged;
 
   inherited;
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
@@ -314,7 +327,7 @@ begin
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
     AcquireSubActions
   else
-    Self.Active := False;
+    Active := False;
 end;
 
 procedure TCnWizMultiLang.AcquireSubActions;
@@ -323,12 +336,12 @@ var
   S: string;
 begin
   if FStorage.LanguageCount > 0 then
-    SetLength(Self.Indexes, FStorage.LanguageCount);
+    SetLength(FIndexes, FStorage.LanguageCount);
   for I := 0 to FStorage.LanguageCount - 1 do
   begin
     S := CnLanguages.NameFromLocaleID[FStorage.Languages[I].LanguageID];
     S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
-    Self.Indexes[I] := RegisterASubAction(csLanguage + InttoStr(I) + FStorage.
+    FIndexes[I] := RegisterASubAction(csLanguage + InttoStr(I) + FStorage.
       Languages[I].Abbreviation, FStorage.Languages[I].LanguageName + ' - ' +
       S, 0, FStorage.Languages[I].LanguageName);
   end;
@@ -366,7 +379,7 @@ begin
 end;
 
 // 语言事件改变的处理事件
-class procedure TCnWizMultiLang.OnLanguageChanged(Sender: TObject);
+class procedure TCnWizMultiLang.LanguageChanged(Sender: TObject);
 begin
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
@@ -387,8 +400,8 @@ procedure TCnWizMultiLang.SubActionExecute(Index: Integer);
 var
   I: Integer;
 begin
-  for I := Low(Indexes) to High(Indexes) do
-    if Indexes[I] = Index then
+  for I := Low(FIndexes) to High(FIndexes) do
+    if FIndexes[I] = Index then
     begin
       CnLanguageManager.CurrentLanguageIndex := I;
       WizOptions.CurrentLangID := FStorage.Languages[I].LanguageID;
@@ -399,7 +412,7 @@ procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
 var
   I: Integer;
 begin
-  for I := Low(Indexes) to High(Indexes) do
+  for I := Low(FIndexes) to High(FIndexes) do
     SubActions[I].Checked := WizOptions.CurrentLangID =
       FStorage.Languages[I].LanguageID;
 end;
@@ -495,7 +508,7 @@ begin
   FActionList.Free;
   FScaler.Free;
   if CnLanguageManager <> nil then
-    CnLanguageManager.RemoveChangeNotifier(OnLanguageChanged);
+    CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
   inherited;
 end;
 
@@ -745,7 +758,7 @@ begin
 {$ENDIF}        
 end;
 
-procedure TCnTranslateForm.OnLanguageChanged(Sender: TObject);
+procedure TCnTranslateForm.LanguageChanged(Sender: TObject);
 begin
   DisableAlign;
   try
@@ -809,7 +822,7 @@ begin
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
   begin
-    CnLanguageManager.AddChangeNotifier(OnLanguageChanged);
+    CnLanguageManager.AddChangeNotifier(LanguageChanged);
     Screen.Cursor := crHourGlass;
     try
       CnLanguageManager.TranslateForm(Self);
@@ -885,6 +898,7 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+
 procedure TCnTranslateForm.EnlargeListViewColumns(ListView: TListView);
 var
   I: Integer;
