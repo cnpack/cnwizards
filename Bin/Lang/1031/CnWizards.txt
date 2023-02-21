@@ -1158,6 +1158,7 @@ TCnPrefixConfigForm.cbDelOldPrefix.Caption=Präfix austauschen wenn Auto-Umbenen
 TCnPrefixConfigForm.cbPopPrefixDefine.Caption=Prompt für nicht definiertes Präfix
 TCnPrefixConfigForm.cbPrefixCaseSens.Caption=Präfix ist case sensitive.
 TCnPrefixConfigForm.cbUseUnderLine.Caption=Unterstrich nach Präfix einfügen wenn umbenannt wird.
+TCnPrefixConfigForm.chkF2Rename.Caption=Verwenden Sie die Taste F2, um die ausgewählte Komponente im Designer umzubenennen.
 TCnPrefixConfigForm.chkUseActionName.Caption=wenn Action verbunden ist, nehme Action Namen als neuen Namen.
 TCnPrefixConfigForm.chkUseFieldName.Caption=Benutze DataField als neuen Namen (wenn existiert).
 TCnPrefixConfigForm.chkWatchActionLink.Caption=automatisches Umbenennen wenn Action sich ändert.

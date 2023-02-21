@@ -1158,6 +1158,7 @@ TCnPrefixConfigForm.cbDelOldPrefix.Caption=自動更名時替換原元件首碼�
 TCnPrefixConfigForm.cbPopPrefixDefine.Caption=提示輸入未定義首碼的元件首碼名。
 TCnPrefixConfigForm.cbPrefixCaseSens.Caption=首碼區分大小寫。
 TCnPrefixConfigForm.cbUseUnderLine.Caption=初次更名時在元件名稱首碼後添加下劃線。
+TCnPrefixConfigForm.chkF2Rename.Caption=設計器中按 F2 鍵可修改選中的組件名稱。
 TCnPrefixConfigForm.chkUseActionName.Caption=重命名組件時允許參照關聯的 Action 的名稱。
 TCnPrefixConfigForm.chkUseFieldName.Caption=重命名組件時允許參照 DataField 屬性的內容。
 TCnPrefixConfigForm.chkWatchActionLink.Caption=當組件關聯 Action 時自動重命名。
