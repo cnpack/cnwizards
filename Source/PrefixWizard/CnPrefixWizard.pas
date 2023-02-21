@@ -123,6 +123,8 @@ type
     function SearchClipboardGetNewName(AComp: TComponent; const ANewName: string): string;
     {* 根据剪贴板上的内容搜寻有无和本组件匹配 ClassName 和 Caption/Text 的，
        如其 Name 符合前缀，则拿来做新名字，调用者再 +1}
+    procedure CreateRenameAction;
+    procedure FreeRenameAction;
   protected
     procedure DoRenameComponent(Component: TComponent; const NewName: string;
       FormEditor: IOTAFormEditor);
@@ -140,6 +142,8 @@ type
     procedure RenameList(AList: TCnPrefixCompList);
     procedure RenameComponent(Component: TComponent; FormEditor: IOTAFormEditor);
     property Updating: Boolean read FUpdating;
+
+    procedure SetActive(Value: Boolean); override;
   public
     procedure AddCompToList(const ProjectName: string; FormEditor: IOTAFormEditor;
       Component: TComponent; List: TCnPrefixCompList);
@@ -381,6 +385,29 @@ begin
   FSetValueHook := TCnMethodHook.Create(@OldSetValueProc, @MySetValue);
 
   RenameProc := @CnPrefixRenameProc;
+  CreateRenameAction;
+end;
+
+destructor TCnPrefixWizard.Destroy;
+begin
+  FreeRenameAction;
+  RenameProc := nil;
+  FWizard := nil;
+  FreeAndNil(FSetActionHook);
+  if FSetValueHook <> nil then
+    FreeAndNil(FSetValueHook);
+  CnWizNotifierServices.RemoveFormEditorNotifier(OnComponentRenamed);
+  CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
+  FreeAndNil(FPrefixList);
+  FreeAndNil(FRenameList);
+  inherited;
+end;
+
+procedure TCnPrefixWizard.CreateRenameAction;
+begin
+  if (FRenameAction <> nil) or not Active or not FF2Rename then
+    Exit;
+
   if GetIDEActionFromShortCut(ShortCut(VK_F2, [])) = nil then
   begin
     // 如果当前 IDE 中无 F2 快捷键的其它 Action，则注册此快捷键来更改
@@ -392,25 +419,18 @@ begin
   else
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('CnPrefix Action: F2 Exists. NOT Register.');
+    CnDebugger.LogMsg('CnPrefix Action: F2 Key Exists. NOT Create and Register.');
 {$ENDIF}
-  end;  
+  end;
 end;
 
-destructor TCnPrefixWizard.Destroy;
+procedure TCnPrefixWizard.FreeRenameAction;
 begin
   if FRenameAction <> nil then
+  begin
     WizActionMgr.DeleteAction(FRenameAction);
-  RenameProc := nil;
-  FWizard := nil;
-  FreeAndNil(FSetActionHook);
-  if FSetValueHook <> nil then
-    FreeAndNil(FSetValueHook);
-  CnWizNotifierServices.RemoveFormEditorNotifier(OnComponentRenamed);
-  CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
-  FreeAndNil(FPrefixList);
-  FreeAndNil(FRenameList);
-  inherited;
+    FRenameAction := nil;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1587,11 +1607,22 @@ begin
   end;
 end;
 
+procedure TCnPrefixWizard.SetActive(Value: Boolean);
+begin
+  inherited;
+  if Active then
+    CreateRenameAction
+  else
+    FreeRenameAction;
+end;
+
 procedure TCnPrefixWizard.SetF2Rename(const Value: Boolean);
 begin
   FF2Rename := Value;
-  if FRenameAction <> nil then
-    FRenameAction.Enabled := Value;
+  if FF2Rename then
+    CreateRenameAction
+  else
+    FreeRenameAction;
 end;
 
 function TCnPrefixWizard.GetSearchContent: string;
