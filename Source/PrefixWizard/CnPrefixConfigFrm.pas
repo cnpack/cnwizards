@@ -28,8 +28,10 @@ unit CnPrefixConfigFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2003.05.11 V1.1
-*               LiuXiao:增加下划线选项
+* 修改记录：2023.02.21 V1.2
+*               增加 F2 改名的选项
+*           2003.05.11 V1.1
+*               增加下划线选项
 *           2003.04.26 V1.0
 *               创建单元
 ================================================================================
@@ -44,7 +46,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnPrefixList, CnWizIdeUtils, CnCommon, CnWizUtils,
-  CnWizConsts, CnWizOptions, CnWizMultiLang, CnPrefixWizard;
+  CnWizConsts, CnWizOptions, CnWizMultiLang, CnPrefixWizard, ExtCtrls;
 
 type
 
@@ -76,6 +78,8 @@ type
     chkWatchActionLink: TCheckBox;
     chkUseFieldName: TCheckBox;
     chkWatchFieldLink: TCheckBox;
+    chkF2Rename: TCheckBox;
+    bvl1: TBevel;
     procedure ListViewClick(Sender: TObject);
     procedure btnModifyClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -100,7 +104,7 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 // 显示配置窗口
@@ -129,6 +133,7 @@ begin
     chkWatchActionLink.Checked := Wizard.WatchActionLink;
     chkUseFieldName.Checked := Wizard.UseFieldName;
     chkWatchFieldLink.Checked := Wizard.WatchFieldLink;
+    chkF2Rename.Checked := Wizard.F2Rename;
     FList := Wizard.PrefixList;
 
     Result := ShowModal = mrOk;
@@ -146,6 +151,7 @@ begin
       Wizard.WatchActionLink := chkWatchActionLink.Checked;
       Wizard.UseFieldName := chkUseFieldName.Checked;
       Wizard.WatchFieldLink := chkWatchFieldLink.Checked;
+      Wizard.F2Rename := chkF2Rename.Checked;
 
       Wizard.DoSaveSettings;
     end;
@@ -166,19 +172,19 @@ end;
 
 procedure TCnPrefixConfigForm.GetListFromListView(List: TCnPrefixList);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to ListView.Items.Count - 1 do
+  for I := 0 to ListView.Items.Count - 1 do
   begin
-    List.Prefixs[ListView.Items[i].Caption] := ListView.Items[i].SubItems[0];
-    List.Ignore[ListView.Items[i].Caption] := not ListView.Items[i].Checked;
+    List.Prefixs[ListView.Items[I].Caption] := ListView.Items[I].SubItems[0];
+    List.Ignore[ListView.Items[I].Caption] := not ListView.Items[I].Checked;
   end;
 end;
 
 procedure TCnPrefixConfigForm.SetListToListView(List: TCnPrefixList);
 var
   CompList: TStringList;
-  i: Integer;
+  I: Integer;
 begin
   ListView.Items.BeginUpdate;
   try
@@ -188,15 +194,15 @@ begin
     try
       CompList.Sorted := True;
       GetInstalledComponents(nil, CompList);
-      for i := 0 to CnNoIconList.Count - 1 do
-        CompList.Add(CnNoIconList[i]);
+      for I := 0 to CnNoIconList.Count - 1 do
+        CompList.Add(CnNoIconList[I]);
         
-      for i := 0 to CompList.Count - 1 do
+      for I := 0 to CompList.Count - 1 do
         with ListView.Items.Add do
         begin
-          Caption := CompList[i];
-          Checked := not List.Ignore[CompList[i]];
-          SubItems.Add(List.Prefixs[CompList[i]]);
+          Caption := CompList[I];
+          Checked := not List.Ignore[CompList[I]];
+          SubItems.Add(List.Prefixs[CompList[I]]);
         end;
 
       if ListView.Items.Count > 0 then
