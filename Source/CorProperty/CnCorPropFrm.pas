@@ -262,7 +262,7 @@ begin
       AValue := '';
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('AValue: ' + VarToStr(AValue));
+    CnDebugger.LogMsg('CorrectProp. AValue: ' + VarToStr(AValue));
 {$ENDIF}
 
     if not ValidateProp(APropDef, AValue, PropInfo) then
@@ -584,7 +584,7 @@ begin
     with AItem do
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg(PropDef.PropName);
+      CnDebugger.LogFmt('UpdateView. PropName %s', [PropDef.PropName]);
 {$ENDIF}
 
       AViewItem.SubItems.Add(OldValue);
@@ -630,7 +630,7 @@ begin
   end;
 end;
 
-{ TCorrectItem }
+{ TCnCorrectItem }
 
 procedure TCnCorrectItem.SetCorrComp(const Value: TComponent);
 begin
@@ -755,7 +755,7 @@ var
   AItem: TCnCorrectItem;
   I: Integer;
 begin
-  //更新属性
+  // 更新属性
   for I := 0 to lvResult.Items.Count - 1 do
   begin
     AItem := TCnCorrectItem(FCorrectItemList.Items[I]);
@@ -798,8 +798,8 @@ begin
   // 如果删除了已经修改的控件，双击定位到该控件的时候因为找不到，
   // 所以会抛出一个异常，以下调用将保证每次激活窗口时自动更新列表
   // 这不是好办法，而且会引起速度慢，所以先屏蔽掉再考虑使用事件，
-  //if lvResult.Items.Count > 0 then
-  //  actCorrectExecute(nil);
+  // if lvResult.Items.Count > 0 then
+  //   actCorrectExecute(nil);
 end;
 
 procedure TCnCorPropForm.lvResultDblClick(Sender: TObject);

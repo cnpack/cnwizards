@@ -319,11 +319,12 @@ type
     property LineNumber: Integer read fLineNumber write fLineNumber;
     {* 当前行号，从 0 开始}
     property LinePos: Integer read fLinePos write fLinePos;
-    {* 当前行行首所在的线性位置}
+    {* 当前行行首所在的线性位置，0 开始，单位是字节}
     property Origin: PAnsiChar read fOrigin write SetOrigin;
     property RunPos: Integer read Run write SetRunPos;
     property TokenPos: Integer read fTokenPos;
-    {* 当前 Token 所在的线性位置，减去 LinePos 即是当前列位置}
+    {* 当前 Token 所在的线性位置，0 开始，单位是字节，减去 LinePos 即是当前列位置
+      注意：和 IDE 中的编辑器线性位置有 Tab 键以及 Utf8（高版本 Delphi）的区别，不能随意通用}
     property Token: AnsiString read GetToken;
     {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
     property TokenAddr: PAnsiChar read GetTokenAddr;

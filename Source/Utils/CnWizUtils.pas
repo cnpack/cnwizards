@@ -94,11 +94,13 @@ type
   TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
   PCnIdeTokenChar = PWideChar;
   TCnIdeTokenChar = WideChar;
+  TCnIdeStringList = TCnWideStringList;
   TCnIdeTokenInt = Word;
 {$ELSE}
   TCnIdeTokenString = string;     // Ansi/Utf16
   PCnIdeTokenChar = PChar;
   TCnIdeTokenChar = Char;
+  TCnIdeStringList = TStringList;
   {$IFDEF UNICODE}
   TCnIdeTokenInt = Word;
   {$ELSE}
@@ -884,11 +886,11 @@ function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASour
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
 
-function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
+function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer; {$IFDEF UNICODE} deprecated; {$ENDIF}
 {* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
    在 Unicode 环境下该位置之前有宽字符时其值不靠谱，不推荐使用}
 
-function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
+function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos; {$IFDEF UNICODE} deprecated; {$ENDIF}
 {* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
    在 Unicode 环境下该位置之前有宽字符时传参没法靠谱}
 

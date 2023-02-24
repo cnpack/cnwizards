@@ -371,8 +371,8 @@ type
     property RunPos: Integer read FRun write SetRunPos;
     {* 当前处理位置相对于 FOrigin 的线性偏移量，单位为字符数，0 开始}
     property TokenPos: Integer read FTokenPos;
-    {* 当前 Token 首相对于 FOrigin 的线性偏移量，单位为字符数，减去 LineStartOffset 即是当前原始列位置
-    （原始列：每个双字节字符占一列，0 开始，不展开 Tab}
+    {* 当前 Token 首相对于 FOrigin 的线性偏移量，0 开始，单位为字符数，减去 LineStartOffset 即是当前原始列位置
+    （原始列：每个双字节字符占一列，0 开始，不展开 Tab），另外和 IDE 中的编辑器线性位置有 Tab 键以及 Utf8 的区别，不能随意通用}
     property TokenID: TTokenKind read FTokenID;
     {* 当前 Token 类型}
     property Token: CnWideString read GetToken;
