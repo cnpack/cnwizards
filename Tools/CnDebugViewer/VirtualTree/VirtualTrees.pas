@@ -1,6 +1,5 @@
 unit VirtualTrees;
 // LiuXiao Added Unicode and x64 Support. Some Codes Copied from New Version
-// Column Painting has Problems.
 // CnPack 2023-02-24
 //
 // LiuXiao Added 'AbsoluteIndex' Field of Node. And Adjusted SetChildCount function.
@@ -218,8 +217,11 @@ type
   TAutoScrollInterval = 1..1000;
 
   // Need to declare the correct WMNCPaint record as the VCL (D5-) doesn't.
-  TRealWMNCPaint = {$IFNDEF CPUX64} packed {$ENDIF} record
+  TRealWMNCPaint = packed record
     Msg: Cardinal;
+{$IFDEF CPUX64}
+    MsgFiller: Cardinal;
+{$ENDIF}
     Rgn: HRGN;
 {$IFDEF CPUX64}
     lParam: NativeInt;
