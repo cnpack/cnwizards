@@ -50,12 +50,6 @@ type
 
   TCnMemoContent = (mcNone, mcMsg, mcTime);
 
-{$IFDEF WIN64}
-  TCnVTString = string;
-{$ELSE}
-  TCnVTString = WideString;
-{$ENDIF}
-
   TCnMsgChild = class(TForm)
     lvTime: TListView;
     splDetail: TSplitter;
@@ -124,7 +118,7 @@ type
     FIsResizing: Boolean;
 
     procedure TreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: TCnVTString);
+      Column: TColumnIndex; TextType: TVSTTextType; var CellText: WideString);
     procedure TreeColumnResize(Sender: TVTHeader; Column: TColumnIndex);
     // procedure TreeClick(Sender: TObject);
     procedure TreeChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
@@ -312,7 +306,7 @@ end;
 
 procedure TCnMsgChild.TreeGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: TCnVTString);
+  var CellText: WideString);
 var
   Index: Integer;
 begin

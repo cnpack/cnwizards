@@ -60,6 +60,7 @@ type
   TGetDebugThread = class(TThread)
   {* 读取 CnDebugger 内容的线程}
   private
+    FCount: Cardinal;
     FPaused: Boolean;
     FFilter: TProcessFilter;
   protected
@@ -282,6 +283,8 @@ var
   end;
 
 begin
+  DebugDebuggerLog('TGetDebugThread Start');
+
   PostStartEvent;
   QueueSize := CnMapSize - CnHeadSize;
   QueueAlreadyEmpty := False;
@@ -313,7 +316,7 @@ begin
     Res := WaitForSingleObject(HMutex, CnWaitMutexTime);
     if (Res = WAIT_FAILED) or (Res = WAIT_TIMEOUT) then
     begin
-      //Sleep(0);
+      // Sleep(0);
       Continue;
     end;
 
@@ -324,6 +327,7 @@ begin
       if Terminated then
       begin
         CheckExit;
+        DebugDebuggerLog('Front = Tail and Terminated');
         Exit;
       end;
       ReleaseMutex(HMutex);
@@ -348,6 +352,7 @@ begin
         if Terminated then
         begin
           CheckExit;
+          DebugDebuggerLog('NOT Pause and Len = 0 and Terminated');
           Exit;
         end;
         ReleaseMutex(HMutex);
@@ -372,6 +377,7 @@ begin
       EnterCriticalSection(CSMsgStore);
       try
         AddADescToStore(ADesc);
+        Inc(FCount);
       finally
         LeaveCriticalSection(CSMsgStore);
       end;
@@ -384,6 +390,7 @@ begin
     if Terminated then
     begin
       CheckExit;
+      DebugDebuggerLog('Check and Terminated');
       Exit;
     end;
 
@@ -397,6 +404,7 @@ begin
   if Terminated then
   begin
     CheckExit;
+    DebugDebuggerLog('Loop out and Terminated');
     Exit;
   end;
 end;

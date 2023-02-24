@@ -401,6 +401,10 @@ begin
 {$IFDEF WIN64}
   Caption := Caption + '64';
 {$ENDIF}
+{$IFDEF DEBUGDEBUGGER}
+  Caption := Caption + ' Debug ';
+{$ENDIF}
+
   if not IsLocalMode then
     Caption := Caption + '- (Global)' // 显示为全局模式
   else
@@ -488,7 +492,7 @@ end;
 
 procedure TCnMainViewer.FormDestroy(Sender: TObject);
 begin
-  //Add Sesame 2008.01.18 记录窗口位置
+  // Add Sesame 2008.01.18 记录窗口位置
   with CnViewerOptions do
   begin
     if SaveFormPosition then
@@ -543,7 +547,8 @@ begin
   else
     (FThread as TGetDebugThread).Paused := False;
 
-  if CnViewerOptions.IgnoreODString then Exit;
+  if CnViewerOptions.IgnoreODString then
+    Exit;
 
   if FDbgThread = nil then
   begin

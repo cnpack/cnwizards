@@ -1,5 +1,8 @@
 unit VirtualTrees;
-
+// LiuXiao Added Unicode and x64 Support. Some Codes Copied from New Version
+// Column Painting has Problems.
+// CnPack 2023-02-24
+//
 // LiuXiao Added 'AbsoluteIndex' Field of Node. And Adjusted SetChildCount function.
 // Only suitable for add node from Last. If insert into middle, AbsoluteIndex
 // will be confused.
@@ -215,19 +218,29 @@ type
   TAutoScrollInterval = 1..1000;
 
   // Need to declare the correct WMNCPaint record as the VCL (D5-) doesn't.
-  TRealWMNCPaint = packed record
+  TRealWMNCPaint = {$IFNDEF CPUX64} packed {$ENDIF} record
     Msg: Cardinal;
     Rgn: HRGN;
+{$IFDEF CPUX64}
+    lParam: NativeInt;
+    Result: NativeInt;
+{$ELSE}
     lParam: Integer;
     Result: Integer;
+{$ENDIF}
   end;
 
   // The next two message records are not declared in Delphi 6 and lower.
-  TWMPrint = packed record
+  TWMPrint = {$IFNDEF CPUX64} packed {$ENDIF} record
     Msg: Cardinal;
     DC: HDC;
+{$IFDEF CPUX64}
+    Flags: NativeUInt;
+    Result: NativeInt;
+{$ELSE}
     Flags: Cardinal;
     Result: Integer;
+{$ENDIF}
   end;
 
   TWMPrintClient = TWMPrint;
@@ -3202,7 +3215,8 @@ const
   ClipboardStates = [tsCopyPending, tsCutPending];
   DefaultScrollUpdateFlags = [suoRepaintHeader, suoRepaintScrollbars, suoScrollClientArea, suoUpdateNCArea];
   MinimumTimerInterval = 1; // minimum resolution for timeGetTime
-  TreeNodeSize = (SizeOf(TVirtualNode) + 3) and not 3; // used for node allocation and access to internal data
+//  TreeNodeSize = (SizeOf(TVirtualNode) + 3) and not 3; // used for node allocation and access to internal data
+  TreeNodeSize = (SizeOf(TVirtualNode) + (SizeOf(Pointer) - 1)) and not (SizeOf(Pointer) - 1); // used for node allocation and access to internal data
 
   // Lookup to quickly convert a specific check state into its pressed counterpart and vice versa. 
   PressedState: array[TCheckState] of TCheckState = (
@@ -3215,7 +3229,7 @@ const
 
   // Do not modify the copyright in any way! Usage of this unit is prohibited without the copyright notice
   // in the compiled binary file.
-  Copyright: string = 'Virtual Treeview © 1999, 2003 Mike Lischke';
+  Copyright: string = 'Virtual Treeview ?1999, 2003 Mike Lischke';
 
 var
   StandardOLEFormat: TFormatEtc = (
@@ -3825,10 +3839,17 @@ begin
     J := R;
     P := TheArray[(L + R) shr 1];
     repeat
+{$IFDEF CPUX64}
+      while NativeUInt(TheArray[I]) < NativeUInt(P) do
+        Inc(I);
+      while NativeUInt(TheArray[J]) > NativeUInt(P) do
+        Dec(J);
+{$ELSE}
       while Cardinal(TheArray[I]) < Cardinal(P) do
         Inc(I);
       while Cardinal(TheArray[J]) > Cardinal(P) do
         Dec(J);
+{$ENDIF}
       if I <= J then
       begin
         T := TheArray[I];
@@ -4154,7 +4175,67 @@ procedure AlphaBlendLineConstant(Source, Destination: Pointer; Count: Integer; C
 // ConstantAlpha must be in the range 0..255 where 0 means totally transparent (destination pixel only)
 // and 255 totally opaque (source pixel only).
 // Bias is an additional value which gets added to every component and must be in the range -128..127
-//
+
+{$IFDEF CPUX64}
+// RCX contains Source
+// RDX contains Destination
+// R8D contains Count
+// R9D contains ConstantAlpha
+// Bias is on the stack
+
+asm
+        //.NOFRAME
+
+        // Load XMM3 with the constant alpha value (replicate it for every component).
+        // Expand it to word size.
+        MOVD        XMM3, R9D  // ConstantAlpha
+        PUNPCKLWD   XMM3, XMM3
+        PUNPCKLDQ   XMM3, XMM3
+
+        // Load XMM5 with the bias value.
+        MOVD        XMM5, [Bias]
+        PUNPCKLWD   XMM5, XMM5
+        PUNPCKLDQ   XMM5, XMM5
+
+        // Load XMM4 with 128 to allow for saturated biasing.
+        MOV         R10D, 128
+        MOVD        XMM4, R10D
+        PUNPCKLWD   XMM4, XMM4
+        PUNPCKLDQ   XMM4, XMM4
+
+@1:     // The pixel loop calculates an entire pixel in one run.
+        // Note: The pixel byte values are expanded into the higher bytes of a word due
+        //       to the way unpacking works. We compensate for this with an extra shift.
+        MOVD        XMM1, DWORD PTR [RCX]   // data is unaligned
+        MOVD        XMM2, DWORD PTR [RDX]   // data is unaligned
+        PXOR        XMM0, XMM0    // clear source pixel register for unpacking
+        PUNPCKLBW   XMM0, XMM1{[RCX]}    // unpack source pixel byte values into words
+        PSRLW       XMM0, 8       // move higher bytes to lower bytes
+        PXOR        XMM1, XMM1    // clear target pixel register for unpacking
+        PUNPCKLBW   XMM1, XMM2{[RDX]}    // unpack target pixel byte values into words
+        MOVQ        XMM2, XMM1    // make a copy of the shifted values, we need them again
+        PSRLW       XMM1, 8       // move higher bytes to lower bytes
+
+        // calculation is: target = (alpha * (source - target) + 256 * target) / 256
+        PSUBW       XMM0, XMM1    // source - target
+        PMULLW      XMM0, XMM3    // alpha * (source - target)
+        PADDW       XMM0, XMM2    // add target (in shifted form)
+        PSRLW       XMM0, 8       // divide by 256
+
+        // Bias is accounted for by conversion of range 0..255 to -128..127,
+        // doing a saturated add and convert back to 0..255.
+        PSUBW     XMM0, XMM4
+        PADDSW    XMM0, XMM5
+        PADDW     XMM0, XMM4
+        PACKUSWB  XMM0, XMM0      // convert words to bytes with saturation
+        MOVD      DWORD PTR [RDX], XMM0     // store the result
+@3:
+        ADD       RCX, 4
+        ADD       RDX, 4
+        DEC       R8D
+        JNZ       @1
+end;
+{$ELSE}
 // EAX contains Source
 // EDX contains Destination
 // ECX contains Count
@@ -4218,7 +4299,7 @@ asm
         POP     EDI
         POP     ESI
 end;
-
+{$ENDIF}
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure AlphaBlendLinePerPixel(Source, Destination: Pointer; Count, Bias: Integer);
@@ -4226,7 +4307,66 @@ procedure AlphaBlendLinePerPixel(Source, Destination: Pointer; Count, Bias: Inte
 // Blends a line of Count pixels from Source to Destination using the alpha value of the source pixels.
 // The layout of a pixel must be BGRA.
 // Bias is an additional value which gets added to every component and must be in the range -128..127
-//
+
+{$IFDEF CPUX64}
+// RCX contains Source
+// RDX contains Destination
+// R8D contains Count
+// R9D contains Bias
+
+asm
+        //.NOFRAME
+
+        // Load XMM5 with the bias value.
+        MOVD        XMM5, R9D   // Bias
+        PUNPCKLWD   XMM5, XMM5
+        PUNPCKLDQ   XMM5, XMM5
+
+        // Load XMM4 with 128 to allow for saturated biasing.
+        MOV         R10D, 128
+        MOVD        XMM4, R10D
+        PUNPCKLWD   XMM4, XMM4
+        PUNPCKLDQ   XMM4, XMM4
+
+@1:     // The pixel loop calculates an entire pixel in one run.
+        // Note: The pixel byte values are expanded into the higher bytes of a word due
+        //       to the way unpacking works. We compensate for this with an extra shift.
+        MOVD        XMM1, DWORD PTR [RCX]   // data is unaligned
+        MOVD        XMM2, DWORD PTR [RDX]   // data is unaligned
+        PXOR        XMM0, XMM0    // clear source pixel register for unpacking
+        PUNPCKLBW   XMM0, XMM1{[RCX]}    // unpack source pixel byte values into words
+        PSRLW       XMM0, 8       // move higher bytes to lower bytes
+        PXOR        XMM1, XMM1    // clear target pixel register for unpacking
+        PUNPCKLBW   XMM1, XMM2{[RDX]}    // unpack target pixel byte values into words
+        MOVQ        XMM2, XMM1    // make a copy of the shifted values, we need them again
+        PSRLW       XMM1, 8       // move higher bytes to lower bytes
+
+        // Load XMM3 with the source alpha value (replicate it for every component).
+        // Expand it to word size.
+        MOVQ        XMM3, XMM0
+        PUNPCKHWD   XMM3, XMM3
+        PUNPCKHDQ   XMM3, XMM3
+
+        // calculation is: target = (alpha * (source - target) + 256 * target) / 256
+        PSUBW       XMM0, XMM1    // source - target
+        PMULLW      XMM0, XMM3    // alpha * (source - target)
+        PADDW       XMM0, XMM2    // add target (in shifted form)
+        PSRLW       XMM0, 8       // divide by 256
+
+        // Bias is accounted for by conversion of range 0..255 to -128..127,
+        // doing a saturated add and convert back to 0..255.
+        PSUBW       XMM0, XMM4
+        PADDSW      XMM0, XMM5
+        PADDW       XMM0, XMM4
+        PACKUSWB    XMM0, XMM0    // convert words to bytes with saturation
+        MOVD        DWORD PTR [RDX], XMM0   // store the result
+@3:
+        ADD         RCX, 4
+        ADD         RDX, 4
+        DEC         R8D
+        JNZ         @1
+end;
+{$ELSE}
 // EAX contains Source
 // EDX contains Destination
 // ECX contains Count
@@ -4289,7 +4429,7 @@ asm
         POP     EDI
         POP     ESI
 end;
-
+{$ENDIF}
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure AlphaBlendLineMaster(Source, Destination: Pointer; Count: Integer; ConstantAlpha, Bias: Integer);
@@ -4298,7 +4438,76 @@ procedure AlphaBlendLineMaster(Source, Destination: Pointer; Count: Integer; Con
 // The layout of a pixel must be BGRA.
 // ConstantAlpha must be in the range 0..255.
 // Bias is an additional value which gets added to every component and must be in the range -128..127
-//
+
+{$IFDEF CPUX64}
+// RCX contains Source
+// RDX contains Destination
+// R8D contains Count
+// R9D contains ConstantAlpha
+// Bias is on the stack
+
+asm
+        .SAVENV XMM6
+
+        // Load XMM3 with the constant alpha value (replicate it for every component).
+        // Expand it to word size.
+        MOVD        XMM3, R9D    // ConstantAlpha
+        PUNPCKLWD   XMM3, XMM3
+        PUNPCKLDQ   XMM3, XMM3
+
+        // Load XMM5 with the bias value.
+        MOV         R10D, [Bias]
+        MOVD        XMM5, R10D
+        PUNPCKLWD   XMM5, XMM5
+        PUNPCKLDQ   XMM5, XMM5
+
+        // Load XMM4 with 128 to allow for saturated biasing.
+        MOV         R10D, 128
+        MOVD        XMM4, R10D
+        PUNPCKLWD   XMM4, XMM4
+        PUNPCKLDQ   XMM4, XMM4
+
+@1:     // The pixel loop calculates an entire pixel in one run.
+        // Note: The pixel byte values are expanded into the higher bytes of a word due
+        //       to the way unpacking works. We compensate for this with an extra shift.
+        MOVD        XMM1, DWORD PTR [RCX]   // data is unaligned
+        MOVD        XMM2, DWORD PTR [RDX]   // data is unaligned
+        PXOR        XMM0, XMM0    // clear source pixel register for unpacking
+        PUNPCKLBW   XMM0, XMM1{[RCX]}     // unpack source pixel byte values into words
+        PSRLW       XMM0, 8       // move higher bytes to lower bytes
+        PXOR        XMM1, XMM1    // clear target pixel register for unpacking
+        PUNPCKLBW   XMM1, XMM2{[RCX]}     // unpack target pixel byte values into words
+        MOVQ        XMM2, XMM1    // make a copy of the shifted values, we need them again
+        PSRLW       XMM1, 8       // move higher bytes to lower bytes
+
+        // Load XMM6 with the source alpha value (replicate it for every component).
+        // Expand it to word size.
+        MOVQ        XMM6, XMM0
+        PUNPCKHWD   XMM6, XMM6
+        PUNPCKHDQ   XMM6, XMM6
+        PMULLW      XMM6, XMM3    // source alpha * master alpha
+        PSRLW       XMM6, 8       // divide by 256
+
+        // calculation is: target = (alpha * master alpha * (source - target) + 256 * target) / 256
+        PSUBW       XMM0, XMM1    // source - target
+        PMULLW      XMM0, XMM6    // alpha * (source - target)
+        PADDW       XMM0, XMM2    // add target (in shifted form)
+        PSRLW       XMM0, 8       // divide by 256
+
+        // Bias is accounted for by conversion of range 0..255 to -128..127,
+        // doing a saturated add and convert back to 0..255.
+        PSUBW       XMM0, XMM4
+        PADDSW      XMM0, XMM5
+        PADDW       XMM0, XMM4
+        PACKUSWB    XMM0, XMM0    // convert words to bytes with saturation
+        MOVD        DWORD PTR [RDX], XMM0   // store the result
+@3:
+        ADD         RCX, 4
+        ADD         RDX, 4
+        DEC         R8D
+        JNZ         @1
+end;
+{$ELSE}
 // EAX contains Source
 // EDX contains Destination
 // ECX contains Count
@@ -4370,6 +4579,7 @@ asm
         POP     EDI
         POP     ESI
 end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -4378,7 +4588,57 @@ procedure AlphaBlendLineMasterAndColor(Destination: Pointer; Count: Integer; Con
 // Blends a line of Count pixels in Destination against the given color using a constant alpha value.
 // The layout of a pixel must be BGRA and Color must be rrggbb00 (as stored by a COLORREF).
 // ConstantAlpha must be in the range 0..255.
-//
+
+{$IFDEF CPUX64}
+// RCX contains Destination
+// EDX contains Count
+// R8D contains ConstantAlpha
+// R9D contains Color
+
+asm
+        //.NOFRAME
+
+        // The used formula is: target = (alpha * color + (256 - alpha) * target) / 256.
+        // alpha * color (factor 1) and 256 - alpha (factor 2) are constant values which can be calculated in advance.
+        // The remaining calculation is therefore: target = (F1 + F2 * target) / 256
+
+        // Load XMM3 with the constant alpha value (replicate it for every component).
+        // Expand it to word size. (Every calculation here works on word sized operands.)
+        MOVD        XMM3, R8D   // ConstantAlpha
+        PUNPCKLWD   XMM3, XMM3
+        PUNPCKLDQ   XMM3, XMM3
+
+        // Calculate factor 2.
+        MOV         R10D, $100
+        MOVD        XMM2, R10D
+        PUNPCKLWD   XMM2, XMM2
+        PUNPCKLDQ   XMM2, XMM2
+        PSUBW       XMM2, XMM3             // XMM2 contains now: 255 - alpha = F2
+
+        // Now calculate factor 1. Alpha is still in XMM3, but the r and b components of Color must be swapped.
+        BSWAP       R9D  // Color
+        ROR         R9D, 8
+        MOVD        XMM1, R9D              // Load the color and convert to word sized values.
+        PXOR        XMM4, XMM4
+        PUNPCKLBW   XMM1, XMM4
+        PMULLW      XMM1, XMM3             // XMM1 contains now: color * alpha = F1
+
+@1:     // The pixel loop calculates an entire pixel in one run.
+        MOVD        XMM0, DWORD PTR [RCX]
+        PUNPCKLBW   XMM0, XMM4
+
+        PMULLW      XMM0, XMM2             // calculate F1 + F2 * target
+        PADDW       XMM0, XMM1
+        PSRLW       XMM0, 8                // divide by 256
+
+        PACKUSWB    XMM0, XMM0             // convert words to bytes with saturation
+        MOVD        DWORD PTR [RCX], XMM0            // store the result
+
+        ADD         RCX, 4
+        DEC         EDX
+        JNZ         @1
+end;
+{$ELSE}
 // EAX contains Destination
 // EDX contains Count
 // ECX contains ConstantAlpha
@@ -4426,16 +4686,22 @@ asm
         DEC     EDX
         JNZ     @1
 end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure EMMS;
 
 // Reset MMX state to use the FPU for other tasks again.
-
+{$IFDEF CPUX64}
+  inline;
+begin
+end;
+{$ELSE}
 asm
         DB      $0F, $77               /// EMMS
 end;
+{$ENDIF}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -4478,7 +4744,11 @@ begin
   if Height > 0 then  // bottom-up DIB
     Row := Height - Row - 1;
   // Return DWORD aligned address of the requested scanline.
+{$IFDEF CPUX64}
+  NativeInt(Result) := NativeInt(Bits) + Row * ((Width * 64 + 63) and not 63) div 8;
+{$ELSE}
   Integer(Result) := Integer(Bits) + Row * ((Width * 32 + 31) and not 31) div 8;
+{$ENDIF}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -4774,6 +5044,12 @@ end;
 
 function HasMMX: Boolean;
 
+{$IFDEF CPUX64}
+begin
+  // We use SSE2 in the "MMX-functions"
+  Result := True;
+end;
+{$ELSE}
 // Helper method to determine whether the current processor supports MMX.
 
 asm
@@ -4804,7 +5080,8 @@ asm
 @1:
         POP     EBX
 end;
- 
+{$ENDIF}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure PrtStretchDrawDIB(Canvas: TCanvas; DestRect: TRect; ABitmap: TBitmap);
@@ -5183,7 +5460,7 @@ var
   Len: Integer;
 
 begin
-  Len := Length(S);
+  Len := Length(S) * SizeOf(Char);
   // Make room for the new string.
   if FEnd - FPosition <= Len then
   begin
@@ -5195,7 +5472,7 @@ begin
     FEnd := FStart + LastLen + AllocIncrement;
   end;                     
   Move(PChar(S)^, FPosition^, Len);
-  Inc(FPosition, Len);
+  Inc(FPosition, Len div SizeOf(Char));
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5208,7 +5485,7 @@ var
 
 begin
   // Make room for the CR/LF characters.
-  if FEnd - FPosition <= 2 then
+  if FEnd - FPosition <= 2 * SizeOf(Char) then
   begin
     // Keep last offset to restore it correctly in the case that FStart gets a new memory block assigned.
     LastLen := FEnd - FStart;
@@ -5485,7 +5762,8 @@ end;
   begin
     if FAllocSize = 0 then
       // Recalculate allocation size first time after a clear.
-      FAllocSize := (Size + 3) and not 3   // Force alignment on 32-bit boundaries.
+      // FAllocSize := (Size + 3) and not 3   // Force alignment on 32-bit boundaries.
+      FAllocSize := (Size + (SizeOf(Pointer) - 1)) and not (SizeOf(Pointer) - 1))
     else
       // Allocation size cannot be increased unless Memory Manager is explicitly cleared.
       Assert(Size <= FAllocSize, 'Node memory manager allocation size cannot be increased.');
@@ -12963,7 +13241,39 @@ function TBaseVirtualTree.PackArray(TheArray: TNodeArray; Count: Integer): Integ
 // On enter EAX contains self reference, EDX the address to TheArray and ECX Count
 // The returned value is the number of remaining entries in the array, so the caller can reallocate (shorten)
 // the selection array if needed or -1 if nothing needs to be changed.
+{$IFDEF CPUX64}
+var
+  Source, Dest: ^PVirtualNode;
+  ConstOne: NativeInt;
+begin
+  Source := Pointer(TheArray);
+  ConstOne := 1;
+  Result := 0;
+  // Do the fastest scan possible to find the first entry
+  while (Count <> 0) and {not Odd(NativeInt(Source^))} (NativeInt(Source^) and ConstOne = 0) do
+  begin
+    Inc(Result);
+    Inc(Source);
+    Dec(Count);
+  end;
 
+  if Count <> 0 then
+  begin
+    Dest := Source;
+    repeat
+      // Skip odd entries
+      if {not Odd(NativeInt(Source^))} NativeInt(Source^) and ConstOne = 0 then
+      begin
+        Dest^ := Source^;
+        Inc(Result);
+        Inc(Dest);
+      end;
+      Inc(Source); // Point to the next entry
+      Dec(Count);
+    until Count = 0;
+  end;
+end;
+{$ELSE}
 asm
         PUSH    EBX
         PUSH    EDI
@@ -13005,7 +13315,7 @@ asm
         POP     EDI
         POP     EBX
 end;
-
+{$ENDIF}
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TBaseVirtualTree.PrepareBitmaps(NeedButtons, NeedLines: Boolean);
@@ -14470,7 +14780,9 @@ var
   ShiftState: Integer;
   P: TPoint;
   Formats: TFormatArray;
-
+{$IFDEF CPUX64}
+  TR: Integer;
+{$ENDIF}
 begin
   with Message, DragRec^ do
   begin
@@ -14507,7 +14819,13 @@ begin
 
             // Allowed drop effects are simulated for VCL dd.
             Result := DROPEFFECT_MOVE or DROPEFFECT_COPY;
+{$IFDEF CPUX64}
+            TR := Result;
+            DragOver(S, ShiftState, TDragState(DragMessage), Pos, TR);
+            Result := TR;
+{$ELSE}
             DragOver(S, ShiftState, TDragState(DragMessage), Pos, Integer(Result));
+{$ENDIF}
             FLastVCLDragTarget := FDropTargetNode;
             FVCLDragEffect := Result;
             if (DragMessage = dmDragLeave) and Assigned(FDropTargetNode) then
@@ -16646,7 +16964,8 @@ begin
   Assert((FRoot = nil) or (FRoot.ChildCount = 0), 'Internal data allocation must be done before any node is created.');
 
   Result := TreeNodeSize + FTotalInternalDataSize;
-  Inc(FTotalInternalDataSize, (Size + 3) and not 3);
+  // Inc(FTotalInternalDataSize, (Size + 3) and not 3);
+  Inc(FTotalInternalDataSize, (Size + (SizeOf(Pointer) - 1)) and not (SizeOf(Pointer) - 1));
   InitRootNode(Result);
 end;
 
@@ -20529,7 +20848,13 @@ begin
       if ([vsSelected, vsDisabled] * NewItems[I].States <> []) or
          (Constrained and (Cardinal(FLastSelectionLevel) <> GetNodeLevel(NewItems[I]))) or
          (SiblingConstrained and (FRangeAnchor.Parent <> NewItems[I].Parent)) then
-        Inc(Cardinal(NewItems[I]))
+      begin
+{$IFDEF CPUX64}
+        Inc(NativeUInt(NewItems[I]));
+{$ELSE}
+        Inc(Cardinal(NewItems[I]));
+{$ENDIF}
+      end
       else
         Include(NewItems[I].States, vsSelected);
   end;
@@ -20915,7 +21240,11 @@ begin
   if FindNodeInSelection(Node, Index, -1, -1) then
   begin
     Exclude(Node.States, vsSelected);
+{$IFDEF CPUX64}
+    Inc(NativeUInt(FSelection[Index]));
+{$ELSE}
     Inc(Cardinal(FSelection[Index]));
+{$ENDIF}
   end;
 end;
 
@@ -29193,7 +29522,7 @@ begin
   if (Node = FRoot) or (Node = nil) then
     Result := nil
   else
-    Result := PChar(Node) + FInternalDataOffset;
+    Result := PAnsiChar(Node) + FInternalDataOffset;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------

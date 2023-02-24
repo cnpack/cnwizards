@@ -1041,23 +1041,30 @@ begin
   inherited;
 end;
 
+{$IFDEF DEBUGDEBUGGER}
+var
+  F: TFileStream = nil;
+{$ENDIF}
+
 procedure DebugDebuggerLog(const S: string);
 {$IFDEF DEBUGDEBUGGER}
 const
   DEBUG_FILE = 'DebugDebugger.txt';
   CRLF: AnsiString = #13#10;
 var
-  F: TFileStream;
   B: TBytes;
   T, FN: string;
 {$ENDIF}
 begin
 {$IFDEF DEBUGDEBUGGER}
-  FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
-  if not FileExists(FN) then
-    F := TFileStream.Create(FN, fmCreate)
-  else
-    F := TFileStream.Create(FN, fmOpenWrite);
+  if F = nil then
+  begin
+    FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
+    if not FileExists(FN) then
+      F := TFileStream.Create(FN, fmCreate or fmShareDenyWrite)
+    else
+      F := TFileStream.Create(FN, fmOpenWrite or fmShareDenyWrite);
+  end;
 
   try
     F.Seek(0, soEnd);
@@ -1065,8 +1072,9 @@ begin
     B := TEncoding.Default.GetBytes(T);
     F.Write(B, Length(B));
     F.Write(CRLF[1], 2);
+
   finally
-    F.Free;
+    // F.Free;
   end;
 {$ENDIF}
 end;
@@ -1075,5 +1083,8 @@ initialization
 
 finalization
   FreeAndNil(FCnMsgManager);
+{$IFDEF DEBUGDEBUGGER}
+  F.Free;
+{$ENDIF}
 
 end.
