@@ -41,11 +41,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
-  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles,
-  CnConsts, CnCommon, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnEditControlWrapper, CnPasCodeParser, CnWidePasParser;
+  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd,
+  CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
+  CnEditControlWrapper, CnPasCodeParser, CnWidePasParser, Buttons, ActnList;
 
 type
+  TCnStringHeadType = (htVar, htConst, htResourcestring);
+
   TCnEditorExtractString = class(TCnBaseCodingToolset)
   private
     FUseUnderLine: Boolean;
@@ -57,6 +59,8 @@ type
     FUseFullPinYin: Boolean;
     FShowPreview: Boolean;
     FIgnoreSimpleFormat: Boolean;
+    FPasParser: TCnGeneralPasStructParser;
+    FTokenListRef: TCnIdeStringList;
     function CanExtract(const S: PCnIdeTokenChar): Boolean;
   protected
 
@@ -69,6 +73,20 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
+
+    function Scan: Boolean;
+    {* 扫描当前源码中的字符串，返回扫描是否成功，产出在 TokenListRef 中}
+    procedure MakeUnique;
+    {* 将 TokenListRef 中的字符串判重并加上 1 等后缀}
+    function GenerateDecl(OutList: TStringList; HeadType: TCnStringHeadType): Boolean;
+    {* 从 FTokenListRef 中生成 var 或 const 的声明块，内容放 OutList 中}
+    function Replace: Boolean;
+    {* 将字符串替换为变量名，不插入声明}
+
+    procedure FreeTokens;
+    {* 处理完毕后外界须调用以释放内存}
+    property TokenListRef: TCnIdeStringList read FTokenListRef;
+    {* 扫描结果，对象均是引用}
 
   published
     property IgnoreSingleChar: Boolean read FIgnoreSingleChar write FIgnoreSingleChar;
@@ -124,9 +142,20 @@ type
     udMaxPinYin: TUpDown;
     chkUseUnderLine: TCheckBox;
     chkShowPreview: TCheckBox;
+    btnCopy: TSpeedButton;
+    actlstExtract: TActionList;
     procedure chkShowPreviewClick(Sender: TObject);
+    procedure btnReScanClick(Sender: TObject);
+    procedure lvStringsData(Sender: TObject; Item: TListItem);
+    procedure FormCreate(Sender: TObject);
+    procedure lvStringsSelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
+    procedure btnCopyClick(Sender: TObject);
   private
     FTool: TCnEditorExtractString;
+    procedure UpdateTokenToListView;
+    procedure LoadSettings;
+    procedure SaveSettings;
   public
     property Tool: TCnEditorExtractString read FTool write FTool;
   end;
@@ -144,7 +173,160 @@ const
   CnSourceStringPosKinds: TCodePosKinds = [pkField, pkProcedure, pkFunction,
     pkConstructor, pkDestructor, pkFieldDot];
 
+  SCN_HEAD_STRS: array[TCnStringHeadType] of string = ('var', 'const', 'resourcestring');
+
   CN_DEF_MAX_WORDS = 7;
+
+{ TCnExtractStringForm }
+
+procedure TCnExtractStringForm.chkShowPreviewClick(Sender: TObject);
+begin
+  mmoPreview.Visible := chkShowPreview.Checked;
+  // spl1.Visible := chkShowPreview.Checked;
+end;
+
+procedure TCnExtractStringForm.UpdateTokenToListView;
+begin
+  lvStrings.Items.Count := FTool.FTokenListRef.Count;
+  lvStrings.Invalidate;
+end;
+
+procedure TCnExtractStringForm.btnReScanClick(Sender: TObject);
+begin
+  if FTool <> nil then
+  begin
+    SaveSettings;
+    if FTool.Scan then
+    begin
+      if FTool.TokenListRef.Count <= 0 then
+      begin
+        ErrorDlg(SCnEditorExtractStringNotFound);
+        Exit;
+      end;
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Rescan OK. To Make Unique.');
+{$ENDIF}
+
+      FTool.MakeUnique;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Make Unique OK. Update To ListView.');
+{$ENDIF}
+
+      UpdateTokenToListView;
+    end;
+  end;
+end;
+
+procedure TCnExtractStringForm.lvStringsData(Sender: TObject;
+  Item: TListItem);
+var
+  Token: TCnGeneralPasToken;
+begin
+  if (Item.Index >= 0) and (Item.Index < FTool.TokenListRef.Count) then
+  begin
+    Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[Item.Index]);
+    Item.Caption := IntToStr(Item.Index + 1);
+    Item.Data := Token;
+
+    with Item.SubItems do
+    begin
+      Add(FTool.TokenListRef[Item.Index]);
+      Add(Token.Token);
+    end;
+  end;
+end;
+
+procedure TCnExtractStringForm.LoadSettings;
+begin
+  if FTool = nil then
+    Exit;
+
+  edtPrefix.Text := FTool.Prefix;
+  cbbIdentWordStyle.ItemIndex := Ord(FTool.IdentWordStyle);
+  if FTool.UseFullPinYin then
+    cbbPinYinRule.ItemIndex := 1
+  else
+    cbbPinYinRule.ItemIndex := 0;
+  udMaxWords.Position := FTool.MaxWords;
+  udMaxPinYin.Position := FTool.MaxPinYinWords;
+  chkUseUnderLine.Checked := FTool.UseUnderLine;
+  chkIgnoreSingleChar.Checked := FTool.IgnoreSingleChar;
+  chkIgnoreSimpleFormat.Checked := FTool.IgnoreSimpleFormat;
+  chkShowPreview.Checked := FTool.ShowPreview;
+end;
+
+procedure TCnExtractStringForm.SaveSettings;
+begin
+  if FTool = nil then
+    Exit;
+
+  FTool.Prefix := edtPrefix.Text;
+  FTool.IdentWordStyle := TCnIdentWordStyle(cbbIdentWordStyle.ItemIndex);
+  FTool.UseFullPinYin := cbbPinYinRule.ItemIndex = 1;
+
+  FTool.MaxWords := udMaxWords.Position;
+  FTool.MaxPinYinWords := udMaxPinYin.Position;
+  FTool.UseUnderLine := chkUseUnderLine.Checked;
+  FTool.IgnoreSingleChar := chkIgnoreSingleChar.Checked;
+  FTool.IgnoreSimpleFormat := chkIgnoreSimpleFormat.Checked;
+  FTool.ShowPreview := chkShowPreview.Checked;
+end;
+
+procedure TCnExtractStringForm.FormCreate(Sender: TObject);
+var
+  EditorCanvas: TCanvas;
+  I: TCnStringHeadType;
+begin
+  for I := Low(SCN_HEAD_STRS) to High(SCN_HEAD_STRS) do
+    cbbMakeType.Items.Add(SCN_HEAD_STRS[I]);
+
+  cbbMakeType.ItemIndex := 0;
+  cbbToArea.ItemIndex := 0;
+
+  EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
+  if EditorCanvas <> nil then
+  begin
+    if EditorCanvas.Font.Name <> mmoPreview.Font.Name then
+      mmoPreview.Font.Name := EditorCanvas.Font.Name;
+    mmoPreview.Font.Size := EditorCanvas.Font.Size;
+    mmoPreview.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
+  end;
+end;
+
+procedure TCnExtractStringForm.lvStringsSelectItem(Sender: TObject;
+  Item: TListItem; Selected: Boolean);
+const
+  CnBeforeLine = 1;
+  CnAfterLine = 4;
+var
+  Token: TCnGeneralPasToken;
+begin
+  if not Selected or (Item = nil) or (Item.Data = nil) then
+    Exit;
+
+  Token := TCnGeneralPasToken(Item.Data);
+  mmoPreview.Lines.Text := CnOtaGetLineText(Token.EditLine - CnBeforeLine,
+    nil, CnBeforeLine + CnAfterLine);
+end;
+
+procedure TCnExtractStringForm.btnCopyClick(Sender: TObject);
+var
+  L: TStringList;
+  HT: TCnStringHeadType;
+begin
+  L := TStringList.Create;
+  try
+    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
+    if FTool.GenerateDecl(L, HT) then
+    begin
+      Clipboard.AsText := L.Text;
+      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
+    end;
+  finally
+    L.Free;
+  end;
+end;
 
 { TCnEditorExtractString }
 
@@ -157,10 +339,14 @@ begin
   if L <= 2 then // 单引号或不全，不算
     Exit;
 
-  if (L = 3) and (S[0] = '''') and (S[2] = '''') then // 单个字符也不算
+  if FIgnoreSingleChar and (L = 3) and (S[0] = '''') and (S[2] = '''') then // 单个字符也不算
     Exit;
 
-  if (L = 4) and (S[0] = '''') and (S[1] = '''') and (S[2] = '''') and (S[2] = '''') then // 单个单引号也不算
+  if FIgnoreSingleChar and (L = 4) and (S[0] = '''') and (S[1] = '''')
+    and (S[2] = '''') and (S[2] = '''') then // 单个单引号也不算
+    Exit;
+
+  if FIgnoreSimpleFormat and IsSimpleFormat(S) then
     Exit;
 
   Result := True;
@@ -173,12 +359,16 @@ begin
   FPrefix := 'S';
   FMaxWords := CN_DEF_MAX_WORDS;
   FMaxPinYinWords := CN_DEF_MAX_WORDS;
-  FIgnoreSingleChar := True; 
+  FUseUnderLine := True;
+  FIgnoreSingleChar := True;
+  FIgnoreSimpleFormat := True;
+  FShowPreview := True;
 end;
 
 destructor TCnEditorExtractString.Destroy;
 begin
-
+  FTokenListRef.Free;
+  FPasParser.Free;
   inherited;
 end;
 
@@ -202,36 +392,18 @@ begin
   with TCnExtractStringForm.Create(Application) do
   begin
     Tool := Self;
-
-    edtPrefix.Text := FPrefix;
-    cbbIdentWordStyle.ItemIndex := Ord(FIdentWordStyle);
-    if FUseFullPinYin then
-      cbbPinYinRule.ItemIndex := 1
-    else
-      cbbPinYinRule.ItemIndex := 0;
-    udMaxWords.Position := FMaxWords;
-    udMaxPinYin.Position := FMaxPinYinWords;
-    chkUseUnderLine.Checked := FUseUnderLine;
-    chkIgnoreSingleChar.Checked := FIgnoreSingleChar;
-    chkIgnoreSimpleFormat.Checked := FIgnoreSimpleFormat;
-    chkShowPreview.Checked := FShowPreview;
+    LoadSettings;
 
     if ShowModal = mrOK then
     begin
-      Prefix := edtPrefix.Text;
-      IdentWordStyle := TCnIdentWordStyle(cbbIdentWordStyle.ItemIndex);
-      UseFullPinYin := cbbPinYinRule.ItemIndex = 1;
+      SaveSettings;
 
-      MaxWords := udMaxWords.Position;
-      MaxPinYinWords := udMaxPinYin.Position;
-      UseUnderLine := chkUseUnderLine.Checked;
-      IgnoreSingleChar := chkIgnoreSingleChar.Checked;
-      IgnoreSimpleFormat := chkIgnoreSimpleFormat.Checked;
-      ShowPreview := chkShowPreview.Checked;
     end;
 
     Free;
   end;
+
+  Exit;
 
   PasParser := nil;
   Stream := nil;
@@ -332,7 +504,7 @@ begin
       end;
       PrevToken := TCnGeneralPasToken(TokenList.Objects[I]);
     end;
-    
+
     EditWriter := CnOtaGetEditWriterForSourceEditor;
 
 {$IFDEF IDE_WIDECONTROL}
@@ -369,6 +541,48 @@ begin
   end;
 end;
 
+procedure TCnEditorExtractString.FreeTokens;
+begin
+  FreeAndNil(FTokenListRef);
+  FreeAndNil(FPasParser);
+end;
+
+function TCnEditorExtractString.GenerateDecl(OutList: TStringList;
+  HeadType: TCnStringHeadType): Boolean;
+var
+  I, L: Integer;
+  Token: TCnGeneralPasToken;
+begin
+  Result := False;
+  if (OutList = nil) or (FTokenListRef = nil) or (FTokenListRef.Count <= 0) then
+    Exit;
+
+  L := EditControlWrapper.GetBlockIndent;
+  OutList.Clear;
+  OutList.Add(SCN_HEAD_STRS[HeadType]);
+
+  if HeadType in [htVar] then
+  begin
+    for I := 0 to FTokenListRef.Count - 1 do
+    begin
+      Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+      OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + Token.Token + ';');
+    end;
+    StringsRemoveDuplicated(OutList);
+    Result := True;
+  end
+  else if HeadType in [htConst, htResourcestring] then
+  begin
+    for I := 0 to FTokenListRef.Count - 1 do
+    begin
+      Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+      OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + Token.Token + ';');
+    end;
+    StringsRemoveDuplicated(OutList);
+    Result := True;
+  end;
+end;
+
 function TCnEditorExtractString.GetCaption: string;
 begin
   Result := SCnEditorExtractStringMenuCaption;
@@ -392,10 +606,183 @@ begin
   Result := SCnEditorExtractStringMenuHint;
 end;
 
-procedure TCnExtractStringForm.chkShowPreviewClick(Sender: TObject);
+procedure TCnEditorExtractString.MakeUnique;
+var
+  I, J: Integer;
+  Map: TCnStrToStrHashMap;
+  S, H: string;
+  Token: TCnGeneralPasToken;
 begin
-  mmoPreview.Visible := chkShowPreview.Checked;
-  // spl1.Visible := chkShowPreview.Checked;
+  if FTokenListRef.Count <= 1 then
+    Exit;
+
+  Map := TCnStrToStrHashMap.Create;
+  try
+    for I := 0 to FTokenListRef.Count - 1 do
+    begin
+      Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+      if Map.Find(string(FTokenListRef[I]), S) then
+      begin
+        if S <> string(Token.Token) then
+        begin
+          // 有同名的，但值不同，要换名
+          J := 1;
+          H := FTokenListRef[I];
+          repeat
+            FTokenListRef[I] := H + IntToStr(J);
+            Inc(J);
+          until not Map.Find(string(FTokenListRef[I]), S);
+
+          // 换名后要添加
+          Map.Add(string(FTokenListRef[I]), string(Token.Token));
+        end;
+        // 同名同值忽略
+      end
+      else // 无同名的，直接添加
+        Map.Add(string(FTokenListRef[I]), string(Token.Token));
+    end;
+  finally
+    Map.Free;
+  end;
+end;
+
+function TCnEditorExtractString.Replace: Boolean;
+var
+  I, LastTokenPos: Integer;
+  EditView: IOTAEditView;
+  Token, StartToken, EndToken, PrevToken: TCnGeneralPasToken;
+  NewCode: TCnIdeTokenString;
+  EditWriter: IOTAEditWriter;
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  StartToken := TCnGeneralPasToken(FTokenListRef.Objects[0]);
+  EndToken := TCnGeneralPasToken(FTokenListRef.Objects[FTokenListRef.Count - 1]);
+  PrevToken := nil;
+
+  // 拼接替换后的字符串
+  for I := 0 to FTokenListRef.Count - 1 do
+  begin
+    Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+    if PrevToken = nil then
+      NewCode := FTokenListRef[I]
+    else
+    begin
+      // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，用 Ansi/Wide/Wide String 来计算
+      LastTokenPos := PrevToken.TokenPos + Length(PrevToken.Token);
+      NewCode := NewCode + Copy(FPasParser.Source, LastTokenPos + 1,
+        Token.TokenPos - LastTokenPos) + FTokenListRef[I];
+    end;
+    PrevToken := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+  end;
+
+  EditWriter := CnOtaGetEditWriterForSourceEditor;
+
+{$IFDEF IDE_WIDECONTROL}
+  // 插入时，Wide 要做 Utf8 转换
+  EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartToken.TokenPos))));
+  EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1, EndToken.TokenPos + Length(EndToken.Token)))));
+  {$IFDEF UNICODE}
+  EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
+  {$ELSE}
+  EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(NewCode)));
+  {$ENDIF}
+{$ELSE}
+  EditWriter.CopyTo(StartToken.TokenPos);
+  EditWriter.DeleteTo(EndToken.TokenPos + Length(EndToken.Token));
+  EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
+{$ENDIF}
+  EditWriter := nil;
+end;
+
+function TCnEditorExtractString.Scan: Boolean;
+var
+  Stream: TMemoryStream;
+  I, CurrPos, LastTokenPos: Integer;
+  EditView: IOTAEditView;
+  Token: TCnGeneralPasToken;
+  EditPos: TOTAEditPos;
+  Info: TCodePosInfo;
+  S: TCnIdeTokenString;
+begin
+  Result := False;
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  Stream := nil;
+
+  try
+    FreeTokens;
+
+    FPasParser := TCnGeneralPasStructParser.Create;
+{$IFDEF BDS}
+    FPasParser.UseTabKey := True;
+    FPasParser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
+
+    Stream := TMemoryStream.Create;
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnEditorExtractString Scan to ParseString.');
+{$ENDIF}
+
+    // 解析当前显示的源文件中的字符串
+    CnPasParserParseString(FPasParser, Stream);
+    for I := 0 to FPasParser.Count - 1 do
+    begin
+      Token := FPasParser.Tokens[I];
+      if CanExtract(Token.Token) then
+      begin
+        ConvertGeneralTokenPos(Pointer(EditView), Token);
+
+{$IFDEF UNICODE}
+        ParsePasCodePosInfoW(PChar(Stream.Memory), Token.EditLine, Token.EditCol, Info);
+{$ELSE}
+        EditPos.Line := Token.EditLine;
+        EditPos.Col := Token.EditCol;
+        CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
+
+        Info := ParsePasCodePosInfo(PChar(Stream.Memory), CurrPos);
+{$ENDIF}
+        Token.Tag := Ord(Info.PosKind);
+      end
+      else
+        Token.Tag := Ord(pkUnknown);
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(FPasParser.Count, 'PasParser.Count');
+{$ENDIF}
+
+    if FTokenListRef = nil then
+      FTokenListRef := TCnIdeStringList.Create
+    else
+      FTokenListRef.Clear;
+
+    for I := 0 to FPasParser.Count - 1 do
+    begin
+      Token := FPasParser.Tokens[I];
+      if TCodePosKind(Token.Tag) in CnSourceStringPosKinds then
+      begin
+        S := ConvertStringToIdent(string(Token.Token), FPrefix, FUseUnderLine,
+          FIdentWordStyle, FUseFullPinYin, FMaxPinYinWords, FMaxWords);
+        // 在 D2005~2007 下有 AnsiString 到 WideString 的转换但也无影响
+
+        FTokenListRef.AddObject(S, Token);
+      end;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(FTokenListRef.Count, 'TokensRefList.Count');
+{$ENDIF}
+    Result := True;
+  finally
+    Stream.Free;
+  end;
 end;
 
 initialization

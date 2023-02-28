@@ -114,15 +114,17 @@ type
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); virtual;
     destructor Destroy; override;
+
     function GetEditorName: string;
+    {* 返回工具名称}
     procedure LoadSettings(Ini: TCustomIniFile); virtual;
-    {* 装载工具设置方法，子类重载此方法从 INI 对象中读取专家参数 }
+    {* 装载工具设置方法，子类重载此方法从 INI 对象中读取专家参数}
     procedure SaveSettings(Ini: TCustomIniFile); virtual;
-    {* 保存工具设置方法，子类重载些方法将专家参数保存到 INI 对象中 }
+    {* 保存工具设置方法，子类重载些方法将专家参数保存到 INI 对象中}
     function GetState: TWizardState; virtual;
     {* 返回工具状态，IOTAWizard 方法，子类重载该方法返回工具状态}
     procedure Execute; virtual; abstract;
-    {* 当用户执行一个工具时，将调用该方法。}
+    {* 当用户执行本工具时将调用该方法}
     procedure Config; virtual;
     {* 配置方法，由管理器在配置界面中调用，当 HasConfig 为真时有效}
     procedure Loaded; virtual;
@@ -135,9 +137,9 @@ type
        var Email: string      - 工具作者邮箱，如果有多个作者，用分号分隔
      |</PRE>}
     procedure RefreshAction; virtual;
-    {* 重新更新 Action 的内容 }
+    {* 重新更新 Action 的内容}
     procedure ParentActiveChanged(ParentActive: Boolean); virtual;
-    {* 编辑器专家状态改变时被调用 }
+    {* 编辑器专家状态改变时被调用}
     property Active: Boolean read FActive write SetActive;
     {* 活跃属性，表明工具当前是否可用}
     property HasConfig: Boolean read GetHasConfig;
