@@ -151,6 +151,8 @@ const
   // Need to use this message to release the edit link interface asynchronly.
   WM_CHANGESTATE = WM_APP + 32;
 
+  WM_TREE_GOTOLAST = WM_USER + $100;
+
   // Virtual Treeview does not need to be subclass by an eventual Theme Manager class as it handles
   // Windows XP theme painting itself. Hence the special non-subclass message is used to prevent subclassing.
   CM_DENYSUBCLASSING = CM_BASE + 2000;
@@ -2050,6 +2052,8 @@ type
       procedure WMThemeChanged(var Message: TMessage); message WM_THEMECHANGED;
     {$endif ThemeSupport}
     procedure WMVScroll(var Message: TWMVScroll); message WM_VSCROLL;
+
+    procedure WMGotoLast(var Message: TMessage); message WM_TREE_GOTOLAST; // LiuXiao Add
   protected
     procedure AddToSelection(Node: PVirtualNode); overload;
     procedure AddToSelection(const NewItems: TNodeArray; NewLength: Integer; ForceInsert: Boolean = False); overload;
@@ -16709,6 +16713,16 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+
+procedure TBaseVirtualTree.WMGotoLast(var Message: TMessage);
+var
+  M: tagMSG;
+begin
+  // 可能来了太多滚到底的消息，全删掉再发送 End 键以实际滚到底
+  while PeekMessage(M, Handle, WM_TREE_GOTOLAST, WM_TREE_GOTOLAST, PM_REMOVE) do
+    ;
+  PostMessage(Handle, WM_KEYDOWN, VK_END, 0);
+end;
 
 procedure TBaseVirtualTree.WMVScroll(var Message: TWMVScroll);
 

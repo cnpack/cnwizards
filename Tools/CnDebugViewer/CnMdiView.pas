@@ -860,23 +860,9 @@ begin
         end;
       end;
 
-      // FMsgTree 向下滚
+      // FMsgTree 批量向下滚
       if CnViewerOptions.AutoScroll then
-      begin
-{$IFDEF WIN64}
-        if FMsgTree.GetLast <> nil then
-        begin
-          if FMsgTree.FocusedNode <> nil then
-            FMsgTree.Selected[FMsgTree.FocusedNode] := False;
-
-          FMsgTree.FocusedNode := FMsgTree.GetLast;
-          FMsgTree.Selected[FMsgTree.GetLast] := True;
-          FMsgTree.ScrollIntoView(FMsgTree.GetLast, False);
-        end;
-{$ELSE}
-        PostMessage(FMsgTree.Handle, WM_KEYDOWN, VK_END, 0);
-{$ENDIF}
-      end;
+        PostMessage(FMsgTree.Handle, WM_TREE_GOTOLAST, 0, 0);
     end;
   end;
 end;
