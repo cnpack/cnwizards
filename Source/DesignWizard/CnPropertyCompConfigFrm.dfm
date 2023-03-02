@@ -8,7 +8,7 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 83
+    Left = 79
     Top = 308
     Width = 75
     Height = 21
@@ -19,7 +19,7 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
     TabOrder = 0
   end
   object btnCancel: TButton
-    Left = 163
+    Left = 159
     Top = 308
     Width = 75
     Height = 21
@@ -52,7 +52,7 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
       object lblAll: TLabel
         Left = 8
         Top = 32
-        Width = 281
+        Width = 165
         Height = 13
         Caption = 'Ignore Properties when Assign All:'
       end

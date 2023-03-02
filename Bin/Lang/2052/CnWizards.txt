@@ -1639,6 +1639,7 @@ TCnPropertyCompConfigForm.btnHelp.Caption=帮助(&H)
 TCnPropertyCompConfigForm.btnOK.Caption=确定(&O)
 TCnPropertyCompConfigForm.Caption=属性比较设置
 TCnPropertyCompConfigForm.chkSameType.Caption=只判断属性名
+TCnPropertyCompConfigForm.chkShowMenu.Caption=在设计器中显示右键菜单
 TCnPropertyCompConfigForm.lblAll.Caption=全部赋值时忽略以下属性：
 TCnPropertyCompConfigForm.tsProperty.Caption=属性(&P)
 TCnImportDirForm.Caption=导入目录结构

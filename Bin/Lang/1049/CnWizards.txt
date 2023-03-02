@@ -1639,6 +1639,7 @@ TCnPropertyCompConfigForm.btnHelp.Caption=Справка
 TCnPropertyCompConfigForm.btnOK.Caption=&OK
 TCnPropertyCompConfigForm.Caption=Настройки сравнения свойств
 TCnPropertyCompConfigForm.chkSameType.Caption=Сравнивать только по имени (игнор. тип)
+TCnPropertyCompConfigForm.chkShowMenu.Caption=Показать контекстное меню в Designer
 TCnPropertyCompConfigForm.lblAll.Caption=При копировании всех свойств, игнорировать:
 TCnPropertyCompConfigForm.tsProperty.Caption=&Свойства
 TCnImportDirForm.Caption=Импорт структуры папок

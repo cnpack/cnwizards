@@ -1639,6 +1639,7 @@ TCnPropertyCompConfigForm.btnHelp.Caption=&Ajuda
 TCnPropertyCompConfigForm.btnOK.Caption=&OK
 TCnPropertyCompConfigForm.Caption=Configurações de comparação de propriedades
 TCnPropertyCompConfigForm.chkSameType.Caption=Verificar apenas nomes de propriedades
+TCnPropertyCompConfigForm.chkShowMenu.Caption=Mostrar Menu de Contexto no Designer
 TCnPropertyCompConfigForm.lblAll.Caption=Ignorar Propriedades ao Atribuir Tudo:
 TCnPropertyCompConfigForm.tsProperty.Caption=&Propriedade
 TCnImportDirForm.Caption=Importar diretórios
