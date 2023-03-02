@@ -651,6 +651,12 @@ var
   SCnEditorExtractStringName: string = 'Extract String Tool';
   SCnEditorExtractStringMenuHint: string = 'Search and Extract Strings in Source.';
   SCnEditorExtractStringNotFound: string = 'NO String Found in Source!';
+  SCnEditorExtractStringCopiedFmt: string = '%d %s(s) Copied.';
+  SCnEditorExtractStringAskReplace: string = 'Sure to Replace Strings with New Names?';
+  SCnEditorExtractStringChangeName: string = 'Change Name';
+  SCnEditorExtractStringEnterNewName: string = 'Enter New Name:';
+  SCnEditorExtractStringDuplicatedName: string = 'Same Name Found, Please Retry.';
+  SCnEditorExtractStringReplacedFmt: string = 'Replace %d String(s) with %d Name(s).';
 
   // CnEditorCodeDelBlank
   SCnEditorCodeDelBlankMenuCaption: string = '&Delete Blank Lines...';

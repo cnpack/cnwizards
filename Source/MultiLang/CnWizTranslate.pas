@@ -378,6 +378,12 @@ begin
   TranslateStr(SCnEditorExtractStringName, 'SCnEditorExtractStringName');
   TranslateStr(SCnEditorExtractStringMenuHint, 'SCnEditorExtractStringMenuHint');
   TranslateStr(SCnEditorExtractStringNotFound, 'SCnEditorExtractStringNotFound');
+  TranslateStr(SCnEditorExtractStringCopiedFmt, 'SCnEditorExtractStringCopiedFmt');
+  TranslateStr(SCnEditorExtractStringAskReplace, 'SCnEditorExtractStringAskReplace');
+  TranslateStr(SCnEditorExtractStringChangeName, 'SCnEditorExtractStringChangeName');
+  TranslateStr(SCnEditorExtractStringEnterNewName, 'SCnEditorExtractStringEnterNewName');
+  TranslateStr(SCnEditorExtractStringDuplicatedName, 'SCnEditorExtractStringDuplicatedName');
+  TranslateStr(SCnEditorExtractStringReplacedFmt, 'SCnEditorExtractStringReplacedFmt');
 
   // CnEditorCodeDelBlank
   TranslateStr(SCnEditorCodeDelBlankMenuCaption, 'SCnEditorCodeDelBlankMenuCaption');

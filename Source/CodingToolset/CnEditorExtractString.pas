@@ -41,12 +41,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
-  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd,
+  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnEditControlWrapper, CnPasCodeParser, CnWidePasParser, Buttons, ActnList;
+  CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser;
 
 type
   TCnStringHeadType = (htVar, htConst, htResourcestring);
+
+  TCnStringAreaType = (atInterface, atImplementation);
 
   TCnEditorExtractString = class(TCnBaseCodingToolset)
   private
@@ -61,6 +63,7 @@ type
     FIgnoreSimpleFormat: Boolean;
     FPasParser: TCnGeneralPasStructParser;
     FTokenListRef: TCnIdeStringList;
+    FBeforeImpl: Boolean;
     function CanExtract(const S: PCnIdeTokenChar): Boolean;
   protected
 
@@ -75,18 +78,22 @@ type
     procedure GetEditorInfo(var Name, Author, Email: string); override;
 
     function Scan: Boolean;
-    {* 扫描当前源码中的字符串，返回扫描是否成功，产出在 TokenListRef 中}
+    {* 扫描当前源码中的字符串，返回扫描是否成功，产出在 TokenListRef 中，以及 FBeforeImpl}
     procedure MakeUnique;
     {* 将 TokenListRef 中的字符串判重并加上 1 等后缀}
     function GenerateDecl(OutList: TStringList; HeadType: TCnStringHeadType): Boolean;
     {* 从 FTokenListRef 中生成 var 或 const 的声明块，内容放 OutList 中}
-    function Replace: Boolean;
-    {* 将字符串替换为变量名，不插入声明}
+    function Replace: Integer;
+    {* 将字符串替换为变量名，不插入声明。返回替换的个数}
+    function InsertDecl(Area: TCnStringAreaType): Integer;
+    {* 将声明插入当前源码指定部分。返回插入的条数}
 
     procedure FreeTokens;
     {* 处理完毕后外界须调用以释放内存}
     property TokenListRef: TCnIdeStringList read FTokenListRef;
     {* 扫描结果，对象均是引用}
+    property BeforeImpl: Boolean read FBeforeImpl;
+    {* 是否有在 implementation 之前的字符串}
 
   published
     property IgnoreSingleChar: Boolean read FIgnoreSingleChar write FIgnoreSingleChar;
@@ -144,13 +151,20 @@ type
     chkShowPreview: TCheckBox;
     btnCopy: TSpeedButton;
     actlstExtract: TActionList;
+    actRescan: TAction;
+    actCopy: TAction;
+    actReplace: TAction;
+    actEdit: TAction;
     procedure chkShowPreviewClick(Sender: TObject);
-    procedure btnReScanClick(Sender: TObject);
     procedure lvStringsData(Sender: TObject; Item: TListItem);
     procedure FormCreate(Sender: TObject);
     procedure lvStringsSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
-    procedure btnCopyClick(Sender: TObject);
+    procedure lvStringsDblClick(Sender: TObject);
+    procedure actCopyExecute(Sender: TObject);
+    procedure actRescanExecute(Sender: TObject);
+    procedure actEditExecute(Sender: TObject);
+    procedure actReplaceExecute(Sender: TObject);
   private
     FTool: TCnEditorExtractString;
     procedure UpdateTokenToListView;
@@ -175,6 +189,7 @@ const
 
   SCN_HEAD_STRS: array[TCnStringHeadType] of string = ('var', 'const', 'resourcestring');
 
+  SCN_AREA_STRS: array[TCnStringAreaType] of string = ('interface', 'implementation');
   CN_DEF_MAX_WORDS = 7;
 
 { TCnExtractStringForm }
@@ -189,33 +204,6 @@ procedure TCnExtractStringForm.UpdateTokenToListView;
 begin
   lvStrings.Items.Count := FTool.FTokenListRef.Count;
   lvStrings.Invalidate;
-end;
-
-procedure TCnExtractStringForm.btnReScanClick(Sender: TObject);
-begin
-  if FTool <> nil then
-  begin
-    SaveSettings;
-    if FTool.Scan then
-    begin
-      if FTool.TokenListRef.Count <= 0 then
-      begin
-        ErrorDlg(SCnEditorExtractStringNotFound);
-        Exit;
-      end;
-{$IFDEF DEBUG}
-      CnDebugger.LogMsg('Rescan OK. To Make Unique.');
-{$ENDIF}
-
-      FTool.MakeUnique;
-
-{$IFDEF DEBUG}
-      CnDebugger.LogMsg('Make Unique OK. Update To ListView.');
-{$ENDIF}
-
-      UpdateTokenToListView;
-    end;
-  end;
 end;
 
 procedure TCnExtractStringForm.lvStringsData(Sender: TObject;
@@ -277,9 +265,12 @@ procedure TCnExtractStringForm.FormCreate(Sender: TObject);
 var
   EditorCanvas: TCanvas;
   I: TCnStringHeadType;
+  J: TCnStringAreaType;
 begin
   for I := Low(SCN_HEAD_STRS) to High(SCN_HEAD_STRS) do
     cbbMakeType.Items.Add(SCN_HEAD_STRS[I]);
+  for J := Low(SCN_AREA_STRS) to High(SCN_AREA_STRS) do
+    cbbToArea.Items.Add(SCN_AREA_STRS[J]);
 
   cbbMakeType.ItemIndex := 0;
   cbbToArea.ItemIndex := 0;
@@ -308,24 +299,6 @@ begin
   Token := TCnGeneralPasToken(Item.Data);
   mmoPreview.Lines.Text := CnOtaGetLineText(Token.EditLine - CnBeforeLine,
     nil, CnBeforeLine + CnAfterLine);
-end;
-
-procedure TCnExtractStringForm.btnCopyClick(Sender: TObject);
-var
-  L: TStringList;
-  HT: TCnStringHeadType;
-begin
-  L := TStringList.Create;
-  try
-    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
-    if FTool.GenerateDecl(L, HT) then
-    begin
-      Clipboard.AsText := L.Text;
-      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
-    end;
-  finally
-    L.Free;
-  end;
 end;
 
 { TCnEditorExtractString }
@@ -402,143 +375,6 @@ begin
 
     Free;
   end;
-
-  Exit;
-
-  PasParser := nil;
-  Stream := nil;
-  TokenList := nil;
-
-  try
-    PasParser := TCnGeneralPasStructParser.Create;
-{$IFDEF BDS}
-    PasParser.UseTabKey := True;
-    PasParser.TabWidth := EditControlWrapper.GetTabWidth;
-{$ENDIF}
-
-    Stream := TMemoryStream.Create;
-    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('CnEditorExtractString.Execute to ParseString.');
-{$ENDIF}
-
-    // 解析当前显示的源文件中的字符串
-    CnPasParserParseString(PasParser, Stream);
-    for I := 0 to PasParser.Count - 1 do
-    begin
-      Token := PasParser.Tokens[I];
-      if CanExtract(Token.Token) then
-      begin
-        ConvertGeneralTokenPos(Pointer(EditView), Token);
-
-{$IFDEF UNICODE}
-        ParsePasCodePosInfoW(PChar(Stream.Memory), Token.EditLine, Token.EditCol, Info);
-{$ELSE}
-        EditPos.Line := Token.EditLine;
-        EditPos.Col := Token.EditCol;
-        CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
-
-        Info := ParsePasCodePosInfo(PChar(Stream.Memory), CurrPos);
-{$ENDIF}
-        Token.Tag := Ord(Info.PosKind);
-      end
-      else
-        Token.Tag := Ord(pkUnknown);
-    end;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogInteger(PasParser.Count, 'PasParser.Count');
-{$ENDIF}
-
-    TokenList := TCnIdeStringList.Create;
-    for I := 0 to PasParser.Count - 1 do
-    begin
-      Token := PasParser.Tokens[I];
-      if TCodePosKind(Token.Tag) in CnSourceStringPosKinds then
-      begin
-        S := ConvertStringToIdent(string(Token.Token));
-        // 在 D2005~2007 下有 AnsiString 到 WideString 的转换但也无影响
-
-        TokenList.AddObject(S, Token);
-      end;
-    end;
-
-    // TokensRefList 中的 Token 是要抽取的内容
-    if TokenList.Count <= 0 then
-    begin
-      ErrorDlg(SCnEditorExtractStringNotFound);
-      Exit;
-    end;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogInteger(TokenList.Count, 'TokensRefList.Count');
-{$ENDIF}
-
-    for I := 0 to TokenList.Count - 1 do
-    begin
-      Token := TCnGeneralPasToken(TokenList.Objects[I]);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('#%3.3d. Line: %2.2d, Col %2.2d, Pos %4.4d. PosKind: %-18s, Token: %-14s, ConvertTo: %14s',
-        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos,
-        GetEnumName(TypeInfo(TCodePosKind), Token.Tag), Token.Token, TokenList[I]]);
-{$ENDIF}
-    end;
-
-    StartToken := TCnGeneralPasToken(TokenList.Objects[0]);
-    EndToken := TCnGeneralPasToken(TokenList.Objects[TokenList.Count - 1]);
-    PrevToken := nil;
-
-    // 拼接替换后的字符串
-    for I := 0 to TokenList.Count - 1 do
-    begin
-      Token := TCnGeneralPasToken(TokenList.Objects[I]);
-      if PrevToken = nil then
-        NewCode := TokenList[I]
-      else
-      begin
-        // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，用 Ansi/Wide/Wide String 来计算
-        LastTokenPos := PrevToken.TokenPos + Length(PrevToken.Token);
-        NewCode := NewCode + Copy(PasParser.Source, LastTokenPos + 1,
-          Token.TokenPos - LastTokenPos) + TokenList[I];
-      end;
-      PrevToken := TCnGeneralPasToken(TokenList.Objects[I]);
-    end;
-
-    EditWriter := CnOtaGetEditWriterForSourceEditor;
-
-{$IFDEF IDE_WIDECONTROL}
-    // 插入时，Wide 要做 Utf8 转换
-    EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartToken.TokenPos))));
-    EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1, EndToken.TokenPos + Length(EndToken.Token)))));
-  {$IFDEF UNICODE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
-  {$ELSE}
-    EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(NewCode)));
-  {$ENDIF}
-{$ELSE}
-    EditWriter.CopyTo(StartToken.TokenPos);
-    EditWriter.DeleteTo(EndToken.TokenPos + Length(EndToken.Token));
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
-{$ENDIF}
-    EditWriter := nil;
-
-    RemoveDuplicatedStrings(TokenList); // 去重
-
-    // 组成声明部分
-    for I := 0 to TokenList.Count - 1 do
-    begin
-      Token := TCnGeneralPasToken(TokenList.Objects[I]);
-      TokenList[I] := '  ' + TokenList[I] + ' = ' + Token.Token + ';';
-    end;
-    TokenList.Insert(0, 'const');
-
-    // TODO: 找到 implementation 部分再次插入
-  finally
-    TokenList.Free;
-    Stream.Free;
-    PasParser.Free;
-  end;
 end;
 
 procedure TCnEditorExtractString.FreeTokens;
@@ -568,7 +404,7 @@ begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
       OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + Token.Token + ';');
     end;
-    StringsRemoveDuplicated(OutList);
+    RemoveDuplicatedStrings(OutList);
     Result := True;
   end
   else if HeadType in [htConst, htResourcestring] then
@@ -578,7 +414,7 @@ begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
       OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + Token.Token + ';');
     end;
-    StringsRemoveDuplicated(OutList);
+    RemoveDuplicatedStrings(OutList);
     Result := True;
   end;
 end;
@@ -604,6 +440,11 @@ end;
 function TCnEditorExtractString.GetHint: string;
 begin
   Result := SCnEditorExtractStringMenuHint;
+end;
+
+function TCnEditorExtractString.InsertDecl(Area: TCnStringAreaType): Integer;
+begin
+  // 找 interface 或 implementation 后的 uses 的分号空，并插入其后，如无 uses，直接插入其后
 end;
 
 procedure TCnEditorExtractString.MakeUnique;
@@ -646,7 +487,7 @@ begin
   end;
 end;
 
-function TCnEditorExtractString.Replace: Boolean;
+function TCnEditorExtractString.Replace: Integer;
 var
   I, LastTokenPos: Integer;
   EditView: IOTAEditView;
@@ -654,6 +495,7 @@ var
   NewCode: TCnIdeTokenString;
   EditWriter: IOTAEditWriter;
 begin
+  Result := 0;
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
     Exit;
@@ -675,6 +517,7 @@ begin
       NewCode := NewCode + Copy(FPasParser.Source, LastTokenPos + 1,
         Token.TokenPos - LastTokenPos) + FTokenListRef[I];
     end;
+    Inc(Result);
     PrevToken := TCnGeneralPasToken(FTokenListRef.Objects[I]);
   end;
 
@@ -706,6 +549,7 @@ var
   EditPos: TOTAEditPos;
   Info: TCodePosInfo;
   S: TCnIdeTokenString;
+  Lex: TCnGeneralWidePasLex;
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;
@@ -713,6 +557,7 @@ begin
     Exit;
 
   Stream := nil;
+  Lex := nil;
 
   try
     FreeTokens;
@@ -779,9 +624,135 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogInteger(FTokenListRef.Count, 'TokensRefList.Count');
 {$ENDIF}
+
+    FBeforeImpl := False;
+    if FTokenListRef.Count > 0 then
+    begin
+      Token := TCnGeneralPasToken(FTokenListRef.Objects[0]);
+
+      // 再找 implementation，看第一个是否在其前面
+      Stream.Position := 0;
+      Lex := TCnGeneralWidePasLex.Create;
+      Lex.Origin := Stream.Memory;
+
+      while not (Lex.TokenID in [tkNull, tkImplementation]) do
+        Lex.NextNoJunk;
+
+      if Lex.TokenID = tkImplementation then
+      begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+        FBeforeImpl := Token.LineNumber < Lex.LineNumber - 1;
+{$ELSE}
+        FBeforeImpl := Token.LineNumber < Lex.LineNumber;
+{$ENDIF}
+      end;
+    end;
     Result := True;
   finally
     Stream.Free;
+    Lex.Free;
+  end;
+end;
+
+procedure TCnExtractStringForm.lvStringsDblClick(Sender: TObject);
+begin
+  actEdit.Execute;
+end;
+
+procedure TCnExtractStringForm.actCopyExecute(Sender: TObject);
+var
+  L: TStringList;
+  HT: TCnStringHeadType;
+begin
+  L := TStringList.Create;
+  try
+    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
+    if FTool.GenerateDecl(L, HT) then
+    begin
+      Clipboard.AsText := L.Text;
+      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
+    end;
+  finally
+    L.Free;
+  end;
+end;
+
+procedure TCnExtractStringForm.actRescanExecute(Sender: TObject);
+begin
+  if FTool = nil then
+    Exit;
+
+  SaveSettings;
+  if FTool.Scan then
+  begin
+    if FTool.TokenListRef.Count <= 0 then
+    begin
+      ErrorDlg(SCnEditorExtractStringNotFound);
+      Exit;
+    end;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Rescan OK. To Make Unique.');
+{$ENDIF}
+
+    FTool.MakeUnique;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Make Unique OK. Update To ListView.');
+{$ENDIF}
+
+    if FTool.BeforeImpl then
+      cbbToArea.ItemIndex := Ord(atInterface)
+    else
+      cbbToArea.ItemIndex := Ord(atImplementation);
+
+    UpdateTokenToListView;
+  end;
+end;
+
+procedure TCnExtractStringForm.actEditExecute(Sender: TObject);
+var
+  Idx, K: Integer;
+  S: string;
+begin
+  if lvStrings.Selected = nil then
+    Exit;
+
+  Idx := lvStrings.Selected.Index;
+  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
+    Exit;
+
+  S := FTool.TokenListRef[Idx];
+  if CnWizInputQuery(SCnEditorExtractStringChangeName, SCnEditorExtractStringEnterNewName, S) then
+  begin
+    K := FTool.TokenListRef.IndexOf(S);
+    if (K >= 0) and (K <> Idx) then
+    begin
+      ErrorDlg(SCnEditorExtractStringDuplicatedName);
+    end
+    else
+    begin
+      FTool.TokenListRef[Idx] := S;
+      lvStrings.Invalidate;
+    end;
+  end;
+end;
+
+procedure TCnExtractStringForm.actReplaceExecute(Sender: TObject);
+var
+  N, S: Integer;
+begin
+  if not QueryDlg(SCnEditorExtractStringAskReplace) then
+    Exit;
+
+  N := FTool.Replace;
+  if N > 0 then
+  begin
+    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex));
+    if S > 0 then
+    begin
+      InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [S, N]));
+      Exit;
+    end;
   end;
 end;
 

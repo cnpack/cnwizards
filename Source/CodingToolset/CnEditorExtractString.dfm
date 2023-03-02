@@ -36,6 +36,7 @@ object CnExtractStringForm: TCnExtractStringForm
     Top = 524
     Width = 23
     Height = 22
+    Action = actCopy
     Flat = True
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
@@ -64,7 +65,6 @@ object CnExtractStringForm: TCnExtractStringForm
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB58C8CEFB56BC68C7BFF00FFFF00FFFF00
       FFFF00FFFF00FFFF00FFFF00FFB58C8CB58C8CB58C8CB58C8CB58C8CB58C8CB5
       8C8CBD8484FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
-    OnClick = btnCopyClick
   end
   object grpScanOption: TGroupBox
     Left = 480
@@ -227,10 +227,9 @@ object CnExtractStringForm: TCnExtractStringForm
     Top = 14
     Width = 108
     Height = 91
+    Action = actRescan
     Anchors = [akTop, akRight]
-    Caption = 'Re&scan'
     TabOrder = 2
-    OnClick = btnReScanClick
   end
   object pnl1: TPanel
     Left = 8
@@ -275,6 +274,7 @@ object CnExtractStringForm: TCnExtractStringForm
       TabOrder = 0
       ViewStyle = vsReport
       OnData = lvStringsData
+      OnDblClick = lvStringsDblClick
       OnSelectItem = lvStringsSelectItem
     end
     object mmoPreview: TMemo
@@ -305,9 +305,6 @@ object CnExtractStringForm: TCnExtractStringForm
     Anchors = [akLeft, akBottom]
     ItemHeight = 13
     TabOrder = 5
-    Items.Strings = (
-      'interface'
-      'implementation')
   end
   object btnHelp: TButton
     Left = 749
@@ -336,12 +333,28 @@ object CnExtractStringForm: TCnExtractStringForm
     Height = 21
     Anchors = [akRight, akBottom]
     Cancel = True
-    Caption = '&Cancel'
+    Caption = '&Close'
     ModalResult = 2
     TabOrder = 7
   end
   object actlstExtract: TActionList
     Left = 384
-    Top = 480
+    Top = 520
+    object actRescan: TAction
+      Caption = 'Re&scan'
+      OnExecute = actRescanExecute
+    end
+    object actCopy: TAction
+      Caption = '&Copy'
+      OnExecute = actCopyExecute
+    end
+    object actReplace: TAction
+      Caption = '&Replace'
+      OnExecute = actReplaceExecute
+    end
+    object actEdit: TAction
+      Caption = '&Edit'
+      OnExecute = actEditExecute
+    end
   end
 end
