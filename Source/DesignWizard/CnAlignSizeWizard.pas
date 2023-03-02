@@ -1720,7 +1720,7 @@ var
 begin
   // 根据 Scripts 里的内容创建 FScriptsDesignExecutors 并挨个注册
   for I := 0 to FScriptsDesignExecutors.Count - 1 do
-    UnregisterDesignMenuExecutor(TCnContextMenuExecutor(FScriptsDesignExecutors[I]));
+    UnRegisterDesignMenuExecutor(TCnContextMenuExecutor(FScriptsDesignExecutors[I]));
   FScriptsDesignExecutors.Clear;
 
   SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;

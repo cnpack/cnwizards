@@ -79,23 +79,28 @@ type
 
   TCnPropertyCompareManager = class(TComponent)
   private
-    FSelectExtutor: TCnSelectCompareExecutor; // 只选中一个时，出现选为左侧
-    FCompareExecutor: TCnDoCompareExecutor;   // 只选中另一个时，与 xxxx 比较，或选中两个时比较两者
+    FSelectExecutor: TCnSelectCompareExecutor; // 只选中一个时，出现选为左侧
+    FCompareExecutor: TCnDoCompareExecutor;    // 只选中另一个时，与 xxxx 比较，或选中两个时比较两者
     FLeftComponent: TComponent;
     FRightObject: TComponent;
     FSelection: TList;
     FSameType: Boolean;
     FIgnoreProperties: TStringList;
     FOnlyShowDiff: Boolean;
+    FShowMenu: Boolean;
     procedure SetLeftComponent(const Value: TComponent);
     procedure SetRightComponent(const Value: TComponent);
     function GetSelectionCount: Integer;
     procedure SelectExecute(Sender: TObject);
     procedure CompareExecute(Sender: TObject);
     procedure SetIgnoreProperties(const Value: TStringList);
+    procedure SetShowMenu(const Value: Boolean);
   protected
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
+
+    procedure RegisterMenu;
+    procedure UnRegisterMenu;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -107,6 +112,8 @@ type
     property RightObject: TComponent read FRightObject write SetRightComponent;
     property SelectionCount: Integer read GetSelectionCount;
 
+    property ShowMenu: Boolean read FShowMenu write SetShowMenu;
+    {* 是否在设计器中显示比较相关的右键菜单}
     property OnlyShowDiff: Boolean read FOnlyShowDiff write FOnlyShowDiff;
     {* 记住的只显示不同属性的选项}
     property SameType: Boolean read FSameType write FSameType;
@@ -315,6 +322,7 @@ const
   PROP_NAME_MIN_WIDTH = 60;
   DEF_IGNORE_PROP = 'Name,Left,Top,TabOrder';
 
+  csShowMenu = 'ShowMenu';
   csOnlyShowDiff = 'OnlyShowDiff';
   csSameType = 'SameType';
   csIgnoreProperties = 'IgnoreProperties';
@@ -440,17 +448,7 @@ begin
   FSelection := TList.Create;
   FIgnoreProperties := TStringList.Create;
 
-  FSelectExtutor := TCnSelectCompareExecutor.Create;
-  FCompareExecutor := TCnDoCompareExecutor.Create;
-
-  FSelectExtutor.Manager := Self;
-  FCompareExecutor.Manager := Self;
-
-  FSelectExtutor.OnExecute := SelectExecute;
-  FCompareExecutor.OnExecute := CompareExecute;
-
-  RegisterDesignMenuExecutor(FSelectExtutor);
-  RegisterDesignMenuExecutor(FCompareExecutor);
+  RegisterMenu;
 end;
 
 destructor TCnPropertyCompareManager.Destroy;
@@ -467,6 +465,7 @@ end;
 
 procedure TCnPropertyCompareManager.LoadSettings(Ini: TCustomIniFile);
 begin
+  ShowMenu := Ini.ReadBool('', csShowMenu, True);
   FOnlyShowDiff := Ini.ReadBool('', csOnlyShowDiff, FOnlyShowDiff);
   FSameType := Ini.ReadBool('', csSameType, FSameType);
   FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
@@ -495,8 +494,27 @@ begin
   end;
 end;
 
+procedure TCnPropertyCompareManager.RegisterMenu;
+begin
+  if (FSelectExecutor = nil) and (FCompareExecutor = nil) then
+  begin
+    FSelectExecutor := TCnSelectCompareExecutor.Create;
+    FCompareExecutor := TCnDoCompareExecutor.Create;
+
+    FSelectExecutor.Manager := Self;
+    FCompareExecutor.Manager := Self;
+
+    FSelectExecutor.OnExecute := SelectExecute;
+    FCompareExecutor.OnExecute := CompareExecute;
+
+    RegisterDesignMenuExecutor(FSelectExecutor);
+    RegisterDesignMenuExecutor(FCompareExecutor);
+  end;
+end;
+
 procedure TCnPropertyCompareManager.SaveSettings(Ini: TCustomIniFile);
 begin
+  Ini.WriteBool('', csShowMenu, FShowMenu);
   Ini.WriteBool('', csOnlyShowDiff, FOnlyShowDiff);
   Ini.WriteBool('', csSameType, FSameType);
   Ini.WriteString('', csIgnoreProperties, FIgnoreProperties.CommaText);
@@ -559,6 +577,30 @@ begin
 
     if FRightObject <> nil then
       FRightObject.FreeNotification(Self);
+  end;
+end;
+
+procedure TCnPropertyCompareManager.SetShowMenu(const Value: Boolean);
+begin
+  if FShowMenu <> Value then
+  begin
+    FShowMenu := Value;
+    if FShowMenu then
+      RegisterMenu
+    else
+      UnRegisterMenu;
+  end;
+end;
+
+procedure TCnPropertyCompareManager.UnRegisterMenu;
+begin
+  if (FSelectExecutor <> nil) and (FCompareExecutor <> nil) then
+  begin
+    UnRegisterDesignMenuExecutor(FSelectExecutor);
+    UnRegisterDesignMenuExecutor(FCompareExecutor);
+
+    FSelectExecutor := nil;
+    FCompareExecutor := nil;
   end;
 end;
 
@@ -1897,6 +1939,7 @@ begin
   with TCnPropertyCompConfigForm.Create(nil) do
   begin
 {$IFNDEF STAND_ALONE}
+    chkShowMenu.Checked := FManager.ShowMenu;
     chkSameType.Checked := not FManager.SameType;
     mmoIgnoreProperties.Lines.Assign(FManager.IgnoreProperties);
 {$ENDIF}
@@ -1904,6 +1947,7 @@ begin
     if ShowModal = mrOK then
     begin
 {$IFNDEF STAND_ALONE}
+      FManager.ShowMenu := chkShowMenu.Checked;
       FManager.SameType := not chkSameType.Checked;
       FManager.IgnoreProperties.Assign(mmoIgnoreProperties.Lines);
 {$ENDIF}

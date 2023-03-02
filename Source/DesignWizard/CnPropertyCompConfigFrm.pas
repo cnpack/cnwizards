@@ -53,6 +53,7 @@ type
     chkSameType: TCheckBox;
     lblAll: TLabel;
     mmoIgnoreProperties: TMemo;
+    chkShowMenu: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
   private
 
