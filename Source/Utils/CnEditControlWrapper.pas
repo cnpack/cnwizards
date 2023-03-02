@@ -426,6 +426,9 @@ type
     function GetTabWidth: Integer;
     {* 获得编辑器选项中的 Tab 键宽度}
 
+    function GetBlockIndent: Integer;
+    {* 获得编辑器缩进宽度}
+
     function ClickBreakpointAtActualLine(ActualLineNum: Integer; EditControl: TControl = nil): Boolean;
     {* 点击编辑器控件左侧指定行的断点栏以增加/删除断点}
 
@@ -2940,6 +2943,22 @@ begin
 {$ELSE}
       Result := StrToIntDef(VarToStr(Options.GetOptionValue('TabStops')), 2);
 {$ENDIF}
+    except
+      ;
+    end;
+  end;
+end;
+
+function TCnEditControlWrapper.GetBlockIndent: Integer;
+var
+  Options: IOTAEnvironmentOptions;
+begin
+  Result := 2;
+  Options := CnOtaGetEnvironmentOptions;
+  if Options <> nil then
+  begin
+    try
+      Result := StrToIntDef(VarToStr(Options.GetOptionValue('BlockIndent')), 2);
     except
       ;
     end;

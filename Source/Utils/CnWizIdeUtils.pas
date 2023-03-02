@@ -3773,12 +3773,11 @@ function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 var
   Stream: TMemoryStream;
+  Lex: TCnGeneralPasLex;
 {$IFDEF UNICODE}
-  Lex: TCnPasWideLex;
   LineText: string;
   S: AnsiString;
 {$ELSE}
-  Lex: TmwPasLex;
   {$IFDEF IDE_STRING_ANSI_UTF8}
   LineText: string;
   S: AnsiString;
