@@ -1029,6 +1029,7 @@ Section "$(OTHERTOOLS)" SecTools
 !endif
   File "..\..\Bin\CnConfigIO.exe"
   File "..\..\Bin\CnDebugViewer.exe"
+  File "..\..\Bin\CnDebugViewer64.exe"
 
 !ifndef LITE_VERSION
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
