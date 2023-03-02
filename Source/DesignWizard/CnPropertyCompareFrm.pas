@@ -950,15 +950,21 @@ begin
   pnlLeft.Caption := '';
   pnlRight.Caption := '';
 
-  if LeftObject is TComponent then
-    pnlLeftName.Caption := Format('%s: %s', [(LeftObject as TComponent).Name, LeftObject.ClassName])
-  else
-    pnlLeftName.Caption := Format('$%p: %s', [Pointer(LeftObject), LeftObject.ClassName]);
+  if FLeftObject <> nil then
+  begin
+    if LeftObject is TComponent then
+      pnlLeftName.Caption := Format('%s: %s', [(LeftObject as TComponent).Name, LeftObject.ClassName])
+    else
+      pnlLeftName.Caption := Format('$%p: %s', [Pointer(LeftObject), LeftObject.ClassName]);
+  end;
 
-  if RightObject is TComponent then
-    pnlRightName.Caption := Format('%s: %s', [(RightObject as TComponent).Name, RightObject.ClassName])
-  else
-    pnlRightName.Caption := Format('$%p: %s', [Pointer(RightObject), RightObject.ClassName]);
+  if FRightObject <> nil then
+  begin
+    if RightObject is TComponent then
+      pnlRightName.Caption := Format('%s: %s', [(RightObject as TComponent).Name, RightObject.ClassName])
+    else
+      pnlRightName.Caption := Format('$%p: %s', [Pointer(RightObject), RightObject.ClassName]);
+  end;
 
   FillGridWithProperties(gridLeft, FLeftProperties, IsRefresh);
   FillGridWithProperties(gridRight, FRightProperties, IsRefresh);
