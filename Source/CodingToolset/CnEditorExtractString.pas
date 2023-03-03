@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
   TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser;
+  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser;
 
 type
   TCnStringHeadType = (htVar, htConst, htResourcestring);
@@ -121,7 +121,7 @@ type
     {*  «∑Òœ‘ æ‘§¿¿¥∞ø⁄}
   end;
 
-  TCnExtractStringForm = class(TForm)
+  TCnExtractStringForm = class(TCnTranslateForm)
     grpScanOption: TGroupBox;
     chkIgnoreSingleChar: TCheckBox;
     chkIgnoreSimpleFormat: TCheckBox;

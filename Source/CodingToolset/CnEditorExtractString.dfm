@@ -1,4 +1,4 @@
-object CnExtractStringForm: TCnExtractStringForm
+inherited CnExtractStringForm: TCnExtractStringForm
   Left = 274
   Top = 124
   Width = 853
@@ -12,6 +12,7 @@ object CnExtractStringForm: TCnExtractStringForm
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -341,7 +342,7 @@ object CnExtractStringForm: TCnExtractStringForm
     Left = 384
     Top = 520
     object actRescan: TAction
-      Caption = 'Re&scan'
+      Caption = '&Scan'
       OnExecute = actRescanExecute
     end
     object actCopy: TAction
