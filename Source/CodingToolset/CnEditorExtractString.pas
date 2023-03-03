@@ -61,12 +61,13 @@ type
     FUseFullPinYin: Boolean;
     FShowPreview: Boolean;
     FIgnoreSimpleFormat: Boolean;
+    FEditStream: TMemoryStream;
     FPasParser: TCnGeneralPasStructParser;
     FTokenListRef: TCnIdeStringList;
     FBeforeImpl: Boolean;
     function CanExtract(const S: PCnIdeTokenChar): Boolean;
   protected
-
+    function GetPasTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
@@ -79,13 +80,14 @@ type
     procedure GetEditorInfo(var Name, Author, Email: string); override;
 
     function Scan: Boolean;
-    {* 扫描当前源码中的字符串，返回扫描是否成功，产出在 TokenListRef 中，以及 FBeforeImpl}
+    {* 扫描当前源码中的字符串，返回扫描是否成功。
+    　内部创建 Stream/Parser，并产出在 TokenListRef 中，以及 FBeforeImpl}
     procedure MakeUnique;
     {* 将 TokenListRef 中的字符串判重并加上 1 等后缀}
     function GenerateDecl(OutList: TCnIdeStringList; HeadType: TCnStringHeadType): Boolean;
-    {* 从 FTokenListRef 中生成 var 或 const 的声明块，内容放 OutList 中}
+    {* 从 FTokenListRef 中生成 var 或 const 的声明块，内部要使用 FEditStream，产出内容放 OutList 中}
     function Replace: Integer;
-    {* 将字符串替换为变量名，不插入声明。返回替换的个数}
+    {* 将字符串替换为变量名，不插入声明，内部要使用 FEditStream。返回替换的个数}
     function InsertDecl(Area: TCnStringAreaType; HeadType: TCnStringHeadType): Integer;
     {* 将声明插入当前源码指定部分。返回插入的条数}
 
@@ -227,7 +229,7 @@ begin
     with Item.SubItems do
     begin
       Add(FTool.TokenListRef[Item.Index]);
-      Add(Token.Token);
+      Add(FTool.GetPasTokenStr(Token));
     end;
   end;
 end;
@@ -351,6 +353,7 @@ destructor TCnEditorExtractString.Destroy;
 begin
   FTokenListRef.Free;
   FPasParser.Free;
+  FEditStream.Free;
   inherited;
 end;
 
@@ -390,6 +393,7 @@ procedure TCnEditorExtractString.FreeTokens;
 begin
   FreeAndNil(FTokenListRef);
   FreeAndNil(FPasParser);
+  FreeAndNil(FEditStream);
 end;
 
 function TCnEditorExtractString.GenerateDecl(OutList: TCnIdeStringList;
@@ -411,7 +415,7 @@ begin
     for I := 0 to FTokenListRef.Count - 1 do
     begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
-      OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + Token.Token + ';');
+      OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + GetPasTokenStr(Token) + ';');
     end;
     RemoveDuplicatedStrings(OutList);
     Result := True;
@@ -421,7 +425,7 @@ begin
     for I := 0 to FTokenListRef.Count - 1 do
     begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
-      OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + Token.Token + ';');
+      OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + GetPasTokenStr(Token) + ';');
     end;
     RemoveDuplicatedStrings(OutList);
     Result := True;
@@ -449,6 +453,26 @@ end;
 function TCnEditorExtractString.GetHint: string;
 begin
   Result := SCnEditorExtractStringMenuHint;
+end;
+
+function TCnEditorExtractString.GetPasTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
+var
+  P: PByte;
+begin
+  Result := '';
+  if (Token <> nil) and (Token.TokenLength > 0) then
+  begin
+    if Token.TokenLength < CN_TOKEN_MAX_SIZE then
+      Result := TCnIdeTokenString(Token.Token)
+    else if (FEditStream <> nil) and
+      (FEditStream.Size >= (Token.TokenPos + Token.TokenLength) * SizeOf(Char)) then
+    begin
+      SetLength(Result, Token.TokenLength);
+      P := FEditStream.Memory;
+      Inc(P, Token.TokenPos * SizeOf(Char));
+      Move(P^, Result[1], Token.TokenLength * SizeOf(Char));
+    end;
+  end;
 end;
 
 function TCnEditorExtractString.GetState: TWizardState;
@@ -569,7 +593,7 @@ begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
       if Map.Find(string(FTokenListRef[I]), S) then
       begin
-        if S <> string(Token.Token) then
+        if S <> string(GetPasTokenStr(Token)) then
         begin
           // 有同名的，但值不同，要换名
           J := 1;
@@ -580,12 +604,12 @@ begin
           until not Map.Find(string(FTokenListRef[I]), S);
 
           // 换名后要添加
-          Map.Add(string(FTokenListRef[I]), string(Token.Token));
+          Map.Add(string(FTokenListRef[I]), string(GetPasTokenStr(Token)));
         end;
         // 同名同值忽略
       end
       else // 无同名的，直接添加
-        Map.Add(string(FTokenListRef[I]), string(Token.Token));
+        Map.Add(string(FTokenListRef[I]), string(GetPasTokenStr(Token)));
     end;
   finally
     Map.Free;
@@ -618,7 +642,7 @@ begin
     else
     begin
       // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，用 Ansi/Wide/Wide String 来计算
-      LastTokenPos := PrevToken.TokenPos + Length(PrevToken.Token);
+      LastTokenPos := PrevToken.TokenPos + PrevToken.TokenLength;
       NewCode := NewCode + Copy(FPasParser.Source, LastTokenPos + 1,
         Token.TokenPos - LastTokenPos) + FTokenListRef[I];
     end;
@@ -631,7 +655,7 @@ begin
 {$IFDEF IDE_WIDECONTROL}
   // 插入时，Wide 要做 Utf8 转换
   EditWriter.CopyTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, StartToken.TokenPos))));
-  EditWriter.DeleteTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, EndToken.TokenPos + Length(EndToken.Token)))));
+  EditWriter.DeleteTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, EndToken.TokenPos + EndToken.TokenLength))));
   {$IFDEF UNICODE}
   EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
   {$ELSE}
@@ -639,7 +663,7 @@ begin
   {$ENDIF}
 {$ELSE}
   EditWriter.CopyTo(StartToken.TokenPos);
-  EditWriter.DeleteTo(EndToken.TokenPos + Length(EndToken.Token));
+  EditWriter.DeleteTo(EndToken.TokenPos + (EndToken.TokenLength));
   EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(AnsiString(NewCode))));
 {$ENDIF}
   EditWriter := nil;
@@ -647,7 +671,6 @@ end;
 
 function TCnEditorExtractString.Scan: Boolean;
 var
-  Stream: TMemoryStream;
   I, CurrPos, LastTokenPos: Integer;
   EditView: IOTAEditView;
   Token: TCnGeneralPasToken;
@@ -661,7 +684,6 @@ begin
   if EditView = nil then
     Exit;
 
-  Stream := nil;
   Lex := nil;
 
   try
@@ -673,15 +695,15 @@ begin
     FPasParser.TabWidth := EditControlWrapper.GetTabWidth;
 {$ENDIF}
 
-    Stream := TMemoryStream.Create;
-    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+    FEditStream := TMemoryStream.Create;
+    CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
 
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnEditorExtractString Scan to ParseString.');
 {$ENDIF}
 
     // 解析当前显示的源文件中的字符串
-    CnPasParserParseString(FPasParser, Stream);
+    CnPasParserParseString(FPasParser, FEditStream);
     for I := 0 to FPasParser.Count - 1 do
     begin
       Token := FPasParser.Tokens[I];
@@ -690,13 +712,13 @@ begin
         ConvertGeneralTokenPos(Pointer(EditView), Token);
 
 {$IFDEF UNICODE}
-        ParsePasCodePosInfoW(PChar(Stream.Memory), Token.EditLine, Token.EditCol, Info);
+        ParsePasCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info);
 {$ELSE}
         EditPos.Line := Token.EditLine;
         EditPos.Col := Token.EditCol;
         CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
 
-        Info := ParsePasCodePosInfo(PChar(Stream.Memory), CurrPos);
+        Info := ParsePasCodePosInfo(PChar(FEditStream.Memory), CurrPos);
 {$ENDIF}
         Token.Tag := Ord(Info.PosKind);
       end
@@ -736,9 +758,9 @@ begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[0]);
 
       // 再找 implementation，看第一个是否在其前面
-      Stream.Position := 0;
+      FEditStream.Position := 0;
       Lex := TCnGeneralWidePasLex.Create;
-      Lex.Origin := Stream.Memory;
+      Lex.Origin := FEditStream.Memory;
 
       while not (Lex.TokenID in [tkNull, tkImplementation]) do
         Lex.NextNoJunk;
@@ -754,7 +776,6 @@ begin
     end;
     Result := True;
   finally
-    Stream.Free;
     Lex.Free;
   end;
 end;

@@ -115,7 +115,7 @@ type
     property CppTokenKind: TCTokenKind read FCppTokenKind;
     {* 作为 C 的 Token 使用时的 CToken 类型}
     property TokenPos: Integer read FTokenPos;
-    {* Token 在整个文件中的线性位置}
+    {* Token 在整个文件中的线性位置，单位为字符数}
     property IsBlockStart: Boolean read FIsBlockStart;
     {* 是否是一块可匹配代码区域的开始}
     property IsBlockClose: Boolean read FIsBlockClose;
