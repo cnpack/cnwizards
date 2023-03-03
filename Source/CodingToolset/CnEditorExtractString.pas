@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-// {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
@@ -74,6 +74,7 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
+    function GetState: TWizardState; override;
     procedure Execute; override;
     procedure GetEditorInfo(var Name, Author, Email: string); override;
 
@@ -81,11 +82,11 @@ type
     {* 扫描当前源码中的字符串，返回扫描是否成功，产出在 TokenListRef 中，以及 FBeforeImpl}
     procedure MakeUnique;
     {* 将 TokenListRef 中的字符串判重并加上 1 等后缀}
-    function GenerateDecl(OutList: TStringList; HeadType: TCnStringHeadType): Boolean;
+    function GenerateDecl(OutList: TCnIdeStringList; HeadType: TCnStringHeadType): Boolean;
     {* 从 FTokenListRef 中生成 var 或 const 的声明块，内容放 OutList 中}
     function Replace: Integer;
     {* 将字符串替换为变量名，不插入声明。返回替换的个数}
-    function InsertDecl(Area: TCnStringAreaType): Integer;
+    function InsertDecl(Area: TCnStringAreaType; HeadType: TCnStringHeadType): Integer;
     {* 将声明插入当前源码指定部分。返回插入的条数}
 
     procedure FreeTokens;
@@ -165,6 +166,8 @@ type
     procedure actRescanExecute(Sender: TObject);
     procedure actEditExecute(Sender: TObject);
     procedure actReplaceExecute(Sender: TObject);
+    procedure actlstExtractUpdate(Action: TBasicAction;
+      var Handled: Boolean);
   private
     FTool: TCnEditorExtractString;
     procedure UpdateTokenToListView;
@@ -174,7 +177,11 @@ type
     property Tool: TCnEditorExtractString read FTool write FTool;
   end;
 
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 {$R *.DFM}
 
@@ -190,7 +197,7 @@ const
   SCN_HEAD_STRS: array[TCnStringHeadType] of string = ('var', 'const', 'resourcestring');
 
   SCN_AREA_STRS: array[TCnStringAreaType] of string = ('interface', 'implementation');
-  CN_DEF_MAX_WORDS = 7;
+  CN_DEF_MAX_WORDS = 6;
 
 { TCnExtractStringForm }
 
@@ -267,6 +274,8 @@ var
   I: TCnStringHeadType;
   J: TCnStringAreaType;
 begin
+  btnCopy.Caption := '';
+
   for I := Low(SCN_HEAD_STRS) to High(SCN_HEAD_STRS) do
     cbbMakeType.Items.Add(SCN_HEAD_STRS[I]);
   for J := Low(SCN_AREA_STRS) to High(SCN_AREA_STRS) do
@@ -383,7 +392,7 @@ begin
   FreeAndNil(FPasParser);
 end;
 
-function TCnEditorExtractString.GenerateDecl(OutList: TStringList;
+function TCnEditorExtractString.GenerateDecl(OutList: TCnIdeStringList;
   HeadType: TCnStringHeadType): Boolean;
 var
   I, L: Integer;
@@ -442,9 +451,105 @@ begin
   Result := SCnEditorExtractStringMenuHint;
 end;
 
-function TCnEditorExtractString.InsertDecl(Area: TCnStringAreaType): Integer;
+function TCnEditorExtractString.GetState: TWizardState;
 begin
+  Result := inherited GetState;
+  if wsEnabled in Result then
+  begin
+    if not CurrentIsDelphiSource then
+      Result := [];
+  end;
+end;
+
+function TCnEditorExtractString.InsertDecl(Area: TCnStringAreaType;
+  HeadType: TCnStringHeadType): Integer;
+const
+  KINDS: array[TCnStringAreaType] of TTokenKind = (tkInterface, tkImplementation);
+var
+  Lex: TCnGeneralWidePasLex;
+  Stream: TMemoryStream;
+  EditView: IOTAEditView;
+  AreaFound: Boolean;
+  InsPos: Integer;
+  Names: TCnIdeStringList;
+  EditWriter: IOTAEditWriter;
+begin
+  Result := 0;
   // 找 interface 或 implementation 后的 uses 的分号空，并插入其后，如无 uses，直接插入其后
+
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  Stream := nil;
+  Lex := nil;
+  Names := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+
+    Lex := TCnGeneralWidePasLex.Create;
+    Lex.Origin := Stream.Memory;
+
+    AreaFound := False;
+    while (Lex.TokenID <> tkNull) and (Lex.TokenID <> KINDS[Area]) do
+      Lex.NextNoJunk;
+
+    if Lex.TokenID = tkNull then
+      Exit;
+
+    // 此刻找到了 interface 或 implementation，记录其尾巴位置
+    InsPos := Lex.TokenPos + Length(Lex.Token);
+
+    while (Lex.TokenID <> tkNull) and (Lex.TokenID <> tkUses) do
+      Lex.NextNoJunk;
+
+    if Lex.TokenID <> tkNull then
+    begin
+      // 此刻找到了 uses，再找后面的第一个分号
+      while (Lex.TokenID <> tkNull) and (Lex.TokenID <> tkSemiColon) do
+        Lex.NextNoJunk;
+
+      if Lex.TokenID <> tkNull then
+      begin
+        // 找到了 uses 后的第一个分号，再记录其尾巴位置
+        InsPos := Lex.TokenPos + Length(Lex.Token);
+      end;
+    end;
+
+    // 利用该位置，换算成编辑器里的线性位置，再插入换行加空行加内容
+    Names := TCnIdeStringList.Create;
+    if not GenerateDecl(Names, HeadType) then
+      Exit;
+
+    if Names.Count <= 1 then
+      Exit;
+
+    Result := Names.Count - 1;
+    Names.Insert(0, '');
+    Names.Insert(0, '');
+
+    EditWriter := CnOtaGetEditWriterForSourceEditor;
+
+{$IFDEF IDE_WIDECONTROL}
+    // 插入时，Wide 要做 Utf8 转换
+    EditWriter.CopyTo(Length(UTF8Encode(Copy(Lex.Origin, 1, InsPos))));
+  {$IFDEF UNICODE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Names.Text)));
+  {$ELSE}
+    EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(Names.Text)));
+  {$ENDIF}
+{$ELSE}
+    EditWriter.CopyTo(InsPos);
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Names.Text)));
+{$ENDIF}
+    EditWriter := nil;
+  finally
+    Names.Free;
+    Lex.Free;
+    Stream.Free;
+  end;
 end;
 
 procedure TCnEditorExtractString.MakeUnique;
@@ -525,8 +630,8 @@ begin
 
 {$IFDEF IDE_WIDECONTROL}
   // 插入时，Wide 要做 Utf8 转换
-  EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartToken.TokenPos))));
-  EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1, EndToken.TokenPos + Length(EndToken.Token)))));
+  EditWriter.CopyTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, StartToken.TokenPos))));
+  EditWriter.DeleteTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, EndToken.TokenPos + Length(EndToken.Token)))));
   {$IFDEF UNICODE}
   EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
   {$ELSE}
@@ -664,6 +769,9 @@ var
   L: TStringList;
   HT: TCnStringHeadType;
 begin
+  if (FTool.TokenListRef = nil) or (FTool.TokenListRef.Count <= 0) then
+    Exit;
+
   L := TStringList.Create;
   try
     HT := TCnStringHeadType(cbbMakeType.ItemIndex);
@@ -747,16 +855,29 @@ begin
   N := FTool.Replace;
   if N > 0 then
   begin
-    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex));
+    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex),
+      TCnStringHeadType(cbbMakeType.ItemIndex));
     if S > 0 then
     begin
-      InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [S, N]));
-      Exit;
+      InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [N, S]));
+      Close;
     end;
   end;
+end;
+
+procedure TCnExtractStringForm.actlstExtractUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  if Action = actEdit then
+    (Action as TCustomAction).Enabled := lvStrings.Selected <> nil
+  else if {(Action = actCopy) or } (Action = actReplace) then
+    (Action as TCustomAction).Enabled := lvStrings.Items.Count > 0
+  else if Action = actRescan then
+    (Action as TCustomAction).Enabled := CurrentIsDelphiSource;
 end;
 
 initialization
   RegisterCnCodingToolset(TCnEditorExtractString); // 注册工具
 
+{$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

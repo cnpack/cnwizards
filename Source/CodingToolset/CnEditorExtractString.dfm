@@ -1,7 +1,7 @@
 object CnExtractStringForm: TCnExtractStringForm
   Left = 274
   Top = 124
-  Width = 837
+  Width = 853
   Height = 580
   ActiveControl = btnReScan
   Caption = 'Extract String'
@@ -320,10 +320,9 @@ object CnExtractStringForm: TCnExtractStringForm
     Top = 525
     Width = 75
     Height = 21
+    Action = actReplace
     Anchors = [akRight, akBottom]
-    Caption = '&Replace'
     Default = True
-    ModalResult = 1
     TabOrder = 6
   end
   object btnClose: TButton
@@ -338,6 +337,7 @@ object CnExtractStringForm: TCnExtractStringForm
     TabOrder = 7
   end
   object actlstExtract: TActionList
+    OnUpdate = actlstExtractUpdate
     Left = 384
     Top = 520
     object actRescan: TAction
