@@ -496,6 +496,7 @@ var
   AreaFound: Boolean;
   InsPos: Integer;
   Names: TCnIdeStringList;
+  S: TCnIdeTokenString;
   EditWriter: IOTAEditWriter;
 begin
   Result := 0;
@@ -553,6 +554,13 @@ begin
     Result := Names.Count - 1;
     Names.Insert(0, '');
     Names.Insert(0, '');
+    S := Names.Text;
+
+    if Length(S) > 2 then // 去掉末尾多余的回车
+    begin
+      if (S[Length(S) - 1] = #13) and (S[Length(S)] = #10) then
+        Delete(S, Length(S) - 1, 2);
+    end;
 
     EditWriter := CnOtaGetEditWriterForSourceEditor;
 
@@ -560,13 +568,13 @@ begin
     // 插入时，Wide 要做 Utf8 转换
     EditWriter.CopyTo(Length(UTF8Encode(Copy(Lex.Origin, 1, InsPos))));
   {$IFDEF UNICODE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Names.Text)));
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(S)));
   {$ELSE}
-    EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(Names.Text)));
+    EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(S)));
   {$ENDIF}
 {$ELSE}
     EditWriter.CopyTo(InsPos);
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Names.Text)));
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(S)));
 {$ENDIF}
     EditWriter := nil;
   finally
