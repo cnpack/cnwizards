@@ -277,6 +277,7 @@ var
     Token.FTokenPos := CParser.RunPosition;
 
     Len := CParser.TokenLength;
+    Token.TokenLength := Len;
     if Len > CN_TOKEN_MAX_SIZE then
       Len := CN_TOKEN_MAX_SIZE;
     FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);

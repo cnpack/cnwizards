@@ -54,6 +54,7 @@ type
     FEditAnsiCol: Integer;
     FTag: Integer;
     FBracketLayer: Integer;
+    FTokenLength: Integer;
     function GetToken: PWideChar;
     function GetEditEndCol: Integer;
   protected
@@ -82,9 +83,9 @@ type
     property UseAsC: Boolean read FUseAsC;
     {* 是否是 C 方式的解析，默认不是}
     property LineNumber: Integer read FLineNumber; // Start 0
-    {* 所在行号，从零开始，由 ParseSource 计算而来 }
+    {* 所在行号，从零开始，由 ParseSource 计算而来}
     property CharIndex: Integer read FCharIndex;   // Start 0
-    {* 从本行开始数的字符位置，从零开始，由 ParseSource 内据需展开 Tab 计算而来 }
+    {* 从本行开始数的字符位置，从零开始，由 ParseSource 内据需展开 Tab 计算而来}
     property AnsiIndex: Integer read FAnsiIndex;   // Start 0
     {* 从本行开始数的 Ansi 字符位置，从零开始，计算而来}
 
@@ -98,29 +99,31 @@ type
     {* Token 结束位置所在列，EditCol 转换成功后才有意义}
 
     property ItemIndex: Integer read FItemIndex;
-    {* 在整个 Parser 中的序号 }
+    {* 在整个 Parser 中的序号}
     property ItemLayer: Integer read FItemLayer;
-    {* 所在高亮的层次，包括过程、函数以及代码块，可直接用来绘制高亮层次，不在任何块内时（最外层）为 0 }
+    {* 所在高亮的层次，包括过程、函数以及代码块，可直接用来绘制高亮层次，不在任何块内时（最外层）为 0}
     property MethodLayer: Integer read FMethodLayer;
-    {* 所在函数的嵌套层次，最外层的函数内为 1，包括匿名函数 }
+    {* 所在函数的嵌套层次，最外层的函数内为 1，包括匿名函数}
     property BracketLayer: Integer read FBracketLayer;
     {* 所在的圆括号的层次，最外层的为 0。圆括号本身应该算高一层（暂未实现）}
     property Token: PWideChar read GetToken;
-    {* 该 Token 的字符串内容 }
+    {* 该 Token 的字符串内容}
+    property TokenLength: Integer read FTokenLength write FTokenLength;
+    {* 该 Token 的实际字符长度，注意它可能大于 Token 数组的内容长度}
     property TokenID: TTokenKind read FTokenID;
-    {* Token 的语法类型 }
+    {* Token 的语法类型}
     property CppTokenKind: TCTokenKind read FCppTokenKind;
     {* 作为 C 的 Token 使用时的 CToken 类型}
     property TokenPos: Integer read FTokenPos;
-    {* Token 在整个文件中的线性位置 }
+    {* Token 在整个文件中的线性位置}
     property IsBlockStart: Boolean read FIsBlockStart;
-    {* 是否是一块可匹配代码区域的开始 }
+    {* 是否是一块可匹配代码区域的开始}
     property IsBlockClose: Boolean read FIsBlockClose;
-    {* 是否是一块可匹配代码区域的结束 }
+    {* 是否是一块可匹配代码区域的结束}
     property IsMethodStart: Boolean read FIsMethodStart;
-    {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况 }
+    {* 是否是函数过程的开始，包括 function 和 begin/asm 的情况}
     property IsMethodClose: Boolean read FIsMethodClose;
-    {* 是否是函数过程的结束，只包括 end 的情况，因此和 MethodStart 数量不等 }
+    {* 是否是函数过程的结束，只包括 end 的情况，因此和 MethodStart 数量不等}
     property MethodStartAfterParentBegin: Boolean read FMethodStartAfterParentBegin;
     {* 当 IsMethodStart 是 True 且是 function/procedure 或 begin/asm 时，
        是否位于上一层 function/procedure 的 begin 后的实现部分。
@@ -509,6 +512,7 @@ begin
   Result.FTokenPos := Lex.TokenPos;
 
   Len := Lex.TokenLength;
+  Result.FTokenLength := Len;
   if Len > CN_TOKEN_MAX_SIZE then
     Len := CN_TOKEN_MAX_SIZE;
   // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
