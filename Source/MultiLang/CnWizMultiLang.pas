@@ -89,7 +89,7 @@ type
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
-    class procedure LanguageChanged(Sender: TObject);
+    procedure WizLanguageChanged(Sender: TObject);
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -319,7 +319,7 @@ end;
 constructor TCnWizMultiLang.Create;
 begin
   if CnLanguageManager <> nil then
-    CnLanguageManager.OnLanguageChanged := LanguageChanged;
+    CnLanguageManager.OnLanguageChanged := WizLanguageChanged;
 
   inherited;
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
@@ -379,7 +379,7 @@ begin
 end;
 
 // 语言事件改变的处理事件
-class procedure TCnWizMultiLang.LanguageChanged(Sender: TObject);
+procedure TCnWizMultiLang.WizLanguageChanged(Sender: TObject);
 begin
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
