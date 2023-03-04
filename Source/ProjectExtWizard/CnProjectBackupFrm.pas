@@ -28,16 +28,18 @@ unit CnProjectBackupFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2008.06.20 V1.1 by LiuXiao
+* 修改记录：2023.03.04 V1.2 by LiuXiao
+*               加入固定自定义文件的机制
+*           2008.06.20 V1.1 by LiuXiao
 *               加入备份后运行命令的机制
 *           2006.08.19 V1.3 by LiuXiao
 *               工程备份完善保存密码的功能
 *           2005.01.10 V1.2 by 何清
-*               1. 使用TObjectList来预加载文件列表，提高加载速度
+*               1. 使用 TObjectList 来预加载文件列表，提高加载速度
 *           2005.01.09 V1.1 by 何清
 *               1. 文件列表使用系统文件图标
 *               2. 支持全部工程、当前活动工程和特定工程项目备份选择
-*               3. 修正一处工程文件两次添加的Bug
+*               3. 修正一处工程文件两次添加的 Bug
 *           2004.12.31 V1.0 by 何清
 *               创建单元
 ================================================================================
@@ -94,11 +96,27 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    procedure LoadFromFile(const FileName: string);
+    {* 从普通文件载入内容，注意只载入简单的文件名}
+    procedure SaveToFile(const FileName: string);
+    {* 将内容存储入普通文件，注意只存简单的文件名}
+
+    function AddFile(const FileName: string): Boolean;
+    {* 根据文件名添加单个文件}
+
     procedure Add(FileInfo: TCnBackupFileInfo);
+    {* 添加已组装好文件信息的对象}
+
     procedure Delete(Index: Integer);
+    {* 删除指定索引的文件对象并释放}
+
     procedure AddFiles(const FileName, UnitName, FormName: string);
+    {* 根据源码文件信息添加一批必要的文件}
+
     property Count: Integer read GetCount;
+    {* 数量}
     property Items[Index: Integer]: TCnBackupFileInfo read GetItem;
+    {* 条目}
   end;
 
   { TCnBackupProjectList }
@@ -161,8 +179,8 @@ type
     procedure actAddOpenedExecute(Sender: TObject);
     procedure actAddDirExecute(Sender: TObject);
   private
-    CustomFiles: TCnBackupProjectInfo;
-    ProjectList: TCnBackupProjectList;
+    FCustomFiles: TCnBackupProjectInfo;
+    FProjectList: TCnBackupProjectList;
     FExt: string;
     FListViewWidthStr: string;
 
@@ -200,6 +218,7 @@ type
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   protected
+    procedure FirstInit(Sender: TObject);
     function GetHelpTopic: string; override;
   public
     procedure LoadSettings(Ini: TCustomIniFile);
@@ -219,12 +238,13 @@ implementation
 {$R *.DFM}
 
 uses
-{$IFDEF DEBUG} CnDebug, {$ENDIF}
-{$IFDEF COMPILER6_UP}Variants, {$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWizOptions, CnWizUtils, CnWizHelperIntf,
   CnWizShareImages, CnProjectBackupSaveFrm, CnWizNotifier;
 
 const
+  csProjBackupFile = 'CustomBackup.txt'; // 自定义文件的存储
+
   csBackupSection = 'ProjectBackup';
   csRemovePath = 'RemovePath';
   csUsePassword = 'UsePassword';
@@ -337,24 +357,24 @@ begin
   FInfoList.Add(FileInfo);
 end;
 
+function TCnBackupProjectInfo.AddFile(const FileName: string): Boolean;
+var
+  FileInfo: TCnBackupFileInfo;
+begin
+  Result := False;
+  if not FileExists(FileName) then
+    Exit;
+
+  FileInfo := TCnBackupFileInfo.Create;
+  FileInfo.SetFileInfo(FileName);
+  Add(FileInfo);
+
+  Result := True;
+end;
+
 procedure TCnBackupProjectInfo.AddFiles(const FileName, UnitName, FormName: string);
 var
   TempFileName: string;
-
-  function AddFile(const F: string): Boolean;
-  var
-    FileInfo: TCnBackupFileInfo;
-  begin
-    Result := False;
-    if not FileExists(F) then
-      Exit;
-
-    FileInfo := TCnBackupFileInfo.Create;
-    FileInfo.SetFileInfo(F);
-    Add(FileInfo);
-
-    Result := True;
-  end;
 begin
   // 不备份 DCP/BPI/DLL 文件
   TempFileName := ExtractUpperFileExt(FileName);
@@ -398,6 +418,45 @@ end;
 procedure TCnBackupProjectInfo.Delete(Index: Integer);
 begin
   FInfoList.Delete(Index);
+end;
+
+procedure TCnBackupProjectInfo.LoadFromFile(const FileName: string);
+var
+  L: TStringList;
+  I: Integer;
+begin
+  if not FileExists(FileName) then
+    Exit;
+
+  L := TStringList.Create;
+  try
+    FInfoList.Clear;
+
+    L.LoadFromFile(FileName);
+    for I := 0 to L.Count - 1 do
+      AddFile(L[I]);
+  finally
+    L.Free;
+  end;
+end;
+
+procedure TCnBackupProjectInfo.SaveToFile(const FileName: string);
+var
+  L: TStringList;
+  I: Integer;
+begin
+  if Count <= 0 then
+    Exit;
+
+  L := TStringList.Create;
+  try
+    for I := 0 to Count - 1 do
+      L.Add(Items[I].FullFileName);
+
+    L.SaveToFile(FileName);
+  finally
+    L.Free;
+  end;
 end;
 
 { TCnBackupProjectList }
@@ -445,35 +504,39 @@ var
   hImgList: THandle;
   FileInfo: TSHFileInfo;
 begin
-  inherited;
   WizOptions.ResetToolbarWithLargeIcons(tlbMain);
 
   Screen.Cursor := crHourGlass;
   try
-    ProjectList := TCnBackupProjectList.Create;
-    CustomFiles := TCnBackupProjectInfo.Create;
+    FProjectList := TCnBackupProjectList.Create;
+    FCustomFiles := TCnBackupProjectInfo.Create;
 
     { 获取系统图标列表 }
     hImgList := SHGetFileInfo('C:\', 0, FileInfo, SizeOf(FileInfo),
       SHGFI_SYSICONINDEX or SHGFI_SMALLICON);
     SendMessage(lvFileView.Handle, LVM_SETIMAGELIST, LVSIL_SMALL, hImgList);
 
-    CreateProjectList;
-    InitComboBox;
-
     // 备份文件视图支持一自外部的文件拖放
     DragAcceptFiles(lvFileView.Handle, True);
     CnWizNotifierServices.AddApplicationMessageNotifier(OnAppMessage);
+
+    CnWizNotifierServices.ExecuteOnApplicationIdle(FirstInit);
   finally
     Screen.Cursor := crDefault;
   end;
 end;
 
+procedure TCnProjectBackupForm.FirstInit(Sender: TObject);
+begin
+  CreateProjectList;
+  InitComboBox;
+end;
+
 procedure TCnProjectBackupForm.FormDestroy(Sender: TObject);
 begin
   CnWizNotifierServices.RemoveApplicationMessageNotifier(OnAppMessage);
-  FreeAndNil(ProjectList);
-  FreeAndNil(CustomFiles);
+  FreeAndNil(FProjectList);
+  FreeAndNil(FCustomFiles);
   inherited;
 end;
 
@@ -511,6 +574,11 @@ begin
 
   FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+
+  FCustomFiles.LoadFromFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.LoadSettings Custom Files Count');
+{$ENDIF}
 end;
 
 procedure TCnProjectBackupForm.SaveSettings(Ini: TCustomIniFile);
@@ -550,6 +618,11 @@ begin
 
   Ini.WriteString(csBackupSection, csListViewWidth,
     GetListViewWidthString(lvFileView, GetFactorFromSizeEnlarge(Enlarge)));
+
+  FCustomFiles.SaveToFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.SaveSettings Custom Files Count');
+{$ENDIF}
 end;
 
 function TCnProjectBackupForm.GetHelpTopic: string;
@@ -623,7 +696,7 @@ begin
       FileInfo.SetFileInfo(DroppedFilename, True);
 
       if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
-        CustomFiles.Add(FileInfo)
+        FCustomFiles.Add(FileInfo)
       else
         FileInfo.Free;
     end;
@@ -663,7 +736,7 @@ begin
 
   FileName := CnOtaGetProjectGroupFileName;
   if FileExists(FileName) then
-    ProjectList.SetFileInfo(FileName);
+    FProjectList.SetFileInfo(FileName);
 
   ProjectInterfaceList := TInterfaceList.Create;
   try
@@ -683,7 +756,7 @@ begin
 
       ProjectInfo := TCnBackupProjectInfo.Create;
       ProjectInfo.SetFileInfo(IProject.FileName);
-      ProjectList.Add(ProjectInfo);
+      FProjectList.Add(ProjectInfo);
 
       for J := 0 to IProject.GetModuleFileCount - 1 do
       begin
@@ -723,9 +796,9 @@ begin
   cbbProjectList.Items.Add(SCnProjExtProjectAll);
   cbbProjectList.Items.Add(SCnProjExtCurrentProject);
 
-  for I := 0 to ProjectList.Count - 1 do
+  for I := 0 to FProjectList.Count - 1 do
   begin
-    ProjectInfo := ProjectList.Items[I];
+    ProjectInfo := FProjectList.Items[I];
     cbbProjectList.Items.Add(ProjectInfo.Name);
   end;
 
@@ -804,9 +877,9 @@ begin
       else
         FCurrentName := CnOtaGetCurrentProjectFileName;
 
-      AddBackupFile(ProjectList.Name, ProjectList);
-      for I := 0 to ProjectList.Count - 1 do
-        AddBackupFiles(ProjectList.Items[I]);
+      AddBackupFile(FProjectList.Name, FProjectList);
+      for I := 0 to FProjectList.Count - 1 do
+        AddBackupFiles(FProjectList.Items[I]);
     end
     else
     begin
@@ -820,18 +893,21 @@ begin
         FCurrentName := IProject.FileName;
       end;
 
-      for I := 0 to ProjectList.Count - 1 do
+      for I := 0 to FProjectList.Count - 1 do
       begin
-        if (CompareText(ProjectList.Items[I].Name, ProjectName) = 0) then
+        if (CompareText(FProjectList.Items[I].Name, ProjectName) = 0) then
         begin
-          FCurrentName := ProjectList.Items[I].GetFullFileName;
-          AddBackupFiles(ProjectList.Items[I]);
+          FCurrentName := FProjectList.Items[I].GetFullFileName;
+          AddBackupFiles(FProjectList.Items[I]);
         end;
       end;
     end;
 
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(FCustomFiles.Count, 'UpdateBackupFileView to Add Custom Files Count');
+{$ENDIF}
     // 添加用户自选备份文件组
-    AddBackupFiles(CustomFiles);
+    AddBackupFiles(FCustomFiles);
   finally
     lvFileView.Items.EndUpdate;
   end;
@@ -983,9 +1059,9 @@ begin
           ListFileName := MakePath(GetWindowsTempPath) + 'BackupList.txt';
           List := TStringList.Create;
           try
-            for I := 0 to Self.lvFileView.Items.Count - 1 do
-              if Self.lvFileView.Items[I].Data <> nil then
-                List.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
+            for I := 0 to lvFileView.Items.Count - 1 do
+              if lvFileView.Items[I].Data <> nil then
+                List.Add(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName);
 
             List.SaveToFile(ListFileName);
           finally
@@ -1026,9 +1102,9 @@ begin
 
               if FRemovePath then
               begin
-                for I := 0 to Self.lvFileView.Items.Count - 1 do
-                  if Self.lvFileView.Items[I].Data <> nil then
-                    CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName), nil);
+                for I := 0 to lvFileView.Items.Count - 1 do
+                  if lvFileView.Items[I].Data <> nil then
+                    CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName), nil);
               end
               else
               begin
@@ -1036,9 +1112,9 @@ begin
                 SrcList := TStringList.Create;
                 ArcList := TStringList.Create;
                 try
-                  for I := 0 to Self.lvFileView.Items.Count - 1 do
-                    if Self.lvFileView.Items[I].Data <> nil then
-                      SrcList.Add(TCnBackupFileInfo(Self.lvFileView.Items[I].Data).FullFileName);
+                  for I := 0 to lvFileView.Items.Count - 1 do
+                    if lvFileView.Items[I].Data <> nil then
+                      SrcList.Add(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName);
 
                   // 删除掉公共目录头后，添加进去
                   if CombineCommonPath(SrcList, ArcList) then
@@ -1113,28 +1189,28 @@ var
   Project: TCnBackupProjectInfo;
   Found: Boolean;
 begin
-  if Self.lvFileView.SelCount > 0 then
+  if lvFileView.SelCount > 0 then
   begin
-    for I := Self.lvFileView.Items.Count - 1 downto 0 do
+    for I := lvFileView.Items.Count - 1 downto 0 do
     begin
-      if not Self.lvFileView.Items[I].Selected then
+      if not lvFileView.Items[I].Selected then
         Continue;
 
-      Info := Self.lvFileView.Items[I].Data;
+      Info := lvFileView.Items[I].Data;
       if Info <> nil then
       begin
         Found := False;
-        for J := Self.ProjectList.Count - 1 downto 0 do
+        for J := FProjectList.Count - 1 downto 0 do
         begin
-          if ProjectList.Items[J] = Info then // 要删的是工程文件
+          if FProjectList.Items[J] = Info then // 要删的是工程文件
           begin
-            ProjectList.Items[J].Hidden := True;
+            FProjectList.Items[J].Hidden := True;
             Found := True;
             Break;
           end
           else // 找工程中的子文件
           begin
-            Project := ProjectList.Items[J];
+            Project := FProjectList.Items[J];
             for K := Project.Count - 1 downto 0 do
             begin
               if Project.Items[K] = Info then
@@ -1148,15 +1224,18 @@ begin
         end;
 
         if not Found then
-          for J := Self.CustomFiles.Count - 1 downto 0 do
-            if Self.CustomFiles.Items[J] = Info then
+        begin
+          for J := FCustomFiles.Count - 1 downto 0 do
+          begin
+            if FCustomFiles.Items[J] = Info then
             begin
-              CustomFiles.Delete(J);
+              FCustomFiles.Delete(J);
               Break;
             end;
-
+          end;
+        end;
       end;
-      Self.lvFileView.Items[I].Delete;
+      lvFileView.Items[I].Delete;
     end;
   end;
 end;
@@ -1166,15 +1245,15 @@ var
   I: Integer;
   FileInfo: TCnBackupFileInfo;
 begin
-  if Self.dlgOpen.Execute then
+  if dlgOpen.Execute then
   begin
-    for I := 0 to Self.dlgOpen.Files.Count - 1 do
+    for I := 0 to dlgOpen.Files.Count - 1 do
     begin
       FileInfo := TCnBackupFileInfo.Create;
-      FileInfo.SetFileInfo(Self.dlgOpen.Files[I], True);
+      FileInfo.SetFileInfo(dlgOpen.Files[I], True);
 
       if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
-        CustomFiles.Add(FileInfo)
+        FCustomFiles.Add(FileInfo)
       else
         FileInfo.Free;
     end;
@@ -1247,7 +1326,7 @@ procedure TCnProjectBackupForm.lvFileViewKeyDown(Sender: TObject;
   var Key: Word; Shift: TShiftState);
 begin
   if (Key = VK_DELETE) and (Shift = []) then
-    Self.actRemoveFile.Execute;
+    actRemoveFile.Execute;
 end;
 
 procedure TCnProjectBackupForm.FormShow(Sender: TObject);
@@ -1281,7 +1360,7 @@ begin
 
     if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
     begin
-      CustomFiles.Add(FileInfo);
+      FCustomFiles.Add(FileInfo);
       Inc(Cnt);
     end
     else
@@ -1304,7 +1383,7 @@ begin
 
       if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
       begin
-        CustomFiles.Add(FileInfo);
+        FCustomFiles.Add(FileInfo);
         Inc(Cnt);
       end
       else
@@ -1339,7 +1418,7 @@ begin
 
       if AddBackupFile(SCnProjExtCustomBackupFile, FileInfo) then
       begin
-        CustomFiles.Add(FileInfo);
+        FCustomFiles.Add(FileInfo);
         Inc(Cnt);
       end
       else
