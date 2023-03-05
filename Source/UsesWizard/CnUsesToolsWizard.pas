@@ -1829,7 +1829,7 @@ begin
           for T := 0 to Info.ExportedNames.Count - 1 do
           begin
             Decl := TDCURec(Info.ExportedNames.Objects[T]);
-            S := Decl.Name^.GetStr;
+            S := string(Decl.Name^.GetStr);
             if (S <> '') and (Decl.GetSecKind <> skNone) then
             begin
               S := ExtractSymbol(S);

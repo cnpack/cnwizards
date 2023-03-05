@@ -39,7 +39,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  SysUtils, Classes, TypInfo, mPasLex, CnPasWideLex, CnTree, CnContainers;
+  SysUtils, Classes, TypInfo, mPasLex, CnPasWideLex, CnTree, CnContainers, CnStrings;
 
 type
   ECnPascalAstException = class(Exception);
@@ -229,6 +229,12 @@ type
     FNoSpaceBefore: Boolean;
   public
     function GetPascalCode: string;
+    function GetCppCode: string;
+
+    function ConvertString: string;
+    function ConvertNumber: string;
+
+    function ConvertQualId: string;
 
     property NodeType: TCnPasNodeType read FNodeType write FNodeType;
     {* 语法树节点类型}
@@ -245,6 +251,9 @@ type
   TCnPasAstTree = class(TCnTree)
   public
     function ReConstructPascalCode: string;
+
+    function ConvertToHppCode: string;
+    function ConvertToCppCode: string;
   end;
 
   TCnPasAstGenerator = class
@@ -1038,9 +1047,9 @@ begin
     Exit;
   end;
 
-  if FLex.TokenID in CanBeIdentifierTokens then // 其他可以做变量名的关键字
+  if FLex.TokenID in CanBeIdentifierTokens then  // 其他可以做变量名的关键字
   begin
-    T := MatchCreateLeafAndStep(FLex.TokenID);   // 头一个变量名
+    T := MatchCreateLeafAndStep(tkIdentifier);   // 头一个变量名，指明是 tkIdentifier，抹杀掉其他关键字
     if FLex.TokenID <> tkPoint then              // 后面没点就退出
       Exit;
 
@@ -3339,12 +3348,142 @@ end;
 
 { TCnPasAstTree }
 
+function TCnPasAstTree.ConvertToCppCode: string;
+begin
+  // 把 implementation 部分整成 cpp 文件
+end;
+
+function TCnPasAstTree.ConvertToHppCode: string;
+begin
+  // 把 interface 部分整成 h 文件
+end;
+
 function TCnPasAstTree.ReConstructPascalCode: string;
 begin
   Result := (FRoot as TCnPasAstLeaf).GetPascalCode;
 end;
 
 { TCnPasAstLeaf }
+
+function TCnPasAstLeaf.ConvertNumber: string;
+begin
+  Result := Text;
+end;
+
+function TCnPasAstLeaf.ConvertQualId: string;
+begin
+
+end;
+
+function TCnPasAstLeaf.ConvertString: string;
+var
+  P: PChar;
+  I: Integer;
+  SB: TCnStringBuilder;
+begin
+  // 扫描内部单引号和#等，转换成 C 风格的字符串输出
+  P := @Text[1];
+  I := 0;
+  SB := TCnStringBuilder.Create;
+
+  try
+    while P[I] <> #0 do
+    begin
+      case P[I] of
+        '''':
+          begin
+            // 单引号
+            if P[I + 1] = '''' then // 连续两个单引号代表一个单引号
+            begin
+              SB.Append('''');
+              Inc(I);
+            end;
+          end;
+        '#':
+          begin
+            // # 号
+            SB.Append('\');
+            if P[I + 1] = '$' then
+            begin
+              SB.Append('0x');
+              Inc(I);
+            end;
+          end;
+        '"':  // 双引号，C 字符串中要转义
+          begin
+            SB.Append('\');
+            SB.Append('"');
+          end;
+      else
+        SB.Append(P[I]);
+      end;
+      Inc(I);
+    end;
+
+    SB.Append('"');
+    Result := '"' + SB.ToString;
+  finally
+    SB.Free;
+  end;
+end;
+
+function TCnPasAstLeaf.GetCppCode: string;
+begin
+  case FTokenKind of // 基础数据类型和基础关键字
+    tkString, tkAsciiChar:
+      begin
+        Result := ConvertString;
+      end;
+    tkNumber, tkFloat:
+      begin
+        Result := ConvertNumber;
+      end;
+    tkPlus, tkMinus, tkStar, tkSlash, tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose, tkPoint:
+      Result := Text; // 四则运算符号，小括号、中括号不变
+    tkGreater, tkGreaterEqual, tkLower, tkLowerEqual:
+      Result := Text; // 这四个比较符号不变
+    tkNotEqual:
+      Result := '!=';  // 不等于
+    tkEqual:
+      Result := '==';
+    tkDiv:
+      Result := '\';
+    tkMod:
+      Result := '%';
+    tkShl:
+      Result := '<<';
+    tkShr:
+      Result := '>>';
+    tkAssign:
+      Result := '=';
+    tkAnd:
+      begin
+
+      end;
+    tkOr:
+      begin
+
+      end;
+    tkNot:
+      begin
+
+      end;
+    tkXor:
+      Result := '^';
+    tkNil:
+      Result := 'NULL';
+  end;
+
+  if Result <> '' then
+    Exit;
+
+  case FNodeType of
+    cntQualId:
+      begin
+        Result := ConvertQualId;
+      end;
+  end;
+end;
 
 function TCnPasAstLeaf.GetPascalCode: string;
 var

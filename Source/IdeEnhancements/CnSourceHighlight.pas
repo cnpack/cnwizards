@@ -1056,7 +1056,7 @@ begin
     Exit;
 
   ALine := Copy(Utf8Text, 1, Utf8Col - 1);
-  ULine := Utf8Encode(ALine);
+  ULine := string(Utf8Encode(ALine));
   Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
 end;
 
