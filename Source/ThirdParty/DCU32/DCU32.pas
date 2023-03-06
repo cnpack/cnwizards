@@ -2458,6 +2458,12 @@ begin
           hDef2 := ReadUindex;
           V := ReadUindex;
         end;
+      $08:  // 08 Add by LiuXiao to Process 11.3 DCUs for new string such as comment after ///
+        begin
+          Result := ReadUIndex;
+          V := ReadUIndex;
+          SkipBlock(V);
+        end;
       $09:
         begin
           Result := ReadUindex;
