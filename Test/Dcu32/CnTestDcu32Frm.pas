@@ -248,13 +248,18 @@ begin
     end;
 
     ALines.Add('===Export Names:');
-    for I := 0 to Info.ExportedNames.Count - 1 do
+    if Info.ExportedNames = nil then
+      ALines.Add('<Exception>')
+    else
     begin
-      Decl := TDCURec(Info.ExportedNames.Objects[I]);
-      if Decl.GetSecKind <> skNone then
+      for I := 0 to Info.ExportedNames.Count - 1 do
       begin
-        S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
-        ALines.Add(ExtractSymbol(Decl.Name^.GetStr) + ' | ' + Decl.Name^.GetStr + ' | ' + S);
+        Decl := TDCURec(Info.ExportedNames.Objects[I]);
+        if Decl.GetSecKind <> skNone then
+        begin
+          S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+          ALines.Add(ExtractSymbol(Decl.Name^.GetStr) + ' | ' + Decl.Name^.GetStr + ' | ' + S);
+        end;
       end;
     end;
     Info.Free;

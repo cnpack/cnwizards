@@ -2627,6 +2627,12 @@ begin
           V1 := ReadUIndex;
           V2 := ReadUIndex;
         end;
+      $16:  // 16 Add by LiuXiao to Process 11.3 DCUs for new info
+        begin
+          Result := ReadUIndex;
+          V := ReadUIndex;
+          SkipBlock(V);
+        end;
     else
       break;
     end;

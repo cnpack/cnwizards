@@ -1813,6 +1813,9 @@ begin
       H := -1;
       for I := 0 to FUnitNames.Count - 1 do
       begin
+{$IFDEF DEBUG}
+//     CnDebugger.LogMsg(FUnitNames[I]);
+{$ENDIF}
         Info := TCnUnitUsesInfo.Create(FUnitNames[I]);
 
         T := (100 * I) div FUnitNames.Count;
@@ -1822,37 +1825,43 @@ begin
           UpdateProgress(H);
         end;
 
-{$IFDEF DEBUG}
-//        CnDebugger.LogMsg(FUnitNames[I]);
-{$ENDIF}
         try
-          for T := 0 to Info.ExportedNames.Count - 1 do
+          if Info.ExportedNames <> nil then
           begin
-            Decl := TDCURec(Info.ExportedNames.Objects[T]);
-            S := string(Decl.Name^.GetStr);
-            if (S <> '') and (Decl.GetSecKind <> skNone) then
+            for T := 0 to Info.ExportedNames.Count - 1 do
             begin
-              S := ExtractSymbol(S);
-              if S = '' then
-                Continue;
-
-              // 针对 DataList 里的 S 与 FUnitNames[I]，得去重
-              if FUnitsMap.Find(S, V) then
+              Decl := TDCURec(Info.ExportedNames.Objects[T]);
+              S := string(Decl.Name^.GetStr);
+              if (S <> '') and (Decl.GetSecKind <> skNone) then
               begin
-                if V = FUnitNames[I] then
-                begin
-                  Decl := Decl.Next;
+                S := ExtractSymbol(S);
+                if S = '' then
                   Continue;
-                end;
-              end;
-              FUnitsMap.Add(S, FUnitNames[I]);
 
-              IdentPair := TCnIdentUnitInfo.Create;
-              IdentPair.Text := S;
-              IdentPair.FullNameWithPath := FUnitNames[I];
-              IdentPair.ImageIndex := 78; // Units
-              DataList.AddObject(S, IdentPair);
-            end;
+                // 针对 DataList 里的 S 与 FUnitNames[I]，得去重
+                if FUnitsMap.Find(S, V) then
+                begin
+                  if V = FUnitNames[I] then
+                  begin
+                    Decl := Decl.Next;
+                    Continue;
+                  end;
+                end;
+                FUnitsMap.Add(S, FUnitNames[I]);
+
+                IdentPair := TCnIdentUnitInfo.Create;
+                IdentPair.Text := S;
+                IdentPair.FullNameWithPath := FUnitNames[I];
+                IdentPair.ImageIndex := 78; // Units
+                DataList.AddObject(S, IdentPair);
+              end;
+            end
+          end
+          else
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogMsgError('Error Parsing: ' + FUnitNames[I]);
+{$ENDIF}
           end;
         finally
           Info.Free;
