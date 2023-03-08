@@ -3861,7 +3861,7 @@ begin
             end;
           end;
         end;
-      tkInterface:
+      tkInterface, tkProgram:
         begin
           MeetIntf := True;
           InIntf := True;

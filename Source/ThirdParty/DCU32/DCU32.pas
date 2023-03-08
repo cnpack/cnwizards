@@ -973,7 +973,7 @@ begin
           end;
         drConstAddInfo:
           begin
-            if not IsMSIL then
+            if (not IsMSIL) and not (Ver >= verD_110A) then // LiuXiao: D11.3 other info packed after uses unit name
               break;
             if hImp <> 0 then
               DCUErrorFmt('ConstAddInfo encountered for %s in subrecord #%d', [UseName, hImp]);
