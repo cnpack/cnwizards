@@ -3443,6 +3443,7 @@ SCnProjExtBackupDllMissCorrupt=ZIP DLL fehlt oder ist beschädigt. Bitte neu ins
 SCnProjExtBackupErrorCompressor=Externer Packer existiert nicht. Bitte wählen Sie einen aus.
 SCnProjExtBackupSuccFmt=Datei gespeichert in %s
 SCnProjExtBackupFail=Sichern der Dateien fehlgeschlagen!
+SCnProjExtBackupLastFmt=Letzte Sicherung: %s - %s
 SCnProjExtDelTempCaption=&Temporäre Dateien löschen...
 SCnProjExtDelTempHint=Temporäre Dateien des Projektes löschen
 SCnProjExtProjectAll=<All>

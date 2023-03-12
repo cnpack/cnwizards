@@ -3443,6 +3443,7 @@ SCnProjExtBackupDllMissCorrupt=ZIP-библиотека отсутствует �
 SCnProjExtBackupErrorCompressor=Внешний архиватор НЕ существует. Пожалуйста, выберите один.
 SCnProjExtBackupSuccFmt=Файлы сохранены в %s
 SCnProjExtBackupFail=Резервное копирование завершилось с ошибкой!
+SCnProjExtBackupLastFmt=Последнее резервное копирование: %s - %s
 SCnProjExtDelTempCaption=Удалить временные файлы...
 SCnProjExtDelTempHint=Удалить временные файлы проекта
 SCnProjExtProjectAll=<Все>

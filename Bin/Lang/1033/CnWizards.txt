@@ -3443,6 +3443,7 @@ SCnProjExtBackupDllMissCorrupt=ZIP Library Missing or Corrupted. Please ReInstal
 SCnProjExtBackupErrorCompressor=External Compressor NOT Exists. Please Select One.
 SCnProjExtBackupSuccFmt=File Saved to %s
 SCnProjExtBackupFail=Backup Files Failed!
+SCnProjExtBackupLastFmt=Last Backup: %s - %s
 SCnProjExtDelTempCaption=&Clean Temporary Files...
 SCnProjExtDelTempHint=Clean Temporary Files in Project
 SCnProjExtProjectAll=<All>

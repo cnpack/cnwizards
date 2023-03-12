@@ -3443,6 +3443,7 @@ SCnProjExtBackupDllMissCorrupt=Bibliothèque ZIP manquante ou corrompue. Veuille
 SCnProjExtBackupErrorCompressor=Le compresseur externe n'existe PAS. S'il vous plait sélectionner en un.
 SCnProjExtBackupSuccFmt=Fichier enregistré dans %s
 SCnProjExtBackupFail=Échec des fichiers de sauvegarde!
+SCnProjExtBackupLastFmt=Dernière sauvegarde: %s - %s
 SCnProjExtDelTempCaption=&Nettoyer les fichiers temporaires...
 SCnProjExtDelTempHint=Nettoyer les fichiers temporaires dans Project
 SCnProjExtProjectAll=<Tout>
