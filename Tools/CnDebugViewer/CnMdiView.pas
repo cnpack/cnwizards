@@ -1349,7 +1349,7 @@ begin
   begin
     Visible := False;
     try
-      Width1 := Width - Header.Columns[0].Width - 20;
+      Width1 := Width - Header.Columns[0].Width - 24;
       if not VertScrollBar.Visible then
         Width1 := Width1 - VertScrollBar.Size;
       for I := Header.Columns.Count - 1 downto 2 do
