@@ -49,7 +49,7 @@ uses
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
 {$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, {$ENDIF}
-  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
+  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang, CnIDEVersion,
   CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
 
 type
@@ -197,6 +197,8 @@ type
     FListViewWidthStr: string;
     FListViewWidthOldStr: string;
 {$ENDIF}
+    FColumnWidthManuallyChanged: Boolean;
+    FOldListViewWndProc: TWndMethod;
     function GetMatchAny: Boolean;
     procedure SetMatchAny(const Value: Boolean);
 
@@ -210,6 +212,7 @@ type
     procedure FirstUpdate(Sender: TObject);
     procedure ChangeIconToIDEImageList;
 {$ENDIF}
+    procedure ListViewWindowProc(var Message: TMessage);
   protected
     FRegExpr: TRegExpr;
     NeedInitProjectControls: Boolean;
@@ -344,6 +347,26 @@ end;
 
 { TCnProjectViewBaseForm }
 
+procedure TCnProjectViewBaseForm.ListViewWindowProc(var Message: TMessage);
+var
+  NM: TWMNotify;
+begin
+  FOldListViewWndProc(Message);
+  if Message.Msg = WM_NOTIFY then
+  begin
+    NM := TWMNotify(Message);
+    case NM.NMHdr^.code of
+      HDN_ENDTRACK, HDN_BEGINTRACK, HDN_TRACK:
+      begin
+        FColumnWidthManuallyChanged := True;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('%s ListView Column Width Manually Changed.', [ClassName]);
+{$ENDIF}
+      end;
+    end;
+  end;
+end;
+
 procedure TCnProjectViewBaseForm.FormCreate(Sender: TObject);
 var
   OldC: TCursor;
@@ -351,6 +374,12 @@ begin
   OldC := Screen.Cursor;
   Screen.Cursor := crHourGlass;
   try
+    if CnIsDelphi11GEDot3 then
+    begin
+      FOldListViewWndProc := lvList.WindowProc;
+      lvList.WindowProc := ListViewWindowProc;
+    end;
+
     FRegExpr := TRegExpr.Create;
     FRegExpr.ModifierI := True;
     FUpArrow := TBitmap.Create;
@@ -728,9 +757,19 @@ begin
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
 {$IFNDEF STAND_ALONE}
-    S := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
-    if S <> FListViewWidthOldStr then // 只变化了才保存
-      WriteString(aSection, csListViewWidth, S);
+    if CnIsDelphi11GEDot3 then
+    begin
+      S := GetListViewWidthString2(lvList, GetFactorFromSizeEnlarge(Enlarge)); // 获取正确的宽度值
+      if FColumnWidthManuallyChanged and (S <> FListViewWidthOldStr) then // 有宽度 Bug 存在的情况下，只手工更改过且变化了才保存
+        WriteString(aSection, csListViewWidth, S);
+    end
+    else
+    begin
+      S := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
+
+      if S <> FListViewWidthOldStr then // 只变化了才保存
+        WriteString(aSection, csListViewWidth, S);
+    end;
 {$ENDIF}
   finally
     Free;
