@@ -1070,6 +1070,7 @@ begin
   TranslateStr(SCnProjExtBackupErrorCompressor, 'SCnProjExtBackupErrorCompressor');
   TranslateStr(SCnProjExtBackupSuccFmt, 'SCnProjExtBackupSuccFmt');
   TranslateStr(SCnProjExtBackupFail, 'SCnProjExtBackupFail');
+  TranslateStr(SCnProjExtBackupLastFmt, 'SCnProjExtBackupLastFmt');
 
   TranslateStr(SCnProjExtDelTempCaption, 'SCnProjExtDelTempCaption');
   TranslateStr(SCnProjExtDelTempHint, 'SCnProjExtDelTempHint');

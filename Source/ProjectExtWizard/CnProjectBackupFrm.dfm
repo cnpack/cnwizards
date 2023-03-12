@@ -1,6 +1,6 @@
 inherited CnProjectBackupForm: TCnProjectBackupForm
-  Left = 433
-  Top = 392
+  Left = 385
+  Top = 274
   AutoScroll = False
   Caption = 'Project Backup'
   ClientHeight = 444
@@ -212,6 +212,12 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
       Width = 38
       Height = 13
       Caption = '&Project:'
+    end
+    object lblLast: TLabel
+      Left = 296
+      Top = 7
+      Width = 3
+      Height = 13
     end
     object cbbProjectList: TComboBox
       Left = 82

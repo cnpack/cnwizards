@@ -162,6 +162,7 @@ type
     actAddDir: TAction;
     btnAddOpened: TToolButton;
     btnAddDir: TToolButton;
+    lblLast: TLabel;
     procedure actCloseExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure cbbProjectListChange(Sender: TObject);
@@ -218,9 +219,12 @@ type
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   protected
+    FLastBackupFile: string;
+    FLastBackupTime: TDateTime;
     procedure FirstInit(Sender: TObject);
     function GetHelpTopic: string; override;
   public
+    procedure UpdateLast;
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
   end;
@@ -270,6 +274,9 @@ const
   csDialogWidth = 'DialogWidth';
   csDialogHeight = 'DialogHeight';
 
+  csLastBackupFile = 'LastBackupFile';
+  csLastBackupTime = 'LastBackupTime';
+
   csCmdCompress = '<compress.exe>';
   csCmdBackupFile = '<BackupFile>';
   csVersionInfo = '<VersionInfo>';
@@ -287,6 +294,7 @@ begin
   try
     ShowHint := WizOptions.ShowHint;
     LoadSettings(Ini);
+    UpdateLast;
     Result := ShowModal = mrOK;
     SaveSettings(Ini);
   finally
@@ -572,6 +580,9 @@ begin
   FDialogWidth := Ini.ReadInteger(csBackupSection, csDialogWidth, 0);
   FDialogHeight := Ini.ReadInteger(csBackupSection, csDialogHeight, 0);
 
+  FLastBackupFile := Ini.ReadString(csBackupSection, csLastBackupFile, '');
+  FLastBackupTime := Ini.ReadDateTime(csBackupSection, csLastBackupTime, 0.0);
+
   FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 
@@ -613,8 +624,15 @@ begin
 
   Ini.WriteInteger(csBackupSection, csWidth, Width);
   Ini.WriteInteger(csBackupSection, csHeight, Height);
+
   Ini.WriteInteger(csBackupSection, csDialogWidth, FDialogWidth);
   Ini.WriteInteger(csBackupSection, csDialogHeight, FDialogHeight);
+
+  if FLastBackupFile <> '' then
+  begin
+    Ini.WriteString(csBackupSection, csLastBackupFile, FLastBackupFile);
+    Ini.WriteDateTime(csBackupSection, csLastBackupTime, FLastBackupTime);
+  end;
 
   Ini.WriteString(csBackupSection, csListViewWidth,
     GetListViewWidthString(lvFileView, GetFactorFromSizeEnlarge(Enlarge)));
@@ -1142,6 +1160,10 @@ begin
               if CnWizZipSaveAndClose then
               begin
                 InfoDlg(Format(SCnProjExtBackupSuccFmt, [SaveFileName]));
+                FLastBackupFile := ExtractFileName(SaveFileName);
+                FLastBackupTime := Now;
+                UpdateLast;
+
                 Close;
               end;
             except
@@ -1441,6 +1463,15 @@ begin
   Ext := ExtractUpperFileExt(FileName);
   if Pos('.~', Ext) <= 0 then  // 不收集带 ~ 的临时文件
     FileList.Add(FileName);
+end;
+
+procedure TCnProjectBackupForm.UpdateLast;
+begin
+  if FLastBackupFile <> '' then
+    lblLast.Caption := Format(SCnProjExtBackupLastFmt,
+      [FLastBackupFile, DateTimeToStr(FLastBackupTime)])
+  else
+    lblLast.Caption := '';
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}

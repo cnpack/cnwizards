@@ -1321,6 +1321,8 @@ var
   SCnProjExtBackupErrorCompressor: string = 'External Compressor NOT Exists. Please Select One.';
   SCnProjExtBackupSuccFmt: string = 'File Saved to %s';
   SCnProjExtBackupFail: string = 'Backup Files Failed!';
+  SCnProjExtBackupLastFmt: string = 'Last Backup: %s - %s';
+
   SCnProjExtDelTempCaption: string = '&Clean Temporary Files...';
   SCnProjExtDelTempHint: string = 'Clean Temporary Files in Project';
   SCnProjExtProjectAll: string = '<All>';
