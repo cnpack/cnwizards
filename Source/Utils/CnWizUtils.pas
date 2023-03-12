@@ -312,21 +312,25 @@ type
 function CnGetComponentText(Component: TComponent): string;
 {* 返回组件的标题}
 function CnGetComponentAction(Component: TComponent): TBasicAction;
-{* 取控件关联的 Action }
+{* 取控件关联的 Action}
 procedure RemoveListViewSubImages(ListView: TListView); overload;
-{* 更新 ListView 控件，去除子项的 SubItemImages }
+{* 更新 ListView 控件，去除子项的 SubItemImages}
 procedure RemoveListViewSubImages(ListItem: TListItem); overload;
-{* 更新 ListItem，去除子项的 SubItemImages }
+{* 更新 ListItem，去除子项的 SubItemImages}
 function GetListViewWidthString(AListView: TListView; DivFactor: Single = 1.0): string;
-{* 转换 ListView 子项宽度为字符串，允许设缩小倍数 }
+{* 转换 ListView 子项宽度为字符串，允许设缩小倍数}
 procedure SetListViewWidthString(AListView: TListView; const Text: string; MulFactor: Single = 1.0);
-{* 转换字符串为 ListView 子项宽度，允许设放大倍数 }
+{* 转换字符串为 ListView 子项宽度，允许设放大倍数}
 function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
-{* ListView 当前选择项是否允许上移 }
+{* ListView 当前选择项是否允许上移}
 function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
-{* ListView 当前选择项是否允许下移 }
+{* ListView 当前选择项是否允许下移}
 procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
-{* 修改 ListView 当前选择项 }
+{* 修改 ListView 当前选择项}
+
+function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
+{* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 带来的宽度误乘以 HDPI 放大倍数的 Bug}
+
 
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
@@ -1235,7 +1239,7 @@ uses
   Math, CnWizOptions, CnWizEditFiler, CnWizScaler, CnGraphUtils
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut
+  CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut, CnIDEVersion
 {$ENDIF}
   ;
 
@@ -2715,7 +2719,7 @@ var
 begin
   Lines := TStringList.Create;
   try
-    if Abs(DivFactor - 1.0) < 0.001 then
+    if SingleEqual(DivFactor, 1.0) then
       for I := 0 to AListView.Columns.Count - 1 do
         Lines.Add(IntToStr(AListView.Columns[I].Width))
     else
@@ -2728,6 +2732,41 @@ begin
   end;
 end;
 
+function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
+{$IFDEF IDE_SUPPORT_HDPI}
+var
+  I: Integer;
+  Lines: TStringList;
+  HdpiFactor: Single;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  if CnIsDelphi11GEDot3 then
+  begin
+    Lines := TStringList.Create;
+
+    HdpiFactor := AListView.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
+
+    try
+      if SingleEqual(DivFactor, 1.0) then
+        for I := 0 to AListView.Columns.Count - 1 do
+          Lines.Add(IntToStr(Round(AListView.Columns[I].Width / HdpiFactor)))
+      else
+        for I := 0 to AListView.Columns.Count - 1 do
+          Lines.Add(IntToStr(Round(AListView.Columns[I].Width / (HdpiFactor * DivFactor))));
+
+      Result := Lines.CommaText;
+    finally
+      Lines.Free;
+    end;
+  end
+  else
+    Result := GetListViewWidthString(AListView, DivFactor);
+{$ELSE}
+  Result := GetListViewWidthString(AListView, DivFactor);
+{$ENDIF}
+end;
+
 {* 转换字符串为 ListView 子项宽度 }
 procedure SetListViewWidthString(AListView: TListView; const Text: string;
   MulFactor: Single);
@@ -2738,7 +2777,7 @@ begin
   Lines := TStringList.Create;
   try
     Lines.CommaText := Text;
-    if Abs(MulFactor - 1.0) < 0.001 then
+    if SingleEqual(MulFactor, 1.0) then
       for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
         AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width)
     else
