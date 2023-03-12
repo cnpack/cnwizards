@@ -382,10 +382,10 @@ procedure TCnProjectViewBaseForm.FormShow(Sender: TObject);
 begin
   UpdateListView;
   SelectOpenedItem;
-{$IFDEF BDS}
-  SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
-{$ENDIF}
 {$IFNDEF STAND_ALONE}
+  {$IFDEF BDS}
+  SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+  {$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(FirstUpdate);
 {$ENDIF}
 end;
@@ -1334,9 +1334,15 @@ begin
     if (Item.ImageIndex >= 0) and (LV.SmallImages <> nil) then
     begin
 {$IFDEF IDE_SUPPORT_HDPI}
+  {$IFDEF STAND_ALONE}
+      // TODO: 拉伸绘制
+      LV.SmallImages.Draw(Bmp.Canvas, csDrawIconMargin,
+        (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
+  {$ELSE}
       // TODO: 拉伸绘制
       LV.SmallImages.Draw(Bmp.Canvas, IdeGetScaledPixelsFromOrigin(csDrawIconMargin, LV),
         (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);
+  {$ENDIF}
 {$ELSE}
       // 图标在竖直方向上在 Bmp 中居中
       LV.SmallImages.Draw(Bmp.Canvas, csDrawIconMargin, (Bmp.Height - LV.SmallImages.Height) div 2, Item.ImageIndex);

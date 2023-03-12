@@ -425,11 +425,11 @@ type
     procedure ProcComboDropDown(Sender: TObject);
     procedure DoIdleComboChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
-{$ENDIF}
-    procedure ClearObjectStrings(ObjectList: TStringList);
 {$IFDEF IDE_SUPPORT_THEMING}
     procedure DoThemeChange(Sender: TObject);
 {$ENDIF}
+{$ENDIF}
+    procedure ClearObjectStrings(ObjectList: TStringList);
   protected
 {$IFNDEF STAND_ALONE}
     procedure SetActive(Value: Boolean); override;
@@ -4408,8 +4408,6 @@ begin
 {$ENDIF}
 end;
 
-{$ENDIF}
-
 {$IFDEF IDE_SUPPORT_THEMING}
 
 procedure TCnProcListWizard.DoThemeChange(Sender: TObject);
@@ -4440,6 +4438,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
