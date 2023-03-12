@@ -38,7 +38,9 @@ unit CnIDEVersion;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2020.05.27 by liuxiao
+* 修改记录：2022.03.12 by liuxiao
+*               持续移植，到 Delphi 11.3 Alexandria
+*           2020.05.27 by liuxiao
 *               持续移植，到 Delphi 10.4 Sydney
 *           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
@@ -66,12 +68,17 @@ function IsDelphi10Dot2GEDot2: Boolean;
 function IsDelphi10Dot4GEDot2: Boolean;
 {* 返回是否 Delphi 10.4.2 或 10.4 的更高的子版本，用于某些古怪判断}
 
+function IsDelphi11GEDot3: Boolean;
+{* 返回是否 Delphi 11.3 或 11 的更高的子版本，用于某些古怪判断}
+
 var
   CnIdeVersionDetected: Boolean = False;
   CnIdeVersionIsLatest: Boolean = False;
 
   CnIsDelphi10Dot2GEDot2: Boolean = False;
   CnIsDelphi10Dot4GEDot2: Boolean = False;
+
+  CnIsDelphi11GEDot3: Boolean = False;
 
 implementation
 
@@ -416,6 +423,23 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
+function IsDelphi11GEDot3: Boolean;
+{$IFDEF DELPHI110_ALEXANDRIA}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 28; Minor: 0; Release: 47991; Build: 2819); // 11.3
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI110_ALEXANDRIA}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide280.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
+end;
+
 function IsIdeVersionLatest: Boolean;
 begin
   if CnIdeVersionDetected then
@@ -533,6 +557,8 @@ begin
   // 初始化一些额外的变量
   CnIsDelphi10Dot2GEDot2 := IsDelphi10Dot2GEDot2;
   CnIsDelphi10Dot4GEDot2 := IsDelphi10Dot4GEDot2;
+
+  CnIsDelphi11GEDot3 := IsDelphi11GEDot3;
 end;
 
 function GetIdeExeVersion: string;
