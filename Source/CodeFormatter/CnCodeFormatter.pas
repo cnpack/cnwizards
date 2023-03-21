@@ -219,10 +219,13 @@ type
     FStructStmtEmptyEnd: Boolean;    // 标记结构语句的结束语句是否是空语句，用来控制后面单个分号的位置
     FStoreIdent: Boolean;            // 控制是否把标识符存入大小写控制的 HashMap 中供后文使用
     FIdentBackupListRef: TObjectList; // 指向当前用来存储备份 HashMap 中的内容的 ObjectList，元素是 TCnIdentBackupObj
+    FIsSingleStatement: Boolean;
     procedure CheckAddIdentBackup(List: TObjectList; const Ident: string);
     procedure RestoreIdentBackup(List: TObjectList);
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
     procedure CheckWriteBeginln;
+    function CheckSingleStatementBegin(PreSpaceCount: Byte = 0): Boolean;
+    procedure CheckSingleStatementEnd(IsSingle: Boolean; PreSpaceCount: Byte = 0);
   protected
     function FormatPossibleAmpersand(PreSpaceCount: Byte = 0): Boolean;
     // 返回是否有&
@@ -1704,6 +1707,8 @@ end;
 
 { CaseSelector -> CaseLabel/','... ':' Statement }
 procedure TCnBasePascalFormatter.FormatCaseSelector(PreSpaceCount: Byte);
+var
+  FIsSingleStatement: Boolean;
 begin
   SpecifyElementType(pfetCaseLabelList);
   try
@@ -1725,7 +1730,11 @@ begin
     FNextBeginShouldIndent := True;
 
   if Scanner.Token <> tokSemicolon then
-    FormatStatement(Tab(PreSpaceCount, False))
+  begin
+    FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
+    FormatStatement(Tab(PreSpaceCount, False));
+    CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
+  end
   else // 是空语句就手工写缩进
     CodeGen.Write('', Tab(PreSpaceCount));
 end;
@@ -1897,7 +1906,10 @@ begin
 
   if Scanner.Token = tokSemicolon then
     FStructStmtEmptyEnd := True;
+
+  FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
   FormatStatement(Tab(PreSpaceCount));
+  CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
 end;
 
 { IfStmt -> IF Expression THEN Statement [ELSE Statement] }
@@ -1945,7 +1957,9 @@ begin
     FStructStmtEmptyEnd := True;
 
   ElseAfterThen := Scanner.Token = tokKeywordElse;
+  FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
   FormatStatement(Tab(PreSpaceCount));
+  CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
 
   if Scanner.Token = tokKeywordElse then
   begin
@@ -1969,7 +1983,10 @@ begin
       CheckWriteBeginln; // 检查 else begin 是否同行
       if Scanner.Token = tokSemicolon then
         FStructStmtEmptyEnd := True;
+
+      FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
       FormatStatement(Tab(PreSpaceCount));
+      CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
     end;
   end;
 end;
@@ -2395,8 +2412,10 @@ begin
   CheckWriteBeginln; // 检查 do begin 是否同行;
 
   OnlySemicolon := Scanner.Token = tokSemicolon;
+  FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
   FormatStatement(Tab(PreSpaceCount));
-  
+  CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
+
   if Scanner.Token = tokSemicolon then
   begin
     if OnlySemicolon then
@@ -2437,7 +2456,9 @@ begin
 
   if Scanner.Token = tokSemicolon then
     FStructStmtEmptyEnd := True;
+  FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
   FormatStatement(Tab(PreSpaceCount));
+  CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
 end;
 
 { WithStmt -> WITH IdentList DO Statement }
@@ -2464,7 +2485,9 @@ begin
 
   if Scanner.Token = tokSemicolon then
     FStructStmtEmptyEnd := True;
+  FIsSingleStatement := CheckSingleStatementBegin(PreSpaceCount);
   FormatStatement(Tab(PreSpaceCount));
+  CheckSingleStatementEnd(FIsSingleStatement, PreSpaceCount);
 end;
 
 { RaiseStmt -> RAISE [ Expression | Expression AT Expression ] }
@@ -6314,6 +6337,25 @@ function TCnBasePascalFormatter.ScanerGetCanLineBreak(
   Sender: TObject): Boolean;
 begin
   Result := CanKeepLineBreak;
+end;
+
+function TCnBasePascalFormatter.CheckSingleStatementBegin(PreSpaceCount: Byte): Boolean;
+begin
+  Result := CnPascalCodeForRule.SingleStatementToBlock and (Scanner.ForwardToken() <> tokKeywordBegin);
+  if Result then
+  begin
+    CodeGen.Write(FormatString('begin', CnPascalCodeForRule.KeywordStyle), PreSpaceCount);
+    Writeln;
+  end;
+end;
+
+procedure TCnBasePascalFormatter.CheckSingleStatementEnd(IsSingle: Boolean; PreSpaceCount: Byte);
+begin
+  if IsSingle then
+  begin
+    Writeln;
+    CodeGen.Write(FormatString('end', CnPascalCodeForRule.KeywordStyle), PreSpaceCount);
+  end;
 end;
 
 initialization

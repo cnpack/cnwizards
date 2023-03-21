@@ -71,6 +71,7 @@ type
     WrapWidth: Integer;
     WrapNewLineWidth: Integer;
     UsesUnitSingleLine: Boolean;
+    SingleStatementToBlock: Boolean; // if while for case 等单个语句是否加 begin end
     UseIgnoreArea: Boolean;
     UsesLineWrapWidth: Integer;
     KeepUserLineBreak: Boolean;
@@ -95,6 +96,7 @@ const
     WrapWidth: 80;
     WrapNewLineWidth: 90;
     UsesUnitSingleLine: False;
+    SingleStatementToBlock: False;
     UseIgnoreArea: True;
     UsesLineWrapWidth: 90;
     KeepUserLineBreak: False;
