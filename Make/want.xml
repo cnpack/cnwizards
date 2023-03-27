@@ -192,7 +192,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="install.output" value="${basedir}/Install/Output" />
   <property name="make"           value="${basedir}/Make" />
   <property name="src"            value="${basedir}/Source" />
-  <property name="tools"          value="${basedir}/Tools" />
+  <property name="tools"          value="${basedir}/Tool" />
   <property name="cnvcl"          value="${basedir}/../cnvcl" />
   <property name="cnvcl.src"      value="${cnvcl}/Source" />
 
