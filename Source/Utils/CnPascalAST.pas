@@ -27,7 +27,9 @@ unit CnPascalAST;
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
 *           不支持 asm（仅跳过），注释还原度较低
-* 开发平台：2022.10.16 V1.1
+* 开发平台：2023.04.01 V1.2
+*               调整部分对外声明以有利使用
+*           2022.10.16 V1.1
 *               基本完成解析
 *           2022.09.24 V1.0
 *               创建单元，离完整实现功能还早
@@ -227,7 +229,11 @@ type
     FReturn: Boolean;
     FNoSpaceBehind: Boolean;
     FNoSpaceBefore: Boolean;
+    function GetItems(AIndex: Integer): TCnPasAstLeaf;
+    procedure SetItems(AIndex: Integer; const Value: TCnPasAstLeaf);
   public
+    property Items[AIndex: Integer]: TCnPasAstLeaf read GetItems write SetItems; default;
+
     function GetPascalCode: string;
     function GetCppCode: string;
 
@@ -249,11 +255,17 @@ type
   end;
 
   TCnPasAstTree = class(TCnTree)
+  private
+    function GetItems(AbsoluteIndex: Integer): TCnPasAstLeaf;
+    function GetRoot: TCnPasAstLeaf;
   public
     function ReConstructPascalCode: string;
 
     function ConvertToHppCode: string;
     function ConvertToCppCode: string;
+
+    property Root: TCnPasAstLeaf read GetRoot;
+    property Items[AbsoluteIndex: Integer]: TCnPasAstLeaf read GetItems;
   end;
 
   TCnPasAstGenerator = class
@@ -2121,17 +2133,21 @@ begin
   try
     MatchCreateLeafAndPush(tkSquareOpen);
 
-    repeat
-      if FLex.TokenID in [tkVar, tkConst, tkOut] then
-        MatchCreateLeafAndStep(FLex.TokenID); // TODO: 区分 var/const 修饰的内容与 VarSection、ConstSection
+    try
+      repeat
+        if FLex.TokenID in [tkVar, tkConst, tkOut] then
+          MatchCreateLeafAndStep(FLex.TokenID); // TODO: 区分 var/const 修饰的内容与 VarSection、ConstSection
 
-      BuildIdentList;
-      MatchCreateLeafAndStep(tkColon);
-      BuildTypeID;
+        BuildIdentList;
+        MatchCreateLeafAndStep(tkColon);
+        BuildTypeID;
 
-      if FLex.TokenID <> tkSemiColon then
-        Break;
-    until False;
+        if FLex.TokenID <> tkSemiColon then
+          Break;
+      until False;
+    finally
+      PopLeaf;
+    end;
 
     MatchCreateLeafAndStep(tkSquareClose);
   finally
@@ -3358,6 +3374,16 @@ begin
   // 把 interface 部分整成 h 文件
 end;
 
+function TCnPasAstTree.GetItems(AbsoluteIndex: Integer): TCnPasAstLeaf;
+begin
+  Result := TCnPasAstLeaf(inherited GetItems(AbsoluteIndex));
+end;
+
+function TCnPasAstTree.GetRoot: TCnPasAstLeaf;
+begin
+  Result := TCnPasAstLeaf(inherited GetRoot);
+end;
+
 function TCnPasAstTree.ReConstructPascalCode: string;
 begin
   Result := (FRoot as TCnPasAstLeaf).GetPascalCode;
@@ -3485,6 +3511,11 @@ begin
   end;
 end;
 
+function TCnPasAstLeaf.GetItems(AIndex: Integer): TCnPasAstLeaf;
+begin
+  Result := TCnPasAstLeaf(inherited GetItems(AIndex));
+end;
+
 function TCnPasAstLeaf.GetPascalCode: string;
 var
   I: Integer;
@@ -3516,6 +3547,12 @@ begin
         Result := Result + ' ' + S;
     end;
   end;
+end;
+
+procedure TCnPasAstLeaf.SetItems(AIndex: Integer;
+  const Value: TCnPasAstLeaf);
+begin
+  inherited SetItems(AIndex, Value);
 end;
 
 end.
