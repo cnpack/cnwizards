@@ -220,6 +220,7 @@ type
     cntBegin,
     cntEnd
   );
+  TCnPasNodeTypes = set of TCnPasNodeType;
 
   TCnPasAstLeaf = class(TCnLeaf)
   {* Text 属性存对应的字符串}
@@ -231,7 +232,9 @@ type
     FNoSpaceBefore: Boolean;
     function GetItems(AIndex: Integer): TCnPasAstLeaf;
     procedure SetItems(AIndex: Integer; const Value: TCnPasAstLeaf);
+    function GetParent: TCnPasAstLeaf;
   public
+    property Parent: TCnPasAstLeaf read GetParent;
     property Items[AIndex: Integer]: TCnPasAstLeaf read GetItems write SetItems; default;
 
     function GetPascalCode: string;
@@ -3514,6 +3517,11 @@ end;
 function TCnPasAstLeaf.GetItems(AIndex: Integer): TCnPasAstLeaf;
 begin
   Result := TCnPasAstLeaf(inherited GetItems(AIndex));
+end;
+
+function TCnPasAstLeaf.GetParent: TCnPasAstLeaf;
+begin
+  Result := TCnPasAstLeaf(inherited GetParent);
 end;
 
 function TCnPasAstLeaf.GetPascalCode: string;
