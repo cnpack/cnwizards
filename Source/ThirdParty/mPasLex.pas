@@ -118,6 +118,7 @@ type
     原有问题四：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：都加上了
   ***}
+  TTokenKinds = set of TTokenKind;
 
   TCommentState=(csAnsi, csBor, csNo);
 
