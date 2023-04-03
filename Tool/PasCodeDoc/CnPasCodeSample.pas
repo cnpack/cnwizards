@@ -48,11 +48,37 @@ const
   {* 某字符串常量值，代表某标题}
 
 type
+
+// =========================== 四种不同的类声明 ================================
+
   TCnDocTestObject = class;
   {* 某类的前向声明}
 
+  TCnDocTestObject1 = class(TObject);
+  {* 某继承类，有显式基类，无声明体}
+
+  TCnDocTestObject2 = class
+  {* 某继承类，无显式基类}
+  end;
+
+  TCnDocTestObject3 = class(TObject)
+  {* 某继承类，有显式基类}
+  end;
+
+// =========================== 三种不同的接口声明 ==============================
+
   ICnDocTestInterface1 = interface;
   {* 某接口的前向声明}
+
+  ICnDocTestInterface2 = interface
+  {* 某继承接口，无显式基类}
+  end;
+
+  ICnDocTestInterface3 = interface(IUnknown)
+  {* 某继承接口，有显式基类}
+  end;
+
+// ================================ 其他各类声明 ===============================
 
   ECnDocTestException = class(Exception);
   {* 某异常}
@@ -123,7 +149,7 @@ type
     {* 某接口的某过程}
   end;
 
-  TCnDocTestObject1 = class
+  TCnDocTestObject4 = class
   {* 某另一测试类}
     FTestField: Integer;
     {* 某无范围的 Field}
