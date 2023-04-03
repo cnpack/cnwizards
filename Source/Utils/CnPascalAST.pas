@@ -1720,11 +1720,8 @@ begin
   MatchCreateLeafAndPush(FLex.TokenID);
 
   try
-    if FLex.TokenID = tkSemiColon then
-    begin
-      MatchCreateLeafAndStep(FLex.TokenID);
+    if FLex.TokenID = tkSemiColon then // 前向声明结束，分号让外部处理
       Exit;
-    end;
 
     if FLex.TokenID = tkRoundOpen then
       BuildInterfaceHeritage;

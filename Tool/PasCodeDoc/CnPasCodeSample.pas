@@ -48,6 +48,12 @@ const
   {* 某字符串常量值，代表某标题}
 
 type
+  TCnDocTestObject = class;
+  {* 某类的前向声明}
+
+  ICnDocTestInterface1 = interface;
+  {* 某接口的前向声明}
+
   ECnDocTestException = class(Exception);
   {* 某异常}
 
@@ -72,12 +78,12 @@ type
   end;
 
   ICnDocTestInterface = interface(IUnknown)
-  {* 某接口，里头有成员函数和属性}
+  {* 某继承接口，里头有成员函数和属性}
   ['{D735C546-338D-4108-ABF8-3A2D23D93FD1}']
     procedure TestInterfaceProcedure;
     {* 某接口的某方法}
     function GetTestProperty: Boolean;
-    {* 某接口的某函数}
+    {* 某接口的某属性函数}
     property TestProperty: Boolean read GetTestProperty;
     {* 某接口的某属性}
   end;
@@ -112,9 +118,9 @@ type
   end;
 
   ICnDocTestInterface1 = interface
-  {* 某接口，里头有成员函数和属性}
+  {* 某没继承接口，里头有成员函数}
     procedure TestInterfaceProcedure1;
-    {* 某接口的某方法}
+    {* 某接口的某过程}
   end;
 
   TCnDocTestObject1 = class
