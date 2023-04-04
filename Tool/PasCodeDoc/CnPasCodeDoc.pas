@@ -44,7 +44,7 @@ type
   ECnPasCodeDocException = class(Exception);
   {* 解析代码文档异常}
 
-  TCnDocType = (dtUnit, dtConst, dtVar, dtProcedure, dtProperty, dtClass, dtInterface, dtRecord);
+  TCnDocType = (dtUnit, dtConst, dtType, dtProcedure, dtVar, dtField, dtProperty);
   {* 支持文档的元素类型}
 
   TCnDocScope = (dsNone, dsPrivate, dsProtected, dsPublic, dsPublished);
@@ -59,6 +59,7 @@ type
     FComment: string;
     FOwner: TCnDocBaseItem;
     FScope: TCnDocScope;
+    FDocType: TCnDocType;
     function GetItem(Index: Integer): TCnDocBaseItem;
     procedure SetItem(Index: Integer; const Value: TCnDocBaseItem);
     function GetCount: Integer;
@@ -68,9 +69,18 @@ type
 
     function AddItem(Item: TCnDocBaseItem): Integer;
     {* 添加一个外部已经创建好的文档对象到内部列表并持有它}
+    procedure Exchange(Index1, Index2: Integer);
+    {* 根据索引交换两个子对象}
+    procedure Delete(Index: Integer);
+    {* 根据索引删除子对象}
+    function Extract(Item: TCnDocBaseItem): TCnDocBaseItem;
+    {* 从列表中抽离子对象，但不释放它}
 
     procedure DumpToStrings(Strs: TStrings; Indent: Integer = 0);
     {* 将内容保存到字符串列表中}
+
+    property DocType: TCnDocType read FDocType;
+    {* 文档元素类型}
 
     property DeclareName: string read FDeclareName write FDeclareName;
     {* 待解释的对象名称，不同的子类有不同的规定}
@@ -91,30 +101,44 @@ type
 
   TCnDocUnit = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的单元的对象}
+  public
+    constructor Create; override;
   end;
 
   TCnConstDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的常量对象}
+  public
+    constructor Create; override;
   end;
 
   TCnVarDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的变量对象}
+  public
+    constructor Create; override;
   end;
 
   TCnProcedureDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的函数过程对象}
+  public
+    constructor Create; override;
   end;
 
   TCnTypeDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的类型对象}
+  public
+    constructor Create; override;
   end;
 
   TCnPropertyDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的属性对象}
+  public
+    constructor Create; override;
   end;
 
   TCnFieldDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的字段对象}
+  public
+    constructor Create; override;
   end;
 
 function CnCreateUnitDocFromFileName(const FileName: string): TCnDocUnit;
@@ -130,70 +154,8 @@ const
   COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment];
   COMMENT_NONE = '<none>';
 
-{ TCnDocBaseItem }
-
-function TCnDocBaseItem.AddItem(Item: TCnDocBaseItem): Integer;
-begin
-  FItems.Add(Item);
-  Item.Owner := Self;
-  Result := FItems.Count;
-end;
-
-constructor TCnDocBaseItem.Create;
-begin
-  FItems := TObjectList.Create(True);
-end;
-
-destructor TCnDocBaseItem.Destroy;
-begin
-  inherited;
-  FItems.Free;
-end;
-
-procedure TCnDocBaseItem.DumpToStrings(Strs: TStrings; Indent: Integer);
-var
-  I: Integer;
-
-  function Spcs(Cnt: Integer): string;
-  begin
-    if Cnt < 0 then
-      Result := ''
-    else
-    begin
-      SetLength(Result, Cnt);
-      FillChar(Result[1], Cnt, 32);
-    end;
-  end;
-
-begin
-  if Indent < 0 then
-    Indent := 0;
-
-  Strs.Add(Spcs(Indent * 2) + FDeclareName);
-  if FScope <> dsNone then
-    Strs.Add(Spcs(Indent * 2) + GetEnumName(TypeInfo(TCnDocScope), Ord(FScope)));
-  Strs.Add(Spcs(Indent * 2) + FComment);
-  Strs.Add('');
-
-  for I := 0 to FItems.Count - 1 do
-    Items[I].DumpToStrings(Strs, Indent + 1);
-end;
-
-function TCnDocBaseItem.GetCount: Integer;
-begin
-  Result := FItems.Count;
-end;
-
-function TCnDocBaseItem.GetItem(Index: Integer): TCnDocBaseItem;
-begin
-  Result := TCnDocBaseItem(FItems[Index]);
-end;
-
-procedure TCnDocBaseItem.SetItem(Index: Integer;
-  const Value: TCnDocBaseItem);
-begin
-  FItems[Index] := Value;
-end;
+procedure SortDocUnit(RootItem: TCnDocUnit); forward;
+{* 文档内部排序}
 
 // 从 ParentLeaf 的第 0 个子节点开始越过注释找符合的节点，返回符合的节点，不符合则抛出异常且返回 nil
 function DocSkipCommentToChild(ParentLeaf: TCnPasAstLeaf;
@@ -753,10 +715,164 @@ begin
       end;
       Inc(I);
     end;
+
+    SortDocUnit(Result);
   finally
     SL.Free;
     AST.Free;
   end;
+end;
+
+procedure DocBubbleSort(RootItem: TCnDocUnit);
+var
+  I, J: Integer;
+begin
+  for I := 0 to RootItem.Count - 1 do
+    for J := 0 to RootItem.Count - I - 2 do
+      if Ord(RootItem[J].DocType) > Ord(RootItem[J + 1].DocType) then
+        RootItem.Exchange(J, J + 1);
+end;
+
+procedure SortDocUnit(RootItem: TCnDocUnit);
+begin
+  // Unit 的下一级，0 到 Count - 1 个，按 const、type、procedure、var 的顺序排序
+  DocBubbleSort(RootItem); // 用冒泡而不用快排是因为需要保持原位稳定
+end;
+
+{ TCnDocBaseItem }
+
+function TCnDocBaseItem.AddItem(Item: TCnDocBaseItem): Integer;
+begin
+  FItems.Add(Item);
+  Item.Owner := Self;
+  Result := FItems.Count;
+end;
+
+constructor TCnDocBaseItem.Create;
+begin
+  FItems := TObjectList.Create(True);
+end;
+
+procedure TCnDocBaseItem.Delete(Index: Integer);
+begin
+  FItems.Delete(Index);
+end;
+
+destructor TCnDocBaseItem.Destroy;
+begin
+  inherited;
+  FItems.Free;
+end;
+
+procedure TCnDocBaseItem.DumpToStrings(Strs: TStrings; Indent: Integer);
+var
+  I: Integer;
+
+  function Spcs(Cnt: Integer): string;
+  begin
+    if Cnt < 0 then
+      Result := ''
+    else
+    begin
+      SetLength(Result, Cnt);
+      FillChar(Result[1], Cnt, 32);
+    end;
+  end;
+
+begin
+  if Indent < 0 then
+    Indent := 0;
+
+  Strs.Add(Spcs(Indent * 2) + FDeclareName);
+  if FScope <> dsNone then
+    Strs.Add(Spcs(Indent * 2) + GetEnumName(TypeInfo(TCnDocScope), Ord(FScope)));
+  Strs.Add(Spcs(Indent * 2) + FComment);
+  Strs.Add('');
+
+  for I := 0 to FItems.Count - 1 do
+    Items[I].DumpToStrings(Strs, Indent + 1);
+end;
+
+procedure TCnDocBaseItem.Exchange(Index1, Index2: Integer);
+begin
+  FItems.Exchange(Index1, Index2);
+end;
+
+function TCnDocBaseItem.Extract(Item: TCnDocBaseItem): TCnDocBaseItem;
+begin
+  Result := TCnDocBaseItem(FItems.Extract(Item));
+end;
+
+function TCnDocBaseItem.GetCount: Integer;
+begin
+  Result := FItems.Count;
+end;
+
+function TCnDocBaseItem.GetItem(Index: Integer): TCnDocBaseItem;
+begin
+  Result := TCnDocBaseItem(FItems[Index]);
+end;
+
+procedure TCnDocBaseItem.SetItem(Index: Integer;
+  const Value: TCnDocBaseItem);
+begin
+  FItems[Index] := Value;
+end;
+
+{ TCnDocUnit }
+
+constructor TCnDocUnit.Create;
+begin
+  inherited;
+  FDocType := dtUnit;
+end;
+
+{ TCnConstDocItem }
+
+constructor TCnConstDocItem.Create;
+begin
+  inherited;
+  FDocType := dtConst;
+end;
+
+{ TCnVarDocItem }
+
+constructor TCnVarDocItem.Create;
+begin
+  inherited;
+  FDocType := dtVar;
+end;
+
+{ TCnProcedureDocItem }
+
+constructor TCnProcedureDocItem.Create;
+begin
+  inherited;
+  FDocType := dtProcedure;
+end;
+
+{ TCnTypeDocItem }
+
+constructor TCnTypeDocItem.Create;
+begin
+  inherited;
+  FDocType := dtType;
+end;
+
+{ TCnPropertyDocItem }
+
+constructor TCnPropertyDocItem.Create;
+begin
+  inherited;
+  FDocType := dtProperty;
+end;
+
+{ TCnFieldDocItem }
+
+constructor TCnFieldDocItem.Create;
+begin
+  inherited;
+  FDocType := dtField;
 end;
 
 end.
