@@ -38,7 +38,7 @@ unit CnPasCodeDoc;
 interface
 
 uses
-  Classes, SysUtils, Contnrs, TypInfo;
+  Classes, SysUtils, Contnrs;
 
 type
   ECnPasCodeDocException = class(Exception);
@@ -153,6 +153,9 @@ const
   COMMENT_NODE_TYPE = [cntBlockComment];
   COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment];
   COMMENT_NONE = '<none>';
+
+  SCOPE_STRS: array[TCnDocScope] of string =
+    ('', 'private', 'protected', 'public', 'published');
 
 procedure SortDocUnit(RootItem: TCnDocUnit); forward;
 {* 文档内部排序}
@@ -723,7 +726,7 @@ begin
   end;
 end;
 
-procedure DocBubbleSort(RootItem: TCnDocUnit);
+procedure DocTypeBubbleSort(RootItem: TCnDocUnit);
 var
   I, J: Integer;
 begin
@@ -733,10 +736,29 @@ begin
         RootItem.Exchange(J, J + 1);
 end;
 
+procedure DocScopeBubbleSort(RootItem: TCnDocBaseItem);
+var
+  I, J: Integer;
+begin
+  for I := 0 to RootItem.Count - 1 do
+    for J := 0 to RootItem.Count - I - 2 do
+      if Ord(RootItem[J].Scope) > Ord(RootItem[J + 1].Scope) then
+        RootItem.Exchange(J, J + 1);
+end;
+
 procedure SortDocUnit(RootItem: TCnDocUnit);
+var
+  I: Integer;
 begin
   // Unit 的下一级，0 到 Count - 1 个，按 const、type、procedure、var 的顺序排序
-  DocBubbleSort(RootItem); // 用冒泡而不用快排是因为需要保持原位稳定
+  DocTypeBubbleSort(RootItem); // 用冒泡而不用快排是因为需要保持原位稳定
+
+  // 每个类或接口，下面的按 Scope 排序
+  for I := 0 to RootItem.Count - 1 do
+  begin
+    if RootItem[I].Count > 1 then
+      DocScopeBubbleSort(RootItem[I]);
+  end;
 end;
 
 { TCnDocBaseItem }
@@ -785,7 +807,7 @@ begin
 
   Strs.Add(Spcs(Indent * 2) + FDeclareName);
   if FScope <> dsNone then
-    Strs.Add(Spcs(Indent * 2) + GetEnumName(TypeInfo(TCnDocScope), Ord(FScope)));
+    Strs.Add(Spcs(Indent * 2) + SCOPE_STRS[FScope]);
   Strs.Add(Spcs(Indent * 2) + FComment);
   Strs.Add('');
 
