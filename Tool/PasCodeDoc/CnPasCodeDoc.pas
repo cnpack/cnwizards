@@ -404,12 +404,6 @@ begin
   OwnerItem.AddItem(Item);
 end;
 
-// record 节点的子节点，收集其 Field 的注释
-procedure DocFindRecordFields(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
-begin
-  // TODO: 慢点儿再整
-end;
-
 // Class 节点的 ClassField 字段节点，收集其单个 Field 的注释。Index 是
 procedure DocFindField(ParentLeaf: TCnPasAstLeaf; Index: Integer; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
 var
@@ -435,6 +429,27 @@ begin
   Inc(Index); // 步进到下一个可能是注释的地方，如果是注释，Index 指向注释末尾，如果不是，Index 会减一以抵消此次步进
   Item.Comment := DocCollectComments(P, Index);
   OwnerItem.AddItem(Item);
+end;
+
+// record 节点的子节点，收集其 Field 的注释
+procedure DocFindRecordFields(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
+var
+  K: Integer;
+  Leaf: TCnPasAstLeaf;
+begin
+  if ParentLeaf.Count > 0 then
+  begin
+    ParentLeaf := DocSkipCommentToChild(ParentLeaf, [cntFieldList]); // record 到 FieldList
+
+    K := 0;
+    while K < ParentLeaf.Count do
+    begin
+      Leaf := ParentLeaf[K];
+      if Leaf.NodeType = cntFieldDecl then
+        DocFindField(Leaf, K, OwnerItem, AScope);
+      Inc(K);
+    end;
+  end;
 end;
 
 // 解析 interface 或 class 的成员，包括函数/过程、Field、属性等。ParentLeaf 是 ClassBody 或 interface
@@ -657,7 +672,6 @@ var
       end;
     end;
   end;
-
 
 begin
   Result := nil;
