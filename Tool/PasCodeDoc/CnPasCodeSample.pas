@@ -123,7 +123,10 @@ type
     procedure SetItem(Index: Integer; const Value: string);
 
   protected
+    FTestField: Boolean;
+    {* 某测试字段}
     procedure DoTest; virtual;
+    {* 某测试虚拟方法}
   public
     constructor Create(AOwner: TObject); virtual;
     {* 构造函数}
@@ -151,12 +154,17 @@ type
 
   TCnDocTestObject4 = class
   {* 某另一测试类}
-    FTestField: Integer;
-    {* 某无范围的 Field}
+    FTestField1: Integer;
+    {* 某无范围的 Field1}
+    FTesetField2: string;
+    {* 某无范围的 Field2}
+  public
+    FTestField3: Cardinal;
+    {* 某有范围的 Field3}
   end;
 
 procedure CnDocTestProcedure(Param1: Integer; var Param2: string); stdcall;
-{* 某全局过程}
+{* 某全局过程，带 Directive}
 
 function CnDocTestFunction(const Param1: Integer; Param2: string = ''): Integer;
 {* 某全局函数}

@@ -19,6 +19,19 @@
 {******************************************************************************}
 
 unit CnPasCodeDoc;
+{* |<PRE>
+================================================================================
+* 软件名称：CnPack 公共单元
+* 单元名称：从 CnPack 的代码中抽取注释形成文档的工具单元
+* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 备    注：
+* 开发平台：PWin7 + Delphi 5
+* 兼容测试：
+* 本 地 化：该单元中的字符串均符合本地化处理方式
+* 修改记录：2022.04.02 V1.0
+*               创建单元，实现功能
+================================================================================
+|</PRE>}
 
 {$I CnPack.inc}
 
@@ -100,6 +113,10 @@ type
   {* 描述一代码帮助文档中的属性对象}
   end;
 
+  TCnFieldDocItem = class(TCnDocBaseItem)
+  {* 描述一代码帮助文档中的字段对象}
+  end;
+
 function CnCreateUnitDocFromFileName(const FileName: string): TCnDocUnit;
 {* 根据源码文件，分析内部的代码注释，返回新创建的单元注释对象供输出}
 
@@ -109,7 +126,8 @@ uses
   CnPascalAst, mPasLex;
 
 const
-  COMMENT_NODE_TYPE = [cntLineComment, cntBlockComment];
+  COMMENT_NODE_TYPE = [cntBlockComment];
+  COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment];
   COMMENT_NONE = '<none>';
 
 { TCnDocBaseItem }
@@ -177,6 +195,26 @@ begin
   FItems[Index] := Value;
 end;
 
+// 从 ParentLeaf 的第 0 个子节点开始越过注释找符合的节点，返回符合的节点，不符合则抛出异常且返回 nil
+function DocSkipCommentToChild(ParentLeaf: TCnPasAstLeaf;
+  MatchedNodeTypes: TCnPasNodeTypes): TCnPasAstLeaf;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to ParentLeaf.Count - 1 do
+  begin
+    if ParentLeaf[I].NodeType in MatchedNodeTypes then
+    begin
+      Result := ParentLeaf[I];
+      Exit;
+    end;
+
+    if not (ParentLeaf[I].NodeType in COMMENT_SKIP_NODE_TYPE) then
+      raise ECnPasCodeDocException.Create('Skip Comment To Node Error.');
+  end;
+end;
+
 // 从 ParentLeaf 的第 Index 个子节点开始找符合的节点，返回符合的节点以及更新后的 Index，不符合则返回 nil。Index 均会步进
 function DocSkipToChild(ParentLeaf: TCnPasAstLeaf; var Index: Integer;
   MatchedNodeTypes: TCnPasNodeTypes; MatchedTokenKinds: TTokenKinds): TCnPasAstLeaf;
@@ -216,30 +254,34 @@ end;
 // 如果 Index 是注释处，则 Index 会步进到最后一个注释处，否则 Index 减一
 function DocCollectComments(ParentLeaf: TCnPasAstLeaf; var Index: Integer): string;
 var
+  S: string;
   SL: TStrings;
 begin
   if (Index < ParentLeaf.Count) and (ParentLeaf[Index].NodeType in COMMENT_NODE_TYPE) then
   begin
-    // 表示有注释，批量添加到一起
-    SL := TStringList.Create;
-    try
-      repeat
-        SL.Add(ParentLeaf[Index].Text);
-        Inc(Index);
-      until (Index >= ParentLeaf.Count) or not (ParentLeaf[Index].NodeType in COMMENT_NODE_TYPE);
-      Dec(Index); // 回到最后一个注释处
+    S := ParentLeaf[Index].Text;
+    if (Length(S) > 2) and (S[1] = '{') and (S[2] = '*') then
+    begin
+      // 表示有符合要求的注释，批量添加到一起
+      SL := TStringList.Create;
+      try
+        repeat
+          SL.Add(ParentLeaf[Index].Text);
+          Inc(Index);
+        until (Index >= ParentLeaf.Count) or not (ParentLeaf[Index].NodeType in COMMENT_NODE_TYPE);
+        Dec(Index); // 回到最后一个注释处
 
-      Result := Trim(SL.Text);
-    finally
-      SL.Free;
+        Result := Trim(SL.Text);
+        Exit;
+      finally
+        SL.Free;
+      end;
     end;
-  end
-  else
-  begin
-    Result := '';
-    if Index > 0 then
-      Dec(Index);
   end;
+
+  Result := '';
+  if Index > 0 then
+    Dec(Index);
 end;
 
 // const 下属子节点三个一组排列：CONSTDECL（子节点是名称）、分号、单个注释块
@@ -303,7 +345,7 @@ end;
 
 // 与同级节点三个一组：procedure/function（子节点是名称）、分号、单个注释块
 // 注意这里 ParentLeaf 是 procedure/function 节点，Index 是该节点在父节点中的索引
-procedure DocFindProcedures(ParentLeaf: TCnPasAstLeaf; var Index: Integer;
+procedure DocFindProcedure(ParentLeaf: TCnPasAstLeaf; var Index: Integer;
   OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsNone);
 var
   K: Integer;
@@ -333,7 +375,7 @@ begin
   OwnerItem.AddItem(Item);
 end;
 
-// 解析一个 property，ParentLeaf 是 Property 的唯一父节点，需遍历其子节点
+// 解析一个 property，ParentLeaf 是 Property 的唯一父节点（所以无需传入 Index），需遍历其子节点
 procedure DocFindProperty(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem;
   AScope: TCnDocScope = dsNone);
 var
@@ -368,7 +410,34 @@ begin
   // TODO: 慢点儿再整
 end;
 
-// 解析 interface 或 class 的成员，包括函数/过程、Field、属性等
+// Class 节点的 ClassField 字段节点，收集其单个 Field 的注释。Index 是
+procedure DocFindField(ParentLeaf: TCnPasAstLeaf; Index: Integer; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
+var
+  Leaf, P: TCnPasAstLeaf;
+  Item: TCnFieldDocItem;
+begin
+  Leaf := nil;
+  if (ParentLeaf.Count > 0) and (ParentLeaf[0].Count > 0) then
+    Leaf := ParentLeaf[0][0];
+  if (Leaf = nil) or (Leaf.NodeType <> cntIdent) then
+    raise ECnPasCodeDocException.Create('NO Class Field Ident Exists.');
+
+  Item := TCnFieldDocItem.Create;
+  Item.DeclareName := Leaf.Text; // 字段名
+  Item.Scope := AScope;
+
+  // 往父一层去找分号与注释
+  P := ParentLeaf.Parent;
+  Leaf := DocSkipToChild(P, Index, [cntSemiColon], [tkSemiColon]);
+  if Leaf = nil then
+    raise ECnPasCodeDocException.Create('NO Class Field Semicolon Exists.');
+
+  Inc(Index); // 步进到下一个可能是注释的地方，如果是注释，Index 指向注释末尾，如果不是，Index 会减一以抵消此次步进
+  Item.Comment := DocCollectComments(P, Index);
+  OwnerItem.AddItem(Item);
+end;
+
+// 解析 interface 或 class 的成员，包括函数/过程、Field、属性等。ParentLeaf 是 ClassBody 或 interface
 procedure DocFindMembers(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsNone);
 var
   K: Integer;
@@ -381,12 +450,17 @@ begin
     Leaf := ParentLeaf[K];
     if Leaf.NodeType in [cntProcedure, cntFunction] then
     begin
-      DocFindProcedures(Leaf, K, OwnerItem, AScope);
+      DocFindProcedure(Leaf, K, OwnerItem, AScope);
       Inc(K);
     end
     else if Leaf.NodeType = cntProperty then
     begin
       DocFindProperty(Leaf, OwnerItem, AScope);
+      Inc(K);
+    end
+    else if Leaf.NodeType = cntClassField then
+    begin
+      DocFindField(Leaf, K, OwnerItem, AScope);
       Inc(K);
     end
     else if (Leaf.NodeType = cntVisibility) and (Leaf.TokenKind in [tkProtected, tkPublic, tkPublished]) then
@@ -527,7 +601,7 @@ var
           begin
             IsClass := True;
             if CIRRoot.Count > 0 then
-              CIRRoot := CIRRoot[0]; // ClassBody 要注意如果有注释混入就可能出错
+              CIRRoot := DocSkipCommentToChild(CIRRoot, [cntClassBody]);
           end;
 
           if IsIntf or IsClass then
@@ -660,7 +734,7 @@ begin
           end;
         cntProcedure, cntFunction:
           begin
-            DocFindProcedures(IntfLeaf[I], I, Result);
+            DocFindProcedure(IntfLeaf[I], I, Result);
           end;
       end;
       Inc(I);
