@@ -115,7 +115,7 @@ type
   end;
 
   TCnDocTestObject = class(TObject)
-  {* 某测试类}
+  {* 某测试大类，有各种内容}
   private
     FAProperty: Integer;
     function GetItem(Index: Integer): string;
@@ -155,7 +155,7 @@ type
     {* 某无范围的 Field}
   end;
 
-procedure CnDocTestProcedure(Param1: Integer; var Param2: string);
+procedure CnDocTestProcedure(Param1: Integer; var Param2: string); stdcall;
 {* 某全局过程}
 
 function CnDocTestFunction(const Param1: Integer; Param2: string = ''): Integer;
@@ -170,7 +170,7 @@ var
 
 implementation
 
-procedure CnDocTestProcedure(Param1: Integer; var Param2: string);
+procedure CnDocTestProcedure(Param1: Integer; var Param2: string); stdcall;
 begin
 
 end;

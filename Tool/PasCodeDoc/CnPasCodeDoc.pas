@@ -177,10 +177,10 @@ begin
   FItems[Index] := Value;
 end;
 
+// 从 ParentLeaf 的第 Index 个子节点开始找符合的节点，返回符合的节点以及更新后的 Index，不符合则返回 nil。Index 均会步进
 function DocSkipToChild(ParentLeaf: TCnPasAstLeaf; var Index: Integer;
   MatchedNodeTypes: TCnPasNodeTypes; MatchedTokenKinds: TTokenKinds): TCnPasAstLeaf;
 begin
-  // 从 ParentLeaf 的第 Index 个子节点开始找符合的节点，返回符合的，或者 nil
   Result := nil;
   if Index >= ParentLeaf.Count then
     Exit;
@@ -195,6 +195,21 @@ begin
     end;
     Inc(Index);
   end;
+end;
+
+// 如果 ParentLeaf 的第 Index 个子节点是分号或 Directive，就跳过，直到非 Directive 且非分号的地方，再回退一
+// 进入时 Index 应该指向 Directive 之前的分号
+procedure DocSkipDirective(ParentLeaf: TCnPasAstLeaf; var Index: Integer);
+begin
+  Inc(Index);
+  while Index < ParentLeaf.Count do
+  begin
+    if not (ParentLeaf[Index].NodeType in [cntSemiColon, cntDirective, cntDefault]) then
+      Break;    // 可能还有其他不包括在 cntDirective 中的关键字
+
+    Inc(Index);
+  end;
+  Dec(Index);
 end;
 
 // 从 ParentLeaf 的第 Index 个子节点起收集注释并拼一块。
@@ -227,7 +242,7 @@ begin
   end;
 end;
 
-// 下属子节点三个一组排列：CONSTDECL（子节点是名称）、分号、单个注释块
+// const 下属子节点三个一组排列：CONSTDECL（子节点是名称）、分号、单个注释块
 procedure DocFindConsts(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
 var
   K: Integer;
@@ -256,7 +271,7 @@ begin
   end;
 end;
 
-// 下属子节点三个一组排列：VARDECL（子节点是名称）、分号、单个注释块
+// var 下属子节点三个一组排列：VARDECL（子节点是名称）、分号、单个注释块
 procedure DocFindVars(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
 var
   K: Integer;
@@ -310,6 +325,9 @@ begin
   if Leaf = nil then
     raise ECnPasCodeDocException.Create('NO Procedure/Function Semicolon Exists.');
 
+  // 此处再跳过可能存在的 Directives 到最后一个分号
+  DocSkipDirective(P, Index);
+
   Inc(Index); // 步进到下一个可能是注释的地方，如果是注释，Index 指向注释末尾，如果不是，Index 会减一以抵消此次步进
   Item.Comment := DocCollectComments(P, Index);
   OwnerItem.AddItem(Item);
@@ -336,14 +354,18 @@ begin
   if Leaf = nil then
     raise ECnPasCodeDocException.Create('NO Property Semicolon Exists.');
 
+  // 此处再跳过可能存在的 Directives 到最后一个分号
+  DocSkipDirective(ParentLeaf, K);
+
   Inc(K);
   Item.Comment := DocCollectComments(ParentLeaf, K);
   OwnerItem.AddItem(Item);
 end;
 
+// record 节点的子节点，收集其 Field 的注释
 procedure DocFindRecordFields(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
 begin
-
+  // TODO: 慢点儿再整
 end;
 
 // 解析 interface 或 class 的成员，包括函数/过程、Field、属性等
@@ -502,7 +524,11 @@ var
           if CIRRoot.NodeType = cntInterfaceType then
             IsIntf := True
           else if CIRRoot.NodeType = cntClassType then
+          begin
             IsClass := True;
+            if CIRRoot.Count > 0 then
+              CIRRoot := CIRRoot[0]; // ClassBody 要注意如果有注释混入就可能出错
+          end;
 
           if IsIntf or IsClass then
             Item.Comment := DocGetClassIntfComments(Leaf, IsClass);
