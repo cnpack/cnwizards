@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, StdCtrls, CnPascalAST, CnTree;
+  ComCtrls, StdCtrls, TypInfo, CnPascalAST, CnTree, Menus;
 
 type
   TFormAST = class(TForm)
@@ -14,7 +14,6 @@ type
     mmoPas: TMemo;
     tvPas: TTreeView;
     grpTest: TGroupBox;
-    lblCount: TLabel;
     btnUsesClause: TButton;
     btnUsesDecl: TButton;
     btnInitSeletion: TButton;
@@ -88,6 +87,10 @@ type
     btnString: TButton;
     btnStrings: TButton;
     btnAsmBlock: TButton;
+    stat1: TStatusBar;
+    mmoCppText: TMemo;
+    pm1: TPopupMenu;
+    ShowString1: TMenuItem;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -147,6 +150,8 @@ type
     procedure btnStringClick(Sender: TObject);
     procedure btnStringsClick(Sender: TObject);
     procedure btnAsmBlockClick(Sender: TObject);
+    procedure tvPasChange(Sender: TObject; Node: TTreeNode);
+    procedure ShowString1Click(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -162,6 +167,9 @@ var
 implementation
 
 {$R *.DFM}
+
+uses
+  mPasLex;
 
 procedure TFormAST.FormDestroy(Sender: TObject);
 begin
@@ -182,7 +190,8 @@ begin
   tvPas.FullExpand;
 
   mmoPasRes.Lines.Text := FAST.Tree.ReConstructPascalCode;
-  lblCount.Caption := Format('Count %d', [FAST.Tree.Count]);
+
+  stat1.Panels[0].Text := Format('Count %d', [FAST.Tree.Count]);
 end;
 
 procedure TFormAST.btnUsesClauseClick(Sender: TObject);
@@ -216,6 +225,7 @@ end;
 procedure TFormAST.SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode;
   var Valid: Boolean);
 begin
+  ATreeNode.Data := ALeaf;
   if ALeaf.Text = '' then
     ATreeNode.Text := '"' + PascalAstNodeTypeToString((ALeaf as TCnPasAstLeaf).NodeType) + '"'
   else
@@ -898,6 +908,38 @@ begin
   );
   FAST.BuildDeclSection;
   SynTree;
+end;
+
+procedure TFormAST.tvPasChange(Sender: TObject; Node: TTreeNode);
+var
+  Leaf: TCnPasAstLeaf;
+  S1, S2: string;
+begin
+  stat1.Panels[1].Text := '';
+  if tvPas.Selected = nil then
+    Exit;
+
+  Leaf := TCnPasAstLeaf(tvPas.Selected.Data);
+  if Leaf = nil then
+    Exit;
+
+  S1 := GetEnumName(TypeInfo(TCnPasNodeType), Integer(Leaf.NodeType));
+  S2 := GetEnumName(TypeInfo(TTokenKind), Integer(Leaf.TokenKind));
+  stat1.Panels[1].Text := S1 + ' ' + S2;
+
+  mmoCppText.Lines.Text := Leaf.GetCppCode;
+end;
+
+procedure TFormAST.ShowString1Click(Sender: TObject);
+var
+  Leaf: TCnPasAstLeaf;
+begin
+  if tvPas.Selected <> nil then
+  begin
+    Leaf := TCnPasAstLeaf(tvPas.Selected.Data);
+    if Leaf <> nil then
+      mmoPasRes.Text := Leaf.GetPascalCode;
+  end;
 end;
 
 end.

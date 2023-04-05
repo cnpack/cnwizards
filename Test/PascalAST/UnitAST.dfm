@@ -47,8 +47,10 @@ object FormAST: TFormAST
         Height = 505
         Anchors = [akLeft, akTop, akBottom]
         Indent = 19
+        PopupMenu = pm1
         ReadOnly = True
         TabOrder = 1
+        OnChange = tvPasChange
       end
       object grpTest: TGroupBox
         Left = 392
@@ -58,12 +60,6 @@ object FormAST: TFormAST
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Test Part'
         TabOrder = 2
-        object lblCount: TLabel
-          Left = 16
-          Top = 600
-          Width = 3
-          Height = 13
-        end
         object btnUsesClause: TButton
           Left = 16
           Top = 24
@@ -641,6 +637,27 @@ object FormAST: TFormAST
           TabOrder = 22
           OnClick = btnParseClick
         end
+        object stat1: TStatusBar
+          Left = 2
+          Top = 604
+          Width = 469
+          Height = 19
+          Panels = <
+            item
+              Width = 100
+            end
+            item
+              Width = 50
+            end>
+          SimplePanel = False
+        end
+        object mmoCppText: TMemo
+          Left = 120
+          Top = 528
+          Width = 297
+          Height = 57
+          TabOrder = 24
+        end
       end
       object pgcRes: TPageControl
         Left = 880
@@ -701,7 +718,15 @@ object FormAST: TFormAST
   end
   object dlgOpen1: TOpenDialog
     Filter = 'Pascal File|*.pas'
-    Left = 512
-    Top = 304
+    Left = 536
+    Top = 336
+  end
+  object pm1: TPopupMenu
+    Left = 316
+    Top = 464
+    object ShowString1: TMenuItem
+      Caption = 'Show String'
+      OnClick = ShowString1Click
+    end
   end
 end

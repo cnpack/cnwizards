@@ -333,6 +333,7 @@ type
     procedure BuildLabelDeclSection;
 
     procedure BuildExportedHeading;
+    {* 组装过程与函数的声明部分}
 
     procedure BuildExportsSection;
     procedure BuildExportsList;
@@ -2033,17 +2034,18 @@ begin
     if FLex.TokenID in [tkSquareOpen, tkColon] then
       BuildPropertyInterface;
     BuildPropertySpecifiers;
-    FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
-
-    if FLex.TokenID = tkDefault then
-    begin
-      MatchCreateLeafAndStep(FLex.TokenID);
-      FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
-    end;
-    FReturnRef.Return := True;
   finally
     PopLeaf;
   end;
+
+  FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
+
+  if FLex.TokenID = tkDefault then
+  begin
+    MatchCreateLeafAndStep(FLex.TokenID);
+    FReturnRef := MatchCreateLeafAndStep(tkSemiColon);
+  end;
+  FReturnRef.Return := True;
 end;
 
 procedure TCnPasAstGenerator.BuildRecVariant;
