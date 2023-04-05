@@ -3539,13 +3539,13 @@ begin
 
   for I := 0 to Count - 1 do
   begin
-    Son := (Items[I] as TCnPasAstLeaf).TokenKind;
-    S := (Items[I] as TCnPasAstLeaf).GetPascalCode;
+    Son := Items[I].TokenKind;
+    S := Items[I].GetPascalCode;
     if Result = '' then
       Result := S
     else if S <> '' then
     begin
-      if FNoSpaceBehind or (Items[I] as TCnPasAstLeaf).NoSpaceBefore or    // 如果本节点后面不要空格，或子节点前面不要空格
+      if FNoSpaceBehind or Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或子节点前面不要空格
         (FTokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or            // 本节点这些后面不要空格
         (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 子节点这些前面不要空格
         tkRoundClose, tkSquareClose]) then

@@ -249,7 +249,7 @@ begin
     Dec(Index);
 end;
 
-// const 下属子节点三个一组排列：CONSTDECL（子节点是名称）、分号、单个注释块
+// 传入 const 节点，下属子节点三个一组排列：CONSTDECL（子节点是名称）、分号、单个注释块
 procedure DocFindConsts(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
 var
   K: Integer;
@@ -265,7 +265,10 @@ begin
 
     Item := TCnConstDocItem.Create;
     if Leaf.Count > 0 then
+    begin
       Item.DeclareName := Leaf[0].Text; // 常量名
+      Item.DeclareType := Leaf.GetPascalCode; // 拿常量的完整声明，包括有类型和无类型两种
+    end;
 
     Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
     if Leaf = nil then
@@ -294,8 +297,11 @@ begin
 
     Item := TCnVarDocItem.Create;
     if Leaf.Count > 0 then
+    begin
       if Leaf[0].Count > 0 then
         Item.DeclareName := Leaf[0][0].Text; // IDENTList 的第一个变量名
+      Item.DeclareType := Leaf.GetPascalCode; // 拿完整声明
+    end;
 
     Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
     if Leaf = nil then
@@ -325,6 +331,7 @@ begin
   Item := TCnProcedureDocItem.Create;
   Item.DeclareName := Leaf.Text; // 独立过程名
   Item.Scope := AScope;
+  Item.DeclareType := ParentLeaf.GetPascalCode; // 获取完整过程声明，无 Directives
 
   // 往父一层去找分号与注释
   P := ParentLeaf.Parent;
@@ -340,12 +347,13 @@ begin
   OwnerItem.AddItem(Item);
 end;
 
-// 解析一个 property，ParentLeaf 是 Property 的唯一父节点（所以无需传入 Index），需遍历其子节点
-procedure DocFindProperty(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem;
+// 解析一个 property，ParentLeaf 是 Property 节点，Index 是 ParentLeaf 在其父节点中的索引，
+// Property 节点后面并列分号和 default 等，需遍历其子节点
+procedure DocFindProperty(ParentLeaf: TCnPasAstLeaf; Index: Integer; OwnerItem: TCnDocBaseItem;
   AScope: TCnDocScope = dsNone);
 var
   K: Integer;
-  Leaf: TCnPasAstLeaf;
+  Leaf, P: TCnPasAstLeaf;
   Item: TCnPropertyDocItem;
 begin
   K := 0;
@@ -354,22 +362,25 @@ begin
     raise ECnPasCodeDocException.Create('NO Property Ident Exists.');
 
   Item := TCnPropertyDocItem.Create;
-  Item.DeclareName := Leaf.Text;
+  Item.DeclareName := Leaf.Text;   // 属性名
   Item.Scope := AScope;
+  Item.DeclareType := ParentLeaf.GetPascalCode; // 完整属性声明
 
-  Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
+  // 往父一层去找分号与注释
+  P := ParentLeaf.Parent;
+  Leaf := DocSkipToChild(P, Index, [cntSemiColon], [tkSemiColon]);
   if Leaf = nil then
     raise ECnPasCodeDocException.Create('NO Property Semicolon Exists.');
 
   // 此处再跳过可能存在的 Directives 到最后一个分号
-  DocSkipDirective(ParentLeaf, K);
+  DocSkipDirective(P, Index);
 
-  Inc(K);
-  Item.Comment := DocCollectComments(ParentLeaf, K);
+  Inc(Index);
+  Item.Comment := DocCollectComments(P, Index);
   OwnerItem.AddItem(Item);
 end;
 
-// Class 节点的 ClassField 字段节点，收集其单个 Field 的注释。Index 是
+// ParentLeaf 是 Class 节点的 ClassField 字段节点，收集其单个 Field 的注释。Index 是 ParentLeaf 在其 Parent 中的索引
 procedure DocFindField(ParentLeaf: TCnPasAstLeaf; Index: Integer; OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsPublic);
 var
   Leaf, P: TCnPasAstLeaf;
@@ -384,6 +395,7 @@ begin
   Item := TCnFieldDocItem.Create;
   Item.DeclareName := Leaf.Text; // 字段名
   Item.Scope := AScope;
+  Item.DeclareType := ParentLeaf.GetPascalCode; // 完整字段声明
 
   // 往父一层去找分号与注释
   P := ParentLeaf.Parent;
@@ -435,7 +447,7 @@ begin
     end
     else if Leaf.NodeType = cntProperty then
     begin
-      DocFindProperty(Leaf, OwnerItem, AScope);
+      DocFindProperty(Leaf, K, OwnerItem, AScope);
       Inc(K);
     end
     else if Leaf.NodeType = cntClassField then
@@ -462,8 +474,56 @@ begin
   end;
 end;
 
+// 递归调用，深度优先遍历，遇到注释时中止。常用于获取声明中注释前的部分
+function InternalGetPascalCodeFromLeafUntilComment(ALeaf: TCnPasAstLeaf; var ToAbort: Boolean): string;
+var
+  I: Integer;
+  S: string;
+  Son: TTokenKind;
+begin
+  if ToAbort then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  Result := ALeaf.Text;
+  for I := 0 to ALeaf.Count - 1 do
+  begin
+    Son := ALeaf.Items[I].TokenKind;
+    if Son in [tkBorComment, tkAnsiComment, tkSlashesComment] then
+    begin
+      ToAbort := True;
+      Exit;
+    end;
+
+    S := InternalGetPascalCodeFromLeafUntilComment(ALeaf.Items[I], ToAbort);
+    if Result = '' then
+      Result := S
+    else if S <> '' then
+    begin
+      if ALeaf.NoSpaceBehind or ALeaf.Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或子节点前面不要空格
+        (ALeaf.TokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or       // 本节点这些后面不要空格
+        (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 子节点这些前面不要空格
+        tkRoundClose, tkSquareOpen, tkSquareClose, tkComma]) then
+        Result := Result + S
+      else
+        Result := Result + ' ' + S;
+    end;
+  end;
+end;
+
+function GetPascalCodeFromLeafUntilComment(ALeaf: TCnPasAstLeaf): string;
+var
+  ToAbort: Boolean;
+begin
+  ToAbort := False;
+  Result := InternalGetPascalCodeFromLeafUntilComment(ALeaf, ToAbort);
+end;
+
 // 获取接口与类声明本身的注释，ParentLeaf 指向高层的 TYPEDECL，各分四种情况
-function DocGetClassIntfComments(ParentLeaf: TCnPasAstLeaf; IsClass: Boolean): string;
+procedure DocGetClassIntfNameComments(ParentLeaf: TCnPasAstLeaf; IsClass: Boolean;
+  var Comment: string; var FullType: string);
 var
   I: Integer;
   Leaf, TmpLeaf: TCnPasAstLeaf;
@@ -484,7 +544,9 @@ begin
                                   注释
 }
 
-  Result := '';
+  Comment := '';
+  FullType := GetPascalCodeFromLeafUntilComment(ParentLeaf);
+
   if ParentLeaf.Count > 2 then
   begin
     Leaf := ParentLeaf[2];
@@ -494,7 +556,7 @@ begin
       if (Leaf.Count > 0) and (Leaf[0].NodeType in COMMENT_NODE_TYPE) then
       begin
         I := 0;
-        Result := DocCollectComments(Leaf, I); // 两种无显式基类的处理
+        Comment := DocCollectComments(Leaf, I); // 两种无显式基类的处理
       end
       else // 两种有显式基类
       begin
@@ -517,13 +579,13 @@ begin
         if TmpLeaf <> nil then // 
         begin
           Inc(I);
-          Result := DocCollectComments(Leaf, I);
+          Comment := DocCollectComments(Leaf, I);
         end;
       end;
     end;
   end;
 
-  if Result <> '' then
+  if Comment <> '' then
     Exit;
 
   // 无声明体 end 的，无论有无显式基类两种情况，都直接寻找其注释
@@ -534,7 +596,105 @@ begin
     raise ECnPasCodeDocException.Create('NO Class/Interface SemiColon Exists.');
 
   Inc(I);
-  Result := DocCollectComments(Leaf, I);
+  Comment := DocCollectComments(Leaf, I);
+end;
+
+// ParentLeaf 是 type，下属子节点三个一组排列：TYPEDECL（子节点是名称）、分号、可能有的单个注释块
+procedure DocFindTypes(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
+var
+  K, M: Integer;
+  Leaf, DeclLeaf, CIRRoot: TCnPasAstLeaf;
+  Item: TCnTypeDocItem;
+  IsIntf, IsClass, IsRecord: Boolean;
+begin
+  K := 0;
+  while K < ParentLeaf.Count do
+  begin
+    Leaf := DocSkipToChild(ParentLeaf, K, [cntTypeDecl], [tkNone]);
+    if Leaf = nil then
+      raise ECnPasCodeDocException.Create('NO Type Decl Exists.');
+
+    DeclLeaf := Leaf;
+    Item := TCnTypeDocItem.Create;
+    if Leaf.Count > 0 then
+      Item.DeclareName := Leaf[0].Text; // 类型名
+
+    // 判断 Leaf 的下标为 2 的子节点类型，如果是 RESTRICTEDTYPE，则表示是 interface、class，要额外处理
+    // 如果是 COMMMONTYPE 且再后面的俩子节点是 packed record 或一个 record，也要额外处理
+    IsIntf := False;
+    IsClass := False;
+    IsRecord := False;
+    CIRRoot := nil;
+
+    if (Leaf.Count >= 2) and (Leaf[2].NodeType = cntRestrictedType) then
+    begin
+      if Leaf[2].Count > 0 then
+      begin
+        CIRRoot := Leaf[2][0];
+        if CIRRoot.NodeType = cntInterfaceType then
+          IsIntf := True
+        else if CIRRoot.NodeType = cntClassType then
+        begin
+          IsClass := True;
+          if CIRRoot.Count > 0 then
+            CIRRoot := DocSkipCommentToChild(CIRRoot, [cntClassBody]);
+        end;
+
+        if IsIntf or IsClass then
+          DocGetClassIntfNameComments(Leaf, IsClass, Item.FComment, Item.FDeclareType);
+      end;
+    end
+    else if (Leaf.Count >= 2) and (Leaf[2].NodeType = cntCommonType) then
+    begin
+      Leaf := Leaf[2]; // 要判断 Leaf[2] 的子节点是否有 record
+      M := 0;
+      Leaf := DocSkipToChild(Leaf, M, [cntRecord], [tkRecord]);
+      if Leaf <> nil then
+      begin
+        IsRecord := True;
+        CIRRoot := Leaf;
+        M := 0;
+        Item.Comment := DocCollectComments(Leaf, M);
+        Item.DeclareType := GetPascalCodeFromLeafUntilComment(DeclLeaf); // Record 类型的完整声明
+      end;
+    end;
+
+    // 到此处，应该判断好 IsIntf 和 IsClass，并且 ClassIntfRoot 指向比较通用的一个父节点
+    if (CIRRoot <> nil) and (IsIntf or IsClass or IsRecord) then
+    begin
+      // CIRRoot 指向比较通用的一个父节点，ClassBody 或 interface 或 record
+      // 解析完其下属内容，把 K 步进到完毕的位置
+      if IsIntf or IsClass then
+      begin
+        DocFindMembers(CIRRoot, Item);
+        OwnerItem.AddItem(Item);
+      end
+      else
+      begin
+        DocFindRecordFields(CIRRoot, Item);
+        OwnerItem.AddItem(Item);
+      end;
+
+      Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
+      if Leaf = nil then
+        raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
+      // 找分号，后没注释了
+      Inc(K);
+    end
+    else // 其他普通类型
+    begin
+      Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
+      if Leaf = nil then
+        raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
+
+      Item.DeclareType := DeclLeaf.GetPascalCode; // 简单类型的完整声明
+
+      Inc(K); // 步进到下一个可能是注释的地方，如果是注释，K 指向注释末尾，如果不是，K 会减一以抵消此次步进
+      Item.Comment := DocCollectComments(ParentLeaf, K);
+      OwnerItem.AddItem(Item);
+      Inc(K);
+    end;
+  end;
 end;
 
 function CnCreateUnitDocFromFileName(const FileName: string): TCnDocUnit;
@@ -543,101 +703,6 @@ var
   SL: TStrings;
   TempLeaf, UnitLeaf, IntfLeaf: TCnPasAstLeaf;
   I: Integer;
-
-  // 下属子节点三个一组排列：TYPEDECL（子节点是名称）、分号、可能有的单个注释块
-  procedure DocFindTypes(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
-  var
-    K, M: Integer;
-    Leaf, CIRRoot: TCnPasAstLeaf;
-    Item: TCnTypeDocItem;
-    IsIntf, IsClass, IsRecord: Boolean;
-  begin
-    K := 0;
-    while K < ParentLeaf.Count do
-    begin
-      Leaf := DocSkipToChild(ParentLeaf, K, [cntTypeDecl], [tkNone]);
-      if Leaf = nil then
-        raise ECnPasCodeDocException.Create('NO Type Decl Exists.');
-
-      Item := TCnTypeDocItem.Create;
-      if Leaf.Count > 0 then
-        Item.DeclareName := Leaf[0].Text; // 先拿到类型名
-
-      // 判断 Leaf 的下标为 2 的子节点类型，如果是 RESTRICTEDTYPE，则表示是 interface、class，要额外处理
-      // 如果是 COMMMONTYPE 且再后面的俩子节点是 packed record 或一个 record，也要额外处理
-      IsIntf := False;
-      IsClass := False;
-      IsRecord := False;
-      CIRRoot := nil;
-
-      if (Leaf.Count >= 2) and (Leaf[2].NodeType = cntRestrictedType) then
-      begin
-        if Leaf[2].Count > 0 then
-        begin
-          CIRRoot := Leaf[2][0];
-          if CIRRoot.NodeType = cntInterfaceType then
-            IsIntf := True
-          else if CIRRoot.NodeType = cntClassType then
-          begin
-            IsClass := True;
-            if CIRRoot.Count > 0 then
-              CIRRoot := DocSkipCommentToChild(CIRRoot, [cntClassBody]);
-          end;
-
-          if IsIntf or IsClass then
-            Item.Comment := DocGetClassIntfComments(Leaf, IsClass);
-        end;
-      end
-      else if (Leaf.Count >= 2) and (Leaf[2].NodeType = cntCommonType) then
-      begin
-        Leaf := Leaf[2]; // 要判断 Leaf[2] 的子节点是否有 record
-        M := 0;
-        Leaf := DocSkipToChild(Leaf, M, [cntRecord], [tkRecord]);
-        if Leaf <> nil then
-        begin
-          IsRecord := True;
-          CIRRoot := Leaf;
-          M := 0;
-          Item.Comment := DocCollectComments(Leaf, M);
-        end;
-      end;
-
-      // 到此处，应该判断好 IsIntf 和 IsClass，并且 ClassIntfRoot 指向比较通用的一个父节点
-      if (CIRRoot <> nil) and (IsIntf or IsClass or IsRecord) then
-      begin
-        // CIRRoot 指向比较通用的一个父节点，ClassBody 或 interface 或 record
-        // 解析完其下属内容，把 K 步进到完毕的位置
-        if IsIntf or IsClass then
-        begin
-          DocFindMembers(CIRRoot, Item);
-          OwnerItem.AddItem(Item);
-        end
-        else
-        begin
-          DocFindRecordFields(CIRRoot, Item);
-          OwnerItem.AddItem(Item);
-        end;
-
-        Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
-        if Leaf = nil then
-          raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
-        // 找分号，后没注释了
-        Inc(K);
-      end
-      else // 其他普通类型
-      begin
-        Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
-        if Leaf = nil then
-          raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
-
-        Inc(K); // 步进到下一个可能是注释的地方，如果是注释，K 指向注释末尾，如果不是，K 会减一以抵消此次步进
-        Item.Comment := DocCollectComments(ParentLeaf, K);
-        OwnerItem.AddItem(Item);
-        Inc(K);
-      end;
-    end;
-  end;
-
 begin
   Result := nil;
   if not FileExists(FileName) then
@@ -808,6 +873,7 @@ begin
   Strs.Add(Spcs(Indent * 2) + FDeclareName);
   if FScope <> dsNone then
     Strs.Add(Spcs(Indent * 2) + SCOPE_STRS[FScope]);
+  Strs.Add(Spcs(Indent * 2) + FDeclareType);
   Strs.Add(Spcs(Indent * 2) + FComment);
   Strs.Add('');
 
