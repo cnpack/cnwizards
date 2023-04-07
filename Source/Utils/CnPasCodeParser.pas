@@ -821,15 +821,10 @@ begin
               begin
                 // 处理 record helper for 的情形，但在 implementation 部分其 end 会被
                 // record 内部的 function/procedure 给干掉，暂无解决方案。
-                IsRecordHelper := False;
                 Lex.SaveToBookmark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
-                if Lex.TokenID in [tkSymbol, tkIdentifier] then
-                begin
-                  if LowerCase(string(Lex.Token)) = 'helper' then
-                    IsRecordHelper := True;
-                end;
+                IsRecordHelper := Lex.TokenID = tkHelper;
 
                 Lex.LoadFromBookmark(Bookmark);
               end;
@@ -919,23 +914,12 @@ begin
                 Lex.SaveToBookmark(Bookmark);
 
                 LexNextNoJunkWithoutCompDirect(Lex);
-                if Lex.TokenID in [tkSymbol, tkIdentifier, tkSealed, tkAbstract] then
+                if Lex.TokenID in [tkHelper, tkSealed, tkAbstract] then
                 begin
-                  if LowerCase(string(Lex.Token)) = 'helper' then
-                  begin
-                    IsClassDef := True;
-                    IsHelper := True;
-                  end
-                  else if Lex.TokenID = tkSealed then
-                  begin
-                    IsClassDef := True;
-                    IsSealed := True;
-                  end
-                  else if Lex.TokenID = tkAbstract then
-                  begin
-                    IsClassDef := True;
-                    IsAbstract := True;
-                  end;
+                  IsClassDef := True;
+                  IsHelper := Lex.TokenID = tkHelper;
+                  IsSealed := Lex.TokenID = tkSealed;
+                  IsAbstract := Lex.TokenID = tkAbstract;
                 end;
 
                 Lex.LoadFromBookmark(Bookmark);
