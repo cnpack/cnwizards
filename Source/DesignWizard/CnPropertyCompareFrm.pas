@@ -88,6 +88,7 @@ type
     FIgnoreProperties: TStringList;
     FOnlyShowDiff: Boolean;
     FShowMenu: Boolean;
+    FShowEvents: Boolean;
     procedure SetLeftComponent(const Value: TComponent);
     procedure SetRightComponent(const Value: TComponent);
     function GetSelectionCount: Integer;
@@ -120,6 +121,8 @@ type
     {* 比较时是否要属性名与类型都相同才算相同，否则类型名相同即可}
     property IgnoreProperties: TStringList read FIgnoreProperties write SetIgnoreProperties;
     {* 全部赋值时要忽略的属性列表，如 Name 等}
+    property ShowEvents: Boolean read FShowEvents write FShowEvents;
+    {* 是否显示事件}
   end;
 
 {$ENDIF}
@@ -128,7 +131,10 @@ type
   private
     FIsSingle: Boolean;
     FModified: Boolean;
+    FMethod: TMethod;
   public
+    property Method: TMethod read FMethod write FMethod;
+    {* 如果是事件，保存事件}
     property IsSingle: Boolean read FIsSingle write FIsSingle;
     {* 对端是否无属性对应}
     property Modified: Boolean read FModified write FModified;
@@ -219,6 +225,8 @@ type
     btnOnlyDiff: TToolButton;
     pnlLeftName: TPanel;
     pnlRightName: TPanel;
+    actShowEvents: TAction;
+    ShowEvents1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
@@ -252,8 +260,10 @@ type
     procedure actListLeftExecute(Sender: TObject);
     procedure actListRightExecute(Sender: TObject);
     procedure actOnlyDiffExecute(Sender: TObject);
+    procedure actShowEventsExecute(Sender: TObject);
   private
     FOnlyDiff: Boolean;
+    FShowEvents: Boolean;
     FLeftObject: TObject;
     FRightObject: TObject;
     FLeftProperties: TObjectList;
@@ -285,7 +295,9 @@ type
     procedure UpdateCompareBmp;
     procedure FillGridWithProperties(G: TStringGrid; Props: TObjectList; IsRefresh: Boolean);
     procedure OnSyncSelect(var Msg: TMessage); message WM_SYNC_SELECT;
+{$IFNDEF STAND_ALONE}
     function CreateWizardIni: TCustomIniFile;
+{$ENDIF}
   protected
     function GetHelpTopic: string; override;
   public
@@ -326,6 +338,7 @@ const
   csOnlyShowDiff = 'OnlyShowDiff';
   csSameType = 'SameType';
   csIgnoreProperties = 'IgnoreProperties';
+  csShowEvents = 'ShowEvents';
 
 {$IFNDEF STAND_ALONE}
 var
@@ -342,11 +355,16 @@ var
   CompareForm: TCnPropertyCompareForm;
 begin
   CompareForm := TCnPropertyCompareForm.Create(Application);
+
+{$IFNDEF STAND_ALONE}
   if FManager <> nil then
   begin
     CompareForm.FOnlyDiff := FManager.OnlyShowDiff;
     CompareForm.actOnlyDiff.Checked := FManager.OnlyShowDiff;
+    CompareForm.FShowEvents := FManager.ShowEvents;
+    CompareForm.actShowEvents.Checked := FManager.ShowEvents;
   end;
+{$ENDIF}
 
   CompareForm.LeftObject := ALeft;
   CompareForm.RightObject := ARight;
@@ -469,6 +487,7 @@ begin
   FOnlyShowDiff := Ini.ReadBool('', csOnlyShowDiff, FOnlyShowDiff);
   FSameType := Ini.ReadBool('', csSameType, FSameType);
   FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
+  FShowEvents := Ini.ReadBool('', csShowEvents, False);
 end;
 
 procedure TCnPropertyCompareManager.Notification(AComponent: TComponent;
@@ -518,6 +537,7 @@ begin
   Ini.WriteBool('', csOnlyShowDiff, FOnlyShowDiff);
   Ini.WriteBool('', csSameType, FSameType);
   Ini.WriteString('', csIgnoreProperties, FIgnoreProperties.CommaText);
+  Ini.WriteBool('', csShowEvents, FShowEvents);
 end;
 
 procedure TCnPropertyCompareManager.SelectExecute(Sender: TObject);
@@ -687,7 +707,12 @@ begin
   P1 := TCnPropertyObject(Item1);
   P2 := TCnPropertyObject(Item2);
 
-  Result := CompareStr(P1.PropName, P2.PropName);
+  if (P1.PropType in tkMethods) and not (P2.PropType in tkMethods) then
+    Result := 1
+  else if (P2.PropType in tkMethods) and not (P1.PropType in tkMethods) then
+    Result := -1
+  else
+    Result := CompareStr(P1.PropName, P2.PropName);
 end;
 
 { TCnPropertyCompareForm }
@@ -834,7 +859,20 @@ begin
       AProp.IntfValue := IUnknown(GetOrdProp(AObject, PropInfo));
   end;
 
-  AProp.DisplayValue := GetPropValueStr(AObject, PropInfo);
+  if AProp.PropType in tkMethods then
+  begin
+    AProp.Method := GetMethodProp(AObject, PropInfo);
+    if AProp.Method.Data <> nil then
+    begin
+      try
+        AProp.DisplayValue := TObject(AProp.Method.Data).MethodName(AProp.Method.Code);
+      except
+        ;
+      end;
+    end;
+  end
+  else
+    AProp.DisplayValue := GetPropValueStr(AObject, PropInfo);
 end;
 
 procedure TCnPropertyCompareForm.LoadOneProp(var AProp: TCnDiffPropertyObject;
@@ -918,7 +956,8 @@ begin
     for I := 0 to APropCount - 1 do
     begin
       PropInfo := PropListPtr^[I];
-      if PropInfo^.PropType^^.Kind in tkProperties then
+      if (PropInfo^.PropType^^.Kind in tkProperties)
+        or (FShowEvents and (PropInfo^.PropType^^.Kind in tkMethods)) then
       begin
         AProp := nil;
         LoadOneClassicProp(AProp, AObject, PropInfo);
@@ -1033,7 +1072,9 @@ begin
       PL := TCnPropertyObject(FLeftProperties[L]);
       PR := TCnPropertyObject(FRightProperties[R]);
 
-      C := CompareStr(PL.PropName, PR.PropName);
+      // C := CompareStr(PL.PropName, PR.PropName);
+      // 只有纯粹属性按字母排序时才能用 CompareStr，有事件时得写成和排序规则一致
+      C := PropertyListCompare(PL, PR);
       if C = 0 then
       begin
         // 如果需要，并且碰上属性名相同但类型不同，则重新算 C
@@ -1048,7 +1089,7 @@ begin
         Inc(R);
 
         if SameType then
-         Merge.Add(PL.PropName + IntToStr(Ord(PL.PropType)))
+          Merge.Add(PL.PropName + IntToStr(Ord(PL.PropType)))
         else
           Merge.Add(PL.PropName);
       end
@@ -2003,26 +2044,43 @@ begin
 {$ENDIF}
 end;
 
-function TCnPropertyCompareForm.CreateWizardIni: TCustomIniFile;
 {$IFNDEF STAND_ALONE}
+
+function TCnPropertyCompareForm.CreateWizardIni: TCustomIniFile;
 var
   Wizard: TCnBaseWizard;
-{$ENDIF}
 begin
   Result := nil;
-{$IFNDEF STAND_ALONE}
   Wizard := CnWizardMgr.WizardByClassName('TCnAlignSizeWizard');
   if Wizard <> nil then
     Result := Wizard.CreateIniFile;
-{$ENDIF}
 end;
+
+{$ENDIF}
 
 procedure TCnPropertyCompareForm.actOnlyDiffExecute(Sender: TObject);
 begin
   FOnlyDiff := not FOnlyDiff;
   actOnlyDiff.Checked := FOnlyDiff;
+
+{$IFNDEF STAND_ALONE}
   if FManager <> nil then
     FManager.OnlyShowDiff := FOnlyDiff;
+{$ENDIF}
+
+  LoadListProperties;
+  ShowProperties;
+end;
+
+procedure TCnPropertyCompareForm.actShowEventsExecute(Sender: TObject);
+begin
+  FShowEvents := not FShowEvents;
+  actShowEvents.Checked := FShowEvents;
+
+{$IFNDEF STAND_ALONE}
+  if FManager <> nil then
+    FManager.ShowEvents := FShowEvents;
+{$ENDIF}
 
   LoadListProperties;
   ShowProperties;

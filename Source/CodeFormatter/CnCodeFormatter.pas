@@ -347,7 +347,6 @@ type
     procedure FormatMethodHeading(PreSpaceCount: Byte = 0; HasClassPrefixForVar: Boolean = True);
     procedure FormatConstructorHeading(PreSpaceCount: Byte = 0);
     procedure FormatDestructorHeading(PreSpaceCount: Byte = 0);
-    procedure FormatOperatorHeading(PreSpaceCount: Byte = 0);
     procedure FormatVarDeclHeading(PreSpaceCount: Byte = 0; IsClassVar: Boolean = True);
     procedure FormatClassVarIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatClassVarIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
@@ -872,6 +871,8 @@ begin
     else if (FLastToken in RightBracket + [tokHat]) and (Token in [tokKeywordThen, tokKeywordDo,
       tokKeywordOf, tokKeywordTo, tokKeywordDownto, tokKeywordAt]) then
       WriteOneSpace  // 强行分离右括号/指针符与关键字
+    else if (FLastToken = tokKeywordOperator) and (Token in [tokKeywordIn]) then
+      WriteOneSpace  // operator in 需要用空格分开
     else if (Token in LeftBracket + [tokPlus, tokMinus, tokHat]) and
       ((FLastToken in NeedSpaceAfterKeywordTokens)
       or ((FLastToken = tokKeywordAt) and UpperContainElementType([pfetRaiseAt]))) then
@@ -2919,16 +2920,6 @@ end;
 procedure TCnBasePascalFormatter.FormatDestructorHeading(PreSpaceCount: Byte);
 begin
   Match(tokKeywordDestructor, PreSpaceCount);
-  FormatMethodName;
-
-  if Scanner.Token = tokLB then
-    FormatFormalParameters;
-end;
-
-{ OperatorHeading -> OPERATOR Ident [FormalParameters] }
-procedure TCnBasePascalFormatter.FormatOperatorHeading(PreSpaceCount: Byte);
-begin
-  Match(tokKeywordOperator, PreSpaceCount);
   FormatMethodName;
 
   if Scanner.Token = tokLB then

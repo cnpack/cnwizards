@@ -405,6 +405,9 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       object OnlyShowDifferentProperties1: TMenuItem
         Action = actOnlyDiff
       end
+      object ShowEvents1: TMenuItem
+        Action = actShowEvents
+      end
     end
     object Help1: TMenuItem
       Caption = '&Help'
@@ -524,6 +527,11 @@ inherited CnPropertyCompareForm: TCnPropertyCompareForm
       Hint = 'Only Show Different Properties'
       ImageIndex = 105
       OnExecute = actOnlyDiffExecute
+    end
+    object actShowEvents: TAction
+      Caption = 'Show &Events'
+      Hint = 'Show Events to Compare'
+      OnExecute = actShowEventsExecute
     end
   end
   object pmGrid: TPopupMenu
