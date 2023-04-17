@@ -728,7 +728,7 @@ begin
   if FLeftObject <> nil then
     LoadProperty(FLeftProperties, FLeftObject);
   if FRightObject <>nil then
-  LoadProperty(FRightProperties, FRightObject);
+    LoadProperty(FRightProperties, FRightObject);
 
   FLeftProperties.Sort(PropertyListCompare);
   FRightProperties.Sort(PropertyListCompare);
@@ -784,47 +784,69 @@ end;
 
 procedure TCnPropertyCompareForm.LoadOneRttiProp(var AProp: TCnDiffPropertyObject;
   AObject: TObject; RttiProperty: TRttiProperty);
+var
+  DataSize: Integer;
 begin
-  if RttiProperty.Visibility <> mvPublished then // 只拿 published 的
-    Exit;
-
-  if AProp = nil then
-    AProp := TCnDiffPropertyObject.Create;
-  AProp.IsNewRTTI := True;
-
-  AProp.PropName := RttiProperty.Name;
-  AProp.PropType := RttiProperty.PropertyType.TypeKind;
-  AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
-
-  // 有写入权限，并且指定类型，才可修改，否则界面上没法整
-  AProp.CanModify := (RttiProperty.IsWritable) and (RttiProperty.PropertyType.TypeKind
-    in CnCanModifyPropTypes);
-
-  if RttiProperty.IsReadable then
+  if RttiProperty <> nil then
   begin
-    try
-      AProp.PropRttiValue := RttiProperty.GetValue(AObject)
-    except
-      // Getting Some Property causes Exception. Catch it.
-      AProp.PropRttiValue := nil;
-    end;
+    if RttiProperty.Visibility <> mvPublished then // 只拿 published 的
+      Exit;
 
-    AProp.ObjValue := nil;
-    AProp.IntfValue := nil;
-    try
-      if AProp.IsObjOrIntf and RttiProperty.GetValue(AObject).IsObject then
-        AProp.ObjValue := RttiProperty.GetValue(AObject).AsObject
-      else if AProp.IsObjOrIntf and (RttiProperty.GetValue(AObject).TypeInfo <> nil) and
-        (RttiProperty.GetValue(AObject).TypeInfo^.Kind = tkInterface) then
-        AProp.IntfValue := RttiProperty.GetValue(AObject).AsInterface;
-    except
-      // Getting Some Property causes Exception. Catch it.;
-    end;
-  end
-  else
-    AProp.PropRttiValue := SCnCanNotReadValue;
+    if AProp = nil then
+      AProp := TCnDiffPropertyObject.Create;
+    AProp.IsNewRTTI := True;
 
-  AProp.DisplayValue := GetRttiPropValueStr(AObject, RttiProperty);
+    AProp.PropName := RttiProperty.Name;
+    AProp.PropType := RttiProperty.PropertyType.TypeKind;
+    AProp.IsObjOrIntf := AProp.PropType in [tkClass, tkInterface];
+
+    // 有写入权限，并且指定类型，才可修改，否则界面上没法整
+    AProp.CanModify := (RttiProperty.IsWritable) and (RttiProperty.PropertyType.TypeKind
+      in CnCanModifyPropTypes);
+
+    if RttiProperty.IsReadable then
+    begin
+      try
+        AProp.PropRttiValue := RttiProperty.GetValue(AObject)
+      except
+        // Getting Some Property causes Exception. Catch it.
+        AProp.PropRttiValue := nil;
+      end;
+
+      AProp.ObjValue := nil;
+      AProp.IntfValue := nil;
+      try
+        if AProp.IsObjOrIntf and RttiProperty.GetValue(AObject).IsObject then
+          AProp.ObjValue := RttiProperty.GetValue(AObject).AsObject
+        else if AProp.IsObjOrIntf and (RttiProperty.GetValue(AObject).TypeInfo <> nil) and
+          (RttiProperty.GetValue(AObject).TypeInfo^.Kind = tkInterface) then
+          AProp.IntfValue := RttiProperty.GetValue(AObject).AsInterface;
+      except
+        // Getting Some Property causes Exception. Catch it.;
+      end;
+    end
+    else
+      AProp.PropRttiValue := SCnCanNotReadValue;
+
+    if AProp.PropType in tkMethods then
+    begin
+      DataSize := RttiProperty.GetValue(AObject).DataSize;
+      if DataSize = SizeOf(TMethod) then
+      begin
+        RttiProperty.GetValue(AObject).ExtractRawData(@AProp.Method);
+        if AProp.Method.Data <> nil then
+        begin
+          try
+            AProp.DisplayValue := TObject(AProp.Method.Data).MethodName(AProp.Method.Code);
+          except
+            ;
+          end;
+        end;
+      end;
+    end
+    else
+      AProp.DisplayValue := GetRttiPropValueStr(AObject, RttiProperty);
+  end;
 end;
 
 {$ENDIF}
@@ -912,6 +934,7 @@ var
   RttiContext: TRttiContext;
   RttiType: TRttiType;
   RttiProperty: TRttiProperty;
+  RttiMethod: TRttiMethod;
 {$ELSE}
   PropListPtr: PPropList;
   I, APropCount: Integer;
@@ -928,6 +951,16 @@ begin
       for RttiProperty in RttiType.GetProperties do
       begin
         if RttiProperty.PropertyType.TypeKind in tkProperties then
+        begin
+          if ListContainsProperty(RttiProperty.Name, List) then // 子类、父类可能有相同的属性
+            Continue;
+
+          AProp := nil;
+          LoadOneRttiProp(AProp, AObject, RttiProperty);
+          if AProp <> nil then
+            List.Add(AProp);
+        end
+        else if FShowEvents and (RttiProperty.PropertyType.TypeKind in tkMethods) then
         begin
           if ListContainsProperty(RttiProperty.Name, List) then // 子类、父类可能有相同的属性
             Continue;
