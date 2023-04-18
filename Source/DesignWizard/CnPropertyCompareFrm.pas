@@ -830,6 +830,7 @@ begin
 
     if AProp.PropType in tkMethods then
     begin
+      AProp.CanModify := True;
       DataSize := RttiProperty.GetValue(AObject).DataSize;
       if DataSize = SizeOf(TMethod) then
       begin
@@ -883,6 +884,7 @@ begin
 
   if AProp.PropType in tkMethods then
   begin
+    AProp.CanModify := True;
     AProp.Method := GetMethodProp(AObject, PropInfo);
     if AProp.Method.Data <> nil then
     begin
@@ -1598,6 +1600,7 @@ function TCnPropertyCompareForm.TransferProperty(PFrom,
 var
   V: Variant;
   Obj: TObject;
+  M: TMethod;
 {$IFDEF SUPPORT_ENHANCED_RTTI}
   RttiContext: TRttiContext;
   RttiTypeFrom, RttiTypeTo: TRttiType;
@@ -1651,6 +1654,12 @@ begin
   begin
     Obj := GetObjectProp(FromObj, PFrom.PropName);
     SetObjectProp(ToObj, PTo.PropName, Obj);
+  end
+  else if PFrom.PropType = tkMethod then
+  begin
+    // 拿到事件再赋值过去
+    M := GetMethodProp(FromObj, PFrom.PropName);
+    SetMethodProp(ToObj, PTo.PropName, M);
   end
   else // 其余相同的类型也用 Variant 过渡
   begin
