@@ -227,6 +227,8 @@ type
     pnlRightName: TPanel;
     actShowEvents: TAction;
     ShowEvents1: TMenuItem;
+    btn4: TToolButton;
+    btnShowEvents: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure actSelectLeftExecute(Sender: TObject);
