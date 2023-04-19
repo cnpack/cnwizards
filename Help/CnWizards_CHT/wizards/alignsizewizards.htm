@@ -122,17 +122,17 @@
 <p class="text">該功能用來對窗體上的不可視組件進行位置的排列，可處理當前窗體上的所有組件。單擊該菜單項後彈出如下對話框：</p>
 <p align="center" class="text"><img src="arrangenonvisual.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text" align="left"><b>按行排列，每行個數</b>：選中該單選鈕表示將不可視組件按照先行後列也就是先橫後豎的順序來排列，每行的個數可指定。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>按列排列，每列個數：</b>選中該單選鈕表示將不可視組件按照先列後行也就是先豎後橫的順序來排列，每列的個數可指定。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>行列間距</b>：可以設置不可視組件排列的行列間距，以相鄰兩組件的邊緣距離為準。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>排列後自動移位</b>：將排列後自動將不可視組件移動到當前窗體的某一位置，可以是窗體的左上、右上、左下、右下以及中央等。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>距窗體邊緣</b>：可以設置最靠近窗體邊緣的組件距窗體邊緣的空白距離。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>按類名排序</b>：可以設置不可視組件是否按類名字符串進行排序。</li>
 </ul>
 <p class="text" align="left">　</p>
@@ -140,46 +140,48 @@
 <p class="text">該功能用來比較當前設計器上選中的兩個組件的屬性，同時設計器菜單上也有選擇與比較的菜單項。單擊該菜單項後彈出如下窗口，上部是菜單與工具欄，中部是左右組件的屬性列表與比較，右側是異同情況的縮略圖與導航欄。左右屬性列表中，屬性相同但值不同的屬性以紅色底色顯示，如某屬性對方不存在，則對方顯示為空白行。</p>
 <p align="center" class="text"><img src="propertycompare.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text" align="left"><b>新建比較</b>：新建空白比較窗口，用戶可以在新窗口裡選擇需要比較的控件。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>刷新</b>：從設計器中重新讀入組件的屬性值並重新比較。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>設置</b>：打開屬性比較的設置窗口。</li>
     <p align="center" class="text"><img src="propertycompconfig.png"></p>
     <ul>
-      <li> 
+      <li>
         <p class="text" align="left"><b>只判斷屬性名</b>：如何判斷兩個組件的兩個屬性是否可比較。如勾選，當屬性名相同時便可比較，如未勾選，則屬性名與屬性類型均需相同才可比較。</li>
-      <li> 
+      <li>
         <p class="text" align="left"><b>全部賦值時忽略以下屬性</b>：部分屬性無需或不能從其他組件賦值過來如 Name 等，這裡指定了全部賦值時要忽略的屬性，每一個屬性名單獨佔一行。注意該選項對單獨賦值無效。</li>
-      <li> 
+      <li>
         <p class="text" align="left"><b>在設計器中顯示右鍵菜單</b>：如勾選，當設計器中右鍵點擊組件時，可出現選擇與比較菜單項。</li>
     </ul>
-  <li> 
+  <li>
     <p class="text" align="left"><b>關閉</b>：關閉本窗口。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>選擇左側組件</b>：使用「組件列表」功能選擇當前設計器上的單個組件作為左側待比較組件。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>選擇右側組件</b>：使用「組件列表」功能選擇當前設計器上的單個組件作為右側待比較組件。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>高級選擇左側組件</b>：使用「組件選擇器」功能選擇當前設計器上的單個組件作為左側待比較組件。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>高級選擇右側組件</b>：使用「組件選擇器」功能選擇當前設計器上的單個組件作為右側待比較組件。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>賦值至左</b>：將右側組件的當前選中屬性的屬性值賦值給左側組件的同名屬性，設計器內組件同步更新。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>賦值至右</b>：將左側組件的當前選中屬性的屬性值賦值給右側組件的同名屬性，設計器內組件同步更新。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>全部至左</b>：將右側組件的所有屬性的屬性值賦值給左側組件的同名屬性，設計器內組件同步更新。該機制會跳過設置中的部分指定屬性，如果對方同名屬性不存在則忽略。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>全部至右</b>：將左側組件的所有屬性的屬性值賦值給右側組件的同名屬性，設計器內組件同步更新。該機制會跳過設置中的部分指定屬性，如果對方同名屬性不存在則忽略。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>上一處不同</b>：在屬性列表中尋找並定位當前選中屬性之前的不同屬性。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>下一處不同</b>：在屬性列表中尋找並定位當前選中屬性之後的不同屬性。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>只顯示不同屬性</b>：選中此項後，屬性列表中只顯示值不同的屬性，否則全部顯示。</li>
-  <li> 
+  <li>
+    <p class="text" align="left"><b>顯示事件</b>：選中此項後，屬性列表中會將事件也列入顯示比較的範圍，否則不包括事件。</li>
+  <li>
     <p class="text" align="left"><b>幫助</b>：顯示此幫助。</li>
 </ul>
 <p class="text" align="left">　</p>
@@ -187,10 +189,10 @@
 <p class="text">該功能用來快速查找並選擇設計器上的組件。它能列出當前設計器上的所有組件的名稱、類名以及標題屬性值並據此供查找定位。單擊該菜單項後彈出如下對話框：</p>
 <p align="center" class="text"><img src="listcomp.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text"><b>在設計器中定位所選組件：</b>在 IDE 的設計器中定位選中的組件。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>複製組件名：</b>複製所選擇的組件名稱到剪貼板。</p>
   </li>
   <li>
@@ -202,22 +204,22 @@
   <li>
     <p class="text"><b>反向選擇組件</b>：反向選擇組件列表中的已選擇組件。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>按字符串開頭匹配：</b>查找的時候，輸入的字符從組件名、類名以及標題的頭部開始匹配，組件名、類名以及標題頭部含有輸入字符的組件才能顯示。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>按字符串的所有位置匹配：</b>查找的時候，輸入的字符匹配組件名、類名以及標題的任何部分，組件名、類名以及標題含有輸入字符的組件才能顯示。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>運行組件選擇器：</b>關閉當前窗口，運行組件選擇專家，以獲得更加靈活的選擇與過濾方式。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>字體：</b>更改列表框字體。</p>
   </li>
-    <li> 
+    <li>
     <p class="text"><b>幫助：</b>顯示幫助信息。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>退出：</b>關閉此窗口。</p>
   </li>
 </ul>
@@ -226,13 +228,13 @@
 <p class="text">該功能用來將當前窗體上選中的組件轉換成創建代碼，語法支持 Delphi 和 C++Builder。單擊該菜單項後彈出如下窗口，上部是工具欄，中部是組件變量聲明，下部是組件創建和屬性賦值的代碼。</p>
 <p align="center" class="text"><img src="comptocode.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text" align="left"><b>刷新</b>：將當前窗體上選中的組件重新轉換成創建代碼，如未選擇組件，默認轉換整個窗體。轉換完畢後狀態欄上將顯示轉換的對象數。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>清空</b>：清除 var 區域和創建代碼。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>複製變量聲明</b>：複製 var 區域的組件變量聲明代碼到剪貼板，複製成功後無提示。</li>
-  <li> 
+  <li>
     <p class="text" align="left"><b>複製創建代碼</b>：複製組件的創建和屬性賦值代碼到剪貼板，複製成功後無提示。</li>
   <li>
     <p class="text" align="left"><b>複製創建過程</b>：將組件變量聲明和創建代碼組合成一完整過程複製到剪貼板，複製成功後會提示複製的過程名。</li>
