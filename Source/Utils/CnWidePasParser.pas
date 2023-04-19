@@ -610,7 +610,7 @@ begin
 
       if {IsImpl and } (Lex.TokenID in [tkCompDirect]) or // Allow CompDirect
         ((not (PrevTokenID in [tkAmpersand, tkAddressOp])) and (Lex.TokenID in
-        [tkProcedure, tkFunction, tkConstructor, tkDestructor,
+        [tkProcedure, tkFunction, tkConstructor, tkDestructor, tkOperator,
         tkInitialization, tkFinalization,
         tkBegin, tkAsm,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
@@ -621,7 +621,7 @@ begin
       begin
         Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
         case Lex.TokenID of
-          tkProcedure, tkFunction, tkConstructor, tkDestructor:
+          tkProcedure, tkFunction, tkConstructor, tkDestructor, tkOperator:
             begin
               // 不处理 procedure/function 类型定义，前面是 = 号
               // 也不处理 procedure/function 变量声明，前面是 : 号
@@ -632,9 +632,6 @@ begin
                 and (DeclareWithEndLevel <= 0) then
               begin
                 // DeclareWithEndLevel <= 0 表示只处理 class/record 外的声明，内部不管
-//                while BlockStack.Count > 0 do
-//                  BlockStack.Pop;
-//                CurrBlock := nil;
                 if CurrBlock = nil then
                   Token.FItemLayer := 0
                 else
