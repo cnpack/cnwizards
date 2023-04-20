@@ -48,8 +48,8 @@ uses
   StrUtils,
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
-{$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, {$ENDIF}
-  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang, CnIDEVersion,
+{$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
+  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
   CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
 
 type
@@ -374,11 +374,13 @@ begin
   OldC := Screen.Cursor;
   Screen.Cursor := crHourGlass;
   try
+{$IFNDEF STAND_ALONE}
     if CnIsDelphi11GEDot3 then
     begin
       FOldListViewWndProc := lvList.WindowProc;
       lvList.WindowProc := ListViewWindowProc;
     end;
+{$ENDIF}
 
     FRegExpr := TRegExpr.Create;
     FRegExpr.ModifierI := True;
