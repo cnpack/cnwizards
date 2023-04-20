@@ -1616,7 +1616,7 @@ begin
   begin
     Info := TCnElementInfo(FElementList.Objects[I]);
     if (Info <> nil) and (Info.ElementType in [etClassFunc, etSingleFunction,
-      etConstructor, etDestructor]) then
+      etConstructor, etDestructor, etOperator]) then
       ProcCombo.DropDownList.InfoItems.AddObject(Info.Text, Info);
   end;
 
@@ -1860,7 +1860,9 @@ var
     if IsClass then
     begin
       if ProcType in [tkFunction, tkProcedure] then
-        Result := etClassFunc;
+        Result := etClassFunc
+      else if ProcType = tkOperator then
+        Result := etOperator
     end
     else
     begin
