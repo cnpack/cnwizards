@@ -79,7 +79,8 @@ type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
 
   TCnElementType = (etUnknown, etClassFunc, etSingleFunction, etConstructor, etDestructor,
-    etIntfMember, etRecord, etClass, etInterface, etProperty, etIntfProperty, etNamespace);
+    etIntfMember, etRecord, etClass, etInterface, etProperty, etIntfProperty, etNamespace,
+    etOperator);
 
   TCnElementInfo = class(TCnBaseElementInfo)
   {* 一元素包含的信息，从过程扩展而来}
@@ -1836,7 +1837,9 @@ var
       if ProcType = tkFunction then
         Result := 'class function' // Do not localize.
       else if ProcType = tkProcedure then
-        Result := 'class procedure'; // Do not localize.
+        Result := 'class procedure' // Do not localize.
+      else if ProcType = tkOperator then
+        Result := 'class operator'; // Do not localize.
     end
     else
     begin
@@ -1846,6 +1849,7 @@ var
         tkProcedure: Result := 'procedure';
         tkConstructor: Result := 'constructor';
         tkDestructor: Result := 'destructor';
+        tkOperator: Result := 'operator';
       end;
     end;
   end;
@@ -1864,6 +1868,7 @@ var
         tkFunction, tkProcedure: Result := etSingleFunction;
         tkConstructor: Result := etConstructor;
         tkDestructor: Result := etDestructor;
+        tkOperator: Result := etOperator;
       end;
     end;
   end;
@@ -2227,7 +2232,7 @@ var
                 FImplLine := GetPasParserLineNumber;
 
               if ((not InTypeDeclaration and InImplementation) or InIntfDeclaration) and
-                (PasParser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor]) then
+                (PasParser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor, tkOperator]) then
               begin
                 IdentifierNeeded := not (PrevTokenID in [tkAssign, tkRoundOpen, tkComma]);
                 // 暂时认为 procedure 前面是 := ( 以及 , 的是匿名函数
