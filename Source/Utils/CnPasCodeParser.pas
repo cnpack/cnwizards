@@ -1801,7 +1801,8 @@ begin
             begin
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID in [tkSealed, tkStrict,
-                tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper]) then
+                tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper, tkClass,
+                tkVar, tkConst, tkType, tkProperty]) then
               begin
                 Result.PosKind := pkClass;
                 InClass := True;
