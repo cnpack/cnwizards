@@ -1796,6 +1796,17 @@ begin
                 InClass := True;
                 Continue;
               end;
+            end
+            else // Lex 的 IsClass 在 class 关键字后是以下内容时判断错误，需如此弥补
+            begin
+              DoNext(True);
+              if (Lex.TokenPos < CurrPos) and (Lex.TokenID in [tkSealed, tkStrict,
+                tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper]) then
+              begin
+                Result.PosKind := pkClass;
+                InClass := True;
+                Continue;
+              end;
             end;
           end;
         tkType:

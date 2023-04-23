@@ -117,7 +117,10 @@ type
       解决方案：已修复 AsciiCharProc 中的问题
     原有问题四：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：都加上了
+    原有问题五：IsClass 的判断用 class 后的标识符是否是合法标识符来判断，对于 class sealed/helper 等判断有误
+      解决方案：暂无
   ***}
+
   TTokenKinds = set of TTokenKind;
 
   TCommentState=(csAnsi, csBor, csNo);
@@ -333,9 +336,6 @@ type
 
     property TokenID: TTokenKind read FTokenID;
   end;
-
-var
-  mwPasLex: TmwPasLex;
 
 implementation
 

@@ -1754,6 +1754,17 @@ begin
                 InClass := True;
                 Continue;
               end;
+            end
+            else
+            begin
+              DoNext(True);
+              if LexStillBeforeCursor and (Lex.TokenID in [tkSealed, tkStrict,
+                tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper]) then
+              begin
+                PosInfo.PosKind := pkClass;
+                InClass := True;
+                Continue;
+              end;
             end;
           end;
         tkType:
