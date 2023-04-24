@@ -3135,6 +3135,10 @@
   {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
 {$ENDIF}
 
+{$IFDEF DELPHIXE8_UP}
+  {$DEFINE SUPPORT_TBYTES_OPERATION}    // XE7 的 TBytes 开始支持相加、插入等操作
+{$ENDIF}
+
 {$IFDEF DELPHIXE5_UP}
   {$DEFINE SUPPORT_MOBILE}              // XE5 开始支持移动开发
   {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
