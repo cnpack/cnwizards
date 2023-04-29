@@ -54,7 +54,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, ToolsAPI, CnConsts, CnWizConsts,
   CnWizOptions, CnWizUtils, CnWizCompilerConst, Clipbrd, ActnList, ShellAPI,
-  Registry, Math, TypInfo, CnCommon, GetIdeVersion, CnWizIdeUtils, CnLangMgr,
+  Registry, Math, TypInfo, CnCommon, CnWizIdeUtils, CnLangMgr,
   CnWizMultiLang, CnWizManager, CnEditControlWrapper;
 
 type
@@ -152,7 +152,6 @@ type
   protected
     procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
     property FeedbackType: TFeedbackType read GetFeedbackType;
   end;
 
@@ -812,8 +811,7 @@ begin
   Result := SOutConfig + SCRLF;
   Result := Result + '  OS: ' + GetOSString + SCRLF;
   Result := Result + '  CnWizards: ' + GetCnPackVersionString;
-  Result := Result + '  IDE: ' + TypInfo.GetEnumName(TypeInfo(TBorlandIdeVersion),
-    Ord(GetBorlandIdeVersion)) + ' ' + GetIdeEdition + ' - ' + GetIdeExeVersion + SCRLF;
+  Result := Result + '  IDE: ' + GetIdeExeVersion + SCRLF;
   Result := Result + '  ComCtl32: ' + GetFileVersionStr(MakePath(GetSystemDir)
     + 'comctl32.dll') + SCRLF + SCRLF;
 

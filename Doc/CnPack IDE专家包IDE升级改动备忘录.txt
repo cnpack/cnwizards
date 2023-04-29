@@ -5,9 +5,9 @@
 **********************************************************************
 
                     CnPack IDE专家包IDE升级改动备忘录
-                           Revision 1.0.0.2
+                           Revision 1.0.0.3
                        =========================
-                         作者：刘啸 2018.11.08
+                         作者：刘啸 2023.04.29
 
 
 
@@ -21,7 +21,6 @@
   二、cnwizards\Source\Framework\CnWizCompilerConst.pas，加入新的枚举常量定义以及库文件名称定义。
       cnwizards\Source\Utils\CnWizIdeUtils.pas 的 GetBDSUserDataDir 中，加入新的定义。
       cnwizards\Misc\CnIDEVersion.pas 加入新的版本判断。
-      cnwizards\ThirdParty\GetIdeVersion.pas 加入新的版本判断。
       cnwizards\Source\ThirdParty\DCU32\DCURecs.pas 2720行左右增加新版定义判断
 
   三、cnwizards\Source\ScriptWizard\CnScript_CnWizUtils.pas 同步加入新的枚举常量注册到脚本以及 
@@ -48,9 +47,7 @@
 
   十三、Pascal Script 的 Unicode 版本需要修改其 eDefines.inc 来支持新 IDE，另外还需要生成一个新的 CnScript_Register_ToolsAPI_Dxxx.pas，供此 IDE 版本的 Pascal Script 使用，并在 CnScriptRegister 中增加注册。
 
-  十四、USE_JCL 宏启用的情况下，JCL 1.94 版也要修改以增加对新 IDE 的支持。
-
-  十五、其他兼容性测试！这是最重要的。
+  十四、其他兼容性测试！这是最重要的。
 
 文档方面：
 
