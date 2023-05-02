@@ -849,7 +849,8 @@ end;
 procedure TCnExtractStringForm.actEditExecute(Sender: TObject);
 var
   Idx, K: Integer;
-  S: string;
+  S, OldName, OldValue: string;
+  Token: TCnGeneralPasToken;
 begin
   if lvStrings.Selected = nil then
     Exit;
@@ -859,16 +860,44 @@ begin
     Exit;
 
   S := FTool.TokenListRef[Idx];
+  OldName := S;
+  Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[Idx]);
+  if Token <> nil then
+    OldValue := Token.Token
+  else
+    OldValue := '';
+
   if CnWizInputQuery(SCnEditorExtractStringChangeName, SCnEditorExtractStringEnterNewName, S) then
   begin
-    K := FTool.TokenListRef.IndexOf(S);
-    if (K >= 0) and (K <> Idx) then
+    if (S <> OldName) and (S <> '') then
     begin
-      ErrorDlg(SCnEditorExtractStringDuplicatedName);
-    end
-    else
-    begin
-      FTool.TokenListRef[Idx] := S;
+      // 拿到旧名字和旧值，挨个搜索，如果有新名字和不同于旧值的，出错退出。
+      // 如果有多个旧名字旧值，则都更改成新名字
+      for K := 0 to FTool.TokenListRef.Count - 1 do
+      begin
+        if (FTool.TokenListRef[K] = S) then // 如果有项等于新名字
+        begin
+          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
+          if Token.Token <> OldValue then   // 且其值不等于旧值
+          begin
+            ErrorDlg(SCnEditorExtractStringDuplicatedName);
+            Exit;
+          end;
+        end;
+      end;
+
+      for K := 0 to FTool.TokenListRef.Count - 1 do
+      begin
+        if (FTool.TokenListRef[K] = OldName) then // 如果有项等于旧名字
+        begin
+          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
+          if Token.Token = OldValue then          // 且其值等于旧值
+          begin
+            FTool.TokenListRef[K] := S;           // 则都改成新名字
+          end;
+        end;
+      end;
+
       lvStrings.Invalidate;
     end;
   end;
