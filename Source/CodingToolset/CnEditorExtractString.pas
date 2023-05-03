@@ -319,7 +319,11 @@ var
   L: Integer;
 begin
   Result := False;
-  L := StrLen(S);
+{$IFDEF IDE_STRING_ANSI_UTF8} // 非 Unicode 编译器下针对 PWideChar 求长度，只能用 Windows API
+  L := lstrlenW(S);
+{$ELSE}
+  L := StrLen(S);             // 非 Unicode 编译器下针对 PAnsiChar 求长度，以及 Unicode 编译器下针对 PWideChar 求长度
+{$ENDIF}
   if L <= 2 then // 单引号或不全，不算
     Exit;
 
@@ -795,13 +799,13 @@ end;
 
 procedure TCnExtractStringForm.actCopyExecute(Sender: TObject);
 var
-  L: TStringList;
+  L: TCnIdeStringList;
   HT: TCnStringHeadType;
 begin
   if (FTool.TokenListRef = nil) or (FTool.TokenListRef.Count <= 0) then
     Exit;
 
-  L := TStringList.Create;
+  L := TCnIdeStringList.Create;
   try
     HT := TCnStringHeadType(cbbMakeType.ItemIndex);
     if FTool.GenerateDecl(L, HT) then
