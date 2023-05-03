@@ -261,6 +261,9 @@
         <DCCReference Include="CodingToolset\CnEditorJumpMessage.pas"/>
         <DCCReference Include="CodingToolset\CnEditorFontZoom.pas"/>
         <DCCReference Include="CodingToolset\CnEditorDuplicateUnit.pas"/>
+        <DCCReference Include="SimpleWizards\CnEditorExtractString.pas">
+                <Form>CnExtractStringForm</Form>
+        </DCCReference>
         <DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
             <Form>CnMsdnConfigForm</Form>
         </DCCReference>

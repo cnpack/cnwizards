@@ -99,6 +99,7 @@ uses
   CnEditorJumpMessage in 'CodingToolset\CnEditorJumpMessage.pas',
   CnEditorFontZoom in 'CodingToolset\CnEditorFontZoom.pas',
   CnEditorDuplicateUnit in 'CodingToolset\CnEditorDuplicateUnit.pas',
+  CnEditorExtractString in 'CodingToolset\CnEditorExtractString.pas' {CnExtractStringForm},
   CnMsdnWizard in 'SimpleWizards\CnMsdnWizard.pas' {CnMsdnConfigForm},
   CnPas2HtmlWizard in 'SimpleWizards\CnPas2HtmlWizard.pas' {CnPas2HtmlForm},
   CnPasConvertTypeFrm in 'SimpleWizards\CnPasConvertTypeFrm.pas' {CnPasConvertTypeForm},
