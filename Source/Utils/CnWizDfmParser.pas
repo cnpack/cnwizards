@@ -338,6 +338,7 @@ end;
 function ParseTextPropertyValue(Parser: TParser; out BinStream: TObject): string;
 var
   Stream: TStream;
+  QS: string;
 
   function GetQuotedStr: string;
   begin
@@ -394,14 +395,17 @@ begin
           end;
           Result := Result + ']';
         end;
-      '(':  // 字符串列表，缩进由输出时控制，这里不放缩进
+      '(':  // 字符串列表或 DesignSize 的整数列表，缩进由输出时控制，这里不放缩进
         begin
           Result := Parser.TokenString;
           Parser.NextToken;
           while Parser.Token <> ')' do
           begin
-            Result := Result + #13#10 + '  ' + GetQuotedStr;
-            // Parser.NextToken; // GetQuotedStr 内部已经 NextToken 了
+            QS := GetQuotedStr;
+            if QS <> '' then
+              Result := Result + #13#10 + '  ' + QS
+            else
+              Parser.NextToken; // GetQuotedStr 内部已经 NextToken 了，整数则先行忽略
           end;
           Result := Result + ')';
         end;
