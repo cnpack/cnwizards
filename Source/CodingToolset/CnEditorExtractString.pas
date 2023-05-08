@@ -43,7 +43,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
   TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser;
+  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser,
+  Menus;
 
 type
   TCnStringHeadType = (htVar, htConst, htResourcestring);
@@ -158,6 +159,10 @@ type
     actCopy: TAction;
     actReplace: TAction;
     actEdit: TAction;
+    actDelete: TAction;
+    pmStrings: TPopupMenu;
+    Edit1: TMenuItem;
+    Delete1: TMenuItem;
     procedure chkShowPreviewClick(Sender: TObject);
     procedure lvStringsData(Sender: TObject; Item: TListItem);
     procedure FormCreate(Sender: TObject);
@@ -170,6 +175,7 @@ type
     procedure actReplaceExecute(Sender: TObject);
     procedure actlstExtractUpdate(Action: TBasicAction;
       var Handled: Boolean);
+    procedure actDeleteExecute(Sender: TObject);
   private
     FTool: TCnEditorExtractString;
     procedure UpdateTokenToListView;
@@ -930,12 +936,30 @@ end;
 procedure TCnExtractStringForm.actlstExtractUpdate(Action: TBasicAction;
   var Handled: Boolean);
 begin
-  if Action = actEdit then
+  if (Action = actEdit) or (Action = actDelete) then
     (Action as TCustomAction).Enabled := lvStrings.Selected <> nil
   else if {(Action = actCopy) or } (Action = actReplace) then
     (Action as TCustomAction).Enabled := lvStrings.Items.Count > 0
   else if Action = actRescan then
     (Action as TCustomAction).Enabled := CurrentIsDelphiSource;
+end;
+
+procedure TCnExtractStringForm.actDeleteExecute(Sender: TObject);
+var
+  Idx: Integer;
+begin
+  if lvStrings.Selected = nil then
+    Exit;
+
+  Idx := lvStrings.Selected.Index;
+  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
+    Exit;
+
+  FTool.TokenListRef.Delete(Idx);
+  UpdateTokenToListView;
+
+  if FTool.TokenListRef.Count = 0 then
+    mmoPreview.Lines.Clear;
 end;
 
 initialization

@@ -4,8 +4,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
   Width = 853
   Height = 580
   ActiveControl = btnReScan
-  Caption = 'Extract String'
-  Font.Name = 'MS Sans Serif'
+  Caption = 'Extract Strings in Current Unit'
+  Font.Charset = ANSI_CHARSET
   Icon.Data = {
     0000010001001010000001000800680500001600000028000000100000002000
     0000010008000000000040010000000000000000000000010000000000000000
@@ -58,7 +58,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   object lblMake: TLabel
     Left = 8
     Top = 529
-    Width = 33
+    Width = 32
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = '&Make: '
@@ -151,35 +151,35 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object lblPinYin: TLabel
       Left = 16
       Top = 68
-      Width = 61
+      Width = 59
       Height = 13
       Caption = 'PinYin Rule: '
     end
     object lblPrefix: TLabel
       Left = 16
       Top = 20
-      Width = 29
+      Width = 32
       Height = 13
       Caption = 'Prefix:'
     end
     object lblStyle: TLabel
       Left = 16
       Top = 44
-      Width = 26
+      Width = 28
       Height = 13
       Caption = 'Style:'
     end
     object lblMaxWords: TLabel
       Left = 248
       Top = 20
-      Width = 57
+      Width = 58
       Height = 13
       Caption = 'Max Words:'
     end
     object lblMaxPinYin: TLabel
       Left = 248
       Top = 44
-      Width = 56
+      Width = 55
       Height = 13
       Caption = 'Max PinYin:'
     end
@@ -310,6 +310,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
       OwnerData = True
       ReadOnly = True
       RowSelect = True
+      PopupMenu = pmStrings
       ShowWorkAreas = True
       TabOrder = 0
       ViewStyle = vsReport
@@ -395,6 +396,22 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object actEdit: TAction
       Caption = '&Edit'
       OnExecute = actEditExecute
+    end
+    object actDelete: TAction
+      Caption = '&Delete'
+      ShortCut = 46
+      OnExecute = actDeleteExecute
+    end
+  end
+  object pmStrings: TPopupMenu
+    Left = 224
+    Top = 232
+    object Edit1: TMenuItem
+      Action = actEdit
+      Default = True
+    end
+    object Delete1: TMenuItem
+      Action = actDelete
     end
   end
 end
