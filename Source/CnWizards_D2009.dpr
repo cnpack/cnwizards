@@ -60,7 +60,7 @@ uses
   CnMultiLineEdtUserFmtFrm in 'DesignEditors\CnMultiLineEdtUserFmtFrm.pas' {CnMultiLineEditorUserFmtForm},
   CnMultiLineEdtToolOptFrm in 'DesignEditors\CnMultiLineEdtToolOptFrm.pas' {CnMultiLineEditorToolsOptionForm},
   CnAlignPropEditor in 'DesignEditors\CnAlignPropEditor.pas',
-  CnAlignSizeWizard in 'DesignWizard\CnAlignSizeWizard.pas' {CnNonArrangeForm},
+  CnDesignWizard in 'DesignWizard\CnDesignWizard.pas' {CnNonArrangeForm},
   CnCodingToolsetWizard in 'CodingToolset\CnCodingToolsetWizard.pas' {CnEditorToolsForm},
   CnListCompFrm in 'DesignWizard\CnListCompFrm.pas' {CnListCompForm},
   CnPropertyCompareFrm in 'DesignWizard\CnPropertyCompareFrm.pas' {CnPropertyCompareForm},

@@ -13,7 +13,7 @@
       ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
-      ..\Dcu\CnAlignSizeWizard.obj ..\Dcu\CnCodingToolsetWizard.obj 
+      ..\Dcu\CnDesignWizard.obj ..\Dcu\CnCodingToolsetWizard.obj 
       ..\Dcu\CnListCompFrm.obj ..\Dcu\CnPropertyCompareFrm.obj 
       ..\Dcu\CnPropertyCompConfigFrm.obj ..\Dcu\CnCompToCodeFrm.obj 
       ..\Dcu\CnMessageBoxWizard.obj ..\Dcu\CnComponentSelector.obj 
@@ -103,7 +103,7 @@
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
       MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
-      DesignWizard\CnAlignSizeWizard.dfm CodingToolset\CnCodingToolsetWizard.dfm 
+      DesignWizard\CnDesignWizard.dfm CodingToolset\CnCodingToolsetWizard.dfm 
       DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 
       DesignWizard\CnPropertyCompConfigFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
       SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 

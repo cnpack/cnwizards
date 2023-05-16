@@ -888,7 +888,7 @@ begin
   TranslateStr(SCnFloatPropBarRenameCaption, 'SCnFloatPropBarRenameCaption');
   TranslateStr(SCnEmbeddedDesignerNotSupport, 'SCnEmbeddedDesignerNotSupport');
 
-  // CnAlignSizeWizard
+  // CnDesignWizard
   TranslateStr(SCnAlignSizeMenuCaption, 'SCnAlignSizeMenuCaption');
   TranslateStr(SCnAlignSizeMenuHint, 'SCnAlignSizeMenuHint');
   TranslateStr(SCnAlignSizeName, 'SCnAlignSizeName');

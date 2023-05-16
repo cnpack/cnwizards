@@ -32,7 +32,7 @@
 // Wizard: CnFastCodeWizard
 {$DEFINE CNWIZARDS_CNFASTCODEWIZARD}
 
-// Wizard: CnAlignSizeWizard
+// Wizard: CnDesignWizard
 {$DEFINE CNWIZARDS_CNALIGNSIZEWIZARD}
 
 // Wizard: CnMessageBoxWizard

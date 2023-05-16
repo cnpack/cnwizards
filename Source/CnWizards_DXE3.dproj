@@ -170,7 +170,7 @@
         </DCCReference>
         <DCCReference Include="DesignEditors\CnAlignPropEditor.pas"/>
         <DCCReference Include="IdeEnhancements\CnFastCodeWizard.pas"/>
-        <DCCReference Include="DesignWizard\CnAlignSizeWizard.pas">
+        <DCCReference Include="DesignWizard\CnDesignWizard.pas">
             <Form>CnNonArrangeForm</Form>
         </DCCReference>
         <DCCReference Include="CodingToolset\CnCodingToolsetWizard.pas">

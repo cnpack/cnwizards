@@ -348,7 +348,7 @@
     <DCCReference Include="ScriptWizard\CnScriptWizard.pas">
       <Form>CnScriptWizardForm</Form>
     </DCCReference>
-    <DCCReference Include="DesignWizard\CnAlignSizeWizard.pas">
+    <DCCReference Include="DesignWizard\CnDesignWizard.pas">
       <Form>CnNonArrangeForm</Form>
     </DCCReference>
     <DCCReference Include="SimpleWizards\CnBookmarkConfigFrm.pas">

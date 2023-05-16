@@ -1145,7 +1145,7 @@ var
   SCnFloatPropBarRenameCaption: string = 'Rename Component';
   SCnEmbeddedDesignerNotSupport: string = 'Sorry. VCL Embedded Designer NOT Supported.';
 
-  // CnAlignSizeWizard
+  // CnDesignWizard
   SCnAlignSizeMenuCaption: string = 'Form Design Wi&zard';
   SCnAlignSizeMenuHint: string = 'Adjust Align or Size of Selected Components';
   SCnAlignSizeName: string = 'Form Design Wizard';
