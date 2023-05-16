@@ -199,23 +199,23 @@
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="编码工具集设置">
-				<param name="Local" value="wizards/editors/wizeditors.htm">
+				<param name="Local" value="wizards\editors\wizeditors.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="赋值交换工具">
-				<param name="Local" value="wizards/editors/editorcodeswap.htm">
+				<param name="Local" value="wizards\editors\editorcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="打开文件工具">
-				<param name="Local" value="wizards/editors/editoropenfile.htm">
+				<param name="Local" value="wizards\editors\editoropenfile.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代码窗口全屏切换工具">
-				<param name="Local" value="wizards/editors/editorfullscreen.htm">
+				<param name="Local" value="wizards\editors\editorfullscreen.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代码转字符串工具">
-				<param name="Local" value="wizards/editors/editorcodetostring.htm">
+				<param name="Local" value="wizards\editors\editorcodetostring.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="删除空行工具">

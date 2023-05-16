@@ -199,23 +199,23 @@
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="絪絏ㄣ栋砞竚">
-				<param name="Local" value="wizards/editors/wizeditors.htm">
+				<param name="Local" value="wizards\editors\wizeditors.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="结ユ传ㄣ">
-				<param name="Local" value="wizards/editors/editorcodeswap.htm">
+				<param name="Local" value="wizards\editors\editorcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="ゴ秨ゅンㄣ">
-				<param name="Local" value="wizards/editors/editoropenfile.htm">
+				<param name="Local" value="wizards\editors\editoropenfile.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="絏怠ち传ㄣ">
-				<param name="Local" value="wizards/editors/editorfullscreen.htm">
+				<param name="Local" value="wizards\editors\editorfullscreen.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="絏锣才﹃ㄣ">
-				<param name="Local" value="wizards/editors/editorcodetostring.htm">
+				<param name="Local" value="wizards\editors\editorcodetostring.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="埃︽ㄣ">

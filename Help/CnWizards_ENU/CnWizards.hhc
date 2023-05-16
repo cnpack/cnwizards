@@ -199,23 +199,23 @@
 		<UL>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Coding Toolset Settings">
-				<param name="Local" value="wizards/editors/wizeditors.htm">
+				<param name="Local" value="wizards\editors\wizeditors.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Evaluation Swap Tool">
-				<param name="Local" value="wizards/editors/editorcodeswap.htm">
+				<param name="Local" value="wizards\editors\editorcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Open File Tool">
-				<param name="Local" value="wizards/editors/editoropenfile.htm">
+				<param name="Local" value="wizards\editors\editoropenfile.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Editor Fullscreen Switch">
-				<param name="Local" value="wizards/editors/editorfullscreen.htm">
+				<param name="Local" value="wizards\editors\editorfullscreen.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Code to String Converting Tool">
-				<param name="Local" value="wizards/editors/editorcodetostring.htm">
+				<param name="Local" value="wizards\editors\editorcodetostring.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Delete Blank Lines Tool">
