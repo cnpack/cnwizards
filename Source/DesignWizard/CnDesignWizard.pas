@@ -22,7 +22,7 @@ unit CnDesignWizard;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：控件对齐专家单元
+* 单元名称：设计期专家单元
 * 单元作者：王玉宝（Wyb_star） Wyb_star@sina.com
 *           周劲羽 (zjy@cnpack.org)
 *           刘啸 (liuxiao@cnpack.org)
@@ -82,7 +82,7 @@ type
 
 { TCnAlignSizeWizard }
 
-  TAlignSizeStyle = (
+  TCnAlignSizeStyle = (
     asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
     asAlignHCenter, asAlignVCenter,
     asSpaceEquH, asSpaceEquHX, asSpaceIncH, asSpaceDecH, asSpaceRemoveH,
@@ -101,7 +101,7 @@ type
 
   TCnAlignSizeWizard = class(TCnSubMenuWizard)
   private
-    Indexes: array[TAlignSizeStyle] of Integer;
+    Indexes: array[TCnAlignSizeStyle] of Integer;
     FHideNonVisual: Boolean;
     FNonArrangeStyle: TNonArrangeStyle;
     FNonMoveStyle: TNonMoveStyle;
@@ -128,7 +128,7 @@ type
       Desc: Boolean = False);
     procedure ControlListSortByProp(List: TList; ProName: string;
       Desc: Boolean = False);
-    procedure DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
+    procedure DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
 
     function UpdateNonVisualComponent(FormEditor: IOTAFormEditor): Boolean;
     procedure HideNonVisualComponent;
@@ -288,16 +288,16 @@ const
   csDefSizeSpace = 16;
 
   // Action 生效需要选择的最小控件数
-  csAlignNeedControls: array[TAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
+  csAlignNeedControls: array[TCnAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
     {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
     0, 0, 0, 0, 0, 1, -1);
 
-  csAlignNeedSepMenu: set of TAlignSizeStyle =
+  csAlignNeedSepMenu: set of TCnAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
     asSendToBack, asLockControls, asCompToCode];
 
-  csAlignSizeNames: array[TAlignSizeStyle] of string = (
+  csAlignSizeNames: array[TCnAlignSizeStyle] of string = (
     'CnAlignLeft', 'CnAlignRight', 'CnAlignTop', 'CnAlignBottom', 'CnAlignHCenter',
     'CnAlignVCenter', 'CnSpaceEquH', 'CnSpaceEquHX', 'CnSpaceIncH', 'CnSpaceDecH', 'CnSpaceRemoveH',
     'CnSpaceEquV', 'CnSpaceEquVY', 'CnSpaceIncV', 'CnSpaceDecV', 'CnSpaceRemoveV',
@@ -310,7 +310,7 @@ const
     'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent', 'CnNonArrange',
     'CnListComp', 'CnCompareProp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
 
-  csAlignSizeCaptions: array[TAlignSizeStyle] of PString = (
+  csAlignSizeCaptions: array[TCnAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
     @SCnAlignBottomCaption, @SCnAlignHCenterCaption, @SCnAlignVCenterCaption,
     @SCnSpaceEquHCaption, @SCnSpaceEquHXCaption, @SCnSpaceIncHCaption, @SCnSpaceDecHCaption, @SCnSpaceRemoveHCaption,
@@ -327,7 +327,7 @@ const
     @SCnListCompCaption, @SCnComparePropertyCaption, @SCnCompToCodeCaption,
     @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
-  csAlignSizeHints: array[TAlignSizeStyle] of PString = (
+  csAlignSizeHints: array[TCnAlignSizeStyle] of PString = (
     @SCnAlignLeftHint, @SCnAlignRightHint, @SCnAlignTopHint,
     @SCnAlignBottomHint, @SCnAlignHCenterHint, @SCnAlignVCenterHint,
     @SCnSpaceEquHHint, @SCnSpaceEquHXHint, @SCnSpaceIncHHint, @SCnSpaceDecHHint, @SCnSpaceRemoveHHint,
@@ -443,7 +443,7 @@ begin
   List.Sort(DoSortByPos);
 end;
 
-procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TAlignSizeStyle);
+procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
 var
   I, AWidth, AHeight, ALeft, ATop: Integer;
   AParent, ALeftComp, ARightComp: TComponent;
@@ -1398,9 +1398,9 @@ end;
 
 procedure TCnAlignSizeWizard.AcquireSubActions;
 var
-  Style: TAlignSizeStyle;
+  Style: TCnAlignSizeStyle;
 
-  function GetDefShortCut(AStyle: TAlignSizeStyle): TShortCut;
+  function GetDefShortCut(AStyle: TCnAlignSizeStyle): TShortCut;
   begin
     if AStyle = asCopyCompName then
       Result := ShortCut(Ord('N'), [ssCtrl, ssAlt])
@@ -1412,7 +1412,7 @@ var
       Result := 0;
   end;
 begin
-  for Style := Low(TAlignSizeStyle) to High(TAlignSizeStyle) do
+  for Style := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
   begin
     Indexes[Style] := RegisterASubAction(csAlignSizeNames[Style],
       csAlignSizeCaptions[Style]^, GetDefShortCut(Style), csAlignSizeHints[Style]^,
@@ -1426,11 +1426,11 @@ end;
 // 子菜单执行过程
 procedure TCnAlignSizeWizard.SubActionExecute(Index: Integer);
 var
-  Style: TAlignSizeStyle;
+  Style: TCnAlignSizeStyle;
 begin
   if not Active then Exit;
 
-  for Style := Low(TAlignSizeStyle) to High(TAlignSizeStyle) do
+  for Style := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
     if Indexes[Style] = Index then
     begin
       DoAlignSize(Style);
@@ -1443,7 +1443,7 @@ procedure TCnAlignSizeWizard.SubActionUpdate(Index: Integer);
 var
   List: TList;
   Count: Integer;
-  Style: TAlignSizeStyle;
+  Style: TCnAlignSizeStyle;
   Actn: TCnWizMenuAction;
 begin
   if not Active or not CurrentIsForm then
@@ -1466,7 +1466,7 @@ begin
   end;
 
   Actn := SubActions[Index];
-  for Style := Low(TAlignSizeStyle) to High(TAlignSizeStyle) do
+  for Style := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
   begin
     if Indexes[Style] = Index then
     begin
@@ -1808,7 +1808,7 @@ end;
 
 procedure CnAfterLoadIcon(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
 var
-  AStyle: TAlignSizeStyle;
+  AStyle: TCnAlignSizeStyle;
   SmallBmp: TBitmap;
   X, Y: Integer;
   P: PRGBArray;
@@ -1844,7 +1844,7 @@ var
   end;
 
 begin
-  for AStyle := Low(TAlignSizeStyle) to High(TAlignSizeStyle) do
+  for AStyle := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
   begin
     if csAlignSizeNames[AStyle] = IconName then
     begin
