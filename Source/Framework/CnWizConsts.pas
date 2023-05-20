@@ -1236,6 +1236,8 @@ var
   SCnComparePropertyHint: string = 'Compare Properties for Selected Components';
   SCnCompToCodeCaption: string = 'Convert to Code...';
   SCnCompToCodeHint: string = 'Convert Selected Components to Creating Code';
+  SCnChangeCompClassCaption: string = 'Change Componenet Class...';
+  SCnChangeCompClassHint: string = 'Change Selected Componenet Class';
   SCnHideComponentCaption: string = 'Hide Non-visual';
   SCnHideComponentHint: string = 'Hide / Display the Non-visual Component';
   SCnShowFlatFormCaption: string = 'Float Toolbar Options...';
@@ -1244,6 +1246,11 @@ var
   SCnCompToCodeEnvNotSupport: string = 'Only VCL Designer Supported.';
   SCnCompToCodeProcCopiedFmt: string = '%s' + #13#10 + 'Copied to Clipboard. ';
   SCnCompToCodeConvertedFmt: string = '%d Items Converted';
+  SCnChangeCompClassErrorNoSelection: string = 'NO Selection in Current Designer.';
+  SCnChangeCompClassErrorDiffType: string = 'Selected Components Must Be the Same Type.';
+  SCnChangeCompClassNewHint: string = 'Enter a New Class Name:';
+  SCnChangeCompClassErrorNew: string = 'Invalid Class Name or Class NOT Found.';
+  SCnChangeCompClassErrorCreateFmt: string = 'Create %s Error!';
   SCnMustGreaterThanZero: string = 'Numbers Entered Must Greater than Zero';
   SCnHideNonVisualNotSupport: string = 'Only VCL Designer Supported.';
   SCnNonNonVisualFound: string = 'No Non-visual Components Found!';

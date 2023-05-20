@@ -658,14 +658,14 @@ begin
   end;
   ARect := PaintBox.ClientRect;
   Frame3D(PaintBox.Canvas, ARect, clHighlightText, clBtnShadow, 1);
-  for i := 1 to N - 2 do
+  for I := 1 to N - 2 do
   begin
-    dc := Round(i * Factor);
+    dc := Round(I * Factor);
     PaintBox.Canvas.Brush.Color := RGB(r + dc, g + dc, b + dc);
     if IsVertical then
-      PaintBox.Canvas.FillRect(Rect(i, 1, i + 1, PaintBox.Height - 1))
+      PaintBox.Canvas.FillRect(Rect(I, 1, I + 1, PaintBox.Height - 1))
     else
-      PaintBox.Canvas.FillRect(Rect(1, i, PaintBox.Width - 1, i + 1));
+      PaintBox.Canvas.FillRect(Rect(1, I, PaintBox.Width - 1, I + 1));
   end;
 end;
 
@@ -712,13 +712,13 @@ end;
 
 procedure TCnFloatSnapPanel.OnMenuPopup(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if Assigned(FPosMenu) then
-    for i := 0 to FPosMenu.Count - 1 do
-      if FPosMenu.Items[i].Tag = Ord(SnapPos) then
+    for I := 0 to FPosMenu.Count - 1 do
+      if FPosMenu.Items[I].Tag = Ord(SnapPos) then
       begin
-        FPosMenu.Items[i].Checked := True;
+        FPosMenu.Items[I].Checked := True;
         Break;
       end;
   if Assigned(FDragMenu) then
@@ -1064,7 +1064,7 @@ end;
 
 procedure TCnFormFloatToolBar.RecreateButtons;
 var
-  i: Integer;
+  I: Integer;
   Col, Row, ButtonWidth, ButtonHeight: Integer;
   Names: TStrings;
   Actn: TContainedAction;
@@ -1137,16 +1137,16 @@ begin
   try
     // 使用临时列表以清除不存在的 Action 但仍保留原有的列表
     Names.Assign(FActions);
-    for i := Names.Count - 1 downto 0 do
+    for I := Names.Count - 1 downto 0 do
     begin
-      Actn := FindIDEAction(Names[i]);
+      Actn := FindIDEAction(Names[I]);
       if not Assigned(Actn) then
-        Names.Delete(i)
+        Names.Delete(I)
       else
       begin
         Actn.Update;
         if (Actn is TCustomAction) and not TCustomAction(Actn).Visible then
-          Names.Delete(i);
+          Names.Delete(I);
       end;
     end;
 
@@ -1165,13 +1165,13 @@ begin
         Panel.Height := ButtonHeight * Row + 1;
       end;
 
-      for i := 0 to Names.Count - 1 do
+      for I := 0 to Names.Count - 1 do
       begin
-        if Names[i] <> '' then
+        if Names[I] <> '' then
           if VertOrder then
-            AddButton(Panel, i, i div Row, i mod Row, Names[i])
+            AddButton(Panel, I, I div Row, I mod Row, Names[I])
           else
-            AddButton(Panel, i, i mod Col, i div Col, Names[i]);
+            AddButton(Panel, I, I mod Col, I div Col, Names[I]);
       end;
     end;
   finally
@@ -1222,7 +1222,7 @@ end;
 procedure TCnFormFloatToolBar.LoadSettings(Ini: TCustomIniFile);
 var
   Value: string;
-  i: Integer;
+  I: Integer;
 begin
   inherited;
 
@@ -1230,14 +1230,14 @@ begin
     csMinLineCount, csMaxLineCount);
   FVertOrder := Ini.ReadBool(csOptions, csVertOrder, True);
 
-  i := 0;
+  I := 0;
   FActions.Clear;
-  while Ini.ValueExists(csToolBar, csButton + IntToStr(i)) do
+  while Ini.ValueExists(csToolBar, csButton + IntToStr(I)) do
   begin
-    Value := Trim(Ini.ReadString(csToolBar, csButton + IntToStr(i), ''));
+    Value := Trim(Ini.ReadString(csToolBar, csButton + IntToStr(I), ''));
     if Value <> '' then
       FActions.Add(Value);
-    Inc(i);
+    Inc(I);
   end;
 
   RecreateButtons;
@@ -1245,7 +1245,7 @@ end;
 
 procedure TCnFormFloatToolBar.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
 
@@ -1253,8 +1253,8 @@ begin
   Ini.WriteBool(csOptions, csVertOrder, FVertOrder);
 
   Ini.EraseSection(csToolBar);
-  for i := 0 to FActions.Count - 1 do
-    Ini.WriteString(csToolBar, csButton + IntToStr(i), FActions[i]);
+  for I := 0 to FActions.Count - 1 do
+    Ini.WriteString(csToolBar, csButton + IntToStr(I), FActions[I]);
 end;
 
 procedure TCnFormFloatToolBar.LoadActions(FileName: string = '');
@@ -1644,7 +1644,7 @@ end;
 
 procedure TCnFormFloatPropBar.UpdateActions;
 var
-  i: Integer;
+  I: Integer;
   List: TList;
   AForm: TCustomForm;
   SelChanged: Boolean;
@@ -1656,8 +1656,8 @@ begin
     begin
       SelChanged := (FDsnForm <> AForm) or (SelectionCount <> List.Count);
       if not SelChanged then
-        for i := 0 to List.Count - 1 do
-          if FSelection[i] <> List[i] then
+        for I := 0 to List.Count - 1 do
+          if FSelection[I] <> List[I] then
           begin
             SelChanged := True;
             Break;
@@ -1667,8 +1667,8 @@ begin
       begin
         FDsnForm := AForm;
         FSelection.Clear;
-        for i := 0 to List.Count - 1 do
-          FSelection.Add(List[i]);
+        for I := 0 to List.Count - 1 do
+          FSelection.Add(List[I]);
       end;
     end
     else
@@ -1691,30 +1691,30 @@ end;
 
 procedure TCnFormFloatPropBar.UpdateControls;
 var
-  i: Integer;
+  I: Integer;
   PList: TStringList;
 
   procedure UpdatePropListFilter(AObj: TPersistent; Update: Boolean);
   var
     PInfo: PPropInfo;
-    i, j: Integer;
+    I, j: Integer;
     PropValid: Boolean;
   begin
     if not Update then
     begin
-      for i := 0 to FFreqProp.Count - 1 do
+      for I := 0 to FFreqProp.Count - 1 do
       begin
-        PInfo := GetPropInfoIncludeSub(AObj, FFreqProp[i], csTypeInfoSimple);
+        PInfo := GetPropInfoIncludeSub(AObj, FFreqProp[I], csTypeInfoSimple);
         if PInfo <> nil then
-          if SameText(FFreqProp[i], PropInfoName(PInfo)) then
+          if SameText(FFreqProp[I], PropInfoName(PInfo)) then
             PList.AddObject(PropInfoName(PInfo), TObject(PInfo^.PropType^))
           else  // 级联属性名
-            PList.AddObject(FFreqProp[i], TObject(PInfo^.PropType^));
+            PList.AddObject(FFreqProp[I], TObject(PInfo^.PropType^));
       end;
     end
     else
     begin
-      for i := PList.Count - 1 downto 0 do
+      for I := PList.Count - 1 downto 0 do
       begin
         PropValid := False;
         for j := 0 to FFreqProp.Count - 1 do
@@ -1723,9 +1723,9 @@ var
           if PInfo = nil then
             Continue;
 
-          if SameText(FFreqProp[j], PList[i]) and
-            (PInfo.PropType^^.Kind = PTypeInfo(PList.Objects[i])^.Kind) and
-            SameText(TypeInfoName(PInfo.PropType^), TypeInfoName(PTypeInfo(PList.Objects[i]))) then
+          if SameText(FFreqProp[j], PList[I]) and
+            (PInfo.PropType^^.Kind = PTypeInfo(PList.Objects[I])^.Kind) and
+            SameText(TypeInfoName(PInfo.PropType^), TypeInfoName(PTypeInfo(PList.Objects[I]))) then
           begin
             PropValid := True;
             Break;
@@ -1733,7 +1733,7 @@ var
         end;
 
         if not PropValid then
-          PList.Delete(i);
+          PList.Delete(I);
       end;
     end;
   end;
@@ -1741,7 +1741,7 @@ var
   procedure UpdatePropListFromObj(AObj: TPersistent; AUpdate: Boolean);
   var
     PropList: PPropList;
-    i, j, Count: Integer;
+    I, j, Count: Integer;
     PropValid: Boolean;
   begin
     try
@@ -1755,25 +1755,25 @@ var
       GetPropList(AObj.ClassInfo, csTypeInfoSimple, PropList);
       if not AUpdate then
       begin
-        for i := 0 to Count - 1 do
-          if PList.IndexOf(PropInfoName(PropList[i])) < 0 then
-            PList.AddObject(PropInfoName(PropList[i]), TObject(PropList[i].PropType^));
+        for I := 0 to Count - 1 do
+          if PList.IndexOf(PropInfoName(PropList[I])) < 0 then
+            PList.AddObject(PropInfoName(PropList[I]), TObject(PropList[I].PropType^));
       end
       else
       begin
-        for i := PList.Count - 1 downto 0 do
+        for I := PList.Count - 1 downto 0 do
         begin
           PropValid := False;
           for j := 0 to Count - 1 do
-            if SameText(PropInfoName(PropList[j]), PList[i]) and
-              (PropList[j].PropType^^.Kind = PTypeInfo(PList.Objects[i])^.Kind) and
-              SameText(TypeInfoName(PropList[j].PropType^), TypeInfoName(PTypeInfo(PList.Objects[i]))) then
+            if SameText(PropInfoName(PropList[j]), PList[I]) and
+              (PropList[j].PropType^^.Kind = PTypeInfo(PList.Objects[I])^.Kind) and
+              SameText(TypeInfoName(PropList[j].PropType^), TypeInfoName(PTypeInfo(PList.Objects[I]))) then
             begin
               PropValid := True;
               Break;
             end;
           if not PropValid then
-            PList.Delete(i);
+            PList.Delete(I);
         end;
       end;
     finally
@@ -1811,27 +1811,27 @@ begin
       try
         PList.Sorted := True;
         UpdatePropListFilter(Selections[0], False);
-        for i := 1 to SelectionCount - 1 do
-          UpdatePropListFilter(Selections[i], True);
+        for I := 1 to SelectionCount - 1 do
+          UpdatePropListFilter(Selections[I], True);
 
         if not FIsFilter then
         begin
           UpdatePropListFromObj(Selections[0], False);
-          for i := 1 to SelectionCount - 1 do
-            UpdatePropListFromObj(Selections[i], True);
+          for I := 1 to SelectionCount - 1 do
+            UpdatePropListFromObj(Selections[I], True);
         end;            
 
         if SelectionCount > 1 then
           if PList.IndexOfName('Name') >= 0 then
             PList.Delete(PList.IndexOfName('Name'));
 
-        for i := 0 to PList.Count - 1 do
-          FNameCombo.Items.Add(PList[i]);
+        for I := 0 to PList.Count - 1 do
+          FNameCombo.Items.Add(PList[I]);
 
-        for i := 0 to FFreqProp.Count - 1 do
-          if (Trim(FFreqProp[i]) <> '') and (PList.IndexOf(Trim(FFreqProp[i])) >= 0) then
+        for I := 0 to FFreqProp.Count - 1 do
+          if (Trim(FFreqProp[I]) <> '') and (PList.IndexOf(Trim(FFreqProp[I])) >= 0) then
           begin
-            FNameCombo.ItemIndex := PList.IndexOf(FFreqProp[i]);
+            FNameCombo.ItemIndex := PList.IndexOf(FFreqProp[I]);
             Break;
           end;
         if (FNameCombo.Items.Count > 0) and (FNameCombo.ItemIndex < 0) then
@@ -1849,14 +1849,14 @@ end;
 
 procedure TCnFormFloatPropBar.UpdateProperty(TextOnly: Boolean);
 var
-  i: Integer;
+  I: Integer;
   PropName: string;
   V: Variant;
   IsStr: Boolean;
 
   procedure AddEnumList(AInfo: PTypeInfo);
   var
-    i: Integer;
+    I: Integer;
     SList: TStringList;
     PData: PTypeData;
   begin
@@ -1866,26 +1866,34 @@ var
       if AInfo^.Kind = tkEnumeration then
       begin
         PData := GetTypeData(AInfo);
-        for i := PData.MinValue to Min(PData.MaxValue, PData.MinValue +
+        for I := PData.MinValue to Min(PData.MaxValue, PData.MinValue +
           csMaxEnumCount - 1) do
-          SList.Add(GetEnumName(AInfo, i));
+          SList.Add(GetEnumName(AInfo, I));
         FValueCombo.Items.Assign(SList);
       end;
     finally
       SList.Free;
     end;
   end;
+
 begin
   if (SelectionCount > 0) and (FNameCombo.ItemIndex >= 0) then
   begin
-    PropName := FNameCombo.Items[FNameCombo.ItemIndex];
-    V := GetPropValueIncludeSub(Selections[0], PropName);
-    for i := 1 to SelectionCount - 1 do
-      if GetPropValueIncludeSub(Selections[i], PropName) <> V then
+    try
+      PropName := FNameCombo.Items[FNameCombo.ItemIndex];
+      V := GetPropValueIncludeSub(Selections[0], PropName);
+    except
+      Exit;
+    end;
+
+    for I := 1 to SelectionCount - 1 do
+    begin
+      if GetPropValueIncludeSub(Selections[I], PropName) <> V then
       begin
         V := '';
         Break;
       end;
+    end;
 
     FTypeInfo := GetPropInfoIncludeSub(Selections[0], PropName)^.PropType^;
     if (FTypeInfo^.Kind = tkSet) and (V <> '') then
@@ -1974,7 +1982,7 @@ var
   PropName: string;
   PropValue: Variant;
   EnumValue: 0..SizeOf(Integer) * 8 - 1;
-  i: Integer;
+  I: Integer;
 begin
   if (SelectionCount > 0) and (FNameCombo.ItemIndex >= 0) then
   begin
@@ -1992,10 +2000,10 @@ begin
     else
       PropValue := FValueCombo.Text;
 
-    for i := 0 to SelectionCount - 1 do
+    for I := 0 to SelectionCount - 1 do
     begin
       try
-        DoSetPropValueIncludeSub(Selections[i], PropName, PropValue);
+        DoSetPropValueIncludeSub(Selections[I], PropName, PropValue);
         CnOtaNotifyFormDesignerModified(CnOtaGetCurrentFormEditor);
       except
         Application.HandleException(Self);
@@ -2244,7 +2252,7 @@ end;
 procedure TCnFormEnhanceWizard.UpdateFlatPanelsPosition;
 var
   Container: TWinControl;
-  i: Integer;
+  I: Integer;
   SnapForm: TCustomForm;
 begin
   if FUpdating then
@@ -2252,10 +2260,10 @@ begin
 
   if not Active or FIsEmbeddedDesigner then
   begin
-    for i := 0 to FlatToolBarCount - 1 do
+    for I := 0 to FlatToolBarCount - 1 do
     begin
-      FlatToolBars[i].SnapForm := nil;
-      FlatToolBars[i].Hide;
+      FlatToolBars[I].SnapForm := nil;
+      FlatToolBars[I].Hide;
     end;
     PropBar.SnapForm := nil;
     PropBar.Hide;
@@ -2285,10 +2293,10 @@ begin
     else
       SnapForm := nil;
 
-    for i := 0 to FlatToolBarCount - 1 do
+    for I := 0 to FlatToolBarCount - 1 do
     begin
-      FlatToolBars[i].SnapForm := SnapForm;
-      FlatToolBars[i].UpdatePosition;
+      FlatToolBars[I].SnapForm := SnapForm;
+      FlatToolBars[I].UpdatePosition;
     end;
     PropBar.SnapForm := SnapForm;
     PropBar.UpdatePosition;
@@ -2384,7 +2392,7 @@ end;
 
 procedure TCnFormEnhanceWizard.ApplicationIdle(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if not Active or FIsEmbeddedDesigner or FUpdating then
     Exit;
@@ -2392,8 +2400,8 @@ begin
   if GetTickCount - FLastUpdateTick > csUpdateInterval then
   begin
     // 由于工具栏创建时没有指定 Parent，上面的 Action 需要手工刷新
-    for i := 0 to FlatToolBarCount - 1 do
-      FlatToolBars[i].UpdateActions;
+    for I := 0 to FlatToolBarCount - 1 do
+      FlatToolBars[I].UpdateActions;
     PropBar.UpdateActions;
     FLastUpdateTick := GetTickCount;
   end;
@@ -2424,31 +2432,31 @@ end;
 
 procedure TCnFormEnhanceWizard.CleanDataFile;
 var
-  i: Integer;
+  I: Integer;
 begin
-  i := FlatToolBarCount;
-  while FileExists(WizOptions.UserPath + GetFlatPanelFileName(i)) do
+  I := FlatToolBarCount;
+  while FileExists(WizOptions.UserPath + GetFlatPanelFileName(I)) do
   begin
-    DeleteFile(WizOptions.UserPath + GetFlatPanelFileName(i));
-    Inc(i);
+    DeleteFile(WizOptions.UserPath + GetFlatPanelFileName(I));
+    Inc(I);
   end;
 end;
 
 procedure TCnFormEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   Count: Integer;
 begin
   FList.Clear;
   Count := Ini.ReadInteger('', csCount, FDefCount);
-  for i := 0 to Count - 1 do
+  for I := 0 to Count - 1 do
   begin
     with AddFlatToolBar do
     begin
       if AllowDrag then
       begin
-        Left := Ini.ReadInteger(GetFlatPanelFileName(i), csLeft, Left);
-        Top := Ini.ReadInteger(GetFlatPanelFileName(i), csTop, Top);
+        Left := Ini.ReadInteger(GetFlatPanelFileName(I), csLeft, Left);
+        Top := Ini.ReadInteger(GetFlatPanelFileName(I), csTop, Top);
       end;
     end;
   end;
@@ -2458,18 +2466,18 @@ end;
 
 procedure TCnFormEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
 begin
   if FlatToolBarCount = FDefCount then
     Ini.DeleteKey('', csCount)
   else
     Ini.WriteInteger('', csCount, FlatToolBarCount);
 
-  for i := 0 to FlatToolBarCount - 1 do
+  for I := 0 to FlatToolBarCount - 1 do
   begin
-    FlatToolBars[i].SaveActions;
-    Ini.WriteInteger(GetFlatPanelFileName(i), csLeft, FlatToolBars[i].Left);
-    Ini.WriteInteger(GetFlatPanelFileName(i), csTop, FlatToolBars[i].Top);
+    FlatToolBars[I].SaveActions;
+    Ini.WriteInteger(GetFlatPanelFileName(I), csLeft, FlatToolBars[I].Left);
+    Ini.WriteInteger(GetFlatPanelFileName(I), csTop, FlatToolBars[I].Top);
   end;
   PropBar.SaveSettings(Ini);
 
@@ -2545,11 +2553,11 @@ end;
 
 procedure TCnFormEnhanceWizard.LanguageChanged(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
-  for i := 0 to FlatToolBarCount - 1 do
-    FlatToolBars[i].LanguageChanged(Sender);
+  for I := 0 to FlatToolBarCount - 1 do
+    FlatToolBars[I].LanguageChanged(Sender);
   PropBar.LanguageChanged(Sender);
 end;
 
@@ -2640,19 +2648,19 @@ end;
 
 procedure TCnFormEnhanceConfigForm.UpdateListView;
 var
-  i: Integer;
+  I: Integer;
 begin
   ListView.Items.BeginUpdate;
   try
     ListView.Items.Clear;
-    for i := 0 to Wizard.FlatToolBarCount - 1 do
+    for I := 0 to Wizard.FlatToolBarCount - 1 do
     begin
       with ListView.Items.Add do
       begin
-        Caption := IntToStr(i);
-        SubItems.Add(Wizard.FlatToolBars[i].Caption);
-        SubItems.Add(StripHotkey(csFlatFormPosCaptions[Wizard.FlatToolBars[i].SnapPos]^));
-        Data := Wizard.FlatToolBars[i];
+        Caption := IntToStr(I);
+        SubItems.Add(Wizard.FlatToolBars[I].Caption);
+        SubItems.Add(StripHotkey(csFlatFormPosCaptions[Wizard.FlatToolBars[I].SnapPos]^));
+        Data := Wizard.FlatToolBars[I];
       end;
     end;
     if ListView.Items.Count > 0 then

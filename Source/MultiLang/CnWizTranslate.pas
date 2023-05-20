@@ -980,6 +980,8 @@ begin
   TranslateStr(SCnComparePropertyHint, 'SCnComparePropertyHint');
   TranslateStr(SCnCompToCodeCaption, 'SCnCompToCodeCaption');
   TranslateStr(SCnCompToCodeHint, 'SCnCompToCodeHint');
+  TranslateStr(SCnChangeCompClassCaption, 'SCnChangeCompClassCaption');
+  TranslateStr(SCnChangeCompClassHint, 'SCnChangeCompClassHint');
   TranslateStr(SCnHideComponentCaption, 'SCnHideComponentCaption');
   TranslateStr(SCnHideComponentHint, 'SCnHideComponentHint');
   TranslateStr(SCnShowFlatFormCaption, 'SCnShowFlatFormCaption');
@@ -988,6 +990,11 @@ begin
   TranslateStr(SCnCompToCodeEnvNotSupport, 'SCnCompToCodeEnvNotSupport');
   TranslateStr(SCnCompToCodeProcCopiedFmt, 'SCnCompToCodeProcCopiedFmt');
   TranslateStr(SCnCompToCodeConvertedFmt, 'SCnCompToCodeConvertedFmt');
+  TranslateStr(SCnChangeCompClassErrorNoSelection, 'SCnChangeCompClassErrorNoSelection');
+  TranslateStr(SCnChangeCompClassErrorDiffType, 'SCnChangeCompClassErrorDiffType');
+  TranslateStr(SCnChangeCompClassNewHint, 'SCnChangeCompClassNewHint');
+  TranslateStr(SCnChangeCompClassErrorNew, 'SCnChangeCompClassErrorNew');
+  TranslateStr(SCnChangeCompClassErrorCreateFmt, 'SCnChangeCompClassErrorCreateFmt');
   TranslateStr(SCnMustGreaterThanZero, 'SCnMustGreaterThanZero');
   TranslateStr(SCnHideNonVisualNotSupport, 'SCnHideNonVisualNotSupport');
   TranslateStr(SCnNonNonVisualFound, 'SCnNonNonVisualFound');
