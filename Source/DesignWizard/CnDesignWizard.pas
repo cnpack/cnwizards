@@ -93,10 +93,11 @@ type
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asCopyCompClass,
-    asHideComponent, asNonArrange, asListComp, asCompareProp, asCompToCode, 
-    asCompRename, asShowFlatForm);
+    asHideComponent, asNonArrange, asListComp, asCompareProp, asCompToCode,
+    asChangeCompClass, asCompRename, asShowFlatForm);
 
   TNonArrangeStyle = (asRow, asCol);
+
   TNonMoveStyle = (msLeftTop, msRightTop, msLeftBottom, msRightBottom, msCenter);
 
   TCnAlignSizeWizard = class(TCnSubMenuWizard)
@@ -155,10 +156,14 @@ type
       Component: TComponent; const OldName, NewName: string);
 
     function GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
-    function GetNonVisualSelComponentsFromCurrentForm(
-      List: TList): Boolean;
+    function GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
     procedure SetNonVisualPos(Form: TCustomForm; Component: TComponent;
       X, Y: Integer);
+
+    procedure ChangeComponentClass;
+    {* 设计期更换组件类名，实际上是原位置新建组件，赋值属性、事件，搬移子 Control，再更名，再删除原组件。
+      测试时须覆盖以下场景：窗体、数据模块；可视化组件、不可视组件；
+      单选、多选（同 Parent、异 Parent）；有无子 Control 等，包括 FMX}
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -287,15 +292,15 @@ const
   csDefPerColCount = 3;
   csDefSizeSpace = 16;
 
-  // Action 生效需要选择的最小控件数
+  // Action 生效需要选择的最小控件数，-1 表示无需判断
   csAlignNeedControls: array[TCnAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
     {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
-    0, 0, 0, 0, 0, 1, -1);
+    0, 0, 0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TCnAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
-    asSendToBack, asLockControls, asCompToCode];
+    asSendToBack, asLockControls, asChangeCompClass];
 
   csAlignSizeNames: array[TCnAlignSizeStyle] of string = (
     'CnAlignLeft', 'CnAlignRight', 'CnAlignTop', 'CnAlignBottom', 'CnAlignHCenter',
@@ -308,7 +313,8 @@ const
     {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
     'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
     'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent', 'CnNonArrange',
-    'CnListComp', 'CnCompareProp', 'CnCompToCode', 'CnCompRename', 'CnShowFlatForm');
+    'CnListComp', 'CnCompareProp', 'CnCompToCode', 'CnChangeCompClass',
+    'CnCompRename', 'CnShowFlatForm');
 
   csAlignSizeCaptions: array[TCnAlignSizeStyle] of PString = (
     @SCnAlignLeftCaption, @SCnAlignRightCaption, @SCnAlignTopCaption,
@@ -325,7 +331,7 @@ const
     @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnCopyCompClassCaption,
     @SCnHideComponentCaption, @SCnNonArrangeCaption,
     @SCnListCompCaption, @SCnComparePropertyCaption, @SCnCompToCodeCaption,
-    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
+    @SCnChangeCompClassCaption, @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
   csAlignSizeHints: array[TCnAlignSizeStyle] of PString = (
     @SCnAlignLeftHint, @SCnAlignRightHint, @SCnAlignTopHint,
@@ -341,8 +347,8 @@ const
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
     @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnCopyCompClassHint,
     @SCnHideComponentHint, @SCnNonArrangeHint, @SCnListCompHint,
-    @SCnComparePropertyHint, @SCnCompToCodeHint,
-    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint);
+    @SCnComparePropertyHint, @SCnCompToCodeHint, @SCnChangeCompClassHint,
+    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint); // 缺 Hint 的用 Caption 代替
 
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
@@ -652,7 +658,7 @@ begin
             ControlListSortByProp(ControlList, 'Width', AlignSizeStyle = asMakeMaxWidth);
           if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight] then
             ControlListSortByProp(ControlList, 'Height', AlignSizeStyle = asMakeMaxHeight);
-          for i := 1 to ControlList.Count - 1 do
+          for I := 1 to ControlList.Count - 1 do
           begin
             if AlignSizeStyle in [asMakeMinWidth, asMakeMaxWidth,
               asMakeSameWidth, asMakeSameSize] then
@@ -671,7 +677,7 @@ begin
               // 取出 Parent 相同的一组控件
               AList.Clear;
               AList.Add(ControlList.Extract(ControlList[0]));
-              for i := ControlList.Count - 1 downto 0 do
+              for I := ControlList.Count - 1 downto 0 do
                 if GetControlParent(ControlList[I]) = GetControlParent(TControl(AList[0])) then
                   AList.Add(ControlList.Extract(ControlList[I]));
 
@@ -837,6 +843,10 @@ begin
         begin
           ShowCompToCodeForm.RefreshCode;
         end;
+      asChangeCompClass:
+        begin
+          ChangeComponentClass;
+        end;
       asCompRename:
         begin
           if (ControlList.Count > 0) and (TObject(ControlList[0]) is TComponent) and
@@ -996,7 +1006,7 @@ end;
 procedure TCnAlignSizeWizard.ArrangeNonVisualComponents;
 var
   CompList: TList;
-  i, Rows, Cols, cRow, cCol: Integer;
+  I, Rows, Cols, cRow, cCol: Integer;
   CompPosArray: array of TPoint;
   AForm: TCustomForm;
   AllWidth, AllHeight, OffSetX, OffSetY: Integer;
@@ -1067,10 +1077,10 @@ begin
     SetLength(CompPosArray, CompList.Count);
     cRow := 1; cCol := 1;
 
-    for i := 0 to CompList.Count - 1 do
+    for I := 0 to CompList.Count - 1 do
     begin
-      CompPosArray[i].x := (cCol - 1) * (csNonVisualSize + FColSpace);
-      CompPosArray[i].y := (cRow - 1) * (csNonVisualSize + FRowSpace);
+      CompPosArray[I].x := (cCol - 1) * (csNonVisualSize + FColSpace);
+      CompPosArray[I].y := (cRow - 1) * (csNonVisualSize + FRowSpace);
       if FNonArrangeStyle = asRow then
       begin
         Inc(cCol);
@@ -1130,17 +1140,17 @@ begin
         end;
     end;
 
-    for i := CompList.Count - 1 downto 0 do
+    for I := CompList.Count - 1 downto 0 do
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('Component #%d. %s: %s, X %d, Y %d.', [ I,
-        TComponent(CompList.Items[i]).ClassName,
-        TComponent(CompList.Items[i]).Name,
-        CompPosArray[i].X + OffSetX,
-        CompPosArray[i].Y + OffSetY]);
+        TComponent(CompList.Items[I]).ClassName,
+        TComponent(CompList.Items[I]).Name,
+        CompPosArray[I].X + OffSetX,
+        CompPosArray[I].Y + OffSetY]);
 {$ENDIF}
-      SetNonVisualPos(AForm, TComponent(CompList.Items[i]),
-        CompPosArray[i].X + OffSetX, CompPosArray[i].Y + OffSetY);
+      SetNonVisualPos(AForm, TComponent(CompList.Items[I]),
+        CompPosArray[I].X + OffSetX, CompPosArray[I].Y + OffSetY);
     end;
 
     FormDesigner.Modified;
@@ -1157,7 +1167,7 @@ var
   IComponent: IOTAComponent;
   Component: TComponent;
   CompList: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   List.Clear;
@@ -1170,9 +1180,9 @@ begin
   CompList := TStringList.Create;
   try
     GetInstalledComponents(nil, CompList);
-    for i := 0 to RootComponent.GetComponentCount - 1 do
+    for I := 0 to RootComponent.GetComponentCount - 1 do
     begin
-      IComponent := RootComponent.GetComponent(i);
+      IComponent := RootComponent.GetComponent(I);
       if Assigned(IComponent) and Assigned(IComponent.GetComponentHandle) and
         (TObject(IComponent.GetComponentHandle) is TComponent) then
       begin
@@ -1195,7 +1205,7 @@ var
   IComponent: IOTAComponent;
   Component: TComponent;
   CompList: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   List.Clear;
@@ -1206,9 +1216,9 @@ begin
   CompList := TStringList.Create;
   try
     GetInstalledComponents(nil, CompList);
-    for i := 0 to FormEditor.GetSelCount - 1 do
+    for I := 0 to FormEditor.GetSelCount - 1 do
     begin
-      IComponent := FormEditor.GetSelComponent(i);
+      IComponent := FormEditor.GetSelComponent(I);
       if Assigned(IComponent) and Assigned(IComponent.GetComponentHandle) and
         (TObject(IComponent.GetComponentHandle) is TComponent) then
       begin
@@ -1506,7 +1516,8 @@ begin
     else
       Actn.Checked := FHideNonVisual;
   end
-  else if (Index = Indexes[asCopyCompName]) or (Index = Indexes[asCopyCompClass]) then
+  else if (Index = Indexes[asCopyCompName]) or (Index = Indexes[asCopyCompClass]) or
+    (Index = Indexes[asChangeCompClass]) then
   begin
     Actn.Enabled := not CnOtaIsCurrFormSelectionsEmpty;
   end
@@ -1761,6 +1772,166 @@ begin
 {$ENDIF}
 end;
 
+procedure TCnAlignSizeWizard.ChangeComponentClass;
+var
+  I, J, K: Integer;
+  ChComps: TInterfaceList;
+  ChComp, OldComp, NewComp: TComponent;
+  ChClass, NewClass, PropName, NewName: string;
+  FormEditor: IOTAFormEditor;
+  OldIComp, NewIComp: IOTAComponent;
+  Pnt: TSmallPoint;
+  PropValue: array[0..127] of Byte;
+  StrValue: string;
+  PropKind: TTypeKind;
+  Par: TWinControl;
+  OldCtrl, NewCtrl: TControl;
+  OldWCtl, NewWCtl: TWinControl;
+begin
+  ChComps := TInterfaceList.Create;
+
+  try
+    FormEditor := CnOtaGetCurrentFormEditor;
+    if FormEditor = nil then
+    begin
+      ErrorDlg(SCnChangeCompClassErrorNoSelection);
+      Exit;
+    end;
+
+    if not CnOtaGetSelectedComponentFromCurrentForm(ChComps) then
+    begin
+      ErrorDlg(SCnChangeCompClassErrorNoSelection);
+      Exit;
+    end;
+
+    ChComp := TComponent((ChComps[0] as IOTAComponent).GetComponentHandle);
+    ChClass := ChComp.ClassName;
+
+    // 检查所选组件类名是否一致
+    for I := 1 to ChComps.Count - 1 do
+    begin
+      ChComp := TComponent((ChComps[I] as IOTAComponent).GetComponentHandle);
+      if not ChComp.ClassNameIs(ChClass) then
+      begin
+        ErrorDlg(SCnChangeCompClassErrorDiffType);
+        Exit;
+      end;
+    end;
+
+    // 输入新类名
+    NewClass := ChClass;
+    if not CnWizInputQuery(SCnInformation, SCnChangeCompClassNewHint, NewClass) then
+      Exit;
+
+    if (NewClass = '') or (NewClass = ChClass) then
+    begin
+      ErrorDlg(SCnChangeCompClassErrorNew);
+      Exit;
+    end;
+
+    // 开始循环替换组件
+    for I := 0 to ChComps.Count - 1 do
+    begin
+      OldIComp := ChComps[I] as IOTAComponent;
+      OldComp := TComponent(OldIComp.GetComponentHandle);
+      Pnt := TSmallPoint(OldComp.DesignInfo);
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('# %d. Old Component %s Position %d, %d.',
+         [I, OldComp.ClassName, Pnt.x, Pnt.y]);
+{$ENDIF}
+
+      // 找到个旧的，建一个新的
+      NewIComp := FormEditor.CreateComponent(OldIComp.GetParent, NewClass, Pnt.x, Pnt.y, 10, 10);
+      if NewIComp <> nil then
+      begin
+        NewComp := TComponent(NewIComp.GetComponentHandle);
+
+        // 并遍历其属性、事件
+        for J := 0 to OldIComp.GetPropCount - 1 do
+        begin
+          PropName := OldIComp.GetPropName(J);
+          if PropName = 'Name' then
+            Continue;
+
+          // 挨个给属性赋值，无同名属性则出错继续
+          PropKind := OldIComp.GetPropType(J);
+          if PropKind in [tkString, tkLString, tkWString {$IFDEF UNICODE}, tkUString {$ENDIF}] then
+          begin
+            OldIComp.GetPropValueByName(PropName, StrValue);
+            NewIComp.SetPropByName(PropName, StrValue);
+          end
+          else
+          begin
+            try
+              OldIComp.GetPropValueByName(PropName, PropValue[0]); // 对 string 类型会出问题，需额外处理
+              NewIComp.SetPropByName(PropName, PropValue[0]);
+            except
+              ;
+            end;
+          end;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('# %d. Transfer Property %s.', [J, PropName]);
+{$ENDIF}
+        end;
+
+        // 同步 Parent
+        if OldIComp.IsTControl and NewIComp.IsTControl then
+        begin
+          OldCtrl := TControl(OldComp);
+          NewCtrl := TControl(NewComp);
+
+          try
+            Par := TControl(OldComp).Parent;
+            TControl(NewComp).Parent := Par;
+          except
+            ;
+          end;
+
+          // 改换子 Controls
+          if (OldCtrl is TWinControl) and (NewCtrl is TWinControl) then
+          begin
+            OldWCtl := TWinControl(OldCtrl);
+            NewWCtl := TWinControl(NewCtrl);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('To Move %d Controls.', [OldWCtl.ControlCount]);
+{$ENDIF}
+            for K := 0 to OldWCtl.ControlCount - 1 do
+              OldWCtl.Controls[0].Parent := NewWCtl;
+          end;
+        end;
+
+{$IFDEF SUPPORT_FMX}
+
+{$ENDIF}
+
+        // 删除旧组件，给新组件换同样的名字
+        NewName := OldComp.Name;
+        if OldIComp.Delete then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('# %d. OldComponent Deleted.', [I]);
+{$ENDIF}
+        end;
+
+        NewIComp.SetPropByName('Name', NewName);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('# %d. Set New Component Name to %s.', [I, NewName]);
+{$ENDIF}
+      end // 一个组件的所有属性替换完成
+      else
+      begin
+        ErrorDlg(Format(SCnChangeCompClassErrorCreateFmt, [NewClass]));
+        Exit;
+      end;
+    end; // 所有选择组件的替换完成
+
+    // TODO: 通知设计器重画，高版本可不用
+    CnOtaNotifyFormDesignerModified(FormEditor);
+  finally
+    ChComps.Free;
+  end;
+end;
 
 //==============================================================================
 // 不可视组件排列窗体

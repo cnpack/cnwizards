@@ -479,10 +479,14 @@ function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinCont
 {* 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
 function CnOtaGetCurrentDesignContainer: TWinControl;
 {* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
-function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean;
-{* 取得当前窗体编辑器的已选择的组件}
-function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean;
-{* 取得当前窗体编辑器的已选择的控件}
+function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean; overload;
+{* 取得当前窗体编辑器的已选择的组件的实例}
+function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean; overload;
+{* 取得当前窗体编辑器的已选择的控件的实例}
+function CnOtaGetSelectedComponentFromCurrentForm(List: TInterfaceList): Boolean; overload;
+{* 取得当前窗体编辑器的已选择的组件的 IComponenet 接口}
+function CnOtaGetSelectedControlFromCurrentForm(List: TInterfaceList): Boolean; overload;
+{* 取得当前窗体编辑器的已选择的控件的 IComponenet 接口}
 function CnOtaShowFormForModule(const Module: IOTAModule): Boolean;
 {* 显示指定模块的窗体 (来自 GExperts Src 1.2)}
 procedure CnOtaShowDesignerForm;
@@ -2652,6 +2656,7 @@ var
       Result := AText <> '';
     end;
   end;
+
 begin
   Result := '';
   if Assigned(Component) then
@@ -3505,6 +3510,78 @@ begin
         begin
           if Assigned(CnFmxGetControlParent(Component)) then
             List.Add(Component);
+        end;
+{$ENDIF}
+      end;
+    end;
+  end;
+
+  Result := List.Count > 0;
+end;
+
+// 取得当前窗体编辑器的已选择的组件的 IComponenet 接口
+function CnOtaGetSelectedComponentFromCurrentForm(List: TInterfaceList): Boolean;
+var
+  FormEditor: IOTAFormEditor;
+  IComponent: IOTAComponent;
+  Component: TComponent;
+  I: Integer;
+begin
+  Result := False;
+  if List = nil then
+    Exit;
+  List.Clear;
+
+  FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
+  if not Assigned(FormEditor) then Exit;
+
+  for I := 0 to FormEditor.GetSelCount - 1 do
+  begin
+    IComponent := FormEditor.GetSelComponent(I);
+    if Assigned(IComponent) and Assigned(IComponent.GetComponentHandle) and
+      (TObject(IComponent.GetComponentHandle) is TComponent) then
+    begin
+      Component := TObject(IComponent.GetComponentHandle) as TComponent;
+      if Assigned(Component) then
+          List.Add(IComponent);
+    end;
+  end;
+
+  Result := List.Count > 0;
+end;
+
+// 取得当前窗体编辑器的已选择的控件的 IComponenet 接口
+function CnOtaGetSelectedControlFromCurrentForm(List: TInterfaceList): Boolean;
+var
+  FormEditor: IOTAFormEditor;
+  IComponent: IOTAComponent;
+  Component: TComponent;
+  I: Integer;
+begin
+  Result := False;
+  if List = nil then
+    Exit;
+  List.Clear;
+
+  FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
+  if not Assigned(FormEditor) then Exit;
+
+  for I := 0 to FormEditor.GetSelCount - 1 do
+  begin
+    IComponent := FormEditor.GetSelComponent(I);
+    if Assigned(IComponent) and Assigned(IComponent.GetComponentHandle) and
+      (TObject(IComponent.GetComponentHandle) is TComponent) then
+    begin
+      Component := TObject(IComponent.GetComponentHandle) as TComponent;
+      if Assigned(Component) then
+      begin
+        if (Component is TControl) and Assigned(TControl(Component).Parent) then
+          List.Add(IComponent);
+{$IFDEF SUPPORT_FMX}
+        if CnFmxIsInheritedFromControl(Component) then
+        begin
+          if Assigned(CnFmxGetControlParent(Component)) then
+            List.Add(IComponent);
         end;
 {$ENDIF}
       end;
