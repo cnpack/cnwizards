@@ -243,7 +243,7 @@ uses
   CnDebug,
 {$ENDIF}
   TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm, CnScriptWizard,
-  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm;
+  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm, CnFmxUtils;
 
 {$R *.dfm}
 
@@ -1902,7 +1902,7 @@ begin
         end;
 
 {$IFDEF SUPPORT_FMX}
-
+        CnFmxMoveSubControl(OldComp, NewComp);
 {$ENDIF}
 
         // 删除旧组件，给新组件换同样的名字
