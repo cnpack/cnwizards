@@ -1249,7 +1249,7 @@ var
   SCnChangeCompClassErrorNoSelection: string = 'NO Selection in Current Designer.';
   SCnChangeCompClassErrorDiffType: string = 'Selected Components Must Be the Same Type.';
   SCnChangeCompClassNewHint: string = 'Enter a New Class Name:';
-  SCnChangeCompClassErrorNew: string = 'Invalid Class Name or Class NOT Found.';
+  SCnChangeCompClassErrorNew: string = 'Invalid Class Name or Class Unchanged.';
   SCnChangeCompClassErrorCreateFmt: string = 'Create %s Error!';
   SCnMustGreaterThanZero: string = 'Numbers Entered Must Greater than Zero';
   SCnHideNonVisualNotSupport: string = 'Only VCL Designer Supported.';
