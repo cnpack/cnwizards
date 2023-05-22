@@ -166,7 +166,7 @@ begin
 
   OrderStr := IntToStr(Control.TabOrder);
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TPaintInternalMethod OrderStr: ' + OrderStr);
+//  CnDebugger.LogMsg('TPaintInternalMethod OrderStr: ' + OrderStr);
 {$ENDIF}
   SaveState := Canvas.SaveState;
   try
@@ -304,7 +304,7 @@ begin
       begin
         // Draw TabOrder Mark
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TabOrderControlPaintInternal Should Draw Mark: ' + Self.ClassName);
+//      CnDebugger.LogMsg('TabOrderControlPaintInternal Should Draw Mark: ' + Self.ClassName);
 {$ENDIF}
         DrawControlTabOrder(Control);
       end;
@@ -340,7 +340,7 @@ begin
       begin
         // Draw TabOrder Mark
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TabOrderControlDoPaint Should Draw Mark: ' + Self.ClassName);
+//      CnDebugger.LogMsg('TabOrderControlDoPaint Should Draw Mark: ' + Self.ClassName);
 {$ENDIF}
         DrawControlTabOrder(Control);
       end;
