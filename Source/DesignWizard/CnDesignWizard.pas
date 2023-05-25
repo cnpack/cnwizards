@@ -1836,6 +1836,12 @@ begin
       OldComp := TComponent(OldIComp.GetComponentHandle);
       Pnt := TSmallPoint(OldComp.DesignInfo);
 
+{$IFDEF SUPPORT_FMX}
+      // FMX 下的可视化组件不用 DesignInfo 存，要拿其 Position 属性
+      if (Pnt.x = 0) and (Pnt.y = 0) then
+        Pnt := CnFmxGetControlPosition(OldComp);
+{$ENDIF}
+
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('# %d. Old Component %s Position %d, %d.',
          [I, OldComp.ClassName, Pnt.x, Pnt.y]);
