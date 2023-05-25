@@ -141,7 +141,6 @@ type
     procedure Error(const Ident: Integer);
     procedure ErrorFmt(const Ident: Integer; const Args: array of const);
     procedure ErrorStr(const Message: string);
-    procedure HexToBinary(Stream: TStream);
 
     function IsInStatement: Boolean;
     {* 判断当前是否在语句内部}
@@ -259,105 +258,6 @@ uses
 const
   MIN_SCAN_BUF_SIZE = 512 * 1024 {512KB};
   MAX_SCAN_BUF_SIZE = 32 * 1024 * 1024 {32MB};
-
-procedure BinToHex(Buffer, Text: PChar; BufSize: Integer); 
-const
-  Convert: array[0..15] of Char = '0123456789ABCDEF';
-var
-  I: Integer;
-begin
-  for I := 0 to BufSize - 1 do
-  begin
-    Text[0] := Convert[Byte(Buffer[I]) shr 4];
-    Text[1] := Convert[Byte(Buffer[I]) and $F];
-    Inc(Text, 2);
-  end;
-end;
-{asm
-        PUSH    ESI
-        PUSH    EDI
-        MOV     ESI,EAX
-        MOV     EDI,EDX
-        MOV     EDX,0
-        JMP     @@1
-@@0:    DB      '0123456789ABCDEF'
-@@1:    LODSB
-        MOV     DL,AL
-        AND     DL,0FH
-        MOV     AH,@@0.Byte[EDX]
-        MOV     DL,AL
-        SHR     DL,4
-        MOV     AL,@@0.Byte[EDX]
-        STOSW
-        DEC     ECX
-        JNE     @@1
-        POP     EDI
-        POP     ESI
-end;}
-
-function HexToBin(Text, Buffer: PChar; BufSize: Integer): Integer;
-const
-  Convert: array['0'..'f'] of SmallInt =
-    ( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,-1,-1,-1,-1,-1,-1,
-     -1,10,11,12,13,14,15,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-     -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-     -1,10,11,12,13,14,15);
-var
-  I: Integer;
-begin
-  I := BufSize;
-  while I > 0 do
-  begin
-    if not (Text[0] in ['0'..'f']) or not (Text[1] in ['0'..'f']) then Break;
-    Buffer[0] := Char((Convert[Text[0]] shl 4) + Convert[Text[1]]);
-    Inc(Buffer);
-    Inc(Text, 2);
-    Dec(I);
-  end;
-  Result := BufSize - I;
-end;
-
-{asm
-        PUSH    ESI
-        PUSH    EDI
-        PUSH    EBX
-        MOV     ESI,EAX
-        MOV     EDI,EDX
-        MOV     EBX,EDX
-        MOV     EDX,0
-        JMP     @@1
-@@0:    DB       0, 1, 2, 3, 4, 5, 6, 7, 8, 9,-1,-1,-1,-1,-1,-1
-        DB      -1,10,11,12,13,14,15,-1,-1,-1,-1,-1,-1,-1,-1,-1
-        DB      -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
-        DB      -1,10,11,12,13,14,15
-@@1:    LODSW
-        CMP     AL,'0'
-        JB      @@2
-        CMP     AL,'f'
-        JA      @@2
-        MOV     DL,AL
-        MOV     AL,@@0.Byte[EDX-'0']
-        CMP     AL,-1
-        JE      @@2
-        SHL     AL,4
-        CMP     AH,'0'
-        JB      @@2
-        CMP     AH,'f'
-        JA      @@2
-        MOV     DL,AH
-        MOV     AH,@@0.Byte[EDX-'0']
-        CMP     AH,-1
-        JE      @@2
-        OR      AL,AH
-        STOSB
-        DEC     ECX
-        JNE     @@1
-@@2:    MOV     EAX,EDI
-        SUB     EAX,EBX
-        POP     EBX
-        POP     EDI
-        POP     ESI
-end;}
 
 { TAbstractScaner }
 
@@ -480,23 +380,6 @@ end;
 procedure TAbstractScanner.ErrorStr(const Message: string);
 begin
   raise EParserError.CreateFmt(SParseError, [Message, FSourceLine, SourcePos]);
-end;
-
-procedure TAbstractScanner.HexToBinary(Stream: TStream);
-var
-  Count: Integer;
-  Buffer: array[0..255] of Char;
-begin
-  SkipBlanks;
-  while FSourcePtr^ <> '}' do
-  begin
-    Count := HexToBin(FSourcePtr, Buffer, SizeOf(Buffer));
-    if Count = 0 then Error(CN_ERRCODE_PASCAL_INVALID_BIN);
-    Stream.Write(Buffer, Count);
-    Inc(FSourcePtr, Count * 2);
-    SkipBlanks;
-  end;
-  NextToken;
 end;
 
 procedure TAbstractScanner.ReadBuffer;
