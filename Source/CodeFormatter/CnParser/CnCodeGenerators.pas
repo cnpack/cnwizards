@@ -119,7 +119,8 @@ type
        逻辑上，复制范围内的内容不包括 EndColumn 所指的字符}
 
     procedure BackSpaceLastSpaces;
-    {* 把最后一行的行尾空格删掉一个，避免因为已经输出了带空格的内容，导致行尾注释后移的问题}
+    {* 把最后一行的行尾空格删掉一个，避免因为已经输出了带空格的内容，导致行尾注释后移的问题
+      注意 Scanner 在忽略区时不要调用，免得引起额外的空格消失}
     procedure TrimLastEmptyLine;
     {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
     function IsLastLineEmpty: Boolean;
