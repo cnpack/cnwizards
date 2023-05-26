@@ -243,7 +243,8 @@ uses
   CnDebug,
 {$ENDIF}
   TypInfo, CnFormEnhancements, CnListCompFrm, CnCompToCodeFrm, CnScriptWizard,
-  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm, CnFmxUtils;
+  CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm
+  {$IFDEF SUPPORT_FMX} , CnFmxUtils {$ENDIF};
 
 {$R *.dfm}
 
