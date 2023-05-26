@@ -1236,8 +1236,8 @@ var
   SCnComparePropertyHint: string = 'Compare Properties for Selected Components';
   SCnCompToCodeCaption: string = 'Convert to Code...';
   SCnCompToCodeHint: string = 'Convert Selected Components to Creating Code';
-  SCnChangeCompClassCaption: string = 'Change Componenet Class...';
-  SCnChangeCompClassHint: string = 'Change Selected Componenet Class';
+  SCnChangeCompClassCaption: string = 'Change Component Class...';
+  SCnChangeCompClassHint: string = 'Change Selected Component Class';
   SCnHideComponentCaption: string = 'Hide Non-visual';
   SCnHideComponentHint: string = 'Hide / Display the Non-visual Component';
   SCnShowFlatFormCaption: string = 'Float Toolbar Options...';
