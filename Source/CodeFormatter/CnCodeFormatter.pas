@@ -6287,7 +6287,7 @@ procedure TCnBasePascalFormatter.ScanerLineBreak(Sender: TObject);
 var
   LineBreak: Boolean;
 begin
-  if FScanner.IsForwarding then
+  if FScanner.IsForwarding or FScanner.InIgnoreArea then
     Exit;
 
   LineBreak := CanKeepLineBreak;
