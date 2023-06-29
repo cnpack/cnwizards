@@ -3021,6 +3021,7 @@ SCnEMVHour=Stunde
 SCnEMVMinute=Minute
 SCnEMVSecond=Sekunde
 SCnEMVCodeLines=derzeitige Unit Quelltext Zeilen
+SCnEMVGUID=Eine neue GUID
 SCnEMVColPos=auffüllen mit Leerzeilen bis Spez. Spalte(Beispiel: %ColPos:80%)
 SCnEMVCursor=Cursor Position nach Einfügen(nur erste vorhanden)
 SCnMsdnWizardName=MSDN Hilfe Werkzeug

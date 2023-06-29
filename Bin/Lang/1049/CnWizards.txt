@@ -3021,6 +3021,7 @@ SCnEMVHour=Час
 SCnEMVMinute=Минута
 SCnEMVSecond=Секунда
 SCnEMVCodeLines=Кол-во строк текущего модуля
+SCnEMVGUID=Новый GUID
 SCnEMVColPos=Заполн. пробелами до опред. позиции (например: %ColPos:80%)
 SCnEMVCursor=Позиция курсора после вставки шаблона (Доступна только первая)
 SCnMsdnWizardName=Мастер MSDN-справки

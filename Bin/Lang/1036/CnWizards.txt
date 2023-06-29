@@ -3021,6 +3021,7 @@ SCnEMVHour=Heure
 SCnEMVMinute=Minute
 SCnEMVSecond=Seconde
 SCnEMVCodeLines=Lignes de code d'unité actuelles
+SCnEMVGUID=Un nouveau GUID
 SCnEMVColPos=Remplir d'espace vers une colonne spéciale (exemple:% ColPos: 80%)
 SCnEMVCursor=Position du curseur après l'insertion (uniquement disponible en premier)
 SCnMsdnWizardName=Assistant d'aide MSDN
