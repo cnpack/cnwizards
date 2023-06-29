@@ -857,6 +857,7 @@ var
   SCnEMVMinute: string = 'Minute';
   SCnEMVSecond: string = 'Second';
   SCnEMVCodeLines: string = 'Current Unit Code Lines';
+  SCnEMVGUID: string = 'A New GUID';
   SCnEMVColPos: string = 'Fill with Space to Special Column(Example: %ColPos:80%)';
   SCnEMVCursor: string = 'Cursor Position after Insert(Only First Available)';
 

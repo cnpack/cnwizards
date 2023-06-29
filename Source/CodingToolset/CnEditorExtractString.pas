@@ -369,16 +369,7 @@ end;
 
 procedure TCnEditorExtractString.Execute;
 var
-  PasParser: TCnGeneralPasStructParser;
-  Stream: TMemoryStream;
-  I, CurrPos, LastTokenPos: Integer;
   EditView: IOTAEditView;
-  Token, StartToken, EndToken, PrevToken: TCnGeneralPasToken;
-  EditPos: TOTAEditPos;
-  Info: TCodePosInfo;
-  TokenList: TCnIdeStringList;
-  S, NewCode: TCnIdeTokenString;
-  EditWriter: IOTAEditWriter;
 begin
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
@@ -503,7 +494,6 @@ var
   Lex: TCnGeneralWidePasLex;
   Stream: TMemoryStream;
   EditView: IOTAEditView;
-  AreaFound: Boolean;
   InsPos: Integer;
   Names: TCnIdeStringList;
   S: TCnIdeTokenString;
@@ -527,7 +517,6 @@ begin
     Lex := TCnGeneralWidePasLex.Create;
     Lex.Origin := Stream.Memory;
 
-    AreaFound := False;
     while (Lex.TokenID <> tkNull) and (Lex.TokenID <> KINDS[Area]) do
       Lex.NextNoJunk;
 

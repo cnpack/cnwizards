@@ -38,8 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, TypInfo, ToolsAPI, CnWizConsts, CnCommon,
-  CnWizCompilerConst, CnPasCodeParser, CnCppCodeParser;
+  Windows, SysUtils, Classes, TypInfo, ActiveX, ToolsAPI,
+  CnWizConsts, CnCommon, CnWizCompilerConst, CnPasCodeParser, CnCppCodeParser;
 
 type
 
@@ -51,7 +51,8 @@ type
     cwmCurrMethodName, cwmCurrClassName, cwmCurrIDEName,
     cwmUser, cwmDateTime, cwmDate, cwmYear, cwmMonth, cwmMonthShortName,
     cwmMonthLongName, cwmDay, cwmDayShortName, cwmDayLongName,
-    cwmHour, cwmMinute, cwmSecond, cwmCodeLines, cwmColPos, cwmCursor);
+    cwmHour, cwmMinute, cwmSecond, cwmCodeLines, cwmGUID,
+    cwmColPos, cwmCursor);
 
   TCnWizMacroText = class(TObject)
   private
@@ -89,7 +90,7 @@ const
     @SCnEMVDateTime, @SCnEMVDate, @SCnEMVYear,
     @SCnEMVMonth, @SCnEMVMonthShortName, @SCnEMVMonthLongName, @SCnEMVDay,
     @SCnEMVDayShortName, @SCnEMVDayLongName, @SCnEMVHour, @SCnEMVMinute,
-    @SCnEMVSecond, @SCnEMVCodeLines, @SCnEMVColPos, @SCnEMVCursor);
+    @SCnEMVSecond, @SCnEMVCodeLines, @SCnEMVGUID, @SCnEMVColPos, @SCnEMVCursor);
 
 function GetMacroName(Macro: TCnWizMacro): string;
 function GetMacroDefText(Macro: TCnWizMacro): string;
@@ -338,6 +339,7 @@ var
   CParser: TCnCppStructureParser;
   S: string;
   IsPasFile, IsCFile: Boolean;
+  Guid: TGUID;
 begin
   Result := AMacro;
   if IsInternalMacro(AMacro, Macro) then
@@ -468,6 +470,15 @@ begin
         Result := FormatDateTime('ss', Time);
       cwmCodeLines:
         Result := EdtGetCodeLines;
+      cwmGUID:
+        begin
+          if CoCreateGuid(Guid) = S_OK then
+            Result := Format('{%.8x-%.4x-%.4x-%.2x%.2x-%.2x%.2x%.2x%.2x%.2x%.2x}',
+              [Guid.D1, Guid.D2, Guid.D3, Guid.D4[0], Guid.D4[1], Guid.D4[2], Guid.D4[3],
+              Guid.D4[4], Guid.D4[5], Guid.D4[6], Guid.D4[7]])
+          else
+            Result := '{640A7730-4128-4313-BA12-1D10811A843E}'; // 失败就随便返回一个固定的
+        end;
       cwmColPos:        // 处理定位宏
         begin
           IPos := GetPosMacroValue(AMacro);

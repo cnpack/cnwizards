@@ -523,6 +523,7 @@ begin
   TranslateStr(SCnEMVMinute, 'SCnEMVMinute');
   TranslateStr(SCnEMVSecond, 'SCnEMVSecond');
   TranslateStr(SCnEMVCodeLines, 'SCnEMVCodeLines');
+  TranslateStr(SCnEMVGUID, 'SCnEMVGUID');
   TranslateStr(SCnEMVColPos, 'SCnEMVColPos');
   TranslateStr(SCnEMVCursor, 'SCnEMVCursor');
 
