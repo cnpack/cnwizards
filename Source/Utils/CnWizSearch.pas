@@ -787,6 +787,11 @@ begin
         end;
       end;
 
+      DestStream.Write(CZ, 1);
+{$IFDEF UNICODE}
+      DestStream.Write(CZ, 1);
+{$ENDIF}
+
       if CorrectCount > 0 then  // ะ่าช Ansi/Ansi/Utf8
       begin
 {$IFDEF UNICODE}
