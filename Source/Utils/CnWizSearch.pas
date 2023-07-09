@@ -796,7 +796,7 @@ begin
         DestStream.Position := 0;
         DestStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
 {$ENDIF}
-        EditFilerReadStreamToFile(FileName, DestStream, True); // 写原始格式
+        EditFilerReadStreamToFile(FileName, DestStream); // 写原始格式
       end;
       Result := True;
     except

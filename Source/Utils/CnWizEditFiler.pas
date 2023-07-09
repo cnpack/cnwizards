@@ -107,7 +107,9 @@ type
     // 要求流中是 Ansi 或 Utf8，无 BOM，不要求 Stream 尾 #0
     // 写文件时不进行转换。写缓冲时如果是 BDS 且 Stream 是 MemoryStream 时，
     // Stream 内容如果是 Ansi，则  CheckUtf8 得设为 True
-    // 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。以下两函数暂未做UTF8适配
+    // 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
+
+    // 以下两函数暂未做 UTF8 适配
     procedure ReadFromStreamInPos(Stream: TStream);
     procedure ReadFromStreamInsertToPos(Stream: TStream);
 
