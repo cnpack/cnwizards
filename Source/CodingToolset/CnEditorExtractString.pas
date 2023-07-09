@@ -952,7 +952,7 @@ begin
 end;
 
 initialization
-  RegisterCnCodingToolset(TCnEditorExtractString); // 注册工具
+  // RegisterCnCodingToolset(TCnEditorExtractString); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.
