@@ -81,7 +81,7 @@ uses
   {$IFDEF BCB6} CnScript_ToolsAPI_D6, {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
   CnScript_CnWizIdeUtils, CnScript_CnWizOptions, CnScript_ScriptEvent,
-  CnScript_RegExpr, CnScript_CnWizClasses, CnScript_CnWizShortCut;
+  CnScript_RegExpr, CnScript_CnWizClasses, CnScript_CnWizManager, CnScript_CnWizShortCut;
 
 initialization
   RegisterCnScriptPlugin(TPSDllPlugin);
@@ -122,6 +122,7 @@ initialization
   RegisterCnScriptPlugin(TPSImport_ScriptEvent);
   RegisterCnScriptPlugin(TPSImport_RegExpr);
   RegisterCnScriptPlugin(TPSImport_CnWizClasses);
+  RegisterCnScriptPlugin(TPSImport_CnWizManager);
   RegisterCnScriptPlugin(TPSImport_CnWizShortCut);
 
 {$ENDIF}
