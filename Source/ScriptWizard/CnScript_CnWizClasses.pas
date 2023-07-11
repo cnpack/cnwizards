@@ -249,12 +249,12 @@ begin
   CL.AddClassN(CL.FindClass('TOBJECT'),'TCnProjectWizard');
   SIRegister_TCnBaseMenuExecutor(CL);
   SIRegister_TCnContextMenuExecutor(CL);
- CL.AddDelphiFunction('Procedure RegisterCnWizard( const AClass : TCnWizardClass)');
- CL.AddDelphiFunction('Function GetCnWizardClass( const ClassName : string) : TCnWizardClass');
+ //CL.AddDelphiFunction('Procedure RegisterCnWizard( const AClass : TCnWizardClass)');
+ //CL.AddDelphiFunction('Function GetCnWizardClass( const ClassName : string) : TCnWizardClass');
  CL.AddDelphiFunction('Function GetCnWizardClassCount : Integer');
- CL.AddDelphiFunction('Function GetCnWizardClassByIndex( const Index : Integer) : TCnWizardClass');
- CL.AddDelphiFunction('Function GetCnWizardTypeNameFromClass( AClass : TClass) : string');
- CL.AddDelphiFunction('Function GetCnWizardTypeName( AWizard : TCnBaseWizard) : string');
+ //CL.AddDelphiFunction('Function GetCnWizardClassByIndex( const Index : Integer) : TCnWizardClass');
+ //CL.AddDelphiFunction('Function GetCnWizardTypeNameFromClass( AClass : TClass) : string');
+ //CL.AddDelphiFunction('Function GetCnWizardTypeName( AWizard : TCnBaseWizard) : string');
  CL.AddDelphiFunction('Procedure GetCnWizardInfoStrs( AWizard : TCnBaseWizard; Infos : TStrings)');
 end;
 
@@ -487,11 +487,11 @@ begin
     RegisterVirtualMethod(@TCnBaseWizard.GetSearchContent, 'GetSearchContent');
     RegisterVirtualMethod(@TCnBaseWizard.DebugComand, 'DebugComand');
     RegisterVirtualMethod(@TCnBaseWizard.GetState, 'GetState');
-    RegisterVirtualAbstractMethod(@TCnBaseWizard, @!.Execute, 'Execute');
+    //RegisterVirtualAbstractMethod(@TCnBaseWizard, @!.Execute, 'Execute');
     RegisterVirtualMethod(@TCnBaseWizard.Loaded, 'Loaded');
     RegisterVirtualMethod(@TCnBaseWizard.LaterLoaded, 'LaterLoaded');
     RegisterVirtualMethod(@TCnBaseWizard.IsInternalWizard, 'IsInternalWizard');
-    RegisterVirtualAbstractMethod(@TCnBaseWizard, @!.GetWizardInfo, 'GetWizardInfo');
+    //RegisterVirtualAbstractMethod(@TCnBaseWizard, @!.GetWizardInfo, 'GetWizardInfo');
     RegisterVirtualMethod(@TCnBaseWizard.Config, 'Config');
     RegisterVirtualMethod(@TCnBaseWizard.LanguageChanged, 'LanguageChanged');
     RegisterVirtualMethod(@TCnBaseWizard.LoadSettings, 'LoadSettings');
