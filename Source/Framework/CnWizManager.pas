@@ -264,6 +264,9 @@ function GetEditorMenuExecutorCount: Integer;
 function GetEditorMenuExecutor(Index: Integer): TCnContextMenuExecutor;
 {* 返回已注册的编辑器右键菜单条目，供编辑器扩展实现自定义编辑器菜单用}
 
+function GetCnWizardMgr: TCnWizardMgr;
+{* 封装的返回 TCnWizardMgr 主专家实例的函数，主要给脚本专家使用}
+
 implementation
 
 uses
@@ -291,6 +294,12 @@ var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
 
   CnEditorExecutorList: TObjectList = nil; // 编辑器右键菜单执行对象列表
+
+// 封装的返回 TCnWizardMgr 主专家实例的函数，主要给脚本专家使用
+function GetCnWizardMgr: TCnWizardMgr;
+begin
+  Result := CnWizardMgr;
+end;
 
 // 注册一个设计器右键菜单的执行对象实例，应该在专家创建时注册
 procedure RegisterBaseDesignMenuExecutor(Executor: TCnBaseMenuExecutor);

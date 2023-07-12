@@ -176,6 +176,7 @@ begin
  CL.AddDelphiFunction('Procedure UnRegisterEditorMenuExecutor( Executor : TCnContextMenuExecutor)');
  CL.AddDelphiFunction('Function GetEditorMenuExecutorCount : Integer');
  CL.AddDelphiFunction('Function GetEditorMenuExecutor( Index : Integer) : TCnContextMenuExecutor');
+ CL.AddDelphiFunction('Function GetCnWizardMgr : TCnWizardMgr');
 end;
 
 (* === run-time registration functions === *)
@@ -238,6 +239,7 @@ begin
  S.RegisterDelphiFunction(@UnRegisterEditorMenuExecutor, 'UnRegisterEditorMenuExecutor', cdRegister);
  S.RegisterDelphiFunction(@GetEditorMenuExecutorCount, 'GetEditorMenuExecutorCount', cdRegister);
  S.RegisterDelphiFunction(@GetEditorMenuExecutor, 'GetEditorMenuExecutor', cdRegister);
+ S.RegisterDelphiFunction(@GetCnWizardMgr, 'GetCnWizardMgr', cdRegister);
 end;
 
 {$IFDEF COMPILER6_UP}

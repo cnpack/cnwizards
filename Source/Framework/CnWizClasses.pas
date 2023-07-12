@@ -551,7 +551,7 @@ uses
 var
   CnWizardClassList: TList = nil; // 专家类引用列表
 
-// 注册一个CnBaseWizard专家类引用
+// 注册一个 CnBaseWizard 专家类引用
 procedure RegisterCnWizard(const AClass: TCnWizardClass);
 begin
   Assert(CnWizardClassList <> nil, 'CnWizardClassList is nil!');
