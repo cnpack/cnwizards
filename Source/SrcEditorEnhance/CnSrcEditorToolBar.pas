@@ -121,7 +121,7 @@ type
 
 { TCnSrcEditorToolBarMgr }
 
-  TCnSrcEditorToolBarMgr = class
+  TCnSrcEditorToolBarMgr = class(TPersistent)
   private
     FShowToolBar: Boolean;
     FToolBarActions: TStringList;
@@ -166,6 +166,7 @@ type
     property Count: Integer read GetCount;
     property ToolBars[Index: Integer]: TCnSrcEditorToolBar read GetToolBar;
 
+  published
     property ShowToolBar: Boolean read FShowToolBar write SetShowToolBar;
     property ShowDesignToolBar: Boolean read FShowDesignToolBar write SetShowDesignToolBar;
     property Wrapable: Boolean read FWrapable write SetWrapable;

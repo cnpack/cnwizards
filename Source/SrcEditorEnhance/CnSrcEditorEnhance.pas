@@ -232,6 +232,7 @@ type
     procedure ConfigEx(APageIndex: Integer);
     procedure LanguageChanged(Sender: TObject); override;
 
+  published
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
     property NavMgr: TCnSrcEditorNavMgr read FNavMgr;
   
