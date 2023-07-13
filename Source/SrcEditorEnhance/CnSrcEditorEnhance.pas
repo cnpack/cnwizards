@@ -183,11 +183,11 @@ type
     procedure btnCurrLineFontClick(Sender: TObject);
     procedure btnDesignToolBarClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 //==============================================================================

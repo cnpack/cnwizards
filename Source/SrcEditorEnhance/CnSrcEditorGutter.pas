@@ -142,7 +142,7 @@ type
 
 { TCnSrcEditorGutterMgr }
 
-  TCnSrcEditorGutterMgr = class(TObject)
+  TCnSrcEditorGutterMgr = class(TPersistent)
   private
     FList: TList;
     FFont: TFont;
@@ -193,11 +193,17 @@ type
     
     property Font: TFont read FFont write SetFont;
     property CurrFont: TFont read FCurrFont write SetCurrFont;
+  published
     property ShowLineNumber: Boolean read FShowLineNumber write SetShowLineNumber;
+    {* 是否在编辑器左侧显示行号区}
     property ShowLineCount: Boolean read FShowLineCount write FShowLineCount;
+    {* 是否在行号区下方显示总行数}
     property AutoWidth: Boolean read FAutoWidth write FAutoWidth;
+    {* 是否根据行号位数自动调整行号区宽度，如否，使用行号区固定宽度}
     property MinWidth: TCnGutterWidth read FMinWidth write SetMinWidth;
+    {* 是否行号区最小宽度}
     property FixedWidth: TCnGutterWidth read FFixedWidth write SetFixedWidth;
+    {* 行号区固定宽度}
 
     property ClickSelectLine: Boolean read FClickSelectLine write FClickSelectLine;
     {* 是否单击选中整行}

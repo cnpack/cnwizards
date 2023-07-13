@@ -73,6 +73,8 @@ type
     FOldForwardMenu: Menus.TPopupMenu;
     FOldBackAction: TBasicAction;
     FOldForwardAction: TBasicAction;
+    FOldBackShortCut: TShortCut;
+    FOldForwardShortCut: TShortCut;
     FOldImageList: TCustomImageList;
     FLastUpdateTick: Cardinal;
     FBackMenu: TPopupMenu;
@@ -119,7 +121,7 @@ type
 
 { TCnSrcEditorNavMgr }
 
-  TCnSrcEditorNavMgr = class(TObject)
+  TCnSrcEditorNavMgr = class(TPersistent)
   private
     FActive: Boolean;
     FList: TList;
@@ -151,7 +153,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile);
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
-
+  published
     property ExtendForwardBack: Boolean read FExtendForwardBack write SetExtendForwardBack;
     property MinLineDiff: Integer read FMinLineDiff write FMinLineDiff;
     property MaxItems: Integer read FMaxItems write FMaxItems;
@@ -509,6 +511,19 @@ begin
       FOldImageList := TToolBar(BackButton.Parent).Images;
       TToolBar(BackButton.Parent).Images := dmCnSharedImages.ilBackForward;
       FOldBackAction := BackButton.Action;
+
+      if FOldBackAction <> nil then
+      begin
+        if FOldBackAction is TCustomAction then
+          FOldBackShortCut := (FOldBackAction as TCustomAction).ShortCut
+        else
+          FOldBackShortCut := 0;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('TCnSrcEditorNav.Install. Old Back %s with Shortcut %s',
+          [FOldBackAction.Name, ShortCutToText(FOldBackShortCut)]);
+{$ENDIF}
+      end;
+
       FOldBackMenu := BackButton.DropdownMenu;
       BackButton.Action := FBackAction;
       BackButton.DropdownMenu := FBackMenu;
@@ -519,6 +534,19 @@ begin
     begin
       FOldForwardAction := ForwardButton.Action;
       FOldForwardMenu := ForwardButton.DropdownMenu;
+
+      if FOldForwardAction <> nil then
+      begin
+        if FOldForwardAction is TCustomAction then
+          FOldForwardShortCut := (FOldForwardAction as TCustomAction).ShortCut
+        else
+          FOldForwardShortCut := 0;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('TCnSrcEditorNav.Install. Old Forward %s with Shortcut %s',
+          [FOldForwardAction.Name, ShortCutToText(FOldForwardShortCut)]);
+{$ENDIF}
+      end;
+
       ForwardButton.Action := FForwardAction;
       ForwardButton.DropdownMenu := FForwardMenu;
     end;
@@ -547,6 +575,19 @@ begin
 
           FOldBackAction := BackButton.Action;
           FOldBackMenu := BackButton.DropdownMenu;
+
+          if FOldBackAction <> nil then
+          begin
+            if FOldBackAction is TCustomAction then
+              FOldBackShortCut := (FOldBackAction as TCustomAction).ShortCut
+            else
+              FOldBackShortCut := 0;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('TCnSrcEditorNav.Install in BDS. Old Back %s with Shortcut %s',
+              [FOldBackAction.Name, ShortCutToText(FOldBackShortCut)]);
+{$ENDIF}
+          end;
+
           BackButton.Action := FBackAction;
           BackButton.DropdownMenu := FBackMenu;
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -558,6 +599,19 @@ begin
         begin
           FOldForwardAction := ForwardButton.Action;
           FOldForwardMenu := ForwardButton.DropdownMenu;
+
+          if FOldForwardAction <> nil then
+          begin
+            if FOldForwardAction is TCustomAction then
+              FOldForwardShortCut := (FOldForwardAction as TCustomAction).ShortCut
+            else
+              FOldForwardShortCut := 0;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('TCnSrcEditorNav.Install in BDS. Old Forward %s with Shortcut %s',
+              [FOldForwardAction.Name, ShortCutToText(FOldForwardShortCut)]);
+{$ENDIF}
+          end;
+
           ForwardButton.Action := FForwardAction;
           ForwardButton.DropdownMenu := FForwardMenu;
 {$IFDEF IDE_SUPPORT_HDPI}

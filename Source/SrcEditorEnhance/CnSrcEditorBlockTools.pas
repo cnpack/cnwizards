@@ -71,7 +71,7 @@ type
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
 
-  TCnSrcEditorBlockTools = class
+  TCnSrcEditorBlockTools = class(TPersistent)
   private
     FIcon: TIcon;
     FCodeWrap: TCnSrcEditorCodeWrapTool;
@@ -155,6 +155,7 @@ type
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure UpdateMenu(Items: TMenuItem; NeedImage: Boolean = True); // 更新浮动按钮的下拉菜单
 
+  published
     property Active: Boolean read FActive write SetActive;
     property ShowBlockTools: Boolean read FShowBlockTools write SetShowBlockTools;
     property ShowColor: Boolean read FShowColor write SetShowColor;

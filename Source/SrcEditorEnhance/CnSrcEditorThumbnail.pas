@@ -86,7 +86,7 @@ type
 
 { TCnSrcEditorThumbnail }
 
-  TCnSrcEditorThumbnail = class(TObject)
+  TCnSrcEditorThumbnail = class(TPersistent)
   private
     FActive: Boolean;
     FThumbWindow: TCnSrcThumbnailWindow;
@@ -126,6 +126,7 @@ type
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
 
+  published
     property Active: Boolean read FActive write SetActive;
     property ShowThumbnail: Boolean read FShowThumbnail write SetShowThumbnail;
   end;

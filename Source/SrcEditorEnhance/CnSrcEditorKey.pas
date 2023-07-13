@@ -73,7 +73,7 @@ type
 
 { TCnSrcEditorKey }
 
-  TCnSrcEditorKey = class(TObject)
+  TCnSrcEditorKey = class(TPersistent)
   private
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
@@ -163,6 +163,7 @@ type
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
 
+  published
     property Active: Boolean read FActive write SetActive;
     property SmartCopy: Boolean read FSmartCopy write FSmartCopy;
     property SmartPaste: Boolean read FSmartPaste write FSmartPaste;
@@ -185,7 +186,6 @@ type
     property AutoEnterEnd: Boolean read FAutoEnterEnd write FAutoEnterEnd;
     property UpperFirstLetter: Boolean read FUpperFirstLetter write FUpperFirstLetter;
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
-
   end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
