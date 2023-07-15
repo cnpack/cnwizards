@@ -148,9 +148,9 @@ procedure CheckUpgrade(AUserCheck: Boolean);
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   CnWizTipOfDayFrm;
 
 {$R *.DFM}
@@ -161,6 +161,7 @@ const
   csBigBugFixed = 'BigBugFixed';
   csBetaVersion = 'BetaVersion';
   csURL = 'URL';
+  csURLCN = 'URL_CN';
 
 var
   FThread: TCnWizUpgradeThread;
@@ -243,9 +244,9 @@ begin
   
   if Suspended then
     Resume;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizUpgradeThread.Create');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 destructor TCnWizUpgradeThread.Destroy;
@@ -253,9 +254,9 @@ begin
   FThread := nil;
   FHTTP.Free;
   FUpgradeCollection.Free;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizUpgradeThread.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
   inherited;
 end;
 
@@ -301,18 +302,18 @@ end;
 // 从 S 中找出可用的 URL 来。
 procedure TCnWizUpgradeThread.FindLinks(S: string; Strings: TStrings);
 var
-  i, j: Integer;
+  I, j: Integer;
 begin
   Strings.Clear;
-  i := Pos(csHttp, LowerCase(S));
-  while i > 0 do
+  I := Pos(csHttp, LowerCase(S));
+  while I > 0 do
   begin
-    j := i + Length(csHttp);
+    j := I + Length(csHttp);
     while (j < Length(S)) and not CharInSet(S[j], ['"', ' ', '>']) do
       Inc(j);
-    Strings.Add(Copy(S, i, j - i));
-    Delete(S, i, j - i);
-    i := Pos(csHttp, LowerCase(S));
+    Strings.Add(Copy(S, I, j - I));
+    Delete(S, I, j - I);
+    I := Pos(csHttp, LowerCase(S));
   end;
 end;
 
@@ -324,7 +325,7 @@ var
 {$ENDIF}
   Res: AnsiString;
   Strings: TStrings;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
 
@@ -356,8 +357,8 @@ begin
     try
       FindLinks(Content, Strings);
       if Strings.Count <= csMaxLinks then // 正常的转向信息不应该有过多的链接
-        for i := 0 to Strings.Count - 1 do
-          if GetUpgrade(Strings[i], Level + 1) then
+        for I := 0 to Strings.Count - 1 do
+          if GetUpgrade(Strings[I], Level + 1) then
           begin
             Result := True;
             Exit;
@@ -375,7 +376,7 @@ function TCnWizUpgradeThread.GetUpgradeCollection(const Content: string
 var
   Strings: TStrings;
   Ini: TMemIniFile;
-  i: Integer;
+  I: Integer;
 {$IFNDEF UNICODE}
   ADateStr: WideString;
   Idx: Integer;
@@ -394,21 +395,21 @@ begin
     begin
       Ini.SetStrings(Strings);
       Ini.ReadSections(Strings);
-      for i := 0 to Strings.Count - 1 do
+      for I := 0 to Strings.Count - 1 do
       begin
         try
 {$IFNDEF UNICODE}
-          ADateStr := WideString(Strings[i]);
+          ADateStr := WideString(Strings[I]);
 {$ENDIF}
-          ADate := CnStrToDate(Strings[i]);
+          ADate := CnStrToDate(Strings[I]);
           Item := FUpgradeCollection.Add;
           with Item do
           begin
             Date := ADate;
-            Version := Ini.ReadString(Strings[i], csVersion, '');
-            NewFeature := Ini.ReadBool(Strings[i], csNewFeature, False);
-            BigBugFixed := Ini.ReadBool(Strings[i], csBigBugFixed, False);
-            Comment := StrToLines(Ini.ReadString(Strings[i], SCnWizUpgradeCommentName, ''));
+            Version := Ini.ReadString(Strings[I], csVersion, '');
+            NewFeature := Ini.ReadBool(Strings[I], csNewFeature, False);
+            BigBugFixed := Ini.ReadBool(Strings[I], csBigBugFixed, False);
+            Comment := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradeCommentName, ''));
 {$IFNDEF UNICODE}
             Idx := Pos(ADateStr, WideCon);
             if Idx > 0 then
@@ -430,12 +431,17 @@ begin
             end;
             // Find ADate in WideComment and delete before, Find SCnWizUpgradeCommentName and CRLF to Comment
 {$ENDIF}
-            URL := Ini.ReadString(Strings[i], csURL, '');
-            BetaVersion := Ini.ReadBool(Strings[i], csBetaVersion, False);
+            URL := '';
+            if WizOptions.CurrentLangID = 2052 then // 简体中文读中文链接
+              URL := Ini.ReadString(Strings[I], csURLCN, '');
+
+            if URL = '' then  // 没有中文链接则读普通链接
+              URL := Ini.ReadString(Strings[I], csURL, '');
+            BetaVersion := Ini.ReadBool(Strings[I], csBetaVersion, False);
           end;
-        {$IFDEF Debug}
+        {$IFDEF DEBUG}
           CnDebugger.LogObject(Item);
-        {$ENDIF Debug}
+        {$ENDIF}
         except
           FreeAndNil(Item);
         end;
@@ -450,12 +456,12 @@ end;
 
 procedure TCnWizUpgradeThread.CheckUpgrade;
 var
-  i: Integer;
+  I: Integer;
   
   function GetBuildNo(const VerStr: string): Integer;
   var
     s, s1: string;
-    i: Integer;
+    I: Integer;
   begin
     Result := 0;
     with TStringList.Create do
@@ -465,9 +471,9 @@ var
       begin
         s := Trim(Strings[3]);
         s1 := '';
-        for i := 1 to Length(s) do
-          if CharInSet(s[i], ['0'..'9']) then
-            s1 := s1 + s[i]
+        for I := 1 to Length(s) do
+          if CharInSet(s[I], ['0'..'9']) then
+            s1 := s1 + s[I]
           else
             Break;
         Result := StrToIntDef(s1, 0);
@@ -484,9 +490,9 @@ begin
     (GetBuildNo(FUpgradeCollection[0].Version) > GetBuildNo(SCnWizardVersion)) then
   begin
     // 删除旧版本记录
-    for i := FUpgradeCollection.Count - 1 downto 1 do
-      if GetBuildNo(FUpgradeCollection[i].Version) <= GetBuildNo(SCnWizardVersion) then
-        FUpgradeCollection.Delete(i);
+    for I := FUpgradeCollection.Count - 1 downto 1 do
+      if GetBuildNo(FUpgradeCollection[I].Version) <= GetBuildNo(SCnWizardVersion) then
+        FUpgradeCollection.Delete(I);
 
     if not FUserCheck then
     begin
@@ -720,8 +726,8 @@ finalization
   if FForm <> nil then
     FForm.Free;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizUpgradeFrm finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 end.
 
