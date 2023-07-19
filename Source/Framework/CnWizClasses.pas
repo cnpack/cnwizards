@@ -144,7 +144,7 @@ type
 
     class function IsInternalWizard: Boolean; virtual;
     {* 该专家是否属于内部专家，不显示、不可配置 }
-    
+
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string);
       virtual; {$IFNDEF BCB}abstract;{$ENDIF BCB}
     {* 取专家信息，用于提供专家的说明和版权信息。抽象方法，子类必须实现。
@@ -189,7 +189,7 @@ type
     property BigIcon: TIcon read GetBigIcon;
     {* 专家大图标，如果有的话}
   end;
-  
+
 {$M-}
 
 type
@@ -230,7 +230,7 @@ type
 
   TCnIDEEnhanceWizard = class(TCnIconWizard);
   {* IDE 功能扩展基础类 }
-  
+
 //==============================================================================
 // 带 Action 和快捷键的抽象专家类
 //==============================================================================
@@ -541,7 +541,7 @@ uses
   CnWizUtils, CnWizOptions, CnCommon
 {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizCommentFrm, CnWizSubActionShortCutFrm
-{$ENDIF}  
+{$ENDIF}
   {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 //==============================================================================
@@ -1020,7 +1020,7 @@ end;
 // 取 Hint 提示方法
 function TCnActionWizard.GetHint: string;
 begin
-  Result := ''
+  Result := '';
 end;
 
 function TCnActionWizard.GetSearchContent: string;

@@ -492,7 +492,7 @@ begin
   CnDebugger.LogEnter('TCnWizardMgr.Create');
 {$ENDIF}
   inherited Create;
-  
+
   // 让专家可以在 Create 和其他过程中能够访问 CnWizardMgr 中的其他属性。
   CnWizardMgr := Self;
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -528,7 +528,7 @@ begin
 {$ENDIF}
     WizShortCutMgr.EndUpdate;
   end;
-  
+
   ConstructSortedMenu;
 {$IFNDEF CNWIZARDS_MINIMUM}
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
@@ -608,7 +608,7 @@ begin
       ReleaseMutex(hMutex);
       CloseHandle(hMutex);
     end;
-  end;          
+  end;
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizardMgr.Destroy');
@@ -652,18 +652,18 @@ end;
 // 重新读入专家的各种语言字符串，包括 Action 标题
 procedure TCnWizardMgr.RefreshLanguage;
 var
-  i: Integer;
+  I: Integer;
 begin
   FConfigAction.Caption := SCnWizConfigCaption;
   FConfigAction.Hint := SCnWizConfigHint;
   FWizAbout.RefreshAction;
-  
+
   WizActionMgr.MoreAction.Caption := SCnMoreMenu;
   WizActionMgr.MoreAction.Hint := StripHotkey(SCnMoreMenu);
-  
-  for i := 0 to WizardCount - 1 do
-    if Wizards[i] is TCnActionWizard then
-      TCnActionWizard(Wizards[i]).RefreshAction;
+
+  for I := 0 to WizardCount - 1 do
+    if Wizards[I] is TCnActionWizard then
+      TCnActionWizard(Wizards[I]).RefreshAction;
 end;
 
 // 调用专家的语言改变事件，由专家自己处理语言变化
@@ -675,7 +675,7 @@ var
 begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   for I := 0 to WizardCount - 1 do
-    Wizards[i].LanguageChanged(CnLanguageManager);
+    Wizards[I].LanguageChanged(CnLanguageManager);
 {$ENDIF}
 end;
 
@@ -723,7 +723,7 @@ begin
       CnDebugger.LogFmt('ConstructSortedMenu. Insert %s', [TCnMenuWizard(List.Items[I]).Menu.Caption]);
 {$ENDIF}
       Menu.Add(TCnMenuWizard(List.Items[I]).Menu);
-    end;  
+    end;
 
     InstallMiscMenu;
   finally
@@ -775,12 +775,12 @@ end;
 // 根据专家类名返回专家实例，如果找不到专家，返回为 nil
 function TCnWizardMgr.WizardByClass(AClass: TCnWizardClass): TCnBaseWizard;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to WizardCount - 1 do
-    if Wizards[i] is AClass then
+  for I := 0 to WizardCount - 1 do
+    if Wizards[I] is AClass then
     begin
-      Result := Wizards[i];
+      Result := Wizards[I];
       Exit;
     end;
   Result := nil;
@@ -789,12 +789,12 @@ end;
 // 根据专家类名字符串返回专家实例，如果找不到专家，返回为 nil
 function TCnWizardMgr.WizardByClassName(const AClassName: string): TCnBaseWizard;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to WizardCount - 1 do
-    if Wizards[i].ClassNameIs(AClassName) then
+  for I := 0 to WizardCount - 1 do
+    if Wizards[I].ClassNameIs(AClassName) then
     begin
-      Result := Wizards[i];
+      Result := Wizards[I];
       Exit;
     end;
   Result := nil;
@@ -883,7 +883,7 @@ end;
 // 安装专家列表
 procedure TCnWizardMgr.InstallWizards;
 var
-  i: Integer;
+  I: Integer;
   Wizard: TCnBaseWizard;
   MenuWizard: TCnMenuWizard;
   IDEEnhanceWizard: TCnIDEEnhanceWizard;
@@ -930,20 +930,20 @@ begin
   end;
 {$ENDIF}
 
-  for i := 0 to GetCnWizardClassCount - 1 do
+  for I := 0 to GetCnWizardClassCount - 1 do
   begin
-    if ((not bUserBoot) and WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName]) or
-       (bUserBoot and BootList[i]) then
+    if ((not bUserBoot) and WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName]) or
+       (bUserBoot and BootList[I]) then
     begin
       try
-        Wizard := TCnWizardClass(GetCnWizardClassByIndex(i)).Create;
+        Wizard := TCnWizardClass(GetCnWizardClassByIndex(I)).Create;
       {$IFDEF DEBUG}
         CnDebugger.LogMsg('Wizard Created: ' + Wizard.ClassName);
       {$ENDIF}
       except
       {$IFDEF DEBUG}
         CnDebugger.LogMsg('Wizard Create Fail: ' +
-          TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName);
+          TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName);
       {$ENDIF}
         Wizard := nil;
       end;
@@ -970,7 +970,7 @@ begin
         FWizards.Add(Wizard);
 
     {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Wizard [%d] installed: %s', [i, Wizard.ClassName]);
+      CnDebugger.LogFmt('Wizard [%d] installed: %s', [I, Wizard.ClassName]);
     {$ENDIF}
     end;
   end;
@@ -1048,7 +1048,7 @@ begin
       Continue;
     end;
   end;
-  
+
   while FRepositoryWizards.Count > 0 do
   begin
   {$IFDEF DEBUG}
@@ -1186,7 +1186,7 @@ begin
   Menu.Add(FConfigAction.Menu);
   Menu.Add(FWizMultiLang.Menu);
   Menu.Add(FWizAbout.Menu);
-{$ENDIF}  
+{$ENDIF}
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('Install misc menu Leave successed.');
 {$ENDIF}
@@ -1291,7 +1291,7 @@ begin
 {$IFNDEF CNWIZARDS_MINIMUM}
   if not IsIdeVersionLatest then
     ShowSimpleCommentForm('', SCnIDENOTLatest, SCnCheckIDEVersion + CompilerShortName);
-{$ENDIF}    
+{$ENDIF}
 end;
 
 // 文件通知
