@@ -161,6 +161,8 @@ type
     FLineStartOffsetBookmark: Integer;
     FLastNoSpaceCRLFPosBookmark: Integer;
     FLastNoSpaceCRLFBookmark: TTokenKind;
+    FMultiLineOffsetBookmark: Integer;
+    FMultiLineStartBookmark: Integer;
   public
     property RunBookmark: LongInt read FRunBookmark write FRunBookmark;
     property LineNumberBookmark: Integer read FLineNumberBookmark write FLineNumberBookmark;
@@ -181,6 +183,8 @@ type
     property StringLenBookmark: Integer read FStringLenBookmark write FStringLenBookmark;
     property TokenPosBookmark: Integer read FTokenPosBookmark write FTokenPosBookmark;
     property ToIdentBookmark: PWideChar read FToIdentBookmark write FToIdentBookmark;
+    property MultiLineOffsetBookmark: Integer read FMultiLineOffsetBookmark write FMultiLineOffsetBookmark;
+    property MultiLineStartBookmark: Integer read FMultiLineStartBookmark write FMultiLineStartBookmark;
   end;
 
   TCnPasWideLex = class(TObject)
@@ -206,6 +210,8 @@ type
     FStringLen: Integer; // 当前字符串的字符长度
     FTokenPos: Integer;
     FToIdent: PWideChar;
+    FMultiLineOffset: Integer;
+    FMultiLineStart: Integer;
 
     FOrigin: PWideChar;
     FProcTable: array[#0..#255] of procedure of object;
@@ -333,6 +339,7 @@ type
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
     function GetWideColumnNumber: Integer;
+    procedure ResetLine;
   protected
     procedure StepRun(Count: Integer = 1; CalcColumn: Boolean = False);
   public
@@ -1662,9 +1669,7 @@ begin
   else
     StepRun;
   end;
-  Inc(FLineNumber);
-  FColumn := 1;
-  FLineStartOffset := FRun;
+  ResetLine;
 end;
 
 procedure TCnPasWideLex.EqualProc;
@@ -1741,9 +1746,7 @@ begin
   else
     StepRun;
   end;
-  Inc(FLineNumber);
-  FColumn := 1;
-  FLineStartOffset := FRun;
+  ResetLine;
 end;
 
 procedure TCnPasWideLex.LoadFromBookmark(var Bookmark: TCnPasWideBookmark);
@@ -1770,6 +1773,8 @@ begin
       FSquareCount := SquareCountBookmark;
       FLastIdentPos := LastIdentPosBookmark;
       FLineStartOffset := LineStartOffsetBookmark;
+      FMultiLineOffset := FMultiLineOffsetBookmark;
+      FMultiLineStart := FMultiLineStartBookmark;
 
       FreeAndNil(Bookmark);
     end;
@@ -1978,6 +1983,8 @@ begin
     SquareCountBookmark := FSquareCount;
     LastIdentPosBookmark := FLastIdentPos;
     LineStartOffsetBookmark := FLineStartOffset;
+    MultiLineOffsetBookmark := FMultiLineOffset;
+    MultiLineStartBookmark := FMultiLineStart;
   end;
 end;
 
@@ -2064,18 +2071,55 @@ end;
 procedure TCnPasWideLex.StringProc;
 begin
   FTokenID := tkString;
-  repeat
-    if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) then
-      StepRun(2);
+  if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) and (FOrigin[FRun + 3] <> #39) then // 出现仨单引号且不是四单引号说明是多行字符串的新语法
+  begin
+    StepRun(2);
+    FTokenID := tkMultiLineString;
+    FMultiLineOffset := 0;
+    FMultiLineStart := 0;
 
-    case FOrigin[FRun] of
-      #0, #10, #13:
+    repeat
+      if FOrigin[FRun] = #13 then // 多行字符串内如果有换行要额外计算
+      begin
+        if FOrigin[FRun + 1]= #10 then
+          StepRun;
+
+        FColumn := 1;
+        Inc(FMultiLineOffset);
+        FMultiLineStart := FRun; // 要正确指向下一行行首，注意和 mPasLex 不同
+      end
+      else if FOrigin[FRun] = #10 then
+      begin
+        FColumn := 1;
+        Inc(FMultiLineOffset);
+        FMultiLineStart := FRun; // 要正确指向下一行行首，注意和 mPasLex 不同
+      end
+      else if FOrigin[FRun] = #0 then
         Break;
-    end;
-    StepRun(1, True); // 目前只在字符串内部进行宽字符宽度计算
-  until FOrigin[FRun] = #39;
-  if FOrigin[FRun] <> #0 then
-    StepRun;
+
+      StepRun(1, True);
+    until (FOrigin[FRun - 1] <> #39) and (FOrigin[FRun] = #39) and (FOrigin[FRun + 1] = #39)
+      and (FOrigin[FRun + 2] = #39) and (FOrigin[FRun + 3] <> #39);
+    // 结束时需要三连续的单引号且前后不能是单引号
+
+    if FOrigin[FRun]<>#0 then
+      StepRun(3);
+  end
+  else
+  begin
+    repeat
+      if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) then
+        StepRun(2);
+
+      case FOrigin[FRun] of
+        #0, #10, #13:
+          Break;
+      end;
+      StepRun(1, True); // 目前只在字符串内部进行宽字符宽度计算
+    until FOrigin[FRun] = #39;
+    if FOrigin[FRun] <> #0 then
+      StepRun;
+  end;
 end;
 
 procedure TCnPasWideLex.BadStringProc;
@@ -2115,6 +2159,17 @@ var
   W: WideChar;
   C: CnIndexChar;
 begin
+  if FMultiLineOffset > 0 then  // Add by LiuXiao for MultiLine String
+  begin
+    Inc(FLineNumber, FMultiLineOffset);
+    FMultiLineOffset := 0;
+  end;
+  if FMultiLineStart > 0 then
+  begin
+    FLineStartOffset := FMultiLineStart;
+    FMultiLineStart := 0;
+  end;
+
   case FTokenID of
     tkIdentifier:
       begin
@@ -2231,6 +2286,13 @@ end;
 function TCnPasWideLex.GetWideColumnNumber: Integer;
 begin
   Result := FTokenPos - FLineStartOffset + 1;
+end;
+
+procedure TCnPasWideLex.ResetLine;
+begin
+  Inc(FLineNumber);
+  FColumn := 1;
+  FLineStartOffset := FRun;
 end;
 
 initialization

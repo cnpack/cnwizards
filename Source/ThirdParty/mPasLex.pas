@@ -97,7 +97,7 @@ type
     tkHelper, tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
-    tkMod, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
+    tkMod, tkMultiLineString, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
     tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload, tkOverride,
     tkPacked, tkPascal, tkPlatform, tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure,
     tkProgram, tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead,
@@ -115,10 +115,12 @@ type
       解决方案：已修复 StringProc 中的问题
     原有问题三：#$0A 这种本应是 tkAsciiChar 的会被解析成一个井号的 tkAsciiChar 加上 $0A 的 tkInteger
       解决方案：已修复 AsciiCharProc 中的问题
-    原有问题四：不支持 tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
+    原有问题四：不支持 tkRequires, tkContains, tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
       解决方案：都加上了
-    原有问题五：IsClass 的判断用 class 后的标识符是否是合法标识符来判断，对于 class sealed/helper 等判断有误
+    原有问题五：IsClass 的判断用 class 前面有等号且后面不是合法标识符来判断，对于 class sealed/helper 以及不换行的 class public 等声明判断有误
       解决方案：暂无
+    新问题六：不支持新语法中的三个单引号括起来的多行字符串新语法
+      解决方案：加上了
   ***}
 
   TTokenKinds = set of TTokenKind;
@@ -151,6 +153,8 @@ type
     LinePosBookmark: Integer;
     IsInterfaceBookmark: Boolean;
     IsClassBookmark: Boolean;
+    MultiLineOffsetBookmark: Integer;
+    MultiLineStartBookmark: Integer;
   end;
 
   TmwPasLex=class(TObject)
@@ -164,6 +168,8 @@ type
     FRoundCount: Integer;
     FSquareCount: Integer;
     fStringLen: Integer;
+    fMultiLineOffset: Integer;  // Added by LiuXiao
+    fMultiLineStart: Integer;   // Added by LiuXiao
     fToIdent: PAnsiChar;
     fIdentFuncTable: array[0..191]of function: TTokenKind of Object;
     fTokenPos: Integer;
@@ -325,16 +331,21 @@ type
     property LinePos: Integer read fLinePos write fLinePos;
     {* 当前行行首所在的线性位置，0 开始，单位是字节}
     property Origin: PAnsiChar read fOrigin write SetOrigin;
+    {* 待解析的字符串地址}
     property RunPos: Integer read Run write SetRunPos;
+    {* 解析线性位置，一般指向当前 Token 的尾巴后}
     property TokenPos: Integer read fTokenPos;
     {* 当前 Token 所在的线性位置，0 开始，单位是字节，减去 LinePos 即是当前列位置
       注意：和 IDE 中的编辑器线性位置有 Tab 键以及 Utf8（高版本 Delphi）的区别，不能随意通用}
     property Token: AnsiString read GetToken;
-    {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
+    {* 当前 Token 的字符串值}
+
     property TokenAddr: PAnsiChar read GetTokenAddr;
     property TokenLength: Integer read GetTokenLength;
+    {* 此俩属性为 PAnsiChar 方式使用，以避免 D2010 下性能问题}
 
     property TokenID: TTokenKind read FTokenID;
+     {* 当前 Token 的类型}
   end;
 
 implementation
@@ -1481,14 +1492,46 @@ end;
 procedure TmwPasLex.StringProc;
 begin
   fTokenID:=tkString;
-  repeat
-    if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)then inc(Run, 2); // Moved by Liu Xiao
-    case FOrigin[Run]of
-      #0, #10, #13: break;
-    end;
-    inc(Run);
-  until FOrigin[Run]=#39;
-  if FOrigin[Run]<>#0 then inc(Run);
+  if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)and(FOrigin[Run+3]<>#39) then // 出现仨单引号且不是四单引号说明是多行字符串的新语法
+  begin
+    inc(Run, 2);
+    FTokenID := tkMultiLineString;
+    fMultiLineOffset := 0;
+    fMultiLineStart := 0;
+    repeat
+      if FOrigin[Run] = #13 then // 多行字符串内如果有换行要额外计算
+      begin
+        if FOrigin[Run+1]= #10 then
+          inc(Run);
+
+        inc(fMultiLineOffset);
+        fMultiLineStart := Run+1; // 要正确指向下一行行首
+      end
+      else if FOrigin[Run] = #10 then
+      begin
+        inc(fMultiLineOffset);
+        fMultiLineStart := Run+1; // 要正确指向下一行行首
+      end
+      else if FOrigin[Run] = #0 then
+        Break;
+
+      inc(Run);
+    until (FOrigin[Run-1]<>#39) and (FOrigin[Run]=#39) and (FOrigin[Run+1]=#39) and (FOrigin[Run+2]=#39) and (FOrigin[Run+3]<>#39);
+    // 结束时需要三连续的单引号且前后不能是单引号
+
+    if FOrigin[Run]<>#0 then inc(Run, 3);
+  end
+  else
+  begin
+    repeat
+      if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)then inc(Run, 2); // Moved by Liu Xiao
+      case FOrigin[Run]of
+        #0, #10, #13: break;
+      end;
+      inc(Run);
+    until FOrigin[Run]=#39;
+    if FOrigin[Run]<>#0 then inc(Run);
+  end;
 end;
 
 procedure TmwPasLex.BadStringProc;
@@ -1525,6 +1568,17 @@ procedure TmwPasLex.Next;
 var
   C: AnsiChar;
 begin
+  if fMultiLineOffset > 0 then  // Add by LiuXiao for MultiLine String
+  begin
+    inc(fLineNumber, fMultiLineOffset);
+    fMultiLineOffset := 0;
+  end;
+  if fMultiLineStart > 0 then
+  begin
+    fLinePos := fMultiLineStart;
+    fMultiLineStart := 0;
+  end;
+
   Case fTokenID of
     tkIdentifier:
       begin
@@ -1634,6 +1688,8 @@ begin
   FLinePos := Bookmark.LinePosBookmark;
   FIsInterface := Bookmark.IsInterfaceBookmark;
   FIsClass := Bookmark.IsClassBookmark;
+  fMultiLineOffset := Bookmark.MultiLineOffsetBookmark;
+  fMultiLineStart := Bookmark.MultiLineStartBookmark;
 end;
 
 procedure TmwPasLex.SaveToBookmark(var Bookmark: TmwPasLexBookmark);
@@ -1658,6 +1714,8 @@ begin
   Bookmark.LinePosBookmark := FLinePos;
   Bookmark.IsInterfaceBookmark := FIsInterface;
   Bookmark.IsClassBookmark := FIsClass;
+  Bookmark.MultiLineOffsetBookmark := FMultiLineOffset;
+  Bookmark.MultiLineStartBookmark := FMultiLineStart;
 end;
 
 initialization
