@@ -77,7 +77,12 @@ begin
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoPasResult.Lines.Add(Format('%3.3d. Line %d, Col(A/W) %2.2d/%2.2d, WLen %2.2d, Pos %4.4d. %s, Token: %s',
+    if P.TokenID = tkClass then // 增加打印 IsClass
+      mmoPasResult.Lines.Add(Format('%3.3d. Line %d, Col(A/W) %2.2d/%2.2d, WLen %2.2d, Pos %4.4d. %s, IsClass %d. Token: %s',
+        [I, P.LineNumber, P.ColumnNumber, P.WideColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
+         Ord(P.TokenID)), Ord(P.IsClass), P.Token]))
+    else
+      mmoPasResult.Lines.Add(Format('%3.3d. Line %d, Col(A/W) %2.2d/%2.2d, WLen %2.2d, Pos %4.4d. %s, Token: %s',
         [I, P.LineNumber, P.ColumnNumber, P.WideColumnNumber, P.TokenLength, P.RunPos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;
@@ -100,7 +105,12 @@ begin
   I := 1;
   while P.TokenID <> tkNull do
   begin
-    mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Pos %4.4d. LineStart %d. %s, Token: %s',
+    if P.TokenID = tkClass then // 增加打印 IsClass
+      mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Pos %4.4d. LineStart %d. %s, IsClass %d. Token: %s',
+        [I, P.LineNumber, P.TokenPos - P.LinePos, P.RunPos, P.LinePos, GetEnumName(TypeInfo(TTokenKind),
+         Ord(P.TokenID)), Ord(P.IsClass), P.Token]))
+    else
+      mmoPasResult.Lines.Add(Format('%3.3d. Line: %d, Col %2.2d, Pos %4.4d. LineStart %d. %s, Token: %s',
         [I, P.LineNumber, P.TokenPos - P.LinePos, P.RunPos, P.LinePos, GetEnumName(TypeInfo(TTokenKind),
          Ord(P.TokenID)), P.Token]));
     P.Next;

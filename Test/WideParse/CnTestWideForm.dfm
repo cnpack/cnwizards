@@ -1,8 +1,8 @@
 object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
   Left = 57
   Top = 114
-  Width = 870
-  Height = 490
+  Width = 1053
+  Height = 573
   Caption = 'Unicode Parsing Text - For Unicode & Non-Unicode Compiler'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,8 +16,8 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
   object pgc1: TPageControl
     Left = 16
     Top = 16
-    Width = 833
-    Height = 433
+    Width = 1016
+    Height = 516
     ActivePage = tsPasLex
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -26,8 +26,13 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
       object mmoPasSrc: TMemo
         Left = 16
         Top = 16
-        Width = 241
-        Height = 369
+        Width = 337
+        Height = 457
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Courier New'
+        Font.Style = []
         Lines.Strings = (
           'unit CnTestPasLexW;'
           ''
@@ -41,7 +46,8 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           'type'
           '  TForm2 = class(TForm)'
           '    mmoSrc: TMemo;'
-          '    procedure FormCreate(Sender: TObject);'
+          '    procedure FormCreate(Sender: '
+          'TObject);'
           '  private'
           '    { Private declarations }'
           '  public'
@@ -50,6 +56,11 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           ''
           'var'
           '  Form2: TForm2;'
+          ''
+          'S := '#39#39#39
+          '  Test for MultiLineString'
+          'and some New strings.'
+          #39#39#39';'
           ''
           'implementation'
           ''
@@ -61,10 +72,11 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           'Caption :=  '#39'≥‘∑π'#39';'
           ' {∫œ  } Exit;'
           'end;')
+        ParentFont = False
         TabOrder = 1
       end
       object btnWideParsePas: TButton
-        Left = 268
+        Left = 364
         Top = 14
         Width = 61
         Height = 25
@@ -73,16 +85,16 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         OnClick = btnWideParsePasClick
       end
       object mmoPasResult: TMemo
-        Left = 344
+        Left = 440
         Top = 16
-        Width = 457
-        Height = 369
+        Width = 553
+        Height = 457
         ScrollBars = ssBoth
         TabOrder = 2
         WordWrap = False
       end
       object chkWideIdent: TCheckBox
-        Left = 265
+        Left = 361
         Top = 104
         Width = 73
         Height = 17
@@ -92,7 +104,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         TabOrder = 4
       end
       object btnAnsiParsePas: TButton
-        Left = 268
+        Left = 364
         Top = 54
         Width = 61
         Height = 25
@@ -107,10 +119,16 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
       object mmoCppSrc: TMemo
         Left = 16
         Top = 16
-        Width = 241
-        Height = 369
+        Width = 337
+        Height = 457
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Courier New'
+        Font.Style = []
         Lines.Strings = (
-          '//-------------------------------------------------------'
+          '//---------------------------------------'
+          '----------------'
           '#include <vcl.h>'
           '#pragma hdrstop'
           ''
@@ -118,27 +136,32 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
           '#include <stdio.h>'
           '#include "imagewn.h"'
           '#include "ViewFrm.h"'
-          '//-------------------------------------------------------'
+          '//---------------------------------------'
+          '----------------'
           '#pragma resource "*.dfm"'
           'TImageForm *ImageForm;'
-          '//-------------------------------------------------------'
+          '//---------------------------------------'
+          '----------------'
           '__fastcall TImageForm::TImageForm'
           '(TComponent *Owner)'
           '  : TForm(Owner)'
           '{ "≥‘∑π"; '#39'ÀÆ'#39';'
           '}'
-          '//-------------------------------------------------------'
+          '//---------------------------------------'
+          '----------------'
           'void __fastcall TImageForm::FormCreate'
           '(TObject* /*Sender*/)'
           '{     FormCaption = Caption + " - ";'
           '}'
           ''
-          '//-------------------------------------------------------'
+          '//---------------------------------------'
+          '----------------'
           '')
+        ParentFont = False
         TabOrder = 1
       end
       object btnWideParseCpp: TButton
-        Left = 268
+        Left = 364
         Top = 14
         Width = 61
         Height = 25
@@ -147,17 +170,17 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         OnClick = btnWideParseCppClick
       end
       object mmoCppResult: TMemo
-        Left = 344
+        Left = 440
         Top = 16
-        Width = 465
-        Height = 369
+        Width = 553
+        Height = 457
         ScrollBars = ssBoth
         TabOrder = 2
         WordWrap = False
       end
       object chkWideIdentC: TCheckBox
-        Left = 265
-        Top = 96
+        Left = 361
+        Top = 104
         Width = 73
         Height = 17
         Caption = 'Wide Ident'
@@ -166,7 +189,7 @@ object CnTestUnicodeParseForm: TCnTestUnicodeParseForm
         TabOrder = 4
       end
       object btnAnsiParseCpp: TButton
-        Left = 268
+        Left = 364
         Top = 54
         Width = 61
         Height = 25
