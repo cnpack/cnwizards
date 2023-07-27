@@ -54,7 +54,8 @@ type
     tokInteger,
     tokAsmHex,
     tokFloat,
-    tokWString,
+    tokWString,   // with #
+    tokMString,  // '''
     tokLineComment,
     tokBlockComment,
     tokCompDirective,
@@ -265,10 +266,10 @@ const
     tokKeywordXOR, tokKeywordDIV, tokKeywordMod, tokKeywordAnd, tokKeywordShl,
     tokKeywordShr];
 
-  ConstTokens = [tokInteger, tokFloat, tokChar, tokString, tokWString, tokTrue,
-    tokFalse, tokKeywordNIL, tokSymbol];
-  FactorTokens = [tokSymbol, tokInteger, tokString, tokWString, tokFloat, tokTrue,
-    tokFalse, tokKeywordNOT, tokSLB]; //, tokTypeId
+  ConstTokens = [tokInteger, tokFloat, tokChar, tokString, tokWString, tokMString,
+    tokTrue, tokFalse, tokKeywordNIL, tokSymbol];
+  FactorTokens = [tokSymbol, tokInteger, tokString, tokWString, tokMString, tokFloat,
+    tokTrue, tokFalse, tokKeywordNOT, tokSLB]; //, tokTypeId
   
   ExprTokens = [tokPlus, tokMinus] + FactorTokens;
   SimpStmtTokens = [tokSymbol, tokAmpersand, tokKeywordGoto, tokKeywordInherited,
@@ -380,6 +381,7 @@ const
     (Value: Integer(tokAsmHex);         Name: ''),
     (Value: Integer(tokFloat);          Name: ''),
     (Value: Integer(tokWString);        Name: ''),
+    (Value: Integer(tokMString);        Name: ''),
     (Value: Integer(tokLineComment);    Name: ''),
     (Value: Integer(tokBlockComment);   Name: ''),
     (Value: Integer(tokCompDirective);  Name: ''),

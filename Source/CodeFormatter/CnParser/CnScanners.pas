@@ -876,7 +876,7 @@ var
   end;
 
 var
-  IsWideStr, FloatStop, IsString: Boolean;
+  IsWideStr, FloatStop, IsString, IsMultiLineStr, PrevMulti: Boolean;
   P, IgnoreP, OldP: PChar;
   Directive: TPascalToken;
   DirectiveNest, FloatCount: Integer;
@@ -921,7 +921,7 @@ begin
         Inc(P);
         Result := tokNoToken;
 
-        // 回溯一下，如果^之前越过空白是字母数字或)]^，就表示不是字符串而是Hat
+        // 回溯一下，如果 ^ 之前越过空白是字母数字或 )]^，就表示不是字符串而是 Hat
         if OldP > FBuffer then
         begin
           repeat
@@ -936,7 +936,7 @@ begin
         IsString := False;
         if Result <> tokHat then // 没有确定是 Hat 的情况下，再判断是否是字符串
         begin
-          // 目前只处理 ^H^J 这种尖号后单个字符的场合，暂未处理混合''型字符串的情形
+          // 目前只处理 ^H^J 这种尖号后单个字符的场合，暂未处理混合 '' 型字符串的情形
           IsString := True;
 
           repeat // 进入此循环时，P 必定指向 ^ 后的一个字符
@@ -975,52 +975,111 @@ begin
 
     '#', '''':
       begin
-        IsWideStr := False;
-        // parser string like this: 'abc'#10^M#13'def'#10#13
-        while True do
-          case P^ of
-            '#':
+        IsMultiLineStr := False;
+        OldP := P;
+
+        if P^ = '''' then       // 第一个单引号
+        begin
+          Inc(P);
+          if P^ = '''' then     // 第二个单引号
+          begin
+            Inc(P);
+            if P^ = '''' then   // 第三个单引号
+            begin
+              Inc(P);
+              if P^ <> '''' then  // 后面不能再是单引号
+                IsMultiLineStr := True;
+            end;
+          end;
+        end;
+
+        if IsMultiLineStr then  // 是多行字符串的新语法
+        begin
+          Result := tokMString;
+
+          // 寻找后面的三个单引号做结尾，此时 P 指向第三个单引号
+          Inc(P);
+          PrevMulti := False;
+
+          while True do
+          begin
+            if P^ = #0 then
+              Break;
+
+            OldP := P;
+            if not PrevMulti and (P^ = '''') then
+            begin
+              Inc(P);
+              if P^ = '''' then
               begin
-                IsWideStr := True;
                 Inc(P);
-                while P^ in ['$', '0'..'9', 'a'..'f', 'A'..'F'] do Inc(P);
+                if P^ = '''' then
+                begin
+                  Inc(P);
+                  if P^ <> '''' then // 碰到仨单引号且后面的不是单引号
+                    Break;
+                end;
               end;
-            '''':
-              begin
-                Inc(P);
-                while True do
-                  case P^ of
-                    #0, #10, #13:
-                      Error(CN_ERRCODE_PASCAL_INVALID_STRING);
-                    '''':
-                      begin
-                        Inc(P);
-                        Break;
-                      end;
+            end;
+            P := OldP;
+
+            PrevMulti := P^ = '''';
+            Inc(P);
+          end;
+
+        end
+        else
+        begin
+          P := OldP;
+
+          IsWideStr := False;
+          // parser string like this: 'abc'#10^M#13'def'#10#13
+          while True do
+          begin
+            case P^ of
+              '#':
+                begin
+                  IsWideStr := True;
+                  Inc(P);
+                  while P^ in ['$', '0'..'9', 'a'..'f', 'A'..'F'] do Inc(P);
+                end;
+              '''':
+                begin
+                  Inc(P);
+                  while True do
+                    case P^ of
+                      #0, #10, #13:
+                        Error(CN_ERRCODE_PASCAL_INVALID_STRING);
+                      '''':
+                        begin
+                          Inc(P);
+                          Break;
+                        end;
+                    else
+                      Inc(P);
+                    end;
+                end;
+              '^':
+                begin
+                  Inc(P);
+                  if not (P^ in [#33..#126]) then
+                    Error(CN_ERRCODE_PASCAL_INVALID_STRING)
                   else
                     Inc(P);
-                  end;
-              end;
-            '^':
-              begin
-                Inc(P);
-                if not (P^ in [#33..#126]) then
-                  Error(CN_ERRCODE_PASCAL_INVALID_STRING)
-                else
-                  Inc(P);
-              end;
+                end;
+            else
+              Break;
+            end; // case P^ of
+          end;
+
+          FStringPtr := P;
+
+          if IsWideStr then
+            Result := tokWString
           else
-            Break;
-          end; // case P^ of
-
-        FStringPtr := P;
-
-        if IsWideStr then
-          Result := tokWString
-        else
-          Result := tokString;
-      end; // '#', '''': while True do
-
+            Result := tokString;
+        end;
+      end;
     '"':
       begin
         Inc(P);

@@ -1290,7 +1290,7 @@ begin
           FormatExpression(0, IndentForAnonymous); // 为啥这里要用 IndentForAnonymous 而不是其他的 PreSpaceCount？
       end;
 
-    tokChar, tokWString, tokString, tokInteger, tokFloat, tokTrue, tokFalse:
+    tokChar, tokWString, tokString, tokMString, tokInteger, tokFloat, tokTrue, tokFalse:
       begin
         NeedPadding := CalcNeedPadding;
         case Scanner.Token of
@@ -1302,7 +1302,7 @@ begin
             else
               CodeGen.Write(UpperFirst(Scanner.TokenString), PreSpaceCount, 0, NeedPadding);
             // CodeGen.Write(FormatString(Scaner.TokenString, CnCodeForRule.KeywordStyle), PreSpaceCount);
-          tokChar, tokString, tokWString:
+          tokChar, tokString, tokWString, tokMString:
             begin
               if CnPascalCodeForRule.UseIgnoreArea and Scanner.InIgnoreArea then
                 CodeGen.Write(Scanner.TokenString)
@@ -3069,7 +3069,7 @@ begin
 
         if not (Scanner.Token in DirectiveTokens) then // 加个后续的表达式
         begin
-          if Scanner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
+          if Scanner.Token in [tokString, tokWString, tokMString, tokLB, tokPlus, tokMinus] then
             WriteOneSpace; // 后续表达式空格分隔
           FormatConstExpr;
         end;
@@ -3590,7 +3590,8 @@ var
   begin
     repeat
       Scanner.NextToken;
-    until not (Scanner.Token in [tokSymbol, tokDot, tokInteger, tokString, tokLB, tokRB,
+    until not (Scanner.Token in [tokSymbol, tokDot, tokInteger,
+      tokString, tokWString, tokMString, tokLB, tokRB,
       tokPlus, tokMinus, tokStar, tokDiv, tokKeywordDiv, tokKeywordMod]);
     // 包括 () 是因为可能有类似于 Low(Integer)..High(Integer) 的情况
     // 还得包括四则运算符与字符串等，以备有其他常量运算的情形
@@ -3953,7 +3954,7 @@ procedure TCnBasePascalFormatter.FormatPropertySpecifiers(PreSpaceCount: Byte);
 
   procedure ProcessBlank;
   begin
-    if Scanner.Token in [tokString, tokWString, tokLB, tokPlus, tokMinus] then
+    if Scanner.Token in [tokString, tokWString, tokMString, tokLB, tokPlus, tokMinus] then
       WriteOneSpace; // 后续表达式空格分隔
   end;
 
@@ -5186,7 +5187,7 @@ begin
   if Scanner.Token = tokKeywordIn then // 处理 in
   begin
     Match(tokKeywordIn, 1, 1);
-    if Scanner.Token in [tokString, tokWString] then
+    if Scanner.Token in [tokString, tokWString] then // uses 的单元路径照理不应该允许仨单引号
       Match(Scanner.Token)
     else
       ErrorToken(tokString);
@@ -5288,7 +5289,7 @@ begin
 
   while Scanner.Token in IsVarStartTokens do // 这些关键字不宜做变量名但也不好处理，只有先写上
   begin
-    // 如果是[，就要越过其属性，找到]后的第一个，确定它是否还是 var，如果不是，就跳出
+    // 如果是[，就要越过其属性，找到 ] 后的第一个，确定它是否还是 var，如果不是，就跳出
     if (Scanner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsVarStartTokens) then
       Exit;
 
