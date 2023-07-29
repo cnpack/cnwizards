@@ -8450,6 +8450,9 @@ begin
   end;
 end;
 
+const
+  MAX_BOOKMARK_COUNT = 20; // 20 是因为 Toggle Var/Uses 使用到了 19 和 20
+
 // 将一 EditView 中的书签信息保存至一 ObjectList 中
 procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
 var
@@ -8460,7 +8463,7 @@ begin
   if (EditView = nil) or (BookMarkList = nil) then Exit;
   BookMarkList.Clear;
 
-  for I := 0 to 20 do // 20 是因为 Toggle Var/Uses 使用到了 19 和 20
+  for I := 0 to MAX_BOOKMARK_COUNT do
   begin
     APos := EditView.BookmarkPos[I];
     if (APos.CharIndex <> 0) or (APos.Line <> 0) then
@@ -8490,7 +8493,7 @@ begin
   if BookMarkList.Count > 0 then
   begin
     SavePos := EditView.CursorPos;
-    for I := 0 to 9 do // 先清除以前的书签
+    for I := 0 to MAX_BOOKMARK_COUNT do // 先清除以前的书签
     begin
       APos := EditView.BookmarkPos[I];
       if (APos.Line <> 0) or (APos.CharIndex <> 0) then
