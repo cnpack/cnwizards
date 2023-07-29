@@ -6035,8 +6035,8 @@ begin
     EndPos := FScanner.SourcePos + FScanner.TokenStringLength;
   end;
 
-  // 写出不属于代码本身的空行时超出标记的话，不算
-  if (StartPos >= FMatchedInStart) and not IsWriteln and not FFirstMatchStart then
+  // 写出不属于代码本身的空行时超出标记的话不算，且在写注释前的空白时也不算
+  if (StartPos >= FMatchedInStart) and not IsWriteln and not IsWriteBlank and not FFirstMatchStart then
   begin
     FMatchedOutStartRow := TCnCodeGenerator(Sender).PrevRow;
     FMatchedOutStartCol := TCnCodeGenerator(Sender).PrevColumn - FPrefixSpaces;
