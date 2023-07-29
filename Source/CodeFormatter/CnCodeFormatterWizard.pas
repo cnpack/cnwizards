@@ -74,9 +74,9 @@ type
     FWrapMode: TCnCodeWrapMode;
     FWrapNewLineWidth: Integer;
     FUseIDESymbols: Boolean;
-    FBreakpoints: TObjectList;
-    FBookmarks: TObjectList;
-    FElideLines: TList;
+    FBreakpoints: TObjectList;  // 文件的断点信息
+    FBookmarks: TObjectList;    // 文件的书签信息
+    FElideLines: TList;         // 文件的折叠信息
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
     FInputHelper: TCnInputHelper;

@@ -6334,7 +6334,7 @@ end;
 
 function TCnBasePascalFormatter.CheckSingleStatementBegin(PreSpaceCount: Byte): Boolean;
 begin
-  Result := CnPascalCodeForRule.SingleStatementToBlock and (Scanner.ForwardToken() <> tokKeywordBegin);
+  Result := CnPascalCodeForRule.SingleStatementToBlock and (Scanner.Token <> tokKeywordBegin);
   if Result then
   begin
     CodeGen.Write(FormatString('begin', CnPascalCodeForRule.KeywordStyle), PreSpaceCount);
