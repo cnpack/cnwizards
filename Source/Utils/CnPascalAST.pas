@@ -27,7 +27,9 @@ unit CnPascalAST;
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
 *           不支持 asm（仅跳过），注释还原度较低
-* 开发平台：2023.04.01 V1.2
+* 开发平台：2023.07.29 V1.3
+*               加入对多行字符串的支持
+*           2023.04.01 V1.2
 *               调整部分对外声明以有利使用
 *           2022.10.16 V1.1
 *               基本完成解析
@@ -637,7 +639,7 @@ begin
     tkIdentifier, tkNil: Result := cntIdent;
     tkInteger, tkNumber: Result := cntInt; // 十六进制整数和普通整数
     tkFloat: Result := cntFloat;
-    tkAsciiChar, tkString: Result := cntString;
+    tkAsciiChar, tkString, tkMultiLineString: Result := cntString;
     tkInherited: Result := cntInherited;
 
     // 元素：符号与运算符等
@@ -995,7 +997,7 @@ begin
             NextToken;
           end;
         end;
-      tkNumber, tkInteger, tkFloat:
+      tkNumber, tkInteger, tkFloat, tkMultiLineString:
         MatchCreateLeafAndStep(FLex.TokenID);
       tkNot:
         begin
