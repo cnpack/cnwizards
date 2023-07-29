@@ -130,21 +130,21 @@ uses
 
 const
   {key words list here}
-  CnPasConvertKeywords: array[0..113] of string =
+  CnPasConvertKeywords: array[0..115] of string =
   ('ABSOLUTE', 'ABSTRACT', 'AND', 'ARRAY', 'AS', 'ASM', 'ASSEMBLER',
     'AUTOMATED', 'BEGIN', 'CASE', 'CDECL', 'CLASS', 'CONST', 'CONSTRUCTOR', 'CONTAINS',
     'DEFAULT', 'DEPRECATED', 'DESTRUCTOR', 'DISPID', 'DISPINTERFACE', 'DIV',
     'DO', 'DOWNTO', 'DYNAMIC', 'ELSE', 'END', 'EXCEPT', 'EXPORT', 'EXPORTS',
-    'EXTERNAL', 'FAR', 'FILE', 'FINALIZATION', 'FINALLY', 'FOR', 'FORWARD',
-    'FUNCTION', 'GOTO', 'IF', 'IMPLEMENTATION', 'IMPLEMENTS', 'IN', 'INDEX',
+    'EXTERNAL', 'FAR', 'FILE', 'FINAL', 'FINALIZATION', 'FINALLY', 'FOR', 'FORWARD',
+    'FUNCTION', 'GOTO', 'HELPER', 'IF', 'IMPLEMENTATION', 'IMPLEMENTS', 'IN', 'INDEX',
     'INHERITED', 'INITIALIZATION', 'INLINE', 'INTERFACE', 'IS', 'LABEL',
     'LIBRARY', 'LOCAL', 'MESSAGE', 'MOD', 'NAME', 'NEAR', 'NIL', 'NODEFAULT',
     'NOT', 'OBJECT', 'OF', 'ON', 'OPERATOR', 'OR', 'OUT', 'OVERLOAD', 'OVERRIDE',
     'PACKAGE', 'PACKED', 'PASCAL', 'PLATFORM', 'PRIVATE', 'PROCEDURE', 'PROGRAM',
     'PROPERTY', 'PROTECTED', 'PUBLIC', 'PUBLISHED', 'RAISE', 'READ', 'READONLY',
     'RECORD', 'REGISTER', 'REINTRODUCE', 'REPEAT', 'REQUIRES', 'RESIDENT',
-    'RESOURCESTRING', 'SEALED', 'SAFECALL', 'SET', 'SHL', 'SHR', 'STDCALL',
-    'STATIC', 'STORED', 'STRICT', 'STRING', 'STRINGRESOURCE', 'THEN', 'THREADVAR',
+    'RESOURCESTRING', 'SAFECALL', 'SEALED', 'SET', 'SHL', 'SHR', 'STATIC', 'STDCALL',
+    'STORED', 'STRICT', 'STRING', 'STRINGRESOURCE', 'THEN', 'THREADVAR',
     'TO', 'TRY', 'TYPE', 'UNIT', 'UNTIL', 'USES', 'VAR', 'VARARGS', 'VIRTUAL',
     'WHILE', 'WITH', 'WRITE', 'WRITEONLY', 'XOR');
 
@@ -184,7 +184,7 @@ type
 { TCnSourceConversion }
 
   TCnPasConvertTokenType = (ttAssembler, ttComment, ttCRLF,
-    ttDirective, ttIdentifier, ttKeyWord, ttNumber, ttSpace, ttString,
+    ttDirective, ttIdentifier, ttKeyWord, ttNumber, ttSpace, ttString, ttMString,
     ttSymbol, ttUnknown);
 
   TCnPasConvertFontKind = (fkBasic, fkAssembler, fkComment, fkDirective,
@@ -262,7 +262,7 @@ type
     procedure ConvertEnd; virtual;
 
     procedure HandleCRLF;
-    procedure HandleString;
+    procedure HandlePasString;
     procedure HandleCString;
     procedure HandleAnsiComment;
     procedure HandleSlashes;
@@ -291,6 +291,8 @@ type
     {this should be override}
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       virtual; abstract;
+    procedure WritePreStart; virtual; abstract;
+    procedure WritePreEnd; virtual; abstract;
   public
     constructor Create;
     destructor Destroy; override;
@@ -333,6 +335,8 @@ type
     procedure WriteTokenToStream; override;
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       override;
+    procedure WritePreStart; override;
+    procedure WritePreEnd; override;
 
     procedure ConvertBegin; override;
     procedure ConvertEnd; override;
@@ -353,6 +357,8 @@ type
     procedure WriteTokenToStream; override;
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       override;
+    procedure WritePreStart; override;
+    procedure WritePreEnd; override;
 
     procedure ConvertBegin; override;
     procedure ConvertEnd; override;
@@ -610,7 +616,7 @@ begin
 
     ttSpace: FTokenType := ttUnknown;
 
-    ttString:
+    ttString, ttMString:
       begin
         FTokenType := ttUnknown;
       end;
@@ -828,7 +834,7 @@ begin
         end;
 
       '''':
-        HandleString;
+        HandlePasString;
 
       '"':
         if FSourceType = stCpp then
@@ -1087,7 +1093,7 @@ begin
       Result := NumberFont;
     ttSpace:
       Result := SpaceFont;
-    ttString:
+    ttString, ttMString:
       Result := StringFont;
     ttSymbol:
       Result := SymbolFont;
@@ -1309,37 +1315,126 @@ begin
   NewToken;
 end;
 
-procedure TCnSourceConversion.HandleString;
+procedure TCnSourceConversion.HandlePasString;
+var
+  IsMulti: Boolean;
+  OldChar: Char;
 begin
   FTokenType := ttString;
 
-  repeat
-    //1.01 no raise Exception now
-    { TODO 1 -oPan Ying : New error report needed }
+  // 检查是否连续仨单引号
 
-    case FNextChar of
-      #0, #10, #13:
-      begin
-
-        RollBackChar;
-        Break;
-      end;
-
-      {
-        raise
-          ECnSourceConversionException.Create('PasConversion Error : Not a valid string');
-      }
-    end;
-    ExtractChar;
-  until FNextChar = '''';
-
+  IsMulti := False;          // 已经 1 个单引号了
   ExtractChar;
+  if FNextChar = '''' then   // 两个了
+  begin
+    ExtractChar;
+    if FNextChar = '''' then // 三个了
+    begin
+      ExtractChar;
+      if FNextChar <> '''' then // 第四个不是
+      begin
+        IsMulti := True;
+      end
+      else                   // 第四个不是则回滚仨
+      begin
+        RollBackChar;
+        RollBackChar;
+        RollBackChar;
+      end;
+    end
+    else                     // 第三个不是则回滚俩
+    begin
+      RollBackChar;
+      RollBackChar;
+    end;
+  end
+  else
+    RollBackChar;            // 第二个不是则回滚一个
+
+  if IsMulti then // 多行字符串，且已经过了仨单引号也就是说 FNextChar 指向非单引号了，开始找末尾的仨单引号
+  begin
+    FTokenType := ttMString;
+    while True do
+    begin
+      OldChar := FNextChar;
+      ExtractChar;
+
+      if (OldChar <> '''') and (FNextChar = '''') then
+      begin
+        ExtractChar;
+        if FNextChar = '''' then
+        begin
+          ExtractChar;
+          if FNextChar = '''' then
+          begin
+            ExtractChar;
+            if FNextChar <> '''' then
+              Break
+            else
+            begin
+              RollBackChar;
+              RollBackChar;
+              RollBackChar;
+            end;
+          end
+          else
+          begin
+            RollBackChar;
+            RollBackChar;
+          end;
+        end
+        else
+          RollBackChar;
+      end;
+    end;
+  end
+  else // 非多行字符串，且已回滚至第一个单引号，开始正常判断
+  begin
+    repeat
+      //1.01 no raise Exception now
+      { TODO 1 -oPan Ying : New error report needed }
+
+      case FNextChar of
+        #0, #10, #13:
+        begin
+
+          RollBackChar;
+          Break;
+        end;
+
+        {
+          raise
+            ECnSourceConversionException.Create('PasConversion Error : Not a valid string');
+        }
+      end;
+      ExtractChar;
+    until FNextChar = '''';
+    ExtractChar;
+  end;
+
   EndToken;
 
   CheckTokenState;
 
   WriteStringToStream(Prefix);
-  WriteTokenToStream;
+  if IsMulti and (TokenLength > 6) then // 硬修补
+  begin
+    WriteStringToStream('''''''');      // 拆开前后各三个单引号
+    WritePreStart;                      // 把 pre 标记写进去
+
+    Inc(FToken, 3);
+    Dec(FTokenCur, 3);
+    WriteTokenToStream;
+    Inc(FTokenCur, 3);
+    Dec(FToken, 3);
+
+    WritePreEnd;
+    WriteStringToStream('''''''');
+  end
+  else
+    WriteTokenToStream;
+
   WriteStringToStream(Postfix);
   NewToken;
 end;
@@ -1507,14 +1602,13 @@ begin
   {this maybe slow, i should use cache here maybe}
   FNextChar := FCurrentChar;
 
-  if (FInStream.Position > 1) then
+  if FInStream.Position > 1 then
   begin
     FInStream.Position := FInStream.Position - 2 * SizeOf(Char);
     FInStream.ReadBuffer(FCurrentChar, SizeOf(Char));
 
     {no forget to delete char from token}
     TokenDeleteLast;
-
   end;
 
   Result := FNextChar;
@@ -1577,6 +1671,7 @@ procedure TCnSourceConversion.SetStringFont(const Value: TFont);
 begin
   FStringFont.Assign(Value);
   SetPreFixAndPosFix(Value, ttString);
+  SetPreFixAndPosFix(Value, ttMString);
 end;
 
 procedure TCnSourceConversion.SetSymbolFont(const Value: TFont);
@@ -1725,12 +1820,22 @@ begin
         FPreFixList[ATokenType] := '';
         FPostFixList[ATokenType] := '';
       end;
-    else
+  else
     begin
       FPreFixList[ATokenType] := '<span class="u' + IntToStr(Ord(ATokenType)) + '">';
       FPostFixList[ATokenType] := '</span>';
     end;
   end;
+end;
+
+procedure TCnSourceToHtmlConversion.WritePreEnd;
+begin
+  WriteStringToStream('</pre>');
+end;
+
+procedure TCnSourceToHtmlConversion.WritePreStart;
+begin
+  WriteStringToStream('<pre>');
 end;
 
 procedure TCnSourceToHtmlConversion.WriteTokenToStream;
@@ -2099,6 +2204,16 @@ begin
   end;
 
   WriteAnsiToStream;
+end;
+
+procedure TCnSourceToRTFConversion.WritePreEnd;
+begin
+  // RTF 中无 pre 标签
+end;
+
+procedure TCnSourceToRTFConversion.WritePreStart;
+begin
+  // RTF 中无 pre 标签
 end;
 
 {$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
