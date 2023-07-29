@@ -8460,7 +8460,7 @@ begin
   if (EditView = nil) or (BookMarkList = nil) then Exit;
   BookMarkList.Clear;
 
-  for I := 0 to 9 do
+  for I := 0 to 20 do // 20 是因为 Toggle Var/Uses 使用到了 19 和 20
   begin
     APos := EditView.BookmarkPos[I];
     if (APos.CharIndex <> 0) or (APos.Line <> 0) then
@@ -8472,6 +8472,9 @@ begin
       BookMarkList.Add(BookMarkObj);
     end;
   end;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('SaveBookMarksToObjectList Got %d Bookmarks.', [BookMarkList.Count]);
+{$ENDIF}
 end;
 
 // 从 ObjectList 中恢复一 EditView 中的书签
