@@ -764,7 +764,7 @@ var
   StartRec, EndRec: TOTACharPos;
   EP, ErrPos: TOTAEditPos;
   ErrLine: string;
-  BpBmLineMarks: array of DWORD;
+  BpBmLineMarks: array of Cardinal;
   OutLineMarks: PDWORD;
 
   // 将解析器中返回的出错列转换成 IDE 里内部使用的列供定位，BDS 以上是 Utf8
@@ -892,6 +892,10 @@ begin
 {$ENDIF}
 
         Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Before Format. All Line Marks: %d', [Length(BpBmLineMarks)]);
+        CnDebugger.LogCardinalArray(BpBmLineMarks, 'In Line Makrs:');
+{$ENDIF}
 
 {$IFDEF UNICODE}
         // Src/Res Utf16
@@ -939,6 +943,9 @@ begin
 {$ENDIF}
           // 恢复光标、断点、书签与折叠信息
           OutLineMarks := Formatter.RetrieveOutputLinkMarks;
+{$IFDEF DEBUG}
+          CnDebugger.LogCardinalArray(OutLineMarks, Int32Len(OutLineMarks) + 1, 'Out Line Marks:');
+{$ENDIF}
 
           // 恢复光标位置
           EP.Line := OutLineMarks^;
@@ -977,7 +984,7 @@ begin
           View.MoveViewToCursor;
           View.Paint;
         end
-        else
+        else // 如果没有结果
         begin
           ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
             SourcePos, CurrentToken);
@@ -1060,6 +1067,11 @@ begin
 
               BpBmLineMarks[FBreakpoints.Count + FBookmarks.Count] := 0;
               Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
+
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Before Format Selection. All Line Marks: %d', [Length(BpBmLineMarks)]);
+              CnDebugger.LogCardinalArray(BpBmLineMarks, 'In Line Marks:');
+{$ENDIF}
             end
             else
               Formatter.SetInputLineMarks(nil);
@@ -1112,7 +1124,7 @@ begin
             if Res <> nil then
             begin
 {$IFDEF DEBUG}
-              CnDebugger.LogRawString('Format Selection Result: ' + Res);
+              // CnDebugger.LogRawString('Format Selection Result: ' + Res);
 {$ENDIF}
               {$IFDEF IDE_STRING_ANSI_UTF8}
               CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
@@ -1120,8 +1132,12 @@ begin
               // Ansi/Unicode 均可用
               CnOtaReplaceCurrentSelection(Res, True, True, True);
               {$ENDIF}
+
               // 恢复断点与书签信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
+{$IFDEF DEBUG}
+              CnDebugger.LogCardinalArray(OutLineMarks, Int32Len(OutLineMarks) + 1, 'Out Line Marks:');
+{$ENDIF}
               if FBookmarks.Count = 0 then
                 RestoreBreakpoints(OutLineMarks)
               else
@@ -1132,7 +1148,7 @@ begin
                 RestoreBookmarks(View, OutLineMarks);
               end;
             end
-            else
+            else // 格式化选择区失败
             begin
               ErrCode := Formatter.RetrievePascalLastError(SourceLine, SourceCol,
                 SourcePos, CurrentToken);

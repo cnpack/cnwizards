@@ -88,10 +88,10 @@ implementation
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
-  CnEditControlWrapper;
+  CnEditControlWrapper {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
-  CnToggleUsesBookmarkID = 20;
+  CnToggleUsesBookmarkID = 18;
   CnToggleUsesTimeInterval = 2; // Seconds
 
   csSkipImplementUses = 'SkipImplementUses';
@@ -250,6 +250,10 @@ begin
             // 用书签记录位置，注意，连按跳到 interface 时不记。
             View.BookmarkRecord(CnToggleUsesBookmarkID);
             FColumn := View.Buffer.EditPosition.Column;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Toggle Uses Use1. Record Bookmark at %d/%d',
+              [View.Buffer.EditPosition.Row, FColumn]);
+{$ENDIF}
           end;  
 
           if Uses1 then
@@ -274,6 +278,10 @@ begin
           // 用书签记录位置
           View.BookmarkRecord(CnToggleUsesBookmarkID);
           FColumn := View.Buffer.EditPosition.Column;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Toggle Uses Use2. Record Bookmark at %d/%d',
+            [View.Buffer.EditPosition.Row, FColumn]);
+{$ENDIF}
 
           if Uses2 then
           begin
@@ -327,6 +335,10 @@ begin
           // 用书签记录位置
           View.BookmarkRecord(CnToggleUsesBookmarkID);
           FColumn := View.Buffer.EditPosition.Column;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Toggle Uses Cpp. Record Bookmark at %d/%d',
+            [View.Buffer.EditPosition.Row, FColumn]);
+{$ENDIF}
 
           View.Buffer.EditPosition.GotoLine(InsertPos);
           View.Buffer.EditPosition.MoveBOL; // 到行首
@@ -409,6 +421,10 @@ begin
     Exit;
 
   View.BookmarkGoto(CnToggleUsesBookmarkID);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Toggle Uses CursorReturnBack.');
+{$ENDIF}
+
   if View.Buffer.EditPosition.Column = 1 then // 行首则回到原列
     View.Buffer.EditPosition.MoveRelative(0, FColumn - 1);
 

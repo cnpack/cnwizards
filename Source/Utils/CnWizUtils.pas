@@ -8547,7 +8547,7 @@ begin
   if BookMarkList.Count > 0 then
   begin
     SavePos := EditView.CursorPos;
-    for I := 0 to 9 do // 先清除存在于 BookMarkList 中的书签
+    for I := 0 to MAX_BOOKMARK_COUNT do // 先清除存在于 BookMarkList 中的书签
     begin
       if not BookMarkIdInList(I) then
         Continue;
