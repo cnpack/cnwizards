@@ -30,7 +30,9 @@ unit CnPasConvert;
 * 开发平台：PWin98SE + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2022.09.23 v1.07
+* 修改记录：2023.07.31 v1.08
+                增加对仨单引号的多行字符串支持
+            2022.09.23 v1.07
                 增加对 Unicode 的支持，输入 Ansi/Utf16，输出 Ansi/Utf8
             2006.09.08 v1.04
 ================================================================================
@@ -176,8 +178,6 @@ const
     'CommentFont', 'DirectiveFont', 'IdentifierFont', 'KeyWordFont', 'NumberFont',
     'SpaceFont', 'StringFont', 'SymbolFont');
 
-  CRLF = #13#10;
-
 type
   TCnConvertSourceType = (stPas, stCpp);
 
@@ -237,6 +237,7 @@ type
     FProcessEvent: TCnSourceConvertProcessEvent;
     FLineNo: Integer;
     FSourceType: TCnConvertSourceType;
+    FIsMulti: Boolean;
 
     procedure NewToken;
     procedure TokenAdd(AChar: Char);
@@ -291,8 +292,6 @@ type
     {this should be override}
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       virtual; abstract;
-    procedure WritePreStart; virtual; abstract;
-    procedure WritePreEnd; virtual; abstract;
   public
     constructor Create;
     destructor Destroy; override;
@@ -335,8 +334,6 @@ type
     procedure WriteTokenToStream; override;
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       override;
-    procedure WritePreStart; override;
-    procedure WritePreEnd; override;
 
     procedure ConvertBegin; override;
     procedure ConvertEnd; override;
@@ -357,8 +354,6 @@ type
     procedure WriteTokenToStream; override;
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       override;
-    procedure WritePreStart; override;
-    procedure WritePreEnd; override;
 
     procedure ConvertBegin; override;
     procedure ConvertEnd; override;
@@ -407,6 +402,8 @@ const
   PosLength = 9;                        // 写入的长度。
 
   SCnUtf8Encoding = 'utf-8';
+
+  CRLF = #13#10;
 
 {-------------------------------------------------------------------------------
   过程名:    WideStringToUTF8
@@ -654,8 +651,8 @@ begin
   while FNextChar <> #0 do
   begin
     try
-      if Assigned(fProcessEvent) then
-        fProcessEvent((FInStream.Position) * 100 div FInStream.Size);
+      if Assigned(FProcessEvent) then
+        FProcessEvent((FInStream.Position) * 100 div FInStream.Size);
     except
       on Exception do
         raise
@@ -933,8 +930,8 @@ begin
   ConvertEnd;
 
   try
-    if Assigned(fProcessEvent) then
-      fProcessEvent(100);
+    if Assigned(FProcessEvent) then
+      FProcessEvent(100);
   except
     on Exception do
       raise
@@ -1317,14 +1314,13 @@ end;
 
 procedure TCnSourceConversion.HandlePasString;
 var
-  IsMulti: Boolean;
   OldChar: Char;
 begin
   FTokenType := ttString;
 
   // 检查是否连续仨单引号
 
-  IsMulti := False;          // 已经 1 个单引号了
+  FIsMulti := False;          // 已经 1 个单引号了
   ExtractChar;
   if FNextChar = '''' then   // 两个了
   begin
@@ -1334,7 +1330,7 @@ begin
       ExtractChar;
       if FNextChar <> '''' then // 第四个不是
       begin
-        IsMulti := True;
+        FIsMulti := True;
       end
       else                   // 第四个不是则回滚仨
       begin
@@ -1352,7 +1348,7 @@ begin
   else
     RollBackChar;            // 第二个不是则回滚一个
 
-  if IsMulti then // 多行字符串，且已经过了仨单引号也就是说 FNextChar 指向非单引号了，开始找末尾的仨单引号
+  if FIsMulti then // 多行字符串，且已经过了仨单引号也就是说 FNextChar 指向非单引号了，开始找末尾的仨单引号
   begin
     FTokenType := ttMString;
     while True do
@@ -1418,22 +1414,8 @@ begin
   CheckTokenState;
 
   WriteStringToStream(Prefix);
-  if IsMulti and (TokenLength > 6) then // 硬修补
-  begin
-    WriteStringToStream('''''''');      // 拆开前后各三个单引号
-    WritePreStart;                      // 把 pre 标记写进去
-
-    Inc(FToken, 3);
-    Dec(FTokenCur, 3);
-    WriteTokenToStream;
-    Inc(FTokenCur, 3);
-    Dec(FToken, 3);
-
-    WritePreEnd;
-    WriteStringToStream('''''''');
-  end
-  else
-    WriteTokenToStream;
+  WriteTokenToStream;
+  FIsMulti := False;
 
   WriteStringToStream(Postfix);
   NewToken;
@@ -1828,16 +1810,6 @@ begin
   end;
 end;
 
-procedure TCnSourceToHtmlConversion.WritePreEnd;
-begin
-  WriteStringToStream('</pre>');
-end;
-
-procedure TCnSourceToHtmlConversion.WritePreStart;
-begin
-  WriteStringToStream('<pre>');
-end;
-
 procedure TCnSourceToHtmlConversion.WriteTokenToStream;
 var
   StartPtr, CurPtr: PAnsiChar;
@@ -1947,7 +1919,7 @@ begin
           Inc(FSize, nCount);
           nCount := 0;
 
-          if (CurPtr^) = #9 {tab} then
+          if CurPtr^ = #9 then {Tab}
           begin
             for J := 1 to FTabSpace do
               FOutStream.WriteBuffer(AnsiString('&nbsp;'), 6);
@@ -1957,6 +1929,21 @@ begin
           begin
             FOutStream.WriteBuffer(AnsiString('&nbsp;'), 6);
             Inc(FSize, 6);
+          end;
+
+          StartPtr := CurPtr + 1;
+        end;
+      #10:
+        begin
+          Inc(nCount);
+          FOutStream.WriteBuffer(StartPtr^, nCount); // 注意这里不是替换 #10 而是加写额外内容因此 #10 还得写进去
+          Inc(FSize, nCount);
+          nCount := 0;
+
+          if FIsMulti then
+          begin
+            FOutStream.WriteBuffer(AnsiString('<br>'), 4);
+            Inc(FSize, 4);
           end;
 
           StartPtr := CurPtr + 1;
@@ -2039,17 +2026,17 @@ end;
 
 function TCnSourceToRTFConversion.ConvertFontToRTFColorTable(AFont: TFont): string;
 var
-  tmpColor: Integer;
+  TmpColor: Integer;
 begin
-  tmpColor := ColorToRGB(AFont.Color);
+  TmpColor := ColorToRGB(AFont.Color);
   Result := Format('\red%d\green%d\blue%d;',
-    [GetRValue(tmpColor), GetGValue(tmpColor), GetBValue(tmpColor)]);
+    [GetRValue(TmpColor), GetGValue(TmpColor), GetBValue(TmpColor)]);
 end;
 
 procedure TCnSourceToRTFConversion.SetPreFixAndPosFix(AFont: TFont; ATokenType:
     TCnPasConvertTokenType);
 var
-  tmpString: string;
+  TmpStr: string;
 begin
   case ATokenType of
     ttCRLF:
@@ -2064,18 +2051,18 @@ begin
       end;
   else
     begin
-      tmpString := Format('\cf%d\f%d\fs%d |\f0\cf0', [Ord(ATokenType) + 1, Ord(ATokenType), AFont.Size * 2]);
-      if fsBold in AFont.Style then tmpString := '\b' + tmpString + '\b0';
-      if fsItalic in AFont.Style then tmpString := '\i' + tmpString + '\i0';
-      if fsUnderline in AFont.Style then tmpString := '\ul' + tmpString + '\ulnone';
-      if fsStrikeOut in AFont.Style then tmpString := '\strike' + tmpString + '\strike0';
-      tmpString := tmpString + ' ';
+      TmpStr := Format('\cf%d\f%d\fs%d |\f0\cf0', [Ord(ATokenType) + 1, Ord(ATokenType), AFont.Size * 2]);
+      if fsBold in AFont.Style then TmpStr := '\b' + TmpStr + '\b0';
+      if fsItalic in AFont.Style then TmpStr := '\i' + TmpStr + '\i0';
+      if fsUnderline in AFont.Style then TmpStr := '\ul' + TmpStr + '\ulnone';
+      if fsStrikeOut in AFont.Style then TmpStr := '\strike' + TmpStr + '\strike0';
+      TmpStr := TmpStr + ' ';
 
-      FPreFixList[ATokenType] := Copy(tmpString, 1, Pos('|', tmpString) - 1);
-      FPostFixList[ATokenType] := Copy(tmpString, Pos('|', tmpString) + 1, Length(tmpString));
+      FPreFixList[ATokenType] := Copy(TmpStr, 1, Pos('|', TmpStr) - 1);
+      FPostFixList[ATokenType] := Copy(TmpStr, Pos('|', TmpStr) + 1, Length(TmpStr));
 
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('[' + tmpString + ']');
+      CnDebugger.LogMsg('[' + TmpStr + ']');
       CnDebugger.LogMsg('PreFixList [' + FPreFixList[ATokenType] + ']');
       CnDebugger.LogMsg('PostFixList [' + FPostFixList[ATokenType] + ']');
     {$ENDIF}
@@ -2085,10 +2072,10 @@ end;
 
 procedure TCnSourceToRTFConversion.WriteTokenToStream;
 var
-  tmpStr: AnsiString;
-  tmpWide: WideString;
+  TmpStr: AnsiString;
+  TmpWide: WideString;
   StartPtr, CurPtr: PChar;
-  I, J, Len, nCount: Integer;
+  I, J, Len, C: Integer;
 
   procedure WriteAnsiToStream;
 {$IFDEF UNICODE}
@@ -2097,19 +2084,19 @@ var
     Utf16Str: string;
 {$ENDIF}
   begin
-    if nCount <= 0 then
+    if C <= 0 then
       Exit;
 {$IFDEF UNICODE}
-    SetLength(Utf16Str, nCount);
-    Move(StartPtr^, Utf16Str[1], nCount * SizeOf(Char));
+    SetLength(Utf16Str, C);
+    Move(StartPtr^, Utf16Str[1], C * SizeOf(Char));
     AnsiStr := AnsiString(Utf16Str);
-    FOutStream.WriteBuffer(AnsiStr[1], nCount);
+    FOutStream.WriteBuffer(AnsiStr[1], C);
 {$ELSE}
-    FOutStream.WriteBuffer(StartPtr^, nCount);
+    FOutStream.WriteBuffer(StartPtr^, C);
 {$ENDIF}
 
-    Inc(FSize, nCount);
-    nCount := 0;
+    Inc(FSize, C);
+    C := 0;
   end;
 
 begin
@@ -2118,7 +2105,7 @@ begin
 
   {v0.96: Optimized, sure not call StrLen ,call TokenLength instead}
   Len := TokenLength;
-  nCount := 0;
+  C := 0;
 
   I := 1;
   while I <= Len do
@@ -2157,7 +2144,7 @@ begin
         begin
           WriteAnsiToStream;
 
-          if (CurPtr^) = #9 {tab} then
+          if CurPtr^ = #9  then {Tab}
           begin
             // Write space char
             for J := 1 to FTabSpace do
@@ -2172,6 +2159,21 @@ begin
 
           StartPtr := CurPtr + 1;
         end;
+      #10:
+        begin
+          Inc(C);
+          FOutStream.WriteBuffer(StartPtr^, C); // 注意这里不是替换 #10 而是加写额外内容因此 #10 还得写进去
+          Inc(FSize, C);
+          C := 0;
+
+          if FIsMulti then
+          begin
+            FOutStream.WriteBuffer(AnsiString('\par '), 5);
+            Inc(FSize, 5);
+          end;
+
+          StartPtr := CurPtr + 1;
+        end;
     else
       if Ord(CurPtr^) > 128 {chinese} then
       begin
@@ -2179,24 +2181,24 @@ begin
 
         // Convert chinese to unicode
 {$IFDEF UNICODE}
-        tmpWide := CurPtr^;
+        TmpWide := CurPtr^;
 {$ELSE}
-        tmpStr := CurPtr^;
+        TmpStr := CurPtr^;
         Inc(CurPtr);
-        tmpStr := tmpStr + CurPtr^;
-        tmpWide := WideString(tmpStr);
+        TmpStr := TmpStr + CurPtr^;
+        TmpWide := WideString(TmpStr);
 {$ENDIF}
 
-        tmpStr := AnsiString(Format('\u%d?', [Ord(tmpWide[1])]));
-        FOutStream.WriteBuffer(tmpStr[1], Length(tmpStr));
-        Inc(FSize, Length(tmpStr));
+        TmpStr := AnsiString(Format('\u%d?', [Ord(TmpWide[1])]));
+        FOutStream.WriteBuffer(TmpStr[1], Length(TmpStr));
+        Inc(FSize, Length(TmpStr));
 {$IFNDEF UNICODE}
         Inc(I);
 {$ENDIF}
         StartPtr := CurPtr + 1;
       end
       else
-        Inc(nCount);
+        Inc(C);
     end;
 
     Inc(CurPtr);
@@ -2204,16 +2206,6 @@ begin
   end;
 
   WriteAnsiToStream;
-end;
-
-procedure TCnSourceToRTFConversion.WritePreEnd;
-begin
-  // RTF 中无 pre 标签
-end;
-
-procedure TCnSourceToRTFConversion.WritePreStart;
-begin
-  // RTF 中无 pre 标签
 end;
 
 {$ENDIF CNWIZARDS_CNPAS2HTMLWIZARD}
