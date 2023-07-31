@@ -2173,8 +2173,15 @@ begin
         end;
       tokKeywordVar: // 新语法，inline var
         begin
-          Match(Scanner.Token, PreSpaceCount);
-          FormatInlineVarDecl(0, PreSpaceCount); // var 语句后面无需缩进，但 var 里头的匿名函数需要缩进
+          // var 语句允许保持内部换行
+          FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+          FNeedKeepLineBreak := True;
+          try
+            Match(Scanner.Token, PreSpaceCount);
+            FormatInlineVarDecl(0, PreSpaceCount); // var 语句后面无需缩进，但 var 里头的匿名函数需要缩进
+          finally
+            FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+          end;
         end;
       tokKeywordConst:
         begin

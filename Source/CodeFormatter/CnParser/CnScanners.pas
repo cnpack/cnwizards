@@ -773,7 +773,8 @@ begin
     Exit;
   end;
 
-  Result := FPrevEffectiveToken in OpTokens + [tokLB, tokSLB]; // 双目运算符后，或左括号后
+  Result := FPrevEffectiveToken in OpTokens + [tokLB, tokSLB, tokKeywordVar];
+  // 双目运算符后，或左括号后。或 inline var 的 var 后
 
   if not Result and not FIsForwarding then
     Result := ForwardActualToken() in OpTokens + [tokSemicolon, tokRB, tokSRB,
