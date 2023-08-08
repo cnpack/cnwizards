@@ -2071,7 +2071,7 @@ end;
 procedure TCnPasWideLex.StringProc;
 begin
   FTokenID := tkString;
-  if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) and (FOrigin[FRun + 3] <> #39) then // 出现仨单引号且不是四单引号说明是多行字符串的新语法
+  if (FOrigin[FRun + 1] = #39) and (FOrigin[FRun + 2] = #39) and (FOrigin[FRun + 3] in [#13, #10]) then // 出现仨单引号且后面是回车换行说明是多行字符串的新语法
   begin
     StepRun(2);
     FTokenID := tkMultiLineString;

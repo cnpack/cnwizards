@@ -1492,7 +1492,7 @@ end;
 procedure TmwPasLex.StringProc;
 begin
   fTokenID:=tkString;
-  if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)and(FOrigin[Run+3]<>#39) then // 出现仨单引号且不是四单引号说明是多行字符串的新语法
+  if(FOrigin[Run+1]=#39)and(FOrigin[Run+2]=#39)and(FOrigin[Run+3]in[#13,#10]) then // 出现仨单引号且后面是回车或换行说明是多行字符串的新语法
   begin
     inc(Run, 2);
     FTokenID := tkMultiLineString;
