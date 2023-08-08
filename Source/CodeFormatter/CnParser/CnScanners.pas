@@ -988,7 +988,7 @@ begin
             if P^ = '''' then   // 第三个单引号
             begin
               Inc(P);
-              if P^ <> '''' then  // 后面不能再是单引号
+              if P^ in [#13, #10] then  // 后面得是回车或换行
                 IsMultiLineStr := True;
             end;
           end;
