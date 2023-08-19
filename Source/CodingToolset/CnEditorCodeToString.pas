@@ -124,9 +124,9 @@ var
   S: string;
 begin
   AdjustRet := StrRight(Text, 2) = #13#10;
-  Result := StrToSourceCode(Text, FDelphiReturn, FCReturn, True, MAX_STRING_LENGTH);
+  Result := StrToSourceCode(Text, FDelphiReturn, FCReturn, True, MAX_STRING_LENGTH, FAddAtHead);
 
-  if FSkipSpace then                    // 跳过行首空格
+  if FSkipSpace and not FAddAtHead then                    // 跳过行首空格
   begin
     Strings := TStringList.Create;
     try
