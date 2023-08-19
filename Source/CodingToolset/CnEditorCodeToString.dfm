@@ -3,25 +3,27 @@ inherited CnEditorCodeToStringForm: TCnEditorCodeToStringForm
   Top = 235
   BorderStyle = bsDialog
   Caption = 'Code to String Tool Settings'
-  ClientHeight = 141
-  ClientWidth = 248
+  ClientHeight = 165
+  ClientWidth = 264
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 86
-    Top = 112
+    Left = 102
+    Top = 136
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 166
-    Top = 112
+    Left = 182
+    Top = 136
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -30,8 +32,9 @@ inherited CnEditorCodeToStringForm: TCnEditorCodeToStringForm
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 233
-    Height = 97
+    Width = 249
+    Height = 121
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Settings'
     TabOrder = 0
     object Label1: TLabel
@@ -51,24 +54,36 @@ inherited CnEditorCodeToStringForm: TCnEditorCodeToStringForm
     object edtDelphiReturn: TEdit
       Left = 104
       Top = 16
-      Width = 121
+      Width = 137
       Height = 21
-      TabOrder = 1
+      Anchors = [akLeft, akTop, akRight]
+      TabOrder = 0
     end
     object edtCReturn: TEdit
       Left = 104
       Top = 40
-      Width = 121
+      Width = 137
       Height = 21
-      TabOrder = 2
+      Anchors = [akLeft, akTop, akRight]
+      TabOrder = 1
     end
     object cbSkipSpace: TCheckBox
       Left = 8
       Top = 72
-      Width = 217
+      Width = 233
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Ignore Spaces in Line Head.'
-      TabOrder = 0
+      TabOrder = 2
+    end
+    object chkAddAtHead: TCheckBox
+      Left = 8
+      Top = 96
+      Width = 233
+      Height = 17
+      Anchors = [akLeft, akTop, akRight]
+      Caption = 'Put + to Next Line Head in Delphi.'
+      TabOrder = 3
     end
   end
 end

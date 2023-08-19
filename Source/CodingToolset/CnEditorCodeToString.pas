@@ -54,6 +54,7 @@ type
     Label2: TLabel;
     edtCReturn: TEdit;
     cbSkipSpace: TCheckBox;
+    chkAddAtHead: TCheckBox;
   private
 
   public
@@ -71,6 +72,7 @@ type
     FDelphiReturn: string;
     FCReturn: string;
     FSkipSpace: Boolean;
+    FAddAtHead: Boolean;
   protected
     function GetHasConfig: Boolean; override;
     function ProcessText(const Text: string): string; override;
@@ -85,6 +87,7 @@ type
     property DelphiReturn: string read FDelphiReturn write FDelphiReturn;
     property CReturn: string read FCReturn write FCReturn;
     property SkipSpace: Boolean read FSkipSpace write FSkipSpace default True;
+    property AddAtHead: Boolean read FAddAtHead write FAddAtHead default False;
   end;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
@@ -117,8 +120,8 @@ var
   AdjustRet: Boolean;
   Strings: TStrings;
   I, SpcCount: Integer;
-  c: Char;
-  s: string;
+  C: Char;
+  S: string;
 begin
   AdjustRet := StrRight(Text, 2) = #13#10;
   Result := StrToSourceCode(Text, FDelphiReturn, FCReturn, True, MAX_STRING_LENGTH);
@@ -131,22 +134,22 @@ begin
       SpcCount := 0;
       for I := 0 to Strings.Count - 1 do
       begin
-        s := Strings[I];
-        if Length(s) > 2 then
-          if s[2] = ' ' then            // 带空格的行
+        S := Strings[I];
+        if Length(S) > 2 then
+          if S[2] = ' ' then            // 带空格的行
           begin
-            c := s[1];
-            s[1] := ' ';
+            C := S[1];
+            S[1] := ' ';
             SpcCount := 0;
-            while (SpcCount < Length(s)) and (s[SpcCount + 2] = ' ') do
+            while (SpcCount < Length(S)) and (S[SpcCount + 2] = ' ') do
               Inc(SpcCount);
-            s[SpcCount + 1] := c;
+            S[SpcCount + 1] := C;
             
-            Strings[I] := s;
+            Strings[I] := S;
           end
           else
           begin                         // 不带空格的行
-            Strings[I] := Spc(SpcCount) + s;
+            Strings[I] := Spc(SpcCount) + S;
           end;
       end;
       Result := Strings.Text;
@@ -167,12 +170,14 @@ begin
     edtDelphiReturn.Text := FDelphiReturn;
     edtCReturn.Text := FCReturn;
     cbSkipSpace.Checked := FSkipSpace;
+    chkAddAtHead.Checked := FAddAtHead;
 
     if ShowModal = mrOK then
     begin
       FDelphiReturn := edtDelphiReturn.Text;
       FCReturn := edtCReturn.Text;
       FSkipSpace := cbSkipSpace.Checked;
+      FAddAtHead := chkAddAtHead.Checked;
     end;
   finally
     Free;
