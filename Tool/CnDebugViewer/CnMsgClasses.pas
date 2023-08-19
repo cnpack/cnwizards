@@ -301,6 +301,13 @@ implementation
 uses
   CnViewCore;
 
+type
+{$IFDEF SUPPORT_32_AND_64}
+  TCnNativeInt     = NativeInt;
+{$ELSE}
+  TCnNativeInt     = Integer;
+{$ENDIF}
+
 var
   FCnMsgManager: TCnMsgManager = nil;
 
@@ -317,7 +324,7 @@ var
   AMsg: array [0..CnMaxMsgLength] of AnsiChar;
   Size: Integer;
 
-  function HexValueHigh(AChar: Char): Char;
+  function HexValueHigh(AChar: AnsiChar): Char;
   var
     AByte: Byte;
   begin
@@ -329,7 +336,7 @@ var
     Result := Chr(AByte);
   end;
 
-  function HexValueLow(AChar: Char): Char;
+  function HexValueLow(AChar: AnsiChar): Char;
   var
     AByte: Byte;
   begin
@@ -344,14 +351,14 @@ var
 {
 十六进制输出格式：
 00 11 22 33 44 55 66 77 88 99 AA BB CC DD EE FF ; 01234567890ABCDEF
-来Size个字节，行数为(Size div 16) + 1，一满行字符为3 * 16 + 2 + 16 + 2
-最后一行为Size mod 16，当其大于0时， 一满行字符为3 * 16 + 2 + (Size mod 16)
+来 Size 个字节，行数为 (Size div 16) + 1，一满行字符为 3 * 16 + 2 + 16 + 2
+最后一行为 Size mod 16，当其大于 0 时， 一满行字符为 3 * 16 + 2 + (Size mod 16)
 如尾部用空格填充，则总字节数简化为 ((Size div 16) + 1 ) * ( 3 * 16 + 2 + 16 + 2 )
 }
   function HexDumpMemory(AMem: Pointer; Size: Integer): string;
   var
     I, J, DestP, PrevLineStart, Remain: Integer;
-    AChar: Char;
+    AChar: AnsiChar;
   begin
     if (Size <= 0) or (AMem = nil) then
     begin
@@ -365,7 +372,7 @@ var
     DestP := 0; PrevLineStart := 0;
     for I := 0 to Size - 1 do
     begin
-      AChar := (PChar(Integer(AMem) + I))^;
+      AChar := (PAnsiChar(TCnNativeInt(AMem) + I))^;
       Inc(DestP);
       Result[DestP] := HexValueHigh(AChar);
       Inc(DestP);
@@ -385,9 +392,9 @@ var
 
           for J := PrevLineStart to I do
           begin
-            AChar := (PChar(Integer(AMem) + J))^;
+            AChar := (PAnsiChar(TCnNativeInt(AMem) + J))^;
             if AChar in [#32..#127] then
-              Result[DestP] := AChar
+              Result[DestP] := Char(AChar)
             else
               Result[DestP] := '.'; // 不可显示字符
             Inc(DestP);
@@ -430,9 +437,9 @@ var
 
       for J := PrevLineStart to Size - 1 do
       begin
-        AChar := (PChar(Integer(AMem) + J))^;
+        AChar := (PAnsiChar(TCnNativeInt(AMem) + J))^;
         if AChar in [#32..#127] then
-          Result[DestP] := AChar
+          Result[DestP] := Char(AChar)
         else
           Result[DestP] := '.'; // 不可显示字符
         Inc(DestP);
