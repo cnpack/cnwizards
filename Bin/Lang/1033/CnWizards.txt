@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C Line Wrap:
 TCnEditorCodeToStringForm.btnCancel.Caption=&Cancel
 TCnEditorCodeToStringForm.btnOK.Caption=&OK
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=Ignore Spaces in Line Head.
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Put + to Next Line Head in Delphi.
 TCnEditorCollectorForm.Caption=Collector
 TCnEditorCollectorForm.actEditClear.Hint=Clear
 TCnEditorCollectorForm.actEditFind.Hint=Find...

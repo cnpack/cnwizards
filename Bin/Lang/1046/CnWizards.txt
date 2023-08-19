@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C Linha Quebra:
 TCnEditorCodeToStringForm.btnCancel.Caption=&Cancelar
 TCnEditorCodeToStringForm.btnOK.Caption=&OK
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=Ignorar Espaços no Cabeçalho da Linha.
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Coloque + no cabeçalho da próxima linha em Delphi.
 TCnEditorCollectorForm.Caption=Coletor
 TCnEditorCollectorForm.actEditClear.Hint=Limpar
 TCnEditorCollectorForm.actEditFind.Hint=Encontrar...

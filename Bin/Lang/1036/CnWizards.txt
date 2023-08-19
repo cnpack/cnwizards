@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C++ Ret. à  la ligne:
 TCnEditorCodeToStringForm.btnCancel.Caption=&Annuler
 TCnEditorCodeToStringForm.btnOK.Caption=&OK
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=Ignorer les espaces en tête de ligne.
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Mettez + à Next Line Head dans Delphi.
 TCnEditorCollectorForm.Caption=Collectionneur
 TCnEditorCollectorForm.actEditClear.Hint=Effacer
 TCnEditorCollectorForm.actEditFind.Hint=Trouver...

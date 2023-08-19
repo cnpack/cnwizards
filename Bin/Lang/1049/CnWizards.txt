@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C перенос:
 TCnEditorCodeToStringForm.btnCancel.Caption=Отмена
 TCnEditorCodeToStringForm.btnOK.Caption=&OK
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=Игнор. пробелы в начале строки
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Поместите + к началу следующей строки в Delphi
 TCnEditorCollectorForm.Caption=Хранилище
 TCnEditorCollectorForm.actEditClear.Hint=Очистить
 TCnEditorCollectorForm.actEditFind.Hint=Найти...

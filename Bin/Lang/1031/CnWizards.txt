@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C Zeilenumbruch:
 TCnEditorCodeToStringForm.btnCancel.Caption=&Abbruch
 TCnEditorCodeToStringForm.btnOK.Caption=&OK
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=ignoriere Leerzeichen am Anfang der Zeile.
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Setzen Sie in Delphi + auf den nächsten Zeilenkopf.
 TCnEditorCollectorForm.Caption=Kollektor
 TCnEditorCollectorForm.actEditClear.Hint=Clear
 TCnEditorCollectorForm.actEditFind.Hint=suchen...

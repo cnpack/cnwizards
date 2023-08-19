@@ -905,6 +905,7 @@ TCnEditorCodeToStringForm.Label2.Caption=C 換行符：
 TCnEditorCodeToStringForm.btnCancel.Caption=取消(&C)
 TCnEditorCodeToStringForm.btnOK.Caption=確定(&O)
 TCnEditorCodeToStringForm.cbSkipSpace.Caption=處理時跳過代碼前面的空格。
+TCnEditorCodeToStringForm.chkAddAtHead.Caption=Delphi中將加號置於下一行行首。
 TCnEditorCollectorForm.Caption=收集面板
 TCnEditorCollectorForm.actEditClear.Hint=清空
 TCnEditorCollectorForm.actEditFind.Hint=查找文字
