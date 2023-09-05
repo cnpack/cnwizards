@@ -89,7 +89,8 @@ begin
     SetLength(Indexes, CnWizardMgr.IdeEnhanceWizardCount);
     for I := Low(Indexes) to High(Indexes) do
     begin
-      if CnWizardMgr.IdeEnhanceWizards[I].HasConfig then
+      if not CnWizardMgr.IdeEnhanceWizards[I].IsInternalWizard and // 内部的不显示
+        CnWizardMgr.IdeEnhanceWizards[I].HasConfig then
       begin
         // 修改子菜单的 Command 命名方式，以便外界找到
         Indexes[I] := RegisterASubAction(SCnIdeEnhanceMenuCommand +

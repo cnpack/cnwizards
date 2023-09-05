@@ -60,9 +60,9 @@ type
     btnCancel: TButton;
     chkCloseAll: TCheckBox;
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 function ShowCnWizCommentForm(Wizard: TCnBaseWizard;

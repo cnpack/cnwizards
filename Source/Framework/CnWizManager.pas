@@ -890,10 +890,10 @@ var
   RepositoryWizard: TCnRepositoryWizard;
   WizardSvcs: IOTAWizardServices;
 {$IFNDEF CNWIZARDS_MINIMUM}
-  frmBoot: TCnWizBootForm;
+  FrmBoot: TCnWizBootForm;
   KeyState: TKeyboardState;
 {$ENDIF}
-  bUserBoot: Boolean;
+  UserBoot: Boolean;
   BootList: array of Boolean;
 begin
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
@@ -908,7 +908,7 @@ begin
   CnDebugger.LogMsg('Begin installing wizards');
 {$ENDIF}
 
-  bUserBoot := False;
+  UserBoot := False;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
   GetKeyboardState(KeyState);
@@ -916,24 +916,24 @@ begin
   if (KeyState[BootShortCutKey] and $80 <> 0) or // 是否由用户引导专家
     FindCmdLineSwitch(SCnShowBootFormSwitch, ['/', '-'], True) then
   begin
-    frmBoot := TCnWizBootForm.Create(Application);
+    FrmBoot := TCnWizBootForm.Create(Application);
     try
-      if frmBoot.ShowModal = mrOK then
+      if FrmBoot.ShowModal = mrOK then
       begin
-        bUserBoot := True;
+        UserBoot := True;
         SetLength(BootList, GetCnWizardClassCount);
-        frmBoot.GetBootList(BootList);
+        FrmBoot.GetBootList(BootList);
       end;
     finally
-      frmBoot.Free;
+      FrmBoot.Free;
     end;
   end;
 {$ENDIF}
 
   for I := 0 to GetCnWizardClassCount - 1 do
   begin
-    if ((not bUserBoot) and WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName]) or
-       (bUserBoot and BootList[I]) then
+    if ((not UserBoot) and WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName]) or
+       (UserBoot and BootList[I]) then
     begin
       try
         Wizard := TCnWizardClass(GetCnWizardClassByIndex(I)).Create;
@@ -980,7 +980,8 @@ begin
   FOffSet[1] := FOffSet[0] + FMenuWizards.Count;
   FOffSet[2] := FOffSet[1] + FIDEEnhanceWizards.Count;
   FOffSet[3] := FOffSet[2] + FRepositoryWizards.Count;
-  if bUserBoot then SetLength(BootList, 0);
+  if UserBoot then
+    SetLength(BootList, 0);
 end;
 
 function TCnWizardMgr.GetOffSet(Index: Integer): Integer;
@@ -1087,7 +1088,7 @@ begin
       end;
     end;
 
-    // 装载专家设置
+    // 装载专家设置，并确保加载设置内容后再设置专家的活动状态
     for I := 0 to WizardCount - 1 do
     begin
       Wizards[I].DoLoadSettings;

@@ -328,7 +328,6 @@ begin
         end;
       end;
   end;
-
 end;
 
 procedure TCnTestDebuggerVisualizerValueReplacer.GetSupportedType(

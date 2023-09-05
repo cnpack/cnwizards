@@ -102,7 +102,8 @@ type
     FDefaultsMap: TCnStrToVariantHashMap;
   protected
     procedure SetActive(Value: Boolean); virtual;
-    {* Active 属性写方法，子类重载该方法处理 Active 属性变更事件 }
+    {* Active 属性写方法，子类重载该方法处理 Active 属性变更事件
+       启动时该方法会在 LoadSettings 之后调用，以确保加载设置内容后再变更活动状态 }
     function GetHasConfig: Boolean; virtual;
     {* HasConfig 属性读方法，子类重载该方法返回是否存在可配置内容 }
     function GetIcon: TIcon; virtual; abstract;

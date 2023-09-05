@@ -58,9 +58,9 @@ type
     lblTest: TLabel;
     dlgSave: TSaveDialog;
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
   TCnTestWizard = class(TCnUnitWizard)
