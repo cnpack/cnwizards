@@ -159,6 +159,10 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   S := WizOptions.GetUserFileName(SCnDebugReplacerDataName, True);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnDebugEnhanceWizard Load: ' + S);
+{$ENDIF}
+
   if FileExists(S) then
   begin
     FVisualCalls.LoadFromFile(S);
@@ -243,12 +247,16 @@ begin
       FFunctions.Add(F);
     end;
   end;
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FNames.Count, 'TCnDebuggerValueReplacer Parse Replacers');
+{$ENDIF}
 end;
 
 function TCnDebuggerValueReplacer.GetReplacementValue(const Expression,
   TypeName, EvalResult: string): string;
 var
   I: Integer;
+  Found: Boolean;
   ID: IOTADebuggerServices;
   CP: IOTAProcess;
   CT: IOTAThread;
@@ -265,6 +273,7 @@ begin
 
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
+
   CP := ID.CurrentProcess;
   if CP = nil then
     Exit;
@@ -273,29 +282,40 @@ begin
   if CT = nil then
     Exit;
 
+  Found := False;
   for I := 0 to FNames.Count - 1 do
   begin
     if TypeName = FNames[I] then
     begin
       NewExpr := Expression + '.' + FFunctions[I];
+      Found := True;
       Break;
     end;
+  end;
+
+{$IFDEF DEBUG}
+  if Found then
+    CnDebugger.LogMsg('TCnDebuggerValueReplacer to Evaluate: ' + NewExpr)
+  else
+  begin
+    CnDebugger.LogMsg('TCnDebuggerValueReplacer NO Match. Exit');
     Exit;
   end;
+{$ENDIF}
 
   EvalRes := CT.Evaluate(NewExpr, @FRes[0], SizeOf(FRes), FCanModify, True,
     '', ResultAddr, ResultSize, ResultVal);
 
   case EvalRes of
 {$IFDEF DEBUG}
-    erError: CnDebugger.LogMsg('Evaluate Error');
-    erBusy: CnDebugger.LogMsg('Evaluate Busy');
+    erError: CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Error');
+    erBusy: CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Busy');
 {$ENDIF}
     erOK: Result := EvalResult + ': ' + FRes;
     erDeferred:
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('Evaluate Deferred. Wait for Events.');
+        CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Deferred. Wait for Events.');
 {$ENDIF}
         FEvalComplete := False;
         FEvalSuccess := False;
@@ -309,7 +329,7 @@ begin
         if FEvalSuccess then
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('Evaluate Deferred Success.');
+          CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Deferred Success.');
 {$ENDIF}
           Result := EvalResult + ': ' + FEvalResult;
         end;
