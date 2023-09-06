@@ -39,17 +39,20 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, IniFiles, ToolsAPI, CnConsts, CnWizConsts, CnWizClasses, CnWizOptions;
+  Dialogs, IniFiles, ToolsAPI, CnConsts, CnWizConsts, CnWizClasses, CnWizOptions,
+  ComCtrls, StdCtrls;
 
 type
   TCnDebugEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
-    FVisualCalls: TStrings;
+    FRegistered: Boolean;
+    FVisualCalls: TStringList;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplacer: IOTADebuggerVisualizerValueReplacer;
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
+    function GetHasConfig: Boolean; override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -60,8 +63,10 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure ResetSettings(Ini: TCustomIniFile); override;
 
-    property VisualCalls: TStrings read FVisualCalls;
-    {* 求值的替换调用方式，形式为类名.方法名}
+    procedure Config; override;
+
+    property VisualCalls: TStringList read FVisualCalls;
+    {* 求值的替换调用方式，形式为 1|类名.方法名}
   end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -106,10 +111,18 @@ type
 {$ENDIF}
 
   TCnDebugEnhanceForm = class(TForm)
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnHelp: TButton;
+    pgc1: TPageControl;
+    tsDebugHint: TTabSheet;
+    lblEnhanceHint: TLabel;
+    lvVisualCalls: TListView;
   private
 
   public
-
+    procedure LoadFromStrings(List: TStringList);
+    procedure SaveToStrings(List: TStringList);
   end;
 
 implementation
@@ -123,6 +136,21 @@ uses
 
 { TCnDebugEnhanceWizard }
 
+procedure TCnDebugEnhanceWizard.Config;
+begin
+  with TCnDebugEnhanceForm.Create(nil) do
+  begin
+    LoadFromStrings(FVisualCalls);
+    if ShowModal = mrOK then
+    begin
+      SaveToStrings(FVisualCalls);
+      DoSaveSettings;
+      (FReplacer as TCnDebuggerValueReplacer).ParseReplacers;
+    end;
+    Free;
+  end;
+end;
+
 constructor TCnDebugEnhanceWizard.Create;
 begin
   inherited;
@@ -133,12 +161,25 @@ begin
 end;
 
 destructor TCnDebugEnhanceWizard.Destroy;
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+var
+  ID: IOTADebuggerServices;
+{$ENDIF}
 begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  if FRegistered then
+    if Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+      ID.UnregisterDebugVisualizer(FReplacer);
+
   FReplacer := nil;
 {$ENDIF}
   FVisualCalls.Free;
   inherited;
+end;
+
+function TCnDebugEnhanceWizard.GetHasConfig: Boolean;
+begin
+  Result := True;
 end;
 
 class procedure TCnDebugEnhanceWizard.GetWizardInfo(var Name, Author,
@@ -201,9 +242,15 @@ begin
     Exit;
 
   if Active then
-    ID.RegisterDebugVisualizer(FReplacer)
+  begin
+    ID.RegisterDebugVisualizer(FReplacer);
+    FRegistered := True;
+  end
   else
+  begin
     ID.UnregisterDebugVisualizer(FReplacer);
+    FRegistered := False;
+  end;
 
 {$ENDIF}
 end;
@@ -231,19 +278,35 @@ end;
 procedure TCnDebuggerValueReplacer.ParseReplacers;
 var
   I, Idx: Integer;
-  N, F: string;
+  S, N, F: string;
+  Sub: Boolean;
 begin
   FNames.Clear;
   FFunctions.Clear;
 
   for I := 0 to FWizard.VisualCalls.Count - 1 do
   begin
-    Idx := Pos('.', FWizard.VisualCalls[I]);
-    if (Idx > 1) and (Idx < Length(FWizard.VisualCalls[I])) then
+    Sub := False;
+    S := FWizard.VisualCalls[I];
+    Idx := Pos('|', S);         // 1| 代表包括子类，其他情况均不包括
+    if Idx > 1 then
     begin
-      N := Copy(FWizard.VisualCalls[I], 1, Idx - 1);
-      F := Copy(FWizard.VisualCalls[I], Idx + 1, MaxInt);
+      N := Copy(S, 1, Idx - 1);
+      if N = '1' then
+        Sub := True;
+
+      Delete(S, 1, Idx);
+    end;
+
+    Idx := Pos('.', S); // 到此处 S 不包括 |
+    if (Idx > 1) and (Idx < Length(S)) then
+    begin
+      N := Copy(S, 1, Idx - 1);
+      F := Copy(S, Idx + 1, MaxInt);
       FNames.Add(N);
+
+      if Sub then
+        FNames.Objects[FNames.Count - 1] := TObject(1);
       FFunctions.Add(F);
     end;
   end;
@@ -341,7 +404,7 @@ procedure TCnDebuggerValueReplacer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants: Boolean);
 begin
   TypeName := FNames[index];
-  AllDescendants := False;
+  AllDescendants := FNames.Objects[Index] <> nil;
 end;
 
 function TCnDebuggerValueReplacer.GetSupportedTypeCount: Integer;
@@ -419,6 +482,47 @@ begin
 end;
 
 {$ENDIF}
+
+{ TCnDebugEnhanceForm }
+
+procedure TCnDebugEnhanceForm.LoadFromStrings(List: TStringList);
+var
+  Item: TListItem;
+  I, Idx: Integer;
+  S: string;
+begin
+  lvVisualCalls.Clear;
+  for I := 0 to List.Count - 1 do
+  begin
+    Item := lvVisualCalls.Items.Add;
+    Item.Caption := '';
+
+    Item.Checked := False;
+    S := List[I];
+    Idx := Pos('|', S);
+    if Idx > 1 then
+    begin
+      if Copy(S, 1, Idx - 1) = '1' then
+        Item.Checked := True;
+      Delete(S, 1, Idx);
+    end;
+    Item.SubItems.Add(S);
+  end;
+end;
+
+procedure TCnDebugEnhanceForm.SaveToStrings(List: TStringList);
+var
+  I: Integer;
+begin
+  List.Clear;
+  for I := 0 to lvVisualCalls.Items.Count - 1 do
+  begin
+    if lvVisualCalls.Items[I].Checked then
+      List.Add('1|' + lvVisualCalls.Items[I].SubItems[0])
+    else
+      List.Add('0|' + lvVisualCalls.Items[I].SubItems[0]);
+  end;
+end;
 
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
