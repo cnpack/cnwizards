@@ -57,6 +57,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    class function IsInternalWizard: Boolean; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
 
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -189,6 +190,11 @@ begin
   Author := SCnPack_LiuXiao;
   Email := SCnPack_LiuXiaoEmail;
   Comment := SCnDebugEnhanceWizardComment;
+end;
+
+class function TCnDebugEnhanceWizard.IsInternalWizard: Boolean;
+begin
+  Result := True;
 end;
 
 procedure TCnDebugEnhanceWizard.LoadSettings(Ini: TCustomIniFile);

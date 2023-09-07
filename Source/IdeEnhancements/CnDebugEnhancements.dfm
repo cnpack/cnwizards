@@ -72,7 +72,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Columns = <
           item
             Caption = 'Sub'
-            Width = 40
+            Width = 36
           end
           item
             Caption = 'Class Expression'
