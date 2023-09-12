@@ -169,7 +169,7 @@ begin
   edtCWRootDir.Text := S + '\Source\';
 
   S := ExtractFileDir(S);
-  edtCVRootDir.Text := S + '\cnvcl\Packages\';
+  edtCVRootDir.Text := S + '\cnvcl\Package\';
   edtCVSortRootDir.Text := edtCVRootDir.Text;
 
   FBefores := TStringList.Create;
