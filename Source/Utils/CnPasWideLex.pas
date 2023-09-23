@@ -218,6 +218,7 @@ type
     FIdentFuncTable: array[0..191] of function: TTokenKind of object;
 
     function KeyHash(ToHash: PWideChar): Integer;
+    // 往前搜索到标识符尾并计算一个散列值供比对
     function KeyComp(const aKey: CnWideString): Boolean;
     function Func15: TTokenKind;
     function Func19: TTokenKind;
@@ -429,7 +430,7 @@ procedure MakeIdentTable;
 var
   I, J: AnsiChar;
 begin
-  for I := #0 to#255 do
+  for I := #0 to #255 do
   begin
     case I of
       '_', '0'..'9', 'a'..'z', 'A'..'Z':
@@ -1416,7 +1417,7 @@ procedure TCnPasWideLex.MakeMethodTables;
 var
   I: AnsiChar;
 begin
-  for I := #0 to#255 do
+  for I := #0 to #255 do
     case I of
       #0:
         FProcTable[I] := NullProc;
