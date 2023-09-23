@@ -296,8 +296,10 @@ type
   private
     FChangeDown: Boolean;
     FDisableChange: Boolean;
+    FFocusedClick: Boolean;
     FOnKillFocus: TNotifyEvent;
     FDropDownList: TCnProcDropDownBox;
+    FOnMarginClick: TNotifyEvent;
     procedure RefreshDropBox(Sender: TObject);
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
@@ -309,6 +311,8 @@ type
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure WndProc(var Message: TMessage); override;
     procedure Change; override;
+    procedure Click; override;
+    procedure DoMarginClick; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -320,6 +324,8 @@ type
     property OnKillFocus: TNotifyEvent read FOnKillFocus write FOnKillFocus;
     property ChangeDown: Boolean read FChangeDown write FChangeDown;
     // 是否由于文字改变导致的下拉，为 False 时大概是点击导致的下拉
+    property OnMarginClick: TNotifyEvent read FOnMarginClick write FOnMarginClick;
+    {* 点击在文字右侧的空白处触发，供改善用户体验用}
   end;
 
   TCnProcToolButton = class(TToolButton);
@@ -1006,6 +1012,7 @@ begin
     SetTextWithoutChange('');
     FDisableChange := False;
     OnButtonClick := ClassComboDropDown;
+    OnMarginClick := ClassComboDropDown;
   end;
 
   Obj.FSplitter1 := TCnCustomizedSplitter.Create(ToolBar);
@@ -1035,6 +1042,7 @@ begin
     SetTextWithoutChange('');
     FDisableChange := False;
     OnButtonClick := ProcComboDropDown;
+    OnMarginClick := ProcComboDropDown;
   end;
 
   Obj.FSplitter2 := TCnCustomizedSplitter.Create(ToolBar);
@@ -4467,6 +4475,9 @@ begin
 
   if Text = '' then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnProcListComboBox.Change: NO Text. Hide');
+{$ENDIF}
     FDropDownList.Hide;
     FDropDownList.SavePosition;
     Exit;
@@ -4483,6 +4494,10 @@ begin
   FDropDownList.MatchStr := Text;
   Obj := FWizard.GetCurrentToolBarObj;
   FDropDownList.MatchMode := GetMatchMode(Obj);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnProcListComboBox.Change: To UpdateDisplay and ShowDropBox');
+{$ENDIF}
 
   FDropDownList.UpdateDisplay;
   if not FDropDownList.Visible then
@@ -4506,6 +4521,9 @@ end;
 
 procedure TCnProcListComboBox.WndProc(var Message: TMessage);
 begin
+  if Message.Msg = WM_LBUTTONDOWN then
+    FFocusedClick := Focused; // 记录鼠标左键点下时有无焦点，有才能处理自动下拉
+
   inherited;
   if Message.Msg = WM_KILLFOCUS then
   begin
@@ -4549,12 +4567,19 @@ end;
 
 procedure TCnProcListComboBox.DropDownListClick(Sender: TObject);
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnProcListComboBox.DropDownListClick');
+{$ENDIF}
   if FDropDownList.FDisableClickFlag then
   begin
+    // 屏蔽一次单击下拉触发事件
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnProcListComboBox.DropDownListClick Ignore One');
+{$ENDIF}
     FDropDownList.FDisableClickFlag := False;
     Exit;
   end;
-  
+
   if FDropDownList.ItemIndex >= 0 then
     PostMessage(Handle, WM_KEYDOWN, VK_RETURN, 0);
 end;
@@ -4737,6 +4762,48 @@ begin
   end;
 {$ENDIF}
   FDisableChange := False;
+end;
+
+procedure TCnProcListComboBox.Click;
+var
+  W: Integer;
+  P: TPoint;
+  ACanvas: TControlCanvas;
+begin
+  inherited;
+  if not FFocusedClick then // 点击前如果没焦点，此次点击只是获取焦点，不应下拉
+    Exit;
+
+  P := Mouse.CursorPos;
+  P := ScreenToClient(P);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnProcListComboBox.Click at X %d, Button Left Edge %d',
+    [P.X, ClientWidth - ButtonWidth]);
+{$ENDIF}
+
+  if P.X > ClientWidth - ButtonWidth then // 鼠标点击位置在按钮上则啥也不做
+    Exit;
+
+  // 鼠标点击位置是否在文字右侧
+  ACanvas := TControlCanvas.Create;
+  try
+    ACanvas.Control := Self;
+    W := ACanvas.TextWidth(Text);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnProcListComboBox.Click at X %d, Text Width %d', [P.X, W]);
+{$ENDIF}
+  finally
+    ACanvas.Free;
+  end;
+
+  if P.X > W then
+    DoMarginClick;
+end;
+
+procedure TCnProcListComboBox.DoMarginClick;
+begin
+  if Assigned(FOnMarginClick) then
+    FOnMarginClick(Self);
 end;
 
 { TCnProcToolBarObj }
