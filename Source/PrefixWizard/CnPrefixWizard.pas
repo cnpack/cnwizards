@@ -61,7 +61,7 @@ uses
   {$ENDIF}
   ToolsAPI, TypInfo, IniFiles, Menus, Contnrs, Clipbrd, CnWizClasses, CnWizUtils,
   CnWizConsts, CnWizMethodHook, CnPrefixList, CnConsts, CnWizOptions, CnCommon,
-  CnWizNotifier, CnPrefixExecuteFrm, CnWizShortCut, CnWizMenuAction;
+  CnWizNotifier, CnPrefixExecuteFrm, CnWizShortCut, CnWizMenuAction, CnEventBus;
 
 type
 
@@ -1614,6 +1614,8 @@ begin
     CreateRenameAction
   else
     FreeRenameAction;
+
+  EventBus.PostEvent(EVENT_PREFIX_WIZARD_ACTIVE_CHANGED);
 end;
 
 procedure TCnPrefixWizard.SetF2Rename(const Value: Boolean);

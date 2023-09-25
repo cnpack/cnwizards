@@ -109,7 +109,7 @@ var
   Wizard: TCnPrefixWizard;
 begin
   Wizard := TCnPrefixWizard(CnWizardMgr.WizardByClass(TCnPrefixWizard));
-  if Assigned(Wizard) then
+  if Assigned(Wizard) and Wizard.Active then
   begin
     RegisterPropertyEditor(TypeInfo(TComponentName), TControl, 'Name',
       TCnNamePropEditor);

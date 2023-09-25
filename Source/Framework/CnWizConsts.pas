@@ -382,6 +382,8 @@ resourcestring
   EVENT_INPUTHELPER_POPUP_SHORTCUT_CHANGED = 'InputHeperPopupShortcutChanged';
   // Script Library Settings Changed
   EVENT_SCRIPT_SETTING_CHANGED = 'CnScriptSettingChanged';
+  // Prefix Wizard Active Changed
+  EVENT_PREFIX_WIZARD_ACTIVE_CHANGED = 'CnPrefixWizardActiveChanged';
 
 //==============================================================================
 // Need to Localize

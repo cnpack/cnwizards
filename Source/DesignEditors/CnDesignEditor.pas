@@ -51,7 +51,7 @@ uses
   DsgnIntf,
   {$ENDIF}
   ToolsAPI, CnCommon, CnConsts, CnDesignEditorConsts, CnWizOptions, CnWizUtils,
-  CnIni, CnWizNotifier;
+  CnIni, CnWizNotifier, CnEventBus;
 
 type
 
@@ -187,6 +187,7 @@ type
     FCompEditorList: TObjectList;
     FGroup: Integer;
     FActive: Boolean;
+    FReceiver: ICnEventBusReceiver;
 
     function GetPropEditorCount: Integer;
     function GetPropEditor(Index: Integer): TCnPropEditorInfo;
@@ -200,7 +201,7 @@ type
 
     procedure SetActive(const Value: Boolean);
   public
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     procedure RegisterPropEditor(AEditor: TPropertyEditorClass;
@@ -269,6 +270,17 @@ var
 {$IFDEF BDS}
   FNeedUnRegister: Boolean = True;
 {$ENDIF}
+
+type
+  TCnWizardActiveChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
+  private
+    FMgr: TCnDesignEditorMgr;
+  public
+    constructor Create(AMgr: TCnDesignEditorMgr);
+    destructor Destroy; override;
+
+    procedure OnEvent(Event: TCnEvent);
+  end;
 
 function CnDesignEditorMgr: TCnDesignEditorMgr;
 begin
@@ -529,10 +541,14 @@ begin
   FGroup := -1;
   FPropEditorList := TObjectList.Create(True);
   FCompEditorList := TObjectList.Create(True);
+
+  FReceiver := TCnWizardActiveChangedReceiver.Create(Self);
 end;
 
 destructor TCnDesignEditorMgr.Destroy;
 begin
+  FReceiver := nil;
+
   UnRegister;
   FPropEditorList.Free;
   FCompEditorList.Free;
@@ -833,6 +849,28 @@ begin
       Exit;
     end;
   Result := -1;
+end;
+
+{ TCnWizardActiveChangedReceiver }
+
+constructor TCnWizardActiveChangedReceiver.Create(
+  AMgr: TCnDesignEditorMgr);
+begin
+  inherited Create;
+  FMgr := AMgr;
+end;
+
+destructor TCnWizardActiveChangedReceiver.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnWizardActiveChangedReceiver.OnEvent(Event: TCnEvent);
+begin
+  FMgr.UnRegister;
+  if FMgr.Active then
+    FMgr.Register;
 end;
 
 initialization
