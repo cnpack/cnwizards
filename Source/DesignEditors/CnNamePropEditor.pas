@@ -74,19 +74,12 @@ uses
 procedure TCnNamePropEditor.Edit;
 var
   Wizard: TCnPrefixWizard;
-
-//  function IsRootControl(Comp: TPersistent): Boolean;
-//  begin
-//    Result := (Comp is TDataModule) or (Comp is TCustomFrame) or
-//      (Comp is TCustomForm);
-//  end;
 begin
   Wizard := TCnPrefixWizard(CnWizardMgr.WizardByClass(TCnPrefixWizard));
-  if Assigned(Wizard) then
+  if Assigned(Wizard) and Wizard.Active then
   begin
     if (GetComponent(0) is TComponent) and
       (Trim(TComponent(GetComponent(0)).Name) <> '') then
-      // not IsRootControl(GetComponent(0)) then
     begin
       Wizard.ExecuteRename(TComponent(GetComponent(0)), True);
     end;
