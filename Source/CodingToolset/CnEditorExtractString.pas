@@ -66,6 +66,8 @@ type
     FPasParser: TCnGeneralPasStructParser;
     FTokenListRef: TCnIdeStringList;
     FBeforeImpl: Boolean;
+    FToArea: Integer;
+    FMakeType: Integer;
     function CanExtract(const S: PCnIdeTokenChar): Boolean;
   protected
     function GetPasTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
@@ -117,9 +119,12 @@ type
     {* 最多的拼音分词个数}
     property MaxWords: Integer read FMaxWords write FMaxWords;
     {* 最多的普通英文分词个数}
-
     property ShowPreview: Boolean read FShowPreview write FShowPreview;
     {* 是否显示预览窗口}
+    property MakeType: Integer read FMakeType write FMakeType;
+    {* 生成的字符串类型是 var 还是 const 还是 resourcestring}
+    property ToArea: Integer read FToArea write FToArea;
+    {* 生成的字符串放置区域是 interface 还是 implementation}
   end;
 
   TCnExtractStringForm = class(TCnTranslateForm)
@@ -257,6 +262,8 @@ begin
   chkIgnoreSingleChar.Checked := FTool.IgnoreSingleChar;
   chkIgnoreSimpleFormat.Checked := FTool.IgnoreSimpleFormat;
   chkShowPreview.Checked := FTool.ShowPreview;
+  cbbMakeType.ItemIndex := FTool.MakeType;
+  cbbToArea.ItemIndex := FTool.ToArea;
 end;
 
 procedure TCnExtractStringForm.SaveSettings;
@@ -274,6 +281,8 @@ begin
   FTool.IgnoreSingleChar := chkIgnoreSingleChar.Checked;
   FTool.IgnoreSimpleFormat := chkIgnoreSimpleFormat.Checked;
   FTool.ShowPreview := chkShowPreview.Checked;
+  FTool.MakeType := cbbMakeType.ItemIndex;
+  FTool.ToArea := cbbToArea.ItemIndex;
 end;
 
 procedure TCnExtractStringForm.FormCreate(Sender: TObject);
@@ -295,6 +304,9 @@ begin
   EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
   if EditorCanvas <> nil then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Get EditConrol Canvas Font ' + EditorCanvas.Font.Name);
+{$ENDIF}
     if EditorCanvas.Font.Name <> mmoPreview.Font.Name then
       mmoPreview.Font.Name := EditorCanvas.Font.Name;
     mmoPreview.Font.Size := EditorCanvas.Font.Size;
@@ -952,7 +964,7 @@ begin
 end;
 
 initialization
-  // RegisterCnCodingToolset(TCnEditorExtractString); // 注册工具
+  RegisterCnCodingToolset(TCnEditorExtractString); // 注册工具
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

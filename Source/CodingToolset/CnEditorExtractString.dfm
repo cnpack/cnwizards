@@ -105,6 +105,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
       FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB58C8CEFB56BC68C7BFF00FFFF00FFFF00
       FFFF00FFFF00FFFF00FFFF00FFB58C8CB58C8CB58C8CB58C8CB58C8CB58C8CB5
       8C8CBD8484FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    ParentShowHint = False
+    ShowHint = True
   end
   object grpScanOption: TGroupBox
     Left = 480
@@ -299,7 +301,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
           Width = 30
         end
         item
-          Caption = 'Name'
+          Caption = 'Name (Double Click to Edit)'
           Width = 340
         end
         item
@@ -324,6 +326,12 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Width = 815
       Height = 123
       Align = alBottom
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 1
     end
   end
@@ -387,6 +395,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     end
     object actCopy: TAction
       Caption = '&Copy'
+      Hint = 'Copy Declarations to Clipboard'
       OnExecute = actCopyExecute
     end
     object actReplace: TAction
