@@ -1,6 +1,6 @@
 inherited CnExtractStringForm: TCnExtractStringForm
   Left = 274
-  Top = 124
+  Top = 125
   Width = 836
   Height = 580
   ActiveControl = btnReScan
@@ -365,6 +365,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 8
+    OnClick = btnHelpClick
   end
   object btnReplace: TButton
     Left = 585

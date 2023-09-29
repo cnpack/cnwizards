@@ -181,11 +181,14 @@ type
     procedure actlstExtractUpdate(Action: TBasicAction;
       var Handled: Boolean);
     procedure actDeleteExecute(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     FTool: TCnEditorExtractString;
     procedure UpdateTokenToListView;
     procedure LoadSettings;
     procedure SaveSettings;
+  protected
+    function GetHelpTopic: string; override;
   public
     property Tool: TCnEditorExtractString read FTool write FTool;
   end;
@@ -328,6 +331,180 @@ begin
   Token := TCnGeneralPasToken(Item.Data);
   mmoPreview.Lines.Text := CnOtaGetLineText(Token.EditLine - CnBeforeLine,
     nil, CnBeforeLine + CnAfterLine);
+end;
+
+function TCnExtractStringForm.GetHelpTopic: string;
+begin
+  Result := 'CnEditorExtractString';
+end;
+
+procedure TCnExtractStringForm.lvStringsDblClick(Sender: TObject);
+begin
+  actEdit.Execute;
+end;
+
+procedure TCnExtractStringForm.actCopyExecute(Sender: TObject);
+var
+  L: TCnIdeStringList;
+  HT: TCnStringHeadType;
+begin
+  if (FTool.TokenListRef = nil) or (FTool.TokenListRef.Count <= 0) then
+    Exit;
+
+  L := TCnIdeStringList.Create;
+  try
+    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
+    if FTool.GenerateDecl(L, HT) then
+    begin
+      Clipboard.AsText := L.Text;
+      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
+    end;
+  finally
+    L.Free;
+  end;
+end;
+
+procedure TCnExtractStringForm.actRescanExecute(Sender: TObject);
+begin
+  if FTool = nil then
+    Exit;
+
+  SaveSettings;
+  if FTool.Scan then
+  begin
+    if FTool.TokenListRef.Count <= 0 then
+    begin
+      ErrorDlg(SCnEditorExtractStringNotFound);
+      Exit;
+    end;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Rescan OK. To Make Unique.');
+{$ENDIF}
+
+    FTool.MakeUnique;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Make Unique OK. Update To ListView.');
+{$ENDIF}
+
+    if FTool.BeforeImpl then
+      cbbToArea.ItemIndex := Ord(atInterface)
+    else
+      cbbToArea.ItemIndex := Ord(atImplementation);
+
+    UpdateTokenToListView;
+  end;
+end;
+
+procedure TCnExtractStringForm.actEditExecute(Sender: TObject);
+var
+  Idx, K: Integer;
+  S, OldName, OldValue: string;
+  Token: TCnGeneralPasToken;
+begin
+  if lvStrings.Selected = nil then
+    Exit;
+
+  Idx := lvStrings.Selected.Index;
+  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
+    Exit;
+
+  S := FTool.TokenListRef[Idx];
+  OldName := S;
+  Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[Idx]);
+  if Token <> nil then
+    OldValue := Token.Token
+  else
+    OldValue := '';
+
+  if CnWizInputQuery(SCnEditorExtractStringChangeName, SCnEditorExtractStringEnterNewName, S) then
+  begin
+    if (S <> OldName) and (S <> '') then
+    begin
+      // 拿到旧名字和旧值，挨个搜索，如果有新名字和不同于旧值的，出错退出。
+      // 如果有多个旧名字旧值，则都更改成新名字
+      for K := 0 to FTool.TokenListRef.Count - 1 do
+      begin
+        if (FTool.TokenListRef[K] = S) then // 如果有项等于新名字
+        begin
+          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
+          if Token.Token <> OldValue then   // 且其值不等于旧值
+          begin
+            ErrorDlg(SCnEditorExtractStringDuplicatedName);
+            Exit;
+          end;
+        end;
+      end;
+
+      for K := 0 to FTool.TokenListRef.Count - 1 do
+      begin
+        if (FTool.TokenListRef[K] = OldName) then // 如果有项等于旧名字
+        begin
+          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
+          if Token.Token = OldValue then          // 且其值等于旧值
+          begin
+            FTool.TokenListRef[K] := S;           // 则都改成新名字
+          end;
+        end;
+      end;
+
+      lvStrings.Invalidate;
+    end;
+  end;
+end;
+
+procedure TCnExtractStringForm.actReplaceExecute(Sender: TObject);
+var
+  N, S: Integer;
+begin
+  if not QueryDlg(SCnEditorExtractStringAskReplace) then
+    Exit;
+
+  N := FTool.Replace;
+  if N > 0 then
+  begin
+    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex),
+      TCnStringHeadType(cbbMakeType.ItemIndex));
+    if S > 0 then
+    begin
+      InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [N, S]));
+      Close;
+    end;
+  end;
+end;
+
+procedure TCnExtractStringForm.actlstExtractUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  if (Action = actEdit) or (Action = actDelete) then
+    (Action as TCustomAction).Enabled := lvStrings.Selected <> nil
+  else if {(Action = actCopy) or } (Action = actReplace) then
+    (Action as TCustomAction).Enabled := lvStrings.Items.Count > 0
+  else if Action = actRescan then
+    (Action as TCustomAction).Enabled := CurrentIsDelphiSource;
+end;
+
+procedure TCnExtractStringForm.actDeleteExecute(Sender: TObject);
+var
+  Idx: Integer;
+begin
+  if lvStrings.Selected = nil then
+    Exit;
+
+  Idx := lvStrings.Selected.Index;
+  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
+    Exit;
+
+  FTool.TokenListRef.Delete(Idx);
+  UpdateTokenToListView;
+
+  if FTool.TokenListRef.Count = 0 then
+    mmoPreview.Lines.Clear;
+end;
+
+procedure TCnExtractStringForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 { TCnEditorExtractString }
@@ -797,170 +974,6 @@ begin
   finally
     Lex.Free;
   end;
-end;
-
-procedure TCnExtractStringForm.lvStringsDblClick(Sender: TObject);
-begin
-  actEdit.Execute;
-end;
-
-procedure TCnExtractStringForm.actCopyExecute(Sender: TObject);
-var
-  L: TCnIdeStringList;
-  HT: TCnStringHeadType;
-begin
-  if (FTool.TokenListRef = nil) or (FTool.TokenListRef.Count <= 0) then
-    Exit;
-
-  L := TCnIdeStringList.Create;
-  try
-    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
-    if FTool.GenerateDecl(L, HT) then
-    begin
-      Clipboard.AsText := L.Text;
-      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
-    end;
-  finally
-    L.Free;
-  end;
-end;
-
-procedure TCnExtractStringForm.actRescanExecute(Sender: TObject);
-begin
-  if FTool = nil then
-    Exit;
-
-  SaveSettings;
-  if FTool.Scan then
-  begin
-    if FTool.TokenListRef.Count <= 0 then
-    begin
-      ErrorDlg(SCnEditorExtractStringNotFound);
-      Exit;
-    end;
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('Rescan OK. To Make Unique.');
-{$ENDIF}
-
-    FTool.MakeUnique;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('Make Unique OK. Update To ListView.');
-{$ENDIF}
-
-    if FTool.BeforeImpl then
-      cbbToArea.ItemIndex := Ord(atInterface)
-    else
-      cbbToArea.ItemIndex := Ord(atImplementation);
-
-    UpdateTokenToListView;
-  end;
-end;
-
-procedure TCnExtractStringForm.actEditExecute(Sender: TObject);
-var
-  Idx, K: Integer;
-  S, OldName, OldValue: string;
-  Token: TCnGeneralPasToken;
-begin
-  if lvStrings.Selected = nil then
-    Exit;
-
-  Idx := lvStrings.Selected.Index;
-  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
-    Exit;
-
-  S := FTool.TokenListRef[Idx];
-  OldName := S;
-  Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[Idx]);
-  if Token <> nil then
-    OldValue := Token.Token
-  else
-    OldValue := '';
-
-  if CnWizInputQuery(SCnEditorExtractStringChangeName, SCnEditorExtractStringEnterNewName, S) then
-  begin
-    if (S <> OldName) and (S <> '') then
-    begin
-      // 拿到旧名字和旧值，挨个搜索，如果有新名字和不同于旧值的，出错退出。
-      // 如果有多个旧名字旧值，则都更改成新名字
-      for K := 0 to FTool.TokenListRef.Count - 1 do
-      begin
-        if (FTool.TokenListRef[K] = S) then // 如果有项等于新名字
-        begin
-          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
-          if Token.Token <> OldValue then   // 且其值不等于旧值
-          begin
-            ErrorDlg(SCnEditorExtractStringDuplicatedName);
-            Exit;
-          end;
-        end;
-      end;
-
-      for K := 0 to FTool.TokenListRef.Count - 1 do
-      begin
-        if (FTool.TokenListRef[K] = OldName) then // 如果有项等于旧名字
-        begin
-          Token := TCnGeneralPasToken(FTool.TokenListRef.Objects[K]);
-          if Token.Token = OldValue then          // 且其值等于旧值
-          begin
-            FTool.TokenListRef[K] := S;           // 则都改成新名字
-          end;
-        end;
-      end;
-
-      lvStrings.Invalidate;
-    end;
-  end;
-end;
-
-procedure TCnExtractStringForm.actReplaceExecute(Sender: TObject);
-var
-  N, S: Integer;
-begin
-  if not QueryDlg(SCnEditorExtractStringAskReplace) then
-    Exit;
-
-  N := FTool.Replace;
-  if N > 0 then
-  begin
-    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex),
-      TCnStringHeadType(cbbMakeType.ItemIndex));
-    if S > 0 then
-    begin
-      InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [N, S]));
-      Close;
-    end;
-  end;
-end;
-
-procedure TCnExtractStringForm.actlstExtractUpdate(Action: TBasicAction;
-  var Handled: Boolean);
-begin
-  if (Action = actEdit) or (Action = actDelete) then
-    (Action as TCustomAction).Enabled := lvStrings.Selected <> nil
-  else if {(Action = actCopy) or } (Action = actReplace) then
-    (Action as TCustomAction).Enabled := lvStrings.Items.Count > 0
-  else if Action = actRescan then
-    (Action as TCustomAction).Enabled := CurrentIsDelphiSource;
-end;
-
-procedure TCnExtractStringForm.actDeleteExecute(Sender: TObject);
-var
-  Idx: Integer;
-begin
-  if lvStrings.Selected = nil then
-    Exit;
-
-  Idx := lvStrings.Selected.Index;
-  if (Idx < 0) or (Idx >= FTool.TokenListRef.Count) then
-    Exit;
-
-  FTool.TokenListRef.Delete(Idx);
-  UpdateTokenToListView;
-
-  if FTool.TokenListRef.Count = 0 then
-    mmoPreview.Lines.Clear;
 end;
 
 initialization
