@@ -165,6 +165,10 @@
 		<param name="Local" value="wizards\explorer.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Extract String Tool">
+		<param name="Local" value="wizards\toolset\extractstring.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Form Design Wizard">
 		<param name="Local" value="wizards\alignsizewizards.htm">
 		</OBJECT>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>抽取字符串工具</title>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<link rel="stylesheet" href="../../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">抽取字符串工具</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">抽取字符串工具</p>
+<p class="text" align="left">
+該工具用於將當前源代碼中的字符串抽取出來，按特定掃瞄規則與變量命名規則，轉換成字符串常量或變量聲明並替換源文件中的原有內容。目前只支持 Delphi 下的 Pascal 代碼。</p>
+<p class="text" align="left">其界面如下：</p>
+<p class="text" align="center">
+<img src="extractstring.png"></p>
+<ul>
+  <li>
+<p class="text" align="left">
+<b>前綴</b>：設置字符串變量的命名前綴。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>大小寫</b>：設置字符串變量命名時使用的大小寫規則。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>拼音規則</b>：如果字符串中有常用漢字，本工具可查找其拼音作為字符串變量的命名。此處可指定使用漢字的完整拼音還只是漢字拼音首字母。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>單詞最多</b>：如果字符串中有英文單詞，本工具可抽取單詞作為字符串變量的命名。此處設定本工具最多將多少個單詞放入字符串變量名中。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>拼音最多</b>：如果字符串中有常用漢字。此處設定本工具最多將多少個漢字的拼音放入字符串變量名中。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>變量名內用下劃線分詞</b>：如果勾選，變量名中不同的單詞或拼音將以下劃線分隔，否則無分隔符。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>忽略單字符的字符串</b>：如果勾選，掃瞄源碼時會忽略只包含單個字符的字符串。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>忽略簡單格式字符串</b>：如果勾選，掃瞄源碼時會忽略只包含簡單的格式化字符串，如「%d」等。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>顯示預覽</b>：如果勾選，字符串列表下部將顯示選中的條目的代碼預覽內容。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>掃瞄</b>：點擊此按鈕，本工具將按設置的命名選項與掃瞄選項掃瞄當前源文件，並將字符串抽取出來，自動命名後列在字符串列表區域供核對與重命名。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>生成類型</b>：可選擇抽取出來的字符串類型，有 var、const 與 resourcestring 三種。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>放置區域</b>：可選擇將抽取出來的字符串插入至 interface 部分還是 implementation 部分。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>複製</b>：可將抽取出的字符串聲明複製到剪貼板，不影響源文件。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>替換</b>：對當前源文件進行更改，將生成的字符串聲明插入源文件，並替換源文件中的字符串內容為對應的聲明。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>關閉</b>：關閉當前窗口。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>幫助</b>：顯示此幫助內容。</p>
+  </li>
+</ul>
+<p class="text" align="left">
+　</p>
+<p class="title" align="left">相關主題<p class="text" align="left">
+<a href="../../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
+<a href="wizeditors.htm">編碼工具集設置</a><p class="text" align="left">
+<a href="../../cnpack/index.htm">關於 IDE 專家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版權所有 2001-2023 CnPack 開發組</a></p>
+</body>
+</html>

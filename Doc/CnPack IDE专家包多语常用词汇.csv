@@ -27,3 +27,12 @@
 26,全选(&A),全選(&A),Select &All,Все,Tout sélect.,wähle alle,Selecionar &Todos
 27,全部不选中(&U),全部不選中(&U),&Unselect All,Снять выделение,&Unselect All,&Unselect alle,&Desmarcar tudo
 28,反向选择(&V),反向選擇(&V),Re&verse Select,Инвертировать,Re&verse Select,Re&verse Selektion,Re&rever seleção
+29,提示,提示,Hint,Информация,Indication,Hint,Dica
+30,警告,警告,Warning,Предупр.,Avertissement,Warning,Aviso
+31,错误,錯誤,Error,Ошибка,Erreur,Error,Erro
+32,启用,啟用,Enabled,Включен,Activée,aktiviert,Ativado
+33,禁用,禁用,Disabled,Выключено,désactivé,deaktiviert,Desativado
+34,是(&Y),是(&Y),&Yes,Да,&Oui,&Ja,&Sim
+35,否(&N),否(&N),&No,Нет,&Non,&Nein,&Não
+36,全部选是(&A),全部選是(&A),Yes to &All,Да для всех,Oui pour &tous,Ja zu &allen,Sim para &Todos
+37,全部选否(&F),全部選否(&F),No to A&ll,Нет для всех,&Non pour t&ous,nein zu a&llen,Não para A&ll

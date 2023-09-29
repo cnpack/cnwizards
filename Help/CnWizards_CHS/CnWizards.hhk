@@ -129,6 +129,10 @@
 		<param name="Local" value="wizards\projext\projectexwizard.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="抽取字符串工具">
+		<param name="Local" value="wizards\toolset\extractstring.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="窗口置顶与折叠扩展专家">
 		<param name="Local" value="ideenhance\wintoproller.htm">
 		</OBJECT>
