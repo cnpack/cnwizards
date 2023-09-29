@@ -661,7 +661,7 @@ var
   SCnEditorExtractStringAskReplace: string = 'Sure to Replace Strings with New Names?';
   SCnEditorExtractStringChangeName: string = 'Change Name';
   SCnEditorExtractStringEnterNewName: string = 'Enter New Name:';
-  SCnEditorExtractStringDuplicatedName: string = 'Same Name Found, Please Retry.';
+  SCnEditorExtractStringDuplicatedName: string = 'Duplicated Name Found, Please Retry.';
   SCnEditorExtractStringReplacedFmt: string = 'Replace %d String(s) with %d Name(s).';
 
   // CnEditorCodeDelBlank

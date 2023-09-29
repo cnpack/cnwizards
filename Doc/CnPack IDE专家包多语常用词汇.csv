@@ -5,7 +5,7 @@
 4,关闭(&C),關閉(&C),&Close,Закрыть,&Fermer,&schließen,&Fechar
 5,设置(&S),設置(&S),&Settings,Настройки,&Réglages,&Einstellungen,&Configurações
 6,查找(&F),查找(&F),&Find,Найти,&Trouver,&suchen,&Localizar
-7,查找修正(&F),查找修正(&F),&Search,Поиск,&Chercher,&suchen,&Pesquisar
+7,查找(&F),查找(&F),&Search,Поиск,&Chercher,&suchen,&Pesquisar
 8,高级(&A),高級(&A),&Advanced,Еще...,&Avance,&weitere,&Avançado
 9,重置(&R),重置(&R),&Reset,Сбросить,&Réinitialiser,zurück setzen,&Redefinir
 10,文件(&F),文件(&F),&File,Файл,&Fichier,&Datei,&Arquivo

@@ -1,7 +1,7 @@
 inherited CnExtractStringForm: TCnExtractStringForm
   Left = 274
   Top = 124
-  Width = 853
+  Width = 836
   Height = 580
   ActiveControl = btnReScan
   Caption = 'Extract Strings in Current Unit'
@@ -62,6 +62,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = '&Make: '
+    FocusControl = cbbMakeType
   end
   object lblToArea: TLabel
     Left = 200
@@ -70,6 +71,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = '&To: '
+    FocusControl = cbbToArea
   end
   object btnCopy: TSpeedButton
     Left = 164
@@ -265,7 +267,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     end
   end
   object btnReScan: TButton
-    Left = 714
+    Left = 710
     Top = 14
     Width = 108
     Height = 91
@@ -276,7 +278,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   object pnl1: TPanel
     Left = 8
     Top = 112
-    Width = 815
+    Width = 811
     Height = 403
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -284,7 +286,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object spl1: TSplitter
       Left = 0
       Top = 276
-      Width = 815
+      Width = 811
       Height = 4
       Cursor = crVSplit
       Align = alBottom
@@ -292,7 +294,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object lvStrings: TListView
       Left = 0
       Top = 0
-      Width = 815
+      Width = 811
       Height = 276
       Align = alClient
       Columns = <
@@ -323,7 +325,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object mmoPreview: TMemo
       Left = 0
       Top = 280
-      Width = 815
+      Width = 811
       Height = 123
       Align = alBottom
       Font.Charset = ANSI_CHARSET
@@ -356,7 +358,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     TabOrder = 5
   end
   object btnHelp: TButton
-    Left = 749
+    Left = 745
     Top = 525
     Width = 75
     Height = 21
@@ -365,7 +367,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     TabOrder = 8
   end
   object btnReplace: TButton
-    Left = 589
+    Left = 585
     Top = 525
     Width = 75
     Height = 21
@@ -375,7 +377,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     TabOrder = 6
   end
   object btnClose: TButton
-    Left = 669
+    Left = 665
     Top = 525
     Width = 75
     Height = 21
