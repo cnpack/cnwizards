@@ -1,8 +1,8 @@
 inherited CnExtractStringForm: TCnExtractStringForm
-  Left = 274
-  Top = 125
-  Width = 836
-  Height = 580
+  Left = 232
+  Top = 124
+  Width = 895
+  Height = 621
   ActiveControl = btnReScan
   Caption = 'Extract Strings in Current Unit'
   Font.Charset = ANSI_CHARSET
@@ -57,7 +57,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   TextHeight = 13
   object lblMake: TLabel
     Left = 8
-    Top = 529
+    Top = 570
     Width = 32
     Height = 13
     Anchors = [akLeft, akBottom]
@@ -66,7 +66,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   end
   object lblToArea: TLabel
     Left = 200
-    Top = 529
+    Top = 570
     Width = 19
     Height = 13
     Anchors = [akLeft, akBottom]
@@ -111,16 +111,16 @@ inherited CnExtractStringForm: TCnExtractStringForm
     ShowHint = True
   end
   object grpScanOption: TGroupBox
-    Left = 480
+    Left = 512
     Top = 8
-    Width = 225
+    Width = 249
     Height = 97
     Caption = 'Scan &Option'
     TabOrder = 1
     object chkIgnoreSingleChar: TCheckBox
       Left = 12
       Top = 20
-      Width = 204
+      Width = 228
       Height = 17
       Anchors = [akLeft, akTop, akRight]
       Caption = 'Ignore Single Char Strings'
@@ -129,7 +129,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object chkIgnoreSimpleFormat: TCheckBox
       Left = 12
       Top = 44
-      Width = 204
+      Width = 228
       Height = 17
       Anchors = [akLeft, akTop, akRight]
       Caption = 'Ignore Simple Format Strings'
@@ -148,7 +148,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   object grpPinYinOption: TGroupBox
     Left = 8
     Top = 8
-    Width = 463
+    Width = 497
     Height = 97
     Caption = '&Name Option'
     TabOrder = 0
@@ -174,21 +174,21 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Caption = 'Style:'
     end
     object lblMaxWords: TLabel
-      Left = 248
+      Left = 256
       Top = 20
       Width = 58
       Height = 13
       Caption = 'Max Words:'
     end
     object lblMaxPinYin: TLabel
-      Left = 248
+      Left = 256
       Top = 44
       Width = 55
       Height = 13
       Caption = 'Max PinYin:'
     end
     object cbbPinYinRule: TComboBox
-      Left = 80
+      Left = 88
       Top = 64
       Width = 145
       Height = 21
@@ -200,14 +200,14 @@ inherited CnExtractStringForm: TCnExtractStringForm
         'Full PinYin')
     end
     object edtPrefix: TEdit
-      Left = 80
+      Left = 88
       Top = 16
       Width = 145
       Height = 21
       TabOrder = 0
     end
     object cbbIdentWordStyle: TComboBox
-      Left = 80
+      Left = 88
       Top = 40
       Width = 145
       Height = 21
@@ -220,7 +220,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
         'Upper First Letter')
     end
     object edtMaxWords: TEdit
-      Left = 312
+      Left = 336
       Top = 16
       Width = 121
       Height = 21
@@ -228,7 +228,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Text = '0'
     end
     object udMaxWords: TUpDown
-      Left = 433
+      Left = 457
       Top = 16
       Width = 15
       Height = 21
@@ -239,7 +239,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Wrap = False
     end
     object edtMaxPinYin: TEdit
-      Left = 312
+      Left = 336
       Top = 40
       Width = 121
       Height = 21
@@ -247,7 +247,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Text = '0'
     end
     object udMaxPinYin: TUpDown
-      Left = 433
+      Left = 457
       Top = 40
       Width = 15
       Height = 21
@@ -258,16 +258,16 @@ inherited CnExtractStringForm: TCnExtractStringForm
       Wrap = False
     end
     object chkUseUnderLine: TCheckBox
-      Left = 248
+      Left = 256
       Top = 68
-      Width = 201
+      Width = 233
       Height = 17
       Caption = 'Use UnderLine as Word Separator'
       TabOrder = 7
     end
   end
   object btnReScan: TButton
-    Left = 710
+    Left = 769
     Top = 14
     Width = 108
     Height = 91
@@ -278,15 +278,15 @@ inherited CnExtractStringForm: TCnExtractStringForm
   object pnl1: TPanel
     Left = 8
     Top = 112
-    Width = 811
-    Height = 403
+    Width = 870
+    Height = 444
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 3
     object spl1: TSplitter
       Left = 0
-      Top = 276
-      Width = 811
+      Top = 317
+      Width = 870
       Height = 4
       Cursor = crVSplit
       Align = alBottom
@@ -294,8 +294,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
     object lvStrings: TListView
       Left = 0
       Top = 0
-      Width = 811
-      Height = 276
+      Width = 870
+      Height = 317
       Align = alClient
       Columns = <
         item
@@ -324,8 +324,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
     end
     object mmoPreview: TMemo
       Left = 0
-      Top = 280
-      Width = 811
+      Top = 321
+      Width = 870
       Height = 123
       Align = alBottom
       Font.Charset = ANSI_CHARSET
@@ -339,7 +339,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   end
   object cbbMakeType: TComboBox
     Left = 64
-    Top = 525
+    Top = 566
     Width = 97
     Height = 21
     Style = csDropDownList
@@ -349,7 +349,7 @@ inherited CnExtractStringForm: TCnExtractStringForm
   end
   object cbbToArea: TComboBox
     Left = 232
-    Top = 525
+    Top = 566
     Width = 137
     Height = 21
     Style = csDropDownList
@@ -358,8 +358,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
     TabOrder = 5
   end
   object btnHelp: TButton
-    Left = 745
-    Top = 525
+    Left = 804
+    Top = 566
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -368,8 +368,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
     OnClick = btnHelpClick
   end
   object btnReplace: TButton
-    Left = 585
-    Top = 525
+    Left = 644
+    Top = 566
     Width = 75
     Height = 21
     Action = actReplace
@@ -378,8 +378,8 @@ inherited CnExtractStringForm: TCnExtractStringForm
     TabOrder = 6
   end
   object btnClose: TButton
-    Left = 665
-    Top = 525
+    Left = 724
+    Top = 566
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
