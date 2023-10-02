@@ -75,7 +75,7 @@ type
 
   TCnBCBWideTokenList = class;
 
-  TCnSearcher = class(Tobject)
+  TCnSearcher = class(TObject)
   private
     FBCBTokenList: TCnBCBWideTokenList;
     FSearchOrigin: PWideChar;
