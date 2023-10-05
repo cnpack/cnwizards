@@ -452,12 +452,12 @@ begin
         ctkidentifier,        // Need these for flow control in source highlight
         ctkreturn, ctkgoto, ctkbreak, ctkcontinue:
           begin
-            Token := NewToken(CParser, Layer);
+            NewToken(CParser, Layer);
           end;
         ctkdirif, ctkdirifdef, // Need these for conditional compile directive
         ctkdirifndef, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirpragma:
           begin
-            Token := NewToken(CParser, Layer);
+            NewToken(CParser, Layer);
           end;
       end;
 

@@ -1192,7 +1192,7 @@ begin
 
         // 需要时，普通标识符加，& 后的标识符也加
         if not AKeyOnly and ((PrevTokenID <> tkAmpersand) or (Lex.TokenID = tkIdentifier)) then
-          Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
+          NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
       end;
 
       if Lex.TokenID = tkRoundOpen then
