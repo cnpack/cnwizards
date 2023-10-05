@@ -41,15 +41,17 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
-  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList,
+  TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList, Menus,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnWidePasParser,
-  Menus;
+  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnCppCodeParser
+  {$IFDEF UNICODE}, CnWidePasParser, CnWideCppParser {$ENDIF};
 
 type
-  TCnStringHeadType = (htVar, htConst, htResourcestring);
+  TCnPasStringHeadType = (htVar, htConst, htResourcestring);
 
-  TCnStringAreaType = (atInterface, atImplementation);
+  TCnPasStringAreaType = (atInterface, atImplementation);
+
+  TCnCppStringHeadType = (htAnsiString, htCharPoint);
 
   TCnEditorExtractString = class(TCnBaseCodingToolset)
   private
@@ -64,13 +66,18 @@ type
     FIgnoreSimpleFormat: Boolean;
     FEditStream: TMemoryStream;
     FPasParser: TCnGeneralPasStructParser;
+    FCppParser: TCnGeneralCppStructParser;
     FTokenListRef: TCnIdeStringList;
     FBeforeImpl: Boolean;
-    FToArea: Integer;
-    FMakeType: Integer;
+    FPasToArea: Integer;
+    FPasMakeType: Integer;
+    FCppMakeType: Integer;
     function CanExtract(const S: PCnIdeTokenChar): Boolean;
   protected
-    function GetPasTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
+    function GetSourceTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
+    // 对 Pas 和 C/C++ 都有效，Token 较短时从 Token 里拿，太长时从当前源文件的内存流里拿
+    function ScanPas: Boolean;
+    function ScanCpp: Boolean;
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     destructor Destroy; override;
@@ -87,12 +94,16 @@ type
     　内部创建 Stream/Parser，并产出在 TokenListRef 中，以及 FBeforeImpl}
     procedure MakeUnique;
     {* 将 TokenListRef 中的字符串判重并加上 1 等后缀}
-    function GenerateDecl(OutList: TCnIdeStringList; HeadType: TCnStringHeadType): Boolean;
+    function GeneratePasDecl(OutList: TCnIdeStringList; HeadType: TCnPasStringHeadType): Boolean;
     {* 从 FTokenListRef 中生成 var 或 const 的声明块，内部要使用 FEditStream，产出内容放 OutList 中}
+    function GenerateCppDecl(OutList: TCnIdeStringList; HeadType: TCnCppStringHeadType): Boolean;
+    {* 从 FTokenListRef 中生成 AnsiString 或 char * 的声明块，内部要使用 FEditStream，产出内容放 OutList 中}
     function Replace: Integer;
-    {* 将字符串替换为变量名，不插入声明，内部要使用 FEditStream。返回替换的个数}
-    function InsertDecl(Area: TCnStringAreaType; HeadType: TCnStringHeadType): Integer;
-    {* 将声明插入当前源码指定部分。返回插入的条数}
+    {* 将字符串替换为变量名，不插入声明，内部要使用 FEditStream。返回替换的个数，适用于 Pascal 与 C/C++}
+    function InsertPasDecl(Area: TCnPasStringAreaType; HeadType: TCnPasStringHeadType): Integer;
+    {* 将声明插入当前 Pascal 源码指定部分。返回插入的条数}
+    function InsertCppDecl(HeadType: TCnCppStringHeadType): Integer;
+    {* 将声明插入当前 C/C++ 源码指定部分。返回插入的条数}
 
     procedure FreeTokens;
     {* 处理完毕后外界须调用以释放内存}
@@ -121,10 +132,12 @@ type
     {* 最多的普通英文分词个数}
     property ShowPreview: Boolean read FShowPreview write FShowPreview;
     {* 是否显示预览窗口}
-    property MakeType: Integer read FMakeType write FMakeType;
-    {* 生成的字符串类型是 var 还是 const 还是 resourcestring}
-    property ToArea: Integer read FToArea write FToArea;
-    {* 生成的字符串放置区域是 interface 还是 implementation}
+    property PasMakeType: Integer read FPasMakeType write FPasMakeType;
+    {* 生成的 Pascal 字符串类型是 var 还是 const 还是 resourcestring}
+    property PasToArea: Integer read FPasToArea write FPasToArea;
+    {* 生成的 Pascal 字符串放置区域是 interface 还是 implementation}
+    property CppMakeType: Integer read FCppMakeType write FCppMakeType;
+    {* 生成的 C/C++ 字符串类型是 AnsiString 还是 char *}
   end;
 
   TCnExtractStringForm = class(TCnTranslateForm)
@@ -207,12 +220,18 @@ uses
 {$ENDIF}
 
 const
-  CnSourceStringPosKinds: TCodePosKinds = [pkField, pkProcedure, pkFunction,
+  CnPasSourceStringPosKinds: TCodePosKinds = [pkField, pkProcedure, pkFunction,
     pkConstructor, pkDestructor, pkFieldDot];
 
-  SCN_HEAD_STRS: array[TCnStringHeadType] of string = ('var', 'const', 'resourcestring');
+  CnCppSourceStringPosKinds: TCodePosKinds = [pkField, pkProcedure, pkFunction,
+    pkConstructor, pkDestructor, pkFieldDot];
 
-  SCN_AREA_STRS: array[TCnStringAreaType] of string = ('interface', 'implementation');
+  SCN_PAS_HEAD_STRS: array[TCnPasStringHeadType] of string = ('var', 'const', 'resourcestring');
+
+  SCN_PAS_AREA_STRS: array[TCnPasStringAreaType] of string = ('interface', 'implementation');
+
+  SCN_CPP_HEAD_STRS: array[TCnCppStringHeadType] of string = ('AnsiString', 'char *');
+
   CN_DEF_MAX_WORDS = 6;
 
 { TCnExtractStringForm }
@@ -243,7 +262,7 @@ begin
     with Item.SubItems do
     begin
       Add(FTool.TokenListRef[Item.Index]);
-      Add(FTool.GetPasTokenStr(Token));
+      Add(FTool.GetSourceTokenStr(Token));
     end;
   end;
 end;
@@ -265,8 +284,8 @@ begin
   chkIgnoreSingleChar.Checked := FTool.IgnoreSingleChar;
   chkIgnoreSimpleFormat.Checked := FTool.IgnoreSimpleFormat;
   chkShowPreview.Checked := FTool.ShowPreview;
-  cbbMakeType.ItemIndex := FTool.MakeType;
-  cbbToArea.ItemIndex := FTool.ToArea;
+  cbbMakeType.ItemIndex := FTool.PasMakeType;
+  cbbToArea.ItemIndex := FTool.PasToArea;
 end;
 
 procedure TCnExtractStringForm.SaveSettings;
@@ -284,22 +303,33 @@ begin
   FTool.IgnoreSingleChar := chkIgnoreSingleChar.Checked;
   FTool.IgnoreSimpleFormat := chkIgnoreSimpleFormat.Checked;
   FTool.ShowPreview := chkShowPreview.Checked;
-  FTool.MakeType := cbbMakeType.ItemIndex;
-  FTool.ToArea := cbbToArea.ItemIndex;
+  FTool.PasMakeType := cbbMakeType.ItemIndex;
+  FTool.PasToArea := cbbToArea.ItemIndex;
 end;
 
 procedure TCnExtractStringForm.FormCreate(Sender: TObject);
 var
   EditorCanvas: TCanvas;
-  I: TCnStringHeadType;
-  J: TCnStringAreaType;
+  I: TCnPasStringHeadType;
+  J: TCnPasStringAreaType;
+  K: TCnCppStringHeadType;
 begin
   btnCopy.Caption := '';
 
-  for I := Low(SCN_HEAD_STRS) to High(SCN_HEAD_STRS) do
-    cbbMakeType.Items.Add(SCN_HEAD_STRS[I]);
-  for J := Low(SCN_AREA_STRS) to High(SCN_AREA_STRS) do
-    cbbToArea.Items.Add(SCN_AREA_STRS[J]);
+  if CurrentIsDelphiSource then
+  begin
+    for I := Low(SCN_PAS_HEAD_STRS) to High(SCN_PAS_HEAD_STRS) do
+      cbbMakeType.Items.Add(SCN_PAS_HEAD_STRS[I]);
+    for J := Low(SCN_PAS_AREA_STRS) to High(SCN_PAS_AREA_STRS) do
+      cbbToArea.Items.Add(SCN_PAS_AREA_STRS[J]);
+  end
+  else if CurrentIsCSource then
+  begin
+    for K := Low(SCN_CPP_HEAD_STRS) to High(SCN_CPP_HEAD_STRS) do
+      cbbMakeType.Items.Add(SCN_CPP_HEAD_STRS[K]);
+    lblToArea.Enabled := False;
+    cbbToArea.Enabled := False;
+  end;
 
   cbbMakeType.ItemIndex := 0;
   cbbToArea.ItemIndex := 0;
@@ -346,18 +376,31 @@ end;
 procedure TCnExtractStringForm.actCopyExecute(Sender: TObject);
 var
   L: TCnIdeStringList;
-  HT: TCnStringHeadType;
+  PHT: TCnPasStringHeadType;
+  CHT: TCnCppStringHeadType;
 begin
   if (FTool.TokenListRef = nil) or (FTool.TokenListRef.Count <= 0) then
     Exit;
 
   L := TCnIdeStringList.Create;
   try
-    HT := TCnStringHeadType(cbbMakeType.ItemIndex);
-    if FTool.GenerateDecl(L, HT) then
+    if CurrentIsDelphiSource then
     begin
-      Clipboard.AsText := L.Text;
-      InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_HEAD_STRS[HT]]));
+      PHT := TCnPasStringHeadType(cbbMakeType.ItemIndex);
+      if FTool.GeneratePasDecl(L, PHT) then
+      begin
+        Clipboard.AsText := L.Text;
+        InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_PAS_HEAD_STRS[PHT]]));
+      end;
+    end
+    else if CurrentIsCSource then
+    begin
+      CHT := TCnCppStringHeadType(cbbMakeType.ItemIndex);
+      if FTool.GenerateCppDecl(L, CHT) then
+      begin
+        Clipboard.AsText := L.Text;
+        InfoDlg(Format(SCnEditorExtractStringCopiedFmt, [L.Count - 1, SCN_CPP_HEAD_STRS[CHT]]));
+      end;
     end;
   finally
     L.Free;
@@ -463,8 +506,13 @@ begin
   N := FTool.Replace;
   if N > 0 then
   begin
-    S := FTool.InsertDecl(TCnStringAreaType(cbbToArea.ItemIndex),
-      TCnStringHeadType(cbbMakeType.ItemIndex));
+    S := 0;
+    if CurrentIsDelphiSource then
+      S := FTool.InsertPasDecl(TCnPasStringAreaType(cbbToArea.ItemIndex),
+        TCnPasStringHeadType(cbbMakeType.ItemIndex))
+    else if CurrentIsCSource then
+      S := FTool.InsertCppDecl(TCnCppStringHeadType(cbbMakeType.ItemIndex));
+
     if S > 0 then
     begin
       InfoDlg(Format(SCnEditorExtractStringReplacedFmt, [N, S]));
@@ -525,6 +573,9 @@ begin
   if FIgnoreSingleChar and (L = 3) and (S[0] = '''') and (S[2] = '''') then // 单个字符也不算
     Exit;
 
+  if FIgnoreSingleChar and (L = 3) and (S[0] = '"') and (S[2] = '"') then // 单个字符也不算
+    Exit;
+
   if FIgnoreSingleChar and (L = 4) and (S[0] = '''') and (S[1] = '''')
     and (S[2] = '''') and (S[2] = '''') then // 单个单引号也不算
     Exit;
@@ -552,6 +603,7 @@ destructor TCnEditorExtractString.Destroy;
 begin
   FTokenListRef.Free;
   FPasParser.Free;
+  FCppParser.Free;
   FEditStream.Free;
   inherited;
 end;
@@ -583,11 +635,12 @@ procedure TCnEditorExtractString.FreeTokens;
 begin
   FreeAndNil(FTokenListRef);
   FreeAndNil(FPasParser);
+  FreeAndNil(FCppParser);
   FreeAndNil(FEditStream);
 end;
 
-function TCnEditorExtractString.GenerateDecl(OutList: TCnIdeStringList;
-  HeadType: TCnStringHeadType): Boolean;
+function TCnEditorExtractString.GeneratePasDecl(OutList: TCnIdeStringList;
+  HeadType: TCnPasStringHeadType): Boolean;
 var
   I, L: Integer;
   Token: TCnGeneralPasToken;
@@ -598,14 +651,14 @@ begin
 
   L := EditControlWrapper.GetBlockIndent;
   OutList.Clear;
-  OutList.Add(SCN_HEAD_STRS[HeadType]);
+  OutList.Add(SCN_PAS_HEAD_STRS[HeadType]);
 
   if HeadType in [htVar] then
   begin
     for I := 0 to FTokenListRef.Count - 1 do
     begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
-      OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + GetPasTokenStr(Token) + ';');
+      OutList.Add(Spc(L) + FTokenListRef[I] + ': string = ' + GetSourceTokenStr(Token) + ';');
     end;
     RemoveDuplicatedStrings(OutList);
     Result := True;
@@ -615,7 +668,40 @@ begin
     for I := 0 to FTokenListRef.Count - 1 do
     begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
-      OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + GetPasTokenStr(Token) + ';');
+      OutList.Add(Spc(L) + FTokenListRef[I] + ' = ' + GetSourceTokenStr(Token) + ';');
+    end;
+    RemoveDuplicatedStrings(OutList);
+    Result := True;
+  end;
+end;
+
+function TCnEditorExtractString.GenerateCppDecl(OutList: TCnIdeStringList;
+  HeadType: TCnCppStringHeadType): Boolean;
+var
+  I: Integer;
+  Token: TCnGeneralCppToken;
+begin
+  Result := False;
+  if (OutList = nil) or (FTokenListRef = nil) or (FTokenListRef.Count <= 0) then
+    Exit;
+
+  OutList.Clear;
+  if HeadType in [htAnsiString] then
+  begin
+    for I := 0 to FTokenListRef.Count - 1 do
+    begin
+      Token := TCnGeneralCppToken(FTokenListRef.Objects[I]);
+      OutList.Add('const AnsiString ' + FTokenListRef[I] + ' = ' + GetSourceTokenStr(Token) + ';');
+    end;
+    RemoveDuplicatedStrings(OutList);
+    Result := True;
+  end
+  else if HeadType in [htCharPoint] then
+  begin
+    for I := 0 to FTokenListRef.Count - 1 do
+    begin
+      Token := TCnGeneralCppToken(FTokenListRef.Objects[I]);
+      OutList.Add('const char * ' + FTokenListRef[I] + ' = ' + GetSourceTokenStr(Token) + ';');
     end;
     RemoveDuplicatedStrings(OutList);
     Result := True;
@@ -645,7 +731,7 @@ begin
   Result := SCnEditorExtractStringMenuHint;
 end;
 
-function TCnEditorExtractString.GetPasTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
+function TCnEditorExtractString.GetSourceTokenStr(Token: TCnGeneralPasToken): TCnIdeTokenString;
 var
   P: PByte;
 begin
@@ -670,15 +756,15 @@ begin
   Result := inherited GetState;
   if wsEnabled in Result then
   begin
-    if not CurrentIsDelphiSource then
+    if not CurrentIsSource then
       Result := [];
   end;
 end;
 
-function TCnEditorExtractString.InsertDecl(Area: TCnStringAreaType;
-  HeadType: TCnStringHeadType): Integer;
+function TCnEditorExtractString.InsertPasDecl(Area: TCnPasStringAreaType;
+  HeadType: TCnPasStringHeadType): Integer;
 const
-  KINDS: array[TCnStringAreaType] of TTokenKind = (tkInterface, tkImplementation);
+  KINDS: array[TCnPasStringAreaType] of TTokenKind = (tkInterface, tkImplementation);
 var
   Lex: TCnGeneralWidePasLex;
   Stream: TMemoryStream;
@@ -733,7 +819,7 @@ begin
 
     // 利用该位置，换算成编辑器里的线性位置，再插入换行加空行加内容
     Names := TCnIdeStringList.Create;
-    if not GenerateDecl(Names, HeadType) then
+    if not GeneratePasDecl(Names, HeadType) then
       Exit;
 
     if Names.Count <= 1 then
@@ -789,7 +875,7 @@ begin
       Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
       if Map.Find(string(FTokenListRef[I]), S) then
       begin
-        if S <> string(GetPasTokenStr(Token)) then
+        if S <> string(GetSourceTokenStr(Token)) then
         begin
           // 有同名的，但值不同，要换名
           J := 1;
@@ -800,12 +886,12 @@ begin
           until not Map.Find(string(FTokenListRef[I]), S);
 
           // 换名后要添加
-          Map.Add(string(FTokenListRef[I]), string(GetPasTokenStr(Token)));
+          Map.Add(string(FTokenListRef[I]), string(GetSourceTokenStr(Token)));
         end;
         // 同名同值忽略
       end
       else // 无同名的，直接添加
-        Map.Add(string(FTokenListRef[I]), string(GetPasTokenStr(Token)));
+        Map.Add(string(FTokenListRef[I]), string(GetSourceTokenStr(Token)));
     end;
   finally
     Map.Free;
@@ -865,7 +951,7 @@ begin
   EditWriter := nil;
 end;
 
-function TCnEditorExtractString.Scan: Boolean;
+function TCnEditorExtractString.ScanPas: Boolean;
 var
   I, CurrPos, LastTokenPos: Integer;
   EditView: IOTAEditView;
@@ -895,7 +981,7 @@ begin
     CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('CnEditorExtractString Scan to ParseString.');
+    CnDebugger.LogMsg('CnEditorExtractString Scan Pascal to ParseString.');
 {$ENDIF}
 
     // 解析当前显示的源文件中的字符串
@@ -934,7 +1020,7 @@ begin
     for I := 0 to FPasParser.Count - 1 do
     begin
       Token := FPasParser.Tokens[I];
-      if TCodePosKind(Token.Tag) in CnSourceStringPosKinds then
+      if TCodePosKind(Token.Tag) in CnPasSourceStringPosKinds then
       begin
         S := ConvertStringToIdent(string(Token.Token), FPrefix, FUseUnderLine,
           FIdentWordStyle, FUseFullPinYin, FMaxPinYinWords, FMaxWords);
@@ -945,7 +1031,7 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogInteger(FTokenListRef.Count, 'TokensRefList.Count');
+    CnDebugger.LogInteger(FTokenListRef.Count, 'Pascal TokensRefList.Count');
 {$ENDIF}
 
     FBeforeImpl := False;
@@ -974,6 +1060,108 @@ begin
   finally
     Lex.Free;
   end;
+end;
+
+function TCnEditorExtractString.ScanCpp: Boolean;
+var
+  I, CurrPos, LastTokenPos: Integer;
+  EditView: IOTAEditView;
+  Token: TCnGeneralPasToken;
+  EditPos: TOTAEditPos;
+  Info: TCodePosInfo;
+  S: TCnIdeTokenString;
+  List: TCnGeneralWidePasLex;
+begin
+  Result := False;
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  List := nil;
+
+  try
+    FreeTokens;
+
+    FCppParser := TCnGeneralCppStructParser.Create;
+{$IFDEF BDS}
+    FCppParser.UseTabKey := True;
+    FCppParser.TabWidth := EditControlWrapper.GetTabWidth;
+{$ENDIF}
+
+    FEditStream := TMemoryStream.Create;
+    CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnEditorExtractString Scan C/C++ to ParseString.');
+{$ENDIF}
+
+    // 解析当前显示的源文件中的字符串
+    CnCppParserParseString(FCppParser, FEditStream);
+    for I := 0 to FCppParser.Count - 1 do
+    begin
+      Token := FCppParser.Tokens[I];
+      if CanExtract(Token.Token) then
+      begin
+        ConvertGeneralTokenPos(Pointer(EditView), Token);
+
+{$IFDEF UNICODE}
+        ParseCppCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info);
+{$ELSE}
+        EditPos.Line := Token.EditLine;
+        EditPos.Col := Token.EditCol;
+        CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
+
+        Info := ParseCppCodePosInfo(PChar(FEditStream.Memory), CurrPos);
+{$ENDIF}
+        Token.Tag := Ord(Info.PosKind);
+      end
+      else
+        Token.Tag := Ord(pkUnknown);
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(FCppParser.Count, 'CppParser.Count');
+{$ENDIF}
+
+    if FTokenListRef = nil then
+      FTokenListRef := TCnIdeStringList.Create
+    else
+      FTokenListRef.Clear;
+
+    for I := 0 to FCppParser.Count - 1 do
+    begin
+      Token := FCppParser.Tokens[I];
+      if TCodePosKind(Token.Tag) in CnCppSourceStringPosKinds then
+      begin
+        S := ConvertStringToIdent(string(Token.Token), FPrefix, FUseUnderLine,
+          FIdentWordStyle, FUseFullPinYin, FMaxPinYinWords, FMaxWords);
+        // 在 D2005~2007 下有 AnsiString 到 WideString 的转换但也无影响
+
+        FTokenListRef.AddObject(S, Token);
+      end;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogInteger(FTokenListRef.Count, 'C/C++ TokensRefList.Count');
+{$ENDIF}
+    Result := True;
+  finally
+    List.Free;
+  end;
+end;
+
+function TCnEditorExtractString.Scan: Boolean;
+begin
+  Result := False;
+  if CurrentIsDelphiSource then
+    Result := ScanPas
+  else if CurrentIsCSource then
+    Result := ScanCpp;
+end;
+
+function TCnEditorExtractString.InsertCppDecl(HeadType: TCnCppStringHeadType): Integer;
+begin
+  // TODO: 插入当前源文件
 end;
 
 initialization
