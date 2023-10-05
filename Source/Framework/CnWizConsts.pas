@@ -653,7 +653,7 @@ var
   SCnEditorCodeToStringMenuHint: string = 'Convert Code Block Selected to String';
 
   // CnEditorExtractString
-  SCnEditorExtractStringMenuCaption: string = '&Extract Strings...';
+  SCnEditorExtractStringMenuCaption: string = 'E&xtract Strings...';
   SCnEditorExtractStringName: string = 'Extract String Tool';
   SCnEditorExtractStringMenuHint: string = 'Search and Extract Strings in Source.';
   SCnEditorExtractStringNotFound: string = 'NO String Found in Source!';
