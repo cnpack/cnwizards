@@ -464,8 +464,8 @@ begin
   Result := TCnWidePasToken(FList[Index]);
 end;
 
-procedure TCnWidePasStructParser.CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer;
-  Lex: TCnPasWideLex; Source: PWideChar);
+procedure TCnWidePasStructParser.CalcCharIndexes(out ACharIndex: Integer;
+  out AnAnsiIndex: Integer; Lex: TCnPasWideLex; Source: PWideChar);
 var
   I, AnsiLen, WideLen: Integer;
 begin
@@ -511,12 +511,12 @@ begin
   Result := CreatePasToken;
   Result.FTokenPos := Lex.TokenPos;
 
-  Len := Lex.TokenLength;
+  Len := Lex.TokenLength;        
   Result.FTokenLength := Len;
   if Len > CN_TOKEN_MAX_SIZE then
     Len := CN_TOKEN_MAX_SIZE;
-  // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-  CopyMemory(@Result.FToken[0], Lex.TokenAddr, Len * SizeOf(WideChar));
+
+  Move(Lex.TokenAddr^, Result.FToken[0], Len * SizeOf(WideChar));
   Result.FToken[Len] := #0;
 
   Result.FLineNumber := Lex.LineNumber - 1;              // 1 开始变成 0 开始

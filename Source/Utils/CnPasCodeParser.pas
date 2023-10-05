@@ -575,8 +575,8 @@ begin
   Result.FTokenLength := Len;
   if Len > CN_TOKEN_MAX_SIZE then
     Len := CN_TOKEN_MAX_SIZE;
-  // FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-  CopyMemory(@Result.FToken[0], Lex.TokenAddr, Len);
+
+  Move(Lex.TokenAddr^, Result.FToken[0], Len);
   Result.FToken[Len] := #0;
 
   Result.FLineNumber := Lex.LineNumber;

@@ -1098,6 +1098,10 @@ procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
 {* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理。
    Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
 
+procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream);
+{* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
+
 procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
 {* 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
@@ -7936,6 +7940,20 @@ begin
   Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
 {$ELSE}
   Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
+{$ENDIF}
+end;
+
+// 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理
+procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
+{$ELSE}
+  Parser.ParseString(PAnsiChar(Stream.Memory), Stream.Size);
 {$ENDIF}
 end;
 

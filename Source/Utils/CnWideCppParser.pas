@@ -83,12 +83,20 @@ type
     FTabWidth: Integer;
     function GetCount: Integer;
     function GetToken(Index: Integer): TCnWideCppToken;
+  protected
+    procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer;
+      CParser: TCnBCBWideTokenList; ASource: PWideChar);
+    function NewToken(CParser: TCnBCBWideTokenList; Source: PWideChar; Layer: Integer = 0): TCnWideCppToken;
   public
     constructor Create(SupportUnicodeIdent: Boolean = True);
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; Size: Integer; CurrLine: Integer = 0;
       CurCol: Integer = 0; ParseCurrent: Boolean = False);
+
+    procedure ParseString(ASource: PWideChar; Size: Integer);
+    {* 对代码进行针对字符串的解析，只生成字符串内容}
+
     function IndexOfToken(Token: TCnWideCppToken): Integer;
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnWideCppToken read GetToken;
@@ -214,6 +222,69 @@ begin
   Result := TCnWideCppToken(FList[Index]);
 end;
 
+procedure TCnWideCppStructParser.CalcCharIndexes(out ACharIndex: Integer;
+  out AnAnsiIndex: Integer; CParser: TCnBCBWideTokenList; ASource: PWideChar);
+var
+  I, AnsiLen, WideLen: Integer;
+begin
+  if FUseTabKey and (FTabWidth >= 2) then
+  begin
+    // 遍历当前行内容进行 Tab 键展开
+    I := CParser.LineStartOffset;
+    AnsiLen := 0;
+    WideLen := 0;
+    while (I < CParser.RunPosition) do
+    begin
+      if (ASource[I] = #09) then
+      begin
+        AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
+        WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
+        // TODO: Wide 字符串的 Tab 展开规则是否是这样？
+      end
+      else
+      begin
+        Inc(WideLen);
+        if Ord(ASource[I]) > $900 then
+          Inc(AnsiLen, SizeOf(WideChar))
+        else
+          Inc(AnsiLen, SizeOf(AnsiChar));
+      end;
+      Inc(I);
+    end;
+    ACharIndex := WideLen;
+    AnAnsiIndex := AnsiLen;
+  end
+  else
+  begin
+    ACharIndex := CParser.RawColNumber - 1;
+    AnAnsiIndex := CParser.ColumnNumber - 1;
+  end;
+end;
+
+function TCnWideCppStructParser.NewToken(CParser: TCnBCBWideTokenList;
+  Source: PWideChar; Layer: Integer): TCnWideCppToken;
+var
+  Len: Integer;
+begin
+  Result := CreateCppToken;
+  Result.FTokenPos := CParser.RunPosition;
+
+  Len := CParser.TokenLength;
+  Result.TokenLength := Len;
+  if Len > CN_TOKEN_MAX_SIZE then
+    Len := CN_TOKEN_MAX_SIZE;
+
+  Move(CParser.TokenAddr^, Result.FToken[0], Len * SizeOf(WideChar));
+  Result.FToken[Len] := #0;
+
+  Result.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
+  CalcCharIndexes(Result.FCharIndex, Result.FAnsiIndex, CParser, Source);
+  Result.FCppTokenKind := CParser.RunID;
+  Result.FItemLayer := Layer;
+  Result.FItemIndex := FList.Count;
+  FList.Add(Result);
+end;
+
 procedure TCnWideCppStructParser.ParseSource(ASource: PWideChar; Size: Integer;
   CurrLine: Integer; CurCol: Integer; ParseCurrent: Boolean);
 const
@@ -230,66 +301,6 @@ var
   BeginBracePosition: Integer;
   FunctionName, OwnerClass: string;
   PrevIsOperator, RunReachedZero: Boolean;
-
-  procedure CalcCharIndexes(out ACharIndex: Integer; out AnAnsiIndex: Integer);
-  var
-    I, AnsiLen, WideLen: Integer;
-  begin
-    if FUseTabKey and (FTabWidth >= 2) then
-    begin
-      // 遍历当前行内容进行 Tab 键展开
-      I := CParser.LineStartOffset;
-      AnsiLen := 0;
-      WideLen := 0;
-      while (I < CParser.RunPosition) do
-      begin
-        if (ASource[I] = #09) then
-        begin
-          AnsiLen := ((AnsiLen div FTabWidth) + 1) * FTabWidth;
-          WideLen := ((WideLen div FTabWidth) + 1) * FTabWidth;
-          // TODO: Wide 字符串的 Tab 展开规则是否是这样？
-        end
-        else
-        begin
-          Inc(WideLen);
-          if Ord(ASource[I]) > $900 then
-            Inc(AnsiLen, SizeOf(WideChar))
-          else
-            Inc(AnsiLen, SizeOf(AnsiChar));
-        end;
-        Inc(I);
-      end;
-      ACharIndex := WideLen;
-      AnAnsiIndex := AnsiLen;
-    end
-    else
-    begin
-      ACharIndex := CParser.RawColNumber - 1;
-      AnAnsiIndex := CParser.ColumnNumber - 1;
-    end;
-  end;
-
-  procedure NewToken;
-  var
-    Len: Integer;
-  begin
-    Token := CreateCppToken;
-    Token.FTokenPos := CParser.RunPosition;
-
-    Len := CParser.TokenLength;
-    Token.TokenLength := Len;
-    if Len > CN_TOKEN_MAX_SIZE then
-      Len := CN_TOKEN_MAX_SIZE;
-    FillChar(Token.FToken[0], SizeOf(Token.FToken), 0);
-    CopyMemory(@Token.FToken[0], CParser.TokenAddr, Len * SizeOf(WideChar));
-
-    Token.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
-    CalcCharIndexes(Token.FCharIndex, Token.FAnsiIndex);
-    Token.FCppTokenKind := CParser.RunID;
-    Token.FItemLayer := Layer;
-    Token.FItemIndex := FList.Count;
-    FList.Add(Token);
-  end;
 
   function CompareLineCol(Line1, Line2, Col1, Col2: Integer): Integer;
   begin
@@ -404,7 +415,7 @@ begin
         ctkbraceopen:
           begin
             Inc(Layer);
-            NewToken;
+            Token := NewToken(CParser, ASource, Layer);
             if HasNamespace then
             begin
               Token.Tag := 1; // 用 Tag 等于 1 来表示是 namespace
@@ -432,7 +443,7 @@ begin
           end;
         ctkbraceclose:
           begin
-            NewToken;
+            Token := NewToken(CParser, ASource, Layer);
             if CompareLineCol(CParser.LineNumber, CurrLine,
               CParser.ColumnNumber, CurCol) >= 0 then // 一旦在光标后了就可判断
             begin
@@ -474,12 +485,12 @@ begin
         ctkidentifier,        // Need these for flow control in source highlight
         ctkreturn, ctkgoto, ctkbreak, ctkcontinue:
           begin
-            NewToken;
+            Token := NewToken(CParser, ASource, Layer);
           end;
         ctkdirif, ctkdirifdef, // Need these for conditional compile directive
         ctkdirifndef, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirpragma:
           begin
-            NewToken;
+            Token := NewToken(CParser, ASource, Layer);
           end;
       end;
 
@@ -671,6 +682,31 @@ end;
 function TCnWideCppStructParser.IndexOfToken(Token: TCnWideCppToken): Integer;
 begin
   Result := FList.IndexOf(Token);
+end;
+
+procedure TCnWideCppStructParser.ParseString(ASource: PWideChar;
+  Size: Integer);
+var
+  TokenList: TCnBCBWideTokenList;
+begin
+  Clear;
+  TokenList := nil;
+
+  try
+    FSource := ASource;
+
+    TokenList := TCnBCBWideTokenList.Create(FSupportUnicodeIdent);
+    TokenList.SetOrigin(ASource, Size);
+
+    while TokenList.RunID <> ctknull do
+    begin
+      if TokenList.RunID in [ctkstring] then
+        NewToken(TokenList, ASource);
+      TokenList.NextNonJunk;
+    end;
+  finally
+    TokenList.Free;
+  end;
 end;
 
 {$IFDEF UNICODE}
