@@ -529,7 +529,7 @@ begin
   else if {(Action = actCopy) or } (Action = actReplace) then
     (Action as TCustomAction).Enabled := lvStrings.Items.Count > 0
   else if Action = actRescan then
-    (Action as TCustomAction).Enabled := CurrentIsDelphiSource;
+    (Action as TCustomAction).Enabled := CurrentIsSource;
 end;
 
 procedure TCnExtractStringForm.actDeleteExecute(Sender: TObject);
@@ -953,7 +953,7 @@ end;
 
 function TCnEditorExtractString.ScanPas: Boolean;
 var
-  I, CurrPos, LastTokenPos: Integer;
+  I, CurrPos: Integer;
   EditView: IOTAEditView;
   Token: TCnGeneralPasToken;
   EditPos: TOTAEditPos;
@@ -1064,7 +1064,7 @@ end;
 
 function TCnEditorExtractString.ScanCpp: Boolean;
 var
-  I, CurrPos, LastTokenPos: Integer;
+  I, CurrPos: Integer;
   EditView: IOTAEditView;
   Token: TCnGeneralPasToken;
   EditPos: TOTAEditPos;

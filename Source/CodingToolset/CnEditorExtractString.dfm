@@ -75,10 +75,11 @@ inherited CnExtractStringForm: TCnExtractStringForm
   end
   object btnCopy: TSpeedButton
     Left = 164
-    Top = 524
+    Top = 566
     Width = 23
     Height = 22
     Action = actCopy
+    Anchors = [akLeft, akBottom]
     Flat = True
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100

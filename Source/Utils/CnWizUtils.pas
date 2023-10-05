@@ -7937,7 +7937,7 @@ begin
     Exit;
 
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
+  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar), CurrLine, CurCol, ParseCurrent);
 {$ELSE}
   Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
 {$ENDIF}
@@ -7951,7 +7951,7 @@ begin
     Exit;
 
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(Char));
+  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar));
 {$ELSE}
   Parser.ParseString(PAnsiChar(Stream.Memory), Stream.Size);
 {$ENDIF}

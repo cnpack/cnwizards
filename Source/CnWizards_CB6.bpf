@@ -80,6 +80,7 @@ USEFORMNS("SrcEditorEnhance\CnSrcEditorGroupReplace.pas", Cnsrceditorgroupreplac
 USEFORMNS("SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas", Cnsrceditorreplaceinblock, CnSrcEditorReplaceInBlockForm);
 USEFORMNS("CodingToolset\CnEditorInsertTime.pas", Cneditorinserttime, CnEditorInsertTimeForm);
 USEFORMNS("CodingToolset\CnEditorCollector.pas", Cneditorcollector, CnEditorCollectorForm);
+USEFORMNS("CodingToolset\CnEditorExtractString.pas", Cnextractstringform, CnExtractStringForm);
 USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);
 USEFORMNS("IdeEnhancements\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
 USEFORMNS("IdeEnhancements\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);
