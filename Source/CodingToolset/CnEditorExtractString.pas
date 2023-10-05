@@ -43,15 +43,15 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
   TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList, Menus,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnWizMultiLang, CnEditControlWrapper, mPasLex, CnPasCodeParser, CnCppCodeParser
-  {$IFDEF UNICODE}, CnWidePasParser, CnWideCppParser {$ENDIF};
+  CnWizMultiLang, CnEditControlWrapper, mPasLex, mwBCBTokenList,
+  CnPasCodeParser, CnCppCodeParser {$IFDEF UNICODE}, CnWidePasParser, CnWideCppParser {$ENDIF};
 
 type
   TCnPasStringHeadType = (htVar, htConst, htResourcestring);
 
   TCnPasStringAreaType = (atInterface, atImplementation);
 
-  TCnCppStringHeadType = (htAnsiString, htCharPoint);
+  TCnCppStringHeadType = (htCharPoint, htAnsiString);
 
   TCnEditorExtractString = class(TCnBaseCodingToolset)
   private
@@ -98,7 +98,7 @@ type
     {* 从 FTokenListRef 中生成 var 或 const 的声明块，内部要使用 FEditStream，产出内容放 OutList 中}
     function GenerateCppDecl(OutList: TCnIdeStringList; HeadType: TCnCppStringHeadType): Boolean;
     {* 从 FTokenListRef 中生成 AnsiString 或 char * 的声明块，内部要使用 FEditStream，产出内容放 OutList 中}
-    function Replace: Integer;
+    function Replace(AddCStr: Boolean = False): Integer;
     {* 将字符串替换为变量名，不插入声明，内部要使用 FEditStream。返回替换的个数，适用于 Pascal 与 C/C++}
     function InsertPasDecl(Area: TCnPasStringAreaType; HeadType: TCnPasStringHeadType): Integer;
     {* 将声明插入当前 Pascal 源码指定部分。返回插入的条数}
@@ -230,7 +230,7 @@ const
 
   SCN_PAS_AREA_STRS: array[TCnPasStringAreaType] of string = ('interface', 'implementation');
 
-  SCN_CPP_HEAD_STRS: array[TCnCppStringHeadType] of string = ('AnsiString', 'char *');
+  SCN_CPP_HEAD_STRS: array[TCnCppStringHeadType] of string = ('char *', 'AnsiString');
 
   CN_DEF_MAX_WORDS = 6;
 
@@ -503,7 +503,11 @@ begin
   if not QueryDlg(SCnEditorExtractStringAskReplace) then
     Exit;
 
-  N := FTool.Replace;
+  if CurrentIsCSource and (TCnCppStringHeadType(cbbMakeType.ItemIndex) = htAnsiString) then
+    N := FTool.Replace(True)
+  else
+    N := FTool.Replace;
+
   if N > 0 then
   begin
     S := 0;
@@ -787,7 +791,7 @@ begin
 
   try
     Stream := TMemoryStream.Create;
-    CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream); // Ansi/Wide/Wide
 
     Lex := TCnGeneralWidePasLex.Create;
     Lex.Origin := Stream.Memory;
@@ -898,7 +902,7 @@ begin
   end;
 end;
 
-function TCnEditorExtractString.Replace: Integer;
+function TCnEditorExtractString.Replace(AddCStr: Boolean): Integer;
 var
   I, LastTokenPos: Integer;
   EditView: IOTAEditView;
@@ -915,29 +919,56 @@ begin
   EndToken := TCnGeneralPasToken(FTokenListRef.Objects[FTokenListRef.Count - 1]);
   PrevToken := nil;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FTokenListRef.Count, 'CnEditorExtractString To Replace Token Count.');
+{$ENDIF}
+
   // 拼接替换后的字符串
   for I := 0 to FTokenListRef.Count - 1 do
   begin
     Token := TCnGeneralPasToken(FTokenListRef.Objects[I]);
+
     if PrevToken = nil then
       NewCode := FTokenListRef[I]
     else
     begin
       // 从上一 Token 的尾巴，到现任 Token 的头，再加替换后的文字，用 Ansi/Wide/Wide String 来计算
       LastTokenPos := PrevToken.TokenPos + PrevToken.TokenLength;
-      NewCode := NewCode + Copy(FPasParser.Source, LastTokenPos + 1,
-        Token.TokenPos - LastTokenPos) + FTokenListRef[I];
+
+      if CurrentIsDelphiSource then
+        NewCode := NewCode + Copy(FPasParser.Source, LastTokenPos + 1,
+          Token.TokenPos - LastTokenPos) + FTokenListRef[I]
+      else if CurrentIsCSource then
+        NewCode := NewCode + Copy(FCppParser.Source, LastTokenPos + 1,
+          Token.TokenPos - LastTokenPos) + FTokenListRef[I];
     end;
+
+    if AddCStr then
+      NewCode := NewCode + '.c_str()';
+
     Inc(Result);
     PrevToken := TCnGeneralPasToken(FTokenListRef.Objects[I]);
   end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnEditorExtractString Replace New Code Generated. To Write to Editor.');
+{$ENDIF}
 
   EditWriter := CnOtaGetEditWriterForSourceEditor;
 
 {$IFDEF IDE_WIDECONTROL}
   // 插入时，Wide 要做 Utf8 转换
-  EditWriter.CopyTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, StartToken.TokenPos))));
-  EditWriter.DeleteTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, EndToken.TokenPos + EndToken.TokenLength))));
+  if CurrentIsDelphiSource then
+  begin
+    EditWriter.CopyTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, StartToken.TokenPos))));
+    EditWriter.DeleteTo(Length(UTF8Encode(Copy(FPasParser.Source, 1, EndToken.TokenPos + EndToken.TokenLength))));
+  end
+  else if CurrentIsCSource then
+  begin
+    EditWriter.CopyTo(Length(UTF8Encode(Copy(FCppParser.Source, 1, StartToken.TokenPos))));
+    EditWriter.DeleteTo(Length(UTF8Encode(Copy(FCppParser.Source, 1, EndToken.TokenPos + EndToken.TokenLength))));
+  end;
+
   {$IFDEF UNICODE}
   EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(NewCode)));
   {$ELSE}
@@ -1066,88 +1097,81 @@ function TCnEditorExtractString.ScanCpp: Boolean;
 var
   I, CurrPos: Integer;
   EditView: IOTAEditView;
-  Token: TCnGeneralPasToken;
+  Token: TCnGeneralCppToken;
   EditPos: TOTAEditPos;
   Info: TCodePosInfo;
   S: TCnIdeTokenString;
-  List: TCnGeneralWidePasLex;
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
     Exit;
 
-  List := nil;
+  FreeTokens;
 
-  try
-    FreeTokens;
-
-    FCppParser := TCnGeneralCppStructParser.Create;
+  FCppParser := TCnGeneralCppStructParser.Create;
 {$IFDEF BDS}
-    FCppParser.UseTabKey := True;
-    FCppParser.TabWidth := EditControlWrapper.GetTabWidth;
+  FCppParser.UseTabKey := True;
+  FCppParser.TabWidth := EditControlWrapper.GetTabWidth;
 {$ENDIF}
 
-    FEditStream := TMemoryStream.Create;
-    CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
+  FEditStream := TMemoryStream.Create;
+  CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('CnEditorExtractString Scan C/C++ to ParseString.');
+  CnDebugger.LogMsg('CnEditorExtractString Scan C/C++ to ParseString.');
 {$ENDIF}
 
-    // 解析当前显示的源文件中的字符串
-    CnCppParserParseString(FCppParser, FEditStream);
-    for I := 0 to FCppParser.Count - 1 do
+  // 解析当前显示的源文件中的字符串
+  CnCppParserParseString(FCppParser, FEditStream);
+  for I := 0 to FCppParser.Count - 1 do
+  begin
+    Token := FCppParser.Tokens[I];
+    if CanExtract(Token.Token) then
     begin
-      Token := FCppParser.Tokens[I];
-      if CanExtract(Token.Token) then
-      begin
-        ConvertGeneralTokenPos(Pointer(EditView), Token);
+      ConvertGeneralTokenPos(Pointer(EditView), Token);
 
 {$IFDEF UNICODE}
-        ParseCppCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info);
+      ParseCppCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info);
 {$ELSE}
-        EditPos.Line := Token.EditLine;
-        EditPos.Col := Token.EditCol;
-        CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
+      EditPos.Line := Token.EditLine;
+      EditPos.Col := Token.EditCol;
+      CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
 
-        Info := ParseCppCodePosInfo(PChar(FEditStream.Memory), CurrPos);
+      Info := ParseCppCodePosInfo(PChar(FEditStream.Memory), CurrPos);
 {$ENDIF}
-        Token.Tag := Ord(Info.PosKind);
-      end
-      else
-        Token.Tag := Ord(pkUnknown);
-    end;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogInteger(FCppParser.Count, 'CppParser.Count');
-{$ENDIF}
-
-    if FTokenListRef = nil then
-      FTokenListRef := TCnIdeStringList.Create
+      Token.Tag := Ord(Info.PosKind);
+    end
     else
-      FTokenListRef.Clear;
-
-    for I := 0 to FCppParser.Count - 1 do
-    begin
-      Token := FCppParser.Tokens[I];
-      if TCodePosKind(Token.Tag) in CnCppSourceStringPosKinds then
-      begin
-        S := ConvertStringToIdent(string(Token.Token), FPrefix, FUseUnderLine,
-          FIdentWordStyle, FUseFullPinYin, FMaxPinYinWords, FMaxWords);
-        // 在 D2005~2007 下有 AnsiString 到 WideString 的转换但也无影响
-
-        FTokenListRef.AddObject(S, Token);
-      end;
-    end;
+      Token.Tag := Ord(pkUnknown);
+  end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogInteger(FTokenListRef.Count, 'C/C++ TokensRefList.Count');
+  CnDebugger.LogInteger(FCppParser.Count, 'CppParser.Count');
 {$ENDIF}
-    Result := True;
-  finally
-    List.Free;
+
+  if FTokenListRef = nil then
+    FTokenListRef := TCnIdeStringList.Create
+  else
+    FTokenListRef.Clear;
+
+  for I := 0 to FCppParser.Count - 1 do
+  begin
+    Token := FCppParser.Tokens[I];
+    if TCodePosKind(Token.Tag) in CnCppSourceStringPosKinds then
+    begin
+      S := ConvertStringToIdent(string(Token.Token), FPrefix, FUseUnderLine,
+        FIdentWordStyle, FUseFullPinYin, FMaxPinYinWords, FMaxWords);
+      // 在 D2005~2007 下有 AnsiString 到 WideString 的转换但也无影响
+
+      FTokenListRef.AddObject(S, Token);
+    end;
   end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FTokenListRef.Count, 'C/C++ TokensRefList.Count');
+{$ENDIF}
+  Result := True;
 end;
 
 function TCnEditorExtractString.Scan: Boolean;
@@ -1160,8 +1184,90 @@ begin
 end;
 
 function TCnEditorExtractString.InsertCppDecl(HeadType: TCnCppStringHeadType): Integer;
+var
+  List: TCnGeneralWideBCBTokenList;
+  Stream: TMemoryStream;
+  EditView: IOTAEditView;
+  InsPos, DirLine: Integer;
+  Names: TCnIdeStringList;
+  S: TCnIdeTokenString;
+  EditWriter: IOTAEditWriter;
 begin
-  // TODO: 插入当前源文件
+  Result := 0;
+  // 找最后一个 #include 并直接插入其后
+
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  Stream := nil;
+  List := nil;
+  Names := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+    CnGeneralSaveEditorToStream(EditView.Buffer, Stream); // Ansi/Utf16/Utf16
+
+    List := TCnGeneralWideBCBTokenList.Create;
+    List.DirectivesAsComments := False;
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+    List.SetOrigin(Stream.Memory, Stream.Size div SizeOf(WideChar));
+{$ELSE}
+    List.SetOrigin(Stream.Memory, Stream.Size);
+{$ENDIF}
+
+    InsPos := 0;
+    DirLine := 0;
+    while List.RunID <> ctknull do
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Meet %s at %d', [GetEnumName(TypeInfo(TCTokenKind), Ord(List.RunID)), List.RunPosition]);
+{$ENDIF}
+      if List.RunID in [ctkdirinclude, ctkdirpragma] then
+      begin
+        DirLine := List.RunLineNumber; // 记录遇到的最近的 directive 的行号
+      end
+      else if (List.RunID = ctkcrlf) and (List.RunLineNumber = DirLine) then
+      begin
+        InsPos := List.RunPosition + List.TokenLength;
+      end;
+
+      List.Next;
+    end;
+
+    // 利用该位置，换算成编辑器里的线性位置，再插入换行加空行加内容
+    Names := TCnIdeStringList.Create;
+    if not GenerateCppDecl(Names, HeadType) then
+      Exit;
+
+    if Names.Count <= 1 then
+      Exit;
+
+    Result := Names.Count - 1;
+    Names.Insert(0, '');
+    Names.Add('');
+    S := Names.Text;
+
+    EditWriter := CnOtaGetEditWriterForSourceEditor;
+
+{$IFDEF IDE_WIDECONTROL}
+    // 插入时，Wide 要做 Utf8 转换
+    EditWriter.CopyTo(Length(UTF8Encode(Copy(List.Origin, 1, InsPos))));
+  {$IFDEF UNICODE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(S)));
+  {$ELSE}
+    EditWriter.Insert(PAnsiChar(ConvertWTextToEditorText(S)));
+  {$ENDIF}
+{$ELSE}
+    EditWriter.CopyTo(InsPos);
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(S)));
+{$ENDIF}
+    EditWriter := nil;
+  finally
+    Names.Free;
+    List.Free;
+    Stream.Free;
+  end;
 end;
 
 initialization
