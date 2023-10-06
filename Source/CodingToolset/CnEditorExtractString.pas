@@ -1225,9 +1225,19 @@ begin
 {$ENDIF}
       if List.RunID in [ctkdirinclude, ctkdirpragma] then
       begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+        DirLine := List.LineNumber;
+{$ELSE}
         DirLine := List.RunLineNumber; // 记录遇到的最近的 directive 的行号
+{$ENDIF}
       end
-      else if (List.RunID = ctkcrlf) and (List.RunLineNumber = DirLine) then
+      else if (List.RunID = ctkcrlf)
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+        and (List.LineNumber = DirLine)
+{$ELSE}
+        and (List.RunLineNumber = DirLine)
+{$ENDIF}
+        then
       begin
         InsPos := List.RunPosition + List.TokenLength;
       end;
