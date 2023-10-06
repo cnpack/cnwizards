@@ -20,7 +20,7 @@
 </table>
 <p class="title">抽取字符串工具</p>
 <p class="text" align="left">
-該工具用於將當前源代碼中的字符串抽取出來，按特定掃瞄規則與變量命名規則，轉換成字符串常量或變量聲明並替換源文件中的原有內容。目前只支持 Delphi 下的 Pascal 代碼。</p>
+該工具用於將當前源代碼中的字符串抽取出來，按特定掃瞄規則與變量命名規則，轉換成字符串常量或變量聲明並替換源文件中的原有內容。目前支持 Delphi 下的 Pascal 代碼與 C++Builder 下的 C/C++ 代碼。</p>
 <p class="text" align="left">其界面如下：</p>
 <p class="text" align="center">
 <img src="extractstring.png"></p>
@@ -67,11 +67,11 @@
   </li>
   <li>
 <p class="text" align="left">
-<b>生成類型</b>：可選擇抽取出來的字符串類型，有 var、const 與 resourcestring 三種。</p>
+<b>生成類型</b>：對於 Pascal 代碼，可選擇抽取出來的字符串類型，有 var、const 與 resourcestring 三種。對於 C/C++ 代碼，可選擇 AnsiString 或 char * 等。</p>
   </li>
   <li>
 <p class="text" align="left">
-<b>放置區域</b>：可選擇將抽取出來的字符串插入至 interface 部分還是 implementation 部分。</p>
+<b>放置區域</b>：對於 Pascal 代碼，可選擇將抽取出來的字符串插入至 interface 部分還是 implementation 部分。C/C++ 代碼則放在全局部分。</p>
   </li>
   <li>
 <p class="text" align="left">
