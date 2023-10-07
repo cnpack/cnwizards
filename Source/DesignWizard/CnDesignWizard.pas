@@ -1600,7 +1600,7 @@ end;
 // 取专家菜单标题
 function TCnAlignSizeWizard.GetCaption: string;
 begin
-  Result := SCnAlignSizeMenuCaption;
+  Result := SCnDesignWizardMenuCaption;
 end;
 
 // 取专家是否有设置窗口
@@ -1612,7 +1612,7 @@ end;
 // 取专家按钮提示
 function TCnAlignSizeWizard.GetHint: string;
 begin
-  Result := SCnAlignSizeMenuHint;
+  Result := SCnDesignWizardMenuHint;
 end;
 
 // 返回专家状态
@@ -1628,12 +1628,12 @@ end;
 class procedure TCnAlignSizeWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
-  Name := SCnAlignSizeName;
+  Name := SCnDesignWizardName;
   Author := SCnPack_Wyb_star + ';' + SCnPack_Zjy + ';' + SCnPack_LiuXiao + ';'
     + SCnPack_Licwing;
   Email := SCnPack_Wyb_starMail + ';' + SCnPack_ZjyEmail + ';'
     + SCnPack_LiuXiaoEmail + ';' + SCnPack_LicwingEmail;
-  Comment := SCnAlignSizeComment;
+  Comment := SCnDesignWizardComment;
 end;
 
 function TCnAlignSizeWizard.GetSearchContent: string;
