@@ -151,6 +151,7 @@ type
     procedure ShowFlatForm;
     procedure NonVisualArrange;
     procedure ArrangeNonVisualComponents;
+    procedure LockMenuExecuteReLock(Sender: TObject);
     procedure FormEditorNotifier(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
@@ -959,6 +960,30 @@ begin
   // IDE 自身没这功能时才需要手动更新新窗体上的状态
   if Active and (NotifyType = fetActivated) and (FIDEHideNonvisualsMenu = nil) then
     UpdateNonVisualComponent(FormEditor);
+
+  if Active and (NotifyType = fetOpened) and (FIDELockControlsMenu <> nil) and
+    FIDELockControlsMenu.Enabled and FIDELockControlsMenu.Checked then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Form Editor Opened and Controls Locked. Do Re-Lock.');
+{$ENDIF}
+    CnWizNotifierServices.ExecuteOnApplicationIdle(LockMenuExecuteReLock);
+  end;
+end;
+
+procedure TCnAlignSizeWizard.LockMenuExecuteReLock(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('LockMenuExecute to Re-Lock.');
+{$ENDIF}
+  if FIDELockControlsMenu <> nil then
+  begin
+    FIDELockControlsMenu.Click;
+    Sleep(0);
+    FIDELockControlsMenu.Click;
+
+    CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
+  end;
 end;
 
 //------------------------------------------------------------------------------
