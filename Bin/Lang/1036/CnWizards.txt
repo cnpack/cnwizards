@@ -3316,10 +3316,10 @@ SCnFlatToolBarRestoreDefault=Êtes-vous sûr de supprimer vos barres d'outils et
 SCnFloatPropBarFilterCaption=Afficher uniquement les propriétés fréquentes
 SCnFloatPropBarRenameCaption=Renommer le composant
 SCnEmbeddedDesignerNotSupport=Pardon. VCL Concepteur intégré NON pris en charge.
-SCnAlignSizeMenuCaption=Assistant de conception de Form
-SCnAlignSizeMenuHint=Ajuster l'alignement ou la taille des composants sélectionnés
-SCnAlignSizeName=Assistant de conception de Form
-SCnAlignSizeComment=Autoriser le réglage de l'alignement ou de la taille des composants sélectionnés
+SCnDesignWizardMenuCaption=Assistant de conception de Form
+SCnDesignWizardMenuHint=Ajuster l'alignement ou la taille des composants sélectionnés
+SCnDesignWizardName=Assistant de conception de Form
+SCnDesignWizardComment=Autoriser le réglage de l'alignement ou de la taille des composants sélectionnés
 SCnAlignLeftCaption=Aligner les bords gauches
 SCnAlignLeftHint=Aligner les bords gauches, activé lorsque sélectionné> = 2
 SCnAlignRightCaption=Aligner les bords droits

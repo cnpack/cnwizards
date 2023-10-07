@@ -3316,10 +3316,10 @@ SCnFlatToolBarRestoreDefault=Sure to Delete Your Toolbars and Restore to Default
 SCnFloatPropBarFilterCaption=Only Show Frequent Properties
 SCnFloatPropBarRenameCaption=Rename Component
 SCnEmbeddedDesignerNotSupport=Sorry. VCL Embedded Designer NOT Supported.
-SCnAlignSizeMenuCaption=Form Design Wi&zard
-SCnAlignSizeMenuHint=Adjust Align or Size of Selected Components
-SCnAlignSizeName=Form Design Wizard
-SCnAlignSizeComment=Allow Adjusting Align or Size of Selected Components
+SCnDesignWizardMenuCaption=Form Design Wi&zard
+SCnDesignWizardMenuHint=Adjust Align or Size of Selected Components
+SCnDesignWizardName=Form Design Wizard
+SCnDesignWizardComment=Allow Adjusting Align or Size of Selected Components
 SCnAlignLeftCaption=Align Left Edges
 SCnAlignLeftHint=Align Left Edges, Enabled when Selected >= 2
 SCnAlignRightCaption=Align Right Edges

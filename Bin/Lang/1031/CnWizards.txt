@@ -3316,10 +3316,10 @@ SCnFlatToolBarRestoreDefault=Sind Sie sicher dass die Toolbar Einstellungen zur�
 SCnFloatPropBarFilterCaption=Zeige nur frequentierte Properties
 SCnFloatPropBarRenameCaption=Umbenennen Komponente
 SCnEmbeddedDesignerNotSupport=Entschuldigung. Der VCL Embedded Designer wird nicht unterstützt.
-SCnAlignSizeMenuCaption=Formular Design Werkzeug
-SCnAlignSizeMenuHint=Ausrichtung und Größenänderung der ausgewählten Komponenten einstellen
-SCnAlignSizeName=Formular Design Werkzeug
-SCnAlignSizeComment=erlaube Ausrichtung und Größenänderung der ausgewählten Komponenten 
+SCnDesignWizardMenuCaption=Formular Design Werkzeug
+SCnDesignWizardMenuHint=Ausrichtung und Größenänderung der ausgewählten Komponenten einstellen
+SCnDesignWizardName=Formular Design Werkzeug
+SCnDesignWizardComment=erlaube Ausrichtung und Größenänderung der ausgewählten Komponenten 
 SCnAlignLeftCaption=Ausrichtung linke Ecke
 SCnAlignLeftHint=Ausrichtung linke Ecke, aktiviert wenn gewählte Anzahl >= 2
 SCnAlignRightCaption=Ausrichtung rechte Ecke

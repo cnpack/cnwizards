@@ -827,10 +827,10 @@ begin
   TranslateStr(SCnEmbeddedDesignerNotSupport, 'SCnEmbeddedDesignerNotSupport');
 
   // CnDesignWizard
-  TranslateStr(SCnAlignSizeMenuCaption, 'SCnAlignSizeMenuCaption');
-  TranslateStr(SCnAlignSizeMenuHint, 'SCnAlignSizeMenuHint');
-  TranslateStr(SCnAlignSizeName, 'SCnAlignSizeName');
-  TranslateStr(SCnAlignSizeComment, 'SCnAlignSizeComment');
+  TranslateStr(SCnDesignWizardMenuCaption, 'SCnDesignWizardMenuCaption');
+  TranslateStr(SCnDesignWizardMenuHint, 'SCnDesignWizardMenuHint');
+  TranslateStr(SCnDesignWizardName, 'SCnDesignWizardName');
+  TranslateStr(SCnDesignWizardComment, 'SCnDesignWizardComment');
 
   TranslateStr(SCnAlignLeftCaption, 'SCnAlignLeftCaption');
   TranslateStr(SCnAlignLeftHint, 'SCnAlignLeftHint');

@@ -1153,10 +1153,10 @@ var
   SCnEmbeddedDesignerNotSupport: string = 'Sorry. VCL Embedded Designer NOT Supported.';
 
   // CnDesignWizard
-  SCnAlignSizeMenuCaption: string = 'Form Design Wi&zard';
-  SCnAlignSizeMenuHint: string = 'Adjust Align or Size of Selected Components';
-  SCnAlignSizeName: string = 'Form Design Wizard';
-  SCnAlignSizeComment: string = 'Allow Adjusting Align or Size of Selected Components';
+  SCnDesignWizardMenuCaption: string = 'Form Design Wi&zard';
+  SCnDesignWizardMenuHint: string = 'Adjust Align or Size of Selected Components';
+  SCnDesignWizardName: string = 'Form Design Wizard';
+  SCnDesignWizardComment: string = 'Allow Adjusting Align or Size of Selected Components';
   SCnAlignLeftCaption: string = 'Align Left Edges';
   SCnAlignLeftHint: string = 'Align Left Edges, Enabled when Selected >= 2';
   SCnAlignRightCaption: string = 'Align Right Edges';
