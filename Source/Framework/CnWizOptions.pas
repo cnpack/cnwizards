@@ -924,6 +924,9 @@ begin
       AToolBar.Images := dmCnSharedImages.LargeVirtualImages
     else
       AToolBar.Images := dmCnSharedImages.VirtualImages;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ResetToolbarWithLargeIcons %s with VirtualImages', [AToolBar.Name]);
+{$ENDIF}
     NeedNew := False;
   end;
   if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
@@ -932,13 +935,27 @@ begin
       AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeVirtualImages
     else
       AToolBar.DisabledImages := dmCnSharedImages.DisabledVirtualImages;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ResetToolbarWithLargeIcons %s with DisabledVirtualImages', [AToolBar.Name]);
+{$ENDIF}
     NeedNew := False;
   end;
 
   if NeedNew and (AToolBar.Images <> nil) and (AToolBar.Owner = AToolBar.Images.Owner) then
+  begin
     AToolBar.Images := IdeGetVirtualImageListFromOrigin(AToolBar.Images);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ResetToolbarWithLargeIcons %s New a VirtualImages', [AToolBar.Name]);
+{$ENDIF}
+  end;
+
   if (AToolBar.DisabledImages <> nil) and (AToolBar.Owner = AToolBar.DisabledImages.Owner) then
+  begin
     AToolBar.DisabledImages := IdeGetVirtualImageListFromOrigin(AToolBar.DisabledImages);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ResetToolbarWithLargeIcons %s New a DisabledVirtualImages', [AToolBar.Name]);
+{$ENDIF}
+  end;
 
 {$ELSE}
   if FUseLargeIcon then

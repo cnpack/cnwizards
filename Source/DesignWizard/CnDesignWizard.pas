@@ -160,6 +160,8 @@ type
     function GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
     procedure SetNonVisualPos(Form: TCustomForm; Component: TComponent;
       X, Y: Integer);
+    {* 设置一个非可视组件的位置，Form 是设计器窗体或 DataModule 容器窗体
+      Component 是这个组件实例，内部会去找具体 Handle 来设置位置}
 
     procedure ChangeComponentClass;
     {* 设计期更换组件类名，实际上是原位置新建组件，赋值属性、事件，搬移子 Control，再更名，再删除原组件。
@@ -1270,7 +1272,7 @@ var
 
   // 此函数目前已支持 DataModule
   procedure GetComponentContainerHandle(AForm: TCustomForm; L, T: Integer;
-    var InternalH1, InternalH2: HWND; var Offset: TPoint);
+    out InternalH1, InternalH2: HWND; var Offset: TPoint);
   var
     R1, R2: TRect;
     P: TPoint;
