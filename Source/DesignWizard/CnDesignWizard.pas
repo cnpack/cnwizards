@@ -113,6 +113,8 @@ type
     FIDELockControlsMenu: TMenuItem;
     FIDEHideNonvisualsMenu: TMenuItem;
     FPropertyCompare: TCnPropertyCompareManager;
+    FUpdateControlList: TList;
+    FUpdateCompList: TList;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
     FIDEMenuBar: TCustomActionMenuBar;
@@ -156,8 +158,16 @@ type
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
 
+    function GetComponentGeneralPos(Component: TComponent): TPoint;
+    {* 封装的获取组件左上角位置的函数，支持可视组件与不可视组件}
+    procedure SetComponentGeneralPos(Form: TCustomForm; Component: TComponent; APos: TPoint);
+    {* 封装的设置组件左上角位置的函数，支持可视组件与不可视组件}
+    function GetDesignerForm: TCustomForm;
+
     function GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
     function GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
+    function GetNonVisualPos(Component: TComponent): TSmallPoint;
+    {* 获取一个非可视组件的位置}
     procedure SetNonVisualPos(Form: TCustomForm; Component: TComponent;
       X, Y: Integer);
     {* 设置一个非可视组件的位置，Form 是设计器窗体或 DataModule 容器窗体
@@ -296,7 +306,7 @@ const
   csDefPerColCount = 3;
   csDefSizeSpace = 16;
 
-  // Action 生效需要选择的最小控件数，-1 表示无需判断
+  // Action 生效需要选择的最小控件数（部分包括组件数），-1 表示无需判断
   csAlignNeedControls: array[TCnAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
     {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
@@ -305,6 +315,10 @@ const
   csAlignNeedSepMenu: set of TCnAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
     asSendToBack, asLockControls, asChangeCompClass];
+
+  csAlignSupportsNonVisual: set of TCnAlignSizeStyle =
+    [asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
+    asAlignHCenter, asAlignVCenter, asSpaceEquH, asSpaceEquV];
 
   csAlignSizeNames: array[TCnAlignSizeStyle] of string = (
     'CnAlignLeft', 'CnAlignRight', 'CnAlignTop', 'CnAlignBottom', 'CnAlignHCenter',
@@ -380,6 +394,9 @@ type
 constructor TCnAlignSizeWizard.Create;
 begin
   inherited;
+  FUpdateControlList := TList.Create;
+  FUpdateCompList := TList.Create;
+
   FPropertyCompare := TCnPropertyCompareManager.Create(nil);
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
@@ -404,6 +421,9 @@ begin
 {$ENDIF}
 {$ENDIF}
   FPropertyCompare.Free;
+
+  FUpdateCompList.Free;
+  FUpdateControlList.Free;
   inherited;
 end;
 
@@ -459,7 +479,7 @@ var
   AParent, ALeftComp, ARightComp: TComponent;
   Count, Value: Integer;
   Curr: Double;
-  ControlList, CompList: TList;
+  ControlList, CompareCompList, CompList: TList;
   AList: TList;
   R1, R2, R3: TRect;
   GridSizeX, GridSizeY: Integer;
@@ -471,39 +491,74 @@ var
   KeyState: TKeyboardState;
   EditAction:IOTAEditActions;
   Ini: TCustomIniFile;
+  FirstPos, SecPos: TPoint;
 begin
   ControlList := TList.Create;
+  CompList := TList.Create;
+
   try
-    if (csAlignNeedControls[AlignSizeStyle] > 0) and
-      not CnOtaGetSelectedControlFromCurrentForm(ControlList) then Exit;
+    if AlignSizeStyle in csAlignSupportsNonVisual then
+    begin
+      // 可能又支持 Controls 的又支持 Components，要提前拿到两种选择：Controls 与 Components
+      // 如果都拿不到则出错
+      if (csAlignNeedControls[AlignSizeStyle] > 0) and
+        (not CnOtaGetSelectedControlFromCurrentForm(ControlList) and
+        not GetNonVisualSelComponentsFromCurrentForm(CompList)) then
+        Exit;
+    end
+    else
+    begin
+      // 只支持 Controls 的，只要提前拿到 Controls，如果拿不到则出错
+      if (csAlignNeedControls[AlignSizeStyle] > 0) and
+        (not CnOtaGetSelectedControlFromCurrentForm(ControlList)) then
+        Exit;
+    end;
 
     IsModified := True;
     case AlignSizeStyle of
       asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
       asAlignHCenter, asAlignVCenter:
         begin
-          R1 := GetControlScreenRect(TControl(ControlList[0]));
-          for I := 1 to ControlList.Count - 1 do
+          if ControlList.Count >= csAlignNeedControls[AlignSizeStyle] then // 只支持全部是控件
           begin
-            R2 := GetControlScreenRect(TControl(ControlList[I]));
+            R1 := GetControlScreenRect(TControl(ControlList[0]));
+            for I := 1 to ControlList.Count - 1 do
+            begin
+              R2 := GetControlScreenRect(TControl(ControlList[I]));
 
-            if AlignSizeStyle = asAlignLeft then
-              OffsetRect(R2, R1.Left - R2.Left, 0)
-            else if AlignSizeStyle = asAlignRight then
-              OffsetRect(R2, R1.Right - R2.Right, 0)
-            else if AlignSizeStyle = asAlignTop then
-              OffsetRect(R2, 0, R1.Top - R2.Top)
-            else if AlignSizeStyle = asAlignBottom then
-              OffsetRect(R2, 0, R1.Bottom - R2.Bottom)
-            else if AlignSizeStyle = asAlignVCenter then
-              OffsetRect(R2, 0, (R1.Top + R1.Bottom - R2.Top - R2.Bottom) div 2)
-            else // AlignSizeStyle = asAlignHCenter
-              OffsetRect(R2, (R1.Left + R1.Right - R2.Left - R2.Right) div 2, 0);
+              if AlignSizeStyle = asAlignLeft then
+                OffsetRect(R2, R1.Left - R2.Left, 0)
+              else if AlignSizeStyle = asAlignRight then
+                OffsetRect(R2, R1.Right - R2.Right, 0)
+              else if AlignSizeStyle = asAlignTop then
+                OffsetRect(R2, 0, R1.Top - R2.Top)
+              else if AlignSizeStyle = asAlignBottom then
+                OffsetRect(R2, 0, R1.Bottom - R2.Bottom)
+              else if AlignSizeStyle = asAlignVCenter then
+                OffsetRect(R2, 0, (R1.Top + R1.Bottom - R2.Top - R2.Bottom) div 2)
+              else // AlignSizeStyle = asAlignHCenter
+                OffsetRect(R2, (R1.Left + R1.Right - R2.Left - R2.Right) div 2, 0);
 
-            SetControlScreenRect(TControl(ControlList[I]), R2);
+              SetControlScreenRect(TControl(ControlList[I]), R2);
+            end;
+          end
+          else if CompList.Count >= csAlignNeedControls[AlignSizeStyle] then // 控件选择数量不足或未选择时，只支持全部是可视化组件
+          begin
+            FirstPos := GetComponentGeneralPos(CompList[0]);
+            for I := 1 to CompList.Count - 1 do
+            begin
+              SecPos := GetComponentGeneralPos(CompList[I]);
+
+              if AlignSizeStyle in [asAlignLeft, asAlignRight, asAlignHCenter] then
+                SecPos.x := FirstPos.x
+              else if AlignSizeStyle in [asAlignTop, asAlignBottom, asAlignVCenter]  then
+                SecPos.y := FirstPos.y;
+
+              SetComponentGeneralPos(GetDesignerForm, CompList[I], SecPos);
+            end;
           end;
         end;
-      asSpaceEquH, asSpaceEquV:
+      asSpaceEquH, asSpaceEquV: // 暂不支持可视化组件
         begin
           if ControlList.Count < 3 then Exit;
           ControlListSortByPos(ControlList, AlignSizeStyle = asSpaceEquV);
@@ -833,14 +888,19 @@ begin
       asCompareProp:
         begin
           // 有选择一个就比一个，没选择就空弹
-          CompList := TList.Create;
-          CnOtaGetSelectedComponentFromCurrentForm(CompList);
-          ALeftComp := nil;
-          ARightComp := nil;
-          if CompList.Count > 0 then
-            ALeftComp := TComponent(CompList[0]);
-          if CompList.Count > 1 then
-            ARightComp := TComponent( CompList[1]);
+          CompareCompList := TList.Create;
+          try
+            CnOtaGetSelectedComponentFromCurrentForm(CompareCompList);
+            ALeftComp := nil;
+            ARightComp := nil;
+            if CompareCompList.Count > 0 then
+              ALeftComp := TComponent(CompareCompList[0]);
+            if CompareCompList.Count > 1 then
+              ARightComp := TComponent(CompareCompList[1]);
+          finally
+            CompareCompList.Free;
+          end;
+
           CompareTwoObjects(ALeftComp, ARightComp);
         end;
       asCompToCode:
@@ -879,6 +939,7 @@ begin
         FormEditor.MarkModified;
     end;
   finally
+    CompList.Free;
     ControlList.Free;
   end;
 end;
@@ -1031,6 +1092,37 @@ begin
     Result := CompareText(TComponent(Item1).Name, TComponent(Item2).Name);
 end;
 
+function TCnAlignSizeWizard.GetDesignerForm: TCustomForm;
+var
+{$IFDEF COMPILER6_UP}
+  FormDesigner: IDesigner;
+  AContainer: TComponent;
+{$ELSE}
+  FormDesigner: IFormDesigner;
+{$ENDIF}
+begin
+  Result := nil;
+  FormDesigner := CnOtaGetFormDesigner;
+  if FormDesigner = nil then Exit;
+
+{$IFDEF COMPILER6_UP}
+  AContainer := FormDesigner.Root;
+
+  if (AContainer is TWinControl) or ObjectIsInheritedFromClass(AContainer, 'TWidgetControl') then
+    Result := TCustomForm(AContainer)
+  else if (AContainer.Owner <> nil)
+    and AContainer.Owner.ClassNameIs('TDataModuleForm') then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('AContainer Owner is DataModule Form.');
+{$ENDIF}
+    Result := AContainer.Owner as TCustomForm;
+  end;
+{$ELSE}
+  Result := FormDesigner.Form;
+{$ENDIF}
+end;
+
 procedure TCnAlignSizeWizard.ArrangeNonVisualComponents;
 var
   CompList: TList;
@@ -1040,7 +1132,6 @@ var
   AllWidth, AllHeight, OffSetX, OffSetY: Integer;
 {$IFDEF COMPILER6_UP}
   FormDesigner: IDesigner;
-  AContainer: TComponent;
 {$ELSE}
   FormDesigner: IFormDesigner;
 {$ENDIF}
@@ -1048,25 +1139,7 @@ begin
   FormDesigner := CnOtaGetFormDesigner;
   if FormDesigner = nil then Exit;
 
-{$IFDEF COMPILER6_UP}
-  AForm := nil;
-  AContainer := FormDesigner.Root;
-{$IFDEF DEBUG}
-    CnDebugger.LogComponent(AContainer);
-{$ENDIF}
-  if (AContainer is TWinControl) or ObjectIsInheritedFromClass(AContainer, 'TWidgetControl') then
-    AForm := TCustomForm(AContainer)
-  else if (AContainer.Owner <> nil) 
-    and AContainer.Owner.ClassNameIs('TDataModuleForm') then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('AContainer Owner is DataModule Form.');
-{$ENDIF}
-    AForm := AContainer.Owner as TCustomForm;
-  end;
-{$ELSE}
-  AForm := FormDesigner.Form;
-{$ENDIF}
+  AForm := GetDesignerForm;
 
   if AForm = nil then
   begin
@@ -1263,6 +1336,56 @@ begin
   Result := List.Count > 0;
 end;
 
+function TCnAlignSizeWizard.GetComponentGeneralPos(Component: TComponent): TPoint;
+var
+  P: TSmallPoint;
+begin
+  if Component is TControl then // VCL 的 Control
+  begin
+    Result.x := TControl(Component).Left;
+    Result.y := TControl(Component).Top;
+  end
+{$IFDEF SUPPORT_FMX}
+  else if CnFmxIsInheritedFromControl(Component) then // FMX 的 Control
+  begin
+    Result.x := CnFmxGetControlPositionValue(Component, fptLeft);
+    Result.y := CnFmxGetControlPositionValue(Component, fptTop);
+  end
+{$ENDIF}
+  else // 不可视组件
+  begin
+    P := GetNonVisualPos(Component);
+    Result.x := P.x;
+    Result.y := P.y;
+  end;
+end;
+
+procedure TCnAlignSizeWizard.SetComponentGeneralPos(Form: TCustomForm;
+  Component: TComponent; APos: TPoint);
+begin
+  if Component is TControl then // VCL 的 Control
+  begin
+    TControl(Component).Left := APos.x;
+    TControl(Component).Top := APos.y;
+  end
+{$IFDEF SUPPORT_FMX}
+  else if CnFmxIsInheritedFromControl(Component) then // FMX 的 Control
+  begin
+    CnFmxSetControlPositionValue(Component, APos.x, fptLeft);
+    CnFmxSetControlPositionValue(Component, APos.y, fptTop);
+  end
+{$ENDIF}
+  else // 不可视组件
+  begin
+    SetNonVisualPos(Form, Component, APos.x, APos.y);
+  end;
+end;
+
+function TCnAlignSizeWizard.GetNonVisualPos(Component: TComponent): TSmallPoint;
+begin
+  Result := TSmallPoint(Component.DesignInfo);
+end;
+
 procedure TCnAlignSizeWizard.SetNonVisualPos(Form: TCustomForm;
   Component: TComponent; X, Y: Integer);
 var
@@ -1272,7 +1395,7 @@ var
 
   // 此函数目前已支持 DataModule
   procedure GetComponentContainerHandle(AForm: TCustomForm; L, T: Integer;
-    out InternalH1, InternalH2: HWND; var Offset: TPoint);
+    out InternalH1, InternalH2: HWND; out Offset: TPoint);
   var
     R1, R2: TRect;
     P: TPoint;
@@ -1406,15 +1529,11 @@ begin
 
   // 设置组件窗体位置
   if H1 <> 0 then
-  begin
     SetWindowPos(H1, 0, X, Y, 0, 0, SWP_NOSIZE or SWP_NOZORDER);
-  end;
 
   // 如果有组件标题，设置标题位置
   if H2 <> 0 then
-  begin
     SetWindowPos(H2, 0, X + Offset.x, Y + Offset.y, 0, 0, SWP_NOSIZE or SWP_NOZORDER);
-  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1479,8 +1598,7 @@ end;
 // Action 状态更新
 procedure TCnAlignSizeWizard.SubActionUpdate(Index: Integer);
 var
-  List: TList;
-  Count: Integer;
+  CtrlCount, CompCount: Integer;
   Style: TCnAlignSizeStyle;
   Actn: TCnWizMenuAction;
 begin
@@ -1490,17 +1608,30 @@ begin
     Exit;
   end;
 
-  List := TList.Create;
+  FUpdateControlList.Clear;
   try
     try
-      CnOtaGetSelectedControlFromCurrentForm(List);
-      Count := List.Count;
+      CnOtaGetSelectedControlFromCurrentForm(FUpdateControlList);
+      CtrlCount := FUpdateControlList.Count;
     except
       ; // Maybe XE4 FMX Style will cause AV here. Catch it
-      Count := 0;
+      CtrlCount := 0;
     end;
   finally
-    List.Free;
+    FUpdateControlList.Clear;
+  end;
+
+  FUpdateCompList.Clear;
+  try
+    try
+      GetNonVisualSelComponentsFromCurrentForm(FUpdateCompList);
+      CompCount := FUpdateCompList.Count;
+    except
+      ; // Maybe XE4 FMX Style will cause AV here. Catch it
+      CompCount := 0;
+    end;
+  finally
+    FUpdateCompList.Clear;
   end;
 
   Actn := SubActions[Index];
@@ -1509,8 +1640,17 @@ begin
     if Indexes[Style] = Index then
     begin
       Actn.Visible := Active;
-      if csAlignNeedControls[Style] >= 0 then
-        Actn.Enabled := Menu.Enabled and (Count >= csAlignNeedControls[Style]);
+      if Style in csAlignSupportsNonVisual then // 支持控件和不可视组件的，要求选择的至少有一类足够多
+      begin
+        if csAlignNeedControls[Style] >= 0 then
+          Actn.Enabled := Menu.Enabled and ((CompCount >= csAlignNeedControls[Style])
+            or (CtrlCount >= csAlignNeedControls[Style]));
+      end
+      else
+      begin
+        if csAlignNeedControls[Style] >= 0 then
+          Actn.Enabled := Menu.Enabled and (CtrlCount >= csAlignNeedControls[Style]);
+      end;
       Break;
     end;
   end;
