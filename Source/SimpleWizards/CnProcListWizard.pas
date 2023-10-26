@@ -4771,8 +4771,9 @@ var
   ACanvas: TControlCanvas;
 begin
   inherited;
-  if not FFocusedClick then // 点击前如果没焦点，此次点击只是获取焦点，不应下拉
-    Exit;
+// 本来点击前如果没焦点，此次点击只是获取焦点，不应下拉，但去掉了这个限制
+//  if not FFocusedClick then
+//    Exit;
 
   P := Mouse.CursorPos;
   P := ScreenToClient(P);
