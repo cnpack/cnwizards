@@ -129,6 +129,8 @@ type
 {$ENDIF}
     procedure ControlListSortByPos(List: TList; IsVert: Boolean;
       Desc: Boolean = False);
+    procedure CompListSortByPos(List: TList; IsVert: Boolean;
+      Desc: Boolean = False);
     procedure ControlListSortByProp(List: TList; ProName: string;
       Desc: Boolean = False);
     procedure DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
@@ -166,8 +168,6 @@ type
 
     function GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
     function GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
-    function GetNonVisualPos(Component: TComponent): TSmallPoint;
-    {* 获取一个非可视组件的位置}
     procedure SetNonVisualPos(Form: TCustomForm; Component: TComponent;
       X, Y: Integer);
     {* 设置一个非可视组件的位置，Form 是设计器窗体或 DataModule 容器窗体
@@ -385,6 +385,50 @@ type
 {$ENDIF}
 {$ENDIF}
 
+// 获取一个非可视组件的位置
+function GetNonVisualPos(Component: TComponent): TSmallPoint;
+begin
+  Result := TSmallPoint(Component.DesignInfo);
+end;
+
+var
+  _ProName: string;
+  _Desc: Boolean;
+  _IsVert: Boolean;
+
+function DoSortByProp(Item1, Item2: Pointer): Integer;
+var
+  V1, V2: Integer;
+begin
+  V1 := GetOrdProp(TComponent(Item1), _ProName);
+  V2 := GetOrdProp(TComponent(Item2), _ProName);
+  Result := CompareInt(V1, V2, _Desc);
+end;
+
+function DoSortByPos(Item1, Item2: Pointer): Integer;
+var
+  R1, R2: TRect;
+begin
+  R1 := GetControlScreenRect(TControl(Item1));
+  R2 := GetControlScreenRect(TControl(Item2));
+  if _IsVert then
+    Result := CompareInt(R1.Top, R2.Top, _Desc)
+  else
+    Result := CompareInt(R1.Left, R2.Left, _Desc)
+end;
+
+function DoSortNonVisualByPos(Item1, Item2: Pointer): Integer;
+var
+  P1, P2: TSmallPoint;
+begin
+  P1 := GetNonVisualPos(TComponent(Item1));
+  P2 := GetNonVisualPos(TComponent(Item2));
+  if _IsVert then
+    Result := CompareInt(P1.y, P2.y, _Desc)
+  else
+    Result := CompareInt(P1.x, P2.x, _Desc)
+end;
+
 //==============================================================================
 // Align Size 设置工具
 //==============================================================================
@@ -431,32 +475,6 @@ end;
 // 组件对齐缩放处理
 //------------------------------------------------------------------------------
 
-var
-  _ProName: string;
-  _Desc: Boolean;
-  _IsVert: Boolean;
-
-function DoSortByProp(Item1, Item2: Pointer): Integer;
-var
-  V1, V2: Integer;
-begin
-  V1 := GetOrdProp(TComponent(Item1), _ProName);
-  V2 := GetOrdProp(TComponent(Item2), _ProName);
-  Result := CompareInt(V1, V2, _Desc);
-end;
-
-function DoSortByPos(Item1, Item2: Pointer): Integer;
-var
-  R1, R2: TRect;
-begin
-  R1 := GetControlScreenRect(TControl(Item1));
-  R2 := GetControlScreenRect(TControl(Item2));
-  if _IsVert then
-    Result := CompareInt(R1.Top, R2.Top, _Desc)
-  else
-    Result := CompareInt(R1.Left, R2.Left, _Desc)
-end;
-
 procedure TCnAlignSizeWizard.ControlListSortByProp(List: TList; ProName: string;
   Desc: Boolean);
 begin
@@ -465,12 +483,18 @@ begin
   List.Sort(DoSortByProp);
 end;
 
-procedure TCnAlignSizeWizard.ControlListSortByPos(List: TList; IsVert: Boolean;
-  Desc: Boolean = False);
+procedure TCnAlignSizeWizard.ControlListSortByPos(List: TList; IsVert, Desc: Boolean);
 begin
   _IsVert := IsVert;
   _Desc := Desc;
   List.Sort(DoSortByPos);
+end;
+
+procedure TCnAlignSizeWizard.CompListSortByPos(List: TList; IsVert, Desc: Boolean);
+begin
+  _IsVert := IsVert;
+  _Desc := Desc;
+  List.Sort(DoSortNonVisualByPos);
 end;
 
 procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
@@ -482,6 +506,7 @@ var
   ControlList, CompareCompList, CompList: TList;
   AList: TList;
   R1, R2, R3: TRect;
+  P1, P2, P3: TPoint;
   GridSizeX, GridSizeY: Integer;
   IsModified: Boolean;
   FormEditor: IOTAFormEditor;
@@ -560,41 +585,71 @@ begin
         end;
       asSpaceEquH, asSpaceEquV: // 暂不支持可视化组件
         begin
-          if ControlList.Count < 3 then Exit;
-          ControlListSortByPos(ControlList, AlignSizeStyle = asSpaceEquV);
-
-          R1 := GetControlScreenRect(TControl(ControlList[0]));
-          R2 := GetControlScreenRect(TControl(ControlList[ControlList.Count - 1]));
-          Count := 0;
-          for I := 1 to ControlList.Count - 2 do
+          if ControlList.Count >= 3 then
           begin
-            R3 := GetControlScreenRect(TControl(ControlList[I]));
-            if AlignSizeStyle = asSpaceEquH then
-              Inc(Count, R3.Right - R3.Left)
-            else
-              Inc(Count, R3.Bottom - R3.Top);
-          end;
+            ControlListSortByPos(ControlList, AlignSizeStyle = asSpaceEquV);
 
-          if AlignSizeStyle = asSpaceEquH then
-            Curr := R1.Right
-          else
-            Curr := R1.Bottom;
-          for I := 1 to ControlList.Count - 2 do
+            R1 := GetControlScreenRect(TControl(ControlList[0]));
+            R2 := GetControlScreenRect(TControl(ControlList[ControlList.Count - 1]));
+            Count := 0;
+            for I := 1 to ControlList.Count - 2 do
+            begin
+              R3 := GetControlScreenRect(TControl(ControlList[I]));
+              if AlignSizeStyle = asSpaceEquH then
+                Inc(Count, R3.Right - R3.Left)
+              else
+                Inc(Count, R3.Bottom - R3.Top);
+            end;
+
+            if AlignSizeStyle = asSpaceEquH then
+              Curr := R1.Right
+            else
+              Curr := R1.Bottom;
+            for I := 1 to ControlList.Count - 2 do
+            begin
+              if AlignSizeStyle = asSpaceEquH then
+                Curr := Curr + (R2.Left - R1.Right - Count) / (ControlList.Count - 1)
+              else
+                Curr := Curr + (R2.Top - R1.Bottom - Count) / (ControlList.Count - 1);
+              R3 := GetControlScreenRect(TControl(ControlList[I]));
+              if AlignSizeStyle = asSpaceEquH then
+                OffsetRect(R3, Round(Curr) - R3.Left, 0)
+              else
+                OffsetRect(R3, 0, Round(Curr) - R3.Top);
+              SetControlScreenRect(TControl(ControlList[I]), R3);
+              if AlignSizeStyle = asSpaceEquH then
+                Curr := Curr + R3.Right - R3.Left
+              else
+                Curr := Curr + R3.Bottom - R3.Top;
+            end;
+          end
+          else if CompList.Count >= 3 then
           begin
+            CompListSortByPos(CompList, AlignSizeStyle = asSpaceEquV);
+
+            P1 := GetComponentGeneralPos(TComponent(CompList[0]));
+            P2 := GetComponentGeneralPos(TComponent(CompList[CompList.Count - 1]));
+
             if AlignSizeStyle = asSpaceEquH then
-              Curr := Curr + (R2.Left - R1.Right - Count) / (ControlList.Count - 1)
+              Curr := P1.x
             else
-              Curr := Curr + (R2.Top - R1.Bottom - Count) / (ControlList.Count - 1);
-            R3 := GetControlScreenRect(TControl(ControlList[I]));
-            if AlignSizeStyle = asSpaceEquH then
-              OffsetRect(R3, Round(Curr) - R3.Left, 0)
-            else
-              OffsetRect(R3, 0, Round(Curr) - R3.Top);
-            SetControlScreenRect(TControl(ControlList[I]), R3);
-            if AlignSizeStyle = asSpaceEquH then
-              Curr := Curr + R3.Right - R3.Left
-            else
-              Curr := Curr + R3.Bottom - R3.Top;
+              Curr := P1.y;
+
+            for I := 1 to CompList.Count - 2 do
+            begin
+              if AlignSizeStyle = asSpaceEquH then
+                Curr := Curr + (P2.x - P1.x) / (CompList.Count - 1)
+              else
+                Curr := Curr + (P2.y - P1.y) / (CompList.Count - 1);
+
+              P3 := GetComponentGeneralPos(TComponent(CompList[I]));
+              if AlignSizeStyle = asSpaceEquH then
+                P3.x := Round(Curr)
+              else
+                P3.y := Round(Curr);
+
+              SetComponentGeneralPos(GetDesignerForm, TComponent(CompList[I]), P3);
+            end;
           end;
         end;
       asSpaceEquHX, asSpaceEquVY:
@@ -1379,11 +1434,6 @@ begin
   begin
     SetNonVisualPos(Form, Component, APos.x, APos.y);
   end;
-end;
-
-function TCnAlignSizeWizard.GetNonVisualPos(Component: TComponent): TSmallPoint;
-begin
-  Result := TSmallPoint(Component.DesignInfo);
 end;
 
 procedure TCnAlignSizeWizard.SetNonVisualPos(Form: TCustomForm;
