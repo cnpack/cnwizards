@@ -44,7 +44,7 @@ uses
   TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList, Menus,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
   CnWizMultiLang, CnEditControlWrapper, mPasLex, mwBCBTokenList,
-  CnPasCodeParser, CnCppCodeParser {$IFDEF UNICODE}, CnWidePasParser, CnWideCppParser {$ENDIF};
+  CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
 type
   TCnPasStringHeadType = (htVar, htConst, htResourcestring);
@@ -1009,7 +1009,7 @@ begin
 {$ENDIF}
 
     FEditStream := TMemoryStream.Create;
-    CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream);
+    CnGeneralSaveEditorToStream(EditView.Buffer, FEditStream); // Ansi/Utf16/Utf16
 
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnEditorExtractString Scan Pascal to ParseString.');
@@ -1025,13 +1025,17 @@ begin
         ConvertGeneralTokenPos(Pointer(EditView), Token);
 
 {$IFDEF UNICODE}
-        ParsePasCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info);
+        ParsePasCodePosInfoW(PChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info); // Utf16
 {$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+        ParsePasCodePosInfoW(PWideChar(FEditStream.Memory), Token.EditLine, Token.EditCol, Info); // Utf16
+  {$ELSE}
         EditPos.Line := Token.EditLine;
         EditPos.Col := Token.EditCol;
         CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
 
-        Info := ParsePasCodePosInfo(PChar(FEditStream.Memory), CurrPos);
+        Info := ParsePasCodePosInfo(PChar(FEditStream.Memory), CurrPos); // Ansi
+  {$ENDIF}
 {$ENDIF}
         Token.Tag := Ord(Info.PosKind);
       end
