@@ -77,6 +77,7 @@ uses
   {$IFDEF DELPHI103_RIO} CnScript_ToolsAPI_D103R, {$ENDIF}
   {$IFDEF DELPHI104_SYDNEY} CnScript_ToolsAPI_D104S, {$ENDIF}
   {$IFDEF DELPHI110_ALEXANDRIA} CnScript_ToolsAPI_D110A, {$ENDIF}
+  {$IFDEF DELPHI120_ATHENS} CnScript_ToolsAPI_D120A, {$ENDIF}
   {$IFDEF BCB5} CnScript_ToolsAPI_D5, {$ENDIF}
   {$IFDEF BCB6} CnScript_ToolsAPI_D6, {$ENDIF}
   CnScript_IdeInstComp, CnScript_CnCommon, CnScript_CnDebug, CnScript_CnWizUtils,
