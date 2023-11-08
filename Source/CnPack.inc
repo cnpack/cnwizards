@@ -3309,6 +3309,10 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI120_ATHENS_UP}
+  {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 TList use NativeInt for Index and Count instead of Integer
+{$ENDIF}
+
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
   {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 removed OldCreateOrder
   {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 supports HDPI using TVirtualImageList, etc.
