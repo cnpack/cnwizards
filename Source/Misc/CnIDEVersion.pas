@@ -38,7 +38,9 @@ unit CnIDEVersion;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2022.03.12 by liuxiao
+* 修改记录：2023.11.08 by liuxiao
+*               持续移植，到 Delphi 12 Athens
+*           2022.03.12 by liuxiao
 *               持续移植，到 Delphi 11.3 Alexandria
 *           2020.05.27 by liuxiao
 *               持续移植，到 Delphi 10.4 Sydney
@@ -423,6 +425,17 @@ begin
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
+function IsDelphi120AIdeVersionLatest: Boolean;
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 29; Minor: 0; Release: 50491; Build: 5718); // 12
+var
+  ReadFileVersion: TVersionNumber;
+begin
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+end;
+
 function IsDelphi11GEDot3: Boolean;
 {$IFDEF DELPHI110_ALEXANDRIA}
 const
@@ -549,6 +562,10 @@ begin
 
 {$IFDEF DELPHI110_ALEXANDRIA}
   CnIdeVersionIsLatest := IsDelphi110AIdeVersionLatest;
+{$ENDIF}
+
+{$IFDEF DELPHI120_ATHENS}
+  CnIdeVersionIsLatest := IsDelphi120AIdeVersionLatest;
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

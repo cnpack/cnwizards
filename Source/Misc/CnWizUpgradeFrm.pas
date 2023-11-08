@@ -131,7 +131,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure cbNoHintClick(Sender: TObject);
   private
-    { Private declarations }
     FCollection: TCnWizUpgradeCollection;
     FMemo: TMemo;
     FPanel: TPanel;
@@ -140,7 +139,7 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 procedure CheckUpgrade(AUserCheck: Boolean);
@@ -162,6 +161,7 @@ const
   csBetaVersion = 'BetaVersion';
   csURL = 'URL';
   csURLCN = 'URL_CN';
+  csNoHint = 'NoHint';
 
 var
   FThread: TCnWizUpgradeThread;
@@ -270,7 +270,7 @@ var
   S: string;
   Y1, M1, D1, Y2, M2, D2: Word;
 begin
-  // 取升级记录，发送IDE大版本号与专家包版本号以及语言ID作为参数
+  // 取升级记录，发送 IDE 大版本号与专家包版本号以及语言 ID 作为参数
   S := Format('%s?ide=%s&ver=%s&langid=%d', [WizOptions.UpgradeURL, CompilerShortName,
     SCnWizardVersion, WizOptions.CurrentLangID]);
 
@@ -302,17 +302,17 @@ end;
 // 从 S 中找出可用的 URL 来。
 procedure TCnWizUpgradeThread.FindLinks(S: string; Strings: TStrings);
 var
-  I, j: Integer;
+  I, J: Integer;
 begin
   Strings.Clear;
   I := Pos(csHttp, LowerCase(S));
   while I > 0 do
   begin
-    j := I + Length(csHttp);
-    while (j < Length(S)) and not CharInSet(S[j], ['"', ' ', '>']) do
-      Inc(j);
-    Strings.Add(Copy(S, I, j - I));
-    Delete(S, I, j - I);
+    J := I + Length(csHttp);
+    while (J < Length(S)) and not CharInSet(S[J], ['"', ' ', '>']) do
+      Inc(J);
+    Strings.Add(Copy(S, I, J - I));
+    Delete(S, I, J - I);
     I := Pos(csHttp, LowerCase(S));
   end;
 end;
@@ -553,7 +553,7 @@ begin
   begin
     FMemo := TMemo.Create(Self);
 
-    //Memo
+    // Memo
     FMemo.Name := 'Memo';
     FMemo.Parent := Self;
     FMemo.Left := 48;
@@ -573,7 +573,7 @@ begin
     FPanel := TPanel.Create(Self);
     FLabelContent := TCnWideLabel.Create(Self);
 
-    //FPanel
+    // FPanel
     FPanel.Name := 'FPanel';
     FPanel.Parent := Self;
     FPanel.Left := 48;
@@ -585,7 +585,7 @@ begin
     FPanel.TabOrder := 4;
     FPanel.Caption := '';
 
-    //FLabelContent
+    // FLabelContent
     FLabelContent.Name := 'FLabelContent';
     FLabelContent.Parent := FPanel;
     FLabelContent.Left := 3;
@@ -596,9 +596,6 @@ begin
     FLabelContent.Caption := '';
   end;
 end;
-
-const
-  csNoHint = 'NoHint';
 
 procedure TCnWizUpgradeForm.FormShow(Sender: TObject);
 var
