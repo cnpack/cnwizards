@@ -88,6 +88,7 @@ const
     'CnWizards_D103R.DLL',
     'CnWizards_D104S.DLL',
     'CnWizards_D110A.DLL',
+    'CnWizards_D120A.DLL',
     'CnWizards_CB5.DLL',
     'CnWizards_CB6.DLL');
 
