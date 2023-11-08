@@ -169,7 +169,6 @@ type
     FSaved: Boolean;
     function GetWizardChanged: Boolean;
 
-    { Private declarations }
     procedure TranslateStrings;
     procedure InitialIDENames;
     procedure CheckCmdParam;
@@ -184,7 +183,7 @@ type
   protected
     procedure DoCreate; override;
   public
-    { Public declarations }
+
   end;
 
 var
