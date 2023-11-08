@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-library CnWizards_D120Y;
+library CnWizards_D120A;
 
 {$WEAKLINKRTTI ON}
 {$RTTI EXPLICIT METHODS([]) PROPERTIES([]) FIELDS([])}

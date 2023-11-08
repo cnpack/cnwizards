@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{1C6A547D-B315-484B-B7DB-08723731B6D1}</ProjectGuid>
-        <MainSource>CnWizards_D120Y.dpr</MainSource>
+        <MainSource>CnWizards_D120A.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
         <TargetedPlatforms>1</TargetedPlatforms>
@@ -68,7 +68,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>CnWizards_D120Y</SanitizedProjectName>
+        <SanitizedProjectName>CnWizards_D120A</SanitizedProjectName>
         <DCC_K>false</DCC_K>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_N>false</DCC_N>
@@ -582,7 +582,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">CnWizards_D120Y.dpr</Source>
+                    <Source Name="MainSource">CnWizards_D120A.dpr</Source>
                 </Source>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
@@ -653,13 +653,13 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx64\libcgsqlite3.dylib" Class="DependencyModule"/>
-                <DeployFile LocalName="..\Bin\CnWizards_D120Y.dll" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="..\Bin\CnWizards_D120A.dll" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>CnWizards_D120Y.dll</RemoteName>
+                        <RemoteName>CnWizards_D120A.dll</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\Bin\CnWizards_D120Y.dll" Configuration="Release" Class="ProjectOutput"/>
+                <DeployFile LocalName="..\Bin\CnWizards_D120A.dll" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="OSX32">
                         <Operation>1</Operation>
