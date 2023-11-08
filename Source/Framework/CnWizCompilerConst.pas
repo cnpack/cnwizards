@@ -49,7 +49,7 @@ type
     cnDelphi2006, cnDelphi2007, cnDelphi2009, cnDelphi2010, cnDelphiXE, cnDelphiXE2,
     cnDelphiXE3, cnDelphiXE4, cnDelphiXE5, cnDelphiXE6, cnDelphiXE7, cnDelphiXE8,
     cnDelphi10S, cnDelphi101B, cnDelphi102T, cnDelphi103R, cnDelphi104S, cnDelphi110A,
-    cnBCB5, cnBCB6);
+    cnDelphi120Y, cnBCB5, cnBCB6);
   TCnCompilers = set of TCnCompiler;
 
 const
@@ -77,6 +77,7 @@ const
     'RAD Studio 10.3 Rio',
     'RAD Studio 10.4 Sydney',
     'RAD Studio 11.0 Alexandria',
+    'RAD Studio 12',
     'C++Builder 5',
     'C++Builder 6');
 
@@ -104,6 +105,7 @@ const
     'RADStudio103R',
     'RADStudio104S',
     'RADStudio110A',
+    'RADStudio12',
     'BCB5',
     'BCB6');
 
@@ -131,6 +133,7 @@ const
     '\Software\Embarcadero\BDS\20.0',
     '\Software\Embarcadero\BDS\21.0',
     '\Software\Embarcadero\BDS\22.0',
+    '\Software\Embarcadero\BDS\23.0',
     '\Software\Borland\C++Builder\5.0',
     '\Software\Borland\C++Builder\6.0');
 
@@ -507,19 +510,26 @@ const
                                             CompilerName = 'RAD Studio 110_ALEXANDRIA';
                                             CompilerShortName = 'D110A';
                                             {$ELSE}
-                                              {$IFDEF BCB5}
-                                                Compiler: TCnCompiler = cnBCB5;
-                                                CompilerKind: TCnCompilerKind = ckBCB;
-                                                CompilerName = 'C++BUILDER 5';
-                                                CompilerShortName = 'CB5';
+                                              {$IFDEF DELPHI120_YUKON}
+                                              Compiler: TCnCompiler = cnDelphi120Y;
+                                              CompilerKind: TCnCompilerKind = ckDelphi;
+                                              CompilerName = 'RAD Studio 120_YUKON';
+                                              CompilerShortName = 'D120Y';
                                               {$ELSE}
-                                                {$IFDEF BCB6}
-                                                  Compiler: TCnCompiler = cnBCB6;
+                                                {$IFDEF BCB5}
+                                                  Compiler: TCnCompiler = cnBCB5;
                                                   CompilerKind: TCnCompilerKind = ckBCB;
-                                                  CompilerName = 'C++BUILDER 6';
-                                                  CompilerShortName = 'CB6';
+                                                  CompilerName = 'C++BUILDER 5';
+                                                  CompilerShortName = 'CB5';
                                                 {$ELSE}
-                                                  {$MESSAGE ERROR 'Unknow Compiler!'}
+                                                  {$IFDEF BCB6}
+                                                    Compiler: TCnCompiler = cnBCB6;
+                                                    CompilerKind: TCnCompilerKind = ckBCB;
+                                                    CompilerName = 'C++BUILDER 6';
+                                                    CompilerShortName = 'CB6';
+                                                  {$ELSE}
+                                                    {$MESSAGE ERROR 'Unknow Compiler!'}
+                                                  {$ENDIF}
                                                 {$ENDIF}
                                               {$ENDIF}
                                             {$ENDIF}
