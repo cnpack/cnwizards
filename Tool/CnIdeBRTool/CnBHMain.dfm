@@ -294,7 +294,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Height = 21
         Anchors = [akTop, akRight]
         BiDiMode = bdRightToLeft
-        Caption = '......&B'
+        Caption = '...'
         ParentBiDiMode = False
         TabOrder = 0
         OnClick = btnBrowRestoreFileClick
