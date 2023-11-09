@@ -116,7 +116,8 @@ type
     procedure CheckDefaultFontSize;
     // 部分 Win7 主题会出现右下角超出窗体的现象，原因是 ClientHeight/ClientWidth
     // 会因为主题而缩小，遍历修复。注意重设 Anchors 时如果 FormCreate 事件里修改
-    // 了尺寸，则会因为组件的 Explicit Bounds 导致尺寸复原，需要特殊处理
+    // 了尺寸，则会因为组件的 Explicit Bounds 导致尺寸复原，需要特殊处理，
+    // 子类可重载 NeedAdjustRightBottomMargin 以不处理
     procedure AdjustRightBottomMargin;
 
     procedure ProcessSizeEnlarge;
@@ -134,6 +135,9 @@ type
     procedure DoDestroy; override;
     procedure ReadState(Reader: TReader); override;
 {$ENDIF}
+
+    function NeedAdjustRightBottomMargin: Boolean; virtual;
+    {* 控制子类是否要调整右下方向边距}
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
@@ -478,7 +482,9 @@ begin
 
   ProcessSizeEnlarge;
   ProcessGlyphForHDPI(Self);
-  AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
+
+  if NeedAdjustRightBottomMargin then
+    AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
 end;
 
 procedure TCnTranslateForm.DoDestroy;
@@ -950,6 +956,11 @@ begin
       ProcessGlyphForHDPI(W.Controls[I]);
   end;
 {$ENDIF}
+end;
+
+function TCnTranslateForm.NeedAdjustRightBottomMargin: Boolean;
+begin
+  Result := True;
 end;
 
 initialization

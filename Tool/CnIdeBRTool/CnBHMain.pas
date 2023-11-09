@@ -158,6 +158,7 @@ type
     procedure DoLanguageChanged(Sender: TObject); override;
     function GetHelpTopic: string; override;
     procedure DoHelpError; override;
+    function NeedAdjustRightBottomMargin: Boolean; override;
   public
     procedure TranslateStrings;
     procedure WndProc(var Message: TMessage); override;
@@ -1268,6 +1269,11 @@ begin
   end
   else
     Result := SCnRegIDEBase;
+end;
+
+function TCnIdeBRMainForm.NeedAdjustRightBottomMargin: Boolean;
+begin
+  Result := False;
 end;
 
 end.
