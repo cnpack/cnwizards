@@ -27,6 +27,8 @@ freely, subject to the following restrictions:
 
 interface
 
+{$RANGECHECKS OFF}
+
 uses
   {$IFDEF UNICODE}  AnsiStrings, {$ENDIF}
   SysUtils, Classes, DasmDefs, DCU_In, DCU_Out, FixUp, DCURecs;

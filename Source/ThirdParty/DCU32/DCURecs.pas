@@ -27,6 +27,8 @@ freely, subject to the following restrictions:
 *)
 interface
 
+{$RANGECHECKS OFF}
+
 {$IFNDEF VER90}
  {$IFNDEF VER100}
   {$REALCOMPATIBILITY ON}

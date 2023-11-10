@@ -25,6 +25,8 @@ unit DCU32;
   distribution.
 *)
 
+{$RANGECHECKS OFF}
+
 {$IFNDEF VER90}
 {$IFNDEF VER100}
 {$REALCOMPATIBILITY ON}
@@ -82,6 +84,7 @@ const { My own (AX) codes for Delphi/Kylix versions, the Delphi codes
   verD_10_3=26; // 10.3 Rio
   verD_10_4=27; // 10.4 Sydney
   verD_11_0=28; // 11 Alexandria
+  verD_12_0=29; // 12 Athens
   verK1=100; // Kylix 1.0
   verK2=101; // Kylix 2.0
   verK3=102; // Kylix 3.0
@@ -3328,7 +3331,7 @@ procedure TUnit.ReadDeclList(LK: TDeclListKind; Owner: TDCURec;
                     Break;
                 { TStrConstTypeDef.Create; }
                 Decl := TStrConstDecl.Create;
-                { //?? надо регистрировать ?таблиц?адресо?
+                { //
                   ReadStr;
                   ReadUIndex;
                   ReadUIndex;
@@ -4789,7 +4792,7 @@ function TUnit.ReadMagic(Magic: ulong): Boolean;
           // which we describe here:
           BVer := Magic shr 24;
           PlMagic := Magic and $FF;
-          if (BVer<=$23 { 11 Alexandria } )and(BVer>=$1B { XE6 } )and
+          if (BVer<=$24 { 12 Athens } )and(BVer>=$1B { XE6 } )and
             (PlMagic=$4D)or(BVer<=$1A { XE5 } )and(BVer>=$17 { XE2 } )and
             (PlMagic=$4B) then
             begin
