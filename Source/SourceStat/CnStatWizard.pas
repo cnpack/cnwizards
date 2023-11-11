@@ -328,8 +328,8 @@ begin
       PRec^.FileName := _CnExtractFileName(FileName);
       PRec^.FileDir := _CnExtractFileDir(FileName);
       PRec^.IsValidSource := True;
-      StatAStream(inStream, PRec, not (IsDelphiSourceModule(FileName) or IsDpk(FileName)));
 
+      StatAStream(inStream, PRec, not (IsDelphiSourceModule(FileName) or IsDpk(FileName)));
     finally
       InStream.Free;
       Reader.Free;
@@ -423,7 +423,7 @@ var
   I: Integer;
   Dir: string;
 begin
-  { 这里应该自己获取文件名列表，不应该放到StatFrm中处理}
+  { 这里应该自己获取文件名列表，不应该放到 StatFrm 中处理}
   Dir := Trim(CnStatForm.cbbDir.Text);
   if Dir = '' then
   begin

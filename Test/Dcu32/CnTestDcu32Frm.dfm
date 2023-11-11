@@ -24,12 +24,13 @@ object FormDcu32: TFormDcu32
   end
   object lblNote: TLabel
     Left = 24
-    Top = 64
+    Top = 60
     Width = 467
-    Height = 13
+    Height = 26
     Caption = 
       'Note: This Test Should Run OK from Delphi 5 ~ Above all. Parse O' +
-      'K for Delphi 5 ~ Above all Units.'
+      'K for Delphi 5 ~ Above all Units.'#13#10'For Delphi 110A or Above, we ' +
+      'use a different DCU32_110 library.'
   end
   object edtDcuFile: TEdit
     Left = 80

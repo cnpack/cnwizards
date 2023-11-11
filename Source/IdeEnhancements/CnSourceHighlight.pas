@@ -28,10 +28,10 @@ unit CnSourceHighlight;
 *           LiuXiao
 *           Shenloqi
 * 备    注：BDS 下 UTF8 的问题有三个地方需要标明：
-*                              D7或以下、  D2009以下的BDS、D2009：
-*           LineText 属性：    AnsiString、UTF8、          UncodeString
-*           EditView.CusorPos：Ansi字节、  UTF8的字节Col、 转成Ansi的字符Col
-*           GetAttributeAtPos：Ansi字节、  UTF8的字节Col、 UTF8的字节Col
+*                              D7 或以下、  D2009 以下的BDS、 D2009：
+*           LineText 属性：    AnsiString、 UTF8、            UncodeString
+*           EditView.CusorPos：Ansi 字节、  UTF8 的字节 Col、 转成 Ansi 的字符 Col
+*           GetAttributeAtPos：Ansi 字节、  UTF8 的字节 Col、 UTF8 的字节 Col
 *               因此 D2009 下处理时，需要额外将获得的 UnicodeString 的 LineText
 *               转成 UTF8 来适应相关的 CursorPos 和 GetAttributeAtPos
 * 开发平台：PWin2000Pro + Delphi 5.01
@@ -604,12 +604,17 @@ type
 {$ENDIF}
 
     property MatchedBracket: Boolean read FMatchedBracket write FMatchedBracket;
+    {* 是否括号配对高亮}
     property BracketColor: TColor read FBracketColor write FBracketColor;
+    {* 括号配对高亮的前景色}
     property BracketBold: Boolean read FBracketBold write FBracketBold;
+    {* 括号配对高亮时的括号是否加粗绘制}
     property BracketColorBk: TColor read FBracketColorBk write FBracketColorBk;
+    {* 括号配对高亮的背景色}
     property BracketColorBd: TColor read FBracketColorBd write FBracketColorBd;
+    {* 括号配对高亮的边框色}
     property BracketMiddle: Boolean read FBracketMiddle write FBracketMiddle;
-
+    {* 光标在括号配对间时是否高亮}
     property StructureHighlight: Boolean read FStructureHighlight write FStructureHighlight;
     {* 是否代码关键字高亮}
     property BlockMatchHighlight: Boolean read FBlockMatchHighlight write FBlockMatchHighlight;
@@ -631,7 +636,9 @@ type
     property BlockHighlightStyle: TBlockHighlightStyle read FBlockHighlightStyle write FBlockHighlightStyle;
     {* 高亮延时模式，默认改成了 bsNow}
     property BlockMatchDelay: Cardinal read FBlockMatchDelay write FBlockMatchDelay;
+    {* 高亮为延时模式时的延时，单位是毫秒}
     property BlockMatchHotkey: TShortCut read GetBlockMatchHotkey write SetBlockMatchHotkey;
+    {* 高亮为热键模式时按什么热键显示高亮}
     property BlockMatchDrawLine: Boolean read FBlockMatchDrawLine write FBlockMatchDrawLine;
     {* 是否简易地画线高亮}
     property BlockMatchLineWidth: Integer read FBlockMatchLineWidth write FBlockMatchLineWidth;
