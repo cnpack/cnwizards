@@ -200,6 +200,11 @@ begin
     FInStream.Position := 0;
 
     FStrings.LoadFromStream(InStream);
+{$IFDEF TSTRINGS_SETTEXTSTR_CANNULL}
+    // D110 以上版本，Stream 末尾的 #0 会被作为单独的一个条目加入
+    if (FStrings.Count > 0) and (FStrings[FStrings.Count - 1] = #0) then
+      FStrings.Delete(FStrings.Count - 1);
+{$ENDIF}
     FAllLines := FStrings.Count;
 
     for I := 0 to FStrings.Count - 1 do
