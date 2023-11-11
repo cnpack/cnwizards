@@ -77,7 +77,7 @@ type
     procedure ProcessAFile(const FileName: string; const Level: Integer;
       IsDirMode: Boolean = False; const Dir: string = '');
     procedure StatAStream(inStream: TStream; PStatRec: PSourceStatRec;
-      IsCPPSource: Boolean); virtual;
+      IsCppSource: Boolean); virtual;
     function GetDefFileMask: string; virtual;
   public
     constructor Create; override;
@@ -174,7 +174,7 @@ begin
       CnStatResultForm.Icon := Self.Icon;
     end;
     CnStatResultForm.StaticEnd := False;
-    
+
     if CnStatResultForm.WindowState = wsMinimized then
       CnStatResultForm.WindowState := wsNormal;
     if not CnStatResultForm.Visible then
@@ -298,7 +298,7 @@ begin
   if Trim(FileName) = '' then
     Exit;
 
-  // 不处理工程组文件（D5下无法处理）及 BCB 工程文件，只生成一个记录。
+  // 不处理工程组文件（D5 下无法处理）及 BCB 工程文件，只生成一个记录。
   if (CnStatResultForm.StatStyle = ssProjectGroup) and (Level = 0) or
     IsBpr(FileName) then
   begin
@@ -328,7 +328,7 @@ begin
       PRec^.FileName := _CnExtractFileName(FileName);
       PRec^.FileDir := _CnExtractFileDir(FileName);
       PRec^.IsValidSource := True;
-      Self.StatAStream(inStream, PRec, not (IsDelphiSourceModule(FileName) or IsDpk(FileName)));
+      StatAStream(inStream, PRec, not (IsDelphiSourceModule(FileName) or IsDpk(FileName)));
 
     finally
       InStream.Free;
@@ -391,15 +391,15 @@ begin
 end;
 
 procedure TCnStatWizard.StatAStream(inStream: TStream;
-  PStatRec: PSourceStatRec; IsCPPSource: Boolean);
+  PStatRec: PSourceStatRec; IsCppSource: Boolean);
 var
   Parser: TCnLineParser;
 begin
   PStatRec^.Bytes := inStream.Size;
   Parser := nil;
   try
-    if IsCPPSource then
-      Parser := TCnCPPLineParser.Create
+    if IsCppSource then
+      Parser := TCnCppLineParser.Create
     else
       Parser := TCnPasLineParser.Create; 
     Parser.InStream := inStream;
@@ -727,7 +727,7 @@ procedure TCnStatWizard.StatUnit;
 begin
   CnStatResultForm.ClearResult;
   if (CnOtaGetCurrentSourceEditor <> nil) and (CnOtaGetCurrentSourceEditor.FileName <> '') then
-    Self.ProcessAFile(CnOtaGetCurrentSourceEditor.FileName, 0)
+    ProcessAFile(CnOtaGetCurrentSourceEditor.FileName, 0)
   else
     ErrorDlg(SCnErrorNoFile);
 end;

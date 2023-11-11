@@ -66,13 +66,11 @@ type
     function GetStatStyle: TStatStyle;
     procedure LoadSettings;
     procedure SaveSettings;
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile);  
     property StatStyle: TStatStyle read GetStatStyle;
-    { Public declarations }
   end;
 
 var
@@ -93,11 +91,11 @@ end;
 
 procedure TCnStatForm.rgStatStyleClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   gbDir.Enabled := StatStyle = ssDir;
-  for i := 0 to gbDir.ControlCount - 1 do
-    gbDir.Controls[i].Enabled := StatStyle = ssDir;
+  for I := 0 to gbDir.ControlCount - 1 do
+    gbDir.Controls[I].Enabled := StatStyle = ssDir;
 end;
 
 procedure TCnStatForm.btnSelectDirClick(Sender: TObject);
@@ -144,11 +142,11 @@ end;
 
 procedure TCnStatForm.SaveSettings;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to ComponentCount - 1 do
-    if Components[i] is TComboBox then
-      AddComboBoxTextToItems(TComboBox(Components[i]));
+  for I := 0 to ComponentCount - 1 do
+    if Components[I] is TComboBox then
+      AddComboBoxTextToItems(TComboBox(Components[I]));
 
   with TCnIniFile.Create(FIni) do
   try
