@@ -696,8 +696,8 @@ begin
     Wizard := TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]);
     if QueryDlg(Format(SCnConfirmResetSetting, [Wizard.WizardName])) then
     begin
-      with Wizard do
-        if HasConfig then DoResetSettings;
+      Wizard.DoResetSettings; // 无论 HasConfig 是 True 还是 False 都应该重置
+
       if Wizard is TCnActionWizard then
       begin
         TCnActionWizard(Wizard).Action.ShortCut := TCnActionWizardHack(Wizard).GetDefShortCut;
