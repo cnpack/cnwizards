@@ -1,11 +1,11 @@
 object TeststructParseForm: TTeststructParseForm
   Left = 132
   Top = 103
+  Width = 813
+  Height = 503
   Caption = 
     'Test Unicode Structure Parse - Should Run OK under Non-Unicode a' +
     'nd Unicode  Compiler. D7/2009.'
-  ClientHeight = 476
-  ClientWidth = 789
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -100,7 +100,7 @@ object TeststructParseForm: TTeststructParseForm
         OnClick = btnGetUsesClick
       end
       object chkWidePas: TCheckBox
-        Left = 568
+        Left = 536
         Top = 183
         Width = 97
         Height = 17
@@ -108,6 +108,15 @@ object TeststructParseForm: TTeststructParseForm
         Checked = True
         State = cbChecked
         TabOrder = 4
+      end
+      object btnPosInfoW: TButton
+        Left = 664
+        Top = 176
+        Width = 75
+        Height = 25
+        Caption = 'PosInfoW'
+        TabOrder = 5
+        OnClick = btnPosInfoWClick
       end
     end
     object tsCpp: TTabSheet

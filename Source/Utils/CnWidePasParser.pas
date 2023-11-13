@@ -233,7 +233,7 @@ type
 procedure ParsePasCodePosInfoW(const Source: CnWideString; Line, Col: Integer;
   var PosInfo: TCodePosInfo; TabWidth: Integer = 2; FullSource: Boolean = True);
 {* UNICODE 环境下的解析光标所在代码的位置，只用于 D2009 或以上
-  Line/Col 对应 View 的 CursorPos，均为 1 开始}
+  非 Unicode 编译器下貌似也行，Line/Col 对应 View 的 CursorPos，均为 1 开始}
 
 procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
   SupportUnicodeIdent: Boolean = False);

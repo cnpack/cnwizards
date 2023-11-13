@@ -22,6 +22,7 @@ type
     lblCpp: TLabel;
     chkWidePas: TCheckBox;
     chkWideCpp: TCheckBox;
+    btnPosInfoW: TButton;
     procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasSrcChange(Sender: TObject);
     procedure btnGetUsesClick(Sender: TObject);
@@ -30,11 +31,11 @@ type
     procedure FormCreate(Sender: TObject);
     procedure mmoPasSrcClick(Sender: TObject);
     procedure mmoCppSrcClick(Sender: TObject);
+    procedure btnPosInfoWClick(Sender: TObject);
   private
-    { Private declarations }
     procedure ShowCursorPos;
   public
-    { Public declarations }
+
   end;
 
 var
@@ -42,7 +43,8 @@ var
 
 implementation
 
-uses CnWidePasParser, mPasLex, CnWideCppParser, mwBCBTokenList;
+uses
+  CnWidePasParser, mPasLex, CnWideCppParser, mwBCBTokenList, CnPasWideLex, CnPasCodeParser;
 
 {$R *.dfm}
 
@@ -203,6 +205,28 @@ begin
     mmoPasSrc.CaretPos.X + 1]);
   lblCpp.Caption := Format('Line: %d, Col %d.', [mmoCppSrc.CaretPos.Y + 1,
     mmoCppSrc.CaretPos.X + 1]);
+end;
+
+procedure TTeststructParseForm.btnPosInfoWClick(Sender: TObject);
+var
+  PosInfo: TCodePosInfo;
+  S: CnWideString;
+begin
+  mmoPasResult.Lines.Clear;
+  S := mmoPasSrc.Lines.Text;
+  ParsePasCodePosInfoW(S, mmoPasSrc.CaretPos.y + 1, mmoPasSrc.CaretPos.x + 1, PosInfo, 2, True);
+  ShowMessage(PosInfo.Token);
+
+  with PosInfo do
+  begin
+    mmoPasResult.Lines.Add('Current TokenID: ' + GetEnumName(TypeInfo(TTokenKind), Ord(TokenID)));
+    mmoPasResult.Lines.Add('AreaKind: ' + GetEnumName(TypeInfo(TCodeAreaKind), Ord(AreaKind)));
+    mmoPasResult.Lines.Add('PosKind: ' + GetEnumName(TypeInfo(TCodePosKind), Ord(PosKind)));
+    mmoPasResult.Lines.Add('Current LineNumber: ' + IntToStr(LineNumber));
+    mmoPasResult.Lines.Add('Current ColumnNumber: ' + IntToStr(TokenPos - LinePos));
+    mmoPasResult.Lines.Add('Previous Token: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)));
+    mmoPasResult.Lines.Add('Current Token: ' + string(Token));
+  end;
 end;
 
 end.
