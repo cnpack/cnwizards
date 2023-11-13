@@ -1843,7 +1843,7 @@ function TCodeTemplateList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in csNormalPosKinds
+    Result := PosInfo.PosKind in csNormalPosKinds + csFieldPosKinds // ParsePasCodePosInfo(W) 判断位置不太准，只得加上 Field
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 
