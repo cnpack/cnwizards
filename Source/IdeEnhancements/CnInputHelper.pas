@@ -169,6 +169,7 @@ type
 
   // 列表排序方式：自动、文本顺序、长度、类型
   TCnSortKind = (skByScope, skByText, skByLength, skByKind);
+
   // 输出标识符时如果光标在中间位置的处理方法
   TCnOutputStyle = (osAuto, osReplaceLeft, osReplaceAll, osEnterAll);
 
@@ -263,7 +264,7 @@ type
     procedure SortSymbolList;
     procedure SortCurrSymbolList;
     function UpdateCurrList(ForcePopup: Boolean): Boolean;
-    // 从 FSymbols 更新所有匹配的符号列表塞给 FItems，FSymbols不重新获取
+    // 从 FSymbols 更新所有匹配的符号列表塞给 FItems，FSymbols 不重新获取
     function UpdateListBox(ForcePopup, InitPopup: Boolean): Boolean;
     // 更新已经弹出的代码输入助手框里的内容，会调用上面的 UpdateCurrList
     procedure UpdateSymbolList;  // 取出所有需要的符号列表塞给 FSymbols

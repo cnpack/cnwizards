@@ -74,6 +74,7 @@ type
     skInterface, skEvent, skKeyword, skClass, skTemplate, skCompDirect,
     skComment, skUser);
   {* 符号类型 }
+
   TSymbolKindSet = set of TSymbolKind;
   {* 符号类型集合 }
 
@@ -1807,7 +1808,7 @@ begin
             if LangName = '' then
             begin
               // 自动判断类型
-{$IFNDEF DELPHI} // 说明是BCB5、6编译
+{$IFNDEF DELPHI} // 说明是 BCB5、6编译
               IsPascal := False;
               IsCpp := True;
 {$ELSE}
@@ -2021,7 +2022,7 @@ var
   CTS: IOTACodeTemplateServices;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in csNormalPosKinds
+    Result := PosInfo.PosKind in csNormalPosKinds + [pkField] // ParsePasCodePosInfo(W) 判断位置不太准，只得加上 Field
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 
