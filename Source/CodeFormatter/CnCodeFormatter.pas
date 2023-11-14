@@ -3161,7 +3161,7 @@ begin
   try
     while not (Scanner.Token in [tokKeywordEnd, tokKeywordCase, tokRB]) do
     begin
-      if Scanner.Token in ClassVisibilityTokens then
+      while Scanner.Token in ClassVisibilityTokens then // 可能出现 private public 这种连续的
         FormatClassVisibility(BackTab(PreSpaceCount));
 
       // 可能先出现属性，不能错误地留到 FormatFieldDecl 里去处理
