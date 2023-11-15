@@ -1106,7 +1106,7 @@ function TFileSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment])
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment, pkField])
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 end;
@@ -1172,17 +1172,17 @@ end;
 procedure TCompDirectSymbolList.AddSection(Ini: TMemIniFile; const Section: string);
 var
   Names: TStringList;
-  i, Idx: Integer;
+  I, Idx: Integer;
   Desc: string;
 begin
   Names := TStringList.Create;
   try
     Ini.ReadSection(Section, Names);
-    for i := 0 to Names.Count - 1 do
+    for I := 0 to Names.Count - 1 do
     begin
-      Desc := Trim(Ini.ReadString(Section, Names[i], ''));
-      Idx := Add(Names[i], skCompDirect, csCompDirectScope, Desc, Names[i], True, True);
-      if Names[i][1] = '#' then // # 开头的是 C/C++ 的
+      Desc := Trim(Ini.ReadString(Section, Names[I], ''));
+      Idx := Add(Names[I], skCompDirect, csCompDirectScope, Desc, Names[I], True, True);
+      if Names[I][1] = '#' then // # 开头的是 C/C++ 的
       begin
         Items[Idx].ForPascal := False;
         Items[Idx].ForCpp := True;
@@ -1236,7 +1236,7 @@ function TCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkIntfUses, pkImplUses])
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkIntfUses, pkImplUses, pkField])
   else
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkField]);
 end;
