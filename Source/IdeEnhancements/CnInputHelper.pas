@@ -72,14 +72,14 @@ const
 type
   TCnInputHelper = class;
 
-{ TCnInputListBox }
-
   TCnInputButton = (ibAddSymbol, ibConfig, ibHelp);
 
   TCnItemHintEvent = procedure (Sender: TObject; Index: Integer;
     var HintStr: string) of object;
 
   TBtnClickEvent = procedure (Sender: TObject; Button: TCnInputButton) of object;
+
+{ TCnInputListBox }
 
   TCnInputListBox = class(TCnFloatListBox)
   private
