@@ -742,7 +742,7 @@ end;
 
 procedure TCnInputListBox.OnHintPaint(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   S: string;
 begin
   with HintForm do
@@ -751,7 +751,7 @@ begin
     Canvas.Font := Self.Font;
     Canvas.Font.Color := clInfoText;
     S := '';
-    for i := 0 to FHintCnt do
+    for I := 0 to FHintCnt do
       S := S + '.';
     Canvas.TextOut(2, 2, SCnInputHelperKibitzCompileRunning + S);
   end;
@@ -1181,7 +1181,7 @@ end;
 
 procedure TCnInputHelper.Loaded;
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   // 初始化符号列表管理器
@@ -1190,9 +1190,9 @@ begin
   // 装载活动设置
   with CreateIniFile do
   try
-    for i := 0 to SymbolListMgr.Count - 1 do
-      SymbolListMgr.List[i].Active := ReadBool(csListActive,
-        SymbolListMgr.List[i].ClassName, True);
+    for I := 0 to SymbolListMgr.Count - 1 do
+      SymbolListMgr.List[I].Active := ReadBool(csListActive,
+        SymbolListMgr.List[I].ClassName, True);
   finally
     Free;
   end;
@@ -1345,13 +1345,13 @@ end;
 
 function TCnInputHelper.IsValidSymbol(Symbol: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if Symbol <> '' then
   begin
-    for i := 1 to Length(Symbol) do
-      if not IsValidSymbolChar(Symbol[i], i = 1) then
+    for I := 1 to Length(Symbol) do
+      if not IsValidSymbolChar(Symbol[I], I = 1) then
         Exit;
     Result := True;
   end;
@@ -1410,14 +1410,14 @@ end;
 
 function TCnInputHelper.IsValidKeyQueue: Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if FEnableAutoSymbols then
   begin
-    for i := 0 to FAutoSymbols.Count - 1 do
+    for I := 0 to FAutoSymbols.Count - 1 do
     begin
-      if SameText(FAutoSymbols[i], StrRight(FKeyQueue, Length(FAutoSymbols[i]))) then
+      if SameText(FAutoSymbols[I], StrRight(FKeyQueue, Length(FAutoSymbols[I]))) then
       begin
         Result := True;
         Exit;
@@ -1943,13 +1943,21 @@ var
 begin
   if AcceptDisplay and GetCaretPosition(Pt) then
   begin
-    // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的#也作为标识符开头
-    CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
-      CalcCharSet(CharSet, @FPosInfo));
+    // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的 # 也作为标识符开头
+    if not CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
+      CalcCharSet(CharSet, @FPosInfo)) then
+    begin
+{$IFDEF DEBUG}
+      // 记录一下光标下无标识符的情形，但还能继续往下走
+      CnDebugger.TraceMsg('Input Helper CnOtaGetCurrPosToken Get No Token');
+{$ENDIF}
+    end;
+
     FMatchStr := Copy(FToken, 1, CurrPos);
 {$IFDEF DEBUG}
     CnDebugger.TraceFmt('Token %s, Match %s', [FToken, FMatchStr]);
 {$ENDIF}
+
     if ForcePopup or IsValidSymbol(FToken) or (FPosInfo.PosKind in [pkFieldDot
       {$IFDEF SUPPORT_UNITNAME_DOT}, pkIntfUses, pkImplUses{$ENDIF} ]) then
     begin
@@ -3445,7 +3453,7 @@ end;
 
 function TCnInputHelper.CalcCharSet(Orig: TAnsiCharSet; PosInfo: PCodePosInfo): TAnsiCharSet;
 begin
-  Result := Orig;
+  Result := Orig - ['+']; // 貌似有部分标识符把 + 给加进来了，这里要强制去掉
 {$IFDEF SUPPORT_UNITNAME_DOT}
   // 支持点号的引用里头，允许点号是标识符的一部分
   if PosInfo^.IsPascal and (PosInfo^.AreaKind in [akIntfUses, akImplUses]) and

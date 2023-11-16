@@ -844,7 +844,7 @@ var
   Root: IXMLElement;
   Node: IXMLElement;
   Writer: TOmniXMLWriterHack;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if FileName <> '' then
@@ -856,10 +856,10 @@ begin
     List.Sort;
     Writer := TOmniXMLWriterHack.Create(Doc);
     try
-      for i := 0 to List.Count - 1 do
+      for I := 0 to List.Count - 1 do
       begin
         Node := Doc.CreateElement(csXmlItem);
-        Writer.Write(List.Items[i], Node, False);
+        Writer.Write(List.Items[I], Node, False);
         Root.AppendChild(Node);
       end;
     finally
@@ -877,7 +877,7 @@ var
   Doc: IXMLDocument;
   Root: IXMLElement;
   Item: TSymbolItem;
-  i, Idx: Integer;
+  I, Idx: Integer;
   Reader: TOmniXMLReaderHack;
 begin
   Result := False;
@@ -891,12 +891,12 @@ begin
 
     Reader := TOmniXMLReaderHack.Create(pfNodes);
     try
-      for i := 0 to Root.ChildNodes.Length - 1 do
-        if SameText(Root.ChildNodes.Item[i].NodeName, csXmlItem) then
+      for I := 0 to Root.ChildNodes.Length - 1 do
+        if SameText(Root.ChildNodes.Item[I].NodeName, csXmlItem) then
         begin
           Item := TSymbolItem.Create;
           try
-            Reader.Read(Item, Root.ChildNodes.Item[i] as IXmlElement);
+            Reader.Read(Item, Root.ChildNodes.Item[I] as IXmlElement);
             Item.MatchFirstOnly := Item.Kind in [skCompDirect, skComment];
             Idx := List.IndexOf(Item.Name, Item.Kind);
             if Idx < 0 then
@@ -922,10 +922,10 @@ end;
 // 调整优先值，减少重复值
 procedure AdjustSymbolListScope(List: TSymbolList);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to List.Count - 1 do
-    List.Items[i].FScope := RateToScope(List.Items[i].ScopeRate) + i;  
+  for I := 0 to List.Count - 1 do
+    List.Items[I].FScope := RateToScope(List.Items[I].ScopeRate) + I;
 end;
 
 constructor TSymbolList.Create;
@@ -991,12 +991,12 @@ end;
 
 function TSymbolList.IndexOf(const AName: string; AKind: TSymbolKind): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    if (AKind = Items[i].Kind) and (CompareStr(Items[i].Name, AName) = 0) then
+  for I := 0 to Count - 1 do
+    if (AKind = Items[I].Kind) and (CompareStr(Items[I].Name, AName) = 0) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
   Result := -1;
@@ -1415,15 +1415,15 @@ var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
   FileName: string;
-  i, j: Integer;
+  I, j: Integer;
   Added: Boolean;
 begin
   ProjectGroup := CnOtaGetProjectGroup;
   if Assigned(ProjectGroup) then
   begin
-    for i := 0 to ProjectGroup.GetProjectCount - 1 do
+    for I := 0 to ProjectGroup.GetProjectCount - 1 do
     begin
-      Project := ProjectGroup.Projects[i];
+      Project := ProjectGroup.Projects[I];
       if Assigned(Project) then
       begin
         for j := 0 to Project.GetModuleCount - 1 do
@@ -1927,18 +1927,18 @@ end;
 
 procedure TSymbolListMgr.InitList;
 var
-  i: Integer;
+  I: Integer;
 begin
   FList.Clear;
   if SymbolListClassList <> nil then
   begin
-    for i := 0 to SymbolListClassList.Count - 1 do
+    for I := 0 to SymbolListClassList.Count - 1 do
     begin
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('Create SymbolList: ' + SymbolListClassList[i].ClassName);
+      CnDebugger.LogMsg('Create SymbolList: ' + SymbolListClassList[I].ClassName);
     {$ENDIF}
       try
-        FList.Add(TSymbolListClass(SymbolListClassList[i]).Create);
+        FList.Add(TSymbolListClass(SymbolListClassList[I]).Create);
       except
       {$IFDEF DEBUG}
         on E: Exception do
@@ -1952,16 +1952,16 @@ end;
 procedure TSymbolListMgr.GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
   PosInfo: TCodePosInfo);
 var
-  i: Integer;
+  I: Integer;
   F, C: TAnsiCharSet;
 begin
   FirstSet := [];
   CharSet := [];
-  for i := 0 to Count - 1 do
+  for I := 0 to Count - 1 do
   begin
-    if List[i].Active then
+    if List[I].Active then
     begin
-      List[i].GetValidCharSet(F, C, PosInfo);
+      List[I].GetValidCharSet(F, C, PosInfo);
       FirstSet := FirstSet + F;
       CharSet := CharSet + C;
     end;
@@ -1970,31 +1970,33 @@ end;
 
 function TSymbolListMgr.ListByClass(AClass: TSymbolListClass): TSymbolList;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
-  for i := 0 to Count - 1 do
-    if List[i].ClassType = AClass then
+  for I := 0 to Count - 1 do
+  begin
+    if List[I].ClassType = AClass then
     begin
-      Result := List[i];
+      Result := List[I];
       Exit;
     end;
+  end;
 end;
 
 procedure TSymbolListMgr.Load;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    List[i].Load;
+  for I := 0 to Count - 1 do
+    List[I].Load;
 end;
 
 procedure TSymbolListMgr.Save;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to Count - 1 do
-    List[i].Save;
+  for I := 0 to Count - 1 do
+    List[I].Save;
 end;
 
 procedure TSymbolListMgr.Reset;
