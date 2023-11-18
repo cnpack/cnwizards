@@ -3311,11 +3311,13 @@
 
 {$IFDEF DELPHI120_ATHENS_UP}
   {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 TList use NativeInt for Index and Count instead of Integer
+  {$DEFINE IDE_HAS_TABMENU_COPY_PATH}   // Athens 12 editor tab menu has item to copy path or filename
 {$ENDIF}
 
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
   {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 removed OldCreateOrder
   {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 supports HDPI using TVirtualImageList, etc.
+  {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 supports auto open VCL source readonly
   {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 TStrings.SetTextStr Ignore #0 Terminated Char
 {$ENDIF}
 
