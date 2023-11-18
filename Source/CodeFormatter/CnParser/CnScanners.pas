@@ -923,10 +923,23 @@ begin
         Result := tokNoToken;
 
         // 回溯一下，如果 ^ 之前越过空白是字母数字或 )]^，就表示不是字符串而是 Hat
+        // 但前面如果是块注释呢？
         if OldP > FBuffer then
         begin
           repeat
             Dec(OldP);
+
+            // 如果 OldP 是块注释尾，跳到块注释头，注意没处理 (* *) 这种格式的块注释，真碰到也认了
+            while OldP^ = '}' do
+            begin
+              repeat
+                Dec(OldP);
+              until (OldP^ = '{') or (OldP <= FBuffer);
+
+              if OldP^ = '{' then
+                Dec(OldP);
+            end;
+
           until (not (OldP^ in [' ', #10, #13, #9])) or (OldP <= FBuffer);
 
           if OldP^ in ['A'..'Z', 'a'..'z', '0'..'9', '^', ')', ']'] then
