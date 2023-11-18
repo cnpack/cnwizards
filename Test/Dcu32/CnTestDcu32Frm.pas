@@ -222,13 +222,13 @@ begin
     Info := TCnUnitUsesInfo.Create(AFileName, False);
 
     ALines.Add('=================== ' + AFileName);
-    ALines.Add('interface:');
+    ALines.Add('interface: ' + IntToStr(Info.IntfUsesCount));
     for I := 0 to Info.IntfUsesCount - 1 do
     begin
       ALines.Add(Info.IntfUses[I]);
       ALines.Add(Info.IntfUsesImport[I].Text);
     end;
-    ALines.Add('implementation:');
+    ALines.Add('implementation: ' + IntToStr(Info.ImplUsesCount));
     for I := 0 to Info.ImplUsesCount - 1 do
     begin
       ALines.Add(Info.ImplUses[I]);
