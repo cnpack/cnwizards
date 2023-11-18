@@ -4592,6 +4592,8 @@ end;
 procedure TCnBasePascalFormatter.FormatVariantSection(PreSpaceCount: Byte);
 begin
   Match(tokKeywordCase, PreSpaceCount);
+  if Scanner.Token = tokAmpersand then // 可能有 &
+    Match(Scanner.Token);
   if Scanner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens) then // case 后允许此等名字
     Match(Scanner.Token);
 
