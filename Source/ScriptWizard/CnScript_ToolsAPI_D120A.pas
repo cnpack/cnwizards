@@ -25,16 +25,16 @@ unit CnScript_ToolsAPI_D120A;
 * 单元名称：脚本扩展 ToolsAPI 注册类
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元由 UnitParser v0.7 自动生成的文件修改而来
-* 开发平台：PWinXP SP2 + Delphi
-* 兼容测试：PWin9X/2000/XP + Delphi
+* 开发平台：PWin7 + Delphi 12
+* 兼容测试：PWin11P + Delphi 12
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2016.04.22 V1.0
+* 修改记录：2023.11.19 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
 
 interface
-
+ 
 {$I CnWizards.inc}
 
 uses
@@ -55,13 +55,26 @@ type
  
  
 { compile-time registration functions }
+procedure SIRegister_IOTAVersionSKUInfoService(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAVersionSKUInfoService290(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAVersionSKUInfoService280(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAAsyncCodeInsightManager270(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
 procedure SIRegister_TOTAStringsAdapter(CL: TPSPascalCompiler);
 procedure SIRegister_TOTAFile(CL: TPSPascalCompiler);
 procedure SIRegister_TModuleNotifierObject(CL: TPSPascalCompiler);
 procedure SIRegister_TNotifierObject(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAIDEWaitDialogServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAIDEWaitDialogServices270(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAIDEThemingServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAIDEThemingServices260(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAIDEThemingServices250(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAExtensionsNotifier(CL: TPSPascalCompiler);
+procedure SIRegister_INTAIDEThemingServicesNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectUnitScopes(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildEventProvider(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildEvent(CL: TPSPascalCompiler);
@@ -92,8 +105,12 @@ procedure SIRegister_IOTACompileNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAHistoryServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAHistoryItem(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAAboutBoxServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAAboutBoxServices280(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAAboutBoxServices270(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAAboutBoxServices120(CL: TPSPascalCompiler);
 procedure SIRegister_IOTASplashScreenServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTASplashScreenServices280(CL: TPSPascalCompiler);
+procedure SIRegister_IOTASplashScreenServices270(CL: TPSPascalCompiler);
 procedure SIRegister_IBorlandIDEServices(CL: TPSPascalCompiler);
 procedure SIRegister_IBorlandIDEServices70(CL: TPSPascalCompiler);
 procedure SIRegister_INTAPersonalityDevelopers(CL: TPSPascalCompiler);
@@ -114,13 +131,13 @@ procedure SIRegister_IOTAIDEInsightNotifier150(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAIDEInsightNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAIDEInsightCategory(CL: TPSPascalCompiler);
 procedure SIRegister_INTAIDEInsightItem(CL: TPSPascalCompiler);
+procedure SIRegister_INTAIDEInsightItem290(CL: TPSPascalCompiler);
+procedure SIRegister_INTAIDEInsightItem280(CL: TPSPascalCompiler);
+procedure SIRegister_INTAIDEInsightItem270(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightServices270(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightServices60(CL: TPSPascalCompiler);
-procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
-procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
-procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomDrawCodeInsightViewer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightViewer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightViewer90(CL: TPSPascalCompiler);
@@ -128,6 +145,11 @@ procedure SIRegister_IOTAPrimaryCodeInsightManager(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightManager(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightManager90(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeBrowsePreview(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightManagerEnvOptions290(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightManagerEnvOptions270(CL: TPSPascalCompiler);
+procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAMultipleCodeInsightInvocation(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAMultipleCodeInsightInvocation290(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightManager100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightParameterList100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACodeInsightParameterList(CL: TPSPascalCompiler);
@@ -145,16 +167,20 @@ procedure SIRegister_INTACustomEditorSubView190(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomEditorSubView(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomEditorViewStatusPanel(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomEditorViewState(CL: TPSPascalCompiler);
+procedure SIRegister_INTACustomEditorView280(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomEditorView150(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomEditorView(CL: TPSPascalCompiler);
 procedure SIRegister_INTAEditorServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditorServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEditorServices280(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditorServices80(CL: TPSPascalCompiler);
+procedure SIRegister_INTAEditorLocalMenu(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditorServices70(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditorServices60(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditorExplorerPersonalityTrait(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditOptions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditOptions60(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEditorColorSpeedSetting(CL: TPSPascalCompiler);
 procedure SIRegister_IOTASpeedSetting(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAKeyboardDiagnostics(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAKeyboardServices(CL: TPSPascalCompiler);
@@ -179,6 +205,9 @@ procedure SIRegister_IOTAServices70(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAServices60(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAServices50(CL: TPSPascalCompiler);
 procedure SIRegister_INTAServices(CL: TPSPascalCompiler);
+procedure SIRegister_INTAServices290(CL: TPSPascalCompiler);
+procedure SIRegister_INTAServices280(CL: TPSPascalCompiler);
+procedure SIRegister_INTAServices270(CL: TPSPascalCompiler);
 procedure SIRegister_INTACustomDockableForm(CL: TPSPascalCompiler);
 procedure SIRegister_INTAServices120(CL: TPSPascalCompiler);
 procedure SIRegister_INTAServices90(CL: TPSPascalCompiler);
@@ -194,7 +223,9 @@ procedure SIRegister_IOTAHelpInsight(CL: TPSPascalCompiler);
 procedure SIRegister_INTAEnvironmentOptionsServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACustomOptions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEnvironmentOptions(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEnvironmentOptions280(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEnvironmentOptions140(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEnvironmentOptionsNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_INTAAddInOptions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAMessageServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAMessageServices80(CL: TPSPascalCompiler);
@@ -211,7 +242,7 @@ procedure SIRegister_INTACustomDrawMessage(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACustomMessage100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACustomMessage50(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACustomMessage(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAPAckageServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAPackageServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAPackageServices210(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAPackageInfo(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAPackageServices140(CL: TPSPascalCompiler);
@@ -221,9 +252,9 @@ procedure SIRegister_IOTAProjectWizard100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectWizard(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAFormWizard100(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAFormWizard(CL: TPSPascalCompiler);
-procedure SIRegister_IOTARepositoryWizard160(CL: TPSPascalCompiler);
-procedure SIRegister_IOTARepositoryWizard190(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard260(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARepositoryWizard190(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARepositoryWizard160(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard80(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard60(CL: TPSPascalCompiler);
 procedure SIRegister_IOTARepositoryWizard(CL: TPSPascalCompiler);
@@ -238,6 +269,7 @@ procedure SIRegister_IOTADebuggerServices150(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerVisualizerExternalViewer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerVisualizerExternalViewerUpdater(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerVisualizerValueReplacer(CL: TPSPascalCompiler);
+procedure SIRegister_IOTADebuggerVisualizer250(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerVisualizer(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerServices120(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADebuggerServices90(CL: TPSPascalCompiler);
@@ -283,8 +315,8 @@ procedure SIRegister_IOTABreakpointNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAModuleServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAModuleServices70(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectGroupCreator(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAProjectCreator160(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator190(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAProjectCreator160(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator80(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator50(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCreator(CL: TPSPascalCompiler);
@@ -321,8 +353,8 @@ procedure SIRegister_IOTAProjectBuilder140(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectCompileNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectBuilder40(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectOptionsConfigurations(CL: TPSPascalCompiler);
-procedure SIRegister_IOTAProjectOptionsConfigurations140(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAProjectOptionsConfigurations230(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAProjectOptionsConfigurations140(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration150(CL: TPSPascalCompiler);
 procedure SIRegister_IOTABuildConfiguration140(CL: TPSPascalCompiler);
@@ -383,12 +415,14 @@ procedure SIRegister_IOTAReplaceOptions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTASearchOptions(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditView40(CL: TPSPascalCompiler);
 procedure SIRegister_IOTACustomEditView(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARawEditReader(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAHighlightServices(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAElisionPreview(CL: TPSPascalCompiler);
 procedure SIRegister_IOTADefaultPreviewTrait(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAHighlighterPreview(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAHighlighter(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditWriter(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAEditWriter280(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAEditReader(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAToolsFilter(CL: TPSPascalCompiler);
 procedure SIRegister_IOTAToolsFilter60(CL: TPSPascalCompiler);
@@ -416,22 +450,7 @@ implementation
 
 
 uses
-   Windows
-  ,ActiveX
-  ,TypInfo
-  ,DockForm
-  ,DesignIntf
-  ,Menus
-  ,ActnList
-  ,Graphics
-  ,ImgList
-  ,Forms
-  ,Controls
-  ,ComCtrls
-  ,XMLIntf
-  ,IniFiles
-  ,Types
-  ,ToolsAPI
+   ToolsAPI
   ;
  
  
@@ -441,6 +460,76 @@ begin
 end;
 
 (* === compile-time registration functions === *)
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAVersionSKUInfoService(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAVersionSKUInfoService290', 'IOTAVersionSKUInfoService') do
+  with CL.AddInterface(CL.FindInterface('IOTAVersionSKUInfoService290'),IOTAVersionSKUInfoService, 'IOTAVersionSKUInfoService') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAVersionSKUInfoService290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAVersionSKUInfoService280', 'IOTAVersionSKUInfoService290') do
+  with CL.AddInterface(CL.FindInterface('IOTAVersionSKUInfoService280'),IOTAVersionSKUInfoService290, 'IOTAVersionSKUInfoService290') do
+  begin
+    RegisterMethod('Function GetSKUName : string', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAVersionSKUInfoService280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IInterface', 'IOTAVersionSKUInfoService280') do
+  with CL.AddInterface(CL.FindInterface('IInterface'),IOTAVersionSKUInfoService280, 'IOTAVersionSKUInfoService280') do
+  begin
+    RegisterMethod('Function GetSKU : Integer', cdRegister);
+    RegisterMethod('Function GetIsProductTrial : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightUIOverride') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightUIOverride, 'IOTACodeInsightUIOverride') do
+  begin
+    RegisterMethod('Procedure EnableTooltip( const AFileName : string; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EnableGotoDefinition( const AEditView : IOTAEditView; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAAsyncCodeInsightManager270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAAsyncCodeInsightManager270') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAAsyncCodeInsightManager270, 'IOTAAsyncCodeInsightManager270') do
+  begin
+    RegisterMethod('Procedure AsyncParameterCodeInsightParamIndexEx( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAParamIndexCallBackEx)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAAsyncCodeInsightManager') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAAsyncCodeInsightManager, 'IOTAAsyncCodeInsightManager') do
+  begin
+    RegisterMethod('Procedure AsyncAllowCodeInsight( var AAllow : Boolean; const AKey : Char)', cdRegister);
+    RegisterMethod('Function AsyncCanInvoke( AInsightType : TOTACodeInsightType) : Boolean', cdRegister);
+    RegisterMethod('Function AsyncEnabled : Boolean', cdRegister);
+    RegisterMethod('Function AsyncInvokeCodeCompletion( AHowInvoked : TOTAInvokeType; var AStr : string; ALine, ACharIndex : Integer; ACallback : TOTACodeCompleteCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncInvokeParameterCodeInsight( HowInvoked : TOTAInvokeType; const AFileName : string; ALine, ACharIndex : Integer; ACallback : TOTAParametersCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncGetHintText( HintLine, HintCol : Integer; ACallBack : TOTAHintTextCallBack) : Integer', cdRegister);
+    RegisterMethod('Function AsyncGotoDefinition( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAGotoDefinitionCallBack) : Integer', cdRegister);
+    RegisterMethod('Procedure AsyncParameterCodeInsightParamIndex( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAParamIndexCallBack)', cdRegister);
+    RegisterMethod('Procedure AsyncOperationCanceled( AId : Integer)', cdRegister);
+    RegisterMethod('Function ShowCalculating : Boolean', cdRegister);
+  end;
+end;
+
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TOTAStringsAdapter(CL: TPSPascalCompiler);
 begin
@@ -484,6 +573,113 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAIDEWaitDialogServices(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAIDEWaitDialogServices270', 'IOTAIDEWaitDialogServices') do
+  with CL.AddInterface(CL.FindInterface('IOTAIDEWaitDialogServices270'),IOTAIDEWaitDialogServices, 'IOTAIDEWaitDialogServices') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAIDEWaitDialogServices270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IInterface', 'IOTAIDEWaitDialogServices270') do
+  with CL.AddInterface(CL.FindInterface('IInterface'),IOTAIDEWaitDialogServices270, 'IOTAIDEWaitDialogServices270') do
+  begin
+    RegisterMethod('Function IsVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsInputEnabled : Boolean', cdRegister);
+    RegisterMethod('Procedure Show( const Caption, ADescription : string)', cdRegister);
+    RegisterMethod('Procedure CloseDialog', cdRegister);
+    RegisterMethod('Procedure UpdateCurrentWork( const ACurrentWork : string)', cdRegister);
+    RegisterMethod('Procedure UpdateDescription( const ADescription : string)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAIDEThemingServices(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAIDEThemingServices260', 'IOTAIDEThemingServices') do
+  with CL.AddInterface(CL.FindInterface('IOTAIDEThemingServices260'),IOTAIDEThemingServices, 'IOTAIDEThemingServices') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAIDEThemingServices260(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAIDEThemingServices250', 'IOTAIDEThemingServices260') do
+  with CL.AddInterface(CL.FindInterface('IOTAIDEThemingServices250'),IOTAIDEThemingServices260, 'IOTAIDEThemingServices260') do
+  begin
+    RegisterMethod('Function AddEditorColorNotifier( const ANotifier : IOTAEditorColorSpeedSetting) : Integer', cdRegister);
+    RegisterMethod('Procedure RemoveEditorColorNotifier( Index : Integer)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAIDEThemingServices250(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IInterface', 'IOTAIDEThemingServices250') do
+  with CL.AddInterface(CL.FindInterface('IInterface'),IOTAIDEThemingServices250, 'IOTAIDEThemingServices250') do
+  begin
+    RegisterMethod('Function AddNotifier( const ANotifier : INTAIDEThemingServicesNotifier) : Integer', cdRegister);
+    RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
+    RegisterMethod('Function GetActiveThemeName : string', cdRegister);
+    RegisterMethod('Function GetIDEStyleServices : TCustomStyleServices', cdRegister);
+    RegisterMethod('Function GetIDEThemingEnabled : Boolean', cdRegister);
+    RegisterMethod('Procedure ApplyTheme( AComponent : TComponent)', cdRegister);
+    RegisterMethod('Function GetEditorColorSpeedSetting( const ThemeName : string) : string', cdRegister);
+    RegisterMethod('Function GetOIColorSpeedSetting( const ThemeName : string) : string', cdRegister);
+    RegisterMethod('Procedure RegisterFormClass( AFormClass : TCustomFormClass)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAExtensionsNotifier(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTANotifier', 'IOTAExtensionsNotifier') do
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAExtensionsNotifier, 'IOTAExtensionsNotifier') do
+  begin
+    RegisterMethod('Procedure AddedOTAExtension( )', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAIDEThemingServicesNotifier(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTANotifier', 'INTAIDEThemingServicesNotifier') do
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTAIDEThemingServicesNotifier, 'INTAIDEThemingServicesNotifier') do
+  begin
+    RegisterMethod('Procedure ChangingTheme( )', cdRegister);
+    RegisterMethod('Procedure ChangedTheme( )', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService230', 'IOTAGetItService') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService230'),IOTAGetItService, 'IOTAGetItService') do
+  begin
+    RegisterMethod('Procedure CheckProjectDependencies( const Project : IOTAProject)', cdRegister);
+    RegisterMethod('Function InstallAndroidSDK : Boolean', cdRegister);
+    RegisterMethod('Function InstallAndroidSDKTools : Boolean', cdRegister);
+    RegisterMethod('Function Install1( const CatalogId : string) : Boolean;', cdRegister);
+    RegisterMethod('Function Install2( const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean;', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService220', 'IOTAGetItService230') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService220'),IOTAGetItService230, 'IOTAGetItService230') do
+  begin
+    RegisterMethod('Function IsInstalled( const CatalogId : string) : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAGetItService220(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAGetItService220') do
@@ -495,36 +691,11 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAGetItService230(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IOTAGetItService220', 'IOTAGetItService230') do
-  with CL.AddInterface(CL.FindInterface('IOTAGetItService220'),IOTAGetItService230, 'IOTAGetItService230') do
-  begin
-    RegisterMethod('Procedure CheckProjectDependencies(const Project:  IOTAProject)', cdRegister);
-    RegisterMethod('Function InstallAndroidSDK : Boolean', cdRegister);
-    RegisterMethod('Function InstallAndroidSDKTools : Boolean', cdRegister);
-    RegisterMethod('Function Install1(const CatalogId : string): Boolean', cdRegister);
-    RegisterMethod('Function Install(const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IOTAGetItService230', 'IOTAGetItService') do
-  with CL.AddInterface(CL.FindInterface('IOTAGetItService230'),IOTAGetItService, 'IOTAGetItService') do
-  begin
-    RegisterMethod('Function IsInstalled(const CatalogId: string): Boolean', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAProjectUnitScopes(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAProjectUnitScopes') do
   with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAProjectUnitScopes, 'IOTAProjectUnitScopes') do
   begin
-    RegisterMethod('Function GetUnitScopes( ConfigName : string; PlatformName : string) : TObject', cdRegister);
   end;
 end;
 
@@ -671,7 +842,7 @@ begin
   begin
     RegisterMethod('Function GetIsMultiSelectable : Boolean', cdRegister);
     RegisterMethod('Procedure SetIsMultiSelectable( Value : Boolean)', cdRegister);
-    RegisterMethod('Procedure Execute( const MenuContextList : IInterfaceList)', cdRegister);
+    RegisterMethod('Procedure Execute1( const MenuContextList : IInterfaceList);', cdRegister);
     RegisterMethod('Function PreExecute( const MenuContextList : IInterfaceList) : Boolean', cdRegister);
     RegisterMethod('Function PostExecute( const MenuContextList : IInterfaceList) : Boolean', cdRegister);
   end;
@@ -769,8 +940,8 @@ begin
     RegisterMethod('Function GetTimerCount : Integer', cdRegister);
     RegisterMethod('Procedure MarkElapsedTime( const Description : string)', cdRegister);
     RegisterMethod('Function StartTimer( const Description : string; const Category : string) : Integer', cdRegister);
-    RegisterMethod('Procedure StopTimer1( TimerID : Integer)', cdRegister);
-    RegisterMethod('Procedure StopTimer( const Description, Category : string)', cdRegister);
+    RegisterMethod('Procedure StopTimer1( TimerID : Integer);', cdRegister);
+    RegisterMethod('Procedure StopTimer2( const Description, Category : string);', cdRegister);
     RegisterMethod('Procedure UpdateLogFile', cdRegister);
     RegisterMethod('Function GetLogFileName : string', cdRegister);
     RegisterMethod('Procedure SetLogFileName( const Value : string)', cdRegister);
@@ -859,7 +1030,7 @@ begin
   //with RegInterfaceS(CL,'IInterface', 'IOTACompileServices') do
   with CL.AddInterface(CL.FindInterface('IInterface'),IOTACompileServices, 'IOTACompileServices') do
   begin
-    RegisterMethod('Function AddNotifier( Notifier : IOTACompileNotifier) : Integer', cdRegister);
+    RegisterMethod('Function AddNotifier1( Notifier : IOTACompileNotifier) : Integer;', cdRegister);
     RegisterMethod('Function CancelBackgroundCompile( Prompt : Boolean) : Boolean', cdRegister);
     RegisterMethod('Function CompileProjects( Projects : array of IOTAProject; CompileMode : TOTACompileMode; Wait, ClearMessages : Boolean) : TOTACompileResult', cdRegister);
     RegisterMethod('Procedure DisableBackgroundCompilation', cdRegister);
@@ -894,8 +1065,8 @@ begin
     RegisterMethod('Function GetForwardCount : Integer', cdRegister);
     RegisterMethod('Function GetForwardItem( Index : Integer) : IOTAHistoryItem', cdRegister);
     RegisterMethod('Procedure GetStackStatus( var CanGoBack, CanGoForward : Boolean)', cdRegister);
-    RegisterMethod('Procedure Execute1( GoForward : Boolean)', cdRegister);
-    RegisterMethod('Procedure Execute( const AItem : IOTAHistoryItem)', cdRegister);
+    RegisterMethod('Procedure Execute1( GoForward : Boolean);', cdRegister);
+    RegisterMethod('Procedure Execute2( const AItem : IOTAHistoryItem);', cdRegister);
     RegisterMethod('Procedure RemoveHistoryItem( const Item : IOTAHistoryItem)', cdRegister);
   end;
 end;
@@ -915,12 +1086,31 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAAboutBoxServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAAboutBoxServices120', 'IOTAAboutBoxServices') do
-  with CL.AddInterface(CL.FindInterface('IOTAAboutBoxServices120'),IOTAAboutBoxServices, 'IOTAAboutBoxServices') do
+  //with RegInterfaceS(CL,'IOTAAboutBoxServices280', 'IOTAAboutBoxServices') do
+  with CL.AddInterface(CL.FindInterface('IOTAAboutBoxServices280'),IOTAAboutBoxServices, 'IOTAAboutBoxServices') do
   begin
-    RegisterMethod('Function AddPluginInfo( const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAlphaFormat : TOTAAlphaFormat) : Integer', cdRegister);
-    RegisterMethod('Function AddProductInfo( const ADialogTitle, ACopyright, ATitle, ADescription : string;' +
-      ' AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat; AProductImageAlphaFormat : TOTAAlphaFormat) : Integer', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAAboutBoxServices280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAAboutBoxServices270', 'IOTAAboutBoxServices280') do
+  with CL.AddInterface(CL.FindInterface('IOTAAboutBoxServices270'),IOTAAboutBoxServices280, 'IOTAAboutBoxServices280') do
+  begin
+    RegisterMethod('Function AddPluginInfo3( const ATitle, ADescription : string; const AImage : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;', cdRegister);
+    RegisterMethod('Function AddProductInfo3( const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage : HBITMAP; const AProductImage : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat) : Integer;', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAAboutBoxServices270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAAboutBoxServices120', 'IOTAAboutBoxServices270') do
+  with CL.AddInterface(CL.FindInterface('IOTAAboutBoxServices120'),IOTAAboutBoxServices270, 'IOTAAboutBoxServices270') do
+  begin
+    RegisterMethod('Function AddPluginInfo2( const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAlphaFormat : TOTAAlphaFormat) : Integer;', cdRegister);
+    RegisterMethod('Function AddProductInfo2( const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat; AProductImageAlphaFormat : TOTAAlphaFormat) : Integer;', cdRegister);
   end;
 end;
 
@@ -930,8 +1120,8 @@ begin
   //with RegInterfaceS(CL,'IInterface', 'IOTAAboutBoxServices120') do
   with CL.AddInterface(CL.FindInterface('IInterface'),IOTAAboutBoxServices120, 'IOTAAboutBoxServices120') do
   begin
-    RegisterMethod('Function AddPluginInfo( const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer', cdRegister);
-    RegisterMethod('Function AddProductInfo( const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer', cdRegister);
+    RegisterMethod('Function AddPluginInfo1( const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;', cdRegister);
+    RegisterMethod('Function AddProductInfo1( const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;', cdRegister);
     RegisterMethod('Procedure RemovePluginInfo( Index : Integer)', cdRegister);
     RegisterMethod('Procedure RemoveProductInfo( Index : Integer)', cdRegister);
   end;
@@ -940,11 +1130,31 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTASplashScreenServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IInterface', 'IOTASplashScreenServices') do
-  with CL.AddInterface(CL.FindInterface('IInterface'),IOTASplashScreenServices, 'IOTASplashScreenServices') do
+  //with RegInterfaceS(CL,'IOTASplashScreenServices280', 'IOTASplashScreenServices') do
+  with CL.AddInterface(CL.FindInterface('IOTASplashScreenServices280'),IOTASplashScreenServices, 'IOTASplashScreenServices') do
   begin
-    RegisterMethod('Procedure AddPluginBitmap( const ACaption : string; ABitmap : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string)', cdRegister);
-    RegisterMethod('Procedure AddProductBitmap( const ACaption : string; ABitmap : HBITMAP; IsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTASplashScreenServices280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTASplashScreenServices270', 'IOTASplashScreenServices280') do
+  with CL.AddInterface(CL.FindInterface('IOTASplashScreenServices270'),IOTASplashScreenServices280, 'IOTASplashScreenServices280') do
+  begin
+    RegisterMethod('Procedure AddPluginBitmap2( const Caption : string; const AImageArray : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);', cdRegister);
+    RegisterMethod('Procedure AddProductBitmap2( const Caption : string; const AImageArray : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTASplashScreenServices270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IInterface', 'IOTASplashScreenServices270') do
+  with CL.AddInterface(CL.FindInterface('IInterface'),IOTASplashScreenServices270, 'IOTASplashScreenServices270') do
+  begin
+    RegisterMethod('Procedure AddPluginBitmap1( const ACaption : string; ABitmap : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);', cdRegister);
+    RegisterMethod('Procedure AddProductBitmap1( const ACaption : string; ABitmap : HBITMAP; IsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);', cdRegister);
     RegisterMethod('Procedure ShowProductSplash( ABitmap : HBITMAP)', cdRegister);
     RegisterMethod('Procedure StatusMessage( const StatusMessage : string)', cdRegister);
     RegisterMethod('Procedure SetProductIcon( AIcon : HICON)', cdRegister);
@@ -958,8 +1168,8 @@ begin
   with CL.AddInterface(CL.FindInterface('IBorlandIDEServices70'),IBorlandIDEServices, 'IBorlandIDEServices') do
   begin
     RegisterMethod('Function SupportsService( const Service : TGUID) : Boolean', cdRegister);
-    RegisterMethod('Function GetService1( const Service : TGUID) : IInterface', cdRegister);
-    RegisterMethod('Function GetService( const Service : TGUID; out Svc) : Boolean', cdRegister);
+    RegisterMethod('Function GetService1( const Service : TGUID) : IInterface;', cdRegister);
+    RegisterMethod('Function GetService2( const Service : TGUID; out Svc) : Boolean;', cdRegister);
   end;
 end;
 
@@ -1025,18 +1235,18 @@ begin
     RegisterMethod('Procedure RemoveFileTrait( const APersonality, AFileType : string; const ATraitGUID : TGUID)', cdRegister);
     RegisterMethod('Function GetCurrentPersonality : string', cdRegister);
     RegisterMethod('Procedure SetCurrentPersonality( const APersonality : string)', cdRegister);
-    RegisterMethod('Function GetFileTrait( const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface', cdRegister);
-    RegisterMethod('Function GetFileTrait1( const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface', cdRegister);
-    RegisterMethod('Function GetFileTrait2( const APersonality, AFileName : string; const ATraitGUID : TGUID) : IInterface', cdRegister);
-    RegisterMethod('Function GetFileTrait3( const AFileName : string; const ATraitGUID : TGUID) : IInterface', cdRegister);
-    RegisterMethod('Function GetTrait1( const APersonality : string; const ATraitGUID : TGUID) : IInterface', cdRegister);
-    RegisterMethod('Function GetTrait( const ATraitGUID : TGUID) : IInterface', cdRegister);
-    RegisterMethod('Function SupportsFileTrait( const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean', cdRegister);
-    RegisterMethod('Function SupportsFileTrait1( const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean', cdRegister);
-    RegisterMethod('Function SupportsFileTrait2( const APersonality, AFileName : string; const ATraitGUID : TGUID) : Boolean', cdRegister);
-    RegisterMethod('Function SupportsFileTrait3( const AFileName : string; const ATraitGUID : TGUID) : Boolean', cdRegister);
-    RegisterMethod('Function SupportsTrait1( const APersonality : string; const ATraitGUID : TGUID) : Boolean', cdRegister);
-    RegisterMethod('Function SupportsTrait( const ATraitGUID : TGUID) : Boolean', cdRegister);
+    RegisterMethod('Function GetFileTrait1( const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface;', cdRegister);
+    RegisterMethod('Function GetFileTrait2( const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface;', cdRegister);
+    RegisterMethod('Function GetFileTrait3( const APersonality, AFileName : string; const ATraitGUID : TGUID) : IInterface;', cdRegister);
+    RegisterMethod('Function GetFileTrait4( const AFileName : string; const ATraitGUID : TGUID) : IInterface;', cdRegister);
+    RegisterMethod('Function GetTrait1( const APersonality : string; const ATraitGUID : TGUID) : IInterface;', cdRegister);
+    RegisterMethod('Function GetTrait2( const ATraitGUID : TGUID) : IInterface;', cdRegister);
+    RegisterMethod('Function SupportsFileTrait1( const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean;', cdRegister);
+    RegisterMethod('Function SupportsFileTrait2( const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean;', cdRegister);
+    RegisterMethod('Function SupportsFileTrait3( const APersonality, AFileName : string; const ATraitGUID : TGUID) : Boolean;', cdRegister);
+    RegisterMethod('Function SupportsFileTrait4( const AFileName : string; const ATraitGUID : TGUID) : Boolean;', cdRegister);
+    RegisterMethod('Function SupportsTrait1( const APersonality : string; const ATraitGUID : TGUID) : Boolean;', cdRegister);
+    RegisterMethod('Function SupportsTrait2( const ATraitGUID : TGUID) : Boolean;', cdRegister);
     RegisterMethod('Function PromptUserForPersonality( const ATraitGUID : TGUID; const Prompt : string) : Boolean', cdRegister);
   end;
 end;
@@ -1167,8 +1377,8 @@ begin
     RegisterMethod('Procedure AddItem( Item : INTAIDEInsightItem; Category : string)', cdRegister);
     RegisterMethod('Function AddNotifier( Notifier : IOTAIDEInsightNotifier) : Integer', cdRegister);
     RegisterMethod('Function CategoryCount : Integer', cdRegister);
-    RegisterMethod('Function GetCategory1( const IndexOrName : Variant) : IOTAIDEInsightCategory', cdRegister);
-    RegisterMethod('Function GetCategory( const Name : string; CanCreate : Boolean) : IOTAIDEInsightCategory', cdRegister);
+    RegisterMethod('Function GetCategory1( const IndexOrName : Variant) : IOTAIDEInsightCategory;', cdRegister);
+    RegisterMethod('Function GetCategory2( const Name : string; CanCreate : Boolean) : IOTAIDEInsightCategory;', cdRegister);
     RegisterMethod('Procedure Invoke', cdRegister);
     RegisterMethod('Procedure RemoveItem( const Item : INTAIDEInsightItem)', cdRegister);
     RegisterMethod('Procedure RemoveNotifier( const Index : Integer)', cdRegister);
@@ -1213,8 +1423,37 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTAIDEInsightItem(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IUNKNOWN', 'INTAIDEInsightItem') do
-  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),INTAIDEInsightItem, 'INTAIDEInsightItem') do
+  //with RegInterfaceS(CL,'INTAIDEInsightItem290', 'INTAIDEInsightItem') do
+  with CL.AddInterface(CL.FindInterface('INTAIDEInsightItem290'),INTAIDEInsightItem, 'INTAIDEInsightItem') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAIDEInsightItem290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTAIDEInsightItem280', 'INTAIDEInsightItem290') do
+  with CL.AddInterface(CL.FindInterface('INTAIDEInsightItem280'),INTAIDEInsightItem290, 'INTAIDEInsightItem290') do
+  begin
+    RegisterMethod('Function GetGlyphArray( var AImageName : string; var AGlyphArray : TGraphicArray) : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAIDEInsightItem280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTAIDEInsightItem270', 'INTAIDEInsightItem280') do
+  with CL.AddInterface(CL.FindInterface('INTAIDEInsightItem270'),INTAIDEInsightItem280, 'INTAIDEInsightItem280') do
+  begin
+    RegisterMethod('Function SetGlyph( const AImageName : string; const AGlyph : TGraphicArray) : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAIDEInsightItem270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'INTAIDEInsightItem270') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),INTAIDEInsightItem270, 'INTAIDEInsightItem270') do
   begin
     RegisterMethod('Function DrawText( Canvas : TCanvas; Rect : TRect; var DrawDefault : Boolean; DoDraw : Boolean) : Integer', cdRegister);
     RegisterMethod('Procedure Execute', cdRegister);
@@ -1229,12 +1468,23 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightSelection') do
+  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightSelection, 'IOTACodeInsightSelection') do
+  begin
+    RegisterMethod('Function GetDisplayName : string', cdRegister);
+    RegisterMethod('Function GetIDString : string', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTACodeInsightServices(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IOTACodeInsightServices270', 'IOTACodeInsightServices') do
   with CL.AddInterface(CL.FindInterface('IOTACodeInsightServices270'),IOTACodeInsightServices, 'IOTACodeInsightServices') do
   begin
-    RegisterMethod('Function HandlesFile( const AFileName, AIDString : string) : Boolean)', cdRegister);
+    RegisterMethod('Function HandlesFile( const AFileName, AIDString : string) : Boolean', cdRegister);
   end;
 end;
 
@@ -1267,70 +1517,6 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTACodeInsightUIOverride(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightUIOverride') do
-  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightUIOverride, 'IOTACodeInsightUIOverride') do
-  begin
-    RegisterMethod('Procedure EnableTooltip( const AFileName : string; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
-    RegisterMethod('Procedure EnableGotoDefinition( const AEditView : IOTAEditView; AElement : Integer; ATooltipPos : TOTAEditPos; var AEnabled : Boolean)', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAAsyncCodeInsightManager(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTAAsyncCodeInsightManager') do
-  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAAsyncCodeInsightManager, 'IOTAAsyncCodeInsightManager') do
-  begin
-    RegisterMethod('Procedure AsyncAllowCodeInsight( var AAllow : Boolean; const AKey : Char)', cdRegister);
-    RegisterMethod('Function AsyncCanInvoke( AInsightType : TOTACodeInsightType) : Boolean', cdRegister);
-    RegisterMethod('Function AsyncEnabled : Boolean', cdRegister);
-    RegisterMethod('Function AsyncInvokeCodeCompletion( AHowInvoked : TOTAInvokeType; var AStr : string; ALine, ACharIndex : Integer; ACallback : TOTACodeCompleteCallBack) : Integer', cdRegister);
-    RegisterMethod('Function AsyncInvokeParameterCodeInsight( HowInvoked : TOTAInvokeType; const AFileName : string; ALine, ACharIndex : Integer; ACallback : TOTAParametersCallBack) : Integer', cdRegister);
-    RegisterMethod('Function AsyncGetHintText( HintLine, HintCol : Integer; ACallBack : TOTAHintTextCallBack) : Integer', cdRegister);
-    RegisterMethod('Function AsyncGotoDefinition( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAGotoDefinitionCallBack) : Integer', cdRegister);
-    RegisterMethod('Procedure AsyncParameterCodeInsightParamIndex( const AFileName : string; ALine, ACharIndex : Integer; ACallBack : TOTAParamIndexCallBack)', cdRegister);
-    RegisterMethod('Procedure AsyncOperationCanceled( AId : Integer)', cdRegister);
-    RegisterMethod('Function ShowCalculating : Boolean', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTACodeInsightSelection(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IUNKNOWN', 'IOTACodeInsightSelection') do
-  with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTACodeInsightSelection, 'IOTACodeInsightSelection') do
-  begin
-    RegisterMethod('Function GetDisplayName : string', cdRegister);
-    RegisterMethod('Function GetIDString : string', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IUnknown', 'IOTACodeInsightManagerEnvOptions') do
-  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTACodeInsightManagerEnvOptions, 'IOTACodeInsightManagerEnvOptions') do
-  begin
-    RegisterMethod('Function IsEnableErrorInsightVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsCodeCompleteAutoParensVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsCodeCompleteAutoInvokeVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsCodeCompleteHistoryVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsCodeCompleteShowReservedWordsVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsCodeParametersVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsEvalHintsVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsDeclInfoVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsToolTipHelpInsightVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsEnableAutoCompletionVisible : Boolean', cdRegister);
-    RegisterMethod('Function IsBlockWrapStyleVisible : Boolean', cdRegister);
-    RegisterMethod('Function GetCodeInsightUIName : string', cdRegister);
-    RegisterMethod('Procedure ManagerDisabled', cdRegister);
-    RegisterMethod('Procedure ManagerEnabled', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
 procedure SIRegister_INTACustomDrawCodeInsightViewer(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IUnknown', 'INTACustomDrawCodeInsightViewer') do
@@ -1346,8 +1532,8 @@ begin
   //with RegInterfaceS(CL,'IOTACodeInsightViewer90', 'IOTACodeInsightViewer') do
   with CL.AddInterface(CL.FindInterface('IOTACodeInsightViewer90'),IOTACodeInsightViewer, 'IOTACodeInsightViewer') do
   begin
-    RegisterMethod('Function GetManagerIsValidSelection1( const Mgr : IOTACodeInsightManager) : Boolean', cdRegister);
-    RegisterMethod('Function GetManagerIsValidSelection( const Mgr : IOTACodeInsightManager; Index : Integer) : Boolean', cdRegister);
+    RegisterMethod('Function GetManagerIsValidSelection1( const Mgr : IOTACodeInsightManager) : Boolean;', cdRegister);
+    RegisterMethod('Function GetManagerIsValidSelection2( const Mgr : IOTACodeInsightManager; Index : Integer) : Boolean;', cdRegister);
     RegisterMethod('Function GetManagerSelectedIndex( const Mgr : IOTACodeInsightManager) : Integer', cdRegister);
   end;
 end;
@@ -1404,6 +1590,68 @@ begin
   with CL.AddInterface(CL.FindInterface('IDispatch'),IOTACodeBrowsePreview, 'IOTACodeBrowsePreview') do
   begin
     RegisterMethod('Function GetCodePreviewInfo( SourceLine : Integer; SourceCol : Integer; out FileName : WideString; out Offset : Integer; out Length : Integer) : WordBool', CdStdCall);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightManagerEnvOptions290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTACodeInsightManagerEnvOptions290') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTACodeInsightManagerEnvOptions290, 'IOTACodeInsightManagerEnvOptions290') do
+  begin
+    RegisterMethod('Function UseVisualAssistCodeCompletion : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightManagerEnvOptions270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTACodeInsightManagerEnvOptions270') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTACodeInsightManagerEnvOptions270, 'IOTACodeInsightManagerEnvOptions270') do
+  begin
+    RegisterMethod('Function IsGenerateVSCodeInfo : Boolean', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTACodeInsightManagerEnvOptions(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTACodeInsightManagerEnvOptions') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTACodeInsightManagerEnvOptions, 'IOTACodeInsightManagerEnvOptions') do
+  begin
+    RegisterMethod('Function IsEnableErrorInsightVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteAutoParensVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteAutoInvokeVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteHistoryVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeCompleteShowReservedWordsVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsCodeParametersVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsEvalHintsVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsDeclInfoVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsToolTipHelpInsightVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsEnableAutoCompletionVisible : Boolean', cdRegister);
+    RegisterMethod('Function IsBlockWrapStyleVisible : Boolean', cdRegister);
+    RegisterMethod('Function GetCodeInsightUIName : string', cdRegister);
+    RegisterMethod('Procedure ManagerDisabled', cdRegister);
+    RegisterMethod('Procedure ManagerEnabled', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAMultipleCodeInsightInvocation(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAMultipleCodeInsightInvocation290', 'IOTAMultipleCodeInsightInvocation') do
+  with CL.AddInterface(CL.FindInterface('IOTAMultipleCodeInsightInvocation290'),IOTAMultipleCodeInsightInvocation, 'IOTAMultipleCodeInsightInvocation') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAMultipleCodeInsightInvocation290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTAMultipleCodeInsightInvocation290') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTAMultipleCodeInsightInvocation290, 'IOTAMultipleCodeInsightInvocation290') do
+  begin
+    RegisterMethod('Procedure GetCodeInsightTypes( AChar : Char; AElement : Integer; var ACodeInsightInvocations : TOTACodeInsightInvocations)', cdRegister);
   end;
 end;
 
@@ -1680,6 +1928,16 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_INTACustomEditorView280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTACustomEditorView150', 'INTACustomEditorView280') do
+  with CL.AddInterface(CL.FindInterface('INTACustomEditorView150'),INTACustomEditorView280, 'INTACustomEditorView280') do
+  begin
+    RegisterMethod('Function GetTabColor : TColor', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_INTACustomEditorView150(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'INTACustomEditorView', 'INTACustomEditorView150') do
@@ -1727,8 +1985,18 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAEditorServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAEditorServices80', 'IOTAEditorServices') do
-  with CL.AddInterface(CL.FindInterface('IOTAEditorServices80'),IOTAEditorServices, 'IOTAEditorServices') do
+  //with RegInterfaceS(CL,'IOTAEditorServices280', 'IOTAEditorServices') do
+  with CL.AddInterface(CL.FindInterface('IOTAEditorServices280'),IOTAEditorServices, 'IOTAEditorServices') do
+  begin
+    RegisterMethod('Function GetEditorLocalMenu : INTAEditorLocalMenu', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEditorServices280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAEditorServices80', 'IOTAEditorServices280') do
+  with CL.AddInterface(CL.FindInterface('IOTAEditorServices80'),IOTAEditorServices280, 'IOTAEditorServices280') do
   begin
     RegisterMethod('Function GetEditOptionsIDString( const FileName : String) : string', cdRegister);
   end;
@@ -1742,6 +2010,17 @@ begin
   begin
     RegisterMethod('Function AddNotifier( const Notifier : INTAEditServicesNotifier) : Integer', cdRegister);
     RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAEditorLocalMenu(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'INTAEditorLocalMenu') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),INTAEditorLocalMenu, 'INTAEditorLocalMenu') do
+  begin
+    RegisterMethod('Procedure RegisterActionList( Actions : TActionList; const MenuCategory : string; InsertAfter : string)', cdRegister);
+    RegisterMethod('Procedure UnregisterActionList( const MenuCategory : string)', cdRegister);
   end;
 end;
 
@@ -1835,6 +2114,17 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEditorColorSpeedSetting(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTANotifier', 'IOTAEditorColorSpeedSetting') do
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAEditorColorSpeedSetting, 'IOTAEditorColorSpeedSetting') do
+  begin
+    RegisterMethod('Procedure EditorColorChanging', cdRegister);
+    RegisterMethod('Procedure EditorColorChanged', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTASpeedSetting(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IOTANotifier', 'IOTASpeedSetting') do
@@ -1916,9 +2206,9 @@ begin
   //with RegInterfaceS(CL,'IUnknown', 'IOTARecord') do
   with CL.AddInterface(CL.FindInterface('IUnknown'),IOTARecord, 'IOTARecord') do
   begin
-    RegisterMethod('Procedure Append( const Keys : array of TShortCut)', cdRegister);
-    RegisterMethod('Procedure Append1( const CmdName : string; IsKeys : Boolean)', cdRegister);
-    RegisterMethod('Procedure Append2( const ARecord : IOTARecord)', cdRegister);
+    RegisterMethod('Procedure Append1( const Keys : array of TShortCut);', cdRegister);
+    RegisterMethod('Procedure Append2( const CmdName : string; IsKeys : Boolean);', cdRegister);
+    RegisterMethod('Procedure Append3( const ARecord : IOTARecord);', cdRegister);
     RegisterMethod('Procedure Clear', cdRegister);
     RegisterMethod('Function GetIsPaused : Boolean', cdRegister);
     RegisterMethod('Function GetIsPlaying : Boolean', cdRegister);
@@ -1994,16 +2284,16 @@ begin
   with CL.AddInterface(CL.FindInterface('IUnknown'),IOTAEditLineTracker, 'IOTAEditLineTracker') do
   begin
     RegisterMethod('Function AddNotifier( const Notifier : IOTAEditLineNotifier) : Integer', cdRegister);
-    RegisterMethod('Procedure AddLine( Line : Integer; Data : Integer)', cdRegister);
+    RegisterMethod('Procedure AddLine( Line : Integer; Data : IntPtr)', cdRegister);
     RegisterMethod('Procedure Delete( Index : Integer)', cdRegister);
     RegisterMethod('Function GetCount : Integer', cdRegister);
-    RegisterMethod('Function GetData( Index : Integer) : Integer', cdRegister);
+    RegisterMethod('Function GetData( Index : Integer) : IntPtr', cdRegister);
     RegisterMethod('Function GetEditBuffer : IOTAEditBuffer', cdRegister);
     RegisterMethod('Function GetLineNum( Index : Integer) : Integer', cdRegister);
     RegisterMethod('Function IndexOfLine( Line : Integer) : Integer', cdRegister);
-    RegisterMethod('Function IndexOfData( Data : Integer) : Integer', cdRegister);
+    RegisterMethod('Function IndexOfData( Data : IntPtr) : Integer', cdRegister);
     RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
-    RegisterMethod('Procedure SetData( Index : Integer; Value : Integer)', cdRegister);
+    RegisterMethod('Procedure SetData( Index : Integer; Value : IntPtr)', cdRegister);
     RegisterMethod('Procedure SetLineNum( Index : Integer; Value : Integer)', cdRegister);
   end;
 end;
@@ -2014,7 +2304,7 @@ begin
   //with RegInterfaceS(CL,'IOTANotifier', 'IOTAEditLineNotifier') do
   with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAEditLineNotifier, 'IOTAEditLineNotifier') do
   begin
-    RegisterMethod('Procedure LineChanged( OldLine, NewLine : Integer; Data : Integer)', cdRegister);
+    RegisterMethod('Procedure LineChanged( OldLine, NewLine : Integer; Data : IntPtr)', cdRegister);
   end;
 end;
 
@@ -2182,8 +2472,37 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTAServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'INTAServices120', 'INTAServices') do
-  with CL.AddInterface(CL.FindInterface('INTAServices120'),INTAServices, 'INTAServices') do
+  //with RegInterfaceS(CL,'INTAServices290', 'INTAServices') do
+  with CL.AddInterface(CL.FindInterface('INTAServices290'),INTAServices, 'INTAServices') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAServices290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTAServices280', 'INTAServices290') do
+  with CL.AddInterface(CL.FindInterface('INTAServices280'),INTAServices290, 'INTAServices290') do
+  begin
+    RegisterMethod('Function CreateDockableFormEx( const CustomDockableForm : INTACustomDockableForm; Titlebar : Boolean) : TCustomForm', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAServices280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTAServices270', 'INTAServices280') do
+  with CL.AddInterface(CL.FindInterface('INTAServices270'),INTAServices280, 'INTAServices280') do
+  begin
+    RegisterMethod('Function AddImage( const AImageName : string; const AImage : TGraphicArray) : Integer', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTAServices270(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTAServices120', 'INTAServices270') do
+  with CL.AddInterface(CL.FindInterface('INTAServices120'),INTAServices270, 'INTAServices270') do
   begin
     RegisterMethod('Procedure RegisterDockableForm( const CustomDockableForm : INTACustomDockableForm)', cdRegister);
     RegisterMethod('Procedure UnregisterDockableForm( const CustomDockableForm : INTACustomDockableForm)', cdRegister);
@@ -2220,7 +2539,7 @@ begin
   //with RegInterfaceS(CL,'INTAServices90', 'INTAServices120') do
   with CL.AddInterface(CL.FindInterface('INTAServices90'),INTAServices120, 'INTAServices120') do
   begin
-    RegisterMethod('Function AddImages1( AImages : TCustomImageList; const Ident : string) : Integer', cdRegister);
+    RegisterMethod('Function AddImages2( AImages : TCustomImageList; const Ident : string) : Integer;', cdRegister);
   end;
 end;
 
@@ -2230,7 +2549,7 @@ begin
   //with RegInterfaceS(CL,'INTAServices70', 'INTAServices90') do
   with CL.AddInterface(CL.FindInterface('INTAServices70'),INTAServices90, 'INTAServices90') do
   begin
-    RegisterMethod('Function AddImages( AImages : TCustomImageList) : Integer', cdRegister);
+    RegisterMethod('Function AddImages1( AImages : TCustomImageList) : Integer;', cdRegister);
     RegisterMethod('Procedure AddActionMenu( const Name : string; NewAction : TCustomAction; NewItem : TMenuItem; InsertAfter : Boolean; InsertAsChild : Boolean)', cdRegister);
     RegisterMethod('Function NewToolbar( const Name, Caption : string; const ReferenceToolBar : string; InsertBefore : Boolean) : TToolbar', cdRegister);
     RegisterMethod('Function AddToolButton( const ToolBarName, ButtonName : string; AAction : TCustomAction; const IsDivider : Boolean; const ReferenceButton : string; InsertBefore : Boolean) : TControl', cdRegister);
@@ -2322,7 +2641,7 @@ begin
   //with RegInterfaceS(CL,'INTAServices40', 'INTAServices70') do
   with CL.AddInterface(CL.FindInterface('INTAServices40'),INTAServices70, 'INTAServices70') do
   begin
-    RegisterMethod('Function AddMasked1( Image : TBitmap; MaskColor : TColor; const Ident : string) : Integer', cdRegister);
+    RegisterMethod('Function AddMasked2( Image : TBitmap; MaskColor : TColor; const Ident : string) : Integer;', cdRegister);
   end;
 end;
 
@@ -2332,7 +2651,7 @@ begin
   //with RegInterfaceS(CL,'IUnknown', 'INTAServices40') do
   with CL.AddInterface(CL.FindInterface('IUnknown'),INTAServices40, 'INTAServices40') do
   begin
-    RegisterMethod('Function AddMasked( Image : TBitmap; MaskColor : TColor) : Integer', cdRegister);
+    RegisterMethod('Function AddMasked1( Image : TBitmap; MaskColor : TColor) : Integer;', cdRegister);
     RegisterMethod('Function GetActionList : TCustomActionList', cdRegister);
     RegisterMethod('Function GetImageList : TCustomImageList', cdRegister);
     RegisterMethod('Function GetMainMenu : TMainMenu', cdRegister);
@@ -2378,10 +2697,20 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAEnvironmentOptions(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAEnvironmentOptions140', 'IOTAEnvironmentOptions') do
-  with CL.AddInterface(CL.FindInterface('IOTAEnvironmentOptions140'),IOTAEnvironmentOptions, 'IOTAEnvironmentOptions') do
+  //with RegInterfaceS(CL,'IOTAEnvironmentOptions280', 'IOTAEnvironmentOptions') do
+  with CL.AddInterface(CL.FindInterface('IOTAEnvironmentOptions280'),IOTAEnvironmentOptions, 'IOTAEnvironmentOptions') do
   begin
-    RegisterMethod('Procedure EditOptions1( const Area : string; const PageCaption : string)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEnvironmentOptions280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAEnvironmentOptions140', 'IOTAEnvironmentOptions280') do
+  with CL.AddInterface(CL.FindInterface('IOTAEnvironmentOptions140'),IOTAEnvironmentOptions280, 'IOTAEnvironmentOptions280') do
+  begin
+    RegisterMethod('Function AddNotifier( const ANotifier : IOTAEnvironmentOptionsNotifier) : Integer', cdRegister);
+    RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
   end;
 end;
 
@@ -2391,6 +2720,17 @@ begin
   //with RegInterfaceS(CL,'IOTAOptions', 'IOTAEnvironmentOptions140') do
   with CL.AddInterface(CL.FindInterface('IOTAOptions'),IOTAEnvironmentOptions140, 'IOTAEnvironmentOptions140') do
   begin
+    RegisterMethod('Procedure EditOptions1( const Area : string; const PageCaption : string);', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEnvironmentOptionsNotifier(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTANotifier', 'IOTAEnvironmentOptionsNotifier') do
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAEnvironmentOptionsNotifier, 'IOTAEnvironmentOptionsNotifier') do
+  begin
+    RegisterMethod('Procedure EnvironmentDesktopChanging', cdRegister);
   end;
 end;
 
@@ -2417,17 +2757,17 @@ begin
   //with RegInterfaceS(CL,'IOTAMessageServices80', 'IOTAMessageServices') do
   with CL.AddInterface(CL.FindInterface('IOTAMessageServices80'),IOTAMessageServices, 'IOTAMessageServices') do
   begin
-    RegisterMethod('Function AddCustomMessage2( const CustomMsg : IOTACustomMessage; Parent : Pointer) : Pointer', cdRegister);
-    RegisterMethod('Function AddCustomMessagePtr( const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup) : Pointer', cdRegister);
-    RegisterMethod('Procedure AddWideCompilerMessage( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer)', cdRegister);
-    RegisterMethod('Procedure AddWideCompilerMessage1( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString)', cdRegister);
-    RegisterMethod('Procedure AddWideCompilerMessage2( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer)', cdRegister);
+    RegisterMethod('Function AddCustomMessage1( const CustomMsg : IOTACustomMessage; Parent : Pointer) : Pointer;', cdRegister);
+    RegisterMethod('Function AddCustomMessagePtr1( const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup) : Pointer;', cdRegister);
+    RegisterMethod('Procedure AddWideCompilerMessage1( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
+    RegisterMethod('Procedure AddWideCompilerMessage1( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);', cdRegister);
+    RegisterMethod('Procedure AddWideCompilerMessage2( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);', cdRegister);
     RegisterMethod('Function AddWideMessageGroup( const GroupName : WideString) : IOTAMessageGroup', cdRegister);
-    RegisterMethod('Procedure AddWideTitleMessage1( const MessageStr : WideString)', cdRegister);
-    RegisterMethod('Procedure AddWideTitleMessage( const MessageStr : WideString; const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer)', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage1( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer)', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage2( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
+    RegisterMethod('Procedure AddWideTitleMessage1( const MessageStr : WideString);', cdRegister);
+    RegisterMethod('Procedure AddWideTitleMessage2( const MessageStr : WideString; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage3( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage4( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage5( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
     RegisterMethod('Function GetWideGroup( const GroupName : WideString) : IOTAMessageGroup', cdRegister);
   end;
 end;
@@ -2440,8 +2780,8 @@ begin
   begin
     RegisterMethod('Procedure NextMessage( GoForward : Boolean)', cdRegister);
     RegisterMethod('Procedure NextErrorMessage( GoForward : Boolean; ErrorsOnly : Boolean)', cdRegister);
-    RegisterMethod('Procedure AddCompilerMessage1( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : string)', cdRegister);
-    RegisterMethod('Procedure AddCompilerMessage2( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer)', cdRegister);
+    RegisterMethod('Procedure AddCompilerMessage2( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : string);', cdRegister);
+    RegisterMethod('Procedure AddCompilerMessage3( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);', cdRegister);
   end;
 end;
 
@@ -2451,7 +2791,7 @@ begin
   //with RegInterfaceS(CL,'IOTAMessageServices60', 'IOTAMessageServices70') do
   with CL.AddInterface(CL.FindInterface('IOTAMessageServices60'),IOTAMessageServices70, 'IOTAMessageServices70') do
   begin
-    RegisterMethod('Procedure AddCompilerMessage( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer)', cdRegister);
+    RegisterMethod('Procedure AddCompilerMessage1( const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
   end;
 end;
 
@@ -2464,11 +2804,11 @@ begin
     RegisterMethod('Function AddNotifier( const ANotifier : IOTAMessageNotifier) : Integer', cdRegister);
     RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
     RegisterMethod('Function AddMessageGroup( const GroupName : string) : IOTAMessageGroup', cdRegister);
-    RegisterMethod('Procedure AddCustomMessage1( const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
-    RegisterMethod('Procedure AddTitleMessage1( const MessageStr : string; const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
-    RegisterMethod('Procedure AddToolMessage2( const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
+    RegisterMethod('Procedure AddCustomMessage1( const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
+    RegisterMethod('Procedure AddTitleMessage1( const MessageStr : string; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
+    RegisterMethod('Procedure AddToolMessage1( const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
     RegisterMethod('Procedure ClearMessageGroup( const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
-    RegisterMethod('Procedure ClearToolMessages1( const MessageGroupIntf : IOTAMessageGroup)', cdRegister);
+    RegisterMethod('Procedure ClearToolMessages1( const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
     RegisterMethod('Function GetMessageGroupCount : Integer', cdRegister);
     RegisterMethod('Function GetMessageGroup( Index : Integer) : IOTAMessageGroup', cdRegister);
     RegisterMethod('Function GetGroup( const GroupName : string) : IOTAMessageGroup', cdRegister);
@@ -2536,7 +2876,7 @@ begin
   //with RegInterfaceS(CL,'IOTAMessageServices40', 'IOTAMessageServices50') do
   with CL.AddInterface(CL.FindInterface('IOTAMessageServices40'),IOTAMessageServices50, 'IOTAMessageServices50') do
   begin
-    RegisterMethod('Procedure AddToolMessage1( const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer)', cdRegister);
+    RegisterMethod('Procedure AddToolMessage1( const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
   end;
 end;
 
@@ -2605,10 +2945,10 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAPAckageServices(CL: TPSPascalCompiler);
+procedure SIRegister_IOTAPackageServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAPackageServices210', 'IOTAPAckageServices') do
-  with CL.AddInterface(CL.FindInterface('IOTAPackageServices210'),IOTAPAckageServices, 'IOTAPAckageServices') do
+  //with RegInterfaceS(CL,'IOTAPackageServices210', 'IOTAPackageServices') do
+  with CL.AddInterface(CL.FindInterface('IOTAPackageServices210'),IOTAPackageServices, 'IOTAPackageServices') do
   begin
     RegisterMethod('Procedure RegisterPackageNotifier( Proc : TPackageNotifier)', cdRegister);
     RegisterMethod('Procedure UnregisterPackageNotifier( Proc : TPackageNotifier)', cdRegister);
@@ -2724,13 +3064,11 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTARepositoryWizard160(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARepositoryWizard260(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTARepositoryWizard80', 'IOTARepositoryWizard160') do
-  with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard80'),IOTARepositoryWizard160, 'IOTARepositoryWizard160') do
+  //with RegInterfaceS(CL,'IOTARepositoryWizard190', 'IOTARepositoryWizard260') do
+  with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard190'),IOTARepositoryWizard260, 'IOTARepositoryWizard260') do
   begin
-    RegisterMethod('Function GetFrameworkTypes : TObject', cdRegister);
-    RegisterMethod('Function GetPlatforms : TObject', cdRegister);
   end;
 end;
 
@@ -2740,17 +3078,15 @@ begin
   //with RegInterfaceS(CL,'IOTARepositoryWizard160', 'IOTARepositoryWizard190') do
   with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard160'),IOTARepositoryWizard190, 'IOTARepositoryWizard190') do
   begin
-    RegisterMethod('Function GetSupportedPlatforms: TObject', cdRegister);
   end;
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTARepositoryWizard260(CL: TPSPascalCompiler);
+procedure SIRegister_IOTARepositoryWizard160(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTARepositoryWizard190', 'IOTARepositoryWizard260') do
-  with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard190'),IOTARepositoryWizard260, 'IOTARepositoryWizard260') do
+  //with RegInterfaceS(CL,'IOTARepositoryWizard80', 'IOTARepositoryWizard160') do
+  with CL.AddInterface(CL.FindInterface('IOTARepositoryWizard80'),IOTARepositoryWizard160, 'IOTARepositoryWizard160') do
   begin
-    RegisterMethod('Function GetGalleryCategories: TObject', cdRegister);
   end;
 end;
 
@@ -2784,7 +3120,7 @@ begin
     RegisterMethod('Function GetAuthor : string', cdRegister);
     RegisterMethod('Function GetComment : string', cdRegister);
     RegisterMethod('Function GetPage : string', cdRegister);
-    RegisterMethod('Function GetGlyph : Cardinal', cdRegister);
+    RegisterMethod('Function GetGlyph : THandle', cdRegister);
   end;
 end;
 
@@ -2808,8 +3144,8 @@ begin
   with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAGalleryCategoryManager, 'IOTAGalleryCategoryManager') do
   begin
     RegisterMethod('Function FindCategory( const IDString : string) : IOTAGalleryCategory', cdRegister);
-    RegisterMethod('Function AddCategory1( const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory', cdRegister);
-    RegisterMethod('Function AddCategory( const ParentCategory : IOTAGalleryCategory; const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory', cdRegister);
+    RegisterMethod('Function AddCategory1( const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory;', cdRegister);
+    RegisterMethod('Function AddCategory2( const ParentCategory : IOTAGalleryCategory; const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory;', cdRegister);
     RegisterMethod('Procedure DeleteCategory( const Category : IOTAGalleryCategory)', cdRegister);
   end;
 end;
@@ -2832,7 +3168,7 @@ begin
   //with RegInterfaceS(CL,'IOTAIDENotifier50', 'IOTAIDENotifier80') do
   with CL.AddInterface(CL.FindInterface('IOTAIDENotifier50'),IOTAIDENotifier80, 'IOTAIDENotifier80') do
   begin
-    RegisterMethod('Procedure AfterCompile2( const Project : IOTAProject; Succeeded : Boolean; IsCodeInsight : Boolean)', cdRegister);
+    RegisterMethod('Procedure AfterCompile2( const Project : IOTAProject; Succeeded : Boolean; IsCodeInsight : Boolean);', cdRegister);
   end;
 end;
 
@@ -2842,8 +3178,8 @@ begin
   //with RegInterfaceS(CL,'IOTAIDENotifier', 'IOTAIDENotifier50') do
   with CL.AddInterface(CL.FindInterface('IOTAIDENotifier'),IOTAIDENotifier50, 'IOTAIDENotifier50') do
   begin
-    RegisterMethod('Procedure BeforeCompile1( const Project : IOTAProject; IsCodeInsight : Boolean; var Cancel : Boolean)', cdRegister);
-    RegisterMethod('Procedure AfterCompile1( Succeeded : Boolean; IsCodeInsight : Boolean)', cdRegister);
+    RegisterMethod('Procedure BeforeCompile1( const Project : IOTAProject; IsCodeInsight : Boolean; var Cancel : Boolean);', cdRegister);
+    RegisterMethod('Procedure AfterCompile1( Succeeded : Boolean; IsCodeInsight : Boolean);', cdRegister);
   end;
 end;
 
@@ -2854,8 +3190,8 @@ begin
   with CL.AddInterface(CL.FindInterface('IOTANotifier'),IOTAIDENotifier, 'IOTAIDENotifier') do
   begin
     RegisterMethod('Procedure FileNotification( NotifyCode : TOTAFileNotification; const FileName : string; var Cancel : Boolean)', cdRegister);
-    RegisterMethod('Procedure BeforeCompile( const Project : IOTAProject; var Cancel : Boolean)', cdRegister);
-    RegisterMethod('Procedure AfterCompile( Succeeded : Boolean)', cdRegister);
+    RegisterMethod('Procedure BeforeCompile1( const Project : IOTAProject; var Cancel : Boolean);', cdRegister);
+    RegisterMethod('Procedure AfterCompile1( Succeeded : Boolean);', cdRegister);
   end;
 end;
 
@@ -2865,7 +3201,7 @@ begin
   //with RegInterfaceS(CL,'IOTADebuggerServices150', 'IOTADebuggerServices') do
   with CL.AddInterface(CL.FindInterface('IOTADebuggerServices150'),IOTADebuggerServices, 'IOTADebuggerServices') do
   begin
-    RegisterMethod('Function NewAddressBreakpoint1( Address : TOTAAddress; Length : LongWord; AccessType : TOTAAccessType; const AProcess : IOTAProcess) : IOTABreakpoint', cdRegister);
+    RegisterMethod('Function NewAddressBreakpoint1( Address : TOTAAddress; Length : LongWord; AccessType : TOTAAccessType; const AProcess : IOTAProcess) : IOTABreakpoint;', cdRegister);
   end;
 end;
 
@@ -2877,7 +3213,7 @@ begin
   begin
     RegisterMethod('Function GetModuleBkptCount : Integer', cdRegister);
     RegisterMethod('Function GetModuleBkpt( Index : Integer) : string', cdRegister);
-    RegisterMethod('Procedure NewModuleBreakpoint1( const ModuleName : string)', cdRegister);
+    RegisterMethod('Procedure NewModuleBreakpoint1( const ModuleName : string);', cdRegister);
     RegisterMethod('Procedure RemoveModuleBreakpoint( const ModuleName : string)', cdRegister);
     RegisterMethod('Procedure RemoveBreakpoint( const Breakpoint : IOTABreakpoint)', cdRegister);
     RegisterMethod('Procedure RegisterDebugVisualizer( const Visualizer : IOTADebuggerVisualizer)', cdRegister);
@@ -2921,13 +3257,23 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTADebuggerVisualizer250(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTADebuggerVisualizer', 'IOTADebuggerVisualizer250') do
+  with CL.AddInterface(CL.FindInterface('IOTADebuggerVisualizer'),IOTADebuggerVisualizer250, 'IOTADebuggerVisualizer250') do
+  begin
+    RegisterMethod('Procedure GetSupportedType1( Index : Integer; var TypeName : string; var AllDescendants : Boolean; var IsGeneric : Boolean);', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTADebuggerVisualizer(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IUNKNOWN', 'IOTADebuggerVisualizer') do
   with CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTADebuggerVisualizer, 'IOTADebuggerVisualizer') do
   begin
     RegisterMethod('Function GetSupportedTypeCount : Integer', cdRegister);
-    RegisterMethod('Procedure GetSupportedType( Index : Integer; var TypeName : string; var AllDescendants : Boolean)', cdRegister);
+    RegisterMethod('Procedure GetSupportedType1( Index : Integer; var TypeName : string; var AllDescendants : Boolean);', cdRegister);
     RegisterMethod('Function GetVisualizerIdentifier : string', cdRegister);
     RegisterMethod('Function GetVisualizerName : string', cdRegister);
     RegisterMethod('Function GetVisualizerDescription : string', cdRegister);
@@ -3033,8 +3379,8 @@ begin
   //with RegInterfaceS(CL,'INTAProcess150', 'INTAProcess') do
   with CL.AddInterface(CL.FindInterface('INTAProcess150'),INTAProcess, 'INTAProcess') do
   begin
-    RegisterMethod('Procedure ShowNonSourceLocation1( const Address : TOTAAddress; BehindWindow : TCustomForm)', cdRegister);
-    RegisterMethod('Procedure ShowMemoryLocation1( const Address : TOTAAddress; BehindWindow : TCustomForm)', cdRegister);
+    RegisterMethod('Procedure ShowNonSourceLocation1( const Address : TOTAAddress; BehindWindow : TCustomForm);', cdRegister);
+    RegisterMethod('Procedure ShowMemoryLocation1( const Address : TOTAAddress; BehindWindow : TCustomForm);', cdRegister);
   end;
 end;
 
@@ -3055,9 +3401,9 @@ begin
   //with RegInterfaceS(CL,'IOTAProcess150', 'IOTAProcess') do
   with CL.AddInterface(CL.FindInterface('IOTAProcess150'),IOTAProcess, 'IOTAProcess') do
   begin
-    RegisterMethod('Function ReadProcessMemory1( Address : TOTAAddress; Count : Integer; var Buffer) : Integer', cdRegister);
-    RegisterMethod('Function WriteProcessMemory1( Address : TOTAAddress; Count : Integer; var Buffer) : Integer', cdRegister);
-    RegisterMethod('Procedure SourceLocationFromAddress1( const Address : TOTAAddress; out FileName : string; out LineNum : Integer)', cdRegister);
+    RegisterMethod('Function ReadProcessMemory1( Address : TOTAAddress; Count : Integer; var Buffer) : Integer;', cdRegister);
+    RegisterMethod('Function WriteProcessMemory1( Address : TOTAAddress; Count : Integer; var Buffer) : Integer;', cdRegister);
+    RegisterMethod('Procedure SourceLocationFromAddress1( const Address : TOTAAddress; out FileName : string; out LineNum : Integer);', cdRegister);
     RegisterMethod('Function GetProcessType : TOTAProcessType', cdRegister);
   end;
 end;
@@ -3236,10 +3582,8 @@ begin
   //with RegInterfaceS(CL,'IOTAThread150', 'IOTAThread') do
   with CL.AddInterface(CL.FindInterface('IOTAThread150'),IOTAThread, 'IOTAThread') do
   begin
-    RegisterMethod('Function Evaluate2( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord;'
-      + ' out CanModify : Boolean; AllowSideEffects : Boolean; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord) : TOTAEvaluateResult', cdRegister);
-    RegisterMethod('Function Evaluate3( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord;'
-      + ' out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult', cdRegister);
+    RegisterMethod('Function Evaluate2( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; AllowSideEffects : Boolean; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord) : TOTAEvaluateResult;', cdRegister);
+    RegisterMethod('Function Evaluate3( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult;', cdRegister);
     RegisterMethod('Function GetOTAThreadContextEx : TOTAThreadContextEx', cdRegister);
     RegisterMethod('Procedure SetOTAThreadContextEx( const Value : TOTAThreadContextEx)', cdRegister);
   end;
@@ -3299,8 +3643,7 @@ begin
   begin
     RegisterMethod('Function StartCallStackAccess : TOTACallStackState', cdRegister);
     RegisterMethod('Procedure EndCallStackAccess', cdRegister);
-    RegisterMethod('Function Evaluate1( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord;'
-      + ' out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : LongWord; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult', cdRegister);
+    RegisterMethod('Function Evaluate1( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : LongWord; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult;', cdRegister);
     RegisterMethod('Function GetDisplayString : string', cdRegister);
     RegisterMethod('Function GetLocationString : string', cdRegister);
     RegisterMethod('Function GetOwningProcess : IOTAProcess', cdRegister);
@@ -3337,8 +3680,7 @@ begin
   with CL.AddInterface(CL.FindInterface('IUnknown'),IOTAThread50, 'IOTAThread50') do
   begin
     RegisterMethod('Function AddNotifier( const Notifier : IOTAThreadNotifier) : Integer', cdRegister);
-    RegisterMethod('Function Evaluate( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord;'
-      + ' out CanModify : Boolean; AllowSideEffects : Boolean; FormatSpecifiers : PAnsiChar; out ResultAddr : LongWord; out ResultSize, ResultVal : LongWord) : TOTAEvaluateResult', cdRegister);
+    RegisterMethod('Function Evaluate( const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; AllowSideEffects : Boolean; FormatSpecifiers : PAnsiChar; out ResultAddr : LongWord; out ResultSize, ResultVal : LongWord) : TOTAEvaluateResult', cdRegister);
     RegisterMethod('Function Modify( const ValueStr : string; ResultStr : PChar; ResultSize : LongWord; out ResultVal : Integer) : TOTAEvaluateResult', cdRegister);
     RegisterMethod('Function GetCallCount : Integer', cdRegister);
     RegisterMethod('Function GetCallHeader( Index : Integer) : string', cdRegister);
@@ -3359,7 +3701,7 @@ begin
   //with RegInterfaceS(CL,'IOTAThreadNotifier', 'IOTAThreadNotifier160') do
   with CL.AddInterface(CL.FindInterface('IOTAThreadNotifier'),IOTAThreadNotifier160, 'IOTAThreadNotifier160') do
   begin
-    RegisterMethod('Procedure EvaluateComplete1( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress : TOTAAddress; ResultSize : LongWord; ReturnCode : Integer)', cdRegister);
+    RegisterMethod('Procedure EvaluateComplete1( const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress : TOTAAddress; ResultSize : LongWord; ReturnCode : Integer);', cdRegister);
   end;
 end;
 
@@ -3547,25 +3889,23 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAProjectCreator190(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAProjectCreator160', 'IOTAProjectCreator190') do
+  with CL.AddInterface(CL.FindInterface('IOTAProjectCreator160'),IOTAProjectCreator190, 'IOTAProjectCreator190') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAProjectCreator160(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IOTAProjectCreator80', 'IOTAProjectCreator160') do
   with CL.AddInterface(CL.FindInterface('IOTAProjectCreator80'),IOTAProjectCreator160, 'IOTAProjectCreator160') do
   begin
     RegisterMethod('Function GetFrameworkType : string', cdRegister);
-    RegisterMethod('Function GetPlatforms : TObject', cdRegister);
     RegisterMethod('Function GetPreferredPlatform : string', cdRegister);
     RegisterMethod('Procedure SetInitialOptions( const NewProject : IOTAProject)', cdRegister);
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
-procedure SIRegister_IOTAProjectCreator190(CL: TPSPascalCompiler);
-begin
-  //with RegInterfaceS(CL,'IOTAProjectCreator160', 'IOTAProjectCreator190') do
-  with CL.AddInterface(CL.FindInterface('IOTAProjectCreator160'),IOTAProjectCreator190, 'IOTAProjectCreator190') do
-  begin
-    RegisterMethod('Function GetSupportedPlatforms: TObject', cdRegister);
   end;
 end;
 
@@ -3864,7 +4204,6 @@ begin
     RegisterMethod('Function GetPlatform : string', cdRegister);
     RegisterMethod('Procedure SetConfiguration( const Value : string)', cdRegister);
     RegisterMethod('Procedure SetPlatform( const Value : string)', cdRegister);
-    RegisterMethod('Function GetSupportedPlatforms : TObject', cdRegister);
   end;
 end;
 
@@ -3980,7 +4319,7 @@ begin
   //with RegInterfaceS(CL,'IOTAProjectBuilder40', 'IOTAProjectBuilder140') do
   with CL.AddInterface(CL.FindInterface('IOTAProjectBuilder40'),IOTAProjectBuilder140, 'IOTAProjectBuilder140') do
   begin
-    RegisterMethod('Function BuildProject1( CompileMode : TOTACompileMode; Wait, ClearMessages : Boolean) : Boolean', cdRegister);
+    RegisterMethod('Function BuildProject1( CompileMode : TOTACompileMode; Wait, ClearMessages : Boolean) : Boolean;', cdRegister);
   end;
 end;
 
@@ -4062,7 +4401,6 @@ begin
   begin
     RegisterMethod('Function GetPlatformConfiguration( const PlatformName : string) : IOTABuildConfiguration', cdRegister);
     RegisterMethod('Function GetPlatform : string', cdRegister);
-    RegisterMethod('Function GetPlatforms : TObject', cdRegister);
   end;
 end;
 
@@ -4085,14 +4423,14 @@ begin
     RegisterMethod('Procedure Remove( const PropName : string)', cdRegister);
     RegisterMethod('Procedure Clear', cdRegister);
     RegisterMethod('Function PropertyExists( const PropName : string) : Boolean', cdRegister);
-    RegisterMethod('Function GetValue1( const PropName : string) : string', cdRegister);
-    RegisterMethod('Function GetValue( const PropName : string; IncludeInheritedValues : Boolean) : string', cdRegister);
+    RegisterMethod('Function GetValue1( const PropName : string) : string;', cdRegister);
+    RegisterMethod('Function GetValue2( const PropName : string; IncludeInheritedValues : Boolean) : string;', cdRegister);
     RegisterMethod('Procedure SetValue( const PropName, Value : string)', cdRegister);
-    RegisterMethod('Function GetBoolean1( const PropName : string) : Boolean', cdRegister);
-    RegisterMethod('Function GetBoolean( const PropName : string; IncludeInheritedValues : Boolean) : Boolean', cdRegister);
+    RegisterMethod('Function GetBoolean1( const PropName : string) : Boolean;', cdRegister);
+    RegisterMethod('Function GetBoolean2( const PropName : string; IncludeInheritedValues : Boolean) : Boolean;', cdRegister);
     RegisterMethod('Procedure SetBoolean( const PropName : string; const Value : Boolean)', cdRegister);
-    RegisterMethod('Function GetInteger1( const PropName : string) : Integer', cdRegister);
-    RegisterMethod('Function GetInteger( const PropName : string; IncludeInheritedValues : Boolean) : Integer', cdRegister);
+    RegisterMethod('Function GetInteger1( const PropName : string) : Integer;', cdRegister);
+    RegisterMethod('Function GetInteger2( const PropName : string; IncludeInheritedValues : Boolean) : Integer;', cdRegister);
     RegisterMethod('Procedure SetInteger( const PropName : string; const Value : Integer)', cdRegister);
     RegisterMethod('Function InheritedValue( const PropName : string) : string', cdRegister);
     RegisterMethod('Procedure GetValues( const PropName : string; Values : TStrings; IncludeInheritedValues : Boolean)', cdRegister);
@@ -4479,8 +4817,8 @@ begin
   //with RegInterfaceS(CL,'IOTASourceEditor180', 'IOTASourceEditor') do
   with CL.AddInterface(CL.FindInterface('IOTASourceEditor180'),IOTASourceEditor, 'IOTASourceEditor') do
   begin
-    RegisterMethod('Procedure SwitchToView2( Index : Integer; const AViewContext : TObject)', cdRegister);
-    RegisterMethod('Procedure SwitchToView3( const AViewIdentifier : string; const AViewContext : TObject)', cdRegister);
+    RegisterMethod('Procedure SwitchToView3( Index : Integer; const AViewContext : TObject);', cdRegister);
+    RegisterMethod('Procedure SwitchToView4( const AViewIdentifier : string; const AViewContext : TObject);', cdRegister);
   end;
 end;
 
@@ -4493,8 +4831,8 @@ begin
     RegisterMethod('Function GetSubViewCount : Integer', cdRegister);
     RegisterMethod('Function GetSubViewIdentifier( Index : Integer) : string', cdRegister);
     RegisterMethod('Function GetSubViewIndex : Integer', cdRegister);
-    RegisterMethod('Procedure SwitchToView( Index : Integer)', cdRegister);
-    RegisterMethod('Procedure SwitchToView1( const AViewIdentifier : string)', cdRegister);
+    RegisterMethod('Procedure SwitchToView1( Index : Integer);', cdRegister);
+    RegisterMethod('Procedure SwitchToView2( const AViewIdentifier : string);', cdRegister);
   end;
 end;
 
@@ -4633,15 +4971,12 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTAEditViewNotifier(CL: TPSPascalCompiler);
 begin
-  // INTAEditViewNotifier HAS GUID in 10.4 so Restore it.
   //with RegInterfaceS(CL,'IOTANotifier', 'INTAEditViewNotifier') do
   with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTAEditViewNotifier, 'INTAEditViewNotifier') do
   begin
     RegisterMethod('Procedure EditorIdle( const View : IOTAEditView)', cdRegister);
     RegisterMethod('Procedure BeginPaint( const View : IOTAEditView; var FullRepaint : Boolean)', cdRegister);
-    RegisterMethod('Procedure PaintLine( const View : IOTAEditView; LineNumber : Integer; const LineText : PAnsiChar;' 
-      + ' const TextWidth : Word; const LineAttributes : TOTAAttributeArray; const Canvas : TCanvas; const TextRect :'
-      + ' TRect; const LineRect : TRect; const CellSize : TSize)', cdRegister);
+    RegisterMethod('Procedure PaintLine( const View : IOTAEditView; LineNumber : Integer; const LineText : PAnsiChar; const TextWidth : Word; const LineAttributes : TOTAAttributeArray; const Canvas : TCanvas; const TextRect : TRect; const LineRect : TRect; const CellSize : TSize)', cdRegister);
     RegisterMethod('Procedure EndPaint( const View : IOTAEditView)', cdRegister);
   end;
 end;
@@ -4653,7 +4988,7 @@ begin
   with CL.AddInterface(CL.FindInterface('IOTAEditView220'),IOTAEditView, 'IOTAEditView') do
   begin
     RegisterMethod('Procedure IncreaseDecreaseFontSize( const ActionMode : TOTAIncreaseDecreaseFontSizeMode)', cdRegister);
-    RegisterMethod('Function AddNotifier( const Extension : IOTANotifier) : Integer', cdRegister);
+    RegisterMethod('Function AddNotifier( const Extension : INTAEditViewNotifier) : Integer', cdRegister);
     RegisterMethod('Procedure RemoveNotifier( Index : Integer)', cdRegister);
   end;
 end;
@@ -4895,15 +5230,15 @@ begin
     RegisterMethod('Procedure Paste', cdRegister);
     RegisterMethod('Function Read( NumberOfCharacters : Integer) : string', cdRegister);
     RegisterMethod('Function RepeatLastSearchOrReplace : Boolean', cdRegister);
-    RegisterMethod('Function Replace1( const Pattern, ReplaceText : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Integer', cdRegister);
-    RegisterMethod('Function Replace : Integer', cdRegister);
+    RegisterMethod('Function Replace1( const Pattern, ReplaceText : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Integer;', cdRegister);
+    RegisterMethod('Function Replace2 : Integer;', cdRegister);
     RegisterMethod('Function ReplaceAgain : Integer', cdRegister);
     RegisterMethod('Procedure Restore', cdRegister);
-    RegisterMethod('Function RipText1( const ValidChars : TSysCharSet; RipFlags : Integer) : string', cdRegister);
-    RegisterMethod('Function RipText( const ValidChars : string; RipFlags : Integer) : string', cdRegister);
+    RegisterMethod('Function RipText1( const ValidChars : TSysCharSet; RipFlags : Integer) : string;', cdRegister);
+    RegisterMethod('Function RipText2( const ValidChars : string; RipFlags : Integer) : string;', cdRegister);
     RegisterMethod('Procedure Save', cdRegister);
-    RegisterMethod('Function Search1( const Pattern : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Boolean', cdRegister);
-    RegisterMethod('Function Search : Boolean', cdRegister);
+    RegisterMethod('Function Search1( const Pattern : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Boolean;', cdRegister);
+    RegisterMethod('Function Search2 : Boolean;', cdRegister);
     RegisterMethod('Function SearchAgain : Boolean', cdRegister);
     RegisterMethod('Procedure Tab( Magnitude : Integer)', cdRegister);
   end;
@@ -4972,7 +5307,18 @@ begin
   //with RegInterfaceS(CL,'IInterface', 'IOTACustomEditView') do
   with CL.AddInterface(CL.FindInterface('IInterface'),IOTACustomEditView, 'IOTACustomEditView') do
   begin
-    RegisterMethod('Function SameView( const EditView : IOTACustomEditView) : Boolean', cdRegister);
+    RegisterMethod('Function SameView1( const EditView : IOTACustomEditView) : Boolean;', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTARawEditReader(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTARawEditReader') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTARawEditReader, 'IOTARawEditReader') do
+  begin
+    RegisterMethod('Procedure GetLineData( AFirstLine : Integer; ARange : Integer; ACallBack : TOTALineDataCallback; AUserData : Pointer)', cdRegister);
+    RegisterMethod('Function GetTotalLinesInBuffer : Integer', cdRegister);
   end;
 end;
 
@@ -5047,7 +5393,7 @@ begin
   begin
     RegisterMethod('Function GetIDString : string', cdRegister);
     RegisterMethod('Function GetName : string', cdRegister);
-    RegisterMethod('Procedure Tokenize( StartClass : TOTALineClass; LineBuf : POTAEdChar; LineBufLen : TOTALineSize; HighlightCodes : Pointer)', cdRegister);
+    RegisterMethod('Procedure Tokenize( StartClass : TOTALineClass; LineBuf : POTAEdChar; LineBufLen : TOTALineSize; HighlightCodes : POTASyntaxCode)', cdRegister);
     RegisterMethod('Function TokenizeLineClass( StartClass : TOTALineClass; LineBuf : POTAEdChar; LineBufLen : TOTALineSize) : TOTALineClass', cdRegister);
   end;
 end;
@@ -5055,8 +5401,24 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAEditWriter(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IUnknown', 'IOTAEditWriter') do
-  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTAEditWriter, 'IOTAEditWriter') do
+  //with RegInterfaceS(CL,'IOTAEditWriter280', 'IOTAEditWriter') do
+  with CL.AddInterface(CL.FindInterface('IOTAEditWriter280'),IOTAEditWriter, 'IOTAEditWriter') do
+  begin
+    RegisterMethod('Procedure Insert1( const Text : UTF8String);', cdRegister);
+    RegisterMethod('Procedure InsertBlankLine( LineNumber : Integer)', cdRegister);
+    RegisterMethod('Procedure InsertLine1( LineNumber : Integer; Buffer : PAnsiChar);', cdRegister);
+    RegisterMethod('Procedure InsertLine2( LineNumber : Integer; const Buffer : UTF8String);', cdRegister);
+    RegisterMethod('Procedure DeleteLine( LineNumber : Integer)', cdRegister);
+    RegisterMethod('Procedure ReplaceLine1( LineNumber : Integer; Buffer : PAnsiChar);', cdRegister);
+    RegisterMethod('Procedure ReplaceLine2( LineNumber : Integer; const Buffer : UTF8String);', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAEditWriter280(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IUnknown', 'IOTAEditWriter280') do
+  with CL.AddInterface(CL.FindInterface('IUnknown'),IOTAEditWriter280, 'IOTAEditWriter280') do
   begin
     RegisterMethod('Procedure CopyTo( Pos : Longint)', cdRegister);
     RegisterMethod('Procedure DeleteTo( Pos : Longint)', cdRegister);
@@ -5191,12 +5553,12 @@ begin
   begin
     RegisterMethod('Procedure Assign( const Strings : IOTAStrings)', cdRegister);
     RegisterMethod('Function GetCount : Integer', cdRegister);
-    RegisterMethod('Function GetData( const Index : Integer) : Integer', cdRegister);
+    RegisterMethod('Function GetData( const Index : Integer) : IntPtr', cdRegister);
     RegisterMethod('Function GetItem( const Index : Integer) : string', cdRegister);
     RegisterMethod('Function GetName( const Index : Integer) : string', cdRegister);
     RegisterMethod('Function GetValue( const Name : string) : string', cdRegister);
     RegisterMethod('Function GetValueFromIndex( const Index : Integer) : string', cdRegister);
-    RegisterMethod('Procedure SetData( const Index : Integer; Value : Integer)', cdRegister);
+    RegisterMethod('Procedure SetData( const Index : Integer; Value : IntPtr)', cdRegister);
     RegisterMethod('Procedure SetItem( const Index : Integer; const Value : string)', cdRegister);
     RegisterMethod('Procedure SetValue( const Name, Value : string)', cdRegister);
     RegisterMethod('Procedure SetValueFromIndex( const Index : Integer; const Value : string)', cdRegister);
@@ -5230,20 +5592,25 @@ begin
  CL.AddConstantN('atFloat','LongInt').SetInt( 7);
  CL.AddConstantN('atOctal','LongInt').SetInt( 8);
  CL.AddConstantN('atHex','LongInt').SetInt( 9);
- CL.AddConstantN('atCharacter','LongInt').SetInt( 10);
- CL.AddConstantN('atPreproc','LongInt').SetInt( 11);
- CL.AddConstantN('atIllegal','LongInt').SetInt( 12);
- CL.AddConstantN('atAssembler','LongInt').SetInt( 13);
- CL.AddConstantN('SyntaxOff','LongInt').SetInt( 14);
+ CL.AddConstantN('atBinary','LongInt').SetInt( 10);
+ CL.AddConstantN('atCharacter','LongInt').SetInt( 11);
+ CL.AddConstantN('atPreproc','LongInt').SetInt( 12);
+ CL.AddConstantN('atIllegal','LongInt').SetInt( 13);
+ CL.AddConstantN('atAssembler','LongInt').SetInt( 14);
+ CL.AddConstantN('SyntaxOff','LongInt').SetInt( 15);
  CL.AddConstantN('atOverridable','LongWord').SetUInt( $8000);
- CL.AddConstantN('MarkedBlock','LongInt').SetInt( 15);
- CL.AddConstantN('SearchMatch','LongInt').SetInt( 16);
- CL.AddConstantN('atHotLink','LongInt').SetInt( 17);
- CL.AddConstantN('atTags','LongInt').SetInt( 20);
- CL.AddConstantN('atAttrNames','LongInt').SetInt( 21);
- CL.AddConstantN('atAttrValues','LongInt').SetInt( 22);
- CL.AddConstantN('atScripts','LongInt').SetInt( 23);
- CL.AddConstantN('RightMargin','LongInt').SetInt( 37);
+ CL.AddConstantN('MarkedBlock','LongInt').SetInt( 16);
+ CL.AddConstantN('SearchMatch','LongInt').SetInt( 17);
+ CL.AddConstantN('atHotLink','LongInt').SetInt( 18);
+ CL.AddConstantN('atTags','LongInt').SetInt( 21);
+ CL.AddConstantN('atAttrNames','LongInt').SetInt( 22);
+ CL.AddConstantN('atAttrValues','LongInt').SetInt( 23);
+ CL.AddConstantN('atScripts','LongInt').SetInt( 24);
+ CL.AddConstantN('atBraceHighlight','LongInt').SetInt( atHotLink + 7);
+ CL.AddConstantN('atLineHighlight','LongInt').SetInt( atHotLink + 8);
+ CL.AddConstantN('atSearchOtherMatchHighlight','LongInt').SetInt( atHotLink + 9);
+ CL.AddConstantN('RightMargin','LongInt').SetInt( 38);
+ CL.AddConstantN('atFolded','LongInt').SetInt( 40);
  CL.AddConstantN('lfCurrentEIP','LongWord').SetUInt( $0001);
  CL.AddConstantN('lfBreakpointEnabled','LongWord').SetUInt( $0002);
  CL.AddConstantN('lfBreakpointDisabled','LongWord').SetUInt( $0004);
@@ -5341,10 +5708,10 @@ begin
  CL.AddConstantN('sForm','String').SetString( 'Form');
  CL.AddConstantN('sText','String').SetString( 'Text');
  CL.AddConstantN('sbaPCHCompile','String').SetString( 'PCHCompile');
- CL.AddConstantN('sCSApplication','String').SetString( 'Application');
- CL.AddConstantN('sCSLibrary','String').SetString( 'Library');
- CL.AddConstantN('sCSConsole','String').SetString( 'Console');
- CL.AddConstantN('sCSPackage','String').SetString( 'Package');
+ CL.AddConstantN('sCSApplication','').SetString( sApplication);
+ CL.AddConstantN('sCSLibrary','').SetString( sLibrary);
+ CL.AddConstantN('sCSConsole','').SetString( sConsole);
+ CL.AddConstantN('sCSPackage','').SetString( sPackage);
  CL.AddConstantN('sAssembly','String').SetString( 'Assembly');
  CL.AddConstantN('sUserControl','String').SetString( 'UserControl');
  CL.AddConstantN('sClass','String').SetString( 'Class');
@@ -5398,15 +5765,6 @@ begin
  CL.AddConstantN('omtFormResource','LongInt').SetInt( 12);
  CL.AddConstantN('omtCustom','LongInt').SetInt( 13);
  CL.AddConstantN('omtIDL','LongInt').SetInt( 14);
- CL.AddConstantN('sNonePersonality','String').SetString( 'None.Personality');
- CL.AddConstantN('sDefaultPersonality','String').SetString( 'Default.Personality');
- CL.AddConstantN('sDelphiPersonality','String').SetString( 'Delphi.Personality');
- CL.AddConstantN('sDelphiDotNetPersonality','String').SetString( 'DelphiDotNet.Personality');
- CL.AddConstantN('sCBuilderPersonality','String').SetString( 'CPlusPlusBuilder.Personality');
- CL.AddConstantN('sCSharpPersonality','String').SetString( 'CSharp.Personality');
- CL.AddConstantN('sVBPersonality','String').SetString( 'VB.Personality');
- CL.AddConstantN('sDesignPersonality','String').SetString( 'Design.Personality');
- CL.AddConstantN('sGenericPersonality','String').SetString( 'Generic.Personality');
  CL.AddConstantN('sCategoryRoot','String').SetString( 'Borland.Root');
  CL.AddConstantN('sCategoryGalileoOther','String').SetString( 'Borland.Galileo.Other');
  CL.AddConstantN('sCategoryDelphiNew','String').SetString( 'Borland.Delphi.New');
@@ -5429,27 +5787,29 @@ begin
  CL.AddConstantN('sCategoryDelphiWeb','String').SetString( 'Borland.Delphi.Web');
  CL.AddConstantN('sCategoryDelphiIndividualFiles','String').SetString( 'Borland.Delphi.IndividualFiles');
  CL.AddConstantN('sCategoryDelphiDatabase','String').SetString( 'Borland.Delphi.Database');
+ CL.AddConstantN('sCategoryDelphiActiveX','String').SetString( 'Borland.Delphi.ActiveX');
  CL.AddConstantN('sCategoryCBuilderWindows','String').SetString( 'Borland.CBuilder.Windows');
  CL.AddConstantN('sCategoryCBuilderMultiDevice','String').SetString( 'Borland.CBuilder.MultiDevice');
  CL.AddConstantN('sCategoryCBuilderRADServer','String').SetString( 'Borland.CBuilder.RADServer');
  CL.AddConstantN('sCategoryCBuilderWeb','String').SetString( 'Borland.CBuilder.Web');
  CL.AddConstantN('sCategoryCBuilderIndividualFiles','String').SetString( 'Borland.CBuilder.IndividualFiles');
  CL.AddConstantN('sCategoryCBuilderDatabase','String').SetString( 'Borland.CBuilder.Database');
+ CL.AddConstantN('sCategoryCBuilderActiveX','String').SetString( 'Borland.CBuilder.ActiveX');
  CL.AddConstantN('cDefEdOptions','String').SetString( 'Borland.EditOptions.');
- CL.AddConstantN('cDefEdDefault','String').SetString( 'Borland.EditOptions.Default');
- CL.AddConstantN('cDefEdPascal','String').SetString( 'Borland.EditOptions.Pascal');
- CL.AddConstantN('cDefEdC','String').SetString( 'Borland.EditOptions.C');
- CL.AddConstantN('cDefEdObjCpp','String').SetString( 'Borland.EditOptions.ObjectiveC++');
- CL.AddConstantN('cDefEdCSharp','String').SetString( 'Borland.EditOptions.C#');
- CL.AddConstantN('cDefEdHTML','String').SetString( 'Borland.EditOptions.HTML');
- CL.AddConstantN('cDefEdXML','String').SetString( 'Borland.EditOptions.XML');
- CL.AddConstantN('cDefEdSQL','String').SetString( 'Borland.EditOptions.SQL');
- CL.AddConstantN('cDefEdIDL','String').SetString( 'Borland.EditOptions.IDL');
- CL.AddConstantN('cDefEdVisualBasic','String').SetString( 'Borland.EditOptions.VisualBasic');
- CL.AddConstantN('cDefEdJavaScript','String').SetString( 'Borland.EditOptions.JavaScript');
- CL.AddConstantN('cDefEdStyleSheet','String').SetString( 'Borland.EditOptions.StyleSheet');
- CL.AddConstantN('cDefEdINI','String').SetString( 'Borland.EditOptions.INI');
- CL.AddConstantN('cDefEdPHP','String').SetString( 'Borland.EditOptions.PHP');
+ CL.AddConstantN('cDefEdDefault','String').SetString( cDefEdOptions + 'Default');
+ CL.AddConstantN('cDefEdPascal','String').SetString( cDefEdOptions + 'Pascal');
+ CL.AddConstantN('cDefEdC','String').SetString( cDefEdOptions + 'C');
+ CL.AddConstantN('cDefEdObjCpp','String').SetString( cDefEdOptions + 'ObjectiveC++');
+ CL.AddConstantN('cDefEdCSharp','String').SetString( cDefEdOptions + 'C#');
+ CL.AddConstantN('cDefEdHTML','String').SetString( cDefEdOptions + 'HTML');
+ CL.AddConstantN('cDefEdXML','String').SetString( cDefEdOptions + 'XML');
+ CL.AddConstantN('cDefEdSQL','String').SetString( cDefEdOptions + 'SQL');
+ CL.AddConstantN('cDefEdIDL','String').SetString( cDefEdOptions + 'IDL');
+ CL.AddConstantN('cDefEdVisualBasic','String').SetString( cDefEdOptions + 'VisualBasic');
+ CL.AddConstantN('cDefEdJavaScript','String').SetString( cDefEdOptions + 'JavaScript');
+ CL.AddConstantN('cDefEdStyleSheet','String').SetString( cDefEdOptions + 'StyleSheet');
+ CL.AddConstantN('cDefEdINI','String').SetString( cDefEdOptions + 'INI');
+ CL.AddConstantN('cDefEdPHP','String').SetString( cDefEdOptions + 'PHP');
  CL.AddConstantN('dcAlign','String').SetString( 'Align');
  CL.AddConstantN('dcSize','String').SetString( 'Size');
  CL.AddConstantN('dcScale','String').SetString( 'Scale');
@@ -5479,111 +5839,100 @@ begin
  CL.AddConstantN('vvfPublished','LongWord').SetUInt( $03);
  CL.AddConstantN('vvfVisMask','LongWord').SetUInt( $04);
  CL.AddConstantN('vvfDeprecated','LongWord').SetUInt( $08);
+ CL.AddConstantN('sBaseConfigurationKey','String').SetString( 'Base');
  CL.AddConstantN('sBT_BuildType','String').SetString( 'BT_BuildType');
  CL.AddConstantN('cbtiOSDeviceDebug','String').SetString( 'Debug');
  CL.AddConstantN('cbtiOSDeviceAdhoc','String').SetString( 'Adhoc');
  CL.AddConstantN('cbtiOSDeviceAppStore','String').SetString( 'AppStore');
- CL.AddConstantN('svpHighest','LongWord').SetInt( - 2147483648);
  CL.AddConstantN('svpHigh','LongInt').SetInt( - 255);
  CL.AddConstantN('svpNormal','LongInt').SetInt( 0);
  CL.AddConstantN('svpLow','LongInt').SetInt( 255);
- CL.AddConstantN('svpLowest','LongInt').SetInt( 2147483647);
  CL.AddConstantN('pmmpBuildSection','LongInt').SetInt( 1000000);
- CL.AddConstantN('pmmpCompile','LongInt').SetInt( 1000100);
- CL.AddConstantN('pmmpMake','LongInt').SetInt( 1000100);
- CL.AddConstantN('pmmpBuild','LongInt').SetInt( 1001010);
- CL.AddConstantN('pmmpBuildFile','LongInt').SetInt( 1001010);
- CL.AddConstantN('pmmpClean','LongInt').SetInt( 1001030);
- CL.AddConstantN('pmmpLink','LongInt').SetInt( 1001040);
- CL.AddConstantN('pmmpFromHere','LongInt').SetInt( 1005000);
- CL.AddConstantN('pmmpCompileFromHere','LongInt').SetInt( 1005010);
- CL.AddConstantN('pmmpMakeFromHere','LongInt').SetInt( 1005020);
- CL.AddConstantN('pmmpBuildFromHere','LongInt').SetInt( 1005030);
- CL.AddConstantN('pmmpCleanFromHere','LongInt').SetInt( 1005040);
- CL.AddConstantN('pmmpMakeAll','LongInt').SetInt( 1005100);
- CL.AddConstantN('pmmpCompileAll','LongInt').SetInt( 1005110);
- CL.AddConstantN('pmmpBuildAll','LongInt').SetInt( 1005120);
- CL.AddConstantN('pmmpCleanAll','LongInt').SetInt( 1005130);
- CL.AddConstantN('pmmpRunSeparator','LongInt').SetInt( 1006000);
- CL.AddConstantN('pmmpRun','LongInt').SetInt( 1006010);
- CL.AddConstantN('pmmpRunNoDebug','LongInt').SetInt( 1006020);
- CL.AddConstantN('pmmpInstallSeparator','LongInt').SetInt( 1007000);
- CL.AddConstantN('pmmpInstall','LongInt').SetInt( 1007010);
- CL.AddConstantN('pmmpUninstall','LongInt').SetInt( 1007020);
- CL.AddConstantN('pmmpLocalBuildCmdsSeparator','LongInt').SetInt( 1008000);
- CL.AddConstantN('pmmpLocalBuildCmds','LongInt').SetInt( 1008100);
- CL.AddConstantN('pmmpPreprocess','LongInt').SetInt( 1008110);
- CL.AddConstantN('pmmpCompileToAsm','LongInt').SetInt( 1008150);
- CL.AddConstantN('pmmpDump','LongInt').SetInt( 1008160);
- CL.AddConstantN('pmmpShowDependencies','LongInt').SetInt( 1008170);
- CL.AddConstantN('pmmpBuildSoonerSeparator','LongInt').SetInt( 1010000);
- CL.AddConstantN('pmmpBuildSooner','LongInt').SetInt( 1010010);
- CL.AddConstantN('pmmpBuildLater','LongInt').SetInt( 1010020);
+ CL.AddConstantN('pmmpCompile','LongInt').SetInt( pmmpBuildSection + 100);
+ CL.AddConstantN('pmmpMake','LongInt').SetInt( pmmpBuildSection + 100);
+ CL.AddConstantN('pmmpBuild','LongInt').SetInt( pmmpBuildSection + 1010);
+ CL.AddConstantN('pmmpBuildFile','').SetString( pmmpBuild);
+ CL.AddConstantN('pmmpClean','LongInt').SetInt( pmmpBuildSection + 1030);
+ CL.AddConstantN('pmmpLink','LongInt').SetInt( pmmpBuildSection + 1040);
+ CL.AddConstantN('pmmpFromHere','LongInt').SetInt( pmmpBuildSection + 5000);
+ CL.AddConstantN('pmmpCompileFromHere','LongInt').SetInt( pmmpBuildSection + 5010);
+ CL.AddConstantN('pmmpMakeFromHere','LongInt').SetInt( pmmpBuildSection + 5020);
+ CL.AddConstantN('pmmpBuildFromHere','LongInt').SetInt( pmmpBuildSection + 5030);
+ CL.AddConstantN('pmmpCleanFromHere','LongInt').SetInt( pmmpBuildSection + 5040);
+ CL.AddConstantN('pmmpMakeAll','LongInt').SetInt( pmmpBuildSection + 5100);
+ CL.AddConstantN('pmmpCompileAll','LongInt').SetInt( pmmpBuildSection + 5110);
+ CL.AddConstantN('pmmpBuildAll','LongInt').SetInt( pmmpBuildSection + 5120);
+ CL.AddConstantN('pmmpCleanAll','LongInt').SetInt( pmmpBuildSection + 5130);
+ CL.AddConstantN('pmmpRunSeparator','LongInt').SetInt( pmmpBuildSection + 6000);
+ CL.AddConstantN('pmmpRun','LongInt').SetInt( pmmpBuildSection + 6010);
+ CL.AddConstantN('pmmpRunNoDebug','LongInt').SetInt( pmmpBuildSection + 6020);
+ CL.AddConstantN('pmmpInstallSeparator','LongInt').SetInt( pmmpBuildSection + 7000);
+ CL.AddConstantN('pmmpInstall','LongInt').SetInt( pmmpBuildSection + 7010);
+ CL.AddConstantN('pmmpUninstall','LongInt').SetInt( pmmpBuildSection + 7020);
+ CL.AddConstantN('pmmpLocalBuildCmdsSeparator','LongInt').SetInt( pmmpBuildSection + 8000);
+ CL.AddConstantN('pmmpLocalBuildCmds','LongInt').SetInt( pmmpBuildSection + 8100);
+ CL.AddConstantN('pmmpPreprocess','LongInt').SetInt( pmmpBuildSection + 8110);
+ CL.AddConstantN('pmmpCompileToAsm','LongInt').SetInt( pmmpBuildSection + 8150);
+ CL.AddConstantN('pmmpDump','LongInt').SetInt( pmmpBuildSection + 8160);
+ CL.AddConstantN('pmmpShowDependencies','LongInt').SetInt( pmmpBuildSection + 8170);
+ CL.AddConstantN('pmmpBuildSoonerSeparator','LongInt').SetInt( pmmpBuildSection + 10000);
+ CL.AddConstantN('pmmpBuildSooner','LongInt').SetInt( pmmpBuildSection + 10010);
+ CL.AddConstantN('pmmpBuildLater','LongInt').SetInt( pmmpBuildSection + 10020);
  CL.AddConstantN('pmmpOpenSection','LongInt').SetInt( 2000000);
- CL.AddConstantN('pmmpOpen','LongInt').SetInt( 2000100);
- CL.AddConstantN('pmmpOpenAsText','LongInt').SetInt( 2000200);
- CL.AddConstantN('pmmpClose','LongInt').SetInt( 2000300);
- CL.AddConstantN('pmmpExplore','LongInt').SetInt( 2000450);
+ CL.AddConstantN('pmmpOpen','LongInt').SetInt( pmmpOpenSection + 100);
+ CL.AddConstantN('pmmpOpenAsText','LongInt').SetInt( pmmpOpenSection + 200);
+ CL.AddConstantN('pmmpClose','LongInt').SetInt( pmmpOpenSection + 300);
+ CL.AddConstantN('pmmpExplore','LongInt').SetInt( pmmpOpenSection + 450);
+ CL.AddConstantN('pmmpCopyFilePath','LongInt').SetInt( pmmpOpenSection + 480);
  CL.AddConstantN('pmmpAddSection','LongInt').SetInt( 3000000);
- CL.AddConstantN('pmmpAdd','LongInt').SetInt( 3000100);
- CL.AddConstantN('pmmpAddNew','LongInt').SetInt( 3000200);
- CL.AddConstantN('pmmpAddItemToProject','LongInt').SetInt( 3000500);
- CL.AddConstantN('pmmpAddComponent','LongInt').SetInt( 3001000);
- CL.AddConstantN('pmmpAddReference','LongInt').SetInt( 3001100);
- CL.AddConstantN('pmmpAddFolder','LongInt').SetInt( 3002000);
- CL.AddConstantN('pmmpCreateNewTarget','LongInt').SetInt( 3005000);
- CL.AddConstantN('pmmpAddToProjectGroup','LongInt').SetInt( 3005000);
- CL.AddConstantN('pmmpAddExistingTarget','LongInt').SetInt( 3005010);
+ CL.AddConstantN('pmmpAdd','LongInt').SetInt( pmmpAddSection + 100);
+ CL.AddConstantN('pmmpAddNew','LongInt').SetInt( pmmpAddSection + 200);
+ CL.AddConstantN('pmmpAddItemToProject','LongInt').SetInt( pmmpAddSection + 500);
+ CL.AddConstantN('pmmpAddComponent','LongInt').SetInt( pmmpAddSection + 1000);
+ CL.AddConstantN('pmmpAddReference','LongInt').SetInt( pmmpAddSection + 1100);
+ CL.AddConstantN('pmmpAddFolder','LongInt').SetInt( pmmpAddSection + 2000);
+ CL.AddConstantN('pmmpCreateNewTarget','LongInt').SetInt( pmmpAddSection + 5000);
+ CL.AddConstantN('pmmpAddToProjectGroup','').SetString( pmmpCreateNewTarget);
+ CL.AddConstantN('pmmpAddExistingTarget','LongInt').SetInt( pmmpAddSection + 5010);
  CL.AddConstantN('pmmpRemoveSection','LongInt').SetInt( 4000000);
- CL.AddConstantN('pmmpRemove','LongInt').SetInt( 4000100);
- CL.AddConstantN('pmmpRemoveItem','LongInt').SetInt( 4000300);
- CL.AddConstantN('pmmpExcludeFromBuild','LongInt').SetInt( 4000400);
- CL.AddConstantN('pmmpRemoveFolder','LongInt').SetInt( 4000500);
- CL.AddConstantN('pmmpRemoveProjects','LongInt').SetInt( 4000600);
+ CL.AddConstantN('pmmpRemove','LongInt').SetInt( pmmpRemoveSection + 100);
+ CL.AddConstantN('pmmpRemoveItem','LongInt').SetInt( pmmpRemove + 200);
+ CL.AddConstantN('pmmpExcludeFromBuild','LongInt').SetInt( pmmpRemove + 300);
+ CL.AddConstantN('pmmpRemoveFolder','LongInt').SetInt( pmmpRemove + 400);
+ CL.AddConstantN('pmmpRemoveProjects','LongInt').SetInt( pmmpRemove + 500);
  CL.AddConstantN('pmmpSaveSection','LongInt').SetInt( 5000000);
- CL.AddConstantN('pmmpSave','LongInt').SetInt( 5000100);
- CL.AddConstantN('pmmpSaveGroup','LongInt').SetInt( 5000100);
- CL.AddConstantN('pmmpSaveAs','LongInt').SetInt( 5000200);
- CL.AddConstantN('pmmpSaveGroupAs','LongInt').SetInt( 5000200);
+ CL.AddConstantN('pmmpSave','LongInt').SetInt( pmmpSaveSection + 100);
+ CL.AddConstantN('pmmpSaveGroup','').SetString( pmmpSave);
+ CL.AddConstantN('pmmpSaveAs','LongInt').SetInt( pmmpSaveSection + 200);
+ CL.AddConstantN('pmmpSaveGroupAs','').SetString( pmmpSaveAs);
  CL.AddConstantN('pmmpRenameSection','LongInt').SetInt( 6000000);
- CL.AddConstantN('pmmpRename','LongInt').SetInt( 6000100);
- CL.AddConstantN('pmmpRenameGroup','LongInt').SetInt( 6000100);
- CL.AddConstantN('pmmpDelete','LongInt').SetInt( 6000200);
+ CL.AddConstantN('pmmpRename','LongInt').SetInt( pmmpRenameSection + 100);
+ CL.AddConstantN('pmmpRenameGroup','').SetString( pmmpRename);
+ CL.AddConstantN('pmmpDelete','LongInt').SetInt( pmmpRenameSection + 200);
  CL.AddConstantN('pmmpVersionControlSection','LongInt').SetInt( 7000000);
- CL.AddConstantN('pmmpVersionControl','LongInt').SetInt( 7000100);
+ CL.AddConstantN('pmmpVersionControl','LongInt').SetInt( pmmpVersionControlSection + 100);
  CL.AddConstantN('pmmpUtilsSection','LongInt').SetInt( 8000000);
- CL.AddConstantN('pmmpActivate','LongInt').SetInt( 8000100);
- CL.AddConstantN('pmmpViewSource','LongInt').SetInt( 8000150);
- CL.AddConstantN('pmmpSortBuildOrder','LongInt').SetInt( 8001000);
- CL.AddConstantN('pmmpSort','LongInt').SetInt( 8001000);
- CL.AddConstantN('pmmpSortName','LongInt').SetInt( 8001001);
- CL.AddConstantN('pmmpSortModified','LongInt').SetInt( 8001002);
- CL.AddConstantN('pmmpSortType','LongInt').SetInt( 8001003);
- CL.AddConstantN('pmmpSortPath','LongInt').SetInt( 8001004);
- CL.AddConstantN('pmmpSortAuto','LongInt').SetInt( 8001100);
- CL.AddConstantN('pmmpDependencies','LongInt').SetInt( 8005000);
- CL.AddConstantN('pmmpUseForPrecompiling','LongInt').SetInt( 8006000);
+ CL.AddConstantN('pmmpActivate','LongInt').SetInt( pmmpUtilsSection + 100);
+ CL.AddConstantN('pmmpViewSource','LongInt').SetInt( pmmpUtilsSection + 150);
+ CL.AddConstantN('pmmpSortBuildOrder','LongInt').SetInt( pmmpUtilsSection + 1000);
+ CL.AddConstantN('pmmpSort','LongInt').SetInt( pmmpUtilsSection + 1000);
+ CL.AddConstantN('pmmpSortName','LongInt').SetInt( pmmpUtilsSection + 1001);
+ CL.AddConstantN('pmmpSortModified','LongInt').SetInt( pmmpUtilsSection + 1002);
+ CL.AddConstantN('pmmpSortType','LongInt').SetInt( pmmpUtilsSection + 1003);
+ CL.AddConstantN('pmmpSortPath','LongInt').SetInt( pmmpUtilsSection + 1004);
+ CL.AddConstantN('pmmpSortAuto','LongInt').SetInt( pmmpUtilsSection + 1100);
+ CL.AddConstantN('pmmpDependencies','LongInt').SetInt( pmmpUtilsSection + 5000);
+ CL.AddConstantN('pmmpUseForPrecompiling','LongInt').SetInt( pmmpUtilsSection + 6000);
  CL.AddConstantN('pmmpReorderSection','LongInt').SetInt( 9000000);
- CL.AddConstantN('pmmpReorder','LongInt').SetInt( 9000100);
- CL.AddConstantN('pmmpBuildOrder','LongInt').SetInt( 9001000);
+ CL.AddConstantN('pmmpReorder','LongInt').SetInt( pmmpReorderSection + 100);
+ CL.AddConstantN('pmmpBuildOrder','LongInt').SetInt( pmmpReorderSection + 1000);
  CL.AddConstantN('pmmpOptionsSection','LongInt').SetInt( 10000000);
- CL.AddConstantN('pmmpFolderOptions','LongInt').SetInt( 10000100);
- CL.AddConstantN('pmmpRemoveLocalOptions','LongInt').SetInt( 10000200);
- CL.AddConstantN('pmmpEditLocalOptions','LongInt').SetInt( 10000201);
- CL.AddConstantN('pmmpProjectOptions','LongInt').SetInt( 10090000);
+ CL.AddConstantN('pmmpFolderOptions','LongInt').SetInt( pmmpOptionsSection + 100);
+ CL.AddConstantN('pmmpRemoveLocalOptions','LongInt').SetInt( pmmpOptionsSection + 200);
+ CL.AddConstantN('pmmpEditLocalOptions','LongInt').SetInt( pmmpOptionsSection + 201);
+ CL.AddConstantN('pmmpProjectOptions','LongInt').SetInt( pmmpOptionsSection + 90000);
  CL.AddConstantN('pmmpBuildConfig','LongInt').SetInt( 11000000);
  CL.AddConstantN('pmmpUserOffset','LongInt').SetInt( 500000);
- CL.AddConstantN('pmmpUserBuild','LongInt').SetInt( 1500000);
- CL.AddConstantN('pmmpUserOpen','LongInt').SetInt( 2500000);
- CL.AddConstantN('pmmpUserAdd','LongInt').SetInt( 3500000);
- CL.AddConstantN('pmmpUserRemove','LongInt').SetInt( 4500000);
- CL.AddConstantN('pmmpUserSave','LongInt').SetInt( 5500000);
- CL.AddConstantN('pmmpUserRename','LongInt').SetInt( 6500000);
- CL.AddConstantN('pmmpUserVersionControl','LongInt').SetInt( 7500100);
- CL.AddConstantN('pmmpUserUtils','LongInt').SetInt( 8500000);
- CL.AddConstantN('pmmpUserReorder','LongInt').SetInt( 9500000);
- CL.AddConstantN('pmmpUserOptions','LongInt').SetInt( 10500000);
- CL.AddConstantN('pmmpUserBuildConfig','LongInt').SetInt( 11500000);
  CL.AddConstantN('icNameChanged','LongWord').SetUInt( $0001);
  CL.AddConstantN('icExecutableChanged','LongWord').SetUInt( $0002);
  CL.AddConstantN('icLanguageChanged','LongWord').SetUInt( $0004);
@@ -5592,20 +5941,64 @@ begin
  CL.AddConstantN('icExtChanged','LongWord').SetUInt( $0020);
  CL.AddConstantN('icEnabled','LongWord').SetUInt( $0040);
  CL.AddConstantN('icDisabled','LongWord').SetUInt( $0080);
+ CL.AddConstantN('cEdMenuCatIdentifier','String').SetString( 'Identifier');
+ CL.AddConstantN('cEdMenuCatBreakPoint','String').SetString( 'BreakPoint');
+ CL.AddConstantN('cEdMenuCatDebugDebug','String').SetString( 'DebugDebug');
+ CL.AddConstantN('cEdMenuCatBase','String').SetString( 'Base');
+ CL.AddConstantN('cEdMenuCatModule','String').SetString( 'Module');
+ CL.AddConstantN('cEdMenuCatClipboard','String').SetString( 'Clipboard');
+ CL.AddConstantN('cEdMenuCatBookMarks','String').SetString( 'BookMarks');
+ CL.AddConstantN('cEdMenuCatDebug','String').SetString( 'Debug');
+ CL.AddConstantN('cEdMenuCatView','String').SetString( 'View');
+ CL.AddConstantN('cEdMenuCatElide','String').SetString( 'Elide');
+ CL.AddConstantN('cEdMenuCatVersionControl','String').SetString( 'VersionControl');
+ CL.AddConstantN('cEdMenuCatRefactor','String').SetString( 'Refactor');
+ CL.AddConstantN('cEdMenuCatFormat','String').SetString( 'Format');
+ CL.AddConstantN('cEdMenuCatRepository','String').SetString( 'Repository');
+ CL.AddConstantN('cEdMenuCatLast','String').SetString( 'Last');
   CL.AddClassN(CL.FindClass('TOBJECT'),'ENonAIRException');
   CL.AddClassN(CL.FindClass('TOBJECT'),'EPersonalityException');
   CL.AddTypeS('TOTACompileMode', '( cmOTAMake, cmOTABuild, cmOTACheck, cmOTAMak'
-   +'eUnit )');
+   +'eUnit, cmOTAClean, cmOTALink )');
   CL.AddTypeS('TOTACompileResult', '( crOTAFailed, crOTASucceeded, crOTABackgro'
    +'und )');
   CL.AddTypeS('TOTAModuleType', 'Integer');
   CL.AddTypeS('TOTAHandle', 'Pointer');
-  CL.AddTypeS('TOTAAddress', 'Int64');
+  CL.AddTypeS('TOTAAddress', 'UInt64');
   CL.AddTypeS('TOTAToDoPriority', 'Integer');
   CL.AddTypeS('TOTAEditPos', 'record Col : SmallInt; Line : Longint; end');
   CL.AddTypeS('TOTACharPos', 'record CharIndex : SmallInt; Line : Longint; end');
   CL.AddTypeS('TOTAOptionName', 'record Name : string; Kind : TTypeKind; end');
   CL.AddTypeS('TOTAOptionNameArray', 'array of TOTAOptionName');
+  CL.AddTypeS('TOTAThreadContext', 'TContext');
+  CL.AddTypeS('TOTAM128A', 'record Low : UInt64; High : Int64; end');
+  CL.AddTypeS('TOTAContextWin32', 'TContext');
+  CL.AddTypeS('TOTAContextOSX32', 'TContext');
+  CL.AddTypeS('TOTAContextOSX64', 'TOTAContextWin64');
+  CL.AddTypeS('TOTAContextARM32', 'record R0 : DWORD; R1 : DWORD; R2 : DWORD; R'
+   +'3 : DWORD; R4 : DWORD; R5 : DWORD; R6 : DWORD; R7 : DWORD; R8 : DWORD; R9 '
+   +': DWORD; R10 : DWORD; R11 : DWORD; R12 : DWORD; Sp : DWORD; Lr : DWORD; Pc'
+   +' : DWORD; Cpsr : DWORD; end');
+  CL.AddTypeS('TOTAContextARM64', 'record X0 : DWORD64; X1 : DWORD64; X2 : DWOR'
+   +'D64; X3 : DWORD64; X4 : DWORD64; X5 : DWORD64; X6 : DWORD64; X7 : DWORD64;'
+   +' X8 : DWORD64; X9 : DWORD64; X10 : DWORD64; X11 : DWORD64; X12 : DWORD64; '
+   +'X13 : DWORD64; X14 : DWORD64; X15 : DWORD64; X16 : DWORD64; X17 : DWORD64;'
+   +' X18 : DWORD64; X19 : DWORD64; X20 : DWORD64; X21 : DWORD64; X22 : DWORD64'
+   +'; X23 : DWORD64; X24 : DWORD64; X25 : DWORD64; X26 : DWORD64; X27 : DWORD6'
+   +'4; X28 : DWORD64; Fp : DWORD64; Lr : DWORD64; Sp : DWORD64; Pc : DWORD64; '
+   +'Cpsr : DWORD64; end');
+  CL.AddTypeS('TOTAThreadContextEx', 'record win32 : TOTAContextWin32; end');
+  CL.AddTypeS('TOTAThreadContext', 'record ContextFlags : DWORD; Dr0 : DWORD; D'
+   +'r1 : DWORD; Dr2 : DWORD; Dr3 : DWORD; Dr6 : DWORD; Dr7 : DWORD; FloatSave '
+   +': TFloatingSaveArea; SegGs : DWORD; SegFs : DWORD; SegEs : DWORD; SegDs : '
+   +'DWORD; Edi : DWORD; Esi : DWORD; Ebx : DWORD; Edx : DWORD; Ecx : DWORD; Ea'
+   +'x : DWORD; Ebp : DWORD; Eip : DWORD; SegCs : DWORD; EFlags : DWORD; Esp : '
+   +'DWORD; SegSs : DWORD; end');
+  CL.AddTypeS('TOTAXMMRegs', 'record XMM0 : TOTAXMMReg; XMM1 : TOTAXMMReg; XMM2'
+   +' : TOTAXMMReg; XMM3 : TOTAXMMReg; XMM4 : TOTAXMMReg; XMM5 : TOTAXMMReg; XM'
+   +'M6 : TOTAXMMReg; XMM7 : TOTAXMMReg; XMM8 : TOTAXMMReg; XMM9 : TOTAXMMReg; '
+   +'XMM10 : TOTAXMMReg; XMM11 : TOTAXMMReg; XMM12 : TOTAXMMReg; XMM13 : TOTAXM'
+   +'MReg; XMM14 : TOTAXMMReg; XMM15 : TOTAXMMReg; MXCSR : LongWord; end');
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAProject, 'IOTAProject');
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAModule, 'IOTAModule');
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTANotifier, 'IOTANotifier');
@@ -5637,19 +6030,29 @@ begin
   SIRegister_IOTAToolsFilter60(CL);
   SIRegister_IOTAToolsFilter(CL);
   SIRegister_IOTAEditReader(CL);
+  SIRegister_IOTAEditWriter280(CL);
   SIRegister_IOTAEditWriter(CL);
   CL.AddTypeS('TOTASyntaxHighlighter', '( shNone, shQuery, shPascal, shC, shSQL'
    +', shIDL, shMax )');
+  CL.AddTypeS('POTASyntaxCode', '^TOTASyntaxCode // will not work');
   CL.AddTypeS('TOTASyntaxCode', 'Byte');
-  CL.AddTypeS('TOTALineClass', 'Byte');
-  CL.AddTypeS('OTAEdChar', 'Char');
-  CL.AddTypeS('POTAEdChar', 'PChar');
+  CL.AddTypeS('TOTALineClass', 'Cardinal');
+  CL.AddTypeS('OTAEdChar', 'WideChar');
+  CL.AddTypeS('POTAEdChar', 'PWideChar');
+  CL.AddTypeS('OTAEdChar', 'AnsiChar');
+  CL.AddTypeS('POTAEdChar', 'PAnsiChar');
   CL.AddTypeS('TOTALineSize', 'Word');
   SIRegister_IOTAHighlighter(CL);
   SIRegister_IOTAHighlighterPreview(CL);
   SIRegister_IOTADefaultPreviewTrait(CL);
   SIRegister_IOTAElisionPreview(CL);
   SIRegister_IOTAHighlightServices(CL);
+  CL.AddTypeS('TOTAEndLine', '( cLineEndDefault, cLineEndCr, cLineEndLf, cLineE'
+   +'ndCrLf, cLineEndLfCr, cLineEndNone )');
+  CL.AddTypeS('TOTALineInfo', 'record lineLength : Integer; lineText : POTAEdCh'
+   +'ar; lineEnd : TOTAEndLine; end');
+  CL.AddTypeS('POTALineInfo', '^TOTALineInfo // will not work');
+  SIRegister_IOTARawEditReader(CL);
   SIRegister_IOTACustomEditView(CL);
   CL.AddTypeS('TOTABlockType', '( btInclusive, btLine, btColumn, btNonInclusive'
    +', btUnknown )');
@@ -5673,6 +6076,7 @@ begin
   CL.AddTypeS('TOTAModificationType', '( mtModSinceLoad, mtModSinceSave, mtAnyM'
    +'od )');
   SIRegister_IOTAEditView220(CL);
+  CL.AddInterface(CL.FindInterface('IUNKNOWN'),INTAEditViewNotifier, 'INTAEditViewNotifier');
   CL.AddTypeS('TOTAIncreaseDecreaseFontSizeMode', '( idFontIncrease, idFontDecr'
    +'ease )');
   SIRegister_IOTAEditView(CL);
@@ -5831,7 +6235,8 @@ begin
   SIRegister_IOTAProcess90(CL);
   SIRegister_IOTAProcess150(CL);
   CL.AddTypeS('TOTAProcessType', '( optWin32, optOSX32, optWin64, optiOS32, opt'
-   +'Android, optiOS64, optLinux64, optOSX64 )');
+   +'Android, optiOS64, optLinux64, optOSX64, optAndroid64, optOSXArm64, optWin'
+   +'64x )');
   SIRegister_IOTAProcess(CL);
   SIRegister_INTAProcess150(CL);
   SIRegister_INTAProcess(CL);
@@ -5847,6 +6252,7 @@ begin
   SIRegister_IOTADebuggerServices90(CL);
   SIRegister_IOTADebuggerServices120(CL);
   SIRegister_IOTADebuggerVisualizer(CL);
+  SIRegister_IOTADebuggerVisualizer250(CL);
   SIRegister_IOTADebuggerVisualizerValueReplacer(CL);
   CL.AddTypeS('TOTAVisualizerClosedProcedure', 'Procedure');
   CL.AddTypeS('TOTAVisualizerUnavailableReason', '( ovurProcessRunning, ovurOut'
@@ -5866,8 +6272,8 @@ begin
   SIRegister_IOTAIDENotifier80(CL);
   SIRegister_IOTAGalleryCategory(CL);
   SIRegister_IOTAGalleryCategoryManager(CL);
-  CL.AddTypeS('TWizardStateE', '( wsEnabled, wsChecked )');
-  CL.AddTypeS('TWizardState', 'set of TWizardStateE');
+  CL.AddTypeS('TWizardStateItem', '( wsEnabled, wsChecked )');
+  CL.AddTypeS('TWizardState', 'set of TWizardStateItem');
   SIRegister_IOTAWizard(CL);
   SIRegister_IOTARepositoryWizard(CL);
   SIRegister_IOTARepositoryWizard60(CL);
@@ -5890,7 +6296,7 @@ begin
   CL.AddTypeS('TPackageOp', '( poInstalled, poUninstalling, poUninstalled )');
   CL.AddTypeS('TPackageNotifier', 'Procedure ( const PackageName : string; Pack'
    +'ageOp : TPackageOp)');
-  SIRegister_IOTAPAckageServices(CL);
+  SIRegister_IOTAPackageServices(CL);
   SIRegister_IOTACustomMessage(CL);
   SIRegister_IOTACustomMessage50(CL);
   SIRegister_IOTACustomMessage100(CL);
@@ -5909,7 +6315,9 @@ begin
   SIRegister_IOTAMessageServices80(CL);
   SIRegister_IOTAMessageServices(CL);
   SIRegister_INTAAddInOptions(CL);
+  SIRegister_IOTAEnvironmentOptionsNotifier(CL);
   SIRegister_IOTAEnvironmentOptions140(CL);
+  SIRegister_IOTAEnvironmentOptions280(CL);
   SIRegister_IOTAEnvironmentOptions(CL);
   SIRegister_IOTACustomOptions(CL);
   SIRegister_INTAEnvironmentOptionsServices(CL);
@@ -5925,6 +6333,9 @@ begin
   SIRegister_INTAServices90(CL);
   SIRegister_INTAServices120(CL);
   SIRegister_INTACustomDockableForm(CL);
+  SIRegister_INTAServices270(CL);
+  SIRegister_INTAServices280(CL);
+  SIRegister_INTAServices290(CL);
   SIRegister_INTAServices(CL);
   SIRegister_IOTAServices50(CL);
   SIRegister_IOTAServices60(CL);
@@ -5942,6 +6353,7 @@ begin
   SIRegister_IOTAEditBuffer60(CL);
   SIRegister_IOTAEditBuffer(CL);
   SIRegister_IOTAEditBufferIterator(CL);
+  CL.AddTypeS('PKeyBindingRec', '^TKeyBindingRec // will not work');
   CL.AddTypeS('TKeyBindingRec', 'record KeyCode : TShortCut; KeyProc : TKeyBind'
    +'ingProc; Context : Pointer; Next : Integer; Reserved : Integer; end');
   SIRegister_IOTAKeyContext(CL);
@@ -5952,16 +6364,20 @@ begin
   SIRegister_IOTAKeyboardServices(CL);
   SIRegister_IOTAKeyboardDiagnostics(CL);
   SIRegister_IOTASpeedSetting(CL);
+  SIRegister_IOTAEditorColorSpeedSetting(CL);
   SIRegister_IOTAEditOptions60(CL);
   SIRegister_IOTAEditOptions(CL);
   SIRegister_IOTAEditorExplorerPersonalityTrait(CL);
   SIRegister_IOTAEditorServices60(CL);
   SIRegister_IOTAEditorServices70(CL);
+  SIRegister_INTAEditorLocalMenu(CL);
   SIRegister_IOTAEditorServices80(CL);
+  SIRegister_IOTAEditorServices280(CL);
   SIRegister_IOTAEditorServices(CL);
   SIRegister_INTAEditorServices(CL);
   SIRegister_INTACustomEditorView(CL);
   SIRegister_INTACustomEditorView150(CL);
+  SIRegister_INTACustomEditorView280(CL);
   SIRegister_INTACustomEditorViewState(CL);
   SIRegister_INTACustomEditorViewStatusPanel(CL);
   SIRegister_INTACustomEditorSubView(CL);
@@ -5975,6 +6391,9 @@ begin
   CL.AddTypeS('TOTAInvokeType', '( itAuto, itManual, itTimer )');
   CL.AddTypeS('TOTACodeInsightType', '( citNone, citCodeInsight, citParameterCo'
    +'deInsight, citBrowseCodeInsight, citHintCodeInsight )');
+  CL.AddTypeS('TOTACodeInsightInvocation', 'record InvokeType : TOTAInvokeType;'
+   +' CodeInsightType : TOTACodeInsightType; end');
+  CL.AddTypeS('TOTACodeInsightInvocations', 'array of TOTACodeInsightInvocation');
   CL.AddTypeS('TOTASortOrder', '( soAlpha, soScope )');
   CL.AddTypeS('TOTAViewerSymbolFlags', '( vsfUnknown, vsfConstant, vsfType, vsf'
    +'Variable, vsfProcedure, vsfFunction, vsfUnit, vsfLabel, vsfProperty, vsfCo'
@@ -5989,7 +6408,11 @@ begin
   SIRegister_IOTACodeInsightParameterList(CL);
   SIRegister_IOTACodeInsightParameterList100(CL);
   SIRegister_IOTACodeInsightManager100(CL);
+  SIRegister_IOTAMultipleCodeInsightInvocation290(CL);
+  SIRegister_IOTAMultipleCodeInsightInvocation(CL);
   SIRegister_IOTACodeInsightManagerEnvOptions(CL);
+  SIRegister_IOTACodeInsightManagerEnvOptions270(CL);
+  SIRegister_IOTACodeInsightManagerEnvOptions290(CL);
   SIRegister_IOTACodeBrowsePreview(CL);
   SIRegister_IOTACodeInsightManager90(CL);
   SIRegister_IOTACodeInsightManager(CL);
@@ -6005,6 +6428,9 @@ begin
   SIRegister_IOTACodeInsightServices270(CL);
   SIRegister_IOTACodeInsightServices(CL);
   SIRegister_IOTACodeInsightSelection(CL);
+  SIRegister_INTAIDEInsightItem270(CL);
+  SIRegister_INTAIDEInsightItem280(CL);
+  SIRegister_INTAIDEInsightItem290(CL);
   SIRegister_INTAIDEInsightItem(CL);
   CL.AddTypeS('INTAIDEInsightItemArray', 'array of INTAIDEInsightItem');
   SIRegister_IOTAIDEInsightCategory(CL);
@@ -6021,8 +6447,8 @@ begin
   CL.AddTypeS('TOTASizeAffect', '( asNothing, asHGrow, asHShrink, asHAbsolute, '
    +'asVGrow, asVShrink, asVAbsolute, asWidths, asHeights, asWidthHeight, asSiz'
    +'eToGrid )');
-  CL.AddTypeS('TOTAAlignableStateE', '( asEnabled, asChecked )');
-  CL.AddTypeS('TOTAAlignableState', 'set of TOTAAlignableStateE');
+  CL.AddTypeS('TOTAAlignableStateItem', '( asEnabled, asChecked )');
+  CL.AddTypeS('TOTAAlignableState', 'set of TOTAAlignableStateItem');
   SIRegister_IOTAAlignable(CL);
   SIRegister_IOTAAlignableState(CL);
   SIRegister_IOTAScaleable(CL);
@@ -6036,11 +6462,14 @@ begin
   SIRegister_INTAPersonalityDevelopers(CL);
   SIRegister_IBorlandIDEServices70(CL);
   SIRegister_IBorlandIDEServices(CL);
-  CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices');
+  SIRegister_IOTASplashScreenServices270(CL);
+  SIRegister_IOTASplashScreenServices280(CL);
   SIRegister_IOTASplashScreenServices(CL);
   SIRegister_IOTAAboutBoxServices120(CL);
   CL.AddTypeS('TOTAAlphaFormat', '( otaafIgnored, otaafDefined, otaafPremultipl'
    +'ied )');
+  SIRegister_IOTAAboutBoxServices270(CL);
+  SIRegister_IOTAAboutBoxServices280(CL);
   SIRegister_IOTAAboutBoxServices(CL);
   SIRegister_IOTAHistoryItem(CL);
   SIRegister_IOTAHistoryServices(CL);
@@ -6081,6 +6510,13 @@ begin
   SIRegister_IOTAGetItService220(CL);
   SIRegister_IOTAGetItService230(CL);
   SIRegister_IOTAGetItService(CL);
+  SIRegister_INTAIDEThemingServicesNotifier(CL);
+  SIRegister_IOTAExtensionsNotifier(CL);
+  SIRegister_IOTAIDEThemingServices250(CL);
+  SIRegister_IOTAIDEThemingServices260(CL);
+  SIRegister_IOTAIDEThemingServices(CL);
+  SIRegister_IOTAIDEWaitDialogServices270(CL);
+  SIRegister_IOTAIDEWaitDialogServices(CL);
   SIRegister_TNotifierObject(CL);
   SIRegister_TModuleNotifierObject(CL);
   SIRegister_TOTAFile(CL);
@@ -6096,17 +6532,18 @@ begin
    +'nst AMessage : string)');
   CL.AddTypeS('TOTAParamIndexCallBack', 'Procedure ( Sender : TObject; AParamIn'
    +'dex : Integer)');
+  CL.AddTypeS('TOTAParamIndexCallBackEx', 'Procedure ( Sender : TObject; AParam'
+   +'Index, ALineIndex : Integer)');
   SIRegister_IOTAAsyncCodeInsightManager(CL);
+  SIRegister_IOTAAsyncCodeInsightManager270(CL);
   SIRegister_IOTACodeInsightUIOverride(CL);
+  SIRegister_IOTAVersionSKUInfoService280(CL);
+  SIRegister_IOTAVersionSKUInfoService290(CL);
+  SIRegister_IOTAVersionSKUInfoService(CL);
  CL.AddDelphiFunction('Procedure RegisterPackageWizard( const Wizard : IOTAWizard)');
  CL.AddDelphiFunction('Function StringToIOTAFile( const CodeString : string) : IOTAFile');
  CL.AddDelphiFunction('Function GetActiveProject : IOTAProject');
  CL.AddDelphiFunction('Function PersonalityServices : IOTAPersonalityServices');
-end;
-
-function BorlandIDEServices: IBorlandIDEServices;
-begin
-  Result := ToolsAPI.BorlandIDEServices;
 end;
 
 (* === run-time registration functions === *)
@@ -6127,9 +6564,428 @@ procedure TOTAFileFSource_R(Self: TOTAFile; var T: string);
 Begin T := Self.FSource; end;
 
 (*----------------------------------------------------------------------------*)
+Function IOTAGetItServiceInstall2_P(Self: IOTAGetItService;  const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean;
+Begin Result := Self.Install(CatalogId, AutoCloseProgressDlg); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAGetItServiceInstall1_P(Self: IOTAGetItService;  const CatalogId : string) : Boolean;
+Begin Result := Self.Install(CatalogId); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAProjectManagerMenuExecute1_P(Self: IOTAProjectManagerMenu;  const MenuContextList : IInterfaceList);
+Begin Self.Execute(MenuContextList); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTATimerServicesStopTimer2_P(Self: IOTATimerServices;  const Description, Category : string);
+Begin Self.StopTimer(Description, Category); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTATimerServicesStopTimer1_P(Self: IOTATimerServices;  TimerID : Integer);
+Begin Self.StopTimer(TimerID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTACompileServicesAddNotifier1_P(Self: IOTACompileServices;  Notifier : IOTACompileNotifier) : Integer;
+Begin Result := Self.AddNotifier(Notifier); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAHistoryServicesExecute2_P(Self: IOTAHistoryServices;  const AItem : IOTAHistoryItem);
+Begin Self.Execute(AItem); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAHistoryServicesExecute1_P(Self: IOTAHistoryServices;  GoForward : Boolean);
+Begin Self.Execute(GoForward); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices280AddProductInfo3_P(Self: IOTAAboutBoxServices280;  const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage : HBITMAP; const AProductImage : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat) : Integer;
+Begin Result := Self.AddProductInfo(ADialogTitle, ACopyright, ATitle, ADescription, AAboutImage, AProductImage, AIsUnRegistered, ALicenseStatus, ASKUName, AAboutImageAlphaFormat); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices280AddPluginInfo3_P(Self: IOTAAboutBoxServices280;  const ATitle, ADescription : string; const AImage : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;
+Begin Result := Self.AddPluginInfo(ATitle, ADescription, AImage, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices270AddProductInfo2_P(Self: IOTAAboutBoxServices270;  const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAboutImageAlphaFormat : TOTAAlphaFormat; AProductImageAlphaFormat : TOTAAlphaFormat) : Integer;
+Begin Result := Self.AddProductInfo(ADialogTitle, ACopyright, ATitle, ADescription, AAboutImage, AProductImage, AIsUnRegistered, ALicenseStatus, ASKUName, AAboutImageAlphaFormat, AProductImageAlphaFormat); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices270AddPluginInfo2_P(Self: IOTAAboutBoxServices270;  const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string; AAlphaFormat : TOTAAlphaFormat) : Integer;
+Begin Result := Self.AddPluginInfo(ATitle, ADescription, AImage, AIsUnRegistered, ALicenseStatus, ASKUName, AAlphaFormat); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices120AddProductInfo1_P(Self: IOTAAboutBoxServices120;  const ADialogTitle, ACopyright, ATitle, ADescription : string; AAboutImage, AProductImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;
+Begin Result := Self.AddProductInfo(ADialogTitle, ACopyright, ATitle, ADescription, AAboutImage, AProductImage, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAAboutBoxServices120AddPluginInfo1_P(Self: IOTAAboutBoxServices120;  const ATitle, ADescription : string; AImage : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string) : Integer;
+Begin Result := Self.AddPluginInfo(ATitle, ADescription, AImage, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASplashScreenServices280AddProductBitmap2_P(Self: IOTASplashScreenServices280;  const Caption : string; const AImageArray : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);
+Begin Self.AddProductBitmap(Caption, AImageArray, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASplashScreenServices280AddPluginBitmap2_P(Self: IOTASplashScreenServices280;  const Caption : string; const AImageArray : TGraphicArray; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);
+Begin Self.AddPluginBitmap(Caption, AImageArray, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASplashScreenServices270AddProductBitmap1_P(Self: IOTASplashScreenServices270;  const ACaption : string; ABitmap : HBITMAP; IsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);
+Begin Self.AddProductBitmap(ACaption, ABitmap, IsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASplashScreenServices270AddPluginBitmap1_P(Self: IOTASplashScreenServices270;  const ACaption : string; ABitmap : HBITMAP; AIsUnRegistered : Boolean; const ALicenseStatus : string; const ASKUName : string);
+Begin Self.AddPluginBitmap(ACaption, ABitmap, AIsUnRegistered, ALicenseStatus, ASKUName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IBorlandIDEServicesGetService2_P(Self: IBorlandIDEServices;  const Service : TGUID; out Svc) : Boolean;
+Begin Result := Self.GetService(Service, Svc); END;
+
+(*----------------------------------------------------------------------------*)
+Function IBorlandIDEServicesGetService1_P(Self: IBorlandIDEServices;  const Service : TGUID) : IInterface;
+Begin Result := Self.GetService(Service); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsTrait2_P(Self: IOTAPersonalityServices100;  const ATraitGUID : TGUID) : Boolean;
+Begin Result := Self.SupportsTrait(ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsTrait1_P(Self: IOTAPersonalityServices100;  const APersonality : string; const ATraitGUID : TGUID) : Boolean;
+Begin Result := Self.SupportsTrait(APersonality, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsFileTrait4_P(Self: IOTAPersonalityServices100;  const AFileName : string; const ATraitGUID : TGUID) : Boolean;
+Begin Result := Self.SupportsFileTrait(AFileName, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsFileTrait3_P(Self: IOTAPersonalityServices100;  const APersonality, AFileName : string; const ATraitGUID : TGUID) : Boolean;
+Begin Result := Self.SupportsFileTrait(APersonality, AFileName, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsFileTrait2_P(Self: IOTAPersonalityServices100;  const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean;
+Begin Result := Self.SupportsFileTrait(AFileName, ATraitGUID, SearchDefault); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100SupportsFileTrait1_P(Self: IOTAPersonalityServices100;  const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : Boolean;
+Begin Result := Self.SupportsFileTrait(APersonality, AFileName, ATraitGUID, SearchDefault); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetTrait2_P(Self: IOTAPersonalityServices100;  const ATraitGUID : TGUID) : IInterface;
+Begin Result := Self.GetTrait(ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetTrait1_P(Self: IOTAPersonalityServices100;  const APersonality : string; const ATraitGUID : TGUID) : IInterface;
+Begin Result := Self.GetTrait(APersonality, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetFileTrait4_P(Self: IOTAPersonalityServices100;  const AFileName : string; const ATraitGUID : TGUID) : IInterface;
+Begin Result := Self.GetFileTrait(AFileName, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetFileTrait3_P(Self: IOTAPersonalityServices100;  const APersonality, AFileName : string; const ATraitGUID : TGUID) : IInterface;
+Begin Result := Self.GetFileTrait(APersonality, AFileName, ATraitGUID); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetFileTrait2_P(Self: IOTAPersonalityServices100;  const AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface;
+Begin Result := Self.GetFileTrait(AFileName, ATraitGUID, SearchDefault); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAPersonalityServices100GetFileTrait1_P(Self: IOTAPersonalityServices100;  const APersonality, AFileName : string; const ATraitGUID : TGUID; SearchDefault : Boolean) : IInterface;
+Begin Result := Self.GetFileTrait(APersonality, AFileName, ATraitGUID, SearchDefault); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAIDEInsightServiceGetCategory2_P(Self: IOTAIDEInsightService;  const Name : string; CanCreate : Boolean) : IOTAIDEInsightCategory;
+Begin Result := Self.GetCategory(Name, CanCreate); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAIDEInsightServiceGetCategory1_P(Self: IOTAIDEInsightService;  const IndexOrName : Variant) : IOTAIDEInsightCategory;
+Begin Result := Self.GetCategory(IndexOrName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTACodeInsightViewerGetManagerIsValidSelection2_P(Self: IOTACodeInsightViewer;  const Mgr : IOTACodeInsightManager; Index : Integer) : Boolean;
+Begin Result := Self.GetManagerIsValidSelection(Mgr, Index); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTACodeInsightViewerGetManagerIsValidSelection1_P(Self: IOTACodeInsightViewer;  const Mgr : IOTACodeInsightManager) : Boolean;
+Begin Result := Self.GetManagerIsValidSelection(Mgr); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTARecordAppend3_P(Self: IOTARecord;  const ARecord : IOTARecord);
+Begin Self.Append(ARecord); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTARecordAppend2_P(Self: IOTARecord;  const CmdName : string; IsKeys : Boolean);
+Begin Self.Append(CmdName, IsKeys); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTARecordAppend1_P(Self: IOTARecord;  const Keys : array of TShortCut);
+Begin Self.Append(Keys); END;
+
+(*----------------------------------------------------------------------------*)
+Function INTAServices120AddImages2_P(Self: INTAServices120;  AImages : TCustomImageList; const Ident : string) : Integer;
+Begin Result := Self.AddImages(AImages, Ident); END;
+
+(*----------------------------------------------------------------------------*)
+Function INTAServices90AddImages1_P(Self: INTAServices90;  AImages : TCustomImageList) : Integer;
+Begin Result := Self.AddImages(AImages); END;
+
+(*----------------------------------------------------------------------------*)
+Function INTAServices70AddMasked2_P(Self: INTAServices70;  Image : TBitmap; MaskColor : TColor; const Ident : string) : Integer;
+Begin Result := Self.AddMasked(Image, MaskColor, Ident); END;
+
+(*----------------------------------------------------------------------------*)
+Function INTAServices40AddMasked1_P(Self: INTAServices40;  Image : TBitmap; MaskColor : TColor) : Integer;
+Begin Result := Self.AddMasked(Image, MaskColor); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEnvironmentOptions140EditOptions1_P(Self: IOTAEnvironmentOptions140;  const Area : string; const PageCaption : string);
+Begin Self.EditOptions(Area, PageCaption); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideToolMessage5_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideToolMessage4_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
+Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideToolMessage3_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);
+Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideTitleMessage2_P(Self: IOTAMessageServices;  const MessageStr : WideString; const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.AddWideTitleMessage(MessageStr, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideTitleMessage1_P(Self: IOTAMessageServices;  const MessageStr : WideString);
+Begin Self.AddWideTitleMessage(MessageStr); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideCompilerMessage2_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);
+Begin Self.AddWideCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpContext); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideCompilerMessage1_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);
+Begin Self.AddWideCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpKeyword); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServicesAddWideCompilerMessage1_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
+Begin Self.AddWideCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAMessageServicesAddCustomMessagePtr1_P(Self: IOTAMessageServices;  const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup) : Pointer;
+Begin Result := Self.AddCustomMessagePtr(CustomMsg, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAMessageServicesAddCustomMessage1_P(Self: IOTAMessageServices;  const CustomMsg : IOTACustomMessage; Parent : Pointer) : Pointer;
+Begin Result := Self.AddCustomMessage(CustomMsg, Parent); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices80AddCompilerMessage3_P(Self: IOTAMessageServices80;  const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);
+Begin Self.AddCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpContext); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices80AddCompilerMessage2_P(Self: IOTAMessageServices80;  const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : string);
+Begin Self.AddCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpKeyword); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices70AddCompilerMessage1_P(Self: IOTAMessageServices70;  const FileName, MessageStr, ToolName : string; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
+Begin Self.AddCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices60ClearToolMessages1_P(Self: IOTAMessageServices60;  const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.ClearToolMessages(MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices60AddToolMessage1_P(Self: IOTAMessageServices60;  const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.AddToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices60AddTitleMessage1_P(Self: IOTAMessageServices60;  const MessageStr : string; const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.AddTitleMessage(MessageStr, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices60AddCustomMessage1_P(Self: IOTAMessageServices60;  const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup);
+Begin Self.AddCustomMessage(CustomMsg, MessageGroupIntf); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAMessageServices50AddToolMessage1_P(Self: IOTAMessageServices50;  const FileName, MessageStr, PrefixStr : string; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
+Begin Self.AddToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAGalleryCategoryManagerAddCategory2_P(Self: IOTAGalleryCategoryManager;  const ParentCategory : IOTAGalleryCategory; const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory;
+Begin Result := Self.AddCategory(ParentCategory, IDString, DisplayName, IconHandle); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAGalleryCategoryManagerAddCategory1_P(Self: IOTAGalleryCategoryManager;  const IDString, DisplayName : string; IconHandle : Integer) : IOTAGalleryCategory;
+Begin Result := Self.AddCategory(IDString, DisplayName, IconHandle); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAIDENotifier80AfterCompile2_P(Self: IOTAIDENotifier80;  const Project : IOTAProject; Succeeded : Boolean; IsCodeInsight : Boolean);
+Begin Self.AfterCompile(Project, Succeeded, IsCodeInsight); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAIDENotifier50AfterCompile1_P(Self: IOTAIDENotifier50;  Succeeded : Boolean; IsCodeInsight : Boolean);
+Begin Self.AfterCompile(Succeeded, IsCodeInsight); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAIDENotifier50BeforeCompile1_P(Self: IOTAIDENotifier50;  const Project : IOTAProject; IsCodeInsight : Boolean; var Cancel : Boolean);
+Begin Self.BeforeCompile(Project, IsCodeInsight, Cancel); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAIDENotifierAfterCompile1_P(Self: IOTAIDENotifier;  Succeeded : Boolean);
+Begin Self.AfterCompile(Succeeded); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAIDENotifierBeforeCompile1_P(Self: IOTAIDENotifier;  const Project : IOTAProject; var Cancel : Boolean);
+Begin Self.BeforeCompile(Project, Cancel); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTADebuggerServicesNewAddressBreakpoint1_P(Self: IOTADebuggerServices;  Address : TOTAAddress; Length : LongWord; AccessType : TOTAAccessType; const AProcess : IOTAProcess) : IOTABreakpoint;
+Begin Result := Self.NewAddressBreakpoint(Address, Length, AccessType, AProcess); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTADebuggerServices150NewModuleBreakpoint1_P(Self: IOTADebuggerServices150;  const ModuleName : string);
+Begin Self.NewModuleBreakpoint(ModuleName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTADebuggerVisualizer250GetSupportedType1_P(Self: IOTADebuggerVisualizer250;  Index : Integer; var TypeName : string; var AllDescendants : Boolean; var IsGeneric : Boolean);
+Begin Self.GetSupportedType(Index, TypeName, AllDescendants, IsGeneric); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTADebuggerVisualizerGetSupportedType1_P(Self: IOTADebuggerVisualizer;  Index : Integer; var TypeName : string; var AllDescendants : Boolean);
+Begin Self.GetSupportedType(Index, TypeName, AllDescendants); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure INTAProcessShowMemoryLocation1_P(Self: INTAProcess;  const Address : TOTAAddress; BehindWindow : TCustomForm);
+Begin Self.ShowMemoryLocation(Address, BehindWindow); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure INTAProcessShowNonSourceLocation1_P(Self: INTAProcess;  const Address : TOTAAddress; BehindWindow : TCustomForm);
+Begin Self.ShowNonSourceLocation(Address, BehindWindow); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAProcessSourceLocationFromAddress1_P(Self: IOTAProcess;  const Address : TOTAAddress; out FileName : string; out LineNum : Integer);
+Begin Self.SourceLocationFromAddress(Address, FileName, LineNum); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAProcessWriteProcessMemory1_P(Self: IOTAProcess;  Address : TOTAAddress; Count : Integer; var Buffer) : Integer;
+Begin Result := Self.WriteProcessMemory(Address, Count, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAProcessReadProcessMemory1_P(Self: IOTAProcess;  Address : TOTAAddress; Count : Integer; var Buffer) : Integer;
+Begin Result := Self.ReadProcessMemory(Address, Count, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAThreadEvaluate3_P(Self: IOTAThread;  const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult;
+Begin Result := Self.Evaluate(ExprStr, ResultStr, ResultStrSize, CanModify, SideEffects, FormatSpecifiers, ResultAddr, ResultSize, ResultVal, FileName, LineNumber); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAThreadEvaluate2_P(Self: IOTAThread;  const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; AllowSideEffects : Boolean; FormatSpecifiers : PAnsiChar; out ResultAddr : TOTAAddress; out ResultSize, ResultVal : LongWord) : TOTAEvaluateResult;
+Begin Result := Self.Evaluate(ExprStr, ResultStr, ResultStrSize, CanModify, AllowSideEffects, FormatSpecifiers, ResultAddr, ResultSize, ResultVal); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAThread90Evaluate1_P(Self: IOTAThread90;  const ExprStr : string; ResultStr : PChar; ResultStrSize : LongWord; out CanModify : Boolean; SideEffects : TOTAEvalSideEffects; FormatSpecifiers : PAnsiChar; out ResultAddr : LongWord; out ResultSize, ResultVal : LongWord; FileName : string; LineNumber : Integer) : TOTAEvaluateResult;
+Begin Result := Self.Evaluate(ExprStr, ResultStr, ResultStrSize, CanModify, SideEffects, FormatSpecifiers, ResultAddr, ResultSize, ResultVal, FileName, LineNumber); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAThreadNotifier160EvaluateComplete1_P(Self: IOTAThreadNotifier160;  const ExprStr, ResultStr : string; CanModify : Boolean; ResultAddress : TOTAAddress; ResultSize : LongWord; ReturnCode : Integer);
+Begin Self.EvaluateComplete(ExprStr, ResultStr, CanModify, ResultAddress, ResultSize, ReturnCode); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAProjectBuilder140BuildProject1_P(Self: IOTAProjectBuilder140;  CompileMode : TOTACompileMode; Wait, ClearMessages : Boolean) : Boolean;
+Begin Result := Self.BuildProject(CompileMode, Wait, ClearMessages); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetInteger2_P(Self: IOTABuildConfiguration140;  const PropName : string; IncludeInheritedValues : Boolean) : Integer;
+Begin Result := Self.GetInteger(PropName, IncludeInheritedValues); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetInteger1_P(Self: IOTABuildConfiguration140;  const PropName : string) : Integer;
+Begin Result := Self.GetInteger(PropName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetBoolean2_P(Self: IOTABuildConfiguration140;  const PropName : string; IncludeInheritedValues : Boolean) : Boolean;
+Begin Result := Self.GetBoolean(PropName, IncludeInheritedValues); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetBoolean1_P(Self: IOTABuildConfiguration140;  const PropName : string) : Boolean;
+Begin Result := Self.GetBoolean(PropName); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetValue2_P(Self: IOTABuildConfiguration140;  const PropName : string; IncludeInheritedValues : Boolean) : string;
+Begin Result := Self.GetValue(PropName, IncludeInheritedValues); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTABuildConfiguration140GetValue1_P(Self: IOTABuildConfiguration140;  const PropName : string) : string;
+Begin Result := Self.GetValue(PropName); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASourceEditorSwitchToView4_P(Self: IOTASourceEditor;  const AViewIdentifier : string; const AViewContext : TObject);
+Begin Self.SwitchToView(AViewIdentifier, AViewContext); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASourceEditorSwitchToView3_P(Self: IOTASourceEditor;  Index : Integer; const AViewContext : TObject);
+Begin Self.SwitchToView(Index, AViewContext); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASourceEditor180SwitchToView2_P(Self: IOTASourceEditor180;  const AViewIdentifier : string);
+Begin Self.SwitchToView(AViewIdentifier); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTASourceEditor180SwitchToView1_P(Self: IOTASourceEditor180;  Index : Integer);
+Begin Self.SwitchToView(Index); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionSearch2_P(Self: IOTAEditPosition) : Boolean;
+Begin Result := Self.Search; END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionSearch1_P(Self: IOTAEditPosition;  const Pattern : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Boolean;
+Begin Result := Self.Search(Pattern, CaseSensitive, RegularExpression, WholeFile, Direction, ErrorCode); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionRipText2_P(Self: IOTAEditPosition;  const ValidChars : string; RipFlags : Integer) : string;
+Begin Result := Self.RipText(ValidChars, RipFlags); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionRipText1_P(Self: IOTAEditPosition;  const ValidChars : TSysCharSet; RipFlags : Integer) : string;
+Begin Result := Self.RipText(ValidChars, RipFlags); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionReplace2_P(Self: IOTAEditPosition) : Integer;
+Begin Result := Self.Replace; END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTAEditPositionReplace1_P(Self: IOTAEditPosition;  const Pattern, ReplaceText : string; CaseSensitive, RegularExpression, WholeFile : Boolean; Direction : TSearchDirection; var ErrorCode : Integer) : Integer;
+Begin Result := Self.Replace(Pattern, ReplaceText, CaseSensitive, RegularExpression, WholeFile, Direction, ErrorCode); END;
+
+(*----------------------------------------------------------------------------*)
+Function IOTACustomEditViewSameView1_P(Self: IOTACustomEditView;  const EditView : IOTACustomEditView) : Boolean;
+Begin Result := Self.SameView(EditView); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEditWriterReplaceLine2_P(Self: IOTAEditWriter;  LineNumber : Integer; const Buffer : UTF8String);
+Begin Self.ReplaceLine(LineNumber, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEditWriterReplaceLine1_P(Self: IOTAEditWriter;  LineNumber : Integer; Buffer : PAnsiChar);
+Begin Self.ReplaceLine(LineNumber, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEditWriterInsertLine2_P(Self: IOTAEditWriter;  LineNumber : Integer; const Buffer : UTF8String);
+Begin Self.InsertLine(LineNumber, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEditWriterInsertLine1_P(Self: IOTAEditWriter;  LineNumber : Integer; Buffer : PAnsiChar);
+Begin Self.InsertLine(LineNumber, Buffer); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure IOTAEditWriterInsert1_P(Self: IOTAEditWriter;  const Text : UTF8String);
+Begin Self.Insert(Text); END;
+
+(*----------------------------------------------------------------------------*)
 procedure RIRegister_ToolsAPI_Routines(S: TPSExec);
 begin
- S.RegisterDelphiFunction(@BorlandIDEServices, 'BorlandIDEServices', cdRegister);
  S.RegisterDelphiFunction(@RegisterPackageWizard, 'RegisterPackageWizard', cdRegister);
  S.RegisterDelphiFunction(@StringToIOTAFile, 'StringToIOTAFile', cdRegister);
  S.RegisterDelphiFunction(@GetActiveProject, 'GetActiveProject', cdRegister);
