@@ -40,6 +40,10 @@ interface
 uses
    SysUtils
   ,Classes
+  ,Windows
+  ,Graphics
+  ,ImgList
+  ,Forms
   ,uPSComponent
   ,uPSRuntime
   ,uPSCompiler
@@ -2760,14 +2764,14 @@ begin
     RegisterMethod('Function AddCustomMessage1( const CustomMsg : IOTACustomMessage; Parent : Pointer) : Pointer;', cdRegister);
     RegisterMethod('Function AddCustomMessagePtr1( const CustomMsg : IOTACustomMessage; const MessageGroupIntf : IOTAMessageGroup) : Pointer;', cdRegister);
     RegisterMethod('Procedure AddWideCompilerMessage1( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
-    RegisterMethod('Procedure AddWideCompilerMessage1( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);', cdRegister);
-    RegisterMethod('Procedure AddWideCompilerMessage2( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);', cdRegister);
+    RegisterMethod('Procedure AddWideCompilerMessage2( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);', cdRegister);
+    RegisterMethod('Procedure AddWideCompilerMessage3( const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);', cdRegister);
     RegisterMethod('Function AddWideMessageGroup( const GroupName : WideString) : IOTAMessageGroup', cdRegister);
     RegisterMethod('Procedure AddWideTitleMessage1( const MessageStr : WideString);', cdRegister);
     RegisterMethod('Procedure AddWideTitleMessage2( const MessageStr : WideString; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage3( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage4( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
-    RegisterMethod('Procedure AddWideToolMessage5( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage1( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage2( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);', cdRegister);
+    RegisterMethod('Procedure AddWideToolMessage3( const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);', cdRegister);
     RegisterMethod('Function GetWideGroup( const GroupName : WideString) : IOTAMessageGroup', cdRegister);
   end;
 end;
@@ -5851,7 +5855,7 @@ begin
  CL.AddConstantN('pmmpCompile','LongInt').SetInt( pmmpBuildSection + 100);
  CL.AddConstantN('pmmpMake','LongInt').SetInt( pmmpBuildSection + 100);
  CL.AddConstantN('pmmpBuild','LongInt').SetInt( pmmpBuildSection + 1010);
- CL.AddConstantN('pmmpBuildFile','').SetString( pmmpBuild);
+ CL.AddConstantN('pmmpBuildFile','LongInt').SetInt( pmmpBuildSection + 1010);
  CL.AddConstantN('pmmpClean','LongInt').SetInt( pmmpBuildSection + 1030);
  CL.AddConstantN('pmmpLink','LongInt').SetInt( pmmpBuildSection + 1040);
  CL.AddConstantN('pmmpFromHere','LongInt').SetInt( pmmpBuildSection + 5000);
@@ -5892,7 +5896,7 @@ begin
  CL.AddConstantN('pmmpAddReference','LongInt').SetInt( pmmpAddSection + 1100);
  CL.AddConstantN('pmmpAddFolder','LongInt').SetInt( pmmpAddSection + 2000);
  CL.AddConstantN('pmmpCreateNewTarget','LongInt').SetInt( pmmpAddSection + 5000);
- CL.AddConstantN('pmmpAddToProjectGroup','').SetString( pmmpCreateNewTarget);
+ CL.AddConstantN('pmmpAddToProjectGroup','LongInt').SetInt( pmmpAddSection + 5000);
  CL.AddConstantN('pmmpAddExistingTarget','LongInt').SetInt( pmmpAddSection + 5010);
  CL.AddConstantN('pmmpRemoveSection','LongInt').SetInt( 4000000);
  CL.AddConstantN('pmmpRemove','LongInt').SetInt( pmmpRemoveSection + 100);
@@ -5902,12 +5906,12 @@ begin
  CL.AddConstantN('pmmpRemoveProjects','LongInt').SetInt( pmmpRemove + 500);
  CL.AddConstantN('pmmpSaveSection','LongInt').SetInt( 5000000);
  CL.AddConstantN('pmmpSave','LongInt').SetInt( pmmpSaveSection + 100);
- CL.AddConstantN('pmmpSaveGroup','').SetString( pmmpSave);
+ CL.AddConstantN('pmmpSaveGroup','LongInt').SetInt( pmmpSaveSection + 100);
  CL.AddConstantN('pmmpSaveAs','LongInt').SetInt( pmmpSaveSection + 200);
- CL.AddConstantN('pmmpSaveGroupAs','').SetString( pmmpSaveAs);
+ CL.AddConstantN('pmmpSaveGroupAs','LongInt').SetInt( pmmpSaveSection + 200);
  CL.AddConstantN('pmmpRenameSection','LongInt').SetInt( 6000000);
  CL.AddConstantN('pmmpRename','LongInt').SetInt( pmmpRenameSection + 100);
- CL.AddConstantN('pmmpRenameGroup','').SetString( pmmpRename);
+ CL.AddConstantN('pmmpRenameGroup','LongInt').SetInt( pmmpRenameSection + 100);
  CL.AddConstantN('pmmpDelete','LongInt').SetInt( pmmpRenameSection + 200);
  CL.AddConstantN('pmmpVersionControlSection','LongInt').SetInt( 7000000);
  CL.AddConstantN('pmmpVersionControl','LongInt').SetInt( pmmpVersionControlSection + 100);
@@ -6569,7 +6573,7 @@ Begin Result := Self.Install(CatalogId, AutoCloseProgressDlg); END;
 
 (*----------------------------------------------------------------------------*)
 Function IOTAGetItServiceInstall1_P(Self: IOTAGetItService;  const CatalogId : string) : Boolean;
-Begin Result := Self.Install(CatalogId); END;
+Begin Result := False; {Self.Install(CatalogId);} END;
 
 (*----------------------------------------------------------------------------*)
 Procedure IOTAProjectManagerMenuExecute1_P(Self: IOTAProjectManagerMenu;  const MenuContextList : IInterfaceList);
@@ -6740,15 +6744,15 @@ Procedure IOTAEnvironmentOptions140EditOptions1_P(Self: IOTAEnvironmentOptions14
 Begin Self.EditOptions(Area, PageCaption); END;
 
 (*----------------------------------------------------------------------------*)
-Procedure IOTAMessageServicesAddWideToolMessage5_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);
+Procedure IOTAMessageServicesAddWideToolMessage3_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; const MessageGroupIntf : IOTAMessageGroup);
 Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef, MessageGroupIntf); END;
 
 (*----------------------------------------------------------------------------*)
-Procedure IOTAMessageServicesAddWideToolMessage4_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
+Procedure IOTAMessageServicesAddWideToolMessage2_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer);
 Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber, Parent, LineRef); END;
 
 (*----------------------------------------------------------------------------*)
-Procedure IOTAMessageServicesAddWideToolMessage3_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);
+Procedure IOTAMessageServicesAddWideToolMessage1_P(Self: IOTAMessageServices;  const FileName, MessageStr, PrefixStr : WideString; LineNumber, ColumnNumber : Integer);
 Begin Self.AddWideToolMessage(FileName, MessageStr, PrefixStr, LineNumber, ColumnNumber); END;
 
 (*----------------------------------------------------------------------------*)
@@ -6760,11 +6764,11 @@ Procedure IOTAMessageServicesAddWideTitleMessage1_P(Self: IOTAMessageServices;  
 Begin Self.AddWideTitleMessage(MessageStr); END;
 
 (*----------------------------------------------------------------------------*)
-Procedure IOTAMessageServicesAddWideCompilerMessage2_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);
+Procedure IOTAMessageServicesAddWideCompilerMessage3_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpContext : Integer);
 Begin Self.AddWideCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpContext); END;
 
 (*----------------------------------------------------------------------------*)
-Procedure IOTAMessageServicesAddWideCompilerMessage1_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);
+Procedure IOTAMessageServicesAddWideCompilerMessage2_P(Self: IOTAMessageServices;  const FileName, MessageStr, ToolName : WideString; Kind : TOTAMessageKind; LineNumber, ColumnNumber : Integer; Parent : Pointer; out LineRef : Pointer; HelpKeyword : WideString);
 Begin Self.AddWideCompilerMessage(FileName, MessageStr, ToolName, Kind, LineNumber, ColumnNumber, Parent, LineRef, HelpKeyword); END;
 
 (*----------------------------------------------------------------------------*)
