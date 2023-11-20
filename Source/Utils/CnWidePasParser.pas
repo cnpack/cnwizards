@@ -1889,7 +1889,9 @@ begin
             if PosInfo.PosKind = pkConst then
               PosInfo.PosKind := pkConstTypeValue
             else if PosInfo.PosKind = pkType then
-              PosInfo.PosKind := pkTypeDecl;
+              PosInfo.PosKind := pkTypeDecl
+            else if PosInfo.PosKind = pkField then // µÈºÅ½áÊø Field
+              PosInfo.PosKind := SavePos;
           end;
         tkAssign:
           begin

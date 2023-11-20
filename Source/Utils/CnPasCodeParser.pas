@@ -1931,7 +1931,9 @@ begin
             if Result.PosKind = pkConst then
               Result.PosKind := pkConstTypeValue
             else if Result.PosKind = pkType then
-              Result.PosKind := pkTypeDecl;
+              Result.PosKind := pkTypeDecl
+            else if Result.PosKind = pkField then // µÈºÅ½áÊø Field
+              Result.PosKind := SavePos;
           end;
         tkAssign:
           begin

@@ -460,7 +460,7 @@ begin
       Keys.Values[csDateKeyName] := DateTimeToStr(Now);
     end;
   except
-    // 对于D5/BCB5/BCB6出错的，简单屏蔽
+    // 对于 D5/BCB5/BCB6 出错的，简单屏蔽
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('VerEnhance. Insert LastCompiledTime not Exists or Fail.');
 {$ENDIF}
