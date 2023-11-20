@@ -1,6 +1,6 @@
 ﻿!LanguageID=1046
 !LanguageName=Português-BR
-!TranslationAuthor=Guilherme Henrique Andriotti;Ricardo B dos Anjos
+!TranslationAuthor=Guilherme Henrique Andriotti;Ricardo Bochnia dos Anjos
 !TranslationAuthorEmail=gha@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,
 TCnDTMainForm.btnAbout.Caption=&Sobre
