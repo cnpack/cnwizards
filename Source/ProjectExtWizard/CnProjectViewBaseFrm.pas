@@ -759,7 +759,7 @@ begin
     WriteInteger(aSection, csWidth, Width);
     WriteInteger(aSection, csHeight, Height);
 {$IFNDEF STAND_ALONE}
-    if CnIsDelphi11GEDot3 then
+    if CnIsGEDelphi11Dot3 then
     begin
       S := GetListViewWidthString2(lvList, GetFactorFromSizeEnlarge(Enlarge)); // 获取正确的宽度值
       if FColumnWidthManuallyChanged and (S <> FListViewWidthOldStr) then // 有宽度 Bug 存在的情况下，只手工更改过且变化了才保存

@@ -333,7 +333,7 @@ procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 {* 修改 ListView 当前选择项}
 
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
-{* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 带来的宽度误乘以 HDPI 放大倍数的 Bug}
+{* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
 
 
 //==============================================================================
@@ -2754,7 +2754,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
-  if CnIsDelphi11GEDot3 then
+  if CnIsGEDelphi11Dot3 then
   begin
     Lines := TStringList.Create;
 
