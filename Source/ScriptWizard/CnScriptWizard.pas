@@ -189,7 +189,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     FUpdating: Boolean;
-    procedure UpdateList;
+    procedure UpdateList(Sender: TObject);
     procedure UpdateControls;
     procedure SetItemToControls(Item: TCnScriptItem);
     procedure GetItemFromControls(Item: TCnScriptItem);
@@ -458,6 +458,9 @@ begin
   finally
     chktvMode.EndUpdate;
   end;
+{$IFDEF DELPHI120_ATHENS_UP}
+  CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateList);
+{$ENDIF}
 end;
 
 procedure TCnScriptWizardForm.FormClose(Sender: TObject;
@@ -470,7 +473,7 @@ begin
   Action := caHide;
 end;
 
-procedure TCnScriptWizardForm.UpdateList;
+procedure TCnScriptWizardForm.UpdateList(Sender: TObject);
 begin
   lvList.Items.Count := TempScripts.Count;
   lvList.Invalidate;
@@ -509,7 +512,7 @@ end;
 procedure TCnScriptWizardForm.actAddExecute(Sender: TObject);
 begin
   TempScripts.Add;
-  UpdateList;
+  UpdateList(Self);
   lvList.Selected := lvList.Items[TempScripts.Count - 1];
 end;
 
@@ -521,7 +524,7 @@ begin
   begin
     Idx := lvList.Selected.Index;
     TempScripts.Delete(Idx);
-    UpdateList;
+    UpdateList(Self);
     if TempScripts.Count > 0 then
       lvList.Selected := lvList.Items[TrimInt(Idx, 0, TempScripts.Count - 1)];
   end;
@@ -532,8 +535,8 @@ begin
   if QueryDlg(SCnClearConfirm) then
   begin
     TempScripts.Clear;
-    UpdateList;
-  end;  
+    UpdateList(Self);
+  end;
 end;
 
 procedure TCnScriptWizardForm.actMoveUpExecute(Sender: TObject);
@@ -575,7 +578,7 @@ begin
   begin
     if not TempScripts.LoadFromFile(dlgOpen.FileName, QueryDlg(SCnImportAppend)) then
       ErrorDlg(SCnImportError);
-    UpdateList;
+    UpdateList(Self);
   end;
 end;
 
@@ -1051,7 +1054,7 @@ begin
 {$ENDIF}
 
     mmoSearchPath.Lines.Assign(Self.FSearchPath);
-    UpdateList;
+    UpdateList(nil);
     
     if NewScript <> '' then
       AddNewScript(NewScript);
