@@ -80,7 +80,8 @@ var
   CnIsDelphi10Dot2GEDot2: Boolean = False;
   CnIsDelphi10Dot4GEDot2: Boolean = False;
 
-  CnIsDelphi11GEDot3: Boolean = False;
+  CnIsDelphi11GEDot3: Boolean = False; // 是否 D11 下的 .3，不包括 D12
+  CnIsGEDelphi11Dot3: Boolean = False; // 是否大于等于 D11.3，包括 D12
 
 implementation
 
@@ -453,6 +454,15 @@ begin
 {$ENDIF}
 end;
 
+function IsGEDelphi11Dot3: Boolean;
+begin
+{$IFDEF DELPHI120_ATHENS_UP}
+  Result := True;
+{$ELSE}
+  Result := IsDelphi11GEDot3;
+{$ENDIF};
+end;
+
 function IsIdeVersionLatest: Boolean;
 begin
   if CnIdeVersionDetected then
@@ -576,6 +586,7 @@ begin
   CnIsDelphi10Dot4GEDot2 := IsDelphi10Dot4GEDot2;
 
   CnIsDelphi11GEDot3 := IsDelphi11GEDot3;
+  CnIsGEDelphi11Dot3 := IsGEDelphi11Dot3;
 end;
 
 function GetIdeExeVersion: string;
