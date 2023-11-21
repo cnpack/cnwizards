@@ -5712,10 +5712,10 @@ begin
  CL.AddConstantN('sForm','String').SetString( 'Form');
  CL.AddConstantN('sText','String').SetString( 'Text');
  CL.AddConstantN('sbaPCHCompile','String').SetString( 'PCHCompile');
- CL.AddConstantN('sCSApplication','').SetString( sApplication);
- CL.AddConstantN('sCSLibrary','').SetString( sLibrary);
- CL.AddConstantN('sCSConsole','').SetString( sConsole);
- CL.AddConstantN('sCSPackage','').SetString( sPackage);
+ CL.AddConstantN('sCSApplication','String').SetString( sApplication);
+ CL.AddConstantN('sCSLibrary','String').SetString( sLibrary);
+ CL.AddConstantN('sCSConsole','String').SetString( sConsole);
+ CL.AddConstantN('sCSPackage','String').SetString( sPackage);
  CL.AddConstantN('sAssembly','String').SetString( 'Assembly');
  CL.AddConstantN('sUserControl','String').SetString( 'UserControl');
  CL.AddConstantN('sClass','String').SetString( 'Class');
@@ -5960,6 +5960,7 @@ begin
  CL.AddConstantN('cEdMenuCatFormat','String').SetString( 'Format');
  CL.AddConstantN('cEdMenuCatRepository','String').SetString( 'Repository');
  CL.AddConstantN('cEdMenuCatLast','String').SetString( 'Last');
+
   CL.AddClassN(CL.FindClass('TOBJECT'),'ENonAIRException');
   CL.AddClassN(CL.FindClass('TOBJECT'),'EPersonalityException');
   CL.AddTypeS('TOTACompileMode', '( cmOTAMake, cmOTABuild, cmOTACheck, cmOTAMak'
@@ -5968,41 +5969,13 @@ begin
    +'und )');
   CL.AddTypeS('TOTAModuleType', 'Integer');
   CL.AddTypeS('TOTAHandle', 'Pointer');
-  CL.AddTypeS('TOTAAddress', 'UInt64');
+  CL.AddTypeS('TOTAAddress', 'Int64');
   CL.AddTypeS('TOTAToDoPriority', 'Integer');
   CL.AddTypeS('TOTAEditPos', 'record Col : SmallInt; Line : Longint; end');
   CL.AddTypeS('TOTACharPos', 'record CharIndex : SmallInt; Line : Longint; end');
   CL.AddTypeS('TOTAOptionName', 'record Name : string; Kind : TTypeKind; end');
   CL.AddTypeS('TOTAOptionNameArray', 'array of TOTAOptionName');
-  CL.AddTypeS('TOTAThreadContext', 'TContext');
-  CL.AddTypeS('TOTAM128A', 'record Low : UInt64; High : Int64; end');
-  CL.AddTypeS('TOTAContextWin32', 'TContext');
-  CL.AddTypeS('TOTAContextOSX32', 'TContext');
-  CL.AddTypeS('TOTAContextOSX64', 'TOTAContextWin64');
-  CL.AddTypeS('TOTAContextARM32', 'record R0 : DWORD; R1 : DWORD; R2 : DWORD; R'
-   +'3 : DWORD; R4 : DWORD; R5 : DWORD; R6 : DWORD; R7 : DWORD; R8 : DWORD; R9 '
-   +': DWORD; R10 : DWORD; R11 : DWORD; R12 : DWORD; Sp : DWORD; Lr : DWORD; Pc'
-   +' : DWORD; Cpsr : DWORD; end');
-  CL.AddTypeS('TOTAContextARM64', 'record X0 : DWORD64; X1 : DWORD64; X2 : DWOR'
-   +'D64; X3 : DWORD64; X4 : DWORD64; X5 : DWORD64; X6 : DWORD64; X7 : DWORD64;'
-   +' X8 : DWORD64; X9 : DWORD64; X10 : DWORD64; X11 : DWORD64; X12 : DWORD64; '
-   +'X13 : DWORD64; X14 : DWORD64; X15 : DWORD64; X16 : DWORD64; X17 : DWORD64;'
-   +' X18 : DWORD64; X19 : DWORD64; X20 : DWORD64; X21 : DWORD64; X22 : DWORD64'
-   +'; X23 : DWORD64; X24 : DWORD64; X25 : DWORD64; X26 : DWORD64; X27 : DWORD6'
-   +'4; X28 : DWORD64; Fp : DWORD64; Lr : DWORD64; Sp : DWORD64; Pc : DWORD64; '
-   +'Cpsr : DWORD64; end');
-  CL.AddTypeS('TOTAThreadContextEx', 'record win32 : TOTAContextWin32; end');
-  CL.AddTypeS('TOTAThreadContext', 'record ContextFlags : DWORD; Dr0 : DWORD; D'
-   +'r1 : DWORD; Dr2 : DWORD; Dr3 : DWORD; Dr6 : DWORD; Dr7 : DWORD; FloatSave '
-   +': TFloatingSaveArea; SegGs : DWORD; SegFs : DWORD; SegEs : DWORD; SegDs : '
-   +'DWORD; Edi : DWORD; Esi : DWORD; Ebx : DWORD; Edx : DWORD; Ecx : DWORD; Ea'
-   +'x : DWORD; Ebp : DWORD; Eip : DWORD; SegCs : DWORD; EFlags : DWORD; Esp : '
-   +'DWORD; SegSs : DWORD; end');
-  CL.AddTypeS('TOTAXMMRegs', 'record XMM0 : TOTAXMMReg; XMM1 : TOTAXMMReg; XMM2'
-   +' : TOTAXMMReg; XMM3 : TOTAXMMReg; XMM4 : TOTAXMMReg; XMM5 : TOTAXMMReg; XM'
-   +'M6 : TOTAXMMReg; XMM7 : TOTAXMMReg; XMM8 : TOTAXMMReg; XMM9 : TOTAXMMReg; '
-   +'XMM10 : TOTAXMMReg; XMM11 : TOTAXMMReg; XMM12 : TOTAXMMReg; XMM13 : TOTAXM'
-   +'MReg; XMM14 : TOTAXMMReg; XMM15 : TOTAXMMReg; MXCSR : LongWord; end');
+
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAProject, 'IOTAProject');
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTAModule, 'IOTAModule');
   CL.AddInterface(CL.FindInterface('IUNKNOWN'),IOTANotifier, 'IOTANotifier');
@@ -6038,13 +6011,13 @@ begin
   SIRegister_IOTAEditWriter(CL);
   CL.AddTypeS('TOTASyntaxHighlighter', '( shNone, shQuery, shPascal, shC, shSQL'
    +', shIDL, shMax )');
-  CL.AddTypeS('POTASyntaxCode', '^TOTASyntaxCode // will not work');
+  //CL.AddTypeS('POTASyntaxCode', '^TOTASyntaxCode');
   CL.AddTypeS('TOTASyntaxCode', 'Byte');
   CL.AddTypeS('TOTALineClass', 'Cardinal');
-  CL.AddTypeS('OTAEdChar', 'WideChar');
-  CL.AddTypeS('POTAEdChar', 'PWideChar');
-  CL.AddTypeS('OTAEdChar', 'AnsiChar');
-  CL.AddTypeS('POTAEdChar', 'PAnsiChar');
+  CL.AddTypeS('OTAEdChar', 'Char');
+  CL.AddTypeS('POTAEdChar', 'PChar');
+  //CL.AddTypeS('OTAEdChar', 'AnsiChar');
+  //CL.AddTypeS('POTAEdChar', 'PAnsiChar');
   CL.AddTypeS('TOTALineSize', 'Word');
   SIRegister_IOTAHighlighter(CL);
   SIRegister_IOTAHighlighterPreview(CL);
@@ -6055,7 +6028,7 @@ begin
    +'ndCrLf, cLineEndLfCr, cLineEndNone )');
   CL.AddTypeS('TOTALineInfo', 'record lineLength : Integer; lineText : POTAEdCh'
    +'ar; lineEnd : TOTAEndLine; end');
-  CL.AddTypeS('POTALineInfo', '^TOTALineInfo // will not work');
+  //CL.AddTypeS('POTALineInfo', '^TOTALineInfo');
   SIRegister_IOTARawEditReader(CL);
   SIRegister_IOTACustomEditView(CL);
   CL.AddTypeS('TOTABlockType', '( btInclusive, btLine, btColumn, btNonInclusive'
@@ -6357,7 +6330,7 @@ begin
   SIRegister_IOTAEditBuffer60(CL);
   SIRegister_IOTAEditBuffer(CL);
   SIRegister_IOTAEditBufferIterator(CL);
-  CL.AddTypeS('PKeyBindingRec', '^TKeyBindingRec // will not work');
+  //CL.AddTypeS('PKeyBindingRec', '^TKeyBindingRec');
   CL.AddTypeS('TKeyBindingRec', 'record KeyCode : TShortCut; KeyProc : TKeyBind'
    +'ingProc; Context : Pointer; Next : Integer; Reserved : Integer; end');
   SIRegister_IOTAKeyContext(CL);
