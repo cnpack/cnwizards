@@ -1528,13 +1528,7 @@ end;
 procedure TCnMainViewer.FormShow(Sender: TObject);
 begin
   if CurrentChild <> nil then
-  begin
-    if CurrentChild.MsgTree <> nil then
-    begin
-      CurrentChild.MsgTree.Parent := CurrentChild.pnlTree;
-      CurrentChild.MsgTree.Visible := True;
-    end;
-  end;
+    ShowAndHideOtherChildren(CurrentChild);
 end;
 
 end.
