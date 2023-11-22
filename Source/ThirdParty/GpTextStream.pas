@@ -135,11 +135,11 @@ type
     tsCreateFlags : TGpTSCreateFlags;
     tsLineDelims  : TGpTSLineDelimiters;
     tsReadlnBuf   : TMemoryStream;
-    tsSmallBuf    : pointer;
+    tsSmallBuf    : Pointer;
     tsWindowsError: DWORD;
   protected
-    function  AllocBuffer(size: integer): pointer; virtual;
-    procedure FreeBuffer(var buffer: pointer); virtual;
+    function  AllocBuffer(size: Integer): Pointer; virtual;
+    procedure FreeBuffer(var buffer: Pointer); virtual;
     function  GetWindowsError: DWORD; virtual;
     procedure PrepareStream; virtual;
     procedure SetCodepage(cp: word); virtual;
@@ -214,6 +214,13 @@ const
   sCannotWriteReversedUnicodeStream  = '%s:Cannot write to reversed Unicode stream.';
   sStreamFailed                      = '%s failed. ';
 
+type
+{$IFDEF SUPPORT_32_AND_64}
+  TCnNativeInt = NativeInt;
+{$ELSE}
+  TCnNativeInt = Integer;
+{$ENDIF}
+
 {:Converts Ansi string to Unicode string using specified code page.
   @param   s        Ansi string.
   @param   codePage Code page to be used in conversion.
@@ -221,7 +228,7 @@ const
 }
 function StringToWideString(const s: AnsiString; codePage: word): WideString;
 var
-  l: integer;
+  l: Integer;
 begin
   if s = '' then
     Result := ''
@@ -240,7 +247,7 @@ end; { StringToWideString }
 }
 function WideStringToString (const ws: WideString; codePage: Word): AnsiString;
 var
-  l: integer;
+  l: Integer;
 begin
   if ws = '' then
     Result := ''
@@ -269,10 +276,10 @@ end; { WideStringToString }
   @returns Number of bytes used in utf8Buf buffer.
   @since   2.01
 }
-function WideCharBufToUTF8Buf(const unicodeBuf; uniByteCount: integer;
-  var utf8Buf): integer;
+function WideCharBufToUTF8Buf(const unicodeBuf; uniByteCount: Integer;
+  var utf8Buf): Integer;
 var
-  iwc: integer;
+  iwc: Integer;
   pch: PAnsiChar;
   pwc: PWideChar;
   wc : word;
@@ -302,7 +309,7 @@ begin { WideCharBufToUTF8Buf }
       AddByte($80 OR (wc AND $3F));
     end;
   end; //for
-  Result := integer(pch)-integer(@utf8Buf);
+  Result := TCnNativeInt(pch)-TCnNativeInt(@utf8Buf);
 end; { WideCharBufToUTF8Buf }
 
 {:Converts UTF-8 encoded buffer into WideChars. Target buffer must be
@@ -320,8 +327,8 @@ end; { WideCharBufToUTF8Buf }
   @returns Number of bytes used in unicodeBuf buffer.
   @since   2.01
 }
-function UTF8BufToWideCharBuf(const utf8Buf; utfByteCount: integer;
- var unicodeBuf; var leftUTF8: integer): integer;
+function UTF8BufToWideCharBuf(const utf8Buf; utfByteCount: Integer;
+ var unicodeBuf; var leftUTF8: Integer): Integer;
 var
   c1 : byte;
   c2 : byte;
@@ -364,7 +371,7 @@ begin
       Dec(leftUTF8,3);
     end;
   end; //while
-  Result := integer(pwc)-integer(@unicodeBuf);
+  Result := TCnNativeInt(pwc)-TCnNativeInt(@unicodeBuf);
 end; { UTF8BufToWideCharBuf }
 
 {:Returns default Ansi codepage for LangID or 'defCP' in case of error (LangID
@@ -374,7 +381,7 @@ end; { UTF8BufToWideCharBuf }
                   a valid language ID.
   @returns Default Ansi codepage for LangID or 'defCP' in case of error.
 }
-function GetDefaultAnsiCodepage (LangID: LCID; defCP: integer): word;
+function GetDefaultAnsiCodepage (LangID: LCID; defCP: Integer): word;
 var
   p: array [0..255] of char;
 begin
@@ -391,7 +398,7 @@ end; { GetDefaultAnsiCodepage }
   @param   size Requested size in bytes.
   @returns Pointer to buffer.
 }
-function TGpTextStream.AllocBuffer(size: integer): pointer;
+function TGpTextStream.AllocBuffer(size: Integer): Pointer;
 begin
   if size <= CtsSmallBufSize then
     Result := tsSmallBuf
@@ -435,7 +442,7 @@ end; { TGpTextStream.Destroy }
   nothing will be done.
   @param   buffer Conversion buffer.
 }
-procedure TGpTextStream.FreeBuffer(var buffer: pointer);
+procedure TGpTextStream.FreeBuffer(var buffer: Pointer);
 begin
   if buffer <> tsSmallBuf then begin
     FreeMem(buffer);
@@ -589,12 +596,12 @@ end; { TGpTextStream.PrepareStream }
 }
 function TGpTextStream.Read(var buffer; count: longint): longint;
 var
-  bufPtr   : pointer;
-  bytesConv: integer;
-  bytesLeft: integer;
-  bytesRead: integer;
-  numChar  : integer;
-  tmpBuf   : pointer;
+  bufPtr   : Pointer;
+  bytesConv: Integer;
+  bytesLeft: Integer;
+  bytesRead: Integer;
+  numChar  : Integer;
+  tmpBuf   : Pointer;
 begin
   DelayedSeek;
   if IsUnicode then begin
@@ -607,15 +614,15 @@ begin
         bytesLeft := 0;
         repeat
           // at least numChar UTF-8 bytes are needed for numChar WideChars
-          bytesRead := WrappedStream.Read(pointer(integer(tmpBuf)+bytesLeft)^,numChar);
+          bytesRead := WrappedStream.Read(Pointer(TCnNativeInt(tmpBuf)+bytesLeft)^,numChar);
           bytesConv := UTF8BufToWideCharBuf(tmpBuf^,bytesRead+bytesLeft,bufPtr^,bytesLeft);
           Result := Result + bytesConv;
           if bytesRead <> numChar then // end of stream
             break;
           numChar := numChar - (bytesConv div SizeOf(WideChar));
-          bufPtr := pointer(integer(bufPtr) + bytesConv);
+          bufPtr := Pointer(TCnNativeInt(bufPtr) + bytesConv);
           if (bytesLeft > 0) and (bytesLeft < bytesRead) then
-            Move(pointer(integer(tmpBuf)+bytesRead-bytesLeft)^,tmpBuf^,bytesLeft);
+            Move(Pointer(TCnNativeInt(tmpBuf)+bytesRead-bytesLeft)^,tmpBuf^,bytesLeft);
         until numChar = 0;
       finally FreeBuffer(tmpBuf); end;
     end
@@ -650,7 +657,7 @@ end; { TGpTextStream.Read }
 function TGpTextStream.Readln: WideString;
 var
   lastCh  : WideChar;
-  numCh   : integer;
+  numCh   : Integer;
   wch     : WideChar;
 
   function Reverse(w: word): word;
@@ -665,7 +672,7 @@ var
 
   procedure ReverseResult;
   var
-    ich: integer;
+    ich: Integer;
     pwc: PWord;
   begin
     if tscfReverseByteOrder in tsCreateFlags then begin
@@ -786,12 +793,12 @@ end; { TGpTextStream.Win32Check }
 }
 function TGpTextStream.Write(const buffer; count: longint): longint;
 var
-  leftUTF8  : integer;
-  numBytes  : integer;
-  numChar   : integer;
-  tmpBuf    : pointer;
-  uniBuf    : pointer;
-  utfWritten: integer;
+  leftUTF8  : Integer;
+  numBytes  : Integer;
+  numChar   : Integer;
+  tmpBuf    : Pointer;
+  uniBuf    : Pointer;
+  utfWritten: Integer;
 begin
   DelayedSeek;
   if IsUnicode then begin

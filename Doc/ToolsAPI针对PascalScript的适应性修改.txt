@@ -24,7 +24,7 @@
 
 5、IFDEF LINUX 内部的都去掉，不需要。尤其是 TGetSrcLinesFunc 后的声明，只留 pascal。
 
-6、结构指针类型都删掉，用的地方替换成 Pointer。
+6、结构指针类型^都删掉，用的地方替换成 Pointer。
 
 7、TOTAThreadContext 声明太复杂无法识别只能全删掉，用它的地方替换成 Pointer（出错再说）。TOTAXMMRegs/TOTAXMMReg 几个用到的地方不删貌似不要紧。
 
