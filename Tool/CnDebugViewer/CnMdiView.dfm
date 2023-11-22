@@ -303,13 +303,11 @@ object CnMsgChild: TCnMsgChild
         Height = 23
         Align = alRight
         Caption = 'tlbBookmark'
-        EdgeBorders = []
-        Flat = True
         Images = CnMainViewer.ilMain
         TabOrder = 6
         object btnBookmark: TToolButton
           Left = 0
-          Top = 0
+          Top = 2
           ImageIndex = 82
           MenuItem = MenuDropBookmark
           ParentShowHint = False

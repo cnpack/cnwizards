@@ -256,6 +256,7 @@ type
     procedure actCopyTextExecute(Sender: TObject);
     procedure actSwtAddToBlackExecute(Sender: TObject);
     procedure actSwtAddToWhiteExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -1522,6 +1523,18 @@ begin
     FThread := nil
   else if Sender = FDbgThread then
     FDbgThread := nil;
+end;
+
+procedure TCnMainViewer.FormShow(Sender: TObject);
+begin
+  if CurrentChild <> nil then
+  begin
+    if CurrentChild.MsgTree <> nil then
+    begin
+      CurrentChild.MsgTree.Parent := CurrentChild.pnlTree;
+      CurrentChild.MsgTree.Visible := True;
+    end;
+  end;
 end;
 
 end.
