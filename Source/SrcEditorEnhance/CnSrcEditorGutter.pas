@@ -527,7 +527,7 @@ begin
         begin
           StrNum := IntToStr(Idx);
           DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
-            DT_RIGHT);
+            DT_RIGHT or DT_SINGLELINE);
         end
         else // 整十模式下，绘制普通短点和五整除长点
         begin
@@ -582,7 +582,7 @@ begin
 
         Canvas.FillRect(R);
         DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
-          DT_RIGHT);
+          DT_RIGHT or DT_SINGLELINE);
       end;
     end;
 
@@ -1145,18 +1145,35 @@ end;
 { TCnSrcEditorGutterMgr }
 
 constructor TCnSrcEditorGutterMgr.Create;
+var
+  Option: IOTAEditOptions;
 begin
   inherited;
   FList := TList.Create;
   FFont := TFont.Create;
   FCurrFont := TFont.Create;
-  FFont.Name := 'Verdana';
-  FFont.Size := 9;
+
+  Option := CnOtaGetEditOptions;
+  if Option <> nil then
+  begin
+    FFont.Name := Option.FontName;
+    FFont.Size := Option.FontSize;
+  end
+  else
+  begin
+    FFont.Name := 'Verdana';
+    FFont.Size := 9;
+  end;
+  FCurrFont.Name := FFont.Name;
+  FCurrFont.Size := FFont.Size;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnSrcEditorGutterMgr.Create Gutter Font Size %d', [FFont.Size]);
+{$ENDIF}
+
   FFont.Color := csDefaultLineNumberColor;
-  FCurrFont.Name := 'Verdana';
-  FCurrFont.Size := 9;
   FCurrFont.Color := csDefaultCurrentLineNumberColor;
-  
+
   FActive := True;
   FShowLineNumber := True;
   FShowLineCount := True;
