@@ -1106,7 +1106,7 @@ function TFileSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment, pkField])
+    Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment]) // ParsePasCodePosInfo(W) 判断位置不准的问题修复了，不用 Field
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 end;
@@ -1415,7 +1415,7 @@ var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
   FileName: string;
-  I, j: Integer;
+  I, J: Integer;
   Added: Boolean;
 begin
   ProjectGroup := CnOtaGetProjectGroup;
@@ -1426,9 +1426,9 @@ begin
       Project := ProjectGroup.Projects[I];
       if Assigned(Project) then
       begin
-        for j := 0 to Project.GetModuleCount - 1 do
+        for J := 0 to Project.GetModuleCount - 1 do
         begin
-          FileName := Project.GetModule(j).FileName;
+          FileName := Project.GetModule(J).FileName;
 
           if FCppMode then
           begin
@@ -1844,7 +1844,7 @@ function TCodeTemplateList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in csNormalPosKinds + [pkField] // ParsePasCodePosInfo(W) 判断位置不太准，只得加上 Field
+    Result := PosInfo.PosKind in csNormalPosKinds // ParsePasCodePosInfo(W) 判断位置不准的问题修复了，不用 Field
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 
@@ -2024,7 +2024,7 @@ var
   CTS: IOTACodeTemplateServices;
 begin
   if PosInfo.IsPascal then
-    Result := PosInfo.PosKind in csNormalPosKinds + [pkField] // ParsePasCodePosInfo(W) 判断位置不太准，只得加上 Field
+    Result := PosInfo.PosKind in csNormalPosKinds // ParsePasCodePosInfo(W) 判断位置不准的问题修复了，不用 Field
   else
     Result := PosInfo.PosKind in [pkField, pkComment];
 

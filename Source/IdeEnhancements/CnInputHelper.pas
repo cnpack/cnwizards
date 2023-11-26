@@ -1254,7 +1254,7 @@ function TCnInputHelper.AcceptDisplay: Boolean;
       {$ELSE}
       Result := CurrentIsDelphiSource; // 2007 及以下版本 OTA 有 Bug，无法支持 C++Builder
       {$ENDIF}
-    {$ELSE} // D7 或以下，包括BCB5/6
+    {$ELSE} // D7 或以下，包括 BCB5/6
     Result := CurrentIsSource;
     {$ENDIF}
   end;
@@ -1366,9 +1366,9 @@ begin
   CnDebugger.LogFmt('IsValidCharKey VK_ScanCodeToAscii: %d %d => %d ("%s")', [VKey, ScanCode, Ord(C), C]);
 {$ENDIF}
   if FPosInfo.IsPascal then
-    Result := C in ( FirstSet + CharSet)
+    Result := C in (FirstSet + CharSet)
   else // C/C++ 允许 -> 号与 # 号
-    Result := C in ( FirstSet + ['>', '#'] + CharSet);
+    Result := C in (FirstSet + ['>', '#'] + CharSet);
 end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
@@ -1793,7 +1793,7 @@ begin
       end;
 
       // 注意 ParsePasCodePosInfo/ParseCppCodePosInfo 内部只支持 Ansi，
-      // BDS 下取出的内容由其做 Utf8->Ansi转换以免注释解析出错等问题，
+      // BDS 下取出的内容由其做 Utf8->Ansi 转换以免注释解析出错等问题，暂不改造成 Wide 版本
       if IsPascalFile then
       begin
         FPosInfo := ParsePasCodePosInfo(P, CurrPos - StartPos, False, True);
