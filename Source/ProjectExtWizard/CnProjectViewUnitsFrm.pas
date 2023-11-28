@@ -302,15 +302,19 @@ var
   procedure OpenItem(const FilePath: string);
   begin
     // CnOtaMakeSourceVisible(FilePath);  // 这样打开可能会导致无 ctView 通知
-    // CnOtaOpenFile(FilePath); // 但这样打开Project文件时会导致重新打开所有文件
+    // CnOtaOpenFile(FilePath); // 但这样打开 Project 文件时会导致重新打开所有文件
                                 // 并且 BCB 5/6 下会只打开窗体而不打开 CPP 文件
 
-    // 所以必须加上这样的判断，也牺牲了打开Project Source与BCB 5/6 CPP打开时的通知
+    // 所以必须加上这样的判断，也牺牲了打开 Project Source 与 BCB 5/6 CPP 打开时的通知
     if IsDpr(FilePath) or IsPackage(FilePath) or IsBdsProject(FilePath) or
       IsDProject(FilePath) or IsBpr(FilePath) or IsCbProject(FilePath) or IsBpg(FilePath)
       {$IFNDEF BDS} or IsCppSourceModule(FilePath) {$ENDIF} then
     begin
-      CnOtaMakeSourceVisible(FilePath);
+      // 如果是 dproj 或 bdsproj，换成 dpr 打开
+      if IsDProject(FilePath) or IsBdsProject(FilePath) then
+        CnOtaMakeSourceVisible(_CnChangeFileExt(FilePath, '.dpr'))
+      else
+        CnOtaMakeSourceVisible(FilePath);
     end
     else
     begin
@@ -404,6 +408,7 @@ begin
         ProjectInfo := TCnProjectInfo.Create;
         ProjectInfo.Name := _CnExtractFileName(IProject.FileName);
         ProjectInfo.FileName := IProject.FileName;
+        // 注意高版本的工程文件这里得到的是 dproj，而没有 dpr
 
         // 将 Project 信息添加到 UnitInfo
         UnitInfo := TCnUnitInfo.Create;
@@ -411,7 +416,7 @@ begin
         begin
           Text := _CnChangeFileExt(_CnExtractFileName(IProject.FileName), '');
           FileName := IProject.FileName;
-          Project := _CnExtractFileName(IProject.FileName);;
+          Project := _CnExtractFileName(IProject.FileName);
           
         {$IFDEF SUPPORT_MODULETYPE}
           // TODO: Check ModuleInfo.ModuleType
@@ -438,7 +443,7 @@ begin
           IModuleInfo := IProject.GetModule(J);
           UnitFileName := IModuleInfo.FileName;
 
-          if UnitFileName = '' then
+          if UnitFileName = '' then // 注意可能有空文件，不知道来源
             Continue;
 
           if SameText(UpperCase(_CnExtractFileExt(UnitFileName)), '.RES') then
