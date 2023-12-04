@@ -1786,7 +1786,7 @@ begin
               PosInfo.PosKind := pkCompDirect;
             end;
           end;
-        tkString:
+        tkString, tkMultiLineString:
           begin
             if PosInfo.PosKind <> pkString then
             begin

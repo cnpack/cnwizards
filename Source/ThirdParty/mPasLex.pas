@@ -120,7 +120,7 @@ type
     原有问题五：IsClass 的判断用 class 前面有等号且后面不是合法标识符来判断，对于 class sealed/helper 以及不换行的 class public 等声明判断有误
       解决方案：暂无
     新问题六：不支持新语法中的三个单引号括起来的多行字符串新语法
-      解决方案：加上了
+      解决方案：加上了 tkMultiLineString
   ***}
 
   TTokenKinds = set of TTokenKind;

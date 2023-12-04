@@ -1828,7 +1828,7 @@ begin
               Result.PosKind := pkCompDirect;
             end;
           end;
-        tkString:
+        tkString, tkMultiLineString:
           begin
             if Result.PosKind <> pkString then
             begin
