@@ -283,6 +283,7 @@ type
     procedure OnHotKey(var Message: TMessage); message WM_HOTKEY;
     procedure OnTabMakeVisible(var Message: TMessage); message WM_TAB_MAKE_VISIBLE;
     procedure OnSetCaptionGlobalLocal(var Message: TMessage); message WM_USER_SET_CAPTION;
+    procedure OnShowChild(var Message: TMessage); message WM_USER_SHOW_CHILD;
   protected
     procedure DoCreate; override;
     procedure ThreadTerminated(Sender: TObject);
@@ -1526,6 +1527,12 @@ begin
 end;
 
 procedure TCnMainViewer.FormShow(Sender: TObject);
+begin
+  if CurrentChild <> nil then
+    PostMessage(Handle, WM_USER_SHOW_CHILD, 0, 0);
+end;
+
+procedure TCnMainViewer.OnShowChild(var Message: TMessage);
 begin
   if CurrentChild <> nil then
     ShowAndHideOtherChildren(CurrentChild);
