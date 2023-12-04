@@ -1319,7 +1319,11 @@ begin
       if not (csDestroying in Application.MainForm.ComponentState) then
       begin
         AStore := CnMsgManager.AddStore(ProcId, ProcName);
+{$IFDEF WIN64}
+        PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, NativeInt(AStore), 0);
+{$ELSE}
         PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
+{$ENDIF}
       end;
   end;
 

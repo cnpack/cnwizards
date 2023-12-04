@@ -222,7 +222,11 @@ begin
           AStore := CnMsgManager.AddStore(0, SCnNoneProcName);
           AStore.ProcessID := ADesc.Annex.ProcessId;
           AStore.ProcName := GetProcNameFromProcessID(AStore.ProcessID);
+{$IFDEF WIN64}
+          PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, NativeInt(AStore), 0);
+{$ELSE}
           PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
+{$ENDIF}
         end;
     end;
 
