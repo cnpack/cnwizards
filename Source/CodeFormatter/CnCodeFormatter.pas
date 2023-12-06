@@ -848,6 +848,7 @@ var
   NeedPadding: Boolean;
   NeedUnIndent: Boolean;
   S: string;
+  WrittingKeyWordTokens: TPascalTokenSet;
 begin
   if CnPascalCodeForRule.UseIgnoreArea and Scanner.InIgnoreArea then
   begin
@@ -888,6 +889,11 @@ begin
   else
     S := AlterativeStr;
 
+  if FElementType in [pfetUnitName] then // 某些区域内某些标识符不能是关键字
+    WrittingKeyWordTokens := KeywordTokens + DirectiveTokens
+  else
+    WrittingKeyWordTokens := KeywordTokens + ComplexTokens + DirectiveTokens; // 关键字范围扩大
+
   // 标点符号的设置
   case Token of
     tokComma:
@@ -918,7 +924,7 @@ begin
     tokAssign:
       CodeGen.Write(S, BeforeSpaceCount, AfterSpaceCount, NeedPadding);
   else
-    if (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then // 关键字范围扩大
+    if Token in WrittingKeyWordTokens then
     begin
       if FLastToken = tokAmpersand then // 关键字前是 & 表示非关键字，并且挨着，无须 Padding
       begin
@@ -950,7 +956,7 @@ begin
   end;
 
   // 关键字如果之前有 &，则不算关键字
-  if (FLastToken = tokAmpersand) and (Token in KeywordTokens + ComplexTokens + DirectiveTokens) then
+  if (FLastToken = tokAmpersand) and (Token in WrittingKeyWordTokens) then
     FLastToken := tokSymbol
   else
     FLastToken := Token;
@@ -5545,7 +5551,14 @@ end;
 procedure TCnGoalCodeFormatter.FormatLibrary(PreSpaceCount: Byte);
 begin
   Match(tokKeywordLibrary);
-  FormatIdent(PreSpaceCount);
+
+  SpecifyElementType(pfetUnitName);
+  try
+    FormatIdent(PreSpaceCount);
+  finally
+    RestoreElementType;
+  end;
+
   while Scanner.Token in DirectiveTokens do
     Match(Scanner.Token);
 
@@ -5564,7 +5577,12 @@ end;
 procedure TCnGoalCodeFormatter.FormatPackage(PreSpaceCount: Byte);
 begin
   Match(tokKeywordPackage, PreSpaceCount);
-  FormatIdent;
+  SpecifyElementType(pfetUnitName);
+  try
+    FormatIdent;
+  finally
+    RestoreElementType;
+  end;
 
   if Scanner.Token = tokSemicolon then
     Match(Scanner.Token, PreSpaceCount);
@@ -5579,7 +5597,12 @@ end;
 procedure TCnGoalCodeFormatter.FormatProgram(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProgram, PreSpaceCount);
-  FormatIdent;
+  SpecifyElementType(pfetUnitName);
+  try
+    FormatIdent;
+  finally
+    RestoreElementType;
+  end;
 
   if Scanner.Token = tokLB then
   begin
@@ -5607,7 +5630,12 @@ end;
 procedure TCnGoalCodeFormatter.FormatUnit(PreSpaceCount: Byte);
 begin
   Match(tokKeywordUnit, PreSpaceCount);
-  FormatIdent;
+  SpecifyElementType(pfetUnitName);
+  try
+    FormatIdent;
+  finally
+    RestoreElementType;
+  end;
 
   while Scanner.Token in DirectiveTokens do
   begin
@@ -5664,7 +5692,8 @@ begin
     begin
       Match(Scanner.Token);
 
-      if Scanner.Token <> tokSymbol then Exit;
+      if Scanner.Token <> tokSymbol then
+        Exit;
 
       Writeln;
 

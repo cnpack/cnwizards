@@ -241,7 +241,7 @@ type
     pfetUsesList, pfetThen, pfetDo, pfetRecordEnd, pfetCaseLabel, pfetCaseLabelList,
     pfetExprListRightBracket, pfetFormalParametersRightBracket, pfetFieldDecl,
     pfetClassField, pfetInGeneric, pfetRecVarFieldListRightBracket, pfetPackageBlock,
-    pfetCompoundEnd, pfetIfAfterElse);
+    pfetCompoundEnd, pfetIfAfterElse, pfetUnitName);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
@@ -324,7 +324,7 @@ const
        tokKeywordIn, tokKeywordAs, tokKeywordIs, tokKeywordDiv, tokKeywordMod];
        // 不包括符号形式的二元运算符
        
-  IdentTokens = SymbolTokens + ConstTokens;
+  IdentTokens = SymbolTokens + ConstTokens + ComplexTokens;
 
   // UpperFirstTypeTokens = [tokInteger, tokFloat, tokChar];
   ClassMemberSymbolTokens = ClassMemberTokens + ComplexTokens + DirectiveTokens;
