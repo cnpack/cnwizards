@@ -1539,7 +1539,7 @@ end;
 procedure TCnMainViewer.OnShowChild(var Message: TMessage);
 begin
   if CurrentChild <> nil then
-    ShowAndHideOtherChildren(CurrentChild);
+    CurrentChild.pnlTree.OnResize(CurrentChild.pnlTree);
 end;
 
 end.
