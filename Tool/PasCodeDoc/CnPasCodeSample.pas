@@ -132,12 +132,12 @@ type
     {* 构造函数}
     destructor Destroy; override;
     {* 析构函数}
-
+  private
     procedure Init;
     {* 初始化函数}
     function IsReady: Boolean;
     {* 返回是否准备好}
-
+  protected
     property Items[Index: Integer]: string read GetItem write SetItem; default;
     {* 某索引属性}
 

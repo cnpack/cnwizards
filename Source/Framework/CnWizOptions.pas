@@ -139,9 +139,13 @@ type
     procedure SaveSettings(Manual: Boolean = False);
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
     {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，也可用于编辑器工具栏
       前提是 AToolbar 已经设好了 Parent 并且 Scale 过}
+
+{$ENDIF}
 
     // 参数读写方法
     function CreateRegIniFile: TCustomIniFile; overload;
@@ -304,7 +308,8 @@ uses
   CnDebug,
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
-  CnWizUtils, CnWizIdeUtils, CnWizManager, CnWizShareImages,
+  CnWizUtils, CnWizIdeUtils, CnWizManager,
+  {$IFNDEF CNWIZARDS_MINIMUM} CnWizShareImages, {$ENDIF}
 {$ENDIF}
   CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNative;
 
@@ -901,6 +906,8 @@ begin
     Result := Round(Value / GetFactorFromSizeEnlarge(AEnlarge));
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
 {$IFDEF IDE_SUPPORT_HDPI}
 var
@@ -970,6 +977,8 @@ begin
   if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
 end;
+
+{$ENDIF}
 
 procedure TCnWizOptions.DumpToStrings(Infos: TStrings);
 begin

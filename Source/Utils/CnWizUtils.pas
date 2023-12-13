@@ -834,9 +834,13 @@ function CnOtaGetCurrentSourceFileName: string;
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 {* 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl = nil): Boolean;
 {* 拿一编辑器中的行折叠信息，Infos 这个 List 里顺序放入折叠的开始行和结束行
   无折叠或不支持折叠时返回 False，注意暂时无法区分紧邻的两个折叠块}
+
+{$ENDIF}
 
 type
   TInsertPos = (ipCur, ipFileHead, ipFileEnd, ipLineHead, ipLineEnd);
@@ -1248,10 +1252,10 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnWizEditFiler, CnWizScaler, CnGraphUtils
+  Math, CnWizOptions, CnWizEditFiler, CnWizScaler, CnGraphUtils, CnWizIdeUtils, CnWizShortCut
 {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizMultiLang, CnLangMgr, CnWizIdeUtils, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnLangStorage, CnHashLangStorage, CnWizHelp, CnWizShortCut, CnIDEVersion
+  , CnWizMultiLang, CnLangMgr, CnWizDebuggerNotifier, CnEditControlWrapper,
+  CnLangStorage, CnHashLangStorage, CnWizHelp, CnIDEVersion
 {$ENDIF}
   ;
 
@@ -6675,6 +6679,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 拿一编辑器中的行折叠信息，Infos 这个 List 里顺序放入折叠的开始行和结束行，无折叠或不支持折叠时返回 False
 function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl): Boolean;
 {$IFDEF IDE_EDITOR_ELIDE}
@@ -6712,6 +6718,8 @@ begin
 
   Result := Infos.Count > 0;
 end;
+
+{$ENDIF}
 
 // 插入一段文本到当前正在编辑的源文件中，返回成功标志
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos): Boolean;

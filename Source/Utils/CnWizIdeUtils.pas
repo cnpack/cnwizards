@@ -718,6 +718,8 @@ function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
 
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 {* 在当前编辑的 Pascal 源文件中搜索 uses 待插入的位置，IsIntf 指明搜索的是 interface 处的 uses
@@ -731,6 +733,8 @@ function JoinUsesOrInclude(IsCpp, FileHasUses: Boolean; IsHFromSystem: Boolean;
   const IncFiles: TStrings): string;
 {* 根据源码类型与待插入的文件名列表得到插入的 uses 或 include 字符串，
   FileHasUses 只对 Pascal 代码有效、IsHFromSystem 只对 Cpp 文件有效}
+
+{$ENDIF}
 
 implementation
 
@@ -3773,6 +3777,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 var
@@ -4002,6 +4008,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
 
 initialization
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
