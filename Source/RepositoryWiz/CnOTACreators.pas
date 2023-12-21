@@ -532,7 +532,11 @@ end;
 
 function TCnTemplateProjectCreator.GetCreatorType: string;
 begin
+{$IFDEF BDS}
   Result := sApplication;
+{$ELSE}
+  Result := inherited GetCreatorType;
+{$ENDIF}
 end;
 
 function TCnTemplateProjectCreator.GetFileName: string;
