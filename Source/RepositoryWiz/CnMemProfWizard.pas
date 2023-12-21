@@ -102,7 +102,12 @@ type
     constructor Create; override;
     destructor Destroy; override;
     procedure NewDefaultModule; override;
-    {* 新建项目时建立默认模块 }
+    {* 新建项目时建立默认模块，注意仅在 D5 ~7 下有效 }
+
+{$IFDEF BDS}
+    procedure NewDefaultProjectModule(const Project: IOTAProject);
+    {* 新建缺省模块 }
+{$ENDIF}
 
     property PopupMsg: Boolean read FPopupMsg write FPopupMsg;
     property UseObjList: Boolean read FUseObjList write FUseObjList;
@@ -273,6 +278,22 @@ begin
 end;
 
 procedure TCnMemProfProjectCreator.NewDefaultModule;
+{$IFNDEF BDS}
+var
+  UnitCreator: TCnBaseCreator;
+{$ENDIF}
+begin
+{$IFNDEF BDS}
+  // 创建 Unit1 的 pas 和 dfm
+  UnitCreator := TCnMemProfUnit1Creator.Create;
+  (BorlandIDEServices as IOTAModuleServices).CreateModule(UnitCreator);
+{$ENDIF}
+end;
+
+{$IFDEF BDS}
+
+procedure TCnMemProfProjectCreator.NewDefaultProjectModule(
+  const Project: IOTAProject);
 var
   UnitCreator: TCnBaseCreator;
 begin
@@ -280,6 +301,8 @@ begin
   UnitCreator := TCnMemProfUnit1Creator.Create;
   (BorlandIDEServices as IOTAModuleServices).CreateModule(UnitCreator);
 end;
+
+{$ENDIF}
 
 { TCnMemProfUnit1Creator }
 

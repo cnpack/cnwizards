@@ -204,7 +204,7 @@ type
     function GetShowSource: Boolean; virtual;
     {* 默认返回 False，表示不显示 Project Source }
     procedure NewDefaultModule; virtual;
-    {* 新建项目时需要建立默认模块的时候调用 }
+    {* 新建项目时需要建立默认模块的时候调用，注意 BDS 中 deprecated了，改成 NewDefaultProjectModule 了 }
     function NewOptionSource(const ProjectName: string): IOTAFile; virtual;
     {* 返回 OptionSource，仅用于 C++ }
     procedure NewProjectResource(const Project: IOTAProject); virtual;
@@ -213,7 +213,7 @@ type
     {* 返回项目源文件的 IOTAFile 接口 }
 
 {$IFDEF BDS}
-    // IOTAProjectCreator80 接口实现
+    // IOTAProjectCreator50 接口实现
     procedure NewDefaultProjectModule(const Project: IOTAProject);
     {* 新建缺省模块 }
     function GetProjectPersonality: string;
