@@ -245,7 +245,6 @@ var
   PStart: PChar;
   Len: Integer;
 begin
-  CnDebugger.LogMsg('TCnTemplateParser.FindNextTag');
   Result := False;
   while P^ <> #0 do
   begin
