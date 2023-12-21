@@ -64,11 +64,11 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
   TCnMemProfWizard = class(TCnProjectWizard)
@@ -165,8 +165,8 @@ end;
 
 procedure TCnMemProfForm.btnBrowseClick(Sender: TObject);
 begin
-  if Self.dlgSave.Execute then
-    Self.edtLogFile.Text := Self.dlgSave.FileName;
+  if dlgSave.Execute then
+    edtLogFile.Text := dlgSave.FileName;
 end;
 
 procedure TCnMemProfForm.UpdateContents(Sender: TObject);
@@ -179,7 +179,7 @@ end;
 
 procedure TCnMemProfForm.FormCreate(Sender: TObject);
 begin
-  Self.UpdateContents(nil);
+  UpdateContents(nil);
 end;
 
 procedure TCnMemProfForm.btnHelpClick(Sender: TObject);
@@ -197,8 +197,8 @@ end;
 
 destructor TCnMemProfWizard.Destroy;
 begin
-  inherited;
 
+  inherited;
 end;
 
 procedure TCnMemProfWizard.Execute;
@@ -242,8 +242,8 @@ end;
 
 destructor TCnMemProfProjectCreator.Destroy;
 begin
-  inherited;
 
+  inherited;
 end;
 
 procedure TCnMemProfProjectCreator.DoReplaceTagsSource(
@@ -278,28 +278,20 @@ begin
 end;
 
 procedure TCnMemProfProjectCreator.NewDefaultModule;
-{$IFNDEF BDS}
 var
   UnitCreator: TCnBaseCreator;
-{$ENDIF}
 begin
-{$IFNDEF BDS}
   // 创建 Unit1 的 pas 和 dfm
   UnitCreator := TCnMemProfUnit1Creator.Create;
   (BorlandIDEServices as IOTAModuleServices).CreateModule(UnitCreator);
-{$ENDIF}
 end;
 
 {$IFDEF BDS}
 
 procedure TCnMemProfProjectCreator.NewDefaultProjectModule(
   const Project: IOTAProject);
-var
-  UnitCreator: TCnBaseCreator;
 begin
-  // 创建 Unit1 的 pas 和 dfm
-  UnitCreator := TCnMemProfUnit1Creator.Create;
-  (BorlandIDEServices as IOTAModuleServices).CreateModule(UnitCreator);
+  // 照 ToolsAPI 中说的，本应该在此创建 Unit1 的 pas 和 dfm，但无效
 end;
 
 {$ENDIF}
@@ -314,8 +306,8 @@ end;
 
 destructor TCnMemProfUnit1Creator.Destroy;
 begin
-  inherited;
 
+  inherited;
 end;
 
 function TCnMemProfUnit1Creator.GetCreatorType: string;
