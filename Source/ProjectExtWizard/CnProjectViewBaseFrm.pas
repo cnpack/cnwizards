@@ -741,6 +741,20 @@ procedure TCnProjectViewBaseForm.SaveSettings(Ini: TCustomIniFile; aSection: str
 {$IFNDEF STAND_ALONE}
 var
   S: string;
+
+  function CheckWidthValid: Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    for I := 0 to lvList.Columns.Count - 1 do
+    begin
+      if lvList.Columns[I].Width > Screen.Width then // 如果列宽超过了屏幕宽度，说明出问题了
+        Exit;
+    end;
+    Result := True;
+  end;
+
 {$ENDIF}
 begin
   with TCnIniFile.Create(Ini) do
@@ -769,8 +783,13 @@ begin
     begin
       S := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
 
-      if S <> FListViewWidthOldStr then // 只变化了才保存
-        WriteString(aSection, csListViewWidth, S);
+      if CheckWidthValid then
+      begin
+        if S <> FListViewWidthOldStr then // 只变化了，且宽度合适，才保存
+          WriteString(aSection, csListViewWidth, S);
+      end
+      else // 宽度不合适，清空设置恢复原始宽度
+        WriteString(aSection, csListViewWidth, '');
     end;
 {$ENDIF}
   finally
