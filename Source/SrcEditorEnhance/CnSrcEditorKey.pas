@@ -3188,10 +3188,12 @@ begin
 
     // 无块时，如不记忆 IDE 的查找，则退出，让 IDE 去执行查找下一个
     if not FKeepSearch then
+    begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('Do NOT Search for not KeepSearch');
 {$ENDIF}
       Exit;
+    end;
 
     // 无选择块并且在 KeepSearch 情况下，使用上次 F3 查找的内容。
     // 已通过挂接实现了记录 IDE 查找对话框中的字符串到 FOldSearchText 中
