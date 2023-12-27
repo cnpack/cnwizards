@@ -510,8 +510,8 @@ begin
 
     mmoImpl.Lines.Add('');
     FCreates.Add('');
-    FCreates.Add(Spc(FIndentWidth) + '//' + AName);
-    mmoImpl.Lines.Add(Spc(FIndentWidth) + '//' + AName);
+    FCreates.Add(Spc(FIndentWidth) + '// ' + AName);
+    mmoImpl.Lines.Add(Spc(FIndentWidth) + '// ' + AName);
     if FCurIsForm and (AComp.Name = FOwnFormName) then // 是这个 Form 本身
     begin
       if FIsPas then
