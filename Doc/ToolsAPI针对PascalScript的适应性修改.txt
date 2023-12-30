@@ -4,10 +4,10 @@
                   (C)Copyright 2001-2023 CnPack 开发组
 **********************************************************************
 
-                    ToolsAPI针对PascalScript的适应性修改
+                  ToolsAPI 针对 PascalScript 的适应性修改
                             Revision 1.0.0.1
                        =========================
-                        作者：刘啸 2015.03.23
+                        作者：刘啸 2023.11.21
 
     CnWizards 中集成的 Pascal Script 引擎能够允许脚本使用 IDE 接口，因此需要在编译期将每个版本 IDE 所对应的 ToolsAPI.pas 文件翻译成 Pascal Script 的运行期注册文件，以便脚本能够顺利调用其功能。之前 CnWizards 只针对 D5 以及 D5 以上版本翻译过两个独立版本，但后期 IDE 升级导致 ToolsAPI.pas 变化过大，无法完全兼容，所以需要将每个版本 IDE 的 ToolsAPI.pas 文件独立翻译，以下是说明（待继续补充）：
 
