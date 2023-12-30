@@ -120,9 +120,6 @@ function ShowUsesCleanResultForm(AList: TObjectList): Boolean;
 begin
   with TCnUsesCleanResultForm.Create(nil) do
   try
-{$IFDEF DELPHI120_ATHENS_UP}
-    chktvResult.CheckBoxes := True;
-{$ENDIF}
     InitList(AList);
     Result := ShowModal = mrOk;
   finally
