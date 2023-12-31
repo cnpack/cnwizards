@@ -109,12 +109,12 @@ uses
 
 type
   TCnVisualClasses = (vcBigNumber, vcBigNumberPolynomial, vcBigNumberRationalPolynomial,
-    vcEccPoint, vcEcc3Point);
+    vcEccPoint, vcEcc3Point, vcInt128, vcUInt128);
 
 const
   SCnVisualClasses: array[Low(TCnVisualClasses)..High(TCnVisualClasses)] of string =
     ('TCnBigNumber', 'TCnBigNumberPolynomial', 'TCnBigNumberRationalPolynomial',
-     'TCnEccPoint', 'TCnEcc3Point');
+     'TCnEccPoint', 'TCnEcc3Point', 'TCnInt128', 'TCnUInt128');
 
 //==============================================================================
 // 测试 DebuggerVisualizer 的菜单专家
@@ -294,6 +294,14 @@ begin
   else if TypeName = SCnVisualClasses[vcEcc3Point] then
   begin
     NewExpr := Expression + '.ToString';
+  end
+  else if TypeName = SCnVisualClasses[vcInt128] then
+  begin
+    NewExpr := 'Int128ToStr(' + Expression + ')';
+  end
+  else if TypeName = SCnVisualClasses[vcUInt128] then
+  begin
+    NewExpr := 'UInt128ToStr(' + Expression + ')';
   end;
 
   EvalRes := CT.Evaluate(NewExpr, @FRes[0], SizeOf(FRes), FCanModify, True,
@@ -344,7 +352,7 @@ end;
 
 function TCnTestDebuggerVisualizerValueReplacer.GetVisualizerDescription: string;
 begin
-  Result := 'CnPack CnVcl Debugger Visualizer for some Classes.'
+  Result := 'CnPack CnVcl Debugger Visualizer for some Types.'
 end;
 
 function TCnTestDebuggerVisualizerValueReplacer.GetVisualizerIdentifier: string;
