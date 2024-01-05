@@ -43,6 +43,26 @@ uses
 type
   TCnDynIntArray = array of Integer;
 
+  TCnSampleCollectionItem = class(TCollectionItem)
+  private
+    FText: string;
+  published
+    property Text: string read FText write FText;
+  end;
+
+  TCnSampleCollection = class(TCollection)
+  private
+    FVersion: Integer;
+    function GetItem(Index: Integer): TCnSampleCollectionItem;
+    procedure SetItem(Index: Integer;
+      const Value: TCnSampleCollectionItem);
+  public
+    constructor Create; reintroduce; virtual;
+    property Items[Index: Integer]: TCnSampleCollectionItem read GetItem write SetItem;
+  published
+    property Version: Integer read FVersion write FVersion;
+  end;
+
   TCnSampleComponent = class(TComponent)
   private
     FHint: AnsiString;
@@ -65,6 +85,8 @@ type
 {$IFDEF UNICODE}
     FUniStr: string;
 {$ENDIF}
+    FCollection: TCnSampleCollection;
+
     FReadOnlyHint: AnsiString;
     FReadOnlyAccChar: Char;
     FReadOnlyFloatValue: Double;
@@ -123,6 +145,7 @@ type
 {$IFDEF UNICODE}
     property UniStr: string read FUniStr write FUniStr;
 {$ENDIF}
+    property Collection: TCnSampleCollection read FCollection write FCollection;
 
     property ReadOnlyHeight: Integer read FReadOnlyHeight;
     property ReadOnlyAccChar: Char read FReadOnlyAccChar;
@@ -182,12 +205,39 @@ begin
   FPoint.y := 20;
 
   FReadOnlyFont := TFont.Create;
+
+  FCollection := TCnSampleCollection.Create;
+  FCollection.Version := 42;
+  FCollection.Add;
+  FCollection.Add;
+  FCollection.Items[0].Text := '³Ô²Ë';
+  FCollection.Items[1].Text := '20240101';
 end;
 
 destructor TCnSampleComponent.Destroy;
 begin
+  FCollection.Free;
   FReadOnlyFont.Free;
   inherited;
+end;
+
+{ TCnSampleCollection }
+
+constructor TCnSampleCollection.Create;
+begin
+  inherited Create(TCnSampleCollectionItem);
+end;
+
+function TCnSampleCollection.GetItem(
+  Index: Integer): TCnSampleCollectionItem;
+begin
+  Result := TCnSampleCollectionItem(inherited GetItem(Index));
+end;
+
+procedure TCnSampleCollection.SetItem(Index: Integer;
+  const Value: TCnSampleCollectionItem);
+begin
+  inherited SetItem(Index, Value);
 end;
 
 end.
