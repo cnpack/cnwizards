@@ -2143,9 +2143,10 @@ begin
               // 假设 Designator 处理完毕，判断后续是啥
 
               IsDesignator := Scanner.Token in [tokAssign, tokLB, tokSemicolon,
-                tokKeywordElse, tokKeywordEnd];
+                tokKeywordElse, tokKeywordEnd, tokKeywordExcept, tokKeywordUntil,
+                tokKeywordFinally];
               // TODO: 目前只想到这几个。Semicolon 是怕 Designator 已经作为语句处理完了，
-              // else/end 是怕语句结束没分号导致判断失误。
+              // else/end 等是怕语句结束没分号导致判断失误。
             except
               IsDesignator := False;
               // 如果后面碰到了 := 等情形，FormatDesignator 会出错，
