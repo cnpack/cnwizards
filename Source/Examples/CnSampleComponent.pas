@@ -85,6 +85,9 @@ type
 {$IFDEF UNICODE}
     FUniStr: string;
 {$ENDIF}
+    FThisDate: TDate;
+    FThisDateTime: TDateTime;
+    FThisTime: TTime;
     FCollection: TCnSampleCollection;
 
     FReadOnlyHint: AnsiString;
@@ -108,6 +111,9 @@ type
 {$IFDEF UNICODE}
     FReadOnlyUniStr: string;
 {$ENDIF}
+    FReadOnlyDate: TDate;
+    FReadOnlyDateTime: TDateTime;
+    FReadOnlyTime: TTime;
   protected
 
   public
@@ -145,6 +151,9 @@ type
 {$IFDEF UNICODE}
     property UniStr: string read FUniStr write FUniStr;
 {$ENDIF}
+    property ThisDate: TDate read FThisDate write FThisDate;
+    property ThisTime: TTime read FThisTime write FThisTime;
+    property ThisDateTime: TDateTime read FThisDateTime write FThisDateTime;
     property Collection: TCnSampleCollection read FCollection write FCollection;
 
     property ReadOnlyHeight: Integer read FReadOnlyHeight;
@@ -166,6 +175,10 @@ type
 {$IFDEF UNICODE}
     property ReadOnlyUniStr: string read FReadOnlyUniStr write FReadOnlyUniStr;
 {$ENDIF}
+    property ReadOnlyDate: TDate read FReadOnlyDate write FReadOnlyDate;
+    property ReadOnlyTime: TTime read FReadOnlyTime write FReadOnlyTime;
+    property ReadOnlyDateTime: TDateTime read FReadOnlyDateTime write FReadOnlyDateTime;
+
   end;
 
 implementation
@@ -205,6 +218,14 @@ begin
   FPoint.y := 20;
 
   FReadOnlyFont := TFont.Create;
+
+  FThisDate := Date;
+  FThisTime := Time;
+  FThisDateTime := Now;
+
+  FReadOnlyDate := Date;
+  FReadOnlyTime := Time;
+  FReadOnlyDateTime := Now;
 
   FCollection := TCnSampleCollection.Create;
   FCollection.Version := 42;
