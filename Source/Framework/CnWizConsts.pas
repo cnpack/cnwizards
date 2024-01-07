@@ -295,8 +295,8 @@ resourcestring
   SCnDefWizMenuCaption = '&Wizards';
 
   // CnDebugEnhancments
-  SCnDebugVisualizerIdentifier = 'CnPackDebugVisualizer';
-  SCnDebugReplacerDataName = 'DebugReplacers.dat';
+  SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
+  SCnDebugReplacerDataName = 'DebugReplacer.txt';
 
   // CnCorPropWizard
   SCnCorPropDataName = 'CorRules.ini';
@@ -1289,8 +1289,8 @@ var
   // CnDebugEnhanceWizard
   SCnDebugEnhanceWizardName: string = 'Debugger Enhancements';
   SCnDebugEnhanceWizardComment: string = 'Debugger Enhancements Wizard';
-  SCnDebugVisualizerName: string = 'CnPack Debug Visualizer';
-  SCnDebugVisualizerDescription: string = 'CnPack IDE Wizards Debug Visualizer';
+  SCnDebugVisualizerName: string = 'CnPack Debugger Visualizer';
+  SCnDebugVisualizerDescription: string = 'CnPack IDE Wizards Debugger Visualizer';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';

@@ -63,12 +63,11 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Height = 13
         Caption = 'Using Below Class Expressions to Enhance Debug Hint:'
       end
-      object lvVisualCalls: TListView
+      object lvReplacers: TListView
         Left = 8
         Top = 32
         Width = 393
         Height = 249
-        Checkboxes = True
         Columns = <
           item
             Caption = 'Type Name'
