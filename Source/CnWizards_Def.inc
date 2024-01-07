@@ -16,6 +16,13 @@
 
 {$IFDEF COMPILER9_UP}
   {$DEFINE USE_DDETOURS_HOOK}
+
+  // DEBUG and DDETOURS conflicts under D2007 or below. Don't know why.
+  {$IFDEF DEBUG}
+    {$IFNDEF COMPILER12_UP}
+      {$UNDEF USE_DDETOURS_HOOK}
+    {$ENDIF}
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF BDS2010_UP}
