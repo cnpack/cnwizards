@@ -71,12 +71,12 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Checkboxes = True
         Columns = <
           item
-            Caption = 'Sub'
-            Width = 36
+            Caption = 'Type Name'
+            Width = 160
           end
           item
-            Caption = 'Class Expression'
-            Width = 320
+            Caption = 'New Expression'
+            Width = 200
           end>
         ReadOnly = True
         RowSelect = True

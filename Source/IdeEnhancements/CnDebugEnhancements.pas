@@ -39,16 +39,18 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, IniFiles, ToolsAPI, CnConsts, CnWizConsts, CnWizClasses, CnWizOptions,
-  ComCtrls, StdCtrls;
+  Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs,
+  CnConsts, CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions;
 
 type
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  TCnDebuggerValueReplaceManager = class;
+{$ENDIF}
+
   TCnDebugEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
-    FRegistered: Boolean;
-    FVisualCalls: TStringList;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-    FReplacer: IOTADebuggerVisualizerValueReplacer;
+    FReplacer: TCnDebuggerValueReplaceManager;
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -65,40 +67,75 @@ type
     procedure ResetSettings(Ini: TCustomIniFile); override;
 
     procedure Config; override;
-
-    property VisualCalls: TStringList read FVisualCalls;
-    {* 求值的替换调用方式，形式为 1|类名.方法名}
   end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-  TCnDebuggerValueReplacer = class(TInterfacedObject, IOTAThreadNotifier,
+  TCnDebuggerBaseValueReplacer = class(TObject)
+  {* 封装的 ValueReplacer 单类型替换型基类，简化了一些内部操作}
+  private
+    FActive: Boolean;
+  protected
+    function GetEvalType: string; virtual; abstract;
+    {* 返回支持的类型名，带 T 前缀}
+    function GetNewExpression(const Expression, TypeName,
+      OldEvalResult: string): string; virtual; abstract;
+    {* 重新求值前调用，让子类给出新表达式供重新求值}
+    function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
+      NewEvalResult: string): string; virtual;
+    {* 重新求值成功后调用，给子类一个调整显示的机会。默认实现是“旧: 新”}
+  public
+    property Active: Boolean read FActive write FActive;
+    {* 是否启用}
+  end;
+
+  TCnDebuggerBaseValueReplacerClass = class of TCnDebuggerBaseValueReplacer;
+
+  TCnDebuggerValueReplaceManager = class(TInterfacedObject, IOTAThreadNotifier,
     IOTADebuggerVisualizerValueReplacer)
+  {* 所有单类型调试值替换类的管理类，自身聚合成单个类注册至 Delphi}
   private
     FRes: array[0..2047] of Char;
     FWizard: TCnDebugEnhanceWizard;
-    FNames, FFunctions: TStrings;
     FNotifierIndex: Integer;
     FEvalComplete: Boolean;
     FEvalSuccess: Boolean;
     FCanModify: Boolean;
     FEvalResult: string;
+    FReplaceItems: TStringList;
+    FReplacers: TObjectList;
+    FMap: TCnStrToPtrHashMap;
   protected
-    procedure ParseReplacers;
+    procedure CreateVisualizers;
   public
     constructor Create(AWizard: TCnDebugEnhanceWizard);
     destructor Destroy; override;
 
+    procedure LoadSettings;
+    {* 装载设置}
+    procedure SaveSettings;
+    {* 保存设置}
+    procedure ResetSettings;
+    {* 重置设置}
+
+    procedure RegisterToService;
+    {* 由外界调用注册至 Delphi}
+    procedure UnregisterFromService;
+    {* 由外界调用从 Delphi 中反注册}
+
+    // IOTANotifier
     procedure AfterSave;
     procedure BeforeSave;
     procedure Destroyed;
     procedure Modified;
 
+    // IOTAThreadNotifier
     procedure ThreadNotify(Reason: TOTANotifyReason);
     procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
       ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
      procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
 
+    // IOTADebuggerVisualizer
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
       var AllDescendants: Boolean); overload;
@@ -106,6 +143,7 @@ type
     function GetVisualizerName: string;
     function GetVisualizerDescription: string;
 
+    // IOTADebuggerVisualizerValueReplacer
     function GetReplacementValue(const Expression, TypeName, EvalResult: string): string;
   end;
 
@@ -122,9 +160,11 @@ type
   private
 
   public
-    procedure LoadFromStrings(List: TStringList);
-    procedure SaveToStrings(List: TStringList);
+
   end;
+
+procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
+{* 供外界的 TCnDebuggerBaseValueReplacer 子类注册，实现针对特定类型的调试期显示内容的值的替换}
 
 implementation
 
@@ -135,18 +175,24 @@ uses
   CnDebug;
 {$ENDIF}
 
+var
+  FDebuggerValueReplacerClass: TList = nil;
+
+procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
+begin
+  if FDebuggerValueReplacerClass.IndexOf(ReplacerClass) < 0 then
+    FDebuggerValueReplacerClass.Add(ReplacerClass);
+end;
+
 { TCnDebugEnhanceWizard }
 
 procedure TCnDebugEnhanceWizard.Config;
 begin
   with TCnDebugEnhanceForm.Create(nil) do
   begin
-    LoadFromStrings(FVisualCalls);
     if ShowModal = mrOK then
     begin
-      SaveToStrings(FVisualCalls);
       DoSaveSettings;
-      (FReplacer as TCnDebuggerValueReplacer).ParseReplacers;
     end;
     Free;
   end;
@@ -155,26 +201,17 @@ end;
 constructor TCnDebugEnhanceWizard.Create;
 begin
   inherited;
-  FVisualCalls := TStringList.Create;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  FReplacer := TCnDebuggerValueReplacer.Create(Self);
+  FReplacer := TCnDebuggerValueReplaceManager.Create(Self);
+
 {$ENDIF}
 end;
 
 destructor TCnDebugEnhanceWizard.Destroy;
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-var
-  ID: IOTADebuggerServices;
-{$ENDIF}
 begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  if FRegistered then
-    if Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
-      ID.UnregisterDebugVisualizer(FReplacer);
-
-  FReplacer := nil;
+  FReplacer.Free;
 {$ENDIF}
-  FVisualCalls.Free;
   inherited;
 end;
 
@@ -198,130 +235,59 @@ begin
 end;
 
 procedure TCnDebugEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-var
-  S: string;
-{$ENDIF}
 begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  S := WizOptions.GetUserFileName(SCnDebugReplacerDataName, True);
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnDebugEnhanceWizard Load: ' + S);
-{$ENDIF}
-
-  if FileExists(S) then
-  begin
-    FVisualCalls.LoadFromFile(S);
-    (FReplacer as TCnDebuggerValueReplacer).ParseReplacers;
-  end;
+  FReplacer.LoadSettings;
 {$ENDIF}
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
 begin
-
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  FReplacer.ResetSettings;
+{$ENDIF}
 end;
 
 procedure TCnDebugEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-var
-  S: string;
-{$ENDIF}
 begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  S := WizOptions.GetUserFileName(SCnDebugReplacerDataName, False);
-  FVisualCalls.SaveToFile(S);
+  FReplacer.SaveSettings;
 {$ENDIF}
-  inherited;
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
-var
-  ID: IOTADebuggerServices;
 begin
   inherited;
-
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-
-  if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
-    Exit;
-
   if Active then
-  begin
-    ID.RegisterDebugVisualizer(FReplacer);
-    FRegistered := True;
-  end
+    FReplacer.RegisterToService
   else
-  begin
-    ID.UnregisterDebugVisualizer(FReplacer);
-    FRegistered := False;
-  end;
-
+    FReplacer.UnRegisterFromService;
 {$ENDIF}
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnDebuggerValueReplacer }
+{ TCnDebuggerValueReplaceManager }
 
-constructor TCnDebuggerValueReplacer.Create(AWizard: TCnDebugEnhanceWizard);
+constructor TCnDebuggerValueReplaceManager.Create(AWizard: TCnDebugEnhanceWizard);
 begin
   inherited Create;
   FWizard := AWizard;
-  FNames := TStringList.Create;
-  FFunctions := TStringList.Create;
-  ParseReplacers;
+  FReplaceItems := TStringList.Create;
+  CreateVisualizers;
 end;
 
-destructor TCnDebuggerValueReplacer.Destroy;
+destructor TCnDebuggerValueReplaceManager.Destroy;
 begin
-  FFunctions.Free;
-  FNames.Free;
+  FMap.Free;
+  FReplaceItems.Free;
+  FReplacers.Free;
   inherited;
 end;
 
-procedure TCnDebuggerValueReplacer.ParseReplacers;
-var
-  I, Idx: Integer;
-  S, N, F: string;
-  Sub: Boolean;
-begin
-  FNames.Clear;
-  FFunctions.Clear;
-
-  for I := 0 to FWizard.VisualCalls.Count - 1 do
-  begin
-    Sub := False;
-    S := FWizard.VisualCalls[I];
-    Idx := Pos('|', S);         // 1| 代表包括子类，其他情况均不包括
-    if Idx > 1 then
-    begin
-      N := Copy(S, 1, Idx - 1);
-      if N = '1' then
-        Sub := True;
-
-      Delete(S, 1, Idx);
-    end;
-
-    Idx := Pos('.', S); // 到此处 S 不包括 |
-    if (Idx > 1) and (Idx < Length(S)) then
-    begin
-      N := Copy(S, 1, Idx - 1);
-      F := Copy(S, Idx + 1, MaxInt);
-      FNames.Add(N);
-
-      if Sub then
-        FNames.Objects[FNames.Count - 1] := TObject(1);
-      FFunctions.Add(F);
-    end;
-  end;
-{$IFDEF DEBUG}
-  CnDebugger.LogInteger(FNames.Count, 'TCnDebuggerValueReplacer Parse Replacers');
-{$ENDIF}
-end;
-
-function TCnDebuggerValueReplacer.GetReplacementValue(const Expression,
+function TCnDebuggerValueReplaceManager.GetReplacementValue(const Expression,
   TypeName, EvalResult: string): string;
 var
   I: Integer;
@@ -329,10 +295,12 @@ var
   ID: IOTADebuggerServices;
   CP: IOTAProcess;
   CT: IOTAThread;
-  NewExpr: string;
+  S, NewExpr: string;
   EvalRes: TOTAEvaluateResult;
   ResultAddr: TOTAAddress;
   ResultSize, ResultVal: Cardinal;
+  P: Pointer;
+  Replacer: TCnDebuggerBaseValueReplacer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnDebuggerValueReplacer get %s: %s, Display %s',
@@ -351,25 +319,29 @@ begin
   if CT = nil then
     Exit;
 
-  Found := False;
-  for I := 0 to FNames.Count - 1 do
+  Replacer := nil;
+  S := FReplaceItems.Values[TypeName];
+  if Length(S) > 0 then
   begin
-    if TypeName = FNames[I] then
-    begin
-      NewExpr := Expression + '.' + FFunctions[I];
-      Found := True;
-      Break;
-    end;
-  end;
+    // 替换格式字符串有效，该 TypeName 在简单替换的列表中
+    if Pos('%s', S) > 0 then
+      NewExpr := Format(S, [TypeName])
+    else
+      NewExpr := S;
+  end
+  else if FMap.Find(TypeName, P) then
+  begin
+    Replacer := TCnDebuggerBaseValueReplacer(P);
+    if Replacer.Active then
+      NewExpr := Replacer.GetNewExpression(Expression, TypeName, EvalResult)
+    else
+      Exit;
+  end
+  else
+    Exit;
 
 {$IFDEF DEBUG}
-  if Found then
-    CnDebugger.LogMsg('TCnDebuggerValueReplacer to Evaluate: ' + NewExpr)
-  else
-  begin
-    CnDebugger.LogMsg('TCnDebuggerValueReplacer NO Match. Exit');
-    Exit;
-  end;
+  CnDebugger.LogMsg('TCnDebuggerValueReplaceManager to Evaluate: ' + NewExpr);
 {$ENDIF}
 
   EvalRes := CT.Evaluate(NewExpr, @FRes[0], SizeOf(FRes), FCanModify, True,
@@ -377,14 +349,14 @@ begin
 
   case EvalRes of
 {$IFDEF DEBUG}
-    erError: CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Error');
-    erBusy: CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Busy');
+    erError: CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Error');
+    erBusy: CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Busy');
 {$ENDIF}
     erOK: Result := EvalResult + ': ' + FRes;
     erDeferred:
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Deferred. Wait for Events.');
+        CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Deferred. Wait for Events.');
 {$ENDIF}
         FEvalComplete := False;
         FEvalSuccess := False;
@@ -398,58 +370,65 @@ begin
         if FEvalSuccess then
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('TCnDebuggerValueReplacer Evaluate Deferred Success.');
+          CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Deferred Success.');
 {$ENDIF}
-          Result := EvalResult + ': ' + FEvalResult;
+          if Replacer <> nil then
+            Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, FEvalResult)
+          else
+            Result := EvalResult + ': ' + FEvalResult;
         end;
       end;
   end;
 end;
 
-procedure TCnDebuggerValueReplacer.GetSupportedType(Index: Integer;
+procedure TCnDebuggerValueReplaceManager.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants: Boolean);
 begin
-  TypeName := FNames[index];
-  AllDescendants := FNames.Objects[Index] <> nil;
+  if Index < FReplaceItems.Count then
+    TypeName := FReplaceItems.Names[Index]
+  else if Index < FReplaceItems.Count + FReplacers.Count then
+    TypeName := (FReplacers[Index] as TCnDebuggerBaseValueReplacer).GetEvalType;
+
+  AllDescendants := False; // 聚合了导致没法支持子类，不知道如何分发
 end;
 
-function TCnDebuggerValueReplacer.GetSupportedTypeCount: Integer;
+function TCnDebuggerValueReplaceManager.GetSupportedTypeCount: Integer;
 begin
-  Result := FNames.Count;
+  Result := FReplaceItems.Count + FReplacers.Count;
 end;
 
-function TCnDebuggerValueReplacer.GetVisualizerDescription: string;
+function TCnDebuggerValueReplaceManager.GetVisualizerDescription: string;
 begin
   Result := SCnDebugVisualizerDescription;
 end;
 
-function TCnDebuggerValueReplacer.GetVisualizerIdentifier: string;
+function TCnDebuggerValueReplaceManager.GetVisualizerIdentifier: string;
 begin
   Result := SCnDebugVisualizerIdentifier;
 end;
 
-function TCnDebuggerValueReplacer.GetVisualizerName: string;
+function TCnDebuggerValueReplaceManager.GetVisualizerName: string;
 begin
   Result := SCnDebugVisualizerName;
 end;
 
 
-procedure TCnDebuggerValueReplacer.AfterSave;
+procedure TCnDebuggerValueReplaceManager.AfterSave;
 begin
 
 end;
 
-procedure TCnDebuggerValueReplacer.BeforeSave;
+procedure TCnDebuggerValueReplaceManager.BeforeSave;
 begin
 
 end;
 
-procedure TCnDebuggerValueReplacer.Destroyed;
+procedure TCnDebuggerValueReplaceManager.Destroyed;
 begin
 
 end;
 
-procedure TCnDebuggerValueReplacer.EvaluteComplete(const ExprStr,
+procedure TCnDebuggerValueReplaceManager.EvaluteComplete(const ExprStr,
   ResultStr: string; CanModify: Boolean; ResultAddress,
   ResultSize: LongWord; ReturnCode: Integer);
 begin
@@ -471,68 +450,106 @@ begin
   FEvalComplete := True;
 end;
 
-procedure TCnDebuggerValueReplacer.Modified;
+procedure TCnDebuggerValueReplaceManager.Modified;
 begin
 
 end;
 
-procedure TCnDebuggerValueReplacer.ModifyComplete(const ExprStr,
+procedure TCnDebuggerValueReplaceManager.ModifyComplete(const ExprStr,
   ResultStr: string; ReturnCode: Integer);
 begin
 
 end;
 
-procedure TCnDebuggerValueReplacer.ThreadNotify(Reason: TOTANotifyReason);
+procedure TCnDebuggerValueReplaceManager.ThreadNotify(Reason: TOTANotifyReason);
 begin
 
 end;
 
 {$ENDIF}
 
-{ TCnDebugEnhanceForm }
-
-procedure TCnDebugEnhanceForm.LoadFromStrings(List: TStringList);
-var
-  Item: TListItem;
-  I, Idx: Integer;
-  S: string;
-begin
-  lvVisualCalls.Clear;
-  for I := 0 to List.Count - 1 do
-  begin
-    Item := lvVisualCalls.Items.Add;
-    Item.Caption := '';
-
-    Item.Checked := False;
-    S := List[I];
-    Idx := Pos('|', S);
-    if Idx > 1 then
-    begin
-      if Copy(S, 1, Idx - 1) = '1' then
-        Item.Checked := True;
-      Delete(S, 1, Idx);
-    end;
-    Item.SubItems.Add(S);
-  end;
-end;
-
-procedure TCnDebugEnhanceForm.SaveToStrings(List: TStringList);
+procedure TCnDebuggerValueReplaceManager.CreateVisualizers;
 var
   I: Integer;
+  Clz: TCnDebuggerBaseValueReplacerClass;
+  Obj: TCnDebuggerBaseValueReplacer;
 begin
-  List.Clear;
-  for I := 0 to lvVisualCalls.Items.Count - 1 do
+  for I := 0 to FDebuggerValueReplacerClass.Count - 1 do
   begin
-    if lvVisualCalls.Items[I].Checked then
-      List.Add('1|' + lvVisualCalls.Items[I].SubItems[0])
-    else
-      List.Add('0|' + lvVisualCalls.Items[I].SubItems[0]);
+    Clz := TCnDebuggerBaseValueReplacerClass(FDebuggerValueReplacerClass[I]);
+    Obj := TCnDebuggerBaseValueReplacer(Clz.NewInstance);
+    Obj.Create;
+    FReplacers.Add(Obj);
   end;
+
+  FMap := TCnStrToPtrHashMap.Create;
+  for I := 0 to FReplacers.Count - 1 do
+    FMap.Add((FReplacers[I] as TCnDebuggerBaseValueReplacer).GetEvalType, FReplacers[I]);
+end;
+
+procedure TCnDebuggerValueReplaceManager.RegisterToService;
+var
+  ID: IOTADebuggerServices;
+begin
+  if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+    Exit;
+
+  ID.RegisterDebugVisualizer(Self as IOTADebuggerVisualizer);
+end;
+
+procedure TCnDebuggerValueReplaceManager.UnregisterFromService;
+var
+  ID: IOTADebuggerServices;
+begin
+  if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+    Exit;
+
+  ID.UnRegisterDebugVisualizer(Self as IOTADebuggerVisualizer);
+end;
+
+procedure TCnDebuggerValueReplaceManager.LoadSettings;
+var
+  F: string;
+begin
+  F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, True);
+  if FileExists(F) then
+    FReplaceItems.LoadFromFile(F);
+end;
+
+procedure TCnDebuggerValueReplaceManager.ResetSettings;
+var
+  F: string;
+begin
+  F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, False);
+  if FileExists(F) then
+    DeleteFile(F);
+end;
+
+procedure TCnDebuggerValueReplaceManager.SaveSettings;
+var
+  F: string;
+begin
+  F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, False);
+  FReplaceItems.SaveToFile(F);
+  WizOptions.CheckUserFile(SCnDebugReplacerDataName);
+end;
+
+{ TCnDebuggerBaseValueReplacer }
+
+function TCnDebuggerBaseValueReplacer.GetFinalResult(const OldExpression,
+  TypeName, OldEvalResult, NewEvalResult: string): string;
+begin
+  Result := OldEvalResult + ': ' + NewEvalResult;
 end;
 
 initialization
+  FDebuggerValueReplacerClass := TList.Create;
+
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   RegisterCnWizard(TCnDebugEnhanceWizard);
 {$ENDIF}
+
+finalization
+  FDebuggerValueReplacerClass.Free;
 
 end.

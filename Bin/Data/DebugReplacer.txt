@@ -1,0 +1,7 @@
+TCnInt128=Int128ToStr(%s)
+TCnUInt128=UInt128ToStr(%s)
+TCnBigNumber=%s.ToHex
+TCnBigNumberPolynomial=%s.ToString
+TCnBigNumberRationalPolynomial=%s.ToString
+TCnEccPoint=%s.ToString
+TCnEcc3Point=%s.ToString
