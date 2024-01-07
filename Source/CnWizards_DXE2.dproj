@@ -88,7 +88,7 @@
 			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_DXE2.dll</DCC_DependencyCheckOutputName>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-			<DCC_Define>USE_JCL;$(DCC_Define)</DCC_Define>
+			<DCC_Define>CAPTURE_STACK;$(DCC_Define)</DCC_Define>
 			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
 		</PropertyGroup>
 		<ItemGroup>

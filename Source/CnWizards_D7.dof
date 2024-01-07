@@ -136,7 +136,7 @@ ProductVersion=1.0.0.0
 Comments=http://www.cnpack.org
 [HistoryLists\hlConditionals]
 Count=2
-Item0=DEBUG;USE_JCL
+Item0=DEBUG;CAPTURE_STACK
 Item1=DEBUG
 [HistoryLists\hlUnitAliases]
 Count=1

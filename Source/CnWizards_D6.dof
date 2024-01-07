@@ -88,7 +88,7 @@ Comments=http://www.cnpack.org
 [HistoryLists\hlConditionals]
 Count=2
 Item0=DEBUG
-Item1=DEBUG;USE_JCL
+Item1=DEBUG;CAPTURE_STACK
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

@@ -82,7 +82,7 @@ ProductVersion=1.0.0.0
 Comments=
 [HistoryLists\hlConditionals]
 Count=1
-Item0=DEBUG;USE_JCL
+Item0=DEBUG;CAPTURE_STACK
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

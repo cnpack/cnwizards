@@ -85,7 +85,7 @@ Count=4
 Item0=TEST_APP;STAND_ALONE
 Item1=TEST_APP
 Item2=STAND_ALONE
-Item3=DEBUG;USE_JCL
+Item3=DEBUG;CAPTURE_STACK
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;

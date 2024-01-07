@@ -443,7 +443,7 @@ Item0=$(BCB)\source\vcl
 [HistoryLists\hlConditionals]
 Count=2
 Item0=DEBUG
-Item1=DEBUG;USE_JCL
+Item1=DEBUG;CAPTURE_STACK
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
