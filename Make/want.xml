@@ -128,7 +128,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="dcc_arg" value=""    unless="dcc_arg" />
 
   <!-- 定义编译时使用的条件编译宏 -->
-  <property name="define._debug"    value=";DEBUG;USE_JCL;CAPTURE_STACK" if="debug" />
+  <property name="define._debug"    value=";DEBUG;CAPTURE_STACK" if="debug" />
   <property name="define._debug"    value=""               unless="debug" />
   <property name="define._lite"     value=";CNWIZARDS_LITE" if="lite" />
   <property name="define._lite"     value=""               unless="lite" />
