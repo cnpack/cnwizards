@@ -3404,6 +3404,7 @@
 {$IFDEF BDS2010}
   // 2010 下 EditView 设置 CursorPos 后调用 EditPosition.InsertText 会有列偏差
   {$DEFINE EDITVIEW_SETCURSORPOS_BUG}
+  {$DEFINE OTA_DEBUG_EVENTS} // 2010 下的 DebuggerService 有 ProcessDebugEvents
 {$ENDIF}
 
 {$IFDEF BDS2009_UP}
@@ -3461,6 +3462,7 @@
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
   {$DEFINE SUPPORT_CLASS_VAR}     // 2006 and above Supports class var
+  {$DEFINE OTA_DEBUG_ERBUSY}      // 2006 下的 Evaluate 有返回值 erBusy
 {$ENDIF}
 
 {$IFDEF BDS2005_UP}
