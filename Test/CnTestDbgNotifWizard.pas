@@ -99,11 +99,6 @@ begin
 end;
 
 procedure TCnTestDbgNotifMenuWizard.Execute;
-var
-  a: array[0..255] of Char;
-  CanModify: Boolean;
-  ResAddr: LongWord;
-  ResSize, ResVal: LongWord;  
 begin
   if (FProcess = nil) or (FThread = nil) then
   begin
@@ -111,13 +106,7 @@ begin
       'Please Use CnDebugViewer to See the Output Results' + #13#10 + 'when Add/Delete Breakpoint and Run/Pause/Stop Process.');
   end;
 
-  FillChar(a, SizeOf(a), 0);
-  if EvaluateExpression(FThread, 'Screen.FormCount', @a[0], 255, CanModify, True, '', ResAddr, ResSize, ResVal) then
-  begin
-    CnDebugger.TraceFmt('Execute ResultStr %s, ResAddr %x, ResSize %x, ResVal %x.', [a, ResAddr, ResSize, ResVal]);
-  end
-  else
-    CnDebugger.TraceFmt('ResultStr %s', [a]);
+  CnDebugger.TraceMsg(CnEvaluationManager.EvaluateExpression('Screen.FormCount'));
 end;
 
 function TCnTestDbgNotifMenuWizard.GetCaption: string;
