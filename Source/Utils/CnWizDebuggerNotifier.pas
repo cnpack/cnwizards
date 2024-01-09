@@ -32,7 +32,9 @@ unit CnWizDebuggerNotifier;
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2013.06.03
+* 修改记录：2024.01.09
+*               简化求值方法并封装在一个全局接口中
+*           2013.06.03
 *               增加获取当前断点信息的方法
 *           2006.11.10
 *               增加 Evaluate 的相关求值方法
@@ -50,6 +52,9 @@ uses
   Contnrs, Consts, CnWizUtils, CnClasses;
 
 type
+  TCnAvailableState = (asAvailable, asProcRunning, asOutOfScope, asNotAvailable);
+  {* 求值时的目标状态}
+
   TCnProcessNotifyReason = (cprCreated, cprDestroyed);
   {* 进程通知的类型，自定义}
 
@@ -1049,5 +1054,7 @@ initialization
 finalization
   if FCnWizDebuggerNotifierServices <> nil then
     FreeAndNil(FCnWizDebuggerNotifierServices);
+
+  FEvaluationManager := nil;
 
 end.

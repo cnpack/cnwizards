@@ -93,17 +93,10 @@ type
 
   TCnDebuggerBaseValueReplacerClass = class of TCnDebuggerBaseValueReplacer;
 
-  TCnDebuggerValueReplaceManager = class(TInterfacedObject, IOTAThreadNotifier,
-    IOTADebuggerVisualizerValueReplacer)
+  TCnDebuggerValueReplaceManager = class(TInterfacedObject, IOTADebuggerVisualizerValueReplacer)
   {* 所有单类型调试值替换类的管理类，自身聚合成单个类注册至 Delphi}
   private
-    FRes: array[0..2047] of Char;
     FWizard: TCnDebugEnhanceWizard;
-    FNotifierIndex: Integer;
-    FEvalComplete: Boolean;
-    FEvalSuccess: Boolean;
-    FCanModify: Boolean;
-    FEvalResult: string;
     FReplaceItems: TStringList;
     FReplacers: TObjectList;
     FMap: TCnStrToPtrHashMap;
@@ -119,18 +112,6 @@ type
     {* 保存设置}
     procedure ResetSettings;
     {* 重置设置}
-
-    // IOTANotifier
-    procedure AfterSave;
-    procedure BeforeSave;
-    procedure Destroyed;
-    procedure Modified;
-
-    // IOTAThreadNotifier
-    procedure ThreadNotify(Reason: TOTANotifyReason);
-    procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
-      ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
-     procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
 
     // IOTADebuggerVisualizer
     function GetSupportedTypeCount: Integer;
@@ -170,10 +151,8 @@ implementation
 
 {$R *.dfm}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnWizDebuggerNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -211,7 +190,6 @@ end;
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
 var
   Mgr: TCnDebuggerValueReplaceManager;
-  I: Integer;
 begin
   Mgr := FReplaceManager as TCnDebuggerValueReplaceManager;
   Results.Add('Replace Item Count: ' + IntToStr(Mgr.FReplaceItems.Count));
@@ -219,8 +197,19 @@ begin
 end;
 
 destructor TCnDebugEnhanceWizard.Destroy;
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+var
+  ID: IOTADebuggerServices;
+{$ENDIF}
 begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  if Active then
+  begin
+    if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+      Exit;
+
+    ID.UnregisterDebugVisualizer(FReplaceManager);
+  end;
   FReplaceManager := nil;
 {$ENDIF}
   inherited;
@@ -322,15 +311,10 @@ end;
 function TCnDebuggerValueReplaceManager.GetReplacementValue(const Expression,
   TypeName, EvalResult: string): string;
 var
-  I: Integer;
-  Found: Boolean;
   ID: IOTADebuggerServices;
   CP: IOTAProcess;
   CT: IOTAThread;
   S, NewExpr: string;
-  EvalRes: TOTAEvaluateResult;
-  ResultAddr: TOTAAddress;
-  ResultSize, ResultVal: Cardinal;
   P: Pointer;
   Replacer: TCnDebuggerBaseValueReplacer;
 begin
@@ -376,41 +360,12 @@ begin
   CnDebugger.LogMsg('TCnDebuggerValueReplaceManager to Evaluate: ' + NewExpr);
 {$ENDIF}
 
-  EvalRes := CT.Evaluate(NewExpr, @FRes[0], SizeOf(FRes), FCanModify, True,
-    '', ResultAddr, ResultSize, ResultVal);
+  S := CnEvaluationManager.EvaluateExpression(NewExpr);
 
-  case EvalRes of
-{$IFDEF DEBUG}
-    erError: CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Error');
-    erBusy: CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Busy');
-{$ENDIF}
-    erOK: Result := EvalResult + ': ' + FRes;
-    erDeferred:
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Deferred. Wait for Events.');
-{$ENDIF}
-        FEvalComplete := False;
-        FEvalSuccess := False;
-        FEvalResult := '';
-
-        FNotifierIndex := CT.AddNotifier(Self);
-        while not FEvalComplete do
-          ID.ProcessDebugEvents;
-        CT.RemoveNotifier(FNotifierIndex);
-
-        if FEvalSuccess then
-        begin
-{$IFDEF DEBUG}
-          CnDebugger.LogMsg('TCnDebuggerValueReplaceManager Evaluate Deferred Success.');
-{$ENDIF}
-          if Replacer <> nil then
-            Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, FEvalResult)
-          else
-            Result := EvalResult + ': ' + FEvalResult;
-        end;
-      end;
-  end;
+  if Replacer <> nil then
+    Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, S)
+  else
+    Result := EvalResult + ': ' + S;
 end;
 
 procedure TCnDebuggerValueReplaceManager.GetSupportedType(Index: Integer;
@@ -442,60 +397,6 @@ end;
 function TCnDebuggerValueReplaceManager.GetVisualizerName: string;
 begin
   Result := SCnDebugVisualizerName;
-end;
-
-
-procedure TCnDebuggerValueReplaceManager.AfterSave;
-begin
-
-end;
-
-procedure TCnDebuggerValueReplaceManager.BeforeSave;
-begin
-
-end;
-
-procedure TCnDebuggerValueReplaceManager.Destroyed;
-begin
-
-end;
-
-procedure TCnDebuggerValueReplaceManager.EvaluteComplete(const ExprStr,
-  ResultStr: string; CanModify: Boolean; ResultAddress,
-  ResultSize: LongWord; ReturnCode: Integer);
-begin
-  // Defer 的结果 Evaluate 完毕，如果 ReturnCode 不等于 0，ResultStr 里可能是出错信息
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnDebuggerValueReplacer EvaluteComplete for %s: %d, %s',
-    [ExprStr, ReturnCode, ResultStr]);
-{$ENDIF}
-
-  FEvalSuccess := ReturnCode = 0;
-
-  if FEvalSuccess then
-  begin
-    FEvalResult := AnsiDequotedStr(ResultStr, '''');
-  end
-  else
-    FEvalResult := '';
-
-  FEvalComplete := True;
-end;
-
-procedure TCnDebuggerValueReplaceManager.Modified;
-begin
-
-end;
-
-procedure TCnDebuggerValueReplaceManager.ModifyComplete(const ExprStr,
-  ResultStr: string; ReturnCode: Integer);
-begin
-
-end;
-
-procedure TCnDebuggerValueReplaceManager.ThreadNotify(Reason: TOTANotifyReason);
-begin
-
 end;
 
 procedure TCnDebuggerValueReplaceManager.CreateVisualizers;

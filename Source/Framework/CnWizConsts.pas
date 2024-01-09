@@ -1291,6 +1291,9 @@ var
   SCnDebugEnhanceWizardComment: string = 'Debugger Enhancements Wizard';
   SCnDebugVisualizerName: string = 'CnPack Debugger Visualizer';
   SCnDebugVisualizerDescription: string = 'CnPack IDE Wizards Debugger Visualizer';
+  SCnDebugDataSetViewerName: string = 'CnPack DataSet Viewer';
+  SCnDebugDataSetViewerDescription: string = 'CnPack IDE Wizards DataSet Viewer';
+  SCnDebugDataSetViewerMenuText: string = 'Show DataSet';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';
