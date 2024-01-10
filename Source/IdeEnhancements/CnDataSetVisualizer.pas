@@ -27,7 +27,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, ToolsAPI, StdCtrls, Grids, DesignIntf, Actnlist, ImgList,
-  Menus, IniFiles, CnWizDebuggerNotifier;
+  Menus, IniFiles, CnWizConsts, CnWizDebuggerNotifier;
 
 type
   TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater)
@@ -60,20 +60,22 @@ type
     procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
   end;
 
-procedure Register;
+  TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
+    IOTADebuggerVisualizerExternalViewer)
+  public
+    function GetSupportedTypeCount: Integer;
+    procedure GetSupportedType(Index: Integer; var TypeName: string;
+      var AllDescendants: Boolean);
+    function GetVisualizerIdentifier: string;
+    function GetVisualizerName: string;
+    function GetVisualizerDescription: string;
+    function GetMenuText: string;
+    function Show(const Expression, TypeName, EvalResult: string; Suggestedleft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
+  end;
 
 implementation
 
 {$R *.dfm}
-
-resourcestring
-  SCnDataSetVisualizerName = 'TDataSet Visualizer for Delphi';
-  SCnDataSetVisualizerDescription = 'Displays a list of the actual strings held in a TStrings instance';
-  SCnDataSetViewerMenuText = 'Show DataSet';
-  SCnDataSetViewerFormCaption = 'TDataSet Visualizer for %s';
-  sProcessNotAccessible = 'process not accessible';
-  sValueNotAccessible = 'value not accessible';
-  sOutOfScope = 'out of scope';
 
 type
   ICnFrameFormHelper = interface
@@ -108,31 +110,18 @@ type
     function GetEditState: TEditState;
     function EditAction(Action: TEditAction): Boolean;
 
-    { IFrameFormHelper }
+    { ICnFrameFormHelper }
     function GetForm: TCustomForm;
     function GetFrame: TCustomFrame;
     procedure SetForm(Form: TCustomForm);
     procedure SetFrame(Frame: TCustomFrame);
   end;
 
-  TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
-    IOTADebuggerVisualizerExternalViewer)
-  public
-    function GetSupportedTypeCount: Integer;
-    procedure GetSupportedType(Index: Integer; var TypeName: string;
-      var AllDescendants: Boolean);
-    function GetVisualizerIdentifier: string;
-    function GetVisualizerName: string;
-    function GetVisualizerDescription: string;
-    function GetMenuText: string;
-    function Show(const Expression, TypeName, EvalResult: string; Suggestedleft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
-  end;
-
 { TCnDebuggerDataSetVisualizer }
 
 function TCnDebuggerDataSetVisualizer.GetMenuText: string;
 begin
-  Result := SCnDataSetViewerMenuText;
+  Result := SCnDebugDataSetViewerMenuText;
 end;
 
 procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer;
@@ -149,7 +138,7 @@ end;
 
 function TCnDebuggerDataSetVisualizer.GetVisualizerDescription: string;
 begin
-  Result := SCnDataSetVisualizerDescription;
+  Result := SCnDebugDataSetViewerDescription;
 end;
 
 function TCnDebuggerDataSetVisualizer.GetVisualizerIdentifier: string;
@@ -159,7 +148,7 @@ end;
 
 function TCnDebuggerDataSetVisualizer.GetVisualizerName: string;
 begin
-  Result := SCnDataSetVisualizerName;
+  Result := SCnDebugDataSetViewerName;
 end;
 
 function TCnDebuggerDataSetVisualizer.Show(const Expression, TypeName, EvalResult: string; SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
@@ -341,7 +330,7 @@ end;
 
 function TCnDataSetVisualizerForm.GetIdentifier: string;
 begin
-  Result := 'DataSetDebugVisualizer';
+  Result := SCnDataSetVisualizerIdentifier;
 end;
 
 function TCnDataSetVisualizerForm.GetMenuActionList: TCustomActionList;
@@ -388,28 +377,5 @@ begin
    FMyFrame := TCnDataSetViewerFrame(Frame);
 end;
 
-var
-  StringListVis: IOTADebuggerVisualizer;
-
-procedure Register;
-begin
-  StringListVis := TCnDebuggerDataSetVisualizer.Create;
-  (BorlandIDEServices as IOTADebuggerServices).RegisterDebugVisualizer(StringListVis);
-end;
-
-procedure RemoveVisualizer;
-var
-  DebuggerServices: IOTADebuggerServices;
-begin
-  if Supports(BorlandIDEServices, IOTADebuggerServices, DebuggerServices) then
-  begin
-    DebuggerServices.UnregisterDebugVisualizer(StringListVis);
-    StringListVis := nil;
-  end;
-end;
-
-initialization
-finalization
-  RemoveVisualizer;
 end.
 

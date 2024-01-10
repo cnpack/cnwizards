@@ -296,6 +296,7 @@ resourcestring
 
   // CnDebugEnhancments
   SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
+  SCnDataSetVisualizerIdentifier = 'CnPackIDEWizardsDataSetVisualizer';
   SCnDebugReplacerDataName = 'DebugReplacer.txt';
 
   // CnCorPropWizard
@@ -1294,6 +1295,10 @@ var
   SCnDebugDataSetViewerName: string = 'CnPack DataSet Viewer';
   SCnDebugDataSetViewerDescription: string = 'CnPack IDE Wizards DataSet Viewer';
   SCnDebugDataSetViewerMenuText: string = 'Show DataSet';
+  SCnDataSetViewerFormCaption: string = 'TDataSet Visualizer for %s';
+  SCnDebugErrorProcessNotAccessible: string = 'Process NOT Accessible';
+  SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
+  SCnDebugErrorOutOfScope: string = 'Out of Scope';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';

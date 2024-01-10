@@ -51,6 +51,7 @@ type
   private
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
+    FDataSetViewer: IOTADebuggerVisualizer;
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -152,7 +153,7 @@ implementation
 {$R *.dfm}
 
 uses
-  CnWizDebuggerNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizDebuggerNotifier, CnDataSetVisualizer {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -184,6 +185,7 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FReplaceManager := TCnDebuggerValueReplaceManager.Create(Self);
+  FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
 {$ENDIF}
 end;
 
@@ -209,8 +211,11 @@ begin
       Exit;
 
     ID.UnregisterDebugVisualizer(FReplaceManager);
+    ID.UnregisterDebugVisualizer(FDataSetViewer);
   end;
+
   FReplaceManager := nil;
+  FDataSetViewer := nil;
 {$ENDIF}
   inherited;
 end;
@@ -270,15 +275,17 @@ begin
   if Active then
   begin
     ID.RegisterDebugVisualizer(FReplaceManager);
+    ID.RegisterDebugVisualizer(FDataSetViewer);
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnDebugEnhanceWizard Register ReplaceManager');
+    CnDebugger.LogMsg('TCnDebugEnhanceWizard Register Viewers');
 {$ENDIF}
   end
   else
   begin
     ID.UnregisterDebugVisualizer(FReplaceManager);
+    ID.UnregisterDebugVisualizer(FDataSetViewer);
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister ReplaceManager');
+    CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister Viewers');
 {$ENDIF}
   end;
 {$ENDIF}
