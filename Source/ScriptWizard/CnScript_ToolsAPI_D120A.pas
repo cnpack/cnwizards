@@ -6439,6 +6439,7 @@ begin
   SIRegister_INTAPersonalityDevelopers(CL);
   SIRegister_IBorlandIDEServices70(CL);
   SIRegister_IBorlandIDEServices(CL);
+  CL.AddDelphiFunction('Function BorlandIDEServices : IBorlandIDEServices');
   SIRegister_IOTASplashScreenServices270(CL);
   SIRegister_IOTASplashScreenServices280(CL);
   SIRegister_IOTASplashScreenServices(CL);
@@ -6521,6 +6522,11 @@ begin
  CL.AddDelphiFunction('Function StringToIOTAFile( const CodeString : string) : IOTAFile');
  CL.AddDelphiFunction('Function GetActiveProject : IOTAProject');
  CL.AddDelphiFunction('Function PersonalityServices : IOTAPersonalityServices');
+end;
+
+function BorlandIDEServices: IBorlandIDEServices;
+begin
+  Result := ToolsAPI.BorlandIDEServices;
 end;
 
 (* === run-time registration functions === *)
@@ -6963,6 +6969,7 @@ Begin Self.Insert(Text); END;
 (*----------------------------------------------------------------------------*)
 procedure RIRegister_ToolsAPI_Routines(S: TPSExec);
 begin
+ S.RegisterDelphiFunction(@BorlandIDEServices, 'BorlandIDEServices', cdRegister);
  S.RegisterDelphiFunction(@RegisterPackageWizard, 'RegisterPackageWizard', cdRegister);
  S.RegisterDelphiFunction(@StringToIOTAFile, 'StringToIOTAFile', cdRegister);
  S.RegisterDelphiFunction(@GetActiveProject, 'GetActiveProject', cdRegister);
