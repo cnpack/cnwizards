@@ -154,6 +154,9 @@ type
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
 
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorMouseUp(Editor: TEditorObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
+    procedure SnapCursorToEol;
   public
     constructor Create;
     destructor Destroy; override;
@@ -479,13 +482,15 @@ begin
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.AddKeyUpNotifier(EditControlKeyUp);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
+  EditControlWrapper.AddEditorMouseUpNotifier(EditorMouseUp);
 end;
 
 destructor TCnSrcEditorKey.Destroy;
 begin
+  EditControlWrapper.RemoveEditorMouseUpNotifier(EditorMouseUp);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
-  EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
+  EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
 
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
   FEditWindowSearchDnClickMethodHook.Free;
@@ -1783,7 +1788,7 @@ begin
   if not CnOtaGetCurrPosToken(Cur, CurIndex) then
     Exit;
   if Cur = '' then Exit;
-  
+
   // 做 F2 更改当前变量名的动作
   BookMarkList := nil;
   EditControl := CnOtaGetCurrentEditControl;
@@ -3455,9 +3460,7 @@ begin
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
-{$IFNDEF DELPHI104_SYDNEY_UP}  // 10.4 无法支持光标行尾
   FCursorBeforeEOL := Ini.ReadBool(csEditorKey, csCursorBeforeEOL, False);
-{$ENDIF}
   FLeftLineWrap := Ini.ReadBool(csEditorKey, csLeftLineWrap, False);
   FRightLineWrap := Ini.ReadBool(csEditorKey, csRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
@@ -3528,22 +3531,35 @@ begin
   FKeepSearch := Value;
 end;
 
-procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+begin
+  if not Active or not FCursorBeforeEOL then
+    Exit;
+
+  if (ctCurrLine in ChangeType) or (ctCurrCol in ChangeType) then
+    SnapCursorToEol;
+end;
+
+procedure TCnSrcEditorKey.EditorMouseUp(Editor: TEditorObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer;
+  IsNC: Boolean);
+begin
+  if not Active or not FCursorBeforeEOL then
+    Exit;
+
+  SnapCursorToEol;
+end;
+
+procedure TCnSrcEditorKey.SnapCursorToEol;
 var
   Line: string;
   EditView: IOTAEditView;
   LineNo, CharIndex, Len: Integer;
 begin
-  if not Active or not FCursorBeforeEOL then
-    Exit;
-
-  if ((ctCurrLine in ChangeType) or (ctCurrCol in ChangeType)) and not FCursorMoving then
-  begin
+  if not FCursorMoving then begin
     // 获得当前编辑器光标位置，并判断是否超出行尾
     if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
     begin
-      // 空行也强迫到行首    
+      // 空行也强迫到行首
 //    if Trim(Line) = '' then
 //      Exit;
 

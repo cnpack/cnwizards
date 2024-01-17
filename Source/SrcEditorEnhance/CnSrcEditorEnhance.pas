@@ -628,12 +628,7 @@ begin
     chkAutoBracket.Checked := FEditorKey.AutoBracket;
     chkShiftEnter.Checked := FEditorKey.ShiftEnter;
     chkHomeExtend.Checked := FEditorKey.HomeExt;
-{$IFDEF DELPHI104_SYDNEY_UP}  // 10.4 无法支持光标行尾
-    chkCursorBeforeEOL.Checked := False;
-    chkCursorBeforeEOL.Enabled := False;
-{$ELSE}
     chkCursorBeforeEOL.Checked := FEditorKey.CursorBeforeEOL;
-{$ENDIF}
     chkLeftWrapLine.Checked := FEditorKey.LeftLineWrap;
     chkRightWrapLine.Checked := FEditorKey.RightLineWrap;
     chkSearchAgain.Checked := FEditorKey.F3Search;
