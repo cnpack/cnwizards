@@ -153,7 +153,12 @@ type
       var Handled: Boolean);
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
 
+    procedure SnapCursorToEol;
     procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+{$IFDEF DELPHI104_SYDNEY_UP}
+    procedure EditorMouseUp(Editor: TEditorObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
+{$ENDIF}
   public
     constructor Create;
     destructor Destroy; override;
@@ -479,13 +484,21 @@ begin
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.AddKeyUpNotifier(EditControlKeyUp);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+  EditControlWrapper.AddEditorMouseUpNotifier(EditorMouseUp);
+{$ENDIF}
 end;
 
 destructor TCnSrcEditorKey.Destroy;
 begin
+{$IFDEF DELPHI104_SYDNEY_UP}
+  EditControlWrapper.RemoveEditorMouseUpNotifier(EditorMouseUp);
+{$ENDIF}
+
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
-  EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
+  EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
 
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
   FEditWindowSearchDnClickMethodHook.Free;
@@ -3455,9 +3468,7 @@ begin
   SearchWrap := Ini.ReadBool(csEditorKey, csSearchWrap, True);
   FHomeExt := Ini.ReadBool(csEditorKey, csHomeExt, True);
   FHomeFirstChar := Ini.ReadBool(csEditorKey, csHomeFirstChar, False);
-{$IFNDEF DELPHI104_SYDNEY_UP}  // 10.4 无法支持光标行尾
   FCursorBeforeEOL := Ini.ReadBool(csEditorKey, csCursorBeforeEOL, False);
-{$ENDIF}
   FLeftLineWrap := Ini.ReadBool(csEditorKey, csLeftLineWrap, False);
   FRightLineWrap := Ini.ReadBool(csEditorKey, csRightLineWrap, False);
   FAutoBracket := Ini.ReadBool(csEditorKey, csAutoBracket, False);
@@ -3530,44 +3541,63 @@ end;
 
 procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject;
   ChangeType: TEditorChangeTypes);
+begin
+  if not Active or not FCursorBeforeEOL then
+    Exit;
+
+  if ((ctCurrLine in ChangeType) or (ctCurrCol in ChangeType)) then
+    SnapCursorToEol;
+end;
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+
+procedure TCnSrcEditorKey.EditorMouseUp(Editor: TEditorObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
+begin
+  if not Active or not FCursorBeforeEOL then
+    Exit;
+
+  SnapCursorToEol;
+end;
+
+{$ENDIF}
+
+procedure TCnSrcEditorKey.SnapCursorToEol;
 var
   Line: string;
   EditView: IOTAEditView;
   LineNo, CharIndex, Len: Integer;
 begin
-  if not Active or not FCursorBeforeEOL then
+  if FCursorMoving then
     Exit;
 
-  if ((ctCurrLine in ChangeType) or (ctCurrCol in ChangeType)) and not FCursorMoving then
+  // 获得当前编辑器光标位置，并判断是否超出行尾
+  if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
   begin
-    // 获得当前编辑器光标位置，并判断是否超出行尾
-    if CnNtaGetCurrLineText(Line, LineNo, CharIndex) then
-    begin
-      // 空行也强迫到行首    
+    // 空行也强迫到行首
 //    if Trim(Line) = '' then
 //      Exit;
 
-      // Line 分别是 Ansi/Utf8/Utf16
+    // Line 分别是 Ansi/Utf8/Utf16
 {$IFDEF UNICODE}
-      Len := CalcAnsiLengthFromWideString(PWideChar(Line));
+    Len := CalcAnsiLengthFromWideString(PWideChar(Line));
 {$ELSE}
-      Len := Length(Line);
+    Len := Length(Line);
 {$ENDIF}
 
-      EditView := CnOtaGetTopMostEditView;
-      CharIndex := EditView.CursorPos.Col - 1;  // 分别是 Ansi/Utf8/Ansi
+    EditView := CnOtaGetTopMostEditView;
+    CharIndex := EditView.CursorPos.Col - 1;  // 分别是 Ansi/Utf8/Ansi
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Len]);
+    CnDebugger.LogFmt('Cursor Before EOL: Col %d, Len %d.', [CharIndex, Len]);
 {$ENDIF}
-      if CharIndex > Len then
-      begin
-        try
-          FCursorMoving := True;
-          EditView.Buffer.EditPosition.MoveEOL;
-          EditView.Paint;
-        finally
-          FCursorMoving := False;
-        end;
+    if CharIndex > Len then
+    begin
+      try
+        FCursorMoving := True;
+        EditView.Buffer.EditPosition.MoveEOL;
+        EditView.Paint;
+      finally
+        FCursorMoving := False;
       end;
     end;
   end;
