@@ -195,7 +195,7 @@ implementation
 
 uses
   {$IFDEF DEBUG}CnDebug, {$ENDIF}
-  CnWizManager, CnWizDfmParser,
+  CnWizManager, CnWizDfmParser, CnMath,
   CnPrefixNewFrm, CnPrefixEditFrm, CnPrefixConfigFrm, CnPrefixCompFrm;
 
 const
@@ -1643,6 +1643,8 @@ var
   I, CLeft, CTop, SLeft, STop, MatchCount, MatchIndex: Integer;
   Tree: TCnDfmTree;
   Leaf: TCnDfmLeaf;
+  MinDistance, Distance: Integer;
+  MatchLeaves: TObjectList;
   GridOffset: TPoint;
 
   function GetComponentLeftTop(C: TComponent; var ALeft, ATop: Integer): Boolean;
@@ -1700,6 +1702,7 @@ begin
 
   Tree := nil;
   Stream := nil;
+  MatchLeaves := nil;
 
   try
     S := Clipboard.AsText;
@@ -1728,6 +1731,7 @@ begin
       [CLeft, CTop, S]);
 {$ENDIF}
 
+    MatchLeaves := TObjectList.Create(False);
     for I := 0 to Tree.Count - 1 do
     begin
       Leaf := Tree.Items[I];
@@ -1750,9 +1754,11 @@ begin
 {$ENDIF}
           if T = S then
           begin
-            // Caption 匹配，是它
-            Result := Leaf.Text;
-            Exit;
+            // Caption 匹配，先存起来
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('SearchClipboardGetNewName: ClassMatched, Caption Matched.');
+{$ENDIF}
+            MatchLeaves.Add(Leaf);
           end
           else
           begin
@@ -1762,22 +1768,28 @@ begin
 {$ENDIF}
             if T = S then
             begin
-              Result := Leaf.Text;
-              Exit;
+              // Text 匹配，也先存起来
+{$IFDEF DEBUG}
+              CnDebugger.LogMsg('SearchClipboardGetNewName: ClassMatched, Text Matched.');
+{$ENDIF}
+              MatchLeaves.Add(Leaf);
             end;
           end;
         end
-        else if (CLeft > 0) and (CTop > 0) then // 新组件无 Caption/Text 属性，以位置来判断
+        else if (CLeft > 0) and (CTop > 0) then // 如果新组件无 Caption/Text 属性，以位置来判断
         begin
           // 拿剪贴板当前组件的 Left 和 Top 属性，可能包括不可视的
+          // 但有些情况下，粘贴的新组件，其 Left Top 离原位置会有较大偏差，就找不着了
           SLeft := StrToIntDef(Leaf.PropertyValue['Left'], 0);
           STop := StrToIntDef(Leaf.PropertyValue['Top'], 0);
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('SearchClipboardGetNewName: Position Left %d Top %d', [SLeft, STop]);
 {$ENDIF}
-          if ((CLeft - SLeft = GridOffset.X) and (CTop - STop = GridOffset.Y))
-            or ((CLeft = SLeft) and (CTop = STop)) then // 同一个容器的偏移粘贴，或不同容器的同位置粘贴
+          if (((CLeft - SLeft) = GridOffset.X) and ((CTop - STop) = GridOffset.Y))
+            or ((CLeft = SLeft) and (CTop = STop)) then
           begin
+            // 同一个容器的偏移粘贴，会往右下角前进一格
+            // 或不同容器的同位置粘贴，位置相同
             Result := Leaf.Text;
             Exit;
           end;
@@ -1790,8 +1802,48 @@ begin
     begin
       Leaf := Tree.Items[MatchIndex];
       Result := Leaf.Text;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SearchClipboardGetNewName: One Class Match. Use %s', [Result]);
+{$ENDIF}
+    end
+    else if MatchLeaves.Count = 1 then // 如果多个类型匹配，但只有一个 Caption/Text 匹配，则就它
+    begin
+      Leaf := MatchLeaves[0] as TCnDfmLeaf;
+      Result := Leaf.Text;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('SearchClipboardGetNewName: One Caption/Text Match. Use %s', [Result]);
+{$ENDIF}
+    end
+    else if MatchLeaves.Count > 1 then
+    begin
+      // 如果多个 Caption/Text 匹配，则挨个找位置，选近的
+      MinDistance := MaxInt;
+      MatchIndex := -1;
+      for I := 0 to MatchLeaves.Count - 1 do
+      begin
+        Leaf := MatchLeaves[I] as TCnDfmLeaf;
+        SLeft := StrToIntDef(Leaf.PropertyValue['Left'], 0);
+        STop := StrToIntDef(Leaf.PropertyValue['Top'], 0);
+
+        Distance := CnIntAbs(CLeft - SLeft) + CnIntAbs(CTop - STop);
+        if Distance < MinDistance then
+        begin
+          MinDistance := Distance;
+          MatchIndex := I;
+        end;
+      end;
+
+      if MatchIndex >= 0 then // 有个最小的距离的
+      begin
+        Leaf := MatchLeaves[MatchIndex] as TCnDfmLeaf;
+        Result := Leaf.Text;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('SearchClipboardGetNewName: More Caption/Text Match. Use Min Distance %s', [Result]);
+{$ENDIF}
+      end;
     end;
   finally
+    MatchLeaves.Free;
     Stream.Free;
     Tree.Free;
   end;
