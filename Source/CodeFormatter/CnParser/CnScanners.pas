@@ -1582,6 +1582,7 @@ begin
     begin
       // 只要当前不是 Comment 就设置非第一个 Comment 的标记
       FFirstCommentInBlock := False;
+      FJustWroteBlockComment := False;
 
       if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
       begin
@@ -1827,6 +1828,7 @@ begin
     begin
       // 只要当前不是 Comment 就设置非第一个 Comment 的标记
       FFirstCommentInBlock := False;
+      FJustWroteBlockComment := False;
 
       if FPreviousIsComment then // 上一个是 Comment，记录这个到 上一个Comment的空行数
       begin
