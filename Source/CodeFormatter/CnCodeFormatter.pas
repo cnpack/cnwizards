@@ -96,6 +96,7 @@ type
     function ErrorTokenString: string;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank: Boolean;
       IsWriteln: Boolean; PrefixSpaces: Integer);
+    function CodeGenGetInIgnore(Sender: TObject): Boolean;
 
     // 区分当前的位置，必须配对使用
     procedure SpecifyElementType(Element: TCnPascalFormattingElementType);
@@ -520,6 +521,7 @@ begin
   FCodeGen := TCnCodeGenerator.Create;
   FCodeGen.CodeWrapMode := CnPascalCodeForRule.CodeWrapMode;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
+  FCodeGen.OnGetInIgnore := CodeGenGetInIgnore;
   FScanner := TScanner.Create(AStream, FCodeGen, ACompDirectiveMode);
 
   FOldElementTypes := TCnElementStack.Create;
@@ -6036,6 +6038,11 @@ begin
     end
   else
     inherited FormatCode(PreSpaceCount);
+end;
+
+function TCnAbstractCodeFormatter.CodeGenGetInIgnore(Sender: TObject): Boolean;
+begin
+  Result := CnPascalCodeForRule.UseIgnoreArea and FScanner.InIgnoreArea;
 end;
 
 procedure TCnAbstractCodeFormatter.CodeGenAfterWrite(Sender: TObject;
