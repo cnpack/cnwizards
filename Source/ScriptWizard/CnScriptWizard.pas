@@ -194,6 +194,7 @@ type
     procedure SetItemToControls(Item: TCnScriptItem);
     procedure GetItemFromControls(Item: TCnScriptItem);
     function CheckCurrentShortCutContinue: Boolean;
+    procedure InitTreeAndList;
   protected
     function GetHelpTopic: string; override;
   public
@@ -405,7 +406,7 @@ end;
 
 { TCnScriptWizardForm }
 
-procedure TCnScriptWizardForm.FormCreate(Sender: TObject);
+procedure TCnScriptWizardForm.InitTreeAndList;
 var
   Mode: TCnScriptMode;
   Node: TTreeNode;
@@ -414,12 +415,6 @@ var
   FormEditorNotifyType: TCnWizFormEditorNotifyType;
   AppEventType: TCnWizAppEventType;
 begin
-  inherited;
-  WizOptions.ResetToolbarWithLargeIcons(tlb1);
-
-  TempScripts := TCnScriptCollection.Create;
-  EnlargeListViewColumns(lvList);
-
   chktvMode.BeginUpdate;
   try
     chktvMode.Items.Clear;
@@ -432,7 +427,7 @@ begin
             for FileNotifyCode := Low(FileNotifyCode) to High(FileNotifyCode) do
               chktvMode.Items.AddChild(Node, GetEnumName(TypeInfo(TOTAFileNotification),
                 Ord(FileNotifyCode)));
-          end;  
+          end;
         smSourceEditorNotify:
           begin
             for SourceEditorNotifyType := Low(SourceEditorNotifyType) to High(SourceEditorNotifyType) do
@@ -461,6 +456,17 @@ begin
 {$IFDEF DELPHI120_ATHENS_UP}
   CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateList);
 {$ENDIF}
+end;
+
+procedure TCnScriptWizardForm.FormCreate(Sender: TObject);
+begin
+  inherited;
+  WizOptions.ResetToolbarWithLargeIcons(tlb1);
+
+  TempScripts := TCnScriptCollection.Create;
+  EnlargeListViewColumns(lvList);
+
+  InitTreeAndList;
 end;
 
 procedure TCnScriptWizardForm.FormClose(Sender: TObject;
