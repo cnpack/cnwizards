@@ -187,6 +187,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure hkShortCutExit(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormShow(Sender: TObject);
   private
     FUpdating: Boolean;
     procedure UpdateList(Sender: TObject);
@@ -466,7 +467,9 @@ begin
   TempScripts := TCnScriptCollection.Create;
   EnlargeListViewColumns(lvList);
 
+{$IFNDEF DELPHI120_ATHENS_UP}
   InitTreeAndList;
+{$ENDIF}
 end;
 
 procedure TCnScriptWizardForm.FormClose(Sender: TObject;
@@ -1361,6 +1364,13 @@ procedure TCnScriptWizardForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 begin
   CanClose := CheckCurrentShortCutContinue;
+end;
+
+procedure TCnScriptWizardForm.FormShow(Sender: TObject);
+begin
+{$IFDEF DELPHI120_ATHENS_UP}
+  InitTreeAndList;
+{$ENDIF}
 end;
 
 initialization
