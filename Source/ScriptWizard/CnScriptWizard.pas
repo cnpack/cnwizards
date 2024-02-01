@@ -713,6 +713,9 @@ begin
   chkExecConfirm.Checked := Item.Confirm;
 
   Node := chktvMode.Items.GetFirstNode;
+  if Node = nil then // 有可能未初始化
+    Exit;
+
   for Mode := Low(Mode) to High(Mode) do
   begin
     if Mode in Item.Mode then
@@ -749,6 +752,9 @@ begin
     else
       chktvMode.Checked[Node] := False;
     Node := Node.getNextSibling;
+
+    if Node = nil then
+      Exit;
   end;
 end;
 
