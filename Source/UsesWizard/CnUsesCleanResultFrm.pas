@@ -82,6 +82,7 @@ type
     procedure mniSameSelClick(Sender: TObject);
     procedure pmListPopup(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     List: TObjectList;
     FSelection: TTreeNode;
@@ -148,7 +149,9 @@ procedure TCnUsesCleanResultForm.InitList(AList: TObjectList);
 begin
   // 本过程需在 Create 后 Show 前调用
   List := AList;
+{$IFNDEF DELPHI120_ATHENS_UP}
   InitTree;
+{$ENDIF}
 end;
 
 procedure TCnUsesCleanResultForm.InitTree;
@@ -357,6 +360,13 @@ end;
 procedure TCnUsesCleanResultForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnUsesCleanResultForm.FormShow(Sender: TObject);
+begin
+{$IFDEF DELPHI120_ATHENS_UP}
+  InitTree;
+{$ENDIF}
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}
