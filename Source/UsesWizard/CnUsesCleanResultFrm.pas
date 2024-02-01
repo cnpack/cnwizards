@@ -85,6 +85,7 @@ type
   private
     List: TObjectList;
     FSelection: TTreeNode;
+    procedure InitTree;
   protected
     function GetHelpTopic: string; override;
   public
@@ -144,6 +145,13 @@ end;
 { TCnUsesCleanResultForm }
 
 procedure TCnUsesCleanResultForm.InitList(AList: TObjectList);
+begin
+  // 本过程需在 Create 后 Show 前调用
+  List := AList;
+  InitTree;
+end;
+
+procedure TCnUsesCleanResultForm.InitTree;
 var
   ProjectInfo: TCnProjectUsesInfo;
   ProjNode, UnitNode, IntfNode, ImplNode, ANode: TTreeNode;
@@ -167,7 +175,6 @@ var
   end;
 
 begin
-  List := AList;
   chktvResult.BeginUpdate;
   try
     chktvResult.Items.Clear;
