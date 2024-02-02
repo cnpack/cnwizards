@@ -719,8 +719,7 @@ begin
     Result := DstFile;
 end;
 
-function TCnWizOptions.GetAbsoluteUserFileName(
-  const FileName: string): string;
+function TCnWizOptions.GetAbsoluteUserFileName(const FileName: string): string;
 begin
   ForceDirectories(UserPath);
   Result := UserPath + FileName;

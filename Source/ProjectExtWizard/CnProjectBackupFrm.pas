@@ -586,10 +586,13 @@ begin
   FListViewWidthStr := Ini.ReadString(csBackupSection, csListViewWidth, '');
   SetListViewWidthString(lvFileView, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 
-  FCustomFiles.LoadFromFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
+  if FileExists(WizOptions.GetAbsoluteUserFileName(csProjBackupFile)) then
+  begin
+    FCustomFiles.LoadFromFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
 {$IFDEF DEBUG}
-  CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.LoadSettings Custom Files Count');
+    CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.LoadSettings Custom Files Count');
 {$ENDIF}
+  end;
 end;
 
 procedure TCnProjectBackupForm.SaveSettings(Ini: TCustomIniFile);
@@ -637,10 +640,15 @@ begin
   Ini.WriteString(csBackupSection, csListViewWidth,
     GetListViewWidthString(lvFileView, GetFactorFromSizeEnlarge(Enlarge)));
 
-  FCustomFiles.SaveToFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
+  if FCustomFiles.Count > 0 then
+  begin
+    FCustomFiles.SaveToFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
 {$IFDEF DEBUG}
-  CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.SaveSettings Custom Files Count');
+    CnDebugger.LogInteger(FCustomFiles.Count, 'TCnProjectBackupForm.SaveSettings Custom Files Count');
 {$ENDIF}
+  end
+  else
+    DeleteFile(WizOptions.GetAbsoluteUserFileName(csProjBackupFile));
 end;
 
 function TCnProjectBackupForm.GetHelpTopic: string;
