@@ -195,7 +195,7 @@ var
 
 implementation
 
-uses CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgXMLFiler;
+uses CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgFiler;
 
 {$R *.DFM}
 

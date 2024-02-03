@@ -35,7 +35,7 @@ uses
   CnMdiView in 'CnMdiView.pas' {CnMsgChild},
   VTHeaderPopup in 'VirtualTree\VTHeaderPopup.pas',
   VirtualTrees in 'VirtualTree\VirtualTrees.pas',
-  CnMsgXMLFiler in 'CnMsgXMLFiler.pas',
+  CnMsgFiler in 'CnMsgFiler.pas',
   CnFilterFrm in 'CnFilterFrm.pas' {CnSenderFilterFrm},
   CnViewOption in 'CnViewOption.pas' {CnViewerOptionsFrm},
   CnWatchFrm in 'CnWatchFrm.pas' {CnWatchForm},
