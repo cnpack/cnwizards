@@ -33,7 +33,7 @@ uses
   CnGetThread in 'CnGetThread.pas',
   CnViewCore in 'CnViewCore.pas',
   CnMdiView in 'CnMdiView.pas' {CnMsgChild},
-  CnMsgXMLFiler in 'CnMsgXMLFiler.pas',
+  CnMsgFiler in 'CnMsgFiler.pas',
   CnFilterFrm in 'CnFilterFrm.pas' {CnSenderFilterFrm},
   CnViewOption in 'CnViewOption.pas' {CnViewerOptionsFrm},
   CnWatchFrm in 'CnWatchFrm.pas' {CnWatchForm},

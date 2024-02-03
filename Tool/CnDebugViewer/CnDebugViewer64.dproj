@@ -153,7 +153,7 @@
         <DCCReference Include="CnMdiView.pas">
             <Form>CnMsgChild</Form>
         </DCCReference>
-        <DCCReference Include="CnMsgXMLFiler.pas"/>
+        <DCCReference Include="CnMsgFiler.pas"/>
         <DCCReference Include="CnFilterFrm.pas">
             <Form>CnSenderFilterFrm</Form>
         </DCCReference>
