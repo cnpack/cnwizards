@@ -765,6 +765,13 @@ begin
         AddBatchItemToView(FStore, 0, FStore.MsgCount - 1);
         RefreshTime(FStore);
       end
+      else if Ext = '.json' then // 是 CnDebugViewer 保存的 JSON 文件
+      begin
+        Filer := TCnMsgJSONFiler.Create;
+        FStore.LoadFromFile(Filer, FileName);
+        AddBatchItemToView(FStore, 0, FStore.MsgCount - 1);
+        RefreshTime(FStore);
+      end
       else if Ext = '.cdd' then // 是 CnDebug.pas 直接 Dump 出的文件
       begin
         DumpFile := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
@@ -801,7 +808,10 @@ begin
   begin
     Screen.Cursor := crHourGlass;
     try
-      Filer := TCnMsgXMLFiler.Create;
+      if LowerCase(_CnExtractFileExt(FileName)) = 'xml' then
+        Filer := TCnMsgXMLFiler.Create
+      else
+        Filer := TCnMsgJsonFiler.Create;
       FStore.SaveToFile(Filer, FileName);
     finally
       Screen.Cursor := crDefault;

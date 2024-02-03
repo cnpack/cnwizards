@@ -42,7 +42,7 @@ uses
 {$IFDEF COMPILER6_UP}
   Variants,
 {$ENDIF}
-  CnMsgClasses,
+  CnMsgClasses, CnJSON,
   OmniXMLPersistent, OmniXML,
 {$IFDEF USE_MSXML}
   OmniXML_MSXML,
@@ -51,6 +51,7 @@ uses
 
 type
   TCnMsgXMLFiler = class(TInterfacedObject, ICnMsgFiler)
+  {* 将数据流化到 XML 的实现类}
   private
     FXMLDoc: IXMLDocument;
     FRoot: IXMLElement;
@@ -66,6 +67,18 @@ type
     procedure WriteProperty(Instance: TPersistent; PropInfo: PPropInfo; Element: IXMLElement);
     procedure InternalWriteText(Root: IXMLElement; Name, Value: string);
     procedure Write(Instance: TPersistent; Root: IXMLElement);
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure LoadFromFile(Instance: TPersistent; const FileName: string);
+    procedure SaveToFile(Instance: TPersistent; const FileName: string);
+  end;
+
+  TCnMsgJSONFiler = class(TInterfacedObject, ICnMsgFiler)
+  {* 将数据流化到 JSON 的实现类}
+  private
+
   public
     constructor Create;
     destructor Destroy; override;
@@ -105,8 +118,10 @@ begin
 
   PropFormatValue := XMLRoot.GetAttribute(PROP_FORMAT);
 
-  for I := Low(TPropsFormat) to High(TPropsFormat) do begin
-    if SameText(PropFormatValue, PropFormatValues[I]) then begin
+  for I := Low(TPropsFormat) to High(TPropsFormat) do
+  begin
+    if SameText(PropFormatValue, PropFormatValues[I]) then
+    begin
       PropsFormat := I;
       Break;
     end;
@@ -123,7 +138,7 @@ begin
   Load(XMLDoc, XMLRoot, PropsFormat);
 end;
 
-{ TCnTreeXMLFiler }
+{ TCnMsgXMLFiler }
 
 constructor TCnMsgXMLFiler.Create;
 begin
@@ -554,6 +569,109 @@ begin
       tkInt64: WriteInt64Prop;
       // 省事，不处理 Class 类型的了
     end;
+  end;
+end;
+
+{ TCnMsgJSONFiler }
+
+constructor TCnMsgJSONFiler.Create;
+begin
+
+end;
+
+destructor TCnMsgJSONFiler.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnMsgJSONFiler.LoadFromFile(Instance: TPersistent;
+  const FileName: string);
+var
+  I: Integer;
+  Reader: TCnJSONReader;
+  Root, Obj: TCnJSONObject;
+  Val: TCnJSONValue;
+  Arr: TCnJSONArray;
+  AStore: TCnMsgStore;
+  AMsgItem: TCnMsgItem;
+  ATimeItem: TCnTimeItem;
+begin
+  if Instance is TCnMsgStore then
+  begin
+    Reader := TCnJSONReader.Create;
+    Root := Reader.FileToJSONObject(FileName);
+    Reader.Read(Instance, Root);
+
+    AStore := Instance as TCnMsgStore;
+    AStore.ClearMsgs;
+    AStore.ClearTimes;
+
+    Val := Root.ValueByName[CNMSG_NODENAME];
+    if (Val <> nil) and (Val is TCnJSONArray) then
+    begin
+      Arr := Val as TCnJSONArray;
+      for I := 0 to Arr.Count - 1 do
+      begin
+        AMsgItem := TCnMsgItem.Create;
+        Obj := Arr.Values[I] as TCnJSONObject;
+        Reader.Read(AMsgItem, Obj);
+        AStore.AddAMsgItem(AMsgItem);
+      end;
+    end;
+
+    Val := Root.ValueByName[CNTIME_NODENAME];
+    if (Val <> nil) and (Val is TCnJSONArray) then
+    begin
+      Arr := Val as TCnJSONArray;
+      for I := 0 to Arr.Count - 1 do
+      begin
+        ATimeItem := TCnTimeItem.Create;
+        Obj := Arr.Values[I] as TCnJSONObject;
+        Reader.Read(ATimeItem, Obj);
+        AStore.AddATimeItem(ATimeItem);
+      end;
+    end;
+  end;
+end;
+
+procedure TCnMsgJSONFiler.SaveToFile(Instance: TPersistent;
+  const FileName: string);
+var
+  I: Integer;
+  AStore: TCnMsgStore;
+  Writer: TCnJSONWriter;
+  Root, Obj: TCnJSONObject;
+  Arr: TCnJSONArray;
+begin
+  if Instance is TCnMsgStore then
+  begin
+    Writer := TCnJSONWriter.Create;
+
+    // 写 Store 本身
+    Root := TCnJSONObject.Create;
+    Writer.Write(Instance, Root);
+
+    // 写各个子项
+    AStore := Instance as TCnMsgStore;
+    Arr := Root.AddArray(CNMSG_NODENAME);
+    for I := 0 to AStore.MsgCount - 1 do
+    begin
+      Obj := TCnJSONObject.Create;
+      Writer.Write(AStore.Msgs[I], Obj);
+      Arr.AddValue(Obj);
+    end;
+
+    Arr := Root.AddArray(CNTIME_NODENAME);
+    for I := 0 to AStore.TimeCount - 1 do
+    begin
+      Obj := TCnJSONObject.Create;
+      Writer.Write(AStore.Times[I], Obj);
+      Arr.AddValue(Obj);
+    end;
+
+    TCnJSONWriter.JSONObjectToFile(Root, FileName);
+    Root.Free;
   end;
 end;
 

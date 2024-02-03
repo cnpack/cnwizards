@@ -611,6 +611,8 @@ begin
   else if (Action = actSwtClose) or (Action = actSwtCloseOther) or (Action = actSwtCloseAll) or
     (Action = actSwtAddToBlack) or (Action = actSwtAddToWhite) then
     (Action as TCustomAction).Enabled := tsSwitch.Tabs.Count > 0
+  else if (Action = actSave) or (Action = actClose) then
+    (Action as TCustomAction).Enabled := CurrentChild <> nil
   else if (Action = actViewTime) then
   begin
     (Action as TCustomAction).Enabled := CurrentChild <> nil;
