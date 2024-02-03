@@ -23,7 +23,7 @@
 <p class="text">&nbsp;</p>
 <p class="title" align="left">CnDebugViewer Introduction</p>
 
-<p class="text" align="left">CnDebugViewer can recieve the debug and timming information output from CnDebug.pas. Debug information is displayed in a tree in the main window. They can be filtered to display, and also can be saved to XML file and re-loaded. The snapshot of CnDebugViewer's main window is as below:</p>
+<p class="text" align="left">CnDebugViewer can recieve the debug and timming information output from CnDebug.pas. Debug information is displayed in a tree in the main window. They can be filtered to display, and also can be saved to XML or JSON file and re-loaded. The snapshot of CnDebugViewer's main window is as below:</p>
 <p class="text" align="center"><img src="cndebugviewer.png"></p>
 <p class="text" align="left">&nbsp;</p>
 <p class="text" align="left">When CnDebugViewer starting up, a share memory map will be created and initilized to a queue for debug information retrieving. And a thread will be launched to read the information output from CnDebug. Information will also be put to different windows by the sender's process id. The switching tab over statusbar shows the sender's exe file name and the process id. Clicking the tab, you can switch to corresponding sender.</p>
@@ -32,9 +32,9 @@
 <p class="title" align="left">Menu: File</p>
 <ul>
   <li><p class="text"><b>New Window</b>: Create a new, empty window. If a process output some debug information through CnDebug, it will be captured by this new, empty window if the read thread of CnDebugViewer is running.</li>
-  <li><p class="text"><b>Open</b>: Open and load a XML file or a CnDebug Dump file (*.cdd). It should be saved by CnDebugViewer before. Note: the read thread must stop.</li>
+  <li><p class="text"><b>Open</b>: Open and load a XML or JSON file or a CnDebug Dump file (*.cdd). It should be saved by CnDebugViewer before.</li>
   <li><p class="text"><b>Close Window</b>: Close current window. No hint to save the message.</li>
-  <li><p class="text"><b>Save</b>: Save the debug messages in current window to XML file. Note: Only debug information and bookmarks are saved. Timing result is not.</li>
+  <li><p class="text"><b>Save</b>: Save the debug messages in current window to XML or JSON file, inlucding debug information, bookmarks and timing results.</li>
   <li><p class="text"><b>Save MemDump</b>: Save the binary MemDump message in current window to file if selected Message item type is MemDump.</li>
   <li><p class="text"><b>Export</b>: Export the debug messages in current window to other file format, including TXT, CSV or HTM etc.</li>  	
   <li><p class="text"><b>Exit</b>: Exit CnDebugViewer.</li>

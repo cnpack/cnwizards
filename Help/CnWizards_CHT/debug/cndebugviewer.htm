@@ -23,7 +23,7 @@
 <p class="text">　</p>
 <p class="title" align="left">CnDebugViewer 功能簡介</p>
 
-<p class="text" align="left">CnDebugViewer 主要用來接收 CnDebug.pas 輸出的調試信息和計時信息。調試信息在主窗口中以樹狀顯示，可方便地根據各種條件過濾顯示，也可保存成 XML 文件並再次載入。CnDebugViewer 的主界面如圖所示：</p>
+<p class="text" align="left">CnDebugViewer 主要用來接收 CnDebug.pas 輸出的調試信息和計時信息。調試信息在主窗口中以樹狀顯示，可方便地根據各種條件過濾顯示，也可保存成 XML 或 JSON 文件並再次載入。CnDebugViewer 的主界面如圖所示：</p>
 <p class="text" align="center"><img src="cndebugviewer.png"></p>
 <p class="text" align="left">&nbsp;</p>
 <p class="text" align="left">CnDebugViewer 啟動時會初始化一片共享內存區域並設置好隊列讀寫標記。然後 CnDebugViewer 啟動一讀取線程，專門負責讀取從 CnDebug 的輸出，並根據發送端的進程 ID 開啟不同的子窗口顯示。最下面狀態欄之上是進程標籤切換頁，頁標題顯示了輸出進程的文件名和進程 ID。點擊不同的標籤可切換到不同的進程輸出窗口。</p>
@@ -32,9 +32,9 @@
 <p class="title" align="left">文件菜單</p>
 <ul>
   <li><p class="text"><b>新建窗口</b>：新建一空白窗口。如有新進程在通過 CnDebug 輸出調試信息並且 CnDebugViewer 讀取線程在運行，則此窗口將捕獲此進程的輸出信息。</li>
-  <li><p class="text"><b>打開</b>：打開一 CnDebugViewer 保存成的 XML 記錄文件或 CnDebug 的輸出文件（擴展名 *.cdd），注意此時 CnDebugViewer 的讀取線程必須未運行。</li>
+    <li><p class="text"><b>打開</b>：打開一 CnDebugViewer 保存成的 XML 或 JSON 記錄文件或 CnDebug 的輸出文件（擴展名 *.cdd）。</li>
   <li><p class="text"><b>關閉當前窗口</b>：關閉當前子窗口，子窗口的記錄不會提示保存。</li>
-  <li><p class="text"><b>保存記錄</b>：將當前子窗口中的調試信息保存成 XML 文件。注意此處只保存調試信息和書籤信息，並未保存計時結果。</li>
+  <li><p class="text"><b>保存記錄</b>：將當前子窗口中的調試信息保存成 XML 或 JSON 文件，內容包括調試信息、書籤信息、計時結果等。</li>
   <li><p class="text"><b>保存內存條目</b>：如果當前子窗口中選中的調試信息是 MemDump 型，此處將該條目的內存 Dump 的內容保存成文件。</li>
   <li><p class="text"><b>輸出</b>：將當前子窗口中的調試信息輸出成其他格式的文件，包括 TXT/CSV/HTM  等。</li>
   <li><p class="text"><b>退出</b>：退出 CnDebugViewer。</li>

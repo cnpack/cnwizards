@@ -23,7 +23,7 @@
 <p class="text">　</p>
 <p class="title" align="left">CnDebugViewer 功能简介</p>
 
-<p class="text" align="left">CnDebugViewer 主要用来接收 CnDebug.pas 输出的调试信息和计时信息。调试信息在主窗口中以树状显示，可方便地根据各种条件过滤显示，也可保存成 XML 文件并再次载入。CnDebugViewer 的主界面如图所示：</p>
+<p class="text" align="left">CnDebugViewer 主要用来接收 CnDebug.pas 输出的调试信息和计时信息。调试信息在主窗口中以树状显示，可方便地根据各种条件过滤显示，也可保存成 XML 或 JSON 文件并再次载入。CnDebugViewer 的主界面如图所示：</p>
 <p class="text" align="center"><img src="cndebugviewer.png"></p>
 <p class="text" align="left">&nbsp;</p>
 <p class="text" align="left">CnDebugViewer 启动时会初始化一片共享内存区域并设置好队列读写标记。然后 CnDebugViewer 启动一读取线程，专门负责读取从 CnDebug 的输出，并根据发送端的进程 ID 开启不同的子窗口显示。最下面状态栏之上是进程标签切换页，页标题显示了输出进程的文件名和进程 ID。点击不同的标签可切换到不同的进程输出窗口。</p>
@@ -32,9 +32,9 @@
 <p class="title" align="left">文件菜单</p>
 <ul>
   <li><p class="text"><b>新建窗口</b>：新建一空白窗口。如有新进程在通过 CnDebug 输出调试信息并且 CnDebugViewer 读取线程在运行，则此窗口将捕获此进程的输出信息。</li>
-  <li><p class="text"><b>打开</b>：打开一 CnDebugViewer 保存成的 XML 记录文件或 CnDebug 的输出文件（扩展名 *.cdd），注意此时 CnDebugViewer 的读取线程必须未运行。</li>
+  <li><p class="text"><b>打开</b>：打开一 CnDebugViewer 保存成的 XML 或 JSON 记录文件或 CnDebug 的输出文件（扩展名 *.cdd）。</li>
   <li><p class="text"><b>关闭当前窗口</b>：关闭当前子窗口，子窗口的记录不会提示保存。</li>
-  <li><p class="text"><b>保存记录</b>：将当前子窗口中的调试信息保存成 XML 文件。注意此处只保存调试信息和书签信息，并未保存计时结果。</li>
+  <li><p class="text"><b>保存记录</b>：将当前子窗口中的调试信息保存成 XML 或 JSON 文件，内容包括调试信息、书签信息、计时结果等。</li>
   <li><p class="text"><b>保存内存条目</b>：如果当前子窗口中选中的调试信息是 MemDump 型，此处将该条目的内存 Dump 的内容保存成文件。</li>
   <li><p class="text"><b>输出</b>：将当前子窗口中的调试信息输出成其他格式的文件，包括 TXT/CSV/HTM 等。</li>
   <li><p class="text"><b>退出</b>：退出 CnDebugViewer。</li>
