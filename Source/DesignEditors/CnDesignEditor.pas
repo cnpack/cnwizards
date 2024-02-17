@@ -29,7 +29,7 @@ unit CnDesignEditor;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2003.04.28 V1.1
-*               修改属性编辑器框架，使用PropertyMapper来动态管理属性编辑器，
+*               修改属性编辑器框架，使用 PropertyMapper 来动态管理属性编辑器，
 *               现在支持动态卸载了同时集合编辑器支持所有集合属性，且专家包的
 *               属性编辑器优先级最高。
 *           2003.03.22 V1.0
@@ -258,7 +258,7 @@ implementation
 {$IFDEF CNWIZARDS_DESIGNEDITOR}
 
 uses
-  {$IFDEF DEBUG}CnDebug, {$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF}
   CnPropEditorCustomizeFrm;
 
 const
@@ -324,9 +324,9 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF Debug}
-    CnDebugger.LogMsg('Loading settings: ' + IDStr);
-  {$ENDIF Debug}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('DesignEditorInfo Loading Settings: ' + IDStr);
+{$ENDIF}
     LoadSettings(Ini);
   finally
     Ini.Free;
@@ -339,9 +339,9 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF Debug}
-    CnDebugger.LogMsg('Saving settings: ' + IDStr);
-  {$ENDIF Debug}
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('DesignEditorInfo Saving Settings: ' + IDStr);
+{$ENDIF}
     SaveSettings(Ini);
   finally
     Ini.Free;
@@ -411,13 +411,13 @@ end;
 
 procedure TCnPropEditorInfo.CheckCustomProperties;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := FCustomProperties.Count - 1 downto 0 do
+  for I := FCustomProperties.Count - 1 downto 0 do
   begin
-    FCustomProperties[i] := Trim(FCustomProperties[i]);
-    if (FCustomProperties[i] = '') or (Pos('.', FCustomProperties[i]) <= 1) then
-      FCustomProperties.Delete(i);
+    FCustomProperties[I] := Trim(FCustomProperties[I]);
+    if (FCustomProperties[I] = '') or (Pos('.', FCustomProperties[I]) <= 1) then
+      FCustomProperties.Delete(I);
   end;
 end;
 
@@ -437,7 +437,7 @@ begin
       CheckCustomProperties;
       DoSaveSettings;
     end;
-  end;  
+  end;
 end;
 
 destructor TCnPropEditorInfo.Destroy;
@@ -473,13 +473,13 @@ end;
 
 procedure TCnCompEditorInfo.CheckCustomClasses;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := FCustomClasses.Count - 1 downto 0 do
+  for I := FCustomClasses.Count - 1 downto 0 do
   begin
-    FCustomClasses[i] := Trim(FCustomClasses[i]);
-    if FCustomClasses[i] = '' then
-      FCustomClasses.Delete(i);
+    FCustomClasses[I] := Trim(FCustomClasses[I]);
+    if FCustomClasses[I] = '' then
+      FCustomClasses.Delete(I);
   end;
 end;
 
@@ -565,11 +565,11 @@ procedure TCnDesignEditorMgr.RegisterCompEditor(
 var
   Info: TCnCompEditorInfo;
   IDStr: string;
-  i: Integer;
+  I: Integer;
 begin
   IDStr := GetClassIDStr(AEditor);
-  for i := 0 to CompEditorCount - 1 do
-    if SameText(CompEditors[i].IDStr, IDStr) then
+  for I := 0 to CompEditorCount - 1 do
+    if SameText(CompEditors[I].IDStr, IDStr) then
       Exit;
 
   Info := TCnCompEditorInfo.Create;
@@ -590,11 +590,11 @@ procedure TCnDesignEditorMgr.RegisterPropEditor(
 var
   Info: TCnPropEditorInfo;
   IDStr: string;
-  i: Integer;
+  I: Integer;
 begin
   IDStr := GetClassIDStr(AEditor);
-  for i := 0 to PropEditorCount - 1 do
-    if SameText(PropEditors[i].IDStr, IDStr) then
+  for I := 0 to PropEditorCount - 1 do
+    if SameText(PropEditors[I].IDStr, IDStr) then
       Exit;
 
   Info := TCnPropEditorInfo.Create;
@@ -610,7 +610,7 @@ end;
 
 procedure TCnDesignEditorMgr.Register;
 var
-  i, j, Idx: Integer;
+  I, J, Idx: Integer;
   AClass: TClass;
   AName, CName, PName: string;
   AInfo: PPropInfo;
@@ -619,26 +619,26 @@ begin
   UnRegister;
 
   FGroup := NewEditorGroup;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogInteger(FGroup, 'NewEditorGroup');
 {$ENDIF}
-  for i := 0 to PropEditorCount - 1 do
-    if PropEditors[i].Active then
+  for I := 0 to PropEditorCount - 1 do
+    if PropEditors[I].Active then
     begin
-      if Assigned(PropEditors[i].RegEditorProc) then
+      if Assigned(PropEditors[I].RegEditorProc) then
       begin
-      {$IFDEF Debug}
-        CnDebugger.LogMsg('Register PropEditor: ' + PropEditors[i].IDStr);
-      {$ENDIF}
-        PropEditors[i].RegEditorProc;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Register PropEditor: ' + PropEditors[I].IDStr);
+{$ENDIF}
+        PropEditors[I].RegEditorProc;
       end;
 
       // 注册自定义的属性
-      if Assigned(PropEditors[i].CustomRegProc) then
+      if Assigned(PropEditors[I].CustomRegProc) then
       begin
-        for j := 0 to PropEditors[i].CustomProperties.Count - 1 do
+        for J := 0 to PropEditors[I].CustomProperties.Count - 1 do
         begin
-          AName := Trim(PropEditors[i].CustomProperties[j]);
+          AName := Trim(PropEditors[I].CustomProperties[J]);
           Idx := Pos('.', AName);
           if Idx > 1 then
           begin
@@ -652,45 +652,47 @@ begin
                 Success := False;
                 AInfo := GetPropInfo(AClass, PName);
                 if (AInfo <> nil) and (AInfo.PropType^ <> nil) then
-                  PropEditors[i].CustomRegProc(AInfo.PropType^, AClass, PName, Success)
+                  PropEditors[I].CustomRegProc(AInfo.PropType^, AClass, PName, Success)
                 else
-                  PropEditors[i].CustomRegProc(nil, AClass, PName, Success);
-              {$IFDEF Debug}
-                CnDebugger.LogFmt('CustomRegister: %s.%s Succ: %s',
+                  PropEditors[I].CustomRegProc(nil, AClass, PName, Success);
+{$IFDEF DEBUG}
+                CnDebugger.LogFmt('PropEditor CustomRegister: %s.%s Succ: %s',
                   [CName, PName, BoolToStr(Success, True)]);
-              {$ENDIF}
+{$ENDIF}
               end
             end;
           end;
-        end;  
+        end;
       end;
     end;
 
-  for i := 0 to CompEditorCount - 1 do
-    if CompEditors[i].Active and Assigned(CompEditors[i].RegEditorProc) then
+  for I := 0 to CompEditorCount - 1 do
+  begin
+    if CompEditors[I].Active and Assigned(CompEditors[I].RegEditorProc) then
     begin
-    {$IFDEF Debug}
-      CnDebugger.LogMsg('Register CompEditor: ' + CompEditors[i].IDStr);
-    {$ENDIF}
-      CompEditors[i].RegEditorProc;
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Register CompEditor: ' + CompEditors[I].IDStr);
+{$ENDIF}
+      CompEditors[I].RegEditorProc;
 
-      for j := 0 to CompEditors[i].CustomClasses.Count - 1 do
+      for J := 0 to CompEditors[I].CustomClasses.Count - 1 do
       begin
-        AName := Trim(CompEditors[i].CustomClasses[j]);
+        AName := Trim(CompEditors[I].CustomClasses[J]);
         if AName <> '' then
         begin
           AClass := GetClass(AName);
           if AClass <> nil then
           begin
-            RegisterComponentEditor(TComponentClass(AClass), CompEditors[i].GetEditorClass);
-          {$IFDEF Debug}
-            CnDebugger.LogFmt('CustomRegister: %s Succ: %s',
+            RegisterComponentEditor(TComponentClass(AClass), CompEditors[I].GetEditorClass);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('ComponentEditor CustomRegister: %s Succ: %s',
               [AName, BoolToStr(Success, True)]);
-          {$ENDIF}
+{$ENDIF}
           end
         end;
       end;
     end;
+  end;
 
   // 为了避免反注册时把其它模块中的编辑器也反注册掉（一个可能的情况是 CodeRush
   // 注册的组件编辑器），此处建一个新组。这样虽然可能导致有多余的空组，不过对
@@ -723,13 +725,13 @@ end;
 
 procedure TCnDesignEditorMgr.LanguageChanged(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to PropEditorCount - 1 do
-    PropEditors[i].LanguageChanged(Sender);
+  for I := 0 to PropEditorCount - 1 do
+    PropEditors[I].LanguageChanged(Sender);
 
-  for i := 0 to CompEditorCount - 1 do
-    CompEditors[i].LanguageChanged(Sender);
+  for I := 0 to CompEditorCount - 1 do
+    CompEditors[I].LanguageChanged(Sender);
 end;
 
 //------------------------------------------------------------------------------
@@ -757,16 +759,18 @@ function TCnDesignEditorMgr.GetCompEditorByClass(
   AEditor: TComponentEditorClass): TCnCompEditorInfo;
 var
   IDStr: string;
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
   IDStr := GetClassIDStr(AEditor);
-  for i := 0 to CompEditorCount - 1 do
-    if SameText(CompEditors[i].IDStr, IDStr) then
+  for I := 0 to CompEditorCount - 1 do
+  begin
+    if SameText(CompEditors[I].IDStr, IDStr) then
     begin
-      Result := CompEditors[i];
+      Result := CompEditors[I];
       Exit;
     end;
+  end;
 end;
 
 function TCnDesignEditorMgr.GetCompEditorCount: Integer;
@@ -795,16 +799,18 @@ function TCnDesignEditorMgr.GetPropEditorByClass(
   AEditor: TPropertyEditorClass): TCnPropEditorInfo;
 var
   IDStr: string;
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
   IDStr := GetClassIDStr(AEditor);
-  for i := 0 to PropEditorCount - 1 do
-    if SameText(PropEditors[i].IDStr, IDStr) then
+  for I := 0 to PropEditorCount - 1 do
+  begin
+    if SameText(PropEditors[I].IDStr, IDStr) then
     begin
-      Result := PropEditors[i];
+      Result := PropEditors[I];
       Exit;
     end;
+  end;
 end;
 
 function TCnDesignEditorMgr.GetPropEditorCount: Integer;
@@ -829,11 +835,13 @@ var
   I: Integer;
 begin
   for I := 0 to CompEditorCount - 1 do
+  begin
     if FCompEditorList[I] = EditorInfo then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
@@ -843,11 +851,13 @@ var
   I: Integer;
 begin
   for I := 0 to PropEditorCount - 1 do
+  begin
     if FPropEditorList[I] = EditorInfo then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 

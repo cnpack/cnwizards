@@ -252,9 +252,9 @@ begin
       memEdit.Modified := False;
       tbtSep9.Visible := False;
       tbtCodeEditor.Visible := False;
-      case ShowModal of
-        mrOK: SetStrValue(memEdit.Text);
-      end;
+
+      if ShowModal = mrOK then
+        SetStrValue(memEdit.Text);
     finally
       Free;
     end;
@@ -317,6 +317,7 @@ begin
   Component := TComponent(GetComponent(0));
   if Trim(Designer.GetRoot.Name) <> '' then
     Ident := Ident + Designer.GetRoot.Name;
+
   if (GetComponent(0) is TComponent) and
     (Trim(TComponent(GetComponent(0)).Name) <> '') then
   begin
@@ -325,6 +326,7 @@ begin
     else
       Ident := TComponent(GetComponent(0)).Name;
   end;
+
   if (Trim(Ident) <> '') and (Trim(GetName) <> '') then
   begin
   {$IFDEF COMPILER10_UP}
@@ -398,6 +400,7 @@ begin
       else
         S := TComponent(GetComponent(0)).Name;
     end;
+
     if (Trim(S) <> '') and (Trim(GetName) <> '') then
       S := S + '.' + GetName
     else
@@ -406,6 +409,7 @@ begin
       Caption := S;
     Tmp := GetStrValue;
     Memos[0].Text := GetShortHint(Tmp);
+
 {$IFDEF DELPHI2009_UP}
     Images := nil;
     ImgIndex := 0;
@@ -416,6 +420,7 @@ begin
       Tmp := GetLongHint(Tmp)
     else
       Tmp := '';
+
     Index := AnsiPos('|', Tmp);
     if Index <> 0 then
     begin
@@ -424,6 +429,7 @@ begin
     end;
     Memos[1].Text := Tmp;
     tshImageIndex.TabVisible := Assigned(Images);
+
     if Assigned(Images) then
     begin
       lvImages.LargeImages := Images;
@@ -443,6 +449,7 @@ begin
       if Images.Count >= ImgIndex then
         lvImages.ItemIndex := ImgIndex;
     end;
+
     if ShowModal = mrOK then
     begin
       if Assigned(Images) and (lvImages.ItemIndex >= 0) then
@@ -463,10 +470,12 @@ begin
     if AnsiPos('|', Tmp) > 0 then
       Memos[1].Text := GetLongHint(Tmp);
     if ShowModal = mrOK then
+    begin
       if Trim(Memos[1].Text) <> '' then
         SetStrValue(Memos[0].Text + '|' + Memos[1].Text)
       else
         SetStrValue(Memos[0].Text);
+    end;
 {$ENDIF}
   finally
     Free;
@@ -512,10 +521,12 @@ begin
       else
         S := TComponent(GetComponent(0)).Name;
     end;
+
     if (Trim(S) <> '') and (Trim(GetName) <> '') then
       S := S + '.' + GetName
     else
       S := '';
+
     if S <> '' then
       Title := S;
     FileName := GetStrValue();
@@ -664,6 +675,7 @@ begin
     SFS := 'S'
   else
     SFS := '';
+
   if not CharsetToIdent(TFont(GetOrdValue).Charset, Charset) then
     Charset := IntToStr(TFont(GetOrdValue).Charset);
   Result := Format('%S,%D,[%S%S%S%S],%S,%S', [TFont(GetOrdValue).Name,
@@ -756,10 +768,12 @@ begin
   if Ctrl.Visible then
     Result := Result + 'Visible';
   if Ctrl.Tracking then
+  begin
     if Result <> '' then
       Result := Result + ',Tracking'
     else
       Result := 'Tracking';
+  end;
 
   Result := Format('%S (%D,%D)', [Result, Ctrl.Range, Ctrl.Position]);
 end;
