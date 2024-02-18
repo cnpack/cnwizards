@@ -3433,6 +3433,8 @@
   {$DEFINE OTA_DPKOPTION_SETVALUE_CORRUPT_BUG}
   // A OpenTools API Bug IOTAProjectOptions.SetOptionValue under 2009 or above:
   // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
+{$ELSE}
+  {$DEFINE ZLIB_STREAM_NOSIZE}      // 2007 及以下的 Zlib 的解压缩流不支持 Size 操作
 {$ENDIF}
 
 {$IFDEF BDS2009}
