@@ -429,11 +429,11 @@ end;
 function IsDelphi120AIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 50491; Build: 5718); // 12
+    (Major: 29; Minor: 0; Release: 51211; Build: 6493); // 12 Patch 1，注意文件换了
 var
   ReadFileVersion: TVersionNumber;
 begin
-  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
 end;
 
