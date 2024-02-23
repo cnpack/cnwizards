@@ -114,7 +114,7 @@ const
   csDefFlowControlBg = $FFCCCC;
   csDefaultHighlightBackgroundColor = $0066FFFF;
 
-  csDefaultCustomIdentifierBackground = clGray;
+  csDefaultCustomIdentifierBackground = $00E3EBEE;
   csDefaultCustomIdentifierForeground = clNavy;
 
   CN_LINE_STYLE_SMALL_DOT_STEP = 2;

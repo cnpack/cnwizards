@@ -129,14 +129,12 @@ type
     procedure btnSeparateLineSettingClick(Sender: TObject);
     procedure btnCustomIdentSettingClick(Sender: TObject);
   private
-    { Private declarations }
     AWizard: TCnSourceHighlight;
     procedure ResetToDefaultColor;
   protected
     function GetHelpTopic: string; override;
-    procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
+
   end;
 
 function ShowSourceHighlightForm(Wizard: TCnSourceHighlight): Boolean;
@@ -322,17 +320,6 @@ end;
 function TCnSourceHighlightForm.GetHelpTopic: string;
 begin
   Result := 'CnSourceHighlight';
-end;
-
-procedure TCnSourceHighlightForm.DoLanguageChanged(Sender: TObject);
-begin
-  if (CnLanguageManager.LanguageStorage <> nil) and
-    (CnLanguageManager.LanguageStorage.CurrentLanguage <> nil) then
-  begin
-    lblCurTokenFg.Caption := lbl3.Caption;
-    lblCurTokenBg.Caption := lbl4.Caption;
-    lblCurTokenBd.Caption := lbl5.Caption;
-  end;
 end;
 
 procedure TCnSourceHighlightForm.btnLineSettingClick(Sender: TObject);
