@@ -172,7 +172,7 @@ uses
   // 以下单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DeskForm, DeskUtil;
 
-{$R *.dfm}
+{$R *.DFM}
 
 type
   TIdeDockManager = class(TSingletonInterfacedObject, IIdeDockManager)

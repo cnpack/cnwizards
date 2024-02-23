@@ -105,7 +105,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNFEEDREADERWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 function ShowCnFeedWizardForm(Wizard: TCnFeedReaderWizard): Boolean;
 begin

@@ -23,7 +23,7 @@ var
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
   SysUtils, StrUtils, Graphics, FastCode;

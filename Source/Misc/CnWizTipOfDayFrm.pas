@@ -83,7 +83,7 @@ implementation
 
 uses CnWizConsts, CnWizOptions, CnCommon;
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   csTipItem = 'TipItems';

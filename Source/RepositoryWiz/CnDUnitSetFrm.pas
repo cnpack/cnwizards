@@ -77,7 +77,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNDUNITWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TCnDUnitSetForm }
 

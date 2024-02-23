@@ -74,7 +74,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNEXPLORERWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
   ShellAPI, ShlObj;

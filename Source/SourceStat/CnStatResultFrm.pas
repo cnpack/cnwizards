@@ -217,7 +217,7 @@ uses
  {$ENDIF}
   CnStatFrm, CnWizShareImages, CnWizOptions;
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   ResultMargin: Integer = 10;

@@ -231,7 +231,7 @@ implementation
 
 {$IFDEF CNWIZARDS_DESIGNEDITOR}
 
-{$R *.dfm}
+{$R *.DFM}
 
 type
   TImageListAccess = class(TImageList);

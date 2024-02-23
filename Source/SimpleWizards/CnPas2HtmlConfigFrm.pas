@@ -144,7 +144,7 @@ implementation
 uses
   CnWizCompilerConst, CnEditControlWrapper, CnPas2HtmlWizard;
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TCnPas2HtmlConfigForm }
 

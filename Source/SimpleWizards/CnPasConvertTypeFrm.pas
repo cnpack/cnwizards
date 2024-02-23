@@ -95,7 +95,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 function TCnPasConvertTypeForm.GetConvertType: TCnPasConvertType;
 begin

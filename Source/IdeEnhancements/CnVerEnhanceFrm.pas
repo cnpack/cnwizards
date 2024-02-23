@@ -75,7 +75,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNVERENHANCEWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 procedure TCnVerEnhanceForm.btnHelpClick(Sender: TObject);
 begin

@@ -150,7 +150,7 @@ procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueRep
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
   CnWizDebuggerNotifier, CnDataSetVisualizer {$IFDEF DEBUG}, CnDebug {$ENDIF};

@@ -450,7 +450,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNFORMENHANCEWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
 {$IFDEF DEBUG}

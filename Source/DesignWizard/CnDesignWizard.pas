@@ -259,7 +259,7 @@ uses
   CnDesignEditorConsts, CnPrefixExecuteFrm, CnGraphUtils, CnScriptFrm
   {$IFDEF SUPPORT_FMX} , CnFmxUtils {$ENDIF};
 
-{$R *.dfm}
+{$R *.DFM}
 
 resourcestring
   SOptionDisplayGrid = 'DisplayGrid';

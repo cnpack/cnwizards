@@ -153,7 +153,7 @@ const
 var
   CnPas2HtmlForm: TCnPas2HtmlForm = nil;
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TCnPas2HtmlWizard }
 

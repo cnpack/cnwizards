@@ -157,7 +157,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNFORMENHANCEWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   csSeparatorCaption = '-';

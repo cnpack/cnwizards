@@ -88,7 +88,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 { TCnEditorInsertTime }
 

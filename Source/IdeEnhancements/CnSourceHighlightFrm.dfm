@@ -201,7 +201,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
       Width = 93
       Height = 21
       Anchors = [akTop, akRight]
-      Caption = 'Identifier Se&ttings'
+      Caption = 'Identi&fier Settings'
       TabOrder = 8
       OnClick = btnCustomIdentSettingClick
     end
@@ -388,7 +388,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object chkDrawLine: TCheckBox
       Left = 8
       Top = 194
-      Width = 249
+      Width = 273
       Height = 17
       Caption = 'Enable Structure Lines.'
       TabOrder = 11
@@ -434,7 +434,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object chkSeparateLine: TCheckBox
       Left = 8
       Top = 214
-      Width = 249
+      Width = 273
       Height = 17
       Caption = 'Enable Separate Lines between Functions.'
       TabOrder = 13
@@ -480,7 +480,7 @@ inherited CnSourceHighlightForm: TCnSourceHighlightForm
     object chkCustomIdent: TCheckBox
       Left = 8
       Top = 174
-      Width = 249
+      Width = 273
       Height = 17
       Caption = 'Enable Highlight Custom Identifiers.'
       TabOrder = 9

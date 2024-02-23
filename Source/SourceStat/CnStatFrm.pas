@@ -82,7 +82,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSTATWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 function TCnStatForm.GetStatStyle: TStatStyle;
 begin

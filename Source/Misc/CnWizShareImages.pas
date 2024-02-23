@@ -141,7 +141,7 @@ uses
   CnDebug;
 {$ENDIF}
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   MaskColor = clBtnFace;

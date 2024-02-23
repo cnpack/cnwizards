@@ -127,7 +127,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNFILESSNAPSHOTWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 function AddFilesSnapshot(Names, Files: TStrings): string;
 begin

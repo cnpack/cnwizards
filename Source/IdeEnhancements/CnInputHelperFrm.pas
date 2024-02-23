@@ -196,7 +196,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   csCnKeywordStyles: array[TCnKeywordStyle] of PString = (

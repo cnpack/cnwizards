@@ -141,7 +141,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNPROJECTEXTWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 uses
   {$IFDEF COMPILER6_UP}Variants, {$ENDIF} CnWizUtils, CnDebug, CnWizOptions, Math;

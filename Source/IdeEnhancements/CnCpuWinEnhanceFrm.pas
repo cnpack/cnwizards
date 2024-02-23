@@ -87,7 +87,7 @@ implementation
 
 {$IFNDEF BDS}
 
-{$R *.dfm}
+{$R *.DFM}
 
 function ShowCpuWinEnhanceForm(var CopyForm: TCopyFrom; var CopyTo: TCopyTo;
   var CopyLineCount: Integer; var SettingToAll: Boolean): Boolean;

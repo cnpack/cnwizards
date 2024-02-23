@@ -64,7 +64,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNEXPLORERWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 {$ENDIF CNWIZARDS_CNEXPLORERWIZARD}
 end.

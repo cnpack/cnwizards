@@ -75,7 +75,7 @@ type
 
 implementation
 
-{$R *.dfm}
+{$R *.DFM}
 
 type
   ICnFrameFormHelper = interface

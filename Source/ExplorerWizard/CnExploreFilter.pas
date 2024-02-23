@@ -94,7 +94,7 @@ implementation
 uses
   CnExploreFilterEditor, CnWizOptions, CnWizUtils;
 
-{$R *.dfm}
+{$R *.DFM}
 
 // 创建默认的文件类型过滤器
 procedure CreateDefaultFilter(lv: TListView);

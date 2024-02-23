@@ -132,7 +132,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
-{$R *.dfm}
+{$R *.DFM}
 
 var
   InternalIndentMode: TCnIndentMode = imInsertToHead;

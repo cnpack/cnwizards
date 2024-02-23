@@ -275,7 +275,7 @@ uses
   CnCommon, CnIni, CnWizUtils, CnWizIdeUtils, CnWizOptions, CnWizShareImages,
   CnExploreDirectory, CnExploreFilter;
 
-{$R *.dfm}
+{$R *.DFM}
 
 const
   csCnExploreForm = 'CnExploreForm';
