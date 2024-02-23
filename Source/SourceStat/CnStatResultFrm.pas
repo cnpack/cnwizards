@@ -638,7 +638,7 @@ begin
         if FSaveMode = smTXT then
         begin
           AList.Add(Format(SCnStatExpTitle, [DateTimeToStr(Date)]));
-          AList.Add(SCnStatExpSeperator);
+          AList.Add(SCnStatExpSeparator);
         end
         else if FSaveMode = smCSV then
         begin
@@ -931,7 +931,7 @@ begin
     AList.Add(s + Format(SCnStatExpFileCodeLines, [IntToStrSp(PRec^.CodeLines)]));
     AList.Add(s + Format(SCnStatExpFileCommentLines, [IntToStrSp(PRec^.CommentLines)]));
     AList.Add(s + Format(SCnStatExpFileCommentBlocks, [IntToStrSp(PRec^.CommentBlocks)]));
-    AList.Add(SCnStatExpSeperator);
+    AList.Add(SCnStatExpSeparator);
   end
   else
   begin
@@ -992,7 +992,7 @@ begin
         if FSaveMode = smTXT then
         begin
           AList.Add(Format(SCnStatExpTitle, [DateTimeToStr(Date)]));
-          AList.Add(SCnStatExpSeperator);
+          AList.Add(SCnStatExpSeparator);
         end
         else if FSaveMode = smCSV then
         begin
@@ -1147,7 +1147,7 @@ begin
   try
     AList := TStringList.Create;
     AList.Add(Format(SCnStatExpTitle, [DateTimeToStr(Date)]));
-    AList.Add(SCnStatExpSeperator);
+    AList.Add(SCnStatExpSeparator);
     CombinedFileStatStr(TreeView.Selected, AList);
     ClipBoard.AsText := AList.Text;
   finally

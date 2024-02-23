@@ -673,7 +673,7 @@ begin
   TranslateStr(SCnStatExpFileCodeLines, 'SCnStatExpFileCodeLines');
   TranslateStr(SCnStatExpFileCommentLines, 'SCnStatExpFileCommentLines');
   TranslateStr(SCnStatExpFileCommentBlocks, 'SCnStatExpFileCommentBlocks');
-  TranslateStr(SCnStatExpSeperator, 'SCnStatExpSeperator');
+  TranslateStr(SCnStatExpSeparator, 'SCnStatExpSeparator');
 
   TranslateStr(SCnStatExpCSVTitleFmt, 'SCnStatExpCSVTitleFmt');
   TranslateStr(SCnStatExpCSVLineFmt, 'SCnStatExpCSVLineFmt');

@@ -1001,7 +1001,7 @@ var
   SCnStatExpFileCodeLines: string = 'Code Lines: %s';
   SCnStatExpFileCommentLines: string = 'Comment Lines: %s';
   SCnStatExpFileCommentBlocks: string = 'Comment Blocks: %s';
-  SCnStatExpSeperator: string = '' + #13#10 + '--------------------------' + #13#10 + ';';
+  SCnStatExpSeparator: string = '' + #13#10 + '--------------------------' + #13#10 + ';';
   SCnStatExpCSVTitleFmt: string = '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s';
   SCnStatExpCSVLineFmt: string = '%s%s%s%s%d%s%d%s%d%s%d%s%d%s%d%s%d%s%d%s%d';
   SCnStatExpCSVProject: string = 'Project Information';
