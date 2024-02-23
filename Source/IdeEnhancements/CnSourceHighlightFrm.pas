@@ -114,6 +114,8 @@ type
     chkCompDirective: TCheckBox;
     shpCompDirective: TShape;
     chkShowLinePosAtGutter: TCheckBox;
+    chkCustomIdent: TCheckBox;
+    btnCustomIdentSetting: TButton;
     procedure UpdateControls(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure shpBracketMouseDown(Sender: TObject; Button: TMouseButton;
@@ -125,6 +127,7 @@ type
     procedure mniExportClick(Sender: TObject);
     procedure mniImportClick(Sender: TObject);
     procedure btnSeparateLineSettingClick(Sender: TObject);
+    procedure btnCustomIdentSettingClick(Sender: TObject);
   private
     { Private declarations }
     AWizard: TCnSourceHighlight;
@@ -142,10 +145,10 @@ function ShowSourceHighlightForm(Wizard: TCnSourceHighlight): Boolean;
 
 implementation
 
-uses
-  CnHighlightLineFrm, CnHighlightSeparateLineFrm;
-
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
+
+uses
+  CnHighlightLineFrm, CnHighlightSeparateLineFrm, CnHighlightCustomIdentFrm;
 
 {$R *.DFM}
 
@@ -183,6 +186,7 @@ begin
     shpFlowControl.Brush.Color := Wizard.FlowStatementBackground;
     chkCompDirective.Checked := Wizard.HighlightCompDirective;
     shpCompDirective.Brush.Color := Wizard.CompDirectiveBackground;
+    chkCustomIdent.Checked := Wizard.HighlightCustomIdentifier;
 
     rgMatchRange.ItemIndex := Integer(Wizard.BlockHighlightRange);
     rgMatchDelay.ItemIndex := Integer(Wizard.BlockHighlightStyle);
@@ -227,6 +231,7 @@ begin
       Wizard.FlowStatementBackground := shpFlowControl.Brush.Color;
       Wizard.HighlightCompDirective := chkCompDirective.Checked;
       Wizard.CompDirectiveBackground := shpCompDirective.Brush.Color;
+      Wizard.HighlightCustomIdentifier := chkCustomIdent.Checked;
 
       Wizard.BlockHighlightRange := TBlockHighlightRange(rgMatchRange.ItemIndex);
       Wizard.BlockHighlightStyle := TBlockHighlightStyle(rgMatchDelay.ItemIndex);
@@ -479,6 +484,28 @@ begin
     finally
       Ini.Free;
     end;
+  end;
+end;
+
+procedure TCnSourceHighlightForm.btnCustomIdentSettingClick(
+  Sender: TObject);
+begin
+  with TCnHighlightCustomIdentForm.Create(Self) do
+  begin
+    shpCustomFg.Brush.Color := AWizard.CustomIdentifierForeground;
+    shpCustomBg.Brush.Color := AWizard.CustomIdentifierBackground;
+    LoadFromStringList(AWizard.CustomIdentifiers);
+
+    if ShowModal = mrOK then
+    begin
+      AWizard.CustomIdentifierForeground := shpCustomFg.Brush.Color;
+      AWizard.CustomIdentifierBackground := shpCustomBg.Brush.Color;
+      SaveToStringList(AWizard.CustomIdentifiers);
+
+      AWizard.DoSaveSettings;
+      AWizard.RepaintEditors;
+    end;
+    Free;
   end;
 end;
 

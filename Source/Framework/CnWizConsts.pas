@@ -1634,6 +1634,8 @@ var
   // CnSourceHighlight
   SCnSourceHighlightWizardName: string = 'Source Highlight Enhancements';
   SCnSourceHighlightWizardComment: string = 'Bracket Match & Structure Highlight';
+  SCnSourceHighlightCustomIdentHint: string = 'Enter an Identifier:';
+  SCnSourceHighlightCustomIdentConfirm: string = 'Sure to Delete Selected Identifier?';
 
   // CnIdeBRWizard
   SCnIdeBRWizardMenuCaption: string = 'IDE Config Backup&/Restore...';

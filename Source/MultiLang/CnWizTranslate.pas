@@ -1302,6 +1302,8 @@ begin
   // CnSourceHighlight
   TranslateStr(SCnSourceHighlightWizardName, 'SCnSourceHighlightWizardName');
   TranslateStr(SCnSourceHighlightWizardComment, 'SCnSourceHighlightWizardComment');
+  TranslateStr(SCnSourceHighlightCustomIdentHint, 'SCnSourceHighlightCustomIdentHint');
+  TranslateStr(SCnSourceHighlightCustomIdentConfirm, 'SCnSourceHighlightCustomIdentConfirm');
 
   // CnIdeBRWizard
   TranslateStr(SCnIdeBRWizardMenuCaption, 'SCnIdeBRWizardMenuCaption');

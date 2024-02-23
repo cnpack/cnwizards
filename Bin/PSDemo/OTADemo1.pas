@@ -35,16 +35,16 @@ end;
 
 procedure ProcessProject(Project: IOTAProject);
 var
-  i: Integer;
+  I: Integer;
   FileName: string;
 begin
   if Project = nil then Exit;
 
   ProcessFile(Project.GetFileName);        // 处理工程文件自身
 
-  for i := 0 to Project.GetModuleCount - 1 do
+  for I := 0 to Project.GetModuleCount - 1 do
   begin
-    FileName := Project.GetModule(i).GetFileName;
+    FileName := Project.GetModule(I).GetFileName;
     if IsSourceModule(FileName) then
       ProcessFile(FileName);
   end;
@@ -52,27 +52,27 @@ end;
 
 procedure ProcessProjectGroup(ProjectGroup: IOTAProjectGroup);
 var
-  i: Integer;
+  I: Integer;
 begin
   if ProjectGroup = nil then Exit;
 
-  for i := 0 to ProjectGroup.GetProjectCount - 1 do
+  for I := 0 to ProjectGroup.GetProjectCount - 1 do
   begin
-    ProcessProject(ProjectGroup.GetProject(i));
+    ProcessProject(ProjectGroup.GetProject(I));
   end;
 end;
 
 procedure ProcessOpenUnits;
 var
   iModuleServices: IOTAModuleServices;
-  i: Integer;
+  I: Integer;
   FileName: string;
 begin
   iModuleServices := IOTAModuleServices(BorlandIDEServices);
 
-  for i := 0 to iModuleServices.GetModuleCount - 1 do
+  for I := 0 to iModuleServices.GetModuleCount - 1 do
   begin
-    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(i), True);
+    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I), True);
     ProcessFile(FileName);
   end;
 end;
