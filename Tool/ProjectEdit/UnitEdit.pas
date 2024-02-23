@@ -100,6 +100,7 @@ type
     edtCVBpkAdd1: TEdit;
     btnCVBpkAdd1: TButton;
     lblCVBpkAdd1: TLabel;
+    lbl2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure btnCWBrowseClick(Sender: TObject);
     procedure btnCWDprAddClick(Sender: TObject);
@@ -311,11 +312,11 @@ begin
         begin // 挨个插入
           if IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            PutToList(L, I + FBefores.Count - 1, S + #9 + FAdds[K]);
+            PutToList(L, I + FBefores.Count - 1, S + #9 + Trim(FAdds[K]));
           end
           else if not IsTab and (Length(FAdds[K]) > 0) and (FAdds[K][1] = ' ') then
           begin
-            PutToList(L, I + FBefores.Count - 1, S + '    ' + FAdds[K]); // 没法判断几个空格，只能先用四个代替
+            PutToList(L, I + FBefores.Count - 1, S + '    ' + Trim(FAdds[K])); // 没法判断几个空格，只能先用四个代替
           end
           else
             PutToList(L, I + FBefores.Count - 1, S + FAdds[K]);

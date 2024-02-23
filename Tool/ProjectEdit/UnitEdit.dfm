@@ -118,6 +118,16 @@ object FormProjectEdit: TFormProjectEdit
         Height = 12
         Caption = '下面增加'
       end
+      object lbl2: TLabel
+        Left = 736
+        Top = 208
+        Width = 96
+        Height = 72
+        Caption = 
+          '注意：新内容中某行如需一级缩进，行首增加一空格即可，会自动判断并' +
+          '替换为固定四个空格或一个Tab'
+        WordWrap = True
+      end
       object edtCWRootDir: TEdit
         Left = 144
         Top = 12
@@ -448,9 +458,9 @@ object FormProjectEdit: TFormProjectEdit
         Height = 20
         TabOrder = 11
         Text = 
-          '<FILE FILENAME="..\..\Source\Crypto\CnNative.pas" FORMNAME="' +
-          '" UNITNAME="CnNative" CONTAINERID="PascalCompiler" DESIGNCLA' +
-          'SS="" LOCALCOMMAND=""/>'
+          '<FILE FILENAME="..\..\Source\Crypto\CnNative.pas" FORMNAME="" UN' +
+          'ITNAME="CnNative" CONTAINERID="PascalCompiler" DESIGNCLASS="" LO' +
+          'CALCOMMAND=""/>'
       end
       object edtCVBpkAdd1: TEdit
         Left = 144
