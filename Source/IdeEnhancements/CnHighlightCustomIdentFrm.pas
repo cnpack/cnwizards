@@ -69,8 +69,11 @@ type
     procedure actDeleteExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
     procedure lvIdentsDblClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
 
+  protected
+    function GetHelpTopic: string; override;
   public
     procedure LoadFromStringList(List: TStringList);
     procedure SaveToStringList(List: TStringList);
@@ -179,6 +182,16 @@ begin
     S := CnWizInputBox(SCnInformation, SCnSourceHighlightCustomIdentHint, S);
     lvIdents.Selected.SubItems[0] := Trim(S);
   end;
+end;
+
+function TCnHighlightCustomIdentForm.GetHelpTopic: string;
+begin
+  Result := 'CnSourceHighlight';
+end;
+
+procedure TCnHighlightCustomIdentForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}

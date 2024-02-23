@@ -5,14 +5,8 @@ inherited CnHighlightCustomIdentForm: TCnHighlightCustomIdentForm
   Caption = 'Custom Highlight Identifiers Settings'
   ClientHeight = 341
   ClientWidth = 418
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
   Font.Name = 'MS Sans Serif'
-  Font.Style = []
   OldCreateOrder = False
-  Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
@@ -42,6 +36,7 @@ inherited CnHighlightCustomIdentForm: TCnHighlightCustomIdentForm
     Height = 21
     Caption = '&Help'
     TabOrder = 2
+    OnClick = btnHelpClick
   end
   object grpCustom: TGroupBox
     Left = 8
