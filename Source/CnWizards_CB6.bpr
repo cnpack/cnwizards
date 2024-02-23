@@ -82,7 +82,7 @@
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnSourceHighlight.obj 
       ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
-      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnInputSymbolList.obj 
+      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnHighlightCustomIdentFrm.obj ..\Dcu\CnInputSymbolList.obj 
       ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
       ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
       ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnSrcEditorWebSearch.obj 
@@ -152,6 +152,7 @@
       IdeEnhancements\CnSourceHighlightFrm.dfm 
       IdeEnhancements\CnHighlightLineFrm.dfm 
       IdeEnhancements\CnHighlightSeparateLineFrm.dfm 
+      IdeEnhancements\CnHighlightCustomIdentFrm.dfm 
       IdeEnhancements\CnInputHelperEditFrm.dfm 
       IdeEnhancements\CnInputHelperFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
@@ -383,6 +384,7 @@
       <FILE FILENAME="IdeEnhancements\CnSourceHighlightFrm.pas" FORMNAME="CnSourceHighlightForm" UNITNAME="CnSourceHighlightFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnHighlightLineFrm.pas" FORMNAME="CnHighlightLineForm" UNITNAME="CnHighlightLineFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnHighlightSeparateLineFrm.pas" FORMNAME="CnHighlightSeparateLineForm" UNITNAME="CnHighlightSeparateLineFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="IdeEnhancements\CnHighlightCustomIdentFrm.pas" FORMNAME="CnHighlightCustomIdentForm" UNITNAME="CnHighlightCustomIdentFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputSymbolList.pas" FORMNAME="" UNITNAME="CnInputSymbolList.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputHelper.pas" FORMNAME="" UNITNAME="CnInputHelper.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnInputHelperEditFrm.pas" FORMNAME="CnInputHelperEditForm" UNITNAME="CnInputHelperEditFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -85,6 +85,7 @@ USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRena
 USEFORMNS("IdeEnhancements\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
 USEFORMNS("IdeEnhancements\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);
 USEFORMNS("IdeEnhancements\CnHighlightSeparateLineFrm.pas", Cnhighlightseparatelinefrm, CnHighlightSeparateLineForm);
+USEFORMNS("IdeEnhancements\CnHighlightCustomIdentFrm.pas", Cnhighlightcustomidentfrm, CnHighlightCustomIdentForm);
 USEFORMNS("IdeEnhancements\CnInputHelperEditFrm.pas", Cninputhelpereditfrm, CnInputHelperEditForm);
 USEFORMNS("IdeEnhancements\CnInputHelperFrm.pas", Cninputhelperfrm, CnInputHelperForm);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorWebSearch.pas", Cnsrceditorwebsearch, CnSrcEditorWebSearchForm);
