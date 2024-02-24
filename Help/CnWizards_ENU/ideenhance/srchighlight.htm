@@ -82,6 +82,30 @@ Brackets ( ), [ ], { } are supported. But { } only valid in C/C++. Code Structur
 <p class="text"><b>Enable Highlight Conditional Compiler Directive at Cursor.</b>: Whether Enable Highlight Background for Matched Conditional Compiler Directive(Preprocessor) in Pascal and C/C++, including {$IFDEF/IFNDEF/IF} {$ELSE} {$ENDIF/IFEND} in Pascal and #if/ifdef/ifndef #else/#elif #endif in C/C++.</p>
   </li>
   <li>
+<p class="text"><b>Enable Highlight Custom Identifiers.</b>: To accommodate the user's custom highlighting needs, this option allows the user to specify identifiers that require additional highlighting.</p>
+  </li>
+    <li>
+<p class="text"><b>Identifier Settings</b>: Settings for custom identifiers. Click to open the dialog box as shown below:</p>
+<p align="center" class="text"><img src="srchighlightcustomidentconf.png"></p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>Custom Highlight Identifiers</b>: List the identifiers in the source code that need to be highlighted. Pascal source code is case-insensitive, while C/C++ source code is case-sensitive. Checking "Bold" will force the identifier to be highlighted in bold.</p>
+  </li>
+  <li>
+<p class="text"><b>Foreground</b>: The text color used for highlighting.</p>
+  </li>
+  <li>
+<p class="text"><b>Background</b>: The background color used for highlighting.</p>
+  </li>
+  <li>
+<p class="text"><b>Add an Identifier</b>Click to add a new identifier that needs to be highlighted. Note that it must be a valid identifier or keyword.</p>
+  </li>
+  <li>
+<p class="text"><b>Delete Selected Identifier</b>Click to delete the selected highlighted identifier.</p>
+  </li>
+  </ul>
+  <li>
 <p class="text"><b>Enable Structure Lines.</b>: Whether Enable Lines Structure Highlight in IDE Editor.</p>
   </li>
   <li>
@@ -173,6 +197,9 @@ Brackets ( ), [ ], { } are supported. But { } only valid in C/C++. Code Structur
   </li>
   <li>
 <p class="text"><b>Cancel</b>: Cancel settings and close dialog.</p>
+  </li>
+  <li>
+<p class="text"><b>Help</b>: Show this help.</p>
   </li>
 </ul>
 <p class="text">&nbsp;</p>

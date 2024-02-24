@@ -81,6 +81,30 @@
 <p class="text"><b>允許光標處匹配條件編譯指令高亮顯示</b>：是否允許光標下配對的條件編譯指令高亮顯示，支持 Pascal 與 C/C++。配對的條件編譯指令包括 Pascal 中的 {$IFDEF/IFNDEF/IF} {$ELSE} {$ENDIF/IFEND} 以及 C/C++ 中的 #if/ifdef/ifndef #else/#elif #endif 等。</p>
   </li>
   <li>
+<p class="text"><b>允許高亮顯示自定義標識符</b>：為了滿足用戶的自定義高亮顯示需要，此選項允許用戶指定需要額外高亮顯示的標識符。</p>
+  </li>
+  <li>
+<p class="text"><b>自定義設置</b>：自定義標識符的設置，點擊打開對話框如下圖：</p>
+<p align="center" class="text"><img src="srchighlightcustomidentconf.png"></p>
+  </li>
+  <ul>
+  <li>
+<p class="text"><b>需要高亮顯示的標識符</b>：列出了源碼中需要高亮顯示的標識符，Pascal 源碼中不區分大小寫，C/C++ 源碼中區分。勾選「加粗」可強制該標識符以粗體方式高亮。</p>
+  </li>
+  <li>
+<p class="text"><b>前景色</b>：高亮繪製時的文字顏色。</p>
+  </li>
+  <li>
+<p class="text"><b>背景色</b>：高亮繪製時的背景顏色。</p>
+  </li>
+  <li>
+<p class="text"><b>增加一新標識符</b>：點擊該按鈕增加一新的需高亮顯示的標識符，注意須是合法標識符或關鍵字。</p>
+  </li>
+  <li>
+<p class="text"><b>刪除選中的標識符</b>：點擊該按鈕刪除選中的高亮標識符。</p>
+  </li>
+  </ul>
+  <li>
 <p class="text"><b>允許代碼結構匹配連線顯示</b>：是否允許代碼結構匹配層次畫線高亮顯示。</p>
   </li>
   <li>
@@ -112,7 +136,7 @@
   <li>
 <p class="text"><b>高亮連線時忽略 C++ 中的 namespace 大括號</b>：C++ 文件中高亮連線時是否忽略 namespace 對應的大括號。</p>
   </li>
-</ul>
+  </ul>
   <li>
 <p class="text"><b>畫線設置</b>：分隔線畫線的設置，點擊打開對話框如下圖：</p>
 <p align="center" class="text"><img src="srchighlightseplineconf.png"></p>
@@ -172,6 +196,9 @@
   </li>
   <li>
 <p class="text"><b>取消</b>：放棄當前操作。</p>
+  </li>
+  <li>
+<p class="text"><b>幫助</b>：顯示此幫助內容。</p>
   </li>
 </ul>
 <p class="text">　</p>
