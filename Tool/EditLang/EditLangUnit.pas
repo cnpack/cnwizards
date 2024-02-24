@@ -78,6 +78,11 @@ type
     btnPastToLeftByRight: TToolButton;
     btn7: TToolButton;
     btnPasteToRightByLeft: TToolButton;
+    btn6: TToolButton;
+    btnPasteMultiLineLeft: TToolButton;
+    btnPasteMultiLineRight: TToolButton;
+    actPasteMultiLineLeft: TAction;
+    actPasteMultiLineRight: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -102,6 +107,8 @@ type
     procedure actSearchAllRightToLeftExecute(Sender: TObject);
     procedure actPastToLeftByRightExecute(Sender: TObject);
     procedure actPasteToRightByLeftExecute(Sender: TObject);
+    procedure actPasteMultiLineLeftExecute(Sender: TObject);
+    procedure actPasteMultiLineRightExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -126,7 +133,7 @@ type
     procedure SearchLeftToRight(Line: Integer);
     procedure SearchRightToLeft(Line: Integer);
   public
-    { Public declarations }
+    procedure PasteToGridMultiLine(Col: Integer);
   end;
 
 var
@@ -557,6 +564,36 @@ begin
   end;
 end;
 
+procedure TEditLangForm.PasteToGridMultiLine(Col: Integer);
+var
+  SL: TStringList;
+  I: Integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Text := Clipboard.AsText;
+    if (SL.Count <= 0) or (Trim(SL[0]) = '') then
+      Exit;
+
+    if Trim(SL[SL.Count - 1]) = '' then
+      SL.Delete(SL.Count - 1);
+
+    for I := 0 to SL.Count - 1 do
+    begin
+      if StringGrid.Cells[Col, StringGrid.Row + I] <> '' then
+      begin
+        InfoDlg('Destination Cells NOT Empty. Can NOT Paste');
+        Exit;
+      end;
+    end;
+
+    for I := 0 to SL.Count - 1 do
+      StringGrid.Cells[Col, StringGrid.Row + I] := SL[I];
+  finally
+    SL.Free;
+  end;
+end;
+
 procedure TEditLangForm.RearrangeDisplays;
 var
   I, L, R, LS, RS, LAC, RAC: Integer;
@@ -741,6 +778,18 @@ begin
     InfoDlg('No Next Different Line.')
   else
     StringGrid.Row := I;
+end;
+
+procedure TEditLangForm.actPasteMultiLineLeftExecute(Sender: TObject);
+begin
+  // 从左侧当前行、可编辑列多行竖向粘贴
+  PasteToGridMultiLine(LEFT_EDITING_COL);
+end;
+
+procedure TEditLangForm.actPasteMultiLineRightExecute(Sender: TObject);
+begin
+  // 从右侧当前行、可编辑列多行竖向粘贴
+  PasteToGridMultiLine(RIGHT_EDITING_COL);
 end;
 
 procedure TEditLangForm.actPasteToRightByLeftExecute(Sender: TObject);

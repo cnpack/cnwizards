@@ -36,3 +36,5 @@
 35,否(&N),否(&N),&No,Нет,&Non,&Nein,&Não
 36,全部选是(&A),全部選是(&A),Yes to &All,Да для всех,Oui pour &tous,Ja zu &allen,Sim para &Todos
 37,全部选否(&F),全部選否(&F),No to A&ll,Нет для всех,&Non pour t&ous,nein zu a&llen,Não para A&ll
+38,前景色,前景色,Foreground,Шрифт,Premier Plan,Vordergrund,Primeiro plano
+39,背景色,背景色,Background,Фон,Fond,Hintergrund,Fundo
