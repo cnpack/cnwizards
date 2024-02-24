@@ -180,7 +180,8 @@ begin
   begin
     S := lvIdents.Selected.SubItems[0];
     S := CnWizInputBox(SCnInformation, SCnSourceHighlightCustomIdentHint, S);
-    lvIdents.Selected.SubItems[0] := Trim(S);
+    if S <> '' then
+      lvIdents.Selected.SubItems[0] := Trim(S);
   end;
 end;
 
