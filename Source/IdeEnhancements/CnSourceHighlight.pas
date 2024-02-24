@@ -6256,9 +6256,9 @@ begin
       begin
         FCustomIdentifierList.Add(CppParser.Tokens[I]);
         if Bold then
-          PasParser.Tokens[I].Tag := 1
+          CppParser.Tokens[I].Tag := 1
         else
-          PasParser.Tokens[I].Tag := 0;
+          CppParser.Tokens[I].Tag := 0;
       end;
     end;
 
