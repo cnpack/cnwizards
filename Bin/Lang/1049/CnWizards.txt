@@ -1644,6 +1644,7 @@ TCnPropertyCompareForm.actNextDiff.Hint=Перейти к следующему �
 TCnPropertyCompareForm.actOnlyDiff.Caption=Показывать только различающиеся свойства
 TCnPropertyCompareForm.actOnlyDiff.Hint=Показывать только отличия
 TCnPropertyCompareForm.actOptions.Caption=Настройки...
+TCnPropertyCompareForm.actOptions.Hint=Показать диалоговое окно параметров
 TCnPropertyCompareForm.actPrevDiff.Caption=Предыдущее отличие
 TCnPropertyCompareForm.actPrevDiff.Hint=Перейти к предыдущему отличию
 TCnPropertyCompareForm.actPropertyToLeft.Caption=Скопировать влево

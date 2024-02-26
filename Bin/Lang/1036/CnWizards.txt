@@ -1644,6 +1644,7 @@ TCnPropertyCompareForm.actNextDiff.Hint=Aller à la prochaine propriété diffé
 TCnPropertyCompareForm.actOnlyDiff.Caption=Montrez seulement &différent
 TCnPropertyCompareForm.actOnlyDiff.Hint=Montrer uniquement des propriétés différentes
 TCnPropertyCompareForm.actOptions.Caption=&Options...
+TCnPropertyCompareForm.actOptions.Hint=Afficher la boîte de dialogue Options
 TCnPropertyCompareForm.actPrevDiff.Caption=&Précédent différent
 TCnPropertyCompareForm.actPrevDiff.Hint=Aller à la propriété précédente différente
 TCnPropertyCompareForm.actPropertyToLeft.Caption=À &gauche

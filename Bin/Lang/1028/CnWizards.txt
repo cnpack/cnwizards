@@ -1644,6 +1644,7 @@ TCnPropertyCompareForm.actNextDiff.Hint=跳至下一處不同屬性
 TCnPropertyCompareForm.actOnlyDiff.Caption=只顯示不同屬性(&D)
 TCnPropertyCompareForm.actOnlyDiff.Hint=只顯示屬性值不同的屬性
 TCnPropertyCompareForm.actOptions.Caption=設置(&O)...
+TCnPropertyCompareForm.actOptions.Hint=顯示設置對話框
 TCnPropertyCompareForm.actPrevDiff.Caption=上一處不同(&P)
 TCnPropertyCompareForm.actPrevDiff.Hint=跳至上一處不同屬性
 TCnPropertyCompareForm.actPropertyToLeft.Caption=賦值至左(&L)
