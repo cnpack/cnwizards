@@ -1577,6 +1577,7 @@ var
   Lex: TmwPasLex;
   Text: AnsiString;
   MyTokenID: TTokenKind;
+  Bookmark: TmwPasLexBookmark;
 
   procedure DoNext(NoJunk: Boolean = False);
   begin
@@ -1799,6 +1800,7 @@ begin
             end
             else // Lex 的 IsClass 在 class 关键字后是以下内容时判断错误，需如此弥补
             begin
+              Lex.SaveToBookmark(Bookmark);
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID in [tkSealed, tkStrict,
                 tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper, tkClass,
@@ -1807,6 +1809,11 @@ begin
                 Result.PosKind := pkClass;
                 InClass := True;
                 Continue;
+              end
+              else
+              begin
+                // 不是，则要恢复，免得多 DoNext 一次
+                Lex.LoadFromBookmark(Bookmark);
               end;
             end;
           end;

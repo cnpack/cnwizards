@@ -1515,6 +1515,7 @@ var
   Lex: TCnPasWideLex;
   ExpandCol: Integer;
   MyTokenID: TTokenKind;
+  Bookmark: TCnPasWideBookmark;
 
   function LexStillBeforeCursor: Boolean;
   begin
@@ -1567,6 +1568,7 @@ var
 begin
   Lex := nil;
   ProcStack := nil;
+  Bookmark := nil;
   PosInfo.IsPascal := True;
 
   try
@@ -1757,6 +1759,7 @@ begin
             end
             else
             begin
+              Lex.SaveToBookmark(Bookmark);
               DoNext(True);
               if LexStillBeforeCursor and (Lex.TokenID in [tkSealed, tkStrict,
                 tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper, tkClass,
@@ -1765,6 +1768,11 @@ begin
                 PosInfo.PosKind := pkClass;
                 InClass := True;
                 Continue;
+              end
+              else
+              begin
+                // 不是，则要恢复，免得多 DoNext 一次
+                Lex.LoadFromBookmark(Bookmark);
               end;
             end;
           end;
@@ -1930,6 +1938,7 @@ begin
     end;
   finally
     Lex.Free;
+    Bookmark.Free; // 如已被 Load，则为 nil了，不怕重复 Free
     ProcStack.Free;
   end;
 end;
