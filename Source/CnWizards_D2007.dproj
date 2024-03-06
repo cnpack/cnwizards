@@ -200,31 +200,31 @@
     <DCCReference Include="IdeEnhancements\CnFormEnhancements.pas">
       <Form>CnFormEnhanceConfigForm</Form>
     </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnHighlightLineFrm.pas">
+    <DCCReference Include="SourceHighlight\CnHighlightLineFrm.pas">
       <Form>CnHighlightLineForm</Form>
     </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnHighlightSeparateLineFrm.pas">
+    <DCCReference Include="SourceHighlight\CnHighlightSeparateLineFrm.pas">
       <Form>CnHighlightSeparateLineForm</Form>
     </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnHighlightCustomIdentFrm.pas">
+    <DCCReference Include="SourceHighlight\CnHighlightCustomIdentFrm.pas">
         <Form>CnHighlightCustomIdentForm</Form>
     </DCCReference>
     <DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas" />
-    <DCCReference Include="IdeEnhancements\CnInputHelper.pas" />
-    <DCCReference Include="IdeEnhancements\CnInputHelperEditFrm.pas">
+    <DCCReference Include="InputHelper\CnInputHelper.pas" />
+    <DCCReference Include="InputHelper\CnInputHelperEditFrm.pas">
       <Form>CnInputHelperEditForm</Form>
     </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnInputHelperFrm.pas">
+    <DCCReference Include="InputHelper\CnInputHelperFrm.pas">
       <Form>CnInputHelperForm</Form>
     </DCCReference>
-    <DCCReference Include="IdeEnhancements\CnInputIdeSymbolList.pas" />
-    <DCCReference Include="IdeEnhancements\CnInputSymbolList.pas" />
+    <DCCReference Include="InputHelper\CnInputIdeSymbolList.pas" />
+    <DCCReference Include="InputHelper\CnInputSymbolList.pas" />
     <DCCReference Include="IdeEnhancements\CnPaletteEnhanceFrm.pas">
       <Form>CnPalEnhanceForm</Form>
     </DCCReference>
     <DCCReference Include="IdeEnhancements\CnPaletteEnhancements.pas" />
-    <DCCReference Include="IdeEnhancements\CnSourceHighlight.pas" />
-    <DCCReference Include="IdeEnhancements\CnSourceHighlightFrm.pas">
+    <DCCReference Include="SourceHighlight\CnSourceHighlight.pas" />
+    <DCCReference Include="SourceHighlight\CnSourceHighlightFrm.pas">
       <Form>CnSourceHighlightForm</Form>
     </DCCReference>
     <DCCReference Include="IdeEnhancements\CnVerEnhanceFrm.pas">

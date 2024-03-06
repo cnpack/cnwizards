@@ -152,14 +152,14 @@
       SrcEditorEnhance\CnIdentRenameFrm.dfm 
       SrcEditorEnhance\CnSrcEditorCodeWrap.dfm 
       SrcEditorEnhance\CnSrcEditorReplaceInBlock.dfm 
-      IdeEnhancements\CnSourceHighlightFrm.dfm 
-      IdeEnhancements\CnHighlightLineFrm.dfm 
-      IdeEnhancements\CnHighlightSeparateLineFrm.dfm 
-      IdeEnhancements\CnHighlightCustomIdentFrm.dfm 
+      SourceHighlight\CnSourceHighlightFrm.dfm 
+      SourceHighlight\CnHighlightLineFrm.dfm 
+      SourceHighlight\CnHighlightSeparateLineFrm.dfm 
+      SourceHighlight\CnHighlightCustomIdentFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
       DesignEditors\CnPropEditorCustomizeFrm.dfm 
-      IdeEnhancements\CnInputHelperEditFrm.dfm 
-      IdeEnhancements\CnInputHelperFrm.dfm 
+      InputHelper\CnInputHelperEditFrm.dfm 
+      InputHelper\CnInputHelperFrm.dfm 
       DesignEditors\CnImageListEditorFrm.dfm
       CodeFormatter\CnCodeFormatterWizard.dfm"/>
     <LIBFILES value=""/>
