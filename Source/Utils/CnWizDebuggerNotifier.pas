@@ -129,6 +129,9 @@ type
     {* 直接求表达式的值，返回字符串结果；如果是对象，则在 ObjectAddr 中返回其地址}
   end;
 
+procedure CropDebugQuotaStr(Str: PChar);
+{* 去掉 PChar 字符串中两头的单引号引用}
+
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 {* 获取 IDE Debugger 通知服务接口}
 
@@ -315,7 +318,7 @@ begin
 end;
 
 // 去掉 PChar 字符串中两头的单引号引用
-procedure CropQuota(Str: PChar);
+procedure CropDebugQuotaStr(Str: PChar);
 var
   Len, I: Integer;
   // Idx: PChar;

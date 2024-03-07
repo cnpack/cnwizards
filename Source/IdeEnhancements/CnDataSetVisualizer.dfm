@@ -1,15 +1,15 @@
 object CnDataSetViewerFrame: TCnDataSetViewerFrame
   Left = 0
   Top = 0
-  Width = 547
-  Height = 249
+  Width = 598
+  Height = 318
   TabOrder = 0
   object Panel1: TPanel
     AlignWithMargins = True
     Left = 8
     Top = 8
-    Width = 531
-    Height = 233
+    Width = 582
+    Height = 302
     Margins.Left = 8
     Margins.Top = 8
     Margins.Right = 8
@@ -22,8 +22,8 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       AlignWithMargins = True
       Left = 1
       Top = 1
-      Width = 529
-      Height = 231
+      Width = 580
+      Height = 300
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
@@ -39,8 +39,8 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
         object mmoProp: TMemo
           Left = 0
           Top = 0
-          Width = 521
-          Height = 197
+          Width = 572
+          Height = 266
           Align = alClient
           BorderStyle = bsNone
           ReadOnly = True
@@ -49,14 +49,36 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
           WantReturns = False
         end
       end
+      object tsField: TTabSheet
+        Caption = '&Field'
+        ImageIndex = 2
+        object grdField: TStringGrid
+          Left = 0
+          Top = 0
+          Width = 572
+          Height = 266
+          Align = alClient
+          BorderStyle = bsNone
+          ColCount = 18
+          FixedRows = 0
+          Font.Charset = RUSSIAN_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Courier New'
+          Font.Style = []
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goFixedRowDefAlign]
+          ParentFont = False
+          TabOrder = 0
+        end
+      end
       object tsData: TTabSheet
         Caption = '&Data'
         ImageIndex = 3
-        object Grid: TStringGrid
+        object grdData: TStringGrid
           Left = 0
           Top = 0
-          Width = 521
-          Height = 197
+          Width = 572
+          Height = 266
           Align = alClient
           BorderStyle = bsNone
           ColCount = 18

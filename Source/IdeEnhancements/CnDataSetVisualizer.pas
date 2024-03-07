@@ -49,7 +49,9 @@ type
     mmoProp: TMemo;
     tsData: TTabSheet;
     Panel1: TPanel;
-    Grid: TStringGrid;
+    grdData: TStringGrid;
+    tsField: TTabSheet;
+    grdField: TStringGrid;
     procedure pcViewsChange(Sender: TObject);
   private
     FOwningForm: TCustomForm;
@@ -65,11 +67,18 @@ type
     procedure SetForm(AForm: TCustomForm);
     procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
     procedure SetAvailableState(const AState: TCnAvailableState);
+    procedure Clear;
 
     procedure WMDPIChangedAfterParent(var Message: TMessage); message WM_DPICHANGED_AFTERPARENT;
   protected
     procedure SetParent(AParent: TWinControl); override;
+
+    procedure LanguageChanged(Sender: TObject);
+    procedure Translate;
   public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
     { IOTADebuggerVisualizerExternalViewerUpdater }
     procedure CloseVisualizer;
     procedure MarkUnavailable(Reason: TOTAVisualizerUnavailableReason);
@@ -111,7 +120,8 @@ type
 implementation
 
 uses
-  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil, BrandingAPI;
+  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil, BrandingAPI,
+  CnLangMgr {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.dfm}
 
@@ -121,7 +131,7 @@ resourcestring
   sOutOfScope = 'out of scope';
 
 type
-  IFrameFormHelper = interface
+  ICnFrameFormHelper = interface
     ['{0FD4A98F-CE6B-422A-BF13-14E59707D3B2}']
     function GetForm: TCustomForm;
     function GetFrame: TCustomFrame;
@@ -129,7 +139,7 @@ type
     procedure SetFrame(Form: TCustomFrame);
   end;
 
-  TCnDataSetVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, IFrameFormHelper)
+  TCnDataSetVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
   private
     FMyFrame: TCnDataSetViewerFrame;
     FMyForm: TCustomForm;
@@ -214,8 +224,8 @@ begin
   try
     AForm.Left := SuggestedLeft;
     AForm.Top := SuggestedTop;
-    (VisDockForm as IFrameFormHelper).SetForm(AForm);
-    AFrame := (VisDockForm as IFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
+    (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
+    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
     AFrame.AddDataSetContent(Expression, TypeName, EvalResult);
     AFrame.pcViewsChange(nil);
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
@@ -253,6 +263,8 @@ begin
     asNotAvailable:
       S := sValueNotAccessible;
   end;
+  if S <> '' then
+    mmoProp.Lines.Text := '';
 end;
 
 procedure TCnDataSetViewerFrame.AddDataSetContent(const Expression, TypeName,
@@ -261,6 +273,8 @@ var
   DebugSvcs: IOTADebuggerServices;
   CurProcess: IOTAProcess;
   CurThread: IOTAThread;
+  S: string;
+  I, C: Integer;
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
@@ -272,7 +286,60 @@ begin
 
   FExpression := Expression;
   SetAvailableState(asAvailable);
-  mmoProp.Lines.Text := Evaluate(FExpression + '.Active');
+
+  Clear;
+
+  S := Evaluate(FExpression + '.Active');
+  mmoProp.Lines.Add('Active: ' + S);
+
+  if LowerCase(S) = 'true' then
+  begin
+    S := Evaluate(FExpression + '.FieldCount');
+    mmoProp.Lines.Add('FieldCount: ' + S);
+    S := Evaluate(FExpression + '.RecordCount');
+    mmoProp.Lines.Add('RecordCount: ' + S);
+    S := Evaluate(FExpression + '.RecNo');
+    mmoProp.Lines.Add('RecNo: ' + S);
+
+    // Fields Defs
+    S := Evaluate(FExpression+ '.FieldDefs.Count');
+    C := StrToIntDef(S, 0);
+    grdField.RowCount := C + 1;
+    grdField.FixedRows := 1;
+    grdField.ColCount := 5;
+    grdfield.FixedCols := 0;
+
+    for I := 0 to grdField.ColCount - 1 do
+      grdField.ColWidths[I] := 90;
+
+    grdField.Cells[0, 0] := 'Name';
+    grdField.Cells[1, 0] := 'DataType';
+    grdField.Cells[2, 0] := 'Size';
+    grdField.Cells[3, 0] := 'Precision';
+    grdField.Cells[4, 0] := 'Attribute';
+
+    for I := 0 to C - 1 do // 行循环
+    begin
+      grdField.Cells[0, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+      grdField.Cells[1, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
+      grdField.Cells[2, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
+      grdField.Cells[3, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
+      grdField.Cells[4, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
+    end;
+
+    // Data
+    grdData.ColCount := C;
+    grdData.RowCount := 2;
+    grdData.FixedRows := 1;
+    for I := 0 to grdData.ColCount - 1 do
+      grdData.ColWidths[I] := 90;
+
+    for I := 0 to C - 1 do // 列循环，打印当前记录的各字段值
+    begin
+      grdData.Cells[I, 0] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+      grdData.Cells[I, 1] := Evaluate(FExpression + Format('.Fields[%d].AsString', [I]));
+    end;
+  end;
 end;
 
 procedure TCnDataSetViewerFrame.AfterSave;
@@ -285,10 +352,39 @@ begin
 
 end;
 
+procedure TCnDataSetViewerFrame.Clear;
+begin
+  mmoProp.Lines.Clear;
+  grdField.RowCount := 1;
+  grdField.ColCount := 1;
+  grdField.Cells[0, 0] := '';
+  grdData.RowCount := 1;
+  grdData.ColCount := 1;
+  grdData.Cells[0, 0] := '';
+end;
+
 procedure TCnDataSetViewerFrame.CloseVisualizer;
 begin
   if FOwningForm <> nil then
     FOwningForm.Close;
+end;
+
+constructor TCnDataSetViewerFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+  DisableAlign;
+  try
+    Translate;
+  finally
+    EnableAlign;
+  end;
+  CnLanguageManager.AddChangeNotifier(LanguageChanged);
+end;
+
+destructor TCnDataSetViewerFrame.Destroy;
+begin
+  CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
+  inherited;
 end;
 
 procedure TCnDataSetViewerFrame.Destroyed;
@@ -318,7 +414,6 @@ begin
     if CurThread <> nil then
     begin
       repeat
-      begin
         Done := True;
         EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
           CanModify, eseAll, '', ResultAddr, ResultSize, ResultVal, '', 0);
@@ -348,8 +443,8 @@ begin
               Done := False;
             end;
         end;
-      end
       until Done = True;
+      CropDebugQuotaStr(PChar(Result));
     end;
   end;
 end;
@@ -368,6 +463,19 @@ begin
   FCompleted := True;
   FDeferredResult := ResultStr;
   FDeferredError := ReturnCode <> 0;
+end;
+
+procedure TCnDataSetViewerFrame.LanguageChanged(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnDataSetViewerFrame.LanguageChanged');
+{$ENDIF}
+  DisableAlign;
+  try
+    CnLanguageManager.TranslateFrame(Self);
+  finally
+    EnableAlign;
+  end;
 end;
 
 procedure TCnDataSetViewerFrame.MarkUnavailable(
@@ -429,13 +537,29 @@ procedure TCnDataSetViewerFrame.pcViewsChange(Sender: TObject);
 begin
   if pcViews.ActivePage = tsProp then
     mmoProp.SetFocus
+  else if pcViews.ActivePage = tsField then
+    grdField.SetFocus
   else if pcViews.ActivePage = tsData then
-    Grid.SetFocus;
+    grdData.SetFocus;
 end;
 
 procedure TCnDataSetViewerFrame.ThreadNotify(Reason: TOTANotifyReason);
 begin
 
+end;
+
+procedure TCnDataSetViewerFrame.Translate;
+begin
+  if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
+    and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
+  begin
+    Screen.Cursor := crHourGlass;
+    try
+      CnLanguageManager.TranslateFrame(Self);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
 end;
 
 { TCnDataSetVisualizerForm }
