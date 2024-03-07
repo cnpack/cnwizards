@@ -3689,7 +3689,10 @@ var
 begin
   if Scanner.Token = tokKeywordConst then
     Match(Scanner.Token);
-  
+
+  if Scanner.Token = tokAmpersand then
+    Match(Scanner.Token);
+
   if Scanner.ForwardToken = tokComma then //IdentList
   begin
     OldStoreIdent := FStoreIdent;
