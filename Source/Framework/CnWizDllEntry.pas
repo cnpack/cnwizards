@@ -142,5 +142,13 @@ begin
   end;
 end;
 
+initialization
+{$IFDEF DEBUG}
+  if CnDebugger.ExceptTracking then
+    CnDebugger.LogMsg('DllEntry initialization. CaptureStack Enabled')
+  else
+    CnDebugger.LogMsg('DllEntry initialization. CaptureStack Disabled')
+{$ENDIF}
+
 end.
 

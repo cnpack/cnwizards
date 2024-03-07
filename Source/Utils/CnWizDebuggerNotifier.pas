@@ -133,7 +133,8 @@ function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 {* 获取 IDE Debugger 通知服务接口}
 
 function CnEvaluationManager: ICnEvaluationManager;
-{* 获取当前被调试进程当前线程求值实例}
+{* 获取当前被调试进程当前线程求值实例
+  注：该实例求值时因内部处理消息，有可能造成调用者释放资源，返回后会出 IntfCopy 的访问冲突}
 
 implementation
 

@@ -19,24 +19,38 @@
 {******************************************************************************}
 
 unit CnDataSetVisualizer;
+{* |<PRE>
+================================================================================
+* 软件名称：CnPack IDE 专家包
+* 单元名称：针对 TDataSet 及其子类的调试期查看器
+* 单元作者：CnPack开发组
+* 备    注：结构参考了 VCL 中自带的各类 Visualizer
+* 开发平台：PWin11 + Delphi 12
+* 兼容测试：
+* 本 地 化：该单元中的字符串均符合本地化处理方式
+* 修改记录：2024.03.07 V1.0
+*               创建单元
+================================================================================
+|</PRE>}
 
 interface
 
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, ToolsAPI, StdCtrls, Grids, DesignIntf, Actnlist, ImgList,
-  Menus, IniFiles, CnWizConsts, CnWizDebuggerNotifier;
+  SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
+  StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier;
 
 type
-  TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater)
-    PCViews: TPageControl;
-    TabList: TTabSheet;
-    TabText: TTabSheet;
-    mmoDataSetProp: TMemo;
-    gridDataSet: TStringGrid;
-    procedure PCViewsChange(Sender: TObject);
+  TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater,
+    IOTAThreadNotifier, IOTAThreadNotifier160)
+    pcViews: TPageControl;
+    tsProp: TTabSheet;
+    mmoProp: TMemo;
+    tsData: TTabSheet;
+    Panel1: TPanel;
+    Grid: TStringGrid;
+    procedure pcViewsChange(Sender: TObject);
   private
     FOwningForm: TCustomForm;
     FClosedProc: TOTAVisualizerClosedProcedure;
@@ -48,37 +62,66 @@ type
     FItems: TStrings;
     FAvailableState: TCnAvailableState;
     function Evaluate(Expression: string): string;
-    function FromDbgStrToText(const AText: string): string;
+    procedure SetForm(AForm: TCustomForm);
+    procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
+    procedure SetAvailableState(const AState: TCnAvailableState);
+
+    procedure WMDPIChangedAfterParent(var Message: TMessage); message WM_DPICHANGED_AFTERPARENT;
   protected
     procedure SetParent(AParent: TWinControl); override;
   public
+    { IOTADebuggerVisualizerExternalViewerUpdater }
     procedure CloseVisualizer;
     procedure MarkUnavailable(Reason: TOTAVisualizerUnavailableReason);
     procedure RefreshVisualizer(const Expression, TypeName, EvalResult: string);
     procedure SetClosedCallback(ClosedProc: TOTAVisualizerClosedProcedure);
-    procedure SetForm(AForm: TCustomForm);
-    procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
+    { IOTAThreadNotifier }
+    procedure AfterSave;
+    procedure BeforeSave;
+    procedure Destroyed;
+    procedure Modified;
+    procedure ThreadNotify(Reason: TOTANotifyReason);
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress, ResultSize: LongWord; ReturnCode: Integer); overload;
+    procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
+    { IOTAThreadNotifier160 }
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress: TOTAAddress; ResultSize: LongWord; ReturnCode: Integer); overload;
   end;
 
   TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
-    IOTADebuggerVisualizerExternalViewer)
+    IOTADebuggerVisualizer250, IOTADebuggerVisualizerExternalViewer)
   public
+    { IOTADebuggerVisualizer }
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
-      var AllDescendants: Boolean);
+      var AllDescendants: Boolean); overload;
     function GetVisualizerIdentifier: string;
     function GetVisualizerName: string;
     function GetVisualizerDescription: string;
+    { IOTADebuggerVisualizer250 }
+    procedure GetSupportedType(Index: Integer; var TypeName: string;
+      var AllDescendants: Boolean; var IsGeneric: Boolean); overload;
+    { IOTADebuggerVisualizerExternalViewer }
     function GetMenuText: string;
-    function Show(const Expression, TypeName, EvalResult: string; Suggestedleft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
+    function Show(const Expression, TypeName, EvalResult: string;
+      SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
   end;
 
 implementation
 
-{$R *.DFM}
+uses
+  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil, BrandingAPI;
+
+{$R *.dfm}
+
+resourcestring
+  sProcessNotAccessible = 'process not accessible';
+  sValueNotAccessible = 'value not accessible';
+  sOutOfScope = 'out of scope';
 
 type
-  ICnFrameFormHelper = interface
+  IFrameFormHelper = interface
     ['{0FD4A98F-CE6B-422A-BF13-14E59707D3B2}']
     function GetForm: TCustomForm;
     function GetFrame: TCustomFrame;
@@ -86,14 +129,13 @@ type
     procedure SetFrame(Form: TCustomFrame);
   end;
 
-  TCnDataSetVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
+  TCnDataSetVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, IFrameFormHelper)
   private
     FMyFrame: TCnDataSetViewerFrame;
     FMyForm: TCustomForm;
     FExpression: string;
   public
     constructor Create(const Expression: string);
-
     { INTACustomDockableForm }
     function GetCaption: string;
     function GetFrameClass: TCustomFrameClass;
@@ -109,8 +151,7 @@ type
     procedure SaveWindowState(Desktop: TCustomIniFile; const Section: string; IsProject: Boolean);
     function GetEditState: TEditState;
     function EditAction(Action: TEditAction): Boolean;
-
-    { ICnFrameFormHelper }
+    { IFrameFormHelper }
     function GetForm: TCustomForm;
     function GetFrame: TCustomFrame;
     procedure SetForm(Form: TCustomForm);
@@ -124,16 +165,24 @@ begin
   Result := SCnDebugDataSetViewerMenuText;
 end;
 
-procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer;
-  var TypeName: string; var AllDescendants: Boolean);
+function TCnDebuggerDataSetVisualizer.GetSupportedTypeCount: Integer;
+begin
+  Result := 1;
+end;
+
+procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
+  var AllDescendants: Boolean);
 begin
   TypeName := 'TDataSet';
   AllDescendants := True;
 end;
 
-function TCnDebuggerDataSetVisualizer.GetSupportedTypeCount: Integer;
+procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer;
+  var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
-  Result := 1;
+  TypeName := 'TDataSet';
+  AllDescendants := True;
+  IsGeneric := False;
 end;
 
 function TCnDebuggerDataSetVisualizer.GetVisualizerDescription: string;
@@ -151,52 +200,89 @@ begin
   Result := SCnDebugDataSetViewerName;
 end;
 
-function TCnDebuggerDataSetVisualizer.Show(const Expression, TypeName, EvalResult: string; SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
+function TCnDebuggerDataSetVisualizer.Show(const Expression, TypeName, EvalResult: string;
+  SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
 var
   AForm: TCustomForm;
   AFrame: TCnDataSetViewerFrame;
   VisDockForm: INTACustomDockableForm;
+  LThemingServices: IOTAIDEThemingServices;
 begin
   VisDockForm := TCnDataSetVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
-  AForm.Left := SuggestedLeft;
-  AForm.Top := SuggestedTop;
-  (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
-  AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
-  AFrame.AddDataSetContent(Expression, TypeName, EvalResult);
-  Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
+  AForm.LockDrawing;
+  try
+    AForm.Left := SuggestedLeft;
+    AForm.Top := SuggestedTop;
+    (VisDockForm as IFrameFormHelper).SetForm(AForm);
+    AFrame := (VisDockForm as IFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
+    AFrame.AddDataSetContent(Expression, TypeName, EvalResult);
+    AFrame.pcViewsChange(nil);
+    Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
+    if Supports(BorlandIDEServices, IOTAIDEThemingServices, LThemingServices) and
+      LThemingServices.IDEThemingEnabled then
+    begin
+      AFrame.Panel1.StyleElements := AFrame.Panel1.StyleElements - [seClient];
+      AFrame.Panel1.ParentBackground := False;
+      LThemingServices.ApplyTheme(AForm);
+      AFrame.Panel1.Color := ColorBlendRGB(LThemingServices.StyleServices.GetSystemColor(clWindowText),
+      LThemingServices.StyleServices.GetSystemColor(clWindow), 0.5);
+
+      if TIDEThemeMetrics.Font.Enabled then
+        AFrame.Font.Assign(TIDEThemeMetrics.Font.GetFont());
+    end;
+  finally
+    AForm.UnlockDrawing;
+  end;
 end;
 
 { TCnDataSetViewerFrame }
 
-function TCnDataSetViewerFrame.FromDbgStrToText(const AText: string): string;
+procedure TCnDataSetViewerFrame.SetAvailableState(const AState: TCnAvailableState);
 var
-  LStream: TStringStream;
-  LParser: TParser;
+  S: string;
 begin
-  LStream := TStringStream.Create(AText);
-  try
-    LParser := TParser.Create(LStream);
-    try
-      Result := LParser.TokenString;
-    finally
-      LParser.Free;
-    end;
-  finally
-    LStream.Free;
+  FAvailableState := AState;
+  case FAvailableState of
+    asAvailable:
+      ;
+    asProcRunning:
+      S := sProcessNotAccessible;
+    asOutOfScope:
+      S := sOutOfScope;
+    asNotAvailable:
+      S := sValueNotAccessible;
   end;
 end;
 
 procedure TCnDataSetViewerFrame.AddDataSetContent(const Expression, TypeName,
   EvalResult: string);
+var
+  DebugSvcs: IOTADebuggerServices;
+  CurProcess: IOTAProcess;
+  CurThread: IOTAThread;
 begin
-  FAvailableState := asAvailable;
-  FExpression := Expression;
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+    CurProcess := DebugSvcs.CurrentProcess;
+  if CurProcess = nil then
+    Exit;
+  CurThread := CurProcess.CurrentThread;
+  if CurThread = nil then
+    Exit;
 
-  // FAvailableState := asNotAvailable;
-  // grdDataSet.Invalidate;
-  mmoDataSetProp.Clear;
-  mmoDataSetProp.Lines.Add(Evaluate(FExpression + '.RecordCount'));
+  FExpression := Expression;
+  SetAvailableState(asAvailable);
+  mmoProp.Lines.Text := Evaluate(FExpression + '.Active');
+end;
+
+procedure TCnDataSetViewerFrame.AfterSave;
+begin
+
+end;
+
+procedure TCnDataSetViewerFrame.BeforeSave;
+begin
+
 end;
 
 procedure TCnDataSetViewerFrame.CloseVisualizer;
@@ -205,43 +291,108 @@ begin
     FOwningForm.Close;
 end;
 
+procedure TCnDataSetViewerFrame.Destroyed;
+begin
+
+end;
+
 function TCnDataSetViewerFrame.Evaluate(Expression: string): string;
 var
   CurProcess: IOTAProcess;
   CurThread: IOTAThread;
-  ID: IOTADebuggerServices;
+  ResultStr: array[0..4095] of Char;
+  CanModify: Boolean;
+  Done: Boolean;
+  ResultAddr, ResultSize, ResultVal: LongWord;
+  EvalRes: TOTAEvaluateResult;
+  DebugSvcs: IOTADebuggerServices;
 begin
+//  Result := CnEvaluationManager.EvaluateExpression(Expression);
+
   Result := '';
-  if Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
-    CurProcess := ID.CurrentProcess;
-  if CurProcess = nil then
-    Exit;
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+    CurProcess := DebugSvcs.CurrentProcess;
+  if CurProcess <> nil then
+  begin
+    CurThread := CurProcess.CurrentThread;
+    if CurThread <> nil then
+    begin
+      repeat
+      begin
+        Done := True;
+        EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
+          CanModify, eseAll, '', ResultAddr, ResultSize, ResultVal, '', 0);
+        case EvalRes of
+          erOK: Result := ResultStr;
+          erDeferred:
+            begin
+              FCompleted := False;
+              FDeferredResult := '';
+              FDeferredError := False;
+              FNotifierIndex := CurThread.AddNotifier(Self);
+              while not FCompleted do
+                DebugSvcs.ProcessDebugEvents;
+              CurThread.RemoveNotifier(FNotifierIndex);
+              FNotifierIndex := -1;
+              if not FDeferredError then
+              begin
+                if FDeferredResult <> '' then
+                  Result := FDeferredResult
+                else
+                  Result := ResultStr;
+              end;
+            end;
+          erBusy:
+            begin
+              DebugSvcs.ProcessDebugEvents;
+              Done := False;
+            end;
+        end;
+      end
+      until Done = True;
+    end;
+  end;
+end;
 
-  CurThread := CurProcess.CurrentThread;
-  if CurThread = nil then
-    Exit;
+procedure TCnDataSetViewerFrame.EvaluateComplete(const ExprStr,
+  ResultStr: string; CanModify: Boolean; ResultAddress, ResultSize: LongWord;
+  ReturnCode: Integer);
+begin
+  EvaluateComplete(ExprStr, ResultStr, CanModify, TOTAAddress(ResultAddress), ResultSize, ReturnCode);
+end;
 
-  Result := CnEvaluationManager.EvaluateExpression(Expression);
+procedure TCnDataSetViewerFrame.EvaluateComplete(const ExprStr,
+  ResultStr: string; CanModify: Boolean; ResultAddress: TOTAAddress; ResultSize: LongWord;
+  ReturnCode: Integer);
+begin
+  FCompleted := True;
+  FDeferredResult := ResultStr;
+  FDeferredError := ReturnCode <> 0;
 end;
 
 procedure TCnDataSetViewerFrame.MarkUnavailable(
   Reason: TOTAVisualizerUnavailableReason);
 begin
   if Reason = ovurProcessRunning then
-  begin
-    FAvailableState := asProcRunning;
-  end else if Reason = ovurOutOfScope then
-    FAvailableState := asOutOfScope;
+    SetAvailableState(asProcRunning)
+  else if Reason = ovurOutOfScope then
+    SetAvailableState(asOutOfScope);
+end;
 
-//  grdDataSet.Items.Count := 1;
-//  grdDataSet.Invalidate;
-  mmoDataSetProp.Clear;
+procedure TCnDataSetViewerFrame.Modified;
+begin
+
+end;
+
+procedure TCnDataSetViewerFrame.ModifyComplete(const ExprStr,
+  ResultStr: string; ReturnCode: Integer);
+begin
+
 end;
 
 procedure TCnDataSetViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  FAvailableState := asAvailable;
   AddDataSetContent(Expression, TypeName, EvalResult);
 end;
 
@@ -267,15 +418,27 @@ begin
   inherited;
 end;
 
-procedure TCnDataSetViewerFrame.PCViewsChange(Sender: TObject);
+procedure TCnDataSetViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
 begin
-  if PCViews.ActivePageIndex = 1 then
-    gridDataSet.SetFocus
-  else if PCViews.ActivePageIndex = 0 then
-    mmoDataSetProp.SetFocus;
+  inherited;
+  if TIDEThemeMetrics.Font.Enabled then
+    TIDEThemeMetrics.Font.AdjustDPISize(Font, TIDEThemeMetrics.Font.Size, PixelsPerInch);
 end;
 
-{ TDataSetVisualizerForm }
+procedure TCnDataSetViewerFrame.pcViewsChange(Sender: TObject);
+begin
+  if pcViews.ActivePage = tsProp then
+    mmoProp.SetFocus
+  else if pcViews.ActivePage = tsData then
+    Grid.SetFocus;
+end;
+
+procedure TCnDataSetViewerFrame.ThreadNotify(Reason: TOTANotifyReason);
+begin
+
+end;
+
+{ TCnDataSetVisualizerForm }
 
 constructor TCnDataSetVisualizerForm.Create(const Expression: string);
 begin
@@ -300,7 +463,7 @@ end;
 
 procedure TCnDataSetVisualizerForm.FrameCreated(AFrame: TCustomFrame);
 begin
-  FMyFrame :=  TCnDataSetViewerFrame(AFrame);
+  FMyFrame := TCnDataSetViewerFrame(AFrame);
 end;
 
 function TCnDataSetVisualizerForm.GetCaption: string;
@@ -330,7 +493,7 @@ end;
 
 function TCnDataSetVisualizerForm.GetIdentifier: string;
 begin
-  Result := SCnDataSetVisualizerIdentifier;
+  Result := 'DataSetDebugVisualizer';
 end;
 
 function TCnDataSetVisualizerForm.GetMenuActionList: TCustomActionList;
@@ -356,13 +519,13 @@ end;
 procedure TCnDataSetVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
   const Section: string);
 begin
-  // no desktop saving
+  //no desktop saving
 end;
 
 procedure TCnDataSetVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
   const Section: string; IsProject: Boolean);
 begin
-  // no desktop saving
+  //no desktop saving
 end;
 
 procedure TCnDataSetVisualizerForm.SetForm(Form: TCustomForm);
