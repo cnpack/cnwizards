@@ -2927,7 +2927,7 @@ function TUnit.ReadConstAddInfo(LastProcDecl: TNameDecl): integer;
             SkipBlock(V);
           end;
         $17:  // 17 Add by LiuXiao to Process D12 DCUs for new info
-          begin^M
+          begin
             Result := ReadUIndex;
             V := ReadUIndex;
             V1 := ReadUIndex;
