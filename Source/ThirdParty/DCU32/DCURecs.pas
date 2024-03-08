@@ -4249,6 +4249,7 @@ end ;
 { TFloatDef. }
 constructor TFloatDef.Create;
 const
+  fkExtra = $80;
   FloatSz: array[TFloatKind]of Cardinal = (SizeOf(Real), SizeOf(Single),
     SizeOf(Double), SizeOf(Extended), SizeOf(Comp), SizeOf(Currency));
 var
@@ -4256,16 +4257,17 @@ var
 begin
   inherited Create;
   B := ReadByte;
-  if B>Ord(High(TFloatKind)) then
-  begin
-    if (B and $80) <> 0 then  // LiuXiao: D12 猜测的特殊处理：如果最高位是 1，则去掉，并跳过后 1 字节
+  if CurUnit.Ver >= verD_XE3 then
+  begin  // LiuXiao: D12 下碰到的并猜测的并在高版本中移植来的特殊处理：如果最高位是 1，则去掉，并跳过后 1 字节
+    if B and fkExtra <> 0 then
     begin
-      B := B and $7F;
+      B := B and not fkExtra;
       ReadByte;
-    end;                      // D12 End
-    if B>Ord(High(TFloatKind)) then
-      DCUErrorFmt('Unknown float kind: %d',[B]);
+    end;
   end;
+
+  if B>Ord(High(TFloatKind)) then
+      DCUErrorFmt('Unknown float kind: %d',[B]);
   Kind := TFloatKind(B);
   if Sz<>FloatSz[Kind] then
     DCUErrorFmt('Float kind and size mismatch: SizeOf(%s)=%d',

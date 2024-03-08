@@ -2636,7 +2636,7 @@ begin
           V := ReadUIndex;
           SkipBlock(V);
         end;
-      $17:  // 17 Add by LiuXiao to Process D12 DCUs for new info
+      $17:  // 17 Add by LiuXiao to Process D12 DCUs for new info. But NOT Used
         begin
           Result := ReadUIndex;
           V := ReadUIndex;

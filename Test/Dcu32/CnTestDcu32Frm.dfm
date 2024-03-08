@@ -26,11 +26,23 @@ object FormDcu32: TFormDcu32
     Left = 24
     Top = 60
     Width = 467
-    Height = 26
+    Height = 13
     Caption = 
       'Note: This Test Should Run OK from Delphi 5 ~ Above all. Parse O' +
-      'K for Delphi 5 ~ Above all Units.'#13#10'For Delphi 110A or Above, we ' +
-      'use a different DCU32_110 library.'
+      'K for Delphi 5 ~ Above all Units.'
+  end
+  object lbl2: TLabel
+    Left = 232
+    Top = 78
+    Width = 371
+    Height = 13
+    Caption = 'For Delphi 110A or Above, we use a different DCU32_110 library!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
   end
   object edtDcuFile: TEdit
     Left = 80

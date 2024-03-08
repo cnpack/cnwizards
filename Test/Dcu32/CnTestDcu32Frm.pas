@@ -18,6 +18,7 @@ type
     mmoDcu: TMemo;
     btnScanDir: TButton;
     btnExtract: TButton;
+    lbl2: TLabel;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnCnDcu32Click(Sender: TObject);
