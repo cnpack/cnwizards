@@ -33,3 +33,6 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI120_ATHENS_UP}
+  {$DEFINE CNWIZARDS_DEBUG_EXTERNALVIEWER}  // 只在 D12 测过调试器的外部查看器，低版本如 11 等测通后也可放开
+{$ENDIF}

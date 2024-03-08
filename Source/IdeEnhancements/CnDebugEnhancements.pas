@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNDEBUGENHANCEWIZARD}
+
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs,
@@ -51,7 +53,9 @@ type
   private
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     FDataSetViewer: IOTADebuggerVisualizer;
+  {$ENDIF}
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -148,12 +152,17 @@ type
 procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
 {* 供外界的 TCnDebuggerBaseValueReplacer 子类注册，实现针对特定类型的调试期显示内容的值的替换}
 
+{$ENDIF CNWIZARDS_CNDEBUGENHANCEWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNDEBUGENHANCEWIZARD}
 
 {$R *.DFM}
 
 uses
-  CnWizDebuggerNotifier, CnDataSetVisualizer {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizDebuggerNotifier {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF}
+  {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -185,7 +194,9 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FReplaceManager := TCnDebuggerValueReplaceManager.Create(Self);
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
+  {$ENDIF}
 {$ENDIF}
 end;
 
@@ -211,11 +222,15 @@ begin
       Exit;
 
     ID.UnregisterDebugVisualizer(FReplaceManager);
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     ID.UnregisterDebugVisualizer(FDataSetViewer);
+  {$ENDIF}
   end;
 
   FReplaceManager := nil;
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   FDataSetViewer := nil;
+  {$ENDIF}
 {$ENDIF}
   inherited;
 end;
@@ -275,7 +290,9 @@ begin
   if Active then
   begin
     ID.RegisterDebugVisualizer(FReplaceManager);
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     ID.RegisterDebugVisualizer(FDataSetViewer);
+  {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnDebugEnhanceWizard Register Viewers');
 {$ENDIF}
@@ -283,7 +300,9 @@ begin
   else
   begin
     ID.UnregisterDebugVisualizer(FReplaceManager);
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     ID.UnregisterDebugVisualizer(FDataSetViewer);
+  {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister Viewers');
 {$ENDIF}
@@ -515,4 +534,5 @@ initialization
 finalization
   FDebuggerValueReplacerClass.Free;
 
+{$ENDIF CNWIZARDS_CNDEBUGENHANCEWIZARD}
 end.

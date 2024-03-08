@@ -131,6 +131,9 @@
 // Wizard: CnVerEnhanceWizard
 {$DEFINE CNWIZARDS_CNVERENHANCEWIZARD}
 
+// Wizard: CnDebugEnhanceWizard
+{$DEFINE CNWIZARDS_CNDEBUGENHANCEWIZARD}
+
 // Wizard: CnUsesToolsWizard
 {$DEFINE CNWIZARDS_CNUSESTOOLS}
 
