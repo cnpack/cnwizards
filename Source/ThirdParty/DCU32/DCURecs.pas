@@ -4257,10 +4257,18 @@ begin
   inherited Create;
   B := ReadByte;
   if B>Ord(High(TFloatKind)) then
-    DCUErrorFmt('Unknown float kind: %d',[B]);
+  begin
+    if B = $83 then  // LiuXiao: D12 猜测的特殊处理：如果最高位是 1，则读后面的字节并加 1
+    begin
+      B := ReadByte;
+      Inc(B);
+    end;             // D12 End
+    if B>Ord(High(TFloatKind)) then
+      DCUErrorFmt('Unknown float kind: %d',[B]);
+  end;
   Kind := TFloatKind(B);
   if Sz<>FloatSz[Kind] then
-    DCUErrorFmt('Float kind and size mismatch: SizeOf()=%d',
+    DCUErrorFmt('Float kind and size mismatch: SizeOf(%s)=%d',
       [GetKindName,Sz]);
 end ;
 
