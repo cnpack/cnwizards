@@ -4258,11 +4258,11 @@ begin
   B := ReadByte;
   if B>Ord(High(TFloatKind)) then
   begin
-    if B = $83 then  // LiuXiao: D12 猜测的特殊处理：如果最高位是 1，则读后面的字节并加 1
+    if (B and $80) <> 0 then  // LiuXiao: D12 猜测的特殊处理：如果最高位是 1，则去掉，并跳过后 1 字节
     begin
-      B := ReadByte;
-      Inc(B);
-    end;             // D12 End
+      B := B and $7F;
+      ReadByte;
+    end;                      // D12 End
     if B>Ord(High(TFloatKind)) then
       DCUErrorFmt('Unknown float kind: %d',[B]);
   end;
