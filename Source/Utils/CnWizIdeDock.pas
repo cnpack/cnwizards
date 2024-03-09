@@ -175,7 +175,7 @@ uses
 {$R *.DFM}
 
 type
-  TIdeDockManager = class(TSingletonInterfacedObject, IIdeDockManager)
+  TIdeDockManager = class(TCnSingletonInterfacedObject, IIdeDockManager)
   public
     // Note: IdeDockFormName must be IDE-unique
     procedure RegisterDockableForm(IdeDockFormClass: TIdeDockFormClass;

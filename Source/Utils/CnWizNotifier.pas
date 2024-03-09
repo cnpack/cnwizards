@@ -362,7 +362,7 @@ type
 
 { TCnWizNotifierServices }
 
-  TCnWizNotifierServices = class(TSingletonInterfacedObject, ICnWizNotifierServices)
+  TCnWizNotifierServices = class(TCnSingletonInterfacedObject, ICnWizNotifierServices)
   private
     FBeforeCompileNotifiers: TList;
     FAfterCompileNotifiers: TList;
