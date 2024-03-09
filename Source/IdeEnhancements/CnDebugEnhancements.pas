@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs,
-  CnConsts, CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions;
+  CnConsts, CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier;
 
 type
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -105,6 +105,7 @@ type
     FReplaceItems: TStringList;
     FReplacers: TObjectList;
     FMap: TCnStrToPtrHashMap;
+    FEvaluator: TCnInProcessEvaluator;
   protected
     procedure CreateVisualizers;
   public
@@ -161,8 +162,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizDebuggerNotifier {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF}
-  {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}CnDataSetVisualizer, {$ENDIF}
+  {$IFDEF DEBUG} CnDebug {$ENDIF};
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -323,11 +324,13 @@ begin
   FWizard := AWizard;
   FReplaceItems := TStringList.Create;
   FReplacers := TObjectList.Create(True);
+  FEvaluator := TCnInProcessEvaluator.Create(nil);
   CreateVisualizers;
 end;
 
 destructor TCnDebuggerValueReplaceManager.Destroy;
 begin
+  FEvaluator.Free;
   FMap.Free;
   FReplaceItems.Free;
   FReplacers.Free;
@@ -386,7 +389,7 @@ begin
   CnDebugger.LogMsg('TCnDebuggerValueReplaceManager to Evaluate: ' + NewExpr);
 {$ENDIF}
 
-  S := CnEvaluationManager.EvaluateExpression(NewExpr);
+  S := FEvaluator.EvaluateExpression(NewExpr);
 
   if Replacer <> nil then
     Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, S)

@@ -129,22 +129,6 @@ type
     {* 直接求表达式的值，返回字符串结果；如果是对象，则在 ObjectAddr 中返回其地址}
   end;
 
-procedure CropDebugQuotaStr(Str: PChar);
-{* 去掉 PChar 字符串中两头的单引号引用}
-
-function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
-{* 获取 IDE Debugger 通知服务接口}
-
-function CnEvaluationManager: ICnEvaluationManager;
-{* 获取当前被调试进程当前线程求值实例
-  注：该实例求值时因内部处理消息，有可能造成调用者释放资源，返回后会出 IntfCopy 的访问冲突}
-
-implementation
-
-uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF}CnWizNotifier;
-
-type
   TCnEvaluationManager = class(TNotifierObject, ICnEvaluationManager, IOTAThreadNotifier
     {$IFDEF SUPPORT_32_AND_64}, IOTAThreadNotifier160 {$ENDIF})
   {* 能够在当前调试进程的当前调试线程中求表达式值的类}
@@ -177,6 +161,60 @@ type
     function EvaluateExpression(const Expression: string; ObjectAddr: PCnOTAAddress): string; overload;
   end;
 
+  TCnInProcessEvaluator = class(TComponent, IOTAThreadNotifier
+    {$IFDEF SUPPORT_32_AND_64}, IOTAThreadNotifier160 {$ENDIF})
+  {* 被调试进程的远程求值类
+    因内部有消息循环，所以使用 TComponent 为基类以尽量避免接口释放问题}
+  private
+    FNotifierIndex: Integer;
+    FCompleted: Boolean;
+    FDeferredResult: string;
+    FDeferredError: Boolean;
+  protected
+    { IOTAThreadNotifier }
+    procedure AfterSave;
+    procedure BeforeSave;
+    procedure Destroyed;
+    procedure Modified;
+    procedure ThreadNotify(Reason: TOTANotifyReason);
+{$IFDEF DELPHI104_SYDNEY_UP}  // The typo is fixed in D104S
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress, ResultSize: LongWord; ReturnCode: Integer); overload;
+{$ELSE}
+    procedure EvaluteComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
+{$ENDIF}
+    procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
+
+{$IFDEF SUPPORT_32_AND_64}
+    { IOTAThreadNotifier160 }
+    // 因为 XE2 及以后版本支持 64 位目标进程，因而 ResultAddress 得是 64 位
+    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
+      ResultAddress: TOTAAddress; ResultSize: LongWord; ReturnCode: Integer); overload;
+{$ENDIF}
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+    function EvaluateExpression(Expression: string): string;
+  end;
+
+procedure CropDebugQuotaStr(Str: PChar);
+{* 去掉 PChar 字符串中两头的单引号引用}
+
+function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
+{* 获取 IDE Debugger 通知服务接口}
+
+//function CnEvaluationManager: ICnEvaluationManager;
+{* 获取当前被调试进程当前线程求值实例
+  注：该实例求值时因内部处理消息，有可能造成调用者释放资源，返回后会出 IntfCopy 的访问冲突}
+
+implementation
+
+uses
+  {$IFDEF DEBUG} CnDebug, {$ENDIF}CnWizNotifier;
+
+type
   TCnOTAProcess = class;
   TCnOTAThread = class;
   TCnWizDebuggerNotifierServices = class;
@@ -308,14 +346,14 @@ type
 
 var
   FCnWizDebuggerNotifierServices: TCnWizDebuggerNotifierServices = nil;
-  FEvaluationManager: ICnEvaluationManager = nil;
-
-function CnEvaluationManager: ICnEvaluationManager;
-begin
-  if FEvaluationManager = nil then
-    FEvaluationManager := TCnEvaluationManager.Create;
-  Result := FEvaluationManager;
-end;
+//  FEvaluationManager: ICnEvaluationManager = nil;
+//
+//function CnEvaluationManager: ICnEvaluationManager;
+//begin
+//  if FEvaluationManager = nil then
+//    FEvaluationManager := TCnEvaluationManager.Create;
+//  Result := FEvaluationManager;
+//end;
 
 // 去掉 PChar 字符串中两头的单引号引用
 procedure CropDebugQuotaStr(Str: PChar);
@@ -1053,12 +1091,154 @@ begin
 
 end;
 
+{ TCnInProcessEvaluator }
+
+procedure TCnInProcessEvaluator.AfterSave;
+begin
+
+end;
+
+procedure TCnInProcessEvaluator.BeforeSave;
+begin
+
+end;
+
+constructor TCnInProcessEvaluator.Create(AOwner: TComponent);
+begin
+  inherited;
+
+end;
+
+destructor TCnInProcessEvaluator.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnInProcessEvaluator.Destroyed;
+begin
+
+end;
+
+function TCnInProcessEvaluator.EvaluateExpression(Expression: string): string;
+var
+  CurProcess: IOTAProcess;
+  CurThread: IOTAThread;
+  ResultStr: array[0..4095] of Char;
+  CanModify: Boolean;
+  Done: Boolean;
+  ResultAddr, ResultSize, ResultVal: LongWord;
+  EvalRes: TOTAEvaluateResult;
+  DebugSvcs: IOTADebuggerServices;
+begin
+  Result := '';
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+    CurProcess := DebugSvcs.CurrentProcess;
+  if CurProcess <> nil then
+  begin
+    CurThread := CurProcess.CurrentThread;
+    if CurThread <> nil then
+    begin
+      repeat
+        Done := True;
+        EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
+          CanModify, eseAll, '', ResultAddr, ResultSize, ResultVal, '', 0);
+        case EvalRes of
+          erOK: Result := ResultStr;
+          erDeferred:
+            begin
+              FCompleted := False;
+              FDeferredResult := '';
+              FDeferredError := False;
+              FNotifierIndex := CurThread.AddNotifier(Self);
+              while not FCompleted do
+                DebugSvcs.ProcessDebugEvents;
+              CurThread.RemoveNotifier(FNotifierIndex);
+              FNotifierIndex := -1;
+              if not FDeferredError then
+              begin
+                if FDeferredResult <> '' then
+                  Result := FDeferredResult
+                else
+                  Result := ResultStr;
+              end;
+            end;
+          erBusy:
+            begin
+              DebugSvcs.ProcessDebugEvents;
+              Done := False;
+            end;
+        end;
+      until Done;
+      CropDebugQuotaStr(PChar(Result));
+    end;
+  end;
+end;
+
+{$IFDEF SUPPORT_32_AND_64}
+
+procedure TCnInProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
+  CanModify: Boolean; ResultAddress: TOTAAddress; ResultSize: LongWord;
+  ReturnCode: Integer);
+begin
+  // 高版本的拼写正确的 32/64 位回调，手动结束
+  FCompleted := True;
+  FDeferredResult := ResultStr;
+  FDeferredError := ReturnCode <> 0;
+end;
+
+{$ENDIF}
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+
+procedure TCnInProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
+  CanModify: Boolean; ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
+begin
+  // 高一点的版本的拼写正确的 32 位回调，调用拼写正确的 32/64 位版本
+  EvaluateComplete(ExprStr, ResultStr, CanModify, TOTAAddress(ResultAddress), ResultSize, ReturnCode);
+end;
+
+{$ELSE}
+
+procedure TCnInProcessEvaluator.EvaluteComplete(const ExprStr,
+  ResultStr: string; CanModify: Boolean; ResultAddress, ResultSize: LongWord;
+  ReturnCode: Integer);
+begin
+{$IFDEF SUPPORT_32_AND_64}
+  // 高一点的版本的拼写错误的 32 位回调，调用拼写正确的 32/64 位版本
+  EvaluateComplete(ExprStr, ResultStr, CanModify, TOTAAddress(ResultAddress), ResultSize, ReturnCode);
+{$ELSE}
+  // 低版本的拼写错误的调用 32 位的回调，手动结束
+  FCompleted := True;
+  FDeferredResult := ResultStr;
+  FDeferredError := ReturnCode <> 0;
+{$ENDIF}
+end;
+
+{$ENDIF}
+
+procedure TCnInProcessEvaluator.Modified;
+begin
+
+end;
+
+procedure TCnInProcessEvaluator.ModifyComplete(const ExprStr, ResultStr: string;
+  ReturnCode: Integer);
+begin
+
+end;
+
+procedure TCnInProcessEvaluator.ThreadNotify(Reason: TOTANotifyReason);
+begin
+
+end;
+
 initialization
 
 finalization
   if FCnWizDebuggerNotifierServices <> nil then
     FreeAndNil(FCnWizDebuggerNotifierServices);
 
-  FEvaluationManager := nil;
+//  FEvaluationManager := nil;
 
 end.

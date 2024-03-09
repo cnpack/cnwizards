@@ -42,8 +42,7 @@ uses
   StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier;
 
 type
-  TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater,
-    IOTAThreadNotifier, IOTAThreadNotifier160)
+  TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater)
     pcViews: TPageControl;
     tsProp: TTabSheet;
     mmoProp: TMemo;
@@ -54,16 +53,12 @@ type
     grdField: TStringGrid;
     procedure pcViewsChange(Sender: TObject);
   private
+    FExpression: string;
     FOwningForm: TCustomForm;
     FClosedProc: TOTAVisualizerClosedProcedure;
-    FExpression: string;
-    FNotifierIndex: Integer;
-    FCompleted: Boolean;
-    FDeferredResult: string;
-    FDeferredError: Boolean;
     FItems: TStrings;
     FAvailableState: TCnAvailableState;
-    function Evaluate(Expression: string): string;
+    FEvaluator: TCnInProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
     procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
     procedure SetAvailableState(const AState: TCnAvailableState);
@@ -84,18 +79,6 @@ type
     procedure MarkUnavailable(Reason: TOTAVisualizerUnavailableReason);
     procedure RefreshVisualizer(const Expression, TypeName, EvalResult: string);
     procedure SetClosedCallback(ClosedProc: TOTAVisualizerClosedProcedure);
-    { IOTAThreadNotifier }
-    procedure AfterSave;
-    procedure BeforeSave;
-    procedure Destroyed;
-    procedure Modified;
-    procedure ThreadNotify(Reason: TOTANotifyReason);
-    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
-      ResultAddress, ResultSize: LongWord; ReturnCode: Integer); overload;
-    procedure ModifyComplete(const ExprStr, ResultStr: string; ReturnCode: Integer);
-    { IOTAThreadNotifier160 }
-    procedure EvaluateComplete(const ExprStr, ResultStr: string; CanModify: Boolean;
-      ResultAddress: TOTAAddress; ResultSize: LongWord; ReturnCode: Integer); overload;
   end;
 
   TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
@@ -289,20 +272,20 @@ begin
 
   Clear;
 
-  S := Evaluate(FExpression + '.Active');
+  S := FEvaluator.EvaluateExpression(FExpression + '.Active');
   mmoProp.Lines.Add('Active: ' + S);
 
   if LowerCase(S) = 'true' then
   begin
-    S := Evaluate(FExpression + '.FieldCount');
+    S := FEvaluator.EvaluateExpression(FExpression + '.FieldCount');
     mmoProp.Lines.Add('FieldCount: ' + S);
-    S := Evaluate(FExpression + '.RecordCount');
+    S := FEvaluator.EvaluateExpression(FExpression + '.RecordCount');
     mmoProp.Lines.Add('RecordCount: ' + S);
-    S := Evaluate(FExpression + '.RecNo');
+    S := FEvaluator.EvaluateExpression(FExpression + '.RecNo');
     mmoProp.Lines.Add('RecNo: ' + S);
 
     // Fields Defs
-    S := Evaluate(FExpression+ '.FieldDefs.Count');
+    S := FEvaluator.EvaluateExpression(FExpression+ '.FieldDefs.Count');
     C := StrToIntDef(S, 0);
     grdField.RowCount := C + 1;
     grdField.FixedRows := 1;
@@ -320,11 +303,11 @@ begin
 
     for I := 0 to C - 1 do // 行循环
     begin
-      grdField.Cells[0, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-      grdField.Cells[1, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
-      grdField.Cells[2, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
-      grdField.Cells[3, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
-      grdField.Cells[4, I + 1] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
+      grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+      grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
+      grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
+      grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
+      grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
     end;
 
     // Data
@@ -336,20 +319,10 @@ begin
 
     for I := 0 to C - 1 do // 列循环，打印当前记录的各字段值
     begin
-      grdData.Cells[I, 0] := Evaluate(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-      grdData.Cells[I, 1] := Evaluate(FExpression + Format('.Fields[%d].AsString', [I]));
+      grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+      grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('.Fields[%d].AsString', [I]));
     end;
   end;
-end;
-
-procedure TCnDataSetViewerFrame.AfterSave;
-begin
-
-end;
-
-procedure TCnDataSetViewerFrame.BeforeSave;
-begin
-
 end;
 
 procedure TCnDataSetViewerFrame.Clear;
@@ -379,90 +352,14 @@ begin
     EnableAlign;
   end;
   CnLanguageManager.AddChangeNotifier(LanguageChanged);
+  FEvaluator := TCnInProcessEvaluator.Create(nil);
 end;
 
 destructor TCnDataSetViewerFrame.Destroy;
 begin
+  FEvaluator.Free;
   CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
   inherited;
-end;
-
-procedure TCnDataSetViewerFrame.Destroyed;
-begin
-
-end;
-
-function TCnDataSetViewerFrame.Evaluate(Expression: string): string;
-var
-  CurProcess: IOTAProcess;
-  CurThread: IOTAThread;
-  ResultStr: array[0..4095] of Char;
-  CanModify: Boolean;
-  Done: Boolean;
-  ResultAddr, ResultSize, ResultVal: LongWord;
-  EvalRes: TOTAEvaluateResult;
-  DebugSvcs: IOTADebuggerServices;
-begin
-//  Result := CnEvaluationManager.EvaluateExpression(Expression);
-
-  Result := '';
-  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
-    CurProcess := DebugSvcs.CurrentProcess;
-  if CurProcess <> nil then
-  begin
-    CurThread := CurProcess.CurrentThread;
-    if CurThread <> nil then
-    begin
-      repeat
-        Done := True;
-        EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
-          CanModify, eseAll, '', ResultAddr, ResultSize, ResultVal, '', 0);
-        case EvalRes of
-          erOK: Result := ResultStr;
-          erDeferred:
-            begin
-              FCompleted := False;
-              FDeferredResult := '';
-              FDeferredError := False;
-              FNotifierIndex := CurThread.AddNotifier(Self);
-              while not FCompleted do
-                DebugSvcs.ProcessDebugEvents;
-              CurThread.RemoveNotifier(FNotifierIndex);
-              FNotifierIndex := -1;
-              if not FDeferredError then
-              begin
-                if FDeferredResult <> '' then
-                  Result := FDeferredResult
-                else
-                  Result := ResultStr;
-              end;
-            end;
-          erBusy:
-            begin
-              DebugSvcs.ProcessDebugEvents;
-              Done := False;
-            end;
-        end;
-      until Done = True;
-      CropDebugQuotaStr(PChar(Result));
-    end;
-  end;
-end;
-
-procedure TCnDataSetViewerFrame.EvaluateComplete(const ExprStr,
-  ResultStr: string; CanModify: Boolean; ResultAddress, ResultSize: LongWord;
-  ReturnCode: Integer);
-begin
-  EvaluateComplete(ExprStr, ResultStr, CanModify, TOTAAddress(ResultAddress), ResultSize, ReturnCode);
-end;
-
-procedure TCnDataSetViewerFrame.EvaluateComplete(const ExprStr,
-  ResultStr: string; CanModify: Boolean; ResultAddress: TOTAAddress; ResultSize: LongWord;
-  ReturnCode: Integer);
-begin
-  FCompleted := True;
-  FDeferredResult := ResultStr;
-  FDeferredError := ReturnCode <> 0;
 end;
 
 procedure TCnDataSetViewerFrame.LanguageChanged(Sender: TObject);
@@ -485,17 +382,6 @@ begin
     SetAvailableState(asProcRunning)
   else if Reason = ovurOutOfScope then
     SetAvailableState(asOutOfScope);
-end;
-
-procedure TCnDataSetViewerFrame.Modified;
-begin
-
-end;
-
-procedure TCnDataSetViewerFrame.ModifyComplete(const ExprStr,
-  ResultStr: string; ReturnCode: Integer);
-begin
-
 end;
 
 procedure TCnDataSetViewerFrame.RefreshVisualizer(const Expression, TypeName,
@@ -541,11 +427,6 @@ begin
     grdField.SetFocus
   else if pcViews.ActivePage = tsData then
     grdData.SetFocus;
-end;
-
-procedure TCnDataSetViewerFrame.ThreadNotify(Reason: TOTANotifyReason);
-begin
-
 end;
 
 procedure TCnDataSetViewerFrame.Translate;
