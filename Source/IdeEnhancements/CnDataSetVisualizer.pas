@@ -28,7 +28,9 @@ unit CnDataSetVisualizer;
 * 开发平台：PWin11 + Delphi 12
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2024.03.07 V1.0
+* 修改记录：2024.03.09 V1.1
+*               重构以抽取求值类至外部
+*           2024.03.07 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -104,7 +106,7 @@ implementation
 
 uses
   DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil, BrandingAPI,
-  CnLangMgr {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnLangMgr, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.dfm}
 
@@ -201,6 +203,8 @@ var
   VisDockForm: INTACustomDockableForm;
   LThemingServices: IOTAIDEThemingServices;
 begin
+  CloseExpandableEvalViewForm; // 调试提示窗口可能过大挡住本窗口，先隐藏之，但也慢
+
   VisDockForm := TCnDataSetVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
   AForm.LockDrawing;

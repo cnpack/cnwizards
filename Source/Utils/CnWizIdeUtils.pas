@@ -149,6 +149,10 @@ const
   SCnMessageViewTabSetName = 'MessageGroups';
   SCnMvEditSourceItemName = 'mvEditSourceItem';
 
+  // 调试信息提示大窗口
+  SCnExpandableEvalViewClassName = 'TExpandableEvalView';
+  SCnExpandableEvalViewName = 'ExpandableEvalView';
+
 {$IFDEF BDS}
   SCnTreeMessageViewClassName = 'TBetterHintWindowVirtualDrawTree';
 {$ELSE}
@@ -333,6 +337,9 @@ function GetComponentPaletteControlBar: TControlBar;
 function GetIdeInsightBar: TWinControl;
 {* 返回 IDE Insight 搜索框控件对象}
 
+function GetExpandableEvalViewForm: TCustomForm;
+{* 返回调试时提示信息大窗口，低版本或非调试期可能为空}
+
 function GetMainMenuItemHeight: Integer;
 {* 返回主菜单项高度 }
 
@@ -344,6 +351,9 @@ function IsIdeDesignForm(AForm: TCustomForm): Boolean;
 
 procedure BringIdeEditorFormToFront;
 {* 将源码编辑器设为活跃}
+
+procedure CloseExpandableEvalViewForm;
+{* 关闭调试时提示信息大窗口}
 
 function IDEIsCurrentWindow: Boolean;
 {* 判断 IDE 是否是当前的活动窗口 }
@@ -1448,6 +1458,21 @@ begin
 {$ENDIF}
 end;
 
+function GetExpandableEvalViewForm: TCustomForm;
+var
+  I: Integer;
+begin
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    if Screen.CustomForms[I].ClassNameIs(SCnExpandableEvalViewClassName) then
+    begin
+      Result := Screen.CustomForms[I];
+      Exit;
+    end;
+  end;
+  Result := nil;
+end;
+
 function GetIdeInsightBar: TWinControl;
 {$IFDEF IDE_HAS_INSIGHT}
 var
@@ -1516,6 +1541,15 @@ begin
       Exit;
     end;
   end;
+end;
+
+procedure CloseExpandableEvalViewForm;
+var
+  F: TCustomForm;
+begin
+  F := GetExpandableEvalViewForm;
+  if F <> nil then
+    F.Close;
 end;
 
 // 判断 IDE 是否是当前的活动窗口
