@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs,
-  CnConsts, CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier;
+  Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, CnConsts,
+  CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF};
 
 type
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -161,9 +162,10 @@ implementation
 
 {$R *.DFM}
 
+{$IFDEF DEBUG}
 uses
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}CnDataSetVisualizer, {$ENDIF}
-  {$IFDEF DEBUG} CnDebug {$ENDIF};
+  CnDebug;
+{$ENDIF}
 
 var
   FDebuggerValueReplacerClass: TList = nil;
