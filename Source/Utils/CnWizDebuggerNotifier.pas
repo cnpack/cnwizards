@@ -1140,9 +1140,11 @@ begin
     if CurThread <> nil then
     begin
       repeat
-        Done := True;
+        Done := True; // 按需调 64 位版本，且 2005 后参数有新改动
         EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
-          CanModify, eseAll, '', ResultAddr, ResultSize, ResultVal, '', 0);
+          CanModify, {$IFDEF BDS} eseAll, {$ELSE} True, {$ENDIF} '', ResultAddr,
+          ResultSize, ResultVal {$IFDEF BDS} , '', 0 {$ENDIF});
+
         case EvalRes of
           erOK: Result := ResultStr;
           erDeferred:
@@ -1152,7 +1154,13 @@ begin
               FDeferredError := False;
               FNotifierIndex := CurThread.AddNotifier(Self);
               while not FCompleted do
+              begin
+{$IFDEF OTA_DEBUG_HAS_EVENTS}
                 DebugSvcs.ProcessDebugEvents;
+{$ELSE}
+                Application.ProcessMessages;
+{$ENDIF}
+              end;
               CurThread.RemoveNotifier(FNotifierIndex);
               FNotifierIndex := -1;
               if not FDeferredError then
@@ -1163,11 +1171,17 @@ begin
                   Result := ResultStr;
               end;
             end;
+{$IFDEF OTA_DEBUG_HAS_ERBUSY}
           erBusy:
             begin
+{$IFDEF OTA_DEBUG_HAS_EVENTS}
               DebugSvcs.ProcessDebugEvents;
+{$ELSE}
+              Application.ProcessMessages;
+{$ENDIF}
               Done := False;
             end;
+{$ENDIF}
         end;
       until Done;
       CropDebugQuotaStr(PChar(Result));
