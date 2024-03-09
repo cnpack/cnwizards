@@ -161,10 +161,10 @@ type
     function EvaluateExpression(const Expression: string; ObjectAddr: PCnOTAAddress): string; overload;
   end;
 
-  TCnInProcessEvaluator = class(TComponent, IOTAThreadNotifier
+  TCnInProcessEvaluator = class(TCnSingletonInterfacedObject, IOTAThreadNotifier
     {$IFDEF SUPPORT_32_AND_64}, IOTAThreadNotifier160 {$ENDIF})
   {* 被调试进程的远程求值类
-    因内部有消息循环，所以使用 TComponent 为基类以尽量避免接口释放问题}
+    因内部有消息循环，所以使用 TCnSingletonInterfacedObject 为基类以尽量避免接口释放问题}
   private
     FNotifierIndex: Integer;
     FCompleted: Boolean;
@@ -193,7 +193,7 @@ type
       ResultAddress: TOTAAddress; ResultSize: LongWord; ReturnCode: Integer); overload;
 {$ENDIF}
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     function EvaluateExpression(Expression: string): string;
@@ -301,7 +301,7 @@ type
     property ThreadNotifierIndex: Integer read FThreadNotifierIndex;
   end;
 
-  TCnWizDebuggerNotifierServices = class(TSingletonInterfacedObject,
+  TCnWizDebuggerNotifierServices = class(TCnSingletonInterfacedObject,
     ICnWizDebuggerNotifierServices)
   {* 实现 IDE 的 Debugger 事件通知服务接口的私有类}
   private
@@ -1103,7 +1103,7 @@ begin
 
 end;
 
-constructor TCnInProcessEvaluator.Create(AOwner: TComponent);
+constructor TCnInProcessEvaluator.Create;
 begin
   inherited;
 

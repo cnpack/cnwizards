@@ -352,7 +352,7 @@ begin
     EnableAlign;
   end;
   CnLanguageManager.AddChangeNotifier(LanguageChanged);
-  FEvaluator := TCnInProcessEvaluator.Create(nil);
+  FEvaluator := TCnInProcessEvaluator.Create;
 end;
 
 destructor TCnDataSetViewerFrame.Destroy;

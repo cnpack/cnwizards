@@ -324,7 +324,7 @@ begin
   FWizard := AWizard;
   FReplaceItems := TStringList.Create;
   FReplacers := TObjectList.Create(True);
-  FEvaluator := TCnInProcessEvaluator.Create(nil);
+  FEvaluator := TCnInProcessEvaluator.Create;
   CreateVisualizers;
 end;
 

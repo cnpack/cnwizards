@@ -99,6 +99,8 @@ begin
 end;
 
 procedure TCnTestDbgNotifMenuWizard.Execute;
+var
+  Eval: TCnInProcessEvaluator;
 begin
   if (FProcess = nil) or (FThread = nil) then
   begin
@@ -106,7 +108,12 @@ begin
       'Please Use CnDebugViewer to See the Output Results' + #13#10 + 'when Add/Delete Breakpoint and Run/Pause/Stop Process.');
   end;
 
-  CnDebugger.TraceMsg(CnEvaluationManager.EvaluateExpression('Screen.FormCount'));
+  Eval := TCnInProcessEvaluator.Create;
+  try
+    CnDebugger.TraceMsg(Eval.EvaluateExpression('Screen.FormCount'));
+  finally
+    Eval.Free;
+  end;
 end;
 
 function TCnTestDbgNotifMenuWizard.GetCaption: string;
@@ -190,7 +197,7 @@ begin
     begin
       CnDebugger.TraceFmt('Notify Evaluation OK. Return String: ', [a]);
       CnDebugger.TraceFmt('Notify ResAddr %x, ResSize %x, ResVal %x.', [ResAddr, ResSize, ResVal]);
-      // 如果返回的是对象，则ResAddr就是此对象的引用地址，也就是对象本身。
+      // 如果返回的是对象，则 ResAddr 就是此对象的引用地址，也就是对象本身。
       // 但由于地址空间不同，所以没法直接使用子进程的此对象。所以下两句不可用。
       // if ResAddr <> 0 then
       //  CnDebugger.TraceMsg(TApplication(TObject(ResAddr)).Title);
