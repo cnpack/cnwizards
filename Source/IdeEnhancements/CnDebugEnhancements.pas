@@ -40,22 +40,23 @@ interface
 {$IFDEF CNWIZARDS_CNDEBUGENHANCEWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, CnConsts,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
+  Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF};
+  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF}, CnWizShareImages,
+  CnWizMultiLang, CnWizUtils;
 
 type
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  TCnDebuggerValueReplaceManager = class;
-{$ENDIF}
-
   TCnDebugEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
   {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     FDataSetViewer: IOTADebuggerVisualizer;
+    FDataSetRegistered: Boolean;
+    FEnableDataSet: Boolean;
+    procedure SetEnableDataSet(const Value: Boolean);
+    procedure CheckDataSetViewerRegistration;
   {$ENDIF}
 {$ENDIF}
   protected
@@ -74,6 +75,10 @@ type
 
     procedure Config; override;
 
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+    property EnableDataSet: Boolean read FEnableDataSet write SetEnableDataSet;
+    {* 是否启用 DataSet Viewer}
+ {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
   end;
 
@@ -136,7 +141,7 @@ type
 
 {$ENDIF}
 
-  TCnDebugEnhanceForm = class(TForm)
+  TCnDebugEnhanceForm = class(TCnTranslateForm)
     btnOK: TButton;
     btnCancel: TButton;
     btnHelp: TButton;
@@ -144,6 +149,20 @@ type
     tsDebugHint: TTabSheet;
     lblEnhanceHint: TLabel;
     lvReplacers: TListView;
+    actlstDebug: TActionList;
+    actAddHint: TAction;
+    actRemoveHint: TAction;
+    tlbHint: TToolBar;
+    btnAddHint: TToolButton;
+    btnRemoveHint: TToolButton;
+    tsViewer: TTabSheet;
+    grpExternalViewer: TGroupBox;
+    chkDataSetViewer: TCheckBox;
+    procedure actRemoveHintExecute(Sender: TObject);
+    procedure actlstDebugUpdate(Action: TBasicAction;
+      var Handled: Boolean);
+    procedure actAddHintExecute(Sender: TObject);
+    procedure lvReplacersDblClick(Sender: TObject);
   private
 
   public
@@ -151,8 +170,12 @@ type
     procedure SaveReplacersToStrings(List: TStringList);
   end;
 
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
 procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
 {* 供外界的 TCnDebuggerBaseValueReplacer 子类注册，实现针对特定类型的调试期显示内容的值的替换}
+
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNDEBUGENHANCEWIZARD}
 
@@ -162,10 +185,13 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnCommon {$IFDEF DEBUG}, CnDebug {$ENDIF};
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
+const
+  csEnableDataSet = 'EnableDataSet';
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -176,16 +202,59 @@ begin
     FDebuggerValueReplacerClass.Add(ReplacerClass);
 end;
 
+{$ENDIF}
+
 { TCnDebugEnhanceWizard }
+
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+
+procedure TCnDebugEnhanceWizard.CheckDataSetViewerRegistration;
+var
+  ID: IOTADebuggerServices;
+begin
+  if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+    Exit;
+
+  if Active and FEnableDataSet then
+  begin
+    if not FDataSetRegistered then
+    begin
+      ID.RegisterDebugVisualizer(FDataSetViewer);
+      FDataSetRegistered := True;
+    end;
+  end
+  else
+  begin
+    if FDataSetRegistered then
+    begin
+      ID.UnregisterDebugVisualizer(FDataSetViewer);
+      FDataSetRegistered := False;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnDebugEnhanceWizard.Config;
 begin
   with TCnDebugEnhanceForm.Create(nil) do
   begin
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
+{$ENDIF}
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+    chkDataSetViewer.Checked := FEnableDataSet;
+{$ELSE}
+    chkDataSetViewer.Enabled := True;
+{$ENDIF}
     if ShowModal = mrOK then
     begin
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+      EnableDataSet := chkDataSetViewer.Checked;
+{$ENDIF}
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
+{$ENDIF}
       DoSaveSettings;
     end;
     Free;
@@ -204,12 +273,16 @@ begin
 end;
 
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 var
   Mgr: TCnDebuggerValueReplaceManager;
+{$ENDIF}
 begin
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   Mgr := FReplaceManager as TCnDebuggerValueReplaceManager;
   Results.Add('Replace Item Count: ' + IntToStr(Mgr.FReplaceItems.Count));
   Results.AddStrings(Mgr.FReplaceItems);
+{$ENDIF}
 end;
 
 destructor TCnDebugEnhanceWizard.Destroy;
@@ -263,6 +336,10 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
 {$ENDIF}
+
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+  EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
+{$ENDIF}
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -277,6 +354,10 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
 {$ENDIF}
+
+{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+  Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
+{$ENDIF}
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
@@ -290,12 +371,10 @@ begin
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
 
+  CheckDataSetViewerRegistration;
   if Active then
   begin
     ID.RegisterDebugVisualizer(FReplaceManager);
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
-    ID.RegisterDebugVisualizer(FDataSetViewer);
-  {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnDebugEnhanceWizard Register Viewers');
 {$ENDIF}
@@ -303,9 +382,6 @@ begin
   else
   begin
     ID.UnregisterDebugVisualizer(FReplaceManager);
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
-    ID.UnregisterDebugVisualizer(FDataSetViewer);
-  {$ENDIF}
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister Viewers');
 {$ENDIF}
@@ -314,6 +390,12 @@ begin
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
+procedure TCnDebugEnhanceWizard.SetEnableDataSet(const Value: Boolean);
+begin
+  FEnableDataSet := Value;
+  CheckDataSetViewerRegistration;
+end;
 
 { TCnDebuggerValueReplaceManager }
 
@@ -529,15 +611,90 @@ begin
 {$ENDIF}
 end;
 
-initialization
-  FDebuggerValueReplacerClass := TList.Create;
+procedure TCnDebugEnhanceForm.actRemoveHintExecute(Sender: TObject);
+begin
+  if lvReplacers.Selected <> nil then
+    if QueryDlg(SCnDebugRemoveReplacerHint) then
+      lvReplacers.Items.Delete(lvReplacers.Selected.Index);
+end;
 
+procedure TCnDebugEnhanceForm.actlstDebugUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  if Action = actRemoveHint then
+    (Action as TCustomAction).Enabled := lvReplacers.Selected <> nil
+  else
+    (Action as TCustomAction).Enabled := True;
+  Handled := True;
+end;
+
+procedure TCnDebugEnhanceForm.actAddHintExecute(Sender: TObject);
+var
+  S, S1, S2: string;
+  Idx: Integer;
+  Item: TListItem;
+begin
+  S := 'TSample=%s.ToString';
+  if CnWizInputQuery(SCnDebugAddReplacerCaption, SCnDebugAddReplacerHint, S) then
+  begin
+    Idx := Pos('=', S);
+    if Idx > 1 then
+    begin
+      S1 := Copy(S, 1, Idx - 1);
+      S2 := Copy(S, Idx + 1, MaxInt);
+      if Pos('%s', S2) > 0 then
+      begin
+        Item := lvReplacers.Items.Add;
+        Item.Caption := S1;
+        Item.SubItems.Add(S2);
+        Exit;
+      end;
+    end;
+
+    ErrorDlg(SCnDebugErrorReplacerFormat);
+  end;
+end;
+
+procedure TCnDebugEnhanceForm.lvReplacersDblClick(Sender: TObject);
+var
+  S, S1, S2: string;
+  Idx: Integer;
+  Item: TListItem;
+begin
+  Item := lvReplacers.Selected;
+  if Item = nil then
+    Exit;
+
+  S := Item.Caption + '=' + Item.SubItems[0];
+  if CnWizInputQuery(SCnDebugAddReplacerCaption, SCnDebugAddReplacerHint, S) then
+  begin
+    Idx := Pos('=', S);
+    if Idx > 1 then
+    begin
+      S1 := Copy(S, 1, Idx - 1);
+      S2 := Copy(S, Idx + 1, MaxInt);
+      if Pos('%s', S2) > 0 then
+      begin
+        Item.Caption := S1;
+        Item.SubItems[0] := S2;
+        Exit;
+      end;
+    end;
+
+    ErrorDlg(SCnDebugErrorReplacerFormat);
+  end;
+end;
+
+initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  FDebuggerValueReplacerClass := TList.Create;
   RegisterCnWizard(TCnDebugEnhanceWizard);
 {$ENDIF}
 
 finalization
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FDebuggerValueReplacerClass.Free;
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNDEBUGENHANCEWIZARD}
 end.

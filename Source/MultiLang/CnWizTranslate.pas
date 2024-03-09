@@ -962,6 +962,23 @@ begin
   TranslateStr(SCnVerEnhanceWizardName, 'SCnVerEnhanceWizardName');
   TranslateStr(SCnVerEnhanceWizardComment, 'SCnVerEnhanceWizardComment');
 
+  // CnDebugEnhanceWizard
+  TranslateStr(SCnDebugEnhanceWizardName, 'SCnDebugEnhanceWizardName');
+  TranslateStr(SCnDebugEnhanceWizardComment, 'SCnDebugEnhanceWizardComment');
+  TranslateStr(SCnDebugVisualizerName, 'SCnDebugVisualizerName');
+  TranslateStr(SCnDebugVisualizerDescription, 'SCnDebugVisualizerDescription');
+  TranslateStr(SCnDebugDataSetViewerName, 'SCnDebugDataSetViewerName');
+  TranslateStr(SCnDebugDataSetViewerDescription, 'SCnDebugDataSetViewerDescription');
+  TranslateStr(SCnDebugDataSetViewerMenuText, 'SCnDebugDataSetViewerMenuText');
+  TranslateStr(SCnDataSetViewerFormCaption, 'SCnDataSetViewerFormCaption');
+  TranslateStr(SCnDebugErrorProcessNotAccessible, 'SCnDebugErrorProcessNotAccessible');
+  TranslateStr(SCnDebugErrorValueNotAccessible, 'SCnDebugErrorValueNotAccessible');
+  TranslateStr(SCnDebugErrorOutOfScope, 'SCnDebugErrorOutOfScope');
+  TranslateStr(SCnDebugAddReplacerCaption, 'SCnDebugAddReplacerCaption');
+  TranslateStr(SCnDebugAddReplacerHint, 'SCnDebugAddReplacerHint');
+  TranslateStr(SCnDebugRemoveReplacerHint, 'SCnDebugRemoveReplacerHint');
+  TranslateStr(SCnDebugErrorReplacerFormat, 'SCnDebugErrorReplacerFormat');
+
   // CnCorPropWizard
   TranslateStr(SCnCorrectPropertyName, 'SCnCorrectPropertyName');
   TranslateStr(SCnCorrectPropertyMenuCaption, 'SCnCorrectPropertyMenuCaption');

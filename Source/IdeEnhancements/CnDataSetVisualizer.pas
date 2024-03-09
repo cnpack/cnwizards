@@ -111,11 +111,6 @@ uses
 
 {$R *.dfm}
 
-resourcestring
-  sProcessNotAccessible = 'process not accessible';
-  sValueNotAccessible = 'value not accessible';
-  sOutOfScope = 'out of scope';
-
 type
   ICnFrameFormHelper = interface
     ['{0FD4A98F-CE6B-422A-BF13-14E59707D3B2}']
@@ -252,11 +247,11 @@ begin
     asAvailable:
       ;
     asProcRunning:
-      S := sProcessNotAccessible;
+      S := SCnDebugErrorProcessNotAccessible;
     asOutOfScope:
-      S := sOutOfScope;
+      S := SCnDebugErrorOutOfScope;
     asNotAvailable:
-      S := sValueNotAccessible;
+      S := SCnDebugErrorValueNotAccessible;
   end;
   if S <> '' then
     mmoProp.Lines.Text := '';

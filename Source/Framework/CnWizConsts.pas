@@ -1299,6 +1299,10 @@ var
   SCnDebugErrorProcessNotAccessible: string = 'Process NOT Accessible';
   SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
   SCnDebugErrorOutOfScope: string = 'Out of Scope';
+  SCnDebugAddReplacerCaption: string = 'Enter a Replacer';
+  SCnDebugAddReplacerHint: string = 'ClassName=Expression with %s';
+  SCnDebugRemoveReplacerHint: string = 'Sure to Delete Selected Hint?';
+  SCnDebugErrorReplacerFormat: string = 'Invalid Replacer Hint Format';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';
