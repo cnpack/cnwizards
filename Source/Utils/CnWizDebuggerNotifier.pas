@@ -159,10 +159,10 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
-    function EvaluateExpression(const Expression: string): string; overload;
-    {* 直接求简单表达式的值，返回字符串结果}
-    function EvaluateExpression(const Expression: string; ObjectAddr: PCnOTAAddress): string; overload;
-    {* 直接求表达式的值，返回字符串结果；如果是对象，则在 ObjectAddr 所指处返回其地址}
+    function EvaluateExpression(const Expression: string;
+      ObjectAddr: PCnOTAAddress = nil): string;
+    {* 求表达式的值，返回字符串结果；
+       如果是对象，且传入了 ObjectAddr 地址，则额外在 ObjectAddr 所指处返回其地址}
   end;
 
 procedure CropDebugQuotaStr(Str: PChar);
@@ -943,11 +943,6 @@ end;
 procedure TCnInProcessEvaluator.Destroyed;
 begin
 
-end;
-
-function TCnInProcessEvaluator.EvaluateExpression(const Expression: string): string;
-begin
-  EvaluateExpression(Expression, nil);
 end;
 
 function TCnInProcessEvaluator.EvaluateExpression(const Expression: string;
