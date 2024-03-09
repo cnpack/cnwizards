@@ -65,8 +65,9 @@ type
     procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
-
+{$IFDEF DELPHI120_ATHENS_UP}
     procedure WMDPIChangedAfterParent(var Message: TMessage); message WM_DPICHANGED_AFTERPARENT;
+{$ENDIF}
   protected
     procedure SetParent(AParent: TWinControl); override;
 
@@ -207,8 +208,11 @@ begin
 
   VisDockForm := TCnDataSetVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
+
+{$IFDEF DELPHI120_ATHENS_UP}
   AForm.LockDrawing;
   try
+{$ENDIF}
     AForm.Left := SuggestedLeft;
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
@@ -225,12 +229,16 @@ begin
       AFrame.Panel1.Color := ColorBlendRGB(LThemingServices.StyleServices.GetSystemColor(clWindowText),
       LThemingServices.StyleServices.GetSystemColor(clWindow), 0.5);
 
+{$IFDEF DELPHI120_ATHENS_UP}
       if TIDEThemeMetrics.Font.Enabled then
         AFrame.Font.Assign(TIDEThemeMetrics.Font.GetFont());
+{$ENDIF}
     end;
+{$IFDEF DELPHI120_ATHENS_UP}
   finally
     AForm.UnlockDrawing;
   end;
+{$ENDIF}
 end;
 
 { TCnDataSetViewerFrame }
@@ -416,12 +424,16 @@ begin
   inherited;
 end;
 
+{$IFDEF DELPHI120_ATHENS_UP}
+
 procedure TCnDataSetViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
 begin
   inherited;
   if TIDEThemeMetrics.Font.Enabled then
     TIDEThemeMetrics.Font.AdjustDPISize(Font, TIDEThemeMetrics.Font.Size, PixelsPerInch);
 end;
+
+{$ENDIF}
 
 procedure TCnDataSetViewerFrame.pcViewsChange(Sender: TObject);
 begin

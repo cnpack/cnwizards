@@ -36,6 +36,10 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsProp: TTabSheet
         Caption = '&Property'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object mmoProp: TMemo
           Left = 0
           Top = 0
@@ -52,6 +56,10 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsField: TTabSheet
         Caption = '&Field'
         ImageIndex = 2
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object grdField: TStringGrid
           Left = 0
           Top = 0
@@ -66,7 +74,6 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
           Font.Height = -11
           Font.Name = 'Courier New'
           Font.Style = []
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goFixedRowDefAlign]
           ParentFont = False
           TabOrder = 0
         end
@@ -74,6 +81,10 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsData: TTabSheet
         Caption = '&Data'
         ImageIndex = 3
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object grdData: TStringGrid
           Left = 0
           Top = 0
@@ -88,7 +99,6 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
           Font.Height = -11
           Font.Name = 'Courier New'
           Font.Style = []
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goFixedRowDefAlign]
           ParentFont = False
           TabOrder = 0
         end
