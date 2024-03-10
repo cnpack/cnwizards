@@ -33,6 +33,3 @@
   {$ENDIF}
 {$ENDIF}
 
-{$IFDEF DELPHIXE_UP}
-  {$DEFINE CNWIZARDS_DEBUG_EXTERNALVIEWER}  // Delphi XE 起支持 DebugVisualizer，包括 Replacer 和 External Viewer
-{$ENDIF}

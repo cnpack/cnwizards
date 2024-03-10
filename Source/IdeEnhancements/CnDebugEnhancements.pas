@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}, CnDataSetVisualizer {$ENDIF}, CnWizShareImages,
+  {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}, CnDataSetVisualizer {$ENDIF}, CnWizShareImages,
   CnWizMultiLang, CnWizUtils;
 
 type
@@ -51,13 +51,11 @@ type
   private
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     FDataSetViewer: IOTADebuggerVisualizer;
     FDataSetRegistered: Boolean;
     FEnableDataSet: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
     procedure CheckDataSetViewerRegistration;
-  {$ENDIF}
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -75,7 +73,7 @@ type
 
     procedure Config; override;
 
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     property EnableDataSet: Boolean read FEnableDataSet write SetEnableDataSet;
     {*  «∑Ò∆Ù”√ DataSet Viewer}
  {$ENDIF}
@@ -206,7 +204,13 @@ end;
 
 { TCnDebugEnhanceWizard }
 
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+      
+procedure TCnDebugEnhanceWizard.SetEnableDataSet(const Value: Boolean);
+begin
+  FEnableDataSet := Value;
+  CheckDataSetViewerRegistration;
+end;
 
 procedure TCnDebugEnhanceWizard.CheckDataSetViewerRegistration;
 var
@@ -241,18 +245,14 @@ begin
   begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
-{$ENDIF}
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
     chkDataSetViewer.Checked := FEnableDataSet;
 {$ELSE}
-    chkDataSetViewer.Enabled := True;
+    chkDataSetViewer.Enabled := False;
 {$ENDIF}
     if ShowModal = mrOK then
     begin
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
-      EnableDataSet := chkDataSetViewer.Checked;
-{$ENDIF}
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+      EnableDataSet := chkDataSetViewer.Checked;
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
       DoSaveSettings;
@@ -266,9 +266,7 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FReplaceManager := TCnDebuggerValueReplaceManager.Create(Self);
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
-  {$ENDIF}
 {$ENDIF}
 end;
 
@@ -298,15 +296,12 @@ begin
       Exit;
 
     ID.UnregisterDebugVisualizer(FReplaceManager);
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
-    ID.UnregisterDebugVisualizer(FDataSetViewer);
-  {$ENDIF}
+    if FDataSetRegistered then
+      ID.UnregisterDebugVisualizer(FDataSetViewer);
   end;
 
   FReplaceManager := nil;
-  {$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   FDataSetViewer := nil;
-  {$ENDIF}
 {$ENDIF}
   inherited;
 end;
@@ -335,9 +330,6 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
-{$ENDIF}
-
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
 {$ENDIF}
 end;
@@ -353,9 +345,6 @@ procedure TCnDebugEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
-{$ENDIF}
-
-{$IFDEF CNWIZARDS_DEBUG_EXTERNALVIEWER}
   Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
 {$ENDIF}
 end;
@@ -390,12 +379,6 @@ begin
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-
-procedure TCnDebugEnhanceWizard.SetEnableDataSet(const Value: Boolean);
-begin
-  FEnableDataSet := Value;
-  CheckDataSetViewerRegistration;
-end;
 
 { TCnDebuggerValueReplaceManager }
 
