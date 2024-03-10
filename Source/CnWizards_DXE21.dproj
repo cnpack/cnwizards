@@ -479,6 +479,13 @@
 			<DCCReference Include="IdeEnhancements\CnVerEnhanceFrm.pas">
 				<Form>CnVerEnhanceForm</Form>
 			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnDebugEnhancements.pas">
+				<Form>CnDebugEnhanceForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnDataSetVisualizer.pas">
+				<Form>CnDataSetViewerFrame</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
 			<DCCReference Include="ProjectExtWizard\CnProjectDirBuilderFrm.pas">
 				<Form>CnProjectDirBuilderForm</Form>
 			</DCCReference>

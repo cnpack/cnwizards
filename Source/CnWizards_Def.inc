@@ -33,6 +33,6 @@
   {$ENDIF}
 {$ENDIF}
 
-{$IFDEF DELPHIXE8_UP}
-  {$DEFINE CNWIZARDS_DEBUG_EXTERNALVIEWER}  // 只在 D12 测过调试器的外部查看器，低版本如 11 等测通后也可放开
+{$IFDEF DELPHIXE_UP}
+  {$DEFINE CNWIZARDS_DEBUG_EXTERNALVIEWER}  // Delphi XE 起支持 DebugVisualizer，包括 Replacer 和 External Viewer
 {$ENDIF}

@@ -203,6 +203,8 @@ uses
   CnProcListWizard in 'SimpleWizards\CnProcListWizard.pas' {CnProcListForm},
   CnVerEnhancements in 'IdeEnhancements\CnVerEnhancements.pas',
   CnVerEnhanceFrm in 'IdeEnhancements\CnVerEnhanceFrm.pas' {CnVerEnhanceForm},
+  CnDebugEnhancements in 'IdeEnhancements\CnDebugEnhancements.pas' {CnDebugEnhanceForm},
+  CnDataSetVisualizer in 'IdeEnhancements\CnDataSetVisualizer.pas' {CnDataSetViewerFrame: TFrame},
   CnProjectDirBuilderFrm in 'ProjectExtWizard\CnProjectDirBuilderFrm.pas' {CnProjectDirBuilderForm},
   CnProjectDirImportFrm in 'ProjectExtWizard\CnProjectDirImportFrm.pas' {CnImportDirForm},
   CnDCU32 in 'Utils\CnDCU32.pas',

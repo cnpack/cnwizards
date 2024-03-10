@@ -109,7 +109,8 @@ type
 implementation
 
 uses
-  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil, BrandingAPI,
+  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil,
+  {$IFDEF DELPHI103_RIO_UP}BrandingAPI, {$ENDIF}
   CnLangMgr, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.dfm}
