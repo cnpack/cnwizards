@@ -101,6 +101,7 @@ end;
 procedure TCnTestDbgNotifMenuWizard.Execute;
 var
   Eval: TCnInProcessEvaluator;
+  S: string;
 begin
   if (FProcess = nil) or (FThread = nil) then
   begin
@@ -110,10 +111,20 @@ begin
 
   Eval := TCnInProcessEvaluator.Create;
   try
-    CnDebugger.TraceMsg(Eval.EvaluateExpression('Screen.FormCount'));
+    S := Eval.EvaluateExpression('Screen.FormCount');
+    if S <> '' then
+      CnDebugger.TraceMsg(S)
+    else
+      CnDebugger.TraceMsg('Empty String Returned from Local Evaluator');
   finally
     Eval.Free;
   end;
+
+  S := CnInProcessEvaluator.EvaluateExpression('ADOTable1');
+  if S <> '' then
+    CnDebugger.TraceMsg(S)
+  else
+    CnDebugger.TraceMsg('Empty String Returned from Global Evaluator');
 end;
 
 function TCnTestDbgNotifMenuWizard.GetCaption: string;

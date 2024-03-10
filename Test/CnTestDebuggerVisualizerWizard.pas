@@ -40,7 +40,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts;
+  ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts,
+  CnDataSetVisualizer;
 
 type
 
@@ -53,7 +54,9 @@ type
   TCnTestDebuggerVisualizerWizard = class(TCnMenuWizard)
   private
     FRegistered: Boolean;
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FVisualizer: IOTADebuggerVisualizerValueReplacer;
+{$ENDIF}
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -69,6 +72,8 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
   end;
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
   TCnTestDebuggerVisualizerValueReplacer = class(TInterfacedObject,
     IOTAThreadNotifier, IOTADebuggerVisualizerValueReplacer)
@@ -99,6 +104,8 @@ type
 
     function GetReplacementValue(const Expression, TypeName, EvalResult: string): string;
   end;
+
+{$ENDIF}
 
 implementation
 
@@ -131,6 +138,7 @@ destructor TCnTestDebuggerVisualizerWizard.Destroy;
 var
   ID: IOTADebuggerServices;
 begin
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   if FRegistered and (FVisualizer <> nil) then
   begin
     if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
@@ -138,7 +146,7 @@ begin
     ID.UnregisterDebugVisualizer(FVisualizer);
     FVisualizer := nil;
   end;
-
+{$ENDIF}
   inherited;
 end;
 
@@ -146,6 +154,7 @@ procedure TCnTestDebuggerVisualizerWizard.Execute;
 var
   ID: IOTADebuggerServices;
 begin
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
 
@@ -164,6 +173,9 @@ begin
     FRegistered := False;
     ShowMessage('Debugger Visualizer UnRegistered');
   end;
+{$ENDIF}
+
+  ShowDataSetExternalViewer('ADOTable1');
 end;
 
 function TCnTestDebuggerVisualizerWizard.GetCaption: string;
@@ -208,6 +220,8 @@ procedure TCnTestDebuggerVisualizerWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
 end;
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
 { TCnTestDebuggerVisualizerValueReplacer }
 
@@ -382,9 +396,9 @@ begin
 
 end;
 
-initialization
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  RegisterCnWizard(TCnTestDebuggerVisualizerWizard); // 注册此测试专家
 {$ENDIF}
+
+initialization
+  RegisterCnWizard(TCnTestDebuggerVisualizerWizard); // 注册此测试专家
 
 end.

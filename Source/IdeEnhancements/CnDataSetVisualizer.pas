@@ -41,10 +41,13 @@ interface
 
 uses
   SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
-  StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier;
+  StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier, CnWizIdeDock;
 
 type
-  TCnDataSetViewerFrame = class(TFrame, IOTADebuggerVisualizerExternalViewerUpdater)
+  TCnDataSetViewerFrame = class(TFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
+    IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
+  {* 在支持调试可视化接口的 Delphi 下，可实例化后给 IDE 创建浮动窗口
+    不支持的低版本 Delphi 中，通过菜单入口自行创建浮动窗口并嵌入该 Frame 实例}
     pcViews: TPageControl;
     tsProp: TTabSheet;
     mmoProp: TMemo;
@@ -57,7 +60,9 @@ type
   private
     FExpression: string;
     FOwningForm: TCustomForm;
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FClosedProc: TOTAVisualizerClosedProcedure;
+{$ENDIF}
     FItems: TStrings;
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnInProcessEvaluator;
@@ -77,12 +82,16 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     { IOTADebuggerVisualizerExternalViewerUpdater }
     procedure CloseVisualizer;
     procedure MarkUnavailable(Reason: TOTAVisualizerUnavailableReason);
     procedure RefreshVisualizer(const Expression, TypeName, EvalResult: string);
     procedure SetClosedCallback(ClosedProc: TOTAVisualizerClosedProcedure);
+{$ENDIF}
   end;
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
   TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
     {$IFDEF DELPHI102_TOKYO_UP} IOTADebuggerVisualizer250, {$ENDIF}
@@ -106,14 +115,23 @@ type
       SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
   end;
 
+{$ENDIF}
+
+procedure ShowDataSetExternalViewer(const Expression: string);
+{* 以手工调用的方式传入一个类型是 TDataSet 的表达式并显示，不走 Delphi 自身的提示按钮}
+
 implementation
 
 uses
-  DesignIntf, Actnlist, ImgList, Menus, IniFiles, GraphUtil,
-  {$IFDEF DELPHI103_RIO_UP}BrandingAPI, {$ENDIF}
+  {$IFDEF COMPILER6_UP} DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}
+   Actnlist, ImgList, Menus, IniFiles, CnCommon,
+  {$IFDEF IDE_SUPPORT_THEMING} GraphUtil, {$ENDIF}
+  {$IFDEF DELPHI103_RIO_UP} BrandingAPI, {$ENDIF}
   CnLangMgr, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.dfm}
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
 type
   ICnFrameFormHelper = interface
@@ -152,6 +170,10 @@ type
     procedure SetForm(Form: TCustomForm);
     procedure SetFrame(Frame: TCustomFrame);
   end;
+
+{$ENDIF}
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
 { TCnDebuggerDataSetVisualizer }
 
@@ -248,6 +270,8 @@ begin
   end;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 { TCnDataSetViewerFrame }
 
@@ -356,12 +380,6 @@ begin
   grdData.Cells[0, 0] := '';
 end;
 
-procedure TCnDataSetViewerFrame.CloseVisualizer;
-begin
-  if FOwningForm <> nil then
-    FOwningForm.Close;
-end;
-
 constructor TCnDataSetViewerFrame.Create(AOwner: TComponent);
 begin
   inherited;
@@ -395,6 +413,14 @@ begin
   end;
 end;
 
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
+procedure TCnDataSetViewerFrame.CloseVisualizer;
+begin
+  if FOwningForm <> nil then
+    FOwningForm.Close;
+end;
+
 procedure TCnDataSetViewerFrame.MarkUnavailable(
   Reason: TOTAVisualizerUnavailableReason);
 begin
@@ -416,6 +442,8 @@ begin
   FClosedProc := ClosedProc;
 end;
 
+{$ENDIF}
+
 procedure TCnDataSetViewerFrame.SetForm(AForm: TCustomForm);
 begin
   FOwningForm := AForm;
@@ -426,8 +454,10 @@ begin
   if AParent = nil then
   begin
     FreeAndNil(FItems);
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     if Assigned(FClosedProc) then
       FClosedProc;
+{$ENDIF}
   end;
   inherited;
 end;
@@ -466,6 +496,8 @@ begin
     end;
   end;
 end;
+
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
 { TCnDataSetVisualizerForm }
 
@@ -567,6 +599,29 @@ end;
 procedure TCnDataSetVisualizerForm.SetFrame(Frame: TCustomFrame);
 begin
    FMyFrame := TCnDataSetViewerFrame(Frame);
+end;
+
+{$ENDIF}
+
+procedure ShowDataSetExternalViewer(const Expression: string);
+var
+  F: TCnIdeDockForm;
+  Fm: TCnDataSetViewerFrame;
+begin
+  if not CnWizDebuggerObjectInheritsFrom(Expression, 'TDataSet') then
+  begin
+    ErrorDlg(Format(SCnDebugErrorExprNotAClass, [Expression, 'TDataSet']));
+    Exit;
+  end;
+
+  F := TCnIdeDockForm.Create(Application);
+  F.Caption := Format(SCnDataSetViewerFormCaption, [Expression])
+  Fm := TCnDataSetViewerFrame.Create(F);
+  Fm.Parent := F;
+  Fm.Align := alClient;
+  Fm.AddDataSetContent(Expression, '', '');
+
+  F.Show;
 end;
 
 end.
