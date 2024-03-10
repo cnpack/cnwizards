@@ -85,18 +85,21 @@ type
   end;
 
   TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
-    IOTADebuggerVisualizer250, IOTADebuggerVisualizerExternalViewer)
+    {$IFDEF DELPHI102_TOKYO_UP} IOTADebuggerVisualizer250, {$ENDIF}
+    IOTADebuggerVisualizerExternalViewer)
   public
     { IOTADebuggerVisualizer }
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
-      var AllDescendants: Boolean); overload;
+      var AllDescendants: Boolean); {$IFDEF DELPHI102_TOKYO_UP} overload; {$ENDIF}
     function GetVisualizerIdentifier: string;
     function GetVisualizerName: string;
     function GetVisualizerDescription: string;
+{$IFDEF DELPHI102_TOKYO_UP}
     { IOTADebuggerVisualizer250 }
     procedure GetSupportedType(Index: Integer; var TypeName: string;
       var AllDescendants: Boolean; var IsGeneric: Boolean); overload;
+{$ENDIF}
     { IOTADebuggerVisualizerExternalViewer }
     function GetMenuText: string;
     function Show(const Expression, TypeName, EvalResult: string;
@@ -168,6 +171,8 @@ begin
   AllDescendants := True;
 end;
 
+{$IFDEF DELPHI102_TOKYO_UP}
+
 procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
@@ -175,6 +180,8 @@ begin
   AllDescendants := True;
   IsGeneric := False;
 end;
+
+{$ENDIF}
 
 function TCnDebuggerDataSetVisualizer.GetVisualizerDescription: string;
 begin
@@ -197,7 +204,9 @@ var
   AForm: TCustomForm;
   AFrame: TCnDataSetViewerFrame;
   VisDockForm: INTACustomDockableForm;
+{$IFDEF IDE_SUPPORT_THEMING}
   LThemingServices: IOTAIDEThemingServices;
+{$ENDIF}
 begin
   CloseExpandableEvalViewForm; // 调试提示窗口可能过大挡住本窗口，先隐藏之，但也慢
 
@@ -215,6 +224,7 @@ begin
     AFrame.AddDataSetContent(Expression, TypeName, EvalResult);
     AFrame.pcViewsChange(nil);
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
+{$IFDEF IDE_SUPPORT_THEMING}
     if Supports(BorlandIDEServices, IOTAIDEThemingServices, LThemingServices) and
       LThemingServices.IDEThemingEnabled then
     begin
@@ -229,6 +239,7 @@ begin
         AFrame.Font.Assign(TIDEThemeMetrics.Font.GetFont());
 {$ENDIF}
     end;
+{$ENDIF}
 {$IFDEF DELPHI120_ATHENS_UP}
   finally
     AForm.UnlockDrawing;
