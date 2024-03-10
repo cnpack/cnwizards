@@ -117,7 +117,6 @@ type
     procedure btnImportClick(Sender: TObject);
     procedure btnExportClick(Sender: TObject);
   private
-    { Private declarations }
     List: TCnWebSearchCollection;
     IsUpdating: Boolean;
     procedure UpdateControls;
@@ -125,7 +124,6 @@ type
     procedure SetDataToControls;
     procedure GetDataFromControls;
   public
-    { Public declarations }
     function GetHelpTopic: string; override;
   end;
 

@@ -42,13 +42,14 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
-  CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier
-  {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}, CnDataSetVisualizer {$ENDIF}, CnWizShareImages,
-  CnWizMultiLang, CnWizUtils;
+  CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
+  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils;
 
 type
-  TCnDebugEnhanceWizard = class(TCnIDEEnhanceWizard)
+  TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
   private
+    FIdEvalAsDataSet: Integer;
+    FIdConfig: Integer;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
     FDataSetViewer: IOTADebuggerVisualizer;
@@ -60,18 +61,24 @@ type
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
+  protected
+    procedure SubActionExecute(Index: Integer); override;
+    procedure SubActionUpdate(Index: Integer); override;
   public
     constructor Create; override;
     destructor Destroy; override;
 
-    class function IsInternalWizard: Boolean; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
 
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure ResetSettings(Ini: TCustomIniFile); override;
 
+    function GetCaption: string; override;
+    function GetHint: string; override;
     procedure Config; override;
+
+    procedure AcquireSubActions; override;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     property EnableDataSet: Boolean read FEnableDataSet write SetEnableDataSet;
@@ -268,6 +275,10 @@ begin
   FReplaceManager := TCnDebuggerValueReplaceManager.Create(Self);
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
 {$ENDIF}
+
+//  FEvalAsDataSetAction := WizActionMgr.AddAction(SCnDebugEvalAsDataSetActionName,
+//    SCnDebugEvalAsDataSetActionCaption, 0, OnEvalAsDataSetExec,
+//    SCnDebugEvalAsDataSetActionName, SCnDebugEvalAsDataSetActionHint);
 end;
 
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
@@ -318,11 +329,6 @@ begin
   Author := SCnPack_LiuXiao;
   Email := SCnPack_LiuXiaoEmail;
   Comment := SCnDebugEnhanceWizardComment;
-end;
-
-class function TCnDebugEnhanceWizard.IsInternalWizard: Boolean;
-begin
-  Result := True;
 end;
 
 procedure TCnDebugEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
@@ -668,11 +674,53 @@ begin
   end;
 end;
 
+procedure TCnDebugEnhanceWizard.AcquireSubActions;
+begin
+  FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
+    SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
+  AddSepMenu;
+  FIdConfig := RegisterASubAction(SCnDebugConfig, SCnDebugConfigCaption, 0,
+    SCnDebugConfigHint);
+end;
+
+procedure TCnDebugEnhanceWizard.SubActionExecute(Index: Integer);
+var
+  S: string;
+  I1: Integer;
+begin
+  if Index = FIdEvalAsDataSet then
+  begin
+    S := CnOtaGetCurrentSelection;
+    if Trim(S) = '' then
+      CnOtaGetCurrPosToken(S, I1);
+
+    if Trim(S) <> '' then
+      ShowDataSetExternalViewer(Trim(S));
+  end
+  else if Index = FIdConfig then
+    Config;
+end;
+
+procedure TCnDebugEnhanceWizard.SubActionUpdate(Index: Integer);
+begin
+
+end;
+
+function TCnDebugEnhanceWizard.GetCaption: string;
+begin
+  Result := SCnDebugEnhanceWizardCaption;
+end;
+
+function TCnDebugEnhanceWizard.GetHint: string;
+begin
+  Result := SCnDebugEnhanceWizardHint;
+end;
+
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FDebuggerValueReplacerClass := TList.Create;
-  RegisterCnWizard(TCnDebugEnhanceWizard);
 {$ENDIF}
+  RegisterCnWizard(TCnDebugEnhanceWizard);
 
 finalization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}

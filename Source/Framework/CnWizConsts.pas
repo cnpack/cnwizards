@@ -249,6 +249,13 @@ resourcestring
   SCnFilesSnapshotsItem = 'CnFilesSnapshotsItem';
   SCnFilesSnapshotReopen = 'CnFilesSnapshotReopen';
 
+  // CnDebugEnhanceWizard
+  SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
+  SCnDataSetVisualizerIdentifier = 'CnPackIDEWizardsDataSetVisualizer';
+  SCnDebugReplacerDataName = 'DebugReplacer.txt';
+  SCnDebugEvalAsDataSet = 'CnDebugEvalAsDataSet';
+  SCnDebugConfig = 'CnDebugConfig';
+
   // CnWizAbout
   SCnWizAboutHelp = 'CnWizAboutHelp';
   SCnWizAboutHistory = 'CnWizAboutHistory';
@@ -293,11 +300,6 @@ resourcestring
   SCnWizMenuName = 'CnWizToolMenu';
   SCnWizOptionMenuName = 'CnWizToolOptionMenu';
   SCnDefWizMenuCaption = '&Wizards';
-
-  // CnDebugEnhancments
-  SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
-  SCnDataSetVisualizerIdentifier = 'CnPackIDEWizardsDataSetVisualizer';
-  SCnDebugReplacerDataName = 'DebugReplacer.txt';
 
   // CnCorPropWizard
   SCnCorPropDataName = 'CorRules.ini';
@@ -1290,6 +1292,12 @@ var
   // CnDebugEnhanceWizard
   SCnDebugEnhanceWizardName: string = 'Debugger Enhancements';
   SCnDebugEnhanceWizardComment: string = 'Debugger Enhancements Wizard';
+  SCnDebugEnhanceWizardCaption: string = 'Debugger Enhancements';
+  SCnDebugEnhanceWizardHint: string = 'Debugger Extension Tools';
+  SCnDebugEvalAsDataSetCaption: string = 'Evaluate as T&DataSet...';
+  SCnDebugEvalAsDataSetHint: string = 'Evaluate Expression as TDataSet';
+  SCnDebugConfigCaption: string = '&Options...';
+  SCnDebugConfigHint: string = 'Display Options Dialog';
   SCnDebugVisualizerName: string = 'CnPack Debugger Visualizer';
   SCnDebugVisualizerDescription: string = 'CnPack IDE Wizards Debugger Visualizer';
   SCnDebugDataSetViewerName: string = 'CnPack DataSet Viewer';
@@ -1303,7 +1311,7 @@ var
   SCnDebugAddReplacerHint: string = 'ClassName=Expression with %s';
   SCnDebugRemoveReplacerHint: string = 'Sure to Delete Selected Hint?';
   SCnDebugErrorReplacerFormat: string = 'Invalid Replacer Hint Format';
-  SCnDebugErrorExprNotAClass: string = '%s is NOT a %s';
+  SCnDebugErrorExprNotAClass: string = '%s Error or NOT a %s';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';
@@ -1706,7 +1714,7 @@ var
   SCnCodeFormatterWizardMenuCaption: string = 'Code Formatter';
   SCnCodeFormatterWizardMenuHint: string = 'Code Formatter Wizard';
   SCnCodeFormatterWizardConfigCaption: string = '&Options...';
-  SCnCodeFormatterWizardConfigHint: string = '&Options...';
+  SCnCodeFormatterWizardConfigHint: string = 'Options of Code Formatter';
   SCnCodeFormatterWizardFormatCurrentCaption: string = 'Format Current File/Selection';
   SCnCodeFormatterWizardFormatCurrentHint: string = 'Format Current File or Selection';
   SCnCodeFormatterWizardErrLineWidth: string = 'Wrap Line Width Error.';

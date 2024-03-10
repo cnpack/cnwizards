@@ -965,6 +965,12 @@ begin
   // CnDebugEnhanceWizard
   TranslateStr(SCnDebugEnhanceWizardName, 'SCnDebugEnhanceWizardName');
   TranslateStr(SCnDebugEnhanceWizardComment, 'SCnDebugEnhanceWizardComment');
+  TranslateStr(SCnDebugEnhanceWizardCaption, 'SCnDebugEnhanceWizardCaption');
+  TranslateStr(SCnDebugEnhanceWizardHint, 'SCnDebugEnhanceWizardHint');
+  TranslateStr(SCnDebugEvalAsDataSetCaption, 'SCnDebugEvalAsDataSetCaption');
+  TranslateStr(SCnDebugEvalAsDataSetHint, 'SCnDebugEvalAsDataSetHint');
+  TranslateStr(SCnDebugConfigCaption, 'SCnDebugConfigCaption');
+  TranslateStr(SCnDebugConfigHint, 'SCnDebugConfigHint');
   TranslateStr(SCnDebugVisualizerName, 'SCnDebugVisualizerName');
   TranslateStr(SCnDebugVisualizerDescription, 'SCnDebugVisualizerDescription');
   TranslateStr(SCnDebugDataSetViewerName, 'SCnDebugDataSetViewerName');

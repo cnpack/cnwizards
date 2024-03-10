@@ -615,8 +615,9 @@ begin
   end;
 
   F := TCnIdeDockForm.Create(Application);
-  F.Caption := Format(SCnDataSetViewerFormCaption, [Expression])
+  F.Caption := Format(SCnDataSetViewerFormCaption, [Expression]);
   Fm := TCnDataSetViewerFrame.Create(F);
+  Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
   Fm.AddDataSetContent(Expression, '', '');
