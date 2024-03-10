@@ -1303,6 +1303,7 @@ var
   SCnDebugAddReplacerHint: string = 'ClassName=Expression with %s';
   SCnDebugRemoveReplacerHint: string = 'Sure to Delete Selected Hint?';
   SCnDebugErrorReplacerFormat: string = 'Invalid Replacer Hint Format';
+  SCnDebugErrorExprNotAClass: string = '%s is NOT a %s';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';

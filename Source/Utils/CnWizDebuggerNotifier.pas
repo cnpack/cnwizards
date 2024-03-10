@@ -125,7 +125,7 @@ type
 
   TCnInProcessEvaluator = class(TCnSingletonInterfacedObject, IOTAThreadNotifier
     {$IFDEF SUPPORT_32_AND_64}, IOTAThreadNotifier160 {$ENDIF})
-  {* 被调试进程的远程求值类
+  {* 被调试进程的远程求值类，可按需实例化使用，也可用本单元的全局函数 CnInProcessEvaluator
     因内部有消息循环，所以使用 TCnSingletonInterfacedObject 为基类以尽量避免接口释放问题}
   private
     FNotifierIndex: Integer;
@@ -161,19 +161,21 @@ type
 
     function EvaluateExpression(const Expression: string;
       ObjectAddr: PCnOTAAddress = nil): string;
-    {* 求表达式的值，返回字符串结果；
-       如果是对象，且传入了 ObjectAddr 地址，则额外在 ObjectAddr 所指处返回其地址}
+    {* 求表达式的值，返回字符串结果；如果出错，则返回空字符串
+       如果结果是对象，则返回 ([csInheritable]) 这种字符串，
+       如果同时传入了 ObjectAddr 地址，则额外在 ObjectAddr 所指处返回该对象的远程地址}
   end;
 
-procedure CropDebugQuotaStr(Str: PChar);
-{* 去掉 PChar 字符串中两头的单引号引用}
+function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
+  Eval: TCnInProcessEvaluator = nil): Boolean;
+{* 通过远程求值判断父类名称的方式，判断某对象名是否继承自指定父类
+  允许外部传入求值工具实例，如果不传则内部创建并释放}
 
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 {* 获取 IDE Debugger 通知服务接口}
 
-//function CnEvaluationManager: ICnEvaluationManager;
-{* 获取当前被调试进程当前线程求值实例
-  注：该实例求值时因内部处理消息，有可能造成调用者释放资源，返回后会出 IntfCopy 的访问冲突}
+function CnInProcessEvaluator: TCnInProcessEvaluator;
+{* 全局求值实例}
 
 implementation
 
@@ -312,14 +314,14 @@ type
 
 var
   FCnWizDebuggerNotifierServices: TCnWizDebuggerNotifierServices = nil;
-//  FEvaluationManager: ICnEvaluationManager = nil;
-//
-//function CnEvaluationManager: ICnEvaluationManager;
-//begin
-//  if FEvaluationManager = nil then
-//    FEvaluationManager := TCnEvaluationManager.Create;
-//  Result := FEvaluationManager;
-//end;
+  FInProcessEvaluator: TCnInProcessEvaluator = nil;
+
+function CnInProcessEvaluator: TCnInProcessEvaluator;
+begin
+  if FInProcessEvaluator = nil then
+    FInProcessEvaluator := TCnInProcessEvaluator.Create;
+  Result := FInProcessEvaluator;
+end;
 
 // 去掉 PChar 字符串中两头的单引号引用
 procedure CropDebugQuotaStr(Str: PChar);
@@ -1080,12 +1082,57 @@ begin
 
 end;
 
+function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
+  Eval: TCnInProcessEvaluator = nil): Boolean;
+var
+  C: Integer;
+  IsEvalNil: Boolean;
+  S, R: string;
+begin
+  Result := False;
+  if (Obj = '') or (BaseClassName = '') then
+    Exit;
+
+  IsEvalNil := Eval = nil;
+  if IsEvalNil then
+    Eval := TCnInProcessEvaluator.Create;
+
+  try
+    // 如果自身类就是
+    if Eval.EvaluateExpression(Obj + '.ClassName') = BaseClassName then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+    // 否则循环找 Parent
+    C := 0;
+    S := Obj + '.ClassParent';
+    repeat
+      R := Eval.EvaluateExpression(S);
+      if R = BaseClassName then
+      begin
+        Result := True;
+        Exit;
+      end
+      else if (R = '') or (R = 'nil') then // 出错或到顶了
+        Exit;
+
+      S := S + '.ClassParent';
+      Inc(C);
+    until C > 128; // 额外写个限制避免万一出死循环
+  finally
+    if IsEvalNil then
+      Eval.Free;
+  end;
+end;
+
 initialization
 
 finalization
   if FCnWizDebuggerNotifierServices <> nil then
     FreeAndNil(FCnWizDebuggerNotifierServices);
-
-//  FEvaluationManager := nil;
+  if FInProcessEvaluator <> nil then
+    FreeAndNil(FInProcessEvaluator);
 
 end.
