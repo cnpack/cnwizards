@@ -231,9 +231,10 @@ begin
       AFrame.Panel1.StyleElements := AFrame.Panel1.StyleElements - [seClient];
       AFrame.Panel1.ParentBackground := False;
       LThemingServices.ApplyTheme(AForm);
+  {$IFDEF DELPHI103_RIO_UP}
       AFrame.Panel1.Color := ColorBlendRGB(LThemingServices.StyleServices.GetSystemColor(clWindowText),
       LThemingServices.StyleServices.GetSystemColor(clWindow), 0.5);
-
+  {$ENDIF}
 {$IFDEF DELPHI120_ATHENS_UP}
       if TIDEThemeMetrics.Font.Enabled then
         AFrame.Font.Assign(TIDEThemeMetrics.Font.GetFont());
