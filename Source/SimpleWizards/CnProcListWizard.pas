@@ -167,6 +167,9 @@ type
     cbbFiles: TComboBox;
     Splitter: TSplitter;
     mmoContent: TMemo;
+    btnPreviewRight: TToolButton;
+    btnPreviewDown: TToolButton;
+    btn2: TToolButton;
     procedure FormDestroy(Sender: TObject);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure btnShowPreviewClick(Sender: TObject);
@@ -183,6 +186,8 @@ type
       Shift: TShiftState);
     procedure lvListKeyPress(Sender: TObject; var Key: Char);
     procedure SplitterMoved(Sender: TObject);
+    procedure btnPreviewRightClick(Sender: TObject);
+    procedure btnPreviewDownClick(Sender: TObject);
   private
     FFileName: string;
 {$IFNDEF STAND_ALONE}
@@ -1262,6 +1267,11 @@ begin
     with TCnProcListForm.Create(nil) do
     try
       Wizard := Self;
+      if FPreviewIsRight then
+        btnPreviewRight.Down := True
+      else
+        btnPreviewDown.Down := True;
+
 {$IFNDEF STAND_ALONE}
       ShowHint := WizOptions.ShowHint;
 {$ENDIF}
@@ -3446,7 +3456,7 @@ begin
     mmoContent.Visible := False;
     Splitter.Visible := False;
 
-    if FPreviewIsRight then
+    if mmoContent.Align = alRight then
       FPreviewWidth := mmoContent.Width
     else
       FPreviewHeight := mmoContent.Height;
@@ -4824,6 +4834,20 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
+end;
+
+procedure TCnProcListForm.btnPreviewRightClick(Sender: TObject);
+begin
+  btnPreviewRight.Down := True;
+  btnPreviewDown.Down := False;
+  FPreviewIsRight := True;
+end;
+
+procedure TCnProcListForm.btnPreviewDownClick(Sender: TObject);
+begin
+  btnPreviewDown.Down := True;
+  btnPreviewRight.Down := False;
+  FPreviewIsRight := False;
 end;
 
 initialization

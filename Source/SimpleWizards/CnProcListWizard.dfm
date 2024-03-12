@@ -95,6 +95,34 @@ inherited CnProcListForm: TCnProcListForm
       Style = tbsCheck
       OnClick = btnShowPreviewClick
     end
+    object btn2: TToolButton
+      Left = 409
+      Top = 0
+      Width = 8
+      Caption = 'btn2'
+      ImageIndex = 47
+      Style = tbsSeparator
+    end
+    object btnPreviewRight: TToolButton
+      Left = 417
+      Top = 0
+      Hint = 'Preview in Right'
+      Caption = 'Preview in Right'
+      Grouped = True
+      ImageIndex = 100
+      Style = tbsCheck
+      OnClick = btnPreviewRightClick
+    end
+    object btnPreviewDown: TToolButton
+      Left = 440
+      Top = 0
+      Hint = 'Preview at Bottom'
+      Caption = 'Preview at Bottom'
+      Grouped = True
+      ImageIndex = 108
+      Style = tbsCheck
+      OnClick = btnPreviewDownClick
+    end
   end
   inherited pnlMain: TPanel
     Width = 681
