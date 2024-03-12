@@ -5,29 +5,18 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
   Height = 318
   TabOrder = 0
   object Panel1: TPanel
-    AlignWithMargins = True
-    Left = 8
-    Top = 8
-    Width = 582
-    Height = 302
-    Margins.Left = 8
-    Margins.Top = 8
-    Margins.Right = 8
-    Margins.Bottom = 8
+    Left = 0
+    Top = 0
+    Width = 598
+    Height = 318
     Align = alClient
     BevelOuter = bvNone
-    ShowCaption = False
     TabOrder = 0
     object pcViews: TPageControl
-      AlignWithMargins = True
-      Left = 1
-      Top = 1
-      Width = 580
-      Height = 300
-      Margins.Left = 1
-      Margins.Top = 1
-      Margins.Right = 1
-      Margins.Bottom = 1
+      Left = 0
+      Top = 0
+      Width = 598
+      Height = 318
       ActivePage = tsProp
       Align = alClient
       TabHeight = 24
@@ -36,15 +25,11 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsProp: TTabSheet
         Caption = '&Property'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object mmoProp: TMemo
           Left = 0
           Top = 0
-          Width = 572
-          Height = 266
+          Width = 590
+          Height = 284
           Align = alClient
           BorderStyle = bsNone
           ReadOnly = True
@@ -56,15 +41,11 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsField: TTabSheet
         Caption = '&Field'
         ImageIndex = 2
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object grdField: TStringGrid
           Left = 0
           Top = 0
-          Width = 572
-          Height = 266
+          Width = 590
+          Height = 284
           Align = alClient
           BorderStyle = bsNone
           ColCount = 18
@@ -74,6 +55,7 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
           Font.Height = -11
           Font.Name = 'Courier New'
           Font.Style = []
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing]
           ParentFont = False
           TabOrder = 0
         end
@@ -81,15 +63,11 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
       object tsData: TTabSheet
         Caption = '&Data'
         ImageIndex = 3
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object grdData: TStringGrid
           Left = 0
           Top = 0
-          Width = 572
-          Height = 266
+          Width = 590
+          Height = 284
           Align = alClient
           BorderStyle = bsNone
           ColCount = 18
@@ -99,6 +77,7 @@ object CnDataSetViewerFrame: TCnDataSetViewerFrame
           Font.Height = -11
           Font.Name = 'Courier New'
           Font.Style = []
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing]
           ParentFont = False
           TabOrder = 0
         end
