@@ -106,8 +106,7 @@ inherited CnProcListForm: TCnProcListForm
     object btnPreviewRight: TToolButton
       Left = 417
       Top = 0
-      Hint = 'Preview in Right'
-      Caption = 'Preview in Right'
+      Hint = 'Preview at Right'
       Grouped = True
       ImageIndex = 100
       Style = tbsCheck
@@ -117,7 +116,6 @@ inherited CnProcListForm: TCnProcListForm
       Left = 440
       Top = 0
       Hint = 'Preview at Bottom'
-      Caption = 'Preview at Bottom'
       Grouped = True
       ImageIndex = 108
       Style = tbsCheck
