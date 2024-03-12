@@ -962,64 +962,64 @@ begin
   Result := '';
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
-  if CurProcess <> nil then
-  begin
-    CurThread := CurProcess.CurrentThread;
-    if CurThread <> nil then
-    begin
-      repeat
-        Done := True; // 按需调 64 位版本，且 2005 后参数有新改动
-        EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
-          CanModify, {$IFDEF BDS} eseAll, {$ELSE} True, {$ENDIF} '', ResultAddr,
-          ResultSize, ResultVal {$IFDEF BDS} , '', 0 {$ENDIF});
 
-        case EvalRes of
-          erOK: Result := ResultStr;
-          erDeferred:
-            begin
-              FCompleted := False;
-              FDeferredResult := '';
-              FDeferredError := False;
-              FResultAddress := 0;
+  if CurProcess = nil then
+    Exit;
+  CurThread := CurProcess.CurrentThread;
+  if CurThread = nil then
+    Exit;
 
-              FNotifierIndex := CurThread.AddNotifier(Self);
-              while not FCompleted do
-              begin
+  repeat
+    Done := True; // 按需调 64 位版本，且 2005 后参数有新改动
+    EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
+      CanModify, {$IFDEF BDS} eseAll, {$ELSE} True, {$ENDIF} '', ResultAddr,
+      ResultSize, ResultVal {$IFDEF BDS} , '', 0 {$ENDIF});
+
+    case EvalRes of
+      erOK: Result := ResultStr;
+      erDeferred:
+        begin
+          FCompleted := False;
+          FDeferredResult := '';
+          FDeferredError := False;
+          FResultAddress := 0;
+
+          FNotifierIndex := CurThread.AddNotifier(Self);
+          while not FCompleted do
+          begin
 {$IFDEF OTA_DEBUG_HAS_EVENTS}
-                DebugSvcs.ProcessDebugEvents;
+            DebugSvcs.ProcessDebugEvents;
 {$ELSE}
-                Application.ProcessMessages;
+            Application.ProcessMessages;
 {$ENDIF}
-              end;
-              CurThread.RemoveNotifier(FNotifierIndex);
-              FNotifierIndex := -1;
-              if not FDeferredError then
-              begin
-                if FDeferredResult <> '' then
-                  Result := FDeferredResult
-                else
-                  Result := ResultStr;
+          end;
+          CurThread.RemoveNotifier(FNotifierIndex);
+          FNotifierIndex := -1;
+          if not FDeferredError then
+          begin
+            if FDeferredResult <> '' then
+              Result := FDeferredResult
+            else
+              Result := ResultStr;
 
-                if ObjectAddr <> nil then
-                  ObjectAddr^ := FResultAddress;
-              end;
-            end;
-{$IFDEF OTA_DEBUG_HAS_ERBUSY}
-          erBusy:
-            begin
-{$IFDEF OTA_DEBUG_HAS_EVENTS}
-              DebugSvcs.ProcessDebugEvents;
-{$ELSE}
-              Application.ProcessMessages;
-{$ENDIF}
-              Done := False;
-            end;
-{$ENDIF}
+            if ObjectAddr <> nil then
+              ObjectAddr^ := FResultAddress;
+          end;
         end;
-      until Done;
-      CropDebugQuotaStr(PChar(Result));
+{$IFDEF OTA_DEBUG_HAS_ERBUSY}
+      erBusy:
+        begin
+{$IFDEF OTA_DEBUG_HAS_EVENTS}
+          DebugSvcs.ProcessDebugEvents;
+{$ELSE}
+          Application.ProcessMessages;
+{$ENDIF}
+          Done := False;
+        end;
+{$ENDIF}
     end;
-  end;
+  until Done;
+  CropDebugQuotaStr(PChar(Result));
 end;
 
 {$IFDEF SUPPORT_32_AND_64}
@@ -1085,46 +1085,17 @@ end;
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
   Eval: TCnInProcessEvaluator = nil): Boolean;
 var
-  C: Integer;
-  IsEvalNil: Boolean;
-  S, R: string;
+  S: string;
 begin
   Result := False;
   if (Obj = '') or (BaseClassName = '') then
     Exit;
 
-  IsEvalNil := Eval = nil;
-  if IsEvalNil then
-    Eval := TCnInProcessEvaluator.Create;
+  if Eval = nil then
+    Eval := CnInProcessEvaluator;
 
-  try
-    // 如果自身类就是
-    if Eval.EvaluateExpression(Obj + '.ClassName') = BaseClassName then
-    begin
-      Result := True;
-      Exit;
-    end;
-
-    // 否则循环找 Parent
-    C := 0;
-    S := Obj + '.ClassParent';
-    repeat
-      R := Eval.EvaluateExpression(S);
-      if R = BaseClassName then
-      begin
-        Result := True;
-        Exit;
-      end
-      else if (R = '') or (R = 'nil') then // 出错或到顶了
-        Exit;
-
-      S := S + '.ClassParent';
-      Inc(C);
-    until C > 128; // 额外写个限制避免万一出死循环
-  finally
-    if IsEvalNil then
-      Eval.Free;
-  end;
+  S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
+  Result := LowerCase(S) = 'true';
 end;
 
 initialization

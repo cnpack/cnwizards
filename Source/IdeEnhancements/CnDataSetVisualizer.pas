@@ -337,7 +337,7 @@ begin
     grdfield.FixedCols := 0;
 
     for I := 0 to grdField.ColCount - 1 do
-      grdField.ColWidths[I] := 90;
+      grdField.ColWidths[I] := 110;
 
     grdField.Cells[0, 0] := 'Name';
     grdField.Cells[1, 0] := 'DataType';
