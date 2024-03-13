@@ -100,7 +100,7 @@ end;
 
 procedure TCnTestDbgNotifMenuWizard.Execute;
 var
-  Eval: TCnInProcessEvaluator;
+  Eval: TCnRemoteProcessEvaluator;
   S: string;
 begin
   if (FProcess = nil) or (FThread = nil) then
@@ -109,7 +109,7 @@ begin
       'Please Use CnDebugViewer to See the Output Results' + #13#10 + 'when Add/Delete Breakpoint and Run/Pause/Stop Process.');
   end;
 
-  Eval := TCnInProcessEvaluator.Create;
+  Eval := TCnRemoteProcessEvaluator.Create;
   try
     S := Eval.EvaluateExpression('Screen.FormCount');
     if S <> '' then
@@ -120,7 +120,7 @@ begin
     Eval.Free;
   end;
 
-  S := CnInProcessEvaluator.EvaluateExpression('ADOTable1');
+  S := CnRemoteProcessEvaluator.EvaluateExpression('ADOTable1');
   if S <> '' then
     CnDebugger.TraceMsg(S)
   else

@@ -65,7 +65,7 @@ type
 {$ENDIF}
     FItems: TStrings;
     FAvailableState: TCnAvailableState;
-    FEvaluator: TCnInProcessEvaluator;
+    FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
     procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
     procedure SetAvailableState(const AState: TCnAvailableState);
@@ -390,7 +390,7 @@ begin
     EnableAlign;
   end;
   CnLanguageManager.AddChangeNotifier(LanguageChanged);
-  FEvaluator := TCnInProcessEvaluator.Create;
+  FEvaluator := TCnRemoteProcessEvaluator.Create;
 end;
 
 destructor TCnDataSetViewerFrame.Destroy;

@@ -123,7 +123,7 @@ type
 {$ENDIF}
   PCnOTAAddress = ^TCnOTAAddress;
 
-  TCnInProcessEvaluator = class(TCnSingletonInterfacedObject, IOTAThreadNotifier
+  TCnRemoteProcessEvaluator = class(TCnSingletonInterfacedObject, IOTAThreadNotifier
     {$IFDEF SUPPORT_32_AND_64}, IOTAThreadNotifier160 {$ENDIF})
   {* 被调试进程的远程求值类，可按需实例化使用，也可用本单元的全局函数 CnInProcessEvaluator
     因内部有消息循环，所以使用 TCnSingletonInterfacedObject 为基类以尽量避免接口释放问题}
@@ -167,20 +167,20 @@ type
   end;
 
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
-  Eval: TCnInProcessEvaluator = nil): Boolean;
+  Eval: TCnRemoteProcessEvaluator = nil): Boolean;
 {* 通过远程求值判断父类名称的方式，判断某对象名是否继承自指定父类
   允许外部传入求值工具实例，如果不传则内部创建并释放}
 
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 {* 获取 IDE Debugger 通知服务接口}
 
-function CnInProcessEvaluator: TCnInProcessEvaluator;
+function CnRemoteProcessEvaluator: TCnRemoteProcessEvaluator;
 {* 全局求值实例}
 
 implementation
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF}CnWizNotifier;
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnWizNotifier;
 
 type
   TCnOTAProcess = class;
@@ -314,52 +314,29 @@ type
 
 var
   FCnWizDebuggerNotifierServices: TCnWizDebuggerNotifierServices = nil;
-  FInProcessEvaluator: TCnInProcessEvaluator = nil;
+  FRemoteProcessEvaluator: TCnRemoteProcessEvaluator = nil;
 
-function CnInProcessEvaluator: TCnInProcessEvaluator;
+function CnRemoteProcessEvaluator: TCnRemoteProcessEvaluator;
 begin
-  if FInProcessEvaluator = nil then
-    FInProcessEvaluator := TCnInProcessEvaluator.Create;
-  Result := FInProcessEvaluator;
+  if FRemoteProcessEvaluator = nil then
+    FRemoteProcessEvaluator := TCnRemoteProcessEvaluator.Create;
+  Result := FRemoteProcessEvaluator;
 end;
 
-// 去掉 PChar 字符串中两头的单引号引用
-procedure CropDebugQuotaStr(Str: PChar);
+// 去掉字符串中两头的单引号引用
+function CropDebugQuotaStr(const Str: string): string;
 var
-  Len, I: Integer;
-  // Idx: PChar;
+  L: Integer;
 begin
-  if Str <> nil then
-  begin
-    // PChar 的下标从 0 开始，不同于 string 的从 1 开始
-    Len := StrLen(Str);
-    if (Str[0] = '''') and (Str[Len - 1] = '''') then // 得两头都是引号才行
-    begin
-      Str[Len - 1] := #0; // 去掉末尾的单引号
-      Dec(Len);
+  Result := Str;
+  if Length(Str) <= 1 then
+    Exit;
 
-      if Str[0] = '''' then  // 移动，去掉头的单引号
-      begin
-        Dec(Len);
-        for I := 0 to Len - 1 do
-          Str[I] := Str[I + 1];
-        Str[Len] := #0;
-      end;
-    end;
+  L := Length(Result);
+  if (Result[1] = '''') and (Result[L] = '''') then // 得两头都是引号才行
+    Result := Copy(Result, 2, L - 2); // 去掉头尾的单引号
 
-{   Idx := StrPos(Str, '''''');
-    while Idx <> nil do
-    begin
-      Len := StrLen(Idx);
-      for I := 0 to Len - 1 do
-        Idx[I] := Idx[I + 1];
-      Idx[Len] := #0;
-
-      Idx := StrPos(Str, '''''');
-
-    end; }
-    // 无需找俩连续的单引号再移动以挤掉一个，因为 IDE 不会将单个引号换成两个
-  end;
+  // 无需找俩连续的单引号再移动以挤掉一个，因为 IDE 不会将单个引号换成两个
 end;
 
 // 获取 IDE Debugger 通知服务接口
@@ -918,36 +895,40 @@ begin
     [Integer(FEnabled), FLineNumber, FFileName]);
 end;
 
-{ TCnInProcessEvaluator }
+{ TCnRemoteProcessEvaluator }
 
-procedure TCnInProcessEvaluator.AfterSave;
+procedure TCnRemoteProcessEvaluator.AfterSave;
 begin
 
 end;
 
-procedure TCnInProcessEvaluator.BeforeSave;
+procedure TCnRemoteProcessEvaluator.BeforeSave;
 begin
 
 end;
 
-constructor TCnInProcessEvaluator.Create;
+constructor TCnRemoteProcessEvaluator.Create;
 begin
   inherited;
-
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnRemoteProcessEvaluator.Create');
+{$ENDIF}
 end;
 
-destructor TCnInProcessEvaluator.Destroy;
+destructor TCnRemoteProcessEvaluator.Destroy;
 begin
-
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnRemoteProcessEvaluator.Destroy: ');
+{$ENDIF}
   inherited;
 end;
 
-procedure TCnInProcessEvaluator.Destroyed;
+procedure TCnRemoteProcessEvaluator.Destroyed;
 begin
 
 end;
 
-function TCnInProcessEvaluator.EvaluateExpression(const Expression: string;
+function TCnRemoteProcessEvaluator.EvaluateExpression(const Expression: string;
   ObjectAddr: PCnOTAAddress): string;
 var
   CurProcess: IOTAProcess;
@@ -969,11 +950,19 @@ begin
   if CurThread = nil then
     Exit;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnRemoteProcessEvaluator.EvaluateExpression: ' + Expression);
+{$ENDIF}
+
   repeat
     Done := True; // 按需调 64 位版本，且 2005 后参数有新改动
     EvalRes := CurThread.Evaluate(Expression, @ResultStr, Length(ResultStr),
       CanModify, {$IFDEF BDS} eseAll, {$ELSE} True, {$ENDIF} '', ResultAddr,
       ResultSize, ResultVal {$IFDEF BDS} , '', 0 {$ENDIF});
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnRemoteProcessEvaluator.EvaluateExpression Res ' + IntToStr(Ord(EvalRes)));
+{$ENDIF}
 
     case EvalRes of
       erOK: Result := ResultStr;
@@ -1019,12 +1008,12 @@ begin
 {$ENDIF}
     end;
   until Done;
-  CropDebugQuotaStr(PChar(Result));
+  Result := CropDebugQuotaStr(Result);
 end;
 
 {$IFDEF SUPPORT_32_AND_64}
 
-procedure TCnInProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
+procedure TCnRemoteProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
   CanModify: Boolean; ResultAddress: TOTAAddress; ResultSize: LongWord;
   ReturnCode: Integer);
 begin
@@ -1033,13 +1022,16 @@ begin
   FDeferredResult := ResultStr;
   FDeferredError := ReturnCode <> 0;
   FResultAddress := ResultAddress;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('High32/64 EvaluateComplete: ' + ResultStr);
+{$ENDIF}
 end;
 
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
 
-procedure TCnInProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
+procedure TCnRemoteProcessEvaluator.EvaluateComplete(const ExprStr, ResultStr: string;
   CanModify: Boolean; ResultAddress, ResultSize: LongWord; ReturnCode: Integer);
 begin
   // 高一点的版本的拼写正确的 32 位回调，调用拼写正确的 32/64 位版本
@@ -1048,7 +1040,7 @@ end;
 
 {$ELSE}
 
-procedure TCnInProcessEvaluator.EvaluteComplete(const ExprStr,
+procedure TCnRemoteProcessEvaluator.EvaluteComplete(const ExprStr,
   ResultStr: string; CanModify: Boolean; ResultAddress, ResultSize: LongWord;
   ReturnCode: Integer);
 begin
@@ -1061,29 +1053,32 @@ begin
   FDeferredResult := ResultStr;
   FDeferredError := ReturnCode <> 0;
   FResultAddress := ResultAddress;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Low32 Typo EvaluateComplete: ' + ResultStr);
+{$ENDIF}
 {$ENDIF}
 end;
 
 {$ENDIF}
 
-procedure TCnInProcessEvaluator.Modified;
+procedure TCnRemoteProcessEvaluator.Modified;
 begin
 
 end;
 
-procedure TCnInProcessEvaluator.ModifyComplete(const ExprStr, ResultStr: string;
+procedure TCnRemoteProcessEvaluator.ModifyComplete(const ExprStr, ResultStr: string;
   ReturnCode: Integer);
 begin
 
 end;
 
-procedure TCnInProcessEvaluator.ThreadNotify(Reason: TOTANotifyReason);
+procedure TCnRemoteProcessEvaluator.ThreadNotify(Reason: TOTANotifyReason);
 begin
 
 end;
 
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
-  Eval: TCnInProcessEvaluator = nil): Boolean;
+  Eval: TCnRemoteProcessEvaluator = nil): Boolean;
 var
   S: string;
 begin
@@ -1092,7 +1087,7 @@ begin
     Exit;
 
   if Eval = nil then
-    Eval := CnInProcessEvaluator;
+    Eval := CnRemoteProcessEvaluator;
 
   S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
   Result := LowerCase(S) = 'true';
@@ -1103,7 +1098,7 @@ initialization
 finalization
   if FCnWizDebuggerNotifierServices <> nil then
     FreeAndNil(FCnWizDebuggerNotifierServices);
-  if FInProcessEvaluator <> nil then
-    FreeAndNil(FInProcessEvaluator);
+  if FRemoteProcessEvaluator <> nil then
+    FreeAndNil(FRemoteProcessEvaluator);
 
 end.
