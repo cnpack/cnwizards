@@ -129,6 +129,26 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         end
       end
     end
+    object tsOthers: TTabSheet
+      Caption = 'Ot&hers'
+      ImageIndex = 2
+      object grpOthers: TGroupBox
+        Left = 8
+        Top = 8
+        Width = 393
+        Height = 329
+        Caption = 'Other Settings'
+        TabOrder = 0
+        object chkAutoClose: TCheckBox
+          Left = 16
+          Top = 24
+          Width = 361
+          Height = 17
+          Caption = 'Auto Close Running Target  Before Compiling or Building'
+          TabOrder = 0
+        end
+      end
+    end
   end
   object actlstDebug: TActionList
     Images = dmCnSharedImages.Images

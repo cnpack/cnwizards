@@ -170,6 +170,9 @@ type
     tsViewer: TTabSheet;
     grpExternalViewer: TGroupBox;
     chkDataSetViewer: TCheckBox;
+    tsOthers: TTabSheet;
+    grpOthers: TGroupBox;
+    chkAutoClose: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -264,12 +267,15 @@ begin
 {$ELSE}
     chkDataSetViewer.Enabled := False;
 {$ENDIF}
+    chkAutoClose.Checked := AutoClose;
+
     if ShowModal = mrOK then
     begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
       EnableDataSet := chkDataSetViewer.Checked;
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
+      AutoClose := chkAutoClose.Checked;
       DoSaveSettings;
     end;
     Free;
