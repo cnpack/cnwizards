@@ -664,6 +664,9 @@ function InheritsFromClassName(AObject: TObject; const AClass: string): Boolean;
 procedure KillProcessByFileName(const FileName: String);
 {* 根据文件名结束进程，不区分路径}
 
+function KillProcessByFullFileName(const FullFileName: string): Boolean;
+{* 根据完整文件名结束进程，区分路径}
+
 function IndexStr(AText: string; AValues: array of string; IgCase: Boolean = True): Integer;
 {* 查找字符串在动态数组中的索引，用于string类型使用Case语句}
 
@@ -1444,7 +1447,11 @@ function InheritsFromClassName(AObject: TObject; const AClass: string): Boolean;
 begin
 end;
 
-procedure KillProcessByFileName(const FileName: String);
+procedure KillProcessByFileName(const FileName: string);
+begin
+end;
+
+function KillProcessByFullFileName(const FullFileName: string): Boolean;
 begin
 end;
 

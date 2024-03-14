@@ -253,6 +253,7 @@ begin
   CL.AddDelphiFunction('Function SoundCardExist : Boolean');
   CL.AddDelphiFunction('Function InheritsFromClassName( AObject : TObject; const AClass : string) : Boolean;');
   CL.AddDelphiFunction('Procedure KillProcessByFileName( const FileName : String)');
+  CL.AddDelphiFunction('Procedure KillProcessByFullFileName( const FullFileName : String)');
   CL.AddDelphiFunction('Function IndexStr( AText : string; AValues : array of string; IgCase : Boolean) : Integer');
   CL.AddDelphiFunction('Function IndexInt( ANum : Integer; AValues : array of Integer) : Integer');
   CL.AddDelphiFunction('Procedure TrimStrings( AList : TStrings)');
@@ -498,6 +499,7 @@ begin
   S.RegisterDelphiFunction(@SoundCardExist, 'SoundCardExist', cdRegister);
   S.RegisterDelphiFunction(@InheritsFromClassName_P, 'InheritsFromClassName', cdRegister);
   S.RegisterDelphiFunction(@KillProcessByFileName, 'KillProcessByFileName', cdRegister);
+  S.RegisterDelphiFunction(@KillProcessByFullFileName, 'KillProcessByFullFileName', cdRegister);
   S.RegisterDelphiFunction(@IndexStr, 'IndexStr', cdRegister);
   S.RegisterDelphiFunction(@IndexInt, 'IndexInt', cdRegister);
   S.RegisterDelphiFunction(@TrimStrings, 'TrimStrings', cdRegister);
