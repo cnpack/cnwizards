@@ -565,6 +565,8 @@ procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfigur
 
 function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出目录}
+function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
+{* 获得项目的二进制文件输出完整路径}
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentProjectName: string;
@@ -4302,6 +4304,82 @@ begin
 
   if Result = '' then
     Result := ProjectDir;
+{$ENDIF}
+end;
+
+// 获得项目的二进制文件输出完整路径
+function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
+var
+  Dir, ProjectFileName: string;
+{$IFNDEF DELPHIXE_UP}
+  OutExt, IntermediaDir: string;
+  Val: Variant;
+{$ENDIF}
+begin
+  Result := '';
+  if Project = nil then
+    Exit;
+
+  ProjectFileName := Project.GetFileName;
+  if ProjectFileName = '' then
+    Exit;
+
+  Dir := CnOtaGetProjectOutputDirectory(Project);
+  if Dir = '' then
+    Exit;
+
+{$IFDEF DELPHIXE_UP}
+  if CnOtaGetActiveProjectOptions <> nil then
+    Result := CnOtaGetActiveProjectOptions.TargetName;
+{$ELSE}
+  { TODO : 自定义的输出扩展名暂不支持 }
+  try
+    if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
+      OutExt := '.bpl';
+  except
+    ;
+  end;
+
+  try
+    if (OutExt = '') and CnOtaGetActiveProjectOption('GenStaticLibrary', Val) and Val then
+      OutExt := '.lib';
+  except
+    ;
+  end;
+
+  try
+    if (OutExt = '') and CnOtaGetActiveProjectOption('GenDll', Val) and Val then
+      OutExt := '.dll';
+  except
+    ;
+  end;
+
+  if OutExt = '' then
+    OutExt := '.exe';
+
+{$IFDEF IDE_CONF_MANAGER}
+  if not IsDelphiRuntime then
+  begin
+{$IFDEF BDS2009_UP}
+    if CnOtaGetActiveProjectOptionsConfigurations <> nil then
+    begin
+      if CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration <> nil then
+      begin
+        IntermediaDir := MakePath(CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration.GetName);
+      end;
+    end;
+{$ELSE}
+    // TODO: BCB2007 下无 OTA 接口得到 Configuration，得想别的法子
+    try
+      if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
+        IntermediaDir := MakePath(VarToStr(Val));
+    except
+      ;
+    end;
+{$ENDIF}
+  end;
+{$ENDIF}
+  Result := MakePath(Dir) + IntermediaDir + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), OutExt);
 {$ENDIF}
 end;
 
