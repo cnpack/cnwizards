@@ -48,6 +48,7 @@ uses
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
   private
+    FIdEvalObj: Integer;
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -116,7 +117,7 @@ type
     FReplaceItems: TStringList;
     FReplacers: TObjectList;
     FMap: TCnStrToPtrHashMap;
-    FEvaluator: TCnInProcessEvaluator;
+    FEvaluator: TCnRemoteProcessEvaluator;
   protected
     procedure CreateVisualizers;
   public
@@ -191,7 +192,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnCommon {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnCommon, CnRemoteInspector {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
@@ -212,7 +213,7 @@ end;
 { TCnDebugEnhanceWizard }
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-      
+
 procedure TCnDebugEnhanceWizard.SetEnableDataSet(const Value: Boolean);
 begin
   FEnableDataSet := Value;
@@ -397,7 +398,7 @@ begin
   FWizard := AWizard;
   FReplaceItems := TStringList.Create;
   FReplacers := TObjectList.Create(True);
-  FEvaluator := TCnInProcessEvaluator.Create;
+  FEvaluator := TCnRemoteProcessEvaluator.Create;
   CreateVisualizers;
 end;
 
@@ -676,6 +677,8 @@ end;
 
 procedure TCnDebugEnhanceWizard.AcquireSubActions;
 begin
+  FIdEvalObj := RegisterASubAction('EvalAsObj',
+    'Evaluate As Object...', 0, '');
   FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
     SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
   AddSepMenu;
@@ -688,7 +691,16 @@ var
   S: string;
   I1: Integer;
 begin
-  if Index = FIdEvalAsDataSet then
+  if Index = FIdEvalObj then
+  begin
+    S := CnOtaGetCurrentSelection;
+    if Trim(S) = '' then
+      CnOtaGetCurrPosToken(S, I1);
+
+    if Trim(S) <> '' then
+      EvaluateRemoteExpression(Trim(S));
+  end
+  else if Index = FIdEvalAsDataSet then
   begin
     S := CnOtaGetCurrentSelection;
     if Trim(S) = '' then
