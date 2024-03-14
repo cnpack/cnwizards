@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
-  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils;
+  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils, CnWizNotifier;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
@@ -51,6 +51,7 @@ type
     FIdEvalObj: Integer;
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
+    FAutoClose: Boolean;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
     FDataSetViewer: IOTADebuggerVisualizer;
@@ -59,10 +60,12 @@ type
     procedure SetEnableDataSet(const Value: Boolean);
     procedure CheckDataSetViewerRegistration;
 {$ENDIF}
+    procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
+      var Cancel: Boolean);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
-  protected
+
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
   public
@@ -86,6 +89,9 @@ type
     {* 是否启用 DataSet Viewer}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+
+    property AutoClose: Boolean read FAutoClose write FAutoClose;
+    {* 编译前是否自动杀掉在运行的目标进程，需是独立运行的 Exe}
   end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -194,9 +200,10 @@ implementation
 uses
   CnCommon, CnRemoteInspector {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
-{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
 const
+  csAutoClose = 'AutoClose';
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   csEnableDataSet = 'EnableDataSet';
 
 var
@@ -277,9 +284,7 @@ begin
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
 {$ENDIF}
 
-//  FEvalAsDataSetAction := WizActionMgr.AddAction(SCnDebugEvalAsDataSetActionName,
-//    SCnDebugEvalAsDataSetActionCaption, 0, OnEvalAsDataSetExec,
-//    SCnDebugEvalAsDataSetActionName, SCnDebugEvalAsDataSetActionHint);
+  CnWizNotifierServices.AddBeforeCompileNotifier(BeforeCompile);
 end;
 
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
@@ -301,6 +306,7 @@ var
   ID: IOTADebuggerServices;
 {$ENDIF}
 begin
+  CnWizNotifierServices.RemoveBeforeCompileNotifier(BeforeCompile);
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   if Active then
   begin
@@ -339,6 +345,7 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
 {$ENDIF}
+  AutoClose := Ini.ReadBool('', csAutoClose, False);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -354,6 +361,7 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
   Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
 {$ENDIF}
+  Ini.WriteBool('', csAutoClose, AutoClose);
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
@@ -726,6 +734,25 @@ end;
 function TCnDebugEnhanceWizard.GetHint: string;
 begin
   Result := SCnDebugEnhanceWizardHint;
+end;
+
+procedure TCnDebugEnhanceWizard.BeforeCompile(const Project: IOTAProject;
+  IsCodeInsight: Boolean; var Cancel: Boolean);
+var
+  Exe: string;
+begin
+  if not Active or not AutoClose or IsCodeInsight then
+    Exit;
+
+  // 当前工程的可执行文件如果在运行则杀掉
+  Exe := CnOtaGetProjectOutputTarget(Project);
+  if (Exe <> '') and FileExists(Exe) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnDebugEnhanceWizard.BeforeCompile to Kill: ' + Exe);
+{$ENDIF}
+    KillProcessByFullFileName(Exe);
+  end;
 end;
 
 initialization
