@@ -1,6 +1,6 @@
 object CnDebugEnhanceForm: TCnDebugEnhanceForm
-  Left = 326
-  Top = 172
+  Left = 432
+  Top = 169
   BorderStyle = bsDialog
   Caption = 'Debug Enhancement Settings'
   ClientHeight = 425

@@ -283,6 +283,9 @@ begin
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
     chkDataSetViewer.Checked := FEnableDataSet;
 {$ELSE}
+    lblEnhanceHint.Enabled := False;
+    lvReplacers.Enabled := False;
+    grpExternalViewer.Enabled := False;
     chkDataSetViewer.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
@@ -655,7 +658,14 @@ begin
   if Action = actRemoveHint then
     (Action as TCustomAction).Enabled := lvReplacers.Selected <> nil
   else
+  begin
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     (Action as TCustomAction).Enabled := True;
+{$ELSE}
+    (Action as TCustomAction).Enabled := False;
+{$ENDIF}
+  end;
+
   Handled := True;
 end;
 
@@ -720,6 +730,10 @@ procedure TCnDebugEnhanceWizard.AcquireSubActions;
 begin
   FIdEvalObj := RegisterASubAction('EvalAsObj',
     'Evaluate As Object...', 0, '');
+
+  // ÔÝÊ±ÏÈÒþ²Ø
+  SubActions[FIdEvalObj].Visible := False;
+
   FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
     SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
   AddSepMenu;
@@ -731,24 +745,34 @@ procedure TCnDebugEnhanceWizard.SubActionExecute(Index: Integer);
 var
   S: string;
   I1: Integer;
+
+  function InputExpr: string;
+  var
+    T: string;
+  begin
+    Result := '';
+    T := Trim(CnOtaGetCurrentSelection);
+    if T = '' then
+    begin
+      CnOtaGetCurrPosToken(T, I1);
+      T := Trim(T);
+    end;
+
+    if CnWizInputQuery(SCnInformation, SCnDebugEnterExpression, T) then
+      Result := Trim(T);
+  end;
 begin
   if Index = FIdEvalObj then
   begin
-    S := CnOtaGetCurrentSelection;
-    if Trim(S) = '' then
-      CnOtaGetCurrPosToken(S, I1);
-
-    if Trim(S) <> '' then
-      EvaluateRemoteExpression(Trim(S));
+    S := InputExpr;
+    if S <> '' then
+      EvaluateRemoteExpression(S);
   end
   else if Index = FIdEvalAsDataSet then
   begin
-    S := CnOtaGetCurrentSelection;
-    if Trim(S) = '' then
-      CnOtaGetCurrPosToken(S, I1);
-
-    if Trim(S) <> '' then
-      ShowDataSetExternalViewer(Trim(S));
+    S := InputExpr;
+    if S <> '' then
+      ShowDataSetExternalViewer(S);
   end
   else if Index = FIdConfig then
     Config;
@@ -756,7 +780,8 @@ end;
 
 procedure TCnDebugEnhanceWizard.SubActionUpdate(Index: Integer);
 begin
-
+  if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) then
+    SubActions[Index].Enabled := CnOtaIsDebugging;
 end;
 
 function TCnDebugEnhanceWizard.GetCaption: string;
