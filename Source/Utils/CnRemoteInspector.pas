@@ -86,15 +86,14 @@ begin
 
   if AForm = nil then
     AForm := TCnPropSheetForm.Create(nil);
-CnDebugger.LogMsg('EvaluateRemoteExpression 1');
+
   AForm.ObjectPointer := nil;
   AForm.ObjectExpr := Trim(Expression); // 注意此时 ObjectPointer 必须为 nil，内部判断使用
   AForm.Clear;
   AForm.ParentSheetForm := AParentSheet;
-CnDebugger.LogMsg('EvaluateRemoteExpression 2');
+
   AForm.SyncMode := SyncMode;
   AForm.InspectorClass := TCnRemoteEvaluationInspector;
-CnDebugger.LogMsg('EvaluateRemoteExpression 3');
 
   Eval := TCnRemoteProcessEvaluator.Create;
   if SyncMode then
@@ -103,7 +102,6 @@ CnDebugger.LogMsg('EvaluateRemoteExpression 3');
     try
       AForm.InspectParam := Eval;
       AForm.InspectObject(AForm.InspectParam);
-CnDebugger.LogMsg('EvaluateRemoteExpression 4');
     finally
       AForm.DoEvaluateEnd;
       AForm.Show;  // After Evaluation. Show the form.
@@ -135,13 +133,7 @@ end;
 
 constructor TCnRemoteEvaluationInspector.Create(Data: Pointer);
 begin
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.Create');
   inherited Create(Data);
-if Data = nil then
-  CnDebugger.TraceCurrentStack('Data nil')
-else
-  CnDebugger.TraceCurrentStack('Data NOT nil');
-
   FEvaluator := TCnRemoteProcessEvaluator(Data);
 end;
 
@@ -178,19 +170,12 @@ begin
     Graphics.Graphic := nil;
   end;
 
-if FEvaluator = nil then
-  CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 0 nil')
-else
-  CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 0');
-CnDebugger.LogCurrentStack('Do Eval '+FObjectExpr);
-
   if not CnWizDebuggerObjectInheritsFrom(FObjectExpr, 'TObject', FEvaluator) then
   begin
     InspectComplete := True;
     Exit;
   end;
 
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 1');
   // 是一个对象，开始求值
   ContentTypes := [pctHierarchy];
   Hies := TStringList.Create;
@@ -199,7 +184,6 @@ CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 1');
     while True do
     begin
       S := FEvaluator.EvaluateExpression(V + '.ClassName');
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 1' + S);
       if (S = '') or (S = 'nil') then
         Break;
 
@@ -210,7 +194,6 @@ CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 1' + S);
       V := V + '.ClassParent';
     end;
     Hierarchy := Hies.Text;
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 2' + Hies.Text);
   finally
     Hies.Free;
   end;
@@ -226,19 +209,9 @@ CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 2' + Hies.Text);
       Strings.DisplayValue := S;
     end;
   end;
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 3');
-//  C := StrToIntDef(CnInProcessEvaluator.EvaluateExpression(
-//    Format('GetTypeData(PTypeInfo(%s.ClassInfo))^.PropCount', [FObjectExpr])), 0);
-//CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 4 ' + IntToStr(C));
-//  if C > 0 then
-//  begin
-//
-//  end;
 
 {$IFDEF SUPPORT_ENHANCED_RTTI}
   S := FEvaluator.EvaluateExpression(Format('Length(TRttiContext.Create.GetType(%s.ClassInfo).GetProperties)', [FObjectExpr]));
-CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 4 ' + S);
-
   C := StrToIntDef(S, 0);
   if C > 0 then
   begin
@@ -261,7 +234,7 @@ CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 4 ' + S);
           AProp := IndexOfProperty(Properties, V);
 
         AProp.PropName := V;
-        // AProp.PropType := S;
+        AProp.PropType := S;
 
         S := FEvaluator.EvaluateExpression(Format('TRttiContext.Create.GetType(%s.ClassInfo).GetProperties[%d].GetValue(%s)', [FObjectExpr, I, FObjectExpr]));
         if S <> AProp.DisplayValue then
@@ -276,7 +249,6 @@ CnDebugger.LogMsg('TCnRemoteEvaluationInspector.DoEvaluate 4 ' + S);
           Properties.Add(AProp);
 
         ContentTypes := ContentTypes + [pctProps];
-
       end;
     end;
   end;
