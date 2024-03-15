@@ -147,6 +147,14 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Caption = 'Auto Close Running Target  Before Compiling or Building'
           TabOrder = 0
         end
+        object chkAutoReset: TCheckBox
+          Left = 16
+          Top = 48
+          Width = 361
+          Height = 17
+          Caption = 'Auto Reset Debugging Target  Before Compiling or Building'
+          TabOrder = 1
+        end
       end
     end
   end

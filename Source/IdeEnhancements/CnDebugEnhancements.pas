@@ -43,7 +43,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
-  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils, CnWizNotifier;
+  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils, CnWizNotifier,
+  CnActionListHook;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
@@ -52,6 +53,9 @@ type
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
     FAutoClose: Boolean;
+    FAutoReset: Boolean;
+    FResetAction: TAction;
+    FHooks: TCnActionListHook;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
     FDataSetViewer: IOTADebuggerVisualizer;
@@ -62,6 +66,11 @@ type
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
       var Cancel: Boolean);
+    procedure UpdateHooks;
+    procedure EnableHooks;
+    procedure DisableHooks;
+    procedure SetAutoReset(const Value: Boolean);
+    procedure NewExecute(Sender: TObject);
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
@@ -92,6 +101,8 @@ type
 
     property AutoClose: Boolean read FAutoClose write FAutoClose;
     {* 编译前是否自动杀掉在运行的目标进程，需是独立运行的 Exe}
+    property AutoReset: Boolean read FAutoReset write SetAutoReset;
+    {* 编译前是否自动关闭在调试的目标进程，需是非独立运行的 Exe}
   end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -173,6 +184,7 @@ type
     tsOthers: TTabSheet;
     grpOthers: TGroupBox;
     chkAutoClose: TCheckBox;
+    chkAutoReset: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -203,9 +215,15 @@ implementation
 uses
   CnCommon, CnRemoteInspector {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
-
 const
   csAutoClose = 'AutoClose';
+  csAutoReset = 'AutoReset';
+
+  SCnRunResetActionName = 'RunResetCommand';
+  SCnCompileActionNames: array[0..4] of string = ('ProjectCompileCommand',
+    'ProjectBuildCommand', 'ProjectSyntaxCommand', 'ProjectCompileAllCommand',
+    'ProjectBuildAllCommand'
+  );
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   csEnableDataSet = 'EnableDataSet';
 
@@ -268,6 +286,7 @@ begin
     chkDataSetViewer.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
+    chkAutoReset.Checked := AutoReset;
 
     if ShowModal = mrOK then
     begin
@@ -276,6 +295,7 @@ begin
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
+      AutoReset := chkAutoReset.Checked;
       DoSaveSettings;
     end;
     Free;
@@ -290,6 +310,8 @@ begin
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
 {$ENDIF}
 
+  FHooks := TCnActionListHook.Create(nil);
+  FResetAction := TAction(GetIDEActionFromName(SCnRunResetActionName));
   CnWizNotifierServices.AddBeforeCompileNotifier(BeforeCompile);
 end;
 
@@ -313,6 +335,8 @@ var
 {$ENDIF}
 begin
   CnWizNotifierServices.RemoveBeforeCompileNotifier(BeforeCompile);
+  FHooks.Free;
+
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   if Active then
   begin
@@ -352,6 +376,7 @@ begin
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
+  AutoReset := Ini.ReadBool('', csAutoReset, False);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -367,7 +392,8 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
   Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
 {$ENDIF}
-  Ini.WriteBool('', csAutoClose, AutoClose);
+  Ini.WriteBool('', csAutoClose, FAutoClose);
+  Ini.WriteBool('', csAutoReset, FAutoReset);
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
@@ -377,6 +403,7 @@ var
 {$ENDIF}
 begin
   inherited;
+  UpdateHooks;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
@@ -758,6 +785,92 @@ begin
     CnDebugger.LogMsg('TCnDebugEnhanceWizard.BeforeCompile to Kill: ' + Exe);
 {$ENDIF}
     KillProcessByFullFileName(Exe);
+  end;
+end;
+
+procedure TCnDebugEnhanceWizard.SetAutoReset(const Value: Boolean);
+begin
+  if FAutoReset <> Value then
+  begin
+    FAutoReset := Value;
+    UpdateHooks;
+  end;
+end;
+
+procedure TCnDebugEnhanceWizard.DisableHooks;
+var
+  I: Integer;
+  Ast: TActionList;
+  Act: TAction;
+begin
+  Ast := TActionList(GetIDEActionList);
+  if (Ast = nil) or not FHooks.IsHooked(Ast) then
+    Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnDebugEnhanceWizard DisableHookes.');
+{$ENDIF}
+
+  for I := High(SCnCompileActionNames) downto Low(SCnCompileActionNames) do
+  begin
+    Act := TAction(GetIDEActionFromName(SCnCompileActionNames[I]));
+    if (Act <> nil) and FHooks.IsActionHooked(Act) then
+      FHooks.RemoveNotifiler(Act);
+  end;
+  FHooks.UnHookActionList(Ast);
+end;
+
+procedure TCnDebugEnhanceWizard.EnableHooks;
+var
+  I: Integer;
+  Ast: TActionList;
+  Act: TAction;
+begin
+  Ast := TActionList(GetIDEActionList);
+  if (Ast = nil) or FHooks.IsHooked(Ast) then
+    Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnDebugEnhanceWizard EnableHookes.');
+{$ENDIF}
+
+  FHooks.HookActionList(Ast);
+  for I := Low(SCnCompileActionNames) to High(SCnCompileActionNames) do
+  begin
+    Act := TAction(GetIDEActionFromName(SCnCompileActionNames[I]));
+    if (Act <> nil) and not FHooks.IsActionHooked(Act) then
+      FHooks.AddActionNotifier(Act, NewExecute, nil);
+  end;
+end;
+
+procedure TCnDebugEnhanceWizard.UpdateHooks;
+begin
+  if Active and FAutoReset then
+    EnableHooks
+  else
+    DisableHooks;
+end;
+
+procedure TCnDebugEnhanceWizard.NewExecute(Sender: TObject);
+var
+  Exe: TNotifyEvent;
+begin
+  if CnOtaIsDebugging and (FResetAction <> nil) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Hooked Actions Enter. Is Debugging. To Reset.');
+{$ENDIF}
+    FResetAction.Execute;
+  end;
+
+  // 找到 Sender 对应的 Action 的 Obj，找到其旧 Execute
+  Exe := FHooks.GetActionOldExecute(Sender as TAction);
+  if Assigned(Exe) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Hooked Actions Enter. Call Old.');
+{$ENDIF}
+    Exe(Sender);
   end;
 end;
 
