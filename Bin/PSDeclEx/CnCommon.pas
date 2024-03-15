@@ -575,8 +575,32 @@ procedure EndWait;
 function CheckWindows9598: Boolean;
 {* 检测是否Win95/98平台}
 
+function CheckWindowsNT: Boolean;
+{* 检测是否 WinNT 平台}
+
 function CheckWinXP: Boolean;
 {* 检测是否WinXP以上平台}
+
+function CheckWinVista: Boolean;
+{* 检查是否 Vista/Windows 7 或以上系统}
+
+function CheckWin8: Boolean;
+{* 检查是否 Windows 8 或以上系统}
+
+function CheckWin10: Boolean;
+{* 检查是否 Windows 10 或以上系统}
+
+function CheckWin64: Boolean;
+{* 检查是否是 64 位 Windows}
+
+function CheckWow64: Boolean;
+{* 检查当前进程是否是 32 位进程跑在 64 位子系统里}
+
+function CheckProcess64(ProcessHandle: THandle): Boolean;
+{* 检查指定进程是否 64 位，参数为进程句柄（并非进程号）。如传 0 ，则判断当前进程}
+
+function CheckProcessWow64(ProcessHandle: THandle): Boolean;
+{* 检查指定进程是否是 32 位进程跑在 64 位子系统里。参数为进程句柄（并非进程号）}
 
 function GetOSString: string;
 {* 返回操作系统标识串}
@@ -1339,7 +1363,39 @@ function CheckWindows9598: Boolean;
 begin
 end;
 
+function CheckWindowsNT: Boolean;
+begin
+end;
+
 function CheckWinXP: Boolean;
+begin
+end;
+
+function CheckWinVista: Boolean;
+begin
+end;
+
+function CheckWin8: Boolean;
+begin
+end;
+
+function CheckWin10: Boolean;
+begin
+end;
+
+function CheckWin64: Boolean;
+begin
+end;
+
+function CheckWow64: Boolean;
+begin
+end;
+
+function CheckProcess64(ProcessHandle: THandle): Boolean;
+begin
+end;
+
+function CheckProcessWow64(ProcessHandle: THandle): Boolean;
 begin
 end;
 
