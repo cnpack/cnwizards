@@ -1312,6 +1312,7 @@ var
   SCnDebugRemoveReplacerHint: string = 'Sure to Delete Selected Hint?';
   SCnDebugErrorReplacerFormat: string = 'Invalid Replacer Hint Format';
   SCnDebugErrorExprNotAClass: string = '%s Error or NOT a %s';
+  SCnDebugEnterExpression: string = 'Enter an Expression to Evaluate:';
 
   // CnCorPropWizard
   SCnCorrectPropertyName: string = 'Property Corrector';

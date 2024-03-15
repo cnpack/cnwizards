@@ -985,6 +985,7 @@ begin
   TranslateStr(SCnDebugRemoveReplacerHint, 'SCnDebugRemoveReplacerHint');
   TranslateStr(SCnDebugErrorReplacerFormat, 'SCnDebugErrorReplacerFormat');
   TranslateStr(SCnDebugErrorExprNotAClass, 'SCnDebugErrorExprNotAClass');
+  TranslateStr(SCnDebugEnterExpression, 'SCnDebugEnterExpression');
 
   // CnCorPropWizard
   TranslateStr(SCnCorrectPropertyName, 'SCnCorrectPropertyName');
