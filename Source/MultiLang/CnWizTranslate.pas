@@ -1376,17 +1376,6 @@ begin
   TranslateStr(SCnScriptModeEditorFlatButton, 'SCnScriptModeEditorFlatButton');
   TranslateStr(SCnScriptModeDesignerContextMenu, 'SCnScriptModeDesignerContextMenu');
 
-  // CnFeedReaderWizard
-  TranslateStr(SCnFeedReaderWizardName, 'SCnFeedReaderWizardName');
-  TranslateStr(SCnFeedReaderWizardComment, 'SCnFeedReaderWizardComment');
-  TranslateStr(SCnFeedPrevFeedCaption, 'SCnFeedPrevFeedCaption');
-  TranslateStr(SCnFeedNextFeedCaption, 'SCnFeedNextFeedCaption');
-  TranslateStr(SCnFeedForceUpdateCaption, 'SCnFeedForceUpdateCaption');
-  TranslateStr(SCnFeedConfigCaption, 'SCnFeedConfigCaption');
-  TranslateStr(SCnFeedCloseCaption, 'SCnFeedCloseCaption');
-  TranslateStr(SCnFeedCloseQuery, 'SCnFeedCloseQuery');
-  TranslateStr(SCnFeedNewItem, 'SCnFeedNewItem');
-
   // CnCodeFormatterWizard
   TranslateStr(SCnCodeFormatterWizardName, 'SCnCodeFormatterWizardName');
   TranslateStr(SCnCodeFormatterWizardComment, 'SCnCodeFormatterWizardComment');

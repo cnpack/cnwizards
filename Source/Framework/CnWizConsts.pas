@@ -1698,17 +1698,6 @@ var
   SCnScriptModeEditorFlatButton: string = 'Attach to Editor Flat Button Menu';
   SCnScriptModeDesignerContextMenu: string = 'Attach to Designer Context Menu';
 
-  // CnFeedReaderWizard
-  SCnFeedReaderWizardName: string = 'FeedReader Wizard';
-  SCnFeedReaderWizardComment: string = 'Display Feed Content in Status Bar';
-  SCnFeedPrevFeedCaption: string = '&Previous Item';
-  SCnFeedNextFeedCaption: string = '&Next Item';
-  SCnFeedForceUpdateCaption: string = '&Update All';
-  SCnFeedConfigCaption: string = '&Settings...';
-  SCnFeedCloseCaption: string = '&Close';
-  SCnFeedCloseQuery: string = 'Sure to Close FeedReader Wizard?';
-  SCnFeedNewItem: string = 'New Feed';
-
   // CnCodeFormatterWizard
   SCnCodeFormatterWizardName: string = 'Code Formatter Wizard';
   SCnCodeFormatterWizardComment: string = 'Format Code';

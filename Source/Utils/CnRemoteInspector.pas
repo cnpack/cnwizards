@@ -234,7 +234,7 @@ begin
           AProp := IndexOfProperty(Properties, V);
 
         AProp.PropName := V;
-        AProp.PropType := S;
+        // AProp.PropType := S;
 
         S := FEvaluator.EvaluateExpression(Format('TRttiContext.Create.GetType(%s.ClassInfo).GetProperties[%d].GetValue(%s)', [FObjectExpr, I, FObjectExpr]));
         if S <> AProp.DisplayValue then
