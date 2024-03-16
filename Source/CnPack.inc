@@ -3318,6 +3318,7 @@
   {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 removed OldCreateOrder
   {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 supports HDPI using TVirtualImageList, etc.
   {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 supports auto open VCL source readonly
+  {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 has Memory Visualizer for Debug
   {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 TStrings.SetTextStr Ignore #0 Terminated Char
 {$ENDIF}
 
@@ -3377,6 +3378,7 @@
 {$IFDEF DELPHIXE_UP}
   {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property.
   {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE ToolsAPI has Debugger Visualizer Interfaces.
+  {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE has TStrings Visualizer for Debug
 {$ENDIF}
 
 {$IFDEF BDS2012_UP}               // 2012 = XE2
@@ -3397,6 +3399,7 @@
   {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
+  {$DEFINE IDE_HAS_DATETIME_HINT}          // TDate/TTime/TDateTime shows Normally in Debug Hint
   {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 об╣д DebuggerService сп ProcessDebugEvents
   {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
