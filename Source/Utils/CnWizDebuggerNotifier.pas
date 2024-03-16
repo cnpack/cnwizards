@@ -167,9 +167,10 @@ type
   end;
 
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
-  Eval: TCnRemoteProcessEvaluator = nil): Boolean;
+  Eval: TCnRemoteProcessEvaluator = nil; IsCpp: Boolean = False): Boolean;
 {* 通过远程求值判断父类名称的方式，判断某对象名是否继承自指定父类
-  允许外部传入求值工具实例，如果不传则内部创建并释放}
+  允许外部传入求值工具实例，如果不传则内部创建并释放
+  IsCpp 表示外部要求求值环境是 C/C++ 语言，影响内部表达式，默认 False}
 
 function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 {* 获取 IDE Debugger 通知服务接口}
@@ -1078,7 +1079,7 @@ begin
 end;
 
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
-  Eval: TCnRemoteProcessEvaluator = nil): Boolean;
+  Eval: TCnRemoteProcessEvaluator; IsCpp: Boolean): Boolean;
 var
   S: string;
 begin
@@ -1089,7 +1090,11 @@ begin
   if Eval = nil then
     Eval := CnRemoteProcessEvaluator;
 
-  S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
+  if IsCpp then
+    S := Eval.EvaluateExpression(Format('%s->InheritsFrom(__classid(%s))', [Obj, BaseClassName]))
+  else
+    S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
+
   Result := LowerCase(S) = 'true';
 end;
 
