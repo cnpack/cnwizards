@@ -42,7 +42,7 @@ interface
 uses
   SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
   StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier,
-  CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock;
+  CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock;
 
 type
   TCnDataSetViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
@@ -67,7 +67,7 @@ type
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
-    procedure AddDataSetContent(const Expression, TypeName, EvalResult: string);
+    procedure AddDataSetContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -241,7 +241,7 @@ begin
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
     AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
-    AFrame.AddDataSetContent(Expression, TypeName, EvalResult);
+    AFrame.AddDataSetContent(Expression, TypeName, EvalResult, CurrentIsCSource);
     AFrame.pcViewsChange(nil);
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
 {$IFDEF IDE_SUPPORT_THEMING}
@@ -292,7 +292,7 @@ begin
 end;
 
 procedure TCnDataSetViewerFrame.AddDataSetContent(const Expression, TypeName,
-  EvalResult: string);
+  EvalResult: string; IsCpp: Boolean);
 var
   DebugSvcs: IOTADebuggerServices;
   CurProcess: IOTAProcess;
@@ -313,21 +313,39 @@ begin
 
   Clear;
 
-  S := FEvaluator.EvaluateExpression(FExpression + '.Active');
+  if IsCpp then
+    S := FEvaluator.EvaluateExpression(FExpression + '->Active')
+  else
+    S := FEvaluator.EvaluateExpression(FExpression + '.Active');
   mmoProp.Lines.Add('Active: ' + S);
 
   if LowerCase(S) = 'true' then
   begin
-    S := FEvaluator.EvaluateExpression(FExpression + '.FieldCount');
+    if IsCpp then
+      S := FEvaluator.EvaluateExpression(FExpression + '->FieldCount')
+    else
+      S := FEvaluator.EvaluateExpression(FExpression + '.FieldCount');
     mmoProp.Lines.Add('FieldCount: ' + S);
-    S := FEvaluator.EvaluateExpression(FExpression + '.RecordCount');
+
+    if IsCpp then
+      S := FEvaluator.EvaluateExpression(FExpression + '->RecordCount')
+    else
+      S := FEvaluator.EvaluateExpression(FExpression + '.RecordCount');
     mmoProp.Lines.Add('RecordCount: ' + S);
-    S := FEvaluator.EvaluateExpression(FExpression + '.RecNo');
+
+    if IsCpp then
+      S := FEvaluator.EvaluateExpression(FExpression + '->RecNo')
+    else
+      S := FEvaluator.EvaluateExpression(FExpression + '.RecNo');
     mmoProp.Lines.Add('RecNo: ' + S);
 
     // Fields Defs
-    S := FEvaluator.EvaluateExpression(FExpression+ '.FieldDefs.Count');
+    if IsCpp then
+      S := FEvaluator.EvaluateExpression(FExpression+ '->FieldDefs->Count')
+    else
+      S := FEvaluator.EvaluateExpression(FExpression+ '.FieldDefs.Count');
     C := StrToIntDef(S, 0);
+
     grdField.RowCount := C + 1;
     grdField.FixedRows := 1;
     grdField.ColCount := 5;
@@ -344,11 +362,22 @@ begin
 
     for I := 0 to C - 1 do // 行循环
     begin
-      grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-      grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
-      grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
-      grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
-      grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
+      if IsCpp then
+      begin
+        grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Name', [I]));
+        grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->DataType', [I]));
+        grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Size', [I]));
+        grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Precision', [I]));
+        grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Attribute', [I]));
+      end
+      else
+      begin
+        grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+        grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
+        grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
+        grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
+        grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
+      end;
     end;
 
     // Data
@@ -360,8 +389,16 @@ begin
 
     for I := 0 to C - 1 do // 列循环，打印当前记录的各字段值
     begin
-      grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-      grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('.Fields[%d].AsString', [I]));
+      if IsCpp then
+      begin
+        grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Name', [I]));
+        grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('->Fields[%d]->AsString', [I]));
+      end
+      else
+      begin
+        grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
+        grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('.Fields[%d].AsString', [I]));
+      end;
     end;
   end;
 end;
@@ -409,7 +446,7 @@ end;
 procedure TCnDataSetViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  AddDataSetContent(Expression, TypeName, EvalResult);
+  AddDataSetContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 end;
 
 procedure TCnDataSetViewerFrame.SetClosedCallback(
@@ -581,7 +618,7 @@ begin
   Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
-  Fm.AddDataSetContent(Expression, '', '');
+  Fm.AddDataSetContent(Expression, '', '', CurrentIsCSource);
 
   F.Show;
 end;

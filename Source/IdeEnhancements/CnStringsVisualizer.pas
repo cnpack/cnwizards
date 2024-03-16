@@ -40,7 +40,7 @@ interface
 uses
   SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
   StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier,
-  CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock;
+  CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock;
 
 type
   TCnStringsViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
@@ -58,7 +58,7 @@ type
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
-    procedure AddStringsContent(const Expression, TypeName, EvalResult: string);
+    procedure AddStringsContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -232,7 +232,7 @@ begin
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
     AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnStringsViewerFrame;
-    AFrame.AddStringsContent(Expression, TypeName, EvalResult);
+    AFrame.AddStringsContent(Expression, TypeName, EvalResult, CurrentIsCSource);
     AFrame.FormResize(AFrame);
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
 {$IFDEF IDE_SUPPORT_THEMING}
@@ -294,7 +294,7 @@ begin
 end;
 
 procedure TCnStringsViewerFrame.AddStringsContent(const Expression, TypeName,
-  EvalResult: string);
+  EvalResult: string; IsCpp: Boolean);
 var
   DebugSvcs: IOTADebuggerServices;
   CurProcess: IOTAProcess;
@@ -316,11 +316,15 @@ begin
 
   Clear;
 
-  S := FEvaluator.EvaluateExpression(FExpression + '.Count');
+  if IsCpp then
+    S := FEvaluator.EvaluateExpression(FExpression + '->Count')
+  else
+    S := FEvaluator.EvaluateExpression(FExpression + '.Count');
   C := StrToIntDef(S, 0);
 
   for I := 0 to C do
   begin
+    // 这个表达式不区分 Pascal 还是 C++
     S := FEvaluator.EvaluateExpression(FExpression + Format('[%d]', [I]));
 
     Item := lvStrings.Items.Add;
@@ -366,7 +370,7 @@ end;
 procedure TCnStringsViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  AddStringsContent(Expression, TypeName, EvalResult);
+  AddStringsContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 end;
 
 procedure TCnStringsViewerFrame.SetClosedCallback(
@@ -529,7 +533,7 @@ begin
   Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
-  Fm.AddStringsContent(Expression, '', '');
+  Fm.AddStringsContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
 
   F.Show;
 end;

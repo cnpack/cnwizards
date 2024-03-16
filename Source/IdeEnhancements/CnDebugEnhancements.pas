@@ -947,10 +947,7 @@ initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FDebuggerValueReplacerClass := TList.Create;
 {$ENDIF}
-
-{$IFDEF DELPHI}
-  RegisterCnWizard(TCnDebugEnhanceWizard); // BCB 5/6 下求值有问题先不注册入口
-{$ENDIF}
+  RegisterCnWizard(TCnDebugEnhanceWizard);
 
 finalization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
