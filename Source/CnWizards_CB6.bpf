@@ -77,6 +77,7 @@ USEFORMNS("SimpleWizards\CnProcListWizard.pas", Cnproclistwizard, CnProcListFrm)
 USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
 USEFORMNS("IdeEnhancements\CnDebugEnhancements.pas", Cndebugenhancements, CnDebugEnhanceForm);
 USEFORMNS("IdeEnhancements\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
+USEFORMNS("IdeEnhancements\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */
 USEFORMNS("Utils\CnWizMacroFrm.pas", Cnwizmacrofrm, CnWizMacroForm);
 USEFORMNS("ProjectExtWizard\CnProjectDirImportFrm.pas", Cnprojectdirimportfrm, CnImportDirForm);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorGroupReplace.pas", Cnsrceditorgroupreplace, CnSrcEditorGroupReplaceForm);
