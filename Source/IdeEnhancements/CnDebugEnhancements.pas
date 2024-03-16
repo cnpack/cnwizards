@@ -314,6 +314,7 @@ begin
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
     chkDataSetViewer.Checked := FEnableDataSet;
     chkStringsViewer.Checked := FEnableStrings;
+    chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
@@ -411,7 +412,7 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
-  EnableStrings := Ini.ReadBool('', csEnableStrings, True);
+  EnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
   AutoReset := Ini.ReadBool('', csAutoReset, False);
@@ -947,7 +948,10 @@ initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FDebuggerValueReplacerClass := TList.Create;
 {$ENDIF}
-  RegisterCnWizard(TCnDebugEnhanceWizard);
+
+{$IFDEF DELPHI}
+  RegisterCnWizard(TCnDebugEnhanceWizard); // BCB 5/6 下调试求值功能不靠谱，不能启用
+{$ENDIF}
 
 finalization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}

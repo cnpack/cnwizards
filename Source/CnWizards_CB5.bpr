@@ -75,6 +75,7 @@
       ..\Dcu\CnSrcEditorBlockTools.obj ..\Dcu\CnProcListWizard.obj 
       ..\Dcu\CnWizDfmParser.obj ..\Dcu\CnNamePropEditor.obj 
       ..\Dcu\CnVerEnhanceFrm.obj ..\Dcu\CnVerEnhancements.obj 
+      ..\Dcu\CnDebugEnhancements.obj ..\Dcu\CnDataSetVisualizer.obj 
       ..\Dcu\CnProjectDirBuilderFrm.obj ..\Dcu\CnProjectDirImportFrm.obj 
       ..\Dcu\CnWizMacroFrm.obj ..\Dcu\CnWizMacroText.obj 
       ..\Dcu\CnWizMacroUtils.obj ..\Dcu\CnSrcEditorCodeWrap.obj 
@@ -147,6 +148,7 @@
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
       SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
+      IdeEnhancements\CnDebugEnhancements.dfm IdeEnhancements\CnDataSetVisualizer.dfm 
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm 
       CodingToolset\CnEditorInsertTime.dfm CodingToolset\CnEditorCollector.dfm 
