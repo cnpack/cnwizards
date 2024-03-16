@@ -10,7 +10,8 @@
       ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
-      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
+      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
+      ..\Dcu\CnWizMultiLang.obj .\Dcu\CnWizMultiLangFrame.obj 
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnFastCodeWizard.obj ..\Dcu\CnDesignWizard.obj 
@@ -99,7 +100,7 @@
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) Misc\CnWizAboutFrm.dfm Misc\CnWizCommentFrm.dfm 
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
-      MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
+      MultiLang\CnWizMultiLang.dfm MultiLang\CnWizMultiLangFrame.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
       DesignWizard\CnDesignWizard.dfm CodingToolset\CnCodingToolsetWizard.dfm 
       DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 
@@ -235,6 +236,7 @@
       <FILE FILENAME="Misc\CnWizAbout.pas" FORMNAME="" UNITNAME="CnWizAbout" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Misc\CnIDEVersion.pas" FORMNAME="" UNITNAME="CnIDEVersion" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="MultiLang\CnWizMultiLang.pas" FORMNAME="CnTranslateForm" UNITNAME="Cnwizmultilang" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="MultiLang\CnWizMultiLangFrame.pas" FORMNAME="CnTranslateFrame" UNITNAME="Cnwizmultilangframe" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizConfigFrm.pas" FORMNAME="CnWizConfigForm" UNITNAME="Cnwizconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizSubActionShortCutFrm.pas" FORMNAME="CnWizSubActionShortCutForm" UNITNAME="Cnwizsubactionshortcutfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizMenuSortFrm.pas" FORMNAME="CnMenuSortFrm" UNITNAME="Cnwizmenusortfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -100,6 +100,10 @@
 			<DCCReference Include="MultiLang\CnWizMultiLang.pas">
 				<Form>CnTranslateForm</Form>
 			</DCCReference>
+			<DCCReference Include="MultiLang\CnWizMultiLangFrame.pas">
+				<Form>CnTranslateFrame</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
 			<DCCReference Include="MultiLang\CnWizTranslate.pas"/>
 			<DCCReference Include="Utils\CnWizUtils.pas"/>
 			<DCCReference Include="Utils\CnWizNotifier.pas"/>

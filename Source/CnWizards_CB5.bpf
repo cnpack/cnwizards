@@ -16,6 +16,7 @@ USEFORMNS("Misc\CnWizShareImages.pas", Cnwizshareimages, dmCnSharedImages); /* T
 USEUNIT("Misc\CnWizAbout.pas");
 USEUNIT("Misc\CnIDEVersion.pas");
 USEFORMNS("MultiLang\CnWizMultiLang.pas", Cnwizmultilang, CnTranslateForm);
+USEFORMNS("MultiLang\CnWizMultiLangFrame.pas", Cnwizmultilangframe, CnTranslateFrame); /* TFrame: File Type */
 USEFORMNS("Config\CnWizConfigFrm.pas", Cnwizconfigfrm, CnWizConfigForm);
 USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnWizSubActionShortCutForm);
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);

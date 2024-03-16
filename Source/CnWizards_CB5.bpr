@@ -10,7 +10,8 @@
       ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
-      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
+      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
+      ..\Dcu\CnWizMultiLang.obj ..\Dcu\CnWizMultiLangFrame.obj 
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnDesignWizard.obj ..\Dcu\CnCodingToolsetWizard.obj 
@@ -101,7 +102,7 @@
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) Misc\CnWizAboutFrm.dfm Misc\CnWizCommentFrm.dfm 
       Misc\CnWizUpgradeFrm.dfm Misc\CnWizShareImages.dfm 
-      MultiLang\CnWizMultiLang.dfm Config\CnWizConfigFrm.dfm 
+      MultiLang\CnWizMultiLang.dfm MultiLang\CnWizMultiLangFrame.dfm Config\CnWizConfigFrm.dfm 
       Config\CnWizSubActionShortCutFrm.dfm Config\CnWizMenuSortFrm.dfm 
       DesignWizard\CnDesignWizard.dfm CodingToolset\CnCodingToolsetWizard.dfm 
       DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 

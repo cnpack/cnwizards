@@ -39,6 +39,7 @@ uses
   CnWizUpgradeFrm in 'Misc\CnWizUpgradeFrm.pas' {CnWizUpgradeForm},
   CnIDEVersion in 'Misc\CnIDEVersion.pas',
   CnWizMultiLang in 'MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
+  CnWizMultiLangFrame in 'MultiLang\CnWizMultiLangFrame.pas' {CnTranslateFrame: TFrame},
   CnWizTranslate in 'MultiLang\CnWizTranslate.pas',
   CnWizUtils in 'Utils\CnWizUtils.pas',
   CnWizNotifier in 'Utils\CnWizNotifier.pas',
