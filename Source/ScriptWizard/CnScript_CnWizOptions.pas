@@ -103,7 +103,7 @@ begin
     RegisterProperty('CompilerID', 'string', iptr);
     RegisterProperty('CompilerRegPath', 'string', iptr);
     RegisterProperty('DelphiExt', 'string', iptrw);
-    RegisterProperty('CExt', 'string', iptrw);
+    RegisterProperty('CppExt', 'string', iptrw);
     RegisterProperty('ShowHint', 'Boolean', iptrw);
     RegisterProperty('ShowWizComment', 'Boolean', iptrw);
     RegisterProperty('ShowTipOfDay', 'Boolean', iptrw);
@@ -235,14 +235,14 @@ begin
   T := Self.ShowHint;
 end;
 
-procedure TCnWizOptionsCExt_W(Self: TCnWizOptions; const T: string);
+procedure TCnWizOptionsCppExt_W(Self: TCnWizOptions; const T: string);
 begin
-  Self.CExt := T;
+  Self.CppExt := T;
 end;
 
-procedure TCnWizOptionsCExt_R(Self: TCnWizOptions; var T: string);
+procedure TCnWizOptionsCppExt_R(Self: TCnWizOptions; var T: string);
 begin
-  T := Self.CExt;
+  T := Self.CppExt;
 end;
 
 procedure TCnWizOptionsDelphiExt_W(Self: TCnWizOptions; const T: string);
@@ -410,7 +410,7 @@ begin
     RegisterPropertyHelper(@TCnWizOptionsCompilerID_R, nil, 'CompilerID');
     RegisterPropertyHelper(@TCnWizOptionsCompilerRegPath_R, nil, 'CompilerRegPath');
     RegisterPropertyHelper(@TCnWizOptionsDelphiExt_R, @TCnWizOptionsDelphiExt_W, 'DelphiExt');
-    RegisterPropertyHelper(@TCnWizOptionsCExt_R, @TCnWizOptionsCExt_W, 'CExt');
+    RegisterPropertyHelper(@TCnWizOptionsCppExt_R, @TCnWizOptionsCppExt_W, 'CppExt');
     RegisterPropertyHelper(@TCnWizOptionsShowHint_R, @TCnWizOptionsShowHint_W, 'ShowHint');
     RegisterPropertyHelper(@TCnWizOptionsShowWizComment_R, @TCnWizOptionsShowWizComment_W, 'ShowWizComment');
     RegisterPropertyHelper(@TCnWizOptionsShowTipOfDay_R, @TCnWizOptionsShowTipOfDay_W, 'ShowTipOfDay');

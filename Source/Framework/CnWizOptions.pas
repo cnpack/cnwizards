@@ -97,7 +97,7 @@ type
     FShowHint: Boolean;
     FShowWizComment: Boolean;
     FDelphiExt: string;
-    FCExt: string;
+    FCppExt: string;
     FCompilerName: string;
     FCompilerID: string;
     FUpgradeReleaseOnly: Boolean;
@@ -246,8 +246,8 @@ type
     // 用户设置
     property DelphiExt: string read FDelphiExt write FDelphiExt;
     {* 用户定义的 Delphi 文件扩展名}
-    property CExt: string read FCExt write FCExt;
-    {* 用户定义的 C 文件扩展名}
+    property CppExt: string read FCppExt write FCppExt;
+    {* 用户定义的 C/C++ 文件扩展名}
     property ShowHint: Boolean read FShowHint write FShowHint;
     {* 是否显示控件 Hint，各窗体应在 Create 时设置 TForm.ShowHint 等于该值}
     property ShowWizComment: Boolean read FShowWizComment write FShowWizComment;
@@ -340,7 +340,7 @@ const
   csShowWizComment = 'ShowWizComment';
   csShowTipOfDay = 'ShowTipOfDay';
   csDelphiExt = 'DelphiExt';
-  csCExt = 'CExt';
+  csCppExt = 'CppExt';
   csUseToolsMenu = 'UseToolsMenu';
   csFixThreadLocale = 'FixThreadLocale';
   csUseOneCPUCore = 'UseOneCPUCore';
@@ -354,7 +354,7 @@ const
 {$ENDIF}
 
   csDelphiExtDefault = '.pas;.dpr;.inc';
-  csCExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
+  csCppExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
 
   csUpgradeURL = 'URL';
   csNightlyBuildURL = 'URL';
@@ -469,8 +469,8 @@ begin
     FShowTipOfDay := ReadBool(SCnOptionSection, csShowTipOfDay, True);
     FDelphiExt := ReadString(SCnOptionSection, csDelphiExt, csDelphiExtDefault);
     if FDelphiExt = '' then FDelphiExt := csDelphiExtDefault;
-    FCExt := ReadString(SCnOptionSection, csCExt, csCExtDefault);
-    if FCExt = '' then FCExt := csCExtDefault;
+    FCppExt := ReadString(SCnOptionSection, csCppExt, csCppExtDefault);
+    if FCppExt = '' then FCppExt := csCppExtDefault;
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
     FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
@@ -543,7 +543,7 @@ begin
     WriteBool(SCnOptionSection, csShowWizComment, FShowWizComment);
     WriteBool(SCnOptionSection, csShowTipOfDay, FShowTipOfDay);
     WriteString(SCnOptionSection, csDelphiExt, FDelphiExt);
-    WriteString(SCnOptionSection, csCExt, FCExt);
+    WriteString(SCnOptionSection, csCppExt, FCppExt);
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
 
@@ -621,7 +621,7 @@ end;
 
 function TCnWizOptions.IsCSource(const FileName: string): Boolean;
 begin
-  Result := FileMatchesExts(FileName, FCExt);
+  Result := FileMatchesExts(FileName, FCppExt);
 end;
 
 function TCnWizOptions.IsDelphiSource(const FileName: string): Boolean;

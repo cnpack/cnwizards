@@ -70,7 +70,7 @@ type
     FDelphiExt: string;
     FUpgradeURL: string;
     FIdeEhnRegPath: string;
-    FCExt: string;
+    FCppExt: string;
     FLangPath: string;
     FDataPath: string;
     FUserPath: string;
@@ -180,7 +180,7 @@ type
     // 用户设置
     property DelphiExt: string read FDelphiExt write FDelphiExt;
     {* 用户定义的 Delphi 文件扩展名}
-    property CExt: string read FCExt write FCExt;
+    property CppExt: string read FCppExt write FCppExt;
     {* 用户定义的 C 文件扩展名}
     property ShowHint: Boolean read FShowHint write FShowHint;
     {* 是否显示控件 Hint，各窗体应在 Create 时设置 TForm.ShowHint 等于该值}

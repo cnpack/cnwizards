@@ -313,7 +313,7 @@ begin
 
     if IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.DelphiExt)) > 0) then
       FFileList.Add(FileName)
-    else if not IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.CExt)) > 0) then
+    else if not IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.CppExt)) > 0) then
       FFileList.Add(FileName);
   end;
 end;

@@ -359,17 +359,17 @@ resourcestring
   SCnDefSourceMask = '.PAS;.DPR;CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
 
 function CurrentIsDelphiSource: Boolean;
-{* 当前编辑的文件是Delphi源文件}
+{* 当前编辑的文件是 Delphi 源文件}
 function CurrentIsCSource: Boolean;
-{* 当前编辑的文件是C源文件}
+{* 当前编辑的文件是 C/C++ 源文件}
 function CurrentIsSource: Boolean;
-{* 当前编辑的文件是Delphi或C源文件}
+{* 当前编辑的文件是 Delphi 或 C/C++ 源文件}
 function CurrentSourceIsDelphi: Boolean;
-{* 当前编辑的源文件（非窗体）是Delphi源文件}
+{* 当前编辑的源文件（非窗体）是 Delphi 源文件}
 function CurrentSourceIsC: Boolean;
-{* 当前编辑的源文件（非窗体）是C源文件}
+{* 当前编辑的源文件（非窗体）是 C/C++ 源文件}
 function CurrentSourceIsDelphiOrCSource: Boolean;
-{* 当前编辑的源文件（非窗体）是Delphi或C源文件}
+{* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
@@ -377,65 +377,65 @@ function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
 function ExtractUpperFileExt(const FileName: string): string;
 {* 取大写文件扩展名}
 procedure AssertIsDprOrPas(const FileName: string);
-{* 假定是.Dpr或.Pas文件}
+{* 假定是 .dpr或.pas文件}
 procedure AssertIsDprOrPasOrInc(const FileName: string);
-{* 假定是.Dpr、.Pas或.Inc文件}
+{* 假定是 .dpr、.pas 或 .inc文件}
 procedure AssertIsPasOrInc(const FileName: string);
-{* 假定是.Pas或.Inc文件}
+{* 假定是 .pas 或 .inc文件}
 function IsSourceModule(const FileName: string): Boolean;
-{* 判断是否Delphi或C++源文件}
+{* 判断是否 Delphi 或 C/C++ 源文件}
 function IsDelphiSourceModule(const FileName: string): Boolean;
-{* 判断是否Delphi源文件}
+{* 判断是否 Delphi 源文件}
 function IsDprOrPas(const FileName: string): Boolean;
-{* 判断是否.Dpr或.Pas文件}
+{* 判断是否 .dpr或.pas 文件}
 function IsDpr(const FileName: string): Boolean;
-{* 判断是否.Dpr文件}
+{* 判断是否 .dpr 文件}
 function IsBpr(const FileName: string): Boolean;
-{* 判断是否.Bpr文件}
+{* 判断是否 .bpr 文件}
 function IsProject(const FileName: string): Boolean;
-{* 判断是否.Bpr或.Dpr文件}
+{* 判断是否 .bpr或 .dpr文件}
 function IsBdsProject(const FileName: string): Boolean;
-{* 判断是否.bdsproj文件}
+{* 判断是否 .bdsproj 文件}
 function IsDProject(const FileName: string): Boolean;
-{* 判断是否.dproj文件}
+{* 判断是否 .dproj 文件}
 function IsCbProject(const FileName: string): Boolean;
-{* 判断是否.cbproj文件}
+{* 判断是否 .cbproj 文件}
 function IsDpk(const FileName: string): Boolean;
 {* 判断是否.Dpk文件}
 function IsBpk(const FileName: string): Boolean;
-{* 判断是否.Bpk文件}
+{* 判断是否 .bpk 文件}
 function IsPackage(const FileName: string): Boolean;
-{* 判断是否.Dpk或.Bpk文件}
+{* 判断是否 .dpk或.bpk 文件}
 function IsBpg(const FileName: string): Boolean;
-{* 判断是否.Bpg文件}
+{* 判断是否 .bpg 文件}
 function IsPas(const FileName: string): Boolean;
-{* 判断是否.Pas文件}
+{* 判断是否 .pas 文件}
 function IsDcu(const FileName: string): Boolean;
-{* 判断是否.Dcu文件}
+{* 判断是否 .dcu 文件}
 function IsInc(const FileName: string): Boolean;
-{* 判断是否.Inc文件}
+{* 判断是否 .inc 文件}
 function IsDfm(const FileName: string): Boolean;
-{* 判断是否.Dfm文件}
+{* 判断是否 .dfm 文件}
 function IsForm(const FileName: string): Boolean;
 {* 判断是否窗体文件}
 function IsXfm(const FileName: string): Boolean;
-{* 判断是否.Xfm文件}
+{* 判断是否 .xfm 文件}
 function IsFmx(const FileName: string): Boolean;
-{* 判断是否.fmx文件}
+{* 判断是否 .fmx 文件}
 function IsCppSourceModule(const FileName: string): Boolean;
-{* 判断是否所有类型的C++源文件}
+{* 判断是否所有类型的 C/C++ 源文件，不依赖于 WizOptions 中的设置}
 function IsHpp(const FileName: string): Boolean;
-{* 判断是否.Hpp文件}
+{* 判断是否 .hpp 文件}
 function IsCpp(const FileName: string): Boolean;
-{* 判断是否.Cpp文件}
+{* 判断是否 .cpp 文件}
 function IsC(const FileName: string): Boolean;
-{* 判断是否.C文件}
+{* 判断是否 .c 文件}
 function IsH(const FileName: string): Boolean;
-{* 判断是否.H文件}
+{* 判断是否 .h 文件}
 function IsAsm(const FileName: string): Boolean;
-{* 判断是否.ASM文件}
+{* 判断是否 .asm 文件}
 function IsRC(const FileName: string): Boolean;
-{* 判断是否.RC文件}
+{* 判断是否 .rc 文件}
 function IsKnownSourceFile(const FileName: string): Boolean;
 {* 判断是否未知文件}
 function IsTypeLibrary(const FileName: string): Boolean;
@@ -2864,13 +2864,13 @@ begin
   Result := WizOptions.IsDelphiSource(CnOtaGetCurrentSourceFile);
 end;
 
-// 当前编辑的文件是 C 源文件
+// 当前编辑的文件是 C/C++ 源文件
 function CurrentIsCSource: Boolean;
 begin
   Result := WizOptions.IsCSource(CnOtaGetCurrentSourceFile);
 end;
 
-// 当前编辑的文件是 Delphi 或 C 源文件
+// 当前编辑的文件是 Delphi 或 C/C++ 源文件
 function CurrentIsSource: Boolean;
 begin
 {$IFDEF BDS}
@@ -2887,13 +2887,13 @@ begin
   Result := WizOptions.IsDelphiSource(CnOtaGetCurrentSourceFileName);
 end;
 
-// 当前编辑的源文件（非窗体）是 C 源文件
+// 当前编辑的源文件（非窗体）是 C/C++ 源文件
 function CurrentSourceIsC: Boolean;
 begin
   Result := WizOptions.IsCSource(CnOtaGetCurrentSourceFileName);
 end;
 
-// 当前编辑的源文件（非窗体）是 Delphi 或 C 源文件
+// 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件
 function CurrentSourceIsDelphiOrCSource: Boolean;
 begin
   Result := CurrentSourceIsDelphi or CurrentSourceIsC;
@@ -6690,7 +6690,7 @@ begin
     end;
   end;
   Result := '';
-  {$IFDEF BCB}  // BCB 下可能存在无法获得当前工程的cpp文件的问题，特此加上此功能
+  {$IFDEF BCB}  // BCB 下可能存在无法获得当前工程的 cpp 文件的问题，特此加上此功能
   if (Result = '') and (CnOtaGetEditBuffer <> nil) then
     Result := CnOtaGetEditBuffer.FileName;
   {$ENDIF}
