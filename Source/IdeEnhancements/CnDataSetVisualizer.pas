@@ -41,10 +41,11 @@ interface
 
 uses
   SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
-  StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier, CnWizIdeDock;
+  StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier,
+  CnWizMultiLang, CnWizIdeDock;
 
 type
-  TCnDataSetViewerFrame = class(TFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
+  TCnDataSetViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
   {* 在支持调试可视化接口的 Delphi 下，可实例化后给 IDE 创建浮动窗口
     不支持的低版本 Delphi 中，通过菜单入口自行创建浮动窗口并嵌入该 Frame 实例}
@@ -75,9 +76,6 @@ type
 {$ENDIF}
   protected
     procedure SetParent(AParent: TWinControl); override;
-
-    procedure LanguageChanged(Sender: TObject);
-    procedure Translate;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -383,34 +381,13 @@ end;
 constructor TCnDataSetViewerFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  DisableAlign;
-  try
-    Translate;
-  finally
-    EnableAlign;
-  end;
-  CnLanguageManager.AddChangeNotifier(LanguageChanged);
   FEvaluator := TCnRemoteProcessEvaluator.Create;
 end;
 
 destructor TCnDataSetViewerFrame.Destroy;
 begin
   FEvaluator.Free;
-  CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
   inherited;
-end;
-
-procedure TCnDataSetViewerFrame.LanguageChanged(Sender: TObject);
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnDataSetViewerFrame.LanguageChanged');
-{$ENDIF}
-  DisableAlign;
-  try
-    CnLanguageManager.TranslateFrame(Self);
-  finally
-    EnableAlign;
-  end;
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -481,20 +458,6 @@ begin
     grdField.SetFocus
   else if pcViews.ActivePage = tsData then
     grdData.SetFocus;
-end;
-
-procedure TCnDataSetViewerFrame.Translate;
-begin
-  if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
-    and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
-  begin
-    Screen.Cursor := crHourGlass;
-    try
-      CnLanguageManager.TranslateFrame(Self);
-    finally
-      Screen.Cursor := crDefault;
-    end;
-  end;
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}

@@ -176,6 +176,16 @@ type
     {* 进行全窗体翻译}
   end;
 
+  TCnTranslateFrame = class(TFrame)
+  {* 拥有翻译功能的 TFrame 类，可独立翻译，不依赖于放置的宿主}
+  protected
+    procedure LanguageChanged(Sender: TObject);
+    procedure Translate;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+  end;
+
 {$IFNDEF TEST_APP}
 function CnLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
@@ -961,6 +971,53 @@ end;
 function TCnTranslateForm.NeedAdjustRightBottomMargin: Boolean;
 begin
   Result := True;
+end;
+
+{ TCnTranslateFrame }
+
+constructor TCnTranslateFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+  DisableAlign;
+  try
+    Translate;
+  finally
+    EnableAlign;
+  end;
+  CnLanguageManager.AddChangeNotifier(LanguageChanged);
+end;
+
+destructor TCnTranslateFrame.Destroy;
+begin
+  CnLanguageManager.RemoveChangeNotifier(LanguageChanged);
+  inherited;
+end;
+
+procedure TCnTranslateFrame.LanguageChanged(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTranslateFrame.LanguageChanged');
+{$ENDIF}
+  DisableAlign;
+  try
+    CnLanguageManager.TranslateFrame(Self);
+  finally
+    EnableAlign;
+  end;
+end;
+
+procedure TCnTranslateFrame.Translate;
+begin
+  if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
+    and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
+  begin
+    Screen.Cursor := crHourGlass;
+    try
+      CnLanguageManager.TranslateFrame(Self);
+    finally
+      Screen.Cursor := crDefault;
+    end;
+  end;
 end;
 
 initialization
