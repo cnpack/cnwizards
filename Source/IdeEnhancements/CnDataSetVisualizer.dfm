@@ -1,9 +1,6 @@
-object CnDataSetViewerFrame: TCnDataSetViewerFrame
-  Left = 0
-  Top = 0
+inherited CnDataSetViewerFrame: TCnDataSetViewerFrame
   Width = 598
   Height = 318
-  TabOrder = 0
   object Panel1: TPanel
     Left = 0
     Top = 0

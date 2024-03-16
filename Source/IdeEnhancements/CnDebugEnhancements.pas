@@ -43,13 +43,14 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
-  CnDataSetVisualizer, CnWizShareImages, CnWizMultiLang, CnWizUtils, CnWizNotifier,
-  CnActionListHook;
+  CnDataSetVisualizer, CnStringsVisualizer, CnWizMultiLang, CnWizShareImages,
+  CnWizUtils, CnWizNotifier, CnActionListHook;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
   private
     FIdEvalObj: Integer;
+    FIdEvalAsStrings: Integer;
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
     FAutoClose: Boolean;
@@ -61,8 +62,12 @@ type
     FDataSetViewer: IOTADebuggerVisualizer;
     FDataSetRegistered: Boolean;
     FEnableDataSet: Boolean;
+    FStringsViewer: IOTADebuggerVisualizer;
+    FStringsRegistered: Boolean;
+    FEnableStrings: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
-    procedure CheckDataSetViewerRegistration;
+    procedure SetEnableStrings(const Value: Boolean);
+    procedure CheckViewersRegistration;
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
       var Cancel: Boolean);
@@ -96,6 +101,8 @@ type
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     property EnableDataSet: Boolean read FEnableDataSet write SetEnableDataSet;
     {* 是否启用 DataSet Viewer}
+    property EnableStrings: Boolean read FEnableStrings write SetEnableStrings;
+    {* 是否启用 Strings Viewer}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
@@ -185,6 +192,7 @@ type
     grpOthers: TGroupBox;
     chkAutoClose: TCheckBox;
     chkAutoReset: TCheckBox;
+    chkStringsViewer: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -226,6 +234,7 @@ const
   );
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   csEnableDataSet = 'EnableDataSet';
+  csEnableStrings = 'EnableStrings';
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -245,22 +254,39 @@ end;
 procedure TCnDebugEnhanceWizard.SetEnableDataSet(const Value: Boolean);
 begin
   FEnableDataSet := Value;
-  CheckDataSetViewerRegistration;
+  CheckViewersRegistration;
 end;
 
-procedure TCnDebugEnhanceWizard.CheckDataSetViewerRegistration;
+procedure TCnDebugEnhanceWizard.SetEnableStrings(const Value: Boolean);
+begin
+  FEnableStrings := Value;
+  CheckViewersRegistration;
+end;
+
+procedure TCnDebugEnhanceWizard.CheckViewersRegistration;
 var
   ID: IOTADebuggerServices;
 begin
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
 
-  if Active and FEnableDataSet then
+  if Active then
   begin
-    if not FDataSetRegistered then
+    if FEnableDataSet then
     begin
-      ID.RegisterDebugVisualizer(FDataSetViewer);
-      FDataSetRegistered := True;
+      if not FDataSetRegistered then
+      begin
+        ID.RegisterDebugVisualizer(FDataSetViewer);
+        FDataSetRegistered := True;
+      end;
+    end;
+    if FEnableStrings then
+    begin
+      if not FStringsRegistered then
+      begin
+        ID.RegisterDebugVisualizer(FStringsViewer);
+        FStringsRegistered := True;
+      end;
     end;
   end
   else
@@ -269,6 +295,11 @@ begin
     begin
       ID.UnregisterDebugVisualizer(FDataSetViewer);
       FDataSetRegistered := False;
+    end;
+    if FStringsRegistered then
+    begin
+      ID.UnregisterDebugVisualizer(FStringsViewer);
+      FStringsRegistered := False;
     end;
   end;
 end;
@@ -282,11 +313,13 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
     chkDataSetViewer.Checked := FEnableDataSet;
+    chkStringsViewer.Checked := FEnableStrings;
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
     grpExternalViewer.Enabled := False;
     chkDataSetViewer.Enabled := False;
+    chkStringsViewer.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
@@ -295,6 +328,7 @@ begin
     begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
       EnableDataSet := chkDataSetViewer.Checked;
+      EnableStrings := chkStringsViewer.Checked;
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
@@ -377,6 +411,7 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
+  EnableStrings := Ini.ReadBool('', csEnableStrings, True);
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
   AutoReset := Ini.ReadBool('', csAutoReset, False);
@@ -394,6 +429,7 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
   Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
+  Ini.WriteBool('', csEnableStrings, FEnableStrings);
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
@@ -411,7 +447,7 @@ begin
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
 
-  CheckDataSetViewerRegistration;
+  CheckViewersRegistration;
   if Active then
   begin
     ID.RegisterDebugVisualizer(FReplaceManager);
@@ -734,6 +770,8 @@ begin
   // 暂时先隐藏
   SubActions[FIdEvalObj].Visible := False;
 
+  FIdEvalAsStrings := RegisterASubAction(SCnDebugEvalAsStrings,
+    SCnDebugEvalAsStringsCaption, 0, SCnDebugEvalAsStringsHint);
   FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
     SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
   AddSepMenu;
@@ -768,6 +806,12 @@ begin
     if S <> '' then
       EvaluateRemoteExpression(S);
   end
+  else if Index = FIdEvalAsStrings then
+  begin
+    S := InputExpr;
+    if S <> '' then
+      ShowStringsExternalViewer(S);
+  end
   else if Index = FIdEvalAsDataSet then
   begin
     S := InputExpr;
@@ -780,7 +824,7 @@ end;
 
 procedure TCnDebugEnhanceWizard.SubActionUpdate(Index: Integer);
 begin
-  if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) then
+  if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) or (Index = FIdEvalAsStrings) then
     SubActions[Index].Enabled := CnOtaIsDebugging;
 end;
 

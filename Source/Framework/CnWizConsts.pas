@@ -253,6 +253,7 @@ resourcestring
   SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
   SCnDataSetVisualizerIdentifier = 'CnPackIDEWizardsDataSetVisualizer';
   SCnDebugReplacerDataName = 'DebugReplacer.txt';
+  SCnDebugEvalAsStrings = 'CnDebugEvalAsStrings';
   SCnDebugEvalAsDataSet = 'CnDebugEvalAsDataSet';
   SCnDebugConfig = 'CnDebugConfig';
 
@@ -1294,6 +1295,8 @@ var
   SCnDebugEnhanceWizardComment: string = 'Debugger Enhancements Wizard';
   SCnDebugEnhanceWizardCaption: string = 'Debugger Enhancements';
   SCnDebugEnhanceWizardHint: string = 'Debugger Extension Tools';
+  SCnDebugEvalAsStringsCaption: string = 'Evaluate as T&Strings...';
+  SCnDebugEvalAsStringsHint: string = 'Evaluate Expression as TStrings';
   SCnDebugEvalAsDataSetCaption: string = 'Evaluate as T&DataSet...';
   SCnDebugEvalAsDataSetHint: string = 'Evaluate Expression as TDataSet';
   SCnDebugConfigCaption: string = '&Options...';
@@ -1304,6 +1307,10 @@ var
   SCnDebugDataSetViewerDescription: string = 'CnPack IDE Wizards DataSet Viewer';
   SCnDebugDataSetViewerMenuText: string = 'Show DataSet';
   SCnDataSetViewerFormCaption: string = 'TDataSet Visualizer for %s';
+  SCnDebugStringsViewerName: string = 'CnPack Strings Viewer';
+  SCnDebugStringsViewerDescription: string = 'CnPack IDE Wizards Strings Viewer';
+  SCnDebugStringsViewerMenuText: string = 'Show Strings';
+  SCnStringsViewerFormCaption: string = 'TStrings Visualizer for %s';
   SCnDebugErrorProcessNotAccessible: string = 'Process NOT Accessible';
   SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
   SCnDebugErrorOutOfScope: string = 'Out of Scope';

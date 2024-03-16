@@ -127,6 +127,14 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Caption = 'Enable TDataSet Viewer'
           TabOrder = 0
         end
+        object chkStringsViewer: TCheckBox
+          Left = 16
+          Top = 48
+          Width = 361
+          Height = 17
+          Caption = 'Enable TStrings Viewer'
+          TabOrder = 1
+        end
       end
     end
     object tsOthers: TTabSheet
