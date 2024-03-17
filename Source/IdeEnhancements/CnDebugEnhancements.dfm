@@ -135,6 +135,14 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Caption = 'Enable TStrings Viewer'
           TabOrder = 1
         end
+        object chkBytesViewer: TCheckBox
+          Left = 16
+          Top = 72
+          Width = 361
+          Height = 17
+          Caption = 'Enable TBytes/RawByteString/MemoryStream Viewer'
+          TabOrder = 2
+        end
       end
     end
     object tsOthers: TTabSheet

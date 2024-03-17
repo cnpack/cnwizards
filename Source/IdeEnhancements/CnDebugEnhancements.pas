@@ -43,14 +43,15 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ToolWin,
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
-  CnDataSetVisualizer, CnStringsVisualizer, CnWizMultiLang, CnWizShareImages,
-  CnWizUtils, CnWizNotifier, CnActionListHook;
+  CnDataSetVisualizer, CnStringsVisualizer, CnBytesVisualizer, CnWizMultiLang,
+  CnWizShareImages, CnWizUtils, CnWizNotifier, CnActionListHook;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
   private
     FIdEvalObj: Integer;
     FIdEvalAsStrings: Integer;
+    FIdEvalAsBytes: Integer;
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
     FAutoClose: Boolean;
@@ -65,8 +66,12 @@ type
     FStringsViewer: IOTADebuggerVisualizer;
     FStringsRegistered: Boolean;
     FEnableStrings: Boolean;
+    FBytesViewer: IOTADebuggerVisualizer;
+    FBytesRegistered: Boolean;
+    FEnableBytes: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
     procedure SetEnableStrings(const Value: Boolean);
+    procedure SetEnableBytes(const Value: Boolean);
     procedure CheckViewersRegistration;
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -102,6 +107,8 @@ type
     property EnableDataSet: Boolean read FEnableDataSet write SetEnableDataSet;
     {* 是否启用 DataSet Viewer}
     property EnableStrings: Boolean read FEnableStrings write SetEnableStrings;
+    {* 是否启用 Strings Viewer}
+    property EnableBytes: Boolean read FEnableBytes write SetEnableBytes;
     {* 是否启用 Strings Viewer}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
@@ -193,6 +200,7 @@ type
     chkAutoClose: TCheckBox;
     chkAutoReset: TCheckBox;
     chkStringsViewer: TCheckBox;
+    chkBytesViewer: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -235,6 +243,7 @@ const
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   csEnableDataSet = 'EnableDataSet';
   csEnableStrings = 'EnableStrings';
+  csEnableBytes = 'EnableBytes';
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -263,6 +272,12 @@ begin
   CheckViewersRegistration;
 end;
 
+procedure TCnDebugEnhanceWizard.SetEnableBytes(const Value: Boolean);
+begin
+  FEnableBytes := Value;
+  CheckViewersRegistration;
+end;
+
 procedure TCnDebugEnhanceWizard.CheckViewersRegistration;
 var
   ID: IOTADebuggerServices;
@@ -288,6 +303,14 @@ begin
         FStringsRegistered := True;
       end;
     end;
+    if FEnableBytes then
+    begin
+      if not FBytesRegistered then
+      begin
+        ID.RegisterDebugVisualizer(FBytesViewer);
+        FBytesRegistered := True;
+      end;
+    end;
   end
   else
   begin
@@ -300,6 +323,11 @@ begin
     begin
       ID.UnregisterDebugVisualizer(FStringsViewer);
       FStringsRegistered := False;
+    end;
+    if FBytesRegistered then
+    begin
+      ID.UnregisterDebugVisualizer(FBytesViewer);
+      FBytesRegistered := False;
     end;
   end;
 end;
@@ -314,13 +342,15 @@ begin
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
     chkDataSetViewer.Checked := FEnableDataSet;
     chkStringsViewer.Checked := FEnableStrings;
-    chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
+    // chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
+    chkBytesViewer.Checked := FEnableBytes;
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
     grpExternalViewer.Enabled := False;
     chkDataSetViewer.Enabled := False;
     chkStringsViewer.Enabled := False;
+    chkBytesViewer.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
@@ -330,6 +360,7 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
       EnableDataSet := chkDataSetViewer.Checked;
       EnableStrings := chkStringsViewer.Checked;
+      EnableBytes := chkBytesViewer.Checked;
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
@@ -346,6 +377,8 @@ begin
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FReplaceManager := TCnDebuggerValueReplaceManager.Create(Self);
   FDataSetViewer := TCnDebuggerDataSetVisualizer.Create;
+  FStringsViewer := TCnDebuggerStringsVisualizer.Create;
+  FBytesViewer := TCnDebuggerBytesVisualizer.Create;
 {$ENDIF}
 
   FHooks := TCnActionListHook.Create(nil);
@@ -382,12 +415,19 @@ begin
       Exit;
 
     ID.UnregisterDebugVisualizer(FReplaceManager);
+
     if FDataSetRegistered then
       ID.UnregisterDebugVisualizer(FDataSetViewer);
+    if FStringsRegistered then
+      ID.UnregisterDebugVisualizer(FStringsViewer);
+    if FBytesRegistered then
+      ID.UnregisterDebugVisualizer(FBytesViewer);
   end;
 
   FReplaceManager := nil;
   FDataSetViewer := nil;
+  FStringsViewer := nil;
+  FBytesViewer := nil;
 {$ENDIF}
   inherited;
 end;
@@ -413,6 +453,7 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
   EnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
+  EnableBytes := Ini.ReadBool('', csEnableBytes, True);      // 高版本 IDE 自带
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
   AutoReset := Ini.ReadBool('', csAutoReset, False);
@@ -431,6 +472,7 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).SaveSettings;
   Ini.WriteBool('', csEnableDataSet, FEnableDataSet);
   Ini.WriteBool('', csEnableStrings, FEnableStrings);
+  Ini.WriteBool('', csEnableBytes, FEnableBytes);
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
@@ -773,6 +815,8 @@ begin
 
   FIdEvalAsStrings := RegisterASubAction(SCnDebugEvalAsStrings,
     SCnDebugEvalAsStringsCaption, 0, SCnDebugEvalAsStringsHint);
+  FIdEvalAsBytes := RegisterASubAction(SCnDebugEvalAsBytes,
+    SCnDebugEvalAsBytesCaption, 0, SCnDebugEvalAsBytesHint);
   FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
     SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
   AddSepMenu;
@@ -800,6 +844,7 @@ var
     if CnWizInputQuery(SCnInformation, SCnDebugEnterExpression, T) then
       Result := Trim(T);
   end;
+
 begin
   if Index = FIdEvalObj then
   begin
@@ -813,6 +858,12 @@ begin
     if S <> '' then
       ShowStringsExternalViewer(S);
   end
+  else if Index = FIdEvalAsBytes then
+  begin
+    S := InputExpr;
+    if S <> '' then
+      ShowBytesExternalViewer(S);
+  end
   else if Index = FIdEvalAsDataSet then
   begin
     S := InputExpr;
@@ -825,7 +876,8 @@ end;
 
 procedure TCnDebugEnhanceWizard.SubActionUpdate(Index: Integer);
 begin
-  if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) or (Index = FIdEvalAsStrings) then
+  if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) or (Index = FIdEvalAsStrings)
+    or (Index = FIdEvalAsBytes) then
     SubActions[Index].Enabled := CnOtaIsDebugging;
 end;
 

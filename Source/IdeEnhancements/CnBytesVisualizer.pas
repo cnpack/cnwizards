@@ -18,19 +18,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnDataSetVisualizer;
+unit CnBytesVisualizer;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：针对 TDataSet 及其子类的调试期查看器
-* 单元作者：CnPack开发组
+* 单元名称：针对 TBytes 等内存数据相关的类的调试期查看器
+* 单元作者：CnPack 开发组
 * 备    注：结构参考了 VCL 中自带的各类 Visualizer
 * 开发平台：PWin11 + Delphi 12
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2024.03.09 V1.1
-*               重构以抽取求值类至外部
-*           2024.03.07 V1.0
+* 修改记录：2024.03.16 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -42,32 +40,24 @@ interface
 uses
   SysUtils, Classes, Graphics, Controls, Forms, Messages, Dialogs, ComCtrls,
   StdCtrls, Grids, ExtCtrls, ToolsAPI, CnWizConsts, CnWizDebuggerNotifier,
-  CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock;
+  CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock, CnHexEditor;
 
 type
-  TCnDataSetViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
+  TCnBytesViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
-  {* 在支持调试可视化接口的 Delphi 下，可实例化后给 IDE 创建浮动窗口
-    不支持的低版本 Delphi 中，通过菜单入口自行创建浮动窗口并嵌入该 Frame 实例}
-    pcViews: TPageControl;
-    tsProp: TTabSheet;
-    mmoProp: TMemo;
-    tsData: TTabSheet;
     Panel1: TPanel;
-    grdData: TStringGrid;
-    tsField: TTabSheet;
-    grdField: TStringGrid;
-    procedure pcViewsChange(Sender: TObject);
   private
+    FHexEditor: TCnHexEditor;
     FExpression: string;
     FOwningForm: TCustomForm;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FClosedProc: TOTAVisualizerClosedProcedure;
 {$ENDIF}
+    FItems: TStrings;
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
-    procedure AddDataSetContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
+    procedure AddBytesContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -90,7 +80,7 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-  TCnDebuggerDataSetVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
+  TCnDebuggerBytesVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
     {$IFDEF DELPHI102_TOKYO_UP} IOTADebuggerVisualizer250, {$ENDIF}
     IOTADebuggerVisualizerExternalViewer)
   public
@@ -114,8 +104,8 @@ type
 
 {$ENDIF}
 
-procedure ShowDataSetExternalViewer(const Expression: string);
-{* 以手工调用的方式传入一个类型是 TDataSet 的表达式并显示，不走 Delphi 自身的提示按钮}
+procedure ShowBytesExternalViewer(const Expression: string);
+{* 以手工调用的方式传入一个类型是 TBytes 的表达式并显示，不走 Delphi 自身的提示按钮}
 
 implementation
 
@@ -124,9 +114,12 @@ uses
    Actnlist, ImgList, Menus, IniFiles, CnCommon,
   {$IFDEF IDE_SUPPORT_THEMING} GraphUtil, {$ENDIF}
   {$IFDEF DELPHI103_RIO_UP} BrandingAPI, {$ENDIF}
-  CnLangMgr, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnLangMgr, CnWizIdeUtils, CnNative {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.DFM}
+
+const
+  MAX_BYTES = $1000;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
@@ -139,9 +132,9 @@ type
     procedure SetFrame(Form: TCustomFrame);
   end;
 
-  TCnDataSetVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
+  TCnBytesVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
   private
-    FMyFrame: TCnDataSetViewerFrame;
+    FMyFrame: TCnBytesViewerFrame;
     FMyForm: TCustomForm;
     FExpression: string;
   public
@@ -172,57 +165,64 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnDebuggerDataSetVisualizer }
+{ TCnDebuggerBytesVisualizer }
 
-function TCnDebuggerDataSetVisualizer.GetMenuText: string;
+function TCnDebuggerBytesVisualizer.GetMenuText: string;
 begin
-  Result := SCnDebugDataSetViewerMenuText;
+  Result := SCnDebugBytesViewerMenuText;
 end;
 
-function TCnDebuggerDataSetVisualizer.GetSupportedTypeCount: Integer;
+function TCnDebuggerBytesVisualizer.GetSupportedTypeCount: Integer;
 begin
-  Result := 1;
+  Result := 4;
 end;
 
-procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
+procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
   var AllDescendants: Boolean);
 begin
-  TypeName := 'TDataSet';
-  AllDescendants := True;
+  if Index in [0, 1, 2, 3] then
+  begin
+    AllDescendants := False;
+    case Index of
+      0: TypeName := 'TBytes';
+      1: TypeName := 'array of Byte';
+      2: TypeName := 'TArray<Byte>';
+      3: TypeName := 'RawByteString';
+    end;
+  end;
 end;
 
 {$IFDEF DELPHI102_TOKYO_UP}
 
-procedure TCnDebuggerDataSetVisualizer.GetSupportedType(Index: Integer;
+procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
-  TypeName := 'TDataSet';
-  AllDescendants := True;
-  IsGeneric := False;
+  GetSupportedType(Index, TypeName, AllDescendants);
+  IsGeneric := Index = 2; // 2 是 TArray<Byte>
 end;
 
 {$ENDIF}
 
-function TCnDebuggerDataSetVisualizer.GetVisualizerDescription: string;
+function TCnDebuggerBytesVisualizer.GetVisualizerDescription: string;
 begin
-  Result := SCnDebugDataSetViewerDescription;
+  Result := SCnDebugBytesViewerDescription;
 end;
 
-function TCnDebuggerDataSetVisualizer.GetVisualizerIdentifier: string;
+function TCnDebuggerBytesVisualizer.GetVisualizerIdentifier: string;
 begin
   Result := ClassName;
 end;
 
-function TCnDebuggerDataSetVisualizer.GetVisualizerName: string;
+function TCnDebuggerBytesVisualizer.GetVisualizerName: string;
 begin
-  Result := SCnDebugDataSetViewerName;
+  Result := SCnDebugBytesViewerName;
 end;
 
-function TCnDebuggerDataSetVisualizer.Show(const Expression, TypeName, EvalResult: string;
+function TCnDebuggerBytesVisualizer.Show(const Expression, TypeName, EvalResult: string;
   SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
 var
   AForm: TCustomForm;
-  AFrame: TCnDataSetViewerFrame;
+  AFrame: TCnBytesViewerFrame;
   VisDockForm: INTACustomDockableForm;
 {$IFDEF IDE_SUPPORT_THEMING}
   LThemingServices: IOTAIDEThemingServices;
@@ -230,7 +230,7 @@ var
 begin
   CloseExpandableEvalViewForm; // 调试提示窗口可能过大挡住本窗口，先隐藏之，但也慢
 
-  VisDockForm := TCnDataSetVisualizerForm.Create(Expression) as INTACustomDockableForm;
+  VisDockForm := TCnBytesVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
 
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -240,9 +240,9 @@ begin
     AForm.Left := SuggestedLeft;
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
-    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnDataSetViewerFrame;
-    AFrame.AddDataSetContent(Expression, TypeName, EvalResult, CurrentIsCSource);
-    AFrame.pcViewsChange(nil);
+    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnBytesViewerFrame;
+    AFrame.AddBytesContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
 {$IFDEF IDE_SUPPORT_THEMING}
     if Supports(BorlandIDEServices, IOTAIDEThemingServices, LThemingServices) and
@@ -270,11 +270,12 @@ end;
 
 {$ENDIF}
 
-{ TCnDataSetViewerFrame }
+{ TCnBytesViewerFrame }
 
-procedure TCnDataSetViewerFrame.SetAvailableState(const AState: TCnAvailableState);
+procedure TCnBytesViewerFrame.SetAvailableState(const AState: TCnAvailableState);
 var
   S: string;
+  Item: TListItem;
 begin
   FAvailableState := AState;
   case FAvailableState of
@@ -287,18 +288,25 @@ begin
     asNotAvailable:
       S := SCnDebugErrorValueNotAccessible;
   end;
+
   if S <> '' then
-    mmoProp.Lines.Text := '';
+  begin
+    Clear;
+//    Item := lvStrings.Items.Add;
+//    Item.SubItems.Add(S);
+  end;
 end;
 
-procedure TCnDataSetViewerFrame.AddDataSetContent(const Expression, TypeName,
+procedure TCnBytesViewerFrame.AddBytesContent(const Expression, TypeName,
   EvalResult: string; IsCpp: Boolean);
 var
   DebugSvcs: IOTADebuggerServices;
   CurProcess: IOTAProcess;
   CurThread: IOTAThread;
-  S: string;
-  I, C: Integer;
+  S, T, PE, LE: string; // 结果、类型、指针表达式、长度表达式
+  P, L: TUInt64;
+  Item: TListItem;
+  Buf: TBytes;
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
@@ -308,119 +316,49 @@ begin
   if CurThread = nil then
     Exit;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnBytesViewerFrame.AddBytesContent: %s: %s', [Expression, TypeName]);
+{$ENDIF}
+
   FExpression := Expression;
   SetAvailableState(asAvailable);
 
   Clear;
+  PE := Format('Pointer(%s)', [Expression]);
+  LE := Format('Length(%s)', [Expression]);
 
-  if IsCpp then
-    S := FEvaluator.EvaluateExpression(FExpression + '->Active')
-  else
-    S := FEvaluator.EvaluateExpression(FExpression + '.Active');
-  mmoProp.Lines.Add('Active: ' + S);
+  S := FEvaluator.EvaluateExpression(LE);
+  L := StrToIntDef(S, 0);
+  if L <= 0 then // 如果长度为 0 就啥都不显示而退出
+    Exit;
+  if L > MAX_BYTES then // 不能太长
+    L := MAX_BYTES;
 
-  if LowerCase(S) = 'true' then
-  begin
-    if IsCpp then
-      S := FEvaluator.EvaluateExpression(FExpression + '->FieldCount')
-    else
-      S := FEvaluator.EvaluateExpression(FExpression + '.FieldCount');
-    mmoProp.Lines.Add('FieldCount: ' + S);
+  S := FEvaluator.EvaluateExpression(PE);
+  if S = 'nil' then // 空的指针，也没法显示
+    Exit;
 
-    if IsCpp then
-      S := FEvaluator.EvaluateExpression(FExpression + '->RecordCount')
-    else
-      S := FEvaluator.EvaluateExpression(FExpression + '.RecordCount');
-    mmoProp.Lines.Add('RecordCount: ' + S);
-
-    if IsCpp then
-      S := FEvaluator.EvaluateExpression(FExpression + '->RecNo')
-    else
-      S := FEvaluator.EvaluateExpression(FExpression + '.RecNo');
-    mmoProp.Lines.Add('RecNo: ' + S);
-
-    // Fields Defs
-    if IsCpp then
-      S := FEvaluator.EvaluateExpression(FExpression+ '->FieldDefs->Count')
-    else
-      S := FEvaluator.EvaluateExpression(FExpression+ '.FieldDefs.Count');
-    C := StrToIntDef(S, 0);
-
-    grdField.RowCount := C + 1;
-    grdField.FixedRows := 1;
-    grdField.ColCount := 5;
-    grdfield.FixedCols := 0;
-
-    for I := 0 to grdField.ColCount - 1 do
-      grdField.ColWidths[I] := 110;
-
-    grdField.Cells[0, 0] := 'Name';
-    grdField.Cells[1, 0] := 'DataType';
-    grdField.Cells[2, 0] := 'Size';
-    grdField.Cells[3, 0] := 'Precision';
-    grdField.Cells[4, 0] := 'Attribute';
-
-    for I := 0 to C - 1 do // 行循环
-    begin
-      if IsCpp then
-      begin
-        grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Name', [I]));
-        grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->DataType', [I]));
-        grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Size', [I]));
-        grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Precision', [I]));
-        grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Attribute', [I]));
-      end
-      else
-      begin
-        grdField.Cells[0, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-        grdField.Cells[1, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].DataType', [I]));
-        grdField.Cells[2, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Size', [I]));
-        grdField.Cells[3, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Precision', [I]));
-        grdField.Cells[4, I + 1] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Attribute', [I]));
-      end;
-    end;
-
-    // Data
-    grdData.ColCount := C;
-    grdData.RowCount := 2;
-    grdData.FixedRows := 1;
-    for I := 0 to grdData.ColCount - 1 do
-      grdData.ColWidths[I] := 90;
-
-    for I := 0 to C - 1 do // 列循环，打印当前记录的各字段值
-    begin
-      if IsCpp then
-      begin
-        grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('->FieldDefs->Items[%d]->Name', [I]));
-        grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('->Fields[%d]->AsString', [I]));
-      end
-      else
-      begin
-        grdData.Cells[I, 0] := FEvaluator.EvaluateExpression(FExpression + Format('.FieldDefs.Items[%d].Name', [I]));
-        grdData.Cells[I, 1] := FEvaluator.EvaluateExpression(FExpression + Format('.Fields[%d].AsString', [I]));
-      end;
-    end;
-  end;
+  P := StrToUInt64(S);
+  SetLength(Buf, L);
+  CurProcess.ReadProcessMemory(P, L, Buf[0]);
+  FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
 end;
 
-procedure TCnDataSetViewerFrame.Clear;
+procedure TCnBytesViewerFrame.Clear;
 begin
-  mmoProp.Lines.Clear;
-  grdField.RowCount := 1;
-  grdField.ColCount := 1;
-  grdField.Cells[0, 0] := '';
-  grdData.RowCount := 1;
-  grdData.ColCount := 1;
-  grdData.Cells[0, 0] := '';
+  FHexEditor.Clear;
 end;
 
-constructor TCnDataSetViewerFrame.Create(AOwner: TComponent);
+constructor TCnBytesViewerFrame.Create(AOwner: TComponent);
 begin
   inherited;
   FEvaluator := TCnRemoteProcessEvaluator.Create;
+  FHexEditor := TCnHexEditor.Create(Self);
+  FHexEditor.Align := alClient;
+  FHexEditor.Parent := Panel1;
 end;
 
-destructor TCnDataSetViewerFrame.Destroy;
+destructor TCnBytesViewerFrame.Destroy;
 begin
   FEvaluator.Free;
   inherited;
@@ -428,13 +366,13 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-procedure TCnDataSetViewerFrame.CloseVisualizer;
+procedure TCnBytesViewerFrame.CloseVisualizer;
 begin
   if FOwningForm <> nil then
     FOwningForm.Close;
 end;
 
-procedure TCnDataSetViewerFrame.MarkUnavailable(
+procedure TCnBytesViewerFrame.MarkUnavailable(
   Reason: TOTAVisualizerUnavailableReason);
 begin
   if Reason = ovurProcessRunning then
@@ -443,13 +381,13 @@ begin
     SetAvailableState(asOutOfScope);
 end;
 
-procedure TCnDataSetViewerFrame.RefreshVisualizer(const Expression, TypeName,
+procedure TCnBytesViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  AddDataSetContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+  AddBytesContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 end;
 
-procedure TCnDataSetViewerFrame.SetClosedCallback(
+procedure TCnBytesViewerFrame.SetClosedCallback(
   ClosedProc: TOTAVisualizerClosedProcedure);
 begin
   FClosedProc := ClosedProc;
@@ -457,15 +395,16 @@ end;
 
 {$ENDIF}
 
-procedure TCnDataSetViewerFrame.SetForm(AForm: TCustomForm);
+procedure TCnBytesViewerFrame.SetForm(AForm: TCustomForm);
 begin
   FOwningForm := AForm;
 end;
 
-procedure TCnDataSetViewerFrame.SetParent(AParent: TWinControl);
+procedure TCnBytesViewerFrame.SetParent(AParent: TWinControl);
 begin
   if AParent = nil then
   begin
+    FreeAndNil(FItems);
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     if Assigned(FClosedProc) then
       FClosedProc;
@@ -476,7 +415,7 @@ end;
 
 {$IFDEF DELPHI120_ATHENS_UP}
 
-procedure TCnDataSetViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
+procedure TCnBytesViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
 begin
   inherited;
   if TIDEThemeMetrics.Font.Enabled then
@@ -485,140 +424,124 @@ end;
 
 {$ENDIF}
 
-procedure TCnDataSetViewerFrame.pcViewsChange(Sender: TObject);
-begin
-  if pcViews.ActivePage = tsProp then
-    mmoProp.SetFocus
-  else if pcViews.ActivePage = tsField then
-    grdField.SetFocus
-  else if pcViews.ActivePage = tsData then
-    grdData.SetFocus;
-end;
-
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnDataSetVisualizerForm }
+{ TCnBytesVisualizerForm }
 
-constructor TCnDataSetVisualizerForm.Create(const Expression: string);
+constructor TCnBytesVisualizerForm.Create(const Expression: string);
 begin
   inherited Create;
   FExpression := Expression;
 end;
 
-procedure TCnDataSetVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
+procedure TCnBytesVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
 begin
   // no toolbar
 end;
 
-procedure TCnDataSetVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
+procedure TCnBytesVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
 begin
  // no toolbar
 end;
 
-function TCnDataSetVisualizerForm.EditAction(Action: TEditAction): Boolean;
+function TCnBytesVisualizerForm.EditAction(Action: TEditAction): Boolean;
 begin
   Result := False;
 end;
 
-procedure TCnDataSetVisualizerForm.FrameCreated(AFrame: TCustomFrame);
+procedure TCnBytesVisualizerForm.FrameCreated(AFrame: TCustomFrame);
 begin
-  FMyFrame := TCnDataSetViewerFrame(AFrame);
+  FMyFrame := TCnBytesViewerFrame(AFrame);
 end;
 
-function TCnDataSetVisualizerForm.GetCaption: string;
+function TCnBytesVisualizerForm.GetCaption: string;
 begin
-  Result := Format(SCnDataSetViewerFormCaption, [FExpression]);
+  Result := Format(SCnBytesViewerFormCaption, [FExpression]);
 end;
 
-function TCnDataSetVisualizerForm.GetEditState: TEditState;
+function TCnBytesVisualizerForm.GetEditState: TEditState;
 begin
   Result := [];
 end;
 
-function TCnDataSetVisualizerForm.GetForm: TCustomForm;
+function TCnBytesVisualizerForm.GetForm: TCustomForm;
 begin
   Result := FMyForm;
 end;
 
-function TCnDataSetVisualizerForm.GetFrame: TCustomFrame;
+function TCnBytesVisualizerForm.GetFrame: TCustomFrame;
 begin
   Result := FMyFrame;
 end;
 
-function TCnDataSetVisualizerForm.GetFrameClass: TCustomFrameClass;
+function TCnBytesVisualizerForm.GetFrameClass: TCustomFrameClass;
 begin
-  Result := TCnDataSetViewerFrame;
+  Result := TCnBytesViewerFrame;
 end;
 
-function TCnDataSetVisualizerForm.GetIdentifier: string;
+function TCnBytesVisualizerForm.GetIdentifier: string;
 begin
-  Result := 'DataSetDebugVisualizer';
+  Result := 'BytesDebugVisualizer';
 end;
 
-function TCnDataSetVisualizerForm.GetMenuActionList: TCustomActionList;
-begin
-  Result := nil;
-end;
-
-function TCnDataSetVisualizerForm.GetMenuImageList: TCustomImageList;
+function TCnBytesVisualizerForm.GetMenuActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-function TCnDataSetVisualizerForm.GetToolbarActionList: TCustomActionList;
+function TCnBytesVisualizerForm.GetMenuImageList: TCustomImageList;
 begin
   Result := nil;
 end;
 
-function TCnDataSetVisualizerForm.GetToolbarImageList: TCustomImageList;
+function TCnBytesVisualizerForm.GetToolbarActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-procedure TCnDataSetVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
+function TCnBytesVisualizerForm.GetToolbarImageList: TCustomImageList;
+begin
+  Result := nil;
+end;
+
+procedure TCnBytesVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
   const Section: string);
 begin
   // no desktop saving
 end;
 
-procedure TCnDataSetVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
+procedure TCnBytesVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
   const Section: string; IsProject: Boolean);
 begin
   // no desktop saving
 end;
 
-procedure TCnDataSetVisualizerForm.SetForm(Form: TCustomForm);
+procedure TCnBytesVisualizerForm.SetForm(Form: TCustomForm);
 begin
   FMyForm := Form;
   if Assigned(FMyFrame) then
     FMyFrame.SetForm(FMyForm);
 end;
 
-procedure TCnDataSetVisualizerForm.SetFrame(Frame: TCustomFrame);
+procedure TCnBytesVisualizerForm.SetFrame(Frame: TCustomFrame);
 begin
-   FMyFrame := TCnDataSetViewerFrame(Frame);
+   FMyFrame := TCnBytesViewerFrame(Frame);
 end;
 
 {$ENDIF}
 
-procedure ShowDataSetExternalViewer(const Expression: string);
+procedure ShowBytesExternalViewer(const Expression: string);
 var
   F: TCnIdeDockForm;
-  Fm: TCnDataSetViewerFrame;
+  Fm: TCnBytesViewerFrame;
 begin
-  if not CnWizDebuggerObjectInheritsFrom(Expression, 'TDataSet') then
-  begin
-    ErrorDlg(Format(SCnDebugErrorExprNotAClass, [Expression, 'TDataSet']));
-    Exit;
-  end;
-
   F := TCnIdeDockForm.Create(Application);
-  F.Caption := Format(SCnDataSetViewerFormCaption, [Expression]);
-  Fm := TCnDataSetViewerFrame.Create(F);
+  F.Caption := Format(SCnBytesViewerFormCaption, [Expression]);
+  Fm := TCnBytesViewerFrame.Create(F);
   Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
-  Fm.AddDataSetContent(Expression, '', '', CurrentIsCSource);
+  Fm.AddBytesContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
 
   F.Show;
 end;

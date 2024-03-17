@@ -117,7 +117,7 @@ uses
   {$IFDEF DELPHI103_RIO_UP} BrandingAPI, {$ENDIF}
   CnLangMgr, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
-{$R *.dfm}
+{$R *.DFM}
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
@@ -493,13 +493,13 @@ end;
 procedure TCnStringsVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
   const Section: string);
 begin
-  //no desktop saving
+  // no desktop saving
 end;
 
 procedure TCnStringsVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
   const Section: string; IsProject: Boolean);
 begin
-  //no desktop saving
+  // no desktop saving
 end;
 
 procedure TCnStringsVisualizerForm.SetForm(Form: TCustomForm);
