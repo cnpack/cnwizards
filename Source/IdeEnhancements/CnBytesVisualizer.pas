@@ -174,22 +174,23 @@ end;
 
 function TCnDebuggerBytesVisualizer.GetSupportedTypeCount: Integer;
 begin
-  Result := 4;
+  Result := 5;
 end;
 
 procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
   var AllDescendants: Boolean);
 begin
-  if Index in [0, 1, 2, 3] then
-  begin
-    AllDescendants := False;
-    case Index of
-      0: TypeName := 'TBytes';
-      1: TypeName := 'array of Byte';
-      2: TypeName := 'TArray<Byte>';
-      3: TypeName := 'RawByteString';
-    end;
+  AllDescendants := False;
+  case Index of
+    0: TypeName := 'TBytes';
+    1: TypeName := 'array of Byte';
+    2: TypeName := 'TArray<Byte>';
+    3: TypeName := 'RawByteString';
+    4: TypeName := 'AnsiString';
   end;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('BytesVisualizer.GetSupportedType #%d: %s', [Index, TypeName])
+{$ENDIF}
 end;
 
 {$IFDEF DELPHI102_TOKYO_UP}
@@ -534,7 +535,16 @@ procedure ShowBytesExternalViewer(const Expression: string);
 var
   F: TCnIdeDockForm;
   Fm: TCnBytesViewerFrame;
+  S: string;
 begin
+  // 求值的要求都能拿到 Length() 值
+  S := CnRemoteProcessEvaluator.EvaluateExpression(Format('Length(%s)', [Expression]));
+  if S = '' then
+  begin
+    ErrorDlg(Format(SCnDebugErrorExprNotAClass, [Expression, 'Byte Array/String']));
+    Exit;
+  end;
+
   F := TCnIdeDockForm.Create(Application);
   F.Caption := Format(SCnBytesViewerFormCaption, [Expression]);
   Fm := TCnBytesViewerFrame.Create(F);
