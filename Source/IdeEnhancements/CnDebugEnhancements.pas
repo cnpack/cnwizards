@@ -303,6 +303,7 @@ begin
         FStringsRegistered := True;
       end;
     end;
+{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
     if FEnableBytes then
     begin
       if not FBytesRegistered then
@@ -311,6 +312,7 @@ begin
         FBytesRegistered := True;
       end;
     end;
+{$ENDIF}
   end
   else
   begin
@@ -324,11 +326,13 @@ begin
       ID.UnregisterDebugVisualizer(FStringsViewer);
       FStringsRegistered := False;
     end;
+{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
     if FBytesRegistered then
     begin
       ID.UnregisterDebugVisualizer(FBytesViewer);
       FBytesRegistered := False;
     end;
+{$ENDIF}
   end;
 end;
 
@@ -342,8 +346,14 @@ begin
     LoadReplacersFromStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
     chkDataSetViewer.Checked := FEnableDataSet;
     chkStringsViewer.Checked := FEnableStrings;
-    // chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
+    chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
     chkBytesViewer.Checked := FEnableBytes;
+  {$IFDEF IDE_HAS_MEMORY_VISUALIZAER}  // 高版本 IDE 自带，先不替换，禁用
+    chkBytesViewer.Checked := False;
+    chkBytesViewer.Enabled := False;
+  {$ELSE}
+    chkBytesViewer.Checked := FEnableBytes;
+  {$ENDIF}
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
@@ -453,7 +463,11 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
   EnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
-  EnableBytes := Ini.ReadBool('', csEnableBytes, True);      // 高版本 IDE 自带
+{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
+  EnableBytes := Ini.ReadBool('', csEnableBytes, False);     // 高版本 IDE 自带
+{$ELSE}
+  EnableBytes := Ini.ReadBool('', csEnableBytes, True);
+{$ENDIF}
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
   AutoReset := Ini.ReadBool('', csAutoReset, False);
