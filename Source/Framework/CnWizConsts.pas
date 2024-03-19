@@ -415,47 +415,47 @@ var
   SCnCountFmt: string = 'Count: %d';
 
   // ·´À¡Ïòµ¼
-  STypeDescription: string =
+  SCnTypeDescription: string =
     '  Bug Report includes access violation, system crash, malfunctions and other exceptions.' + #13#10#13#10 +
     '  Suggestions include advices, new requirements and other information to CnPack IDE Wizards.' + #13#10#13#10 +
     '  Please make sure that your CnPack IDE Wizards is the latest version when you commit this report. ' +
     'You can obtain the latest version by auto update or access our website.';
-  SBugDescriptionDescription: string =
+  SCnBugDescriptionDescription: string =
     '  Please enter the bug details, including special configuration data in your system and other useful information which is beneficial to developers.' + #13#10#13#10 +
     '  Generally, Only a bug can be reproduced, it can be fixed effectively. Your compiler environments and OS information will be collected as important details.';
-  SFeatureDescriptionDescription: string =
+  SCnFeatureDescriptionDescription: string =
     '  Please enter the details about your requirements, making sure that it''s useful to you.';
-  SDetailsDescription: string =
+  SCnDetailsDescription: string =
     '  It''s Important for us to reproduce the bug your reported.' + #13#10#13#10 +
     '  Please tell us whether you can reproduce the bug through some certain steps, and its probability.' + #13#10#13#10 +
     '  If possible, including whether the bug can recur at other computer and whether only relative to some certain projects.';
-  SStepsDescription: string =
+  SCnStepsDescription: string =
     '  Please enter the steps to help us to reproduce the bug.' + #13#10#13#10 +
     '  The steps should begin at starting IDE to the bug''s appearing, include Mouse clicking, Shortcuts, Form switching and Exception information about the bug.' + #13#10#13#10 +
     '  If possible, try to reproduce it by a simple or default project, or a IDE Demo project.';
-  SBugConfigurationDescription: string =
+  SCnBugConfigurationDescription: string =
     '  Your selection will send to us to help us to reproduce the bug and fix it.' + #13#10#13#10 +
     '  To keep the report effective, we recommend that you keep the default options. Before you send it, you can edit or delete the options information.';
-  SFeatureConfigurationDescription: string =
+  SCnFeatureConfigurationDescription: string =
     '  Your selection will send to us to help us to affirm your suggestions.' + #13#10#13#10 +
     '  To keep the report effective, we recommend that you keep the default options. Before you send it, you can edit or delete the options information.';
-  SReportDescription: string =
+  SCnReportDescription: string =
     '  Press Finish button to generate a feedback mail''s content. You need paste the content to your email, ' + #13#10#13#10 +
     '  or press Save button to save the content and send to %s as attachment.' + #13#10#13#10 +
     '  Our Wizards would not automatically send information which may be about your privacy. All contents need you to send manually.';
-  STypeExample: string =
+  SCnTypeExample: string =
     '  CnPack team won''t to take any commercial develop tasks. All members are busy. ' +
     'Freeware developing is our interesting and pursuit, so we won''t do any customize components, ' +
     'wizards or projects. Further more, wizards existing in free Tools, e.g. GExperts, are also excluded.' + #13#10#13#10 +
     '  Please pay attention to it.';
-  SBugDescriptionExample: string =
+  SCnBugDescriptionExample: string =
     '  I add some Toolbutton to IDE toolbar. After restarting, the buttons added become empty.';
-  SFeatureDescriptionExample: string =
+  SCnFeatureDescriptionExample: string =
     '  I hope that You can write a new editor, which can convert Delphi or C++ code to VB, so I can write Outlook Email Virus in Delphi or C++. :-)' + #13#10#13#10 +
     '  If you could implement it, I''ll give you a lot of money.';
-  SDetailsExample: string =
+  SCnDetailsExample: string =
     '';
-  SStepsExample: string =
+  SCnStepsExample: string =
     '1. Run %s from Start Menu.' + #13#10 +
     '2. Right-Click the Toolbar in IDE, Choose Customize...' + #13#10 +
     '3. Drag a CnPack IDE Wizard to Toolbar.' + #13#10 +
@@ -466,35 +466,35 @@ var
     '';
   SReportExample: string =
     '';
-  SFinish: string = '&Finished';
-  SNext: string = '&Next >';
-  STitle: string = 'Bug Report or Suggestions Wizard -';
-  SBugReport: string = 'Bug Report';
-  SFeatureRequest: string = 'Suggestions';
-  SDescription: string = 'Description:';
-  SSteps: string = 'Steps:';
-  SBugDetails: string = 'Bug Details:';
-  SBugIsReproducible: string = '  Can Recur with a Probability of %s%%.';
-  SBugIsNotReproducible: string = '  Can''t Recur.';
-  SFillInReminder: string = 'Please Paste the Report Here';
-  SFillInReminderPaste: string = 'Please Paste the Report Here';
-  SFillInReminderAttach: string = 'Please Paste the Report and the Attachment %s Here';
-  SBugSteps: string =
+  SCnFinish: string = '&Finished';
+  SCnNext: string = '&Next >';
+  SCnTitle: string = 'Bug Report or Suggestions Wizard -';
+  SCnBugReport: string = 'Bug Report';
+  SCnFeatureRequest: string = 'Suggestions';
+  SCnDescription: string = 'Description:';
+  SCnSteps: string = 'Steps:';
+  SCnBugDetails: string = 'Bug Details:';
+  SCnBugIsReproducible: string = '  Can Recur with a Probability of %s%%.';
+  SCnBugIsNotReproducible: string = '  Can''t Recur.';
+  SCnFillInReminder: string = 'Please Paste the Report Here';
+  SCnFillInReminderPaste: string = 'Please Paste the Report Here';
+  SCnFillInReminderAttach: string = 'Please Paste the Report and the Attachment %s Here';
+  SCnBugSteps: string =
     '1. Run %s from Start Menu.' + #13#10 +
     '2. A Blank Project Created.' + #13#10 +
     '3. Click the MainMenu...' + #13#10 +
     '4.' + #13#10 +
     '5.';
 
-  SUnknown: string = '<Unknown>';
-  SOutKeyboard: string = 'Keyboard:';
-  SOutLocale: string = 'Localization Info:';
-  SOutExperts: string = 'Wizards Installed:';
-  SOutPackages: string = 'Packages Installed:';
-  SOutIDEPackages: string = 'IDE Packages Installed:';
-  SOutCnWizardsActive: string = 'CnPack IDE Wizards Enabled State:';
-  SOutCnWizardsCreated: string = 'CnPack IDE Wizards Created State:';
-  SOutConfig: string = 'Settings:';
+  SCnUnknown: string = '<Unknown>';
+  SCnOutKeyboard: string = 'Keyboard:';
+  SCnOutLocale: string = 'Localization Info:';
+  SCnOutExperts: string = 'Wizards Installed:';
+  SCnOutPackages: string = 'Packages Installed:';
+  SCnOutIDEPackages: string = 'IDE Packages Installed:';
+  SCnOutCnWizardsActive: string = 'CnPack IDE Wizards Enabled State:';
+  SCnOutCnWizardsCreated: string = 'CnPack IDE Wizards Created State:';
+  SCnOutConfig: string = 'Settings:';
   SOutEditorSettings: string = 'Editor Settings:';
 
   // Key Mapping Conflicts

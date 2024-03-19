@@ -1851,7 +1851,7 @@ var
 
   function GetProperProcName(ProcType: TTokenKind; IsClass: Boolean): string;
   begin
-    Result := SUnknown;
+    Result := SCnUnknown;
     if IsClass then
     begin
       if ProcType = tkFunction then

@@ -228,23 +228,23 @@ begin
 
   case Notebook.PageIndex of
     IdType:
-      Lines.Text := STypeDescription;
+      Lines.Text := SCnTypeDescription;
     IdDesc:
       if FeedbackType = fbBug then
-        Lines.Text := SBugDescriptionDescription
+        Lines.Text := SCnBugDescriptionDescription
       else
-        Lines.Text := SFeatureDescriptionDescription;
+        Lines.Text := SCnFeatureDescriptionDescription;
     IdBugDetails:
-      Lines.Text := SDetailsDescription;
+      Lines.Text := SCnDetailsDescription;
     IdBugSteps:
-      Lines.Text := SStepsDescription;
+      Lines.Text := SCnStepsDescription;
     IdConfig:
       if FeedbackType = fbBug then
-        Lines.Text := SBugConfigurationDescription
+        Lines.Text := SCnBugConfigurationDescription
       else
-        Lines.Text := SFeatureConfigurationDescription;
+        Lines.Text := SCnFeatureConfigurationDescription;
     IdFinished:
-      Lines.Text := Format(SReportDescription, [GetDestinationEmail]);
+      Lines.Text := Format(SCnReportDescription, [GetDestinationEmail]);
   end;
 end;
 
@@ -257,16 +257,16 @@ begin
 
   case Notebook.PageIndex of
     IdType:
-      Lines.Text := STypeExample;
+      Lines.Text := SCnTypeExample;
     IdDesc:
       if FeedbackType = fbBug then
-        Lines.Text := SBugDescriptionExample
+        Lines.Text := SCnBugDescriptionExample
       else
-        Lines.Text := SFeatureDescriptionExample;
+        Lines.Text := SCnFeatureDescriptionExample;
     IdBugDetails:
-      Lines.Text := SDetailsExample;
+      Lines.Text := SCnDetailsExample;
     IdBugSteps:
-      Lines.Text := Format(SStepsExample, [CompilerName, CompilerName, CompilerName]);
+      Lines.Text := Format(SCnStepsExample, [CompilerName, CompilerName, CompilerName]);
     IdConfig:
       Lines.Text := SConfigurationExample;
     IdFinished:
@@ -291,9 +291,9 @@ procedure TCnWizFeedbackForm.actNextUpdate(Sender: TObject);
 begin
   actNext.Enabled := CanProceed(Notebook.PageIndex);
   if OnLastPage then
-    actNext.Caption := SFinish
+    actNext.Caption := SCnFinish
   else
-    actNext.Caption := SNext;
+    actNext.Caption := SCnNext;
 end;
 
 procedure TCnWizFeedbackForm.actPrevExecute(Sender: TObject);
@@ -403,9 +403,9 @@ begin
   Subject := 'CnPack IDE Wizards ' + GetFeedbackTypeString;
   Address := GetDestinationEmail;
   if dlgSaveReport.FileName <> '' then
-    Body := Format(SFillInReminderAttach, [dlgSaveReport.FileName])
+    Body := Format(SCnFillInReminderAttach, [dlgSaveReport.FileName])
   else
-    Body := SFillInReminderPaste;
+    Body := SCnFillInReminderPaste;
 
   // 请不要本地化
   Execute := Format('mailto:%s?Subject=%s&Body=%s', [Address, Subject, Body]);
@@ -446,7 +446,7 @@ begin
     GenerateReport;
 
   if (Notebook.PageIndex = IdBugSteps) and (not memBugSteps.Modified) then
-    memBugSteps.Lines.Text := Format(SBugSteps, [CompilerName]);
+    memBugSteps.Lines.Text := Format(SCnBugSteps, [CompilerName]);
 end;
 
 procedure TCnWizFeedbackForm.GenerateReport;
@@ -471,7 +471,7 @@ end;
 procedure TCnWizFeedbackForm.NotebookPageChanged(Sender: TObject);
 begin
   CnWizardImage.ItemIndex := Notebook.PageIndex;
-  lblTitle.Caption := STitle + CnWizardImage.Items[Notebook.PageIndex].Caption;
+  lblTitle.Caption := SCnTitle + CnWizardImage.Items[Notebook.PageIndex].Caption;
 end;
 
 procedure TCnWizFeedbackForm.CnWizardImageChanging(Sender: TObject;
@@ -527,11 +527,11 @@ begin
     IdType:
       Result := 'CnPack IDE Wizards ' + GetFeedbackTypeString + SCRLF + SCRLF;
     IdDesc:
-      Result := SDescription + SCRLF + memDesc.Lines.Text + SCRLF + SCRLF;
+      Result := SCnDescription + SCRLF + memDesc.Lines.Text + SCRLF + SCRLF;
     IdBugDetails:
       Result := GetBugDetailsString;
     IdBugSteps:
-      Result := SSteps + SCRLF + memBugSteps.Lines.Text + SCRLF + SCRLF;
+      Result := SCnSteps + SCRLF + memBugSteps.Lines.Text + SCRLF + SCRLF;
     IdConfig:
       Result := GetSystemConfigurationString;
   end;
@@ -540,18 +540,18 @@ end;
 function TCnWizFeedbackForm.GetFeedbackTypeString: string;
 begin
   if FeedbackType = fbBug then
-    Result := SBugReport
+    Result := SCnBugReport
   else
-    Result := SFeatureRequest;
+    Result := SCnFeatureRequest;
 end;
 
 function TCnWizFeedbackForm.GetBugDetailsString: string;
 begin
-  Result := SBugDetails + SCRLF;
+  Result := SCnBugDetails + SCRLF;
   if cbReproducible.Checked then
-    Result := Result + Format(SBugIsReproducible + SCRLF, [edtPercent.Text])
+    Result := Result + Format(SCnBugIsReproducible + SCRLF, [edtPercent.Text])
   else
-    Result := Result + SBugIsNotReproducible + SCRLF;
+    Result := Result + SCnBugIsNotReproducible + SCRLF;
   if cbMultipleMachines.Checked then
     Result := Result + '  ' + cbMultipleMachines.Caption + SCRLF; // Do not localize.
   if cbProjectSpecific.Checked then
@@ -587,7 +587,7 @@ var
   Name, Code, Dll: string;
   Layout: string;
 begin
-  Result := SUnknown;
+  Result := SCnUnknown;
   SetLength(Layout, KL_NAMELENGTH);
   if not GetKeyboardLayoutName(PChar(Layout)) then
     Exit;
@@ -618,14 +618,14 @@ var
 begin
   Data := TStringList.Create;
   try
-    Data.Add(SOutKeyboard);
+    Data.Add(SCnOutKeyboard);
     Data.Add(Format('  Type %d: %s with %s FKeys', [GetKeyboardType(1),
       cKeySubCodes[Min(GetKeyboardType(0), 7)],
         cKeyNumFKeys[Min(GetKeyboardType(2), 7)]]));
     Data.Add(Format('  Layout: %s', [GetKeyboardLayoutNameFromReg]));
     Data.Add('');
 
-    Data.Add(SOutLocale);
+    Data.Add(SCnOutLocale);
     Data.Add(Format('  Number of Digits: ''%s''', [GetLocaleChar(0, LOCALE_IDIGITS, '.')]));
     Data.Add(Format('  Leading Zero: ''%s''', [GetLocaleStr(0, LOCALE_ITLZERO, '0')]));
     Data.Add(Format('  List Separators: ''%s''', [GetLocaleStr(0, LOCALE_SLIST, '0')]));
@@ -747,23 +747,23 @@ end;
 
 function GetInstalledExpertsString: string;
 begin
-  Result := ReportItemsInRegistryKey(SOutExperts,
+  Result := ReportItemsInRegistryKey(SCnOutExperts,
     WizOptions.CompilerRegPath + '\Experts') + SCRLF;
 end;
 
 function GetInstalledPackagesString: string;
 begin
-  Result := ReportItemsInRegistryKey(SOutPackages,
+  Result := ReportItemsInRegistryKey(SCnOutPackages,
     WizOptions.CompilerRegPath + '\Known Packages') + SCRLF;
-  Result := Result + ReportItemsInRegistryKey(SOutIDEPackages,
+  Result := Result + ReportItemsInRegistryKey(SCnOutIDEPackages,
     WizOptions.CompilerRegPath + '\Known IDE Packages') + SCRLF;
 end;
 
 function GetCnPackSettingsString: string;
 begin
-  Result := ReportItemsInRegistryKey(SOutCnWizardsActive,
+  Result := ReportItemsInRegistryKey(SCnOutCnWizardsActive,
     WizOptions.RegPath + SCnActiveSection) + SCRLF;
-  Result := Result + ReportItemsInRegistryKey(SOutCnWizardsCreated,
+  Result := Result + ReportItemsInRegistryKey(SCnOutCnWizardsCreated,
     WizOptions.RegPath + SCnCreateSection) + SCRLF;
 end;
 
@@ -808,7 +808,7 @@ end;
 
 function TCnWizFeedbackForm.GetSystemConfigurationString: string;
 begin
-  Result := SOutConfig + SCRLF;
+  Result := SCnOutConfig + SCRLF;
   Result := Result + '  OS: ' + GetOSString + SCRLF;
   Result := Result + '  CnWizards: ' + GetCnPackVersionString;
   Result := Result + '  IDE: ' + GetIdeExeVersion + SCRLF;
