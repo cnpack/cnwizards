@@ -702,7 +702,11 @@ begin
   TranslateStr(SCnPrefixDupName, 'SCnPrefixDupName');
   TranslateStr(SCnPrefixNoComp, 'SCnPrefixNoComp');
   TranslateStr(SCnPrefixAskToProcess, 'SCnPrefixAskToProcess');
+end;
 
+// 拆成两个，以躲过 2009/2010 下局部变量过多的问题
+procedure CnTranslateWizards2;
+begin
   // CnWizAbout
   // CnWizAboutForm
   TranslateStr(SCnWizAboutCaption, 'SCnWizAboutCaption');
@@ -1499,6 +1503,7 @@ begin
   TranslateStr(SCnKeyMappingConflictsHint, 'SCnKeyMappingConflictsHint');
 
   CnTranslateWizards;
+  CnTranslateWizards2;
   CnTranslateDesignConsts;
 end;
 
