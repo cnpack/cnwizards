@@ -494,6 +494,10 @@
             <Form>CnStringsViewerFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
+        <DCCReference Include="IdeEnhancements\CnBytesVisualizer.pas">
+            <Form>CnBytesViewerFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
         <DCCReference Include="ProjectExtWizard\CnProjectDirBuilderFrm.pas">
             <Form>CnProjectDirBuilderForm</Form>
         </DCCReference>

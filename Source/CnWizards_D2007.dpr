@@ -203,6 +203,7 @@ uses
   CnDebugEnhancements in 'IdeEnhancements\CnDebugEnhancements.pas' {CnDebugEnhanceForm},
   CnDataSetVisualizer in 'IdeEnhancements\CnDataSetVisualizer.pas' {CnDataSetViewerFrame: TFrame},
   CnStringsVisualizer in 'IdeEnhancements\CnStringsVisualizer.pas' {CnStringsViewerFrame: TFrame},
+  CnBytesVisualizer in 'IdeEnhancements\CnBytesVisualizer.pas' {CnBytesViewerFrame: TFrame},
   CnProjectDirBuilderFrm in 'ProjectExtWizard\CnProjectDirBuilderFrm.pas' {CnProjectDirBuilderForm},
   CnProjectDirImportFrm in 'ProjectExtWizard\CnProjectDirImportFrm.pas' {CnImportDirForm},
   CnDCU32 in 'Utils\CnDCU32.pas',
