@@ -201,6 +201,7 @@ type
     chkAutoReset: TCheckBox;
     chkStringsViewer: TCheckBox;
     chkBytesViewer: TCheckBox;
+    lblHint: TLabel;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);

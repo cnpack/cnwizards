@@ -63,6 +63,15 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Height = 13
         Caption = 'Using Below Class Expressions to Enhance Debug Hint:'
       end
+      object lblHint: TLabel
+        Left = 168
+        Top = 296
+        Width = 229
+        Height = 13
+        BiDiMode = bdLeftToRight
+        Caption = 'Note: Only Availiable under Delphi XE or Above.'
+        ParentBiDiMode = False
+      end
       object lvReplacers: TListView
         Left = 8
         Top = 32
@@ -141,7 +150,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Top = 48
           Width = 361
           Height = 17
-          Caption = 'Enable TBytes/RawByteString Viewer'
+          Caption = 'Enable TBytes/RawByteString Viewer (Delphi XE ~ 10.4)'
           TabOrder = 1
         end
       end
