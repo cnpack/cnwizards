@@ -55,13 +55,13 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 3
     object tsDebugHint: TTabSheet
-      Caption = 'Debug &Hint'
+      Caption = 'Debug H&int'
       object lblEnhanceHint: TLabel
         Left = 8
         Top = 8
-        Width = 262
+        Width = 261
         Height = 13
-        Caption = 'Using Below Class Expressions to Enhance Debug Hint:'
+        Caption = 'Using Below Type Expressions to Enhance Debug Hint:'
       end
       object lblHint: TLabel
         Left = 168
@@ -126,7 +126,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Top = 8
         Width = 393
         Height = 329
-        Caption = '&External Viewer for Debugging'
+        Caption = 'External Viewer for Debugging'
         TabOrder = 0
         object chkDataSetViewer: TCheckBox
           Left = 16
@@ -156,7 +156,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       end
     end
     object tsOthers: TTabSheet
-      Caption = 'Ot&hers'
+      Caption = 'Othe&rs'
       ImageIndex = 2
       object grpOthers: TGroupBox
         Left = 8
