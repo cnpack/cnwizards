@@ -1306,8 +1306,6 @@ begin
   // CnUsesCleaner
   TranslateStr(SCnUsesCleanerMenuCaption, 'SCnUsesCleanerMenuCaption');
   TranslateStr(SCnUsesCleanerMenuHint, 'SCnUsesCleanerMenuHint');
-  TranslateStr(SCnUsesCleanerName, 'SCnUsesCleanerName');
-  TranslateStr(SCnUsesCleanerComment, 'SCnUsesCleanerComment');
   TranslateStr(SCnUsesCleanerCompileFail, 'SCnUsesCleanerCompileFail');
   TranslateStr(SCnUsesCleanerUnitError, 'SCnUsesCleanerUnitError');
   TranslateStr(SCnUsesCleanerProcessError, 'SCnUsesCleanerProcessError');

@@ -1299,7 +1299,7 @@ var
   SCnDebugEvalAsStringsCaption: string = 'Evaluate as T&Strings...';
   SCnDebugEvalAsStringsHint: string = 'Evaluate Expression as TStrings';
   SCnDebugEvalAsBytesCaption: string = 'Evaluate as T&Bytes/RawByteString...';
-  SCnDebugEvalAsBytesHint: string = 'Evaluate Expression as TBytes or RawByteString or MemoryStream';
+  SCnDebugEvalAsBytesHint: string = 'Evaluate Expression as TBytes or RawByteString';
   SCnDebugEvalAsDataSetCaption: string = 'Evaluate as T&DataSet...';
   SCnDebugEvalAsDataSetHint: string = 'Evaluate Expression as TDataSet';
   SCnDebugConfigCaption: string = '&Options...';
@@ -1625,8 +1625,6 @@ var
   // CnUsesCleaner
   SCnUsesCleanerMenuCaption: string = '&Uses Cleaner...';
   SCnUsesCleanerMenuHint: string = 'Clean Unused Units Reference';
-  SCnUsesCleanerName: string = 'Uses Units Cleaner';
-  SCnUsesCleanerComment: string = 'Clean Unused Units Reference';
   SCnUsesCleanerCompileFail: string = 'Compile Error. Cleaner can NOT Continue.';
   SCnUsesCleanerUnitError: string = 'Processing %s Failed.' + #13#10#13#10 + 'Perhaps the Format is NOT supported, Please contact CnPack Team. ';
   SCnUsesCleanerProcessError: string = 'Failed when Processing file %s , Continue?';
