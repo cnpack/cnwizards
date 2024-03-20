@@ -45,6 +45,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
     Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 2
+    OnClick = btnHelpClick
   end
   object pgc1: TPageControl
     Left = 8

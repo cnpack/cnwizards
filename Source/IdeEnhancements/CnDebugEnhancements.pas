@@ -207,8 +207,11 @@ type
       var Handled: Boolean);
     procedure actAddHintExecute(Sender: TObject);
     procedure lvReplacersDblClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
 
+  protected
+    function GetHelpTopic: string; override;
   public
     procedure LoadReplacersFromStrings(List: TStringList);
     procedure SaveReplacersToStrings(List: TStringList);
@@ -1009,6 +1012,16 @@ begin
 {$ENDIF}
     Exe(Sender);
   end;
+end;
+
+function TCnDebugEnhanceForm.GetHelpTopic: string;
+begin
+  Result := 'CnDebugEnhanceWizard';
+end;
+
+procedure TCnDebugEnhanceForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 initialization
