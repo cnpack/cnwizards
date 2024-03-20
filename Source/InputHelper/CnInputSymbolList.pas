@@ -231,7 +231,7 @@ type
   end;
 
 //==============================================================================
-// 预定义符号列表
+// 预定义符号列表，包括关键字与部分类型名等
 //==============================================================================
 
 { TPreDefSymbolList }
@@ -241,6 +241,8 @@ type
     function GetDataFileName: string; override;
   public
     class function GetListName: string; override;
+    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+      TCodePosInfo): Boolean; override;
   end;
 
 //==============================================================================
@@ -483,7 +485,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCRC32, CnWizMacroText, CnWizMacroFrm;
+  CnCRC32, CnWizMacroText, CnWizMacroFrm, mPasLex;
 
 const
   csCompD5 = 'D5';
@@ -1142,6 +1144,19 @@ end;
 function TPreDefSymbolList.GetDataFileName: string;
 begin
   Result := SCnPreDefSymbolsFile;
+end;
+
+function TPreDefSymbolList.Reload(Editor: IOTAEditBuffer;
+  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+begin
+  Result := inherited Reload(Editor, InputText, PosInfo);
+  if not Result and PosInfo.IsPascal then
+  begin
+    // 额外处理，如果用户迅速输入 uses，导致光标左边的 Token 是 uses 但区域又解析为 IntfUses/ImplUses
+    // 那么应该把关键字与其他内容塞进来，让 uses 能够出现在列表项的数据中供进一步筛选
+    if (PosInfo.PosKind in [pkIntfUses, pkImplUses]) and (PosInfo.LastNoSpace = tkUses) then
+      Result := True;
+  end;
 end;
 
 { TUserTemplateList }

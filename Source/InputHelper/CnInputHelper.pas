@@ -509,7 +509,7 @@ const
     {skUnit,} skLabel, skInterface, skKeyword, skClass, skUser];
   // 2005 后支持 class constant 和 class type，所以不能去除 skConstant, skType,
 
-  // BCB 中不易区分 Field，干脆就等同于Code。
+  // BCB 中不易区分 Field，干脆就等同于 Code。
   csCppFieldSymbolKind = csAllSymbolKind;
 
   csPascalSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
@@ -1976,24 +1976,30 @@ begin
         if not ForcePopup and SmartDisplay then
         begin
           for I := 0 to FItems.Count - 1 do
+          begin
             with TSymbolItem(FItems.Objects[I]) do
-            if not AlwaysDisp and ((Kind = skKeyword) and
-              (CompareStr(GetKeywordText(KeywordStyle), FToken) = 0) or
-              (Kind <> skKeyword) and (CompareStr(Name, Text) = 0) and
-              (CompareStr(FToken, Name) = 0)) then
             begin
+              if not AlwaysDisp and ((Kind = skKeyword) and
+                (CompareStr(GetKeywordText(KeywordStyle), FToken) = 0) or
+                (Kind <> skKeyword) and (CompareStr(Name, Text) = 0) and
+                (CompareStr(FToken, Name) = 0)) then
+              begin
 {$IFDEF DEBUG}
-              CnDebugger.LogMsg('Do NOT ShowList for Full Match: ' + Name);
+                CnDebugger.LogMsg('Do NOT ShowList for Full Match: ' + Name);
 {$ENDIF}
-              FKeyCount := DispOnlyAtLeastKey - 1;
-              Exit;
+                FKeyCount := DispOnlyAtLeastKey - 1;
+                Exit;
+              end;
             end;
+          end;
         end;
 
         AForm := CnOtaGetCurrentEditWindow;
         if Assigned(AForm) and Assigned(AForm.Monitor) then
+        begin
           with AForm.Monitor do
-            WorkRect := Bounds(Left, Top, Width, Height)
+            WorkRect := Bounds(Left, Top, Width, Height);
+        end
         else
           WorkRect := Bounds(0, 0, Screen.Width, Screen.Height);
 
@@ -2001,6 +2007,7 @@ begin
           ALeft := Pt.x
         else
           ALeft := Max(Pt.x - List.Width, WorkRect.Left);
+
         if Pt.y + csLineHeight + List.Height <= WorkRect.Bottom then
         begin
           ATop := Pt.y + csLineHeight;
@@ -2376,7 +2383,7 @@ begin
       begin
         FSymbolReloading := False; // 及时恢复标记
 {$IFDEF DEBUG}
-//      CnDebugger.LogFmt('Input Helper Reload %s Success: %d', [SymbolList.ClassName, SymbolList.Count]);
+        CnDebugger.LogFmt('Input Helper Reload %s Success: %d', [SymbolList.ClassName, SymbolList.Count]);
 {$ENDIF}
         // 根据语言类型得到可用的 KindSet
         if FPosInfo.IsPascal then
@@ -2396,8 +2403,9 @@ begin
 {$IFDEF DEBUG}
 //        CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
 {$ENDIF}
-
-          if (Item.Kind in Kinds) and (Length(S) >= ListOnlyAtLeastLetter) then
+                                      // 额外处理，如果用户迅速输入 uses，那么应该在 uses 处允许出现关键字类型
+          if ((Item.Kind in Kinds) or ((Item.Kind = skKeyword) and (FPosInfo.LastNoSpace = tkUses)))
+            and (Length(S) >= ListOnlyAtLeastLetter) then
           begin
 {$IFDEF DEBUG}
 //          CnDebugger.LogMsg('Input Helper is in Kinds. ' + IntToStr(ListOnlyAtLeastLetter));
