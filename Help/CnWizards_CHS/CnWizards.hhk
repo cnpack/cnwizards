@@ -341,6 +341,10 @@
 		<param name="Local" value="wizards\toolset\editorfontdec.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="调试增强工具">
+		<param name="Local" value="ideenhance\debugenh.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至后一标识符工具">
 		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
 		</OBJECT>
@@ -431,10 +435,6 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="源码模块关系分析">
 		<param name="Local" value="cnsmr\cnsmr.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="源阅读专家">
-		<param name="Local" value="wizards\feedreader.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="在 IDE Insight 中搜索">

@@ -141,8 +141,8 @@
 			<param name="Local" value="wizards\scriptwizard.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Feed Reader Wizard">
-			<param name="Local" value="wizards\feedreader.htm">
+			<param name="Name" value="Debugger Enhancements">
+			<param name="Local" value="ideenhance\debugenh.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Code Formatter Wizard">

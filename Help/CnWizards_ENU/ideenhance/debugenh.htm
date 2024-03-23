@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Debugger Enhancements</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">Debugger Enhancements</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">Debugger Enhancements</p>
+```html
+<p class="text">This wizard provides some enhanced tools related to debugging, including debugging hints and visualizers. Some features are only valid in specific versions of the IDE and currently do not support C++Builder.</p>
+<p class="text">The menu items of this wizard are shown in the figure below:</p>
+<p class="text" align="center">
+<img src="debugenhmenu.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Evaluate as TStrings</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as TStrings type or its subclasses for content viewing. An error will occur if the expression type is not TStrings or its subclass.</p>
+  </li>
+  <li>
+    <p class="text"><b>Evaluate as TBytes/RawByteString</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as byte arrays or single-byte string types for content viewing. An error will occur if the expression type is not a byte array or a single-byte string type.</p>
+  </li>
+  <li>
+    <p class="text"><b>Evaluate as TDatSet</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as TDataSet type or its subclasses for content viewing. An error will occur if the expression type is not TDataSet or its subclass.</p>
+  </li>
+</ul>
+<p class="text">The first page of the wizard's settings window, "Debug Hint," is shown in the figure below:</p>
+<p class="text" align="center">
+<img src="debugenhconf1.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Enhanced Debug Hint</b>: In Delphi XE or later versions, this feature supports customizing the hint display when the mouse hovers over an expression in the editor during debugging, to increase the readability of specific types of debugging values.</p>
+  </li>
+  <li>
+    <p class="text"><b>Add Hint</b>: Insert a new debugging hint. The hint is in the form of "TypeName=Expression containing %s", indicating that when the IDE evaluates an expression of a specific type, it replaces it with a new expression. For example, the hint "TCnBigNumber=%s.ToString" means that when the cursor moves over a variable of type TCnBigNumber, such as Num1, the IDE generates a debug hint and evaluates Num1.ToString to add it after the original hint, increasing readability.</p>
+  </li>
+  <li>
+    <p class="text"><b>Remove Hint</b>: Delete the selected debug hint expression.</p>
+  </li>
+</ul>
+<p class="text">The second page of the wizard's settings window, "External Viewer," is shown in the figure below:</p>
+<p class="text" align="center">
+<img src="debugenhconf2.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Enable TDataSet Viewer</b>: This option allows the debugging period to enable a specific viewer for expressions of TDataSet and its subclasses, viewing their general properties, column definitions, and current record values, etc.</p>
+  </li>
+  <li>
+    <p class="text"><b>Enable TBytes/RawByteString Viewer</b>: This option allows the debugging period to enable a specific viewer for expressions of byte arrays or byte-type strings, viewing their original hexadecimal data. This option is only valid for Delphi XE to 10.4 versions and does not support higher or lower versions.</p>
+  </li>
+</ul>
+<p class="text">The third page of the wizard's settings window, "Others," is shown in the figure below:</p>
+<p class="text" align="center">
+<img src="debugenhconf3.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>Auto Close Running Target  Before Compiling or Building
+</b>: This option allows users to automatically close the target program running outside the IDE before compiling or building, to avoid errors where the target file cannot be written. This option is turned off by default.</p>
+  </li>
+  <li>
+    <p class="text"><b>Auto Reset Debugging Target  Before Compiling or Building</b>: This option allows users to automatically reset the debugged target program before compiling or building, to avoid the appearance of a debug query dialog box for the target program. This option is turned off by default.</p>
+  </li>
+</ul>
+<p class="text">Note: Most options are only valid in higher versions of Delphi and are invalid for C++Builder.</p>
+<p class="text">&nbsp;</p>
+<p class="title" align="left">Links<p class="text" align="left">
+<p class="text" align="left"> <a href="formdesigner.htm">Form Designer Enhancements</a>
+<p class="text" align="left"> <a href="palette.htm">IDE Main Form Enhancements</a>
+<p class="text" align="left"> <a href="objinspector.htm">Object Inspector Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="wintoproller.htm">Caption Button Enhancements</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">Code Input Helper</a><p class="text" align="left">
+<a href="../cnpack/index.htm">About CnWizards</a><p class="text" align="left"><hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">Copyrights 2001-2024 CnPack Team</a></p>
+</body>
+</html>

@@ -27,6 +27,10 @@ ideenhance\capbuttons.png
 ideenhance\cpuwin.htm
 ideenhance\cpuwinconf.png
 ideenhance\cpuwinmenu.png
+ideenhance\debugenh.htm
+ideenhance\debugenhconf1.png
+ideenhance\debugenhconf2.png
+ideenhance\debugenhconf3.png
 ideenhance\flatform.png
 ideenhance\flatformcustomize.png
 ideenhance\formdesigner.htm
@@ -162,9 +166,6 @@ wizards\toolset\extractstring.htm
 wizards\toolset\extractstring.png
 wizards\toolset\wizeditorform.png
 wizards\toolset\wizeditors.htm
-wizards\feedreader.htm
-wizards\feedreader.png
-wizards\feedreadercfg.png
 wizards\explorer.png
 wizards\explorer.htm
 wizards\idemenu.png

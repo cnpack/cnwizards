@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>调试增强工具</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<link rel="stylesheet" href="../css/style.css" type="text/css">
+</head>
+
+<body>
+<table width="100%" border="0" cellpadding="4">
+  <tr>
+    <td class="head" height="16">调试增强工具</td>
+  </tr>
+  <tr>
+    <td bgcolor="#FF9900" height="6"></td>
+  </tr>
+  <tr>
+    <td height=6></td>
+  </tr>
+</table>
+<p class="title">调试增强工具</p>
+<p class="text">本专家提供部分调试相关的增强工具，包括调试提示、可视化查看器等。部分功能仅在特定版本的 IDE 中有效，且当前不支持 C++Builder。</p>  
+<p class="text">该专家的菜单项如下图所示：</p>  
+<p class="text" align="center">
+<img src="debugenhmenu.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>作为 TStrings 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为 TStrings 类型或其子类进行内容查看。如果表达式类型不是 TStrings 或其子类则出错。</p>
+  </li>
+  <li>
+    <p class="text"><b>作为 TBytes/RawByteString 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为字节数组或单字节字符串类型进行内容查看。如果表达式类型不是字节数组与单字节字符串等类型则出错。</p>
+  </li>
+  <li>
+    <p class="text"><b>作为 TDatSet 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为 TDataSet 类型或其子类进行内容查看。如果表达式类型不是 TDataSet 或其子类则出错。/p>
+  </li>
+</ul>
+<p class="text">该专家的设置窗口第一页“调试提示”，如下图所示：</p>  
+<p class="text" align="center">
+<img src="debugenhconf1.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>增强调试提示</b>：在 Delphi XE 或以上版本支持调试期间鼠标移动到编辑器中的表达式上时自定义其提示显示，以增加特定类型的调试期值的可读性。</p>
+  </li>
+  <li>
+    <p class="text"><b>添加调试提示</b>：插入新的调试提示。提示是“类型名=含%s表达式”的形式，表示当 IDE 针对特定类型的表达式求值时用新表达式进行替换。例如提示“TCnBigNumber=%s.ToString”，代表当光标移动到类型是 TCnBigNumber 的变量如 Num1 上，IDE 生成调试期提示时，会求值 Num1.ToString 来增加至原始提示后，以增加可读性。</p>
+  </li>
+  <li>
+    <p class="text"><b>删除调试提示</b>：删除选中的调试提示表达式。</p>
+  </li>
+</ul>
+<p class="text">该专家的设置窗口第二页“外部查看器”，如下图所示：</p>  
+<p class="text" align="center">
+<img src="debugenhconf2.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>启用 TDataSet 查看器</b>：此选项允许调试期针对 TDataSet 及其子类的表达式启用特定查看器，查看其普通属性、列定义与当前记录值等。</p>
+  </li>
+  <li>
+    <p class="text"><b>启用 TBytes/RawByteString 查看器</b>：此选项允许调试期针对字节数组或字节型字符串等类型的表达式启用特定查看器，查看其原始十六进制数据。该选项只针对 Delphi XE 到 10.4 版本有效，不支持更高或更低的版本。</p>
+  </li>
+</ul>
+<p class="text">该专家的设置窗口第三页“其他”，如下图所示：</p>  
+<p class="text" align="center">
+<img src="debugenhconf3.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>在编译或构建前自动关闭正在运行的目标程序</b>：此选项允许用户实施编译或构建前自动关闭脱离 IDE 运行的目标程序，避免出现目标文件无法写入的错误。此选项默认关闭。</p>
+  </li>
+  <li>
+    <p class="text"><b>在编译或构建前自动重置被调试的目标程序</b>：此选项允许用户实施编译或构建前自动重置被调试的目标程序，以避免出现目标程序被调试的询问对话框。此选项默认关闭。</p>
+  </li>
+</ul>
+<p class="text">注：选项大部分只在高版本 Delphi 中有效，且对 C++Builder 无效。</p>
+<p class="text">　</p>
+<p class="title" align="left">相关主题
+<p class="text" align="left"> <a href="formdesigner.htm">窗体设计器扩展专家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗体扩展专家</a>
+<p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口扩展专家</a>
+<p class="text" align="left"> <a href="wintoproller.htm">窗口置顶与折叠扩展专家</a><p class="text" align="left">
+<p class="text" align="left"> <a href="inputhelper.htm">代码输入助手</a><p class="text" align="left">
+<p class="text" align="left">
+<a href="../cnpack/index.htm">关于 IDE 专家包</a><p class="text" align="left">　<hr>
+<p class="text" align="center"><a href="http://www.cnpack.org">(C)版权所有 2001-2024 CnPack 开发组</a></p>
+</body>
+</html>

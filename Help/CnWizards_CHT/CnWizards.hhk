@@ -342,6 +342,10 @@
 		<param name="Local" value="wizards\toolset\editorfontdec.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="調試增強工具">
+		<param name="Local" value="ideenhance\debugenh.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至後一標識符工具">
 		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
 		</OBJECT>
@@ -424,10 +428,6 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="源代碼自動保存">
 		<param name="Local" value="srcedtenh\srcedtautosave.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="源閱讀專家">
-		<param name="Local" value="wizards\feedreader.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="源碼模板專家">

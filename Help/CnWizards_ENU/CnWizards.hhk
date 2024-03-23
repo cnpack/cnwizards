@@ -121,6 +121,10 @@
 		<param name="Local" value="other\credits.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Debugger Enhancements">
+		<param name="Local" value="ideenhance\debugenh.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Decrease Font Size Tool">
 		<param name="Local" value="wizards\toolset\editorfontdec.htm">
 		</OBJECT>
@@ -175,10 +179,6 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="FastCode IDE Optimizer">
 		<param name="Local" value="ideenhance\fastcodeopt.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Feed Reader Wizard">
-		<param name="Local" value="wizards\feedreader.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Form Designer Enhancements Wizard">
