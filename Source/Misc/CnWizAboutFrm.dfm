@@ -43,7 +43,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Width = 160
     Height = 13
     Cursor = crHandPoint
-    Caption = 'WebSite: http://www.cnpack.org'
+    Caption = 'WebSite: https://www.cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11
@@ -81,7 +81,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Width = 143
     Height = 13
     Cursor = crHandPoint
-    Caption = 'Forum: http://bbs.cnpack.org'
+    Caption = 'Forum: https://bbs.cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
     Font.Height = -11

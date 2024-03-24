@@ -13,7 +13,7 @@
 {            您应该已经和开发包一起收到一份 CnPack 发布协议的副本。如果        }
 {        还没有，可访问我们的网站：                                            }
 {                                                                              }
-{            网站地址：http://www.cnpack.org                                   }
+{            网站地址：https://www.cnpack.org                                  }
 {            电子邮件：master@cnpack.org                                       }
 {                                                                              }
 {******************************************************************************}
@@ -23,7 +23,7 @@ unit CnPascalAST;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Pascal 代码抽象语法树生成单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; http://www.cnpack.org
+* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; https://www.cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
 *           不支持 asm（仅跳过），注释还原度较低

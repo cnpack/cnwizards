@@ -161,7 +161,7 @@
 			<VersionInfoKeys Name="LegalCopyright">(C)Copyright 2001-2024 CnPack Team</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks">CnPack</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">CnWizards</VersionInfoKeys>
-			<VersionInfoKeys Name="Comments">http://www.cnpack.org</VersionInfoKeys>
+			<VersionInfoKeys Name="Comments">https://www.cnpack.org</VersionInfoKeys>
 			<VersionInfoKeys Name="CompanyName">CnPack Team</VersionInfoKeys>
 		</VersionInfoKeys>
 		<Language>

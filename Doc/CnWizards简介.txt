@@ -45,7 +45,7 @@ CnWizards ÔÚ Delphi / C++Builder / BDS µÄ IDE ÖÐÌá¹©ÁËÊ®¶à¸ö¿É¶ÀÁ¢ÉèÖÃµÄ
   * ÒýÓÃµ¥ÔªÇåÀí
   * ÆäËû´óÁ¿ÔöÇ¿Óë¸Ä½ø
 
-¹ØÓÚ½çÃæ½ØÍ¼¿É²Î¿¼£ºhttp://www.cnpack.org/images/cnwizards.gif
+¹ØÓÚ½çÃæ½ØÍ¼¿É²Î¿¼£ºhttps://www.cnpack.org/images/cnwizards.gif
 ´ËÍâ£¬CnWizards »¹¸½´øÏÂÁÐ¶ÀÁ¢ÔËÐÐµÄÐ¡¹¤¾ß£º
 
   * CnWizards ÉèÖÃµ¼Èëµ¼³ö¹¤¾ß
@@ -68,9 +68,9 @@ CnPack ÊÇÓÉ»¥ÁªÍøÉÏÒ»ÈºÖÐ¹ú³ÌÐòÔ±¿ª·¢µÄ¿ª·ÅÔ´ÂëµÄ×ÔÓÉÈí¼þÏîÄ¿£¬µ±Ç°Ö÷Òª
 Í³µÈ¡£
 CnPack ¿ª·¢ÍÅ¶ÓÄ¿Ç°¹æÄ£ÓÐ 260 ÓàÈË£¬²¢ÇÒ»¹ÔÚ²»¶Ï·¢Õ¹×³´óÖÐ¡£
 
-CnPack ÍøÕ¾£ºhttp://www.cnpack.org
-CnPack ÂÛÌ³£ºhttp://bbs.cnpack.org
-Ã¿ÈÕ¹¹½¨°æ£º http://www.cnpack.org/downbuilds.php
+CnPack ÍøÕ¾£ºhttps://www.cnpack.org
+CnPack ÂÛÌ³£ºhttps://bbs.cnpack.org
+Ã¿ÈÕ¹¹½¨°æ£º https://www.cnpack.org/downbuilds.php
 ¹ÜÀíÔ±ÐÅÏä£º master@cnpack.org
 
 Ô´ÂëÍÐ¹Ü£º
@@ -125,7 +125,7 @@ in Delphi / C++ Builder /BDS IDE:
   * Lots of Other Improvements
 
 Screenshot (English):
-http://www.cnpack.org/images/cnwizards.gif
+https://www.cnpack.org/images/cnwizards.gif
 
 Furthermore, these independent tools are also included in CnWizards:
 
@@ -147,9 +147,9 @@ CnPack Team are Made up of Many Chinese Programmers and Delphi / C++
 Builder Fans on Internet. Our products include CnPack IDE Wizards, 
 CnPack Component Package and CVSTracNT. etc.
 
-CnPack Website: http://www.cnpack.org
-CnPack BBS:     http://bbs.cnpack.org
-Nightly Build:  http://www.cnpack.org/downbuilds.php
+CnPack Website: https://www.cnpack.org
+CnPack BBS:     https://bbs.cnpack.org
+Nightly Build:  https://www.cnpack.org/downbuilds.php
 Email:          master@cnpack.org
 
 ***********************************************************************
@@ -189,7 +189,7 @@ CnWizards §ã§à§Õ§Ö§â§Ø§Ú§ä §Ò§à§Ý§Ö§Ö §Õ§Ö§ã§ñ§ä§Ú §Þ§Ñ§ã§ä§Ö§â§à§Ó §ã §Þ§ß§à§Ø§
   * §®§ß§à§Ø§Ö§ã§ä§Ó§à §Õ§â§å§Ô§Ú§ç §å§Ý§å§é§ê§Ö§ß§Ú§Û
 
 §³§ß§Ú§Þ§à§Ü §ï§Ü§â§Ñ§ß§Ñ (§Ñ§ß§Ô§Ý§Ú§Û§ã§Ü§Ú§Û):
-http://www.cnpack.org/images/cnwizards.gif
+https://www.cnpack.org/images/cnwizards.gif
 
 §¬§â§à§Þ§Ö §ä§à§Ô§à, §Ó CnWizards §ä§Ñ§Ü§Ø§Ö §Ó§Ü§Ý§ð§é§Ö§ß§í §ã§Ý§Ö§Õ§å§ð§ë§Ú§Ö §ß§Ö§Ù§Ñ§Ó§Ú§ã§Ú§Þ§í§Ö §Ú§ß§ã§ä§â§å§Þ§Ö§ß§ä§í:
 
@@ -209,11 +209,11 @@ CnWizards §ñ§Ó§Ý§ñ§Ö§ä§ã§ñ §ã§Ó§à§Ò§à§Õ§ß§í§Þ §Ú§ß§ã§ä§â§å§Þ§Ö§ß§ä§à§Þ §ã §à§ä§Ü
 
 §¬§à§Þ§Ñ§ß§Õ§Ñ CnPack §ã§à§ã§ä§à§Ú§ä §Ú§Ù §Ü§Ú§ä§Ñ§Û§ã§Ü§Ú§ç §á§â§à§Ô§â§Ñ§Þ§Þ§Ú§ã§ä§à§Ó §Ú §á§à§Ü§Ý§à§ß§ß§Ú§Ü§à§Ó Delphi/C++ Builder §Ó §Ú§ß§ä§Ö§â§ß§Ö§ä§Ö. §¯§Ñ§ê§Ñ §á§â§à§Õ§å§Ü§è§Ú§ñ §Ó§Ü§Ý§ð§é§Ñ§Ö§ä §Ó §ã§Ö§Ò§ñ CnPack IDE Wizards, §ß§Ñ§Ò§à§â §Ü§à§Þ§á§à§ß§Ö§ß§ä§à§Ó CnPack §Ú CVSTracNT.
 
-CnPack §ã§Ñ§Û§ä: http://www.cnpack.org
+CnPack §ã§Ñ§Û§ä: https://www.cnpack.org
 
-CnPack BBS: http://bbs.cnpack.org
+CnPack BBS: https://bbs.cnpack.org
 
-§¯§à§é§ß§í§Ö §ã§Ò§à§â§Ü§Ú: http://www.cnpack.org/downbuilds.php
+§¯§à§é§ß§í§Ö §ã§Ò§à§â§Ü§Ú: https://www.cnpack.org/downbuilds.php
 
 §¿§Ý§Ö§Ü§ä§â§à§ß§ß§Ñ§ñ §á§à§é§ä§Ñ (§Ñ§ß§Ô§Ý.): master@cnpack.org
 

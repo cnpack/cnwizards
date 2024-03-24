@@ -13,7 +13,7 @@
 {            您应该已经和开发包一起收到一份 CnPack 发布协议的副本。如果        }
 {        还没有，可访问我们的网站：                                            }
 {                                                                              }
-{            网站地址：http://www.cnpack.org                                   }
+{            网站地址：https://www.cnpack.org                                  }
 {            电子邮件：master@cnpack.org                                       }
 {                                                                              }
 {******************************************************************************}
@@ -386,7 +386,7 @@ const
     'EndFragment:000000000' + SCnPas2HtmlLineFeed +
     'StartSelection:000000000' + SCnPas2HtmlLineFeed +
     'EndSelection:000000000' + SCnPas2HtmlLineFeed +
-    'SourceURL:http://www.cnpack.org/' + SCnPas2HtmlLineFeed +
+    'SourceURL:https://www.cnpack.org/' + SCnPas2HtmlLineFeed +
     '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">' +
       SCnPas2HtmlLineFeed;
   SCnHtmlClipStart = '<!--StartFragment-->';
@@ -1738,7 +1738,7 @@ begin
 
   WriteStringToStream('<html>' + CRLF + '<head>' + CRLF + '<title>' + Title + '</title>' + CRLF);
   WriteStringToStream('<meta http-equiv="Content-Type" content="text/html; charset=' + FHTMLEncode + '">' + CRLF);
-  WriteStringToStream('<meta name="GENERATOR" content="CnPack Source2Html Wizard (http://www.cnpack.org)">' + CRLF);
+  WriteStringToStream('<meta name="GENERATOR" content="CnPack Source2Html Wizard (https://www.cnpack.org)">' + CRLF);
   WriteStringToStream('<style type="text/css">' + CRLF + '<!--' + CRLF);
 
   { v1.03: Set default body style as Whitespace style }
@@ -1995,7 +1995,7 @@ begin
 
   DecodeDate(Now, AYear, AMonth, ADay);
   DecodeTime(Now, AHour, AMin, ASec, AMiSec);
-  WriteStringToStream(Format('{\info{\author CnPack Source2RTF Wizard (http://www.cnpack.org)}{\creatim\yr%d\mo%d\dy%d\hr%d\min%d}{\comment CnPack Source2RTF Wizard (http://www.cnpack.org)}}' + CRLF,
+  WriteStringToStream(Format('{\info{\author CnPack Source2RTF Wizard (https://www.cnpack.org)}{\creatim\yr%d\mo%d\dy%d\hr%d\min%d}{\comment CnPack Source2RTF Wizard (https://www.cnpack.org)}}' + CRLF,
     [AYear, AMonth, ADay, AHour, AMin]));
   WriteStringToStream(Format('{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\lang%d', [GetSystemDefaultLangID]));
 end;

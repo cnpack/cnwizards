@@ -1,6 +1,6 @@
 # CnPack IDE Wizards (CnWizards)
 
- * Latest Nightly Build:  http://www.cnpack.org/downbuilds.php
+ * Latest Nightly Build:  https://www.cnpack.org/downbuilds.php
 
 # 1. What is CnWizards?
 
@@ -62,8 +62,8 @@ Builder Fans on Internet. Our products include CnPack IDE Wizards,
 CnPack Component Package and CVSTracNT. etc.
 CnPack becomes Embarcadero Technology Partner in 2009.
 
- * CnPack Website: http://www.cnpack.org
- * CnPack BBS:     http://bbs.cnpack.org
+ * CnPack Website: https://www.cnpack.org
+ * CnPack BBS:     https://bbs.cnpack.org
  * Email:          master@cnpack.org
 
 # 5. Related Links

@@ -2,7 +2,7 @@
   <o>
     <Caption>CnPack RSS</Caption>
     <IDStr>CnPackRSS</IDStr>
-    <Url>http://www.cnpack.org/rss/?id=0&amp;lang=$langid$</Url>
+    <Url>https://www.cnpack.org/rss/?id=0&amp;lang=$langid$</Url>
     <FeedType>ftCnPack</FeedType>
     <CheckPeriod>240</CheckPeriod>
     <Limit>0</Limit>
@@ -10,7 +10,7 @@
   <o>
     <Caption>CnPack Partner RSS 1</Caption>
     <IDStr>PartnerRSS1</IDStr>
-    <Url>http://www.cnpack.org/rss/?id=1&amp;lang=$langid$</Url>
+    <Url>https://www.cnpack.org/rss/?id=1&amp;lang=$langid$</Url>
     <FeedType>ftPartner</FeedType>
     <CheckPeriod>240</CheckPeriod>
     <Limit>20</Limit>
@@ -18,7 +18,7 @@
   <o>
     <Caption>CnPack Partner RSS 2</Caption>
     <IDStr>PartnerRSS2</IDStr>
-    <Url>http://www.cnpack.org/rss/?id=2&amp;lang=$langid$</Url>
+    <Url>https://www.cnpack.org/rss/?id=2&amp;lang=$langid$</Url>
     <FeedType>ftPartner</FeedType>
     <CheckPeriod>240</CheckPeriod>
     <Limit>20</Limit>

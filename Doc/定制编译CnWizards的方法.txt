@@ -26,15 +26,15 @@
 具体步骤如下：
 
 一、从 CnPack 开发网站上下载 CnWizards 最新安装包并进行安装，推荐下载最
-    新的每日构建版。http://www.cnpack.org/downbuilds.php
+    新的每日构建版。https://www.cnpack.org/downbuilds.php
 
 二、从 GitHub 上将代码下载至本地，包含两个库。
 
-    git clone http://github.com/cnpack/cnvcl.git
-    git clone http://github.com/cnpack/cnwizards.git
+    git clone https://github.com/cnpack/cnvcl.git
+    git clone https://github.com/cnpack/cnwizards.git
 
     关于具体如何使用 Git，请参考 CnPack 网站上的 Git 使用说明
-    http://www.cnpack.org/showdetail.php?id=639&lang=zh-cn
+    https://www.cnpack.org/showdetail.php?id=639&lang=zh-cn
 
 三、启动 Delphi，打开 cnwizards\Tools\CnCustBuild\CnCustBuild.dpr，编译
     运行。
@@ -77,12 +77,12 @@ If you want to get a customized build of CnWizards that only contains
 the features you want, you can follow these steps:
 
 1. Download latest (nightly-build) installer of CnWizards and install it.
-   http://www.cnpack.org/downbuilds.php
+   https://www.cnpack.org/downbuilds.php
 
 2. Download latest source code from GitHub to local directory.
 
-   git clone http://github.com/cnpack/cnvcl.git
-   git clone http://github.com/cnpack/cnwizards.git
+   git clone https://github.com/cnpack/cnvcl.git
+   git clone https://github.com/cnpack/cnwizards.git
 
 3. Start Delphi, Open cnwizards\Tools\CnCustBuild\CnCustBuild.dpr and Run.
 

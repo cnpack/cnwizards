@@ -78,7 +78,7 @@ LegalTrademarks=CnPack
 OriginalFilename=AsciiChart.EXE
 ProductName=CnWizards
 ProductVersion=1.0.0.0
-Comments=http://www.cnpack.org
+Comments=https://www.cnpack.org
 [HistoryLists\hlConditionals]
 Count=1
 Item0=STAND_ALONE
