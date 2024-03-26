@@ -24,9 +24,9 @@ unit CnVerEnhancements;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：版本信息增强专家
 * 单元作者：陈省（hubdog）
-* 备    注：本专家不支持D5,C5
+* 备    注：本专家不支持D5, C5
 * 开发平台：JWinXPPro + Delphi 7.01
-* 兼容测试：JWinXPPro ＋Delphi7.０１
+* 兼容测试：JWinXPPro ＋Delphi 7.01
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2019.03.26 V1.5 by liuxiao
 *               加入将年月日设为版本号的设置

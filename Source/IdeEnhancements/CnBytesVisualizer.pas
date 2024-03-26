@@ -306,7 +306,6 @@ var
   CurThread: IOTAThread;
   S, T, PE, LE: string; // 结果、类型、指针表达式、长度表达式
   P, L: TUInt64;
-  Item: TListItem;
   Buf: TBytes;
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
