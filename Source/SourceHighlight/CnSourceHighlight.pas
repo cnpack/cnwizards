@@ -34,6 +34,10 @@ unit CnSourceHighlight;
 *           GetAttributeAtPos：Ansi 字节、  UTF8 的字节 Col、 UTF8 的字节 Col
 *               因此 D2009 下处理时，需要额外将获得的 UnicodeString 的 LineText
 *               转成 UTF8 来适应相关的 CursorPos 和 GetAttributeAtPos
+*
+*           如果绘制错位，多半是 EditorGetTextRect 中的判断字符宽度的行为和 IDE 不一致
+*           如果光标判断标识符错位，多半是 CnOtaGeneralGetCurrPosToken 里判断宽度和 IDE 不一致
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -2855,9 +2859,18 @@ var
     if Integer(AChar) < $80  then
       Result := CharSize.cx
     else
+    begin
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+      if WideCharIsWideLength(AChar) then // D11 以上似乎固定画了
+        Result := CharSize.cx * 2
+      else
+        Result := CharSize.cx;
+{$ELSE}
       Result := Round(EditCanvas.TextWidth(AChar) / CharSize.cx) * CharSize.cx;
       // 这里怕是也有错，TextWidth 可能因为字体不存在等原因返回单个字符长，
       // 但 IDE 有可能会刻意让此字符保持两个字符宽度，无法确定其逻辑
+{$ENDIF}
+    end;
   end;
 {$ENDIF}
 
@@ -4016,8 +4029,12 @@ var
       Result := WideCharIsWideLength(AChar)
     else
     begin
+{$IFDEF DELPHI110_ALEXANDRIA_UP} // 高版本的绘制似乎改成固定宽度了
+      Result := WideCharIsWideLength(AChar);
+{$ELSE}
       CW := EditCanvas.TextWidth(AChar);
       Result := CW > AnsiCharWidthLimit; // 双字节字符绘制出的宽度大于 1.5 倍的窄字符宽度就认为宽
+{$ENDIF}
     end;
   end;
 {$ENDIF}

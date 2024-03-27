@@ -661,7 +661,8 @@ function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
    不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1 赋给 EditPos.Col。
    Utf16CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始，+ 1 便可下标
    PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
-   为 False 时直接判断字符是否大于 $FF 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
+   为 False 时直接判断字符 Unicode 编码是否大于 $900 来决定其是一字符宽还是二字符宽，
+   碰上部分古怪 Unicode 字符时会产生偏差}
 {$ENDIF}
 
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
@@ -5270,7 +5271,7 @@ begin
   begin
     Text := GetStrProp(EditControl, 'LineText');
 
-    // CursorPos 在 Unicode IDE 下反映的是 Ansi（非UTF8）方式的列，
+    // CursorPos 在 Unicode IDE 下反映的是 Ansi（非 UTF8）方式的列，
     // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
     AnsiCharIndex := View.CursorPos.Col - 1;
     if not PreciseMode then
@@ -5603,8 +5604,13 @@ function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex
   EditView: IOTAEditView): Boolean;
 begin
 {$IFDEF UNICODE}
+  {$IFDEF DELPHI110_ALEXANDRIA_UP}
+  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, False); // D110 以上改成固定宽度了
+  {$ELSE}
   Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
     FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, True); // 使用精确模式来计算字符宽度
+{$ENDIF}
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
   Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
