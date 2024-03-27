@@ -207,7 +207,7 @@ end;
 }
 procedure TCnRemoteEvaluationInspector.DoEvaluate;
 var
-  C, I, L, APCnt, PCnt, PSum: Integer;
+  C, I, Len, Ret, APCnt, PCnt, PSum: Integer;
   RemotePtr: TCnOTAAddress;
   V, S: string;
   Buf: TBytes;
@@ -282,19 +282,19 @@ begin
   RemotePtr := StrToUInt64(S);
   if RemotePtr <> 0 then
   begin
-    L := 512;
-    SetLength(Buf, L);
-    L := FEvaluator.ReadProcessMemory(RemotePtr, L, Buf[0]);
+    Len := 512;
+    SetLength(Buf, Len);
+    Ret := FEvaluator.ReadProcessMemory(RemotePtr, Len, Buf[0]);
 
 {$IFDEF DEBUG}
-    CnDebugger.LogInteger(L, 'FEvaluator.ReadProcessMemory Return');
-    CnDebugger.LogMemDump(@Buf[0], L);
+    CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [Len, Ret]);
+    CnDebugger.LogMemDump(@Buf[0], Ret);
 {$ENDIF}
 
     // 先拿属性总数，Buf 是 TCnTypeInfoRec
     BufPtr := @Buf[0];
-    L := PCnTypeInfoRec(BufPtr)^.NameLength;
-    Inc(BufPtr, SizeOf(TCnTypeInfoRec) + L); // 跳过俩字节指向 ClassName，再跳过字符串长度指向 TypeData
+    Len := PCnTypeInfoRec(BufPtr)^.NameLength;
+    Inc(BufPtr, SizeOf(TCnTypeInfoRec) + Len); // 跳过俩字节指向 ClassName，再跳过字符串长度指向 TypeData
 
     ContentTypes := [pctHierarchy];
     Hies := TStringList.Create;
@@ -314,18 +314,21 @@ begin
       // RemotePtr 始终是本类层次的 ClassInfo 指针，循环结束即将开始下一轮循环时改指向父类的指针
       while True do
       begin
-        L := (APCnt + 1) * 256; // 预留尽可能大的空间
-        SetLength(Buf, L);
-        L := FEvaluator.ReadProcessMemory(RemotePtr, L, Buf[0]);
+        Len := (APCnt + 1) * 256; // 预留尽可能大的空间
+        SetLength(Buf, Len);
+        Ret := FEvaluator.ReadProcessMemory(RemotePtr, Len, Buf[0]);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [Len, Ret]);
+{$ENDIF}
 
         // Buf 是本类的 PCnTypeInfoRec
         BufPtr := @Buf[0];
-        L := PCnTypeInfoRec(BufPtr)^.NameLength;
+        Len := PCnTypeInfoRec(BufPtr)^.NameLength;
         Inc(BufPtr, SizeOf(TCnTypeInfoRec)); // 跳过俩字节指向 ClassName
 
-        SetLength(S, L);
-        Move(BufPtr^, S[1], L);              // 读入 ClassName
-        Inc(BufPtr, L);
+        SetLength(S, Len);
+        Move(BufPtr^, S[1], Len);              // 读入 ClassName
+        Inc(BufPtr, Len);
         Hies.Add(S);
 
         // 此时 BufPtr 指向 TypeData，先拿父类的类型指针
@@ -352,19 +355,19 @@ begin
 
           if Is32 then
           begin
-            L := PCnPropInfoRec32(BufPtr)^.NameLength;  // 拿到属性名的长度
+            Len := PCnPropInfoRec32(BufPtr)^.NameLength;  // 拿到属性名的长度
             Inc(BufPtr, SizeOf(TCnPropInfoRec32));      // BufPtr 指向属性名
-            SetLength(S, L);
-            Move(BufPtr^, S[1], L);                     // 复制属性名
-            Inc(BufPtr, L);                             // BufPtr 跳过名称，指向下一个
+            SetLength(S, Len);
+            Move(BufPtr^, S[1], Len);                     // 复制属性名
+            Inc(BufPtr, Len);                             // BufPtr 跳过名称，指向下一个
           end
           else
           begin
-            L := PCnPropInfoRec64(BufPtr)^.NameLength;  // 拿到属性名的长度
+            Len := PCnPropInfoRec64(BufPtr)^.NameLength;  // 拿到属性名的长度
             Inc(BufPtr, SizeOf(TCnPropInfoRec64));      // BufPtr 指向属性名
-            SetLength(S, L);
-            Move(BufPtr^, S[1], L);                     // 复制属性名
-            Inc(BufPtr, L);                             // BufPtr 跳过名称，指向下一个
+            SetLength(S, Len);
+            Move(BufPtr^, S[1], Len);                     // 复制属性名
+            Inc(BufPtr, Len);                             // BufPtr 跳过名称，指向下一个
           end;
           // 拿到属性名在 S 里，求其 TypeKind，再根据是否要处理来决定是否加入结果
 

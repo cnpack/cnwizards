@@ -159,11 +159,18 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
+    function CurrentProcessIs32: Boolean;
+    {* 返回被调试进程是否 Win32 或 OSX 的 32 位，如果否，是 Win64 或其他平台的 64 位或者是不支持的 32 位}
+
     function EvaluateExpression(const Expression: string;
       ObjectAddr: PCnOTAAddress = nil): string;
     {* 求表达式的值，返回字符串结果；如果出错，则返回空字符串
        如果结果是对象，则返回 ([csInheritable]) 这种字符串，
        如果同时传入了 ObjectAddr 地址，则额外在 ObjectAddr 所指处返回该对象的远程地址}
+
+    function ReadProcessMemory(Address: TCnOTAAddress; ByteCount: Integer; var Buffer): Integer;
+    {* 读目标进程的内存地址，Address 为目标进程地址空间内的虚拟地址，
+       ByteCount 为待读取字节数，Buffer 为存放空间，返回读取成功的字节数}
   end;
 
 function CnWizDebuggerObjectInheritsFrom(const Obj, BaseClassName: string;
@@ -1096,6 +1103,53 @@ begin
     S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
 
   Result := LowerCase(S) = 'true';
+end;
+
+function TCnRemoteProcessEvaluator.ReadProcessMemory(Address: TCnOTAAddress;
+  ByteCount: Integer; var Buffer): Integer;
+var
+  CurProcess: IOTAProcess;
+  CurThread: IOTAThread;
+  DebugSvcs: IOTADebuggerServices;
+begin
+  Result := 0;
+  if ByteCount <= 0 then
+    Exit;
+
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+    CurProcess := DebugSvcs.CurrentProcess;
+
+  if CurProcess = nil then
+    Exit;
+  CurThread := CurProcess.CurrentThread;
+  if CurThread = nil then
+    Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogPointer(Pointer(Address), 'TCnRemoteProcessEvaluator.ReadProcessMemory: ');
+{$ENDIF}
+
+  Result := CurProcess.ReadProcessMemory(Address, ByteCount, Buffer);
+end;
+
+function TCnRemoteProcessEvaluator.CurrentProcessIs32: Boolean;
+var
+  CurProcess: IOTAProcess;
+  DebugSvcs: IOTADebuggerServices;
+begin
+  Result := True;
+
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+    CurProcess := DebugSvcs.CurrentProcess;
+
+  if CurProcess = nil then
+    Exit;
+
+{$IFDEF SUPPORT_32_AND_64}
+  Result := CurProcess.GetProcessType in [optWin32, optOSX32];
+{$ELSE}
+  Result := True;
+{$ENDIF}
 end;
 
 initialization
