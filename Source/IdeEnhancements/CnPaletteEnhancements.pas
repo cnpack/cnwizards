@@ -67,7 +67,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, ExtCtrls, Menus, ComCtrls, Contnrs, StdCtrls, Buttons, ActnList,
-  CnWizMethodHook,
+  CnWizMethodHook, Registry,
   CnCommon, CnWizUtils, CnWizNotifier, CnWizIdeUtils, CnWizConsts, CnMenuHook,
   CnConsts, CnCompUtils, CnWizClasses, CnWizMenuAction, CnWizManager, 
   {$IFDEF COMPILER7_UP}
@@ -87,6 +87,7 @@ type
   private
     FMenuLine: Boolean;
     FLockToolbar: Boolean;
+    FClearRegSession: Boolean;
     FTempDisableLock: Boolean;
     FHookedToolbarMouseDown: Boolean;
     FOldMouseDown: TMouseEvent;
@@ -96,7 +97,7 @@ type
 
   {$IFDEF COMPILER7_UP}
     FMenuBar: TActionMainMenuBar;
-  {$ENDIF COMPILER7_UP}
+  {$ENDIF}
 
     FEnableWizMenu: Boolean;
     FWizMenuNames: TStringList;
@@ -133,17 +134,17 @@ type
     FTabsMenu: Boolean;
     FHooked: Boolean;
     FMenuHook: TCnMenuHook;
-  {$IFDEF COMPILER5}
+    {$IFDEF COMPILER5}
     FTabMenuItem: TCnMenuItemDef;
-  {$ENDIF COMPILER5}
+    {$ENDIF}
     FMultiLineMenuItem: TCnMenuItemDef;
     FSepMenuItem: TCnSepMenuItemDef;
 
     FDivTab: Boolean;
-  {$IFDEF COMPILER6_UP}
+    {$IFDEF COMPILER6_UP}
     FTabPopupItem: TMenuItem;
     FTabOnClick: TNotifyEvent;
-  {$ENDIF COMPILER6_UP}
+    {$ENDIF}
   {$ELSE}
     FNewComponentPalette: TWinControl;
   {$ENDIF}
@@ -164,7 +165,7 @@ type
     procedure OnTabMenuCreated(Sender: TObject; MenuItem: TMenuItem);
   {$ELSE}
     procedure OnMenuAfterPopup(Sender: TObject; Menu: TPopupMenu);
-  {$ENDIF COMPILER5}
+  {$ENDIF}
 
     procedure OnActiveFormChanged(Sender: TObject);
     procedure OnMultiLineItemClick(Sender: TObject);
@@ -189,7 +190,7 @@ type
   {$IFDEF COMPILER7_UP}
     procedure InitMenuBar;
     procedure FinalMenuBar;
-  {$ENDIF COMPILER7_UP}
+  {$ENDIF}
 
   {$IFDEF FIX_EDITORLINEENDS_BUG}
     procedure SetFixEditorLineEndsBug(const Value: Boolean);
@@ -263,6 +264,7 @@ type
   {$ENDIF}
     property MenuLine: Boolean read FMenuLine write FMenuLine;
     property LockToolbar: Boolean read FLockToolbar write SetLockToolbar;
+    property ClearRegSession: Boolean read FClearRegSession write FClearRegSession;
   published
     property TempDisableLock: Boolean read FTempDisableLock write SetTempDisableLock;
     {* 外部其他模块使用，供修补工具栏显示不全的问题，不开放给用户}
@@ -310,6 +312,7 @@ const
   csUseSmallImg = 'UseSmallImg';
   csShowDetails = 'ShowDetails';
   csAutoSelect = 'AutoSelect';
+  csClearRegSession = 'ClearRegSession';
 
   SCN_EDITORLINEENDS_FILE = 'EditorLineEnds.ttr';
 
@@ -351,6 +354,9 @@ var
 var
   FixEditorLineEndsBugGlobal: Boolean = True;
 {$ENDIF}
+
+var
+  GlobalClearRegSession: Boolean = False;
 
 {$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
 
@@ -542,6 +548,7 @@ begin
 
   FControlBarMenuHook.Free;
   FinalWizMenus;
+  GlobalClearRegSession := FClearRegSession;
   inherited;
 end;
 
@@ -1176,6 +1183,7 @@ begin
 {$ENDIF}
   FMenuLine := Ini.ReadBool('', csIDEMenuLine, False);
   FLockToolbar := Ini.ReadBool('', csLockToolbar, False);
+  FClearRegSession := Ini.ReadBool('', csClearRegSession, False);
 
   FEnableWizMenu := Ini.ReadBool(WizOptions.CompilerID, csEnableWizMenu, FEnableWizMenu);
   FWizMenuNames.CommaText := Ini.ReadString(WizOptions.CompilerID, csWizMenuNames, FWizMenuNames.CommaText);
@@ -1195,7 +1203,7 @@ begin
   Ini.WriteBool('', csPalMultiLine, FMultiLine);
   Ini.WriteBool('', csPalButtonStyle, FButtonStyle);
   Ini.WriteBool('', csDivTabMenu, FDivTab);
-{$ENDIF COMPILER8_UP}
+{$ENDIF}
 
 {$IFDEF SUPPORT_PALETTE_ENHANCE}
   Ini.WriteBool('', csCompFilter, FCompFilter);
@@ -1208,6 +1216,7 @@ begin
 
   Ini.WriteBool('', csIDEMenuLine, FMenuLine);
   Ini.WriteBool('', csLockToolbar, FLockToolbar);
+  Ini.WriteBool('', csClearRegSession, FClearRegSession);
 
   Ini.WriteBool(WizOptions.CompilerID, csEnableWizMenu, FEnableWizMenu);
   Ini.WriteString(WizOptions.CompilerID, csWizMenuNames, FWizMenuNames.CommaText);
@@ -1264,6 +1273,7 @@ begin
 
     chkMenuLine.Checked := MenuLine;
     chkLockToolbar.Checked := LockToolbar;
+    chkClearRegSessionProject.Checked := ClearRegSession;
 
     chkMoveWizMenus.Checked := FEnableWizMenu;
     edtMoveToUser.Text := FWizMenu.Caption;
@@ -1285,6 +1295,7 @@ begin
 
       MenuLine := chkMenuLine.Checked;
       LockToolbar := chkLockToolbar.Checked;
+      ClearRegSession := chkClearRegSessionProject.Checked;
 
       FEnableWizMenu := chkMoveWizMenus.Checked;
       FWizMenu.Caption := edtMoveToUser.Text;
@@ -1704,6 +1715,41 @@ end;
 
 {$ENDIF}
 
+procedure ClearRegistrySessionProject;
+const
+  SCnProject = 'Project';
+var
+  I: Integer;
+  S: string;
+  Reg: TRegistry;
+begin
+  if not GlobalClearRegSession then
+    Exit;
+
+  S := SCnIDERegPaths[Compiler] + '\Session';
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('To ClearRegistrySessionProject: %s', [S]);
+{$ENDIF}
+
+  Reg := nil;
+
+  try
+    Reg := TRegistry.Create;
+    Reg.RootKey := HKEY_CURRENT_USER;
+
+    if Reg.OpenKey(S, False) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ClearRegistrySessionProject to Delete Value %s', [SCnProject]);
+{$ENDIF}
+      if Reg.ValueExists(SCnProject) then
+        Reg.DeleteValue(SCnProject);
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
 initialization
   RegisterCnWizard(TCnPaletteEnhanceWizard);
 
@@ -1720,6 +1766,8 @@ finalization
     ;
   end;
 {$ENDIF}
+
+  ClearRegistrySessionProject;
 
 {$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
   FreeAndNil(FCutMethodHook);

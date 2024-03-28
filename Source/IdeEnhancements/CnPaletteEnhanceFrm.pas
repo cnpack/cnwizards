@@ -71,6 +71,7 @@ type
     chkLockToolbar: TCheckBox;
     lblShortcut: TLabel;
     hkCompFilter: THotKey;
+    chkClearRegSessionProject: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateControls(Sender: TObject);
@@ -80,11 +81,10 @@ type
     procedure btnUpClick(Sender: TObject);
     procedure btnDownClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure SetWizMenuNames(AList: TStrings; AWizMenu: TMenuItem);
     procedure GetWizMenuNames(AList: TStrings);
   end;
@@ -159,16 +159,16 @@ end;
 
 procedure TCnPalEnhanceForm.GetWizMenuNames(AList: TStrings);
 var
-  i: Integer;
+  I: Integer;
 begin
   AList.Clear;
-  for i := 0 to lstDest.Items.Count - 1 do
-    AList.Add(TMenuItem(lstDest.Items.Objects[i]).Name);
+  for I := 0 to lstDest.Items.Count - 1 do
+    AList.Add(TMenuItem(lstDest.Items.Objects[I]).Name);
 end;
 
 procedure TCnPalEnhanceForm.SetWizMenuNames(AList: TStrings; AWizMenu: TMenuItem);
 var
-  i: Integer;
+  I: Integer;
   Idx: Integer;
   MainMenu: TMainMenu;
   
@@ -185,30 +185,32 @@ var
 
   function IndexOfMenu(const AName: string): Integer;
   var
-    i: Integer;
+    I: Integer;
   begin
     Result := -1;
-    for i := 0 to lstSource.Items.Count - 1 do
-      if SameText(TMenuItem(lstSource.Items.Objects[i]).Name, AName) then
+    for I := 0 to lstSource.Items.Count - 1 do
+    begin
+      if SameText(TMenuItem(lstSource.Items.Objects[I]).Name, AName) then
       begin
-        Result := i;
+        Result := I;
         Exit;
-      end;  
+      end;
+    end;
   end;  
 begin
   lstSource.Items.Clear;
   MainMenu := GetIDEMainMenu;
   if MainMenu <> nil then
-    for i := 0 to MainMenu.Items.Count - 1 do
-      DoAddMenu(MainMenu.Items[i]);
+    for I := 0 to MainMenu.Items.Count - 1 do
+      DoAddMenu(MainMenu.Items[I]);
 
-  for i := 0 to AWizMenu.Count - 3 do
-    DoAddMenu(AWizMenu[i]);
+  for I := 0 to AWizMenu.Count - 3 do
+    DoAddMenu(AWizMenu[I]);
 
   lstDest.Items.Clear;
-  for i := 0 to AList.Count - 1 do
+  for I := 0 to AList.Count - 1 do
   begin
-    Idx := IndexOfMenu(Trim(AList[i]));
+    Idx := IndexOfMenu(Trim(AList[I]));
     if Idx >= 0 then
       lstDest.Items.AddObject(lstSource.Items[Idx], lstSource.Items.Objects[Idx]);
   end;
@@ -216,44 +218,48 @@ end;
 
 procedure TCnPalEnhanceForm.btnAddClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to lstSource.Items.Count - 1 do
-    if lstSource.Selected[i] and (lstDest.Items.IndexOf(lstSource.Items[i]) < 0) then
-      lstDest.Items.AddObject(lstSource.Items[i], lstSource.Items.Objects[i]);
+  for I := 0 to lstSource.Items.Count - 1 do
+    if lstSource.Selected[I] and (lstDest.Items.IndexOf(lstSource.Items[I]) < 0) then
+      lstDest.Items.AddObject(lstSource.Items[I], lstSource.Items.Objects[I]);
 end;
 
 procedure TCnPalEnhanceForm.btnDeleteClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := lstDest.Items.Count - 1 downto 0 do
-    if lstDest.Selected[i] then
-      lstDest.Items.Delete(i);
+  for I := lstDest.Items.Count - 1 downto 0 do
+    if lstDest.Selected[I] then
+      lstDest.Items.Delete(I);
 end;
 
 procedure TCnPalEnhanceForm.btnUpClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 1 to lstDest.Items.Count - 1 do
-    if lstDest.Selected[i] and not lstDest.Selected[i - 1] then
+  for I := 1 to lstDest.Items.Count - 1 do
+  begin
+    if lstDest.Selected[I] and not lstDest.Selected[I - 1] then
     begin
-      lstDest.Items.Move(i, i - 1);
-      lstDest.Selected[i - 1] := True;
+      lstDest.Items.Move(I, I - 1);
+      lstDest.Selected[I - 1] := True;
     end;
+  end;
 end;
 
 procedure TCnPalEnhanceForm.btnDownClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := lstDest.Items.Count - 2 downto 0 do
-    if lstDest.Selected[i] and not lstDest.Selected[i + 1] then
+  for I := lstDest.Items.Count - 2 downto 0 do
+  begin
+    if lstDest.Selected[I] and not lstDest.Selected[I + 1] then
     begin
-      lstDest.Items.Move(i, i + 1);
-      lstDest.Selected[i + 1] := True;
+      lstDest.Items.Move(I, I + 1);
+      lstDest.Selected[I + 1] := True;
     end;
+  end;
 end;
 
 end.

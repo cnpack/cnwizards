@@ -3,7 +3,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   Top = 101
   BorderStyle = bsDialog
   Caption = 'IDE Main Form Enhancements Wizard Settings'
-  ClientHeight = 463
+  ClientHeight = 483
   ClientWidth = 488
   OnCreate = FormCreate
   OnShow = FormShow
@@ -13,12 +13,12 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
     Left = 8
     Top = 8
     Width = 470
-    Height = 172
+    Height = 192
     Caption = 'Component &Palette Extension Settings'
     TabOrder = 0
     object lblShortcut: TLabel
       Left = 24
-      Top = 119
+      Top = 139
       Width = 45
       Height = 13
       Caption = 'Shortcut:'
@@ -52,13 +52,13 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
     end
     object chkCompFilter: TCheckBox
       Left = 8
-      Top = 96
+      Top = 116
       Width = 457
       Height = 17
       Caption = 
         'Add "Search Component" Button in Palette(Delphi 7 Below or 2010 ' +
         'Above Only).'
-      TabOrder = 4
+      TabOrder = 5
       OnClick = UpdateControls
     end
     object chkButtonStyle: TCheckBox
@@ -71,37 +71,48 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
     end
     object chkLockToolbar: TCheckBox
       Left = 8
-      Top = 144
+      Top = 164
       Width = 457
       Height = 17
       Caption = 'Lock IDE Toolbars to Disable Drag.'
-      TabOrder = 6
+      TabOrder = 7
     end
     object hkCompFilter: THotKey
       Left = 120
-      Top = 116
+      Top = 136
       Width = 121
       Height = 19
       HotKey = 32833
       InvalidKeys = [hcNone]
       Modifiers = [hkAlt]
-      TabOrder = 5
+      TabOrder = 6
+    end
+    object chkClearRegSessionProject: TCheckBox
+      Left = 8
+      Top = 96
+      Width = 457
+      Height = 17
+      Caption = 'Clear Session Project  in Registry when Exiting.'
+      TabOrder = 4
+      OnClick = UpdateControls
     end
   end
   object btnHelp: TButton
     Left = 404
-    Top = 432
+    Top = 452
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 5
     OnClick = btnHelpClick
   end
   object btnOK: TButton
     Left = 244
-    Top = 432
+    Top = 452
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -109,9 +120,10 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object btnCancel: TButton
     Left = 324
-    Top = 432
+    Top = 452
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -119,9 +131,10 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object grpMisc: TGroupBox
     Left = 8
-    Top = 184
+    Top = 204
     Width = 470
     Height = 41
+    Anchors = [akLeft, akRight, akBottom]
     Caption = 'O&ther Settings'
     TabOrder = 1
     object chkMenuLine: TCheckBox
@@ -138,9 +151,10 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
   end
   object grpMenu: TGroupBox
     Left = 8
-    Top = 232
+    Top = 252
     Width = 470
     Height = 193
+    Anchors = [akLeft, akRight, akBottom]
     Caption = 'M&ain Form Settings'
     TabOrder = 2
     object lbl1: TLabel
