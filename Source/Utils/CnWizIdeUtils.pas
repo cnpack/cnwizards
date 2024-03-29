@@ -766,6 +766,11 @@ const
   SBeginBatchOpenCloseName = '@Editorform@BeginBatchOpenClose$qqrv';
   SEndBatchOpenCloseName = '@Editorform@EndBatchOpenClose$qqrv';
 
+{$IFDEF DELPHI120_ATHENS_UP}
+  // D12.1 改名了，但 12 没改
+  SEndBatchOpenCloseName121 = '@Editorform@EndBatchOpenClose$qqrxo';
+{$ENDIF}
+
 var
   BeginBatchOpenCloseProc: TProcedure = nil;
   EndBatchOpenCloseProc: TProcedure = nil;
@@ -2368,6 +2373,11 @@ begin
   Assert(Assigned(BeginBatchOpenCloseProc), 'Failed to load BeginBatchOpenCloseProc from CorIdeModule');
 
   EndBatchOpenCloseProc := GetProcAddress(CorIdeModule, SEndBatchOpenCloseName);
+{$IFDEF DELPHI120_ATHENS_UP}
+  if not Assigned(EndBatchOpenCloseProc) then // D12.1 改名了，再找一次
+    EndBatchOpenCloseProc := GetProcAddress(CorIdeModule, SEndBatchOpenCloseName121);
+{$ENDIF}
+
   Assert(Assigned(EndBatchOpenCloseProc), 'Failed to load EndBatchOpenCloseProc from CorIdeModule');
 {$ENDIF}
 end;
