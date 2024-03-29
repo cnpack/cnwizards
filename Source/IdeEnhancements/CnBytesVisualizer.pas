@@ -28,7 +28,9 @@ unit CnBytesVisualizer;
 * 开发平台：PWin11 + Delphi 12
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2024.03.16 V1.0
+* 修改记录：2024.03.30 V1.0
+*               IOTADebuggerVisualizer250 改成 10.3 才支持，避免 10.2 低 Update 包不支持
+*           2024.03.16 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -81,17 +83,17 @@ type
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
   TCnDebuggerBytesVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
-    {$IFDEF DELPHI102_TOKYO_UP} IOTADebuggerVisualizer250, {$ENDIF}
+    {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} IOTADebuggerVisualizer250, {$ENDIF}
     IOTADebuggerVisualizerExternalViewer)
   public
     { IOTADebuggerVisualizer }
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
-      var AllDescendants: Boolean); {$IFDEF DELPHI102_TOKYO_UP} overload; {$ENDIF}
+      var AllDescendants: Boolean); {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} overload; {$ENDIF}
     function GetVisualizerIdentifier: string;
     function GetVisualizerName: string;
     function GetVisualizerDescription: string;
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
     { IOTADebuggerVisualizer250 }
     procedure GetSupportedType(Index: Integer; var TypeName: string;
       var AllDescendants: Boolean; var IsGeneric: Boolean); overload;
@@ -193,7 +195,7 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF DELPHI102_TOKYO_UP}
+{$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
 
 procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);

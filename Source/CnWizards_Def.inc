@@ -33,3 +33,9 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI103_RIO_UP}
+  {$DEFINE FULL_IOTADEBUGGERVISUALIZER_250}
+  // IOTADebuggerVisualizer250 是 D102T Update 包（可能是 10.2.2）中引入的，不支持低版本的如 10.2.1 与 10.2
+  // 因而为了保险起见，定义 10.3 或以上才支持该接口
+{$ENDIF}
+
