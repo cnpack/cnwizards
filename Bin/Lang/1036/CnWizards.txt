@@ -1301,6 +1301,7 @@ TCnPalEnhanceForm.btnHelp.Caption=&Aide
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.chkAddTabs.Caption=Ajoutez des "onglets" au menu contextuel (Delphi 5 / BCB 5 uniquement).
 TCnPalEnhanceForm.chkButtonStyle.Caption=Définissez le style de la palette de composants sur le bouton plat.
+TCnPalEnhanceForm.chkClearRegSessionProject.Caption=Ne chargez PAS le projet ouvert pour la dernière fois automatiquement au lancement de l'IDE.
 TCnPalEnhanceForm.chkCompFilter.Caption=Ajoutez le bouton "Rechercher un composant" dans la palette (Delphi 7 ci-dessous ou 2010 ci-dessus uniquement).
 TCnPalEnhanceForm.chkDivTabMenu.Caption=Menu Wrap Tabs lorsqu'il est trop long (Delphi 7 uniquement).
 TCnPalEnhanceForm.chkLockToolbar.Caption=Verrouillez les barres d'outils IDE pour désactiver le glissement.

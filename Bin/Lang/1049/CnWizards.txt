@@ -1301,6 +1301,7 @@ TCnPalEnhanceForm.btnHelp.Caption=Справка
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.chkAddTabs.Caption=Добавлять "Вкладки" в конт. меню (только Delphi 5/BCB 5)
 TCnPalEnhanceForm.chkButtonStyle.Caption=Плоские кнопки в палитре компонентов
+TCnPalEnhanceForm.chkClearRegSessionProject.Caption=Не загружать автоматически последний открытый проект при запуске IDE.
 TCnPalEnhanceForm.chkCompFilter.Caption=Добавлять кнопку "Поиск компоненты" в палитру (Delphi 7 и ниже)
 TCnPalEnhanceForm.chkDivTabMenu.Caption=Сокращать длинный текст меню вкладок (Delphi 7 и ниже)
 TCnPalEnhanceForm.chkLockToolbar.Caption=Закрепить панель инструментов IDE

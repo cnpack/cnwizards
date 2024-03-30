@@ -1301,6 +1301,7 @@ TCnPalEnhanceForm.btnHelp.Caption=說明(&H)
 TCnPalEnhanceForm.btnOK.Caption=確定(&O)
 TCnPalEnhanceForm.chkAddTabs.Caption=在元件面板的彈出菜單上添加 Tabs 項（僅適用於 Delphi 5 與 BCB 5）。
 TCnPalEnhanceForm.chkButtonStyle.Caption=設置組件面板頁面為平面按鈕風格。
+TCnPalEnhanceForm.chkClearRegSessionProject.Caption=啟動時禁止自動加載歷史工程。
 TCnPalEnhanceForm.chkCompFilter.Caption=在組件面板上添加"查找組件"按鈕（僅適用於 Delphi 7 及以下或 2010 及以上版本）。
 TCnPalEnhanceForm.chkDivTabMenu.Caption=屏幕空間不足時折疊 Tabs 子菜單（僅適用於 Delphi 7 及以下版本）。
 TCnPalEnhanceForm.chkLockToolbar.Caption=鎖定 IDE 主窗口的工具欄以禁止拖動。

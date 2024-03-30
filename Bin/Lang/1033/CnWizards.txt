@@ -1301,6 +1301,7 @@ TCnPalEnhanceForm.btnHelp.Caption=&Help
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.chkAddTabs.Caption=Add "Tabs" to Popup Menu(Delphi 5/BCB 5 only).
 TCnPalEnhanceForm.chkButtonStyle.Caption=Set Component Palette's Style to Flat Button.
+TCnPalEnhanceForm.chkClearRegSessionProject.Caption=Do NOT Load Last Opened Project Automatically when IDE Launched.
 TCnPalEnhanceForm.chkCompFilter.Caption=Add "Search Component" Button in Palette(Delphi 7 Below or 2010 Above Only).
 TCnPalEnhanceForm.chkDivTabMenu.Caption=Wrap Tabs Menu when too Long(Delphi 7 Below Only).
 TCnPalEnhanceForm.chkLockToolbar.Caption=Lock IDE Toolbars to Disable Drag.

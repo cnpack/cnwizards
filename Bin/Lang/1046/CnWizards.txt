@@ -1301,6 +1301,7 @@ TCnPalEnhanceForm.btnHelp.Caption=&Ajuda
 TCnPalEnhanceForm.btnOK.Caption=&OK
 TCnPalEnhanceForm.chkAddTabs.Caption=Adicionar "guias" ao menu popup (somente Delphi 5/BCB 5).
 TCnPalEnhanceForm.chkButtonStyle.Caption=Definir o Estilo da Paleta de Componentes para Botão Simples.
+TCnPalEnhanceForm.chkClearRegSessionProject.Caption=Não carregue automaticamente o último projeto aberto ao iniciar o IDE.
 TCnPalEnhanceForm.chkCompFilter.Caption=Adicionar o botão "Pesquisar Componente" na Paleta (Somente Delphi 7 Abaixo ou 2010 Acima).
 TCnPalEnhanceForm.chkDivTabMenu.Caption=Embrulhar o menu de guias quando muito longo (somente Delphi 7 abaixo).
 TCnPalEnhanceForm.chkLockToolbar.Caption=Bloquear Barras de Ferramentas IDE para Desabilitar Arrastar.

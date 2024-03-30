@@ -92,7 +92,7 @@ inherited CnPalEnhanceForm: TCnPalEnhanceForm
       Top = 96
       Width = 457
       Height = 17
-      Caption = 'Clear Session Project  in Registry when Exiting.'
+      Caption = 'Do NOT Auto-Load Last Opened Project when IDE Launched.'
       TabOrder = 4
       OnClick = UpdateControls
     end

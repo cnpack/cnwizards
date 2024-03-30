@@ -1194,6 +1194,12 @@ begin
   UpdateCompPalette;
   if FLockToolbar then
     UpdateToolbarLock;
+
+  if FClearRegSession then
+  begin
+    GlobalClearRegSession := True;
+    ClearRegistrySessionProject; // 如设置了，载入时也清除一次
+  end;
 end;
 
 procedure TCnPaletteEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
@@ -1767,7 +1773,7 @@ finalization
   end;
 {$ENDIF}
 
-  ClearRegistrySessionProject;
+  ClearRegistrySessionProject; // 退出时也清除一次
 
 {$IFDEF FIX_NP_FMX_DESIGN_CLIPBOARD_BUG}
   FreeAndNil(FCutMethodHook);
