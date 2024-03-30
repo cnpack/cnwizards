@@ -491,6 +491,41 @@ end;
 
 {$ENDIF}
 
+procedure ClearRegistrySessionProject;
+const
+  SCnProject = 'Project';
+var
+  I: Integer;
+  S: string;
+  Reg: TRegistry;
+begin
+  if not GlobalClearRegSession then
+    Exit;
+
+  S := SCnIDERegPaths[Compiler] + '\Session';
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('To ClearRegistrySessionProject: %s', [S]);
+{$ENDIF}
+
+  Reg := nil;
+
+  try
+    Reg := TRegistry.Create;
+    Reg.RootKey := HKEY_CURRENT_USER;
+
+    if Reg.OpenKey(S, False) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('ClearRegistrySessionProject to Delete Value %s', [SCnProject]);
+{$ENDIF}
+      if Reg.ValueExists(SCnProject) then
+        Reg.DeleteValue(SCnProject);
+    end;
+  finally
+    Reg.Free;
+  end;
+end;
+
 //==============================================================================
 // 组件面板扩展专家
 //==============================================================================
@@ -1720,41 +1755,6 @@ begin
 end;
 
 {$ENDIF}
-
-procedure ClearRegistrySessionProject;
-const
-  SCnProject = 'Project';
-var
-  I: Integer;
-  S: string;
-  Reg: TRegistry;
-begin
-  if not GlobalClearRegSession then
-    Exit;
-
-  S := SCnIDERegPaths[Compiler] + '\Session';
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('To ClearRegistrySessionProject: %s', [S]);
-{$ENDIF}
-
-  Reg := nil;
-
-  try
-    Reg := TRegistry.Create;
-    Reg.RootKey := HKEY_CURRENT_USER;
-
-    if Reg.OpenKey(S, False) then
-    begin
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('ClearRegistrySessionProject to Delete Value %s', [SCnProject]);
-{$ENDIF}
-      if Reg.ValueExists(SCnProject) then
-        Reg.DeleteValue(SCnProject);
-    end;
-  finally
-    Reg.Free;
-  end;
-end;
 
 initialization
   RegisterCnWizard(TCnPaletteEnhanceWizard);
