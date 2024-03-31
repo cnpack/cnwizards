@@ -395,8 +395,9 @@ function GetComponentUnitName(const ComponentName: string): string;
 procedure GetInstalledComponents(Packages, Components: TStrings);
 {* 取已安装的包和组件，参数允许为 nil（忽略）}
 
-function GetIDERegistryFont(const RegItem: string; AFont: TFont): Boolean;
-{* 从某项注册表中载入某项字体并赋值给 AFont
+function GetIDERegistryFont(const RegItem: string; AFont: TFont;
+  out BackgroundColor: TColor): Boolean;
+{* 从某项注册表中载入某项字体并赋值给 AFont，并把背景色赋值给 BackgroundColor
    RegItem 可以是 '', 'Assembler', 'Comment', 'Preprocessor',
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol'
     等注册表里头已经定义了的键值}
@@ -2006,7 +2007,8 @@ begin
   end;
 end;
 
-function GetIDERegistryFont(const RegItem: string; AFont: TFont): Boolean;
+function GetIDERegistryFont(const RegItem: string; AFont: TFont;
+  out BackgroundColor: TColor): Boolean;
 const
   SCnIDERegName = {$IFDEF BDS} 'BDS' {$ELSE} {$IFDEF DELPHI} 'Delphi' {$ELSE} 'C++Builder' {$ENDIF}{$ENDIF};
 
@@ -2080,7 +2082,7 @@ begin
           end;
           Result := True; // 不存在则用默认字体
         end
-        else  // 是高亮字体，有前景色读取，但没读背景色，因为 TFont 没有背景色
+        else  // 是高亮字体，有前景色读取和背景色读取，因为 TFont 没有背景色，因而搁 BackgroundColor 变量中
         begin
           AFont.Style := [];
           if Reg.OpenKeyReadOnly(Format(WizOptions.CompilerRegPath
@@ -2104,18 +2106,34 @@ begin
             if Reg.ValueExists(SCnIDEForeColor) then
             begin
               Result := True;
-  {$IFDEF COMPILER7_UP}
+{$IFDEF COMPILER7_UP}
               AColorStr := Reg.ReadString(SCnIDEForeColor);
               if IdentToColor(AColorStr, AColor) then
                 AFont.Color := AColor
               else
                 AFont.Color := StrToIntDef(AColorStr, 0);
-  {$ELSE}
+{$ELSE}
               // D5/6 的颜色是 16 色索引号
               AColor := Reg.ReadInteger(SCnIDEForeColor);
               if AColor in [0..15] then
                 AFont.Color := SCnColor16Table[AColor];
-  {$ENDIF}
+{$ENDIF}
+            end;
+            if Reg.ValueExists(SCnIDEBackColor) then
+            begin
+              Result := True;
+{$IFDEF COMPILER7_UP}
+              AColorStr := Reg.ReadString(SCnIDEBackColor);
+              if IdentToColor(AColorStr, AColor) then
+                BackgroundColor := AColor
+              else
+                BackgroundColor := StrToIntDef(AColorStr, 0);
+{$ELSE}
+              // D5/6 的颜色是 16 色索引号
+              AColor := Reg.ReadInteger(SCnIDEBackColor);
+              if AColor in [0..15] then
+                BackgroundColor := SCnColor16Table[AColor];
+{$ENDIF}
             end;
           end;
         end;

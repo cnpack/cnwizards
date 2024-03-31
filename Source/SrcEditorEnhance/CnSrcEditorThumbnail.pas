@@ -192,6 +192,7 @@ procedure TCnSrcEditorThumbnail.CheckCreateForm;
 var
   AFont: TFont;
   Canvas: TControlCanvas;
+  BColor: TColor;
 begin
   if FThumbWindow = nil then
   begin
@@ -211,7 +212,7 @@ begin
     AFont.Name := 'Courier New';  {Do NOT Localize}
     AFont.Size := 10;
 
-    GetIDERegistryFont('', AFont);
+    GetIDERegistryFont('', AFont, BColor);
     FThumbWindow.Font := AFont;
     Canvas := TControlCanvas.Create;
     Canvas.Control := FThumbWindow;

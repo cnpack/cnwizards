@@ -238,6 +238,7 @@ type
     FLineNo: Integer;
     FSourceType: TCnConvertSourceType;
     FIsMulti: Boolean;
+    FBackgroundColor: TColor;
 
     procedure NewToken;
     procedure TokenAdd(AChar: Char);
@@ -304,6 +305,7 @@ type
     property OutStream: TStream read FOutStream write SetOutStream;  // 输出流 Ansi 或 utf8
 
     property Size: Integer read FSize;
+    property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor;
     property AssemblerFont: TFont read FAssemblerFont write SetAssemblerFont;
     property CommentFont: TFont read FCommentFont write SetCommentFont;
     property DirectiveFont: TFont read FDirectiveFont write SetDirectiveFont;
@@ -328,6 +330,8 @@ type
   private
     FIsUtf8: Boolean;
     FHTMLEncode: string;
+    function ColorToHTML(AColor: TColor): string;
+    {* 将 TColor 转为 #AABBCC 这种格式的颜色字符串}
     function ConvertFontToCss(AFont: TFont): string;
     procedure SetHTMLEncode(const Value: string);
   protected
@@ -1749,7 +1753,7 @@ begin
     WriteStringToStream('.u' + IntToStr(Ord(TokenType)) + ' { '
       + ConvertFontToCss(StatusFont[TokenType]) + ' }' + CRLF);
   WriteStringToStream('-->' + CRLF + '</style> ' + CRLF + '</head>' + CRLF
-    + '<body bgcolor="#FFFFFF">' + CRLF);
+    + Format('<body bgcolor="%s">', [ColorToHTML(FBackgroundColor)]) + CRLF);
 end;
 
 procedure TCnSourceToHtmlConversion.ConvertEnd;
@@ -1758,9 +1762,16 @@ begin
   inherited;
 end;
 
-function TCnSourceToHtmlConversion.ConvertFontToCss(AFont: TFont): string;
+function TCnSourceToHtmlConversion.ColorToHTML(AColor: TColor): string;
 var
-  TempColor: TColor;
+  T: LongInt;
+begin
+  T := ColorToRGB(AColor);
+  Result := '#' + IntToHex(GetRValue(T), 2) + IntToHex(GetGValue(T), 2)
+    + IntToHex(GetBValue(T), 2);
+end;
+
+function TCnSourceToHtmlConversion.ConvertFontToCss(AFont: TFont): string;
 begin
   Result := 'font-family: "' + AFont.Name
     + '"; font-size: ' + IntToStr(AFont.Size) + 'pt;';
@@ -1774,9 +1785,7 @@ begin
   if fsBold in AFont.Style then
     Result := Result + ' font-weight: bold;';
 
-  TempColor := ColorToRGB(AFont.Color);
-  Result := Result + 'color: #' + IntToHex(GetRValue(TempColor), 2)
-    + IntToHex(GetGValue(TempColor), 2) + IntToHex(GetBValue(TempColor), 2);
+  Result := Result + 'color: #' + ColorToHTML(AFont.Color);
 end;
 
 procedure TCnSourceToHtmlConversion.SetHTMLEncode(const Value: string);

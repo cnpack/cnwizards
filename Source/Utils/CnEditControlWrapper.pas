@@ -260,7 +260,7 @@ type
     FMouseLeaveNotifiers: TList;
     FNcPaintNotifiers: TList;
     FVScrollNotifiers: TList;
-
+    FBackgroundColor: TColor;
     FEditorList: TObjectList;
     FEditControlList: TList;
     FOptionChanged: Boolean;
@@ -313,6 +313,7 @@ type
     procedure ResetFontsFromBasic(ABasicFont: TFont);
     function GetFonts(Index: Integer): TFont;
     procedure SetFonts(const Index: Integer; const Value: TFont);
+    function GetBackgroundColor: TColor;
   protected
     procedure DoAfterPaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
     procedure DoBeforePaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
@@ -511,6 +512,9 @@ type
     property FontSpace: TFont index 7 read GetFonts write SetFonts;
     property FontString: TFont index 8 read GetFonts write SetFonts;
     property FontSymbol: TFont index 9 read GetFonts write SetFonts;
+
+    property BackgroundColor: TColor read GetBackgroundColor;
+    {* 编辑器的文字背景色，实际上是 WhiteSpace 字体的背景色}
   end;
 
 function EditControlWrapper: TCnEditControlWrapper;
@@ -2985,6 +2989,11 @@ begin
   Result := FFontArray[Index];
 end;
 
+function TCnEditControlWrapper.GetBackgroundColor: TColor;
+begin
+  Result := FBackgroundColor;
+end;
+
 procedure TCnEditControlWrapper.LoadFontFromRegistry;
 const
   arrRegItems: array [0..9] of string = ('', 'Assembler', 'Comment', 'Preprocessor',
@@ -2992,6 +3001,7 @@ const
 var
   I: Integer;
   AFont: TFont;
+  BColor: TColor;
 begin
   // 从注册表中载入 IDE 的字体供外界使用
   AFont := TFont.Create;
@@ -2999,14 +3009,20 @@ begin
     AFont.Name := 'Courier New';  {Do NOT Localize}
     AFont.Size := 10;
 
-    if GetIDERegistryFont(arrRegItems[0], AFont) then
+    BColor := clNone;
+    if GetIDERegistryFont(arrRegItems[0], AFont, BColor) then
       ResetFontsFromBasic(AFont);
 
     for I := Low(FFontArray) + 1 to High(FFontArray) do
     begin
       try
-        if GetIDERegistryFont(arrRegItems[I], AFont) then
+        BColor := clNone;
+        if GetIDERegistryFont(arrRegItems[I], AFont, BColor) then
+        begin
           FFontArray[I].Assign(AFont);
+          if (I = 7) and (BColor <> clNone) then
+            FBackgroundColor := BColor;
+        end;
       except
         Continue;
       end;

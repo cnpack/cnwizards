@@ -3,7 +3,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
   Top = 138
   BorderStyle = bsDialog
   Caption = 'Source Code to HTML/RTF Wizard Settings'
-  ClientHeight = 293
+  ClientHeight = 313
   ClientWidth = 330
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -12,9 +12,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
   TextHeight = 13
   object btnOK: TButton
     Left = 86
-    Top = 264
+    Top = 284
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -22,9 +23,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
   end
   object btnCancel: TButton
     Left = 166
-    Top = 264
+    Top = 284
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
@@ -32,9 +34,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
   end
   object btnHelp: TButton
     Left = 246
-    Top = 264
+    Top = 284
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
@@ -43,8 +46,9 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
     Left = 8
     Top = 8
     Width = 313
-    Height = 249
+    Height = 269
     ActivePage = TabSheet1
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Normal &Options'
@@ -52,7 +56,8 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         Left = 8
         Top = 8
         Width = 289
-        Height = 177
+        Height = 197
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Sho&rtcut Settings'
         TabOrder = 0
         object Label1: TLabel
@@ -160,9 +165,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
       end
       object CheckBoxDispGauge: TCheckBox
         Left = 8
-        Top = 192
+        Top = 212
         Width = 249
         Height = 17
+        Anchors = [akLeft, akBottom]
         Caption = 'Show Progressbar when Batch Converting'
         Checked = True
         State = cbChecked
@@ -176,7 +182,8 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         Left = 8
         Top = 8
         Width = 289
-        Height = 201
+        Height = 221
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Fo&nt Settings'
         TabOrder = 0
         object Label5: TLabel
@@ -188,7 +195,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         end
         object LabelFontDisp: TLabel
           Left = 56
-          Top = 102
+          Top = 124
           Width = 217
           Height = 12
           AutoSize = False
@@ -197,10 +204,26 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         end
         object Label7: TLabel
           Left = 16
-          Top = 102
+          Top = 124
           Width = 26
           Height = 13
           Caption = 'Font:'
+        end
+        object lblBackground: TLabel
+          Left = 16
+          Top = 96
+          Width = 225
+          Height = 13
+          AutoSize = False
+          Caption = 'Output Page Background Color:'
+          WordWrap = True
+        end
+        object shpBackground: TShape
+          Left = 252
+          Top = 92
+          Width = 20
+          Height = 20
+          OnMouseDown = shpBackgroundMouseDown
         end
         object ComboBoxFont: TComboBox
           Left = 80
@@ -245,9 +268,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         end
         object PanelDisp: TPanel
           Left = 16
-          Top = 136
+          Top = 156
           Width = 257
           Height = 49
+          Anchors = [akLeft, akRight, akBottom]
           BevelOuter = bvLowered
           Caption = 'CnPack'
           Color = clWhite
@@ -297,5 +321,10 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
       Hint = 'Load Fonts From IDE Registry'
       OnExecute = actLoadExecute
     end
+  end
+  object dlgColor: TColorDialog
+    Ctl3D = True
+    Left = 268
+    Top = 184
   end
 end

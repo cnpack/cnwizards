@@ -28,7 +28,9 @@ unit CnPas2HtmlWizard;
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2022.09.23 V1.4
+* 修改记录：2024.03.31 V1.5
+*               支持背景色
+*           2022.09.23 V1.4
 *               支持 Unicode
 *           2003.04.15 V1.3
 *               修改 Action 更新部分代码（by yygw）
@@ -65,7 +67,6 @@ type
     FIdExportDPR: Integer;
     FIdExportBPG: Integer;
     FIdConfig: Integer;
-
     FDispGauge: Boolean;
     FAutoSave: Boolean;
     FConvertType: TCnPasConvertType;
@@ -73,7 +74,7 @@ type
     FSourceHtmlEncode: string;
     FFontArray: array[0..9] of TFont;
     FOpenAfterConvert: Boolean;
-
+    FBackgroundColor: TColor;
     procedure CopyHTMLToClipBoard(HtmlStrBuf: PAnsiChar; SizeH: Integer;
       StrBuf: PAnsiChar; SizeT: Integer);
     function InternalProcessAFile(const Filename, OutputDir: string): Boolean;
@@ -82,6 +83,7 @@ type
     procedure ProcessGauge(Process: Integer);
     function GetFonts(const Index: Integer): TFont;
     procedure SetFonts(const Index: Integer; const Value: TFont);
+    procedure SetBackgroundColor(const Value: TColor);
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -104,9 +106,9 @@ type
     procedure AcquireSubActions; override;
     property DispGauge: Boolean read FDispGauge write FDispGauge;
     property AutoSave: Boolean read FAutoSave write FAutoSave;
-
     property OpenAfterConvert: Boolean read FOpenAfterConvert
       write FOpenAfterConvert;
+    property BackgroundColor: TColor read FBackgroundColor write SetBackgroundColor;
     property FontBasic: TFont index 0 read GetFonts write SetFonts;
     property FontAssembler: TFont index 1 read GetFonts write SetFonts;
     property FontComment: TFont index 2 read GetFonts write SetFonts;
@@ -128,10 +130,8 @@ type
     LabelDisp: TLabel;
     ProgressBar: TProgressBar;
   private
-    { Private declarations }
     procedure SetConvertingFileName(const Value: string);
   public
-    { Public declarations }
     procedure CreateParams(var Params: TCreateParams); override;
     property ConvertingFileName: string write SetConvertingFileName;
   end;
@@ -149,6 +149,7 @@ const
   csDispGauge = 'DispGauge';
   csAutoSave = 'SaveBeforeConvert';
   csOpenAfterConvert = 'OpenAfterConvert';
+  csBackgroundColor = 'BackgroundColor';
 
 var
   CnPas2HtmlForm: TCnPas2HtmlForm = nil;
@@ -169,6 +170,7 @@ begin
     ConfigShortCut := SubActions[FIdConfig].ShortCut;
     DispGauge := Self.FDispGauge;
     AutoSave := Self.FAutoSave;
+    BackgroundColor := Self.FBackgroundColor;
 
     FontBasic := Self.FontBasic;
     FontAssembler := Self.FontAssembler;
@@ -180,6 +182,7 @@ begin
     FontSpace := Self.FontSpace;
     FontString := Self.FontString;
     FontSymbol := Self.FontSymbol;
+
     // 这里显示其余设置
     if ShowModal = mrOK then
     begin
@@ -191,6 +194,7 @@ begin
       SubActions[FIdConfig].ShortCut := ConfigShortCut;
       Self.FDispGauge := DispGauge;
       Self.FAutoSave := AutoSave;
+      Self.FBackgroundColor := BackgroundColor;
 
       Self.FontBasic := FontBasic;
       Self.FontAssembler := FontAssembler;
@@ -424,7 +428,7 @@ begin
     SrcEditor := CnOtaGetCurrentSourceEditor;
     if SrcEditor <> nil then
     begin
-      { DONE : 处理当前View的所有内容。 }
+      // 处理当前 View 的所有内容。
       InMStream := nil;
       OutMStream := nil;
       try
@@ -733,6 +737,7 @@ begin
     FDispGauge := ReadBool('', csDispGauge, True);
     FAutoSave := ReadBool('', csAutoSave, False);
     FOpenAfterConvert := ReadBool('', csOpenAfterConvert, False);
+    FBackgroundColor := ReadColor('', csBackgroundColor, clWhite);
 
     // 这里读入其他设置数据
     TempFont := TFont.Create;
@@ -796,6 +801,7 @@ begin
     WriteBool('', csDispGauge, FDispGauge);
     WriteBool('', csAutoSave, FAutoSave);
     WriteBool('', csOpenAfterConvert, FOpenAfterConvert);
+    WriteColor('', csBackgroundColor, FBackgroundColor);
 
     for I := Low(FFontArray) to High(FFontArray) do
       WriteFont('', CnTCnPasConvertFontName[I], FFontArray[I]);
@@ -959,6 +965,7 @@ var
 begin
   with Conversion do
   begin
+    BackgroundColor := Self.FBackgroundColor;
     for I := Low(FFontArray) to High(FFontArray) do
     begin
       case I of
@@ -975,6 +982,11 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TCnPas2HtmlWizard.SetBackgroundColor(const Value: TColor);
+begin
+  FBackgroundColor := Value;
 end;
 
 initialization
