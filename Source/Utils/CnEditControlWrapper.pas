@@ -3009,19 +3009,24 @@ begin
     AFont.Name := 'Courier New';  {Do NOT Localize}
     AFont.Size := 10;
 
-    BColor := clNone;
+    BColor := clWhite;
     if GetIDERegistryFont(arrRegItems[0], AFont, BColor) then
       ResetFontsFromBasic(AFont);
 
     for I := Low(FFontArray) + 1 to High(FFontArray) do
     begin
       try
-        BColor := clNone;
+        BColor := clWhite;
         if GetIDERegistryFont(arrRegItems[I], AFont, BColor) then
         begin
           FFontArray[I].Assign(AFont);
-          if (I = 7) and (BColor <> clNone) then
+          if I = 7 then // WhiteSpace µÄ±³¾°É«
+          begin
             FBackgroundColor := BColor;
+{$IFDEF DEBUG}
+            CnDebugger.LogColor(FBackgroundColor, 'LoadFontFromRegistry Get Background');
+{$ENDIF}
+          end;
         end;
       except
         Continue;

@@ -1785,7 +1785,7 @@ begin
   if fsBold in AFont.Style then
     Result := Result + ' font-weight: bold;';
 
-  Result := Result + 'color: #' + ColorToHTML(AFont.Color);
+  Result := Result + 'color: ' + ColorToHTML(AFont.Color);
 end;
 
 procedure TCnSourceToHtmlConversion.SetHTMLEncode(const Value: string);

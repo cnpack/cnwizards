@@ -287,10 +287,11 @@ begin
   finally
     TempFont.Free;
   end;
-  FBackgroundColor := clNone;
+  FBackgroundColor := clWhite;
+  shpBackground.Brush.Color := FBackgroundColor;
 
   ComboBoxFont.ItemIndex := 0;
-  ComboBoxFont.OnChange(ComboBoxFont);
+  ComboBoxFontChange(ComboBoxFont);
 end;
 
 procedure TCnPas2HtmlConfigForm.ResetFontsFromBasic(ABasicFont: TFont);
