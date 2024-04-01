@@ -437,6 +437,7 @@ TCnPas2HtmlConfigForm.btnCancel.Caption=取消(&C)
 TCnPas2HtmlConfigForm.btnHelp.Caption=說明(&H)
 TCnPas2HtmlConfigForm.btnOK.Caption=確定(&O)
 TCnPas2HtmlConfigForm.gbShortCut.Caption=快捷鍵設置(&K)
+TCnPas2HtmlConfigForm.lblBackground.Caption=輸出頁面的背景色：
 TCnReplaceWizardForm.Caption=批量文件替換工具
 TCnReplaceWizardForm.Label1.Caption=查找文本(&F)：
 TCnReplaceWizardForm.Label2.Caption=替換為(&P)：

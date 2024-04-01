@@ -437,6 +437,7 @@ TCnPas2HtmlConfigForm.btnCancel.Caption=Отмена
 TCnPas2HtmlConfigForm.btnHelp.Caption=Справка
 TCnPas2HtmlConfigForm.btnOK.Caption=&OK
 TCnPas2HtmlConfigForm.gbShortCut.Caption=Горячие клавиши
+TCnPas2HtmlConfigForm.lblBackground.Caption=Цвет фона страницы вывода:
 TCnReplaceWizardForm.Caption=Групповая Замена в файлах
 TCnReplaceWizardForm.Label1.Caption=Искать:
 TCnReplaceWizardForm.Label2.Caption=Заменить на:

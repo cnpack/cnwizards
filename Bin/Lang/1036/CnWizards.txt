@@ -437,6 +437,7 @@ TCnPas2HtmlConfigForm.btnCancel.Caption=&Annuler
 TCnPas2HtmlConfigForm.btnHelp.Caption=&Aide
 TCnPas2HtmlConfigForm.btnOK.Caption=&OK
 TCnPas2HtmlConfigForm.gbShortCut.Caption=Pa&ramètres de raccourci
+TCnPas2HtmlConfigForm.lblBackground.Caption=Couleur de fond de la page de sortie:
 TCnReplaceWizardForm.Caption=Outils de remplacement par lots dans fichiers
 TCnReplaceWizardForm.Label1.Caption=Rechercher:
 TCnReplaceWizardForm.Label2.Caption=Rem&placer:

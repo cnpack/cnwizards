@@ -437,6 +437,7 @@ TCnPas2HtmlConfigForm.btnCancel.Caption=&Abbruch
 TCnPas2HtmlConfigForm.btnHelp.Caption=&Hilfe
 TCnPas2HtmlConfigForm.btnOK.Caption=&OK
 TCnPas2HtmlConfigForm.gbShortCut.Caption=Tastatu&rkürzel Einstellungen
+TCnPas2HtmlConfigForm.lblBackground.Caption=Hintergrundfarbe der Ausgabeseite:
 TCnReplaceWizardForm.Caption=Stapel ersetzen Werkzeug
 TCnReplaceWizardForm.Label1.Caption=Suchtext:
 TCnReplaceWizardForm.Label2.Caption=ersetzen mit:

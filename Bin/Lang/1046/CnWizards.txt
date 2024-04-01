@@ -437,6 +437,7 @@ TCnPas2HtmlConfigForm.btnCancel.Caption=&Cancelar
 TCnPas2HtmlConfigForm.btnHelp.Caption=&Ajuda
 TCnPas2HtmlConfigForm.btnOK.Caption=&OK
 TCnPas2HtmlConfigForm.gbShortCut.Caption=Configurações de At&rtcut
+TCnPas2HtmlConfigForm.lblBackground.Caption=Cor de fundo da página de saída:
 TCnReplaceWizardForm.Caption=Ferramentas de substituição de lote de arquivos
 TCnReplaceWizardForm.Label1.Caption=&Pesquisar:
 TCnReplaceWizardForm.Label2.Caption=Substituir:
