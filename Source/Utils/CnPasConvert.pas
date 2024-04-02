@@ -294,7 +294,7 @@ type
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       virtual; abstract;
   public
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
 
     function Convert: Boolean;
@@ -983,14 +983,15 @@ begin
   FStringFont := TFont.Create;
   FSymbolFont := TFont.Create;
 
+  FBackgroundColor := clWhite;
+
   {change the TokenLength if has problem}
   FTokenLength := 1024;
   try
     GetMem(FToken, FTokenLength * SizeOf(Char));
   except
     on EOutOfMemory do
-      raise
-      ECnSourceConversionException.Create('SourceConversion Error : Can not maintain the Token Memory');
+      raise ECnSourceConversionException.Create('SourceConversion Error : Can not maintain the Token Memory');
   end;
   FTokenEnd := FToken + FTokenLength; // PChar 加减是针对 Char 的，无需乘以 SizeOf(Char)
 
@@ -1973,10 +1974,10 @@ end;
 procedure TCnSourceToRTFConversion.ConvertBegin;
 const
   S_RTF_BK =
-    '\noqfpromote \paperw12240\paperh15840\margl1800\margr1800\margt1440\margb1440\gutter0\ltrsect' + #13#10 +
-    '\ftnbj\aenddoc\trackmoves0\trackformatting1\donotembedsysfont0\relyonvml0\donotembedlingdata1\grfdocevents0\validatexml0\showplaceholdtext0\ignoremixedcontent0\saveinvalidxml0\showxmlerrors0\horzdoc\dghspace120\dgvspace120\dghorigin1701\dgvorigin1984' + #13#10 +
-    '\dghshow0\dgvshow3\jcompress\viewkind1\viewscale100\rsidroot12779632\viewbksp1 \fet0{\*\wgrffmtfilter 2450}\ilfomacatclnup0{\*\background' + #13#10 +
-    '{\shp{\*\shpinst\shpleft0\shptop0\shpright0\shpbottom0\shpfhdr0\shpbxmargin\shpbxignore\shpbymargin\shpbyignore\shpwr0\shpwrk0\shpfblwtxt1\shpz0\shplid1025{\sp{\sn shapeType}{\sv 1}}{\sp{\sn fFlipH}{\sv 0}}{\sp{\sn fFlipV}{\sv 0}}' + #13#10 +
+    '\noqfpromote \paperw12240\paperh15840\margl1800\margr1800\margt1440\margb1440\gutter0\ltrsect' + CRLF +
+    '\ftnbj\aenddoc\trackmoves0\trackformatting1\donotembedsysfont0\relyonvml0\donotembedlingdata1\grfdocevents0\validatexml0\showplaceholdtext0\ignoremixedcontent0\saveinvalidxml0\showxmlerrors0\horzdoc\dghspace120\dgvspace120\dghorigin1701\dgvorigin1984' + CRLF +
+    '\dghshow0\dgvshow3\jcompress\viewkind1\viewscale100\rsidroot12779632\viewbksp1 \fet0{\*\wgrffmtfilter 2450}\ilfomacatclnup0{\*\background' + CRLF +
+    '{\shp{\*\shpinst\shpleft0\shptop0\shpright0\shpbottom0\shpfhdr0\shpbxmargin\shpbxignore\shpbymargin\shpbyignore\shpwr0\shpwrk0\shpfblwtxt1\shpz0\shplid1025{\sp{\sn shapeType}{\sv 1}}{\sp{\sn fFlipH}{\sv 0}}{\sp{\sn fFlipV}{\sv 0}}' + CRLF +
     '{\sp{\sn fillColor}{\sv %d}}{\sp{\sn fFilled}{\sv 1}}{\sp{\sn lineWidth}{\sv 0}}{\sp{\sn fLine}{\sv 0}}{\sp{\sn bWMode}{\sv 9}}{\sp{\sn fBackground}{\sv 1}}{\sp{\sn fLayoutInCell}{\sv 1}}{\sp{\sn fLayoutInCell}{\sv 1}}}}}';
 var
   TokenType: TCnPasConvertTokenType;
@@ -2181,7 +2182,13 @@ begin
       #10:
         begin
           Inc(C);
+{$IFDEF UNICODE}
+          if C = 2 then
+            FOutStream.WriteBuffer(StartPtr^, 1); // 单独写 #13
+          FOutStream.WriteBuffer(CurPtr^, 1);     // 再单独写 #10
+{$ELSE}
           FOutStream.WriteBuffer(StartPtr^, C); // 注意这里不是替换 #10 而是加写额外内容因此 #10 还得写进去
+{$ENDIF}
           Inc(FSize, C);
           C := 0;
 
