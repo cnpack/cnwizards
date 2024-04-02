@@ -1971,6 +1971,13 @@ end;
 { TCnSourceToRTFConversion }
 
 procedure TCnSourceToRTFConversion.ConvertBegin;
+const
+  S_RTF_BK =
+    '\noqfpromote \paperw12240\paperh15840\margl1800\margr1800\margt1440\margb1440\gutter0\ltrsect' + #13#10 +
+    '\ftnbj\aenddoc\trackmoves0\trackformatting1\donotembedsysfont0\relyonvml0\donotembedlingdata1\grfdocevents0\validatexml0\showplaceholdtext0\ignoremixedcontent0\saveinvalidxml0\showxmlerrors0\horzdoc\dghspace120\dgvspace120\dghorigin1701\dgvorigin1984' + #13#10 +
+    '\dghshow0\dgvshow3\jcompress\viewkind1\viewscale100\rsidroot12779632\viewbksp1 \fet0{\*\wgrffmtfilter 2450}\ilfomacatclnup0{\*\background' + #13#10 +
+    '{\shp{\*\shpinst\shpleft0\shptop0\shpright0\shpbottom0\shpfhdr0\shpbxmargin\shpbxignore\shpbymargin\shpbyignore\shpwr0\shpwrk0\shpfblwtxt1\shpz0\shplid1025{\sp{\sn shapeType}{\sv 1}}{\sp{\sn fFlipH}{\sv 0}}{\sp{\sn fFlipV}{\sv 0}}' + #13#10 +
+    '{\sp{\sn fillColor}{\sv %d}}{\sp{\sn fFilled}{\sv 1}}{\sp{\sn lineWidth}{\sv 0}}{\sp{\sn fLine}{\sv 0}}{\sp{\sn bWMode}{\sv 9}}{\sp{\sn fBackground}{\sv 1}}{\sp{\sn fLayoutInCell}{\sv 1}}{\sp{\sn fLayoutInCell}{\sv 1}}}}}';
 var
   TokenType: TCnPasConvertTokenType;
   FontTable: string;
@@ -2001,6 +2008,9 @@ begin
   WriteStringToStream(Format('{\rtf1\ansi\ansicpg%d\deff0\deflang1033\deflangfe%d{\fonttbl %s}' + CRLF,
     [CodePage, GetSystemDefaultLangID, FontTable]));
   WriteStringToStream('{\colortbl ;' + ColorTable + '}' + CRLF);
+
+  if (FBackgroundColor <> clWhite) and (FBackgroundColor <> clNone) then
+    WriteStringToStream(Format(S_RTF_BK, [ColorToRGB(FBackgroundColor)]));
 
   DecodeDate(Now, AYear, AMonth, ADay);
   DecodeTime(Now, AHour, AMin, ASec, AMiSec);

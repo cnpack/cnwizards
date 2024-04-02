@@ -1091,7 +1091,7 @@ const
   sMenuBar = 'MenuBar';
 var
   List: TList;
-  i, j: Integer;
+  I, J: Integer;
   ViewBar, MenuBar: TToolBar;
   ControlBar: TControlBar;
   LeftCtrl: TControl;
@@ -1105,10 +1105,10 @@ begin
   begin
     ControlBar := TControlBar(ViewBar.Parent);
     MenuBar := nil;
-    for i := 0 to ControlBar.ControlCount - 1 do
-      if SameText(ControlBar.Controls[i].Name, sMenuBar) then
+    for I := 0 to ControlBar.ControlCount - 1 do
+      if SameText(ControlBar.Controls[I].Name, sMenuBar) then
       begin
-        MenuBar := TToolBar(ControlBar.Controls[i]);
+        MenuBar := TToolBar(ControlBar.Controls[I]);
         Break;
       end;
 
@@ -1118,24 +1118,24 @@ begin
     // 把菜单栏同样高度的右边的控件靠左挤过去，避免出现空隙
     List := TList.Create;
     try
-      for i := 0 to ControlBar.ControlCount - 1 do
-        if (ControlBar.Controls[i] <> MenuBar) and
-          (ControlBar.Controls[i].Top = MenuBar.Top) then
+      for I := 0 to ControlBar.ControlCount - 1 do
+        if (ControlBar.Controls[I] <> MenuBar) and
+          (ControlBar.Controls[I].Top = MenuBar.Top) then
         begin
-          j := 0;
-          while (j < List.Count) and (ControlBar.Controls[i].Left >
-            TControl(List[j]).Left) do
-            Inc(j);
-          List.Insert(j, ControlBar.Controls[i]);
+          J := 0;
+          while (J < List.Count) and (ControlBar.Controls[I].Left >
+            TControl(List[J]).Left) do
+            Inc(J);
+          List.Insert(J, ControlBar.Controls[I]);
         end;
 
-      for i := 0 to List.Count - 1 do
+      for I := 0 to List.Count - 1 do
       begin
-        if i = 0 then
+        if I = 0 then
           LeftCtrl := MenuBar
         else
-          LeftCtrl := TControl(List[i - 1]);
-        TControl(List[i]).Left := LeftCtrl.Left + LeftCtrl.Width;
+          LeftCtrl := TControl(List[I - 1]);
+        TControl(List[I]).Left := LeftCtrl.Left + LeftCtrl.Width;
       end;  
     finally
       List.Free;
@@ -1146,17 +1146,17 @@ end;
 procedure TCnPaletteEnhanceWizard.UpdateWizMenus;
 var
   MainMenu: TMainMenu;
-  i: Integer;
+  I: Integer;
 
   procedure DoInsertMenu(AMenu: TMenuItem; const AName: string);
   var
-    i: Integer;
+    I: Integer;
     MenuItem: TMenuItem;
   begin
-    for i := MainMenu.Items.Count - 1 downto 0 do
-      if SameText(MainMenu.Items[i].Name, AName) then
+    for I := MainMenu.Items.Count - 1 downto 0 do
+      if SameText(MainMenu.Items[I].Name, AName) then
       begin
-        MenuItem := MainMenu.Items[i];
+        MenuItem := MainMenu.Items[I];
         MainMenu.Items.Remove(MenuItem);
         AMenu.Insert(0, MenuItem);
         Break;
@@ -1173,9 +1173,9 @@ begin
   if Assigned(MainMenu) and Active and FEnableWizMenu and
     (FWizMenuNames.Count > 0) then
   begin
-    for i := FWizMenuNames.Count - 1 downto 0 do    // 把设置中要独立出来的菜单项先挑出来挂 FWizMenu 下
+    for I := FWizMenuNames.Count - 1 downto 0 do    // 把设置中要独立出来的菜单项先挑出来挂 FWizMenu 下
     begin
-      DoInsertMenu(FWizMenu, FWizMenuNames[i]);
+      DoInsertMenu(FWizMenu, FWizMenuNames[I]);
     end;
     MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu); // 再把 FWizMenu 挂主菜单下
 
