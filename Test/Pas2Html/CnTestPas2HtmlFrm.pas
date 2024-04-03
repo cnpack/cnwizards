@@ -38,9 +38,9 @@ var
   Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
+  S: string;
 {$IFDEF UNICODE}
   Strs: TStringList;
-  S: string;
 {$ENDIF}
 begin
   // 测试转 HTML
@@ -62,6 +62,12 @@ begin
     // 非 Unicode 环境，只支持 Ansi 的文件格式
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
 {$ENDIF}
+    S := LowerCase(ExtractFileExt(dlgOpen1.FileName));
+    if (S = '.c') or (S = '.cpp') then
+      Con.SourceType := stCpp
+    else
+      Con.SourceType := stPas;
+
     OutStream := TMemoryStream.Create;
 
     Con.InStream := InStream;
@@ -82,9 +88,9 @@ var
   Con: TCnSourceConversion;
   InStream: TStream;
   OutStream: TMemoryStream;
+  S: string;
 {$IFDEF UNICODE}
   Strs: TStringList;
-  S: string;
 {$ENDIF}
 begin
   // 测试转 RTF
@@ -104,6 +110,11 @@ begin
     // 非 Unicode 环境，只支持 Ansi 的文件格式
     InStream := TFileStream.Create(dlgOpen1.FileName, fmOpenRead);
 {$ENDIF}
+    S := LowerCase(ExtractFileExt(dlgOpen1.FileName));
+    if (S = '.c') or (S = '.cpp') then
+      Con.SourceType := stCpp
+    else
+      Con.SourceType := stPas;
 
     OutStream := TMemoryStream.Create;
 

@@ -2,7 +2,7 @@ object FormPasConvert: TFormPasConvert
   Left = 161
   Top = 150
   BorderStyle = bsDialog
-  Caption = 'Pas2Html Test'
+  Caption = 'Source Pas/Cpp to Html Test'
   ClientHeight = 308
   ClientWidth = 317
   Color = clBtnFace
@@ -16,18 +16,18 @@ object FormPasConvert: TFormPasConvert
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
-    Left = 48
+    Left = 24
     Top = 200
-    Width = 218
+    Width = 272
     Height = 13
-    Caption = 'Should Run OK both in Delphi 5 ~ Delphi 2009'
+    Caption = 'Should Run OK both in Delphi 5 ~ Delphi 2009 and above'
   end
   object btnPas2Html: TButton
     Left = 40
     Top = 32
     Width = 233
     Height = 25
-    Caption = 'Open PAS and Convert to HTML'
+    Caption = 'Open PAS/CPP and Convert to HTML'
     TabOrder = 0
     OnClick = btnPas2HtmlClick
   end
@@ -36,7 +36,7 @@ object FormPasConvert: TFormPasConvert
     Top = 88
     Width = 233
     Height = 25
-    Caption = 'Open PAS and Convert to RTF'
+    Caption = 'Open PAS/CPP and Convert to RTF'
     TabOrder = 1
     OnClick = btnPas2RtfClick
   end
@@ -60,7 +60,7 @@ object FormPasConvert: TFormPasConvert
   end
   object dlgOpen1: TOpenDialog
     DefaultExt = '*.pas'
-    Filter = '*.pas|*.pas'
+    Filter = '*.pas|*.pas|*.cpp|*.cpp|*.c|*.c|*.*|*.*'
     Left = 184
     Top = 32
   end

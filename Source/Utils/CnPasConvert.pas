@@ -26,7 +26,7 @@ unit CnPasConvert;
 * 单元作者：Pan Ying  panying@sina.com
 *           小冬 (kendling)
 *           LiuXiao
-* 备    注：实现 PAS 到 HTML 以及 RTF 转换的解析器
+* 备    注：实现 PAS 到 HTML 以及 RTF 转换的解析器，不支持纯 #10 换行的源文件
 * 开发平台：PWin98SE + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
@@ -123,7 +123,7 @@ interface
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 uses
-  Classes, SysUtils, Graphics, Windows, CnCommon;
+  Classes, SysUtils, Graphics, Windows, CnCommon, CnWideStrings;
 
 {$IFDEF DEBUG}
   {$DEFINE CNPASCONVERT_DEBUG}
@@ -197,8 +197,8 @@ type
 
   TCnSourceConversion = class(TObject)
   private
-    bDiffer: Boolean;
-    bAssembler: Boolean;
+    FDiffer: Boolean;
+    FAssembler: Boolean;
 
     FTokenType: TCnPasConvertTokenType;
 
@@ -409,74 +409,13 @@ const
 
   CRLF = #13#10;
 
-{-------------------------------------------------------------------------------
-  过程名:    WideStringToUTF8
-  作者:      Administrator
-  日期:      2003.02.20
-  参数:      Buf: WideString; Len: Integer; outStream: TStream
-  返回值:    无
-  备注:      参考 JclUnicode 库，将字符串转换成 UTF8 格式，注意 Len 必须是 WideString 的长度
-
--------------------------------------------------------------------------------}
-procedure WideStringToUTF8(Buf: WideString; Len: Integer; outStream: TStream);
-const
-  FirstByteMark: array[0..6] of Byte = ($00, $00, $C0, $E0, $F0, $F8, $FC);
-  ReplacementCharacter: Cardinal = $0000FFFD;
-  MaximumUCS2: Cardinal = $0000FFFF;
-  MaximumUTF16: Cardinal = $0010FFFF;
-  MaximumUCS4: Cardinal = $7FFFFFFF;
+procedure WideStringToUTF8Stream(const Buf: WideString; outStream: TStream);
 var
-  Ch: Cardinal;
-  L, J, T, BytesToWrite: Cardinal;
-  ByteMask: Cardinal;
-  ByteMark: Cardinal;
   R: AnsiString;
 begin
-  if Len = 0 then
-    R := ''
-  else
+  if Length(Buf) > 0 then
   begin
-    SetLength(R, Len * 6);
-    T := 1;
-    ByteMask := $BF;
-    ByteMark := $80;
-
-    for J := 1 to Len do
-    begin
-      Ch := Cardinal(Buf[J]);
-
-      if Ch < $80 then
-        BytesToWrite := 1
-      else
-        if Ch < $800 then
-          BytesToWrite := 2
-        else
-          if Ch < $10000 then
-            BytesToWrite := 3
-          else
-            if Ch < $200000 then
-              BytesToWrite := 4
-            else
-              if Ch < $4000000 then
-                BytesToWrite := 5
-              else
-                if Ch <= MaximumUCS4 then
-                  BytesToWrite := 6
-                else
-                begin
-                  BytesToWrite := 2;
-                  Ch := ReplacementCharacter;
-                end;
-
-      for L := BytesToWrite downto 2 do
-      begin
-        R[T + L - 1] := AnsiChar((Ch or ByteMark) and ByteMask);
-        Ch := Ch shr 6;
-      end;
-      R[T] := AnsiChar(Ch or FirstByteMark[BytesToWrite]);
-      Inc(T, BytesToWrite);
-    end;
-    SetLength(R, T - 1);
+    R := CnUtf8EncodeWideString(Buf);
     outStream.Write(R[1], Length(R));
   end;
 end;
@@ -497,34 +436,34 @@ procedure ConvertHTMLToClipBoardHtml(inStream, outStream: TMemoryStream);
   end;
 
 var
-  tmpoutStream: TMemoryStream;
-  bodyPos, bodyEndPos, Headlen: Integer;
+  TmpOutStream: TMemoryStream;
+  BodyPos, BodyEndPos, HeadLen: Integer;
   PCh: PAnsiChar;
   S: WideString;
   Zero: Byte;
 begin
   if Assigned(inStream) and Assigned(outStream) then
   begin
-    tmpoutStream := TMemoryStream.Create;
+    TmpOutStream := TMemoryStream.Create;
 
     Zero := 0;
     inStream.Write(Zero, 1); // Write #0 after string;
     S := WideString(PAnsiChar(inStream.Memory));
-    WideStringToUTF8(S, Length(S), tmpoutStream);
+    WideStringToUTF8Stream(S, TmpOutStream);
     // 先转 UTF8
 
    { 接着处理 tmpoutStream，变换成 HTML 剪贴板形式写入 OutStream}
-    Headlen := Length(SCnHtmlClipHead);
-    outStream.Write(AnsiString(SCnHtmlClipHead), Headlen);
-    bodyPos := Pos(AnsiString('<span '), PAnsiChar(tmpoutStream.Memory));
-    bodyEndPos := Pos(AnsiString('</body>'), PAnsiChar(tmpoutStream.Memory));
-    outStream.Write(tmpoutStream.Memory^, bodyPos - 1);
+    HeadLen := Length(SCnHtmlClipHead);
+    outStream.Write(AnsiString(SCnHtmlClipHead), HeadLen);
+    BodyPos := Pos(AnsiString('<span '), PAnsiChar(TmpOutStream.Memory));
+    BodyEndPos := Pos(AnsiString('</body>'), PAnsiChar(TmpOutStream.Memory));
+    outStream.Write(TmpOutStream.Memory^, BodyPos - 1);
     outStream.Write(AnsiString(SCnHtmlClipStart), Length(SCnHtmlClipStart));
-    outStream.Write((Pointer(Integer(tmpoutStream.Memory) + bodyPos - 1))^,
-      bodyEndPos - bodyPos - 1);
+    outStream.Write((Pointer(Integer(TmpOutStream.Memory) + BodyPos - 1))^,
+      BodyEndPos - BodyPos - 1);
     outStream.Write(AnsiString(SCnHtmlClipEnd), Length(SCnHtmlClipEnd));
-    outStream.Write((Pointer(Integer(tmpoutStream.Memory) + bodyEndPos - 1))^,
-      tmpoutStream.Size - bodyEndPos + 1);
+    outStream.Write((Pointer(Integer(TmpOutStream.Memory) + BodyEndPos - 1))^,
+      TmpOutStream.Size - BodyEndPos + 1);
 
 {    // 写 StartHTML
     outStream.Seek(PosStartHTML, soFromBeginning);
@@ -566,11 +505,11 @@ begin
     CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
-    tmpoutStream.Free;
+    TmpOutStream.Free;
   end;
 end;
 
-{ TCnPasConversion }
+{ TCnSourceConversion }
 
 function TCnSourceConversion.CheckNextChar: Char;
 begin
@@ -581,7 +520,7 @@ end;
 
 procedure TCnSourceConversion.CheckTokenState;
 begin
-  if (bAssembler) and (FTokenType <> ttComment) and (FTokenType <> ttCRLF)
+  if (FAssembler) and (FTokenType <> ttComment) and (FTokenType <> ttCRLF)
     and (FTokenType <> ttKeyWord)
     and (CompareStr(UpperCase(FTokenStr), 'END') = 0) then
     FTokenType := ttAssembler;
@@ -610,7 +549,7 @@ begin
     ttKeyWord:
       begin
         FTokenType := ttUnknown;
-        bAssembler := (CompareStr(UpperCase(FTokenStr), 'ASM') = 0) or
+        FAssembler := (CompareStr(UpperCase(FTokenStr), 'ASM') = 0) or
          (FSourceType = stCpp) and ((CompareStr(UpperCase(FTokenStr), '_ASM') = 0) or
          (CompareStr(UpperCase(FTokenStr), '__ASM') = 0));
       end;
@@ -703,7 +642,7 @@ begin
               if IsDirectiveKeyWord(FTokenStr) then
               begin
                 { v1.03: 不区分 Property 后的 KeyWord }
-                if bDiffer then
+                if FDiffer then
                   FTokenType := ttKeyWord;
               end
               else
@@ -943,7 +882,7 @@ begin
   end;
 
   {v0.96 sigh , forget to set it :P}
-  Result := true;
+  Result := True;
 end;
 
 procedure TCnSourceConversion.ConvertBegin;
@@ -963,8 +902,8 @@ begin
   inherited;
 
   {ok, i initial all the private varible here}
-  bDiffer := False;
-  bAssembler := False;
+  FDiffer := False;
+  FAssembler := False;
 
   FInStream := nil;
   FOutStream := nil;
@@ -1492,9 +1431,9 @@ begin
   Result := False;
   Token := UpperCase(AToken);
   if CompareStr('PROPERTY', Token) = 0 then
-    bDiffer := True;
+    FDiffer := True;
   if IsDiffKey(Token) then
-    bDiffer := False;
+    FDiffer := False;
   while First <= Last do
   begin
     I := (First + Last) shr 1;
@@ -1502,7 +1441,7 @@ begin
     if Compare = 0 then
     begin
       Result := True;
-      if bDiffer then
+      if FDiffer then
       begin
         Result := False;
         if CompareStr('NAME', Token) = 0 then
@@ -1946,7 +1885,13 @@ begin
       #10:
         begin
           Inc(nCount);
+{$IFDEF UNICODE}
+          if nCount = 2 then
+            FOutStream.WriteBuffer(StartPtr^, 1); // 单独写 #13
+          FOutStream.WriteBuffer(CurPtr^, 1);     // 再单独写 #10
+{$ELSE}
           FOutStream.WriteBuffer(StartPtr^, nCount); // 注意这里不是替换 #10 而是加写额外内容因此 #10 还得写进去
+{$ENDIF}
           Inc(FSize, nCount);
           nCount := 0;
 
