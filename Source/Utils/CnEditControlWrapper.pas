@@ -899,6 +899,7 @@ begin
 
   for I := Low(Self.FFontArray) to High(FFontArray) do
     FFontArray[I] := TFont.Create;
+  FBackgroundColor := clWhite;
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
