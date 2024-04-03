@@ -16,13 +16,13 @@ Delphi/C++Builder/BDS µÄ IDE ÖÐ£¬ÓÃÓÚÔöÇ¿ IDE ¹¦ÄÜ¡¢Ìá¸ß IDE µÄ¿ÉÓÃÐÔ¼°
 ¶þ¡¢CnWizards Ö÷ÒªÃæ¶ÔÄÄÀàÓÃ»§Èº£¿
 ==================================
 
-CnWizards ²úÆ·Ö÷ÒªÃæ¶ÔÊ¹ÓÃ Delphi 5 6 7¡¢C++Builder 5 6 Óë BDS 2005 
-2006¡¢RAD Studio 2007 2009 2010¡¢XE¡¢XE2¡¢XE3¡¢XE4¡¢XE5¡¢XE6¡¢XE7¡¢
+CnWizards ²úÆ·Ö÷ÒªÃæ¶ÔÊ¹ÓÃ Delphi 5¡¢6¡¢7¡¢C++Builder 5¡¢6 Óë BDS 2005¡¢ 
+2006¡¢RAD Studio 2007¡¢2009¡¢2010¡¢XE¡¢XE2¡¢XE3¡¢XE4¡¢XE5¡¢XE6¡¢XE7¡¢
 XE8¡¢10 Seattle¡¢10.1 Berlin¡¢10.2 Tokyo¡¢10.3 Rio¡¢10.4 Sydney¡¢
-11 Alexandria 12 AthensµÄ¿ª·¢Õß¡£
+11 Alexandria¡¢12 Athens µÄ¿ª·¢Õß¡£
 
-CnWizards Ä¿Ç°°üÀ¨ÒÔÏÂ¼¸ÖÖÓïÑÔµÄ·¢²¼°æ±¾£º¼òÌåÖÐÎÄ¡¢·±ÌåÖÐÎÄ¡¢Ó¢Óï¡¢
-¶íÓï¡¢µÂÓï¡¢·¨Óï¡£
+CnWizards Ä¿Ç°°üÀ¨ÒÔÏÂÆßÖÖÓïÑÔµÄ·¢²¼°æ±¾£º¼òÌåÖÐÎÄ¡¢·±ÌåÖÐÎÄ¡¢Ó¢Óï¡¢
+¶íÓï¡¢µÂÓï¡¢·¨Óï¡¢°ÍÎ÷Î÷°àÑÀÓï¡£
 
 ==============================
 Èý¡¢CnWizards Ö÷ÒªÓÐÄÄÐ©¹¦ÄÜ£¿
@@ -95,13 +95,14 @@ CnWizards enters Embarcadero Delphi XE Partner DVD in Sep. 2010.
 2. Who can use CnWizards?
 =========================
 
-CnWizards is designed to face the programmers who use Delphi 5 6 7, 
-C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2,
+CnWizards is designed to face the programmers who use Delphi 5, 6, 7, 
+C++Builder 5, 6 and BDS 2005, 2006, RAD Studio 2007, 2009, 2010, XE, XE2,
 XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
-10.3 Rio, 10.4 Sydney, 11 Alexandria 12 Athens.
+10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens.
 
 The offical version of CnWizards includes follow languages: 
-Simplified Chinese, Traditional Chinese, English, Russian, German and French.
+Simplified Chinese, Traditional Chinese, English, Russian, German, French
+and Brazilian Spanish.
 
 =========================
 3. What can CnWizards do?
@@ -164,7 +165,7 @@ CnWizards - §ï§ä§à §à§ã§ß§à§Ó§ß§à§Û §á§â§à§Õ§å§Ü§ä §Ü§à§Þ§Ñ§ß§Õ§í CnPack, §ã §á§
 * 2. §¬§ä§à §Þ§à§Ø§Ö§ä §Ú§ã§á§à§Ý§î§Ù§à§Ó§Ñ§ä§î CnWizards? *
 ========================================
 
-CnWizards §ã§à§Ù§Õ§Ñ§ß §Õ§Ý§ñ §á§â§à§Ô§â§Ñ§Þ§Þ§Ú§ã§ä§à§Ó, §Ü§à§ä§à§â§í§Ö §Ú§ã§á§à§Ý§î§Ù§å§ð§ä Delphi 5 6 7, C++ Builder 5 6 §Ú BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2, XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria 12 Athens.
+CnWizards §ã§à§Ù§Õ§Ñ§ß §Õ§Ý§ñ §á§â§à§Ô§â§Ñ§Þ§Þ§Ú§ã§ä§à§Ó, §Ü§à§ä§à§â§í§Ö §Ú§ã§á§à§Ý§î§Ù§å§ð§ä Delphi 5, 6, 7, C++ Builder 5, 6, §Ú BDS 2005, 2006, RAD Studio 2007, 2009, 2010, XE, XE2, XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens.
 §°§æ§Ú§è§Ú§Ñ§Ý§î§ß§Ñ§ñ §Ó§Ö§â§ã§Ú§ñ CnWizards §á§Ö§â§Ö§Ó§Ö§Õ§Ö§ß§Ñ §ß§Ñ §ã§Ý§Ö§Õ§å§ð§ë§Ú§Ö §ñ§Ù§í§Ü§Ú: §å§á§â§à§ë§Ö§ß§ß§í§Û §Ü§Ú§ä§Ñ§Û§ã§Ü§Ú§Û, §ä§â§Ñ§Õ§Ú§è§Ú§à§ß§ß§í§Û §Ü§Ú§ä§Ñ§Û§ã§Ü§Ú§Û, §Ñ§ß§Ô§Ý§Ú§Û§ã§Ü§Ú§Û, §ß§Ö§Þ§Ö§è§Ü§Ú§Û §Ú §â§å§ã§ã§Ü§Ú§Û. §°§Õ§ß§Ñ§Ü§à, §æ§Ñ§Û§Ý §ã§á§â§Ñ§Ó§Ü§Ú §á§Ö§â§Ö§Ó§Ö§Õ§×§ß §á§à§Ü§Ñ §ä§à§Ý§î§Ü§à §ß§Ñ §ä§â§Ú: §å§á§â§à§ë§Ö§ß§ß§í§Û §Ü§Ú§ä§Ñ§Û§ã§Ü§Ú§Û, §ä§â§Ñ§Õ§Ú§è§Ú§à§ß§ß§í§Û §Ü§Ú§ä§Ñ§Û§ã§Ü§Ú§Û §Ú §Ñ§ß§Ô§Ý§Ú§Û§ã§Ü§Ú§Û. §°§Õ§ß§Ñ§Ü§à, §Ó §Ú§ß§ä§Ö§â§ß§Ö§ä§Ö §Õ§à§ã§ä§å§á§ß§à §à§á§Ú§ã§Ñ§ß§Ú§Ö §Ú §ß§Ñ §â§å§ã§ã§Ü§à§Þ §ñ§Ù§í§Ü§Ö, §ã§Þ. §â§Ñ§Ù§Õ§Ö§Ý "§° CnPack Wizards §ß§Ñ §â§å§ã§ã§Ü§à§Þ"
 
 ===========================
