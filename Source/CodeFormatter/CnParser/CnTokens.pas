@@ -282,8 +282,9 @@ const
 
   StmtTokens = [tokKeywordLabel] + SimpStmtTokens + StructStmtTokens;
 
+  // 能够做语句中的内容的关键字
   StmtKeywordTokens = [tokKeywordIn, tokKeywordOut, tokKeywordString, tokKeywordAlign,
-    tokKeywordAt, tokKeywordContains, tokKeywordRequires];
+    tokKeywordAt, tokKeywordContains, tokKeywordRequires, tokKeywordOperator];
 
   RestrictedTypeTokens = [tokKeywordObject, tokKeywordClass, tokKeywordInterface,
     tokKeywordDispinterface];

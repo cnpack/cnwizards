@@ -2092,7 +2092,7 @@ begin
     case Scanner.Token of
       tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
       tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
-      tokKeywordContains, tokKeywordRequires,
+      tokKeywordContains, tokKeywordRequires, tokKeywordOperator,
       tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头，其余和 CanBeSymbol 函数内部实现类似
       tokComplex_BEGIN..tokComplex_END:
         begin
