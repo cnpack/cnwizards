@@ -22,7 +22,7 @@ XE8、10 Seattle、10.1 Berlin、10.2 Tokyo、10.3 Rio、10.4 Sydney、
 11 Alexandria、12 Athens 的开发者。
 
 CnWizards 目前包括以下七种语言的发布版本：简体中文、繁体中文、英语、
-俄语、德语、法语、巴西西班牙语。
+俄语、德语、法语、巴西葡萄牙语。
 
 ==============================
 三、CnWizards 主要有哪些功能？
@@ -72,6 +72,7 @@ CnPack 网站：https://www.cnpack.org
 CnPack 论坛：https://bbs.cnpack.org
 每日构建版： https://www.cnpack.org/downbuilds.php
 管理员信箱： master@cnpack.org
+微信公众号：CnPack开发组
 
 源码托管：
 https://github.com/cnpack
@@ -102,7 +103,7 @@ XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
 
 The offical version of CnWizards includes follow languages: 
 Simplified Chinese, Traditional Chinese, English, Russian, German, French
-and Brazilian Spanish.
+and Brazilian Portuguese.
 
 =========================
 3. What can CnWizards do?
