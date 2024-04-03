@@ -120,7 +120,8 @@ var
   CurrentModule: IOTAModule;
 begin
   CurrentModule := CnOtaGetCurrentModule;
-  Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+  if CurrentModule <> nil then
+    Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
 end;
 
 function TCnEditorOpenFileForm.GetSelectedFileName: string;
