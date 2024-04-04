@@ -139,11 +139,11 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         end
         object chkStringsViewer: TCheckBox
           Left = 16
-          Top = 72
+          Top = 96
           Width = 361
           Height = 17
           Caption = 'Enable TStrings Viewer'
-          TabOrder = 2
+          TabOrder = 3
           Visible = False
         end
         object chkBytesViewer: TCheckBox
@@ -153,6 +153,14 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Height = 17
           Caption = 'Enable TBytes/RawByteString Viewer (Delphi XE ~ 10.4)'
           TabOrder = 1
+        end
+        object chkWideViewer: TCheckBox
+          Left = 16
+          Top = 72
+          Width = 361
+          Height = 17
+          Caption = 'Enable WideString/UnicodeString Viewer (Delphi XE ~ 10.4)'
+          TabOrder = 2
         end
       end
     end

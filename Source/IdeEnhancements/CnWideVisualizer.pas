@@ -18,19 +18,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnBytesVisualizer;
+unit CnWideVisualizer;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：针对 TBytes 等内存数据相关的类的调试期查看器
+* 单元名称：针对 UnicodeString/WideString 等内存数据相关的类的调试期查看器
 * 单元作者：CnPack 开发组
 * 备    注：结构参考了 VCL 中自带的各类 Visualizer
 * 开发平台：PWin11 + Delphi 12
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2024.03.30 V1.0
-*               IOTADebuggerVisualizer250 改成 10.3 才支持，避免 10.2 低 Update 包不支持
-*           2024.03.16 V1.0
+* 修改记录：2024.04.04 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -45,7 +43,7 @@ uses
   CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock, CnHexEditor;
 
 type
-  TCnBytesViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
+  TCnWideViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
     Panel1: TPanel;
   private
@@ -59,7 +57,7 @@ type
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
-    procedure AddBytesContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
+    procedure AddWideContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -82,7 +80,7 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-  TCnDebuggerBytesVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
+  TCnDebuggerWideVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
     {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} IOTADebuggerVisualizer250, {$ENDIF}
     IOTADebuggerVisualizerExternalViewer)
   public
@@ -106,7 +104,7 @@ type
 
 {$ENDIF}
 
-procedure ShowBytesExternalViewer(const Expression: string);
+procedure ShowWideExternalViewer(const Expression: string);
 {* 以手工调用的方式传入一个类型是 TBytes 的表达式并显示，不走 Delphi 自身的提示按钮}
 
 implementation
@@ -121,7 +119,7 @@ uses
 {$R *.DFM}
 
 const
-  MAX_BYTES = $1000;
+  MAX_LEN = $1000;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
@@ -134,9 +132,9 @@ type
     procedure SetFrame(Form: TCustomFrame);
   end;
 
-  TCnBytesVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
+  TCnWideVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
   private
-    FMyFrame: TCnBytesViewerFrame;
+    FMyFrame: TCnWideViewerFrame;
     FMyForm: TCustomForm;
     FExpression: string;
   public
@@ -167,67 +165,67 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnDebuggerBytesVisualizer }
+{ TCnDebuggerWideVisualizer }
 
-function TCnDebuggerBytesVisualizer.GetMenuText: string;
+function TCnDebuggerWideVisualizer.GetMenuText: string;
 begin
-  Result := SCnDebugBytesViewerMenuText;
+  Result := SCnDebugWideViewerMenuText;
 end;
 
-function TCnDebuggerBytesVisualizer.GetSupportedTypeCount: Integer;
+function TCnDebuggerWideVisualizer.GetSupportedTypeCount: Integer;
 begin
   Result := 7;
 end;
 
-procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
+procedure TCnDebuggerWideVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
   var AllDescendants: Boolean);
 begin
   AllDescendants := False;
   case Index of
-    0: TypeName := 'TBytes';
-    1: TypeName := 'array of Byte';
-    2: TypeName := 'TArray<Byte>';
-    3: TypeName := 'RawByteString';
-    4: TypeName := 'AnsiString';
-    5: TypeName := 'array of AnsiChar';
-    6: TypeName := 'TArray<AnsiChar>';
+    0: TypeName := 'string';
+    1: TypeName := 'UnicodeString';
+    2: TypeName := 'WideString';
+    3: TypeName := 'array of Char';
+    4: TypeName := 'array of WideChar';
+    5: TypeName := 'TArray<Char>';
+    6: TypeName := 'TArray<WideChar>';
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('BytesVisualizer.GetSupportedType #%d: %s', [Index, TypeName])
+  CnDebugger.LogFmt('WideVisualizer.GetSupportedType #%d: %s', [Index, TypeName])
 {$ENDIF}
 end;
 
 {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
 
-procedure TCnDebuggerBytesVisualizer.GetSupportedType(Index: Integer;
+procedure TCnDebuggerWideVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
   GetSupportedType(Index, TypeName, AllDescendants);
-  IsGeneric := Index in [2, 6];
+  IsGeneric := Index in [5, 6];
 end;
 
 {$ENDIF}
 
-function TCnDebuggerBytesVisualizer.GetVisualizerDescription: string;
+function TCnDebuggerWideVisualizer.GetVisualizerDescription: string;
 begin
-  Result := SCnDebugBytesViewerDescription;
+  Result := SCnDebugWideViewerDescription;
 end;
 
-function TCnDebuggerBytesVisualizer.GetVisualizerIdentifier: string;
+function TCnDebuggerWideVisualizer.GetVisualizerIdentifier: string;
 begin
   Result := ClassName;
 end;
 
-function TCnDebuggerBytesVisualizer.GetVisualizerName: string;
+function TCnDebuggerWideVisualizer.GetVisualizerName: string;
 begin
-  Result := SCnDebugBytesViewerName;
+  Result := SCnDebugWideViewerName;
 end;
 
-function TCnDebuggerBytesVisualizer.Show(const Expression, TypeName, EvalResult: string;
+function TCnDebuggerWideVisualizer.Show(const Expression, TypeName, EvalResult: string;
   SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
 var
   AForm: TCustomForm;
-  AFrame: TCnBytesViewerFrame;
+  AFrame: TCnWideViewerFrame;
   VisDockForm: INTACustomDockableForm;
 {$IFDEF IDE_SUPPORT_THEMING}
   LThemingServices: IOTAIDEThemingServices;
@@ -235,7 +233,7 @@ var
 begin
   CloseExpandableEvalViewForm; // 调试提示窗口可能过大挡住本窗口，先隐藏之，但也慢
 
-  VisDockForm := TCnBytesVisualizerForm.Create(Expression) as INTACustomDockableForm;
+  VisDockForm := TCnWideVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
 
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -245,8 +243,8 @@ begin
     AForm.Left := SuggestedLeft;
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
-    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnBytesViewerFrame;
-    AFrame.AddBytesContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnWideViewerFrame;
+    AFrame.AddWideContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
 {$IFDEF IDE_SUPPORT_THEMING}
@@ -275,9 +273,9 @@ end;
 
 {$ENDIF}
 
-{ TCnBytesViewerFrame }
+{ TCnWideViewerFrame }
 
-procedure TCnBytesViewerFrame.SetAvailableState(const AState: TCnAvailableState);
+procedure TCnWideViewerFrame.SetAvailableState(const AState: TCnAvailableState);
 var
   S: string;
 begin
@@ -297,7 +295,7 @@ begin
     Clear;
 end;
 
-procedure TCnBytesViewerFrame.AddBytesContent(const Expression, TypeName,
+procedure TCnWideViewerFrame.AddWideContent(const Expression, TypeName,
   EvalResult: string; IsCpp: Boolean);
 var
   DebugSvcs: IOTADebuggerServices;
@@ -316,7 +314,7 @@ begin
     Exit;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnBytesViewerFrame.AddBytesContent: %s: %s', [Expression, TypeName]);
+  CnDebugger.LogFmt('TCnWideViewerFrame.AddWideContent: %s: %s', [Expression, TypeName]);
 {$ENDIF}
 
   FExpression := Expression;
@@ -330,25 +328,25 @@ begin
   L := StrToIntDef(S, 0);
   if L <= 0 then // 如果长度为 0 就啥都不显示而退出
     Exit;
-  if L > MAX_BYTES then // 不能太长
-    L := MAX_BYTES;
+  if L > MAX_LEN then // 不能太长
+    L := MAX_LEN;
 
   S := FEvaluator.EvaluateExpression(PE);
   if S = 'nil' then // 空的指针，也没法显示
     Exit;
 
   P := StrToUInt64(S);
-  SetLength(Buf, L);
-  CurProcess.ReadProcessMemory(P, L, Buf[0]);
+  SetLength(Buf, L * SizeOf(Char));
+  CurProcess.ReadProcessMemory(P, L * SizeOf(Char), Buf[0]);
   FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
 end;
 
-procedure TCnBytesViewerFrame.Clear;
+procedure TCnWideViewerFrame.Clear;
 begin
   FHexEditor.Clear;
 end;
 
-constructor TCnBytesViewerFrame.Create(AOwner: TComponent);
+constructor TCnWideViewerFrame.Create(AOwner: TComponent);
 begin
   inherited;
   FEvaluator := TCnRemoteProcessEvaluator.Create;
@@ -357,7 +355,7 @@ begin
   FHexEditor.Parent := Panel1;
 end;
 
-destructor TCnBytesViewerFrame.Destroy;
+destructor TCnWideViewerFrame.Destroy;
 begin
   FEvaluator.Free;
   inherited;
@@ -365,13 +363,13 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-procedure TCnBytesViewerFrame.CloseVisualizer;
+procedure TCnWideViewerFrame.CloseVisualizer;
 begin
   if FOwningForm <> nil then
     FOwningForm.Close;
 end;
 
-procedure TCnBytesViewerFrame.MarkUnavailable(
+procedure TCnWideViewerFrame.MarkUnavailable(
   Reason: TOTAVisualizerUnavailableReason);
 begin
   if Reason = ovurProcessRunning then
@@ -380,13 +378,13 @@ begin
     SetAvailableState(asOutOfScope);
 end;
 
-procedure TCnBytesViewerFrame.RefreshVisualizer(const Expression, TypeName,
+procedure TCnWideViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  AddBytesContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+  AddWideContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 end;
 
-procedure TCnBytesViewerFrame.SetClosedCallback(
+procedure TCnWideViewerFrame.SetClosedCallback(
   ClosedProc: TOTAVisualizerClosedProcedure);
 begin
   FClosedProc := ClosedProc;
@@ -394,12 +392,12 @@ end;
 
 {$ENDIF}
 
-procedure TCnBytesViewerFrame.SetForm(AForm: TCustomForm);
+procedure TCnWideViewerFrame.SetForm(AForm: TCustomForm);
 begin
   FOwningForm := AForm;
 end;
 
-procedure TCnBytesViewerFrame.SetParent(AParent: TWinControl);
+procedure TCnWideViewerFrame.SetParent(AParent: TWinControl);
 begin
   if AParent = nil then
   begin
@@ -414,7 +412,7 @@ end;
 
 {$IFDEF DELPHI120_ATHENS_UP}
 
-procedure TCnBytesViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
+procedure TCnWideViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
 begin
   inherited;
   if TIDEThemeMetrics.Font.Enabled then
@@ -425,114 +423,114 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnBytesVisualizerForm }
+{ TCnWideVisualizerForm }
 
-constructor TCnBytesVisualizerForm.Create(const Expression: string);
+constructor TCnWideVisualizerForm.Create(const Expression: string);
 begin
   inherited Create;
   FExpression := Expression;
 end;
 
-procedure TCnBytesVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
+procedure TCnWideVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
 begin
   // no toolbar
 end;
 
-procedure TCnBytesVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
+procedure TCnWideVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
 begin
  // no toolbar
 end;
 
-function TCnBytesVisualizerForm.EditAction(Action: TEditAction): Boolean;
+function TCnWideVisualizerForm.EditAction(Action: TEditAction): Boolean;
 begin
   Result := False;
 end;
 
-procedure TCnBytesVisualizerForm.FrameCreated(AFrame: TCustomFrame);
+procedure TCnWideVisualizerForm.FrameCreated(AFrame: TCustomFrame);
 begin
-  FMyFrame := TCnBytesViewerFrame(AFrame);
+  FMyFrame := TCnWideViewerFrame(AFrame);
 end;
 
-function TCnBytesVisualizerForm.GetCaption: string;
+function TCnWideVisualizerForm.GetCaption: string;
 begin
-  Result := Format(SCnBytesViewerFormCaption, [FExpression]);
+  Result := Format(SCnWideViewerFormCaption, [FExpression]);
 end;
 
-function TCnBytesVisualizerForm.GetEditState: TEditState;
+function TCnWideVisualizerForm.GetEditState: TEditState;
 begin
   Result := [];
 end;
 
-function TCnBytesVisualizerForm.GetForm: TCustomForm;
+function TCnWideVisualizerForm.GetForm: TCustomForm;
 begin
   Result := FMyForm;
 end;
 
-function TCnBytesVisualizerForm.GetFrame: TCustomFrame;
+function TCnWideVisualizerForm.GetFrame: TCustomFrame;
 begin
   Result := FMyFrame;
 end;
 
-function TCnBytesVisualizerForm.GetFrameClass: TCustomFrameClass;
+function TCnWideVisualizerForm.GetFrameClass: TCustomFrameClass;
 begin
-  Result := TCnBytesViewerFrame;
+  Result := TCnWideViewerFrame;
 end;
 
-function TCnBytesVisualizerForm.GetIdentifier: string;
+function TCnWideVisualizerForm.GetIdentifier: string;
 begin
-  Result := 'BytesDebugVisualizer';
+  Result := 'WideDebugVisualizer';
 end;
 
-function TCnBytesVisualizerForm.GetMenuActionList: TCustomActionList;
-begin
-  Result := nil;
-end;
-
-function TCnBytesVisualizerForm.GetMenuImageList: TCustomImageList;
+function TCnWideVisualizerForm.GetMenuActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-function TCnBytesVisualizerForm.GetToolbarActionList: TCustomActionList;
+function TCnWideVisualizerForm.GetMenuImageList: TCustomImageList;
 begin
   Result := nil;
 end;
 
-function TCnBytesVisualizerForm.GetToolbarImageList: TCustomImageList;
+function TCnWideVisualizerForm.GetToolbarActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-procedure TCnBytesVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
+function TCnWideVisualizerForm.GetToolbarImageList: TCustomImageList;
+begin
+  Result := nil;
+end;
+
+procedure TCnWideVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
   const Section: string);
 begin
   // no desktop saving
 end;
 
-procedure TCnBytesVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
+procedure TCnWideVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
   const Section: string; IsProject: Boolean);
 begin
   // no desktop saving
 end;
 
-procedure TCnBytesVisualizerForm.SetForm(Form: TCustomForm);
+procedure TCnWideVisualizerForm.SetForm(Form: TCustomForm);
 begin
   FMyForm := Form;
   if Assigned(FMyFrame) then
     FMyFrame.SetForm(FMyForm);
 end;
 
-procedure TCnBytesVisualizerForm.SetFrame(Frame: TCustomFrame);
+procedure TCnWideVisualizerForm.SetFrame(Frame: TCustomFrame);
 begin
-   FMyFrame := TCnBytesViewerFrame(Frame);
+   FMyFrame := TCnWideViewerFrame(Frame);
 end;
 
 {$ENDIF}
 
-procedure ShowBytesExternalViewer(const Expression: string);
+procedure ShowWideExternalViewer(const Expression: string);
 var
   F: TCnIdeDockForm;
-  Fm: TCnBytesViewerFrame;
+  Fm: TCnWideViewerFrame;
   S: string;
 begin
   // 求值的要求都能拿到 Length() 值
@@ -544,12 +542,12 @@ begin
   end;
 
   F := TCnIdeDockForm.Create(Application);
-  F.Caption := Format(SCnBytesViewerFormCaption, [Expression]);
-  Fm := TCnBytesViewerFrame.Create(F);
+  F.Caption := Format(SCnWideViewerFormCaption, [Expression]);
+  Fm := TCnWideViewerFrame.Create(F);
   Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
-  Fm.AddBytesContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
+  Fm.AddWideContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
 
   F.Show;
 end;

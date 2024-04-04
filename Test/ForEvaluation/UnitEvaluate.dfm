@@ -1,9 +1,9 @@
 object FormEvaluate: TFormEvaluate
   Left = 192
   Top = 107
-  Width = 979
-  Height = 563
   Caption = 'Evaluate Demo for Debugging'
+  ClientHeight = 536
+  ClientWidth = 971
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -75,6 +75,33 @@ object FormEvaluate: TFormEvaluate
     Caption = 'AnsiString'
     TabOrder = 6
     OnClick = btnAnsiStringClick
+  end
+  object btnUnicodeString: TButton
+    Left = 32
+    Top = 160
+    Width = 137
+    Height = 25
+    Caption = 'UnicodeString'
+    TabOrder = 7
+    OnClick = btnUnicodeStringClick
+  end
+  object btnWideString: TButton
+    Left = 218
+    Top = 160
+    Width = 137
+    Height = 25
+    Caption = 'WideString'
+    TabOrder = 8
+    OnClick = btnWideStringClick
+  end
+  object btnString: TButton
+    Left = 408
+    Top = 160
+    Width = 137
+    Height = 25
+    Caption = 'string in Unicode Compiler'
+    TabOrder = 9
+    OnClick = btnStringClick
   end
   object ADODataSet1: TADODataSet
     Parameters = <>

@@ -18,6 +18,9 @@ type
     btnTArrayByte: TButton;
     btnRawByteString: TButton;
     btnAnsiString: TButton;
+    btnUnicodeString: TButton;
+    btnWideString: TButton;
+    btnString: TButton;
     procedure btnDataSetClick(Sender: TObject);
     procedure btnStringsClick(Sender: TObject);
     procedure btnArrayOfByteClick(Sender: TObject);
@@ -25,6 +28,9 @@ type
     procedure btnTArrayByteClick(Sender: TObject);
     procedure btnRawByteStringClick(Sender: TObject);
     procedure btnAnsiStringClick(Sender: TObject);
+    procedure btnUnicodeStringClick(Sender: TObject);
+    procedure btnWideStringClick(Sender: TObject);
+    procedure btnStringClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -44,6 +50,20 @@ begin
     ShowMessage('DataSet Active')
   else
     ShowMessage('DataSet NOT Active');
+end;
+
+procedure TFormEvaluate.btnStringClick(Sender: TObject);
+{$IFDEF UNICODE}
+var
+  S: string;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  S := '³Ô·¹andºÈË®';
+
+  if S[1] = #0 then
+    ShowMessage('String Zero');
+{$ENDIF}
 end;
 
 procedure TFormEvaluate.btnStringsClick(Sender: TObject);
@@ -78,6 +98,34 @@ begin
 
   if T1[1] = 0 then
     ShowMessage('TBytes Zero');
+{$ENDIF}
+end;
+
+procedure TFormEvaluate.btnUnicodeStringClick(Sender: TObject);
+{$IFDEF UNICODE}
+var
+  S: UnicodeString;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  S := '³Ô·¹andºÈË®';
+
+  if S[1] = #0 then
+    ShowMessage('UnicodeString Zero');
+{$ENDIF}
+end;
+
+procedure TFormEvaluate.btnWideStringClick(Sender: TObject);
+{$IFDEF UNICODE}
+var
+  S: WideString;
+{$ENDIF}
+begin
+{$IFDEF UNICODE}
+  S := 'Ë¯¾õµÄWideString';
+
+  if S[1] = #0 then
+    ShowMessage('WideString Zero');
 {$ENDIF}
 end;
 

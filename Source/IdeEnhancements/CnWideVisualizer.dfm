@@ -1,4 +1,4 @@
-inherited CnBytesViewerFrame: TCnBytesViewerFrame
+inherited CnWideViewerFrame: TCnWideViewerFrame
   Width = 623
   Height = 231
   object Panel1: TPanel

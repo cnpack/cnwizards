@@ -255,6 +255,7 @@ resourcestring
   SCnDebugReplacerDataName = 'DebugReplacer.txt';
   SCnDebugEvalAsStrings = 'CnDebugEvalAsStrings';
   SCnDebugEvalAsBytes = 'CnDebugEvalAsBytes';
+  SCnDebugEvalAsWide = 'CnDebugEvalAsWide';
   SCnDebugEvalAsDataSet = 'CnDebugEvalAsDataSet';
   SCnDebugConfig = 'CnDebugConfig';
 
@@ -1300,6 +1301,8 @@ var
   SCnDebugEvalAsStringsHint: string = 'Evaluate Expression as TStrings';
   SCnDebugEvalAsBytesCaption: string = 'Evaluate as T&Bytes/RawByteString...';
   SCnDebugEvalAsBytesHint: string = 'Evaluate Expression as TBytes or RawByteString';
+  SCnDebugEvalAsWideCaption: string = 'Evaluate as &WideString/UnicodeString...';
+  SCnDebugEvalAsWideHint: string = 'Evaluate Expression as WideString or UnicodeString';
   SCnDebugEvalAsDataSetCaption: string = 'Evaluate as T&DataSet...';
   SCnDebugEvalAsDataSetHint: string = 'Evaluate Expression as TDataSet';
   SCnDebugConfigCaption: string = '&Options...';
@@ -1318,6 +1321,10 @@ var
   SCnDebugBytesViewerDescription: string = 'CnPack IDE Wizards Bytes Viewer';
   SCnDebugBytesViewerMenuText: string = 'Show Bytes';
   SCnBytesViewerFormCaption: string = 'TBytes Visualizer for %s';
+  SCnDebugWideViewerName: string = 'CnPack UnicodeString Viewer';
+  SCnDebugWideViewerDescription: string = 'CnPack IDE Wizards UnicodeString Viewer';
+  SCnDebugWideViewerMenuText: string = 'Show UnicodeString';
+  SCnWideViewerFormCaption: string = 'UnicodeString Visualizer for %s';
   SCnDebugErrorProcessNotAccessible: string = 'Process NOT Accessible';
   SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
   SCnDebugErrorOutOfScope: string = 'Out of Scope';
