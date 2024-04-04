@@ -149,7 +149,7 @@
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
       SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
-      IdeEnhancements\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
+      DebugEnhance\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
       DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm 
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm CodingToolset\CnEditorInsertTime.dfm 

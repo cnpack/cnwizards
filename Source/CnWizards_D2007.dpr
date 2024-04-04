@@ -200,7 +200,7 @@ uses
   CnProcListWizard in 'SimpleWizards\CnProcListWizard.pas' {CnProcListForm},
   CnVerEnhancements in 'IdeEnhancements\CnVerEnhancements.pas',
   CnVerEnhanceFrm in 'IdeEnhancements\CnVerEnhanceFrm.pas' {CnVerEnhanceForm},
-  CnDebugEnhancements in 'IdeEnhancements\CnDebugEnhancements.pas' {CnDebugEnhanceForm},
+  CnDebugEnhancements in 'DebugEnhance\CnDebugEnhancements.pas' {CnDebugEnhanceForm},
   CnDataSetVisualizer in 'DebugEnhance\CnDataSetVisualizer.pas' {CnDataSetViewerFrame: TFrame},
   CnStringsVisualizer in 'DebugEnhance\CnStringsVisualizer.pas' {CnStringsViewerFrame: TFrame},
   CnBytesVisualizer in 'DebugEnhance\CnBytesVisualizer.pas' {CnBytesViewerFrame: TFrame},
