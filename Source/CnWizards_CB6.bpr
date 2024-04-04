@@ -146,8 +146,8 @@
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
       SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
-      IdeEnhancements\CnDebugEnhancements.dfm IdeEnhancements\CnDataSetVisualizer.dfm 
-      IdeEnhancements\CnStringsVisualizer.dfm IdeEnhancements\CnBytesVisualizer.dfm 
+      IdeEnhancements\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
+      DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm 
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm CodingToolset\CnEditorInsertTime.dfm 
       CodingToolset\CnEditorCollector.dfm 
@@ -366,9 +366,9 @@
       <FILE FILENAME="IdeEnhancements\CnVerEnhanceFrm.pas" FORMNAME="CnVerEnhanceForm" UNITNAME="CnVerEnhanceFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnVerEnhancements.pas" FORMNAME="" UNITNAME="CnVerEnhancements" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnDebugEnhancements.pas" FORMNAME="CnDebugEnhanceForm" UNITNAME="CnDebugEnhancements" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="IdeEnhancements\CnDataSetVisualizer.pas" FORMNAME="CnDataSetViewerFrame" UNITNAME="CnDataSetVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
-      <FILE FILENAME="IdeEnhancements\CnStringsVisualizer.pas" FORMNAME="CnStringsViewerFrame" UNITNAME="CnStringsVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
-      <FILE FILENAME="IdeEnhancements\CnBytesVisualizer.pas" FORMNAME="CnBytesViewerFrame" UNITNAME="CnBytesVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
+      <FILE FILENAME="DebugEnhance\CnDataSetVisualizer.pas" FORMNAME="CnDataSetViewerFrame" UNITNAME="CnDataSetVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
+      <FILE FILENAME="DebugEnhance\CnStringsVisualizer.pas" FORMNAME="CnStringsViewerFrame" UNITNAME="CnStringsVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
+      <FILE FILENAME="DebugEnhance\CnBytesVisualizer.pas" FORMNAME="CnBytesViewerFrame" UNITNAME="CnBytesVisualizer" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectDirBuilderFrm.pas" FORMNAME="" UNITNAME="CnProjectDirBuilderFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizMacroFrm.pas" FORMNAME="CnWizMacroForm" UNITNAME="CnWizMacroFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizMacroText.pas" FORMNAME="" UNITNAME="CnWizMacroText.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

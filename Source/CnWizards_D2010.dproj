@@ -521,15 +521,15 @@
 			<DCCReference Include="IdeEnhancements\CnDebugEnhancements.pas">
 				<Form>CnDebugEnhanceForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnDataSetVisualizer.pas">
+			<DCCReference Include="DebugEnhance\CnDataSetVisualizer.pas">
 				<Form>CnDataSetViewerFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnStringsVisualizer.pas">
+			<DCCReference Include="DebugEnhance\CnStringsVisualizer.pas">
 				<Form>CnStringsViewerFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnBytesVisualizer.pas">
+			<DCCReference Include="DebugEnhance\CnBytesVisualizer.pas">
 				<Form>CnBytesViewerFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>

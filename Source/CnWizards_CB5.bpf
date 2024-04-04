@@ -149,9 +149,9 @@ USEUNIT("DesignEditors\CnNamePropEditor.pas");
 USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
 USEUNIT("IdeEnhancements\CnVerEnhancements.pas");
 USEFORMNS("IdeEnhancements\CnDebugEnhancements.pas", Cndebugenhancements, CnDebugEnhanceForm);
-USEFORMNS("IdeEnhancements\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
-USEFORMNS("IdeEnhancements\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */
-USEFORMNS("IdeEnhancements\CnBytesVisualizer.pas", Cnbytesvisualizer, CnBytesViewerFrame); /* TFrame: File Type */
+USEFORMNS("DebugEnhance\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
+USEFORMNS("DebugEnhance\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */
+USEFORMNS("DebugEnhance\CnBytesVisualizer.pas", Cnbytesvisualizer, CnBytesViewerFrame); /* TFrame: File Type */
 USEUNIT("ProjectExtWizard\CnProjectDirBuilderFrm.pas");
 USEFORMNS("ProjectExtWizard\CnProjectDirImportFrm.pas", Cnprojectdirimportfrm, CnImportDirForm);
 USEFORMNS("Utils\CnWizMacroFrm.pas", Cnwizmacrofrm, CnWizMacroForm);
