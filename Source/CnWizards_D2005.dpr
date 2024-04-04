@@ -204,6 +204,7 @@ uses
   CnDataSetVisualizer in 'DebugEnhance\CnDataSetVisualizer.pas' {CnDataSetViewerFrame: TFrame},
   CnStringsVisualizer in 'DebugEnhance\CnStringsVisualizer.pas' {CnStringsViewerFrame: TFrame},
   CnBytesVisualizer in 'DebugEnhance\CnBytesVisualizer.pas' {CnBytesViewerFrame: TFrame},
+  CnWideVisualizer in 'DebugEnhance\CnWideVisualizer.pas' {CnWideViewerFrame: TFrame},
   CnProjectDirBuilderFrm in 'ProjectExtWizard\CnProjectDirBuilderFrm.pas' {CnProjectDirBuilderForm},
   CnProjectDirImportFrm in 'ProjectExtWizard\CnProjectDirImportFrm.pas' {CnImportDirForm},
   CnDCU32 in 'Utils\CnDCU32.pas',

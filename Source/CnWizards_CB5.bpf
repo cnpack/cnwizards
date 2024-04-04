@@ -152,6 +152,7 @@ USEFORMNS("DebugEnhance\CnDebugEnhancements.pas", Cndebugenhancements, CnDebugEn
 USEFORMNS("DebugEnhance\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
 USEFORMNS("DebugEnhance\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */
 USEFORMNS("DebugEnhance\CnBytesVisualizer.pas", Cnbytesvisualizer, CnBytesViewerFrame); /* TFrame: File Type */
+USEFORMNS("DebugEnhance\CnWideVisualizer.pas", Cnwidevisualizer, CnWideViewerFrame); /* TFrame: File Type */
 USEUNIT("ProjectExtWizard\CnProjectDirBuilderFrm.pas");
 USEFORMNS("ProjectExtWizard\CnProjectDirImportFrm.pas", Cnprojectdirimportfrm, CnImportDirForm);
 USEFORMNS("Utils\CnWizMacroFrm.pas", Cnwizmacrofrm, CnWizMacroForm);
