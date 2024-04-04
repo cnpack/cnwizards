@@ -301,7 +301,7 @@ var
   DebugSvcs: IOTADebuggerServices;
   CurProcess: IOTAProcess;
   CurThread: IOTAThread;
-  S, T, PE, LE: string; // 结果、类型、指针表达式、长度表达式
+  S, PE, LE: string; // 结果、类型、指针表达式、长度表达式
   P, L: TUInt64;
   Buf: TBytes;
 begin

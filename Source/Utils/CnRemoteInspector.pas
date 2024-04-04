@@ -202,14 +202,15 @@ end;
 {
   如果表达式是对象，则求其 ClassInfo 得到地址指针，第一次复制 256 + 256 字节，用以拿到类名、父类 Info 指针与属性总数
   再根据属性总数，读本次 ClassInfo 的 256 * （属性数 + 1）字节，得到本类属性数，遍历获取
-  再根据父类 Info 指针，再读 256 * （属性数 + 1）字节，得到父类名、父类属性数，遍历获取
+  再额外求其父类 Info 指针，再读 256 * （属性数 + 1）字节，得到父类名、父类属性数，遍历获取
   总共读到足够属性数或到了 TObject 就停，大概要读该对象的层级数那么多次的地址空间内容
 }
 procedure TCnRemoteEvaluationInspector.DoEvaluate;
 var
-  C, I, Len, Ret, APCnt, PCnt, PSum: Integer;
-  RemotePtr: TCnOTAAddress;
-  V, S: string;
+  I, Len, Ret, APCnt, PCnt: Integer;
+  BufLen: Integer;
+  RemPtr: TCnOTAAddress;
+  Base, S: string;
   Buf: TBytes;
   BufPtr: PByte;
   Hies: TStringList;
@@ -242,29 +243,6 @@ begin
     Exit;
   end;
 
-  // 是一个对象，开始求值
-//  ContentTypes := [pctHierarchy];
-//  Hies := TStringList.Create;
-//  try
-//    V := FObjectExpr;
-//    while True do
-//    begin
-//      S := FEvaluator.EvaluateExpression(V + '.ClassName');
-//      if (S = '') or (S = 'nil') then
-//        Break;
-//
-//      Hies.Add(S);
-//      if S = 'TObject' then
-//        Break;
-//
-//      V := V + '.ClassParent';
-//    end;
-//    Hierarchy := Hies.Text;
-//  finally
-//    Hies.Free;
-//  end;
-//  DoAfterEvaluateHierarchy;
-
   if CnWizDebuggerObjectInheritsFrom(FObjectExpr, 'TStrings', FEvaluator) then
   begin
     ContentTypes := ContentTypes + [pctStrings];
@@ -276,121 +254,153 @@ begin
     end;
   end;
 
-  S := Format('Pointer((%s).ClassInfo)', [FObjectExpr]);
+  Base := Format('(%s)', [FObjectExpr]);
+  S := Format('Pointer(%s.ClassInfo)', [Base]);
   S := FEvaluator.EvaluateExpression(S);
+  if LowerCase(S) = 'nil' then
+    RemPtr := 0
+  else
+    RemPtr := StrToUInt64(S);
 
-  RemotePtr := StrToUInt64(S);
-  if RemotePtr <> 0 then
+  if RemPtr <> 0 then
   begin
-    Len := 512;
-    SetLength(Buf, Len);
-    Ret := FEvaluator.ReadProcessMemory(RemotePtr, Len, Buf[0]);
-
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [Len, Ret]);
-    CnDebugger.LogMemDump(@Buf[0], Ret);
-{$ENDIF}
-
-    // 先拿属性总数，Buf 是 TCnTypeInfoRec
-    BufPtr := @Buf[0];
-    Len := PCnTypeInfoRec(BufPtr)^.NameLength;
-    Inc(BufPtr, SizeOf(TCnTypeInfoRec) + Len); // 跳过俩字节指向 ClassName，再跳过字符串长度指向 TypeData
-
     ContentTypes := [pctHierarchy];
     Hies := TStringList.Create;
-
     try
+      BufLen := 512;
+      SetLength(Buf, BufLen);
+      Ret := FEvaluator.ReadProcessMemory(RemPtr, BufLen, Buf[0]);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [BufLen, Ret]);
+      CnDebugger.LogMemDump(@Buf[0], Ret);
+{$ENDIF}
+
+      BufPtr := @Buf[0];
+      Len := PCnTypeInfoRec(BufPtr)^.NameLength;
+      Inc(BufPtr, SizeOf(TCnTypeInfoRec));                      // 跳过俩字节指向 ClassName
+      Inc(BufPtr, Len);                                         // 再跳过字符串长度指向 TypeData
+
+      // 先拿属性总数，Buf 是 TCnTypeInfoRec
       Is32 := FEvaluator.CurrentProcessIs32;
+{$IFDEF DEBUG}
+      if Is32 then
+        CnDebugger.LogMsg('Remote Process is 32.')
+      else
+        CnDebugger.LogMsg('Remote Process is 64.');
+{$ENDIF}
+
       if Is32 then
         APCnt := PCnTypeDataRec32(BufPtr)^.PropCount
       else
         APCnt := PCnTypeDataRec64(BufPtr)^.PropCount;
 
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('FEvaluator.DoEvaluate %s: All Property Count: %d', [FObjectExpr, APCnt]);
+      CnDebugger.LogFmt('All Properties Count: %d', [APCnt]);
 {$ENDIF}
 
-      PSum := 0; // 已经解析到的属性累计
-      // RemotePtr 始终是本类层次的 ClassInfo 指针，循环结束即将开始下一轮循环时改指向父类的指针
-      while True do
+      if APCnt > 0 then
       begin
-        Len := (APCnt + 1) * 256; // 预留尽可能大的空间
-        SetLength(Buf, Len);
-        Ret := FEvaluator.ReadProcessMemory(RemotePtr, Len, Buf[0]);
+        // 拿到属性总数后，BufLen 基本确定，重新读入 Buf，并准备好 BufPtr，开始循环
+        BufLen := (APCnt + 1) * 256; // 预留尽可能大的空间
+        SetLength(Buf, BufLen);
+        Ret := FEvaluator.ReadProcessMemory(RemPtr, BufLen, Buf[0]);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [Len, Ret]);
+        CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [BufLen, Ret]);
 {$ENDIF}
-
         // Buf 是本类的 PCnTypeInfoRec
         BufPtr := @Buf[0];
-        Len := PCnTypeInfoRec(BufPtr)^.NameLength;
-        Inc(BufPtr, SizeOf(TCnTypeInfoRec)); // 跳过俩字节指向 ClassName
 
-        SetLength(S, Len);
-        Move(BufPtr^, S[1], Len);              // 读入 ClassName
-        Inc(BufPtr, Len);
-        Hies.Add(S);
+        repeat
+          Len := PCnTypeInfoRec(BufPtr)^.NameLength;
+          Inc(BufPtr, SizeOf(TCnTypeInfoRec));                      // 跳过俩字节指向 ClassName
 
-        // 此时 BufPtr 指向 TypeData，先拿父类的类型指针
-        if Is32 then
-        begin
-          RemotePtr := TCnOTAAddress(PCnTypeDataRec32(BufPtr)^.ParentInfo);
-          Inc(BufPtr, SizeOf(TCnTypeDataRec32) + PCnTypeDataRec32(BufPtr)^.UnitNameLength);
-        end
-        else
-        begin
-          RemotePtr := TCnOTAAddress(PCnTypeDataRec64(BufPtr)^.ParentInfo);
-          Inc(BufPtr, SizeOf(TCnTypeDataRec64) + PCnTypeDataRec64(BufPtr)^.UnitNameLength);
-        end;
+          SetLength(S, Len);
+          Move(BufPtr^, S[1], Len);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('ClassName: %s', [S]);
+{$ENDIF}
+          Hies.Add(S);
 
-        // 此时 BufPtr 指向 PropData，先拿本类的属性数
-        PCnt := PCnPropDataRec(Buf)^.PropCount;
-        Inc(BufPtr, SizeOf(TCnPropDataRec));
+          Inc(BufPtr, Len);                                         // 再跳过字符串长度指向 TypeData
 
-        // 此时 BufPtr 指向 PropInfo 的第一个元素
-        for I := 0 to PCnt - 1 do
-        begin
-          // 无法根据 PCnPropInfoRec32(BufPtr)^.PropType 判断是否要处理该属性，
-          // 虽然 32 和 64 一致无需分开处理，但是一个指针，无法再指一次，得再次求值
+          Is32 := FEvaluator.CurrentProcessIs32;
+          RemPtr := 0;
+
+          Base := Base + '.ClassParent';                            // 先拿父类的 ClassInfo 数字
+          S := Format('Pointer(%s.ClassInfo)', [Base]);
+          S := FEvaluator.EvaluateExpression(S);
+          if LowerCase(S) <> 'nil' then
+            RemPtr := StrToUInt64(S);
 
           if Is32 then
           begin
-            Len := PCnPropInfoRec32(BufPtr)^.NameLength;  // 拿到属性名的长度
-            Inc(BufPtr, SizeOf(TCnPropInfoRec32));      // BufPtr 指向属性名
+            // APCnt := PCnTypeDataRec32(BufPtr)^.PropCount;           // 拿到本类到所有子类的属性总数
+            Len := PCnTypeDataRec32(BufPtr)^.UnitNameLength;
+            Inc(BufPtr, SizeOf(TCnTypeDataRec32));                  // 指向 UnitName 字符串
             SetLength(S, Len);
-            Move(BufPtr^, S[1], Len);                     // 复制属性名
-            Inc(BufPtr, Len);                             // BufPtr 跳过名称，指向下一个
+            Move(BufPtr^, S[1], Len);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('UnitName: %s', [S]);
+{$ENDIF}
           end
           else
           begin
-            Len := PCnPropInfoRec64(BufPtr)^.NameLength;  // 拿到属性名的长度
-            Inc(BufPtr, SizeOf(TCnPropInfoRec64));      // BufPtr 指向属性名
+            // APCnt := PCnTypeDataRec64(BufPtr)^.PropCount;
+            Len := PCnTypeDataRec64(BufPtr)^.UnitNameLength;
+            Inc(BufPtr, SizeOf(TCnTypeDataRec64));                  // 指向 UnitName 字符串
             SetLength(S, Len);
-            Move(BufPtr^, S[1], Len);                     // 复制属性名
-            Inc(BufPtr, Len);                             // BufPtr 跳过名称，指向下一个
+            Move(BufPtr^, S[1], Len);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('UnitName: %s', [S]);
+{$ENDIF}
           end;
-          // 拿到属性名在 S 里，求其 TypeKind，再根据是否要处理来决定是否加入结果
 
-          if not IsRefresh then
+          Inc(BufPtr, Len);                                         // 跳过 UnitName 指向 PropData
+          PCnt := PCnPropDataRec(BufPtr)^.PropCount;                // 拿到本类的属性数
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Properties Count: %d', [PCnt]);
+{$ENDIF}
+          Inc(BufPtr, SizeOf(TCnPropDataRec));                      // 指向 PropInfo，如果有的话
+
+          if PCnt > 0 then
           begin
-            AProp := TCnPropertyObject.Create;
-            AProp.IsNewRTTI := True;
+            for I := 0 to PCnt - 1 do
+            begin
+              if Is32 then
+              begin
+                Len := PCnPropInfoRec32(BufPtr)^.NameLength;        // 拿到属性名的长度
+                Inc(BufPtr, SizeOf(TCnPropInfoRec32));              // BufPtr 指向属性名
+                SetLength(S, Len);
+                Move(BufPtr^, S[1], Len);                           // 复制属性名
+                Inc(BufPtr, Len);                                   // BufPtr 跳过名称，指向下一个
+              end
+              else
+              begin
+                Len := PCnPropInfoRec64(BufPtr)^.NameLength;        // 拿到属性名的长度
+                Inc(BufPtr, SizeOf(TCnPropInfoRec64));              // BufPtr 指向属性名
+                SetLength(S, Len);
+                Move(BufPtr^, S[1], Len);                           // 复制属性名
+                Inc(BufPtr, Len);                                   // BufPtr 跳过名称，指向下一个
+              end;
+              // 拿到属性名在 S 里
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Property %d: %s', [I + 1, S]);
+{$ENDIF}
+            end;
+          end;
+
+          // 如果拿到了父类信息的远程指针，则重新读进一块内存
+          if RemPtr <> 0 then
+          begin
+            Ret := FEvaluator.ReadProcessMemory(RemPtr, BufLen, Buf[0]);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('FEvaluator.ReadProcessMemory %d Return %d', [BufLen, Ret]);
+{$ENDIF}
+            BufPtr := @Buf[0];                                        // 指向父类，重新开始循环
           end
           else
-            AProp := IndexOfProperty(Properties, V);
-
-          AProp.PropName := S;
-
-          if not IsRefresh then
-            Properties.Add(AProp);
-
-          ContentTypes := ContentTypes + [pctProps];
-
-          Inc(PSum);
-        end;
-
-        if RemotePtr = 0 then // 没父类了，走
-          Break;
+            BufPtr := nil;
+        until BufPtr = nil;
       end;
 
       Hierarchy := Hies.Text;
@@ -443,32 +453,6 @@ begin
 //      end;
 //    end;
 //  end;
-//
-//{$ELSE}
-//
-//
-//
-//  S := Format('GetTypeData(PTypeInfo((%s).ClassInfo))^.PropCount', [FObjectExpr]);
-//  S := FEvaluator.EvaluateExpression(S);
-//  C := StrToIntDef(S, 0);
-//  if C > 0 then
-//  begin
-//    S := Format('Pointer((%s).ClassInfo)', [FObjectExpr]);
-//    S := FEvaluator.EvaluateExpression(S);
-//
-//    // 得到 ClassInfo 的指针字符串，转换成指针
-//    PropPtr := Pointer(StrToUInt64(S));
-//
-//    L := (C + 1) * 256; // 准备一次性批量读 TypeInfo 及属性表，假定每个属性占据空间不会大于 256 字节
-//    SetLength(TypeInfoBuf, L);
-//    L := FEvaluator.ReadProcessMemory(PropPtr, L, TypeInfoBuf[0]);
-//
-//{$IFDEF DEBUG}
-//    CnDebugger.LogInteger(L, 'FEvaluator.ReadProcessMemory Return');
-//    CnDebugger.LogMemDump(@TypeInfoBuf[0], L);
-//{$ENDIF}
-//  end;
-//
 //{$ENDIF}
 
   InspectComplete := True;
