@@ -495,7 +495,6 @@ procedure ClearRegistrySessionProject;
 const
   SCnProject = 'Project';
 var
-  I: Integer;
   S: string;
   Reg: TRegistry;
 begin

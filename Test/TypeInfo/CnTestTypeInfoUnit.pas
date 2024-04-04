@@ -92,10 +92,10 @@ var
   Is32: Boolean;
   S: AnsiString;
   I, Len, APCnt, PCnt: Integer;
-  BufPtr, RemPtr: PByte;
+  BufPtr, ParentPtr: PByte;
   PPtr: PPointer;
 begin
-  BufPtr := Self.ClassInfo;
+  BufPtr := Self.ClassInfo;  // 远程时需读目标进程内存
 
   repeat
     CnDebugger.LogSeparator;
@@ -115,12 +115,12 @@ begin
     Is32 := True;
   {$ENDIF}
 
-    RemPtr := nil;
+    ParentPtr := nil;
     if Is32 then
     begin
       PPtr := PPointer(PCnTypeDataRec32(BufPtr)^.ParentInfo); // 拿到父类的 TypeInfo 指针的指针
       if PPtr <> nil then
-        RemPtr := PByte(PPtr^);                               // 拿到父类的 TypeInfo 指针
+        ParentPtr := PByte(PPtr^);                               // 拿到父类的 TypeInfo 指针。远程时这三句需通过其他方式再读目标进程内存实现
 
       APCnt := PCnTypeDataRec32(BufPtr)^.PropCount;           // 拿到本类到所有子类的属性总数
       CnDebugger.LogFmt('All Properties Count: %d', [APCnt]);
@@ -136,7 +136,7 @@ begin
     begin
       PPtr := PPointer(PCnTypeDataRec64(BufPtr)^.ParentInfo); // 拿到父类的 TypeInfo 指针的指针
       if PPtr <> nil then
-        RemPtr := PByte(PPtr^);                               // 拿到父类的 TypeInfo 指针
+        ParentPtr := PByte(PPtr^);                               // 拿到父类的 TypeInfo 指针。远程时这三句需通过其他方式再读目标进程内存实现
 
       APCnt := PCnTypeDataRec64(BufPtr)^.PropCount;
       CnDebugger.LogFmt('All Properties Count: %d', [APCnt]);
@@ -180,7 +180,7 @@ begin
       end;
     end;
 
-    BufPtr := RemPtr;                                         // 指向父类，重新开始循环
+    BufPtr := ParentPtr;                                         // 指向父类，重新开始循环
   until BufPtr = nil;
 end;
 

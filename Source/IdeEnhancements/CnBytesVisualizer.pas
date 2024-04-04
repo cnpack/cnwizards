@@ -278,7 +278,6 @@ end;
 procedure TCnBytesViewerFrame.SetAvailableState(const AState: TCnAvailableState);
 var
   S: string;
-  Item: TListItem;
 begin
   FAvailableState := AState;
   case FAvailableState of
@@ -293,11 +292,7 @@ begin
   end;
 
   if S <> '' then
-  begin
     Clear;
-//    Item := lvStrings.Items.Add;
-//    Item.SubItems.Add(S);
-  end;
 end;
 
 procedure TCnBytesViewerFrame.AddBytesContent(const Expression, TypeName,
