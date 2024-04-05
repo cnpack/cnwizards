@@ -48,6 +48,10 @@ type
   TCnBytesViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
     Panel1: TPanel;
+    pgcView: TPageControl;
+    tsHex: TTabSheet;
+    tsAnsi: TTabSheet;
+    mmoAnsi: TMemo;
   private
     FHexEditor: TCnHexEditor;
     FExpression: string;
@@ -341,11 +345,14 @@ begin
   SetLength(Buf, L);
   CurProcess.ReadProcessMemory(P, L, Buf[0]);
   FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+
+  mmoAnsi.Lines.Text := BytesToAnsi(Buf);
 end;
 
 procedure TCnBytesViewerFrame.Clear;
 begin
   FHexEditor.Clear;
+  mmoAnsi.Lines.Clear;
 end;
 
 constructor TCnBytesViewerFrame.Create(AOwner: TComponent);
@@ -354,7 +361,7 @@ begin
   FEvaluator := TCnRemoteProcessEvaluator.Create;
   FHexEditor := TCnHexEditor.Create(Self);
   FHexEditor.Align := alClient;
-  FHexEditor.Parent := Panel1;
+  FHexEditor.Parent := tsHex;
 end;
 
 destructor TCnBytesViewerFrame.Destroy;

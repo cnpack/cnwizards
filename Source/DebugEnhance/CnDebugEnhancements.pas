@@ -322,7 +322,7 @@ begin
         FStringsRegistered := True;
       end;
     end;
-{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFNDEF IDE_HAS_MEMORY_VISUALIZAER}
     if FEnableBytes then
     begin
       if not FBytesRegistered then
@@ -353,7 +353,7 @@ begin
       ID.UnregisterDebugVisualizer(FStringsViewer);
       FStringsRegistered := False;
     end;
-{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFNDEF IDE_HAS_MEMORY_VISUALIZAER}
     if FBytesRegistered then
     begin
       ID.UnregisterDebugVisualizer(FBytesViewer);

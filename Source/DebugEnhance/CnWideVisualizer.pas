@@ -46,6 +46,10 @@ type
   TCnWideViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
     Panel1: TPanel;
+    pgcView: TPageControl;
+    tsHex: TTabSheet;
+    tsWide: TTabSheet;
+    mmoWide: TMemo;
   private
     FHexEditor: TCnHexEditor;
     FExpression: string;
@@ -304,6 +308,7 @@ var
   S, PE, LE: string; // 结果、类型、指针表达式、长度表达式
   P, L: TUInt64;
   Buf: TBytes;
+  M: WideString;
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
@@ -336,14 +341,19 @@ begin
     Exit;
 
   P := StrToUInt64(S);
-  SetLength(Buf, L * SizeOf(Char));
-  CurProcess.ReadProcessMemory(P, L * SizeOf(Char), Buf[0]);
+  SetLength(Buf, L * SizeOf(WideChar));
+  CurProcess.ReadProcessMemory(P, L * SizeOf(WideChar), Buf[0]);
   FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+
+  SetLength(M, L);
+  Move(Buf[0], M[1], Length(Buf));
+  mmoWide.Lines.Text := M;
 end;
 
 procedure TCnWideViewerFrame.Clear;
 begin
   FHexEditor.Clear;
+  mmoWide.Lines.Clear;
 end;
 
 constructor TCnWideViewerFrame.Create(AOwner: TComponent);
@@ -352,7 +362,7 @@ begin
   FEvaluator := TCnRemoteProcessEvaluator.Create;
   FHexEditor := TCnHexEditor.Create(Self);
   FHexEditor.Align := alClient;
-  FHexEditor.Parent := Panel1;
+  FHexEditor.Parent := tsHex;
 end;
 
 destructor TCnWideViewerFrame.Destroy;
