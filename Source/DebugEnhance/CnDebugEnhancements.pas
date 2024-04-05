@@ -44,7 +44,8 @@ uses
   Dialogs, IniFiles, ComCtrls, StdCtrls, ToolsAPI, Contnrs, ActnList, CnConsts,
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
   CnDataSetVisualizer, CnStringsVisualizer, CnBytesVisualizer, CnWideVisualizer,
-  CnWizMultiLang, CnWizShareImages, CnWizUtils, CnWizNotifier, CnActionListHook;
+  CnMemoryStreamVisualizer, CnWizMultiLang, CnWizShareImages, CnWizUtils,
+  CnWizNotifier, CnActionListHook;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
@@ -53,6 +54,7 @@ type
     FIdEvalAsStrings: Integer;
     FIdEvalAsBytes: Integer;
     FIdEvalAsWide: Integer;
+    FIdEvalAsMemoryStream: Integer;
     FIdEvalAsDataSet: Integer;
     FIdConfig: Integer;
     FAutoClose: Boolean;
@@ -73,10 +75,14 @@ type
     FWideViewer: IOTADebuggerVisualizer;
     FWideRegistered: Boolean;
     FEnableWide: Boolean;
+    FMemoryStreamViewer: IOTADebuggerVisualizer;
+    FMemoryStreamRegistered: Boolean;
+    FEnableMemoryStream: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
     procedure SetEnableStrings(const Value: Boolean);
     procedure SetEnableBytes(const Value: Boolean);
     procedure SetEnableWide(const Value: Boolean);
+    procedure SetEnableMemoryStream(const Value: Boolean);
     procedure CheckViewersRegistration;
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -117,6 +123,8 @@ type
     {* 是否启用 Bytes Viewer}
     property EnableWide: Boolean read FEnableWide write SetEnableWide;
     {* 是否启用 UnicodeString Viewer}
+    property EnableMemoryStream: Boolean read FEnableMemoryStream write SetEnableMemoryStream;
+    {* 是否启用 MemoryStream Viewer}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
@@ -210,6 +218,7 @@ type
     chkBytesViewer: TCheckBox;
     lblHint: TLabel;
     chkWideViewer: TCheckBox;
+    chkMemoryStreamViewer: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -257,6 +266,7 @@ const
   csEnableStrings = 'EnableStrings';
   csEnableBytes = 'EnableBytes';
   csEnableWide = 'EnableWide';
+  csEnableMemoryStream = 'EnableMemoryStream';
 
 var
   FDebuggerValueReplacerClass: TList = nil;
@@ -297,6 +307,12 @@ begin
   CheckViewersRegistration;
 end;
 
+procedure TCnDebugEnhanceWizard.SetEnableMemoryStream(const Value: Boolean);
+begin
+  FEnableMemoryStream := Value;
+  CheckViewersRegistration;
+end;
+
 procedure TCnDebugEnhanceWizard.CheckViewersRegistration;
 var
   ID: IOTADebuggerServices;
@@ -331,6 +347,14 @@ begin
         FBytesRegistered := True;
       end;
     end;
+    if FEnableMemoryStream then
+    begin
+      if not FMemoryStreamRegistered then
+      begin
+        ID.RegisterDebugVisualizer(FMemoryStreamViewer);
+        FMemoryStreamRegistered := True;
+      end;
+    end;
 {$ENDIF}
     if FEnableWide then
     begin
@@ -359,6 +383,11 @@ begin
       ID.UnregisterDebugVisualizer(FBytesViewer);
       FBytesRegistered := False;
     end;
+    if FMemoryStreamRegistered then
+    begin
+      ID.UnregisterDebugVisualizer(FMemoryStreamViewer);
+      FMemoryStreamRegistered := False;
+    end;
 {$ENDIF}
     if FWideRegistered then
     begin
@@ -381,9 +410,12 @@ begin
     chkStringsViewer.Visible := False; // IDE 自带了，也没法替换，先隐藏不让设置
     chkBytesViewer.Checked := FEnableBytes;
     chkWideViewer.Checked := FEnableWide;
+    chkMemoryStreamViewer.Checked := FEnableMemoryStream;
   {$IFDEF IDE_HAS_MEMORY_VISUALIZAER}  // 高版本 IDE 自带，先不替换，禁用
     chkBytesViewer.Checked := False;
     chkBytesViewer.Enabled := False;
+    chkMemoryStreamViewer.Checked := False;
+    chkMemoryStreamViewer.Enabled := False;
   {$ELSE}
     chkBytesViewer.Checked := FEnableBytes;
   {$ENDIF}
@@ -394,6 +426,8 @@ begin
     chkDataSetViewer.Enabled := False;
     chkStringsViewer.Enabled := False;
     chkBytesViewer.Enabled := False;
+    chkWideViewer.Enabled := False;
+    chkMemoryStreamViewer.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
@@ -405,6 +439,7 @@ begin
       EnableStrings := chkStringsViewer.Checked;
       EnableBytes := chkBytesViewer.Checked;
       EnableWide := chkWideViewer.Checked;
+      EnableMemoryStream := chkMemoryStreamViewer.Checked;
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
@@ -424,6 +459,7 @@ begin
   FStringsViewer := TCnDebuggerStringsVisualizer.Create;
   FBytesViewer := TCnDebuggerBytesVisualizer.Create;
   FWideViewer := TCnDebuggerWideVisualizer.Create;
+  FMemoryStreamViewer := TCnDebuggerMemoryStreamVisualizer.Create;
 {$ENDIF}
 
   FHooks := TCnActionListHook.Create(nil);
@@ -469,6 +505,8 @@ begin
       ID.UnregisterDebugVisualizer(FBytesViewer);
     if FWideRegistered then
       ID.UnregisterDebugVisualizer(FWideViewer);
+    if FMemoryStreamRegistered then
+      ID.UnregisterDebugVisualizer(FMemoryStreamViewer);
   end;
 
   FReplaceManager := nil;
@@ -476,6 +514,7 @@ begin
   FStringsViewer := nil;
   FBytesViewer := nil;
   FWideViewer := nil;
+  FMemoryStreamViewer := nil;
 {$ENDIF}
   inherited;
 end;
@@ -503,10 +542,12 @@ begin
   EnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
 {$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
   EnableBytes := Ini.ReadBool('', csEnableBytes, False);     // 高版本 IDE 自带
+  EnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, False);
 {$ELSE}
   EnableBytes := Ini.ReadBool('', csEnableBytes, True);
-  EnableWide := Ini.ReadBool('', csEnableWide, True);
+  EnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, True);
 {$ENDIF}
+  EnableWide := Ini.ReadBool('', csEnableWide, True);
 {$ENDIF}
   AutoClose := Ini.ReadBool('', csAutoClose, False);
   AutoReset := Ini.ReadBool('', csAutoReset, False);
@@ -527,6 +568,7 @@ begin
   Ini.WriteBool('', csEnableStrings, FEnableStrings);
   Ini.WriteBool('', csEnableBytes, FEnableBytes);
   Ini.WriteBool('', csEnableWide, FEnableWide);
+  Ini.WriteBool('', csEnableMemoryStream, FEnableMemoryStream);
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
@@ -873,6 +915,8 @@ begin
     SCnDebugEvalAsBytesCaption, 0, SCnDebugEvalAsBytesHint);
   FIdEvalAsWide := RegisterASubAction(SCnDebugEvalAsWide,
     SCnDebugEvalAsWideCaption, 0, SCnDebugEvalAsWideHint);
+  FIdEvalAsMemoryStream := RegisterASubAction(SCnDebugEvalAsMemoryStream,
+    SCnDebugEvalAsMemoryStreamCaption, 0, SCnDebugEvalAsMemoryStreamHint);
   FIdEvalAsDataSet := RegisterASubAction(SCnDebugEvalAsDataSet,
     SCnDebugEvalAsDataSetCaption, 0, SCnDebugEvalAsDataSetHint);
   AddSepMenu;
@@ -926,6 +970,12 @@ begin
     if S <> '' then
       ShowWideExternalViewer(S);
   end
+  else if Index = FIdEvalAsMemoryStream then
+  begin
+    S := InputExpr;
+    if S <> '' then
+      ShowMemoryStreamExternalViewer(S);
+  end
   else if Index = FIdEvalAsDataSet then
   begin
     S := InputExpr;
@@ -939,7 +989,7 @@ end;
 procedure TCnDebugEnhanceWizard.SubActionUpdate(Index: Integer);
 begin
   if (Index = FIdEvalObj) or (Index = FIdEvalAsDataSet) or (Index = FIdEvalAsStrings)
-    or (Index = FIdEvalAsBytes) or (Index = FIdEvalAsWide) then
+    or (Index = FIdEvalAsBytes) or (Index = FIdEvalAsWide) or (Index = FIdEvalAsMemoryStream) then
     SubActions[Index].Enabled := CnOtaIsDebugging;
 end;
 

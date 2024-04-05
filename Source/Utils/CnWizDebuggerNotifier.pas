@@ -1098,9 +1098,9 @@ begin
     Eval := CnRemoteProcessEvaluator;
 
   if IsCpp then
-    S := Eval.EvaluateExpression(Format('%s->InheritsFrom(__classid(%s))', [Obj, BaseClassName]))
+    S := Eval.EvaluateExpression(Format('(%s)->InheritsFrom(__classid(%s))', [Obj, BaseClassName]))
   else
-    S := Eval.EvaluateExpression(Format('%s.InheritsFrom(%s)', [Obj, BaseClassName]));
+    S := Eval.EvaluateExpression(Format('(%s).InheritsFrom(%s)', [Obj, BaseClassName]));
 
   Result := LowerCase(S) = 'true';
 end;

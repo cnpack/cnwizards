@@ -977,6 +977,8 @@ begin
   TranslateStr(SCnDebugEvalAsBytesHint, 'SCnDebugEvalAsBytesHint');
   TranslateStr(SCnDebugEvalAsWideCaption, 'SCnDebugEvalAsWideCaption');
   TranslateStr(SCnDebugEvalAsWideHint, 'SCnDebugEvalAsWideHint');
+  TranslateStr(SCnDebugEvalAsMemoryStreamCaption, 'SCnDebugEvalAsMemoryStreamCaption');
+  TranslateStr(SCnDebugEvalAsMemoryStreamHint, 'SCnDebugEvalAsMemoryStreamHint');
   TranslateStr(SCnDebugEvalAsDataSetCaption, 'SCnDebugEvalAsDataSetCaption');
   TranslateStr(SCnDebugEvalAsDataSetHint, 'SCnDebugEvalAsDataSetHint');
   TranslateStr(SCnDebugConfigCaption, 'SCnDebugConfigCaption');
@@ -999,6 +1001,10 @@ begin
   TranslateStr(SCnDebugWideViewerDescription, 'SCnDebugWideViewerDescription');
   TranslateStr(SCnDebugWideViewerMenuText, 'SCnDebugWideViewerMenuText');
   TranslateStr(SCnWideViewerFormCaption, 'SCnWideViewerFormCaption');
+  TranslateStr(SCnDebugMemoryStreamViewerName, 'SCnDebugMemoryStreamViewerName');
+  TranslateStr(SCnDebugMemoryStreamViewerDescription, 'SCnDebugMemoryStreamViewerDescription');
+  TranslateStr(SCnDebugMemoryStreamViewerMenuText, 'SCnDebugMemoryStreamViewerMenuText');
+  TranslateStr(SCnMemoryStreamViewerFormCaption, 'SCnMemoryStreamViewerFormCaption');
   TranslateStr(SCnDebugErrorProcessNotAccessible, 'SCnDebugErrorProcessNotAccessible');
   TranslateStr(SCnDebugErrorValueNotAccessible, 'SCnDebugErrorValueNotAccessible');
   TranslateStr(SCnDebugErrorOutOfScope, 'SCnDebugErrorOutOfScope');

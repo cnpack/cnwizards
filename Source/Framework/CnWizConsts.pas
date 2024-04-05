@@ -256,6 +256,7 @@ resourcestring
   SCnDebugEvalAsStrings = 'CnDebugEvalAsStrings';
   SCnDebugEvalAsBytes = 'CnDebugEvalAsBytes';
   SCnDebugEvalAsWide = 'CnDebugEvalAsWide';
+  SCnDebugEvalAsMemoryStream = 'CnDebugEvalAsMemoryStream';
   SCnDebugEvalAsDataSet = 'CnDebugEvalAsDataSet';
   SCnDebugConfig = 'CnDebugConfig';
 
@@ -1303,6 +1304,8 @@ var
   SCnDebugEvalAsBytesHint: string = 'Evaluate Expression as TBytes or RawByteString';
   SCnDebugEvalAsWideCaption: string = 'Evaluate as &WideString/UnicodeString...';
   SCnDebugEvalAsWideHint: string = 'Evaluate Expression as WideString or UnicodeString';
+  SCnDebugEvalAsMemoryStreamCaption: string = 'Evaluate as T&MemoryStream...';
+  SCnDebugEvalAsMemoryStreamHint: string = 'Evaluate Expression as TMemoryStream';
   SCnDebugEvalAsDataSetCaption: string = 'Evaluate as T&DataSet...';
   SCnDebugEvalAsDataSetHint: string = 'Evaluate Expression as TDataSet';
   SCnDebugConfigCaption: string = '&Options...';
@@ -1325,6 +1328,10 @@ var
   SCnDebugWideViewerDescription: string = 'CnPack IDE Wizards UnicodeString Viewer';
   SCnDebugWideViewerMenuText: string = 'Show UnicodeString';
   SCnWideViewerFormCaption: string = 'UnicodeString Visualizer for %s';
+  SCnDebugMemoryStreamViewerName: string = 'CnPack MemoryStream Viewer';
+  SCnDebugMemoryStreamViewerDescription: string = 'CnPack IDE Wizards MemoryStream Viewer';
+  SCnDebugMemoryStreamViewerMenuText: string = 'Show MemoryStream';
+  SCnMemoryStreamViewerFormCaption: string = 'MemoryStream Visualizer for %s';
   SCnDebugErrorProcessNotAccessible: string = 'Process NOT Accessible';
   SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
   SCnDebugErrorOutOfScope: string = 'Out of Scope';

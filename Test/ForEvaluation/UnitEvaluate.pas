@@ -21,6 +21,8 @@ type
     btnUnicodeString: TButton;
     btnWideString: TButton;
     btnString: TButton;
+    btnMemoryStream: TButton;
+    btnCustomMemoryStream: TButton;
     procedure btnDataSetClick(Sender: TObject);
     procedure btnStringsClick(Sender: TObject);
     procedure btnArrayOfByteClick(Sender: TObject);
@@ -31,6 +33,8 @@ type
     procedure btnUnicodeStringClick(Sender: TObject);
     procedure btnWideStringClick(Sender: TObject);
     procedure btnStringClick(Sender: TObject);
+    procedure btnMemoryStreamClick(Sender: TObject);
+    procedure btnCustomMemoryStreamClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -169,6 +173,42 @@ begin
     ShowMessage('AnsiString 0')
   else
     ShowMessage('AnsiString NOT 0');
+end;
+
+procedure TFormEvaluate.btnMemoryStreamClick(Sender: TObject);
+var
+  M: TMemoryStream;
+  S: string;
+begin
+  M := TMemoryStream.Create;
+  S := Caption;
+  M.Write(S[1], Length(S));
+
+  if M.Size > 0 then
+    ShowMessage('Memory Stream Size > 0');
+  M.Free;
+end;
+
+type
+  TCnMemoryStream = class(TCustomMemoryStream)
+  private
+    FNewProp: Integer;
+  public
+    property NewProp: Integer read FNewProp;
+  end;
+
+procedure TFormEvaluate.btnCustomMemoryStreamClick(Sender: TObject);
+var
+  M: TCnMemoryStream;
+  S: string;
+begin
+  M := TCnMemoryStream.Create;
+  S := Caption;
+  M.Write(S[1], Length(S));
+
+  if M.Size > 0 then
+    ShowMessage('Memory Stream Size > 0');
+  M.Free;
 end;
 
 end.

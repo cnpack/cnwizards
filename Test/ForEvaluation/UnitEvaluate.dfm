@@ -1,9 +1,9 @@
 object FormEvaluate: TFormEvaluate
   Left = 192
   Top = 107
+  Width = 979
+  Height = 563
   Caption = 'Evaluate Demo for Debugging'
-  ClientHeight = 536
-  ClientWidth = 971
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -102,6 +102,24 @@ object FormEvaluate: TFormEvaluate
     Caption = 'string in Unicode Compiler'
     TabOrder = 9
     OnClick = btnStringClick
+  end
+  object btnMemoryStream: TButton
+    Left = 32
+    Top = 224
+    Width = 137
+    Height = 25
+    Caption = 'MemoryStream'
+    TabOrder = 10
+    OnClick = btnMemoryStreamClick
+  end
+  object btnCustomMemoryStream: TButton
+    Left = 216
+    Top = 224
+    Width = 137
+    Height = 25
+    Caption = 'CustomMemoryStream'
+    TabOrder = 11
+    OnClick = btnCustomMemoryStreamClick
   end
   object ADODataSet1: TADODataSet
     Parameters = <>

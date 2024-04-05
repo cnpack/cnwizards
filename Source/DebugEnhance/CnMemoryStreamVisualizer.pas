@@ -18,17 +18,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnWideVisualizer;
+unit CnMemoryStreamVisualizer;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：针对 UnicodeString/WideString 等内存数据相关的类的调试期查看器
+* 单元名称：针对 MemoryStream 等内存数据相关的类的调试期查看器
 * 单元作者：CnPack 开发组
 * 备    注：结构参考了 VCL 中自带的各类 Visualizer
 * 开发平台：PWin11 + Delphi 12
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2024.04.04 V1.0
+* 修改记录：2024.04.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -43,12 +43,14 @@ uses
   CnWizUtils, CnWizMultiLang, CnWizMultiLangFrame, CnWizIdeDock, CnHexEditor;
 
 type
-  TCnWideViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
+  TCnMemoryStreamViewerFrame = class(TCnTranslateFrame {$IFDEF IDE_HAS_DEBUGGERVISUALIZER},
     IOTADebuggerVisualizerExternalViewerUpdater {$ENDIF})
     Panel1: TPanel;
     pgcView: TPageControl;
     tsHex: TTabSheet;
+    tsAnsi: TTabSheet;
     tsWide: TTabSheet;
+    mmoAnsi: TMemo;
     mmoWide: TMemo;
   private
     FHexEditor: TCnHexEditor;
@@ -61,7 +63,7 @@ type
     FAvailableState: TCnAvailableState;
     FEvaluator: TCnRemoteProcessEvaluator;
     procedure SetForm(AForm: TCustomForm);
-    procedure AddWideContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
+    procedure AddMemoryStreamContent(const Expression, TypeName, EvalResult: string; IsCpp: Boolean = False);
     procedure SetAvailableState(const AState: TCnAvailableState);
     procedure Clear;
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -84,7 +86,7 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-  TCnDebuggerWideVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
+  TCnDebuggerMemoryStreamVisualizer = class(TInterfacedObject, IOTADebuggerVisualizer,
     {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} IOTADebuggerVisualizer250, {$ENDIF}
     IOTADebuggerVisualizerExternalViewer)
   public
@@ -108,7 +110,7 @@ type
 
 {$ENDIF}
 
-procedure ShowWideExternalViewer(const Expression: string);
+procedure ShowMemoryStreamExternalViewer(const Expression: string);
 {* 以手工调用的方式传入一个类型是 TBytes 的表达式并显示，不走 Delphi 自身的提示按钮}
 
 implementation
@@ -136,9 +138,9 @@ type
     procedure SetFrame(Form: TCustomFrame);
   end;
 
-  TCnWideVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
+  TCnMemoryStreamVisualizerForm = class(TInterfacedObject, INTACustomDockableForm, ICnFrameFormHelper)
   private
-    FMyFrame: TCnWideViewerFrame;
+    FMyFrame: TCnMemoryStreamViewerFrame;
     FMyForm: TCustomForm;
     FExpression: string;
   public
@@ -169,67 +171,61 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnDebuggerWideVisualizer }
+{ TCnDebuggerMemoryStreamVisualizer }
 
-function TCnDebuggerWideVisualizer.GetMenuText: string;
+function TCnDebuggerMemoryStreamVisualizer.GetMenuText: string;
 begin
-  Result := SCnDebugWideViewerMenuText;
+  Result := SCnDebugMemoryStreamViewerMenuText;
 end;
 
-function TCnDebuggerWideVisualizer.GetSupportedTypeCount: Integer;
+function TCnDebuggerMemoryStreamVisualizer.GetSupportedTypeCount: Integer;
 begin
-  Result := 7;
+  Result := 1;
 end;
 
-procedure TCnDebuggerWideVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
+procedure TCnDebuggerMemoryStreamVisualizer.GetSupportedType(Index: Integer; var TypeName: string;
   var AllDescendants: Boolean);
 begin
-  AllDescendants := False;
+  AllDescendants := True;
   case Index of
-    0: TypeName := 'string';
-    1: TypeName := 'UnicodeString';
-    2: TypeName := 'WideString';
-    3: TypeName := 'array of Char';
-    4: TypeName := 'array of WideChar';
-    5: TypeName := 'TArray<Char>';
-    6: TypeName := 'TArray<WideChar>';
+    0: TypeName := 'TCustomMemoryStream';
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('WideVisualizer.GetSupportedType #%d: %s', [Index, TypeName])
+  CnDebugger.LogFmt('MemoryStreamVisualizer.GetSupportedType #%d: %s', [Index, TypeName])
 {$ENDIF}
 end;
 
 {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
 
-procedure TCnDebuggerWideVisualizer.GetSupportedType(Index: Integer;
+procedure TCnDebuggerMemoryStreamVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
   GetSupportedType(Index, TypeName, AllDescendants);
-  IsGeneric := Index in [5, 6];
+  IsGeneric := False;
 end;
 
 {$ENDIF}
 
-function TCnDebuggerWideVisualizer.GetVisualizerDescription: string;
+function TCnDebuggerMemoryStreamVisualizer.GetVisualizerDescription: string;
 begin
-  Result := SCnDebugWideViewerDescription;
+  Result := SCnDebugMemoryStreamViewerDescription;
 end;
 
-function TCnDebuggerWideVisualizer.GetVisualizerIdentifier: string;
+function TCnDebuggerMemoryStreamVisualizer.GetVisualizerIdentifier: string;
 begin
   Result := ClassName;
 end;
 
-function TCnDebuggerWideVisualizer.GetVisualizerName: string;
+function TCnDebuggerMemoryStreamVisualizer.GetVisualizerName: string;
 begin
-  Result := SCnDebugWideViewerName;
+  Result := SCnDebugMemoryStreamViewerName;
 end;
 
-function TCnDebuggerWideVisualizer.Show(const Expression, TypeName, EvalResult: string;
+function TCnDebuggerMemoryStreamVisualizer.Show(const Expression, TypeName, EvalResult: string;
   SuggestedLeft, SuggestedTop: Integer): IOTADebuggerVisualizerExternalViewerUpdater;
 var
   AForm: TCustomForm;
-  AFrame: TCnWideViewerFrame;
+  AFrame: TCnMemoryStreamViewerFrame;
   VisDockForm: INTACustomDockableForm;
 {$IFDEF IDE_SUPPORT_THEMING}
   LThemingServices: IOTAIDEThemingServices;
@@ -237,7 +233,7 @@ var
 begin
   CloseExpandableEvalViewForm; // 调试提示窗口可能过大挡住本窗口，先隐藏之，但也慢
 
-  VisDockForm := TCnWideVisualizerForm.Create(Expression) as INTACustomDockableForm;
+  VisDockForm := TCnMemoryStreamVisualizerForm.Create(Expression) as INTACustomDockableForm;
   AForm := (BorlandIDEServices as INTAServices).CreateDockableForm(VisDockForm);
 
 {$IFDEF DELPHI120_ATHENS_UP}
@@ -247,8 +243,8 @@ begin
     AForm.Left := SuggestedLeft;
     AForm.Top := SuggestedTop;
     (VisDockForm as ICnFrameFormHelper).SetForm(AForm);
-    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnWideViewerFrame;
-    AFrame.AddWideContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+    AFrame := (VisDockForm as ICnFrameFormHelper).GetFrame as TCnMemoryStreamViewerFrame;
+    AFrame.AddMemoryStreamContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 
     Result := AFrame as IOTADebuggerVisualizerExternalViewerUpdater;
 {$IFDEF IDE_SUPPORT_THEMING}
@@ -277,9 +273,9 @@ end;
 
 {$ENDIF}
 
-{ TCnWideViewerFrame }
+{ TCnMemoryStreamViewerFrame }
 
-procedure TCnWideViewerFrame.SetAvailableState(const AState: TCnAvailableState);
+procedure TCnMemoryStreamViewerFrame.SetAvailableState(const AState: TCnAvailableState);
 var
   S: string;
 begin
@@ -299,7 +295,7 @@ begin
     Clear;
 end;
 
-procedure TCnWideViewerFrame.AddWideContent(const Expression, TypeName,
+procedure TCnMemoryStreamViewerFrame.AddMemoryStreamContent(const Expression, TypeName,
   EvalResult: string; IsCpp: Boolean);
 var
   DebugSvcs: IOTADebuggerServices;
@@ -308,7 +304,8 @@ var
   S, PE, LE: string; // 结果、类型、指针表达式、长度表达式
   P, L: TUInt64;
   Buf: TBytes;
-  M: WideString;
+  M: AnsiString;
+  W: WideString;
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
@@ -319,15 +316,15 @@ begin
     Exit;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnWideViewerFrame.AddWideContent: %s: %s', [Expression, TypeName]);
+  CnDebugger.LogFmt('TCnMemoryStreamViewerFrame.AddMemoryStreamContent: %s: %s', [Expression, TypeName]);
 {$ENDIF}
 
   FExpression := Expression;
   SetAvailableState(asAvailable);
 
   Clear;
-  PE := Format('Pointer(%s)', [Expression]);
-  LE := Format('Length(%s)', [Expression]);
+  PE := Format('(TCustomMemoryStream(%s)).Memory', [Expression]);
+  LE := Format('(TCustomMemoryStream(%s)).Size', [Expression]);
 
   S := FEvaluator.EvaluateExpression(LE);
   L := StrToIntDef(S, 0);
@@ -341,22 +338,28 @@ begin
     Exit;
 
   P := StrToUInt64(S);
-  SetLength(Buf, L * SizeOf(WideChar));
-  CurProcess.ReadProcessMemory(P, L * SizeOf(WideChar), Buf[0]);
+  SetLength(Buf, L);
+  CurProcess.ReadProcessMemory(P, L, Buf[0]);
   FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
 
   SetLength(M, L);
   Move(Buf[0], M[1], Length(Buf));
-  mmoWide.Lines.Text := M;
+  mmoAnsi.Lines.Text := M;
+
+  L := L shr 1;
+  SetLength(W, L);
+  Move(Buf[0], W[1], L * SizeOf(WideChar));
+  mmoWide.Lines.Text := W;
 end;
 
-procedure TCnWideViewerFrame.Clear;
+procedure TCnMemoryStreamViewerFrame.Clear;
 begin
   FHexEditor.Clear;
+  mmoAnsi.Lines.Clear;
   mmoWide.Lines.Clear;
 end;
 
-constructor TCnWideViewerFrame.Create(AOwner: TComponent);
+constructor TCnMemoryStreamViewerFrame.Create(AOwner: TComponent);
 begin
   inherited;
   FEvaluator := TCnRemoteProcessEvaluator.Create;
@@ -365,7 +368,7 @@ begin
   FHexEditor.Parent := tsHex;
 end;
 
-destructor TCnWideViewerFrame.Destroy;
+destructor TCnMemoryStreamViewerFrame.Destroy;
 begin
   FEvaluator.Free;
   inherited;
@@ -373,13 +376,13 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-procedure TCnWideViewerFrame.CloseVisualizer;
+procedure TCnMemoryStreamViewerFrame.CloseVisualizer;
 begin
   if FOwningForm <> nil then
     FOwningForm.Close;
 end;
 
-procedure TCnWideViewerFrame.MarkUnavailable(
+procedure TCnMemoryStreamViewerFrame.MarkUnavailable(
   Reason: TOTAVisualizerUnavailableReason);
 begin
   if Reason = ovurProcessRunning then
@@ -388,13 +391,13 @@ begin
     SetAvailableState(asOutOfScope);
 end;
 
-procedure TCnWideViewerFrame.RefreshVisualizer(const Expression, TypeName,
+procedure TCnMemoryStreamViewerFrame.RefreshVisualizer(const Expression, TypeName,
   EvalResult: string);
 begin
-  AddWideContent(Expression, TypeName, EvalResult, CurrentIsCSource);
+  AddMemoryStreamContent(Expression, TypeName, EvalResult, CurrentIsCSource);
 end;
 
-procedure TCnWideViewerFrame.SetClosedCallback(
+procedure TCnMemoryStreamViewerFrame.SetClosedCallback(
   ClosedProc: TOTAVisualizerClosedProcedure);
 begin
   FClosedProc := ClosedProc;
@@ -402,12 +405,12 @@ end;
 
 {$ENDIF}
 
-procedure TCnWideViewerFrame.SetForm(AForm: TCustomForm);
+procedure TCnMemoryStreamViewerFrame.SetForm(AForm: TCustomForm);
 begin
   FOwningForm := AForm;
 end;
 
-procedure TCnWideViewerFrame.SetParent(AParent: TWinControl);
+procedure TCnMemoryStreamViewerFrame.SetParent(AParent: TWinControl);
 begin
   if AParent = nil then
   begin
@@ -422,7 +425,7 @@ end;
 
 {$IFDEF DELPHI120_ATHENS_UP}
 
-procedure TCnWideViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
+procedure TCnMemoryStreamViewerFrame.WMDPIChangedAfterParent(var Message: TMessage);
 begin
   inherited;
   if TIDEThemeMetrics.Font.Enabled then
@@ -433,131 +436,129 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-{ TCnWideVisualizerForm }
+{ TCnMemoryStreamVisualizerForm }
 
-constructor TCnWideVisualizerForm.Create(const Expression: string);
+constructor TCnMemoryStreamVisualizerForm.Create(const Expression: string);
 begin
   inherited Create;
   FExpression := Expression;
 end;
 
-procedure TCnWideVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
+procedure TCnMemoryStreamVisualizerForm.CustomizePopupMenu(PopupMenu: TPopupMenu);
 begin
   // no toolbar
 end;
 
-procedure TCnWideVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
+procedure TCnMemoryStreamVisualizerForm.CustomizeToolBar(ToolBar: TToolBar);
 begin
  // no toolbar
 end;
 
-function TCnWideVisualizerForm.EditAction(Action: TEditAction): Boolean;
+function TCnMemoryStreamVisualizerForm.EditAction(Action: TEditAction): Boolean;
 begin
   Result := False;
 end;
 
-procedure TCnWideVisualizerForm.FrameCreated(AFrame: TCustomFrame);
+procedure TCnMemoryStreamVisualizerForm.FrameCreated(AFrame: TCustomFrame);
 begin
-  FMyFrame := TCnWideViewerFrame(AFrame);
+  FMyFrame := TCnMemoryStreamViewerFrame(AFrame);
 end;
 
-function TCnWideVisualizerForm.GetCaption: string;
+function TCnMemoryStreamVisualizerForm.GetCaption: string;
 begin
-  Result := Format(SCnWideViewerFormCaption, [FExpression]);
+  Result := Format(SCnMemoryStreamViewerFormCaption, [FExpression]);
 end;
 
-function TCnWideVisualizerForm.GetEditState: TEditState;
+function TCnMemoryStreamVisualizerForm.GetEditState: TEditState;
 begin
   Result := [];
 end;
 
-function TCnWideVisualizerForm.GetForm: TCustomForm;
+function TCnMemoryStreamVisualizerForm.GetForm: TCustomForm;
 begin
   Result := FMyForm;
 end;
 
-function TCnWideVisualizerForm.GetFrame: TCustomFrame;
+function TCnMemoryStreamVisualizerForm.GetFrame: TCustomFrame;
 begin
   Result := FMyFrame;
 end;
 
-function TCnWideVisualizerForm.GetFrameClass: TCustomFrameClass;
+function TCnMemoryStreamVisualizerForm.GetFrameClass: TCustomFrameClass;
 begin
-  Result := TCnWideViewerFrame;
+  Result := TCnMemoryStreamViewerFrame;
 end;
 
-function TCnWideVisualizerForm.GetIdentifier: string;
+function TCnMemoryStreamVisualizerForm.GetIdentifier: string;
 begin
-  Result := 'WideDebugVisualizer';
+  Result := 'MemoryStreamDebugVisualizer';
 end;
 
-function TCnWideVisualizerForm.GetMenuActionList: TCustomActionList;
-begin
-  Result := nil;
-end;
-
-function TCnWideVisualizerForm.GetMenuImageList: TCustomImageList;
+function TCnMemoryStreamVisualizerForm.GetMenuActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-function TCnWideVisualizerForm.GetToolbarActionList: TCustomActionList;
+function TCnMemoryStreamVisualizerForm.GetMenuImageList: TCustomImageList;
 begin
   Result := nil;
 end;
 
-function TCnWideVisualizerForm.GetToolbarImageList: TCustomImageList;
+function TCnMemoryStreamVisualizerForm.GetToolbarActionList: TCustomActionList;
 begin
   Result := nil;
 end;
 
-procedure TCnWideVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
+function TCnMemoryStreamVisualizerForm.GetToolbarImageList: TCustomImageList;
+begin
+  Result := nil;
+end;
+
+procedure TCnMemoryStreamVisualizerForm.LoadWindowState(Desktop: TCustomIniFile;
   const Section: string);
 begin
   // no desktop saving
 end;
 
-procedure TCnWideVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
+procedure TCnMemoryStreamVisualizerForm.SaveWindowState(Desktop: TCustomIniFile;
   const Section: string; IsProject: Boolean);
 begin
   // no desktop saving
 end;
 
-procedure TCnWideVisualizerForm.SetForm(Form: TCustomForm);
+procedure TCnMemoryStreamVisualizerForm.SetForm(Form: TCustomForm);
 begin
   FMyForm := Form;
   if Assigned(FMyFrame) then
     FMyFrame.SetForm(FMyForm);
 end;
 
-procedure TCnWideVisualizerForm.SetFrame(Frame: TCustomFrame);
+procedure TCnMemoryStreamVisualizerForm.SetFrame(Frame: TCustomFrame);
 begin
-   FMyFrame := TCnWideViewerFrame(Frame);
+   FMyFrame := TCnMemoryStreamViewerFrame(Frame);
 end;
 
 {$ENDIF}
 
-procedure ShowWideExternalViewer(const Expression: string);
+procedure ShowMemoryStreamExternalViewer(const Expression: string);
 var
   F: TCnIdeDockForm;
-  Fm: TCnWideViewerFrame;
+  Fm: TCnMemoryStreamViewerFrame;
   S: string;
 begin
-  // 求值的要求都能拿到 Length() 值
-  S := CnRemoteProcessEvaluator.EvaluateExpression(Format('Length(%s)', [Expression]));
-  if S = '' then
+  if not CnWizDebuggerObjectInheritsFrom(Expression, 'TCustomMemoryStream') then
   begin
-    ErrorDlg(Format(SCnDebugErrorExprNotAClass, [Expression, 'WideString/UnicodeString']));
+    ErrorDlg(Format(SCnDebugErrorExprNotAClass, [Expression, 'TCustomMemoryStream']));
     Exit;
   end;
 
   F := TCnIdeDockForm.Create(Application);
-  F.Caption := Format(SCnWideViewerFormCaption, [Expression]);
-  Fm := TCnWideViewerFrame.Create(F);
+  F.Caption := Format(SCnMemoryStreamViewerFormCaption, [Expression]);
+  Fm := TCnMemoryStreamViewerFrame.Create(F);
   Fm.SetForm(F);
   Fm.Parent := F;
   Fm.Align := alClient;
-  Fm.AddWideContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
+  Fm.AddMemoryStreamContent(Expression, '', '',  CurrentIsCSource); // 不是 C/C++ 的以 Pascal 为准
 
   F.Show;
 end;
