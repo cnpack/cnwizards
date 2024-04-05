@@ -2063,7 +2063,9 @@ var
 begin
   IL := GetIDEImageList;
   if (IL <> nil) and (IL is TVirtualImageList) then
-    Result := (IL as TVirtualImageList).ImageCollection;
+    Result := (IL as TVirtualImageList).ImageCollection
+  else
+    Result := nil;
 end;
 
 {$ENDIF}
@@ -2754,13 +2756,16 @@ end;
 
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
   I: Integer;
   Lines: TStringList;
   HdpiFactor: Single;
 {$ENDIF}
+{$ENDIF}
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
+  {$IFNDEF CNWIZARDS_MINIMUM}
   if CnIsGEDelphi11Dot3 then
   begin
     Lines := TStringList.Create;
@@ -2782,6 +2787,9 @@ begin
   end
   else
     Result := GetListViewWidthString(AListView, DivFactor);
+  {$ELSE}
+    Result := GetListViewWidthString(AListView, DivFactor);
+  {$ENDIF}
 {$ELSE}
   Result := GetListViewWidthString(AListView, DivFactor);
 {$ENDIF}
@@ -6940,10 +6948,12 @@ var
   CharPos: TOTACharPos;
   IEditView: IOTAEditView;
 {$IFDEF UNICODE}
+{$IFNDEF CNWIZARDS_MINIMUM}
   Text: string;
   LineNo: Integer;
   CharIdx: Integer;
   EditControl: TControl;
+{$ENDIF}
 {$ENDIF}
 begin
   if not Assigned(SourceEditor) then
