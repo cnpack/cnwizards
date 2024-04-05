@@ -513,6 +513,10 @@
             <Form>CnWideViewerFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
+        <DCCReference Include="DebugEnhance\CnMemoryStreamVisualizer.pas">
+            <Form>CnMemoryStreamViewerFrame</Form>
+            <DesignClass>TFrame</DesignClass>
+        </DCCReference>
         <DCCReference Include="ProjectExtWizard\CnProjectDirBuilderFrm.pas">
             <Form>CnProjectDirBuilderForm</Form>
         </DCCReference>

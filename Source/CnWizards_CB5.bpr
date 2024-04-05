@@ -76,7 +76,8 @@
       ..\Dcu\CnWizDfmParser.obj ..\Dcu\CnNamePropEditor.obj 
       ..\Dcu\CnVerEnhanceFrm.obj ..\Dcu\CnVerEnhancements.obj 
       ..\Dcu\CnDebugEnhancements.obj ..\Dcu\CnDataSetVisualizer.obj 
-      ..\Dcu\CnStringsVisualizer.obj ..\Dcu\CnBytesVisualizer.obj  ..\Dcu\CnWideVisualizer.obj 
+      ..\Dcu\CnStringsVisualizer.obj ..\Dcu\CnBytesVisualizer.obj 
+      ..\Dcu\CnWideVisualizer.obj ..\Dcu\CnMemoryStreamVisualizer.obj 
       ..\Dcu\CnProjectDirBuilderFrm.obj ..\Dcu\CnProjectDirImportFrm.obj 
       ..\Dcu\CnWizMacroFrm.obj ..\Dcu\CnWizMacroText.obj 
       ..\Dcu\CnWizMacroUtils.obj ..\Dcu\CnSrcEditorCodeWrap.obj 
@@ -150,7 +151,8 @@
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
       SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
       DebugEnhance\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
-      DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm DebugEnhance\CnWideVisualizer.dfm 
+      DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm 
+      DebugEnhance\CnWideVisualizer.dfm DebugEnhance\CnMemoryStreamVisualizer.dfm 
       ProjectExtWizard\CnProjectDirImportFrm.dfm Utils\CnWizMacroFrm.dfm 
       SrcEditorEnhance\CnSrcEditorGroupReplace.dfm CodingToolset\CnEditorInsertTime.dfm 
       CodingToolset\CnEditorCollector.dfm 
