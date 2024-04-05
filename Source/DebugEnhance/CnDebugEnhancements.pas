@@ -907,7 +907,7 @@ begin
     'Evaluate As Object...', 0, '');
 
   // ÔÝÊ±ÏÈÒþ²Ø
-  // SubActions[FIdEvalObj].Visible := False;
+  SubActions[FIdEvalObj].Visible := False;
 
   FIdEvalAsStrings := RegisterASubAction(SCnDebugEvalAsStrings,
     SCnDebugEvalAsStringsCaption, 0, SCnDebugEvalAsStringsHint);
