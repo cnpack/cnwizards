@@ -167,7 +167,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Top = 96
           Width = 361
           Height = 17
-          Caption = 'Enable TCustomMemoryStream Viewer (Delphi XE ~ 10.4)'
+          Caption = 'Enable TMemoryStream Viewer (Delphi XE ~ 10.4)'
           TabOrder = 3
         end
       end
@@ -187,7 +187,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Top = 24
           Width = 361
           Height = 17
-          Caption = 'Auto Close Running Target  Before Compiling or Building'
+          Caption = 'Auto Close Running Target Before Compiling or Building'
           TabOrder = 0
         end
         object chkAutoReset: TCheckBox
@@ -195,7 +195,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Top = 48
           Width = 361
           Height = 17
-          Caption = 'Auto Reset Debugging Target  Before Compiling or Building'
+          Caption = 'Auto Reset Debugging Target Before Compiling or Building'
           TabOrder = 1
         end
       end
