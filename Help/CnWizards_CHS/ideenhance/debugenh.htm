@@ -31,6 +31,12 @@
     <p class="text"><b>作为 TBytes/RawByteString 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为字节数组或单字节字符串类型进行内容查看。如果表达式类型不是字节数组与单字节字符串等类型则出错。</p>
   </li>
   <li>
+    <p class="text"><b>作为 WideString/UnicodeString 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为宽字符数组或双字节字符串类型进行内容查看。如果表达式类型不是宽字符数组与双字节字符串等类型则出错。</p>
+  </li>
+  <li>
+    <p class="text"><b>作为 TMemoryStream 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为 MemoryStream 内存流进行内容查看。如果表达式类型不是 TCustomMemoryStream 或其派生类型则出错。</p>
+  </li>
+  <li>
     <p class="text"><b>作为 TDatSet 查看</b>：该功能仅在 Delphi 调试断点期间可用，手工输入表达式作为 TDataSet 类型或其子类进行内容查看。如果表达式类型不是 TDataSet 或其子类则出错。/p>
   </li>
 </ul>
@@ -42,7 +48,7 @@
     <p class="text"><b>增强调试提示</b>：在 Delphi XE 或以上版本支持调试期间鼠标移动到编辑器中的表达式上时自定义其提示显示，以增加特定类型的调试期值的可读性。</p>
   </li>
   <li>
-    <p class="text"><b>添加调试提示</b>：插入新的调试提示。提示是“类型名=含%s表达式”的形式，表示当 IDE 针对特定类型的表达式求值时用新表达式进行替换。例如提示“TCnBigNumber=%s.ToString”，代表当光标移动到类型是 TCnBigNumber 的变量如 Num1 上，IDE 生成调试期提示时，会求值 Num1.ToString 来增加至原始提示后，以增加可读性。</p>
+    <p class="text"><b>增加调试提示</b>：插入新的调试提示。提示是“类型名=含%s表达式”的形式，表示当 IDE 针对特定类型的表达式求值时用新表达式进行替换。例如提示“TCnBigNumber=%s.ToString”，代表当光标移动到类型是 TCnBigNumber 的变量如 Num1 上，IDE 生成调试期提示时，会求值 Num1.ToString 来增加至原始提示后，以增加可读性。</p>
   </li>
   <li>
     <p class="text"><b>删除调试提示</b>：删除选中的调试提示表达式。</p>
@@ -57,6 +63,12 @@
   </li>
   <li>
     <p class="text"><b>启用 TBytes/RawByteString 查看器</b>：此选项允许调试期针对字节数组或字节型字符串等类型的表达式启用特定查看器，查看其原始十六进制数据。该选项只针对 Delphi XE 到 10.4 版本有效，不支持更高或更低的版本。</p>
+  </li>
+  <li>
+    <p class="text"><b>启用 WideString/UnicodeString 查看器</b>：此选项允许调试期针对宽字符数组或双字节字符串等类型的表达式启用特定查看器，查看其原始十六进制数据。该选项只针对 Delphi XE 及更高版本有效。</p>
+  </li>
+  <li>
+    <p class="text"><b>启用 TMemoryStream 查看器</b>：此选项允许调试期针对 MemoryStream 内存流等类型的表达式启用特定查看器，查看其原始十六进制数据。该选项只针对 Delphi XE 到 10.4 版本有效，不支持更高或更低的版本。</p>
   </li>
 </ul>
 <p class="text">该专家的设置窗口第三页“其他”，如下图所示：</p>  

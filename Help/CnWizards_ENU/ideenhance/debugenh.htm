@@ -31,6 +31,12 @@
     <p class="text"><b>Evaluate as TBytes/RawByteString</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as byte arrays or single-byte string types for content viewing. An error will occur if the expression type is not a byte array or a single-byte string type.</p>
   </li>
   <li>
+    <p class="text"><b>Evaluate as WideString/UnicodeString</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as widechar arrays or double-byte string types for content viewing. An error will occur if the expression type is not a widechar array or a double-byte string type.</p>
+  </li>
+  <li>
+    <p class="text"><b>Evaluate as TMemoryStream</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as MemoryStream types for content viewing. An error will occur if the expression type is not a TCustomMemoryStream type.</p>
+  </li>
+  <li>
     <p class="text"><b>Evaluate as TDatSet</b>: This feature is only available during Delphi debugging breakpoints, where expressions are manually entered as TDataSet type or its subclasses for content viewing. An error will occur if the expression type is not TDataSet or its subclass.</p>
   </li>
 </ul>
@@ -57,6 +63,12 @@
   </li>
   <li>
     <p class="text"><b>Enable TBytes/RawByteString Viewer</b>: This option allows the debugging period to enable a specific viewer for expressions of byte arrays or byte-type strings, viewing their original hexadecimal data. This option is only valid for Delphi XE to 10.4 versions and does not support higher or lower versions.</p>
+  </li>
+  <li>
+    <p class="text"><b>Enable WideString/UnicodeString Viewer</b>: This option allows the debugging period to enable a specific viewer for expressions of widechar arrays or unicode strings, viewing their original hexadecimal data. This option is only valid for Delphi XE versions or above.</p>
+  </li>
+  <li>
+    <p class="text"><b>Enable TMemoryStream Viewer</b>: This option allows the debugging period to enable a specific viewer for expressions of MemoryStream, viewing their original hexadecimal data. This option is only valid for Delphi XE to 10.4 versions and does not support higher or lower versions.</p>
   </li>
 </ul>
 <p class="text">The third page of the wizard's settings window, "Others," is shown in the figure below:</p>
