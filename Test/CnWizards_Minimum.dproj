@@ -54,16 +54,16 @@
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <DCC_UnitSearchPath>$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\Source\ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;..\Source\ThirdParty\DDetours;..\Source\Utils;..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_S>false</DCC_S>
-        <VerInfo_Keys>CompanyName=CnPack Team;FileDescription=CnWizards For Delphi 5;FileVersion=0.9.0.0;InternalName=CnWizards_D5;LegalCopyright=(C)Copyright 2001-2009 CnPack Develop Team;LegalTrademarks=CnPack;OriginalFilename=CnWizards_D5.DLL;ProductName=CnWizards;ProductVersion=1.0.0.0;Comments=http://www.cnpack.org</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=CnPack Team;FileDescription=CnWizards For Delphi 5;FileVersion=0.9.0.0;InternalName=CnWizards_D5;LegalCopyright=(C)Copyright 2001-2009 CnPack Develop Team;LegalTrademarks=CnPack;OriginalFilename=CnWizards_D5.DLL;ProductName=CnWizards;ProductVersion=1.0.0.0;Comments=https://www.cnpack.org</VerInfo_Keys>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_ImageBase>00400000</DCC_ImageBase>
-        <DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_UsePackage>rtl;vcl;vclx;designide;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_DebugInformation>1</DCC_DebugInformation>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Vcl;$(DCC_Namespace)</DCC_Namespace>
         <DCC_Alignment>1</DCC_Alignment>
         <DCC_K>false</DCC_K>
-        <DCC_Define>CNWIZARDS_MINIMUM;DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_Define>CNWIZARDS_MINIMUM;DISABLE_FMX;DEBUG;$(DCC_Define)</DCC_Define>
         <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
         <SanitizedProjectName>CnWizards_Minimum</SanitizedProjectName>
         <DCC_SymbolReferenceInfo>1</DCC_SymbolReferenceInfo>
