@@ -296,7 +296,10 @@ begin
   end;
 
   if S <> '' then
+  begin
     Clear;
+    Caption := S;
+  end;
 end;
 
 procedure TCnWideViewerFrame.AddWideContent(const Expression, TypeName,
@@ -337,7 +340,7 @@ begin
     L := MAX_LEN;
 
   S := FEvaluator.EvaluateExpression(PE);
-  if S = 'nil' then // 空的指针，也没法显示
+  if (S = '') or (S = 'nil') then // 出错或空的指针，也没法显示
     Exit;
 
   P := StrToUInt64(S);
