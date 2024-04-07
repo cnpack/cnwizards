@@ -947,6 +947,21 @@ var
   ResultAddr, ResultSize, ResultVal: LongWord;
   EvalRes: TOTAEvaluateResult;
   DebugSvcs: IOTADebuggerServices;
+
+  function EvalResultToString(ER: TOTAEvaluateResult): string;
+  begin
+    case ER of
+      erOK: Result := 'OK';
+      erError: Result := 'Error';
+      erDeferred: Result := 'Deferred';
+{$IFDEF OTA_DEBUG_HAS_ERBUSY}
+      erBusy: Result := 'Busy';
+{$ENDIF}
+    else
+      Result := 'Error Result';
+    end;
+  end;
+
 begin
   Result := '';
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
@@ -969,11 +984,17 @@ begin
       ResultSize, ResultVal {$IFDEF BDS} , '', 0 {$ENDIF});
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnRemoteProcessEvaluator.EvaluateExpression Res ' + IntToStr(Ord(EvalRes)));
+      CnDebugger.LogMsg('TCnRemoteProcessEvaluator.EvaluateExpression Res ' + EvalResultToString(EvalRes));
 {$ENDIF}
 
     case EvalRes of
       erOK: Result := ResultStr;
+      erError:
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnRemoteProcessEvaluator.EvaluateExpression Error: ' + ResultStr);
+{$ENDIF}
+        end;
       erDeferred:
         begin
           FCompleted := False;
