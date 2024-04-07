@@ -313,6 +313,9 @@ var
   S, PE, LE: string; // 结果、类型、指针表达式、长度表达式
   P, L: TUInt64;
   Buf: TBytes;
+{$IFDEF UNICODE}
+  M: AnsiString;
+{$ENDIF}
 begin
   if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
     CurProcess := DebugSvcs.CurrentProcess;
@@ -341,15 +344,34 @@ begin
     L := MAX_BYTES;
 
   S := FEvaluator.EvaluateExpression(PE);
-  if (S = '') or (S = 'nil') then // 出错或空的指针，也没法显示
-    Exit;
+  if S = '' then // 出错，说明没法拿到指针地址，换成直接拿值
+  begin
+    // 如果是常量，Pointer 拿不到，直接取值
+    S := FEvaluator.EvaluateExpression(Expression);
+    if S = '' then
+      Exit;
 
-  P := StrToUInt64(S);
-  SetLength(Buf, L);
-  CurProcess.ReadProcessMemory(P, L, Buf[0]);
-  FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+{$IFDEF UNICODE}
+    M := AnsiString(S);
+    SetLength(Buf, Length(M));
+    Move(M[1], Buf[0], Length(Buf));
+    mmoAnsi.Lines.Text := M;
+{$ELSE}
+    SetLength(Buf, Length(S));
+    Move(S[1], Buf[0], Length(Buf));
+    mmoAnsi.Lines.Text := S;
+{$ENDIF}
+    FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+  end
+  else
+  begin
+    P := StrToUInt64(S);
+    SetLength(Buf, L);
+    CurProcess.ReadProcessMemory(P, L, Buf[0]);
+    FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
 
-  mmoAnsi.Lines.Text := BytesToAnsi(Buf);
+    mmoAnsi.Lines.Text := BytesToAnsi(Buf);
+  end;
 end;
 
 procedure TCnBytesViewerFrame.Clear;

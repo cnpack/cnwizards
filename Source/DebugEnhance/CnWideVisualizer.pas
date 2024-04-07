@@ -340,17 +340,36 @@ begin
     L := MAX_LEN;
 
   S := FEvaluator.EvaluateExpression(PE);
-  if (S = '') or (S = 'nil') then // 出错或空的指针，也没法显示
-    Exit;
+  if S = '' then // 出错，说明没法拿到指针地址，换成直接拿值
+  begin
+    // 如果是常量，Pointer 拿不到，直接取值
+    S := FEvaluator.EvaluateExpression(Expression);
+    if S = '' then
+      Exit;
 
-  P := StrToUInt64(S);
-  SetLength(Buf, L * SizeOf(WideChar));
-  CurProcess.ReadProcessMemory(P, L * SizeOf(WideChar), Buf[0]);
-  FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+{$IFDEF UNICODE}
+    SetLength(Buf, Length(S) * SizeOf(WideChar));
+    Move(S[1], Buf[0], Length(Buf));
+    mmoWide.Lines.Text := S;
+{$ELSE}
+    M := WideString(S);
+    SetLength(Buf, Length(M) * SizeOf(WideChar));
+    Move(M[1], Buf[0], Length(Buf));
+    mmoWide.Lines.Text := M;
+{$ENDIF}
+    FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
+  end
+  else
+  begin
+    P := StrToUInt64(S);
+    SetLength(Buf, L * SizeOf(WideChar));
+    CurProcess.ReadProcessMemory(P, L * SizeOf(WideChar), Buf[0]);
+    FHexEditor.LoadFromBuffer(Buf[0], Length(Buf));
 
-  SetLength(M, L);
-  Move(Buf[0], M[1], Length(Buf));
-  mmoWide.Lines.Text := M;
+    SetLength(M, L);
+    Move(Buf[0], M[1], Length(Buf));
+    mmoWide.Lines.Text := M;
+  end;
 end;
 
 procedure TCnWideViewerFrame.Clear;

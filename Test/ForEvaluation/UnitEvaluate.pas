@@ -48,6 +48,19 @@ implementation
 
 {$R *.DFM}
 
+const
+  SCONST_A = 'Const String A';
+  SCONST_B: AnsiString = 'Const Ansi B';
+  SCONST_C: string = 'Const String C';
+
+type
+  TCnMemoryStream = class(TCustomMemoryStream)
+  private
+    FNewProp: Integer;
+  public
+    property NewProp: Integer read FNewProp;
+  end;
+
 procedure TFormEvaluate.btnDataSetClick(Sender: TObject);
 begin
   if ADODataSet1.Active then
@@ -188,14 +201,6 @@ begin
     ShowMessage('Memory Stream Size > 0');
   M.Free;
 end;
-
-type
-  TCnMemoryStream = class(TCustomMemoryStream)
-  private
-    FNewProp: Integer;
-  public
-    property NewProp: Integer read FNewProp;
-  end;
 
 procedure TFormEvaluate.btnCustomMemoryStreamClick(Sender: TObject);
 var
