@@ -488,7 +488,9 @@ begin
       AWizard.CustomIdentifierForeground := shpCustomFg.Brush.Color;
       AWizard.CustomIdentifierBackground := shpCustomBg.Brush.Color;
       SaveToStringList(AWizard.CustomIdentifiers);
-
+{$IFDEF IDE_STRING_ANSI_UTF8}
+      AWizard.SyncCustomWide;
+{$ENDIF}
       AWizard.DoSaveSettings;
       AWizard.RepaintEditors;
     end;

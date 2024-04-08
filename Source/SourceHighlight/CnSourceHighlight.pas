@@ -104,6 +104,7 @@ uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
+  {$IFDEF IDE_STRING_ANSI_UTF8} CnWideStrings, {$ENDIF}
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
@@ -222,7 +223,7 @@ type
     FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数
     FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens 的引用
     FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens 的引用
-    FCustomIdentifierList: TCnList;   // 容纳解析出来的自定义高亮标识符的引用
+    FCustomIdentifierTokenList: TCnList;   // 容纳解析出来的自定义高亮标识符的引用
 
     // *LineList 容纳快速访问结果
     FKeyLineList: TCnFastObjectList;      // 容纳按行方式存储的快速访问的关键字内容
@@ -260,10 +261,10 @@ type
     function GetCompDirectiveTokens(Index: Integer): TCnGeneralPasToken;
     function GetCompDirectiveLineCount: Integer;
     function GetCompDirectiveLines(LineNum: Integer): TCnList;
-    function GetCustomIdentifierCount: Integer;
-    function GetCustomIdentifierLines(LineNum: Integer): TCnList;
-    function GetCustomIdentifiers(Index: Integer): TCnGeneralPasToken;
+    function GetCustomIdentifierTokenCount: Integer;
+    function GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
     function GetCustomIdentifierLineCount: Integer;
+    function GetCustomIdentifierLines(LineNum: Integer): TCnList;
   protected
     function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
     function CheckIsCustomIdentifier(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
@@ -284,7 +285,7 @@ type
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
     procedure ConvertFlowLineList;      // 将解析出的流程控制标识符转换成按行方式快速访问的
     procedure ConvertCompDirectiveLineList; // 将解析出的编译指令转换成按行方式快速访问的
-    procedure ConvertCustomIdentifierLineList;   // 将解析出的
+    procedure ConvertCustomIdentifierLineList;   // 将解析出的自定义标识符转换成按行方式快速访问的
 
     procedure Clear;
     procedure AddToKeyList(AToken: TCnGeneralPasToken);
@@ -309,10 +310,10 @@ type
     {* 编译指令的标识符列表}
     property CompDirectiveTokenCount: Integer read GetCompDirectiveTokenCount;
     {* 编译指令的标识符列表数目}
-    property CustomIdentifiers[Index: Integer]: TCnGeneralPasToken read GetCustomIdentifiers;
+    property CustomIdentifierTokens[Index: Integer]: TCnGeneralPasToken read GetCustomIdentifierTokens;
     {* 自定义标识符的列表}
-    property CustomIdentifierCount: Integer read GetCustomIdentifierCount;
-    {* 编译指令的标识符列表数目}
+    property CustomIdentifierTokenCount: Integer read GetCustomIdentifierTokenCount;
+    {* 自定义标识符的列表数目}
 
     property LineCount: Integer read GetLineCount;
     property IdLineCount: Integer read GetIdLineCount;
@@ -543,6 +544,9 @@ type
     FCustomIdentifierBackground: TColor;
     FCustomIdentifierForeground: TColor;
     FCustomIdentifiers: TStringList;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    FCustomWideIdentfiers: TCnWideStringList;
+{$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
     function EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
       {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
@@ -620,6 +624,10 @@ type
 
     constructor Create; override;
     destructor Destroy; override;
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    procedure SyncCustomWide; // 2005/2006/2007 下使用宽字符串进行对比
+{$ENDIF}
 
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetSearchContent: string; override;
@@ -2399,7 +2407,7 @@ begin
   FCurTokenListEditCol.Clear;
   FFlowTokenList.Clear;
   FCompDirectiveTokenList.Clear;
-  FCustomIdentifierList.Clear;
+  FCustomIdentifierTokenList.Clear;
 
   FKeyLineList.Clear;
   FIdLineList.Clear;
@@ -2447,7 +2455,7 @@ begin
   FCurTokenListEditCol := TCnList.Create;
   FFlowTokenList := TCnList.Create;
   FCompDirectiveTokenList := TCnList.Create;
-  FCustomIdentifierList := TCnList.Create;
+  FCustomIdentifierTokenList := TCnList.Create;
 
   FKeyLineList := TCnFastObjectList.Create;
   FIdLineList := TCnFastObjectList.Create;
@@ -2478,7 +2486,7 @@ begin
   FCustomIdentifierLineList.Free;
   FSeparateLineList.Free;
 
-  FCustomIdentifierList.Free;
+  FCustomIdentifierTokenList.Free;
   FCompDirectiveTokenList.Free;
   FFlowTokenList.Free;
   FCurTokenListEditLine.Free;
@@ -2656,7 +2664,7 @@ begin
       MaxLine := CompDirectiveTokens[I].EditLine;
   FCompDirectiveLineList.Count := MaxLine + 1;
 
-  if True then
+  if FHighlight.HighlightCompDirective then
   begin
     for I := 0 to FCompDirectiveTokenList.Count - 1 do
     begin
@@ -2736,6 +2744,9 @@ begin
   FCustomIdentifierBackground := csDefaultCustomIdentifierBackground;
   FCustomIdentifierForeground := csDefaultCustomIdentifierForeground;
   FCustomIdentifiers := TStringList.Create;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  FCustomWideIdentfiers := TCnWideStringList.Create;
+{$ENDIF}
 
   FHighlightCompDirective := True;    // 默认打开光标下的编译指令背景高亮
   FCompDirectiveBackground := csDefaultHighlightBackgroundColor;
@@ -2805,6 +2816,9 @@ begin
   FCompDirectiveHighlight.Free;
   FDirtyList.Free;
   FCustomIdentifiers.Free;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  FCustomWideIdentfiers.Free;
+{$ENDIF}
   FViewFileNameIsPascalList.Free;
   FViewChangedList.Free;
 {$IFNDEF BDS}
@@ -4096,7 +4110,7 @@ begin
       end;
 
       if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
-        or (Info.FlowTokenCount > 0) or (Info.CustomIdentifierCount > 0) then
+        or (Info.FlowTokenCount > 0) or (Info.CustomIdentifierTokenCount > 0) then
       begin
         // 同时做关键字背景匹配高亮，可能由 MarkLinesDirty 调用
         KeyPair := nil;
@@ -5209,7 +5223,9 @@ begin
     FCustomIdentifierBackground := ReadColor('', csCustomIdentifierBackground, csDefaultCustomIdentifierBackground);
     FCustomIdentifierForeground := ReadColor('', csCustomIdentifierForeground, csDefaultCustomIdentifierForeground);
     ReadStringsBoolean('', csCustomIdentifiers, FCustomIdentifiers);
-
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    SyncCustomWide;
+{$ENDIF}
     FBlockHighlightRange := TBlockHighlightRange(ReadInteger('', csBlockHighlightRange,
       Ord(brAll)));
     FBlockMatchDelay := ReadInteger('', csBlockMatchDelay, 600);
@@ -5633,6 +5649,23 @@ begin
       Exit;
     end;
   Result := -1;
+end;
+
+{$ENDIF}
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+
+procedure TCnSourceHighlight.SyncCustomWide;
+var
+  I: Integer;
+  S: WideString;
+begin
+  FCustomWideIdentfiers.Clear;
+  for I := 0 to FCustomIdentifiers.Count - 1 do
+  begin
+    S := WideString(FCustomIdentifiers[I]);
+    FCustomWideIdentfiers.AddObject(S, FCustomIdentifiers.Objects[I]);
+  end;
 end;
 
 {$ENDIF}
@@ -6171,7 +6204,7 @@ end;
 
 procedure TCnBlockMatchInfo.AddToCustomIdentifierList(AToken: TCnGeneralPasToken);
 begin
-  FCustomIdentifierList.Add(AToken);
+  FCustomIdentifierTokenList.Add(AToken);
 end;
 
 procedure TCnBlockMatchInfo.ConvertCustomIdentifierLineList;
@@ -6181,16 +6214,16 @@ var
   MaxLine: Integer;
 begin
   MaxLine := 0;
-  for I := 0 to FCustomIdentifierList.Count - 1 do
-    if CustomIdentifiers[I].EditLine > MaxLine then
-      MaxLine := CustomIdentifiers[I].EditLine;
+  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    if CustomIdentifierTokens[I].EditLine > MaxLine then
+      MaxLine := CustomIdentifierTokens[I].EditLine;
   FCustomIdentifierLineList.Count := MaxLine + 1;
 
   if FHighlight.HighlightCustomIdentifier then
   begin
-    for I := 0 to FCustomIdentifierList.Count - 1 do
+    for I := 0 to FCustomIdentifierTokenList.Count - 1 do
     begin
-      Token := CustomIdentifiers[I];
+      Token := CustomIdentifierTokens[I];
       if FCustomIdentifierLineList[Token.EditLine] = nil then
         FCustomIdentifierLineList[Token.EditLine] := TCnList.Create;
       TCnList(FCustomIdentifierLineList[Token.EditLine]).Add(Token);
@@ -6198,9 +6231,9 @@ begin
   end;
 end;
 
-function TCnBlockMatchInfo.GetCustomIdentifierCount: Integer;
+function TCnBlockMatchInfo.GetCustomIdentifierTokenCount: Integer;
 begin
-  Result := FCustomIdentifierList.Count;
+  Result := FCustomIdentifierTokenList.Count;
 end;
 
 function TCnBlockMatchInfo.GetCustomIdentifierLines(LineNum: Integer): TCnList;
@@ -6208,9 +6241,9 @@ begin
   Result := TCnList(FCustomIdentifierLineList[LineNum]);
 end;
 
-function TCnBlockMatchInfo.GetCustomIdentifiers(Index: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
 begin
-  Result := TCnGeneralPasToken(FCustomIdentifierList[Index]);
+  Result := TCnGeneralPasToken(FCustomIdentifierTokenList[Index]);
 end;
 
 procedure TCnBlockMatchInfo.UpdateCustomIdentifierList;
@@ -6236,7 +6269,7 @@ begin
   if EditView = nil then
     Exit;
 
-  FCustomIdentifierList.Clear;
+  FCustomIdentifierTokenList.Clear;
   if not FIsCppSource then
   begin
     if Assigned(PasParser) then
@@ -6250,7 +6283,7 @@ begin
         Bold := False;
         if CheckIsCustomIdentifier(PasParser.Tokens[I], FIsCppSource, Bold) then
         begin
-          FCustomIdentifierList.Add(PasParser.Tokens[I]);
+          FCustomIdentifierTokenList.Add(PasParser.Tokens[I]);
           if Bold then
             PasParser.Tokens[I].Tag := 1  // 如果设置要求加粗，用 Tag 存储加粗标志
           else
@@ -6271,7 +6304,7 @@ begin
     begin
       if CheckIsCustomIdentifier(CppParser.Tokens[I], FIsCppSource, Bold) then
       begin
-        FCustomIdentifierList.Add(CppParser.Tokens[I]);
+        FCustomIdentifierTokenList.Add(CppParser.Tokens[I]);
         if Bold then
           CppParser.Tokens[I].Tag := 1
         else
@@ -6284,11 +6317,11 @@ begin
   end;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('FCustomIdentifierList.Count: %d', [FCustomIdentifierList.Count]);
+  CnDebugger.LogFmt('FCustomIdentifierTokenList.Count: %d', [FCustomIdentifierTokenList.Count]);
 {$ENDIF}
 
-  for I := 0 to FCustomIdentifierList.Count - 1 do
-    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierList[I]).EditLine);
+  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierTokenList[I]).EditLine);
 end;
 
 function TCnBlockMatchInfo.GetCustomIdentifierLineCount: Integer;
@@ -6314,7 +6347,33 @@ begin
   Result := False;
   if AToken = nil then
     Exit;
-
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005 2006 2007 下使用宽字符串列表进行比对
+  if IsCpp then // 区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomWideIdentfiers[I])[1]), True) then
+      begin
+        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end
+  else // 不区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomWideIdentfiers[I])[1])) then
+      begin
+        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+{$ELSE}
   if IsCpp then // 区分大小写
   begin
     for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
@@ -6339,6 +6398,7 @@ begin
       end;
     end;
   end;
+{$ENDIF}
 end;
 
 initialization
