@@ -25,6 +25,10 @@ unit CnCodeFormatter;
 * 单元名称：格式化专家核心类 CnCodeFormater
 * 单元作者：CnPack 开发组
 * 备    注：该单元实现了代码格式化的核心类
+*
+*           保留换行时如果某些语句没有注释但换行后顶格了没正确缩进，八成是少了一句
+*           FCurrentTab := PreSpaceCount; 得加上以让换行时缩进正确的格数
+*
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
@@ -3109,9 +3113,16 @@ end;
 { EnumeratedType -> '(' EnumeratedList ')' }
 procedure TCnBasePascalFormatter.FormatEnumeratedType(PreSpaceCount: Byte);
 begin
-  Match(tokLB, PreSpaceCount);
-  FormatEnumeratedList;
-  Match(tokRB);
+  // 枚举类型允许保持内部换行
+  FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+  FNeedKeepLineBreak := True;
+  try
+    Match(tokLB, PreSpaceCount);
+    FormatEnumeratedList;
+    Match(tokRB);
+  finally
+    FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+  end;
 end;
 
 { EnumeratedList -> EmumeratedIdent/','... }
@@ -4318,7 +4329,8 @@ begin
     else // EnumeratedType
     if Scanner.Token = tokLB then
     begin
-      FormatEnumeratedType; // 无需换行
+      FCurrentTab := PreSpaceCount;
+      FormatEnumeratedType; // 内部按保留用户换行的设置来按需换行，因而要提前记录 FCurrentTab
     end
     else
     begin
@@ -5879,6 +5891,7 @@ begin
     tokEQUAL:
       begin
         Match(Scanner.Token, 1); // 等号前空一格
+        FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
         FormatConstExpr(1); // 等号后只空一格
       end;
 
