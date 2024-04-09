@@ -198,6 +198,8 @@ begin
 
   if (Dll <> '') and FileExists(Dll) then
   begin
+    OutputDebugString(PChar(Format('Get DLL: %s', [Dll])));
+
     DllInst := LoadLibraryA(PAnsiChar(Dll));
     if DllInst <> 0 then
     begin
@@ -210,10 +212,10 @@ begin
         Terminate := LoaderTerminate;
       end
       else
-        OutputDebugString(PChar(Format('DLL %s Corrupted!', [Dll])));
+        OutputDebugString(PChar(Format('DLL Corrupted! No Entry %s', [WizardEntryPoint])));
     end
     else
-      OutputDebugString(PChar(Format('DLL %s Loading Error!', [Dll])));
+      OutputDebugString(PChar(Format('DLL Loading Error! %d', [GetLastError])));
   end
   else
     OutputDebugString(PChar(Format('DLL %s NOT Found!', [Dll])));
