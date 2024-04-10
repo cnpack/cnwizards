@@ -63,6 +63,7 @@ type
     FHooks: TCnActionListHook;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
     FReplaceManager: IOTADebuggerVisualizerValueReplacer;
+    FReplaceRegistered: Boolean;
     FDataSetViewer: IOTADebuggerVisualizer;
     FDataSetRegistered: Boolean;
     FEnableDataSet: Boolean;
@@ -473,7 +474,17 @@ var
   Mgr: TCnDebuggerValueReplaceManager;
 {$ENDIF}
 begin
+  inherited;
+
+  Results.Add(Format('AutoClose %d', [Ord(FAutoClose)]));
+  Results.Add(Format('AutoReset %d', [Ord(FAutoReset)]));
+
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+  Results.Add(Format('DataSet Viewer Registered: %d', [Ord(FDataSetRegistered)]));
+  Results.Add(Format('Bytes Viewer Registered: %d', [Ord(FBytesRegistered)]));
+  Results.Add(Format('Wide Viewer Registered: %d', [Ord(FWideRegistered)]));
+  Results.Add(Format('MemoryStream Viewer Registered: %d', [Ord(FMemoryStreamRegistered)]));
+
   Mgr := FReplaceManager as TCnDebuggerValueReplaceManager;
   Results.Add('Replace Item Count: ' + IntToStr(Mgr.FReplaceItems.Count));
   Results.AddStrings(Mgr.FReplaceItems);
@@ -538,19 +549,19 @@ begin
   inherited;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
-  EnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
-  EnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
+  FEnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
+  FEnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
 {$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
-  EnableBytes := Ini.ReadBool('', csEnableBytes, False);     // 高版本 IDE 自带
-  EnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, False);
+  FEnableBytes := Ini.ReadBool('', csEnableBytes, False);     // 高版本 IDE 自带
+  FEnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, False);
 {$ELSE}
-  EnableBytes := Ini.ReadBool('', csEnableBytes, True);
-  EnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, True);
+  FEnableBytes := Ini.ReadBool('', csEnableBytes, True);
+  FEnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, True);
 {$ENDIF}
-  EnableWide := Ini.ReadBool('', csEnableWide, True);
+  FEnableWide := Ini.ReadBool('', csEnableWide, True);
 {$ENDIF}
-  AutoClose := Ini.ReadBool('', csAutoClose, False);
-  AutoReset := Ini.ReadBool('', csAutoReset, False);
+  FAutoClose := Ini.ReadBool('', csAutoClose, False);
+  FAutoReset := Ini.ReadBool('', csAutoReset, False);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -587,19 +598,27 @@ begin
     Exit;
 
   CheckViewersRegistration;
-  if Active then
+  if Active  then
   begin
-    ID.RegisterDebugVisualizer(FReplaceManager);
+    if not FReplaceRegistered then
+    begin
+      ID.RegisterDebugVisualizer(FReplaceManager);
+      FReplaceRegistered := True;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnDebugEnhanceWizard Register Viewers');
+      CnDebugger.LogMsg('TCnDebugEnhanceWizard Register Viewers');
 {$ENDIF}
+    end;
   end
   else
   begin
-    ID.UnregisterDebugVisualizer(FReplaceManager);
+    if FReplaceRegistered then
+    begin
+      ID.UnregisterDebugVisualizer(FReplaceManager);
+      FReplaceRegistered := False;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister Viewers');
+      CnDebugger.LogMsg('TCnDebugEnhanceWizard Unregister Viewers');
 {$ENDIF}
+    end;
   end;
 {$ENDIF}
 end;

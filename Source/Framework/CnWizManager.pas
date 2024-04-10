@@ -26,6 +26,11 @@ unit CnWizManager;
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元为 CnWizards 框架的一部分，定义了 CnWizardMgr 专家管理器。
 *           单元实现了专家 DLL 的入口导出函数，创建专家管理并初始化所有的专家。
+*
+*           注意专家们实例的启动顺序是 Create LoadSettings SetActive
+*           所以宜在 Create 时初始化做准备，LoadSettings 时载入设置的静态内容，
+*           在 SetActive 时使其有效或无效
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
