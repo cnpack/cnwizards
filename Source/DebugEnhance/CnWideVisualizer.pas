@@ -123,7 +123,7 @@ uses
 {$R *.DFM}
 
 const
-  MAX_LEN = $1000;
+  MAX_LEN = $10000;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 

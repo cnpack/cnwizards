@@ -125,7 +125,7 @@ uses
 {$R *.DFM}
 
 const
-  MAX_BYTES = $1000;
+  MAX_BYTES = $10000;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
