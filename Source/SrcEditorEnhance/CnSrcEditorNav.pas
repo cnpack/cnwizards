@@ -564,7 +564,7 @@ begin
         BackButton := BrowserToolbar.Buttons[0];
         ForwardButton := BrowserToolbar.Buttons[1];
 
-        if Assigned(BackButton) and (BackButton.Action <> FBackAction) then
+        if Assigned(BackButton) and (BackButton.Parent <> nil) and (BackButton.Action <> FBackAction) then
         begin
           FOldImageList := TToolBar(BackButton.Parent).Images;
 {$IFDEF IDE_SUPPORT_HDPI}
