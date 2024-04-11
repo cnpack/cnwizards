@@ -808,7 +808,7 @@ begin
   begin
     Screen.Cursor := crHourGlass;
     try
-      if LowerCase(_CnExtractFileExt(FileName)) = 'xml' then
+      if LowerCase(_CnExtractFileExt(FileName)) = '.xml' then
         Filer := TCnMsgXMLFiler.Create
       else
         Filer := TCnMsgJsonFiler.Create;
