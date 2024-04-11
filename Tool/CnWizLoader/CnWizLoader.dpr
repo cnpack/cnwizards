@@ -95,8 +95,9 @@ end;
 
 function GetWizardDll: string;
 const
-  RIO_13_2_RELEASE = 34749;
   XE2_UPDATE4_HOTFIX1_RELEASE = 4504;
+  XE8_UPDATE1_RELEASE = 19908;
+  RIO_13_2_RELEASE = 34749;
   SYDNEY_14_1_RELEASE = 38860;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
@@ -147,7 +148,13 @@ begin
     19: Result := Dir + 'CnWizards_DXE5.DLL';
     20: Result := Dir + 'CnWizards_DXE6.DLL';
     21: Result := Dir + 'CnWizards_DXE7.DLL';
-    22: Result := Dir + 'CnWizards_DXE8.DLL';
+    22:
+      begin
+        if V.Release < XE8_UPDATE1_RELEASE then
+          Result := Dir + 'CnWizards_DXE81.DLL' // XE8 Update 1 或以上的 FMX 不兼容无 Update 版，采用另一个低版本编译的 DLL
+        else
+          Result := Dir + 'CnWizards_DXE8.DLL';
+      end;
     23: Result := Dir + 'CnWizards_D10S.DLL';
     24: Result := Dir + 'CnWizards_D101B.DLL';
     25: Result := Dir + 'CnWizards_D102T.DLL';
