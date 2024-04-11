@@ -251,9 +251,9 @@ end;
 
 class function TCnBaseImageProvider.DispName: string;
 var
-  s: string;
+  S: string;
 begin
-  GetProviderInfo(Result, s);
+  GetProviderInfo(Result, S);
 end;
 
 procedure TCnBaseImageProvider.DoProgress(Progress: Integer);
@@ -266,7 +266,7 @@ function TCnBaseImageProvider.FindCache(Url, Keywords, Ext: string;
   ASize: Integer): string;
 var
   Size: Integer;
-  md5: string;
+  Md5Dig: string;
   Info: TSearchRec;
   Succ: Integer;
   RegExpr: TRegExpr;
@@ -287,12 +287,12 @@ var
 begin
   RegExpr := TRegExpr.Create;
   List := TStringList.Create;
-  md5 := MD5Print(MD5String(Url));
-  Succ := FindFirst(CachePath + md5 + '_*.*', faAnyFile - faDirectory - faVolumeID, Info);
+  Md5Dig := MD5Print(MD5String(Url));
+  Succ := FindFirst(CachePath + Md5Dig + '_*.*', faAnyFile - faDirectory - faVolumeID, Info);
   try
     while Succ = 0 do
     begin
-      RegExpr.Expression := md5 + '_\[([^\]]+)\]_\((\d+)\)';
+      RegExpr.Expression := Md5Dig + '_\[([^\]]+)\]_\((\d+)\)';
       if RegExpr.Exec(Info.Name) then
       begin
         Size := StrToIntDef(RegExpr.Match[2], 0);
@@ -300,7 +300,7 @@ begin
         begin
           // 在文件名中使用新的关键字，并更名文件
           AddKeywords;
-          Result := CachePath + md5 + Format('_[%s]_(%d)%s',
+          Result := CachePath + Md5Dig + Format('_[%s]_(%d)%s',
             [List.CommaText, ASize, Ext]);
           if not RenameFile(CachePath + Info.Name, Result) then
             Result := CachePath + Info.Name;
@@ -312,7 +312,7 @@ begin
 
     List.Clear;
     AddKeywords;
-    Result := CachePath + md5 + Format('_[%s]_(%d)%s', [List.CommaText,
+    Result := CachePath + Md5Dig + Format('_[%s]_(%d)%s', [List.CommaText,
       ASize, Ext]);
   finally
     FindClose(Info);
@@ -329,9 +329,9 @@ end;
 
 class function TCnBaseImageProvider.HomeUrl: string;
 var
-  s: string;
+  S: string;
 begin
-  GetProviderInfo(s, Result);
+  GetProviderInfo(S, Result);
 end;
 
 class function TCnBaseImageProvider.IsLocalImage: Boolean;
@@ -352,7 +352,7 @@ end;
 
 function TCnBaseImageProvider.SearchImage(Req: TCnImageReqInfo): Boolean;
 var
-  i, idx: Integer;
+  I, Idx: Integer;
   Prog: Integer;
   Task: TCnDownTask;
   Item: TCnImageRespItem;
@@ -379,6 +379,7 @@ var
       AItem.Free;
     end;
   end;
+
 begin
   DownMgr := nil;
   DownList := nil;
@@ -406,38 +407,38 @@ begin
     if IsLocalImage then
     begin
       DoProgress(5);
-      for i := 0 to Items.Count - 1 do
+      for I := 0 to Items.Count - 1 do
       begin
-        Items[i].FCacheName := Items[i].Url;
-        LoadCache(Items[i]);
-        Prog := i * 95 div Items.Count + 5;
+        Items[I].FCacheName := Items[I].Url;
+        LoadCache(Items[I]);
+        Prog := I * 95 div Items.Count + 5;
         DoProgress(Prog);
       end;
     end
     else
     begin
-      for i := 0 to Items.Count - 1 do
+      for I := 0 to Items.Count - 1 do
       begin
-        idx := 0;
+        Idx := 0;
         repeat
-          Items[i].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[i].Url)) + IntToStr(idx);
-          Inc(idx);
-        until not FileExists(Items[i].FFileName);
-        Items[i].FCacheName := FindCache(Items[i].Url, Req.Keyword, Items[i].Ext, Items[i].Size);
-        if FileExists(Items[i].FCacheName) then
-          LoadCache(Items[i])
+          Items[I].FFileName := GetWindowsTempPath + MD5Print(MD5String(Items[I].Url)) + IntToStr(Idx);
+          Inc(Idx);
+        until not FileExists(Items[I].FFileName);
+        Items[I].FCacheName := FindCache(Items[I].Url, Req.Keyword, Items[I].Ext, Items[I].Size);
+        if FileExists(Items[I].FCacheName) then
+          LoadCache(Items[I])
         else
-          DownList.Add(DownMgr.NewDownload(Items[i].Url, Items[i].FFileName,
-            Items[i].FUserAgent, Items[i].FReferer, Items[i]));
+          DownList.Add(DownMgr.NewDownload(Items[I].Url, Items[I].FFileName,
+            Items[I].FUserAgent, Items[I].FReferer, Items[I]));
       end;
 
       Prog := 5;
       DoProgress(5);
       while DownMgr.FinishCount <> DownMgr.Count do
       begin
-        for i := DownList.Count - 1 downto 0 do
+        for I := DownList.Count - 1 downto 0 do
         begin
-          Task := TCnDownTask(DownList[i]);
+          Task := TCnDownTask(DownList[I]);
           Item := TCnImageRespItem(Task.Data);
           if Task.Status in [tsFailure, tsFinished] then
           begin
@@ -470,7 +471,7 @@ begin
               end;
             end;
             DeleteFile(TmpName);
-            DownList.Delete(i);
+            DownList.Delete(I);
           end;
         end;
 

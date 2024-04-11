@@ -332,29 +332,29 @@ end;
 
 function HashLine(const Line: string; IgnoreCase, IgnoreBlanks: Boolean): Pointer;
 var
-  i, j, Len: Integer;
-  s: string;
+  I, J, Len: Integer;
+  S: string;
 begin
-  s := Line;
+  S := Line;
   if IgnoreBlanks then
   begin
-    i := 1;
-    j := 1;
+    I := 1;
+    J := 1;
     Len := Length(Line);
-    while i <= Len do
+    while I <= Len do
     begin
-      if not CharInSet(Line[i], [#9, #32]) then
+      if not CharInSet(Line[I], [#9, #32]) then
       begin
-        s[j] := Line[i];
-        Inc(j);
+        S[J] := Line[I];
+        Inc(J);
       end;
-      Inc(i);
+      Inc(I);
     end;
-    SetLength(s, j - 1);
+    SetLength(S, J - 1);
   end;
-  if IgnoreCase then s := AnsiLowerCase(s);
+  if IgnoreCase then S := AnsiLowerCase(S);
   //return result as a pointer to save typecasting later...
-  Result := Pointer(CRC32Calc(0, PChar(s)^, Length(s) * SizeOf(Char)));
+  Result := Pointer(CRC32Calc(0, PChar(S)^, Length(S) * SizeOf(Char)));
 end;
 
 //==============================================================================
@@ -474,14 +474,14 @@ const
 
 procedure TCnSourceDiffForm.LoadOptions;
 var
-  l, t, w, h: Integer;
+  L, T, W, H: Integer;
 begin
   with TCnIniFile.Create(Ini) do
   try
-    l := ReadInteger('', csBoundsLeft, 0);
-    t := ReadInteger('', csBoundsTop, 0);
-    w := ReadInteger('', csBoundsWidth, -1);
-    h := ReadInteger('', csBoundsHeight, -1);
+    L := ReadInteger('', csBoundsLeft, 0);
+    T := ReadInteger('', csBoundsTop, 0);
+    W := ReadInteger('', csBoundsWidth, -1);
+    H := ReadInteger('', csBoundsHeight, -1);
 
     //set (Add, Del, Mod) colors...
     DiffControl1.LineColors[colorAdd] := ReadColor('', csAddColor, $0FD70F);
@@ -517,10 +517,10 @@ begin
 
   //make sure the form is positioned on screen ...
   //(ie make sure nobody's fiddled with the INI file!)
-  if (w > 0) and (h > 0) and
-    (l < Screen.Width) and (t < Screen.Height) and
-    (l + w > 0) and (t + h > 0) then
-    SetBounds(l, t, w, h);
+  if (W > 0) and (H > 0) and
+    (L < Screen.Width) and (T < Screen.Height) and
+    (L + W > 0) and (T + H > 0) then
+    SetBounds(L, T, W, H);
 end;
 
 procedure TCnSourceDiffForm.SaveOptions;
@@ -554,10 +554,10 @@ begin
   end;
 end;
 
-//Syncronise scrolling of both DiffControls...
+// Syncronise scrolling of both DiffControls...
 procedure TCnSourceDiffForm.SyncScroll(Sender: TObject);
 begin
-  //stop recursive WM_SCROLL messages...
+  // stop recursive WM_SCROLL messages...
   DiffControl1.OnScroll := nil;
   DiffControl2.OnScroll := nil;
   DiffControlMerge.OnScroll := nil;
@@ -624,7 +624,9 @@ begin
   end;
 
   if not (Kind in Kinds) then
+  begin
     for FKind := Low(FKind) to High(FKind) do
+    begin
       if FKind in Kinds then
       begin
         if OpenFile1 then
@@ -641,6 +643,8 @@ begin
         end;
         Break;
       end;
+    end;
+  end;
 
   FilesCompared := False;
   if OpenFile1 then
@@ -760,9 +764,12 @@ begin
       begin
         //don't allow editing empty lines...
         with DiffControlMerge do
+        begin
           if (FocusLength > 0) and (Lines.LineNum[FocusStart] <> 0) then
-            actEditFocusedTextExecute(nil)
-      end else
+            actEditFocusedTextExecute(nil);
+        end;
+      end
+      else
         actMergeFocusedTextExecute(nil);
     end;
   end;
@@ -791,7 +798,7 @@ end;
 
 procedure TCnSourceDiffForm.actCompareExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   HashList1, HashList2: TList;
   optionsStr: string;
 begin
@@ -801,37 +808,43 @@ begin
   if actIgnoreCase.Checked then
     optionsStr := SCnSourceDiffCaseIgnored;
   if actIgnoreBlanks.Checked then
+  begin
     if optionsStr = '' then
-      optionsStr := SCnSourceDiffBlanksIgnored else
+      optionsStr := SCnSourceDiffBlanksIgnored
+    else
       optionsStr := optionsStr + ', ' + SCnSourceDiffBlanksIgnored;
+  end;
+
   if optionsStr <> '' then
     optionsStr := '  (' + optionsStr + ')';
 
   HashList1 := TList.Create;
   HashList2 := TList.Create;
   try
-    //create the hash lists to compare...
+    // create the hash lists to compare...
     HashList1.capacity := Lines1.Count;
     HashList2.capacity := Lines2.Count;
-    for i := 0 to Lines1.Count - 1 do
-      HashList1.Add(HashLine(Lines1[i], actIgnoreCase.Checked,
+    for I := 0 to Lines1.Count - 1 do
+      HashList1.Add(HashLine(Lines1[I], actIgnoreCase.Checked,
         actIgnoreBlanks.Checked));
-    for i := 0 to Lines2.Count - 1 do
-      HashList2.Add(HashLine(Lines2[i], actIgnoreCase.Checked,
+    for I := 0 to Lines2.Count - 1 do
+      HashList2.Add(HashLine(Lines2[I], actIgnoreCase.Checked,
         actIgnoreBlanks.Checked));
 
     screen.cursor := crHourglass;
     try
       actCancel.Enabled := True;
-      //CALCULATE THE DIFFS HERE ...
+      // CALCULATE THE DIFFS HERE ...
       if not Diff.Execute(PIntArray(HashList1.List), PIntArray(HashList2.List),
-        HashList1.Count, HashList2.Count) then Exit;
+        HashList1.Count, HashList2.Count) then
+        Exit;
       FilesCompared := True;
       DisplayDiffs;
     finally
       screen.cursor := crDefault;
       actCancel.Enabled := False;
     end;
+
     Statusbar1.Panels[3].Text := Format(SCnSourceDiffChanges, [Diff.ChangeCount,
       optionsStr]);
   finally
@@ -847,7 +860,6 @@ begin
   actCompare.Execute;
 end;
 
-
 procedure TCnSourceDiffForm.DiffProgress(Sender: TObject; percent: Integer);
 begin
   Statusbar1.Panels[3].Text := Format(SCnSourceDiffApprox, [percent]);
@@ -856,7 +868,7 @@ end;
 
 procedure TCnSourceDiffForm.DisplayDiffs;
 var
-  i, j, k: Integer;
+  I, J, K: Integer;
 begin
   DiffControl1.Lines.BeginUpdate;
   DiffControl2.Lines.BeginUpdate;
@@ -866,61 +878,71 @@ begin
     DiffControl1.MaxLineNum := Lines1.Count;
     DiffControl2.MaxLineNum := Lines2.Count;
 
-    j := 0;
-    k := 0;
+    J := 0;
+    K := 0;
     with Diff do
-      for i := 0 to ChangeCount - 1 do
-        with changes[i] do
+    begin
+      for I := 0 to ChangeCount - 1 do
+      begin
+        with Changes[I] do
         begin
-        //first add preceeding unmodified lines...
+          // first add preceeding unmodified lines...
           if actShowDiffOnly.Checked then
-            Inc(k, x - j)
+            Inc(K, x - J)
           else
-            while j < x do
+          begin
+            while J < x do
             begin
-              DiffControl1.Lines.AddLineInfo(lines1[j], j + 1, 0);
-              DiffControl2.Lines.AddLineInfo(lines2[k], k + 1, 0);
-              Inc(j);
-              Inc(k);
+              DiffControl1.Lines.AddLineInfo(lines1[J], J + 1, 0);
+              DiffControl2.Lines.AddLineInfo(lines2[K], K + 1, 0);
+              Inc(J);
+              Inc(K);
             end;
+          end;
 
           if Kind = ckAdd then
           begin
-            for j := k to k + Range - 1 do
+            for J := K to K + Range - 1 do
             begin
               DiffControl1.Lines.AddLineInfo('', 0, colorAdd);
-              DiffControl2.Lines.AddLineInfo(lines2[j], j + 1, colorAdd);
+              DiffControl2.Lines.AddLineInfo(lines2[J], J + 1, colorAdd);
             end;
-            j := x;
-            k := y + Range;
+            J := x;
+            K := y + Range;
           end else if Kind = ckModify then
           begin
-            for j := 0 to Range - 1 do
+            for J := 0 to Range - 1 do
             begin
-              DiffControl1.Lines.AddLineInfo(lines1[x + j], x + j + 1, colorMod);
-              DiffControl2.Lines.AddLineInfo(lines2[k + j], k + j + 1, colorMod);
+              DiffControl1.Lines.AddLineInfo(lines1[x + J], x + J + 1, colorMod);
+              DiffControl2.Lines.AddLineInfo(lines2[K + J], K + J + 1, colorMod);
             end;
-            j := x + Range;
-            k := y + Range;
-          end else
+            J := x + Range;
+            K := y + Range;
+          end
+          else
           begin
-            for j := x to x + Range - 1 do
+            for J := x to x + Range - 1 do
             begin
-              DiffControl1.Lines.AddLineInfo(lines1[j], j + 1, colorDel);
+              DiffControl1.Lines.AddLineInfo(lines1[J], J + 1, colorDel);
               DiffControl2.Lines.AddLineInfo('', 0, colorDel);
             end;
-            j := x + Range;
+            J := x + Range;
           end;
         end;
-    //add remaining unmodified lines...
-    if not actShowDiffOnly.Checked then
-      while j < lines1.Count do
-      begin
-        DiffControl1.Lines.AddLineInfo(lines1[j], j + 1, 0);
-        DiffControl2.Lines.AddLineInfo(lines2[k], k + 1, 0);
-        Inc(j);
-        Inc(k);
       end;
+    end;
+
+    // add remaining unmodified lines...
+    if not actShowDiffOnly.Checked then
+    begin
+      while J < lines1.Count do
+      begin
+        DiffControl1.Lines.AddLineInfo(lines1[J], J + 1, 0);
+        DiffControl2.Lines.AddLineInfo(lines2[K], K + 1, 0);
+        Inc(J);
+        Inc(K);
+      end;
+    end;
   finally
     DiffControl1.Lines.EndUpdate;
     DiffControl2.Lines.EndUpdate;
@@ -948,8 +970,8 @@ end;
 procedure TCnSourceDiffForm.actShowDiffOnlyExecute(Sender: TObject);
 begin
   actShowDiffOnly.Checked := not actShowDiffOnly.Checked;
-  //if files have already been compared then refresh the changes
-  //as long as no merge has been atarted ...
+  // if files have already been compared then refresh the changes
+  // as long as no merge has been atarted ...
   if FilesCompared and not IsMerging then
     DisplayDiffs;
 end;
@@ -957,7 +979,8 @@ end;
 procedure TCnSourceDiffForm.actFontExecute(Sender: TObject);
 begin
   FontDialog.Font := DiffControl1.Font;
-  if not FontDialog.Execute then Exit;
+  if not FontDialog.Execute then
+    Exit;
   DiffControl1.Font := FontDialog.Font;
   DiffControl2.Font := FontDialog.Font;
   DiffControlMerge.Font := FontDialog.Font;
@@ -989,11 +1012,12 @@ end;
 
 procedure TCnSourceDiffForm.UpdateFileBmp;
 var
-  i, j, y1, y2: Integer;
+  I, J, Y1, Y2: Integer;
   clrIndex: Integer;
   HeightRatio: single;
 begin
-  if (DiffControl1.Lines.Count = 0) or (DiffControl2.Lines.Count = 0) then Exit;
+  if (DiffControl1.Lines.Count = 0) or (DiffControl2.Lines.Count = 0) then
+    Exit;
   HeightRatio := Screen.Height / DiffControl1.Lines.Count;
 
   FileBmp.Height := Screen.Height;
@@ -1001,24 +1025,25 @@ begin
   FileBmp.Canvas.Pen.Width := 2;
   FileBmp.Canvas.Brush.Color := clWhite;
   FileBmp.Canvas.FillRect(Rect(0, 0, FileBmp.Width, FileBmp.Height));
+
   with DiffControl1 do
   begin
-    i := 0;
-    while i < Lines.Count do
+    I := 0;
+    while I < Lines.Count do
     begin
-      clrIndex := Lines.ColorIndex[i];
+      clrIndex := Lines.ColorIndex[I];
       if clrIndex = 0 then
-        Inc(i)
+        Inc(I)
       else
       begin
-        j := i + 1;
-        while (j < Lines.Count) and (Lines.ColorIndex[j] = Lines.ColorIndex[i]) do
-          Inc(j);
+        J := I + 1;
+        while (J < Lines.Count) and (Lines.ColorIndex[J] = Lines.ColorIndex[I]) do
+          Inc(J);
         FileBmp.Canvas.Brush.Color := LineColors[clrIndex];
-        y1 := Trunc(i * HeightRatio);
-        y2 := Trunc(j * HeightRatio);
-        FileBmp.Canvas.FillRect(Rect(0, y1, FileBmp.Width, y2));
-        i := j;
+        Y1 := Trunc(I * HeightRatio);
+        Y2 := Trunc(J * HeightRatio);
+        FileBmp.Canvas.FillRect(Rect(0, Y1, FileBmp.Width, Y2));
+        I := J;
       end;
     end;
   end;
@@ -1047,7 +1072,9 @@ procedure TCnSourceDiffForm.pbPosPaint(Sender: TObject);
 var
   yPos: Integer;
 begin
-  if DiffControl1.Lines.Count = 0 then Exit;
+  if DiffControl1.Lines.Count = 0 then
+    Exit;
+
   with pbPos do
   begin
     Canvas.Brush.Color := clWindow;
@@ -1074,7 +1101,9 @@ begin
   with ColorDialog do
   begin
     Color := DiffControl1.LineColors[colorAdd];
-    if not Execute then Exit;
+    if not Execute then
+      Exit;
+
     DiffControl1.LineColors[colorAdd] := Color;
     DiffControl2.LineColors[colorAdd] := Color;
     DiffControlMerge.LineColors[colorAdd] := Color;
@@ -1087,7 +1116,9 @@ begin
   with ColorDialog do
   begin
     Color := DiffControl1.LineColors[colorMod];
-    if not Execute then Exit;
+    if not Execute then
+      Exit;
+
     DiffControl1.LineColors[colorMod] := Color;
     DiffControl2.LineColors[colorMod] := Color;
     DiffControlMerge.LineColors[colorMod] := Color;
@@ -1100,7 +1131,9 @@ begin
   with ColorDialog do
   begin
     Color := DiffControl1.LineColors[colorDel];
-    if not Execute then Exit;
+    if not Execute then
+      Exit;
+
     DiffControl1.LineColors[colorDel] := Color;
     DiffControl2.LineColors[colorDel] := Color;
     DiffControlMerge.LineColors[colorDel] := Color;
@@ -1115,8 +1148,10 @@ begin
     0: StatusBar1.Canvas.Brush.Color := DiffControl1.LineColors[colorAdd];
     1: StatusBar1.Canvas.Brush.Color := DiffControl1.LineColors[colorMod];
     2: StatusBar1.Canvas.Brush.Color := DiffControl1.LineColors[colorDel];
-  else Exit;
+  else
+    Exit;
   end;
+
   StatusBar1.Canvas.FillRect(Rect);
   StatusBar1.Canvas.TextOut(Rect.Left + 4, Rect.Top, Panel.Text);
 end;
@@ -1128,7 +1163,7 @@ end;
 
 procedure TCnSourceDiffForm.actMergeFromExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   DiffControl1.UseFocusRect := True;
   DiffControl2.UseFocusRect := True;
@@ -1138,14 +1173,17 @@ begin
     DiffControlMerge.Lines.Assign(DiffControl1.Lines);
     DiffControlMerge.MaxLineNum := Lines1.Count;
     if (Sender = actMergeFromNeither) then
+    begin
       with DiffControlMerge.Lines do
       begin
         BeginUpdate;
-        for i := 0 to Count - 1 do
-          if ColorIndex[i] <> 0 then Strings[i] := '';
+        for I := 0 to Count - 1 do
+          if ColorIndex[I] <> 0 then Strings[I] := '';
         EndUpdate;
       end;
-  end else
+    end;
+  end
+  else
   begin
     DiffControlMerge.Lines.Assign(DiffControl2.Lines);
     DiffControlMerge.MaxLineNum := Lines2.Count;
@@ -1161,16 +1199,17 @@ begin
   else
     pnlMerge.Height := (ClientHeight -
       statusbar1.Height - pnlCaptionLeft.Height) div 2;
-  pnlMerge.Top := 1;                    //force pnlMerge above statusbar
+
+  pnlMerge.Top := 1;                    // force pnlMerge above statusbar
   Splitter2.Visible := True;
-  Splitter2.Top := 0;                   //force Splitter2 above pnlMerge
+  Splitter2.Top := 0;                   // force Splitter2 above pnlMerge
   DiffControlMerge.OnScroll := SyncScroll;
   SyncScroll(DiffControl1);
 end;
 
 procedure TCnSourceDiffForm.actMergeFocusedTextExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   DiffControl: TDiffControl;
 begin
   if DiffControl1.Focused then
@@ -1178,11 +1217,13 @@ begin
     DiffControl := DiffControl2;
   with DiffControl do
   begin
-    if FocusLength <= 0 then Exit;
-    for i := FocusStart to FocusStart + FocusLength - 1 do
+    if FocusLength <= 0 then
+      Exit;
+
+    for I := FocusStart to FocusStart + FocusLength - 1 do
     begin
-      DiffControlMerge.Lines[i] := Lines[i];
-      DiffControlMerge.Lines.LineNum[i] := Lines.LineNum[i];
+      DiffControlMerge.Lines[I] := Lines[I];
+      DiffControlMerge.Lines.LineNum[I] := Lines.LineNum[I];
     end;
   end;
 end;
@@ -1214,9 +1255,12 @@ begin
     Exit;
   end;
 
-  if DiffControl1.Focused then DiffControl := DiffControl1
-  else if DiffControl2.Focused then DiffControl := DiffControl2
-  else DiffControl := DiffControlMerge;
+  if DiffControl1.Focused then
+    DiffControl := DiffControl1
+  else if DiffControl2.Focused then
+    DiffControl := DiffControl2
+  else
+    DiffControl := DiffControlMerge;
 
   if (DiffControl.FocusLength = 0) or
     ((DiffControl = DiffControlMerge) and
@@ -1235,19 +1279,24 @@ end;
 
 procedure TCnSourceDiffForm.actSaveMergedExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   SaveDialog.InitialDir := OpenDialog1.InitialDir;
-  if not SaveDialog.Execute then Exit;
+  if not SaveDialog.Execute then
+    Exit;
+
   with TStringList.Create do
   try
     BeginUpdate;
-    //todo - watch out for merges with ShowDiffsOnly checked!!!
-    for i := 0 to DiffControlMerge.Lines.Count - 1 do
-      if DiffControlMerge.Lines.LineNum[i] > 0 then
-        Add(DiffControlMerge.Lines[i]);
+    // todo - watch out for merges with ShowDiffsOnly checked!!!
+    for I := 0 to DiffControlMerge.Lines.Count - 1 do
+    begin
+      if DiffControlMerge.Lines.LineNum[I] > 0 then
+        Add(DiffControlMerge.Lines[I]);
+    end;
+
     EndUpdate;
-    savetofile(SaveDialog.FileName);
+    SaveToFile(SaveDialog.FileName);
   finally
     Free;
   end;
@@ -1255,7 +1304,7 @@ end;
 
 procedure TCnSourceDiffForm.actEditFocusedTextExecute(Sender: TObject);
 var
-  i, oldLineNum, oldClrIdx: Integer;
+  I, OldLineNum, OldClrIdx: Integer;
 begin
   with TCnDiffEditorForm.Create(Self) do
   try
@@ -1271,24 +1320,28 @@ begin
 
     Memo.Lines.BeginUpdate;
     with DiffControlMerge do
-      for i := FocusStart to FocusStart + FocusLength - 1 do
-        Memo.Lines.Add(Lines[i]);
+    begin
+      for I := FocusStart to FocusStart + FocusLength - 1 do
+        Memo.Lines.Add(Lines[I]);
+    end;
     Memo.Lines.EndUpdate;
 
     Memo.SelStart := 0;
     Memo.Modified := False;
 
-    if (ShowModal <> mrOK) or not Memo.Modified then Exit;
+    if (ShowModal <> mrOK) or not Memo.Modified then
+      Exit;
+
     with DiffControlMerge do
     begin
-      oldLineNum := Lines.LineNum[FocusStart];
-      oldClrIdx := Lines.ColorIndex[FocusStart];
+      OldLineNum := Lines.LineNum[FocusStart];
+      OldClrIdx := Lines.ColorIndex[FocusStart];
       Lines.BeginUpdate;
       //for the moment the no. of lines after editing must remain the same...
       while Memo.Lines.Count < FocusLength do Memo.Lines.Add('');
-      for i := 1 to FocusLength do Lines.Delete(FocusStart);
-      for i := FocusLength - 1 downto 0 do
-        Lines.InsertLineInfo(FocusStart, Memo.Lines[i], oldLineNum + i, oldClrIdx);
+      for I := 1 to FocusLength do Lines.Delete(FocusStart);
+      for I := FocusLength - 1 downto 0 do
+        Lines.InsertLineInfo(FocusStart, Memo.Lines[I], OldLineNum + I, OldClrIdx);
       Lines.EndUpdate;
     end;
   finally
@@ -1315,17 +1368,17 @@ end;
 procedure TCnSourceDiffForm.StatusBar1MouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  i: Integer;
+  I: Integer;
 begin
   if (X >= 0) and (X <= StatusBar1.Panels[0].Width * 3) and (Y >= 0) and
     (Y <= StatusBar1.ClientHeight) and (Button = mbLeft) then
   begin
-    i := X div StatusBar1.Panels[0].Width + 1;
-    if i = colorAdd then
+    I := X div StatusBar1.Panels[0].Width + 1;
+    if I = colorAdd then
       actAddColor.Execute
-    else if i = colorMod then
+    else if I = colorMod then
       actModColor.Execute
-    else if i = colorDel then
+    else if I = colorDel then
       actDelColor.Execute;
   end;
 end;
@@ -1483,7 +1536,7 @@ procedure TCnSourceDiffForm.UpdateHistoryMenu(Menu: TPopupMenu;
   History: TStrings; OnClick: TNotifyEvent; IsEmpty: Boolean);
 var
   iModuleServices: IOTAModuleServices;
-  i: Integer;
+  I: Integer;
   FileName: string;
 
   procedure CreateItem(const Caption: string; Tag: Integer; AOnClick: TNotifyEvent);
@@ -1507,17 +1560,17 @@ begin
     CreateItem(SCnSourceDiffUpdateFile, csUpdateIndex, OnClick);
   CreateItem('-', -1, nil);
 
-  for i := 0 to iModuleServices.GetModuleCount - 1 do
+  for I := 0 to iModuleServices.GetModuleCount - 1 do
   begin
-    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(i));
+    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
     UnitList.Add(FileName);
-    CreateItem(FileName, csUnitIndex + i, OnClick);
+    CreateItem(FileName, csUnitIndex + I, OnClick);
   end;
 
   CreateItem('-', -1, nil);
 
-  for i := 0 to History.Count - 1 do
-    CreateItem(History[i], csHistoryIndex + i, OnClick);
+  for I := 0 to History.Count - 1 do
+    CreateItem(History[I], csHistoryIndex + I, OnClick);
 end;
 
 procedure TCnSourceDiffForm.pmHistory1Popup(Sender: TObject);
@@ -1659,32 +1712,32 @@ procedure TCnSourceDiffForm.actGotoExecute(Sender: TObject);
   procedure GotoSourceEditor(DiffControl: TDiffControl; const FileName: string);
   var
     P: TPoint;
-    i, y: Integer;
+    I, y: Integer;
   begin
     GetCursorPos(P);
     P := DiffControl.ScreenToClient(P);
     P := DiffControl.ClientPtToTextPoint(P);
-    i := P.y;
+    I := P.y;
 
     if FilesCompared then
     begin
       // 向前查找有效的行号
-      if DiffControl.Lines.LineNum[i] = 0 then
-        while (i > 0) and (DiffControl.Lines.LineNum[i] = 0) do
-        Dec(i);
+      if DiffControl.Lines.LineNum[I] = 0 then
+        while (I > 0) and (DiffControl.Lines.LineNum[I] = 0) do
+        Dec(I);
 
       // 向后查找有效的行号
-      if DiffControl.Lines.LineNum[i] = 0 then
+      if DiffControl.Lines.LineNum[I] = 0 then
       begin
-        i := P.y;
-        while (i < DiffControl.Lines.Count - 1) and
-         (DiffControl.Lines.LineNum[i] = 0) do
-         Inc(i);
+        I := P.y;
+        while (I < DiffControl.Lines.Count - 1) and
+         (DiffControl.Lines.LineNum[I] = 0) do
+         Inc(I);
       end;
 
       // 在编辑器中打开
-      if DiffControl.Lines.LineNum[i] > 0 then
-        y := DiffControl.Lines.LineNum[i]
+      if DiffControl.Lines.LineNum[I] > 0 then
+        y := DiffControl.Lines.LineNum[I]
       else
         y := 0;
     end

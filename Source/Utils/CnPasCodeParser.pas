@@ -1286,15 +1286,15 @@ var
   procedure _BackwardFindDeclarePos;
   var
     Level: Integer;
-    i, NestedProcs: Integer;
+    I, NestedProcs: Integer;
     StartInner: Boolean;
   begin
     Level := 0;
     StartInner := True;
     NestedProcs := 1;
-    for i := CurrIndex - 1 downto 0 do
+    for I := CurrIndex - 1 downto 0 do
     begin
-      Token := Tokens[i];
+      Token := Tokens[I];
       if Token.IsBlockStart then
       begin
         if StartInner and (Level = 0) then
@@ -1345,15 +1345,15 @@ var
   procedure _ForwardFindDeclarePos;
   var
     Level: Integer;
-    i, NestedProcs: Integer;
+    I, NestedProcs: Integer;
     EndInner: Boolean;
   begin
     Level := 0;
     EndInner := True;
     NestedProcs := 1;
-    for i := CurrIndex to Count - 1 do
+    for I := CurrIndex to Count - 1 do
     begin
-      Token := Tokens[i];
+      Token := Tokens[I];
       if Token.IsBlockClose then
       begin
         if EndInner and (Level = 0) then

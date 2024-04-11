@@ -78,19 +78,20 @@ uses CnWizClasses, CnWizManager;
 
 procedure TCnWizBootForm.FormShow(Sender: TObject);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to GetCnWizardClassCount - 1 do
+  for I := 0 to GetCnWizardClassCount - 1 do
   begin
     with lvWizardsList.Items.Add do
     begin
-      Caption := IntToStr(i + 1); 
-      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(i)).WizardName);
-      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(i)).GetIDStr);
-      SubItems.Add(GetCnWizardTypeNameFromClass(TCnWizardClass(GetCnWizardClassByIndex(i))));
+      Caption := IntToStr(I + 1);
+      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(I)).WizardName);
+      SubItems.Add(TCnWizardClass(GetCnWizardClassByIndex(I)).GetIDStr);
+      SubItems.Add(GetCnWizardTypeNameFromClass(TCnWizardClass(GetCnWizardClassByIndex(I))));
+
       Checked := WizOptions.ReadBool(SCnBootLoadSection,
-        TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName,
-        CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName]);
+        TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName,
+        CnWizardMgr.WizardCanCreate[TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName]);
     end;
   end;
   UpdateStatusBar;
@@ -98,38 +99,36 @@ end;
 
 procedure TCnWizBootForm.UpdateStatusBar;
 var
-  i, count: integer;
+  I, Count: Integer;
 begin
-  count := 0;
-  for i := 0 to lvWizardsList.Items.Count - 1 do
+  Count := 0;
+  for I := 0 to lvWizardsList.Items.Count - 1 do
   begin
-    if lvWizardsList.Items[i].Checked then
-      Inc(count);
+    if lvWizardsList.Items[I].Checked then
+      Inc(Count);
   end;
   
   stbStatusbar.Panels[1].Text := Format(SCnWizBootCurrentCount, [lvWizardsList.Items.Count]);
-  stbStatusbar.Panels[2].Text := Format(SCnWizBootEnabledCount, [count]);
+  stbStatusbar.Panels[2].Text := Format(SCnWizBootEnabledCount, [Count]);
 end;
 
 procedure TCnWizBootForm.GetBootList(var ABoots: array of boolean);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardsList.Items.Count - 1 do
-  begin
-    ABoots[i] := lvWizardsList.Items[i].Checked;
-  end;
+  for I := 0 to lvWizardsList.Items.Count - 1 do
+    ABoots[I] := lvWizardsList.Items[I].Checked;
 end;
 
 procedure TCnWizBootForm.tbtnOKClick(Sender: TObject);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to GetCnWizardClassCount - 1 do
+  for I := 0 to GetCnWizardClassCount - 1 do
   begin
     WizOptions.WriteBool(SCnBootLoadSection,
-      TCnWizardClass(GetCnWizardClassByIndex(i)).ClassName,
-      lvWizardsList.Items[i].Checked);
+      TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName,
+      lvWizardsList.Items[I].Checked);
   end;
   ModalResult := mrOK;
 end;
@@ -141,34 +140,31 @@ end;
 
 procedure TCnWizBootForm.tbnSelectAllClick(Sender: TObject);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardsList.Items.Count - 1 do
-  begin
-    lvWizardsList.Items[i].Checked := True;
-  end;
+  for I := 0 to lvWizardsList.Items.Count - 1 do
+    lvWizardsList.Items[I].Checked := True;
+
   UpdateStatusBar;
 end;
 
 procedure TCnWizBootForm.tbnUnSelectClick(Sender: TObject);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardsList.Items.Count - 1 do
-  begin
-    lvWizardsList.Items[i].Checked := False;
-  end;
+  for I := 0 to lvWizardsList.Items.Count - 1 do
+    lvWizardsList.Items[I].Checked := False;
+
   UpdateStatusBar;
 end;
 
 procedure TCnWizBootForm.tbnReverseSelectClick(Sender: TObject);
 var
-  i: integer;
+  I: Integer;
 begin
-  for i := 0 to lvWizardsList.Items.Count - 1 do
-  begin
-    lvWizardsList.Items[i].Checked := not lvWizardsList.Items[i].Checked;
-  end;  
+  for I := 0 to lvWizardsList.Items.Count - 1 do
+    lvWizardsList.Items[I].Checked := not lvWizardsList.Items[I].Checked;
+
   UpdateStatusBar;
 end;
 
@@ -180,7 +176,7 @@ end;
 procedure TCnWizBootForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #27 then
-    tbtnCancelClick(Nil);
+    tbtnCancelClick(nil);
 end;
 
 end.

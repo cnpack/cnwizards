@@ -88,9 +88,9 @@ function TCnImageProvider_IconFinder.DoSearchImage(Req: TCnImageReqInfo): Boolea
 var
   Url, Text: string;
   Lic: Integer;
-  xml: IXMLDocument;
-  root, node, icon: IXMLNode;
-  i, j, size: Integer;
+  Xml: IXMLDocument;
+  Root, Node, Icon: IXMLNode;
+  I, J, Size: Integer;
   Item: TCnImageRespItem;
 begin
   Result := False;
@@ -101,35 +101,35 @@ begin
   Url := Format('http://www.iconfinder.com/xml/search/?q=%s&c=%d&p=%d&l=%d&min=%d&max=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
     [Req.Keyword, FItemsPerPage, Req.Page, Lic, Req.MinSize, Req.MaxSize]);
   Text := string(CnInet_GetString(Url));
-  xml := CreateXMLDoc;
-  if xml.LoadXML(Text) then
+  Xml := CreateXMLDoc;
+  if Xml.LoadXML(Text) then
   begin
-    root := FindNode(xml, 'results');
-    if root <> nil then
+    Root := FindNode(Xml, 'results');
+    if Root <> nil then
     begin
-      for i := 0 to root.ChildNodes.Length - 1 do
+      for I := 0 to Root.ChildNodes.Length - 1 do
       begin
-        node := root.ChildNodes.Item[i];
-        if SameText(node.NodeName, 'opensearch:totalResults') then
+        Node := Root.ChildNodes.Item[I];
+        if SameText(Node.NodeName, 'opensearch:totalResults') then
         begin
-          FTotalCount := XMLStrToIntDef(node.Text, 0);
+          FTotalCount := XMLStrToIntDef(Node.Text, 0);
           FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
         end
-        else if SameText(node.NodeName, 'iconmatches') then
+        else if SameText(Node.NodeName, 'iconmatches') then
         begin
           Result := True;
-          for j := 0 to node.ChildNodes.Length - 1 do
+          for J := 0 to Node.ChildNodes.Length - 1 do
           begin
-            icon := node.ChildNodes.Item[j];
-            if SameText(icon.NodeName, 'icon') then
+            Icon := Node.ChildNodes.Item[J];
+            if SameText(Icon.NodeName, 'icon') then
             begin
-              size := GetNodeTextInt(icon, 'size', 0);
-              if (size >= Req.MinSize) and (size <= Req.MaxSize) then
+              Size := GetNodeTextInt(Icon, 'size', 0);
+              if (Size >= Req.MinSize) and (Size <= Req.MaxSize) then
               begin
                 Item := Items.Add;
-                Item.Size := size;
-                Item.Id := GetNodeTextStr(icon, 'id', '');
-                Item.Url := GetNodeTextStr(icon, 'image', '');
+                Item.Size := Size;
+                Item.Id := GetNodeTextStr(Icon, 'id', '');
+                Item.Url := GetNodeTextStr(Icon, 'image', '');
                 Item.Ext := _CnExtractFileExt(Item.Url);
               end;
             end;
@@ -149,23 +149,23 @@ function TCnImageProvider_IconFinder.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
-  xml: IXMLDocument;
-  root, node: IXMLNode;
+  Xml: IXMLDocument;
+  Root, Node: IXMLNode;
 begin
   Result := False;
   Url := Format('http://www.iconfinder.com/xml/icondetails/?id=%s&size=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
     [Item.Id, Item.Size]);
   Text := string(CnInet_GetString(Url));
-  xml := CreateXMLDoc;
-  if xml.LoadXML(Text) then
+  Xml := CreateXMLDoc;
+  if Xml.LoadXML(Text) then
   begin
-    root := FindNode(xml, 'icon');
-    if root <> nil then
+    Root := FindNode(Xml, 'icon');
+    if Root <> nil then
     begin
-      node := FindNode(root, 'iconsetid');
-      if node <> nil then
+      Node := FindNode(Root, 'iconsetid');
+      if Node <> nil then
       begin
-        Req.Keyword := 'iconset:' + node.Text;
+        Req.Keyword := 'iconset:' + Node.Text;
         Req.Page := 0;
         Result := True;
       end;

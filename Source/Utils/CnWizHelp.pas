@@ -103,12 +103,12 @@ end;
 // 取帮助主题是否存在
 function TopicHelpFileExists(Url: string): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
-  i := AnsiPos('::/', Url);
-  if i > 0 then
+  I := AnsiPos('::/', Url);
+  if I > 0 then
   begin
-    Delete(Url, i, MaxInt);
+    Delete(Url, I, MaxInt);
     Result := FileExists(ModulePath + csHelpPath + Url);
   end
   else
@@ -119,8 +119,8 @@ end;
 function ShowHelp(const Topic: string; const Section: string): Boolean;
 var
   Url: string;
-  si: TStartupInfo;
-  pi: TProcessInformation;
+  Si: TStartupInfo;
+  Pi: TProcessInformation;
 begin
   Result := False;
   Url := GetTopicHelpUrl(Topic, Section);
@@ -129,13 +129,13 @@ begin
     if TopicHelpFileExists(Url) then
     begin
       Url := 'mk:@MSITStore:' + ModulePath + csHelpPath + Url;
-      ZeroMemory(@si, SizeOf(si));
-      si.cb := SizeOf(si);
-      ZeroMemory(@pi, SizeOf(pi));
+      ZeroMemory(@Si, SizeOf(Si));
+      Si.cb := SizeOf(Si);
+      ZeroMemory(@Pi, SizeOf(Pi));
       CreateProcess(nil, PChar('hh ' + Url),
-        nil, nil, False, 0, nil, nil, si, pi);
-      if pi.hProcess <> 0 then CloseHandle(pi.hProcess);
-      if pi.hThread <> 0 then CloseHandle(pi.hThread);
+        nil, nil, False, 0, nil, nil, Si, Pi);
+      if Pi.hProcess <> 0 then CloseHandle(Pi.hProcess);
+      if Pi.hThread <> 0 then CloseHandle(Pi.hThread);
     end
     else
       ShellExecute(0, nil, PChar(csCnWizOnlineHelpUrl + Url), nil, nil, SW_SHOWNORMAL);

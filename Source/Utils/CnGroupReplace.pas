@@ -41,7 +41,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, CnClasses, CnCommon;
+  Windows, SysUtils, Classes, CnClasses, CnNative, CnCommon;
 
 type
   TCnReplacement = class(TCnAssignableCollectionItem)
@@ -137,7 +137,7 @@ begin
     begin
       if not FWholeWord then
       begin
-        Result := Integer(PSub) - Integer(PText);
+        Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
         Exit;
       end
       else
@@ -145,11 +145,11 @@ begin
         if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
           IsValidIdentChar(Char(PSub[L])) then
         begin
-          PSub := PAnsiChar(Integer(PSub) + L);
+          PSub := PAnsiChar(TCnNativeInt(PSub) + L);
         end
         else
         begin
-          Result := Integer(PSub) - Integer(PText);
+          Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
           Exit;
         end;
       end;
@@ -174,7 +174,8 @@ begin
     ASrc := Source;
 
   Result := -1;
-  if (Text = '') or (ASrc = '') then Exit;
+  if (Text = '') or (ASrc = '') then
+    Exit;
 
   L := Length(ASrc);
   PText := PChar(Text);
@@ -185,7 +186,7 @@ begin
     begin
       if not FWholeWord then
       begin
-        Result := Integer(PSub) - Integer(PText);
+        Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
         Exit;
       end
       else
@@ -193,11 +194,11 @@ begin
         if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
           IsValidIdentChar(Char(PSub[L])) then
         begin
-          PSub := PChar(Integer(PSub) + L);
+          PSub := PChar(TCnNativeInt(PSub) + L);
         end
         else
         begin
-          Result := Integer(PSub) - Integer(PText);
+          Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
           Exit;
         end;
       end;
@@ -246,11 +247,12 @@ end;
 
 function TCnGroupReplacement.Execute(Text: string): string;
 var
-  i, APos, MinPos, ItemIdx: Integer;
+  I, APos, MinPos, ItemIdx: Integer;
   AnsiText, AnsiResult: {$IFDEF UNICODE} string {$ELSE} AnsiString {$ENDIF};
 begin
   Result := '';
-  if Text = '' then Exit;
+  if Text = '' then
+    Exit;
 
 {$IFDEF UNICODE}
   AnsiText := Text;
@@ -259,12 +261,13 @@ begin
   repeat
     MinPos := MaxInt;
     ItemIdx := -1;
-    for i := 0 to Items.Count - 1 do
+
+    for I := 0 to Items.Count - 1 do
     begin
-      APos := Items[i].FindInTextW(AnsiText);
+      APos := Items[I].FindInTextW(AnsiText);
       if (APos >= 0) and (APos < MinPos) then
       begin
-        ItemIdx := i;
+        ItemIdx := I;
         MinPos := APos;
         if MinPos = 0 then
           Break;
@@ -286,12 +289,12 @@ begin
   repeat
     MinPos := MaxInt;
     ItemIdx := -1;
-    for i := 0 to Items.Count - 1 do
+    for I := 0 to Items.Count - 1 do
     begin
-      APos := Items[i].FindInText(AnsiText);
+      APos := Items[I].FindInText(AnsiText);
       if (APos >= 0) and (APos < MinPos) then
       begin
-        ItemIdx := i;
+        ItemIdx := I;
         MinPos := APos;
         if MinPos = 0 then
           Break;

@@ -386,7 +386,7 @@ end;
 
 procedure TCnSrcEditorToolButton.InitiateAction;
 begin
-  // 减少调用次数，降低CPU占用率
+  // 减少调用次数，降低 CPU 占用率
   if Abs(GetTickCount - FLastTick) > csUpdateMinInterval then
   begin
     inherited InitiateAction;

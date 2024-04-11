@@ -70,11 +70,11 @@ type
     procedure cbbValue0KeyPress(Sender: TObject; var Key: Char);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 function GetEditorMacroValue(Macros: TStrings; const ACaption: string = ''; 
@@ -104,7 +104,7 @@ var
   lblMacros: array of TLabel;
   lblValues: array of TLabel;
   Ini: TCustomIniFile;
-  i, Delta: Integer;
+  I, Delta: Integer;
   Macro: string;
 
   function CreateEdit(Exists: TEdit; TopDelta: Integer): TEdit;
@@ -145,7 +145,8 @@ var
 begin
   Assert(Macros <> nil);
   Result := True;
-  if Macros.Count = 0 then Exit;
+  if Macros.Count = 0 then
+    Exit;
 
   Ini := nil;
   with TCnWizMacroForm.Create(nil) do
@@ -165,37 +166,37 @@ begin
     SetLength(lblMacros, Macros.Count);
     SetLength(lblValues, Macros.Count);
 
-    for i := 0 to Macros.Count - 1 do
+    for I := 0 to Macros.Count - 1 do
     begin
-      Assert(Macros[i] <> '');
-      if i = 0 then
+      Assert(Macros[I] <> '');
+      if I = 0 then
       begin
-        edtMacros[i] := edtMacro0;
-        cbbValues[i] := cbbValue0;
-        lblMacros[i] := lblMacro0;
-        lblValues[i] := lblValue0;
+        edtMacros[I] := edtMacro0;
+        cbbValues[I] := cbbValue0;
+        lblMacros[I] := lblMacro0;
+        lblValues[I] := lblValue0;
       end
-      else if i = 1 then
+      else if I = 1 then
       begin
-        edtMacros[i] := edtMacro1;
-        cbbValues[i] := cbbValue1;
-        lblMacros[i] := lblMacro1;
-        lblValues[i] := lblValue1;
+        edtMacros[I] := edtMacro1;
+        cbbValues[I] := cbbValue1;
+        lblMacros[I] := lblMacro1;
+        lblValues[I] := lblValue1;
       end
       else
       begin
-        edtMacros[i] := CreateEdit(edtMacro0, i * Delta);
-        cbbValues[i] := CreateComboBox(cbbValue0, i * Delta);
-        lblMacros[i] := CreateLabel(lblMacro0, i * Delta);
-        lblValues[i] := CreateLabel(lblValue0, i * Delta);
+        edtMacros[I] := CreateEdit(edtMacro0, I * Delta);
+        cbbValues[I] := CreateComboBox(cbbValue0, I * Delta);
+        lblMacros[I] := CreateLabel(lblMacro0, I * Delta);
+        lblValues[I] := CreateLabel(lblValue0, I * Delta);
       end;
       
-      Macro := Macros.Names[i];
-      if Macro = '' then Macro := Macros[i];
-      edtMacros[i].Text := Macro;
-      ReadStringsFromIni(Ini, Macro, cbbValues[i].Items);
-      if cbbValues[i].Items.Count > 0 then
-        cbbValues[i].Text := cbbValues[i].Items[0];
+      Macro := Macros.Names[I];
+      if Macro = '' then Macro := Macros[I];
+      edtMacros[I].Text := Macro;
+      ReadStringsFromIni(Ini, Macro, cbbValues[I].Items);
+      if cbbValues[I].Items.Count > 0 then
+        cbbValues[I].Text := cbbValues[I].Items[0];
     end;
 
     if Macros.Count = 1 then
@@ -211,19 +212,19 @@ begin
     Result := ShowModal = mrOk;
     if Result then
     begin
-      for i := 0 to Macros.Count - 1 do
+      for I := 0 to Macros.Count - 1 do
       begin
-        Macro := Macros.Names[i];
-        if Macro = '' then Macro := Macros[i];
-        Macros.Values[Macro] := cbbValues[i].Text;
+        Macro := Macros.Names[I];
+        if Macro = '' then Macro := Macros[I];
+        Macros.Values[Macro] := cbbValues[I].Text;
 
-        if cbbValues[i].Items.IndexOf(cbbValues[i].Text) < 0 then
-          cbbValues[i].Items.Insert(0, cbbValues[i].Text)
+        if cbbValues[I].Items.IndexOf(cbbValues[I].Text) < 0 then
+          cbbValues[I].Items.Insert(0, cbbValues[I].Text)
         else
-          cbbValues[i].Items.Move(cbbValues[i].Items.IndexOf(cbbValues[i].Text), 0);
-        while cbbValues[i].Items.Count > csMaxLastCount do
-          cbbValues[i].Items.Delete(csMaxLastCount);
-        WriteStringsToIni(Ini, Macro, cbbValues[i].Items);
+          cbbValues[I].Items.Move(cbbValues[I].Items.IndexOf(cbbValues[I].Text), 0);
+        while cbbValues[I].Items.Count > csMaxLastCount do
+          cbbValues[I].Items.Delete(csMaxLastCount);
+        WriteStringsToIni(Ini, Macro, cbbValues[I].Items);
       end;
     end;
   finally

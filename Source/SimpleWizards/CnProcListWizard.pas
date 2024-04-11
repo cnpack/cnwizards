@@ -528,8 +528,8 @@ const
   csClassComboName = 'ClassCombo';
 
   CN_SPLITTER_WIDTH = 3;
-  CN_INIT_CLASSCOMBO_WIDTH = 250;
-  CN_INIT_PROCCOMBO_WIDTH = 350;
+  CN_INIT_CLASSCOMBO_WIDTH = 300;
+  CN_INIT_PROCCOMBO_WIDTH = 400;
   CN_ICON_WIDTH = 22;
 
   csDefHistoryCount = 8;
@@ -3294,7 +3294,7 @@ procedure TCnProcListWizard.AddProcedure(ElementList, ObjectList: TStringList;
   ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
-  i, j: Integer;
+  I, J: Integer;
 begin
 {$IFNDEF STAND_ALONE}
   ElementInfo.Name := CompressWhiteSpace(ElementInfo.Name);
@@ -3304,19 +3304,19 @@ begin
       begin
         TempStr := ElementInfo.Name;
         // Remove the class reserved word
-        i := Pos('CLASS ', UpperCase(TempStr)); // Do not localize.
-        if i = 1 then
+        I := Pos('CLASS ', UpperCase(TempStr)); // Do not localize.
+        if I = 1 then
           Delete(TempStr, 1, Length('CLASS ')); // Do not localize.
         // Remove 'function' or 'procedure'
-        i := Pos(' ', TempStr);
-        j := Pos('(', TempStr);
-        if (i > 0) and (i < j) then // 匿名函数没有函数名
-          TempStr := Copy(TempStr, i + 1, Length(TempStr))
-        else if (i > 0) and (j = 0) then
+        I := Pos(' ', TempStr);
+        J := Pos('(', TempStr);
+        if (I > 0) and (I < J) then // 匿名函数没有函数名
+          TempStr := Copy(TempStr, I + 1, Length(TempStr))
+        else if (I > 0) and (J = 0) then
         begin
-          j := Pos(';', TempStr); // 没有括号的函数，有分号也可以
-          if j > i then
-            TempStr := Copy(TempStr, i + 1, Length(TempStr));
+          J := Pos(';', TempStr); // 没有括号的函数，有分号也可以
+          if J > I then
+            TempStr := Copy(TempStr, I + 1, Length(TempStr));
         end;
 
         // 为 Interface 的成员声明加上 Interface 名
@@ -3324,13 +3324,13 @@ begin
           TempStr := ElementInfo.OwnerClass + '.' + TempStr;
 
         // Remove the paramater list
-        i := Pos('(', TempStr);
-        if i > 0 then
-          TempStr := Copy(TempStr, 1, i - 1);
+        I := Pos('(', TempStr);
+        if I > 0 then
+          TempStr := Copy(TempStr, 1, I - 1);
         // Remove the function return type
-        i := Pos(':', TempStr);
-        if i > 0 then
-          TempStr := Copy(TempStr, 1, i - 1);
+        I := Pos(':', TempStr);
+        if I > 0 then
+          TempStr := Copy(TempStr, 1, I - 1);
         // Check for an implementation procedural type
         if Length(TempStr) = 0 then
         begin
@@ -4298,8 +4298,8 @@ end;
 constructor TCnProcDropDownBox.Create(AOwner: TComponent);
 const
   csMinDispItems = 6;
-  csDefDispItems = 12;
-  csMinDispWidth = 450;
+  csDefDispItems = 16;
+  csMinDispWidth = 500;
   csDefDispWidth = 300;
 begin
   inherited;

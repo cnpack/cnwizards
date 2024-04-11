@@ -163,14 +163,14 @@ type
     FDrawControls: TComponentList;
     FUpdateDrawForms: TComponentList;
 
-    IdSetCurrControl: Integer;
-    IdSetCurrForm: Integer;
-    IdSetOpenedForm: Integer;
-    IdSetProject: Integer;
-    IdSetProjectGroup: Integer;
-    IdDispTabOrder: Integer;
-    IdAutoReset: Integer;
-    IdConfig: Integer;
+    FIdSetCurrControl: Integer;
+    FIdSetCurrForm: Integer;
+    FIdSetOpenedForm: Integer;
+    FIdSetProject: Integer;
+    FIdSetProjectGroup: Integer;
+    FIdDispTabOrder: Integer;
+    FIdAutoReset: Integer;
+    FIdConfig: Integer;
 
     function DoSetFormEditor(Editor: IOTAFormEditor): Boolean;
     function DoSetProject(Project: IOTAProject): Integer;
@@ -688,7 +688,7 @@ var
   List: TList;
   Rects: TList;
   NewRect: PCnRectRec;
-  i, j, Idx: Integer;
+  I, J, Idx: Integer;
   L, R, T, B: Integer;
   Match: Boolean;
 
@@ -715,8 +715,10 @@ var
   end;
 
 begin
-  if not Active then Exit;
-  if not Assigned(WinControl) or (WinControl.ControlCount = 0) then Exit;
+  if not Active then
+    Exit;
+  if not Assigned(WinControl) or (WinControl.ControlCount = 0) then
+    Exit;
 
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnTabOrderWizard.DoSetTabOrder: ' + WinControl.Name);
@@ -730,47 +732,49 @@ begin
   List := TList.Create;
   try
     List.Clear;
-    for i := 0 to WinControl.ControlCount - 1 do // 将控件放到临时列表中
-      if WinControl.Controls[i] is TWinControl then
+    for I := 0 to WinControl.ControlCount - 1 do // 将控件放到临时列表中
+    begin
+      if WinControl.Controls[I] is TWinControl then
       begin
         New(NewRect);
-        NewRect.Context := WinControl.Controls[i];
-        GetControlPos(WinControl.Controls[i], L, T, R, B);
+        NewRect.Context := WinControl.Controls[I];
+        GetControlPos(WinControl.Controls[I], L, T, R, B);
         NewRect.Rect := Rect(L, T, R, B);
         List.Add(NewRect);
       end;
+    end;
 
     if List.Count > 0 then
     begin
       List.Sort(TabOrderSort);
       if not FGroup then                // 不分组进行排序
       begin
-        for i := 0 to List.Count - 1 do
+        for I := 0 to List.Count - 1 do
         begin
-          TWinControl(PCnRectRec(List[i]).Context).TabOrder := i;
-          DrawControlTabOrder(TWinControl(PCnRectRec(List[i]).Context));
+          TWinControl(PCnRectRec(List[I]).Context).TabOrder := I;
+          DrawControlTabOrder(TWinControl(PCnRectRec(List[I]).Context));
         end;
       end
       else                              // 分组排序
       begin
         Rects := TList.Create;
         try
-          for i := 0 to List.Count - 1 do
+          for I := 0 to List.Count - 1 do
           begin
-            GetControlPos(TWinControl(PCnRectRec(List[i]).Context), L, T, R, B);
+            GetControlPos(TWinControl(PCnRectRec(List[I]).Context), L, T, R, B);
             Match := False;
             // 将控件分组，左右相同或上下相同的控件归为一组
-            for j := 0 to Rects.Count - 1 do
+            for J := 0 to Rects.Count - 1 do
             begin
-              with PCnRectRec(Rects[j])^.Rect do
+              with PCnRectRec(Rects[J])^.Rect do
               begin
                 if FTabOrderStyle = tsHorz then
                 begin                   // 水平优先时先判断垂直位置
                   if (L = Left) and (R = Right) and (Min(Abs(T - Bottom),
                     Abs(B - Top)) <= (B - T)) then
                   begin
-                    AddList(TList(PCnRectRec(Rects[j])^.Context),
-                      TWinControl(PCnRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[J])^.Context),
+                      TWinControl(PCnRectRec(List[I]).Context));
                     Match := True;
                     Top := Min(T, Top);
                     Bottom := Max(B, Bottom);
@@ -779,8 +783,8 @@ begin
                   else if (T = Top) and (B = Bottom) and (Min(Abs(L - Right),
                     Abs(R - Left)) <= (R - L)) then
                   begin
-                    AddList(TList(PCnRectRec(Rects[j])^.Context),
-                      TWinControl(PCnRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[J])^.Context),
+                      TWinControl(PCnRectRec(List[I]).Context));
                     Match := True;
                     Left := Min(L, Left);
                     Right := Max(R, Right);
@@ -792,8 +796,8 @@ begin
                   if (T = Top) and (B = Bottom) and (Min(Abs(L - Right),
                     Abs(R - Left)) <= (R - L)) then
                   begin
-                    AddList(TList(PCnRectRec(Rects[j])^.Context),
-                      TWinControl(PCnRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[J])^.Context),
+                      TWinControl(PCnRectRec(List[I]).Context));
                     Match := True;
                     Left := Min(L, Left);
                     Right := Max(R, Right);
@@ -802,8 +806,8 @@ begin
                   else if (L = Left) and (R = Right) and (Min(Abs(T - Bottom),
                     Abs(B - Top)) <= (B - T)) then
                   begin
-                    AddList(TList(PCnRectRec(Rects[j])^.Context),
-                      TWinControl(PCnRectRec(List[i]).Context));
+                    AddList(TList(PCnRectRec(Rects[J])^.Context),
+                      TWinControl(PCnRectRec(List[I]).Context));
                     Match := True;
                     Top := Min(T, Top);
                     Bottom := Max(B, Bottom);
@@ -818,7 +822,7 @@ begin
               New(NewRect);
               NewRect.Context := TList.Create;
               AddList(TList(PCnRectRec(NewRect.Context)),
-                TWinControl(PCnRectRec(List[i]).Context));
+                TWinControl(PCnRectRec(List[I]).Context));
               NewRect.Rect := Rect(L, T, R, B);
               Rects.Add(NewRect);
             end;
@@ -826,39 +830,43 @@ begin
 
           Rects.Sort(TabOrderSort);       // 对控件组排序
           Idx := 0;
-          for i := 0 to Rects.Count - 1 do
-            with TList(PCnRectRec(Rects[i]).Context) do
+          for I := 0 to Rects.Count - 1 do
+          begin
+            with TList(PCnRectRec(Rects[I]).Context) do
             begin
               Sort(TabOrderSort);         // 对同一组内的控件排序
-              for j := 0 to Count - 1 do
+              for J := 0 to Count - 1 do
               begin                       // 设置控件 Tab Order
-                TWinControl(PCnRectRec(Items[j]).Context).TabOrder := Idx;
-                DrawControlTabOrder(TWinControl(PCnRectRec(Items[j]).Context));
+                TWinControl(PCnRectRec(Items[J]).Context).TabOrder := Idx;
+                DrawControlTabOrder(TWinControl(PCnRectRec(Items[J]).Context));
                 Inc(Idx);
               end;
             end;
+          end;
         finally
-          for i := 0 to Rects.Count - 1 do
+          for I := 0 to Rects.Count - 1 do
           begin
-            with TList(PCnRectRec(Rects[i]).Context) do
+            with TList(PCnRectRec(Rects[I]).Context) do
             begin
-              for j := 0 to Count - 1 do
-                Dispose(Items[j]);
+              for J := 0 to Count - 1 do
+                Dispose(Items[J]);
               Free;
             end;
-            Dispose(Rects[i]);
+            Dispose(Rects[I]);
           end;
           Rects.Free;
         end;
       end;
 
       if AInludeChildren then          // 递归设置子控件
-        for i := 0 to List.Count - 1 do
-          DoSetTabOrder(TWinControl(PCnRectRec(List[i]).Context), AInludeChildren);
+      begin
+        for I := 0 to List.Count - 1 do
+          DoSetTabOrder(TWinControl(PCnRectRec(List[I]).Context), AInludeChildren);
+      end;
     end;
   finally
-    for i := 0 to List.Count - 1 do
-      Dispose(List[i]);
+    for I := 0 to List.Count - 1 do
+      Dispose(List[I]);
     List.Free;
   {$IFDEF DEBUG}
     CnDebugger.LogLeave('TCnTabOrderWizard.DoSetTabOrder');
@@ -869,23 +877,24 @@ end;
 // 子菜单执行过程
 procedure TCnTabOrderWizard.SubActionExecute(Index: Integer);
 begin
-  if not Active then Exit;
+  if not Active then
+    Exit;
 
-  if Index = IdSetCurrControl then
+  if Index = FIdSetCurrControl then
     OnSetCurrControl
-  else if Index = IdSetCurrForm then
+  else if Index = FIdSetCurrForm then
     OnSetCurrForm
-  else if Index = IdSetOpenedForm then
+  else if Index = FIdSetOpenedForm then
     OnSetOpenedForm
-  else if Index = IdSetProject then
+  else if Index = FIdSetProject then
     OnSetProject
-  else if Index = IdSetProjectGroup then
+  else if Index = FIdSetProjectGroup then
     OnSetProjectGroup
-  else if Index = IdDispTabOrder then
+  else if Index = FIdDispTabOrder then
     OnDispTabOrder
-  else if Index = IdAutoReset then
+  else if Index = FIdAutoReset then
     OnAutoReset
-  else if Index = IdConfig then
+  else if Index = FIdConfig then
     OnConfig;
 end;
 
@@ -913,7 +922,7 @@ procedure TCnTabOrderWizard.OnSetCurrControl;
 var
   AForm: TCustomForm;
   AList: TList;
-  i: Integer;
+  I: Integer;
   Modified: Boolean;
 begin
   if not Active then Exit;
@@ -921,21 +930,22 @@ begin
   try
     Modified := False;
     if not CnOtaGetCurrDesignedForm(AForm, AList) then Exit;
-    for i := 0 to AList.Count - 1 do
+    for I := 0 to AList.Count - 1 do
     begin
-      if (TComponent(AList[i]) is TWinControl) and
-        (TWinControl(AList[i]).ControlCount > 0) then
+      if (TComponent(AList[I]) is TWinControl) and
+        (TWinControl(AList[I]).ControlCount > 0) then
       begin                          // 选择的控件是容器控件并包含子控件
-        DoSetTabOrder(TWinControl(AList[i]), IncludeChildren);
+        DoSetTabOrder(TWinControl(AList[I]), IncludeChildren);
         Modified := True;
       end                            // 对控件的父控件进行设置
-      else if (TComponent(AList[i]) is TControl) and
-        (TControl(AList[i]).Parent <> nil) then
+      else if (TComponent(AList[I]) is TControl) and
+        (TControl(AList[I]).Parent <> nil) then
       begin
-        DoSetTabOrder(TControl(AList[i]).Parent, IncludeChildren);
+        DoSetTabOrder(TControl(AList[I]).Parent, IncludeChildren);
         Modified := True;
       end;
     end;
+
     if Modified then
       CnOtaNotifyFormDesignerModified;
   finally
@@ -950,10 +960,12 @@ var
   AForm: TWinControl;
 begin
   Result := False;
-  if Editor = nil then Exit;
+  if Editor = nil then
+    Exit;
 
   Root := CnOtaGetRootComponentFromEditor(Editor);
-  if Root = nil then Exit;
+  if Root = nil then
+    Exit;
 {$IFDEF TABORDER_FMX}
   DoSetFmxTabOrder(Root, True);
 {$ENDIF}
@@ -969,15 +981,15 @@ end;
 // 设置一个工程
 function TCnTabOrderWizard.DoSetProject(Project: IOTAProject): Integer;
 var
-  i: Integer;
+  I: Integer;
   ModuleInfo: IOTAModuleInfo;
   Module: IOTAModule;
   FormEditor: IOTAFormEditor;
 begin
   Result := 0;
-  for i := 0 to Project.GetModuleCount - 1 do
+  for I := 0 to Project.GetModuleCount - 1 do
   begin
-    ModuleInfo := Project.GetModule(i);
+    ModuleInfo := Project.GetModule(I);
     if not Assigned(ModuleInfo) then
       Continue;
 
@@ -1006,7 +1018,7 @@ end;
 // 设置打开的窗体执行方法
 procedure TCnTabOrderWizard.OnSetOpenedForm;
 var
-  i: Integer;
+  I: Integer;
   FormEditor: IOTAFormEditor;
   ModuleServices: IOTAModuleServices;
   Count: Integer;
@@ -1015,9 +1027,9 @@ begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
 
   Count := 0;
-  for i := 0 to ModuleServices.GetModuleCount - 1 do
+  for I := 0 to ModuleServices.GetModuleCount - 1 do
   begin
-    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(i));
+    FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(I));
     if Assigned(FormEditor) then
       if DoSetFormEditor(FormEditor) then
         Inc(Count);
@@ -1046,7 +1058,7 @@ end;
 // 设置当前工程组执行方法
 procedure TCnTabOrderWizard.OnSetProjectGroup;
 var
-  i: Integer;
+  I: Integer;
   ProjectGroup: IOTAProjectGroup;
   Count: Integer;
 begin
@@ -1055,8 +1067,8 @@ begin
   Count := 0;
   ProjectGroup := CnOtaGetProjectGroup;
   if Assigned(ProjectGroup) then
-    for i := 0 to ProjectGroup.ProjectCount - 1 do
-      Inc(Count, DoSetProject(ProjectGroup.Projects[i]));
+    for I := 0 to ProjectGroup.ProjectCount - 1 do
+      Inc(Count, DoSetProject(ProjectGroup.Projects[I]));
 
   if Count > 0 then
     InfoDlg(Format(SCnTabOrderSucc, [Count]))
@@ -1202,9 +1214,13 @@ begin
       if Root <> nil then
       begin
         if Root is TWinControl then
+        begin
           for J := 0 to Root.ComponentCount - 1 do
+          begin
             if Root.Components[J] is TWinControl then
               TWinControl(Root.Components[J]).Invalidate;
+          end;
+        end;
 {$IFDEF TABORDER_FMX}
         UpdateFMXDraw(Root);  // Thanks Vitaliy Grabchuk for this correction
 {$ENDIF}
@@ -1219,9 +1235,13 @@ var
   I: Integer;
 begin
   if Assigned(DesignForm) then
+  begin
     for I := 0 to DesignForm.ComponentCount - 1 do
+    begin
       if DesignForm.Components[I] is TWinControl then
-        DrawControlTabOrder(TWinControl(DesignForm.Components[I]));
+        DrawControlTabOrder(TWinControl(DesignForm.Components[I]))
+    end;
+  end;
 end;
 
 // 绘制控件 Tab Order
@@ -1250,6 +1270,7 @@ var
     RGBToHSL(FBkColor, H, S, L);
     Result := HSLToRGB(H + I / csMaxLevel, 0.7, 0.7);
   end;
+
 begin
   if Active and FDispTabOrder and WinControl.HandleAllocated and
     (csDesigning in WinControl.ComponentState) and Assigned(WinControl.Parent) and
@@ -1365,32 +1386,32 @@ begin
   Project := CnOtaGetCurrentProject;
   AEnabled := Assigned(Project);
 
-  SubActions[IdSetCurrControl].Visible := Active;
-  SubActions[IdSetCurrControl].Enabled := Action.Enabled and
+  SubActions[FIdSetCurrControl].Visible := Active;
+  SubActions[FIdSetCurrControl].Enabled := Action.Enabled and
     not CnOtaIsCurrFormSelectionsEmpty;
 
-  SubActions[IdSetCurrForm].Visible := Active;
-  SubActions[IdSetCurrForm].Enabled := CurrentIsForm;
+  SubActions[FIdSetCurrForm].Visible := Active;
+  SubActions[FIdSetCurrForm].Enabled := CurrentIsForm;
 
-  SubActions[IdSetOpenedForm].Visible := Active;
-  SubActions[IdSetOpenedForm].Enabled := AEnabled;
+  SubActions[FIdSetOpenedForm].Visible := Active;
+  SubActions[FIdSetOpenedForm].Enabled := AEnabled;
 
-  SubActions[IdSetProject].Visible := Active;
-  SubActions[IdSetProject].Enabled := AEnabled;
+  SubActions[FIdSetProject].Visible := Active;
+  SubActions[FIdSetProject].Enabled := AEnabled;
   
-  SubActions[IdSetProjectGroup].Visible := Active;
-  SubActions[IdSetProjectGroup].Enabled := AEnabled;
+  SubActions[FIdSetProjectGroup].Visible := Active;
+  SubActions[FIdSetProjectGroup].Enabled := AEnabled;
 
-  SubActions[IdDispTabOrder].Visible := Active;
-  SubActions[IdDispTabOrder].Enabled := Action.Enabled;
-  SubActions[IdDispTabOrder].Checked := FDispTabOrder;
+  SubActions[FIdDispTabOrder].Visible := Active;
+  SubActions[FIdDispTabOrder].Enabled := Action.Enabled;
+  SubActions[FIdDispTabOrder].Checked := FDispTabOrder;
   
-  SubActions[IdAutoReset].Visible := Active;
-  SubActions[IdAutoReset].Checked := FAutoReset;
-  SubActions[IdAutoReset].Enabled := Action.Enabled;
+  SubActions[FIdAutoReset].Visible := Active;
+  SubActions[FIdAutoReset].Checked := FAutoReset;
+  SubActions[FIdAutoReset].Enabled := Action.Enabled;
   
-  SubActions[IdConfig].Visible := Active;
-  SubActions[IdConfig].Enabled := Action.Enabled;
+  SubActions[FIdConfig].Visible := Active;
+  SubActions[FIdConfig].Enabled := Action.Enabled;
 end;
 
 // 取专家菜单标题
@@ -1432,28 +1453,28 @@ end;
 
 procedure TCnTabOrderWizard.AcquireSubActions;
 begin
-  IdSetCurrControl := RegisterASubAction(SCnTabOrderSetCurrControl,
+  FIdSetCurrControl := RegisterASubAction(SCnTabOrderSetCurrControl,
     SCnTabOrderSetCurrControlCaption, 0, SCnTabOrderSetCurrControlHint);
-  IdSetCurrForm := RegisterASubAction(SCnTabOrderSetCurrForm,
+  FIdSetCurrForm := RegisterASubAction(SCnTabOrderSetCurrForm,
     SCnTabOrderSetCurrFormCaption, TextToShortCut('Ctrl+='),
     SCnTabOrderSetCurrFormHint);
-  IdSetOpenedForm := RegisterASubAction(SCnTabOrderSetOpenedForm,
+  FIdSetOpenedForm := RegisterASubAction(SCnTabOrderSetOpenedForm,
     SCnTabOrderSetOpenedFormCaption, 0, SCnTabOrderSetOpenedFormHint);
-  IdSetProject := RegisterASubAction(SCnTabOrderSetProject,
+  FIdSetProject := RegisterASubAction(SCnTabOrderSetProject,
     SCnTabOrderSetProjectCaption, 0, SCnTabOrderSetProjectHint);
-  IdSetProjectGroup := RegisterASubAction(SCnTabOrderSetProjectGroup,
+  FIdSetProjectGroup := RegisterASubAction(SCnTabOrderSetProjectGroup,
     SCnTabOrderSetProjectGroupCaption, 0, SCnTabOrderSetProjectGroupHint);
 
   AddSepMenu;
 
-  IdAutoReset := RegisterASubAction(SCnTabOrderAutoReset,
+  FIdAutoReset := RegisterASubAction(SCnTabOrderAutoReset,
     SCnTabOrderAutoResetCaption, 0, SCnTabOrderAutoResetHint);
-  IdDispTabOrder := RegisterASubAction(SCnTabOrderDispTabOrder,
+  FIdDispTabOrder := RegisterASubAction(SCnTabOrderDispTabOrder,
     SCnTabOrderDispTabOrderCaption, 0, SCnTabOrderDispTabOrderHint);
 
   AddSepMenu;
 
-  IdConfig := RegisterASubAction(SCnTabOrderConfig,
+  FIdConfig := RegisterASubAction(SCnTabOrderConfig,
     SCnTabOrderConfigCaption, 0, SCnTabOrderConfigHint);
 end;
 

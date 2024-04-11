@@ -73,7 +73,7 @@ end;
 function TCnImageProvider_LocalCache.DoSearchImage(
   Req: TCnImageReqInfo): Boolean;
 var
-  i, size: Integer;
+  I, Size: Integer;
   Info: TSearchRec;
   Succ: Integer;
   Files: TStringList;
@@ -93,11 +93,11 @@ begin
         begin
           if RegExpr.Exec(Info.Name) then
           begin
-            size := StrToIntDef(RegExpr.Match[1], 0);
+            Size := StrToIntDef(RegExpr.Match[1], 0);
             if (Pos(UpperCase(Trim(Req.Keyword)), UpperCase(Info.Name)) > 0) and
-              (size >= Req.MinSize) and (size <= Req.MinSize) then
+              (Size >= Req.MinSize) and (Size <= Req.MinSize) then
             begin
-              Files.AddObject(Info.Name, TObject(size));
+              Files.AddObject(Info.Name, TObject(Size));
             end;
           end;
         end
@@ -108,13 +108,13 @@ begin
     FTotalCount := Files.Count;
     FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
     Req.Page := TrimInt(Req.Page, 0, Max(0, FPageCount - 1));
-    for i := Req.Page * FItemsPerPage to Min((Req.Page + 1) * FItemsPerPage, Files.Count) - 1 do
+    for I := Req.Page * FItemsPerPage to Min((Req.Page + 1) * FItemsPerPage, Files.Count) - 1 do
     begin
       Item := Items.Add;
-      Item.Size := Integer(Files.Objects[i]);
-      Item.Id := Files[i];
-      Item.Url := CachePath + Files[i];
-      Item.Ext := _CnExtractFileExt(Files[i]);
+      Item.Size := Integer(Files.Objects[I]);
+      Item.Id := Files[I];
+      Item.Url := CachePath + Files[I];
+      Item.Ext := _CnExtractFileExt(Files[I]);
     end;
     Result := Items.Count > 0;
   finally

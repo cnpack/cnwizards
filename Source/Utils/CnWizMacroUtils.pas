@@ -285,18 +285,18 @@ var
   Args: TCnProcArguments;
   RetType: string;
   Text: string;
-  i: Integer;
+  I: Integer;
 begin
   Result := '';
   if (FormatStr <> '') and EdtGetProcInfo(Name, Args, RetType) then
   begin
-    for i := Low(Args) to High(Args) do
+    for I := Low(Args) to High(Args) do
     begin
       Text := FormatStr;
-      Text := StringReplace(Text, csArgKind, Args[i].ArgKind, [rfReplaceAll]);
-      Text := StringReplace(Text, csArgName, Args[i].ArgName, [rfReplaceAll]);
-      Text := StringReplace(Text, csArgType, Args[i].ArgType, [rfReplaceAll]);
-      Text := StringReplace(Text, csArgDefault, Args[i].ArgDefault, [rfReplaceAll]);
+      Text := StringReplace(Text, csArgKind, Args[I].ArgKind, [rfReplaceAll]);
+      Text := StringReplace(Text, csArgName, Args[I].ArgName, [rfReplaceAll]);
+      Text := StringReplace(Text, csArgType, Args[I].ArgType, [rfReplaceAll]);
+      Text := StringReplace(Text, csArgDefault, Args[I].ArgDefault, [rfReplaceAll]);
       Result := Result + Text;
     end;
   end;
@@ -347,14 +347,14 @@ var
 
   function ParseArgs(DoAdd: Boolean): Integer;
   var
-    i, j, Idx: Integer;
+    I, J, Idx: Integer;
     Text, ArgKind, ArgType, ArgDefault: string;
   begin
     Result := 0;
     Lines.Text := StringReplace(ProcArgs, ';', CRLF, [rfReplaceAll]);
-    for i := 0 to Lines.Count - 1 do
+    for I := 0 to Lines.Count - 1 do
     begin
-      Text := Trim(Lines[i]);
+      Text := Trim(Lines[I]);
     {$IFDEF DEBUG}
       if DoAdd then
         CnDebugger.LogFmt('Line: %s', [Text]);
@@ -403,12 +403,12 @@ var
 
       // 取参数名
       Params.Text := StringReplace(Text, ',', CRLF, [rfReplaceAll]);
-      for j := 0 to Params.Count - 1 do
+      for J := 0 to Params.Count - 1 do
       begin
         if DoAdd then
         begin
           Args[Result].ArgKind := ArgKind;
-          Args[Result].ArgName := Trim(Params[j]);
+          Args[Result].ArgName := Trim(Params[J]);
           Args[Result].ArgType := ArgType;
           Args[Result].ArgDefault := ArgDefault;
         end;
