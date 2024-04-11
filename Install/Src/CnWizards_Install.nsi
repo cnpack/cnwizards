@@ -549,6 +549,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_DXE8.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_DXE81.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_DXE81.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !ifdef IDE_VERSION_D10S
@@ -911,6 +915,7 @@ SectionEnd
 Section "RAD Studio XE8" SecDXE8
   SectionIn 1 2
   SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_DXE81.dll"
   File "..\..\Bin\CnWizards_DXE8.dll"
   ; 写入专家注册键值
   DeleteRegValue HKCU "Software\Embarcadero\BDS\16.0\Experts" "CnWizards_DXE8"
