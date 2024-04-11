@@ -659,9 +659,14 @@ procedure TCnWizardMgr.RefreshLanguage;
 var
   I: Integer;
 begin
-  FConfigAction.Caption := SCnWizConfigCaption;
-  FConfigAction.Hint := SCnWizConfigHint;
-  FWizAbout.RefreshAction;
+  if FConfigAction <> nil then
+  begin
+    FConfigAction.Caption := SCnWizConfigCaption;
+    FConfigAction.Hint := SCnWizConfigHint;
+  end;
+
+  if FWizAbout <> nil then
+    FWizAbout.RefreshAction;
 
   WizActionMgr.MoreAction.Caption := SCnMoreMenu;
   WizActionMgr.MoreAction.Hint := StripHotkey(SCnMoreMenu);
