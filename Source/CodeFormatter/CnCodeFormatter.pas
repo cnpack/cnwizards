@@ -2015,7 +2015,16 @@ begin
   CheckKeepLineBreakWriteln;
   
   Match(tokKeywordUntil, PreSpaceCount);
-  FormatExpression(0, PreSpaceCount);
+
+  // until 后面的表达式也需保留换行
+  FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+  FNeedKeepLineBreak := True;
+
+  try
+    FormatExpression(0, PreSpaceCount);
+  finally
+    FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+  end;
 end;
 
 {
@@ -2465,7 +2474,16 @@ end;
 procedure TCnBasePascalFormatter.FormatWhileStmt(PreSpaceCount: Byte);
 begin
   Match(tokKeywordWhile, PreSpaceCount);
-  FormatExpression(0, PreSpaceCount);
+
+  // while 后的表达式要保留换行
+  FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+  FNeedKeepLineBreak := True;
+
+  try
+    FormatExpression(0, PreSpaceCount);
+  finally
+    FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
+  end;
 
   SpecifyElementType(pfetDo);
   try
