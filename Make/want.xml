@@ -788,7 +788,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_DXE81.rc" />
     <brcc file="${src}/CnWizards_DXE81.rc" exename="${exe.brcc32}" output="${src}/CnWizards_DXE81.res" />
-    <dcc basedir="${src}" source="CnWizards_DXE81.dpr" exename="${exe.DXE8}" usecfg="true" arguments="${dcc_arg}" >
+    <dcc basedir="${src}" source="CnWizards_DXE81.dpr" exename="${exe.DXE81}" usecfg="true" arguments="${dcc_arg}" >
       <define name="${define.add}" />
     </dcc>
     <delete dir="${src}">
