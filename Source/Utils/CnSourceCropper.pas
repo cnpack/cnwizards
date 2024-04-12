@@ -47,20 +47,20 @@ uses
   Classes, SysUtils;
 
 type
-  TSourceTokenKind = (skUndefined, skCode, skBlockComment, skLineComment,
+  TCnCropSourceTokenKind = (skUndefined, skCode, skBlockComment, skLineComment,
     skQuoteString, skDittoString, skDirective, skTodoList, skToReserve);
-    
-  TCropOption = (coAll, coExAscii);
+
+  TCnCropOption = (coAll, coExAscii);
 
 type
   TCnSourceCropper = class
   private
-    FCurTokenKind: TSourceTokenKind;
+    FCurTokenKind: TCnCropSourceTokenKind;
     FCurChar: AnsiChar;
 
     FCropTodoList: Boolean;
     FCropDirective: Boolean;
-    FCropOption: TCropOption;
+    FCropOption: TCnCropOption;
     FInStream: TStream;
     FOutStream: TStream;
     FReserve: Boolean;
@@ -96,7 +96,7 @@ type
     {* 输入要求是 Ansi 或 Utf8 形式的 AnsiString}
     property OutStream: TStream read FOutStream write SetOutStream;
     {* 输出会是对应的 Ansi 或 Utf8 形式的 AnsiString}
-    property CropOption: TCropOption read FCropOption write FCropOption;
+    property CropOption: TCnCropOption read FCropOption write FCropOption;
     property CropDirective: Boolean read FCropDirective write FCropDirective;
     property CropTodoList: Boolean read FCropTodoList write FCropTodoList;
     property RemoveSingleLineSlashes: Boolean read FRemoveSingleLineSlashes write FRemoveSingleLineSlashes;
@@ -121,7 +121,7 @@ type
   end;
 
 type
-  TCnCPPCropper = class(TCnSourceCropper)
+  TCnCppCropper = class(TCnSourceCropper)
   private
 
   protected
@@ -460,9 +460,9 @@ begin
   end;
 end;
 
-{ TCnCPPCropper }
+{ TCnCppCropper }
 
-procedure TCnCPPCropper.DoParse;
+procedure TCnCppCropper.DoParse;
 var
   IsSpace, WholeLineSpace: Boolean;
   SpCount: Integer;
@@ -541,7 +541,7 @@ begin
   WriteChar(#0);
 end;
 
-procedure TCnCPPCropper.ProcessToBlockEnd;
+procedure TCnCppCropper.ProcessToBlockEnd;
 var
   NeedSep: Boolean;
 begin

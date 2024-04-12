@@ -97,8 +97,8 @@ type
   private
     function GetCropStyle: TCropStyle;
     procedure SetCropStyle(const Value: TCropStyle);
-    function GetCropOption: TCropOption;
-    procedure SetCropOption(const Value: TCropOption);
+    function GetCropOption: TCnCropOption;
+    procedure SetCropOption(const Value: TCnCropOption);
     function GetCropDirective: Boolean;
     procedure SetCropDirective(const Value: Boolean);
     function GetCropTodoList: Boolean;
@@ -121,7 +121,7 @@ type
     function GetHelpTopic: string; override;
   public
     property CropStyle: TCropStyle read GetCropStyle write SetCropStyle;
-    property CropOption: TCropOption read GetCropOption write SetCropOption;
+    property CropOption: TCnCropOption read GetCropOption write SetCropOption;
     property CropDirective: Boolean read GetCropDirective write SetCropDirective;
     property CropTodoList: Boolean read GetCropTodoList write SetCropTodoList;
     property CropProjectSrc: Boolean read GetCropProjectSrc write SetCropProjectSrc;
@@ -140,7 +140,7 @@ type
     FCropTodoList: Boolean;
     FCropDirective: Boolean;
     FCropProjectSrc: Boolean;
-    FCropOption: TCropOption;
+    FCropOption: TCnCropOption;
     FCropStyle: TCropStyle;
     FCropCount: Integer;
     FReserve: Boolean;
@@ -183,7 +183,7 @@ type
     procedure CropInDirectories;
 
     property CropStyle: TCropStyle read FCropStyle write FCropStyle;
-    property CropOption: TCropOption read FCropOption write FCropOption;
+    property CropOption: TCnCropOption read FCropOption write FCropOption;
     property CropDirective: Boolean read FCropDirective write FCropDirective;
     property CropTodoList: Boolean read FCropTodoList write FCropTodoList;
     property CropProjectSrc: Boolean read FCropProjectSrc write FCropProjectSrc;
@@ -208,7 +208,7 @@ implementation
 uses
   CnDebug;
 {$ENDIF}
-  
+
 const
   csCropOption = 'CropOption';
   csCropDirective = 'CropDirective';
@@ -376,7 +376,7 @@ begin
         if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
           Cropper := TCnPasCropper.Create
         else
-          Cropper := TCnCPPCropper.Create;
+          Cropper := TCnCppCropper.Create;
 
         Cropper.InStream := InStream;
         Cropper.OutStream := OutStream;
@@ -391,7 +391,7 @@ begin
         if FMergeBlank then
           MergeBlankStream(OutStream);
 {$IFDEF DEBUG}
-//      CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size); 
+//      CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size);
 {$ENDIF}
 
         CnOtaDeleteCurrentSelection;
@@ -503,7 +503,7 @@ begin
     IncludeSubDirs := ReadBool('', csIncludeSub, True);
     Reserve := ReadBool('', csReserve, True);
     ReserveStr := ReadString('', csReserveStr, csDefReserveStr);
-    CropOption := TCropOption(ReadInteger('', csCropOption, 0));
+    CropOption := TCnCropOption(ReadInteger('', csCropOption, 0));
     ReadStrings('', csDirsHistory, FDirsHistory);
     ReadStrings('', csFileMasksHistory, FFileMasksHistory);
     Free;
@@ -538,7 +538,7 @@ begin
   Result := chkCropDirective.Checked;
 end;
 
-function TCnCommentCropForm.GetCropOption: TCropOption;
+function TCnCommentCropForm.GetCropOption: TCnCropOption;
 begin
   if rbExAscii.Checked then
     Result := coExAscii
@@ -571,7 +571,7 @@ begin
   chkCropDirective.Checked := Value;
 end;
 
-procedure TCnCommentCropForm.SetCropOption(const Value: TCropOption);
+procedure TCnCommentCropForm.SetCropOption(const Value: TCnCropOption);
 begin
   case Value of
     coAll:     rbCropComment.Checked := True;
@@ -633,7 +633,7 @@ begin
   if IsDelphi then
     Cropper := TCnPasCropper.Create
   else
-    Cropper := TCnCPPCropper.Create;
+    Cropper := TCnCppCropper.Create;
 
   Cropper.InStream := InStream;
   Cropper.OutStream := OutStream;

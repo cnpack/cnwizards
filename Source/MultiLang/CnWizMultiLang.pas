@@ -134,10 +134,10 @@ type
     procedure DoCreate; override;
     procedure DoDestroy; override;
     procedure ReadState(Reader: TReader); override;
-{$ENDIF}
 
     function NeedAdjustRightBottomMargin: Boolean; virtual;
     {* 控制子类是否要调整右下方向边距}
+{$ENDIF}
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
@@ -978,14 +978,14 @@ initialization
 finalization
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizMultiLang finalization.');
-{$ENDIF DEBUG}
+{$ENDIF}
 
   if FStorage <> nil then
     FreeAndNil(FStorage);
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizMultiLang finalization.');
-{$ENDIF DEBUG}
+{$ENDIF}
 
 {$ENDIF TEST_APP}
 end.

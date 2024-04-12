@@ -3,7 +3,7 @@ object TestCaptionButtonForm: TTestCaptionButtonForm
   Top = 260
   Width = 577
   Height = 246
-  Caption = 'Test Caption Button'
+  Caption = 'Test Caption Button for 32/64 Unicode/Non-Unicode'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

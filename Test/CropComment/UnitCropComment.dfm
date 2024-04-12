@@ -2,7 +2,7 @@ object FormCrop: TFormCrop
   Left = 192
   Top = 107
   BorderStyle = bsDialog
-  Caption = 'Test Crop Comment'
+  Caption = 'Test Crop Comment for 32/64 Unicode/Non-Unicode'
   ClientHeight = 536
   ClientWidth = 971
   Color = clBtnFace
@@ -57,13 +57,18 @@ object FormCrop: TFormCrop
           ''
           '{$R *.RES}  // kkk'
           ''
+          '{走天下}'
           'begin'
-          '  Applic{aaa}ation.Initialize;//'
+          '  Applic{aaa}ation.Initialize;//吃饭喝水'
           '  Application.CreateForm(TForm1, Form1); //mmmmm'
+          '(* 人生啊'
+          '*)'
           '  Application.Run;'
           'end.')
         ParentFont = False
+        ScrollBars = ssBoth
         TabOrder = 0
+        WordWrap = False
       end
       object mmoPasRes: TMemo
         Left = 488
@@ -94,6 +99,7 @@ object FormCrop: TFormCrop
         Font.Name = 'MS Sans Serif'
         Font.Style = [fsBold]
         ParentFont = False
+        OnClick = btnCppCropClick
       end
       object mmoCpp: TMemo
         Left = 8
@@ -105,8 +111,43 @@ object FormCrop: TFormCrop
         Font.Height = -13
         Font.Name = 'Courier New'
         Font.Style = []
+        Lines.Strings = (
+          
+            '//--------------------------------------------------------------' +
+            '-------------'
+          ''
+          '#include <vcl.h>'
+          '#pragma hdrstop'
+          ''
+          '#include "Unit2.h"'
+          
+            '//--------------------------------------------------------------' +
+            '-------------'
+          '#pragma package(smart_init)'
+          '#pragma resource "*.dfm"'
+          'TForm2 *Form2;'
+          
+            '//---------------------------人生啊-----------------------------' +
+            '-------------------'
+          '__fastcall TForm2::TForm2(TComponent* Owner)'
+          '  : TForm(Owner)'
+          '{'
+          '}'
+          
+            '//----------------------------------------------------------aaa-' +
+            '----------------'
+          'void __fastcall TForm2::FormCreate(TObject *Sender)'
+          '{'
+          '/* 吃饭'
+          '喝水*/'
+          '}'
+          
+            '//--------------------------------------------------------------' +
+            '-------------')
         ParentFont = False
+        ScrollBars = ssBoth
         TabOrder = 0
+        WordWrap = False
       end
       object mmoCppRes: TMemo
         Left = 488

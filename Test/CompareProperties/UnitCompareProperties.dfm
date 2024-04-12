@@ -3,7 +3,7 @@ object FormTestCompare: TFormTestCompare
   Top = 164
   Width = 581
   Height = 341
-  Caption = 'Test Compare Properties'
+  Caption = 'Test Compare Properties 32/64 Unicode/Non-Unicode'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
