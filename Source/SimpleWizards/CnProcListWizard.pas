@@ -3932,6 +3932,20 @@ begin
   UpdateStatusBar;
 end;
 
+procedure TCnProcListForm.btnPreviewRightClick(Sender: TObject);
+begin
+  btnPreviewRight.Down := True;
+  btnPreviewDown.Down := False;
+  FPreviewIsRight := True;
+end;
+
+procedure TCnProcListForm.btnPreviewDownClick(Sender: TObject);
+begin
+  btnPreviewDown.Down := True;
+  btnPreviewRight.Down := False;
+  FPreviewIsRight := False;
+end;
+
 procedure TCnProcListForm.UpdateMemoSize(Sender: TObject);
 const
   csStep = 5;
@@ -4836,20 +4850,6 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
-end;
-
-procedure TCnProcListForm.btnPreviewRightClick(Sender: TObject);
-begin
-  btnPreviewRight.Down := True;
-  btnPreviewDown.Down := False;
-  FPreviewIsRight := True;
-end;
-
-procedure TCnProcListForm.btnPreviewDownClick(Sender: TObject);
-begin
-  btnPreviewDown.Down := True;
-  btnPreviewRight.Down := False;
-  FPreviewIsRight := False;
 end;
 
 initialization

@@ -1240,7 +1240,7 @@ begin
   begin
     Match(Scanner.Token, 0, 1);
 
-    if Scanner.Token in ([tokAtSign, tokLB] + ExprTokens + KeywordTokens +
+    if Scanner.Token in ([tokAmpersand, tokAtSign, tokLB] + ExprTokens + KeywordTokens +
       DirectiveTokens + ComplexTokens) then // 有关键字做变量名的情况也得考虑到
     begin
       FormatExpression(0, IndentForAnonymous);
