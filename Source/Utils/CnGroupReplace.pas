@@ -31,7 +31,9 @@ unit CnGroupReplace;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2005.08.09
+* 修改记录：2024.04.13
+*                完善 32位、64位及 Unicode 支持
+*           2005.08.09
 *               从 CnSrcEditorGroupReplace 中移出
 ================================================================================
 |</PRE>}
@@ -126,7 +128,8 @@ begin
     ASrc := AnsiString(Source);
 
   Result := -1;
-  if (Text = '') or (ASrc = '') then Exit;
+  if (Text = '') or (ASrc = '') then
+    Exit;
 
   L := Length(ASrc);
   PText := PAnsiChar(Text);
@@ -142,7 +145,7 @@ begin
       end
       else
       begin
-        if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
+        if (TCnNativeUInt(PSub) > TCnNativeUInt(PText)) and IsValidIdentChar(Char(PSub[-1])) or
           IsValidIdentChar(Char(PSub[L])) then
         begin
           PSub := PAnsiChar(TCnNativeInt(PSub) + L);
@@ -186,19 +189,19 @@ begin
     begin
       if not FWholeWord then
       begin
-        Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
+        Result := (TCnNativeInt(PSub) - TCnNativeInt(PText)) shr 1; // div SizeOf(WideChar)
         Exit;
       end
       else
       begin
-        if (Cardinal(PSub) > Cardinal(PText)) and IsValidIdentChar(Char(PSub[-1])) or
+        if (TCnNativeUInt(PSub) > TCnNativeUInt(PText)) and IsValidIdentChar(Char(PSub[-1])) or
           IsValidIdentChar(Char(PSub[L])) then
         begin
           PSub := PChar(TCnNativeInt(PSub) + L);
         end
         else
         begin
-          Result := TCnNativeInt(PSub) - TCnNativeInt(PText);
+          Result := (TCnNativeInt(PSub) - TCnNativeInt(PText)) shr 1; // div SizeOf(WideChar)
           Exit;
         end;
       end;

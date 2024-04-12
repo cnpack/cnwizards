@@ -2,7 +2,7 @@ object GroupReplaceForm: TGroupReplaceForm
   Left = 192
   Top = 130
   BorderStyle = bsDialog
-  Caption = 'Test Group Replace'
+  Caption = 'Test Group Replace 32/64 Unicode/Non-Unicode'
   ClientHeight = 331
   ClientWidth = 534
   Color = clBtnFace
