@@ -25,7 +25,8 @@ unit CnPascalAST;
 * 单元名称：Pascal 代码抽象语法树生成单元
 * 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; https://www.cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
-*           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const 等
+*           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const/type 等
+*           不支持仨单引号字符串，不支持内联 var
 *           不支持 asm（仅跳过），注释还原度较低
 * 开发平台：2023.07.29 V1.3
 *               加入对多行字符串的支持
@@ -1067,7 +1068,7 @@ begin
 
   if FLex.TokenID in CanBeIdentifierTokens then  // 其他可以做变量名的关键字
   begin
-    T := MatchCreateLeafAndStep(tkIdentifier);   // 头一个变量名，指明是 tkIdentifier，抹杀掉其他关键字
+    T := MatchCreateLeafAndStep(FLex.TokenID);
     if FLex.TokenID <> tkPoint then              // 后面没点就退出
       Exit;
 
@@ -1621,10 +1622,19 @@ function TCnPasAstGenerator.MatchCreateLeaf(AToken: TTokenKind;
 begin
   Result := nil;
   if (AToken <> tkNone) and (AToken <> FLex.TokenID) then
+  begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+    raise ECnPascalAstException.CreateFmt(SCnErrorTokenNotMatchFmt,
+      [GetEnumName(TypeInfo(TTokenKind), Ord(AToken)),
+       GetEnumName(TypeInfo(TTokenKind), Ord(FLex.TokenID)),
+       FLex.Token, FLex.LineNumber, FLex.TokenPos - FLex.LineStartOffset]);
+{$ELSE}
     raise ECnPascalAstException.CreateFmt(SCnErrorTokenNotMatchFmt,
       [GetEnumName(TypeInfo(TTokenKind), Ord(AToken)),
        GetEnumName(TypeInfo(TTokenKind), Ord(FLex.TokenID)),
        FLex.Token, FLex.LineNumber, FLex.TokenPos - FLex.LinePos]);
+{$ENDIF}
+  end;
 
   if NodeType = cntInvalid then
     NodeType := NodeTypeFromToken(AToken);

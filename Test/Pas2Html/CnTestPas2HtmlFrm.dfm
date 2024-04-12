@@ -2,7 +2,7 @@ object FormPasConvert: TFormPasConvert
   Left = 161
   Top = 150
   BorderStyle = bsDialog
-  Caption = 'Source Pas/Cpp to Html Test'
+  Caption = 'Source Pas/Cpp to Html Test 32/64 Unicode/Non-Unicode'
   ClientHeight = 308
   ClientWidth = 317
   Color = clBtnFace

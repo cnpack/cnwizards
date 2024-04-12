@@ -3,7 +3,7 @@ object FormAST: TFormAST
   Top = 92
   Width = 1328
   Height = 716
-  Caption = 'Pascal AST'
+  Caption = 'Pascal AST 32/64 Unicode/Non-Unicode'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
