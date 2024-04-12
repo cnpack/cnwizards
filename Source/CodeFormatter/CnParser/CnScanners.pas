@@ -50,7 +50,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Contnrs, CnFormatterIntf,
+  Classes, SysUtils, Contnrs, CnFormatterIntf, CnNative,
   CnParseConsts, CnTokens, CnCodeGenerators, CnCodeFormatRules;
 
 type
@@ -386,21 +386,23 @@ procedure TAbstractScanner.ReadBuffer;
 var
   Count: Integer;
 begin
-  Inc(FOrigin, Integer(FSourcePtr) - Integer(FBuffer));
+  Inc(FOrigin, TCnNativeInt(FSourcePtr) - TCnNativeInt(FBuffer));
   FSourceEnd[0] := FSaveChar;
-  Count := Integer(FBufPtr) - Integer(FSourcePtr);
-  if Count <> 0 then Move(FSourcePtr[0], FBuffer[0], Count);
-  FBufPtr := PChar(Integer(FBuffer) + Count);
+  Count := TCnNativeInt(FBufPtr) - TCnNativeInt(FSourcePtr);
+  if Count <> 0 then
+    Move(FSourcePtr[0], FBuffer[0], Count);
+  FBufPtr := PChar(TCnNativeInt(FBuffer) + Count);
 
-  Count := FStream.Read(FBufPtr[0], (Integer(FBufEnd) - Integer(FBufPtr))); // 读进来的 Byte 数
-  FBufPtr := PChar(Integer(FBufPtr) + Count);
+  Count := FStream.Read(FBufPtr[0], (TCnNativeInt(FBufEnd) - TCnNativeInt(FBufPtr))); // 读进来的 Byte 数
+  FBufPtr := PChar(TCnNativeInt(FBufPtr) + Count);
 
   FSourcePtr := FBuffer;
   FSourceEnd := FBufPtr;
   if FSourceEnd = FBufEnd then
   begin
     FSourceEnd := LineStart(FBuffer, FSourceEnd - 1);
-    if FSourceEnd = FBuffer then Error(CN_ERRCODE_PASCAL_LINE_TOOLONG);
+    if FSourceEnd = FBuffer then
+      Error(CN_ERRCODE_PASCAL_LINE_TOOLONG);
   end;
   FSaveChar := FSourceEnd[0];
   FSourceEnd[0] := #0;
@@ -418,7 +420,7 @@ begin
     FBufPtr := FBuffer;
 
     Count := FStream.Read(FBuffer[0], FBufSize);
-    FBufPtr := PChar(Integer(FBufPtr) + Count);
+    FBufPtr := PChar(TCnNativeInt(FBufPtr) + Count);
 
     FSourcePtr := FBuffer;
     FSourceEnd := FBufPtr;
@@ -1154,7 +1156,7 @@ begin
         if P^ = '}' then
         begin
           // 判断 IgnoreP 与 P 之间是否是 IgnoreFormat 标记
-          if (Result = tokBlockComment) and (Integer(P) - Integer(IgnoreP) = 3 * SizeOf(Char)) then // 3 means '{(*}'
+          if (Result = tokBlockComment) and (TCnNativeInt(P) - TCnNativeInt(IgnoreP) = 3 * SizeOf(Char)) then // 3 means '{(*}'
           begin
             Inc(IgnoreP);
             if IgnoreP^ = '(' then
