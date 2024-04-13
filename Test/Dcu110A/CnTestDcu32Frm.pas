@@ -4,8 +4,8 @@ interface
 
 {$I CnPack.inc}
 
-{$IFDEF DELPHI110_ALEXANDRIA_UP}
-  {$MESSAGE ERROR 'This case is only for Delphi 5~10.4'}
+{$IFNDEF DELPHI110_ALEXANDRIA_UP}
+  {$MESSAGE ERROR 'Only D110A and Above'}
 {$ENDIF}
 
 uses
@@ -33,7 +33,7 @@ type
     function ExtractSymbol(const Symbol: string): string;
     procedure DumpADcu(const AFileName: string; ALines: TStrings);
   public
-
+    { Public declarations }
   end;
 
 var

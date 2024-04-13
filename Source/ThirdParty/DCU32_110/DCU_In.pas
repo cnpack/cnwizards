@@ -42,7 +42,7 @@ type
   TDCURecTag = Byte { Char };
 
   PNDX = ^TNDX;
-  TNDX = integer;
+  TNDX = NativeInt;
 
   TNameRecData = packed record
     case integer of
@@ -429,6 +429,32 @@ function ReadName: PName;
     SkipBlock(L);
   end;
 
+{$IFDEF WIN64}
+
+function StrLEnd(Str: PAnsiChar; L: Cardinal): PAnsiChar;
+var
+  I, Len: Integer;
+  PEnd: PAnsiChar;
+begin
+  Len := L;
+  PEnd := Str;
+  while (PEnd^ <> #0) and (Len > 0) do
+  begin
+    Inc(PEnd);
+    Dec(Len);
+  end;
+  if Len > 0 then
+  begin
+    // 如果字符串长度大于L，需要找到长度为 L 的子字符串的结束位置
+    PEnd := Str;
+    for I := 1 to L do
+      PEnd := PAnsiChar(NativeUInt(PEnd) - 1);
+  end;
+  Result := PAnsiChar(PEnd);
+end;
+
+{$ELSE}
+
 function StrLEnd(Str: PAnsiChar; L: Cardinal): PAnsiChar; assembler;
   asm
     MOV     ECX,EDX
@@ -442,6 +468,8 @@ function StrLEnd(Str: PAnsiChar; L: Cardinal): PAnsiChar; assembler;
     MOV     EAX,EDI
     MOV     EDI,EDX
 end;
+
+{$ENDIF}
 
 function ReadNDXStr: AnsiString;
   // Was observed only in drConstAddInfo records of MSIL
@@ -545,6 +573,13 @@ function ReadUIndex: LongInt;
       end;
   end;
 
+function SarInt32(var V: LongInt; ShiftCount: Integer): LongInt;
+begin
+  Result := V shr ShiftCount;
+  if (V and $80000000) <> 0 then
+    Result := Result or $80000000;
+end;
+
 function ReadIndex: LongInt;
   type
     TR4 = packed record
@@ -568,17 +603,19 @@ function ReadIndex: LongInt;
     B[0] := ReadByte;
     if B[0] and $1 = 0 then begin
         Result := SB;
-        asm
-          sar DWORD PTR[Result],1
-        end;
+        Result := SarInt32(Result, 1);
+//        asm
+//          sar DWORD PTR[Result],1
+//        end;
       end
     else begin
         B[1] := ReadByte;
         if B[0] and $2 = 0 then begin
             Result := W;
-            asm
-              sar DWORD PTR[Result],2
-            end;
+            Result := SarInt32(Result, 2);
+//            asm
+//              sar DWORD PTR[Result],2
+//            end;
           end
         else begin
             B[2] := ReadByte;
@@ -586,17 +623,19 @@ function ReadIndex: LongInt;
             if B[0] and $4 = 0 then begin
                 RL.i := ShortInt(B[2]);
                 Result := L;
-                asm
-                  sar DWORD PTR[Result],3
-                end;
+                Result := SarInt32(Result, 3);
+//                asm
+//                  sar DWORD PTR[Result],3
+//                end;
               end
             else begin
                 B[3] := ReadByte;
                 if B[0] and $8 = 0 then begin
                     Result := L;
-                    asm
-                      sar DWORD PTR[Result],4
-                    end;
+                    Result := SarInt32(Result, 4);
+//                    asm
+//                      sar DWORD PTR[Result],4
+//                    end;
                   end
                 else begin
                     B[4] := ReadByte;

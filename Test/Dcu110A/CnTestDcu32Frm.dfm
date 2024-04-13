@@ -2,7 +2,7 @@ object FormDcu32: TFormDcu32
   Left = 240
   Top = 201
   BorderStyle = bsDialog
-  Caption = 'Test Dcu32 Intf/Impl Parsing in D5~10.4 Unicode/Non-Unicode'
+  Caption = 'Test Dcu32 Intf/Impl Parsing for D110A Unicode 32/64'
   ClientHeight = 512
   ClientWidth = 622
   Color = clBtnFace
@@ -11,9 +11,7 @@ object FormDcu32: TFormDcu32
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
-  PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
     Left = 24
@@ -25,11 +23,11 @@ object FormDcu32: TFormDcu32
   object lblNote: TLabel
     Left = 24
     Top = 60
-    Width = 434
+    Width = 505
     Height = 13
-    Caption =
-      'Note: This Test Should Run OK from Delphi 5 ~ 10.4. Parse OK for' +
-      ' Delphi 5 ~ 10.4 all Units.'
+    Caption = 
+      'Note: This Test Should Run OK from Delphi 110A ~ Above all. Pars' +
+      'e OK for Delphi 110A ~ Above all Units.'
   end
   object edtDcuFile: TEdit
     Left = 80
@@ -96,7 +94,7 @@ object FormDcu32: TFormDcu32
   end
   object OpenDialog1: TOpenDialog
     Filter = '*.DCU|*.dcu'
-    Left = 424
-    Top = 64
+    Left = 568
+    Top = 56
   end
 end

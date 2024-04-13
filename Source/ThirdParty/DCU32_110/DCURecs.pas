@@ -4626,7 +4626,10 @@ function TFloatDef.ShowValue(DP: Pointer; DS: Cardinal): integer { Size used };
               end;
             end;
         end;
+{$IFNDEF WIN64}
+      // Win64 下 Extended 8 字节而非 10 字节，与 Double 重复
       SizeOf(Extended): E := Extended(DP^);
+{$ENDIF}
       SizeOf(Real): E := Real(DP^);
     else
       Ok := false;
