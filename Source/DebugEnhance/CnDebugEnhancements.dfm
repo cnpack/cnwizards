@@ -3,8 +3,8 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
   Top = 169
   BorderStyle = bsDialog
   Caption = 'Debug Enhancement Settings'
-  ClientHeight = 425
-  ClientWidth = 436
+  ClientHeight = 461
+  ClientWidth = 490
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -16,8 +16,8 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
-    Left = 190
-    Top = 394
+    Left = 244
+    Top = 430
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -27,8 +27,8 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
     TabOrder = 0
   end
   object btnCancel: TButton
-    Left = 270
-    Top = 394
+    Left = 324
+    Top = 430
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -38,8 +38,8 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
     TabOrder = 1
   end
   object btnHelp: TButton
-    Left = 350
-    Top = 394
+    Left = 404
+    Top = 430
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -50,8 +50,8 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
   object pgc1: TPageControl
     Left = 8
     Top = 8
-    Width = 417
-    Height = 377
+    Width = 471
+    Height = 413
     ActivePage = tsDebugHint
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 3
@@ -65,10 +65,11 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         Caption = 'Using Below Type Expressions to Enhance Debug Hint:'
       end
       object lblHint: TLabel
-        Left = 168
-        Top = 296
+        Left = 222
+        Top = 332
         Width = 229
         Height = 13
+        Anchors = [akRight, akBottom]
         BiDiMode = bdLeftToRight
         Caption = 'Note: Only Availiable under Delphi XE or Above.'
         ParentBiDiMode = False
@@ -76,16 +77,17 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       object lvReplacers: TListView
         Left = 8
         Top = 32
-        Width = 393
-        Height = 249
+        Width = 447
+        Height = 285
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
           item
             Caption = 'Type Name'
-            Width = 160
+            Width = 200
           end
           item
             Caption = 'New Expression'
-            Width = 200
+            Width = 220
           end>
         ReadOnly = True
         RowSelect = True
@@ -96,10 +98,11 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       end
       object tlbHint: TToolBar
         Left = 8
-        Top = 288
+        Top = 324
         Width = 73
         Height = 29
         Align = alNone
+        Anchors = [akLeft, akBottom]
         Caption = 'tlbHint'
         EdgeBorders = []
         Flat = True
@@ -125,23 +128,26 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       object grpExternalViewer: TGroupBox
         Left = 8
         Top = 8
-        Width = 393
-        Height = 329
+        Width = 447
+        Height = 365
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'External Viewer for Debugging'
         TabOrder = 0
         object chkDataSetViewer: TCheckBox
           Left = 16
           Top = 24
-          Width = 361
+          Width = 415
           Height = 17
-          Caption = 'Enable TDataSet Viewer'
+          Anchors = [akLeft, akTop, akRight]
+          Caption = 'Enable TDataSet Viewer (Delphi XE or Above)'
           TabOrder = 0
         end
         object chkStringsViewer: TCheckBox
           Left = 16
           Top = 120
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Enable TStrings Viewer'
           TabOrder = 4
           Visible = False
@@ -149,24 +155,27 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         object chkBytesViewer: TCheckBox
           Left = 16
           Top = 48
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Enable TBytes/RawByteString Viewer (Delphi XE ~ 10.4)'
           TabOrder = 1
         end
         object chkWideViewer: TCheckBox
           Left = 16
           Top = 72
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Enable WideString/UnicodeString Viewer (Delphi XE or Above)'
           TabOrder = 2
         end
         object chkMemoryStreamViewer: TCheckBox
           Left = 16
           Top = 96
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Enable TMemoryStream Viewer (Delphi XE ~ 10.4)'
           TabOrder = 3
         end
@@ -178,23 +187,26 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       object grpOthers: TGroupBox
         Left = 8
         Top = 8
-        Width = 393
-        Height = 329
+        Width = 447
+        Height = 365
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Other Settings'
         TabOrder = 0
         object chkAutoClose: TCheckBox
           Left = 16
           Top = 24
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Auto Close Running Target Before Compiling or Building'
           TabOrder = 0
         end
         object chkAutoReset: TCheckBox
           Left = 16
           Top = 48
-          Width = 361
+          Width = 415
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Auto Reset Debugging Target Before Compiling or Building'
           TabOrder = 1
         end
@@ -205,7 +217,7 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
     Images = dmCnSharedImages.Images
     OnUpdate = actlstDebugUpdate
     Left = 20
-    Top = 344
+    Top = 384
     object actAddHint: TAction
       Caption = 'Add Hint'
       Hint = 'Add a Debug Hint'

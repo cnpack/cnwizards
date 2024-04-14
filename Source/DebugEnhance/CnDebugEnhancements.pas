@@ -24,7 +24,9 @@ unit CnDebugEnhancements;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：调试功能扩展单元
 * 单元作者：刘啸 (liuxiao@cnpack.org)
-* 备    注：
+* 备    注：IDE_HAS_DEBUGGERVISUALIZER 是 XE 或以上有，表示能增强 Hint 以及查看器
+*           FULL_IOTADEBUGGERVISUALIZER_250 是 10.3 或以上支持泛型的增强查看器
+*           IDE_HAS_MEMORY_VISUALIZAER 是 110 或以上有，表示有特定的 TBytes 查看器
 * 开发平台：PWin7Pro + Delphi 10.3
 * 兼容测试：暂无
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -157,7 +159,9 @@ type
 
   TCnDebuggerBaseValueReplacerClass = class of TCnDebuggerBaseValueReplacer;
 
-  TCnDebuggerValueReplaceManager = class(TInterfacedObject, IOTADebuggerVisualizerValueReplacer)
+  TCnDebuggerValueReplaceManager = class(TInterfacedObject,
+    {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} IOTADebuggerVisualizer250, {$ENDIF}
+    IOTADebuggerVisualizerValueReplacer)
   {* 所有单类型调试值替换类的管理类，自身聚合成单个类注册至 Delphi}
   private
     FWizard: TCnDebugEnhanceWizard;
@@ -181,10 +185,15 @@ type
     // IOTADebuggerVisualizer
     function GetSupportedTypeCount: Integer;
     procedure GetSupportedType(Index: Integer; var TypeName: string;
-      var AllDescendants: Boolean); overload;
+      var AllDescendants: Boolean); {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} overload; {$ENDIF}
     function GetVisualizerIdentifier: string;
     function GetVisualizerName: string;
     function GetVisualizerDescription: string;
+{$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
+    { IOTADebuggerVisualizer250 }
+    procedure GetSupportedType(Index: Integer; var TypeName: string;
+      var AllDescendants: Boolean; var IsGeneric: Boolean); overload;
+{$ENDIF}
 
     // IOTADebuggerVisualizerValueReplacer
     function GetReplacementValue(const Expression, TypeName, EvalResult: string): string;
@@ -724,6 +733,17 @@ begin
 
   AllDescendants := False; // 聚合了导致没法支持子类，不知道如何分发
 end;
+
+{$IFDEF FULL_IOTADEBUGGERVISUALIZER_250}
+
+procedure TCnDebuggerValueReplaceManager.GetSupportedType(Index: Integer;
+  var TypeName: string; var AllDescendants: Boolean; var IsGeneric: Boolean);
+begin
+  GetSupportedType(Index, TypeName, AllDescendants);
+  IsGeneric := False;
+end;
+
+{$ENDIF}
 
 function TCnDebuggerValueReplaceManager.GetSupportedTypeCount: Integer;
 begin
