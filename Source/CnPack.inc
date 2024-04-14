@@ -3312,6 +3312,7 @@
 {$IFDEF DELPHI120_ATHENS_UP}
   {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 TList use NativeInt for Index and Count instead of Integer
   {$DEFINE IDE_HAS_TABMENU_COPY_PATH}   // Athens 12 editor tab menu has item to copy path or filename
+  {$DEFINE IDE_HAS_DBCLICK_HIGHLIGHT}   // Athens 12 editor double click selection highlight
 {$ENDIF}
 
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
