@@ -26,7 +26,7 @@ unit CnPascalAST;
 * 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; https://www.cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const/type 等
-*           不支持仨单引号字符串，不支持内联 var
+*           不支持泛型、不支持内联 var
 *           不支持 asm（仅跳过），注释还原度较低
 * 开发平台：2023.07.29 V1.3
 *               加入对多行字符串的支持

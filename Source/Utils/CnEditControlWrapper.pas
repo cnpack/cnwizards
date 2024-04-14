@@ -3024,8 +3024,8 @@ begin
           if I = 7 then // WhiteSpace 的背景色
           begin
             FBackgroundColor := BColor;
-{$IFDEF DEBUG}
-            CnDebugger.LogColor(FBackgroundColor, 'LoadFontFromRegistry Get Background');
+{$IFDEF DEBUG} // 没有 EditControl 实例时可能会因为拿不到信息被 Idle 频繁调用，不打
+//          CnDebugger.LogColor(FBackgroundColor, 'LoadFontFromRegistry Get Background');
 {$ENDIF}
           end;
         end;

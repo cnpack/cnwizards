@@ -506,7 +506,8 @@ begin
     if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
       Exit;
 
-    ID.UnregisterDebugVisualizer(FReplaceManager);
+    if FReplaceRegistered then
+      ID.UnregisterDebugVisualizer(FReplaceManager);
 
     if FDataSetRegistered then
       ID.UnregisterDebugVisualizer(FDataSetViewer);
@@ -597,7 +598,6 @@ begin
   if not Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
     Exit;
 
-  CheckViewersRegistration;
   if Active  then
   begin
     if not FReplaceRegistered then
@@ -620,6 +620,7 @@ begin
 {$ENDIF}
     end;
   end;
+  CheckViewersRegistration;
 {$ENDIF}
 end;
 
@@ -717,12 +718,19 @@ begin
   else if Index < FReplaceItems.Count + FReplacers.Count then
     TypeName := (FReplacers[Index] as TCnDebuggerBaseValueReplacer).GetEvalType;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnDebuggerValueReplaceManager.GetSupportedType #%d: %s', [Index, TypeName]);
+{$ENDIF}
+
   AllDescendants := False; // 聚合了导致没法支持子类，不知道如何分发
 end;
 
 function TCnDebuggerValueReplaceManager.GetSupportedTypeCount: Integer;
 begin
   Result := FReplaceItems.Count + FReplacers.Count;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnDebuggerValueReplaceManager.GetSupportedTypeCount %d', [Result]);
+{$ENDIF}
 end;
 
 function TCnDebuggerValueReplaceManager.GetVisualizerDescription: string;
@@ -761,7 +769,7 @@ begin
   for I := 0 to FReplacers.Count - 1 do
     FMap.Add((FReplacers[I] as TCnDebuggerBaseValueReplacer).GetEvalType, FReplacers[I]);
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnDebuggerValueReplaceManager CreateVisualizers OK');
+  CnDebugger.LogMsg('TCnDebuggerValueReplaceManager CreateVisualizers Complete');
 {$ENDIF}
 end;
 
@@ -772,6 +780,9 @@ begin
   F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, True);
   if FileExists(F) then
     FReplaceItems.LoadFromFile(F);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnDebuggerValueReplaceManager Load %d Items.', [FReplaceItems.Count]);
+{$ENDIF}
 end;
 
 procedure TCnDebuggerValueReplaceManager.ResetSettings;

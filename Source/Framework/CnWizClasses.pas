@@ -1430,12 +1430,13 @@ begin
 end;
 
 procedure TCnSubMenuWizard.SetActive(Value: Boolean);
+var
+  Old: Boolean;
 begin
-  if FActive <> Value then
-  begin
-    inherited;
+  Old := FActive;
+  inherited;             // 确保无论是否改变，基类也被调用
+  if Old <> Value then
     RefreshSubActions;
-  end;
 end;
 
 procedure TCnSubMenuWizard.OnActionUpdate(Sender: TObject);
