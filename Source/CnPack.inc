@@ -3374,6 +3374,7 @@
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
   {$DEFINE SUPPORT_GDIPLUS}                    // XE2 Supports GDI+
   {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 Defined Int64Array
+  {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 System.UITypes Has TAlphaColors
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
