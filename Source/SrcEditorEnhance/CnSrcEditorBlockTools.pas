@@ -28,7 +28,9 @@ unit CnSrcEditorBlockTools;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2018.07.30
+* 修改记录：2024.04.15
+*               色块支持 TAlphaColors 类型的字符串
+*           2018.07.30
 *               增加显示色块的功能
 *           2012.11.02 by liuxiao
 *               因 OTA 的 Bug，屏蔽 D7 下的三项新增功能
@@ -54,6 +56,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
   IniFiles, Forms, Menus, ActnList, Math, {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
+  {$IFDEF SUPPORT_ALPHACOLOR} System.UITypes, System.UIConsts, {$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
   CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
@@ -990,11 +993,33 @@ var
   SyncBtn: TControl;
 {$ENDIF}
 
+{$IFDEF SUPPORT_ALPHACOLOR}
+  function IdentToAlphaColor(const ColorStr: string; out AColor: TColor): Boolean;
+  var
+    F: TAlphaColor;
+  begin
+    try
+      F := StringToAlphaColor(ColorStr);
+      AColor := AlphaColorToColor(F);
+      Result := True;
+    except
+      Result := False;
+    end;
+  end;
+{$ENDIF}
+
   function StringIsColor(const ColorStr: string; out AColor: TColor): Boolean;
   begin
     Result := False;
     if IdentToColor(ColorStr, Longint(AColor)) then
       Result := True
+{$IFDEF SUPPORT_ALPHACOLOR}
+    // System.UITypes 里的 TAlphaColors.Red 这种也要能处理
+    else if IdentToAlphaColor(ColorStr, AColor) then
+    begin
+      Result := True;
+    end
+{$ENDIF}
     else
     begin
       if (Length(ColorStr) = 6) or (Length(ColorStr) = 8) then
