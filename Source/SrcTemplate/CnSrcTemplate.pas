@@ -495,7 +495,6 @@ begin
   FConfigIndex := RegisterASubAction(SCnSrcTemplateConfigName,
     SCnSrcTemplateConfigCaption, 0, SCnSrcTemplateConfigHint,
     SCnSrcTemplateIconName);
-  FLastIndexRef := FConfigIndex;
 
   AddSepMenu;
   FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
@@ -530,8 +529,12 @@ var
 {$ENDIF}
   end;
 begin
+  if not Active then
+    Exit;
+
   WizShortCutMgr.BeginUpdate;
   try
+    // 注意如果 Active 为 False，则 FLastIndexRef 可能为 0，会出错
     while SubActionCount > FLastIndexRef + 1 do
       DeleteSubAction(FLastIndexRef + 1);
 
