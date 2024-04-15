@@ -540,12 +540,16 @@ begin
   else
   begin
     for I := 0 to EditorToolCount - 1 do
+    begin
       with EditorTools[I] do
+      begin
         if Active and (FAction = SubActions[Index]) then
         begin
           Execute;
           Exit;
         end;
+      end;
+    end;
   end;
 end;
 
@@ -570,7 +574,7 @@ end;
 
 procedure TCnCodingToolsetWizard.AcquireSubActions;
 var
-  I: Integer;
+  I, Idx: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
@@ -580,12 +584,16 @@ begin
     if EditorToolCount > 0 then
       AddSepMenu;
     FEditorIndex := FConfigIndex + 1;
+
     for I := 0 to EditorToolCount - 1 do
+    begin
       with EditorTools[I] do
       begin
-        FAction := SubActions[RegisterASubAction(GetIDStr, GetCaption, GetDefShortCut, GetHint)];
+        Idx := RegisterASubAction(GetIDStr, GetCaption, GetDefShortCut, GetHint);
+        FAction := SubActions[Idx];
         FAction.Visible := Self.Active and Active;
       end;
+    end;
   finally
     WizShortCutMgr.EndUpdate;
   end;
@@ -608,17 +616,21 @@ var
   I: Integer;
 begin
   for I := 0 to EditorToolCount - 1 do
+  begin
     if EditorTools[I].FAction <> nil then
       EditorTools[I].FAction.Visible := Active and EditorTools[I].Active;
+  end;
 end;
 
 procedure TCnCodingToolsetWizard.SetActive(Value: Boolean);
 var
   I: Integer;
+  Old: Boolean;
 begin
-  if Value <> Active then
+  Old := Active;
+  inherited;
+  if Value <> Old then
   begin
-    inherited;
     for I := 0 to EditorToolCount - 1 do
       EditorTools[I].ParentActiveChanged(Active);
   end;
@@ -629,10 +641,15 @@ var
   I: Integer;
 begin
   inherited;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnCodingToolsetWizard.ClearSubActions');
+{$ENDIF}
   // 清除 Action 时要清除引用
   if FEditorTools <> nil then
+  begin
     for I := 0 to GetEditorToolCount - 1 do
       EditorTools[I].FAction := nil;
+  end;
 end;
 
 { TCnEditorToolsForm }
@@ -658,7 +675,9 @@ begin
       SubItems.Add(SCnEnabled)
     else
       SubItems.Add(SCnDisabled);
-    SubItems.Add(ShortCutToText(FWizard.EditorTools[Index].FAction.ShortCut));
+
+    if FWizard.EditorTools[Index].FAction <> nil then
+      SubItems.Add(ShortCutToText(FWizard.EditorTools[Index].FAction.ShortCut));
   end;
 end;
 
@@ -690,7 +709,8 @@ begin
   if CheckQueryShortCutDuplicated(HotKey.HotKey,
     FWizard.EditorTools[Idx].FAction) <> sdDuplicatedStop then
   begin
-    FWizard.EditorTools[Idx].FAction.ShortCut := HotKey.HotKey;
+    if FWizard.EditorTools[Idx].FAction <> nil then
+      FWizard.EditorTools[Idx].FAction.ShortCut := HotKey.HotKey;
     UpdateToolItem(Idx);
   end;
 end;
@@ -699,7 +719,8 @@ procedure TCnEditorToolsForm.chkEnabledClick(Sender: TObject);
 var
   Idx: Integer;
 begin
-  if not Assigned(lvTools.Selected) then Exit;
+  if not Assigned(lvTools.Selected) then
+    Exit;
   Idx := lvTools.Selected.Index;
   FWizard.EditorTools[Idx].Active := chkEnabled.Checked;
   UpdateToolItem(Idx);
@@ -741,12 +762,19 @@ begin
     imgIcon.Canvas.Brush.Style := bsSolid;
     imgIcon.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
     imgIcon.Canvas.FillRect(Rect(0, 0, imgIcon.Width, imgIcon.Height));
+
+    if FWizard.EditorTools[Idx].FAction <> nil then
     DrawIconEx(imgIcon.Canvas.Handle, 0, 0, FWizard.EditorTools[Idx].FAction.Icon.Handle,
       imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
 
     lblToolName.Caption := AName;
     lblToolAuthor.Caption := CnAuthorEmailToStr(AAuthor, AEmail);
-    HotKey.HotKey := FWizard.EditorTools[Idx].FAction.ShortCut;
+
+    if FWizard.EditorTools[Idx].FAction <> nil then
+      HotKey.HotKey := FWizard.EditorTools[Idx].FAction.ShortCut
+    else
+      HotKey.HotKey := 0;
+
     chkEnabled.Checked := FWizard.EditorTools[Idx].Active;
     btnConfig.Visible := FWizard.EditorTools[Idx].HasConfig;
     mmoComment.Lines.Text := GetCommandComment(FWizard.EditorTools[Idx].GetIDStr);

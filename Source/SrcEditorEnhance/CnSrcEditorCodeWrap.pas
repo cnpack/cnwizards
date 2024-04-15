@@ -209,7 +209,7 @@ function TCnCodeWrapCollection.LoadFromFile(const FileName: string;
   Append: Boolean): Boolean;
 var
   Col: TCnCodeWrapCollection;
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
   if not FileExists(FileName) then
@@ -218,11 +218,11 @@ begin
   try
     if not Append then
       Clear;
-      
+
     Col := TCnCodeWrapCollection.Create;
     try
       TOmniXMLReader.LoadFromFile(Col, FileName);
-      for i := 0 to Col.Count - 1 do
+      for I := 0 to Col.Count - 1 do
         Add.Assign(Col.Items[I]);
       Result := True;
     finally
@@ -254,15 +254,15 @@ end;
 
 procedure TCnSrcEditorCodeWrapTool.Clear;
 var
-  i: Integer;
+  I: Integer;
   ShortCut: TCnWizShortCut;
 begin
   if FMenu <> nil then
     FMenu.Clear;
-    
-  for i := 0 to FShortCuts.Count - 1 do
+
+  for I := 0 to FShortCuts.Count - 1 do
   begin
-    ShortCut := TCnWizShortCut(FShortCuts[i]);
+    ShortCut := TCnWizShortCut(FShortCuts[I]);
     WizShortCutMgr.DeleteShortCut(ShortCut);
   end;
   FShortCuts.Clear;
@@ -346,7 +346,7 @@ var
       Macros.Free;
     end;
   end;
-  
+
   function GetIndentPos(AEditView: IOTAEditView): Integer;
   var
     Text: string;
@@ -418,23 +418,23 @@ var
   procedure OutputLines(ALineNo: Integer; AIndent: Integer);
   var
     Line: string;
-    i: Integer;
+    I: Integer;
   begin
-    for i := 0 to Lines.Count - 1 do
+    for I := 0 to Lines.Count - 1 do
     begin
-      Line := Lines[i];
+      Line := Lines[I];
       if AIndent > 0 then
         Line := Spc(AIndent) + Line;
-        
+
       if not Relocate and (Pos('|', Line) > 0) then
       begin
         CurX := Pos('|', Line);
-        CurY := ALineNo + i;
+        CurY := ALineNo + I;
         Relocate := True;
       end;
 
       Line := StringReplace(Line, '|', '', [rfReplaceAll]);
-      CnOtaInsertSingleLine(ALineNo + i, Line, EditView);
+      CnOtaInsertSingleLine(ALineNo + I, Line, EditView);
     end;
   end;
 begin
@@ -444,7 +444,7 @@ begin
   begin
     if not ProcessMacros then
       Exit;
-      
+
     if not Item.LineBlockMode then
     begin
       StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
@@ -536,7 +536,7 @@ begin
       if Relocate then
         EditView.CursorPos := OTAEditPos(CurX, CurY);
     end;
-    
+
     Application.ProcessMessages;
     EditView.Paint;
   end;
@@ -544,23 +544,23 @@ end;
 
 procedure TCnSrcEditorCodeWrapTool.InitMenuItems(AMenu: TMenuItem);
 var
-  i: Integer;
+  I: Integer;
 begin
   WizShortCutMgr.BeginUpdate;
   try
     FMenu := AMenu;
     Clear;
 
-    for i := 0 to Items.Count - 1 do
+    for I := 0 to Items.Count - 1 do
     begin
-      AddMenuItem(AMenu, Items[i].Caption, OnMenuItemClick, nil,
-        Items[i].ShortCut, '', i);
+      AddMenuItem(AMenu, Items[I].Caption, OnMenuItemClick, nil,
+        Items[I].ShortCut, '', I);
 
 //    加了WizShortCutMgr的处理后热键弹出右键菜单后可能会出未知错误。
 //    2007.12.13 Commented by LiuXiao | 2008.11.11 UnCommented Back
 
-      if (Items[i].Caption <> '-') and (Items[i].ShortCut <> 0) then
-        FShortCuts.Add(WizShortCutMgr.Add('', Items[i].ShortCut, OnShortCut, '', i));
+      if (Items[I].Caption <> '-') and (Items[I].ShortCut <> 0) then
+        FShortCuts.Add(WizShortCutMgr.Add('', Items[I].ShortCut, OnShortCut, '', I));
     end;
 
     AddSepMenuItem(AMenu);
@@ -657,13 +657,13 @@ end;
 
 procedure TCnSrcEditorCodeWrapForm.btnDeleteClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if (ListView.SelCount > 0) and QueryDlg(SCnDeleteConfirm) then
   begin
-    for i := ListView.Items.Count - 1 downto 0 do
-      if ListView.Items[i].Selected then
-        List.Delete(i);
+    for I := ListView.Items.Count - 1 downto 0 do
+      if ListView.Items[I].Selected then
+        List.Delete(I);
     UpdateListView;
     ListViewSelectItems(ListView, smNothing);
   end;
@@ -671,28 +671,28 @@ end;
 
 procedure TCnSrcEditorCodeWrapForm.btnUpClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 1 to ListView.Items.Count - 1 do
-    if ListView.Items[i].Selected and not ListView.Items[i - 1].Selected then
+  for I := 1 to ListView.Items.Count - 1 do
+    if ListView.Items[I].Selected and not ListView.Items[I - 1].Selected then
     begin
-      List.Items[i].Index := i - 1;
-      ListView.Items[i - 1].Selected := True;
-      ListView.Items[i].Selected := False;
+      List.Items[I].Index := I - 1;
+      ListView.Items[I - 1].Selected := True;
+      ListView.Items[I].Selected := False;
     end;
   ListView.Update;
 end;
 
 procedure TCnSrcEditorCodeWrapForm.btnDownClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := ListView.Items.Count - 2 downto 0 do
-    if ListView.Items[i].Selected and not ListView.Items[i + 1].Selected then
+  for I := ListView.Items.Count - 2 downto 0 do
+    if ListView.Items[I].Selected and not ListView.Items[I + 1].Selected then
     begin
-      List.Items[i].Index := i + 1;
-      ListView.Items[i + 1].Selected := True;
-      ListView.Items[i].Selected := False;
+      List.Items[I].Index := I + 1;
+      ListView.Items[I + 1].Selected := True;
+      ListView.Items[I].Selected := False;
     end;
   ListView.Update;
 end;
