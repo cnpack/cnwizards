@@ -1092,7 +1092,7 @@ begin
     Exit;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnDebugEnhanceWizard DisableHookes.');
+  CnDebugger.LogMsg('TCnDebugEnhanceWizard DisableHooks.');
 {$ENDIF}
 
   for I := High(SCnCompileActionNames) downto Low(SCnCompileActionNames) do

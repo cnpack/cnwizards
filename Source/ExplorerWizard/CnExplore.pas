@@ -981,11 +981,14 @@ begin
 end;
 
 procedure TCnExplorerWizard.SetActive(Value: Boolean);
+var
+  Old: Boolean;
 begin
-  if Value = Active then
+  Old := Active;
+  inherited;
+  if Value <> Old then
     Exit;
 
-  inherited;
   if Active then
   begin
     IdeDockManager.RegisterDockableForm(TCnExploreForm, CnExploreForm,

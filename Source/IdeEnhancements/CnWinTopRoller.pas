@@ -704,11 +704,12 @@ procedure TCnWinTopRoller.SetActive(Value: Boolean);
 var
   I: Integer;
   Button: TComponent;
+  Old: Boolean;
 begin
-  if Value <> Active then
+  Old := Active;
+  inherited;
+  if Value <> Old then
   begin
-    inherited;
-
     for I := 0 to Screen.CustomFormCount - 1 do
     begin
       Button := Screen.CustomForms[I].FindComponent(SCnCaptionBarButtonName);

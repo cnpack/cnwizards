@@ -535,10 +535,13 @@ begin
 end;
 
 procedure TCnBookmarkWizard.SetActive(Value: Boolean);
+var
+  Old: Boolean;
 begin
-  if Value <> Active then
+  Old := Active;
+  inherited;
+  if Value <> Old then
   begin
-    inherited;
     if Value then
     begin
       IdeDockManager.RegisterDockableForm(TCnBookmarkForm, CnBookmarkForm,
