@@ -1000,7 +1000,10 @@ var
   begin
     try
       F := StringToAlphaColor(ColorStr);
-      AColor := AlphaColorToColor(F);
+      TColorRec(AColor).R := TAlphaColorRec(F).R;
+      TColorRec(AColor).G := TAlphaColorRec(F).G;
+      TColorRec(AColor).B := TAlphaColorRec(F).B;
+      TColorRec(AColor).A := 0;
       Result := True;
     except
       Result := False;
