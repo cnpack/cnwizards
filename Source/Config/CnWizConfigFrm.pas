@@ -645,15 +645,19 @@ procedure TCnWizConfigForm.ToggleWizardActive;
 var
   Idx: Integer;
 begin
-  Idx := CalcSelectedWizardIndex(); // Idx 会返回 lbWizards.ItemIndex
+  Idx := CalcSelectedWizardIndex; // Idx 会返回 lbWizards.ItemIndex
   if Idx >= 0 then
   begin
     FWizardsActiveChanged := True;
     FActives[Idx] := not FActives[Idx];
 
     // 实时更新 Wizard 实例的状态
-    TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).Active := FActives[Idx];
-
+    Screen.Cursor := crHourGlass;
+    try
+      TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).Active := FActives[Idx];
+    finally
+      Screen.Cursor := crDefault;
+    end;
     cbWizardActive.Checked := FActives[Idx];
     btnConfig.Enabled := FActives[Idx] and
       TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).HasConfig;
@@ -667,7 +671,7 @@ procedure TCnWizConfigForm.TogglePropertyEditorActive;
 var
   Idx: Integer;
 begin
-  Idx := CalcSelectedEditorIndex();
+  Idx := CalcSelectedEditorIndex;
   if Idx >= 0 then
   begin
     FEditorActives[Idx] := not FEditorActives[Idx];
