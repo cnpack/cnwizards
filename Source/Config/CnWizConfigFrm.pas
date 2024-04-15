@@ -177,18 +177,19 @@ type
     procedure lbDesignEditorsKeyPress(Sender: TObject; var Key: Char);
   private
     FWizardsActiveChanged: Boolean;
-    FShortCuts: array of TShortCut;
-    FActives: array of Boolean;
-    FEditorActives: array of Boolean;
+    FShortCuts: array of TShortCut;    // 所有专家的快捷键
+    FActives: array of Boolean;        // 所有专家的启用状态
+    FEditorActives: array of Boolean;  // 所有编辑器的启用状态
     FDrawTextHeight: Integer;
     function CalcSelectedWizardIndex(Wizard: TCnBaseWizard = nil): Integer;
+    {* 返回指定 Wizard 实例在专家中的索引号，或返回专家列表框中的选中的索引号}
     function CalcSelectedEditorIndex(Editor: TCnDesignEditorInfo = nil): Integer;
     procedure ToggleWizardActive;
     procedure TogglePropertyEditorActive;
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 // 显示配置窗口
@@ -644,11 +645,15 @@ procedure TCnWizConfigForm.ToggleWizardActive;
 var
   Idx: Integer;
 begin
-  Idx := CalcSelectedWizardIndex();
+  Idx := CalcSelectedWizardIndex(); // Idx 会返回 lbWizards.ItemIndex
   if Idx >= 0 then
   begin
     FWizardsActiveChanged := True;
     FActives[Idx] := not FActives[Idx];
+
+    // 实时更新 Wizard 实例的状态
+    TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).Active := FActives[Idx];
+
     cbWizardActive.Checked := FActives[Idx];
     btnConfig.Enabled := FActives[Idx] and
       TCnBaseWizard(lbWizards.Items.Objects[lbWizards.ItemIndex]).HasConfig;
@@ -666,6 +671,9 @@ begin
   if Idx >= 0 then
   begin
     FEditorActives[Idx] := not FEditorActives[Idx];
+
+    // 实时更新属性编辑器实例状态
+    CnDesignEditorMgr.PropEditors[Idx].Active := FEditorActives[Idx];
     cbDesignEditorActive.Checked := FEditorActives[Idx];
     btnDesignEditorConfig.Enabled := cbDesignEditorActive.Checked;
     lbDesignEditors.Refresh;
