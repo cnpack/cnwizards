@@ -410,6 +410,8 @@ end;
 {$ENDIF}
 
 procedure TCnDebugEnhanceWizard.Config;
+var
+  ID: IOTADebuggerServices;
 begin
   with TCnDebugEnhanceForm.Create(nil) do
   begin
@@ -450,7 +452,16 @@ begin
       EnableBytes := chkBytesViewer.Checked;
       EnableWide := chkWideViewer.Checked;
       EnableMemoryStream := chkMemoryStreamViewer.Checked;
+
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
+      if Active and FReplaceRegistered then // 重新注册以让新条目生效
+      begin
+        if Supports(BorlandIDEServices, IOTADebuggerServices, ID) then
+        begin
+          ID.UnregisterDebugVisualizer(FReplaceManager);
+          ID.RegisterDebugVisualizer(FReplaceManager);
+        end;
+      end;
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
       AutoReset := chkAutoReset.Checked;
