@@ -870,7 +870,7 @@ begin
   begin
     // 两个标识符之间以空格分离，前提是本行未被注释等分行从而隔开 FLastToken
     if not FCodeGen.NextOutputWillbeLineHead and
-      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign])) then
+      ((FLastToken in IdentTokens) and (Token in IdentTokens + [tokAtSign, tokAmpersand])) then
       WriteOneSpace
     else if ((BeforeSpaceCount = 0) and (FLastToken = tokGreat) and
       (CurrentContainElementType([pfetInGeneric]) or (FLastElementType = pfetInGeneric))
@@ -1672,7 +1672,7 @@ end;
 
 procedure TCnBasePascalFormatter.FormatTypeParamIdent(PreSpaceCount: Byte);
 begin
-  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
+  FormatPossibleAmpersand;
   if Scanner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
     Match(Scanner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
 
@@ -3855,7 +3855,7 @@ begin
   else
     Match(Scanner.Token, PreSpaceCount);
 
-  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
+  FormatPossibleAmpersand;
 
   { !! Fixed. e.g. "const proc: procedure = nil;" }
   if Scanner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
@@ -3941,11 +3941,11 @@ begin
   FormatType(PreSpaceCount, True);
 end;
 
-{ PropertyList -> PROPERTY  Ident [PropertyInterface]  PropertySpecifiers }
+{ PropertyList -> PROPERTY Ident [PropertyInterface]  PropertySpecifiers }
 procedure TCnBasePascalFormatter.FormatPropertyList(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
-  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
+  FormatPossibleAmpersand;
   FormatIdent;
 
   if Scanner.Token in [tokSLB, tokColon] then
@@ -4568,6 +4568,7 @@ end;
 procedure TCnBasePascalFormatter.FormatTypeDecl(PreSpaceCount: Byte);
 var
   Old, GreatEqual: Boolean;
+  Pre: Byte;
 begin
   while Scanner.Token = tokSLB do
   begin
@@ -4575,10 +4576,14 @@ begin
     Writeln;
   end;
 
+  Pre := PreSpaceCount;
+  if FormatPossibleAmpersand(PreSpaceCount) then // 类型名可能是带 & 的关键字或标识符
+    Pre := 0;
+
   Old := FIsTypeID;
   try
     FIsTypeID := True;
-    FormatIdent(PreSpaceCount);
+    FormatIdent(Pre);
   finally
     FIsTypeID := Old;
   end;
@@ -4605,7 +4610,7 @@ end;
 { TypeSection -> TYPE (TypeDecl ';')... }
 procedure TCnBasePascalFormatter.FormatTypeSection(PreSpaceCount: Byte);
 const
-  IsTypeStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
+  IsTypeStartTokens = [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
     + KeywordTokens - NOTExpressionTokens;
 var
   FirstType: Boolean;
@@ -5223,10 +5228,16 @@ end;
 
 { UseDecl -> Ident [IN String]}
 procedure TCnProgramBlockFormatter.FormatUsesDecl(PreSpaceCount: Byte;
- const CanHaveUnitQual: Boolean);
+  const CanHaveUnitQual: Boolean);
+var
+  Pre: Byte;
 begin
+  Pre := PreSpaceCount;
+  if FormatPossibleAmpersand(PreSpaceCount) then // 单元名可能是带 & 的关键字或标识符
+    Pre := 0;
+
   if Scanner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-    Match(Scanner.Token, PreSpaceCount); // 标识符中允许使用部分关键字
+    Match(Scanner.Token, Pre); // 标识符中允许使用部分关键字
 
   while CanHaveUnitQual and (Scanner.Token = tokDot) do
   begin
@@ -5837,7 +5848,7 @@ end;
 procedure TCnBasePascalFormatter.FormatClassProperty(PreSpaceCount: Byte);
 begin
   Match(tokKeywordProperty, PreSpaceCount);
-  FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
+  FormatPossibleAmpersand;
   FormatIdent;
 
   if Scanner.Token in [tokSLB, tokColon] then
@@ -5863,10 +5874,12 @@ begin
   Writeln;
 
   FirstType := True;
-  while Scanner.Token in [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
-   + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do
+  while Scanner.Token in [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
+   + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do  // 和普通 Type 类似但有一个差异
   begin
-    if not FirstType then WriteLine;
+    if not FirstType then
+      WriteLine;
+
     FormatTypeDecl(Tab(PreSpaceCount));
     while Scanner.Token in DirectiveTokens do
       FormatDirective;
