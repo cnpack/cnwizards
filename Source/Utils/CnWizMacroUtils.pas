@@ -53,7 +53,7 @@ uses
 {$I CnWizards.inc}
 
 type
-  TEditorInsertPos = (ipCurrPos, ipBOL, ipEOL, ipBOF, ipEOF, ipProcHead);
+  TCnEditorInsertPos = (ipCurrPos, ipBOL, ipEOL, ipBOF, ipEOF, ipProcHead);
 
   TCnProcArgument = record
     ArgKind: string;
@@ -62,13 +62,6 @@ type
     ArgDefault: string;
   end;
   TCnProcArguments = array of TCnProcArgument;
-
-const
-  csArgKind = '$k';
-  csArgName = '$n';
-  csArgType = '$t';
-  csArgDefault = '$d';
-  csRetType = '$t';
 
 function EdtGetProjectDir: string;
 function EdtGetProjectName: string;
@@ -90,7 +83,7 @@ function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
 {* 从当前光标往后找第一个函数的声明内容}
 
 procedure EdtInsertTextToCurSource(const AContent: string;
-  InsertPos: TEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
+  InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
 {* AContent 是待插入的内容；InsertPos是待插入的位置
    ASavePos 是否插入后光标回到原处，如为 False，则根据 PosInText 调整光标位置}
 
@@ -102,9 +95,76 @@ uses
 {$ENDIF}
   CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils, mPasLex;
 
+const
+  csArgKind = '$k';
+  csArgName = '$n';
+  csArgType = '$t';
+  csArgDefault = '$d';
+  csRetType = '$t';
+
 function IsParseSource: Boolean;
 begin
   Result := CurrentIsDelphiSource;
+end;
+
+// 从 Ansi/Utf16/Utf16 的源码地址开始搜索后面的过程函数名、参数列表及返回值
+function ParseNameArgsResult(Source: Pointer; var Name, Args, ResultType: string;
+  IgnoreCompDir: Boolean = False): Integer;
+var
+  Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
+begin
+  Parser := TCnGeneralWidePasLex.Create;
+  try
+    Parser.Origin := Source;
+    while not (Parser.TokenID in [tkNull, tkProcedure, tkFunction, tkConstructor, tkDestructor]) do
+      Parser.NextNoJunk;
+    if Parser.TokenID in [tkProcedure, tkFunction, tkConstructor, tkDestructor] then
+    begin
+      Parser.NextNoJunk; // Get the proc/class identifier
+      if Parser.TokenID in [tkIdentifier, tkRegister] then
+        Name := string(Parser.Token);
+      Parser.NextNoJunk; // Skip to the open paren or the '.'
+      if Parser.TokenID = tkPoint then
+      begin
+        Parser.NextNoJunk; // Get the proc identifier
+        Name := Name + '.' + string(Parser.Token);
+        Parser.NextNoJunk; // skip past the procedure identifier
+      end;
+
+      if Parser.TokenID = tkRoundOpen then
+      begin
+        Parser.NextNoJunk;
+        Args := '';
+        while not (Parser.TokenID in [tkNull, tkRoundClose]) do
+        begin
+          if Parser.TokenID in [tkCRLF, tkCRLFCo, tkSlashesComment,
+            tkBorComment, tkAnsiComment, tkSpace] then
+            Args := Args + ' '
+          else if IgnoreCompDir and (Parser.TokenID = tkCompDirect) then
+            Args := Args + ' '
+          else
+            Args := Args + string(Parser.Token);
+          Parser.Next;
+        end;
+        Args := CompressWhiteSpace(Args);
+        // Skip to the colon or semicolon after the ')'
+        Parser.NextNoJunk;
+      end;
+      if Parser.TokenID in [tkAnsiComment, tkBorComment, tkCRLF, tkCRLFCo, tkSpace] then
+        Parser.NextNoJunk;
+      // If a colon is found, find the next token
+      if Parser.TokenID = tkColon then
+      begin
+        Parser.NextNoJunk;
+        ResultType := string(Parser.Token);
+      end;
+
+      // 返回最后一个 Token 的尾部在 Source 中的线性字符位置
+      Result := Parser.TokenPos + Parser.TokenLength;
+    end;
+  finally
+    Parser.Free;
+  end;
 end;
 
 procedure GetNameArgsResult(var Name, Args, ResultType: string;
@@ -129,55 +189,7 @@ begin
   MemStream := TMemoryStream.Create;
   try
     CnGeneralSaveEditorToStream(nil, MemStream, True); // Ansi/Utf16/Utf16
-    Parser := TCnGeneralWidePasLex.Create;
-    try
-      Parser.Origin := MemStream.Memory;
-      while not (Parser.TokenID in [tkNull, tkProcedure, tkFunction, tkConstructor, tkDestructor]) do
-        Parser.NextNoJunk;
-      if Parser.TokenID in [tkProcedure, tkFunction, tkConstructor, tkDestructor] then
-      begin
-        Parser.NextNoJunk; // Get the proc/class identifier
-        if Parser.TokenID in [tkIdentifier, tkRegister] then
-          Name := string(Parser.Token);
-        Parser.NextNoJunk; // Skip to the open paren or the '.'
-        if Parser.TokenID = tkPoint then
-        begin
-          Parser.NextNoJunk; // Get the proc identifier
-          Name := Name + '.' + string(Parser.Token);
-          Parser.NextNoJunk; // skip past the procedure identifier
-        end;
-
-        if Parser.TokenID = tkRoundOpen then
-        begin
-          Parser.NextNoJunk;
-          Args := '';
-          while not (Parser.TokenID in [tkNull, tkRoundClose]) do
-          begin
-            if Parser.TokenID in [tkCRLF, tkCRLFCo, tkSlashesComment,
-              tkBorComment, tkAnsiComment, tkSpace] then
-              Args := Args + ' '
-            else if IgnoreCompDir and (Parser.TokenID = tkCompDirect) then
-              Args := Args + ' '
-            else
-              Args := Args + string(Parser.Token);
-            Parser.Next;
-          end;
-          Args := CompressWhiteSpace(Args);
-          // Skip to the colon or semicolon after the ')'
-          Parser.NextNoJunk;
-        end;
-        if Parser.TokenID in [tkAnsiComment, tkBorComment, tkCRLF, tkCRLFCo, tkSpace] then
-          Parser.NextNoJunk;
-        // If a colon is found, find the next token
-        if Parser.TokenID = tkColon then
-        begin
-          Parser.NextNoJunk;
-          ResultType := string(Parser.Token);
-        end;
-      end;
-    finally
-      Parser.Free;
-    end;
+    ParseNameArgsResult(MemStream.Memory, Name, Args, ResultType, IgnoreCompDir);
   finally
     MemStream.Free;
   end;
@@ -251,6 +263,9 @@ begin
   Result := CnOtaGetCurrentProcedure;
   if Result = '' then
     Result := SCnUnknownNameResult;
+
+  // TODO: 声明区域也许行？全 Save 到 MemStream 中，从头 Parse，但如何判断当前光标位置？
+  // 往前找到最近一个 function/procedure/constructor/destructor 再找结尾看是否在此光标前
 end;
 
 function EdtGetResult: string;
@@ -450,7 +465,7 @@ begin
 end;
 
 procedure EdtInsertTextToCurSource(const AContent: string;
-  InsertPos: TEditorInsertPos; ASavePos: Boolean; PosInText: Integer);
+  InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer);
 var
   EditView: IOTAEditView;
   SavePos: Integer;

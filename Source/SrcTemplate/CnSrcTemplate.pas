@@ -61,7 +61,7 @@ type
     FIconName: string;
     FContent: string;
     FHint: string;
-    FInsertPos: TEditorInsertPos;
+    FInsertPos: TCnEditorInsertPos;
     FShortCut: TShortCut;
     FActionIndex: Integer;
     FSavePos: Boolean;
@@ -76,7 +76,7 @@ type
     property Enabled: Boolean read FEnabled write FEnabled;
     property ShortCut: TShortCut read FShortCut write FShortCut;
     property SavePos: Boolean read FSavePos write FSavePos;
-    property InsertPos: TEditorInsertPos read FInsertPos write FInsertPos;
+    property InsertPos: TCnEditorInsertPos read FInsertPos write FInsertPos;
     property Caption: string read FCaption write FCaption;
     property Content: string read FContent write FContent;
     property Hint: string read FHint write FHint;
@@ -185,7 +185,7 @@ type
   end;
 
 const
-  csEditorInsertPosDescs: array[TEditorInsertPos] of PString = (
+  csEditorInsertPosDescs: array[TCnEditorInsertPos] of PString = (
     @SCnEIPCurrPos, @SCnEIPBOL, @SCnEIPEOL, @SCnEIPBOF, @SCnEIPEOF, @SCnEIPProcHead);
 
 {$ENDIF CNWIZARDS_CNSRCTEMPLATE}
@@ -759,7 +759,7 @@ var
   AHint: string;
   AIconName: string;
   AShortCut: TShortCut;
-  AInsertPos: TEditorInsertPos;
+  AInsertPos: TCnEditorInsertPos;
   AEnabled: Boolean;
   ASavePos: Boolean;
   AContent: string;

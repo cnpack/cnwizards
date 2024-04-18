@@ -90,7 +90,7 @@ function ShowEditorEditForm(EditorItem: TCnEditorItem): Boolean; overload;
 {* 显示编辑器专家编辑窗体，用于编辑界面}
 
 function ShowEditorEditForm(var ACaption, AHint, AIconName: string;
-  var AShortCut: TShortCut; var AInsertPos: TEditorInsertPos;
+  var AShortCut: TShortCut; var AInsertPos: TCnEditorInsertPos;
   var AEnabled, ASavePos: Boolean; var AContent: string; var AForDelphi,
   AForBcb: Boolean): Boolean; overload;
 {* 显示编辑器专家编辑窗体，用于新增界面}
@@ -127,7 +127,7 @@ begin
       EditorItem.Hint := edtHint.Text;
       EditorItem.IconName := edtIcon.Text;
       EditorItem.ShortCut := HotKey.HotKey;
-      EditorItem.InsertPos := TEditorInsertPos(cbbInsertPos.ItemIndex);
+      EditorItem.InsertPos := TCnEditorInsertPos(cbbInsertPos.ItemIndex);
       EditorItem.Enabled := not chkDisabled.Checked;
       EditorItem.SavePos := chkSavePos.Checked;
       EditorItem.Content := mmoContent.Lines.Text;
@@ -140,7 +140,7 @@ begin
 end;
 
 function ShowEditorEditForm(var ACaption, AHint, AIconName: string;
-  var AShortCut: TShortCut; var AInsertPos: TEditorInsertPos;
+  var AShortCut: TShortCut; var AInsertPos: TCnEditorInsertPos;
   var AEnabled, ASavePos: Boolean; var AContent: string; var AForDelphi,
   AForBcb: Boolean): Boolean; overload;
 begin
@@ -164,7 +164,7 @@ begin
       AHint := edtHint.Text;
       AIconName := edtIcon.Text;
       AShortCut := HotKey.HotKey;
-      AInsertPos := TEditorInsertPos(cbbInsertPos.ItemIndex);
+      AInsertPos := TCnEditorInsertPos(cbbInsertPos.ItemIndex);
       AEnabled := not chkDisabled.Checked;
       ASavePos := chkSavePos.Checked;
       AContent := mmoContent.Lines.Text;
@@ -180,7 +180,7 @@ end;
 
 procedure TCnSrcTemplateEditForm.FormCreate(Sender: TObject);
 var
-  InsertPos: TEditorInsertPos;
+  InsertPos: TCnEditorInsertPos;
   Macro: TCnWizMacro;
 begin
   ItemIndex := -1;

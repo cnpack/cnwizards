@@ -635,7 +635,7 @@ procedure CnOtaEditDelete(Many: Integer);
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaGetCurrentProcedure: string;
-{* 获取当前光标所在的过程或函数名}
+{* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
 function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
 function CnOtaGetLineText(LineNum: Integer; EditBuffer: IOTAEditBuffer = nil;
@@ -4974,7 +4974,7 @@ end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
-// 获取当前光标所在的过程或函数名
+// 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域
 function CnOtaGetCurrentProcedure: string;
 var
   EditView: IOTAEditView;

@@ -480,7 +480,7 @@ type
     FBlockMatchDelay: Cardinal;
     FBlockHighlightStyle: TBlockHighlightStyle;
     FBlockMatchDrawLine: Boolean;
-    FBlockMatchList: TObjectList;
+    FBlockMatchList: TObjectList;      // 存放 TCnBlockMatchInfo 实例的
     FBlockLineList: TObjectList;
     FCompDirectiveList: TObjectList;
     FLineMapList: TObjectList;   // 容纳行映射信息
@@ -3600,11 +3600,13 @@ var
   I: Integer;
 begin
   for I := 0 to FBlockMatchList.Count - 1 do
+  begin
     if TCnBlockMatchInfo(FBlockMatchList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
