@@ -429,7 +429,7 @@ end;
 function IsDelphi120AIdeVersionLatest: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 51961; Build: 7529); // 12.1，注意文件换了
+    (Major: 29; Minor: 0; Release: 52161; Build: 7750); // 12.1，注意文件换了
 var
   ReadFileVersion: TVersionNumber;
 begin
