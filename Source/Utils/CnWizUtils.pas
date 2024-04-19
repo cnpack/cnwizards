@@ -892,6 +892,10 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
+function CnGeneralGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
+{* 与 CnGeneralSaveEditorToStream 且 FromCurrPos 为 False 时配合使用的、
+  返回当前光标在 Stream 中的字符偏移量，0 开始，与 Stream 格式对应为 Ansi/Utf16/Utf16}
+
 function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
   本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
@@ -942,7 +946,7 @@ function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
 {* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
   也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0
   如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
-  需用 CnGeneralGetCurrLinearPos 函数，偏移量符合 Ansi/Utf16/Utf16}
+  需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -6922,6 +6926,39 @@ begin
   except
     ;
   end;
+end;
+
+function CnGeneralGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
+{$IFDEF BDS}
+var
+  Stream: TMemoryStream;
+  Utf8Text: AnsiString;
+  WideText: WideString;
+{$ENDIF}
+begin
+  Result := CnOtaGetCurrLinearPos(SourceEditor);
+{$IFDEF BDS}
+  // Utf8 偏移量需转换成 Utf16 偏移量，等于取 1 到 Utf8 偏移量的子串，转 UnicodeString 再求字符长度
+  if Result <= 0 then
+    Exit;
+
+  Stream := TMemoryStream.Create;
+  try
+    CnGeneralSaveEditorToStream(SourceEditor, Stream);
+    if Stream.Size <= 0 then
+      Exit;
+
+    if Stream.Size < Result then
+      Result := Stream.Size;
+
+    SetLength(Utf8Text, Result);
+    Move(Stream.Memory^, Utf8Text[1], Result);
+    WideText := CnUtf8DecodeToWideString(Utf8Text);
+    Result := Length(WideText);
+  finally
+    Stream.Free;
+  end;
+{$ENDIF}
 end;
 
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
