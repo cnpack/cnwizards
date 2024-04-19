@@ -201,7 +201,7 @@ implementation
 
 uses
   {$IFDEF DEBUG}CnDebug, {$ENDIF}
-  CnSourceHighlight, mPasLex, mwBCBTokenList, CnIdentRenameFrm;
+  CnSourceHighlight, mPasLex, mwBCBTokenList, CnIdentRenameFrm, CnWideStrings;
 
 { TCnSrcEditorKey }
 

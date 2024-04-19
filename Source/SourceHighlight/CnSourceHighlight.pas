@@ -771,7 +771,8 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus;
+  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus,
+  CnWideStrings;
 
 type
   TBracketChars = array[0..1] of AnsiChar;

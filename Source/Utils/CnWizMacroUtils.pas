@@ -93,7 +93,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils, mPasLex;
+  CnNative, CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils, mPasLex;
 
 const
   csArgKind = '$k';
@@ -259,13 +259,62 @@ begin
 end;
 
 function EdtGetCurrProcName: string;
+var
+  Stream: TMemoryStream;
+  CurrLinear, LastProcLinear, EndPos: Integer;
+  Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
+  Name, Args, ResultType: string;
+  P: Pointer;
 begin
   Result := CnOtaGetCurrentProcedure;
   if Result = '' then
-    Result := SCnUnknownNameResult;
+  begin
+    Parser := nil;
+    Stream := nil;
 
-  // TODO: 声明区域也许行？全 Save 到 MemStream 中，从头 Parse，但如何判断当前光标位置？
-  // 往前找到最近一个 function/procedure/constructor/destructor 再找结尾看是否在此光标前
+    // 处理在声明区域内的情形。全 Save 到 MemStream 中，从头 Parse，
+    // 往前找到最近一个 function/procedure/constructor/destructor 再开找函数结尾，
+    // 看是否超过了光标处，超过了说明光标在这个函数声明内
+
+    try
+      Stream := TMemoryStream.Create;
+      CnGeneralSaveEditorToStream(nil, Stream); // Ansi/Utf16/Utf16
+      CurrLinear := CnGeneralGetCurrLinearPos;
+
+      Parser := TCnGeneralWidePasLex.Create;;
+      Parser.Origin := Stream.Memory;
+
+      LastProcLinear := 0;
+      while (Parser.TokenID <> tkNull) and (Parser.TokenPos <= CurrLinear) do
+      begin
+        if Parser.TokenID in [tkProcedure, tkFunction, tkConstructor, tkDestructor] then
+          LastProcLinear := Parser.TokenPos;
+        Parser.NextNoJunk;
+      end;
+
+      if LastProcLinear > 0 then
+      begin
+        // 找到了最近一个，从此处再解析往后找函数结尾，看看是否超过光标
+{$IFDEF BDS}
+        P := Pointer(TCnNativeInt(Stream.Memory) + LastProcLinear * SizeOf(Char));
+{$ELSE}
+        P := Pointer(TCnNativeInt(Stream.Memory) + LastProcLinear);
+{$ENDIF}
+        EndPos := LastProcLinear + ParseNameArgsResult(P, Name, Args, ResultType);
+
+        if EndPos >= CurrLinear then
+        begin
+          Result := Name;
+          Exit;
+        end;
+      end;
+    finally
+      Stream.Free;
+      Parser.Free;
+    end;
+  end;
+
+  Result := SCnUnknownNameResult;
 end;
 
 function EdtGetResult: string;

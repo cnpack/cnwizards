@@ -174,7 +174,8 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm, CnProgressFrm;
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm,
+  CnWideStrings, CnProgressFrm;
 
 {$R *.DFM}
 
