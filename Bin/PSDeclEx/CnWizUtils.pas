@@ -814,7 +814,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
-function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
@@ -1791,7 +1791,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
 begin
 end;
 
-function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
 begin
 end;
 

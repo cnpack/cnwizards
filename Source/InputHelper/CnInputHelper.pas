@@ -1776,7 +1776,7 @@ begin
 
   Stream := TMemoryStream.Create;
   try
-    CurrPos := CnOtaGetCurrLinePos(View.Buffer); // 得到较为准确的线性偏移 Ansi/Utf8/Utf8
+    CurrPos := CnOtaGetCurrLinearPos(View.Buffer); // 得到较为准确的线性偏移 Ansi/Utf8/Utf8
     if View.CursorPos.Line > csMaxProcessLines then
     begin
       // CnOtaEditPosToLinePos 在大文件时会很慢，此处直接使用线性位置来计算

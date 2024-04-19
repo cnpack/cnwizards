@@ -892,7 +892,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
-function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
   本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
@@ -940,7 +940,9 @@ function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0}
+  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0
+  如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
+  需用 CnGeneralGetCurrLinearPos 函数，偏移量符合 Ansi/Utf16/Utf16}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -6923,7 +6925,7 @@ begin
 end;
 
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
-function CnOtaGetCurrLinePos(SourceEditor: IOTASourceEditor): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor): Integer;
 var
   IEditView: IOTAEditView;
   EditPos: TOTAEditPos;
@@ -7054,7 +7056,7 @@ begin
   end;
 end;
 
-// 保存 EditReader 内容到流中，流中的内容默认为 Ansi 格式
+// 保存 EditReader 内容到流中，流中的内容 CheckUtf8 时默认为 Ansi，否则 Ansi/Utf8/Utf8 格式
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
@@ -7070,11 +7072,9 @@ var
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$ENDIF}
-
 {$IFDEF UNICODE}
   UniText: string;
 {$ENDIF}
-
 begin
   Assert(EditReader <> nil);
   Assert(Stream <> nil);
@@ -7183,7 +7183,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrLinePos(Editor)
+      IPos := CnOtaGetCurrLinearPos(Editor)
     else
       IPos := 0;
 
@@ -7341,7 +7341,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrLinePos(Editor)
+      IPos := CnOtaGetCurrLinearPos(Editor)
     else
       IPos := 0;
 
@@ -7502,7 +7502,7 @@ begin
   if Editor.EditViewCount > 0 then
   begin
     if FromCurrPos then
-      IPos := CnOtaGetCurrLinePos(Editor)
+      IPos := CnOtaGetCurrLinearPos(Editor)
     else
       IPos := 0;
 

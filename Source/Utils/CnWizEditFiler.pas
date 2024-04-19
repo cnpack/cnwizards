@@ -814,7 +814,7 @@ begin
     if FEditWrite = nil then
       raise Exception.Create(SNoEditWriter);
 
-    CurrPos := CnOtaGetCurrLinePos;
+    CurrPos := CnOtaGetCurrLinearPos;
     FEditWrite.CopyTo(CurrPos);
 
     FEditWrite.DeleteTo(CurrPos + Stream.Size);
@@ -857,7 +857,7 @@ begin
     if FEditWrite = nil then
       raise Exception.Create(SNoEditWriter);
 
-    FEditWrite.CopyTo(CnOtaGetCurrLinePos);
+    FEditWrite.CopyTo(CnOtaGetCurrLinearPos);
     if Buf = nil then
       GetMem(Buf, BufSize + 1);
 

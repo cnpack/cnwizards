@@ -71,7 +71,7 @@ uses
   {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnWizEditFiler, CnCommon,
-  CnWizOptions, CnWizCompilerConst;
+  CnWideStrings, CnWizOptions, CnWizCompilerConst;
 
 //==============================================================================
 // IDE 中的常量定义

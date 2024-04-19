@@ -501,13 +501,13 @@ var
           ClassPos := Parser.TokenPos; // 先记录 class 保留字的开始位置
           Parser.NextNoJunk;
           if Parser.TokenID in [tkProcedure, tkFunction] then
-            CnOtaGotoPosition(CnOtaGetCurrLinePos + ClassPos, nil, False)
+            CnOtaGotoPosition(CnOtaGetCurrLinearPos + ClassPos, nil, False)
           else // class 保留字后未跟有 procedure 或 function，则重新找过程头
             goto BeginFindProcHead;  
         end
         else if Parser.TokenID in [tkProcedure, tkFunction,
           tkConstructor, tkDestructor] then
-          CnOtaGotoPosition(CnOtaGetCurrLinePos + Parser.TokenPos, nil, False);
+          CnOtaGotoPosition(CnOtaGetCurrLinearPos + Parser.TokenPos, nil, False);
       finally
         Parser.Free;
       end;
@@ -516,7 +516,7 @@ var
     end;
   end;
 begin
-  SavePos := CnOtaGetCurrLinePos;
+  SavePos := CnOtaGetCurrLinearPos;
   case InsertPos of
     ipBOL:
       begin
