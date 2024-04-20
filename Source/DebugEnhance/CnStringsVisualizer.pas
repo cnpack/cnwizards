@@ -324,7 +324,7 @@ begin
     S := FEvaluator.EvaluateExpression(FExpression + '.Count');
   C := StrToIntDef(S, 0);
 
-  for I := 0 to C do
+  for I := 0 to C - 1 do
   begin
     // 这个表达式不区分 Pascal 还是 C++
     S := FEvaluator.EvaluateExpression(FExpression + Format('[%d]', [I]));
