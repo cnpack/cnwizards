@@ -3294,7 +3294,7 @@ procedure TCnProcListWizard.AddProcedure(ElementList, ObjectList: TStringList;
   ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
-  I, J: Integer;
+  I, J, K1, K2: Integer;
 begin
 {$IFNDEF STAND_ALONE}
   ElementInfo.Name := CompressWhiteSpace(ElementInfo.Name);
@@ -3314,9 +3314,18 @@ begin
           TempStr := Copy(TempStr, I + 1, Length(TempStr))
         else if (I > 0) and (J = 0) then
         begin
-          J := Pos(';', TempStr); // 没有括号的函数，有分号也可以
+          J := Pos(';', TempStr); // 没有括号的函数，有分号也可以，但得处理分号是在注释内的情况
           if J > I then
-            TempStr := Copy(TempStr, I + 1, Length(TempStr));
+          begin
+            K1 := Pos('{', TempStr);
+            K2 := Pos('}', TempStr);
+
+            // 简单处理 {}。如果分号是注释内，也就是 K1 < J < K2，那么只要 Copy 到 K1
+            if (K1 < J) and (J < K2) then
+              TempStr := Copy(TempStr, I + 1, K1 - I - 1)
+            else
+              TempStr := Copy(TempStr, I + 1, Length(TempStr));
+          end;
         end;
 
         // 为 Interface 的成员声明加上 Interface 名

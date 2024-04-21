@@ -141,7 +141,7 @@ end;
 procedure AddProcedure(ElementInfo: TCnElementInfo; IsIntf: Boolean);
 var
   TempStr: string;
-  i, J: Integer;
+  I, J, K1, K2: Integer;
 begin
   // ElementInfo.Name := CompressWhiteSpace(ElementInfo.Name);
   case FLanguage of
@@ -149,19 +149,28 @@ begin
       begin
         TempStr := ElementInfo.Name;
         // Remove the class reserved word
-        i := Pos('CLASS ', UpperCase(TempStr)); // Do not localize.
-        if i = 1 then
+        I := Pos('CLASS ', UpperCase(TempStr)); // Do not localize.
+        if I = 1 then
           Delete(TempStr, 1, Length('CLASS ')); // Do not localize.
         // Remove 'function' or 'procedure'
-        i := Pos(' ', TempStr);
-        j := Pos('(', TempStr);
-        if (i > 0) and (i < j) then // 匿名函数没有函数名
-          TempStr := Copy(TempStr, i + 1, Length(TempStr))
-        else if (i > 0) and (j = 0) then
+        I := Pos(' ', TempStr);
+        J := Pos('(', TempStr);
+        if (I > 0) and (I < J) then // 匿名函数没有函数名
+          TempStr := Copy(TempStr, I + 1, Length(TempStr))
+        else if (I > 0) and (J = 0) then
         begin
-          j := Pos(';', TempStr); // 没有括号的函数，有分号也可以
-          if j > i then
-            TempStr := Copy(TempStr, i + 1, Length(TempStr));
+          J := Pos(';', TempStr); // 没有括号的函数，有分号也可以，但得处理分号是在注释内
+          if J > I then
+          begin
+            K1 := Pos('{', TempStr);
+            K2 := Pos('}', TempStr);
+
+            // 如果分号是注释内，也就是 K1 < J < K2，那么只要 Copy 到 K1
+            if (K1 < J) and (J < K2) then
+              TempStr := Copy(TempStr, I + 1, K1 - I - 1)
+            else
+              TempStr := Copy(TempStr, I + 1, Length(TempStr));
+          end;
         end;
 
         // 为 Interfac 的成员声明加上 Interface 名
@@ -169,13 +178,13 @@ begin
           TempStr := ElementInfo.OwnerClass + '.' + TempStr;
 
         // Remove the paramater list
-        i := Pos('(', TempStr);
-        if i > 0 then
-          TempStr := Copy(TempStr, 1, i - 1);
+        I := Pos('(', TempStr);
+        if I > 0 then
+          TempStr := Copy(TempStr, 1, I - 1);
         // Remove the function return type
-        i := Pos(':', TempStr);
-        if i > 0 then
-          TempStr := Copy(TempStr, 1, i - 1);
+        I := Pos(':', TempStr);
+        if I > 0 then
+          TempStr := Copy(TempStr, 1, I - 1);
         // Check for an implementation procedural type
         if Length(TempStr) = 0 then
         begin
@@ -574,7 +583,7 @@ var
     ProcEndSemicolon: Boolean;
     ElementInfo: TCnElementInfo;
     BeginProcHeaderPosition: Longint;
-    j, k: Integer;
+    J, k: Integer;
     LineNo: Integer;
     ProcName, ProcReturnType, IntfName: string;
     ElementTypeStr, OwnerClass, ProcArgs: string;
@@ -1017,12 +1026,12 @@ var
 
             try
               // 记录最后的位置，避免从头查找时超过末尾
-              j := CppParser.TokenPositionsList[CppParser.TokenPositionsList.Count - 1];
+              J := CppParser.TokenPositionsList[CppParser.TokenPositionsList.Count - 1];
               FindBeginningProcedureBrace(NewName, ElementType);
               // 上面的函数会找到一个类声明或函数声明的开头，如果是类声明等，
               // 类名称会被塞入 NewName 这个变量
 
-              while (CppParser.RunPosition <= j - 1) or (CppParser.RunID <> ctknull) do
+              while (CppParser.RunPosition <= J - 1) or (CppParser.RunID <> ctknull) do
               begin
                 // NewName = '' 表示是个函数，做函数的处理
                 if NewName = '' then
