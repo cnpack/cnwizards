@@ -60,7 +60,7 @@ uses
   CnPasCodeParser, CnCppCodeParser, CnEventBus,
   {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
   CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
-  CnEditControlWrapper, CnWizMethodHook, CnPopupMenu, CnStrings;
+  CnEditControlWrapper, CnWizMethodHook, CnPopupMenu, CnStrings, CnWideStrings;
 
 const
   csMinDispDelay = 50;
