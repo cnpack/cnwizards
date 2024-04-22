@@ -103,8 +103,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
-  {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
-  {$IFDEF IDE_STRING_ANSI_UTF8} CnWideStrings, {$ENDIF}
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings,
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
@@ -771,8 +770,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus,
-  CnWideStrings;
+  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus;
 
 type
   TBracketChars = array[0..1] of AnsiChar;
