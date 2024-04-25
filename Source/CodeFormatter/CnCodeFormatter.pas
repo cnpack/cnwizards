@@ -274,7 +274,7 @@ type
     procedure FormatFormalParameters(PreSpaceCount: Byte = 0);
     procedure FormatFormalParm(PreSpaceCount: Byte = 0);
     procedure FormatParameter(PreSpaceCount: Byte = 0);
-    procedure FormatSimpleType(PreSpaceCount: Byte = 0);
+    function FormatSimpleType(PreSpaceCount: Byte = 0): Boolean; // 返回是否泛型 >= 结尾
     procedure FormatSubrangeType(PreSpaceCount: Byte = 0);
     procedure FormatDirective(PreSpaceCount: Byte = 0; IgnoreFirst: Boolean = False);
     procedure FormatBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
@@ -1684,7 +1684,7 @@ begin
     Match(tokDot);
     FormatPossibleAmpersand;
     if Scanner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens + DirectiveTokens) then
-      Match(Scanner.Token); // 也继续允许使用部分关键字，且不和之前的点或&隔开
+      Match(Scanner.Token); // 也继续允许使用部分关键字，且不和之前的点或 & 隔开
   end;
 
   if Scanner.Token = tokLess then
@@ -3717,7 +3717,7 @@ end;
 }
 procedure TCnBasePascalFormatter.FormatParameter(PreSpaceCount: Byte);
 var
-  OldStoreIdent: Boolean;
+  OldStoreIdent, GreatEqual: Boolean;
 begin
   if Scanner.Token = tokKeywordConst then
     Match(Scanner.Token);
@@ -3772,10 +3772,11 @@ begin
         Match(tokKeywordOf);
       end;
 
+      GreatEqual := False;
       if Scanner.Token in [tokKeywordString, tokKeywordFile, tokKeywordConst] then
         Match(Scanner.Token)
       else
-        FormatSimpleType;
+        GreatEqual := FormatSimpleType;
 
       if Scanner.Token = tokEQUAL then
       begin
@@ -3783,6 +3784,11 @@ begin
         //  Error('Can not have default value');
 
         Match(tokEQUAL, 1, 1);
+        FormatConstExpr;
+      end
+      else if GreatEqual then
+      begin
+        // 上面 GreatEqual := FormatSimpleType 这句已经处理好了泛型的 >= 拆成 > = 了
         FormatConstExpr;
       end;
     end
@@ -4228,8 +4234,9 @@ begin
 end;
 
 { SimpleType -> (SubrangeType | EnumeratedType | OrdIdent | RealType) }
-procedure TCnBasePascalFormatter.FormatSimpleType(PreSpaceCount: Byte);
+function TCnBasePascalFormatter.FormatSimpleType(PreSpaceCount: Byte): Boolean;
 begin
+  Result := False;
   if Scanner.Token = tokLB then
     FormatSubrangeType
   else
@@ -4242,11 +4249,9 @@ begin
     end;
   end;
 
-  // 加入对<>泛型的支持
+  // 加入对 <> 泛型的支持
   if Scanner.Token = tokLess then
-  begin
-    FormatTypeParams;
-  end;
+    Result := FormatTypeParams(0, True);
 end;
 
 {

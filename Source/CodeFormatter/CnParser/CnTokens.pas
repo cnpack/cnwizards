@@ -267,7 +267,7 @@ const
     tokKeywordShr];
 
   ConstTokens = [tokInteger, tokFloat, tokChar, tokString, tokWString, tokMString,
-    tokTrue, tokFalse, tokKeywordNIL, tokSymbol];
+    tokTrue, tokFalse, tokKeywordNil, tokSymbol];
   FactorTokens = [tokSymbol, tokInteger, tokString, tokWString, tokMString, tokFloat,
     tokTrue, tokFalse, tokKeywordNOT, tokSLB]; //, tokTypeId
   
@@ -463,7 +463,7 @@ const
     (Value: Integer(tokKeywordLabel);          Name: 'Label'),
     (Value: Integer(tokKeywordLibrary);        Name: 'Library'),
     (Value: Integer(tokKeywordMod);            Name: 'Mod'),
-    (Value: Integer(tokKeywordNil);            Name: ''),
+    (Value: Integer(tokKeywordNil);            Name: 'Nil'),
     (Value: Integer(tokKeywordNot);            Name: 'Not'),
     (Value: Integer(tokKeywordObject);         Name: 'Object'),
     (Value: Integer(tokKeywordOf);             Name: 'Of'),
