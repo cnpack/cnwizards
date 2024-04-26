@@ -5,10 +5,10 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
   AutoScroll = False
   BorderIcons = [biSystemMenu]
   Caption = 'Edit Component'#39's Name'
-  ClientHeight = 239
-  ClientWidth = 332
-  Constraints.MinHeight = 255
-  Constraints.MinWidth = 344
+  ClientHeight = 299
+  ClientWidth = 434
+  Constraints.MinHeight = 326
+  Constraints.MinWidth = 442
   Icon.Data = {
     0000010001001010000001000800680500001600000028000000100000002000
     0000010008000000000040010000000000000000000000000000000000000000
@@ -60,8 +60,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
   object gbEdit: TGroupBox
     Left = 8
     Top = 8
-    Width = 322
-    Height = 202
+    Width = 416
+    Height = 250
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Edit Component Name'
     TabOrder = 0
@@ -75,7 +75,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     object bvl1: TBevel
       Left = 8
       Top = 96
-      Width = 302
+      Width = 396
       Height = 2
       Anchors = [akLeft, akTop, akRight]
       Shape = bsBottomLine
@@ -150,7 +150,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Caption = 'lblText'
     end
     object btnClassName: TSpeedButton
-      Left = 290
+      Left = 384
       Top = 36
       Width = 20
       Height = 20
@@ -175,7 +175,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     object edtName: TEdit
       Left = 176
       Top = 108
-      Width = 134
+      Width = 228
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
@@ -183,7 +183,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     end
     object cbNeverDisp: TCheckBox
       Left = 8
-      Top = 157
+      Top = 205
       Width = 217
       Height = 17
       Anchors = [akLeft, akBottom]
@@ -192,7 +192,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     end
     object cbIgnoreComp: TCheckBox
       Left = 8
-      Top = 137
+      Top = 185
       Width = 217
       Height = 17
       Anchors = [akLeft, akBottom]
@@ -200,8 +200,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       TabOrder = 3
     end
     object btnPrefix: TButton
-      Left = 221
-      Top = 134
+      Left = 315
+      Top = 182
       Width = 89
       Height = 21
       Anchors = [akRight, akBottom]
@@ -221,7 +221,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     end
     object chkDisablePrefix: TCheckBox
       Left = 8
-      Top = 177
+      Top = 225
       Width = 217
       Height = 17
       Anchors = [akLeft, akBottom]
@@ -230,8 +230,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     end
   end
   object btnOK: TButton
-    Left = 95
-    Top = 220
+    Left = 189
+    Top = 268
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -241,8 +241,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 175
-    Top = 220
+    Left = 269
+    Top = 268
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -252,8 +252,8 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 255
-    Top = 220
+    Left = 349
+    Top = 268
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
