@@ -1873,10 +1873,12 @@ var
     Result := etUnknown;
     if IsClass then
     begin
-      if ProcType in [tkFunction, tkProcedure] then
-        Result := etClassFunc
-      else if ProcType = tkOperator then
-        Result := etOperator
+      case ProcType of
+        tkFunction, tkProcedure: Result := etClassFunc;
+        tkConstructor: Result := etConstructor;
+        tkDestructor: Result := etDestructor;
+        tkOperator: Result := etOperator;
+      end;
     end
     else
     begin
