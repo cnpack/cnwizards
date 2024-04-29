@@ -1852,26 +1852,20 @@ var
   function GetProperProcName(ProcType: TTokenKind; IsClass: Boolean): string;
   begin
     Result := SCnUnknown;
-    if IsClass then
-    begin
-      if ProcType = tkFunction then
-        Result := 'class function' // Do not localize.
-      else if ProcType = tkProcedure then
-        Result := 'class procedure' // Do not localize.
-      else if ProcType = tkOperator then
-        Result := 'class operator'; // Do not localize.
-    end
+
+    case ProcType of
+      // Do not localize.
+      tkFunction: Result := 'function';
+      tkProcedure: Result := 'procedure';
+      tkConstructor: Result := 'constructor';
+      tkDestructor: Result := 'destructor';
+      tkOperator: Result := 'operator';
     else
-    begin
-      case ProcType of
-        // Do not localize.
-        tkFunction: Result := 'function';
-        tkProcedure: Result := 'procedure';
-        tkConstructor: Result := 'constructor';
-        tkDestructor: Result := 'destructor';
-        tkOperator: Result := 'operator';
-      end;
+      Exit;
     end;
+
+    if IsClass then
+      Result := 'class ' + Result;
   end;
 
   function GetProperElementType(ProcType: TTokenKind; IsClass: Boolean): TCnElementType;
