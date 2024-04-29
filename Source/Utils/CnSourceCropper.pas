@@ -360,9 +360,12 @@ begin
   if Assigned(FInStream) then
   begin
     try
-      FInStream.Seek(- Value - 1, soFromCurrent);
-      FInStream.Read(Result, SizeOf(AnsiChar));
-      FInStream.Seek(Value, soFromCurrent);
+      if FInStream.Position - Value - 1 >= 0 then // 前面有足够空位才往回找
+      begin
+        FInStream.Seek(- Value - 1, soFromCurrent);
+        FInStream.Read(Result, SizeOf(AnsiChar));
+        FInStream.Seek(Value, soFromCurrent);
+      end;
     except
       Exit;
     end;
