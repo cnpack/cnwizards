@@ -31,4 +31,30 @@ object FormPool: TFormPool
     Height = 449
     TabOrder = 1
   end
+  object btnAIConfigSave: TButton
+    Left = 144
+    Top = 16
+    Width = 97
+    Height = 25
+    Caption = 'AI Config Save'
+    TabOrder = 2
+    OnClick = btnAIConfigSaveClick
+  end
+  object btnAIConfigLoad: TButton
+    Left = 264
+    Top = 16
+    Width = 97
+    Height = 25
+    Caption = 'AI Config Load'
+    TabOrder = 3
+    OnClick = btnAIConfigLoadClick
+  end
+  object dlgSave1: TSaveDialog
+    Left = 384
+    Top = 16
+  end
+  object dlgOpen1: TOpenDialog
+    Left = 424
+    Top = 16
+  end
 end

@@ -2,7 +2,8 @@ program NetPool;
 
 uses
   Forms,
-  UnitPool in 'UnitPool.pas' {FormPool};
+  UnitPool in 'UnitPool.pas' {FormPool},
+  CnAICoderConfig in '..\..\Source\AICoder\CnAICoderConfig.pas';
 
 {$R *.RES}
 

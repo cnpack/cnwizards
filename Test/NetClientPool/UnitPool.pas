@@ -4,18 +4,25 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers;
+  StdCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON, CnAICoderConfig;
 
 type
   TFormPool = class(TForm)
     btnAddHttps: TButton;
     mmoHTTP: TMemo;
+    btnAIConfigSave: TButton;
+    btnAIConfigLoad: TButton;
+    dlgSave1: TSaveDialog;
+    dlgOpen1: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
+    procedure btnAIConfigSaveClick(Sender: TObject);
+    procedure btnAIConfigLoadClick(Sender: TObject);
   private
     FPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
+    FAIConfig: TCnAIEngineOptionManager;
   protected
     procedure ShowData;
   public
@@ -92,10 +99,14 @@ begin
   FPool.ForceTerminate := True; // 允许强制结束
 
   FResQueue := TCnObjectQueue.Create(True);
+
+  FAIConfig := TCnAIEngineOptionManager.Create;
 end;
 
 procedure TFormPool.FormDestroy(Sender: TObject);
 begin
+  FAIConfig.Free;
+
   FPool.Free;
 
   while not FResQueue.IsEmpty do
@@ -201,6 +212,46 @@ begin
     FormPool.mmoHTTP.Lines.Add(Format('Get Bytes %d from SendId %d', [Length(Obj.Data), Obj.SendId]));
     // FormPool.mmoHTTP.Lines.Add(BytesToString(Obj.Data));
     Obj.Free;
+  end;
+end;
+
+procedure TFormPool.btnAIConfigSaveClick(Sender: TObject);
+var
+  Option: TCnAIEngineOption;
+begin
+  FAIConfig.Clear;
+
+  Option := TCnAIEngineOption.Create;
+  Option.EngineName := '吃饱的引擎';
+  Option.Model := 'cnpack-noai-9.9';
+  Option.URL := 'https://www.cnpack.org/';
+  Option.ApiKey := '{B13DB6F2-B0DA-40BC-B0F7-E654F96FD159}';
+  Option.SystemMessage := '你是一名 Delphi 专家';
+
+  FAIConfig.AddOption(Option);
+
+  Option := TCnAIEngineOption.Create;
+  Option.EngineName := '挨饿的引擎';
+  Option.Model := 'cnpack-noai-9.8';
+  Option.URL := 'https://upgrade.cnpack.org/';
+  Option.ApiKey := '{ACED92D0-6D09-4B88-BEA7-B963A8301CA4}';
+  Option.SystemMessage := '你是一名 C++Builder 专家';
+
+  FAIConfig.AddOption(Option);
+
+  dlgSave1.FileName := 'AIConfig.json';
+  if dlgSave1.Execute then
+    FAIConfig.SaveToFile(dlgSave1.FileName);
+end;
+
+procedure TFormPool.btnAIConfigLoadClick(Sender: TObject);
+begin
+  dlgOpen1.FileName := 'AIConfig.json';
+  if dlgOpen1.Execute then
+  begin
+    FAIConfig.LoadFromFile(dlgOpen1.FileName);
+    mmoHTTP.Lines.Clear;
+    mmoHTTP.Lines.Add(FAIConfig.SaveToJSON);
   end;
 end;
 
