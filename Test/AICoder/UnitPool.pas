@@ -247,11 +247,13 @@ begin
   FAIConfig.Clear;
 
   Option := TCnAIEngineOption.Create;
-  Option.EngineName := '吃饱的引擎';
-  Option.Model := 'cnpack-noai-9.9';
-  Option.URL := 'https://www.cnpack.org/';
+  Option.EngineName := 'Moonshot';
+  Option.Model := 'moonshot-v1-8k';
+  Option.URL := 'https://api.moonshot.cn/v1/chat/completions';
   Option.ApiKey := '{B13DB6F2-B0DA-40BC-B0F7-E654F96FD159}';
   Option.SystemMessage := '你是一名 Delphi 专家';
+  Option.Temperature := '0.3';
+  Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
 
@@ -261,8 +263,11 @@ begin
   Option.URL := 'https://upgrade.cnpack.org/';
   Option.ApiKey := '{ACED92D0-6D09-4B88-BEA7-B963A8301CA4}';
   Option.SystemMessage := '你是一名 C++Builder 专家';
+  Option.Temperature := '0.3';
+  Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
+  FAIConfig.ActiveEngine := 'Moonshot';
 
   dlgSave1.FileName := 'AIConfig.json';
   if dlgSave1.Execute then
@@ -328,7 +333,7 @@ end;
 
 class function TCnAITestEngine.EngineName: string;
 begin
-  Result := '吃饱的引擎';
+  Result := 'Moonshot';
 end;
 
 initialization

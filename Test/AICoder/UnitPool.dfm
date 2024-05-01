@@ -3,7 +3,7 @@ object FormPool: TFormPool
   Top = 108
   Width = 964
   Height = 619
-  Caption = 'HTTPS Client Thread Pool'
+  Caption = 'AI Coder Test'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,7 +20,7 @@ object FormPool: TFormPool
     Top = 16
     Width = 921
     Height = 553
-    ActivePage = tsEngine
+    ActivePage = tsHTTP
     TabOrder = 0
     object tsHTTP: TTabSheet
       Caption = 'HTTP Pool Test'

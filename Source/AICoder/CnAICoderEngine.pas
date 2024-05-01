@@ -38,8 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, Windows, CnContainers,
-  CnNative, CnInetUtils, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
+  SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON,
+  CnInetUtils, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
 
 type
   TCnAIAnswerObject = class(TPersistent)
@@ -73,14 +73,19 @@ type
     {* 有默认实现且子类可重载的、与 AI 服务提供者进行网络通讯获取结果的实现函数
       是第一步组装好数据扔给线程池后，由线程池调度后在具体工作线程中被调用
       在一次完整的 AI 网络通讯过程中属于第三步，内部会根据结果回调 OnAINetDataResponse 事件}
+
     procedure OnAINetDataResponse(Success: Boolean; Thread: TCnPoolingThread;
       DataObj: TCnAINetRequestDataObject; Data: TBytes); virtual;
     {* AI 服务提供者进行网络通讯的结果回调，是在子线程中被调用的，内部应 Sync 给请求调用者
       Success 返回成功与否，成功则 Data 中是数据
       在一次完整的 AI 网络通讯过程中属于第四步}
+
     procedure SyncCallback;
     {* 被上述第四步通过 Synchronize 的方式调用，之前已将应答对象推入 FAnswerQueue 队列
       在一次完整的 AI 网络通讯过程中属于第五步}
+
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
+    {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
   public
     constructor Create(ANetPool: TCnThreadPool); virtual;
     destructor Destroy; override;
@@ -256,11 +261,13 @@ begin
     Obj.SendId := 10000000 + Random(100000000);
     Obj.Engine := EngineName;
 
-    // TODO: 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
+    // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
+    Obj.Data := ConstructRequest(artExplainCode, Code);
 
     Obj.OnAnswer := AnswerCallback;
     Obj.OnResponse := OnAINetDataResponse;
     FPoolRef.AddRequest(Obj);
+
     Result := Obj.SendId;
   end;
 end;
@@ -268,6 +275,37 @@ end;
 procedure TCnAIBaseEngine.CheckOptionPool;
 begin
   // 检查 Pool、Option 等内容是否合法
+end;
+
+function TCnAIBaseEngine.ConstructRequest(RequestType: TCnAIRequestType;
+  const Code: string): TBytes;
+var
+  ReqRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
+begin
+  ReqRoot := TCnJSONObject.Create;
+  try
+    ReqRoot.AddPair('model', FOption.Model);
+    ReqRoot.AddPair('temperature', FOption.Temperature);
+    Arr := ReqRoot.AddArray('messages');
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'system');
+    Msg.AddPair('content', FOption.SystemMessage);
+    Arr.AddValue(Msg);
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'user');
+    Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code);
+
+    Arr.AddValue(Msg);
+
+    S := ReqRoot.ToJSON;
+    Result := AnsiToBytes(S);
+  finally
+    ReqRoot.Free;
+  end;
 end;
 
 constructor TCnAIBaseEngine.Create(ANetPool: TCnThreadPool);
@@ -337,7 +375,10 @@ begin
     HTTP := TCnHTTP.Create;
     Stream := TMemoryStream.Create;
 
-    if HTTP.GetStream(TCnAINetRequestDataObject(DataObj).URL, Stream) then
+    HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
+
+    if HTTP.GetStream(TCnAINetRequestDataObject(DataObj).URL, Stream,
+      TCnAINetRequestDataObject(DataObj).Data) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('*** HTTP Request OK Get Bytes ' + IntToStr(Stream.Size));

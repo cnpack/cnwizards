@@ -49,6 +49,8 @@ type
     FApiKey: string;
     FModel: string;
     FEngineName: string;
+    FTemperature: string;
+    FExplainCodePrompt: string;
   protected
 
   published
@@ -61,8 +63,13 @@ type
     {* 调用的授权码}
     property Model: string read FModel write FModel;
     {* 模型名称}
+    property Temperature: string read FTemperature write FTemperature;
+    {* 温度参数}
     property SystemMessage: string read FSystemMessage write FSystemMessage;
     {* 系统预设消息}
+
+    property ExplainCodePrompt: string read FExplainCodePrompt write FExplainCodePrompt;
+    {* 解释代码的提示文字}
   end;
 
   TCnAIEngineOptionManager = class(TPersistent)
