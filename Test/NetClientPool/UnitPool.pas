@@ -4,25 +4,44 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON, CnAICoderConfig;
+  StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
+  CnAICoderConfig, CnAICoderEngine;
 
 type
   TFormPool = class(TForm)
-    btnAddHttps: TButton;
-    mmoHTTP: TMemo;
-    btnAIConfigSave: TButton;
-    btnAIConfigLoad: TButton;
     dlgSave1: TSaveDialog;
     dlgOpen1: TOpenDialog;
+    pgcAICoder: TPageControl;
+    tsHTTP: TTabSheet;
+    mmoHTTP: TMemo;
+    btnAddHttps: TButton;
+    tsAIConfig: TTabSheet;
+    btnAIConfigSave: TButton;
+    btnAIConfigLoad: TButton;
+    mmoConfig: TMemo;
+    tsEngine: TTabSheet;
+    btnLoadAIConfig: TButton;
+    lblAIName: TLabel;
+    cbbAIEngines: TComboBox;
+    btnSaveAIConfig: TButton;
+    btnExplainCode: TButton;
+    mmoAI: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
     procedure btnAIConfigSaveClick(Sender: TObject);
     procedure btnAIConfigLoadClick(Sender: TObject);
+    procedure btnLoadAIConfigClick(Sender: TObject);
+    procedure cbbAIEnginesChange(Sender: TObject);
+    procedure btnSaveAIConfigClick(Sender: TObject);
+    procedure btnExplainCodeClick(Sender: TObject);
   private
-    FPool: TCnThreadPool;
+    FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
     FAIConfig: TCnAIEngineOptionManager;
+
+    // 以下是综合测试
+    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer; Answer: TBytes);
   protected
     procedure ShowData;
   public
@@ -85,18 +104,24 @@ uses
 const
   DBG_TAG = 'NET';
 
+type
+  TCnAITestEngine = class(TCnAIBaseEngine)
+  protected
+    class function EngineName: string; override;
+  end;
+
 procedure TFormPool.FormCreate(Sender: TObject);
 begin
-  FPool := TCnThreadPool.CreateSpecial(nil, TSendThread);
+  FNetPool := TCnThreadPool.CreateSpecial(nil, TSendThread);
 
-  FPool.OnProcessRequest := ProcessRequest;
-  FPool.AdjustInterval := 5 * 1000;
-  FPool.MinAtLeast := False;
-  FPool.ThreadDeadTimeout := 10 * 1000;
-  FPool.ThreadsMinCount := 0;
-  FPool.ThreadsMaxCount := 5;
-  FPool.TerminateWaitTime := 2 * 1000;
-  FPool.ForceTerminate := True; // 允许强制结束
+  FNetPool.OnProcessRequest := ProcessRequest;
+  FNetPool.AdjustInterval := 5 * 1000;
+  FNetPool.MinAtLeast := False;
+  FNetPool.ThreadDeadTimeout := 10 * 1000;
+  FNetPool.ThreadsMinCount := 0;
+  FNetPool.ThreadsMaxCount := 5;
+  FNetPool.TerminateWaitTime := 2 * 1000;
+  FNetPool.ForceTerminate := True; // 允许强制结束
 
   FResQueue := TCnObjectQueue.Create(True);
 
@@ -107,7 +132,7 @@ procedure TFormPool.FormDestroy(Sender: TObject);
 begin
   FAIConfig.Free;
 
-  FPool.Free;
+  FNetPool.Free;
 
   while not FResQueue.IsEmpty do
     FResQueue.Pop.Free;
@@ -167,7 +192,7 @@ begin
     Obj.SendId := 1000 + Random(10000);
     Obj.OnResponse := MyResponse;
 
-    FPool.AddRequest(Obj);
+    FNetPool.AddRequest(Obj);
   end;
 end;
 
@@ -250,9 +275,63 @@ begin
   if dlgOpen1.Execute then
   begin
     FAIConfig.LoadFromFile(dlgOpen1.FileName);
-    mmoHTTP.Lines.Clear;
-    mmoHTTP.Lines.Add(FAIConfig.SaveToJSON);
+    mmoConfig.Lines.Clear;
+    mmoConfig.Lines.Add(FAIConfig.SaveToJSON);
   end;
 end;
+
+procedure TFormPool.btnLoadAIConfigClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  if dlgOpen1.Execute then
+  begin
+    CnAIEngineOptionManager.LoadFromFile(dlgOpen1.FileName);
+    cbbAIEngines.Items.Clear;
+    for I := 0 to CnAIEngineOptionManager.OptionCount - 1 do
+      cbbAIEngines.Items.Add(CnAIEngineOptionManager.Options[I].EngineName);
+
+    cbbAIEngines.ItemIndex := CnAIEngineOptionManager.ActiveEngineIndex;
+    CnAIEngineManager.CurrentIndex := CnAIEngineOptionManager.ActiveEngineIndex;
+  end;
+end;
+
+procedure TFormPool.cbbAIEnginesChange(Sender: TObject);
+begin
+  CnAIEngineOptionManager.ActiveEngine := cbbAIEngines.Text;
+  CnAIEngineManager.CurrentIndex := CnAIEngineOptionManager.ActiveEngineIndex;
+end;
+
+procedure TFormPool.btnSaveAIConfigClick(Sender: TObject);
+begin
+ dlgSave1.FileName := 'AIConfig.json';
+  if dlgSave1.Execute then
+    CnAIEngineOptionManager.SaveToFile(dlgSave1.FileName);
+end;
+
+procedure TFormPool.btnExplainCodeClick(Sender: TObject);
+begin
+  CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.Terminate;',
+    AIOnExplainCodeAnswer);
+end;
+
+procedure TFormPool.AIOnExplainCodeAnswer(Success: Boolean;
+  SendId: Integer; Answer: TBytes);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, BytesToAnsi(Answer)]))
+  else
+    mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code %d', [SendId, GetLastError]));
+end;
+
+{ TCnAITestEngine }
+
+class function TCnAITestEngine.EngineName: string;
+begin
+  Result := '吃饱的引擎';
+end;
+
+initialization
+  RegisterAIEngine(TCnAITestEngine);
 
 end.

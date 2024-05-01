@@ -65,12 +65,15 @@ type
     {* 系统预设消息}
   end;
 
-  TCnAIEngineOptionManager = class
+  TCnAIEngineOptionManager = class(TPersistent)
   {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象}
   private
-    FOptions: TObjectList;
+    FOptions: TObjectList; // 容纳多个 TCnAIEngineOption 对象，可以是其子类
+    FActiveEngine: string;
     function GetOptionCount: Integer;
-    function GetOption(Index: Integer): TCnAIEngineOption; // 容纳多个 TCnAIEngineOption 对象，可以是其子类
+    function GetOption(Index: Integer): TCnAIEngineOption;
+    function GetActiveEngineIndex: Integer;
+    {* 根据活动引擎名称查找索引号}
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -95,13 +98,32 @@ type
     function SaveToJSON: AnsiString;
     {* 保存至 UTF8 格式的 JSON 字符串中}
 
+    property ActiveEngineIndex: Integer read GetActiveEngineIndex;
+    {* 根据活动引擎名称查找到的索引号，供设置引擎用}
+
     property OptionCount: Integer read GetOptionCount;
     {* 持有的设置对象数}
     property Options[Index: Integer]: TCnAIEngineOption read GetOption;
     {* 根据索引号获取持有的对象}
+  published
+    property ActiveEngine: string read FActiveEngine write FActiveEngine;
+    {* 活动引擎名称，供存储载入后设置活动引擎}
   end;
 
+function CnAIEngineOptionManager: TCnAIEngineOptionManager;
+{* 返回一全局的 AI 引擎配置管理对象}
+
 implementation
+
+var
+  FAIEngineOptionManager: TCnAIEngineOptionManager = nil;
+
+function CnAIEngineOptionManager: TCnAIEngineOptionManager;
+begin
+  if FAIEngineOptionManager = nil then
+    FAIEngineOptionManager := TCnAIEngineOptionManager.Create;
+  Result := FAIEngineOptionManager;
+end;
 
 { TCnAIEngineOptionManager }
 
@@ -128,6 +150,24 @@ destructor TCnAIEngineOptionManager.Destroy;
 begin
   FOptions.Free;
   inherited;
+end;
+
+function TCnAIEngineOptionManager.GetActiveEngineIndex: Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  if FActiveEngine = '' then
+    Exit;
+
+  for I := 0 to FOptions.Count - 1 do
+  begin
+    if FActiveEngine = TCnAIEngineOption(FOptions[I]).EngineName then
+    begin
+      Result := I;
+      Exit;
+    end;
+  end;
 end;
 
 function TCnAIEngineOptionManager.GetOption(Index: Integer): TCnAIEngineOption;
@@ -172,6 +212,8 @@ begin
   if Root = nil then
     Exit;
 
+  TCnJSONReader.Read(Self, Root);
+
   V := Root.ValueByName['Engines'];
   if (V <> nil) and (V is TCnJSONArray) then
   begin
@@ -214,6 +256,8 @@ var
 begin
   Root := TCnJSONObject.Create;
   try
+    TCnJSONWriter.Write(Self, Root);
+
     Arr := Root.AddArray('Engines');
     for I := 0 to OptionCount - 1 do
     begin
@@ -227,5 +271,10 @@ begin
     Root.Free;
   end;
 end;
+
+initialization
+
+finalization
+  FAIEngineOptionManager.Free;
 
 end.
