@@ -1,4 +1,4 @@
-unit UnitPool;
+unit AICoderUnit;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   CnAICoderConfig, CnAICoderEngine;
 
 type
-  TFormPool = class(TForm)
+  TFormAITest = class(TForm)
     dlgSave1: TSaveDialog;
     dlgOpen1: TOpenDialog;
     pgcAICoder: TPageControl;
@@ -92,7 +92,7 @@ type
   end;
 
 var
-  FormPool: TFormPool;
+  FormAITest: TFormAITest;
 
 implementation
 
@@ -110,7 +110,7 @@ type
     class function EngineName: string; override;
   end;
 
-procedure TFormPool.FormCreate(Sender: TObject);
+procedure TFormAITest.FormCreate(Sender: TObject);
 begin
   FNetPool := TCnThreadPool.CreateSpecial(nil, TSendThread);
 
@@ -128,7 +128,7 @@ begin
   FAIConfig := TCnAIEngineOptionManager.Create;
 end;
 
-procedure TFormPool.FormDestroy(Sender: TObject);
+procedure TFormAITest.FormDestroy(Sender: TObject);
 begin
   FAIConfig.Free;
 
@@ -143,7 +143,7 @@ end;
 type
   TThreadHack = class(TThread);
 
-procedure TFormPool.ProcessRequest(Sender: TCnThreadPool;
+procedure TFormAITest.ProcessRequest(Sender: TCnThreadPool;
   DataObj: TCnTaskDataObject; Thread: TCnPoolingThread);
 var
   HTTP: TCnHTTP;
@@ -176,7 +176,7 @@ begin
   end;
 end;
 
-procedure TFormPool.btnAddHttpsClick(Sender: TObject);
+procedure TFormAITest.btnAddHttpsClick(Sender: TObject);
 const
   A_URL = 'http://www.baidu.com/s?wd=CnPack';
 var
@@ -208,7 +208,7 @@ end;
 
 { TSendThread }
 
-procedure TFormPool.MyResponse(Success: Boolean; Thread: TCnPoolingThread;
+procedure TFormAITest.MyResponse(Success: Boolean; Thread: TCnPoolingThread;
   SendId: Integer; Data: TBytes);
 var
   Res: TResponseDataObject;
@@ -227,7 +227,7 @@ begin
   end;
 end;
 
-procedure TFormPool.ShowData;
+procedure TFormAITest.ShowData;
 var
   Obj: TResponseDataObject;
 begin
@@ -240,7 +240,7 @@ begin
   end;
 end;
 
-procedure TFormPool.btnAIConfigSaveClick(Sender: TObject);
+procedure TFormAITest.btnAIConfigSaveClick(Sender: TObject);
 var
   Option: TCnAIEngineOption;
 begin
@@ -274,7 +274,7 @@ begin
     FAIConfig.SaveToFile(dlgSave1.FileName);
 end;
 
-procedure TFormPool.btnAIConfigLoadClick(Sender: TObject);
+procedure TFormAITest.btnAIConfigLoadClick(Sender: TObject);
 begin
   dlgOpen1.FileName := 'AIConfig.json';
   if dlgOpen1.Execute then
@@ -285,7 +285,7 @@ begin
   end;
 end;
 
-procedure TFormPool.btnLoadAIConfigClick(Sender: TObject);
+procedure TFormAITest.btnLoadAIConfigClick(Sender: TObject);
 var
   I: Integer;
 begin
@@ -301,26 +301,26 @@ begin
   end;
 end;
 
-procedure TFormPool.cbbAIEnginesChange(Sender: TObject);
+procedure TFormAITest.cbbAIEnginesChange(Sender: TObject);
 begin
   CnAIEngineOptionManager.ActiveEngine := cbbAIEngines.Text;
   CnAIEngineManager.CurrentIndex := CnAIEngineOptionManager.ActiveEngineIndex;
 end;
 
-procedure TFormPool.btnSaveAIConfigClick(Sender: TObject);
+procedure TFormAITest.btnSaveAIConfigClick(Sender: TObject);
 begin
  dlgSave1.FileName := 'AIConfig.json';
   if dlgSave1.Execute then
     CnAIEngineOptionManager.SaveToFile(dlgSave1.FileName);
 end;
 
-procedure TFormPool.btnExplainCodeClick(Sender: TObject);
+procedure TFormAITest.btnExplainCodeClick(Sender: TObject);
 begin
   CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.Terminate;',
     AIOnExplainCodeAnswer);
 end;
 
-procedure TFormPool.AIOnExplainCodeAnswer(Success: Boolean;
+procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
   SendId: Integer; Answer: TBytes);
 begin
   if Success then

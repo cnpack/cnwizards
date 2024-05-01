@@ -1,8 +1,8 @@
-program NetPool;
+program AICoderTest;
 
 uses
   Forms,
-  UnitPool in 'UnitPool.pas' {FormPool},
+  AICoderUnit in 'AICoderUnit.pas' {FormAITest},
   CnAICoderConfig in '..\..\Source\AICoder\CnAICoderConfig.pas',
   CnAICoderEngine in '..\..\Source\AICoder\CnAICoderEngine.pas',
   CnAICoderNetClient in '..\..\Source\AICoder\CnAICoderNetClient.pas';
@@ -11,6 +11,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.CreateForm(TFormPool, FormPool);
+  Application.CreateForm(TFormAITest, FormAITest);
   Application.Run;
 end.

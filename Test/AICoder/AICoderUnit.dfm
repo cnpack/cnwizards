@@ -1,4 +1,4 @@
-object FormPool: TFormPool
+object FormAITest: TFormAITest
   Left = 192
   Top = 108
   Width = 964
