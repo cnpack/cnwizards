@@ -20,7 +20,7 @@
 
 {******************************************************************************}
 { Unit Note:                                                                   }
-{    This file is derived from GExperts 1.2                                    }
+{    This file is partly derived from GExperts 1.2                             }
 {                                                                              }
 { Original author:                                                             }
 {    GExperts, Inc  http://www.gexperts.org/                                   }
@@ -84,7 +84,7 @@ function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
 
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
-{* AContent 是待插入的内容；InsertPos是待插入的位置
+{* AContent 是待插入的内容；InsertPos 是待插入的位置
    ASavePos 是否插入后光标回到原处，如为 False，则根据 PosInText 调整光标位置}
 
 implementation
@@ -314,7 +314,8 @@ begin
     end;
   end;
 
-  Result := SCnUnknownNameResult;
+  if Result = '' then
+    Result := SCnUnknownNameResult;
 end;
 
 function EdtGetResult: string;

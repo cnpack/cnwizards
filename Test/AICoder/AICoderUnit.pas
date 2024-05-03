@@ -234,8 +234,8 @@ begin
   Obj := TResponseDataObject(FResQueue.Pop);
   if Obj <> nil then
   begin
-    FormPool.mmoHTTP.Lines.Add(Format('Get Bytes %d from SendId %d', [Length(Obj.Data), Obj.SendId]));
-    // FormPool.mmoHTTP.Lines.Add(BytesToString(Obj.Data));
+    FormAITest.mmoHTTP.Lines.Add(Format('Get Bytes %d from SendId %d', [Length(Obj.Data), Obj.SendId]));
+    // FormAITest.mmoHTTP.Lines.Add(BytesToString(Obj.Data));
     Obj.Free;
   end;
 end;
