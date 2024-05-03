@@ -49,9 +49,11 @@ type
     FAnswer: TBytes;
     FSuccess: Boolean;
     FCallback: TCnAIAnswerCallback;
+    FRequestType: TCnAIRequestType;
   public
     property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
+    property RequestType: TCnAIRequestType read FRequestType write FRequestType;
     property Answer: TBytes read FAnswer write FAnswer;
     property Callback: TCnAIAnswerCallback read FCallback write FCallback;
   end;
@@ -86,6 +88,10 @@ type
 
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
+    function ParseResponse(var Success: Boolean; RequestType: TCnAIRequestType;
+      const Response: TBytes): string; virtual;
+    {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者
+      同时允许根据返回的错误信息更改成功与否}
   public
     constructor Create(ANetPool: TCnThreadPool); virtual;
     destructor Destroy; override;
@@ -258,8 +264,8 @@ begin
   begin
     Obj := TCnAINetRequestDataObject.Create;
     Obj.URL := FOption.URL;
+    Randomize;
     Obj.SendId := 10000000 + Random(100000000);
-    Obj.Engine := EngineName;
 
     // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
     Obj.Data := ConstructRequest(artExplainCode, Code);
@@ -275,6 +281,11 @@ end;
 procedure TCnAIBaseEngine.CheckOptionPool;
 begin
   // 检查 Pool、Option 等内容是否合法
+  if FPoolRef = nil then
+    raise Exception.Create('No Net Pool');
+
+  if FOption = nil then
+    raise Exception.Create('No Options for ' + EngineName);
 end;
 
 function TCnAIBaseEngine.ConstructRequest(RequestType: TCnAIRequestType;
@@ -308,6 +319,61 @@ begin
   end;
 end;
 
+function TCnAIBaseEngine.ParseResponse(var Success: Boolean;
+  RequestType: TCnAIRequestType; const Response: TBytes): string;
+var
+  RespRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+begin
+  Result := '';
+  RespRoot := CnJSONParse(BytesToAnsi(Response));
+  if RespRoot = nil then
+  begin
+    // 一类原始错误，如账号达到最大并发等
+    Result := BytesToAnsi(Response);
+    Exit;
+  end;
+
+  try
+    // 正常回应
+    if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
+    begin
+      Arr := TCnJSONArray(RespRoot['choices']);
+      if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+      begin
+        Msg := TCnJSONObject(Arr[0]['message']);
+        Result := Msg['content'].AsString;
+      end;
+    end;
+
+    if Result <> '' then
+      Exit;
+
+    // 只要没有正常回应，就说明出错了
+    Success := False;
+
+    // 一类业务错误，比如 Key 无效等
+    if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+    begin
+      Msg := TCnJSONObject(RespRoot['error']);
+      Result := Msg['message'].AsString;
+    end;
+
+    // 一类网络错误，比如 URL 错了等
+    if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+      Result := RespRoot['error'].AsString;
+    if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+    begin
+      if Result = '' then
+        Result := RespRoot['message'].AsString
+      else
+        Result := Result + ', ' + RespRoot['message'].AsString;
+    end;
+  finally
+    RespRoot.Free;
+  end;
+end;
+
 constructor TCnAIBaseEngine.Create(ANetPool: TCnThreadPool);
 begin
   inherited Create;
@@ -337,12 +403,11 @@ var
   AnswerObj: TCnAIAnswerObject;
 begin
   // 网络线程里拿到数据或结果后本事件被直接调用，适当包装后 Synchronize 返回给宿主
-  if (DataObj <> nil) and Assigned(TCnAINetRequestDataObject(DataObj).OnAnswer) then
-    TCnAINetRequestDataObject(DataObj).OnAnswer(Success, TCnAINetRequestDataObject(DataObj).SendId, Data);
-
   AnswerObj := TCnAIAnswerObject.Create;
   AnswerObj.Success := Success;
   AnswerObj.SendId := TCnAINetRequestDataObject(DataObj).SendId;
+  AnswerObj.RequestType := TCnAINetRequestDataObject(DataObj).RequestType;
+  AnswerObj.Callback := TCnAINetRequestDataObject(DataObj).OnAnswer;
   AnswerObj.Answer := Data; // 引用但有计数，不会随便释放
 
   FAnswerQueue.Push(AnswerObj);
@@ -352,12 +417,16 @@ end;
 procedure TCnAIBaseEngine.SyncCallback;
 var
   AnswerObj: TCnAIAnswerObject;
+  Answer: string;
 begin
   AnswerObj := TCnAIAnswerObject(FAnswerQueue.Pop);
   if AnswerObj <> nil then
   begin
     if Assigned(AnswerObj.Callback) then
-      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, AnswerObj.Answer);
+    begin
+      Answer := ParseResponse(AnswerObj.FSuccess, AnswerObj.RequestType, AnswerObj.Answer);
+      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer);
+    end;
     AnswerObj.Free;
   end;
 end;

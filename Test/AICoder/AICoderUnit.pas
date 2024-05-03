@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
-  CnAICoderConfig, CnAICoderEngine;
+  CnAICoderConfig, CnAICoderEngine, CnWideStrings;
 
 type
   TFormAITest = class(TForm)
@@ -41,7 +41,7 @@ type
     FAIConfig: TCnAIEngineOptionManager;
 
     // 以下是综合测试
-    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer; Answer: TBytes);
+    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer; const Answer: string);
   protected
     procedure ShowData;
   public
@@ -250,9 +250,10 @@ begin
   Option.EngineName := 'Moonshot';
   Option.Model := 'moonshot-v1-8k';
   Option.URL := 'https://api.moonshot.cn/v1/chat/completions';
-  Option.ApiKey := '{B13DB6F2-B0DA-40BC-B0F7-E654F96FD159}';
+  Option.ApiKey := 'sk-*****************';
+  Option.WebAddress := 'https://platform.moonshot.cn/console';
   Option.SystemMessage := '你是一名 Delphi 专家';
-  Option.Temperature := '0.3';
+  Option.Temperature := 0.3;
   Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
@@ -263,7 +264,7 @@ begin
   Option.URL := 'https://upgrade.cnpack.org/';
   Option.ApiKey := '{ACED92D0-6D09-4B88-BEA7-B963A8301CA4}';
   Option.SystemMessage := '你是一名 C++Builder 专家';
-  Option.Temperature := '0.3';
+  Option.Temperature := 0.3;
   Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
@@ -321,12 +322,13 @@ begin
 end;
 
 procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
-  SendId: Integer; Answer: TBytes);
+  SendId: Integer; const Answer: string);
 begin
   if Success then
-    mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, BytesToAnsi(Answer)]))
+    mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, Answer]))
   else
-    mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code %d', [SendId, GetLastError]));
+    mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, GetLastError, Answer]));
 end;
 
 { TCnAITestEngine }

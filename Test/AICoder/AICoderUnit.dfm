@@ -1,9 +1,10 @@
 object FormAITest: TFormAITest
   Left = 192
   Top = 108
-  Width = 964
-  Height = 619
+  BorderStyle = bsDialog
   Caption = 'AI Coder Test'
+  ClientHeight = 592
+  ClientWidth = 956
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -29,6 +30,7 @@ object FormAITest: TFormAITest
         Top = 56
         Width = 881
         Height = 449
+        ReadOnly = True
         TabOrder = 0
       end
       object btnAddHttps: TButton
@@ -67,6 +69,7 @@ object FormAITest: TFormAITest
         Top = 56
         Width = 881
         Height = 449
+        ReadOnly = True
         TabOrder = 2
       end
     end
@@ -122,6 +125,7 @@ object FormAITest: TFormAITest
         Top = 56
         Width = 881
         Height = 449
+        ReadOnly = True
         TabOrder = 4
       end
     end

@@ -46,7 +46,7 @@ type
 
   TCnAINetRequestDataObject = class;
 
-  TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer; Answer: TBytes) of object;
+  TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer; const Answer: string) of object;
   {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容}
 
   TCnAINetDataResponse = procedure(Success: Boolean; Thread: TCnPoolingThread;
@@ -67,7 +67,6 @@ type
   {* 代表网络请求的任务类，由发起者根据网络请求参数创建，并扔给线程池
     有结果时线程会回调 OnResponse 事件}
   private
-    FEngine: string;
     FURL: string;
     FSendId: Integer;
     FData: TBytes;
@@ -77,8 +76,6 @@ type
   public
     function Clone: TCnTaskDataObject; override;
 
-    property Engine: string read FEngine write FEngine;
-    {* 具体 AI 引擎的名称}
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
     {* 请求类型}
     property Data: TBytes read FData write FData;
@@ -107,7 +104,9 @@ begin
   // 注意如果 TCnAINetRequestDataObject 后面增加属性，此处要同步补充
   TCnAINetRequestDataObject(Result).URL := FURL;
   TCnAINetRequestDataObject(Result).SendId := FSendId;
+  TCnAINetRequestDataObject(Result).RequestType := FRequestType;
   TCnAINetRequestDataObject(Result).OnResponse := FOnResponse;
+  TCnAINetRequestDataObject(Result).OnAnswer := FOnAnswer;
 end;
 
 end.
