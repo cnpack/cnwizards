@@ -67,9 +67,6 @@ type
     FAnswerQueue: TCnObjectQueue;
     procedure CheckOptionPool;
   protected
-    class function EngineName: string; virtual; abstract;
-    {* 子类必须有个名字}
-
     procedure TalkToEngine(Sender: TCnThreadPool; DataObj: TCnTaskDataObject;
       Thread: TCnPoolingThread); virtual;
     {* 有默认实现且子类可重载的、与 AI 服务提供者进行网络通讯获取结果的实现函数
@@ -93,6 +90,9 @@ type
     {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者
       同时允许根据返回的错误信息更改成功与否}
   public
+    class function EngineName: string; virtual; abstract;
+    {* 子类必须有个名字}
+
     constructor Create(ANetPool: TCnThreadPool); virtual;
     destructor Destroy; override;
 

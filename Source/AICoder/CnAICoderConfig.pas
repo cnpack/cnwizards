@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, CnJSON;
+  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnBase64, CnSM4;
 
 type
   TCnAIEngineOption = class(TPersistent)
@@ -61,7 +61,7 @@ type
     property URL: string read FURL write FURL;
     {* 请求地址}
     property ApiKey: string read FApiKey write FApiKey;
-    {* 调用的授权码}
+    {* 调用的授权码，存储时会加密}
     property Model: string read FModel write FModel;
     {* 模型名称}
     property Temperature: Extended read FTemperature write FTemperature;
@@ -85,6 +85,10 @@ type
     function GetOption(Index: Integer): TCnAIEngineOption;
     function GetActiveEngineIndex: Integer;
     {* 根据活动引擎名称查找索引号}
+  protected
+    // SM4 加十六进制加解密
+    function EncryptKey(const Key: string): string;
+    function DecryptKey(const Text: string): string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -126,6 +130,10 @@ function CnAIEngineOptionManager: TCnAIEngineOptionManager;
 
 implementation
 
+const
+  SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
+  SM4_IV: TCnSM4Iv   = ($18, $40, $19, $21, $19, $31, $19, $37, $19, $45, $19, $49, $19, $53, $19, $78);
+
 var
   FAIEngineOptionManager: TCnAIEngineOptionManager = nil;
 
@@ -157,10 +165,49 @@ begin
   FOptions := TObjectList.Create(True);
 end;
 
+function TCnAIEngineOptionManager.DecryptKey(const Text: string): string;
+var
+  K, Iv, Res: TBytes;
+begin
+  if Text = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(SM4_KEY));
+  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
+
+  SetLength(Iv, SizeOf(SM4_IV));
+  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
+
+  Res := SM4DecryptCbcBytesFromHex(K, Iv, Text);
+  Result := Trim(BytesToAnsi(Res)); // 注意没处理对齐，因而需要 Trim 掉尾巴上可能有的 #0
+end;
+
 destructor TCnAIEngineOptionManager.Destroy;
 begin
   FOptions.Free;
   inherited;
+end;
+
+function TCnAIEngineOptionManager.EncryptKey(const Key: string): string;
+var
+  K, Iv: TBytes;
+begin
+  if Key = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(SM4_KEY));
+  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
+
+  SetLength(Iv, SizeOf(SM4_IV));
+  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
+
+  Result := SM4EncryptCbcBytesToHex(K, Iv, AnsiToBytes(Key));
 end;
 
 function TCnAIEngineOptionManager.GetActiveEngineIndex: Integer;
@@ -237,6 +284,9 @@ begin
       begin
         Option := TCnAIEngineOption.Create;
         TCnJSONReader.Read(Option, TCnJSONObject(Arr[I]));
+
+        // 载入后原地解密 APIKey
+        Option.ApiKey := DecryptKey(Option.ApiKey);
         AddOption(Option);
       end;
     end;
@@ -264,6 +314,7 @@ var
   Root, Obj: TCnJSONObject;
   Arr: TCnJSONArray;
   I: Integer;
+  PlainKey: string;
 begin
   Root := TCnJSONObject.Create;
   try
@@ -273,7 +324,16 @@ begin
     for I := 0 to OptionCount - 1 do
     begin
       Obj := TCnJSONObject.Create;
-      TCnJSONWriter.Write(Options[I], Obj);
+
+      PlainKey := Options[I].ApiKey;
+      try
+        // 原地加密 APIKey
+        Options[I].ApiKey := EncryptKey(Options[I].ApiKey);
+        TCnJSONWriter.Write(Options[I], Obj);
+      finally
+        // 内存中再还原
+        Options[I].ApiKey := PlainKey;
+      end;
       Arr.AddValue(Obj);
     end;
 
