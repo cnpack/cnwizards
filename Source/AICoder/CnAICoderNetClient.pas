@@ -46,7 +46,8 @@ type
 
   TCnAINetRequestDataObject = class;
 
-  TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer; const Answer: string) of object;
+  TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer;
+    const Answer: string; ErrorCode: Cardinal) of object;
   {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容}
 
   TCnAINetDataResponse = procedure(Success: Boolean; Thread: TCnPoolingThread;

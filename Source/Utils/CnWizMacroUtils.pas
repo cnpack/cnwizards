@@ -113,6 +113,7 @@ function ParseNameArgsResult(Source: Pointer; var Name, Args, ResultType: string
 var
   Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
 begin
+  Result := 0;
   Parser := TCnGeneralWidePasLex.Create;
   try
     Parser.Origin := Source;
@@ -170,7 +171,6 @@ end;
 procedure GetNameArgsResult(var Name, Args, ResultType: string;
   RetEmpty: Boolean = False; IgnoreCompDir: Boolean = False);
 var
-  Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
   MemStream: TMemoryStream;
 begin
   if RetEmpty then

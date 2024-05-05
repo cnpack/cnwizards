@@ -26,6 +26,10 @@ type
     btnSaveAIConfig: TButton;
     btnExplainCode: TButton;
     mmoAI: TMemo;
+    lblProxy: TLabel;
+    edtProxy: TEdit;
+    lblTestProxy: TLabel;
+    edtTestProxy: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -41,7 +45,8 @@ type
     FAIConfig: TCnAIEngineOptionManager;
 
     // 以下是综合测试
-    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer; const Answer: string);
+    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal);
   protected
     procedure ShowData;
   public
@@ -86,9 +91,13 @@ type
   private
     FSendId: Integer;
     FData: TBytes;
+    FSuccess: Boolean;
+    FErrorCode: Cardinal;
   public
+    property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
     property Data: TBytes read FData write FData;
+    property ErrorCode: Cardinal read FErrorCode write FErrorCode;
   end;
 
 var
@@ -103,12 +112,6 @@ uses
 
 const
   DBG_TAG = 'NET';
-
-type
-  TCnAITestEngine = class(TCnAIBaseEngine)
-  protected
-    class function EngineName: string; override;
-  end;
 
 procedure TFormAITest.FormCreate(Sender: TObject);
 begin
@@ -150,6 +153,12 @@ var
   Stream: TMemoryStream;
 begin
   HTTP := TCnHTTP.Create;
+  if Trim(edtTestProxy.Text) <> '' then
+  begin
+    HTTP.ProxyMode := pmProxy;
+    HTTP.ProxyServer := edtTestProxy.Text;
+  end;
+
   Stream := TMemoryStream.Create;
 
   try
@@ -219,8 +228,21 @@ begin
   if Success and (Length(Data) > 0) then
   begin
     Res := TResponseDataObject.Create;
+    Res.Success := True;
     Res.SendId := SendId;
     Res.Data := Data;
+    Res.ErrorCode := 0;
+
+    FResQueue.Push(Res);
+    TThreadHack(Thread).Synchronize(ShowData);
+  end
+  else
+  begin
+    Res := TResponseDataObject.Create;
+    Res.Success := False;
+    Res.SendId := SendId;
+    Res.Data := Data;
+    Res.ErrorCode := GetLastError;
 
     FResQueue.Push(Res);
     TThreadHack(Thread).Synchronize(ShowData);
@@ -234,8 +256,10 @@ begin
   Obj := TResponseDataObject(FResQueue.Pop);
   if Obj <> nil then
   begin
-    FormAITest.mmoHTTP.Lines.Add(Format('Get Bytes %d from SendId %d', [Length(Obj.Data), Obj.SendId]));
-    // FormAITest.mmoHTTP.Lines.Add(BytesToString(Obj.Data));
+    if Obj.Success then
+      FormAITest.mmoHTTP.Lines.Add(Format('Get Bytes %d from SendId %d', [Length(Obj.Data), Obj.SendId]))
+    else
+      FormAITest.mmoHTTP.Lines.Add(Format('Get Failed from SendId %d. Error Code %d', [Obj.SendId, Obj.ErrorCode]));
     Obj.Free;
   end;
 end;
@@ -294,18 +318,20 @@ begin
   begin
     CnAIEngineOptionManager.LoadFromFile(dlgOpen1.FileName);
     cbbAIEngines.Items.Clear;
-    for I := 0 to CnAIEngineOptionManager.OptionCount - 1 do
-      cbbAIEngines.Items.Add(CnAIEngineOptionManager.Options[I].EngineName);
+    for I := 0 to CnAIEngineManager.EngineCount - 1 do
+      cbbAIEngines.Items.Add(CnAIEngineManager.Engines[I].EngineName);
 
-    cbbAIEngines.ItemIndex := CnAIEngineOptionManager.ActiveEngineIndex;
-    CnAIEngineManager.CurrentIndex := CnAIEngineOptionManager.ActiveEngineIndex;
+    CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+    cbbAIEngines.ItemIndex := CnAIEngineManager.CurrentIndex;
+
+    edtProxy.Text := CnAIEngineOptionManager.ProxyServer;
   end;
 end;
 
 procedure TFormAITest.cbbAIEnginesChange(Sender: TObject);
 begin
   CnAIEngineOptionManager.ActiveEngine := cbbAIEngines.Text;
-  CnAIEngineManager.CurrentIndex := CnAIEngineOptionManager.ActiveEngineIndex;
+  CnAIEngineManager.CurrentEngineName := cbbAIEngines.Text;
 end;
 
 procedure TFormAITest.btnSaveAIConfigClick(Sender: TObject);
@@ -317,28 +343,18 @@ end;
 
 procedure TFormAITest.btnExplainCodeClick(Sender: TObject);
 begin
-  CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.Terminate;',
+  CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.CreateForm(TForm1, Form1);',
     AIOnExplainCodeAnswer);
 end;
 
 procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
-  SendId: Integer; const Answer: string);
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal);
 begin
   if Success then
     mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, Answer]))
   else
     mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
-      [SendId, GetLastError, Answer]));
+      [SendId, ErrorCode, Answer]));
 end;
-
-{ TCnAITestEngine }
-
-class function TCnAITestEngine.EngineName: string;
-begin
-  Result := 'Moonshot';
-end;
-
-initialization
-  RegisterAIEngine(TCnAITestEngine);
 
 end.

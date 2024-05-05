@@ -50,10 +50,12 @@ type
     FSuccess: Boolean;
     FCallback: TCnAIAnswerCallback;
     FRequestType: TCnAIRequestType;
+    FErrorCode: Cardinal;
   public
     property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
+    property ErrorCode: Cardinal read FErrorCode write FErrorCode;
     property Answer: TBytes read FAnswer write FAnswer;
     property Callback: TCnAIAnswerCallback read FCallback write FCallback;
   end;
@@ -83,10 +85,12 @@ type
     {* 被上述第四步通过 Synchronize 的方式调用，之前已将应答对象推入 FAnswerQueue 队列
       在一次完整的 AI 网络通讯过程中属于第五步}
 
+    // 以下俩过程，子类看接口情况重载
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
-    function ParseResponse(var Success: Boolean; RequestType: TCnAIRequestType;
-      const Response: TBytes): string; virtual;
+
+    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+      RequestType: TCnAIRequestType; const Response: TBytes): string; virtual;
     {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者
       同时允许根据返回的错误信息更改成功与否}
   public
@@ -121,14 +125,21 @@ type
     function GetEnginCount: Integer;
     function GetEngine(Index: Integer): TCnAIBaseEngine;
     procedure SetCurrentIndex(const Value: Integer);
+    function GetCurrentEngineName: string;
+    procedure SetCurrentEngineName(const Value: string);
   protected
     procedure ProcessRequest(Sender: TCnThreadPool;
       DataObj: TCnTaskDataObject; Thread: TCnPoolingThread);
+    function FindEngineIndexByName(const EngineName: string): Integer;
+    {* 根据特定引擎名查找内部索引号，供设置 CurrentIndex 使用}
   public
     constructor Create; virtual;
     {* 构造函数，传入外部的网络线程池引用，供分配给 AI 引擎使用}
     destructor Destroy; override;
 
+
+    property CurrentEngineName: string read GetCurrentEngineName write SetCurrentEngineName;
+    {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎}
     property CurrentIndex: Integer read FCurrentIndex write SetCurrentIndex;
     {* 当前活动引擎的索引号，供外界切换设置}
     property CurrentEngine: TCnAIBaseEngine read GetCurrentEngine;
@@ -217,12 +228,36 @@ begin
   FEngines.Free;
 end;
 
+function TCnAIEngineManager.FindEngineIndexByName(
+  const EngineName: string): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  if Trim(EngineName) <> '' then
+  begin
+    for I := 0 to FEngines.Count - 1 do
+    begin
+      if (FEngines[I] <> nil) and (TCnAIBaseEngine(FEngines[I]).EngineName = EngineName) then
+      begin
+        Result := I;
+        Exit;
+      end;
+    end;
+  end;
+end;
+
 function TCnAIEngineManager.GetCurrentEngine: TCnAIBaseEngine;
 begin
   if (FCurrentIndex >= 0) and (FCurrentIndex < FEngines.Count) then
     Result := TCnAIBaseEngine(FEngines[FCurrentIndex])
   else
     raise Exception.Create('NO Engine Selected.');
+end;
+
+function TCnAIEngineManager.GetCurrentEngineName: string;
+begin
+  Result := CurrentEngine.EngineName;
 end;
 
 function TCnAIEngineManager.GetEnginCount: Integer;
@@ -241,12 +276,24 @@ begin
   CurrentEngine.TalkToEngine(Sender, DataObj, Thread);
 end;
 
+procedure TCnAIEngineManager.SetCurrentEngineName(const Value: string);
+var
+  Idx: Integer;
+begin
+  Idx := FindEngineIndexByName(Value);
+  if Idx >= 0 then
+    CurrentIndex := Idx
+  else
+    raise Exception.CreateFmt('Invalid Engine Name %s', [Value]);
+end;
+
 procedure TCnAIEngineManager.SetCurrentIndex(const Value: Integer);
 begin
   if FCurrentIndex <> Value then
   begin
+    // 旧引擎释放
     FCurrentIndex := Value;
-    // 记录引擎改变了
+    // 记录引擎改变了，如果需要的话初始化新引擎
   end;
 end;
 
@@ -319,14 +366,16 @@ begin
   end;
 end;
 
-function TCnAIBaseEngine.ParseResponse(var Success: Boolean;
+function TCnAIBaseEngine.ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
   RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
+  S: AnsiString;
 begin
   Result := '';
-  RespRoot := CnJSONParse(BytesToAnsi(Response));
+  S := BytesToAnsi(Response);
+  RespRoot := CnJSONParse(S);
   if RespRoot = nil then
   begin
     // 一类原始错误，如账号达到最大并发等
@@ -410,6 +459,9 @@ begin
   AnswerObj.Callback := TCnAINetRequestDataObject(DataObj).OnAnswer;
   AnswerObj.Answer := Data; // 引用但有计数，不会随便释放
 
+  if not Success then
+    AnswerObj.ErrorCode := GetLastError;
+
   FAnswerQueue.Push(AnswerObj);
   TThreadHack(Thread).Synchronize(SyncCallback);
 end;
@@ -424,8 +476,9 @@ begin
   begin
     if Assigned(AnswerObj.Callback) then
     begin
-      Answer := ParseResponse(AnswerObj.FSuccess, AnswerObj.RequestType, AnswerObj.Answer);
-      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer);
+      Answer := ParseResponse(AnswerObj.FSuccess, AnswerObj.FErrorCode,
+        AnswerObj.RequestType, AnswerObj.Answer);
+      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer, AnswerObj.ErrorCode);
     end;
     AnswerObj.Free;
   end;
@@ -442,10 +495,21 @@ begin
 
   try
     HTTP := TCnHTTP.Create;
-    Stream := TMemoryStream.Create;
-
+    if CnAIEngineOptionManager.UseProxy then
+    begin
+      if Trim(CnAIEngineOptionManager.ProxyServer) <> '' then
+      begin
+        HTTP.ProxyMode := pmProxy;
+        HTTP.ProxyServer := CnAIEngineOptionManager.ProxyServer;
+        HTTP.ProxyUserName := CnAIEngineOptionManager.ProxyUserName;
+        HTTP.ProxyPassword := CnAIEngineOptionManager.ProxyPassword;
+      end
+      else
+        HTTP.ProxyMode := pmIE;
+    end;
     HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
 
+    Stream := TMemoryStream.Create;
     if HTTP.GetStream(TCnAINetRequestDataObject(DataObj).URL, Stream,
       TCnAINetRequestDataObject(DataObj).Data) then
     begin
@@ -461,7 +525,7 @@ begin
     else
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('*** HTTP Request Fail. ' + IntToStr(GetLastError));
+      CnDebugger.LogMsg('*** HTTP Request Fail.');
 {$ENDIF}
       if Assigned(TCnAINetRequestDataObject(DataObj).OnResponse) then
         TCnAINetRequestDataObject(DataObj).OnResponse(False, Thread, TCnAINetRequestDataObject(DataObj), nil);

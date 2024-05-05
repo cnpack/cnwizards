@@ -5,7 +5,8 @@ uses
   AICoderUnit in 'AICoderUnit.pas' {FormAITest},
   CnAICoderConfig in '..\..\Source\AICoder\CnAICoderConfig.pas',
   CnAICoderEngine in '..\..\Source\AICoder\CnAICoderEngine.pas',
-  CnAICoderNetClient in '..\..\Source\AICoder\CnAICoderNetClient.pas';
+  CnAICoderNetClient in '..\..\Source\AICoder\CnAICoderNetClient.pas',
+  CnAICoderEngineImpl in '..\..\Source\AICoder\CnAICoderEngineImpl.pas';
 
 {$R *.RES}
 

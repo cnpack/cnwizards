@@ -81,10 +81,12 @@ type
   private
     FOptions: TObjectList; // 容纳多个 TCnAIEngineOption 对象，可以是其子类
     FActiveEngine: string;
+    FProxyServer: string;
+    FProxyUserName: string;
+    FProxyPassword: string;
+    FUseProxy: Boolean;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
-    function GetActiveEngineIndex: Integer;
-    {* 根据活动引擎名称查找索引号}
   protected
     // SM4 加十六进制加解密
     function EncryptKey(const Key: string): string;
@@ -113,16 +115,22 @@ type
     function SaveToJSON: AnsiString;
     {* 保存至 UTF8 格式的 JSON 字符串中}
 
-    property ActiveEngineIndex: Integer read GetActiveEngineIndex;
-    {* 根据活动引擎名称查找到的索引号，供设置引擎用}
-
     property OptionCount: Integer read GetOptionCount;
     {* 持有的设置对象数}
     property Options[Index: Integer]: TCnAIEngineOption read GetOption;
     {* 根据索引号获取持有的对象}
   published
     property ActiveEngine: string read FActiveEngine write FActiveEngine;
-    {* 活动引擎名称，供存储载入后设置活动引擎}
+    {* 活动引擎名称，供存储载入后设置活动引擎，除此以外别无它用。}
+
+    property UseProxy: Boolean read FUseProxy write FUseProxy;
+    {* 是否使用代理服务器；否表示直连，是的情况下如果 FProxyServer 为空，表示使用系统设置}
+    property ProxyServer: string read FProxyServer write FProxyServer;
+    {* HTTP(s) 的代理服务器，空表示直连}
+    property ProxyUserName: string read FProxyUserName write FProxyUserName;
+    {* 代理服务器用户名}
+    property ProxyPassword: string read FProxyPassword write FProxyPassword;
+    {* 代理服务器密码}
   end;
 
 function CnAIEngineOptionManager: TCnAIEngineOptionManager;
@@ -208,24 +216,6 @@ begin
   Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
 
   Result := SM4EncryptCbcBytesToHex(K, Iv, AnsiToBytes(Key));
-end;
-
-function TCnAIEngineOptionManager.GetActiveEngineIndex: Integer;
-var
-  I: Integer;
-begin
-  Result := -1;
-  if FActiveEngine = '' then
-    Exit;
-
-  for I := 0 to FOptions.Count - 1 do
-  begin
-    if FActiveEngine = TCnAIEngineOption(FOptions[I]).EngineName then
-    begin
-      Result := I;
-      Exit;
-    end;
-  end;
 end;
 
 function TCnAIEngineOptionManager.GetOption(Index: Integer): TCnAIEngineOption;

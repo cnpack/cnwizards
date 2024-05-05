@@ -25,6 +25,13 @@ object FormAITest: TFormAITest
     TabOrder = 0
     object tsHTTP: TTabSheet
       Caption = 'HTTP Pool Test'
+      object lblTestProxy: TLabel
+        Left = 128
+        Top = 20
+        Width = 29
+        Height = 13
+        Caption = 'Proxy:'
+      end
       object mmoHTTP: TMemo
         Left = 16
         Top = 56
@@ -41,6 +48,13 @@ object FormAITest: TFormAITest
         Caption = 'Add Many HTTPS'
         TabOrder = 1
         OnClick = btnAddHttpsClick
+      end
+      object edtTestProxy: TEdit
+        Left = 168
+        Top = 16
+        Width = 121
+        Height = 21
+        TabOrder = 2
       end
     end
     object tsAIConfig: TTabSheet
@@ -82,6 +96,13 @@ object FormAITest: TFormAITest
         Width = 44
         Height = 13
         Caption = 'AI Name:'
+      end
+      object lblProxy: TLabel
+        Left = 504
+        Top = 20
+        Width = 29
+        Height = 13
+        Caption = 'Proxy:'
       end
       object btnLoadAIConfig: TButton
         Left = 16
@@ -127,6 +148,13 @@ object FormAITest: TFormAITest
         Height = 449
         ReadOnly = True
         TabOrder = 4
+      end
+      object edtProxy: TEdit
+        Left = 544
+        Top = 16
+        Width = 121
+        Height = 21
+        TabOrder = 5
       end
     end
   end
