@@ -3414,6 +3414,7 @@
 
 {$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}
+  {$DEFINE SUPPORT_ATTRIBUTE}       // Ö§³Ö Attribute
   {$DEFINE SUPPORT_ENCODING}        // Unicode with TEncoding
   {$DEFINE SUPPORT_PUINT64}         // Has Pointer of UInt64
   {$DEFINE OBJECT_HAS_TOSTRING}     // TObject.ToString Function
