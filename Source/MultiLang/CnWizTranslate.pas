@@ -80,6 +80,8 @@ begin
   TranslateStr(SCnPack_ZiMin, 'SCnPack_ZiMin');
   TranslateStr(SCnPack_rarnu, 'SCnPack_rarnu');
   TranslateStr(SCnPack_dejoy, 'SCnPack_dejoy');
+  TranslateStr(SCnPack_Rain, 'SCnPack_Rain');
+  TranslateStr(SCnPack_cnwinds, 'SCnPack_cnwinds');
 end;
 
 procedure CnTranslateDesignConsts;
