@@ -48,6 +48,7 @@ implementation
 
 procedure CnTranslateAuthorInfo;
 begin
+  TranslateStr(SCnPack_Team, 'SCnPack_Team');
   TranslateStr(SCnPack_Zjy, 'SCnPack_Zjy');
   TranslateStr(SCnPack_Shenloqi, 'SCnPack_Shenloqi');
   TranslateStr(SCnPack_xiaolv, 'SCnPack_xiaolv');

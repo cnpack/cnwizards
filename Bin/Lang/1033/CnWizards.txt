@@ -3,6 +3,7 @@
 !TranslationAuthor=tif;Liu Xiao
 !TranslationAuthorEmail=tif@0451.com;liuxiao@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,
+SCnPack_Team=CnPack Team
 SCnPack_Zjy=Zhou JingYu
 SCnPack_Shenloqi=Chinbo
 SCnPack_xiaolv=xiaolv

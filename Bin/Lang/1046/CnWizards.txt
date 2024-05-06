@@ -3,6 +3,7 @@
 !TranslationAuthor=Guilherme Henrique Andriotti;Ricardo Bochnia dos Anjos
 !TranslationAuthorEmail=gha@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,
+SCnPack_Team=A equipe CnPack
 SCnPack_Zjy=Zhou JingYu
 SCnPack_Shenloqi=Chinbo
 SCnPack_xiaolv=xiaolv

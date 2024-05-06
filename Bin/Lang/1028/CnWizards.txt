@@ -3,6 +3,7 @@
 !TranslationAuthor=LiuXiao
 !TranslationAuthorEmail=liuxiao@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,CHINESEBIG5_CHARSET
+SCnPack_Team=CnPack開發組
 SCnPack_Zjy=周勁羽
 SCnPack_Shenloqi=沈龍強(Chinbo)
 SCnPack_xiaolv=呂宏慶

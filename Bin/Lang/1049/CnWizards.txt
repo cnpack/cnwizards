@@ -3,6 +3,7 @@
 !TranslationAuthor=Yuri Petrov;Alexander
 !TranslationAuthorEmail=mailtoYuriPetrov@gmail.com;schnider.ru@gmail.com
 !TranslationDefaultFont=Tahoma,8,,,,
+SCnPack_Team=Команда CnPack
 SCnPack_Zjy=Zhou JingYu
 SCnPack_Shenloqi=Chinbo
 SCnPack_xiaolv=xiaolv
