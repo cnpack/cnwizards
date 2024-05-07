@@ -54,6 +54,9 @@ type
     FWebAddress: string;
   protected
 
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -75,6 +78,8 @@ type
     property ExplainCodePrompt: string read FExplainCodePrompt write FExplainCodePrompt;
     {* 解释代码的提示文字}
   end;
+
+  TCnAIEngineOptionClass = class of TCnAIEngineOption;
 
   TCnAIEngineOptionManager = class(TPersistent)
   {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象}
@@ -254,7 +259,9 @@ var
   V: TCnJSONValue;
   Arr: TCnJSONArray;
   I: Integer;
+  S: string;
   Option: TCnAIEngineOption;
+  Clz: TCnAIEngineOptionClass;
 begin
   Root := CnJSONParse(JSON);
   if Root = nil then
@@ -272,7 +279,27 @@ begin
     begin
       if Arr[I] is TCnJSONObject then
       begin
-        Option := TCnAIEngineOption.Create;
+        Option := nil;
+        try
+          // 找 JSON 中的类名来动态创建
+          if TCnJSONObject(Arr[I])['Class'] <> nil then
+          begin
+            S := TCnJSONObject(Arr[I])['Class'].AsString;
+            Clz := TCnAIEngineOptionClass(GetClass(S));
+            if Clz <> nil then
+            begin
+              Option := TCnAIEngineOption(Clz.NewInstance);
+              Option.Create;
+            end;
+          end;
+        except
+          ;
+        end;
+
+        // 没有就用基类
+        if Option = nil then
+          Option := TCnAIEngineOption.Create;
+
         TCnJSONReader.Read(Option, TCnJSONObject(Arr[I]));
 
         // 载入后原地解密 APIKey
@@ -319,6 +346,9 @@ begin
       try
         // 原地加密 APIKey
         Options[I].ApiKey := EncryptKey(Options[I].ApiKey);
+
+        // 先写个类名
+        Obj.AddPair('Class', Options[I].ClassName);
         TCnJSONWriter.Write(Options[I], Obj);
       finally
         // 内存中再还原
@@ -331,6 +361,19 @@ begin
   finally
     Root.Free;
   end;
+end;
+
+{ TCnAIEngineOption }
+
+constructor TCnAIEngineOption.Create;
+begin
+
+end;
+
+destructor TCnAIEngineOption.Destroy;
+begin
+
+  inherited;
 end;
 
 initialization

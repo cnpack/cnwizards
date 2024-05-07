@@ -377,6 +377,11 @@ resourcestring
   SCnCodeFormatterWizardConfig = 'CnCodeFormatterWizardConfig';
   SCnCodeFormatterWizardFormatCurrent = 'CnCodeFormatterWizardFormatCurrent';
 
+  // AICoderWizard
+  SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
+  SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
+  SCnAICoderEngineOptionFile = 'AICoderConfig.json';
+
 //==============================================================================
 // Event Names used around CnEventBus
 //==============================================================================
@@ -1761,6 +1766,22 @@ var
   SCnCodeFormatterErrPascalUnknownGoal: string = 'Unknown Target Source File.';
   SCnCodeFormatterErrPascalErrorInterface: string = 'Interface Error.';
   SCnCodeFormatterErrPascalInvalidStatement: string = 'Invalid Statement.';
+
+  // CnAICoderWizard
+  SCnAICoderWizardName: string = 'AI Coder Wizard';
+  SCnAICoderWizardComment: string = 'AI Assistant for Coding';
+  SCnAICoderWizardMenuCaption: string = 'AI Coder';
+  SCnAICoderWizardMenuHint: string = 'AI Coder Wizard';
+  SCnAICoderWizardExplainCodeCaption: string = '&Explain Code...';
+  SCnAICoderWizardExplainCodeHint: string = 'Explain Selected Code';
+  SCnAICoderWizardShowWindowCaption: string = '&Show AI Window';
+  SCnAICoderWizardShowWindowHint: string = 'Show or Hide AI Window';
+  SCnAICoderWizardConfigCaption: string = '&Options...';
+  SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
+
+  SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists';
+  SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s';
+  SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';
