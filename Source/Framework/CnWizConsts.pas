@@ -379,6 +379,7 @@ resourcestring
 
   // AICoderWizard
   SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
+  SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
   SCnAICoderEngineOptionFile = 'AICoderConfig.json';
 
@@ -1774,8 +1775,8 @@ var
   SCnAICoderWizardMenuHint: string = 'AI Coder Wizard';
   SCnAICoderWizardExplainCodeCaption: string = '&Explain Code...';
   SCnAICoderWizardExplainCodeHint: string = 'Explain Selected Code';
-  SCnAICoderWizardShowWindowCaption: string = '&Show AI Window';
-  SCnAICoderWizardShowWindowHint: string = 'Show or Hide AI Window';
+  SCnAICoderWizardChatWindowCaption: string = 'AI &Chat Window';
+  SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
 

@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnBase64, CnSM4;
+  SysUtils, Classes, Contnrs, CnJSON, CnNative;
 
 type
   TCnAIEngineOption = class(TPersistent)
@@ -143,9 +143,13 @@ function CnAIEngineOptionManager: TCnAIEngineOptionManager;
 
 implementation
 
+uses
+  CnSM4, CnAEAD;
+
 const
   SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
   SM4_IV: TCnSM4Iv   = ($18, $40, $19, $21, $19, $31, $19, $37, $19, $45, $19, $49, $19, $53, $19, $78);
+  SM4_AD: AnsiString = 'CnPack';
 
 var
   FAIEngineOptionManager: TCnAIEngineOptionManager = nil;
@@ -180,7 +184,7 @@ end;
 
 function TCnAIEngineOptionManager.DecryptKey(const Text: string): string;
 var
-  K, Iv, Res: TBytes;
+  K, Iv, AD, Res: TBytes;
 begin
   if Text = '' then
   begin
@@ -194,8 +198,11 @@ begin
   SetLength(Iv, SizeOf(SM4_IV));
   Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
 
-  Res := SM4DecryptCbcBytesFromHex(K, Iv, Text);
-  Result := Trim(BytesToAnsi(Res)); // 注意没处理对齐，因而需要 Trim 掉尾巴上可能有的 #0
+  SetLength(AD, Length(SM4_AD));
+  Move(SM4_AD[1], AD[0], Length(AD));
+
+  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
+  Result := BytesToString(Res);
 end;
 
 destructor TCnAIEngineOptionManager.Destroy;
@@ -206,7 +213,7 @@ end;
 
 function TCnAIEngineOptionManager.EncryptKey(const Key: string): string;
 var
-  K, Iv: TBytes;
+  K, Iv, AD: TBytes;
 begin
   if Key = '' then
   begin
@@ -220,7 +227,10 @@ begin
   SetLength(Iv, SizeOf(SM4_IV));
   Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
 
-  Result := SM4EncryptCbcBytesToHex(K, Iv, AnsiToBytes(Key));
+  SetLength(AD, Length(SM4_AD));
+  Move(SM4_AD[1], AD[0], Length(AD));
+
+  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
 end;
 
 function TCnAIEngineOptionManager.GetOption(Index: Integer): TCnAIEngineOption;

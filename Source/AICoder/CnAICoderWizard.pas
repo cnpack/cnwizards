@@ -24,9 +24,9 @@ unit CnAICoderWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：AI 辅助编码专家单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元演示了一个基本的带子菜单专家应该有的东西
-* 开发平台：PWin2000Pro + Delphi 5.01
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 备    注：
+* 开发平台：PWin7 + Delphi 5
+* 兼容测试：PWin7/10/11 + Delphi + C++Builder
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
 * 修改记录：2024.04.29 V1.0
 *               创建单元
@@ -41,7 +41,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
-  CnFrmAICoderOption;
+  CnFrmAICoderOption, CnAICoderChatFrm;
 
 type
   TCnAICoderConfigForm = class(TForm)
@@ -70,11 +70,13 @@ type
   TCnAICoderWizard = class(TCnSubMenuWizard)
   private
     FIdExplainCode: Integer;
+    FIdShowChatWindow: Integer;
     FIdConfig: Integer;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
-    procedure AnswerCallback(Success: Boolean; SendId: Integer;
+    procedure ExplainCodeAnswer(Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal);
+    procedure EnsureChatWindowVisible;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -142,6 +144,10 @@ begin
   // 创建分隔菜单
   AddSepMenu;
 
+  FIdShowChatWindow := RegisterASubAction(SCnAICoderWizardChatWindow,
+    SCnAICoderWizardChatWindowCaption, 0,
+    SCnAICoderWizardChatWindowHint, SCnAICoderWizardChatWindow);
+
   FIdConfig := RegisterASubAction(SCnAICoderWizardConfig,
     SCnAICoderWizardConfigCaption, 0, SCnAICoderWizardConfigHint, SCnAICoderWizardConfig);
 end;
@@ -207,6 +213,13 @@ begin
 
   if Index = FIdConfig then
     Config
+  else if Index = FIdShowChatWindow then
+  begin
+    if CnAICoderChatForm = nil then
+      CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
+
+    CnAICoderChatForm.Visible := not CnAICoderChatForm.Visible;
+  end
   else
   begin
     if not ValidateAIEngines then
@@ -219,7 +232,7 @@ begin
     begin
       S := CnOtaGetCurrentSelection;
       if Trim(S) <> '' then
-        CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode(S, AnswerCallback);
+        CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode(S, ExplainCodeAnswer);
     end;
   end;
 end;
@@ -228,6 +241,8 @@ procedure TCnAICoderWizard.SubActionUpdate(Index: Integer);
 begin
   if Index = FIdConfig then
     SubActions[Index].Enabled := Active
+  else if Index = FIdShowChatWindow then
+    SubActions[Index].Checked := (CnAICoderChatForm <> nil) and CnAICoderChatForm.Visible
   else
     SubActions[Index].Enabled := Active and (CnOtaGetCurrentSelection <> '');
 end;
@@ -313,13 +328,24 @@ begin
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;
 end;
 
-procedure TCnAICoderWizard.AnswerCallback(Success: Boolean;
+procedure TCnAICoderWizard.ExplainCodeAnswer(Success: Boolean;
   SendId: Integer; const Answer: string; ErrorCode: Cardinal);
 begin
+  EnsureChatWindowVisible;
+
   if Success then
-    InfoDlg(Answer)
+    CnAICoderChatForm.mmoContent.Lines.Add(Answer)
   else
-    ErrorDlg(Format('%d %s', [ErrorCode, Answer]));
+    CnAICoderChatForm.mmoContent.Lines.Add(Format('%d %s', [ErrorCode, Answer]));
+end;
+
+procedure TCnAICoderWizard.EnsureChatWindowVisible;
+begin
+  if CnAICoderChatForm = nil then
+    CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
+
+  CnAICoderChatForm.Visible := True;
+  CnAICoderChatForm.BringToFront;
 end;
 
 initialization
