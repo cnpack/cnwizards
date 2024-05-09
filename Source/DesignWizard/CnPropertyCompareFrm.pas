@@ -791,7 +791,7 @@ var
 begin
   if RttiProperty <> nil then
   begin
-    if RttiProperty.Visibility <> mvPublished then // 只拿 published 的
+    if not (RttiProperty.Visibility in [mvPublished]) then // 注意部分 published 的属性在这里会取到 public 导致不显示，可能是 IDE 的 Bug，绕过方法是使用旧 RTTI
       Exit;
 
     if AProp = nil then
@@ -909,7 +909,7 @@ var
   RttiType: TRttiType;
   RttiProperty: TRttiProperty;
 {$ELSE}
-  PropInfo:PPropInfo;
+  PropInfo: PPropInfo;
 {$ENDIF}
 begin
 {$IFDEF SUPPORT_ENHANCED_RTTI}
@@ -939,49 +939,12 @@ var
   RttiType: TRttiType;
   RttiProperty: TRttiProperty;
   RttiMethod: TRttiMethod;
-{$ELSE}
+{$ENDIF}
   PropListPtr: PPropList;
   I, APropCount: Integer;
   PropInfo: PPropInfo;
-{$ENDIF}
 begin
-{$IFDEF SUPPORT_ENHANCED_RTTI}
-  // D2010 及以上，使用新 RTTI 方法获取更多属性
-  RttiContext := TRttiContext.Create;
-  try
-    RttiType := RttiContext.GetType(AObject.ClassInfo);
-    if RttiType <> nil then
-    begin
-      for RttiProperty in RttiType.GetProperties do
-      begin
-        if RttiProperty.PropertyType.TypeKind in tkProperties then
-        begin
-          if ListContainsProperty(RttiProperty.Name, List) then // 子类、父类可能有相同的属性
-            Continue;
-
-          AProp := nil;
-          LoadOneRttiProp(AProp, AObject, RttiProperty);
-          if AProp <> nil then
-            List.Add(AProp);
-        end
-        else if FShowEvents and (RttiProperty.PropertyType.TypeKind in tkMethods) then
-        begin
-          if ListContainsProperty(RttiProperty.Name, List) then // 子类、父类可能有相同的属性
-            Continue;
-
-          AProp := nil;
-          LoadOneRttiProp(AProp, AObject, RttiProperty);
-          if AProp <> nil then
-            List.Add(AProp);
-        end;
-      end;
-    end;
-  finally
-    RttiContext.Free;
-  end;
-
-{$ELSE}
-
+  // 注意必须先拿旧的！如果只拿新的，新 RTTI 里有的属性明明是 published 的结果返回 public 的导致不能显示
   APropCount := GetTypeData(PTypeInfo(AObject.ClassInfo))^.PropCount;
   if APropCount <= 0 then
     Exit;
@@ -1007,6 +970,40 @@ begin
     FreeMem(PropListPtr);
   end;
 
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+  // D2010 及以上，使用新 RTTI 方法补充获取更多属性，实际可能也多不出来因为内部控制了 published 的
+  RttiContext := TRttiContext.Create;
+  try
+    RttiType := RttiContext.GetType(AObject.ClassInfo);
+    if RttiType <> nil then
+    begin
+      for RttiProperty in RttiType.GetProperties do
+      begin
+        if RttiProperty.PropertyType.TypeKind in tkProperties then
+        begin
+          if ListContainsProperty(RttiProperty.Name, List) then // 前面旧的、以及子类、父类可能有相同的属性
+            Continue;
+
+          AProp := nil;
+          LoadOneRttiProp(AProp, AObject, RttiProperty);
+          if AProp <> nil then
+            List.Add(AProp);
+        end
+        else if FShowEvents and (RttiProperty.PropertyType.TypeKind in tkMethods) then
+        begin
+          if ListContainsProperty(RttiProperty.Name, List) then // 上面旧的、以及子类、父类可能有相同的属性
+            Continue;
+
+          AProp := nil;
+          LoadOneRttiProp(AProp, AObject, RttiProperty);
+          if AProp <> nil then
+            List.Add(AProp);
+        end;
+      end;
+    end;
+  finally
+    RttiContext.Free;
+  end;
 {$ENDIF}
 end;
 
