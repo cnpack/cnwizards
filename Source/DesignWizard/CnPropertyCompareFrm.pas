@@ -908,11 +908,15 @@ var
   RttiContext: TRttiContext;
   RttiType: TRttiType;
   RttiProperty: TRttiProperty;
-{$ELSE}
-  PropInfo: PPropInfo;
 {$ENDIF}
+  PropInfo: PPropInfo;
 begin
+  // 先以旧方式拿，因为 LoadOneRttiProp 里可能因为属性类型有误而拿不着
+  PropInfo := GetPropInfo(AObject, PropName);
+  LoadOneClassicProp(AProp, AObject, PropInfo);
+
 {$IFDEF SUPPORT_ENHANCED_RTTI}
+  // 其实新方式拿似乎也重复了，只能指望拿到时它们一致
   RttiContext := TRttiContext.Create;
   try
     RttiType := RttiContext.GetType(AObject.ClassInfo);
@@ -924,9 +928,6 @@ begin
   finally
     RttiContext.Free;
   end;
-{$ELSE}
-  PropInfo := GetPropInfo(AObject, PropName);
-  LoadOneClassicProp(AProp, AObject, PropInfo);
 {$ENDIF}
 end;
 
