@@ -1780,6 +1780,9 @@ var
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
 
+  SCNAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder. Now we use %s. Please Ensure that the Line Breaks in Your Answer Use #13#10 instead of a Single #10.';
+  SCNAICoderWizardUserMessageExplain: string = 'Please Explain the Code: ';
+
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s';

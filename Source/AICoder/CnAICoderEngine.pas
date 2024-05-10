@@ -164,6 +164,10 @@ uses
   CnDebug;
 {$ENDIF}
 
+const
+  CRLF = #13#10;
+  LF = #10;
+
 type
   TThreadHack = class(TThread);
 
@@ -380,47 +384,52 @@ begin
   begin
     // 一类原始错误，如账号达到最大并发等
     Result := BytesToAnsi(Response);
-    Exit;
-  end;
-
-  try
-    // 正常回应
-    if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
-    begin
-      Arr := TCnJSONArray(RespRoot['choices']);
-      if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+  end
+  else
+  begin
+    try
+      // 正常回应
+      if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
       begin
-        Msg := TCnJSONObject(Arr[0]['message']);
-        Result := Msg['content'].AsString;
+        Arr := TCnJSONArray(RespRoot['choices']);
+        if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(Arr[0]['message']);
+          Result := Msg['content'].AsString;
+        end;
       end;
-    end;
 
-    if Result <> '' then
-      Exit;
-
-    // 只要没有正常回应，就说明出错了
-    Success := False;
-
-    // 一类业务错误，比如 Key 无效等
-    if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
-    begin
-      Msg := TCnJSONObject(RespRoot['error']);
-      Result := Msg['message'].AsString;
-    end;
-
-    // 一类网络错误，比如 URL 错了等
-    if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
-      Result := RespRoot['error'].AsString;
-    if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
-    begin
       if Result = '' then
-        Result := RespRoot['message'].AsString
-      else
-        Result := Result + ', ' + RespRoot['message'].AsString;
+      begin
+        // 只要没有正常回应，就说明出错了
+        Success := False;
+
+        // 一类业务错误，比如 Key 无效等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(RespRoot['error']);
+          Result := Msg['message'].AsString;
+        end;
+
+        // 一类网络错误，比如 URL 错了等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+          Result := RespRoot['error'].AsString;
+        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+        begin
+          if Result = '' then
+            Result := RespRoot['message'].AsString
+          else
+            Result := Result + ', ' + RespRoot['message'].AsString;
+        end;
+      end;
+    finally
+      RespRoot.Free;
     end;
-  finally
-    RespRoot.Free;
   end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
 constructor TCnAIBaseEngine.Create(ANetPool: TCnThreadPool);

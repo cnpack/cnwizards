@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source
+SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source;..\..\Source\Framework
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=DEBUG
 DebugSourceDirs=
@@ -85,8 +85,9 @@ Item0=DEBUG
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=4
-Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source
-Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual
-Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm
-Item3=D:\VCL\Indy9\Source
+Count=5
+Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source;..\..\Source\Framework
+Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source
+Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual
+Item3=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm
+Item4=D:\VCL\Indy9\Source

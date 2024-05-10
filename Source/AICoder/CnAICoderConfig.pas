@@ -38,25 +38,30 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, CnJSON, CnNative;
+  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnWizConsts, CnWizCompilerConst;
 
 type
   TCnAIEngineOption = class(TPersistent)
   {* 一个 AI 配置项基类}
   private
     FURL: string;
-    FSystemMessage: string;
     FApiKey: string;
     FModel: string;
     FEngineName: string;
     FTemperature: Extended;
-    FExplainCodePrompt: string;
     FWebAddress: string;
+    function GetExplainCodePrompt: string;
+    function GetSystemMessage: string;
   protected
 
   public
     constructor Create; virtual;
     destructor Destroy; override;
+
+    property SystemMessage: string read GetSystemMessage;
+    {* 系统预设消息}
+    property ExplainCodePrompt: string read GetExplainCodePrompt;
+    {* 解释代码的提示文字}
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -69,14 +74,9 @@ type
     {* 模型名称}
     property Temperature: Extended read FTemperature write FTemperature;
     {* 温度参数}
-    property SystemMessage: string read FSystemMessage write FSystemMessage;
-    {* 系统预设消息}
 
     property WebAddress: string read FWebAddress write FWebAddress;
     {* 用来申请 APIKEY 的网址}
-
-    property ExplainCodePrompt: string read FExplainCodePrompt write FExplainCodePrompt;
-    {* 解释代码的提示文字}
   end;
 
   TCnAIEngineOptionClass = class of TCnAIEngineOption;
@@ -384,6 +384,16 @@ destructor TCnAIEngineOption.Destroy;
 begin
 
   inherited;
+end;
+
+function TCnAIEngineOption.GetExplainCodePrompt: string;
+begin
+  Result := SCNAICoderWizardUserMessageExplain;
+end;
+
+function TCnAIEngineOption.GetSystemMessage: string;
+begin
+  Result := Format(SCNAICoderWizardSystemMessageFmt, [CompilerName]);
 end;
 
 initialization

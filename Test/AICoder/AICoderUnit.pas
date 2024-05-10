@@ -175,7 +175,7 @@ begin
     end
     else
     begin
-      CnDebugger.LogMsgWithTag('*** HTTP Request Fail. ' + IntToStr(GetLastError), DBG_TAG);
+      CnDebugger.LogMsgWithTag('*** HTTP Request Fail.', DBG_TAG);
       if Assigned(TSendDataObject(DataObj).OnResponse) then
         TSendDataObject(DataObj).OnResponse(False, Thread, TSendDataObject(DataObj).SendId, nil);
     end;
@@ -276,9 +276,9 @@ begin
   Option.URL := 'https://api.moonshot.cn/v1/chat/completions';
   Option.ApiKey := 'sk-*****************';
   Option.WebAddress := 'https://platform.moonshot.cn/console';
-  Option.SystemMessage := '你是一名 Delphi 专家';
+  // Option.SystemMessage := '你是一名 Delphi 专家';
   Option.Temperature := 0.3;
-  Option.ExplainCodePrompt := '请解释以下代码：';
+  // Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
 
@@ -287,9 +287,9 @@ begin
   Option.Model := 'cnpack-noai-9.8';
   Option.URL := 'https://upgrade.cnpack.org/';
   Option.ApiKey := '{ACED92D0-6D09-4B88-BEA7-B963A8301CA4}';
-  Option.SystemMessage := '你是一名 C++Builder 专家';
+  // Option.SystemMessage := '你是一名 C++Builder 专家';
   Option.Temperature := 0.3;
-  Option.ExplainCodePrompt := '请解释以下代码：';
+  // Option.ExplainCodePrompt := '请解释以下代码：';
 
   FAIConfig.AddOption(Option);
   FAIConfig.ActiveEngine := 'Moonshot';

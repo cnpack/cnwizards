@@ -11,6 +11,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   PixelsPerInch = 96
   TextHeight = 13
   object spl1: TSplitter

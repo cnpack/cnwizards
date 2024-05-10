@@ -25,6 +25,16 @@ unit CnWizTranslate;
 * 单元名称：资源字符串定义单元
 * 单元作者：CnPack开发组
 * 备    注：该单元对 CnWizards 用到的资源字符串进行翻译
+*
+*           从 CnWizConsts.pas 中将定义的变量字符串转换过来的 AI（如通义千问） 提示词：
+
+            请帮我处理一批多语翻译字符串，原始字符串以Pascal变量的形式定义，
+            如这句定义代码 SCnTestName: string = '一个测试名称';
+            这一句代码我们会转换成翻译代码为 TranslateStr(SCnTestName, 'SCnTestName');
+            只需处理变量名，无需处理其值。如果你看明白了，请回答明白。
+
+            下一次把 CnWizConsts.pas 中将定义的变量字符串的代码贴过去即可。
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -1440,6 +1450,23 @@ begin
   TranslateStr(SCnCodeFormatterErrPascalUnknownGoal, 'SCnCodeFormatterErrPascalUnknownGoal');
   TranslateStr(SCnCodeFormatterErrPascalErrorInterface, 'SCnCodeFormatterErrPascalErrorInterface');
   TranslateStr(SCnCodeFormatterErrPascalInvalidStatement, 'SCnCodeFormatterErrPascalInvalidStatement');
+
+  // CnAICoderWizard
+  TranslateStr(SCnAICoderWizardName, 'SCnAICoderWizardName');
+  TranslateStr(SCnAICoderWizardComment, 'SCnAICoderWizardComment');
+  TranslateStr(SCnAICoderWizardMenuCaption, 'SCnAICoderWizardMenuCaption');
+  TranslateStr(SCnAICoderWizardMenuHint, 'SCnAICoderWizardMenuHint');
+  TranslateStr(SCnAICoderWizardExplainCodeCaption, 'SCnAICoderWizardExplainCodeCaption');
+  TranslateStr(SCnAICoderWizardExplainCodeHint, 'SCnAICoderWizardExplainCodeHint');
+  TranslateStr(SCnAICoderWizardChatWindowCaption, 'SCnAICoderWizardChatWindowCaption');
+  TranslateStr(SCnAICoderWizardChatWindowHint, 'SCnAICoderWizardChatWindowHint');
+  TranslateStr(SCnAICoderWizardConfigCaption, 'SCnAICoderWizardConfigCaption');
+  TranslateStr(SCnAICoderWizardConfigHint, 'SCnAICoderWizardConfigHint');
+  TranslateStr(SCNAICoderWizardSystemMessageFmt, 'SCNAICoderWizardSystemMessageFmt');
+  TranslateStr(SCNAICoderWizardUserMessageExplain, 'SCNAICoderWizardUserMessageExplain');
+  TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
+  TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
+  TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');
 
   // CnMatchButtonFrame
   TranslateStr(SCnMatchButtonFrameMenuStartCaption, 'SCnMatchButtonFrameMenuStartCaption');
