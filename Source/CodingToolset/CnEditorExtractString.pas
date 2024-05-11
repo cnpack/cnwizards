@@ -984,13 +984,16 @@ end;
 
 function TCnEditorExtractString.ScanPas: Boolean;
 var
-  I, CurrPos: Integer;
+  I: Integer;
   EditView: IOTAEditView;
   Token: TCnGeneralPasToken;
-  EditPos: TOTAEditPos;
   Info: TCodePosInfo;
   S: TCnIdeTokenString;
   Lex: TCnGeneralWidePasLex;
+{$IFNDEF IDE_STRING_ANSI_UTF8}
+  CurrPos: Integer;
+  EditPos: TOTAEditPos;
+{$ENDIF}
 begin
   Result := False;
   EditView := CnOtaGetTopMostEditView;

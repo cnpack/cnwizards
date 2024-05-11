@@ -547,7 +547,6 @@ procedure ShowMemoryStreamExternalViewer(const Expression: string);
 var
   F: TCnIdeDockForm;
   Fm: TCnMemoryStreamViewerFrame;
-  S: string;
 begin
   if not CnWizDebuggerObjectInheritsFrom(Expression, 'TCustomMemoryStream') then
   begin

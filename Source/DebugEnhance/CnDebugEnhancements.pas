@@ -410,8 +410,10 @@ end;
 {$ENDIF}
 
 procedure TCnDebugEnhanceWizard.Config;
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 var
   ID: IOTADebuggerServices;
+{$ENDIF}
 begin
   with TCnDebugEnhanceForm.Create(nil) do
   begin
