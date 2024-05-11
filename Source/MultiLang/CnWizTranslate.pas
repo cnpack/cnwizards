@@ -1462,8 +1462,8 @@ begin
   TranslateStr(SCnAICoderWizardChatWindowHint, 'SCnAICoderWizardChatWindowHint');
   TranslateStr(SCnAICoderWizardConfigCaption, 'SCnAICoderWizardConfigCaption');
   TranslateStr(SCnAICoderWizardConfigHint, 'SCnAICoderWizardConfigHint');
-  TranslateStr(SCNAICoderWizardSystemMessageFmt, 'SCNAICoderWizardSystemMessageFmt');
-  TranslateStr(SCNAICoderWizardUserMessageExplain, 'SCNAICoderWizardUserMessageExplain');
+  TranslateStr(SCnAICoderWizardSystemMessageFmt, 'SCnAICoderWizardSystemMessageFmt');
+  TranslateStr(SCnAICoderWizardUserMessageExplain, 'SCnAICoderWizardUserMessageExplain');
   TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
   TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
   TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');

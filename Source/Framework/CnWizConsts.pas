@@ -25,6 +25,16 @@ unit CnWizConsts;
 * 单元名称：资源字符串定义单元
 * 单元作者：CnPack开发组
 * 备    注：该单元定义了 CnWizards 用到的资源字符串
+*
+*           从本文件中将定义的变量字符串转换成多语文件条目的 AI（如通义千问） 提示词：
+
+            请帮我处理一批多语翻译字符串，原始字符串以 Pascal 变量的形式定义，
+            如这句定义代码 SCnTestName: string = '一个测试名称';
+            这一句代码我们会转换成多语条目为 SCnTestName=一个测试名称
+            也就是需去掉类型、引号等。如果你看明白了，请回答明白。
+
+            下一次把本文件中将定义的变量字符串的代码贴过去即可。
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -1779,13 +1789,11 @@ var
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
-
-  SCNAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder. Now we use %s. Please Ensure that the Line Breaks in Your Answer Use #13#10 instead of a Single #10.';
-  SCNAICoderWizardUserMessageExplain: string = 'Please Explain the Code: ';
-
-  SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists';
-  SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s';
-  SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s';
+  SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder. Now we use %s. Please Ensure that the Line Breaks in Your Answer Use #13#10 instead of a Single #10.';
+  SCnAICoderWizardUserMessageExplain: string = 'Please Explain the Code: ';
+  SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
+  SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
+  SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';

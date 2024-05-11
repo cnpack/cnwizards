@@ -300,13 +300,15 @@ begin
     FOptionFrames[I].Parent := FTabsheets[I];
     FOptionFrames[I].Top := 0;
     FOptionFrames[I].Left := 0;
+    FOptionFrames[I].Align := alClient;
 
     // 给每个 Frame 里的东西塞 Option 内容
     FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
     FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
     FOptionFrames[I].edtModel.Text := CnAIEngineOptionManager.Options[I].Model;
 
-    // FOptionFrames[I].Tag := I;
+    // 网址申请给塞上供点击打开
+    FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress;
   end;
 end;
 
