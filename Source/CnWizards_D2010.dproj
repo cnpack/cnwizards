@@ -46,7 +46,7 @@
 			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
 			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
 			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
-			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_Define>RELEASE;ENABLE_UIINTERACT;$(DCC_Define)</DCC_Define>
 			<DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
 			<DCC_SYMBOL_LIBRARY>False</DCC_SYMBOL_LIBRARY>
 			<DCC_SYMBOL_PLATFORM>False</DCC_SYMBOL_PLATFORM>
@@ -72,7 +72,7 @@
 			<DCC_ResourcePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_ResourcePath)</DCC_ResourcePath>
 			<DCC_ObjPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_ObjPath)</DCC_ObjPath>
 			<DCC_IncludePath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_IncludePath)</DCC_IncludePath>
-			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+			<DCC_Define>DEBUG;ENABLE_UIINTERACT;$(DCC_Define)</DCC_Define>
 			<DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
 			<DCC_SYMBOL_LIBRARY>False</DCC_SYMBOL_LIBRARY>
 			<DCC_SYMBOL_PLATFORM>False</DCC_SYMBOL_PLATFORM>

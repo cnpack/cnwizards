@@ -45,7 +45,7 @@
 			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
-			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_Define>RELEASE;ENABLE_UIINTERACT;$(DCC_Define)</DCC_Define>
 			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_DXE.dll</DCC_DependencyCheckOutputName>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_DebugInformation>false</DCC_DebugInformation>
@@ -56,7 +56,7 @@
 			<DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
 			<DCC_Optimize>false</DCC_Optimize>
-			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+			<DCC_Define>DEBUG;ENABLE_UIINTERACT;$(DCC_Define)</DCC_Define>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_DependencyCheckOutputName>..\Bin\CnWizards_DXE.dll</DCC_DependencyCheckOutputName>
 		</PropertyGroup>

@@ -125,7 +125,7 @@
 			<Directories Name="PackageDCPOutputDir"></Directories>
 			<Directories Name="SearchPath">..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard</Directories>
 			<Directories Name="Packages">rtl;vcl;vclx;designide</Directories>
-			<Directories Name="Conditionals"></Directories>
+			<Directories Name="Conditionals">ENABLE_UIINTERACT</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">True</Directories>
 		</Directories>

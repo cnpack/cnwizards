@@ -181,7 +181,7 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
-    <USERDEFINES value="${define.add}"/>
+    <USERDEFINES value="ENABLE_UIINTERACT;${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB5.bpf"/>
     <INCLUDEPATH value="CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
