@@ -7,6 +7,14 @@
     "Engines": [
         {
             "Class": "TCnAIEngineOption",
+            "EngineName": "OpenAI",
+            "URL": "https://api.openai.com/v1/chat/completions",
+            "ApiKey": "",
+            "Model": "gpt-3.5-turbo",
+            "Temperature": 0.3,
+            "WebAddress": "https://platform.openai.com/api-keys"
+        }, {
+            "Class": "TCnAIEngineOption",
             "EngineName": "月之暗面",
             "URL": "https://api.moonshot.cn/v1/chat/completions",
             "ApiKey": "",
@@ -23,12 +31,12 @@
             "WebAddress": "https://open.bigmodel.cn/usercenter/apikeys"
         }, {
             "Class": "TCnAIEngineOption",
-            "EngineName": "OpenAI",
-            "URL": "https://api.openai.com/v1/chat/completions",
+            "EngineName": "百川智能",
+            "URL": "https://api.baichuan-ai.com/v1/chat/completions",
             "ApiKey": "",
-            "Model": "gpt-3.5-turbo",
+            "Model": "Baichuan2-Turbo-192k",
             "Temperature": 0.3,
-            "WebAddress": "https://platform.openai.com/api-keys"
+            "WebAddress": "https://api.baichuan-ai.com/v1/chat/completions"
         }
     ]
 }

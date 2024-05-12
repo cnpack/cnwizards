@@ -64,6 +64,15 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnBaiChuanAIEngine = class(TCnAIBaseEngine)
+  {* 百川 AI 引擎}
+  private
+  protected
+    procedure PrepareRequestHeader(Headers: TStringList); override;
+  public
+    class function EngineName: string; override;
+  end;
+
 implementation
 
 { TCnMoonshotAIEngine }
@@ -92,9 +101,22 @@ begin
   Headers.Add('Content-Type: application/json');
 end;
 
+{ TCnBaiChuanAIEngine }
+
+class function TCnBaiChuanAIEngine.EngineName: string;
+begin
+  Result := '百川智能';
+end;
+
+procedure TCnBaiChuanAIEngine.PrepareRequestHeader(Headers: TStringList);
+begin
+  Headers.Add('Content-Type: application/json');
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
+  RegisterAIEngine(TCnBaiChuanAIEngine);
 
 end.
