@@ -119,6 +119,7 @@ begin
 
       DoSaveSettings;
     end;
+    Free;
   end;
 end;
 
