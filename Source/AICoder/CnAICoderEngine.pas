@@ -85,7 +85,10 @@ type
     {* 被上述第四步通过 Synchronize 的方式调用，之前已将应答对象推入 FAnswerQueue 队列
       在一次完整的 AI 网络通讯过程中属于第五步}
 
-    // 以下俩过程，子类看接口情况重载
+    // 以下仨过程，子类看接口情况重载
+    procedure PrepareRequestHeader(Headers: TStringList); virtual;
+    {* 请求发送前，给子类一个处理自定义 HTTP 头的机会}
+
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
 
@@ -256,7 +259,8 @@ begin
   if (FCurrentIndex >= 0) and (FCurrentIndex < FEngines.Count) then
     Result := TCnAIBaseEngine(FEngines[FCurrentIndex])
   else
-    raise Exception.Create('NO Engine Selected.');
+    Result := nil;
+//  raise Exception.Create('NO Engine Selected.');
 end;
 
 function TCnAIEngineManager.GetCurrentEngineName: string;
@@ -286,9 +290,9 @@ var
 begin
   Idx := FindEngineIndexByName(Value);
   if Idx >= 0 then
-    CurrentIndex := Idx
-  else
-    raise Exception.CreateFmt('Invalid Engine Name %s', [Value]);
+    CurrentIndex := Idx;
+//  else
+//    raise Exception.CreateFmt('Invalid Engine Name %s', [Value]);
 end;
 
 procedure TCnAIEngineManager.SetCurrentIndex(const Value: Integer);
@@ -517,6 +521,7 @@ begin
         HTTP.ProxyMode := pmIE;
     end;
     HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
+    PrepareRequestHeader(HTTP.HttpRequestHeaders);
 
     Stream := TMemoryStream.Create;
     if HTTP.GetStream(TCnAINetRequestDataObject(DataObj).URL, Stream,
@@ -543,6 +548,11 @@ begin
     Stream.Free;
     HTTP.Free;
   end;
+end;
+
+procedure TCnAIBaseEngine.PrepareRequestHeader(Headers: TStringList);
+begin
+  // 基类什么都不做
 end;
 
 initialization

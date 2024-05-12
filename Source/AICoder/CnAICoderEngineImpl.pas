@@ -55,13 +55,22 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnChatGLMAIEngine = class(TCnAIBaseEngine)
+  {* 智谱清言 AI 引擎}
+  private
+  protected
+    procedure PrepareRequestHeader(Headers: TStringList); override;
+  public
+    class function EngineName: string; override;
+  end;
+
 implementation
 
 { TCnMoonshotAIEngine }
 
 class function TCnMoonshotAIEngine.EngineName: string;
 begin
-  Result := 'Moonshot';
+  Result := '月之暗面';
 end;
 
 { TCnOpenAIEngine }
@@ -71,8 +80,21 @@ begin
   Result := 'OpenAI';
 end;
 
+{ TCnChatGLMAIEngine }
+
+class function TCnChatGLMAIEngine.EngineName: string;
+begin
+  Result := '智谱清言';
+end;
+
+procedure TCnChatGLMAIEngine.PrepareRequestHeader(Headers: TStringList);
+begin
+  Headers.Add('Content-Type: application/json');
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
+  RegisterAIEngine(TCnChatGLMAIEngine);
 
 end.
