@@ -400,8 +400,32 @@ function DoSortByProp(Item1, Item2: Pointer): Integer;
 var
   V1, V2: Integer;
 begin
-  V1 := GetOrdProp(TComponent(Item1), _ProName);
-  V2 := GetOrdProp(TComponent(Item2), _ProName);
+  if _ProName = 'Width' then
+  begin
+    V1 := GetControlWidth(TComponent(Item1));
+    V2 := GetControlWidth(TComponent(Item2));
+  end
+  else if _ProName = 'Height' then
+  begin
+    V1 := GetControlHeight(TComponent(Item1));
+    V2 := GetControlHeight(TComponent(Item2));
+  end
+  else if _ProName = 'Top' then
+  begin
+    V1 := GetControlTop(TComponent(Item1));
+    V2 := GetControlTop(TComponent(Item2));
+  end
+  else if _ProName = 'Left' then
+  begin
+    V1 := GetControlLeft(TComponent(Item1));
+    V2 := GetControlLeft(TComponent(Item2));
+  end
+  else // FMX 控件貌似通过 GetOrdProp 拿不到以上信息，只能单独处理
+  begin
+    V1 := GetOrdProp(TComponent(Item1), _ProName);
+    V2 := GetOrdProp(TComponent(Item2), _ProName);
+  end;
+
   Result := CompareInt(V1, V2, _Desc);
 end;
 
@@ -539,6 +563,11 @@ begin
         Exit;
     end;
 
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('DoAlignSize Get Selected Controls %d Components %d',
+      [ControlList.Count, CompList.Count]);
+{$ENDIF}
+
     IsModified := True;
     case AlignSizeStyle of
       asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
@@ -546,10 +575,10 @@ begin
         begin
           if ControlList.Count >= csAlignNeedControls[AlignSizeStyle] then // 只支持全部是控件
           begin
-            R1 := GetControlScreenRect(TControl(ControlList[0]));
+            R1 := GetControlScreenRect(TComponent(ControlList[0]));
             for I := 1 to ControlList.Count - 1 do
             begin
-              R2 := GetControlScreenRect(TControl(ControlList[I]));
+              R2 := GetControlScreenRect(TComponent(ControlList[I]));
 
               if AlignSizeStyle = asAlignLeft then
                 OffsetRect(R2, R1.Left - R2.Left, 0)
@@ -564,7 +593,7 @@ begin
               else // AlignSizeStyle = asAlignHCenter
                 OffsetRect(R2, (R1.Left + R1.Right - R2.Left - R2.Right) div 2, 0);
 
-              SetControlScreenRect(TControl(ControlList[I]), R2);
+              SetControlScreenRect(TComponent(ControlList[I]), R2);
             end;
           end
           else if CompList.Count >= csAlignNeedControls[AlignSizeStyle] then // 控件选择数量不足或未选择时，只支持全部是可视化组件
@@ -589,12 +618,12 @@ begin
           begin
             ControlListSortByPos(ControlList, AlignSizeStyle = asSpaceEquV);
 
-            R1 := GetControlScreenRect(TControl(ControlList[0]));
-            R2 := GetControlScreenRect(TControl(ControlList[ControlList.Count - 1]));
+            R1 := GetControlScreenRect(TComponent(ControlList[0]));
+            R2 := GetControlScreenRect(TComponent(ControlList[ControlList.Count - 1]));
             Count := 0;
             for I := 1 to ControlList.Count - 2 do
             begin
-              R3 := GetControlScreenRect(TControl(ControlList[I]));
+              R3 := GetControlScreenRect(TComponent(ControlList[I]));
               if AlignSizeStyle = asSpaceEquH then
                 Inc(Count, R3.Right - R3.Left)
               else
@@ -611,12 +640,12 @@ begin
                 Curr := Curr + (R2.Left - R1.Right - Count) / (ControlList.Count - 1)
               else
                 Curr := Curr + (R2.Top - R1.Bottom - Count) / (ControlList.Count - 1);
-              R3 := GetControlScreenRect(TControl(ControlList[I]));
+              R3 := GetControlScreenRect(TComponent(ControlList[I]));
               if AlignSizeStyle = asSpaceEquH then
                 OffsetRect(R3, Round(Curr) - R3.Left, 0)
               else
                 OffsetRect(R3, 0, Round(Curr) - R3.Top);
-              SetControlScreenRect(TControl(ControlList[I]), R3);
+              SetControlScreenRect(TComponent(ControlList[I]), R3);
               if AlignSizeStyle = asSpaceEquH then
                 Curr := Curr + R3.Right - R3.Left
               else
@@ -670,7 +699,7 @@ begin
           end;
 
           // 获得了手工间距，开始排列
-          R1 := GetControlScreenRect(TControl(ControlList[0]));
+          R1 := GetControlScreenRect(TComponent(ControlList[0]));
           if AlignSizeStyle = asSpaceEquHX then
             Curr := R1.Right
           else
@@ -680,12 +709,12 @@ begin
           begin
             Curr := Curr + Space;
 
-            R3 := GetControlScreenRect(TControl(ControlList[I]));
+            R3 := GetControlScreenRect(TComponent(ControlList[I]));
             if AlignSizeStyle = asSpaceEquHX then
               OffsetRect(R3, Round(Curr) - R3.Left, 0)
             else
               OffsetRect(R3, 0, Round(Curr) - R3.Top);
-            SetControlScreenRect(TControl(ControlList[I]), R3);
+            SetControlScreenRect(TComponent(ControlList[I]), R3);
 
             if AlignSizeStyle = asSpaceEquHX then
               Curr := Curr + R3.Right - R3.Left
@@ -698,10 +727,11 @@ begin
         begin
           ControlListSortByPos(ControlList, AlignSizeStyle in
             [asSpaceIncV, asSpaceDecV, asSpaceRemoveV]);
-          R1 := GetControlScreenRect(TControl(ControlList[0]));
+          R1 := GetControlScreenRect(TComponent(ControlList[0]));
+
           for I := 1 to ControlList.Count - 1 do
           begin
-            R2 := GetControlScreenRect(TControl(ControlList[I]));
+            R2 := GetControlScreenRect(TComponent(ControlList[I]));
             if AlignSizeStyle = asSpaceIncH then
               OffsetRect(R2, csSpaceIncStep * I, 0)
             else if AlignSizeStyle = asSpaceIncV then
@@ -714,11 +744,11 @@ begin
               OffsetRect(R2, R1.Right - R2.Left, 0)
             else // AlignSizeStyle = asSpaceRemoveV then
               OffsetRect(R2, 0, R1.Bottom - R2.Top);
-            SetControlScreenRect(TControl(ControlList[I]), R2);
+            SetControlScreenRect(TComponent(ControlList[I]), R2);
             R1 := R2;
           end;
         end;
-      asIncWidth, asDecWidth, asIncHeight, asDecHeight, // FMX support
+      asIncWidth, asDecWidth, asIncHeight, asDecHeight, // FMX Support
       asAlignToGrid, asSizeToGrid:
        begin
           try
@@ -729,33 +759,33 @@ begin
             begin
               for I := 0 to ControlList.Count - 1 do
               begin
-                ALeft := GetControlLeft(TControl(ControlList[I]));
-                ATop := GetControlTop(TControl(ControlList[I]));
-                AWidth := GetControlWidth(TControl(ControlList[I]));
-                AHeight := GetControlHeight(TControl(ControlList[I]));
+                ALeft := GetControlLeft(TComponent(ControlList[I]));
+                ATop := GetControlTop(TComponent(ControlList[I]));
+                AWidth := GetControlWidth(TComponent(ControlList[I]));
+                AHeight := GetControlHeight(TComponent(ControlList[I]));
 
                 if AlignSizeStyle = asIncWidth then
-                  SetControlWidth(TControl(ControlList[I]), AWidth + GridSizeX)
+                  SetControlWidth(TComponent(ControlList[I]), AWidth + GridSizeX)
                 else if AlignSizeStyle = asDecWidth then
                 begin
                   if AWidth > GridSizeX then
-                    SetControlWidth(TControl(ControlList[I]), AWidth - GridSizeX);
+                    SetControlWidth(TComponent(ControlList[I]), AWidth - GridSizeX);
                 end
                 else if AlignSizeStyle = asIncHeight then
-                  SetControlHeight(TControl(ControlList[I]), AHeight + GridSizeY)
+                  SetControlHeight(TComponent(ControlList[I]), AHeight + GridSizeY)
                 else if AlignSizeStyle = asDecHeight then
                 begin
                   if AHeight > GridSizeY then
-                    SetControlHeight(TControl(ControlList[I]), AHeight - GridSizeY);
+                    SetControlHeight(TComponent(ControlList[I]), AHeight - GridSizeY);
                 end
                 else
                 begin
-                  SetControlLeft(TControl(ControlList[I]), ALeft - ALeft mod GridSizeX);
-                  SetControlTop(TControl(ControlList[I]), ATop - ATop mod GridSizeY);
+                  SetControlLeft(TComponent(ControlList[I]), ALeft - ALeft mod GridSizeX);
+                  SetControlTop(TComponent(ControlList[I]), ATop - ATop mod GridSizeY);
                   if AlignSizeStyle = asSizeToGrid then
                   begin
-                    SetControlWidth(TControl(ControlList[I]), Round(AWidth / GridSizeX) * GridSizeX);
-                    SetControlHeight(TControl(ControlList[I]), Round(AHeight / GridSizeY) * GridSizeY);
+                    SetControlWidth(TComponent(ControlList[I]), Round(AWidth / GridSizeX) * GridSizeX);
+                    SetControlHeight(TComponent(ControlList[I]), Round(AHeight / GridSizeY) * GridSizeY);
                   end;
                 end;
               end;
@@ -769,17 +799,30 @@ begin
       asMakeSameSize:
         begin
           if AlignSizeStyle in [asMakeMinWidth, asMakeMaxWidth] then
-            ControlListSortByProp(ControlList, 'Width', AlignSizeStyle = asMakeMaxWidth);
-          if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight] then
+            ControlListSortByProp(ControlList, 'Width', AlignSizeStyle = asMakeMaxWidth)
+          else if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight] then
             ControlListSortByProp(ControlList, 'Height', AlignSizeStyle = asMakeMaxHeight);
-          for I := 1 to ControlList.Count - 1 do
+
+          if AlignSizeStyle in [asMakeMinWidth, asMakeMaxWidth,
+            asMakeSameWidth, asMakeSameSize] then
           begin
-            if AlignSizeStyle in [asMakeMinWidth, asMakeMaxWidth,
-              asMakeSameWidth, asMakeSameSize] then
-              SetControlWidth(ControlList[I], GetControlWidth(TControl(ControlList[0])));
-            if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight,
-              asMakeSameHeight, asMakeSameSize] then
-              SetControlHeight(ControlList[I], GetControlHeight(TControl(ControlList[0])));
+            Value := GetControlWidth(TComponent(ControlList[0]));
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('DoAlignSize. Make %d Controls Width to %d', [ControlList.Count, Value]);
+{$ENDIF}
+            for I := 1 to ControlList.Count - 1 do
+              SetControlWidth(TComponent(ControlList[I]), Value);
+          end;
+
+          if AlignSizeStyle in [asMakeMinHeight, asMakeMaxHeight,
+            asMakeSameHeight, asMakeSameSize] then
+          begin
+            Value := GetControlHeight(TComponent(ControlList[0]));
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('DoAlignSize. Make %d Controls Height to %d', [ControlList.Count, Value]);
+{$ENDIF}
+            for I := 1 to ControlList.Count - 1 do
+              SetControlHeight(TComponent(ControlList[I]), Value);
           end;
         end;
       asParentHCenter, asParentVCenter:
@@ -792,7 +835,7 @@ begin
               AList.Clear;
               AList.Add(ControlList.Extract(ControlList[0]));
               for I := ControlList.Count - 1 downto 0 do
-                if GetControlParent(ControlList[I]) = GetControlParent(TControl(AList[0])) then
+                if GetControlParent(TComponent(ControlList[I])) = GetControlParent(TComponent(TControl(AList[0]))) then
                   AList.Add(ControlList.Extract(ControlList[I]));
 
               if AlignSizeStyle = asParentHCenter then
@@ -854,9 +897,9 @@ begin
         begin
           for I := 0 to ControlList.Count - 1 do
             if AlignSizeStyle = asBringToFront then
-              ControlBringToFront(TControl(ControlList[I]))
+              ControlBringToFront(TComponent(ControlList[I]))
             else
-              ControlSendToBack(TControl(ControlList[I]));
+              ControlSendToBack(TComponent(ControlList[I]));
         end;
       asSnapToGrid:
         begin
