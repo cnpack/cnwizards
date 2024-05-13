@@ -53,6 +53,7 @@ type
     btnHelp: TButton;
     chkProxy: TCheckBox;
     edtProxy: TEdit;
+    procedure cbbActiveEngineChange(Sender: TObject);
   private
     FTabsheets: array of TTabSheet;
     FOptionFrames: array of TCnAICoderOptionFrame;
@@ -349,6 +350,12 @@ begin
 
   CnAICoderChatForm.Visible := True;
   CnAICoderChatForm.BringToFront;
+end;
+
+procedure TCnAICoderConfigForm.cbbActiveEngineChange(Sender: TObject);
+begin
+  if (cbbActiveEngine.ItemIndex >= 0) and (cbbActiveEngine.ItemIndex < pgcAI.PageCount) then
+    pgcAI.ActivePageIndex := cbbActiveEngine.ItemIndex;
 end;
 
 initialization

@@ -30,6 +30,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Style = csDropDownList
     ItemHeight = 13
     TabOrder = 0
+    OnChange = cbbActiveEngineChange
   end
   object pgcAI: TPageControl
     Left = 8
