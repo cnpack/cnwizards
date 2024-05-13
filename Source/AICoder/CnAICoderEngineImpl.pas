@@ -43,50 +43,42 @@ uses
 type
   TCnOpenAIEngine = class(TCnAIBaseEngine)
   {* OpenAI 引擎}
-  private
   public
     class function EngineName: string; override;
   end;
 
   TCnMoonshotAIEngine = class(TCnAIBaseEngine)
   {* 月之暗面 AI 引擎}
-  private
   public
     class function EngineName: string; override;
   end;
 
   TCnChatGLMAIEngine = class(TCnAIBaseEngine)
   {* 智谱清言 AI 引擎}
-  private
-  protected
-    procedure PrepareRequestHeader(Headers: TStringList); override;
   public
     class function EngineName: string; override;
   end;
 
   TCnBaiChuanAIEngine = class(TCnAIBaseEngine)
   {* 百川 AI 引擎}
-  private
-  protected
-    procedure PrepareRequestHeader(Headers: TStringList); override;
   public
     class function EngineName: string; override;
   end;
 
 implementation
 
-{ TCnMoonshotAIEngine }
-
-class function TCnMoonshotAIEngine.EngineName: string;
-begin
-  Result := '月之暗面';
-end;
-
 { TCnOpenAIEngine }
 
 class function TCnOpenAIEngine.EngineName: string;
 begin
   Result := 'OpenAI';
+end;
+
+{ TCnMoonshotAIEngine }
+
+class function TCnMoonshotAIEngine.EngineName: string;
+begin
+  Result := '月之暗面';
 end;
 
 { TCnChatGLMAIEngine }
@@ -96,21 +88,11 @@ begin
   Result := '智谱清言';
 end;
 
-procedure TCnChatGLMAIEngine.PrepareRequestHeader(Headers: TStringList);
-begin
-  Headers.Add('Content-Type: application/json');
-end;
-
 { TCnBaiChuanAIEngine }
 
 class function TCnBaiChuanAIEngine.EngineName: string;
 begin
   Result := '百川智能';
-end;
-
-procedure TCnBaiChuanAIEngine.PrepareRequestHeader(Headers: TStringList);
-begin
-  Headers.Add('Content-Type: application/json');
 end;
 
 initialization

@@ -552,7 +552,7 @@ end;
 
 procedure TCnAIBaseEngine.PrepareRequestHeader(Headers: TStringList);
 begin
-  // 基类什么都不做
+  Headers.Add('Content-Type: application/json');
 end;
 
 initialization
