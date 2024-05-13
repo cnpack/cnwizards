@@ -1789,7 +1789,7 @@ var
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
-  SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder. Now we use %s. Please Ensure that the Line Breaks in Your Answer Use #13#10 instead of a Single #10.';
+  SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder/RAD Studio. Now we use %s.';
   SCnAICoderWizardUserMessageExplain: string = 'Please Explain the Code: ';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
