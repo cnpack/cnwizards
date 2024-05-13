@@ -38,7 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnWizConsts, CnWizCompilerConst;
+  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnWizConsts, CnWizCompilerConst
+  {$IFNDEF TEST_APP} , CnWizMultiLang {$ENDIF};
 
 type
   TCnAIEngineOption = class(TPersistent)
@@ -53,7 +54,7 @@ type
     function GetExplainCodePrompt: string;
     function GetSystemMessage: string;
   protected
-
+    function GetCurrentLangName: string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -386,9 +387,20 @@ begin
   inherited;
 end;
 
+function TCnAIEngineOption.GetCurrentLangName: string;
+begin
+  Result := '¼òÌåÖÐÎÄ';
+{$IFNDEF TEST_APP}
+  if CnWizLangMgr.LanguageStorage <> nil then
+    if CnWizLangMgr.LanguageStorage.CurrentLanguage <> nil then
+      if CnWizLangMgr.LanguageStorage.CurrentLanguage.LanguageName <> '' then
+        Result := CnWizLangMgr.LanguageStorage.CurrentLanguage.LanguageName;
+{$ENDIF}
+end;
+
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
-  Result := SCNAICoderWizardUserMessageExplain;
+  Result := Format(SCNAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
 end;
 
 function TCnAIEngineOption.GetSystemMessage: string;
