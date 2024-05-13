@@ -178,7 +178,7 @@ type
 
 {$IFNDEF TEST_APP}
 
-function CnLangMgr: TCnCustomLangManager;
+function CnWizLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
 
 procedure InitLangManager;
@@ -302,7 +302,7 @@ begin
 end;
 
 // CnLanguageManager 的简略封装，保证返回的管理器不为 nil 且能进行翻译
-function CnLangMgr: TCnCustomLangManager;
+function CnWizLangMgr: TCnCustomLangManager;
 begin
   if CnLanguageManager = nil then
     CreateLanguageManager;

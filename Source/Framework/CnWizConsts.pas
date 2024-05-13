@@ -1790,7 +1790,7 @@ var
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
   SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder/RAD Studio. Now we use %s.';
-  SCnAICoderWizardUserMessageExplain: string = 'Please Explain the Code: ';
+  SCnAICoderWizardUserMessageExplainFmt: string = 'Please Explain the Code using %s: ';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';

@@ -1463,7 +1463,7 @@ begin
   TranslateStr(SCnAICoderWizardConfigCaption, 'SCnAICoderWizardConfigCaption');
   TranslateStr(SCnAICoderWizardConfigHint, 'SCnAICoderWizardConfigHint');
   TranslateStr(SCnAICoderWizardSystemMessageFmt, 'SCnAICoderWizardSystemMessageFmt');
-  TranslateStr(SCnAICoderWizardUserMessageExplain, 'SCnAICoderWizardUserMessageExplain');
+  TranslateStr(SCnAICoderWizardUserMessageExplainFmt, 'SCnAICoderWizardUserMessageExplainFmt');
   TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
   TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
   TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');
