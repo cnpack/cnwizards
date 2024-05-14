@@ -391,7 +391,7 @@ resourcestring
   SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
   SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
-  SCnAICoderEngineOptionFile = 'AICoderConfig.json';
+  SCnAICoderEngineOptionFileFmt = 'AICoderConfig%s.json';
 
 //==============================================================================
 // Event Names used around CnEventBus

@@ -41,7 +41,7 @@ uses
   SysUtils, Classes, CnAICoderEngine;
 
 type
-  TCnOpenAIEngine = class(TCnAIBaseEngine)
+  TCnOpenAIAIEngine = class(TCnAIBaseEngine)
   {* OpenAI ÒýÇæ}
   public
     class function EngineName: string; override;
@@ -69,7 +69,7 @@ implementation
 
 { TCnOpenAIEngine }
 
-class function TCnOpenAIEngine.EngineName: string;
+class function TCnOpenAIAIEngine.EngineName: string;
 begin
   Result := 'OpenAI';
 end;
@@ -96,7 +96,7 @@ begin
 end;
 
 initialization
-  RegisterAIEngine(TCnOpenAIEngine);
+  RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);

@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
-  CnAICoderConfig, CnAICoderEngine, CnWideStrings;
+  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl;
 
 type
   TFormAITest = class(TForm)
@@ -112,6 +112,7 @@ uses
 
 const
   DBG_TAG = 'NET';
+  AI_FILE_FMT = 'AIConfig%s.json';
 
 procedure TFormAITest.FormCreate(Sender: TObject);
 begin
@@ -313,10 +314,12 @@ end;
 procedure TFormAITest.btnLoadAIConfigClick(Sender: TObject);
 var
   I: Integer;
+  S: string;
 begin
-  if dlgOpen1.Execute then
+  if SelectDirectory('', '', S) then
   begin
-    CnAIEngineOptionManager.LoadFromFile(dlgOpen1.FileName);
+    CnAIEngineManager.LoadFromDirectory(IncludeTrailingBackslash(S), AI_FILE_FMT);
+
     cbbAIEngines.Items.Clear;
     for I := 0 to CnAIEngineManager.EngineCount - 1 do
       cbbAIEngines.Items.Add(CnAIEngineManager.Engines[I].EngineName);
@@ -335,10 +338,11 @@ begin
 end;
 
 procedure TFormAITest.btnSaveAIConfigClick(Sender: TObject);
+var
+  Dir: string;
 begin
- dlgSave1.FileName := 'AIConfig.json';
-  if dlgSave1.Execute then
-    CnAIEngineOptionManager.SaveToFile(dlgSave1.FileName);
+  if SelectDirectory('', '', Dir) then
+    CnAIEngineManager.SaveToDirectory(IncludeTrailingBackslash(Dir), AI_FILE_FMT);
 end;
 
 procedure TFormAITest.btnExplainCodeClick(Sender: TObject);

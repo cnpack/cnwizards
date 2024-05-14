@@ -186,25 +186,19 @@ procedure TCnAICoderWizard.LoadSettings(Ini: TCustomIniFile);
 var
   F: string;
 begin
-  F := WizOptions.GetUserFileName(SCnAICoderEngineOptionFile, True);
-  if FileExists(F) then
-  begin
-    CnAIEngineOptionManager.LoadFromFile(F);
-    // 这句很重要，手动设置存储的活动引擎名称
-    CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
-  end;
+  CnAIEngineManager.LoadFromWizOptions;
+
+  // 这句很重要，手动设置存储的活动引擎名称
+  CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('CnAIEngineOptionManager Load %d Options.', [CnAIEngineOptionManager.OptionCount]);
 {$ENDIF}
 end;
 
 procedure TCnAICoderWizard.SaveSettings(Ini: TCustomIniFile);
-var
-  F: string;
 begin
-  F := WizOptions.GetUserFileName(SCnAICoderEngineOptionFile, False);
-  CnAIEngineOptionManager.SaveToFile(F);
-  WizOptions.CheckUserFile(SCnAICoderEngineOptionFile);
+  CnAIEngineManager.SaveToWizOptions;
 end;
 
 procedure TCnAICoderWizard.SubActionExecute(Index: Integer);
@@ -312,6 +306,8 @@ begin
     // 网址申请给塞上供点击打开
     FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress;
   end;
+
+  pgcAI.ActivePageIndex := CnAIEngineManager.CurrentIndex;
 end;
 
 procedure TCnAICoderConfigForm.SaveToOptions;

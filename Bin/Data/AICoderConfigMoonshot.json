@@ -1,0 +1,8 @@
+﻿{
+    "EngineName": "月之暗面",
+    "URL": "https://api.moonshot.cn/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "moonshot-v1-8k",
+    "Temperature": 0.3,
+    "WebAddress": "https://platform.moonshot.cn/console"
+}

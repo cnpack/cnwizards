@@ -38,8 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON,
-  CnInetUtils, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
+  SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
+  CnInetUtils, CnWizOptions, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
 
 type
   TCnAIAnswerObject = class(TPersistent)
@@ -99,6 +99,10 @@ type
   public
     class function EngineName: string; virtual; abstract;
     {* 子类必须有个名字}
+    class function EngineID: string;
+    {* 引擎的 ID，供存储保存用，根据类名运算而来}
+    class function OptionClass: TCnAIEngineOptionClass; virtual;
+    {* 引擎配置所对应的类，默认为基类 TCnAIEngineOption}
 
     constructor Create(ANetPool: TCnThreadPool); virtual;
     destructor Destroy; override;
@@ -140,6 +144,17 @@ type
     {* 构造函数，传入外部的网络线程池引用，供分配给 AI 引擎使用}
     destructor Destroy; override;
 
+    procedure LoadFromDirectory(const Dir, BaseFileFmt: string);
+    {* 独立运行时的加载总入口，从指定目录及基础文件名加载所有配置}
+    procedure SaveToDirectory(const Dir, BaseFileFmt: string);
+    {* 独立运行时的保存总入口，将所有配置根据基础文件名存入指定目录}
+
+{$IFNDEF STAND_ALONE}
+    procedure LoadFromWizOptions;
+    {* 专家包的加载总入口，动态加载所有配置，内部会分辨不同目录}
+    procedure SaveToWizOptions;
+    {* 专家包的保存总入口，动态保存所有配置到用户目录}
+{$ENDIF}
 
     property CurrentEngineName: string read GetCurrentEngineName write SetCurrentEngineName;
     {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎}
@@ -278,6 +293,44 @@ begin
   Result := TCnAIBaseEngine(FEngines[Index]);
 end;
 
+procedure TCnAIEngineManager.LoadFromDirectory(const Dir,
+  BaseFileFmt: string);
+var
+  I: Integer;
+  S: string;
+begin
+  // OptionManager 加载基本设置
+  S := Format(BaseFileFmt, ['']);
+  if FileExists(S) then
+    CnAIEngineOptionManager.LoadFromFile(Dir + S);
+
+  // 挨个根据引擎 ID，修改文件名，创建并加载其对应 Option
+  for I := 0 to EngineCount - 1 do
+  begin
+    S := Format(BaseFileFmt, [Engines[I].EngineID]);
+    CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
+      Dir + S, Engines[I].OptionClass);
+  end;
+end;
+
+procedure TCnAIEngineManager.SaveToDirectory(const Dir,
+  BaseFileFmt: string);
+var
+  I: Integer;
+  S: string;
+begin
+  // OptionManager 加载基本设置
+  S := Format(BaseFileFmt, ['']);
+  CnAIEngineOptionManager.SaveToFile(Dir + S);
+
+  // 挨个根据引擎 ID，修改文件名，保存其对应 Option
+  for I := 0 to EngineCount - 1 do
+  begin
+    S := Format(BaseFileFmt, [Engines[I].EngineID]);
+    CnAIEngineOptionManager.SaveOptionToFile(Engines[I].EngineName, Dir + S);
+  end;
+end;
+
 procedure TCnAIEngineManager.ProcessRequest(Sender: TCnThreadPool;
   DataObj: TCnTaskDataObject; Thread: TCnPoolingThread);
 begin
@@ -304,6 +357,52 @@ begin
     // 记录引擎改变了，如果需要的话初始化新引擎
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
+
+procedure TCnAIEngineManager.LoadFromWizOptions;
+var
+  I: Integer;
+  S: string;
+begin
+  // OptionManager 加载基本设置
+  S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt, ['']), True);
+  if FileExists(S) then
+    CnAIEngineOptionManager.LoadFromFile(S);
+
+  // 挨个根据引擎 ID，修改文件名，创建并加载其对应 Option
+  for I := 0 to EngineCount - 1 do
+  begin
+    S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt,
+      [Engines[I].EngineID]), True);
+    CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
+      S, Engines[I].OptionClass);
+
+    Engines[I].InitOption;
+  end;
+end;
+
+procedure TCnAIEngineManager.SaveToWizOptions;
+var
+  I: Integer;
+  S, F: string;
+begin
+  // OptionManager 加载基本设置
+  S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt, ['']), False);
+  CnAIEngineOptionManager.SaveToFile(S);
+  WizOptions.CheckUserFile(S);
+
+  // 挨个根据引擎 ID，修改文件名，保存其对应 Option
+  for I := 0 to EngineCount - 1 do
+  begin
+    F := Format(SCnAICoderEngineOptionFileFmt, [Engines[I].EngineID]);
+    S := WizOptions.GetUserFileName(F, False);
+    CnAIEngineOptionManager.SaveOptionToFile(Engines[I].EngineName, S);
+    WizOptions.CheckUserFile(F);
+  end;
+end;
+
+{$ENDIF}
 
 { TCnAIBaseEngine }
 
@@ -553,6 +652,27 @@ end;
 procedure TCnAIBaseEngine.PrepareRequestHeader(Headers: TStringList);
 begin
   Headers.Add('Content-Type: application/json');
+end;
+
+class function TCnAIBaseEngine.EngineID: string;
+const
+  PREFIX = 'TCn';
+  SUBFIX = 'AIEngine';
+begin
+  // TCn***AIEngine 的命名方法
+  Result := ClassName;
+  if Pos(PREFIX, Result) = 1 then
+    Delete(Result, 1, Length(PREFIX));
+  if Pos(SUBFIX, Result) = Length(Result) - Length(SUBFIX) + 1 then
+    Result := Copy(Result, 1, Length(Result) - Length(SUBFIX));
+
+  if Result = '' then
+    Result := 'Default';
+end;
+
+class function TCnAIBaseEngine.OptionClass: TCnAIEngineOptionClass;
+begin
+  Result := TCnAIEngineOption;
 end;
 
 initialization

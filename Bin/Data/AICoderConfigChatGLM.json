@@ -1,0 +1,8 @@
+﻿{
+    "EngineName": "智谱清言",
+    "URL": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    "ApiKey": "",
+    "Model": "glm-4",
+    "Temperature": 0.3,
+    "WebAddress": "https://open.bigmodel.cn/usercenter/apikeys"
+}

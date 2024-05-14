@@ -3,40 +3,5 @@
     "UseProxy": false,
     "ProxyServer": "",
     "ProxyUserName": "",
-    "ProxyPassword": "",
-    "Engines": [
-        {
-            "Class": "TCnAIEngineOption",
-            "EngineName": "OpenAI",
-            "URL": "https://api.openai.com/v1/chat/completions",
-            "ApiKey": "",
-            "Model": "gpt-3.5-turbo",
-            "Temperature": 0.3,
-            "WebAddress": "https://platform.openai.com/api-keys"
-        }, {
-            "Class": "TCnAIEngineOption",
-            "EngineName": "月之暗面",
-            "URL": "https://api.moonshot.cn/v1/chat/completions",
-            "ApiKey": "",
-            "Model": "moonshot-v1-8k",
-            "Temperature": 0.3,
-            "WebAddress": "https://platform.moonshot.cn/console"
-        }, {
-            "Class": "TCnAIEngineOption",
-            "EngineName": "智谱清言",
-            "URL": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
-            "ApiKey": "",
-            "Model": "glm-4",
-            "Temperature": 0.3,
-            "WebAddress": "https://open.bigmodel.cn/usercenter/apikeys"
-        }, {
-            "Class": "TCnAIEngineOption",
-            "EngineName": "百川智能",
-            "URL": "https://api.baichuan-ai.com/v1/chat/completions",
-            "ApiKey": "",
-            "Model": "Baichuan2-Turbo-192k",
-            "Temperature": 0.3,
-            "WebAddress": "https://api.baichuan-ai.com/v1/chat/completions"
-        }
-    ]
+    "ProxyPassword": ""
 }

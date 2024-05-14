@@ -24,7 +24,8 @@ unit CnAICoderConfig;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：AI 辅助编码专家的配置存储载入单元
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：CnAIEngineOptionManager 及 TCnAIEngineOption 的各个存储载入接口应由
+*           CnAIEngineManager 统一调用，其余地方不应混乱调用，因为涉及多个文件
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -55,9 +56,17 @@ type
     function GetSystemMessage: string;
   protected
     function GetCurrentLangName: string;
+    // SM4-GCM 加十六进制加解密
+    function EncryptKey(const Key: string): string;
+    function DecryptKey(const Text: string): string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
+
+    procedure LoadFromJSON(const JSON: AnsiString);
+    {* 从 UTF8 格式的 JSON 字符串中加载一个选项实例的设置到自身}
+    function SaveToJSON: AnsiString;
+    {* 保存自身选项实例的设置至 UTF8 格式的 JSON 字符串中}
 
     property SystemMessage: string read GetSystemMessage;
     {* 系统预设消息}
@@ -83,7 +92,7 @@ type
   TCnAIEngineOptionClass = class of TCnAIEngineOption;
 
   TCnAIEngineOptionManager = class(TPersistent)
-  {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象}
+  {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象，数量顺序和 EngineManager 一致}
   private
     FOptions: TObjectList; // 容纳多个 TCnAIEngineOption 对象，可以是其子类
     FActiveEngine: string;
@@ -93,10 +102,6 @@ type
     FUseProxy: Boolean;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
-  protected
-    // SM4 加十六进制加解密
-    function EncryptKey(const Key: string): string;
-    function DecryptKey(const Text: string): string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -112,14 +117,20 @@ type
     {* 增加一个外界创建并设置好的 AI 引擎设置对象，内部会判断其 EngineName 是否重复}
 
     procedure LoadFromFile(const FileName: string);
-    {* 从 JSON 文件中加载}
+    {* 从 JSON 文件中加载基本设置}
     procedure SaveToFile(const FileName: string);
-    {* 保存至 JSON 文件中}
+    {* 将基本设置保存至 JSON 文件中}
 
     procedure LoadFromJSON(const JSON: AnsiString);
-    {* 从 UTF8 格式的 JSON 字符串中加载}
+    {* 从 UTF8 格式的 JSON 字符串中加载基本设置}
     function SaveToJSON: AnsiString;
-    {* 保存至 UTF8 格式的 JSON 字符串中}
+    {* 保存基本设置至 UTF8 格式的 JSON 字符串中}
+
+    function CreateOptionFromFile(const EngineName, FileName: string;
+      OptionClass: TCnAIEngineOptionClass = nil): TCnAIEngineOption;
+    {* 从指定文件名中用指定的 OptionClass 加载一个 Option 实例并添加到自身并作为结果返回}
+    procedure SaveOptionToFile(const EngineName, FileName: string);
+    {* 将指定名称的引擎对应的 Option 对象实例保存至指定文件名}
 
     property OptionCount: Integer read GetOptionCount;
     {* 持有的设置对象数}
@@ -183,55 +194,36 @@ begin
   FOptions := TObjectList.Create(True);
 end;
 
-function TCnAIEngineOptionManager.DecryptKey(const Text: string): string;
-var
-  K, Iv, AD, Res: TBytes;
+function TCnAIEngineOptionManager.CreateOptionFromFile(const EngineName,
+  FileName: string; OptionClass: TCnAIEngineOptionClass): TCnAIEngineOption;
 begin
-  if Text = '' then
+  if OptionClass = nil then
+    Result := TCnAIEngineOption.Create
+  else
   begin
-    Result := '';
-    Exit;
+    try
+      Result := TCnAIEngineOption(OptionClass.NewInstance);
+      Result.Create;
+    except
+      Result := nil;
+    end;
   end;
 
-  SetLength(K, SizeOf(SM4_KEY));
-  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
+  // 异常了就基类重新创建
+  if Result = nil then
+    Result := TCnAIEngineOption.Create;
 
-  SetLength(Iv, SizeOf(SM4_IV));
-  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
+  if FileExists(FileName) then
+    Result.LoadFromJSON(TCnJSONReader.FileToJSON(FileName));
 
-  SetLength(AD, Length(SM4_AD));
-  Move(SM4_AD[1], AD[0], Length(AD));
-
-  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
-  Result := BytesToString(Res);
+  Result.EngineName := EngineName;
+  AddOption(Result);
 end;
 
 destructor TCnAIEngineOptionManager.Destroy;
 begin
   FOptions.Free;
   inherited;
-end;
-
-function TCnAIEngineOptionManager.EncryptKey(const Key: string): string;
-var
-  K, Iv, AD: TBytes;
-begin
-  if Key = '' then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  SetLength(K, SizeOf(SM4_KEY));
-  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
-
-  SetLength(Iv, SizeOf(SM4_IV));
-  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
-
-  SetLength(AD, Length(SM4_AD));
-  Move(SM4_AD[1], AD[0], Length(AD));
-
-  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
 end;
 
 function TCnAIEngineOptionManager.GetOption(Index: Integer): TCnAIEngineOption;
@@ -267,57 +259,15 @@ end;
 procedure TCnAIEngineOptionManager.LoadFromJSON(const JSON: AnsiString);
 var
   Root: TCnJSONObject;
-  V: TCnJSONValue;
-  Arr: TCnJSONArray;
-  I: Integer;
-  S: string;
-  Option: TCnAIEngineOption;
-  Clz: TCnAIEngineOptionClass;
 begin
   Root := CnJSONParse(JSON);
   if Root = nil then
     Exit;
 
-  TCnJSONReader.Read(Self, Root);
-
-  V := Root.ValueByName['Engines'];
-  if (V <> nil) and (V is TCnJSONArray) then
-  begin
-    Arr := TCnJSONArray(V);
-    Clear;
-
-    for I := 0 to Arr.Count - 1 do
-    begin
-      if Arr[I] is TCnJSONObject then
-      begin
-        Option := nil;
-        try
-          // 找 JSON 中的类名来动态创建
-          if TCnJSONObject(Arr[I])['Class'] <> nil then
-          begin
-            S := TCnJSONObject(Arr[I])['Class'].AsString;
-            Clz := TCnAIEngineOptionClass(GetClass(S));
-            if Clz <> nil then
-            begin
-              Option := TCnAIEngineOption(Clz.NewInstance);
-              Option.Create;
-            end;
-          end;
-        except
-          ;
-        end;
-
-        // 没有就用基类
-        if Option = nil then
-          Option := TCnAIEngineOption.Create;
-
-        TCnJSONReader.Read(Option, TCnJSONObject(Arr[I]));
-
-        // 载入后原地解密 APIKey
-        Option.ApiKey := DecryptKey(Option.ApiKey);
-        AddOption(Option);
-      end;
-    end;
+  try
+    TCnJSONReader.Read(Self, Root);
+  finally
+    Root.Free;
   end;
 end;
 
@@ -332,6 +282,18 @@ begin
   end;
 end;
 
+procedure TCnAIEngineOptionManager.SaveOptionToFile(const EngineName,
+  FileName: string);
+var
+  Option: TCnAIEngineOption;
+begin
+  Option := GetOptionByEngine(EngineName);
+
+  // 没选项就不存
+  if Option <> nil then
+    TCnJSONWriter.JSONToFile(Option.SaveToJSON, FileName);
+end;
+
 procedure TCnAIEngineOptionManager.SaveToFile(const FileName: string);
 begin
   TCnJSONWriter.JSONToFile(SaveToJSON, FileName);
@@ -339,35 +301,11 @@ end;
 
 function TCnAIEngineOptionManager.SaveToJSON: AnsiString;
 var
-  Root, Obj: TCnJSONObject;
-  Arr: TCnJSONArray;
-  I: Integer;
-  PlainKey: string;
+  Root: TCnJSONObject;
 begin
   Root := TCnJSONObject.Create;
   try
     TCnJSONWriter.Write(Self, Root);
-
-    Arr := Root.AddArray('Engines');
-    for I := 0 to OptionCount - 1 do
-    begin
-      Obj := TCnJSONObject.Create;
-
-      PlainKey := Options[I].ApiKey;
-      try
-        // 原地加密 APIKey
-        Options[I].ApiKey := EncryptKey(Options[I].ApiKey);
-
-        // 先写个类名
-        Obj.AddPair('Class', Options[I].ClassName);
-        TCnJSONWriter.Write(Options[I], Obj);
-      finally
-        // 内存中再还原
-        Options[I].ApiKey := PlainKey;
-      end;
-      Arr.AddValue(Obj);
-    end;
-
     Result := CnJSONConstruct(Root);
   finally
     Root.Free;
@@ -398,6 +336,51 @@ begin
 {$ENDIF}
 end;
 
+function TCnAIEngineOption.EncryptKey(const Key: string): string;
+var
+  K, Iv, AD: TBytes;
+begin
+  if Key = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(SM4_KEY));
+  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
+
+  SetLength(Iv, SizeOf(SM4_IV));
+  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
+
+  SetLength(AD, Length(SM4_AD));
+  Move(SM4_AD[1], AD[0], Length(AD));
+
+  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
+end;
+
+function TCnAIEngineOption.DecryptKey(const Text: string): string;
+var
+  K, Iv, AD, Res: TBytes;
+begin
+  if Text = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(SM4_KEY));
+  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
+
+  SetLength(Iv, SizeOf(SM4_IV));
+  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
+
+  SetLength(AD, Length(SM4_AD));
+  Move(SM4_AD[1], AD[0], Length(AD));
+
+  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
+  Result := BytesToString(Res);
+end;
+
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
   Result := Format(SCNAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
@@ -406,6 +389,46 @@ end;
 function TCnAIEngineOption.GetSystemMessage: string;
 begin
   Result := Format(SCNAICoderWizardSystemMessageFmt, [CompilerName]);
+end;
+
+procedure TCnAIEngineOption.LoadFromJSON(const JSON: AnsiString);
+var
+  Root: TCnJSONObject;
+begin
+  Root := CnJSONParse(JSON);
+  if Root = nil then
+    Exit;
+
+  try
+    TCnJSONReader.Read(Self, Root);
+  finally
+    Root.Free;
+  end;
+
+  ApiKey := DecryptKey(ApiKey);
+end;
+
+function TCnAIEngineOption.SaveToJSON: AnsiString;
+var
+  Root: TCnJSONObject;
+  PlainKey: string;
+begin
+  Root := TCnJSONObject.Create;
+  try
+    PlainKey := ApiKey;
+    try
+      // 原地加密 APIKey
+      ApiKey := EncryptKey(ApiKey);
+      TCnJSONWriter.Write(Self, Root);
+    finally
+      // 内存中再还原
+      ApiKey := PlainKey;
+    end;
+
+    Result := CnJSONConstruct(Root);
+  finally
+    Root.Free;
+  end;
 end;
 
 initialization

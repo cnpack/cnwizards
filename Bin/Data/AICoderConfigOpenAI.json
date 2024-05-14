@@ -1,0 +1,8 @@
+﻿{
+    "EngineName": "OpenAI",
+    "URL": "https://api.openai.com/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "gpt-3.5-turbo",
+    "Temperature": 0.3,
+    "WebAddress": "https://platform.openai.com/api-keys"
+}

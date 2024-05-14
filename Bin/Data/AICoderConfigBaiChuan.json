@@ -1,0 +1,8 @@
+﻿{
+    "EngineName": "百川智能",
+    "URL": "https://api.baichuan-ai.com/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "Baichuan2-Turbo-192k",
+    "Temperature": 0.3,
+    "WebAddress": "https://api.baichuan-ai.com/v1/chat/completions"
+}
