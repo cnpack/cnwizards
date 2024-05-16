@@ -7,7 +7,7 @@ USEFORMNS("MultiLang\CnWizMultiLangFrame.pas", Cnwizmultilangframe, CnTranslateF
 USEFORMNS("Config\CnWizConfigFrm.pas", Cnwizconfigfrm, CnWizConfigForm);
 USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnWizSubActionShortCutForm);
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);
-USEFORMNS("DesignWizard\CnDesignWizard.pas", Cnalignsizewizard, CnNonArrangeForm);
+USEFORMNS("DesignWizard\CnDesignWizard.pas", Cndesignwizard, CnNonArrangeForm);
 USEFORMNS("CodingToolset\CnCodingToolsetWizard.pas", Cncodingtoolsetwizard, CnEditorToolsForm);
 USEFORMNS("DesignWizard\CnListCompFrm.pas", Cnlistcompfrm, CnListCompForm);
 USEFORMNS("DesignWizard\CnPropertyCompareFrm.pas", Cnpropertycomparefrm, CnPropertyCompareForm);
@@ -87,7 +87,7 @@ USEFORMNS("SrcEditorEnhance\CnSrcEditorGroupReplace.pas", Cnsrceditorgroupreplac
 USEFORMNS("SrcEditorEnhance\CnSrcEditorReplaceInBlock.pas", Cnsrceditorreplaceinblock, CnSrcEditorReplaceInBlockForm);
 USEFORMNS("CodingToolset\CnEditorInsertTime.pas", Cneditorinserttime, CnEditorInsertTimeForm);
 USEFORMNS("CodingToolset\CnEditorCollector.pas", Cneditorcollector, CnEditorCollectorForm);
-USEFORMNS("CodingToolset\CnEditorExtractString.pas", Cnextractstringform, CnExtractStringForm);
+USEFORMNS("CodingToolset\CnEditorExtractString.pas", Cneditorextractstring, CnExtractStringForm);
 USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);
 USEFORMNS("SourceHighlight\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
 USEFORMNS("SourceHighlight\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);
@@ -101,6 +101,9 @@ USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
 USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
 USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);
+USEFORMNS("AICoder\CnAICoderWizard.pas", Cnaicoderwizard, CnAICoderConfigForm);
+USEFORMNS("AICoder\CnAICoderChatFrm.pas", Cnaicoderchatfrm, CnAICoderChatForm);
+USEFORMNS("AICoder\CnFrmAICoderOption.pas", Cnfrmaicoderoption, CnAICoderOptionFrame); /* TFrame: File Type */
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 

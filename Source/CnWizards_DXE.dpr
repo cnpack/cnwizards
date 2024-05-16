@@ -230,7 +230,14 @@ uses
   CnImageProvider_FindIcons in 'Utils\CnImageProvider_FindIcons.pas',
   CnImageProvider_LocalCache in 'Utils\CnImageProvider_LocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
-  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm};
+  CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},
+  CnAICoderWizard in 'AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
+  CnAICoderConfig in 'AICoder\CnAICoderConfig.pas',
+  CnAICoderNetClient in 'AICoder\CnAICoderNetClient.pas',
+  CnAICoderEngine in 'AICoder\CnAICoderEngine.pas',
+  CnAICoderEngineImpl in 'AICoder\CnAICoderEngineImpl.pas',
+  CnAICoderChatFrm in 'AICoder\CnAICoderChatFrm.pas' {CnAICoderChatForm},
+  CnFrmAICoderOption in 'AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame};
 
 {$R *.RES}
 

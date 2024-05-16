@@ -96,7 +96,11 @@
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
       ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
       ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
-      ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj"/>
+      ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
+      ..\Dcu\CnAICoderWizard.obj ..\Dcu\CnAICoderConfig.obj 
+      ..\Dcu\CnAICoderNetClient.obj ..\Dcu\CnAICoderEngine.obj 
+      ..\Dcu\CnAICoderEngineImpl.obj ..\Dcu\CnAICoderChatFrm.obj 
+      ..\Dcu\CnFrmAICoderOption.obj"/>
     <RESFILES value="CnWizards_CB6.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -166,7 +170,8 @@
       DesignEditors\CnPropEditorCustomizeFrm.dfm ScriptWizard\CnScriptFrm.dfm 
       ScriptWizard\CnScriptWizard.dfm 
       DesignEditors\CnImageListEditorFrm.dfm
-      CodeFormatter\CnCodeFormatterWizard.dfm"/>
+      CodeFormatter\CnCodeFormatterWizard.dfm AICoder\CnAICoderWizard.dfm 
+      AICoder\CnAICoderChatFrm.dfm AICoder\CnFrmAICoderOption.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value="bcb2kaxserver.lib indy.lib dclocx.lib dbxcds.lib soaprtl.lib bcbie.lib 
       nmfast.lib dbexpress.lib inetdbxpress.lib inetdbbde.lib bcbsmp.lib 
@@ -182,7 +187,7 @@
       soaprtl.lib dbxcds.lib dclocx.lib indy.lib bcb2kaxserver.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi vclsmp.bpi designide.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;SourceHighlight;InputHelper;Utils;IdeEnhancements;SimpleWizards;CodingToolset;SrcTemplate;SourceDiff;DesignEditors;DesignWizard;DebugEnhance;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard;CodeFormatter"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;SourceHighlight;InputHelper;Utils;IdeEnhancements;SimpleWizards;CodingToolset;SrcTemplate;SourceDiff;DesignEditors;DesignWizard;DebugEnhance;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard;CodeFormatter;AICoder"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -191,13 +196,13 @@
     <USERDEFINES value="ENABLE_UIINTERACT;${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB6.bpf"/>
-    <INCLUDEPATH value="CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <LIBPATH value="CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditors;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphics;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-ICodeFormatter -IScriptWizard -ISrcTemplate -IReopenWizard 
+    <IDLCFLAGS value="-IAICoder -ICodeFormatter -IScriptWizard -ISrcTemplate -IReopenWizard 
       -ISimpleWizards -IConfig -IMultiLang -IMisc -ISrcEditorEnhance -IDebugEnhance 
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
       -IIdeEnhancements -IPrefixWizard -ISourceStat -IDesignEditors -IDesignWizard -ISourceDiff 
@@ -420,6 +425,13 @@
       <FILE FILENAME="Utils\CnImageProvider_LocalCache.pas" FORMNAME="" UNITNAME="CnImageProvider_LocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnFormatterIntf.pas" FORMNAME="" UNITNAME="CnFormatterIntf" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnCodeFormatterWizard.pas" FORMNAME="CnCodeFormatterForm" UNITNAME="CnCodeFormatterWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderWizard.pas" FORMNAME="CnAICoderConfigForm" UNITNAME="CnAICoderWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderConfig.pas" FORMNAME="" UNITNAME="CnAICoderConfig" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderNetClient.pas" FORMNAME="" UNITNAME="CnAICoderNetClient" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderEngine.pas" FORMNAME="" UNITNAME="CnAICoderEngine" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderEngineImpl.pas" FORMNAME="" UNITNAME="CnAICoderEngineImpl" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnAICoderChatFrm.pas" FORMNAME="CnAICoderChatForm" UNITNAME="CnAICoderChatFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="AICoder\CnFrmAICoderOption.pas" FORMNAME="CnAICoderOptionFrame" UNITNAME="CnFrmAICoderOption" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>

@@ -197,6 +197,13 @@ USEUNIT("Utils\CnImageProvider_FindIcons.pas");
 USEUNIT("Utils\CnImageProvider_LocalCache.pas");
 USEUNIT("CodeFormatter\CnFormatterIntf.pas");
 USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);
+USEFORMNS("AICoder\CnAICoderWizard.pas", Cnaicoderwizard, CnAICoderConfigForm);
+USEUNIT("AICoder\CnAICoderConfig.pas");
+USEUNIT("AICoder\CnAICoderNetClient.pas");
+USEUNIT("AICoder\CnAICoderEngine.pas");
+USEUNIT("AICoder\CnAICoderEngineImpl.pas");
+USEFORMNS("AICoder\CnAICoderChatFrm.pas", Cnaicoderchatfrm, CnAICoderChatForm);
+USEFORMNS("AICoder\CnFrmAICoderOption.pas", Cnfrmaicoderoption, CnAICoderOptionFrame); /* TFrame: File Type */
 //---------------------------------------------------------------------------
 This file is used by the project manager only and should be treated like the project file
 
