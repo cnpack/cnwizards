@@ -97,7 +97,7 @@ type
     {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者
       同时允许根据返回的错误信息更改成功与否}
   public
-    class function EngineName: string; virtual; abstract;
+    class function EngineName: string; virtual;
     {* 子类必须有个名字}
     class function EngineID: string;
     {* 引擎的 ID，供存储保存用，根据类名运算而来}
@@ -673,6 +673,11 @@ end;
 class function TCnAIBaseEngine.OptionClass: TCnAIEngineOptionClass;
 begin
   Result := TCnAIEngineOption;
+end;
+
+class function TCnAIBaseEngine.EngineName: string;
+begin
+  Result := '<NoName>';
 end;
 
 initialization

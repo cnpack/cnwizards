@@ -183,8 +183,6 @@ begin
 end;
 
 procedure TCnAICoderWizard.LoadSettings(Ini: TCustomIniFile);
-var
-  F: string;
 begin
   CnAIEngineManager.LoadFromWizOptions;
 
@@ -355,6 +353,6 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnAICoderWizard); // 注册专家
+  // RegisterCnWizard(TCnAICoderWizard); // 注册专家
 
 end.
