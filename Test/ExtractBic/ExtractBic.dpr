@@ -3,7 +3,7 @@ program ExtractBic;
 uses
   Forms,
   MainUnit in 'MainUnit.pas' {FormExtract},
-  CnCompressor in '..\..\Tools\CnIdeBRTool\CnCompressor.pas';
+  CnCompressor in '..\..\Tool\CnIdeBRTool\CnCompressor.pas';
 
 {$R *.res}
 

@@ -5,7 +5,7 @@ CD Test
 SETLOCAL ENABLEDELAYEDEXPANSION
 SET ROOTDIR=%~dp0
 ECHO ROOTDIR=!ROOTDIR!
-SET DCC32="C:\Program Files\Borland\Delphi7\Bin\dcc32.exe"
+SET DCC32="C:\Program Files\Borland\Delphi5\Bin\dcc32.exe"
 SET DCC7_32="C:\Program Files\Borland\Delphi7\Bin\dcc32.exe"
 SET DCCR_32="C:\Program Files\Embarcadero\RAD Studio\9.0\bin\dcc32.exe"
 
@@ -42,8 +42,12 @@ FOR /D %%D IN (.\*) DO (
                 %DCCR_32% "%%F" < "!DPR:~0,-3!cfg"
                 IF !ERRORLEVEL! NEQ 0 GOTO END
               ) ELSE (
-                %DCC32% "%%F" < "!DPR:~0,-3!cfg"
-                IF !ERRORLEVEL! NEQ 0 GOTO END
+                IF "!DIRNAME:~-4!" == "110A" (
+                  ECHO Skip "%%F"
+                ) ELSE (
+                  %DCC32% "%%F" < "!DPR:~0,-3!cfg"
+                  IF !ERRORLEVEL! NEQ 0 GOTO END
+                )
               )
             )
           )

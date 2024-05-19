@@ -50,7 +50,7 @@
 			<DCCReference Include="CnPngConvert.pas">
 				<Form>FormTestPng</Form>
 			</DCCReference>
-			<DCCReference Include="..\..\Tools\CnPngLib\CnPngUtils.pas"/>
+			<DCCReference Include="..\..\Tool\CnPngLib\CnPngUtils.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

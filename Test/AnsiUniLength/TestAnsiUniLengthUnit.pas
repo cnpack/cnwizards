@@ -35,7 +35,7 @@ var
 implementation
 
 uses
-  CnCommon;
+  CnCommon, CnWideStrings;
 
 {$R *.DFM}
 

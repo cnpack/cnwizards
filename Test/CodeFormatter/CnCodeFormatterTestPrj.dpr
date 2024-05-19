@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-program CnCodeFormaterTestPrj;
+program CnCodeFormatterTestPrj;
 
 uses
   Forms,

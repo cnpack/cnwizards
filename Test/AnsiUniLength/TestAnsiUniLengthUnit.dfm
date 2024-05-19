@@ -2,7 +2,9 @@ object TestAnsiUniForm: TTestAnsiUniForm
   Left = 216
   Top = 204
   BorderStyle = bsDialog
-  Caption = 'Test Ansi / Unicode String Length Conversion for 32/64 Unicode/Non-Unicode'
+  Caption = 
+    'Test Ansi / Unicode String Length Conversion for 32/64 Unicode/N' +
+    'on-Unicode'
   ClientHeight = 307
   ClientWidth = 646
   Color = clBtnFace
