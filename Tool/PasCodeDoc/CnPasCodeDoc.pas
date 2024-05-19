@@ -63,6 +63,9 @@ type
     function GetItem(Index: Integer): TCnDocBaseItem;
     procedure SetItem(Index: Integer; const Value: TCnDocBaseItem);
     function GetCount: Integer;
+  protected
+    procedure Sort; virtual;
+    {* 内部排序}
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -85,7 +88,7 @@ type
     property DeclareName: string read FDeclareName write FDeclareName;
     {* 待解释的对象名称，不同的子类有不同的规定}
     property DeclareType: string read FDeclareType write FDeclareType;
-    {* 待解释的对象类型，不同的子类也有不同的用途}
+    {* 待解释的对象类型，不同的子类也有不同的用途，常用于存储完整声明}
     property Comment: string read FComment write FComment;
     {* 该元素的注释文档}
     property Scope: TCnDocScope read FScope write FScope;
@@ -101,8 +104,18 @@ type
 
   TCnDocUnit = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的单元的对象}
+  private
+    FUnitBrief: string;
+  protected
+    procedure Sort; override;
+    {* 按常量、类型声明、函数过程、变量排序}
   public
     constructor Create; override;
+
+    procedure ParseBrief;
+    {* 从注释中解析出单元简介，以及用备注字段内容替换 Comment 属性内容}
+    property UnitBrief: string read FUnitBrief write FUnitBrief;
+    {* 单元简介，也就是注释头部的单元名称字段内容}
   end;
 
   TCnConstDocItem = class(TCnDocBaseItem)
@@ -156,9 +169,6 @@ const
 
   SCOPE_STRS: array[TCnDocScope] of string =
     ('', 'private', 'protected', 'public', 'published');
-
-procedure SortDocUnit(RootItem: TCnDocUnit); forward;
-{* 文档内部排序}
 
 // 从 ParentLeaf 的第 0 个子节点开始越过注释找符合的节点，返回符合的节点，不符合则抛出异常且返回 nil
 function DocSkipCommentToChild(ParentLeaf: TCnPasAstLeaf;
@@ -261,7 +271,11 @@ begin
   begin
     Leaf := DocSkipToChild(ParentLeaf, K, [cntConstDecl], [tkNone]);
     if Leaf = nil then
-      raise ECnPasCodeDocException.Create('NO Const Decl Exists.');
+    begin
+      Inc(K);
+      Continue;
+    end;
+    //  raise ECnPasCodeDocException.Create('NO Const Decl Exists.');
 
     Item := TCnConstDocItem.Create;
     if Leaf.Count > 0 then
@@ -293,7 +307,11 @@ begin
   begin
     Leaf := DocSkipToChild(ParentLeaf, K, [cntVarDecl], [tkNone]);
     if Leaf = nil then
-      raise ECnPasCodeDocException.Create('NO Var Decl Exists.');
+    begin
+      Inc(K);
+      Continue;
+    end;
+    // raise ECnPasCodeDocException.Create('NO Var Decl Exists.');
 
     Item := TCnVarDocItem.Create;
     if Leaf.Count > 0 then
@@ -611,8 +629,12 @@ begin
   while K < ParentLeaf.Count do
   begin
     Leaf := DocSkipToChild(ParentLeaf, K, [cntTypeDecl], [tkNone]);
-    if Leaf = nil then
-      raise ECnPasCodeDocException.Create('NO Type Decl Exists.');
+    if Leaf = nil then // 没找到可能说明到尾巴了可能碰上注释了？
+    begin
+      Inc(K);
+      Continue;
+    end;
+    // raise ECnPasCodeDocException.Create('NO Type Decl Exists.');
 
     DeclLeaf := Leaf;
     Item := TCnTypeDocItem.Create;
@@ -784,7 +806,7 @@ begin
       Inc(I);
     end;
 
-    SortDocUnit(Result);
+    Result.Sort;
   finally
     SL.Free;
     AST.Free;
@@ -815,7 +837,7 @@ procedure SortDocUnit(RootItem: TCnDocUnit);
 var
   I: Integer;
 begin
-  // Unit 的下一级，0 到 Count - 1 个，按 const、type、procedure、var 的顺序排序
+  // Unit 的下一级，0 到 Count - 1 个，按 const、type、procedure、var 的顺序排序合并
   DocTypeBubbleSort(RootItem); // 用冒泡而不用快排是因为需要保持原位稳定
 
   // 每个类或接口，下面的按 Scope 排序
@@ -907,12 +929,27 @@ begin
   FItems[Index] := Value;
 end;
 
+procedure TCnDocBaseItem.Sort;
+begin
+  // 基类啥都不做
+end;
+
 { TCnDocUnit }
 
 constructor TCnDocUnit.Create;
 begin
   inherited;
   FDocType := dtUnit;
+end;
+
+procedure TCnDocUnit.ParseBrief;
+begin
+  // TODO: Comment 属性里找合适的内容
+end;
+
+procedure TCnDocUnit.Sort;
+begin
+  SortDocUnit(Self);
 end;
 
 { TCnConstDocItem }

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnCommon;
+  StdCtrls, CnCommon, ComCtrls, CnPasCodeDoc;
 
 type
   TFormPasDoc = class(TForm)
@@ -13,12 +13,16 @@ type
     dlgOpen1: TOpenDialog;
     btnCombineInterface: TButton;
     dlgSave1: TSaveDialog;
+    tvPas: TTreeView;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure tvPasDblClick(Sender: TObject);
   private
+    FDoc: TCnDocUnit;
     FAllFile: TStringList;
+    procedure DumpToTreeView(Doc: TCnDocUnit);
   public
     procedure FileCallBack(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
@@ -29,20 +33,16 @@ var
 
 implementation
 
-uses
-  CnPasCodeDoc;
-
 {$R *.DFM}
 
 procedure TFormPasDoc.btnExtractFromFileClick(Sender: TObject);
-var
-  Item: TCnDocUnit;
 begin
   if dlgOpen1.Execute then
   begin
-    Item := CnCreateUnitDocFromFileName(dlgOpen1.FileName);
-    Item.DumpToStrings(mmoResult.Lines);
-    Item.Free;
+    FreeAndNil(FDoc);
+    FDoc := CnCreateUnitDocFromFileName(dlgOpen1.FileName);
+    FDoc.DumpToStrings(mmoResult.Lines);
+    DumpToTreeView(FDoc);
   end;
 end;
 
@@ -107,12 +107,56 @@ end;
 procedure TFormPasDoc.FormDestroy(Sender: TObject);
 begin
   FAllFile.Free;
+  FDoc.Free;
 end;
 
 procedure TFormPasDoc.FileCallBack(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
   FAllFile.Add(FileName);
+end;
+
+procedure TFormPasDoc.DumpToTreeView(Doc: TCnDocUnit);
+var
+  Root: TTreeNode;
+
+  // 调用者已创建了 ParentItem 和其对应的 ParentNode，本过程处理其子节点
+  procedure AddSubs(ParentNode: TTreeNode; ParentItem: TCnDocBaseItem);
+  var
+    I: Integer;
+    Node: TTreeNode;
+  begin
+    // 对象赋值
+    ParentNode.Data := ParentItem;
+
+    // 加子节点
+    for I := 0 to ParentItem.Count - 1 do
+    begin
+      Node := tvPas.Items.AddChild(ParentNode, ParentItem[I].DeclareName);
+      AddSubs(Node, ParentItem[I]);
+    end;
+  end;
+
+begin
+  tvPas.Items.Clear;
+
+  Root := tvPas.Items.Add(nil, Doc.DeclareName);
+  Root.Data := Doc;
+  AddSubs(Root, Doc);
+
+  tvPas.FullExpand;
+end;
+
+procedure TFormPasDoc.tvPasDblClick(Sender: TObject);
+var
+  Item: TCnDocBaseItem;
+begin
+  if tvPas.Selected <> nil then
+  begin
+    Item := TCnDocBaseItem(tvPas.Selected.Data);
+    if Item <> nil then
+      ShowMessage(Item.DeclareType + #13#10 + Item.Comment);
+  end;
 end;
 
 end.
