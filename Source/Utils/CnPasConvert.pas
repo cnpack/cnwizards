@@ -288,6 +288,7 @@ type
     procedure SetInStream(const Value: TStream);
     procedure SetOutStream(const Value: TStream);
   protected
+    FFull: Boolean; // 控制是否写入头尾，由 ConvertBegin 和 ConvertEnd 处理
     {this should be override}
     procedure WriteTokenToStream; virtual; abstract;
     {this should be override}
@@ -297,7 +298,7 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
-    function Convert: Boolean;
+    function Convert(Full: Boolean = True): Boolean;
 
     property StatusFont[ATokenType: TCnPasConvertTokenType]: TFont read
       GetStatusFont;
@@ -565,9 +566,11 @@ begin
   end;
 end;
 
-function TCnSourceConversion.Convert: Boolean;
+function TCnSourceConversion.Convert(Full: Boolean): Boolean;
 begin
   Result := False;
+  FFull := Full;
+
   {check the two stream is ok }
   if (FInStream = nil) or (FOutStream = nil) then
     Exit;
@@ -1677,28 +1680,32 @@ var
   TokenType: TCnPasConvertTokenType;
 begin
   inherited;
-  if FHTMLEncode = '' then
-    FHTMLEncode := 'gb2312';
+  if FFull then
+  begin
+    if FHTMLEncode = '' then
+      FHTMLEncode := 'gb2312';
 
-  WriteStringToStream('<html>' + CRLF + '<head>' + CRLF + '<title>' + Title + '</title>' + CRLF);
-  WriteStringToStream('<meta http-equiv="Content-Type" content="text/html; charset=' + FHTMLEncode + '">' + CRLF);
-  WriteStringToStream('<meta name="GENERATOR" content="CnPack Source2Html Wizard (https://www.cnpack.org)">' + CRLF);
-  WriteStringToStream('<style type="text/css">' + CRLF + '<!--' + CRLF);
+    WriteStringToStream('<html>' + CRLF + '<head>' + CRLF + '<title>' + Title + '</title>' + CRLF);
+    WriteStringToStream('<meta http-equiv="Content-Type" content="text/html; charset=' + FHTMLEncode + '">' + CRLF);
+    WriteStringToStream('<meta name="GENERATOR" content="CnPack Source2Html Wizard (https://www.cnpack.org)">' + CRLF);
+    WriteStringToStream('<style type="text/css">' + CRLF + '<!--' + CRLF);
 
-  { v1.03: Set default body style as Whitespace style }
-  WriteStringToStream('body { ' + ConvertFontToCss(StatusFont[ttSpace]) + ' }'
-    + CRLF + CRLF);
+    { v1.03: Set default body style as Whitespace style }
+    WriteStringToStream('body { ' + ConvertFontToCss(StatusFont[ttSpace]) + ' }'
+      + CRLF + CRLF);
 
-  for TokenType := Low(TCnPasConvertTokenType) to High(TCnPasConvertTokenType) do
-    WriteStringToStream('.u' + IntToStr(Ord(TokenType)) + ' { '
-      + ConvertFontToCss(StatusFont[TokenType]) + ' }' + CRLF);
-  WriteStringToStream('-->' + CRLF + '</style> ' + CRLF + '</head>' + CRLF
-    + Format('<body bgcolor="%s">', [ColorToHTML(FBackgroundColor)]) + CRLF);
+    for TokenType := Low(TCnPasConvertTokenType) to High(TCnPasConvertTokenType) do
+      WriteStringToStream('.u' + IntToStr(Ord(TokenType)) + ' { '
+        + ConvertFontToCss(StatusFont[TokenType]) + ' }' + CRLF);
+    WriteStringToStream('-->' + CRLF + '</style> ' + CRLF + '</head>' + CRLF
+      + Format('<body bgcolor="%s">', [ColorToHTML(FBackgroundColor)]) + CRLF);
+  end;
 end;
 
 procedure TCnSourceToHtmlConversion.ConvertEnd;
 begin
-  WriteStringToStream(CRLF + '</body>' + CRLF + '</html>' + CRLF);
+  if FFull then
+    WriteStringToStream(CRLF + '</body>' + CRLF + '</html>' + CRLF);
   inherited;
 end;
 
@@ -1928,41 +1935,43 @@ var
   TokenType: TCnPasConvertTokenType;
   FontTable: string;
   ColorTable: string;
-  // Code Page varibles
   CodePage: DWORD;
   CPInfo: TCPInfo;
   AYear, AMonth, ADay, AHour, AMin, ASec, AMiSec: Word;
 begin
   inherited;
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('Create Font Table');
-{$ENDIF}
-  for TokenType := Low(TCnPasConvertTokenType) to High(TCnPasConvertTokenType) do
+  if FFull then
   begin
-    FontTable := FontTable + ConvertFontToRTFFontTable(TokenType, StatusFont[TokenType]);
-    ColorTable := ColorTable + ConvertFontToRTFColorTable(StatusFont[TokenType]);
-  end;
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('End Font Table');
+    CnDebugger.LogMsg('Create Font Table');
+{$ENDIF}
+    for TokenType := Low(TCnPasConvertTokenType) to High(TCnPasConvertTokenType) do
+    begin
+      FontTable := FontTable + ConvertFontToRTFFontTable(TokenType, StatusFont[TokenType]);
+      ColorTable := ColorTable + ConvertFontToRTFColorTable(StatusFont[TokenType]);
+    end;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('End Font Table');
 {$ENDIF}
 
-  // Get system Code Page
-  CodePage := 0;
-  FillChar(CPInfo, SizeOf(CPInfo), 0);
-  GetCPInfo(CodePage, CPInfo);
+    // Get system Code Page
+    CodePage := 0;
+    FillChar(CPInfo, SizeOf(CPInfo), 0);
+    GetCPInfo(CodePage, CPInfo);
 
-  WriteStringToStream(Format('{\rtf1\ansi\ansicpg%d\deff0\deflang1033\deflangfe%d{\fonttbl %s}' + CRLF,
-    [CodePage, GetSystemDefaultLangID, FontTable]));
-  WriteStringToStream('{\colortbl ;' + ColorTable + '}' + CRLF);
+    WriteStringToStream(Format('{\rtf1\ansi\ansicpg%d\deff0\deflang1033\deflangfe%d{\fonttbl %s}' + CRLF,
+      [CodePage, GetSystemDefaultLangID, FontTable]));
+    WriteStringToStream('{\colortbl ;' + ColorTable + '}' + CRLF);
 
-  if (FBackgroundColor <> clWhite) and (FBackgroundColor <> clNone) then
-    WriteStringToStream(Format(S_RTF_BK, [ColorToRGB(FBackgroundColor)]));
+    if (FBackgroundColor <> clWhite) and (FBackgroundColor <> clNone) then
+      WriteStringToStream(Format(S_RTF_BK, [ColorToRGB(FBackgroundColor)]));
 
-  DecodeDate(Now, AYear, AMonth, ADay);
-  DecodeTime(Now, AHour, AMin, ASec, AMiSec);
-  WriteStringToStream(Format('{\info{\author CnPack Source2RTF Wizard (https://www.cnpack.org)}{\creatim\yr%d\mo%d\dy%d\hr%d\min%d}{\comment CnPack Source2RTF Wizard (https://www.cnpack.org)}}' + CRLF,
-    [AYear, AMonth, ADay, AHour, AMin]));
-  WriteStringToStream(Format('{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\lang%d', [GetSystemDefaultLangID]));
+    DecodeDate(Now, AYear, AMonth, ADay);
+    DecodeTime(Now, AHour, AMin, ASec, AMiSec);
+    WriteStringToStream(Format('{\info{\author CnPack Source2RTF Wizard (https://www.cnpack.org)}{\creatim\yr%d\mo%d\dy%d\hr%d\min%d}{\comment CnPack Source2RTF Wizard (https://www.cnpack.org)}}' + CRLF,
+      [AYear, AMonth, ADay, AHour, AMin]));
+    WriteStringToStream(Format('{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\lang%d', [GetSystemDefaultLangID]));
+  end;
 end;
 
 function TCnSourceToRTFConversion.ConvertChineseToRTF(const AString: string): string;
@@ -1970,20 +1979,23 @@ var
   I: Integer;
 begin
   for I := 1 to Length(AString) do
+  begin
     if Ord(AString[I]) > 128 then
       Result := Result + '\''' + IntToHex(Ord(AString[I]), 2)
     else
       Result := Result + AString[I];
+  end;
 end;
 
 procedure TCnSourceToRTFConversion.ConvertEnd;
 begin
-  WriteStringToStream(CRLF + '}' + CRLF);
+  if FFull then
+    WriteStringToStream(CRLF + '}' + CRLF);
   inherited;
 end;
 
 function TCnSourceToRTFConversion.ConvertFontToRTFFontTable(const TokenType:
-    TCnPasConvertTokenType; const AFont: TFont): string;
+  TCnPasConvertTokenType; const AFont: TFont): string;
 begin
   Result := Format('{\f%d\fnil\fprq%d\fcharset%d %s;}',
     [Ord(TokenType), Ord(AFont.Pitch), AFont.Charset, ConvertChineseToRTF(AFont.Name)]);
@@ -1999,7 +2011,7 @@ begin
 end;
 
 procedure TCnSourceToRTFConversion.SetPreFixAndPosFix(AFont: TFont; ATokenType:
-    TCnPasConvertTokenType);
+  TCnPasConvertTokenType);
 var
   TmpStr: string;
 begin
