@@ -1298,10 +1298,13 @@ end;
 
 // 检查 IDE 版本并提示
 procedure TCnWizardMgr.CheckIDEVersion;
+var
+  LatestUpdate: string;
 begin
 {$IFNDEF CNWIZARDS_MINIMUM}
-  if not IsIdeVersionLatest then
-    ShowSimpleCommentForm('', SCnIDENOTLatest, SCnCheckIDEVersion + CompilerShortName);
+  if not IsIdeVersionLatest(LatestUpdate) then
+    ShowSimpleCommentForm('', Format(SCnIDENOTLatest, [LatestUpdate]),
+      SCnCheckIDEVersion + CompilerShortName);
 {$ENDIF}
 end;
 

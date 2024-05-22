@@ -61,7 +61,7 @@ uses
 function GetIdeExeVersion: string;
 {* 获取 IDE 的 exe 文件的详细版本号}
 
-function IsIdeVersionLatest: Boolean;
+function IsIdeVersionLatest(out LatestUpdate: string): Boolean;
 {* 返回当前是否最新 IDE 版本}
 
 function IsDelphi10Dot2GEDot2: Boolean;
@@ -112,7 +112,7 @@ begin
   Result := V1.Build - V2.Build;
 end;
 
-function IsDelphi5IdeVersionLatest: Boolean;
+function IsDelphi5IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 5; Minor: 0; Release: 6; Build: 18);
@@ -121,9 +121,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coride50.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsBCB5IdeVersionLatest: Boolean;
+function IsBCB5IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 1
     (Major: 5; Minor: 0; Release: 12; Build: 34);
@@ -132,9 +133,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coride50.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphi6IdeVersionLatest: Boolean;
+function IsDelphi6IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 6; Minor: 0; Release: 6; Build: 240);
@@ -143,9 +145,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide60.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsBCB6IdeVersionLatest: Boolean;
+function IsBCB6IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =  // Update 4
     (Major: 6; Minor: 0; Release: 10; Build: 166);
@@ -154,9 +157,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide60.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 4';
 end;
 
-function IsDelphi7IdeVersionLatest: Boolean;
+function IsDelphi7IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 1
     (Major: 7; Minor: 0; Release: 8; Build: 1);
@@ -165,9 +169,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide70.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphi8IdeVersionLatest: Boolean;
+function IsDelphi8IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 7; Minor: 1; Release: 1446; Build: 610);
@@ -181,9 +186,10 @@ begin
     ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\bds.exe');
     Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
   end;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphi2005IdeVersionLatest: Boolean;
+function IsDelphi2005IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 9; Minor: 0; Release: 1935; Build: 22056);
@@ -192,9 +198,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide90.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphi2006IdeVersionLatest: Boolean;
+function IsDelphi2006IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 10; Minor: 0; Release: 2329; Build: 20030);
@@ -203,9 +210,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide100.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphi2007IdeVersionLatest: Boolean;
+function IsDelphi2007IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 3, Dec 2007
     (Major: 11; Minor: 0; Release: 2902; Build: 10471);
@@ -214,9 +222,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide100.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 3';
 end;
 
-function IsDelphi2009IdeVersionLatest: Boolean;
+function IsDelphi2009IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 4?
     (Major: 12; Minor: 0; Release: 3420; Build: 21218);
@@ -225,9 +234,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide120.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 4';
 end;
 
-function IsDelphi2010IdeVersionLatest: Boolean;
+function IsDelphi2010IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 4
     (Major: 14; Minor: 0; Release: 3593; Build: 25826);
@@ -236,9 +246,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide140.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 4';
 end;
 
-function IsDelphiXEIdeVersionLatest: Boolean;
+function IsDelphiXEIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 2
     (Major: 15; Minor: 0; Release: 3809; Build: 34076);
@@ -247,9 +258,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide150.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphiXE2IdeVersionLatest: Boolean;
+function IsDelphiXE2IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber = // Update 4 HotFix 1
     (Major: 16; Minor: 0; Release: 4504; Build: 48759);
@@ -258,9 +270,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide160.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 4 HotFix 1';
 end;
 
-function IsDelphiXE3IdeVersionLatest: Boolean;
+function IsDelphiXE3IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 17; Minor: 0; Release: 4771; Build: 56661); // Update 2
@@ -269,9 +282,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide170.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphiXE4IdeVersionLatest: Boolean;
+function IsDelphiXE4IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 18; Minor: 0; Release: 4905; Build: 60485); // Update 1
@@ -280,9 +294,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide180.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphiXE5IdeVersionLatest: Boolean;
+function IsDelphiXE5IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 19; Minor: 0; Release: 14356; Build: 6604); // Update 2
@@ -291,9 +306,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide190.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphiXE6IdeVersionLatest: Boolean;
+function IsDelphiXE6IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 20; Minor: 0; Release: 16277; Build: 1276); // Update 1
@@ -302,9 +318,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide200.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphiXE7IdeVersionLatest: Boolean;
+function IsDelphiXE7IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 21; Minor: 0; Release: 17707; Build: 5020); // Update 1
@@ -313,9 +330,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide210.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphiXE8IdeVersionLatest: Boolean;
+function IsDelphiXE8IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 22; Minor: 0; Release: 19908; Build: 869); // Update 1
@@ -324,9 +342,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide220.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphi10SIdeVersionLatest: Boolean;
+function IsDelphi10SIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 23; Minor: 0; Release: 21418; Build: 4207); // Update 1
@@ -335,9 +354,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide230.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1';
 end;
 
-function IsDelphi101BIdeVersionLatest: Boolean;
+function IsDelphi101BIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 24; Minor: 0; Release: 25048; Build: 9432); // Update 2
@@ -346,9 +366,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide240.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2';
 end;
 
-function IsDelphi102TIdeVersionLatest: Boolean;
+function IsDelphi102TIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 25; Minor: 0; Release: 31059; Build: 3231); // 10.2.3 存在更新的版本，其实应该叫 10.2.4
@@ -357,6 +378,7 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide250.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 3 (10.2.3)';
 end;
 
 function IsDelphi10Dot2GEDot2: Boolean;
@@ -376,7 +398,7 @@ begin
 {$ENDIF}
 end;
 
-function IsDelphi103RIdeVersionLatest: Boolean;
+function IsDelphi103RIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 26; Minor: 0; Release: 36039; Build: 7899); // 10.3.3
@@ -385,9 +407,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide260.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 3 (10.3.3)';
 end;
 
-function IsDelphi104SIdeVersionLatest: Boolean;
+function IsDelphi104SIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 27; Minor: 0; Release: 40680; Build: 4203); // 10.4.2
@@ -396,6 +419,7 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide270.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 2 (10.4.2)';
 end;
 
 function IsDelphi10Dot4GEDot2: Boolean;
@@ -415,7 +439,7 @@ begin
 {$ENDIF}
 end;
 
-function IsDelphi110AIdeVersionLatest: Boolean;
+function IsDelphi110AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 28; Minor: 0; Release: 48361; Build: 3236); // 11.3.1
@@ -424,9 +448,10 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide280.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 3.1 (11.3.1)';
 end;
 
-function IsDelphi120AIdeVersionLatest: Boolean;
+function IsDelphi120AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 29; Minor: 0; Release: 52161; Build: 7750); // 12.1，注意文件换了
@@ -435,6 +460,7 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := 'Update 1 (12.1)';
 end;
 
 function IsDelphi11GEDot3: Boolean;
@@ -463,7 +489,7 @@ begin
 {$ENDIF};
 end;
 
-function IsIdeVersionLatest: Boolean;
+function IsIdeVersionLatest(out LatestUpdate: string): Boolean;
 begin
   if CnIdeVersionDetected then
   begin
@@ -475,107 +501,107 @@ begin
   CnIdeVersionIsLatest := True;
 
 {$IFDEF DELPHI5}
-  CnIdeVersionIsLatest := IsDelphi5IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi5IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF BCB5}
-  CnIdeVersionIsLatest := IsBCB5IdeVersionLatest;
+  CnIdeVersionIsLatest := IsBCB5IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI6}
-  CnIdeVersionIsLatest := IsDelphi6IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi6IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF BCB6}
-  CnIdeVersionIsLatest := IsBCB6IdeVersionLatest;
+  CnIdeVersionIsLatest := IsBCB6IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI7}
-  CnIdeVersionIsLatest := IsDelphi7IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi7IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI8}
-  CnIdeVersionIsLatest := IsDelphi8IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi8IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI2005}
-  CnIdeVersionIsLatest := IsDelphi2005IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi2005IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI2006}
-  CnIdeVersionIsLatest := IsDelphi2006IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi2006IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI2007}
-  CnIdeVersionIsLatest := IsDelphi2007IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi2007IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI2009}
-  CnIdeVersionIsLatest := IsDelphi2009IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi2009IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI2010}
-  CnIdeVersionIsLatest := IsDelphi2010IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi2010IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE}
-  CnIdeVersionIsLatest := IsDelphiXEIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXEIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE2}
-  CnIdeVersionIsLatest := IsDelphiXE2IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE2IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE3}
-  CnIdeVersionIsLatest := IsDelphiXE3IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE3IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE4}
-  CnIdeVersionIsLatest := IsDelphiXE4IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE4IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE5}
-  CnIdeVersionIsLatest := IsDelphiXE5IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE5IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE6}
-  CnIdeVersionIsLatest := IsDelphiXE6IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE6IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE7}
-  CnIdeVersionIsLatest := IsDelphiXE7IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE7IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHIXE8}
-  CnIdeVersionIsLatest := IsDelphiXE8IdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphiXE8IdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE}
-  CnIdeVersionIsLatest := IsDelphi10SIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi10SIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI101_BERLIN}
-  CnIdeVersionIsLatest := IsDelphi101BIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi101BIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI102_TOKYO}
-  CnIdeVersionIsLatest := IsDelphi102TIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi102TIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI103_RIO}
-  CnIdeVersionIsLatest := IsDelphi103RIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi103RIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY}
-  CnIdeVersionIsLatest := IsDelphi104SIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi104SIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI110_ALEXANDRIA}
-  CnIdeVersionIsLatest := IsDelphi110AIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi110AIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
 {$IFDEF DELPHI120_ATHENS}
-  CnIdeVersionIsLatest := IsDelphi120AIdeVersionLatest;
+  CnIdeVersionIsLatest := IsDelphi120AIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

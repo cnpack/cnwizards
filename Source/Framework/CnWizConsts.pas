@@ -545,7 +545,7 @@ var
 
   // CheckIDEVersion
   SCnIDENOTLatest: string =
-    'We''ve Detected that the Latest Update Pack Maybe NOT Installed in this IDE. ' +
+    'We''ve Detected that the Latest Update Pack %s Maybe NOT Installed in this IDE. ' +
     'Perhaps Your IDE is NOT stable, and Some Functions of CnWizards will NOT be Supported. ' +
     'We Recommend You Download and Install the Latest Update Pack.';
 
