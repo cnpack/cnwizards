@@ -3539,10 +3539,10 @@ function TCnPasAstLeaf.GetPascalCode: string;
 var
   I: Integer;
   S: string;
-  Son: TTokenKind;
+  Prev, Son: TTokenKind;
 begin
   if FReturn or (FTokenKind in [tkBorComment, tkAnsiComment, tkSlashesComment, // 注释都暂且先换行
-    tkBegin, tkThen, tkDo, tkRepeat,
+    tkBegin, tkThen, tkDo, tkRepeat,                                           // 这些后面都换行
     tkExcept, tkExports, tkFinally, tkInitialization, tkFinalization, tkAsm,
     tkImplementation, tkRecord, tkPrivate, tkProtected, tkPublic, tkPublished]) then
     Result := Text + #13#10
@@ -3557,9 +3557,14 @@ begin
       Result := S
     else if S <> '' then
     begin
-      if FNoSpaceBehind or Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或子节点前面不要空格
-        (FTokenKind in [tkRoundOpen, tkSquareOpen, tkPoint]) or            // 本节点这些后面不要空格
-        (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 子节点这些前面不要空格
+      if I = 0 then
+        Prev := FTokenKind
+      else
+        Prev := Items[I - 1].TokenKind;
+
+      if FNoSpaceBehind or Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或当前子节点前面不要空格
+        (Prev in [tkRoundOpen, tkSquareOpen, tkPoint]) or            // 前一个节点如果是这些，则前一个节点后面不要空格
+        (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 当前子节点如果是这些，则当前子节点前面不要空格
         tkRoundClose, tkSquareClose]) then
         Result := Result + S
       else
