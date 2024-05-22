@@ -5764,7 +5764,8 @@ begin
   for I := 0 to FBlockMatchList.Count - 1 do
   begin
     Info := TCnBlockMatchInfo(FBlockMatchList[I]);
-    Info.Control.Invalidate;
+    if (Info <> nil) and (Info.Control <> nil) then
+      Info.Control.Invalidate;
   end;
 end;
 
