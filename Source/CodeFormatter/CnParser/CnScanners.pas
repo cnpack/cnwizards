@@ -755,10 +755,21 @@ begin
   // 如果前一个有效 Token 是标识符，就得判断当前或靠后（如果当前的是注释）的有效 Token 是不是 End 和 Else
   // 如果靠后一个是，表示语句已经结束，现状已经在语句外了。以应对 End 或 Else 前的语句无分号的问题
   if not FIsForwarding then
+  begin
     Result := (FPrevEffectiveToken in [tokSemicolon, tokKeywordFinally, tokKeywordExcept,
       tokKeywordOf, tokKeywordElse, tokKeywordDo] + StructStmtTokens +
       RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens)
-      or not (ForwardActualToken() in [tokKeywordEnd, tokKeywordElse]) // 这句对性能有所影响
+      or not (ForwardActualToken() in [tokKeywordEnd, tokKeywordElse]); // 这句对性能有所影响
+
+    if Result then
+    begin
+      // 如果出现 “Symbol 编译指令 Symbol” 连续的情况，说明可能是被编译指令隔开的合法语句但看上去不合法了
+      // 这里强行让前者变成语句外部
+      if (FPrevEffectiveToken = tokSymbol) and (FToken = tokCompDirective) and
+        (ForwardActualToken() in [tokSymbol]) then
+        Result := False;
+    end;
+  end
   else
     Result := FPrevEffectiveToken in [tokSemicolon] + StructStmtTokens;
   // 在 ForwardToken 调用中不要再重入了
@@ -1513,6 +1524,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
+            // 四处相同之第一处：
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
@@ -1631,6 +1643,7 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
+            // 四处相同之第二处：
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
             // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
@@ -1721,10 +1734,18 @@ begin
           if BlankStr <> '' then
           begin
             FCodeGen.BackSpaceLastSpaces;
+            // 四处相同之第三处：
             // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
             // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-            if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
+            // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
+            // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
+            if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
+              and GetCanLineBreakFromOut and not IsInStatement
+              or (IsInOpStatement and GetCanLineBreakFromOut) then
             begin
+              // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+              // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
+
               Idx := Pos(#13#10, BlankStr);
               if Idx > 0 then
                 Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
@@ -1761,10 +1782,18 @@ begin
               if BlankStr <> '' then
               begin
                 FCodeGen.BackSpaceLastSpaces;
+                // 四处相同之第四处：
                 // 如果当前是保留单个空行模式，且不是语句中，则 BlankStr 开头的空格与回车要省略，避免出现多余的换行
                 // 如语句中的判断有误，则可能出现该换行的行注释拼到同一行的情况
-                if FKeepOneBlankLine and IsStringStartWithSpacesCRLF(BlankStr) and not IsInStatement then
+                // 行注释回车回车块注释，这种模式下写完行注释并第一个回车后，递归到此处写 BlankStr 第二个回车时，该回车会被误删
+                // 因而需要用 FNestedIsComment 变量控制，该变量在碰到注释递归进入时会被设置为 True
+                if FKeepOneBlankLine and not FNestedIsComment and IsStringStartWithSpacesCRLF(BlankStr)
+                  and GetCanLineBreakFromOut and not IsInStatement
+                  or (IsInOpStatement and GetCanLineBreakFromOut) then
                 begin
+                  // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
+                  // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
+
                   Idx := Pos(#13#10, BlankStr);
                   if Idx > 0 then
                     Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2

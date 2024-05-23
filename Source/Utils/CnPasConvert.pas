@@ -302,8 +302,10 @@ type
 
     property StatusFont[ATokenType: TCnPasConvertTokenType]: TFont read
       GetStatusFont;
-    property InStream: TStream read FInStream write SetInStream;     // 输入流 Ansi/Utf16
+    property InStream: TStream read FInStream write SetInStream;
+    {* 输入的代码流，内容根据当前编译器版本，必须是 Ansi 或 Utf16 的字符串}
     property OutStream: TStream read FOutStream write SetOutStream;  // 输出流 Ansi 或 utf8
+    {* 输出的代码流，内容根据当前编译器版本输出的是 Ansi 或 Utf8 的字符串}
 
     property Size: Integer read FSize;
     property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor;
@@ -323,6 +325,7 @@ type
       FProcessEvent;
 
     property SourceType: TCnConvertSourceType read FSourceType write FSourceType;
+    {* 由外界指定源码语言类型}
   end;
 
 { TCnSourceToHtmlConversion }
