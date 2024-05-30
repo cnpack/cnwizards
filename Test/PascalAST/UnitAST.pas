@@ -871,7 +871,7 @@ end;
 procedure TFormAST.btnFunctionClick(Sender: TObject);
 begin
   ReInitAst(
-    'function Help(A: Int64; B: array of const; var DivRes: Integer): Boolean; assembler;' + #13#10 +
+    'function Help(A, C: Int64; B: array of const; var DivRes: Integer): Boolean; assembler;' + #13#10 +
     'begin' + #13#10 +
       'WinApi.Windows.CommonFlag := True;' + #13#10 +
     'end;'

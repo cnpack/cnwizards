@@ -253,11 +253,11 @@ type
     property TokenKind: TTokenKind read FTokenKind write FTokenKind;
     {* Pascal Token 类型，注意有的节点本身没有实际对应的 Token，用 tkNone 代替}
     property Return: Boolean read FReturn write FReturn;
-    {* 该 Token 后是否应换行}
+    {* 该 Token 后是否应换行，默认不换}
     property NoSpaceBehind: Boolean read FNoSpaceBehind write FNoSpaceBehind;
-    {* 该 Token 后是否无空格}
+    {* 该 Token 后是否无空格，默认有}
     property NoSpaceBefore: Boolean read FNoSpaceBefore write FNoSpaceBefore;
-    {* 该 Token 前是否无空格}
+    {* 该 Token 前是否无空格，默认有}
   end;
 
   TCnPasAstTree = class(TCnTree)
@@ -2448,7 +2448,7 @@ begin
   MatchCreateLeafAndPush(tkNone, cntClassHeritage);
 
   try
-    MatchCreateLeafAndPush(tkRoundOpen);
+    MarkNoSpaceBeforeFlag(MatchCreateLeafAndPush(tkRoundOpen));
     try
       BuildIdentList;
     finally
@@ -3540,6 +3540,7 @@ var
   I: Integer;
   S: string;
   Prev, Son: TTokenKind;
+  NSP: Boolean;
 begin
   if FReturn or (FTokenKind in [tkBorComment, tkAnsiComment, tkSlashesComment, // 注释都暂且先换行
     tkBegin, tkThen, tkDo, tkRepeat,                                           // 这些后面都换行
@@ -3562,10 +3563,20 @@ begin
       else
         Prev := Items[I - 1].TokenKind;
 
-      if FNoSpaceBehind or Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或当前子节点前面不要空格
-        (Prev in [tkRoundOpen, tkSquareOpen, tkPoint]) or            // 前一个节点如果是这些，则前一个节点后面不要空格
+      NSP := FNoSpaceBehind or Items[I].NoSpaceBefore or    // 如果本节点后面不要空格，或当前子节点前面不要空格
+        (Prev in [tkRoundOpen, tkSquareOpen, tkPoint, tkDotDot]) or            // 前一个节点如果是这些，则前一个节点后面不要空格
         (Son in [tkPoint, tkDotdot, tkPointerSymbol, tkSemiColon, tkColon, // 当前子节点如果是这些，则当前子节点前面不要空格
-        tkRoundClose, tkSquareClose]) then
+        tkRoundClose, tkSquareClose, tkComma]);
+
+      if not NSP then
+      begin
+        // 还有些 FuncCall(  class(  array[ 的不要空格，没法单独处理，这里额外处理
+        if ((Prev in [tkClass, tkIdentifier]) and (Son in [tkRoundOpen]))
+          or ((Prev in [tkArray]) and (Son in [tkSquareOpen])) then
+          NSP := True;
+      end;
+
+      if NSP then
         Result := Result + S
       else
         Result := Result + ' ' + S;
