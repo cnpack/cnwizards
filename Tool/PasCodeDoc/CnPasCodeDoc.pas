@@ -807,6 +807,7 @@ begin
     end;
 
     Result.Sort;
+    Result.ParseBrief;
   finally
     SL.Free;
     AST.Free;
@@ -943,8 +944,47 @@ begin
 end;
 
 procedure TCnDocUnit.ParseBrief;
+const
+  UNIT_NAME = '* 单元名称：';
+  MEMO_START = '* 备    注：';
+  MEMO_BODY = '*   ';
+var
+  I, MStart, MEnd: Integer;
+  SL, MO: TStringList;
+  S: string;
+  MF: Boolean;
 begin
-  // TODO: Comment 属性里找合适的内容
+  // Comment 属性里找合适的内容
+  SL := TStringList.Create;
+  MO := TStringList.Create;
+
+  try
+    SL.Text := FComment;
+    MF := False;
+
+    for I := 0 to SL.Count - 1 do
+    begin
+      if Pos(UNIT_NAME, SL[I]) = 1 then
+        FDeclareType := Copy(SL[I], Length(UNIT_NAME) + 1, MaxInt)
+      else if Pos(MEMO_START, SL[I]) = 1 then
+      begin
+        MO.Add(Copy(SL[I], Length(MEMO_START) + 1, MaxInt));
+        MF := True;
+      end
+      else if MF then
+      begin
+        if Pos(MEMO_BODY, SL[I]) = 1 then
+          MO.Add(Copy(SL[I], Length(MEMO_BODY) + 1, MaxInt))
+        else
+          Break;
+      end;
+    end;
+
+    FComment := MO.Text;
+  finally
+    MO.Free;
+    SL.Free;
+  end;
 end;
 
 procedure TCnDocUnit.Sort;
