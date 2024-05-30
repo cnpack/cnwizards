@@ -1,0 +1,135 @@
+hr
+	{
+	margin-top: -5 px;
+	noshade;
+	color: #cccccc;
+	text-indent:0px;
+	}
+a
+	{ text-decoration: none }
+
+a:hover
+	{ color: #FF0000; text-decoration: underline }
+
+a:link
+	{ color: #0000FF }
+
+a:active
+	{ color: #FF0000; text-decoration: underline }
+
+a:visited
+	{ color: #0000FF }
+
+p
+	{
+	margin-left: 1pt;
+	margin-right: 1pt;
+	margin-top: 5pt;
+	margin-bottom: 5pt
+	}
+
+ol
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	line-height: 13pt;
+	margin-left: 18pt;
+	margin-top: 2pt;
+	margin-bottom: 2pt
+	}
+
+ul
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	line-height: 13pt;
+	margin-left: 14pt;
+	margin-top: 2pt;
+	margin-bottom: 2pt
+	}
+
+li
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 0px;
+	line-height: 13pt;
+	}
+
+.text
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 0px;
+	line-height: 13pt;
+	}
+
+.narrow
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 0px;
+	line-height: 13pt;
+	margin-top: 1pt;
+	margin-bottom: 1pt
+	}
+
+.indent
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 15px;
+	line-height: 13pt;
+	}
+
+.indentnarrow
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 15px;
+	line-height: 13pt;
+	margin-top: 1pt;
+	margin-bottom: 1pt
+	}
+
+.title
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 9pt;
+	text-indent: 0px;
+	font-weight: bold;
+	}
+
+.head
+	{
+	font-family: "宋体","Verdana","Courier New";
+	font-size: 12pt;
+	color: #3366FF;
+	font-weight: bold
+	}
+
+.code
+	{
+	font-family: "Courier New";
+	}
+
+table
+	{
+	font-family: "宋体", "Verdana", "Courier New";
+	font-size: 9pt;
+	line-height: 13pt;
+	}
+
+.u0 { font-family: "Courier New"; font-size: 10pt;color: #FF0000 }
+.u1 { font-family: "Courier New"; font-size: 10pt; font-style: italic;color: #000080 }
+.u2 { font-family: "Courier New"; font-size: 10pt;color: #0000FF }
+.u3 { font-family: "Courier New"; font-size: 10pt;color: #008000 }
+.u4 { font-family: "Courier New"; font-size: 10pt;color: #000000 }
+.u5 { font-family: "Courier New"; font-size: 10pt; font-weight: bold;color: #000000 }
+.u6 { font-family: "Courier New"; font-size: 10pt;color: #000000 }
+.u7 { font-family: "Courier New"; font-size: 10pt;color: #000000 }
+.u8 { font-family: "Courier New"; font-size: 10pt;color: #0000FF }
+.u9 { font-family: "Courier New"; font-size: 10pt;color: #0000FF }
+.u10 { font-family: "Courier New"; font-size: 10pt;color: #000000 }
+.u11 { font-family: "Courier New"; font-size: 10pt;color: #0000FF }
+.uc { font-family: "Courier New"; font-size: 12pt;color: #000000 }
