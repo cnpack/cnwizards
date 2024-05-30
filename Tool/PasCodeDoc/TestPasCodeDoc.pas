@@ -70,36 +70,52 @@ const
     '</html>';
 
   HTML_UNIT_FMT = // 单元说明，备注
-    '<p class="text">%s</p>' + #13#10 +
-    '<p class="text">%s</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>单元名称</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>单元说明</b>：%s</p>' + #13#10 +
     '<p class="text">　</p>' + #13#10;
 
   HTML_CONST_FMT = // 常量说明
     '<p class="text">　</p>' + #13#10 +
-    '<p class="text">常量：%s</p>' + #13#10 +
-    '<p class="text">声明：%s</p>' + #13#10 +
-    '<p class="text">说明：%s</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>常量</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
     '<p class="text">　</p>' + #13#10;
 
   HTML_TYPE_FMT =  // 类型说明
     '<p class="text">　</p>' + #13#10 +
-    '<p class="text">类型：%s</p>' + #13#10 +
-    '<p class="text">声明：%s</p>' + #13#10 +
-    '<p class="text">说明：%s</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>类型</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
     '<p class="text">　</p>' + #13#10;
 
   HTML_PROCEDURE_FMT = // 过程说明
     '<p class="text">　</p>' + #13#10 +
-    '<p class="text">函数：%s</p>' + #13#10 +
-    '<p class="text">声明：%s</p>' + #13#10 +
-    '<p class="text">说明：%s</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>函数</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
     '<p class="text">　</p>' + #13#10;
 
   HTML_VAR_FMT =   // 变量说明
     '<p class="text">　</p>' + #13#10 +
-    '<p class="text">变量：%s</p>' + #13#10 +
-    '<p class="text">声明：%s</p>' + #13#10 +
-    '<p class="text">说明：%s</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>变量</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
+    '<p class="text">　</p>' + #13#10;
+
+  HTML_PROP_FMT =   // 属性说明
+    '<p class="text">　</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>属性</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>可见</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
+    '<p class="text">　</p>' + #13#10;
+
+  HTML_METHOD_FMT = // 方法说明
+    '<p class="text">　</p>' + #13#10 +
+    '<p class="text"><span class="uc"><b>方法</b>：%s</span></p>' + #13#10 +
+    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>可见</b>：%s</p>' + #13#10 +
+    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
     '<p class="text">　</p>' + #13#10;
 
 procedure TFormPasDoc.btnExtractFromFileClick(Sender: TObject);
@@ -116,6 +132,7 @@ begin
     Html := TStringList.Create;
     try
       DumpDocToHtml(FDoc, Html);
+      dlgSave1.FileName := ChangeFileExt(dlgOpen1.FileName, '.html');
       if dlgSave1.Execute then
         Html.SaveToFile(dlgSave1.FileName);
     finally
@@ -238,14 +255,14 @@ end;
 
 procedure TFormPasDoc.DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
 var
-  I: Integer;
+  I, J: Integer;
   S: string;
-  Item: TCnDocBaseItem;
+  Item, Sub: TCnDocBaseItem;
 begin
   if (Doc = nil) or (HtmlStrings = nil) then
     Exit;
 
-  S := Format(HTML_HEAD_FMT, [Doc.DeclareName, Doc.DeclareName]);
+  S := Format(HTML_HEAD_FMT, [Doc.DeclareName + '.pas', Doc.DeclareName + '.pas']);
   HtmlStrings.Add(S);
 
   S := Format(HTML_UNIT_FMT, [Doc.DeclareType, Doc.Comment]);
@@ -257,14 +274,37 @@ begin
     Item := Doc.Items[I];
     HtmlStrings.Add('<hr>');
     case Item.DocType of
+      dtType: // 类型内部还有其他内容
+        begin
+          S := Format(HTML_TYPE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          HtmlStrings.Add(S);
+          if Item.Count > 0 then
+          begin
+            HtmlStrings.Add('<blockquote>');
+            for J := 0 to Item.Count - 1 do
+            begin
+              Sub := Item.Items[J];
+              case Sub.DocType of
+                dtProperty:
+                  begin
+                    HtmlStrings.Add('<hr>');
+                    S := Format(HTML_PROP_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    HtmlStrings.Add(S);
+                  end;
+                dtProcedure:
+                  begin
+                    HtmlStrings.Add('<hr>');
+                    S := Format(HTML_METHOD_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    HtmlStrings.Add(S);
+                  end;
+              end;
+            end;
+            HtmlStrings.Add('</blockquote>');
+          end;
+        end;
       dtConst:
         begin
           S := Format(HTML_CONST_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
-          HtmlStrings.Add(S);
-        end;
-      dtType:
-        begin
-          S := Format(HTML_TYPE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
           HtmlStrings.Add(S);
         end;
       dtProcedure:

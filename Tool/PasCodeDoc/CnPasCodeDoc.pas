@@ -82,6 +82,9 @@ type
     procedure DumpToStrings(Strs: TStrings; Indent: Integer = 0);
     {* 将内容保存到字符串列表中}
 
+    function GetScopeStr: string;
+    {* 返回 FScope 对应的字符串}
+
     property DocType: TCnDocType read FDocType;
     {* 文档元素类型}
 
@@ -924,6 +927,11 @@ begin
   Result := TCnDocBaseItem(FItems[Index]);
 end;
 
+function TCnDocBaseItem.GetScopeStr: string;
+begin
+  Result := SCOPE_STRS[FScope];
+end;
+
 procedure TCnDocBaseItem.SetItem(Index: Integer;
   const Value: TCnDocBaseItem);
 begin
@@ -949,9 +957,8 @@ const
   MEMO_START = '* 备    注：';
   MEMO_BODY = '*   ';
 var
-  I, MStart, MEnd: Integer;
+  I: Integer;
   SL, MO: TStringList;
-  S: string;
   MF: Boolean;
 begin
   // Comment 属性里找合适的内容
