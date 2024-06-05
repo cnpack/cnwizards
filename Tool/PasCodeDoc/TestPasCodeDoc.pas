@@ -70,53 +70,66 @@ const
     '</html>';
 
   HTML_UNIT_FMT = // 单元说明，备注
-    '<p class="text"><span class="uc"><b>单元名称</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>单元说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="1">' + #13#10 +
+    '<tr><td width=84 valign=top><p class="text"><span class="uc"><b>单元名称</b>：</td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=84 valign=top><p class="text"><b>单元说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr></table>' + #13#10;
 
   HTML_CONST_FMT = // 常量说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>常量</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>常量</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
   HTML_TYPE_FMT =  // 类型说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>类型</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>类型</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
   HTML_PROCEDURE_FMT = // 过程说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>函数</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>函数</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
   HTML_VAR_FMT =   // 变量说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>变量</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>变量</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
   HTML_PROP_FMT =   // 属性说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>属性</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>可见</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>属性</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
   HTML_METHOD_FMT = // 方法说明
-    '<p class="text">　</p>' + #13#10 +
-    '<p class="text"><span class="uc"><b>方法</b>：%s</span></p>' + #13#10 +
-    '<p class="text"><b>声明</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>可见</b>：%s</p>' + #13#10 +
-    '<p class="text"><b>说明</b>：%s</p>' + #13#10 +
-    '<p class="text">　</p>' + #13#10;
+    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>方法</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
+    '</table>' + #13#10;
 
 procedure TFormPasDoc.btnExtractFromFileClick(Sender: TObject);
 var
