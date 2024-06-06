@@ -91,6 +91,7 @@ type
     mmoCppText: TMemo;
     pm1: TPopupMenu;
     ShowString1: TMenuItem;
+    btnExternalFunction: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -152,6 +153,9 @@ type
     procedure btnAsmBlockClick(Sender: TObject);
     procedure tvPasChange(Sender: TObject; Node: TTreeNode);
     procedure ShowString1Click(Sender: TObject);
+    procedure btnGotoClick(Sender: TObject);
+    procedure btnInheritedClick(Sender: TObject);
+    procedure btnExternalFunctionClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -267,6 +271,20 @@ begin
   SynTree;
 end;
 
+procedure TFormAST.btnGotoClick(Sender: TObject);
+begin
+  ReInitAst('goto aaaa;');
+  FAST.BuildSimpleStatement;
+  SynTree;
+end;
+
+procedure TFormAST.btnInheritedClick(Sender: TObject);
+begin
+  ReInitAst('Result := inherited click;');
+  FAST.BuildSimpleStatement;
+  SynTree;
+end;
+
 procedure TFormAST.btnExpressionListClick(Sender: TObject);
 begin
   ReInitAst('(Windows.SetSource as TBig)[3, 5]^^.Pig, [1..33]');
@@ -276,7 +294,7 @@ end;
 
 procedure TFormAST.btnArrayTypeClick(Sender: TObject);
 begin
-  ReInitAst('array[0..33] of Integer');
+  ReInitAst('array[Low(Integer)..High(Integer)] of Integer');
   FAST.BuildArrayType;
   SynTree;
 end;
@@ -623,7 +641,7 @@ end;
 
 procedure TFormAST.btnRaiseClick(Sender: TObject);
 begin
-  ReInitAst('raise EReadError.CreateRes(@SReadError);');
+  ReInitAst('raise EStringListError.CreateFmt(string(Msg), [Data]) at ReturnAddr;');
   FAST.BuildRaiseStatement;
   SynTree;
 end;
@@ -940,6 +958,13 @@ begin
     if Leaf <> nil then
       mmoPasRes.Text := Leaf.GetPascalCode;
   end;
+end;
+
+procedure TFormAST.btnExternalFunctionClick(Sender: TObject);
+begin
+  ReInitAst('function Help: Boolean; external ADVAPI32 name ''CryptAcquireContextA'';');
+  FAST.BuildDeclSection;
+  SynTree;
 end;
 
 end.

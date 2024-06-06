@@ -131,6 +131,7 @@ type
     cntOn,
     cntThen,
     cntUntil,
+    cntAt,
     cntCaseSelector,
     cntCaseLabel,
     cntOut,
@@ -627,6 +628,7 @@ begin
     tkOn: Result := cntOn;
     tkThen: Result := cntThen;
     tkUntil: Result := cntUntil;
+    tkAt: Result := cntAt;
 
     tkOut: Result := cntOut;
     tkObject: Result := cntObject;
@@ -922,7 +924,7 @@ begin
       else if FLex.TokenID = tkPoint then
       begin
         MatchCreateLeafAndStep(FLex.TokenID);
-        BuildIdent;
+        BuildExpression;
       end
       else if FLex.TokenID = tkSquareOpen then
       begin
@@ -2797,9 +2799,12 @@ begin
     MatchCreateLeafAndStep(FLex.TokenID);
 
   repeat
+    while FLex.TokenID = tkSemiColon do
+      MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
+
     BuildStatement;
 
-    if FLex.TokenID = tkSemiColon then
+    while FLex.TokenID = tkSemiColon do
       MarkReturnFlag(MatchCreateLeafAndStep(FLex.TokenID));
 
     if not (FLex.TokenID in StatementTokens) then

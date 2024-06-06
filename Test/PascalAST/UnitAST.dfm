@@ -155,6 +155,7 @@ object FormAST: TFormAST
             Height = 25
             Caption = 'Goto'
             TabOrder = 2
+            OnClick = btnGotoClick
           end
           object btnInherited: TButton
             Left = 16
@@ -163,6 +164,7 @@ object FormAST: TFormAST
             Height = 25
             Caption = 'inherited'
             TabOrder = 3
+            OnClick = btnInheritedClick
           end
           object btnStringConvert: TButton
             Left = 16
@@ -608,6 +610,15 @@ object FormAST: TFormAST
             Caption = 'Asm Block'
             TabOrder = 2
             OnClick = btnAsmBlockClick
+          end
+          object btnExternalFunction: TButton
+            Left = 16
+            Top = 96
+            Width = 75
+            Height = 25
+            Caption = 'External Func'
+            TabOrder = 3
+            OnClick = btnExternalFunctionClick
           end
         end
         object btnDesignator: TButton
