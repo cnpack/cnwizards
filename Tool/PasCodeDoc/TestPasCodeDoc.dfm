@@ -49,12 +49,21 @@ object FormPasDoc: TFormPasDoc
   end
   object tvPas: TTreeView
     Left = 16
-    Top = 56
+    Top = 80
     Width = 305
-    Height = 409
+    Height = 385
     Indent = 19
     TabOrder = 3
     OnDblClick = tvPasDblClick
+  end
+  object btnConvertDirectory: TButton
+    Left = 16
+    Top = 48
+    Width = 305
+    Height = 25
+    Caption = 'Convert Directory'
+    TabOrder = 4
+    OnClick = btnConvertDirectoryClick
   end
   object dlgOpen1: TOpenDialog
     Left = 232

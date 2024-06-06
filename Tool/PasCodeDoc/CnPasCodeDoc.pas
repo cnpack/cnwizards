@@ -988,6 +988,7 @@ begin
     end;
 
     FComment := MO.Text;
+    FComment := StringReplace(FComment, #13#10#13#10, '<br><br>', [rfReplaceAll]);
   finally
     MO.Free;
     SL.Free;

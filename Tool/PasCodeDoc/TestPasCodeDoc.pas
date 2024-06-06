@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnCommon, ComCtrls, CnPasCodeDoc, CnPasConvert;
+  StdCtrls, CnCommon, ComCtrls, FileCtrl, CnPasCodeDoc, CnPasConvert;
 
 type
   TFormPasDoc = class(TForm)
@@ -14,11 +14,13 @@ type
     btnCombineInterface: TButton;
     dlgSave1: TSaveDialog;
     tvPas: TTreeView;
+    btnConvertDirectory: TButton;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure tvPasDblClick(Sender: TObject);
+    procedure btnConvertDirectoryClick(Sender: TObject);
   private
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
@@ -71,14 +73,14 @@ const
 
   HTML_UNIT_FMT = // 单元说明，备注
     '<table width="100%%" border="0" cellpadding="1">' + #13#10 +
-    '<tr><td width=84 valign=top><p class="text"><span class="uc"><b>单元名称</b>：</td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=84 valign=top><p class="text"><b>单元说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
+    '<tr><td width=90 valign=top><p class="text"><span class="uc"><b>单元名称</b>：</td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=90 valign=top><p class="text"><b>单元说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr></table>' + #13#10;
 
   HTML_CONST_FMT = // 常量说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>常量</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>常量</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
@@ -87,7 +89,7 @@ const
   HTML_TYPE_FMT =  // 类型说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>类型</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>类型</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
@@ -96,7 +98,7 @@ const
   HTML_PROCEDURE_FMT = // 过程说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>函数</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>函数</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
@@ -105,7 +107,7 @@ const
   HTML_VAR_FMT =   // 变量说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>变量</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>变量</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
@@ -113,22 +115,18 @@ const
 
   HTML_PROP_FMT =   // 属性说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>属性</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>属性</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
     '</table>' + #13#10;
 
   HTML_METHOD_FMT = // 方法说明
     '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>方法</b>：</span></p></td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
+    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>方法</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
     '</table>' + #13#10;
 
 procedure TFormPasDoc.btnExtractFromFileClick(Sender: TObject);
@@ -151,6 +149,47 @@ begin
     finally
       Html.Free;
     end;
+  end;
+end;
+
+procedure TFormPasDoc.btnConvertDirectoryClick(Sender: TObject);
+var
+  Dir, F: string;
+  I: Integer;
+  Html: TStringList;
+begin
+  if SelectDirectory('Select a Directory', '', Dir) then
+  begin
+    FAllFile.Clear;
+    Screen.Cursor := crHourGlass;
+
+    try
+      FindFile(Dir, '*.pas', FileCallBack);
+
+      for I := 0 to FAllFile.Count - 1 do
+      begin
+        FreeAndNil(FDoc);
+        try
+          FDoc := CnCreateUnitDocFromFileName(FAllFile[I]);
+        except
+          on E: Exception do
+            ShowMessage(FAllFile[I] + ' ' + E.Message);
+        end;
+
+        Html := TStringList.Create;
+        try
+          DumpDocToHtml(FDoc, Html);
+          F := ChangeFileExt(FAllFile[I], '.html');
+          Html.SaveToFile(F);
+        finally
+          Html.Free;
+        end;
+      end;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+
+    ShowMessage('Convert OK');
   end;
 end;
 
@@ -369,7 +408,7 @@ begin
     OutStream.Position := 0;
     OutStream.Read(S[1], OutStream.Size);
 
-    Result := S; // 先不处理 UTF8 的情况
+    Result := StringReplace(S, '&nbsp;', ' ', [rfIgnoreCase, rfReplaceAll]); // 先不处理 UTF8 的情况
   finally
     OutStream.Free;
     InStream.Free;
