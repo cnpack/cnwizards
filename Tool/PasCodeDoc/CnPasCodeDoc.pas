@@ -175,7 +175,7 @@ const
 
 // 从 ParentLeaf 的第 0 个子节点开始越过注释找符合的节点，返回符合的节点，不符合则抛出异常且返回 nil
 function DocSkipCommentToChild(ParentLeaf: TCnPasAstLeaf;
-  MatchedNodeTypes: TCnPasNodeTypes): TCnPasAstLeaf;
+  MatchedNodeTypes: TCnPasNodeTypes; NeedRaise: Boolean = True): TCnPasAstLeaf;
 var
   I: Integer;
 begin
@@ -189,7 +189,8 @@ begin
     end;
 
     if not (ParentLeaf[I].NodeType in COMMENT_SKIP_NODE_TYPE) then
-      raise ECnPasCodeDocException.Create('Skip Comment To Node Error.');
+      if NeedRaise then
+        raise ECnPasCodeDocException.Create('Skip Comment To Node Error.');
   end;
 end;
 
@@ -624,7 +625,7 @@ end;
 procedure DocFindTypes(ParentLeaf: TCnPasAstLeaf; OwnerItem: TCnDocBaseItem);
 var
   K, M: Integer;
-  Leaf, DeclLeaf, CIRRoot: TCnPasAstLeaf;
+  Leaf, DeclLeaf, CIRRoot, Tmp: TCnPasAstLeaf;
   Item: TCnTypeDocItem;
   IsIntf, IsClass, IsRecord: Boolean;
 begin
@@ -662,7 +663,15 @@ begin
         begin
           IsClass := True;
           if CIRRoot.Count > 0 then
-            CIRRoot := DocSkipCommentToChild(CIRRoot, [cntClassBody]);
+          begin
+            Tmp := DocSkipCommentToChild(CIRRoot, [cntClassBody], False);
+            if Tmp <> nil then
+              CIRRoot := Tmp
+            else
+            begin
+              // 返回 nil 表示是 class of xxxx 这种，似乎也不用做啥
+            end;
+          end;
         end;
 
         if IsIntf or IsClass then
