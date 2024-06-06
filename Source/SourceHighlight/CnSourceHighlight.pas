@@ -1225,7 +1225,7 @@ begin
             begin
               if X1 = X2 then
               begin
-                YStep := Abs(Y2 - Y1) div (Step * 2); // Y方向总步数，正值
+                YStep := Abs(Y2 - Y1) div (Step * 2); // Y 方向总步数，正值
                 if Y1 < Y2 then
                 begin
                   for I := 0 to YStep - 1 do
@@ -1245,7 +1245,7 @@ begin
               end
               else if Y1 = Y2 then
               begin
-                XStep := Abs(X2 - X1) div (Step * 2); // X方向总步数
+                XStep := Abs(X2 - X1) div (Step * 2); // X 方向总步数
                 if X1 < X2 then
                 begin
                   for I := 0 to XStep - 1 do

@@ -302,6 +302,7 @@ type
     procedure UnknownProc;
     function GetToken: AnsiString;
     function InSymbols(aChar: AnsiChar): Boolean;
+    function InSymbols1(aChar: AnsiChar): Boolean;
     function GetTokenAddr: PAnsiChar;
     function GetTokenLength: Integer;
   protected
@@ -555,7 +556,7 @@ begin
   if KeyComp('Or')then Result:=tkOr else
     if KeyComp('Name')then
     begin
-      if inSymbols(CharAhead(fStringLen))then Result:=tkIdentifier else
+      if inSymbols1(CharAhead(fStringLen))then Result:=tkIdentifier else
         Result:=tkName
     end else
       if KeyComp('Asm')then Result:=tkAsm else Result:=tkIdentifier;
@@ -1223,6 +1224,12 @@ end;
 function TmwPasLex.InSymbols(aChar: AnsiChar): Boolean;
 begin
   if aChar in ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':',
+    ';', '<', '=', '>', '@', '[', ']', '^']then Result:=True else Result:=False;
+end;
+
+function TmwPasLex.InSymbols1(aChar: AnsiChar): Boolean;
+begin
+  if aChar in ['#', '$', '&', '(', ')', '*', '+', ',', '?', '.', '/', ':',
     ';', '<', '=', '>', '@', '[', ']', '^']then Result:=True else Result:=False;
 end;
 

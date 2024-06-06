@@ -978,7 +978,7 @@ begin
             PopLeaf;
           end;
         end;
-      tkIdentifier, tkNil, tkKeyString: // TODO: 还有部分关键字可以做变量名
+      tkIdentifier, tkNil, tkKeyString, tkIndex: // TODO: 还有部分关键字可以做变量名
         begin
           BuildDesignator;
           if FLex.TokenID = tkRoundOpen then
@@ -1109,7 +1109,7 @@ var
   begin
     repeat
       FLex.NextNoJunk;
-    until not (FLex.TokenID in [tkIdentifier, tkPoint, tkInteger, tkString, tkRoundOpen, tkSquareOpen,
+    until not (FLex.TokenID in [tkIdentifier, tkPoint, tkInteger, tkString, tkRoundOpen, tkRoundClose,
       tkPlus, tkMinus, tkStar, tkSlash, tkDiv, tkMod]);
   end;
 
@@ -1176,7 +1176,7 @@ begin
     case FLex.TokenID of
       tkKeyString:
         MatchCreateLeafAndStep(FLex.TokenID); // TODO: 还有一些关键字可以做强制类型转换或函数调用名
-      tkNil, tkIdentifier:
+      tkNil, tkIdentifier, tkIndex:           // TODO: 还有一些关键字可以做变量名
         BuildIdent;
       tkRoundOpen:
         begin
@@ -1507,7 +1507,7 @@ begin
     BuildIdent;
     MatchCreateLeafAndStep(tkEqual);
     if FLex.TokenID = tkType then
-      MatchCreateLeafAndStep(tkNone, cntTypeKeyword);
+      MatchCreateLeafAndStep(tkType, cntTypeKeyword);
 
     // 要分开 RestrictType 和普通 Type，前者包括 class/object/interface，部分场合不允许出现
     if FLex.TokenID in [tkClass, tkObject, tkInterface, tkDispInterface] then
@@ -1627,12 +1627,12 @@ begin
     raise ECnPascalAstException.CreateFmt(SCnErrorTokenNotMatchFmt,
       [GetEnumName(TypeInfo(TTokenKind), Ord(AToken)),
        GetEnumName(TypeInfo(TTokenKind), Ord(FLex.TokenID)),
-       FLex.Token, FLex.LineNumber, FLex.TokenPos - FLex.LineStartOffset]);
+       FLex.Token, FLex.LineNumber + 1, FLex.TokenPos - FLex.LineStartOffset]);
 {$ELSE}
     raise ECnPascalAstException.CreateFmt(SCnErrorTokenNotMatchFmt,
       [GetEnumName(TypeInfo(TTokenKind), Ord(AToken)),
        GetEnumName(TypeInfo(TTokenKind), Ord(FLex.TokenID)),
-       FLex.Token, FLex.LineNumber, FLex.TokenPos - FLex.LinePos]);
+       FLex.Token, FLex.LineNumber + 1, FLex.TokenPos - FLex.LinePos]);
 {$ENDIF}
   end;
 

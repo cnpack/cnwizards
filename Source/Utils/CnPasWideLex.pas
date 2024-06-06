@@ -336,7 +336,8 @@ type
     procedure AmpersandProc; // &
     procedure UnknownProc;
     function GetToken: CnWideString;
-    function InSymbols(aChar: WideChar): Boolean;
+    function InSymbols(aChar: WideChar): Boolean;  // 用来判断关键字后的有效字符是否符合一定条件以进一步确定是否关键字
+    function InSymbols1(aChar: WideChar): Boolean; // 去除了上面函数的引号操作
     function GetTokenAddr: PWideChar;
     function GetTokenLength: Integer;
     function GetWideColumnNumber: Integer;
@@ -723,7 +724,7 @@ function TCnPasWideLex.Func28: TTokenKind;
 begin
   if KeyComp('Read') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkRead
@@ -762,7 +763,7 @@ begin
     Result := tkOr
   else if KeyComp('Name') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols1(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkName
@@ -917,7 +918,7 @@ function TCnPasWideLex.Func56: TTokenKind;
 begin
   if KeyComp('Index') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkIndex
@@ -968,7 +969,7 @@ function TCnPasWideLex.Func63: TTokenKind;
 begin
   if KeyComp('Public') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkPublic
@@ -1055,7 +1056,7 @@ function TCnPasWideLex.Func75: TTokenKind;
 begin
   if KeyComp('Write') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkWrite
@@ -1144,7 +1145,7 @@ function TCnPasWideLex.Func91: TTokenKind;
 begin
   if KeyComp('Private') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkPrivate
@@ -1191,7 +1192,7 @@ function TCnPasWideLex.Func96: TTokenKind;
 begin
   if KeyComp('Published') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkPublished
@@ -1232,7 +1233,7 @@ function TCnPasWideLex.Func100: TTokenKind;
 begin
   if KeyComp('Automated') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkAutomated
@@ -1279,7 +1280,7 @@ function TCnPasWideLex.Func106: TTokenKind;
 begin
   if KeyComp('Protected') then
   begin
-    if inSymbols(CharAhead(FStringLen)) then
+    if InSymbols(CharAhead(FStringLen)) then
       Result := tkIdentifier
     else
       Result := tkProtected
@@ -1698,6 +1699,14 @@ end;
 function TCnPasWideLex.InSymbols(aChar: WideChar): Boolean;
 begin
   if _WideCharInSet(aChar, ['#', '$', '&', #39, '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^']) then
+    Result := True
+  else
+    Result := False;
+end;
+
+function TCnPasWideLex.InSymbols1(aChar: WideChar): Boolean;
+begin
+  if _WideCharInSet(aChar, ['#', '$', '&', '(', ')', '*', '+', ',', '?', '.', '/', ':', ';', '<', '=', '>', '@', '[', ']', '^']) then
     Result := True
   else
     Result := False;
