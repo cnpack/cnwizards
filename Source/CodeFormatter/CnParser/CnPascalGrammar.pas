@@ -101,8 +101,16 @@ unit CnPascalGrammar;
                -> Ident ':' TypeId '=' TypedConstant
 
   TypeSection -> TYPE (TypeDecl ';')...
-  TypeDecl -> Ident '=' Type
-           -> Ident '=' RestrictedType
+  TypeDecl -> Ident[TypeParams] '=' [type] Type
+           -> Ident[TypeParams] '=' RestrictedType
+
+  // 这四个是泛型支持
+  TypeParams -> '<' TypeParamDeclList '>'
+  TypeParamDeclList -> TypeParamDecl/';'...
+  TypeParamDecl -> TypeParamList [ ':' ConstraintList ]
+  TypeParamList -> ( Ident[TypeParams] )/','...
+
+  ConstraintList = IdentList
 
   TypedConstant -> (ConstExpr | SetConstructor | ArrayConstant | RecordConstant)
   ArrayConstant -> '(' TypedConstant/','... ')'

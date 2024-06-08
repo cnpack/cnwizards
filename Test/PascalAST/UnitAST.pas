@@ -92,6 +92,7 @@ type
     pm1: TPopupMenu;
     ShowString1: TMenuItem;
     btnExternalFunction: TButton;
+    btnGeneric: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -156,6 +157,7 @@ type
     procedure btnGotoClick(Sender: TObject);
     procedure btnInheritedClick(Sender: TObject);
     procedure btnExternalFunctionClick(Sender: TObject);
+    procedure btnGenericClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -964,6 +966,13 @@ procedure TFormAST.btnExternalFunctionClick(Sender: TObject);
 begin
   ReInitAst('function Help: Boolean; external ADVAPI32 name ''CryptAcquireContextA'';');
   FAST.BuildDeclSection;
+  SynTree;
+end;
+
+procedure TFormAST.btnGenericClick(Sender: TObject);
+begin
+  ReInitAst('TTest<T: Test> = class(TPair<string, TObject<TPersistent>>) end;');
+  FAST.BuildTypeDecl;
   SynTree;
 end;
 
