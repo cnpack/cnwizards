@@ -1464,14 +1464,15 @@ begin
             Result := tokFloat;
           end;
 
-          if (P^ in ['c', 'C', 'd', 'D', 's', 'S']) then
-          begin
-            Result := tokFloat;
-            FFloatType := P^;
-            Inc(P);
-          end
-          else
-            FFloatType := #0;
+//          if (P^ in ['c', 'C', 'd', 'D', 's', 'S']) then
+//          begin
+//            Result := tokFloat;
+//            FFloatType := P^;
+//            Inc(P);
+//          end
+//          else
+
+          FFloatType := #0; // 去除对浮点数后一个字母的处理，貌似 Delphi 不支持
         end;
       end;
     #10:  // 如果有回车则处理，以 #10 为准

@@ -71,7 +71,7 @@ type
     WrapWidth: Integer;
     WrapNewLineWidth: Integer;
     UsesUnitSingleLine: Boolean;
-    SingleStatementToBlock: Boolean; // if while for case 等单个语句是否加 begin end
+    SingleStatementToBlock: Boolean; // if while for case 等单个语句是否加 begin end，也暂不对外开放
     UseIgnoreArea: Boolean;
     UsesLineWrapWidth: Integer;
     KeepUserLineBreak: Boolean;
