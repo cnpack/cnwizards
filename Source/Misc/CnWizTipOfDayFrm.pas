@@ -39,7 +39,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, CnWizClasses, CnWizMultiLang, CnLangMgr, CnWizIni,
-  CnWideStrings;
+  CnCommon;
 
 type
 
@@ -81,7 +81,8 @@ procedure ShowCnWizTipOfDayForm(Manual: Boolean);
 
 implementation
 
-uses CnWizConsts, CnWizOptions, CnCommon;
+uses
+  CnWizConsts, CnWizOptions;
 
 {$R *.DFM}
 
