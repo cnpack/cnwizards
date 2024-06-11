@@ -25,15 +25,15 @@ type
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
     procedure DumpToTreeView(Doc: TCnDocUnit);
-    function TrimComment(const Comment: string): string;
+    class function TrimComment(const Comment: string): string;
     {* 处理掉说明的注释标记}
-    function PasCodeToHtml(const Code: string): string;
+    class function PasCodeToHtml(const Code: string): string;
     {* 将 Pascal 代码加上 HTML 标记，对应格式外部预定义}
   public
     procedure FileCallBack(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
 
-    procedure DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
+    class procedure DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
   end;
 
 var
@@ -305,7 +305,7 @@ begin
   end;
 end;
 
-procedure TFormPasDoc.DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
+class procedure TFormPasDoc.DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
 var
   I, J: Integer;
   S: string;
@@ -378,7 +378,7 @@ begin
   HtmlStrings.Add(HTML_TAIL_FMT);
 end;
 
-function TFormPasDoc.PasCodeToHtml(const Code: string): string;
+class function TFormPasDoc.PasCodeToHtml(const Code: string): string;
 var
   Conv: TCnSourceToHtmlConversion;
   InStream, OutStream: TMemoryStream;
@@ -416,7 +416,7 @@ begin
   end;
 end;
 
-function TFormPasDoc.TrimComment(const Comment: string): string;
+class function TFormPasDoc.TrimComment(const Comment: string): string;
 begin
   Result := Comment;
   if Pos('{* ', Result) = 1 then
