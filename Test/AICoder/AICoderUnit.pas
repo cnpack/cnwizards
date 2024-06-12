@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
-  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl;
+  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox,
+  ExtCtrls;
 
 type
   TFormAITest = class(TForm)
@@ -30,6 +31,13 @@ type
     edtProxy: TEdit;
     lblTestProxy: TLabel;
     edtTestProxy: TEdit;
+    tsChat: TTabSheet;
+    pnlChat: TPanel;
+    btnAddInfo: TButton;
+    btnAddMyMsg: TButton;
+    btnAddYouMsg: TButton;
+    btnAddYouLongMsg: TButton;
+    btnAddMyLongMsg: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -39,11 +47,16 @@ type
     procedure cbbAIEnginesChange(Sender: TObject);
     procedure btnSaveAIConfigClick(Sender: TObject);
     procedure btnExplainCodeClick(Sender: TObject);
+    procedure btnAddInfoClick(Sender: TObject);
+    procedure btnAddMyMsgClick(Sender: TObject);
+    procedure btnAddYouMsgClick(Sender: TObject);
+    procedure btnAddYouLongMsgClick(Sender: TObject);
+    procedure btnAddMyLongMsgClick(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
     FAIConfig: TCnAIEngineOptionManager;
-
+    FChatBox: TCnChatBox;
     // 以下是综合测试
     procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal);
@@ -130,6 +143,11 @@ begin
   FResQueue := TCnObjectQueue.Create(True);
 
   FAIConfig := TCnAIEngineOptionManager.Create;
+
+  FChatBox := TCnChatBox.Create(Self);
+  FChatBox.Color := clWhite;
+  FChatBox.Parent := pnlChat;
+  FChatBox.Align := alClient;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);
@@ -359,6 +377,58 @@ begin
   else
     mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]));
+end;
+
+procedure TFormAITest.btnAddInfoClick(Sender: TObject);
+begin
+  with FChatBox.Items.AddInfo do
+    Text := 'info ' + IntToStr(FChatBox.Items.Count);
+end;
+
+procedure TFormAITest.btnAddMyMsgClick(Sender: TObject);
+begin
+  with FChatBox.Items.AddMessage do
+  begin
+    From := 'CnPack';
+    FromType := cmtMe;
+    Text := 'My Message';
+  end;
+end;
+
+procedure TFormAITest.btnAddYouMsgClick(Sender: TObject);
+begin
+  with FChatBox.Items.AddMessage do
+  begin
+    From := 'AI';
+    FromType := cmtYou;
+    Text := 'Your Message';
+  end;
+end;
+
+procedure TFormAITest.btnAddYouLongMsgClick(Sender: TObject);
+begin
+  with FChatBox.Items.AddMessage do
+  begin
+    From := 'AI';
+    FromType := cmtYou;
+    Text := 'Any data compression method involves the reduction of redundancy in the data. '
+      + 'Consequently, any corruption of the data is likely to have severe effects and be difficult to correct. '
+      + 'Uncompressed text, on the other hand, will probably still be readable despite the presence of some corrupted bytes.';
+  end;
+end;
+
+procedure TFormAITest.btnAddMyLongMsgClick(Sender: TObject);
+begin
+  with FChatBox.Items.AddMessage do
+  begin
+    From := 'AI';
+    FromType := cmtYou;
+    Text := '低代码开发方式具有丰富的UI界面编辑功能，通过可视化界面开发方式快速构建布局，可有效降低开发者的上手成本并提升开发者构建UI界面的效率。 '
+      + '悠悠密西西比泾流经墨西哥，静静地流淌着，滋润着佛罗里达的土地，养育了南北战争中的百姓。这里水陆交通便捷，经济文化发达。' + #13#10
+      + '①既往有对机体严重影响的疾病史(如心衰、严重脑梗死、心肌梗死等)；②既往有精神或神经方面疾病史，或有精神类药物依赖史；'
+      + '③近期服用过影响大脑神经功能的药物，接受相关测试前24 h内饮用含酒精类饮品；④既往有其他睡眠相关疾病史；'
+      + '⑤因各种原因不能配合研究者；⑥数据缺失或不全者。';
+  end;
 end;
 
 end.

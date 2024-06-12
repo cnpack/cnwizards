@@ -157,6 +157,63 @@ object FormAITest: TFormAITest
         TabOrder = 5
       end
     end
+    object tsChat: TTabSheet
+      Caption = 'Chat'
+      ImageIndex = 3
+      object pnlChat: TPanel
+        Left = 16
+        Top = 56
+        Width = 881
+        Height = 457
+        BevelOuter = bvNone
+        TabOrder = 0
+      end
+      object btnAddInfo: TButton
+        Left = 16
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Add Info'
+        TabOrder = 1
+        OnClick = btnAddInfoClick
+      end
+      object btnAddMyMsg: TButton
+        Left = 112
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Add My Msg'
+        TabOrder = 2
+        OnClick = btnAddMyMsgClick
+      end
+      object btnAddYouMsg: TButton
+        Left = 208
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Add Your Msg'
+        TabOrder = 3
+        OnClick = btnAddYouMsgClick
+      end
+      object btnAddYouLongMsg: TButton
+        Left = 304
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'Your Long Msg'
+        TabOrder = 4
+        OnClick = btnAddYouLongMsgClick
+      end
+      object btnAddMyLongMsg: TButton
+        Left = 400
+        Top = 16
+        Width = 75
+        Height = 25
+        Caption = 'My Long Msg'
+        TabOrder = 5
+        OnClick = btnAddMyLongMsgClick
+      end
+    end
   end
   object dlgSave1: TSaveDialog
     Left = 384
