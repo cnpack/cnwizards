@@ -991,6 +991,8 @@ begin
       begin
         if Pos(MEMO_BODY, SL[I]) = 1 then
           MO.Add(Copy(SL[I], Length(MEMO_BODY) + 1, MaxInt))
+        else if Trim(SL[I]) = '*' then // 注释中的空行，留着做硬回车
+          MO.Add('')
         else
           Break;
       end;
