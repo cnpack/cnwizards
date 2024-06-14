@@ -23,6 +23,9 @@ type
     chkWidePas: TCheckBox;
     chkWideCpp: TCheckBox;
     btnPosInfoW: TButton;
+    btnOpenPas: TButton;
+    dlgOpen1: TOpenDialog;
+    btnOpenC: TButton;
     procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasSrcChange(Sender: TObject);
     procedure btnGetUsesClick(Sender: TObject);
@@ -32,6 +35,8 @@ type
     procedure mmoPasSrcClick(Sender: TObject);
     procedure mmoCppSrcClick(Sender: TObject);
     procedure btnPosInfoWClick(Sender: TObject);
+    procedure btnOpenPasClick(Sender: TObject);
+    procedure btnOpenCClick(Sender: TObject);
   private
     procedure ShowCursorPos;
   public
@@ -227,6 +232,20 @@ begin
     mmoPasResult.Lines.Add('Previous Token: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)));
     mmoPasResult.Lines.Add('Current Token: ' + string(Token));
   end;
+end;
+
+procedure TTeststructParseForm.btnOpenPasClick(Sender: TObject);
+begin
+  dlgOpen1.Filter := 'Pascal|*.pas';
+  if dlgOpen1.Execute then
+    mmoPasSrc.Lines.LoadFromFile(dlgOpen1.FileName);
+end;
+
+procedure TTeststructParseForm.btnOpenCClick(Sender: TObject);
+begin
+  dlgOpen1.Filter := 'C++|*.cpp';
+  if dlgOpen1.Execute then
+    mmoCppSrc.Lines.LoadFromFile(dlgOpen1.FileName);
 end;
 
 end.

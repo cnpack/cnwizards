@@ -1,7 +1,7 @@
 object TeststructParseForm: TTeststructParseForm
-  Left = 132
-  Top = 103
-  Width = 813
+  Left = 197
+  Top = 108
+  Width = 787
   Height = 503
   Caption = 
     'Test Unicode Structure Parse - Should Run OK under Non-Unicode a' +
@@ -19,14 +19,14 @@ object TeststructParseForm: TTeststructParseForm
   object pgc1: TPageControl
     Left = 8
     Top = 8
-    Width = 757
+    Width = 761
     Height = 460
     ActivePage = tsPascal
     TabOrder = 0
     object tsPascal: TTabSheet
       Caption = 'Pascal'
       object lblPascal: TLabel
-        Left = 131
+        Left = 139
         Top = 181
         Width = 181
         Height = 13
@@ -70,14 +70,15 @@ object TeststructParseForm: TTeststructParseForm
           'end;'
           ''
           'end.')
+        ScrollBars = ssVertical
         TabOrder = 0
         OnChange = mmoPasSrcChange
         OnClick = mmoPasSrcClick
       end
       object btnParsePas: TButton
-        Left = 3
-        Top = 179
-        Width = 75
+        Left = 56
+        Top = 176
+        Width = 73
         Height = 25
         Caption = 'Parse'
         TabOrder = 1
@@ -118,6 +119,15 @@ object TeststructParseForm: TTeststructParseForm
         TabOrder = 5
         OnClick = btnPosInfoWClick
       end
+      object btnOpenPas: TButton
+        Left = 8
+        Top = 176
+        Width = 41
+        Height = 25
+        Caption = 'Open'
+        TabOrder = 6
+        OnClick = btnOpenPasClick
+      end
     end
     object tsCpp: TTabSheet
       Caption = 'C/C++'
@@ -148,14 +158,15 @@ object TeststructParseForm: TTeststructParseForm
           'Test Comment'
           '*/ Test();'
           '}')
+        ScrollBars = ssVertical
         TabOrder = 0
         OnChange = mmoCppSrcChange
         OnClick = mmoCppSrcClick
       end
       object btnParseCpp: TButton
-        Left = 8
+        Left = 56
         Top = 176
-        Width = 75
+        Width = 73
         Height = 25
         Caption = 'Parse'
         TabOrder = 1
@@ -178,6 +189,19 @@ object TeststructParseForm: TTeststructParseForm
         State = cbChecked
         TabOrder = 3
       end
+      object btnOpenC: TButton
+        Left = 8
+        Top = 176
+        Width = 41
+        Height = 25
+        Caption = 'Open'
+        TabOrder = 4
+        OnClick = btnOpenCClick
+      end
     end
+  end
+  object dlgOpen1: TOpenDialog
+    Left = 204
+    Top = 208
   end
 end
