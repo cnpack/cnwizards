@@ -26,6 +26,8 @@ unit CnAICoderConfig;
 * 单元作者：CnPack 开发组
 * 备    注：CnAIEngineOptionManager 及 TCnAIEngineOption 的各个存储载入接口应由
 *           CnAIEngineManager 统一调用，其余地方不应混乱调用，因为涉及多个文件
+*           目前 AI 总体的通用配置存一个独立文件，每个 AI 引擎的配置也单独存一
+*           个文件。
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式

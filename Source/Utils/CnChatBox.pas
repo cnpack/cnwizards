@@ -664,7 +664,7 @@ begin
         if FSkip then
           Continue;
 
-        Radius := 14;
+        Radius := 4;
         if (FItems[I] is TCnChatMessage) then
         begin
           if (FItems[I] as TCnChatMessage).FromType = cmtMe then

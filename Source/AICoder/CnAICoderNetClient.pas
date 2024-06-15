@@ -47,8 +47,9 @@ type
   TCnAINetRequestDataObject = class;
 
   TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer;
-    const Answer: string; ErrorCode: Cardinal) of object;
-  {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容}
+    const Answer: string; ErrorCode: Cardinal; Tag: TObject) of object;
+  {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容
+    Tag 是发送请求时传入的 Tag}
 
   TCnAINetDataResponse = procedure(Success: Boolean; Thread: TCnPoolingThread;
     DataObj: TCnAINetRequestDataObject; Data: TBytes) of object;
@@ -74,6 +75,7 @@ type
     FOnResponse: TCnAINetDataResponse;
     FRequestType: TCnAIRequestType;
     FOnAnswer: TCnAIAnswerCallback;
+    FTag: TObject;
   public
     function Clone: TCnTaskDataObject; override;
 
@@ -86,6 +88,8 @@ type
     {* 请求 ID 备用}
     property URL: string read FURL write FURL;
     {* 请求地址}
+    property Tag: TObject read FTag write FTag;
+    {* 备用的一个 Object 引用，供发送数据与收到回应时传递关联}
 
     property OnAnswer: TCnAIAnswerCallback read FOnAnswer write FOnAnswer;
     {* 给调用者的回调事件，一般由用户设置到用户界面中}
@@ -103,6 +107,7 @@ begin
   Result := TCnAINetRequestDataObject.Create;
 
   // 注意如果 TCnAINetRequestDataObject 后面增加属性，此处要同步补充
+  TCnAINetRequestDataObject(Result).Tag := FTag;
   TCnAINetRequestDataObject(Result).URL := FURL;
   TCnAINetRequestDataObject(Result).SendId := FSendId;
   TCnAINetRequestDataObject(Result).RequestType := FRequestType;

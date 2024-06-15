@@ -12,6 +12,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object spl1: TSplitter
@@ -30,12 +31,14 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Align = alTop
     TabOrder = 0
   end
-  object mmoContent: TMemo
+  object pnlChat: TPanel
     Left = 0
     Top = 116
     Width = 476
     Height = 468
     Align = alClient
+    BevelInner = bvLowered
+    BevelOuter = bvNone
     TabOrder = 1
   end
 end

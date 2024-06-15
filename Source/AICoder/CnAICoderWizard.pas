@@ -332,9 +332,9 @@ begin
   EnsureChatWindowVisible;
 
   if Success then
-    CnAICoderChatForm.mmoContent.Lines.Add(Answer)
+    CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
   else
-    CnAICoderChatForm.mmoContent.Lines.Add(Format('%d %s', [ErrorCode, Answer]));
+    CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
 end;
 
 procedure TCnAICoderWizard.EnsureChatWindowVisible;
@@ -353,6 +353,6 @@ begin
 end;
 
 initialization
-  // RegisterCnWizard(TCnAICoderWizard); // 注册专家
+  RegisterCnWizard(TCnAICoderWizard); // 注册专家
 
 end.

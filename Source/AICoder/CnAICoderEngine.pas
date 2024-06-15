@@ -51,12 +51,14 @@ type
     FCallback: TCnAIAnswerCallback;
     FRequestType: TCnAIRequestType;
     FErrorCode: Cardinal;
+    FTag: TObject;
   public
     property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
     property ErrorCode: Cardinal read FErrorCode write FErrorCode;
     property Answer: TBytes read FAnswer write FAnswer;
+    property Tag: TObject read FTag write FTag;
     property Callback: TCnAIAnswerCallback read FCallback write FCallback;
   end;
 
@@ -110,7 +112,7 @@ type
     procedure InitOption;
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
-    function AskAIEngineExplainCode(const Code: string;
+    function AskAIEngineExplainCode(const Code: string; Tag: TObject;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 用户调用的解释代码过程，内部会封装请求数据组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
@@ -300,16 +302,18 @@ var
   S: string;
 begin
   // OptionManager 加载基本设置
-  S := Format(BaseFileFmt, ['']);
+  S := Dir + Format(BaseFileFmt, ['']);
   if FileExists(S) then
-    CnAIEngineOptionManager.LoadFromFile(Dir + S);
+    CnAIEngineOptionManager.LoadFromFile(S);
 
   // 挨个根据引擎 ID，修改文件名，创建并加载其对应 Option
   for I := 0 to EngineCount - 1 do
   begin
-    S := Format(BaseFileFmt, [Engines[I].EngineID]);
+    S := Dir + Format(BaseFileFmt, [Engines[I].EngineID]);
     CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
-      Dir + S, Engines[I].OptionClass);
+      S, Engines[I].OptionClass);
+
+    Engines[I].InitOption;
   end;
 end;
 
@@ -407,7 +411,7 @@ end;
 { TCnAIBaseEngine }
 
 function TCnAIBaseEngine.AskAIEngineExplainCode(const Code: string;
-  AnswerCallback: TCnAIAnswerCallback): Integer;
+  Tag: TObject; AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
 begin
@@ -418,6 +422,7 @@ begin
   begin
     Obj := TCnAINetRequestDataObject.Create;
     Obj.URL := FOption.URL;
+    Obj.Tag := Tag;
     Randomize;
     Obj.SendId := 10000000 + Random(100000000);
 
@@ -569,7 +574,8 @@ begin
   AnswerObj.SendId := TCnAINetRequestDataObject(DataObj).SendId;
   AnswerObj.RequestType := TCnAINetRequestDataObject(DataObj).RequestType;
   AnswerObj.Callback := TCnAINetRequestDataObject(DataObj).OnAnswer;
-  AnswerObj.Answer := Data; // 引用但有计数，不会随便释放
+  AnswerObj.Tag := TCnAINetRequestDataObject(DataObj).Tag;
+  AnswerObj.Answer := Data; // 引用，但有计数，不会随便释放
 
   if not Success then
     AnswerObj.ErrorCode := GetLastError;
@@ -590,7 +596,8 @@ begin
     begin
       Answer := ParseResponse(AnswerObj.FSuccess, AnswerObj.FErrorCode,
         AnswerObj.RequestType, AnswerObj.Answer);
-      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer, AnswerObj.ErrorCode);
+      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer,
+        AnswerObj.ErrorCode, AnswerObj.Tag);
     end;
     AnswerObj.Free;
   end;

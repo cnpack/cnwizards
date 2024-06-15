@@ -39,17 +39,18 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, StdCtrls, CnWizIdeDock;
+  ExtCtrls, StdCtrls, CnWizIdeDock, CnChatBox;
 
 type
   TCnAICoderChatForm = class(TCnIdeDockForm)
     mmoSelf: TMemo;
     spl1: TSplitter;
-    mmoContent: TMemo;
+    pnlChat: TPanel;
+    procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
+    FChatBox: TCnChatBox;
   public
-    { Public declarations }
+    procedure AddMessage(const Msg, AFrom: string; IsMe: Boolean = False);
   end;
 
 var
@@ -58,5 +59,28 @@ var
 implementation
 
 {$R *.DFM}
+
+procedure TCnAICoderChatForm.AddMessage(const Msg, AFrom: string; IsMe: Boolean);
+begin
+  with FChatBox.Items.AddMessage do
+  begin
+    Text := Msg;
+    if IsMe then
+      FromType := cmtMe
+    else
+    begin
+      FromType := cmtYou;
+      From := AFrom;
+    end;
+  end;
+end;
+
+procedure TCnAICoderChatForm.FormCreate(Sender: TObject);
+begin
+  FChatBox := TCnChatBox.Create(Self);
+  FChatBox.Color := clWhite;
+  FChatBox.Parent := pnlChat;
+  FChatBox.Align := alClient;
+end;
 
 end.
