@@ -49,7 +49,8 @@ var
 implementation
 
 uses
-  CnWidePasParser, mPasLex, CnWideCppParser, mwBCBTokenList, CnPasWideLex, CnPasCodeParser;
+  CnWidePasParser, mPasLex, CnWideCppParser, mwBCBTokenList, CnPasWideLex,
+  CnPasCodeParser, CnCommon;
 
 {$R *.dfm}
 
@@ -205,11 +206,13 @@ begin
 end;
 
 procedure TTeststructParseForm.ShowCursorPos;
+var
+  P: TPoint;
 begin
-  lblPascal.Caption := Format('Line: %d, Col %d.', [mmoPasSrc.CaretPos.Y + 1,
-    mmoPasSrc.CaretPos.X + 1]);
-  lblCpp.Caption := Format('Line: %d, Col %d.', [mmoCppSrc.CaretPos.Y + 1,
-    mmoCppSrc.CaretPos.X + 1]);
+  P := MemoGetCaretPos(mmoPasSrc);
+  lblPascal.Caption := Format('Line: %d, Col %d.', [P.Y + 1, P.X + 1]);
+  P := MemoGetCaretPos(mmoCppSrc);
+  lblCpp.Caption := Format('Line: %d, Col %d.', [P.Y + 1, P.X + 1]);
 end;
 
 procedure TTeststructParseForm.btnPosInfoWClick(Sender: TObject);
