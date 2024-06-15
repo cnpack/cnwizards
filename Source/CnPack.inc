@@ -3359,6 +3359,8 @@
   {$IFNDEF DISABLE_FMX}
     {$DEFINE SUPPORT_FMX_FRAME}         // XE4 FMX Supports FMX Frame
   {$ENDIF}
+{$ELSE}
+  {$DEFINE MEMO_CARETPOS_BUG}           // Memo CaretPos Get Negative Error Value for Large File under XE3 or below
 {$ENDIF}
 
 {$IFDEF DELPHIXE3_UP}
