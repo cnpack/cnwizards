@@ -68,11 +68,13 @@ type
     procedure SetText(const Value: string);
     procedure SetColor(const Value: TColor);
   public
+    constructor Create(AOwner: TCnChatItems); virtual;
+    destructor Destroy; override;
+
     function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; virtual;
     function DrawImage(Canvas: TCanvas; Rect: TRect): TRect; virtual;
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; virtual;
-    constructor Create(AOwner: TCnChatItems); virtual;
-    destructor Destroy; override;
+
     property Owner: TCnChatItems read FOwner write SetOwner;
     property Selected: Boolean read FSelected write SetSelected;
     property ImageIndex: Integer read FImageIndex write SetImageIndex;
@@ -101,6 +103,7 @@ type
   public
     constructor Create(AOwner: TCnChatItems); override;
     destructor Destroy; override;
+
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     property ShowFrom: Boolean read FShowFrom write SetShowFrom;
@@ -119,10 +122,12 @@ type
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     constructor Create(AOwner: TCnChatItems); override;
+
     property FillColor: TColor read FFillColor write SetFillColor;
   end;
 
   TCnChatItems = class(TObjectList)
+  {* 聊天内容管理列表类}
   private
     FOwner: TCnCustomChatBox;
     procedure SetOwner(const Value: TCnCustomChatBox);
@@ -135,6 +140,7 @@ type
     function Insert(Index: Integer; Value: TCnChatItem): Integer;
     function SelectCount: Integer;
     procedure Clear; override;
+
     procedure DoChanged(Item: TCnChatItem);
     procedure NeedResize;
     constructor Create(AOwner: TCnCustomChatBox);
@@ -142,6 +148,7 @@ type
 
     property Items[Index: Integer]: TCnChatItem read GetItem write SetItem; default;
     property Owner: TCnCustomChatBox read FOwner write SetOwner;
+    {* 本聊天内容列表属于哪个聊天控件}
   end;
 
   TOnSelectionEvent = procedure(Sender: TObject; Count: Integer) of object;
@@ -239,6 +246,7 @@ type
     procedure BeginUpdate;
     procedure EndUpdate(Force: Boolean = False);
     procedure Reset;
+
     property Item[Index: Integer]: TCnChatItem read GetItem write SetItem;
     property Items: TCnChatItems read FItems write SetItems;
     property DoubleBuffered default True;
