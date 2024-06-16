@@ -76,7 +76,7 @@ type
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
     procedure ExplainCodeAnswer(Success: Boolean; SendId: Integer;
-      const Answer: string; ErrorCode: Cardinal);
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure EnsureChatWindowVisible;
   protected
     function GetHasConfig: Boolean; override;
@@ -101,7 +101,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizOptions {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnWizOptions, CnChatBox {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 //==============================================================================
 // AI 辅助编码菜单专家
@@ -202,6 +202,7 @@ end;
 procedure TCnAICoderWizard.SubActionExecute(Index: Integer);
 var
   S: string;
+  Msg: TCnChatMessage;
 begin
   if not Active then Exit;
 
@@ -226,7 +227,15 @@ begin
     begin
       S := CnOtaGetCurrentSelection;
       if Trim(S) <> '' then
-        CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode(S, ExplainCodeAnswer);
+      begin
+        EnsureChatWindowVisible;
+        Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
+        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.FromType := cmtYou;
+        Msg.Text := '...';
+
+        CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode(S, Msg, ExplainCodeAnswer);
+      end;
     end;
   end;
 end;
@@ -327,14 +336,24 @@ begin
 end;
 
 procedure TCnAICoderWizard.ExplainCodeAnswer(Success: Boolean;
-  SendId: Integer; const Answer: string; ErrorCode: Cardinal);
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   EnsureChatWindowVisible;
 
-  if Success then
-    CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
+  if (Tag <> nil) and (Tag is TCnChatMessage) then
+  begin
+    if Success then
+      TCnChatMessage(Tag).Text := Answer
+    else
+      TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
+  end
   else
-    CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
+  begin
+    if Success then
+      CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
+    else
+      CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
+  end;
 end;
 
 procedure TCnAICoderWizard.EnsureChatWindowVisible;

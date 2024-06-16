@@ -22,6 +22,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Height = 3
     Cursor = crVSplit
     Align = alTop
+    Visible = False
   end
   object mmoSelf: TMemo
     Left = 0
@@ -30,6 +31,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Height = 113
     Align = alTop
     TabOrder = 0
+    Visible = False
   end
   object pnlChat: TPanel
     Left = 0

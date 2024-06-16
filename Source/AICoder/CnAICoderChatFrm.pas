@@ -51,6 +51,8 @@ type
     FChatBox: TCnChatBox;
   public
     procedure AddMessage(const Msg, AFrom: string; IsMe: Boolean = False);
+
+    property ChatBox: TCnChatBox read FChatBox;
   end;
 
 var
