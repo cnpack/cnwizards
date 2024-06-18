@@ -39,10 +39,10 @@ interface
 
 uses 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnCommon;
+  StdCtrls, CnCommon, CnWizMultiLangFrame;
 
 type
-  TCnAICoderOptionFrame = class(TFrame)
+  TCnAICoderOptionFrame = class(TCnTranslateFrame)
     lblURL: TLabel;
     lblAPIKey: TLabel;
     edtURL: TEdit;
@@ -54,12 +54,20 @@ type
   private
     FWebAddr: string;
   public
+    constructor Create(AOwner: TComponent); override;
     property WebAddr: string read FWebAddr write FWebAddr;
   end;
 
 implementation
 
 {$R *.DFM}
+
+constructor TCnAICoderOptionFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+  lblApply.Font.Color := clBlue;
+  lblApply.Font.Style := [fsUnderline];
+end;
 
 procedure TCnAICoderOptionFrame.lblApplyClick(Sender: TObject);
 begin

@@ -1,9 +1,6 @@
-object CnAICoderOptionFrame: TCnAICoderOptionFrame
-  Left = 0
-  Top = 0
+inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   Width = 497
   Height = 239
-  TabOrder = 0
   object lblURL: TLabel
     Left = 16
     Top = 24
@@ -26,19 +23,17 @@ object CnAICoderOptionFrame: TCnAICoderOptionFrame
     Caption = 'Model Name:'
   end
   object lblApply: TLabel
-    Left = 448
+    Left = 424
     Top = 112
-    Width = 26
+    Width = 50
     Height = 13
     Cursor = crHandPoint
+    Alignment = taRightJustify
     Anchors = [akTop, akRight]
+    AutoSize = False
+    BiDiMode = bdLeftToRight
     Caption = 'Apply'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlue
-    Font.Height = -11
-    Font.Name = 'MS Sans Serif'
-    Font.Style = [fsUnderline]
-    ParentFont = False
+    ParentBiDiMode = False
     OnClick = lblApplyClick
   end
   object edtURL: TEdit
