@@ -3,7 +3,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   Top = 107
   BorderStyle = bsDialog
   Caption = 'AI Coder Settings'
-  ClientHeight = 429
+  ClientHeight = 413
   ClientWidth = 621
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -41,7 +41,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   end
   object btnOK: TButton
     Left = 373
-    Top = 391
+    Top = 381
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -52,7 +52,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   end
   object btnCancel: TButton
     Left = 453
-    Top = 391
+    Top = 381
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -63,7 +63,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   end
   object btnHelp: TButton
     Left = 533
-    Top = 391
+    Top = 381
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]

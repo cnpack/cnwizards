@@ -41,10 +41,10 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
-  CnFrmAICoderOption, CnAICoderChatFrm;
+  CnFrmAICoderOption, CnAICoderChatFrm, CnWizMultiLang;
 
 type
-  TCnAICoderConfigForm = class(TForm)
+  TCnAICoderConfigForm = class(TCnTranslateForm)
     lblActiveEngine: TLabel;
     cbbActiveEngine: TComboBox;
     pgcAI: TPageControl;
