@@ -446,6 +446,7 @@ begin
   FDateTimeFormat := csDefaultDateTimeFormat;
   CnWizNotifierServices.AddBeforeCompileNotifier(BeforeCompile);
   CnWizNotifierServices.AddAfterCompileNotifier(AfterCompile);
+  FCompileNotifierAdded := True;
 end;
 
 procedure TCnVerEnhanceWizard.InsertTime;
