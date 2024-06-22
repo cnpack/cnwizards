@@ -23,7 +23,7 @@ unit CnProjectDirImportFrm;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：工程目录创建器导入目录单元
-* 单元作者：LiuXiao liuxiao@cnpack.org
+* 单元作者：LiuXiao master@cnpack.org
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

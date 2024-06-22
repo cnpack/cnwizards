@@ -25,7 +25,7 @@ unit CnDesignWizard;
 * 单元名称：设计期专家单元
 * 单元作者：王玉宝（Wyb_star） Wyb_star@sina.com
 *           周劲羽 (zjy@cnpack.org)
-*           刘啸 (liuxiao@cnpack.org)
+*           CnPack 开发组 (master@cnpack.org)
 *           朱磊（Licwing Zue）licwing@chinasystemsn.com
 * 备    注：控件对齐专家单元
 * 开发平台：PWin2000Pro + Delphi 5.01

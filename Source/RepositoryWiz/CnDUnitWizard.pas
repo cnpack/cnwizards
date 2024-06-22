@@ -24,7 +24,7 @@ unit CnDUnitWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：DUnit 单元测试工程生成单元
 * 单元作者：刘玺（SQUALL）
-×          LiuXiao （liuxiao@cnpack.org）
+×          LiuXiao （master@cnpack.org）
 * 备    注：DUnit 单元测试工程生成单元
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7

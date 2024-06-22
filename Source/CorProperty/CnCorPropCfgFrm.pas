@@ -24,7 +24,7 @@ unit CnCorPropCfgFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：属性修改专家配置单元
 * 单元作者：陈省(hubdog) hubdog@263.net
-*           刘啸(LiuXiao) liuxiao@cnpack.org
+*           CnPack 开发组 master@cnpack.org
 * 备    注：属性修改专家配置单元
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5

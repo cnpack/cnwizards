@@ -23,7 +23,7 @@ unit CnWinTopRoller;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWinTopRoller 专家和设置窗体
-* 单元作者：LiuXiao (刘啸) liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：为 IDE 中的窗体的标题栏增加置顶和折叠按钮
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7

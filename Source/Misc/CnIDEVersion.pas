@@ -32,7 +32,7 @@ unit CnIDEVersion;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 版本检查单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元部分内容移植自 GExperts
 *           其原始内容受 GExperts License 的保护
 * 开发平台：PWin2000Pro + Delphi 5.01

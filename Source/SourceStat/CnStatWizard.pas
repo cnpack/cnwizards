@@ -23,7 +23,7 @@ unit CnStatWizard;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：源代码统计专家
-* 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：源码统计专家实现模块
 * 开发平台：Windows 98 + Delphi 6
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

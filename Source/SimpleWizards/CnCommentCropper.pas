@@ -23,7 +23,7 @@ unit CnCommentCropper;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：删除注释专家与窗体单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 *           dejoy
 * 备    注：删除注释专家与窗体单元
 * 开发平台：PWin2000Pro + Delphi 5.01

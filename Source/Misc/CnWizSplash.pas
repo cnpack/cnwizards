@@ -23,7 +23,7 @@ unit CnWizSplash;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 封面窗口处理单元
-* 单元作者：刘啸 liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 开发平台：WinXpPro + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式

@@ -23,7 +23,7 @@ unit CnCompDirectiveTree;
 ================================================================================
 * 软件名称：CnPack 专家包
 * 单元名称：实现代码根据 IFDEF 分树的单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元为使用 TCnTree 和 TCnLeaf 的派生类进行代码的 IFDEF 分树实现单元。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7

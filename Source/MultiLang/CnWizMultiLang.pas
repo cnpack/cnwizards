@@ -23,7 +23,7 @@ unit CnWizMultiLang;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：专家包多语控制单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：OldCreateOrder 必须为 False，才能正常调整边距
 *           AutoScroll 必须为 False，才能正常缩放
 *           所以要检查凡是 Sizable 的 Form，AutoScroll自动为 True，要手工改回来。

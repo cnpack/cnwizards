@@ -23,7 +23,7 @@ unit CnWizScaler;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：针对专家包窗体的运行期比例缩放实现单元，与屏幕 DPI 无关
-* 单元作者：刘啸 liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：初步实现窗体简单缩放，暂时不处理 ListView 的列宽缩放，也不处理工具栏
 * 开发平台：PWinXP SP3 + Delphi 7
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

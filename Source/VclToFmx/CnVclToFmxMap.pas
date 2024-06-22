@@ -23,7 +23,7 @@ unit CnVclToFmxMap;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWizards VCL/FMX 转换单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元以 Delphi 10.3.1 的 VCL 与 FMX 为基础确定了一些映射关系
 * 开发平台：PWin7 + Delphi 10.3.1
 * 兼容测试：XE2 或以上，不支持更低版本

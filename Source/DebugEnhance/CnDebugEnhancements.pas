@@ -23,7 +23,7 @@ unit CnDebugEnhancements;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：调试功能扩展单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：IDE_HAS_DEBUGGERVISUALIZER 是 XE 或以上有，表示能增强 Hint 以及查看器
 *           FULL_IOTADEBUGGERVISUALIZER_250 是 10.3 或以上支持泛型的增强查看器
 *           IDE_HAS_MEMORY_VISUALIZAER 是 110 或以上有，表示有特定的 TBytes 查看器

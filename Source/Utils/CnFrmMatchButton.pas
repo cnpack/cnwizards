@@ -23,7 +23,7 @@ unit CnFrmMatchButton;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：代码编辑器工具栏单元
-* 单元作者：liuxiao (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：用来做工具按钮带下拉菜单选择匹配方式的公用 Frame
 * 开发平台：PWinXP + Delphi 5.01
 * 兼容测试：PWinXP/7 + Delphi 5/6/7 + C++Builder 5/6

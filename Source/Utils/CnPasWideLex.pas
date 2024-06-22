@@ -97,7 +97,7 @@ unit CnPasWideLex;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：mwPasLex 的 Unicode 版本实现，专门解析 UTF16 字符串
-* 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：此单元自 mwPasLex 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 *           当 SupportUnicodeIdent 为 False 时，Unicode 字符挨个作为 tkUnknown 解析
 *           为 True 时整个作为 Identifier 解析。支持 Unicode/非 Unicode 编译器。

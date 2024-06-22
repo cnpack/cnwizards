@@ -23,7 +23,7 @@ unit CnSrcEditorGutter;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：代码编辑器行号显示单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 *           周劲羽 (zjy@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01

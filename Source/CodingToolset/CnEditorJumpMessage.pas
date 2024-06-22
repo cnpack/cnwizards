@@ -23,7 +23,7 @@ unit CnEditorJumpMessage;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：跳至上下一信息行与跳至 intf/impl 与跳至匹配关键字实现单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：跳转的 Index 使用 MessageCount - 2 是由于最后一条消息强制为空，无效。
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

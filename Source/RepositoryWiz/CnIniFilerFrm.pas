@@ -23,7 +23,7 @@ unit CnIniFilerFrm;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Ini 文件读写单元窗体
-* 单元作者：LiuXiao （liuxiao@cnpack.org）
+* 单元作者：LiuXiao （master@cnpack.org）
 * 备    注：Ini 文件读写单元窗体
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7

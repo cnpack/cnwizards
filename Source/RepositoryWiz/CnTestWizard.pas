@@ -23,7 +23,7 @@ unit CnTestWizard;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnPack IDE 专家包测试专家生成单元
-* 单元作者：LiuXiao （liuxiao@cnpack.org）
+* 单元作者：LiuXiao （master@cnpack.org）
 * 备    注：CnPack IDE 专家包测试专家生成单元
 * 开发平台：Windows XP + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7

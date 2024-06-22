@@ -23,7 +23,7 @@ unit CnFmxTabOrderUtils;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Tab Order 专家支持 FMX 设计器的实现单元
-* 单元作者：Liu Xiao (liuxiao@cnpack.org)
+* 单元作者：Liu Xiao (master@cnpack.org)
 * 备    注：FMX 由于引用问题，不可集成在原有的 CnTabOrderWizard 单元中
 * 开发平台：Win7 + Delphi XE6
 * 兼容测试：暂无

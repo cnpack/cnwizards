@@ -32,7 +32,7 @@ unit CnProcListWizard;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：函数过程列表专家单元
-* 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：该单元部分内容移植自 GExperts 的相应单元
 *           其原始内容受 GExperts License 的保护
 *           ——有待增加设置窗口控制其设置

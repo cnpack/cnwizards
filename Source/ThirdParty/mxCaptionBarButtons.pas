@@ -26,7 +26,7 @@
 // * Modified by JingYu Zhou, 07.20.2004
 // * zjy@cnpack.org https://www.cnpack.org
 // * Modified by Liu Xiao, 08.20.2006
-// * liuxiao@cnpack.org https://www.cnpack.org
+// * master@cnpack.org https://www.cnpack.org
 // ****************************************************************************
 // ** 修改记录：
 // *   + 增加了对 DWM 的 Aero 风格的绘制支持 by liuxiao

@@ -23,7 +23,7 @@ unit CnWizDebuggerNotifier;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE Debugger 通知服务单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元提供了 IDE Debugger 通知事件服务。
 *           Debugger 系列通知服务因为结构的复杂性，特写成独立单元中的独立服务接口
 *           目标线程求值返回值说明：如果是对象，则其地址在 ResultAddr 中，([csInheritable]) 之类的放入 ResultStr

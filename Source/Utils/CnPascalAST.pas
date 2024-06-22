@@ -23,7 +23,7 @@ unit CnPascalAST;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Pascal 代码抽象语法树生成单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org; https://www.cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const/type 等
 *           不支持泛型、不支持内联 var

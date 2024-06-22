@@ -23,7 +23,7 @@ unit CnOTACreators;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Creators 单元框架
-* 单元作者：LiuXiao （liuxiao@cnpack.org）
+* 单元作者：LiuXiao （master@cnpack.org）
 * 备    注：利用 TCnTemplateParser 生成代码的实现了 Creators 的框架单元
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

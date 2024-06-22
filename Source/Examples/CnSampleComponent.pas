@@ -23,7 +23,7 @@ unit CnSampleComponent;
 ================================================================================
 * 软件名称：CnPack 专家包
 * 单元名称：示例组件单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：
 * 开发平台：Win7 + Delphi 5
 * 兼容测试：未测试

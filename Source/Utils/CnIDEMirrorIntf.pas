@@ -23,7 +23,7 @@ unit CnIDEMirrorIntf;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 接口镜像单元，用于动态查找 IDE 接口的场合
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元提供了 IDE 的部分 ToolsAPI 接口的镜像声明。
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6

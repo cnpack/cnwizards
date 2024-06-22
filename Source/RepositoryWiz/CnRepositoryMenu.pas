@@ -23,7 +23,7 @@ unit CnRepositoryMenu;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：专家引导工具
-* 单元作者：LiuXiao  （liuxiao@cnpack.org）
+* 单元作者：LiuXiao  （master@cnpack.org）
 * 备    注：将 Repository 专家加入到子菜单中。
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

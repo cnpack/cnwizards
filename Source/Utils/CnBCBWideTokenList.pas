@@ -43,7 +43,7 @@ unit CnBCBWideTokenList;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：mwBCBTokenList 的 Unicode 版本实现
-* 单元作者：刘啸(LiuXiao) liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：此单元自 mwBCBTokenList 移植而来并改为 Unicode/WideString 实现，保留原始版权声明
 * 开发平台：Windows 7 + Delphi XE
 * 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~

@@ -23,7 +23,7 @@ unit CnWizCmdSend;
 ================================================================================
 * 软件名称：CnPack IDE 专家工具包
 * 单元名称：CnWizards 命令机制的发送端
-* 单元作者：CnPack开发组 刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack开发组 CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元实现了 CnWizards 命令机制的发送端
 *           外部程序进行命令消息发送时需要使用到本单元
 * 开发平台：WinXP + Delphi 5.01

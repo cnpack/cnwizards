@@ -23,7 +23,7 @@ unit CnWizCmdMsg;
 ================================================================================
 * 软件名称：CnPack IDE 专家工具包
 * 单元名称：CnWizards 命令机制的消息定义
-* 单元作者：CnPack开发组 刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack开发组 CnPack 开发组 (master@cnpack.org)
 * 备    注：该单元定义了 CnWizards 命令机制的消息格式与常量定义
 *           外部程序使用命令消息格式时需要使用到本单元
 * 开发平台：WinXP + Delphi 5.01

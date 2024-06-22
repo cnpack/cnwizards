@@ -23,7 +23,7 @@ unit CnAsciiChart;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Ascii字符表工具单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5
 * 兼容测试：未测试

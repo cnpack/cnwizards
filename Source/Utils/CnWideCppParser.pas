@@ -23,7 +23,7 @@ unit CnWideCppParser;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：C/C++ 源代码分析器
-* 单元作者：刘啸 liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：CnCppCodeParser 的 Unicode/WideString 版本
 * 开发平台：PWin2000Pro + Delphi 2009
 * 兼容测试：

@@ -33,7 +33,7 @@ unit CnPrefixWizard;
 *               增加根据 Action, DataField 重命名的功能 
 *           2004.06.14 V1.5 LiuXiao
 *               增加前缀是否大小写敏感的选项，默认为敏感。
-*           2004.03.24 V1.4 刘啸(LiuXiao)
+*           2004.03.24 V1.4 CnPack 开发组
 *               修正设计期可能会吞吃 WM_LBUTTONUP 消息从而产生拖动状态的缺陷
 *           2003.09.27 V1.3 何清(QSoft)
 *               修正添加一个新控件时多次被加入 TObjectList 中的 BUG

@@ -33,7 +33,7 @@ unit CnWizIdeUtils;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 相关公共单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-*           LiuXiao（刘啸）liuxiao@cnpack.org
+*           CnPack 开发组 master@cnpack.org
 * 备    注：该单元部分内容移植自 GExperts 1.12 Src
 *           其原始内容受 GExperts License 的保护
 * 开发平台：PWin2000Pro + Delphi 5.01
