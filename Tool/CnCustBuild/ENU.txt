@@ -29,5 +29,5 @@ SCnWizardDisabled= NOT Compiled
 SCnWizardExitAsk=Sure to Exit?
 SCnWizardGenerate=Sure to Write Compiling Control File cnwizards\Source\CnWizards.inc ?
 SCnWizardGenerateOK=Succesfully Write into cnwizards\Source\CnWizards.inc
-SCnCustBuildAbout=CnPack IDE Wizards Custom Build Tool<BR><BR>Author: LiuXiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2024 CnPack Team
+SCnCustBuildAbout=CnPack IDE Wizards Custom Build Tool<BR><BR>Author: LiuXiao (master@cnpack.org)<BR>Copyright (C) 2001-2024 CnPack Team
 SCnCustBuildHelp=CnPack IDE Wizards supports custom building. Whether a wizards will be compiled is controlled by a flag in <BR>"cnwizards\Source\CnWizards.inc" file.<BR><BR>This tool can set the control flags with a visualization mode and generate CnWizards.inc automatically.<BR>You can use this tool to build a Customized CnWizards with only the wizards you need.<BR><BR>Usage: <BR>1. Download CnWizards source, including "cnpack" and "cnwizards" module.<BR>2. Compile and run CnCustBuild.dpr in "cnwizards\Tools\CnCustBuild".<BR>3. Then you can check the wizards you need and write CnWizards.inc file.<BR><BR>Note: Some wizards only can be used in some IDE. For other IDE that NOT supported, Checking here makes no sense.<BR><BR>After writing, you can open cnwizards project file in cnwizards\Source to build a customized CnWizards.

@@ -23,7 +23,7 @@ library CnWizLoader;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWizard 专家 DLL 加载器实现单元
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin7 + Delphi 5.0
 * 兼容测试：所有版本的 Delphi

@@ -104,7 +104,7 @@ var
   SCnIDEAbout: string = 'CnPack IDE Wizards - Source file / affected Modules Relation Analyzer' + #13#10#13#10 +
     'Author:' + #13#10 +
     'Chinbo (Shenloqi)  chinbo@eyou.com' + #13#10 +
-    'LiuXiao (LiuXiao)  liuxiao@cnpack.org' + #13#10#13#10 +
+    'LiuXiao (LiuXiao)  (master@cnpack.org)' + #13#10#13#10 +
     'Copyright (C) 2001-2024 CnPack Team';
 
   SCnAnalyzedResultsSaved: string = 'Analyzed Results Saved Successed to File %s.';

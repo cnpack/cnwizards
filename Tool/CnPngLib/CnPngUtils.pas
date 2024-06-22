@@ -30,7 +30,7 @@ unit CnPngUtils;
 * 开发平台：Win7 + Delphi 2010
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: CnPngUtils.pas 763 2011-02-07 14:18:23Z liuxiao@cnpack.org $
+* 单元标识：$Id: CnPngUtils.pas 763 2011-02-07 14:18:23Z (master@cnpack.org) $
 * 修改记录：2017.03.15 V1.1
 *               用绘制的方式取代 Assign 以避免部分 PNG8 图片全黑的问题
 *           2011.07.05 V1.0

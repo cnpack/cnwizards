@@ -23,7 +23,7 @@ unit CnViewCore;
 ================================================================================
 * 软件名称：CnDebugViewer
 * 单元名称：核心结构与字符串定义单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
@@ -278,7 +278,7 @@ var
   SCnDebugViewerAbout: string =
     'CnDebugViewer 1.9' + #13#10#13#10 +
     'This Tool is Used to Show the Debugging Output Information from CnDebug.' + #13#10#13#10 +
-    'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
+    'Author: Liu Xiao (master@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2024 CnPack Team';
 
   SCnHTMFormatHeader: string =

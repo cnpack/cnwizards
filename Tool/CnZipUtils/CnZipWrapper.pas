@@ -23,7 +23,7 @@ unit CnZipWrapper;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：项目备份功能对 CnZip 功能的封装
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

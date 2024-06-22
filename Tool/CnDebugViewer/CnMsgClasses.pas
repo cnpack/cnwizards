@@ -23,7 +23,7 @@ unit CnMsgClasses;
 ================================================================================
 * 软件名称：CnDebugViewer
 * 单元名称：消息类单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：Msgs 等的列表以 0 开头，而 VirtualTree 中的 Node 的 AbsoluteIndex
 *           以 1 开头，使用时应该注意 
 * 开发平台：PWin2000Pro + Delphi 5.01

@@ -125,7 +125,7 @@ var
     'or C++Builder 6 to Delphi 5 or C++ Builder 5 Format.' + #13#10 +
     'Text and Binary Format are both Supported.' + #13#10#13#10 +
     'Author: Zhou JingYu (zjy@cnpack.org)' + #13#10 +
-    'Multilang: LiuXiao (liuxiao@cnpack.org)' + #13#10 +
+    'Multilang: LiuXiao (master@cnpack.org)' + #13#10 +
     'Copyright (C)2001-2024 CnPack Team';
 
   csResults: array[TDFMConvertResult] of string =

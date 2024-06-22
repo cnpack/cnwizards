@@ -23,7 +23,7 @@ library CnSampleWizard;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWizard 专家包示例工程，不与正式工程共用
-* 单元作者：刘啸 (liuxiao@cnpack.org)
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 *           !!! 打开此 dpr 后请自行将 $(DELPHI)\Source\Toolsapi 加入搜索路径 !!!
 *           !!! 并勾选 Build with Runtime Package !!!

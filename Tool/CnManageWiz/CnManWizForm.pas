@@ -23,7 +23,7 @@ unit CnManWizForm;
 ================================================================================
 * 软件名称：CnPack IDE 专家包专家管理工具
 * 单元名称：专家管理工具主单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -212,7 +212,7 @@ var
   SCnWizardChangedFmt: string = 'Below IDE(s) Wizard Registration Information Changed. Save?' + #13#10#13#10;
   SCnConfirmExit: string = 'Sure to Exit?';
   SCnManageWizAbout: string = 'CnPack IDE External Wizard Management' + #13#10#13#10 +
-    'Author LiuXiao liuxiao@cnpack.org' + #13#10 +
+    'Author LiuXiao (master@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2024 CnPack Team';
 
 function GetAppRootDir(IDE: TCnCompiler): string;

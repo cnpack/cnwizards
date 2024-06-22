@@ -147,7 +147,7 @@ var
   SCnIDEAbout: string = 'IDE Config Backup/Restore Tool' + #13#10#13#10 +
     'Author:' + #13#10 +
     'ccrun (info@ccrun.com)' + #13#10 +
-    'LiuXiao (liuxiao@cnpack.org)' + #13#10#13#10 +
+    'LiuXiao (master@cnpack.org)' + #13#10#13#10 +
     'Copyright 2001-2024 CnPack Team';
 
 implementation

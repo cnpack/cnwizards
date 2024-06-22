@@ -9,7 +9,7 @@ CnAsciiChart
 功能：ASCII 字符表
 版本：V1.0
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2005.02.20
 
 CnConfigIO
@@ -18,7 +18,7 @@ CnConfigIO
 功能：专家包设置导入导出工具
 版本：V1.0
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2003.05.20
 
 CnCustBuild
@@ -27,7 +27,7 @@ CnCustBuild
 功能：供开发者手工定制专家包编译选项
 版本：V1.0
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2014.05.08
 
 CnDebugViewer
@@ -36,7 +36,7 @@ CnDebugViewer
 功能：调试信息查看工具
 版本：V1.4
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2006.04
 
 CnDfm6To5
@@ -54,7 +54,7 @@ CnFixStart
 功能：专家包启动修复工具
 版本：V1.0
 使用：直接运行使用，修复部分 RAD Studio 中 Key Mapping 问题
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2021.01.26
 
 CnFormatLib
@@ -63,7 +63,7 @@ CnFormatLib
 功能：格式化代码实现工具类
 版本：V1.0
 使用：Ansi/Unicode 两个 DLL 供专家包调用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2015.02
 
 CnIdeBRTool
@@ -73,7 +73,7 @@ CnIdeBRTool
 版本：V1.0
 使用：直接运行使用。
 作者：ccRun（老妖）
-移植：刘啸（LiuXiao） liuxiao@cnpack.org
+移植：CnPack 开发组 (master@cnpack.org)
 时间：2006.08.23
 备注：此功能已整合了 IDE 打开文件历史记录清除工具。
 
@@ -83,7 +83,7 @@ CnManageWiz
 功能：IDE 专家管理工具
 版本：V1.0
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2008
 
 CnPngLib
@@ -101,7 +101,7 @@ CnSelectLang
 功能：选择专家包语言工具
 版本：V1.0
 使用：直接运行使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2008
 
 CnSMR
@@ -119,7 +119,7 @@ CnVclToFmx
 功能：将 VCL 窗体转换为 FMX 的实现封装
 版本：V1.0
 使用：由专家包加载使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2022
 
 CnWizHelper
@@ -137,7 +137,7 @@ CnWizLoader
 功能：专家包统一 DLL 入口，根据 Delphi 版本不同动态加载不同的专家 DLL
 版本：V1.0
 使用：由专家包加载使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2020.5
 
 CnWizRes
@@ -164,6 +164,6 @@ CnZipUtils
 功能：封装 Zip 的压缩功能以备跨版本 Delphi 使用
 版本：V1.0
 使用：由专家包加载使用。
-作者：刘啸（LiuXiao） liuxiao@cnpack.org
+作者：CnPack 开发组 (master@cnpack.org)
 时间：2018.08
 

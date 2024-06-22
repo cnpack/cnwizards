@@ -23,7 +23,7 @@ unit CnBuildFrm;
 ================================================================================
 * 软件名称：CnPack IDE 专家包自定义构建工具
 * 单元名称：CnPack IDE 专家包自定义构建工具主窗体单元
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -131,7 +131,7 @@ var
   SCnWizardGenerate: string = '是否确定将编译控制信息写入 cnwizards\Source\CnWizards.inc ?';
   SCnWizardGenerateOK: string = 'cnwizards\Source\CnWizards.inc 写入成功。';
   SCnCustBuildAbout: string = 'CnPack IDE 专家包自定义构建工具' + #13#10#13#10 +
-    '软件作者 刘啸 (LiuXiao)  liuxiao@cnpack.org' + #13#10 +
+    '软件作者 CnPack 开发组 (master@cnpack.org)' + #13#10 +
     '版权所有 (C) 2001-2024 CnPack 开发组';
 
   SCnCustBuildHelp: string =

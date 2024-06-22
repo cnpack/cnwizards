@@ -23,7 +23,7 @@ unit ConfigIO;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：专家包设置导入导出工具
-* 单元作者：刘啸（LiuXiao） liuxiao@cnpack.org
+* 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -75,7 +75,7 @@ var
   SCnConfigIOAbout: string = 'CnPack IDE Wizards Config Import & Export Tool' + #13#10#13#10 +
     'This tool can be used to Import and Export CnPack IDE Wizards Config Information ' + #13#10 +
     'for Config backup or migration.' + #13#10#13#10 +
-    'Author: Liu Xiao (liuxiao@cnpack.org)' + #13#10 +
+    'Author: Liu Xiao (master@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2024 CnPack Team';
 
 type
