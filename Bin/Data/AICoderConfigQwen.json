@@ -1,0 +1,8 @@
+﻿{
+    "EngineName": "通义千问",
+    "URL": "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
+    "ApiKey": "",
+    "Model": "qwen-turbo",
+    "Temperature": 0.85,
+    "WebAddress": "https://bailian.console.aliyun.com/"
+}

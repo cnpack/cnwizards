@@ -38,6 +38,7 @@ type
     btnAddYouMsg: TButton;
     btnAddYouLongMsg: TButton;
     btnAddMyLongMsg: TButton;
+    pnlAIChat: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -57,9 +58,10 @@ type
     FResQueue: TCnObjectQueue;
     FAIConfig: TCnAIEngineOptionManager;
     FChatBox: TCnChatBox;
+    FAIChatBox: TCnChatBox;
     // 以下是综合测试
     procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer;
-      const Answer: string; ErrorCode: Cardinal);
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure ShowData;
   public
@@ -125,7 +127,7 @@ uses
 
 const
   DBG_TAG = 'NET';
-  AI_FILE_FMT = 'AIConfig%s.json';
+  AI_FILE_FMT = 'AICoderConfig%s.json';
 
 procedure TFormAITest.FormCreate(Sender: TObject);
 begin
@@ -148,6 +150,13 @@ begin
   FChatBox.Color := clWhite;
   FChatBox.Parent := pnlChat;
   FChatBox.Align := alClient;
+  FChatBox.ScrollBarVisible := True;
+
+  FAIChatBox := TCnChatBox.Create(Self);
+  FAIChatBox.Color := clWhite;
+  FAIChatBox.Parent := pnlAIChat;
+  FAIChatBox.Align := alClient;
+  FAIChatBox.ScrollBarVisible := True;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);
@@ -364,19 +373,35 @@ begin
 end;
 
 procedure TFormAITest.btnExplainCodeClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
 begin
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+
   CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.CreateForm(TForm1, Form1);',
-    AIOnExplainCodeAnswer);
+    Msg, AIOnExplainCodeAnswer);
 end;
 
 procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
-  SendId: Integer; const Answer: string; ErrorCode: Cardinal);
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   if Success then
     mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, Answer]))
   else
     mmoAI.Lines.Add(Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]));
+
+  if (Tag = nil) or not (Tag is TCnChatMessage) then
+    Exit;
+
+  if Success then
+    TCnChatMessage(Tag).Text := Answer
+  else
+    TCnChatMessage(Tag).Text := Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]);
 end;
 
 procedure TFormAITest.btnAddInfoClick(Sender: TObject);

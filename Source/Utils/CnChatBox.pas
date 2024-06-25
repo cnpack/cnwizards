@@ -86,6 +86,7 @@ type
   end;
 
   TCnChatMessage = class(TCnChatItem)
+  {* 聊天消息，分你的和我的两种样式}
   private
     FCalcedFromHeight: Integer;
     FShowFrom: Boolean;
@@ -107,14 +108,20 @@ type
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; override;
     property ShowFrom: Boolean read FShowFrom write SetShowFrom;
+    {* 是否绘制消息发送者}
     property From: string read FFrom write SetFrom;
+    {* 消息发送者}
     property FromType: TCnChatMessageType read GetFromType write SetFromType;
+    {* 消息发送者类型，你还是我}
     property FromColor: TColor read FFromColor write SetFromColor;
+    {* 消息发送者的绘制颜色}
     property FromColorSelect: TColor read FFromColorSelect write SetFromColorSelect;
+    {* 选中时的消息发送者颜色}
     property CalcedFromHeight: Integer read FCalcedFromHeight write SetCalcedFromHeight;
   end;
 
   TCnChatInfo = class(TCnChatItem)
+  {* 居中的小块提示信息}
   private
     FFillColor: TColor;
   public
@@ -124,6 +131,7 @@ type
     constructor Create(AOwner: TCnChatItems); override;
 
     property FillColor: TColor read FFillColor write SetFillColor;
+    {* 信息填充色}
   end;
 
   TCnChatItems = class(TObjectList)
@@ -268,6 +276,7 @@ type
     property PaddingSize: Integer read FPaddingSize write SetPaddingSize default 10;
     property ImageMargin: Integer read FImageMargin write SetImageMargin default 36;
     property RevertAdding: Boolean read FRevertAdding write SetRevertAdding;
+
     property OnPaint: TNotifyEvent read FOnPaint write SetOnPaint;
     property OnListEnd: TNotifyEvent read FOnListEnd write SetOnListEnd;
     property ShowDownButton: Boolean read GetShowDownButton write SetShowDownButton;
@@ -635,6 +644,7 @@ begin
 
     FItemUnderMouse := -1;
     if FItems.Count > 0 then
+    begin
       for I := FItems.Count - 1 downto 0 do
       begin
         Limit := Rect;
@@ -752,6 +762,7 @@ begin
         else if FStartDraw then
           FSkip := True;
       end;
+    end;
     FMaxOffset := 0 - LastRect.Top;
 
     if (not FCalcOnly) and (Assigned(FOnPaint)) then
@@ -1259,10 +1270,11 @@ var
 begin
   if (FromType = cmtYou) and FShowFrom then
   begin
+    // 画对方名字，加粗
     S := From;
     R := Rect;
     Canvas.Font.Size := 11;
-    Canvas.Font.Style := [];
+    Canvas.Font.Style := [fsBold];
     if Selected then
       Canvas.Font.Color := FromColorSelect
     else
@@ -1271,12 +1283,15 @@ begin
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
       or DT_SINGLELINE or DT_END_ELLIPSIS, nil);
     // Canvas.TextRect(R, S, [tfLeft, tfSingleLine, tfEndEllipsis]);
+    Canvas.Font.Style := [];
   end;
 
   R := Rect;
   if (FromType = cmtYou) and FShowFrom then
     CnRectOffset(R, 0, FCalcedFromHeight);
     // R.Offset(0, FCalcedFromHeight);
+
+  // 画文字内容
   S := Text;
   Canvas.Font.Size := 8;
   Canvas.Font.Style := [];

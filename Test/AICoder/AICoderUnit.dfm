@@ -1,6 +1,6 @@
 object FormAITest: TFormAITest
   Left = 192
-  Top = 108
+  Top = 109
   BorderStyle = bsDialog
   Caption = 'AI Coder Test'
   ClientHeight = 592
@@ -144,8 +144,8 @@ object FormAITest: TFormAITest
       object mmoAI: TMemo
         Left = 16
         Top = 56
-        Width = 881
-        Height = 449
+        Width = 393
+        Height = 457
         ReadOnly = True
         TabOrder = 4
       end
@@ -155,6 +155,14 @@ object FormAITest: TFormAITest
         Width = 121
         Height = 21
         TabOrder = 5
+      end
+      object pnlAIChat: TPanel
+        Left = 424
+        Top = 56
+        Width = 473
+        Height = 457
+        BevelOuter = bvNone
+        TabOrder = 6
       end
     end
     object tsChat: TTabSheet

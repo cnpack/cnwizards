@@ -38,11 +38,22 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, CnAICoderEngine;
+  SysUtils, Classes, CnNative, CnJSON, CnAICoderEngine, CnAICoderNetClient;
 
 type
   TCnOpenAIAIEngine = class(TCnAIBaseEngine)
   {* OpenAI 引擎}
+  public
+    class function EngineName: string; override;
+  end;
+
+  TCnQWenAIEngine = class(TCnAIBaseEngine)
+  {* 通义千问 AI 引擎}
+  protected
+    // 通义千问的 HTTP 接口的 JSON 格式和其他几个有所不同
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -67,11 +78,127 @@ type
 
 implementation
 
+const
+  CRLF = #13#10;
+  LF = #10;
+
 { TCnOpenAIEngine }
 
 class function TCnOpenAIAIEngine.EngineName: string;
 begin
   Result := 'OpenAI';
+end;
+
+{ TCnQWenAIEngine }
+
+function TCnQWenAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
+  const Code: string): TBytes;
+var
+  ReqRoot, Input, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
+begin
+  ReqRoot := TCnJSONObject.Create;
+  try
+    ReqRoot.AddPair('model', Option.Model);
+    ReqRoot.AddPair('temperature', Option.Temperature);
+
+    Input := TCnJSONObject.Create;
+    ReqRoot.AddPair('input', Input);
+    Arr := Input.AddArray('messages');
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'system');
+    Msg.AddPair('content', Option.SystemMessage);
+    Arr.AddValue(Msg);
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'user');
+    Msg.AddPair('content', Option.ExplainCodePrompt + #13#10 + Code);
+
+    Arr.AddValue(Msg);
+
+    Input := TCnJSONObject.Create;
+    ReqRoot.AddPair('parameters', Input);
+    Input.AddPair('result_format', 'message');
+
+    S := ReqRoot.ToJSON;
+    Result := AnsiToBytes(S);
+  finally
+    ReqRoot.Free;
+  end;
+end;
+
+class function TCnQWenAIEngine.EngineName: string;
+begin
+  Result := '通义千问';
+end;
+
+function TCnQWenAIEngine.ParseResponse(var Success: Boolean;
+  var ErrorCode: Cardinal; RequestType: TCnAIRequestType;
+  const Response: TBytes): string;
+var
+  RespRoot, Output, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
+begin
+  Result := '';
+  S := BytesToAnsi(Response);
+  RespRoot := CnJSONParse(S);
+  if RespRoot = nil then
+  begin
+    // 一类原始错误，如账号达到最大并发等
+    Result := BytesToAnsi(Response);
+  end
+  else
+  begin
+    try
+      // 正常回应
+      if (RespRoot['output'] <> nil) and (RespRoot['output'] is TCnJSONObject) then
+      begin
+        Output := TCnJSONObject(RespRoot['output']);
+        if (Output['choices'] <> nil) and (Output['choices'] is TCnJSONArray) then
+        begin
+          Arr := TCnJSONArray(Output['choices']);
+          if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(Arr[0]['message']);
+            Result := Msg['content'].AsString;
+          end;
+        end;
+      end;
+
+      if Result = '' then
+      begin
+        // 只要没有正常回应，就说明出错了
+        Success := False;
+
+        // 一类业务错误，比如 Key 无效等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(RespRoot['error']);
+          Result := Msg['message'].AsString;
+        end;
+
+        // 一类网络错误，比如 URL 错了等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+          Result := RespRoot['error'].AsString;
+        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+        begin
+          if Result = '' then
+            Result := RespRoot['message'].AsString
+          else
+            Result := Result + ', ' + RespRoot['message'].AsString;
+        end;
+      end;
+    finally
+      RespRoot.Free;
+    end;
+  end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
 { TCnMoonshotAIEngine }
@@ -97,6 +224,7 @@ end;
 
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
+  RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
