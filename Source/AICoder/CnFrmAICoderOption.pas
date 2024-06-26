@@ -48,8 +48,8 @@ type
     edtURL: TEdit;
     edtAPIKey: TEdit;
     lblModel: TLabel;
-    edtModel: TEdit;
     lblApply: TLabel;
+    cbbModel: TComboBox;
     procedure lblApplyClick(Sender: TObject);
   private
     FWebAddr: string;

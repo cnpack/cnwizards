@@ -52,12 +52,13 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 2
   end
-  object edtModel: TEdit
+  object cbbModel: TComboBox
     Left = 96
     Top = 52
     Width = 377
     Height = 21
     Anchors = [akLeft, akTop, akRight]
+    ItemHeight = 13
     TabOrder = 1
   end
 end

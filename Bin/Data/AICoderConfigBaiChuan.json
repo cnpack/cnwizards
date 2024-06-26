@@ -3,6 +3,7 @@
     "URL": "https://api.baichuan-ai.com/v1/chat/completions",
     "ApiKey": "",
     "Model": "Baichuan2-Turbo-192k",
+    "ModelList": "Baichuan4,Baichuan3-Turbo,Baichuan3-Turbo-128k,Baichuan2-Turbo,Baichuan2-Turbo-192k",
     "Temperature": 0.3,
-    "WebAddress": "https://api.baichuan-ai.com/v1/chat/completions"
+    "WebAddress": "https://platform.baichuan-ai.com/console/apikey"
 }

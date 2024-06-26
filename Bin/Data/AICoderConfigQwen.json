@@ -3,6 +3,7 @@
     "URL": "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
     "ApiKey": "",
     "Model": "qwen-turbo",
+    "ModelList": "qwen-turbo,qwen-plus,qwen-max,qwen-max-0428,qwen-max-0403,qwen-max-0107,qwen-max-longcontext",
     "Temperature": 0.85,
     "WebAddress": "https://bailian.console.aliyun.com/"
 }

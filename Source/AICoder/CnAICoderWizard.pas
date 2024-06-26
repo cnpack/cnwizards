@@ -276,6 +276,7 @@ end;
 procedure TCnAICoderConfigForm.LoadFromOptions;
 var
   I: Integer;
+  SL: TStringList;
 begin
   chkProxy.Checked := CnAIEngineOptionManager.UseProxy;
   edtProxy.Text := CnAIEngineOptionManager.ProxyServer;
@@ -290,30 +291,39 @@ begin
   SetLength(FTabsheets, CnAIEngineOptionManager.OptionCount);
   SetLength(FOptionFrames, CnAIEngineOptionManager.OptionCount);
 
-  for I := 0 to CnAIEngineOptionManager.OptionCount - 1 do
-  begin
-    // 给每个 Options 创建一个 Tab
-    FTabsheets[I] := TTabSheet.Create(pgcAI);
-    FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I + 1]);
-    FTabsheets[I].PageControl := pgcAI;
+  SL := TStringList.Create;
+  try
+    for I := 0 to CnAIEngineOptionManager.OptionCount - 1 do
+    begin
+      // 给每个 Options 创建一个 Tab
+      FTabsheets[I] := TTabSheet.Create(pgcAI);
+      FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I + 1]);
+      FTabsheets[I].PageControl := pgcAI;
 
-    // 给每个 Tab 里塞一个 Frame
-    FOptionFrames[I] := TCnAICoderOptionFrame.Create(FTabsheets[I]);
-    FOptionFrames[I].Name := 'CnAICoderOptionFrame' + IntToStr(I);
-    FOptionFrames[I].Parent := FTabsheets[I];
-    FOptionFrames[I].Top := 0;
-    FOptionFrames[I].Left := 0;
-    FOptionFrames[I].Align := alClient;
+      // 给每个 Tab 里塞一个 Frame
+      FOptionFrames[I] := TCnAICoderOptionFrame.Create(FTabsheets[I]);
+      FOptionFrames[I].Name := 'CnAICoderOptionFrame' + IntToStr(I);
+      FOptionFrames[I].Parent := FTabsheets[I];
+      FOptionFrames[I].Top := 0;
+      FOptionFrames[I].Left := 0;
+      FOptionFrames[I].Align := alClient;
 
-    // 给每个 Frame 里的东西塞 Option 内容
-    FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
-    FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
-    FOptionFrames[I].edtModel.Text := CnAIEngineOptionManager.Options[I].Model;
+      // 给每个 Frame 里的东西塞 Option 内容
+      FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
+      FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
+      FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
 
-    // 网址申请给塞上供点击打开
-    FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress;
+      SL.Clear;
+      ExtractStrings([','], [' '], PChar(CnAIEngineOptionManager.Options[I].ModelList), SL);
+      if SL.Count > 0 then
+        FOptionFrames[I].cbbModel.Items.Assign(SL);
+
+      // 网址申请给塞上，供点击打开
+      FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress;
+    end;
+  finally
+    SL.Free;
   end;
-
   pgcAI.ActivePageIndex := CnAIEngineManager.CurrentIndex;
 end;
 
@@ -325,7 +335,7 @@ begin
   begin
     CnAIEngineOptionManager.Options[I].URL := FOptionFrames[I].edtURL.Text;
     CnAIEngineOptionManager.Options[I].APIKey := FOptionFrames[I].edtAPIKey.Text;
-    CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].edtModel.Text;
+    CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].cbbModel.Text;
   end;
 
   CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
