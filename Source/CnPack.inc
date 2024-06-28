@@ -3342,8 +3342,12 @@
   {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
 {$ENDIF}
 
-{$IFDEF DELPHIXE8_UP}
+{$IFDEF DELPHIXE7_UP}
   {$DEFINE SUPPORT_TBYTES_OPERATION}    // XE7 的 TBytes 开始支持相加、插入等操作
+{$ENDIF}
+
+{$IFDEF DELPHIXE6_UP}
+  {$DEFINE FMX_CONTROL_HAS_SIZE}        // XE6 的 FMX 的 Control 才有 Size 属性
 {$ENDIF}
 
 {$IFDEF DELPHIXE6_UP}
