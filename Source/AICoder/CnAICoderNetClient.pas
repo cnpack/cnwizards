@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   SysUtils, Classes, CnNative, CnThreadPool;
 
@@ -98,7 +100,11 @@ type
       注意是在子线程中被调用的，处理时如需 Synchronize 到主线程则需及时保存数据}
   end;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 { TCnAINetRequestDataObject }
 
@@ -115,4 +121,5 @@ begin
   TCnAINetRequestDataObject(Result).OnAnswer := FOnAnswer;
 end;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

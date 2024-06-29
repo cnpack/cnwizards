@@ -40,6 +40,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   SysUtils, Classes, Contnrs, CnJSON, CnNative, CnWizConsts, CnWizCompilerConst
   {$IFNDEF TEST_APP} , CnWizMultiLang {$ENDIF};
@@ -158,7 +160,11 @@ type
 function CnAIEngineOptionManager: TCnAIEngineOptionManager;
 {* 返回一全局的 AI 引擎配置管理对象}
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
   CnSM4, CnAEAD;
@@ -441,4 +447,5 @@ initialization
 finalization
   FAIEngineOptionManager.Free;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

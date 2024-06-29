@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
   CnInetUtils, CnWizOptions, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
@@ -177,7 +179,11 @@ procedure RegisterAIEngine(AIEngineClass: TCnAIBaseEngineClass);
 function CnAIEngineManager: TCnAIEngineManager;
 {* 返回一全局 AI 引擎管理对象}
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 {$IFDEF DEBUG}
 uses
@@ -694,4 +700,5 @@ finalization
   FAIEngineManager.Free;
   FAIEngines.Free;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

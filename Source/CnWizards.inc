@@ -152,6 +152,9 @@
 // Wizard: CnCodeFormatterWizard
 {$DEFINE CNWIZARDS_CNCODEFORMATTERWIZARD}
 
+// Wizard: CnAICoderWizard
+{$DEFINE CNWIZARDS_CNAICODERWIZARD}
+
 {$ENDIF}
 
 {$I CnWizards_Def.inc}

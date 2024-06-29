@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   SysUtils, Classes, CnNative, CnJSON, CnAICoderEngine, CnAICoderNetClient;
 
@@ -76,7 +78,11 @@ type
     class function EngineName: string; override;
   end;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 const
   CRLF = #13#10;
@@ -229,4 +235,5 @@ initialization
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

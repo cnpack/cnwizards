@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
@@ -96,7 +98,11 @@ type
     function GetHint: string; override;
   end;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 {$R *.DFM}
 
@@ -384,4 +390,5 @@ end;
 initialization
   RegisterCnWizard(TCnAICoderWizard); // ×¢²á×¨¼Ò
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

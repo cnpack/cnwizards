@@ -37,6 +37,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, CnWizIdeDock, CnChatBox;
@@ -58,7 +60,11 @@ type
 var
   CnAICoderChatForm: TCnAICoderChatForm;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 {$R *.DFM}
 
@@ -85,4 +91,5 @@ begin
   FChatBox.Align := alClient;
 end;
 
+{$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.
