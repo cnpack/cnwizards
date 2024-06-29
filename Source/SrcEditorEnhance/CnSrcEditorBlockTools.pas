@@ -69,10 +69,12 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
+    btAICoderExplainCode, btAICoderToggleChatWindow, btAICoderSetting,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
+  // 通过 AddMenuItemWithAction 添加的菜单项也需在此增加类型，但除了映射外暂无实际作用
 
   TCnSrcEditorBlockTools = class(TPersistent)
   private
@@ -106,6 +108,9 @@ type
     FScriptMenu: TMenuItem;
     FScriptSettingChangedReceiver: ICnEventBusReceiver;
 {$ENDIF}
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+    FAICoderMenu: TMenuItem;
 {$ENDIF}
     FHideStructMenu: TMenuItem;
     FTabIndent: Boolean;
@@ -174,7 +179,7 @@ implementation
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 uses
-  CnWizSubActionShortCutFrm, CnScriptWizard, CnScriptFrm
+  CnWizSubActionShortCutFrm, CnScriptWizard, CnScriptFrm, CnAICoderWizard
   {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 const
@@ -646,11 +651,13 @@ var
   I: Integer;
 begin
   for I := 0 to MenuItem.Count - 1 do
+  begin
     if (MenuItem.Items[I].Tag = Ord(Kind)) and Assigned(MenuItem.Items[I].Action) then
     begin
       Result := MenuItem.Items[I].Action.Execute;
       Exit;
     end;
+  end;
   Result := False;
 end;
 
@@ -806,6 +813,9 @@ var
   SW: TCnScriptWizard;
 {$ENDIF}
 {$ENDIF}
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+  AW: TCnAICoderWizard;
+{$ENDIF}
 
   function DoAddMenuItem(AItem: TMenuItem; const ACaption: string;
     Kind: TBlockToolKind; const ShortCut: TShortCut = 0;
@@ -918,7 +928,7 @@ begin
       begin
         Item := AddMenuItem(FScriptMenu, SW.Scripts[I].Name, OnScriptExecute);
         Item.Enabled := SW.Scripts[I].Enabled;
-        Item.tag := I;
+        Item.Tag := I;
       end;
     end;
     FScriptMenu.Visible := FScriptMenu.Count > 0;
@@ -927,6 +937,19 @@ begin
 {$ENDIF}
   end;
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNAICODERWIZARD}
+  // AI 辅助编程菜单
+  AW := CnWizardMgr.WizardByClassName('TCnAICoderWizard') as TCnAICoderWizard;
+  if AW <> nil then
+  begin
+    FAICoderMenu := AddMenuItem(Items, SCnAICoderWizardMenuCaption, nil);
+    AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardExplainCode', btAICoderExplainCode);
+    AddSepMenuItem(FAICoderMenu);
+    AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardChatWindow', btAICoderToggleChatWindow);
+    AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardConfig', btAICoderSetting);
+  end;
 {$ENDIF}
 
   // 其它菜单
