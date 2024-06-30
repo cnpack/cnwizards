@@ -3387,7 +3387,7 @@
   {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE has TStrings Visualizer for Debug
 {$ENDIF}
 
-{$IFDEF BDS2012_UP}               // 2012 = XE2
+{$IFDEF BDS2012_UP}                        // 2012 = XE2
   {$DEFINE SUPPORT_32_AND_64}              // XE2 Support Win32 and Win64
   {$IFNDEF DISABLE_FMX}
     {$DEFINE SUPPORT_FMX}
@@ -3403,12 +3403,13 @@
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}
   {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI.
   {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
+  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
+  {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
+  {$DEFINE SUPPORT_FORMAT_SETTINGS}        // 2010 开始支持 FormatSettings
+  {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 下的 DebuggerService 有 ProcessDebugEvents
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
   {$DEFINE IDE_HAS_DATETIME_HINT}          // TDate/TTime/TDateTime shows Normally in Debug Hint
-  {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 下的 DebuggerService 有 ProcessDebugEvents
-  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
-  {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
 {$ENDIF}
 
 {$IFDEF BDS2010}
@@ -3418,17 +3419,16 @@
 
 {$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}
-  {$DEFINE SUPPORT_ATTRIBUTE}       // 支持 Attribute
-  {$DEFINE SUPPORT_ENCODING}        // Unicode with TEncoding
-  {$DEFINE SUPPORT_PUINT64}         // Has Pointer of UInt64
-  {$DEFINE OBJECT_HAS_TOSTRING}     // TObject.ToString Function
-  {$DEFINE OBJECT_HAS_EQUAL}        // TObject.Equal Function
-  {$DEFINE OBJECT_HAS_GETHASHCODE}  // TObject.GetHashCode Function
+  {$DEFINE SUPPORT_ATTRIBUTE}                    // 支持 Attribute
+  {$DEFINE SUPPORT_GENERIC}                      // 支持泛型
+  {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}          // AnsiString 的声明支持指定代码页
+  {$DEFINE SUPPORT_ENCODING}                     // Unicode with TEncoding
+  {$DEFINE SUPPORT_PUINT64}                      // Has Pointer of UInt64
+  {$DEFINE OBJECT_HAS_TOSTRING}                  // TObject.ToString Function
+  {$DEFINE OBJECT_HAS_EQUAL}                     // TObject.Equal Function
+  {$DEFINE OBJECT_HAS_GETHASHCODE}               // TObject.GetHashCode Function
   {$DEFINE TGRAPHIC_SUPPORT_PARTIALTRANSPARENCY} // TGraphic 类支持 Alpha 通道透明
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
-  {$DEFINE SUPPORT_GENERIC}         // 支持泛型
-  {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}
-  // AnsiString 的声明支持指定代码页
 
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
   // MainForm of 2009 or Above will eat Message in MouseWheelHandler
@@ -3444,7 +3444,7 @@
   // A OpenTools API Bug IOTAProjectOptions.SetOptionValue under 2009 or above:
   // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
 {$ELSE}
-  {$DEFINE ZLIB_STREAM_NOSIZE}      // 2007 及以下的 Zlib 的解压缩流不支持 Size 操作
+  {$DEFINE ZLIB_STREAM_NOSIZE}           // 2007 及以下的 Zlib 的解压缩流不支持 Size 操作
 {$ENDIF}
 
 {$IFDEF BDS2009}
@@ -3456,8 +3456,8 @@
 
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
-  {$DEFINE TBYTES_DEFINED}    // 2007 Defined TBytes = array of Byte;
-  {$DEFINE PROJECT_FILENAME_DPROJ} // Project File is .dproj
+  {$DEFINE TBYTES_DEFINED}               // 2007 Defined TBytes = array of Byte;
+  {$DEFINE PROJECT_FILENAME_DPROJ}       // Project File is .dproj
 {$ENDIF}
 
 {$IFDEF BDS2007}
@@ -3466,21 +3466,21 @@
 {$ENDIF}
 
 {$IFDEF BDS2006_UP}
+  {$DEFINE SUPPORT_CLASS_VAR}            // 2006 and above Supports class var
   {$DEFINE TCONTROL_HAS_MARGINS}         // 2006 and above TControl has Margins
   {$DEFINE TCONTROL_HAS_EXPLICIT_BOUNDS} // 2006 and above TControl has Explicit Bounds
-  {$DEFINE IDE_HAS_GUIDE_LINE}    // 2006 and above has Designer Guide Line
-  {$DEFINE IDE_SYNC_EDIT_BLOCK}   // 2006 and above Editor Supports Sync Block Edit
-  {$DEFINE OTA_CODE_TEMPLATE_API} // 2006 and above Provides CodeTemplateAPI.
+  {$DEFINE OTA_CODE_TEMPLATE_API}        // 2006 and above Provides CodeTemplateAPI.
+  {$DEFINE OTA_DEBUG_HAS_ERBUSY}         // 2006 下的 Evaluate 有返回值 erBusy
+  {$DEFINE IDE_HAS_GUIDE_LINE}           // 2006 and above has Designer Guide Line
+  {$DEFINE IDE_SYNC_EDIT_BLOCK}          // 2006 and above Editor Supports Sync Block Edit
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
-  {$DEFINE SUPPORT_CLASS_VAR}     // 2006 and above Supports class var
-  {$DEFINE OTA_DEBUG_HAS_ERBUSY}  // 2006 下的 Evaluate 有返回值 erBusy
 {$ENDIF}
 
 {$IFDEF BDS2005_UP}
-  {$DEFINE IDE_EDITOR_ELIDE}  // 2005 或以上编辑器支持折叠
-  {$DEFINE OTA_PALETTE_API}   // 2005 and above Provides PaletteAPI.
-  {$DEFINE IDE_FILE_HISTORY}  // 2005 或以上版本会存储文件历史版本
+  {$DEFINE OTA_PALETTE_API}              // 2005 and above Provides PaletteAPI.
+  {$DEFINE IDE_EDITOR_ELIDE}             // 2005 或以上编辑器支持折叠
+  {$DEFINE IDE_FILE_HISTORY}             // 2005 或以上版本会存储文件历史版本
 {$ENDIF}
 
 {$IFDEF BDS2006}
