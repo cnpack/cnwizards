@@ -2304,7 +2304,7 @@ var
             while PasParser.TokenID <> tkNull do
             begin
               // 记录下每个 Identifier
-              if (PasParser.TokenID in [tkProgram, tkLibrary, tkUnit, tkPackage]) and (FUnitLine = 0) then // 第一个 Unit
+              if (PasParser.TokenID in [tkProgram, tkLibrary, tkUnit]) and (FUnitLine = 0) then // 第一个 Unit
                 FUnitLine := GetPasParserLineNumber
               else if (PasParser.TokenID = tkInitialization) and (FInitializationLine = 0) then // 第一个 Initialization
                 FInitializationLine := GetPasParserLineNumber
