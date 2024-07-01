@@ -355,6 +355,9 @@ begin
     cbbAIEngines.ItemIndex := CnAIEngineManager.CurrentIndex;
 
     edtProxy.Text := CnAIEngineOptionManager.ProxyServer;
+
+    for I := 0 to CnAIEngineManager.EngineCount - 1 do
+      mmoAI.Lines.Add(CnAIEngineManager.Engines[I].Option.SaveToJSON);
   end;
 end;
 

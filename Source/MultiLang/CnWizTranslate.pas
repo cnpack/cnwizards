@@ -1317,6 +1317,7 @@ begin
 
   TranslateStr(SCnProcListJumpIntfHint, 'SCnProcListJumpIntfHint');
   TranslateStr(SCnProcListJumpImplHint, 'SCnProcListJumpImplHint');
+  TranslateStr(SCnProcListJumpsHintFmt, 'SCnProcListJumpsHintFmt');
   TranslateStr(SCnProcListClassComboHint, 'SCnProcListClassComboHint');
   TranslateStr(SCnProcListProcComboHint, 'SCnProcListProcComboHint');
 
@@ -1331,6 +1332,10 @@ begin
   TranslateStr(SCnProcListCloseToolBarHint, 'SCnProcListCloseToolBarHint');
   TranslateStr(SCnProcListErrorNoIntf, 'SCnProcListErrorNoIntf');
   TranslateStr(SCnProcListErrorNoImpl, 'SCnProcListErrorNoImpl');
+  TranslateStr(SCnProcListErrorNoUnit, 'SCnProcListErrorNoUnit');
+  TranslateStr(SCnProcListErrorNoEnd, 'SCnProcListErrorNoEnd');
+  TranslateStr(SCnProcListErrorNoInitialization, 'SCnProcListErrorNoInitialization');
+  TranslateStr(SCnProcListErrorNoFinalization, 'SCnProcListErrorNoFinalization');
 
   // CnUsesTools
   TranslateStr(SCnUsesToolsMenuCaption, 'SCnUsesToolsMenuCaption');

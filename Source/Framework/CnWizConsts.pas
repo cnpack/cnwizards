@@ -1631,6 +1631,7 @@ var
   SCnProcListAllFileOpened: string = '<All Opened>';
   SCnProcListJumpIntfHint: string = 'Jump to Interface';
   SCnProcListJumpImplHint: string = 'Jump to Implementation';
+  SCnProcListJumpsHintFmt: string = 'Jump to %s';
   SCnProcListClassComboHint: string = 'Class List';
   SCnProcListProcComboHint: string = 'Procedure/Function List';
   SCnProcListSortMenuCaption: string = '&Sort';
@@ -1645,6 +1646,10 @@ var
     'in Procedure List Dialog.';
   SCnProcListErrorNoIntf: string = 'Interface NOT Found.';
   SCnProcListErrorNoImpl: string = 'Implementation NOT Found.';
+  SCnProcListErrorNoUnit: string = 'Unit Name NOT Found.';
+  SCnProcListErrorNoEnd: string = 'End. NOT Found.';
+  SCnProcListErrorNoInitialization: string = 'Initialization NOT Found.';
+  SCnProcListErrorNoFinalization: string = 'Finalization NOT Found.';
 
   // CnUsesTools
   SCnUsesToolsMenuCaption: string = '&Uses Units Tools';

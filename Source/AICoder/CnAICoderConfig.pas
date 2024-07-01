@@ -327,7 +327,8 @@ end;
 
 constructor TCnAIEngineOption.Create;
 begin
-
+  inherited;
+  FTemperature := 0.3; // д╛хож╣
 end;
 
 destructor TCnAIEngineOption.Destroy;

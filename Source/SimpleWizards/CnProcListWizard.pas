@@ -347,6 +347,8 @@ type
     FToolBtnSep1: TCnProcToolButton;
     FToolBtnJumpIntf: TCnProcToolButton;
     FToolBtnJumpImpl: TCnProcToolButton;
+    FToolBtnJumps: TCnProcToolButton;
+    FJumpsMenu: TPopupMenu;
     FClassCombo: TCnProcListComboBox;
     FProcCombo: TCnProcListComboBox;
     FPopupMenu: TPopupMenu;
@@ -369,6 +371,8 @@ type
     property ToolBtnSep1: TCnProcToolButton read FToolBtnSep1 write FToolBtnSep1;
     property ToolBtnJumpIntf: TCnProcToolButton read FToolBtnJumpIntf write FToolBtnJumpIntf;
     property ToolBtnJumpImpl: TCnProcToolButton read FToolBtnJumpImpl write FToolBtnJumpImpl;
+    property ToolBtnJumps: TCnProcToolButton read FToolBtnJumps write FToolBtnJumps;
+    property JumpsMenu: TPopupMenu read FJumpsMenu write FJumpsMenu;
     property ClassCombo: TCnProcListComboBox read FClassCombo write FClassCombo;
     property Splitter1: TCnCustomizedSplitter read FSplitter1 write FSplitter1;
     property Splitter2: TCnCustomizedSplitter read FSplitter2 write FSplitter2;
@@ -435,6 +439,7 @@ type
     procedure CurrentGotoLineAndFocusEditControl(Line: Integer); overload;
     procedure JumpIntfOnClick(Sender: TObject);
     procedure JumpImplOnClick(Sender: TObject);
+    procedure JumpsOnClick(Sender: TObject);
     procedure ClassComboDropDown(Sender: TObject);
     procedure ProcComboDropDown(Sender: TObject);
     procedure DoIdleComboChange(Sender: TObject);
@@ -513,6 +518,20 @@ uses
 
 {$R *.DFM}
 
+type
+  TCnFileInfo = class(TObject)
+  private
+    FAllName: string;
+    FProjectName: string;
+    FFileName: string;
+  public
+    property FileName: string read FFileName write FFileName;
+    property AllName: string read FAllName write FAllName;
+    property ProjectName: string read FProjectName write FProjectName;
+  end;
+
+  TCnJumpsPoint = (jpUnit, jpEnd, jpInitialization, jpFinalization);
+
 const
   csUseEditorToolbar = 'UseEditorToolBar';
   csPreviewLineCount = 'PreviewLineCount';
@@ -536,19 +555,6 @@ const
   csDefPreviewLineCount = 4;
   csDefProcDropDownBoxFontSize = 8;
 
-type
-  TCnFileInfo = class(TObject)
-  private
-    FAllName: string;
-    FProjectName: string;
-    FFileName: string;
-  public
-    property FileName: string read FFileName write FFileName;
-    property AllName: string read FAllName write FAllName;
-    property ProjectName: string read FProjectName write FProjectName;
-  end;
-
-const
   csShowPreview = 'ShowPreview';
   csPreviewHeight = 'PreviewHeight';
   csPreviewWidth = 'PreviewWidth';
@@ -564,6 +570,10 @@ const
 
   ProcBlacklist: array[0..2] of string = ('CATCH_ALL', 'CATCH', 'AND_CATCH_ALL');
 
+  JumpCaptions: array[Low(TCnJumpsPoint)..High(TCnJumpsPoint)] of string =
+    ('unit ;', 'end.', 'initialization', 'finalization');
+  JUMP_IMAGE_OFFSET = 5;
+
 var
   FLanguage: TCnSourceLanguageType;
   FCurElement: string;
@@ -571,6 +581,10 @@ var
   FOldCaption: string;
   FIntfLine: Integer = 0;
   FImplLine: Integer = 0;
+  FUnitLine: Integer = 0;
+  FEndLine: Integer = 0;
+  FInitializationLine: Integer = 0;
+  FFinalizationLine: Integer = 0;
 
   GListSortIndex: Integer = 0;
   GListSortReverse: Boolean = False;
@@ -687,11 +701,13 @@ begin
     begin
       Obj.ToolBtnJumpIntf.Enabled := True;
       Obj.ToolBtnJumpImpl.Enabled := True;
+      Obj.ToolBtnJumps.Enabled := True;
     end
     else
     begin
       Obj.ToolBtnJumpIntf.Enabled := False;
       Obj.ToolBtnJumpImpl.Enabled := False;
+      Obj.ToolBtnJumps.Enabled := False;
     end;
   end;
 end;
@@ -814,6 +830,10 @@ begin
   FElementList.Clear;
   FIntfLine := 0;
   FImplLine := 0;
+  FUnitLine := 0;
+  FEndLine := 0;
+  FInitializationLine := 0;
+  FFinalizationLine := 0;
 end;
 
 procedure TCnProcListWizard.Config;
@@ -919,6 +939,7 @@ procedure TCnProcListWizard.CreateProcToolBar(ToolBarType: string;
 var
   Obj: TCnProcToolBarObj;
   Item, SubItem: TMenuItem;
+  JP: TCnJumpsPoint;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('ProcList: Create Proc ToolBar from EditControl %8.8x', [Integer(EditControl)]);
@@ -1107,6 +1128,34 @@ begin
     ImageIndex := 1;
     SetToolBar(Obj.InternalToolBar2);
     OnClick := JumpImplOnClick;
+  end;
+
+  Obj.JumpsMenu := TPopupMenu.Create(Obj.InternalToolBar2);
+  Obj.JumpsMenu.Images := dmCnSharedImages.ilProcToolBar;;
+
+  for JP := Low(TCnJumpsPoint) to High(TCnJumpsPoint) do
+  begin
+    Item := TMenuItem.Create(Obj.JumpsMenu);
+    Item.Caption := JumpCaptions[JP];
+    Item.Tag := Ord(JP);
+    Item.ImageIndex := JUMP_IMAGE_OFFSET + Ord(JP);
+    Item.Hint := Format(SCnProcListJumpsHintFmt, [JumpCaptions[JP]]);
+    Item.OnClick := JumpsOnClick;
+    Obj.JumpsMenu.Items.Add(Item);
+  end;
+
+  Obj.ToolBtnJumps := TCnProcToolButton.Create(ToolBar);
+  with Obj.ToolBtnJumps do
+  begin
+    Left := 90;
+    Top := 0;
+    Caption := '';
+    Style := tbsDropDown;
+    ImageIndex := JUMP_IMAGE_OFFSET;
+    Item.Hint := Format(SCnProcListJumpsHintFmt, [JumpCaptions[Low(TCnJumpsPoint)]]);
+    SetToolBar(Obj.InternalToolBar2);
+    DropdownMenu := Obj.JumpsMenu;
+    OnClick := JumpsOnClick;
   end;
 
   Obj.InternalToolBar1 := TCnExternalSrcEditorToolBar.Create(ToolBar);
@@ -1478,6 +1527,65 @@ begin
     CurrentGotoLineAndFocusEditControl(FImplLine)
   else
     ErrorDlg(SCnProcListErrorNoImpl);
+end;
+
+procedure TCnProcListWizard.JumpsOnClick(Sender: TObject);
+var
+  JP: TCnJumpsPoint;
+  Item: TMenuItem;
+  Menu: TPopupMenu;
+  Tlb: TToolBar;
+  I: Integer;
+begin
+  CheckReparse;
+
+  // 拿 Sender 的 Tag 跳
+  if not (Sender is TComponent) then
+    Exit;
+
+  JP := TCnJumpsPoint((Sender as TComponent).Tag);
+  case JP of
+    jpUnit:
+      if FUnitLine > 0 then
+        CurrentGotoLineAndFocusEditControl(FUnitLine)
+      else
+        ErrorDlg(SCnProcListErrorNoUnit);
+    jpEnd:
+      if FEndLine > 0 then
+        CurrentGotoLineAndFocusEditControl(FEndLine)
+      else
+        ErrorDlg(SCnProcListErrorNoEnd);
+    jpInitialization:
+      if FInitializationLine > 0 then
+        CurrentGotoLineAndFocusEditControl(FInitializationLine)
+      else
+        ErrorDlg(SCnProcListErrorNoInitialization);
+    jpFinalization:
+      if FFinalizationLine > 0 then
+        CurrentGotoLineAndFocusEditControl(FFinalizationLine)
+      else
+        ErrorDlg(SCnProcListErrorNoFinalization);
+  end;
+
+  // 判断 Sender 是 MenuItem 的话，把 Button 的 ImageIndex 和 Tag 设过去
+  if Sender is TMenuItem then
+  begin
+    Item := Sender as TMenuItem;
+    Menu := TPopupMenu(Item.Owner);
+    if Menu <> nil then
+    begin
+      Tlb := TToolBar(Menu.Owner);
+      for I := 0 to Tlb.ButtonCount - 1 do
+      begin
+        if Tlb.Buttons[I].DropdownMenu = Menu then
+        begin
+          Tlb.Buttons[I].ImageIndex := Item.ImageIndex;
+          Tlb.Buttons[I].Tag := Item.Tag;
+          Tlb.Buttons[I].Hint := Item.Hint;
+        end;
+      end;
+    end;
+  end;
 end;
 
 procedure TCnProcListWizard.JumpIntfOnClick(Sender: TObject);
@@ -2196,7 +2304,13 @@ var
             while PasParser.TokenID <> tkNull do
             begin
               // 记录下每个 Identifier
-              if PasParser.TokenID = tkLower then
+              if (PasParser.TokenID in [tkProgram, tkLibrary, tkUnit, tkPackage]) and (FUnitLine = 0) then // 第一个 Unit
+                FUnitLine := GetPasParserLineNumber
+              else if (PasParser.TokenID = tkInitialization) and (FInitializationLine = 0) then // 第一个 Initialization
+                FInitializationLine := GetPasParserLineNumber
+              else if (PasParser.TokenID = tkFinalization) and (FFinalizationLine = 0) then // 第一个 Finalization
+                FFinalizationLine := GetPasParserLineNumber
+              else if PasParser.TokenID = tkLower then
               begin
                 IsInTemplate := True;
                 CurIdent := CurIdent + '<'
@@ -2578,6 +2692,10 @@ var
 
               ClassLast := (PasParser.TokenID = tkClass);
               IntfLast := (PasParser.TokenID = tkInterface);
+
+              // 最后一个 end
+              if PasParser.TokenID = tkEnd then
+                FEndLine := GetPasParserLineNumber;
 
               if not (PasParser.TokenID in [tkSpace, tkCRLF, tkCRLFCo]) then
                 PrevTokenID := PasParser.TokenID;
