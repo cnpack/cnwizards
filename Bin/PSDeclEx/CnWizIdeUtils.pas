@@ -341,7 +341,7 @@ type
 
 { TCnEditControlWrapper }
 
-  TEditControlInfo = record
+  TCnEditControlInfo = record
   {* 代码编辑器位置信息 }
     TopLine: Integer;         // 顶行号
     LinesInWindow: Integer;   // 窗口显示行数
@@ -375,7 +375,7 @@ type
 
   TEditorChangeTypes = set of TEditorChangeType;
 
-  TEditorContext = record
+  TCnEditorContext = record
     TopRow: Integer;               // 视觉上第一行的行号
     BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
@@ -402,7 +402,7 @@ type
     FLastBottomElided: Boolean;
     FLinesChanged: Boolean;
     FTopControl: TControl;
-    FContext: TEditorContext;
+    FContext: TCnEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
     FEditView: IOTAEditView;
@@ -420,7 +420,7 @@ type
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
     procedure IDEShowLineNumberChanged;
-    property Context: TEditorContext read FContext;
+    property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
     property EditView: IOTAEditView read FEditView;
@@ -560,8 +560,8 @@ type
       TControl; Context: Pointer);
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
-    function GetEditorContext(Editor: TEditorObject): TEditorContext;
-    function CheckViewLines(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    function GetEditorContext(Editor: TEditorObject): TCnEditorContext;
+    function CheckViewLines(Editor: TEditorObject; Context: TCnEditorContext): Boolean;
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
@@ -626,7 +626,7 @@ type
     {* 返回编辑器字宽 }
     function GetCharSize: TSize;
     {* 返回编辑器行高和字宽 }
-    function GetEditControlInfo(EditControl: TControl): TEditControlInfo;
+    function GetEditControlInfo(EditControl: TControl): TCnEditControlInfo;
     {* 返回编辑器当前信息 }
     function GetEditControlCharHeight(EditControl: TControl): Integer;
     {* 返回编辑器内的字符高度也就是行高}
@@ -1297,7 +1297,7 @@ begin
 end;
 
 function TCnEditControlWrapper.CheckViewLines(Editor: TEditorObject;
-  Context: TEditorContext): Boolean;
+  Context: TCnEditorContext): Boolean;
 begin
 
 end;
@@ -1462,7 +1462,7 @@ begin
 end;
 
 function TCnEditControlWrapper.GetEditControlInfo(
-  EditControl: TControl): TEditControlInfo;
+  EditControl: TControl): TCnEditControlInfo;
 begin
 
 end;
@@ -1474,7 +1474,7 @@ begin
 end;
 
 function TCnEditControlWrapper.GetEditorContext(
-  Editor: TEditorObject): TEditorContext;
+  Editor: TEditorObject): TCnEditorContext;
 begin
 
 end;

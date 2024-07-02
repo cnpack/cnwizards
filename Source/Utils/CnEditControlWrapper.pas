@@ -149,7 +149,8 @@ type
     constructor Create(AEditControl: TControl; AEditView: IOTAEditView);
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
-    procedure IDEShowLineNumberChanged;
+    procedure NotifyIDEGutterChanged;
+
     property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
@@ -590,18 +591,21 @@ function TEditorObject.GetGutterWidth: Integer;
 begin
   if FGutterChanged and Assigned(FEditView) then
   begin
-  {$IFDEF BDS}
+{$IFDEF BDS}
     FGutterWidth := EditControlWrapper.GetPointFromEdPos(FEditControl,
       OTAEditPos(1, 1)).X;
     FGutterWidth := FGutterWidth + (FEditView.LeftColumn - 1) *
       FEditControlWrapper.FCharSize.cx;
-  {$ELSE}
+{$ELSE}
     FGutterWidth := FEditView.Buffer.BufferOptions.LeftGutterWidth;
-  {$ENDIF}
+{$ENDIF}
 
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditorObject GetGutterWidth. ReCalc to ' + IntToStr(FGutterWidth));
+{$ENDIF}
     FGutterChanged := False;
   end;
-  Result := FGutterWidth;  
+  Result := FGutterWidth;
 end;
 
 function TEditorObject.GetViewBottomLine: Integer;
@@ -642,12 +646,12 @@ begin
       begin
         Result := ACtrl;
         Exit;
-      end;  
-    end;  
-  end;  
+      end;
+    end;
+  end;
 end;
 
-procedure TEditorObject.IDEShowLineNumberChanged;
+procedure TEditorObject.NotifyIDEGutterChanged;
 begin
   FGutterChanged := True;
 end;

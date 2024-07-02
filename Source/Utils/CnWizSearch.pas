@@ -808,6 +808,7 @@ begin
       ;
     end;
   finally
+    DestStream.Free;
     SourceStream.Free;
   end;
 end;

@@ -41,7 +41,9 @@ unit CnSourceHighlight;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2022.02.26
+* 修改记录：2024.07.02
+*               增加 ControlHook 拦截窗口位置变化消息重新计算左侧栏位宽度的机制避免绘制错位。
+*           2022.02.26
 *               光标下的高亮关键字块，其配对使用实线绘制。
 *           2021.09.03
 *               加入对区域折叠标记的高亮配对显示。
@@ -88,7 +90,7 @@ unit CnSourceHighlight;
 *           2008.06.08
 *               增加画线匹配的功能
 *           2008.03.11
-*               修正EditControl关闭时通知器内部未释放高亮对象的问题
+*               修正 EditControl 关闭时通知器内部未释放高亮对象的问题
 *           2005.07.25
 *               创建单元
 ================================================================================
@@ -103,7 +105,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
-  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings,
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings, CnControlHook,
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
@@ -209,6 +211,7 @@ type
   {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息，注意 Tokens 均是引用}
   private
     FControl: TControl;
+    FHook: TCnControlHook;
     FModified: Boolean;
     FChanged: Boolean;
     FIsCppSource: Boolean;
@@ -267,6 +270,9 @@ type
   protected
     function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
     function CheckIsCustomIdentifier(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
+
+    procedure EditControlAfterMessage(Sender: TObject; Control: TControl;
+      var Msg: TMessage; var Handled: Boolean);
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -321,7 +327,7 @@ type
     property CustomIdentifierLineCount: Integer read GetCustomIdentifierLineCount;
 
     property Lines[LineNum: Integer]: TCnList read GetLines;
-    {* 每行一个CnList，后者容纳 Token}
+    {* 每行一个 CnList，后者容纳 Token}
     property IdLines[LineNum: Integer]: TCnList read GetIdLines;
     {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CurToken}
     property FlowLines[LineNum: Integer]: TCnList read GetFlowLines;
@@ -2469,10 +2475,17 @@ begin
 
   FModified := True;
   FChanged := True;
+
+  FHook := TCnControlHook.Create(nil);
+  FHook.AfterMessage := EditControlAfterMessage;
+  FHook.Hook(FControl);
+  FHook.Active := True;
 end;
 
 destructor TCnBlockMatchInfo.Destroy;
 begin
+  FHook.Free;
+
   Clear;
   FStack.Free;
   FIfThenStack.Free;
@@ -2496,6 +2509,23 @@ begin
   FCppParser.Free;
   FPasParser.Free;
   inherited;
+end;
+
+procedure TCnBlockMatchInfo.EditControlAfterMessage(Sender: TObject;
+  Control: TControl; var Msg: TMessage; var Handled: Boolean);
+var
+  Obj: TEditorObject;
+begin
+  // 尝试修补第一次打开时绘制偏差的问题，不确定是否生效
+  if Msg.Msg = WM_WINDOWPOSCHANGED then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditControl Got WindowPosChanged Message.');
+{$ENDIF}
+    Obj := EditControlWrapper.GetEditorObject(Control);
+    if Obj <> nil then
+      Obj.NotifyIDEGutterChanged;
+  end;
 end;
 
 function TCnBlockMatchInfo.GetKeyCount: Integer;
@@ -3029,11 +3059,13 @@ var
   I: Integer;
 begin
   for I := 0 to FBracketList.Count - 1 do
+  begin
     if TCnBracketInfo(FBracketList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
