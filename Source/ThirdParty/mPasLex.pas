@@ -13,8 +13,6 @@
  | INDICATES YOUR ASSENT TO THE
  | FOLLOWING LICENCE CONDITIONS.
  |
- |
- |
  | These Licence Conditions are exlusively
  | governed by the Law and Rules of the
  | Federal Republic of Germany.
@@ -50,7 +48,6 @@
  |    code separately.
  |    Proof of this donations must be provided to the author of
  |    this software.
- |
  |
  | DISCLAIMER:
  |
@@ -98,7 +95,7 @@ type
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
     tkMod, tkMultiLineString, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
-    tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload, tkOverride,
+    tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload, tkOverride, tkPackage,
     tkPacked, tkPascal, tkPlatform, tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure,
     tkProgram, tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead,
     tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat, tkRequires, tkResident,
@@ -115,7 +112,7 @@ type
       解决方案：已修复 StringProc 中的问题
     原有问题三：#$0A 这种本应是 tkAsciiChar 的会被解析成一个井号的 tkAsciiChar 加上 $0A 的 tkInteger
       解决方案：已修复 AsciiCharProc 中的问题
-    原有问题四：不支持 tkRequires, tkContains, tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper
+    原有问题四：不支持 tkRequires, tkContains, tkStrict，tkOperator, tkPlatform, tkDeprecated, tkFinal, tkStatic, tkSealed, tkHelper, tkPackage
       解决方案：都加上了
     原有问题五：IsClass 的判断用 class 前面有等号且后面不是合法标识符来判断，对于 class sealed/helper 以及不换行的 class public 等声明判断有误
       解决方案：暂无
@@ -603,7 +600,8 @@ end;
 
 function TmwPasLex.Func44: TTokenKind;
 begin
-  if KeyComp('Set')then Result:=tkSet else Result:=tkIdentifier;
+  if KeyComp('Set')then Result:=tkSet else
+    if KeyComp('Package')then Result:=tkPackage else Result:=tkIdentifier;
 end;
 
 function TmwPasLex.Func45: TTokenKind;

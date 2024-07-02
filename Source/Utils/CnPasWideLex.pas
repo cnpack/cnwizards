@@ -842,6 +842,8 @@ function TCnPasWideLex.Func44: TTokenKind;
 begin
   if KeyComp('Set') then
     Result := tkSet
+  else if KeyComp('Package') then
+    Result := tkPackage
   else
     Result := tkIdentifier;
 end;
