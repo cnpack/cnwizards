@@ -69,7 +69,7 @@ type
 
 { TCnEditControlWrapper }
 
-  TEditControlInfo = record
+  TCnEditControlInfo = record
   {* 代码编辑器位置信息 }
     TopLine: Integer;         // 顶行号
     LinesInWindow: Integer;   // 窗口显示行数
@@ -105,7 +105,7 @@ type
 
   TEditorChangeTypes = set of TEditorChangeType;
 
-  TEditorContext = record
+  TCnEditorContext = record
     TopRow: Integer;               // 视觉上第一行的行号
     BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
@@ -132,7 +132,7 @@ type
     FLastBottomElided: Boolean;
     FLinesChanged: Boolean;
     FTopControl: TControl;
-    FContext: TEditorContext;
+    FContext: TCnEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
     FEditView: IOTAEditView;
@@ -150,7 +150,7 @@ type
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
     procedure IDEShowLineNumberChanged;
-    property Context: TEditorContext read FContext;
+    property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
     property EditView: IOTAEditView read FEditView;
@@ -290,8 +290,8 @@ type
       TControl; Context: Pointer);
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
-    function GetEditorContext(Editor: TEditorObject): TEditorContext;
-    function CheckViewLinesChange(Editor: TEditorObject; Context: TEditorContext): Boolean;
+    function GetEditorContext(Editor: TEditorObject): TCnEditorContext;
+    function CheckViewLinesChange(Editor: TEditorObject; Context: TCnEditorContext): Boolean;
     // 检查某个 View 中的具体行号分布有无改变，包括纵向滚动、纵向伸缩、折叠等，不包括单行内改动
 
     function CheckEditorChanges(Editor: TEditorObject): TEditorChangeTypes;
@@ -361,7 +361,7 @@ type
     {* 返回编辑器字宽 }
     function GetCharSize: TSize;
     {* 返回编辑器行高和字宽 }
-    function GetEditControlInfo(EditControl: TControl): TEditControlInfo;
+    function GetEditControlInfo(EditControl: TControl): TCnEditControlInfo;
     {* 返回编辑器当前信息 }
     function GetEditControlCharHeight(EditControl: TControl): Integer;
     {* 返回编辑器内的字符高度也就是行高}
@@ -1083,9 +1083,9 @@ begin
 end;
 
 function TCnEditControlWrapper.GetEditorContext(Editor: TEditorObject):
-  TEditorContext;
+  TCnEditorContext;
 begin
-  FillChar(Result, SizeOf(TEditorContext), 0);
+  FillChar(Result, SizeOf(TCnEditorContext), 0);
   if (Editor <> nil) and (Editor.EditView <> nil) and (Editor.EditControl <> nil) then
   begin
     Result.TopRow := Editor.EditView.TopRow;
@@ -1161,7 +1161,7 @@ begin
 end;
 
 function TCnEditControlWrapper.CheckViewLinesChange(Editor: TEditorObject;
-  Context: TEditorContext): Boolean;
+  Context: TCnEditorContext): Boolean;
 var
   I, Idx, LineCount: Integer;
 begin
@@ -1217,7 +1217,7 @@ end;
 function TCnEditControlWrapper.CheckEditorChanges(Editor: TEditorObject):
   TEditorChangeTypes;
 var
-  Context, OldContext: TEditorContext;
+  Context, OldContext: TCnEditorContext;
   ACtrl: TControl;
 begin
   Result := [];
@@ -1717,7 +1717,7 @@ begin
 end;
 
 function TCnEditControlWrapper.GetEditControlInfo(EditControl: TControl):
-  TEditControlInfo;
+  TCnEditControlInfo;
 begin
   try
     Result.TopLine := GetOrdProp(EditControl, 'TopLine');

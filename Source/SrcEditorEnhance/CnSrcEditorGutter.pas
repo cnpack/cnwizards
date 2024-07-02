@@ -90,7 +90,7 @@ type
     FIDELineNumMenu: TMenuItem;
 {$ENDIF}
     FOldLineWidth: Integer;
-    FPosInfo: TEditControlInfo;
+    FPosInfo: TCnEditControlInfo;
 {$IFNDEF BDS}
     FLineInfo: TCnList;
 {$ENDIF}

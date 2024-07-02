@@ -3,8 +3,8 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   Top = 107
   BorderStyle = bsDialog
   Caption = 'AI Coder Settings'
-  ClientHeight = 413
-  ClientWidth = 621
+  ClientHeight = 452
+  ClientWidth = 715
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,11 +23,12 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = 'Active AI Engine:'
   end
   object cbbActiveEngine: TComboBox
-    Left = 104
+    Left = 128
     Top = 14
-    Width = 241
+    Width = 289
     Height = 21
     Style = csDropDownList
+    Anchors = [akLeft, akTop, akRight]
     ItemHeight = 13
     TabOrder = 0
     OnChange = cbbActiveEngineChange
@@ -35,13 +36,14 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object pgcAI: TPageControl
     Left = 8
     Top = 56
-    Width = 601
-    Height = 313
+    Width = 695
+    Height = 352
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 1
   end
   object btnOK: TButton
-    Left = 373
-    Top = 381
+    Left = 467
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -51,8 +53,8 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 453
-    Top = 381
+    Left = 547
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -62,8 +64,8 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 3
   end
   object btnHelp: TButton
-    Left = 533
-    Top = 381
+    Left = 627
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -71,15 +73,16 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 4
   end
   object chkProxy: TCheckBox
-    Left = 384
+    Left = 454
     Top = 16
-    Width = 89
+    Width = 107
     Height = 17
+    Anchors = [akTop, akRight]
     Caption = 'Use Proxy:'
     TabOrder = 5
   end
   object edtProxy: TEdit
-    Left = 472
+    Left = 566
     Top = 14
     Width = 137
     Height = 21
