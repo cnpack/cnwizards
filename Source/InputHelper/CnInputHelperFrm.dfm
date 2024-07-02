@@ -4,7 +4,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   BorderStyle = bsDialog
   Caption = 'Input Helper Settings'
   ClientHeight = 540
-  ClientWidth = 592
+  ClientWidth = 622
   KeyPreview = True
   OnActivate = FormActivate
   OnCreate = FormCreate
@@ -14,7 +14,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   PixelsPerInch = 96
   TextHeight = 13
   object btnHelp: TButton
-    Left = 510
+    Left = 540
     Top = 511
     Width = 75
     Height = 21
@@ -24,7 +24,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     OnClick = btnHelpClick
   end
   object btnOK: TButton
-    Left = 351
+    Left = 381
     Top = 511
     Width = 75
     Height = 21
@@ -35,7 +35,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 431
+    Left = 461
     Top = 511
     Width = 75
     Height = 21
@@ -48,7 +48,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
   object pgc1: TPageControl
     Left = 8
     Top = 8
-    Width = 577
+    Width = 607
     Height = 496
     ActivePage = ts1
     Anchors = [akLeft, akTop, akRight, akBottom]
@@ -58,8 +58,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
       object grp1: TGroupBox
         Left = 8
         Top = 8
-        Width = 553
+        Width = 583
         Height = 225
+        Anchors = [akLeft, akTop, akRight]
         Caption = '&Auto-Settings'
         TabOrder = 0
         object lbl1: TLabel
@@ -70,18 +71,20 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = 'Popup after How Many Characters Input:'
         end
         object lbl2: TLabel
-          Left = 250
+          Left = 280
           Top = 16
           Width = 99
           Height = 13
+          Anchors = [akTop, akRight]
           Caption = 'Delay before Popup:'
         end
         object lbl3: TLabel
-          Left = 232
+          Left = 262
           Top = 66
           Width = 40
           Height = 12
           Alignment = taCenter
+          Anchors = [akTop, akRight]
           AutoSize = False
           Caption = '0.1 Sec'
         end
@@ -128,10 +131,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Value = 1
         end
         object tbDispDelay: TTrackBar
-          Left = 240
+          Left = 270
           Top = 32
           Width = 305
           Height = 33
+          Anchors = [akTop, akRight]
           Max = 2000
           Min = 100
           Orientation = trHorizontal
@@ -155,8 +159,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object hkEnabled: THotKey
           Left = 248
           Top = 148
-          Width = 289
+          Width = 319
           Height = 19
+          Anchors = [akLeft, akTop, akRight]
           HotKey = 32833
           InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
@@ -165,8 +170,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object hkPopup: THotKey
           Left = 248
           Top = 172
-          Width = 289
+          Width = 319
           Height = 19
+          Anchors = [akLeft, akTop, akRight]
           HotKey = 32833
           InvalidKeys = [hcNone]
           Modifiers = [hkAlt]
@@ -192,8 +198,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object edtAutoSymbols: TEdit
           Left = 248
           Top = 121
-          Width = 289
+          Width = 319
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 6
         end
         object chkKeySeq: TCheckBox
@@ -206,10 +213,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           OnClick = UpdateControls
         end
         object btnDisableCompletion: TButton
-          Left = 376
+          Left = 406
           Top = 94
           Width = 161
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'Disable Code Com&pletion'
           TabOrder = 4
           OnClick = btnDisableCompletionClick
@@ -218,9 +226,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
       object grp3: TGroupBox
         Left = 8
         Top = 240
-        Width = 553
+        Width = 583
         Height = 216
-        Anchors = [akLeft, akTop, akBottom]
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'O&utput Settings'
         TabOrder = 1
         object lbl9: TLabel
@@ -247,16 +255,18 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object edtCompleteChars: TEdit
           Left = 248
           Top = 16
-          Width = 289
+          Width = 319
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 0
         end
         object cbbOutputStyle: TComboBox
           Left = 248
           Top = 70
-          Width = 289
+          Width = 319
           Height = 21
           Style = csDropDownList
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 2
           Items.Strings = (
@@ -301,8 +311,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object edtFilterSymbols: TEdit
           Left = 248
           Top = 43
-          Width = 289
+          Width = 319
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 1
         end
         object chkIgnoreSpace: TCheckBox
@@ -314,10 +325,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 5
         end
         object chkTabComplete: TCheckBox
-          Left = 280
+          Left = 310
           Top = 96
           Width = 265
           Height = 17
+          Anchors = [akTop, akRight]
           Caption = 'Allow Inputting Current Item by Pressing Tab.'
           TabOrder = 4
           OnClick = chkSpcCompleteClick
@@ -338,8 +350,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
       object grp2: TGroupBox
         Left = 8
         Top = 8
-        Width = 553
+        Width = 583
         Height = 198
+        Anchors = [akLeft, akTop, akRight]
         Caption = '&Display Settings'
         TabOrder = 0
         object lbl7: TLabel
@@ -357,10 +370,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           Caption = 'List Sorted by:'
         end
         object PaintBox: TPaintBox
-          Left = 432
+          Left = 462
           Top = 45
           Width = 113
           Height = 25
+          Anchors = [akTop, akRight]
           OnPaint = PaintBoxPaint
         end
         object lbl15: TLabel
@@ -397,10 +411,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           TabOrder = 0
         end
         object btnFont: TButton
-          Left = 432
+          Left = 462
           Top = 16
           Width = 113
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'List Font...'
           TabOrder = 1
           OnClick = btnFontClick
@@ -408,24 +423,27 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object chkAutoAdjustScope: TCheckBox
           Left = 8
           Top = 120
-          Width = 505
+          Width = 535
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Adjust Priority Automatically according to the Frequency.'
           TabOrder = 5
         end
         object chkUseCodeInsightMgr: TCheckBox
           Left = 8
           Top = 156
-          Width = 505
+          Width = 535
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Use the Compatible Way to Obtain Symbols.(slower)'
           TabOrder = 7
         end
         object chkRemoveSame: TCheckBox
           Left = 8
           Top = 138
-          Width = 505
+          Width = 535
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Remove Duplicate Symbols.'
           TabOrder = 6
         end
@@ -441,8 +459,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object chkUseKibitzCompileThread: TCheckBox
           Left = 8
           Top = 174
-          Width = 505
+          Width = 535
           Height = 17
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'Prefetch Symbols List when Opening Project.'
           TabOrder = 8
         end
@@ -460,10 +479,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
             'Fuzzy Match')
         end
         object chkUseEditorColor: TCheckBox
-          Left = 432
+          Left = 462
           Top = 88
           Width = 113
           Height = 17
+          Anchors = [akTop, akRight]
           Caption = 'Use Editor Colors'
           TabOrder = 9
         end
@@ -471,7 +491,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
       object grp4: TGroupBox
         Left = 8
         Top = 214
-        Width = 553
+        Width = 583
         Height = 242
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Conten&t Settings'
@@ -502,9 +522,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object chklstKind: TCheckListBox
           Left = 384
           Top = 40
-          Width = 161
+          Width = 191
           Height = 191
-          Anchors = [akLeft, akTop, akBottom]
+          Anchors = [akLeft, akTop, akRight, akBottom]
           ItemHeight = 13
           TabOrder = 1
         end
@@ -516,7 +536,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
       object grp5: TGroupBox
         Left = 8
         Top = 8
-        Width = 553
+        Width = 583
         Height = 448
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Cus&tomize Symbols'
@@ -538,8 +558,9 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object lvList: TListView
           Left = 8
           Top = 48
-          Width = 465
+          Width = 495
           Height = 169
+          Anchors = [akLeft, akTop, akRight]
           Columns = <
             item
               Caption = 'Name'
@@ -570,10 +591,11 @@ inherited CnInputHelperForm: TCnInputHelperForm
           OnDblClick = btnEditClick
         end
         object btnAdd: TButton
-          Left = 480
+          Left = 510
           Top = 48
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Add'
           TabOrder = 2
           OnClick = btnAddClick
@@ -581,7 +603,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object mmoTemplate: TMemo
           Left = 8
           Top = 240
-          Width = 465
+          Width = 495
           Height = 200
           Anchors = [akLeft, akTop, akRight, akBottom]
           Font.Charset = ANSI_CHARSET
@@ -595,91 +617,101 @@ inherited CnInputHelperForm: TCnInputHelperForm
           OnExit = mmoTemplateExit
         end
         object btnDelete: TButton
-          Left = 480
+          Left = 510
           Top = 97
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Delete'
           TabOrder = 4
           OnClick = btnDeleteClick
         end
         object btnEdit: TButton
-          Left = 480
+          Left = 510
           Top = 122
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Edit'
           TabOrder = 5
           OnClick = btnEditClick
         end
         object btnImport: TButton
-          Left = 480
+          Left = 510
           Top = 171
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Import'
           TabOrder = 7
           OnClick = btnImportClick
         end
         object btnExport: TButton
-          Left = 480
+          Left = 510
           Top = 196
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'E&xport'
           TabOrder = 8
           OnClick = btnExportClick
         end
         object btnInsertMacro: TButton
-          Left = 480
+          Left = 510
           Top = 241
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'Insert &Macro'
           TabOrder = 10
           OnClick = btnInsertMacroClick
         end
         object btnCursor: TButton
-          Left = 480
+          Left = 510
           Top = 296
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'Curso&r'
           TabOrder = 12
           OnClick = btnCursorClick
         end
         object btnClear: TButton
-          Left = 480
+          Left = 510
           Top = 324
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'C&lear'
           TabOrder = 13
           OnClick = btnClearClick
         end
         object btnDup: TButton
-          Left = 480
+          Left = 510
           Top = 73
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'D&uplicate'
           TabOrder = 3
           OnClick = btnDupClick
         end
         object btnUserMacro: TButton
-          Left = 480
+          Left = 510
           Top = 268
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'U&ser Macro'
           TabOrder = 11
           OnClick = btnUserMacroClick
         end
         object btnDefault: TButton
-          Left = 480
+          Left = 510
           Top = 147
           Width = 65
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = 'Defaul&t'
           TabOrder = 6
           OnClick = btnDefaultClick
@@ -687,9 +719,10 @@ inherited CnInputHelperForm: TCnInputHelperForm
         object cbbList: TComboBox
           Left = 72
           Top = 16
-          Width = 401
+          Width = 431
           Height = 21
           Style = csDropDownList
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 0
           OnChange = cbbListChange
