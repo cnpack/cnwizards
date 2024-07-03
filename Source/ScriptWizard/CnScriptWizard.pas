@@ -454,6 +454,9 @@ begin
   finally
     chktvMode.EndUpdate;
   end;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InitTreeAndList Nodes ' + IntToStr(chktvMode.items.Count));
+{$ENDIF}
 {$IFDEF DELPHI120_ATHENS_UP}
   CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateList);
 {$ENDIF}
@@ -642,7 +645,14 @@ begin
   SourceEditorNotifyTypeSet := [];
   FormEditorNotifyTypeSet := [];
   AppEventTypeSet := [];
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('GetItemFromControls Nodes ' + IntToStr(chktvMode.items.Count));
+{$ENDIF}
+
   Node := chktvMode.Items.GetFirstNode;
+  if Node = nil then
+    Exit;
+
   for Mode := Low(Mode) to High(Mode) do
   begin
     case Mode of
@@ -678,13 +688,16 @@ begin
           if AppEventTypeSet <> [] then
             Include(ModeSet, Mode);
         end;
-      else
-        begin
-          if chktvMode.Checked[Node] then
-            Include(ModeSet, Mode);
-        end;
+    else
+      begin
+        if chktvMode.Checked[Node] then
+          Include(ModeSet, Mode);
+      end;
     end;
+
     Node := Node.getNextSibling;
+    if Node = nil then
+      Break;
   end;
 
   Item.Mode := ModeSet;
@@ -745,8 +758,8 @@ begin
               chktvMode.Checked[Node[Ord(AppEventType)]] :=
                 AppEventType in Item.AppEventType;
           end;
-        else
-          chktvMode.Checked[Node] := True;
+      else
+        chktvMode.Checked[Node] := True;
       end;
     end
     else
