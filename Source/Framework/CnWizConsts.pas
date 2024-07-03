@@ -287,7 +287,7 @@ resourcestring
   SCnMenuCloseOtherPagesName = 'CnCloseOtherPages';
   SCnShellMenuName = 'CnShellMenu';
   SCnMenuSelAllName = 'CnSelAll';
-  SCnMenuEnableThumbnail = 'CnEnableThumbnail';
+  SCnMenuEnableThumbnailName = 'CnEnableThumbnail';
   SCnMenuBlockToolsName = 'CnMenuBlockTools';
   SCnMenuExploreName = 'CnExplore';
   SCnCopyFileNameMenuName = 'CnCopyFileName';

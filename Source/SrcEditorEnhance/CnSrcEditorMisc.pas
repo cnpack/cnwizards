@@ -510,7 +510,7 @@ begin
   FBlockToolsMenu.OnCreated := OnBlockToolsMenuCreated;
   FMenuHook.AddMenuItemDef(FBlockToolsMenu);
 
-  FThumbnailMenu := TCnMenuItemDef.Create(SCnMenuEnableThumbnail, SCnMenuEnableThumbnailCaption,
+  FThumbnailMenu := TCnMenuItemDef.Create(SCnMenuEnableThumbnailName, SCnMenuEnableThumbnailCaption,
     OnThumbnailClick, ipAfter, SMenuEditPasteItemName);
   FThumbnailMenu.OnCreated := OnThumbnailMenuCreated;
   FMenuHook.AddMenuItemDef(FThumbnailMenu);
@@ -1116,6 +1116,7 @@ begin
   FCopyFileNameMenu.SetCaption(SCnMenuCopyFileNameMenuCaption);
   FSelAllMenu.SetCaption(SCnMenuSelAllCaption);
   FBlockToolsMenu.SetCaption(SCnMenuBlockToolsCaption);
+  FThumbnailMenu.SetCaption(SCnMenuEnableThumbnailCaption);
   FCloseOtherPagesMenu.SetCaption(SCnMenuCloseOtherPagesCaption);
   FShellMenu.SetCaption(SCnMenuShellMenuCaption);
 {$IFDEF COMPILER6_UP}
