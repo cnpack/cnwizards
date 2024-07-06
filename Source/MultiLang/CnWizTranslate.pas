@@ -1443,6 +1443,7 @@ begin
   TranslateStr(SCnCodeFormatterWizardErrSelection, 'SCnCodeFormatterWizardErrSelection');
   TranslateStr(SCnCodeFormatterErrUnknown, 'SCnCodeFormatterErrUnknown');
   TranslateStr(SCnCodeFormatterErrPascalFmt, 'SCnCodeFormatterErrPascalFmt');
+  TranslateStr(SCnCodeFormatterErrMaybeComment, 'SCnCodeFormatterErrMaybeComment');
   TranslateStr(SCnCodeFormatterErrPascalIdentExp, 'SCnCodeFormatterErrPascalIdentExp');
   TranslateStr(SCnCodeFormatterErrPascalStringExp, 'SCnCodeFormatterErrPascalStringExp');
   TranslateStr(SCnCodeFormatterErrPascalNumberExp, 'SCnCodeFormatterErrPascalNumberExp');

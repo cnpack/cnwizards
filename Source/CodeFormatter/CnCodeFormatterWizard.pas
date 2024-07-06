@@ -997,7 +997,7 @@ begin
             SourceLine), nil, False);
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
             ConvertToVisibleCol(ErrLine, SourceCol),
-            GetErrorStr(ErrCode), CurrentToken]));
+            GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
         end;
       finally
         Formatter := nil;
@@ -1165,7 +1165,7 @@ begin
               CnOtaGotoEditPos(ErrPos);
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
                 ConvertToVisibleCol(ErrLine, SourceCol),
-                GetErrorStr(ErrCode), CurrentToken]));
+                GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
             end;
           end;
         end;

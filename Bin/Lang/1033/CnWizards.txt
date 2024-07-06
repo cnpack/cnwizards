@@ -3976,6 +3976,7 @@ SCnCodeFormatterWizardErrLineWidth=Wrap Line Width Error.
 SCnCodeFormatterWizardErrSelection=Can NOT Process Current Selection for Error Position.
 SCnCodeFormatterErrUnknown=Unknown Error.
 SCnCodeFormatterErrPascalFmt=Format Error(%d, %d): %s<BR><BR>Current: ''%s''
+SCnCodeFormatterErrMaybeComment=<BR><BR>If Error Caused by Compiler Directive {$...} nearby,<BR>Maybe You Can Change Format Option for it and Try Again.
 SCnCodeFormatterErrPascalIdentExp=Identifier Expected.
 SCnCodeFormatterErrPascalStringExp=String Expected.
 SCnCodeFormatterErrPascalNumberExp=Number Expected.

@@ -3976,6 +3976,7 @@ SCnCodeFormatterWizardErrLineWidth=自動換行寬度設置錯誤。
 SCnCodeFormatterWizardErrSelection=選擇區起止位置不恰當，無法進行代碼塊格式化。請重新選擇。
 SCnCodeFormatterErrUnknown=未知錯誤。
 SCnCodeFormatterErrPascalFmt=格式化錯誤（%d，%d）：%s<BR><BR>當前標識符：''%s''
+SCnCodeFormatterErrMaybeComment=<BR><BR>如果該錯誤由附近的編譯指令引發，<BR>您可嘗試在設置中修改編譯指令處理方式後重試。
 SCnCodeFormatterErrPascalIdentExp=缺失有效標識符。
 SCnCodeFormatterErrPascalStringExp=缺失有效字符串。
 SCnCodeFormatterErrPascalNumberExp=缺失有效數字。

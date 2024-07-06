@@ -25,7 +25,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object cbbActiveEngine: TComboBox
     Left = 128
     Top = 14
-    Width = 289
+    Width = 249
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akTop, akRight]
@@ -73,9 +73,9 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 4
   end
   object chkProxy: TCheckBox
-    Left = 454
+    Left = 422
     Top = 16
-    Width = 107
+    Width = 139
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'Use Proxy:'

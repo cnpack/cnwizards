@@ -3976,6 +3976,7 @@ SCnCodeFormatterWizardErrLineWidth=Erreur de largeur de ligne d'habillage.
 SCnCodeFormatterWizardErrSelection=Impossible de traiter la sélection actuelle pour la position d'erreur.
 SCnCodeFormatterErrUnknown=Erreur inconnue.
 SCnCodeFormatterErrPascalFmt=Erreur de format (%d,%d):%s<BR><BR>Actuel: ''%s ''
+SCnCodeFormatterErrMaybeComment=Si cette erreur est causée par une instruction de compilation proche,<BR>vous pouvez essayer de modifier la manière de traiter l'instruction de compilation dans les paramètres et réessayer.
 SCnCodeFormatterErrPascalIdentExp=Identifiant attendu.
 SCnCodeFormatterErrPascalStringExp=Chaîne attendue.
 SCnCodeFormatterErrPascalNumberExp=Nombre Attendu.

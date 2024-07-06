@@ -1759,7 +1759,7 @@ var
 
   SCnCodeFormatterErrUnknown: string = 'Unknown Error.';
   SCnCodeFormatterErrPascalFmt: string = 'Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';
-
+  SCnCodeFormatterErrMaybeComment: string = #13#10#13#10 + 'If Error Caused by Compiler Directive {$...},' + #13#10 + 'Maybe You Can Change Format Option for it and Try Again.';
   SCnCodeFormatterErrPascalIdentExp: string = 'Identifier Expected.';
   SCnCodeFormatterErrPascalStringExp: string = 'String Expected.';
   SCnCodeFormatterErrPascalNumberExp: string = 'Number Expected.';

@@ -3976,6 +3976,7 @@ SCnCodeFormatterWizardErrLineWidth=Zeilenumbruch Fehler (Zeilen Länge).
 SCnCodeFormatterWizardErrSelection=Kann aktuelle Auswahl nicht verarbeiten.
 SCnCodeFormatterErrUnknown=unbekannter Fehler.
 SCnCodeFormatterErrPascalFmt=Formatier Fehler(%d, %d): %s<BR><BR>Aktuell: ''%s''
+SCnCodeFormatterErrMaybeComment=Wenn dieser Fehler durch eine nahegelegene Kompilieranweisung verursacht wird,<BR>können Sie versuchen, die Verarbeitung der Kompilieranweisung in der Einstellung zu ändern und es erneut zu versuchen.
 SCnCodeFormatterErrPascalIdentExp=Bezeichner erwartet.
 SCnCodeFormatterErrPascalStringExp=String erwartet.
 SCnCodeFormatterErrPascalNumberExp=Nummer erwartet.
