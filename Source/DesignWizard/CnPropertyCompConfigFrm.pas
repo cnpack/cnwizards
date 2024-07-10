@@ -58,14 +58,16 @@ type
     pnlFont: TPanel;
     btnFont: TButton;
     dlgFont: TFontDialog;
+    btnReset: TButton;
     procedure btnHelpClick(Sender: TObject);
     procedure btnFontClick(Sender: TObject);
+    procedure btnResetClick(Sender: TObject);
   private
-
+    FFontChanged: Boolean;
   protected
     function GetHelpTopic: string; override;
   public
-
+    property FontChanged: Boolean read FFontChanged;
   end;
 
 var
@@ -95,7 +97,16 @@ procedure TCnPropertyCompConfigForm.btnFontClick(Sender: TObject);
 begin
   dlgFont.Font := pnlFont.Font;
   if dlgFont.Execute then
+  begin
     pnlFont.Font := dlgFont.Font;
+    FFontChanged := True;
+  end;
+end;
+
+procedure TCnPropertyCompConfigForm.btnResetClick(Sender: TObject);
+begin
+  pnlFont.ParentFont := True;
+  FFontChanged := True;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

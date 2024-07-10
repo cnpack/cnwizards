@@ -104,6 +104,15 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
         TabOrder = 1
         OnClick = btnFontClick
       end
+      object btnReset: TButton
+        Left = 176
+        Top = 96
+        Width = 113
+        Height = 21
+        Caption = '&Reset'
+        TabOrder = 2
+        OnClick = btnResetClick
+      end
     end
   end
   object dlgFont: TFontDialog

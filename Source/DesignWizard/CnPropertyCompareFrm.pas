@@ -327,7 +327,7 @@ implementation
 {$R *.DFM}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnWizOptions
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnWizOptions, CnGraphUtils
   {$IFNDEF STAND_ALONE}, CnListCompFrm {$ENDIF};
 
 const
@@ -473,8 +473,7 @@ begin
   FManager := Self;
   FSelection := TList.Create;
   FIgnoreProperties := TStringList.Create;
-  FGridFont := TFont.Create;
-
+  // 延迟创建 FGridFont
   RegisterMenu;
 end;
 
@@ -492,6 +491,8 @@ begin
 end;
 
 procedure TCnPropertyCompareManager.LoadSettings(Ini: TCustomIniFile);
+var
+  Temp1, Temp2: TFont;
 begin
   ShowMenu := Ini.ReadBool('', csShowMenu, True);
   FOnlyShowDiff := Ini.ReadBool('', csOnlyShowDiff, FOnlyShowDiff);
@@ -501,8 +502,25 @@ begin
 
   with TCnIniFile.Create(Ini) do
   try
+    Temp1 := TFont.Create;
+    Temp2 := TFont.Create;
+    Temp2 := ReadFont('', csGridFont, Temp2);
+
+    if FontEqual(Temp1, Temp2) then
+    begin
+      // Temp2 没有变化，说明没有设置，保持 FGridFont 为 nil
+      FreeAndNil(FGridFont);
+    end
+    else
+    begin
+      FGridFont := TFont.Create;
+      FGridFont.Assign(Temp2);
+    end;
+
     GridFont := ReadFont('', csGridFont, FGridFont);
   finally
+    Temp2.Free;
+    Temp1.Free;
     Free;
   end;
 end;
@@ -558,7 +576,8 @@ begin
 
   with TCnIniFile.Create(Ini) do
   try
-    WriteFont('', csGridFont, FGridFont);
+    if FGridFont <> nil then
+      WriteFont('', csGridFont, FGridFont);
   finally
     Free;
   end;
@@ -2056,13 +2075,20 @@ begin
     chkShowMenu.Checked := FManager.ShowMenu;
     chkSameType.Checked := not FManager.SameType;
     mmoIgnoreProperties.Lines.Assign(FManager.IgnoreProperties);
-    pnlFont.Font := FManager.GridFont;
+
+    if FManager.GridFont <> nil then
+      pnlFont.Font := FManager.GridFont;
 {$ENDIF}
 
     if ShowModal = mrOK then
     begin
 {$IFNDEF STAND_ALONE}
-      FManager.GridFont := pnlFont.Font;
+      if FontChanged then
+      begin
+        if FManager.GridFont = nil then
+          FManager.GridFont := TFont.Create;
+        FManager.GridFont := pnlFont.Font;
+      end;
       FManager.ShowMenu := chkShowMenu.Checked;
       FManager.SameType := not chkSameType.Checked;
       FManager.IgnoreProperties.Assign(mmoIgnoreProperties.Lines);
@@ -2167,6 +2193,9 @@ procedure TCnPropertyCompareForm.UpdateFont;
 var
   H: Integer;
 begin
+  if FManager.GridFont = nil then
+    Exit;
+
   gridLeft.Font := FManager.GridFont;
   gridRight.Font := FManager.GridFont;
 
