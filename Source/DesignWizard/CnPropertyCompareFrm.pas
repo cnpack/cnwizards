@@ -2204,7 +2204,7 @@ begin
     FManager.GridFont.Size, FManager.GridFont.Height]);
 {$ENDIF}
 
-  H := FManager.GridFont.Height + 4;
+  H := FManager.GridFont.Height + 8;
   if H < 18 then
     H := 18;
 

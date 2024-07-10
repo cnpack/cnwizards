@@ -116,8 +116,7 @@ begin
     pnlFont.ParentFont := True;
 
     // 重置后得字体有变化才行
-    if not FontEqual(OldFont, pnlFont.Font) then
-      FFontChanged := True;
+    FFontChanged := not FontEqual(OldFont, pnlFont.Font);
   finally
     OldFont.Free;
   end;
