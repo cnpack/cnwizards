@@ -81,6 +81,9 @@ implementation
 
 {$R *.DFM}
 
+uses
+  CnGraphUtils;
+
 { TCnPropertyCompConfigForm }
 
 function TCnPropertyCompConfigForm.GetHelpTopic: string;
@@ -104,9 +107,20 @@ begin
 end;
 
 procedure TCnPropertyCompConfigForm.btnResetClick(Sender: TObject);
+var
+  OldFont: TFont;
 begin
-  pnlFont.ParentFont := True;
-  FFontChanged := True;
+  OldFont := TFont.Create;
+  try
+    OldFont.Assign(pnlFont.Font);
+    pnlFont.ParentFont := True;
+
+    // 重置后得字体有变化才行
+    if not FontEqual(OldFont, pnlFont.Font) then
+      FFontChanged := True;
+  finally
+    OldFont.Free;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

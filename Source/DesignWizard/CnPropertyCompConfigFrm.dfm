@@ -100,7 +100,7 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
         Top = 96
         Width = 113
         Height = 21
-        Caption = '&Change Font'
+        Caption = 'Chan&ge Font'
         TabOrder = 1
         OnClick = btnFontClick
       end
