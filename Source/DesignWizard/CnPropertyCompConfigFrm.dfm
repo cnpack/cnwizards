@@ -80,5 +80,41 @@ inherited CnPropertyCompConfigForm: TCnPropertyCompConfigForm
         TabOrder = 2
       end
     end
+    object tsFont: TTabSheet
+      Caption = '&Font'
+      ImageIndex = 1
+      object pnlFont: TPanel
+        Left = 8
+        Top = 8
+        Width = 281
+        Height = 73
+        BevelInner = bvLowered
+        BevelOuter = bvNone
+        Caption = 'Property Font'
+        Color = clWhite
+        TabOrder = 0
+        OnDblClick = btnFontClick
+      end
+      object btnFont: TButton
+        Left = 8
+        Top = 96
+        Width = 113
+        Height = 21
+        Caption = '&Change Font'
+        TabOrder = 1
+        OnClick = btnFontClick
+      end
+    end
+  end
+  object dlgFont: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 180
+    Top = 144
   end
 end

@@ -45,7 +45,7 @@ uses
   {$IFNDEF STAND_ALONE}
   CnWizClasses, CnWizUtils, CnWizIdeUtils, CnWizManager, CnComponentSelector,
   {$ENDIF}
-  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} IniFiles,
+  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} IniFiles, CnIni,
   CnConsts, CnWizConsts, CnWizMultiLang, CnCommon, CnPropSheetFrm, CnWizShareImages;
 
 const
@@ -89,6 +89,7 @@ type
     FOnlyShowDiff: Boolean;
     FShowMenu: Boolean;
     FShowEvents: Boolean;
+    FGridFont: TFont;
     procedure SetLeftComponent(const Value: TComponent);
     procedure SetRightComponent(const Value: TComponent);
     function GetSelectionCount: Integer;
@@ -96,6 +97,7 @@ type
     procedure CompareExecute(Sender: TObject);
     procedure SetIgnoreProperties(const Value: TStringList);
     procedure SetShowMenu(const Value: Boolean);
+    procedure SetGridFont(const Value: TFont);
   protected
     procedure Notification(AComponent: TComponent;
       Operation: TOperation); override;
@@ -123,6 +125,8 @@ type
     {* 全部赋值时要忽略的属性列表，如 Name 等}
     property ShowEvents: Boolean read FShowEvents write FShowEvents;
     {* 是否显示事件}
+    property GridFont: TFont read FGridFont write SetGridFont;
+    {* 显示的字体}
   end;
 
 {$ENDIF}
@@ -271,6 +275,7 @@ type
     FLeftProperties: TObjectList;
     FRightProperties: TObjectList;
     FCompareBmp: TBitmap;
+    procedure UpdateFont;
 {$IFDEF SUPPORT_ENHANCED_RTTI}
     function ListContainsProperty(const APropName: string; List: TObjectList): Boolean;
 {$ENDIF}
@@ -341,6 +346,7 @@ const
   csSameType = 'SameType';
   csIgnoreProperties = 'IgnoreProperties';
   csShowEvents = 'ShowEvents';
+  csGridFont = 'GridFont';
 
 {$IFNDEF STAND_ALONE}
 var
@@ -467,12 +473,14 @@ begin
   FManager := Self;
   FSelection := TList.Create;
   FIgnoreProperties := TStringList.Create;
+  FGridFont := TFont.Create;
 
   RegisterMenu;
 end;
 
 destructor TCnPropertyCompareManager.Destroy;
 begin
+  FGridFont.Free;
   FIgnoreProperties.Free;
   FSelection.Free;
   inherited;
@@ -490,6 +498,13 @@ begin
   FSameType := Ini.ReadBool('', csSameType, FSameType);
   FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
   FShowEvents := Ini.ReadBool('', csShowEvents, False);
+
+  with TCnIniFile.Create(Ini) do
+  try
+    GridFont := ReadFont('', csGridFont, FGridFont);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnPropertyCompareManager.Notification(AComponent: TComponent;
@@ -540,6 +555,13 @@ begin
   Ini.WriteBool('', csSameType, FSameType);
   Ini.WriteString('', csIgnoreProperties, FIgnoreProperties.CommaText);
   Ini.WriteBool('', csShowEvents, FShowEvents);
+
+  with TCnIniFile.Create(Ini) do
+  try
+    WriteFont('', csGridFont, FGridFont);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnPropertyCompareManager.SelectExecute(Sender: TObject);
@@ -552,6 +574,12 @@ begin
     if Comp <> nil then
       LeftComponent := Comp;
   end;
+end;
+
+procedure TCnPropertyCompareManager.SetGridFont(const Value: TFont);
+begin
+  if Value <> nil then
+    FGridFont.Assign(Value);
 end;
 
 procedure TCnPropertyCompareManager.SetIgnoreProperties(
@@ -780,6 +808,8 @@ begin
 
   FCompareBmp := TBitmap.Create;
   FCompareBmp.Canvas.Brush.Color := clWindow;
+
+  UpdateFont;
 end;
 
 {$IFDEF SUPPORT_ENHANCED_RTTI}
@@ -1418,6 +1448,7 @@ begin
     P2 := TCnDiffPropertyObject(Another[ARow]);
 
   // 画背景
+  G.Canvas.Font.Assign(G.Font);
   G.Canvas.Font.Color := clBtnText;
   G.Canvas.Brush.Style := bsSolid;
 
@@ -2025,14 +2056,18 @@ begin
     chkShowMenu.Checked := FManager.ShowMenu;
     chkSameType.Checked := not FManager.SameType;
     mmoIgnoreProperties.Lines.Assign(FManager.IgnoreProperties);
+    pnlFont.Font := FManager.GridFont;
 {$ENDIF}
 
     if ShowModal = mrOK then
     begin
 {$IFNDEF STAND_ALONE}
+      FManager.GridFont := pnlFont.Font;
       FManager.ShowMenu := chkShowMenu.Checked;
       FManager.SameType := not chkSameType.Checked;
       FManager.IgnoreProperties.Assign(mmoIgnoreProperties.Lines);
+
+      UpdateFont;
 {$ENDIF}
     end;
 
@@ -2126,6 +2161,26 @@ begin
 
   LoadListProperties;
   ShowProperties;
+end;
+
+procedure TCnPropertyCompareForm.UpdateFont;
+var
+  H: Integer;
+begin
+  gridLeft.Font := FManager.GridFont;
+  gridRight.Font := FManager.GridFont;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('PropertyCompare Grid Font: %s Size %d. Height %d.', [FManager.GridFont.Name,
+    FManager.GridFont.Size, FManager.GridFont.Height]);
+{$ENDIF}
+
+  H := FManager.GridFont.Height + 4;
+  if H < 18 then
+    H := 18;
+
+  gridLeft.DefaultRowHeight := H;
+  gridRight.DefaultRowHeight := H;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

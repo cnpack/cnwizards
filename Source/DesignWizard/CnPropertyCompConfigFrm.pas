@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, CnWizMultiLang;
+  StdCtrls, ComCtrls, CnWizMultiLang, ExtCtrls;
 
 type
   TCnPropertyCompConfigForm = class(TCnTranslateForm)
@@ -54,7 +54,12 @@ type
     lblAll: TLabel;
     mmoIgnoreProperties: TMemo;
     chkShowMenu: TCheckBox;
+    tsFont: TTabSheet;
+    pnlFont: TPanel;
+    btnFont: TButton;
+    dlgFont: TFontDialog;
     procedure btnHelpClick(Sender: TObject);
+    procedure btnFontClick(Sender: TObject);
   private
 
   protected
@@ -84,6 +89,13 @@ end;
 procedure TCnPropertyCompConfigForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnPropertyCompConfigForm.btnFontClick(Sender: TObject);
+begin
+  dlgFont.Font := pnlFont.Font;
+  if dlgFont.Execute then
+    pnlFont.Font := dlgFont.Font;
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
