@@ -78,6 +78,12 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnDeepSeekAIEngine = class(TCnAIBaseEngine)
+  {* 深度求索 AI 引擎}
+  public
+    class function EngineName: string; override;
+  end;
+
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 
 implementation
@@ -228,12 +234,20 @@ begin
   Result := '百川智能';
 end;
 
+{ TCnDeepSeekAIEngine }
+
+class function TCnDeepSeekAIEngine.EngineName: string;
+begin
+  Result := 'DeepSeek';
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
+  RegisterAIEngine(TCnDeepSeekAIEngine);
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

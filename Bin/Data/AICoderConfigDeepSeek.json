@@ -1,0 +1,9 @@
+﻿{
+    "EngineName": "DeepSeek",
+    "URL": "https://api.deepseek.com/chat/completions",
+    "ApiKey": "",
+    "Model": "deepseek-coder",
+    "ModelList": "deepseek-coder,deepseek-chat",
+    "Temperature": 1.0,
+    "WebAddress": "https://platform.deepseek.com/api_keys"
+}

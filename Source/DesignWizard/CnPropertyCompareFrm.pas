@@ -500,6 +500,9 @@ begin
   FIgnoreProperties.CommaText := Ini.ReadString('', csIgnoreProperties, DEF_IGNORE_PROP);
   FShowEvents := Ini.ReadBool('', csShowEvents, False);
 
+  Temp1 := nil;
+  Temp2 := nil;
+
   with TCnIniFile.Create(Ini) do
   try
     Temp1 := TFont.Create;
