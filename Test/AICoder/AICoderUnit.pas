@@ -39,6 +39,7 @@ type
     btnAddYouLongMsg: TButton;
     btnAddMyLongMsg: TButton;
     pnlAIChat: TPanel;
+    btnReviewCode: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -53,6 +54,7 @@ type
     procedure btnAddYouMsgClick(Sender: TObject);
     procedure btnAddYouLongMsgClick(Sender: TObject);
     procedure btnAddMyLongMsgClick(Sender: TObject);
+    procedure btnReviewCodeClick(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -61,6 +63,8 @@ type
     FAIChatBox: TCnChatBox;
     // 以下是综合测试
     procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnReviewCodeAnswer(Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure ShowData;
@@ -123,7 +127,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnDebug;
+  CnDebug, CnAICoderNetClient;
 
 const
   DBG_TAG = 'NET';
@@ -384,8 +388,8 @@ begin
   Msg.FromType := cmtYou;
   Msg.Text := '...';
 
-  CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode('Application.CreateForm(TForm1, Form1);',
-    Msg, AIOnExplainCodeAnswer);
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
+    Msg, artExplainCode, AIOnExplainCodeAnswer);
 end;
 
 procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
@@ -457,6 +461,38 @@ begin
       + '③近期服用过影响大脑神经功能的药物，接受相关测试前24 h内饮用含酒精类饮品；④既往有其他睡眠相关疾病史；'
       + '⑤因各种原因不能配合研究者；⑥数据缺失或不全者。';
   end;
+end;
+
+procedure TFormAITest.btnReviewCodeClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+begin
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
+    Msg, artReviewCode, AIOnReviewCodeAnswer);
+end;
+
+procedure TFormAITest.AIOnReviewCodeAnswer(Success: Boolean; SendId: Integer;
+  const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Review Code OK for Request %d: %s', [SendId, Answer]))
+  else
+    mmoAI.Lines.Add(Format('Review Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]));
+
+  if (Tag = nil) or not (Tag is TCnChatMessage) then
+    Exit;
+
+  if Success then
+    TCnChatMessage(Tag).Text := Answer
+  else
+    TCnChatMessage(Tag).Text := Format('Review Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]);
 end;
 
 end.

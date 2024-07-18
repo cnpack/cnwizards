@@ -114,9 +114,9 @@ type
     procedure InitOption;
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
-    function AskAIEngineExplainCode(const Code: string; Tag: TObject;
+    function AskAIEngineForCode(const Code: string; Tag: TObject; RequestType: TCnAIRequestType;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
-    {* 用户调用的解释代码过程，内部会封装请求数据组装成请求对象扔给线程池，返回一个请求 ID
+    {* 用户调用的解释代码或检查代码的过程，内部会封装请求数据组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
 
     property Option: TCnAIEngineOption read FOption;
@@ -416,8 +416,8 @@ end;
 
 { TCnAIBaseEngine }
 
-function TCnAIBaseEngine.AskAIEngineExplainCode(const Code: string;
-  Tag: TObject; AnswerCallback: TCnAIAnswerCallback): Integer;
+function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
+  RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
 begin
@@ -433,7 +433,7 @@ begin
     Obj.SendId := 10000000 + Random(100000000);
 
     // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
-    Obj.Data := ConstructRequest(artExplainCode, Code);
+    Obj.Data := ConstructRequest(RequestType, Code);
 
     Obj.OnAnswer := AnswerCallback;
     Obj.OnResponse := OnAINetDataResponse;
@@ -473,7 +473,10 @@ begin
 
     Msg := TCnJSONObject.Create;
     Msg.AddPair('role', 'user');
-    Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code);
+    if RequestType = artExplainCode then
+      Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code)
+    else if RequestType = artReviewCode then
+      Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code);
 
     Arr.AddValue(Msg);
 

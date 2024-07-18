@@ -389,6 +389,7 @@ resourcestring
 
   // AICoderWizard
   SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
+  SCnAICoderWizardReviewCode = 'CnAICoderWizardReviewCode';
   SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
   SCnAICoderEngineOptionFileFmt = 'AICoderConfig%s.json';
@@ -1790,12 +1791,16 @@ var
   SCnAICoderWizardMenuHint: string = 'AI Coder Wizard';
   SCnAICoderWizardExplainCodeCaption: string = '&Explain Code...';
   SCnAICoderWizardExplainCodeHint: string = 'Explain Selected Code';
+  SCnAICoderWizardReviewCodeCaption: string = '&Review Code...';
+  SCnAICoderWizardReviewCodeHint: string = 'Review Selected Code';
   SCnAICoderWizardChatWindowCaption: string = 'AI &Chat Window';
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
   SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder/RAD Studio. Now we use %s.';
   SCnAICoderWizardUserMessageExplainFmt: string = 'Please Explain the Code using %s: ';
+  SCnAICoderWizardUserMessageReviewFmt: string = 'Please conduct a code review for this segment of code. ' +
+    'There is No Need to Explain its Functionality; instead, Please Analyze and Point out Issues using %s from Aspects such as Structure, Spelling, and Performance. If the Code is too Short or has No Obvious Issues, Respond No Problems.';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';

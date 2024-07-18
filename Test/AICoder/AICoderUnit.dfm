@@ -133,9 +133,9 @@ object FormAITest: TFormAITest
         OnClick = btnSaveAIConfigClick
       end
       object btnExplainCode: TButton
-        Left = 776
+        Left = 704
         Top = 16
-        Width = 121
+        Width = 89
         Height = 25
         Caption = 'Explain Code'
         TabOrder = 3
@@ -163,6 +163,15 @@ object FormAITest: TFormAITest
         Height = 457
         BevelOuter = bvNone
         TabOrder = 6
+      end
+      object btnReviewCode: TButton
+        Left = 808
+        Top = 16
+        Width = 89
+        Height = 25
+        Caption = 'Review Code'
+        TabOrder = 7
+        OnClick = btnReviewCodeClick
       end
     end
     object tsChat: TTabSheet

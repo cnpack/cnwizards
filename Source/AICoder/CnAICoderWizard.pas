@@ -73,11 +73,12 @@ type
   TCnAICoderWizard = class(TCnSubMenuWizard)
   private
     FIdExplainCode: Integer;
+    FIdReviewCode: Integer;
     FIdShowChatWindow: Integer;
     FIdConfig: Integer;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
-    procedure ExplainCodeAnswer(Success: Boolean; SendId: Integer;
+    procedure ForCodeAnswer(Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure EnsureChatWindowVisible;
   protected
@@ -107,7 +108,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizOptions, CnChatBox {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnWizOptions, CnAICoderNetClient, CnChatBox {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 //==============================================================================
 // AI 辅助编码菜单专家
@@ -148,6 +149,10 @@ begin
   FIdExplainCode := RegisterASubAction(SCnAICoderWizardExplainCode,
     SCnAICoderWizardExplainCodeCaption, 0,
     SCnAICoderWizardExplainCodeHint, SCnAICoderWizardExplainCode);
+
+  FIdReviewCode := RegisterASubAction(SCnAICoderWizardReviewCode,
+    SCnAICoderWizardReviewCodeCaption, 0,
+    SCnAICoderWizardReviewCodeHint, SCnAICoderWizardReviewCode);
 
   // 创建分隔菜单
   AddSepMenu;
@@ -229,7 +234,7 @@ begin
       Exit;
     end;
 
-    if Index = FIdExplainCode then
+    if (Index = FIdExplainCode) or (Index = FIdReviewCode) then
     begin
       S := CnOtaGetCurrentSelection;
       if Trim(S) <> '' then
@@ -240,7 +245,10 @@ begin
         Msg.FromType := cmtYou;
         Msg.Text := '...';
 
-        CnAIEngineManager.CurrentEngine.AskAIEngineExplainCode(S, Msg, ExplainCodeAnswer);
+        if Index = FIdExplainCode then
+          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artExplainCode, ForCodeAnswer)
+        else
+          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artReviewCode, ForCodeAnswer)
       end;
     end;
   end;
@@ -351,7 +359,7 @@ begin
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;
 end;
 
-procedure TCnAICoderWizard.ExplainCodeAnswer(Success: Boolean;
+procedure TCnAICoderWizard.ForCodeAnswer(Success: Boolean;
   SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   EnsureChatWindowVisible;

@@ -59,6 +59,7 @@ type
     FModelList: string;
     function GetExplainCodePrompt: string;
     function GetSystemMessage: string;
+    function GetReviewCodePrompt: string;
   protected
     function GetCurrentLangName: string;
     // SM4-GCM 加十六进制加解密
@@ -77,6 +78,8 @@ type
     {* 系统预设消息}
     property ExplainCodePrompt: string read GetExplainCodePrompt;
     {* 解释代码的提示文字}
+    property ReviewCodePrompt: string read GetReviewCodePrompt;
+    {* 检查代码的提示文字}
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -396,6 +399,11 @@ end;
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
   Result := Format(SCNAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
+end;
+
+function TCnAIEngineOption.GetReviewCodePrompt: string;
+begin
+  Result := Format(SCNAICoderWizardUserMessageReviewFmt, [GetCurrentLangName]);
 end;
 
 function TCnAIEngineOption.GetSystemMessage: string;
