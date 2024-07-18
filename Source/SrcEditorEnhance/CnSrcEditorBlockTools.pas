@@ -69,7 +69,7 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
-    btAICoderExplainCode, btAICoderToggleChatWindow, btAICoderSetting,
+    btAICoderExplainCode, btAICoderReviewCode, btAICoderToggleChatWindow, btAICoderSetting,
     btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
@@ -946,6 +946,7 @@ begin
   begin
     FAICoderMenu := AddMenuItem(Items, SCnAICoderWizardMenuCaption, nil);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardExplainCode', btAICoderExplainCode);
+    AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardReviewCode', btAICoderReviewCode);
     AddSepMenuItem(FAICoderMenu);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardChatWindow', btAICoderToggleChatWindow);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardConfig', btAICoderSetting);
