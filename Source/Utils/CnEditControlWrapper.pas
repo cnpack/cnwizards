@@ -601,7 +601,8 @@ begin
 {$ENDIF}
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditorObject GetGutterWidth. ReCalc to ' + IntToStr(FGutterWidth));
+    CnDebugger.LogFmt('EditorObject GetGutterWidth. Control Left %d. ReCalc to %d',
+      [FEditControl.Left, FGutterWidth]);
 {$ENDIF}
     FGutterChanged := False;
   end;

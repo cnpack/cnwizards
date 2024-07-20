@@ -5041,10 +5041,10 @@ begin
 {$IFDEF DELPHI104_SYDNEY_UP}
   if Operation = opInsert then
   begin
-    TThread.CreateAnonymousMethod(
+    TThread.CreateAnonymousThread(
       procedure
       begin
-        Sleep(1000);
+        Sleep(1200);
         try
           EditControl.Invalidate;
         except
