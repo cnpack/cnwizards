@@ -42,7 +42,7 @@ unit CnSourceHighlight;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2024.07.02
-*               增加 ControlHook 拦截窗口位置变化消息重新计算左侧栏位宽度的机制避免绘制错位。
+*               增加 ControlHook 拦截窗口位置变化消息重新计算左侧栏位宽度的机制避免绘制错位然而似乎无效。
 *           2022.02.26
 *               光标下的高亮关键字块，其配对使用实线绘制。
 *           2021.09.03
@@ -211,7 +211,7 @@ type
   {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息，注意 Tokens 均是引用}
   private
     FControl: TControl;
-    FHook: TCnControlHook;
+    // FHook: TCnControlHook;
     FModified: Boolean;
     FChanged: Boolean;
     FIsCppSource: Boolean;
@@ -271,8 +271,8 @@ type
     function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
     function CheckIsCustomIdentifier(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
 
-    procedure EditControlAfterMessage(Sender: TObject; Control: TControl;
-      var Msg: TMessage; var Handled: Boolean);
+//    procedure EditControlAfterMessage(Sender: TObject; Control: TControl;
+//      var Msg: TMessage; var Handled: Boolean);
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -2476,15 +2476,15 @@ begin
   FModified := True;
   FChanged := True;
 
-  FHook := TCnControlHook.Create(nil);
-  FHook.AfterMessage := EditControlAfterMessage;
-  FHook.Hook(FControl);
-  FHook.Active := True;
+//  FHook := TCnControlHook.Create(nil);
+//  FHook.AfterMessage := EditControlAfterMessage;
+//  FHook.Hook(FControl);
+//  FHook.Active := True;
 end;
 
 destructor TCnBlockMatchInfo.Destroy;
 begin
-  FHook.Free;
+//  FHook.Free;
 
   Clear;
   FStack.Free;
@@ -2511,22 +2511,25 @@ begin
   inherited;
 end;
 
-procedure TCnBlockMatchInfo.EditControlAfterMessage(Sender: TObject;
-  Control: TControl; var Msg: TMessage; var Handled: Boolean);
-var
-  Obj: TEditorObject;
-begin
-  // 尝试修补第一次打开时绘制偏差的问题，不确定是否生效
-  if Msg.Msg = WM_WINDOWPOSCHANGED then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditControl Got WindowPosChanged Message.');
-{$ENDIF}
-    Obj := EditControlWrapper.GetEditorObject(Control);
-    if Obj <> nil then
-      Obj.NotifyIDEGutterChanged;
-  end;
-end;
+//procedure TCnBlockMatchInfo.EditControlAfterMessage(Sender: TObject;
+//  Control: TControl; var Msg: TMessage; var Handled: Boolean);
+//var
+//  Obj: TEditorObject;
+//begin
+//  // 尝试修补第一次打开时绘制偏差的问题，不确定是否生效
+//  if Msg.Msg = WM_WINDOWPOSCHANGED then
+//  begin
+//{$IFDEF DEBUG}
+//    CnDebugger.LogMsg('EditControl Got WindowPosChanged Message.');
+//{$ENDIF}
+//    Obj := EditControlWrapper.GetEditorObject(Control);
+//    if Obj <> nil then
+//    begin
+//      Obj.NotifyIDEGutterChanged;
+//      Control.Invalidate;
+//    end;
+//  end;
+//end;
 
 function TCnBlockMatchInfo.GetKeyCount: Integer;
 begin
@@ -5034,6 +5037,23 @@ begin
 {$ENDIF}
     end;
   end;
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+  if Operation = opInsert then
+  begin
+    TThread.CreateAnonymousMethod(
+      procedure
+      begin
+        Sleep(1000);
+        try
+          EditControl.Invalidate;
+        except
+          ;
+        end;
+      end
+    ).Start;
+  end;
+{$ENDIF}
 end;
 
 procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
