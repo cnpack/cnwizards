@@ -25,6 +25,7 @@ unit CnScanners;
 * 单元名称：Object Pascal 词法分析器
 * 单元作者：CnPack开发组
 * 备    注：该单元实现了 Object Pascal 词法分析器
+*
 *    缓冲区机制：一块固定长度的缓冲区，读入代码内容后找到最后一个换行，以此为结尾。
 *    扫描至结尾后，重新 ReadBuffer，把本区域结尾到缓冲区尾的内容重新填回缓冲区首，
 *    再在其后跟读满缓冲区，再找最后一个换行并标记结尾。
@@ -33,6 +34,7 @@ unit CnScanners;
 *    ”整个缓冲区全是注释“导致 FSourcePtr 没有步进从而无法读入新内容的情况。
 *           唯一办法：使用足够大的单块缓冲区！
 *           另外，Unicode 编译器中，才支持 Unicode 标识符和全角空格
+*
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell

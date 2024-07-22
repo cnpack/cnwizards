@@ -32,6 +32,9 @@ unit CnCodeFormatter;
 *           保留换行时如果某些语句内部因为注释会多出空行来，八成是 IsInStatement
 *           或 IsInOpStatement 对注释前的符号判断是否在语句内有误导致没删除回车换行
 *
+*           如果语句间不因注释等，单纯多出现了空行，跟到 DoBlankLinesWhenSkip 多输出了空行
+*           则八成是外部应设 KeepOneBlankLine 为 False，而被嵌套的给盖掉了
+*
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
@@ -4633,7 +4636,8 @@ begin
     if (Scanner.Token = tokSLB) and not IsTokenAfterAttributesInSet(IsTypeStartTokens) then
       Exit;
 
-    if not FirstType then WriteLine;
+    if not FirstType then
+      WriteLine;
 
     FormatTypeDecl(Tab(PreSpaceCount));
     while Scanner.Token in DirectiveTokens do
@@ -5876,23 +5880,30 @@ end;
 procedure TCnBasePascalFormatter.FormatClassTypeSection(
   PreSpaceCount: Byte);
 var
-  FirstType: Boolean;
+  FirstType, OldKeepOneBlankLine: Boolean;
 begin
   Match(tokKeywordType, PreSpaceCount);
   Writeln;
 
-  FirstType := True;
-  while Scanner.Token in [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
-   + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do  // 和普通 Type 类似但有一个差异
-  begin
-    if not FirstType then
-      WriteLine;
+  OldKeepOneBlankLine := Scanner.KeepOneBlankLine;
+  Scanner.KeepOneBlankLine := False;
 
-    FormatTypeDecl(Tab(PreSpaceCount));
-    while Scanner.Token in DirectiveTokens do
-      FormatDirective;
-    Match(tokSemicolon);
-    FirstType := False;
+  try
+    FirstType := True;
+    while Scanner.Token in [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
+     + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens do  // 和普通 Type 类似但有一个差异
+    begin
+      if not FirstType then
+        WriteLine;
+
+      FormatTypeDecl(Tab(PreSpaceCount));
+      while Scanner.Token in DirectiveTokens do
+        FormatDirective;
+      Match(tokSemicolon);
+      FirstType := False;
+    end;
+  finally
+    Scanner.KeepOneBlankLine := OldKeepOneBlankLine;
   end;
 end;
 
