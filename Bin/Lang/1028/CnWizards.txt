@@ -4014,6 +4014,7 @@ SCnAICoderWizardConfigCaption=設置(&O)...
 SCnAICoderWizardConfigHint=AI 輔助編碼的設置選項
 SCNAICoderWizardSystemMessageFmt=你是一名 Delphi/C++Builder/RAD Studio 開發專家，目前正在使用 %s，負責回答其開發相關問題。
 SCnAICoderWizardUserMessageExplainFmt=請使用 %s 解釋以下代碼：
+SCnAICoderWizardUserMessageReviewFmt=請針對這段代碼做Code Review，不需解釋其功能，需從其結構、拼寫、性能、安全性等方面加以分析並指出其問題。如果代碼太短或無明顯問題，則回答沒有問題。
 SCnAICoderWizardErrorNoEngine=缺少合法的 AI 引擎或選項。
 SCnAICoderWizardErrorURLFmt=AI 引擎 %s 請求地址錯誤。
 SCnAICoderWizardErrorAPIKeyFmt=AI 引擎 %s 的 API Key 錯誤或缺失。

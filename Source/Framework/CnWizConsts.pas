@@ -1799,8 +1799,8 @@ var
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
   SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder/RAD Studio. Now we use %s.';
   SCnAICoderWizardUserMessageExplainFmt: string = 'Please Explain the Code using %s: ';
-  SCnAICoderWizardUserMessageReviewFmt: string = 'Please conduct a code review for this segment of code. ' +
-    'There is No Need to Explain its Functionality; instead, Please Analyze and Point out Issues using %s from Aspects such as Structure, Spelling, and Performance. If the Code is too Short or has No Obvious Issues, Respond No Problems.';
+  SCnAICoderWizardUserMessageReviewFmt: string = 'Please Conduct a Code Review for this Segment of Code. ' +
+    'There is No Need to Explain its Functionality; instead, Please Analyze and Point out Issues using %s from Aspects such as Structure, Spelling, Performance and Safety etc. If the Code is too Short or has No Obvious Issues, Answer No Problem.';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';
