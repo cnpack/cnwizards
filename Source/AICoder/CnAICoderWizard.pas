@@ -56,9 +56,12 @@ type
     chkProxy: TCheckBox;
     edtProxy: TEdit;
     procedure cbbActiveEngineChange(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     FTabsheets: array of TTabSheet;
     FOptionFrames: array of TCnAICoderOptionFrame;
+  protected
+    function GetHelpTopic: string; override;
   public
     procedure LoadFromOptions;
     procedure SaveToOptions;
@@ -393,6 +396,16 @@ procedure TCnAICoderConfigForm.cbbActiveEngineChange(Sender: TObject);
 begin
   if (cbbActiveEngine.ItemIndex >= 0) and (cbbActiveEngine.ItemIndex < pgcAI.PageCount) then
     pgcAI.ActivePageIndex := cbbActiveEngine.ItemIndex;
+end;
+
+procedure TCnAICoderConfigForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
+end;
+
+function TCnAICoderConfigForm.GetHelpTopic: string;
+begin
+  Result := 'CnAICoderWizard';
 end;
 
 initialization

@@ -71,6 +71,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
+    OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
     Left = 422
