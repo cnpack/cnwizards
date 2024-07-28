@@ -149,6 +149,10 @@
 			<param name="Local" value="wizards\codeformatter.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="AI 辅助编码专家">
+			<param name="Local" value="wizards\aicoderwizard.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="IDE 专家管理工具">
 			<param name="Local" value="wizards\cnmanagewiz.htm">
 			</OBJECT>

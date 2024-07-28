@@ -8,6 +8,10 @@
 	<param name="FrameName" value="right">
 </OBJECT>
 <UL>
+  <LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="AI ±àÂë¸¨Öú×¨¼Ò">
+		<param name="Local" value="wizards\aicoderwizard.htm">
+		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="ASCII ×Ö·û±í">
 		<param name="Local" value="wizards\toolset\asciichart.htm">

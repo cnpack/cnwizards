@@ -8,6 +8,10 @@
 	<param name="FrameName" value="right">
 </OBJECT>
 <UL>
+  <LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="AI 編碼輔助專家">
+		<param name="Local" value="wizards\aicoderwizard.htm">
+		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="ASCII 字符表">
 		<param name="Name" value="ASCII 字符表">
