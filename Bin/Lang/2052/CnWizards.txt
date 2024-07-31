@@ -3892,6 +3892,7 @@ SCnProcListErrorNoUnit=未找到 Unit 部分
 SCnProcListErrorNoEnd=未找到 End. 部分
 SCnProcListErrorNoInitialization=未找到 Initialization 部分
 SCnProcListErrorNoFinalization=未找到 Finalization 部分
+SCnProcListErrorNoProgramBegin=未找到 Program Begin 部分
 SCnUsesToolsMenuCaption=引用单元工具(&U)
 SCnUsesToolsMenuHint=引用单元工具
 SCnUsesToolsName=引用单元工具

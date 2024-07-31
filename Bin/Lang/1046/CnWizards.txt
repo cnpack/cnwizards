@@ -3892,6 +3892,7 @@ SCnProcListErrorNoUnit=Unit NÃO Encontrada.
 SCnProcListErrorNoEnd=End. NÃO Encontrada.
 SCnProcListErrorNoInitialization=Initialization NÃO Encontrada.
 SCnProcListErrorNoFinalization=Finalization NÃO Encontrada.
+SCnProcListErrorNoProgramBegin=Program Begin NÃO Encontrada.
 SCnUsesToolsMenuCaption=&Usa Ferramentas de Unidades
 SCnUsesToolsMenuHint=Usa Ferramentas de Unidades
 SCnUsesToolsName=Usa Ferramentas de Unidades

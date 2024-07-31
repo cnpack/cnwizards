@@ -3892,6 +3892,7 @@ SCnProcListErrorNoUnit=Unit NOT Found.
 SCnProcListErrorNoEnd=End. NOT Found.
 SCnProcListErrorNoInitialization=Initialization NOT Found.
 SCnProcListErrorNoFinalization=Finalization NOT Found.
+SCnProcListErrorNoProgramBegin=Program Begin NOT Found.
 SCnUsesToolsMenuCaption=&Uses Units Tools
 SCnUsesToolsMenuHint=Uses Units Tools
 SCnUsesToolsName=Uses Units Tools

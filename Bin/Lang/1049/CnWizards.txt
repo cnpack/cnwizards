@@ -3892,6 +3892,7 @@ SCnProcListErrorNoUnit=Раздел Unit НЕ найден
 SCnProcListErrorNoEnd=Раздел End. НЕ найден
 SCnProcListErrorNoInitialization=Раздел Initialization НЕ найден 
 SCnProcListErrorNoFinalization=Раздел Finalization НЕ найден
+SCnProcListErrorNoProgramBegin=Раздел Program Begin НЕ найден
 SCnUsesToolsMenuCaption=Модули
 SCnUsesToolsMenuHint=Модули
 SCnUsesToolsName=Модули
