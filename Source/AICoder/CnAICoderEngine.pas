@@ -398,9 +398,10 @@ var
   S, F: string;
 begin
   // OptionManager 加载基本设置
-  S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt, ['']), False);
+  F := Format(SCnAICoderEngineOptionFileFmt, ['']);
+  S := WizOptions.GetUserFileName(F, False);
   CnAIEngineOptionManager.SaveToFile(S);
-  WizOptions.CheckUserFile(S);
+  WizOptions.CheckUserFile(F);
 
   // 挨个根据引擎 ID，修改文件名，保存其对应 Option
   for I := 0 to EngineCount - 1 do
