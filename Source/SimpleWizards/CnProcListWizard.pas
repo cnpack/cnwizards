@@ -530,7 +530,7 @@ type
     property ProjectName: string read FProjectName write FProjectName;
   end;
 
-  TCnJumpsPoint = (jpUnit, jpEnd, jpInitialization, jpFinalization);
+  TCnJumpsPoint = (jpUnit, jpEnd, jpInitialization, jpFinalization, jpProgramBegin);
 
 const
   csUseEditorToolbar = 'UseEditorToolBar';
@@ -571,7 +571,7 @@ const
   ProcBlacklist: array[0..2] of string = ('CATCH_ALL', 'CATCH', 'AND_CATCH_ALL');
 
   JumpCaptions: array[Low(TCnJumpsPoint)..High(TCnJumpsPoint)] of string =
-    ('unit ;', 'end.', 'initialization', 'finalization');
+    ('unit ;', 'end.', 'initialization', 'finalization', 'program begin');
   JUMP_IMAGE_OFFSET = 5;
 
 var
@@ -583,6 +583,7 @@ var
   FImplLine: Integer = 0;
   FUnitLine: Integer = 0;
   FEndLine: Integer = 0;
+  FOuterBeginLine: Integer = 0;
   FInitializationLine: Integer = 0;
   FFinalizationLine: Integer = 0;
 
@@ -701,6 +702,12 @@ begin
     begin
       Obj.ToolBtnJumpIntf.Enabled := True;
       Obj.ToolBtnJumpImpl.Enabled := True;
+      Obj.ToolBtnJumps.Enabled := True;
+    end
+    else if IsDpr(S) then
+    begin
+      Obj.ToolBtnJumpIntf.Enabled := False;
+      Obj.ToolBtnJumpImpl.Enabled := False;
       Obj.ToolBtnJumps.Enabled := True;
     end
     else
@@ -832,6 +839,7 @@ begin
   FImplLine := 0;
   FUnitLine := 0;
   FEndLine := 0;
+  FOuterBeginLine := 0;
   FInitializationLine := 0;
   FFinalizationLine := 0;
 end;
@@ -1131,7 +1139,7 @@ begin
   end;
 
   Obj.JumpsMenu := TPopupMenu.Create(Obj.InternalToolBar2);
-  Obj.JumpsMenu.Images := dmCnSharedImages.ilProcToolBar;;
+  Obj.JumpsMenu.Images := dmCnSharedImages.ilProcToolBar;
 
   for JP := Low(TCnJumpsPoint) to High(TCnJumpsPoint) do
   begin
@@ -1565,6 +1573,11 @@ begin
         CurrentGotoLineAndFocusEditControl(FFinalizationLine)
       else
         ErrorDlg(SCnProcListErrorNoFinalization);
+    jpProgramBegin:
+      if FOuterBeginLine > 0 then
+        CurrentGotoLineAndFocusEditControl(FOuterBeginLine)
+      else
+        ErrorDlg(SCnProcListErrorNoProgramBegin);
   end;
 
   // 判断 Sender 是 MenuItem 的话，把 Button 的 ImageIndex 和 Tag 设过去
@@ -2264,6 +2277,7 @@ var
     ElementInfo: TCnElementInfo;
     BeginProcHeaderPosition: Longint;
     J, K: Integer;
+    IsProgram: Boolean;
     LineNo: Integer;
     ProcName, ProcReturnType, IntfName: string;
     ElementTypeStr, OwnerClass, ProcArgs: string;
@@ -2300,10 +2314,14 @@ var
             CurClassForNotKnown := '';
             PrevTokenID := tkNull;
             NotKnownLineNo := -1;
+            IsProgram := False;
 
             while PasParser.TokenID <> tkNull do
             begin
               // 记录下每个 Identifier
+              if PasParser.TokenID in [tkProgram, tkLibrary] then
+                IsProgram := True;
+
               if (PasParser.TokenID in [tkProgram, tkLibrary, tkUnit]) and (FUnitLine = 0) then // 第一个 Unit
                 FUnitLine := GetPasParserLineNumber
               else if (PasParser.TokenID = tkInitialization) and (FInitializationLine = 0) then // 第一个 Initialization
@@ -2361,7 +2379,10 @@ var
                 CurIntf := CurIdent;
               end
               else if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
-                FImplLine := GetPasParserLineNumber;
+                FImplLine := GetPasParserLineNumber
+              else if IsProgram and (PasParser.TokenID = tkBegin) and
+                (PasParser.TokenPos = PasParser.LinePos) then // Program 中最后一个行首的 begin
+                FOuterBeginLine := GetPasParserLineNumber;
 
               if ((not InTypeDeclaration and InImplementation) or InIntfDeclaration) and
                 (PasParser.TokenID in [tkFunction, tkProcedure, tkConstructor, tkDestructor, tkOperator]) then

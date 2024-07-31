@@ -1651,6 +1651,7 @@ var
   SCnProcListErrorNoEnd: string = 'End. NOT Found.';
   SCnProcListErrorNoInitialization: string = 'Initialization NOT Found.';
   SCnProcListErrorNoFinalization: string = 'Finalization NOT Found.';
+  SCnProcListErrorNoProgramBegin: string = 'Program Begin NOT Found';
 
   // CnUsesTools
   SCnUsesToolsMenuCaption: string = '&Uses Units Tools';

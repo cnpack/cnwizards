@@ -1336,6 +1336,7 @@ begin
   TranslateStr(SCnProcListErrorNoEnd, 'SCnProcListErrorNoEnd');
   TranslateStr(SCnProcListErrorNoInitialization, 'SCnProcListErrorNoInitialization');
   TranslateStr(SCnProcListErrorNoFinalization, 'SCnProcListErrorNoFinalization');
+  TranslateStr(SCnProcListErrorNoProgramBegin, 'SCnProcListErrorNoProgramBegin');
 
   // CnUsesTools
   TranslateStr(SCnUsesToolsMenuCaption, 'SCnUsesToolsMenuCaption');
