@@ -66,6 +66,8 @@ type
     procedure UpdateStatusBar; override;
     procedure OpenSelect; override;
     function GetHelpTopic: string; override;
+
+    function GetSelectedFileName: string; override;
   public
 
   end;
@@ -196,6 +198,11 @@ end;
 function TCnUsesIdentForm.GetHelpTopic: string;
 begin
   Result := 'CnUsesUnitsTools';
+end;
+
+function TCnUsesIdentForm.GetSelectedFileName: string;
+begin
+  Result := '';
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

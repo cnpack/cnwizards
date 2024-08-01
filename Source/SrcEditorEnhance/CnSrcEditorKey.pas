@@ -200,7 +200,7 @@ implementation
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 uses
-  {$IFDEF DEBUG}CnDebug, {$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnIDEStrings,
   CnSourceHighlight, mPasLex, mwBCBTokenList, CnIdentRenameFrm, CnWideStrings;
 
 { TCnSrcEditorKey }

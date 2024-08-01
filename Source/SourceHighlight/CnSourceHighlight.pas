@@ -109,7 +109,7 @@ uses
   CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
   CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
-  CnCppCodeParser, CnWideCppParser, CnGraphUtils, CnFastList;
+  CnCppCodeParser, CnWideCppParser, CnGraphUtils, CnFastList, CnIDEStrings;
 
 const
   HighLightDefColors: array[-1..5] of TColor = ($00000099, $000000FF, $000099FF,
@@ -2907,7 +2907,7 @@ var
     else
     begin
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
-      if WideCharIsWideLength(AChar) then // D11 以上似乎固定画了
+      if IDEWideCharIsWideLength(AChar) then // D11 以上似乎固定画了
         Result := CharSize.cx * 2
       else
         Result := CharSize.cx;
@@ -4076,11 +4076,11 @@ var
     if (Ord(AChar) < $FF) then
       Result := False
     else if AnsiCharWidthLimit <= 2 then
-      Result := WideCharIsWideLength(AChar)
+      Result := IDEWideCharIsWideLength(AChar)
     else
     begin
 {$IFDEF DELPHI110_ALEXANDRIA_UP} // 高版本的绘制似乎改成固定宽度了
-      Result := WideCharIsWideLength(AChar);
+      Result := IDEWideCharIsWideLength(AChar);
 {$ELSE}
       CW := EditCanvas.TextWidth(AChar);
       Result := CW > AnsiCharWidthLimit; // 双字节字符绘制出的宽度大于 1.5 倍的窄字符宽度就认为宽
@@ -4493,7 +4493,7 @@ begin
                     TextOut(R.Left, R.Top, string(Token.Token[J]));
                   end;
 
-                  if WideCharIsWideLength(Token.Token[J]) then
+                  if IDEWideCharIsWideLength(Token.Token[J]) then
                   begin
                     Inc(R.Left, CharSize.cx * SizeOf(WideChar));
                     Inc(R.Right, CharSize.cx * SizeOf(WideChar));
@@ -4599,7 +4599,7 @@ begin
                       TextOut(R.Left, R.Top, string(Token.Token[J]));
                     end;
 
-                    if WideCharIsWideLength(Token.Token[J]) then
+                    if IDEWideCharIsWideLength(Token.Token[J]) then
                     begin
                       Inc(R.Left, CharSize.cx * SizeOf(WideChar));
                       Inc(R.Right, CharSize.cx * SizeOf(WideChar));
@@ -4706,7 +4706,7 @@ begin
                     TextOut(R.Left, R.Top, string(Token.Token[J]));
                   end;
 
-                  if WideCharIsWideLength(Token.Token[J]) then
+                  if IDEWideCharIsWideLength(Token.Token[J]) then
                   begin
                     Inc(R.Left, CharSize.cx * SizeOf(WideChar));
                     Inc(R.Right, CharSize.cx * SizeOf(WideChar));

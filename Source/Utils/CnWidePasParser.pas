@@ -45,7 +45,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
-  Contnrs, CnFastList, CnPasCodeParser, CnContainers;
+  Contnrs, CnFastList, CnPasCodeParser, CnContainers, CnIDEStrings;
 
 type
   TCnWidePasToken = class(TPersistent)
@@ -486,7 +486,8 @@ begin
       else
       begin
         Inc(WideLen);
-        if Ord(Source[I]) > $900 then
+        // if Ord(Source[I]) > $900 then
+        if IDEWideCharIsWideLength(Source[I]) then
           Inc(AnsiLen, SizeOf(WideChar))
         else
           Inc(AnsiLen, SizeOf(AnsiChar));

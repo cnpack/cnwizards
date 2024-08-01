@@ -175,7 +175,7 @@ uses
   CnDebug,
 {$ENDIF}
   CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm,
-  CnWideStrings, CnProgressFrm;
+  CnWideStrings, CnProgressFrm, CnIDEStrings;
 
 {$R *.DFM}
 

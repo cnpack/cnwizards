@@ -70,7 +70,7 @@ uses
   ComCtrls, ToolWin, StdCtrls, ExtCtrls, IniFiles, Math, Menus, ActnList,
   CnProjectViewBaseFrm, CnIni, mPasLex,  mwBCBTokenList, Contnrs, Clipbrd, CnPasCodeParser,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
-  CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, RegExpr,
+  CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, RegExpr, CnIDEStrings,
 {$IFNDEF STAND_ALONE}
   ToolsAPI, CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
   CnWizMenuAction, CnWizIdeUtils, CnFloatWindow,

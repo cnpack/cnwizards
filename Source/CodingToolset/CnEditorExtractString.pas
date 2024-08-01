@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ToolsAPI,
   TypInfo, StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, Buttons, ActnList, Menus,
   CnConsts, CnCommon, CnHashMap, CnWizConsts, CnWizUtils, CnCodingToolsetWizard,
-  CnWizMultiLang, CnEditControlWrapper, mPasLex, mwBCBTokenList,
+  CnWizMultiLang, CnEditControlWrapper, mPasLex, mwBCBTokenList, CnIDEStrings,
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
 type

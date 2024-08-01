@@ -71,7 +71,7 @@ uses
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
   RegExpr, mPasLex, mwBCBTokenList,
-  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs,
+  Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni, CnSearchCombo,
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
@@ -90,24 +90,6 @@ type
   IDesigner = IFormDesigner;
 {$ENDIF}
 
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
-  PCnIdeTokenChar = PWideChar;
-  TCnIdeTokenChar = WideChar;
-  TCnIdeStringList = TCnWideStringList;
-  TCnIdeTokenInt = Word;
-{$ELSE}
-  TCnIdeTokenString = string;     // Ansi/Utf16
-  PCnIdeTokenChar = PChar;
-  TCnIdeTokenChar = Char;
-  TCnIdeStringList = TStringList;
-  {$IFDEF UNICODE}
-  TCnIdeTokenInt = Word;
-  {$ELSE}
-  TCnIdeTokenInt = Byte;
-  {$ENDIF}
-{$ENDIF}
-  PCnIdeTokenInt = ^TCnIdeTokenInt;
 
   // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
@@ -661,7 +643,7 @@ function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
    不适用于 ConvertPos 转成 EditPos。只能将 CharIndex 转成 Ansi 后 + 1 赋给 EditPos.Col。
    Utf16CharIndex 是当前光标在 Text 中的 Utf16 真实位置，0 开始，+ 1 便可下标
    PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
-   为 False 时直接判断字符 Unicode 编码是否大于 $900 来决定其是一字符宽还是二字符宽，
+   为 False 时直接判断字符 Unicode 编码是否大于 $1100 来决定其是一字符宽还是二字符宽，
    碰上部分古怪 Unicode 字符时会产生偏差}
 {$ENDIF}
 
@@ -692,7 +674,7 @@ function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
 {* 取当前光标下的标识符及光标在标识符中的索引号的 Unicode 版本，允许 Unicode 标识符，
   可用于 2009 或以上。CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移
   PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
-   为 False 时直接判断字符是否大于 $FF 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
+   为 False 时直接判断字符是否大于 $1100 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
 {$ENDIF}
 
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;

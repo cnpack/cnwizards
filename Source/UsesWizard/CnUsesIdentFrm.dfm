@@ -46,26 +46,6 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
       OnDblClick = rbIntfDblClick
     end
   end
-  inherited lvList: TListView
-    Width = 730
-    Height = 406
-    Columns = <
-      item
-        Caption = 'Identifier'
-        Width = 220
-      end
-      item
-        Caption = 'Unit'
-        Width = 160
-      end
-      item
-        Caption = 'Path'
-        Width = 320
-      end>
-    MultiSelect = False
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Top = 472
     Width = 730
@@ -85,6 +65,30 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
     end
     inherited btnSep4: TToolButton
       Visible = False
+    end
+  end
+  inherited pnlMain: TPanel
+    Width = 730
+    Height = 406
+    inherited lvList: TListView
+      Width = 730
+      Height = 406
+      Columns = <
+        item
+          Caption = 'Identifier'
+          Width = 220
+        end
+        item
+          Caption = 'Unit'
+          Width = 160
+        end
+        item
+          Caption = 'Path'
+          Width = 320
+        end>
+      MultiSelect = False
+      OwnerData = True
+      OnData = lvListData
     end
   end
   inherited ActionList: TActionList
