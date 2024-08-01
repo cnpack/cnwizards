@@ -1944,6 +1944,15 @@ var
 {$ENDIF}
   end;
 
+  function GetPasParserColNumber: Integer;
+  begin
+{$IFDEF UNICODE}
+    Result := PasParser.TokenPos - PasParser.LineStartOffset;
+{$ELSE}
+    Result := PasParser.TokenPos - PasParser.LinePos;
+{$ENDIF}
+  end;
+
   function IsDprOrInc(const AFile: string): Boolean;
   var
     FileExt: string;
@@ -2381,7 +2390,7 @@ var
               else if (PasParser.TokenID = tkImplementation) and (FImplLine = 0) then
                 FImplLine := GetPasParserLineNumber
               else if IsProgram and (PasParser.TokenID = tkBegin) and
-                (PasParser.TokenPos = PasParser.LinePos) then // Program 中最后一个行首的 begin
+                (GetPasParserColNumber = 0) then // Program 中最后一个行首的 begin
                 FOuterBeginLine := GetPasParserLineNumber;
 
               if ((not InTypeDeclaration and InImplementation) or InIntfDeclaration) and
