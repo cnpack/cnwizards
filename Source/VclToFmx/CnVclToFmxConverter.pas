@@ -392,10 +392,12 @@ class procedure TCnCaptionConverter.ProcessProperties(const PropertyName,
   TheClassName, PropertyValue: string; InProperties, OutProperties: TStrings;
   Tab: Integer);
 begin
-  // FMX TPanel / TToolBar 对应的 TGridLayout / ToolButton 对应的 SpeedButton 没有 Text 属性
+  // FMX TPanel / TToolBar 对应的 TGridLayout 没有 Text 属性
   if (PropertyName = 'Caption') and ((TheClassName <> 'TPanel') and
-    (TheClassName <> 'TToolBar') and (TheClassName <> 'TToolButton')) then
+    (TheClassName <> 'TToolBar')) then
     OutProperties.Add('Text = ' + PropertyValue);
+
+  // ToolButton 对应的 SpeedButton 以前没有 Text 属性后来加上了
 end;
 
 { TCnSizeConverter }

@@ -1172,8 +1172,6 @@ begin
 end;
 
 function GetStringPropertyValue(const PropertyName, AProp: string): string;
-var
-  S: string;
 begin
   Result := '';
   if Pos(PropertyName + ' = ', AProp) = 1 then
