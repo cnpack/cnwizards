@@ -2193,9 +2193,12 @@ begin
 end;
 
 procedure TCnPropertyCompareForm.UpdateFont;
+{$IFNDEF STAND_ALONE}
 var
   H: Integer;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   if FManager.GridFont = nil then
     Exit;
 
@@ -2213,6 +2216,7 @@ begin
 
   gridLeft.DefaultRowHeight := H;
   gridRight.DefaultRowHeight := H;
+{$ENDIF}
 end;
 
 {$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}

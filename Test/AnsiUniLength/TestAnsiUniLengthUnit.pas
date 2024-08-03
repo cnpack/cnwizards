@@ -47,7 +47,7 @@ begin
   for I := 0 to mmoStr.Lines.Count - 1 do
   begin
     WS := mmoStr.Lines[I];
-    Len := CalcAnsiLengthFromWideString(PWideChar(WS));
+    Len := CalcAnsiDisplayLengthFromWideString(PWideChar(WS));
     ShowMessage('Ansi Length of Memo Line ' + IntToStr(I) + ' is ' + IntToStr(Len));
   end;
 end;
@@ -60,7 +60,7 @@ begin
   for I := 0 to mmoStr.Lines.Count - 1 do
   begin
     WS := mmoStr.Lines[I];
-    Offset := CalcAnsiLengthFromWideStringOffset(PWideChar(WS), udOffset.Position);
+    Offset := CalcAnsiDisplayLengthFromWideStringOffset(PWideChar(WS), udOffset.Position);
     ShowMessage(Format('Ansi SubString Length of Memo Line %d is %d', [I, Offset]));
   end;
 end;
@@ -73,7 +73,7 @@ begin
   for I := 0 to mmoStr.Lines.Count - 1 do
   begin
     WS := mmoStr.Lines[I];
-    Offset := CalcWideStringLengthFromAnsiOffset(PWideChar(WS), udOffset.Position);
+    Offset := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(WS), udOffset.Position);
     ShowMessage(Format('Wide SubString Length of Memo Line %d is %d', [I, Offset]));
   end;
 end;
@@ -86,7 +86,7 @@ begin
   for I := 0 to mmoStr.Lines.Count - 1 do
   begin
     S := CnAnsiToUtf8(mmoStr.Lines[I]);
-    ShowMessage(ConvertUtf8ToAlterAnsi(PAnsiChar(S), '~'));
+    ShowMessage(ConvertUtf8ToAlterDisplayAnsi(PAnsiChar(S), '~'));
   end;
 end;
 
