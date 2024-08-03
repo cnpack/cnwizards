@@ -9,10 +9,10 @@ begin
 if h = '¡ø' then
 if h = '¡÷' then
   Exit;
-
+begin  ¡÷  ¡ø   end;
   var ³Ô·¹: string := 'Test';
   ³Ô·¹ := '';
-
+  begin  ¡ø  ¡÷  end;
 end;
 
 
