@@ -2863,7 +2863,7 @@ begin
       Utf8Text := Copy(Utf8Text, 1, FSavePos.Col);
       Utf8Len := Length(Utf8Text);  // 得到有 Bug 时的 Utf8 插入位置
       Text := UTF8Decode(Utf8Text); // 转回 Utf16，看位置差
-      AnsiLen := CalcAnsiLengthFromWideString(PWideChar(Text)); // 得到 Utf16 转 Ansi 后的长度
+      AnsiLen := CalcAnsiDisplayLengthFromWideString(PWideChar(Text)); // 得到 Utf16 转 Ansi 后的长度
 
       // 补上差值
       if Utf8Len > AnsiLen then

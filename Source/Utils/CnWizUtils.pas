@@ -5466,7 +5466,7 @@ begin
     begin
       // CurrIndex 是 WideString 的，需要转换回 Ansi 的
       WideText := Copy(WideText, 1, CurrIndex);
-      CurrIndex := CalcAnsiLengthFromWideString(PWideChar(WideText));
+      CurrIndex := CalcAnsiDisplayLengthFromWideString(PWideChar(WideText));
     end;
   end;
 

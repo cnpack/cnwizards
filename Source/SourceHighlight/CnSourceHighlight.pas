@@ -3521,10 +3521,10 @@ begin
     begin
       // 不做 Ansi 转换，免得出错
       W := Utf8Decode(Copy(AInfo.TokenLine, 1, AInfo.TokenPos.Col));
-      AInfo.FTokenPos.Col := CalcAnsiLengthFromWideString(PWideChar(W));
+      AInfo.FTokenPos.Col := CalcAnsiDisplayLengthFromWideString(PWideChar(W));
 
       W := Utf8Decode(Copy(AInfo.TokenMatchLine, 1, AInfo.TokenMatchPos.Col));
-      AInfo.FTokenMatchPos.Col := CalcAnsiLengthFromWideString(PWideChar(W));
+      AInfo.FTokenMatchPos.Col := CalcAnsiDisplayLengthFromWideString(PWideChar(W));
 
 //      AInfo.FTokenPos.Col := Length(CnUtf8ToAnsi(AnsiString(Copy(AInfo.TokenLine, 1,
 //        AInfo.TokenPos.Col))));
@@ -6002,10 +6002,10 @@ begin
   if (Text <> '') and (Col > 0) then
   begin
     WideText := Utf8Decode(Copy(Text, 1, Col - 1));
-    Col := CalcAnsiLengthFromWideString(PWideChar(WideText)) + 1;
+    Col := CalcAnsiDisplayLengthFromWideString(PWideChar(WideText)) + 1;
 
     WideText := Utf8Decode(Text);
-    Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
+    Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(WideText), 'C');
   end;
 {$ENDIF}
 
@@ -6202,10 +6202,10 @@ begin
   if (Text <> '') and (Col > 0) then
   begin
     WideText := Utf8Decode(Copy(Text, 1, Col - 1));
-    Col := CalcAnsiLengthFromWideString(PWideChar(WideText)) + 1;
+    Col := CalcAnsiDisplayLengthFromWideString(PWideChar(WideText)) + 1;
 
     WideText := Utf8Decode(Text);
-    Text := ConvertUtf16ToAlterAnsi(PWideChar(WideText), 'C');
+    Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(WideText), 'C');
   end;
 {$ENDIF}
 
