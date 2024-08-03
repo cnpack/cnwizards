@@ -394,7 +394,7 @@ begin
     TObject(TokenPool[I]).Free;
 end;
 
-// NextNoJunk仅仅只跳过注释，而没跳过编译指令的情况。加此函数可过编译指令
+// NextNoJunk 仅仅只跳过注释，而没跳过编译指令的情况。加此函数可过编译指令
 procedure LexNextNoJunkWithoutCompDirect(Lex: TCnPasWideLex);
 begin
   repeat
@@ -486,7 +486,6 @@ begin
       else
       begin
         Inc(WideLen);
-        // if Ord(Source[I]) > $900 then
         if IDEWideCharIsWideLength(Source[I]) then
           Inc(AnsiLen, SizeOf(WideChar))
         else

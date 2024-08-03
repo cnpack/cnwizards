@@ -1022,7 +1022,7 @@ begin
 {$IFDEF UNICODE}
   // 括号匹配时，光标可能在行尾之外，也就是说 AnsiCol 超出字符串长度，所以必须指定
   // AllowExceedEnd 为 True 才能获得正确的匹配位置，否则就会被截断，产生匹配查找错误的问题
-  UniCol := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCol, True, True);
+  UniCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text), AnsiCol, True);
   ULine := Copy(Text, 1, UniCol - 1);
   Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
 
@@ -1105,7 +1105,7 @@ begin
 
   ALine := Copy(Utf8Text, 1, Utf8Col - 1);
   ULine := string(Utf8Encode(ALine));
-  Result := CalcAnsiLengthFromWideString(PWideChar(ULine)) + 1;
+  Result := CalcAnsiDisplayLengthFromWideString(PWideChar(ULine)) + 1;
 end;
 
 {$ENDIF}
@@ -2932,7 +2932,7 @@ begin
 
   {$IFDEF UNICODE}
       // 遇到窄的双字节字符时转 AnsiString 会导致列计算错误，此处换一种方法
-      UCol := CalcWideStringLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
+      UCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
       if UCol > 1 then
         U := Copy(LineText, 1, UCol - 1)
       else
@@ -3446,7 +3446,7 @@ begin
     RawLine := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
 {$IFDEF UNICODE}
     // 在 D2009 下是 UnicodeString，CursorPos 是 Ansi 位置，因此需要转成 Ansi。
-    LText := ConvertUtf16ToAlterAnsi(PWideChar(RawLine), 'C');
+    LText := ConvertUtf16ToAlterDisplayAnsi(PWideChar(RawLine), 'C');
 {$ELSE}
     LText := AnsiString(RawLine);
     // BDS 下 CursorPos 是 utf8 的位置，LText 在 BDS 下是 UTF8，一致。
@@ -5990,7 +5990,7 @@ begin
 
 {$IFDEF UNICODE}
   // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
-  Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
+  Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
 {$ELSE}
   Text := GetStrProp(FControl, 'LineText');
 {$ENDIF}
@@ -6190,7 +6190,7 @@ begin
 
 {$IFDEF UNICODE}
   // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
-  Text := ConvertUtf16ToAlterAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
+  Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
 {$ELSE}
   Text := AnsiString(GetStrProp(FControl, 'LineText'));
 {$ENDIF}

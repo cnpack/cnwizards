@@ -3580,7 +3580,7 @@ begin
 
     // Line ·Ö±ðÊÇ Ansi/Utf8/Utf16
 {$IFDEF UNICODE}
-    Len := CalcAnsiLengthFromWideString(PWideChar(Line));
+    Len := CalcAnsiDisplayLengthFromWideString(PWideChar(Line));
 {$ELSE}
     Len := Length(Line);
 {$ENDIF}

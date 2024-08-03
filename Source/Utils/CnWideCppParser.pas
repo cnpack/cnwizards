@@ -144,6 +144,9 @@ procedure ParseCppCodePosInfoW(const Source: string; Line, Col: Integer;
 
 implementation
 
+uses
+  CnIDEStrings;
+
 var
   TokenPool: TCnList = nil;
 
@@ -244,7 +247,7 @@ begin
       else
       begin
         Inc(WideLen);
-        if Ord(ASource[I]) > $900 then
+        if IDEWideCharIsWideLength(Source[I]) then
           Inc(AnsiLen, SizeOf(WideChar))
         else
           Inc(AnsiLen, SizeOf(AnsiChar));

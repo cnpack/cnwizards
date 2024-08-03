@@ -1213,7 +1213,7 @@ begin
   // 行相等才需要比较列，并且由于 CursorPos 是 ANSI 的光标位置，
   // 所以得把 Utf16 转成 Ansi 来比较
   Result := (Col >= Token.EditCol) and (Col <= Token.EditCol +
-    CalcAnsiLengthFromWideString(Token.Token));
+    CalcAnsiDisplayLengthFromWideString(Token.Token));
 end;
 
 //==============================================================================

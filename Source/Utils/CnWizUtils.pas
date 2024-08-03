@@ -5191,7 +5191,7 @@ begin
     begin
 {$IFDEF UNICODE}
       // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
-      CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiLengthFromWideString(PWideChar(Text)));
+      CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiDisplayLengthFromWideString(PWideChar(Text)));
 {$ELSE}
       CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
 {$ENDIF}
@@ -5271,7 +5271,7 @@ begin
     // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
     AnsiCharIndex := View.CursorPos.Col - 1;
     if not PreciseMode then
-      Utf16CharIndex := CalcWideStringLengthFromAnsiOffset(PWideChar(Text), AnsiCharIndex)
+      Utf16CharIndex := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text), AnsiCharIndex)
     else
       Utf16CharIndex := CalcWideStringLengthFromAnsiOffsetOnCanvas(PWideChar(Text),
         AnsiCharIndex);
@@ -6377,14 +6377,14 @@ begin
 {$IFDEF UNICODE}
   // D2009 或以上
   if UseAlterChar then // 纯英文 Unicode 环境下不能直接转 Ansi
-    Result := ConvertUtf16ToAlterAnsi(PWideChar(LineText), 'C')
+    Result := ConvertUtf16ToAlterDisplayAnsi(PWideChar(LineText), 'C')
   else
     Result := AnsiString(LineText);
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
      // D2005 ~ 2007 Utf8 to Ansi
      if UseAlterChar then // 纯英文环境下 Utf8 不能直接转 Ansi
-       Result := ConvertUtf8ToAlterAnsi(PAnsiChar(LineText), 'C')
+       Result := ConvertUtf8ToAlterDisplayAnsi(PAnsiChar(LineText), 'C')
      else
        Result := Utf8ToAnsi(LineText);
   {$ELSE}
@@ -7149,7 +7149,7 @@ begin
       // Unicode 环境里在纯英文 OS 下不能按照后面的转 Ansi，以免丢字符。
       // 需要转成 UTF16 的再硬替成 Ansi。
       UniText := Utf8Decode(PAnsiChar(Stream.Memory));
-      Text := ConvertUtf16ToAlterAnsi(PWideChar(UniText));
+      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(UniText));
 {$ELSE}
       Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
 {$ENDIF}
