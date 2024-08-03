@@ -37,11 +37,17 @@ unit CnSourceHighlight;
 *
 *           如果绘制错位，多半是 EditorGetTextRect 中的判断字符宽度的行为和 IDE 不一致
 *           如果光标判断标识符错位，多半是 CnOtaGeneralGetCurrPosToken 里判断宽度和 IDE 不一致
+*           如果部分字符绘制宽度在不同版本的 IDE 里有变化导致光标高亮与绘制错位，则需在
+*           CnIDEStrings.pas 里的 IDEWideCharIsWideLength 函数里，照 IDE 的行为进行补充
+*           注：本专家在测量编辑器中的字符的位置、光标列、绘制宽度时已经抽象出了处理核心
+*           IDEWideCharIsWideLength 函数。
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2024.07.02
+* 修改记录：2024.08.03
+*               Unicode 下多处调用 DisplayLength 系列函数的场景指定 IDE 相关的宽度计算。
+*           2024.07.02
 *               增加 ControlHook 拦截窗口位置变化消息重新计算左侧栏位宽度的机制避免绘制错位然而似乎无效。
 *           2022.02.26
 *               光标下的高亮关键字块，其配对使用实线绘制。
@@ -1022,7 +1028,8 @@ begin
 {$IFDEF UNICODE}
   // 括号匹配时，光标可能在行尾之外，也就是说 AnsiCol 超出字符串长度，所以必须指定
   // AllowExceedEnd 为 True 才能获得正确的匹配位置，否则就会被截断，产生匹配查找错误的问题
-  UniCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text), AnsiCol, True);
+  UniCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text), AnsiCol,
+    True, @IDEWideCharIsWideLength);
   ULine := Copy(Text, 1, UniCol - 1);
   Result := CalcUtf8LengthFromWideString(PWideChar(ULine)) + 1;
 
@@ -1105,7 +1112,7 @@ begin
 
   ALine := Copy(Utf8Text, 1, Utf8Col - 1);
   ULine := string(Utf8Encode(ALine));
-  Result := CalcAnsiDisplayLengthFromWideString(PWideChar(ULine)) + 1;
+  Result := CalcAnsiDisplayLengthFromWideString(PWideChar(ULine), @IDEWideCharIsWideLength) + 1;
 end;
 
 {$ENDIF}
@@ -2932,7 +2939,8 @@ begin
 
   {$IFDEF UNICODE}
       // 遇到窄的双字节字符时转 AnsiString 会导致列计算错误，此处换一种方法
-      UCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(LineText), AnsiPos.Col);
+      UCol := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(LineText),
+        AnsiPos.Col, False, @IDEWideCharIsWideLength);
       if UCol > 1 then
         U := Copy(LineText, 1, UCol - 1)
       else
