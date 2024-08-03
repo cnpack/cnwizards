@@ -5191,7 +5191,8 @@ begin
     begin
 {$IFDEF UNICODE}
       // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
-      CharIndex := Min(View.CursorPos.Col - 1, CalcAnsiDisplayLengthFromWideString(PWideChar(Text)));
+      CharIndex := Min(View.CursorPos.Col - 1,
+        CalcAnsiDisplayLengthFromWideString(PWideChar(Text), @IDEWideCharIsWideLength));
 {$ELSE}
       CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
 {$ENDIF}
@@ -5271,7 +5272,8 @@ begin
     // 需要把 string 转成 Ansi 后才能得到光标对应到 Text 中的真实位置
     AnsiCharIndex := View.CursorPos.Col - 1;
     if not PreciseMode then
-      Utf16CharIndex := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text), AnsiCharIndex)
+      Utf16CharIndex := CalcWideStringDisplayLengthFromAnsiOffset(PWideChar(Text),
+        AnsiCharIndex, False, @IDEWideCharIsWideLength)
     else
       Utf16CharIndex := CalcWideStringLengthFromAnsiOffsetOnCanvas(PWideChar(Text),
         AnsiCharIndex);
