@@ -2,21 +2,26 @@
   <o>
     <Caption>Искать в Google</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.google.ru/search?q=%s</Url>
+    <Url>https://www.google.ru/search?q=%s</Url>
+  </o>
+  <o>
+    <Caption>Искать в Bing</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>https://cn.bing.com/search?q=%s</Url>
   </o>
   <o>
     <Caption>-</Caption>
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>Искать в MSDN Online</Caption>
+    <Caption>Искать в MS Learn</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://social.msdn.microsoft.com/Search/ru-RU?query=%s</Url>
+    <Url>https://learn.microsoft.com/zh-cn/search/?terms=%s</Url>
   </o>
   <o>
     <Caption>Embarcadero Knowledge Base Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://edn.embarcadero.com/search?q=%s&amp;allsites=y&amp;allwords=y&amp;x=18&amp;y=9</Url>
+    <Url>https://docwiki.embarcadero.com/RADStudio/Athens/e/index.php?search=%s&title=Special%3ASearch&go=Go</Url>
   </o>
   <o>
     <Caption>-</Caption>
@@ -25,31 +30,26 @@
   <o>
     <Caption>Винград.ру</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://forum.vingrad.ru/act-Search.html</Url>
+    <Url>https://forum.vingrad.ru/act-Search.html</Url>
   </o>
   <o>
     <Caption>Исходники.ру</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://forum.sources.ru/index.php?act=Search&amp;f=</Url>
+    <Url>https://forum.sources.ru/index.php?act=Search&amp;f=</Url>
   </o>
   <o>
     <Caption>DRKB-online</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://antonn.ru/index.php?drkb&amp;drkb_search=%s&amp;f_d</Url>
+    <Url>https://antonn.ru/index.php?drkb&amp;drkb_search=%s&amp;f_d</Url>
   </o>
   <o>
     <Caption>Torry's Delphi Pages</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
+    <Url>https://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
   </o>
   <o>
     <Caption>SourceForge.net</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
-  </o>
-  <o>
-    <Caption>Delphi Super Pages</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://dsp.href.com/</Url>
+    <Url>https://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
   </o>
 </TCnWebSearchCollection>

@@ -2,41 +2,31 @@
   <o>
     <Caption>Google Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.google.com/search?hl=en&amp;q=%s</Url>
+    <Url>https://www.google.com/search?hl=en&amp;q=%s</Url>
   </o>
   <o>
     <Caption>Google Newsgroups</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://groups.google.com/groups?as_q=%s&amp;num=10&amp;scoring=r&amp;hl=en&amp;as_epq=&amp;as_oq=&amp;as_eq=&amp;as_ugroup=&amp;as_usubject=&amp;as_uauthors=&amp;lr=&amp;as_drrb=q&amp;as_qdr=&amp;as_mind=1&amp;as_minm=1&amp;as_miny=1981&amp;as_maxd=8&amp;as_maxm=9&amp;as_maxy=2005&amp;safe=off</Url>
+    <Url>https://groups.google.com/groups?as_q=%s&amp;num=10&amp;scoring=r&amp;hl=en&amp;as_epq=&amp;as_oq=&amp;as_eq=&amp;as_ugroup=&amp;as_usubject=&amp;as_uauthors=&amp;lr=&amp;as_drrb=q&amp;as_qdr=&amp;as_mind=1&amp;as_minm=1&amp;as_miny=1981&amp;as_maxd=8&amp;as_maxm=9&amp;as_maxy=2005&amp;safe=off</Url>
   </o>
   <o>
-    <Caption>Google CodeSearch</Caption>
+    <Caption>Bing Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.google.com/codesearch?hl=en&amp;lr=&amp;q=%s</Url>
-  </o>
-  <o>
-    <Caption>Yahoo! Search</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://search.yahoo.com/search?ei=UTF-8&amp;fr=sfp&amp;p=%s</Url>
-  </o>
-  <o>
-    <Caption>MSN Search</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://search.msn.com/results.aspx?FORM=MSNH&amp;srch_type=0&amp;q=%s</Url>
+    <Url>https://cn.bing.com/search?q=%s</Url>
   </o>
   <o>
     <Caption>-</Caption>
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>MSDN Online Search</Caption>
+    <Caption>MS Learn Online Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://social.msdn.microsoft.com/Search/en-US/?query=%s&amp;refinement=117%2c183</Url>
+    <Url>https://learn.microsoft.com/zh-cn/search/?terms=%s</Url>
   </o>
   <o>
     <Caption>Embarcadero Knowledge Base Search </Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://edn.embarcadero.com/search?q=%s&amp;allsites=y&amp;allwords=y&amp;x=18&amp;y=9</Url>
+    <Url>https://docwiki.embarcadero.com/RADStudio/Athens/e/index.php?search=%s&title=Special%3ASearch&go=Go</Url>
   </o>
   <o>
     <Caption>-</Caption>
@@ -45,16 +35,11 @@
   <o>
     <Caption>Torry's Delphi Pages</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
-  </o>
-  <o>
-    <Caption>Delphi Super Pages</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://dsp.href.com/</Url>
+    <Url>https://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
   </o>
   <o>
     <Caption>SourceForge.net</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
+    <Url>https://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
   </o>
 </TCnWebSearchCollection>

@@ -2,70 +2,45 @@
   <o>
     <Caption>Google 中文</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.google.com/search?hl=zh-TW&amp;q=%s</Url>
+    <Url>https://www.google.com/search?hl=zh-TW&amp;q=%s</Url>
   </o>
   <o>
     <Caption>Google 新聞組</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://groups.google.com/groups?as_q=%s&amp;num=10&amp;scoring=r&amp;hl=en&amp;as_epq=&amp;as_oq=&amp;as_eq=&amp;as_ugroup=&amp;as_usubject=&amp;as_uauthors=&amp;lr=&amp;as_drrb=q&amp;as_qdr=&amp;as_mind=1&amp;as_minm=1&amp;as_miny=1981&amp;as_maxd=8&amp;as_maxm=9&amp;as_maxy=2005&amp;safe=off</Url>
-  </o>
-  <o>
-    <Caption>Google 程式碼搜索</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://www.google.com/codesearch?hl=zh-TW&amp;lr=&amp;q=%s</Url>
-  </o>
-  <o>
-    <Caption>Yahoo! 奇摩</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://tw.search.yahoo.com/search?ei=UTF-8&amp;fr=sfp&amp;p=%s&amp;_adv_prop=web&amp;fl=0&amp;vl=0&amp;vf=all&amp;vd=all</Url>
+    <Url>https://groups.google.com/groups?as_q=%s&amp;num=10&amp;scoring=r&amp;hl=en&amp;as_epq=&amp;as_oq=&amp;as_eq=&amp;as_ugroup=&amp;as_usubject=&amp;as_uauthors=&amp;lr=&amp;as_drrb=q&amp;as_qdr=&amp;as_mind=1&amp;as_minm=1&amp;as_miny=1981&amp;as_maxd=8&amp;as_maxm=9&amp;as_maxy=2005&amp;safe=off</Url>
   </o>
   <o>
     <Caption>百度搜索</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.baidu.com/baidu?word=%s</Url>
+    <Url>https://www.baidu.com/s?wd=%s</Url>
   </o>
   <o>
-    <Caption>MSN 搜索</Caption>
+    <Caption>Bing 搜索</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://search.msn.com/results.aspx?FORM=MSNH&amp;srch_type=0&amp;q=%s</Url>
+    <Url>https://cn.bing.com/search?q=%s</Url>
   </o>
   <o>
     <Caption>-</Caption>
     <ShortCut>0</ShortCut>
-  </o>
-  <o>
-    <Caption>Programmer 深度論壇</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://forum.vclxx.org/search.asp?Search=%s</Url>
   </o>
   <o>
     <Caption>Delphi K.Top 討論區</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://delphi.ktop.com.tw/quicksearch.exe/quicksearch?SearchStr=%s</Url>
-  </o>
-  <o>
-    <Caption>大富翁全文檢索</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://www.richsearch.com/search/search.aspx?S1=%s</Url>
-  </o>
-  <o>
-    <Caption>CSDN 搜索</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://www.csdn.net/search.asp</Url>
+    <Url>https://delphi.ktop.com.tw/queryStr.php</Url>
   </o>
   <o>
     <Caption>-</Caption>
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>MSDN 線上搜索</Caption>
+    <Caption>MS Learn 線上搜索</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://social.msdn.microsoft.com/Search/zh-TW?query=%s&amp;addenglish=1</Url>
+    <Url>https://learn.microsoft.com/zh-cn/search/?terms=%s</Url>
   </o>
   <o>
     <Caption>Embarcadero 知識庫</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://edn.embarcadero.com/search?q=%s&amp;allsites=y&amp;allwords=y&amp;x=18&amp;y=9</Url>
+    <Url>https://docwiki.embarcadero.com/RADStudio/Athens/e/index.php?search=%s&title=Special%3ASearch&go=Go</Url>
   </o>
   <o>
     <Caption>-</Caption>
@@ -74,16 +49,11 @@
   <o>
     <Caption>Torry's Delphi Pages</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
-  </o>
-  <o>
-    <Caption>Delphi Super Pages</Caption>
-    <ShortCut>0</ShortCut>
-    <Url>http://dsp.href.com/</Url>
+    <Url>https://www.torry.net/quicksearchd.php?String=%s&amp;Title=Yes</Url>
   </o>
   <o>
     <Caption>SourceForge.net</Caption>
     <ShortCut>0</ShortCut>
-    <Url>http://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
+    <Url>https://sourceforge.net/search/?type_of_search=soft&amp;forum_id=0&amp;group_id=0&amp;atid=0&amp;words=%s&amp;Search=Search</Url>
   </o>
 </TCnWebSearchCollection>
