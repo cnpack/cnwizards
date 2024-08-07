@@ -71,6 +71,9 @@ const
     '</body>' + #13#10 +
     '</html>';
 
+  HTML_DIRECTORY_LIST_FMT = // 目录条目
+    '<li><p class="uc" align="left"><a href="%s" target="_content">%s</p></li>';
+
   HTML_UNIT_FMT = // 单元说明，备注
     '<table width="100%%" border="0" cellpadding="1">' + #13#10 +
     '<tr><td width=90 valign=top><p class="text"><span class="uc"><b>单元名称</b>：</td><td valign=top><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
@@ -165,7 +168,39 @@ begin
 
     try
       FindFile(Dir, '*.pas', FileCallBack);
+      FAllFile.Sort;
 
+      // 生成框架文件
+      Html := TStringList.Create;
+      try
+        Html.Add('<html><frameset cols="280,*">');
+        Html.Add('<frame src="directory.html">');
+        Html.Add(Format('<frame src="%s" name="_content">', [ChangeFileExt(FAllFile[0], '.html')]));
+        Html.SaveToFile(ExtractFileDir(FAllFile[0]) + '\index.html');
+      finally
+        Html.Free;
+      end;
+
+      // 生成目录文件
+      Html := TStringList.Create;
+      try
+        Html.Add(Format(HTML_HEAD_FMT, ['目录', '目录']));
+        Html.Add('<ul>');
+        for I := 0 to FAllFile.Count - 1 do
+        begin
+          Dir := ChangeFileExt(ExtractFileName(FAllFile[I]), '');
+          F := ChangeFileExt(FAllFile[I], '.html');
+          Html.Add(Format(HTML_DIRECTORY_LIST_FMT, [F, Dir]));
+        end;
+        Html.Add('</ul><hr>');
+        Html.Add(HTML_TAIL_FMT);
+
+        Html.SaveToFile(ExtractFileDir(FAllFile[0]) + '\directory.html');
+      finally
+        Html.Free;
+      end;
+
+      // 生成每个单元的帮助文件
       for I := 0 to FAllFile.Count - 1 do
       begin
         FreeAndNil(FDoc);
@@ -185,6 +220,9 @@ begin
           Html.Free;
         end;
       end;
+
+
+      // 生成容器文件
     finally
       Screen.Cursor := crDefault;
     end;
