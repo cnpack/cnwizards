@@ -24,8 +24,9 @@
     <ShortCut>0</ShortCut>
   </o>
   <o>
-    <Caption>-</Caption>
+    <Caption>GitHub</Caption>
     <ShortCut>0</ShortCut>
+    <Url>https://github.com/search?q=%s</Url>
   </o>
   <o>
     <Caption>MS Learn 在线搜索</Caption>

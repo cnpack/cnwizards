@@ -28,9 +28,10 @@
     <ShortCut>0</ShortCut>
     <Url>https://delphi.ktop.com.tw/queryStr.php</Url>
   </o>
-  <o>
-    <Caption>-</Caption>
+    <o>
+    <Caption>GitHub</Caption>
     <ShortCut>0</ShortCut>
+    <Url>https://github.com/search?q=%s</Url>
   </o>
   <o>
     <Caption>MS Learn 線上搜索</Caption>

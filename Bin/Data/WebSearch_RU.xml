@@ -14,6 +14,11 @@
     <ShortCut>0</ShortCut>
   </o>
   <o>
+    <Caption>GitHub</Caption>
+    <ShortCut>0</ShortCut>
+    <Url>https://github.com/search?q=%s</Url>
+  </o>
+  <o>
     <Caption>Искать в MS Learn</Caption>
     <ShortCut>0</ShortCut>
     <Url>https://learn.microsoft.com/zh-cn/search/?terms=%s</Url>
