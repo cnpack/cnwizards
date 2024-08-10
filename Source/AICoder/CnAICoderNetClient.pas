@@ -43,7 +43,7 @@ uses
   SysUtils, Classes, CnNative, CnThreadPool;
 
 type
-  TCnAIRequestType = (artExplainCode, artReviewCode);
+  TCnAIRequestType = (artRaw, artExplainCode, artReviewCode);
   {* «Î«Û¿‡–Õ}
 
   TCnAINetRequestDataObject = class;

@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
-  CnFrmAICoderOption, CnAICoderChatFrm, CnWizMultiLang;
+  CnFrmAICoderOption, CnWizMultiLang;
 
 type
   TCnAICoderConfigForm = class(TCnTranslateForm)
@@ -81,8 +81,6 @@ type
     FIdConfig: Integer;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
-    procedure ForCodeAnswer(Success: Boolean; SendId: Integer;
-      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure EnsureChatWindowVisible;
   protected
     function GetHasConfig: Boolean; override;
@@ -91,6 +89,9 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    procedure ForCodeAnswer(Success: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 
     procedure AcquireSubActions; override;
     function GetState: TWizardState; override;
@@ -111,7 +112,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizOptions, CnAICoderNetClient, CnChatBox {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox
+  {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 //==============================================================================
 // AI 辅助编码菜单专家
@@ -225,7 +227,10 @@ begin
   else if Index = FIdShowChatWindow then
   begin
     if CnAICoderChatForm = nil then
+    begin
       CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
+      CnAICoderChatForm.Wizard := Self;
+    end;
 
     CnAICoderChatForm.Visible := not CnAICoderChatForm.Visible;
   end
@@ -386,7 +391,10 @@ end;
 procedure TCnAICoderWizard.EnsureChatWindowVisible;
 begin
   if CnAICoderChatForm = nil then
+  begin
     CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
+    CnAICoderChatForm.Wizard := Self;
+  end;
 
   CnAICoderChatForm.Visible := True;
   CnAICoderChatForm.BringToFront;

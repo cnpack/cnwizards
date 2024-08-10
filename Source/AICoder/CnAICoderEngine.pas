@@ -114,10 +114,14 @@ type
     procedure InitOption;
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
+    function AskAIEngine(const Text: TBytes; Tag: TObject;
+      AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
+    {* 用户调用的与 AI 通讯的过程，传入原始通讯数据，内部会组装成请求对象扔给线程池，返回一个请求 ID
+      在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
+
     function AskAIEngineForCode(const Code: string; Tag: TObject; RequestType: TCnAIRequestType;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
-    {* 用户调用的解释代码或检查代码的过程，内部会封装请求数据组装成请求对象扔给线程池，返回一个请求 ID
-      在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
+    {* 进一步封装的用户调用的解释代码或检查代码的过程，内部将 Code 转换为 JSON 后调用 AskAIEngine}
 
     property Option: TCnAIEngineOption read FOption;
     {* 引擎配置，根据名字从配置管理器中取来的引用}
@@ -417,15 +421,15 @@ end;
 
 { TCnAIBaseEngine }
 
-function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
-  RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
+function TCnAIBaseEngine.AskAIEngine(const Text: TBytes; Tag: TObject;
+  AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
 begin
   CheckOptionPool;
   Result := 0;
 
-  if Code <> '' then
+  if Length(Text) > 0 then
   begin
     Obj := TCnAINetRequestDataObject.Create;
     Obj.URL := FOption.URL;
@@ -434,7 +438,7 @@ begin
     Obj.SendId := 10000000 + Random(100000000);
 
     // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
-    Obj.Data := ConstructRequest(RequestType, Code);
+    Obj.Data := Text;
 
     Obj.OnAnswer := AnswerCallback;
     Obj.OnResponse := OnAINetDataResponse;
@@ -442,6 +446,12 @@ begin
 
     Result := Obj.SendId;
   end;
+end;
+
+function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
+  RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
+begin
+  Result := AskAIEngine(ConstructRequest(RequestType, Code), Tag, AnswerCallback);
 end;
 
 procedure TCnAIBaseEngine.CheckOptionPool;
@@ -477,7 +487,9 @@ begin
     if RequestType = artExplainCode then
       Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
-      Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code);
+      Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artRaw then
+      Msg.AddPair('content', Code);
 
     Arr.AddValue(Msg);
 

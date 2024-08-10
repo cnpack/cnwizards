@@ -67,6 +67,8 @@ type
     procedure SetDate(const Value: TDateTime);
     procedure SetText(const Value: string);
     procedure SetColor(const Value: TColor);
+  protected
+    procedure NotifyRedraw; virtual;
   public
     constructor Create(AOwner: TCnChatItems); virtual;
     destructor Destroy; override;
@@ -445,6 +447,7 @@ begin
     FUpdateCount := 0
   else
     Dec(FUpdateCount);
+
   if FUpdateCount = 0 then
     NeedRepaint;
 end;
@@ -453,11 +456,12 @@ procedure TCnCustomChatBox.FOnClick(Sender: TObject);
 begin
   if not Focused then
     SetFocus;
+
   if (not FDragItem) and (not FScrolling) and (FSelectionMode) then
+  begin
     if FItemUnderMouse >= 0 then
-    begin
       FItems[FItemUnderMouse].Selected := not FItems[FItemUnderMouse].Selected;
-    end;
+  end;
 end;
 
 procedure TCnCustomChatBox.FOnDownButtonHide;
@@ -1219,6 +1223,14 @@ procedure TCnChatItem.SetText(const Value: string);
 begin
   FText := Value;
   FNeedCalc := True;
+  NotifyRedraw;
+end;
+
+procedure TCnChatItem.NotifyRedraw;
+begin
+  if FOwner <> nil then
+    if FOwner.Owner <> nil then
+      FOwner.Owner.NeedRepaint;
 end;
 
 { TCnChatMessage }
@@ -1246,7 +1258,7 @@ begin
       R := Rect;
       S := From;
       Canvas.Font.Size := 11;
-      Canvas.Font.Style := [];
+      Canvas.Font.Style := [fsBold];
       DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
         or DT_SINGLELINE or DT_END_ELLIPSIS, nil);
       // Canvas.TextRect(R, S, [tfLeft, tfCalcRect, tfSingleLine, tfEndEllipsis]);

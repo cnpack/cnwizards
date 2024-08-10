@@ -41,20 +41,45 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, StdCtrls, CnWizIdeDock, CnChatBox;
+  ExtCtrls, StdCtrls, CnWizIdeDock, CnChatBox, ToolWin, ComCtrls, ActnList,
+  Buttons, CnWizShareImages, CnWizOptions, CnAICoderEngine, CnAICoderWizard;
 
 type
   TCnAICoderChatForm = class(TCnIdeDockForm)
-    mmoSelf: TMemo;
-    spl1: TSplitter;
     pnlChat: TPanel;
+    tlbAICoder: TToolBar;
+    actlstAICoder: TActionList;
+    actToggleSend: TAction;
+    pnlTop: TPanel;
+    spl1: TSplitter;
+    mmoSelf: TMemo;
+    btnMsgSend: TSpeedButton;
+    actCopyCode: TAction;
+    btnToggleSend: TToolButton;
+    btnOption: TToolButton;
+    actHelp: TAction;
+    btnCopyCode: TToolButton;
+    btnHelp: TToolButton;
+    actOption: TAction;
+    btn1: TToolButton;
     procedure FormCreate(Sender: TObject);
+    procedure actToggleSendExecute(Sender: TObject);
+    procedure actHelpExecute(Sender: TObject);
+    procedure actlstAICoderUpdate(Action: TBasicAction;
+      var Handled: Boolean);
+    procedure btnMsgSendClick(Sender: TObject);
+    procedure actOptionExecute(Sender: TObject);
+    procedure mmoSelfKeyPress(Sender: TObject; var Key: Char);
   private
     FChatBox: TCnChatBox;
+    FWizard: TCnAICoderWizard;
+  protected
+    function GetHelpTopic: string; override;
   public
     procedure AddMessage(const Msg, AFrom: string; IsMe: Boolean = False);
 
     property ChatBox: TCnChatBox read FChatBox;
+    property Wizard: TCnAICoderWizard read FWizard write FWizard;
   end;
 
 var
@@ -65,6 +90,9 @@ var
 implementation
 
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
+uses
+  CnAICoderNetClient;
 
 {$R *.DFM}
 
@@ -89,6 +117,72 @@ begin
   FChatBox.Color := clWhite;
   FChatBox.Parent := pnlChat;
   FChatBox.Align := alClient;
+  FChatBox.ColorSelection := clGreen;
+  FChatBox.ScrollBarVisible := True;
+
+  WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
+end;
+
+procedure TCnAICoderChatForm.actToggleSendExecute(Sender: TObject);
+begin
+  pnlTop.Visible := not pnlTop.Visible;
+  actToggleSend.Checked := pnlTop.Visible;
+end;
+
+procedure TCnAICoderChatForm.actHelpExecute(Sender: TObject);
+begin
+  ShowFormHelp;
+end;
+
+function TCnAICoderChatForm.GetHelpTopic: string;
+begin
+  Result := 'CnAICoderWizard';
+end;
+
+procedure TCnAICoderChatForm.actlstAICoderUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+//  if Action = actCopyCode then
+//    // 选中内容里有无 ```
+//  else if Action = actSend then
+//    (Action as TAction).Enabled := mmoSelf.Lines.Text <> '';
+end;
+
+procedure TCnAICoderChatForm.btnMsgSendClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+begin
+  if Trim(mmoSelf.Lines.Text) <> '' then
+  begin
+    // 发出的消息
+    Msg := ChatBox.Items.AddMessage;
+    Msg.From := CnAIEngineManager.CurrentEngineName;
+    Msg.Text := mmoSelf.Lines.Text;
+    Msg.FromType := cmtMe;
+
+    // 回来的消息
+    Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
+    Msg.From := CnAIEngineManager.CurrentEngineName;
+    Msg.FromType := cmtYou;
+    Msg.Text := '...';
+
+    CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoSelf.Lines.Text, Msg,
+      artRaw, FWizard.ForCodeAnswer);
+    mmoSelf.Lines.Text := '';
+  end;
+end;
+
+procedure TCnAICoderChatForm.actOptionExecute(Sender: TObject);
+begin
+  if FWizard <> nil then
+    FWizard.Config;
+end;
+
+procedure TCnAICoderChatForm.mmoSelfKeyPress(Sender: TObject;
+  var Key: Char);
+begin
+  if Key = #13 then
+    btnMsgSend.Click;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
