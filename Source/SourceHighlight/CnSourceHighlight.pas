@@ -5052,9 +5052,11 @@ begin
     TThread.CreateAnonymousThread(
       procedure
       begin
-        Sleep(1200);
+        Sleep(1000);
         try
           EditControl.Invalidate;
+          Sleep(3000);
+          EditControl.Invalidate; // 重绘两次，这样无论编辑器跳变的动作出现早晚，理论上都能盖掉
         except
           ;
         end;
