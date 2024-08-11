@@ -24,7 +24,9 @@ unit CnProjectViewBaseFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：工程扩展工具窗体列表单元列表基类
 * 单元作者：Leeon (real-like@163.com); 张伟（Alan） BeyondStudio@163.com
-* 备    注：
+* 备    注：保存与加载列宽时，部分高版本的 Delphi 在 HDPI 下会出现列宽计算错误，
+*           因而用了个 WindowProc 的 Hook 拦截 ListView 的列宽改变消息才保存，
+*           但 D12 下这个消息拦截不到，因而 D12 下只能接受可能有的列宽误差。
 * 开发平台：PWin2000Pro + Delphi 5.5
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
@@ -354,6 +356,7 @@ begin
   FOldListViewWndProc(Message);
   if Message.Msg = WM_NOTIFY then
   begin
+    // 注意，似乎在 D12 下进不来，收不到列宽改变的通知
     NM := TWMNotify(Message);
     case NM.NMHdr^.code of
       HDN_ENDTRACK, HDN_BEGINTRACK, HDN_TRACK:
@@ -726,6 +729,9 @@ begin
     if FListViewWidthOldStr = '' then // 保留旧宽度供判断是否改变过
       FListViewWidthOldStr := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
     FListViewWidthStr := ReadString(aSection, csListViewWidth, '');
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Read ListView Widths %s', [FListViewWidthStr]);
+{$ENDIF}
     if FListViewWidthStr <> '' then
       SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
 {$ENDIF}
@@ -776,13 +782,19 @@ begin
     if CnIsGEDelphi11Dot3 then
     begin
       S := GetListViewWidthString2(lvList, GetFactorFromSizeEnlarge(Enlarge)); // 获取正确的宽度值
-      if FColumnWidthManuallyChanged and (S <> FListViewWidthOldStr) then // 有宽度 Bug 存在的情况下，只手工更改过且变化了才保存
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnProjectViewBaseForm.SaveSettings To Write ListView Width2 %s', [S]);
+{$ENDIF}
+      if {$IFNDEF DELPHI120_ATHENS_UP} FColumnWidthManuallyChanged and {$ENDIF}
+        (S <> FListViewWidthOldStr) then // 有宽度 Bug 存在的情况下，只手工更改过且变化了才保存
         WriteString(aSection, csListViewWidth, S);
     end
     else
     begin
       S := GetListViewWidthString(lvList, GetFactorFromSizeEnlarge(Enlarge));
-
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnProjectViewBaseFormSaveSettings To Write ListView Width %s', [S]);
+{$ENDIF}
       if CheckWidthValid then
       begin
         if S <> FListViewWidthOldStr then // 只变化了，且宽度合适，才保存
