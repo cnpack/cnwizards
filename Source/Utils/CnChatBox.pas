@@ -85,6 +85,7 @@ type
     property CalcedRect: TRect read FCalcedRect write FCalcedRect;
     property Text: string read FText write SetText;
     property Color: TColor read FColor write SetColor;
+    {* 每一条消息的颜色}
   end;
 
   TCnChatMessage = class(TCnChatItem)
@@ -177,7 +178,7 @@ type
     FMouseInScroll: Boolean;
     FMouseInScrollButton: Boolean;
     FScrollPosStart: TPoint;
-    FScrollLentgh: Integer;
+    FScrollLength: Integer;
     FScrollPos: Integer;
     FScrolling: Boolean;
     FPaintCounter: Integer;
@@ -190,7 +191,7 @@ type
     FColorMe: TColor;
     FColorInfo: TColor;
     FColorSelection: TColor;
-    FColorOpponent: TColor;
+    FColorYou: TColor;
     FColorScrollActive: TColor;
     FColorScrollInactive: TColor;
     FColorScrollButton: TColor;
@@ -213,10 +214,13 @@ type
     procedure FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure FOnMouseMoveEvent(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure FOnClick(Sender: TObject);
+{$IFDEF TCONTROL_HAS_MOUSEENTERLEAVE}
     procedure FOnMouseEnter(Sender: TObject);
+    procedure FOnMouseLeave(Sender: TObject);
+{$ENDIF}
     procedure FOnDownButtonNeed;
     procedure FOnDownButtonHide;
-    procedure FOnMouseLeave(Sender: TObject);
+
     procedure FOnMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FOnMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure SetScrollBarVisible(const Value: Boolean);
@@ -231,7 +235,7 @@ type
     procedure WMSize(var Message: TWMSize); message WM_SIZE;
     procedure SetColorInfo(const Value: TColor);
     procedure SetColorMe(const Value: TColor);
-    procedure SetColorOpponent(const Value: TColor);
+    procedure SetColorYou(const Value: TColor);
     procedure SetColorSelection(const Value: TColor);
     procedure SetColorScrollActive(const Value: TColor);
     procedure SetColorScrollButton(const Value: TColor);
@@ -268,7 +272,7 @@ type
     property OnSelectionEnd: TOnSelectionEvent read FOnSelectionEnd write SetOnSelectionEnd;
     property Color default $0020160F;
     property ColorInfo: TColor read FColorInfo write SetColorInfo default $003A2C1D;
-    property ColorOpponent: TColor read FColorOpponent write SetColorOpponent default $00322519;
+    property ColorYou: TColor read FColorYou write SetColorYou default $00322519;
     property ColorMe: TColor read FColorMe write SetColorMe default $0078522B;
     property ColorSelection: TColor read FColorSelection write SetColorSelection default $00A5702E;
     property ColorScrollInactive: TColor read FColorScrollInactive write SetColorScrollInactive default $00332A24;
@@ -305,7 +309,7 @@ type
     property OnListEnd;
 
     property ColorInfo;
-    property ColorOpponent;
+    property ColorYou;
     property ColorMe;
     property ColorSelection;
     property ColorScrollInactive;
@@ -322,6 +326,12 @@ implementation
 uses
   Math, CnGraphUtils;
 
+const
+  FONT_DEF_SIZE = 10;
+  FONT_SENDER_SIZE = 12;
+  MOUSE_WHEEL_STEP = 50;
+  DOWN_BUTTON_OFFSET = 300;
+
 { TCnCustomChatBox }
 
 procedure TCnCustomChatBox.BeginUpdate;
@@ -334,12 +344,12 @@ begin
   FOffset := Max(0, Min(FMaxOffset, FOffset));
   if not FShowingDownButton then
   begin
-    if FOffset > 300 then
+    if FOffset > DOWN_BUTTON_OFFSET then
       FOnDownButtonNeed;
   end
   else
   begin
-    if FOffset < 300 then
+    if FOffset < DOWN_BUTTON_OFFSET then
       FOnDownButtonHide;
   end;
 
@@ -373,8 +383,11 @@ begin
   OnClick := FOnClick;
   OnMouseDown := FOnMouseDown;
   OnMouseUp := FOnMouseUp;
-//  OnMouseEnter := FOnMouseEnter;
-//  OnMouseLeave := FOnMouseLeave;
+
+{$IFDEF TCONTROL_HAS_MOUSEENTERLEAVE}
+  OnMouseEnter := FOnMouseEnter;
+  OnMouseLeave := FOnMouseLeave;
+{$ENDIF}
 
   FShowDownButton := False;
 
@@ -382,12 +395,12 @@ begin
   FWasEventListEnd := False;
   FShowingDownButton := False;
   FCalcOnly := False;
-  FColorOpponent := $00322519;
+  FColorYou := $00322519;
   FColorMe := $0078522B;
   FColorInfo := $003A2C1D;
   FColorSelection := $00A5702E;
-  FColorScrollActive := $003C342E;
-  FColorScrollInactive := $00332A24;
+  FColorScrollActive := $00BCB4AE;    // 滚动条活动颜色
+  FColorScrollInactive := $00BCB4AE;  // 滚动条非活动颜色
   FColorScrollButton := $00605B56;
 
   FBorderWidth := 4;
@@ -398,7 +411,7 @@ begin
   FDragItem := False;
   FSelectionMode := False;
   FPaintCounter := 0;
-  FMouseIn := False;
+  FMouseIn := True; // 该变量控制鼠标进入时滚动条显示等，先强行设 True
   FMouseInScroll := False;
   FMouseInScrollButton := False;
   FScrollBarVisible := True;
@@ -484,8 +497,8 @@ begin
     begin
       if FMouseInScroll and not FMouseInScrollButton then
       begin
-        FScrollPos := FScrollLentgh - Y + 20;
-        FOffset := Round((FScrollPos / (FScrollLentgh / 100)) / (100 / FMaxOffset));
+        FScrollPos := FScrollLength - Y + 20;
+        FOffset := Round((FScrollPos / (FScrollLength / 100)) / (100 / FMaxOffset));
         CheckOffset;
         FScrolling := True;
         FScrollPosStart.x := X;
@@ -506,6 +519,8 @@ begin
   NeedRepaint;
 end;
 
+{$IFDEF TCONTROL_HAS_MOUSEENTERLEAVE}
+
 procedure TCnCustomChatBox.FOnMouseEnter(Sender: TObject);
 begin
   FMouseIn := True;
@@ -518,17 +533,16 @@ begin
   NeedRepaint;
 end;
 
+{$ENDIF}
+
 procedure TCnCustomChatBox.FOnMouseMoveEvent(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  {if not Focused then
-    SetFocus;  }
-
   FMousePos.x := X;
   FMousePos.y := Y;
   if FScrolling then
   begin
     FScrollPos := FScrollPos + (FScrollPosStart.Y - FMousePos.Y);
-    FOffset := Round((FScrollPos / (FScrollLentgh / 100)) / (100 / FMaxOffset));
+    FOffset := Round((FScrollPos / (FScrollLength / 100)) / (100 / FMaxOffset));
     CheckOffset;
     FScrollPosStart := FMousePos;
   end
@@ -573,14 +587,14 @@ end;
 
 procedure TCnCustomChatBox.FOnMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  FOffset := FOffset - 50;
+  FOffset := FOffset - MOUSE_WHEEL_STEP;
   CheckOffset;
   NeedRepaint;
 end;
 
 procedure TCnCustomChatBox.FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  FOffset := FOffset + 50;
+  FOffset := FOffset + MOUSE_WHEEL_STEP;
   CheckOffset;
   NeedRepaint;
 end;
@@ -666,7 +680,7 @@ begin
         CnSetRectWidth(Limit, Min(500, CnGetRectWidth(Limit)));
         TxtRect := FItems[I].CalcRect(Canvas, Limit);
 
-        Brush.Color := FColorOpponent;
+        Brush.Color := FColorYou;
 
         ItemRect := TxtRect;
         CnRectInflate(ItemRect, PaddingSize, PaddingSize);
@@ -780,10 +794,10 @@ begin
       begin
         Rect := ClientRect;
         ItemRect := Rect;
-        ItemRect.Left := ItemRect.Right - 10;
+        ItemRect.Left := ItemRect.Right - 12;  // 右侧宽 12 的区域作为滚动条
         ItemRect.Right := ItemRect.Right - 4;
         CnRectInflate(ItemRect, 0, -4);
-        //ItemRect.Inflate(0, -4);
+
         if CnRectContains(ItemRect, FMousePos) or FScrolling then
         begin
           FMouseInScroll := True;
@@ -799,19 +813,17 @@ begin
           // RoundRect(ItemRect, 6, 6);
         end;
 
-        LastRect := ItemRect;
+        LastRect := ItemRect; // ItemRect 现在是滚动条区域
         CnSetRectHeight(LastRect, 40);
-        FScrollLentgh := CnGetRectHeight(ItemRect) - CnGetRectHeight(LastRect);
-        //FOffset
-        //FMaxOffset
-        FScrollPos := Round((FScrollLentgh / 100) * ((100 / FMaxOffset) * FOffset));
+        FScrollLength := CnGetRectHeight(ItemRect) - CnGetRectHeight(LastRect);
 
+        FScrollPos := Round((FScrollLength / 100) * ((100 / FMaxOffset) * FOffset));
         CnSetRectLocation(LastRect, LastRect.Left, (ItemRect.Bottom - CnGetRectHeight(LastRect)) - FScrollPos);
         // LastRect.Location := TPoint.Create();
 
         if not FCalcOnly then
         begin
-          if CnRectContains(LastRect, FMousePos) then
+          if CnRectContains(LastRect, FMousePos) then // 鼠标光标仅仅在 LastRect 里才代表在滚动按钮里？
             FMouseInScrollButton := True;
           Brush.Color := FColorScrollButton;
           Pen.Color := Brush.Color;
@@ -821,19 +833,16 @@ begin
       end;
     end;
 
-    if NeedDrawDownButton then
+    if NeedDrawDownButton then // 画下按钮的区域
     begin
       Rect := ClientRect;
       FDownButtonRect.Left := Rect.Right - 100;
       FDownButtonRect.Top := Rect.Bottom - 100;
-      FDownButtonRect.Right := 40;
-      FDownButtonRect.Bottom := 40;
-      // FDownButtonRect := TRect.Create(TPoint.Create(, ), 40, 40);
+      FDownButtonRect.Right := FDownButtonRect.Left + 40;
+      FDownButtonRect.Bottom := FDownButtonRect.Top + 40;
+
       FillRect(FDownButtonRect);
     end;
-    {TextOut(0, 0, FOffset.ToString);
-    TextOut(0, 20, FMaxOffset.ToString);
-    TextOut(0, 40, FPaintCounter.ToString);  }
   end;
   EndPaint(Handle, lpPaint);
 end;
@@ -864,8 +873,8 @@ begin
   finally
     FCalcOnly := False;
   end;
-  if FScrollLentgh > 0 then
-    FOffset := Round((FScrollPos / (FScrollLentgh / 100)) / (100 / FMaxOffset))
+  if FScrollLength > 0 then
+    FOffset := Round((FScrollPos / (FScrollLength / 100)) / (100 / FMaxOffset))
   else
     FOffset := 0;
   CheckOffset;
@@ -915,9 +924,9 @@ begin
   FColorMe := Value;
 end;
 
-procedure TCnCustomChatBox.SetColorOpponent(const Value: TColor);
+procedure TCnCustomChatBox.SetColorYou(const Value: TColor);
 begin
-  FColorOpponent := Value;
+  FColorYou := Value;
 end;
 
 procedure TCnCustomChatBox.SetColorScrollActive(const Value: TColor);
@@ -1134,7 +1143,7 @@ begin
   begin
     R := Rect;
     S := Text;
-    Canvas.Font.Size := 8;
+    Canvas.Font.Size := FONT_DEF_SIZE;
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1164,7 +1173,7 @@ var
 begin
   R := Rect;
   S := Text;
-  Canvas.Font.Size := 8;
+  Canvas.Font.Size := FONT_DEF_SIZE;
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
@@ -1183,7 +1192,7 @@ begin
   FCalcedRect.Bottom := 0;
   FNeedCalc := True;
   FOwner := AOwner;
-  Color := clWhite;
+  Color := clBlack;
 end;
 
 destructor TCnChatItem.Destroy;
@@ -1245,7 +1254,7 @@ begin
     Result := Rect;
     R := Rect;
     S := Text;
-    Canvas.Font.Size := 8;
+    Canvas.Font.Size := FONT_DEF_SIZE;
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1257,7 +1266,7 @@ begin
     begin
       R := Rect;
       S := From;
-      Canvas.Font.Size := 11;
+      Canvas.Font.Size := FONT_SENDER_SIZE;
       Canvas.Font.Style := [fsBold];
       DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
         or DT_SINGLELINE or DT_END_ELLIPSIS, nil);
@@ -1285,7 +1294,7 @@ begin
     // 画对方名字，加粗
     S := From;
     R := Rect;
-    Canvas.Font.Size := 11;
+    Canvas.Font.Size := FONT_SENDER_SIZE;
     Canvas.Font.Style := [fsBold];
     if Selected then
       Canvas.Font.Color := FromColorSelect
@@ -1305,7 +1314,7 @@ begin
 
   // 画文字内容
   S := Text;
-  Canvas.Font.Size := 8;
+  Canvas.Font.Size := FONT_DEF_SIZE;
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
@@ -1356,7 +1365,7 @@ constructor TCnChatMessage.Create(AOwner: TCnChatItems);
 begin
   inherited;
   FShowFrom := True;
-  FromColor := $00D4D4D4;
+  FromColor := clNavy;
   FromColorSelect := clWhite;
 end;
 
@@ -1376,7 +1385,7 @@ begin
   begin
     R := Rect;
     S := Text;
-    Canvas.Font.Size := 8;
+    Canvas.Font.Size := FONT_DEF_SIZE;
     Canvas.Font.Style := [fsBold];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1403,7 +1412,7 @@ var
 begin
   R := Rect;
   S := Text;
-  Canvas.Font.Size := 8;
+  Canvas.Font.Size := FONT_DEF_SIZE;
   Canvas.Font.Style := [fsBold];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT

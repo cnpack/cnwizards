@@ -134,6 +134,8 @@ const
   AI_FILE_FMT = 'AICoderConfig%s.json';
 
 procedure TFormAITest.FormCreate(Sender: TObject);
+const
+  BK_COLOR = $71EA9A;
 begin
   FNetPool := TCnThreadPool.CreateSpecial(nil, TSendThread);
 
@@ -155,12 +157,22 @@ begin
   FChatBox.Parent := pnlChat;
   FChatBox.Align := alClient;
   FChatBox.ScrollBarVisible := True;
+  FChatBox.ShowDownButton := True;
+  FChatBox.ColorSelection := BK_COLOR;
+  FChatBox.ColorScrollButton := clRed;
+  FChatBox.ColorYou := BK_COLOR;
+  FChatBox.ColorMe := BK_COLOR;
 
   FAIChatBox := TCnChatBox.Create(Self);
   FAIChatBox.Color := clWhite;
   FAIChatBox.Parent := pnlAIChat;
   FAIChatBox.Align := alClient;
   FAIChatBox.ScrollBarVisible := True;
+  FAIChatBox.ShowDownButton := True;
+  FAIChatBox.ColorSelection := BK_COLOR;
+  FAIChatBox.ColorScrollButton := clRed;
+  FAIChatBox.ColorYou := BK_COLOR;
+  FAIChatBox.ColorMe := BK_COLOR;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);

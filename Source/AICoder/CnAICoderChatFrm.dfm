@@ -17,7 +17,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   TextHeight = 13
   object spl1: TSplitter
     Left = 0
-    Top = 122
+    Top = 137
     Width = 541
     Height = 3
     Cursor = crVSplit
@@ -25,9 +25,9 @@ object CnAICoderChatForm: TCnAICoderChatForm
   end
   object pnlChat: TPanel
     Left = 0
-    Top = 125
+    Top = 140
     Width = 541
-    Height = 547
+    Height = 532
     Align = alClient
     BevelInner = bvLowered
     BevelOuter = bvNone
@@ -79,14 +79,13 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Left = 0
     Top = 30
     Width = 541
-    Height = 92
+    Height = 107
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
-    Visible = False
     object btnMsgSend: TSpeedButton
       Left = 476
-      Top = 8
+      Top = 16
       Width = 65
       Height = 65
       Hint = '发送'
@@ -167,7 +166,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Left = 0
       Top = 0
       Width = 474
-      Height = 92
+      Height = 107
       Align = alLeft
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
@@ -180,6 +179,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Left = 48
     Top = 505
     object actToggleSend: TAction
+      Checked = True
       Hint = '切换发送框的显示'
       ImageIndex = 34
       OnExecute = actToggleSendExecute

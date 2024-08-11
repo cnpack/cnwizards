@@ -112,12 +112,16 @@ begin
 end;
 
 procedure TCnAICoderChatForm.FormCreate(Sender: TObject);
+const
+  BK_COLOR = $71EA9A;
 begin
   FChatBox := TCnChatBox.Create(Self);
   FChatBox.Color := clWhite;
   FChatBox.Parent := pnlChat;
   FChatBox.Align := alClient;
-  FChatBox.ColorSelection := clGreen;
+  FChatBox.ColorYou := BK_COLOR;
+  FChatBox.ColorMe := BK_COLOR;
+  FChatBox.ColorSelection := BK_COLOR;
   FChatBox.ScrollBarVisible := True;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
