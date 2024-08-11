@@ -649,7 +649,7 @@ begin
     else
       MainMenu.Items.Add(Menu);
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Install menu succeed');
+    CnDebugger.LogMsg('Install Menu Succeed');
   {$ENDIF}
   end;
 end;
@@ -788,11 +788,13 @@ var
   I: Integer;
 begin
   for I := 0 to WizardCount - 1 do
+  begin
     if Wizards[I] is AClass then
     begin
       Result := Wizards[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -802,11 +804,13 @@ var
   I: Integer;
 begin
   for I := 0 to WizardCount - 1 do
+  begin
     if Wizards[I].ClassNameIs(AClassName) then
     begin
       Result := Wizards[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -854,11 +858,13 @@ var
   I: Integer;
 begin
   for I := 0 to WizardCount - 1 do
+  begin
     if Wizards[I] = Wizard then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
@@ -868,11 +874,13 @@ var
   I: Integer;
 begin
   for I := 0 to WizardCount - 1 do
+  begin
     if SameText(Wizards[I].WizardName, WizardName) then
     begin
       Result := Wizards[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -909,13 +917,18 @@ begin
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
   {$IFDEF DEBUG}
-    CnDebugger.LogMsgWithType('Query IOTAWizardServices fail', cmtError);
+    CnDebugger.LogMsgWithType('Query IOTAWizardServices Fail', cmtError);
   {$ENDIF}
     Exit;
   end;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Begin installing wizards');
+  CnDebugger.LogMsg('Adjust Wizards Class Order');
+{$ENDIF}
+  AdjustCnWizardsClassOrder;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Begin Installing Wizards');
 {$ENDIF}
 
   UserBoot := False;
@@ -958,7 +971,8 @@ begin
         Wizard := nil;
       end;
 
-      if Wizard = nil then Continue;
+      if Wizard = nil then
+        Continue;
 
       if Wizard is TCnRepositoryWizard then
       begin
@@ -980,7 +994,7 @@ begin
         FWizards.Add(Wizard);
 
     {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Wizard [%d] installed: %s', [I, Wizard.ClassName]);
+      CnDebugger.LogFmt('Wizard [%d] Installed: %s', [I, Wizard.ClassName]);
     {$ENDIF}
     end;
   end;
@@ -1181,7 +1195,7 @@ end;
 procedure TCnWizardMgr.InstallMiscMenu;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('Install misc menu Entered.');
+  CnDebugger.LogEnter('Install Misc Menu Entered.');
 {$ENDIF}
   if Menu.Count > 0 then
   begin
@@ -1199,7 +1213,7 @@ begin
   Menu.Add(FWizAbout.Menu);
 {$ENDIF}
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('Install misc menu Leave successed.');
+  CnDebugger.LogLeave('Install Misc Menu Leave Successed.');
 {$ENDIF}
 end;
 
@@ -1211,7 +1225,7 @@ begin
   FWizAbout.Free;
   FSepMenu.Free;
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Free misc menu succeed');
+  CnDebugger.LogMsg('Free Misc Menu Succeed');
 {$ENDIF}
 end;
 
@@ -1223,7 +1237,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Begin installing component editors');
+  CnDebugger.LogMsg('Begin Installing Component Editors');
 {$ENDIF}
 {$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.CompEditorRegPath) do
@@ -1234,7 +1248,7 @@ begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
       {$IFDEF DEBUG}
         if Active then
-          CnDebugger.LogMsg('Component editors installed: ' + IDStr);
+          CnDebugger.LogMsg('Component Editors Installed: ' + IDStr);
       {$ENDIF}
         DoLoadSettings;
       end;
@@ -1243,7 +1257,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Installing component editors succeed');
+  CnDebugger.LogMsg('Installing Component Editors Succeed');
 {$ENDIF}
 end;
 
@@ -1255,7 +1269,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Begin installing property editors');
+  CnDebugger.LogMsg('Begin Installing Property Editors');
 {$ENDIF}
 {$IFNDEF CNWIZARDS_MINIMUM}
   with WizOptions.CreateRegIniFile(WizOptions.PropEditorRegPath) do
@@ -1266,7 +1280,7 @@ begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
       {$IFDEF DEBUG}
         if Active then
-          CnDebugger.LogMsg('Property editors installed: ' + IDStr);
+          CnDebugger.LogMsg('Property Editors Installed: ' + IDStr);
       {$ENDIF}
         DoLoadSettings;
       end;
@@ -1275,7 +1289,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Installing property editors succeed');
+  CnDebugger.LogMsg('Installing Property Editors Succeed');
 {$ENDIF}
 end;
 
