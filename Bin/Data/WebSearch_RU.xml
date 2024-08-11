@@ -26,7 +26,7 @@
   <o>
     <Caption>Embarcadero Knowledge Base Search</Caption>
     <ShortCut>0</ShortCut>
-    <Url>https://docwiki.embarcadero.com/RADStudio/Athens/e/index.php?search=%s&title=Special%3ASearch&go=Go</Url>
+    <Url>https://docwiki.embarcadero.com/RADStudio/Athens/e/index.php?search=%s&amp;title=Special%3ASearch&amp;go=Go</Url>
   </o>
   <o>
     <Caption>-</Caption>
