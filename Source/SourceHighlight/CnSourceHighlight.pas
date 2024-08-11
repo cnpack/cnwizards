@@ -5049,11 +5049,17 @@ begin
 {$IFDEF DELPHI104_SYDNEY_UP}
   if Operation = opInsert then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('EditControlNotify Insert, To Start a Thread to Repaint.');
+{$ENDIF}
     TThread.CreateAnonymousThread(
       procedure
       begin
         Sleep(1000);
         try
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('A Repaint Thread to Repaint.');
+{$ENDIF}
           EditControl.Invalidate;
           Sleep(3000);
           EditControl.Invalidate; // 重绘两次，这样无论编辑器跳变的动作出现早晚，理论上都能盖掉
