@@ -171,6 +171,9 @@ type
     function IsCSource(const FileName: string): Boolean;
     {* 判断指定文件是否 C 源文件，使用由用户设置的扩展名列表判断}
 
+    function GetDataFileName(const FileName: string): string;
+    {* 返回安装时自带的原始数据文件，无论有无用户数据文件，
+      供外界需要明确处理原始数据文件时使用，比如新版选项合并}
     function GetUserFileName(const FileName: string; IsRead: Boolean; FileNameDef:
       string = ''): string;
     {* 返回用户数据文件名，如果 UserPath 下的文件不存在，返回 DataPath 中的文件名}
@@ -703,6 +706,11 @@ begin
   end;
 end;
 
+function TCnWizOptions.GetDataFileName(const FileName: string): string;
+begin
+  Result := DataPath + FileName;
+end;
+
 function TCnWizOptions.GetUserFileName(const FileName: string; IsRead: Boolean;
   FileNameDef: string = ''): string;
 var
@@ -1002,4 +1010,5 @@ begin
 end;
 
 {$ENDIF}
+
 end.

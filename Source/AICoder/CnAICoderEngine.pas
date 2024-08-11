@@ -378,6 +378,7 @@ procedure TCnAIEngineManager.LoadFromWizOptions;
 var
   I: Integer;
   S: string;
+  OrigOption, Option: TCnAIEngineOption;
 begin
   // OptionManager 加载基本设置
   S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt, ['']), True);
@@ -389,8 +390,21 @@ begin
   begin
     S := WizOptions.GetUserFileName(Format(SCnAICoderEngineOptionFileFmt,
       [Engines[I].EngineID]), True);
-    CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
+    Option := CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
       S, Engines[I].OptionClass);
+
+    // 检查原始数据文件
+    try
+      S := WizOptions.GetDataFileName(Format(SCnAICoderEngineOptionFileFmt,
+        [Engines[I].EngineID]));
+      OrigOption := CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
+        S, Engines[I].OptionClass, False); // 注意该原始配置对象无需进行管理
+
+      // OrigOption 中的新的非空选项，要赋值给 Option 的同名属性，仅仨基本数据类型
+      OrigOption.AssignToEmpty(Option);
+    finally
+      OrigOption.Free;
+    end;
 
     Engines[I].InitOption;
   end;

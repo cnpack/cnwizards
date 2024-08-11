@@ -43,12 +43,13 @@ interface
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  SysUtils, Classes, Contnrs, CnJSON, CnNative, CnWizConsts, CnWizCompilerConst
-  {$IFNDEF TEST_APP} , CnWizMultiLang {$ENDIF};
+  SysUtils, Classes, Contnrs, TypInfo, CnJSON, CnNative, CnWizConsts,
+  CnWizCompilerConst {$IFNDEF TEST_APP} , CnWizMultiLang {$ENDIF};
 
 type
   TCnAIEngineOption = class(TPersistent)
-  {* 一个 AI 配置项基类}
+  {* 一个 AI 配置项基类，如未来要扩展基础类型的属性，只需在 published 域
+    直接添加可读写属性即可，会做好新旧配置默认值传递并且不丢失用户配置}
   private
     FURL: string;
     FApiKey: string;
@@ -68,6 +69,9 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
+
+    procedure AssignToEmpty(Dest: TCnAIEngineOption);
+    {* 目标属性非空时赋值，用于新旧版本属性合并}
 
     procedure LoadFromJSON(const JSON: AnsiString);
     {* 从 UTF8 格式的 JSON 字符串中加载一个选项实例的设置到自身}
@@ -137,8 +141,9 @@ type
     {* 保存基本设置至 UTF8 格式的 JSON 字符串中}
 
     function CreateOptionFromFile(const EngineName, FileName: string;
-      OptionClass: TCnAIEngineOptionClass = nil): TCnAIEngineOption;
-    {* 从指定文件名中用指定的 OptionClass 加载一个 Option 实例并添加到自身并作为结果返回}
+      OptionClass: TCnAIEngineOptionClass = nil; Managed: Boolean = True): TCnAIEngineOption;
+    {* 从指定文件名中用指定的 OptionClass 加载一个 Option 实例
+      如果 Managed 为 True 则添加到自身进行管理，否则仅仅作为结果返回}
     procedure SaveOptionToFile(const EngineName, FileName: string);
     {* 将指定名称的引擎对应的 Option 对象实例保存至指定文件名}
 
@@ -209,7 +214,8 @@ begin
 end;
 
 function TCnAIEngineOptionManager.CreateOptionFromFile(const EngineName,
-  FileName: string; OptionClass: TCnAIEngineOptionClass): TCnAIEngineOption;
+  FileName: string; OptionClass: TCnAIEngineOptionClass;
+  Managed: Boolean): TCnAIEngineOption;
 begin
   if OptionClass = nil then
     Result := TCnAIEngineOption.Create
@@ -231,7 +237,9 @@ begin
     Result.LoadFromJSON(TCnJSONReader.FileToJSON(FileName));
 
   Result.EngineName := EngineName;
-  AddOption(Result);
+
+  if Managed then
+    AddOption(Result);
 end;
 
 destructor TCnAIEngineOptionManager.Destroy;
@@ -448,6 +456,67 @@ begin
     Result := CnJSONConstruct(Root);
   finally
     Root.Free;
+  end;
+end;
+
+procedure TCnAIEngineOption.AssignToEmpty(Dest: TCnAIEngineOption);
+var
+  Count: Integer;
+  PropIdx: Integer;
+  PropList: PPropList;
+  PropInfo: PPropInfo;
+  AKind: TTypeKind;
+  VI: Integer;
+  VE: Extended;
+  VS: string;
+  V64: Int64;
+begin
+  Count := GetPropList(Self.ClassInfo, tkProperties - [tkArray, tkRecord,
+    tkInterface], nil);
+  if Count <=0 then
+    Exit;
+
+  GetMem(PropList, Count * SizeOf(Pointer));
+  try
+    GetPropList(Self.ClassInfo, tkProperties - [tkArray, tkRecord,
+      tkInterface], @PropList^[0]);
+
+    for PropIdx := 0 to Count - 1 do
+    begin
+      PropInfo := PropList^[PropIdx];
+      if PropInfo^.SetProc = nil then // 不能写的跳过
+        Continue;
+
+      AKind := PropInfo^.PropType^^.Kind;
+      case AKind of
+        tkInteger, tkChar, tkWChar, tkClass, tkEnumeration, tkSet:
+          begin
+            VI := GetOrdProp(Self, PropInfo);
+            if VI <> 0 then
+              SetOrdProp(Dest, PropInfo, VI);
+          end;
+        tkFloat:
+          begin
+            VE := GetFloatProp(Self, PropInfo);
+            if VE <> 0 then
+              SetFloatProp(Dest, PropInfo, VE);
+          end;
+        tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}:
+          begin
+            VS := GetStrProp(Self, PropInfo);
+            if VS <> '' then
+              SetStrProp(Dest, PropInfo, VS);
+          end;
+        tkInt64:
+          begin
+            V64 := GetInt64Prop(Self, PropInfo);
+            if V64 <> 0 then
+              SetInt64Prop(Dest, PropInfo, V64);
+          end;
+      end;
+    end;
+  finally
+    FreeMem(PropList);
   end;
 end;
 
