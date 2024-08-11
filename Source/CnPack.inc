@@ -3437,6 +3437,7 @@
   {$DEFINE SUPPORT_CLASS_VAR}            // 2006 and above Supports class var
   {$DEFINE TCONTROL_HAS_MARGINS}         // 2006 and above TControl has Margins
   {$DEFINE TCONTROL_HAS_EXPLICIT_BOUNDS} // 2006 and above TControl has Explicit Bounds
+  {$DEFINE TCONTROL_HAS_MOUSEENTERLEAVE} // 2006 and above TControl has Mouse Enter/Leave Events
   {$DEFINE OTA_CODE_TEMPLATE_API}        // 2006 and above Provides CodeTemplateAPI.
   {$DEFINE OTA_DEBUG_HAS_ERBUSY}         // 2006 下的 Evaluate 有返回值 erBusy
   {$DEFINE IDE_HAS_GUIDE_LINE}           // 2006 and above has Designer Guide Line
