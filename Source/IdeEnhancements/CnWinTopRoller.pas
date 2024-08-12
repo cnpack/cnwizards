@@ -24,7 +24,7 @@ unit CnWinTopRoller;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWinTopRoller 专家和设置窗体
 * 单元作者：CnPack 开发组 master@cnpack.org
-* 备    注：为 IDE 中的窗体的标题栏增加置顶和折叠按钮
+* 备    注：为 IDE 中的窗体的标题栏增加置顶和折叠按钮，之前不支持 BDS，后来放开
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -38,8 +38,6 @@ interface
 {$I CnWizards.inc}
 
 {$IFDEF CNWIZARDS_CNWINTOPROLLER}
-
-{$IFNDEF BDS}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -172,24 +170,19 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure LoadRules(AList: TObjectList);
     procedure SaveRules(AList: TObjectList);
   end;
-
-{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNWINTOPROLLER}
 
 implementation
 
 {$IFDEF CNWIZARDS_CNWINTOPROLLER}
-
-{$IFNDEF BDS}
 
 {$R *.DFM}
 
@@ -255,8 +248,10 @@ begin
   if AClassName <> '' then
   begin
     for I := 0 to FFilters.Count - 1 do
+    begin
       if (Filters.Items[I] as TCnWinFilterItem).WinClass = AClassName then
         Exit;
+    end;
 
     AItem := TCnWinFilterItem.Create;
     AItem.Enabled := True;
@@ -431,11 +426,13 @@ var
 begin
   Result := nil;
   for I := 0 to FRollerStatus.Count - 1 do
+  begin
     if TCnRollerFormStatusItem(FRollerStatus.Items[I]).FFormClass = AClassName then
     begin
       Result := TCnRollerFormStatusItem(FRollerStatus.Items[I]);
       Exit;
     end;
+  end;
 end;
 
 procedure TCnWinTopRoller.InitClassList;
@@ -671,6 +668,7 @@ begin
       Sl.Add(Format('%d|%s|%s', [Integer(AItem.Enabled), AItem.WinClass,
         AItem.Comment]));
     end;
+
     for I := 0 to FRollerStatus.Count - 1 do
     begin
       AStatus := TCnRollerFormStatusItem(FRollerStatus.Items[I]);
@@ -678,6 +676,7 @@ begin
         Sl.Add(Format('%s%d|%s|%d', [SCnRollerStatusPrefix, Integer(AStatus.Rolled),
           AStatus.FormClass, AStatus.OldHeight]));
     end;
+
     Sl.SaveToFile(AFileName);
   finally
     Sl.Free;
@@ -733,8 +732,10 @@ begin
     begin
       Button := Screen.CustomForms[I].FindComponent(SCnCaptionBarButtonName);
       if (Button <> nil) and (Button is TmxCaptionBarButtons) then
+      begin
         for J := 0 to (Button as TmxCaptionBarButtons).Buttons.Count - 1 do
           (Button as TmxCaptionBarButtons).Buttons[J].Animate := Value;
+      end;
     end;
   end;
 end;
@@ -798,6 +799,7 @@ begin
       ListView.Selected := ListView.Items[Index]
     else
       ListView.Selected := ListView.Items[Index - 1];
+
     if ListView.Selected = nil then
     begin
       cbbClassName.Text := '';
@@ -815,6 +817,7 @@ begin
   begin
     Self.ListView.Items.Clear;
     for I := 0 to AList.Count - 1 do
+    begin
       if AList.Items[I] is TCnWinFilterItem then
       begin
         AItem := TCnWinFilterItem(AList.Items[I]);
@@ -825,6 +828,7 @@ begin
           SubItems.Add(Trim(AItem.Comment));
         end;
       end;
+    end;
   end;
 end;
 
@@ -870,11 +874,13 @@ begin
   begin
     B := True;
     for I := 0 to ListView.Items.Count - 1 do
+    begin
       if ListView.Items[I].Caption = cbbClassName.Text then
       begin
         B := False;
         Break;
       end;
+    end;
     (Action as TAction).Enabled := B and (Trim(cbbClassName.Text) <> '');
   end;
   Handled := True;
@@ -910,8 +916,6 @@ end;
 
 initialization
   RegisterCnWizard(TCnWinTopRoller);
-
-{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNWINTOPROLLER}
 end.
