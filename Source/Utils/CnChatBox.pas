@@ -214,9 +214,12 @@ type
     procedure FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure FOnMouseMoveEvent(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure FOnClick(Sender: TObject);
-{$IFDEF TCONTROL_HAS_MOUSEENTERLEAVE}
+
     procedure FOnMouseEnter(Sender: TObject);
     procedure FOnMouseLeave(Sender: TObject);
+{$IFNDEF TCONTROL_HAS_MOUSEENTERLEAVE}
+    procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
+    procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
 {$ENDIF}
     procedure FOnDownButtonNeed;
     procedure FOnDownButtonHide;
@@ -295,7 +298,7 @@ type
   published
     property Align;
     property Color;
-    property Canvas;
+    property PopupMenu;
     property ScrollBarVisible;
     property DoubleBuffered;
     property Visible;
@@ -368,7 +371,9 @@ var
   I, J: Integer;
 begin
   inherited Create(AOwner);
-  ControlStyle := [csAcceptsControls, csCaptureMouse, csOpaque, csClickEvents, csDoubleClicks];
+  ControlStyle := [csAcceptsControls, csCaptureMouse, csOpaque,
+    csClickEvents, csDoubleClicks];
+
   Width := 200;
   Height := 400;
   Color := $0020160F;
@@ -411,7 +416,7 @@ begin
   FDragItem := False;
   FSelectionMode := False;
   FPaintCounter := 0;
-  FMouseIn := True; // 该变量控制鼠标进入时滚动条显示等，先强行设 True
+  FMouseIn := False; // 该变量控制鼠标进入时滚动条显示等
   FMouseInScroll := False;
   FMouseInScrollButton := False;
   FScrollBarVisible := True;
@@ -489,7 +494,8 @@ begin
   NeedRepaint;
 end;
 
-procedure TCnCustomChatBox.FOnMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TCnCustomChatBox.FOnMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
 begin
   if Button = mbLeft then
   begin
@@ -519,8 +525,6 @@ begin
   NeedRepaint;
 end;
 
-{$IFDEF TCONTROL_HAS_MOUSEENTERLEAVE}
-
 procedure TCnCustomChatBox.FOnMouseEnter(Sender: TObject);
 begin
   FMouseIn := True;
@@ -531,6 +535,19 @@ procedure TCnCustomChatBox.FOnMouseLeave(Sender: TObject);
 begin
   FMouseIn := False;
   NeedRepaint;
+end;
+
+{$IFNDEF TCONTROL_HAS_MOUSEENTERLEAVE}
+
+procedure TCnCustomChatBox.CMMouseEnter(var Message: TMessage);
+begin
+  inherited;
+  FOnMouseEnter(Self);
+end;
+
+procedure TCnCustomChatBox.CMMouseLeave(var Message: TMessage);
+begin
+  FOnMouseLeave(Self);
 end;
 
 {$ENDIF}
@@ -571,7 +588,8 @@ begin
   NeedRepaint;
 end;
 
-procedure TCnCustomChatBox.FOnMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TCnCustomChatBox.FOnMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
 begin
   if Button = mbLeft then
   begin
@@ -585,14 +603,16 @@ begin
   end;
 end;
 
-procedure TCnCustomChatBox.FOnMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TCnCustomChatBox.FOnMouseWheelDown(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
 begin
   FOffset := FOffset - MOUSE_WHEEL_STEP;
   CheckOffset;
   NeedRepaint;
 end;
 
-procedure TCnCustomChatBox.FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TCnCustomChatBox.FOnMouseWheelUp(Sender: TObject; Shift: TShiftState;
+  MousePos: TPoint; var Handled: Boolean);
 begin
   FOffset := FOffset + MOUSE_WHEEL_STEP;
   CheckOffset;

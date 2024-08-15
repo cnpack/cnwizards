@@ -1375,9 +1375,14 @@ procedure TCnBasePascalFormatter.FormatIdent(PreSpaceCount: Byte;
 begin
   while Scanner.Token = tokSLB do // Attribute
   begin
+    if CurrentContainElementType([pfetInlineVar]) then // inline var 里的属性不换行，留个空格
+      WriteOneSpace;
+
     FormatSingleAttribute(PreSpaceCount);
-    // if not CurrentContainElementType([pfetFormalParameters]) then // 参数列表里的属性不换行
-    Writeln;
+    if CurrentContainElementType([pfetInlineVar]) then // inline var 里的属性不换行，后面再来个空格
+      WriteOneSpace
+    else
+      Writeln;
   end;
 
   if Scanner.Token = tokAmpersand then // & 表示后面的声明使用的关键字是转义的
@@ -5316,38 +5321,45 @@ procedure TCnBasePascalFormatter.FormatInlineVarDecl(PreSpaceCount, IndentForAno
 var
   OldStoreIdent: Boolean;
 begin
-  OldStoreIdent := FStoreIdent;
+  SpecifyElementType(pfetInlineVar);
+
   try
-    // 把 var 区的内容存入标识符 Map 用来纠正大小写
-    FStoreIdent := True;
-    FormatIdentList(PreSpaceCount);
+    OldStoreIdent := FStoreIdent;
+    try
+      // 把 var 区的内容存入标识符 Map 用来纠正大小写
+      FStoreIdent := True;
+      FormatIdentList(PreSpaceCount);
+    finally
+      FStoreIdent := OldStoreIdent;
+    end;
+
+    if Scanner.Token = tokColon then // 放宽语法限制
+    begin
+      Match(tokColon);
+      FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
+    end;
+
+    if Scanner.Token = tokAssign then  // 注意 InlineVar 此处与 var 不同
+    begin
+      Match(Scanner.Token, 1, 1);
+      // var F := not A 这种，走不了 TypedConstant，得走 ConstExpr
+      if Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
+        FormatTypedConstant(0, IndentForAnonymous)
+      else
+        FormatConstExpr(0, IndentForAnonymous);
+    end
+    else if Scanner.TokenSymbolIs('ABSOLUTE') then
+    begin
+      Match(Scanner.Token);
+      FormatConstExpr; // include indent
+    end;
+
+    while Scanner.Token in DirectiveTokens do
+      FormatDirective;
+
   finally
-    FStoreIdent := OldStoreIdent;
+    RestoreElementType;
   end;
-
-  if Scanner.Token = tokColon then // 放宽语法限制
-  begin
-    Match(tokColon);
-    FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
-  end;
-
-  if Scanner.Token = tokAssign then  // 注意 InlineVar 此处与 var 不同
-  begin
-    Match(Scanner.Token, 1, 1);
-    // var F := not A 这种，走不了 TypedConstant，得走 ConstExpr
-    if Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
-      FormatTypedConstant(0, IndentForAnonymous)
-    else
-      FormatConstExpr(0, IndentForAnonymous);
-  end
-  else if Scanner.TokenSymbolIs('ABSOLUTE') then
-  begin
-    Match(Scanner.Token);
-    FormatConstExpr; // include indent
-  end;
-
-  while Scanner.Token in DirectiveTokens do
-    FormatDirective;
 end;
 
 { VarSection -> VAR | THREADVAR (VarDecl ';')... }
