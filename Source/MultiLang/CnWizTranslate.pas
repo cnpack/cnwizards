@@ -328,6 +328,11 @@ begin
   TranslateStr(SCnEditorCodeSwapName, 'SCnEditorCodeSwapName');
   TranslateStr(SCnEditorCodeSwapMenuHint, 'SCnEditorCodeSwapMenuHint');
 
+  // CnEditorEvalAlign
+  TranslateStr(SCnEditorEvalAlignMenuCaption, 'SCnEditorEvalAlignMenuCaption');
+  TranslateStr(SCnEditorEvalAlignName, 'SCnEditorEvalAlignName');
+  TranslateStr(SCnEditorEvalAlignMenuHint, 'SCnEditorEvalAlignMenuHint');
+
   // CnEditorCodeToString
   TranslateStr(SCnEditorCodeToStringMenuCaption, 'SCnEditorCodeToStringMenuCaption');
   TranslateStr(SCnEditorCodeToStringName, 'SCnEditorCodeToStringName');

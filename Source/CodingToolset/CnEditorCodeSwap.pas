@@ -69,11 +69,34 @@ type
     procedure GetEditorInfo(var Name, Author, Email: string); override;
   end;
 
+//==============================================================================
+// 赋值对齐工具类
+//==============================================================================
+
+{ TCnEditorEvalAlign }
+
+  TCnEditorEvalAlign = class(TCnEditorCodeTool)
+  private
+
+  protected
+    function ProcessText(const Text: string): string; override;
+    function GetStyle: TCnCodeToolStyle; override;
+  public
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetEditorInfo(var Name, Author, Email: string); override;
+  end;
+
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 implementation
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
 
 //==============================================================================
 // 赋值交换工具类
@@ -204,8 +227,82 @@ begin
   Email := SCnPack_ZjyEmail + ';' + SCnPack_BetaEmail;
 end;
 
+{ TCnEditorEvalAlign }
+
+function TCnEditorEvalAlign.GetCaption: string;
+begin
+  Result := SCnEditorEvalAlignMenuCaption;
+end;
+
+procedure TCnEditorEvalAlign.GetEditorInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorEvalAlignName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorEvalAlign.GetHint: string;
+begin
+  Result := SCnEditorEvalAlignMenuHint;
+end;
+
+function TCnEditorEvalAlign.GetStyle: TCnCodeToolStyle;
+begin
+  Result := csLine;
+end;
+
+function TCnEditorEvalAlign.ProcessText(const Text: string): string;
+var
+  I, P, EP: Integer;
+  Lines: TStringList;
+  L, R: string;
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.Text := Text;
+
+    EP := 0;
+    for I := 0 to Lines.Count - 1 do
+    begin
+      P := Pos(':=', Lines[I]);
+      if P > EP then
+      begin
+        EP := P;
+        if (P > 1) and (Lines[I][P - 1] <> ' ') then
+          Inc(EP);
+      end;
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnEditorEvalAlign.ProcessText. Got Eval Point at %d', [EP]);
+{$ENDIF}
+
+    // EP 是赋值号们应该对齐的位置，减 1 后也是左边字符串应该有的长度
+    if EP > 0 then
+    begin
+      for I := 0 to Lines.Count - 1 do
+      begin
+        P := Pos(':=', Lines[I]);
+        if P > 0 then // 有赋值号的，去补
+        begin
+          L := Copy(Lines[I], 1, P - 1);
+          R := Copy(Lines[I], P, MaxInt);
+          if EP - 1 - Length(L) > 0 then
+            Lines[I] := L + Spc(EP - 1 - Length(L)) + R;
+        end;
+      end;
+    end;
+
+    Result := Lines.Text;
+  finally
+    Lines.Free;
+  end;
+end;
+
 initialization
   RegisterCnCodingToolset(TCnEditorCodeSwap); // 注册工具
+  RegisterCnCodingToolset(TCnEditorEvalAlign);
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 end.

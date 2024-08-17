@@ -671,6 +671,11 @@ var
   SCnEditorCodeSwapName: string = 'Eval Swap Tool';
   SCnEditorCodeSwapMenuHint: string = 'Swap the Contents of the Evaluation Sign in Both Sides';
 
+  // CnEditorEvalAlign
+  SCnEditorEvalAlignMenuCaption: string = 'Eval &Align';
+  SCnEditorEvalAlignName: string = 'Eval Align Tool';
+  SCnEditorEvalAlignMenuHint: string = 'Align the Evaluation Signs in Lines';
+
   // CnEditorCodeToString
   SCnEditorCodeToStringMenuCaption: string = 'Convert to &String';
   SCnEditorCodeToStringName: string = 'Code to String Converter';
