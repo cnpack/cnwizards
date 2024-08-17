@@ -165,6 +165,10 @@
 		<param name="Local" value="options\otherconfig.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Evaluation Align Tool">
+		<param name="Local" value="wizards\toolset\editorevalalign.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Evaluation Swap Tool">
 		<param name="Local" value="wizards\toolset\editorcodeswap.htm">
 		</OBJECT>

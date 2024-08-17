@@ -217,6 +217,10 @@
 		<param name="Local" value="propeditor\propstring.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="赋值对齐工具">
+		<param name="Local" value="wizards\toolset\editorevalalign.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="赋值交换工具">
 		<param name="Local" value="wizards\toolset\editorcodeswap.htm">
 		</OBJECT>
