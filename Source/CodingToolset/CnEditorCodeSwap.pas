@@ -256,16 +256,22 @@ function TCnEditorEvalAlign.ProcessText(const Text: string): string;
 var
   I, P, EP: Integer;
   Lines: TStringList;
-  L, R: string;
+  EquStr, L, R: string;
 begin
   Lines := TStringList.Create;
   try
     Lines.Text := Text;
 
+    if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) or
+      IsInc(CnOtaGetCurrentSourceFile) then
+      EquStr := ':='
+    else
+      EquStr := '=';
+
     EP := 0;
     for I := 0 to Lines.Count - 1 do
     begin
-      P := Pos(':=', Lines[I]);
+      P := Pos(EquStr, Lines[I]);
       if P > EP then
       begin
         EP := P;
@@ -283,7 +289,7 @@ begin
     begin
       for I := 0 to Lines.Count - 1 do
       begin
-        P := Pos(':=', Lines[I]);
+        P := Pos(EquStr, Lines[I]);
         if P > 0 then // 有赋值号的，去补
         begin
           L := Copy(Lines[I], 1, P - 1);

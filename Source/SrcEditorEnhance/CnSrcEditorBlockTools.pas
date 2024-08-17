@@ -70,7 +70,7 @@ type
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btAICoderExplainCode, btAICoderReviewCode, btAICoderToggleChatWindow, btAICoderSetting,
-    btFormatCode, btCodeSwap, btCodeToString, btInsertColor, btInsertDateTime,
+    btFormatCode, btCodeSwap, btEvalAlign, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
@@ -957,6 +957,7 @@ begin
   FMiscMenu := AddMenuItem(Items, SCnSrcBlockMisc, nil);
   AddMenuItemWithAction(FMiscMenu, 'actCnCodeFormatterWizardFormatCurrent', btFormatCode);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorCodeSwap', btCodeSwap);
+  AddMenuItemWithAction(FMiscMenu, 'actCnEditorEvalAlign', btEvalAlign);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorCodeToString', btCodeToString);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertColor', btInsertColor);
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorInsertTime', btInsertDateTime);
