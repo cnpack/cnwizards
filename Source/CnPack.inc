@@ -3478,7 +3478,11 @@
 {$ENDIF}
 
 {$IFDEF DELPHI7_UP}
-  {$DEFINE SUPPORT_FORMAT_SETTINGS}      // Delphi 7 开始支持 FormatSettings
+  {$DEFINE SUPPORT_FORMAT_SETTINGS}       // Delphi 7 开始支持 FormatSettings
+  {$DEFINE IDE_MENUBAR_VERTICAL_POSITION_BUG}
+  // Delphi 7 及以上的 MenuBar 的竖直方向上的弹出位置计算错误，容易超出上界
+  {$DEFINE IDE_MENUBAR_VERTICAL_NOSCROLL_BUG}
+  // Delphi 7 及以上的 MenuBar 的竖直方向上数量超标时不会滚动
 {$ENDIF}
 
 {$IFDEF COMPILER6_UP}
