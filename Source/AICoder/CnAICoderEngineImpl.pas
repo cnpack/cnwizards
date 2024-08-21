@@ -49,6 +49,12 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnMistralAIAIEngine = class(TCnAIBaseEngine)
+  {* MistralAI 引擎}
+  public
+    class function EngineName: string; override;
+  end;
+
   TCnQWenAIEngine = class(TCnAIBaseEngine)
   {* 通义千问 AI 引擎}
   protected
@@ -241,8 +247,16 @@ begin
   Result := 'DeepSeek';
 end;
 
+{ TCnMistralAIAIEngine }
+
+class function TCnMistralAIAIEngine.EngineName: string;
+begin
+  Result := 'MistralAI';
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
+  RegisterAIEngine(TCnMistralAIAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);

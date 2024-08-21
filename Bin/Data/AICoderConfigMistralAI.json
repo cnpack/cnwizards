@@ -1,0 +1,9 @@
+﻿{
+    "EngineName": "MistralAI",
+    "URL": "https://api.mistral.ai/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "mistral-large-latest",
+    "ModelList": "mistral-large-latest,open-mistral-nemo,mistral-small-latest,mistral-medium-latest,codestral-latest",
+    "Temperature": 0.3,
+    "WebAddress": "https://console.mistral.ai/api-keys/"
+}
