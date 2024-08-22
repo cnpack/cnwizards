@@ -257,6 +257,7 @@ type
     procedure Paint; override;
     // procedure UpdateStyleElements; override;
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
+    procedure WMContextMenu(var Message: TWMContextMenu); message WM_CONTEXTMENU;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -298,6 +299,7 @@ type
   published
     property Align;
     property Color;
+    property Font;
     property PopupMenu;
     property ScrollBarVisible;
     property DoubleBuffered;
@@ -884,6 +886,40 @@ begin
   NeedRepaint;
 end;
 
+procedure TCnCustomChatBox.WMContextMenu(var Message: TWMContextMenu);
+var
+  Pt, Temp: TPoint;
+begin
+  if Message.Result <> 0 then Exit;
+  if csDesigning in ComponentState then Exit;
+
+  if (PopupMenu <> nil) and PopupMenu.AutoPopup then
+  begin
+    Pt := SmallPointToPoint(Message.Pos);
+    if Pt.X < 0 then
+      Temp := Pt
+    else
+    begin
+      Temp := ScreenToClient(Pt);
+      if not PtInRect(ClientRect, Temp) then
+      begin
+        inherited;
+        Exit;
+      end;
+    end;
+
+    SendCancelMode(nil);
+    PopupMenu.PopupComponent := Self;
+    if Pt.X < 0 then
+      Pt := ClientToScreen(Point(0,0));
+
+    PopupMenu.Popup(Pt.X, Pt.Y);
+    //TrackPopupMenu(PopupMenu.Items.Handle, TPM_LEFTALIGN or TPM_RIGHTBUTTON,
+    //  Pt.x, Pt.y, 0, 0, nil);
+    Message.Result := 1;
+  end;
+end;
+
 procedure TCnCustomChatBox.WMSize(var Message: TWMSize);
 begin
   FItems.NeedResize;
@@ -1163,6 +1199,8 @@ begin
   begin
     R := Rect;
     S := Text;
+    if FOwner.Owner <> nil then
+      Canvas.Font.Name := FOwner.Owner.Font.Name;
     Canvas.Font.Size := FONT_DEF_SIZE;
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
@@ -1193,6 +1231,8 @@ var
 begin
   R := Rect;
   S := Text;
+  if FOwner.Owner <> nil then
+    Canvas.Font.Name := FOwner.Owner.Font.Name;
   Canvas.Font.Size := FONT_DEF_SIZE;
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
@@ -1274,6 +1314,8 @@ begin
     Result := Rect;
     R := Rect;
     S := Text;
+    if FOwner.Owner <> nil then
+      Canvas.Font.Name := FOwner.Owner.Font.Name;
     Canvas.Font.Size := FONT_DEF_SIZE;
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
@@ -1286,6 +1328,8 @@ begin
     begin
       R := Rect;
       S := From;
+      if FOwner.Owner <> nil then
+        Canvas.Font.Name := FOwner.Owner.Font.Name;
       Canvas.Font.Size := FONT_SENDER_SIZE;
       Canvas.Font.Style := [fsBold];
       DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
@@ -1314,6 +1358,8 @@ begin
     // 画对方名字，加粗
     S := From;
     R := Rect;
+    if FOwner.Owner <> nil then
+      Canvas.Font.Name := FOwner.Owner.Font.Name;
     Canvas.Font.Size := FONT_SENDER_SIZE;
     Canvas.Font.Style := [fsBold];
     if Selected then
@@ -1334,6 +1380,8 @@ begin
 
   // 画文字内容
   S := Text;
+  if FOwner.Owner <> nil then
+    Canvas.Font.Name := FOwner.Owner.Font.Name;
   Canvas.Font.Size := FONT_DEF_SIZE;
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;

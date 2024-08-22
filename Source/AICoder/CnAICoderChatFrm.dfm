@@ -51,13 +51,8 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Top = 0
       Action = actToggleSend
     end
-    object btnCopyCode: TToolButton
-      Left = 23
-      Top = 0
-      Action = actCopyCode
-    end
     object btn1: TToolButton
-      Left = 46
+      Left = 23
       Top = 0
       Width = 8
       Caption = 'btn1'
@@ -65,12 +60,12 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Style = tbsSeparator
     end
     object btnOption: TToolButton
-      Left = 54
+      Left = 31
       Top = 0
       Action = actOption
     end
     object btnHelp: TToolButton
-      Left = 77
+      Left = 54
       Top = 0
       Action = actHelp
     end
@@ -184,8 +179,9 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 34
       OnExecute = actToggleSendExecute
     end
-    object actCopyCode: TAction
-      Hint = '复制代码'
+    object actCopy: TAction
+      Caption = '复制(&C)'
+      Hint = '复制内容'
       ImageIndex = 10
       Visible = False
     end
@@ -198,6 +194,14 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Hint = '显示帮助'
       ImageIndex = 1
       OnExecute = actHelpExecute
+    end
+  end
+  object pmChat: TPopupMenu
+    Images = dmCnSharedImages.Images
+    Left = 112
+    Top = 500
+    object N1: TMenuItem
+      Action = actCopy
     end
   end
 end

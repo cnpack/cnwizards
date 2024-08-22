@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, StdCtrls, CnWizIdeDock, CnChatBox, ToolWin, ComCtrls, ActnList,
-  Buttons, CnWizShareImages, CnWizOptions, CnAICoderEngine, CnAICoderWizard;
+  ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons,
+  CnWizIdeDock, CnChatBox, CnWizShareImages, CnWizOptions, CnAICoderEngine,
+  CnAICoderWizard, CnEditControlWrapper;
 
 type
   TCnAICoderChatForm = class(TCnIdeDockForm)
@@ -54,14 +55,15 @@ type
     spl1: TSplitter;
     mmoSelf: TMemo;
     btnMsgSend: TSpeedButton;
-    actCopyCode: TAction;
+    actCopy: TAction;
     btnToggleSend: TToolButton;
     btnOption: TToolButton;
     actHelp: TAction;
-    btnCopyCode: TToolButton;
     btnHelp: TToolButton;
     actOption: TAction;
     btn1: TToolButton;
+    pmChat: TPopupMenu;
+    N1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -75,7 +77,9 @@ type
     FWizard: TCnAICoderWizard;
   protected
     function GetHelpTopic: string; override;
+    procedure DoLanguageChanged(Sender: TObject); override;
   public
+    procedure UpdateCaption;
     procedure AddMessage(const Msg, AFrom: string; IsMe: Boolean = False);
 
     property ChatBox: TCnChatBox read FChatBox;
@@ -123,6 +127,10 @@ begin
   FChatBox.ColorMe := BK_COLOR;
   FChatBox.ColorSelection := BK_COLOR;
   FChatBox.ScrollBarVisible := True;
+  FChatBox.PopupMenu := pmChat;
+
+  FChatBox.Font := EditControlWrapper.FontBasic;
+  mmoSelf.Font := EditControlWrapper.FontBasic;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
 end;
@@ -187,6 +195,26 @@ procedure TCnAICoderChatForm.mmoSelfKeyPress(Sender: TObject;
 begin
   if Key = #13 then
     btnMsgSend.Click;
+end;
+
+procedure TCnAICoderChatForm.UpdateCaption;
+const
+  SEP = ' - ';
+var
+  S: string;
+  I: Integer;
+begin
+  S := Caption;
+  I := Pos(SEP, S);
+  if I > 0 then
+    Delete(S, I, MaxInt);
+
+  Caption := S + SEP + CnAIEngineManager.CurrentEngineName;
+end;
+
+procedure TCnAICoderChatForm.DoLanguageChanged(Sender: TObject);
+begin
+  UpdateCaption;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}

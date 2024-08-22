@@ -131,6 +131,9 @@ begin
       SaveToOptions;
 
       DoSaveSettings;
+
+      if CnAICoderChatForm <> nil then
+        CnAICoderChatForm.UpdateCaption;
     end;
     Free;
   end;
