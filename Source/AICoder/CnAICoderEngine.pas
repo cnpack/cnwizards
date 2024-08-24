@@ -394,6 +394,7 @@ begin
       S, Engines[I].OptionClass);
 
     // 检查原始数据文件
+    OrigOption := nil;
     try
       S := WizOptions.GetDataFileName(Format(SCnAICoderEngineOptionFileFmt,
         [Engines[I].EngineID]));

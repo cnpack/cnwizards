@@ -171,7 +171,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   object actlstAICoder: TActionList
     Images = dmCnSharedImages.Images
     OnUpdate = actlstAICoderUpdate
-    Left = 48
+    Left = 40
     Top = 497
     object actToggleSend: TAction
       Checked = True
@@ -195,6 +195,12 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 1
       OnExecute = actHelpExecute
     end
+    object actCopyCode: TAction
+      Caption = '复制代码(&M)'
+      Hint = '复制代码内容'
+      ImageIndex = 56
+      OnExecute = actCopyCodeExecute
+    end
   end
   object pmChat: TPopupMenu
     Images = dmCnSharedImages.Images
@@ -203,6 +209,9 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Top = 500
     object N1: TMenuItem
       Action = actCopy
+    end
+    object M1: TMenuItem
+      Action = actCopyCode
     end
   end
 end

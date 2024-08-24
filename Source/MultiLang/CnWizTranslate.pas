@@ -1492,6 +1492,7 @@ begin
   TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
   TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
   TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');
+  TranslateStr(SCnAICoderWizardErrorNoCode, 'SCnAICoderWizardErrorNoCode');
 
   // CnMatchButtonFrame
   TranslateStr(SCnMatchButtonFrameMenuStartCaption, 'SCnMatchButtonFrameMenuStartCaption');

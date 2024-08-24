@@ -1810,6 +1810,7 @@ var
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';
+  SCnAICoderWizardErrorNoCode: string = 'NO Code Found between ``` and ```';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';

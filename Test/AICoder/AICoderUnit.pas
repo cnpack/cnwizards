@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
   CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox,
-  ExtCtrls;
+  ExtCtrls, Menus;
 
 type
   TFormAITest = class(TForm)
@@ -40,6 +40,10 @@ type
     btnAddMyLongMsg: TButton;
     pnlAIChat: TPanel;
     btnReviewCode: TButton;
+    pmChat: TPopupMenu;
+    Copy1: TMenuItem;
+    pmAIChat: TPopupMenu;
+    CopyCode1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -162,6 +166,7 @@ begin
   FChatBox.ColorScrollButton := clRed;
   FChatBox.ColorYou := BK_COLOR;
   FChatBox.ColorMe := BK_COLOR;
+  FChatBox.PopupMenu := pmChat;
 
   FAIChatBox := TCnChatBox.Create(Self);
   FAIChatBox.Color := clWhite;
@@ -173,6 +178,7 @@ begin
   FAIChatBox.ColorScrollButton := clRed;
   FAIChatBox.ColorYou := BK_COLOR;
   FAIChatBox.ColorMe := BK_COLOR;
+  FAIChatBox.PopupMenu := pmAIChat;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);

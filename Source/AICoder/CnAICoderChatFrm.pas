@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons, Clipbrd,
   CnWizIdeDock, CnChatBox, CnWizShareImages, CnWizOptions, CnAICoderEngine,
-  CnAICoderWizard, CnEditControlWrapper;
+  CnAICoderWizard, CnWizConsts, CnEditControlWrapper;
 
 type
   TCnAICoderChatForm = class(TCnIdeDockForm)
@@ -64,6 +64,8 @@ type
     btn1: TToolButton;
     pmChat: TPopupMenu;
     N1: TMenuItem;
+    actCopyCode: TAction;
+    M1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -74,9 +76,11 @@ type
     procedure mmoSelfKeyPress(Sender: TObject; var Key: Char);
     procedure actCopyExecute(Sender: TObject);
     procedure pmChatPopup(Sender: TObject);
+    procedure actCopyCodeExecute(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
+    FItemUnderMouse: TCnChatItem;
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -98,7 +102,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnAICoderNetClient;
+  CnAICoderNetClient, CnCommon;
 
 {$R *.DFM}
 
@@ -220,20 +224,57 @@ begin
 end;
 
 procedure TCnAICoderChatForm.actCopyExecute(Sender: TObject);
-var
-  Item: TCnChatItem;
 begin
-  Item := FChatBox.GetItemUnderMouse;
-  if Item <> nil then
+  if FItemUnderMouse <> nil then
   begin
-    if Item is TCnChatMessage then
-      Clipboard.AsText := TCnChatMessage(Item).Text;
+    try
+      if FItemUnderMouse is TCnChatMessage then
+        Clipboard.AsText := TCnChatMessage(FItemUnderMouse).Text;
+    except
+      ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
+    end;
   end;
 end;
 
 procedure TCnAICoderChatForm.pmChatPopup(Sender: TObject);
 begin
-  actCopy.Enabled := FChatBox.GetItemUnderMouse <> nil;
+  FItemUnderMouse := FChatBox.GetItemUnderMouse;
+  actCopy.Enabled := FItemUnderMouse <> nil;
+  actCopyCode.Enabled := FItemUnderMouse <> nil;
+end;
+
+procedure TCnAICoderChatForm.actCopyCodeExecute(Sender: TObject);
+const
+  CODE_BLOCK = '```';
+var
+  S: string;
+  I1, I2: Integer;
+begin
+  if FItemUnderMouse <> nil then
+  begin
+    try
+      if FItemUnderMouse is TCnChatMessage then
+      begin
+        S := TCnChatMessage(FItemUnderMouse).Text;
+        I1 := Pos(CODE_BLOCK, S);
+        if I1 > 0 then
+        begin
+          Delete(S, 1, I1 + Length(CODE_BLOCK) - 1);
+          I2 := Pos(CODE_BLOCK, S);
+          if I2 > 0 then
+          begin
+            S := Copy(S, 1, I2 - 1);
+            Clipboard.AsText := Trim(S);
+            Exit;
+          end;
+        end;
+
+        ErrorDlg(SCnAICoderWizardErrorNoCode);
+      end;
+    except
+      ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
+    end;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
