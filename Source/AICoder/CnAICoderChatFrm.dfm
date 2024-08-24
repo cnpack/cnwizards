@@ -172,7 +172,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Images = dmCnSharedImages.Images
     OnUpdate = actlstAICoderUpdate
     Left = 48
-    Top = 505
+    Top = 497
     object actToggleSend: TAction
       Checked = True
       Hint = '切换发送框的显示'
@@ -183,7 +183,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Caption = '复制(&C)'
       Hint = '复制内容'
       ImageIndex = 10
-      Visible = False
+      OnExecute = actCopyExecute
     end
     object actOption: TAction
       Hint = '设置'
@@ -198,6 +198,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   end
   object pmChat: TPopupMenu
     Images = dmCnSharedImages.Images
+    OnPopup = pmChatPopup
     Left = 112
     Top = 500
     object N1: TMenuItem

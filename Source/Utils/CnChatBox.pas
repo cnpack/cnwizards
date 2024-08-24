@@ -25,7 +25,7 @@ unit CnChatBox;
 * 单元名称：聊天对话框实现类
 * 单元作者：CnPack 开发组
 * 备    注：该单元自开源代码 https://github.com/HemulGM/Components 改写而来
-*           增加了 D5 的支持
+*           增加了低版本尤其是 D5 的支持
 *
 * 开发平台：Win7 + Delphi 5.0
 * 兼容测试：暂无
@@ -264,6 +264,8 @@ type
     procedure BeginUpdate;
     procedure EndUpdate(Force: Boolean = False);
     procedure Reset;
+
+    function GetItemUnderMouse: TCnChatItem;
 
     property Item[Index: Integer]: TCnChatItem read GetItem write SetItem;
     property Items: TCnChatItems read FItems write SetItems;
@@ -1186,6 +1188,14 @@ end;
 procedure TCnChatItems.SetOwner(const Value: TCnCustomChatBox);
 begin
   FOwner := Value;
+end;
+
+function TCnCustomChatBox.GetItemUnderMouse: TCnChatItem;
+begin
+  if FItemUnderMouse >= 0 then
+    Result := FItems[FItemUnderMouse]
+  else
+    Result := nil;
 end;
 
 { TCnChatItem }

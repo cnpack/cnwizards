@@ -240,4 +240,18 @@ object FormAITest: TFormAITest
     Left = 424
     Top = 16
   end
+  object pmChat: TPopupMenu
+    Left = 468
+    Top = 16
+    object Copy1: TMenuItem
+      Caption = 'Copy'
+    end
+  end
+  object pmAIChat: TPopupMenu
+    Left = 512
+    Top = 16
+    object CopyCode1: TMenuItem
+      Caption = 'Copy Code'
+    end
+  end
 end

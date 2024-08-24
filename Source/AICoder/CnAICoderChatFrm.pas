@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons,
+  ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons, Clipbrd,
   CnWizIdeDock, CnChatBox, CnWizShareImages, CnWizOptions, CnAICoderEngine,
   CnAICoderWizard, CnEditControlWrapper;
 
@@ -72,6 +72,8 @@ type
     procedure btnMsgSendClick(Sender: TObject);
     procedure actOptionExecute(Sender: TObject);
     procedure mmoSelfKeyPress(Sender: TObject; var Key: Char);
+    procedure actCopyExecute(Sender: TObject);
+    procedure pmChatPopup(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -215,6 +217,23 @@ end;
 procedure TCnAICoderChatForm.DoLanguageChanged(Sender: TObject);
 begin
   UpdateCaption;
+end;
+
+procedure TCnAICoderChatForm.actCopyExecute(Sender: TObject);
+var
+  Item: TCnChatItem;
+begin
+  Item := FChatBox.GetItemUnderMouse;
+  if Item <> nil then
+  begin
+    if Item is TCnChatMessage then
+      Clipboard.AsText := TCnChatMessage(Item).Text;
+  end;
+end;
+
+procedure TCnAICoderChatForm.pmChatPopup(Sender: TObject);
+begin
+  actCopy.Enabled := FChatBox.GetItemUnderMouse <> nil;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
