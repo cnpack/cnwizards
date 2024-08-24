@@ -254,24 +254,19 @@ end;
 
 function TCnEditorEvalAlign.ProcessText(const Text: string): string;
 var
-  I, P, EP: Integer;
   Lines: TStringList;
-  EquStr, L, R: string;
-begin
-  Lines := TStringList.Create;
-  try
-    Lines.Text := Text;
+  EquStr: string;
 
-    if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) or
-      IsInc(CnOtaGetCurrentSourceFile) then
-      EquStr := ':='
-    else
-      EquStr := '=';
-
+  function ProcessLines(const Equ: string): Boolean;
+  var
+    I, P, EP: Integer;
+    L, R: string;
+  begin
+    Result := False;
     EP := 0;
     for I := 0 to Lines.Count - 1 do
     begin
-      P := Pos(EquStr, Lines[I]);
+      P := Pos(Equ, Lines[I]);
       if P > EP then
       begin
         EP := P;
@@ -281,12 +276,13 @@ begin
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnEditorEvalAlign.ProcessText. Got Eval Point at %d', [EP]);
+    CnDebugger.LogFmt('TCnEditorEvalAlign.ProcessLines. Got Eval %s Point at %d', [Equ, EP]);
 {$ENDIF}
 
     // EP 是赋值号们应该对齐的位置，减 1 后也是左边字符串应该有的长度
     if EP > 0 then
     begin
+      Result := True;
       for I := 0 to Lines.Count - 1 do
       begin
         P := Pos(EquStr, Lines[I]);
@@ -299,6 +295,21 @@ begin
         end;
       end;
     end;
+  end;
+
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.Text := Text;
+
+    if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) or
+      IsInc(CnOtaGetCurrentSourceFile) then
+    begin
+      if not ProcessLines(':=') then // 变量赋值号
+        ProcessLine('=')             // 常量赋值号
+    end
+    else
+      ProcessLine('=');              // 赋值号
 
     Result := Lines.Text;
   finally
