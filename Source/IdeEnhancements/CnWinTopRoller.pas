@@ -915,7 +915,9 @@ begin
 end;
 
 initialization
-  RegisterCnWizard(TCnWinTopRoller);
+{$IFNDEF IDE_SUPPORT_THEMING}
+  RegisterCnWizard(TCnWinTopRoller); // 主题绘制有问题，禁用
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNWINTOPROLLER}
 end.

@@ -1,6 +1,6 @@
 object CnAICoderChatForm: TCnAICoderChatForm
-  Left = 744
-  Top = 141
+  Left = 700
+  Top = 110
   Width = 549
   Height = 704
   Caption = 'AI Coder Chat'
@@ -17,15 +17,15 @@ object CnAICoderChatForm: TCnAICoderChatForm
   TextHeight = 13
   object spl1: TSplitter
     Left = 0
-    Top = 137
+    Top = 562
     Width = 541
     Height = 3
     Cursor = crVSplit
-    Align = alTop
+    Align = alBottom
   end
   object pnlChat: TPanel
     Left = 0
-    Top = 140
+    Top = 30
     Width = 541
     Height = 532
     Align = alClient
@@ -72,10 +72,10 @@ object CnAICoderChatForm: TCnAICoderChatForm
   end
   object pnlTop: TPanel
     Left = 0
-    Top = 30
+    Top = 565
     Width = 541
     Height = 107
-    Align = alTop
+    Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
     object btnMsgSend: TSpeedButton
