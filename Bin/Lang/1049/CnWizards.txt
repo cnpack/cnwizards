@@ -4024,6 +4024,7 @@ SCnAICoderWizardUserMessageReviewFmt=Пожалуйста, проведите п
 SCnAICoderWizardErrorNoEngine=Неактивный AI-двигатель или не существует опция.
 SCnAICoderWizardErrorURLFmt=Ошибка URL или пусто для AI-двигателя %s.
 SCnAICoderWizardErrorAPIKeyFmt=Ошибка API-ключа или пусто для AI-двигателя %s.
+SCnAICoderWizardErrorNoCode=Никакой код не найден между ``` и ```
 SCnMatchButtonFrameMenuStartCaption=Фильтр по началу имени
 SCnMatchButtonFrameMenuStartHint=Фильтр по началу имени
 SCnMatchButtonFrameMenuAnyCaption=Фильтр по всему имени

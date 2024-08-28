@@ -685,7 +685,7 @@ var
   SCnEditorExtractStringMenuCaption: string = 'E&xtract Strings...';
   SCnEditorExtractStringName: string = 'Extract String Tool';
   SCnEditorExtractStringMenuHint: string = 'Search and Extract Strings in Source.';
-  SCnEditorExtractStringNotFound: string = 'NO String Found in Source!';
+  SCnEditorExtractStringNotFound: string = 'No String Found in Source!';
   SCnEditorExtractStringCopiedFmt: string = '%d %s(s) Copied.';
   SCnEditorExtractStringAskReplace: string = 'Sure to Replace Strings with New Names?';
   SCnEditorExtractStringChangeName: string = 'Change Name';
@@ -1282,7 +1282,7 @@ var
   SCnCompToCodeEnvNotSupport: string = 'Only VCL Designer Supported.';
   SCnCompToCodeProcCopiedFmt: string = '%s' + #13#10 + 'Copied to Clipboard. ';
   SCnCompToCodeConvertedFmt: string = '%d Items Converted';
-  SCnChangeCompClassErrorNoSelection: string = 'NO Selection in Current Designer.';
+  SCnChangeCompClassErrorNoSelection: string = 'No Selection in Current Designer.';
   SCnChangeCompClassErrorDiffType: string = 'Selected Components Must Be the Same Type.';
   SCnChangeCompClassNewHint: string = 'Enter a New Class Name:';
   SCnChangeCompClassErrorNew: string = 'Invalid Class Name or Class Unchanged.';
@@ -1296,8 +1296,8 @@ var
   SCnPropertyCompareSelectCaptionFmt: string = 'Select %s:%s to Compare';
   SCnPropertyCompareToComponentsFmt: string = 'Compare to %s:%s';
   SCnPropertyCompareTwoComponentsFmt: string = 'Compare %s:%s with %s:%s';
-  SCnPropertyCompareNoPrevDiff: string = 'NO Previous Different Property.';
-  SCnPropertyCompareNoNextDiff: string = 'NO Next Different Property.';
+  SCnPropertyCompareNoPrevDiff: string = 'No Previous Different Property.';
+  SCnPropertyCompareNoNextDiff: string = 'No Next Different Property.';
 
   // CnPaletteEnhanceWizard
   SCnPaletteEnhanceWizardName: string = 'IDE Main Form Enhancements';
@@ -1570,7 +1570,7 @@ var
   SCnIniErrorClassName: string = 'Invalid ClassName';
   SCnIniErrorReadIni: string = 'Error Occurred when Read the INI File, Please Check It.';
   SCnIniErrorNOTSupport: string = 'Only Pascal or C++ Supported. C# and Other Formats NOT Supported.';
-  SCnIniErrorNOProject: string = 'Please Select the Language Type.' + #13#10 + 'Use Pascal? YES Means Pascal, and NO Means C++.';
+  SCnIniErrorNOProject: string = 'Please Select the Language Type.' + #13#10 + 'Use Pascal? Yes Means Pascal, and No Means C++.';
 
   // CnMemProfWizard
   SCnMemProfWizardName: string = 'CnMemProf Project';
@@ -1675,7 +1675,7 @@ var
   SCnUsesCleanerInCleanList: string = 'In Clean List';
   SCnUsesCleanerInIgnoreList: string = 'In Skipping List';
   SCnUsesCleanerCompRef: string = 'Indirectly Depend';
-  SCnUsesCleanerNotSource: string = 'NO Source Code.';
+  SCnUsesCleanerNotSource: string = 'No Source Code.';
   SCnUsesCleanerNoneResult: string = 'Nothing to Process.';
   SCnUsesCleanerReport: string = 'Clean Complete!' + #13#10 + '%d Unused Reference Units Removed from %d Units.' + #13#10#13#10 + 'Do you want to view log?';
 
@@ -1810,7 +1810,7 @@ var
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';
-  SCnAICoderWizardErrorNoCode: string = 'NO Code Found between ``` and ```';
+  SCnAICoderWizardErrorNoCode: string = 'No Code Found between ``` and ```';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';

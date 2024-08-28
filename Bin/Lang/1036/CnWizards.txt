@@ -4024,6 +4024,7 @@ SCnAICoderWizardUserMessageReviewFmt=Veuillez effectuer une revue de code pour c
 SCnAICoderWizardErrorNoEngine=Aucun moteur AI actif ou aucune option existe.
 SCnAICoderWizardErrorURLFmt=Erreur d'URL ou vide pour le moteur AI %s.
 SCnAICoderWizardErrorAPIKeyFmt=Erreur de clé API ou vide pour le moteur AI %s.
+SCnAICoderWizardErrorNoCode=Aucun code trouvé entre ``` et ```
 SCnMatchButtonFrameMenuStartCaption=Match From &Start
 SCnMatchButtonFrameMenuStartHint=Correspondance depuis le début
 SCnMatchButtonFrameMenuAnyCaption=Match &All Parts

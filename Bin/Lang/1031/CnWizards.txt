@@ -4024,6 +4024,7 @@ SCnAICoderWizardUserMessageReviewFmt=Bitte führen Sie eine Code-Überprüfung f
 SCnAICoderWizardErrorNoEngine=Kein aktives AI-Modul oder keine Option vorhanden.
 SCnAICoderWizardErrorURLFmt=URL-Fehler oder leer für AI-Modul %s.
 SCnAICoderWizardErrorAPIKeyFmt=API-Schlüsselfehler oder leer für AI-Modul %s.
+SCnAICoderWizardErrorNoCode=Kein Code gefunden zwischen ``` und ```
 SCnMatchButtonFrameMenuStartCaption=Match &Start
 SCnMatchButtonFrameMenuStartHint=Match Start
 SCnMatchButtonFrameMenuAnyCaption=Match &alle

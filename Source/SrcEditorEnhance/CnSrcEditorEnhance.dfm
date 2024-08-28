@@ -582,7 +582,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 16
           Width = 350
           Height = 17
-          Caption = 'Cut / Copy Token under Cursor when NO Selection.'
+          Caption = 'Cut / Copy Token under Cursor when No Selection.'
           TabOrder = 0
         end
         object chkSmartPaste: TCheckBox

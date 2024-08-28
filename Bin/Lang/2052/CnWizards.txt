@@ -4024,6 +4024,7 @@ SCnAICoderWizardUserMessageReviewFmt=请针对这段代码做Code Review，不�
 SCnAICoderWizardErrorNoEngine=缺少合法的 AI 引擎或选项。
 SCnAICoderWizardErrorURLFmt=AI 引擎 %s 请求地址错误。
 SCnAICoderWizardErrorAPIKeyFmt=AI 引擎 %s 的 API Key 错误或缺失。
+SCnAICoderWizardErrorNoCode=未发现位于 ``` 与 ``` 之间的代码。
 SCnMatchButtonFrameMenuStartCaption=匹配开头(&S)
 SCnMatchButtonFrameMenuStartHint=匹配字符串开头
 SCnMatchButtonFrameMenuAnyCaption=匹配所有(&A)
