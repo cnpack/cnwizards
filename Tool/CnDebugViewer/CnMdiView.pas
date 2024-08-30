@@ -51,7 +51,7 @@ type
   TCnMemoContent = (mcNone, mcMsg, mcTime);
 
   TCnMsgChild = class(TForm)
-    lvTime: TListView;
+    pnlTime: TPanel;
     splDetail: TSplitter;
     splTime: TSplitter;
     pnlTree: TPanel;
@@ -95,21 +95,19 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    procedure lvTimeData(Sender: TObject; Item: TListItem);
     procedure HeadPanelResize(Sender: TObject);
     procedure FilterChange(Sender: TObject);
     procedure cbbSearchKeyPress(Sender: TObject; var Key: Char);
-    procedure lvTimeClick(Sender: TObject);
-    procedure lvTimeEnter(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure pmTreePopup(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
     FStore: TCnMsgStore;     // 交由外部线程用来读写并通知本界面更新
-    FViewStore: TCnMsgStore; // 用来显示的，其内部Item只是引用，由FStore内容同步更新
+    FViewStore: TCnMsgStore; // 用来显示的，其内部Item只是引用，由 FStore 内容同步更新
     FProcessID: DWORD;
     FProcName: string;
     FMsgTree: TVirtualStringTree;
+    FTimeTree: TVirtualStringTree;
     FFilter: TCnDisplayFilter;
     FMemContent: TCnMemoContent;
     FSelectedIndex: Integer;
@@ -132,15 +130,29 @@ type
     procedure TreeEnter(Sender: TObject);
     procedure TreeKeyPress(Sender: TObject; var Key: Char);
 
+    procedure TimeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType; var CellText: WideString);
+    procedure TimeChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure TimeEnter(Sender: TObject);
+
     procedure InitTree;
+    procedure InitTimeTree;
     procedure InitControls;
 
     procedure UpdateToViewStore(Source, Dest: TCnMsgStore);
+    {* 将收到的消息从 FStore 同步到 FViewStore 里}
     procedure UpdateConditionsToView(Content: TCnFilterUpdates);
     procedure UpdateViewStoreToTree;
+    {* 将 FViewStore 的内容全部同步到界面 Tree 中，内部会循环调用 AddAItemToTree}
     procedure AddAItemToTree(var OldIndent: Integer; var PrevNode: PVirtualNode;
       AItem: TCnMsgItem);
+    {* 将单个消息条目添加到界面}
     procedure AddBatchItemToView(AStore: TCnMsgStore; StartIndex, EndIndex: Integer);
+    {* 来了一批消息，批量添加到 FStore，内部会循环调用 AddAItemToTree}
+    procedure UpdateTimeToTree(AStore: TCnMsgStore);
+    {* 将 AStore 里的全部计时条目同步到界面 Tree中，内部会循环调用 AddATimeToTree}
+    procedure AddATimeToTree(AItem: TCnTimeItem);
+    {* 将单个计时条目添加到界面}
     procedure RefreshTime(Sender: TObject);
 
     function GetAnEmptyBookmarkSlot: Integer;
@@ -183,6 +195,7 @@ type
     property ProcessID: DWORD read FProcessID write FProcessID;
     property ProcName: string read FProcName write FProcName;
     property MsgTree: TVirtualStringTree read FMsgTree;
+    property TimeTree: TVirtualStringTree read FTimeTree;
     property HasBookmarks: Boolean read FHasBookmarks;
     property IsResizing: Boolean read FIsResizing write FIsResizing;
     property SelectedContent: string read GetSelectedContent;
@@ -215,6 +228,7 @@ begin
 
   CnMainViewer.UpdateFormInSwitch(Self, fsAdd);
   FMsgTree := TVirtualStringTree.Create(Self);
+  FTimeTree := TVirtualStringTree.Create(Self);
   FFilter := TCnDisplayFilter.Create;
 
   InitControls;
@@ -286,24 +300,6 @@ begin
     CnMainViewer.UpdateFormInSwitch(Self, fsActiveChange);
 end;
 
-procedure TCnMsgChild.lvTimeData(Sender: TObject; Item: TListItem);
-var
-  ATimeItem: TCnTimeItem;
-begin
-  if (FStore = nil) or (Item.Index > FStore.TimeCount) then Exit;
-  ATimeItem := FStore.Times[Item.Index];
-  if ATimeItem = nil then Exit;
-  
-  Item.Caption := IntToStr(Item.Index + 1);
-  Item.SubItems.Add(IntToStr(ATimeItem.PassCount));
-  Item.SubItems.Add(Format('%f', [ATimeItem.CPUPeriod / CPUClock]));
-  Item.SubItems.Add(Format('%f', [ATimeItem.AvePeriod / CPUClock]));
-  Item.SubItems.Add(Format('%f', [ATimeItem.MaxPeriod / CPUClock]));
-  Item.SubItems.Add(Format('%f', [ATimeItem.MinPeriod / CPUClock]));
-
-  Item.SubItems.Add(ATimeItem.Tag);
-end;
-
 procedure TCnMsgChild.TreeGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: WideString);
@@ -346,7 +342,8 @@ const
 var
   I: Integer;
 begin
-  if FMsgTree = nil then Exit;
+  if FMsgTree = nil then
+    Exit;
 
   FMsgTree.Align := alClient;
   FMsgTree.DefaultNodeHeight := 16;
@@ -378,7 +375,7 @@ begin
         Width := CnViewerOptions.MsgColumnWidth; // 信息列宽
     end;
   end;
-  
+
   FMsgTree.Header.MainColumn := 1; // "输出信息" 列
   FMsgTree.Header.Columns[0].MinWidth := CnColumnsWidth[0];
   FMsgTree.Header.Options := FMsgTree.Header.Options - [hoDrag];
@@ -386,6 +383,42 @@ begin
     FMsgTree.OnColumnResize(FMsgTree.Header, I);
 
   DoTreeResize;
+end;
+
+procedure TCnMsgChild.InitTimeTree;
+const
+  CnColumnsWidth: array[0..6] of Integer = (20, 37, 64, 64, 64, 64, 40);
+var
+  I: Integer;
+begin
+  if FTimeTree = nil then
+    Exit;
+
+  FTimeTree.Align := alClient;
+  FTimeTree.DefaultNodeHeight := 16;
+  FTimeTree.LineStyle := lsDotted;
+  FTimeTree.Hint := SCnTimeHint;
+  FTimeTree.Header.Options := FTimeTree.Header.Options + [hoVisible];
+  FTimeTree.TreeOptions.SelectionOptions := FTimeTree.TreeOptions.SelectionOptions
+    + [toFullRowSelect, toMiddleClickSelect, toRightClickSelect, toMultiSelect];
+  FTimeTree.TreeOptions.PaintOptions := FTimeTree.TreeOptions.PaintOptions + [toHideFocusRect];
+  FTimeTree.TreeOptions.AutoOptions := FTimeTree.TreeOptions.AutoOptions + [toAutoExpand, toAutoScroll];
+
+  FTimeTree.OnGetText := TimeGetText;
+  FTimeTree.OnChange := TimeChange;
+  FTimeTree.OnEnter := TimeEnter;
+
+  FTimeTree.Parent := pnlTime;
+  for I := Low(SCnTimeColumnArray) to High(SCnTimeColumnArray) do
+  begin
+    with FTimeTree.Header.Columns.Add do
+    begin
+      Text := SCnTimeColumnArray[I]^;
+      Width := CnColumnsWidth[I];
+    end;
+  end;
+
+  FTimeTree.Header.Options := FTimeTree.Header.Options - [hoDrag];
 end;
 
 procedure TCnMsgChild.HeadPanelResize(Sender: TObject);
@@ -404,13 +437,13 @@ var
   APanel: TPanel;
 begin
   case Column of
-  0: APanel := pnlLabel;
-  1: APanel := pnlMsg;
-  2: APanel := pnlType;
-  3: APanel := pnlLevel;
-  4: APanel := pnlThread;
-  5: APanel := pnlTag;
-  6: APanel := nil;
+    0: APanel := pnlLabel;
+    1: APanel := pnlMsg;
+    2: APanel := pnlType;
+    3: APanel := pnlLevel;
+    4: APanel := pnlThread;
+    5: APanel := pnlTag;
+    6: APanel := nil;
   else
     APanel := nil;
   end;
@@ -437,7 +470,9 @@ begin
   cbbThread.Items.Add('*');
   cbbThread.ItemIndex := 0;
   pnlTree.OnResize := pnlTreeOnResize;
+
   InitTree;
+  InitTimeTree;
 
   for I := Low(FBookmarks) to High(FBookmarks) do
     FBookmarks[I] := CnInvalidLine;
@@ -451,8 +486,8 @@ begin
   if CnViewerOptions.DisplayFont <> nil then
   begin
     FMsgTree.Font.Assign(CnViewerOptions.DisplayFont);
+    FTimeTree.Font.Assign(CnViewerOptions.DisplayFont);
     mmoDetail.Font := CnViewerOptions.DisplayFont;
-    lvTime.Font := CnViewerOptions.DisplayFont;
   end;
 end;
 
@@ -534,12 +569,13 @@ var
   Node: PVirtualNode;
 begin
   FMsgTree.Clear;
-  if FViewStore.MsgCount = 0 then Exit;
+  if FViewStore.MsgCount = 0 then
+    Exit;
 
   OldIndent := FViewStore.Msgs[0].Indent;
   Node := FMsgTree.AddChild(nil, nil);
 
-  for I := 1 to FViewStore.MsgCount - 1 do
+  for I := 0 to FViewStore.MsgCount - 1 do
     AddAItemToTree(OldIndent, Node, FViewStore.Msgs[I]);
 end;
 
@@ -578,6 +614,24 @@ begin
   end;
 
   OldIndent := Indent;
+end;
+
+procedure TCnMsgChild.AddATimeToTree(AItem: TCnTimeItem);
+begin
+  FTimeTree.AddChild(nil, nil);
+end;
+
+procedure TCnMsgChild.UpdateTimeToTree(AStore: TCnMsgStore);
+var
+  I: Integer;
+  Node: PVirtualNode;
+begin
+  FTimeTree.Clear;
+  if AStore.TimeCount = 0 then
+    Exit;
+
+  for I := 0 to AStore.TimeCount - 1 do
+    AddATimeToTree(AStore.Times[I]);
 end;
 
 procedure TCnMsgChild.TreeChange(Sender: TBaseVirtualTree; Node: PVirtualNode);
@@ -649,6 +703,48 @@ begin
   end;
 end;
 
+
+procedure TCnMsgChild.TimeChange(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  Index: Integer;
+begin
+  if (FViewStore <> nil) and (Node <> nil) then
+  begin
+    mmoDetail.Clear;
+    mmoDetail.Text := DescriptionOfTime(Node^.AbsoluteIndex - 1);
+    FMemContent := mcTime;
+  end;
+end;
+
+procedure TCnMsgChild.TimeGetText(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+  var CellText: WideString);
+var
+  Index: Integer;
+  ATimeItem: TCnTimeItem;
+begin
+  Index := Node^.AbsoluteIndex - 1;
+  if (FStore = nil) or (Index > FStore.TimeCount) then
+    Exit;
+
+  ATimeItem := FStore.Times[Index];
+  if ATimeItem = nil then
+    Exit;
+
+  case Column of
+    0: CellText := IntToStr(Index + 1);                                  // 序号
+    1: CellText := IntToStr(ATimeItem.PassCount);                        // 次数
+    2: CellText := Format('%f', [ATimeItem.CPUPeriod / CPUClock]);       // 总时间
+    3: CellText := Format('%f', [ATimeItem.AvePeriod / CPUClock]);       // 平均时间
+    4: CellText := Format('%f', [ATimeItem.MaxPeriod / CPUClock]);       // 最大时间
+    5: CellText := Format('%f', [ATimeItem.MinPeriod / CPUClock]);       // 最小时间
+    6: CellText := ATimeItem.Tag;
+  else
+    CellText := '';
+  end;
+end;
+
 procedure TCnMsgChild.ClearStores;
 begin
   FMsgTree.Clear;
@@ -685,23 +781,15 @@ begin
     {AMsgItem.MsgCPInterval, } GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
 end;
 
-procedure TCnMsgChild.lvTimeClick(Sender: TObject);
-begin
-  if lvTime.Selected <> nil then
-  begin
-    mmoDetail.Clear;
-    mmoDetail.Text := DescriptionOfTime(lvTime.Selected.Index);
-    FMemContent := mcTime;
-  end;
-end;
-
 function TCnMsgChild.DescriptionOfTime(Index: Integer): string;
 var
   dTime, aTime, MaxTime, MinTime: Double;
 begin
   Result := '';
-  if FStore = nil then Exit;
-  //Add Sesame 2008-1-22 增加时分秒方式显示时间
+  if FStore = nil then
+    Exit;
+
+  // Add Sesame 2008-1-22 增加时分秒方式显示时间
   dTime := FStore.Times[Index].CPUPeriod / CPUClock;
   aTime := FStore.Times[Index].AvePeriod / CPUClock;
   MaxTime := FStore.Times[Index].MaxPeriod / CPUClock;
@@ -719,14 +807,10 @@ procedure TCnMsgChild.ClearTimes;
 begin
   if FStore <> nil then
     FStore.ClearTimes;
-  lvTime.Items.Clear;
+
+  FTimeTree.Clear;
   if FMemContent = mcTime then
     mmoDetail.Clear;
-end;
-
-procedure TCnMsgChild.lvTimeEnter(Sender: TObject);
-begin
-  (Sender as TListView).OnClick(Sender);
 end;
 
 procedure TCnMsgChild.TreeEnter(Sender: TObject);
@@ -738,7 +822,19 @@ begin
     Tree := Sender as TVirtualStringTree;
     if Assigned(Tree.OnChange) then
       Tree.OnChange(Tree, Tree.FocusedNode);
-  end
+  end;
+end;
+
+procedure TCnMsgChild.TimeEnter(Sender: TObject);
+var
+  Tree: TVirtualStringTree;
+begin
+  if Sender is TVirtualStringTree then
+  begin
+    Tree := Sender as TVirtualStringTree;
+    if Assigned(Tree.OnChange) then
+      Tree.OnChange(Tree, Tree.FocusedNode);
+  end;
 end;
 
 procedure TCnMsgChild.LoadFromFile(const FileName: string);
@@ -879,10 +975,9 @@ end;
 
 procedure TCnMsgChild.RefreshTime(Sender: TObject);
 begin
-  lvTime.Items.Count := (Sender as TCnMsgStore).TimeCount;
-  lvTime.Repaint;
-  if Assigned(lvTime.OnClick) then
-    lvTime.OnClick(lvTime);
+  // 刷新 TimeTree
+  UpdateTimeToTree(Sender as TCnMsgStore);
+  FTimeTree.Refresh;
 end;
 
 procedure TCnMsgChild.FindNode(const AText: string; IsDown: Boolean;
@@ -891,7 +986,8 @@ var
   I, OldPos: Integer;
   FoundNode: PVirtualNode;
 begin
-  if (AText = '') or (FStore = nil) then Exit;
+  if (AText = '') or (FStore = nil) then
+    Exit;
 
   if FMsgTree.FocusedNode <> nil then
     OldPos := FMsgTree.FocusedNode.AbsoluteIndex // 从 1 开始的
@@ -998,14 +1094,13 @@ procedure TCnMsgChild.LanguageChanged(Sender: TObject);
 var
   I, OldIndex: Integer;
 begin
-  for I := Low(SCnTreeColumnArray) to High(SCnTreeColumnArray) do
-  begin
-    with FMsgTree.Header.Columns[I] do
-    begin
-      Text := SCnTreeColumnArray[I]^;
-    end;
-  end;
   FMsgTree.Hint := SCnHintMsgTree;
+  for I := Low(SCnTreeColumnArray) to High(SCnTreeColumnArray) do
+    FMsgTree.Header.Columns[I].Text := SCnTreeColumnArray[I]^;
+
+  FTimeTree.Hint := SCnTimeHint;
+  for I := Low(SCnTimeColumnArray) to High(SCnTimeColumnArray) do
+    FTimeTree.Header.Columns[I].Text := SCnTimeColumnArray[I]^;
 
   OldIndex := cbbType.ItemIndex;
   cbbType.Items.Clear;

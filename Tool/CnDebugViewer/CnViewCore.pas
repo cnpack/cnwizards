@@ -211,6 +211,15 @@ var
   SCnTreeColumn5: string = 'Tag';
   SCnTreeColumn6: string = 'TimeStamp';
 
+  SCnTimeHint: string = 'Timing Display';
+  SCnTimeColumn0: string = '#';
+  SCnTimeColumn1: string = 'Cnt';
+  SCnTimeColumn2: string = 'Time(us)';
+  SCnTimeColumn3: string = 'Ave(us)';
+  SCnTimeColumn4: string = 'Max(us)';
+  SCnTimeColumn5: string = 'Min(us)';
+  SCnTimeColumn6: string = 'Tag';
+
   SCnMsgTypeNone:          string = '*';
   SCnMsgTypeInformation:   string = 'Information';
   SCnMsgTypeWarning:       string = 'Warning';
@@ -316,6 +325,10 @@ const
   SCnTreeColumnArray: array[0..6] of PString = (@SCnTreeColumn0,
     @SCnTreeColumn1, @SCnTreeColumn2, @SCnTreeColumn3, @SCnTreeColumn4,
     @SCnTreeColumn5, @SCnTreeColumn6);
+
+  SCnTimeColumnArray: array[0..6] of PString = (@SCnTimeColumn0,
+    @SCnTimeColumn1, @SCnTimeColumn2, @SCnTimeColumn3, @SCnTimeColumn4,
+    @SCnTimeColumn5, @SCnTimeColumn6);
 
   CnMsgTypesArray: array[0..13] of TCnMsgTypes = ( [],
     [cmtInformation], [cmtWarning], [cmtError], [cmtSeparator], [cmtEnterProc,
@@ -669,6 +682,15 @@ begin
   TranslateStr(SCnTreeColumn4, 'SCnTreeColumn4');
   TranslateStr(SCnTreeColumn5, 'SCnTreeColumn5');
   TranslateStr(SCnTreeColumn6, 'SCnTreeColumn6');
+
+  TranslateStr(SCnTimeHint, 'SCnTimeHint');
+  TranslateStr(SCnTimeColumn0, 'SCnTimeColumn0');
+  TranslateStr(SCnTimeColumn1, 'SCnTimeColumn1');
+  TranslateStr(SCnTimeColumn2, 'SCnTimeColumn2');
+  TranslateStr(SCnTimeColumn3, 'SCnTimeColumn3');
+  TranslateStr(SCnTimeColumn4, 'SCnTimeColumn4');
+  TranslateStr(SCnTimeColumn5, 'SCnTimeColumn5');
+  TranslateStr(SCnTimeColumn6, 'SCnTimeColumn6');
 
   TranslateStr(SCnMsgTypeNone, 'SCnMsgTypeNone');
   TranslateStr(SCnMsgTypeInformation, 'SCnMsgTypeInformation');

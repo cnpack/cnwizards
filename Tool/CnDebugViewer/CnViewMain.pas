@@ -616,7 +616,7 @@ begin
   else if (Action = actViewTime) then
   begin
     (Action as TCustomAction).Enabled := CurrentChild <> nil;
-    (Action as TCustomAction).Checked := (Action as TCustomAction).Enabled and CurrentChild.lvTime.Visible;
+    (Action as TCustomAction).Checked := (Action as TCustomAction).Enabled and CurrentChild.pnlTime.Visible;
   end
   else if (Action = actViewDetail) then
   begin
@@ -730,16 +730,16 @@ begin
   begin
     CurrentChild.IsResizing := True;
     try
-      CurrentChild.lvTime.Visible := not CurrentChild.lvTime.Visible;
+      CurrentChild.pnlTime.Visible := not CurrentChild.pnlTime.Visible;
       CurrentChild.splTime.Visible := not CurrentChild.splTime.Visible;
-      (Sender as TCustomAction).Checked := CurrentChild.lvTime.Visible;
+      (Sender as TCustomAction).Checked := CurrentChild.pnlTime.Visible;
       Column := CurrentChild.MsgTree.Header.MainColumn;
-      if CurrentChild.lvTime.Visible then W := 0 - CurrentChild.lvTime.Width
-      else W := CurrentChild.lvTime.Width;
+      if CurrentChild.pnlTime.Visible then W := 0 - CurrentChild.pnlTime.Width
+      else W := CurrentChild.pnlTime.Width;
 
       CurrentChild.MsgTree.Header.Columns[Column].Width :=
         CurrentChild.MsgTree.Header.Columns[Column].Width + W;
-      if CurrentChild.lvTime.Visible then
+      if CurrentChild.pnlTime.Visible then
         CurrentChild.splTime.Left := CurrentChild.MsgTree.Width;
 
       CurrentChild.pnlTree.OnResize(CurrentChild.pnlTree);
@@ -992,8 +992,8 @@ begin
           and (AChild.MsgTree.Selected[AChild.MsgTree.FocusedNode]) then
           AChild.MsgTree.OnChange(AChild.MsgTree, AChild.MsgTree.FocusedNode);
 
-        if AChild.lvTime.Focused and Assigned(AChild.lvTime.OnClick) then
-          AChild.lvTime.OnClick(AChild.lvTime);
+        if AChild.TimeTree.Focused and Assigned(AChild.TimeTree.OnChange) then
+          AChild.TimeTree.OnChange(AChild.TimeTree, nil);
       end;
     end;
   end;

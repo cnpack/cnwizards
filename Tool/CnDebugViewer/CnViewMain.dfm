@@ -21,8 +21,8 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 392
-    Width = 635
+    Top = 394
+    Width = 643
     Height = 19
     AutoHint = True
     Panels = <
@@ -42,7 +42,7 @@ object CnMainViewer: TCnMainViewer
   object tlbMain: TToolBar
     Left = 0
     Top = 0
-    Width = 635
+    Width = 643
     Height = 29
     BorderWidth = 1
     Caption = 'tlbMain'
@@ -226,8 +226,8 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 372
-    Width = 635
+    Top = 374
+    Width = 643
     Height = 20
     Align = alBottom
     BevelOuter = bvNone
@@ -235,7 +235,7 @@ object CnMainViewer: TCnMainViewer
     object tsSwitch: TCnTabSet
       Left = 0
       Top = 0
-      Width = 635
+      Width = 643
       Height = 20
       Align = alClient
       DitherBackground = False
@@ -257,8 +257,8 @@ object CnMainViewer: TCnMainViewer
   object pnlChildContainer: TPanel
     Left = 0
     Top = 29
-    Width = 635
-    Height = 343
+    Width = 643
+    Height = 345
     Align = alClient
     BevelOuter = bvNone
     Color = clAppWorkSpace
@@ -3919,8 +3919,8 @@ object CnMainViewer: TCnMainViewer
   end
   object dlgOpen: TOpenDialog
     Filter = 
-      'XML File (*.xml)|*.xml|JSON File (*.json)|*.json|CnDebug Dump File(*.cdd)' +
-        '|*.cdd|All Files (*.*)|*.*'
+      'XML File (*.xml)|*.xml|JSON File (*.json)|*.json|CnDebug Dump Fi' +
+      'le(*.cdd)|*.cdd|All Files (*.*)|*.*'
     Left = 504
     Top = 40
   end

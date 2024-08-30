@@ -37,51 +37,14 @@ object CnMsgChild: TCnMsgChild
     Height = 295
     Align = alRight
   end
-  object lvTime: TListView
+  object pnlTime: TPanel
     Left = 593
     Top = 0
     Width = 175
     Height = 295
-    Hint = 'Timing Display'
     Align = alRight
-    Columns = <
-      item
-        Caption = '#'
-        Width = 20
-      end
-      item
-        Caption = 'Cnt'
-        Width = 37
-      end
-      item
-        Caption = 'Time(us)'
-        Width = 64
-      end
-      item
-        Caption = 'Ave(us)'
-        Width = 64
-      end
-      item
-        Caption = 'Max(us)'
-        Width = 64
-      end
-      item
-        Caption = 'Min(us)'
-        Width = 64
-      end
-      item
-        Caption = 'Tag'
-        Width = 40
-      end>
-    HideSelection = False
-    OwnerData = True
-    ReadOnly = True
-    RowSelect = True
+    BevelOuter = bvNone
     TabOrder = 1
-    ViewStyle = vsReport
-    OnClick = lvTimeClick
-    OnData = lvTimeData
-    OnEnter = lvTimeEnter
   end
   object pnlTree: TPanel
     Left = 0

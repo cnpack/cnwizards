@@ -276,7 +276,7 @@ type
   TVirtualNodeStates = set of TVirtualNodeState;
 
   // States used in InitNode to indicate states a node shall initially have.
-  TVirtualNodeInitState = ( 
+  TVirtualNodeInitState = (
     ivsDisabled,
     ivsExpanded,
     ivsHasChildren,
@@ -23091,7 +23091,7 @@ begin
 
     // Check if there is initial user data and there is also enough user data space allocated.
     if Assigned(UserData) then
-      if FNodeDataSize >= 4 then
+      if FNodeDataSize >= SizeOf(Pointer) then
       begin
         NodeData := Pointer(PChar(@Result.Data) + FTotalInternalDataSize);
         NodeData^ := UserData;
