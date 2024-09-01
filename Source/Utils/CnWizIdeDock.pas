@@ -20,7 +20,7 @@
 
 {******************************************************************************}
 { Unit Note:                                                                   }
-{    This file is derived from GExperts 1.2                                    }
+{    This file is partly derived from GExperts 1.2                                    }
 {                                                                              }
 { Original author:                                                             }
 {    GExperts, Inc  http://www.gexperts.org/                                   }
@@ -33,17 +33,17 @@ unit CnWizIdeDock;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE Dock 基窗体单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：该窗体为支持 IDE 内部停靠的基窗体，移植自 GExperts
+* 备    注：该窗体为支持 IDE 内部停靠的基窗体，部分内容移植自 GExperts
 *           其原始内容受 GExperts License 的保护
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
 * 修改记录：2012.11.30
-*               不使用CnFormScaler来处理字体，改用固定的96/72进行字体尺寸计算。
+*               不使用 CnFormScaler 来处理字体，改用固定的 96/72 进行字体尺寸计算。
 *           2009.01.07
 *               加入位置保存功能，采用了一些和 CnTranslateForm 中不同的机制
 *           2004.11.19 V1.1
-*               修正因多语切换引起的Scaled=False时字体还是会Scaled的BUG (shenloqi)
+*               修正因多语切换引起的 Scaled = False 时字体还是会 Scaled 的 BUG (shenloqi)
 *           2003.02.16 V1.0
 *               从 GExperts 1.12Src 修改而来
 ================================================================================
@@ -83,6 +83,8 @@ type
   private
     FEnlarge: TCnWizSizeEnlarge;
     function GetEnlarged: Boolean;
+    function GetVisibleWithParent: Boolean;
+    procedure SetVisibleWithParent(const Value: Boolean);
   protected
     FNeedRestore: Boolean;
     FRestoreRect: TRect;
@@ -139,8 +141,13 @@ type
     property Enlarged: Boolean read GetEnlarged;
     {* 是否有缩放}
 
-    // 以下复制自 TCnTranslateForm 以实现多语
     procedure Translate; virtual;
+    {* 该实现复制自 TCnTranslateForm 以实现多语}
+
+    property VisibleWithParent: Boolean read GetVisibleWithParent write SetVisibleWithParent;
+    {* 窗体自身及 Parent 只要有 Visible 为 False 的就返回 False，全是 True 才返回 True
+      Set True 时确保自身 Visible 为 True 及其 Parent 的所有 Visible 全为 True
+      Set False 时仅自身 Visible 设为 False；该属性用于处理停靠与非停靠的情况}
   end;
 
 type
@@ -548,6 +555,46 @@ end;
 function TCnIdeDockForm.GetEnlarged: Boolean;
 begin
   Result := FEnlarge <> wseOrigin;
+end;
+
+function TCnIdeDockForm.GetVisibleWithParent: Boolean;
+var
+  C: TControl;
+begin
+  if Self = nil then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  Result := True;
+  C := Self;
+  while C <> nil do
+  begin
+    if not C.Visible then
+    begin
+      Result := False;
+      Exit;
+    end;
+    C := C.Parent;
+  end;
+end;
+
+procedure TCnIdeDockForm.SetVisibleWithParent(const Value: Boolean);
+var
+  C: TControl;
+begin
+  if Value then
+  begin
+    C := Self;
+    while C <> nil do
+    begin
+      C.Visible := True;
+      C := C.Parent;
+    end;
+  end
+  else
+    Visible := False;
 end;
 
 { TDummyPopupMenu }
