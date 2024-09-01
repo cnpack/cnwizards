@@ -82,6 +82,10 @@ type
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
     procedure EnsureChatWindowVisible;
+    {* 确保 ChatWindow 的 Visible 为 True，及其 Parent 全 Visible 为 True}
+    function GetChatWindowAllParentVisible: Boolean;
+    {* ChatWindow 及 Parent 只要有 Visible 为 False 的就返回 False
+      全是 True 才返回 True}
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -229,13 +233,10 @@ begin
     Config
   else if Index = FIdShowChatWindow then
   begin
-    if CnAICoderChatForm = nil then
-    begin
-      CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
-      CnAICoderChatForm.Wizard := Self;
-    end;
-
-    CnAICoderChatForm.Visible := not CnAICoderChatForm.Visible;
+    if GetChatWindowAllParentVisible then
+      CnAICoderChatForm.Visible := False
+    else
+      EnsureChatWindowVisible;
   end
   else
   begin
@@ -270,7 +271,7 @@ begin
   if Index = FIdConfig then
     SubActions[Index].Enabled := Active
   else if Index = FIdShowChatWindow then
-    SubActions[Index].Checked := (CnAICoderChatForm <> nil) and CnAICoderChatForm.Visible
+    SubActions[Index].Checked := GetChatWindowAllParentVisible
   else
     SubActions[Index].Enabled := Active and (CnOtaGetCurrentSelection <> '');
 end;
@@ -392,6 +393,8 @@ begin
 end;
 
 procedure TCnAICoderWizard.EnsureChatWindowVisible;
+var
+  C: TControl;
 begin
   if CnAICoderChatForm = nil then
   begin
@@ -401,6 +404,36 @@ begin
 
   CnAICoderChatForm.Visible := True;
   CnAICoderChatForm.BringToFront;
+
+  C := CnAICoderChatForm.Parent;
+  while C <> nil do
+  begin
+    C.Visible := True;
+    C := C.Parent;
+  end;
+end;
+
+function TCnAICoderWizard.GetChatWindowAllParentVisible: Boolean;
+var
+  C: TControl;
+begin
+  if CnAICoderChatForm = nil then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  Result := True;
+  C := CnAICoderChatForm;
+  while C <> nil do
+  begin
+    if not C.Visible then
+    begin
+      Result := False;
+      Exit;
+    end;
+    C := C.Parent;
+  end;
 end;
 
 procedure TCnAICoderConfigForm.cbbActiveEngineChange(Sender: TObject);
