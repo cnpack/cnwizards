@@ -3,7 +3,6 @@
   Copyright (c) 2001-2003 Juancarlo Anez, Caracas, Venezuela.
   All rights reserved.
 
-
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -22,6 +21,8 @@
 
 This is the Want script for building CnWizards.
 See http://www.suigeneris.org/want/ for details.
+
+注意：本文件不能有 BOM，否则 NSIS 不认！
 -->
 <project name="cnwizards"
          basedir="../"
@@ -231,9 +232,9 @@ Usage: want [target-name] [-Dname=value]
     cnwizsetup - Compile CnWizards Setup.
     cnfixstart - Compile CnWizards Fix Starting-Up Tool
     tools      - Compile Tools (CnDfm6To5, CnWizSetup, etc.).
-    help_chs   - Compile Chinese chm help (GB2312).
-    help_cht   - Compile Chinese chm help (BIG5).
-    help_enu   - Compile English chm help.
+    help_chs   - Compile Simplified Chinese CHM help (GB18030/GB2312).
+    help_cht   - Compile Traditional Chinese CHM help (BIG5).
+    help_enu   - Compile English CHM help.
     makehelp   - Compile all chm help files.
     makeinst   - Build CnWizards Installer.
     all        - All above tasks except gitpull.
@@ -1485,7 +1486,7 @@ Usage: want [target-name] [-Dname=value]
   <target name="makehelp" depends="-prepare,help_chs,help_cht,help_enu" description="Compile all chm help files." >
   </target>
 
-  <target name="help_chs" depends="-prepare" description="Compile Chinese chm help (GB2312)." >
+  <target name="help_chs" depends="-prepare" description="Compile Simplified Chinese CHM help (GB18030/GB2312)." >
     <exec basedir="${help}/CnWizards_CHS" errorlevel="1" defaultfilters="true"
           executable="${ProgramFiles}\HTML Help Workshop\hhc">
       <arg value="CnWizards.hhp" />
@@ -1495,7 +1496,7 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
-  <target name="help_cht" depends="-prepare" description="Compile Chinese chm help (BIG5)." >
+  <target name="help_cht" depends="-prepare" description="Compile Traditional Chinese CHM help (BIG5)." >
     <exec basedir="${help}/CnWizards_CHT" errorlevel="1" defaultfilters="true"
           executable="${ProgramFiles}\HTML Help Workshop\hhc">
       <arg value="CnWizards.hhp" />
@@ -1505,7 +1506,7 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
-  <target name="help_enu" depends="-prepare" description="Compile English chm help." >
+  <target name="help_enu" depends="-prepare" description="Compile English CHM help." >
     <exec basedir="${help}/CnWizards_ENU" errorlevel="1" defaultfilters="true"
           executable="${ProgramFiles}\HTML Help Workshop\hhc">
       <arg value="CnWizards.hhp" />
