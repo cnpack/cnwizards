@@ -178,7 +178,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
       Height = 99
       Align = alBottom
       Constraints.MinHeight = 30
-      Font.Charset = GB2312_CHARSET
+      Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Tahoma'

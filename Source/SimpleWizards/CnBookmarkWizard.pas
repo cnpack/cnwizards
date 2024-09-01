@@ -62,7 +62,7 @@ type
 
   TCnBookmarkWizard = class;
 
-  TCnEditorObj = class
+  TCnBookmarkEditorObj = class
   public
     FileName: string;
     FList: TObjectList;
@@ -71,11 +71,11 @@ type
   end;
 
   TCnBookmarkObj = class
-    Parent: TCnEditorObj;
+    Parent: TCnBookmarkEditorObj;
     BookmarkID: Integer;
     Pos: TOTACharPos;
     Line: string;
-    constructor Create(AParent: TCnEditorObj);
+    constructor Create(AParent: TCnBookmarkEditorObj);
   end;
 
   TCnBookmarkForm = class(TCnIdeDockForm)
@@ -595,13 +595,13 @@ end;
 
 { TCnEditorObj }
 
-constructor TCnEditorObj.Create;
+constructor TCnBookmarkEditorObj.Create;
 begin
   inherited Create;
   FList := TObjectList.Create;
 end;
 
-destructor TCnEditorObj.Destroy;
+destructor TCnBookmarkEditorObj.Destroy;
 begin
   FList.Free;
   inherited;
@@ -609,7 +609,7 @@ end;
 
 { TCnBookmarkObj }
 
-constructor TCnBookmarkObj.Create(AParent: TCnEditorObj);
+constructor TCnBookmarkObj.Create(AParent: TCnBookmarkEditorObj);
 begin
   inherited Create;
   Parent := AParent;
@@ -665,7 +665,7 @@ end;
 
 function DoSort(Item1, Item2: Pointer): Integer;
 begin
-  Result := CompareText(TCnEditorObj(Item1).FileName, TCnEditorObj(Item2).FileName);
+  Result := CompareText(TCnBookmarkEditorObj(Item1).FileName, TCnBookmarkEditorObj(Item2).FileName);
 end;
 
 procedure TCnBookmarkForm.SortList(AList: TObjectList);
@@ -686,7 +686,7 @@ end;
 
 function TCnBookmarkForm.UpdateBookmarkList: Boolean;
 var
-  EditorObj: TCnEditorObj;
+  EditorObj: TCnBookmarkEditorObj;
   BkObj: TCnBookmarkObj;
   I, J, K: Integer;
   ModuleSvcs: IOTAModuleServices;
@@ -698,7 +698,7 @@ var
   function SameEditorList(List1, List2: TObjectList): Boolean;
   var
     I, J: Integer;
-    Edt1, Edt2: TCnEditorObj;
+    Edt1, Edt2: TCnBookmarkEditorObj;
     Bk1, Bk2: TCnBookmarkObj;
   begin
     if List1.Count <> List2.Count then
@@ -709,8 +709,8 @@ var
 
     for I := 0 to List1.Count - 1 do
     begin
-      Edt1 := TCnEditorObj(List1[I]);
-      Edt2 := TCnEditorObj(List2[I]);
+      Edt1 := TCnBookmarkEditorObj(List1[I]);
+      Edt2 := TCnBookmarkEditorObj(List2[I]);
       if not SameText(Edt1.FileName, Edt2.FileName) or
         (Edt1.FList.Count <> Edt2.FList.Count) then
       begin
@@ -757,7 +757,7 @@ begin
                 begin
                   if EditorObj = nil then
                   begin
-                    EditorObj := TCnEditorObj.Create;
+                    EditorObj := TCnBookmarkEditorObj.Create;
                     EditorObj.FileName := Buffer.FileName;
                     NewList.Add(EditorObj);
                   end;
@@ -791,7 +791,7 @@ end;
 
 procedure TCnBookmarkForm.UpdateComboBox;
 var
-  Editor: TCnEditorObj;
+  Editor: TCnBookmarkEditorObj;
   I, Idx: Integer;
 begin
   if FUpdateCount > 0 then
@@ -809,7 +809,7 @@ begin
 
     for I := 0 to FList.Count - 1 do
     begin
-      Editor := TCnEditorObj(FList[I]);
+      Editor := TCnBookmarkEditorObj(FList[I]);
       cbbUnit.Items.Add(_CnExtractFileName(Editor.FileName));
       if not FSavedAllUnit and not FSavedCurrentUnit and (CompareText(Editor.FileName, FSavedFileName) = 0) then
         Idx := I + 2; // 前面有两项
@@ -825,10 +825,10 @@ end;
 procedure TCnBookmarkForm.UpdateListView;
 var
   I: Integer;
-  Editor: TCnEditorObj;
+  Editor: TCnBookmarkEditorObj;
   NewSel: TListItem;
 
-  procedure AddBookmarksFromEditor(AEditor: TCnEditorObj);
+  procedure AddBookmarksFromEditor(AEditor: TCnBookmarkEditorObj);
   var
     I: Integer;
     BkObj: TCnBookmarkObj;
@@ -867,17 +867,17 @@ begin
     if cbbUnit.ItemIndex <= 0 then
     begin
       for I := 0 to FList.Count - 1 do
-        AddBookmarksFromEditor(TCnEditorObj(FList[I]));
+        AddBookmarksFromEditor(TCnBookmarkEditorObj(FList[I]));
     end
     else if cbbUnit.ItemIndex = 1 then
     begin
       for I := 0 to FList.Count - 1 do
-        if TCnEditorObj(FList[I]).FileName = FWizard.FCurrentSource then
-          AddBookmarksFromEditor(TCnEditorObj(FList[I]));
+        if TCnBookmarkEditorObj(FList[I]).FileName = FWizard.FCurrentSource then
+          AddBookmarksFromEditor(TCnBookmarkEditorObj(FList[I]));
     end
     else
     begin
-      Editor := TCnEditorObj(FList[cbbUnit.ItemIndex - 2]);
+      Editor := TCnBookmarkEditorObj(FList[cbbUnit.ItemIndex - 2]);
       AddBookmarksFromEditor(Editor);
     end;
   finally
@@ -902,7 +902,7 @@ begin
   else if cbbUnit.ItemIndex = 1 then
     StatusBar.SimpleText := FWizard.FCurrentSource
   else
-    StatusBar.SimpleText := TCnEditorObj(FList[cbbUnit.ItemIndex
+    StatusBar.SimpleText := TCnBookmarkEditorObj(FList[cbbUnit.ItemIndex
       - 2]).FileName;
 end;
 
