@@ -39,7 +39,6 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Width = 541
     Height = 30
     BorderWidth = 1
-    Caption = 'tlbAICoder'
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     Flat = True
     Images = dmCnSharedImages.Images
@@ -55,7 +54,6 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Left = 23
       Top = 0
       Width = 8
-      Caption = 'btn1'
       ImageIndex = 2
       Style = tbsSeparator
     end
@@ -83,7 +81,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Top = 16
       Width = 65
       Height = 65
-      Hint = '发送'
+      Hint = 'Enter to Send, Ctrl+Enter to Make a New Line'
       Anchors = [akTop, akRight]
       Flat = True
       Glyph.Data = {
@@ -155,6 +153,8 @@ object CnAICoderChatForm: TCnAICoderChatForm
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      ParentShowHint = False
+      ShowHint = True
       OnClick = btnMsgSendClick
     end
     object mmoSelf: TMemo
@@ -174,32 +174,35 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Left = 40
     Top = 497
     object actToggleSend: TAction
+      Caption = '&Toggle Send Area'
       Checked = True
-      Hint = '切换发送框的显示'
+      Hint = 'Toggle Send Area'
       ImageIndex = 34
       OnExecute = actToggleSendExecute
     end
     object actCopy: TAction
-      Caption = '复制(&C)'
-      Hint = '复制内容'
+      Caption = '&Copy'
+      Hint = 'Copy Chat Content'
       ImageIndex = 10
       OnExecute = actCopyExecute
     end
+    object actCopyCode: TAction
+      Caption = 'Copy Co&de'
+      Hint = 'Copy Code Content between ``` and ```'
+      ImageIndex = 56
+      OnExecute = actCopyCodeExecute
+    end
     object actOption: TAction
-      Hint = '设置'
+      Caption = '&Options...'
+      Hint = 'Display Options'
       ImageIndex = 2
       OnExecute = actOptionExecute
     end
     object actHelp: TAction
-      Hint = '显示帮助'
+      Caption = '&Help'
+      Hint = 'Display Help'
       ImageIndex = 1
       OnExecute = actHelpExecute
-    end
-    object actCopyCode: TAction
-      Caption = '复制代码(&M)'
-      Hint = '复制代码内容'
-      ImageIndex = 56
-      OnExecute = actCopyCodeExecute
     end
   end
   object pmChat: TPopupMenu
