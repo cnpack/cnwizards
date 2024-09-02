@@ -22,15 +22,15 @@
 <p class="text" align="left"> 該嚮導可以根據一現成的 INI 文件生成一讀寫此 INI 文件的單元，目前支持 Pascal 和 C++。執行此嚮導後，顯示的窗體如圖所示：</p>
 <p align="center"> <img src="inifilerform.png"></p>
 <ul>
-  <li> 
+  <li>
     <p class="text"><b>INI 文件</b>：打開一個現成的 INI 文件，此項必須選擇一個存在的文件。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>常量前綴</b>：INI 讀寫單元中會生成一系列常量字符串來表示該 INI 文件中的 Section 和 
       Names 等。Section 常量的命名採用「常量前綴 + Section 名稱」的方式，各個 Section 中的 Name 的命名採用「常量前綴 
       + Name 所在的 Section 名稱 + Name 名稱」的方式，本項即用來設置此常量前綴，默認為「csIni」。</p>
   </li>
-  <li> 
+  <li>
     <p class="text"><b>類名</b>：INI 讀寫單元中會生成一個類和此類的實例作為讀寫 INI 文件的對象，此項即用來設置此類的類名，無需輸入類名前綴的 
       T，默認值是「IniOptions」。</p>
   </li>
