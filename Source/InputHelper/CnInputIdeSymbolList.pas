@@ -556,8 +556,14 @@ var
           EditView.CursorPos.Col - 1, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
-        while not FAsyncResultGot and (GetTickCount - Tick < 1000) do // 得异步等待
-          Application.ProcessMessages;
+        try
+          while not FAsyncResultGot and (GetTickCount - Tick < 1000) do // 得异步等待
+            Application.ProcessMessages;
+        except
+{$IFDEF DEBUG}
+          CnDebugger.LogError('Async Result Exception when Waiting.');
+{$ENDIF}
+        end;
 
 {$IFDEF DEBUG}
         if not FAsyncResultGot then
