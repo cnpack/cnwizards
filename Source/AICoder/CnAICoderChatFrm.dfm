@@ -62,13 +62,18 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 2
       Style = tbsSeparator
     end
-    object btnOption: TToolButton
+    object btnFont: TToolButton
       Left = 54
+      Top = 0
+      Action = actFont
+    end
+    object btnOption: TToolButton
+      Left = 77
       Top = 0
       Action = actOption
     end
     object btnHelp: TToolButton
-      Left = 77
+      Left = 100
       Top = 0
       Action = actHelp
     end
@@ -203,6 +208,12 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 13
       OnExecute = actClearExecute
     end
+    object actFont: TAction
+      Caption = '&Font'
+      Hint = 'Change Font'
+      ImageIndex = 29
+      OnExecute = actFontExecute
+    end
     object actOption: TAction
       Caption = '&Options...'
       Hint = 'Display Options'
@@ -233,5 +244,16 @@ object CnAICoderChatForm: TCnAICoderChatForm
     object Clear1: TMenuItem
       Action = actClear
     end
+  end
+  object dlgFont: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 56
+    Top = 594
   end
 end

@@ -70,6 +70,9 @@ type
     btnClear: TToolButton;
     N2: TMenuItem;
     Clear1: TMenuItem;
+    actFont: TAction;
+    btnFont: TToolButton;
+    dlgFont: TFontDialog;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -82,6 +85,7 @@ type
     procedure pmChatPopup(Sender: TObject);
     procedure actCopyCodeExecute(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
+    procedure actFontExecute(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -107,7 +111,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnAICoderNetClient, CnCommon;
+  CnAICoderNetClient, CnAICoderConfig, CnCommon, CnIniStrUtils;
 
 {$R *.DFM}
 
@@ -140,8 +144,16 @@ begin
   FChatBox.ScrollBarVisible := True;
   FChatBox.PopupMenu := pmChat;
 
-  FChatBox.Font := EditControlWrapper.FontBasic;
-  mmoSelf.Font := EditControlWrapper.FontBasic;
+  if Trim(CnAIEngineOptionManager.ChatFontStr) <> '' then
+  begin
+    StringToFont(CnAIEngineOptionManager.ChatFontStr, FChatBox.Font);
+    StringToFont(CnAIEngineOptionManager.ChatFontStr, mmoSelf.Font);
+  end
+  else
+  begin
+    FChatBox.Font := EditControlWrapper.FontBasic;
+    mmoSelf.Font := EditControlWrapper.FontBasic;
+  end;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
 end;
@@ -205,7 +217,10 @@ procedure TCnAICoderChatForm.mmoSelfKeyPress(Sender: TObject;
   var Key: Char);
 begin
   if Key = #13 then
+  begin
+    Key := #0;
     btnMsgSend.Click;
+  end;
 end;
 
 procedure TCnAICoderChatForm.UpdateCaption;
@@ -285,6 +300,17 @@ end;
 procedure TCnAICoderChatForm.actClearExecute(Sender: TObject);
 begin
   FChatBox.Items.ClearNoWaiting;
+end;
+
+procedure TCnAICoderChatForm.actFontExecute(Sender: TObject);
+begin
+  dlgFont.Font := mmoSelf.Font;
+  if dlgFont.Execute then
+  begin
+    mmoSelf.Font := dlgFont.Font;
+    FChatBox.Font := dlgFont.Font;
+    CnAIEngineOptionManager.ChatFontStr := FontToString(dlgFont.Font);
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}

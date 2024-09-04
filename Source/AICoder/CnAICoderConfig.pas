@@ -114,6 +114,7 @@ type
     FProxyUserName: string;
     FProxyPassword: string;
     FUseProxy: Boolean;
+    FChatFontStr: string;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -152,6 +153,9 @@ type
     property Options[Index: Integer]: TCnAIEngineOption read GetOption;
     {* 根据索引号获取持有的对象}
   published
+    property ChatFontStr: string read FChatFontStr write FChatFontStr;
+    {* 聊天窗口的字体}
+
     property ActiveEngine: string read FActiveEngine write FActiveEngine;
     {* 活动引擎名称，供存储载入后设置活动引擎，除此以外别无它用。}
 
