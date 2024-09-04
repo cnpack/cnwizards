@@ -254,6 +254,7 @@ begin
         Msg.From := CnAIEngineManager.CurrentEngineName;
         Msg.FromType := cmtYou;
         Msg.Text := '...';
+        Msg.Waiting := True;
 
         if Index = FIdExplainCode then
           CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artExplainCode, ForCodeAnswer)
@@ -376,6 +377,7 @@ begin
 
   if (Tag <> nil) and (Tag is TCnChatMessage) then
   begin
+    TCnChatMessage(Tag).Waiting := False;
     if Success then
       TCnChatMessage(Tag).Text := Answer
     else

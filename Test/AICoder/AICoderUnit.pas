@@ -405,6 +405,7 @@ begin
   Msg.From := 'AI';
   Msg.FromType := cmtYou;
   Msg.Text := '...';
+  Msg.Waiting := True;
 
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
     Msg, artExplainCode, AIOnExplainCodeAnswer);
@@ -422,6 +423,7 @@ begin
   if (Tag = nil) or not (Tag is TCnChatMessage) then
     Exit;
 
+  TCnChatMessage(Tag).Waiting := False;
   if Success then
     TCnChatMessage(Tag).Text := Answer
   else

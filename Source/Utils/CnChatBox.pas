@@ -61,6 +61,7 @@ type
     FDate: TDateTime;
     FText: string;
     FColor: TColor;
+    FWaiting: Boolean;
     procedure SetOwner(const Value: TCnChatItems);
     procedure SetSelected(const Value: Boolean);
     procedure SetImageIndex(const Value: Integer);
@@ -86,6 +87,7 @@ type
     property Text: string read FText write SetText;
     property Color: TColor read FColor write SetColor;
     {* 每一条消息的颜色}
+    property Waiting: Boolean read FWaiting write FWaiting;
   end;
 
   TCnChatMessage = class(TCnChatItem)
@@ -151,6 +153,7 @@ type
     function Insert(Index: Integer; Value: TCnChatItem): Integer;
     function SelectCount: Integer;
     procedure Clear; override;
+    procedure ClearNoWaiting;
 
     procedure DoChanged(Item: TCnChatItem);
     procedure NeedResize;
@@ -1129,6 +1132,16 @@ end;
 procedure TCnChatItems.Clear;
 begin
   inherited;
+  FOwner.Reset;
+end;
+
+procedure TCnChatItems.ClearNoWaiting;
+var
+  I: Integer;
+begin
+  for I := Count - 1 downto 0 do
+    if not Items[I].Waiting then
+      Delete(I);
   FOwner.Reset;
 end;
 

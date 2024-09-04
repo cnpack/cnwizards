@@ -17,7 +17,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   TextHeight = 13
   object spl1: TSplitter
     Left = 0
-    Top = 562
+    Top = 567
     Width = 541
     Height = 3
     Cursor = crVSplit
@@ -27,7 +27,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Left = 0
     Top = 30
     Width = 541
-    Height = 532
+    Height = 537
     Align = alClient
     BevelInner = bvLowered
     BevelOuter = bvNone
@@ -50,27 +50,32 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Top = 0
       Action = actToggleSend
     end
-    object btn1: TToolButton
+    object btnClear: TToolButton
       Left = 23
+      Top = 0
+      Action = actClear
+    end
+    object btn1: TToolButton
+      Left = 46
       Top = 0
       Width = 8
       ImageIndex = 2
       Style = tbsSeparator
     end
     object btnOption: TToolButton
-      Left = 31
+      Left = 54
       Top = 0
       Action = actOption
     end
     object btnHelp: TToolButton
-      Left = 54
+      Left = 77
       Top = 0
       Action = actHelp
     end
   end
   object pnlTop: TPanel
     Left = 0
-    Top = 565
+    Top = 570
     Width = 541
     Height = 107
     Align = alBottom
@@ -192,6 +197,12 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 56
       OnExecute = actCopyCodeExecute
     end
+    object actClear: TAction
+      Caption = 'C&lear'
+      Hint = 'Clear Messages'
+      ImageIndex = 13
+      OnExecute = actClearExecute
+    end
     object actOption: TAction
       Caption = '&Options...'
       Hint = 'Display Options'
@@ -215,6 +226,12 @@ object CnAICoderChatForm: TCnAICoderChatForm
     end
     object M1: TMenuItem
       Action = actCopyCode
+    end
+    object N2: TMenuItem
+      Caption = '-'
+    end
+    object Clear1: TMenuItem
+      Action = actClear
     end
   end
 end

@@ -66,6 +66,10 @@ type
     N1: TMenuItem;
     actCopyCode: TAction;
     M1: TMenuItem;
+    actClear: TAction;
+    btnClear: TToolButton;
+    N2: TMenuItem;
+    Clear1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -77,6 +81,7 @@ type
     procedure actCopyExecute(Sender: TObject);
     procedure pmChatPopup(Sender: TObject);
     procedure actCopyCodeExecute(Sender: TObject);
+    procedure actClearExecute(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -275,6 +280,11 @@ begin
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
   end;
+end;
+
+procedure TCnAICoderChatForm.actClearExecute(Sender: TObject);
+begin
+  FChatBox.Items.ClearNoWaiting;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
