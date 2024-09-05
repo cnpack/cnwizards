@@ -1223,8 +1223,13 @@ begin
     R := Rect;
     S := Text;
     if FOwner.Owner <> nil then
+    begin
       Canvas.Font.Name := FOwner.Owner.Font.Name;
-    Canvas.Font.Size := FONT_DEF_SIZE;
+      Canvas.Font.Size := FOwner.Owner.Font.Size;
+    end
+    else
+      Canvas.Font.Size := FONT_DEF_SIZE;
+
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1255,8 +1260,13 @@ begin
   R := Rect;
   S := Text;
   if FOwner.Owner <> nil then
+  begin
     Canvas.Font.Name := FOwner.Owner.Font.Name;
-  Canvas.Font.Size := FONT_DEF_SIZE;
+    Canvas.Font.Size := FOwner.Owner.Font.Size;
+  end
+  else
+    Canvas.Font.Size := FONT_DEF_SIZE;
+
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
@@ -1338,8 +1348,13 @@ begin
     R := Rect;
     S := Text;
     if FOwner.Owner <> nil then
+    begin
       Canvas.Font.Name := FOwner.Owner.Font.Name;
-    Canvas.Font.Size := FONT_DEF_SIZE;
+      Canvas.Font.Size := FOwner.Owner.Font.Size;
+    end
+    else
+      Canvas.Font.Size := FONT_DEF_SIZE;
+
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1404,8 +1419,13 @@ begin
   // »­ÎÄ×ÖÄÚÈÝ
   S := Text;
   if FOwner.Owner <> nil then
+  begin
     Canvas.Font.Name := FOwner.Owner.Font.Name;
-  Canvas.Font.Size := FONT_DEF_SIZE;
+    Canvas.Font.Size := FOwner.Owner.Font.Size;
+  end
+  else
+    Canvas.Font.Size := FONT_DEF_SIZE;
+
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
@@ -1457,7 +1477,7 @@ begin
   inherited;
   FShowFrom := True;
   FromColor := clNavy;
-  FromColorSelect := clWhite;
+  FromColorSelect := clNavy;
 end;
 
 destructor TCnChatMessage.Destroy;
@@ -1476,7 +1496,14 @@ begin
   begin
     R := Rect;
     S := Text;
-    Canvas.Font.Size := FONT_DEF_SIZE;
+    if FOwner.Owner <> nil then
+    begin
+      Canvas.Font.Name := FOwner.Owner.Font.Name;
+      Canvas.Font.Size := FOwner.Owner.Font.Size;
+    end
+    else
+      Canvas.Font.Size := FONT_DEF_SIZE;
+
     Canvas.Font.Style := [fsBold];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
@@ -1503,7 +1530,14 @@ var
 begin
   R := Rect;
   S := Text;
-  Canvas.Font.Size := FONT_DEF_SIZE;
+  if FOwner.Owner <> nil then
+  begin
+    Canvas.Font.Name := FOwner.Owner.Font.Name;
+    Canvas.Font.Size := FOwner.Owner.Font.Size;
+  end
+  else
+    Canvas.Font.Size := FONT_DEF_SIZE;
+
   Canvas.Font.Style := [fsBold];
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
