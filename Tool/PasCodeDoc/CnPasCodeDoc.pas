@@ -38,7 +38,7 @@ unit CnPasCodeDoc;
 interface
 
 uses
-  Classes, SysUtils, Contnrs;
+  Classes, SysUtils, Contnrs, CnPascalAst;
 
 type
   ECnPasCodeDocException = class(Exception);
@@ -49,6 +49,30 @@ type
 
   TCnDocScope = (dsNone, dsPrivate, dsProtected, dsPublic, dsPublished);
   {* 元素的可见性，无可见性的为 dsNone}
+
+  TCnScanProcDeclEvent = procedure (ProcLeaf: TCnPasAstLeaf; Visibility: TCnDocScope;
+    const CurrentTypeName: string) of object;
+  {* 扫描 Pascal 源文件时遇到函数过程声明时的回调，其中 ProcLeaf 下的结构类似如下：
+    function
+      FunctionName
+      formalparameters
+        (
+          FormalParams
+            IdentList
+              A
+              ,
+              B
+            CommonType
+              TypeID
+                Int64
+          FormalParams
+          FormalParams
+        )
+      :
+      COMMONTYPE
+        TypeID
+          Boolean
+  }
 
   TCnDocBaseItem = class(TObject)
   {* 描述文档元素的基类}
@@ -160,10 +184,33 @@ type
 function CnCreateUnitDocFromFileName(const FileName: string): TCnDocUnit;
 {* 根据源码文件，分析内部的代码注释，返回新创建的单元注释对象供输出}
 
+procedure CnScanFileProcDecls(const FileName: string; OnScan: TCnScanProcDeclEvent);
+{* 扫描 Pascal 源文件中的函数过程，包括独立的及类中的，并调用回调，传入 procedure 的 Leaf 供自定义处理
+  目前处理了以下两种情况：
+
+一：
+  interface
+    type
+      TYPEDECL 多个
+        TypeName
+        =
+        RESTRICTTYPE
+          class
+            CLASSBODY
+              CLASSHERITAGE
+              public
+                procedure/function/constructor/destructor
+
+二：
+  interface
+    function
+    procedure
+}
+
 implementation
 
 uses
-  CnPascalAst, mPasLex;
+  mPasLex;
 
 resourcestring
   SCnErrorSkipCommentToNode = 'Skip Comment To Node Error.';
@@ -189,6 +236,18 @@ const
 
   SCOPE_STRS: array[TCnDocScope] of string =
     ('', 'private', 'protected', 'public', 'published');
+
+function VisibilityTokenKindToDocScope(Token: TTokenKind): TCnDocScope;
+begin
+  case Token of
+    tkPrivate:   Result := dsPrivate;
+    tkProtected: Result := dsProtected;
+    tkPublic:    Result := dsPublic;
+    tkPublished: Result := dsPublished;
+  else
+    Result := dsNone;
+  end;
+end;
 
 // 从 ParentLeaf 的第 0 个子节点开始越过注释找符合的节点，返回符合的节点，不符合则抛出异常且返回 nil
 function DocSkipCommentToChild(ParentLeaf: TCnPasAstLeaf;
@@ -496,13 +555,7 @@ begin
     end
     else if (Leaf.NodeType = cntVisibility) and (Leaf.TokenKind in [tkProtected, tkPublic, tkPublished]) then
     begin
-      case Leaf.TokenKind of
-        tkProtected: MyScope := dsProtected;
-        tkPublic:    MyScope := dsPublic;
-        tkPublished: MyScope := dsPublished;
-      else
-        MyScope := dsNone;
-      end;
+      MyScope := VisibilityTokenKindToDocScope(Leaf.TokenKind);
       DocFindMembers(Leaf, OwnerItem, MyScope);
       Inc(K);
     end
@@ -875,6 +928,111 @@ begin
   begin
     if RootItem[I].Count > 1 then
       DocScopeBubbleSort(RootItem[I]);
+  end;
+end;
+
+procedure CnScanFileProcDecls(const FileName: string; OnScan: TCnScanProcDeclEvent);
+var
+  AST: TCnPasAstGenerator;
+  SL, Pars: TStringList;
+  UnitLeaf, IntfLeaf, TypeLeaf, ClassLeaf, VisibilityLeaf: TCnPasAstLeaf;
+  I, I1, I2, I3, I4: Integer;
+  CurrTypeName: string;
+begin
+  SL := nil;
+  AST := nil;
+  Pars := nil;
+
+  try
+    SL := TStringList.Create;
+    SL.LoadFromFile(FileName);
+
+    AST := TCnPasAstGenerator.Create(SL.Text);
+    AST.Build;
+
+    UnitLeaf := nil;
+    Pars := TStringList.Create;
+    for I := 0 to AST.Tree.Root.Count - 1 do
+    begin
+      if (AST.Tree.Root.Items[I].NodeType = cntUnit) and (AST.Tree.Root.Items[I].TokenKind = tkUnit) then
+      begin
+        UnitLeaf := AST.Tree.Root.Items[I];
+        Break;
+      end;
+    end;
+
+    if UnitLeaf = nil then
+      Exit;
+
+    // 找 interface 节点
+    IntfLeaf := nil;
+    I := 0;
+    while I < UnitLeaf.Count do
+    begin
+      if (UnitLeaf[I].NodeType in [cntInterfaceSection]) and
+        (UnitLeaf[I].TokenKind in [tkInterface]) then
+      begin
+        IntfLeaf := UnitLeaf[I];
+        Break;
+      end;
+      Inc(I);
+    end;
+
+    if IntfLeaf = nil then
+      Exit;
+
+    // 找 interface 节点下的直属节点们并解析
+    I := 0;
+    while I < IntfLeaf.Count do
+    begin
+      case IntfLeaf[I].NodeType of
+        cntTypeSection:  // 类型区
+          begin
+            TypeLeaf := IntfLeaf[I];
+            for I1 := 0 to TypeLeaf.Count - 1 do
+            begin
+              if (TypeLeaf[I1].NodeType = cntTypeDecl) and (TypeLeaf[I1].Count >= 3) then
+              begin
+                // 记录 TypeName
+                CurrTypeName := TypeLeaf[I1][0].Text;
+                for I2 := 0 to TypeLeaf[I1].Count - 1 do
+                begin
+                  if (TypeLeaf[I1][I2].NodeType = cntRestrictedType) and (TypeLeaf[I1][I2].Count >= 1)
+                    and (TypeLeaf[I1][I2][0].NodeType = cntClassType) then
+                  begin
+                    ClassLeaf := TypeLeaf[I1][I2][0];
+                    if (ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody) then
+                    begin
+                      ClassLeaf := ClassLeaf[0];
+                      for I3 := 0 to ClassLeaf.Count - 1 do
+                      begin
+                        if (ClassLeaf[I3].NodeType = cntVisibility) {and (ClassLeaf[I3].TokenKind = tkPublic)} then
+                        begin
+                          VisibilityLeaf := ClassLeaf[I3];
+                          for I4 := 0 to VisibilityLeaf.Count - 1 do
+                          begin
+                            if VisibilityLeaf[I4].NodeType in [cntProcedure, cntFunction] then
+                              OnScan(VisibilityLeaf[I4], VisibilityTokenKindToDocScope(VisibilityLeaf.TokenKind), CurrTypeName);
+                          end;
+                        end;
+                      end;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+        cntProcedure, cntFunction:
+          begin
+            OnScan(IntfLeaf[I], dsNone, '');
+          end;
+      end;
+      Inc(I);
+    end;
+  finally
+    Pars.Free;
+    AST.Free;
+    SL.Free;
   end;
 end;
 
