@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnCommon, ComCtrls, FileCtrl, CnPasCodeDoc, CnPasConvert;
+  StdCtrls, CnCommon, ComCtrls, FileCtrl, CnPasCodeDoc, CnPasConvert, CnPascalAST,
+  mPasLex;
 
 type
   TFormPasDoc = class(TForm)
@@ -15,12 +16,14 @@ type
     dlgSave1: TSaveDialog;
     tvPas: TTreeView;
     btnConvertDirectory: TButton;
+    btnCheckParamList: TButton;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure tvPasDblClick(Sender: TObject);
     procedure btnConvertDirectoryClick(Sender: TObject);
+    procedure btnCheckParamListClick(Sender: TObject);
   private
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
@@ -461,6 +464,188 @@ begin
     Delete(Result, 1, 3);
   if Pos('}', Result) = Length(Result) then
     Delete(Result, Length(Result), 1);
+end;
+
+procedure TFormPasDoc.btnCheckParamListClick(Sender: TObject);
+var
+  AST: TCnPasAstGenerator;
+  SL, Pars: TStringList;
+  UnitLeaf, IntfLeaf, TypeLeaf, ClassLeaf, PublicLeaf: TCnPasAstLeaf;
+  I, I1, I2, I3, I4: Integer;
+  CurrTypeName: string;
+
+{
+function
+  FunctionName
+  formalparameters
+    (
+      FormalParams
+        IdentList
+          A
+          ,
+          B
+        CommonType
+          TypeID
+            Int64
+      FormalParams
+      FormalParams
+    )
+  :
+  COMMONTYPE
+    TypeID
+      Boolean
+}
+  procedure MakeProcParams(ProcLeaf: TCnPasAstLeaf; Params: TStringList);
+  var
+    L1, L2, L3: TCnPasAstLeaf;
+    J, K: Integer;
+  begin
+    if ProcLeaf.Count < 2 then
+      Exit;
+
+    L1 := ProcLeaf[1]; // formalparameters
+    if L1.Count > 0 then
+    begin
+      L2 := L1[0];       // (
+      for J := 0 to L2.Count - 1 do
+      begin
+        K := 0;
+        if L2[J].Count = 0 then // 可能是用于分隔参数的分号
+          Continue;
+
+        if L2[J][K].NodeType <> cntIdentList then
+          Inc(K);
+        L3 := L2[J][K];  // identlist
+        if L3.Count > 1 then
+        begin
+          if CurrTypeName <> '' then
+            Params.Add(CurrTypeName + '.' + ProcLeaf[0].Text)
+          else
+            Params.Add(ProcLeaf[0].Text);
+        end;
+      end;
+    end;
+  end;
+
+begin
+  if not dlgOpen1.Execute then
+    Exit;
+
+  SL := nil;
+  AST := nil;
+  Pars := nil;
+
+  try
+    SL := TStringList.Create;
+    SL.LoadFromFile(dlgOpen1.FileName);
+
+    AST := TCnPasAstGenerator.Create(SL.Text);
+    AST.Build;
+
+    UnitLeaf := nil;
+    Pars := TStringList.Create;
+    for I := 0 to AST.Tree.Root.Count - 1 do
+    begin
+      if (AST.Tree.Root.Items[I].NodeType = cntUnit) and (AST.Tree.Root.Items[I].TokenKind = tkUnit) then
+      begin
+        UnitLeaf := AST.Tree.Root.Items[I];
+        Break;
+      end;
+    end;
+
+    if UnitLeaf = nil then
+      Exit;
+
+    // 找 interface 节点
+    IntfLeaf := nil;
+    I := 0;
+    while I < UnitLeaf.Count do
+    begin
+      if (UnitLeaf[I].NodeType in [cntInterfaceSection]) and
+        (UnitLeaf[I].TokenKind in [tkInterface]) then
+      begin
+        IntfLeaf := UnitLeaf[I];
+        Break;
+      end;
+      Inc(I);
+    end;
+
+    if IntfLeaf = nil then
+      Exit;
+
+    // 找 interface 节点下的直属节点们并解析
+    I := 0;
+    while I < IntfLeaf.Count do
+    begin
+      case IntfLeaf[I].NodeType of
+        cntTypeSection:  // 类型区
+          begin
+            // 下属子节点两种情况：
+            // 简单类型，三个一组排列：TYPEDECL（子节点是名称）、分号、单个注释块
+            // 但 class/record/interface 等的 TYPEDECL，注释块在其内部
+            // DocFindTypes(IntfLeaf[I], Result);
+{
+  interface
+    type
+      TYPEDECL 多个
+        TypeName
+        =
+        RESTRICTTYPE
+          class
+            CLASSBODY
+              CLASSHERITAGE
+              public
+                procedure/function/constructor/destructor
+}
+            TypeLeaf := IntfLeaf[I];
+            for I1 := 0 to TypeLeaf.Count - 1 do
+            begin
+              if (TypeLeaf[I1].NodeType = cntTypeDecl) and (TypeLeaf[I1].Count >= 3) then
+              begin
+                // 记录 TypeName
+                CurrTypeName := TypeLeaf[I1][0].Text;
+                for I2 := 0 to TypeLeaf[I1].Count - 1 do
+                begin
+                  if (TypeLeaf[I1][I2].NodeType = cntRestrictedType) and (TypeLeaf[I1][I2].Count >= 1)
+                    and (TypeLeaf[I1][I2][0].NodeType = cntClassType) then
+                  begin
+                    ClassLeaf := TypeLeaf[I1][I2][0];
+                    if (ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody) then
+                    begin
+                      ClassLeaf := ClassLeaf[0];
+                      for I3 := 0 to ClassLeaf.Count - 1 do
+                      begin
+                        if (ClassLeaf[I3].NodeType = cntVisibility) and (ClassLeaf[I3].TokenKind = tkPublic) then
+                        begin
+                          PublicLeaf := ClassLeaf[I3];
+                          for I4 := 0 to PublicLeaf.Count - 1 do
+                          begin
+                            if PublicLeaf[I4].NodeType in [cntProcedure, cntFunction] then
+                              MakeProcParams(PublicLeaf[I4], Pars);
+                          end;
+                        end;
+                      end;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+        cntProcedure, cntFunction:
+          begin
+            MakeProcParams(IntfLeaf[I], Pars);
+          end;
+      end;
+      Inc(I);
+    end;
+
+    mmoResult.Lines.Clear;
+    mmoResult.Lines.AddStrings(Pars);
+  finally
+    Pars.Free;
+    AST.Free;
+    SL.Free;
+  end;
 end;
 
 end.

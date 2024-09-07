@@ -165,6 +165,23 @@ implementation
 uses
   CnPascalAst, mPasLex;
 
+resourcestring
+  SCnErrorSkipCommentToNode = 'Skip Comment To Node Error.';
+  SCnErrorNoConstSemicolonExists = 'NO Const Semicolon Exists.';
+  SCnErrorNoVarSemicolonExists = 'NO Var Semicolon Exists.';
+  SCnErrorNoProcedureFunctionIdentExists = 'NO Procedure/Function Ident Exists.';
+  SCnErrorNoProcedureFunctionSemicolonExists = 'NO Procedure/Function Semicolon Exists.';
+  SCnErrorNoPropertyIdentExists = 'NO Property Ident Exists.';
+  SCnErrorNoPropertySemicolonExists = 'NO Property Semicolon Exists.';
+  SCnErrorNoClassFieldIdentExists = 'NO Class Field Ident Exists.';
+  SCnErrorNoClassFieldSemicolonExists = 'NO Class Field Semicolon Exists.';
+  SCnErrorNoClassInterfaceSemicolonExists = 'NO Class/Interface SemiColon Exists.';
+  SCnErrorNoTypeSemicolonExists = 'NO Type Semicolon Exists.';
+  SCnErrorNoUnitExists = 'NO Unit Exists.';
+  SCnErrorNoUnitSemicolonExists = 'NO Unit Semicolon Exists.';
+  SCnErrorNoInterfacesectionPartExists = 'NO InterfaceSection Part Exists.';
+  SCnBrBr = '<br><br>';
+
 const
   COMMENT_NODE_TYPE = [cntBlockComment];
   COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment];
@@ -190,7 +207,7 @@ begin
 
     if not (ParentLeaf[I].NodeType in COMMENT_SKIP_NODE_TYPE) then
       if NeedRaise then
-        raise ECnPasCodeDocException.Create('Skip Comment To Node Error.');
+        raise ECnPasCodeDocException.Create(SCnErrorSkipCommentToNode);
   end;
 end;
 
@@ -290,7 +307,7 @@ begin
 
     Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
     if Leaf = nil then
-      raise ECnPasCodeDocException.Create('NO Const Semicolon Exists.');
+      raise ECnPasCodeDocException.Create(SCnErrorNoConstSemicolonExists);
 
     Inc(K); // 步进到下一个可能是注释的地方，如果是注释，K 指向注释末尾，如果不是，K 会减一以抵消此次步进
     Item.Comment := DocCollectComments(ParentLeaf, K);
@@ -327,7 +344,7 @@ begin
 
     Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
     if Leaf = nil then
-      raise ECnPasCodeDocException.Create('NO Var Semicolon Exists.');
+      raise ECnPasCodeDocException.Create(SCnErrorNoVarSemicolonExists);
 
     Inc(K); // 步进到下一个可能是注释的地方，如果是注释，K 指向注释末尾，如果不是，K 会减一以抵消此次步进
     Item.Comment := DocCollectComments(ParentLeaf, K);
@@ -348,7 +365,7 @@ begin
   K := 0;
   Leaf := DocSkipToChild(ParentLeaf, K, [cntIdent], [tkIdentifier]);
   if Leaf = nil then
-    raise ECnPasCodeDocException.Create('NO Procedure/Function Ident Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoProcedureFunctionIdentExists);
 
   Item := TCnProcedureDocItem.Create;
   Item.DeclareName := Leaf.Text; // 独立过程名
@@ -359,7 +376,7 @@ begin
   P := ParentLeaf.Parent;
   Leaf := DocSkipToChild(P, Index, [cntSemiColon], [tkSemiColon]);
   if Leaf = nil then
-    raise ECnPasCodeDocException.Create('NO Procedure/Function Semicolon Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoProcedureFunctionSemicolonExists);
 
   // 此处再跳过可能存在的 Directives 到最后一个分号
   DocSkipDirective(P, Index);
@@ -381,7 +398,7 @@ begin
   K := 0;
   Leaf := DocSkipToChild(ParentLeaf, K, [cntIdent], [tkIdentifier]);
   if Leaf = nil then
-    raise ECnPasCodeDocException.Create('NO Property Ident Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoPropertyIdentExists);
 
   Item := TCnPropertyDocItem.Create;
   Item.DeclareName := Leaf.Text;   // 属性名
@@ -392,7 +409,7 @@ begin
   P := ParentLeaf.Parent;
   Leaf := DocSkipToChild(P, Index, [cntSemiColon], [tkSemiColon]);
   if Leaf = nil then
-    raise ECnPasCodeDocException.Create('NO Property Semicolon Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoPropertySemicolonExists);
 
   // 此处再跳过可能存在的 Directives 到最后一个分号
   DocSkipDirective(P, Index);
@@ -412,7 +429,7 @@ begin
   if (ParentLeaf.Count > 0) and (ParentLeaf[0].Count > 0) then
     Leaf := ParentLeaf[0][0];
   if (Leaf = nil) or (Leaf.NodeType <> cntIdent) then
-    raise ECnPasCodeDocException.Create('NO Class Field Ident Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoClassFieldIdentExists);
 
   Item := TCnFieldDocItem.Create;
   Item.DeclareName := Leaf.Text; // 字段名
@@ -423,7 +440,7 @@ begin
   P := ParentLeaf.Parent;
   Leaf := DocSkipToChild(P, Index, [cntSemiColon], [tkSemiColon]);
   if Leaf = nil then
-    raise ECnPasCodeDocException.Create('NO Class Field Semicolon Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoClassFieldSemicolonExists);
 
   Inc(Index); // 步进到下一个可能是注释的地方，如果是注释，Index 指向注释末尾，如果不是，Index 会减一以抵消此次步进
   Item.Comment := DocCollectComments(P, Index);
@@ -615,7 +632,7 @@ begin
   I := ParentLeaf.Index;
   TmpLeaf := DocSkipToChild(Leaf, I, [cntSemiColon], [tkSemiColon]);
   if TmpLeaf = nil then
-    raise ECnPasCodeDocException.Create('NO Class/Interface SemiColon Exists.');
+    raise ECnPasCodeDocException.Create(SCnErrorNoClassInterfaceSemicolonExists);
 
   Inc(I);
   Comment := DocCollectComments(Leaf, I);
@@ -711,7 +728,7 @@ begin
 
       Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
       if Leaf = nil then
-        raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
+        raise ECnPasCodeDocException.Create(SCnErrorNoTypeSemicolonExists);
       // 找分号，后没注释了
       Inc(K);
     end
@@ -719,7 +736,7 @@ begin
     begin
       Leaf := DocSkipToChild(ParentLeaf, K, [cntSemiColon], [tkSemiColon]);
       if Leaf = nil then
-        raise ECnPasCodeDocException.Create('NO Type Semicolon Exists.');
+        raise ECnPasCodeDocException.Create(SCnErrorNoTypeSemicolonExists);
 
       Item.DeclareType := DeclLeaf.GetPascalCode; // 简单类型的完整声明
 
@@ -766,7 +783,7 @@ begin
     end;
 
     if UnitLeaf = nil then
-      raise ECnPasCodeDocException.Create('NO Unit Exists.');
+      raise ECnPasCodeDocException.Create(SCnErrorNoUnitExists);
 
     Result := TCnDocUnit.Create;
 
@@ -779,7 +796,7 @@ begin
     // 找分号
     TempLeaf := DocSkipToChild(UnitLeaf, I, [cntSemiColon], [tkSemiColon]);
     if TempLeaf = nil then
-      raise ECnPasCodeDocException.Create('NO Unit Semicolon Exists.');
+      raise ECnPasCodeDocException.Create(SCnErrorNoUnitSemicolonExists);
 
     // 找分号后的一批注释
     Inc(I);
@@ -788,7 +805,7 @@ begin
     // 找 interface 节点
     IntfLeaf := DocSkipToChild(UnitLeaf, I, [cntInterfaceSection], [tkInterface]);
     if IntfLeaf = nil then
-      raise ECnPasCodeDocException.Create('NO InterfaceSection Part Exists.');
+      raise ECnPasCodeDocException.Create(SCnErrorNoInterfacesectionPartExists);
 
     // 找 interface 节点下的直属节点们并解析
     I := 0;
@@ -999,7 +1016,7 @@ begin
     end;
 
     FComment := MO.Text;
-    FComment := StringReplace(FComment, #13#10#13#10, '<br><br>', [rfReplaceAll]);
+    FComment := StringReplace(FComment, #13#10#13#10, SCnBrBr, [rfReplaceAll]);
   finally
     MO.Free;
     SL.Free;

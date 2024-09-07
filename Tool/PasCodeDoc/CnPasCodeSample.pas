@@ -192,7 +192,8 @@ end;
 
 constructor TCnDocTestObject.Create(AOwner: TObject);
 begin
-
+  if not IsReady then
+    Init;
 end;
 
 destructor TCnDocTestObject.Destroy;
