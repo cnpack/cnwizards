@@ -28,7 +28,9 @@ unit CnPascalAST;
 *           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const/type 等
 *           不支持泛型、不支持内联 var
 *           不支持 asm（仅跳过），注释还原度较低
-* 开发平台：2023.07.29 V1.3
+* 开发平台：2024.09.07 V1.4
+*               加入对 Attribute 的支持
+*           2023.07.29 V1.3
 *               加入对多行字符串的支持
 *           2023.04.01 V1.2
 *               调整部分对外声明以有利使用
@@ -228,6 +230,9 @@ type
     cntQualId,
     cntTerm,
     cntFactor,
+
+    cntSingleAttribute,
+    cntAttributeItem,
 
     cntBegin,
     cntEnd
@@ -531,6 +536,10 @@ type
     procedure BuildIdent;
     {* 组装一个标识符，可以带点号}
 
+    procedure BuildSingleAttribute;
+    {* 组装一个中括号内的简单 Attribute}
+    procedure BuildAttributeItem;
+    {* 组装一个 Attribute 项，一个项是 Ident:Ident 或 Ident(ExprList)，多个项用逗号分开}
   end;
 
 function PascalAstNodeTypeToString(AType: TCnPasNodeType): string;
@@ -1086,6 +1095,9 @@ procedure TCnPasAstGenerator.BuildIdent;
 var
   T: TCnPasAstLeaf;
 begin
+  while FLex.TokenID = tkSquareOpen do // 加入 Attribute 的支持
+    BuildSingleAttribute;
+
   if FLex.TokenID = tkAmpersand then
     MatchCreateLeafAndStep(FLex.TokenID);
 
@@ -1688,7 +1700,7 @@ begin
   // Pop 之前，内部添加的节点均为 type 节点之子
 
   try
-    while FLex.TokenID in [tkIdentifier, tkAmpersand] do
+    while FLex.TokenID in [tkIdentifier, tkAmpersand, tkSquareOpen] do
     begin
       BuildTypeDecl;
       MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
@@ -1905,8 +1917,11 @@ begin
     if FLex.TokenID = tkSquareOpen then
       BuildGuid;
 
-    while FLex.TokenID in VisibilityTokens + ProcedureTokens + [tkProperty] do
+    while FLex.TokenID in VisibilityTokens + ProcedureTokens + [tkProperty, tkSquareOpen] do
     begin
+      while FLex.TokenID = tkSquareOpen do // 加入 Attribute 的支持
+        BuildSingleAttribute;
+
       if FLex.TokenID in VisibilityTokens then
         BuildClassVisibility
       else if FLex.TokenID in ProcedureTokens then
@@ -1984,6 +1999,9 @@ begin
     begin
       if FLex.TokenID in VisibilityTokens then
         BuildClassVisibility;
+
+      while FLex.TokenID = tkSquareOpen do // 加入 Attribute 的支持
+        BuildSingleAttribute;
 
       if FLex.TokenID = tkCase then
         Break
@@ -2571,6 +2589,9 @@ begin
   MatchCreateLeafAndPush(tkNone, cntFormalParam);
 
   try
+    while FLex.TokenID = tkSquareOpen do // 加入 Attribute 的支持
+      BuildSingleAttribute;
+
     if FLex.TokenID in [tkVar, tkConst, tkOut] then
       MatchCreateLeafAndStep(FLex.TokenID);
     BuildIdentList;
@@ -2690,6 +2711,8 @@ begin
         BuildClassTypeSection;
       tkConst:
         BuildClassConstSection;
+      tkSquareOpen:
+        BuildSingleAttribute;
     else
       BuildClassField;
     end;
@@ -2875,7 +2898,7 @@ begin
     while FLex.TokenID = tkUses do
       BuildUsesClause;
 
-    while FLex.TokenID in InterfaceDeclTokens do
+    if FLex.TokenID in InterfaceDeclTokens then
       BuildInterfaceDecl;
   finally
     PopLeaf;
@@ -2923,6 +2946,8 @@ begin
         BuildExportsSection;
       tkClass, tkProcedure, tkFunction, tkConstructor, tkDestructor:
         BuildProcedureDeclSection;
+      tkSquareOpen:
+        BuildSingleAttribute;
     end;
   end;
 end;
@@ -3532,6 +3557,61 @@ begin
       if T <> nil then
         T.Text := T.Text + FLex.Token;
       FLex.Next;
+    end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildSingleAttribute;
+begin
+  MatchCreateLeafAndPush(tkNone, cntSingleAttribute);
+  // Pop 之前内部内容均为该抽象 SingleAttribute 之子
+
+  try
+    if FLex.TokenID = tkSquareOpen then
+    begin
+      MatchCreateLeafAndPush(tkSquareOpen);
+      try
+        repeat
+          BuildAttributeItem;
+          if FLex.TokenID = tkComma then
+            MatchCreateLeafAndStep(tkComma)
+          else
+            Break;
+        until False;
+      finally
+        PopLeaf;
+      end;
+      MatchCreateLeafAndStep(tkSquareClose);
+    end;
+  finally
+    PopLeaf;
+  end;
+end;
+
+procedure TCnPasAstGenerator.BuildAttributeItem;
+begin
+  MatchCreateLeafAndPush(tkNone, cntAttributeItem);
+  // Pop 之前内部内容均为该抽象 AttributeItem 之子
+
+  try
+    BuildIdent;
+
+    if FLex.TokenID = tkRoundOpen then
+    begin
+      MatchCreateLeafAndPush(tkRoundOpen);
+      try
+        BuildExpressionList;
+      finally
+        PopLeaf;
+      end;
+      MatchCreateLeafAndStep(tkRoundClose);
+    end
+    else if FLex.TokenID in [tkColon, tkEqual] then
+    begin
+      MatchCreateLeafAndStep(FLex.TokenID);
+      BuildIdent;
     end;
   finally
     PopLeaf;

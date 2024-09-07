@@ -5974,6 +5974,10 @@ begin
     FormatDirective;
 end;
 
+{
+ [ Ident : Ident | ( Expression, Expression ),
+   Ident = Ident | ( Expression, Expression )... ]
+}
 procedure TCnBasePascalFormatter.FormatSingleAttribute(
   PreSpaceCount: Byte; LineEndSpaceCount: Byte);
 var

@@ -353,6 +353,15 @@ object FormAST: TFormAST
             TabOrder = 4
             OnClick = btnGenericClick
           end
+          object btnAttribute: TButton
+            Left = 96
+            Top = 72
+            Width = 75
+            Height = 25
+            Caption = 'Attribute'
+            TabOrder = 5
+            OnClick = btnAttributeClick
+          end
         end
         object btnExports: TButton
           Left = 16

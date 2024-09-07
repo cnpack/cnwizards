@@ -93,6 +93,7 @@ type
     ShowString1: TMenuItem;
     btnExternalFunction: TButton;
     btnGeneric: TButton;
+    btnAttribute: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -158,6 +159,7 @@ type
     procedure btnInheritedClick(Sender: TObject);
     procedure btnExternalFunctionClick(Sender: TObject);
     procedure btnGenericClick(Sender: TObject);
+    procedure btnAttributeClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -891,7 +893,7 @@ end;
 procedure TFormAST.btnFunctionClick(Sender: TObject);
 begin
   ReInitAst(
-    'function Help(A, C: Int64; B: array of const; var DivRes: Integer): Boolean; assembler;' + #13#10 +
+    'function Help(A, C: Int64; B: array of Integer; var DivRes: Integer): Boolean; assembler;' + #13#10 +
     'begin' + #13#10 +
       'WinApi.Windows.CommonFlag := True;' + #13#10 +
     'end;'
@@ -973,6 +975,15 @@ procedure TFormAST.btnGenericClick(Sender: TObject);
 begin
   ReInitAst('TTest<T: Test> = class(TPair<string, TObject<TPersistent>>) end;');
   FAST.BuildTypeDecl;
+  SynTree;
+end;
+
+procedure TFormAST.btnAttributeClick(Sender: TObject);
+begin
+  ReInitAst(
+    '[ComponentPlatformsAttribute(pidWin32 or pidWin64), ComponentType: Unknown]'
+  );
+  FAST.BuildSingleAttribute;
   SynTree;
 end;
 
