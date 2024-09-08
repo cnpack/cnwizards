@@ -534,7 +534,7 @@ begin
   if RespRoot = nil then
   begin
     // 一类原始错误，如账号达到最大并发等
-    Result := BytesToAnsi(Response);
+    Result := S;
   end
   else
   begin
@@ -573,6 +573,10 @@ begin
             Result := Result + ', ' + RespRoot['message'].AsString;
         end;
       end;
+
+      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
+      if Result = '' then
+        Result := S;
     finally
       RespRoot.Free;
     end;
