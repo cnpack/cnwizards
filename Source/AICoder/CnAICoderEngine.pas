@@ -24,7 +24,8 @@ unit CnAICoderEngine;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：AI 辅助编码专家的引擎管理单元
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：与 API 服务端通讯时如返回错误码 12022 一般是连接超时
+*           12029 一般是 SSL 版本过低导致无法建立连接
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin7/10/11 + Delphi/C++Builder
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -66,7 +67,7 @@ type
 
   TCnAIBaseEngine = class
   {* 处理特定 AI 服务提供者的引擎基类，有自身的特定配置，
-   并有添加请求任务、发起网络请求、获得结果并回调的典型功能}
+    并有添加请求任务、发起网络请求、获得结果并回调的典型功能}
   private
     FPoolRef: TCnThreadPool; // 从 Manager 处拿来持有的线程池对象引用
     FOption: TCnAIEngineOption;
@@ -121,7 +122,7 @@ type
 
     function AskAIEngineForCode(const Code: string; Tag: TObject; RequestType: TCnAIRequestType;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
-    {* 进一步封装的用户调用的解释代码或检查代码的过程，内部将 Code 转换为 JSON 后调用 AskAIEngine}
+    {* 进一步封装的用户调用的解释代码或检查代码的过程，内部将 Code 转换为 JSON 后调用 AskAIEngine，也算第一步}
 
     property Option: TCnAIEngineOption read FOption;
     {* 引擎配置，根据名字从配置管理器中取来的引用}
@@ -460,6 +461,11 @@ begin
     FPoolRef.AddRequest(Obj);
 
     Result := Obj.SendId;
+  end
+  else
+  begin
+    if Assigned(AnswerCallback) then // 没发送的数据就直接回调出错
+      AnswerCallback(False, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
   end;
 end;
 
@@ -664,6 +670,8 @@ begin
         HTTP.ProxyMode := pmIE;
     end;
     HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
+    // 大多数 AI 引擎的身份验证都是这句。少数不是的，可以在子类的 PrepareRequestHeader 里删掉这句再加
+
     PrepareRequestHeader(HTTP.HttpRequestHeaders);
 
     Stream := TMemoryStream.Create;

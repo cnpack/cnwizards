@@ -105,6 +105,18 @@ type
 
   TCnAIEngineOptionClass = class of TCnAIEngineOption;
 
+  TCnClaudeAIEngineOption = class(TCnAIEngineOption)
+  {* 给 Claude 专用的设置项，多了几个选项}
+  private
+    FAnthropicVersion: string;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+  published
+    property AnthropicVersion: string read FAnthropicVersion write FAnthropicVersion;
+    {* Claude 的版本}
+  end;
+
   TCnAIEngineOptionManager = class(TPersistent)
   {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象，数量顺序和 EngineManager 一致}
   private
@@ -522,6 +534,21 @@ begin
   finally
     FreeMem(PropList);
   end;
+end;
+
+{ TCnClaudeAIEngineOption }
+
+constructor TCnClaudeAIEngineOption.Create;
+begin
+  inherited;
+  Temperature := 1.0;
+  AnthropicVersion := '2023-06-01';
+end;
+
+destructor TCnClaudeAIEngineOption.Destroy;
+begin
+
+  inherited;
 end;
 
 initialization

@@ -40,7 +40,8 @@ interface
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  SysUtils, Classes, CnNative, CnJSON, CnAICoderEngine, CnAICoderNetClient;
+  SysUtils, Classes, CnNative, CnJSON, CnAICoderEngine, CnAICoderNetClient,
+  CnAICoderConfig;
 
 type
   TCnOpenAIAIEngine = class(TCnAIBaseEngine)
@@ -53,6 +54,18 @@ type
   {* MistralAI 引擎}
   public
     class function EngineName: string; override;
+  end;
+
+  TCnClaudeAIEngine = class(TCnAIBaseEngine)
+  {* Claude 引擎}
+  protected
+    // Claude 的身份验证头信息和其他几个不同
+    procedure PrepareRequestHeader(Headers: TStringList); override;
+    // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+  public
+    class function EngineName: string; override;
+    class function OptionClass: TCnAIEngineOptionClass; override;
   end;
 
   TCnQWenAIEngine = class(TCnAIBaseEngine)
@@ -254,9 +267,38 @@ begin
   Result := 'MistralAI';
 end;
 
+{ TCnClaudeAIEngine }
+
+function TCnClaudeAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
+  const Code: string): TBytes;
+begin
+  // 先用旧的
+  Result := inherited ConstructRequest(RequestType, Code);
+end;
+
+class function TCnClaudeAIEngine.EngineName: string;
+begin
+  Result := 'Claude';
+end;
+
+class function TCnClaudeAIEngine.OptionClass: TCnAIEngineOptionClass;
+begin
+  Result := TCnClaudeAIEngineOption;
+end;
+
+procedure TCnClaudeAIEngine.PrepareRequestHeader(Headers: TStringList);
+begin
+  inherited;
+  Headers.Add('x-api-key: ' + Option.ApiKey);
+  // 原先的 Authorization: Bearer 暂时不删
+
+  Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMistralAIAIEngine);
+  // RegisterAIEngine(TCnClaudeAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
