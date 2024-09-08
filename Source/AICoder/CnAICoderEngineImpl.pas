@@ -61,8 +61,13 @@ type
   protected
     // Claude 的身份验证头信息和其他几个不同
     procedure PrepareRequestHeader(Headers: TStringList); override;
+
     // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+
+    // Claude 的信息返回格式也不同
+    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
     class function OptionClass: TCnAIEngineOptionClass; override;
@@ -178,8 +183,8 @@ begin
   RespRoot := CnJSONParse(S);
   if RespRoot = nil then
   begin
-    // 一类原始错误，如账号达到最大并发等
-    Result := BytesToAnsi(Response);
+    // 一类原始错误
+    Result := S;
   end
   else
   begin
@@ -271,9 +276,36 @@ end;
 
 function TCnClaudeAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
   const Code: string): TBytes;
+var
+  ReqRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
 begin
-  // 先用旧的
-  Result := inherited ConstructRequest(RequestType, Code);
+  ReqRoot := TCnJSONObject.Create;
+  try
+    ReqRoot.AddPair('model', Option.Model);
+    ReqRoot.AddPair('temperature', Option.Temperature);
+    ReqRoot.AddPair('max_tokens', (Option as TCnClaudeAIEngineOption).MaxTokens);
+
+    ReqRoot.AddPair('system', Option.SystemMessage); // Claude 额外放 System 消息
+    Arr := ReqRoot.AddArray('messages');
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'user');
+    if RequestType = artExplainCode then
+      Msg.AddPair('content', Option.ExplainCodePrompt + #13#10 + Code)
+    else if RequestType = artReviewCode then
+      Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artRaw then
+      Msg.AddPair('content', Code);
+
+    Arr.AddValue(Msg);
+
+    S := ReqRoot.ToJSON;
+    Result := AnsiToBytes(S);
+  finally
+    ReqRoot.Free;
+  end;
 end;
 
 class function TCnClaudeAIEngine.EngineName: string;
@@ -284,6 +316,71 @@ end;
 class function TCnClaudeAIEngine.OptionClass: TCnAIEngineOptionClass;
 begin
   Result := TCnClaudeAIEngineOption;
+end;
+
+function TCnClaudeAIEngine.ParseResponse(var Success: Boolean;
+  var ErrorCode: Cardinal; RequestType: TCnAIRequestType;
+  const Response: TBytes): string;
+var
+  RespRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
+begin
+  Result := '';
+  S := BytesToAnsi(Response);
+  RespRoot := CnJSONParse(S);
+  if RespRoot = nil then
+  begin
+    // 一类原始错误
+    Result := S;
+  end
+  else
+  begin
+    try
+      // 正常回应
+      if (RespRoot['content'] <> nil) and (RespRoot['content'] is TCnJSONArray) then
+      begin
+        Arr := TCnJSONArray(RespRoot['content']);
+        if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+          Result := Arr[0]['text'].AsString;
+      end;
+
+      if Result = '' then
+      begin
+        // 只要没有正常回应，就说明出错了，但 Claude 的文档里没有说明，只能照着其他 AI 引擎写
+        Success := False;
+
+        // 一类业务错误，比如 Key 无效等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(RespRoot['error']);
+          Result := Msg['message'].AsString;
+        end;
+
+        // 一类网络错误，比如 URL 错了等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+          Result := RespRoot['error'].AsString;
+        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+        begin
+          if Result = '' then
+            Result := RespRoot['message'].AsString
+          else
+            Result := Result + ', ' + RespRoot['message'].AsString;
+        end;
+      end;
+
+      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
+      if Result = '' then
+        Result := S;
+
+    finally
+      RespRoot.Free;
+    end;
+  end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
 procedure TCnClaudeAIEngine.PrepareRequestHeader(Headers: TStringList);
@@ -298,7 +395,7 @@ end;
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMistralAIAIEngine);
-  // RegisterAIEngine(TCnClaudeAIEngine);
+  RegisterAIEngine(TCnClaudeAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);

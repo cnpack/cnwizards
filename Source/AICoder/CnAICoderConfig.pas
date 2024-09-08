@@ -109,10 +109,13 @@ type
   {* 给 Claude 专用的设置项，多了几个选项}
   private
     FAnthropicVersion: string;
+    FMaxTokens: Integer;
   public
     constructor Create; override;
     destructor Destroy; override;
   published
+    property MaxTokens: Integer read FMaxTokens write FMaxTokens;
+    {* 最大 Token 数，Claude 必须，其余默认}
     property AnthropicVersion: string read FAnthropicVersion write FAnthropicVersion;
     {* Claude 的版本}
   end;
@@ -543,6 +546,7 @@ begin
   inherited;
   Temperature := 1.0;
   AnthropicVersion := '2023-06-01';
+  MaxTokens := 10240;
 end;
 
 destructor TCnClaudeAIEngineOption.Destroy;
