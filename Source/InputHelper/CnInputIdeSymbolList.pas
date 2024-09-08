@@ -561,7 +561,7 @@ var
             Application.ProcessMessages;
         except
 {$IFDEF DEBUG}
-          CnDebugger.LogError('Async Result Exception when Waiting.');
+          CnDebugger.LogMsgError('Async Result Exception when Waiting.');
 {$ENDIF}
         end;
 
