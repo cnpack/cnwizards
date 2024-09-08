@@ -54,19 +54,23 @@ type
     const CurrentTypeName: string) of object;
   {* 扫描 Pascal 源文件时遇到函数过程声明时的回调，其中 ProcLeaf 下的结构类似如下：
     function
-      FunctionName
-      formalparameters
+      <FunctionName>
+      FormalParameters
         (
-          FormalParams
+          FormalParam
             IdentList
               A
               ,
               B
+            :
             CommonType
               TypeID
                 Int64
-          FormalParams
-          FormalParams
+          ;
+          FormalParam
+            ...
+          FormalParam
+            ...
         )
       :
       COMMONTYPE

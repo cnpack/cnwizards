@@ -49,9 +49,9 @@ object FormPasDoc: TFormPasDoc
   end
   object tvPas: TTreeView
     Left = 16
-    Top = 120
+    Top = 152
     Width = 305
-    Height = 345
+    Height = 313
     Indent = 19
     TabOrder = 3
     OnDblClick = tvPasDblClick
@@ -73,6 +73,15 @@ object FormPasDoc: TFormPasDoc
     Caption = 'Check Params List'
     TabOrder = 5
     OnClick = btnCheckParamListClick
+  end
+  object btnGenParamList: TButton
+    Left = 16
+    Top = 112
+    Width = 305
+    Height = 25
+    Caption = 'Generate Params List'
+    TabOrder = 6
+    OnClick = btnGenParamListClick
   end
   object dlgOpen1: TOpenDialog
     Left = 232
