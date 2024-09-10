@@ -2861,6 +2861,7 @@ SCnMsgDlgYes=&Oui
 SCnMsgDlgNo=&Non
 SCnMsgDlgYesToAll=Oui pour &tous
 SCnMsgDlgNoToAll=&Non pour t&ous
+SCnVersion=Version
 SCnSaveDlgTxtFilter=Fichier Texte (*.txt)|*.TXT|Tous les fichiers (*.*)|*.*|
 SCnSaveDlgTitle=Enregistrer sous...
 SCnOverwriteQuery=Le fichier existe déjà , écraser?

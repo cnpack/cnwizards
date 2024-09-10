@@ -112,7 +112,7 @@ end;
 
 procedure TCnWizAboutForm.FormCreate(Sender: TObject);
 begin
-  edtVer.Text := Format('%s %s.%s Build %s', [edtVer.Text,
+  edtVer.Text := Format('%s %s.%s Build %s', [SCnVersion,
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
   Caption := Caption + ' - ' + _CnExtractFileName(WizOptions.DllName);
 end;

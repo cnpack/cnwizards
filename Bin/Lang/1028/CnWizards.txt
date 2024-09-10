@@ -2861,6 +2861,7 @@ SCnMsgDlgYes=是(&Y)
 SCnMsgDlgNo=否(&N)
 SCnMsgDlgYesToAll=全部選是(&A)
 SCnMsgDlgNoToAll=全部選否(&F)
+SCnVersion=版本
 SCnSaveDlgTxtFilter=文字檔案 (*.txt)|*.TXT|所有檔 (*.*)|*.*|
 SCnSaveDlgTitle=保存為...
 SCnOverwriteQuery=檔已經存在，是否覆蓋？

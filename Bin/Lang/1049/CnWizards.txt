@@ -2861,6 +2861,7 @@ SCnMsgDlgYes=Да
 SCnMsgDlgNo=Нет
 SCnMsgDlgYesToAll=Да для всех
 SCnMsgDlgNoToAll=Нет для всех
+SCnVersion=Версия
 SCnSaveDlgTxtFilter=Текстовые файлы (*.txt)|*.TXT|Все файлы (*.*)|*.*|
 SCnSaveDlgTitle=Сохранить как...
 SCnOverwriteQuery=Файл уже существует, перезаписать?
