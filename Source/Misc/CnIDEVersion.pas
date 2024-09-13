@@ -454,13 +454,13 @@ end;
 function IsDelphi120AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 52161; Build: 7750); // 12.1，注意文件换了
+    (Major: 29; Minor: 0; Release: 53571; Build: 9782); // 12.2，注意文件换了
 var
   ReadFileVersion: TVersionNumber;
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
-  LatestUpdate := 'Update 1 (12.1)';
+  LatestUpdate := 'Update 2 (12.2)';
 end;
 
 function IsDelphi11GEDot3: Boolean;
