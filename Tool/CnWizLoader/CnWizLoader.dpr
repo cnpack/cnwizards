@@ -97,8 +97,9 @@ function GetWizardDll: string;
 const
   XE2_UPDATE4_HOTFIX1_RELEASE = 4504;
   XE8_UPDATE1_RELEASE = 19908;
-  RIO_13_2_RELEASE = 34749;
-  SYDNEY_14_1_RELEASE = 38860;
+  RIO_10_3_2_RELEASE = 34749;
+  SYDNEY_10_4_1_RELEASE = 38860;
+  ATHENS_12_2_RELEASE = 53571;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
@@ -160,20 +161,26 @@ begin
     25: Result := Dir + 'CnWizards_D102T.DLL';
     26:
       begin
-        if V.Release < RIO_13_2_RELEASE then  // 10.3.1 或以下采用另一个 DLL
+        if V.Release < RIO_10_3_2_RELEASE then  // 10.3.1 或以下采用另一个 DLL
           Result := Dir + 'CnWizards_D103R1.DLL'
         else
           Result := Dir + 'CnWizards_D103R.DLL';
       end;
     27:
       begin
-        if V.Release < SYDNEY_14_1_RELEASE then  // 10.4.0 采用另一个 DLL
+        if V.Release < SYDNEY_10_4_1_RELEASE then  // 10.4.0 采用另一个 DLL
           Result := Dir + 'CnWizards_D104S1.DLL'
         else
           Result := Dir + 'CnWizards_D104S.DLL';
       end;
     28: Result := Dir + 'CnWizards_D110A.DLL';
-    29: Result := Dir + 'CnWizards_D120A.DLL';
+    29:
+      begin
+        if V.Release < ATHENS_12_2_RELEASE then  // 12.1 采用另一个 DLL
+          Result := Dir + 'CnWizards_D120A1.DLL'
+        else
+          Result := Dir + 'CnWizards_D120A.DLL';
+      end;
   end;
 end;
 
