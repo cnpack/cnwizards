@@ -201,7 +201,7 @@ begin
   // 使窗体可接受文件拖放
   DragAcceptFiles(Handle, True);
   //
-  Application.Title := g_strAppTitle + g_strAppVer;
+  Application.Title := SCnAppTitle + SCnAppVer;
   Caption := Application.Title;
   pgcMain.SendToBack;
   pgcMain.ActivePageIndex := 0;
@@ -212,25 +212,25 @@ begin
     strRootDir := GetAppRootDir(TAbiType(I));
     if strRootDir <> '' then
     begin
-      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[g_strAppName[I], strRootDir]), TObject(1));
+      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[SCnAppName[I], strRootDir]), TObject(1));
     end
     else
     begin
-      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[g_strAppName[I], g_strNotInstalled]), TObject(0));
+      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[SCnAppName[I], SCnNotInstalled]), TObject(0));
     end;
   end;
 
   for I := Ord(Low(TAbiType)) to Ord(High(TAbiType)) do
   begin
-    if FindCmdLineSwitch('I' + g_strAppAbName[I], ['-', '/'], True) then
+    if FindCmdLineSwitch('I' + SCnAppAbName[I], ['-', '/'], True) then
       if lbxSelectApp.Items.Objects[I] = TObject(1) then
         lbxSelectApp.ItemIndex := I;
   end;
 
-  for I := 0 to Length(g_strAbiOptions) - 1 do
+  for I := 0 to Length(SCnAbiOptions) - 1 do
   begin
-    lbxBackupOptions.Items.Add(g_strAbiOptions[I]);
-    lbxRestoreOptions.Items.Add(g_strAbiOptions[I]);
+    lbxBackupOptions.Items.Add(SCnAbiOptions[I]);
+    lbxRestoreOptions.Items.Add(SCnAbiOptions[I]);
   end;
 end;
 
@@ -238,7 +238,7 @@ end;
 procedure TCnIdeBRMainForm.btnNextClick(Sender: TObject);
 var
   i: Integer;
-  m_abi: TAppBuilderInfo;
+  FAbi: TAppBuilderInfo;
 begin
   if pgcMain.ActivePage = tsFirst then
   begin
@@ -271,15 +271,15 @@ begin
     begin
       if (ItemIndex = -1) or (Integer(Items.Objects[ItemIndex]) = 0) then
       begin
-        Application.MessageBox(PChar(g_strErrorSelectApp),
-          PChar(g_strAppTitle), MB_OK or MB_ICONWARNING);
+        Application.MessageBox(PChar(SCnErrorSelectApp),
+          PChar(SCnAppTitle), MB_OK or MB_ICONWARNING);
         exit;
       end;
     end;
 //    备份时似乎 IDE 在运行也不要紧？
 //    if IsAppBuilderRunning(TAbiType(lbxSelectApp.ItemIndex)) then
 //    begin
-//      ErrorDlg(Format(g_strErrorIDERunningFmt, [g_strAppName[lbxSelectApp.ItemIndex]]);
+//      ErrorDlg(Format(SCnErrorIDERunningFmt, [SCnAppName[lbxSelectApp.ItemIndex]]);
 //      Exit;
 //    end;
     for I := 0 to lbxBackupOptions.Items.Count - 1 do
@@ -311,7 +311,7 @@ begin
     begin
       if not MyValidLbxItemChecked(lbxBackupOptions) then
       begin
-        ErrorDlg(g_strErrorSelectBackup, SCnErrorCaption);
+        ErrorDlg(SCnErrorSelectBackup, SCnErrorCaption);
         SetFocus;
         Exit;
       end;
@@ -319,7 +319,7 @@ begin
 
     if Length(Trim(edtBackupFile.Text)) = 0 then
     begin
-      ErrorDlg(g_strErrorFileName, SCnErrorCaption);
+      ErrorDlg(SCnErrorFileName, SCnErrorCaption);
       edtBackupFile.SetFocus;
       Exit;
     end;
@@ -328,29 +328,29 @@ begin
     pgcMain.ActivePage := tsResult;
 
     // 进行备份操作
-    if m_abi <> nil then
-      FreeAndNil(m_abi);
+    if FAbi <> nil then
+      FreeAndNil(FAbi);
     btnClose.Enabled := False;
     m_bCanClose := False;
     Screen.Cursor := crHourGlass;
 
     // 创建 TAppBuilderInfo 对象
     try
-      m_abi := TAppBuilderInfo.Create(
+      FAbi := TAppBuilderInfo.Create(
           Handle, TAbiType(lbxSelectApp.ItemIndex));
       if lbxBackupOptions.Checked[0] then
-        m_abi.m_AbiOption := [aoCodeTemp];
+        FAbi.AbiOptions := [aoCodeTemp];
       if lbxBackupOptions.Checked[1] then
-        m_abi.m_AbiOption := m_abi.m_AbiOption + [aoObjRep];
+        FAbi.AbiOptions := FAbi.AbiOptions + [aoObjRep];
       if lbxBackupOptions.Checked[2] then
-        m_abi.m_AbiOption := m_abi.m_AbiOption + [aoRegInfo];
+        FAbi.AbiOptions := FAbi.AbiOptions + [aoRegInfo];
       if lbxBackupOptions.Checked[3] then
-        m_abi.m_AbiOption := m_abi.m_AbiOption + [aoMenuTemp];
+        FAbi.AbiOptions := FAbi.AbiOptions + [aoMenuTemp];
 
-      m_abi.BackupInfoToFile(edtBackupFile.Text, chkSaveUsrObjRep2Sys.Checked);
+      FAbi.BackupInfoToFile(edtBackupFile.Text, chkSaveUsrObjRep2Sys.Checked);
       FDone := True;
     finally
-      FreeAndNil(m_abi);
+      FreeAndNil(FAbi);
       btnClose.Enabled := True;
       m_bCanClose := True;
       Screen.Cursor := crDefault;
@@ -365,13 +365,13 @@ begin
     end;
     if Length(Trim(edtRestoreFile.Text)) = 0 then
     begin
-      ErrorDlg(g_strErrorSelectFile, SCnErrorCaption);
+      ErrorDlg(SCnErrorSelectFile, SCnErrorCaption);
       edtRestoreFile.SetFocus;
       Exit;
     end;
     if Not FileExists(edtRestoreFile.Text) then
     begin
-      ErrorDlg(g_strErrorFileNotExist, SCnErrorCaption);
+      ErrorDlg(SCnErrorFileNotExist, SCnErrorCaption);
       Exit;
     end;
     if edtRestoreRootPath.Text <> GetAppRootDir(m_atRestore) then
@@ -385,12 +385,12 @@ begin
   begin
     if edtRestoreRootPath.Text <> GetAppRootDir(m_atRestore) then
     begin
-      ErrorDlg(g_strErrorNoIDE, SCnErrorCaption);
+      ErrorDlg(SCnErrorNoIDE, SCnErrorCaption);
       Exit;
     end;
     if not MyValidLbxItemChecked(lbxRestoreOptions) then
     begin
-      ErrorDlg(g_strErrorSelectRestore, SCnErrorCaption);
+      ErrorDlg(SCnErrorSelectRestore, SCnErrorCaption);
       lbxRestoreOptions.SetFocus;
       Exit;
     end;
@@ -406,28 +406,28 @@ begin
 
       // 进行恢复操作
       try
-        m_abi := TAppBuilderInfo.Create(Handle, m_atRestore);
-        m_abi.m_AbiOption := [];
+        FAbi := TAppBuilderInfo.Create(Handle, m_atRestore);
+        FAbi.AbiOptions := [];
         if lbxRestoreOptions.Checked[0] then
-          m_abi.m_AbiOption := [aoCodeTemp];
+          FAbi.AbiOptions := [aoCodeTemp];
         if lbxRestoreOptions.Checked[1] then
-          m_abi.m_AbiOption := m_abi.m_AbiOption + [aoObjRep];
+          FAbi.AbiOptions := FAbi.AbiOptions + [aoObjRep];
         if lbxRestoreOptions.Checked[2] then
-          m_abi.m_AbiOption := m_abi.m_AbiOption + [aoRegInfo];
+          FAbi.AbiOptions := FAbi.AbiOptions + [aoRegInfo];
         if lbxRestoreOptions.Checked[3] then
-          m_abi.m_AbiOption := m_abi.m_AbiOption + [aoMenuTemp];
+          FAbi.AbiOptions := FAbi.AbiOptions + [aoMenuTemp];
 
-        m_abi.RestoreInfoFromFile(edtRestoreFile.Text);
+        FAbi.RestoreInfoFromFile(edtRestoreFile.Text);
         FDone := True;
       finally
-        FreeAndNil(m_abi);
+        FreeAndNil(FAbi);
         btnClose.Enabled := True;
         m_bCanClose := True;
         Screen.Cursor := crDefault;
       end;
     end
     else
-      ErrorDlg(Format(g_strErrorIDERunningFmt, [g_strAppName[Integer(m_atRestore)]]), SCnErrorCaption);
+      ErrorDlg(Format(SCnErrorIDERunningFmt, [SCnAppName[Integer(m_atRestore)]]), SCnErrorCaption);
   end
   else if pgcMain.ActivePage = tsOther then
   begin
@@ -700,20 +700,20 @@ begin
   try
     ao := ParseBakFile(strBakFile, strRootDir, strAppName, m_atRestore);
   except
-    mmoBakFileInfo.Lines.Add(g_strFileInvalid);
+    mmoBakFileInfo.Lines.Add(SCnFileInvalid);
   end;
   if ao = [] then
   begin
     btnNext.Enabled := False;
-    mmoBakFileInfo.Lines.Add(g_strFileInvalid);
+    mmoBakFileInfo.Lines.Add(SCnFileInvalid);
   end
   else
   begin
     btnNext.Enabled := True;
     mmoBakFileInfo.Lines.Clear;
-    mmoBakFileInfo.Lines.Add(g_strIDEName + #13#10 + '　　' + strAppName);
-    mmoBakFileInfo.Lines.Add(g_strInstallDir + #13#10 + '　　' + strRootDir);
-    mmoBakFileInfo.Lines.Add(g_strBackupContent);
+    mmoBakFileInfo.Lines.Add(SCnIDEName + #13#10 + '　　' + strAppName);
+    mmoBakFileInfo.Lines.Add(SCnInstallDir + #13#10 + '　　' + strRootDir);
+    mmoBakFileInfo.Lines.Add(SCnBackupContent);
 
     for i := 0 to lbxRestoreOptions.Items.Count - 1 do
       lbxRestoreOptions.Checked[i] := False;
@@ -721,22 +721,22 @@ begin
     if aoCodeTemp in ao then
     begin
       lbxRestoreOptions.Checked[0] := True;
-      mmoBakFileInfo.Lines.Add('　　' + g_strAbiOptions[0]);
+      mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[0]);
     end;
     if aoObjRep in ao then
     begin
       lbxRestoreOptions.Checked[1] := True;
-      mmoBakFileInfo.Lines.Add('　　' + g_strAbiOptions[1]);
+      mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[1]);
     end;
     if aoRegInfo in ao then
     begin
       lbxRestoreOptions.Checked[2] := True;
-      mmoBakFileInfo.Lines.Add('　　' + g_strAbiOptions[2]);
+      mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[2]);
     end;
     if aoMenuTemp in ao then
     begin
       lbxRestoreOptions.Checked[3] := True;
-      mmoBakFileInfo.Lines.Add('　　' + g_strAbiOptions[3]);
+      mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[3]);
     end;
 
     lbxRestoreOptions.Items.Objects[0] := TObject(Integer(aoCodeTemp in ao));
@@ -747,11 +747,11 @@ begin
     lbxRestoreOptions.Enabled := True;
     edtRestoreRootPath.Text := GetAppRootDir(m_atRestore);
 
-    if (strAppName = g_strAppName[6]) or (strAppName = g_strAppName[7]) then
+    if (strAppName = SCnAppName[6]) or (strAppName = SCnAppName[7]) then
       lbxRestoreOptions.ItemEnabled[0] := False;
 
     if Length(edtRestoreRootPath.Text) < 2 then
-      edtRestoreRootPath.Text := strAppName + g_strIDENotInstalled;
+      edtRestoreRootPath.Text := strAppName + SCnIDENotInstalled;
   end;
   pgcMain.ActivePage := tsPreRestore;
 end;
@@ -805,7 +805,7 @@ begin
     btnNext.Visible := True;
     btnNext.Enabled := True;
     edtBackupFile.Text := MakePath(GetMyDocumentsDir) 
-        + g_strAppAbName[lbxSelectApp.ItemIndex]
+        + SCnAppAbName[lbxSelectApp.ItemIndex]
         + FormatDateTime('_yyyymmdd', Now()) + '.bic';
   end
   else if ts = tsRestore then
@@ -1191,43 +1191,43 @@ end;
 
 procedure TCnIdeBRMainForm.TranslateStrings;
 begin
-  TranslateStrArray(g_strOpResult, 'g_strOpResult');
-  TranslateStrArray(g_strAbiOptions, 'g_strAbiOptions');
-  TranslateStr(g_strFileInvalid, 'g_strFileInvalid');
-  TranslateStr(g_strBackup, 'g_strBackup');
-  TranslateStr(g_strRestore, 'g_strRestore');
-  TranslateStr(g_strBackuping, 'g_strBackuping');
-  TranslateStr(g_strAnalyzing, 'g_strAnalyzing');
-  TranslateStr(g_strRestoring, 'g_strRestoring');
-  TranslateStr(g_strCreating, 'g_strCreating');
-  TranslateStr(g_strNotFound, 'g_strNotFound');
-  TranslateStr(g_strObjRepConfig, 'g_strObjRepConfig');
-  TranslateStr(g_strObjRepUnit, 'g_strObjRepUnit');
-  TranslateStr(g_strPleaseWait, 'g_strPleaseWait');
-  TranslateStr(g_strUnkownName, 'g_strUnkownName');
-  TranslateStr(g_strBakFile, 'g_strBakFile');
-  TranslateStr(g_strCreate, 'g_strCreate');
-  TranslateStr(g_strAnalyseSuccess, 'g_strAnalyseSuccess');
-  TranslateStr(g_strBackupSuccess, 'g_strBackupSuccess');
-  TranslateStr(g_strThanksForRestore, 'g_strThanksForRestore');
-  TranslateStr(g_strThanksForBackup, 'g_strThanksForBackup');
-  TranslateStr(g_strPleaseCheckFile, 'g_strPleaseCheckFile');
-  TranslateStr(g_strAppTitle, 'g_strAppTitle');
-  TranslateStr(g_strBugReportToMe, 'g_strBugReportToMe');
+  TranslateStrArray(SCnOpResult, 'SCnOpResult');
+  TranslateStrArray(SCnAbiOptions, 'SCnAbiOptions');
+  TranslateStr(SCnFileInvalid, 'SCnFileInvalid');
+  TranslateStr(SCnBackup, 'SCnBackup');
+  TranslateStr(SCnRestore, 'SCnRestore');
+  TranslateStr(SCnBackuping, 'SCnBackuping');
+  TranslateStr(SCnAnalyzing, 'SCnAnalyzing');
+  TranslateStr(SCnRestoring, 'SCnRestoring');
+  TranslateStr(SCnCreating, 'SCnCreating');
+  TranslateStr(SCnNotFound, 'SCnNotFound');
+  TranslateStr(SCnObjRepConfig, 'SCnObjRepConfig');
+  TranslateStr(SCnObjRepUnit, 'SCnObjRepUnit');
+  TranslateStr(SCnPleaseWait, 'SCnPleaseWait');
+  TranslateStr(SCnUnkownName, 'SCnUnkownName');
+  TranslateStr(SCnBakFile, 'SCnBakFile');
+  TranslateStr(SCnCreate, 'SCnCreate');
+  TranslateStr(SCnAnalyseSuccess, 'SCnAnalyseSuccess');
+  TranslateStr(SCnBackupSuccess, 'SCnBackupSuccess');
+  TranslateStr(SCnThanksForRestore, 'SCnThanksForRestore');
+  TranslateStr(SCnThanksForBackup, 'SCnThanksForBackup');
+  TranslateStr(SCnPleaseCheckFile, 'SCnPleaseCheckFile');
+  TranslateStr(SCnAppTitle, 'SCnAppTitle');
+  TranslateStr(SCnBugReportToMe, 'SCnBugReportToMe');
 
-  TranslateStr(g_strIDEName, 'g_strIDEName');
-  TranslateStr(g_strInstallDir, 'g_strInstallDir');
-  TranslateStr(g_strBackupContent,  'g_strBackupContent');
-  TranslateStr(g_strIDENotInstalled, 'g_strIDENotInstalled');
-  TranslateStr(g_strErrorSelectApp, 'g_strErrorSelectApp');
-  TranslateStr(g_strErrorSelectBackup, 'g_strErrorSelectBackup');
-  TranslateStr(g_strErrorFileName, 'g_strErrorFileName');
-  TranslateStr(g_strErrorSelectFile, 'g_strErrorSelectFile');
-  TranslateStr(g_strErrorFileNotExist, 'g_strErrorFileNotExist');
-  TranslateStr(g_strErrorNoIDE, 'g_strErrorNoIDE');
-  TranslateStr(g_strErrorSelectRestore, 'g_strErrorSelectRestore');
-  TranslateStr(g_strErrorIDERunningFmt, 'g_strErrorIDERunningFmt');
-  TranslateStr(g_strNotInstalled, 'g_strNotInstalled');
+  TranslateStr(SCnIDEName, 'SCnIDEName');
+  TranslateStr(SCnInstallDir, 'SCnInstallDir');
+  TranslateStr(SCnBackupContent,  'SCnBackupContent');
+  TranslateStr(SCnIDENotInstalled, 'SCnIDENotInstalled');
+  TranslateStr(SCnErrorSelectApp, 'SCnErrorSelectApp');
+  TranslateStr(SCnErrorSelectBackup, 'SCnErrorSelectBackup');
+  TranslateStr(SCnErrorFileName, 'SCnErrorFileName');
+  TranslateStr(SCnErrorSelectFile, 'SCnErrorSelectFile');
+  TranslateStr(SCnErrorFileNotExist, 'SCnErrorFileNotExist');
+  TranslateStr(SCnErrorNoIDE, 'SCnErrorNoIDE');
+  TranslateStr(SCnErrorSelectRestore, 'SCnErrorSelectRestore');
+  TranslateStr(SCnErrorIDERunningFmt, 'SCnErrorIDERunningFmt');
+  TranslateStr(SCnNotInstalled, 'SCnNotInstalled');
   TranslateStr(SCnIDERunning, 'SCnIDERunning');
   TranslateStr(SCnQuitAsk, 'SCnQuitAsk');
   TranslateStr(SCnQuitAskCaption, 'SCnQuitAskCaption');
