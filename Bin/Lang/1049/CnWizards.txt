@@ -2862,6 +2862,7 @@ SCnMsgDlgNo=Нет
 SCnMsgDlgYesToAll=Да для всех
 SCnMsgDlgNoToAll=Нет для всех
 SCnVersion=Версия
+SCnNeedAdmin=Возможно, потребуются права администратора.
 SCnSaveDlgTxtFilter=Текстовые файлы (*.txt)|*.TXT|Все файлы (*.*)|*.*|
 SCnSaveDlgTitle=Сохранить как...
 SCnOverwriteQuery=Файл уже существует, перезаписать?

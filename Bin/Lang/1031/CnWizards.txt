@@ -2862,6 +2862,7 @@ SCnMsgDlgNo=&Nein
 SCnMsgDlgYesToAll=Ja zu &allen
 SCnMsgDlgNoToAll=nein zu a&llen
 SCnVersion=Version
+SCnNeedAdmin=Es könnte Administratorrechte erforderlich sein.
 SCnSaveDlgTxtFilter=Text Datei (*.txt)|*.TXT|alle Dateien (*.*)|*.*|
 SCnSaveDlgTitle=speichern als...
 SCnOverwriteQuery=Datei existiert bereits! Überschreiben?
