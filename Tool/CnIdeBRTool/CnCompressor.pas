@@ -40,14 +40,14 @@ uses
 
 type
   THeaderStruct = packed record
-    dwSign: DWORD; // 文件标志
+    dwSign: DWORD;                   // 文件标志
     szReserve: array[0..19] of Char; // 保留
-    btAbiType: Byte;  // IDE的类型
-    btAbiOption: Byte;  // 备份的选项
-    szAppRootPath: array[0..MAX_PATH] of char;
-    nFileTableOffset: Integer; // 文件表偏移值
-    nFileCount: Integer; // 文件总数
-    btCheckSum: Byte;  // 文件头校验和
+    btAbiType: Byte;                 // IDE的类型
+    btAbiOption: Byte;               // 备份的选项
+    szAppRootPath: array[0..MAX_PATH] of Char;
+    nFileTableOffset: Integer;       // 文件表偏移值
+    nFileCount: Integer;             // 文件总数
+    btCheckSum: Byte;                // 文件头校验和
   end;
 
   PFileEntry = ^TFileEntry;
@@ -59,7 +59,7 @@ type
     strFileName: Char;
   end;
 
-  TCompressionQuery = function(const strLocalFileName: String): Boolean of object;
+  TCompressionQuery = function(const LocalFileName: string): Boolean of object;
 
   TCompressor = class
   private
@@ -67,12 +67,12 @@ type
     FFiles: TList;
     FPosition: Int64;
     FOnCompressionQuery: TCompressionQuery;
-    function CanCompress(const strFileName: String): Boolean;
+    function CanCompress(const strFileName: string): Boolean;
   public
     constructor Create(OutputStream: TStream);
-    destructor Destroy;override;
-    procedure AddFile(const strLocalFileName: String; const strPackageFileName: String);
-    procedure AddFolder(const strFolder: String);
+    destructor Destroy; override;
+    procedure AddFile(const LocalFileName: string; const PackageFileName: string);
+    procedure AddFolder(const Folder: string);
     property OnCompressionQuery: TCompressionQuery read FOnCompressionQuery write FOnCompressionQuery;
   end;
 
@@ -89,43 +89,48 @@ type
     function FirstFile: PFileEntry;
     function NextFile: PFileEntry;
     procedure ReadFile(FileEntry: PFileEntry;Stream: TStream);
-    function Extract(const strOutputDir: String): Integer;
+    function Extract(const OutputDir: string): Integer;
   end;
 
 const
   CompressSign = $00434942; {BIC0}
   XorKey: Byte = $C2; // 异或的键值
-  function GetHashCode(const Str: String): Cardinal;
-  function CreateFileEntry(Offset: DWORD; dwSizeBeforeCompress: DWORD;
-      dwSizeAfterCompress: DWORD; const strFileName: String): PFileEntry;
-  function ExtractFileSize(const strName: String): Integer;
-  procedure CreateDirectory(const strPath: String; dwAttributes: DWORD);
+
+function GetHashCode(const Str: string): Cardinal;
+
+function CreateFileEntry(Offset: DWORD; dwSizeBeforeCompress: DWORD;
+  dwSizeAfterCompress: DWORD; const strFileName: string): PFileEntry;
+
+function ExtractFileSize(const strName: string): Integer;
+
+procedure CreateDirectory(const strPath: string; dwAttributes: DWORD);
 
 implementation
 
-//------------------------------------------------------------------------------
-procedure strenc(s: PChar);
+procedure StrEnc(S: PChar);
 begin
-  while s^ <> #0 do
+  while S^ <> #0 do
   begin
-    Byte(s^) := Byte(s^) xor XorKey;
-    Inc(s);
+    Byte(S^) := Byte(S^) xor XorKey;
+    Inc(S);
   end;
 end;
-//------------------------------------------------------------------------------
-function ExtractFileSize(const strName: String): Integer;
+
+function ExtractFileSize(const strName: string): Integer;
 var
   hFile: THandle;
 begin
   Result := -1;
   hFile := CreateFile(PChar(strName), GENERIC_READ, 0, NIL, OPEN_EXISTING, 0, 0);
-  if hFile = INVALID_HANDLE_VALUE then exit;
+  if hFile = INVALID_HANDLE_VALUE then
+    Exit;
+
   Result := SetFilePointer(hFile, 0, nil, FILE_END);
   CloseHandle(hFile);
 end;
-//------------------------------------------------------------------------------
+
 function CreateFileEntry(Offset: DWORD; dwSizeBeforeCompress: DWORD;
-    dwSizeAfterCompress: DWORD; const strFileName: String): PFileEntry;
+    dwSizeAfterCompress: DWORD; const strFileName: string): PFileEntry;
 var
   dwRecordSize: DWORD;
 begin
@@ -136,18 +141,18 @@ begin
   Result^.dwSizeAfterCompress := dwSizeAfterCompress;
   Result^.dwNextFileEntryOffset := dwRecordSize;
   lstrcpy(@Result^.strFileName, PChar(strFileName));
-  strenc(@Result^.strFileName);
+  StrEnc(@Result^.strFileName);
 end;
-//------------------------------------------------------------------------------
-function GetHashCode(const Str: String): Cardinal;
+
+function GetHashCode(const Str: string): Cardinal;
 var
-  nOff, nLen, nSkip, i: Integer;
+  nOff, nLen, nSkip, I: Integer;
 begin
   Result := 0;
   nOff := 1;
   nLen := Length(Str);
   if nLen < 16 then
-  for i := (nLen - 1) downto 0 do
+  for I := (nLen - 1) downto 0 do
   begin
     Result := (Result * 37) + Ord(Str[nOff]);
     Inc(nOff);
@@ -156,17 +161,17 @@ begin
   begin
     { Only sample some characters }
     nSkip := nLen div 8;
-    i := nLen - 1;
-    while i >= 0 do
+    I := nLen - 1;
+    while I >= 0 do
     begin
       Result := (Result * 39) + Ord(Str[nOff]);
-      Dec(i, nSkip);
+      Dec(I, nSkip);
       Inc(nOff, nSkip);
     end;
   end;
 end;
-//------------------------------------------------------------------------------
-procedure CreateDirectory(const strPath: String; dwAttributes: DWORD);
+
+procedure CreateDirectory(const strPath: string; dwAttributes: DWORD);
 var
   lpPath: PChar;
   lpTemp: PChar;
@@ -176,12 +181,13 @@ var
     while lpTemp^ <> #0 do
     begin
       if lpTemp^ = '\' then
-        exit;
+        Exit;
       Inc(lpTemp);
     end;
   end;
 begin
-  if DirectoryExists(strPath) then exit;
+  if DirectoryExists(strPath) then
+    Exit;
   FillChar(szBuffer, sizeof(szBuffer), 0);
   lstrcpy(@szBuffer, PChar(strPath));
   lpPath := @szBuffer;
@@ -202,10 +208,7 @@ begin
     Inc(lpTemp);
   end;
 end;
-//------------------------------------------------------------------------------
 
-
-//------------------------------------------------------------------------------
 constructor TCompressor.Create(OutputStream: TStream);
 var
   Header: THeaderStruct;
@@ -222,19 +225,19 @@ begin
   Header.nFileCount := 0;
   FStream.WriteBuffer(Header,sizeof(Header));
 end;
-//------------------------------------------------------------------------------
+
 destructor TCompressor.Destroy;
 var
-  i, nLast: Integer;
+  I, nLast: Integer;
   pEntry: PFileEntry;
   lPos, lFileEntryOffset: Int64;
   Header: THeaderStruct;
 begin
   lFileEntryOffset := FStream.Position - FPosition;
   nLast := FFiles.Count -1;
-  for i := 0 to nLast do
+  for I := 0 to nLast do
   begin
-    pEntry := FFiles[i];
+    pEntry := FFiles[I];
     FStream.WriteBuffer(pEntry^, pEntry^.dwNextFileEntryOffset);
     FreeMem(pEntry);
   end;
@@ -249,76 +252,79 @@ begin
   FFiles.Free;
   inherited;
 end;
-//------------------------------------------------------------------------------
-procedure TCompressor.AddFile(const strLocalFileName: String; const strPackageFileName: String);
+
+procedure TCompressor.AddFile(const LocalFileName: string; const PackageFileName: string);
 var
   pEntry: PFileEntry;
   lOffset: Int64;
   dwSizeBeforeCompress: DWORD;
-  fs: TFileStream;
-  cs: TCompressionStream;
+  FS: TFileStream;
+  CS: TCompressionStream;
 begin
   lOffset := FStream.Position - FPosition;
-  dwSizeBeforeCompress := ExtractFileSize(strLocalFileName);
-  pEntry := CreateFileEntry(lOffset,dwSizeBeforeCompress,0,strPackageFileName);
+  dwSizeBeforeCompress := ExtractFileSize(LocalFileName);
+  pEntry := CreateFileEntry(lOffset,dwSizeBeforeCompress,0,PackageFileName);
   FFiles.Add(pEntry);
-  fs := nil;
+  FS := nil;
   try
-    fs := TFileStream.Create(strLocalFileName, fmOpenRead);
-    cs := TCompressionStream.Create(clFastest, FStream);
-    cs.CopyFrom(fs,fs.Size);
+    FS := TFileStream.Create(LocalFileName, fmOpenRead);
+    CS := TCompressionStream.Create(clFastest, FStream);
+    CS.CopyFrom(FS,FS.Size);
   finally
-    FreeAndNil(cs);
-    FreeAndNil(fs);
+    FreeAndNil(CS);
+    FreeAndNil(FS);
   end;
-  end;
-//------------------------------------------------------------------------------
-function TCompressor.CanCompress(const strFileName: String): Boolean;
+end;
+
+function TCompressor.CanCompress(const strFileName: string): Boolean;
 begin
   if Assigned(FOnCompressionQuery) then
     Result := FOnCompressionQuery(strFileName)
   else
     Result := True;
 end;
-//------------------------------------------------------------------------------
-procedure TCompressor.AddFolder(const strFolder: String);
+
+procedure TCompressor.AddFolder(const Folder: string);
 var
-  strPath: String;
-  strFileName: String;
-  procedure GetFiles(strParentFolder: String; strParent: String);
+  strPath: string;
+  strFileName: string;
+
+  procedure GetFiles(const strParentFolder: string; const strParent: string);
   var
-    strPattern: String;
-    sr: TSearchRec;
+    strPattern: string;
+    SR: TSearchRec;
     nRet: Integer;
   begin
     strPattern := strParentFolder + '*.*';
-    nRet := FindFirst(strPattern, faAnyFile, sr);
+    nRet := FindFirst(strPattern, faAnyFile, SR);
     while nRet = 0 do
     begin
-      if(sr.Attr and faDirectory) = faDirectory then
+      if(SR.Attr and faDirectory) = faDirectory then
       begin
-        if(CompareStr(sr.Name, '.') <> 0) and (CompareStr(sr.Name, '..') <> 0) then
-          GetFiles(strParentFolder + sr.Name + '\', strParent + sr.Name + '\');
+        if(CompareStr(SR.Name, '.') <> 0) and (CompareStr(SR.Name, '..') <> 0) then
+          GetFiles(strParentFolder + SR.Name + '\', strParent + SR.Name + '\');
       end
       else
       begin
-        strFileName := strParentFolder + sr.Name;
+        strFileName := strParentFolder + SR.Name;
         if CanCompress(strFileName) then
         begin
-          AddFile(strFileName, strParent + sr.Name);
+          AddFile(strFileName, strParent + SR.Name);
         end;
       end;
-      nRet := FindNext(sr);
+      nRet := FindNext(SR);
     end;
-    FindClose(sr);
+    FindClose(SR);
   end;
 begin
-if not DirectoryExists(strFolder) then exit;
-  strPath := strFolder;
-  if strPath[Length(strPath)]<>'\' then strPath := strPath+'\';
-  GetFiles(strPath,'');
+  if not DirectoryExists(Folder) then
+    Exit;
+  strPath := Folder;
+  if strPath[Length(strPath)] <> '\' then
+    strPath := strPath+'\';
+  GetFiles(strPath, '');
 end;
-//------------------------------------------------------------------------------
+
 constructor TDecompressor.Create(InputStream: TStream);
 begin
   FStream := InputStream;
@@ -330,11 +336,11 @@ begin
   if FHeader.dwSign <> CompressSign then
     raise ERangeError.Create('文件格式有误');
 end;
-//------------------------------------------------------------------------------
+
 destructor TDecompressor.Destroy;
 begin
 end;
-//------------------------------------------------------------------------------
+
 function TDecompressor.FirstFile: PFileEntry;
 var
   pEntry: TFileEntry;
@@ -342,7 +348,7 @@ begin
   FFilePos := FHeader.nFileTableOffset + FPosition;
   FFileIndex := 1;
   Result := nil;
-  if FFileIndex>FHeader.nFileCount  then exit;
+  if FFileIndex>FHeader.nFileCount  then Exit;
 
   FStream.Position := FFilePos;
   FStream.ReadBuffer(pEntry, sizeof(pEntry));
@@ -350,26 +356,26 @@ begin
   GetMem(Result, pEntry.dwNextFileEntryOffset);
   FStream.Position := FFilePos;
   FStream.ReadBuffer(Result^, pEntry.dwNextFileEntryOffset);
-  strenc(@Result^.strFileName);
+  StrEnc(@Result^.strFileName);
   FFilePos := FFilePos+pEntry.dwNextFileEntryOffset;
 end;
-//------------------------------------------------------------------------------
+
 function TDecompressor.NextFile: PFileEntry;
 var
   pEntry: TFileEntry;
 begin
   Inc(FFileIndex);
   Result := nil;
-  if FFileIndex>FHeader.nFileCount then exit;
+  if FFileIndex>FHeader.nFileCount then Exit;
   FStream.Position := FFilePos;
   FStream.ReadBuffer(pEntry, sizeof(pEntry));
   GetMem(Result, pEntry.dwNextFileEntryOffset);
   FStream.Position := FFilePos;
   FStream.ReadBuffer(Result^, pEntry.dwNextFileEntryOffset);
-  strenc(@Result^.strFileName);
+  StrEnc(@Result^.strFileName);
   FFilePos := FFilePos+pEntry.dwNextFileEntryOffset ;
 end;
-//------------------------------------------------------------------------------
+
 procedure TDecompressor.ReadFile(FileEntry: PFileEntry; Stream: TStream);
 var
   ds: TDecompressionStream;
@@ -382,16 +388,16 @@ begin
     ds.Free ;
   end;
 end;
-//------------------------------------------------------------------------------
-function TDecompressor.Extract(const strOutputDir: String): Integer;
+
+function TDecompressor.Extract(const OutputDir: string): Integer;
 var
   pEntry: PFileEntry;
-  strFileName: String;
-  strPath: String;
-  FilePath: String;
-  fs: TFileStream;
+  strFileName: string;
+  strPath: string;
+  FilePath: string;
+  FS: TFileStream;
 begin
-  strPath := strOutputDir;
+  strPath := OutputDir;
   strPath := strPath + '\';
   pEntry := FirstFile;
   Result := 0;
@@ -402,13 +408,13 @@ begin
     FilePath := _CnExtractFilePath(strFileName);
     if not DirectoryExists(FilePath) then
       CreateDirectory(FilePath, 0);
-    fs := nil;
+    FS := nil;
     try
-    fs := TFileStream.Create(strFileName, fmCreate);
+    FS := TFileStream.Create(strFileName, fmCreate);
     if pEntry^.dwSizeBeforeCompress <> 0 then
-      ReadFile(pEntry, fs);
+      ReadFile(pEntry, FS);
     finally
-      FreeAndNil(fs);
+      FreeAndNil(FS);
     end;
     FreeMem(pEntry);
     pEntry := NextFile;

@@ -82,9 +82,9 @@ type
     destructor Destroy; override;
 
     // 保存所有信息到文件
-    procedure BackupInfoToFile(const strBakFileName: string; bFlag: Boolean);
+    procedure BackupInfoToFile(const BackFileName: string; bFlag: Boolean);
     // 从文件中装载所有信息
-    function RestoreInfoFromFile(const strBakFileName: string): Boolean;
+    function RestoreInfoFromFile(const BackFileName: string): Boolean;
 
     // 备份/恢复选项
     property AbiOptions: TAbiOptions read FAbiOptions write FAbiOptions;
@@ -95,12 +95,12 @@ type
 //------------------------------------------------------------------------------
 
 // 获取 AppBuilder 安装目录
-function GetAppRootDir(at: TAbiType): string;
+function GetAppRootDir(AbiType: TAbiType): string;
 // 分析备份文件
-function ParseBakFile(strBakFileName: string;
-  var strRootDir, strAppName: string; var at: TAbiType): TAbiOptions;
+function ParseBackFile(const BackFileName: string;
+  var RootDir, AppName: string; var AbiType: TAbiType): TAbiOptions;
 // 操作结果的字符串
-function OpResult(bResult: Boolean): string;
+function OpResult(Res: Boolean): string;
 // 临时目录
 function MyGetTempPath(AFileName: string): string;
 // AppBuilder 是否在运行中
@@ -160,17 +160,17 @@ begin
 end;
 
 // 将信息保存到备份文件
-procedure TAppBuilderInfo.BackupInfoToFile(const strBakFileName: string; bFlag: Boolean);
+procedure TAppBuilderInfo.BackupInfoToFile(const BackFileName: string; bFlag: Boolean);
 var
   CMR: TCompressor;
   MS: TFileStream;
   AFileName, ARegFile: string;
-  bResult: Boolean;
+  Res: Boolean;
   Header: THeaderStruct;
-  btCheckSum: Byte;
+  CheckSum: Byte;
   I: Integer;
   pHeader: PByte;
-  szBuf: array[0..MAX_PATH] of Char;
+  Buf: array[0..MAX_PATH] of Char;
 begin
   FSaveUsrObjRep2Sys := bFlag;
 
@@ -186,9 +186,9 @@ begin
 
     if FileExists(AFileName) then
     begin
-      bResult := CopyFile(PChar(AFileName),
+      Res := CopyFile(PChar(AFileName),
           PChar(FTempPath + GetAbiOptionFile(aoCodeTemp)), False);
-      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoCodeTemp)] + SCnBackup + OpResult(bResult));
+      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoCodeTemp)] + SCnBackup + OpResult(Res));
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnAbiOptions[Ord(aoCodeTemp)]);
@@ -206,10 +206,10 @@ begin
 
     if FileExists(AFileName) then
     begin
-      bResult := CopyFile(PChar(AFileName),
+      Res := CopyFile(PChar(AFileName),
           PChar(FTempPath + GetAbiOptionFile(aoObjRep)), False);
       OutputLog(FAppName + ' ' + SCnObjRepConfig
-          + SCnBackup + OpResult(bResult));
+          + SCnBackup + OpResult(Res));
 
       SaveObjRep(FTempPath + GetAbiOptionFile(aoObjRep));
     end
@@ -226,9 +226,9 @@ begin
       AFileName := FRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp);
     if FileExists(AFileName) then
     begin
-      bResult := CopyFile(PChar(AFileName),
+      Res := CopyFile(PChar(AFileName),
           PChar(FTempPath + GetAbiOptionFile(aoMenuTemp)), False);
-      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)] + SCnBackup + OpResult(bResult));
+      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)] + SCnBackup + OpResult(Res));
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)]);
@@ -249,7 +249,7 @@ begin
 
   // 压缩这些文件
   try
-    MS := TFileStream.Create(strBakFileName, fmCreate);
+    MS := TFileStream.Create(BackFileName, fmCreate);
   except
     OutputLog(SCnErrorCaption + '! ' + SCnPleaseCheckFile);
     Exit;
@@ -266,33 +266,33 @@ begin
   // 备份文件的选项
   Header.btAbiOption := Byte(AbiOptions);
   // AppBuilder 安装目录
-  StrCopy(szBuf, PChar(FRootDir));
+  StrCopy(Buf, PChar(FRootDir));
   for I := 0 to Length(FRootDir) - 1 do
-    szBuf[I] := Char(Byte(szBuf[I]) xor XorKey);
+    Buf[I] := Char(Byte(Buf[I]) xor XorKey);
 
-  szBuf[Length(FRootDir)] := Char(XorKey);
-  StrCopy(Header.szAppRootPath, szBuf);
+  Buf[Length(FRootDir)] := Char(XorKey);
+  StrCopy(Header.szAppRootPath, Buf);
 
   // 文件头校验和（除去校验字节本身）
   pHeader := PByte(@Header);
-  btCheckSum := 0;
+  CheckSum := 0;
   for I := 0 to SizeOf(Header) - 2 do
   begin
-    btCheckSum := btCheckSum xor pHeader^;
+    CheckSum := CheckSum xor pHeader^;
     Inc(pHeader);
   end;
-  Header.btCheckSum := btCheckSum;
+  Header.btCheckSum := CheckSum;
 
   // 写回文件头
   MS.Position := 0;
   MS.Write(Header, sizeof(Header));
   FreeAndNil(MS);
   //
-  bResult := FileExists(strBakFileName);
+  Res := FileExists(BackFileName);
   OutputLog(SCnBakFile + SCnCreate
-      + OpResult(bResult) + #13#10 + strBakFileName, 1);
+      + OpResult(Res) + #13#10 + BackFileName, 1);
   OutputLog('----------------------------------------');
-  if bResult then
+  if Res then
     OutputLog(SCnThanksForBackup)
   else
     OutputLog(SCnPleaseCheckFile);
@@ -337,7 +337,7 @@ function TAppBuilderInfo.SaveKey2File: string;
     Result := string(PChar(Result));
   end;
 var
-  bResult: Boolean;
+  Res: Boolean;
   pList: TStringList;
   strOrgPath, regExec: string;
   Ini: TIniFile;
@@ -345,9 +345,9 @@ begin
   regExec := 'regedit.exe /e "' + FTempPath + FAppAbName + '.reg" '
     + 'HKEY_CURRENT_USER' + GetRegIDEBaseFromAt(FAbiType) + FRegPath;
   WinExecAndWait32(regExec, SW_HIDE, True);
-  bResult := FileExists(FTempPath + FAppAbName + '.reg');
+  Res := FileExists(FTempPath + FAppAbName + '.reg');
 
-  if bResult then
+  if Res then
   begin
     // 将REG文件中的绝对路径转换成相对路径
     pList := TStringList.Create;
@@ -647,69 +647,75 @@ begin
       FreeAndNil(pSecList);
     end;
   end;
+
   pSecList := TStringList.Create;
-  // 将AppBuilder安装目录字符串用$(MYROOTDIR)代替
-  pSecList.LoadFromFile(strDroFile);
-  pSecList.Text := StringReplaceNonAnsi(pSecList.Text, FRootDir,
-      '$(MYROOTDIR)\', [rfReplaceAll, rfIgnoreCase]);
-  pSecList.SaveToFile(strDroFile);
-  FreeAndNil(pSecList);
+  try
+    // 将 AppBuilder 安装目录字符串用 $(MYROOTDIR) 代替
+    pSecList.LoadFromFile(strDroFile);
+    pSecList.Text := StringReplaceNonAnsi(pSecList.Text, FRootDir,
+        '$(MYROOTDIR)\', [rfReplaceAll, rfIgnoreCase]);
+    pSecList.SaveToFile(strDroFile);
+  finally
+    FreeAndNil(pSecList);
+  end;
   OutputLog(FAppName + ' ' + SCnObjRepUnit + SCnBackupSuccess, 1);
 end;
 
 // 分析备份文件
-function ParseBakFile(strBakFileName: string;
-  var strRootDir, strAppName: string; var at: TAbiType): TAbiOptions;
+function ParseBackFile(const BackFileName: string;
+  var RootDir, AppName: string; var AbiType: TAbiType): TAbiOptions;
 var
   Header: THeaderStruct;
-  btCheckSum: Byte;
+  CheckSum: Byte;
   I: Integer;
   pHeader: PByte;
   FS: TFileStream;
-  szBuf: array[0..MAX_PATH] of Char;
+  Buf: array[0..MAX_PATH] of Char;
 begin
-  FS := TFileStream.Create(strBakFileName, fmOpenRead);
+  FS := TFileStream.Create(BackFileName, fmOpenRead);
   FS.Position := 0;
-  FS.ReadBuffer(Header, sizeof(Header));
+  FS.ReadBuffer(Header, SizeOf(Header));
   FreeAndNil(FS);
   // 验证校验和
-  btCheckSum := 0;
+  CheckSum := 0;
   pHeader := PByte(@Header);
   for I := 0 to SizeOf(Header) - 2 do
   begin
-    btCheckSum := btCheckSum xor pHeader^;
+    CheckSum := CheckSum xor pHeader^;
     Inc(pHeader);
   end;
-  if btCheckSum <> Header.btCheckSum then
+  if CheckSum <> Header.btCheckSum then
   begin
     Result := [];
-    exit;
+    Exit;
   end;
-  at := TAbiType(Header.btAbiType - 1);
+
+  AbiType := TAbiType(Header.btAbiType - 1);
   // AppBuilder 的名称
-  if at In [Low(TAbiType)..High(TAbiType)] then
-    strAppName := SCnAppName[Integer(at)]
+  if AbiType In [Low(TAbiType)..High(TAbiType)] then
+    AppName := SCnAppName[Integer(AbiType)]
   else
-    strAppName := SCnUnkownName;
+    AppName := SCnUnkownName;
+
   // AppBuilder 安装目录
-  ZeroMemory(@szBuf, SizeOf(szBuf));
+  ZeroMemory(@Buf, SizeOf(Buf));
   for I := 0 to SizeOf(Header.szAppRootPath) - 1 do
   begin
-    szBuf[I] := Char(Byte(Header.szAppRootPath[I]) xor XorKey);
+    Buf[I] := Char(Byte(Header.szAppRootPath[I]) xor XorKey);
   end;
-  strRootDir := szBuf;
-  //
+  RootDir := Buf;
+
   Result := TAbiOptions(Header.btAbiOption);
 end;
 
 // 从备份文件中还原信息
-function TAppBuilderInfo.RestoreInfoFromFile(const strBakFileName: string): Boolean;
+function TAppBuilderInfo.RestoreInfoFromFile(const BackFileName: string): Boolean;
 var
   FS: TFileStream;
   Dcmp: TDecompressor;
   TmpPath, AFileName, strOrgPath, strSecName: string;
   SFO: SHFILEOPSTRUCT;
-  bResult: Boolean;
+  Res: Boolean;
   pList: TStringList;
   Ini: TIniFile;
   I: Integer;
@@ -717,7 +723,7 @@ var
 begin
   // 解压缩备份文件先
   try
-    FS := TFileStream.Create(strBakFileName, fmOpenRead);
+    FS := TFileStream.Create(BackFileName, fmOpenRead);
     Dcmp := TDecompressor.Create(FS);
 
     TmpPath := MyGetTempPath(ParamStr(0)) + FAppAbName + '\';
@@ -751,17 +757,17 @@ begin
     if FileExists(AFileName) then
     begin
       if FAbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'Objrepos\' + GetAbiOptionFile(aoCodeTemp)), False)
       else if Ord(FAbiType) >= Ord(atDelphiXE) then
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'Objrepos\en\' + GetAbiOptionFile(aoCodeTemp)), False)
       else
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'bin\' + GetAbiOptionFile(aoCodeTemp)), False);
 
       OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoCodeTemp)]
-          + SCnRestore + OpResult(bResult));
+          + SCnRestore + OpResult(Res));
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnAbiOptions[Ord(aoCodeTemp)]);
@@ -774,20 +780,20 @@ begin
     if FileExists(AFileName) then
     begin
       OutputLog(SCnRestoring + SCnObjRepUnit + SCnPleaseWait);
-      //
-      bResult := LoadRepObj(AFileName);
-      OutputLog(FAppName + ' ' + SCnObjRepUnit + SCnRestore + OpResult(bResult), 1);
+
+      Res := LoadRepObj(AFileName);
+      OutputLog(FAppName + ' ' + SCnObjRepUnit + SCnRestore + OpResult(Res), 1);
 
       if FAbiType in [atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010] then
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'Objrepos\' + GetAbiOptionFile(aoObjRep)), False)
       else if Ord(FAbiType) >= Ord(atDelphiXE) then
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'Objrepos\en' + GetAbiOptionFile(aoObjRep)), False)
       else
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'bin\' + GetAbiOptionFile(aoObjRep)), False);
-      OutputLog(FAppName + ' ' + SCnObjRepConfig + SCnRestore + OpResult(bResult));
+      OutputLog(FAppName + ' ' + SCnObjRepConfig + SCnRestore + OpResult(Res));
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnObjRepConfig);
@@ -800,12 +806,12 @@ begin
     if FileExists(AFileName) then
     begin
       if Ord(FAbiType) >= Ord(atDelphiXE) then
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'ObjRepos\en\' + GetAbiOptionFile(aoMenuTemp)), False)
       else
-        bResult := CopyFile(PChar(AFileName),
+        Res := CopyFile(PChar(AFileName),
           PChar(FRootDir + 'bin\' + GetAbiOptionFile(aoMenuTemp)), False);
-      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)] + SCnRestore + OpResult(bResult));
+      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)] + SCnRestore + OpResult(Res));
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnAbiOptions[Ord(aoMenuTemp)]);
@@ -858,9 +864,9 @@ begin
       OutputLog(SCnAbiOptions[Ord(aoRegInfo)] + SCnAnalyseSuccess + SCnPleaseWait, 1);
       regExec := 'regedit.exe /s "' + AFileName + '"';
       //bResult := Integer(ShellExecute(0, 'open', , nil, SW_HIDE)) > 32;
-      bResult := (0 = WinExecAndWait32(regExec, SW_HIDE, True));
+      Res := (0 = WinExecAndWait32(regExec, SW_HIDE, True));
 
-      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoRegInfo)] + SCnRestore + OpResult(bResult), 1);
+      OutputLog(FAppName + ' ' + SCnAbiOptions[Ord(aoRegInfo)] + SCnRestore + OpResult(Res), 1);
     end
     else
       OutputLog(SCnNotFound + FAppName + ' ' + SCnAbiOptions[Ord(aoRegInfo)]);
@@ -979,7 +985,7 @@ end;
 function IsAppBuilderRunning(AbiType: TAbiType): Boolean;
 var
   hAppBuilder: THandle;
-  szBuf: array[0..255] of Char;
+  Buf: array[0..255] of Char;
   TempName, AppName: string;
   AExeName: string;
   bInProcess, bFoundWin: Boolean;
@@ -988,9 +994,9 @@ begin
   hAppBuilder := FindWindow('TAppBuilder', nil);
   if hAppBuilder <> 0 then
   begin
-    GetWindowText(hAppBuilder, szBuf, 255);
+    GetWindowText(hAppBuilder, Buf, 255);
     TempName := Copy(AppName, 1, Length(AppName) - 2);
-    bFoundWin := Pos(TempName, string(szBuf)) > 0;
+    bFoundWin := Pos(TempName, string(Buf)) > 0;
   end
   else
     bFoundWin := False;
@@ -1014,26 +1020,26 @@ begin
 end;
 
 // AppBuilder 的安装根目录
-function GetAppRootDir(at: TAbiType): string;
+function GetAppRootDir(AbiType: TAbiType): string;
 var
-  bResult: Boolean;
-  strAppFile: string;
+  Res: Boolean;
+  AppFile: string;
   pReg: TRegistry; // 操作注册表对象
 begin
   Result := '';
 
   pReg := TRegistry.Create; // 创建操作注册表对象
   pReg.RootKey := HKEY_LOCAL_MACHINE;
-  bResult := pReg.OpenKey(GetRegIDEBaseFromAt(at) + SCnRegPath[Integer(at)], False);
-  if bResult = True then
+  Res := pReg.OpenKey(GetRegIDEBaseFromAt(AbiType) + SCnRegPath[Integer(AbiType)], False);
+  if Res = True then
   begin
     if pReg.ValueExists('App') then
     begin
-      strAppFile := pReg.ReadString('App');
-      if FileExists(strAppFile) and pReg.ValueExists('RootDir') then
+      AppFile := pReg.ReadString('App');
+      if FileExists(AppFile) and pReg.ValueExists('RootDir') then
         Result := IncludeTrailingBackslash(pReg.ReadString('RootDir'));
     end;
-    if Ord(at) >= Ord(atDelphi10S) then
+    if Ord(AbiType) >= Ord(atDelphi10S) then
     begin
       if pReg.ValueExists('RootDir') then
         Result := IncludeTrailingBackslash(pReg.ReadString('RootDir'));
@@ -1046,13 +1052,13 @@ begin
   if Trim(Result) = '' then
   begin
     pReg.RootKey := HKEY_CURRENT_USER;
-    bResult := pReg.OpenKey(GetRegIDEBaseFromAt(at) + SCnRegPath[Integer(at)], False);
-    if bResult = True then
+    Res := pReg.OpenKey(GetRegIDEBaseFromAt(AbiType) + SCnRegPath[Integer(AbiType)], False);
+    if Res = True then
     begin
       if pReg.ValueExists('App') then
       begin
-        strAppFile := pReg.ReadString('App');
-        if FileExists(strAppFile) and pReg.ValueExists('RootDir') then
+        AppFile := pReg.ReadString('App');
+        if FileExists(AppFile) and pReg.ValueExists('RootDir') then
           Result := IncludeTrailingBackslash(pReg.ReadString('RootDir'));
       end;
     end;
@@ -1063,18 +1069,18 @@ begin
 end;
 
 // 操作结果的字符串
-function OpResult(bResult: Boolean): string;
+function OpResult(Res: Boolean): string;
 begin
-  Result := SCnOpResult[Integer(bResult)];
+  Result := SCnOpResult[Integer(Res)];
 end;
 
 // 临时文件存放目录
 function MyGetTempPath(AFileName: string): string;
 var
-  szBuf: array[0..MAX_PATH] of Char;
+  Buf: array[0..MAX_PATH] of Char;
 begin
-  GetTempPath(MAX_PATH, szBuf);
-  Result := szBuf;
+  GetTempPath(MAX_PATH, Buf);
+  Result := Buf;
 end;
 
 // 查看指定文件是否在进程列表中
@@ -1151,21 +1157,21 @@ end;
 procedure TAppBuilderInfo.OnFindBackupDskFile(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
-  bResult: Boolean;
+  Res: Boolean;
 begin
-  bResult := CopyFile(PChar(FileName), PChar(MakePath(FTempPath) +
+  Res := CopyFile(PChar(FileName), PChar(MakePath(FTempPath) +
     _CnExtractFileName(FileName)), False);
-  OutputLog(FAppName + ' ' + _CnExtractFileName(FileName) + SCnBackup + OpResult(bResult));
+  OutputLog(FAppName + ' ' + _CnExtractFileName(FileName) + SCnBackup + OpResult(Res));
 end;
 
 procedure TAppBuilderInfo.OnFindRestoreDskFile(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 var
-  bResult: Boolean;
+  Res: Boolean;
 begin
-  bResult := CopyFile(PChar(FileName), PChar(FRootDir + 'bin\' +
+  Res := CopyFile(PChar(FileName), PChar(FRootDir + 'bin\' +
     _CnExtractFileName(FileName)), False);
-  OutputLog(FAppName + ' ' + _CnExtractFileName(FileName) + SCnRestore + OpResult(bResult));
+  OutputLog(FAppName + ' ' + _CnExtractFileName(FileName) + SCnRestore + OpResult(Res));
 end;
 
 end.

@@ -698,7 +698,7 @@ begin
   mmoBakFileInfo.Lines.Clear;
   // 分析备份文件
   try
-    Ao := ParseBakFile(BakFile, RootDir, AppName, FAbiTypeRestore);
+    Ao := ParseBackFile(BakFile, RootDir, AppName, FAbiTypeRestore);
   except
     mmoBakFileInfo.Lines.Add(SCnFileInvalid);
   end;

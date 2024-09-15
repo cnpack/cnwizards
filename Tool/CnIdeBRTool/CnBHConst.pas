@@ -53,7 +53,7 @@ var
       'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'RAD Studio XE6',
       'RAD Studio XE7', 'RAD Studio XE8', 'RAD Studio 10 Seattle',
       'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio',
-      'RAD Studio 10.4 Sydney', 'RAD Studio 11.0 Alexandria', 'RAD Studio 12.0 Athens'
+      'RAD Studio 10.4 Sydney', 'RAD Studio 11 Alexandria', 'RAD Studio 12 Athens'
   );
 
   SCnAppAbName: array[0..Integer(High(TAbiType))] of string =

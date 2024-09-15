@@ -76,8 +76,8 @@ const
     'RAD Studio 10.2 Tokyo',
     'RAD Studio 10.3 Rio',
     'RAD Studio 10.4 Sydney',
-    'RAD Studio 11.0 Alexandria',
-    'RAD Studio 12.0 Athens',
+    'RAD Studio 11 Alexandria',
+    'RAD Studio 12 Athens',
     'C++Builder 5',
     'C++Builder 6');
 
