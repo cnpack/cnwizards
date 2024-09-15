@@ -45,7 +45,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, Menus,
   CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
-  CnWizConsts, CnEditorCodeTool, CnIni, mPasLex;
+  CnWizConsts, CnSelectionCodeTool, CnIni, mPasLex;
 
 type
 

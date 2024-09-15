@@ -34,7 +34,7 @@
       ..\Dcu\CnHintEditorFrm.obj ..\Dcu\CnMultiLineEditorFrm.obj 
       ..\Dcu\CnSetPropEditor.obj ..\Dcu\CnDesignPropEditors.obj 
       ..\Dcu\CnSizeConstraintsEditorFrm.obj ..\Dcu\CnEditorCodeToString.obj 
-      ..\Dcu\CnEditorCodeDelBlank.obj ..\Dcu\CnEditorCodeTool.obj 
+      ..\Dcu\CnEditorCodeDelBlank.obj ..\Dcu\CnSelectionCodeTool.obj 
       ..\Dcu\CnLineParser.obj ..\Dcu\CnEditorCodeComment.obj 
       ..\Dcu\CnEditorCodeIndent.obj ..\Dcu\CnAsciiChart.obj ..\Dcu\CnStatFrm.obj 
       ..\Dcu\CnStatResultFrm.obj ..\Dcu\CnStatWizard.obj 
@@ -293,7 +293,7 @@
       <FILE FILENAME="DesignEditors\CnSizeConstraintsEditorFrm.pas" FORMNAME="CnSizeConstraintsEditorForm" UNITNAME="Cnsizeconstraintseditorfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorCodeToString.pas" FORMNAME="CnEditorCodeToStringForm" UNITNAME="Cneditorcodetostring" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorCodeDelBlank.pas" FORMNAME="CnDelBlankFrm" UNITNAME="Cneditorcodedelblank" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="CodingToolset\CnEditorCodeTool.pas" FORMNAME="" UNITNAME="CnEditorCodeTool" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="CodingToolset\CnSelectionCodeTool.pas" FORMNAME="" UNITNAME="CnSelectionCodeTool" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnLineParser.pas" FORMNAME="" UNITNAME="CnLineParser" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorCodeComment.pas" FORMNAME="CnEditorCodeCommentForm" UNITNAME="CnEditorCodeComment" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorCodeIndent.pas" FORMNAME="" UNITNAME="CnEditorCodeIndent" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

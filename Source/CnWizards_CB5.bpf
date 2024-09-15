@@ -63,7 +63,7 @@ USEUNIT("DesignEditors\CnDesignPropEditors.pas");
 USEFORMNS("DesignEditors\CnSizeConstraintsEditorFrm.pas", Cnsizeconstraintseditorfrm, CnSizeConstraintsEditorForm);
 USEFORMNS("CodingToolset\CnEditorCodeToString.pas", Cneditorcodetostring, CnEditorCodeToStringForm);
 USEFORMNS("CodingToolset\CnEditorCodeDelBlank.pas", Cneditorcodedelblank, CnDelBlankFrm);
-USEUNIT("CodingToolset\CnEditorCodeTool.pas");
+USEUNIT("CodingToolset\CnSelectionCodeTool.pas");
 USEUNIT("Utils\CnLineParser.pas");
 USEFORMNS("CodingToolset\CnEditorCodeComment.pas", Cneditorcodecomment, CnEditorCodeCommentForm);
 USEUNIT("CodingToolset\CnEditorCodeIndent.pas");

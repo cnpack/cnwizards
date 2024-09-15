@@ -662,7 +662,7 @@ var
   SCnCodingToolsetWizardConfigCaption: string = '&Options...';
   SCnCodingToolsetWizardConfigHint: string = 'Configurate the Coding Toolset';
 
-  // CnEditorCodeTool
+  // CnSelectionCodeTool
   SCnEditorCodeToolSelIsEmpty: string = 'Please Select the Code Block to Process.';
   SCnEditorCodeToolNoLine: string = 'Can not Get Source Lines.';
 

@@ -82,7 +82,7 @@ uses
   CnEditorOpenFileFrm in 'CodingToolset\CnEditorOpenFileFrm.pas' {CnEditorOpenFileForm},
   CnEditorCodeSwap in 'CodingToolset\CnEditorCodeSwap.pas',
   CnEditorZoomFullScreen in 'CodingToolset\CnEditorZoomFullScreen.pas' {CnEditorZoomFullScreenForm},
-  CnEditorCodeTool in 'CodingToolset\CnEditorCodeTool.pas',
+  CnSelectionCodeTool in 'CodingToolset\CnSelectionCodeTool.pas',
   CnEditorCodeToString in 'CodingToolset\CnEditorCodeToString.pas' {CnEditorCodeToStringForm},
   CnEditorCodeDelBlank in 'CodingToolset\CnEditorCodeDelBlank.pas' {CnDelBlankForm},
   CnEditorCodeComment in 'CodingToolset\CnEditorCodeComment.pas' {CnEditorCodeCommentForm},

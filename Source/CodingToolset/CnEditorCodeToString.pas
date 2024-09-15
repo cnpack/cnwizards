@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizMultiLang;
+  CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizMultiLang;
 
 type
   TCnEditorCodeToStringForm = class(TCnTranslateForm)

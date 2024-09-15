@@ -216,7 +216,7 @@
 			<DCCReference Include="CodingToolset\CnEditorZoomFullScreen.pas">
 				<Form>CnEditorZoomFullScreenForm</Form>
 			</DCCReference>
-			<DCCReference Include="CodingToolset\CnEditorCodeTool.pas"/>
+			<DCCReference Include="CodingToolset\CnSelectionCodeTool.pas"/>
 			<DCCReference Include="CodingToolset\CnEditorCodeToString.pas">
 				<Form>CnEditorCodeToStringForm</Form>
 			</DCCReference>

@@ -319,7 +319,7 @@ begin
   TranslateStr(SCnCodingToolsetWizardConfigCaption, 'SCnCodingToolsetWizardConfigCaption');
   TranslateStr(SCnCodingToolsetWizardConfigHint, 'SCnCodingToolsetWizardConfigHint');
 
-  // CnEditorCodeTool
+  // CnSelectionCodeTool
   TranslateStr(SCnEditorCodeToolSelIsEmpty, 'SCnEditorCodeToolSelIsEmpty');
   TranslateStr(SCnEditorCodeToolNoLine, 'SCnEditorCodeToolNoLine');
 

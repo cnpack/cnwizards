@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
-  CnWizConsts, CnEditorCodeTool, CnIni, CnWizMultiLang;
+  CnWizConsts, CnSelectionCodeTool, CnIni, CnWizMultiLang;
 
 type
 

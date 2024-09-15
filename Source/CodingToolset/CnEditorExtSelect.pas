@@ -41,7 +41,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, Menus, ToolsAPI,
   CnWizUtils, CnConsts, CnCommon, CnWizManager, CnWizEditFiler,
-  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool, CnWizIdeUtils,
+  CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
   CnCppCodeParser, mwBCBTokenList;
 

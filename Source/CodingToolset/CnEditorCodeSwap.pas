@@ -47,7 +47,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnCodingToolsetWizard, CnWizConsts, CnEditorCodeTool;
+  CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool;
 
 type
 
