@@ -207,47 +207,47 @@
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Open File Tool">
-				<param name="Local" value="wizards\toolset\editoropenfile.htm">
+				<param name="Local" value="wizards\toolset\toolsetopenfile.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Evaluation Swap Tool">
-				<param name="Local" value="wizards\toolset\editorcodeswap.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Evaluation Align Tool">
-				<param name="Local" value="wizards\toolset\editorevalalign.htm">
+				<param name="Local" value="wizards\toolset\toolsetevalalign.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Editor Fullscreen Switch">
-				<param name="Local" value="wizards\toolset\editorfullscreen.htm">
+				<param name="Local" value="wizards\toolset\toolsetfullscreen.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Code to String Converting Tool">
-				<param name="Local" value="wizards\toolset\editorcodetostring.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodetostring.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Delete Blank Lines Tool">
-				<param name="Local" value="wizards\toolset\editorcodedelblank.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodedelblank.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Comment Code Tool">
-				<param name="Local" value="wizards\toolset\editorcodecomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodecomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Uncomment Code Tool">
-				<param name="Local" value="wizards\toolset\editorcodeuncomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeuncomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Toggle Comment Tool">
-				<param name="Local" value="wizards\toolset\editorcodetogglecomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodetogglecomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Indent Code Tool">
-				<param name="Local" value="wizards\toolset\editorcodeindent.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeindent.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Unindent Code Tool">
-				<param name="Local" value="wizards\toolset\editorcodeunindent.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeunindent.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="ASCII Chart">
@@ -255,71 +255,71 @@
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Insert Color Tool">
-				<param name="Local" value="wizards\toolset\editorinsertcolor.htm">
+				<param name="Local" value="wizards\toolset\toolsetinsertcolor.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Insert Date Time Tool">
-				<param name="Local" value="wizards\toolset\editorinserttime.htm">
+				<param name="Local" value="wizards\toolset\toolsetinserttime.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Collector">
-				<param name="Local" value="wizards\toolset\editorcollector.htm">
+				<param name="Local" value="wizards\toolset\toolsetcollector.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Sort Selected Lines Tool">
-				<param name="Local" value="wizards\toolset\editorsortlines.htm">
+				<param name="Local" value="wizards\toolset\toolsetsortlines.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Toggle Uses/Include Tool">
-				<param name="Local" value="wizards\toolset\editortoggleuses.htm">
+				<param name="Local" value="wizards\toolset\toolsettoggleuses.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Toggle Var Field Tool">
-				<param name="Local" value="wizards\toolset\editortogglevar.htm">
+				<param name="Local" value="wizards\toolset\toolsettogglevar.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Previous Message Line Tool">
-				<param name="Local" value="wizards\toolset\editorprevmsg.htm">
+				<param name="Local" value="wizards\toolset\toolsetprevmsg.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Next Message Line Tool">
-				<param name="Local" value="wizards\toolset\editorjumpmsg.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpmsg.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Jump to Interface Tool">
-				<param name="Local" value="wizards\toolset\editorjumpintf.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpintf.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Jump to Implememtation Tool">
-				<param name="Local" value="wizards\toolset\editorjumpimpl.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpimpl.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Jump to Matched Keyword Tool">
-				<param name="Local" value="wizards\toolset\editorjumpkeyword.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Jump to Previous Identifier Tool">
-				<param name="Local" value="wizards\toolset\editorjumpprevident.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpprevident.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Jump to Next Identifier Tool">
-				<param name="Local" value="wizards\toolset\editorjumpnextident.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Search in IDE Insight">
-				<param name="Local" value="wizards\toolset\editorjumpideinsight.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpideinsight.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Increase Font Size Tool">
-				<param name="Local" value="wizards\toolset\editorfontinc.htm">
+				<param name="Local" value="wizards\toolset\toolsetfontinc.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Decrease Font Size Tool">
-				<param name="Local" value="wizards\toolset\editorfontdec.htm">
+				<param name="Local" value="wizards\toolset\toolsetfontdec.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Duplicate Current Unit Tool">
-				<param name="Local" value="wizards\toolset\editorduplicateunit.htm">
+				<param name="Local" value="wizards\toolset\toolsetduplicateunit.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Extract String Tool">

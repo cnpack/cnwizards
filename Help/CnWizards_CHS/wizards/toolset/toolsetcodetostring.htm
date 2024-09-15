@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<title>删除空行工具</title>
+<title>代码转字符串工具</title>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
 <link rel="stylesheet" href="../../css/style.css" type="text/css">
 </head>
@@ -9,7 +9,7 @@
 <body>
 <table width="100%" border="0" cellpadding="4">
   <tr>
-    <td class="head" height="16">删除空行工具</td>
+    <td class="head" height="16">代码转字符串工具</td>
   </tr>
   <tr>
     <td bgcolor="#FF9900" height="6"></td>
@@ -18,19 +18,29 @@
     <td height=6></td>
   </tr>
 </table>
-<p class="title">删除空行工具</p>
-<p class="text" align="left">该工具允许用户删除代码中的空行。</p>
+<p class="title">代码转字符串工具</p>
+<p class="text" align="left">
+该工具用于将当前选择的源代码转换成多行字符串常量，这样可以省去输入引号和换行字符的麻烦，使用前需要先选择要转换的代码行。支持 Delphi/C++
+Builder。</p>
+<p class="text" align="left">其设置界面如下：</p>
 <p class="text" align="center">
-<img src="editorcodedelblank.png"></p>
+<img src="toolsetcodetostring.png"></p>
 <ul>
   <li>
-<p class="text"><b>处理内容</b>：选择待处理的对象是当前选择的代码块还是当前整个文件。</p>
+<p class="text" align="left">
+<b>Delphi 换行符</b>：设置 Delphi 代码使用的换行符。</p>
   </li>
   <li>
-<p class="text"><b>将多行连续空行合并为一行</b>：选择此选项后，该工具会自动搜索代码块中连续的空行，并将多于一行的连续空行合并成一行。对于单独一行空行则不作处理。</p>
+<p class="text" align="left">
+<b>C 换行符</b>：设置 C 代码使用的换行符。</p>
   </li>
   <li>
-<p class="text"><b>删除所有空行</b>：选择此选项后，该工具将删除代码块中的所有空行。</p>
+<p class="text" align="left">
+<b>处理时跳过代码前面的空格</b>：如果选择，执行转换时将以一行文本中第一个非空格的字符作为字符串的开始。</p>
+  </li>
+  <li>
+<p class="text" align="left">
+<b>Delphi中将加号置于下一行行首</b>：如果选择，Delphi中执行转换时会将拼接多行字符串的+号置于下一行行首，否则本行行尾。</p>
   </li>
 </ul>
 <p class="text" align="left">

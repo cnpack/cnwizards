@@ -207,47 +207,47 @@
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="打開文件工具">
-				<param name="Local" value="wizards\toolset\editoropenfile.htm">
+				<param name="Local" value="wizards\toolset\toolsetopenfile.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="賦值交換工具">
-				<param name="Local" value="wizards\toolset\editorcodeswap.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="賦值對齊工具">
-				<param name="Local" value="wizards\toolset\editorevalalign.htm">
+				<param name="Local" value="wizards\toolset\toolsetevalalign.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼窗口全屏切換工具">
-				<param name="Local" value="wizards\toolset\editorfullscreen.htm">
+				<param name="Local" value="wizards\toolset\toolsetfullscreen.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼轉字符串工具">
-				<param name="Local" value="wizards\toolset\editorcodetostring.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodetostring.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="刪除空行工具">
-				<param name="Local" value="wizards\toolset\editorcodedelblank.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodedelblank.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼塊註釋工具">
-				<param name="Local" value="wizards\toolset\editorcodecomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodecomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼塊取消註釋工具">
-				<param name="Local" value="wizards\toolset\editorcodeuncomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeuncomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼塊註釋反轉工具">
-				<param name="Local" value="wizards\toolset\editorcodetogglecomment.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodetogglecomment.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼塊縮進工具">
-				<param name="Local" value="wizards\toolset\editorcodeindent.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeindent.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="代碼塊反縮進工具">
-				<param name="Local" value="wizards\toolset\editorcodeunindent.htm">
+				<param name="Local" value="wizards\toolset\toolsetcodeunindent.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="ASCII 字符表">
@@ -255,71 +255,71 @@
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="插入顏色工具">
-				<param name="Local" value="wizards\toolset\editorinsertcolor.htm">
+				<param name="Local" value="wizards\toolset\toolsetinsertcolor.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="插入日期時間工具">
-				<param name="Local" value="wizards\toolset\editorinserttime.htm">
+				<param name="Local" value="wizards\toolset\toolsetinserttime.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="收集面板">
-				<param name="Local" value="wizards\toolset\editorcollector.htm">
+				<param name="Local" value="wizards\toolset\toolsetcollector.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="選擇行排序工具">
-				<param name="Local" value="wizards\toolset\editorsortlines.htm">
+				<param name="Local" value="wizards\toolset\toolsetsortlines.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="切換引用區">
-				<param name="Local" value="wizards\toolset\editortoggleuses.htm">
+				<param name="Local" value="wizards\toolset\toolsettoggleuses.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="切換局部變量編輯區">
-				<param name="Local" value="wizards\toolset\editortogglevar.htm">
+				<param name="Local" value="wizards\toolset\toolsettogglevar.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至上一信息行工具">
-				<param name="Local" value="wizards\toolset\editorprevmsg.htm">
+				<param name="Local" value="wizards\toolset\toolsetprevmsg.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至下一信息行工具">
-				<param name="Local" value="wizards\toolset\editorjumpmsg.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpmsg.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至聲明區工具">
-				<param name="Local" value="wizards\toolset\editorjumpintf.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpintf.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至實現區工具">
-				<param name="Local" value="wizards\toolset\editorjumpimpl.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpimpl.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至匹配關鍵字工具">
-				<param name="Local" value="wizards\toolset\editorjumpkeyword.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至前一標識符工具">
-				<param name="Local" value="wizards\toolset\editorjumpprevident.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpprevident.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="跳至後一標識符工具">
-				<param name="Local" value="wizards\toolset\editorjumpnextident.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="在 IDE Insight 中搜索">
-				<param name="Local" value="wizards\toolset\editorjumpideinsight.htm">
+				<param name="Local" value="wizards\toolset\toolsetjumpideinsight.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="增大字體工具">
-				<param name="Local" value="wizards\toolset\editorfontinc.htm">
+				<param name="Local" value="wizards\toolset\toolsetfontinc.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="縮小字體工具">
-				<param name="Local" value="wizards\toolset\editorfontdec.htm">
+				<param name="Local" value="wizards\toolset\toolsetfontdec.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="複製當前單元工具">
-				<param name="Local" value="wizards\toolset\editorduplicateunit.htm">
+				<param name="Local" value="wizards\toolset\toolsetduplicateunit.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="抽取字符串工具">
