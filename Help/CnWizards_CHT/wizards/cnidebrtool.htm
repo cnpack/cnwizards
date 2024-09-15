@@ -19,8 +19,11 @@
   </tr>
 </table>
 <p class="title">IDE 配置備份恢復工具</p>
-<p class="text" align="left"> 該專家用於備份/恢復 IDE 的配置信息，也可作為獨立的可執行程序使用，支持 Delphi/C++Builder/BDS。</p>
-<p class="text" align="left"> 對於經常使用 Delphi  或 C++Builder 的朋友來說，每次安裝完 Delphi 或 C++Builder 後配置 IDE 是個比較麻煩的過程，而且積累下來的很多東西容易丟失。本程序可以備份/恢復 Delphi 和 C++Builder 的配置，包括代碼模板，對像庫，菜單模板，IDE 編輯選項配置，IDE 窗口信息等。目前版本支持 Delphi 5/6/7/8、C++Builder 5/6 和 BDS 2005/2006、RAD Studio 2007/2009。此外，本工具還整合了清除 IDE 打開文件歷史記錄的功能。該工具主界面如圖：</p><p class="text" align="center"> 
+<p class="text" align="left">該專家用於備份/恢復 IDE 的配置信息，也可作為獨立的可執行程序使用，支持 Delphi/C++Builder/BDS/RAD Studio。</p>
+<p class="text" align="left">對於經常使用 Delphi  或 C++Builder 的朋友來說，每次安裝完 Delphi 或 C++Builder 後配置 IDE 是個比較麻煩的過程，而且積累下來的很多東西容易丟失。本程序可以備份/恢復 Delphi 和 C++Builder 的配置，包括代碼模板、對像庫、菜單模板、IDE 編輯選項配置、IDE 窗口信息等。目前版本支持 Delphi 5/6/7、C++Builder 5/6 和 BDS 2005/2006、RAD Studio 2007/2009 及以上各版本。此外，本工具還整合了清除 IDE 打開文件歷史記錄的功能。</p>
+<p class="text" align="left">註：如備份恢復失敗，請嘗試以管理員身份運行。</p>
+<p class="text" align="left">該工具主界面如圖：</p>
+<p class="text" align="center"> 
   <img src="cnidebrtool1.png"> </p>
 <p class="title">　</p>
 <p class="title">備份 IDE 配置</p>
@@ -30,44 +33,41 @@
 <p class="text" align="left">選擇欲備份的 IDE 後點擊下一步，出現備份內容選擇如圖。包括四項：
 <p class="text" align="center"> 
   <img src="cnidebrtool3.png"> </p>
-  
 <ul>
   <li>
-<p class="text" align="left"><b>代碼模板(Code Templates)</b>：Editor Options 中設置的代碼模板，可加快代碼輸入速度。</p>
+<p class="text" align="left"><b>代碼模板（Code Templates）</b>：Editor Options 中設置的代碼模板，可加快代碼輸入速度。</p>
   </li>
 	<li>
-<p class="text" align="left"><b>對像庫(Object Repository)</b>：出現在新建對話框中的對象庫。對像庫用來存儲常用的窗體，模塊或工程，增強資源共用，減少重複勞動。</p>
+<p class="text" align="left"><b>對像庫（Object Repository）</b>：出現在新建對話框中的對象庫。對像庫用來存儲常用的窗體，模塊或工程，增強資源共用，減少重複勞動。</p>
   </li>
   <li>
-<p class="text" align="left"><b>IDE 配置信息(IDE Configuration)</b>：IDE 在註冊表中的配置信息，包括窗口佈局信息、環境選項和編輯器選項等。</p>
+<p class="text" align="left"><b>IDE 配置信息（IDE Configuration）</b>：IDE 在註冊表中的配置信息，包括窗口佈局信息、環境選項和編輯器選項等。</p>
   </li>
   <li>
-<p class="text" align="left"><b>菜單模板(Menu Templates) </b>：菜單設計器中的預定義和自定義模板。</p>
+<p class="text" align="left"><b>菜單模板（Menu Templates）</b>：菜單設計器中的預定義和自定義模板。</p>
   </li>
 </ul>
 <p class="text" align="left">勾選需要備份的內容，選擇備份目標文件名後點擊下一步，工具會開始自動備份所選擇的內容到文件中。備份文件是 CnWizards 的自定義格式 bic。您可以保存此備份文件備用。
 <p class="text" align="left">備份成功的界面如圖：</p>
 <p class="text" align="center"> 
-  <img src="cnidebrtool4.png"> </p>
+  <img src="cnidebrtool4.png"></p>
 <p class="title">　</p>
 <p class="title">恢復 IDE 配置</p>
 <p class="text" align="left">如在主界面中選擇「恢復 IDE 配置」後點擊下一步，則出現恢復界面。選擇一 bic 文件後會顯示其包含的備份內容，如圖：</p>
 <p class="text" align="center"> 
-  <img src="cnidebrtool5.png"> </p>
+  <img src="cnidebrtool5.png"></p>
 <p class="text" align="left">點擊下一步，會顯示對應 IDE 的安裝目錄。選擇需要恢復的內容，如圖：</p>
 <p class="text" align="center"> 
-  <img src="cnidebrtool6.png"> </p>
+  <img src="cnidebrtool6.png"></p>
 <p class="text" align="left">點擊下一步開始恢復，恢復時要求對應的 IDE 處於關閉狀態，否則恢復出錯。恢復成功的界面如圖：</p>
 <p class="text" align="center"> 
-  <img src="cnidebrtool7.png"> </p>
+  <img src="cnidebrtool7.png"></p>
 <p class="text" align="left">需要說明的是，恢復備份是把備份的內容以覆蓋的方式寫入已有的內容處，但不會首先刪除原有的內容，所以某些開放的設置如用戶環境變量會出現「增加」的效果。用戶環境變量在恢復的時候本工具是把備份的鍵值寫入註冊表的鍵內，並未刪除原有的鍵值，所以用戶備份後用戶新建的環境變量也同時會予以保留。</p>
 <p class="title">　</p>
 <p class="title">清除 IDE 打開文件歷史記錄</p>
 <p class="text" align="left">如在主界面中選擇「清除 IDE 打開文件歷史記錄」，會出現已安裝的 IDE 和對應的歷史工程和普通文件的記錄列表，如圖。勾選需要清除的內容後點擊「下一步」便可完成清除。注意同樣要求所有 IDE 都不在運行中。
 <p class="text" align="center"> 
-  <img src="cnidebrtool9.png"> </p>
-
-
+  <img src="cnidebrtool9.png"></p>
 <p class="title" align="left">　<p class="title" align="left">相關主題<p class="text" align="left">
 <a href="wizards.htm">IDE 專家基本操作</a><p class="text" align="left">
 <a href="../options/wizconfig.htm">IDE 專家設置</a><p class="text" align="left">
