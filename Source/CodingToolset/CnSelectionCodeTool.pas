@@ -137,7 +137,7 @@ begin
   try
     Lines.Text := Text;
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnEditorCodeTool.ProcessText Default %d Lines.', [Lines.Count]);
+    CnDebugger.LogFmt('TCnSelectionCodeTool.ProcessText Default %d Lines.', [Lines.Count]);
 {$ENDIF}
 
     for I := 0 to Lines.Count - 1 do  // 预处理一下
@@ -184,9 +184,9 @@ begin
     begin
 {$IFDEF DEBUG}
       if Block = nil then
-        CnDebugger.LogMsg('TCnEditorCodeTool.Execute: Block is nil.')
+        CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is nil.')
       else if Block.IsValid then
-        CnDebugger.LogMsg('TCnEditorCodeTool.Execute: Block is Valid.');
+        CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is Valid.');
 {$ENDIF}
       if (Block <> nil) and Block.IsValid then
       begin             // 选择文本扩大到整行
@@ -270,7 +270,7 @@ begin
     if HasTab then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('TCnEditorCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
+      CnDebugger.LogMsg('TCnSelectionCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
 {$ENDIF}
       // 直接得到 Ansi/Utf8/UnicodeString
       OrigText := AnsiString(BlockText);
@@ -280,7 +280,7 @@ begin
       // Reader 读出的是 Ansi/Utf8/Utf8
       Len := EndPos - StartPos;
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('TCnEditorCodeTool.Execute StartPos %d, EndPos %d.', [StartPos, EndPos]);
+      CnDebugger.LogFmt('TCnSelectionCodeTool.Execute StartPos %d, EndPos %d.', [StartPos, EndPos]);
 {$ENDIF}
       Assert(Len >= 0);
       SetLength(OrigText, Len);

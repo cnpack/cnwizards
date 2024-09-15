@@ -297,7 +297,7 @@ begin
   WizOptions.ResetToolbarWithLargeIcons(tlbMain);
 
   Ini := Collector.CreateIniFile;
-  FPath := MakePath(WizOptions.UserPath + SCnEditorToolsetCollectorDir);
+  FPath := MakePath(WizOptions.UserPath + SCnCodingToolsetCollectorDir);
   ForceDirectories(FPath);
   TabSet.Font := Font;
   LoadSettings;
@@ -321,22 +321,24 @@ end;
 
 procedure TCnEditorCollectorForm.LoadSettings;
 var
-  s: string;
+  S: string;
 begin
   Updating := True;
   with TCnIniFile.Create(Ini) do
   try
     TabSet.Tabs.Clear;
-    if FileExists(WizOptions.UserPath + SCnEditorToolsetCollectorData) then
-      TabSet.Tabs.LoadFromFile(WizOptions.UserPath + SCnEditorToolsetCollectorData);
+    if FileExists(WizOptions.UserPath + SCnCodingToolsetCollectorData) then
+      TabSet.Tabs.LoadFromFile(WizOptions.UserPath + SCnCodingToolsetCollectorData);
     FindFile(FPath, '*.*', OnFindFile, nil, False, False);
+
     if TabSet.Tabs.Count = 0 then
       TabSet.Tabs.Add(csDefLabel);
-    s := ReadString('', csTabLabel, '');
-    if (s <> '') and (TabSet.Tabs.IndexOf(s) >= 0) then
-      TabSet.TabIndex := TabSet.Tabs.IndexOf(s)
+    S := ReadString('', csTabLabel, '');
+    if (S <> '') and (TabSet.Tabs.IndexOf(S) >= 0) then
+      TabSet.TabIndex := TabSet.Tabs.IndexOf(S)
     else if TabSet.TabIndex < 0 then
       TabSet.TabIndex := 0;
+
     mmoEdit.Font := ReadFont('', csFont, mmoEdit.Font);
     mmoEdit.WordWrap := ReadBool('', csWordWrap, mmoEdit.WordWrap);
     FAutoPaste := ReadBool('', csAutoPaste, False);
@@ -360,11 +362,12 @@ begin
   SavePage;
   with TCnIniFile.Create(Ini) do
   try
-    TabSet.Tabs.SaveToFile(WizOptions.UserPath + SCnEditorToolsetCollectorData);
+    TabSet.Tabs.SaveToFile(WizOptions.UserPath + SCnCodingToolsetCollectorData);
     if (TabSet.TabIndex >= 0) then
       WriteString('', csTabLabel, TabSet.Tabs[TabSet.TabIndex])
     else
       WriteString('', csTabLabel, '');
+
     WriteFont('', csFont, mmoEdit.Font);
     WriteBool('', csWordWrap, mmoEdit.WordWrap);
     WriteBool('', csAutoPaste, FAutoPaste);
@@ -382,7 +385,7 @@ end;
 
 function TCnEditorCollectorForm.GetNewLabel(AName: string): string;
 var
-  i: Integer;
+  I: Integer;
 begin
   if AName = '' then
     AName := csDefLabel;
@@ -391,10 +394,10 @@ begin
     Result := AName;
     Exit;
   end;  
-  i := 1;
-  while TabSet.Tabs.IndexOf(AName + IntToStr(i)) >= 0 do
-    Inc(i);
-  Result := AName + IntToStr(i);
+  I := 1;
+  while TabSet.Tabs.IndexOf(AName + IntToStr(I)) >= 0 do
+    Inc(I);
+  Result := AName + IntToStr(I);
 end;
   
 procedure TCnEditorCollectorForm.LoadPage(Idx: Integer);

@@ -203,8 +203,8 @@ resourcestring
 
   // CnCodingToolsetWizard
   SCnCodingToolsetWizardConfigName = 'CnCodingToolsetWizardConfig';
-  SCnEditorToolsetCollectorDir = 'Collector';
-  SCnEditorToolsetCollectorData = 'Collector.dat';
+  SCnCodingToolsetCollectorDir = 'Collector';
+  SCnCodingToolsetCollectorData = 'Collector.dat';
 
   // CnSrcTemplate
   SCnSrcTemplateConfigName = 'CnSrcTemplateConfig';

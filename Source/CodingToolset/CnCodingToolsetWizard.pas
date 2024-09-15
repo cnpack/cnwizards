@@ -155,11 +155,11 @@ type
   TCnCodingToolsetWizard = class(TCnSubMenuWizard)
   private
     FConfigIndex: Integer;
-    FEditorIndex: Integer;
-    FEditorTools: TList;
+    FToolIndex: Integer;
+    FCodingTools: TList;
     procedure UpdateActions;
-    function GetEditorTools(Index: Integer): TCnBaseCodingToolset;
-    function GetEditorToolCount: Integer;
+    function GetCodingTools(Index: Integer): TCnBaseCodingToolset;
+    function GetCodingToolCount: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SetActive(Value: Boolean); override;
@@ -180,8 +180,8 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    property EditorTools[Index: Integer]: TCnBaseCodingToolset read GetEditorTools;
-    property EditorToolCount: Integer read GetEditorToolCount;
+    property CodingTools[Index: Integer]: TCnBaseCodingToolset read GetCodingTools;
+    property CodingToolCount: Integer read GetCodingToolCount;
   end;
 
 procedure RegisterCnCodingToolset(const AClass: TCnCodingToolsetClass);
@@ -386,14 +386,14 @@ var
   ActiveIni: TCustomIniFile;
 begin
   inherited;
-  FEditorTools := TList.Create;
+  FCodingTools := TList.Create;
   ActiveIni := CreateIniFile;
   try
     Editor := nil;
     for I := 0 to GetCnCodingToolsetClassCount - 1 do
     begin
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Creating: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
+      CnDebugger.LogMsg('CodingTool Creating: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
     {$ENDIF}
       try
         Editor := GetCnCodingToolsetClassByIndex(I).Create(Self);
@@ -406,9 +406,9 @@ begin
       end;
       Editor.Active := ActiveIni.ReadBool(SCnActiveSection,
         Editor.GetIDStr, Editor.Active);
-      FEditorTools.Add(Editor);
+      FCodingTools.Add(Editor);
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Created: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
+      CnDebugger.LogMsg('CodingTool Created: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
     {$ENDIF}
     end;
   finally
@@ -423,8 +423,8 @@ var
 begin
   ActiveIni := CreateIniFile;
   try
-    for I := 0 to EditorToolCount - 1 do
-    with EditorTools[I] do
+    for I := 0 to CodingToolCount - 1 do
+    with CodingTools[I] do
     begin
       ActiveIni.WriteBool(SCnActiveSection, GetIDStr, Active);
       Free;
@@ -432,7 +432,7 @@ begin
   finally
     ActiveIni.Free;
   end;
-  FreeAndNil(FEditorTools);
+  FreeAndNil(FCodingTools);
   inherited;
 end;
 
@@ -446,8 +446,8 @@ var
   I: Integer;
 begin
   inherited;
-  for I := 0 to EditorToolCount - 1 do
-    EditorTools[I].Loaded;
+  for I := 0 to CodingToolCount - 1 do
+    CodingTools[I].Loaded;
 end;
 
 function TCnCodingToolsetWizard.GetCaption: string;
@@ -482,14 +482,14 @@ begin
   Comment := SCnCodingToolsetWizardComment;
 end;
 
-function TCnCodingToolsetWizard.GetEditorTools(Index: Integer): TCnBaseCodingToolset;
+function TCnCodingToolsetWizard.GetCodingTools(Index: Integer): TCnBaseCodingToolset;
 begin
-  Result := TCnBaseCodingToolset(FEditorTools[Index]);
+  Result := TCnBaseCodingToolset(FCodingTools[Index]);
 end;
 
-function TCnCodingToolsetWizard.GetEditorToolCount: Integer;
+function TCnCodingToolsetWizard.GetCodingToolCount: Integer;
 begin
-  Result := FEditorTools.Count;
+  Result := FCodingTools.Count;
 end;
 
 procedure TCnCodingToolsetWizard.LoadSettings(Ini: TCustomIniFile);
@@ -499,11 +499,11 @@ var
 begin
   inherited;
 
-  for I := 0 to EditorToolCount - 1 do
+  for I := 0 to CodingToolCount - 1 do
   begin
-    AIni := EditorTools[I].CreateIniFile;
+    AIni := CodingTools[I].CreateIniFile;
     try
-      EditorTools[I].LoadSettings(AIni);
+      CodingTools[I].LoadSettings(AIni);
     finally
       AIni.Free;
     end;
@@ -517,11 +517,11 @@ var
 begin
   inherited;
 
-  for I := 0 to EditorToolCount - 1 do
+  for I := 0 to CodingToolCount - 1 do
   begin
-    AIni := EditorTools[I].CreateIniFile;
+    AIni := CodingTools[I].CreateIniFile;
     try
-      EditorTools[I].SaveSettings(AIni);
+      CodingTools[I].SaveSettings(AIni);
     finally
       AIni.Free;
     end;
@@ -539,9 +539,9 @@ begin
   end
   else
   begin
-    for I := 0 to EditorToolCount - 1 do
+    for I := 0 to CodingToolCount - 1 do
     begin
-      with EditorTools[I] do
+      with CodingTools[I] do
       begin
         if Active and (FAction = SubActions[Index]) then
         begin
@@ -558,12 +558,12 @@ var
   I: Integer;
   State: TWizardState;
 begin
-  for I := 0 to EditorToolCount - 1 do
+  for I := 0 to CodingToolCount - 1 do
   begin
-    if EditorTools[I].FAction = SubActions[Index] then
+    if CodingTools[I].FAction = SubActions[Index] then
     begin
-      State := EditorTools[I].GetState;
-      SubActions[Index].Visible := Active and EditorTools[I].Active;
+      State := CodingTools[I].GetState;
+      SubActions[Index].Visible := Active and CodingTools[I].Active;
       SubActions[Index].Enabled := Action.Enabled and (wsEnabled in State);
       SubActions[Index].Checked := wsChecked in State;
       Exit;
@@ -581,13 +581,13 @@ begin
     FConfigIndex := RegisterASubAction(SCnCodingToolsetWizardConfigName,
       SCnCodingToolsetWizardConfigCaption, 0, SCnCodingToolsetWizardConfigHint,
       SCnCodingToolsetWizardConfigName);
-    if EditorToolCount > 0 then
+    if CodingToolCount > 0 then
       AddSepMenu;
-    FEditorIndex := FConfigIndex + 1;
+    FToolIndex := FConfigIndex + 1;
 
-    for I := 0 to EditorToolCount - 1 do
+    for I := 0 to CodingToolCount - 1 do
     begin
-      with EditorTools[I] do
+      with CodingTools[I] do
       begin
         Idx := RegisterASubAction(GetIDStr, GetCaption, GetDefShortCut, GetHint);
         FAction := SubActions[Idx];
@@ -604,8 +604,8 @@ procedure TCnCodingToolsetWizard.RefreshSubActions;
 var
   I: Integer;
 begin // 处理方法有稍许不同，因此不能 inherited 来用 AcquireSubActions。
-  for I := 0 to GetEditorToolCount - 1 do
-    EditorTools[I].RefreshAction;
+  for I := 0 to GetCodingToolCount - 1 do
+    CodingTools[I].RefreshAction;
 
   inherited;
   UpdateActions;
@@ -615,10 +615,10 @@ procedure TCnCodingToolsetWizard.UpdateActions;
 var
   I: Integer;
 begin
-  for I := 0 to EditorToolCount - 1 do
+  for I := 0 to CodingToolCount - 1 do
   begin
-    if EditorTools[I].FAction <> nil then
-      EditorTools[I].FAction.Visible := Active and EditorTools[I].Active;
+    if CodingTools[I].FAction <> nil then
+      CodingTools[I].FAction.Visible := Active and CodingTools[I].Active;
   end;
 end;
 
@@ -631,8 +631,8 @@ begin
   inherited;
   if Value <> Old then
   begin
-    for I := 0 to EditorToolCount - 1 do
-      EditorTools[I].ParentActiveChanged(Active);
+    for I := 0 to CodingToolCount - 1 do
+      CodingTools[I].ParentActiveChanged(Active);
   end;
 end;
 
@@ -645,10 +645,10 @@ begin
   CnDebugger.LogMsg('TCnCodingToolsetWizard.ClearSubActions');
 {$ENDIF}
   // 清除 Action 时要清除引用
-  if FEditorTools <> nil then
+  if FCodingTools <> nil then
   begin
-    for I := 0 to GetEditorToolCount - 1 do
-      EditorTools[I].FAction := nil;
+    for I := 0 to GetCodingToolCount - 1 do
+      CodingTools[I].FAction := nil;
   end;
 end;
 
@@ -668,16 +668,16 @@ var
 begin
   with lvTools.Items[Index] do
   begin
-    FWizard.EditorTools[Index].GetToolsetInfo(AName, AAuthor, AEmail);
+    FWizard.CodingTools[Index].GetToolsetInfo(AName, AAuthor, AEmail);
     Caption := AName;
     SubItems.Clear;
-    if FWizard.EditorTools[Index].Active then
+    if FWizard.CodingTools[Index].Active then
       SubItems.Add(SCnEnabled)
     else
       SubItems.Add(SCnDisabled);
 
-    if FWizard.EditorTools[Index].FAction <> nil then
-      SubItems.Add(ShortCutToText(FWizard.EditorTools[Index].FAction.ShortCut));
+    if FWizard.CodingTools[Index].FAction <> nil then
+      SubItems.Add(ShortCutToText(FWizard.CodingTools[Index].FAction.ShortCut));
   end;
 end;
 
@@ -686,7 +686,7 @@ var
   I: Integer;
 begin
   lvTools.Items.Clear;
-  for I := 0 to FWizard.EditorToolCount - 1 do
+  for I := 0 to FWizard.CodingToolCount - 1 do
   begin
     lvTools.Items.Add;
     UpdateToolItem(I);
@@ -707,10 +707,10 @@ begin
   if not Assigned(lvTools.Selected) then Exit;
   Idx := lvTools.Selected.Index;
   if CheckQueryShortCutDuplicated(HotKey.HotKey,
-    FWizard.EditorTools[Idx].FAction) <> sdDuplicatedStop then
+    FWizard.CodingTools[Idx].FAction) <> sdDuplicatedStop then
   begin
-    if FWizard.EditorTools[Idx].FAction <> nil then
-      FWizard.EditorTools[Idx].FAction.ShortCut := HotKey.HotKey;
+    if FWizard.CodingTools[Idx].FAction <> nil then
+      FWizard.CodingTools[Idx].FAction.ShortCut := HotKey.HotKey;
     UpdateToolItem(Idx);
   end;
 end;
@@ -722,7 +722,7 @@ begin
   if not Assigned(lvTools.Selected) then
     Exit;
   Idx := lvTools.Selected.Index;
-  FWizard.EditorTools[Idx].Active := chkEnabled.Checked;
+  FWizard.CodingTools[Idx].Active := chkEnabled.Checked;
   UpdateToolItem(Idx);
 end;
 
@@ -732,8 +732,8 @@ var
 begin
   if not Assigned(lvTools.Selected) then Exit;
   Idx := lvTools.Selected.Index;
-  if FWizard.EditorTools[Idx].HasConfig then
-    FWizard.EditorTools[Idx].Config;
+  if FWizard.CodingTools[Idx].HasConfig then
+    FWizard.CodingTools[Idx].Config;
   UpdateToolItem(Idx);
 end;
 
@@ -756,28 +756,28 @@ begin
   if Assigned(lvTools.Selected) then
   begin
     Idx := lvTools.Selected.Index;
-    FWizard.EditorTools[Idx].GetToolsetInfo(AName, AAuthor, AEmail);
+    FWizard.CodingTools[Idx].GetToolsetInfo(AName, AAuthor, AEmail);
 
     // Action.Icon 改为 16x16 后，不能再直接 Assign 了否则过小，需放大绘制
     imgIcon.Canvas.Brush.Style := bsSolid;
     imgIcon.Canvas.Brush.Color := TControlHack(imgIcon.Parent).Color;
     imgIcon.Canvas.FillRect(Rect(0, 0, imgIcon.Width, imgIcon.Height));
 
-    if FWizard.EditorTools[Idx].FAction <> nil then
-    DrawIconEx(imgIcon.Canvas.Handle, 0, 0, FWizard.EditorTools[Idx].FAction.Icon.Handle,
+    if FWizard.CodingTools[Idx].FAction <> nil then
+    DrawIconEx(imgIcon.Canvas.Handle, 0, 0, FWizard.CodingTools[Idx].FAction.Icon.Handle,
       imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
 
     lblToolName.Caption := AName;
     lblToolAuthor.Caption := CnAuthorEmailToStr(AAuthor, AEmail);
 
-    if FWizard.EditorTools[Idx].FAction <> nil then
-      HotKey.HotKey := FWizard.EditorTools[Idx].FAction.ShortCut
+    if FWizard.CodingTools[Idx].FAction <> nil then
+      HotKey.HotKey := FWizard.CodingTools[Idx].FAction.ShortCut
     else
       HotKey.HotKey := 0;
 
-    chkEnabled.Checked := FWizard.EditorTools[Idx].Active;
-    btnConfig.Visible := FWizard.EditorTools[Idx].HasConfig;
-    mmoComment.Lines.Text := GetCommandComment(FWizard.EditorTools[Idx].GetIDStr);
+    chkEnabled.Checked := FWizard.CodingTools[Idx].Active;
+    btnConfig.Visible := FWizard.CodingTools[Idx].HasConfig;
+    mmoComment.Lines.Text := GetCommandComment(FWizard.CodingTools[Idx].GetIDStr);
   end
 end;
 
