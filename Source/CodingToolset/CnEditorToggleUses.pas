@@ -75,7 +75,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -108,7 +108,7 @@ begin
   Result := SCnEditorToggleUsesMenuHint;
 end;
 
-procedure TCnEditorToggleUses.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorToggleUses.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorToggleUsesName;
   Author := SCnPack_LiuXiao;

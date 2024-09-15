@@ -22,7 +22,7 @@ unit CnCodingToolsetWizard;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：编辑器专家单元
+* 单元名称：编码工具集专家单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 5.01
@@ -115,7 +115,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); virtual;
     destructor Destroy; override;
 
-    function GetEditorName: string;
+    function GetToolsetName: string;
     {* 返回工具名称}
     procedure LoadSettings(Ini: TCustomIniFile); virtual;
     {* 装载工具设置方法，子类重载此方法从 INI 对象中读取专家参数}
@@ -129,7 +129,7 @@ type
     {* 配置方法，由管理器在配置界面中调用，当 HasConfig 为真时有效}
     procedure Loaded; virtual;
     {* IDE 启动完成后调用该方法}
-    procedure GetEditorInfo(var Name, Author, Email: string); virtual; abstract;
+    procedure GetToolsetInfo(var Name, Author, Email: string); virtual; abstract;
     {* 取工具信息，用于提供工具的说明和版权信息。抽象方法，子类必须实现。
      |<PRE>
        var AName: string      - 工具名称，可以是支持本地化的字符串
@@ -185,17 +185,17 @@ type
   end;
 
 procedure RegisterCnCodingToolset(const AClass: TCnCodingToolsetClass);
-{* 注册一个 CnEditorToolset 编辑器工具类引用，每个编辑器工具类实现单元
-   应在该单元的 initialization 节调用该过程注册编辑器工具类}
+{* 注册一个 CnCodingToolset 编码工具类引用，每个编码工具类实现单元
+   应在该单元的 initialization 节调用该过程注册编码工具类}
 
-function GetCnEditorToolClass(const ClassName: string): TCnCodingToolsetClass;
-{* 根据编辑器工具类名取指定的编辑器工具类引用}
+function GetCnCodingToolsetClass(const ClassName: string): TCnCodingToolsetClass;
+{* 根据编码工具类名取指定的编码工具类引用}
 
-function GetCnEditorToolClassCount: Integer;
-{* 返回已注册的编辑器工具类总数}
+function GetCnCodingToolsetClassCount: Integer;
+{* 返回已注册的编码工具类总数}
 
-function GetCnEditorToolClassByIndex(const Index: Integer): TCnCodingToolsetClass;
-{* 根据索引号取指定的编辑器工具类引用}
+function GetCnCodingToolsetClassByIndex(const Index: Integer): TCnCodingToolsetClass;
+{* 根据索引号取指定的编码工具类引用}
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
@@ -215,41 +215,41 @@ type
   TControlHack = class(TControl);
 
 var
-  CnEditorClassList: TList = nil; // 编辑器工具类引用列表
+  CnCodingToolsetClassList: TList = nil; // 编辑器工具类引用列表
 
 // 注册一个 CnCodingToolset 编辑器工具类引用
 procedure RegisterCnCodingToolset(const AClass: TCnCodingToolsetClass);
 begin
-  Assert(CnEditorClassList <> nil, 'CnEditorClassList is nil!');
-  if CnEditorClassList.IndexOf(AClass) < 0 then
-    CnEditorClassList.Add(AClass);
+  Assert(CnCodingToolsetClassList <> nil, 'CnEditorClassList is nil!');
+  if CnCodingToolsetClassList.IndexOf(AClass) < 0 then
+    CnCodingToolsetClassList.Add(AClass);
 end;
 
 // 根据编辑器工具类名取指定的编辑器工具类引用
-function GetCnEditorToolClass(const ClassName: string): TCnCodingToolsetClass;
+function GetCnCodingToolsetClass(const ClassName: string): TCnCodingToolsetClass;
 var
   I: Integer;
 begin
   Result := nil;
-  for I := 0 to CnEditorClassList.Count - 1 do
+  for I := 0 to CnCodingToolsetClassList.Count - 1 do
   begin
-    Result := CnEditorClassList[I];
+    Result := CnCodingToolsetClassList[I];
     if Result.ClassNameIs(ClassName) then Exit;
   end;
 end;
 
 // 返回已注册的编辑器工具类总数
-function GetCnEditorToolClassCount: Integer;
+function GetCnCodingToolsetClassCount: Integer;
 begin
-  Result := CnEditorClassList.Count;
+  Result := CnCodingToolsetClassList.Count;
 end;
 
 // 根据索引号取指定的编辑器工具类引用
-function GetCnEditorToolClassByIndex(const Index: Integer): TCnCodingToolsetClass;
+function GetCnCodingToolsetClassByIndex(const Index: Integer): TCnCodingToolsetClass;
 begin
   Result := nil;
-  if (Index >= 0) and (Index <= CnEditorClassList.Count - 1) then
-    Result := CnEditorClassList[Index];
+  if (Index >= 0) and (Index <= CnCodingToolsetClassList.Count - 1) then
+    Result := CnCodingToolsetClassList[Index];
 end;
 
 { TCnBaseEditorTool }
@@ -330,11 +330,11 @@ begin
   Result := '';
 end;
 
-function TCnBaseCodingToolset.GetEditorName: string;
+function TCnBaseCodingToolset.GetToolsetName: string;
 var
   Author, Email: string;
 begin
-  GetEditorInfo(Result, Author, Email);
+  GetToolsetInfo(Result, Author, Email);
 end;
 
 function TCnBaseCodingToolset.GetState: TWizardState;
@@ -390,13 +390,13 @@ begin
   ActiveIni := CreateIniFile;
   try
     Editor := nil;
-    for I := 0 to GetCnEditorToolClassCount - 1 do
+    for I := 0 to GetCnCodingToolsetClassCount - 1 do
     begin
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Creating: ' + GetCnEditorToolClassByIndex(I).ClassName);
+      CnDebugger.LogMsg('EditorTool Creating: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
     {$ENDIF}
       try
-        Editor := GetCnEditorToolClassByIndex(I).Create(Self);
+        Editor := GetCnCodingToolsetClassByIndex(I).Create(Self);
       except
         on E: Exception do
         begin
@@ -408,7 +408,7 @@ begin
         Editor.GetIDStr, Editor.Active);
       FEditorTools.Add(Editor);
     {$IFDEF DEBUG}
-      CnDebugger.LogMsg('EditorTool Created: ' + GetCnEditorToolClassByIndex(I).ClassName);
+      CnDebugger.LogMsg('EditorTool Created: ' + GetCnCodingToolsetClassByIndex(I).ClassName);
     {$ENDIF}
     end;
   finally
@@ -668,7 +668,7 @@ var
 begin
   with lvTools.Items[Index] do
   begin
-    FWizard.EditorTools[Index].GetEditorInfo(AName, AAuthor, AEmail);
+    FWizard.EditorTools[Index].GetToolsetInfo(AName, AAuthor, AEmail);
     Caption := AName;
     SubItems.Clear;
     if FWizard.EditorTools[Index].Active then
@@ -756,7 +756,7 @@ begin
   if Assigned(lvTools.Selected) then
   begin
     Idx := lvTools.Selected.Index;
-    FWizard.EditorTools[Idx].GetEditorInfo(AName, AAuthor, AEmail);
+    FWizard.EditorTools[Idx].GetToolsetInfo(AName, AAuthor, AEmail);
 
     // Action.Icon 改为 16x16 后，不能再直接 Assign 了否则过小，需放大绘制
     imgIcon.Canvas.Brush.Style := bsSolid;
@@ -782,7 +782,7 @@ begin
 end;
 
 initialization
-  CnEditorClassList := TList.Create;
+  CnCodingToolsetClassList := TList.Create;
   RegisterCnWizard(TCnCodingToolsetWizard); // 注册专家
 
 finalization
@@ -790,7 +790,7 @@ finalization
   CnDebugger.LogEnter('CnCodingToolsetWizard finalization.');
 {$ENDIF}
 
-  FreeAndNil(CnEditorClassList);
+  FreeAndNil(CnCodingToolsetClassList);
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnCodingToolsetWizard finalization.');

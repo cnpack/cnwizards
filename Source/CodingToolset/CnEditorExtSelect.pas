@@ -66,7 +66,7 @@ type
 
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
 
     property WholeLines: Boolean read FWholeLines write FWholeLines;
@@ -344,7 +344,7 @@ begin
   Result := TextToShortCut('Alt+Q');
 end;
 
-procedure TCnEditorExtendingSelect.GetEditorInfo(var Name, Author,
+procedure TCnEditorExtendingSelect.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorExtendingSelectName;

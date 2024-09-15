@@ -87,7 +87,7 @@ type
     function GetDefShortCut: TShortCut; override;
     function GetState: TWizardState; override;
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
 
     function Scan: Boolean;
     {* 扫描当前源码中的字符串，返回扫描是否成功。
@@ -722,7 +722,7 @@ begin
   Result := 0;
 end;
 
-procedure TCnEditorExtractString.GetEditorInfo(var Name, Author,
+procedure TCnEditorExtractString.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorExtractStringName;

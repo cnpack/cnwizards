@@ -65,7 +65,7 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
   end;
 
@@ -304,7 +304,7 @@ begin
   Result := SCnEditorDuplicateUnitMenuHint;
 end;
 
-procedure TCnEditorDuplicateUnit.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorDuplicateUnit.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorDuplicateUnitName;
   Author := SCnPack_LiuXiao;

@@ -62,7 +62,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     procedure Execute; override;
   end;
@@ -102,7 +102,7 @@ begin
   Result := SCnEditorInsertColorMenuHint;
 end;
 
-procedure TCnEditorInsertColor.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorInsertColor.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorInsertColorName;
   Author := SCnPack_Zjy;

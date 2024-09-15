@@ -74,7 +74,7 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
 
     class function SearchAndOpenFile(FileName: string; Prefixes: TStrings = nil): Boolean;
     {* 根据精确的文件名和可能的前缀在各种目录中搜索文件}
@@ -194,7 +194,7 @@ begin
   Result := SCnEditorOpenFileMenuHint;
 end;
 
-procedure TCnEditorOpenFile.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorOpenFile.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorOpenFileName;
   Author := SCnPack_Zjy;

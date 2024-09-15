@@ -60,7 +60,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
@@ -112,7 +112,7 @@ begin
   Result := SCnEditorSortLinesMenuHint;
 end;
 
-procedure TCnEditorSortLines.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorSortLines.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorSortLinesName;
   Author := SCnPack_Zjy;

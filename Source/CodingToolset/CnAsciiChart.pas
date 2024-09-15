@@ -68,7 +68,7 @@ type
     destructor Destroy; override;
 
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure ParentActiveChanged(ParentActive: Boolean); override;
   end;
 
@@ -227,7 +227,7 @@ begin
   Result := SCnAsciiChartMenuCaption;
 end;
 
-procedure TCnAsciiChart.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnAsciiChart.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnAsciiChartName;
   Author := SCnPack_LiuXiao;

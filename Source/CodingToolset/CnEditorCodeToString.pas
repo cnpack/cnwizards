@@ -81,7 +81,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Config; override;
   published
     property DelphiReturn: string read FDelphiReturn write FDelphiReturn;
@@ -204,7 +204,7 @@ begin
   Result := SCnEditorCodeToStringMenuHint;
 end;
 
-procedure TCnEditorCodeToString.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeToString.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeToStringName;
   Author := SCnPack_Zjy;

@@ -57,7 +57,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
   end;
 
@@ -72,7 +72,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
   end;
 
@@ -101,7 +101,7 @@ begin
   Result := SCnEditorCodeIndentMenuHint;
 end;
 
-procedure TCnEditorCodeIndent.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeIndent.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeIndentName;
   Author := SCnPack_LiuXiao;
@@ -139,7 +139,7 @@ begin
   Result := SCnEditorCodeUnIndentMenuHint;
 end;
 
-procedure TCnEditorCodeUnIndent.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeUnIndent.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeUnIndentName;
   Author := SCnPack_LiuXiao;

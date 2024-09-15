@@ -101,7 +101,7 @@ type
     function GetDefShortCut: TShortCut; override;
     procedure Loaded; override;
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Config; override;
 
     property FullScreen: Boolean read GetFullScreen write SetFullScreen;
@@ -255,7 +255,7 @@ begin
   Result := SCnEditorZoomFullScreenMenuHint;
 end;
 
-procedure TCnEditorZoomFullScreen.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorZoomFullScreen.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorZoomFullScreen;
   Author := SCnPack_Zjy;

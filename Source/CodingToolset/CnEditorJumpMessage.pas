@@ -74,7 +74,7 @@ type
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
   end;
 
@@ -90,7 +90,7 @@ type
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
   end;
 
@@ -104,7 +104,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -120,7 +120,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -140,7 +140,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -156,7 +156,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -172,7 +172,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -190,7 +190,7 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -247,7 +247,7 @@ begin
   Result := TextToShortCut('Alt+.');
 end;
 
-procedure TCnEditorNextMessage.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorNextMessage.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorNextMessageName;
   Author := SCnPack_LiuXiao;
@@ -324,7 +324,7 @@ begin
   Result := TextToShortCut('Alt+,');
 end;
 
-procedure TCnEditorPrevMessage.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorPrevMessage.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorPrevMessageName;
   Author := SCnPack_LiuXiao;
@@ -405,7 +405,7 @@ begin
   Result := SCnEditorJumpIntfMenuHint;
 end;
 
-procedure TCnEditorJumpIntf.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorJumpIntf.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorJumpIntfName;
   Author := SCnPack_LiuXiao;
@@ -468,7 +468,7 @@ begin
   Result := SCnEditorJumpImplMenuHint;
 end;
 
-procedure TCnEditorJumpImpl.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorJumpImpl.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorJumpImplName;
   Author := SCnPack_LiuXiao;
@@ -535,7 +535,7 @@ begin
   Result := SCnEditorJumpMatchedKeywordMenuHint;
 end;
 
-procedure TCnEditorJumpMatchedKeyword.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorJumpMatchedKeyword.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorJumpMatchedKeywordName;
   Author := SCnPack_LiuXiao;
@@ -1040,7 +1040,7 @@ begin
   Result := ShortCut(VK_UP, [ssAlt, ssCtrl]);
 end;
 
-procedure TCnEditorJumpPrevIdent.GetEditorInfo(var Name, Author,
+procedure TCnEditorJumpPrevIdent.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorJumpPrevIdentName;
@@ -1104,7 +1104,7 @@ begin
   Result := ShortCut(VK_DOWN, [ssAlt, ssCtrl]);
 end;
 
-procedure TCnEditorJumpNextIdent.GetEditorInfo(var Name, Author,
+procedure TCnEditorJumpNextIdent.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorJumpNextIdentName;
@@ -1188,7 +1188,7 @@ begin
   Result := TextToShortCut('Alt+F6');
 end;
 
-procedure TCnEditorJumpIDEInsight.GetEditorInfo(var Name, Author,
+procedure TCnEditorJumpIDEInsight.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorJumpIDEInsightName;

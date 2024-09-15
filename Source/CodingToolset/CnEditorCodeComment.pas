@@ -64,7 +64,7 @@ type
   public
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 //==============================================================================
@@ -80,7 +80,7 @@ type
   public
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 //==============================================================================
@@ -106,7 +106,7 @@ type
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
     procedure Config; override;
   published
@@ -224,7 +224,7 @@ begin
   Result := SCnEditorCodeCommentMenuHint;
 end;
 
-procedure TCnEditorCodeComment.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeComment.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeCommentName;
   Author := SCnPack_LiuXiao;
@@ -253,7 +253,7 @@ begin
   Result := SCnEditorCodeUnCommentMenuHint;
 end;
 
-procedure TCnEditorCodeUnComment.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeUnComment.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeUnCommentName;
   Author := SCnPack_LiuXiao;
@@ -292,7 +292,7 @@ begin
   Result := SCnEditorCodeToggleCommentMenuCaption;
 end;
 
-procedure TCnEditorCodeToggleComment.GetEditorInfo(var Name, Author,
+procedure TCnEditorCodeToggleComment.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorCodeToggleCommentName;

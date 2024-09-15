@@ -59,7 +59,7 @@ type
     destructor Destroy; override;
 
     procedure Execute; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure ParentActiveChanged(ParentActive: Boolean); override;
   end;
 
@@ -243,7 +243,7 @@ begin
   Result := SCnEditorCollectorMenuCaption;
 end;
 
-procedure TCnEditorCollector.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCollector.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCollectorName;
   Author := SCnPack_Zjy;

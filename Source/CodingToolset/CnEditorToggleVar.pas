@@ -73,7 +73,7 @@ type
     destructor Destroy; override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
     function GetState: TWizardState; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
@@ -129,7 +129,7 @@ begin
   Result := SCnEditorToggleVarMenuHint;
 end;
 
-procedure TCnEditorToggleVar.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorToggleVar.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorToggleVarName;
   Author := SCnPack_LiuXiao;

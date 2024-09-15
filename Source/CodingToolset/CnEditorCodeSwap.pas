@@ -66,7 +66,7 @@ type
   public
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 //==============================================================================
@@ -84,7 +84,7 @@ type
   public
     function GetCaption: string; override;
     function GetHint: string; override;
-    procedure GetEditorInfo(var Name, Author, Email: string); override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
   end;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
@@ -220,7 +220,7 @@ begin
   Result := SCnEditorCodeSwapMenuHint;
 end;
 
-procedure TCnEditorCodeSwap.GetEditorInfo(var Name, Author, Email: string);
+procedure TCnEditorCodeSwap.GetToolsetInfo(var Name, Author, Email: string);
 begin
   Name := SCnEditorCodeSwapName;
   Author := SCnPack_Zjy + ';' + SCnPack_Beta;
@@ -234,7 +234,7 @@ begin
   Result := SCnEditorEvalAlignMenuCaption;
 end;
 
-procedure TCnEditorEvalAlign.GetEditorInfo(var Name, Author,
+procedure TCnEditorEvalAlign.GetToolsetInfo(var Name, Author,
   Email: string);
 begin
   Name := SCnEditorEvalAlignName;

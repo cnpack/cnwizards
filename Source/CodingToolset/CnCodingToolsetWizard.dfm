@@ -1,11 +1,11 @@
 inherited CnEditorToolsForm: TCnEditorToolsForm
   Left = 359
   Top = 144
+  Width = 586
+  Height = 537
   BorderIcons = [biSystemMenu]
   Caption = 'Coding Toolset Settings'
-  ClientHeight = 510
-  ClientWidth = 578
-  Constraints.MinHeight = 540
+  Constraints.MinHeight = 537
   Constraints.MinWidth = 586
   Icon.Data = {
     0000010001001010000001000800680500001600000028000000100000002000
