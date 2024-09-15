@@ -355,31 +355,31 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至後一標識符工具">
-		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至匹配關鍵字工具">
-		<param name="Local" value="wizards\editor\editorjumpkeyword.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至前一標識符工具">
-		<param name="Local" value="wizards\editor\editorjumpprevident.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpprevident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至上一信息行工具">
-		<param name="Local" value="wizards\editor\editorprevmsg.htm">
+		<param name="Local" value="wizards\toolset\toolsetprevmsg.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至聲明區工具">
-		<param name="Local" value="wizards\editor\editorjumpintf.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpintf.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至實現區工具">
-		<param name="Local" value="wizards\editor\editorjumpimpl.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpimpl.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至下一信息行工具">
-		<param name="Local" value="wizards\editor\editorjumpmsg.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpmsg.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="文件管理器專家">

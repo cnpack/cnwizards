@@ -254,23 +254,23 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Interface Tool">
-		<param name="Local" value="wizards\editor\editorjumpintf.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpintf.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Implementation Tool">
-		<param name="Local" value="wizards\editor\editorjumpimpl.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpimpl.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Matched Keyword Tool">
-		<param name="Local" value="wizards\editor\editorjumpkeyword.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Next Identifier Tool">
-		<param name="Local" value="wizards\editor\editorjumpnextident.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Previous Identifier Tool">
-		<param name="Local" value="wizards\editor\editorjumpprevident.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpprevident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jumping Enhancement">
@@ -302,7 +302,7 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Next Message Line Tool">
-		<param name="Local" value="wizards\editor\editorjumpmsg.htm">
+		<param name="Local" value="wizards\toolset\toolsetjumpmsg.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Object Inspector Enhancements Wizard">
@@ -326,7 +326,7 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Previous Message Line Tool">
-		<param name="Local" value="wizards\editor\editorprevmsg.htm">
+		<param name="Local" value="wizards\toolset\toolsetprevmsg.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Privacy Policy">
