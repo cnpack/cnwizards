@@ -54,12 +54,12 @@ type
 // 选择文本代码编辑器基类
 //==============================================================================
 
-{ TCnEditorCodeTool }
+{ TCnSelectionCodeTool }
 
   TCnCodeToolStyle = (csLine, csSelText, csAllText);
   {* 处理文本的方式，csLine 为选择行方式，csSelText/csAllText为选择/全部文本方式}
 
-  TCnEditorCodeTool = class(TCnBaseCodingToolset)
+  TCnSelectionCodeTool = class(TCnBaseCodingToolset)
   {* 选择代码处理工具基类。
      该基类用来处理用户选择的文本，当用户选择了代码后，执行该编辑器工具，对已
      选择的代码进行转换处理。}
@@ -111,24 +111,24 @@ uses
 
 { TCnEditorCodeTool }
 
-constructor TCnEditorCodeTool.Create(AOwner: TCnCodingToolsetWizard);
+constructor TCnSelectionCodeTool.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   ValidInSource := True;
   BlockMustNotEmpty := False;
 end;
 
-procedure TCnEditorCodeTool.PrePreocessLine(const Str: string);
+procedure TCnSelectionCodeTool.PrePreocessLine(const Str: string);
 begin
   { do nothing }
 end;
 
-function TCnEditorCodeTool.ProcessLine(const Str: string): string;
+function TCnSelectionCodeTool.ProcessLine(const Str: string): string;
 begin
   { do nothing }
 end;
 
-function TCnEditorCodeTool.ProcessText(const Text: string): string;
+function TCnSelectionCodeTool.ProcessText(const Text: string): string;
 var
   Lines: TStrings;
   I: Integer;
@@ -151,7 +151,7 @@ begin
   end;
 end;
 
-procedure TCnEditorCodeTool.Execute;
+procedure TCnSelectionCodeTool.Execute;
 const
   SCnOtaBatchSize = $7FFF;
 var
@@ -352,7 +352,7 @@ begin
     ErrorDlg(SCnEditorCodeToolSelIsEmpty);
 end;
 
-function TCnEditorCodeTool.GetState: TWizardState;
+function TCnSelectionCodeTool.GetState: TWizardState;
 begin
   Result := inherited GetState;
   if wsEnabled in Result then
@@ -363,7 +363,7 @@ begin
   end;
 end;
 
-procedure TCnEditorCodeTool.GetNewPos(var ARow, ACol: Integer);
+procedure TCnSelectionCodeTool.GetNewPos(var ARow, ACol: Integer);
 begin
 // 基类啥都不做，不改变值
 end;

@@ -72,7 +72,7 @@ type
 
   TCnDelBlankStyle = (dsMulti, dsAll);
 
-  TCnEditorCodeDelBlank = class(TCnEditorCodeTool)
+  TCnEditorCodeDelBlank = class(TCnSelectionCodeTool)
   private
     FStrings: TStrings;
     FStyle: TCnCodeToolStyle;

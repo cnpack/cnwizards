@@ -57,7 +57,7 @@ type
 
 { TCnEditorCodeSwap }
 
-  TCnEditorCodeSwap = class(TCnEditorCodeTool)
+  TCnEditorCodeSwap = class(TCnSelectionCodeTool)
   private
 
   protected
@@ -75,7 +75,7 @@ type
 
 { TCnEditorEvalAlign }
 
-  TCnEditorEvalAlign = class(TCnEditorCodeTool)
+  TCnEditorEvalAlign = class(TCnSelectionCodeTool)
   private
 
   protected

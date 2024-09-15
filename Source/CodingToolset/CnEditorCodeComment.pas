@@ -57,7 +57,7 @@ type
 
 { TCnEditorCodeComment }
 
-  TCnEditorCodeComment = class(TCnEditorCodeTool)
+  TCnEditorCodeComment = class(TCnSelectionCodeTool)
   protected
     function ProcessLine(const Str: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
@@ -73,7 +73,7 @@ type
 
 { TCnEditorCodeUnComment }
 
-  TCnEditorCodeUnComment = class(TCnEditorCodeTool)
+  TCnEditorCodeUnComment = class(TCnSelectionCodeTool)
   protected
     function ProcessLine(const Str: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;
@@ -89,7 +89,7 @@ type
 
 { TCnEditorCodeToggleComment }
 
-  TCnEditorCodeToggleComment = class(TCnEditorCodeTool)
+  TCnEditorCodeToggleComment = class(TCnSelectionCodeTool)
   private
     FAllIsCommented: Boolean;
     FMoveToNextLine: Boolean;

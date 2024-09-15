@@ -52,7 +52,7 @@ type
 
 { TCnEditorSortLines }
 
-  TCnEditorSortLines = class(TCnEditorCodeTool)
+  TCnEditorSortLines = class(TCnSelectionCodeTool)
   protected
     function ProcessText(const Text: string): string; override;
     function GetStyle: TCnCodeToolStyle; override;

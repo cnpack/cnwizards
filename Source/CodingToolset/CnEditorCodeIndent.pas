@@ -52,7 +52,7 @@ type
 
 { TCnEditorCodeIndent }
 
-  TCnEditorCodeIndent = class(TCnEditorCodeTool)
+  TCnEditorCodeIndent = class(TCnSelectionCodeTool)
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
@@ -67,7 +67,7 @@ type
 
 { TCnEditorCodeUnIndent }
 
-  TCnEditorCodeUnIndent = class(TCnEditorCodeTool)
+  TCnEditorCodeUnIndent = class(TCnSelectionCodeTool)
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;

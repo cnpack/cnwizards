@@ -52,7 +52,7 @@ type
 
 { TCnEditorFontInc }
 
-  TCnEditorFontInc = class(TCnEditorCodeTool)
+  TCnEditorFontInc = class(TCnSelectionCodeTool)
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;
@@ -67,7 +67,7 @@ type
 
 { TCnEditorFontDec }
 
-  TCnEditorFontDec = class(TCnEditorCodeTool)
+  TCnEditorFontDec = class(TCnSelectionCodeTool)
   public
     constructor Create(AOwner: TCnCodingToolsetWizard); override;
     function GetCaption: string; override;

@@ -67,7 +67,7 @@ type
 
 { TCnEditorCodeToString }
 
-  TCnEditorCodeToString = class(TCnEditorCodeTool)
+  TCnEditorCodeToString = class(TCnSelectionCodeTool)
   private
     FDelphiReturn: string;
     FCReturn: string;
