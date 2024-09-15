@@ -135,10 +135,9 @@ type
     procedure pgcMainChanging(Sender: TObject; var AllowChange: Boolean);
     procedure btnHelpClick(Sender: TObject);
   private
-    m_bCanClose: Boolean;
-    m_atRestore: TAbiType;
+    FCanClose: Boolean;
+    FAbiTypeRestore: TAbiType;
     FDone: Boolean;
-
     FOldSel: Integer;
     function GetEntryValue(const AValue: string): string;
     procedure LoadHistories;
@@ -148,7 +147,7 @@ type
     procedure CleanHis;
 
     procedure WMDropFiles(var Msg: TWMDropFiles);
-    procedure ParseFileAndNotifyUI(strBakFile: String);
+    procedure ParseFileAndNotifyUI(const BakFile: String);
     function MyValidLbxItemChecked(lbx: TCheckListBox): boolean;
     procedure lstProjectsFilesClickCheck(Sender: TObject);
 
@@ -195,9 +194,9 @@ var
 procedure TCnIdeBRMainForm.FormCreate(Sender: TObject);
 var
   I: Integer;
-  strRootDir: String;
+  RootDir: String;
 begin
-  m_bCanClose := True;
+  FCanClose := True;
   // 使窗体可接受文件拖放
   DragAcceptFiles(Handle, True);
   //
@@ -209,10 +208,10 @@ begin
   // 查看系统中已安装的 AppBuilder
   for I := Ord(Low(TAbiType)) to Ord(High(TAbiType)) do
   begin
-    strRootDir := GetAppRootDir(TAbiType(I));
-    if strRootDir <> '' then
+    RootDir := GetAppRootDir(TAbiType(I));
+    if RootDir <> '' then
     begin
-      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[SCnAppName[I], strRootDir]), TObject(1));
+      lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[SCnAppName[I], RootDir]), TObject(1));
     end
     else
     begin
@@ -237,8 +236,8 @@ end;
 // 下一步-----------------------------------------------------------------------
 procedure TCnIdeBRMainForm.btnNextClick(Sender: TObject);
 var
-  i: Integer;
-  FAbi: TAppBuilderInfo;
+  I: Integer;
+  Abi: TAppBuilderInfo;
 begin
   if pgcMain.ActivePage = tsFirst then
   begin
@@ -328,31 +327,31 @@ begin
     pgcMain.ActivePage := tsResult;
 
     // 进行备份操作
-    if FAbi <> nil then
-      FreeAndNil(FAbi);
+    if Abi <> nil then
+      FreeAndNil(Abi);
     btnClose.Enabled := False;
-    m_bCanClose := False;
+    FCanClose := False;
     Screen.Cursor := crHourGlass;
 
     // 创建 TAppBuilderInfo 对象
     try
-      FAbi := TAppBuilderInfo.Create(
+      Abi := TAppBuilderInfo.Create(
           Handle, TAbiType(lbxSelectApp.ItemIndex));
       if lbxBackupOptions.Checked[0] then
-        FAbi.AbiOptions := [aoCodeTemp];
+        Abi.AbiOptions := [aoCodeTemp];
       if lbxBackupOptions.Checked[1] then
-        FAbi.AbiOptions := FAbi.AbiOptions + [aoObjRep];
+        Abi.AbiOptions := Abi.AbiOptions + [aoObjRep];
       if lbxBackupOptions.Checked[2] then
-        FAbi.AbiOptions := FAbi.AbiOptions + [aoRegInfo];
+        Abi.AbiOptions := Abi.AbiOptions + [aoRegInfo];
       if lbxBackupOptions.Checked[3] then
-        FAbi.AbiOptions := FAbi.AbiOptions + [aoMenuTemp];
+        Abi.AbiOptions := Abi.AbiOptions + [aoMenuTemp];
 
-      FAbi.BackupInfoToFile(edtBackupFile.Text, chkSaveUsrObjRep2Sys.Checked);
+      Abi.BackupInfoToFile(edtBackupFile.Text, chkSaveUsrObjRep2Sys.Checked);
       FDone := True;
     finally
-      FreeAndNil(FAbi);
+      FreeAndNil(Abi);
       btnClose.Enabled := True;
-      m_bCanClose := True;
+      FCanClose := True;
       Screen.Cursor := crDefault;
     end;
   end
@@ -374,7 +373,7 @@ begin
       ErrorDlg(SCnErrorFileNotExist, SCnErrorCaption);
       Exit;
     end;
-    if edtRestoreRootPath.Text <> GetAppRootDir(m_atRestore) then
+    if edtRestoreRootPath.Text <> GetAppRootDir(FAbiTypeRestore) then
       btnNext.Enabled := False
     else
       btnNext.Enabled := True;
@@ -383,7 +382,7 @@ begin
   end
   else if pgcMain.ActivePage = tsRestore then
   begin
-    if edtRestoreRootPath.Text <> GetAppRootDir(m_atRestore) then
+    if edtRestoreRootPath.Text <> GetAppRootDir(FAbiTypeRestore) then
     begin
       ErrorDlg(SCnErrorNoIDE, SCnErrorCaption);
       Exit;
@@ -396,38 +395,38 @@ begin
     end;
 
     // 判断 AppBuilder 是否正在运行中
-    if not IsAppBuilderRunning(m_atRestore) then
+    if not IsAppBuilderRunning(FAbiTypeRestore) then
     begin
       // 切换到结果页面
       btnClose.Enabled := False;
-      m_bCanClose := False;
+      FCanClose := False;
       pgcMain.ActivePage := tsResult;
       Screen.Cursor := crHourGlass;
 
       // 进行恢复操作
       try
-        FAbi := TAppBuilderInfo.Create(Handle, m_atRestore);
-        FAbi.AbiOptions := [];
+        Abi := TAppBuilderInfo.Create(Handle, FAbiTypeRestore);
+        Abi.AbiOptions := [];
         if lbxRestoreOptions.Checked[0] then
-          FAbi.AbiOptions := [aoCodeTemp];
+          Abi.AbiOptions := [aoCodeTemp];
         if lbxRestoreOptions.Checked[1] then
-          FAbi.AbiOptions := FAbi.AbiOptions + [aoObjRep];
+          Abi.AbiOptions := Abi.AbiOptions + [aoObjRep];
         if lbxRestoreOptions.Checked[2] then
-          FAbi.AbiOptions := FAbi.AbiOptions + [aoRegInfo];
+          Abi.AbiOptions := Abi.AbiOptions + [aoRegInfo];
         if lbxRestoreOptions.Checked[3] then
-          FAbi.AbiOptions := FAbi.AbiOptions + [aoMenuTemp];
+          Abi.AbiOptions := Abi.AbiOptions + [aoMenuTemp];
 
-        FAbi.RestoreInfoFromFile(edtRestoreFile.Text);
+        Abi.RestoreInfoFromFile(edtRestoreFile.Text);
         FDone := True;
       finally
-        FreeAndNil(FAbi);
+        FreeAndNil(Abi);
         btnClose.Enabled := True;
-        m_bCanClose := True;
+        FCanClose := True;
         Screen.Cursor := crDefault;
       end;
     end
     else
-      ErrorDlg(Format(SCnErrorIDERunningFmt, [SCnAppName[Integer(m_atRestore)]]), SCnErrorCaption);
+      ErrorDlg(Format(SCnErrorIDERunningFmt, [SCnAppName[Integer(FAbiTypeRestore)]]), SCnErrorCaption);
   end
   else if pgcMain.ActivePage = tsOther then
   begin
@@ -526,12 +525,12 @@ end;
 // 验证 CheckListBox 中是否有选择 Item
 function TCnIdeBRMainForm.MyValidLbxItemChecked(lbx: TCheckListBox): boolean;
 var
-  i: integer;
+  I: Integer;
 begin
   Result := False;
-  for i := 0 to lbx.Items.Count - 1 do
+  for I := 0 to lbx.Items.Count - 1 do
   begin
-    if lbx.Checked[i] then
+    if lbx.Checked[I] then
     begin
       Result := True;
       break;
@@ -543,20 +542,20 @@ end;
 procedure TCnIdeBRMainForm.MyDrawRadioListBoxItem(Control: TWinControl; Index: Integer;
   Rect: TRect; State: TOwnerDrawState);
 var
-  rct, rctDraw: TRect;
-  uState: UINT;
+  Rct, RctDraw: TRect;
+  AState: UINT;
 begin
   with Control as TListBox do
   begin
-    rct.Left := Rect.Left + 15;
-    rct.Top := Rect.Top;
-    rct.Bottom := Rect.Bottom;
-    rct.Right := rct.Left + Control.Width - 32;
+    Rct.Left := Rect.Left + 15;
+    Rct.Top := Rect.Top;
+    Rct.Bottom := Rect.Bottom;
+    Rct.Right := Rct.Left + Control.Width - 32;
 
-    rctDraw.left := Rect.Left + 1;
-    rctDraw.right := Rect.Left + 13;
-    rctDraw.top := Rect.Top;
-    rctDraw.bottom := Rect.Bottom;
+    RctDraw.left := Rect.Left + 1;
+    RctDraw.right := Rect.Left + 13;
+    RctDraw.top := Rect.Top;
+    RctDraw.bottom := Rect.Bottom;
 
     Canvas.Brush.Color := Color;
     Canvas.FillRect(Rect);
@@ -566,26 +565,26 @@ begin
     begin
       Canvas.Brush.Color := $00FFF7F7;
       Canvas.Pen.Color := clGray;
-      Canvas.RoundRect(rct.Left, rct.Top, rct.Right, rct.Bottom, 5, 5);
+      Canvas.RoundRect(Rct.Left, Rct.Top, Rct.Right, Rct.Bottom, 5, 5);
     end;
 
     if odSelected in State then
     begin
       if Integer(Items.Objects[Index]) = 0 then
-        uState := DFCS_BUTTONRADIO or DFCS_INACTIVE
+        AState := DFCS_BUTTONRADIO or DFCS_INACTIVE
       else
-        uState := DFCS_BUTTONRADIO or DFCS_CHECKED;
+        AState := DFCS_BUTTONRADIO or DFCS_CHECKED;
     end
     else
     begin
       if Integer(Items.Objects[Index]) = 0 then
-        uState := DFCS_BUTTONRADIO or DFCS_INACTIVE
+        AState := DFCS_BUTTONRADIO or DFCS_INACTIVE
       else
-        uState := DFCS_BUTTONRADIO;
+        AState := DFCS_BUTTONRADIO;
     end;
 
-    Windows.DrawFrameControl(Canvas.Handle, rctDraw,
-        DFC_BUTTON, uState);
+    Windows.DrawFrameControl(Canvas.Handle, RctDraw,
+        DFC_BUTTON, AState);
     // 字体颜色
     if Integer(Items.Objects[Index]) = 1 then
       Canvas.Font.Color := Font.Color
@@ -593,12 +592,12 @@ begin
       Canvas.Font.Color := clGray;
 
     // 绘制图标
-    il16.Draw(Canvas, rct.Left + 4,
-        rct.Top + (rct.Bottom - rct.Top - il16.Height) div 2, Index);
+    il16.Draw(Canvas, Rct.Left + 4,
+        Rct.Top + (Rct.Bottom - Rct.Top - il16.Height) div 2, Index);
 
     // 绘制出文字
-    Canvas.TextOut(rct.Left + 24,
-        rct.Top + (Rect.Bottom - rct.Top - Canvas.TextHeight('A')) div 2,
+    Canvas.TextOut(Rct.Left + 24,
+        Rct.Top + (Rect.Bottom - Rct.Top - Canvas.TextHeight('A')) div 2,
         Items.Strings[Index]);
     if odFocused in State then
       Canvas.DrawFocusRect(Rect);
@@ -609,20 +608,20 @@ end;
 procedure TCnIdeBRMainForm.MyDrawCheckListBoxItem(Control: TWinControl;
   Index: Integer; Rect: TRect; AState: TOwnerDrawState);
 var
-  rct: TRect;
+  Rct: TRect;
 begin
   with (Control as TCheckListBox) do
   begin
-    rct.Left := Rect.Left;
-    rct.Top := Rect.Top;
-    rct.Bottom := Rect.Bottom;
-    rct.Right := rct.Left + Canvas.TextWidth('A')
+    Rct.Left := Rect.Left;
+    Rct.Top := Rect.Top;
+    Rct.Bottom := Rect.Bottom;
+    Rct.Right := Rct.Left + Canvas.TextWidth('A')
         * (Length(Items.Strings[Index]) + 2) + 16;
     if (odFocused in AState) and ItemEnabled[Index] then // 当前选中项
     begin
       Canvas.Brush.Color := $00FFF7F7;
       Canvas.Pen.Color := clGray;
-      Canvas.RoundRect(rct.Left, rct.Top, rct.Right, rct.Bottom, 5, 5);
+      Canvas.RoundRect(Rct.Left, Rct.Top, Rct.Right, Rct.Bottom, 5, 5);
     end
     else
     begin
@@ -668,41 +667,43 @@ end;
 // 处理文件拖放消息
 procedure TCnIdeBRMainForm.WMDropFiles(var Msg: TWMDropFiles);
 var
-  strFileName: String;
-  nLength: Integer;
+  FileName: String;
+  L: Integer;
 begin
   if DragQueryFile(HDROP(Msg.Drop), $FFFFFFFF, nil, 0) > 0 then
   begin
     // 选择一个文件的路径
-    SetLength(strFileName, MAX_PATH);
-    nLength := DragQueryFile(HDROP(Msg.Drop), 0, PChar(strFileName), Length(strFileName));
-    SetLength(strFileName, nLength);
-    if UpperCase(_CnExtractFileExt(strFileName)) = '.BIC' then
+    SetLength(FileName, MAX_PATH);
+    L := DragQueryFile(HDROP(Msg.Drop), 0, PChar(FileName), Length(FileName));
+    SetLength(FileName, L);
+    if UpperCase(_CnExtractFileExt(FileName)) = '.BIC' then
     begin
-      ParseFileAndNotifyUI(strFileName);
+      ParseFileAndNotifyUI(FileName);
     end;
   end;
   DragFinish(HDROP(Msg.Drop));
 end;
 
 // 分析备份文件
-procedure TCnIdeBRMainForm.ParseFileAndNotifyUI(strBakFile: String);
+procedure TCnIdeBRMainForm.ParseFileAndNotifyUI(const BakFile: String);
 var
-  strRootDir, strAppName: String;
-  ao: TAbiOptions;
-  i: integer;
+  RootDir, AppName: String;
+  Ao: TAbiOptions;
+  I: Integer;
 begin
-  if not FileExists(strBakFile) then Exit;
+  if not FileExists(BakFile) then
+    Exit;
 
-  edtRestoreFile.Text := strBakFile;
+  edtRestoreFile.Text := BakFile;
   mmoBakFileInfo.Lines.Clear;
   // 分析备份文件
   try
-    ao := ParseBakFile(strBakFile, strRootDir, strAppName, m_atRestore);
+    Ao := ParseBakFile(BakFile, RootDir, AppName, FAbiTypeRestore);
   except
     mmoBakFileInfo.Lines.Add(SCnFileInvalid);
   end;
-  if ao = [] then
+
+  if Ao = [] then
   begin
     btnNext.Enabled := False;
     mmoBakFileInfo.Lines.Add(SCnFileInvalid);
@@ -711,54 +712,54 @@ begin
   begin
     btnNext.Enabled := True;
     mmoBakFileInfo.Lines.Clear;
-    mmoBakFileInfo.Lines.Add(SCnIDEName + #13#10 + '　　' + strAppName);
-    mmoBakFileInfo.Lines.Add(SCnInstallDir + #13#10 + '　　' + strRootDir);
+    mmoBakFileInfo.Lines.Add(SCnIDEName + #13#10 + '　　' + AppName);
+    mmoBakFileInfo.Lines.Add(SCnInstallDir + #13#10 + '　　' + RootDir);
     mmoBakFileInfo.Lines.Add(SCnBackupContent);
 
-    for i := 0 to lbxRestoreOptions.Items.Count - 1 do
-      lbxRestoreOptions.Checked[i] := False;
+    for I := 0 to lbxRestoreOptions.Items.Count - 1 do
+      lbxRestoreOptions.Checked[I] := False;
 
-    if aoCodeTemp in ao then
+    if aoCodeTemp in Ao then
     begin
       lbxRestoreOptions.Checked[0] := True;
       mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[0]);
     end;
-    if aoObjRep in ao then
+    if aoObjRep in Ao then
     begin
       lbxRestoreOptions.Checked[1] := True;
       mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[1]);
     end;
-    if aoRegInfo in ao then
+    if aoRegInfo in Ao then
     begin
       lbxRestoreOptions.Checked[2] := True;
       mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[2]);
     end;
-    if aoMenuTemp in ao then
+    if aoMenuTemp in Ao then
     begin
       lbxRestoreOptions.Checked[3] := True;
       mmoBakFileInfo.Lines.Add('　　' + SCnAbiOptions[3]);
     end;
 
-    lbxRestoreOptions.Items.Objects[0] := TObject(Integer(aoCodeTemp in ao));
-    lbxRestoreOptions.Items.Objects[1] := TObject(Integer(aoObjRep in ao));
-    lbxRestoreOptions.Items.Objects[2] := TObject(Integer(aoRegInfo in ao));
-    lbxRestoreOptions.Items.Objects[3] := TObject(Integer(aoMenuTemp in ao));
+    lbxRestoreOptions.Items.Objects[0] := TObject(Integer(aoCodeTemp in Ao));
+    lbxRestoreOptions.Items.Objects[1] := TObject(Integer(aoObjRep in Ao));
+    lbxRestoreOptions.Items.Objects[2] := TObject(Integer(aoRegInfo in Ao));
+    lbxRestoreOptions.Items.Objects[3] := TObject(Integer(aoMenuTemp in Ao));
 
     lbxRestoreOptions.Enabled := True;
-    edtRestoreRootPath.Text := GetAppRootDir(m_atRestore);
+    edtRestoreRootPath.Text := GetAppRootDir(FAbiTypeRestore);
 
-    if (strAppName = SCnAppName[6]) or (strAppName = SCnAppName[7]) then
+    if (AppName = SCnAppName[6]) or (AppName = SCnAppName[7]) then
       lbxRestoreOptions.ItemEnabled[0] := False;
 
     if Length(edtRestoreRootPath.Text) < 2 then
-      edtRestoreRootPath.Text := strAppName + SCnIDENotInstalled;
+      edtRestoreRootPath.Text := AppName + SCnIDENotInstalled;
   end;
   pgcMain.ActivePage := tsPreRestore;
 end;
 
 procedure TCnIdeBRMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if Not m_bCanClose then
+  if Not FCanClose then
     Action := caNone;
 end;
 
@@ -770,16 +771,16 @@ end;
 
 procedure TCnIdeBRMainForm.TabSheetShow(Sender: TObject);
 var
-  ts: TTabSheet;
+  TS: TTabSheet;
 begin
-  ts := Sender as TTabSheet;
-  if ts = tsFirst then
+  TS := Sender as TTabSheet;
+  if TS = tsFirst then
   begin
     btnPrev.Visible := False;
     btnNext.Visible := True;
     btnNext.Enabled := True;
   end
-  else if ts = tsSelectApp then
+  else if TS = tsSelectApp then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
@@ -788,7 +789,7 @@ begin
     if Assigned(lbxSelectApp.OnClick) then
       lbxSelectApp.OnClick(lbxSelectApp);
   end
-  else if ts = tsPreRestore then
+  else if TS = tsPreRestore then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
@@ -798,7 +799,7 @@ begin
     else
       btnNext.Enabled := False;
   end
-  else if ts = tsBackup then
+  else if TS = tsBackup then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
@@ -808,20 +809,20 @@ begin
         + SCnAppAbName[lbxSelectApp.ItemIndex]
         + FormatDateTime('_yyyymmdd', Now()) + '.bic';
   end
-  else if ts = tsRestore then
+  else if TS = tsRestore then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
     btnNext.Visible := True;
   end
-  else if ts = tsOther then
+  else if TS = tsOther then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
     btnNext.Visible := True;
     btnNext.Enabled := True;
   end
-  else if ts = tsResult then
+  else if TS = tsResult then
   begin
     btnPrev.Visible := True;
     btnPrev.Enabled := True;
@@ -866,6 +867,7 @@ begin
         end;
         Reg.CloseKey;
       end;
+
       if Reg.OpenKey(GetRegIDEBase(IDE) + SACnRegIDEEntries[IDE]
         + SCnRegHisFiles, False) then
       begin
@@ -1122,7 +1124,8 @@ var
   State: TCheckBoxState;
   IsChecked, IsUnchecked: Boolean;
 begin
-  if not (Sender is TCheckListBox) then Exit;
+  if not (Sender is TCheckListBox) then
+    Exit;
 
   IsChecked := True; IsUnchecked := True;
   for I := 0 to lstProjects.Items.Count - 1 do
