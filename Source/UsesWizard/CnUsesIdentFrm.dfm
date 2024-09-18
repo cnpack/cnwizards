@@ -98,7 +98,7 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
     end
     inherited actAttribute: TAction
       Caption = '&Open'
-      Hint = 'Open Selected File'
+      Hint = 'Open Selected File in IDE'
       ImageIndex = 25
     end
     inherited actCopy: TAction
