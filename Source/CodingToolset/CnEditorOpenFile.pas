@@ -76,6 +76,8 @@ type
     procedure Execute; override;
     procedure GetToolsetInfo(var Name, Author, Email: string); override;
 
+    procedure DoExecuteSearch(const F: string);
+
     class function SearchAndOpenFile(FileName: string; Prefixes: TStrings = nil): Boolean;
     {* 根据精确的文件名和可能的前缀在各种目录中搜索文件}
     function SearchFileList(FileName: string): Boolean;
@@ -89,7 +91,7 @@ implementation
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
-  CnWizIdeUtils;
+  CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   SrcFile: string;
@@ -132,7 +134,7 @@ end;
 
 procedure TCnEditorOpenFile.Execute;
 var
-  FileName, F: string;
+  F: string;
   Ini: TCustomIniFile;
 begin
   Ini := CreateIniFile;
@@ -142,37 +144,8 @@ begin
   finally
     Ini.Free;
   end;
-  
-  if F <> '' then
-  begin
-    if not SearchAndOpenFile(F) then
-    begin
-      // For Vcl.Forms like
-      if IsDelphiRuntime then
-        FileName := F + '.pas'
-      else
-        FileName := F + '.cpp';
 
-      if not SearchAndOpenFile(FileName) then
-      begin
-        // 单一未找到，则匹配搜索
-        if FFileList = nil then
-           FFileList := TStringList.Create
-        else
-          FFileList.Clear;
-
-        if SearchFileList(F) and (FFileList.Count > 0) then
-        begin
-          if FFileList.Count = 1 then // 只搜到一个就直接打开
-            DoOpenFile(FFileList[0])
-          else  // 搜到不止一个则弹列表
-            ShowOpenFileResultList(FFileList);
-        end
-        else
-          ErrorDlg(SCnEditorOpenFileNotFound);
-      end;
-    end;
-  end;
+  DoExecuteSearch(F);
 end;
 
 function TCnEditorOpenFile.GetCaption: string;
@@ -315,6 +288,54 @@ begin
       FFileList.Add(FileName)
     else if not IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.CppExt)) > 0) then
       FFileList.Add(FileName);
+  end;
+end;
+
+procedure TCnEditorOpenFile.DoExecuteSearch(const F: string);
+var
+  FileName: string;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnEditorOpenFile.DoExecuteSearch: ' + F);
+{$ENDIF}
+  if F <> '' then
+  begin
+    if not SearchAndOpenFile(F) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnEditorOpenFile.DoExecuteSearch. SearchAndOpenFile 1st Failed.');
+{$ENDIF}
+      // For Vcl.Forms like
+      if IsDelphiRuntime then
+        FileName := F + '.pas'
+      else
+        FileName := F + '.cpp';
+
+      if not SearchAndOpenFile(FileName) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnEditorOpenFile.DoExecuteSearch. SearchAndOpenFile 2nd Failed.');
+{$ENDIF}
+        // 单一未找到，则匹配搜索
+        if FFileList = nil then
+          FFileList := TStringList.Create
+        else
+          FFileList.Clear;
+
+        if SearchFileList(F) and (FFileList.Count > 0) then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnEditorOpenFile.DoExecuteSearch. SearchFileList 3rd Got.');
+{$ENDIF}
+          if FFileList.Count = 1 then // 只搜到一个就直接打开
+            DoOpenFile(FFileList[0])
+          else  // 搜到不止一个则弹列表
+            ShowOpenFileResultList(FFileList);
+        end
+        else
+          ErrorDlg(SCnEditorOpenFileNotFound);
+      end;
+    end;
   end;
 end;
 

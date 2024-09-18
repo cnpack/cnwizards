@@ -61,6 +61,7 @@ type
     procedure edtMatchSearchChange(Sender: TObject);
     procedure actCopyExecute(Sender: TObject);
     procedure actAttributeExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
 
   protected
@@ -80,6 +81,9 @@ implementation
 {$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 {$R *.DFM}
+
+uses
+  CnWizManager, CnCodingToolsetWizard, CnEditorOpenFile;
 
 { TCnUsesIdentForm }
 
@@ -210,20 +214,36 @@ procedure TCnUsesIdentForm.actAttributeExecute(Sender: TObject);
 var
   Info: TCnIdentUnitInfo;
   S: string;
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  Wizard: TCnCodingToolsetWizard;
+  Tool: TCnEditorOpenFile;
+{$ENDIF}
 begin
   if lvList.Selected <> nil then
   begin
-    Info := TCnIdentUnitInfo(lvList.Selected.Data);
-    if Info <> nil then
+    if lvList.Selected.SubItems.Count > 0 then
     begin
-      S := Info.FullNameWithPath;
-      if FileExists(S) then
+      S := lvList.Selected.SubItems[0];
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+      Wizard := TCnCodingToolsetWizard(CnWizardMgr.WizardByClass(TCnCodingToolsetWizard));
+      if Wizard <> nil then
       begin
-        ModalResult := mrOk;
-        CnOtaOpenFile(S);
+        Tool := TCnEditorOpenFile(Wizard.CodingToolByClass(TCnEditorOpenFile));
+        if Tool <> nil then
+          Tool.DoExecuteSearch(S);
       end;
+{$ENDIF}
+      ModalResult := mrOk;
     end;
   end;
+end;
+
+procedure TCnUsesIdentForm.FormShow(Sender: TObject);
+begin
+  inherited;
+{$IFNDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  actAttribute.Visible := False;
+{$ENDIF}
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

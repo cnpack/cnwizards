@@ -180,6 +180,10 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
+
+    function CodingToolByClass(ToolClass: TCnCodingToolsetClass): TCnBaseCodingToolset;
+    {* 根据类名查找子工具实例}
+
     property CodingTools[Index: Integer]: TCnBaseCodingToolset read GetCodingTools;
     property CodingToolCount: Integer read GetCodingToolCount;
   end;
@@ -650,6 +654,22 @@ begin
     for I := 0 to GetCodingToolCount - 1 do
       CodingTools[I].FAction := nil;
   end;
+end;
+
+function TCnCodingToolsetWizard.CodingToolByClass(
+  ToolClass: TCnCodingToolsetClass): TCnBaseCodingToolset;
+var
+  I: Integer;
+begin
+  for I := 0 to GetCodingToolCount - 1 do
+  begin
+    if CodingTools[I].ClassNameIs(ToolClass.ClassName) then
+    begin
+      Result := CodingTools[I];
+      Exit;
+    end;
+  end;
+  Result := nil;
 end;
 
 { TCnEditorToolsForm }
