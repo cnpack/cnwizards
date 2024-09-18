@@ -97,7 +97,9 @@ inherited CnUsesIdentForm: TCnUsesIdentForm
       Hint = 'Use Selected Unit'
     end
     inherited actAttribute: TAction
-      Visible = False
+      Caption = '&Open'
+      Hint = 'Open Selected File'
+      ImageIndex = 25
     end
     inherited actCopy: TAction
       Hint = 'Copy Selected Unit Name to Clipboard'

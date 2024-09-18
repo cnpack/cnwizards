@@ -60,6 +60,7 @@ type
     procedure rbIntfDblClick(Sender: TObject);
     procedure edtMatchSearchChange(Sender: TObject);
     procedure actCopyExecute(Sender: TObject);
+    procedure actAttributeExecute(Sender: TObject);
   private
 
   protected
@@ -203,6 +204,26 @@ end;
 function TCnUsesIdentForm.GetSelectedFileName: string;
 begin
   Result := '';
+end;
+
+procedure TCnUsesIdentForm.actAttributeExecute(Sender: TObject);
+var
+  Info: TCnIdentUnitInfo;
+  S: string;
+begin
+  if lvList.Selected <> nil then
+  begin
+    Info := TCnIdentUnitInfo(lvList.Selected.Data);
+    if Info <> nil then
+    begin
+      S := Info.FullNameWithPath;
+      if FileExists(S) then
+      begin
+        ModalResult := mrOk;
+        CnOtaOpenFile(S);
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}

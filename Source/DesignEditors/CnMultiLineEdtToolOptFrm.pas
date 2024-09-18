@@ -82,11 +82,9 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure edtQuotedCharExit(Sender: TObject);
   private
-    { Private declarations }
-    FToolsOption: TToolsOpt;
+    FToolsOption: TCnToolsOpt;
   public
-    { Public declarations }
-    property ToolsOption: TToolsOpt read FToolsOption write FToolsOption;
+    property ToolsOption: TCnToolsOpt read FToolsOption write FToolsOption;
   end;
 
 {$ENDIF CNWIZARDS_DESIGNEDITOR}
