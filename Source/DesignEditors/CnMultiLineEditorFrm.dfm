@@ -4,8 +4,8 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
   AutoScroll = False
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Multi-line Property Editor'
-  ClientHeight = 273
-  ClientWidth = 472
+  ClientHeight = 330
+  ClientWidth = 578
   Constraints.MinHeight = 300
   Constraints.MinWidth = 450
   Icon.Data = {
@@ -31,7 +31,7 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
   object tbrMain: TToolBar
     Left = 0
     Top = 0
-    Width = 472
+    Width = 578
     Height = 26
     AutoSize = True
     Caption = 'tbrMain'
@@ -224,8 +224,8 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
   object memEdit: TMemo
     Left = 0
     Top = 26
-    Width = 472
-    Height = 206
+    Width = 578
+    Height = 263
     Align = alClient
     Ctl3D = True
     HideSelection = False
@@ -236,8 +236,8 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
   end
   object Panel1: TPanel
     Left = 0
-    Top = 232
-    Width = 472
+    Top = 289
+    Width = 578
     Height = 41
     Align = alBottom
     BevelOuter = bvNone
@@ -281,7 +281,7 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
       OnClick = btnToolsClick
     end
     object btnOK: TButton
-      Left = 310
+      Left = 416
       Top = 12
       Width = 75
       Height = 21
@@ -292,7 +292,7 @@ inherited CnMultiLineEditorForm: TCnMultiLineEditorForm
       OnClick = btnOKClick
     end
     object btnCancel: TButton
-      Left = 390
+      Left = 496
       Top = 12
       Width = 75
       Height = 21

@@ -68,16 +68,16 @@ uses
   CnWizMultiLang, Menus, Buttons, CnPopupMenu, CnWizOptions;
 
 type
-  TStringConvert = (scUpper, scLower, scCaptain, scIgnore);
+  TCnStringConvert = (scUpper, scLower, scCaptain, scIgnore);
 
-  TSQLFormatterOpt = record
-    KeyWord: TStringConvert;
-    Func: TStringConvert;
-    Table: TStringConvert;
-    Column: TStringConvert;
+  TCnSQLFormatterOpt = record
+    KeyWord: TCnStringConvert;
+    Func: TCnStringConvert;
+    Table: TCnStringConvert;
+    Column: TCnStringConvert;
   end;
 
-  TToolsOpt = record
+  TCnToolsOpt = record
     QuotedChar: Char;
     UnQuotedSep: string;
     LineMoveSpaces: Integer;
@@ -87,7 +87,7 @@ type
     UserFormatStrBefore: string;
     UserFormatStrAfter: string;
     UserFormatOpt: DWORD;
-    SQLFormatterOpt: TSQLFormatterOpt;
+    SQLFormatterOpt: TCnSQLFormatterOpt;
   end;
 
   TCnMultiLineEditorForm = class(TCnTranslateForm)
@@ -208,9 +208,8 @@ type
     procedure EditReloadUpdate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    { Private declarations }
     FOldMemoWndProc: TWndMethod;
-    FToolsOption: TToolsOpt;
+    FToolsOption: TCnToolsOpt;
     OldValue: string;
 
     function DoFind(const Str: string; const UpperCase: Boolean; const Dlg:
@@ -224,7 +223,7 @@ type
   public
     procedure LoadFormSize;
 
-    property ToolsOption: TToolsOpt read FToolsOption write FToolsOption;
+    property ToolsOption: TCnToolsOpt read FToolsOption write FToolsOption;
     property HasSelText: Boolean read GetHasSelText;
   end;
 
@@ -232,32 +231,32 @@ type
 // 按照#13#10，#13或者#10区分每一行
 // 开销比StringList小，且可以处理Unix/Linux/Mac OS/Windows的换行
 //------------------------------------------------------------------------------
-function FoundSep(var p: PChar; var s, Sep: string): Boolean;
+function FoundSep(var P: PChar; var S, Sep: string): Boolean;
 
 //------------------------------------------------------------------------------
 // 删除左边的空格
 //------------------------------------------------------------------------------
-function DeleteLeftSpace(const s: string; const i: Integer): string;
+function DeleteLeftSpace(const S: string; const I: Integer): string;
 
 //------------------------------------------------------------------------------
 // 为每行加上前后缀
 //------------------------------------------------------------------------------
-function FormatEx(const sin, sbefore, safter: string): string;
+function FormatEx(const Sin, SBefore, SAfter: string): string;
 
 //------------------------------------------------------------------------------
 // 左移行
 //------------------------------------------------------------------------------
-function StringMoveLeft(const sin: string; const i: Integer): string;
+function StringMoveLeft(const Sin: string; const I: Integer): string;
 
 //------------------------------------------------------------------------------
 // 右移行
 //------------------------------------------------------------------------------
-function StringMoveRight(const sin: string; const i: Integer): string;
+function StringMoveRight(const Sin: string; const I: Integer): string;
 
 //------------------------------------------------------------------------------
 // 删除每行结束的空格
 //------------------------------------------------------------------------------
-function DelRightSpaces(const sin: string): string;
+function DelRightSpaces(const Sin: string): string;
 
 {$ENDIF CNWIZARDS_DESIGNEDITOR}
 
@@ -298,57 +297,57 @@ const
   csUserFormatStrAfter = 'UserFmtStrAfter';
   csUserFormatOpt = 'UserFmtOption';
 
-function FoundSep(var p: PChar; var s, Sep: string): Boolean;
+function FoundSep(var P: PChar; var S, Sep: string): Boolean;
 begin
-  s := '';
+  S := '';
   Sep := '';
-  Result := p^ <> #0;
+  Result := P^ <> #0;
   if Result then
   begin
-    while p^ <> #0 do
+    while P^ <> #0 do
     begin
-      if StrByteType(p, 0) = mbSingleByte then
+      if StrByteType(P, 0) = mbSingleByte then
       begin
-        if p^ = #13 then
+        if P^ = #13 then
         begin
           Sep := #13;
-          Inc(p);
-          if p^ = #10 then
+          Inc(P);
+          if P^ = #10 then
           begin
             Sep := #13#10;
           end
           else
-            Dec(p);
-          Inc(p);
+            Dec(P);
+          Inc(P);
           Break;
         end
-        else if p^ = #10 then
+        else if P^ = #10 then
         begin
           Sep := #10;
-          Inc(p);
+          Inc(P);
           Break;
         end
         else
         begin
-          s := s + p^;
-          Inc(p);
+          S := S + P^;
+          Inc(P);
         end;
       end
       else
       begin
-        s := s + p^;
-        Inc(p);
+        S := S + P^;
+        Inc(P);
       end;
     end;
   end;
 end;
 
-function DeleteLeftSpace(const s: string; const i: Integer): string;
+function DeleteLeftSpace(const S: string; const I: Integer): string;
 var
   iCount: Integer;
 begin
-  Result := s;
-  for iCount := 1 to i do
+  Result := S;
+  for iCount := 1 to I do
   begin
     if (Result <> '') and (Result[1] = ' ') then
       Result := Copy(Result, 2, MaxInt)
@@ -357,67 +356,67 @@ begin
   end;
 end;
 
-function FormatEx(const sin, sbefore, safter: string): string;
+function FormatEx(const Sin, SBefore, SAfter: string): string;
 var
-  s, Sep: string;
-  p, psave: PChar;
+  S, Sep: string;
+  P, PSave: PChar;
 begin
   Result := '';
-  psave := StrNew(PChar(sin));
-  p := psave;
+  PSave := StrNew(PChar(Sin));
+  P := PSave;
   try
-    while FoundSep(p, s, Sep) do
-      Result := Result + sbefore + s + safter + Sep;
+    while FoundSep(P, S, Sep) do
+      Result := Result + SBefore + S + SAfter + Sep;
   finally
-    StrDispose(psave);
+    StrDispose(PSave);
   end;
 end;
 
-function StringMoveLeft(const sin: string; const i: Integer): string;
+function StringMoveLeft(const Sin: string; const I: Integer): string;
 var
-  s, Sep: string;
-  p, psave: PChar;
+  S, Sep: string;
+  P, PSave: PChar;
 begin
   Result := '';
-  psave := StrNew(PChar(sin));
-  p := psave;
+  PSave := StrNew(PChar(Sin));
+  P := PSave;
   try
-    while FoundSep(p, s, Sep) do
-      Result := Result + DeleteLeftSpace(s, i) + Sep;
+    while FoundSep(P, S, Sep) do
+      Result := Result + DeleteLeftSpace(S, I) + Sep;
   finally
-    StrDispose(psave);
+    StrDispose(PSave);
   end;
 end;
 
-function StringMoveRight(const sin: string; const i: Integer): string;
+function StringMoveRight(const Sin: string; const I: Integer): string;
 var
-  s, Sep: string;
-  p, psave: PChar;
+  S, Sep: string;
+  P, PSave: PChar;
 begin
   Result := '';
-  psave := StrNew(PChar(sin));
-  p := psave;
+  PSave := StrNew(PChar(Sin));
+  P := PSave;
   try
-    while FoundSep(p, s, Sep) do
-      Result := Result + StringOfChar(' ', i) + s + Sep;
+    while FoundSep(P, S, Sep) do
+      Result := Result + StringOfChar(' ', I) + S + Sep;
   finally
-    StrDispose(psave);
+    StrDispose(PSave);
   end;
 end;
 
-function DelRightSpaces(const sin: string): string;
+function DelRightSpaces(const Sin: string): string;
 var
-  s, Sep: string;
-  p, psave: PChar;
+  S, Sep: string;
+  P, PSave: PChar;
 begin
   Result := '';
-  psave := StrNew(PChar(sin));
-  p := psave;
+  PSave := StrNew(PChar(Sin));
+  P := PSave;
   try
-    while FoundSep(p, s, Sep) do
-      Result := Result + TrimRight(s) + Sep;
+    while FoundSep(P, S, Sep) do
+      Result := Result + TrimRight(S) + Sep;
   finally
-    StrDispose(psave);
+    StrDispose(PSave);
   end;
 end;
 
@@ -1117,8 +1116,8 @@ end;
 
 procedure TCnMultiLineEditorForm.miSingleLineClick(Sender: TObject);
 var
-  s, Sep: string;
-  p, psave: PChar;
+  S, Sep: string;
+  P, PSave: PChar;
 
   iSelStart: Integer;
   sReplace: string;
@@ -1127,16 +1126,16 @@ begin
   begin
     iSelStart := memEdit.SelStart;
     sReplace := '';
-    psave := StrNew(PChar(GetSelText(memEdit)));
-    p := psave;
+    PSave := StrNew(PChar(GetSelText(memEdit)));
+    P := PSave;
     try
-      while FoundSep(p, s, Sep) do
+      while FoundSep(P, S, Sep) do
         if Sep <> '' then
-          sReplace := sReplace + s + ToolsOption.SingleLineSep
+          sReplace := sReplace + S + ToolsOption.SingleLineSep
         else
-          sReplace := sReplace + s;
+          sReplace := sReplace + S;
     finally
-      StrDispose(psave);
+      StrDispose(PSave);
     end;
     memEdit.SelText := sReplace;
     memEdit.SelStart := iSelStart;

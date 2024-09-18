@@ -4,8 +4,8 @@ inherited CnHintEditorForm: TCnHintEditorForm
   AutoScroll = False
   BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Hint Property Editor'
-  ClientHeight = 270
-  ClientWidth = 406
+  ClientHeight = 341
+  ClientWidth = 545
   Constraints.MinHeight = 297
   Constraints.MinWidth = 414
   Icon.Data = {
@@ -29,15 +29,15 @@ inherited CnHintEditorForm: TCnHintEditorForm
   TextHeight = 13
   object lblDesc: TLabel
     Left = 8
-    Top = 249
+    Top = 320
     Width = 177
     Height = 13
     Anchors = [akLeft, akBottom]
     Caption = 'Ctrl+Enter to Confirm, TAB to Switch'
   end
   object btnOK: TButton
-    Left = 245
-    Top = 243
+    Left = 384
+    Top = 314
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -47,8 +47,8 @@ inherited CnHintEditorForm: TCnHintEditorForm
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 325
-    Top = 243
+    Left = 464
+    Top = 314
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -61,7 +61,7 @@ inherited CnHintEditorForm: TCnHintEditorForm
   object tbrMain: TToolBar
     Left = 0
     Top = 0
-    Width = 406
+    Width = 545
     Height = 26
     AutoSize = True
     Caption = 'tbrMain'
@@ -210,8 +210,8 @@ inherited CnHintEditorForm: TCnHintEditorForm
   object pgcMain: TPageControl
     Left = 0
     Top = 26
-    Width = 406
-    Height = 211
+    Width = 545
+    Height = 282
     ActivePage = tshShort
     Anchors = [akLeft, akTop, akRight, akBottom]
     Style = tsFlatButtons
@@ -221,8 +221,8 @@ inherited CnHintEditorForm: TCnHintEditorForm
       object memShort: TMemo
         Left = 0
         Top = 0
-        Width = 398
-        Height = 180
+        Width = 537
+        Height = 251
         Align = alClient
         Ctl3D = True
         ParentCtl3D = False

@@ -30,7 +30,7 @@ unit CnHintEditorFrm;
 * 本 地 化：该单元和窗体中的字符串已经符合本地化处理方式
 * 修改记录：
 *           2003.09.17 V1.4
-*               修改了全部替换死循环的BUG
+*               修改了全部替换死循环的 BUG
 *           2003.03.14 V1.2
 *               注释了Font对话框的文字设定
 *               增加了Height,Weight的save,load
@@ -131,7 +131,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     Memos: array[0..1] of TMemo;
     function PageNo: Integer;
   end;
