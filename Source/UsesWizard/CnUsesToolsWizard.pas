@@ -1694,6 +1694,8 @@ var
   end;
 
   function ExtractSymbol(const Symbol: string): string;
+  const
+    THUNK = '$thunk_';
   var
     K, Idx, C, Front, Back: Integer;
     Deled: Boolean;
@@ -1711,6 +1713,9 @@ var
       Exit;
 
     Result := Symbol;
+    if Pos(THUNK, Result) = 1 then     // $thunk_ 这种延迟加载的，去掉该前缀
+      Delete(Result, 1, Length(THUNK));
+
     if Result[1] in [':', '.'] then
       Delete(Result, 1, 1);
     if IsInt(Result) then
