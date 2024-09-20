@@ -277,6 +277,7 @@ end;
 procedure TCnAICoderChatForm.actCopyCodeExecute(Sender: TObject);
 const
   CODE_BLOCK = '```';
+  DELPHI_PREFIX = 'delphi' + #13#10;
 var
   S: string;
   I1, I2: Integer;
@@ -295,6 +296,10 @@ begin
           if I2 > 0 then
           begin
             S := Copy(S, 1, I2 - 1);
+            I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 delphi
+            if I2 = 1 then
+              Delete(S, 1, Length(DELPHI_PREFIX));
+
             Clipboard.AsText := Trim(S);
             Exit;
           end;
