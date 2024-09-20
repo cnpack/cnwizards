@@ -77,6 +77,25 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Top = 0
       Action = actHelp
     end
+    object btn2: TToolButton
+      Left = 123
+      Top = 0
+      Width = 8
+      Caption = 'btn2'
+      ImageIndex = 2
+      Style = tbsSeparator
+    end
+    object cbbActiveEngine: TComboBox
+      Left = 131
+      Top = 0
+      Width = 126
+      Height = 21
+      Style = csDropDownList
+      Anchors = [akLeft, akTop, akRight]
+      ItemHeight = 13
+      TabOrder = 0
+      OnChange = cbbActiveEngineChange
+    end
   end
   object pnlTop: TPanel
     Left = 0

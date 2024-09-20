@@ -73,6 +73,8 @@ type
     actFont: TAction;
     btnFont: TToolButton;
     dlgFont: TFontDialog;
+    cbbActiveEngine: TComboBox;
+    btn2: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -86,6 +88,7 @@ type
     procedure actCopyCodeExecute(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
+    procedure cbbActiveEngineChange(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -133,6 +136,8 @@ end;
 procedure TCnAICoderChatForm.FormCreate(Sender: TObject);
 const
   BK_COLOR = $71EA9A;
+var
+  I: Integer;
 begin
   FChatBox := TCnChatBox.Create(Self);
   FChatBox.Color := clWhite;
@@ -156,6 +161,12 @@ begin
   end;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
+
+  cbbActiveEngine.Items.Clear;
+  for I := 0 to CnAIEngineManager.EngineCount - 1 do
+    cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineName);
+
+  cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
 end;
 
 procedure TCnAICoderChatForm.actToggleSendExecute(Sender: TObject);
@@ -311,6 +322,12 @@ begin
     FChatBox.Font := dlgFont.Font;
     CnAIEngineOptionManager.ChatFontStr := FontToString(dlgFont.Font);
   end;
+end;
+
+procedure TCnAICoderChatForm.cbbActiveEngineChange(Sender: TObject);
+begin
+  CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
+  CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
