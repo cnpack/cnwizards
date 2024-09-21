@@ -23,6 +23,8 @@ This is the Want script for building CnWizards.
 See http://www.suigeneris.org/want/ for details.
 
 注意：本文件不能有 BOM，否则 NSIS 不认！因而不能用会自动添加 BOM 的记事本编辑！
+另：D120A 在 12.2 下编译，因其有 AI 相关 OTA 接口因而在 dproj 及此脚本中定义 OTA_HAS_AISERVICE，未在 cfg 中定义。
+
 -->
 <project name="cnwizards"
          basedir="../"
@@ -1012,7 +1014,7 @@ Usage: want [target-name] [-Dname=value]
     <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D120A.rc" />
     <brcc file="${src}/CnWizards_D120A.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D120A.res" />
     <dcc basedir="${src}" source="CnWizards_D120A.dpr" exename="${exe.D120A}" usecfg="true" arguments="${dcc_arg}" >
-      <define name="${define.add};I64" />
+      <define name="${define.add};I64;OTA_HAS_AISERVICE" />
     </dcc>
     <delete dir="${src}">
        <include name="CnWizards_D120A.res" />
