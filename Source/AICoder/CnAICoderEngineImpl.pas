@@ -425,24 +425,19 @@ begin
   try
     Cont := ReqRoot.AddArray('contents');
     Msg := TCnJSONObject.Create;
-    Msg.AddPair('role', 'system');
-    Part := Msg.AddArray('parts');
-    Txt := TCnJSONObject.Create;
-    Txt.AddPair('text', Option.SystemMessage);
-    Part.AddValue(Txt);
-    Cont.AddValue(Msg);
 
+    // Gemini 不支持 system role，一块搁 user 里
     Msg := TCnJSONObject.Create;
     Msg.AddPair('role', 'user');
     Part := Msg.AddArray('parts');
     Txt := TCnJSONObject.Create;
 
     if RequestType = artExplainCode then
-      Txt.AddPair('text', Option.ExplainCodePrompt + #13#10 + Code)
+      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
-      Txt.AddPair('text', Option.ReviewCodePrompt + #13#10 + Code)
+      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ReviewCodePrompt + #13#10 + Code)
     else if RequestType = artRaw then
-      Txt.AddPair('text', Code);
+      Txt.AddPair('text', Option.SystemMessage + #13#10 + Code);
 
     Part.AddValue(Txt);
     Cont.AddValue(Msg);
@@ -468,8 +463,76 @@ end;
 function TCnGeminiAIEngine.ParseResponse(var Success: Boolean;
   var ErrorCode: Cardinal; RequestType: TCnAIRequestType;
   const Response: TBytes): string;
+var
+  RespRoot, Parts, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
 begin
+  Result := '';
+  S := BytesToAnsi(Response);
+  RespRoot := CnJSONParse(S);
+  if RespRoot = nil then
+  begin
+    // 一类原始错误，如账号达到最大并发等
+    Result := S;
+  end
+  else
+  begin
+    try
+      // 正常回应，Gemini 格式
+      if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
+      begin
+        Arr := TCnJSONArray(RespRoot['candidates']);
+        if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
+        begin
+          Parts := TCnJSONObject(Arr[0]['content']);
+          if (Parts['parts'] <> nil) and (Parts['parts'] is TCnJSONArray) then
+          begin
+            Arr := TCnJSONArray(Parts['parts']);
+            if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+            begin
+              Msg := TCnJSONObject(Arr[0]);
+              Result := Msg['text'].AsString;
+            end;
+          end;
+        end;
+      end;
 
+      if Result = '' then
+      begin
+        // 只要没有正常回应，就说明出错了
+        Success := False;
+
+        // 一类业务错误，比如 Key 无效等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(RespRoot['error']);
+          Result := Msg['message'].AsString;
+        end;
+
+        // 一类网络错误，比如 URL 错了等
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+          Result := RespRoot['error'].AsString;
+        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+        begin
+          if Result = '' then
+            Result := RespRoot['message'].AsString
+          else
+            Result := Result + ', ' + RespRoot['message'].AsString;
+        end;
+      end;
+
+      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
+      if Result = '' then
+        Result := S;
+    finally
+      RespRoot.Free;
+    end;
+  end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
 procedure TCnGeminiAIEngine.PrepareRequestHeader(Headers: TStringList);

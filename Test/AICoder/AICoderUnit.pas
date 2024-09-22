@@ -407,6 +407,14 @@ begin
   Msg.Text := '...';
   Msg.Waiting := True;
 
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
+
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
     Msg, artExplainCode, AIOnExplainCodeAnswer);
 end;
@@ -491,6 +499,14 @@ begin
   Msg.From := 'AI';
   Msg.FromType := cmtYou;
   Msg.Text := '...';
+
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
 
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
     Msg, artReviewCode, AIOnReviewCodeAnswer);
