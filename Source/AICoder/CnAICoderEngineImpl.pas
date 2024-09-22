@@ -73,6 +73,26 @@ type
     class function OptionClass: TCnAIEngineOptionClass; override;
   end;
 
+  TCnGeminiAIEngine = class(TCnAIBaseEngine)
+  {* Gemini 引擎}
+  protected
+    // Gemini 的 URL 和其他几个不同
+    function GetRequestURL(DataObj: TCnAINetRequestDataObject): string; override;
+
+    // Gemini 的身份验证头信息和其他几个不同
+    procedure PrepareRequestHeader(Headers: TStringList); override;
+
+    // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+
+    // Claude 的信息返回格式也不同
+    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
+  public
+    class function EngineName: string; override;
+
+  end;
+
   TCnQWenAIEngine = class(TCnAIBaseEngine)
   {* 通义千问 AI 引擎}
   protected
@@ -392,9 +412,76 @@ begin
   Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
 end;
 
+{ TCnGeminiAIEngine }
+
+function TCnGeminiAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
+  const Code: string): TBytes;
+var
+  ReqRoot, Msg, Txt: TCnJSONObject;
+  Cont, Part: TCnJSONArray;
+  S: AnsiString;
+begin
+  ReqRoot := TCnJSONObject.Create;
+  try
+    Cont := ReqRoot.AddArray('contents');
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'system');
+    Part := Msg.AddArray('parts');
+    Txt := TCnJSONObject.Create;
+    Txt.AddPair('text', Option.SystemMessage);
+    Part.AddValue(Txt);
+    Cont.AddValue(Msg);
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'user');
+    Part := Msg.AddArray('parts');
+    Txt := TCnJSONObject.Create;
+
+    if RequestType = artExplainCode then
+      Txt.AddPair('text', Option.ExplainCodePrompt + #13#10 + Code)
+    else if RequestType = artReviewCode then
+      Txt.AddPair('text', Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artRaw then
+      Txt.AddPair('text', Code);
+
+    Part.AddValue(Txt);
+    Cont.AddValue(Msg);
+
+    S := ReqRoot.ToJSON;
+    Result := AnsiToBytes(S);
+  finally
+    ReqRoot.Free;
+  end;
+end;
+
+class function TCnGeminiAIEngine.EngineName: string;
+begin
+  Result := 'Gemini';
+end;
+
+function TCnGeminiAIEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;
+begin
+  // 模型名和身份验证的 Key 均在 URL 里
+  Result := DataObj.URL + Option.Model + ':generateContent?key=' + Option.ApiKey;
+end;
+
+function TCnGeminiAIEngine.ParseResponse(var Success: Boolean;
+  var ErrorCode: Cardinal; RequestType: TCnAIRequestType;
+  const Response: TBytes): string;
+begin
+
+end;
+
+procedure TCnGeminiAIEngine.PrepareRequestHeader(Headers: TStringList);
+begin
+  inherited;
+  // 暂时不删别的，身份认证在 URL 里
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMistralAIAIEngine);
+  RegisterAIEngine(TCnGeminiAIEngine);
   RegisterAIEngine(TCnClaudeAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);

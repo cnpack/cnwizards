@@ -90,7 +90,10 @@ type
     {* 被上述第四步通过 Synchronize 的方式调用，之前已将应答对象推入 FAnswerQueue 队列
       在一次完整的 AI 网络通讯过程中属于第五步}
 
-    // 以下仨过程，子类看接口情况重载
+    // 以下四过程，子类看接口情况重载
+    function GetRequestURL(DataObj: TCnAINetRequestDataObject): string; virtual;
+    {* 请求发送前，给子类一个处理自定义 URL  的机会}
+
     procedure PrepareRequestHeader(Headers: TStringList); virtual;
     {* 请求发送前，给子类一个处理自定义 HTTP 头的机会}
 
@@ -655,6 +658,7 @@ procedure TCnAIBaseEngine.TalkToEngine(Sender: TCnThreadPool;
 var
   HTTP: TCnHTTP;
   Stream: TMemoryStream;
+  AURL: string;
 begin
   HTTP := nil;
   Stream := nil;
@@ -679,8 +683,9 @@ begin
     PrepareRequestHeader(HTTP.HttpRequestHeaders);
 
     Stream := TMemoryStream.Create;
-    if HTTP.GetStream(TCnAINetRequestDataObject(DataObj).URL, Stream,
-      TCnAINetRequestDataObject(DataObj).Data) then
+    AURL := GetRequestURL(TCnAINetRequestDataObject(DataObj));
+
+    if HTTP.GetStream(AURL, Stream, TCnAINetRequestDataObject(DataObj).Data) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('*** HTTP Request OK Get Bytes ' + IntToStr(Stream.Size));
@@ -734,6 +739,11 @@ end;
 class function TCnAIBaseEngine.EngineName: string;
 begin
   Result := '<NoName>';
+end;
+
+function TCnAIBaseEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;
+begin
+  Result := DataObj.URL;
 end;
 
 initialization
