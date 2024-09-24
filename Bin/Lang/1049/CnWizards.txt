@@ -2330,6 +2330,7 @@ TCnSrcEditorCodeWrapForm.btnExport.Caption=Экспорт
 TCnSrcEditorCodeWrapForm.btnHelp.Caption=Справка
 TCnSrcEditorCodeWrapForm.btnImport.Caption=Импорт
 TCnSrcEditorCodeWrapForm.btnOK.Caption=&OK
+TCnSrcEditorCodeWrapForm.btnReset.Caption=Сбросить
 TCnSrcEditorCodeWrapForm.btnUp.Caption=Вверх
 TCnSrcEditorCodeWrapForm.chkHeadIndent.Caption=Авто отступ
 TCnSrcEditorCodeWrapForm.chkLineBlock.Caption=Блок кода

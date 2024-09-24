@@ -2330,6 +2330,7 @@ TCnSrcEditorCodeWrapForm.btnExport.Caption=E&xportar
 TCnSrcEditorCodeWrapForm.btnHelp.Caption=&Ajuda
 TCnSrcEditorCodeWrapForm.btnImport.Caption=&Importar
 TCnSrcEditorCodeWrapForm.btnOK.Caption=&OK
+TCnSrcEditorCodeWrapForm.btnReset.Caption=&Setzen Redefinir
 TCnSrcEditorCodeWrapForm.btnUp.Caption=&Up
 TCnSrcEditorCodeWrapForm.chkHeadIndent.Caption=Recuo Automático
 TCnSrcEditorCodeWrapForm.chkLineBlock.Caption=Modo de Bloco de Linha

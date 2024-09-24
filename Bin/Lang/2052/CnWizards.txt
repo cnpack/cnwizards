@@ -2330,6 +2330,7 @@ TCnSrcEditorCodeWrapForm.btnExport.Caption=导出(&X)
 TCnSrcEditorCodeWrapForm.btnHelp.Caption=帮助(&H)
 TCnSrcEditorCodeWrapForm.btnImport.Caption=导入(&I)
 TCnSrcEditorCodeWrapForm.btnOK.Caption=确定(&O)
+TCnSrcEditorCodeWrapForm.btnReset.Caption=重置(&S)
 TCnSrcEditorCodeWrapForm.btnUp.Caption=上(&U)
 TCnSrcEditorCodeWrapForm.chkHeadIndent.Caption=自动缩进。
 TCnSrcEditorCodeWrapForm.chkLineBlock.Caption=行块处理模式。
