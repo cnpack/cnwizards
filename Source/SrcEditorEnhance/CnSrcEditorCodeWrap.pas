@@ -41,6 +41,8 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, StdCtrls, ComCtrls, Menus, ToolsApi, CnSpin, CnClasses,
@@ -126,6 +128,7 @@ type
     dlgSave: TSaveDialog;
     chkForPas: TCheckBox;
     chkForCpp: TCheckBox;
+    btnReset: TButton;
     procedure ListViewData(Sender: TObject; Item: TListItem);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -144,6 +147,7 @@ type
     procedure ListViewMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure btnHelpClick(Sender: TObject);
+    procedure btnResetClick(Sender: TObject);
   private
     List: TCnCodeWrapCollection;
     IsUpdating: Boolean;
@@ -177,7 +181,11 @@ type
     property Items: TCnCodeWrapCollection read FItems;
   end;
 
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
+
 implementation
+
+{$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 {$IFDEF DEBUG}
 uses
@@ -601,7 +609,7 @@ begin
     MI := AMenu.Items[I];
     CI := Items[I];
 
-    if (CI.Caption = '=') or (not Pas and not Cpp) then
+    if (CI.Caption = '-') or (not Pas and not Cpp) then
       MI.Visible := True // 分隔条，以及不认识的扩展名，都显示
     else if Pas then
       MI.Visible := CI.ForPas
@@ -702,8 +710,11 @@ begin
   if (ListView.SelCount > 0) and QueryDlg(SCnDeleteConfirm) then
   begin
     for I := ListView.Items.Count - 1 downto 0 do
+    begin
       if ListView.Items[I].Selected then
         List.Delete(I);
+    end;
+
     UpdateListView;
     ListViewSelectItems(ListView, smNothing);
   end;
@@ -714,12 +725,14 @@ var
   I: Integer;
 begin
   for I := 1 to ListView.Items.Count - 1 do
+  begin
     if ListView.Items[I].Selected and not ListView.Items[I - 1].Selected then
     begin
       List.Items[I].Index := I - 1;
       ListView.Items[I - 1].Selected := True;
       ListView.Items[I].Selected := False;
     end;
+  end;
   ListView.Update;
 end;
 
@@ -728,12 +741,14 @@ var
   I: Integer;
 begin
   for I := ListView.Items.Count - 2 downto 0 do
+  begin
     if ListView.Items[I].Selected and not ListView.Items[I + 1].Selected then
     begin
       List.Items[I].Index := I + 1;
       ListView.Items[I + 1].Selected := True;
       ListView.Items[I].Selected := False;
     end;
+  end;
   ListView.Update;
 end;
 
@@ -873,4 +888,20 @@ begin
   chkForCpp.Enabled := ListView.Selected <> nil;
 end;
 
+procedure TCnSrcEditorCodeWrapForm.btnResetClick(Sender: TObject);
+var
+  S: string;
+begin
+  // 删除旧配置文件并重新载入
+  S := WizOptions.GetAbsoluteUserFileName(SCnCodeWrapFile);
+  DeleteFile(S);
+
+  List.Clear;
+  S := WizOptions.GetUserFileName(SCnCodeWrapFile, True);
+  List.LoadFromFile(S);
+
+  UpdateListView;
+end;
+
+{$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 end.

@@ -10,7 +10,7 @@
     <TailText>)</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -24,7 +24,7 @@
     <TailText>]</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -38,7 +38,7 @@
     <TailText>}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -52,7 +52,7 @@
     <TailText> */</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -66,7 +66,7 @@
     <TailText>)</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -90,7 +90,7 @@
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -105,7 +105,7 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -124,18 +124,8 @@ begin
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
-  </o>
-  <o>
-    <Caption>-</Caption>
-    <ShortCut>0</ShortCut>
-    <LineBlockMode>0</LineBlockMode>
-    <IndentLevel>0</IndentLevel>
-    <HeadAutoIndent>1</HeadAutoIndent>
-    <HeadIndentLevel>0</HeadIndentLevel>
-    <TailAutoIndent>1</TailAutoIndent>
-    <TailIndentLevel>0</TailIndentLevel>
   </o>
   <o>
     <Caption>with begin..end</Caption>
@@ -149,7 +139,7 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -164,7 +154,7 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -178,7 +168,7 @@ begin</HeadText>
     <TailText>until |;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -193,7 +183,7 @@ begin</HeadText>
     <TailText>}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -212,7 +202,7 @@ else
 }</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -227,7 +217,7 @@ else
     <TailText>}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -253,7 +243,7 @@ else
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -269,7 +259,7 @@ end;</TailText>
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -288,7 +278,7 @@ __finally
 }</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -307,7 +297,7 @@ catch (|)
 }</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -331,7 +321,7 @@ catch (|)
     <TailText>{$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -347,7 +337,7 @@ catch (|)
 {$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -361,7 +351,7 @@ catch (|)
     <TailText>{$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -375,7 +365,7 @@ catch (|)
     <TailText>{$ENDREGION}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
   <o>
@@ -389,7 +379,7 @@ catch (|)
     <TailText>{*)}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>1<Forpas/>
+    <ForPas>1</ForPas>
     <ForCpp>0</ForCpp>
   </o>
     <o>
@@ -403,7 +393,7 @@ catch (|)
     <TailText>#endif</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
   <o>
@@ -419,7 +409,7 @@ catch (|)
 #endif</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
-    <ForPas>0<Forpas/>
+    <ForPas>0</ForPas>
     <ForCpp>1</ForCpp>
   </o>
 </TCnCodeWrapCollection>

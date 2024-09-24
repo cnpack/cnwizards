@@ -1,9 +1,9 @@
 inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
-  Left = 218
-  Top = 62
+  Left = 314
+  Top = 125
   BorderStyle = bsDialog
   Caption = 'Code Surround Setting'
-  ClientHeight = 503
+  ClientHeight = 528
   ClientWidth = 538
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -14,7 +14,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     Left = 8
     Top = 8
     Width = 523
-    Height = 145
+    Height = 170
     Anchors = [akLeft, akTop, akRight]
     Caption = '&List'
     TabOrder = 0
@@ -22,7 +22,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Left = 8
       Top = 16
       Width = 427
-      Height = 121
+      Height = 146
       Anchors = [akLeft, akTop, akRight]
       Columns = <
         item
@@ -109,10 +109,20 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       TabOrder = 4
       OnClick = btnDownClick
     end
+    object btnReset: TButton
+      Left = 442
+      Top = 141
+      Width = 73
+      Height = 21
+      Anchors = [akTop, akRight]
+      Caption = 'Re&set'
+      TabOrder = 7
+      OnClick = btnResetClick
+    end
   end
   object grp2: TGroupBox
     Left = 8
-    Top = 160
+    Top = 185
     Width = 523
     Height = 303
     Anchors = [akLeft, akTop, akRight]
@@ -320,7 +330,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   end
   object btnHelp: TButton
     Left = 456
-    Top = 474
+    Top = 499
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -330,7 +340,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   end
   object btnOK: TButton
     Left = 296
-    Top = 474
+    Top = 499
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -341,7 +351,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   end
   object btnCancel: TButton
     Left = 376
-    Top = 474
+    Top = 499
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
