@@ -10,6 +10,8 @@
     <TailText>)</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
   <o>
     <Caption>[..]</Caption>
@@ -22,6 +24,8 @@
     <TailText>]</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
   <o>
     <Caption>{..}</Caption>
@@ -34,6 +38,22 @@
     <TailText>}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>1</ForCpp>
+  </o>
+  <o>
+    <Caption>/*..*/</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>0</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>/* </HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText> */</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
   <o>
     <Caption>Typecast...</Caption>
@@ -46,6 +66,8 @@
     <TailText>)</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>-</Caption>
@@ -68,6 +90,8 @@
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>if begin..end</Caption>
@@ -81,6 +105,8 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>if begin..end else begin..end</Caption>
@@ -98,6 +124,8 @@ begin
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>-</Caption>
@@ -121,6 +149,8 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>while begin..end</Caption>
@@ -134,6 +164,8 @@ begin</HeadText>
     <TailText>end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>repeat..until</Caption>
@@ -146,6 +178,57 @@ begin</HeadText>
     <TailText>until |;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
+  </o>
+  <o>
+    <Caption>if {..}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>if (|)
+{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
+  </o>
+  <o>
+    <Caption>if {..} else {..}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>if (|)
+{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}
+else
+{
+
+}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
+  </o>
+  <o>
+    <Caption>while {..}</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>while (|)
+{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
   <o>
     <Caption>-</Caption>
@@ -170,6 +253,8 @@ begin</HeadText>
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>try..except..end</Caption>
@@ -184,6 +269,46 @@ end;</TailText>
 end;</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
+  </o>
+  <o>
+    <Caption>try..finally</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>__try
+{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}
+__finally
+{
+  |
+}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
+  </o>
+  <o>
+    <Caption>try..catch</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>1</IndentLevel>
+    <HeadText>try
+{</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>0</HeadIndentLevel>
+    <TailText>}
+catch (|)
+{
+
+}</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>0</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
   <o>
     <Caption>-</Caption>
@@ -206,6 +331,8 @@ end;</TailText>
     <TailText>{$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>{$IFDEF}..{$ELSE}..{$ENDIF}</Caption>
@@ -220,6 +347,8 @@ end;</TailText>
 {$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>{$IFDEF DEBUG}..{$ENDIF}</Caption>
@@ -232,6 +361,8 @@ end;</TailText>
     <TailText>{$ENDIF}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>{$REGION}..{$ENDREGION}</Caption>
@@ -244,6 +375,8 @@ end;</TailText>
     <TailText>{$ENDREGION}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
   </o>
   <o>
     <Caption>{(*}..{*)}</Caption>
@@ -256,5 +389,37 @@ end;</TailText>
     <TailText>{*)}</TailText>
     <TailAutoIndent>1</TailAutoIndent>
     <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>1<Forpas/>
+    <ForCpp>0</ForCpp>
+  </o>
+    <o>
+    <Caption>#ifdef..#endif</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>#ifdef |</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>#endif</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
+  </o>
+  <o>
+    <Caption>#ifdef..#else..#endif</Caption>
+    <ShortCut>0</ShortCut>
+    <LineBlockMode>1</LineBlockMode>
+    <IndentLevel>0</IndentLevel>
+    <HeadText>#ifdef |</HeadText>
+    <HeadAutoIndent>1</HeadAutoIndent>
+    <HeadIndentLevel>-1</HeadIndentLevel>
+    <TailText>#else
+
+#endif</TailText>
+    <TailAutoIndent>1</TailAutoIndent>
+    <TailIndentLevel>-1</TailIndentLevel>
+    <ForPas>0<Forpas/>
+    <ForCpp>1</ForCpp>
   </o>
 </TCnCodeWrapCollection>

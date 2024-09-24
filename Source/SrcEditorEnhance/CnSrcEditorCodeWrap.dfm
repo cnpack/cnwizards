@@ -3,8 +3,8 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   Top = 62
   BorderStyle = bsDialog
   Caption = 'Code Surround Setting'
-  ClientHeight = 455
-  ClientWidth = 440
+  ClientHeight = 503
+  ClientWidth = 538
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -13,23 +13,25 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   object grp1: TGroupBox
     Left = 8
     Top = 8
-    Width = 425
+    Width = 523
     Height = 145
+    Anchors = [akLeft, akTop, akRight]
     Caption = '&List'
     TabOrder = 0
     object ListView: TListView
       Left = 8
       Top = 16
-      Width = 329
+      Width = 427
       Height = 121
+      Anchors = [akLeft, akTop, akRight]
       Columns = <
         item
           Caption = 'Caption'
-          Width = 125
+          Width = 200
         end
         item
           Caption = 'Shortcut'
-          Width = 120
+          Width = 130
         end
         item
           Caption = 'Indent'
@@ -48,55 +50,61 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       OnSelectItem = ListViewSelectItem
     end
     object btnAdd: TButton
-      Left = 344
+      Left = 442
       Top = 16
       Width = 73
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Add'
       TabOrder = 1
       OnClick = btnAddClick
     end
     object btnDelete: TButton
-      Left = 344
+      Left = 442
       Top = 42
       Width = 73
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Remove'
       TabOrder = 2
       OnClick = btnDeleteClick
     end
     object btnImport: TButton
-      Left = 344
+      Left = 442
       Top = 91
       Width = 73
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Import'
       TabOrder = 5
       OnClick = btnImportClick
     end
     object btnExport: TButton
-      Left = 344
+      Left = 442
       Top = 116
       Width = 73
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = 'E&xport'
       TabOrder = 6
       OnClick = btnExportClick
     end
     object btnUp: TButton
-      Left = 344
+      Left = 442
       Top = 66
       Width = 34
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Up'
       TabOrder = 3
       OnClick = btnUpClick
     end
     object btnDown: TButton
-      Left = 383
+      Left = 481
       Top = 66
       Width = 34
       Height = 21
+      Anchors = [akTop, akRight]
       Caption = '&Down'
       TabOrder = 4
       OnClick = btnDownClick
@@ -105,8 +113,9 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
   object grp2: TGroupBox
     Left = 8
     Top = 160
-    Width = 425
-    Height = 257
+    Width = 523
+    Height = 303
+    Anchors = [akLeft, akTop, akRight]
     Caption = '&Surround Item'
     TabOrder = 1
     object lbl1: TLabel
@@ -132,7 +141,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     end
     object lbl5: TLabel
       Left = 8
-      Top = 174
+      Top = 185
       Width = 20
       Height = 13
       Caption = 'Tail:'
@@ -145,45 +154,50 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       Caption = 'Block:'
     end
     object lbl7: TLabel
-      Left = 216
+      Left = 314
       Top = 70
       Width = 100
       Height = 13
       Alignment = taRightJustify
+      Anchors = [akTop, akRight]
       AutoSize = False
       Caption = 'Indent Count:'
     end
     object lbl8: TLabel
-      Left = 216
-      Top = 150
+      Left = 314
+      Top = 161
       Width = 100
       Height = 13
       Alignment = taRightJustify
+      Anchors = [akTop, akRight]
       AutoSize = False
       Caption = 'Relative Indent:'
     end
     object lbl9: TLabel
-      Left = 216
-      Top = 231
+      Left = 314
+      Top = 252
       Width = 100
       Height = 13
       Alignment = taRightJustify
+      Anchors = [akTop, akRight]
       AutoSize = False
       Caption = 'Relative Indent:'
     end
     object edtCaption: TEdit
       Left = 56
       Top = 16
-      Width = 361
+      Width = 459
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 0
       OnChange = ControlChanged
     end
     object HotKey: THotKey
       Left = 56
       Top = 41
-      Width = 361
+      Width = 459
       Height = 19
+      Anchors = [akLeft, akTop, akRight]
       HotKey = 0
       InvalidKeys = [hcNone]
       Modifiers = []
@@ -202,8 +216,9 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     object mmoHead: TMemo
       Left = 56
       Top = 93
-      Width = 361
-      Height = 49
+      Width = 459
+      Height = 60
+      Anchors = [akLeft, akTop, akRight]
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -216,9 +231,10 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     end
     object mmoTail: TMemo
       Left = 56
-      Top = 174
-      Width = 361
-      Height = 49
+      Top = 185
+      Width = 459
+      Height = 60
+      Anchors = [akLeft, akTop, akRight]
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -230,10 +246,11 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       OnExit = ControlChanged
     end
     object seIndent: TCnSpinEdit
-      Left = 320
+      Left = 418
       Top = 66
       Width = 97
       Height = 22
+      Anchors = [akTop, akRight]
       MaxValue = 99
       MinValue = -99
       TabOrder = 3
@@ -242,7 +259,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     end
     object chkHeadIndent: TCheckBox
       Left = 56
-      Top = 146
+      Top = 157
       Width = 153
       Height = 22
       Caption = 'Auto Indent'
@@ -250,10 +267,11 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       OnClick = ControlChanged
     end
     object seHeadIndent: TCnSpinEdit
-      Left = 320
-      Top = 146
+      Left = 418
+      Top = 157
       Width = 97
       Height = 22
+      Anchors = [akTop, akRight]
       MaxValue = 99
       MinValue = -99
       TabOrder = 6
@@ -262,7 +280,7 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
     end
     object chkTailIndent: TCheckBox
       Left = 56
-      Top = 227
+      Top = 249
       Width = 153
       Height = 22
       Caption = 'Auto Indent'
@@ -270,41 +288,63 @@ inherited CnSrcEditorCodeWrapForm: TCnSrcEditorCodeWrapForm
       OnClick = ControlChanged
     end
     object seTailIndent: TCnSpinEdit
-      Left = 320
-      Top = 227
+      Left = 418
+      Top = 249
       Width = 97
       Height = 22
+      Anchors = [akTop, akRight]
       MaxValue = 99
       MinValue = -99
       TabOrder = 9
       Value = 0
       OnChange = ControlChanged
     end
+    object chkForPas: TCheckBox
+      Left = 56
+      Top = 273
+      Width = 153
+      Height = 22
+      Caption = 'Pascal'
+      TabOrder = 10
+      OnClick = ControlChanged
+    end
+    object chkForCpp: TCheckBox
+      Left = 192
+      Top = 273
+      Width = 153
+      Height = 22
+      Caption = 'C/C++'
+      TabOrder = 11
+      OnClick = ControlChanged
+    end
   end
   object btnHelp: TButton
-    Left = 358
-    Top = 426
+    Left = 456
+    Top = 474
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
   object btnOK: TButton
-    Left = 198
-    Top = 426
+    Left = 296
+    Top = 474
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 278
-    Top = 426
+    Left = 376
+    Top = 474
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2

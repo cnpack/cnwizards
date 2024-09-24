@@ -293,11 +293,7 @@ resourcestring
   SCnCopyFileNameMenuName = 'CnCopyFileName';
   SCnEditorToolBarDataName = 'EditorToolBar.ini';
   SCnEditorDesignToolBarDataName = 'DesignToolBar.ini';
-{$IFDEF DELPHI}
   SCnCodeWrapFile = 'CodeWrap.xml';
-{$ELSE}
-  SCnCodeWrapFile = 'CodeWrap_CB.xml';
-{$ENDIF}
   SCnGroupReplaceFile = 'GroupReplace.xml';
   SCnWebSearchFile = 'WebSearch.xml';
 

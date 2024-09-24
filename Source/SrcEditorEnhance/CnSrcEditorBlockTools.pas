@@ -992,7 +992,11 @@ begin
   if FCommentMenu <> nil then
     FCommentMenu.Visible := (FCommentMenu.Count > 0) and CurrentIsSource;
   if FWrapMenu <> nil then
+  begin
     FWrapMenu.Visible := (FWrapMenu.Count > 0) and CurrentIsSource;
+    if FWrapMenu.Visible then
+      FCodeWrap.UpdateMenuItems(FWrapMenu); // 控制子菜单根据源码类型的可见
+  end;
   if FReplaceMenu <> nil then
     FReplaceMenu.Visible := FReplaceMenu.Count > 0;
   if FMiscMenu <> nil then
