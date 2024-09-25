@@ -557,7 +557,7 @@ var
 
         Tick := GetTickCount;
         try
-          while not FAsyncResultGot and (GetTickCount - Tick < 1000) do // 得异步等待
+          while not FAsyncResultGot and (GetTickCount - Tick < 2000) do // 得异步等待
             Application.ProcessMessages;
         except
 {$IFDEF DEBUG}
@@ -566,7 +566,9 @@ var
         end;
 
 {$IFDEF DEBUG}
-        if not FAsyncResultGot then
+        if FAsyncResultGot then
+          CnDebugger.LogMsg('Async Result Got. Cost ms ' + IntToStr(GetTickCount - Tick))
+        else
           CnDebugger.LogMsg('Async Result Time out. Fail to Get Symbol List.');
 {$ENDIF}
       finally
