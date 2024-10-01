@@ -40,9 +40,43 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   {$IFDEF OTA_HAS_AISERVICE} ToolsAPI.AI, {$ENDIF}
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts;
+  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, Vcl.StdCtrls;
 
 type
+  TCnTestAIPluginFrame = class(TFrame, IOTAAIPluginSetting)
+    edtTest: TEdit;
+  private
+
+  public
+    procedure SaveSettings;
+    procedure LoadSettings;
+    function GetModified: Boolean;
+    function GetPluginEnabled: Boolean;
+    function ParameterValidations(var AErrorMsg: string): Boolean;
+  end;
+
+  TCnTestAIPluginSample = class(TInterfacedObject, IOTAAIPlugin)
+  private
+    FNotifiers: TInterfaceList;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function AddNotifier(const ANotifier: IOTAAIServicesNotifier): Integer;
+    procedure RemoveNotifier(const AIndex: Integer);
+    function Chat(const AQuestion: string): TGUID;
+    function LoadModels: TGUID;
+    function Instruction(const AInput: string; const AInstruction: string): TGUID;
+    function Moderation(const AInput: string): TGUID;
+    function GenerateImage(const APrompt: string; const ASize: string; const AFormat: string): TGUID;
+    function GenerateSpeechFromText(const AText: string; const AVoice: string): TGUID;
+    function GenerateTextFromAudioFile(const AAudioFilePath: string): TGUID;
+    procedure Cancel;
+    function GetName: string;
+    function GetSettingFrame(AOwner: TComponent): IOTAAIPluginSetting;
+    function GetFeatures: TAIFeatures;
+    function GetEnabled: Boolean;
+  end;
 
 //==============================================================================
 // CnTestAIPluginWizard 菜单专家
@@ -52,10 +86,14 @@ type
 
   TCnTestAIPluginWizard = class(TCnMenuWizard)
   private
-
+    FPlugin: IOTAAIPlugin;
+    FIndex: Integer;
   protected
     function GetHasConfig: Boolean; override;
   public
+    constructor Create; override;
+    destructor Destroy; override;
+
     function GetState: TWizardState; override;
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
@@ -69,6 +107,13 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
+{$R *.dfm}
+
 //==============================================================================
 // CnTestAIPluginWizard 菜单专家
 //==============================================================================
@@ -80,24 +125,66 @@ begin
   ShowMessage('No Option for this Test Case.');
 end;
 
+constructor TCnTestAIPluginWizard.Create;
+begin
+  inherited;
+
+end;
+
+destructor TCnTestAIPluginWizard.Destroy;
+begin
+  if (FPlugin <> nil) and (FIndex > 0) then
+  begin
+    AIEngineService.UnregisterPlugin(FIndex);
+    FIndex := 0;
+    FPlugin := nil;
+  end;
+  inherited;
+end;
+
 procedure TCnTestAIPluginWizard.Execute;
 {$IFDEF OTA_HAS_AISERVICE}
-var
-  I: Integer;
-  SL: TStringList;
+  procedure ShowPlugins;
+  var
+    I: Integer;
+    SL: TStringList;
+  begin
+    ShowMessage('AIEngineService PluginCount: ' + IntToStr(AIEngineService.PluginCount));
+    SL := TStringList.Create;
+    try
+      for I := 0 to AIEngineService.PluginCount - 1 do
+        SL.Add(AIEngineService.GetPluginByIndex(I).Name);
+
+      ShowMessage(SL.Text);
+    finally
+      SL.Free;
+    end;
+  end;
 {$ENDIF}
 begin
 {$IFDEF OTA_HAS_AISERVICE}
-  ShowMessage('AIEngineService PluginCount: ' + IntToStr(AIEngineService.PluginCount));
-  SL := TStringList.Create;
-  try
-    for I := 0 to AIEngineService.PluginCount - 1 do
-      SL.Add(AIEngineService.GetPluginByIndex(I).Name);
+  ShowPlugins;
 
-    ShowMessage(SL.Text);
-  finally
-    SL.Free;
+  if FPlugIn = nil then
+  begin
+    FPlugIn := TCnTestAIPluginSample.Create;
+    FIndex := AIEngineService.RegisterPlugin(FPlugin);
+    ShowMessage('AI Plugin Registered at ' + IntToStr(FIndex));
+  end
+  else
+  begin
+    if FIndex > 0 then
+    begin
+      AIEngineService.UnregisterPlugin(FIndex);
+      FIndex := 0;
+      FPlugin := nil;
+      ShowMessage('AI Plugin UnRegistered.');
+    end;
   end;
+
+  ShowPlugins;
+{$ELSE}
+  ShowMessage('NO AI Engine Support.');
 {$ENDIF}
 end;
 
@@ -142,6 +229,180 @@ end;
 procedure TCnTestAIPluginWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+{ TCnTestAIPluginSample }
+
+function TCnTestAIPluginSample.AddNotifier(
+  const ANotifier: IOTAAIServicesNotifier): Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.AddNotifier');
+{$ENDIF}
+  FNotifiers.Add(ANotifier);
+  Result := FNotifiers.Count - 1;
+end;
+
+procedure TCnTestAIPluginSample.Cancel;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.Cancel');
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.Chat(const AQuestion: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.Chat ' + AQuestion);
+{$ENDIF}
+end;
+
+constructor TCnTestAIPluginSample.Create;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.Create');
+{$ENDIF}
+  FNotifiers := TInterfaceList.Create;
+end;
+
+destructor TCnTestAIPluginSample.Destroy;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.Destroy');
+{$ENDIF}
+  FNotifiers.Free;
+  inherited;
+end;
+
+function TCnTestAIPluginSample.GenerateImage(const APrompt, ASize,
+  AFormat: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnTestAIPluginSample.GenerateImage Format %s. Size %s. Prompt %s',
+    [AFormat, ASize, APrompt]);
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.GenerateSpeechFromText(const AText,
+  AVoice: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnTestAIPluginSample.GenerateSpeechFromText Voice %s. Text %s',
+    [AVoice, AText]);
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.GenerateTextFromAudioFile(
+  const AAudioFilePath: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.GenerateTextFromAudioFile ' + AAudioFilePath);
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.GetEnabled: Boolean;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.GetEnabled');
+{$ENDIF}
+  Result := True;
+end;
+
+function TCnTestAIPluginSample.GetFeatures: TAIFeatures;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.GetFeatures');
+{$ENDIF}
+  Result := [afChat];
+end;
+
+function TCnTestAIPluginSample.GetName: string;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.GetName');
+{$ENDIF}
+  Result := '胡说八道';
+end;
+
+function TCnTestAIPluginSample.GetSettingFrame(
+  AOwner: TComponent): IOTAAIPluginSetting;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.GetSettingFrame');
+  CnDebugger.LogComponent(AOwner);
+{$ENDIF}
+  Result := TCnTestAIPluginFrame.Create(AOwner);
+end;
+
+function TCnTestAIPluginSample.Instruction(const AInput,
+  AInstruction: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnTestAIPluginSample.Instruction %s %s', [AInput, AInstruction]);
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.LoadModels: TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginSample.LoadModels');
+{$ENDIF}
+end;
+
+function TCnTestAIPluginSample.Moderation(const AInput: string): TGUID;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnTestAIPluginSample.Moderation %s', [AInput]);
+{$ENDIF}
+end;
+
+procedure TCnTestAIPluginSample.RemoveNotifier(const AIndex: Integer);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnTestAIPluginSample.RemoveNotifier %d', [AIndex]);
+{$ENDIF}
+  FNotifiers.Delete(AIndex);
+end;
+
+{ TCnTestAIPluginFrame }
+
+function TCnTestAIPluginFrame.GetModified: Boolean;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginFrame.GetModified');
+{$ENDIF}
+  Result := True;
+end;
+
+function TCnTestAIPluginFrame.GetPluginEnabled: Boolean;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginFrame.GetPluginEnabled');
+{$ENDIF}
+  Result := True;
+end;
+
+procedure TCnTestAIPluginFrame.LoadSettings;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginFrame.LoadSettings');
+{$ENDIF}
+end;
+
+function TCnTestAIPluginFrame.ParameterValidations(
+  var AErrorMsg: string): Boolean;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginFrame.ParameterValidations');
+{$ENDIF}
+  Result := True;
+end;
+
+procedure TCnTestAIPluginFrame.SaveSettings;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTestAIPluginFrame.SaveSettings');
+{$ENDIF}
 end;
 
 initialization
