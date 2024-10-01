@@ -128,15 +128,15 @@ end;
 constructor TCnTestAIPluginWizard.Create;
 begin
   inherited;
-
+  FIndex := -1;
 end;
 
 destructor TCnTestAIPluginWizard.Destroy;
 begin
-  if (FPlugin <> nil) and (FIndex > 0) then
+  if (FPlugin <> nil) and (FIndex >= 0) then
   begin
     AIEngineService.UnregisterPlugin(FIndex);
-    FIndex := 0;
+    FIndex := -1;
     FPlugin := nil;
   end;
   inherited;
@@ -173,10 +173,10 @@ begin
   end
   else
   begin
-    if FIndex > 0 then
+    if FIndex >= 0 then
     begin
       AIEngineService.UnregisterPlugin(FIndex);
-      FIndex := 0;
+      FIndex := -1;
       FPlugin := nil;
       ShowMessage('AI Plugin UnRegistered.');
     end;
