@@ -382,7 +382,7 @@ end;
 procedure TFormDcu32.DumpASysDcu(const AFileName: string; ALines: TStrings);
 var
   Info: TCnUnitUsesInfo;
-  S, F, N: string;
+  {S, }F, N, L: string;
   I: Integer;
   Decl: TDCURec;
 begin
@@ -399,12 +399,14 @@ begin
         Decl := TDCURec(Info.ExportedNames.Objects[I]);
         if Decl.GetSecKind <> skNone then
         begin
-          S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+          // S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
           N := ExtractSymbol(Decl.Name^.GetStr);
           if (Trim(N) = '') or (N = '.') then
             Continue;
 
-          ALines.Add(F +  ' | ' +  N + ' | ' + S);
+          L := F +  '|' +  N; // + '|' + S;
+          if (ALines.Count = 0) or (ALines[ALines.Count - 1] <> L) then
+            ALines.Add(L);
         end;
       end;
     end;
