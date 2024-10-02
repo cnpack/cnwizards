@@ -3,8 +3,8 @@ object FormDcu32: TFormDcu32
   Top = 201
   BorderStyle = bsDialog
   Caption = 'Test Dcu32 Intf/Impl Parsing for D110A Unicode 32/64'
-  ClientHeight = 512
-  ClientWidth = 622
+  ClientHeight = 568
+  ClientWidth = 660
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,6 +12,9 @@ object FormDcu32: TFormDcu32
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   Position = poScreenCenter
+  DesignSize = (
+    660
+    568)
   TextHeight = 13
   object lbl1: TLabel
     Left = 24
@@ -65,9 +68,10 @@ object FormDcu32: TFormDcu32
   end
   object mmoDcu: TMemo
     Left = 24
-    Top = 144
-    Width = 577
-    Height = 345
+    Top = 158
+    Width = 615
+    Height = 387
+    Anchors = [akLeft, akTop, akRight, akBottom]
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 4
@@ -92,9 +96,31 @@ object FormDcu32: TFormDcu32
     TabOrder = 6
     OnClick = btnExtractClick
   end
+  object btnScanSysLib: TButton
+    Left = 328
+    Top = 127
+    Width = 129
+    Height = 25
+    Caption = 'Scan SysLib'
+    TabOrder = 7
+    OnClick = btnScanSysLibClick
+  end
+  object btnGenSysLib: TButton
+    Left = 474
+    Top = 127
+    Width = 129
+    Height = 25
+    Caption = 'Gen SysLib'
+    TabOrder = 8
+    OnClick = btnGenSysLibClick
+  end
   object OpenDialog1: TOpenDialog
     Filter = '*.DCU|*.dcu'
     Left = 568
     Top = 56
+  end
+  object dlgSave1: TSaveDialog
+    Left = 488
+    Top = 248
   end
 end

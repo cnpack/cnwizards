@@ -24,16 +24,24 @@ type
     mmoDcu: TMemo;
     btnScanDir: TButton;
     btnExtract: TButton;
+    btnScanSysLib: TButton;
+    dlgSave1: TSaveDialog;
+    btnGenSysLib: TButton;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnCnDcu32Click(Sender: TObject);
     procedure btnScanDirClick(Sender: TObject);
     procedure btnExtractClick(Sender: TObject);
+    procedure btnScanSysLibClick(Sender: TObject);
+    procedure btnGenSysLibClick(Sender: TObject);
   private
+    FSys: TStringList;
     function ExtractSymbol(const Symbol: string): string;
     procedure DumpADcu(const AFileName: string; ALines: TStrings);
   public
-    { Public declarations }
+    procedure DumpASysDcu(const AFileName: string; ALines: TStrings);
+    procedure SysLibFind(const FileName: string; const Info: TSearchRec;
+      var Abort: Boolean);
   end;
 
 var
@@ -128,13 +136,102 @@ begin
     FS := TStringList.Create;
     try
       GetDirFiles(S, FS);
-      for I := 0 to FS.Count - 1 do
-        if LowerCase(ExtractFileExt(FS[I])) = '.dcu' then
-          DumpADcu(MakePath(S) + FS[I], mmoDcu.Lines);
+      mmoDcu.Lines.BeginUpdate;
+      try
+        for I := 0 to FS.Count - 1 do
+        begin
+          if LowerCase(ExtractFileExt(FS[I])) = '.dcu' then
+          begin
+            ShowMessage(FS[I]);
+            DumpADcu(MakePath(S) + FS[I], mmoDcu.Lines);
+          end;
+        end;
+      finally
+        mmoDcu.Lines.EndUpdate;
+      end;
     finally
       FS.Free;
     end;
   end;
+end;
+
+procedure TFormDcu32.btnScanSysLibClick(Sender: TObject);
+var
+  S: string;
+  I: Integer;
+  Res: TStringList;
+begin
+  if SelectDirectory('', '', S) then
+  begin
+    FSys := TStringList.Create;
+    Res := TStringList.Create;
+    try
+      FindFile(S, '*.dcu', SysLibFind);
+
+      mmoDcu.Lines.Clear;
+      mmoDcu.Lines.BeginUpdate;
+      try
+        for I := 0 to FSys.Count - 1 do
+        begin
+          mmoDcu.lines.Add(FSys[I]);
+          DumpASysDcu(FSys[I], Res);
+          // DumpADcu(MakePath(S) + FSys[I], mmoDcu.Lines);
+        end;
+      finally
+        mmoDcu.Lines.EndUpdate;
+      end;
+
+      ShowMessage(IntToStr(FSys.Count));
+      if dlgSave1.Execute then
+        Res.SaveToFile(dlgSave1.FileName);
+    finally
+      FSys.Free;
+      Res.Free;
+    end;
+  end;
+end;
+
+procedure TFormDcu32.btnGenSysLibClick(Sender: TObject);
+const
+  PLS: array[0..9] of string = ('android', 'android64', 'iosDevice64', 'iossimarm64',
+    'linux64', 'osx64', 'osxarm64', 'win32', 'win64', 'win64x');
+var
+  I, J: Integer;
+  Root, S, SR: string;
+  Sys, Res: TStringList;
+begin
+  if not SelectDirectory('', '', Root) then
+    Exit;
+
+  if not SelectDirectory('', '', SR) then
+    Exit;
+
+  Sys := TStringList.Create;
+  Res := TStringList.Create;
+  Screen.Cursor := crHourGlass;
+
+  try
+    for I := Low(PLS) to High(PLS) do
+    begin
+      S := MakePath(Root) + PLS[I] + '\release\';
+      Sys.Clear;
+      Res.Clear;
+
+      GetDirFiles(S, Sys);
+      for J := 0 to Sys.Count - 1 do
+      begin
+        if LowerCase(ExtractFileExt(Sys[J])) = '.dcu' then
+          DumpASysDcu(S + Sys[J], Res);
+      end;
+
+      Res.SaveToFile(MakePath(SR) + PLS[I] + '.txt');
+    end;
+  finally
+    Screen.Cursor := crDefault;
+    Sys.Free;
+    Res.Free;
+  end;
+  ShowMessage('Genrate OK');
 end;
 
 function TFormDcu32.ExtractSymbol(const Symbol: string): string;
@@ -216,6 +313,16 @@ begin
     Result := Copy(Result, Idx + 1, MaxInt);
 end;
 
+procedure TFormDcu32.SysLibFind(const FileName: string; const Info: TSearchRec;
+  var Abort: Boolean);
+begin
+  if Pos('\debug\', FileName) > 0 then
+    Exit;
+
+  if FSys <> nil then
+    FSys.Add(FileName);
+end;
+
 procedure TFormDcu32.DumpADcu(const AFileName: string; ALines: TStrings);
 var
   Info: TCnUnitUsesInfo;
@@ -265,6 +372,39 @@ begin
         begin
           S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
           ALines.Add(ExtractSymbol(Decl.Name^.GetStr) + ' | ' + Decl.Name^.GetStr + ' | ' + S);
+        end;
+      end;
+    end;
+    Info.Free;
+  end;
+end;
+
+procedure TFormDcu32.DumpASysDcu(const AFileName: string; ALines: TStrings);
+var
+  Info: TCnUnitUsesInfo;
+  S, F, N: string;
+  I: Integer;
+  Decl: TDCURec;
+begin
+  if FileExists(AFileName) then
+  begin
+    Info := TCnUnitUsesInfo.Create(AFileName, False);
+
+    if Info.ExportedNames <> nil then
+    begin
+      F := ExtractFileName(AFileName);
+      F := ChangeFileExt(F, '');
+      for I := 0 to Info.ExportedNames.Count - 1 do
+      begin
+        Decl := TDCURec(Info.ExportedNames.Objects[I]);
+        if Decl.GetSecKind <> skNone then
+        begin
+          S := GetEnumName(TypeInfo(TDeclSecKind), Ord(Decl.GetSecKind));
+          N := ExtractSymbol(Decl.Name^.GetStr);
+          if (Trim(N) = '') or (N = '.') then
+            Continue;
+
+          ALines.Add(F +  ' | ' +  N + ' | ' + S);
         end;
       end;
     end;
