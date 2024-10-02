@@ -93,7 +93,7 @@ const { My own (AX) codes for Delphi/Kylix versions, the Delphi codes
 type
   TDCUPlatform=(dcuplWin32, dcuplWin64, dcuplAndroid32, dcuplAndroid64,
     dcupliOSDevice32, dcupliOSDevice64, dcuplOSX32, dcuplOSX64,
-    dcupliOSEmulator, dcuplLinux64);
+    dcupliOSEmulator, dcuplLinux64, dcuplOSXArm64, dcupliOSSimArm64);
 
 const
   MobilePlatforms=[dcuplAndroid32, dcuplAndroid64, dcupliOSDevice32,
@@ -726,7 +726,8 @@ function TUnit.GetVersionStr: String;
     platfStr: array [TDCUPlatform] of string=('Windows (32-bit)',
       'Windows (64-bit)', 'Android (32-bit)', 'Android (64-bit)',
       'iOS Device (32-bit)', 'iOS Device (64-bit)', 'OS X (32-bit)',
-      'OS X (64-bit)', 'iOS (Emulator)', 'Linux (64-bit)');
+      'OS X (64-bit)', 'iOS (Emulator)', 'Linux (64-bit)', 'OS X Arm (64-bit)',
+      'iOS Simulator Arm (64-bit)');
   begin
     if Ver<verK1 then
       begin
@@ -4864,6 +4865,20 @@ function TUnit.ReadMagic(Magic: ulong): Boolean;
                     FPlatform := dcuplLinux64;
                     // The drCBlock section is missing here, all the memory is in the corresponding
                     // *.o file. Or inline info decoding is required
+                  end;
+                $84:
+                  begin
+                    if (FVer<verD_11_0) then
+                        Exit { osxarm64 support was added in 11 };
+
+                    FPlatform := dcuplOSXArm64;
+                  end;
+                $88:
+                  begin
+                    if (FVer<verD_11_0) then
+                        Exit { iossimarm64 support was added in 11 };
+
+                    FPlatform := dcupliOSSimArm64;
                   end;
               else
                 Exit;

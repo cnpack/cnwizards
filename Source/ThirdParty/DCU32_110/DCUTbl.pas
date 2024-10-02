@@ -222,7 +222,8 @@ function GetDelphiLibDir(VerRq: integer; MSILRq: Boolean; PlatformRq: TDCUPlatfo
       'iOSDevice', 'iOSDevice64',
       'osx32', 'osx64',
       'iOSSimulator',
-      'linux64'
+      'linux64',
+      'osxarm64', 'iOSSimArm64'
       );
   var
     Key: HKey;
