@@ -25,7 +25,10 @@ unit CnInputHelper;
 * 单元名称：输入助手专家窗体
 * 单元作者：Johnson Zhong zhongs@tom.com http://www.longator.com
 *           周劲羽 zjy@cnpack.org
-* 备    注：
+* 备    注：LSP 异步模式下，我们如果先接收键盘输入，调用 IDE 符号表异步等待结果，
+*           然后用户继续输入到点号，弹出 IDE 自身列表时，非常容易出异常，哪怕拦
+*           截点号输入并 Cancel 异步等待过程也没用。
+*           如果改成拦截点号并 Application.ProcessMessages 以等待符号表加载完毕呢？
 * 开发平台：PWin2000Pro + Delphi 7.1
 * 兼容测试：
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -1460,6 +1463,7 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnInputHelper.HandleKeyDown. SymbolReloading and DotKey Should IDE CodeInsight. Cancel Ours.');
         SymbolListMgr.Cancel;
+        HideAndClearList;
 {$ENDIF}
       end;
     end;
