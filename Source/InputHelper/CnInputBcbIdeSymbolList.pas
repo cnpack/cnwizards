@@ -290,7 +290,7 @@ begin
     Assert(Assigned(CppGetSymbolFlags), 'Failed to load CppGetSymbolFlags');
 
     Result := True;
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnTestBCBSymbolWizard KibitzInitialize succ');
   {$ENDIF}
   except
@@ -323,7 +323,7 @@ end;
 procedure FakeDoKibitzCompile(FileName: AnsiString; XPos, YPos: Integer;
   var KibitzResult: TKibitzResult); register;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('FakeDoKibitzCompile');
 {$ENDIF}
   FillChar(KibitzResult.KibitzDataArray, SizeOf(KibitzResult.KibitzDataArray), 0);
@@ -332,7 +332,7 @@ end;
 function FakeKibitzGetValidSymbols(var KibitzResult: TKibitzResult;
   Symbols: PSymbols; Unknowns: PUnknowns; SymbolCount: Integer): Integer; stdcall;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('FakeKibitzGetValidSymbols');
 {$ENDIF}
   Result := 0;
@@ -446,7 +446,7 @@ end;
 
 constructor TKibitzThread.Create(const FileName: AnsiString; X, Y: Integer);
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TKibitzThread.Create');
 {$ENDIF}
   inherited Create(False);
@@ -458,7 +458,7 @@ end;
 
 destructor TKibitzThread.Destroy;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TKibitzThread.Destroy');
 {$ENDIF}
   KibitzThread := nil;
@@ -467,7 +467,7 @@ end;
 
 procedure TKibitzThread.Execute;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TKibitzThread.Execute');
 {$ENDIF}
   // TODO: 跑一次编译，但无需获得 Symbol
@@ -478,7 +478,7 @@ var
   Stream: TMemoryStream;
   Source: AnsiString;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('ParseBcbProjectBegin');
 {$ENDIF}
 
@@ -492,7 +492,7 @@ begin
     Stream.Free;
   end;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg(FileName + #13#10 + Source);
 {$ENDIF}
   // TODO: 解析 Cpp 工程文件获得入口。
@@ -503,7 +503,7 @@ var
   FileName: AnsiString;
   X, Y: Integer;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('CreateKibitzThread');
 {$ENDIF}
   if not SupportKibitzCompileThread or not UseKibitzCompileThread or KibitzCompileThreadRunning then
@@ -511,10 +511,9 @@ begin
 
   if ParseBcbProjectBegin(FileName, X, Y) then
   begin
-  {$IFDEF Debug}
+{$IFDEF DEBUG}
     CnDebugger.LogFmt('FileName: %s X: %d Y: %d', [FileName, X, Y]);
-  {$ENDIF}
-  
+{$ENDIF}
   // TODO: 创建并运行线程
   end;
 end;
@@ -545,7 +544,7 @@ begin
     
   if (NotifyCode = ofnFileOpened) and IsDpr(FileName) then
   begin
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogFmt('TBcbIDESymbolList.OnFileNotify: %s', [FileName]);
   {$ENDIF}
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleExecute);
@@ -597,7 +596,7 @@ begin
   end;
 {$ENDIF}
 
-{$IFDEF BCB6} // BCB6没法子，选择直接触发IDE的自动完成
+{$IFDEF BCB6} // BCB6 没法子，选择直接触发IDE的自动完成
   HookMessageDlgPos := nil;
   if Assigned(EditControl) then
   begin
@@ -687,12 +686,8 @@ end;
 
 initialization
 {$IFDEF SUPPORT_IDESymbolList}
-{$IFDEF BCB6}
-  RegisterSymbolList(TBcbIDESymbolList); // BCB6下注册
-{$ELSE}
-  {$IFDEF BCB5}
-  RegisterSymbolList(TBcbIDESymbolList); // BCB5下注册
-  {$ENDIF}
+{$IFDEF BCB5OR6}
+  RegisterSymbolList(TBcbIDESymbolList); // BCB5、6下注册
 {$ENDIF}
 {$ENDIF}
 

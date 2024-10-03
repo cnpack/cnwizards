@@ -385,6 +385,7 @@ var
   {S, }F, N, L: string;
   I: Integer;
   Decl: TDCURec;
+  CheckDup: TStringList;
 begin
   if FileExists(AFileName) then
   begin
@@ -392,6 +393,9 @@ begin
 
     if Info.ExportedNames <> nil then
     begin
+      CheckDup := TStringList.Create;
+      CheckDup.Sorted := True;
+
       F := ExtractFileName(AFileName);
       F := ChangeFileExt(F, '');
       for I := 0 to Info.ExportedNames.Count - 1 do
@@ -405,10 +409,14 @@ begin
             Continue;
 
           L := F +  '|' +  N; // + '|' + S;
-          if (ALines.Count = 0) or (ALines[ALines.Count - 1] <> L) then
+          if CheckDup.IndexOf(L) < 0 then
+          begin
             ALines.Add(L);
+            CheckDup.Add(L);
+          end;
         end;
       end;
+      CheckDup.Free;
     end;
     Info.Free;
   end;
