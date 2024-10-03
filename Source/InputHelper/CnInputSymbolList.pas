@@ -61,7 +61,7 @@ uses
   OmniXMLUtils, CnWizMacroUtils, CnWizIni;
 
 const
-  CODE_TEMPLATE_INDEX_INVALID = -1;
+  CN_CODE_TEMPLATE_INDEX_INVALID = -1;
 
 type
 
@@ -69,26 +69,26 @@ type
 // 符号项类
 //==============================================================================
 
-  TSymbolKind = (skUnknown, skConstant, skType, skVariable, skProcedure,
+  TCnSymbolKind = (skUnknown, skConstant, skType, skVariable, skProcedure,
     skFunction, skUnit, skLabel, skProperty, skConstructor, skDestructor,
     skInterface, skEvent, skKeyword, skClass, skTemplate, skCompDirect,
     skComment, skUser);
   {* 符号类型 }
 
-  TSymbolKindSet = set of TSymbolKind;
+  TCnSymbolKindSet = set of TCnSymbolKind;
   {* 符号类型集合 }
 
   TCnKeywordStyle = (ksDefault, ksLower, ksUpper, ksFirstUpper);
   {* 关键字大小写方式 }
-  
-{ TSymbolItem }
 
-  TSymbolItem = class(TPersistent)
+{ TCnSymbolItem }
+
+  TCnSymbolItem = class(TPersistent)
   {* 用于代码输入的符号项 }
   private
     FDescription: string;
     FDescIsUtf8: Boolean;
-    FKind: TSymbolKind;
+    FKind: TCnSymbolKind;
     FName: string;
     FScope: Integer;
     FScopeHit: Integer;
@@ -145,7 +145,7 @@ type
   published
     property Name: string read FName write FName;
     {* 符号的名称，即用户键入的字符串 }
-    property Kind: TSymbolKind read FKind write FKind;
+    property Kind: TCnSymbolKind read FKind write FKind;
     {* 符号的类型 }
     property Description: string read GetDescription write FDescription;
     {* 符号的声明，显示在列表中 }
@@ -171,12 +171,12 @@ type
 
 { TSymbolList }
 
-  TSymbolList = class(TObject)
+  TCnSymbolList = class(TObject)
   private
     FList: TObjectList; // 持有符号对象的实例们
     FActive: Boolean;
     function GetCount: Integer;
-    function GetItem(Index: Integer): TSymbolItem;
+    function GetItem(Index: Integer): TCnSymbolItem;
   protected
     property List: TObjectList read FList;
   public
@@ -189,17 +189,17 @@ type
     class function GetListName: string; virtual;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo): Boolean; virtual;
-    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); virtual;
-    function Add(AItem: TSymbolItem): Integer; overload; virtual;
-    function Add(const AName: string; AKind: TSymbolKind; AScope: Integer; const
-      ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean = 
+    function Add(AItem: TCnSymbolItem): Integer; overload; virtual;
+    function Add(const AName: string; AKind: TCnSymbolKind; AScope: Integer; const
+      ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean =
       True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
       ADescIsUtf8: Boolean = False): Integer; overload; virtual;
     procedure Clear; virtual;
     procedure Delete(Index: Integer);
-    procedure Remove(AItem: TSymbolItem);
-    function IndexOf(const AName: string; AKind: TSymbolKind): Integer;
+    procedure Remove(AItem: TCnSymbolItem);
+    function IndexOf(const AName: string; AKind: TCnSymbolKind): Integer;
     function CanCustomize: Boolean; virtual;
     procedure RestoreDefault; virtual;
 
@@ -207,11 +207,11 @@ type
     {* 用于异步时的中止，普通子类均无实现}
 
     property Count: Integer read GetCount;
-    property Items[Index: Integer]: TSymbolItem read GetItem;
+    property Items[Index: Integer]: TCnSymbolItem read GetItem;
     property Active: Boolean read FActive write FActive;
   end;
 
-  TSymbolListClass = class of TSymbolList;
+  TSymbolListClass = class of TCnSymbolList;
 
 //==============================================================================
 // 自定义符号列表
@@ -219,7 +219,7 @@ type
 
 { TFileSymbolList }
 
-  TFileSymbolList = class(TSymbolList)
+  TFileSymbolList = class(TCnSymbolList)
   protected
     function GetReadFileName: string; virtual;
     function GetWriteFileName: string; virtual;
@@ -273,7 +273,7 @@ type
     function GetDataFileName: string; override;
   public
     class function GetListName: string; override;
-    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); override;
   end;
 
@@ -317,7 +317,7 @@ type
 
 { TCompDirectSymbolList }
 
-  TCompDirectSymbolList = class(TSymbolList)
+  TCompDirectSymbolList = class(TCnSymbolList)
   protected
     procedure AddSection(Ini: TMemIniFile; const Section: string);
   public
@@ -336,7 +336,7 @@ type
 
 { TUnitNameList }
 
-  TUnitNameList = class(TSymbolList)
+  TUnitNameList = class(TCnSymbolList)
   private
     FUseFullPath: Boolean;
     FCppMode: Boolean;
@@ -353,7 +353,7 @@ type
     FCurrPathList: TStringList;
     function AddUnit(const UnitName: string; IsInProject: Boolean = False): Boolean;
     procedure AddUnitFullNameWithPath(const UnitFullName: string);
-    procedure DoFindFile(const FileName: string; const Info: TSearchRec; var Abort: 
+    procedure DoFindFile(const FileName: string; const Info: TSearchRec; var Abort:
       Boolean);
     procedure LoadFromSysPath;
     procedure LoadFromProjectPath;
@@ -378,7 +378,7 @@ type
 
 { TUnitUsesList }
 
-  TUnitUsesList = class(TSymbolList)
+  TUnitUsesList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -391,7 +391,7 @@ type
 
 { TCodeTemplateList }
 
-  TCodeTemplateList = class(TSymbolList)
+  TCodeTemplateList = class(TCnSymbolList)
   private
     FFileAge: Integer;
   protected
@@ -419,7 +419,7 @@ type
 
 {$IFDEF OTA_CODE_TEMPLATE_API}
 
-  TIDEModernCodeTemplateList = class(TSymbolList)
+  TIDEModernCodeTemplateList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -432,36 +432,36 @@ type
 // 符号列表管理器
 //==============================================================================
 
-{ TSymbolListMgr }
+{ TCnSymbolListMgr }
 
-  TSymbolListMgr = class(TObject)
+  TCnSymbolListMgr = class(TObject)
   private
     FList: TObjectList;
     function GetCount: Integer;
-    function GetList(Index: Integer): TSymbolList;
+    function GetList(Index: Integer): TCnSymbolList;
   public
     constructor Create;
     destructor Destroy; override;
     procedure InitList;
     procedure Reset;
     procedure Cancel; // 只在支持 LSP 且启用了 LSP 的异步模式下调用
-    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+    procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo);
-    function ListByClass(AClass: TSymbolListClass): TSymbolList;
+    function ListByClass(AClass: TSymbolListClass): TCnSymbolList;
     procedure Load;
     procedure Save;
-    property List[Index: Integer]: TSymbolList read GetList;
+    property List[Index: Integer]: TCnSymbolList read GetList;
     property Count: Integer read GetCount;
   end;
 
-function GetSymbolKindName(Kind: TSymbolKind): string;
+function GetSymbolKindName(Kind: TCnSymbolKind): string;
 {* 返回符号类型的名称 }
 
 function ScopeToRate(Scope: Integer): Integer;
 function RateToScope(Rate: Integer): Integer;
 
-function SaveListToXMLFile(List: TSymbolList; const FileName: string): Boolean;
-function LoadListFromXMLFile(List: TSymbolList; const FileName: string): Boolean;
+function SaveListToXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
+function LoadListFromXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 
 procedure RegisterSymbolList(AClass: TSymbolListClass);
 {* 注册一个符号列表类 }
@@ -533,9 +533,9 @@ type
   TOmniXMLWriterHack = class(TOmniXMLWriter);
 
 // 返回符号类型的名称
-function GetSymbolKindName(Kind: TSymbolKind): string;
+function GetSymbolKindName(Kind: TCnSymbolKind): string;
 begin
-  Result := Copy(GetEnumName(TypeInfo(TSymbolKind), Ord(Kind)), 3, MaxInt);
+  Result := Copy(GetEnumName(TypeInfo(TCnSymbolKind), Ord(Kind)), 3, MaxInt);
 end;
 
 function ScopeToRate(Scope: Integer): Integer;
@@ -552,52 +552,52 @@ end;
 // 符号项类
 //==============================================================================
 
-{ TSymbolItem }
+{ TCnSymbolItem }
 
-constructor TSymbolItem.Create;
+constructor TCnSymbolItem.Create;
 begin
   inherited;
   FScope := csDefScope;
   FAutoIndent := True;
   FAlwaysDisp := False;
   FForPascal := True;
-  FCodeTemplateIndex := CODE_TEMPLATE_INDEX_INVALID;
+  FCodeTemplateIndex := CN_CODE_TEMPLATE_INDEX_INVALID;
   FFuzzyMatchIndexes := TList.Create;
 end;
 
-procedure TSymbolItem.Assign(Source: TPersistent);
+procedure TCnSymbolItem.Assign(Source: TPersistent);
 begin
-  if Source is TSymbolItem then
+  if Source is TCnSymbolItem then
   begin
-    FDescription := TSymbolItem(Source).FDescription;
-    FDescIsUtf8 := TSymbolItem(Source).FDescIsUtf8;
-    FKind := TSymbolItem(Source).FKind;
-    FName := TSymbolItem(Source).FName;
-    FScope := TSymbolItem(Source).FScope;
-    FScopeAdjust := TSymbolItem(Source).FScopeAdjust;
-    FText := TSymbolItem(Source).FText;
-    FTag := TSymbolItem(Source).FTag;
-    FHashCode := TSymbolItem(Source).FHashCode;
-    FMatchFirstOnly := TSymbolItem(Source).FMatchFirstOnly;
-    FAutoIndent := TSymbolItem(Source).FAutoIndent;
+    FDescription := TCnSymbolItem(Source).FDescription;
+    FDescIsUtf8 := TCnSymbolItem(Source).FDescIsUtf8;
+    FKind := TCnSymbolItem(Source).FKind;
+    FName := TCnSymbolItem(Source).FName;
+    FScope := TCnSymbolItem(Source).FScope;
+    FScopeAdjust := TCnSymbolItem(Source).FScopeAdjust;
+    FText := TCnSymbolItem(Source).FText;
+    FTag := TCnSymbolItem(Source).FTag;
+    FHashCode := TCnSymbolItem(Source).FHashCode;
+    FMatchFirstOnly := TCnSymbolItem(Source).FMatchFirstOnly;
+    FAutoIndent := TCnSymbolItem(Source).FAutoIndent;
   end
   else
     inherited;
 end;
 
-procedure TSymbolItem.CalcHashCode;
+procedure TCnSymbolItem.CalcHashCode;
 begin
   FHashCode := Ord(FKind);
   FHashCode := StrCRC32(FHashCode, FName);
   FHashCode := StrCRC32(FHashCode, FDescription);
 end;
 
-function TSymbolItem.GetScopeRate: Integer;
+function TCnSymbolItem.GetScopeRate: Integer;
 begin
   Result := ScopeToRate(FScope);
 end;
 
-function TSymbolItem.GetText: string;
+function TCnSymbolItem.GetText: string;
 begin
   if AllowMultiLine then
     Result := FText
@@ -605,7 +605,7 @@ begin
     Result := FName;
 end;
 
-function TSymbolItem.GetDescription: string;
+function TCnSymbolItem.GetDescription: string;
 begin
   if FDescIsUtf8 then
     Result := string(ConvertEditorTextToText(AnsiString(FDescription)))
@@ -613,17 +613,17 @@ begin
     Result := FDescription;
 end;
 
-procedure TSymbolItem.SetScopeRate(const Value: Integer);
+procedure TCnSymbolItem.SetScopeRate(const Value: Integer);
 begin
   FScope := RateToScope(Value);
 end;
 
-function TSymbolItem.GetAllowMultiLine: Boolean;
+function TCnSymbolItem.GetAllowMultiLine: Boolean;
 begin
   Result := Kind in [skTemplate, skComment];
 end;
 
-function TSymbolItem.GetKeywordText(KeywordStyle: TCnKeywordStyle): string;
+function TCnSymbolItem.GetKeywordText(KeywordStyle: TCnKeywordStyle): string;
 begin
   Result := Name;
   if (FKind = skKeyword) and (KeywordStyle <> ksDefault) then
@@ -641,7 +641,7 @@ begin
   end;
 end;
 
-procedure TSymbolItem.OutputLines(Editor: IOTAEditBuffer; Lines: TStrings);
+procedure TCnSymbolItem.OutputLines(Editor: IOTAEditBuffer; Lines: TStrings);
 var
   Line: string;
   OrgPos: TOTAEditPos;
@@ -695,7 +695,7 @@ begin
   end;
 end;
 
-procedure TSymbolItem.OutputTemplate(Editor: IOTAEditBuffer; Icon: TIcon);
+procedure TCnSymbolItem.OutputTemplate(Editor: IOTAEditBuffer; Icon: TIcon);
 var
   OutText: string;
   Lines: TStringList;
@@ -728,7 +728,7 @@ begin
   end;
 end;
 
-procedure TSymbolItem.Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
+procedure TCnSymbolItem.Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
   TCnKeywordStyle);
 var
   S: string;
@@ -754,17 +754,17 @@ begin
     begin
       Editor.TopView.Paint;
       OutputTemplate(Editor, Icon);
-    end;        
+    end;
   end;
 end;
 
-destructor TSymbolItem.Destroy;
+destructor TCnSymbolItem.Destroy;
 begin
   FFuzzyMatchIndexes.Free;
   inherited;
 end;
 
-function TSymbolItem.PipesCursorPosition(var S: string): Integer;
+function TCnSymbolItem.PipesCursorPosition(var S: string): Integer;
 const
   RPC = #0;
 var
@@ -839,13 +839,13 @@ end;
 // 符号列表基类
 //==============================================================================
 
-{ TSymbolList }
+{ TCnSymbolList }
 
 const
   csXmlRoot = 'Symbols';
   csXmlItem = 'Item';
 
-function SaveListToXMLFile(List: TSymbolList; const FileName: string): Boolean;
+function SaveListToXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 var
   Doc: IXMLDocument;
   Root: IXMLElement;
@@ -859,7 +859,7 @@ begin
     Doc := CreateXMLDoc;
     Root := Doc.CreateElement(csXmlRoot);
     Doc.DocumentElement := Root;
-    
+
     List.Sort;
     Writer := TOmniXMLWriterHack.Create(Doc);
     try
@@ -879,11 +879,11 @@ begin
   end;
 end;
 
-function LoadListFromXMLFile(List: TSymbolList; const FileName: string): Boolean;
+function LoadListFromXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 var
   Doc: IXMLDocument;
   Root: IXMLElement;
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   I, Idx: Integer;
   Reader: TOmniXMLReaderHack;
 begin
@@ -901,7 +901,7 @@ begin
       for I := 0 to Root.ChildNodes.Length - 1 do
         if SameText(Root.ChildNodes.Item[I].NodeName, csXmlItem) then
         begin
-          Item := TSymbolItem.Create;
+          Item := TCnSymbolItem.Create;
           try
             Reader.Read(Item, Root.ChildNodes.Item[I] as IXmlElement);
             Item.MatchFirstOnly := Item.Kind in [skCompDirect, skComment];
@@ -927,7 +927,7 @@ begin
 end;
 
 // 调整优先值，减少重复值
-procedure AdjustSymbolListScope(List: TSymbolList);
+procedure AdjustSymbolListScope(List: TCnSymbolList);
 var
   I: Integer;
 begin
@@ -935,7 +935,7 @@ begin
     List.Items[I].FScope := RateToScope(List.Items[I].ScopeRate) + I;
 end;
 
-constructor TSymbolList.Create;
+constructor TCnSymbolList.Create;
 begin
   inherited;
   FList := TObjectList.Create;
@@ -943,26 +943,26 @@ begin
   Load;
 end;
 
-destructor TSymbolList.Destroy;
+destructor TCnSymbolList.Destroy;
 begin
   FList.Free;
   inherited;
 end;
 
-function TSymbolList.Add(AItem: TSymbolItem): Integer;
+function TCnSymbolList.Add(AItem: TCnSymbolItem): Integer;
 begin
   AItem.CalcHashCode;
   Result := FList.Add(AItem);
 end;
 
-function TSymbolList.Add(const AName: string; AKind: TSymbolKind; AScope:
-  Integer; const ADescription: string = ''; const AText: string = ''; 
-  AAutoIndent: Boolean = True; AMatchFirstOnly: Boolean = False; 
+function TCnSymbolList.Add(const AName: string; AKind: TCnSymbolKind; AScope:
+  Integer; const ADescription: string = ''; const AText: string = '';
+  AAutoIndent: Boolean = True; AMatchFirstOnly: Boolean = False;
   AAlwaysDisp: Boolean = False; ADescIsUtf8: Boolean = False): Integer;
 var
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
 begin
-  Item := TSymbolItem.Create;
+  Item := TCnSymbolItem.Create;
   Item.Name := AName;
   Item.Description := ADescription;
   if AText = '' then
@@ -972,7 +972,7 @@ begin
   Item.Kind := AKind;
   Item.Scope := AScope;
   Item.AutoIndent := AAutoIndent;
-  if not (Item.Kind in [Low(TSymbolKind)..High(TSymbolKind)]) then
+  if not (Item.Kind in [Low(TCnSymbolKind)..High(TCnSymbolKind)]) then
     Item.Kind := skUnknown;
   Item.MatchFirstOnly := AMatchFirstOnly;
   Item.AlwaysDisp := AAlwaysDisp;
@@ -981,27 +981,27 @@ begin
   Result := FList.Add(Item);
 end;
 
-procedure TSymbolList.Clear;
+procedure TCnSymbolList.Clear;
 begin
   FList.Clear;
 end;
 
-procedure TSymbolList.Cancel;
+procedure TCnSymbolList.Cancel;
 begin
   // 基类和普通子类啥也不做
 end;
 
-procedure TSymbolList.Delete(Index: Integer);
+procedure TCnSymbolList.Delete(Index: Integer);
 begin
   FList.Delete(Index);
 end;
 
-procedure TSymbolList.Remove(AItem: TSymbolItem);
+procedure TCnSymbolList.Remove(AItem: TCnSymbolItem);
 begin
   FList.Remove(AItem);
 end;
 
-function TSymbolList.IndexOf(const AName: string; AKind: TSymbolKind): Integer;
+function TCnSymbolList.IndexOf(const AName: string; AKind: TCnSymbolKind): Integer;
 var
   I: Integer;
 begin
@@ -1014,65 +1014,65 @@ begin
   Result := -1;
 end;
 
-function TSymbolList.GetCount: Integer;
+function TCnSymbolList.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TSymbolList.GetItem(Index: Integer): TSymbolItem;
+function TCnSymbolList.GetItem(Index: Integer): TCnSymbolItem;
 begin
-  Result := TSymbolItem(FList[Index]);
+  Result := TCnSymbolItem(FList[Index]);
 end;
 
-class function TSymbolList.GetListName: string;
+class function TCnSymbolList.GetListName: string;
 begin
   Result := RemoveClassPrefix(ClassName);
 end;
 
-function TSymbolList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnSymbolList.Reload(Editor: IOTAEditBuffer; const InputText: string;
   PosInfo: TCodePosInfo): Boolean;
 begin
   Result := Count > 0;
 end;
 
-procedure TSymbolList.GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+procedure TCnSymbolList.GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
   PosInfo: TCodePosInfo);
 begin
   FirstSet := csIdentFirstSet;
   CharSet := csIdentCharSet;
 end;
 
-function TSymbolList.CanCustomize: Boolean;
+function TCnSymbolList.CanCustomize: Boolean;
 begin
   Result := False;
 end;
 
-procedure TSymbolList.RestoreDefault;
+procedure TCnSymbolList.RestoreDefault;
 begin
 
 end;
 
 function DoListSort(Item1, Item2: Pointer): Integer;
 begin
-  Result := CompareText(TSymbolItem(Item1).Name, TSymbolItem(Item2).Name);
-end;  
+  Result := CompareText(TCnSymbolItem(Item1).Name, TCnSymbolItem(Item2).Name);
+end;
 
-procedure TSymbolList.Sort;
+procedure TCnSymbolList.Sort;
 begin
   FList.Sort(DoListSort);
 end;
 
-procedure TSymbolList.Load;
+procedure TCnSymbolList.Load;
 begin
 
 end;
 
-procedure TSymbolList.Save;
+procedure TCnSymbolList.Save;
 begin
 
 end;
 
-procedure TSymbolList.Reset;
+procedure TCnSymbolList.Reset;
 begin
 
 end;
@@ -1187,7 +1187,7 @@ end;
 
 { TCompDirectSymbolList }
 
-procedure TCompDirectSymbolList.GetValidCharSet(var FirstSet, 
+procedure TCompDirectSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   FirstSet := csCompDirectFirstSet;
@@ -1319,7 +1319,7 @@ procedure TXMLCommentSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   FirstSet := csCommentFirstSet;
-  CharSet := csCommentCharSet; 
+  CharSet := csCommentCharSet;
 end;
 
 function TXMLCommentSymbolList.Reload(Editor: IOTAEditBuffer;
@@ -1361,7 +1361,7 @@ end;
 function TJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
-  Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++ 
+  Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++
 end;
 
 //==============================================================================
@@ -1747,7 +1747,7 @@ begin
     end;
   except
     ;
-  end;          
+  end;
 end;
 
 //==============================================================================
@@ -1928,29 +1928,29 @@ begin
     SymbolListClassList.Add(AClass);
 end;
 
-constructor TSymbolListMgr.Create;
+constructor TCnSymbolListMgr.Create;
 begin
   inherited;
   FList := TObjectList.Create;
 end;
 
-destructor TSymbolListMgr.Destroy;
+destructor TCnSymbolListMgr.Destroy;
 begin
   FList.Free;
   inherited;
 end;
 
-function TSymbolListMgr.GetCount: Integer;
+function TCnSymbolListMgr.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TSymbolListMgr.GetList(Index: Integer): TSymbolList;
+function TCnSymbolListMgr.GetList(Index: Integer): TCnSymbolList;
 begin
-  Result := TSymbolList(FList[Index]);
+  Result := TCnSymbolList(FList[Index]);
 end;
 
-procedure TSymbolListMgr.InitList;
+procedure TCnSymbolListMgr.InitList;
 var
   I: Integer;
 begin
@@ -1974,7 +1974,7 @@ begin
   end;
 end;
 
-procedure TSymbolListMgr.GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
+procedure TCnSymbolListMgr.GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
   PosInfo: TCodePosInfo);
 var
   I: Integer;
@@ -1993,7 +1993,7 @@ begin
   end;
 end;
 
-function TSymbolListMgr.ListByClass(AClass: TSymbolListClass): TSymbolList;
+function TCnSymbolListMgr.ListByClass(AClass: TSymbolListClass): TCnSymbolList;
 var
   I: Integer;
 begin
@@ -2008,7 +2008,7 @@ begin
   end;
 end;
 
-procedure TSymbolListMgr.Load;
+procedure TCnSymbolListMgr.Load;
 var
   I: Integer;
 begin
@@ -2016,7 +2016,7 @@ begin
     List[I].Load;
 end;
 
-procedure TSymbolListMgr.Save;
+procedure TCnSymbolListMgr.Save;
 var
   I: Integer;
 begin
@@ -2024,7 +2024,7 @@ begin
     List[I].Save;
 end;
 
-procedure TSymbolListMgr.Reset;
+procedure TCnSymbolListMgr.Reset;
 var
   I: Integer;
 begin
@@ -2032,7 +2032,7 @@ begin
     List[I].Reset;
 end;
 
-procedure TSymbolListMgr.Cancel;
+procedure TCnSymbolListMgr.Cancel;
 var
   I: Integer;
 begin

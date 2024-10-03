@@ -68,15 +68,15 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure cbbKindChange(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 function CnShowInputHelperEditForm(var AName, ADesc: string;
-  var AKind: TSymbolKind; var Scope: Integer; var AutoIndent,
+  var AKind: TCnSymbolKind; var Scope: Integer; var AutoIndent,
   AlwaysDisp, ForPascal, ForCpp: Boolean): Boolean;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
@@ -88,7 +88,7 @@ implementation
 {$R *.DFM}
 
 function CnShowInputHelperEditForm(var AName, ADesc: string;
-  var AKind: TSymbolKind; var Scope: Integer; var AutoIndent,
+  var AKind: TCnSymbolKind; var Scope: Integer; var AutoIndent,
   AlwaysDisp, ForPascal, ForCpp: Boolean): Boolean;
 begin
   with TCnInputHelperEditForm.Create(Application) do
@@ -108,7 +108,7 @@ begin
     begin
       AName := Trim(edtName.Text);
       ADesc := Trim(edtDesc.Text);
-      AKind := TSymbolKind(cbbKind.ItemIndex);
+      AKind := TCnSymbolKind(cbbKind.ItemIndex);
       Scope := seScope.Value;
       AutoIndent := chkAutoIndent.Checked;
       AlwaysDisp := chkAlwaysDisp.Checked;
@@ -122,7 +122,7 @@ end;
 
 procedure TCnInputHelperEditForm.FormCreate(Sender: TObject);
 var
-  Kind: TSymbolKind;
+  Kind: TCnSymbolKind;
 begin
   inherited;
   for Kind := Low(Kind) to High(Kind) do
@@ -158,7 +158,7 @@ end;
 
 procedure TCnInputHelperEditForm.cbbKindChange(Sender: TObject);
 begin
-  chkAutoIndent.Enabled := TSymbolKind(cbbKind.ItemIndex) in
+  chkAutoIndent.Enabled := TCnSymbolKind(cbbKind.ItemIndex) in
     [skTemplate, skComment];
 end;
 

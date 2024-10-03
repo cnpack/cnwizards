@@ -155,17 +155,17 @@ type
 
 { TCnSymbolHashList }
 
-  PSymbolItemArray = ^TSymbolItemArray;
-  TSymbolItemArray = array[0..65535] of TSymbolItem;
-  
+  PCnSymbolItemArray = ^TCnSymbolItemArray;
+  TCnSymbolItemArray = array[0..65535] of TCnSymbolItem;
+
   TCnSymbolHashList = class(TObject)
   private
     FCount: Integer;
-    FList: PSymbolItemArray;
+    FList: PCnSymbolItemArray;
   public
     constructor Create(ACount: Integer);
     destructor Destroy; override;
-    function CheckExist(AItem: TSymbolItem): Boolean;
+    function CheckExist(AItem: TCnSymbolItem): Boolean;
   end;
 
 { TCnInputHelper }
@@ -188,7 +188,7 @@ type
     SortMenuItem: TMenuItem;
     IconMenuItem: TMenuItem;
     FHitCountMgr: TCnSymbolHitCountMgr;
-    FSymbolListMgr: TSymbolListMgr;
+    FSymbolListMgr: TCnSymbolListMgr;
     FirstSet: TAnsiCharSet;  // 所有 Symbol 的起始字符的合法 CharSet 的并集
     CharSet: TAnsiCharSet;   // 所有 Symbol 的合法 CharSet 的并集
     FAutoPopup: Boolean;
@@ -233,7 +233,7 @@ type
     FIgnoreDot: Boolean;
     FIgnoreSpc: Boolean;
     FAutoAdjustScope: Boolean;
-    FDispKindSet: TSymbolKindSet;
+    FDispKindSet: TCnSymbolKindSet;
     FRemoveSame: Boolean;
     FKeywordStyle: TCnKeywordStyle;
     FUseEditorColor: Boolean;
@@ -337,8 +337,8 @@ type
     property IsShowing: Boolean read GetIsShowing;
     property ListFont: TFont read FListFont write SetListFont;
     property HitCountMgr: TCnSymbolHitCountMgr read FHitCountMgr;
-    property SymbolListMgr: TSymbolListMgr read FSymbolListMgr;
-  
+    property SymbolListMgr: TCnSymbolListMgr read FSymbolListMgr;
+
     property AutoPopup: Boolean read FAutoPopup write SetAutoPopup default True;
     {* 是否自动弹出输入助手}
     property PopupKey: TShortCut read GetPopupKey write SetPopupKey;
@@ -349,7 +349,7 @@ type
     property DispOnlyAtLeastKey: Integer read FDispOnlyAtLeastKey write
       FDispOnlyAtLeastKey default 2;
     {* 弹出列表时需要连续键入的有效按键数}
-    property DispKindSet: TSymbolKindSet read FDispKindSet write FDispKindSet;
+    property DispKindSet: TCnSymbolKindSet read FDispKindSet write FDispKindSet;
     {* 允许显示的符号类型}
     property SortKind: TCnSortKind read FSortKind write FSortKind default skByScope;
     {* 列表排序类型}
@@ -501,7 +501,7 @@ const
   csKeyCodeCompletion = 'CodeCompletion';
 
   // 图标集合设置
-  csAllSymbolKind = [Low(TSymbolKind)..High(TSymbolKind)];
+  csAllSymbolKind = [Low(TCnSymbolKind)..High(TCnSymbolKind)];
   csNoneSymbolKind = [];
   csCompDirectSymbolKind = [skCompDirect];
   csCommentSymbolKind = [skComment];
@@ -516,7 +516,7 @@ const
   // BCB 中不易区分 Field，干脆就等同于 Code。
   csCppFieldSymbolKind = csAllSymbolKind;
 
-  csPascalSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
+  csPascalSymbolKindTable: array[TCodePosKind] of TCnSymbolKindSet = (
     csNoneSymbolKind,          // 未知无效区
     csAllSymbolKind,           // 单元空白区
     csCommentSymbolKind,       // 注释块内部
@@ -542,7 +542,7 @@ const
 
     csNoneSymbolKind);         // C 变量声明区
 
-  csCppSymbolKindTable: array[TCodePosKind] of TSymbolKindSet = (
+  csCppSymbolKindTable: array[TCodePosKind] of TCnSymbolKindSet = (
     csNoneSymbolKind,          // 未知无效区
     csAllSymbolKind,           // 单元空白区
     csCommentSymbolKind,       // 注释块内部
@@ -688,7 +688,7 @@ begin
   HintForm.Width := Width;
   HintForm.Height := csHintHeight;
   HintForm.OnPaint := OnHintPaint;
-  
+
   FHintTimer := TTimer.Create(Self);
   FHintTimer.Enabled := False;
   FHintTimer.Interval := 600;
@@ -791,7 +791,7 @@ begin
   end
   else
     BtnForm.Visible := False;
-    
+
   if KibitzCompileThreadRunning then
   begin
     HintForm.Visible := Visible;
@@ -1023,7 +1023,7 @@ begin
       Flag := csFileFlag;
       if Stream.Write(Flag, SizeOf(Flag)) <> SizeOf(Flag) then
         Exit;
-        
+
       Version := csVersion;
       if Stream.Write(Version, SizeOf(Version)) <> SizeOf(Version) then
         Exit;
@@ -1051,7 +1051,7 @@ end;
 
 { TCnSymbolHashList }
 
-function TCnSymbolHashList.CheckExist(AItem: TSymbolItem): Boolean;
+function TCnSymbolHashList.CheckExist(AItem: TCnSymbolItem): Boolean;
 var
   I, Idx: Integer;
   Hash: Cardinal;
@@ -1084,7 +1084,7 @@ var
   Size: Integer;
 begin
   FCount := ACount * csHashListInc + 13;
-  Size := FCount * SizeOf(TSymbolItem);
+  Size := FCount * SizeOf(TCnSymbolItem);
   GetMem(FList, Size);
   ZeroMemory(FList, Size);
 end;
@@ -1132,7 +1132,7 @@ begin
   AppEvents := TApplicationEvents.Create(nil);
   AppEvents.OnDeactivate := OnAppDeactivate;
   FHitCountMgr := TCnSymbolHitCountMgr.Create;
-  FSymbolListMgr := TSymbolListMgr.Create;
+  FSymbolListMgr := TCnSymbolListMgr.Create;
   FKeyDownValidStack := TStack.Create;
 
   FSymbols := TStringList.Create;
@@ -1200,7 +1200,7 @@ begin
   finally
     Free;
   end;
-  
+
   SymbolListMgr.GetValidCharSet(FirstSet, CharSet, FPosInfo);
   BroadcastShortCut;
 end;
@@ -1628,7 +1628,7 @@ end;
 // 由 KeyDown 转换的 Char 来调用，不是拦截的系统 KeyPress 事件
 function TCnInputHelper.HandleKeyPress(Key: AnsiChar): Boolean;
 var
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   Idx, LineNo, CharIdx: Integer;
   NewMatchStr, Text: string;
 begin
@@ -1641,7 +1641,7 @@ begin
   if (((Key >= #32) and (Key < #127)) or (Key = #8)) and IsShowing then
   begin
     // 已经弹出，根据按键判断是否需要更新列表内容，是则设置 FNeedUpdate，供 KeyUp 事件使用
-    Item := TSymbolItem(FItems.Objects[List.ItemIndex]);
+    Item := TCnSymbolItem(FItems.Objects[List.ItemIndex]);
 
     // 这一句对于退格键是不对的，但退格时 NewMatchStr 并不用于判断
     NewMatchStr := UpperCase(FMatchStr + Char(Key));
@@ -1710,7 +1710,7 @@ begin
 {$ENDIF}
   Key := Msg.wParam;
   ScanCode := (Msg.lParam and $00FF0000) shr 16;
-  
+
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnInputHelper.HandleKeyUp %d when KeyDownValid %d, ValidKeyQueue %d, IsShowing %d',
     [Msg.wParam, Integer(GetKeyDownValid), Integer(IsValidKeyQueue), Integer(IsShowing)]);
@@ -2002,7 +2002,7 @@ begin
         begin
           for I := 0 to FItems.Count - 1 do
           begin
-            with TSymbolItem(FItems.Objects[I]) do
+            with TCnSymbolItem(FItems.Objects[I]) do
             begin
               if not AlwaysDisp and ((Kind = skKeyword) and
                 (CompareStr(GetKeywordText(KeywordStyle), FToken) = 0) or
@@ -2138,7 +2138,7 @@ begin
       end;
     end;
   end;
-  
+
   if Assigned(FCodeWndProc) then
     FCodeWndProc(Message);
 end;
@@ -2212,8 +2212,8 @@ function SymbolSortByScope(List: TStringList; Index1, Index2: Integer): Integer;
 var
   L1, L2: Integer;
 begin
-  L1 := TSymbolItem(List.Objects[Index1]).ScopeAdjust;
-  L2 := TSymbolItem(List.Objects[Index2]).ScopeAdjust;
+  L1 := TCnSymbolItem(List.Objects[Index1]).ScopeAdjust;
+  L2 := TCnSymbolItem(List.Objects[Index2]).ScopeAdjust;
   if L2 < L1 then
     Result := 1
   else if L2 > L1 then
@@ -2227,13 +2227,13 @@ var
   N1, N2, L1, L2: Integer;
 begin
   // FuzzyScope Compare，注意和 Pos 的不同。Pos 是 Index 小排前面，模糊匹配是 Score 高排前面
-  with TSymbolItem(List.Objects[Index1]) do
+  with TCnSymbolItem(List.Objects[Index1]) do
   begin
     N1 := Tag;
     L1 := ScopeAdjust;
   end;
 
-  with TSymbolItem(List.Objects[Index2]) do
+  with TCnSymbolItem(List.Objects[Index2]) do
   begin
     N2 := Tag;
     L2 := ScopeAdjust;
@@ -2259,13 +2259,13 @@ function SymbolSortByScopePos(List: TStringList; Index1, Index2: Integer): Integ
 var
   N1, N2, L1, L2: Integer;
 begin
-  with TSymbolItem(List.Objects[Index1]) do
+  with TCnSymbolItem(List.Objects[Index1]) do
   begin
     N1 := Tag;
     L1 := ScopeAdjust;
   end;
 
-  with TSymbolItem(List.Objects[Index2]) do
+  with TCnSymbolItem(List.Objects[Index2]) do
   begin
     N2 := Tag;
     L2 := ScopeAdjust;
@@ -2291,8 +2291,8 @@ function SymbolSortByLen(List: TStringList; Index1, Index2: Integer): Integer;
 var
   S1, S2, L1, L2: Integer;
 begin
-  S1 := TSymbolItem(List.Objects[Index1]).ScopeHit;
-  S2 := TSymbolItem(List.Objects[Index2]).ScopeHit;
+  S1 := TCnSymbolItem(List.Objects[Index1]).ScopeHit;
+  S2 := TCnSymbolItem(List.Objects[Index2]).ScopeHit;
   if S2 > S1 then
     Result := 1
   else if S2 < S1 then
@@ -2314,16 +2314,16 @@ function SymbolSortByKind(List: TStringList; Index1, Index2: Integer): Integer;
 var
   S1, S2, L1, L2: Integer;
 begin
-  S1 := TSymbolItem(List.Objects[Index1]).ScopeHit;
-  S2 := TSymbolItem(List.Objects[Index2]).ScopeHit;
+  S1 := TCnSymbolItem(List.Objects[Index1]).ScopeHit;
+  S2 := TCnSymbolItem(List.Objects[Index2]).ScopeHit;
   if S2 > S1 then
     Result := 1
   else if S2 < S1 then
     Result := -1
   else
   begin
-    L1 := Ord(TSymbolItem(List.Objects[Index1]).Kind);
-    L2 := Ord(TSymbolItem(List.Objects[Index2]).Kind);
+    L1 := Ord(TCnSymbolItem(List.Objects[Index1]).Kind);
+    L2 := Ord(TCnSymbolItem(List.Objects[Index2]).Kind);
     if L2 < L1 then
       Result := 1
     else if L2 > L1 then
@@ -2337,8 +2337,8 @@ function SymbolSortByText(List: TStringList; Index1, Index2: Integer): Integer;
 var
   S1, S2: Integer;
 begin
-  S1 := TSymbolItem(List.Objects[Index1]).ScopeHit;
-  S2 := TSymbolItem(List.Objects[Index2]).ScopeHit;
+  S1 := TCnSymbolItem(List.Objects[Index1]).ScopeHit;
+  S2 := TCnSymbolItem(List.Objects[Index2]).ScopeHit;
   if S2 > S1 then
     Result := 1
   else if S2 < S1 then
@@ -2376,9 +2376,9 @@ procedure TCnInputHelper.UpdateSymbolList;
 var
   I, J: Integer;
   S: string;
-  Kinds: TSymbolKindSet;
-  Item: TSymbolItem;
-  SymbolList: TSymbolList;
+  Kinds: TCnSymbolKindSet;
+  Item: TCnSymbolItem;
+  SymbolList: TCnSymbolList;
   Editor: IOTAEditBuffer;
   HashList: TCnSymbolHashList;
 begin
@@ -2501,7 +2501,7 @@ begin
           if Idx <> 1 then
             FItems.Delete(I)
           else
-            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+            TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
         end;
       end
       else if FMatchMode = mmAnywhere then
@@ -2512,7 +2512,7 @@ begin
           if Idx <= 0 then
             FItems.Delete(I)
           else
-            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+            TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
         end;
       end
       else if FMatchMode = mmFuzzy then
@@ -2520,10 +2520,10 @@ begin
         for I := FItems.Count - 1 downto 0 do
         begin
           if not FuzzyMatchStrWithScore(Symbol, FItems[I], Idx,
-            TSymbolItem(FItems.Objects[I]).FuzzyMatchIndexes) then
+            TCnSymbolItem(FItems.Objects[I]).FuzzyMatchIndexes) then
             FItems.Delete(I)
           else
-            TSymbolItem(FItems.Objects[I]).Tag := Idx;
+            TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
         end;
       end;
     end
@@ -2546,7 +2546,7 @@ begin
 
               if Idx = 1 then
               begin
-                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end;
             end;
@@ -2561,10 +2561,10 @@ begin
                 Idx := 1;
 
               // 头匹配的，匹配为 1，或非头匹配的，任意匹配
-              if ((Idx > 0) and not TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly)
-                or ((Idx = 1) and TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly) then
+              if ((Idx > 0) and not TCnSymbolItem(FSymbols.Objects[I]).MatchFirstOnly)
+                or ((Idx = 1) and TCnSymbolItem(FSymbols.Objects[I]).MatchFirstOnly) then
               begin
-                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end;
             end;
@@ -2575,29 +2575,29 @@ begin
             begin
               if Symbol = '' then
               begin
-                TSymbolItem(FSymbols.Objects[I]).Tag := 1;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := 1;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end
-              else if TSymbolItem(FSymbols.Objects[I]).MatchFirstOnly then
+              else if TCnSymbolItem(FSymbols.Objects[I]).MatchFirstOnly then
               begin
                 Idx := Pos(Symbol, UpperCase(FSymbols[I]));
                 if Idx = 1 then
                 begin
-                  TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                  TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                   FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
                 end;
               end
               else if FuzzyMatchStrWithScore(Symbol, FSymbols[I], Idx,
-                TSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes) then
+                TCnSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes) then
               begin
-                TSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end;
             end;
           end;
       end;
     end;
-    
+
     SortCurrSymbolList;
     List.SetCount(FItems.Count);
 
@@ -2687,7 +2687,7 @@ procedure TCnInputHelper.SendSymbolToIDE(MatchFirstOnly, AutoEnter,
 var
   S: string;
   Len, RL: Integer;
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   DelLeft: Boolean;
   Buffer: IOTAEditBuffer;
   C: Char;
@@ -2697,7 +2697,7 @@ var
   CTS: IOTACodeTemplateServices;
 {$ENDIF}
 
-  function ItemHasParam(AItem: TSymbolItem): Boolean;
+  function ItemHasParam(AItem: TCnSymbolItem): Boolean;
   var
     Desc: string;
   begin
@@ -2741,10 +2741,10 @@ begin
   HideList;
   if List.ItemIndex >= 0 then
   begin
-    Item := TSymbolItem(FItems.Objects[List.ItemIndex]);
+    Item := TCnSymbolItem(FItems.Objects[List.ItemIndex]);
 
 {$IFDEF OTA_CODE_TEMPLATE_API}
-    if Item.CodeTemplateIndex > CODE_TEMPLATE_INDEX_INVALID then
+    if Item.CodeTemplateIndex > CN_CODE_TEMPLATE_INDEX_INVALID then
     begin
       CTS := BorlandIDEServices as IOTACodeTemplateServices;
       if CTS <> nil then
@@ -2924,12 +2924,12 @@ const
   DESC_INTERVAL = 28;
 var
   AText: string;
-  SymbolItem: TSymbolItem;
+  SymbolItem: TCnSymbolItem;
   TextWith: Integer;
   Kind: Integer;
   ColorFont, ColorBrush: TColor;
 
-  function GetHighlightColor(Kind: TSymbolKind): TColor;
+  function GetHighlightColor(Kind: TCnSymbolKind): TColor;
   begin
     Result := List.FontColor;
     if Kind = skKeyword then
@@ -2956,7 +2956,7 @@ begin
   // 自画 ListBox 中的 SymbolList
   with List do
   begin
-    SymbolItem := TSymbolItem(FItems.Objects[Index]);
+    SymbolItem := TCnSymbolItem(FItems.Objects[Index]);
     Canvas.Font := Font;
 
     if odSelected in State then  // 根据主题，指定选中/非选中状态下的文字色
@@ -3016,14 +3016,14 @@ end;
 procedure TCnInputHelper.ListItemHint(Sender: TObject; Index: Integer; var
   HintStr: string);
 var
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   TextWidth: Integer;
 begin
   with List do
   begin
     if ItemIndex >= 0 then
     begin
-      Item := TSymbolItem(FItems.Objects[Index]);
+      Item := TCnSymbolItem(FItems.Objects[Index]);
       TextWidth := 28;
       Canvas.Font.Style := [fsBold];
       TextWidth := TextWidth + Canvas.TextWidth(Item.Name);
@@ -3049,7 +3049,7 @@ end;
 
 procedure TCnInputHelper.CreateMenuItem;
 var
-  Kind: TSymbolKind;
+  Kind: TCnSymbolKind;
   SortKind: TCnSortKind;
 
   function NewMenuItem(const ACaption: string; AOnClick: TNotifyEvent;
@@ -3088,7 +3088,7 @@ begin
   Menu.Items.Add(SortMenuItem);
 
   IconMenuItem := NewMenuItem(SCnInputHelperIcon, nil);
-  for Kind := Low(TSymbolKind) to High(TSymbolKind) do
+  for Kind := Low(TCnSymbolKind) to High(TCnSymbolKind) do
     IconMenuItem.Add(NewMenuItem(GetSymbolKindName(Kind), OnIconMenu,
       Ord(Kind), Ord(Kind)));
   Menu.Items.Add(IconMenuItem);
@@ -3107,7 +3107,7 @@ begin
   DispBtnMenuItem.Checked := List.DispButtons;
   SortMenuItem.Items[Ord(FSortKind)].Checked := True;
   for I := 0 to IconMenuItem.Count - 1 do
-    IconMenuItem.Items[I].Checked := TSymbolKind(IconMenuItem.Items[I].Tag) in FDispKindSet;
+    IconMenuItem.Items[I].Checked := TCnSymbolKind(IconMenuItem.Items[I].Tag) in FDispKindSet;
 end;
 
 procedure TCnInputHelper.OnDispBtnMenu(Sender: TObject);
@@ -3123,11 +3123,11 @@ end;
 
 procedure TCnInputHelper.OnCopyMenu(Sender: TObject);
 var
-  SymbolItem: TSymbolItem;
+  SymbolItem: TCnSymbolItem;
 begin
   if List.ItemIndex >= 0 then
   begin
-    SymbolItem := TSymbolItem(FItems.Objects[List.ItemIndex]);
+    SymbolItem := TCnSymbolItem(FItems.Objects[List.ItemIndex]);
     if SymbolItem <> nil then
       Clipboard.AsText := SymbolItem.Name + ' ' + SymbolItem.Description;
   end;
@@ -3153,11 +3153,11 @@ end;
 
 procedure TCnInputHelper.OnIconMenu(Sender: TObject);
 var
-  Kind: TSymbolKind;
+  Kind: TCnSymbolKind;
 begin
   if Sender is TMenuItem then
   begin
-    Kind := TSymbolKind(TMenuItem(Sender).Tag);
+    Kind := TCnSymbolKind(TMenuItem(Sender).Tag);
     if Kind in FDispKindSet then
       Exclude(FDispKindSet, Kind)
     else
@@ -3254,7 +3254,7 @@ begin
   SortSymbolList;
   UpdateCurrList(False);
   CreateMenuItem;
-  
+
   DoSaveSettings;
   BroadcastShortCut;
 end;
@@ -3296,7 +3296,7 @@ begin
     AutoPopup := ReadBool('', csAutoPopup, True);
     FListOnlyAtLeastLetter := ReadInteger('', csListOnlyAtLeastLetter, 1);
     FDispOnlyAtLeastKey := ReadInteger('', csDispOnlyAtLeastKey, 2);
-    FDispKindSet := TSymbolKindSet(ReadInteger('', csDispKindSet, Integer(FDispKindSet)));
+    FDispKindSet := TCnSymbolKindSet(ReadInteger('', csDispKindSet, Integer(FDispKindSet)));
     FSortKind := TCnSortKind(ReadInteger('', csSortKind, 0));
     FMatchMode := TCnMatchMode(ReadInteger('', csMatchMode, Ord(mmFuzzy)));
     FAutoAdjustScope := ReadBool('', csAutoAdjustScope, True);
@@ -3393,7 +3393,7 @@ begin
   finally
     Free;
   end;
-  
+
   with CreateIniFile(True) do
   try
     if SupportMultiIDESymbolList then
@@ -3468,7 +3468,7 @@ end;
 procedure TCnInputHelper.DebugComand(Cmds, Results: TStrings);
 var
   I, J: Integer;
-  List: TSymbolList;
+  List: TCnSymbolList;
 begin
   for I := 0 to FSymbolListMgr.Count - 1 do
   begin

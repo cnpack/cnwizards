@@ -168,11 +168,11 @@ type
   private
     InputHelper: TCnInputHelper;
     NewSymbol: string;
-    SaveKind: TSymbolKind;
+    SaveKind: TCnSymbolKind;
     SaveScope: Integer;
     SaveAutoIndent: Boolean;
     AddMode: Boolean;
-    CurrList: TSymbolList;
+    CurrList: TCnSymbolList;
     SortIdx: Integer;
     SortDesc: Boolean;
     function DoAddSymbol(const NewName: string): Boolean;
@@ -184,7 +184,7 @@ type
   protected
     function GetHelpTopic: string; override;
   end;
-  
+
 function CnInputHelperConfig(AInputHelper: TCnInputHelper; HideSymbolPages: Boolean = False): Boolean;
 
 function CnInputHelperAddSymbol(AInputHelper: TCnInputHelper;
@@ -251,7 +251,7 @@ const
 procedure TCnInputHelperForm.FormShow(Sender: TObject);
 var
   Kind: TCnSortKind;
-  SymbolKind: TSymbolKind;
+  SymbolKind: TCnSymbolKind;
   KwStyle: TCnKeywordStyle;
   Macro: TCnWizMacro;
   i: Integer;
@@ -267,7 +267,7 @@ begin
   try
     SortIdx := ReadInteger(csOption, csSortIdx, 0);
     SortDesc := ReadBool(csOption, csSortDesc, False);
-    SaveKind := TSymbolKind(ReadInteger(csOption, csSaveKind, Ord(skUser)));
+    SaveKind := TCnSymbolKind(ReadInteger(csOption, csSaveKind, Ord(skUser)));
     SaveScope := ReadInteger(csOption, csSaveScope, csDefScopeRate);
   finally
     Free;
@@ -353,7 +353,7 @@ end;
 procedure TCnInputHelperForm.FormDestroy(Sender: TObject);
 begin
   inherited;
-  
+
   with InputHelper.CreateIniFile do
   try
     WriteInteger(csOption, csSortIdx, SortIdx);
@@ -390,7 +390,7 @@ end;
 procedure TCnInputHelperForm.btnOKClick(Sender: TObject);
 var
   I: Integer;
-  SymbolKind: TSymbolKind;
+  SymbolKind: TCnSymbolKind;
 begin
   with InputHelper do
   begin
@@ -498,7 +498,7 @@ end;
 procedure TCnInputHelperForm.UpdateListItem(Item: TListItem);
 begin
   if Item <> nil then
-    with TSymbolItem(Item.Data) do
+    with TCnSymbolItem(Item.Data) do
     begin
       Item.Caption := Name;
       Item.SubItems.Clear;
@@ -527,14 +527,14 @@ begin
   btnEdit.Enabled := lvList.Selected <> nil;
   btnDup.Enabled := lvList.SelCount > 0;
   IsTemplate := (lvList.Selected <> nil) and
-    TSymbolItem(lvList.Selected.Data).AllowMultiLine;
+    TCnSymbolItem(lvList.Selected.Data).AllowMultiLine;
   mmoTemplate.Enabled := IsTemplate;
   btnInsertMacro.Enabled := IsTemplate;
   btnUserMacro.Enabled := IsTemplate;
   btnCursor.Enabled := IsTemplate;
   btnClear.Enabled := IsTemplate;
   if IsTemplate then
-    mmoTemplate.Lines.Text := TSymbolItem(lvList.Selected.Data).Text
+    mmoTemplate.Lines.Text := TCnSymbolItem(lvList.Selected.Data).Text
   else
     mmoTemplate.Lines.Clear;
 end;
@@ -556,9 +556,9 @@ begin
     Compare := CompareText(Item1.Caption, Item2.Caption)
   else if SortIdx = 2 then
   begin
-    if TSymbolItem(Item1.Data).Scope > TSymbolItem(Item2.Data).Scope then
+    if TCnSymbolItem(Item1.Data).Scope > TCnSymbolItem(Item2.Data).Scope then
       Compare := 1
-    else if TSymbolItem(Item1.Data).Scope < TSymbolItem(Item2.Data).Scope then
+    else if TCnSymbolItem(Item1.Data).Scope < TCnSymbolItem(Item2.Data).Scope then
       Compare := -1
     else
       Compare := 0;
@@ -579,7 +579,7 @@ procedure TCnInputHelperForm.cbbListChange(Sender: TObject);
 begin
   if cbbList.ItemIndex >= 0 then
   begin
-    CurrList := TSymbolList(cbbList.Items.Objects[cbbList.ItemIndex]);
+    CurrList := TCnSymbolList(cbbList.Items.Objects[cbbList.ItemIndex]);
     InitListView;
   end;
 end;
@@ -606,7 +606,7 @@ begin
       SaveAutoIndent, AlwaysDisp);
     CurrList.Items[Idx].ForPascal := ForPascal;
     CurrList.Items[Idx].ForCpp := ForCpp;
-    
+
     LVItem := lvList.Items.Add;
     LVItem.Data := CurrList.Items[CurrList.Count - 1];
     UpdateListItem(LVItem);
@@ -627,7 +627,7 @@ end;
 procedure TCnInputHelperForm.btnDupClick(Sender: TObject);
 var
   i: Integer;
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   LVItem: TListItem;
 begin
   if lvList.SelCount > 0 then
@@ -637,8 +637,8 @@ begin
       if lvList.Items[i].Selected then
       begin
         lvList.Items[i].Selected := False;
-        Item := TSymbolItem.Create;
-        Item.Assign(TSymbolItem(lvList.Items[i].Data));
+        Item := TCnSymbolItem.Create;
+        Item.Assign(TCnSymbolItem(lvList.Items[i].Data));
         Item.Name := Item.Name + '1';
         CurrList.Add(Item);
         LVItem := lvList.Items.Add;
@@ -663,7 +663,7 @@ begin
       if lvList.Items[i].Selected then
       begin
         Idx := i;
-        CurrList.Remove(TSymbolItem(lvList.Items[i].Data));
+        CurrList.Remove(TCnSymbolItem(lvList.Items[i].Data));
         lvList.Items.Delete(i);
       end;
     end;
@@ -677,9 +677,9 @@ end;
 
 procedure TCnInputHelperForm.btnEditClick(Sender: TObject);
 var
-  Item: TSymbolItem;
+  Item: TCnSymbolItem;
   AName, ADesc: string;
-  AKind: TSymbolKind;
+  AKind: TCnSymbolKind;
   AutoIndent: Boolean;
   AlwaysDisp: Boolean;
   AScope: Integer;
@@ -688,7 +688,7 @@ var
 begin
   if lvList.Selected <> nil then
   begin
-    Item := TSymbolItem(lvList.Selected.Data);
+    Item := TCnSymbolItem(lvList.Selected.Data);
     AName := Item.Name;
     ADesc := Item.Description;
     AKind := Item.Kind;
@@ -709,7 +709,7 @@ begin
       Item.AlwaysDisp := AlwaysDisp;
       Item.ForPascal := ForPascal;
       Item.ForCpp := ForCpp;
-      
+
       UpdateListView(True);
       lvList.AlphaSort;
     end;
@@ -743,7 +743,7 @@ end;
 procedure TCnInputHelperForm.mmoTemplateExit(Sender: TObject);
 begin
   if lvList.Selected <> nil then
-    TSymbolItem(lvList.Selected.Data).Text := mmoTemplate.Lines.Text;
+    TCnSymbolItem(lvList.Selected.Data).Text := mmoTemplate.Lines.Text;
 end;
 
 procedure TCnInputHelperForm.btnInsertMacroClick(Sender: TObject);

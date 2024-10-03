@@ -88,6 +88,10 @@ uses
   {$UNDEF SYMBOL_LOCKHOOK}
 {$ENDIF}
 
+const
+  CN_IDESYMBOL_ASYNC_TIMEOUT = 3000;
+  {* 异步符号列表的超时时间，单位毫秒}
+
 type
 
 //==============================================================================
@@ -96,7 +100,7 @@ type
 
 { TIDESymbolList }
 
-  TIDESymbolList = class(TSymbolList)
+  TIDESymbolList = class(TCnSymbolList)
   private
   {$IFDEF IDE_SUPPORT_LSP}
      FKeepUnique: Boolean; // Name 是否可重复
@@ -128,8 +132,8 @@ type
       TCodePosInfo): Boolean; override;
 
     // 以下俩函数在 LSP 模式下会做防重处理，注意 Add(Item: TSymbolItem) 未做
-    function Add(const AName: string; AKind: TSymbolKind; AScope: Integer; const
-      ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean = 
+    function Add(const AName: string; AKind: TCnSymbolKind; AScope: Integer; const
+      ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean =
       True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
       ADescIsUtf8: Boolean = False): Integer; overload; override;
     procedure Clear; override;
@@ -279,7 +283,7 @@ end;
 
 {$IFDEF IDE_SUPPORT_LSP}
 
-function SymbolClassTextToKind(const ClassText: string): TSymbolKind;
+function SymbolClassTextToKind(const ClassText: string): TCnSymbolKind;
 begin
   Result := skUnknown;
   if Length(ClassText) >= 3 then
@@ -356,7 +360,7 @@ var
     Result := string(S);
   end;
 
-  function CppTypeToKind(V: Integer; const SName: string): TSymbolKind;
+  function CppTypeToKind(V: Integer; const SName: string): TCnSymbolKind;
   begin
     case V of
       1: Result := skKeyword;
@@ -473,9 +477,9 @@ var
   Index: Integer;
 
   function SymbolFlagsToKind(Flags: TOTAViewerSymbolFlags; const Description: string):
-    TSymbolKind;
+    TCnSymbolKind;
   begin
-    Result := TSymbolKind(Flags);
+    Result := TCnSymbolKind(Flags);
     if (Flags = vsfType) then
     begin
       if Copy(Description, 1, 8) = ' : class' then
@@ -519,7 +523,7 @@ var
     I, Idx: Integer;
     SymbolList: IOTACodeInsightSymbolList;
     Desc: string;
-    Kind: TSymbolKind;
+    Kind: TCnSymbolKind;
     Allow: Boolean;
     ValidChars: TSysCharSet;
     Name: string;
@@ -569,7 +573,7 @@ var
           // 得异步等待，注意外头的代码输入助手会继续处理 KeyDown 和 KeyUp 等事件
           // 因此外头加了 Symbol 正在 Reloading 时的防重入，但没有主动 Cancel 本次
           // 异步等待的机制
-          while not FAnsycCancel and not FAsyncResultGot and (GetTickCount - Tick < 2000) do
+          while not FAnsycCancel and not FAsyncResultGot and (GetTickCount - Tick < CN_IDESYMBOL_ASYNC_TIMEOUT) do
             Application.ProcessMessages;
         except
 {$IFDEF DEBUG}
@@ -713,7 +717,7 @@ begin
       + IntToStr(CodeInsightServices.CodeInsightManagerCount));
 {$ENDIF}
 
-  {$IFDEF IDE_SetQueryContext_Bug}
+{$IFDEF IDE_SetQueryContext_Bug}
     for Index := 0 to CodeInsightServices.CodeInsightManagerCount - 1 do
     begin
       CodeInsightManager := CodeInsightServices.CodeInsightManager[Index];
@@ -738,7 +742,7 @@ begin
         Break;
       end;
     end;
-  {$ELSE}
+{$ELSE}
     CodeInsightServices.GetCurrentCodeInsightManager(CodeInsightManager);
     if (CodeInsightManager = nil) then
     begin
@@ -758,7 +762,7 @@ begin
 {$ENDIF}
       AddToSymbolList(CodeInsightManager);
     end;
-  {$ENDIF}
+{$ENDIF}
   end;
 
   Result := Count > 0;
@@ -1095,7 +1099,7 @@ var
   var
     Idx, Len: Integer;
     AName, ADesc: string;
-    AKind: TSymbolKind;
+    AKind: TCnSymbolKind;
   begin
     if Length(AText) > 6 then
     begin
@@ -1290,7 +1294,7 @@ begin
 {$ENDIF SUPPORT_IDESYMBOLLIST}
 end;
 
-function TIDESymbolList.Add(const AName: string; AKind: TSymbolKind;
+function TIDESymbolList.Add(const AName: string; AKind: TCnSymbolKind;
   AScope: Integer; const ADescription, AText: string; AAutoIndent,
   AMatchFirstOnly, AAlwaysDisp, ADescIsUtf8: Boolean): Integer;
 {$IFDEF IDE_SUPPORT_LSP}
