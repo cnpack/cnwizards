@@ -390,6 +390,14 @@ begin
     if not Assigned(FAsyncManagerObj) then
       Exit;
 
+    if FAnsycCancel then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('AsyncCodeCompletionCallBack. Got Cancel. Exit');
+{$ENDIF}
+      Exit;
+    end;
+
     if FAsyncIsPascal then
     begin
       if Assigned(DelphiLspGetCount) and Assigned(DelphiLspGetCodeCompEntry) then
@@ -460,7 +468,11 @@ begin
       end;
     end;
   finally
-    FAsyncResultGot := True; // 最后才放，比较保险
+    if not FAnsycCancel then
+      FAsyncResultGot := True; // 最后才放，比较保险
+{$IFDEF DEBUG}
+    CnDebugger.LogBoolean(FAsyncResultGot, 'AsyncCodeCompletionCallBack. Finally Set AsyncResultGot');
+{$ENDIF}
   end;
 end;
 
@@ -583,10 +595,10 @@ var
 
         FAsyncWaiting := False; // 标记异步等待结束
 {$IFDEF DEBUG}
-        if FAsyncResultGot then
-          CnDebugger.LogMsg('Async Result Got. Cost ms ' + IntToStr(GetTickCount - Tick))
-        else if FAnsycCancel then
+        if FAnsycCancel then    // 被中止的优先级更高
           CnDebugger.LogMsg('Async Result Canceled after ms ' + IntToStr(GetTickCount - Tick))
+        else if FAsyncResultGot then
+          CnDebugger.LogMsg('Async Result Got. Cost ms ' + IntToStr(GetTickCount - Tick))
         else
           CnDebugger.LogMsg('Async Result Time out. Fail to Get Symbol List.');
 {$ENDIF}
