@@ -104,6 +104,8 @@ type
      FAsyncResultGot: Boolean;
      FAsyncManagerObj: TObject;
      FAsyncIsPascal: Boolean;
+     FAsyncWaiting: Boolean;
+     FAnsycCancel: Boolean;
      procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
        AError: Boolean; const AMessage: string);
   {$ENDIF}
@@ -131,6 +133,9 @@ type
       True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
       ADescIsUtf8: Boolean = False): Integer; overload; override;
     procedure Clear; override;
+
+    procedure Cancel; override;
+    // 供外界按需通知中止异步等待
   end;
 
 const
@@ -552,12 +557,19 @@ var
         CnDebugger.LogFmt('To Async Invoke %s.', [FAsyncManagerObj.ClassName]);
     {$ENDIF}
         FKeepUnique := True;
+        FAnsycCancel := False;
+        FAsyncWaiting := True;
+        // 标记开始异步等待
+
         AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, EditView.CursorPos.Line,
           EditView.CursorPos.Col - 1, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
         try
-          while not FAsyncResultGot and (GetTickCount - Tick < 2000) do // 得异步等待
+          // 得异步等待，注意外头的代码输入助手会继续处理 KeyDown 和 KeyUp 等事件
+          // 因此外头加了 Symbol 正在 Reloading 时的防重入，但没有主动 Cancel 本次
+          // 异步等待的机制
+          while not FAnsycCancel and not FAsyncResultGot and (GetTickCount - Tick < 2000) do
             Application.ProcessMessages;
         except
 {$IFDEF DEBUG}
@@ -565,9 +577,12 @@ var
 {$ENDIF}
         end;
 
+        FAsyncWaiting := False; // 标记异步等待结束
 {$IFDEF DEBUG}
         if FAsyncResultGot then
           CnDebugger.LogMsg('Async Result Got. Cost ms ' + IntToStr(GetTickCount - Tick))
+        else if FAnsycCancel then
+          CnDebugger.LogMsg('Async Result Canceled after ms ' + IntToStr(GetTickCount - Tick))
         else
           CnDebugger.LogMsg('Async Result Time out. Fail to Get Symbol List.');
 {$ENDIF}
@@ -1298,6 +1313,16 @@ begin
 
   Result := inherited Add(AName, AKind, AScope, ADescription, AText, AAutoIndent,
     AMatchFirstOnly, AAlwaysDisp, ADescIsUtf8);
+end;
+
+procedure TIDESymbolList.Cancel;
+begin
+{$IFDEF IDE_SUPPORT_LSP}
+  FAnsycCancel := True;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('IDE SymbolList Cancel.');
+{$ENDIF}
+{$ENDIF}
 end;
 
 procedure TIDESymbolList.Clear;

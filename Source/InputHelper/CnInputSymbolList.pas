@@ -202,6 +202,10 @@ type
     function IndexOf(const AName: string; AKind: TSymbolKind): Integer;
     function CanCustomize: Boolean; virtual;
     procedure RestoreDefault; virtual;
+
+    procedure Cancel; virtual;
+    {* 用于异步时的中止，普通子类均无实现}
+
     property Count: Integer read GetCount;
     property Items[Index: Integer]: TSymbolItem read GetItem;
     property Active: Boolean read FActive write FActive;
@@ -440,6 +444,7 @@ type
     destructor Destroy; override;
     procedure InitList;
     procedure Reset;
+    procedure Cancel; // 只在支持 LSP 且启用了 LSP 的异步模式下调用
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; 
       PosInfo: TCodePosInfo);
     function ListByClass(AClass: TSymbolListClass): TSymbolList;
@@ -979,6 +984,11 @@ end;
 procedure TSymbolList.Clear;
 begin
   FList.Clear;
+end;
+
+procedure TSymbolList.Cancel;
+begin
+  // 基类和普通子类啥也不做
 end;
 
 procedure TSymbolList.Delete(Index: Integer);
@@ -2020,6 +2030,14 @@ var
 begin
   for I := 0 to Count - 1 do
     List[I].Reset;
+end;
+
+procedure TSymbolListMgr.Cancel;
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+    List[I].Cancel;
 end;
 
 {$IFDEF OTA_CODE_TEMPLATE_API}

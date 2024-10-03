@@ -289,6 +289,7 @@ type
     function IsValidCharKey(VKey: Word; ScanCode: Word): Boolean;
     function IsValidDelelteKey(Key: Word): Boolean;
     function IsValidDotKey(Key: Word): Boolean;
+    // 当前按键是点且 IDE 禁用了点弹且我们取代点弹才返回 True
     function IsValidCppPopupKey(VKey: Word; Code: Word): Boolean;
     function IsValidKeyQueue: Boolean;
     function CalcFirstSet(Orig: TAnsiCharSet; IsPascal: Boolean): TAnsiCharSet;
@@ -1435,14 +1436,34 @@ var
   Key: Word;
   KeyDownChar: AnsiChar;
   ShouldIgnore: Boolean;
+{$IFDEF IDE_SUPPORT_LSP}
+  Option: IOTAEnvironmentOptions;
+{$ENDIF}
 {$IFDEF IDE_SYNC_EDIT_BLOCK}
   ShouldEatTab: Boolean;
 {$ENDIF}
 begin
   Result := False;
 {$IFDEF IDE_SUPPORT_LSP}
-  if FSymbolReloading then
+  if FSymbolReloading then // 防止正在异步等待符号表时重入
   begin
+    // 提前获得是否是点号
+    Key := Msg.wParam;
+    if not CheckImmRun and (Key = VK_PROCESSKEY) then
+      Key := MapVirtualKey(ScanCode, 1);
+
+    if (Key = VK_DECIMAL) or (Key = MY_VK_DOT_KEY) then
+    begin
+      Option := CnOtaGetEnvironmentOptions;
+      if Option.GetOptionValue(csKeyCodeCompletion) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnInputHelper.HandleKeyDown. SymbolReloading and DotKey Should IDE CodeInsight. Cancel Ours.');
+        SymbolListMgr.Cancel;
+{$ENDIF}
+      end;
+    end;
+
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnInputHelper.HandleKeyDown. SymbolReloading Exit.');
 {$ENDIF}
