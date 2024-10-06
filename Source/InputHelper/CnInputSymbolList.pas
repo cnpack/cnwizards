@@ -169,7 +169,7 @@ type
 // 符号列表基类
 //==============================================================================
 
-{ TSymbolList }
+{ TCnSymbolList }
 
   TCnSymbolList = class(TObject)
   private
@@ -211,15 +211,15 @@ type
     property Active: Boolean read FActive write FActive;
   end;
 
-  TSymbolListClass = class of TCnSymbolList;
+  TCnSymbolListClass = class of TCnSymbolList;
 
 //==============================================================================
 // 自定义符号列表
 //==============================================================================
 
-{ TFileSymbolList }
+{ TCnFileSymbolList }
 
-  TFileSymbolList = class(TCnSymbolList)
+  TCnFileSymbolList = class(TCnSymbolList)
   protected
     function GetReadFileName: string; virtual;
     function GetWriteFileName: string; virtual;
@@ -238,9 +238,9 @@ type
 // 预定义符号列表，包括关键字与部分类型名等
 //==============================================================================
 
-{ TPreDefSymbolList }
+{ TCnPreDefSymbolList }
 
-  TPreDefSymbolList = class(TFileSymbolList)
+  TCnPreDefSymbolList = class(TCnFileSymbolList)
   protected
     function GetDataFileName: string; override;
   public
@@ -253,9 +253,9 @@ type
 // 预定义符号列表
 //==============================================================================
 
-{ TUserTemplateList }
+{ TCnUserTemplateList }
 
-  TUserTemplateList = class(TFileSymbolList)
+  TCnUserTemplateList = class(TCnFileSymbolList)
   protected
     function GetDataFileName: string; override;
   public
@@ -266,9 +266,9 @@ type
 // 用户定义符号列表
 //==============================================================================
 
-{ TUserSymbolList }
+{ TCnUserSymbolList }
 
-  TUserSymbolList = class(TFileSymbolList)
+  TCnUserSymbolList = class(TCnFileSymbolList)
   protected
     function GetDataFileName: string; override;
   public
@@ -281,9 +281,9 @@ type
 // XML 注释列表
 //==============================================================================
 
-{ TXMLCommentSymbolList }
+{ TCnXMLCommentSymbolList }
 
-  TXMLCommentSymbolList = class(TFileSymbolList)
+  TCnXMLCommentSymbolList = class(TCnFileSymbolList)
   protected
     function GetDataFileName: string; override;
   public
@@ -298,9 +298,9 @@ type
 // JavaDoc 注释列表
 //==============================================================================
 
-{ TJavaDocSymbolList }
+{ TCnJavaDocSymbolList }
 
-  TJavaDocSymbolList = class(TFileSymbolList)
+  TCnJavaDocSymbolList = class(TCnFileSymbolList)
   protected
     function GetDataFileName: string; override;
   public
@@ -315,9 +315,9 @@ type
 // 编译指令符号列表
 //==============================================================================
 
-{ TCompDirectSymbolList }
+{ TCnCompDirectSymbolList }
 
-  TCompDirectSymbolList = class(TCnSymbolList)
+  TCnCompDirectSymbolList = class(TCnSymbolList)
   protected
     procedure AddSection(Ini: TMemIniFile; const Section: string);
   public
@@ -334,9 +334,9 @@ type
 // 在 uses 中使用的单元名称列表
 //==============================================================================
 
-{ TUnitNameList }
+{ TCnUnitNameList }
 
-  TUnitNameList = class(TCnSymbolList)
+  TCnUnitNameList = class(TCnSymbolList)
   private
     FUseFullPath: Boolean;
     FCppMode: Boolean;
@@ -376,9 +376,9 @@ type
 // 当前单元引用的单元名称列表
 //==============================================================================
 
-{ TUnitUsesList }
+{ TCnUnitUsesList }
 
-  TUnitUsesList = class(TCnSymbolList)
+  TCnUnitUsesList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -389,9 +389,9 @@ type
 // 代码模板列表
 //==============================================================================
 
-{ TCodeTemplateList }
+{ TCnCodeTemplateList }
 
-  TCodeTemplateList = class(TCnSymbolList)
+  TCnCodeTemplateList = class(TCnSymbolList)
   private
     FFileAge: Integer;
   protected
@@ -408,9 +408,9 @@ type
 // IDE 自带的代码模板列表
 //==============================================================================
 
-{ TIDECodeTemplateList }
+{ TCnIDECodeTemplateList }
 
-  TIDECodeTemplateList = class(TCodeTemplateList)
+  TCnIDECodeTemplateList = class(TCnCodeTemplateList)
   protected
     function GetReadFileName: string; override;
   public
@@ -419,7 +419,7 @@ type
 
 {$IFDEF OTA_CODE_TEMPLATE_API}
 
-  TIDEModernCodeTemplateList = class(TCnSymbolList)
+  TCnIDEModernCodeTemplateList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
@@ -447,7 +447,7 @@ type
     procedure Cancel; // 只在支持 LSP 且启用了 LSP 的异步模式下调用
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo);
-    function ListByClass(AClass: TSymbolListClass): TCnSymbolList;
+    function ListByClass(AClass: TCnSymbolListClass): TCnSymbolList;
     procedure Load;
     procedure Save;
     property List[Index: Integer]: TCnSymbolList read GetList;
@@ -463,7 +463,7 @@ function RateToScope(Rate: Integer): Integer;
 function SaveListToXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 function LoadListFromXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 
-procedure RegisterSymbolList(AClass: TSymbolListClass);
+procedure RegisterSymbolList(AClass: TCnSymbolListClass);
 {* 注册一个符号列表类 }
 
 const
@@ -1082,29 +1082,29 @@ end;
 //==============================================================================
 
 
-{ TFileSymbolList }
+{ TCnFileSymbolList }
 
-function TFileSymbolList.CanCustomize: Boolean;
+function TCnFileSymbolList.CanCustomize: Boolean;
 begin
   Result := True;
 end;
 
-function TFileSymbolList.GetDataFileName: string;
+function TCnFileSymbolList.GetDataFileName: string;
 begin
 
 end;
 
-function TFileSymbolList.GetReadFileName: string;
+function TCnFileSymbolList.GetReadFileName: string;
 begin
   Result := WizOptions.GetUserFileName(GetDataFileName, True);
 end;
 
-function TFileSymbolList.GetWriteFileName: string;
+function TCnFileSymbolList.GetWriteFileName: string;
 begin
   Result := WizOptions.GetUserFileName(GetDataFileName, False);
 end;
 
-procedure TFileSymbolList.Load;
+procedure TCnFileSymbolList.Load;
 begin
   Clear;
   LoadListFromXMLFile(Self, GetReadFileName);
@@ -1114,7 +1114,7 @@ begin
   AdjustSymbolListScope(Self);
 end;
 
-function TFileSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnFileSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -1123,18 +1123,18 @@ begin
     Result := PosInfo.PosKind in [pkField, pkComment];
 end;
 
-procedure TFileSymbolList.Reset;
+procedure TCnFileSymbolList.Reset;
 begin
   RestoreDefault;
 end;
 
-procedure TFileSymbolList.RestoreDefault;
+procedure TCnFileSymbolList.RestoreDefault;
 begin
   DeleteFile(WizOptions.UserPath + GetDataFileName);
   Load;
 end;
 
-procedure TFileSymbolList.Save;
+procedure TCnFileSymbolList.Save;
 begin
   SaveListToXMLFile(Self, GetWriteFileName);
   WizOptions.CheckUserFile(GetDataFileName);
@@ -1144,19 +1144,19 @@ end;
 // 预定义符号列表
 //==============================================================================
 
-{ TPreDefSymbolList }
+{ TCnPreDefSymbolList }
 
-class function TPreDefSymbolList.GetListName: string;
+class function TCnPreDefSymbolList.GetListName: string;
 begin
   Result := SCnInputHelperPreDefSymbolList;
 end;
 
-function TPreDefSymbolList.GetDataFileName: string;
+function TCnPreDefSymbolList.GetDataFileName: string;
 begin
   Result := SCnPreDefSymbolsFile;
 end;
 
-function TPreDefSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnPreDefSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   Result := inherited Reload(Editor, InputText, PosInfo);
@@ -1169,14 +1169,14 @@ begin
   end;
 end;
 
-{ TUserTemplateList }
+{ TCnUserTemplateList }
 
-class function TUserTemplateList.GetListName: string;
+class function TCnUserTemplateList.GetListName: string;
 begin
   Result := SCnInputHelperUserTemplateList;
 end;
 
-function TUserTemplateList.GetDataFileName: string;
+function TCnUserTemplateList.GetDataFileName: string;
 begin
   Result := SCnCodeTemplateFile;
 end;
@@ -1185,16 +1185,16 @@ end;
 // 编译指令符号列表
 //==============================================================================
 
-{ TCompDirectSymbolList }
+{ TCnCompDirectSymbolList }
 
-procedure TCompDirectSymbolList.GetValidCharSet(var FirstSet,
+procedure TCnCompDirectSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   FirstSet := csCompDirectFirstSet;
   CharSet := csCompDirectCharSet;
 end;
 
-procedure TCompDirectSymbolList.AddSection(Ini: TMemIniFile; const Section: string);
+procedure TCnCompDirectSymbolList.AddSection(Ini: TMemIniFile; const Section: string);
 var
   Names: TStringList;
   I, Idx: Integer;
@@ -1218,7 +1218,7 @@ begin
   end;
 end;
 
-procedure TCompDirectSymbolList.Load;
+procedure TCnCompDirectSymbolList.Load;
 var
   Ini: TMemIniFile;
 begin
@@ -1257,7 +1257,7 @@ begin
   AdjustSymbolListScope(Self);
 end;
 
-function TCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -1266,12 +1266,12 @@ begin
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkField]);
 end;
 
-procedure TCompDirectSymbolList.Save;
+procedure TCnCompDirectSymbolList.Save;
 begin
   // do nothing
 end;
 
-class function TCompDirectSymbolList.GetListName: string;
+class function TCnCompDirectSymbolList.GetListName: string;
 begin
   Result := SCnInputHelperCompDirectSymbolList;
 end;
@@ -1280,19 +1280,19 @@ end;
 // 用户自定义符号列表
 //==============================================================================
 
-{ TUserSymbolList }
+{ TCnUserSymbolList }
 
-class function TUserSymbolList.GetListName: string;
+class function TCnUserSymbolList.GetListName: string;
 begin
   Result := SCnInputHelperUserSymbolList;
 end;
 
-function TUserSymbolList.GetDataFileName: string;
+function TCnUserSymbolList.GetDataFileName: string;
 begin
   Result := SCnUserSymbolsFile;
 end;
 
-procedure TUserSymbolList.GetValidCharSet(var FirstSet,
+procedure TCnUserSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   FirstSet := csIdentFirstSet + csCompDirectFirstSet + csCommentFirstSet;
@@ -1303,26 +1303,26 @@ end;
 // XML 注释列表
 //==============================================================================
 
-{ TXMLCommentSymbolList }
+{ TCnXMLCommentSymbolList }
 
-class function TXMLCommentSymbolList.GetListName: string;
+class function TCnXMLCommentSymbolList.GetListName: string;
 begin
   Result := SCnInputHelperXMLCommentList;
 end;
 
-function TXMLCommentSymbolList.GetDataFileName: string;
+function TCnXMLCommentSymbolList.GetDataFileName: string;
 begin
   Result := SCnXmlCommentDataFile;
 end;
 
-procedure TXMLCommentSymbolList.GetValidCharSet(var FirstSet,
+procedure TCnXMLCommentSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   FirstSet := csCommentFirstSet;
   CharSet := csCommentCharSet;
 end;
 
-function TXMLCommentSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnXMLCommentSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   Result := PosInfo.PosKind in (csNormalPosKinds + [pkComment]);
@@ -1332,19 +1332,19 @@ end;
 // JavaDoc 注释列表
 //==============================================================================
 
-{ TJavaDocSymbolList }
+{ TCnJavaDocSymbolList }
 
-class function TJavaDocSymbolList.GetListName: string;
+class function TCnJavaDocSymbolList.GetListName: string;
 begin
   Result := SCnInputHelperJavaDocList;
 end;
 
-function TJavaDocSymbolList.GetDataFileName: string;
+function TCnJavaDocSymbolList.GetDataFileName: string;
 begin
   Result := SCnJavaDocDataFile;
 end;
 
-procedure TJavaDocSymbolList.GetValidCharSet(var FirstSet,
+procedure TCnJavaDocSymbolList.GetValidCharSet(var FirstSet,
   CharSet: TAnsiCharSet; PosInfo: TCodePosInfo);
 begin
   if PosInfo.PosKind in [pkComment] then
@@ -1358,7 +1358,7 @@ begin
   CharSet := csJavaDocCharSet;
 end;
 
-function TJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++
@@ -1368,9 +1368,9 @@ end;
 // 在 uses 中使用的单元名称列表
 //==============================================================================
 
-{ TUnitNameList }
+{ TCnUnitNameList }
 
-constructor TUnitNameList.Create(UseFullPath: Boolean; IsCppMode: Boolean;
+constructor TCnUnitNameList.Create(UseFullPath: Boolean; IsCppMode: Boolean;
   LoadAfterCreate: Boolean);
 begin
   FUseFullPath := UseFullPath;
@@ -1379,7 +1379,7 @@ begin
   Create;
 end;
 
-constructor TUnitNameList.Create;
+constructor TCnUnitNameList.Create;
 begin
   inherited;
   FSysUnitsName := TStringList.Create;
@@ -1398,7 +1398,7 @@ begin
     LoadFromSysPath;
 end;
 
-destructor TUnitNameList.Destroy;
+destructor TCnUnitNameList.Destroy;
 begin
   FProjectUnitsPath.Free;
   FProjectUnitsName.Free;
@@ -1409,12 +1409,12 @@ begin
   inherited;
 end;
 
-class function TUnitNameList.GetListName: string;
+class function TCnUnitNameList.GetListName: string;
 begin
   Result := SCnInputHelperUnitNameList;
 end;
 
-function TUnitNameList.AddUnit(const UnitName: string; IsInProject: Boolean): Boolean;
+function TCnUnitNameList.AddUnit(const UnitName: string; IsInProject: Boolean): Boolean;
 begin
   Result := False;
   if FUnitNames.IndexOf(UnitName) < 0 then
@@ -1429,13 +1429,13 @@ begin
   end;
 end;
 
-procedure TUnitNameList.AddUnitFullNameWithPath(const UnitFullName: string);
+procedure TCnUnitNameList.AddUnitFullNameWithPath(const UnitFullName: string);
 begin
   FUnitPaths.Add(UnitFullName);
   // 必须允许重复
 end;
 
-procedure TUnitNameList.LoadFromCurrProject;
+procedure TCnUnitNameList.LoadFromCurrProject;
 var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
@@ -1493,7 +1493,7 @@ begin
   end;
 end;
 
-procedure TUnitNameList.DoFindFile(const FileName: string; const Info:
+procedure TCnUnitNameList.DoFindFile(const FileName: string; const Info:
   TSearchRec; var Abort: Boolean);
 var
   FilePart: string;
@@ -1513,7 +1513,7 @@ begin
   end;
 end;
 
-procedure TUnitNameList.LoadFromSysPath;
+procedure TCnUnitNameList.LoadFromSysPath;
 var
   I: Integer;
   Paths: TStringList;
@@ -1572,7 +1572,7 @@ begin
   end;
 end;
 
-procedure TUnitNameList.LoadFromProjectPath;
+procedure TCnUnitNameList.LoadFromProjectPath;
 var
   I: Integer;
   Paths: TStringList;
@@ -1623,7 +1623,7 @@ begin
 end;
 
 // 上面更新大小写时会影响排序，此处根据预先记录的下标更新对应的路径
-procedure TUnitNameList.UpdatePathsSequence(Names, Paths: TStringList);
+procedure TCnUnitNameList.UpdatePathsSequence(Names, Paths: TStringList);
 var
   I, Idx: Integer;
   List: TStringList;
@@ -1644,7 +1644,7 @@ begin
   end;
 end;
 
-function TUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
   PosInfo: TCodePosInfo): Boolean;
 begin
   Result := False;
@@ -1661,7 +1661,7 @@ begin
   end;
 end;
 
-procedure TUnitNameList.DoInternalLoad(IncludePath: Boolean);
+procedure TCnUnitNameList.DoInternalLoad(IncludePath: Boolean);
 begin
   FUnitNames.Clear;
   FUnitPaths.Clear;
@@ -1674,7 +1674,7 @@ begin
   end;
 end;
 
-procedure TUnitNameList.ExportToStringList(Names, Paths: TStringList);
+procedure TCnUnitNameList.ExportToStringList(Names, Paths: TStringList);
 begin
   if Names <> nil then
     Names.Assign(FUnitNames);
@@ -1687,14 +1687,14 @@ end;
 // 当前单元引用的单元名称列表
 //==============================================================================
 
-{ TUnitUsesList }
+{ TCnUnitUsesList }
 
-class function TUnitUsesList.GetListName: string;
+class function TCnUnitUsesList.GetListName: string;
 begin
   Result := SCnInputHelperUnitUsesList;
 end;
 
-function TUnitUsesList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnUnitUsesList.Reload(Editor: IOTAEditBuffer; const InputText: string;
   PosInfo: TCodePosInfo): Boolean;
 const
   csMaxProcessLines = 30000;
@@ -1754,9 +1754,9 @@ end;
 // 代码模板列表
 //==============================================================================
 
-{ TCodeTemplateList }
+{ TCnCodeTemplateList }
 
-procedure TCodeTemplateList.Load;
+procedure TCnCodeTemplateList.Load;
 var
   Lines: TStringList;
   StrList: TStringList;
@@ -1865,7 +1865,7 @@ begin
   end;
 end;
 
-function TCodeTemplateList.Reload(Editor: IOTAEditBuffer;
+function TCnCodeTemplateList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -1883,14 +1883,14 @@ end;
 // IDE 自带的代码模板列表
 //==============================================================================
 
-{ TIDECodeTemplateList }
+{ TCnIDECodeTemplateList }
 
-class function TIDECodeTemplateList.GetListName: string;
+class function TCnIDECodeTemplateList.GetListName: string;
 begin
   Result := SCnInputHelperIDECodeTemplateList;
 end;
 
-function TIDECodeTemplateList.GetReadFileName: string;
+function TCnIDECodeTemplateList.GetReadFileName: string;
 begin
 {$IFDEF BDS}
   // C:\Documents and Settings\Administrator\Local Settings\Application Data\Borland\BDS\3.0\bds.dci
@@ -1915,12 +1915,12 @@ end;
 // 符号列表管理器
 //==============================================================================
 
-{ TSymbolListMgr }
+{ TCnSymbolListMgr }
 
 var
   SymbolListClassList: TClassList;
 
-procedure RegisterSymbolList(AClass: TSymbolListClass);
+procedure RegisterSymbolList(AClass: TCnSymbolListClass);
 begin
   if SymbolListClassList = nil then
     SymbolListClassList := TClassList.Create;
@@ -1963,7 +1963,7 @@ begin
       CnDebugger.LogMsg('Create SymbolList: ' + SymbolListClassList[I].ClassName);
     {$ENDIF}
       try
-        FList.Add(TSymbolListClass(SymbolListClassList[I]).Create);
+        FList.Add(TCnSymbolListClass(SymbolListClassList[I]).Create);
       except
       {$IFDEF DEBUG}
         on E: Exception do
@@ -1993,7 +1993,7 @@ begin
   end;
 end;
 
-function TCnSymbolListMgr.ListByClass(AClass: TSymbolListClass): TCnSymbolList;
+function TCnSymbolListMgr.ListByClass(AClass: TCnSymbolListClass): TCnSymbolList;
 var
   I: Integer;
 begin
@@ -2042,14 +2042,14 @@ end;
 
 {$IFDEF OTA_CODE_TEMPLATE_API}
 
-{ TIDEModernCodeTemplateList }
+{ TCnIDEModernCodeTemplateList }
 
-class function TIDEModernCodeTemplateList.GetListName: string;
+class function TCnIDEModernCodeTemplateList.GetListName: string;
 begin
   Result := SCnInputHelperIDECodeTemplateList;
 end;
 
-function TIDEModernCodeTemplateList.Reload(Editor: IOTAEditBuffer;
+function TCnIDEModernCodeTemplateList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 var
   I, Idx: Integer;
@@ -2093,19 +2093,19 @@ end;
 {$ENDIF}
 
 initialization
-  RegisterSymbolList(TPreDefSymbolList);
-  RegisterSymbolList(TUserTemplateList);
-  RegisterSymbolList(TCompDirectSymbolList);
-  RegisterSymbolList(TXMLCommentSymbolList);
-  RegisterSymbolList(TJavaDocSymbolList);
-  RegisterSymbolList(TUnitNameList);
-  RegisterSymbolList(TUnitUsesList);
+  RegisterSymbolList(TCnPreDefSymbolList);
+  RegisterSymbolList(TCnUserTemplateList);
+  RegisterSymbolList(TCnCompDirectSymbolList);
+  RegisterSymbolList(TCnXMLCommentSymbolList);
+  RegisterSymbolList(TCnJavaDocSymbolList);
+  RegisterSymbolList(TCnUnitNameList);
+  RegisterSymbolList(TCnUnitUsesList);
 {$IFDEF OTA_CODE_TEMPLATE_API}
-  RegisterSymbolList(TIDEModernCodeTemplateList);
+  RegisterSymbolList(TCnIDEModernCodeTemplateList);
 {$ELSE}
-  RegisterSymbolList(TIDECodeTemplateList);
+  RegisterSymbolList(TCnIDECodeTemplateList);
 {$ENDIF}
-  RegisterSymbolList(TUserSymbolList);
+  RegisterSymbolList(TCnUserSymbolList);
 
 finalization
 {$IFDEF DEBUG}

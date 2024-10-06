@@ -122,8 +122,8 @@ type
     FCorIdeModule: HModule;
     FMethodHook: TCnMethodHook;
     FOldViewDialogExecute: Pointer;
-    FPasUnitNameList: TUnitNameList;
-    FCppUnitNameList: TUnitNameList;
+    FPasUnitNameList: TCnUnitNameList;
+    FCppUnitNameList: TCnUnitNameList;
   {$IFNDEF BDS}
     procedure RunSeparately;
   {$ENDIF}

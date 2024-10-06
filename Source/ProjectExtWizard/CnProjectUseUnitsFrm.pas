@@ -83,7 +83,7 @@ type
     procedure cbbProjectListChange(Sender: TObject);
   private
     FIsCppMode: Boolean;
-    FUnitNameListRef: TUnitNameList;
+    FUnitNameListRef: TCnUnitNameList;
     procedure FillUnitInfo(AInfo: TCnUseUnitInfo);
   protected
     function DoSelectOpenedItem: string; override;
@@ -96,23 +96,23 @@ type
 
     procedure UpdateComboBox; override;
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
-    
+
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
     constructor Create(AOwner: TComponent; CppMode: Boolean;
-      UnitNameList: TUnitNameList); reintroduce;
+      UnitNameList: TCnUnitNameList); reintroduce;
 
     procedure InternalCreateList;
     property IsCppMode: Boolean read FIsCppMode write FIsCppMode;
-    property UnitNameListRef: TUnitNameList read FUnitNameListRef write FUnitNameListRef;
+    property UnitNameListRef: TCnUnitNameList read FUnitNameListRef write FUnitNameListRef;
   end;
 
 // UnitNameList 允许外部传入，避免每次打开 Form 时加载过慢
 function ShowProjectUseUnits(Ini: TCustomIniFile; out Hooked: Boolean;
-  var UnitNameList: TUnitNameList): Boolean;
+  var UnitNameList: TCnUnitNameList): Boolean;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 
@@ -136,7 +136,7 @@ const
 { TCnUseUnitInfo }
 
 function ShowProjectUseUnits(Ini: TCustomIniFile; out Hooked: Boolean;
-  var UnitNameList: TUnitNameList): Boolean;
+  var UnitNameList: TCnUnitNameList): Boolean;
 var
   IsCppMode: Boolean;
   OldCursor: TCursor;
@@ -149,7 +149,7 @@ begin
       OldCursor := Screen.Cursor;
       Screen.Cursor := crHourGlass;
       try
-        UnitNameList := TUnitNameList.Create(True, True, False);
+        UnitNameList := TCnUnitNameList.Create(True, True, False);
       finally
         Screen.Cursor := OldCursor;
       end;
@@ -163,7 +163,7 @@ begin
       OldCursor := Screen.Cursor;
       Screen.Cursor := crHourGlass;
       try
-        UnitNameList := TUnitNameList.Create(True, False, False);
+        UnitNameList := TCnUnitNameList.Create(True, False, False);
       finally
         Screen.Cursor := OldCursor;
       end;
@@ -194,7 +194,7 @@ end;
 { TCnProjectUseUnitsForm }
 
 constructor TCnProjectUseUnitsForm.Create(AOwner: TComponent; CppMode: Boolean;
-  UnitNameList: TUnitNameList);
+  UnitNameList: TCnUnitNameList);
 begin
   FIsCppMode := CppMode;
   FUnitNameListRef := UnitNameList;

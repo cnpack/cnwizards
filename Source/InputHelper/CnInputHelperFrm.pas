@@ -338,7 +338,7 @@ begin
     end;
 
     InputHelper.SymbolListMgr.Load;
-    CurrList := InputHelper.SymbolListMgr.ListByClass(TUserSymbolList);
+    CurrList := InputHelper.SymbolListMgr.ListByClass(TCnUserSymbolList);
     Assert(Assigned(CurrList));
     cbbList.ItemIndex := cbbList.Items.IndexOfObject(CurrList);
     Assert(cbbList.ItemIndex >= 0);

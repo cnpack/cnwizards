@@ -595,7 +595,7 @@ begin
 {$ENDIF}
   end;
 
-  UnitNames := FSymbolListMgr.ListByClass(TUnitNameList);
+  UnitNames := FSymbolListMgr.ListByClass(TCnUnitNameList);
   if UnitNames <> nil then
   begin
     PosInfo.PosKind := pkIntfUses;

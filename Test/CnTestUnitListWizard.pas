@@ -52,7 +52,7 @@ type
 
   TCnTestUnitListWizard = class(TCnMenuWizard)
   private
-    FList: TUnitNameList;
+    FList: TCnUnitNameList;
     function SearchPasInsertPos(IsIntf: Boolean; out HasUses: Boolean;
       out CharPos: TOTACharPos): Boolean;
     function SearchCppInsertPos(IsH: Boolean; out CharPos: TOTACharPos): Boolean;
@@ -125,12 +125,12 @@ var
 begin
   if CurrentIsDelphiSource then
   begin
-    FList := TUnitNameList.Create(True, False, False);
+    FList := TCnUnitNameList.Create(True, False, False);
     IsCppMode := False;
   end
   else if CurrentIsCSource then
   begin
-    FList := TUnitNameList.Create(True, True, False);
+    FList := TCnUnitNameList.Create(True, True, False);
     IsCppMode := True;
   end
   else
