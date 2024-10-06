@@ -57,8 +57,7 @@ type
     FCharSize: TSize;
     FGutterWidth: Integer;
     FAdded: Boolean;
-
-    procedure PaintLine(EditControl: TControl; EditView: IOTAEditView; LineNum: Integer);
+    procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: string;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic: Boolean);
   protected
@@ -222,8 +221,8 @@ begin
 
 end;
 
-procedure TCnTestPaintLineMenuWizard.PaintLine(EditControl: TControl;
-  EditView: IOTAEditView; LineNum: Integer);
+procedure TCnTestPaintLineMenuWizard.PaintLine(Editor: TCnEditorObject;
+  LineNum, LogicLineNum: Integer);
 var
   ARect: TRect;
   S: string;
@@ -232,24 +231,24 @@ var
   P: TPoint;
 {$ENDIF}
 begin
-  FGutterWidth := EditView.Buffer.BufferOptions.LeftGutterWidth;
+  FGutterWidth := Editor.EditView.Buffer.BufferOptions.LeftGutterWidth;
   Inc(FTest);
   S := 'PaintLine Examples: ' + IntToStr(FTest) + ' ' + IntToStr(LineNum);
   APos.Col := 1;
   APos.Line := LineNum;
 {$IFDEF BDS}
-  P := EditControlWrapper.GetPointFromEdPos(EditControl, APos);
+  P := EditControlWrapper.GetPointFromEdPos(Editor.EditControl, APos);
   CnDebugger.TracePoint(P, '');
   ARect := Bounds(P.X + (APos.Col - 1) * FCharSize.cx,
-        (APos.Line - EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
+        (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
         FCharSize.cy);
 {$ELSE}
-  ARect := Bounds(FGutterWidth + (APos.Col - EditView.LeftColumn) * FCharSize.cx,
-        (APos.Line - EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
+  ARect := Bounds(FGutterWidth + (APos.Col - Editor.EditView.LeftColumn) * FCharSize.cx,
+        (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
         FCharSize.cy);
 {$ENDIF}
   CnDebugger.TraceRect(ARect, Format('%d line: ', [LineNum]));
-  EditorPaintText(EditControl, ARect, S, clGreen, clYellow, clNone, True, False);
+  EditorPaintText(Editor.EditControl, ARect, S, clGreen, clYellow, clNone, True, False);
 end;
 
 procedure TCnTestPaintLineMenuWizard.SaveSettings(Ini: TCustomIniFile);

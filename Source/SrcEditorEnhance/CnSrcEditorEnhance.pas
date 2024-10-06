@@ -206,8 +206,7 @@ type
     FBlockTools: TCnSrcEditorBlockTools;
     FEditorKey: TCnSrcEditorKey;
 {$IFDEF BDS}
-    procedure EditorChanged(Editor: TEditorObject;
-      ChangeType: TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure CheckToolBarEnableOnIdle(Sender: TObject);
@@ -235,7 +234,7 @@ type
   published
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
     property NavMgr: TCnSrcEditorNavMgr read FNavMgr;
-  
+
     property ToolBarMgr: TCnSrcEditorToolBarMgr read FToolbarMgr;
     property EditorMisc: TCnSrcEditorMisc read FEditorMisc;
     property Thumbnail: TCnSrcEditorThumbnail read FThumbnail;
@@ -478,7 +477,7 @@ begin
   FThumbnail.Free;
   FEditorMisc.Free;
   FToolbarMgr.Free;
-  
+
   CnEditorToolBarService := nil;
   FGutterMgr.Free;
   FNavMgr.Free;
@@ -604,7 +603,7 @@ begin
     chkGutterDragSelectLines.Checked := FGutterMgr.DragSelectLines;
 
     chkEditorMultiLine.Checked := FEditorMisc.EditorTabMultiLine;
-    chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;  
+    chkEditorFlatButtons.Checked := FEditorMisc.EditorTabFlatButton;
 
     chkExtendForwardBack.Checked := FNavMgr.ExtendForwardBack;
     seNavMinLineDiff.Value := FNavMgr.MinLineDiff;
@@ -749,8 +748,8 @@ end;
 
 {$IFDEF BDS}
 
-procedure TCnSrcEditorEnhance.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSrcEditorEnhance.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 begin
   if Active and (ChangeType * [ctTopEditorChanged {$IFDEF DELPHI103_RIO_UP}, ctView{$ENDIF}] <> []) then
   begin

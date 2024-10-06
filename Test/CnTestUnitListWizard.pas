@@ -125,12 +125,12 @@ var
 begin
   if CurrentIsDelphiSource then
   begin
-    FList := TUnitNameList.Create(True, False);
+    FList := TUnitNameList.Create(True, False, False);
     IsCppMode := False;
   end
   else if CurrentIsCSource then
   begin
-    FList := TUnitNameList.Create(True, True);
+    FList := TUnitNameList.Create(True, True, False);
     IsCppMode := True;
   end
   else

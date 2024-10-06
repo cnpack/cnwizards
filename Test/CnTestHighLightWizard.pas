@@ -24,7 +24,7 @@ unit CnTestHighLightWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：代码高亮部分功能测试单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元实现了代码高亮部分功能的测试
+* 备    注：该单元实现了代码高亮部分功能的测试，暂时只支持低版本非 Unicode，未适配 Unicode
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -102,6 +102,7 @@ begin
 end;
 
 procedure TCnTestHighLightWizard.Execute;
+{$IFNDEF UNICODE}
 const
   csKeyTokens: set of TTokenKind = [
     tkIf, tkThen, tkRecord, tkClass,
@@ -115,8 +116,10 @@ var
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  i, Sum: Integer;
+  I, Sum: Integer;
+{$ENDIF}
 begin
+{$IFNDEF UNICODE}
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then Exit;
 
@@ -134,18 +137,18 @@ begin
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
   Parser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
-  
+
   CnDebugger.TraceFmt('CharPos.Line %d, CharPos.CharIndex %d.',
     [CharPos.Line, CharPos.CharIndex]);
 
   if Parser.Count > 0 then
   begin
-    for i := 0 to Parser.Count - 1 do
+    for I := 0 to Parser.Count - 1 do
     begin
-      CharPos := OTACharPos(Parser.Tokens[i].CharIndex, Parser.Tokens[i].LineNumber + 1);
+      CharPos := OTACharPos(Parser.Tokens[I].CharIndex, Parser.Tokens[I].LineNumber + 1);
       EditView.ConvertPos(False, EditPos, CharPos);
-      Parser.Tokens[i].EditCol := EditPos.Col;
-      Parser.Tokens[i].EditLine := EditPos.Line;
+      Parser.Tokens[I].EditCol := EditPos.Col;
+      Parser.Tokens[I].EditLine := EditPos.Line;
     end;
   end;
 
@@ -169,6 +172,7 @@ begin
   CnDebugger.TraceObject(Parser.InnerBlockCloseToken);
 
   CnDebugger.TraceSeparator;
+{$ENDIF}
 end;
 
 function TCnTestHighLightWizard.GetCaption: string;

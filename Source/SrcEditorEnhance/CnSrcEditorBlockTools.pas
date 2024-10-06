@@ -153,7 +153,7 @@ type
     procedure ReInitShortCuts;
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
-    procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
   public
     constructor Create;
     destructor Destroy; override;
@@ -1005,7 +1005,7 @@ begin
     FHideStructMenu.Visible := CanShowDisableStructuralHighlight;
 end;
 
-procedure TCnSrcEditorBlockTools.ShowFlatButton(EditWindow: TCustomForm; 
+procedure TCnSrcEditorBlockTools.ShowFlatButton(EditWindow: TCustomForm;
   EditControl: TControl; EditView: IOTAEditView);
 var
   IsColor: Boolean;
@@ -1116,7 +1116,7 @@ begin
         if I < EndingRow then Inc(ElidedEndingRows);
       end;
     end;
-    
+
     // 计算得到实际起始行数
     Dec(StartingRow, ElidedStartingRows);
     Dec(EndingRow, ElidedEndingRows);
@@ -1210,8 +1210,8 @@ begin
   end;
 end;
 
-procedure TCnSrcEditorBlockTools.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSrcEditorBlockTools.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 begin
   if CanShowButton and (ChangeType * [ctView, ctWindow, ctCurrLine, ctFont,
     ctVScroll, ctBlock] <> []) then

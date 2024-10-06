@@ -182,7 +182,7 @@ uses
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
 
 type
-  TCnEditorToolBarEvent = procedure (ToolBarType: string;
+  TCnEditorToolBarEvent = procedure (const ToolBarType: string;
      EditControl: TControl; ToolBar: TToolBar) of object;
 
   ICnEditorToolBarService = interface

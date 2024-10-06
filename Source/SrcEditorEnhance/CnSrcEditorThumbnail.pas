@@ -99,9 +99,9 @@ type
     FCheckHideTimer: TTimer;
     FAppEvents: TApplicationEvents;
     FShowThumbnail: Boolean;
-    procedure EditControlMouseMove(Editor: TEditorObject; Shift: TShiftState;
+    procedure EditControlMouseMove(Editor: TCnEditorObject; Shift: TShiftState;
       X, Y: Integer; IsNC: Boolean);
-    procedure EditControlMouseLeave(Editor: TEditorObject; IsNC: Boolean);
+    procedure EditControlMouseLeave(Editor: TCnEditorObject; IsNC: Boolean);
 
     procedure OnShowTimer(Sender: TObject);
     procedure OnHideTimer(Sender: TObject);
@@ -148,7 +148,7 @@ const
   csHintHeight = 24;
   csGap = 20;
 
-  csThumbnail = 'Thumbnail';                   
+  csThumbnail = 'Thumbnail';
   csShowThumbnail = 'ShowThumbnail';
 
 //==============================================================================
@@ -281,7 +281,7 @@ begin
 end;
 
 procedure TCnSrcEditorThumbnail.EditControlMouseLeave(
-  Editor: TEditorObject; IsNC: Boolean);
+  Editor: TCnEditorObject; IsNC: Boolean);
 begin
   if not Active or not FShowThumbnail or (Editor.EditControl <> CnOtaGetCurrentEditControl) then
     Exit;
@@ -295,7 +295,7 @@ begin
   FHideTimer.Enabled := True;  // ×¼±¸Òþ²Ø
 end;
 
-procedure TCnSrcEditorThumbnail.EditControlMouseMove(Editor: TEditorObject;
+procedure TCnSrcEditorThumbnail.EditControlMouseMove(Editor: TCnEditorObject;
   Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   InRightScroll: Boolean;

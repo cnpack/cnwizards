@@ -95,7 +95,7 @@ type
     FLineInfo: TCnList;
 {$ENDIF}
     procedure MenuPopup(Sender: TObject);
-    procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure OnClearBookMarks(Sender: TObject);
     procedure OnEnhConfig(Sender: TObject);
     procedure OnGotoLine(Sender: TObject);
@@ -165,7 +165,7 @@ type
     function GetCount: Integer;
     function GetGutters(Index: Integer): TCnSrcEditorGutter;
     procedure SetCurrFont(const Value: TFont);
-    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SetFixedWidth(const Value: TCnGutterWidth);
     procedure SetMinWidth(const Value: TCnGutterWidth);
@@ -173,7 +173,7 @@ type
     procedure SetTenMode(const Value: Boolean);
   protected
     procedure ThemeChanged(Sender: TObject);
-    procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context: 
+    procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context:
       Pointer);
     procedure DoEnhConfig;
     procedure DoLineClose;
@@ -181,16 +181,16 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    
+
     procedure UpdateGutters;
     procedure LanguageChanged(Sender: TObject);
     procedure LoadSettings(Ini: TCustomIniFile);
-    procedure SaveSettings(Ini: TCustomIniFile); 
+    procedure SaveSettings(Ini: TCustomIniFile);
     procedure ResetSettings(Ini: TCustomIniFile);
 
     property Count: Integer read GetCount;
     property Gutters[Index: Integer]: TCnSrcEditorGutter read GetGutters;
-    
+
     property Font: TFont read FFont write SetFont;
     property CurrFont: TFont read FCurrFont write SetCurrFont;
   published
@@ -344,8 +344,8 @@ begin
 end;
 {$ENDIF}
 
-procedure TCnSrcEditorGutter.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSrcEditorGutter.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 var
   OldHeight: Integer;
 begin
@@ -372,7 +372,7 @@ end;
 
 procedure TCnSrcEditorGutter.UpdateStatus;
 var
-  EditorObj: TEditorObject;
+  EditorObj: TCnEditorObject;
   MaxRowWidth, MaxCurRowWidth: Integer;
   EndLine: Integer;
 
@@ -390,7 +390,7 @@ begin
     Visible := False;
     Exit;
   end;
-  
+
   EditorObj := EditControlWrapper.GetEditorObject(EditControl);
   if (EditorObj = nil) or not EditorObj.EditorIsOnTop then
   begin
@@ -449,7 +449,7 @@ var
   R: TRect;
   StrNum: string;
   I, X, Y, Idx, MaxRow: Integer;
-  EditorObj: TEditorObject;
+  EditorObj: TCnEditorObject;
   OldColor: TColor;
 begin
   if FPainting or not Visible or (EditControl = nil) or (Parent = nil) then

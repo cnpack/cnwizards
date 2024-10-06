@@ -92,10 +92,11 @@ var
   PosInfo: TCodePosInfo;
 begin
   View := CnOtaGetTopMostEditView;
-  if not Assigned(View) then Exit;
+  if not Assigned(View) then
+    Exit;
 
   Stream := TMemoryStream.Create;
-  CurrPos := CnOtaGetCurrPos(View.Buffer);
+  CurrPos := CnOtaGetCurrLinearPos(View.Buffer);
   CnDebugger.LogMsg('CurrPos: ' + IntToStr(CurrPos));
   
   CnOtaSaveCurrentEditorToStream(Stream, False, False);

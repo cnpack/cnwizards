@@ -81,7 +81,7 @@ type
 implementation
 
 uses
-  CnWizIdeUtils, CnDebug, CnEditControlWrapper;
+  CnWizIdeUtils, CnDebug, CnEditControlWrapper, CnIDEStrings;
 
 {$R *.DFM}
 
@@ -287,7 +287,7 @@ begin
 {$ENDIF}
 
   lstInfo.Items.Add(SEP);
-  CurrPos := CnOtaGetCurrLinePos; // 取到的线性偏移基本准确
+  CurrPos := CnOtaGetCurrLinearPos; // 取到的线性偏移基本准确
   lstInfo.Items.Add(Format('CnOtaGetCurrPos Linear %d.', [CurrPos]));
 
   Stream := TMemoryStream.Create;

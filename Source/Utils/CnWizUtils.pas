@@ -6768,7 +6768,7 @@ function CnOtaGetLinesElideInfo(Infos: TList; EditControl: TControl): Boolean;
 {$IFDEF IDE_EDITOR_ELIDE}
 var
   I: Integer;
-  Obj: TEditorObject;
+  Obj: TCnEditorObject;
   Old, B: Boolean;
 {$ENDIF}
 begin

@@ -525,11 +525,11 @@ type
     FBlockExtendLeft: Boolean;
     FBlockMatchLineSolidCurrent: Boolean;
     FBlockMatchLineStyle: TCnLineStyle;
-    FKeywordHighlight: THighlightItem;
-    FIdentifierHighlight: THighlightItem;
-    FCompDirectiveHighlight: THighlightItem; // 注意 Pascal 和 C++ 的都用这同一个，在D56/BCB56 里会有不一致的问题所以还需要一个
+    FKeywordHighlight: TCnHighlightItem;
+    FIdentifierHighlight: TCnHighlightItem;
+    FCompDirectiveHighlight: TCnHighlightItem; // 注意 Pascal 和 C++ 的都用这同一个，在D56/BCB56 里会有不一致的问题所以还需要一个
 {$IFNDEF COMPILER7_UP}
-    FCompDirectiveOtherHighlight: THighlightItem; // D56/BCB56 下需要另一个，用来分别指示 C++/Pascal 的内容
+    FCompDirectiveOtherHighlight: TCnHighlightItem; // D56/BCB56 下需要另一个，用来分别指示 C++/Pascal 的内容
 {$ENDIF}
     FDirtyList: TList;
     FViewChangedList: TList;
@@ -559,7 +559,7 @@ type
     FCustomWideIdentfiers: TCnWideStringList;
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
-    function EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
+    function EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
       {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
       var ARect: TRect): Boolean;
     {* 计算某 EditPos 位置的指定字符串在所在的行中的 Rect，注意绘制所用的 Rect
@@ -570,7 +570,7 @@ type
     function IndexOfBracket(EditControl: TControl): Integer;
     function GetBracketMatch(EditView: IOTAEditView; EditBuffer: IOTAEditBuffer;
       EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
-    procedure CheckBracketMatch(Editor: TEditorObject);
+    procedure CheckBracketMatch(Editor: TCnEditorObject);
 
     function IndexOfBlockMatch(EditControl: TControl): Integer;
     function IndexOfBlockLine(EditControl: TControl): Integer;
@@ -584,35 +584,35 @@ type
     procedure OnHighlightTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
     procedure OnCurrentTokenValidateTimer(Sender: TObject);
-    procedure BeginUpdateEditor(Editor: TEditorObject);
-    procedure EndUpdateEditor(Editor: TEditorObject);
+    procedure BeginUpdateEditor(Editor: TCnEditorObject);
+    procedure EndUpdateEditor(Editor: TCnEditorObject);
     // 标记一行代码需要重画，只有在 BeginUpdateEditor 和 EndUpdateEditor 之间调用有效
     procedure EditorMarkLineDirty(LineNum: Integer);
     procedure RefreshCurrentTokens(Info: TCnBlockMatchInfo);
-    procedure UpdateHighlight(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure ActiveFormChanged(Sender: TObject);
     procedure AfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
-    procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
-    procedure ClearHighlight(Editor: TEditorObject);
-    procedure PaintBracketMatch(Editor: TEditorObject;
+    procedure ClearHighlight(Editor: TCnEditorObject);
+    procedure PaintBracketMatch(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
-    procedure PaintBlockMatchKeyword(Editor: TEditorObject; // 其他非匹配的高亮都在里头画
+    procedure PaintBlockMatchKeyword(Editor: TCnEditorObject; // 其他非匹配的高亮都在里头画
       LineNum, LogicLineNum: Integer; AElided: Boolean);
-    procedure PaintBlockMatchLine(Editor: TEditorObject;
+    procedure PaintBlockMatchLine(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
-    procedure PaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
+    procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     function GetBlockMatchHotkey: TShortCut;
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
     procedure ReloadIDEFonts;
     procedure SetHilightSeparateLine(const Value: Boolean);
 {$IFNDEF BDS}
-    procedure BeforePaintLine(Editor: TEditorObject; LineNum, LogicLineNum: Integer);
+    procedure BeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     procedure SetHighLightCurrentLine(const Value: Boolean);
     procedure SetHighLightLineColor(const Value: TColor);
 {$ENDIF}
@@ -2762,11 +2762,11 @@ begin
   // FBlockMatchLineStyle := lsTinyDot;
   FBlockMatchLineHoriDot := True;
 
-  FKeywordHighlight := THighlightItem.Create;
-  FIdentifierHighlight := THighlightItem.Create;
-  FCompDirectiveHighlight := THighlightItem.Create;
+  FKeywordHighlight := TCnHighlightItem.Create;
+  FIdentifierHighlight := TCnHighlightItem.Create;
+  FCompDirectiveHighlight := TCnHighlightItem.Create;
 {$IFNDEF COMPILER7_UP}
-  FCompDirectiveOtherHighlight := THighlightItem.Create;
+  FCompDirectiveOtherHighlight := TCnHighlightItem.Create;
 {$ENDIF}
   FKeywordHighlight.Bold := True;
 
@@ -2888,7 +2888,7 @@ begin
     FOnEnhConfig(Self);
 end;
 
-function TCnSourceHighlight.EditorGetTextRect(Editor: TEditorObject; AnsiPos: TOTAEditPos;
+function TCnSourceHighlight.EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
   {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
   var ARect: TRect): Boolean;
 {$IFDEF BDS}
@@ -3469,7 +3469,7 @@ begin
     if not CnOtaIsEditPosOutOfLine(EditView.CursorPos, EditView) and
       not InCommentOrString(AttributePos) then
     begin
-      // 使用 CursorPos.Col 在 LText 里搜索，偏移量与字符串都要求对应为 Ansi/Utf8/Ansi    
+      // 使用 CursorPos.Col 在 LText 里搜索，偏移量与字符串都要求对应为 Ansi/Utf8/Ansi
       if LText <> '' then
       begin
         if CharPos.CharIndex > 0 then
@@ -3554,7 +3554,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.CheckBracketMatch(Editor: TEditorObject);
+procedure TCnSourceHighlight.CheckBracketMatch(Editor: TCnEditorObject);
 var
   IsMatch: Boolean;
   Info: TCnBracketInfo;
@@ -3606,7 +3606,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.PaintBracketMatch(Editor: TEditorObject;
+procedure TCnSourceHighlight.PaintBracketMatch(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
   R: TRect;
@@ -3680,7 +3680,7 @@ begin
   Result := -1;
 end;
 
-procedure TCnSourceHighlight.ClearHighlight(Editor: TEditorObject);
+procedure TCnSourceHighlight.ClearHighlight(Editor: TCnEditorObject);
 var
   Index: Integer;
 begin
@@ -3726,8 +3726,8 @@ begin
 end;
 
 // Editor 情况发生变化时被调用，如果内容改变，则重新进行语法分析
-procedure TCnSourceHighlight.UpdateHighlight(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSourceHighlight.UpdateHighlight(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 var
   OldPair, NewPair: TCnBlockLinePair;
   Info: TCnBlockMatchInfo;
@@ -4048,7 +4048,7 @@ begin
    // HSLToRGB(ALayer / 7, 1, 0.5);
 end;
 
-procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TEditorObject;
+procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
   R, R1: TRect;
@@ -4072,7 +4072,7 @@ var
   CanDrawToken: Boolean;
   RectGot: Boolean;
   CanvasSaved: Boolean;
-  CompDirectiveHighlightRef: THighlightItem;
+  CompDirectiveHighlightRef: TCnHighlightItem;
 {$IFDEF BDS}
   WidePaintBuf: array[0..1] of WideChar;
   AnsiCharWidthLimit: Integer;
@@ -4752,7 +4752,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.PaintBlockMatchLine(Editor: TEditorObject;
+procedure TCnSourceHighlight.PaintBlockMatchLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
   LineInfo: TCnBlockLineInfo;
@@ -5103,8 +5103,8 @@ begin
 end;
 
 // EditorChange 时调用此事件去检查括号和结构高亮
-procedure TCnSourceHighlight.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSourceHighlight.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 var
   EditorIndex: Integer;
 begin
@@ -5178,7 +5178,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.PaintLine(Editor: TEditorObject;
+procedure TCnSourceHighlight.PaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
 var
   AElided: Boolean;
@@ -5433,7 +5433,7 @@ begin
     EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION);
 end;
 
-procedure TCnSourceHighlight.BeginUpdateEditor(Editor: TEditorObject);
+procedure TCnSourceHighlight.BeginUpdateEditor(Editor: TCnEditorObject);
 begin
   if FDirtyList = nil then
     FDirtyList := TList.Create
@@ -5441,7 +5441,7 @@ begin
     FDirtyList.Clear;
 end;
 
-procedure TCnSourceHighlight.EndUpdateEditor(Editor: TEditorObject);
+procedure TCnSourceHighlight.EndUpdateEditor(Editor: TCnEditorObject);
 var
   I: Integer;
   NeedRefresh: Boolean;
@@ -5506,7 +5506,7 @@ end;
 
 procedure TCnSourceHighlight.ReloadIDEFonts;
 var
-  AHighlight: THighlightItem;
+  AHighlight: TCnHighlightItem;
 begin
   if EditControlWrapper.IndexOfHighlight(csReservedWord) >= 0 then
   begin
@@ -5645,7 +5645,7 @@ begin
   end;
 end;
 
-procedure TCnSourceHighlight.BeforePaintLine(Editor: TEditorObject;
+procedure TCnSourceHighlight.BeforePaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
 var
   CurLine: TCnCurLineInfo;
@@ -5756,7 +5756,7 @@ end;
 
 function LoadIDEDefaultCurrentColor: TColor;
 var
-  AHighlight: THighlightItem;
+  AHighlight: TCnHighlightItem;
 begin
   Result := $00E6FFFA;  // 默认
   if EditControlWrapper.IndexOfHighlight(csWhiteSpace) >= 0 then

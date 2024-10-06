@@ -39,7 +39,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls,
+  ToolsAPI, IniFiles, StdCtrls, ComCtrls,
   CnWizClasses, CnWizUtils, CnWizConsts, CnEditControlWrapper;
 
 type
@@ -56,8 +56,7 @@ type
     FRegistered: Boolean;
   protected
     function GetHasConfig: Boolean; override;
-    procedure EditorChanged(Editor: TEditorObject; ChangeType:
-      TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
   public
     function GetState: TWizardState; override;
     procedure Config; override;
@@ -68,11 +67,12 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
     procedure Execute; override;
-
     destructor Destroy; override;
 
-    procedure CreateToolBar(EditControl: TControl; Sender: TObject);
-    procedure InitToolBar(EditControl: TControl; Sender: TObject);
+    procedure CreateToolBar(const ToolBarType: string; EditControl: TControl;
+      ToolBar: TToolBar);
+    procedure InitToolBar(const ToolBarType: string; EditControl: TControl;
+      ToolBar: TToolBar);
   end;
 
 implementation
@@ -92,15 +92,16 @@ begin
   { TODO -oAnyone : 在此显示配置窗口 }
 end;
 
-procedure TCnTestToolBarWizard.CreateToolBar(EditControl: TControl; Sender: TObject);
+procedure TCnTestToolBarWizard.CreateToolBar(const ToolBarType: string;
+  EditControl: TControl; ToolBar: TToolBar);
 begin
-  if Sender is TControl then
+  if ToolBar <> nil then
   begin
-    FCombo := TComboBox.Create(Sender as TComponent);
-    FCombo.Parent := Sender as TWinControl;
+    FCombo := TComboBox.Create(ToolBar as TComponent);
+    FCombo.Parent := ToolBar as TWinControl;
 
-    (Sender as TControl).Top := 50;
-  end;  
+    (ToolBar as TControl).Top := 50;
+  end;
 end;
 
 destructor TCnTestToolBarWizard.Destroy;
@@ -110,8 +111,8 @@ begin
   inherited;
 end;
 
-procedure TCnTestToolBarWizard.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnTestToolBarWizard.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 var
   S: string;
 begin
@@ -130,7 +131,8 @@ procedure TCnTestToolBarWizard.Execute;
 begin
   if CnEditorToolBarService <> nil then
   begin
-    CnEditorToolBarService.RegisterToolBarType('TestToolBar', CreateToolBar, InitToolBar, nil);
+    CnEditorToolBarService.RegisterToolBarType('TestToolBar',
+      CreateToolBar, InitToolBar, nil);
     EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
     FRegistered := True;
   end;
@@ -176,7 +178,8 @@ begin
   { TODO -oAnyone : 返回专家的名称、作者、邮箱及备注，字符串请进行本地化处理 }
 end;
 
-procedure TCnTestToolBarWizard.InitToolBar(EditControl: TControl; Sender: TObject);
+procedure TCnTestToolBarWizard.InitToolBar(const ToolBarType: string;
+  EditControl: TControl; ToolBar: TToolBar);
 begin
   (FCombo as TComboBox).Items.Add('Test1');
   (FCombo as TComboBox).Items.Add('Test2');

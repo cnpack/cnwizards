@@ -154,9 +154,9 @@ type
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
 
     procedure SnapCursorToEol;
-    procedure EditorChanged(Editor: TEditorObject; ChangeType: TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
 {$IFDEF DELPHI104_SYDNEY_UP}
-    procedure EditorMouseUp(Editor: TEditorObject; Button: TMouseButton;
+    procedure EditorMouseUp(Editor: TCnEditorObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 {$ENDIF}
   public
@@ -1796,7 +1796,7 @@ begin
   if not CnOtaGetCurrPosToken(Cur, CurIndex) then
     Exit;
   if Cur = '' then Exit;
-  
+
   // 做 F2 更改当前变量名的动作
   BookMarkList := nil;
   EditControl := CnOtaGetCurrentEditControl;
@@ -3539,8 +3539,8 @@ begin
   FKeepSearch := Value;
 end;
 
-procedure TCnSrcEditorKey.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnSrcEditorKey.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 begin
   if not Active or not FCursorBeforeEOL then
     Exit;
@@ -3551,7 +3551,7 @@ end;
 
 {$IFDEF DELPHI104_SYDNEY_UP}
 
-procedure TCnSrcEditorKey.EditorMouseUp(Editor: TEditorObject; Button: TMouseButton;
+procedure TCnSrcEditorKey.EditorMouseUp(Editor: TCnEditorObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 begin
   if not Active or not FCursorBeforeEOL then

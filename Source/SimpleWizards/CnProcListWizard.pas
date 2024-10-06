@@ -414,9 +414,12 @@ type
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
     procedure SplitterMoved(Sender: TObject);
-    procedure CreateProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
-    procedure InitProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
-    procedure RemoveProcToolBar(ToolBarType: string; EditControl: TControl; ToolBar: TToolBar);
+    procedure CreateProcToolBar(const ToolBarType: string; EditControl: TControl;
+      ToolBar: TToolBar);
+    procedure InitProcToolBar(const ToolBarType: string; EditControl: TControl;
+      ToolBar: TToolBar);
+    procedure RemoveProcToolBar(const ToolBarType: string; EditControl: TControl;
+      ToolBar: TToolBar);
     procedure OnToolBarTimer(Sender: TObject);
     procedure PopupCloseItemClick(Sender: TObject);
     procedure PopupSubItemSortByClick(Sender: TObject);
@@ -427,9 +430,7 @@ type
     procedure EditorToolBarEnable(const Value: Boolean);
     procedure SetUseEditorToolBar(const Value: Boolean);
 
-    procedure EditorChange(Editor: TEditorObject; ChangeType:
-      TEditorChangeTypes);
-
+    procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure ParseCurrent;
     procedure ClearList;
     procedure CheckCurrentFile(Sender: TObject);
@@ -942,7 +943,7 @@ begin
   end;
 end;
 
-procedure TCnProcListWizard.CreateProcToolBar(ToolBarType: string;
+procedure TCnProcListWizard.CreateProcToolBar(const ToolBarType: string;
   EditControl: TControl; ToolBar: TToolBar);
 var
   Obj: TCnProcToolBarObj;
@@ -1262,8 +1263,8 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnProcListWizard.EditorChange(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnProcListWizard.EditorChange(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 var
   Obj: TCnProcToolBarObj;
 begin
@@ -1454,7 +1455,7 @@ begin
   Result := inherited GetSearchContent + 'ÊôÐÔ,ÔªËØ,property,function,element,';
 end;
 
-procedure TCnProcListWizard.InitProcToolBar(ToolBarType: string;
+procedure TCnProcListWizard.InitProcToolBar(const ToolBarType: string;
   EditControl: TControl; ToolBar: TToolBar);
 var
   Obj: TCnProcToolBarObj;
@@ -1788,7 +1789,7 @@ begin
   CnWizNotifierServices.ExecuteOnApplicationIdle(ProcCombo.RefreshDropBox);
 end;
 
-procedure TCnProcListWizard.RemoveProcToolBar(ToolBarType: string;
+procedure TCnProcListWizard.RemoveProcToolBar(const ToolBarType: string;
   EditControl: TControl; ToolBar: TToolBar);
 begin
   RemoveToolBarObjFromEditControl(EditControl);

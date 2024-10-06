@@ -106,7 +106,7 @@ type
     function FindActionByNameFromActionManager(ActionManager: TActionManager; AName: string): TBasicAction;
 {$ENDIF}
 
-    procedure HookMouseDown(Editor: TEditorObject; Button: TMouseButton;
+    procedure HookMouseDown(Editor: TCnEditorObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
   protected
     procedure OnEnhConfig(Sender: TObject);
@@ -130,11 +130,11 @@ type
     FMinLineDiff: Integer;
     FMaxItems: Integer;
 
-    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm; 
+    procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SetExtendForwardBack(const Value: Boolean);
   protected
-    procedure SetActive(Value: Boolean); 
+    procedure SetActive(Value: Boolean);
     procedure DoUpdateInstall(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
     procedure DoEnhConfig;
@@ -198,7 +198,7 @@ begin
   FForwardMenu := TPopupMenu.Create(Self);
   FBackAction := TAction.Create(Self);
   FForwardAction := TAction.Create(Self);
-  
+
   FBackMenu.OnPopup := BackMenuPopup;
   FForwardMenu.OnPopup := ForwardMenuPopup;
   FBackAction.OnExecute := BackActionExecute;
@@ -210,7 +210,7 @@ begin
   FForwardAction.OnUpdate := ActionUpdate;
   FForwardAction.ImageIndex := 1;
   FForwardAction.Name := SCnForwardActionName;
-  
+
   FBackList := TStringList.Create;
   FForwardList := TStringList.Create;
 
@@ -235,11 +235,11 @@ procedure TCnSrcEditorNav.AddItem(AList: TStringList;
 begin
   if AFileName = '' then
     Exit;
-    
+
   if (AList.Count > 0) and (AList[AList.Count - 1] = AFileName) and
     (Integer(AList.Objects[AList.Count - 1]) = ALine) then
     Exit;
-    
+
   AList.AddObject(AFileName, TObject(ALine));
   UpdateControls;
 end;
@@ -382,7 +382,7 @@ begin
 end;
 
 procedure TCnSrcEditorNav.DoMenuPopup(AMenu: Menus.TPopupMenu; AList: TStringList;
-  AOnItem, AOnIDE: TNotifyEvent; const AIDECaption, AIDEListCaption: string; 
+  AOnItem, AOnIDE: TNotifyEvent; const AIDECaption, AIDEListCaption: string;
   AOldAction: TBasicAction; AOldMenu: Menus.TPopupMenu);
 var
   I: Integer;
@@ -742,7 +742,7 @@ end;
 
 {$ENDIF}
 
-procedure TCnSrcEditorNav.HookMouseDown(Editor: TEditorObject;
+procedure TCnSrcEditorNav.HookMouseDown(Editor: TCnEditorObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: Integer; IsNC: Boolean);
 var
   Line: Integer;
