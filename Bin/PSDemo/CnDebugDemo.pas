@@ -7,6 +7,8 @@
 {                                                       }
 {*******************************************************}
 
+// 注意尽量调用 Trace 系列方法，以防 Log 系列方法因未定义 DEBUG 而禁用
+
 program CnDebugDemo;
 
 uses
@@ -15,30 +17,30 @@ uses
 
 function Calc(N: Integer): Integer;
 begin
-  CnDebugger.LogEnter('Calc', '');
+  CnDebugger.TraceEnter('Calc', '');
   if N > 0 then
     Result := N * Calc(N - 1)
   else
     Result := 1;
-  CnDebugger.LogInteger(Result, 'Result');
-  CnDebugger.LogLeave('Calc', '');
+  CnDebugger.TraceInteger(Result, 'Result');
+  CnDebugger.TraceLeave('Calc', '');
 end;
 
 var
-  i: Integer;
+  I: Integer;
 
 begin
   CnDebugger.StartDebugViewer;
   
-  CnDebugger.LogMsg('CnDebugDemo');
+  CnDebugger.TraceMsg('CnDebugDemo');
   Calc(6);
 
   CnDebugger.StartTimeMark(1, 'loop');
-  for i := 1 to 10000 do
+  for I := 1 to 10000 do
     ;
   CnDebugger.StopTimeMark(1, 'loop');
 
-  CnDebugger.LogObject(Application.MainForm);
+  CnDebugger.TraceObject(Application.MainForm);
   
   CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos);
 end.
