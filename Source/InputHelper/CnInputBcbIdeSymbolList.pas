@@ -61,9 +61,9 @@ type
 // 从 IDE 中获得的标识符列表
 //==============================================================================
 
-{ TBcbIDESymbolList }
+{ TCnBcbIDESymbolList }
 
-  TBcbIDESymbolList = class(TSymbolList)
+  TCnBcbIDESymbolList = class(TCnSymbolList)
   private
   {$IFDEF SUPPORT_KibitzCompile}
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
@@ -115,13 +115,13 @@ uses
   CnWizEditFiler, mPasLex;
 
 var
-  FBcbIdeSymbolList: TBcbIDESymbolList = nil;
-  
+  FBcbIdeSymbolList: TCnBcbIDESymbolList = nil;
+
 //==============================================================================
 // 从 IDE 中获得的标识符列表
 //==============================================================================
 
-{ TBcbIDESymbolList }
+{ TCnBcbIDESymbolList }
 
 function MyMessageDlgPosHelp(const Msg: string; DlgType: TMsgDlgType;
   Buttons: TMsgDlgButtons; HelpCtx: Longint; X, Y: Integer;
@@ -149,6 +149,7 @@ type
   PSymbols = ^TSymbols;
   TUnknowns = packed array [0..(MaxInt div SizeOf(Byte))-1] of Byte;
   PUnknowns = ^TUnknowns;
+
   // 这个声明来自 TKibitzResult 记录的 RTTI 信息，在BCB中不一定有用
   TKibitzResult = packed record
   {$IFDEF COMPILER7_UP}
@@ -178,8 +179,8 @@ type
   TCompGetSymbolTextProc = procedure(Symbol: Integer {Comtypes::TSymbol*};
     Bif: PChar; TextType: Word); stdcall;
 
-  TCppGetSymbolFlagsProc = function(Symbol: Integer): Integer; stdcall;  
-    
+  TCppGetSymbolFlagsProc = function(Symbol: Integer): Integer; stdcall;
+
   TKibitzThread = class(TThread)
   private
     FFileName: AnsiString;
@@ -338,7 +339,7 @@ begin
   Result := 0;
 end;
 
-function ParseSymbolFlags(AFlags: Integer): TSymbolKind;
+function ParseSymbolFlags(AFlags: Integer): TCnSymbolKind;
 begin
   AFlags := AFlags and $0000000F; // 取最低四位
   case AFlags of
@@ -372,7 +373,7 @@ var
   procedure AddItem(const AName: PChar; const AType: PChar; Flag, Index: Integer);
   var
     Idx: Integer;
-    Sk: TSymbolKind;
+    Sk: TCnSymbolKind;
   begin
     if FBcbIdeSymbolList = nil then
       Exit;
@@ -518,7 +519,7 @@ begin
   end;
 end;
 
-procedure TBcbIDESymbolList.OnIdleExecute(Sender: TObject);
+procedure TCnBcbIDESymbolList.OnIdleExecute(Sender: TObject);
 var
   Tick: Cardinal;
 begin
@@ -536,22 +537,22 @@ begin
   InvokeKibitzCompileInThread;
 end;
 
-procedure TBcbIDESymbolList.OnFileNotify(NotifyCode: TOTAFileNotification;
+procedure TCnBcbIDESymbolList.OnFileNotify(NotifyCode: TOTAFileNotification;
   const FileName: string);
 begin
   if not SupportKibitzCompileThread or not UseKibitzCompileThread then
     Exit;
-    
+
   if (NotifyCode = ofnFileOpened) and IsDpr(FileName) then
   begin
   {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TBcbIDESymbolList.OnFileNotify: %s', [FileName]);
+    CnDebugger.LogFmt('TCnBcbIDESymbolList.OnFileNotify: %s', [FileName]);
   {$ENDIF}
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleExecute);
   end;
 end;
 
-function TBcbIDESymbolList.Reload_KibitzCompile(Editor: IOTAEditBuffer;
+function TCnBcbIDESymbolList.Reload_KibitzCompile(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 const
   csMaxSymbolCount = 32768;
@@ -612,7 +613,7 @@ begin
     IDEEnableKibitzingHook := TCnMethodHook.Create(@IDEEnableKibitzing, @CnIDEEnableKibitzing)
   else
     IDEEnableKibitzingHook.HookMethod;
-    
+
 {$IFDEF BCB5}
   // 执行符号信息编译，在被Hook的过程中拿到符号列表
   GetKibitzInfo(GlobalCodeCompletionManager, CharPos.CharIndex + Offset,
@@ -630,7 +631,7 @@ begin
   if KibitzGetValidSymbolsHook = nil then
     KibitzGetValidSymbolsHook := TCnMethodHook.Create(@KibitzGetValidSymbols, @FakeKibitzGetValidSymbols);
   KibitzGetValidSymbolsHook.UnhookMethod; // 让被屏蔽的恢复正常
-  
+
   Result := Count > 0;
 end;
 
@@ -645,7 +646,7 @@ begin
 {$ENDIF SUPPORT_KibitzCompile}
 end;
 
-constructor TBcbIDESymbolList.Create;
+constructor TCnBcbIDESymbolList.Create;
 begin
   inherited;
   FBcbIdeSymbolList := Self;
@@ -657,7 +658,7 @@ begin
 {$ENDIF SUPPORT_KibitzCompile}
 end;
 
-destructor TBcbIDESymbolList.Destroy;
+destructor TCnBcbIDESymbolList.Destroy;
 begin
 {$IFDEF SUPPORT_KibitzCompile}
   CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
@@ -667,12 +668,12 @@ begin
   inherited;
 end;
 
-class function TBcbIDESymbolList.GetListName: string;
+class function TCnBcbIDESymbolList.GetListName: string;
 begin
   Result := SCnInputHelperIDESymbolList;
 end;
 
-function TBcbIDESymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnBcbIDESymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo): Boolean;
 begin
 {$IFDEF SUPPORT_IDESymbolList}
@@ -687,7 +688,7 @@ end;
 initialization
 {$IFDEF SUPPORT_IDESymbolList}
 {$IFDEF BCB5OR6}
-  RegisterSymbolList(TBcbIDESymbolList); // BCB5、6下注册
+  RegisterSymbolList(TCnBcbIDESymbolList); // BCB5、6下注册
 {$ENDIF}
 {$ENDIF}
 
