@@ -228,7 +228,12 @@ const
   SCnSearchPanelWholeWordBoxName = 'WholeWordBox';
   SCnSearchPanelRegExBoxName = 'RegExBox';
 
+{$IFDEF DELPHI120_ATHENS_UP}
+  SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqrx20System@UnicodeString';
+{$ELSE}
   SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqr20System@UnicodeString';
+{$ENDIF}
+
   SCnEditWindowSearchUpClick = '@Editorform@TEditWindow@SearchUpClick$qqrp14System@TObject';
   SCnEditWindowSearchDnClick = '@Editorform@TEditWindow@SearchDnClick$qqrp14System@TObject';
 {$ENDIF}
@@ -478,6 +483,16 @@ begin
       if FOldEditWindowSearchDnClick <> nil then
         FEditWindowSearchDnClickMethodHook := TCnMethodHook.Create(FOldEditWindowSearchDnClick, @CnEditWindowSearchDnClick);
     end;
+
+{$IFDEF DEBUG}
+    if FOldEditWindowDoSearch = nil then
+      CnDebugger.LogMsgWarning('SrcEditorKey EditWindowDoSearch NOT Found.');
+    if FOldEditWindowSearchUpClick = nil then
+      CnDebugger.LogMsgWarning('SrcEditorKey EditWindowSearchUpClick NOT Found.');
+    if FOldEditWindowSearchDnClick = nil then
+      CnDebugger.LogMsgWarning('SrcEditorKey EditWindowSearchDnClick NOT Found.');
+{$ENDIF}
+
 {$ENDIF}
   end;
 
