@@ -1014,10 +1014,10 @@ var
     end;
     FilterText := LowerCase(FilterText);
 
-    if (Pos(FilterText, Wizard.WizardName) > 0)
-      or (Pos(FilterText, Wizard.GetIDStr) > 0)
-      or (Pos(FilterText, Wizard.GetAuthor) > 0)
-      or (Pos(FilterText, Wizard.GetSearchContent) > 0) then
+    if (Pos(FilterText, LowerCase(Wizard.WizardName)) > 0)
+      or (Pos(FilterText, LowerCase(Wizard.GetIDStr)) > 0)
+      or (Pos(FilterText, LowerCase(Wizard.GetAuthor)) > 0)
+      or (Pos(FilterText, LowerCase(Wizard.GetSearchContent)) > 0) then
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
@@ -1072,8 +1072,8 @@ var
     end;
     FilterText := LowerCase(FilterText);
 
-    if (Pos(FilterText, Editor.Name) > 0)
-      or (Pos(FilterText, Editor.Author) > 0) then
+    if (Pos(FilterText, LowerCase(Editor.Name)) > 0)
+      or (Pos(FilterText, LowerCase(Editor.Author)) > 0) then
       Result := True
     else // ²éÕÒÆ´ÒôÊ××ÖÄ¸
     begin
