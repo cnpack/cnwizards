@@ -45,7 +45,7 @@ PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;CodeFormatter;ScriptWizard
 Packages=Vcl50;Vclx50;VclSmp50;dsnide50
-Conditionals=ENABLE_UIINTERACT
+Conditionals=ENABLE_UIINTERACT;SUPPORT_EVALUATE
 DebugSourceDirs=
 UsePackages=1
 [Parameters]
