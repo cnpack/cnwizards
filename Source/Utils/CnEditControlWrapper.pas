@@ -634,15 +634,15 @@ end;
 
 function TCnEditorObject.GetTopEditor: TControl;
 var
-  i: Integer;
+  I: Integer;
   ACtrl: TControl;
 begin
   Result := nil;
   if (EditControl <> nil) and (EditControl.Parent <> nil) then
   begin
-    for i := EditControl.Parent.ControlCount - 1 downto 0 do
+    for I := EditControl.Parent.ControlCount - 1 downto 0 do
     begin
-      ACtrl := EditControl.Parent.Controls[i];
+      ACtrl := EditControl.Parent.Controls[I];
       if (ACtrl.Align = alClient) and ACtrl.Visible then
       begin
         Result := ACtrl;
@@ -1392,7 +1392,7 @@ const
   csColorFgName = 'Foreground Color';
 {$ENDIF}
 var
-  i: Integer;
+  I: Integer;
   Reg: TRegistry;
   Names, Values: TStringList;
   Item: TCnHighlightItem;
@@ -1442,10 +1442,10 @@ begin
     if Reg.OpenKeyReadOnly(WizOptions.CompilerRegPath + '\Editor\Highlight') then
     begin
       Reg.GetKeyNames(Names);
-      for i := 0 to Names.Count - 1 do
+      for I := 0 to Names.Count - 1 do
       begin
         if Reg.OpenKeyReadOnly(WizOptions.CompilerRegPath +
-          '\Editor\Highlight\' + Names[i]) then
+          '\Editor\Highlight\' + Names[I]) then
         begin
           Item := nil;
           try
@@ -1464,7 +1464,7 @@ begin
                 Item.ColorFg := clWindowText
               else
                 Item.ColorFg := RegReadColor(Reg, csColorFgName);
-              FHighlights.AddObject(Names[i], Item);
+              FHighlights.AddObject(Names[I], Item);
             end;
           except
             on E: Exception do
@@ -1900,10 +1900,10 @@ end;
 
 procedure TCnEditControlWrapper.ClearHighlights;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FHighlights.Count - 1 do
-    FHighlights.Objects[i].Free;
+  for I := 0 to FHighlights.Count - 1 do
+    FHighlights.Objects[I].Free;
   FHighlights.Clear;
 end;
 
@@ -1960,11 +1960,13 @@ begin
     // RAD Studio 2007 Update1 下，Close All 时 EditControl 似乎不会释放，
     // 为了防止 EditView 释放了而 EditControl 没有释放的情况，此处进行检查
     for I := 0 to EditorCount - 1 do
+    begin
       if Editors[I].EditView = EditView then
       begin
         NoRef(Editors[I].FEditView) := nil;
         Break;
       end;
+    end;
   end;
 {$ENDIF}
 end;
@@ -1973,18 +1975,21 @@ procedure TCnEditControlWrapper.CheckOptionDlg;
 
   function IsEditorOptionDlgVisible: Boolean;
   var
-    i: Integer;
+    I: Integer;
   begin
-    for i := 0 to Screen.CustomFormCount - 1 do
-      if Screen.CustomForms[i].ClassNameIs(SEditorOptionDlgClassName) and
-        SameText(Screen.CustomForms[i].Name, SEditorOptionDlgName) and
-        Screen.CustomForms[i].Visible then
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      if Screen.CustomForms[I].ClassNameIs(SEditorOptionDlgClassName) and
+        SameText(Screen.CustomForms[I].Name, SEditorOptionDlgName) and
+        Screen.CustomForms[I].Visible then
       begin
         Result := True;
         Exit;
       end;
+    end;
     Result := False;
   end;
+
 begin
   if IsEditorOptionDlgVisible then
     FOptionDlgVisible := True
@@ -1992,9 +1997,9 @@ begin
   begin
     FOptionDlgVisible := False;
     FOptionChanged := True;
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Option Dialog Closed. Editor Option Changed');
-  {$ENDIF}
+{$ENDIF}
   end;
 end;
 
@@ -2052,14 +2057,16 @@ begin
   Result := nil;
   EditView := CnOtaGetTopMostEditView;
   for Idx := 0 to EditorCount - 1 do
+  begin
     if Editors[Idx].EditView = EditView then
     begin
       Result := Editors[Idx].EditControl;
       Exit;
     end;
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsgWarning('GetTopMostEditControl: not found in list.');
-  {$ENDIF}
+  end;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsgWarning('GetTopMostEditControl: not found in list.');
+{$ENDIF}
 end;
 
 function TCnEditControlWrapper.GetEditViewFromTabs(TabControl: TXTabControl;
@@ -2119,12 +2126,14 @@ begin
 end;
 
 {$IFDEF BDS}
+
 function TCnEditControlWrapper.GetPointFromEdPos(EditControl: TControl;
   APos: TOTAEditPos): TPoint;
 begin
   if Assigned(PointFromEdPos) then
     Result := PointFromEdPos(EditControl, APos, True, True);
 end;
+
 {$ENDIF}
 
 procedure TCnEditControlWrapper.MarkLinesDirty(EditControl: TControl; Line:
@@ -2192,7 +2201,8 @@ var
   Item: TCnBreakPointClickItem;
 begin
   Result := False;
-  if ActualLineNum <=0 then Exit;
+  if ActualLineNum <= 0 then
+    Exit;
 
   if EditControl = nil then
     EditControl := CnOtaGetCurrentEditControl;
@@ -2266,14 +2276,14 @@ end;
 procedure TCnEditControlWrapper.RemoveNotifier(List: TList; Notifier: TMethod);
 var
   Rec: PCnWizNotifierRecord;
-  idx: Integer;
+  Idx: Integer;
 begin
-  idx := IndexOf(List, Notifier);
-  if idx >= 0 then
+  Idx := IndexOf(List, Notifier);
+  if Idx >= 0 then
   begin
-    Rec := List[idx];
+    Rec := List[Idx];
     Dispose(Rec);
-    List.Delete(idx);
+    List.Delete(Idx);
   end;
 end;
 
@@ -2292,15 +2302,17 @@ end;
 
 function TCnEditControlWrapper.IndexOf(List: TList; Notifier: TMethod): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to List.Count - 1 do
-    if CompareMem(List[i], @Notifier, SizeOf(TMethod)) then
+  for I := 0 to List.Count - 1 do
+  begin
+    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -2462,12 +2474,14 @@ begin
   end;
 
   for I := 0 to FEditorChangeNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FEditorChangeNotifiers[I])^ do
-      TCnEditorChangeNotifier(Notifier)(Editor, ChangeType);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoEditorChange[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FEditorChangeNotifiers[I])^ do
+        TCnEditorChangeNotifier(Notifier)(Editor, ChangeType);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoEditorChange[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2524,7 +2538,7 @@ begin
 
     for I := 0 to EditorCount - 1 do
     begin
-      DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[i]));
+      DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
     end;
   end
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -2534,7 +2548,7 @@ begin
     // 将系统 DPI 改变的通知转化为字体大小选项变化，并且为了避免多次调用，只判断主窗体
     FOptionChanged := True;
     for I := 0 to EditorCount - 1 do
-      DoEditorChange(Editor, ChangeType + CheckEditorChanges(Editors[i]));
+      DoEditorChange(Editor, ChangeType + CheckEditorChanges(Editors[I]));
   end
 {$ENDIF}
   else if (Msg.Msg = WM_NCPAINT) and IsEditControl(Control) then
@@ -2672,13 +2686,15 @@ begin
       List := FKeyUpNotifiers;
 
     for I := 0 to List.Count - 1 do
-    try
-      with PCnWizNotifierRecord(List[I])^ do
-        TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
-      if Handled then Break;
-    except
-      on E: Exception do
-        DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']', E);
+    begin
+      try
+        with PCnWizNotifierRecord(List[I])^ do
+          TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
+        if Handled then Break;
+      except
+        on E: Exception do
+          DoHandleException('TCnEditControlWrapper.KeyMessage[' + IntToStr(I) + ']', E);
+      end;
     end;
   end;
 end;
@@ -2764,12 +2780,14 @@ var
   I: Integer;
 begin
   for I := 0 to FMouseDownNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FMouseDownNotifiers[I])^ do
-      TCnEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FMouseDownNotifiers[I])^ do
+        TCnEditorMouseDownNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoMouseDown[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2779,12 +2797,14 @@ var
   I: Integer;
 begin
   for I := 0 to FMouseMoveNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FMouseMoveNotifiers[I])^ do
-      TCnEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y, IsNC);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FMouseMoveNotifiers[I])^ do
+        TCnEditorMouseMoveNotifier(Notifier)(Editor, Shift, X, Y, IsNC);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoMouseMove[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2794,12 +2814,14 @@ var
   I: Integer;
 begin
   for I := 0 to FMouseUpNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FMouseUpNotifiers[I])^ do
-      TCnEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FMouseUpNotifiers[I])^ do
+        TCnEditorMouseUpNotifier(Notifier)(Editor, Button, Shift, X, Y, IsNC);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoMouseUp[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2808,12 +2830,14 @@ var
   I: Integer;
 begin
   for I := 0 to FMouseLeaveNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FMouseLeaveNotifiers[I])^ do
-      TCnEditorMouseLeaveNotifier(Notifier)(Editor, IsNC);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoMouseLeave[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FMouseLeaveNotifiers[I])^ do
+        TCnEditorMouseLeaveNotifier(Notifier)(Editor, IsNC);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoMouseLeave[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2848,12 +2872,14 @@ var
   I: Integer;
 begin
   for I := 0 to FNcPaintNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FNcPaintNotifiers[I])^ do
-      TCnEditorNcPaintNotifier(Notifier)(Editor);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FNcPaintNotifiers[I])^ do
+        TCnEditorNcPaintNotifier(Notifier)(Editor);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoNcPaint[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -2874,12 +2900,14 @@ var
   I: Integer;
 begin
   for I := 0 to FVScrollNotifiers.Count - 1 do
-  try
-    with PCnWizNotifierRecord(FVScrollNotifiers[I])^ do
-      TCnEditorVScrollNotifier(Notifier)(Editor);
-  except
-    on E: Exception do
-      DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']', E);
+  begin
+    try
+      with PCnWizNotifierRecord(FVScrollNotifiers[I])^ do
+        TCnEditorVScrollNotifier(Notifier)(Editor);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.DoVScroll[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -3002,7 +3030,7 @@ end;
 
 procedure TCnEditControlWrapper.LoadFontFromRegistry;
 const
-  arrRegItems: array [0..9] of string = ('', 'Assembler', 'Comment', 'Preprocessor',
+  ArrRegItems: array [0..9] of string = ('', 'Assembler', 'Comment', 'Preprocessor',
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol');
 var
   I: Integer;
@@ -3016,14 +3044,14 @@ begin
     AFont.Size := 10;
 
     BColor := clWhite;
-    if GetIDERegistryFont(arrRegItems[0], AFont, BColor) then
+    if GetIDERegistryFont(ArrRegItems[0], AFont, BColor) then
       ResetFontsFromBasic(AFont);
 
     for I := Low(FFontArray) + 1 to High(FFontArray) do
     begin
       try
         BColor := clWhite;
-        if GetIDERegistryFont(arrRegItems[I], AFont, BColor) then
+        if GetIDERegistryFont(ArrRegItems[I], AFont, BColor) then
         begin
           FFontArray[I].Assign(AFont);
           if I = 7 then // WhiteSpace 的背景色
