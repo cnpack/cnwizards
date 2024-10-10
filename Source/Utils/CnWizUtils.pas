@@ -341,17 +341,17 @@ resourcestring
   SCnDefSourceMask = '.PAS;.DPR;CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
 
 function CurrentIsDelphiSource: Boolean;
-{* 当前编辑的文件是 Delphi 源文件}
+{* 当前编辑的文件是 Delphi 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentIsCSource: Boolean;
-{* 当前编辑的文件是 C/C++ 源文件}
+{* 当前编辑的文件是 C/C++ 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentIsSource: Boolean;
-{* 当前编辑的文件是 Delphi 或 C/C++ 源文件}
+{* 当前编辑的文件是 Delphi 或 C/C++ 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentSourceIsDelphi: Boolean;
-{* 当前编辑的源文件（非窗体）是 Delphi 源文件}
+{* 当前编辑的源文件（非窗体）是 Delphi 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentSourceIsC: Boolean;
-{* 当前编辑的源文件（非窗体）是 C/C++ 源文件}
+{* 当前编辑的源文件（非窗体）是 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentSourceIsDelphiOrCSource: Boolean;
-{* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件}
+{* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
@@ -811,10 +811,12 @@ function ConvertEditorTextToTextW(const Text: AnsiString): string;
 {$ENDIF}
 
 function CnOtaGetCurrentSourceFile: string;
-{* 取当前编辑的源文件}
+{* 取当前编辑的源文件。编辑器活动时返回在编辑的源文件，
+  在设计窗体活动时，会返回 dfm 或类似文件，不是源码文件}
 
 function CnOtaGetCurrentSourceFileName: string;
-{* 取当前编辑的 Pascal 或 C 源文件，判断限制较多}
+{* 取当前编辑的 Pascal 或 Cpp 源文件，判断限制较多。
+  如取到 dfm 等，会判断对应 pas/cpp 源文件是否打开，打开则返回对应源文件}
 
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 {* 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式}
@@ -8553,7 +8555,7 @@ begin
   {$ENDIF}
   Exit;
 {$ELSE} // 是 BDS 2005/2006 或以上则需要动态判断
-  Result := CurrentIsDelphiSource;
+  Result := CurrentSourceIsDelphi;
   Project := CnOtaGetCurrentProject;
   if Project <> nil then
   begin
