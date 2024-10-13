@@ -504,9 +504,9 @@
 			</DCCReference>
 			<DCCReference Include="DesignEditors\CnImageListEditor.pas"/>
 			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
-			<DCCReference Include="Utils\CnImageProvider_IconFinder.pas"/>
-			<DCCReference Include="Utils\CnImageProvider_FindIcons.pas"/>
-			<DCCReference Include="Utils\CnImageProvider_LocalCache.pas"/>
+			<DCCReference Include="Utils\CnImageProviderIconFinder.pas"/>
+			<DCCReference Include="Utils\CnImageProviderFindIcons.pas"/>
+			<DCCReference Include="Utils\CnImageProviderLocalCache.pas"/>
 			<DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">
 				<Form>CnCodeFormatterForm</Form>
 			</DCCReference>

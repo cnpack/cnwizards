@@ -94,8 +94,8 @@
       ..\Dcu\CnScriptClasses.obj ..\Dcu\CnScriptRegister.obj 
       ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
       ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
-      ..\Dcu\CnImageProvider_IconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
-      ..\Dcu\CnImageProvider_FindIcons.obj ..\Dcu\CnImageProvider_LocalCache.obj 
+      ..\Dcu\CnImageProviderIconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
+      ..\Dcu\CnImageProviderFindIcons.obj ..\Dcu\CnImageProviderLocalCache.obj 
       ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
       ..\Dcu\CnAICoderWizard.obj ..\Dcu\CnAICoderConfig.obj 
       ..\Dcu\CnAICoderNetClient.obj ..\Dcu\CnAICoderEngine.obj 
@@ -419,10 +419,10 @@
       <FILE FILENAME="ScriptWizard\CnScriptWizard.pas" FORMNAME="CnScriptWizardForm" UNITNAME="CnScriptWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnImageListEditor.pas" FORMNAME="" UNITNAME="CnImageListEditor.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnImageListEditorFrm.pas" FORMNAME="CnImageListEditorForm" UNITNAME="CnImageListEditorFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="Utils\CnImageProvider_IconFinder.pas" FORMNAME="" UNITNAME="CnImageProvider_IconFinder.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnImageProviderIconFinder.pas" FORMNAME="" UNITNAME="CnImageProviderIconFinder.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProviderMgr.pas" FORMNAME="" UNITNAME="CnImageProviderMgr.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="Utils\CnImageProvider_FindIcons.pas" FORMNAME="" UNITNAME="CnImageProvider_FindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="Utils\CnImageProvider_LocalCache.pas" FORMNAME="" UNITNAME="CnImageProvider_LocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnImageProviderFindIcons.pas" FORMNAME="" UNITNAME="CnImageProviderFindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnImageProviderLocalCache.pas" FORMNAME="" UNITNAME="CnImageProviderLocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnFormatterIntf.pas" FORMNAME="" UNITNAME="CnFormatterIntf" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnCodeFormatterWizard.pas" FORMNAME="CnCodeFormatterForm" UNITNAME="CnCodeFormatterWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="AICoder\CnAICoderWizard.pas" FORMNAME="CnAICoderConfigForm" UNITNAME="CnAICoderWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
