@@ -39,8 +39,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  {$IFDEF OTA_HAS_AISERVICE} ToolsAPI.AI, {$ENDIF}
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, Vcl.StdCtrls;
+  {$IFDEF OTA_HAS_AISERVICE} ToolsAPI.AI, {$ENDIF} ToolsAPI, IniFiles,
+   CnWizClasses, CnWizUtils, CnWizConsts, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
   TCnTestAIPluginFrame = class(TFrame, IOTAAIPluginSetting)
@@ -58,6 +58,11 @@ type
   TCnTestAIPluginSample = class(TInterfacedObject, IOTAAIPlugin)
   private
     FNotifiers: TInterfaceList;
+    FChatGuid: TGUID;
+    FTimer: TTimer;
+  protected
+    procedure NotifyAnswer;
+    procedure AITimer(Sender: TObject);
   public
     constructor Create;
     destructor Destroy; override;
@@ -243,6 +248,12 @@ begin
   Result := FNotifiers.Count - 1;
 end;
 
+procedure TCnTestAIPluginSample.AITimer(Sender: TObject);
+begin
+  NotifyAnswer;
+  FTimer.Enabled := False;
+end;
+
 procedure TCnTestAIPluginSample.Cancel;
 begin
 {$IFDEF DEBUG}
@@ -253,8 +264,11 @@ end;
 function TCnTestAIPluginSample.Chat(const AQuestion: string): TGUID;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnTestAIPluginSample.Chat ' + AQuestion);
+  CnDebugger.LogMsg('TCnTestAIPluginSample.Chat: ' + AQuestion);
 {$ENDIF}
+  CreateGUID(FChatGuid);
+  Result := FChatGuid;
+  FTimer.Enabled := True;
 end;
 
 constructor TCnTestAIPluginSample.Create;
@@ -263,6 +277,10 @@ begin
   CnDebugger.LogMsg('TCnTestAIPluginSample.Create');
 {$ENDIF}
   FNotifiers := TInterfaceList.Create;
+  FTimer := TTimer.Create(Application);
+  FTimer.Interval := 500;
+  FTimer.Enabled := False;
+  FTimer.OnTimer := AITimer;
 end;
 
 destructor TCnTestAIPluginSample.Destroy;
@@ -354,6 +372,21 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnTestAIPluginSample.Moderation %s', [AInput]);
 {$ENDIF}
+end;
+
+procedure TCnTestAIPluginSample.NotifyAnswer;
+var
+  I: Integer;
+  Ans: IOTAAIServicesNotifier;
+begin
+  for I := 0 to FNotifiers.Count - 1 do
+  begin
+    Ans := FNotifiers[I] as IOTAAIServicesNotifier;
+    Ans.Answer('别问了，俺啥都不知道。', FChatGuid);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('NotifyAnswer ' + GUIDToString(FChatGuid));
+{$ENDIF}
+  end;
 end;
 
 procedure TCnTestAIPluginSample.RemoveNotifier(const AIndex: Integer);
