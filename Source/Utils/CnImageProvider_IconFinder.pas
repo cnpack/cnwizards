@@ -49,7 +49,7 @@ uses
   CnCommon, CnWizXmlUtils;
 
 type
-  TCnImageProvider_IconFinder = class(TCnBaseImageProvider)
+  TCnImageProviderIconFinder = class(TCnBaseImageProvider)
   protected
     function DoSearchImage(Req: TCnImageReqInfo): Boolean; override;
   public
@@ -64,27 +64,27 @@ implementation
 
 { TCnImageProvider_IconFinder }
 
-constructor TCnImageProvider_IconFinder.Create;
+constructor TCnImageProviderIconFinder.Create;
 begin
   inherited;
   FItemsPerPage := 20;
   FFeatures := [pfOpenInBrowser, pfSearchIconset];
 end;
 
-destructor TCnImageProvider_IconFinder.Destroy;
+destructor TCnImageProviderIconFinder.Destroy;
 begin
 
   inherited;
 end;
 
-class procedure TCnImageProvider_IconFinder.GetProviderInfo(var DispName,
+class procedure TCnImageProviderIconFinder.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
   DispName := 'IconFinder.com';
   HomeUrl := 'http://www.iconfinder.com';
 end;
 
-function TCnImageProvider_IconFinder.DoSearchImage(Req: TCnImageReqInfo): Boolean;
+function TCnImageProviderIconFinder.DoSearchImage(Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
   Lic: Integer;
@@ -140,12 +140,12 @@ begin
   end;
 end;
 
-procedure TCnImageProvider_IconFinder.OpenInBrowser(Item: TCnImageRespItem);
+procedure TCnImageProviderIconFinder.OpenInBrowser(Item: TCnImageRespItem);
 begin
   OpenUrl(Format('http://www.iconfinder.com/icondetails/%s/%d/', [Item.Id, Item.Size]));
 end;
 
-function TCnImageProvider_IconFinder.SearchIconset(Item: TCnImageRespItem;
+function TCnImageProviderIconFinder.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
@@ -174,6 +174,6 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProvider_IconFinder);
+  ImageProviderMgr.RegisterProvider(TCnImageProviderIconFinder);
 
 end.

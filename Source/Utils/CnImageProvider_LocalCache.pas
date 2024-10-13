@@ -43,7 +43,7 @@ uses
   Math, RegExpr;
 
 type
-  TCnImageProvider_LocalCache = class(TCnBaseImageProvider)
+  TCnImageProviderLocalCache = class(TCnBaseImageProvider)
   protected
     function DoSearchImage(Req: TCnImageReqInfo): Boolean; override;
   public
@@ -58,19 +58,19 @@ implementation
 
 { TCnImageProvider_LocalCache }
 
-constructor TCnImageProvider_LocalCache.Create;
+constructor TCnImageProviderLocalCache.Create;
 begin
   inherited;
   FItemsPerPage := 20;
   FFeatures := [pfOpenInBrowser];
 end;
 
-destructor TCnImageProvider_LocalCache.Destroy;
+destructor TCnImageProviderLocalCache.Destroy;
 begin
   inherited;
 end;
 
-function TCnImageProvider_LocalCache.DoSearchImage(
+function TCnImageProviderLocalCache.DoSearchImage(
   Req: TCnImageReqInfo): Boolean;
 var
   I, Size: Integer;
@@ -124,7 +124,7 @@ begin
   end;
 end;
 
-class procedure TCnImageProvider_LocalCache.GetProviderInfo(var DispName,
+class procedure TCnImageProviderLocalCache.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
   inherited;
@@ -132,12 +132,12 @@ begin
   HomeUrl := MakeDir(CachePath);
 end;
 
-class function TCnImageProvider_LocalCache.IsLocalImage: Boolean;
+class function TCnImageProviderLocalCache.IsLocalImage: Boolean;
 begin
   Result := True;
 end;
 
-procedure TCnImageProvider_LocalCache.OpenInBrowser(
+procedure TCnImageProviderLocalCache.OpenInBrowser(
   Item: TCnImageRespItem);
 begin
   inherited;
@@ -146,6 +146,6 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProvider_LocalCache);
+  ImageProviderMgr.RegisterProvider(TCnImageProviderLocalCache);
 
 end.

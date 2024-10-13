@@ -43,7 +43,7 @@ uses
   CnCommon, RegExpr;
 
 type
-  TCnImageProvider_FindIcons = class(TCnBaseImageProvider)
+  TCnImageProviderFindIcons = class(TCnBaseImageProvider)
   protected
     function DoSearchImage(Req: TCnImageReqInfo): Boolean; override;
   public
@@ -58,27 +58,27 @@ implementation
 
 { TCnImageProvider_FindIcons }
 
-constructor TCnImageProvider_FindIcons.Create;
+constructor TCnImageProviderFindIcons.Create;
 begin
   inherited;
   FItemsPerPage := 24;
   FFeatures := [pfOpenInBrowser];
 end;
 
-destructor TCnImageProvider_FindIcons.Destroy;
+destructor TCnImageProviderFindIcons.Destroy;
 begin
 
   inherited;
 end;
 
-class procedure TCnImageProvider_FindIcons.GetProviderInfo(var DispName,
+class procedure TCnImageProviderFindIcons.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
   DispName := 'FindIcons.com (Beta)';
   HomeUrl := 'http://www.findicons.com';
 end;
 
-function TCnImageProvider_FindIcons.DoSearchImage(
+function TCnImageProviderFindIcons.DoSearchImage(
   Req: TCnImageReqInfo): Boolean;
 var
   Url, Text, KeyStr, PageStr, LicStr: string;
@@ -150,12 +150,12 @@ begin
   end;   
 end;
 
-procedure TCnImageProvider_FindIcons.OpenInBrowser(Item: TCnImageRespItem);
+procedure TCnImageProviderFindIcons.OpenInBrowser(Item: TCnImageRespItem);
 begin
   OpenUrl('http://findicons.com/icon/' + Item.Id);
 end;
 
-function TCnImageProvider_FindIcons.SearchIconset(Item: TCnImageRespItem;
+function TCnImageProviderFindIcons.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
 begin
   // todo: 支持图标集
@@ -163,6 +163,6 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProvider_FindIcons);
+  ImageProviderMgr.RegisterProvider(TCnImageProviderFindIcons);
 
 end.
