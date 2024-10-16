@@ -134,7 +134,6 @@ type
     procedure btnImportClick(Sender: TObject);
     procedure btnExportClick(Sender: TObject);
   private
-    { Private declarations }
     FPath: string;
     FNextHandle: THandle;
     FAutoPaste: Boolean;
@@ -159,8 +158,11 @@ type
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
   public
-    { Public declarations }
+
   end;
+
+var
+  CnEditorCollectorForm: TCnEditorCollectorForm = nil;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
@@ -171,8 +173,7 @@ implementation
 {$R *.DFM}
 
 var
-  Collector: TCnEditorCollector;
-  CnEditorCollectorForm: TCnEditorCollectorForm;
+  Collector: TCnEditorCollector = nil;
 
 const
   csCnCollectorForm = 'CnEditorCollectorForm';
@@ -199,10 +200,8 @@ destructor TCnEditorCollector.Destroy;
 begin
   IdeDockManager.UnRegisterDockableForm(CnEditorCollectorForm, csCnCollectorForm);
   if CnEditorCollectorForm <> nil then
-  begin
-    CnEditorCollectorForm.Free;
-    CnEditorCollectorForm := nil;
-  end;
+    FreeAndNil(CnEditorCollectorForm);
+
   Collector := nil;
   inherited;
 end;
@@ -210,9 +209,8 @@ end;
 procedure TCnEditorCollector.Execute;
 begin
   if CnEditorCollectorForm = nil then
-  begin
     CnEditorCollectorForm := TCnEditorCollectorForm.Create(nil);
-  end;
+
   IdeDockManager.ShowForm(CnEditorCollectorForm);
 end;
 

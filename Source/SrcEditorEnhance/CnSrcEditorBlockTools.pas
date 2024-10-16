@@ -71,7 +71,8 @@ type
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
     btAICoderExplainCode, btAICoderReviewCode, btAICoderToggleChatWindow, btAICoderSetting,
     btFormatCode, btCodeSwap, btEvalAlign, btCodeToString, btInsertColor, btInsertDateTime,
-    btSortLines, btUsesFromIdent, {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
+    btSortLines, btUsesFromIdent, {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD} btAddToCollector, {$ENDIF}
+    {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
   // 通过 AddMenuItemWithAction 添加的菜单项也需在此增加类型，但除了映射外暂无实际作用
@@ -86,6 +87,9 @@ type
     FLowerCaseShortCut: TCnWizShortCut;
     FUpperCaseShortCut: TCnWizShortCut;
     FToggleCaseShortCut: TCnWizShortCut;
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+    FAddToCollectorShortCut: TCnWizShortCut;
+{$ENDIF}
 {$IFDEF BDS}
     FBlockMoveUpShortCut: TCnWizShortCut;
     FBlockMoveDownShortCut: TCnWizShortCut;
@@ -126,6 +130,9 @@ type
     procedure OnEditBlockMoveUp(Sender: TObject);
     procedure OnEditBlockMoveDown(Sender: TObject);
     procedure OnEditBlockDelLines(Sender: TObject);
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+    procedure OnEditAddToCollector(Sender: TObject);
+{$ENDIF}
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
     procedure OnScriptExecute(Sender: TObject);
@@ -179,8 +186,8 @@ implementation
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 uses
-  CnWizSubActionShortCutFrm, CnScriptWizard, CnScriptFrm, CnAICoderWizard
-  {$IFDEF DEBUG}, CnDebug{$ENDIF};
+  CnWizSubActionShortCutFrm, CnScriptWizard, CnScriptFrm, CnAICoderWizard,
+  CnCodingToolsetWizard, CnEditorCollector {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 const
   csLeftKeep = 2;
@@ -218,6 +225,11 @@ begin
     FUpperCaseShortCut := WizShortCutMgr.Add('CnEditUpperCase', 0, OnEditUpperCase);
   if FToggleCaseShortCut = nil then
     FToggleCaseShortCut := WizShortCutMgr.Add('CnEditToggleCase', 0, OnEditToggleCase);
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  if FAddToCollectorShortCut = nil then
+    FAddToCollectorShortCut := WizShortCutMgr.Add('CnAddToCollector', 0, OnEditAddToCollector);
+{$ENDIF}
+
 {$IFDEF BDS}
   if FBlockMoveUpShortCut = nil then
     FBlockMoveUpShortCut := WizShortCutMgr.Add('CnEditBlockMoveUp',
@@ -237,6 +249,9 @@ begin
   WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  WizShortCutMgr.DeleteShortCut(FAddToCollectorShortCut);
 {$ENDIF}
   WizShortCutMgr.DeleteShortCut(FToggleCaseShortCut);
   WizShortCutMgr.DeleteShortCut(FUpperCaseShortCut);
@@ -353,6 +368,29 @@ begin
     end;
   end;
 end;
+
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+
+procedure TCnSrcEditorBlockTools.OnEditAddToCollector(Sender: TObject);
+var
+  Wizard: TCnCodingToolsetWizard;
+  Collector: TCnEditorCollector;
+begin
+  // 打开收集面板并添加内容
+  Wizard := TCnCodingToolsetWizard(CnWizardMgr.WizardByClass(TCnCodingToolsetWizard));
+  if Wizard = nil then
+    Exit;
+
+  Collector := TCnEditorCollector(Wizard.CodingToolByClass(TCnEditorCollector));
+  if Collector = nil then
+    Exit;
+
+  Collector.Execute;
+  if CnEditorCollectorForm <> nil then
+    CnEditorCollectorForm.btnImport.Click;
+end;
+
+{$ENDIF}
 
 procedure TCnSrcEditorBlockTools.OnEditBlockMoveDown(Sender: TObject);
 var
@@ -766,6 +804,9 @@ begin
       btBlockMoveUp: OnEditBlockMoveUp(nil);
       btBlockMoveDown: OnEditBlockMoveDown(nil);
       btBlockDelLines: OnEditBlockDelLines(nil);
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+      btAddToCollector: OnEditAddToCollector(nil);
+{$ENDIF}
     else
       ExecuteMenu(FMiscMenu, Kind);
     end;
@@ -965,6 +1006,10 @@ begin
   AddMenuItemWithAction(FMiscMenu, 'actCnUsesToolsFromIdent', btUsesFromIdent);
 {$IFDEF IDE_HAS_INSIGHT}
   AddMenuItemWithAction(FMiscMenu, 'actCnEditorJumpIDEInsight', btSearchInsight);
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  DoAddMenuItem(FMiscMenu, SCnSrcblockAddToCollector, btAddToCollector, 0, 'actCnEditorCollector');
 {$ENDIF}
 
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
@@ -1339,6 +1384,10 @@ begin
     List.Add(Holder);
     Holder := TCnShortCutHolder.Create(SCnSrcBlockToggleCase, FToggleCaseShortCut);
     List.Add(Holder);
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+    Holder := TCnShortCutHolder.Create(SCnSrcblockAddToCollector, FAddToCollectorShortCut);
+    List.Add(Holder);
+{$ENDIF}
 
 {$IFDEF BDS}
     Holder := TCnShortCutHolder.Create(SCnSrcBlockMoveUp, FBlockMoveUpShortCut);

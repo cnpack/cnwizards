@@ -1143,6 +1143,7 @@ var
   SCnSrcBlockSearch: string = '&Web Search';
   SCnWebSearchFileDef: string = 'WebSearch_ENU.xml';
   SCnSrcBlockMisc: string = '&Others';
+  SCnSrcblockAddToCollector: string = 'Add to Co&llector...';
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
   SCnSrcBlockDeleteLines: string = 'Delete &Lines';
