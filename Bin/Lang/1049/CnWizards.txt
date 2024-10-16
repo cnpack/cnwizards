@@ -3372,6 +3372,7 @@ SCnSrcBlockReplaceInBlock=Заменить в области выбора...
 SCnSrcBlockSearch=Веб-поиск
 SCnWebSearchFileDef=WebSearch_RU.xml
 SCnSrcBlockMisc=Другое
+SCnSrcblockAddToCollector=Добавить в коллекцию
 SCnSrcBlockMoveUp=Вверх
 SCnSrcBlockMoveDown=Вниз
 SCnSrcBlockDeleteLines=Удалить строки

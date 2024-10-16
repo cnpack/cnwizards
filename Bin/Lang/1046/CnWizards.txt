@@ -3372,6 +3372,7 @@ SCnSrcBlockReplaceInBlock=&Substituir na Seleção...
 SCnSrcBlockSearch=&Pesquisa na Web
 SCnWebSearchFileDef=WebSearch_ENU.xml
 SCnSrcBlockMisc=&Outros
+SCnSrcblockAddToCollector=Adicionar ao co&lecionador
 SCnSrcBlockMoveUp=Mover &Para cima
 SCnSrcBlockMoveDown=Mover &Baixo
 SCnSrcBlockDeleteLines=Excluir &Linhas

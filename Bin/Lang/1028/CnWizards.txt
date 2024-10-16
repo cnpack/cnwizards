@@ -3372,6 +3372,7 @@ SCnSrcBlockReplaceInBlock=在選擇區中替換(&R)...
 SCnSrcBlockSearch=Web 搜索(&W)
 SCnWebSearchFileDef=WebSearch_CHT.xml
 SCnSrcBlockMisc=其他(&O)
+SCnSrcblockAddToCollector=添加至收集面板(&L)...
 SCnSrcBlockMoveUp=向上移動一行(&U)
 SCnSrcBlockMoveDown=向下移動一行(&D)
 SCnSrcBlockDeleteLines=刪除當前行(&L)
