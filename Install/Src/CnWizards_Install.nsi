@@ -614,6 +614,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_D120A1.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D120A2.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D120A2.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !endif
@@ -999,6 +1003,7 @@ SectionEnd
 Section "RAD Studio 12 Athens" SecD120A
   SectionIn 1 2
   SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D120A2.dll"
   File "..\..\Bin\CnWizards_D120A1.dll"
   File "..\..\Bin\CnWizards_D120A.dll"
   ; 写入专家注册键值

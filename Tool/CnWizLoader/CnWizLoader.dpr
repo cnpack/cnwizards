@@ -29,7 +29,7 @@ library CnWizLoader;
 * 兼容测试：所有版本的 Delphi
 * 本 地 化：该单元无需本地化
 * 修改记录：2020.05.13 V1.0
-*               创建单元
+*               创建单元，持续根据 Delphi 的新版及新 Update 包及新 Patch 包更新
 ================================================================================
 |</PRE>}
 
@@ -100,6 +100,7 @@ const
   RIO_10_3_2_RELEASE = 34749;
   SYDNEY_10_4_1_RELEASE = 38860;
   ATHENS_12_2_RELEASE = 53571;
+  ATHENS_12_2_PATCH1_RELEASE = 53982;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
@@ -176,10 +177,11 @@ begin
     28: Result := Dir + 'CnWizards_D110A.DLL';
     29:
       begin
-        if V.Release < ATHENS_12_2_RELEASE then  // 12.1 采用另一个 DLL
+        if V.Release < ATHENS_12_2_RELEASE then  // 12.1 或 12.0 采用另一个 DLL
           Result := Dir + 'CnWizards_D120A1.DLL'
+        else if V.Release < ATHENS_12_2_PATCH1_RELEASE then // 12.2 采用另一个 DLL
         else
-          Result := Dir + 'CnWizards_D120A.DLL';
+          Result := Dir + 'CnWizards_D120A.DLL'; // 12.2 Patch 1
       end;
   end;
 end;

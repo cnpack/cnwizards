@@ -73,6 +73,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D104S_64"   value="${ProgramFiles}\Embarcadero\Studio\21.0\Bin\DCC64.EXE" unless="env.D104S_64" />
   <property name="exe.D110A"      value="${ProgramFiles}\Embarcadero\Studio\22.0\Bin\DCC32.EXE" unless="env.D110A" />
   <property name="exe.D120A1"      value="${ProgramFiles}\Embarcadero\Studio\23.0_1\Bin\DCC32.EXE" unless="env.D120A1" />
+  <property name="exe.D120A2"      value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
   <property name="exe.D120A"      value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC32.EXE" unless="env.D120A" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
@@ -85,7 +86,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value=""          if="full" />
   <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a,-cb5,-cb6" unless="lite" />
+  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-cb5,-cb6" unless="lite" />
   <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" unless="lite" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cnwizsetup" if="lite" />
@@ -214,7 +215,7 @@ Usage: want [target-name] [-Dname=value]
     gitpull    - Update all files.
     cnwizloader  - Compile CnWizards Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a, cb5, cb6 also)
+                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
@@ -357,7 +358,8 @@ Usage: want [target-name] [-Dname=value]
   <target name="d104s" depends="-d104s,-cw_final" description="Compile CnWizards for RAD Studio 10.4 Sydney." />
   <target name="d110a" depends="-d110a,-cw_final" description="Compile CnWizards for RAD Studio 11.0 Alexandria." />
   <target name="d120a1" depends="-d120a1,-cw_final" description="Compile CnWizards for RAD Studio 12.1 Athens or below." />
-  <target name="d120a" depends="-d120a,-cw_final" description="Compile CnWizards for RAD Studio 12.2 Athens." />
+  <target name="d120a2" depends="-d120a2,-cw_final" description="Compile CnWizards for RAD Studio 12.2 Athens." />
+  <target name="d120a" depends="-d120a,-cw_final" description="Compile CnWizards for RAD Studio 12.2 Athens Patch 1." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
@@ -1004,8 +1006,30 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <target name="-d120a" depends="-cw_prepare" >
+  <target name="-d120a2" depends="-cw_prepare" >
     <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 12.2 Athens" />
+    <property name="Ver.InternalName"     value="CnWizards_D120A2" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D120A2.DLL" />
+    <copy tofile="${src}/CnWizards_D120A2.res.old" >
+       <include name="${src}/CnWizards_D120A2.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D120A2.rc" />
+    <brcc file="${src}/CnWizards_D120A2.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D120A2.res" />
+    <dcc basedir="${src}" source="CnWizards_D120A2.dpr" exename="${exe.D120A2}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add};I64;OTA_HAS_AISERVICE" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D120A2.res" />
+       <include name="CnWizards_D120A2.rc" />
+       <include name="CnWizards_D120A2.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D120A2.res" >
+       <include name="${src}/CnWizards_D120A2.res.old" />
+    </move>
+  </target>
+
+  <target name="-d120a" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 12.2 Athens Patch 1" />
     <property name="Ver.InternalName"     value="CnWizards_D120A" />
     <property name="Ver.OriginalFilename" value="CnWizards_D120A.DLL" />
     <copy tofile="${src}/CnWizards_D120A.res.old" >
