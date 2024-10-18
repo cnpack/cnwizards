@@ -203,7 +203,7 @@ type
     var Handled: Boolean) of object;
   {* 按键事件}
 
-  // 鼠标事件类似于 TControl 内的定义，但 Sender 是 TEditorObject，并且加了是否是非客户区的标志
+  // 鼠标事件类似于 TControl 内的定义，但 Sender 是 TCnEditorObject，并且加了是否是非客户区的标志
   TCnEditorMouseUpNotifier = procedure(Editor: TCnEditorObject; Button: TMouseButton;
     Shift: TShiftState; X, Y: Integer; IsNC: Boolean) of object;
   {* 编辑器内鼠标抬起通知}
@@ -568,7 +568,7 @@ begin
   Result := Length(IntToStr(LineCount));
 end;
 
-{ TEditorObject }
+{ TCnEditorObject }
 
 constructor TCnEditorObject.Create(AEditControl: TControl;
   AEditView: IOTAEditView);
@@ -1198,11 +1198,13 @@ begin
   else
   begin
     for I := 0 to FCmpLines.Count - 1 do
+    begin
       if FCmpLines[I] <> Editor.FLines[I] then
       begin
         Result := True;
         Break;
       end;
+    end;
   end;
 
   if Result then

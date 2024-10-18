@@ -20,7 +20,7 @@
 
 {******************************************************************************}
 { Unit Note:                                                                   }
-{    This file is derived from GExperts 1.3                                    }
+{    This file is partly derived from GExperts 1.3                             }
 {                                                                              }
 { Original author:                                                             }
 {    GExperts, Inc  http://www.gexperts.org/                                   }
@@ -454,13 +454,13 @@ end;
 function IsDelphi120AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 53571; Build: 9782); // 12.2，注意文件换了
+    (Major: 29; Minor: 0; Release: 53982; Build: 0329); // 12.2 Patch 1，注意文件换了
 var
   ReadFileVersion: TVersionNumber;
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
-  LatestUpdate := 'Update 2 (12.2)';
+  LatestUpdate := 'Update 2 (12.2) Patch 1';
 end;
 
 function IsDelphi11GEDot3: Boolean;
