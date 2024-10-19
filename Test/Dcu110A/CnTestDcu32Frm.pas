@@ -10,7 +10,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo, Clipbrd, ExtCtrls, FileCtrl;
+  StdCtrls, TypInfo, Clipbrd, ExtCtrls, FileCtrl, Contnrs, CnHashMap;
 
 type
   TFormDcu32 = class(TForm)
@@ -27,6 +27,7 @@ type
     btnScanSysLib: TButton;
     dlgSave1: TSaveDialog;
     btnGenSysLib: TButton;
+    btnLoadGenTxt: TButton;
     procedure btnOpenClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure btnCnDcu32Click(Sender: TObject);
@@ -34,10 +35,15 @@ type
     procedure btnExtractClick(Sender: TObject);
     procedure btnScanSysLibClick(Sender: TObject);
     procedure btnGenSysLibClick(Sender: TObject);
+    procedure btnLoadGenTxtClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     FSys: TStringList;
     function ExtractSymbol(const Symbol: string): string;
     procedure DumpADcu(const AFileName: string; ALines: TStrings);
+  protected
+    FSinglePlatformMap: TCnStrToPtrHashMap;
+    FMapLists: TObjectList;
   public
     procedure DumpASysDcu(const AFileName: string; ALines: TStrings);
     procedure SysLibFind(const FileName: string; const Info: TSearchRec;
@@ -234,6 +240,66 @@ begin
   ShowMessage('Genrate OK');
 end;
 
+procedure TFormDcu32.btnLoadGenTxtClick(Sender: TObject);
+var
+  I, Idx: Integer;
+  SL, Obj: TStringList;
+  S, U, N: string;
+begin
+  if OpenDialog1.Execute then
+  begin
+    SL := TStringList.Create;
+    SL.LoadFromFile(OpenDialog1.FileName);
+
+    FreeAndNil(FSinglePlatformMap);
+    FreeAndNil(FMapLists);
+
+    FSinglePlatformMap := TCnStrToPtrHashMap.Create;
+    FMapLists := TObjectList.Create(True);
+
+    for I := 0 to SL.Count - 1 do
+    begin
+      S := SL[I];
+      Idx := Pos('|', S);
+      if Idx > 1 then
+      begin
+        U := Copy(S, 1, Idx - 1);
+        N := Copy(S, Idx + 1, MaxInt);
+
+        if (Trim(U) = '') or (Trim(N) = '') then
+          Continue;
+
+        // 从 Map 里根据 N 找 StringList，有则把 U 加入，无则创建 StringList，加入 U，并以 N 加入 Map
+        if FSinglePlatformMap.Find(N, Pointer(Obj)) then
+        begin
+          if Obj <> nil then
+            Obj.Add(N);
+        end
+        else
+        begin
+          Obj := TStringList.Create;
+          Obj.Sorted := True;
+          Obj.Duplicates := dupIgnore;
+          Obj.Add(U);
+
+          FSinglePlatformMap.Add(N, Obj);
+        end;
+      end;
+    end;
+
+    ShowMessage(IntToStr(SL.Count));
+    FreeAndNil(SL);
+
+    // 从 HashMap 里 Dump 出来
+    mmoDcu.Lines.Clear;
+    FSinglePlatformMap.StartEnum;
+    mmoDcu.Lines.BeginUpdate;
+    while FSinglePlatformMap.GetNext(N, Pointer(SL)) do
+      mmoDcu.Lines.Add(N + '|' + SL.CommaText);
+    mmoDcu.Lines.EndUpdate;
+  end;
+end;
+
 function TFormDcu32.ExtractSymbol(const Symbol: string): string;
 var
   K, Idx, C, Front, Back: Integer;
@@ -311,6 +377,12 @@ begin
   Idx := LastCharPos(Result, '.');
   if Idx > 0 then
     Result := Copy(Result, Idx + 1, MaxInt);
+end;
+
+procedure TFormDcu32.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(FMapLists);
+  FreeAndNil(FSinglePlatformMap);
 end;
 
 procedure TFormDcu32.SysLibFind(const FileName: string; const Info: TSearchRec;

@@ -12,6 +12,8 @@ object FormDcu32: TFormDcu32
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   Position = poScreenCenter
+  ShowHint = True
+  OnDestroy = FormDestroy
   DesignSize = (
     660
     568)
@@ -68,9 +70,9 @@ object FormDcu32: TFormDcu32
   end
   object mmoDcu: TMemo
     Left = 24
-    Top = 158
+    Top = 168
     Width = 615
-    Height = 387
+    Height = 377
     Anchors = [akLeft, akTop, akRight, akBottom]
     ReadOnly = True
     ScrollBars = ssVertical
@@ -97,7 +99,7 @@ object FormDcu32: TFormDcu32
     OnClick = btnExtractClick
   end
   object btnScanSysLib: TButton
-    Left = 328
+    Left = 24
     Top = 127
     Width = 129
     Height = 25
@@ -106,16 +108,28 @@ object FormDcu32: TFormDcu32
     OnClick = btnScanSysLibClick
   end
   object btnGenSysLib: TButton
-    Left = 474
+    Left = 170
     Top = 127
-    Width = 129
+    Width = 143
     Height = 25
+    Hint = 
+      'Select a Directory like C:\Program Files (x86)\Embarcadero\Studi' +
+      'o\23.0\lib'
     Caption = 'Gen SysLib'
     TabOrder = 8
     OnClick = btnGenSysLibClick
   end
+  object btnLoadGenTxt: TButton
+    Left = 328
+    Top = 127
+    Width = 129
+    Height = 25
+    Caption = 'Load Generated Text'
+    TabOrder = 9
+    OnClick = btnLoadGenTxtClick
+  end
   object OpenDialog1: TOpenDialog
-    Filter = '*.DCU|*.dcu'
+    Filter = '*.DCU|*.dcu|*.TXT|*.txt'
     Left = 568
     Top = 56
   end
