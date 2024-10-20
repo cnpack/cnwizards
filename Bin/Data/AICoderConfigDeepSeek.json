@@ -1,5 +1,5 @@
 ﻿{
-    "EngineName": "DeepSeek",
+    "EngineName": "深度求索",
     "URL": "https://api.deepseek.com/chat/completions",
     "ApiKey": "",
     "Model": "deepseek-coder",

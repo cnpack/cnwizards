@@ -117,7 +117,7 @@ type
   end;
 
   TCnBaiChuanAIEngine = class(TCnAIBaseEngine)
-  {* 百川 AI 引擎}
+  {* 百川智能 AI 引擎}
   public
     class function EngineName: string; override;
   end;
@@ -282,7 +282,7 @@ end;
 
 class function TCnDeepSeekAIEngine.EngineName: string;
 begin
-  Result := 'DeepSeek';
+  Result := '深度求索';
 end;
 
 { TCnMistralAIAIEngine }
