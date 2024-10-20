@@ -567,7 +567,7 @@ begin
           Result := Msg['message'].AsString;
         end;
 
-        // 一类网络错误，比如 URL 错了等
+        // 一类业务返回的网络错误，比如 URL 错了等
         if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
           Result := RespRoot['error'].AsString;
         if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
@@ -631,6 +631,7 @@ begin
 
   if not Success then
     AnswerObj.ErrorCode := GetLastError;
+  // 典型的错误码中，12002 是超时，12029 是无法建立连接可能是 SSL 版本错等
 
   FAnswerQueue.Push(AnswerObj);
   TThreadHack(Thread).Synchronize(SyncCallback);
