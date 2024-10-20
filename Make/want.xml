@@ -23,7 +23,7 @@ This is the Want script for building CnWizards.
 See http://www.suigeneris.org/want/ for details.
 
 注意：本文件不能有 BOM，否则 NSIS 不认！因而不能用会自动添加 BOM 的记事本编辑！
-另：D120A 在 12.2 下编译，因其有 AI 相关 OTA 接口因而在 dproj 及此脚本中定义 OTA_HAS_AISERVICE，未在 cfg 中定义。
+另：D120A2/D120A 在 12 的 Update 2 及以上编译，因其有 AI 相关 OTA 接口因而在 dproj 及此脚本中定义 OTA_HAS_AISERVICE，未在 cfg 中定义。
 
 -->
 <project name="cnwizards"
@@ -72,8 +72,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D104S"      value="${ProgramFiles}\Embarcadero\Studio\21.0\Bin\DCC32.EXE" unless="env.D104S" />
   <property name="exe.D104S_64"   value="${ProgramFiles}\Embarcadero\Studio\21.0\Bin\DCC64.EXE" unless="env.D104S_64" />
   <property name="exe.D110A"      value="${ProgramFiles}\Embarcadero\Studio\22.0\Bin\DCC32.EXE" unless="env.D110A" />
-  <property name="exe.D120A1"      value="${ProgramFiles}\Embarcadero\Studio\23.0_1\Bin\DCC32.EXE" unless="env.D120A1" />
-  <property name="exe.D120A2"      value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
+  <property name="exe.D120A1"     value="${ProgramFiles}\Embarcadero\Studio\23.0_1\Bin\DCC32.EXE" unless="env.D120A1" />
+  <property name="exe.D120A2"     value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
   <property name="exe.D120A"      value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC32.EXE" unless="env.D120A" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />

@@ -201,48 +201,10 @@ var
   ParamNoMsg: Boolean;
   ParamCmdHelp :Boolean;
 
-// 取专家 DLL 完整文件名，有部分动态机制供删除旧版使用，不全也没关系
+// 取专家 DLL 完整文件名（已删除动态机制）
 function GetDllFullPathName(Compiler: TCnCompiler): string;
-const
-  RIO_10_3_2: TVersionNumber =
-    (Major: 26; Minor: 0; Release: 34749; Build: 6593); // 10.3.2
-var
-  IDE: string;
-  Reg: TRegistry;
-  Version: TVersionNumber;
 begin
   Result := _CnExtractFilePath(ParamStr(0)) + csDllLoaderName;
-  // 10.3 下动态判断文件名的版本确定究竟用哪个 DLL
-  if Compiler = cnDelphi103R then
-  begin
-    // 10.3.2 使用最新 DLL，但 10.3.1 或以下版本使用另一个 DLL
-    // 读 HKEY_CURRENT_USER\Software\Embarcadero\BDS\20.0 下的 RootDir 得到安装目录
-    IDE := 'C:\Program Files\Embarcadero\Studio\20.0\';
-    Reg := nil;
-
-    try
-      Reg := TRegistry.Create;
-      if Reg.OpenKey('\Software\Embarcadero\BDS\20.0', False) then
-        IDE := Reg.ReadString('RootDir');
-    finally
-      Reg.Free;
-    end;
-
-    if not DirectoryExists(IDE) then
-      Exit;
-
-    IDE := IncludeTrailingPathDelimiter(IDE) + 'bin\bds.exe';
-    if not FileExists(IDE) then
-      Exit;
-
-    // 读 bds.exe 的版本号
-    Version := GetFileVersionNumber(IDE);
-    if (Version.Major <> 26) or (Version.Minor <> 0) then
-      Exit;
-
-    if Version.Release < RIO_10_3_2.Release then
-      Result := _CnExtractFilePath(ParamStr(0)) + 'CnWizards_D103R1.DLL';
-  end;
 end;
 
 // 取旧的专家名作为旧 Key
@@ -264,12 +226,14 @@ var
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
+  begin
     if WizardExists(Compiler) and RegKeyExists(SCnIDERegPaths[Compiler]) and
       not RegValueExists(SCnIDERegPaths[Compiler] + csExperts, GetDllOldKeyName(Compiler)) then
     begin
       Result := False;
       Exit;
     end;
+  end;
 end;
 
 // 判断是否安装了 Loader

@@ -153,7 +153,7 @@ begin
     22:
       begin
         if V.Release < XE8_UPDATE1_RELEASE then
-          Result := Dir + 'CnWizards_DXE81.DLL' // XE8 Update 1 或以上的 FMX 不兼容无 Update 版，采用另一个低版本编译的 DLL
+          Result := Dir + 'CnWizards_DXE81.DLL' // XE8 Update 1 或以上的 FMX 不兼容无 Update 版的，采用另一个低版本编译的 DLL
         else
           Result := Dir + 'CnWizards_DXE8.DLL';
       end;
@@ -180,6 +180,7 @@ begin
         if V.Release < ATHENS_12_2_RELEASE then  // 12.1 或 12.0 采用另一个 DLL
           Result := Dir + 'CnWizards_D120A1.DLL'
         else if V.Release < ATHENS_12_2_PATCH1_RELEASE then // 12.2 采用另一个 DLL
+          Result := Dir + 'CnWizards_D120A2.DLL'
         else
           Result := Dir + 'CnWizards_D120A.DLL'; // 12.2 Patch 1
       end;
