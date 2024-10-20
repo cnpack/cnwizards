@@ -111,6 +111,8 @@ type
     {* 引擎的 ID，供存储保存用，根据类名运算而来}
     class function OptionClass: TCnAIEngineOptionClass; virtual;
     {* 引擎配置所对应的类，默认为基类 TCnAIEngineOption}
+    class function NeedApiKey: Boolean; virtual;
+    {* 引擎是否需要提供 API Key 才能调用，默认 True}
 
     constructor Create(ANetPool: TCnThreadPool); virtual;
     destructor Destroy; override;
@@ -677,7 +679,9 @@ begin
       else
         HTTP.ProxyMode := pmIE;
     end;
-    HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
+
+    if FOption.ApiKey <> '' then
+      HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
     // 大多数 AI 引擎的身份验证都是这句。少数不是的，可以在子类的 PrepareRequestHeader 里删掉这句再加
 
     PrepareRequestHeader(HTTP.HttpRequestHeaders);
@@ -744,6 +748,11 @@ end;
 function TCnAIBaseEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;
 begin
   Result := DataObj.URL;
+end;
+
+class function TCnAIBaseEngine.NeedApiKey: Boolean;
+begin
+  Result := True;
 end;
 
 initialization

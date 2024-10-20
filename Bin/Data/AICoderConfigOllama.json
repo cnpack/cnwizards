@@ -1,0 +1,9 @@
+﻿{
+    "EngineName": "Ollama",
+    "URL": "http://127.0.0.1:11434/api/chat",
+    "ApiKey": "",
+    "Model": "qwen2.5-coder",
+    "ModelList": "qwen2.5-coder,llama3.2,phi3.5,mistral-nemo,deepseek-coder-v2,codegemma",
+    "Temperature": 1.0,
+    "WebAddress": ""
+}

@@ -128,6 +128,17 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnOllamaAIEngine = class(TCnAIBaseEngine)
+  {* 本地或私有化部署的集成 Ollama 引擎}
+  protected
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
+  public
+    class function EngineName: string; override;
+    class function NeedApiKey: Boolean; override;
+  end;
+
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 
 implementation
@@ -424,7 +435,6 @@ begin
   ReqRoot := TCnJSONObject.Create;
   try
     Cont := ReqRoot.AddArray('contents');
-    Msg := TCnJSONObject.Create;
 
     // Gemini 不支持 system role，一块搁 user 里
     Msg := TCnJSONObject.Create;
@@ -541,6 +551,99 @@ begin
   // 暂时不删别的，身份认证在 URL 里
 end;
 
+{ TCnOllamaAIEngine }
+
+function TCnOllamaAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
+  const Code: string): TBytes;
+var
+  ReqRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S: AnsiString;
+begin
+  ReqRoot := TCnJSONObject.Create;
+  try
+    ReqRoot.AddPair('model', Option.Model);
+    ReqRoot.AddPair('stream', False);
+    Arr := ReqRoot.AddArray('messages');
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'system');
+    Msg.AddPair('content', Option.SystemMessage);
+    Arr.AddValue(Msg);
+
+    Msg := TCnJSONObject.Create;
+    Msg.AddPair('role', 'user');
+    if RequestType = artExplainCode then
+      Msg.AddPair('content', Option.ExplainCodePrompt + #13#10 + Code)
+    else if RequestType = artReviewCode then
+      Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artRaw then
+      Msg.AddPair('content', Code);
+
+    Arr.AddValue(Msg);
+
+    S := ReqRoot.ToJSON;
+    Result := AnsiToBytes(S);
+  finally
+    ReqRoot.Free;
+  end;
+end;
+
+class function TCnOllamaAIEngine.EngineName: string;
+begin
+  Result := 'Ollama';
+end;
+
+class function TCnOllamaAIEngine.NeedApiKey: Boolean;
+begin
+  Result := False;
+end;
+
+function TCnOllamaAIEngine.ParseResponse(var Success: Boolean;
+  var ErrorCode: Cardinal; RequestType: TCnAIRequestType;
+  const Response: TBytes): string;
+var
+  RespRoot, Msg: TCnJSONObject;
+  S: AnsiString;
+begin
+  Result := '';
+  S := BytesToAnsi(Response);
+  RespRoot := CnJSONParse(S);
+  if RespRoot = nil then
+  begin
+    // 一类原始错误，如账号达到最大并发等
+    Result := S;
+  end
+  else
+  begin
+    try
+      // Ollama 的简要格式，message 下其实还有 role: assistant 但不管
+      if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONObject) then
+      begin
+        Msg := TCnJSONObject(RespRoot['message']);
+        Result := Msg['content'].AsString;
+      end;
+
+      if Result = '' then
+      begin
+        // Ollama 的简要错误格式
+        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+          Result := RespRoot['error'].AsString;
+      end;
+
+      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
+      if Result = '' then
+        Result := S;
+    finally
+      RespRoot.Free;
+    end;
+  end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
+end;
+
 initialization
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMistralAIAIEngine);
@@ -551,6 +654,7 @@ initialization
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
   RegisterAIEngine(TCnDeepSeekAIEngine);
+  RegisterAIEngine(TCnOllamaAIEngine);
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 end.

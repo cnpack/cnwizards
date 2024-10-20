@@ -225,7 +225,8 @@ var
   S: string;
   Msg: TCnChatMessage;
 begin
-  if not Active then Exit;
+  if not Active then
+    Exit;
 
   if Index = FIdConfig then
     Config
@@ -289,7 +290,7 @@ begin
     ErrorDlg(Format(SCnAICoderWizardErrorURLFmt, [CnAIEngineManager.CurrentEngine.EngineName]));
     Exit;
   end;
-  if (Trim(CnAIEngineManager.CurrentEngine.Option.ApiKey) = '') then
+  if CnAIEngineManager.CurrentEngine.NeedApiKey and (Trim(CnAIEngineManager.CurrentEngine.Option.ApiKey) = '') then
   begin
     ErrorDlg(Format(SCnAICoderWizardErrorAPIKeyFmt, [CnAIEngineManager.CurrentEngine.EngineName]));
     Exit;
@@ -322,7 +323,7 @@ begin
     begin
       // 给每个 Options 创建一个 Tab
       FTabsheets[I] := TTabSheet.Create(pgcAI);
-      FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I + 1]);
+      FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I]);
       FTabsheets[I].PageControl := pgcAI;
 
       // 给每个 Tab 里塞一个 Frame
@@ -343,8 +344,11 @@ begin
       if SL.Count > 0 then
         FOptionFrames[I].cbbModel.Items.Assign(SL);
 
-      // 网址申请给塞上，供点击打开
-      FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress;
+      // 有的话，网址申请给塞上，供点击打开
+      if CnAIEngineOptionManager.Options[I].WebAddress <> '' then
+        FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress
+      else
+        FOptionFrames[I].lblApply.Visible := False;
     end;
   finally
     SL.Free;
