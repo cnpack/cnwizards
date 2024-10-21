@@ -668,6 +668,13 @@ begin
 
   try
     HTTP := TCnHTTP.Create;
+
+    // 设置超时，默认 0 表示按系统来
+    HTTP.ConnectTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
+    HTTP.SendTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
+    HTTP.ReceiveTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
+
+    // 如有就设置代理
     if CnAIEngineOptionManager.UseProxy then
     begin
       if Trim(CnAIEngineOptionManager.ProxyServer) <> '' then

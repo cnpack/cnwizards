@@ -130,6 +130,7 @@ type
     FProxyPassword: string;
     FUseProxy: Boolean;
     FChatFontStr: string;
+    FTimeoutSec: Cardinal;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -173,6 +174,9 @@ type
 
     property ActiveEngine: string read FActiveEngine write FActiveEngine;
     {* 活动引擎名称，供存储载入后设置活动引擎，除此以外别无它用。}
+
+    property TimeoutSec: Cardinal read FTimeoutSec write FTimeoutSec;
+    {* 网络超时秒数，0 为系统默认}
 
     property UseProxy: Boolean read FUseProxy write FUseProxy;
     {* 是否使用代理服务器；否表示直连，是的情况下如果 FProxyServer 为空，表示使用系统设置}

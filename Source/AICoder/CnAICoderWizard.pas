@@ -55,6 +55,9 @@ type
     btnHelp: TButton;
     chkProxy: TCheckBox;
     edtProxy: TEdit;
+    lblTimeout: TLabel;
+    edtTimeout: TEdit;
+    udTimeout: TUpDown;
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
@@ -313,6 +316,8 @@ begin
 
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
 
+  udTimeout.Position := CnAIEngineOptionManager.TimeoutSec;
+
   // 给每个 Options 创建一个 Tab，每个 Tab 里塞一个 Frame，给 Frame 里的东西塞 Option 内容
   SetLength(FTabsheets, CnAIEngineOptionManager.OptionCount);
   SetLength(FOptionFrames, CnAIEngineOptionManager.OptionCount);
@@ -369,6 +374,8 @@ begin
 
   CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
   CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+
+  CnAIEngineOptionManager.TimeoutSec := udTimeout.Position;
 
   CnAIEngineOptionManager.UseProxy := chkProxy.Checked;
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;

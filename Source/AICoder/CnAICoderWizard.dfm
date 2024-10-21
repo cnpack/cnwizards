@@ -22,10 +22,17 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Height = 13
     Caption = 'Active AI Engine:'
   end
+  object lblTimeout: TLabel
+    Left = 328
+    Top = 16
+    Width = 86
+    Height = 13
+    Caption = 'Timeout Seconds:'
+  end
   object cbbActiveEngine: TComboBox
     Left = 128
     Top = 14
-    Width = 257
+    Width = 161
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akTop, akRight]
@@ -39,7 +46,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Width = 766
     Height = 381
     Anchors = [akLeft, akTop, akRight, akBottom]
-    TabOrder = 1
+    TabOrder = 4
   end
   object btnOK: TButton
     Left = 538
@@ -50,7 +57,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = '&OK'
     Default = True
     ModalResult = 1
-    TabOrder = 2
+    TabOrder = 5
   end
   object btnCancel: TButton
     Left = 618
@@ -61,7 +68,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 3
+    TabOrder = 6
   end
   object btnHelp: TButton
     Left = 698
@@ -70,17 +77,17 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Height = 21
     Anchors = [akRight, akBottom]
     Caption = '&Help'
-    TabOrder = 4
+    TabOrder = 7
     OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
-    Left = 485
+    Left = 501
     Top = 16
-    Width = 140
+    Width = 124
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'Use Proxy:'
-    TabOrder = 5
+    TabOrder = 2
   end
   object edtProxy: TEdit
     Left = 632
@@ -88,6 +95,26 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Width = 142
     Height = 21
     Anchors = [akTop, akRight]
-    TabOrder = 6
+    TabOrder = 3
+  end
+  object edtTimeout: TEdit
+    Left = 424
+    Top = 14
+    Width = 33
+    Height = 21
+    TabOrder = 1
+    Text = '0'
+  end
+  object udTimeout: TUpDown
+    Left = 457
+    Top = 14
+    Width = 15
+    Height = 21
+    Associate = edtTimeout
+    Min = 0
+    Max = 60
+    Position = 0
+    TabOrder = 8
+    Wrap = False
   end
 end
