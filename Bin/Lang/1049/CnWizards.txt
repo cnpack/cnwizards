@@ -2833,6 +2833,7 @@ TCnAICoderConfigForm.btnOK.Caption=&OK
 TCnAICoderConfigForm.Caption=Настройки AI Кодера
 TCnAICoderConfigForm.chkProxy.Caption=Использовать прокси:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Активный движок AI:
+TCnAICoderConfigForm.lblTimeout.Caption=Секунды тайм-аута:
 TCnAICoderOptionFrame.lblAPIKey.Caption=Ключ API:
 TCnAICoderOptionFrame.lblApply.Caption=Применить
 TCnAICoderOptionFrame.lblModel.Caption=Название модели:

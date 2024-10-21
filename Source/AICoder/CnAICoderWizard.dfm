@@ -23,7 +23,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = 'Active AI Engine:'
   end
   object lblTimeout: TLabel
-    Left = 328
+    Left = 320
     Top = 16
     Width = 86
     Height = 13

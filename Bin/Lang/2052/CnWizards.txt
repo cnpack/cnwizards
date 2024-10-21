@@ -2833,6 +2833,7 @@ TCnAICoderConfigForm.btnOK.Caption=确定(&O)
 TCnAICoderConfigForm.Caption=AI 辅助编码设置
 TCnAICoderConfigForm.chkProxy.Caption=使用代理：
 TCnAICoderConfigForm.lblActiveEngine.Caption=当前 AI 引擎：
+TCnAICoderConfigForm.lblTimeout.Caption=超时秒数：
 TCnAICoderOptionFrame.lblAPIKey.Caption=API 密钥：
 TCnAICoderOptionFrame.lblApply.Caption=申请
 TCnAICoderOptionFrame.lblModel.Caption=模型名称：
