@@ -372,8 +372,8 @@ begin
     for I := 0 to Parser.Count - 1 do
     begin
       Token := Parser.Tokens[I];
-      mmoParseCpp.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. Tag: %d. TokenKind %s, Token: %s',
-        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, Token.Tag, GetEnumName(TypeInfo(TCTokenKind),
+      mmoParseCpp.Lines.Add(Format('%3.3d Token. Line: %d, Col %2.2d, Position %4.4d. IsNS: %d. TokenKind %s, Token: %s',
+        [I, Token.LineNumber, Token.CharIndex, Token.TokenPos, Ord(Token.IsNameSpace), GetEnumName(TypeInfo(TCTokenKind),
          Ord(Token.CppTokenKind)), Token.Token]
       ));
     end;
@@ -409,6 +409,15 @@ begin
       mmoParseCpp.Lines.Add(Format('InnerClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
        [Parser.InnerBlockCloseToken.LineNumber, Parser.InnerBlockCloseToken.CharIndex,
         Parser.InnerBlockCloseToken.ItemLayer, Parser.InnerBlockCloseToken.Token]));
+
+    if Parser.NonNamespaceStartToken <> nil then
+      mmoParseCpp.Lines.Add(Format('NonNamespaceStart: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.NonNamespaceStartToken.LineNumber, Parser.NonNamespaceStartToken.CharIndex,
+        Parser.NonNamespaceStartToken.ItemLayer, Parser.NonNamespaceStartToken.Token]));
+    if Parser.NonNamespaceCloseToken <> nil then
+      mmoParseCpp.Lines.Add(Format('NonNamespaceClose: Line: %d, Col %2.2d. Layer: %d. Token: %s',
+       [Parser.NonNamespaceCloseToken.LineNumber, Parser.NonNamespaceCloseToken.CharIndex,
+        Parser.NonNamespaceCloseToken.ItemLayer, Parser.NonNamespaceCloseToken.Token]));
 
     mmoParseCpp.Lines.Add('');
     mmoParseCpp.Lines.Add('Current Class: ' + Parser.CurrentClass);

@@ -2115,12 +2115,18 @@ begin
       CurFuncStartToken := nil;
       CurFuncEndToken := nil;
 
-      // 首先，找出正确的 CurrentFunc：最外层的非 namespace，或次外层（当最外层是 namespace）
+      // 首先，找出正确的 CurrentFunc：手工最外层的非 namespace，或解析器解出的最外层的非 namespace，
+      // 最后才用非正规的次外层（当最外层是 namespace，多层 namespace 嵌套时不准确）
       if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
         (CParser.BlockCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.BlockStartToken;
         CurFuncEndToken := CParser.BlockCloseToken;
+      end
+      else if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.NonNamespaceStartToken;
+        CurFuncEndToken := CParser.NonNamespaceCloseToken;
       end
       else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
         (CParser.ChildCloseToken <> nil) then
@@ -2196,7 +2202,7 @@ begin
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
           else if rbCurrentInnerProc.Checked then
-            Rit := ritInnerProc                   // 这里进不来
+            Rit := ritInnerProc                   // 这里进不来，因为 C/C++ 没有函数内嵌
           else if rbUnit.Checked then
             Rit := ritUnit
           else if rbCurrentBlock.Checked then
@@ -2273,9 +2279,9 @@ begin
               NewCode := NewCode + string(Copy(AnsiString(CParser.Source), LastTokenPos + 1,
                 TCnPasToken(CurTokens[I]).TokenPos - LastTokenPos)) + NewName;
             end;
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
             CnDebugger.LogMsg('Cpp NewCode: ' + NewCode);
-  {$ENDIF}
+{$ENDIF}
             // 同一行前面的会影响光标位置
             if (TCnPasToken(CurTokens[I]).EditLine = CurToken.EditLine) and
               (TCnPasToken(CurTokens[I]).EditCol < CurToken.EditCol) then
@@ -2813,17 +2819,24 @@ begin
             CurToken := CParser.Tokens[I];
         end;
       end;
-      if CurTokens.Count = 0 then Exit;
+      if CurTokens.Count = 0 then
+        Exit;
 
       CurFuncStartToken := nil;
       CurFuncEndToken := nil;
 
-      // 首先，找出正确的 CurrentFunc：最外层的非 namespace，或次外层（当最外层是 namespace）
+      // 首先，找出正确的 CurrentFunc：手工最外层的非 namespace，或解析器解出的最外层的非 namespace，
+      // 最后才用非正规的次外层（当最外层是 namespace，多层 namespace 嵌套时不准确）
       if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
         (CParser.BlockCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.BlockStartToken;
         CurFuncEndToken := CParser.BlockCloseToken;
+      end
+      else if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.NonNamespaceStartToken;
+        CurFuncEndToken := CParser.NonNamespaceCloseToken;
       end
       else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
         (CParser.ChildCloseToken <> nil) then

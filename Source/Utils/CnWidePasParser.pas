@@ -78,7 +78,7 @@ type
     FIsBlockClose: Boolean;
     FUseAsC: Boolean;
   public
-    procedure Clear;
+    procedure Clear; virtual;
 
     property UseAsC: Boolean read FUseAsC;
     {* 是否是 C 方式的解析，默认不是}
@@ -525,6 +525,7 @@ begin
 
   Result.FTokenID := Lex.TokenID;
   Result.FItemIndex := FList.Count;
+  Result.Tag := 0;
   if CurrBlock <> nil then
     Result.FItemLayer := CurrBlock.FItemLayer;
 

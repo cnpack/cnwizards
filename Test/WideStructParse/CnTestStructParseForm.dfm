@@ -1,8 +1,8 @@
 object TeststructParseForm: TTeststructParseForm
   Left = 197
   Top = 108
-  Width = 787
-  Height = 503
+  Width = 910
+  Height = 595
   Caption = 
     'Test Unicode Structure Parse - Should Run OK under Non-Unicode a' +
     'nd Unicode  Compiler. D7/2009.'
@@ -19,9 +19,10 @@ object TeststructParseForm: TTeststructParseForm
   object pgc1: TPageControl
     Left = 8
     Top = 8
-    Width = 761
-    Height = 460
+    Width = 884
+    Height = 552
     ActivePage = tsPascal
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsPascal: TTabSheet
       Caption = 'Pascal'
@@ -36,8 +37,9 @@ object TeststructParseForm: TTeststructParseForm
       object mmoPasSrc: TMemo
         Left = 7
         Top = 7
-        Width = 734
+        Width = 857
         Height = 158
+        Anchors = [akLeft, akTop, akRight]
         Lines.Strings = (
           'unit Unit1;'
           ''
@@ -87,8 +89,10 @@ object TeststructParseForm: TTeststructParseForm
       object mmoPasResult: TMemo
         Left = 7
         Top = 210
-        Width = 734
-        Height = 210
+        Width = 857
+        Height = 302
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ScrollBars = ssVertical
         TabOrder = 2
       end
       object btnGetUses: TButton
@@ -143,7 +147,7 @@ object TeststructParseForm: TTeststructParseForm
       object mmoCppSrc: TMemo
         Left = 7
         Top = 7
-        Width = 734
+        Width = 857
         Height = 158
         Lines.Strings = (
           '#include <stdio.h>'
@@ -158,6 +162,7 @@ object TeststructParseForm: TTeststructParseForm
           'Test Comment'
           '*/ Test();'
           '}')
+        Anchors = [akLeft, akTop, akRight]
         ScrollBars = ssVertical
         TabOrder = 0
         OnChange = mmoCppSrcChange
@@ -175,8 +180,10 @@ object TeststructParseForm: TTeststructParseForm
       object mmoCppResult: TMemo
         Left = 7
         Top = 210
-        Width = 734
-        Height = 210
+        Width = 857
+        Height = 302
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ScrollBars = ssVertical
         TabOrder = 2
       end
       object chkWideCpp: TCheckBox
@@ -201,7 +208,7 @@ object TeststructParseForm: TTeststructParseForm
     end
   end
   object dlgOpen1: TOpenDialog
-    Left = 204
+    Left = 300
     Top = 208
   end
 end

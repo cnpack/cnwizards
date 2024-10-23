@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, CnWidePasParser,
-  mwBCBTokenList, CnBCBWideTokenList, CnCommon, CnFastList;
+  CnCppCodeParser, mwBCBTokenList, CnBCBWideTokenList, CnCommon, CnFastList;
   
 type
 //==============================================================================
@@ -53,12 +53,16 @@ type
   TCnWideCppToken = class(TCnWidePasToken)
   {* 描述一 Token 的结构高亮信息}
   private
-
+    FIsNameSpace: Boolean;
   public
     constructor Create;
+    procedure Clear; override;
   published
     // 注意父类 WidePas 解析出来的 LineNumber 与 CharIndex 都是 0 开始的
     // WideCpp 解析器解析出来的 LineNumber 与 CharIndex 也是 0 开始的
+
+    property IsNameSpace: Boolean read FIsNameSpace write FIsNameSpace;
+    {* 是否是 namespace 的对应大括号}
   end;
 
   TCnWideCppStructParser = class(TObject)
@@ -72,8 +76,8 @@ type
     FCurrentChildMethod: CnWideString;
     FCurrentMethod: CnWideString;
     FList: TCnList;
-    FMethodCloseToken: TCnWideCppToken;
-    FMethodStartToken: TCnWideCppToken;
+    FNonNamespaceCloseToken: TCnWideCppToken;
+    FNonNamespaceStartToken: TCnWideCppToken;
     FInnerBlockCloseToken: TCnWideCppToken;
     FInnerBlockStartToken: TCnWideCppToken;
     FCurrentClass: CnWideString;
@@ -101,19 +105,21 @@ type
     property Count: Integer read GetCount;
     property Tokens[Index: Integer]: TCnWideCppToken read GetToken;
 
-    property MethodStartToken: TCnWideCppToken read FMethodStartToken;
-    property MethodCloseToken: TCnWideCppToken read FMethodCloseToken;
-    {* 上面俩未解析}
-
     property ChildStartToken: TCnWideCppToken read FChildStartToken;
     property ChildCloseToken: TCnWideCppToken read FChildCloseToken;
-    {* 当前层次为 2 的大括号}
+    {* 当前层次为 2 的大括号，注意虽然一般是函数，
+     但当有多个 namespace 嵌套时也可能是 namespace，因而不太可靠
+     得用 NonNamespaceStartToken 和 NonNamespaceCloseToken 代替}
 
     property BlockStartToken: TCnWideCppToken read FBlockStartToken;
     property BlockCloseToken: TCnWideCppToken read FBlockCloseToken;
-    {* 当前层次为 1 的大括号}
+    {* 当前层次为 1 的大括号，注意可能是 namespace 或函数}
     property BlockIsNamespace: Boolean read FBlockIsNamespace;
-    {* 当前层次为 1 的大括号是否是 namespace}
+    {* 当前层次为 1 的大括号是否是 namespace，注意没有其他层次的类似标志}
+
+    property NonNamespaceStartToken: TCnWideCppToken read FNonNamespaceStartToken;
+    property NonNamespaceCloseToken: TCnWideCppToken read FNonNamespaceCloseToken;
+    {* 最外层非 namespace 的大括号}
 
     property InnerBlockStartToken: TCnWideCppToken read FInnerBlockStartToken;
     property InnerBlockCloseToken: TCnWideCppToken read FInnerBlockCloseToken;
@@ -205,8 +211,9 @@ begin
   for I := 0 to FList.Count - 1 do
     FreeCppToken(TCnWideCppToken(FList[I]));
   FList.Clear;
-  FMethodStartToken := nil;
-  FMethodCloseToken := nil;
+
+  FNonNamespaceStartToken := nil;
+  FNonNamespaceCloseToken := nil;
   FChildStartToken := nil;
   FChildCloseToken := nil;
   FBlockStartToken := nil;
@@ -281,6 +288,7 @@ begin
   Result.FToken[Len] := #0;
 
   Result.FLineNumber := CParser.LineNumber - 1;    // 1 开始变成 0 开始
+  Result.Tag := 0;
   CalcCharIndexes(Result.FCharIndex, Result.FAnsiIndex, CParser, Source);
   Result.FCppTokenKind := CParser.RunID;
   Result.FItemLayer := Layer;
@@ -298,8 +306,9 @@ var
   Layer: Integer;
   HasNamespace: Boolean;
   BraceStack: TStack;
-  Brace1Stack: TStack;
-  Brace2Stack: TStack;
+  Brace1Stack: TStack;  // 用来配对 OuterBlock
+  Brace2Stack: TStack;  // 用来配对 ChildBlock
+  Brace3Stack: TStack;  // 用来配对 NonNamespaceBlock
   BraceStartToken: TCnWideCppToken;
   BeginBracePosition: Integer;
   FunctionName, OwnerClass: string;
@@ -380,11 +389,14 @@ begin
   BraceStack := nil;
   Brace1Stack := nil;
   Brace2Stack := nil;
+  Brace3Stack := nil;
 
   FInnerBlockStartToken := nil;
   FInnerBlockCloseToken := nil;
   FBlockStartToken := nil;
   FBlockCloseToken := nil;
+  FNonNamespaceStartToken := nil;
+  FNonNamespaceCloseToken := nil;
   FBlockIsNamespace := False;
 
   FCurrentClass := '';
@@ -394,6 +406,7 @@ begin
     BraceStack := TStack.Create;
     Brace1Stack := TStack.Create;
     Brace2Stack := TStack.Create;
+    Brace3Stack := TStack.Create;
     FSource := ASource;
 
     CParser := TCnBCBWideTokenList.Create(FSupportUnicodeIdent);
@@ -421,7 +434,9 @@ begin
             Token := NewToken(CParser, ASource, Layer);
             if HasNamespace then
             begin
-              Token.Tag := 1; // 用 Tag 等于 1 来表示是 namespace
+              Token.Tag := CN_CPP_BRACKET_NAMESPACE;
+              // 用 Tag 等于 CN_CPP_BRACKET_NAMESPACE 来表示是 namespace 对应的左括号供外界快速判断
+              Token.IsNameSpace := True; // 是一 namespace 对应的左括号
               HasNamespace := False;
             end;
 
@@ -433,8 +448,10 @@ begin
                 Brace1Stack.Push(Token)
               else if Layer = 2 then
                 Brace2Stack.Push(Token);
+              if not Token.IsNameSpace  and (Brace3Stack.Count = 0) then // 非 namespace 的第一个左大括号也参与配对
+                Brace3Stack.Push(Token);
             end
-            else // 一旦在光标后了，就可以判断 Start 了
+            else // // 一旦在光标后了碰到左括号，说明之前堆积的 Start 可以确定了。但如果没碰到左括号，则在碰到右括号时处理
             begin
               if (FInnerBlockStartToken = nil) and (BraceStack.Count > 0) then
                 FInnerBlockStartToken := TCnWideCppToken(BraceStack.Pop);
@@ -442,6 +459,8 @@ begin
                 FBlockStartToken := TCnWideCppToken(Brace1Stack.Pop);
               if (FChildStartToken = nil) and (Brace2Stack.Count > 0) then
                 FChildStartToken := TCnWideCppToken(Brace2Stack.Pop);
+              if (FNonNamespaceStartToken = nil) and (Brace3Stack.Count > 0) then
+                FNonNamespaceStartToken := TCnWideCppToken(Brace3Stack.Pop);
             end;
           end;
         ctkbraceclose:
@@ -456,11 +475,19 @@ begin
                 FBlockStartToken := TCnWideCppToken(Brace1Stack.Pop);
               if (FChildStartToken = nil) and (Brace2Stack.Count > 0) then
                 FChildStartToken := TCnWideCppToken(Brace2Stack.Pop);
+              if (FNonNamespaceStartToken = nil) and (Brace3Stack.Count > 0) then
+                FNonNamespaceStartToken := TCnWideCppToken(Brace3Stack.Pop);
 
               if (FInnerBlockCloseToken = nil) and (FInnerBlockStartToken <> nil) then
               begin
                 if Layer = FInnerBlockStartToken.ItemLayer then
                   FInnerBlockCloseToken := Token;
+              end;
+
+              if (FNonNamespaceCloseToken = nil) and (FNonNamespaceStartToken <> nil) then
+              begin
+                if Layer = FNonNamespaceStartToken.ItemLayer then // 如果层次等于之前的
+                  FNonNamespaceCloseToken := Token;
               end;
 
               if Layer = 1  then // 第一层，为 OuterBlock 的 End
@@ -482,6 +509,12 @@ begin
                 Brace1Stack.Pop;
               if (Layer = 2) and (Brace2Stack.Count > 0) then
                 Brace2Stack.Pop;
+
+              if Brace3Stack.Count > 0 then
+              begin
+                if TCnWideCppToken(Brace3Stack.Peek).ItemLayer = Layer then
+                  Brace3Stack.Pop;
+              end;
             end;
             Dec(Layer);
           end;
@@ -505,36 +538,41 @@ begin
       // 处理第一层或第二层（如果第一层是 namespace 的话）的内容
       if FBlockStartToken <> nil then
       begin
-        BraceStartToken := FBlockStartToken;
-
-        // 先到达最外层括号处
-        if CParser.RunPosition > FBlockStartToken.TokenPos then
+        if FNonNamespaceStartToken <> nil then
+          BraceStartToken := FNonNamespaceStartToken
+        else // 以下暂时保留以前寻找处理第一层或第二层的代码
         begin
-          while CParser.RunPosition > FBlockStartToken.TokenPos do
-            CParser.PreviousNonJunk;
-        end
-        else if CParser.RunPosition < FBlockStartToken.TokenPos then
-          while CParser.RunPosition < FBlockStartToken.TokenPos do
-            CParser.NextNonJunk;
+          BraceStartToken := FBlockStartToken;
 
-        RunReachedZero := False;
-        while not (CParser.RunID in [ctkNull, ctkbraceclose, ctksemicolon])
-          and (CParser.RunPosition >= 0) do               //  防止 using namespace std; 这种
-        begin
-          if RunReachedZero and (CParser.RunPosition = 0) then
-            Break; // 曾经到 0，现在还是 0，表示出现了死循环
-          if CParser.RunPosition = 0 then
-            RunReachedZero := True;
-
-          // 如果 namespace 是最开头，则 RunPosition 可以是 0
-          if CParser.RunID in [ctknamespace] then
+          // 先到达最外层括号处
+          if CParser.RunPosition > FBlockStartToken.TokenPos then
           begin
-            // 本层是 namespace，处理第二层去
-            BraceStartToken := FChildStartToken;
-            FBlockIsNamespace := True;
-            Break;
+            while CParser.RunPosition > FBlockStartToken.TokenPos do
+              CParser.PreviousNonJunk;
+          end
+          else if CParser.RunPosition < FBlockStartToken.TokenPos then
+            while CParser.RunPosition < FBlockStartToken.TokenPos do
+              CParser.NextNonJunk;
+
+          RunReachedZero := False;
+          while not (CParser.RunID in [ctkNull, ctkbraceclose, ctksemicolon])
+            and (CParser.RunPosition >= 0) do               //  防止 using namespace std; 这种
+          begin
+            if RunReachedZero and (CParser.RunPosition = 0) then
+              Break; // 曾经到 0，现在还是 0，表示出现了死循环
+            if CParser.RunPosition = 0 then
+              RunReachedZero := True;
+
+            // 如果 namespace 是最开头，则 RunPosition 可以是 0
+            if CParser.RunID in [ctknamespace] then
+            begin
+              // 本层是 namespace，处理第二层去
+              BraceStartToken := FChildStartToken;
+              FBlockIsNamespace := True;
+              Break;
+            end;
+            CParser.PreviousNonJunk;
           end;
-          CParser.PreviousNonJunk;
         end;
 
         if BraceStartToken = nil then
@@ -650,6 +688,11 @@ begin
             FunctionName := FunctionName + CParser.RunToken;
             CParser.PreviousNonJunk;
 
+            if CParser.RunID = ctktilde then // 加上析构函数
+            begin
+              FunctionName := '~' + FunctionName;
+              CParser.PreviousNonJunk;
+            end;
             if CParser.RunID = ctkcoloncolon then
             begin
               FCurrentClass := '';
@@ -675,9 +718,10 @@ begin
       end;
     end;
   finally
-    BraceStack.Free;
-    Brace1Stack.Free;
+    Brace3Stack.Free;
     Brace2Stack.Free;
+    Brace1Stack.Free;
+    BraceStack.Free;
     CParser.Free;
   end;
 end;
@@ -847,6 +891,12 @@ end;
 {$ENDIF}
 
 { TCnWideCppToken }
+
+procedure TCnWideCppToken.Clear;
+begin
+  inherited;
+  FIsNameSpace := False;
+end;
 
 constructor TCnWideCppToken.Create;
 begin

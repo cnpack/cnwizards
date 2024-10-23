@@ -2097,8 +2097,8 @@ begin
 
             Pair := TCnBlockLinePair(FStack.Pop);
 
-            // 解析器里把 namespace 的左括号设成了 Tag = 1
-            if IgnoreNamespace and (Pair.StartToken.Tag = 1) then
+            // 解析器里把 namespace 的左括号设成了 Tag = CN_CPP_BRACKET_NAMESPACE
+            if IgnoreNamespace and (Pair.StartToken.Tag = CN_CPP_BRACKET_NAMESPACE) then
             begin
               Pair.Free;
             end

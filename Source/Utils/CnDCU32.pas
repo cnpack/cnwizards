@@ -63,7 +63,7 @@ type
     procedure GetUsesList(AList: TStringList; AFlag: TUnitImpFlags);
     procedure ClearUsesList(AList: TStringList);
   public
-    constructor Create(const DcuName: string; UseOnly: Boolean = True);
+    constructor Create(const DcuName: string; UseOnly: Boolean = True); reintroduce;
     destructor Destroy; override;
     procedure Sort;
     
@@ -164,7 +164,6 @@ end;
 
 constructor TCnUnitUsesInfo.Create(const DcuName: string; UseOnly: Boolean);
 begin
-  //InitOut('');
   FIntfUses := TStringList.Create;
   FImplUses := TStringList.Create;
   inherited Create;
