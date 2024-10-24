@@ -45,7 +45,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, RegExpr,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
-  CnWizSearch, CnIni, CnWizMultiLang;
+  CnWizSearch, CnIni, CnWizMultiLang {$IFDEF IDE_WIDECONTROL}, CnWideStrings {$ENDIF};
 
 type
 

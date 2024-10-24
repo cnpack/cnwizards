@@ -52,7 +52,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Math, ToolsAPI, CnWizConsts, CnCommon;
+  SysUtils, Classes, Math, ToolsAPI, CnWizConsts
+  {$IFDEF BDS}, CnWideStrings {$ENDIF};
 
 type
   TModuleMode = (mmModule, mmFile);

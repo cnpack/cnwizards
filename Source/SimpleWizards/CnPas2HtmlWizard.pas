@@ -50,10 +50,11 @@ interface
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Classes, CnPasConvert, Clipbrd, ToolsAPI,
-  CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizIdeUtils,
-  Forms, Dialogs, Controls, StdCtrls, ComCtrls, CnIni, IniFiles, ShellAPI,
-  FileCtrl, Graphics, CnWizEditFiler, CnWizMultiLang, CnPasConvertTypeFrm;
+  Windows, Messages, SysUtils, Classes, Clipbrd, ToolsAPI, Forms, Dialogs,
+  Controls, IniFiles, ShellAPI, StdCtrls, ComCtrls, FileCtrl, Graphics,
+  CnCommon, CnPasConvert, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils,
+  {$IFDEF IDE_STRING_ANSI_UTF8} CnWideStrings, {$ENDIF}  CnIni, CnWizIdeUtils,
+  CnWizEditFiler, CnWizMultiLang, CnPasConvertTypeFrm;
 
 type
 

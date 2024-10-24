@@ -50,8 +50,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList,
-  Contnrs, CnCommon, CnFastList, CnContainers;
+  Windows, SysUtils, Classes, mPasLex, mwBCBTokenList, Contnrs,
+  CnCommon, {$IFDEF IDE_WIDECONTROL} CnWideStrings, {$ENDIF} CnFastList, CnContainers;
 
 const
   CN_TOKEN_MAX_SIZE = 63;
@@ -1608,7 +1608,7 @@ begin
     Lex := TmwPasLex.Create;
     ProcStack := TStack.Create;
 
-{$IFDEF BDS}
+{$IFDEF IDE_WIDECONTROL}
     if SourceIsUtf8 then
     begin
       Text := CnUtf8ToAnsi(PAnsiChar(Source));

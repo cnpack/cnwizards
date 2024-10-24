@@ -23,6 +23,7 @@ This is the Want script for building CnWizards.
 See http://www.suigeneris.org/want/ for details.
 
 注意：本文件不能有 BOM，否则 NSIS 不认！因而不能用会自动添加 BOM 的记事本编辑！
+另：目标说明中，不带具体更新 Update 包的均指其最新 Update 包。其余同大版本的目标均是无 Update 或某 Update 以下的旧版。
 另：D120A2/D120A 在 12 的 Update 2 及以上编译，因其有 AI 相关 OTA 接口因而在 dproj 及此脚本中定义 OTA_HAS_AISERVICE，未在 cfg 中定义。
 
 -->

@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Contnrs, CnPasCodeParser, 
-  mwBCBTokenList, CnCommon, CnFastList;
+  mwBCBTokenList, CnCommon, {$IFDEF IDE_WIDECONTROL} CnWideStrings, {$ENDIF} CnFastList;
 
 const
   CN_CPP_BRACKET_NAMESPACE = 1;
@@ -775,7 +775,7 @@ begin
   try
     CParser := TBCBTokenList.Create;
     CParser.DirectivesAsComments := False;
-{$IFDEF BDS}
+{$IFDEF IDE_WIDECONTROL}
     if SourceIsUtf8 then
     begin
       Text := CnUtf8ToAnsi(PAnsiChar(Source));
