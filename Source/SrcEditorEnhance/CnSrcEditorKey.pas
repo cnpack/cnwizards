@@ -1802,7 +1802,8 @@ var
   FSrcEditor: IOTASourceEditor;
 begin
   Result := False;
-  if (Key <> FRenameKey) or (Shift <> FRenameShift) then Exit;
+  if (Key <> FRenameKey) or (Shift <> FRenameShift) then
+    Exit;
 
   if (GetIDEActionFromShortCut(ShortCut(VK_F2, [])) <> nil) and
     GetIDEActionFromShortCut(ShortCut(VK_F2, [])).Visible then
@@ -2110,29 +2111,39 @@ begin
             CurToken := CParser.Tokens[I];
         end;
       end;
-      if CurTokens.Count = 0 then Exit;
+      if CurTokens.Count = 0 then
+        Exit;
 
       CurFuncStartToken := nil;
       CurFuncEndToken := nil;
 
-      // 首先，找出正确的 CurrentFunc：手工最外层的非 namespace，或解析器解出的最外层的非 namespace，
+      // 首先，找出正确的 CurrentFunc：解析器解出的最外层的非 namespace 优先，再手工最外层的非 namespace，
       // 最后才用非正规的次外层（当最外层是 namespace，多层 namespace 嵌套时不准确）
-      if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
+      if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.NonNamespaceStartToken;
+        CurFuncEndToken := CParser.NonNamespaceCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 Rename. Prepare Cpp Range: NonNamespace');
+{$ENDIF}
+      end
+      else if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
         (CParser.BlockCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.BlockStartToken;
         CurFuncEndToken := CParser.BlockCloseToken;
-      end
-      else if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
-      begin
-        CurFuncStartToken := CParser.NonNamespaceStartToken;
-        CurFuncEndToken := CParser.NonNamespaceCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 Rename. Prepare Cpp Range: Block');
+{$ENDIF}
       end
       else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
         (CParser.ChildCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.ChildStartToken;
         CurFuncEndToken := CParser.ChildCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 Rename. Prepare Cpp Range: Child');
+{$ENDIF}
       end;
 
       // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
@@ -2825,24 +2836,33 @@ begin
       CurFuncStartToken := nil;
       CurFuncEndToken := nil;
 
-      // 首先，找出正确的 CurrentFunc：手工最外层的非 namespace，或解析器解出的最外层的非 namespace，
+      // 首先，找出正确的 CurrentFunc：解析器解出的最外层的非 namespace，再是手工最外层的非 namespace，
       // 最后才用非正规的次外层（当最外层是 namespace，多层 namespace 嵌套时不准确）
-      if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
+      if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
+      begin
+        CurFuncStartToken := CParser.NonNamespaceStartToken;
+        CurFuncEndToken := CParser.NonNamespaceCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 RenameW. Prepare Cpp Range: NonNamespace');
+{$ENDIF}
+      end
+      else if not CParser.BlockIsNamespace and (CParser.BlockStartToken <> nil) and
         (CParser.BlockCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.BlockStartToken;
         CurFuncEndToken := CParser.BlockCloseToken;
-      end
-      else if (CParser.NonNamespaceStartToken <> nil) and (CParser.NonNamespaceCloseToken <> nil) then
-      begin
-        CurFuncStartToken := CParser.NonNamespaceStartToken;
-        CurFuncEndToken := CParser.NonNamespaceCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 RenameW. Prepare Cpp Range: Block');
+{$ENDIF}
       end
       else if CParser.BlockIsNamespace and (CParser.ChildStartToken <> nil) and
         (CParser.ChildCloseToken <> nil) then
       begin
         CurFuncStartToken := CParser.ChildStartToken;
         CurFuncEndToken := CParser.ChildCloseToken;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Cpp F2 RenameW. Prepare Cpp Range: Child');
+{$ENDIF}
       end;
 
       // 如果当前光标下的 Token 在 InnerBlock 之间，并且所有的 Token 都在
