@@ -24,7 +24,7 @@ unit CnTestAIPluginWizard;
 * 软件名称：CnPack IDE 专家包测试用例
 * 单元名称：CnTestAIPluginWizard
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：该测试专家仅支持 D12.2 或以上版本编译
 * 开发平台：Windows 7 + Delphi 5
 * 兼容测试：XP/7 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   {$IFDEF OTA_HAS_AISERVICE} ToolsAPI.AI, {$ENDIF} ToolsAPI, IniFiles,
-   CnWizClasses, CnWizUtils, CnWizConsts, Vcl.StdCtrls, Vcl.ExtCtrls;
+  CnWizClasses, CnWizUtils, CnWizConsts, StdCtrls, ExtCtrls;
 
 type
   TCnTestAIPluginFrame = class(TFrame, IOTAAIPluginSetting)

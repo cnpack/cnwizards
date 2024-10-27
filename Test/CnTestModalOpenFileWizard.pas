@@ -158,7 +158,7 @@ end;
 
 procedure TTestModalOpenFileForm.btnOpenClick(Sender: TObject);
 begin
-  if dlgOpen1.Execute(Handle) then
+  if dlgOpen1.Execute then
     edtFileName.Text := dlgOpen1.FileName;
 end;
 

@@ -22,7 +22,7 @@ unit CnTestBuildConfigWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
-* 单元名称：CnWizDebuggerNotifier测试用例单元
+* 单元名称：CnWizDebuggerNotifier 测试用例单元
 * 单元作者：CnPack 开发组
 * 备    注：该单元只支持 Delphi 2009 及后续版本
             只需将此单元加入专家包源码工程后重编译加载即可进行测试，

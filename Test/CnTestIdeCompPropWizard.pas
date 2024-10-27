@@ -24,7 +24,7 @@ unit CnTestIdeCompPropWizard;
 * 软件名称：CnPack IDE 专家包测试用例
 * 单元名称：CnTestIdeCompPropWizard
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：只支持 D2010 或以上版本，因为需要新 RTTI
 * 开发平台：Windows 7 + Delphi XE2
 * 兼容测试：XP/7 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式

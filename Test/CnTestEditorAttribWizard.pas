@@ -57,13 +57,17 @@ type
     FIdAttrib: Integer;
     FIdLine: Integer;
     FIdElide: Integer;
+{$IFDEF IDE_EDITOR_ELIDE}
     FIdLineElide: Integer;
     FIdLineUnElide: Integer;
+{$ENDIF}
     procedure TestAttributeAtCursor;
     procedure TestAttributeLine;
     procedure TestLinesElideInfo;
+{$IFDEF IDE_EDITOR_ELIDE}
     procedure TestElideLine;
     procedure TestUnElideLine;
+{$ENDIF}
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -109,8 +113,10 @@ begin
   FIdAttrib := RegisterASubAction(SCnAttribCommand, SCnAttribCaption);
   FIdLine := RegisterASubAction(SCnLineAttribCommand, SCnLineAttribCaption);
   FIdElide := RegisterASubAction(SCnLineElideInfoCommand, SCnLineElideInfoCaption);
+{$IFDEF IDE_EDITOR_ELIDE}
   FIdLineElide := RegisterASubAction(SCnElideLineCommand, SCnElideLineCaption);
   FIdLineUnElide := RegisterASubAction(SCnUnElideLineCommand, SCnUnElideLineCaption);
+{$ENDIF}
 end;
 
 procedure TCnTestEditorAttribWizard.Config;
@@ -250,10 +256,12 @@ begin
     TestAttributeLine
   else if Index = FIdElide then
     TestLinesElideInfo
+{$IFDEF IDE_EDITOR_ELIDE}
   else if Index = FIdLineElide then
     TestElideLine
   else if Index = FIdLineUnElide then
     TestUnElideLine
+{$ENDIF}
 end;
 
 procedure TCnTestEditorAttribWizard.TestAttributeLine;
@@ -345,6 +353,8 @@ begin
   ShowMessage('Information Sent to CnDebugViewer for Current Line.');
 end;
 
+{$IFDEF IDE_EDITOR_ELIDE}
+
 procedure TCnTestEditorAttribWizard.TestElideLine;
 var
   L: Integer;
@@ -357,6 +367,8 @@ begin
   L := StrToInt(CnInputBox('Hint', 'Enter a Line Number', '1'));
   EditControlWrapper.ElideLine(Control, L);
 end;
+
+{$ENDIF}
 
 procedure TCnTestEditorAttribWizard.TestLinesElideInfo;
 var
@@ -382,6 +394,8 @@ begin
   List.Free;
 end;
 
+{$IFDEF IDE_EDITOR_ELIDE}
+
 procedure TCnTestEditorAttribWizard.TestUnElideLine;
 var
   L: Integer;
@@ -394,6 +408,8 @@ begin
   L := StrToInt(CnInputBox('Hint', 'Enter a Line Number', '1'));
   EditControlWrapper.UnElideLine(Control, L);
 end;
+
+{$ENDIF}
 
 initialization
   RegisterCnWizard(TCnTestEditorAttribWizard); // ×¢²á×¨¼Ò
