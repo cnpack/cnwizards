@@ -191,7 +191,11 @@ type
     FSymbolListMgr: TCnSymbolListMgr;
     FirstSet: TAnsiCharSet;  // 所有 Symbol 的起始字符的合法 CharSet 的并集
     CharSet: TAnsiCharSet;   // 所有 Symbol 的合法 CharSet 的并集
+{$IFDEF IDE_SUPPORT_LSP}
+    AutoPopupLSP: Boolean;
+{$ELSE}
     FAutoPopup: Boolean;
+{$ENDIF}
     FToken: string;
     FMatchStr: string;     // 当前拿来匹配的 Pattern，从编辑器光标下获取而来
     FLastStr: string;      // 上一次匹配的 FMatchStr
@@ -278,7 +282,11 @@ type
     procedure PopupKeyProc(Sender: TObject);
     procedure OnPopupMenu(Sender: TObject);
     procedure CreateMenuItem;
+{$IFDEF IDE_SUPPORT_LSP}
+    procedure SetAutoPopupLSP(Value: Boolean);
+{$ELSE}
     procedure SetAutoPopup(Value: Boolean);
+{$ENDIF}
     procedure OnDispBtnMenu(Sender: TObject);
     procedure OnConfigMenu(Sender: TObject);
     procedure OnCopyMenu(Sender: TObject);
@@ -329,6 +337,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure ResetSettings(Ini: TCustomIniFile); override;
+    function GetGeneralAutoPopup: Boolean;
     procedure SendSymbolToIDE(MatchFirstOnly, AutoEnter, RepFullToken: Boolean;
       Key: AnsiChar; var Handled: Boolean);
     procedure ShowIDECodeCompletion;
@@ -339,8 +348,13 @@ type
     property HitCountMgr: TCnSymbolHitCountMgr read FHitCountMgr;
     property SymbolListMgr: TCnSymbolListMgr read FSymbolListMgr;
 
+{$IFDEF IDE_SUPPORT_LSP}
+    property AutoPopupLSP: Boolean read FAutoPopupLSP write SetAutoPopupLSP default True;
+    {* LSP 模式下是否自动弹出输入助手}
+{$ELSE}
     property AutoPopup: Boolean read FAutoPopup write SetAutoPopup default True;
-    {* 是否自动弹出输入助手}
+    {* 普通模式下是否自动弹出输入助手}
+{$ENDIF}
     property PopupKey: TShortCut read GetPopupKey write SetPopupKey;
     {* 自动弹出快捷键}
     property ListOnlyAtLeastLetter: Integer read FListOnlyAtLeastLetter write
@@ -453,7 +467,11 @@ const
   csHeight = 'Height';
   csFont = 'Font';
   csDispButtons = 'DispButtons';
+{$IFDEF IDE_SUPPORT_LSP}
+  csAutoPopupLSP = 'AutoPopupLSP';
+{$ELSE}
   csAutoPopup = 'AutoPopup';
+{$ENDIF}
   csListOnlyAtLeastLetter = 'ListOnlyAtLeastLetter';
   csDispOnlyAtLeastKey = 'DispOnlyAtLeastKey';
   csDispKindSet = 'DispKindSet';
@@ -1141,7 +1159,12 @@ begin
     ShortCut(VK_DOWN, [ssAlt]), PopupKeyProc);
 
   FDispKindSet := csAllSymbolKind;
+
+{$IFDEF IDE_SUPPORT_LSP}
+  AutoPopupLSP := True;
+{$ELSE}
   AutoPopup := True;
+{$ENDIF}
 
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
@@ -1606,7 +1629,7 @@ begin
   else // 如果未显示列表，则记录按键准备弹出条件
   begin
     Timer.Enabled := False;
-    if AutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
+    if GetGeneralAutoPopup and ((FKeyCount < DispOnlyAtLeastKey - 1) or CurrBlockIsEmpty) and
       (IsValidCharKey(Key, ScanCode) or IsValidDelelteKey(Key) or IsValidDotKey(Key)
        or IsValidCppPopupKey(Key, ScanCode)) then // 判断是否满足弹出条件积累
     begin
@@ -3105,7 +3128,7 @@ procedure TCnInputHelper.OnPopupMenu(Sender: TObject);
 var
   I: Integer;
 begin
-  AutoMenuItem.Checked := FAutoPopup;
+  AutoMenuItem.Checked := GetGeneralAutoPopup;
   DispBtnMenuItem.Checked := List.DispButtons;
   SortMenuItem.Items[Ord(FSortKind)].Checked := True;
   for I := 0 to IconMenuItem.Count - 1 do
@@ -3192,6 +3215,37 @@ begin
   FPopupShortCut.ShortCut := Value;
 end;
 
+function TCnInputHelper.GetGeneralAutoPopup: Boolean;
+begin
+{$IFDEF IDE_SUPPORT_LSP}
+  Result := FAutoPopupLSP;
+{$ELSE}
+  Result := FAutoPopup;
+{$ENDIF}
+end;
+
+{$IFDEF IDE_SUPPORT_LSP}
+
+procedure TCnInputHelper.SetAutoPopupLSP(Value: Boolean);
+begin
+  FAutoPopupLSP := Value;
+  Action.Checked := Value;
+  AutoMenuItem.Checked := Value;
+  if not FAutoPopupLSP and IsShowing then
+    HideAndClearList;
+{$IFNDEF SUPPORT_IDESYMBOLLIST}
+  if FCCErrorHook <> nil then
+  begin
+    if Value and Active then
+      FCCErrorHook.HookMethod
+    else
+      FCCErrorHook.UnHookMethod;
+  end;
+{$ENDIF}
+end;
+
+{$ELSE}
+
 procedure TCnInputHelper.SetAutoPopup(Value: Boolean);
 begin
   FAutoPopup := Value;
@@ -3210,14 +3264,20 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 procedure TCnInputHelper.OnActionUpdate(Sender: TObject);
 begin
-  Action.Checked := AutoPopup;
+  Action.Checked := GetGeneralAutoPopup;
 end;
 
 procedure TCnInputHelper.Click(Sender: TObject);
 begin
+{$IFDEF IDE_SUPPORT_LSP}
+  AutoPopupLSP := not AutoPopupLSP;
+{$ELSE}
   AutoPopup := not AutoPopup;
+{$ENDIF}
 end;
 
 procedure TCnInputHelper.SetListFont(const Value: TFont);
@@ -3295,7 +3355,11 @@ begin
     List.DispButtons := ReadBool('', csDispButtons, True);
     UseEditorColor := ReadBool('', csUseEditorColor, FUseEditorColor);
 
+{$IFDEF IDE_SUPPORT_LSP}
+    AutoPopupLSP := ReadBool('', csAutoPopupLSP, True);
+{$ELSE}
     AutoPopup := ReadBool('', csAutoPopup, True);
+{$ENDIF}
     FListOnlyAtLeastLetter := ReadInteger('', csListOnlyAtLeastLetter, 1);
     FDispOnlyAtLeastKey := ReadInteger('', csDispOnlyAtLeastKey, 2);
     FDispKindSet := TCnSymbolKindSet(ReadInteger('', csDispKindSet, Integer(FDispKindSet)));
@@ -3353,7 +3417,11 @@ begin
     WriteBool('', csDispButtons, List.DispButtons);
     WriteBool('', csUseEditorColor, FUseEditorColor);
 
+ {$IFDEF IDE_SUPPORT_LSP}
+    WriteBool('', csAutoPopupLSP, FAutoPopupLSP);
+ {$ELSE}
     WriteBool('', csAutoPopup, FAutoPopup);
+ {$ENDIF}
     WriteInteger('', csListOnlyAtLeastLetter, FListOnlyAtLeastLetter);
     WriteInteger('', csDispOnlyAtLeastKey, FDispOnlyAtLeastKey);
     WriteInteger('', csDispKindSet, Integer(FDispKindSet));
@@ -3418,7 +3486,7 @@ begin
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
-    if Value and FAutoPopup then
+    if Value and GetGeneralAutoPopup then
       FCCErrorHook.HookMethod
     else
       FCCErrorHook.UnHookMethod;

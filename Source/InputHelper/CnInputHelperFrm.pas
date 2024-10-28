@@ -254,7 +254,7 @@ var
   SymbolKind: TCnSymbolKind;
   KwStyle: TCnKeywordStyle;
   Macro: TCnWizMacro;
-  i: Integer;
+  I: Integer;
 begin
   inherited;
 
@@ -283,7 +283,7 @@ begin
     chkUseKibitzCompileThread.Enabled := SupportKibitzCompileThread;
     if SupportKibitzCompileThread then
       chkUseKibitzCompileThread.Checked := UseKibitzCompileThread;
-    chkAutoPopup.Checked := AutoPopup;
+    chkAutoPopup.Checked := GetGeneralAutoPopup;
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
     tbDispDelay.Position := DispDelay;
     seListOnlyAtLeastLetter.Value := ListOnlyAtLeastLetter;
@@ -316,13 +316,13 @@ begin
     chkKeySeq.Checked := EnableAutoSymbols;
     FontDialog.Font.Assign(ListFont);
 
-    for i := 0 to SymbolListMgr.Count - 1 do
+    for I := 0 to SymbolListMgr.Count - 1 do
     begin
-      chklstSymbol.Items.Add(SymbolListMgr.List[i].GetListName);
-      chklstSymbol.Checked[i] := SymbolListMgr.List[i].Active;
-      if SymbolListMgr.List[i].CanCustomize then
-        cbbList.Items.AddObject(SymbolListMgr.List[i].GetListName,
-          SymbolListMgr.List[i]);
+      chklstSymbol.Items.Add(SymbolListMgr.List[I].GetListName);
+      chklstSymbol.Checked[I] := SymbolListMgr.List[I].Active;
+      if SymbolListMgr.List[I].CanCustomize then
+        cbbList.Items.AddObject(SymbolListMgr.List[I].GetListName,
+          SymbolListMgr.List[I]);
     end;
 
     for SymbolKind := Low(SymbolKind) to High(SymbolKind) do
@@ -369,11 +369,11 @@ end;
 
 procedure TCnInputHelperForm.InitListView;
 var
-  i: Integer;
+  I: Integer;
 begin
   lvList.Items.Clear;
-  for i := 0 to CurrList.Count - 1 do
-    lvList.Items.Add.Data := CurrList.Items[i];
+  for I := 0 to CurrList.Count - 1 do
+    lvList.Items.Add.Data := CurrList.Items[I];
   UpdateListView(False);
   lvList.AlphaSort;
 end;
@@ -399,7 +399,11 @@ begin
       UseCodeInsightMgr := chkUseCodeInsightMgr.Checked;
     if SupportKibitzCompileThread then
       UseKibitzCompileThread := chkUseKibitzCompileThread.Checked;
+{$IFDEF IDE_SUPPORT_LSP}
+    AutoPopupLSP := chkAutoPopup.Checked;
+{$ELSE}
     AutoPopup := chkAutoPopup.Checked;
+{$ENDIF}
     DispOnlyAtLeastKey := seDispOnlyAtLeastKey.Value;
     DispDelay := tbDispDelay.Position;
     ListOnlyAtLeastLetter := seListOnlyAtLeastLetter.Value;
@@ -428,9 +432,7 @@ begin
     ListFont := FontDialog.Font; // 不能 Assign，要用赋值触发 SetListFont 以更新列表字体
 
     for I := 0 to SymbolListMgr.Count - 1 do
-    begin
       SymbolListMgr.List[I].Active := chklstSymbol.Checked[I];
-    end;
 
     DispKindSet := [];
     for SymbolKind := Low(SymbolKind) to High(SymbolKind) do
@@ -626,19 +628,19 @@ end;
 
 procedure TCnInputHelperForm.btnDupClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Item: TCnSymbolItem;
   LVItem: TListItem;
 begin
   if lvList.SelCount > 0 then
   begin
-    for i := 0 to lvList.Items.Count - 1 do
+    for I := 0 to lvList.Items.Count - 1 do
     begin
-      if lvList.Items[i].Selected then
+      if lvList.Items[I].Selected then
       begin
-        lvList.Items[i].Selected := False;
+        lvList.Items[I].Selected := False;
         Item := TCnSymbolItem.Create;
-        Item.Assign(TCnSymbolItem(lvList.Items[i].Data));
+        Item.Assign(TCnSymbolItem(lvList.Items[I].Data));
         Item.Name := Item.Name + '1';
         CurrList.Add(Item);
         LVItem := lvList.Items.Add;
@@ -653,18 +655,18 @@ end;
 
 procedure TCnInputHelperForm.btnDeleteClick(Sender: TObject);
 var
-  i, Idx: Integer;
+  I, Idx: Integer;
 begin
   if (lvList.SelCount > 0) and QueryDlg(SCnDeleteConfirm) then
   begin
     Idx := -1;
-    for i := lvList.Items.Count - 1 downto 0 do
+    for I := lvList.Items.Count - 1 downto 0 do
     begin
-      if lvList.Items[i].Selected then
+      if lvList.Items[I].Selected then
       begin
-        Idx := i;
-        CurrList.Remove(TCnSymbolItem(lvList.Items[i].Data));
-        lvList.Items.Delete(i);
+        Idx := I;
+        CurrList.Remove(TCnSymbolItem(lvList.Items[I].Data));
+        lvList.Items.Delete(I);
       end;
     end;
 
@@ -758,13 +760,13 @@ end;
 procedure TCnInputHelperForm.OnMacroMenu(Sender: TObject);
 var
   Macro: string;
-  i: Integer;
+  I: Integer;
 begin
   if Sender is TMenuItem then
   begin
     Macro := GetMacro(GetMacroDefText(TCnWizMacro(TMenuItem(Sender).Tag)));
-    for i := 1 to Length(Macro) do
-      mmoTemplate.Perform(WM_CHAR, Ord(Macro[i]), 0);
+    for I := 1 to Length(Macro) do
+      mmoTemplate.Perform(WM_CHAR, Ord(Macro[I]), 0);
     mmoTemplate.SetFocus;
   end;
 end;
@@ -773,7 +775,7 @@ procedure TCnInputHelperForm.btnUserMacroClick(Sender: TObject);
 var
   Ini: TCustomIniFile;
   Macro: string;
-  i: Integer;
+  I: Integer;
 begin
   Ini := InputHelper.CreateIniFile;
   try
@@ -781,8 +783,8 @@ begin
       Macro, Ini, 'UserMacroHis') then
     begin
       Macro := GetMacro(Macro);
-      for i := 1 to Length(Macro) do
-        mmoTemplate.Perform(WM_CHAR, Ord(Macro[i]), 0);
+      for I := 1 to Length(Macro) do
+        mmoTemplate.Perform(WM_CHAR, Ord(Macro[I]), 0);
       mmoTemplate.SetFocus;
     end;
   finally
