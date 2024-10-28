@@ -192,7 +192,7 @@ type
     FirstSet: TAnsiCharSet;  // 所有 Symbol 的起始字符的合法 CharSet 的并集
     CharSet: TAnsiCharSet;   // 所有 Symbol 的合法 CharSet 的并集
 {$IFDEF IDE_SUPPORT_LSP}
-    AutoPopupLSP: Boolean;
+    FAutoPopupLSP: Boolean;
 {$ELSE}
     FAutoPopup: Boolean;
 {$ENDIF}
