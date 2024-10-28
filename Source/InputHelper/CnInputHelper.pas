@@ -1291,9 +1291,11 @@ begin
     begin
       case Msg.message of
         WM_KEYDOWN:
-          Handled := HandleKeyDown(Msg);
+          if not Handled then // 加上是为了避免其他专家已经通过 OnMessage 事件处理掉了
+            Handled := HandleKeyDown(Msg);
         WM_KEYUP:
-          Handled := HandleKeyUp(Msg);
+          if not Handled then // 加上是为了避免其他专家已经通过 OnMessage 事件处理掉了
+            Handled := HandleKeyUp(Msg);
         WM_MOUSEWHEEL:
           if IsShowing then
           begin
