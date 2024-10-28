@@ -3465,14 +3465,14 @@
   {$DEFINE SUPPORT_CSHARP}
   {$DEFINE SUPPORT_INLINE}
   {$DEFINE SUPPORT_UINT64}
-  {$DEFINE IDE_WIDECONTROL}
-  {$DEFINE IDE_EDITOR_SUPPORT_FOLDING}   // 2005 以上的编辑器支持区域折叠
-  {$DEFINE OTA_NEW_BREAKPOINT_NOBUG}     // 2005 以上的 NewBreakpoint 才能工作
+  {$DEFINE IDE_WIDECONTROL}              // 2005 及以上的编辑器内部是宽字符串且输出 UTF-8，无论是否 Unicode 编译器
+  {$DEFINE IDE_EDITOR_SUPPORT_FOLDING}   // 2005 及以上的编辑器支持区域折叠
+  {$DEFINE OTA_NEW_BREAKPOINT_NOBUG}     // 2005 及以上的 NewBreakpoint 才能工作
   {$DEFINE IDE_ACTION_UPDATE_DELAY}      // IDE's Action Menu Update will Delay in 2005 or Up.
   {$DEFINE SUPPORT_WIDECHAR_IDENTIFIER}
 
   {$IFNDEF COMPILER12_UP}
-    // 2005~2007 Compiler is Ansi but Editor String is Utf8
+    // 2005~2007 Compiler is Ansi but Editor String is UTF-8
     {$DEFINE IDE_STRING_ANSI_UTF8}
   {$ENDIF}
 {$ENDIF}
