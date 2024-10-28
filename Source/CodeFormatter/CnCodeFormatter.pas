@@ -5450,10 +5450,10 @@ begin
   begin
     FormatDirective;
     {
-     FIX A BUG: semicolon can missing after directive like this:
+      FIXME: 以下句末没有分号的声明也是合法的，会导致行尾没正确判断语句结束，从而在语句内保留换行时多输出回车
 
-     procedure Foo; external 'foo.dll' name '__foo'
-     procedure Bar; external 'bar.dll' name '__bar'
+      procedure Foo; external 'foo.dll' name '__foo'
+      procedure Bar; external 'bar.dll' name '__bar'
     }
     if Scanner.Token = tokSemicolon then
       Match(tokSemicolon, 0, 0, True);
