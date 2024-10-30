@@ -3037,7 +3037,7 @@ const
 var
   I: Integer;
   AFont: TFont;
-  BColor: TColor;
+  BColor, SysBColor: TColor;
 begin
   // 从注册表中载入 IDE 的字体供外界使用
   AFont := TFont.Create;
@@ -3049,11 +3049,12 @@ begin
     if GetIDERegistryFont(ArrRegItems[0], AFont, BColor) then
       ResetFontsFromBasic(AFont);
 
+    SysBColor := GetSysColor(COLOR_WINDOW);
     for I := Low(FFontArray) + 1 to High(FFontArray) do
     begin
       try
-        BColor := clWhite;
-        if GetIDERegistryFont(ArrRegItems[I], AFont, BColor) then
+        BColor := SysBColor;
+        if GetIDERegistryFont(ArrRegItems[I], AFont, BColor, True) then
         begin
           FFontArray[I].Assign(AFont);
           if I = 7 then // WhiteSpace 的背景色

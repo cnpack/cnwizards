@@ -396,8 +396,10 @@ procedure GetInstalledComponents(Packages, Components: TStrings);
 {* 取已安装的包和组件，参数允许为 nil（忽略）}
 
 function GetIDERegistryFont(const RegItem: string; AFont: TFont;
-  out BackgroundColor: TColor): Boolean;
+  out BackgroundColor: TColor; CheckBackDef: Boolean = False): Boolean;
 {* 从某项注册表中载入某项字体并赋值给 AFont，并把背景色赋值给 BackgroundColor
+   CheckBackDef 表示（目前仅在 D56 下）读背景色时是否检查 Default Background 为 True，
+   True 代表使用默认背景色而不是本条目背景色，因而不返回读到的背景色值
    RegItem 可以是 '', 'Assembler', 'Comment', 'Preprocessor',
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol'
     等注册表里头已经定义了的键值}
@@ -2008,14 +2010,14 @@ begin
 end;
 
 function GetIDERegistryFont(const RegItem: string; AFont: TFont;
-  out BackgroundColor: TColor): Boolean;
+  out BackgroundColor: TColor; CheckBackDef: Boolean): Boolean;
 const
-  SCnIDERegName = {$IFDEF BDS} 'BDS' {$ELSE} {$IFDEF DELPHI} 'Delphi' {$ELSE} 'C++Builder' {$ENDIF}{$ENDIF};
-
   SCnIDEFontName = 'Editor Font';
   SCnIDEFontSize = 'Font Size';
 
   SCnIDEBold = 'Bold';
+  SCnIDEDefaultBackground = 'Default Background';
+
   {$IFDEF COMPILER7_UP}
   SCnIDEForeColor = 'Foreground Color New';
   SCnIDEBackColor = 'Background Color New'; // 暂未读取
@@ -2132,7 +2134,17 @@ begin
               // D5/6 的颜色是 16 色索引号
               AColor := Reg.ReadInteger(SCnIDEBackColor);
               if AColor in [0..15] then
+              begin
+                if CheckBackDef then // 该条目里，Default Background 为 True 时表示用系统色，此选项无效，不必返回
+                begin
+                  if Reg.ValueExists(SCnIDEDefaultBackground) then
+                  begin
+                    if LowerCase(Reg.ReadString(SCnIDEDefaultBackground)) <> 'true' then
+                      BackgroundColor := SCnColor16Table[AColor];
+                  end;
+                end;
                 BackgroundColor := SCnColor16Table[AColor];
+              end;
 {$ENDIF}
             end;
           end;
