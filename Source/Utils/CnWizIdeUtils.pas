@@ -2135,15 +2135,17 @@ begin
               AColor := Reg.ReadInteger(SCnIDEBackColor);
               if AColor in [0..15] then
               begin
-                if CheckBackDef then // 该条目里，Default Background 为 True 时表示用系统色，此选项无效，不必返回
+                if CheckBackDef then // 该条目里，Default Background 为 False 时表示有背景色，此选项才有效，才返回
                 begin
                   if Reg.ValueExists(SCnIDEDefaultBackground) then
                   begin
-                    if LowerCase(Reg.ReadString(SCnIDEDefaultBackground)) <> 'true' then
+                    // 其他 -1 这些字符串都算 True
+                    if LowerCase(Reg.ReadString(SCnIDEDefaultBackground)) = 'false' then
                       BackgroundColor := SCnColor16Table[AColor];
                   end;
-                end;
-                BackgroundColor := SCnColor16Table[AColor];
+                end
+                else
+                  BackgroundColor := SCnColor16Table[AColor];
               end;
 {$ENDIF}
             end;
