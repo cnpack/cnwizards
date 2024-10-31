@@ -5435,6 +5435,8 @@ end;
                   -> FunctionHeading ';' [(DIRECTIVE ';')...]
 }
 procedure TCnGoalCodeFormatter.FormatExportedHeading(PreSpaceCount: Byte);
+var
+  SemiAfterDirective: Boolean;
 begin
   case Scanner.Token of
     tokKeywordProcedure: FormatProcedureHeading(PreSpaceCount);
@@ -5446,17 +5448,29 @@ begin
   if Scanner.Token = tokSemicolon then
     Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
 
+  SemiAfterDirective := True;
   while Scanner.Token in DirectiveTokens do
   begin
+    SemiAfterDirective := False;
     FormatDirective;
     {
-      FIXME: 以下句末没有分号的声明也是合法的，会导致行尾没正确判断语句结束，从而在语句内保留换行时多输出回车
+      以下句末没有分号的声明也是合法的，会导致行尾没正确判断语句结束，
+      从而在语句内保留换行时多输出回车，需要在循环外补救
 
       procedure Foo; external 'foo.dll' name '__foo'
       procedure Bar; external 'bar.dll' name '__bar'
     }
     if Scanner.Token = tokSemicolon then
+    begin
+      SemiAfterDirective := True;
       Match(tokSemicolon, 0, 0, True);
+    end;
+  end;
+
+  if not SemiAfterDirective and CnPascalCodeForRule.KeepUserLineBreak then
+  begin
+    // 所以在此补上一个硬动作，删除最新的所有空行
+    CodeGen.BackSpaceEmptyLines;
   end;
 end;
 

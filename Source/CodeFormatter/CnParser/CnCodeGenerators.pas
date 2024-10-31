@@ -125,10 +125,13 @@ type
       注意 Scanner 在忽略区时不要调用，免得引起额外的空格消失}
     procedure TrimLastEmptyLine;
     {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
+    procedure BackSpaceEmptyLines;
+    {* 单独针对 Directive 无句末分号而写的，删除尾部所有纯空格行的方法，需严格限制使用以避免副作用}
+
     function IsLastLineEmpty: Boolean;
-    {* 最后一行是否就一个回车}
+    {* 最后一行是否就是一个完全的空行，不算回车换行}
     function IsLastLineSpaces: Boolean;
-    {* 最后一行是否就空格和 Tab}
+    {* 最后一行是否就空格和 Tab，不算回车换行}
     function IsLast2LineEmpty: Boolean;
     {* 最后两行是否就两个回车，如果行数不够也返回 False}
 
@@ -221,6 +224,17 @@ begin
   end;
 end;
 
+procedure TCnCodeGenerator.BackSpaceEmptyLines;
+begin
+  while IsLastLineSpaces do
+  begin
+    if FCode.Count > 0 then
+      FCode.Delete(FCode.Count - 1);
+    if FActualLines.Count > 0 then
+      FActualLines.Delete(FActualLines.Count - 1);
+  end;
+end;
+
 procedure TCnCodeGenerator.TrimLastEmptyLine;
 var
   S: string;
@@ -233,8 +247,10 @@ begin
     if Len > 0 then
     begin
       for I := 1 to Len do
+      begin
         if S[I] <> ' ' then
           Exit;
+      end;
 
       FCode[FCode.Count - 1] := '';
 {$IFDEF DEBUG}
@@ -246,13 +262,15 @@ begin
       if Len > 0 then
       begin
         for I := 1 to Len do
+        begin
           if S[I] <> ' ' then
             Exit;
+        end;
 
         FActualLines[FActualLines.Count - 1] := '';
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogFmt('GodeGen: FActualLines TrimLastEmptyLine %d Spaces.', [Len]);
-  {$ENDIF}
+{$ENDIF}
       end;
     end;
   end;
@@ -1017,9 +1035,13 @@ begin
     S := FCode[FCode.Count - 1];
     Len := Length(S);
     if Len > 0 then
+    begin
       for I := 1 to Len do
+      begin
         if (S[I] <> ' ') and (S[I] <> #09) then
           Exit;
+      end;
+    end;
   end;
   Result := True;
 end;
