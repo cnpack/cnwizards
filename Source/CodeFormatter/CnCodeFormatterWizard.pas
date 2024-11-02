@@ -401,7 +401,7 @@ begin
   FElideLines := TList.Create;
 {$IFDEF IDE_EDITOR_ELIDE}
   FElideTimer := TTimer.Create(nil);
-  FElideTimer.Interval := 2000;
+  FElideTimer.Interval := 3000;
   FElideTimer.OnTimer := ElideOnTimer;
   FElideTimer.Enabled := False;
 {$ENDIF}
@@ -852,6 +852,7 @@ begin
 
 {$IFDEF IDE_EDITOR_ELIDE}
     FElideTimer.Enabled := False;
+    FElideMarks := nil;
 {$ENDIF}
 
     // 记录断点、书签、折叠行、光标信息
