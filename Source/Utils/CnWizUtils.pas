@@ -6775,6 +6775,9 @@ var
 {$ENDIF}
 begin
   Result := False;
+  if Infos = nil then
+    Exit;
+
   if EditControl = nil then
     EditControl := CnOtaGetCurrentEditControl;
 
