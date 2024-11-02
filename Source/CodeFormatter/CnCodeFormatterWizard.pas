@@ -401,7 +401,7 @@ begin
   FElideLines := TList.Create;
 {$IFDEF IDE_EDITOR_ELIDE}
   FElideTimer := TTimer.Create(nil);
-  FElideTimer.Interval := 800;
+  FElideTimer.Interval := 2000;
   FElideTimer.OnTimer := ElideOnTimer;
   FElideTimer.Enabled := False;
 {$ENDIF}
