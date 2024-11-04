@@ -550,7 +550,7 @@ begin
   inherited;
   Temperature := 1.0;
   AnthropicVersion := '2023-06-01';
-  MaxTokens := 10240;
+  MaxTokens := 4096;
 end;
 
 destructor TCnClaudeAIEngineOption.Destroy;
