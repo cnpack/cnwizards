@@ -1,19 +1,19 @@
-Contrato de Licença CnWizards
+﻿Contrato de Licença CnPack 2ª Edição
 
-CnPack IDE Wizards (CnWizards) tem Copyright 2001-2024 pela equipe CnPack e vários outros autores que enviaram seus códigos para inclusão. Este contrato de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores a respeito de seus respectivos direitos autorais e termos.
+Os produtos CnPack estão protegidos por direitos autorais de 2001-2024 pela equipe CnPack e por vários outros autores que submeteram seu código para inclusão. Este acordo de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores sobre seus respectivos direitos autorais e condições.
 
-As regras que regem o uso do código-fonte CnWizards e CnWizards são derivadas da definição oficial de Código Aberto, disponível em http://www.opensource.org. As condições e limitações são as seguintes:
+As regras que regem o uso do CnPack e do código-fonte do CnPack são derivadas da definição oficial de software de código aberto, disponível em https://www.opensource.org. As condições e restrições são as seguintes:
 
-1. O uso de distribuições binárias CnWizards é permitido para todos os desenvolvedores.
+1. O uso de distribuições binárias do CnPack é permitido para todos os usuários.
 
-2. Você não pode usar o código-fonte CnWizards para criar e distribuir versões personalizadas de CnWizards sob o nome "CnPack" ou "CnWizards". Se você modificar e distribuir versões personalizadas de CnWizards, a distribuição binária deve ser nomeada de forma diferente e claramente marcada para que os usuários possam saber que não estão usando a distribuição oficial CnWizards. Uma versão visível e não modificada desta licença deve aparecer em qualquer distribuição modificada de CnWizards.
+2. Você não pode usar o código-fonte do CnPack para criar e distribuir versões personalizadas do CnPack sob o nome "CnPack" ou de outros produtos CnPack. Se você modificar e distribuir versões personalizadas do CnPack, a distribuição binária deve ter um nome diferente e ser claramente marcada para que os usuários saibam que não estão usando a distribuição oficial do CnPack. Uma versão visível e inalterada desta licença deve aparecer em qualquer distribuição modificada de produtos CnPack.
 
-3. As distribuições personalizadas do CnWizards devem incluir todas as alterações personalizadas como um arquivo de patch que pode ser aplicado ao código-fonte original. Essa restrição existe para proteger a integridade do código-fonte do autor original. Nenhum suporte para versões modificadas de CnWizards será fornecido pelos autores originais ou no site CnWizards, bbs ou listas de correio.
+3. Distribuições personalizadas do CnPack devem incluir todas as alterações personalizadas como um arquivo de patch que pode ser aplicado ao código-fonte original. Esta restrição está em vigor para proteger a integridade do código-fonte do autor original. Não será fornecida suporte para versões modificadas do CnPack pelos autores originais ou no site, fórum ou listas de discussão do CnPack.
 
-4. O código-fonte do CnWizards pode ser usado em projetos de código aberto sem notificar a equipe do CnPack. Todos os trabalhos de código aberto derivados de CnWizards devem ser distribuídos sob uma licença compatível com esta licença e a definição de código aberto oficial, que pode ser obtida em http://www.opensource.org/.
+4. Sujeito às disposições do item 2, o código-fonte do CnPack pode ser usado livremente em projetos de código aberto sem informar a equipe CnPack. Todas as obras de código aberto derivadas do CnPack devem ser distribuídas sob uma licença compatível com esta licença e a definição oficial de software de código aberto, que pode ser obtida em https://www.opensource.org/.
 
-5. Você não pode usar o código-fonte do CnWizards para desenvolver produtos proprietários ou comerciais, incluindo plug-ins ou bibliotecas para tais produtos, sem a permissão formal da equipe CnPack. Se você precisar de permissão, entre em contato com a equipe CnPack.
+5. Sujeito às disposições do item 2, o código-fonte do CnPack também pode ser usado livremente para desenvolver produtos proprietários ou comerciais, incluindo plugins ou bibliotecas, e é recomendável informar a equipe CnPack.
 
-Observe que a equipe CnPack e outros autores contribuintes declaram que este pacote é fornecido "como está" e sem quaisquer garantias expressas ou implícitas, incluindo, mas não se limitando a, garantias implícitas de comercialização e adequação para um uso específico. Em outras palavras, não somos responsáveis ​​por quaisquer danos que possam resultar do uso de CnWizards ou programas usando o código-fonte CnWizards.
+Por favor, note que a equipe CnPack e os outros autores contribuidores declaram que este pacote é fornecido "como está" e sem quaisquer garantias expressas ou implícitas, incluindo, mas não se limitando a, as garantias implícitas de comercialização e adequação para um propósito específico. Em outras palavras, nós não aceitamos nenhuma responsabilidade por qualquer dano que possa resultar do uso do CnPack ou de programas que usam o código-fonte do CnPack.
 
 Se você tiver alguma dúvida sobre esta licença, entre em contato com a equipe CnPack.
