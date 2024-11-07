@@ -29,12 +29,12 @@
 		<param name="Local" value="wizards\repository\cnmemprof.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="CnPack IDE 专家包许可协议">
-		<param name="Local" value="licenses\license.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="CnPack IDE 专家包更新提示">
 		<param name="Local" value="options\upgrade.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnPack 发布协议">
+		<param name="Local" value="licenses\license.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Constraints 编辑器">
