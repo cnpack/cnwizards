@@ -304,7 +304,7 @@ end;
 
 procedure TCnAICoderConfigForm.LoadFromOptions;
 var
-  I: Integer;
+  I, J, C: Integer;
   SL: TStringList;
 begin
   chkProxy.Checked := CnAIEngineOptionManager.UseProxy;
@@ -344,6 +344,19 @@ begin
       FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
       FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
 
+      // 把该 Option 里的额外参数塞给 Frame 实例，并加载值
+      C := CnAIEngineOptionManager.Options[I].GetExtraOptionCount;
+      if C > 0 then
+      begin
+        for J := 0 to C - 1 do
+        begin
+          FOptionFrames[I].RegisterExtraOption(CnAIEngineOptionManager.Options[I],
+            CnAIEngineOptionManager.Options[I].GetExtraOptionName(J),
+            CnAIEngineOptionManager.Options[I].GetExtraOptionType(J));
+        end;
+        FOptionFrames[I].BuildExtraOptionElements;
+      end;
+
       SL.Clear;
       ExtractStrings([','], [' '], PChar(CnAIEngineOptionManager.Options[I].ModelList), SL);
       if SL.Count > 0 then
@@ -367,9 +380,13 @@ var
 begin
   for I := 0 to Length(FOptionFrames) - 1 do
   begin
+    // 存标准属性
     CnAIEngineOptionManager.Options[I].URL := FOptionFrames[I].edtURL.Text;
     CnAIEngineOptionManager.Options[I].APIKey := FOptionFrames[I].edtAPIKey.Text;
     CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].cbbModel.Text;
+
+    // 存额外属性
+    FOptionFrames[I].SaveExtraOptions;
   end;
 
   CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;

@@ -407,7 +407,8 @@ begin
       OrigOption := CnAIEngineOptionManager.CreateOptionFromFile(Engines[I].EngineName,
         S, Engines[I].OptionClass, False); // 注意该原始配置对象无需进行管理
 
-      // OrigOption 中的新的非空选项，要赋值给 Option 的同名属性，仅仨基本数据类型
+      // OrigOption 中的新的非空选项，要赋值给 Option 的同名的空值的属性，仅几种基本数据类型
+      // 该机制用于新版配置增加新的属性时使用，希望嫑有新旧区分有误的问题。
       OrigOption.AssignToEmpty(Option);
     finally
       OrigOption.Free;

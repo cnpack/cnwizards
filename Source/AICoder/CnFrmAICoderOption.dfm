@@ -1,6 +1,6 @@
 inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
-  Width = 497
-  Height = 239
+  Width = 619
+  Height = 268
   object lblURL: TLabel
     Left = 16
     Top = 24
@@ -23,7 +23,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     Caption = 'Model Name:'
   end
   object lblApply: TLabel
-    Left = 392
+    Left = 518
     Top = 112
     Width = 82
     Height = 33
@@ -39,7 +39,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   object edtURL: TEdit
     Left = 120
     Top = 20
-    Width = 353
+    Width = 480
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
@@ -47,7 +47,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   object edtAPIKey: TEdit
     Left = 120
     Top = 84
-    Width = 353
+    Width = 480
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 2
@@ -55,7 +55,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   object cbbModel: TComboBox
     Left = 120
     Top = 52
-    Width = 353
+    Width = 480
     Height = 21
     Anchors = [akLeft, akTop, akRight]
     ItemHeight = 13

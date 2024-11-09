@@ -70,8 +70,13 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
+    // 以下仨函数供子类设置让外部界面额外显示特殊字段的设置文本和编辑框，注意要和子类里 published 的额外属性对应
+    function GetExtraOptionCount: Integer; virtual;
+    function GetExtraOptionName(Index: Integer): string; virtual;
+    function GetExtraOptionType(Index: Integer): TTypeKind; virtual;
+
     procedure AssignToEmpty(Dest: TCnAIEngineOption);
-    {* 目标属性非空时赋值，用于新旧版本属性合并}
+    {* 源属性非空且目标属性空时赋值，用于新增加的设置理，与旧版本属性合并}
 
     procedure LoadFromJSON(const JSON: AnsiString);
     {* 从 UTF8 格式的 JSON 字符串中加载一个选项实例的设置到自身}
@@ -113,6 +118,11 @@ type
   public
     constructor Create; override;
     destructor Destroy; override;
+
+    // 注意本类较基类在 published 区域增加了 2 个属性，因而以下仨函数需重载返回这俩
+    function GetExtraOptionCount: Integer; override;
+    function GetExtraOptionName(Index: Integer): string; override;
+    function GetExtraOptionType(Index: Integer): TTypeKind; override;
   published
     property MaxTokens: Integer read FMaxTokens write FMaxTokens;
     {* 最大 Token 数，Claude 必须，其余默认}
@@ -489,14 +499,14 @@ var
   PropList: PPropList;
   PropInfo: PPropInfo;
   AKind: TTypeKind;
-  VI: Integer;
-  VE: Extended;
-  VS: string;
-  V64: Int64;
+  VI, VI1: Integer;
+  VE, VE1: Extended;
+  VS, VS1: string;
+  V64, V641: Int64;
 begin
   Count := GetPropList(Self.ClassInfo, tkProperties - [tkArray, tkRecord,
     tkInterface], nil);
-  if Count <=0 then
+  if Count <= 0 then
     Exit;
 
   GetMem(PropList, Count * SizeOf(Pointer));
@@ -507,40 +517,71 @@ begin
     for PropIdx := 0 to Count - 1 do
     begin
       PropInfo := PropList^[PropIdx];
-      if PropInfo^.SetProc = nil then // 不能写的跳过
+      if PropInfo^.SetProc = nil then // 自身该属性不能写的跳过
         Continue;
 
       AKind := PropInfo^.PropType^^.Kind;
       case AKind of
         tkInteger, tkChar, tkWChar, tkClass, tkEnumeration, tkSet:
           begin
-            VI := GetOrdProp(Self, PropInfo);
+            VI := GetOrdProp(Self, PropInfo);    // 源非 0，目标 0，才赋值
             if VI <> 0 then
-              SetOrdProp(Dest, PropInfo, VI);
+            begin
+              VI1 := GetOrdProp(Dest, PropInfo);
+              if VI1 = 0 then
+                SetOrdProp(Dest, PropInfo, VI);
+            end;
           end;
         tkFloat:
           begin
-            VE := GetFloatProp(Self, PropInfo);
+            VE := GetFloatProp(Self, PropInfo);  // 源非 0，目标 0，才赋值
             if VE <> 0 then
-              SetFloatProp(Dest, PropInfo, VE);
+            begin
+              VE1 := GetOrdProp(Dest, PropInfo);
+              if VE1 = 0.0 then
+                SetFloatProp(Dest, PropInfo, VE);
+            end;
           end;
         tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}:
           begin
-            VS := GetStrProp(Self, PropInfo);
+            VS := GetStrProp(Self, PropInfo);    // 源非空，目标空，才赋值
             if VS <> '' then
-              SetStrProp(Dest, PropInfo, VS);
+            begin
+              VS1 := GetStrProp(Dest, PropInfo);
+              if VS1 = '' then
+                SetStrProp(Dest, PropInfo, VS);
+            end;
           end;
         tkInt64:
           begin
-            V64 := GetInt64Prop(Self, PropInfo);
+            V64 := GetInt64Prop(Self, PropInfo);  // 源非 0，目标 0，才赋值
             if V64 <> 0 then
-              SetInt64Prop(Dest, PropInfo, V64);
+            begin
+              V641 := GetInt64Prop(Dest, PropInfo);
+              if V641 = 0 then
+                SetInt64Prop(Dest, PropInfo, V64);
+            end;
           end;
       end;
     end;
   finally
     FreeMem(PropList);
   end;
+end;
+
+function TCnAIEngineOption.GetExtraOptionCount: Integer;
+begin
+  Result := 0;
+end;
+
+function TCnAIEngineOption.GetExtraOptionName(Index: Integer): string;
+begin
+  Result := '';
+end;
+
+function TCnAIEngineOption.GetExtraOptionType(Index: Integer): TTypeKind;
+begin
+  Result := tkUnknown;
 end;
 
 { TCnClaudeAIEngineOption }
@@ -557,6 +598,33 @@ destructor TCnClaudeAIEngineOption.Destroy;
 begin
 
   inherited;
+end;
+
+function TCnClaudeAIEngineOption.GetExtraOptionCount: Integer;
+begin
+  Result := 2;
+end;
+
+function TCnClaudeAIEngineOption.GetExtraOptionName(
+  Index: Integer): string;
+begin
+  case Index of
+    0: Result := 'MaxTokens';
+    1: Result := 'AnthropicVersion';
+  else
+    Result := '';
+  end;
+end;
+
+function TCnClaudeAIEngineOption.GetExtraOptionType(
+  Index: Integer): TTypeKind;
+begin
+  case Index of
+    0: Result := tkInteger;
+    1: Result := tkString;
+  else
+    Result := tkUnknown;
+  end;
 end;
 
 initialization
