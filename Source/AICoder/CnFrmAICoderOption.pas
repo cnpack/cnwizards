@@ -89,7 +89,7 @@ implementation
 
 
 uses
-  CnWizOptions {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizOptions, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   CN_AI_CODER_SUPPORT_TYPES: TTypeKinds = [tkInteger, tkFloat, tkString];
@@ -122,6 +122,7 @@ end;
 
 procedure TCnAICoderOptionFrame.CalcExtraPositions;
 begin
+  // 注意此处都是屏幕实际尺寸，不考虑 HDPI 缩放
   FVerticalDistance := lblAPIKey.Top - lblModel.Top;
   FVerticalLabelStart := lblAPIKey.Top + FVerticalDistance;
   FVerticalEditStart := edtAPIKey.Top + FVerticalDistance;
@@ -132,9 +133,6 @@ end;
 constructor TCnAICoderOptionFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  lblApply.Font.Color := clBlue;
-  lblApply.Font.Style := [fsUnderline];
-
   FExtraOptions := TObjectList.Create(True);
 end;
 
@@ -180,8 +178,13 @@ begin
   begin
     Item := TCnAIExtraItem(FExtraOptions[I]);
     Lbl := TLabel.Create(Self);
+{$IFDEF IDE_SUPPORT_HDPI}
+    Lbl.Left := Trunc(FHoriLabelStart / IdeGetScaledFactor);
+    Lbl.Top := Trunc((FVerticalLabelStart + I * FVerticalDistance) / IdeGetScaledFactor);
+{$ELSE}
     Lbl.Left := FHoriLabelStart;
     Lbl.Top := FVerticalLabelStart + I * FVerticalDistance;
+{$ENDIF}
     if (WizOptions.CurrentLangID = 2052) or (WizOptions.CurrentLangID = 1028) then
       Lbl.Caption := Item.OptionName + '：'
     else
@@ -189,9 +192,15 @@ begin
     Lbl.Parent := Self;
 
     Edt := TEdit.Create(Self);
+{$IFDEF IDE_SUPPORT_HDPI}
+    Edt.Left := Trunc(FHoriEditStart / IdeGetScaledFactor);;
+    Edt.Top := Trunc((FVerticalEditStart + I * FVerticalDistance) / IdeGetScaledFactor);;
+    Edt.Width := Trunc(edtURL.Width / IdeGetScaledFactor);;
+{$ELSE}
     Edt.Left := FHoriEditStart;
     Edt.Top := FVerticalEditStart + I * FVerticalDistance;
     Edt.Width := edtURL.Width;
+{$ENDIF}
     Edt.Name := 'edt' + Item.OptionName;
     Edt.Text := Item.GetStringValue;
     // Edt.Anchors := [akLeft, akTop, akRight];

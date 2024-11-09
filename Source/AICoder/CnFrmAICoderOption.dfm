@@ -33,7 +33,13 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     AutoSize = False
     BiDiMode = bdLeftToRight
     Caption = 'Apply'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlue
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsUnderline]
     ParentBiDiMode = False
+    ParentFont = False
     OnClick = lblApplyClick
   end
   object edtURL: TEdit
