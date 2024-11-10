@@ -659,6 +659,12 @@ var
   SFB, SFI, SFU, SFS: string;
   Charset: string;
 begin
+  if GetOrdValue = 0 then
+  begin
+    Result := '';
+    Exit;
+  end;
+
   if fsBold in TFont(GetOrdValue).Style then
     SFB := 'B'
   else
