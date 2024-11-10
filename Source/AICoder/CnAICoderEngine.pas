@@ -74,6 +74,9 @@ type
     FAnswerQueue: TCnObjectQueue;
     procedure CheckOptionPool;
   protected
+    procedure DeleteAuthorizationHeader(Headers: TStringList);
+    {* 供子类按需使用的，删除请求头里的 Authorization 字段，以备其他认证方式}
+
     procedure TalkToEngine(Sender: TCnThreadPool; DataObj: TCnTaskDataObject;
       Thread: TCnPoolingThread); virtual;
     {* 有默认实现且子类可重载的、与 AI 服务提供者进行网络通讯获取结果的实现函数
@@ -762,6 +765,20 @@ end;
 class function TCnAIBaseEngine.NeedApiKey: Boolean;
 begin
   Result := True;
+end;
+
+procedure TCnAIBaseEngine.DeleteAuthorizationHeader(Headers: TStringList);
+var
+  I: Integer;
+begin
+  for I := 0 to Headers.Count - 1 do
+  begin
+    if Pos('Authorization:', Headers[I]) = 1 then
+    begin
+      Headers.Delete(I);
+      Exit;
+    end;
+  end;
 end;
 
 initialization

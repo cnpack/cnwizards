@@ -417,9 +417,8 @@ end;
 procedure TCnClaudeAIEngine.PrepareRequestHeader(Headers: TStringList);
 begin
   inherited;
+  DeleteAuthorizationHeader(Headers); // 删除原有的认证头，换新头
   Headers.Add('x-api-key: ' + Option.ApiKey);
-  // 原先的 Authorization: Bearer 暂时不删
-
   Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
 end;
 
@@ -548,7 +547,8 @@ end;
 procedure TCnGeminiAIEngine.PrepareRequestHeader(Headers: TStringList);
 begin
   inherited;
-  // 暂时不删别的，身份认证在 URL 里
+  // 删原有的 Authorization，因为身份认证在 URL 里
+  DeleteAuthorizationHeader(Headers);
 end;
 
 { TCnOllamaAIEngine }
