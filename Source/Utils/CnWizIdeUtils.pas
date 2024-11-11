@@ -3776,7 +3776,6 @@ begin
 {$ELSE}
   Result := 1.0; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
 {$ENDIF}
-
 end;
 
 procedure IdeSetReverseScaledFontSize(AControl: TControl);

@@ -1035,6 +1035,10 @@ begin
             if P^ = #0 then
               Break;
 
+            // 多行字符串里别忘记了增加 SourceLine 避免对照产生偏差
+            if P^ = #10 then
+              Inc(FSourceLine);
+
             OldP := P;
             if not PrevMulti and (P^ = '''') then
             begin
@@ -1055,7 +1059,6 @@ begin
             PrevMulti := P^ = '''';
             Inc(P);
           end;
-
         end
         else
         begin
