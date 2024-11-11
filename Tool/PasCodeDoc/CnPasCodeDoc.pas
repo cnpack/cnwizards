@@ -203,12 +203,12 @@ procedure CnScanFileProcDecls(const FileName: string; OnScan: TCnScanProcDeclEve
             CLASSBODY
               CLASSHERITAGE
               public
-                procedure/function/constructor/destructor
+                procedure/function/constructor/destructor -- 返回这个
 
 二：
   interface
-    function
-    procedure
+    function                                              -- 返回这个
+    procedure                                             -- 返回这个
 }
 
 implementation

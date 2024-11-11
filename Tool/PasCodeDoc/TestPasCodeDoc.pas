@@ -543,23 +543,33 @@ end;
 
 procedure TFormPasDoc.OnProcedureGenerate(ProcLeaf: TCnPasAstLeaf;
   Visibility: TCnDocScope; const CurrentType: string);
+const
+  SPC_CNT = 2;
 var
   L1, L2: TCnPasAstLeaf;
-  J, I: Integer;
-  S1, S2: string;
+  J, I, C: Integer;
+  S, S1, S2: string;
 begin
   if ProcLeaf.Count < 2 then
     Exit;
 
-  if CurrentType <> '' then
-    mmoResult.Lines.Add(CurrentType + '.' + ProcLeaf[0].Text)
+  if ProcLeaf.NodeType = cntFunction then
+    S := 'function'
   else
-    mmoResult.Lines.Add(ProcLeaf[0].Text);
+    S := 'procedure';
+
+  if CurrentType <> '' then
+    mmoResult.Lines.Add(S + ' ' +CurrentType + '.' + ProcLeaf[0].Text)
+  else
+    mmoResult.Lines.Add(S + ' ' + ProcLeaf[0].Text);
+  mmoResult.Lines.Add('');
+  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', SPC_CNT)]));
 
   L1 := ProcLeaf[1]; // formalparameters
   if L1.Count > 0 then
   begin
     L2 := L1[0];       // (
+    C := 0;
     for J := 0 to L2.Count - 1 do // 找 ( 也就是 L2 下属的每一个 FormalParams
     begin
       if (L2[J].Count = 0) or (L2[J].NodeType <> cntFormalParam) then // 可能是用于分隔参数的分号
@@ -577,9 +587,46 @@ begin
       end;
 
       if (S1 <> '') and (S2 <> '') then
-        mmoResult.Lines.Add(Format('  %s: %s', [S1, S2]));
+      begin
+        S := Format('%s%s: %s', [StringOfChar(' ', SPC_CNT + SPC_CNT), S1, S2]);
+        mmoResult.Lines.Add(Format('%-50.50s-', [S]));
+        Inc(C);
+      end;
     end;
+
+    if C = 0 then
+      mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', SPC_CNT)]));
+  end
+  else
+    mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', SPC_CNT + SPC_CNT)]));
+
+  mmoResult.Lines.Add('');
+  S := StringOfChar(' ', SPC_CNT) + '返回值：';
+
+  if ProcLeaf.NodeType = cntFunction then
+  begin
+    if ProcLeaf.Count = 3 then  // function foo: Boolean;
+      L1 := ProcLeaf[2]  // Common Type
+    else if ProcLeaf.Count > 3 then  // function foo(): Boolean;
+      L1 := ProcLeaf[3]; // Common Type
+
+    if L1.Count > 0 then
+    begin
+      L1 := L1.Items[0];  // TypeId
+      if L1.Count > 0 then
+      begin
+        L1 := L1.Items[0];
+        S := S + L1.GetPascalCode;
+      end;
+    end;
+    mmoResult.Lines.Add(S);
+  end
+  else
+  begin
+    S := S + '（无）';
+    mmoResult.Lines.Add(S);
   end;
+  mmoResult.Lines.Add('');
 end;
 
 procedure TFormPasDoc.btnGenParamListClick(Sender: TObject);
