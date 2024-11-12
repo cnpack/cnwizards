@@ -672,7 +672,7 @@ begin
 
         I := 0; // 寻找右括号
         TmpLeaf := DocSkipToChild(Leaf, I, [cntRoundClose], [tkRoundClose]);
-        if TmpLeaf <> nil then // 
+        if TmpLeaf <> nil then //
         begin
           Inc(I);
           Comment := DocCollectComments(Leaf, I);
@@ -1005,9 +1005,14 @@ begin
                     and (TypeLeaf[I1][I2][0].NodeType = cntClassType) then
                   begin
                     ClassLeaf := TypeLeaf[I1][I2][0];
-                    if (ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody) then
+                    if ((ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody)) or // 可能 0 是一个注释
+                      ((ClassLeaf.Count > 1) and (ClassLeaf[1].NodeType = cntClassBody))then
                     begin
-                      ClassLeaf := ClassLeaf[0];
+                      if (ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody) then
+                        ClassLeaf := ClassLeaf[0]
+                      else
+                        ClassLeaf := ClassLeaf[1];
+
                       for I3 := 0 to ClassLeaf.Count - 1 do
                       begin
                         if (ClassLeaf[I3].NodeType = cntVisibility) {and (ClassLeaf[I3].TokenKind = tkPublic)} then

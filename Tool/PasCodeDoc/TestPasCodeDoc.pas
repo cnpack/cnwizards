@@ -550,7 +550,7 @@ var
   J, I, C: Integer;
   S, S1, S2: string;
 begin
-  if ProcLeaf.Count < 2 then
+  if (ProcLeaf.Count < 2) or (Visibility in [dsPrivate]) then
     Exit;
 
   if ProcLeaf.NodeType = cntFunction then
@@ -563,7 +563,7 @@ begin
   else
     mmoResult.Lines.Add(S + ' ' + ProcLeaf[0].Text);
   mmoResult.Lines.Add('');
-  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', SPC_CNT)]));
+  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', 3)]));
 
   L1 := ProcLeaf[1]; // formalparameters
   if L1.Count > 0 then
@@ -588,8 +588,8 @@ begin
 
       if (S1 <> '') and (S2 <> '') then
       begin
-        S := Format('%s%s: %s', [StringOfChar(' ', SPC_CNT + SPC_CNT), S1, S2]);
-        mmoResult.Lines.Add(Format('%-50.50s-', [S]));
+        S := Format('%s%s: %s', [StringOfChar(' ', 3 + SPC_CNT), S1, S2]);
+        mmoResult.Lines.Add(Format('%-42.42s-', [S]));
         Inc(C);
       end;
     end;
@@ -601,7 +601,7 @@ begin
     mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', SPC_CNT + SPC_CNT)]));
 
   mmoResult.Lines.Add('');
-  S := StringOfChar(' ', SPC_CNT) + '返回值：';
+  S := StringOfChar(' ', 3) + '返回值：';
 
   if ProcLeaf.NodeType = cntFunction then
   begin
@@ -617,6 +617,9 @@ begin
       begin
         L1 := L1.Items[0];
         S := S + L1.GetPascalCode;
+
+        if Length(S) < 42 then
+          S := S + StringOfChar(' ', 42 - Length(S)) + '-';
       end;
     end;
     mmoResult.Lines.Add(S);
