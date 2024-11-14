@@ -142,6 +142,7 @@ type
     {* 按常量、类型声明、函数过程、变量排序}
   public
     constructor Create; override;
+    {* 构造函数}
 
     procedure ParseBrief;
     {* 从注释中解析出单元简介，以及用备注字段内容替换 Comment 属性内容}
@@ -234,8 +235,8 @@ resourcestring
   SCnBrBr = '<br><br>';
 
 const
-  COMMENT_NODE_TYPE = [cntBlockComment];
-  COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment];
+  COMMENT_NODE_TYPE = [cntBlockComment, cntCRLFInComment];
+  COMMENT_SKIP_NODE_TYPE = [cntBlockComment, cntLineComment, cntCRLFInComment];
   COMMENT_NONE = '<none>';
 
   SCOPE_STRS: array[TCnDocScope] of string =
@@ -315,6 +316,7 @@ function DocCollectComments(ParentLeaf: TCnPasAstLeaf; var Index: Integer): stri
 var
   S: string;
   SL: TStrings;
+  PrevType: TCnPasNodeType;
 begin
   if (Index < ParentLeaf.Count) and (ParentLeaf[Index].NodeType in COMMENT_NODE_TYPE) then
   begin
@@ -324,8 +326,14 @@ begin
       // 表示有符合要求的注释，批量添加到一起
       SL := TStringList.Create;
       try
+        PrevType := cntInvalid;
         repeat
-          SL.Add(ParentLeaf[Index].Text);
+          if (PrevType = cntCRLFInComment) and (ParentLeaf[Index].NodeType = cntCRLFInComment) then // 本身是块注释后的换行，且上一个也是，就添加一个空行
+            SL.Add('')
+          else if ParentLeaf[Index].NodeType <> cntCRLFInComment then // 单独的 cntCRLFInComment 不增加空行也不增加回车换行本身
+            SL.Add(ParentLeaf[Index].Text);
+
+          PrevType := ParentLeaf[Index].NodeType;
           Inc(Index);
         until (Index >= ParentLeaf.Count) or not (ParentLeaf[Index].NodeType in COMMENT_NODE_TYPE);
         Dec(Index); // 回到最后一个注释处

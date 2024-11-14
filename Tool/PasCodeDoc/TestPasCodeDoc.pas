@@ -466,12 +466,28 @@ begin
 end;
 
 class function TFormPasDoc.TrimComment(const Comment: string): string;
+var
+  I: Integer;
+  SL: TStringList;
 begin
   Result := Comment;
   if Pos('{* ', Result) = 1 then
     Delete(Result, 1, 3);
   if Pos('}', Result) = Length(Result) then
     Delete(Result, Length(Result), 1);
+
+  SL := TStringList.Create;
+  try
+    SL.Text := Result;
+    for I := 0 to SL.Count - 1 do
+      SL[I] := Trim(SL[I]);
+    Result := SL.Text;
+  finally
+    SL.Free;
+  end;
+
+  Result := StringReplace(Result, #13#10#13#10, '<p>', [rfReplaceAll]);
+  Result := StringReplace(Result, #13#10, '<br>', [rfReplaceAll]);
 end;
 
 procedure TFormPasDoc.btnCheckParamListClick(Sender: TObject);
