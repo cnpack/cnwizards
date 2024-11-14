@@ -580,8 +580,10 @@ begin
       S2 := '';
       for I := 0 to L2[J].Count - 1 do
       begin
+        if L2[J][I].TokenKind in [tkVar, tkConst, tkOut] then
+          S1 := L2[J][I].GetPascalCode + ' ';
         if L2[J][I].NodeType = cntIdentList then
-          S1 := L2[J][I].GetPascalCode;
+          S1 := S1 + L2[J][I].GetPascalCode;
         if L2[J][I].NodeType = cntCommonType then
           S2 := L2[J][I].GetPascalCode
       end;
