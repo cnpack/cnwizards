@@ -467,10 +467,28 @@ end;
 
 class function TFormPasDoc.TrimComment(const Comment: string): string;
 var
-  I: Integer;
+  I, C, SpcCnt: Integer;
   SL: TStringList;
+
+  function CalcHeadSpace(const H: string): Integer;
+  var
+    J: Integer;
+  begin
+    Result := 0;
+    for J := 1 to Length(H) - 1 do
+    begin
+      if H[J] = ' ' then
+        Inc(Result)
+      else
+        Exit;
+    end;
+  end;
+
 begin
   Result := Comment;
+  if Result = '' then
+    Exit;
+
   if Pos('{* ', Result) = 1 then
     Delete(Result, 1, 3);
   if Pos('}', Result) = Length(Result) then
@@ -479,8 +497,26 @@ begin
   SL := TStringList.Create;
   try
     SL.Text := Result;
+    SpcCnt := 0;
     for I := 0 to SL.Count - 1 do
-      SL[I] := Trim(SL[I]);
+    begin
+      // 找每行头上有多少个空格
+      C := CalcHeadSpace(SL[I]);
+      if (C > 0) and (SpcCnt = 0) then
+        SpcCnt := C;
+    end;
+
+    if SpcCnt > 0 then
+    begin
+      for I := 0 to SL.Count - 1 do
+      begin
+        // 删除每行头上的 SpcCnt 个空格
+        C := CalcHeadSpace(SL[I]);
+        if C >= SpcCnt then
+          SL[I] := Copy(SL[I], SpcCnt + 1, MaxInt);
+      end;
+    end;
+
     Result := SL.Text;
   finally
     SL.Free;
@@ -488,6 +524,7 @@ begin
 
   Result := StringReplace(Result, #13#10#13#10, '<p>', [rfReplaceAll]);
   Result := StringReplace(Result, #13#10, '<br>', [rfReplaceAll]);
+  Result := StringReplace(Result, ' ', '&nbsp;', [rfReplaceAll]);
 end;
 
 procedure TFormPasDoc.btnCheckParamListClick(Sender: TObject);
