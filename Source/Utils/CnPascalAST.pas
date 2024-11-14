@@ -66,6 +66,7 @@ type
     cntLineComment,
     cntBlockComment,
     cntCompDirective,
+    cntCRLFInComment,
 
     cntAsm,
 
@@ -670,6 +671,7 @@ begin
     tkBorComment, tkAnsiComment: Result := cntBlockComment;
     tkSlashesComment: Result := cntLineComment;
     tkCompDirect: Result := cntCompDirective;
+    tkCRLFCo: Result := cntCRLFInComment;
 
     // 元素：标识符和数字、字符串等
     tkIdentifier, tkNil: Result := cntIdent;
@@ -1852,8 +1854,8 @@ begin
   repeat
     FLex.Next;
 
-    if FLex.TokenID in CommentTokens + [tkCompDirect] then
-      MatchCreateLeaf(FLex.TokenID); // 不步进，由本循环步进
+    if FLex.TokenID in CommentTokens + [tkCompDirect, tkCRLFCo] then
+      MatchCreateLeaf(FLex.TokenID); // 不步进，由本循环步进，加入 tkCRLFCo 是为了让节点中的注释内部不丢失回车换行
 
   until not (FLex.TokenID in SpaceTokens + CommentTokens + [tkCompDirect]);
 end;
@@ -3807,6 +3809,8 @@ begin
     tkExcept, tkExports, tkFinally, tkInitialization, tkFinalization, tkAsm,
     tkImplementation, tkRecord, tkPrivate, tkProtected, tkPublic, tkPublished]) then
     Result := Text + #13#10
+//  else if FTokenKind = tkCRLFCo then
+//    Result := ''
   else
     Result := Text;
 
