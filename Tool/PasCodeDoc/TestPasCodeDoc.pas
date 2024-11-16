@@ -524,6 +524,7 @@ begin
 
   Result := StringReplace(Result, #13#10#13#10, '<p>', [rfReplaceAll]);
   Result := StringReplace(Result, #13#10, '<br>', [rfReplaceAll]);
+  Result := StringReplace(Result, '  ', '　', [rfReplaceAll]);
   Result := StringReplace(Result, ' ', '&nbsp;', [rfReplaceAll]);
 end;
 
@@ -600,7 +601,7 @@ const
   SPC_CNT = 2;
 var
   L1, L2: TCnPasAstLeaf;
-  J, I, C: Integer;
+  J, I, C, ID1, ID2: Integer;
   S, S1, S2: string;
 begin
   if (ProcLeaf.Count < 2) or (Visibility in [dsPrivate]) then
@@ -611,12 +612,18 @@ begin
   else
     S := 'procedure';
 
+  ID1 := 0;
+  ID2 := 3;
   if CurrentType <> '' then
-    mmoResult.Lines.Add(S + ' ' +CurrentType + '.' + ProcLeaf[0].Text)
+  begin
+    mmoResult.Lines.Add(S + ' ' +CurrentType + '.' + ProcLeaf[0].Text);
+    ID1 := 4; // 类方法声明，先缩进 4
+  end
   else
     mmoResult.Lines.Add(S + ' ' + ProcLeaf[0].Text);
+
   mmoResult.Lines.Add('');
-  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', 3)]));
+  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', ID1 + ID2)]));
 
   L1 := ProcLeaf[1]; // formalparameters
   if L1.Count > 0 then
@@ -643,20 +650,20 @@ begin
 
       if (S1 <> '') and (S2 <> '') then
       begin
-        S := Format('%s%s: %s', [StringOfChar(' ', 3 + SPC_CNT), S1, S2]);
+        S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
         mmoResult.Lines.Add(Format('%-42.42s-', [S]));
         Inc(C);
       end;
     end;
 
     if C = 0 then
-      mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', SPC_CNT)]));
+      mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2)]));
   end
   else
-    mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', SPC_CNT + SPC_CNT)]));
+    mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2 + SPC_CNT)]));
 
   mmoResult.Lines.Add('');
-  S := StringOfChar(' ', 3) + '返回值：';
+  S := StringOfChar(' ', ID1 + ID2) + '返回值：';
 
   if ProcLeaf.NodeType = cntFunction then
   begin
