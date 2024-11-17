@@ -1012,16 +1012,17 @@ begin
                   if (TypeLeaf[I1][I2].NodeType = cntRestrictedType) and (TypeLeaf[I1][I2].Count >= 1)
                     and (TypeLeaf[I1][I2][0].NodeType = cntClassType) then
                   begin
-                    ClassLeaf := TypeLeaf[I1][I2][0];
-                    if ((ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody)) or // 可能 0 是一个注释
-                      ((ClassLeaf.Count > 1) and (ClassLeaf[1].NodeType = cntClassBody))then
-                    begin
-                      if (ClassLeaf.Count > 0) and (ClassLeaf[0].NodeType = cntClassBody) then
-                        ClassLeaf := ClassLeaf[0]
-                      else
-                        ClassLeaf := ClassLeaf[1];
+                    ClassLeaf := TypeLeaf[I1][I2][0]; // 此时 ClassLeaf 是 class，在其子节点中跳过可能的多行注释找 ClassBody
 
-                      for I3 := 0 to ClassLeaf.Count - 1 do
+                    I3 := 0;
+                    while (I3 < ClassLeaf.Count) and (ClassLeaf[I3].NodeType <> cntClassBody) do
+                      Inc(I3);
+
+                    if I3 < ClassLeaf.Count then // 说明找到 ClassBody 了
+                    begin
+                      ClassLeaf := ClassLeaf[I3];
+
+                      for I3 := 0 to ClassLeaf.Count - 1 do // 找 ClassBody 的子节点
                       begin
                         if (ClassLeaf[I3].NodeType = cntVisibility) {and (ClassLeaf[I3].TokenKind = tkPublic)} then
                         begin
