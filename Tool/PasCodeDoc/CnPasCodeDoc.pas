@@ -53,7 +53,8 @@ type
   TCnScanProcDeclEvent = procedure (ProcLeaf: TCnPasAstLeaf; Visibility: TCnDocScope;
     const CurrentTypeName: string) of object;
   {* 扫描 Pascal 源文件时遇到函数过程声明时的回调，其中 ProcLeaf 下的结构类似如下：
-    function
+
+    function ——这个是 ProcLeaf
       <FunctionName>
       FormalParameters
         (
@@ -76,6 +77,8 @@ type
       COMMONTYPE
         TypeID
           Boolean
+
+    和 function 节点同级往下找，越过 directive 等，找到的一批连续的注释节点就是所需注释块
   }
 
   TCnDocBaseItem = class(TObject)
@@ -211,6 +214,13 @@ procedure CnScanFileProcDecls(const FileName: string; OnScan: TCnScanProcDeclEve
     function                                              -- 返回这个
     procedure                                             -- 返回这个
 }
+
+function CnGetCommentLeafFromProcedure(ProcLeaf: TCnPasAstLeaf;
+  Last: Boolean = True): TCnPasAstLeaf;
+{* 按文档规范，获取 function/procedure 关键字节点相关的最后一块注释的节点
+  内部实现是找其同级，越过分号、directives、编译指令，到达第一个注释块或最后一个注释块
+  外部可用最后一个注释块是否是单独的右大括号来判断该注释块是否符合规范
+  如果该函数过程无注释，还不确定如何处理。}
 
 implementation
 
@@ -425,7 +435,7 @@ begin
 end;
 
 // 与同级节点三个一组：procedure/function（子节点是名称）、分号、单个注释块
-// 注意这里 ParentLeaf 是 procedure/function 节点，Index 是该节点在父节点中的索引
+// 注意这里 ParentLeaf 是 procedure/function 节点，Index 是该节点在父节点中的索引供步进
 procedure DocFindProcedure(ParentLeaf: TCnPasAstLeaf; var Index: Integer;
   OwnerItem: TCnDocBaseItem; AScope: TCnDocScope = dsNone);
 var
@@ -1051,6 +1061,52 @@ begin
     Pars.Free;
     AST.Free;
     SL.Free;
+  end;
+end;
+
+function CnGetCommentLeafFromProcedure(ProcLeaf: TCnPasAstLeaf;
+  Last: Boolean): TCnPasAstLeaf;
+var
+  Prev, Leaf: TCnPasAstLeaf;
+  Comm: Boolean;
+begin
+  Result := nil;
+  Leaf := ProcLeaf;
+  Comm := False;
+
+  while True do
+  begin
+    Prev := Leaf;
+    Leaf := TCnPasAstLeaf(Leaf.GetNextSibling);
+
+    if Leaf = nil then
+    begin
+      if Last and Comm then // 如果上一个是注释，那么这里结束，所以就上一个了
+      begin
+        Result := Prev;
+        Exit;
+      end;
+      Break;
+    end;
+
+    if Leaf.NodeType in COMMENT_NODE_TYPE then
+    begin
+      if not Last then // 第一回碰到时就会跳出
+      begin
+        Result := Leaf;
+        Exit;
+      end;
+      Comm := True;
+    end
+    else // 当前非注释时
+    begin
+      if Last and Comm then // 如果上一个是注释，那么就上一个了
+      begin
+        Result := Prev;
+        Exit;
+      end;
+      Comm := False;
+    end;
   end;
 end;
 

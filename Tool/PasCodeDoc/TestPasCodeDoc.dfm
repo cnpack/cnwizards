@@ -1,6 +1,6 @@
 object FormPasDoc: TFormPasDoc
   Left = 192
-  Top = 107
+  Top = 108
   Width = 979
   Height = 551
   Caption = 'Pascal Document'
@@ -77,11 +77,19 @@ object FormPasDoc: TFormPasDoc
   object btnGenParamList: TButton
     Left = 16
     Top = 112
-    Width = 305
+    Width = 241
     Height = 25
     Caption = 'Generate Params List'
     TabOrder = 6
     OnClick = btnGenParamListClick
+  end
+  object chkModFile: TCheckBox
+    Left = 264
+    Top = 116
+    Width = 57
+    Height = 17
+    Caption = 'Modify'
+    TabOrder = 7
   end
   object dlgOpen1: TOpenDialog
     Left = 232

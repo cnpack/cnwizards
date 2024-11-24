@@ -18,6 +18,7 @@ type
     btnConvertDirectory: TButton;
     btnCheckParamList: TButton;
     btnGenParamList: TButton;
+    chkModFile: TCheckBox;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -29,6 +30,9 @@ type
   private
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
+    FScanFileName: string;
+    FCommOffset: Integer;
+    FProcComments: TStringList;
     procedure DumpToTreeView(Doc: TCnDocUnit);
     class function TrimComment(const Comment: string): string;
     {* 处理掉说明的注释标记}
@@ -297,10 +301,12 @@ end;
 procedure TFormPasDoc.FormCreate(Sender: TObject);
 begin
   FAllFile := TStringList.Create;
+  FProcComments := TStringList.Create;
 end;
 
 procedure TFormPasDoc.FormDestroy(Sender: TObject);
 begin
+  FProcComments.Free;
   FAllFile.Free;
   FDoc.Free;
 end;
@@ -600,13 +606,18 @@ procedure TFormPasDoc.OnProcedureGenerate(ProcLeaf: TCnPasAstLeaf;
 const
   SPC_CNT = 2;
 var
-  L1, L2: TCnPasAstLeaf;
+  L1, L2, Comm: TCnPasAstLeaf;
   J, I, C, ID1, ID2: Integer;
   S, S1, S2: string;
+  Over: Boolean;
+  F: TFileStream;
+  M: TMemoryStream;
+  Buf: array of Byte;
 begin
   if (ProcLeaf.Count < 2) or (Visibility in [dsPrivate]) then
     Exit;
 
+  Over := False;
   if ProcLeaf.NodeType = cntFunction then
     S := 'function'
   else
@@ -622,8 +633,8 @@ begin
   else
     mmoResult.Lines.Add(S + ' ' + ProcLeaf[0].Text);
 
-  mmoResult.Lines.Add('');
-  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', ID1 + ID2)]));
+//  mmoResult.Lines.Add('');
+//  mmoResult.Lines.Add(Format('%s参数：', [StringOfChar(' ', ID1 + ID2)]));
 
   L1 := ProcLeaf[1]; // formalparameters
   if L1.Count > 0 then
@@ -651,18 +662,24 @@ begin
       if (S1 <> '') and (S2 <> '') then
       begin
         S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
-        mmoResult.Lines.Add(Format('%-42.42s-', [S]));
+        if Length(S) < 42 then
+          // mmoResult.Lines.Add(Format('%-42.42s-', [S]))
+        else
+        begin
+          // mmoResult.Lines.Add(Format('%-58.58s-', [S]));
+          Over := True;
+        end;
         Inc(C);
       end;
     end;
 
-    if C = 0 then
-      mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2)]));
-  end
-  else
-    mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2 + SPC_CNT)]));
+//    if C = 0 then
+//      mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2)]));
+  end;
+//  else
+//    mmoResult.Lines.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2 + SPC_CNT)]));
 
-  mmoResult.Lines.Add('');
+//  mmoResult.Lines.Add('');
   S := StringOfChar(' ', ID1 + ID2) + '返回值：';
 
   if ProcLeaf.NodeType = cntFunction then
@@ -684,21 +701,166 @@ begin
           S := S + StringOfChar(' ', 42 - Length(S)) + '-';
       end;
     end;
-    mmoResult.Lines.Add(S);
+    // mmoResult.Lines.Add(S);
   end
   else
   begin
     S := S + '（无）';
-    mmoResult.Lines.Add(S);
+    // mmoResult.Lines.Add(S);
   end;
-  mmoResult.Lines.Add('');
+  // mmoResult.Lines.Add('');
+
+  Comm := CnGetCommentLeafFromProcedure(ProcLeaf);
+  if Comm <> nil then
+  begin
+    mmoResult.Lines.Add(Comm.GetPascalCode);
+    if Trim(Comm.GetPascalCode) = '}' then // 单行右花括号结尾，认为是符合规范的，无需再往下处理了
+      Exit;
+  end;
+
+  FProcComments.Clear;
+  FProcComments.Add('');
+
+  // 重新走一遍，利用 Over 修正内容缩进，并生成到 FProcComments 中
+  if ProcLeaf.NodeType = cntFunction then
+    S := 'function'
+  else
+    S := 'procedure';
+
+  ID1 := 0;
+  ID2 := 3;
+  if CurrentType <> '' then
+  begin
+    mmoResult.Lines.Add(S + ' ' +CurrentType + '.' + ProcLeaf[0].Text);
+    ID1 := 4; // 类方法声明，先缩进 4
+  end
+  else
+    mmoResult.Lines.Add(S + ' ' + ProcLeaf[0].Text);
+
+  FProcComments.Add('');
+  FProcComments.Add(Format('%s参数：', [StringOfChar(' ', ID1 + ID2)]));
+
+  L1 := ProcLeaf[1]; // formalparameters
+  if L1.Count > 0 then
+  begin
+    L2 := L1[0];       // (
+    C := 0;
+    for J := 0 to L2.Count - 1 do // 找 ( 也就是 L2 下属的每一个 FormalParams
+    begin
+      if (L2[J].Count = 0) or (L2[J].NodeType <> cntFormalParam) then // 可能是用于分隔参数的分号
+        Continue;
+
+      // L2[J] 是 FormalParam，找它子树，凑成一行
+      S1 := '';
+      S2 := '';
+      for I := 0 to L2[J].Count - 1 do
+      begin
+        if L2[J][I].TokenKind in [tkVar, tkConst, tkOut] then
+          S1 := L2[J][I].GetPascalCode + ' ';
+        if L2[J][I].NodeType = cntIdentList then
+          S1 := S1 + L2[J][I].GetPascalCode;
+        if L2[J][I].NodeType = cntCommonType then
+          S2 := L2[J][I].GetPascalCode
+      end;
+
+      if (S1 <> '') and (S2 <> '') then
+      begin
+        S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
+        if not Over then
+          FProcComments.Add(Format('%-42.42s-', [S]))
+        else
+          FProcComments.Add(Format('%-58.58s-', [S]));
+        Inc(C);
+      end;
+    end;
+
+    if C = 0 then
+      FProcComments.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2)]));
+  end
+  else
+    FProcComments.Add(Format('%s（无）', [StringOfChar(' ', ID1 + ID2 + SPC_CNT)]));
+
+  FProcComments.Add('');
+  S := StringOfChar(' ', ID1 + ID2) + '返回值：';
+
+  if ProcLeaf.NodeType = cntFunction then
+  begin
+    if ProcLeaf.Count = 3 then  // function foo: Boolean;
+      L1 := ProcLeaf[2]  // Common Type
+    else if ProcLeaf.Count > 3 then  // function foo(): Boolean;
+      L1 := ProcLeaf[3]; // Common Type
+
+    if L1.Count > 0 then
+    begin
+      L1 := L1.Items[0];  // TypeId
+      if L1.Count > 0 then
+      begin
+        L1 := L1.Items[0];
+        S := S + L1.GetPascalCode;
+
+        if not Over then
+          S := S + StringOfChar(' ', 42 - Length(S)) + '-'
+        else
+          S := S + StringOfChar(' ', 58 - Length(S)) + '-'
+      end;
+    end;
+    FProcComments.Add(S);
+  end
+  else
+  begin
+    S := S + '（无）';
+    FProcComments.Add(S);
+  end;
+
+  S := FProcComments.Text;
+  // 重新生成了较为标准的 FProcComments，根据需要插入 Comm 所标识的位置
+  if (Comm <> nil) and (Length(S) > 0) and chkModFile.Checked then
+  begin
+    // 将 S 插入该文件的 Comm.LinearPos + FCommOffset 处
+    F := nil;
+    M := nil;
+    try
+      F := TFileStream.Create(FScanFileName, fmOpenRead or fmShareDenyWrite);
+      M := TMemoryStream.Create;
+
+      SetLength(Buf, Comm.LinearPos + FCommOffset - 1);
+      F.Read(Buf[0], Comm.LinearPos + FCommOffset - 1);
+      M.Write(Buf[0], Comm.LinearPos + FCommOffset - 1);
+      M.Write(S[1], Length(S));
+
+      SetLength(Buf, F.Size - (Comm.LinearPos + FCommOffset - 1));
+      if Length(Buf) > 0 then
+      begin
+        F.Read(Buf[0], Length(Buf));
+        M.Write(Buf[0], Length(Buf));
+      end;
+      FreeAndNil(F);
+
+      M.SaveToFile(FScanFileName);
+    finally
+      M.Free;
+      F.Free;
+    end;
+
+    FCommOffset := FCommOffset + Length(S); // 从前往后要修正偏移量
+  end
+  else
+    mmoResult.Lines.Add(S);
 end;
 
 procedure TFormPasDoc.btnGenParamListClick(Sender: TObject);
+var
+  M: TMemoryStream;
 begin
   if dlgOpen1.Execute then
   begin
     mmoResult.Lines.Clear;
+    M := TMemoryStream.Create;
+    M.LoadFromFile(dlgOpen1.FileName);
+    FScanFileName := ChangeFileExt(dlgOpen1.FileName, '.doc');
+    M.SaveToFile(FScanFileName);
+
+    FCommOffset := 0;
     CnScanFileProcDecls(dlgOpen1.FileName, OnProcedureGenerate);
   end;
 end;

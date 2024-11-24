@@ -248,6 +248,7 @@ type
     FReturn: Boolean;
     FNoSpaceBehind: Boolean;
     FNoSpaceBefore: Boolean;
+    FLinearPos: Cardinal;
     function GetItems(AIndex: Integer): TCnPasAstLeaf;
     procedure SetItems(AIndex: Integer; const Value: TCnPasAstLeaf);
     function GetParent: TCnPasAstLeaf;
@@ -267,6 +268,8 @@ type
     {* 语法树节点类型}
     property TokenKind: TTokenKind read FTokenKind write FTokenKind;
     {* Pascal Token 类型，注意有的节点本身没有实际对应的 Token，用 tkNone 代替}
+    property LinearPos: Cardinal read FLinearPos write FLinearPos;
+    {* 该节点对应的文件也就是解析器里的线性位置，注意只能处理 Ansi 编码}
     property Return: Boolean read FReturn write FReturn;
     {* 该 Token 后是否应换行，默认不换}
     property NoSpaceBehind: Boolean read FNoSpaceBehind write FNoSpaceBehind;
@@ -1818,6 +1821,7 @@ begin
 
   if FLocked = 0 then // 未锁才创建节点
   begin
+    // 该处是所有节点的创建处
     if (FCurrentRef <> nil) and (FTree.Root <> FCurrentRef) then
       Result := FTree.AddChild(FCurrentRef) as TCnPasAstLeaf
     else
@@ -1825,6 +1829,7 @@ begin
 
     Result.TokenKind := AToken;
     Result.NodeType := NodeType;
+    Result.LinearPos := FLex.RunPos;
 
     if AToken <> tkNone then      // 未锁才赋值
       Result.Text := FLex.Token;
