@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=Deixe o IDE lembrar do texto de pe
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=Cursor de contorno ao pressionar Esquerda no Cabeçalho da Linha.
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=Substituir Token sob o Cursor ao Colar.
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=Exibir Menu Shell clicando botão direito do mouse na Aba com Shift ou Ctrl.
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=Número Relativo da Linha.
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Desenrolar o cursor ao pressionar a direita no final da linha.
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 para pesquisar texto selecionado.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Colocar no Fim da Linha quando Enter ";" no Código-Fonte.

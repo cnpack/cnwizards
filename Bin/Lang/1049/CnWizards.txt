@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=Пусть IDE сохраняет 
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=Перен. курсор при нажмите стрелку влево в начале строки
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=При вставке заменить символ под курсором без выделения
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=Отобр. КМ Проводника при щелчке по вкладке с Shift или Ctrl
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=Относительный номер строки
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Перен. курсор при нажмите стрелку вправо в конце строки
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 для поиска выделенного текста
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Перемещение в конец строки при вводе ";" в коде

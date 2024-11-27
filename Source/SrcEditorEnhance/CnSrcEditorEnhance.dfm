@@ -335,7 +335,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Top = 56
           Width = 321
           Height = 17
-          Caption = 'Relative Line Number'
+          Caption = 'Relative Line Number.'
           TabOrder = 4
         end
         object btnCurrLineFont: TButton

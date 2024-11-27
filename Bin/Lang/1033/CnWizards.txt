@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=Let IDE Remember F3/Shift+F3 Searc
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=Wrap Cursor when Press Left at Line Head.
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=Replace Token under Cursor when Pasting.
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=Show Shell Menu by Right-click Tabset with Shift or Ctrl.
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=Relative Line Number.
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Wrap Cursor when Press Right at Line End.
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 to Search Selected Text.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Put to Line End when Enter ";" in Source Code.

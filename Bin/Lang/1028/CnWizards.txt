@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=F3/Shift+F3 查找時記憶查找�
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=光標在行首時按左方向鍵跳行。
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=粘貼時自動替換當前游標下的識別字。
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=使用 Shift 或 Ctrl 加滑鼠右鍵點擊標籤顯示外殼功能表。
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=顯示為相對於當前行的行數差。
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=光標在行尾時按右方向鍵跳行。
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Shift+F3 查找選中的文字。
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=有效代碼語句中輸入分號時自動移動到行尾。

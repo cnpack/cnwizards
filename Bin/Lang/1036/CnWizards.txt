@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=Laissez IDE mémoriser le texte de
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=Curseur quand vous appuyez à  gauche sur le début de ligne.
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=Remplacez le jeton sous le curseur lors du collage.
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=Afficher le menu du shell par clic droit sur l'Onglet avec Maj ou Ctrl.
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=Numéro de ligne relatif.
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Enveloppez le curseur quand vous appuyez à  droite à  la fin de ligne.
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=F3/Maj+F3 pour rechercher le texte sélectionné.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=Mettre en fin de ligne lorsque vous entrez ";" dans le code source.

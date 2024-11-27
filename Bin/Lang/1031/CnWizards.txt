@@ -2278,6 +2278,7 @@ TCnSrcEditorEnhanceForm.chkKeepSearch.Caption=lasse IDE Suchtext erinnern [F3]/[
 TCnSrcEditorEnhanceForm.chkLeftWrapLine.Caption=Umbreche den Cursor, wenn Links am Anfang eine Zeile gedrückt wird.
 TCnSrcEditorEnhanceForm.chkPasteReplace.Caption=ersetze Zeichen beim Einfügen.
 TCnSrcEditorEnhanceForm.chkRClickShellMenu.Caption=Zeige Shell Menu bei Rechts-Klick mit [Shift] und [Strg].
+TCnSrcEditorEnhanceForm.chkRelativeNumber.Caption=Relative Zeilennummer.
 TCnSrcEditorEnhanceForm.chkRightWrapLine.Caption=Umbreche den Cursor, wenn Rechts am Ende eine Zeile gedrückt wird.
 TCnSrcEditorEnhanceForm.chkSearchAgain.Caption=[F3]/[Shift]+[F3 ]um selektierten Text zu suchen.
 TCnSrcEditorEnhanceForm.chkSemicolon.Caption=gehe zu Zeilenende wenn ";" eingegeben wird.
