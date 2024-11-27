@@ -291,6 +291,7 @@ begin
 
   chkShowLineCount.Enabled := chkShowLineNumber.Checked;
   chkTenMode.Enabled := chkShowLineNumber.Checked;
+  chkRelativeNumber.Enabled := chkShowLineNumber.Checked;
   rbLinePanelAutoWidth.Enabled := chkShowLineNumber.Checked;
   btnLineFont.Enabled := chkShowLineNumber.Checked;
   btnCurrLineFont.Enabled := chkShowLineNumber.Checked;
