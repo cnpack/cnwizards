@@ -104,6 +104,7 @@ type
     lbl1: TLabel;
     seLinePanelFixWidth: TCnSpinEdit;
     chkShowLineCount: TCheckBox;
+    chkShowRelativeLineNumbers: TCheckBox;
     lbl2: TLabel;
     seLinePanelMinWidth: TCnSpinEdit;
     dlgFontCurrLine: TFontDialog;
@@ -289,6 +290,7 @@ begin
     chkShowInDesign.Enabled and chkShowInDesign.Checked;
 
   chkShowLineCount.Enabled := chkShowLineNumber.Checked;
+  chkShowRelativeLineNumbers.Enabled := chkShowLineNumber.Checked;
   chkTenMode.Enabled := chkShowLineNumber.Checked;
   rbLinePanelAutoWidth.Enabled := chkShowLineNumber.Checked;
   btnLineFont.Enabled := chkShowLineNumber.Checked;
@@ -590,6 +592,7 @@ begin
 
     chkShowLineNumber.Checked := FGutterMgr.ShowLineNumber;
     chkShowLineCount.Checked := FGutterMgr.ShowLineCount;
+    chkShowRelativeLineNumbers.Checked := FGutterMgr.RelativeLineNumbers;
     chkTenMode.Checked := FGutterMgr.TenMode;
     rbLinePanelAutoWidth.Checked := FGutterMgr.AutoWidth;
     rbLinePanelFixedWidth.Checked := not FGutterMgr.AutoWidth;
@@ -693,6 +696,7 @@ begin
 
       FGutterMgr.ShowLineNumber := chkShowLineNumber.Checked;
       FGutterMgr.ShowLineCount := chkShowLineCount.Checked;
+      FGutterMgr.RelativeLineNumbers := chkShowRelativeLineNumbers.Checked;
       FGutterMgr.TenMode := chkTenMode.Checked;
       FGutterMgr.AutoWidth := rbLinePanelAutoWidth.Checked;
       FGutterMgr.AutoWidth := not rbLinePanelFixedWidth.Checked;

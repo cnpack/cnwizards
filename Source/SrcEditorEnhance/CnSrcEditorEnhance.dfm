@@ -279,6 +279,14 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Caption = 'Show Total Line Count.'
           TabOrder = 2
         end
+        object chkShowRelativeLineNumbers: TCheckBox
+          Left = 24
+          Top = 36
+          Width = 321
+          Height = 17
+          Caption = 'Show Relative Line Numbers.'
+          TabOrder = 2
+        end
         object seLinePanelMinWidth: TCnSpinEdit
           Left = 184
           Top = 86

@@ -159,6 +159,7 @@ type
     FClickSelectLine: Boolean;
     FDragSelectLines: Boolean;
     FTenMode: Boolean;
+    FRelativeLineNumbers: Boolean;
     procedure SetFont(const Value: TFont);
     procedure SetShowLineNumber(const Value: Boolean);
     procedure SetActive(const Value: Boolean);
@@ -171,6 +172,7 @@ type
     procedure SetMinWidth(const Value: TCnGutterWidth);
     procedure SetShowModifier(const Value: Boolean);
     procedure SetTenMode(const Value: Boolean);
+    procedure SetRelativeLineNumbers(const Value: Boolean);
   protected
     procedure ThemeChanged(Sender: TObject);
     procedure DoUpdateGutters(EditWindow: TCustomForm; EditControl: TControl; Context:
@@ -213,6 +215,7 @@ type
     {* 是否双击切换书签}
     property TenMode: Boolean read FTenMode write SetTenMode;
     {* 是否使用缩略模式，只显示整十的行}
+    property RelativeLineNumbers: Boolean read FRelativeLineNumbers write SetRelativeLineNumbers;
 
     property Active: Boolean read FActive write SetActive;
     property ShowModifier: Boolean read FShowModifier write SetShowModifier;
@@ -277,6 +280,7 @@ const
   csClickSelectLine = 'ClickSelectLine';
   csDragSelectLines = 'DragSelectLines';
   csTenMode = 'TenMode';
+  csRelativeLineNumbers = 'RelativeLineNumbers';
   csDblClickToggleBookmark = 'DblClickToggleBookmark';
 
   CN_GUTTER_LINE_MODIFIER_CHANGED = 1;
@@ -525,7 +529,11 @@ begin
         if not FGutterMgr.TenMode or (Idx mod 10 = 0)
           or (Idx = FPosInfo.CaretY) or (Idx = 1) then // 第一行也画
         begin
-          StrNum := IntToStr(Idx);
+          if FGutterMgr.RelativeLineNumbers and not (Idx = FPosInfo.CaretY) then
+            StrNum := IntToStr(abs(Idx - FPosInfo.CaretY))
+          else
+            StrNum := IntToStr(Idx);
+
           DrawText(Canvas.Handle, PChar(StrNum), Length(StrNum), R, DT_VCENTER or
             DT_RIGHT or DT_SINGLELINE);
         end
@@ -1299,6 +1307,7 @@ begin
     FClickSelectLine := ReadBool(csGutter, csClickSelectLine, FClickSelectLine);
     FDragSelectLines := ReadBool(csGutter, csDragSelectLines, FDragSelectLines);
     FTenMode := ReadBool(csGutter, csTenMode, FTenMode);
+    FRelativeLineNumbers := ReadBool(csGutter, csRelativeLineNumbers, FRelativeLineNumbers);
     FDblClickToggleBookmark := ReadBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
     UpdateGutters;
   finally
@@ -1323,6 +1332,7 @@ begin
     WriteBool(csGutter, csClickSelectLine, FClickSelectLine);
     WriteBool(csGutter, csDragSelectLines, FDragSelectLines);
     WriteBool(csGutter, csTenMode, FTenMode);
+    WriteBool(csGutter, csRelativeLineNumbers, FRelativeLineNumbers);
     WriteBool(csGutter, csDblClickToggleBookmark, FDblClickToggleBookmark);
   finally
     Free;
@@ -1402,6 +1412,15 @@ begin
   if FTenMode <> Value then
   begin
     FTenMode := Value;
+    UpdateGutters;
+  end;
+end;
+
+procedure TCnSrcEditorGutterMgr.SetRelativeLineNumbers(const Value: Boolean);
+begin
+  if FRelativeLineNumbers <> Value then
+  begin
+    FRelativeLineNumbers := Value;
     UpdateGutters;
   end;
 end;
