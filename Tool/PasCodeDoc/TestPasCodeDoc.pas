@@ -2,6 +2,7 @@ unit TestPasCodeDoc;
 
 interface
 
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, CnCommon, ComCtrls, FileCtrl, CnPasCodeDoc, CnPasConvert, CnPascalAST,
@@ -852,6 +853,14 @@ procedure TFormPasDoc.btnGenParamListClick(Sender: TObject);
 var
   M: TMemoryStream;
 begin
+{$IFDEF UNICODE}
+  if chkModFile.Checked then
+  begin
+    ShowMessage('Modify File Can NOT Run under Unicode');
+    Exit;
+  end;
+{$ENDIF}
+
   if dlgOpen1.Execute then
   begin
     mmoResult.Lines.Clear;

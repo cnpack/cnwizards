@@ -3,7 +3,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   Top = 98
   BorderStyle = bsDialog
   Caption = 'Editor Enhancements Wizard Settings'
-  ClientHeight = 491
+  ClientHeight = 515
   ClientWidth = 401
   KeyPreview = True
   OnCreate = FormCreate
@@ -12,7 +12,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   TextHeight = 13
   object btnOK: TButton
     Left = 158
-    Top = 460
+    Top = 484
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -23,7 +23,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   end
   object btnCancel: TButton
     Left = 238
-    Top = 460
+    Top = 484
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -34,7 +34,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
   end
   object btnHelp: TButton
     Left = 318
-    Top = 460
+    Top = 484
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -46,7 +46,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
     Left = 8
     Top = 8
     Width = 385
-    Height = 444
+    Height = 468
     ActivePage = ts1
     TabOrder = 0
     object ts1: TTabSheet
@@ -137,12 +137,12 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 180
         Width = 361
-        Height = 224
+        Height = 248
         Caption = '&Read Only Protection'
         TabOrder = 1
         object lblDir: TLabel
           Left = 8
-          Top = 169
+          Top = 189
           Width = 17
           Height = 13
           Caption = 'Dir:'
@@ -160,21 +160,21 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Left = 8
           Top = 40
           Width = 337
-          Height = 116
+          Height = 137
           ItemHeight = 13
           TabOrder = 1
           OnClick = lbReadOnlyDirsClick
         end
         object edtDir: TEdit
           Left = 48
-          Top = 165
+          Top = 185
           Width = 273
           Height = 21
           TabOrder = 2
         end
         object btnSelectDir: TButton
           Left = 325
-          Top = 165
+          Top = 185
           Width = 21
           Height = 21
           Caption = '...'
@@ -183,7 +183,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnReplace: TButton
           Left = 47
-          Top = 193
+          Top = 213
           Width = 75
           Height = 21
           Action = actReplace
@@ -191,7 +191,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnAdd: TButton
           Left = 127
-          Top = 193
+          Top = 213
           Width = 75
           Height = 21
           Action = actAdd
@@ -199,7 +199,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object btnDel: TButton
           Left = 207
-          Top = 193
+          Top = 213
           Width = 75
           Height = 21
           Action = actDelete
@@ -215,40 +215,40 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 98
         Width = 361
-        Height = 206
+        Height = 230
         Caption = '&Line Number'
         TabOrder = 1
         object lbl1: TLabel
           Left = 42
-          Top = 127
+          Top = 151
           Width = 59
           Height = 13
           Caption = 'Show Fixed:'
         end
         object lbl2: TLabel
           Left = 42
-          Top = 91
+          Top = 115
           Width = 72
           Height = 13
           Caption = 'Show at Least:'
         end
         object rbLinePanelFixedWidth: TRadioButton
           Left = 24
-          Top = 108
+          Top = 132
           Width = 321
           Height = 17
           Caption = 'Fixed Width of Line Number.'
-          TabOrder = 7
+          TabOrder = 8
           OnClick = UpdateContent
         end
         object rbLinePanelAutoWidth: TRadioButton
           Left = 24
-          Top = 71
+          Top = 96
           Width = 321
           Height = 17
           Caption = 'Auto Adjust Width of Line Number.'
           Checked = True
-          TabOrder = 5
+          TabOrder = 6
           TabStop = True
           OnClick = UpdateContent
         end
@@ -263,12 +263,12 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object seLinePanelFixWidth: TCnSpinEdit
           Left = 184
-          Top = 122
+          Top = 146
           Width = 49
           Height = 22
           MaxValue = 10
           MinValue = 1
-          TabOrder = 8
+          TabOrder = 9
           Value = 3
         end
         object chkShowLineCount: TCheckBox
@@ -281,12 +281,12 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         end
         object seLinePanelMinWidth: TCnSpinEdit
           Left = 184
-          Top = 86
+          Top = 110
           Width = 49
           Height = 22
           MaxValue = 10
           MinValue = 1
-          TabOrder = 6
+          TabOrder = 7
           Value = 3
         end
         object btnLineFont: TButton
@@ -298,6 +298,46 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           TabOrder = 1
           OnClick = btnLineFontClick
         end
+        object chkGutterClickSelectLine: TCheckBox
+          Left = 8
+          Top = 170
+          Width = 321
+          Height = 17
+          Caption = 'Single Click to Select One Line in Editor.'
+          TabOrder = 10
+        end
+        object chkGutterDblClickToggleBookmark: TCheckBox
+          Left = 8
+          Top = 190
+          Width = 321
+          Height = 17
+          Caption = 'Double Click to Toggle Bookmark in Editor.'
+          TabOrder = 11
+        end
+        object chkGutterDragSelectLines: TCheckBox
+          Left = 8
+          Top = 208
+          Width = 321
+          Height = 17
+          Caption = 'Drag to Select Multi-Lines in Editor.'
+          TabOrder = 12
+        end
+        object chkTenMode: TCheckBox
+          Left = 24
+          Top = 76
+          Width = 201
+          Height = 17
+          Caption = 'Only Show 10th Numbers.'
+          TabOrder = 5
+        end
+        object chkRelativeNumber: TCheckBox
+          Left = 24
+          Top = 56
+          Width = 321
+          Height = 17
+          Caption = 'Relative Line Number'
+          TabOrder = 4
+        end
         object btnCurrLineFont: TButton
           Left = 228
           Top = 40
@@ -306,38 +346,6 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Caption = 'C&ur. Line Number Font...'
           TabOrder = 3
           OnClick = btnCurrLineFontClick
-        end
-        object chkGutterClickSelectLine: TCheckBox
-          Left = 8
-          Top = 146
-          Width = 321
-          Height = 17
-          Caption = 'Single Click to Select One Line in Editor.'
-          TabOrder = 9
-        end
-        object chkGutterDblClickToggleBookmark: TCheckBox
-          Left = 8
-          Top = 165
-          Width = 321
-          Height = 17
-          Caption = 'Double Click to Toggle Bookmark in Editor.'
-          TabOrder = 10
-        end
-        object chkGutterDragSelectLines: TCheckBox
-          Left = 8
-          Top = 184
-          Width = 321
-          Height = 17
-          Caption = 'Drag to Select Multi-Lines in Editor.'
-          TabOrder = 11
-        end
-        object chkTenMode: TCheckBox
-          Left = 24
-          Top = 54
-          Width = 201
-          Height = 17
-          Caption = 'Only Show 10th Numbers.'
-          TabOrder = 4
         end
       end
       object grpToolBar: TGroupBox
@@ -394,7 +402,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
       end
       object grpEditorNav: TGroupBox
         Left = 8
-        Top = 312
+        Top = 336
         Width = 361
         Height = 92
         Caption = '&Jumping Enhancement'
@@ -749,7 +757,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
         Left = 8
         Top = 278
         Width = 361
-        Height = 126
+        Height = 150
         Caption = 'Auto &Indent'
         TabOrder = 1
         object lbl3: TLabel
@@ -772,7 +780,7 @@ inherited CnSrcEditorEnhanceForm: TCnSrcEditorEnhanceForm
           Left = 24
           Top = 56
           Width = 325
-          Height = 56
+          Height = 78
           ScrollBars = ssVertical
           TabOrder = 1
           WordWrap = False

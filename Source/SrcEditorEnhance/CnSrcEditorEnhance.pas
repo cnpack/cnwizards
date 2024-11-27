@@ -167,6 +167,7 @@ type
     chkPasteReplace: TCheckBox;
     chkTenMode: TCheckBox;
     chkShowColor: TCheckBox;
+    chkRelativeNumber: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure UpdateContent(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -590,6 +591,7 @@ begin
 
     chkShowLineNumber.Checked := FGutterMgr.ShowLineNumber;
     chkShowLineCount.Checked := FGutterMgr.ShowLineCount;
+    chkRelativeNumber.Checked := FGutterMgr.RelativeNumber;
     chkTenMode.Checked := FGutterMgr.TenMode;
     rbLinePanelAutoWidth.Checked := FGutterMgr.AutoWidth;
     rbLinePanelFixedWidth.Checked := not FGutterMgr.AutoWidth;
@@ -693,6 +695,7 @@ begin
 
       FGutterMgr.ShowLineNumber := chkShowLineNumber.Checked;
       FGutterMgr.ShowLineCount := chkShowLineCount.Checked;
+      FGutterMgr.RelativeNumber := chkRelativeNumber.Checked;
       FGutterMgr.TenMode := chkTenMode.Checked;
       FGutterMgr.AutoWidth := rbLinePanelAutoWidth.Checked;
       FGutterMgr.AutoWidth := not rbLinePanelFixedWidth.Checked;
