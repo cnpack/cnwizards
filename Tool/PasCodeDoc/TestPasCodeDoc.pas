@@ -657,12 +657,22 @@ begin
         if L2[J][I].NodeType = cntIdentList then
           S1 := S1 + L2[J][I].GetPascalCode;
         if L2[J][I].NodeType = cntCommonType then
-          S2 := L2[J][I].GetPascalCode
+          S2 := L2[J][I].GetPascalCode;
+        if (L2[J][I].TokenKind = tkArray) and (I < L2[J].Count - 2) then
+        begin
+          // 组合　array of ConstantExpression 到 S
+          if (L2[J][I + 1].TokenKind = tkOf) and (L2[J][I + 2].NodeType = cntConstExpression) then
+            S2 := Format('%s %s %s', [L2[J][I].GetPascalCode, L2[J][I + 1].GetPascalCode, L2[J][I + 2].GetPascalCode]);
+        end;
       end;
 
-      if (S1 <> '') and (S2 <> '') then
+      if S1 <> '' then // and (S2 <> '') 无需判断 S2，因为可能无类型
       begin
-        S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
+        if S2 <> '' then
+          S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2])
+        else
+          S := Format('%s%s  %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
+
         if Length(S) < 42 then
           // mmoResult.Lines.Add(Format('%-42.42s-', [S]))
         else
@@ -761,12 +771,22 @@ begin
         if L2[J][I].NodeType = cntIdentList then
           S1 := S1 + L2[J][I].GetPascalCode;
         if L2[J][I].NodeType = cntCommonType then
-          S2 := L2[J][I].GetPascalCode
+          S2 := L2[J][I].GetPascalCode;
+        if (L2[J][I].TokenKind = tkArray) and (I < L2[J].Count - 2) then
+        begin
+          // 组合　array of ConstantExpression 到 S
+          if (L2[J][I + 1].TokenKind = tkOf) and (L2[J][I + 2].NodeType = cntConstExpression) then
+            S2 := Format('%s %s %s', [L2[J][I].GetPascalCode, L2[J][I + 1].GetPascalCode, L2[J][I + 2].GetPascalCode]);
+        end;
       end;
 
-      if (S1 <> '') and (S2 <> '') then
+      if S1 <> '' then // and (S2 <> '') 无需判断 S2，因为可能无类型
       begin
-        S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
+        if S2 <> '' then
+          S := Format('%s%s: %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2])
+        else
+          S := Format('%s%s  %s', [StringOfChar(' ', ID1 + ID2 + SPC_CNT), S1, S2]);
+
         if not Over then
           FProcComments.Add(Format('%-42.42s-', [S]))
         else
