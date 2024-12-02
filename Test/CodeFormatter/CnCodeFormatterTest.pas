@@ -116,6 +116,8 @@ type
     procedure btnParseCompDirectiveClick(Sender: TObject);
     procedure tvCompDirectiveCustomDrawItem(Sender: TCustomTreeView; Node:
       TTreeNode; State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure SrcMemoKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
 
   public
@@ -504,6 +506,16 @@ begin
   end
   else
     tvCompDirective.Canvas.Font.Color := clBlack;
+end;
+
+procedure TMainForm.SrcMemoKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (Key = Ord('A')) and (ssCtrl in Shift) then
+  begin
+    (Sender as TMemo).SelectAll;
+    Key := 0;
+  end;
 end;
 
 end.

@@ -3,7 +3,9 @@ object MainForm: TMainForm
   Top = 37
   Width = 1036
   Height = 729
-  Caption = 'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序 for 32/64 Unicode/Non-Unicode'
+  Caption = 
+    'CnPack IDE 专家包 Object Pascal / Delphi 代码格式化测试程序 for ' +
+    '32/64 Unicode/Non-Unicode'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -137,6 +139,7 @@ object MainForm: TMainForm
           ScrollBars = ssBoth
           TabOrder = 0
           WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
         end
       end
       object Panel2: TPanel
@@ -181,6 +184,7 @@ object MainForm: TMainForm
           ScrollBars = ssBoth
           TabOrder = 0
           WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
         end
         object tvCompDirective: TTreeView
           Left = 0
@@ -512,7 +516,7 @@ object MainForm: TMainForm
         object Label5: TLabel
           Left = 0
           Top = 0
-          Width = 36
+          Width = 393
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -529,12 +533,13 @@ object MainForm: TMainForm
           TabOrder = 0
           WantReturns = False
           WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
         end
       end
       object Panel5: TPanel
         Left = 396
         Top = 29
-        Width = 675
+        Width = 624
         Height = 646
         Align = alClient
         BevelOuter = bvNone
@@ -543,7 +548,7 @@ object MainForm: TMainForm
         object Label6: TLabel
           Left = 0
           Top = 0
-          Width = 36
+          Width = 624
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -553,19 +558,20 @@ object MainForm: TMainForm
         object Memo2: TMemo
           Left = 0
           Top = 12
-          Width = 675
+          Width = 624
           Height = 634
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
           WantReturns = False
           WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
         end
       end
       object ToolBar2: TToolBar
         Left = 0
         Top = 0
-        Width = 1071
+        Width = 1020
         Height = 29
         BorderWidth = 1
         ButtonHeight = 20
