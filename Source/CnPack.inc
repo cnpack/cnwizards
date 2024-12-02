@@ -20,8 +20,8 @@
 
 {******************************************************************************}
 {                                                                              }
-{                备注：该单元为公共编译指令和编译器版本信息包含文件            }
-{                      该单元的内容参考了 JCL 和 GExperts                      }
+{               备注：该单元为公共编译指令和编译器版本信息包含文件             }
+{                   该单元的内容部分参考了 JCL 和 GExperts                     }
 {                                                                              }
 {******************************************************************************}
 
@@ -3276,6 +3276,7 @@
   {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 supports auto open VCL source readonly
   {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 has Memory Visualizer for Debug
   {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 TStrings.SetTextStr Ignore #0 Terminated Char
+  {$DEFINE MEMORYSTREAM_CAPACITY_NATIVEINT}  // Alexandria 11 TMemoryStream Capacity is NativeInt instead of Longint
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
