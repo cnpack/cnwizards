@@ -781,6 +781,8 @@ function TAbstractScanner.IsInOpStatement: Boolean;
 const
   OpTokens = RelOpTokens + AddOPTokens + MulOpTokens + ShiftOpTokens
     + [tokAssign];
+var
+  T: TPascalToken;
 begin
   if FPrevEffectiveToken = tokSemicolon then // 分号说明不在语句内
   begin
@@ -788,13 +790,19 @@ begin
     Exit;
   end;
 
-  Result := FPrevEffectiveToken in OpTokens + [tokLB, tokSLB, tokKeywordVar, tokComma];
+  Result := (FPrevEffectiveToken in OpTokens + [tokLB, tokSLB, tokKeywordVar, tokComma]);
   // 双目运算符后，或左括号后。或 inline var 的 var 后，或 Enum 的逗号后
 
   if not Result and not FIsForwarding then
-    Result := ForwardActualToken() in OpTokens + [tokSemicolon, tokRB, tokSRB,
+  begin
+    T := ForwardActualToken();
+    Result := T in OpTokens + [tokSemicolon, tokRB, tokSRB,
       tokKeywordDo, tokKeywordOf, tokKeywordThen];  // 或者下一个是双目运算符或分号或右括号几个其他语句结束关键字
-  // 可能还有其他判断
+    if not Result then
+      Result := (T = tokDot) and (FPrevEffectiveToken = tokRB); // 级联的调用 ().test 这种
+
+    // 可能还有其他判断
+  end;
 end;
 
 function TAbstractScanner.GetCanLineBreakFromOut: Boolean;
