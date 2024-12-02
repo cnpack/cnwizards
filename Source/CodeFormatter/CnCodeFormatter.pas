@@ -1084,7 +1084,7 @@ procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
 var
   IsB, IsGeneric: Boolean;
   GenericBookmark: TScannerBookmark;
-  LessCount: Integer;
+  LessCount, OldTab: Integer;
 begin
   if Scanner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
@@ -1143,9 +1143,25 @@ begin
         begin
           { DONE: deal with index visit and function/procedure call}
           IsB := (Scanner.Token = tokLB);
-          Match(Scanner.Token);
-          // Str 这种函数调用，参数列表要支持冒号分割，不知道副作用是否大不大
-          FormatExprList(PreSpaceCount, IndentForAnonymous, IsB);
+
+          OldTab := FCurrentTab;
+          try
+            // 加入这几句是为了在调用理的参数间回车换行时缩进，类似于
+            // Call(
+            //   a,
+            //   b);
+
+            if IsB then
+              FCurrentTab := Tab(IndentForAnonymous);
+
+            Match(Scanner.Token);
+
+            // Str 这种函数调用，参数列表要支持冒号分割，不知道副作用是否大不大
+            FormatExprList(PreSpaceCount, IndentForAnonymous, IsB);
+          finally
+            if IsB then
+              FCurrentTab := OldTab;
+          end;
 
           IsB := Scanner.Token = tokRB;
           if IsB then
