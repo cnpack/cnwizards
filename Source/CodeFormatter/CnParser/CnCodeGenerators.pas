@@ -127,6 +127,9 @@ type
     {* 如果最后一行是全空格，则清除此行的所有空格，用于保留换行的场合}
     procedure BackSpaceEmptyLines;
     {* 单独针对 Directive 无句末分号而写的，删除尾部所有纯空格行的方法，需严格限制使用以避免副作用}
+    procedure BackSpaceSpaceLineIndent(Indent: Integer = 2);
+    {* 如果最后一行全是空格，且空格数比 Indent 多，则清除 Indent 个空格，
+      单独针对保留换行时函数调用的末括号而言的，，需严格限制使用以避免副作用}
 
     function IsLastLineEmpty: Boolean;
     {* 最后一行是否就是一个完全的空行，不算回车换行}
@@ -268,6 +271,47 @@ begin
         end;
 
         FActualLines[FActualLines.Count - 1] := '';
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('GodeGen: FActualLines TrimLastEmptyLine %d Spaces.', [Len]);
+{$ENDIF}
+      end;
+    end;
+  end;
+end;
+
+procedure TCnCodeGenerator.BackSpaceSpaceLineIndent(Indent: Integer);
+var
+  S: string;
+  I, Len: Integer;
+begin
+  if FCode.Count > 0 then
+  begin
+    S := FCode[FCode.Count - 1];
+    Len := Length(S);
+    if Len > Indent then
+    begin
+      for I := 1 to Len do
+      begin
+        if S[I] <> ' ' then
+          Exit;
+      end;
+
+      FCode[FCode.Count - 1] := Copy(S, 1, Len - Indent);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('GodeGen: BackSpaceSpaceLineIndent %d Spaces.', [Indent]);
+{$ENDIF}
+
+      S := FActualLines[FActualLines.Count - 1];
+      Len := Length(S);
+      if Len > Indent then
+      begin
+        for I := 1 to Len do
+        begin
+          if S[I] <> ' ' then
+            Exit;
+        end;
+
+        FActualLines[FActualLines.Count - 1] := Copy(S, 1, Len - Indent);
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('GodeGen: FActualLines TrimLastEmptyLine %d Spaces.', [Len]);
 {$ENDIF}

@@ -1167,6 +1167,10 @@ begin
           if IsB then
             SpecifyElementType(pfetExprListRightBracket);
           try
+            // 注意这句删俩空格，只有保留换行的情况下，函数调用最后一个参数后的右括号前换行时才有效
+            if CnPascalCodeForRule.KeepUserLineBreak then
+              FCodeGen.BackSpaceSpaceLineIndent(CnPascalCodeForRule.TabSpaceCount);
+
             Match(Scanner.Token);
           finally
             if IsB then
