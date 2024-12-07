@@ -312,8 +312,8 @@ begin
   Inc(Index);
   while Index < ParentLeaf.Count do
   begin
-    if not (ParentLeaf[Index].NodeType in [cntSemiColon, cntDirective, cntDefault]) then
-      Break;    // 可能还有其他不包括在 cntDirective 中的关键字
+    if not (ParentLeaf[Index].NodeType in [cntCompDirective, cntSemiColon, cntDirective, cntDefault]) then
+      Break;    // 可能还有其他不包括在 cntDirective 中的关键字或 IFDEF 等编译指令
 
     Inc(Index);
   end;

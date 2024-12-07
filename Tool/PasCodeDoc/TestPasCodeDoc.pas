@@ -834,6 +834,9 @@ begin
   end;
 
   S := FProcComments.Text;
+  if ID1 > 0 then
+    S := S + StringOfChar(' ', ID1);
+
   // 重新生成了较为标准的 FProcComments，根据需要插入 Comm 所标识的位置
   if (Comm <> nil) and (Length(S) > 0) and chkModFile.Checked then
   begin
