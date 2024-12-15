@@ -206,6 +206,7 @@ type
     tokDirectiveSTDCALL,
     tokDirectiveVARARGS,
     tokDirectiveVIRTUAL,
+    tokDirectiveWINAPI,
     tokDirective_END,
 
     tokComplex_BEGIN,
@@ -534,6 +535,7 @@ const
     (Value: Integer(tokDirectiveSTDCALL);      Name: 'STDCALL'),
     (Value: Integer(tokDirectiveVARARGS);      Name: 'VARARGS'),
     (Value: Integer(tokDirectiveVIRTUAL);      Name: 'VIRTUAL'),
+    (Value: Integer(tokDirectiveWINAPI);       Name: 'WINAPI'),
     (Value: Integer(tokDirective_END);         Name: ''),
                                                               
     //Complex Keyword, it can be keyword or directive or symbol(variant/proc name)

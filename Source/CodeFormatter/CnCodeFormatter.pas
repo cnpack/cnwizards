@@ -483,6 +483,7 @@ begin
   FKeywordsValidArray[tokDirectiveMESSAGE] := [pfetDirective];
   FKeywordsValidArray[tokDirectiveREGISTER] := [pfetDirective];
   FKeywordsValidArray[tokDirectiveEXPORT] := [pfetDirective];
+  FKeywordsValidArray[tokDirectiveWINAPI] := [pfetDirective];
   // TODO: 加入其他 Directive
 
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
