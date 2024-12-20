@@ -1562,10 +1562,11 @@ begin
 
         S := TokenString;
         // 再写注释本身
-        if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
+        if FASMMode and (Length(S) >= 1) then
         begin
           // 注意 ASM 下这个注释可能是 #13 结尾，需要砍掉
-          Delete(S, Length(S), 1);
+          if S[Length(S)] = #13 then
+            Delete(S, Length(S), 1);
           FCodeGen.Write(S);
           FCodeGen.WriteCommentEndln;
         end
@@ -1681,10 +1682,11 @@ begin
 
         S := TokenString;
         // 再写注释本身
-        if FASMMode and (Length(S) >= 1) and (S[Length(S)] = #13) then
+        if FASMMode and (Length(S) >= 1) then
         begin
           // 注意 ASM 下这个注释可能是 #13 结尾，需要砍掉
-          Delete(S, Length(S), 1);
+          if S[Length(S)] = #13 then
+            Delete(S, Length(S), 1);
           FCodeGen.Write(S);
           FCodeGen.WriteCommentEndln;
         end
