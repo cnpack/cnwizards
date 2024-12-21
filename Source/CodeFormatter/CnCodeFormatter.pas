@@ -2615,7 +2615,7 @@ begin
       OldLastToken := FLastToken;
       CodeGen.LockOutput;
 
-      if NewLine then // 行首，要检测label
+      if NewLine then // 行首，要检测 label
       begin
         LabelLen := 0;
         ALabel := '';
@@ -2760,7 +2760,7 @@ begin
   Match(tokLB);
   OldKeepOneBlankLine := Scanner.KeepOneBlankLine;
   Scanner.KeepOneBlankLine := False; // 嵌套数组声明中无需保留原有内部的至少一行换行的模式
-                                    // 不等于保留换行的选项
+                                     // 不等于保留换行的选项
   SpecifyElementType(pfetArrayConstant);
 
   try
