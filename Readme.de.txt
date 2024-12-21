@@ -43,7 +43,7 @@ Datei, um weitere Einzelheiten zu erfahren.
     Auf der CnPack Internetseite können Sie die neuesten 
 Informationen erfahren.
 	
-    http://www.cnpack.org
+    https://www.cnpack.org
 
 ======================================================================
 3. Installation
@@ -56,7 +56,7 @@ installieren. Für weitere Informationen lesen Sie bitte die Hilfe-Datei.
     Wenn Sie irgendwelche Probleme während der Arbeit mit cnWizards haben,
 kontaktieren Sie uns bitte unter:
 
-    http://www.cnpack.org
+    https://www.cnpack.org
     mailto:master@cnpack.org
 
 ======================================================================
@@ -75,7 +75,7 @@ der cnWizards:
     5. Install: beinhaltet die Installations Skripte.
     6. Make:    beinhaltet Skripte für das automatische Herstellen.
     7. Source:  beinhaltet den ganzen Quelltext der CnWizards.
-    8. Tools:   beinhaltet den Quelltext der anderen Tools der cnWizards.
+    8. Tool:    beinhaltet den Quelltext der anderen Tools der cnWizards.
 	
 ======================================================================
 5. Herunterladen
@@ -84,11 +84,11 @@ der cnWizards:
 Sie können die neueste Version von der cnPack Internet-Seite 
 	herunterladen oder:
 
-    CnPack Komponenten Paket: http://download.cnpack.org/CnVcl.zip
-    CnWizards Installer:      http://download.cnpack.org/CnWizards.exe
-    CnWizards Quelltext:      http://download.cnpack.org/CnWizards_Src.zip
+    CnPack Komponenten Paket: https://download.cnpack.org/CnVcl.7z
+    CnWizards Installer:      https://download.cnpack.org/CnWizards.exe
+    CnWizards Quelltext:      https://download.cnpack.org/CnWizards_Src.7z
 
-    GIT: http://github.com/cnpack
+    GIT: https://github.com/cnpack
 
 ======================================================================
 6. Kompilierung und Herstellung

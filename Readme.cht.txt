@@ -38,7 +38,7 @@ Alexandria、12 Athens 進行開發的程式師。
 
     請訪問 CnPack 開發網站，以獲得最新的更新消息：
 
-    http://www.cnpack.org
+    https://www.cnpack.org
 
 ======================================================================
 3. 安裝使用
@@ -49,7 +49,7 @@ Alexandria、12 Athens 進行開發的程式師。
 
     如果您在使用專家包的過程中發現任何問題，請與 CnPack 開發組聯繫：
 
-    http://www.cnpack.org
+    https://www.cnpack.org
     mailto:master@cnpack.org
 
 ======================================================================
@@ -66,7 +66,7 @@ Alexandria、12 Athens 進行開發的程式師。
     5、Install 專家包安裝文件製作目錄。
     6、Make 專家包構建目錄。
     7、Source 專家包源代碼目錄，所有的 CnWizards 源碼放於該目錄下。
-    8、Tools 存放專家包附帶的工具的源碼。
+    8、Tool 存放專家包附帶的工具的源碼。
 
 ======================================================================
 5. 程序及源碼下載
@@ -74,12 +74,12 @@ Alexandria、12 Athens 進行開發的程式師。
 
     最新的 CnWizards 源碼可以從 cnpack 開發網站下載，或者使用以下地址：
 
-    cnpack 組件包源碼:  http://download.cnpack.org/CnVcl.zip
-    CnWizards 安裝程序: http://download.cnpack.org/CnWizards.exe
-    CnWizards 源代碼:   http://download.cnpack.org/CnWizards_Src.zip
+    cnpack 組件包源碼:  https://download.cnpack.org/CnVcl.7z
+    CnWizards 安裝程序: https://download.cnpack.org/CnWizards.exe
+    CnWizards 源代碼:   https://download.cnpack.org/CnWizards_Src.7z
 
     GIT 源代碼檢出：
-    http://github.com/cnpack
+    https://github.com/cnpack
 
 ======================================================================
 6. 編譯及自動構建

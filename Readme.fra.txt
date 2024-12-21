@@ -38,7 +38,7 @@ La licence est également protégée par celle-ci.
 
     Bienvenue sur le site Web de CnPack pour obtenir les dernières informations.
 
-    http://www.cnpack.org
+    https://www.cnpack.org
 
 ================================================== ====================
 3. Installation
@@ -50,7 +50,7 @@ fichier.
 
     Si vous rencontrez un problème lors de l'utilisation de CnWizards, veuillez nous contacter:
 
-    http://www.cnpack.org
+    https://www.cnpack.org
     mailto:master@cnpack.org
 
 ======================================================================
@@ -67,7 +67,7 @@ fichier.
     5. Install.Il contient des scripts d'installation.
     6. Make. Il contient des scripts de construction automatique.
     7. Source. Il contient tous les codes source de CnWizards.
-    8. Tools. Il contient les codes sources d'autres outils de CnWizards.
+    8. Tool. Il contient les codes sources d'autres outils de CnWizards.
 
 ======================================================================
 5. Téléchargement
@@ -75,11 +75,11 @@ fichier.
 
     Vous pouvez télécharger la dernière version sur le site Web de cnpack ou:
 	
-    Package de composants CnPack:  http://download.cnpack.org/CnVcl.zip
-    Installation CnWizards      :  http://download.cnpack.org/CnWizards.exe
-    Source CnWizards            :  http://download.cnpack.org/CnWizards_Src.zip
+    Package de composants CnPack:  https://download.cnpack.org/CnVcl.7z
+    Installation CnWizards      :  https://download.cnpack.org/CnWizards.exe
+    Source CnWizards            :  https://download.cnpack.org/CnWizards_Src.7z
 
-    GIT: http://github.com/cnpack
+    GIT: https://github.com/cnpack
 
 ======================================================================
 6. Compilation et construction
