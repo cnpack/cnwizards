@@ -489,9 +489,10 @@ begin
   FKeywordsValidArray[tokComplexName] := [pfetDirective];
   FKeywordsValidArray[tokKeywordAlign] := [pfetRecordEnd];
 
-  // requires/contains 只在 dpk 里算关键字
+  // requires/contains 等只在 dpk 里算关键字
   FKeywordsValidArray[tokKeywordRequires] := [pfetPackageBlock];
   FKeywordsValidArray[tokKeywordContains] := [pfetPackageBlock];
+  FKeywordsValidArray[tokKeywordPackage] := [pfetPackageKeyword];
 
   // at 只在 raise 后面才算关键字
   FKeywordsValidArray[tokKeywordAt] := [pfetRaiseAt];
@@ -2137,7 +2138,7 @@ begin
     case Scanner.Token of
       tokSymbol, tokAmpersand, tokAtSign, tokKeywordFinal, tokKeywordIn, tokKeywordOut,
       tokKeywordString, tokKeywordAlign, tokKeywordAt, tokInteger, tokFloat,
-      tokKeywordContains, tokKeywordRequires, tokKeywordOperator,
+      tokKeywordContains, tokKeywordRequires, tokKeywordOperator, tokKeywordPackage,
       tokDirective_BEGIN..tokDirective_END, // 允许语句以部分关键字以及数字开头，其余和 CanBeSymbol 函数内部实现类似
       tokComplex_BEGIN..tokComplex_END:
         begin
@@ -5677,12 +5678,18 @@ begin
 end;
 
 {
-  Program -> [PROGRAM Ident ['(' IdentList ')'] ';']
-             ProgramBlock '.'
+  Program -> [PACKAGE Ident ['(' IdentList ')'] ';']
+             PackageBlock '.'
 }
 procedure TCnGoalCodeFormatter.FormatPackage(PreSpaceCount: Byte);
 begin
-  Match(tokKeywordPackage, PreSpaceCount);
+  try
+    SpecifyElementType(pfetPackageKeyword);
+    Match(tokKeywordPackage, PreSpaceCount);
+  finally
+    RestoreElementType;
+  end;
+
   SpecifyElementType(pfetUnitName);
   try
     FormatIdent;

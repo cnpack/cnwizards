@@ -241,8 +241,8 @@ type
     pfetArrayConstant, pfetSetConstructor, pfetFormalParameters, pfetConstExpr,
     pfetUsesList, pfetThen, pfetDo, pfetRecordEnd, pfetCaseLabel, pfetCaseLabelList,
     pfetExprListRightBracket, pfetFormalParametersRightBracket, pfetFieldDecl,
-    pfetClassField, pfetInGeneric, pfetRecVarFieldListRightBracket, pfetPackageBlock,
-    pfetCompoundEnd, pfetIfAfterElse, pfetUnitName, pfetInlineVar);
+    pfetClassField, pfetInGeneric, pfetRecVarFieldListRightBracket, pfetPackageKeyword,
+    pfetPackageBlock, pfetCompoundEnd, pfetIfAfterElse, pfetUnitName, pfetInlineVar);
 
   TCnPascalFormattingElementTypeSet = set of TCnPascalFormattingElementType;
 
@@ -285,7 +285,7 @@ const
 
   // 能够做语句中的内容的关键字
   StmtKeywordTokens = [tokKeywordIn, tokKeywordOut, tokKeywordString, tokKeywordAlign,
-    tokKeywordAt, tokKeywordContains, tokKeywordRequires, tokKeywordOperator];
+    tokKeywordAt, tokKeywordContains, tokKeywordRequires, tokKeywordOperator, tokKeywordPackage];
 
   RestrictedTypeTokens = [tokKeywordObject, tokKeywordClass, tokKeywordInterface,
     tokKeywordDispinterface];
