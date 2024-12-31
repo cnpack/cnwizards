@@ -158,7 +158,7 @@
 			<VersionInfoKeys Name="InternalName">CnWizards_D2005</VersionInfoKeys>
 			<VersionInfoKeys Name="OriginalFilename">CnWizards_D2005.DLL</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-			<VersionInfoKeys Name="LegalCopyright">(C)Copyright 2001-2024 CnPack Team</VersionInfoKeys>
+			<VersionInfoKeys Name="LegalCopyright">(C)Copyright 2001-2025 CnPack Team</VersionInfoKeys>
 			<VersionInfoKeys Name="LegalTrademarks">CnPack</VersionInfoKeys>
 			<VersionInfoKeys Name="ProductName">CnWizards</VersionInfoKeys>
 			<VersionInfoKeys Name="Comments">https://www.cnpack.org</VersionInfoKeys>

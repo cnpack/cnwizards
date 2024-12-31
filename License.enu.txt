@@ -1,6 +1,6 @@
 ﻿CnPack Agreement License 2nd Edition
 
-CnPack products are Copyright 2001-2024 by CnPack Team and several other authors who have submitted their code for inclusion. This license agreement only covers code written by CnPack Team. You should contact the other authors concerning their respective copyrights and conditions. 
+CnPack products are Copyright 2001-2025 by CnPack Team and several other authors who have submitted their code for inclusion. This license agreement only covers code written by CnPack Team. You should contact the other authors concerning their respective copyrights and conditions. 
 
 The rules governing the use of CnPack and the CnPack source code are derived from the official Open Source Definition, available at https://www.opensource.org. The conditions and limitations are as follows: 
 

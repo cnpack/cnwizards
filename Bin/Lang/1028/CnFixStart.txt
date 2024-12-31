@@ -21,4 +21,4 @@ SCnNoKeyMappingProblemFound=未發現鍵盤映射問題，一切正常。
 SCnKeyMappingProblemFound=發現可能存在的鍵盤映射問題。
 SCnKeyMappingProblemFixed=鍵盤映射問題已修正，請嘗試運行 Delphi。
 SCnKeyMappingNoProblemNeedFix=未發現鍵盤映射問題，無需修復。
-SCnFixToolAbout=CnPack IDE 專家包啟動修復工具 1.0<BR><BR>本工具用來診斷安裝 CnPack IDE 專家包後 Delphi 無法啟動的問題。<BR><BR>作者：劉嘯 (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2024 CnPack Team
+SCnFixToolAbout=CnPack IDE 專家包啟動修復工具 1.0<BR><BR>本工具用來診斷安裝 CnPack IDE 專家包後 Delphi 無法啟動的問題。<BR><BR>作者：劉嘯 (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2025 CnPack Team

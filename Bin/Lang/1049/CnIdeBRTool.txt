@@ -83,4 +83,4 @@ SCnIDERunning=IDE открыта, пожалуйста, закройте ее и
 SCnCleaned=История IDE успешно стерта!
 SCnHelpOpenError=Ошибка открытия файла справки!
 SCnAboutCaption=О программе
-SCnIDEAbout=Утилита сохранения/восстановления настроек IDE<BR><BR>Авторы:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyrights 2001-2024 CnPack Team
+SCnIDEAbout=Утилита сохранения/восстановления настроек IDE<BR><BR>Авторы:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyrights 2001-2025 CnPack Team

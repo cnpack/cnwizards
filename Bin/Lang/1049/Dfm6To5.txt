@@ -31,4 +31,4 @@ SSucc=Успешно конвертировано
 SOpenFail=Ошибка при открытии
 SSaveFail=Ошибка при сохранении
 SInvalidFormat=Неверный формат файла
-SAbout=DFM-конвертер<BR><BR>Утилита позволяет конвертировать формы Delphi 6/7 или<BR>C++Builder 6 в формы формата  Delphi 5 или C++ Builder 5.<BR>Поддерживается как текстовый, так и двоичный формат.<BR><BR>Автор: Zhou JingYu (zjy@cnpack.org)<BR>Мультиязычность: LiuXiao (liuxiao@cnpack.org)<BR>Copyright (C)2001-2024 CnPack Team
+SAbout=DFM-конвертер<BR><BR>Утилита позволяет конвертировать формы Delphi 6/7 или<BR>C++Builder 6 в формы формата  Delphi 5 или C++ Builder 5.<BR>Поддерживается как текстовый, так и двоичный формат.<BR><BR>Автор: Zhou JingYu (zjy@cnpack.org)<BR>Мультиязычность: LiuXiao (liuxiao@cnpack.org)<BR>Copyright (C)2001-2025 CnPack Team

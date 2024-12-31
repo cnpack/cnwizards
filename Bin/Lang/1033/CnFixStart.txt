@@ -22,4 +22,4 @@ SCnNoKeyMappingProblemFound=NO Key Mapping Problem Found. Everything is OK.
 SCnKeyMappingProblemFound=Possible Key Mapping Problem Found.
 SCnKeyMappingProblemFixed=Key Mapping Problem Fixed. Please Try to Start Delphi.
 SCnKeyMappingNoProblemNeedFix=NO Key Mapping Problem Needs to Fix.
-SCnFixToolAbout=CnPack IDE Wizards Starting-Up Fix Tool 1.0<BR><BR>This Tool is Used to Try to Fix Delphi Starting-Up Problem when Installed CnPack.<BR><BR>Author: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2024 CnPack Team
+SCnFixToolAbout=CnPack IDE Wizards Starting-Up Fix Tool 1.0<BR><BR>This Tool is Used to Try to Fix Delphi Starting-Up Problem when Installed CnPack.<BR><BR>Author: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2025 CnPack Team

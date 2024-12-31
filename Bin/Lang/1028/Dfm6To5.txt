@@ -31,4 +31,4 @@ SSucc=轉換成功
 SOpenFail=打開失敗
 SSaveFail=保存失敗
 SInvalidFormat=無效的格式
-SAbout=DFM 表單檔轉換工具<BR><BR>用於將由 Delphi 6/7 及 C++Builder 6 保存的 DFM 表單<BR>轉換成 Delphi 5 及 C++Builder 5 支援的表單檔。<BR>支援文本格式和二進位格式的表單。<BR><BR>軟體作者 周勁羽 (zjy@cnpack.org)<BR>多語支持 劉嘯 (liuxiao@cnpack.org)<BR>版權所有 (C)2001-2024 CnPack 開發組
+SAbout=DFM 表單檔轉換工具<BR><BR>用於將由 Delphi 6/7 及 C++Builder 6 保存的 DFM 表單<BR>轉換成 Delphi 5 及 C++Builder 5 支援的表單檔。<BR>支援文本格式和二進位格式的表單。<BR><BR>軟體作者 周勁羽 (zjy@cnpack.org)<BR>多語支持 劉嘯 (liuxiao@cnpack.org)<BR>版權所有 (C)2001-2025 CnPack 開發組

@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2024 CnPack 开发组                       }
+{                   (C)Copyright 2001-2025 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -105,7 +105,7 @@ var
     'Author:' + #13#10 +
     'Chinbo (Shenloqi)  chinbo@eyou.com' + #13#10 +
     'LiuXiao (LiuXiao)  (master@cnpack.org)' + #13#10#13#10 +
-    'Copyright (C) 2001-2024 CnPack Team';
+    'Copyright (C) 2001-2025 CnPack Team';
 
   SCnAnalyzedResultsSaved: string = 'Analyzed Results Saved Successed to File %s.';
   SCnDuplicatedNameFound: string = 'Can NOT Save analyzed result: Duplicated File Names Found:'#13#10#13#10'%s';

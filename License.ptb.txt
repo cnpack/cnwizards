@@ -1,6 +1,6 @@
 ﻿Contrato de Licença CnPack 2ª Edição
 
-Os produtos CnPack estão protegidos por direitos autorais de 2001-2024 pela equipe CnPack e por vários outros autores que submeteram seu código para inclusão. Este acordo de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores sobre seus respectivos direitos autorais e condições.
+Os produtos CnPack estão protegidos por direitos autorais de 2001-2025 pela equipe CnPack e por vários outros autores que submeteram seu código para inclusão. Este acordo de licença cobre apenas o código escrito pela equipe CnPack. Você deve entrar em contato com os outros autores sobre seus respectivos direitos autorais e condições.
 
 As regras que regem o uso do CnPack e do código-fonte do CnPack são derivadas da definição oficial de software de código aberto, disponível em https://www.opensource.org. As condições e restrições são as seguintes:
 

@@ -22,4 +22,4 @@ SCnNoKeyMappingProblemFound=NENHUM problema de mapeamento de teclas encontrado. 
 SCnKeyMappingProblemFound=Possível problema de mapeamento de teclas encontrado.
 SCnKeyMappingProblemFixed=Problema de mapeamento de teclas corrigido. Por favor, tente iniciar o Delphi.
 SCnKeyMappingNoProblemNeedFix=NENHUM problema de mapeamento de teclas precisa ser corrigido.
-SCnFixToolAbout=Ferramenta de correção de inicialização do CnPack IDE Wizards 1.0<BR><BR>Esta ferramenta é usada para tentar corrigir o problema de inicialização do Delphi quando o CnPack é instalado.<BR><BR>Autor: Liu Xiao (liuxiao@cnpack.org )<BR>Copyright (C) 2001-2024 Equipe CnPack
+SCnFixToolAbout=Ferramenta de correção de inicialização do CnPack IDE Wizards 1.0<BR><BR>Esta ferramenta é usada para tentar corrigir o problema de inicialização do Delphi quando o CnPack é instalado.<BR><BR>Autor: Liu Xiao (liuxiao@cnpack.org )<BR>Copyright (C) 2001-2025 Equipe CnPack

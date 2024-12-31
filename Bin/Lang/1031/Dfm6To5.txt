@@ -31,4 +31,4 @@ SSucc=Konvertierung erfolgreich.
 SOpenFail=Öffnen fehlgeschlagen.
 SSaveFail=Speichern fehlgeschlagen.
 SInvalidFormat=ungültiges Dateiformat.
-SAbout=DFM Datei Konvertierungs Werkzeug<BR><BR>Dieses Werkzeug konvertiert Formulare die mit Delphi 6/7 <BR>oder C++Bilder 6 erstellt wurden in das Delphi 5 oder C++ Builder 5 Format.<BR>Text and Binär Formate werden beide unterstützt.<BR><BR>Author: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2024 CnPack Team
+SAbout=DFM Datei Konvertierungs Werkzeug<BR><BR>Dieses Werkzeug konvertiert Formulare die mit Delphi 6/7 <BR>oder C++Bilder 6 erstellt wurden in das Delphi 5 oder C++ Builder 5 Format.<BR>Text and Binär Formate werden beide unterstützt.<BR><BR>Author: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2025 CnPack Team

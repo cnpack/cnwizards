@@ -43,4 +43,4 @@ SCnConfirmDeleteFmt=確定刪除專家 %s 在 %s 下的註冊信息？
 SCnChangedRefreshFmt=%s 下的專家註冊信息已經改變，是否放棄改變，重新載入？
 SCnWizardChangedFmt=下列 IDE 的專家註冊信息已經改變，退出前是否保存？<BR><BR>
 SCnConfirmExit=確實要退出 CnPack IDE 專家管理工具？
-SCnManageWizAbout=CnPack IDE 專家管理工具<BR><BR>軟件作者 劉嘯 (LiuXiao)liuxiao@cnpack.org<BR>版權所有 (C) 2001-2024 CnPack 開發組
+SCnManageWizAbout=CnPack IDE 專家管理工具<BR><BR>軟件作者 劉嘯 (LiuXiao)liuxiao@cnpack.org<BR>版權所有 (C) 2001-2025 CnPack 開發組

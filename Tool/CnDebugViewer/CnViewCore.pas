@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2024 CnPack 开发组                       }
+{                   (C)Copyright 2001-2025 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -288,7 +288,7 @@ var
     'CnDebugViewer 1.9' + #13#10#13#10 +
     'This Tool is Used to Show the Debugging Output Information from CnDebug.' + #13#10#13#10 +
     'Author: Liu Xiao (master@cnpack.org)' + #13#10 +
-    'Copyright (C) 2001-2024 CnPack Team';
+    'Copyright (C) 2001-2025 CnPack Team';
 
   SCnHTMFormatHeader: string =
     '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">' + #13#10 +

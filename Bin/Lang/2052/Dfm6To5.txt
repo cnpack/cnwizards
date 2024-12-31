@@ -31,4 +31,4 @@ SSucc=转换成功
 SOpenFail=打开失败
 SSaveFail=保存失败
 SInvalidFormat=无效的格式
-SAbout=DFM 窗体文件转换工具<BR><BR>用于将由 Delphi 6/7 及 C++Builder 6 保存的 DFM 窗体<BR>转换成 Delphi 5 及 C++Builder 5 支持的窗体文件。<BR>支持文本格式和二进制格式的窗体。<BR><BR>软件作者 周劲羽 (zjy@cnpack.org)<BR>多语支持 刘啸 (liuxiao@cnpack.org)<BR>版权所有 (C)2001-2024 CnPack 开发组
+SAbout=DFM 窗体文件转换工具<BR><BR>用于将由 Delphi 6/7 及 C++Builder 6 保存的 DFM 窗体<BR>转换成 Delphi 5 及 C++Builder 5 支持的窗体文件。<BR>支持文本格式和二进制格式的窗体。<BR><BR>软件作者 周劲羽 (zjy@cnpack.org)<BR>多语支持 刘啸 (liuxiao@cnpack.org)<BR>版权所有 (C)2001-2025 CnPack 开发组

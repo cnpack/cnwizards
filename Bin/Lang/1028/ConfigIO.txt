@@ -25,4 +25,4 @@ SCnIdeRunning1=在執行恢復默認操作前，請先關閉您的 Delphi/C++Bui
 SCnRestoreError=無法導入指定的註冊表檔！也許您需要以管理員身份運行本程序。
 SCnConfigIOCmdHelp=本工具支持命令行參數的不顯示主窗口的導入導出方式<BR><BR>命令行參數說明：<BR><BR>         命令行參數中第一個不以 / 或 - 開頭的是文件名參數<BR>         -i 或 /i     導入設置<BR>         -o 或 /o     導出設置<BR>         -r 或 /r     恢復默認設置<BR>         -n 或 /n 或 -NoMsg 或 /NoMsg 不彈出成功的提示信息<BR>         -? 或 /? 或 -h 或 /h  命令行參數幫助<BR><BR>如：<BR>         CnConfigIO -i C:\a.cnw -n<BR>         CnConfigIO -o C:\a.cnw -n<BR>         CnConfigIO -r
 SCnConfigIOAboutCaption=關於
-SCnConfigIOAbout=CnPack IDE 專家包設置導入導出工具<BR><BR>該工具提供 CnPack IDE 專家包設置的導入導出功能，<BR>用於保留設置備份，或者將設置遷移到其他環境中。<BR><BR>軟體作者 劉嘯 liuxiao@cnpack.org<BR>版權所有 (C) 2001-2024 CnPack 開發組
+SCnConfigIOAbout=CnPack IDE 專家包設置導入導出工具<BR><BR>該工具提供 CnPack IDE 專家包設置的導入導出功能，<BR>用於保留設置備份，或者將設置遷移到其他環境中。<BR><BR>軟體作者 劉嘯 liuxiao@cnpack.org<BR>版權所有 (C) 2001-2025 CnPack 開發組

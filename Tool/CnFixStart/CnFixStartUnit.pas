@@ -99,7 +99,7 @@ var
     'CnPack IDE Wizards Starting-Up Fix Tool 1.0' + #13#10#13#10 +
     'This Tool is Used to Try to Fix Delphi Starting-Up Problem when Installed CnPack.' + #13#10#13#10 +
     'Author: Liu Xiao (master@cnpack.org)' + #13#10 +
-    'Copyright (C) 2001-2024 CnPack Team';
+    'Copyright (C) 2001-2025 CnPack Team';
 
 procedure TFormStartFix.btnCloseClick(Sender: TObject);
 begin

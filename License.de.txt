@@ -1,6 +1,6 @@
 ﻿CnPack Lizenz Vereinbarung 2. Auflage
 
-Das Urheberrecht 2001-2024 der CnPack IDE Wizards (CnWizards) liegt bei dem CnPack Team und weiteren Autoren, die Ihren Quelltext zur Einbeziehung überlassen haben. Diese Lizenz Vereinbarung bezieht sich nur auf den Quelltext, der von dem CnPack Team entwickelt wurde. Sie sollten die anderen Autoren hinsichtlich ihrer jeweiligen Urheberrechts- Bedingungen kontaktieren.
+Das Urheberrecht 2001-2025 der CnPack IDE Wizards (CnWizards) liegt bei dem CnPack Team und weiteren Autoren, die Ihren Quelltext zur Einbeziehung überlassen haben. Diese Lizenz Vereinbarung bezieht sich nur auf den Quelltext, der von dem CnPack Team entwickelt wurde. Sie sollten die anderen Autoren hinsichtlich ihrer jeweiligen Urheberrechts- Bedingungen kontaktieren.
 
 Die Regeln für die Nutzung von CnPack und dem CnPack-Quellcode stützen sich auf die offizielle Open-Source-Definition, die unter https://www.opensource.org verfügbar ist. Die Bedingungen und Einschränkungen lauten wie folgt:
 
