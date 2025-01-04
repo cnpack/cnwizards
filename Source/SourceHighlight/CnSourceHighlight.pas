@@ -4078,8 +4078,10 @@ var
   AnsiCharWidthLimit: Integer;
 
   function WideCharIsWideLengthOnCanvas(AChar: WideChar): Boolean;
+  {$IFNDEF DELPHI110_ALEXANDRIA_UP}
   var
     CW: Integer;
+  {$ENDIF}
   begin
     if (Ord(AChar) < $FF) then
       Result := False
@@ -4087,12 +4089,12 @@ var
       Result := IDEWideCharIsWideLength(AChar)
     else
     begin
-{$IFDEF DELPHI110_ALEXANDRIA_UP} // 高版本的绘制似乎改成固定宽度了
+  {$IFDEF DELPHI110_ALEXANDRIA_UP} // 高版本的绘制似乎改成固定宽度了
       Result := IDEWideCharIsWideLength(AChar);
-{$ELSE}
+  {$ELSE}
       CW := EditCanvas.TextWidth(AChar);
       Result := CW > AnsiCharWidthLimit; // 双字节字符绘制出的宽度大于 1.5 倍的窄字符宽度就认为宽
-{$ENDIF}
+  {$ENDIF}
     end;
   end;
 {$ENDIF}

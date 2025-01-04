@@ -991,7 +991,6 @@ var
   RttiContext: TRttiContext;
   RttiType: TRttiType;
   RttiProperty: TRttiProperty;
-  RttiMethod: TRttiMethod;
 {$ENDIF}
   PropListPtr: PPropList;
   I, APropCount: Integer;

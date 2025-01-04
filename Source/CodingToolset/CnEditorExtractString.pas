@@ -990,9 +990,11 @@ var
   Info: TCodePosInfo;
   S: TCnIdeTokenString;
   Lex: TCnGeneralWidePasLex;
+{$IFNDEF UNICODE}
 {$IFNDEF IDE_STRING_ANSI_UTF8}
   CurrPos: Integer;
   EditPos: TOTAEditPos;
+{$ENDIF}
 {$ENDIF}
 begin
   Result := False;
@@ -1102,10 +1104,13 @@ end;
 
 function TCnEditorExtractString.ScanCpp: Boolean;
 var
-  I, CurrPos: Integer;
+  I: Integer;
   EditView: IOTAEditView;
   Token: TCnGeneralCppToken;
+{$IFNDEF UNICODE}
+  CurrPos: Integer;
   EditPos: TOTAEditPos;
+{$ENDIF}
   Info: TCodePosInfo;
   S: TCnIdeTokenString;
 begin

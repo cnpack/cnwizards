@@ -2493,13 +2493,14 @@ var
 {$ENDIF}
 begin
   // Env Options ÀïµÄ ErrorInsightMarks Öµ
-  Result := csErrorInsightRenderStyleNotSupport;
 {$IFDEF IDE_HAS_ERRORINSIGHT}
   V := CnOtaGetEnvironmentOptionValue(SCnErrorInsightRenderStyleKeyName);
   if VarToStr(V) = '' then
     Result := csErrorInsightRenderStyleNotSupport
   else
     Result := V;
+{$ELSE}
+  Result := csErrorInsightRenderStyleNotSupport;
 {$ENDIF}
 end;
 
