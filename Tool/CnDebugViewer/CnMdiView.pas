@@ -305,6 +305,7 @@ procedure TCnMsgChild.TreeGetText(Sender: TBaseVirtualTree;
   var CellText: WideString);
 var
   Index: Integer;
+  MsgItem: TCnMsgItem;
 begin
   if FViewStore = nil then Exit;
   
@@ -312,14 +313,19 @@ begin
   // 原始的VirtualTree中，获得该 Index 严重影响显示速度，
   // 后经修改VirtualTree源码解决，但只支持顺序增加的节点
 
+  if Index >= FViewStore.MsgCount then Exit;
+
+  MsgItem := FViewStore.Msgs[Index];
+  if MsgItem = nil then Exit;
+
   case Column of
     0: CellText := IntToStr(Index + 1);                                  // 序号
-    1: CellText := FViewStore.Msgs[Index].Msg;                           // 正文
-    2: CellText := SCnMsgTypeDescArray[FViewStore.Msgs[Index].MsgType]^; // 类型
-    3: CellText := IntToStr(FViewStore.Msgs[Index].Level);               // 层次
-    4: CellText := '$' + IntToHex(FViewStore.Msgs[Index].ThreadId, 2);   // 线程 ID
-    5: CellText := FViewStore.Msgs[Index].Tag;
-    6: CellText := GetTimeDesc(FViewStore.Msgs[Index]);
+    1: CellText := MsgItem.Msg;                           // 正文
+    2: CellText := SCnMsgTypeDescArray[MsgItem.MsgType]^; // 类型
+    3: CellText := IntToStr(MsgItem.Level);               // 层次
+    4: CellText := '$' + IntToHex(MsgItem.ThreadId, 2);   // 线程 ID
+    5: CellText := MsgItem.Tag;
+    6: CellText := GetTimeDesc(MsgItem);
   else
     CellText := '';
   end;
@@ -573,10 +579,12 @@ begin
     Exit;
 
   OldIndent := FViewStore.Msgs[0].Indent;
-  Node := FMsgTree.AddChild(nil, nil);
 
   for I := 0 to FViewStore.MsgCount - 1 do
+  begin
+    Node := FMsgTree.GetLast;
     AddAItemToTree(OldIndent, Node, FViewStore.Msgs[I]);
+  end;
 end;
 
 procedure TCnMsgChild.AddAItemToTree(var OldIndent: Integer;
@@ -773,12 +781,14 @@ begin
   end;
 end;
 
-function TCnMsgChild.DescriptionOfMsg(Index: Integer;
-  AMsgItem: TCnMsgItem): string;
+function TCnMsgChild.DescriptionOfMsg(Index: Integer; AMsgItem: TCnMsgItem): string;
 begin
-  Result := Format(SCnMsgDescriptionFmt, [Index + 1, AMsgItem.Indent,
-    AMsgItem.Level, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
-    {AMsgItem.MsgCPInterval, } GetLongTimeDesc(AMsgItem), AMsgItem.Msg]);
+  if AMsgItem <> nil then
+    Result := Format(SCnMsgDescriptionFmt, [Index + 1, AMsgItem.Indent,
+      AMsgItem.Level, AMsgItem.ThreadId, AMsgItem.ProcessId, AMsgItem.Tag,
+      {AMsgItem.MsgCPInterval, } GetLongTimeDesc(AMsgItem), AMsgItem.Msg])
+  else
+    Result := '';
 end;
 
 function TCnMsgChild.DescriptionOfTime(Index: Integer): string;
