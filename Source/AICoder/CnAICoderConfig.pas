@@ -61,6 +61,7 @@ type
     function GetExplainCodePrompt: string;
     function GetSystemMessage: string;
     function GetReviewCodePrompt: string;
+    function GetGenTestCasePrompt: string;
   protected
     function GetCurrentLangName: string;
     // SM4-GCM 加十六进制加解密
@@ -89,6 +90,8 @@ type
     {* 解释代码的提示文字}
     property ReviewCodePrompt: string read GetReviewCodePrompt;
     {* 检查代码的提示文字}
+    property GenTestCasePrompt: string read GetGenTestCasePrompt;
+    {* 生成测试用例的提示文字}
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -208,7 +211,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnSM4, CnAEAD;
+  CnSM4, CnAEAD, CnWizUtils;
 
 const
   SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
@@ -439,17 +442,27 @@ end;
 
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
-  Result := Format(SCNAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
+  Result := Format(SCnAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
 end;
 
 function TCnAIEngineOption.GetReviewCodePrompt: string;
 begin
-  Result := Format(SCNAICoderWizardUserMessageReviewFmt, [GetCurrentLangName]);
+  Result := Format(SCnAICoderWizardUserMessageReviewFmt, [GetCurrentLangName]);
+end;
+
+function TCnAIEngineOption.GetGenTestCasePrompt: string;
+begin
+  if CurrentSourceIsDelphi then
+    Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal'])
+  else if CurrentSourceIsC then
+    Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['C/C++'])
+  else // 不认识的文件名干脆也用 Pascal
+    Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal'])
 end;
 
 function TCnAIEngineOption.GetSystemMessage: string;
 begin
-  Result := Format(SCNAICoderWizardSystemMessageFmt, [CompilerName]);
+  Result := Format(SCnAICoderWizardSystemMessageFmt, [CompilerName]);
 end;
 
 procedure TCnAIEngineOption.LoadFromJSON(const JSON: AnsiString);

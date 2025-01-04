@@ -80,6 +80,7 @@ type
   private
     FIdExplainCode: Integer;
     FIdReviewCode: Integer;
+    FIdGenTestCase: Integer;
     FIdShowChatWindow: Integer;
     FIdConfig: Integer;
     function ValidateAIEngines: Boolean;
@@ -97,6 +98,10 @@ type
 
     procedure ForCodeAnswer(Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    {* 返回文字的回调}
+    procedure ForCodeGen(Success: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    {* 返回代码的回调}
 
     procedure AcquireSubActions; override;
     function GetState: TWizardState; override;
@@ -138,7 +143,7 @@ begin
       DoSaveSettings;
 
       if CnAICoderChatForm <> nil then
-        CnAICoderChatForm.UpdateCaption;
+        CnAICoderChatForm.NotifySettingChanged;
     end;
     Free;
   end;
@@ -166,6 +171,10 @@ begin
   FIdReviewCode := RegisterASubAction(SCnAICoderWizardReviewCode,
     SCnAICoderWizardReviewCodeCaption, 0,
     SCnAICoderWizardReviewCodeHint, SCnAICoderWizardReviewCode);
+
+  FIdGenTestCase := RegisterASubAction(SCnAICoderWizardGenTestCase,
+    SCnAICoderWizardGenTestCaseCaption, 0,
+    SCnAICoderWizardGenTestCaseHint, SCnAICoderWizardGenTestCase);
 
   // 创建分隔菜单
   AddSepMenu;
@@ -263,7 +272,23 @@ begin
         if Index = FIdExplainCode then
           CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artExplainCode, ForCodeAnswer)
         else
-          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artReviewCode, ForCodeAnswer)
+          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artReviewCode, ForCodeAnswer);
+      end;
+    end
+    else if Index = FIdGenTestCase then
+    begin
+      S := CnOtaGetCurrentSelection;
+      if Trim(S) <> '' then
+      begin
+        EnsureChatWindowVisible;
+
+        Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
+        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.FromType := cmtYou;
+        Msg.Text := '...';
+        Msg.Waiting := True;
+
+        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artGenTestCase, ForCodeGen);
       end;
     end;
   end;
@@ -413,6 +438,51 @@ begin
   end
   else
   begin
+    if Success then
+      CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
+    else
+      CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
+  end;
+end;
+
+procedure TCnAICoderWizard.ForCodeGen(Success: Boolean; SendId: Integer;
+  const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+var
+  S: string;
+  View: IOTAEditView;
+begin
+  if (Tag <> nil) and (Tag is TCnChatMessage) then
+  begin
+    TCnChatMessage(Tag).Waiting := False;
+    if Success then
+    begin
+      TCnChatMessage(Tag).Text := Answer;
+
+      // 挑出代码
+      S := TCnAICoderChatForm.ExtractCode(TCnChatMessage(Tag));
+      if S <> '' then
+      begin
+        // 判断有无选择区，避免覆盖选择区内容
+        if CnOtaGetCurrentSelection <> '' then
+        begin
+          // 取消选择，并下移光标
+          View := CnOtaGetTopMostEditView;
+          if View <> nil then
+            if View.Block <> nil then
+              View.Block.Reset;
+        end;
+        CnOtaInsertTextIntoEditor(#13#10 + S + #13#10);
+      end;
+    end
+    else
+    begin
+      EnsureChatWindowVisible;
+      TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
+    end;
+  end
+  else
+  begin
+    EnsureChatWindowVisible;
     if Success then
       CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
     else

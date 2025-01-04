@@ -327,6 +327,8 @@ begin
       Msg.AddPair('content', Option.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
       Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artGenTestCase then
+      Msg.AddPair('content', Option.GenTestCasePrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Msg.AddPair('content', Code);
 
@@ -445,6 +447,8 @@ begin
       Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
       Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artGenTestCase then
+      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.GenTestCasePrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Txt.AddPair('text', Option.SystemMessage + #13#10 + Code);
 
@@ -577,6 +581,8 @@ begin
       Msg.AddPair('content', Option.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
       Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artGenTestCase then
+      Msg.AddPair('content', Option.GenTestCasePrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Msg.AddPair('content', Code);
 

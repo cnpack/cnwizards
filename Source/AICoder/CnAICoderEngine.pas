@@ -518,6 +518,8 @@ begin
       Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code)
     else if RequestType = artReviewCode then
       Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code)
+    else if RequestType = artGenTestCase then
+      Msg.AddPair('content', FOption.GenTestCasePrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Msg.AddPair('content', Code);
 

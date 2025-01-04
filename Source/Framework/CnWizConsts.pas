@@ -386,6 +386,7 @@ resourcestring
   // AICoderWizard
   SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
   SCnAICoderWizardReviewCode = 'CnAICoderWizardReviewCode';
+  SCnAICoderWizardGenTestCase = 'CnAICoderWizardGenTestCase';
   SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
   SCnAICoderEngineOptionFileFmt = 'AICoderConfig%s.json';
@@ -1796,6 +1797,8 @@ var
   SCnAICoderWizardExplainCodeHint: string = 'Explain Selected Code';
   SCnAICoderWizardReviewCodeCaption: string = '&Review Code...';
   SCnAICoderWizardReviewCodeHint: string = 'Review Selected Code';
+  SCnAICoderWizardGenTestCaseCaption: string = 'Generate &Test Case...';
+  SCnAICoderWizardGenTestCaseHint: string = 'Generate a Test Case for Selected Code';
   SCnAICoderWizardChatWindowCaption: string = 'AI &Chat Window';
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
@@ -1804,6 +1807,9 @@ var
   SCnAICoderWizardUserMessageExplainFmt: string = 'Please Explain the Code using %s: ';
   SCnAICoderWizardUserMessageReviewFmt: string = 'Please Conduct a Code Review for this Segment of Code. ' +
     'There is No Need to Explain its Functionality; instead, Please Analyze and Point out Issues using %s from Aspects such as Structure, Spelling, Performance and Safety etc. If the Code is too Short or has No Obvious Issues, Answer No Problem.';
+  SCnAICoderWizardUserMessageGenTestCaseFmt: string = 'Please Analyze the Functionality of the Following Code and Generate a non-UI Interactive Test Case for this Code using %s. ' +
+    'The Test Case should be Provided as a Single Function, Covering some Typical Scenarios and Boundary Conditions. ' +
+    'Using Assert is Encouraged for Flexibility. If the Code is not a Complete Function, please Answer that it cannot be Generated.';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';

@@ -97,6 +97,9 @@ type
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
   public
+    class function ExtractCode(Item: TCnChatMessage): string;
+    procedure NotifySettingChanged;
+
     procedure UpdateCaption;
     procedure AddMessage(const Msg, AFrom: string; IsMe: Boolean = False);
 
@@ -275,9 +278,6 @@ begin
 end;
 
 procedure TCnAICoderChatForm.actCopyCodeExecute(Sender: TObject);
-const
-  CODE_BLOCK = '```';
-  DELPHI_PREFIX = 'delphi' + #13#10;
 var
   S: string;
   I1, I2: Integer;
@@ -287,22 +287,11 @@ begin
     try
       if FItemUnderMouse is TCnChatMessage then
       begin
-        S := TCnChatMessage(FItemUnderMouse).Text;
-        I1 := Pos(CODE_BLOCK, S);
-        if I1 > 0 then
+        S := ExtractCode(TCnChatMessage(FItemUnderMouse));
+        if S <> '' then
         begin
-          Delete(S, 1, I1 + Length(CODE_BLOCK) - 1);
-          I2 := Pos(CODE_BLOCK, S);
-          if I2 > 0 then
-          begin
-            S := Copy(S, 1, I2 - 1);
-            I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 delphi
-            if I2 = 1 then
-              Delete(S, 1, Length(DELPHI_PREFIX));
-
-            Clipboard.AsText := Trim(S);
-            Exit;
-          end;
+          Clipboard.AsText := Trim(S);
+          Exit;
         end;
 
         ErrorDlg(SCnAICoderWizardErrorNoCode);
@@ -333,6 +322,66 @@ procedure TCnAICoderChatForm.cbbActiveEngineChange(Sender: TObject);
 begin
   CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
   CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+end;
+
+class function TCnAICoderChatForm.ExtractCode(Item: TCnChatMessage): string;
+const
+  CODE_BLOCK = '```';
+  DELPHI_PREFIX = 'delphi' + #13#10;
+  PASCAL_PREFIX = 'pascal' + #13#10;
+  C_PREFIX = 'c' + #13#10;
+  CPP_PREFIX = 'c++' + #13#10;
+var
+  S: string;
+  I1, I2: Integer;
+begin
+  Result := '';
+  if Item = nil then
+    Exit;
+
+  S := TCnChatMessage(Item).Text;
+  I1 := Pos(CODE_BLOCK, S);
+  if I1 > 0 then
+  begin
+    Delete(S, 1, I1 + Length(CODE_BLOCK) - 1);
+    I2 := Pos(CODE_BLOCK, S);
+    if I2 > 0 then
+    begin
+      S := Copy(S, 1, I2 - 1);
+      I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 delphi
+      if I2 = 1 then
+        Delete(S, 1, Length(DELPHI_PREFIX));
+
+      I2 := Pos(PASCAL_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 pascal
+      if I2 = 1 then
+        Delete(S, 1, Length(PASCAL_PREFIX));
+
+      I2 := Pos(C_PREFIX, LowerCase(S));      // 去除第一个 ``` 后的 C
+      if I2 = 1 then
+        Delete(S, 1, Length(C_PREFIX));
+
+      I2 := Pos(CPP_PREFIX, LowerCase(S));    // 去除第一个 ``` 后的 C++
+      if I2 = 1 then
+        Delete(S, 1, Length(CPP_PREFIX));
+
+      Result := Trim(S);
+    end;
+  end;
+end;
+
+procedure TCnAICoderChatForm.NotifySettingChanged;
+var
+  Old: TNotifyEvent;
+begin
+  Old := cbbActiveEngine.OnChange;
+  try
+    cbbActiveEngine.OnChange := nil;
+    cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
+  finally
+    cbbActiveEngine.OnChange := Old;
+  end;
+
+  UpdateCaption;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
