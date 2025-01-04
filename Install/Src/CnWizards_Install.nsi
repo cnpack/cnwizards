@@ -1486,7 +1486,7 @@ Function ShowReleaseNotes
 
   OpenWeb:
 !endif
-    ExecShell "open" "http://www.cnpack.org/"
+    ExecShell "open" "https://www.cnpack.org/"
 !ifndef NO_HELP
   FuncEnd:
 !endif

@@ -41,7 +41,7 @@ in Delphi/C++ Builder/BDS/RAD Studio IDE:
   * Lots of Other Improvements
 
 Screenshot (English):
-http://www.cnpack.org/images/cnwizards.gif
+https://www.cnpack.org/images/cnwizards.gif
 
 Furthermore, these independent tools are also included in CnWizards:
 
