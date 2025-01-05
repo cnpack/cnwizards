@@ -477,6 +477,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetEditActionsFromModule( Module : IOTAModule) : IOTAEditActions');
   CL.AddDelphiFunction('Function CnOtaGetCurrentSelection : string');
   CL.AddDelphiFunction('Procedure CnOtaDeleteCurrentSelection');
+  CL.AddDelphiFunction('Function CnOtaDeSelection( CursorStopAtEnd : Boolean) : Boolean');
   CL.AddDelphiFunction('Procedure CnOtaEditBackspace( Many : Integer)');
   CL.AddDelphiFunction('Procedure CnOtaEditDelete( Many : Integer)');
   CL.AddDelphiFunction('Function CnOtaGetCurrentProcedure: string;');
@@ -752,6 +753,7 @@ begin
   S.RegisterDelphiFunction(@CnOtaGetEditActionsFromModule, 'CnOtaGetEditActionsFromModule', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentSelection, 'CnOtaGetCurrentSelection', cdRegister);
   S.RegisterDelphiFunction(@CnOtaDeleteCurrentSelection, 'CnOtaDeleteCurrentSelection', cdRegister);
+  S.RegisterDelphiFunction(@CnOtaDeSelection, 'CnOtaDeSelection', cdRegister);
   S.RegisterDelphiFunction(@CnOtaEditBackspace, 'CnOtaEditBackspace', cdRegister);
   S.RegisterDelphiFunction(@CnOtaEditDelete, 'CnOtaEditDelete', cdRegister);
   S.RegisterDelphiFunction(@CnOtaGetCurrentProcedure, 'CnOtaGetCurrentProcedure', cdRegister);

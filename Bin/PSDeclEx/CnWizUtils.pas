@@ -674,6 +674,8 @@ function CnOtaGetCurrentSelection: string;
 {* 取当前选择的文本}
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
+function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
+{* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -1616,6 +1618,10 @@ begin
 end;
 
 procedure CnOtaDeleteCurrentSelection;
+begin
+end;
+
+function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
 begin
 end;
 

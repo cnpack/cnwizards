@@ -463,14 +463,9 @@ begin
       if S <> '' then
       begin
         // 判断有无选择区，避免覆盖选择区内容
-        if CnOtaGetCurrentSelection <> '' then
-        begin
-          // 取消选择，并下移光标
-          View := CnOtaGetTopMostEditView;
-          if View <> nil then
-            if View.Block <> nil then
-              View.Block.Reset;
-        end;
+        if CnOtaGetCurrentSelection <> '' then // 取消选择，并下移光标
+          CnOtaDeSelection(True);
+
         CnOtaInsertTextIntoEditor(#13#10 + S + #13#10);
       end;
     end

@@ -609,6 +609,8 @@ function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boo
 function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用，不丢字符}
+function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
+{* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -1031,7 +1033,7 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer = 0);
-{* 光标跳至指定的 EditPos 并重画}
+{* 光标跳至指定的行与列并重画，行列均是 1 开始。EditPosCol 为 0 时表示行首}
 
 {$ENDIF}
 
@@ -4927,6 +4929,35 @@ begin
     // 选中插入的内容，从 StartPos 到 EndPos 加线性位置
     CnOtaMoveAndSelectBlock(StartPos, EndPos, EditView);
   end;
+  Result := True;
+end;
+
+function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
+var
+  EditView: IOTAEditView;
+  R, C: Integer;
+begin
+  Result := False;
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  if EditView.Block = nil then
+    Exit;
+
+  if CursorStopAtEnd then
+  begin
+    R := EditView.Block.EndingRow;
+    C := EditView.Block.EndingColumn;
+  end
+  else
+  begin
+    R := EditView.Block.StartingRow;
+    C := EditView.Block.StartingColumn;
+  end;
+
+  EditView.Block.Reset;
+  CnOtaGotoEditPosAndRepaint(EditView, R, C);
   Result := True;
 end;
 

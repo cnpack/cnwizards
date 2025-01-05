@@ -57,6 +57,8 @@ type
     FIdMoveRelative: Integer;
     FIdDelete: Integer;
     FIdBackspaceDelete: Integer;
+    FIdDeSelectionBegin: Integer;
+    FIdDeSelectionEnd: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -112,6 +114,14 @@ begin
   FIdBackspaceDelete := RegisterASubAction('CnTestEditPositionBackspaceDelete',
     'Test EditPosition BackspaceDelete', 0, 'Test EditPosition BackspaceDelete',
     'CnTestEditPositionBackspaceDelete');
+
+  AddSepMenu;
+  FIdDeSelectionBegin := RegisterASubAction('CnTestEditViewDeSelectionBegin',
+    'Test EditView DeSelection Begin', 0, 'Test EditView DeSelection Begin',
+    'CnTestEditViewDeSelectionBegin');
+  FIdDeSelectionEnd := RegisterASubAction('CnTestEditViewDeSelectionEnd',
+    'Test EditView DeSelection End', 0, 'Test EditView DeSelection End',
+    'CnTestEditViewDeSelectionEnd');
 end;
 
 function TCnTestEditPosMoveWizard.GetCaption: string;
@@ -160,6 +170,17 @@ var
   EditPosition: IOTAEditPosition;
 begin
   if not Active then Exit;
+
+  if Index = FIdDeSelectionBegin then
+  begin
+    CnOtaDeSelection(False);
+    Exit;
+  end
+  else if Index = FIdDeSelectionEnd then
+  begin
+    CnOtaDeSelection(True);
+    Exit;
+  end;
 
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
