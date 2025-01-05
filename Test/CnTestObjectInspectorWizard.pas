@@ -190,9 +190,30 @@ begin
 end;
 
 procedure TCnTestObjectInspectorWizard.SelectItemChange(Sender: TObject);
+var
+  Clz, Prop: string;
+  CT, OrigCT: TClass;
 begin
   CnDebugger.LogMsg('TCnTestObjectInspectorWizard.SelectItemChange');
   DumpObjectInspector;
+
+  Clz := ObjectInspectorWrapper.ActiveComponentType;
+  if Clz = '' then // 可能选中了多个
+    Exit;
+
+  Prop := ObjectInspectorWrapper.ActivePropName;
+
+  CT := GetClass(Clz); // 这里竟然拿不到设计器窗体，只能拿到窗体内的组件，得换其他办法拿设计器里的窗体
+  if CT <> nil then
+  begin
+    OrigCT := GetOriginalClassFromProperty(CT, Prop);
+    if OrigCT <> nil then
+      CnDebugger.LogFmt('Get Orig %s.%s', [OrigCT.ClassName, Prop])
+    else
+      CnDebugger.LogFmt('Get %s.%s', [CT.ClassName, Prop]);
+  end
+  else
+    CnDebugger.LogMsg('Get NO Class for ' + Clz);
 end;
 
 procedure TCnTestObjectInspectorWizard.DumpObjectInspector;

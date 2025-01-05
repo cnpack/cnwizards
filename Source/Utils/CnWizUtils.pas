@@ -2516,12 +2516,14 @@ var
   I: Integer;
 begin
   for I := 0 to AWinControl.ComponentCount - 1 do
+  begin
     if (AWinControl.Components[I] is AClass) and ((AComponentName = '') or
       (SameText(AComponentName, AWinControl.Components[I].Name))) then
     begin
       Result := AWinControl.Components[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -2532,12 +2534,14 @@ var
   I: Integer;
 begin
   for I := 0 to AWinControl.ComponentCount - 1 do
+  begin
     if AWinControl.Components[I].ClassNameIs(AClassName) and ((AComponentName =
       '') or (SameText(AComponentName, AWinControl.Components[I].Name))) then
     begin
       Result := AWinControl.Components[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -2547,11 +2551,13 @@ var
   I: Integer;
 begin
   for I := 0 to Screen.CustomFormCount - 1 do
+  begin
     if fsModal in Screen.CustomForms[I].FormState then
     begin
       Result := True;
       Exit;
     end;
+  end;
   Result := False;
 end;
 
@@ -2607,7 +2613,7 @@ begin
   FList.Add(S);
 end;
 
-// 取Cursor标识符列表
+// 取 Cursor 标识符列表
 procedure GetCursorList(List: TStrings);
 begin
   with TCnGetListClass.Create do
@@ -2619,7 +2625,7 @@ begin
   end;
 end;
 
-// 取FontCharset标识符列表
+// 取 FontCharset 标识符列表
 procedure GetCharsetList(List: TStrings);
 begin
   with TCnGetListClass.Create do
@@ -2631,7 +2637,7 @@ begin
   end;
 end;
 
-// 取Color标识符列表
+// 取 Color 标识符列表
 procedure GetColorList(List: TStrings);
 begin
   with TCnGetListClass.Create do
@@ -2721,7 +2727,7 @@ var
 begin
 {$IFDEF BDS}
   for I := 0 to ListItem.SubItems.Count - 1 do
-      ListItem.SubItemImages[I] := -1;
+    ListItem.SubItemImages[I] := -1;
 {$ENDIF}
 end;
 

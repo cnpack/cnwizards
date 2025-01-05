@@ -68,15 +68,15 @@ type
     {* 删除一个选中改变的通知}
 
     property ActiveComponentType: string read GetActiveComponentType;
-    {* 对象查看器当前选中的组件类名}
+    {* 对象查看器当前选中的组件类名，选中多个组件时为空，哪怕组件们同类}
     property ActiveComponentName: string read GetActiveComponentName;
-    {* 对象查看器当前选中的组件名}
+    {* 对象查看器当前选中的组件名，选中多个组件时为 2 items selected 这种}
     property ActivePropName: string read GetActivePropName;
     {* 对象查看器当前选中的属性名}
     property ActivePropValue: string read GetActivePropValue;
     {* 对象查看器当前选中的属性值}
     property ShowGridLines: Boolean read GetShowGridLines write SetShowGridLines;
-    {* 对象查看器显示区是否显示网格}
+    {* 对象查看器显示区是否显示网格，仅 Delphi 6 及以上版本有效}
   end;
 
 function ObjectInspectorWrapper: TCnObjectInspectorWrapper;
