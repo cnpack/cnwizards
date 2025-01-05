@@ -1956,7 +1956,7 @@ begin
     begin
       if Editors[I].EditView = EditView then
       begin
-        NoRef(Editors[I].FEditView) := nil;
+        NoRefCount(Editors[I].FEditView) := nil;
         Break;
       end;
     end;

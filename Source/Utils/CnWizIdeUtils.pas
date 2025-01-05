@@ -114,6 +114,8 @@ const
   // 对象查看器
   PropertyInspectorClassName = 'TPropertyInspector';
   PropertyInspectorName = 'PropertyInspector';
+  PropertyInspectorListClassName = 'TInspListBox';
+  PropertyInspectorListName = 'PropList';
 
   // 编辑器设置对话框
 {$IFDEF BDS}
@@ -1419,9 +1421,9 @@ function GetObjectInspectorForm: TCustomForm;
 begin
   Result := GetIdeMainForm;
   if Result <> nil then  // 大部分版本下 ObjectInspector 是 AppBuilder 的子控件
-    Result := TCustomForm(Result.FindComponent('PropertyInspector'));
+    Result := TCustomForm(Result.FindComponent(PropertyInspectorName));
   if Result = nil then // D2007 或某些版本下 ObjectInspector 是 Application 的子控件
-    Result := TCustomForm(Application.FindComponent('PropertyInspector'));
+    Result := TCustomForm(Application.FindComponent(PropertyInspectorName));
 {$IFDEF DEBUG}
   if Result = nil then
     CnDebugger.LogMsgError('Unable to Find Oject Inspector!');
