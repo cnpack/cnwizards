@@ -205,7 +205,7 @@ const
     ('TObjectTreeView', 'TPropertyInspector', 'TProjectManagerForm',
      'TAlignPalette', 'TCallStackWindow', 'TWatchWindow', 'TLocalVarsWindow');
 
-  arrRollerStatusClasses: array[0..19] of string = // 所有单实例的窗体，会被Desktop保存的
+  arrRollerStatusClasses: array[0..19] of string = // 所有单实例的窗体，会被 Desktop 保存的
     ('TAppBuilder', 'TObjectTreeView', 'TPropertyInspector',
     'TPasModExpForm', 'TProjectManagerForm', 'TToDoListWindow',
     'TAlignPalette', 'TSynbolExplorer', 'TCompListForm', 'TMessageHintFrm',
@@ -441,8 +441,10 @@ var
 begin
   FClassList.Clear;
   for I := 0 to FFilters.Count - 1 do
+  begin
     if (FFilters.Items[I] as TCnWinFilterItem).Enabled then
       FClassList.Add((FFilters.Items[I] as TCnWinFilterItem).WinClass);
+  end;
 end;
 
 function TCnWinTopRoller.InitPopupMenu(AMenu: TPopupMenu): TPopupMenu;

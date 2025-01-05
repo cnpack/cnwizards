@@ -146,12 +146,14 @@ const
     GetMem(PropList, Count * SizeOf(PPropInfo));
     try
       GetPropList(AObj.ClassInfo, tkOrdinal, PropList);
-      for i := 0 to Count - 1 do
+      for I := 0 to Count - 1 do
+      begin
         if PropList[I].Default <> GetOrdProp(AObj, PropList[I]) then
         begin
           Result := False;
           Break;
         end;
+      end;
     finally
       FreeMem(PropList);
     end;
@@ -167,15 +169,13 @@ begin
     // 不用IsStoredProp
     if not ASelected then
     begin
-
       if ASelf is TSetElementProperty then
       begin
         EnumInfo := GetTypeData(THackPropertyEditor(ASelf).GetPropType).CompType^;
         dwDefault := THackPropertyEditor(ASelf).GetPropInfo.Default;
         dwValue := THackPropertyEditor(ASelf).GetOrdValue;
         dwbBit := GetEnumValue(EnumInfo, TSetElementProperty(ASelf).GetName);
-        if GetBit(dwDefault, dwbBit) <>
-          GetBit(dwValue, dwbBit) then
+        if GetBit(dwDefault, dwbBit) <> GetBit(dwValue, dwbBit) then
         begin
           ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
         end
@@ -183,21 +183,23 @@ begin
           ACanvas.Font.Style := ACanvas.Font.Style - [fsBold];
       end
       else
-      // TODO: 判断事件是不是继承的
-      if ((THackPropertyEditor(ASelf).GetPropType.Kind in tkOrdinal) and
-          (THackPropertyEditor(ASelf).GetOrdValue <> THackPropertyEditor(ASelf).GetPropInfo.default)) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkFloat]) and
-          (THackPropertyEditor(ASelf).GetFloatValue <> 0)) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}]) and
-          (THackPropertyEditor(ASelf).GetStrValue <> '') and (THackPropertyEditor(ASelf).GetName <> 'Name')) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkInt64]) and
-          (THackPropertyEditor(ASelf).GetInt64Value <> THackPropertyEditor(ASelf).GetPropInfo.default)) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind = tkClass) and
-          (Pointer(THackPropertyEditor(ASelf).GetOrdValue) <> nil) and
-          (not _ObjPropAllEqualDef(TObject(THackPropertyEditor(ASelf).GetOrdValue)))) or
-        ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkMethod]) and
-          (THackPropertyEditor(ASelf).GetMethodValue.Code <> nil)) then
-          ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
+      begin
+        // TODO: 判断事件是不是继承的
+        if ((THackPropertyEditor(ASelf).GetPropType.Kind in tkOrdinal) and
+            (THackPropertyEditor(ASelf).GetOrdValue <> THackPropertyEditor(ASelf).GetPropInfo.default)) or
+          ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkFloat]) and
+            (THackPropertyEditor(ASelf).GetFloatValue <> 0)) or
+          ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}]) and
+            (THackPropertyEditor(ASelf).GetStrValue <> '') and (THackPropertyEditor(ASelf).GetName <> 'Name')) or
+          ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkInt64]) and
+            (THackPropertyEditor(ASelf).GetInt64Value <> THackPropertyEditor(ASelf).GetPropInfo.default)) or
+          ((THackPropertyEditor(ASelf).GetPropType.Kind = tkClass) and
+            (Pointer(THackPropertyEditor(ASelf).GetOrdValue) <> nil) and
+            (not _ObjPropAllEqualDef(TObject(THackPropertyEditor(ASelf).GetOrdValue)))) or
+          ((THackPropertyEditor(ASelf).GetPropType.Kind in [tkMethod]) and
+            (THackPropertyEditor(ASelf).GetMethodValue.Code <> nil)) then
+            ACanvas.Font.Style := ACanvas.Font.Style + [fsBold];
+      end;
     end;
   end;
 
@@ -281,7 +283,7 @@ end;
 
 function TCnObjInspectorEnhanceWizard.GetSearchContent: string;
 begin
-  Result := inherited GetSearchContent + '属性,property,';
+  Result := inherited GetSearchContent + '属性,property,事件,event,';
 end;
 
 initialization

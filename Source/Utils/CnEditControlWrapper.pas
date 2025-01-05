@@ -277,15 +277,11 @@ type
     FEditorBaseFont: TFont;
     procedure ScrollAndClickEditControl(Sender: TObject);
 
-    procedure AddNotifier(List: TList; Notifier: TMethod);
     function CalcCharSize: Boolean;
     // 计算字符串尺寸，核心思想是从注册表里拿各种高亮设置计算，取其大者
     procedure GetHighlightFromReg;
-    procedure ClearAndFreeList(var List: TList);
-    function IndexOf(List: TList; Notifier: TMethod): Integer;
     procedure InitEditControlHook;
     procedure CheckAndSetEditControlMouseHookFlag;
-    procedure RemoveNotifier(List: TList; Notifier: TMethod);
     function UpdateCharSize: Boolean;
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
       TControl; Context: Pointer);
@@ -529,12 +525,7 @@ uses
 {$ENDIF}
 
 type
-  PCnWizNotifierRecord = ^TCnWizNotifierRecord;
-  TCnWizNotifierRecord = record
-    Notifier: TMethod;
-  end;
-
-  NoRef = Pointer;
+  //NoRef = Pointer;
 
   TCustomControlHack = class(TCustomControl);
 
@@ -629,7 +620,7 @@ end;
 
 procedure TCnEditorObject.SetEditView(AEditView: IOTAEditView);
 begin
-  NoRef(FEditView) := NoRef(AEditView);
+  NoRefCount(FEditView) := NoRefCount(AEditView);
 end;
 
 function TCnEditorObject.GetTopEditor: TControl;
@@ -955,18 +946,18 @@ begin
   ClearHighlights;
   FHighlights.Free;
 
-  ClearAndFreeList(FVScrollNotifiers);
-  ClearAndFreeList(FNcPaintNotifiers);
-  ClearAndFreeList(FMouseUpNotifiers);
-  ClearAndFreeList(FMouseDownNotifiers);
-  ClearAndFreeList(FMouseMoveNotifiers);
-  ClearAndFreeList(FMouseLeaveNotifiers);
-  ClearAndFreeList(FBeforePaintLineNotifiers);
-  ClearAndFreeList(FAfterPaintLineNotifiers);
-  ClearAndFreeList(FEditControlNotifiers);
-  ClearAndFreeList(FEditorChangeNotifiers);
-  ClearAndFreeList(FKeyDownNotifiers);
-  ClearAndFreeList(FKeyUpNotifiers);
+  CnWizClearAndFreeList(FVScrollNotifiers);
+  CnWizClearAndFreeList(FNcPaintNotifiers);
+  CnWizClearAndFreeList(FMouseUpNotifiers);
+  CnWizClearAndFreeList(FMouseDownNotifiers);
+  CnWizClearAndFreeList(FMouseMoveNotifiers);
+  CnWizClearAndFreeList(FMouseLeaveNotifiers);
+  CnWizClearAndFreeList(FBeforePaintLineNotifiers);
+  CnWizClearAndFreeList(FAfterPaintLineNotifiers);
+  CnWizClearAndFreeList(FEditControlNotifiers);
+  CnWizClearAndFreeList(FEditorChangeNotifiers);
+  CnWizClearAndFreeList(FKeyDownNotifiers);
+  CnWizClearAndFreeList(FKeyUpNotifiers);
 
   FCmpLines.Free;
   inherited;
@@ -2260,89 +2251,31 @@ begin
 end;
 
 //------------------------------------------------------------------------------
-// 通知器列表操作
-//------------------------------------------------------------------------------
-
-procedure TCnEditControlWrapper.AddNotifier(List: TList; Notifier: TMethod);
-var
-  Rec: PCnWizNotifierRecord;
-begin
-  if IndexOf(List, Notifier) < 0 then
-  begin
-    New(Rec);
-    Rec^.Notifier := TMethod(Notifier);
-    List.Add(Rec);
-  end;
-end;
-
-procedure TCnEditControlWrapper.RemoveNotifier(List: TList; Notifier: TMethod);
-var
-  Rec: PCnWizNotifierRecord;
-  Idx: Integer;
-begin
-  Idx := IndexOf(List, Notifier);
-  if Idx >= 0 then
-  begin
-    Rec := List[Idx];
-    Dispose(Rec);
-    List.Delete(Idx);
-  end;
-end;
-
-procedure TCnEditControlWrapper.ClearAndFreeList(var List: TList);
-var
-  Rec: PCnWizNotifierRecord;
-begin
-  while List.Count > 0 do
-  begin
-    Rec := List[0];
-    Dispose(Rec);
-    List.Delete(0);
-  end;
-  FreeAndNil(List);
-end;
-
-function TCnEditControlWrapper.IndexOf(List: TList; Notifier: TMethod): Integer;
-var
-  I: Integer;
-begin
-  Result := -1;
-  for I := 0 to List.Count - 1 do
-  begin
-    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
-    begin
-      Result := I;
-      Exit;
-    end;
-  end;
-end;
-
-//------------------------------------------------------------------------------
 // 编辑器绘制 Hook 通知
 //------------------------------------------------------------------------------
 
 procedure TCnEditControlWrapper.AddAfterPaintLineNotifier(
   Notifier: TCnEditorPaintLineNotifier);
 begin
-  AddNotifier(FAfterPaintLineNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FAfterPaintLineNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddBeforePaintLineNotifier(
   Notifier: TCnEditorPaintLineNotifier);
 begin
-  AddNotifier(FBeforePaintLineNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FBeforePaintLineNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveAfterPaintLineNotifier(
   Notifier: TCnEditorPaintLineNotifier);
 begin
-  RemoveNotifier(FAfterPaintLineNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FAfterPaintLineNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveBeforePaintLineNotifier(
   Notifier: TCnEditorPaintLineNotifier);
 begin
-  RemoveNotifier(FBeforePaintLineNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FBeforePaintLineNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoAfterPaintLine(Editor: TCnEditorObject;
@@ -2416,13 +2349,13 @@ end;
 procedure TCnEditControlWrapper.AddEditControlNotifier(
   Notifier: TCnEditorNotifier);
 begin
-  AddNotifier(FEditControlNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FEditControlNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditControlNotifier(
   Notifier: TCnEditorNotifier);
 begin
-  RemoveNotifier(FEditControlNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FEditControlNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoEditControlNotify(EditControl: TControl;
@@ -2449,13 +2382,13 @@ end;
 procedure TCnEditControlWrapper.AddEditorChangeNotifier(
   Notifier: TCnEditorChangeNotifier);
 begin
-  AddNotifier(FEditorChangeNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FEditorChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorChangeNotifier(
   Notifier: TCnEditorChangeNotifier);
 begin
-  RemoveNotifier(FEditorChangeNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FEditorChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoEditorChange(Editor: TCnEditorObject;
@@ -2494,25 +2427,25 @@ end;
 procedure TCnEditControlWrapper.AddKeyDownNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
-  AddNotifier(FKeyDownNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FKeyDownNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddKeyUpNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
-  AddNotifier(FKeyUpNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FKeyUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveKeyDownNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
-  RemoveNotifier(FKeyDownNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FKeyDownNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveKeyUpNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
-  RemoveNotifier(FKeyUpNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FKeyUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.OnCallWndProcRet(Handle: HWND;
@@ -2741,39 +2674,39 @@ procedure TCnEditControlWrapper.AddEditorMouseDownNotifier(
   Notifier: TCnEditorMouseDownNotifier);
 begin
   CheckAndSetEditControlMouseHookFlag;
-  AddNotifier(FMouseDownNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FMouseDownNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseMoveNotifier(
   Notifier: TCnEditorMouseMoveNotifier);
 begin
   CheckAndSetEditControlMouseHookFlag;
-  AddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FMouseMoveNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddEditorMouseUpNotifier(
   Notifier: TCnEditorMouseUpNotifier);
 begin
   CheckAndSetEditControlMouseHookFlag;
-  AddNotifier(FMouseUpNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FMouseUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorMouseDownNotifier(
   Notifier: TCnEditorMouseDownNotifier);
 begin
-  RemoveNotifier(FMouseDownNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FMouseDownNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorMouseMoveNotifier(
   Notifier: TCnEditorMouseMoveNotifier);
 begin
-  RemoveNotifier(FMouseMoveNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FMouseMoveNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorMouseUpNotifier(
   Notifier: TCnEditorMouseUpNotifier);
 begin
-  RemoveNotifier(FMouseUpNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FMouseUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoMouseDown(Editor: TCnEditorObject;
@@ -2847,26 +2780,26 @@ procedure TCnEditControlWrapper.AddEditorMouseLeaveNotifier(
   Notifier: TCnEditorMouseLeaveNotifier);
 begin
   CheckAndSetEditControlMouseHookFlag;
-  AddNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorMouseLeaveNotifier(
   Notifier: TCnEditorMouseLeaveNotifier);
 begin
-  RemoveNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FMouseLeaveNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.AddEditorNcPaintNotifier(
   Notifier: TCnEditorNcPaintNotifier);
 begin
   CheckAndSetEditControlMouseHookFlag;
-  AddNotifier(FNcPaintNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FNcPaintNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorNcPaintNotifier(
   Notifier: TCnEditorNcPaintNotifier);
 begin
-  RemoveNotifier(FNcPaintNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FNcPaintNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoNcPaint(Editor: TCnEditorObject);
@@ -2888,13 +2821,13 @@ end;
 procedure TCnEditControlWrapper.AddEditorVScrollNotifier(
   Notifier: TCnEditorVScrollNotifier);
 begin
-  AddNotifier(FVScrollNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FVScrollNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveEditorVScrollNotifier(
   Notifier: TCnEditorVScrollNotifier);
 begin
-  RemoveNotifier(FVScrollNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FVScrollNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.DoVScroll(Editor: TCnEditorObject);

@@ -647,13 +647,13 @@ end;
 
 class procedure TCnPaletteEnhanceWizard.ResizeComponentPalette(Sender: TObject);
 var
-  h : Integer;
+  H : Integer;
 begin
   with (Sender as TTabControl) do
   begin
-    h := Height + DisplayRect.Top - DisplayRect.Bottom + 29;
-    Constraints.MinHeight := h;
-    Parent.Constraints.MaxHeight := h;
+    H := Height + DisplayRect.Top - DisplayRect.Bottom + 29;
+    Constraints.MinHeight := H;
+    Parent.Constraints.MaxHeight := H;
   end;
 end;
 
@@ -834,7 +834,7 @@ begin
         MenuItem.Add(AItem);
       end;
     finally
-    List.Free;
+      List.Free;
     end;
   end;
 end;
@@ -862,9 +862,13 @@ var
 {$ENDIF}
 begin
   if FTabPopupItem = nil then
+  begin
     for I := 0 to Menu.Items.Count - 1 do
+    begin
       if Menu.Items.Items[I].Name = csTabsItem then
         FTabPopupItem := Menu.Items.Items[I];
+    end;
+  end;
 
   if FTabPopupItem = nil then
     Exit;
@@ -1173,11 +1177,9 @@ begin
     (FWizMenuNames.Count > 0) then
   begin
     for I := FWizMenuNames.Count - 1 downto 0 do    // 把设置中要独立出来的菜单项先挑出来挂 FWizMenu 下
-    begin
       DoInsertMenu(FWizMenu, FWizMenuNames[I]);
-    end;
-    MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu); // 再把 FWizMenu 挂主菜单下
 
+    MainMenu.Items.Insert(GetMenuInsertIndex + 1, FWizMenu); // 再把 FWizMenu 挂主菜单下
     AdjustMainMenuBar; // 菜单调整后会露空，要把菜单栏同样高度的右边控件往左挤
   end;
 end;

@@ -204,6 +204,18 @@ type
 function CnWizNotifierServices: ICnWizNotifierServices;
 {* 获取 IDE 通知服务接口}
 
+procedure CnWizClearAndFreeList(var List: TList);
+{* 全部释放通知器的公用函数}
+
+procedure CnWizAddNotifier(List: TList; Notifier: TMethod);
+{* 增加通知器公用函数}
+
+procedure CnWizRemoveNotifier(List: TList; Notifier: TMethod);
+{* 删除通知器公用函数}
+
+function CnWizIndexOfNotifier(List: TList; Notifier: TMethod): Integer;
+{* 查找通知器公用函数}
+
 implementation
 
 {$IFDEF DEBUG}
@@ -410,11 +422,7 @@ type
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
     FCurrentCompilingProject: IOTAProject;
-    procedure ClearAndFreeList(var List: TList);
-    function IndexOf(List: TList; Notifier: TMethod): Integer;
-    procedure AddNotifier(List: TList; Notifier: TMethod);
     procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
-    procedure RemoveNotifier(List: TList; Notifier: TMethod);
     procedure CheckActiveControl;
     procedure DoIdleNotifiers;
   protected
@@ -533,6 +541,63 @@ begin
     FCnWizNotifierServices.Free;
     FCnWizNotifierServices := nil;
     FIsReleased := True;
+  end;
+end;
+
+procedure CnWizClearAndFreeList(var List: TList);
+var
+  Rec: PCnWizNotifierRecord;
+begin
+  while List.Count > 0 do
+  begin
+    Rec := List[0];
+    Dispose(Rec);
+    List.Delete(0);
+  end;
+  FreeAndNil(List);
+end;
+
+procedure CnWizAddNotifier(List: TList; Notifier: TMethod);
+var
+  Rec: PCnWizNotifierRecord;
+begin
+  if List = nil then
+    Exit;
+
+  if CnWizIndexOfNotifier(List, Notifier) < 0 then
+  begin
+    New(Rec);
+    Rec^.Notifier := TMethod(Notifier);
+    List.Add(Rec);
+  end;
+end;
+
+procedure CnWizRemoveNotifier(List: TList; Notifier: TMethod);
+var
+  Rec: PCnWizNotifierRecord;
+  Idx: Integer;
+begin
+  Idx := CnWizIndexOfNotifier(List, Notifier);
+  if Idx >= 0 then
+  begin
+    Rec := List[Idx];
+    Dispose(Rec);
+    List.Delete(Idx);
+  end;
+end;
+
+function CnWizIndexOfNotifier(List: TList; Notifier: TMethod): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to List.Count - 1 do
+  begin
+    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
+    begin
+      Result := I;
+      Exit;
+    end;
   end;
 end;
 
@@ -976,29 +1041,29 @@ begin
   FreeAndNil(FCompNotifyList);
   FreeAndNil(FEvents);
 
-  ClearAndFreeList(FBeforeCompileNotifiers);
-  ClearAndFreeList(FAfterCompileNotifiers);
-  ClearAndFreeList(FProcessCreatedNotifiers);
-  ClearAndFreeList(FProcessDestroyedNotifiers);
-  ClearAndFreeList(FBreakpointAddedNotifiers);
-  ClearAndFreeList(FBreakpointDeletedNotifiers);
-  ClearAndFreeList(FFileNotifiers);
-  ClearAndFreeList(FSourceEditorNotifiers);
-  ClearAndFreeList(FFormEditorNotifiers);
-  ClearAndFreeList(FActiveFormNotifiers);
-  ClearAndFreeList(FActiveControlNotifiers);
-  ClearAndFreeList(FApplicationIdleNotifiers);
-  ClearAndFreeList(FApplicationMessageNotifiers);
-  ClearAndFreeList(FAppEventNotifiers);
-  ClearAndFreeList(FCallWndProcNotifiers);
+  CnWizClearAndFreeList(FBeforeCompileNotifiers);
+  CnWizClearAndFreeList(FAfterCompileNotifiers);
+  CnWizClearAndFreeList(FProcessCreatedNotifiers);
+  CnWizClearAndFreeList(FProcessDestroyedNotifiers);
+  CnWizClearAndFreeList(FBreakpointAddedNotifiers);
+  CnWizClearAndFreeList(FBreakpointDeletedNotifiers);
+  CnWizClearAndFreeList(FFileNotifiers);
+  CnWizClearAndFreeList(FSourceEditorNotifiers);
+  CnWizClearAndFreeList(FFormEditorNotifiers);
+  CnWizClearAndFreeList(FActiveFormNotifiers);
+  CnWizClearAndFreeList(FActiveControlNotifiers);
+  CnWizClearAndFreeList(FApplicationIdleNotifiers);
+  CnWizClearAndFreeList(FApplicationMessageNotifiers);
+  CnWizClearAndFreeList(FAppEventNotifiers);
+  CnWizClearAndFreeList(FCallWndProcNotifiers);
   FreeAndNil(FCallWndProcMsgList);
-  ClearAndFreeList(FCallWndProcRetNotifiers);
+  CnWizClearAndFreeList(FCallWndProcRetNotifiers);
   FreeAndNil(FCallWndProcRetMsgList);
-  ClearAndFreeList(FGetMsgNotifiers);
+  CnWizClearAndFreeList(FGetMsgNotifiers);
   FreeAndNil(FGetMsgMsgList);
-  ClearAndFreeList(FBeforeThemeChangeNotifiers);
-  ClearAndFreeList(FAfterThemeChangeNotifiers);
-  ClearAndFreeList(FIdleMethods);
+  CnWizClearAndFreeList(FBeforeThemeChangeNotifiers);
+  CnWizClearAndFreeList(FAfterThemeChangeNotifiers);
+  CnWizClearAndFreeList(FIdleMethods);
 
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FFormEditorIntfs.Count, 'Remove FormEditorNotifiers');
@@ -1046,70 +1111,17 @@ end;
 // 列表操作
 //------------------------------------------------------------------------------
 
-procedure TCnWizNotifierServices.AddNotifier(List: TList;
-  Notifier: TMethod);
-var
-  Rec: PCnWizNotifierRecord;
-begin
-  if IndexOf(List, Notifier) < 0 then
-  begin
-    New(Rec);
-    Rec^.Notifier := TMethod(Notifier);
-    List.Add(Rec);
-  end;
-end;
-
 procedure TCnWizNotifierServices.AddNotifierEx(List, MsgList: TList;
   Notifier: TMethod; MsgIDs: array of Cardinal);
 var
   I: Integer;
 begin
-  AddNotifier(List, Notifier);
+  CnWizAddNotifier(List, Notifier);
   for I := Low(MsgIDs) to High(MsgIDs) do
+  begin
     if MsgList.IndexOf(Pointer(MsgIDs[I])) < 0 then
       MsgList.Add(Pointer(MsgIDs[I]));
-end;
-
-procedure TCnWizNotifierServices.RemoveNotifier(List: TList;
-  Notifier: TMethod);
-var
-  Rec: PCnWizNotifierRecord;
-  idx: Integer;
-begin
-  idx := IndexOf(List, Notifier);
-  if idx >= 0 then
-  begin
-    Rec := List[idx];
-    Dispose(Rec);
-    List.Delete(idx);
   end;
-end;
-
-procedure TCnWizNotifierServices.ClearAndFreeList(var List: TList);
-var
-  Rec: PCnWizNotifierRecord;
-begin
-  while List.Count > 0 do
-  begin
-    Rec := List[0];
-    Dispose(Rec);
-    List.Delete(0);
-  end;
-  FreeAndNil(List);
-end;
-
-function TCnWizNotifierServices.IndexOf(List: TList;
-  Notifier: TMethod): Integer;
-var
-  I: Integer;
-begin
-  Result := -1;
-  for I := 0 to List.Count - 1 do
-    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
-    begin
-      Result := I;
-      Exit;
-    end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1119,13 +1131,13 @@ end;
 procedure TCnWizNotifierServices.AddFileNotifier(
   Notifier: TCnWizFileNotifier);
 begin
-  AddNotifier(FFileNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FFileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveFileNotifier(
   Notifier: TCnWizFileNotifier);
 begin
-  RemoveNotifier(FFileNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FFileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.FileNotification(
@@ -1177,49 +1189,49 @@ end;
 procedure TCnWizNotifierServices.AddAfterCompileNotifier(
   Notifier: TCnWizAfterCompileNotifier);
 begin
-  AddNotifier(FAfterCompileNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddAfterThemeChangeNotifier(
   Notifier: TNotifyEvent);
 begin
-  AddNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
-  AddNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddBeforeThemeChangeNotifier(
   Notifier: TNotifyEvent);
 begin
-  AddNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveAfterCompileNotifier(
   Notifier: TCnWizAfterCompileNotifier);
 begin
-  RemoveNotifier(FAfterCompileNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveAfterThemeChangeNotifier(
   Notifier: TNotifyEvent);
 begin
-  RemoveNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
-  RemoveNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveBeforeThemeChangeNotifier(
   Notifier: TNotifyEvent);
 begin
-  RemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AfterCompile(Succeeded,
@@ -1287,13 +1299,13 @@ end;
 procedure TCnWizNotifierServices.AddSourceEditorNotifier(
   Notifier: TCnWizSourceEditorNotifier);
 begin
-  AddNotifier(FSourceEditorNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FSourceEditorNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveSourceEditorNotifier(
   Notifier: TCnWizSourceEditorNotifier);
 begin
-  RemoveNotifier(FSourceEditorNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FSourceEditorNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.SourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -1419,13 +1431,13 @@ end;
 procedure TCnWizNotifierServices.AddFormEditorNotifier(
   Notifier: TCnWizFormEditorNotifier);
 begin
-  AddNotifier(FFormEditorNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FFormEditorNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveFormEditorNotifier(
   Notifier: TCnWizFormEditorNotifier);
 begin
-  RemoveNotifier(FFormEditorNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FFormEditorNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.FormEditorNotify(FormEditor: IOTAFormEditor;
@@ -1653,25 +1665,25 @@ end;
 procedure TCnWizNotifierServices.AddActiveControlNotifier(
   Notifier: TNotifyEvent);
 begin
-  AddNotifier(FActiveControlNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FActiveControlNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddActiveFormNotifier(
   Notifier: TNotifyEvent);
 begin
-  AddNotifier(FActiveFormNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FActiveFormNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveActiveControlNotifier(
   Notifier: TNotifyEvent);
 begin
-  RemoveNotifier(FActiveControlNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FActiveControlNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveActiveFormNotifier(
   Notifier: TNotifyEvent);
 begin
-  RemoveNotifier(FActiveFormNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FActiveFormNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.CheckActiveControl;
@@ -1734,37 +1746,37 @@ end;
 procedure TCnWizNotifierServices.AddApplicationIdleNotifier(
   Notifier: TNotifyEvent);
 begin
-  AddNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveApplicationIdleNotifier(
   Notifier: TNotifyEvent);
 begin
-  RemoveNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddApplicationMessageNotifier(
   Notifier: TMessageEvent);
 begin
-  AddNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveApplicationMessageNotifier(
   Notifier: TMessageEvent);
 begin
-  RemoveNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddAppEventNotifier(
   Notifier: TCnWizAppEventNotifier);
 begin
-  AddNotifier(FAppEventNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FAppEventNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveAppEventNotifier(
   Notifier: TCnWizAppEventNotifier);
 begin
-  RemoveNotifier(FAppEventNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FAppEventNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.DoIdleNotifiers;
@@ -1893,12 +1905,12 @@ end;
 procedure TCnWizNotifierServices.ExecuteOnApplicationIdle(
   Method: TNotifyEvent);
 begin
-  AddNotifier(FIdleMethods, TMethod(Method));
+  CnWizAddNotifier(FIdleMethods, TMethod(Method));
 end;
 
 procedure TCnWizNotifierServices.StopExecuteOnApplicationIdle(Method: TNotifyEvent);
 begin
-  RemoveNotifier(FIdleMethods, TMethod(Method));
+  CnWizRemoveNotifier(FIdleMethods, TMethod(Method));
 end;
 
 function TCnWizNotifierServices.GetCurrentCompilingProject: IOTAProject;
@@ -1940,12 +1952,15 @@ var
   begin
     Result := False;
     for I := 0 to MsgList.Count - 1 do
+    begin
       if Msg.Msg = Cardinal(MsgList[I]) then
       begin
         Result := True;
         Exit;
       end;
+    end;
   end;
+
 begin
   if not IdeClosing and (AList <> nil) and IsMsgRegistered then
   begin
@@ -1969,7 +1984,7 @@ end;
 procedure TCnWizNotifierServices.RemoveCallWndProcNotifier(
   Notifier: TCnWizMsgHookNotifier);
 begin
-  RemoveNotifier(FCallWndProcNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FCallWndProcNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.DoCallWndProc(Handle: HWND; Msg: TMessage);
@@ -1986,7 +2001,7 @@ end;
 procedure TCnWizNotifierServices.RemoveCallWndProcRetNotifier(
   Notifier: TCnWizMsgHookNotifier);
 begin
-  RemoveNotifier(FCallWndProcRetNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FCallWndProcRetNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.DoCallWndProcRet(Handle: HWND;
@@ -2004,7 +2019,7 @@ end;
 procedure TCnWizNotifierServices.RemoveGetMsgNotifier(
   Notifier: TCnWizMsgHookNotifier);
 begin
-  RemoveNotifier(FGetMsgNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FGetMsgNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.DoGetMsg(Handle: HWND; Msg: TMessage);
@@ -2093,49 +2108,49 @@ end;
 procedure TCnWizNotifierServices.AddBreakpointAddedNotifier(
   Notifier: TCnWizBreakpointNotifier);
 begin
-  AddNotifier(FBreakpointAddedNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FBreakpointAddedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddBreakpointDeletedNotifier(
   Notifier: TCnWizBreakpointNotifier);
 begin
-  AddNotifier(FBreakpointDeletedNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FBreakpointDeletedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddProcessCreatedNotifier(
   Notifier: TCnWizProcessNotifier);
 begin
-  AddNotifier(FProcessCreatedNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FProcessCreatedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AddProcessDestroyedNotifier(
   Notifier: TCnWizProcessNotifier);
 begin
-  AddNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
+  CnWizAddNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveBreakpointAddedNotifier(
   Notifier: TCnWizBreakpointNotifier);
 begin
-  RemoveNotifier(FBreakpointAddedNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FBreakpointAddedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveBreakpointDeletedNotifier(
   Notifier: TCnWizBreakpointNotifier);
 begin
-  RemoveNotifier(FBreakpointDeletedNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FBreakpointDeletedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveProcessCreatedNotifier(
   Notifier: TCnWizProcessNotifier);
 begin
-  RemoveNotifier(FProcessCreatedNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FProcessCreatedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveProcessDestroyedNotifier(
   Notifier: TCnWizProcessNotifier);
 begin
-  RemoveNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
+  CnWizRemoveNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.DoAfterThemeChange;

@@ -418,7 +418,7 @@ end;
 
 procedure TCnWizControlServices.HookDesignRoot(DesignRoot: TComponent);
 var
-  i: Integer;
+  I: Integer;
 begin
   if not Assigned(DesignRoot) then Exit;
 
@@ -427,9 +427,9 @@ begin
     HookControl(TControl(DesignRoot), False);
 
   // 挂接其子组件
-  for i := 0 to DesignRoot.ComponentCount - 1 do
-    if DesignRoot.Components[i] is TControl then
-      HookControl(TControl(DesignRoot.Components[i]));
+  for I := 0 to DesignRoot.ComponentCount - 1 do
+    if DesignRoot.Components[I] is TControl then
+      HookControl(TControl(DesignRoot.Components[I]));
 end;
 
 procedure TCnWizControlServices.Notification(AComponent: TComponent;
@@ -584,13 +584,13 @@ end;
 function TCnWizControlServices.IndexOf(List: TList;
   Notifier: TMethod): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to List.Count - 1 do
-    if CompareMem(List[i], @Notifier, SizeOf(TMethod)) then
+  for I := 0 to List.Count - 1 do
+    if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -626,17 +626,17 @@ end;
 function TCnWizControlServices.DoAfterMessage(Control: TControl;
   var Msg: TMessage): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
-  for i := 0 to FAfterNotifiers.Count - 1 do
+  for I := 0 to FAfterNotifiers.Count - 1 do
   begin
     try
-      with PCnWizNotifierRecord(FAfterNotifiers[i])^ do
+      with PCnWizNotifierRecord(FAfterNotifiers[I])^ do
         TCnWizMessageNotifier(Notifier)(Control, Msg, Result);
     except
       on E: Exception do
-        DoHandleException('TCnWizControlServices.DoAfterMessage[' + IntToStr(i) + ']', E);
+        DoHandleException('TCnWizControlServices.DoAfterMessage[' + IntToStr(I) + ']', E);
     end;
 
     if Result then Exit;
@@ -646,17 +646,17 @@ end;
 function TCnWizControlServices.DoBeforeMessage(Control: TControl;
   var Msg: TMessage): Boolean;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := False;
-  for i := 0 to FBeforeNotifiers.Count - 1 do
+  for I := 0 to FBeforeNotifiers.Count - 1 do
   begin
     try
-      with PCnWizNotifierRecord(FBeforeNotifiers[i])^ do
+      with PCnWizNotifierRecord(FBeforeNotifiers[I])^ do
         TCnWizMessageNotifier(Notifier)(Control, Msg, Result);
     except
       on E: Exception do
-        DoHandleException('TCnWizControlServices.DoBeforeMessage[' + IntToStr(i) + ']', E);
+        DoHandleException('TCnWizControlServices.DoBeforeMessage[' + IntToStr(I) + ']', E);
     end;
 
     if Result then Exit;
@@ -706,13 +706,13 @@ end;
 
 function TCnWizControlServices.IndexOfControl(Control: TControl): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to GetControlCount - 1 do
-    if Control = GetControls(i) then
+  for I := 0 to GetControlCount - 1 do
+    if Control = GetControls(I) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -720,13 +720,13 @@ end;
 function TCnWizControlServices.IndexOfDesignRoot(
   DesignRoot: TComponent): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to GetDesignRootCount - 1 do
-    if DesignRoot = GetDesignRoots(i) then
+  for I := 0 to GetDesignRootCount - 1 do
+    if DesignRoot = GetDesignRoots(I) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
@@ -734,13 +734,13 @@ end;
 function TCnWizControlServices.IndexOfDesignContainer(
   DesignContainer: TWinControl): Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := -1;
-  for i := 0 to GetDesignContainerCount - 1 do
-    if DesignContainer = GetDesignContainers(i) then
+  for I := 0 to GetDesignContainerCount - 1 do
+    if DesignContainer = GetDesignContainers(I) then
     begin
-      Result := i;
+      Result := I;
       Exit;
     end;
 end;
