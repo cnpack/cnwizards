@@ -116,6 +116,8 @@ const
   PropertyInspectorName = 'PropertyInspector';
   PropertyInspectorListClassName = 'TInspListBox';
   PropertyInspectorListName = 'PropList';
+  PropertyInspectorTabControlName = 'TabControl';
+  PropertyInspectorLocalPopupMenu = 'LocalPopupMenu';
 
   // ±à¼­Æ÷ÉèÖÃ¶Ô»°¿ò
 {$IFDEF BDS}
@@ -1426,7 +1428,7 @@ begin
     Result := TCustomForm(Application.FindComponent(PropertyInspectorName));
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsgError('Unable to Find Oject Inspector!');
+    CnDebugger.LogMsgError('Unable to Find Object Inspector!');
 {$ENDIF}
 end;
 

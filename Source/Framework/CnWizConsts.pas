@@ -341,6 +341,9 @@ resourcestring
   // CnRepositoryMenu
   SCnRepositoryMenuCommand = 'CnRepositoryMenu';
 
+  // CnObjInspectorEnhanceWizard
+  SCnObjInspectorCommentWindowMenuName = 'CnObjInspectorCommentWindow';
+
   // CnMsdnWizard
   SCnMsdnWizRunConfig = 'CnMsdnWizRunConfig';
   SCnMsdnWizRunMsdn = 'CnMsdnWizRunMsdn';
@@ -1527,6 +1530,7 @@ var
   // CnObjInspectorEnhanceWizard
   SCnObjInspectorEnhanceWizardName: string = 'Object Inspector Enhancements';
   SCnObjInspectorEnhanceWizardComment: string = 'Object Inspector Enhancements';
+  SCnObjInspectorCommentWindowMenuCaption: string = 'Comment &Window';
 
   // CnWizBoot
   SCnWizBootCurrentCount: string = 'Current Wizards: %d';

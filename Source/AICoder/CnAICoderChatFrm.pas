@@ -280,7 +280,7 @@ end;
 procedure TCnAICoderChatForm.actCopyCodeExecute(Sender: TObject);
 var
   S: string;
-  I1, I2: Integer;
+  I1: Integer;
 begin
   if FItemUnderMouse <> nil then
   begin

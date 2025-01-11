@@ -1239,6 +1239,7 @@ begin
   // CnObjInspectorEnhanceWizard
   TranslateStr(SCnObjInspectorEnhanceWizardName, 'SCnObjInspectorEnhanceWizardName');
   TranslateStr(SCnObjInspectorEnhanceWizardComment, 'SCnObjInspectorEnhanceWizardComment');
+  TranslateStr(SCnObjInspectorCommentWindowMenuCaption, 'SCnObjInspectorCommentWindowMenuCaption');
 
   // CnWizBoot
   TranslateStr(SCnWizBootCurrentCount, 'SCnWizBootCurrentCount');

@@ -130,9 +130,13 @@ type
     property Filtered: Boolean read FFiltered write FFiltered;
     property CaptionPacked: Boolean read FCaptionPacked write SetCaptionPacked;
     property Animate: Boolean read FAnimate write SetAnimate;
+    {* 折叠时是否动画}
     property ShowTop: Boolean read FShowTop write FShowTop;
+    {* 是否显示置顶按钮}
     property ShowRoller: Boolean read FShowRoller write FShowRoller;
+    {* 是否显示折叠按钮}
     property ShowOptions: Boolean read FShowOptions write FShowOptions;
+    {* 是否显示选项按钮}
   end;
 
   TCnTopRollerForm = class(TCnTranslateForm)

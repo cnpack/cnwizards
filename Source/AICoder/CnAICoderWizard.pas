@@ -449,7 +449,6 @@ procedure TCnAICoderWizard.ForCodeGen(Success: Boolean; SendId: Integer;
   const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 var
   S: string;
-  View: IOTAEditView;
 begin
   if (Tag <> nil) and (Tag is TCnChatMessage) then
   begin

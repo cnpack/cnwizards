@@ -45,25 +45,38 @@ interface
 
 {$IFDEF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
 
-{$IFDEF COMPILER6_UP}
-  'Error: This wizard can used only for Delphi/C++ Builder 5.'
-{$ENDIF COMPILER6_UP}
-
 uses
-  Windows, SysUtils, Classes, Graphics, IniFiles, TypInfo,
+  Windows, SysUtils, Classes, Graphics, IniFiles, TypInfo, Controls, StdCtrls,
+  Menus, Forms,
 {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, VCLEditors,
 {$ELSE}
   DsgnIntf,
 {$ENDIF}
-  CnConsts, CnWizClasses, CnWizConsts, CnWizMethodHook;
+  CnConsts, CnWizClasses, CnWizConsts, CnWizMultiLang, CnWizMethodHook, CnIni,
+  CnObjInspectorCommentFrm, CnMenuHook;
 
 type
   TCnObjInspectorEnhanceWizard = class(TCnIDEEnhanceWizard)
   private
+    FEnhancePaint: Boolean;
+    FShowCommentMenu: Boolean;
+    FInspectorComment: Boolean;
+    FMenuHook: TCnMenuHook;
+    FCommentWindowMenu: TCnMenuItemDef;
+    FCommentForm: TCnObjInspectorCommentForm;
     procedure HookPropEditor;
     procedure UnhookPropEditor;
+    procedure SetEnhancePaint(const Value: Boolean);
+    procedure SetInspectorComment(const Value: Boolean);
+    function GetHideGridLine: Boolean;
+    procedure SetHideGridLine(const Value: Boolean);
+    procedure SetShowCommentMenu(const Value: Boolean);
   protected
+    procedure HookObjectInspectorMenu;
+    procedure ActiveFormChanged(Sender: TObject);
+    procedure OnCommentWindowClick(Sender: TObject);
+    procedure OnMenuAfterPopup(Sender: TObject; Menu: TPopupMenu);
     function GetHasConfig: Boolean; override;
     procedure SetActive(Value: Boolean); override;
   public
@@ -75,6 +88,33 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure Config; override;
+
+    property EnhancePaint: Boolean read FEnhancePaint write SetEnhancePaint;
+    {* 是否增强绘制属性编辑器，仅 Delphi 5 下有效}
+    property HideGridLine: Boolean read GetHideGridLine write SetHideGridLine;
+    {* 是否隐藏对象查看器的网格线}
+    property ShowCommentMenu: Boolean read FShowCommentMenu write SetShowCommentMenu;
+    {* 是否在对象查看器的右键菜单里插入显示备注窗体的菜单项}
+
+    property InspectorComment: Boolean read FInspectorComment write SetInspectorComment;
+    {* 是否显示对象查看器备注窗体}
+  end;
+
+  TCnObjInspectorConfigForm = class(TCnTranslateForm)
+    grpSettings: TGroupBox;
+    btnOK: TButton;
+    btnCancel: TButton;
+    btnHelp: TButton;
+    chkEnhancePaint: TCheckBox;
+    chkCommentWindow: TCheckBox;
+    chkHideGridLine: TCheckBox;
+    procedure btnHelpClick(Sender: TObject);
+  private
+
+  protected
+    function GetHelpTopic: string; override;
+  public
+
   end;
 
 {$ENDIF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
@@ -83,8 +123,17 @@ implementation
 
 {$IFDEF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
 
+{$R *.DFM}
+
 uses
-  CnCommon;
+  CnCommon, CnObjectInspectorWrapper, CnWizNotifier;
+
+const
+  csEnhancePaint = 'EnhancePaint';
+  csHideGridLine = 'HideGridLine';
+  csShowCommentMenu = 'ShowCommentMenu';
+
+{$IFDEF COMPILER5}
 
 type
   // 原属性编辑器绘制方法，因为原过程为对象方法，专家中使用普通过程来挂接，
@@ -92,17 +141,22 @@ type
   TPropDrawProc = procedure (ASelf: TPropertyEditor; ACanvas: TCanvas;
     const ARect: TRect; ASelected: Boolean);
 
+  THackPropertyEditor = class(TPropertyEditor);
+
+{$ENDIF}
+
 var
+{$IFDEF COMPILER5}
   OldPropDrawName: TPropDrawProc;
   OldPropDrawValue: TPropDrawProc;
   PropDrawNameHook: TCnMethodHook;
   PropDrawValueHook: TCnMethodHook;
-  AllowHook: Boolean;
+{$ENDIF}
+  AllowHook: Boolean = False;
+
+{$IFDEF COMPILER5}
 
 // 挂接 TPropertyEditor.PropDrawName 的方法
-type
-  THackPropertyEditor = class(TPropertyEditor);
-
 procedure PropDrawName(ASelf: TPropertyEditor; ACanvas: TCanvas;
   const ARect: TRect; ASelected: Boolean);
 begin
@@ -166,7 +220,7 @@ var
 begin
   if AllowHook and (ASelf.PropCount > 0) then
   begin
-    // 不用IsStoredProp
+    // 不用 IsStoredProp
     if not ASelected then
     begin
       if ASelf is TSetElementProperty then
@@ -212,64 +266,113 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 { TCnObjInspectorEnhanceWizard }
 
 constructor TCnObjInspectorEnhanceWizard.Create;
 begin
   inherited;
   HookPropEditor;
+
+  FMenuHook := TCnMenuHook.Create(nil);
+  HookObjectInspectorMenu;
+
+  CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
 end;
 
 destructor TCnObjInspectorEnhanceWizard.Destroy;
 begin
+  CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
+
+  FMenuHook.Free;
+  if FCommentForm <> nil then
+    FCommentForm.Free;
+
   UnhookPropEditor;
   inherited;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.HookPropEditor;
 begin
+{$IFDEF COMPILER5}
   // 取得原有的属性编辑器绘制方法地址
   OldPropDrawName := GetBplMethodAddress(@TPropertyEditor.PropDrawName);
   OldPropDrawValue := GetBplMethodAddress(@TPropertyEditor.PropDrawValue);
   // 挂接属性编辑器绘制方法
   PropDrawNameHook := TCnMethodHook.Create(@OldPropDrawName, @PropDrawName);
   PropDrawValueHook := TCnMethodHook.Create(@OldPropDrawValue, @PropDrawValue);
+{$ENDIF}
 end;
 
 procedure TCnObjInspectorEnhanceWizard.UnhookPropEditor;
 begin
+{$IFDEF COMPILER5}
   OldPropDrawName := nil;
   OldPropDrawValue := nil;
   FreeAndNil(PropDrawNameHook);
   FreeAndNil(PropDrawValueHook);
+{$ENDIF}
 end;
 
 procedure TCnObjInspectorEnhanceWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
-  { TODO : 装载设置 }
+  with TCnIniFile.Create(Ini) do
+  try
+    EnhancePaint := Ini.ReadBool('', csEnhancePaint, True);
+    HideGridLine := Ini.ReadBool('', csHideGridLine, False);
+    ShowCommentMenu := Ini.ReadBool('', csShowCommentMenu, False);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
-  { TODO : 保存设置 }
+  with TCnIniFile.Create(Ini) do
+  try
+    Ini.WriteBool('', csEnhancePaint, FEnhancePaint);
+    Ini.WriteBool('', csHideGridLine, HideGridLine);
+    Ini.WriteBool('', csShowCommentMenu, FShowCommentMenu);
+  finally
+    Free;
+  end;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.SetActive(Value: Boolean);
 begin
   inherited;
-  AllowHook := Value;
+  AllowHook := Value and FEnhancePaint;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.Config;
 begin
-  { TODO : 显示设置窗口 }
+  with TCnObjInspectorConfigForm.Create(nil) do
+  begin
+{$IFDEF COMPILER5}
+    chkEnhancePaint.Checked := EnhancePaint;
+{$ELSE}
+    chkEnhancePaint.Enabled := False;
+{$ENDIF}
+    chkHideGridLine.Checked := HideGridLine;
+    chkCommentWindow.Checked := ShowCommentMenu;
+
+    if ShowModal = mrOk then
+    begin
+{$IFDEF COMPILER5}
+      EnhancePaint := chkEnhancePaint.Checked;
+{$ENDIF}
+      HideGridLine := chkHideGridLine.Checked;
+      ShowCommentMenu := chkCommentWindow.Checked;
+    end;
+  end;
 end;
 
 function TCnObjInspectorEnhanceWizard.GetHasConfig: Boolean;
 begin
-  Result := False;
+  Result := True;
 end;
 
 class procedure TCnObjInspectorEnhanceWizard.GetWizardInfo(var Name,
@@ -281,9 +384,105 @@ begin
   Comment := SCnObjInspectorEnhanceWizardComment;
 end;
 
+procedure TCnObjInspectorEnhanceWizard.SetEnhancePaint(const Value: Boolean);
+begin
+  FEnhancePaint := Value;
+  AllowHook := Active and FEnhancePaint;
+  ObjectInspectorWrapper.RepaintPropList;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetInspectorComment(const Value: Boolean);
+begin
+  FInspectorComment := Value;
+
+  if FInspectorComment then
+  begin
+    if FCommentForm = nil then
+      FCommentForm := TCnObjInspectorCommentForm.Create(Application);
+    FCommentForm.VisibleWithParent := True;
+    FCommentForm.BringToFront;
+  end
+  else
+  begin
+    if FCommentForm <> nil then
+      FCommentForm.Hide;
+  end;
+end;
+
 function TCnObjInspectorEnhanceWizard.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '属性,property,事件,event,';
+end;
+
+function TCnObjInspectorEnhanceWizard.GetHideGridLine: Boolean;
+begin
+  Result := not ObjectInspectorWrapper.ShowGridLines;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetHideGridLine(
+  const Value: Boolean);
+begin
+  ObjectInspectorWrapper.ShowGridLines := not Value;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetShowCommentMenu(
+  const Value: Boolean);
+begin
+  if FShowCommentMenu <> Value then
+  begin
+    FShowCommentMenu := Value;
+    FMenuHook.Active := FShowCommentMenu;
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.OnCommentWindowClick(
+  Sender: TObject);
+begin
+  InspectorComment := not InspectorComment;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.OnMenuAfterPopup(Sender: TObject; Menu: TPopupMenu);
+var
+  I: Integer;
+begin
+  for I := 0 to Menu.Items.Count - 1 do
+  begin
+    if Menu.Items.Items[I].Name = SCnObjInspectorCommentWindowMenuName then
+    begin
+      Menu.Items.Items[I].Checked := (FCommentForm <> nil) and FCommentForm.VisibleWithParent;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.HookObjectInspectorMenu;
+begin
+  if (ObjectInspectorWrapper.PopupMenu <> nil) and not
+    FMenuHook.IsHooked(ObjectInspectorWrapper.PopupMenu) then
+  begin
+    FMenuHook.HookMenu(ObjectInspectorWrapper.PopupMenu);
+    FMenuHook.OnAfterPopup := OnMenuAfterPopup;
+    FCommentWindowMenu := TCnMenuItemDef.Create(SCnObjInspectorCommentWindowMenuName,
+      SCnObjInspectorCommentWindowMenuCaption, OnCommentWindowClick, ipLast);
+    FMenuHook.AddMenuItemDef(FCommentWindowMenu);
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.ActiveFormChanged(Sender: TObject);
+begin
+  HookObjectInspectorMenu;
+end;
+
+{ TCnObjInspectorConfigForm }
+
+function TCnObjInspectorConfigForm.GetHelpTopic: string;
+begin
+  Result := 'CnObjInspectorEnhanceWizard';
+end;
+
+procedure TCnObjInspectorConfigForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
 end;
 
 initialization
