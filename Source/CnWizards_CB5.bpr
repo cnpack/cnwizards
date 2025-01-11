@@ -54,7 +54,8 @@
       ..\Dcu\CnCommentCropper.obj ..\Dcu\CnSourceCropper.obj 
       ..\Dcu\CnCpuWinEnhancements.obj ..\Dcu\CnCpuWinEnhanceFrm.obj 
       ..\Dcu\CnMultiLineEdtToolOptFrm.obj ..\Dcu\CnMultiLineEdtUserFmtFrm.obj 
-      ..\Dcu\CnObjInspectorEnhancements.obj ..\Dcu\CnRepositoryMenu.obj 
+      ..\Dcu\CnObjInspectorEnhancements.obj ..\Dcu\CnObjInspectorCommentFrm.obj 
+      ..\Dcu\CnObjectInspectorWrapper.obj ..\Dcu\CnRepositoryMenu.obj 
       ..\Dcu\CnDUnitWizard.obj ..\Dcu\CnDUnitSetFrm.obj ..\Dcu\CnIniFilerFrm.obj 
       ..\Dcu\CnIniFilerWizard.obj ..\Dcu\CnTestWizard.obj 
       ..\Dcu\CnOTACreators.obj ..\Dcu\CnProjectDelTempFrm.obj 
@@ -143,6 +144,8 @@
       ProjectExtWizard\CnProjectFramesFrm.dfm 
       ProjectExtWizard\CnProjectListUsedFrm.dfm 
       SimpleWizards\CnCommentCropper.dfm 
+      IdeEnhancements\CnCpuWinEnhanceFrm.dfm IdeEnhancements\CnObjInspectorEnhancements.dfm 
+      IdeEnhancements\CnObjInspectorCommentFrm.dfm 
       DesignEditors\CnMultiLineEdtToolOptFrm.dfm 
       DesignEditors\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
       RepositoryWiz\CnIniFilerFrm.dfm RepositoryWiz\CnTestWizard.dfm 

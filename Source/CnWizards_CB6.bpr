@@ -52,6 +52,8 @@
       ..\Dcu\CnCommentCropper.obj ..\Dcu\CnSourceCropper.obj 
       ..\Dcu\CnCpuWinEnhancements.obj ..\Dcu\CnCpuWinEnhanceFrm.obj 
       ..\Dcu\CnMultiLineEdtToolOptFrm.obj ..\Dcu\CnMultiLineEdtUserFmtFrm.obj 
+      ..\Dcu\CnObjInspectorEnhancements.obj ..\Dcu\CnObjInspectorCommentFrm.obj 
+      ..\Dcu\CnObjectInspectorWrapper.obj 
       ..\Dcu\CnRepositoryMenu.obj ..\Dcu\CnDUnitWizard.obj 
       ..\Dcu\CnDUnitSetFrm.obj ..\Dcu\CnIniFilerFrm.obj 
       ..\Dcu\CnIniFilerWizard.obj ..\Dcu\CnTestWizard.obj ..\Dcu\CnOTACreators.obj 
@@ -139,6 +141,8 @@
       ProjectExtWizard\CnProjectFramesFrm.dfm 
       ProjectExtWizard\CnProjectListUsedFrm.dfm 
       SimpleWizards\CnCommentCropper.dfm 
+      IdeEnhancements\CnCpuWinEnhanceFrm.dfm IdeEnhancements\CnObjInspectorEnhancements.dfm 
+      IdeEnhancements\CnObjInspectorCommentFrm.dfm 
       DesignEditors\CnMultiLineEdtToolOptFrm.dfm 
       DesignEditors\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
       RepositoryWiz\CnIniFilerFrm.dfm ProjectExtWizard\CnProjectDelTempFrm.dfm 
@@ -329,6 +333,9 @@
       <FILE FILENAME="IdeEnhancements\CnCpuWinEnhanceFrm.pas" FORMNAME="" UNITNAME="CnCpuWinEnhanceFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnMultiLineEdtToolOptFrm.pas" FORMNAME="CnMultiLineEditorToolsOptionFrm" UNITNAME="Cnmultilineedttooloptfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditors\CnMultiLineEdtUserFmtFrm.pas" FORMNAME="CnMultiLineEditorUserFmtFrm" UNITNAME="Cnmultilineedtuserfmtfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="IdeEnhancements\CnObjInspectorEnhancements.pas" FORMNAME="CnObjInspectorConfigForm" UNITNAME="Cnobjinspectorenhancements" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="IdeEnhancements\CnObjInspectorCommentFrm.pas" FORMNAME="CnObjInspectorCommentForm" UNITNAME="Cnobjinspectorcommentfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnObjectInspectorWrapper.pas" FORMNAME="" UNITNAME="Cnobjectinspectorwrapper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="RepositoryWiz\CnRepositoryMenu.pas" FORMNAME="" UNITNAME="CnRepositoryMenu" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="RepositoryWiz\CnDUnitWizard.pas" FORMNAME="" UNITNAME="CnDUnitWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="RepositoryWiz\CnDUnitSetFrm.pas" FORMNAME="CnDUnitSetForm" UNITNAME="Cndunitsetfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

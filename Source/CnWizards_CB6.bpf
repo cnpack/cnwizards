@@ -55,8 +55,11 @@ USEFORMNS("ProjectExtWizard\CnProjectUseUnitsFrm.pas", Cnprojectuseunitsfrm, CnP
 USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProjectFramesForm);
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
 USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
+USEFORMNS("IdeEnhancements\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
 USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
 USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
+USEFORMNS("IdeEnhancements\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
+USEFORMNS("IdeEnhancements\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
 USEFORMNS("RepositoryWiz\CnIniFilerFrm.pas", Cninifilerfrm, CnIniFilerForm);
 USEFORMNS("RepositoryWiz\CnTestWizard.pas", Cntestwizard, CnTestWizardForm);

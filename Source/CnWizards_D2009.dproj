@@ -348,6 +348,13 @@
 			<DCCReference Include="IdeEnhancements\CnCpuWinEnhanceFrm.pas">
 				<Form>CnCpuWinEnhanceForm</Form>
 			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnObjInspectorEnhancements.pas">
+				<Form>CnObjInspectorConfigForm</Form>
+			</DCCReference>
+			<DCCReference Include="IdeEnhancements\CnObjInspectorCommentFrm.pas">
+				<Form>CnObjInspectorCommentForm</Form>
+			</DCCReference>
+			<DCCReference Include="Utils\CnObjectInspectorWrapper.pas"/>
 			<DCCReference Include="RepositoryWiz\CnRepositoryMenu.pas"/>
 			<DCCReference Include="RepositoryWiz\CnDUnitWizard.pas"/>
 			<DCCReference Include="RepositoryWiz\CnDUnitSetFrm.pas">

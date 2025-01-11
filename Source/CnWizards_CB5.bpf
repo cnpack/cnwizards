@@ -100,10 +100,12 @@ USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnP
 USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
 USEUNIT("Utils\CnSourceCropper.pas");
 USEUNIT("IdeEnhancements\CnCpuWinEnhancements.pas");
-USEUNIT("IdeEnhancements\CnCpuWinEnhanceFrm.pas");
+USEFORMNS("IdeEnhancements\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
 USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
 USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
-USEUNIT("IdeEnhancements\CnObjInspectorEnhancements.pas");
+USEFORMNS("IdeEnhancements\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
+USEFORMNS("IdeEnhancements\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
+USEUNIT("Utils\CnObjectInspectorWrapper.pas");
 USEUNIT("RepositoryWiz\CnRepositoryMenu.pas");
 USEUNIT("RepositoryWiz\CnDUnitWizard.pas");
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
