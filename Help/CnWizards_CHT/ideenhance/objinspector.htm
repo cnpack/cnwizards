@@ -7,9 +7,9 @@
 </head>
 
 <body>
-<table width="100%" border="0" cellpadding="4" id="table1">
+<table width="100%" border="0" cellpadding="4">
   <tr>
-    <td class="head" height="16">物件查看器擴展專家</td>
+    <td class="head" height="16">對像查看器擴展專家</td>
   </tr>
   <tr>
     <td bgcolor="#FF9900" height="6"></td>
@@ -18,15 +18,55 @@
     <td height=6></td>
   </tr>
 </table>
-<p class="title">物件查看器擴展專家</p>
-<p class="text">物件查看器擴展專家為低版本 IDE 的物件查看器增加了類似 Delphi 7 中的非預設值屬性加粗顯示的功能，當前支援 Delphi 5 和 C++Builder 5。</p>
-<p class="text">如下圖所示，啟用該專家後，在 Delphi 5 的物件查看器中，非預設值屬性以粗體顯示，元件類屬性則顯示為棕色。</p>
+<p class="title">對像查看器擴展專家</p>
+<p class="text">對像查看器擴展專家為對像查看器提供了一系列擴展功能，其設置界面如下圖：</p>
+<p class="text" align="center">
+<img src="objinspectorconf.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>增強繪製屬性編輯器</b>：為低版本 IDE 的對象查看器增加了類似 Delphi 7 中的非默認值屬性加粗顯示的功能，當前支持 Delphi 5 和 C++Builder 5。如下圖所示，啟用該專家後，在 Delphi 5 的對象查看器中，非默認值屬性以粗體顯示，組件類屬性則顯示為棕色。</p>
 <p class="text" align="center">
 <img src="objinspector.png"></p>
+  </li>
+  <li>
+    <p class="text"><b>顯示對像查看器網格線</b>：Delphi 6/7 的對象查看器內部繪製有橫向網格線，而 Delphi 2005 版本以上沒有。該兩個選項可以分別設置其是否繪製網格線，以滿足用戶的細節需求。</p>
+  </li>
+	<li>
+    <p class="text"><b>在對像查看器右鍵菜單中增加「備註窗口」菜單項</b>：是否在對像查看器右鍵菜單中增加一個「備註窗口」的菜單項，該菜單項可顯示或隱藏一個針對對像查看器所選擇內容的備註窗口，供有需要的用戶輸入備註供記憶與查看。備註窗口如下圖，上部會聯動顯示當前設計器所選中的單個組件及其對像查看器中選中的屬性，並提供相應的備註編輯框進行備註內容的編輯，同時底部的狀態條也會顯示當前選中組件的類繼承關係。</p>
+    <p class="text" align="center">
+<img src="objinspectorcomment.png"></p>
+    <ul>
+      <li>
+    <p class="text"><b>類名</b>：當前設計器中選中的組件，只支持選中的單個組件。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>類名備註</b>：可在此輸入該類組件的備註信息。</p>
+  		</li>
+      <li>
+    <p class="text"><b>屬性事件名</b>：對像查看器中當前選中的屬性或事件名稱。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>屬性事件名備註</b>：可在此輸入該類組件的該屬性或事件的備註信息。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>狀態欄</b>：顯示選中組件的類繼承關係。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>清空</b>：清空備註窗口中的備註信息。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>字體</b>：更改顯示字體。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>幫助</b>：顯示此幫助。</p>
+  		</li>
+	  </ul>
+  </li>
+</ul>
 <p class="text">　</p>
 <p class="title" align="left">相關主題
-<p class="text" align="left"> <a href="formdesigner.htm">表單設計器擴展專家</a>
-<p class="text" align="left"> <a href="palette.htm">IDE 主表單擴展專家</a>
+<p class="text" align="left"> <a href="formdesigner.htm">窗體設計器擴展專家</a>
+<p class="text" align="left"> <a href="palette.htm">IDE 主窗體擴展專家</a>
 <p class="text" align="left"> <a href="cpuwin.htm">CPU 窗口擴展專家</a>
 <p class="text" align="left"> <a href="wintoproller.htm">窗口置頂與折疊擴展專家</a><p class="text" align="left">
 <p class="text" align="left"> <a href="inputhelper.htm">代碼輸入助手</a><p class="text" align="left">

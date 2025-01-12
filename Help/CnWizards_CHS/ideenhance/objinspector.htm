@@ -19,10 +19,50 @@
   </tr>
 </table>
 <p class="title">对象查看器扩展专家</p>
-<p class="text">对象查看器扩展专家为低版本 IDE 的对象查看器增加了类似 Delphi 7 中的非默认值属性加粗显示的功能，当前支持 Delphi 5 和 C++Builder 5。</p>  
-<p class="text">如下图所示，启用该专家后，在 Delphi 5 的对象查看器中，非默认值属性以粗体显示，组件类属性则显示为棕色。</p>  
+<p class="text">对象查看器扩展专家为对象查看器提供了一系列扩展功能，其设置界面如下图：</p>
+<p class="text" align="center">
+<img src="objinspectorconf.png"></p>
+<ul>
+  <li>
+    <p class="text"><b>增强绘制属性编辑器</b>：为低版本 IDE 的对象查看器增加了类似 Delphi 7 中的非默认值属性加粗显示的功能，当前支持 Delphi 5 和 C++Builder 5。如下图所示，启用该专家后，在 Delphi 5 的对象查看器中，非默认值属性以粗体显示，组件类属性则显示为棕色。</p>
 <p class="text" align="center">
 <img src="objinspector.png"></p>
+  </li>
+  <li>
+    <p class="text"><b>显示对象查看器网格线</b>：Delphi 6/7 的对象查看器内部绘制有横向网格线，而 Delphi 2005 版本以上没有。该两个选项可以分别设置其是否绘制网格线，以满足用户的细节需求。</p>
+  </li>
+	<li>
+    <p class="text"><b>在对象查看器右键菜单中增加“备注窗口”菜单项</b>：是否在对象查看器右键菜单中增加一个“备注窗口”的菜单项，该菜单项可显示或隐藏一个针对对象查看器所选择内容的备注窗口，供有需要的用户输入备注供记忆与查看。备注窗口如下图，上部会联动显示当前设计器所选中的单个组件及其对象查看器中选中的属性，并提供相应的备注编辑框进行备注内容的编辑，同时底部的状态条也会显示当前选中组件的类继承关系。</p>
+    <p class="text" align="center">
+<img src="objinspectorcomment.png"></p>
+    <ul>
+      <li>
+    <p class="text"><b>类名</b>：当前设计器中选中的组件，只支持选中的单个组件。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>类名备注</b>：可在此输入该类组件的备注信息。</p>
+  		</li>
+      <li>
+    <p class="text"><b>属性事件名</b>：对象查看器中当前选中的属性或事件名称。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>属性事件名备注</b>：可在此输入该类组件的该属性或事件的备注信息。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>状态栏</b>：显示选中组件的类继承关系。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>清空</b>：清空备注窗口中的备注信息。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>字体</b>：更改显示字体。</p>
+  		</li>
+  		<li>
+    <p class="text"><b>帮助</b>：显示此帮助。</p>
+  		</li>
+	  </ul>
+  </li>
+</ul>
 <p class="text">　</p>
 <p class="title" align="left">相关主题
 <p class="text" align="left"> <a href="formdesigner.htm">窗体设计器扩展专家</a>

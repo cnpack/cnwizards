@@ -192,7 +192,6 @@ type
     function UIToMemStr(const Str: string): string;
   protected
     function GetHelpTopic: string; override;
-    procedure DoLanguageChanged(Sender: TObject); override;
   public
     procedure ShowCurrent;
     procedure SaveCurrentPropToManager;
@@ -223,11 +222,6 @@ end;
 function TCnObjInspectorCommentForm.GetHelpTopic: string;
 begin
   Result := 'CnObjInspectorEnhanceWizard';
-end;
-
-procedure TCnObjInspectorCommentForm.DoLanguageChanged(Sender: TObject);
-begin
-
 end;
 
 procedure TCnObjInspectorCommentForm.actFontExecute(Sender: TObject);

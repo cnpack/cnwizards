@@ -19,10 +19,52 @@
   </tr>
 </table>
 <p class="title">Object Inspector Enhancements Wizard</p>
-<p class="text">Object Inspector Enhancements Wizard enables the Object Inspector of older IDE display the properties like Delphi 7. Now Only Delphi 5 and C++Builder 5 are supported.</p>  
-<p class="text">When enable this wizard, properties which values are not default will display their values used bold font. And object properties will display their names used brown font. See below:</p>  
+<p class="text">Object Inspector Enhancements Wizard provides a series of extended functionalities for the Object Inspector. Its configuration interface is shown in the figure below:</p>
+<p class="text" align="center">
+<img src="objinspectorconf.png"></p>
+
+<ul>
+  <li>
+    <p class="text"><b>Enhance Property Editor Drawing</b>: The feature adds bold display for non-default property values in the Object Inspector, similar to that in Delphi 7, and currently supports Delphi 5 and C++Builder 5. As shown in the figure below, after enabling this expert, in the Object Inspector of Delphi 5, non-default property values are displayed in bold, while component class properties are shown in brown.</p>
 <p class="text" align="center">
 <img src="objinspector.png"></p>
+  </li>
+  <li>
+    <p class="text"><b>Show Object Inspector Grid Lines</b>: The Object Inspector in Delphi 6/7 features internal drawing with horizontal grid lines, whereas versions of Delphi 2005 and later do not include these lines. These two options allow for the individual settings to either draw or omit the grid lines, catering to the specific needs of the users.</p>
+  </li>
+	<li>
+    <p class="text"><b>Add "Comment Window" in Object Inspector's Popupmenu</b>: Whether to add a "Comment Window" menu item in the Object Inspector's context menu. This menu item allows users to show or hide a comment window that targets the selected content in the Object Inspector. The comment window is designed for users who need to input notes for memory and reference. As shown in the figure below, the top part of the comment window dynamically displays the currently selected single component in the designer and its selected property in the Object Inspector, along with a corresponding comment edit box for editing note content. Additionally, the status bar at the bottom shows the class inheritance hierarchy of the currently selected component.</p>
+    <p class="text" align="center">
+<img src="objinspectorcomment.png"></p>
+    <ul>
+      <li>
+    <p class="text"><b>Type Name</b>: Selected One component in current designer.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Type Comment</b>: Enter Type comment for this component here.</p>
+  		</li>
+      <li>
+    <p class="text"><b>Property/Event Name</b>: Selected One property or event in Object Inspector.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Property/Event Comment</b>: Enter property/event comment here.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Status Bar</b>: The status bar at the bottom displays the class inheritance hierarchy of the currently selected component.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Clear</b>: Clear all comments in this window.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Font</b>: Change Display Font.</p>
+  		</li>
+  		<li>
+    <p class="text"><b>Help</b>: Show this help.</p>
+  		</li>
+	  </ul>
+  </li>
+</ul>
+
 <p class="text">&nbsp;</p>
 <p class="title" align="left">Links<p class="text" align="left">
 <p class="text" align="left"> <a href="formdesigner.htm">Form Designer Enhancements</a>
