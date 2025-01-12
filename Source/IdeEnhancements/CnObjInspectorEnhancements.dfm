@@ -18,33 +18,33 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
     object chkEnhancePaint: TCheckBox
       Left = 16
       Top = 24
-      Width = 305
+      Width = 329
       Height = 17
-      Caption = 'Enhance Property Editor Drawing (Delphi 5 Only)'
+      Caption = 'Enhance Property Editor Drawing (Delphi 5 Only).'
       TabOrder = 0
     end
     object chkCommentWindow: TCheckBox
       Left = 16
       Top = 96
-      Width = 305
+      Width = 329
       Height = 17
-      Caption = 'Add "Comment Window" in Object Inspector'#39's Popupmenu'
+      Caption = 'Add "Comment Window" in Object Inspector'#39's Popupmenu.'
       TabOrder = 3
     end
     object chkShowGridLine: TCheckBox
       Left = 16
       Top = 48
-      Width = 305
+      Width = 329
       Height = 17
-      Caption = 'Show Object Inspector Grid Lines (Delphi 6/7 Only)'
+      Caption = 'Show Object Inspector Grid Lines (Delphi 6/7 Only).'
       TabOrder = 1
     end
     object chkShowGridLineBDS: TCheckBox
       Left = 16
       Top = 72
-      Width = 305
+      Width = 329
       Height = 17
-      Caption = 'Show Object Inspector Grid Lines (BDS 2005 Above Only)'
+      Caption = 'Show Object Inspector Grid Lines (BDS 2005 Above Only).'
       TabOrder = 2
     end
   end

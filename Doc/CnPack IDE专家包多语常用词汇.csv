@@ -1,40 +1,41 @@
-﻿词汇/语种,简体中文,繁体中文,英语,俄语,法语,德语,葡萄牙语
-1,确定(&O),確定(&O),&OK,&OK,&OK,&OK,&OK
-2,取消(&C),取消(&C),&Cancel,Отмена,&Annuler,&Abbruch,&Cancelar
-3,帮助(&H),說明(&H),&Help,Справка,&Aide,&Hilfe,&Ajuda
-4,关闭(&C),關閉(&C),&Close,Закрыть,&Fermer,&schließen,&Fechar
-5,设置(&S),設置(&S),&Settings,Настройки,&Réglages,&Einstellungen,&Configurações
-6,查找(&F),查找(&F),&Find,Найти,&Trouver,&suchen,&Localizar
-7,查找(&F),查找(&F),&Search,Поиск,&Chercher,&suchen,&Pesquisar
-8,高级(&A),高級(&A),&Advanced,Еще...,&Avance,&weitere,&Avançado
-9,重置(&R),重置(&R),&Reset,Сбросить,&Réinitialiser,zurück setzen,&Redefinir
-10,文件(&F),文件(&F),&File,Файл,&Fichier,&Datei,&Arquivo
-11,关闭(&X),關閉(&X),E&xit,Выход,Quitter,E&xit,S&sair
-12,编辑(&E),編輯(&E),&Edit,Редакт.,&Editer,&editieren,&Editar
-13,删除(&D),刪除(&D),&Delete,Удалить,&Supprimer,&löschen,&Excluir
-14,删除(&R),刪除(&R),&Remove,Удалить,&Retirer,&löschen,&Remover
-15,载入(&L),載入(&L),&Load,Загрузить,&Charger,&Laden,&Carregar
-16,保存(&S),保存(&S),&Save,Сохранить,&Sauver,&speichern,&Salvar
-17,增加(&A),增加(&A),&Add,Добавить,&Ajouter,&hinzufügen,&Adicionar
-18,打开(&O),打開(&O),&Open,Открыть,&Ouvrir,&Öffnen,&Abrir
-19,复制(&C),複製(&C),&Copy,Скопировать,&Copie,&kopieren,&Copiar
-20,字体(&F)...,字體(&F)...,&Font...,Шрифт...,&Font...,&Schriftart...,&Fonte...
-21,设置(&O),設置(&O),&Options,Настройки,&Options,&Optionen,&Opções
-22,上一步(&P),上一步(&P),&Previous,Назад,&Précédent,&vorheriger,&Anterior
-23,下一步(&N),下一步(&N),&Next,Далее,&Suivant,&Nächster,&Próximo
-24,全部展开(&E),全部展開(&E),&Expand All,Развернуть все,Dév&elopper tout,&expandiere alle,&Expandir tudo
-25,全部折叠(&O),全部折疊(&O),C&ollapse All,Свернуть все,Réduire t&out,zusammenfalten alle,Recolher tudo
-26,全选(&A),全選(&A),Select &All,Все,Tout sélect.,wähle alle,Selecionar &Todos
-27,全部不选中(&U),全部不選中(&U),&Unselect All,Снять выделение,&Unselect All,&Unselect alle,&Desmarcar tudo
-28,反向选择(&V),反向選擇(&V),Re&verse Select,Инвертировать,Re&verse Select,Re&verse Selektion,Re&rever seleção
-29,提示,提示,Hint,Информация,Indication,Hint,Dica
-30,警告,警告,Warning,Предупр.,Avertissement,Warning,Aviso
-31,错误,錯誤,Error,Ошибка,Erreur,Error,Erro
-32,启用,啟用,Enabled,Включен,Activée,aktiviert,Ativado
-33,禁用,禁用,Disabled,Выключено,désactivé,deaktiviert,Desativado
-34,是(&Y),是(&Y),&Yes,Да,&Oui,&Ja,&Sim
-35,否(&N),否(&N),&No,Нет,&Non,&Nein,&Não
-36,全部选是(&A),全部選是(&A),Yes to &All,Да для всех,Oui pour &tous,Ja zu &allen,Sim para &Todos
-37,全部选否(&F),全部選否(&F),No to A&ll,Нет для всех,&Non pour t&ous,nein zu a&llen,Não para A&ll
-38,前景色,前景色,Foreground,Шрифт,Premier Plan,Vordergrund,Primeiro plano
-39,背景色,背景色,Background,Фон,Fond,Hintergrund,Fundo
+﻿词汇/语种,简体中文,繁体中文,英语,德语,法语,葡萄牙语,俄语,
+1,取消(&C),取消(&C),&Cancel,&Abbruch,&Annuler,&Cancelar,Отмена,
+2,帮助(&H),說明(&H),&Help,&Hilfe,&Aide,&Ajuda,Справка,
+3,确定(&O),確定(&O),&OK,&OK,&OK,&OK,&OK,
+4,关闭(&C),關閉(&C),&Close,&schließen,&Fermer,&Fechar,Закрыть,
+5,设置(&S),設置(&S),&Settings,&Einstellungen,&Réglages,&Configurações,Настройки,
+6,查找(&F),查找(&F),&Find,&suchen,&Trouver,&Localizar,Найти,
+7,查找(&F),查找(&F),&Search,&suchen,&Chercher,&Pesquisar,Поиск,
+8,高级(&A),高級(&A),&Advanced,&weitere,&Avance,&Avançado,Еще...,
+9,重置(&R),重置(&R),&Reset,zurück setzen,&Réinitialiser,&Redefinir,Сбросить,
+10,文件(&F),文件(&F),&File,&Datei,&Fichier,&Arquivo,Файл,
+11,关闭(&X),關閉(&X),E&xit,E&xit,Quitter,S&sair,Выход,
+12,编辑(&E),編輯(&E),&Edit,&editieren,&Editer,&Editar,Редакт.,
+13,删除(&D),刪除(&D),&Delete,&löschen,&Supprimer,&Excluir,Удалить,
+14,删除(&R),刪除(&R),&Remove,&löschen,&Retirer,&Remover,Удалить,
+15,载入(&L),載入(&L),&Load,&Laden,&Charger,&Carregar,Загрузить,
+16,保存(&S),保存(&S),&Save,&speichern,&Sauver,&Salvar,Сохранить,
+17,增加(&A),增加(&A),&Add,&hinzufügen,&Ajouter,&Adicionar,Добавить,
+18,打开(&O),打開(&O),&Open,&Öffnen,&Ouvrir,&Abrir,Открыть,
+19,复制(&C),複製(&C),&Copy,&kopieren,&Copie,&Copiar,Скопировать,
+20,字体(&F)...,字體(&F)...,&Font...,&Schriftart...,&Font...,&Fonte...,Шрифт...,
+21,设置(&O),設置(&O),&Options,&Optionen,&Options,&Opções,Настройки,
+22,上一步(&P),上一步(&P),&Previous,&vorheriger,&Précédent,&Anterior,Назад,
+23,下一步(&N),下一步(&N),&Next,&Nächster,&Suivant,&Próximo,Далее,
+24,全部展开(&E),全部展開(&E),&Expand All,&expandiere alle,Dév&elopper tout,&Expandir tudo,Развернуть все,
+25,全部折叠(&O),全部折疊(&O),C&ollapse All,zusammenfalten alle,Réduire t&out,Recolher tudo,Свернуть все,
+26,全选(&A),全選(&A),Select &All,wähle alle,Tout sélect.,Selecionar &Todos,Все,
+27,全部不选中(&U),全部不選中(&U),&Unselect All,&Unselect alle,&Unselect All,&Desmarcar tudo,Снять выделение,
+28,反向选择(&V),反向選擇(&V),Re&verse Select,Re&verse Selektion,Re&verse Select,Re&rever seleção,Инвертировать,
+29,提示,提示,Hint,Hint,Indication,Dica,Информация,
+30,警告,警告,Warning,Warning,Avertissement,Aviso,Предупр.,
+31,错误,錯誤,Error,Error,Erreur,Erro,Ошибка,
+32,启用,啟用,Enabled,aktiviert,Activée,Ativado,Включен,
+33,禁用,禁用,Disabled,deaktiviert,désactivé,Desativado,Выключено,
+34,是(&Y),是(&Y),&Yes,&Ja,&Oui,&Sim,Да,
+35,否(&N),否(&N),&No,&Nein,&Non,&Não,Нет,
+36,全部选是(&A),全部選是(&A),Yes to &All,Ja zu &allen,Oui pour &tous,Sim para &Todos,Да для всех,
+37,全部选否(&F),全部選否(&F),No to A&ll,nein zu a&llen,&Non pour t&ous,Não para A&ll,Нет для всех,
+38,前景色,前景色,Foreground,Vordergrund,Premier Plan,Primeiro plano,Шрифт,
+39,背景色,背景色,Background,Hintergrund,Fond,Fundo,Фон,
+40,清空(&L),清空(&L),Clear,Clear,Vider,Limpar,Очистить,
