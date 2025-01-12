@@ -1,0 +1,25 @@
+﻿!LanguageID=1031
+!LanguageName=German
+!TranslationAuthor=Liu Xiao
+!TranslationAuthorEmail=liuxiao@cnpack.org
+!TranslationDefaultFont=Tahoma,8,,,,
+TFormStartFix.btnAbout.Caption=&Über
+TFormStartFix.btnClose.Caption=&Schließen
+TFormStartFix.btnHelp.Caption=&Hilfe
+TFormStartFix.btnKeyMappingFix.Caption=Problem der Tastenkombination beheben
+TFormStartFix.Caption=CnPack IDE Wizards Startbehebungstool
+TFormStartFix.lblDesc.Caption=Wenn Delphi nach der Installation von CnPack IDE Wizards nicht startet, bitte dieses Tool ausführen.
+TFormStartFix.lblFun.!Font=,,B,,,DEFAULT_CHARSET
+TFormStartFix.lblFun.Caption=CnPack IDE Wizards Startbehebungstool
+TFormStartFix.lblInstalledKeyMapping.Caption=Installierte Tastenkombinationen:
+TFormStartFix.lblKeyMappingDescription.Caption=Möglicher Grund für das Nichtstarten von Delphi und das Auftauchen eines Zugriffsverletzungsdialogfensters liegt in der falschen Prioritätsreihenfolge in Delphis Tastenkombinationseinstellungen in XE8 oder höher.<BR><BR>Dieses Tool kann versuchen, die Reihenfolge der Tastenkombinationen anzupassen, um CnPack die niedrigste Priorität zu geben und so dieses Problem zu vermeiden.
+TFormStartFix.lblKeyMappingNote.!Font=MS Sans Serif,,B,,,DEFAULT_CHARSET
+TFormStartFix.lblKeyMappingNote.Caption=Hinweis: Wenn Ihr Delphi normal startet, ändern Sie hier nichts!
+TFormStartFix.lblKeyMappingProblemFound.!Font=MS Sans Serif,,B,,,DEFAULT_CHARSET
+TFormStartFix.tsKeyMapping.Caption=Behebe &Tastenkombinationsproblem
+SCnNoKeyMappingProblemFound=Kein Tastenkombinationsproblem gefunden. Alles ist in Ordnung.
+SCnKeyMappingProblemFound=Mögliches Tastenkombinationsproblem gefunden.
+SCnKeyMappingProblemFixed=Tastenkombinationsproblem behoben. Bitte versuchen Sie, Delphi zu starten.
+SCnKeyMappingNoProblemNeedFix=Kein Tastenkombinationsproblem muss behoben werden.
+SCnFixToolAbout=CnPack IDE Wizards Startbehebungstool 1.0<BR><BR>Dieses Tool wird verwendet, um Probleme beim Starten von Delphi nach der Installation von CnPack zu beheben.<BR><BR>Autor: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2025 CnPack Team
+
