@@ -69,9 +69,11 @@ type
     procedure UnhookPropEditor;
     procedure SetEnhancePaint(const Value: Boolean);
     procedure SetInspectorComment(const Value: Boolean);
-    function GetHideGridLine: Boolean;
-    procedure SetHideGridLine(const Value: Boolean);
+    function GetShowGridLine: Boolean;
+    procedure SetShowGridLine(const Value: Boolean);
     procedure SetShowCommentMenu(const Value: Boolean);
+    function GetShowGridLineBDS: Boolean;
+    procedure SetShowGridLineBDS(const Value: Boolean);
   protected
     procedure HookObjectInspectorMenu;
     procedure ActiveFormChanged(Sender: TObject);
@@ -91,8 +93,10 @@ type
 
     property EnhancePaint: Boolean read FEnhancePaint write SetEnhancePaint;
     {* 是否增强绘制属性编辑器，仅 Delphi 5 下有效}
-    property HideGridLine: Boolean read GetHideGridLine write SetHideGridLine;
-    {* 是否隐藏对象查看器的网格线}
+    property ShowGridLine: Boolean read GetShowGridLine write SetShowGridLine;
+    {* 是否显示对象查看器的网格线，针对 D6/7 有效}
+    property ShowGridLineBDS: Boolean read GetShowGridLineBDS write SetShowGridLineBDS;
+    {* 是否显示对象查看器的网格线，针对 D2005 及以上版本有效}
     property ShowCommentMenu: Boolean read FShowCommentMenu write SetShowCommentMenu;
     {* 是否在对象查看器的右键菜单里插入显示备注窗体的菜单项}
 
@@ -107,7 +111,8 @@ type
     btnHelp: TButton;
     chkEnhancePaint: TCheckBox;
     chkCommentWindow: TCheckBox;
-    chkHideGridLine: TCheckBox;
+    chkShowGridLine: TCheckBox;
+    chkShowGridLineBDS: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
   private
 
@@ -130,7 +135,8 @@ uses
 
 const
   csEnhancePaint = 'EnhancePaint';
-  csHideGridLine = 'HideGridLine';
+  csShowGridLine = 'ShowGridLine';
+  csShowGridLineBDS = 'ShowGridLineBDS';
   csShowCommentMenu = 'ShowCommentMenu';
 
 {$IFDEF COMPILER5}
@@ -321,7 +327,11 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     EnhancePaint := Ini.ReadBool('', csEnhancePaint, True);
-    HideGridLine := Ini.ReadBool('', csHideGridLine, False);
+{$IFDEF BDS}
+    ShowGridLineBDS := Ini.ReadBool('', csShowGridLineBDS, False);  // 2005 及以上版本默认无画线
+{$ELSE}
+    ShowGridLine := Ini.ReadBool('', csShowGridLine, True);         // D 6 7 默认有画线，D5 无效
+{$ENDIF}
     ShowCommentMenu := Ini.ReadBool('', csShowCommentMenu, False);
   finally
     Free;
@@ -334,7 +344,11 @@ begin
   with TCnIniFile.Create(Ini) do
   try
     Ini.WriteBool('', csEnhancePaint, FEnhancePaint);
-    Ini.WriteBool('', csHideGridLine, HideGridLine);
+{$IFDEF BDS}
+    Ini.WriteBool('', csShowGridLineBDS, ShowGridLineBDS);
+{$ELSE}
+    Ini.WriteBool('', csShowGridLine, ShowGridLine);
+{$ENDIF}
     Ini.WriteBool('', csShowCommentMenu, FShowCommentMenu);
   finally
     Free;
@@ -353,10 +367,19 @@ begin
   begin
 {$IFDEF COMPILER5}
     chkEnhancePaint.Checked := EnhancePaint;
+    chkShowGridLine.Enabled := False; // D5 的该功能没开放
 {$ELSE}
     chkEnhancePaint.Enabled := False;
 {$ENDIF}
-    chkHideGridLine.Checked := HideGridLine;
+
+{$IFDEF BDS}
+    chkShowGridLineBDS.Checked := ShowGridLineBDS;
+    chkShowGridLine.Enabled := False;
+{$ELSE}
+    chkShowGridLine.Checked := ShowGridLine;
+    chkShowGridLineBDS.Enabled := False;
+{$ENDIF}
+
     chkCommentWindow.Checked := ShowCommentMenu;
 
     if ShowModal = mrOk then
@@ -364,7 +387,12 @@ begin
 {$IFDEF COMPILER5}
       EnhancePaint := chkEnhancePaint.Checked;
 {$ENDIF}
-      HideGridLine := chkHideGridLine.Checked;
+
+{$IFDEF BDS}
+      ShowGridLineBDS := chkShowGridLineBDS.Checked;
+{$ELSE}
+      ShowGridLine := chkShowGridLine.Checked;
+{$ENDIF}
       ShowCommentMenu := chkCommentWindow.Checked;
     end;
   end;
@@ -414,15 +442,32 @@ begin
   Result := inherited GetSearchContent + '属性,property,事件,event,';
 end;
 
-function TCnObjInspectorEnhanceWizard.GetHideGridLine: Boolean;
+function TCnObjInspectorEnhanceWizard.GetShowGridLine: Boolean;
 begin
-  Result := not ObjectInspectorWrapper.ShowGridLines;
+  Result := ObjectInspectorWrapper.ShowGridLines;
 end;
 
-procedure TCnObjInspectorEnhanceWizard.SetHideGridLine(
+procedure TCnObjInspectorEnhanceWizard.SetShowGridLine(
   const Value: Boolean);
 begin
-  ObjectInspectorWrapper.ShowGridLines := not Value;
+{$IFNDEF BDS}
+  if Active then
+    ObjectInspectorWrapper.ShowGridLines := Value;
+{$ENDIF}
+end;
+
+function TCnObjInspectorEnhanceWizard.GetShowGridLineBDS: Boolean;
+begin
+  Result := ObjectInspectorWrapper.ShowGridLines;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetShowGridLineBDS(
+  const Value: Boolean);
+begin
+{$IFDEF BDS}
+  if Active then
+    ObjectInspectorWrapper.ShowGridLines := Value;
+{$ENDIF}
 end;
 
 procedure TCnObjInspectorEnhanceWizard.SetShowCommentMenu(

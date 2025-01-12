@@ -206,10 +206,8 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnWizUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   csCommentDir = 'OIComm';
@@ -284,6 +282,7 @@ procedure TCnObjInspectorCommentForm.InspectorSelectionChange(Sender: TObject);
 var
   AName, Hie: string;
   AClass: TClass;
+  Root: TComponent;
 begin
   // 拿到当前类型当前属性或事件
   AName := ObjectInspectorWrapper.ActiveComponentType;
@@ -292,11 +291,27 @@ begin
   AClass := GetClass(AName);
   if AClass = nil then
   begin
-    // TODO: 找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
+    //  找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Class NOT Found');
 {$ENDIF}
 
+    Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
+    if (Root <> nil) and (Root is TDataModule) then
+    begin
+      Hie := AName + '->';
+      AName := 'TDataModule';
+    end
+    else if (Root <> nil) and (Root is TControl) then
+    begin
+      Hie := AName + '->';
+      AName := 'TForm';
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Change to ' + AName);
+{$ENDIF}
+    AClass := GetClass(AName);
   end;
 
   while AClass <> nil do

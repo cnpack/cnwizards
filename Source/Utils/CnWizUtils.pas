@@ -383,7 +383,7 @@ function IsDProject(const FileName: string): Boolean;
 function IsCbProject(const FileName: string): Boolean;
 {* 判断是否 .cbproj 文件}
 function IsDpk(const FileName: string): Boolean;
-{* 判断是否.Dpk文件}
+{* 判断是否 .dpk 文件}
 function IsBpk(const FileName: string): Boolean;
 {* 判断是否 .bpk 文件}
 function IsPackage(const FileName: string): Boolean;
@@ -399,7 +399,7 @@ function IsInc(const FileName: string): Boolean;
 function IsDfm(const FileName: string): Boolean;
 {* 判断是否 .dfm 文件}
 function IsForm(const FileName: string): Boolean;
-{* 判断是否窗体文件}
+{* 判断是否窗体文件，包括 dfm/xfm/fmx 等}
 function IsXfm(const FileName: string): Boolean;
 {* 判断是否 .xfm 文件}
 function IsFmx(const FileName: string): Boolean;
@@ -461,7 +461,7 @@ function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
 {* 取窗体编辑器}
 function CnOtaGetCurrentFormEditor: IOTAFormEditor;
 {* 取当前窗体编辑器}
-function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinControl;
+function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor = nil): TWinControl;
 {* 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
 function CnOtaGetCurrentDesignContainer: TWinControl;
 {* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
@@ -3443,6 +3443,9 @@ function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinCont
 var
   Root: TComponent;
 begin
+  if FormEditor = nil then
+    FormEditor := CnOtaGetCurrentFormEditor;
+
   { 支持为 Root 非 TWinControl 的设计对象取其 Container }
   Result := nil;
   Root := CnOtaGetRootComponentFromEditor(FormEditor);

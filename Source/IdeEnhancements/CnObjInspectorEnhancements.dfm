@@ -3,15 +3,16 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
   Top = 160
   BorderStyle = bsDialog
   Caption = 'Object Inspector Enhancements Wizard Settings'
-  ClientHeight = 157
-  ClientWidth = 356
+  ClientHeight = 181
+  ClientWidth = 372
   PixelsPerInch = 96
   TextHeight = 13
   object grpSettings: TGroupBox
     Left = 8
     Top = 8
-    Width = 337
-    Height = 104
+    Width = 354
+    Height = 128
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Settings'
     TabOrder = 0
     object chkEnhancePaint: TCheckBox
@@ -24,24 +25,32 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
     end
     object chkCommentWindow: TCheckBox
       Left = 16
-      Top = 72
+      Top = 96
       Width = 305
       Height = 17
       Caption = 'Add "Comment Window" in Object Inspector'#39's Popupmenu'
-      TabOrder = 2
+      TabOrder = 3
     end
-    object chkHideGridLine: TCheckBox
+    object chkShowGridLine: TCheckBox
       Left = 16
       Top = 48
       Width = 305
       Height = 17
-      Caption = 'Hide Object Inspector Grid Lines'
+      Caption = 'Show Object Inspector Grid Lines (Delphi 6/7 Only)'
       TabOrder = 1
+    end
+    object chkShowGridLineBDS: TCheckBox
+      Left = 16
+      Top = 72
+      Width = 305
+      Height = 17
+      Caption = 'Show Object Inspector Grid Lines (BDS 2005 Above Only)'
+      TabOrder = 2
     end
   end
   object btnOK: TButton
-    Left = 107
-    Top = 125
+    Left = 123
+    Top = 149
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -51,8 +60,8 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
     TabOrder = 1
   end
   object btnCancel: TButton
-    Left = 189
-    Top = 125
+    Left = 205
+    Top = 149
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -62,8 +71,8 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
     TabOrder = 2
   end
   object btnHelp: TButton
-    Left = 270
-    Top = 125
+    Left = 286
+    Top = 149
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
