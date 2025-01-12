@@ -214,7 +214,7 @@ type
 
     // 专家使用的目录名
     property LangPath: string read FLangPath;
-    {* 多语言存储文件目录 }
+    {* 多语言存储文件目录}
     property IconPath: string read FIconPath;
     {* 图标目录}
     property DataPath: string read FDataPath;

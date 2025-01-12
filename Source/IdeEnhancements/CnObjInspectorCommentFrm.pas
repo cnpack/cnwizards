@@ -42,8 +42,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons, Clipbrd,
-  Contnrs, CnWizIdeDock, CnWizShareImages, CnWizOptions, CnWizConsts,
-  CnObjectInspectorWrapper, CnHashMap, Grids;
+  Contnrs, ToolsAPI, CnWizNotifier, CnWizIdeDock, CnWizShareImages, CnWizOptions,
+  CnWizConsts, CnObjectInspectorWrapper, CnHashMap, CnCommon;
 
 type
   TCnPropertyCommentType = class;
@@ -69,16 +69,19 @@ type
     {* 再来一块注释，允许多行}
   end;
 
+  TCnPropertyCommentManager = class;
+
   TCnPropertyCommentType = class(TObjectList)
   {* 一个类型持有所有属性事件等}
   private
     FChanged: Boolean;
     FTypeName: string;
     FComment: string;
+    FManager: TCnPropertyCommentManager;
     function GetItem(Index: Integer): TCnPropertyCommentItem;
     procedure SetItem(Index: Integer; const Value: TCnPropertyCommentItem);
   public
-    constructor Create; virtual;
+    constructor Create(AManager: TCnPropertyCommentManager); virtual;
     destructor Destroy; override;
 
     function Add(const PropertyName: string): TCnPropertyCommentItem;
@@ -112,7 +115,9 @@ type
     {* 该类的属性和事件条目}
 
     property Changed: Boolean read FChanged write FChanged;
-    {* 由 Item 通知的改变}
+    {* 由 Item 通知的改变，保存成功后会变成 False}
+    property Manager: TCnPropertyCommentManager read FManager write FManager;
+    {* 所属的管理器}
   end;
 
   TCnPropertyCommentManager = class
@@ -120,6 +125,8 @@ type
   private
     FList: TObjectList;            // 持有并管理多个 TCnPropertyCommentType
     FHashMap: TCnStrToPtrHashMap;  // 根据 TypeName 快速搜索的 Map，只引用，不管理对象
+    FDataDir: string;
+    FUserDir: string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -138,6 +145,11 @@ type
     {* 从目录加载}
     procedure SaveToDirectory(const DirName: string);
     {* 保存至目录}
+
+    property DataDir: string read FDataDir write FDataDir;
+    {* 原始数据储存目录，尾部带 \}
+    property UserDir: string read FUserDir write FUserDir;
+    {* 用户数据储存目录，尾部带 \}
   end;
 
   TCnObjInspectorCommentForm = class(TCnIdeDockForm)
@@ -160,18 +172,22 @@ type
     actClear: TAction;
     actFont: TAction;
     actHelp: TAction;
+    statHie: TStatusBar;
     procedure actHelpExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure actClearExecute(Sender: TObject);
   private
     FManager: TCnPropertyCommentManager;
     FCurrentType: TCnPropertyCommentType;
     FCurrentProp: TCnPropertyCommentItem;
-    procedure UpdateCaption;
-    procedure InspectorSelectionChange(Sender: TObject);
+    procedure InspectorSelectionChange(Sender: TObject); // 注意因为多个地方复用调用，Sender 不可靠
+    procedure FormEditorChange(FormEditor: IOTAFormEditor;
+      NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
+      Component: TComponent; const OldName, NewName: string);
     function MemToUIStr(const Str: string): string;
     function UIToMemStr(const Str: string): string;
   protected
@@ -196,9 +212,10 @@ uses
 {$ENDIF}
 
 const
-  csCommentDir = 'OIComment';
+  csCommentDir = 'OIComm';
   csRepCRLF = '\n';
   csCRLF = #13#10;
+  FILE_SEP = #2;
 
 procedure TCnObjInspectorCommentForm.actHelpExecute(Sender: TObject);
 begin
@@ -210,19 +227,9 @@ begin
   Result := 'CnObjInspectorEnhanceWizard';
 end;
 
-procedure TCnObjInspectorCommentForm.UpdateCaption;
-const
-  SEP = ' - ';
-var
-  S: string;
-  I: Integer;
-begin
-
-end;
-
 procedure TCnObjInspectorCommentForm.DoLanguageChanged(Sender: TObject);
 begin
-  UpdateCaption;
+
 end;
 
 procedure TCnObjInspectorCommentForm.actFontExecute(Sender: TObject);
@@ -237,26 +244,72 @@ begin
   end;
 end;
 
+procedure TCnObjInspectorCommentForm.actClearExecute(Sender: TObject);
+begin
+  edtTypeComment.Text := '';
+  edtPropComment.Text := '';
+  mmoComment.Lines.Clear;
+end;
+
 procedure TCnObjInspectorCommentForm.FormCreate(Sender: TObject);
 begin
   FManager := TCnPropertyCommentManager.Create;
+  FManager.DataDir := MakePath(MakePath(WizOptions.DataPath) + csCommentDir);
+  FManager.UserDir := MakePath(MakePath(WizOptions.UserPath) + csCommentDir);
+
+  WizOptions.ResetToolbarWithLargeIcons(tlbObjComment);
+
   ObjectInspectorWrapper.AddSelectionChangeNotifier(InspectorSelectionChange);
+  CnWizNotifierServices.AddFormEditorNotifier(FormEditorChange);
 end;
 
 procedure TCnObjInspectorCommentForm.FormDestroy(Sender: TObject);
 begin
   FManager.Free;
+  CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorChange);
   ObjectInspectorWrapper.RemoveSelectionChangeNotifier(InspectorSelectionChange);
+end;
+
+procedure TCnObjInspectorCommentForm.FormEditorChange(
+  FormEditor: IOTAFormEditor; NotifyType: TCnWizFormEditorNotifyType;
+  ComponentHandle: TOTAHandle; Component: TComponent; const OldName,
+  NewName: string);
+begin
+  if NotifyType in [fetOpened, fetComponentSelectionChanged,
+    fetActivated, fetComponentCreated, fetComponentRenamed] then
+    InspectorSelectionChange(Self);
 end;
 
 procedure TCnObjInspectorCommentForm.InspectorSelectionChange(Sender: TObject);
 var
-  AName: string;
+  AName, Hie: string;
+  AClass: TClass;
 begin
   // 拿到当前类型当前属性或事件
   AName := ObjectInspectorWrapper.ActiveComponentType;
+  Hie := '';
+
+  AClass := GetClass(AName);
+  if AClass = nil then
+  begin
+    // TODO: 找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('InspectorSelectionChange: ActiveComponentType %s', [AName]);
+    CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Class NOT Found');
+{$ENDIF}
+
+  end;
+
+  while AClass <> nil do
+  begin
+    Hie := Hie + AClass.ClassName;
+    AClass := AClass.ClassParent;
+    if AClass <> nil then
+      Hie := Hie + '->';
+  end;
+  statHie.SimpleText := Hie;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('InspectorSelectionChange: ActiveComponentType %s', [AName]);
 {$ENDIF}
   if (FCurrentType = nil) or (FCurrentType.TypeName <> AName) then
   begin
@@ -341,13 +394,16 @@ end;
 
 procedure TCnObjInspectorCommentForm.SaveCurrentPropToManager;
 begin
-  if FCurrentType <> nil then
-    FCurrentType.Comment := UIToMemStr(edtTypeComment.Text);
-
   if FCurrentProp <> nil then
   begin
     FCurrentProp.PropertyComment := UIToMemStr(edtPropComment.Text);
     FCurrentProp.Comment := UIToMemStr(mmoComment.Lines.Text);
+  end;
+
+  if FCurrentType <> nil then
+  begin
+    FCurrentType.Comment := UIToMemStr(edtTypeComment.Text);
+    FCurrentType.Save;
   end;
 end;
 
@@ -389,6 +445,7 @@ end;
 procedure TCnObjInspectorCommentForm.FormShow(Sender: TObject);
 begin
   FormResize(Sender);
+  InspectorSelectionChange(Sender);
 end;
 
 function TCnObjInspectorCommentForm.MemToUIStr(const Str: string): string;
@@ -414,9 +471,10 @@ begin
   inherited Add(Result);
 end;
 
-constructor TCnPropertyCommentType.Create;
+constructor TCnPropertyCommentType.Create(AManager: TCnPropertyCommentManager);
 begin
   inherited Create(True);
+  FManager := AManager;
 end;
 
 destructor TCnPropertyCommentType.Destroy;
@@ -462,13 +520,21 @@ begin
 end;
 
 procedure TCnPropertyCommentType.Load;
+var
+  F: string;
 begin
+  if TypeName = '' then
+    Exit;
 
+  F := FManager.UserDir + TypeName + '.txt';
+  if not FileExists(F) then
+    F := FManager.DataDir + TypeName + '.txt';
+
+  if FileExists(F) then
+    LoadFromFile(F);
 end;
 
 procedure TCnPropertyCommentType.LoadFromFile(const FileName: string);
-const
-  SEP = #2;
 var
   I: Integer;
   S: string;
@@ -486,7 +552,7 @@ begin
     begin
       S := SL[0];
       Res.Clear;
-      ExtractStrings([SEP], [' '], PChar(S), Res);
+      ExtractStrings([FILE_SEP], [' '], PChar(S), Res);
 
       if Res.Count > 0 then 
       begin
@@ -504,7 +570,7 @@ begin
     begin
       S := SL[I];
       Res.Clear;
-      ExtractStrings([SEP], [' '], PChar(S), Res);
+      ExtractStrings([FILE_SEP], [' '], PChar(S), Res);
 
       // 拿到 SEP 分割的内容，顺序是属性事件名、属性事件注释，块注释
       if Res.Count > 0 then
@@ -537,13 +603,50 @@ begin
 end;
 
 procedure TCnPropertyCommentType.Save;
+var
+  F: string;
 begin
+  if TypeName = '' then
+    Exit;
 
+  F := FManager.UserDir + TypeName + '.txt';
+  ForceDirectories(FManager.UserDir);
+
+  // 如果没目标文件且自己没内容就无需存
+  if not FileExists(F) and (FComment = '') and (Count = 0) then
+    Exit;
+
+  SaveToFile(F);
 end;
 
 procedure TCnPropertyCommentType.SaveToFile(const FileName: string);
+var
+  SL: TStringList;
+  S: string;
+  I: Integer;
 begin
+  SL := TStringList.Create;
+  try
+    // 第一行是类名、类注释
+    S := FTypeName + FILE_SEP + FComment;
+    SL.Add(S);
 
+    // 后面是属性事件名、属性事件注释，块注释
+    for I := 0 to Count - 1 do
+    begin
+      S := Items[I].PropertyName + FILE_SEP + Items[I].PropertyComment + FILE_SEP + Items[I].Comment;
+      SL.Add(S);
+    end;
+
+    try
+      SL.SaveToFile(FileName); // 保存的异常屏蔽
+      Changed := False;
+    except
+      ;
+    end;
+  finally
+    SL.Free;
+  end;
 end;
 
 procedure TCnPropertyCommentType.SetItem(Index: Integer;
@@ -565,7 +668,7 @@ begin
 
   if not FHashMap.Find(TypeName, Obj) then
   begin
-    Result := TCnPropertyCommentType.Create;
+    Result := TCnPropertyCommentType.Create(Self);
     Result.TypeName := TypeName;
     FHashMap.Add(TypeName, Result);
   end;

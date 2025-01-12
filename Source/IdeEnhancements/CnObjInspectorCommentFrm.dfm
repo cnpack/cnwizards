@@ -1,6 +1,6 @@
 object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
-  Left = 323
-  Top = 234
+  Left = 427
+  Top = 226
   Width = 347
   Height = 498
   Caption = 'Object Inspector Comment'
@@ -32,7 +32,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Left = 1
       Top = 51
       Width = 337
-      Height = 389
+      Height = 370
       Align = alClient
       TabOrder = 0
     end
@@ -95,6 +95,14 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
         Anchors = [akLeft, akTop, akRight]
         TabOrder = 1
       end
+    end
+    object statHie: TStatusBar
+      Left = 1
+      Top = 421
+      Width = 337
+      Height = 19
+      Panels = <>
+      SimplePanel = True
     end
   end
   object tlbObjComment: TToolBar
@@ -159,6 +167,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Caption = 'C&lear'
       Hint = 'Clear Comment'
       ImageIndex = 13
+      OnExecute = actClearExecute
     end
     object actFont: TAction
       Caption = '&Font'

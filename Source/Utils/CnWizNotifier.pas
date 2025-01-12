@@ -78,7 +78,7 @@ type
 
   TCnWizFormEditorNotifyType = (fetOpened, fetClosing, fetModified,
     fetActivated, fetSaving, fetComponentCreating, fetComponentCreated,
-    fetComponentDestorying, fetComponentRenamed);
+    fetComponentDestorying, fetComponentRenamed, fetComponentSelectionChanged);
   TCnWizFormEditorNotifier = procedure (FormEditor: IOTAFormEditor;
     NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
     Component: TComponent; const OldName, NewName: string) of object;
@@ -418,12 +418,15 @@ type
 {$ENDIF}
     FLastControl: TWinControl;
     FLastForm: TForm;
+    FDesignerSelection: TList;
+    FLastDesignerSelection: TList;
     FCompNotifyList: TComponentList;
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
     FCurrentCompilingProject: IOTAProject;
     procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure CheckActiveControl;
+    procedure CheckDesignerSelection;
     procedure DoIdleNotifiers;
   protected
     // ICnWizNotifierServices
@@ -971,6 +974,8 @@ begin
   FBeforeThemeChangeNotifiers := TList.Create;
   FAfterThemeChangeNotifiers := TList.Create;
   FIdleMethods := TList.Create;
+  FDesignerSelection := TList.Create;
+  FLastDesignerSelection := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
   FIdeNotifierIndex := IServices.AddNotifier(FCnWizIdeNotifier as IOTAIDENotifier);
@@ -1040,6 +1045,8 @@ begin
 
   FreeAndNil(FCompNotifyList);
   FreeAndNil(FEvents);
+  FDesignerSelection.Free;
+  FLastDesignerSelection.Free;
 
   CnWizClearAndFreeList(FBeforeCompileNotifiers);
   CnWizClearAndFreeList(FAfterCompileNotifiers);
@@ -1446,10 +1453,15 @@ var
   I: Integer;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('FormEditorNotify: %s (%s)',
-   [GetEnumName(TypeInfo(TCnWizFormEditorNotifyType),
-    Ord(NotifyType)), FormEditor.FileName]);
+  if FormEditor <> nil then
+    CnDebugger.LogFmt('FormEditorNotify: %s (%s)',
+      [GetEnumName(TypeInfo(TCnWizFormEditorNotifyType),
+      Ord(NotifyType)), FormEditor.FileName])
+  else
+    CnDebugger.LogFmt('FormEditorNotify: %s',
+      [GetEnumName(TypeInfo(TCnWizFormEditorNotifyType), Ord(NotifyType))]);
 {$ENDIF}
+
   if FFormEditorNotifiers <> nil then
   begin
     for I := FFormEditorNotifiers.Count - 1 downto 0 do
@@ -1644,6 +1656,7 @@ begin
         {$ENDIF}
           FormEditorNotify(FormEditor, fetClosing);
           for J := 0 to FFormEditorIntfs.Count - 1 do
+          begin
             if TCnFormEditorNotifier(FFormEditorIntfs[J]).FormEditor =
               FormEditor then
             begin
@@ -1653,9 +1666,38 @@ begin
               TCnFormEditorNotifier(FFormEditorIntfs[J]).ClosingNotified := True;
               Break;
             end;
+          end;
         end;
     end;
   end;
+end;
+
+procedure TCnWizNotifierServices.CheckDesignerSelection;
+var
+  I: Integer;
+begin
+  CnOtaGetSelectedComponentFromCurrentForm(FDesignerSelection);
+  if FDesignerSelection.Count <> FLastDesignerSelection.Count then
+  begin
+    // 通知组件选择改变
+    FormEditorNotify(CnOtaGetCurrentFormEditor, fetComponentSelectionChanged);
+  end
+  else
+  begin
+    for I := 0 to FDesignerSelection.Count - 1 do
+    begin
+      if FDesignerSelection[I] <> FLastDesignerSelection[I] then
+      begin
+        // 通知组件选择改变
+        FormEditorNotify(CnOtaGetCurrentFormEditor, fetComponentSelectionChanged);
+        Break;
+      end;
+    end;
+  end;
+
+  FLastDesignerSelection.Clear;
+  for I := 0 to FDesignerSelection.Count - 1 do
+    FLastDesignerSelection.Add(FDesignerSelection[I]);
 end;
 
 //------------------------------------------------------------------------------
@@ -1805,7 +1847,7 @@ procedure TCnWizNotifierServices.DoApplicationIdle(Sender: TObject;
   var Done: Boolean);
 begin
   CheckCompNotifyObj;
-  
+  CheckDesignerSelection;
   DoIdleExecute;
 
   if Abs(GetTickCount - FLastIdleTick) > csIdleMinInterval then

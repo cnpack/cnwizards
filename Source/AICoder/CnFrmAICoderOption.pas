@@ -237,8 +237,6 @@ end;
 { TCnAIExtraItem }
 
 function TCnAIExtraItem.GetStringValue: string;
-var
-  P: PPropInfo;
 begin
   Result := '';
   // 从 Option 对象里拿名字为 OptionName 的属性并检查其类型
