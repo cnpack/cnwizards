@@ -65,6 +65,7 @@ type
     FMenuHook: TCnMenuHook;
     FCommentWindowMenu: TCnMenuItemDef;
     FCommentForm: TCnObjInspectorCommentForm;
+    FCommentFont: TFont;
     procedure HookPropEditor;
     procedure UnhookPropEditor;
     procedure SetEnhancePaint(const Value: Boolean);
@@ -74,6 +75,7 @@ type
     procedure SetShowCommentMenu(const Value: Boolean);
     function GetShowGridLineBDS: Boolean;
     procedure SetShowGridLineBDS(const Value: Boolean);
+    procedure SetCommentFont(const Value: TFont);
   protected
     procedure HookObjectInspectorMenu;
     procedure ActiveFormChanged(Sender: TObject);
@@ -91,6 +93,8 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure Config; override;
 
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+
     property EnhancePaint: Boolean read FEnhancePaint write SetEnhancePaint;
     {* 是否增强绘制属性编辑器，仅 Delphi 5 下有效}
     property ShowGridLine: Boolean read GetShowGridLine write SetShowGridLine;
@@ -102,6 +106,8 @@ type
 
     property InspectorComment: Boolean read FInspectorComment write SetInspectorComment;
     {* 是否显示对象查看器备注窗体}
+    property CommentFont: TFont read FCommentFont write SetCommentFont;
+    {* 字体}
   end;
 
   TCnObjInspectorConfigForm = class(TCnTranslateForm)
@@ -138,6 +144,7 @@ const
   csShowGridLine = 'ShowGridLine';
   csShowGridLineBDS = 'ShowGridLineBDS';
   csShowCommentMenu = 'ShowCommentMenu';
+  csCommentFont = 'CommentFont';
 
 {$IFDEF COMPILER5}
 
@@ -284,12 +291,14 @@ begin
   FMenuHook := TCnMenuHook.Create(nil);
   HookObjectInspectorMenu;
 
+  FCommentFont := TFont.Create;
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
 end;
 
 destructor TCnObjInspectorEnhanceWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
+  FCommentFont.Free;
 
   FMenuHook.Free;
   if FCommentForm <> nil then
@@ -326,13 +335,14 @@ begin
   inherited;
   with TCnIniFile.Create(Ini) do
   try
-    EnhancePaint := Ini.ReadBool('', csEnhancePaint, True);
+    EnhancePaint := ReadBool('', csEnhancePaint, True);
 {$IFDEF BDS}
-    ShowGridLineBDS := Ini.ReadBool('', csShowGridLineBDS, False);  // 2005 及以上版本默认无画线
+    ShowGridLineBDS := ReadBool('', csShowGridLineBDS, False);  // 2005 及以上版本默认无画线
 {$ELSE}
-    ShowGridLine := Ini.ReadBool('', csShowGridLine, True);         // D 6 7 默认有画线，D5 无效
+    ShowGridLine := ReadBool('', csShowGridLine, True);         // D 6 7 默认有画线，D5 无效
 {$ENDIF}
-    ShowCommentMenu := Ini.ReadBool('', csShowCommentMenu, False);
+    ShowCommentMenu := ReadBool('', csShowCommentMenu, False);
+    ReadFont('', csCommentFont, FCommentFont);
   finally
     Free;
   end;
@@ -343,13 +353,14 @@ begin
   inherited;
   with TCnIniFile.Create(Ini) do
   try
-    Ini.WriteBool('', csEnhancePaint, FEnhancePaint);
+    WriteBool('', csEnhancePaint, FEnhancePaint);
 {$IFDEF BDS}
-    Ini.WriteBool('', csShowGridLineBDS, ShowGridLineBDS);
+    WriteBool('', csShowGridLineBDS, ShowGridLineBDS);
 {$ELSE}
-    Ini.WriteBool('', csShowGridLine, ShowGridLine);
+    WriteBool('', csShowGridLine, ShowGridLine);
 {$ENDIF}
-    Ini.WriteBool('', csShowCommentMenu, FShowCommentMenu);
+    WriteBool('', csShowCommentMenu, FShowCommentMenu);
+    WriteFont('', csCommentFont, FCommentFont);
   finally
     Free;
   end;
@@ -426,7 +437,10 @@ begin
   if FInspectorComment then
   begin
     if FCommentForm = nil then
+    begin
       FCommentForm := TCnObjInspectorCommentForm.Create(Application);
+      FCommentForm.SetCommentFont(FCommentFont);
+    end;
     FCommentForm.VisibleWithParent := True;
     FCommentForm.BringToFront;
   end
@@ -516,6 +530,35 @@ end;
 procedure TCnObjInspectorEnhanceWizard.ActiveFormChanged(Sender: TObject);
 begin
   HookObjectInspectorMenu;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetCommentFont(const Value: TFont);
+begin
+  FCommentFont.Assign(Value);
+end;
+
+procedure TCnObjInspectorEnhanceWizard.DebugComand(Cmds, Results: TStrings);
+var
+  I, J: Integer;
+  T: TCnPropertyCommentType;
+  P: TCnPropertyCommentItem;
+begin
+  if FCommentForm <> nil then
+  begin
+    Results.Add('Type Count ' + IntToStr(FCommentForm.Manager.Count));
+    for I := 0 to FCommentForm.Manager.Count - 1 do
+    begin
+      T := FCommentForm.Manager.Items[I];
+      Results.Add(T.TypeName + ' - ' + T.Comment);
+      Results.Add('Property Count ' + IntToStr(T.Count));
+
+      for J := 0 to T.Count - 1 do
+      begin
+        P := T.Items[J];
+        Results.Add('  ' + P.PropertyName + ' - ' + P.PropertyComment + ' - ' + P.Comment);
+      end;
+    end;
+  end;
 end;
 
 { TCnObjInspectorConfigForm }

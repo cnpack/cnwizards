@@ -55,6 +55,7 @@ type
     FPropertyName: string;
     FOwnerType: TCnPropertyCommentType;
     FPropertyComment: string;
+    function GetEmpty: Boolean;
   public
     constructor Create(AOwnerType: TCnPropertyCommentType); virtual;
     destructor Destroy; override;
@@ -67,6 +68,9 @@ type
     {* 属性或事件注释}
     property Comment: string read FComment write FComment;
     {* 再来一块注释，允许多行}
+
+    property Empty: Boolean read GetEmpty;
+    {* 是否为空}
   end;
 
   TCnPropertyCommentManager = class;
@@ -80,6 +84,7 @@ type
     FManager: TCnPropertyCommentManager;
     function GetItem(Index: Integer): TCnPropertyCommentItem;
     procedure SetItem(Index: Integer; const Value: TCnPropertyCommentItem);
+    function GetEmpty: Boolean;
   public
     constructor Create(AManager: TCnPropertyCommentManager); virtual;
     destructor Destroy; override;
@@ -111,6 +116,9 @@ type
     property Comment: string read FComment write FComment;
     {* 针对类型名的注释}
 
+    property Empty: Boolean read GetEmpty;
+    {* 是否为空。包括无条目，及条目无注释两种情况}
+
     property Items[Index: Integer]: TCnPropertyCommentItem read GetItem write SetItem; default;
     {* 该类的属性和事件条目}
 
@@ -127,6 +135,8 @@ type
     FHashMap: TCnStrToPtrHashMap;  // 根据 TypeName 快速搜索的 Map，只引用，不管理对象
     FDataDir: string;
     FUserDir: string;
+    function GetCount: Integer;
+    function GetItem(Index: Integer): TCnPropertyCommentType;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -145,6 +155,11 @@ type
     {* 从目录加载}
     procedure SaveToDirectory(const DirName: string);
     {* 保存至目录}
+
+    property Count: Integer read GetCount;
+    {* 类型数量}
+    property Items[Index: Integer]: TCnPropertyCommentType read GetItem; default;
+    {* 该类型的条目}
 
     property DataDir: string read FDataDir write FDataDir;
     {* 原始数据储存目录，尾部带 \}
@@ -193,8 +208,11 @@ type
   protected
     function GetHelpTopic: string; override;
   public
+    procedure SetCommentFont(AFont: TFont);
     procedure ShowCurrent;
     procedure SaveCurrentPropToManager;
+
+    property Manager: TCnPropertyCommentManager read FManager;
   end;
 
 {$ENDIF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
@@ -226,14 +244,9 @@ end;
 
 procedure TCnObjInspectorCommentForm.actFontExecute(Sender: TObject);
 begin
+  dlgFont.Font := mmoComment.Font;
   if dlgFont.Execute then
-  begin
-    mmoComment.Font := dlgFont.Font;
-    edtType.Font := dlgFont.Font;
-    edtTypeComment.Font := dlgFont.Font;
-    edtProp.Font := dlgFont.Font;
-    edtPropComment.Font := dlgFont.Font;
-  end;
+    SetCommentFont(dlgFont.Font);
 end;
 
 procedure TCnObjInspectorCommentForm.actClearExecute(Sender: TObject);
@@ -257,6 +270,8 @@ end;
 
 procedure TCnObjInspectorCommentForm.FormDestroy(Sender: TObject);
 begin
+  SaveCurrentPropToManager;
+
   FManager.Free;
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorChange);
   ObjectInspectorWrapper.RemoveSelectionChangeNotifier(InspectorSelectionChange);
@@ -457,6 +472,15 @@ begin
   InspectorSelectionChange(Sender);
 end;
 
+procedure TCnObjInspectorCommentForm.SetCommentFont(AFont: TFont);
+begin
+  mmoComment.Font := AFont;
+  edtType.Font := AFont;
+  edtTypeComment.Font := AFont;
+  edtProp.Font := AFont;
+  edtPropComment.Font := AFont;
+end;
+
 function TCnObjInspectorCommentForm.MemToUIStr(const Str: string): string;
 begin
   Result := StringReplace(Str, csRepCRLF, csCRLF, [rfReplaceAll]);
@@ -490,6 +514,23 @@ destructor TCnPropertyCommentType.Destroy;
 begin
 
   inherited;
+end;
+
+function TCnPropertyCommentType.GetEmpty: Boolean;
+var
+  I: Integer;
+begin
+  Result := Count <= 0;
+  if not Result then
+  begin
+    // 如果是 False 表示有条目，挨个判断条目
+    for I := 0 to Count - 1 do
+    begin
+      if not Items[I].Empty then // 有非空的，直接返回 False 退出
+        Exit;
+    end;
+    Result := True;
+  end;
 end;
 
 function TCnPropertyCommentType.GetItem(Index: Integer): TCnPropertyCommentItem;
@@ -622,7 +663,7 @@ begin
   ForceDirectories(FManager.UserDir);
 
   // 如果没目标文件且自己没内容就无需存
-  if not FileExists(F) and (FComment = '') and (Count = 0) then
+  if not FileExists(F) and Empty then
     Exit;
 
   SaveToFile(F);
@@ -679,7 +720,8 @@ begin
   begin
     Result := TCnPropertyCommentType.Create(Self);
     Result.TypeName := TypeName;
-    FHashMap.Add(TypeName, Result);
+    FHashMap.Add(TypeName, Result); // 添加引用
+    FList.Add(Result);              // 真正管理起来
   end;
 end;
 
@@ -695,6 +737,17 @@ begin
   FList.Free;
   FHashMap.Free;
   inherited;
+end;
+
+function TCnPropertyCommentManager.GetCount: Integer;
+begin
+  Result := FList.Count;
+end;
+
+function TCnPropertyCommentManager.GetItem(
+  Index: Integer): TCnPropertyCommentType;
+begin
+  Result := TCnPropertyCommentType(FList[Index]);
 end;
 
 function TCnPropertyCommentManager.GetType(
@@ -752,6 +805,11 @@ destructor TCnPropertyCommentItem.Destroy;
 begin
 
   inherited;
+end;
+
+function TCnPropertyCommentItem.GetEmpty: Boolean;
+begin
+  Result := (FComment= '') and (FPropertyComment = '');
 end;
 
 {$ENDIF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
