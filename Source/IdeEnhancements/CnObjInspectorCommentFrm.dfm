@@ -13,6 +13,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
   OldCreateOrder = False
   Position = poScreenCenter
   Visible = True
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize

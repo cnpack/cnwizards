@@ -195,6 +195,7 @@ type
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FManager: TCnPropertyCommentManager;
     FCurrentType: TCnPropertyCommentType;
@@ -270,8 +271,6 @@ end;
 
 procedure TCnObjInspectorCommentForm.FormDestroy(Sender: TObject);
 begin
-  SaveCurrentPropToManager;
-
   FManager.Free;
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorChange);
   ObjectInspectorWrapper.RemoveSelectionChangeNotifier(InspectorSelectionChange);
@@ -472,6 +471,12 @@ begin
   InspectorSelectionChange(Sender);
 end;
 
+procedure TCnObjInspectorCommentForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  SaveCurrentPropToManager;
+end;
+
 procedure TCnObjInspectorCommentForm.SetCommentFont(AFont: TFont);
 begin
   mmoComment.Font := AFont;
@@ -598,7 +603,7 @@ begin
     Clear;
 
     // 第一行是类名、类注释
-    if Count >= 1 then
+    if SL.Count >= 1 then
     begin
       S := SL[0];
       Res.Clear;
@@ -610,9 +615,10 @@ begin
           TypeName := Res[0]
         else if TypeName <> Res[0] then
           raise Exception.Create('Type Name NOT Matched');
+
+        if Res.Count > 1 then
+          Comment := Res[1];
       end;
-      if Res.Count > 1 then
-        Comment := Res[1];
     end;
 
     // 后面的是属性事件
