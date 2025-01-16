@@ -182,7 +182,7 @@ type
     actFont: TAction;
     actHelp: TAction;
     statHie: TStatusBar;
-    pnl1: TPanel;
+    pnlContainer: TPanel;
     pnlRight: TPanel;
     spl1: TSplitter;
     pnlLeft: TPanel;
@@ -214,6 +214,7 @@ type
     function UIToMemStr(const Str: string): string;
   protected
     function GetHelpTopic: string; override;
+    procedure AdjustHeight(Sender: TObject);
   public
     procedure SetCommentFont(AFont: TFont);
     procedure ShowCurrent;
@@ -494,11 +495,29 @@ end;
 
 procedure TCnObjInspectorCommentForm.SetCommentFont(AFont: TFont);
 begin
+  edtType.BorderStyle := bsSingle;
+  edtProp.BorderStyle := bsSingle;
+
   mmoComment.Font := AFont;
   edtType.Font := AFont;
   edtTypeComment.Font := AFont;
   edtProp.Font := AFont;
   edtPropComment.Font := AFont;
+
+  CnWizNotifierServices.ExecuteOnApplicationIdle(AdjustHeight);
+end;
+
+procedure TCnObjInspectorCommentForm.AdjustHeight(Sender: TObject);
+var
+  H: Integer;
+begin
+  H := edtTypeComment.Height * 2 + 6;
+  if H < 48 then
+    H := 48;
+
+  pnlContainer.Height := H;
+  edtType.BorderStyle := bsNone;
+  edtProp.BorderStyle := bsNone;
 end;
 
 function TCnObjInspectorCommentForm.MemToUIStr(const Str: string): string;
