@@ -439,6 +439,7 @@ begin
     if FCommentForm = nil then
     begin
       FCommentForm := TCnObjInspectorCommentForm.Create(Application);
+      FCommentForm.Wizard := Self;
       FCommentForm.SetCommentFont(FCommentFont);
     end;
     FCommentForm.VisibleWithParent := True;

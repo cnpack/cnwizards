@@ -16,7 +16,6 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnResize = FormResize
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -31,71 +30,11 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
     TabOrder = 0
     object mmoComment: TMemo
       Left = 1
-      Top = 51
+      Top = 49
       Width = 337
-      Height = 370
+      Height = 372
       Align = alClient
       TabOrder = 0
-    end
-    object pnlType: TPanel
-      Left = 1
-      Top = 1
-      Width = 337
-      Height = 25
-      Align = alTop
-      AutoSize = True
-      BevelOuter = bvNone
-      BorderWidth = 1
-      Color = clInfoBk
-      TabOrder = 1
-      object edtType: TEdit
-        Left = 4
-        Top = 3
-        Width = 120
-        Height = 21
-        BorderStyle = bsNone
-        ParentColor = True
-        ReadOnly = True
-        TabOrder = 0
-      end
-      object edtTypeComment: TEdit
-        Left = 124
-        Top = 1
-        Width = 210
-        Height = 21
-        Anchors = [akLeft, akTop, akRight]
-        TabOrder = 1
-      end
-    end
-    object pnlProp: TPanel
-      Left = 1
-      Top = 26
-      Width = 337
-      Height = 25
-      Align = alTop
-      AutoSize = True
-      BevelOuter = bvNone
-      BorderWidth = 1
-      Color = clInfoBk
-      TabOrder = 2
-      object edtProp: TEdit
-        Left = 4
-        Top = 3
-        Width = 120
-        Height = 21
-        BorderStyle = bsNone
-        ParentColor = True
-        ReadOnly = True
-        TabOrder = 0
-      end
-      object edtPropComment: TEdit
-        Left = 124
-        Top = 1
-        Width = 210
-        Height = 21
-        Anchors = [akLeft, akTop, akRight]
-        TabOrder = 1
-      end
     end
     object statHie: TStatusBar
       Left = 1
@@ -105,6 +44,127 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Panels = <>
       SimplePanel = True
     end
+    object pnl1: TPanel
+      Left = 1
+      Top = 1
+      Width = 337
+      Height = 48
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 2
+      object spl1: TSplitter
+        Left = 120
+        Top = 0
+        Width = 3
+        Height = 48
+        Cursor = crHSplit
+        Color = clInfoBk
+        ParentColor = False
+      end
+      object pnlLeft: TPanel
+        Left = 123
+        Top = 0
+        Width = 214
+        Height = 48
+        Align = alClient
+        BevelOuter = bvNone
+        BorderWidth = 2
+        Color = clInfoBk
+        TabOrder = 0
+        object pnlEdtType: TPanel
+          Left = 2
+          Top = 2
+          Width = 210
+          Height = 21
+          Align = alTop
+          BevelOuter = bvNone
+          ParentColor = True
+          TabOrder = 0
+          object edtTypeComment: TEdit
+            Left = 0
+            Top = 0
+            Width = 210
+            Height = 21
+            Anchors = [akLeft, akTop, akRight]
+            TabOrder = 0
+          end
+        end
+        object pnlEdtProp: TPanel
+          Left = 2
+          Top = 23
+          Width = 210
+          Height = 23
+          Align = alClient
+          AutoSize = True
+          BevelOuter = bvNone
+          ParentColor = True
+          TabOrder = 1
+          object edtPropComment: TEdit
+            Left = 0
+            Top = 2
+            Width = 210
+            Height = 21
+            Anchors = [akLeft, akTop, akRight]
+            TabOrder = 0
+          end
+        end
+      end
+      object pnlRight: TPanel
+        Left = 0
+        Top = 0
+        Width = 120
+        Height = 48
+        Align = alLeft
+        BevelOuter = bvNone
+        BorderWidth = 2
+        Color = clInfoBk
+        TabOrder = 1
+        object pnlType: TPanel
+          Left = 2
+          Top = 2
+          Width = 116
+          Height = 21
+          Align = alTop
+          AutoSize = True
+          BevelOuter = bvNone
+          ParentColor = True
+          TabOrder = 0
+          object edtType: TEdit
+            Left = 4
+            Top = 0
+            Width = 112
+            Height = 21
+            Anchors = [akLeft, akTop, akRight]
+            BorderStyle = bsNone
+            ParentColor = True
+            ReadOnly = True
+            TabOrder = 0
+          end
+        end
+        object pnlProp: TPanel
+          Left = 2
+          Top = 23
+          Width = 116
+          Height = 23
+          Align = alClient
+          AutoSize = True
+          BevelOuter = bvNone
+          ParentColor = True
+          TabOrder = 1
+          object edtProp: TEdit
+            Left = 4
+            Top = 1
+            Width = 112
+            Height = 21
+            Anchors = [akLeft, akTop, akRight]
+            BorderStyle = bsNone
+            ParentColor = True
+            ReadOnly = True
+            TabOrder = 0
+          end
+        end
+      end
+    end
   end
   object tlbObjComment: TToolBar
     Left = 0
@@ -112,7 +172,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
     Width = 339
     Height = 30
     BorderWidth = 1
-    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    EdgeBorders = [ebLeft, ebTop, ebRight]
     Flat = True
     Images = dmCnSharedImages.Images
     ParentShowHint = False

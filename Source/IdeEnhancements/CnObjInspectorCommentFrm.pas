@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons, Clipbrd,
   Contnrs, ToolsAPI, CnWizNotifier, CnWizIdeDock, CnWizShareImages, CnWizOptions,
-  CnWizConsts, CnObjectInspectorWrapper, CnHashMap, CnCommon;
+  CnWizConsts, CnObjectInspectorWrapper, CnHashMap, CnCommon, CnWizClasses;
 
 type
   TCnPropertyCommentType = class;
@@ -177,26 +177,32 @@ type
     dlgFont: TFontDialog;
     btn2: TToolButton;
     mmoComment: TMemo;
-    pnlType: TPanel;
-    edtType: TEdit;
-    edtTypeComment: TEdit;
-    pnlProp: TPanel;
-    edtProp: TEdit;
-    edtPropComment: TEdit;
     actlstComment: TActionList;
     actClear: TAction;
     actFont: TAction;
     actHelp: TAction;
     statHie: TStatusBar;
+    pnl1: TPanel;
+    pnlLeft: TPanel;
+    spl1: TSplitter;
+    pnlRight: TPanel;
+    pnlType: TPanel;
+    edtType: TEdit;
+    pnlProp: TPanel;
+    edtProp: TEdit;
+    pnlEdtType: TPanel;
+    edtTypeComment: TEdit;
+    pnlEdtProp: TPanel;
+    edtPropComment: TEdit;
     procedure actHelpExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FWizard: TCnBaseWizard;
     FManager: TCnPropertyCommentManager;
     FCurrentType: TCnPropertyCommentType;
     FCurrentProp: TCnPropertyCommentItem;
@@ -213,6 +219,7 @@ type
     procedure ShowCurrent;
     procedure SaveCurrentPropToManager;
 
+    property Wizard: TCnBaseWizard read FWizard write FWizard;
     property Manager: TCnPropertyCommentManager read FManager;
   end;
 
@@ -225,7 +232,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizUtils, CnObjInspectorEnhancements {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   csCommentDir = 'OIComm';
@@ -247,7 +254,11 @@ procedure TCnObjInspectorCommentForm.actFontExecute(Sender: TObject);
 begin
   dlgFont.Font := mmoComment.Font;
   if dlgFont.Execute then
+  begin
     SetCommentFont(dlgFont.Font);
+    if FWizard <> nil then
+      (FWizard as TCnObjInspectorEnhanceWizard).CommentFont := dlgFont.Font;
+  end;
 end;
 
 procedure TCnObjInspectorCommentForm.actClearExecute(Sender: TObject);
@@ -459,15 +470,8 @@ begin
   end;
 end;
 
-procedure TCnObjInspectorCommentForm.FormResize(Sender: TObject);
-begin
-  edtTypeComment.Width := pnlType.Width - edtType.Width - 6;
-  edtPropComment.Width := pnlProp.Width - edtProp.Width - 6;
-end;
-
 procedure TCnObjInspectorCommentForm.FormShow(Sender: TObject);
 begin
-  FormResize(Sender);
   InspectorSelectionChange(Sender);
 end;
 
