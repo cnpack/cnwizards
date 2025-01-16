@@ -183,9 +183,9 @@ type
     actHelp: TAction;
     statHie: TStatusBar;
     pnl1: TPanel;
-    pnlLeft: TPanel;
-    spl1: TSplitter;
     pnlRight: TPanel;
+    spl1: TSplitter;
+    pnlLeft: TPanel;
     pnlType: TPanel;
     edtType: TEdit;
     pnlProp: TPanel;
@@ -365,26 +365,32 @@ begin
     end;
     FCurrentProp := nil;
 
-    // 内存里查找新类
-    FCurrentType := FManager.GetType(AName);
-    if FCurrentType = nil then
+    if AName <> '' then
     begin
-      // 内存 HashMap 里没找到，于是内存里创建一个
-      FCurrentType := FManager.AddType(AName);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('InspectorSelectionChange: Create New Type %s', [AName]);
-{$ENDIF}
-      // 并尝试加载可能有的数据，范围为当前类的所有属性事件
-      FCurrentType.Load;
+      // 内存里查找新类
+      FCurrentType := FManager.GetType(AName);
+      if FCurrentType = nil then
+      begin
+        // 内存 HashMap 里没找到，于是内存里创建一个
+        FCurrentType := FManager.AddType(AName);
+  {$IFDEF DEBUG}
+        CnDebugger.LogFmt('InspectorSelectionChange: Create New Type %s', [AName]);
+  {$ENDIF}
+        // 并尝试加载可能有的数据，范围为当前类的所有属性事件
+        FCurrentType.Load;
+      end
+      else
+      begin
+  {$IFDEF DEBUG}
+        CnDebugger.LogFmt('InspectorSelectionChange: Exist New Type %s', [AName]);
+  {$ENDIF}
+      end;
+
+      // 内存里拿到新类了，更新类信息到界面
     end
     else
-    begin
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('InspectorSelectionChange: Exist New Type %s', [AName]);
-{$ENDIF}
-    end;
+      FCurrentType := nil; // 没拿到，置为空
 
-    // 内存里拿到新类了，更新类信息到界面
     ShowCurrent;
   end;
 
@@ -405,21 +411,26 @@ begin
       SaveCurrentPropToManager;
     end;
 
-    FCurrentProp := FCurrentType.GetProperty(AName);
-    if FCurrentProp = nil then
+    if AName <> '' then
     begin
-      FCurrentProp := FCurrentType.Add(AName);
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('InspectorSelectionChange: Create New Prop %s', [FCurrentProp.PropertyName]);
-{$ENDIF}
-      // 注意 Prop 条目不会单独从文件中加载
+      FCurrentProp := FCurrentType.GetProperty(AName);
+      if FCurrentProp = nil then
+      begin
+        FCurrentProp := FCurrentType.Add(AName);
+  {$IFDEF DEBUG}
+        CnDebugger.LogFmt('InspectorSelectionChange: Create New Prop %s', [FCurrentProp.PropertyName]);
+  {$ENDIF}
+        // 注意 Prop 条目不会单独从文件中加载
+      end
+      else
+      begin
+  {$IFDEF DEBUG}
+        CnDebugger.LogFmt('InspectorSelectionChange: Exist New Prop %s', [FCurrentProp.PropertyName]);
+  {$ENDIF}
+      end;
     end
     else
-    begin
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('InspectorSelectionChange: Exist New Prop %s', [FCurrentProp.PropertyName]);
-{$ENDIF}
-    end;
+      FCurrentProp := nil;
 
     // 再更新到界面
     ShowCurrent;

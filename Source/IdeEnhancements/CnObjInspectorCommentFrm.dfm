@@ -61,12 +61,13 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
         Color = clInfoBk
         ParentColor = False
       end
-      object pnlLeft: TPanel
+      object pnlRight: TPanel
         Left = 123
         Top = 0
         Width = 214
         Height = 48
         Align = alClient
+        AutoSize = True
         BevelOuter = bvNone
         BorderWidth = 2
         Color = clInfoBk
@@ -109,7 +110,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
           end
         end
       end
-      object pnlRight: TPanel
+      object pnlLeft: TPanel
         Left = 0
         Top = 0
         Width = 120
