@@ -42,8 +42,11 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls,ToolWin, ComCtrls, ActnList, Menus, Buttons, Clipbrd,
-  Contnrs, ToolsAPI, CnWizNotifier, CnWizIdeDock, CnWizShareImages, CnWizOptions,
-  CnWizConsts, CnObjectInspectorWrapper, CnHashMap, CnCommon, CnWizClasses;
+  Contnrs, Grids, TypInfo,
+{$IFNDEF STAND_ALONE}
+  ToolsAPI, CnWizNotifier, CnWizIdeDock, CnObjectInspectorWrapper, CnWizClasses, 
+{$ENDIF}
+  CnWizShareImages, CnWizOptions, CnWizConsts, CnHashMap, CnCommon;
 
 type
   TCnPropertyCommentType = class;
@@ -167,6 +170,10 @@ type
     {* 用户数据储存目录，尾部带 \}
   end;
 
+{$IFDEF STAND_ALONE}
+  TCnIdeDockForm = class(TForm);
+{$ENDIF}
+
   TCnObjInspectorCommentForm = class(TCnIdeDockForm)
     pnlComment: TPanel;
     tlbObjComment: TToolBar;
@@ -182,7 +189,7 @@ type
     actFont: TAction;
     actHelp: TAction;
     statHie: TStatusBar;
-    pnlContainer: TPanel;
+    pnlNonGrid: TPanel;
     pnlRight: TPanel;
     spl1: TSplitter;
     pnlLeft: TPanel;
@@ -194,6 +201,12 @@ type
     edtTypeComment: TEdit;
     pnlEdtProp: TPanel;
     edtPropComment: TEdit;
+    actToggleGird: TAction;
+    btnToggleGird: TToolButton;
+    spl2: TSplitter;
+    pnlContainer: TPanel;
+    pnlGrid: TPanel;
+    grdProp: TStringGrid;
     procedure actHelpExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -201,27 +214,47 @@ type
     procedure FormShow(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure actToggleGirdExecute(Sender: TObject);
+    procedure grdPropSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure FormResize(Sender: TObject);
+    procedure grdPropExit(Sender: TObject);
   private
+{$IFNDEF STAND_ALONE}
     FWizard: TCnBaseWizard;
+{$ENDIF}
     FManager: TCnPropertyCommentManager;
-    FCurrentType: TCnPropertyCommentType;
-    FCurrentProp: TCnPropertyCommentItem;
+    FCurrentType: TCnPropertyCommentType;   // 当前类，两种显示模式都有效
+    FCurrentProp: TCnPropertyCommentItem;   // 当前属性，两种显示模式都有效
+    FGridMode: Boolean;
+    FPropEvents: TStringList;
     procedure InspectorSelectionChange(Sender: TObject); // 注意因为多个地方复用调用，Sender 不可靠
+{$IFNDEF STAND_ALONE}
     procedure FormEditorChange(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
+{$ENDIF}
     function MemToUIStr(const Str: string): string;
     function UIToMemStr(const Str: string): string;
+    procedure SetGridMode(const Value: Boolean);
   protected
+{$IFNDEF STAND_ALONE}
     function GetHelpTopic: string; override;
-    procedure AdjustHeight(Sender: TObject);
+{$ENDIF}
+    procedure AdjustNonGridHeight(Sender: TObject);
+    procedure InitGrid;
+    procedure SetTypeToGrid;
+    procedure AdjustGridSize(Sender: TObject);
+    procedure GetPropEvents(AClass: TClass; Props: TStringList);
   public
     procedure SetCommentFont(AFont: TFont);
     procedure ShowCurrent;
     procedure SaveCurrentPropToManager;
-
+{$IFNDEF STAND_ALONE}
     property Wizard: TCnBaseWizard read FWizard write FWizard;
+{$ENDIF}
     property Manager: TCnPropertyCommentManager read FManager;
+    property GridMode: Boolean read FGridMode write SetGridMode;
   end;
 
 {$ENDIF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
@@ -232,8 +265,10 @@ implementation
 
 {$R *.DFM}
 
+{$IFNDEF STAND_ALONE}
 uses
   CnWizUtils, CnObjInspectorEnhancements {$IFDEF DEBUG}, CnDebug {$ENDIF};
+{$ENDIF}
 
 const
   csCommentDir = 'OIComm';
@@ -241,15 +276,44 @@ const
   csCRLF = #13#10;
   FILE_SEP = #2;
 
+function PropSort(List: TStringList; Index1, Index2: Integer): Integer;
+var
+  O1, O2: Integer;
+begin
+  if List.Objects[Index1] <> nil then
+    O1 := 0
+  else
+    O1 := 1;
+
+  if List.Objects[Index2] <> nil then
+    O2 := 0
+  else
+    O2 := 1;
+
+  // Object 非 0 代表事件，排 0 后面
+  if O1 > O2 then
+    Result := -1
+  else if O1 < O2 then
+    Result := 1
+  else
+    Result := CompareStr(List[Index1], List[Index2]);
+end;
+
 procedure TCnObjInspectorCommentForm.actHelpExecute(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   ShowFormHelp;
+{$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnObjInspectorCommentForm.GetHelpTopic: string;
 begin
   Result := 'CnObjInspectorEnhanceWizard';
 end;
+
+{$ENDIF}
 
 procedure TCnObjInspectorCommentForm.actFontExecute(Sender: TObject);
 begin
@@ -257,36 +321,67 @@ begin
   if dlgFont.Execute then
   begin
     SetCommentFont(dlgFont.Font);
+{$IFNDEF STAND_ALONE}
     if FWizard <> nil then
       (FWizard as TCnObjInspectorEnhanceWizard).CommentFont := dlgFont.Font;
+{$ENDIF}
   end;
 end;
 
 procedure TCnObjInspectorCommentForm.actClearExecute(Sender: TObject);
+var
+  I: Integer;
 begin
-  edtTypeComment.Text := '';
-  edtPropComment.Text := '';
+  if FGridMode then
+  begin
+    for I := 0 to grdProp.RowCount - 1 do
+      grdProp.Cells[1, I] := '';
+  end
+  else
+  begin
+    edtTypeComment.Text := '';
+    edtPropComment.Text := '';
+  end;
   mmoComment.Lines.Clear;
+end;
+
+procedure TCnObjInspectorCommentForm.actToggleGirdExecute(Sender: TObject);
+begin
+  GridMode := not GridMode;
+  actToggleGird.Checked := FGridMode;
 end;
 
 procedure TCnObjInspectorCommentForm.FormCreate(Sender: TObject);
 begin
   FManager := TCnPropertyCommentManager.Create;
+{$IFDEF STAND_ALONE}
+  FManager.DataDir := MakePath(ExtractFilePath(Application.ExeName) + csCommentDir);
+  FManager.UserDir := MakePath(ExtractFilePath(Application.ExeName) + csCommentDir);
+{$ELSE}
   FManager.DataDir := MakePath(MakePath(WizOptions.DataPath) + csCommentDir);
   FManager.UserDir := MakePath(MakePath(WizOptions.UserPath) + csCommentDir);
+{$ENDIF}
+  FPropEvents := TStringList.Create;
 
+{$IFNDEF STAND_ALONE}
   WizOptions.ResetToolbarWithLargeIcons(tlbObjComment);
 
   ObjectInspectorWrapper.AddSelectionChangeNotifier(InspectorSelectionChange);
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorChange);
+{$ENDIF}
 end;
 
 procedure TCnObjInspectorCommentForm.FormDestroy(Sender: TObject);
 begin
+  FPropEvents.Free;
   FManager.Free;
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorChange);
   ObjectInspectorWrapper.RemoveSelectionChangeNotifier(InspectorSelectionChange);
+{$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnObjInspectorCommentForm.FormEditorChange(
   FormEditor: IOTAFormEditor; NotifyType: TCnWizFormEditorNotifyType;
@@ -298,17 +393,28 @@ begin
     InspectorSelectionChange(Self);
 end;
 
+{$ENDIF}
+
 procedure TCnObjInspectorCommentForm.InspectorSelectionChange(Sender: TObject);
 var
   AName, Hie: string;
   AClass: TClass;
+{$IFNDEF STAND_ALONE}
   Root: TComponent;
+{$ENDIF}
 begin
   // 拿到当前类型当前属性或事件
+{$IFDEF STAND_ALONE}
+  AName := 'TFormTestComment'; // 独立运行的测试用例
+{$ELSE}
   AName := ObjectInspectorWrapper.ActiveComponentType;
+{$ENDIF}
   Hie := '';
 
   AClass := GetClass(AName);
+
+{$IFNDEF STAND_ALONE}
+
   if AClass = nil then
   begin
     //  找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
@@ -333,6 +439,7 @@ begin
 {$ENDIF}
     AClass := GetClass(AName);
   end;
+{$ENDIF}
 
   while AClass <> nil do
   begin
@@ -360,9 +467,8 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('InspectorSelectionChange: Old Prop %s', [FCurrentProp.PropertyName]);
 {$ENDIF}
-        SaveCurrentPropToManager;
+        SaveCurrentPropToManager; // 网格或普通模式均存入内存再存盘
       end;
-      FCurrentType.Save;
     end;
     FCurrentProp := nil;
 
@@ -395,8 +501,16 @@ begin
     ShowCurrent;
   end;
 
+  if FGridMode then // 列表模式下，当前属性不改了
+    Exit;
+
   // 当前类没变，或变了且拿到新类了，查找 PropertyName 并更新属性事件信息到界面
+{$IFDEF STAND_ALONE}
+  AName := 'Caption';
+{$ELSE}
   AName := ObjectInspectorWrapper.ActivePropName;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('InspectorSelectionChange: ActivePropName %s', [AName]);
 {$ENDIF}
@@ -439,17 +553,68 @@ begin
 end;
 
 procedure TCnObjInspectorCommentForm.SaveCurrentPropToManager;
+var
+  I: Integer;
+  Item: TCnPropertyCommentItem;
 begin
-  if FCurrentProp <> nil then
+  if FGridMode then // 网格模式，整个全存
   begin
-    FCurrentProp.PropertyComment := UIToMemStr(edtPropComment.Text);
-    FCurrentProp.Comment := UIToMemStr(mmoComment.Lines.Text);
-  end;
+    if FCurrentType <> nil then
+    begin
+      // 先存类型注释
+      if grdProp.RowCount >= 1 then
+        FCurrentType.Comment := grdProp.Cells[1, 0];
 
-  if FCurrentType <> nil then
+      if grdProp.RowCount <= 1 then
+        Exit;
+
+      // 再存当前属性的块注释
+      if FCurrentProp <> nil then
+        FCurrentProp.Comment := UIToMemStr(mmoComment.Lines.Text);
+
+      // 再存全部事件注释
+      for I := 1 to grdProp.RowCount - 1 do
+      begin
+        if grdProp.Cells[1, I] <> '' then    // 有注释
+        begin
+          if grdProp.Cells[0, I] <> '' then  // 有属性名
+          begin
+            // 则保存该属性名的注释
+            Item := FCurrentType.GetProperty(grdProp.Cells[0, I]);
+            if Item = nil then
+              Item := FCurrentType.Add(grdProp.Cells[0, I]);
+
+            Item.PropertyComment := grdProp.Cells[1, I];
+          end;
+        end
+        else
+        begin
+          // 无注释
+          if grdProp.Cells[0, I] <> '' then
+          begin
+            // 则清除该属性名的注释
+            Item := FCurrentType.GetProperty(grdProp.Cells[0, I]);
+            if Item <> nil then
+              Item.PropertyComment := '';
+          end;
+        end;
+      end;
+      FCurrentType.Save;
+    end;
+  end
+  else // 非网格模式
   begin
-    FCurrentType.Comment := UIToMemStr(edtTypeComment.Text);
-    FCurrentType.Save;
+    if FCurrentProp <> nil then
+    begin
+      FCurrentProp.PropertyComment := UIToMemStr(edtPropComment.Text);
+      FCurrentProp.Comment := UIToMemStr(mmoComment.Lines.Text);
+    end;
+
+    if FCurrentType <> nil then
+    begin
+      FCurrentType.Comment := UIToMemStr(edtTypeComment.Text);
+      FCurrentType.Save;
+    end;
   end;
 end;
 
@@ -465,6 +630,9 @@ begin
     edtType.Text := '';
     edtTypeComment.Text := '';
   end;
+
+  if FGridMode then
+    SetTypeToGrid;
 
   if FCurrentProp <> nil then
   begin
@@ -504,20 +672,232 @@ begin
   edtProp.Font := AFont;
   edtPropComment.Font := AFont;
 
-  CnWizNotifierServices.ExecuteOnApplicationIdle(AdjustHeight);
+  grdProp.Font := AFont;
+
+{$IFDEF STAND_ALONE}
+  AdjustNonGridHeight(nil);
+  AdjustGridSize(nil);
+{$ELSE}
+  CnWizNotifierServices.ExecuteOnApplicationIdle(AdjustNonGridHeight);
+  CnWizNotifierServices.ExecuteOnApplicationIdle(AdjustGridSize);
+{$ENDIF}
 end;
 
-procedure TCnObjInspectorCommentForm.AdjustHeight(Sender: TObject);
+procedure TCnObjInspectorCommentForm.AdjustNonGridHeight(Sender: TObject);
 var
   H: Integer;
 begin
+  if FGridMode then
+    Exit;
+
   H := edtTypeComment.Height * 2 + 6;
   if H < 48 then
     H := 48;
 
-  pnlContainer.Height := H;
+  pnlContainer.Height := H + 2;
+  pnlNonGrid.Height := H;
   edtType.BorderStyle := bsNone;
   edtProp.BorderStyle := bsNone;
+end;
+
+procedure TCnObjInspectorCommentForm.AdjustGridSize(Sender: TObject);
+var
+  I, L: Integer;
+  S: string;
+begin
+  S := '';
+  for I := 0 to grdProp.RowCount - 1 do
+  begin
+    if Length(grdProp.Cells[0, I]) > Length(S) then
+      S := grdProp.Cells[0, I];
+  end;
+
+  L := grdProp.Canvas.TextWidth(S) + 10;
+  if L < 60 then
+    L := 60;
+  grdProp.ColWidths[0] := L;
+  grdProp.ColWidths[1] := grdProp.Width - L - 25;
+
+  L := grdProp.Canvas.TextHeight(S) + 2;
+  if L < 21 then
+    L := 21;
+  grdProp.DefaultRowHeight := L;
+end;
+
+procedure TCnObjInspectorCommentForm.FormResize(Sender: TObject);
+begin
+  AdjustGridSize(nil);
+end;
+
+procedure TCnObjInspectorCommentForm.SetGridMode(const Value: Boolean);
+begin
+  if Value <> FGridMode then
+  begin
+    SaveCurrentPropToManager;
+    FGridMode := Value;
+
+    // 切换显示模式
+    if FGridMode then
+    begin
+      // 显示网格，隐藏条目
+      pnlNonGrid.Visible := False;
+      pnlGrid.Align := alClient;
+      pnlGrid.Visible := True;
+      pnlGrid.BringToFront;
+      spl2.Visible := True;
+
+      InitGrid;
+      SetCommentFont(grdProp.Font);
+    end
+    else
+    begin
+      // 隐藏网格，显示条目
+      pnlGrid.Visible := False;
+      pnlNonGrid.Align := alClient;
+      pnlNonGrid.Visible := True;
+      pnlNonGrid.BringToFront;
+      spl2.Visible := False;
+
+      AdjustNonGridHeight(nil);
+      InspectorSelectionChange(nil);
+    end;
+  end;
+end;
+
+procedure TCnObjInspectorCommentForm.grdPropSelectCell(Sender: TObject;
+  ACol, ARow: Integer; var CanSelect: Boolean);
+var
+  AName: string;
+begin
+  if ACol >= 1 then
+    grdProp.Options := grdProp.Options + [goEditing]
+  else
+    grdProp.Options := grdProp.Options - [goEditing];
+
+  if ARow = 0 then
+  begin
+    // 选中的类的一行，只保存，不加载
+    SaveCurrentPropToManager;
+    Exit;
+  end;
+
+  // 更改 FCurrentProp
+  AName := grdProp.Cells[0, ARow];
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Grid Selection Change: ActivePropName %s', [AName]);
+{$ENDIF}
+  if (FCurrentProp = nil) or (FCurrentProp.PropertyName <> AName) then
+  begin
+    // 当前无属性，或新选中的不是当前属性
+    if FCurrentProp <> nil then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Grid Selection Change: Old Prop %s', [FCurrentProp.PropertyName]);
+{$ENDIF}
+      // 当前有属性事件，把界面内容写回 FCurrentProp 中
+      SaveCurrentPropToManager;
+    end;
+  end;
+
+  if (FCurrentType <> nil) and (AName <> '') then
+  begin
+    FCurrentProp := FCurrentType.GetProperty(AName);
+    if FCurrentProp = nil then
+    begin
+      FCurrentProp := FCurrentType.Add(AName);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Grid Selection Change: Create New Prop %s', [FCurrentProp.PropertyName]);
+{$ENDIF}
+    end
+    else
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Grid Selection Change: Exist New Prop %s', [FCurrentProp.PropertyName]);
+{$ENDIF}
+    end;
+
+    // 拿到新 CurrentProp 了，设置到界面
+  end
+  else
+    FCurrentProp := nil;
+  ShowCurrent;
+end;
+
+procedure TCnObjInspectorCommentForm.GetPropEvents(AClass: TClass;
+  Props: TStringList);
+var
+  PropListPtr: PPropList;
+  I, APropCount: Integer;
+  PropInfo: PPropInfo;
+begin
+  Props.Clear;
+
+  // 先拿所有 tkProperties，再拿 tkMethods，再排序。
+  APropCount := GetTypeData(PTypeInfo(AClass.ClassInfo))^.PropCount;
+  if APropCount > 0 then
+  begin
+    GetMem(PropListPtr, APropCount * SizeOf(Pointer));
+    GetPropList(PTypeInfo(AClass.ClassInfo), tkAny, PropListPtr);
+
+    for I := 0 to APropCount - 1 do
+    begin
+      PropInfo := PropListPtr^[I];
+      if PropInfo^.PropType^^.Kind in tkProperties then
+        Props.AddObject(PropInfoName(PropInfo), TObject(0));
+    end;
+    for I := 0 to APropCount - 1 do
+    begin
+      PropInfo := PropListPtr^[I];
+      if PropInfo^.PropType^^.Kind in tkMethods then
+        Props.AddObject(PropInfoName(PropInfo), TObject(1));
+    end;
+
+    Props.CustomSort(PropSort);
+  end;
+end;
+
+procedure TCnObjInspectorCommentForm.InitGrid;
+begin
+  SetTypeToGrid;
+  AdjustGridSize(nil);
+  pnlContainer.Height := Height * 2 div 3;
+end;
+
+procedure TCnObjInspectorCommentForm.SetTypeToGrid;
+var
+  AClass: TClass;
+  I: Integer;
+  Item: TCnPropertyCommentItem;
+begin
+  if FCurrentType <> nil then
+  begin
+    AClass := GetClass(FCurrentType.TypeName);
+    FPropEvents.Clear;
+    if AClass <> nil then
+      GetPropEvents(AClass, FPropEvents);
+
+    grdProp.RowCount := FPropEvents.Count + 1;
+
+    grdProp.Cells[0, 0] := FCurrentType.TypeName;
+    grdProp.Cells[1, 0] := FCurrentType.Comment;
+    for I := 0 to FPropEvents.Count - 1 do
+    begin
+      grdProp.Cells[0, I + 1] := FPropEvents[I];
+      Item := FCurrentType.GetProperty(FPropEvents[I]);
+      if Item <> nil then
+        grdProp.Cells[1, I + 1] := Item.PropertyComment
+      else
+        grdProp.Cells[1, I + 1] := '';
+    end;
+  end
+  else
+    grdProp.RowCount := 0;
+end;
+
+procedure TCnObjInspectorCommentForm.grdPropExit(Sender: TObject);
+begin
+  SaveCurrentPropToManager;
 end;
 
 function TCnObjInspectorCommentForm.MemToUIStr(const Str: string): string;

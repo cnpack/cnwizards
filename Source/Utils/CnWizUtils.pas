@@ -90,7 +90,6 @@ type
   IDesigner = IFormDesigner;
 {$ENDIF}
 
-
   // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
   TCnGeneralPasToken = TCnWidePasToken;
