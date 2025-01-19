@@ -126,7 +126,7 @@ type
     {* 该类的属性和事件条目}
 
     property Changed: Boolean read FChanged write FChanged;
-    {* 由 Item 通知的改变，保存成功后会变成 False}
+    {* 由 Item 通知的改变，保存成功后会变成 False，暂未使用}
     property Manager: TCnPropertyCommentManager read FManager write FManager;
     {* 所属的管理器}
   end;
@@ -201,7 +201,7 @@ type
     edtTypeComment: TEdit;
     pnlEdtProp: TPanel;
     edtPropComment: TEdit;
-    actToggleGird: TAction;
+    actToggleGrid: TAction;
     btnToggleGird: TToolButton;
     spl2: TSplitter;
     pnlContainer: TPanel;
@@ -214,7 +214,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure actClearExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure actToggleGirdExecute(Sender: TObject);
+    procedure actToggleGridExecute(Sender: TObject);
     procedure grdPropSelectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
     procedure FormResize(Sender: TObject);
@@ -345,7 +345,7 @@ begin
   mmoComment.Lines.Clear;
 end;
 
-procedure TCnObjInspectorCommentForm.actToggleGirdExecute(Sender: TObject);
+procedure TCnObjInspectorCommentForm.actToggleGridExecute(Sender: TObject);
 begin
   GridMode := not GridMode;
   actToggleGird.Checked := FGridMode;
@@ -769,17 +769,17 @@ procedure TCnObjInspectorCommentForm.grdPropSelectCell(Sender: TObject;
 var
   AName: string;
 begin
-  if ACol >= 1 then
-    grdProp.Options := grdProp.Options + [goEditing]
-  else
-    grdProp.Options := grdProp.Options - [goEditing];
-
   if ARow = 0 then
   begin
     // 选中的类的一行，只保存，不加载
     SaveCurrentPropToManager;
+
+    mmoComment.Lines.Text := '';
+    mmoComment.ReadOnly := True; // 选中最上面一行时没有大块注释
     Exit;
   end;
+
+  mmoComment.ReadOnly := False;
 
   // 更改 FCurrentProp
   AName := grdProp.Cells[0, ARow];

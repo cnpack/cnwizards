@@ -203,7 +203,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
           BorderStyle = bsNone
           ColCount = 2
           FixedRows = 0
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goEditing, goAlwaysShowEditor]
           ScrollBars = ssVertical
           TabOrder = 0
           OnExit = grdPropExit
@@ -244,7 +244,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
     object btnToggleGird: TToolButton
       Left = 54
       Top = 0
-      Action = actToggleGird
+      Action = actToggleGrid
     end
     object btn2: TToolButton
       Left = 77
@@ -287,11 +287,11 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       ImageIndex = 29
       OnExecute = actFontExecute
     end
-    object actToggleGird: TAction
-      Caption = 'Toggle &Gird'
-      Hint = 'Toggle Gird Mode'
+    object actToggleGrid: TAction
+      Caption = 'Toggle &Grid Mode'
+      Hint = 'Toggle Grid Mode'
       ImageIndex = 62
-      OnExecute = actToggleGirdExecute
+      OnExecute = actToggleGridExecute
     end
     object actHelp: TAction
       Caption = '&Help'
