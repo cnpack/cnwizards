@@ -1044,14 +1044,20 @@ end;
 
 procedure TCnPropertyCommentType.Load;
 var
-  F: string;
+  F, S: string;
 begin
   if TypeName = '' then
     Exit;
 
-  F := FManager.UserDir + TypeName + '.txt';
+{$IFDEF UNICODE}
+  S := '_W';
+{$ELSE}
+  S := '_A';
+{$ENDIF}
+
+  F := FManager.UserDir + TypeName + S + '.txt';
   if not FileExists(F) then
-    F := FManager.DataDir + TypeName + '.txt';
+    F := FManager.DataDir + TypeName + S + '.txt';
 
   if FileExists(F) then
     LoadFromFile(F);
@@ -1128,12 +1134,17 @@ end;
 
 procedure TCnPropertyCommentType.Save;
 var
-  F: string;
+  F, S: string;
 begin
   if TypeName = '' then
     Exit;
 
-  F := FManager.UserDir + TypeName + '.txt';
+{$IFDEF UNICODE}
+  S := '_W';
+{$ELSE}
+  S := '_A';
+{$ENDIF}
+  F := FManager.UserDir + TypeName + S + '.txt';
   ForceDirectories(FManager.UserDir);
 
   // 如果没目标文件且自己没内容就无需存
@@ -1163,7 +1174,12 @@ begin
     end;
 
     try
+{$IFDEF UNICODE}
+      SL.SaveToFile(FileName, TEncoding.UTF8);
+{$ELSE}
       SL.SaveToFile(FileName); // 保存的异常屏蔽
+{$ENDIF}
+
       Changed := False;
     except
       ;
