@@ -202,10 +202,12 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
           Align = alClient
           BorderStyle = bsNone
           ColCount = 2
+          DefaultDrawing = False
           FixedRows = 0
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goEditing, goAlwaysShowEditor]
           ScrollBars = ssVertical
           TabOrder = 0
+          OnDrawCell = grdPropDrawCell
           OnExit = grdPropExit
           OnSelectCell = grdPropSelectCell
         end
@@ -229,25 +231,30 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Top = 0
       Action = actClear
     end
-    object btn1: TToolButton
+    object btnCopy: TToolButton
       Left = 23
+      Top = 0
+      Action = actCopy
+    end
+    object btn1: TToolButton
+      Left = 46
       Top = 0
       Width = 8
       ImageIndex = 2
       Style = tbsSeparator
     end
     object btnFont: TToolButton
-      Left = 31
+      Left = 54
       Top = 0
       Action = actFont
     end
     object btnToggleGird: TToolButton
-      Left = 54
+      Left = 77
       Top = 0
       Action = actToggleGrid
     end
     object btn2: TToolButton
-      Left = 77
+      Left = 100
       Top = 0
       Width = 8
       Caption = 'btn2'
@@ -255,7 +262,7 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Style = tbsSeparator
     end
     object btnHelp: TToolButton
-      Left = 85
+      Left = 108
       Top = 0
       Action = actHelp
     end
@@ -280,6 +287,12 @@ object CnObjInspectorCommentForm: TCnObjInspectorCommentForm
       Hint = 'Clear Comment'
       ImageIndex = 13
       OnExecute = actClearExecute
+    end
+    object actCopy: TAction
+      Caption = '&Copy Name'
+      Hint = 'Copy Name'
+      ImageIndex = 10
+      OnExecute = actCopyExecute
     end
     object actFont: TAction
       Caption = '&Font'

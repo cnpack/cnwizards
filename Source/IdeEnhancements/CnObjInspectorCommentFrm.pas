@@ -207,6 +207,8 @@ type
     pnlContainer: TPanel;
     pnlGrid: TPanel;
     grdProp: TStringGrid;
+    actCopy: TAction;
+    btnCopy: TToolButton;
     procedure actHelpExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -219,6 +221,9 @@ type
       var CanSelect: Boolean);
     procedure FormResize(Sender: TObject);
     procedure grdPropExit(Sender: TObject);
+    procedure grdPropDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure actCopyExecute(Sender: TObject);
   private
 {$IFNDEF STAND_ALONE}
     FWizard: TCnBaseWizard;
@@ -228,6 +233,7 @@ type
     FCurrentProp: TCnPropertyCommentItem;   // 当前属性，两种显示模式都有效
     FGridMode: Boolean;
     FPropEvents: TStringList;
+    FPropCount: Integer;
     procedure InspectorSelectionChange(Sender: TObject); // 注意因为多个地方复用调用，Sender 不可靠
 {$IFNDEF STAND_ALONE}
     procedure FormEditorChange(FormEditor: IOTAFormEditor;
@@ -343,6 +349,24 @@ begin
     edtPropComment.Text := '';
   end;
   mmoComment.Lines.Clear;
+end;
+
+procedure TCnObjInspectorCommentForm.actCopyExecute(Sender: TObject);
+var
+  S: string;
+begin
+  if FGridMode then
+    S := grdProp.Cells[0, grdProp.Row]
+  else
+  begin
+    if edtType.Focused or edtTypeComment.Focused then
+      S := edtType.Text
+    else
+      S := edtProp.Text;
+  end;
+
+  if S <> '' then
+    Clipboard.AsText := S;
 end;
 
 procedure TCnObjInspectorCommentForm.actToggleGridExecute(Sender: TObject);
@@ -764,6 +788,30 @@ begin
   end;
 end;
 
+procedure TCnObjInspectorCommentForm.grdPropDrawCell(Sender: TObject; ACol,
+  ARow: Integer; Rect: TRect; State: TGridDrawState);
+var
+  H: Integer;
+begin
+  if ACol >= 1 then
+  begin
+    if ARow > FPropCount then
+      grdProp.Canvas.Brush.Color := $00FEFCDF
+    else
+      grdProp.Canvas.Brush.Color := $00DFFFFF;
+  end
+  else
+    grdProp.Canvas.Brush.Color := clBtnFace;
+
+  grdProp.Canvas.FillRect(Rect);
+  H :=  grdProp.Canvas.TextHeight(grdProp.Cells[ACol, ARow]);
+  H := (Rect.Bottom - Rect.Top - H) div 2;
+  if H < 0 then
+    H := 0;
+
+  grdProp.Canvas.TextOut(Rect.Left + 2, Rect.Top + H, grdProp.Cells[ACol, ARow]);
+end;
+
 procedure TCnObjInspectorCommentForm.grdPropSelectCell(Sender: TObject;
   ACol, ARow: Integer; var CanSelect: Boolean);
 var
@@ -854,6 +902,12 @@ begin
     end;
 
     Props.CustomSort(PropSort);
+    FPropCount := 0;
+    for I := 0 to Props.Count - 1 do
+    begin
+      if Props.Objects[I] = nil then
+        Inc(FPropCount);
+    end;
   end;
 end;
 
