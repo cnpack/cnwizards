@@ -348,7 +348,7 @@ end;
 procedure TCnObjInspectorCommentForm.actToggleGridExecute(Sender: TObject);
 begin
   GridMode := not GridMode;
-  actToggleGird.Checked := FGridMode;
+  actToggleGrid.Checked := FGridMode;
 end;
 
 procedure TCnObjInspectorCommentForm.FormCreate(Sender: TObject);
