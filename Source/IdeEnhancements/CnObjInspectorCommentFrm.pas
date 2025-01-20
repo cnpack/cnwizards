@@ -46,7 +46,7 @@ uses
 {$IFNDEF STAND_ALONE}
   ToolsAPI, CnWizNotifier, CnWizIdeDock, CnObjectInspectorWrapper, CnWizClasses, 
 {$ENDIF}
-  CnWizShareImages, CnWizOptions, CnWizConsts, CnHashMap, CnCommon;
+  CnWizShareImages, CnWizOptions, CnWizConsts, CnHashMap;
 
 type
   TCnPropertyCommentType = class;
@@ -246,6 +246,7 @@ type
   protected
 {$IFNDEF STAND_ALONE}
     function GetHelpTopic: string; override;
+    procedure AdjustClass(var AClass: TClass; var Hie: string; var AName: string);
 {$ENDIF}
     procedure AdjustNonGridHeight(Sender: TObject);
     procedure InitGrid;
@@ -271,10 +272,10 @@ implementation
 
 {$R *.DFM}
 
-{$IFNDEF STAND_ALONE}
 uses
-  CnWizUtils, CnObjInspectorEnhancements {$IFDEF DEBUG}, CnDebug {$ENDIF};
-{$ENDIF}
+  CnCommon {$IFDEF SUPPORT_FMX}, CnFmxUtils {$ENDIF}
+  {$IFDEF DEBUG}, CnDebug {$ENDIF}
+  {$IFNDEF STAND_ALONE}, CnWizUtils, CnObjInspectorEnhancements {$ENDIF};
 
 const
   csCommentDir = 'OIComm';
@@ -419,13 +420,52 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
+procedure TCnObjInspectorCommentForm.AdjustClass(var AClass: TClass;
+  var Hie, AName: string);
+var
+  Root: TComponent;
+begin
+  if AClass = nil then
+  begin
+    //  找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('AdjustClass: Class NOT Found');
+{$ENDIF}
+
+    Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
+    if (Root <> nil) and (Root is TDataModule) then
+    begin
+      Hie := AName + '->';
+      AName := 'TDataModule';
+    end
+{$IFDEF SUPPORT_FMX}
+    else if (Root <> nil) and CnFmxClassIsInheritedFromForm(Root.ClassType) then
+    begin
+      Hie := AName + '->';
+      AName := 'TForm';
+    end
+{$ENDIF}
+    else if (Root <> nil) and (Root is TControl) then
+    begin
+      Hie := AName + '->';
+      AName := 'TForm';
+    end;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Change to ' + AName);
+{$ENDIF}
+    AClass := GetClass(AName);
+  end;
+end;
+
+{$ENDIF}
+
 procedure TCnObjInspectorCommentForm.InspectorSelectionChange(Sender: TObject);
 var
   AName, Hie: string;
   AClass: TClass;
-{$IFNDEF STAND_ALONE}
-  Root: TComponent;
-{$ENDIF}
 begin
   // 拿到当前类型当前属性或事件
 {$IFDEF STAND_ALONE}
@@ -438,31 +478,7 @@ begin
   AClass := GetClass(AName);
 
 {$IFNDEF STAND_ALONE}
-
-  if AClass = nil then
-  begin
-    //  找不到，说明 AName 可能是容器，需要把 AName 变成设计器基类，再 GetClass，再加上 AName->
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Class NOT Found');
-{$ENDIF}
-
-    Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
-    if (Root <> nil) and (Root is TDataModule) then
-    begin
-      Hie := AName + '->';
-      AName := 'TDataModule';
-    end
-    else if (Root <> nil) and (Root is TControl) then
-    begin
-      Hie := AName + '->';
-      AName := 'TForm';
-    end;
-
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('InspectorSelectionChange: ActiveComponentType Change to ' + AName);
-{$ENDIF}
-    AClass := GetClass(AName);
-  end;
+  AdjustClass(AClass, Hie, AName);
 {$ENDIF}
 
   while AClass <> nil do
@@ -736,6 +752,7 @@ begin
       S := grdProp.Cells[0, I];
   end;
 
+  grdProp.Canvas.Font := grdProp.Font;
   L := grdProp.Canvas.TextWidth(S) + 10;
   if L < 60 then
     L := 60;
@@ -804,6 +821,8 @@ begin
     grdProp.Canvas.Brush.Color := clBtnFace;
 
   grdProp.Canvas.FillRect(Rect);
+  grdProp.Canvas.Font := grdProp.Font;
+
   H :=  grdProp.Canvas.TextHeight(grdProp.Cells[ACol, ARow]);
   H := (Rect.Bottom - Rect.Top - H) div 2;
   if H < 0 then
@@ -927,6 +946,7 @@ begin
   if FCurrentType <> nil then
   begin
     AClass := GetClass(FCurrentType.TypeName);
+
     FPropEvents.Clear;
     if AClass <> nil then
       GetPropEvents(AClass, FPropEvents);
