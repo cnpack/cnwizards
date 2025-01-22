@@ -83,6 +83,11 @@
   {$ENDIF}
 
   {$mode Delphi}       // Delphi Compatibility, not DelphiUnicode。注意源码中勿重复声明
+
+  // 关闭 Range Check 和 Overflow Check
+  {$R- No Range checking}
+  {$OVERFLOWCHECKS OFF}
+
 {$ELSE FPC} // Below is for Delphi Compiler
 
 //{$DEFINE PERSONAL_EDITION}
