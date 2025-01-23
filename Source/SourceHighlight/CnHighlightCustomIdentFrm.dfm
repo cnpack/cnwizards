@@ -120,6 +120,14 @@ inherited CnHighlightCustomIdentForm: TCnHighlightCustomIdentForm
         Action = actDelete
       end
     end
+    object chkBkTransparent: TCheckBox
+      Left = 216
+      Top = 256
+      Width = 97
+      Height = 17
+      Caption = 'Transparent'
+      TabOrder = 2
+    end
   end
   object dlgColor: TColorDialog
     Ctl3D = True

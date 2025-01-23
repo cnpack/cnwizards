@@ -4671,11 +4671,12 @@ begin
               begin
                 R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
                 if FCustomIdentifierBackground <> clNone then
-                begin
-                  Brush.Color := FCustomIdentifierBackground;
-                  Brush.Style := bsSolid;
-                  FillRect(R1);
-                end;
+                  Brush.Color := FCustomIdentifierBackground
+                else
+                  Brush.Color := EditControlWrapper.BackgroundColor; // 透明意味着使用编辑器原来的背景色
+
+                Brush.Style := bsSolid;
+                FillRect(R1);
 
                 if Element = atIdentifier then
                 begin

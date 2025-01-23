@@ -62,6 +62,7 @@ type
     tlb1: TToolBar;
     btnAdd: TToolButton;
     btnDelete: TToolButton;
+    chkBkTransparent: TCheckBox;
     procedure shpCustomColorMouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure actlstCustomUpdate(Action: TBasicAction;

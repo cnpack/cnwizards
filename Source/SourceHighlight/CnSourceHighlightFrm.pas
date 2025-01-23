@@ -480,13 +480,29 @@ begin
   with TCnHighlightCustomIdentForm.Create(Self) do
   begin
     shpCustomFg.Brush.Color := AWizard.CustomIdentifierForeground;
-    shpCustomBg.Brush.Color := AWizard.CustomIdentifierBackground;
+
+    if AWizard.CustomIdentifierBackground = clNone then
+    begin
+      shpCustomBg.Brush.Color := clWhite;
+      chkBkTransparent.Checked := True;
+    end
+    else
+    begin
+      shpCustomBg.Brush.Color := AWizard.CustomIdentifierBackground;
+      chkBkTransparent.Checked := False;
+    end;
+
     LoadFromStringList(AWizard.CustomIdentifiers);
 
     if ShowModal = mrOK then
     begin
       AWizard.CustomIdentifierForeground := shpCustomFg.Brush.Color;
-      AWizard.CustomIdentifierBackground := shpCustomBg.Brush.Color;
+
+      if chkBkTransparent.Checked then
+        AWizard.CustomIdentifierBackground := clNone
+      else
+        AWizard.CustomIdentifierBackground := shpCustomBg.Brush.Color;
+
       SaveToStringList(AWizard.CustomIdentifiers);
 {$IFDEF IDE_STRING_ANSI_UTF8}
       AWizard.SyncCustomWide;
