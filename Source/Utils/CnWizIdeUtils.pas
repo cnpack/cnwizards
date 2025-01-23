@@ -79,56 +79,56 @@ uses
 
 const
   // IDE Action 名称
-  SEditSelectAllCommand = 'EditSelectAllCommand';
+  SCnEditSelectAllCommand = 'EditSelectAllCommand';
 
   // Editor 窗口右键菜单名称
-  SMenuClosePageName = 'ecClosePage';
-  SMenuClosePageIIName = 'ecClosePageII';
-  SMenuEditPasteItemName = 'EditPasteItem';
-  SMenuOpenFileAtCursorName = 'ecOpenFileAtCursor';
+  SCnMenuClosePageName = 'ecClosePage';
+  SCnMenuClosePageIIName = 'ecClosePageII';
+  SCnMenuEditPasteItemName = 'EditPasteItem';
+  SCnMenuOpenFileAtCursorName = 'ecOpenFileAtCursor';
 
   // Editor 窗口相关类名
-  EditorFormClassName = 'TEditWindow';
-  EditControlName = 'Editor';
-  EditControlClassName = 'TEditControl';
-  DesignControlClassName = 'TEditorFormDesigner';
-  WelcomePageClassName = 'TWelcomePageFrame';
-  DisassemblyViewClassName = 'TDisassemblyView';
-  EditorStatusBarName = 'StatusBar';
+  SCnEditorFormClassName = 'TEditWindow';
+  SCnEditControlName = 'Editor';
+  SCnEditControlClassName = 'TEditControl';
+  SCnDesignControlClassName = 'TEditorFormDesigner';
+  SCnWelcomePageClassName = 'TWelcomePageFrame';
+  SCnDisassemblyViewClassName = 'TDisassemblyView';
+  SCnEditorStatusBarName = 'StatusBar';
 
 {$IFDEF BDS}
   {$IFDEF BDS4_UP} // BDS 2006 RAD Studio 2007 的标签页类名
-  XTabControlClassName = 'TIDEGradientTabSet';   // TWinControl 子类
+  SCnXTabControlClassName = 'TIDEGradientTabSet';   // TWinControl 子类
   {$ELSE} // BDS 2005 的标签页类名
-  XTabControlClassName = 'TCodeEditorTabControl'; // TTabSet 子类
+  SCnXTabControlClassName = 'TCodeEditorTabControl'; // TTabSet 子类
   {$ENDIF}
 {$ELSE} // Delphi BCB 的标签页类名
-  XTabControlClassName = 'TXTabControl';
+  SCnXTabControlClassName = 'TXTabControl';
 {$ENDIF BDS}
-  XTabControlName = 'TabControl';
+  SCnXTabControlName = 'TabControl';
 
-  TabControlPanelName = 'TabControlPanel';
-  CodePanelName = 'CodePanel';
-  TabPanelName = 'TabPanel';
+  SCnTabControlPanelName = 'TabControlPanel';
+  SCnCodePanelName = 'CodePanel';
+  SCnTabPanelName = 'TabPanel';
 
   // 对象查看器
-  PropertyInspectorClassName = 'TPropertyInspector';
-  PropertyInspectorName = 'PropertyInspector';
-  PropertyInspectorListClassName = 'TInspListBox';
-  PropertyInspectorListName = 'PropList';
-  PropertyInspectorTabControlName = 'TabControl';
-  PropertyInspectorLocalPopupMenu = 'LocalPopupMenu';
+  SCnPropertyInspectorClassName = 'TPropertyInspector';
+  SCnPropertyInspectorName = 'PropertyInspector';
+  SCnPropertyInspectorListClassName = 'TInspListBox';
+  SCnPropertyInspectorListName = 'PropList';
+  SCnPropertyInspectorTabControlName = 'TabControl';
+  SCnPropertyInspectorLocalPopupMenu = 'LocalPopupMenu';
 
   // 编辑器设置对话框
 {$IFDEF BDS}
-  SEditorOptionDlgClassName = 'TDefaultEnvironmentDialog';
-  SEditorOptionDlgName = 'DefaultEnvironmentDialog';
+  SCnEditorOptionDlgClassName = 'TDefaultEnvironmentDialog';
+  SCnEditorOptionDlgName = 'DefaultEnvironmentDialog';
 {$ELSE} {$IFDEF BCB}
-  SEditorOptionDlgClassName = 'TCppEditorPropertyDialog';
-  SEditorOptionDlgName = 'CppEditorPropertyDialog';
+  SCnEditorOptionDlgClassName = 'TCppEditorPropertyDialog';
+  SCnEditorOptionDlgName = 'CppEditorPropertyDialog';
 {$ELSE}
-  SEditorOptionDlgClassName = 'TPasEditorPropertyDialog';
-  SEditorOptionDlgName = 'PasEditorPropertyDialog';
+  SCnEditorOptionDlgClassName = 'TPasEditorPropertyDialog';
+  SCnEditorOptionDlgName = 'PasEditorPropertyDialog';
 {$ENDIF} {$ENDIF}
 
   // 控件板相关类名和属性名
@@ -1413,7 +1413,7 @@ begin
   if EditWindow = nil then
     Exit;
 
-  AComp := EditWindow.FindComponent(EditorStatusBarName);
+  AComp := EditWindow.FindComponent(SCnEditorStatusBarName);
   if (AComp <> nil) and (AComp is TStatusBar) then
     Result := AComp as TStatusBar;
 end;
@@ -1423,9 +1423,9 @@ function GetObjectInspectorForm: TCustomForm;
 begin
   Result := GetIdeMainForm;
   if Result <> nil then  // 大部分版本下 ObjectInspector 是 AppBuilder 的子控件
-    Result := TCustomForm(Result.FindComponent(PropertyInspectorName));
+    Result := TCustomForm(Result.FindComponent(SCnPropertyInspectorName));
   if Result = nil then // D2007 或某些版本下 ObjectInspector 是 Application 的子控件
-    Result := TCustomForm(Application.FindComponent(PropertyInspectorName));
+    Result := TCustomForm(Application.FindComponent(SCnPropertyInspectorName));
 {$IFDEF DEBUG}
   if Result = nil then
     CnDebugger.LogMsgError('Unable to Find Object Inspector!');
@@ -1536,7 +1536,7 @@ function IsIdeEditorForm(AForm: TCustomForm): Boolean;
 begin
   Result := (AForm <> nil) and
             (Pos('EditWindow_', AForm.Name) = 1) and
-            (AForm.ClassName = EditorFormClassName) and
+            (AForm.ClassName = SCnEditorFormClassName) and
             (not (csDesigning in AForm.ComponentState));
 end;
 
@@ -2187,22 +2187,22 @@ end;
 // 判断指定控件是否代码编辑器控件
 function IsEditControl(AControl: TComponent): Boolean;
 begin
-  Result := (AControl <> nil) and AControl.ClassNameIs(EditControlClassName)
-    and SameText(AControl.Name, EditControlName);
+  Result := (AControl <> nil) and AControl.ClassNameIs(SCnEditControlClassName)
+    and SameText(AControl.Name, SCnEditControlName);
 end;
 
 // 判断指定控件是否编辑器窗口的 TabControl 控件
 function IsXTabControl(AControl: TComponent): Boolean;
 begin
-  Result := (AControl <> nil) and AControl.ClassNameIs(XTabControlClassName)
-    and SameText(AControl.Name, XTabControlName);
+  Result := (AControl <> nil) and AControl.ClassNameIs(SCnXTabControlClassName)
+    and SameText(AControl.Name, SCnXTabControlName);
 end;
 
 // 返回编辑器窗口的编辑器控件
 function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
 begin
-  Result := TControl(FindComponentByClassName(AForm, EditControlClassName,
-    EditControlName));
+  Result := TControl(FindComponentByClassName(AForm, SCnEditControlClassName,
+    SCnEditControlName));
 end;
 
 // 从编辑器控件获得其所属的编辑器窗口的状态栏
@@ -2233,8 +2233,8 @@ end;
 // 返回编辑器窗口的 TabControl 控件
 function GetTabControlFromEditorForm(AForm: TCustomForm): TXTabControl;
 begin
-  Result := TXTabControl(FindComponentByClassName(AForm, XTabControlClassName,
-    XTabControlName));
+  Result := TXTabControl(FindComponentByClassName(AForm, SCnXTabControlClassName,
+    SCnXTabControlName));
 end;
 
 // 返回编辑器 TabControl 控件的 Tabs 属性
@@ -2383,13 +2383,13 @@ begin
     Ctrl := AControl.Controls[I];
     if Ctrl.Visible and (Ctrl.Align = alClient) then
     begin
-      if Ctrl.ClassNameIs(EditControlClassName) then
+      if Ctrl.ClassNameIs(SCnEditControlClassName) then
         Result := epCode
-      else if Ctrl.ClassNameIs(DisassemblyViewClassName) then
+      else if Ctrl.ClassNameIs(SCnDisassemblyViewClassName) then
         Result := epCPU
-      else if Ctrl.ClassNameIs(DesignControlClassName) then
+      else if Ctrl.ClassNameIs(SCnDesignControlClassName) then
         Result := epDesign
-      else if Ctrl.ClassNameIs(WelcomePageClassName) then
+      else if Ctrl.ClassNameIs(SCnWelcomePageClassName) then
         Result := epWelcome;
       Break;
     end;

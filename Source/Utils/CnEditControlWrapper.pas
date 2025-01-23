@@ -1972,8 +1972,8 @@ procedure TCnEditControlWrapper.CheckOptionDlg;
   begin
     for I := 0 to Screen.CustomFormCount - 1 do
     begin
-      if Screen.CustomForms[I].ClassNameIs(SEditorOptionDlgClassName) and
-        SameText(Screen.CustomForms[I].Name, SEditorOptionDlgName) and
+      if Screen.CustomForms[I].ClassNameIs(SCnEditorOptionDlgClassName) and
+        SameText(Screen.CustomForms[I].Name, SCnEditorOptionDlgName) and
         Screen.CustomForms[I].Visible then
       begin
         Result := True;

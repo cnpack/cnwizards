@@ -225,7 +225,7 @@ begin
       CnDebugger.LogMsg('TCnObjectInspectorWrapper ActivePropValue ' + PropInfo^.PropType^.Name);
 {$ENDIF}
 
-    C := FObjectInspectorForm.FindComponent(PropertyInspectorListName);
+    C := FObjectInspectorForm.FindComponent(SCnPropertyInspectorListName);
     if C <> nil then
     begin
       if C is TControl then
@@ -252,7 +252,7 @@ begin
     end;
 
     // 找 TabControl，因其类名是 TTXTabControl 或 TCodeEditorTabControl 不定，干脆不判断 
-    C := FObjectInspectorForm.FindComponent(PropertyInspectorTabControlName);
+    C := FObjectInspectorForm.FindComponent(SCnPropertyInspectorTabControlName);
     if C <> nil then
     begin
       if C is TControl then
@@ -271,7 +271,7 @@ begin
     end;
 
     // 找右键菜单
-    C := FObjectInspectorForm.FindComponent(PropertyInspectorLocalPopupMenu);
+    C := FObjectInspectorForm.FindComponent(SCnPropertyInspectorLocalPopupMenu);
     if C <> nil then
     begin
       if C is TPopupMenu then
