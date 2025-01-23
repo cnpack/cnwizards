@@ -1981,6 +1981,13 @@ procedure TCnEditControlWrapper.CheckOptionDlg;
       end;
     end;
     Result := False;
+
+{$IFDEF DELPHI104_SYDNEY_UP}
+    // 10.4 或以上，该对话框弹出并触发 ActiveFormChanged 事件时，可能 Visible 为 False，增加一个 ActiveCustomForm 的判断
+    if (Screen.ActiveCustomForm <> nil) and Screen.ActiveCustomForm.ClassNameIs(SCnEditorOptionDlgClassName)
+      and SameText(Screen.ActiveCustomForm.Name, SCnEditorOptionDlgName) then
+      Result := True;
+{$ENDIF}
   end;
 
 begin
