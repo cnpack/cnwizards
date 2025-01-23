@@ -537,7 +537,7 @@ begin
     SCnMenuShellMenuCaption, OnShellMenu, ipAfter, SCnMenuCloseOtherPagesName + '1');
   {$ELSE}
   FShellMenu1 := TCnMenuItemDef.Create(SCnShellMenuName + '1',
-    SCnMenuShellMenuCaption, OnShellMenu, ipAfter, SMenuClosePageIIName);
+    SCnMenuShellMenuCaption, OnShellMenu, ipAfter, SCnMenuClosePageIIName);
   {$ENDIF}
   FMenuHookTabPopup.AddMenuItemDef(FShellMenu1);
 

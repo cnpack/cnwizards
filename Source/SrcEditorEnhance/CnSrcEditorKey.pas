@@ -336,7 +336,7 @@ var
   I: Integer;
   F1, F2, F3: Boolean;
 begin
-  if (AOwner = nil) or not AOwner.ClassNameIs(EditorFormClassName) then
+  if (AOwner = nil) or not AOwner.ClassNameIs(SCnEditorFormClassName) then
     Exit;
 
   F1 := False;
