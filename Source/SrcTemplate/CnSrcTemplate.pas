@@ -52,9 +52,9 @@ type
 { TCnEditorItem }
 
   TCnSrcTemplate = class;
-  TCnEditorCollection = class;
-  
-  TCnEditorItem = class(TCollectionItem)
+  TCnTemplateCollection = class;
+
+  TCnTemplateItem = class(TCollectionItem)
   private
     FEnabled: Boolean;
     FCaption: string;
@@ -65,13 +65,13 @@ type
     FShortCut: TShortCut;
     FActionIndex: Integer;
     FSavePos: Boolean;
-    FCollection: TCnEditorCollection;
+    FCollection: TCnTemplateCollection;
     FForDelphi: Boolean;
     FForBcb: Boolean;
   public
     constructor Create(Collection: TCollection); override;
     procedure Assign(Source: TPersistent); override;
-    property Collection: TCnEditorCollection read FCollection;
+    property Collection: TCnTemplateCollection read FCollection;
   published
     property Enabled: Boolean read FEnabled write FEnabled;
     property ShortCut: TShortCut read FShortCut write FShortCut;
@@ -86,21 +86,21 @@ type
     property ForBcb: Boolean read FForBcb write FForBcb default {$IFDEF BDS} True {$ELSE} {$IFDEF DELPHI} False {$ELSE} True {$ENDIF} {$ENDIF};
   end;
 
-{ TCnEditorCollection }
+{ TCnTemplateCollection }
 
-  TCnEditorCollection = class(TCollection)
+  TCnTemplateCollection = class(TCollection)
   private
     FWizard: TCnSrcTemplate;
-    function GetItems(Index: Integer): TCnEditorItem;
-    procedure SetItems(Index: Integer; const Value: TCnEditorItem);
+    function GetItems(Index: Integer): TCnTemplateItem;
+    procedure SetItems(Index: Integer; const Value: TCnTemplateItem);
   protected
     property Wizard: TCnSrcTemplate read FWizard;
   public
     constructor Create(AWizard: TCnSrcTemplate);
     function LoadFromFile(const FileName: string): Boolean;
     function SaveToFile(const FileName: string): Boolean;
-    function Add: TCnEditorItem;
-    property Items[Index: Integer]: TCnEditorItem read GetItems write SetItems; default;
+    function Add: TCnTemplateItem;
+    property Items[Index: Integer]: TCnTemplateItem read GetItems write SetItems; default;
   end;
 
 { TCnSrcTemplate }
@@ -111,11 +111,11 @@ type
     FInsertToProcIndex: Integer;
     FLastIndexRef: Integer;
     FBatchCode: string;
-    FCollection: TCnEditorCollection;
+    FCollection: TCnTemplateCollection;
     FExecuting: Boolean;
 
     procedure UpdateActions;
-    procedure DoExecute(Editor: TCnEditorItem);
+    procedure DoExecute(Editor: TCnTemplateItem);
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -139,7 +139,7 @@ type
     function GetSearchContent: string; override;
     function GetCaption: string; override;
     function GetHint: string; override;
-    property Collection: TCnEditorCollection read FCollection;
+    property Collection: TCnTemplateCollection read FCollection;
   end;
 
 { TCnSrcTemplateForm }
@@ -205,28 +205,28 @@ uses
 
 { TCnEditorItem }
 
-procedure TCnEditorItem.Assign(Source: TPersistent);
+procedure TCnTemplateItem.Assign(Source: TPersistent);
 begin
-  if Source is TCnEditorItem then
+  if Source is TCnTemplateItem then
   begin
-    FEnabled := TCnEditorItem(Source).FEnabled;
-    FIconName := TCnEditorItem(Source).FIconName;
-    FContent := TCnEditorItem(Source).FContent;
-    FShortCut := TCnEditorItem(Source).FShortCut;
-    FCaption := TCnEditorItem(Source).FCaption;
-    FSavePos := TCnEditorItem(Source).FSavePos;
-    FHint := TCnEditorItem(Source).FHint;
-    FInsertPos := TCnEditorItem(Source).FInsertPos;
+    FEnabled := TCnTemplateItem(Source).FEnabled;
+    FIconName := TCnTemplateItem(Source).FIconName;
+    FContent := TCnTemplateItem(Source).FContent;
+    FShortCut := TCnTemplateItem(Source).FShortCut;
+    FCaption := TCnTemplateItem(Source).FCaption;
+    FSavePos := TCnTemplateItem(Source).FSavePos;
+    FHint := TCnTemplateItem(Source).FHint;
+    FInsertPos := TCnTemplateItem(Source).FInsertPos;
   end
   else
     inherited Assign(Source);
 end;
 
-constructor TCnEditorItem.Create(Collection: TCollection);
+constructor TCnTemplateItem.Create(Collection: TCollection);
 begin
-  Assert(Collection is TCnEditorCollection);
+  Assert(Collection is TCnTemplateCollection);
   inherited Create(Collection);
-  FCollection := TCnEditorCollection(Collection);
+  FCollection := TCnTemplateCollection(Collection);
   FEnabled := True;
   FInsertPos := ipCurrPos;
   FSavePos := False;
@@ -251,29 +251,29 @@ end;
 
 { TCnEditorCollection }
 
-function TCnEditorCollection.Add: TCnEditorItem;
+function TCnTemplateCollection.Add: TCnTemplateItem;
 begin
-  Result := TCnEditorItem(inherited Add);
+  Result := TCnTemplateItem(inherited Add);
 end;
 
-constructor TCnEditorCollection.Create(AWizard: TCnSrcTemplate);
+constructor TCnTemplateCollection.Create(AWizard: TCnSrcTemplate);
 begin
-  inherited Create(TCnEditorItem);
+  inherited Create(TCnTemplateItem);
   FWizard := AWizard;
 end;
 
-function TCnEditorCollection.GetItems(Index: Integer): TCnEditorItem;
+function TCnTemplateCollection.GetItems(Index: Integer): TCnTemplateItem;
 begin
-  Result := TCnEditorItem(inherited Items[Index]);
+  Result := TCnTemplateItem(inherited Items[Index]);
 end;
 
-procedure TCnEditorCollection.SetItems(Index: Integer;
-  const Value: TCnEditorItem);
+procedure TCnTemplateCollection.SetItems(Index: Integer;
+  const Value: TCnTemplateItem);
 begin
   inherited Items[Index] := Value;
 end;
 
-function TCnEditorCollection.LoadFromFile(const FileName: string): Boolean;
+function TCnTemplateCollection.LoadFromFile(const FileName: string): Boolean;
 var
   I: Integer;
 begin
@@ -295,7 +295,7 @@ begin
   end;
 end;
 
-function TCnEditorCollection.SaveToFile(const FileName: string): Boolean;
+function TCnTemplateCollection.SaveToFile(const FileName: string): Boolean;
 begin
   try
     TOmniXMLWriter.SaveToFile(Self, FileName, pfAuto, ofIndent);
@@ -326,7 +326,7 @@ end;
 constructor TCnSrcTemplate.Create;
 begin
   inherited;
-  FCollection := TCnEditorCollection.Create(Self);
+  FCollection := TCnTemplateCollection.Create(Self);
 end;
 
 destructor TCnSrcTemplate.Destroy;
@@ -335,7 +335,7 @@ begin
   inherited;
 end;
 
-procedure TCnSrcTemplate.DoExecute(Editor: TCnEditorItem);
+procedure TCnSrcTemplate.DoExecute(Editor: TCnTemplateItem);
 var
   MacroText: TCnWizMacroText;
   Content: string;
@@ -510,7 +510,7 @@ procedure TCnSrcTemplate.UpdateActions;
 var
   I: Integer;
 
-  function ItemCanShow(Item: TCnEditorItem): Boolean;
+  function ItemCanShow(Item: TCnTemplateItem): Boolean;
   begin
     Result := False;
     if Item = nil then
@@ -879,14 +879,14 @@ end;
 
 procedure TCnSrcTemplateForm.btnImportClick(Sender: TObject);
 var
-  EditorCollection: TCnEditorCollection;
+  EditorCollection: TCnTemplateCollection;
 begin
   if OpenDialog.FileName = '' then
     OpenDialog.FileName := WizOptions.GetUserFileName(SCnSrcTemplateDataName,
       True, SCnSrcTemplateDataDefName);
   if OpenDialog.Execute then
   begin
-    EditorCollection := TCnEditorCollection.Create(nil);
+    EditorCollection := TCnTemplateCollection.Create(nil);
     try
       if EditorCollection.LoadFromFile(OpenDialog.FileName) then
       begin

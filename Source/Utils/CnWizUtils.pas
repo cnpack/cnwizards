@@ -520,6 +520,12 @@ function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
 {* 取当前工程组中的第 Index 个工程，从 0 开始}
+function CnOtaGetProjectSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean = True; Project: IOTAProject = nil): Boolean;
+{* 获取指定工程所包含的源码文件并放入 Sources，如不指定工程则用当前工程，返回是否获取成功}
+function CnOtaGetProjectGroupSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean = True): Boolean;
+{* 获取当前工程组里所有工程中的源码文件并放入 Sources，返回是否获取成功}
 procedure CnOtaGetOptionsNames(Options: IOTAOptions; List: TStrings;
   IncludeType: Boolean = True); overload;
 function CnOtaGetOptionsNames(Options: IOTAOptions; IncludeType:
@@ -2707,13 +2713,13 @@ end;
 procedure RemoveListViewSubImages(ListView: TListView); overload;
 {$IFDEF BDS}
 var
-  I, j: Integer;
+  I, J: Integer;
 {$ENDIF}
 begin
 {$IFDEF BDS}
   for I := 0 to ListView.Items.Count - 1 do
-    for j := 0 to ListView.Items[I].SubItems.Count - 1 do
-      ListView.Items[I].SubItemImages[j] := -1;
+    for J := 0 to ListView.Items[I].SubItems.Count - 1 do
+      ListView.Items[I].SubItemImages[J] := -1;
 {$ENDIF}
 end;
 
@@ -2766,7 +2772,6 @@ begin
   if CnIsGEDelphi11Dot3 then
   begin
     Lines := TStringList.Create;
-
     HdpiFactor := AListView.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
 
     try
@@ -2803,9 +2808,12 @@ begin
   try
     Lines.CommaText := Text;
     if SingleEqual(MulFactor, 1.0) then
+    begin
       for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
-        AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width)
+        AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width);
+    end
     else
+    begin
       for I := 0 to AListView.Columns.Count - 1 do
       begin
         if I < Lines.Count then
@@ -2813,6 +2821,7 @@ begin
         else // 无设置，则按原始情况放大
           AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
       end;
+    end;
   finally
     Lines.Free;
   end;
@@ -2839,11 +2848,13 @@ var
 begin
   Result := False;
   for I := AListView.Items.Count - 2 downto 0 do
+  begin
     if AListView.Items[I].Selected and not AListView.Items[I + 1].Selected then
     begin
       Result := True;
       Exit;
     end;
+  end;
 end;
 
 // 修改 ListView 当前选择项
@@ -2852,12 +2863,14 @@ var
   I: Integer;
 begin
   for I := 0 to AListView.Items.Count - 1 do
+  begin
     if Mode = smAll then
       AListView.Items[I].Selected := True
     else if Mode = smNothing then
       AListView.Items[I].Selected := False
     else
       AListView.Items[I].Selected := not AListView.Items[I].Selected;
+  end;
 end;
 
 //==============================================================================
@@ -3894,12 +3907,14 @@ begin
   Result := IModuleServices.MainProjectGroup;
 {$ELSE}
   if IModuleServices <> nil then
+  begin
     for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
       IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProjectGroup, Result) then
         Exit;
     end;
+  end;
   Result := nil;
 {$ENDIF}
 end;
@@ -4275,6 +4290,68 @@ begin
     Result := CnOtaGetProjectGroup.GetProject(Index)
   else
     Result := nil;
+end;
+
+// 获取指定工程所包含的源码文件并放入 Sources，如不指定工程则用当前工程，返回是否获取成功
+function CnOtaGetProjectSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean; Project: IOTAProject): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  Sources.Clear;
+
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+  if IncludeDpr and IsSourceModule(Project.FileName) then
+    Sources.Add(Project.FileName);
+{$IFDEF BDS}
+  if not IsDpr(Project.FileName) then
+    Sources.Add(_CnChangeFileExt(Project.FileName, '.dpr'));
+{$ENDIF}
+
+  for I := 0 to Project.GetModuleCount - 1 do
+  begin
+    if IsSourceModule(Project.GetModule(I).FileName) then
+      Sources.Add(Project.GetModule(I).FileName);
+  end;
+  Result := Sources.Count > 0;
+end;
+
+// 获取当前工程组里所有工程中的源码文件并放入 Sources，返回是否获取成功
+function CnOtaGetProjectGroupSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean): Boolean;
+var
+  B: Boolean;
+  I: Integer;
+  G: IOTAProjectGroup;
+  P: IOTAProject;
+  SL: TStringList;
+begin
+  Result := False;
+  G := CnOtaGetProjectGroup;
+  if G <> nil then
+  begin
+    Sources.Clear;
+    SL := TStringList.Create;
+    try
+      for I := 0 to G.ProjectCount - 1 do
+      begin
+        P := G.Projects[I];
+        B := CnOtaGetProjectSourceFiles(SL, IncludeDpr, P);
+        if B then
+        begin
+          Sources.AddStrings(SL);
+          Result := True;
+        end;
+      end;
+    finally
+      SL.Free;
+    end;
+  end;
 end;
 
 // 获得项目的二进制文件输出目录

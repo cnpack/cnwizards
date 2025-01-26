@@ -83,10 +83,10 @@ type
     function GetHelpTopic: string; override;
   public
     property ItemIndex: Integer read FItemIndex write FItemIndex;
-    {* 该项对应的 EditorItem 的索引，用来寻找对应 Action}
+    {* 该项对应的 TemplateItem 的索引，用来寻找对应 Action}
   end;
 
-function ShowEditorEditForm(EditorItem: TCnEditorItem): Boolean; overload;
+function ShowEditorEditForm(TemplateItem: TCnTemplateItem): Boolean; overload;
 {* 显示编辑器专家编辑窗体，用于编辑界面}
 
 function ShowEditorEditForm(var ACaption, AHint, AIconName: string;
@@ -103,36 +103,36 @@ implementation
 
 {$R *.DFM}
 
-function ShowEditorEditForm(EditorItem: TCnEditorItem): Boolean;
+function ShowEditorEditForm(TemplateItem: TCnTemplateItem): Boolean;
 begin
-  Assert(EditorItem <> nil);
+  Assert(TemplateItem <> nil);
   with TCnSrcTemplateEditForm.Create(nil) do
   try
-    ItemIndex := EditorItem.Index;
+    ItemIndex := TemplateItem.Index;
     ShowHint := WizOptions.ShowHint;
-    edtCaption.Text := EditorItem.Caption;
-    edtHint.Text := EditorItem.Hint;
-    edtIcon.Text := EditorItem.IconName;
-    HotKey.HotKey := EditorItem.ShortCut;
-    cbbInsertPos.ItemIndex := Ord(EditorItem.InsertPos);
-    chkDisabled.Checked := not EditorItem.Enabled;
-    chkSavePos.Checked := EditorItem.SavePos;
-    mmoContent.Lines.Text := EditorItem.Content;
-    chkForDelphi.Checked := EditorItem.ForDelphi;
-    chkForBcb.Checked := EditorItem.ForBcb;
+    edtCaption.Text := TemplateItem.Caption;
+    edtHint.Text := TemplateItem.Hint;
+    edtIcon.Text := TemplateItem.IconName;
+    HotKey.HotKey := TemplateItem.ShortCut;
+    cbbInsertPos.ItemIndex := Ord(TemplateItem.InsertPos);
+    chkDisabled.Checked := not TemplateItem.Enabled;
+    chkSavePos.Checked := TemplateItem.SavePos;
+    mmoContent.Lines.Text := TemplateItem.Content;
+    chkForDelphi.Checked := TemplateItem.ForDelphi;
+    chkForBcb.Checked := TemplateItem.ForBcb;
     Result := ShowModal = mrOk;
     if Result then
     begin
-      EditorItem.Caption := edtCaption.Text;
-      EditorItem.Hint := edtHint.Text;
-      EditorItem.IconName := edtIcon.Text;
-      EditorItem.ShortCut := HotKey.HotKey;
-      EditorItem.InsertPos := TCnEditorInsertPos(cbbInsertPos.ItemIndex);
-      EditorItem.Enabled := not chkDisabled.Checked;
-      EditorItem.SavePos := chkSavePos.Checked;
-      EditorItem.Content := mmoContent.Lines.Text;
-      EditorItem.ForDelphi := chkForDelphi.Checked;
-      EditorItem.ForBcb := chkForBcb.Checked;
+      TemplateItem.Caption := edtCaption.Text;
+      TemplateItem.Hint := edtHint.Text;
+      TemplateItem.IconName := edtIcon.Text;
+      TemplateItem.ShortCut := HotKey.HotKey;
+      TemplateItem.InsertPos := TCnEditorInsertPos(cbbInsertPos.ItemIndex);
+      TemplateItem.Enabled := not chkDisabled.Checked;
+      TemplateItem.SavePos := chkSavePos.Checked;
+      TemplateItem.Content := mmoContent.Lines.Text;
+      TemplateItem.ForDelphi := chkForDelphi.Checked;
+      TemplateItem.ForBcb := chkForBcb.Checked;
     end;
   finally
     Free;
