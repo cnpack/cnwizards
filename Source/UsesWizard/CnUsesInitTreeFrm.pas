@@ -110,6 +110,8 @@ type
     mmoSourceFileText: TMemo;
     mmoDcuFileText: TMemo;
     statUses: TStatusBar;
+    grpOrder: TGroupBox;
+    mmoOrder: TMemo;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -132,7 +134,10 @@ type
     FDcuPath: string;
     FProjectList: TInterfaceList;
     FOldSearchStr: string;
+    FInitOrders: TStringList;
     procedure InitProjectList;
+    procedure GenerateInitOrder;
+    procedure OnDepthFirst(Sender: TObject);
     procedure TreeSaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
     procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
       UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
@@ -236,12 +241,15 @@ begin
   FDcuPath := GetProjectDcuPath(Proj);
   GetLibraryPath(FLibPaths, False);
 
-  (FTree.Root as TCnUsesLeaf).SourceName := CnOtaGetProjectSourceFileName(Proj);;
-  (FTree.Root as TCnUsesLeaf).DcuName := ProjDcu;
-  (FTree.Root as TCnUsesLeaf).SearchType := mstInProject;
-  (FTree.Root as TCnUsesLeaf).IsImpl := False;
-  (FTree.Root as TCnUsesLeaf).Text := _CnExtractFileName((FTree.Root as TCnUsesLeaf).SourceName);
-  ProjDcu := GetDcuName(FDcuPath, (FTree.Root as TCnUsesLeaf).SourceName);
+  with FTree.Root as TCnUsesLeaf do
+  begin
+    SourceName := CnOtaGetProjectSourceFileName(Proj);
+    DcuName := ProjDcu;
+    SearchType := mstInProject;
+    IsImpl := False;
+    Text := _CnExtractFileName(SourceName);
+    ProjDcu := GetDcuName(FDcuPath, SourceName);
+  end;
 
   Screen.Cursor := crHourGlass;
   try
@@ -251,6 +259,7 @@ begin
     Screen.Cursor := crDefault;
   end;
 
+  GenerateInitOrder;
   UpdateTreeView;
 end;
 
@@ -267,6 +276,7 @@ begin
   InitProjectList;
   WizOptions.ResetToolbarWithLargeIcons(tlbUses);
   IdeScaleToolbarComboFontSize(cbbProject);
+  FInitOrders := TStringList.Create;
 
   if WizOptions.UseLargeIcon then
   begin
@@ -277,6 +287,7 @@ end;
 
 procedure TCnUsesInitTreeForm.FormDestroy(Sender: TObject);
 begin
+  FInitOrders.Free;
   FProjectList.Free;
   FTree.Free;
   FLibPaths.Free;
@@ -403,6 +414,29 @@ begin
   end;
 end;
 
+procedure TCnUsesInitTreeForm.OnDepthFirst(Sender: TObject);
+var
+  Leaf: TCnUsesLeaf;
+begin
+  Leaf := Sender as TCnUsesLeaf;
+
+  if (Leaf.SearchType = mstInProject) or
+    (chkSystemPath.Checked and (Leaf.SearchType = mstSystemSearch)) or
+    (chkProjectPath.Checked and (Leaf.SearchType = mstProjectSearch)) then
+    FInitOrders.Add(Leaf.Text);
+end;
+
+procedure TCnUsesInitTreeForm.GenerateInitOrder;
+begin
+  FInitOrders.Clear;
+  FTree.OnDepthFirstTravelLeaf := OnDepthFirst;
+
+  FTree.DepthFirstTravel(False);
+
+  mmoOrder.Lines.Clear;
+  mmoOrder.Lines.AddStrings(FInitOrders);
+end;
+
 procedure TCnUsesInitTreeForm.UpdateTreeView;
 var
   Node: TTreeNode;
@@ -443,6 +477,7 @@ end;
 
 procedure TCnUsesInitTreeForm.chkSystemPathClick(Sender: TObject);
 begin
+  GenerateInitOrder;
   UpdateTreeView;
 end;
 

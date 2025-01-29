@@ -1,10 +1,10 @@
 inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
-  Left = 263
-  Top = 143
+  Left = 233
+  Top = 101
   AutoScroll = False
   Caption = 'Uses Initialization Tree'
-  ClientHeight = 519
-  ClientWidth = 814
+  ClientHeight = 554
+  ClientWidth = 988
   Font.Charset = ANSI_CHARSET
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
@@ -23,7 +23,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   PixelsPerInch = 96
   TextHeight = 13
   object grpFilter: TGroupBox
-    Left = 471
+    Left = 645
     Top = 40
     Width = 342
     Height = 81
@@ -54,16 +54,16 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object grpTree: TGroupBox
     Left = 8
     Top = 40
-    Width = 456
-    Height = 465
+    Width = 417
+    Height = 486
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Initialization Tree'
     TabOrder = 1
     object tvTree: TTreeView
       Left = 8
       Top = 16
-      Width = 440
-      Height = 441
+      Width = 401
+      Height = 462
       Anchors = [akLeft, akTop, akRight, akBottom]
       HideSelection = False
       Indent = 19
@@ -77,7 +77,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 814
+    Width = 988
     Height = 28
     Align = alTop
     BevelOuter = bvNone
@@ -176,10 +176,10 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     end
   end
   object grpInfo: TGroupBox
-    Left = 471
+    Left = 645
     Top = 124
     Width = 342
-    Height = 381
+    Height = 402
     Anchors = [akTop, akRight, akBottom]
     Caption = 'Unit &Info'
     TabOrder = 3
@@ -276,11 +276,30 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   end
   object statUses: TStatusBar
     Left = 0
-    Top = 500
-    Width = 814
+    Top = 535
+    Width = 988
     Height = 19
     Panels = <>
     SimplePanel = True
+  end
+  object grpOrder: TGroupBox
+    Left = 432
+    Top = 40
+    Width = 206
+    Height = 486
+    Anchors = [akTop, akRight, akBottom]
+    Caption = 'Initialization Order'
+    TabOrder = 5
+    object mmoOrder: TMemo
+      Left = 8
+      Top = 16
+      Width = 190
+      Height = 462
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      ReadOnly = True
+      ScrollBars = ssVertical
+      TabOrder = 0
+    end
   end
   object actlstUses: TActionList
     Images = dmCnSharedImages.Images
