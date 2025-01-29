@@ -57,7 +57,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Width = 417
     Height = 486
     Anchors = [akLeft, akTop, akRight, akBottom]
-    Caption = 'Initialization Tree'
+    Caption = 'Initialization &Tree'
     TabOrder = 1
     object tvTree: TTreeView
       Left = 8
@@ -87,7 +87,8 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       Top = 8
       Width = 38
       Height = 13
-      Caption = 'Project:'
+      Caption = '&Project:'
+      FocusControl = cbbProject
     end
     object cbbProject: TComboBox
       Left = 64
@@ -288,7 +289,7 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
     Width = 206
     Height = 486
     Anchors = [akTop, akRight, akBottom]
-    Caption = 'Initialization Order'
+    Caption = 'Initialization &Order'
     TabOrder = 5
     object mmoOrder: TMemo
       Left = 8
