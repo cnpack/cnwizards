@@ -845,7 +845,7 @@ var
   SCnSrcTemplateInsertToProcHint: string = 'Insert Code to All Procedures/Functions in Current Unit';
   SCnSrcTemplateInsertToProcPrompt: string = 'Insert Below Code to All Procedures/Functions in Current Unit:';
   SCnSrcTemplateInsertToProcCountFmt: string = '%d Inserted.';
-  SCnSrcTemplateInsertInitToUnitsCaption: string = 'Insert Code to Project Units &Initialization...';
+  SCnSrcTemplateInsertInitToUnitsCaption: string = 'Insert Code to Project &Units Initialization...';
   SCnSrcTemplateInsertInitToUnitsHint: string = 'Insert Code to Initialization of All Units in Current Project';
   SCnSrcTemplateInsertInitToUnitsPrompt: string = 'Insert Below Code to Initialization of All Units in Current Project:';
   SCnSrcTemplateInsertInitToUnitsCountFmt: string = '%d Inserted.';
