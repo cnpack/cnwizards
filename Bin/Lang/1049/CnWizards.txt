@@ -2496,6 +2496,7 @@ TCnUsesInitTreeForm.Edit1.Caption=Редактировать
 TCnUsesInitTreeForm.File1.Caption=Файл
 TCnUsesInitTreeForm.grpFilter.Caption=Фильтр
 TCnUsesInitTreeForm.grpInfo.Caption=Информация о модуле
+TCnUsesInitTreeForm.grpOrder.Caption=Порядок &инициализации
 TCnUsesInitTreeForm.grpTree.Caption=Дерево инициализации
 TCnUsesInitTreeForm.Help1.Caption=Справка
 TCnUsesInitTreeForm.lblDcuFile.Caption=Dcu-файл:
