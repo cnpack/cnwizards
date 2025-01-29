@@ -501,9 +501,14 @@ begin
   TranslateStr(SCnSrcTemplateInsertToProcHint, 'SCnSrcTemplateInsertToProcHint');
   TranslateStr(SCnSrcTemplateInsertToProcPrompt, 'SCnSrcTemplateInsertToProcPrompt');
   TranslateStr(SCnSrcTemplateInsertToProcCountFmt, 'SCnSrcTemplateInsertToProcCountFmt');
+  TranslateStr(SCnSrcTemplateInsertInitToUnitsCaption, 'SCnSrcTemplateInsertInitToUnitsCaption');
+  TranslateStr(SCnSrcTemplateInsertInitToUnitsHint, 'SCnSrcTemplateInsertInitToUnitsHint');
+  TranslateStr(SCnSrcTemplateInsertInitToUnitsPrompt, 'SCnSrcTemplateInsertInitToUnitsPrompt');
+  TranslateStr(SCnSrcTemplateInsertInitToUnitsCountFmt, 'SCnSrcTemplateInsertInitToUnitsCountFmt');
   TranslateStr(SCnSrcTemplateCaptionIsEmpty, 'SCnSrcTemplateCaptionIsEmpty');
   TranslateStr(SCnSrcTemplateContentIsEmpty, 'SCnSrcTemplateContentIsEmpty');
   TranslateStr(SCnSrcTemplateSourceTypeNotSupport, 'SCnSrcTemplateSourceTypeNotSupport');
+  TranslateStr(SCnSrcTemplateErrorProjectSource, 'SCnSrcTemplateErrorProjectSource');
   TranslateStr(SCnSrcTemplateReadDataError, 'SCnSrcTemplateReadDataError');
   TranslateStr(SCnSrcTemplateWriteDataError, 'SCnSrcTemplateWriteDataError');
   TranslateStr(SCnSrcTemplateImportAppend, 'SCnSrcTemplateImportAppend');

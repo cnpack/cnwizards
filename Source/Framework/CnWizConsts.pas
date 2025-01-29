@@ -209,8 +209,9 @@ resourcestring
   // CnSrcTemplate
   SCnSrcTemplateConfigName = 'CnSrcTemplateConfig';
   SCnSrcTemplateInsertToProcName = 'CnSrcTemplateInsertToProc';
+  SCnSrcTemplateInsertInitToUnitsName = 'CnSrcTemplateInsertInitToUnits';
   SCnSrcTemplateIconName = 'TCnSrcTemplate';
-  SCnSrcTemplateItem = 'CnEditorItem';
+  SCnSrcTemplateItem = 'CnTemplateItem';
 
   // CnTabOrderWizard
   SCnTabOrderSetCurrControl = 'CnTabOrderSetCurrControl';
@@ -844,9 +845,14 @@ var
   SCnSrcTemplateInsertToProcHint: string = 'Insert Code to All Procedures/Functions in Current Unit';
   SCnSrcTemplateInsertToProcPrompt: string = 'Insert Below Code to All Procedures/Functions in Current Unit:';
   SCnSrcTemplateInsertToProcCountFmt: string = '%d Inserted.';
+  SCnSrcTemplateInsertInitToUnitsCaption: string = 'Insert Code to Project Units &Initialization...';
+  SCnSrcTemplateInsertInitToUnitsHint: string = 'Insert Code to Initialization of All Units in Current Project';
+  SCnSrcTemplateInsertInitToUnitsPrompt: string = 'Insert Below Code to Initialization of All Units in Current Project:';
+  SCnSrcTemplateInsertInitToUnitsCountFmt: string = '%d Inserted.';
   SCnSrcTemplateCaptionIsEmpty: string = 'Template''s Menu Caption can''t be Empty!';
   SCnSrcTemplateContentIsEmpty: string = 'Template''s Content can''t be Empty!';
   SCnSrcTemplateSourceTypeNotSupport: string = 'Current Source Type NOT Supported!';
+  SCnSrcTemplateErrorProjectSource: string = 'NO Project or Source Files!';
   SCnSrcTemplateReadDataError: string = 'Error Reading Data Files.';
   SCnSrcTemplateWriteDataError: string = 'Error Saving Data Files.';
   SCnSrcTemplateImportAppend: string = 'Append the Data to Templates?';

@@ -109,8 +109,10 @@ type
   private
     FConfigIndex: Integer;
     FInsertToProcIndex: Integer;
+    FInsertInitIndex: Integer;
     FLastIndexRef: Integer;
-    FBatchCode: string;
+    FProcBatchCode: string;
+    FInitBatchCode: string;
     FCollection: TCnTemplateCollection;
     FExecuting: Boolean;
 
@@ -124,6 +126,7 @@ type
     procedure SaveCollection;
 
     procedure InsertCodeToProc;
+    procedure InsertInitToUnits;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -199,7 +202,7 @@ uses
   CnDebug,
 {$ENDIF}
   mPasLex, CnSrcTemplateEditFrm, CnWizOptions, CnWizShortCut, CnCommon,
-  CnWizMacroFrm, CnWizMacroText, CnWizCommentFrm;
+  CnWizMacroFrm, CnWizMacroText, CnWizCommentFrm, CnIDEStrings;
 
 {$R *.DFM}
 
@@ -468,15 +471,20 @@ begin
   begin
     InsertCodeToProc;
   end
+  else if Index = FInsertInitIndex then
+  begin
+    InsertInitToUnits;
+  end
   else
   begin
     for I := 0 to FCollection.Count - 1 do
-      if FCollection[I].FEnabled and (FCollection[I].FActionIndex
-        = Index) then
+    begin
+      if FCollection[I].FEnabled and (FCollection[I].FActionIndex = Index) then
       begin
         DoExecute(FCollection[I]);
         Exit;
       end;
+    end;
   end;
 end;
 
@@ -499,8 +507,10 @@ begin
   AddSepMenu;
   FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
     SCnSrcTemplateInsertToProcCaption, 0, SCnSrcTemplateInsertToProcHint);
+  FInsertInitIndex := RegisterASubAction(SCnSrcTemplateInsertInitToUnitsName,
+    SCnSrcTemplateInsertInitToUnitsCaption, 0, SCnSrcTemplateInsertInitToUnitsHint);
 
-  FLastIndexRef := FInsertToProcIndex;
+  FLastIndexRef := FInsertInitIndex;
 
   AddSepMenu;
   UpdateActions;
@@ -568,7 +578,7 @@ end;
 procedure TCnSrcTemplate.InsertCodeToProc;
 const
   PROC_NAME = '%ProcName%';
-  DEF_CODE = '  CnDebugger.LogMsg(''%ProcName%'');';
+  DEF_PROC_CODE = '  CnDebugger.LogMsg(''%ProcName%'');';
 var
   I, J: Integer;
   S, T, ProcName: string;
@@ -590,13 +600,13 @@ begin
     Exit;
   end;
 
-  if FBatchCode = '' then
-    FBatchCode := DEF_CODE;
-  S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, FBatchCode);
+  if FProcBatchCode = '' then
+    FProcBatchCode := DEF_PROC_CODE;
+  S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertToProcPrompt, FProcBatchCode);
   if S = '' then
     Exit;
 
-  FBatchCode := S;
+  FProcBatchCode := S;
 
   PasParser := nil;
   Stream := nil;
@@ -693,6 +703,147 @@ begin
     ProcNames.Free;
     Stream.Free;
     PasParser.Free;
+  end;
+end;
+
+procedure TCnSrcTemplate.InsertInitToUnits;
+const
+  UNIT_NAME = '%UnitName%';
+  DEF_INIT_CODE = '  CnDebugger.LogMsg(''%UnitName%'');';
+var
+  S, F: string;
+  FS: TStringList;
+  I, C: Integer;
+
+  procedure ProcessFile(const FileName: string; const Code: string);
+  const
+    CRLF = #13#10;
+  var
+    Stream, Dest: TMemoryStream;
+    Lex: TCnGeneralWidePasLex;
+    PosInit, PosFinal, PosEnd, LenInit, LenFinal, LenEnd, L: Integer;
+    Str: TCnIdeTokenString;
+  begin
+    Stream := nil;
+    Dest := nil;
+    Lex := nil;
+
+    try
+      Stream := TMemoryStream.Create;
+      CnGeneralFilerSaveFileToStream(FileName, Stream);
+
+      Lex := TCnGeneralWidePasLex.Create;
+      Lex.Origin := Stream.Memory;
+
+      PosInit := 0;
+      PosFinal := 0;
+      PosEnd := 0;
+      LenInit := 0;
+      LenFinal := 0;
+      LenEnd := 0;
+
+      while Lex.TokenID <> tkNull do
+      begin
+        case Lex.TokenID of
+          tkInitialization:
+            begin
+              PosInit := Lex.TokenPos;  // 最后一个 initialization
+              LenInit := Length(Lex.Token);
+            end;
+          tkFinalization:
+            begin
+              PosFinal := Lex.TokenPos;  // 最后一个 finalization
+              LenFinal := Length(Lex.Token);
+            end;
+          tkEnd:
+            begin
+              PosEnd := Lex.TokenPos;    // 最后一个 end
+              LenEnd := Length(Lex.Token);
+            end;
+        end;
+        Lex.NextNoJunk;
+      end;
+
+      // 确定插入位置，分好几种情况。L 变成最终插入位置
+      if PosInit > 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('PosInit %d. InitLen %d', [PosInit, LenInit]);
+{$ENDIF}
+
+        // 有 initialization，直接在其后插入回车及代码及空行
+        Str := TCnIdeTokenString(CRLF + Code + CRLF);
+        L := PosInit + LenInit;
+      end
+      else if PosFinal > 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('PosFinal %d. FinalLen %d', [PosFinal, LenFinal]);
+{$ENDIF}
+
+        // 没有 initialization，只有 finalization，在其前面插入 initialization 回车和代码及空行
+        Str := TCnIdeTokenString('initialization' + CRLF + Code + CRLF);
+        L := PosFinal;
+      end
+      else if PosEnd > 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('PosEnd %d. EndLen %d', [PosEnd, LenEnd]);
+{$ENDIF}
+
+        // initialization 和 finalization 都没有，插最后一个 end 前插入 initialization 回车和代码及空行
+        Str := TCnIdeTokenString('initialization' + CRLF + Code + CRLF + CRLF);
+        L := PosEnd;
+      end
+      else
+        Exit;
+
+      Dest := TMemoryStream.Create;
+      Stream.Position := 0;
+      Dest.CopyFrom(Stream, L * SizeOf(TCnIdeTokenChar));
+      Dest.Write(Str[1], Length(Str) * SizeOf(TCnIdeTokenChar));
+      Dest.CopyFrom(Stream, Stream.Size - (L + 1) * SizeOf(TCnIdeTokenChar));
+      // +1 是去除末尾的 #0，因为下面不需要
+
+      CnGeneralFilerLoadFileFromStream(FileName, Dest);
+    finally
+      Dest.Free;
+      Stream.Free;
+      Lex.Free;
+    end;
+  end;
+
+begin
+  FS := TStringList.Create;
+  if not CnOtaGetProjectSourceFiles(FS, False) then
+  begin
+    ErrorDlg(SCnSrcTemplateErrorProjectSource);
+    Exit;
+  end;
+
+  try
+    if FInitBatchCode = '' then
+      FInitBatchCode := DEF_INIT_CODE;
+    S := CnWizInputMultiLineBox(SCnInformation, SCnSrcTemplateInsertInitToUnitsPrompt, FInitBatchCode);
+    if S = '' then
+      Exit;
+
+    FInitBatchCode := S;
+
+    // 循环处理文件
+    C := 0;
+    for I := 0 to FS.Count - 1 do
+    begin
+      F := _CnChangeFileExt(_CnExtractFileName(FS[I]), '');
+      S := StringReplace(FInitBatchCode, UNIT_NAME, F, [rfReplaceAll]); // 本文件名替换后代码 S 准备插入
+
+      ProcessFile(FS[I], S);
+      Inc(C);
+    end;
+
+    InfoDlg(Format(SCnSrcTemplateInsertInitToUnitsCountFmt, [C]));
+  finally
+    FS.Free;
   end;
 end;
 

@@ -215,7 +215,7 @@ begin
   if RespRoot = nil then
   begin
     // 一类原始错误
-    Result := S;
+    Result := string(S);
   end
   else
   begin
@@ -365,7 +365,7 @@ begin
   if RespRoot = nil then
   begin
     // 一类原始错误
-    Result := S;
+    Result := string(S);
   end
   else
   begin
@@ -404,7 +404,7 @@ begin
 
       // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
       if Result = '' then
-        Result := S;
+        Result := string(S);
 
     finally
       RespRoot.Free;
@@ -487,7 +487,7 @@ begin
   if RespRoot = nil then
   begin
     // 一类原始错误，如账号达到最大并发等
-    Result := S;
+    Result := string(S);
   end
   else
   begin
@@ -537,7 +537,7 @@ begin
 
       // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
       if Result = '' then
-        Result := S;
+        Result := string(S);
     finally
       RespRoot.Free;
     end;
@@ -618,7 +618,7 @@ begin
   if RespRoot = nil then
   begin
     // 一类原始错误，如账号达到最大并发等
-    Result := S;
+    Result := string(S);
   end
   else
   begin
@@ -639,7 +639,7 @@ begin
 
       // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
       if Result = '' then
-        Result := S;
+        Result := string(S);
     finally
       RespRoot.Free;
     end;

@@ -932,10 +932,20 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
 
+function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{* 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 BDS 以上均使用 WideChar，
+  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾不能有结束字符 #0。
+  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用}
+
+function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
+  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
+  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
+
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0
+  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用
   如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
   需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
 
@@ -4309,7 +4319,7 @@ begin
   if IncludeDpr and IsSourceModule(Project.FileName) then
     Sources.Add(Project.FileName);
 {$IFDEF BDS}
-  if not IsDpr(Project.FileName) then
+  if IncludeDpr and not IsDpr(Project.FileName) then
     Sources.Add(_CnChangeFileExt(Project.FileName, '.dpr'));
 {$ENDIF}
 
@@ -7364,6 +7374,54 @@ begin
   finally
     Strm.Free;
   end;
+end;
+
+// 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 Ansi/Utf16/Utf16，
+// 末尾不能有结束字符 #0。不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用
+function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Utf8: AnsiString;
+  Text: WideString;
+{$ENDIF}
+begin
+  Result := False;
+  if Stream.Size <= 0 then
+    Exit;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005~2007 的 Stream 要求是 Utf8，需要从 Utf16 转换而来
+  SetLength(Text, Stream.Size div SizeOf(WideChar));
+  Move(Stream.Memory^, Text[1], Length(Text) * SizeOf(WideChar));
+  Utf8 := CnUtf8EncodeWideString(Text);
+
+  Stream.Size := Length(Utf8) + 1;
+  Stream.Position := 0;
+  Stream.Write(PAnsiChar(Utf8)^, (Length(Utf8) + 1));
+  Stream.Position := 0;
+{$ENDIF}
+  EditFilerLoadFileFromStream(FileName, Stream, False);
+  Result := True;
+end;
+
+// 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，Ansi/Utf16/Utf16，末尾均有结束字符 #0，
+// 不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用
+function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Utf8: AnsiString;
+  Text: WideString;
+{$ENDIF}
+begin
+  EditFilerSaveFileToStream(FileName, Stream, False);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005~2007 的 Stream 是 Utf8，需要转换成 Utf16
+  Utf8 := StrPas(PAnsiChar((Stream as TMemoryStream).Memory));
+  Text := CnUtf8DecodeToWideString(Utf8);
+  Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+  Stream.Position := 0;
+  Stream.Write(Pointer(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+{$ENDIF}
+  Result := Stream.Size > 0;
 end;
 
 // 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8

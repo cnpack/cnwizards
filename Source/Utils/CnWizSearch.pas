@@ -792,17 +792,9 @@ begin
       DestStream.Write(CZ, 1);
 {$ENDIF}
 
-      if CorrectCount > 0 then  // 需要 Ansi/Ansi/Utf8
-      begin
-{$IFDEF UNICODE}
-        // DestStream 里做一次 Utf16 到 Utf8 的转换
-        Text := Utf8Encode(PChar(DestStream.Memory));
-        DestStream.Size := Length(Text) + 1;
-        DestStream.Position := 0;
-        DestStream.Write(PAnsiChar(Text)^, Length(Text) + 1);
-{$ENDIF}
-        EditFilerReadStreamToFile(FileName, DestStream); // 写原始格式
-      end;
+      if CorrectCount > 0 then  // 需要 Ansi/Ansi/Utf16
+        EditFilerLoadFileFromStream(FileName, DestStream); // 写原始格式 Ansi/Ansi/Utf16
+
       Result := True;
     except
       ;
