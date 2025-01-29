@@ -109,7 +109,9 @@ type
   private
     FConfigIndex: Integer;
     FInsertToProcIndex: Integer;
+{$IFNDEF IDE_STRING_ANSI_UTF8}
     FInsertInitIndex: Integer;
+{$ENDIF}
     FLastIndexRef: Integer;
     FProcBatchCode: string;
     FInitBatchCode: string;
@@ -126,7 +128,9 @@ type
     procedure SaveCollection;
 
     procedure InsertCodeToProc;
+{$IFNDEF IDE_STRING_ANSI_UTF8}
     procedure InsertInitToUnits;
+{$ENDIF}
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -471,10 +475,12 @@ begin
   begin
     InsertCodeToProc;
   end
+{$IFNDEF IDE_STRING_ANSI_UTF8}
   else if Index = FInsertInitIndex then
   begin
     InsertInitToUnits;
   end
+{$ENDIF}
   else
   begin
     for I := 0 to FCollection.Count - 1 do
@@ -507,10 +513,15 @@ begin
   AddSepMenu;
   FInsertToProcIndex := RegisterASubAction(SCnSrcTemplateInsertToProcName,
     SCnSrcTemplateInsertToProcCaption, 0, SCnSrcTemplateInsertToProcHint);
+
+{$IFNDEF IDE_STRING_ANSI_UTF8}
   FInsertInitIndex := RegisterASubAction(SCnSrcTemplateInsertInitToUnitsName,
     SCnSrcTemplateInsertInitToUnitsCaption, 0, SCnSrcTemplateInsertInitToUnitsHint);
 
   FLastIndexRef := FInsertInitIndex;
+{$ELSE}
+  FLastIndexRef := FInsertToProcIndex;
+{$ENDIF}
 
   AddSepMenu;
   UpdateActions;
@@ -706,6 +717,8 @@ begin
   end;
 end;
 
+{$IFNDEF IDE_STRING_ANSI_UTF8}
+
 procedure TCnSrcTemplate.InsertInitToUnits;
 const
   UNIT_NAME = '%UnitName%';
@@ -727,6 +740,10 @@ var
     Stream := nil;
     Dest := nil;
     Lex := nil;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('SrcTemplate ProcessFile %s', [FileName]);
+{$ENDIF}
 
     try
       Stream := TMemoryStream.Create;
@@ -846,6 +863,8 @@ begin
     FS.Free;
   end;
 end;
+
+{$ENDIF}
 
 { TCnSrcTemplateForm }
 

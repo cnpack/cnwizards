@@ -35,12 +35,25 @@ unit CnWizEditFiler;
 * 单元作者：CnPack 开发组
 * 备    注：该单元由 GExperts 1.2 Src 的 GX_EditReader 移植而来
 *           其原始内容受 GExperts License 的保护
+*
+*           EditFilerLoadFileFromStream 的编码行为：
+*                        D567            D2005~2007               D2009 或以上
+*           磁盘文件     Ansi            文件原始编码             UTF16
+*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    UTF16
+*
+*           EditFilerSaveFileToStream 的编码行为：
+*                        D567            D2005~2007               D2009 或以上
+*           磁盘文件     Ansi            文件原始编码             UTF16
+*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    UTF16
+*
+*           因而该俩函数不适合处理 D2005~2007 下的磁盘文件
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 修改记录：2025.01.29 V1.3
 *               修改 EditFilerLoadFileFromStream 的行为，使其和 Save 版本保持一致的
-*               Ansi、Ansi/Utf8、Utf16
+*               Ansi、Ansi/Utf8、Utf16，但文件编码未能适应，Save 版本类似
 *           2017.04.29 V1.2
 *               修正 Unicode 环境下读文件时未转换为 UTF16 的问题
 *           2003.06.17 V1.1
@@ -99,14 +112,15 @@ type
 {$ENDIF}
     procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
     // 读出均为无 BOM 的 Ansi 或 Utf8 格式，尾部 #0。
-    // BDS 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
-    // D5/6/7 中只支持 Ansi
+    // BDS 里，当文件在 IDE 里打开、且 CheckUtf8 是 True 并且是 MemoryStream 时，
+    // Utf8 会转换成 Ansi，否则保持 Utf8。D5/6/7 中只支持 Ansi
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
 
 {$IFDEF UNICODE}
     procedure ReadFromStreamW(Stream: TStream);
     // 从 Stream 整个写到文件或缓冲中，覆盖原有内容。要求流中是 UTF16，无 BOM
+    // 文件是磁盘形式时，能够将 UTF16 编码转换为文件对应编码
 {$ENDIF}
     // LiuXiao 添加三个读入流函数。
     procedure ReadFromStream(Stream: TStream; CheckUtf8: Boolean = False);
@@ -114,6 +128,7 @@ type
     // 要求流中是 Ansi 或 Utf8，无 BOM，不要求 Stream 尾 #0（准确来讲不能是 #0 否则会出现多余字符）
     // 写文件时 Stream 内容不进行转换。写缓冲时如果是 BDS 且 Stream 是 MemoryStream 时，
     // Stream 内容如果是 Ansi，则 CheckUtf8 得设为 True 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
+    // 注意：文件是磁盘形式时，目前只能原封不动写入文件，无法转换编码
 
     // TODO: 以下两函数暂未做 UTF8 适配
     procedure ReadFromStreamInPos(Stream: TStream);
@@ -135,8 +150,11 @@ procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; C
 
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
 {* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式（Ansi、Ansi/Utf8、Utf16），尾部 #0。
-  原始格式：BDS 2005 到 2007 里，当 CheckUtf8 是 True 并且是 MemoryStream 时，Utf8 会转换成 Ansi，否则保持 Utf8
-  Unicode 环境下会忽略 CheckUtf8，Stream 中固定为 Utf16，D5/6/7 中只支持 Ansi，都可以直接  PChar(Stream.Memory) 使用}
+  注意：BDS 2005 到 2007 里，当文件内容来自 IDE 内存时内部一定是 UTF8 格式，
+  如将 CheckUtf8 设为 True 并且是 MemoryStream 时，该函数会将 Utf8 会转换成 Ansi，否则保持 Utf8
+  而 Unicode 环境下文件内容来自磁盘时会忽略 CheckUtf8，Stream 中固定为 Utf16，
+  如文件内容来自磁盘，则保持文件编码，不一定是 Ansi 还是 Utf8 还是 Utf 16。
+  D5/6/7 中只支持 Ansi，都可以直接  PChar(Stream.Memory) 使用}
 
 implementation
 
@@ -510,6 +528,10 @@ begin
     FStreamFile.Position := 0;
     Stream.CopyFrom(FStreamFile, FStreamFile.Size);
     Stream.Write(TheEnd, 1);
+    // 注意此处内容的编码是文件编码，D567下只支持 Ansi，无需额外处理
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // TODO: D2005~2007 下，检测文件内容编码。是 Ansi 或 UTF16 则编码成 UTF8；UTF8 则保持不变
+{$ENDIF}
   end
   else
   begin
@@ -854,6 +876,9 @@ begin
   begin
     Assert(FStreamFile <> nil);
 
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // TODO: D2005~2007 下，Stream 的内容编码，要按文件编码转换后，再写入文件
+{$ENDIF}
     Stream.Position := 0;
     FStreamFile.Size := 0;
     FStreamFile.CopyFrom(Stream, Stream.Size);

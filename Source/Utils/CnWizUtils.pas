@@ -940,7 +940,7 @@ function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemor
 function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
 {* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
   D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
-  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
+  理应不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用，但磁盘文件的编码目前只能保持文件编码）}
 
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
@@ -7394,9 +7394,9 @@ begin
   Move(Stream.Memory^, Text[1], Length(Text) * SizeOf(WideChar));
   Utf8 := CnUtf8EncodeWideString(Text);
 
-  Stream.Size := Length(Utf8) + 1;
+  Stream.Size := Length(Utf8);
   Stream.Position := 0;
-  Stream.Write(PAnsiChar(Utf8)^, (Length(Utf8) + 1));
+  Stream.Write(PAnsiChar(Utf8)^, (Length(Utf8)));
   Stream.Position := 0;
 {$ENDIF}
   EditFilerLoadFileFromStream(FileName, Stream, False);
@@ -7414,12 +7414,28 @@ var
 begin
   EditFilerSaveFileToStream(FileName, Stream, False);
 {$IFDEF IDE_STRING_ANSI_UTF8}
-  // BDS 2005~2007 的 Stream 是 Utf8，需要转换成 Utf16
-  Utf8 := StrPas(PAnsiChar((Stream as TMemoryStream).Memory));
-  Text := CnUtf8DecodeToWideString(Utf8);
-  Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
-  Stream.Position := 0;
-  Stream.Write(Pointer(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+  // BDS 2005~2007 的 Stream 如从 IDE 中读出，则可能是 Utf8，需要转换成 Utf16
+  if Stream.Size > 0 then
+  begin
+    SetLength(Utf8, Stream.Size);
+    Move(Stream.Memory^, Utf8[1], Stream.Size);
+    Text := CnUtf8DecodeToWideString(Utf8);
+
+    if Text <> '' then
+    begin
+      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+      Stream.Position := 0;
+      Stream.Write(Pointer(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+    end
+    else
+    begin
+      // 如果转 UTF16 失败，说明不是 Utf8，当成 Ansi 处理，直接转换为 WideString
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnGeneralFilerSaveFileToStream Utf8 to Wide Fail, use Ansi to Wide.');
+{$ENDIF}
+      Text := WideString(Utf8);
+    end;
+  end;
 {$ENDIF}
   Result := Stream.Size > 0;
 end;
