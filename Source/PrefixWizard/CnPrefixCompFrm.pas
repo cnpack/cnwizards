@@ -101,7 +101,7 @@ uses
   CnWizManager, CnPrefixWizard, CnWizOptions;
 
 const
-  aSection = 'CnPrefixCompForm';
+  csSection = 'CnPrefixCompForm';
   csWidth = 'Width';
   csHeight = 'Height';
   csListViewWidth = 'ListViewWidth';
@@ -115,17 +115,17 @@ begin
   with Frm, IniFile do
   try
     FList := List;
-    Width := ReadInteger(aSection, csWidth, Width);
-    Height := ReadInteger(aSection, csHeight, Height);
+    Width := ReadInteger(csSection, csWidth, Width);
+    Height := ReadInteger(csSection, csHeight, Height);
     CenterForm(Frm);
-    SetListViewWidthString(ListView, ReadString(aSection, csListViewWidth, ''),
+    SetListViewWidthString(ListView, ReadString(csSection, csListViewWidth, ''),
       GetFactorFromSizeEnlarge(Enlarge));
     UpdateTrigger := UpdateListToListView;
     Result := ShowModal = mrOk;
-    
-    WriteInteger(aSection, csWidth, Width);
-    WriteInteger(aSection, csHeight, Height);
-    WriteString(aSection, csListViewWidth,
+
+    WriteInteger(csSection, csWidth, Width);
+    WriteInteger(csSection, csHeight, Height);
+    WriteString(csSection, csListViewWidth,
       GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
   finally
     Frm.Free;

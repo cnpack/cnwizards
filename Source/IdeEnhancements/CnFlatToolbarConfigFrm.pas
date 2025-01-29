@@ -185,15 +185,16 @@ end;
 procedure TCnFlatToolbarConfigForm.GetCategories(ActionList: TCustomActionList;
   Categories: TStrings);
 var
-  i: Integer;
+  I: Integer;
   Category: string;
 begin
   Assert(Assigned(ActionList));
   Assert(Assigned(Categories));
   Categories.Clear;
-  for i := 0 to ActionList.ActionCount - 1 do
+
+  for I := 0 to ActionList.ActionCount - 1 do
   begin
-    Category := ActionList.Actions[i].Category;
+    Category := ActionList.Actions[I].Category;
     if Trim(Category) = '' then
       Category := SNoButtonCategory;
     if Categories.IndexOf(Category) = -1 then
@@ -203,7 +204,7 @@ end;
 
 procedure TCnFlatToolbarConfigForm.SetupActionListBoxes;
 var
-  i: Integer;
+  I: Integer;
   Action: TContainedAction;
   NoneIndex: Integer;
 begin
@@ -224,10 +225,10 @@ begin
   ListboxHorizontalScrollbar(lbCategories);
 
   Assert(Assigned(FToolbarActionNames));
-  for i := 0 to FToolbarActionNames.Count - 1 do
+  for I := 0 to FToolbarActionNames.Count - 1 do
   begin
-    Action := FindIDEAction(FToolbarActionNames[i]);
-    if (FToolbarActionNames[i] = csSeparatorCaption) or Assigned(Action) then
+    Action := FindIDEAction(FToolbarActionNames[I]);
+    if (FToolbarActionNames[I] = csSeparatorCaption) or Assigned(Action) then
       AddActionToListbox(Action, lbToolbar, False);
   end;
 end;
@@ -275,13 +276,15 @@ end;
 
 procedure TCnFlatToolbarConfigForm.actAddButtonExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   if lbAvailable.MultiSelect then
   begin
-    for i := 0 to lbAvailable.Items.Count-1 do
-      if lbAvailable.Selected[i] then
-        AddActionToListbox(TContainedAction(lbAvailable.Items.Objects[i]), lbToolbar, True);
+    for I := 0 to lbAvailable.Items.Count-1 do
+    begin
+      if lbAvailable.Selected[I] then
+        AddActionToListbox(TContainedAction(lbAvailable.Items.Objects[I]), lbToolbar, True);
+    end;
   end
   else
   begin
@@ -292,15 +295,15 @@ end;
 
 procedure TCnFlatToolbarConfigForm.actRemoveButtonExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   SelIndex: Integer;
 begin
   SelIndex := lbToolbar.ItemIndex;
   if lbToolbar.MultiSelect then
   begin
-    for i := lbToolbar.Items.Count - 1 downto 0 do
-      if lbToolbar.Selected[i] then
-        lbToolbar.Items.Delete(i);
+    for I := lbToolbar.Items.Count - 1 downto 0 do
+      if lbToolbar.Selected[I] then
+        lbToolbar.Items.Delete(I);
   end
   else
   begin
@@ -337,7 +340,7 @@ end;
 
 procedure TCnFlatToolbarConfigForm.lbCategoriesClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Category: string;
 begin
   lbAvailable.Items.BeginUpdate;
@@ -345,20 +348,22 @@ begin
     lbAvailable.Clear;
     if lbCategories.ItemIndex = -1 then
       Exit;
+
     Category := lbCategories.Items[lbCategories.ItemIndex];
-    for i := 0 to FActionList.ActionCount - 1 do
+    for I := 0 to FActionList.ActionCount - 1 do
     begin
-      if FActionList.Actions[i].Name = '' then
+      if FActionList.Actions[I].Name = '' then
         Continue;
-      if (FActionList.Actions[i] is TCustomAction) then // 不加入隐藏的 Action
-        if not TCustomAction(FActionList.Actions[i]).Visible then
+      if (FActionList.Actions[I] is TCustomAction) then // 不加入隐藏的 Action
+        if not TCustomAction(FActionList.Actions[I]).Visible then
           Continue;
+
       if Category = SAllButtonsCategory then
-        AddActionToListbox(FActionList.Actions[i], lbAvailable, False)
-      else if SameText(Category, FActionList.Actions[i].Category) then
-        AddActionToListbox(FActionList.Actions[i], lbAvailable, False)
-      else if (Category = SNoButtonCategory) and (Trim(FActionList.Actions[i].Category) = '') then
-        AddActionToListbox(FActionList.Actions[i], lbAvailable, False);
+        AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
+      else if SameText(Category, FActionList.Actions[I].Category) then
+        AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
+      else if (Category = SNoButtonCategory) and (Trim(FActionList.Actions[I].Category) = '') then
+        AddActionToListbox(FActionList.Actions[I], lbAvailable, False);
     end;
     lbAvailable.Sorted := True;
   finally
@@ -399,17 +404,17 @@ end;
 
 procedure TCnFlatToolbarConfigForm.btnOKClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Action: TContainedAction;
 begin
   FToolbarActionNames.Clear;
-  for i := 0 to lbToolbar.Items.Count - 1 do
+  for I := 0 to lbToolbar.Items.Count - 1 do
   begin
-    Action := TContainedAction(lbToolbar.Items.Objects[i]);
+    Action := TContainedAction(lbToolbar.Items.Objects[I]);
     if Action <> nil then
       FToolbarActionNames.Add(Action.Name)
     else
-      FToolbarActionNames.Add(lbToolbar.Items[i]);
+      FToolbarActionNames.Add(lbToolbar.Items[I]);
   end;
 end;
 
@@ -497,9 +502,9 @@ begin
   // Autoscroll the listbox to make dragging easier
   if Y < 15 then
     lbToolbar.Perform(WM_VSCROLL, SB_LINEUP, 0)
-  else
-    if Y > lbToolbar.Height - 15 then
-      lbToolbar.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+  else if Y > lbToolbar.Height - 15 then
+    lbToolbar.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+
   Idx := lbToolbar.ItemAtPos(Point(X, Y), False);
   if (Idx > -1) and (Idx < lbToolbar.Items.Count) then
     lbToolbar.ItemIndex := Idx;
@@ -567,7 +572,7 @@ procedure TCnFlatToolbarConfigForm.actResetExecute(Sender: TObject);
 var
   Value, FileName: string;
   Action: TContainedAction;
-  i: Integer;
+  I: Integer;
 begin
   FToolbarActionNames.Clear;
   lbToolbar.Clear;
@@ -586,22 +591,22 @@ begin
         VertOrder := ReadBool(csOptions, csVertOrder, True);
       end;
 
-      i := 0;
-      while ValueExists(csToolBar, csButton + IntToStr(i)) do
+      I := 0;
+      while ValueExists(csToolBar, csButton + IntToStr(I)) do
       begin
-        Value := Trim(ReadString(csToolBar, csButton + IntToStr(i), ''));
+        Value := Trim(ReadString(csToolBar, csButton + IntToStr(I), ''));
         if Value <> '' then
           FToolbarActionNames.Add(Value);
-        Inc(i);
+        Inc(I);
       end;
     finally
       Free;
     end;
 
-    for i := 0 to FToolbarActionNames.Count - 1 do
+    for I := 0 to FToolbarActionNames.Count - 1 do
     begin
-      Action := FindIDEAction(FToolbarActionNames[i]);
-      if (FToolbarActionNames[i] = csSeparatorCaption) or Assigned(Action) then
+      Action := FindIDEAction(FToolbarActionNames[I]);
+      if (FToolbarActionNames[I] = csSeparatorCaption) or Assigned(Action) then
         AddActionToListbox(Action, lbToolbar, False);
     end;
   end;

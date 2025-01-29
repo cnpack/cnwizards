@@ -136,7 +136,7 @@ implementation
 
 {$IFDEF CNWIZARDS_CNPREFIXWIZARD}
 
-{ TPrefixItem }
+{ TCnPrefixItem }
 
 procedure TCnPrefixItem.SetPrefix(const Value: string);
 begin
@@ -148,7 +148,7 @@ begin
     FPrefix := '';
 end;
 
-{ TPrefixList }
+{ TCnPrefixList }
 
 function TCnPrefixList.Add(const ComponentClass, Prefix: string;
   Ignore: Boolean): Integer;
@@ -320,7 +320,7 @@ begin
     Add(ComponentClass, Value);
 end;
 
-{ TCompList }
+{ TCnPrefixCompList }
 
 function TCnPrefixCompList.Add(const AProjectName: string; AFormEditor: IOTAFormEditor;
   AComponent: TComponent; const APrefix, AOldName, ANewName: string): Integer;
@@ -375,13 +375,14 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
+  begin
     if (Items[I].FFormEditor = AFormEditor) and (Items[I].FComponent = AComponent) then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
-
 end;
 
 function TCnPrefixCompList.IndexOfNewName(AFormEditor: IOTAFormEditor;
@@ -390,12 +391,14 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
+  begin
     if (Items[I].FFormEditor = AFormEditor) and SameText(Items[I].FNewName,
       ANewName) then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
