@@ -101,6 +101,7 @@ type
     FIdCleaner: Integer;
     FIdInitTree: Integer;
     FIdFromIdent: Integer;
+    FIdProjImplUse: Integer;
     FIgnoreInit: Boolean;
     FIgnoreReg: Boolean;
     FIgnoreNoSrc: Boolean;
@@ -118,6 +119,7 @@ type
 {$IFDEF SUPPORT_CROSS_PLATFORM}
     FCurrPlatform: string;    // 工程的 Platform 发生变化时 lib 库会变，需要重新解析
 {$ENDIF}
+    FProjImplUnit: string;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
@@ -143,6 +145,7 @@ type
     procedure CleanExecute;
     procedure InitTreeExecute;
     procedure FromIdentExecute;
+    procedure ProjImplExecute;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -175,7 +178,7 @@ uses
   CnDebug,
 {$ENDIF}
   CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm,
-  CnWideStrings, CnProgressFrm, CnIDEStrings;
+  CnWideStrings, CnProgressFrm, CnIDEStrings, CnPasCodeParser, CnWidePasParser;
 
 {$R *.DFM}
 
@@ -1541,6 +1544,8 @@ begin
     0, SCnUsesInitTreeMenuHint);
   FIdFromIdent := RegisterASubAction(ScnUsesToolsFromIdent, SCnUsesUnitFromIdentMenuCaption,
     0, SCnUsesUnitFromIdentMenuHint);
+  FIdProjImplUse := RegisterASubAction(SCnUsesToolsProjImplUse, SCnUsesToolsProjImplUseMenuCaption,
+    0, SCnUsesToolsProjImplUseMenuHint);
 end;
 
 procedure TCnUsesToolsWizard.SubActionExecute(Index: Integer);
@@ -1550,7 +1555,9 @@ begin
   else if Index = FIdInitTree then
     InitTreeExecute
   else if Index = FIdFromIdent then
-    FromIdentExecute;
+    FromIdentExecute
+  else if Index = FIdProjImplUse then
+    ProjImplExecute;
 end;
 
 procedure TCnUsesToolsWizard.SubActionUpdate(Index: Integer);
@@ -1942,6 +1949,118 @@ begin
       Ini.Free;
     end;
     Free;
+  end;
+end;
+
+procedure TCnUsesToolsWizard.ProjImplExecute;
+const
+  DEF_UNIT = 'CnDebug';
+var
+  I, C: Integer;
+  U: string;
+  F: TStringList;
+
+  function ProcessFile(const FileName: string; const AUnit: string): Boolean;
+  var
+    Stream, Dest: TMemoryStream;
+    Lex: TCnGeneralWidePasLex;
+    NameList: TStringList;
+    HasUses: Boolean;
+    LinearPos: Integer;
+    Ins: string;
+  begin
+    Result := False;
+    // 打开单个源文件，解析 intf 和 impl 里是否引用了 AUnit，如无则引用上
+    Stream := nil;
+    Dest := nil;
+    NameList := nil;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('UsesTools Project uses ProcessFile %s', [FileName]);
+{$ENDIF}
+
+    try
+      Stream := TMemoryStream.Create;
+      CnGeneralFilerSaveFileToStream(FileName, Stream); // Stream 得到 Ansi/*/Utf16
+
+      NameList := TStringList.Create;
+{$IFDEF UNICODE}
+      ParseUnitUsesW(PChar(Stream.Memory), NameList);
+{$ELSE}
+      ParseUnitUses(PAnsiChar(Stream.Memory), NameList);
+{$ENDIF}
+
+      if NameList.IndexOf(AUnit) >= 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('UsesTools Project File Already uses %s', [AUnit]);
+{$ENDIF}
+        Exit;
+      end;
+
+      // 要加上 uses，先查找插入位置
+      if SearchUsesInsertPosInPasFile(FileName, False, HasUses, LinearPos) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('UsesTools Project File Search Uses. Impl Has uses %d. Can Insert to %d', [Ord(HasUses), LinearPos]);
+{$ENDIF}
+
+        // 根据 HasUses 和 Linear 位置拼凑内容插入
+        NameList.Clear;
+        NameList.Add(AUnit);
+
+        Ins := JoinUsesOrInclude(False, HasUses, False, NameList);
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('UsesTools Project File Insert Content %s', [Ins]);
+{$ENDIF}
+
+        Dest := TMemoryStream.Create;
+        Stream.Position := 0;
+        Dest.CopyFrom(Stream, LinearPos * SizeOf(TCnIdeTokenChar));
+        Dest.Write(Ins[1], Length(Ins) * SizeOf(TCnIdeTokenChar));
+        Dest.CopyFrom(Stream, Stream.Size - (LinearPos + 1) * SizeOf(TCnIdeTokenChar));
+
+        CnGeneralFilerLoadFileFromStream(FileName, Dest);
+        Result := True;
+      end;
+    finally
+      Dest.Free;
+      Stream.Free;
+      NameList.Free;
+    end;
+  end;
+
+begin
+  // 拿到单元名，在工程内的非 dpr 文件里，全盘判断并 impl 部分加入 uses
+  if FProjImplUnit = '' then
+    FProjImplUnit := DEF_UNIT;
+
+  U := FProjImplUnit;
+  if CnWizInputQuery(SCnInformation, SCnUsesToolsProjImplPrompt, U) then
+  begin
+    // TODO: 判断 U 是否合法，不合法则退出
+
+    FProjImplUnit := U;
+    F := TStringList.Create;
+    try
+      if not CnOtaGetProjectSourceFiles(F, False) then
+      begin
+        ErrorDlg(SCnUsesToolsProjImplErrorSource);
+        Exit;
+      end;
+
+      C := 0;
+      for I := 0 to F.Count - 1 do
+      begin
+        if ProcessFile(F[I], FProjImplUnit) then
+          Inc(C);
+      end;
+
+      InfoDlg(Format(SCnUsesToolsProjImplCountFmt, [C]));
+    finally
+      F.Free;
+    end;
   end;
 end;
 

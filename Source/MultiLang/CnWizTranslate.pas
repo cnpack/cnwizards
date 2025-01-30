@@ -1385,6 +1385,13 @@ begin
   TranslateStr(SCnUsesUnitAnalyzeWaiting, 'SCnUsesUnitAnalyzeWaiting');
   TranslateStr(SCNUsesUnitFromIdentErrorFmt, 'SCNUsesUnitFromIdentErrorFmt');
 
+  TranslateStr(SCnUsesToolsProjImplUseMenuCaption, 'SCnUsesToolsProjImplUseMenuCaption');
+  TranslateStr(SCnUsesToolsProjImplUseMenuHint, 'SCnUsesToolsProjImplUseMenuHint');
+  TranslateStr(SCnUsesToolsProjImplPrompt, 'SCnUsesToolsProjImplPrompt');
+  TranslateStr(SCnUsesToolsProjImplCountFmt, 'SCnUsesToolsProjImplCountFmt');
+  TranslateStr(SCnUsesToolsProjImplErrorUnit, 'SCnUsesToolsProjImplErrorUnit');
+  TranslateStr(SCnUsesToolsProjImplErrorSource, 'SCnUsesToolsProjImplErrorSource');
+
   // CnIdeEnhanceMenu
   TranslateStr(SCnIdeEnhanceMenuCaption, 'SCnIdeEnhanceMenuCaption');
   TranslateStr(SCnIdeEnhanceMenuHint, 'SCnIdeEnhanceMenuHint');

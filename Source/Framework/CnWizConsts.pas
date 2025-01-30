@@ -363,6 +363,7 @@ resourcestring
   SCnUsesToolsCleaner = 'CnUsesToolsCleaner';
   SCnUsesToolsInitTree = 'CnUsesToolsInitTree';
   SCnUsesToolsFromIdent = 'CnUsesToolsFromIdent';
+  SCnUsesToolsProjImplUse = 'CnUsesToolsProjImplUse';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCommand = 'CnIdeEnhanceMenu';
@@ -1696,10 +1697,18 @@ var
   SCnUsesInitTreeNotFound: string = 'Search Text NOT Found.';
 
   // CnUsesFromIdent
-  SCnUsesUnitFromIdentMenuCaption: string = 'Use Unit from Identifier...';
+  SCnUsesUnitFromIdentMenuCaption: string = 'Use Unit from I&dentifier...';
   SCnUsesUnitFromIdentMenuHint: string = 'Search and Use Unit from Identifier under Cursor';
   SCnUsesUnitAnalyzeWaiting: string = 'Analyzing Library Files...';
   SCNUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
+
+  // CnProjImplUse
+  SCnUsesToolsProjImplUseMenuCaption: string = 'Batch Uses in Project...';
+  SCnUsesToolsProjImplUseMenuHint: string = 'Uses One Unit in Project Implementation...';
+  SCnUsesToolsProjImplPrompt: string = 'Enter the Unit Name which will be Used in All Units Implementation in Current Project.';
+  SCnUsesToolsProjImplCountFmt: string = '%d Inserted.';
+  SCnUsesToolsProjImplErrorUnit: string = 'Invalid Unit Name!';
+  SCnUsesToolsProjImplErrorSource: string = 'NO Project or Source Files!';
 
   // CnIdeEnhanceMenu
   SCnIdeEnhanceMenuCaption: string = '&IDE Enhancements Settings';

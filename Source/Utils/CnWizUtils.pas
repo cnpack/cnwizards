@@ -940,7 +940,7 @@ function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemor
 function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
 {* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
   D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
-  理应不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用，但磁盘文件的编码目前只能保持文件编码）}
+  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
 
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;

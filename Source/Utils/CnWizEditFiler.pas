@@ -511,7 +511,7 @@ var
   Size: Integer;
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
-{$IFDEF UNICOEE}
+{$IFDEF UNICODE}
   List: TStringList;
   Utf16Text: string;
 {$ELSE}

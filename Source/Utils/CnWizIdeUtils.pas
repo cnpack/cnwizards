@@ -737,10 +737,16 @@ function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
+function SearchUsesInsertPosInPasFile(const FileName: string; IsIntf: Boolean;
+  out HasUses: Boolean; out LinearPos: Integer): Boolean;
+{* 使用 Filer 封装指定 Pascal 源文件中搜索 uses 待插入的线性位置，不区分文件或磁盘
+  偏移均以 Ansi/Utf16/Utf16 为准。IsIntf 指明搜索的是 interface 处的 uses
+  还是 implemetation 的，返回是否成功。成功时返回线性位置，以及该处是否已有 uses}
+
 function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
-{* 在当前编辑的 Pascal 源文件中搜索 uses 待插入的位置，IsIntf 指明搜索的是 interface 处的 uses
-  还是 implemetation 的，返回是否成功，成功时返回位置，以及该处是否已有 uses}
+{* 在当前编辑的 Pascal 源文件中搜索 uses 待插入的编辑器位置，IsIntf 指明搜索的是 interface 处的 uses
+  还是 implemetation 的，返回是否成功，成功时返回编辑器位置，以及该处是否已有 uses}
 
 function SearchUsesInsertPosInCurrentCpp(out CharPos: TOTACharPos;
   SourceEditor: IOTASourceEditor = nil): Boolean;
@@ -3859,6 +3865,99 @@ end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
+function SearchUsesInsertPosInPasFile(const FileName: string; IsIntf: Boolean;
+  out HasUses: Boolean; out LinearPos: Integer): Boolean;
+var
+  Stream: TMemoryStream;
+  Lex: TCnGeneralWidePasLex;
+  InIntf: Boolean;
+  MeetIntf: Boolean;
+  InImpl: Boolean;
+  MeetImpl: Boolean;
+  IntfPos, ImplPos: Integer;
+begin
+  Result := False;
+  InIntf := False;
+  InImpl := False;
+  MeetIntf := False;
+  MeetImpl := False;
+
+  HasUses := False;
+  IntfPos := 0;
+  ImplPos := 0;
+
+  Stream := nil;
+  Lex := nil;
+
+  try
+    Stream := TMemoryStream.Create;
+    CnGeneralFilerSaveFileToStream(FileName, Stream);
+
+    Lex := TCnGeneralWidePasLex.Create;
+    Lex.Origin := Stream.Memory;
+
+    while Lex.TokenID <> tkNull do
+    begin
+      case Lex.TokenID of
+      tkUses:
+        begin
+          if (IsIntf and InIntf) or (not IsIntf and InImpl) then
+          begin
+            HasUses := True; // 到达了自己需要的 uses 处
+            while not (Lex.TokenID in [tkNull, tkSemiColon]) do
+              Lex.Next;
+
+            if Lex.TokenID = tkSemiColon then
+            begin
+              // 插入位置就在分号前
+              Result := True;
+              LinearPos := Lex.TokenPos;
+              Exit;
+            end
+            else // uses 后找不着分号，出错
+            begin
+              Result := False;
+              Exit;
+            end;
+          end;
+        end;
+      tkInterface, tkProgram:
+        begin
+          MeetIntf := True;
+          InIntf := True;
+          InImpl := False;
+
+          IntfPos := Lex.TokenPos;
+        end;
+      tkImplementation:
+        begin
+          MeetImpl := True;
+          InIntf := False;
+          InImpl := True;
+
+          ImplPos := Lex.TokenPos;
+        end;
+      end;
+      Lex.Next;
+    end;
+
+    // 解析完毕，到此处是没有 uses 的情形
+    if IsIntf and MeetIntf then    // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      LinearPos := IntfPos + Length('interface');
+    end
+    else if not IsIntf and MeetImpl then // 曾经遇到过 interface 就以 interface 为插入点
+    begin
+      Result := True;
+      LinearPos := ImplPos + Length('implementation');
+    end;
+  finally
+    Lex.Free;
+    Stream.Free;
+  end;
+end;
+
 function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 var
@@ -3882,6 +3981,7 @@ begin
   Result := False;
   Stream := TMemoryStream.Create;
 
+  // 这里可优化成 General 系列，不过先不整
 {$IFDEF UNICODE}
   Lex := TCnPasWideLex.Create;
   CnOtaSaveCurrentEditorToStreamW(Stream, False);
