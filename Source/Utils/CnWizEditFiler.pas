@@ -512,10 +512,10 @@ var
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$IFDEF UNICOEE}
-  List: TCnWideStringList;
+  List: TStringList;
   Utf16Text: string;
 {$ELSE}
-  List: TStringList;
+  List: TCnWideStringList;
   Utf16Text: WideString;
 {$ENDIF}
 {$ENDIF}
