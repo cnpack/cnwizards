@@ -239,7 +239,7 @@ constructor TCnEditFiler.Create(const FileName: string);
 begin
   inherited Create;
 
-  FBufSize := 32760; // Large buffers are faster, but too large causes crashes
+  FBufSize := 65535; // Large buffers are faster, but too large causes crashes
   FNotifierIndex := InvalidNotifierIndex;
   FMode := mmModule;
   if FileName <> '' then
@@ -404,7 +404,7 @@ begin
   if (FBuf = nil) and (New <> FBufSize) then
     FBufSize := New;
   // 32K is the max we can read from an edit reader at once
-  Assert(FBufSize <= 1024 * 32);
+  // Assert(FBufSize <= 1024 * 32);
 end;
 
 procedure TCnEditFiler.ShowSource;
@@ -811,6 +811,8 @@ end;
 {$IFDEF UNICODE}
 
 procedure TCnEditFiler.ReadFromStreamW(Stream: TStream);
+const
+  TheEnd: AnsiChar = AnsiChar(#0);
 var
   Size: Integer;
   Utf8Text: AnsiString;
@@ -866,9 +868,10 @@ begin
         Utf8Text := CnUtf8EncodeWideString(Utf16Text);
 
         Utf8Stream := TMemoryStream.Create;
-        Utf8Stream.Size := Length(Utf8Text);
+        Utf8Stream.Size := Length(Utf8Text) + 1;
         Utf8Stream.Position := 0;
         Utf8Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text));
+        Utf8Stream.Write(TheEnd, 1); // FEditWrite.Insert 需要一次性的 PAnsiChar 且 #0 结尾
       end;
 
       if FBuf = nil then
@@ -876,17 +879,10 @@ begin
 
       if Utf8Stream <> nil then
       begin
-        if Utf8Stream.Size > 0 then
-        begin
-          Utf8Stream.Position := 0;
-          repeat
-            FillChar(FBuf^, BufSize + 1, 0);
-            Size := Utf8Stream.Read(FBuf^, BufSize);
-            FEditWrite.Insert(FBuf);
-          until Size <> BufSize;
-        end
+        if Utf8Stream.Size > 0 then // 不分块，直接一次性写入
+          FEditWrite.Insert(PAnsiChar(Utf8Stream.Memory));
       end
-      else // 没转 UTF8
+      else // 没转 UTF8，照常分块
       begin
         if Stream.Size > 0 then
         begin
