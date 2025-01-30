@@ -36,17 +36,17 @@ unit CnWizEditFiler;
 * 备    注：该单元由 GExperts 1.2 Src 的 GX_EditReader 移植而来
 *           其原始内容受 GExperts License 的保护
 *
-*           EditFilerLoadFileFromStream 的编码行为：
+*           EditFilerLoadFileFromStream 对 Stream 的编码要求：
 *                        D567            D2005~2007               D2009 或以上
-*           磁盘文件     Ansi            文件原始编码             UTF16
-*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    UTF16
+*           磁盘文件     Ansi            Utf8（可指定成 Ansi）    Utf16
+*           IDE 内存     Ansi            Utf8（可指定成 Ansi）    Utf16
 *
-*           EditFilerSaveFileToStream 的编码行为：
+*           EditFilerSaveFileToStream 得到的 Stream 的编码行为：
 *                        D567            D2005~2007               D2009 或以上
-*           磁盘文件     Ansi            文件原始编码             UTF16
-*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    UTF16
+*           磁盘文件     Ansi            Utf8（可解码成 Ansi）    Utf16
+*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    Utf16
 *
-*           因而该俩函数不适合处理 D2005~2007 下的磁盘文件
+*           注意控制 Utf8 指定或解码成 Ansi 时，需将 CheckUtf8 参数为 True
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -55,7 +55,7 @@ unit CnWizEditFiler;
 *               修改 EditFilerLoadFileFromStream 的行为，使其和 Save 版本保持一致的
 *               Ansi、Ansi/Utf8、Utf16，但文件编码未能适应，Save 版本类似
 *           2017.04.29 V1.2
-*               修正 Unicode 环境下读文件时未转换为 UTF16 的问题
+*               修正 Unicode 环境下读文件时未转换为 Utf16 的问题
 *           2003.06.17 V1.1
 *               修改文件名，加入写功能（LiuXiao）
 *           2003.03.02 V1.0
@@ -511,6 +511,13 @@ var
   Size: Integer;
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
+{$IFDEF UNICOEE}
+  List: TCnWideStringList;
+  Utf16Text: string;
+{$ELSE}
+  List: TStringList;
+  Utf16Text: WideString;
+{$ENDIF}
 {$ENDIF}
 const
   TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
@@ -525,12 +532,50 @@ begin
   begin
     Assert(FStreamFile <> nil);
 
+    // 注意此处内容的编码是文件编码
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // D2005~2007 下，用 TCnWideStringList 检测文件内容编码并加载为 UTF16
+    List := TCnWideStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile);
+      Utf16Text := List.Text;
+
+      if CheckUtf8 then
+        Text := AnsiString(Utf16Text)                // 再根据参数将 Utf16 转为 Utf8
+      else
+        Text := CnUtf8EncodeWideString(Utf16Text);   // 或直接转为 AnsiString
+
+      Stream.Write(Text[1], Length(Text) * SizeOf(AnsiChar));
+      Stream.Write(TheEnd, 1);
+    finally
+      List.Free;
+    end;
+{$ELSE}
+  {$IFDEF UNICODE}
+    // D2009 或以上，用系统自带 TStringList 检测文件内容编码并加载为 UTF16
+    List := TStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile);
+      Utf16Text := List.Text;
+
+      if CheckUtf8 then
+        Text := AnsiString(Utf16Text)                // 再根据参数将 Utf16 转为 Utf8
+      else
+        Text := CnUtf8EncodeWideString(Utf16Text);   // 或直接转为 AnsiString
+
+      Stream.Write(Text[1], Length(Text) * SizeOf(AnsiChar));
+      Stream.Write(TheEnd, 1);
+    finally
+      List.Free;
+    end
+  {$ELSE}
+    // D567下只支持 Ansi，无需额外处理
     FStreamFile.Position := 0;
     Stream.CopyFrom(FStreamFile, FStreamFile.Size);
     Stream.Write(TheEnd, 1);
-    // 注意此处内容的编码是文件编码，D567下只支持 Ansi，无需额外处理
-{$IFDEF IDE_STRING_ANSI_UTF8}
-    // TODO: D2005~2007 下，检测文件内容编码。是 Ansi 或 UTF16 则编码成 UTF8；UTF8 则保持不变
+  {$ENDIF}
 {$ENDIF}
   end
   else
@@ -597,7 +642,7 @@ begin
     // Unicode 环境下，要根据文件的 BOM 转换成 UTF16，不能直接复制文件流
     List := TStringList.Create;
     try
-      List.LoadFromStream(FStreamFile);
+      List.LoadFromStream(FStreamFile); // 内部会根据文件 BOM 记录其编码，然后转换成 UTF16
       Text := List.Text;
       Stream.Write(Text[1], Length(Text) * SizeOf(Char));
       Stream.Write(TheEnd, 1);  // Write UTF16 #$0000
@@ -681,6 +726,7 @@ begin
 
   if Mode = mmFile then
   begin
+    // TODO: 文件编码的 UTF8 处理
     Assert(FStreamFile <> nil);
     FStreamFile.Position := 0;
     Stream.CopyFrom(FStreamFile, FStreamFile.Size);
@@ -721,6 +767,7 @@ begin
 
   if Mode = mmFile then
   begin
+    // TODO: 文件编码的 UTF8 处理
     Assert(FStreamFile <> nil);
     FStreamFile.Position := 0;
     Stream.CopyFrom(FStreamFile, FStreamFile.Size);
@@ -787,15 +834,16 @@ begin
       List := TStringList.Create;
       try
         FStreamFile.Position := 0;
-        List.LoadFromStream(FStreamFile);
+        List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
 
+        // 把 Stream 的 Utf16 内容塞给 Utf16Text 再给 List
         SetLength(Utf16Text, Stream.Size div 2);
         Stream.Position := 0;
         Move((Stream as TMemoryStream).Memory^, Utf16Text[1], Length(Utf16Text) * SizeOf(WideChar));
         List.Text := Utf16Text;
 
         FStreamFile.Size := 0;
-        List.SaveToStream(FStreamFile);
+        List.SaveToStream(FStreamFile); // List 保存时根据之前记录的文件编码转换后保存
       finally
         List.Free;
       end;
@@ -863,7 +911,14 @@ procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean);
 var
   Size: Integer;
 {$IFDEF IDE_WIDECONTROL}
-  Text: AnsiString;
+  AnsiText: AnsiString;
+  Utf8Text: AnsiString;
+  Utf16Text: WideString;
+{$IFDEF UNICODE}
+  List: TStringList;
+{$ELSE}
+  List: TCnWideStringList;
+{$ENDIF}
 {$ENDIF}
 begin
   Assert(Stream <> nil);
@@ -876,12 +931,55 @@ begin
   begin
     Assert(FStreamFile <> nil);
 
-{$IFDEF IDE_STRING_ANSI_UTF8}
-    // TODO: D2005~2007 下，Stream 的内容编码，要按文件编码转换后，再写入文件
-{$ENDIF}
+{$IFDEF IDE_WIDECONTROL}
+    if CheckUtf8 and (Stream is TMemoryStream) then
+    begin
+      SetLength(AnsiText, Stream.Size);
+      Move((Stream as TMemoryStream).Memory^, AnsiText[1], Stream.Size);
+      Utf8Text := CnAnsiToUtf8(AnsiText);
+    end
+    else
+    begin
+      SetLength(Utf8Text, Stream.Size);
+      Move((Stream as TMemoryStream).Memory^, Utf8Text[1], Stream.Size);
+    end;
+
+    // 此时 Utf8Text 里是 Utf8 内容，要转 UTF16 以放到 StringList 里
+    Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
+  {$IFDEF UNICODE}
+    // Unicode 环境下，要给 StringList 赋值，让其内部根据文件的 BOM，转换 UTF16 的内容写入文件
+    List := TStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
+
+      List.Text := Utf16Text;
+
+      FStreamFile.Size := 0;
+      List.SaveToStream(FStreamFile); // List 保存时根据之前记录的文件编码转换后保存
+    finally
+      List.Free;
+    end;
+  {$ELSE}
+    // D2005~2007 下，要给 CnWideStringList 赋值，让其根据文件的 BOM，转换 UTF16 的内容写入文件
+    List := TCnWideStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
+
+      List.Text := Utf16Text;
+
+      FStreamFile.Size := 0;
+      List.SaveToStream(FStreamFile, List.LoadFormat); // List 保存时根据之前记录的文件编码转换后保存
+    finally
+      List.Free;
+    end;
+  {$ENDIF}
+{$ELSE}
     Stream.Position := 0;
     FStreamFile.Size := 0;
     FStreamFile.CopyFrom(Stream, Stream.Size);
+{$ENDIF}
   end
   else
   begin
@@ -891,12 +989,12 @@ begin
     FEditWrite.DeleteTo(MaxInt);
 
 {$IFDEF IDE_WIDECONTROL}
-    if CheckUtf8 and (Stream is TMemoryStream) then
+    if CheckUtf8 and (Stream is TMemoryStream) then // Stream 内容是 Ansi，BDS 以上得转 Utf8，无需尾部 #0
     begin
-      Text := CnAnsiToUtf8(PAnsiChar((Stream as TMemoryStream).Memory));
-      Stream.Size := Length(Text) + 1;
+      Utf8Text := CnAnsiToUtf8(PAnsiChar((Stream as TMemoryStream).Memory));
+      Stream.Size := Length(Utf8Text);
       Stream.Position := 0;
-      Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+      Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text));
     end;
 {$ENDIF}
 

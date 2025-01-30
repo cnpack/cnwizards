@@ -330,7 +330,8 @@ function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
   另外注意 D567/BCB56 下 SourceIsUtf8 参数不起作用}
 
 procedure ParseUnitUses(const Source: AnsiString; UsesList: TStrings);
-{* 分析源代码中引用的单元，Source 是文件内容}
+{* 分析源代码中引用的单元，将已引用单元放入 UsesList，Source 是文件的 Ansi 内容。
+  目前 Unicode 环境大部分情况下也是用的该方法，只有 Ansi 出问题时才需要换}
 
 implementation
 
