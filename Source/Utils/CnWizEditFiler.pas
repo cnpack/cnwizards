@@ -923,24 +923,32 @@ begin
 
   AllocateFileData;
 
+{$IFDEF IDE_WIDECONTROL}
+  // 改用 READ/WRITE 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
+  Stream.Position := 0;
+  if CheckUtf8 then
+  begin
+    // Stream 内容是 Ansi，一次全部读入后转成 Utf8
+    SetLength(AnsiText, Stream.Size);
+    Stream.Read(AnsiText[1], Stream.Size);
+    // Move((Stream as TMemoryStream).Memory^, AnsiText[1], Stream.Size);
+    Utf8Text := CnAnsiToUtf8(AnsiText);
+  end
+  else
+  begin
+    // Stream 内容是 Utf8，一次全部读入
+    SetLength(Utf8Text, Stream.Size);
+    Stream.Read(Utf8Text[1], Stream.Size);
+    // Move((Stream as TMemoryStream).Memory^, Utf8Text[1], Stream.Size);
+  end;
+{$ENDIF}
+
   if Mode = mmFile then
   begin
     Assert(FStreamFile <> nil);
 
 {$IFDEF IDE_WIDECONTROL}
-    if CheckUtf8 and (Stream is TMemoryStream) then
-    begin
-      SetLength(AnsiText, Stream.Size);
-      Move((Stream as TMemoryStream).Memory^, AnsiText[1], Stream.Size);
-      Utf8Text := CnAnsiToUtf8(AnsiText);
-    end
-    else
-    begin
-      SetLength(Utf8Text, Stream.Size);
-      Move((Stream as TMemoryStream).Memory^, Utf8Text[1], Stream.Size);
-    end;
-
-    // 此时 Utf8Text 里是 Utf8 内容，要转 UTF16 以放到 StringList 里
+    // 此时 Utf8Text 里是 Utf8 内容且末尾有 #0，要转 UTF16 以放到 StringList 里
     Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
   {$IFDEF UNICODE}
     // Unicode 环境下，要给 StringList 赋值，让其内部根据文件的 BOM，转换 UTF16 的内容写入文件
@@ -985,15 +993,10 @@ begin
     FEditWrite.DeleteTo(MaxInt);
 
 {$IFDEF IDE_WIDECONTROL}
-    if CheckUtf8 and (Stream is TMemoryStream) then // Stream 内容是 Ansi，BDS 以上得转 Utf8，无需尾部 #0
-    begin
-      Utf8Text := CnAnsiToUtf8(PAnsiChar((Stream as TMemoryStream).Memory));
-      Stream.Size := Length(Utf8Text);
-      Stream.Position := 0;
-      Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text));
-    end;
-{$ENDIF}
-
+    // 此时 Utf8Text 里是 Utf8 内容且末尾有 #0，不分块，直接写入
+    FEditWrite.Insert(PAnsiChar(Utf8Text));
+{$ELSE}
+    // D567 下照常分块写入
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
 
@@ -1006,6 +1009,7 @@ begin
         FEditWrite.Insert(FBuf);
       until Size <> BufSize;
     end;
+{$ENDIF}
   end;
 end;
 
