@@ -1383,7 +1383,7 @@ begin
   TranslateStr(SCnUsesUnitFromIdentMenuCaption, 'SCnUsesUnitFromIdentMenuCaption');
   TranslateStr(SCnUsesUnitFromIdentMenuHint, 'SCnUsesUnitFromIdentMenuHint');
   TranslateStr(SCnUsesUnitAnalyzeWaiting, 'SCnUsesUnitAnalyzeWaiting');
-  TranslateStr(SCNUsesUnitFromIdentErrorFmt, 'SCNUsesUnitFromIdentErrorFmt');
+  TranslateStr(SCnUsesUnitFromIdentErrorFmt, 'SCnUsesUnitFromIdentErrorFmt');
 
   TranslateStr(SCnUsesToolsProjImplUseMenuCaption, 'SCnUsesToolsProjImplUseMenuCaption');
   TranslateStr(SCnUsesToolsProjImplUseMenuHint, 'SCnUsesToolsProjImplUseMenuHint');

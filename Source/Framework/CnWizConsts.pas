@@ -1700,12 +1700,12 @@ var
   SCnUsesUnitFromIdentMenuCaption: string = 'Use Unit from I&dentifier...';
   SCnUsesUnitFromIdentMenuHint: string = 'Search and Use Unit from Identifier under Cursor';
   SCnUsesUnitAnalyzeWaiting: string = 'Analyzing Library Files...';
-  SCNUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
+  SCnUsesUnitFromIdentErrorFmt: string = 'Can NOT Find %s in Searching Units';
 
   // CnProjImplUse
-  SCnUsesToolsProjImplUseMenuCaption: string = 'Batch Uses in Project...';
-  SCnUsesToolsProjImplUseMenuHint: string = 'Uses One Unit in Project Implementation...';
-  SCnUsesToolsProjImplPrompt: string = 'Enter the Unit Name which will be Used in All Units Implementation in Current Project.';
+  SCnUsesToolsProjImplUseMenuCaption: string = '&Batch Uses in Project...';
+  SCnUsesToolsProjImplUseMenuHint: string = 'Uses One Unit in Implementation in Project Files';
+  SCnUsesToolsProjImplPrompt: string = 'Enter Unit Name to be Used in All Project Units:';
   SCnUsesToolsProjImplCountFmt: string = '%d Inserted.';
   SCnUsesToolsProjImplErrorUnit: string = 'Invalid Unit Name!';
   SCnUsesToolsProjImplErrorSource: string = 'NO Project or Source Files!';
