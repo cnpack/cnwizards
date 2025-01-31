@@ -318,7 +318,7 @@ begin
       try
         Stream := TMemoryStream.Create;
         try
-          EditFilerSaveFileToStream(FSourceFileName, Stream, True);
+          EditFilerSaveFileToStream(FSourceFileName, Stream, True); // Ansi/Ansi/Utf16
 {$IFDEF UNICODE}
           ParseUnitUsesW(PChar(Stream.Memory), UsesList);
 {$ELSE}

@@ -108,11 +108,11 @@ type
     procedure ShowForm;
 {$IFDEF UNICODE}
     procedure SaveToStreamW(Stream: TStream);
-    // 将文件内容存入流中，如果是 TMemoryStream，存成没 BOM 的 UTF16 格式，否则 Utf8 格式，尾部 #0
+    // 将文件内容存入流中，存成没 BOM 的 UTF16 格式，尾部 #0
 {$ENDIF}
     procedure SaveToStream(Stream: TStream; CheckUtf8: Boolean = False);
     // 读出均为无 BOM 的 Ansi 或 Utf8 格式，尾部 #0。
-    // BDS 里，当文件在 IDE 里打开、且 CheckUtf8 是 True 并且是 MemoryStream 时，
+    // BDS 里，无论文件在 IDE 里打开还是磁盘形式，CheckUtf8 是 True 时，
     // Utf8 会转换成 Ansi，否则保持 Utf8。D5/6/7 中只支持 Ansi
     procedure SaveToStreamFromPos(Stream: TStream);
     procedure SaveToStreamToPos(Stream: TStream);
@@ -126,9 +126,9 @@ type
     procedure ReadFromStream(Stream: TStream; CheckUtf8: Boolean = False);
     // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关，
     // 要求流中是 Ansi 或 Utf8，无 BOM，不要求 Stream 尾 #0（准确来讲不能是 #0 否则会出现多余字符）
-    // 写文件时 Stream 内容不进行转换。写缓冲时如果是 BDS 且 Stream 是 MemoryStream 时，
-    // Stream 内容如果是 Ansi，则 CheckUtf8 得设为 True 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
-    // 注意：文件是磁盘形式时，目前只能原封不动写入文件，无法转换编码
+    // 写缓冲时如果是 BDS 且 Stream 内容如果是 Ansi，则 CheckUtf8 得设为 True 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
+    // 写文件时是磁盘形式时，目前 D567 只支持 Ansi 照常写，BDS 或以上则支持 Ansi（需 CheckUtf8 为 True） 或 Utf8
+    // 内部会统一转 UTF8 再转 UTF16 再判断文件编码写入。
 
     // TODO: 以下两函数暂未做 UTF8 适配
     procedure ReadFromStreamInPos(Stream: TStream);
@@ -142,19 +142,16 @@ type
     property FileSize: Integer read GetFileSize;
   end;
 
-procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
-{* 封装的用流写入 Filer 的文件内容，要求流中无 BOM，尾部无需 #0。
-  内部写文件时不进行转换。写缓冲时如果是 BDS 2005 到 2007 里且 Stream 是 MemoryStream，
-  则可由 CheckUtf8 设为 True 来进行 Ansi 到 Utf8 的转换以适合编辑器缓冲，D5/6/7 中不会转换。
-  Unicode 环境下会忽略 CheckUtf8，Stream 中必须固定为 Utf16。也就是 Ansi、Ansi/Utf8、Utf16}
+procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; IsAnsi: Boolean = False);
+{* 封装的用流写入 Filer 的文件内容，要求流中无 BOM，尾部无需 #0，格式 Ansi、Ansi/Utf8、Utf16
+  如果是 BDS 2005 到 2007 里且 Stream 内容是 Ansi 格式，则可由 IsAnsi 设为 True
+  来进行 Ansi 到 Utf8 的转换以适合编辑器缓冲，如果是文件模式也内部自动适配编码，不会转换。
+  D5/6/7 与 Unicode 环境下会忽略 IsAnsi，Stream 中必须固定为 Ansi 及 Utf16}
 
-procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean = False);
+procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; NeedAnsi: Boolean = False);
 {* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式（Ansi、Ansi/Utf8、Utf16），尾部 #0。
-  注意：BDS 2005 到 2007 里，当文件内容来自 IDE 内存时内部一定是 UTF8 格式，
-  如将 CheckUtf8 设为 True 并且是 MemoryStream 时，该函数会将 Utf8 会转换成 Ansi，否则保持 Utf8
-  而 Unicode 环境下文件内容来自磁盘时会忽略 CheckUtf8，Stream 中固定为 Utf16，
-  如文件内容来自磁盘，则保持文件编码，不一定是 Ansi 还是 Utf8 还是 Utf 16。
-  D5/6/7 中只支持 Ansi，都可以直接  PChar(Stream.Memory) 使用}
+  在 BDS 2005 到 2007 里，如将 NeedAnsi 设为 True 时，该函数会将 Utf8 会转换成 Ansi，否则保持 Utf8，
+  而 Unicode 环境下会忽略 NeedAnsi，Stream 中固定为 Utf16，以上无论文件是磁盘还是 IDE 内部打开均如此。}
 
 implementation
 
@@ -164,28 +161,28 @@ uses
 {$ENDIF}
   CnWizUtils;
 
-procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean);
+procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; IsAnsi: Boolean);
 begin
   with TCnEditFiler.Create(FileName) do
   try
 {$IFDEF UNICODE}
     ReadFromStreamW(Stream);
 {$ELSE}
-    ReadFromStream(Stream, CheckUtf8);
+    ReadFromStream(Stream, IsAnsi);
 {$ENDIF}
   finally
     Free;
   end;
 end;
 
-procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; CheckUtf8: Boolean);
+procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; NeedAnsi: Boolean);
 begin
   with TCnEditFiler.Create(FileName) do
   try
 {$IFDEF UNICODE}
     SaveToStreamW(Stream);
 {$ELSE}
-    SaveToStream(Stream, CheckUtf8);
+    SaveToStream(Stream, NeedAnsi);
 {$ENDIF}
   finally
     Free;
@@ -506,11 +503,13 @@ begin
 end;
 
 procedure TCnEditFiler.SaveToStream(Stream: TStream; CheckUtf8: Boolean);
+const
+  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
 var
   Pos: Integer;
   Size: Integer;
 {$IFDEF IDE_WIDECONTROL}
-  Text: AnsiString;
+  Text, Utf8Text: AnsiString;
 {$IFDEF UNICODE}
   List: TStringList;
   Utf16Text: string;
@@ -519,8 +518,6 @@ var
   Utf16Text: WideString;
 {$ENDIF}
 {$ENDIF}
-const
-  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
 begin
   Assert(Stream <> nil);
 
@@ -607,9 +604,17 @@ begin
     Stream.Write(TheEnd, 1);
 
 {$IFDEF IDE_WIDECONTROL}
-    if CheckUtf8 and (Stream is TMemoryStream) then
+    if CheckUtf8 then
     begin
-      Text := CnUtf8ToAnsi(PAnsiChar((Stream as TMemoryStream).Memory));
+      // 缓冲区里读出的是 Utf8 格式的流，有 #0，读成字符串后因为尾部有 #0 了，所以少读一个
+      SetLength(Utf8Text, Stream.Size - 1);
+      Stream.Position := 0;
+      Stream.Read(Utf8Text[1], Stream.Size - 1);
+
+      // 转成 Ansi
+      Text := CnUtf8ToAnsi(PAnsiChar(Utf8Text));
+
+      // 再写回 Stream，加个 #0
       Stream.Size := Length(Text) + 1;
       Stream.Position := 0;
       Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
@@ -621,13 +626,14 @@ end;
 {$IFDEF UNICODE}
 
 procedure TCnEditFiler.SaveToStreamW(Stream: TStream);
+const
+  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
 var
   Pos: Integer;
   Size: Integer;
+  Utf8Text: AnsiString;
   Text: string;
   List: TStringList;
-const
-  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
 begin
   Assert(Stream <> nil);
 
@@ -678,16 +684,17 @@ begin
       end;
       Stream.Write(FBuf^, Size);
     end;
-    Stream.Write(TheEnd, 1);  // Write UTF16 #$0000
-    Stream.Write(TheEnd, 1);
 
-    if Stream is TMemoryStream then
-    begin
-      Text := Utf8Decode(PAnsiChar((Stream as TMemoryStream).Memory));
-      Stream.Size := (Length(Text) + 1) * SizeOf(Char);
-      Stream.Position := 0;
-      Stream.Write(PChar(Text)^, (Length(Text) + 1) * SizeOf(Char));
-    end;
+    // 缓冲区里读出的是 Utf8 格式的流，无 #0，读成字符串后尾部有 #0 了，转 Utf16 后尾部也有宽 #0 了
+    SetLength(Utf8Text, Stream.Size);
+    Stream.Position := 0;
+    Stream.Read(Utf8Text[1], Stream.Size);
+    Text := CnUtf8DecodeToWideString(Utf8Text);
+
+    // 写 Stream 时多写一个宽字符，写进宽 #0 去
+    Stream.Size := (Length(Text) + 1) * SizeOf(Char);
+    Stream.Position := 0;
+    Stream.Write(PChar(Text)^, (Length(Text) + 1) * SizeOf(Char));
   end;
 end;
 
@@ -811,14 +818,11 @@ end;
 {$IFDEF UNICODE}
 
 procedure TCnEditFiler.ReadFromStreamW(Stream: TStream);
-const
-  TheEnd: AnsiChar = AnsiChar(#0);
 var
   Size: Integer;
   Utf8Text: AnsiString;
   List: TStringList;
   Utf16Text: string;
-  Utf8Stream: TMemoryStream;
 begin
   Assert(Stream <> nil);
 
@@ -830,25 +834,22 @@ begin
   begin
     Assert(FStreamFile <> nil);
 
-    if Stream is TMemoryStream then
-    begin
-      // Unicode 环境下，要根据文件的 BOM 转换 UTF16 的 Stream 内容，不能直接复制文件流
-      List := TStringList.Create;
-      try
-        FStreamFile.Position := 0;
-        List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
+    // Unicode 环境下，要根据文件的 BOM 转换 UTF16 的 Stream 内容，不能直接复制文件流
+    List := TStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
 
-        // 把 Stream 的 Utf16 内容塞给 Utf16Text 再给 List
-        SetLength(Utf16Text, Stream.Size div 2);
-        Stream.Position := 0;
-        Move((Stream as TMemoryStream).Memory^, Utf16Text[1], Length(Utf16Text) * SizeOf(WideChar));
-        List.Text := Utf16Text;
+      // 把 Stream 的 Utf16 内容塞给 Utf16Text 再给 List
+      SetLength(Utf16Text, Stream.Size div 2);
+      Stream.Position := 0;
+      Stream.Read(Utf16Text[1], Length(Utf16Text) * SizeOf(WideChar));
+      List.Text := Utf16Text;
 
-        FStreamFile.Size := 0;
-        List.SaveToStream(FStreamFile); // List 保存时根据之前记录的文件编码转换后保存
-      finally
-        List.Free;
-      end;
+      FStreamFile.Size := 0;
+      List.SaveToStream(FStreamFile); // List 保存时根据之前记录的文件编码转换后保存
+    finally
+      List.Free;
     end;
   end
   else
@@ -858,45 +859,15 @@ begin
 
     FEditWrite.DeleteTo(MaxInt);
 
-    Utf8Stream := nil;
-    try
-      if Stream is TMemoryStream then // 外部传入的 UTF16 格式内容在这里要转成 Utf8
-      begin
-        SetLength(Utf16Text, Stream.Size div 2);
-        Stream.Position := 0;
-        Move((Stream as TMemoryStream).Memory^, Utf16Text[1], Length(Utf16Text) * SizeOf(WideChar));
-        Utf8Text := CnUtf8EncodeWideString(Utf16Text);
+    // 外部传入的 Utf16 格式尾部无宽 #0 内容，在这里要加上宽 #0 转成 Utf8
+    SetLength(Utf16Text, Stream.Size div 2);
+    Stream.Position := 0;
+    Stream.Read(Utf16Text[1], Length(Utf16Text) * SizeOf(WideChar));
+    Utf8Text := CnUtf8EncodeWideString(Utf16Text);
 
-        Utf8Stream := TMemoryStream.Create;
-        Utf8Stream.Size := Length(Utf8Text) + 1;
-        Utf8Stream.Position := 0;
-        Utf8Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text));
-        Utf8Stream.Write(TheEnd, 1); // FEditWrite.Insert 需要一次性的 PAnsiChar 且 #0 结尾
-      end;
-
-      if FBuf = nil then
-        GetMem(FBuf, BufSize + 1);
-
-      if Utf8Stream <> nil then
-      begin
-        if Utf8Stream.Size > 0 then // 不分块，直接一次性写入
-          FEditWrite.Insert(PAnsiChar(Utf8Stream.Memory));
-      end
-      else // 没转 UTF8，照常分块
-      begin
-        if Stream.Size > 0 then
-        begin
-          Stream.Position := 0;
-          repeat
-            FillChar(FBuf^, BufSize + 1, 0);
-            Size := Stream.Read(FBuf^, BufSize);
-            FEditWrite.Insert(FBuf);
-          until Size <> BufSize;
-        end;
-      end;
-    finally
-      Utf8Stream.Free;
-    end;
+    // Utf8 尾部有 #0，用 FEditWrite.Insert 一次性写入，正好有 PAnsiChar 且 #0 结尾
+    if Length(Utf8Text) > 0 then
+      FEditWrite.Insert(PAnsiChar(Utf8Text));
   end;
 end;
 
@@ -924,14 +895,13 @@ begin
   AllocateFileData;
 
 {$IFDEF IDE_WIDECONTROL}
-  // 改用 READ/WRITE 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
+  // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
   Stream.Position := 0;
   if CheckUtf8 then
   begin
     // Stream 内容是 Ansi，一次全部读入后转成 Utf8
     SetLength(AnsiText, Stream.Size);
     Stream.Read(AnsiText[1], Stream.Size);
-    // Move((Stream as TMemoryStream).Memory^, AnsiText[1], Stream.Size);
     Utf8Text := CnAnsiToUtf8(AnsiText);
   end
   else
@@ -939,7 +909,6 @@ begin
     // Stream 内容是 Utf8，一次全部读入
     SetLength(Utf8Text, Stream.Size);
     Stream.Read(Utf8Text[1], Stream.Size);
-    // Move((Stream as TMemoryStream).Memory^, Utf8Text[1], Stream.Size);
   end;
 {$ENDIF}
 
