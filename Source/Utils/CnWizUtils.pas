@@ -4039,13 +4039,13 @@ begin
   IProjectGroup := CnOtaGetProjectGroup;
   if Assigned(IProjectGroup) then
   begin
-      try
-        // This raises exceptions in D5 with .bat projects active
-        Result := IProjectGroup.ActiveProject;
-        Exit;
-      except
-        ;
-      end;
+    try
+      // This raises exceptions in D5 with .bat projects active
+      Result := IProjectGroup.ActiveProject;
+      Exit;
+    except
+      ;
+    end;
   end;
   Result := nil;
 end;
@@ -4276,12 +4276,14 @@ var
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
   if IModuleServices <> nil then
+  begin
     for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
       IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProject, Result) then
         Exit;
     end;
+  end;
   Result := nil;
 end;
 

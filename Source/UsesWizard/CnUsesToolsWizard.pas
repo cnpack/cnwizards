@@ -1563,7 +1563,9 @@ end;
 procedure TCnUsesToolsWizard.SubActionUpdate(Index: Integer);
 begin
   if (Index = FIdCleaner) or (Index = FIdInitTree) then
-    SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil;
+    SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil
+  else if Index = FIdProjImplUse then
+    SubActions[Index].Enabled := CnOtaGetCurrentProject <> nil
 end;
 
 procedure TCnUsesToolsWizard.InitTreeExecute;
