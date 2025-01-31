@@ -1967,7 +1967,7 @@ var
     NameList: TStringList;
     HasUses: Boolean;
     LinearPos: Integer;
-    Ins: string;
+    Ins: TCnIdeTokenString;
   begin
     Result := False;
     // 打开单个源文件，解析 intf 和 impl 里是否引用了 AUnit，如无则引用上
@@ -2009,7 +2009,7 @@ var
         NameList.Clear;
         NameList.Add(AUnit);
 
-        Ins := JoinUsesOrInclude(False, HasUses, False, NameList);
+        Ins := TCnIdeTokenString(JoinUsesOrInclude(False, HasUses, False, NameList));
 
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('UsesTools Project File Insert Content %s', [Ins]);
