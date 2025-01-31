@@ -1759,6 +1759,7 @@ TCnObjInspectorConfigForm.btnCancel.Caption=&Abbruch
 TCnObjInspectorConfigForm.btnHelp.Caption=&Hilfe
 TCnObjInspectorConfigForm.btnOK.Caption=&OK
 TCnObjInspectorConfigForm.Caption=Konfiguration des Object Inspector Verbesserungen
+TCnObjInspectorConfigForm.chkChangeFontSize.Caption=Ändere die Schriftgröße des Objektinspektors zu
 TCnObjInspectorConfigForm.chkCommentWindow.Caption=Füge "Kommentarfenster" zum Popupmenü des Object Inspectors hinzu.
 TCnObjInspectorConfigForm.chkEnhancePaint.Caption=Verbessere die Zeichnung des Eigenschafteneditors (nur Delphi 5).
 TCnObjInspectorConfigForm.chkShowGridLine.Caption=Zeige Gitterlinien des Object Inspectors (nur Delphi 6/7).

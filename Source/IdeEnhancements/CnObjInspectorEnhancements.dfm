@@ -3,15 +3,16 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
   Top = 160
   BorderStyle = bsDialog
   Caption = 'Object Inspector Enhancements Wizard Settings'
-  ClientHeight = 181
+  ClientHeight = 205
   ClientWidth = 372
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object grpSettings: TGroupBox
     Left = 8
     Top = 8
     Width = 354
-    Height = 128
+    Height = 152
     Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = '&Settings'
     TabOrder = 0
@@ -47,10 +48,29 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
       Caption = 'Show Object Inspector Grid Lines (BDS 2005 Above Only).'
       TabOrder = 2
     end
+    object chkChangeFontSize: TCheckBox
+      Left = 16
+      Top = 120
+      Width = 241
+      Height = 17
+      Caption = 'Change Object Inspector Font Size to'
+      TabOrder = 4
+      OnClick = chkChangeFontSizeClick
+    end
+    object seFontSize: TCnSpinEdit
+      Left = 280
+      Top = 120
+      Width = 65
+      Height = 22
+      MaxValue = 120
+      MinValue = 8
+      TabOrder = 5
+      Value = 8
+    end
   end
   object btnOK: TButton
     Left = 123
-    Top = 149
+    Top = 173
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -61,7 +81,7 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
   end
   object btnCancel: TButton
     Left = 205
-    Top = 149
+    Top = 173
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -72,7 +92,7 @@ inherited CnObjInspectorConfigForm: TCnObjInspectorConfigForm
   end
   object btnHelp: TButton
     Left = 286
-    Top = 149
+    Top = 173
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]

@@ -1759,6 +1759,7 @@ TCnObjInspectorConfigForm.btnCancel.Caption=取消(&C)
 TCnObjInspectorConfigForm.btnHelp.Caption=帮助(&H)
 TCnObjInspectorConfigForm.btnOK.Caption=确定(&O)
 TCnObjInspectorConfigForm.Caption=对象查看器扩展专家设置
+TCnObjInspectorConfigForm.chkChangeFontSize.Caption=修改对象查看器字体的字号为
 TCnObjInspectorConfigForm.chkCommentWindow.Caption=在对象查看器右键菜单中增加“备注窗口”菜单项。
 TCnObjInspectorConfigForm.chkEnhancePaint.Caption=增强绘制属性编辑器（仅适用于 Delphi 5）。
 TCnObjInspectorConfigForm.chkShowGridLine.Caption=显示对象查看器网格线（仅适用于 Delphi 6/7）。

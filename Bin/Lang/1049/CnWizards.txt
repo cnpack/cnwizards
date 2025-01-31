@@ -1759,6 +1759,7 @@ TCnObjInspectorConfigForm.btnCancel.Caption=Отмена
 TCnObjInspectorConfigForm.btnHelp.Caption=Справка
 TCnObjInspectorConfigForm.btnOK.Caption=&OK
 TCnObjInspectorConfigForm.Caption=Настройки мастера улучшения инспектора объектов
+TCnObjInspectorConfigForm.chkChangeFontSize.Caption=Изменить размер шрифта инспектора объектов на
 TCnObjInspectorConfigForm.chkCommentWindow.Caption=Добавить "Окно комментариев" в контекстное меню инспектора объектов
 TCnObjInspectorConfigForm.chkEnhancePaint=Улучшить отрисовку редактора свойств (только Delphi 5)
 TCnObjInspectorConfigForm.chkShowGridLine=Показывать линии сетки инспектора объектов (только Delphi 6/7)

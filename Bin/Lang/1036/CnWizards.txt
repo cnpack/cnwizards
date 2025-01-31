@@ -1760,6 +1760,7 @@ TCnObjInspectorConfigForm.btnHelp.Caption=&Aide
 TCnObjInspectorConfigForm.btnOK.Caption=&OK
 TCnObjInspectorConfigForm.Caption=Object Inspector Enhancements Wizard Settings
 TCnObjInspectorConfigForm.Caption=Réglages de l'Assistant d'amélioration de l'inspecteur d'objets
+TCnObjInspectorConfigForm.chkChangeFontSize.Caption=Changer la taille de police de l'inspecteur d'objets à
 TCnObjInspectorConfigForm.chkCommentWindow.Caption=Ajouter une "Fenêtre de commentaire" dans le menu contextuel de l'inspecteur d'objets.
 TCnObjInspectorConfigForm.chkEnhancePaint.Caption=Améliorer le dessin de l'éditeur de propriétés (Delphi 5 seulement).
 TCnObjInspectorConfigForm.chkShowGridLine.Caption=Afficher les lignes de grille de l'inspecteur d'objets (Delphi 6/7 seulement).

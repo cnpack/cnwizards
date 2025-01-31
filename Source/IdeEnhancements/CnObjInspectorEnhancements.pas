@@ -54,7 +54,7 @@ uses
   DsgnIntf,
 {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMultiLang, CnWizMethodHook, CnIni,
-  CnObjInspectorCommentFrm, CnMenuHook;
+  CnObjInspectorCommentFrm, CnMenuHook, CnSpin;
 
 type
   TCnObjInspectorEnhanceWizard = class(TCnIDEEnhanceWizard)
@@ -66,6 +66,9 @@ type
     FCommentWindowMenu: TCnMenuItemDef;
     FCommentForm: TCnObjInspectorCommentForm;
     FCommentFont: TFont;
+    FChangeFontSize: Boolean;
+    FOriginalSize: Integer;
+    FFontSize: Integer;
     procedure HookPropEditor;
     procedure UnhookPropEditor;
     procedure SetEnhancePaint(const Value: Boolean);
@@ -76,11 +79,15 @@ type
     function GetShowGridLineBDS: Boolean;
     procedure SetShowGridLineBDS(const Value: Boolean);
     procedure SetCommentFont(const Value: TFont);
+    procedure SetChangeFontSize(const Value: Boolean);
+    procedure SetFontSize(const Value: Integer);
   protected
     procedure HookObjectInspectorMenu;
     procedure ActiveFormChanged(Sender: TObject);
+    procedure ObjectInspectorCreated(Sender: TObject);
     procedure OnCommentWindowClick(Sender: TObject);
     procedure OnMenuAfterPopup(Sender: TObject; Menu: TPopupMenu);
+    procedure UpdateObjectInspectorFontSize;
     function GetHasConfig: Boolean; override;
     procedure SetActive(Value: Boolean); override;
   public
@@ -108,6 +115,11 @@ type
     {* 是否显示对象查看器备注窗体}
     property CommentFont: TFont read FCommentFont write SetCommentFont;
     {* 字体}
+
+    property ChangeFontSize: Boolean read FChangeFontSize write SetChangeFontSize;
+    {* 是否修改对象查看器的显示字号}
+    property FontSize: Integer read FFontSize write SetFontSize;
+    {* 修改时，所设置的对象查看器的显示字号}
   end;
 
   TCnObjInspectorConfigForm = class(TCnTranslateForm)
@@ -119,7 +131,11 @@ type
     chkCommentWindow: TCheckBox;
     chkShowGridLine: TCheckBox;
     chkShowGridLineBDS: TCheckBox;
+    chkChangeFontSize: TCheckBox;
+    seFontSize: TCnSpinEdit;
     procedure btnHelpClick(Sender: TObject);
+    procedure chkChangeFontSizeClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
 
   protected
@@ -137,7 +153,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnCommon, CnObjectInspectorWrapper, CnWizNotifier;
+  CnCommon, CnObjectInspectorWrapper, CnWizNotifier, CnWizIdeUtils;
 
 const
   csEnhancePaint = 'EnhancePaint';
@@ -145,6 +161,8 @@ const
   csShowGridLineBDS = 'ShowGridLineBDS';
   csShowCommentMenu = 'ShowCommentMenu';
   csCommentFont = 'CommentFont';
+  csChangeFontSize = 'ChangeFontSize';
+  csFontSize = 'FontSize';
 
 {$IFDEF COMPILER5}
 
@@ -291,12 +309,15 @@ begin
   FMenuHook := TCnMenuHook.Create(nil);
   HookObjectInspectorMenu;
 
+  FFontSize := 12; // 如果改变字号，默认为 12
   FCommentFont := TFont.Create;
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+  ObjectInspectorWrapper.AddObjectInspectorCreatedNotifier(ObjectInspectorCreated);
 end;
 
 destructor TCnObjInspectorEnhanceWizard.Destroy;
 begin
+  ObjectInspectorWrapper.RemoveObjectInspectorCreatedNotifier(ObjectInspectorCreated);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   FCommentFont.Free;
 
@@ -343,6 +364,9 @@ begin
 {$ENDIF}
     ShowCommentMenu := ReadBool('', csShowCommentMenu, False);
     ReadFont('', csCommentFont, FCommentFont);
+
+    ChangeFontSize := ReadBool('', csChangeFontSize, False);
+    FontSize := ReadInteger('', csFontSize, FFontSize);
   finally
     Free;
   end;
@@ -361,6 +385,9 @@ begin
 {$ENDIF}
     WriteBool('', csShowCommentMenu, FShowCommentMenu);
     WriteFont('', csCommentFont, FCommentFont);
+
+    WriteBool('', csChangeFontSize, FChangeFontSize);
+    WriteInteger('', csFontSize, FFontSize);
   finally
     Free;
   end;
@@ -370,6 +397,8 @@ procedure TCnObjInspectorEnhanceWizard.SetActive(Value: Boolean);
 begin
   inherited;
   AllowHook := Value and FEnhancePaint;
+  UpdateObjectInspectorFontSize;
+  FMenuHook.Active := ShowCommentMenu and Value;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.Config;
@@ -393,6 +422,9 @@ begin
 
     chkCommentWindow.Checked := ShowCommentMenu;
 
+    chkChangeFontSize.Checked := ChangeFontSize;
+    seFontSize.Value := FontSize;
+
     if ShowModal = mrOk then
     begin
 {$IFDEF COMPILER5}
@@ -405,6 +437,9 @@ begin
       ShowGridLine := chkShowGridLine.Checked;
 {$ENDIF}
       ShowCommentMenu := chkCommentWindow.Checked;
+
+      ChangeFontSize := chkChangeFontSize.Checked;
+      FontSize := seFontSize.Value;
     end;
   end;
 end;
@@ -491,7 +526,7 @@ begin
   if FShowCommentMenu <> Value then
   begin
     FShowCommentMenu := Value;
-    FMenuHook.Active := FShowCommentMenu;
+    FMenuHook.Active := FShowCommentMenu and Active;
   end;
 end;
 
@@ -562,6 +597,51 @@ begin
   end;
 end;
 
+procedure TCnObjInspectorEnhanceWizard.SetChangeFontSize(const Value: Boolean);
+begin
+  if Value <> FChangeFontSize then
+  begin
+    FChangeFontSize := Value;
+    UpdateObjectInspectorFontSize;
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.SetFontSize(const Value: Integer);
+begin
+  if FFontSize <> Value then
+  begin
+    FFontSize := Value;
+    UpdateObjectInspectorFontSize;
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.UpdateObjectInspectorFontSize;
+begin
+  if GetObjectInspectorForm = nil then
+    Exit;
+
+  if FChangeFontSize and Active then
+  begin
+    // 由不改到改
+    if FOriginalSize = 0 then
+      FOriginalSize := GetObjectInspectorForm.Font.Size; // 第一次记录的必然是原始尺寸
+
+    GetObjectInspectorForm.Font.Size := FFontSize;
+  end
+  else
+  begin
+    // 由改到不改
+    if FOriginalSize >= 8 then
+      GetObjectInspectorForm.Font.Size := FOriginalSize;
+  end;
+end;
+
+procedure TCnObjInspectorEnhanceWizard.ObjectInspectorCreated(
+  Sender: TObject);
+begin
+  UpdateObjectInspectorFontSize;
+end;
+
 { TCnObjInspectorConfigForm }
 
 function TCnObjInspectorConfigForm.GetHelpTopic: string;
@@ -572,6 +652,16 @@ end;
 procedure TCnObjInspectorConfigForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnObjInspectorConfigForm.chkChangeFontSizeClick(Sender: TObject);
+begin
+  seFontSize.Enabled := chkChangeFontSize.Checked;
+end;
+
+procedure TCnObjInspectorConfigForm.FormShow(Sender: TObject);
+begin
+  chkChangeFontSizeClick(chkChangeFontSize);
 end;
 
 initialization
