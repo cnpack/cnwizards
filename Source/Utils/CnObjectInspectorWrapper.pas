@@ -28,7 +28,9 @@ unit CnObjectInspectorWrapper;
 * 开发平台：Win7 + Delphi 5.01
 * 兼容测试：Win7 + D5/2007/2009
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 修改记录：2025.01.05 V1.0
+* 修改记录：2025.01.31 V1.1
+*               增加对象查看器创建的通知
+*           2025.01.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -51,6 +53,7 @@ type
     FListEventHook: TCnEventHook;       // 挂接属性列表选择改变事件
     FTabEventHook: TCnEventHook;        // 挂接属性事件 Tab 切换事件
     FSelectionChangeNotifiers: TList;
+    FObjectInspectorCreatedNotifiers: TList;
     function GetActiveComponentName: string;
     function GetActiveComponentType: string;
     function GetActivePropName: string;
@@ -71,6 +74,11 @@ type
     {* 增加一个选中改变的通知}
     procedure RemoveSelectionChangeNotifier(Notifier: TNotifyEvent);
     {* 删除一个选中改变的通知}
+
+    procedure AddObjectInspectorCreatedNotifier(Notifier: TNotifyEvent);
+    {* 增加一个对象查看器创建的通知，源于对象查看器可能 IDE 启动后的很久以后才创建}
+    procedure RemoveObjectInspectorCreatedNotifier(Notifier: TNotifyEvent);
+    {* 删除一个对象查看器创建的通知}
 
     procedure RepaintPropList;
     {* 重绘列表}
@@ -119,6 +127,24 @@ begin
   CnWizAddNotifier(FSelectionChangeNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnObjectInspectorWrapper.RemoveSelectionChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizRemoveNotifier(FSelectionChangeNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnObjectInspectorWrapper.AddObjectInspectorCreatedNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizAddNotifier(FObjectInspectorCreatedNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnObjectInspectorWrapper.RemoveObjectInspectorCreatedNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizRemoveNotifier(FObjectInspectorCreatedNotifiers, TMethod(Notifier));
+end;
+
 procedure TCnObjectInspectorWrapper.CheckObjectInspector;
 begin
   if (FObjectInspectorForm = nil) or (FPropListBox = nil) then
@@ -129,6 +155,7 @@ constructor TCnObjectInspectorWrapper.Create;
 begin
   inherited;
   FSelectionChangeNotifiers := TList.Create;
+  FObjectInspectorCreatedNotifiers := TList.Create;
 
   InitObjectInspector;
 
@@ -141,6 +168,7 @@ begin
 
   FTabEventHook.Free;
   FListEventHook.Free;
+  CnWizClearAndFreeList(FObjectInspectorCreatedNotifiers);
   CnWizClearAndFreeList(FSelectionChangeNotifiers);
   inherited;
 end;
@@ -280,12 +308,6 @@ begin
   end;
 end;
 
-procedure TCnObjectInspectorWrapper.RemoveSelectionChangeNotifier(
-  Notifier: TNotifyEvent);
-begin
-  CnWizRemoveNotifier(FSelectionChangeNotifiers, TMethod(Notifier));
-end;
-
 procedure TCnObjectInspectorWrapper.RepaintPropList;
 begin
   if FPropListBox <> nil then
@@ -349,8 +371,26 @@ begin
 end;
 
 procedure TCnObjectInspectorWrapper.ActiveFormChanged(Sender: TObject);
+var
+  I: Integer;
+  IsNil: Boolean;
 begin
+  IsNil := FObjectInspectorForm = nil;
   CheckObjectInspector;
+  if FObjectInspectorForm <> nil then
+  begin
+    // 通知检测到了对象查看器的创建
+    if FObjectInspectorCreatedNotifiers <> nil then
+    begin
+      for I := FObjectInspectorCreatedNotifiers.Count - 1 downto 0 do
+      try
+        with PCnWizNotifierRecord(FObjectInspectorCreatedNotifiers[I])^ do
+          TNotifyEvent(Notifier)(Sender);
+      except
+        DoHandleException('TCnObjectInspectorWrapper.ObjectInspectorCreated[' + IntToStr(I) + ']');
+      end;
+    end;
+  end;
 end;
 
 initialization
