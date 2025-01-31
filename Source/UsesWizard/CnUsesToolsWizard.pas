@@ -165,6 +165,8 @@ type
 
     procedure Execute; override;
     procedure AcquireSubActions; override;
+
+    function IsValidUnitName(const AUnitName: string): Boolean;
   end;
 
 {$ENDIF CNWIZARDS_CNUSESTOOLS}
@@ -2041,7 +2043,12 @@ begin
   U := FProjImplUnit;
   if CnWizInputQuery(SCnInformation, SCnUsesToolsProjImplPrompt, U) then
   begin
-    // TODO: 判断 U 是否合法，不合法则退出
+    // 判断 U 是否合法，不合法则退出
+    if not IsValidUnitName(U) then
+    begin
+      ErrorDlg(SCnUsesToolsProjImplErrorUnit);
+      Exit;
+    end;
 
     FProjImplUnit := U;
     F := TStringList.Create;
@@ -2081,6 +2088,34 @@ end;
 procedure TCnUsesCleanerForm.rbCurrUnitClick(Sender: TObject);
 begin
   chkProcessDependencies.Enabled := not rbCurrUnit.Checked;
+end;
+
+function TCnUsesToolsWizard.IsValidUnitName(const AUnitName: string): Boolean;
+const
+  Alpha = ['A'..'Z', 'a'..'z', '_'];
+  AlphaNumeric = Alpha + ['0'..'9', '.'];
+var
+  I: Integer;
+begin
+  Result := False;
+{$IFDEF UNICODE} // Unicode Identifier Supports
+  if (Length(AUnitName) = 0) or not (CharInSet(AUnitName[1], Alpha) or (Ord(AUnitName[1]) > 127)) then
+    Exit;
+  for I := 2 to Length(AUnitName) do
+  begin
+    if not (CharInSet(AUnitName[I], AlphaNumeric) or (Ord(AUnitName[I]) > 127)) then
+      Exit;
+  end;
+{$ELSE}
+  if (Length(AUnitName) = 0) or not CharInSet(AUnitName[1], Alpha) then
+    Exit;
+  for I := 2 to Length(AUnitName) do
+  begin
+    if not CharInSet(AUnitName[I], AlphaNumeric) then
+      Exit;
+  end;
+{$ENDIF}
+  Result := True;
 end;
 
 initialization

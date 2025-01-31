@@ -119,7 +119,6 @@ type
     procedure SetRenameShortCut(const Value: TShortCut);
   protected
     procedure SetActive(Value: Boolean);
-    function IsValidRenameIdent(const Ident: string): Boolean;
     procedure DoEnhConfig;
     function DoAutoMatchEnter(View: IOTAEditView; Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean): Boolean;
@@ -168,6 +167,7 @@ type
     procedure ResetSettings(Ini: TCustomIniFile);
     procedure LanguageChanged(Sender: TObject);
 
+    function IsValidRenameIdent(const Ident: string): Boolean;
   published
     property Active: Boolean read FActive write SetActive;
     property SmartCopy: Boolean read FSmartCopy write FSmartCopy;
@@ -3663,11 +3663,18 @@ begin
   if (Length(Ident) = 0) or not (CharInSet(Ident[1], Alpha) or (Ord(Ident[1]) > 127)) then
     Exit;
   for I := 2 to Length(Ident) do
+  begin
     if not (CharInSet(Ident[I], AlphaNumeric) or (Ord(Ident[I]) > 127)) then
       Exit;
+  end;
 {$ELSE}
-  if (Length(Ident) = 0) or not CharInSet(Ident[1], Alpha) then Exit;
-  for I := 2 to Length(Ident) do if not CharInSet(Ident[I], AlphaNumeric) then Exit;
+  if (Length(Ident) = 0) or not CharInSet(Ident[1], Alpha) then
+    Exit;
+  for I := 2 to Length(Ident) do
+  begin
+    if not CharInSet(Ident[I], AlphaNumeric) then
+      Exit;
+  end;
 {$ENDIF}
   Result := True;
 end;
