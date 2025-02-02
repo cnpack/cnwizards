@@ -63,7 +63,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 uses
   Windows, SysUtils, Messages, Classes, Forms, IniFiles, ToolsAPI, Controls,
@@ -80,7 +80,7 @@ type
 // Align Size 设置工具
 //==============================================================================
 
-{ TCnAlignSizeWizard }
+{ TCnDesignWizard }
 
   TCnAlignSizeStyle = (
     asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
@@ -100,7 +100,7 @@ type
 
   TNonMoveStyle = (msLeftTop, msRightTop, msLeftBottom, msRightBottom, msCenter);
 
-  TCnAlignSizeWizard = class(TCnSubMenuWizard)
+  TCnDesignWizard = class(TCnSubMenuWizard)
   private
     Indexes: array[TCnAlignSizeStyle] of Integer;
     FHideNonVisual: Boolean;
@@ -245,11 +245,11 @@ type
 
   end;
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 uses
 {$IFDEF DEBUG}
@@ -374,9 +374,9 @@ const
 type
   TCnDesignScriptSettingChangedReceiver = class(TInterfacedObject, ICnEventBusReceiver)
   private
-    FWizard: TCnAlignSizeWizard;
+    FWizard: TCnDesignWizard;
   public
-    constructor Create(AWizard: TCnAlignSizeWizard);
+    constructor Create(AWizard: TCnDesignWizard);
     destructor Destroy; override;
 
     procedure OnEvent(Event: TCnEvent);
@@ -457,9 +457,9 @@ end;
 // Align Size 设置工具
 //==============================================================================
 
-{ TCnAlignSizeWizard }
+{ TCnDesignWizard }
 
-constructor TCnAlignSizeWizard.Create;
+constructor TCnDesignWizard.Create;
 begin
   inherited;
   FUpdateControlList := TList.Create;
@@ -478,7 +478,7 @@ begin
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotifier);
 end;
 
-destructor TCnAlignSizeWizard.Destroy;
+destructor TCnDesignWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotifier);
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
@@ -499,7 +499,7 @@ end;
 // 组件对齐缩放处理
 //------------------------------------------------------------------------------
 
-procedure TCnAlignSizeWizard.ControlListSortByProp(List: TList; ProName: string;
+procedure TCnDesignWizard.ControlListSortByProp(List: TList; ProName: string;
   Desc: Boolean);
 begin
   _ProName := ProName;
@@ -507,21 +507,21 @@ begin
   List.Sort(DoSortByProp);
 end;
 
-procedure TCnAlignSizeWizard.ControlListSortByPos(List: TList; IsVert, Desc: Boolean);
+procedure TCnDesignWizard.ControlListSortByPos(List: TList; IsVert, Desc: Boolean);
 begin
   _IsVert := IsVert;
   _Desc := Desc;
   List.Sort(DoSortByPos);
 end;
 
-procedure TCnAlignSizeWizard.CompListSortByPos(List: TList; IsVert, Desc: Boolean);
+procedure TCnDesignWizard.CompListSortByPos(List: TList; IsVert, Desc: Boolean);
 begin
   _IsVert := IsVert;
   _Desc := Desc;
   List.Sort(DoSortNonVisualByPos);
 end;
 
-procedure TCnAlignSizeWizard.DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
+procedure TCnDesignWizard.DoAlignSize(AlignSizeStyle: TCnAlignSizeStyle);
 var
   I, AWidth, AHeight, ALeft, ATop: Integer;
   AParent, ALeftComp, ARightComp: TComponent;
@@ -1046,7 +1046,7 @@ end;
 // 隐藏不可视组件
 //------------------------------------------------------------------------------
 
-procedure TCnAlignSizeWizard.HideNonvisualComponent;
+procedure TCnDesignWizard.HideNonvisualComponent;
 begin
   if Assigned(FIDEHideNonvisualsMenu) then // 如果 IDE 有此功能
   begin
@@ -1062,7 +1062,7 @@ begin
     ErrorDlg(SCnHideNonVisualNotSupport);
 end;
 
-function TCnAlignSizeWizard.UpdateNonVisualComponent(
+function TCnDesignWizard.UpdateNonVisualComponent(
   FormEditor: IOTAFormEditor): Boolean;
 var
   Component: IOTAComponent;
@@ -1114,7 +1114,7 @@ begin
   end;
 end;
 
-procedure TCnAlignSizeWizard.FormEditorNotifier(FormEditor: IOTAFormEditor;
+procedure TCnDesignWizard.FormEditorNotifier(FormEditor: IOTAFormEditor;
   NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
   Component: TComponent; const OldName, NewName: string);
 begin
@@ -1132,7 +1132,7 @@ begin
   end;
 end;
 
-procedure TCnAlignSizeWizard.LockMenuExecuteReLock(Sender: TObject);
+procedure TCnDesignWizard.LockMenuExecuteReLock(Sender: TObject);
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('LockMenuExecute to Re-Lock.');
@@ -1151,7 +1151,7 @@ end;
 // 排列不可视组件
 //------------------------------------------------------------------------------
 
-procedure TCnAlignSizeWizard.NonVisualArrange;
+procedure TCnDesignWizard.NonVisualArrange;
 begin
   with TCnNonArrangeForm.Create(nil) do
   begin
@@ -1190,7 +1190,7 @@ begin
     Result := CompareText(TComponent(Item1).Name, TComponent(Item2).Name);
 end;
 
-function TCnAlignSizeWizard.GetDesignerForm: TCustomForm;
+function TCnDesignWizard.GetDesignerForm: TCustomForm;
 var
 {$IFDEF COMPILER6_UP}
   FormDesigner: IDesigner;
@@ -1221,7 +1221,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnAlignSizeWizard.ArrangeNonVisualComponents;
+procedure TCnDesignWizard.ArrangeNonVisualComponents;
 var
   CompList: TList;
   I, Rows, Cols, cRow, cCol: Integer;
@@ -1359,7 +1359,7 @@ begin
   end;
 end;
 
-function TCnAlignSizeWizard.GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
+function TCnDesignWizard.GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
 var
   FormEditor: IOTAFormEditor;
   RootComponent: IOTAComponent;
@@ -1398,7 +1398,7 @@ begin
   Result := List.Count > 0;
 end;
 
-function TCnAlignSizeWizard.GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
+function TCnDesignWizard.GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
 var
   FormEditor: IOTAFormEditor;
   IComponent: IOTAComponent;
@@ -1434,7 +1434,7 @@ begin
   Result := List.Count > 0;
 end;
 
-function TCnAlignSizeWizard.GetComponentGeneralPos(Component: TComponent): TPoint;
+function TCnDesignWizard.GetComponentGeneralPos(Component: TComponent): TPoint;
 var
   P: TSmallPoint;
 begin
@@ -1458,7 +1458,7 @@ begin
   end;
 end;
 
-procedure TCnAlignSizeWizard.SetComponentGeneralPos(Form: TCustomForm;
+procedure TCnDesignWizard.SetComponentGeneralPos(Form: TCustomForm;
   Component: TComponent; APos: TPoint);
 begin
   if Component is TControl then // VCL 的 Control
@@ -1479,7 +1479,7 @@ begin
   end;
 end;
 
-procedure TCnAlignSizeWizard.SetNonVisualPos(Form: TCustomForm;
+procedure TCnDesignWizard.SetNonVisualPos(Form: TCustomForm;
   Component: TComponent; X, Y: Integer);
 var
   P: TSmallPoint;
@@ -1633,7 +1633,7 @@ end;
 // 显示浮动工具面板
 //------------------------------------------------------------------------------
 
-procedure TCnAlignSizeWizard.ShowFlatForm;
+procedure TCnDesignWizard.ShowFlatForm;
 var
   Wizard: TCnIDEEnhanceWizard;
 begin
@@ -1646,7 +1646,7 @@ end;
 // 专家调用方法
 //------------------------------------------------------------------------------
 
-procedure TCnAlignSizeWizard.AcquireSubActions;
+procedure TCnDesignWizard.AcquireSubActions;
 var
   Style: TCnAlignSizeStyle;
 
@@ -1674,7 +1674,7 @@ begin
 end;
 
 // 子菜单执行过程
-procedure TCnAlignSizeWizard.SubActionExecute(Index: Integer);
+procedure TCnDesignWizard.SubActionExecute(Index: Integer);
 var
   Style: TCnAlignSizeStyle;
 begin
@@ -1689,7 +1689,7 @@ begin
 end;
 
 // Action 状态更新
-procedure TCnAlignSizeWizard.SubActionUpdate(Index: Integer);
+procedure TCnDesignWizard.SubActionUpdate(Index: Integer);
 var
   CtrlCount, CompCount: Integer;
   Style: TCnAlignSizeStyle;
@@ -1794,14 +1794,14 @@ end;
 //------------------------------------------------------------------------------
 
 // 显示配置窗口
-procedure TCnAlignSizeWizard.Config;
+procedure TCnDesignWizard.Config;
 begin
   if ShowShortCutDialog('CnAlignSizeConfig') then
     DoSaveSettings;
 end;
 
 // 装载专家设置
-procedure TCnAlignSizeWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnDesignWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
   FNonArrangeStyle := TNonArrangeStyle(Ini.ReadInteger('', csNonArrangeStyle, Ord(asRow)));
@@ -1817,7 +1817,7 @@ begin
 end;
 
 // 保存专家设置
-procedure TCnAlignSizeWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnDesignWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
   Ini.WriteInteger('', csNonArrangeStyle, Ord(FNonArrangeStyle));
@@ -1833,25 +1833,25 @@ begin
 end;
 
 // 取专家菜单标题
-function TCnAlignSizeWizard.GetCaption: string;
+function TCnDesignWizard.GetCaption: string;
 begin
   Result := SCnDesignWizardMenuCaption;
 end;
 
 // 取专家是否有设置窗口
-function TCnAlignSizeWizard.GetHasConfig: Boolean;
+function TCnDesignWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
 // 取专家按钮提示
-function TCnAlignSizeWizard.GetHint: string;
+function TCnDesignWizard.GetHint: string;
 begin
   Result := SCnDesignWizardMenuHint;
 end;
 
 // 返回专家状态
-function TCnAlignSizeWizard.GetState: TWizardState;
+function TCnDesignWizard.GetState: TWizardState;
 begin
   if Active and CurrentIsForm then
     Result := [wsEnabled] // 当前编辑的文件是窗体时才启用
@@ -1860,7 +1860,7 @@ begin
 end;
 
 // 返回专家信息
-class procedure TCnAlignSizeWizard.GetWizardInfo(var Name, Author, Email,
+class procedure TCnDesignWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);
 begin
   Name := SCnDesignWizardName;
@@ -1871,7 +1871,7 @@ begin
   Comment := SCnDesignWizardComment;
 end;
 
-function TCnAlignSizeWizard.GetSearchContent: string;
+function TCnDesignWizard.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent;
   Result := Result + '窗体,设计,对齐,排列,组件,浮动工具面板,缩放,尺寸,栅格,水平,垂直,高度,宽度,' +
@@ -1881,7 +1881,7 @@ end;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
 
-procedure TCnAlignSizeWizard.CheckMenuBarReady(Sender: TObject);
+procedure TCnDesignWizard.CheckMenuBarReady(Sender: TObject);
 var
   Comp: TComponent;
   I: Integer;
@@ -1900,7 +1900,7 @@ begin
       begin
         FEditMenuActionControl := Comp as TCustomActionControl;
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TCnAlignSizeWizard EditMenuActionControl Got.');
+        CnDebugger.LogMsg('TCnDesignWizard EditMenuActionControl Got.');
 {$ENDIF}
         Break;
       end;
@@ -1910,7 +1910,7 @@ end;
 
 {$ENDIF}
 
-procedure TCnAlignSizeWizard.CheckMenuItemReady(Sender: TObject);
+procedure TCnDesignWizard.CheckMenuItemReady(Sender: TObject);
 begin
   if FIDELockControlsMenu = nil then
     FIDELockControlsMenu := TMenuItem(Application.MainForm.FindComponent(SIDELockControlsMenuName));
@@ -1921,7 +1921,7 @@ begin
 end;
 
 
-procedure TCnAlignSizeWizard.RequestLockControlsMenuUpdate(Sender: TObject);
+procedure TCnDesignWizard.RequestLockControlsMenuUpdate(Sender: TObject);
 begin
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
   CheckMenuBarReady(nil);
@@ -1933,14 +1933,14 @@ begin
       FIDEMenuBar.OnPopup(FIDEMenuBar, FEditMenuActionControl);
 {$IFDEF DEBUG}
       CnDebugger.LogBoolean(FIDELockControlsMenu.Checked,
-        'TCnAlignSizeWizard RequestLockControlsMenuUpdate Call MenuBar.OnPopup. IDELockControlsMenu.Checked');
+        'TCnDesignWizard RequestLockControlsMenuUpdate Call MenuBar.OnPopup. IDELockControlsMenu.Checked');
 {$ENDIF}
     end;
   end;
 {$ENDIF}
 end;
 
-procedure TCnAlignSizeWizard.RequestNonvisualsMenuUpdate(Sender: TObject);
+procedure TCnDesignWizard.RequestNonvisualsMenuUpdate(Sender: TObject);
 begin
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
   CheckMenuBarReady(nil);
@@ -1952,7 +1952,7 @@ begin
       FIDEMenuBar.OnPopup(FIDEMenuBar, FEditMenuActionControl);
 {$IFDEF DEBUG}
       CnDebugger.LogBoolean(FIDEHideNonvisualsMenu.Checked,
-        'TCnAlignSizeWizard RequestNonvisualsMenuUpdate Call MenuBar.OnPopup. IDEToggleNonvisualsMenu.Checked');
+        'TCnDesignWizard RequestNonvisualsMenuUpdate Call MenuBar.OnPopup. IDEToggleNonvisualsMenu.Checked');
 {$ENDIF}
     end;
   end;
@@ -1962,7 +1962,7 @@ end;
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
 
-procedure TCnAlignSizeWizard.ScriptExecute(Sender: TObject);
+procedure TCnDesignWizard.ScriptExecute(Sender: TObject);
 var
   Idx: Integer;
   SW: TCnScriptWizard;
@@ -1984,7 +1984,7 @@ begin
   end;
 end;
 
-procedure TCnAlignSizeWizard.SyncScriptsDesignMenus;
+procedure TCnDesignWizard.SyncScriptsDesignMenus;
 var
   I: Integer;
   Ext: TCnContextMenuExecutor;
@@ -2018,13 +2018,13 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-procedure TCnAlignSizeWizard.Loaded;
+procedure TCnDesignWizard.Loaded;
 begin
   inherited;
   CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady);
 end;
 
-procedure TCnAlignSizeWizard.LaterLoaded;
+procedure TCnDesignWizard.LaterLoaded;
 begin
   inherited;
   CnWizNotifierServices.ExecuteOnApplicationIdle(CheckMenuItemReady); // 如果开始没找到，这儿再找一次
@@ -2033,7 +2033,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnAlignSizeWizard.ChangeComponentClass;
+procedure TCnDesignWizard.ChangeComponentClass;
 var
   I, J, K: Integer;
   ChComps: TInterfaceList;
@@ -2325,7 +2325,7 @@ end;
 { TCnDesignScriptSettingChangedReceiver }
 
 constructor TCnDesignScriptSettingChangedReceiver.Create(
-  AWizard: TCnAlignSizeWizard);
+  AWizard: TCnDesignWizard);
 begin
   inherited Create;
   FWizard := AWizard;
@@ -2352,7 +2352,7 @@ end;
 {$ENDIF}
 
 initialization
-  RegisterCnWizard(TCnAlignSizeWizard); // 注册专家
+  RegisterCnWizard(TCnDesignWizard); // 注册专家
 
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFDEF DEBUG}
@@ -2363,7 +2363,7 @@ initialization
   //  CnLoadIconProc := CnAfterLoadIcon;      // 效果不佳，暂时禁用
 {$ENDIF}
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 end.
 
 

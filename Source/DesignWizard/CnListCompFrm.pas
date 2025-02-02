@@ -41,7 +41,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
@@ -96,11 +96,11 @@ function CnListComponent(Ini: TCustomIniFile): Boolean;
 function CnListComponentForOne(Ini: TCustomIniFile): TComponent;
 {* 供外界调用以弹出界面并返回一个当前设计器上的组件}
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 {$R *.DFM}
 
@@ -464,5 +464,5 @@ begin
   end;
 end;
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 end.

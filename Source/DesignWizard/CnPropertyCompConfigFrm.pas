@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -73,11 +73,11 @@ type
 var
   CnPropertyCompConfigForm: TCnPropertyCompConfigForm;
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 
 implementation
 
-{$IFDEF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$IFDEF CNWIZARDS_CNDESIGNWIZARD}
 
 {$R *.DFM}
 
@@ -122,5 +122,5 @@ begin
   end;
 end;
 
-{$ENDIF CNWIZARDS_CNALIGNSIZEWIZARD}
+{$ENDIF CNWIZARDS_CNDESIGNWIZARD}
 end.

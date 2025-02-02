@@ -664,7 +664,7 @@ begin
   for I := 0 to CnWizardClassList.Count - 1 do
   begin
     W := TCnWizardClass(CnWizardClassList[I]);
-    if W.ClassNameIs('TCnAlignSizeWizard') then
+    if W.ClassNameIs('TCnDesignWizard') then
     begin
       CnWizardClassList.Delete(I);
       CnWizardClassList.Insert(0, W);
