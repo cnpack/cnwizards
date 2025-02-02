@@ -1967,7 +1967,6 @@ var
   function ProcessFile(const FileName: string; const AUnit: string): Boolean;
   var
     Stream, Dest: TMemoryStream;
-    Lex: TCnGeneralWidePasLex;
     NameList: TStringList;
     HasUses: Boolean;
     LinearPos: Integer;

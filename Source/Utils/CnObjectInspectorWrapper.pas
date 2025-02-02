@@ -28,7 +28,9 @@ unit CnObjectInspectorWrapper;
 * 开发平台：Win7 + Delphi 5.01
 * 兼容测试：Win7 + D5/2007/2009
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 修改记录：2025.01.31 V1.1
+* 修改记录：2025.02.02 V1.2
+*               增加对象查看器释放时同步释放引用及 Hook 的机制避免退出时出错
+*           2025.01.31 V1.1
 *               增加对象查看器创建的通知
 *           2025.01.05 V1.0
 *               创建单元
@@ -43,7 +45,7 @@ uses
   SysUtils, Classes, Controls, Forms, TypInfo, Menus, CnEventHook;
 
 type
-  TCnObjectInspectorWrapper = class
+  TCnObjectInspectorWrapper = class(TComponent)
   {* 对象查看器的封装}
   private
     FObjectInspectorForm: TCustomForm;  // 对象查看器窗体
@@ -66,8 +68,10 @@ type
     procedure TabChange(Sender: TObject);
     procedure CheckObjectInspector;
     procedure InitObjectInspector;
+
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
-    constructor Create; virtual;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     procedure AddSelectionChangeNotifier(Notifier: TNotifyEvent);
@@ -115,7 +119,7 @@ var
 function ObjectInspectorWrapper: TCnObjectInspectorWrapper;
 begin
   if FObjectInspectorWrapper = nil then
-    FObjectInspectorWrapper := TCnObjectInspectorWrapper.Create;
+    FObjectInspectorWrapper := TCnObjectInspectorWrapper.Create(nil);
   Result := FObjectInspectorWrapper;
 end;
 
@@ -151,9 +155,10 @@ begin
     InitObjectInspector;
 end;
 
-constructor TCnObjectInspectorWrapper.Create;
+constructor TCnObjectInspectorWrapper.Create(AOwner: TComponent);
 begin
   inherited;
+
   FSelectionChangeNotifiers := TList.Create;
   FObjectInspectorCreatedNotifiers := TList.Create;
 
@@ -164,6 +169,15 @@ end;
 
 destructor TCnObjectInspectorWrapper.Destroy;
 begin
+  if FObjectInspectorForm <> nil then
+    FObjectInspectorForm.RemoveFreeNotification(Self);
+  if FPropListBox <> nil then
+    FPropListBox.RemoveFreeNotification(Self);
+  if FTabControl <> nil then
+    FTabControl.RemoveFreeNotification(Self);
+  if FPopupMenu <> nil then
+    FPopupMenu.RemoveFreeNotification(Self);
+
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
 
   FTabEventHook.Free;
@@ -218,9 +232,13 @@ begin
 
   if FPropListBox <> nil then
   begin
-    PropInfo := GetPropInfo(FPropListBox, 'ShowGridLines');
-    if PropInfo <> nil then
-      Result := GetOrdProp(FPropListBox, 'ShowGridLines') <> 0;
+    try
+      PropInfo := GetPropInfo(FPropListBox, 'ShowGridLines');
+      if PropInfo <> nil then
+        Result := GetOrdProp(FPropListBox, 'ShowGridLines') <> 0;
+    except
+      ; // 万一 FreeNotification 没起作用，可能 IDE 关闭期间对象查看器释放了但 FPropListBox 还保留而出错，此处暂时屏蔽
+    end;
   end;
 end;
 
@@ -235,6 +253,7 @@ begin
   FObjectInspectorForm := GetObjectInspectorForm;
   if FObjectInspectorForm <> nil then
   begin
+    FObjectInspectorForm.FreeNotification(Self);
 {$IFDEF DEBUG}
     PropInfo := GetPropInfo(FObjectInspectorForm, 'ActiveComponentType');
     if PropInfo <> nil then
@@ -259,6 +278,7 @@ begin
       if C is TControl then
       begin
         FPropListBox := TControl(C);
+        FPropListBox.FreeNotification(Self);
 
 {$IFDEF DEBUG}
         PropInfo := GetPropInfo(FPropListBox, 'ShowGridLines');
@@ -286,6 +306,7 @@ begin
       if C is TControl then
       begin
         FTabControl := TControl(C);
+        FTabControl.FreeNotification(Self);
 
         // Hook 其 Change 事件
         FTabEventHook := TCnEventHook.Create(FTabControl, 'OnChange',
@@ -303,7 +324,10 @@ begin
     if C <> nil then
     begin
       if C is TPopupMenu then
+      begin
         FPopupMenu := TPopupMenu(C);
+        FPopupMenu.FreeNotification(Self);
+      end;
     end;
   end;
 end;
@@ -361,11 +385,15 @@ begin
   CheckObjectInspector;
   if FPropListBox <> nil then
   begin
-    PropInfo := GetPropInfo(FPropListBox, 'ShowGridLines');
-    if PropInfo <> nil then
-    begin
-      SetOrdProp(FPropListBox, 'ShowGridLines', Ord(Value));
-      FPropListBox.Repaint;
+    try
+      PropInfo := GetPropInfo(FPropListBox, 'ShowGridLines');
+      if PropInfo <> nil then
+      begin
+        SetOrdProp(FPropListBox, 'ShowGridLines', Ord(Value));
+        FPropListBox.Repaint;
+      end;
+    except
+      ; // 也屏蔽，怕万一
     end;
   end;
 end;
@@ -390,6 +418,30 @@ begin
         DoHandleException('TCnObjectInspectorWrapper.ObjectInspectorCreated[' + IntToStr(I) + ']');
       end;
     end;
+  end;
+end;
+
+procedure TCnObjectInspectorWrapper.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited;
+  if (AComponent = FObjectInspectorForm) or (AComponent = FPropListBox)
+    or (AComponent = FTabControl) or (AComponent = FPopupMenu) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Object Inspector Form Free Notification. Set Nil and UnHook.');
+{$ENDIF}
+
+    FObjectInspectorForm := nil;
+    FPropListBox := nil;
+    FTabControl := nil;
+    FPopupMenu := nil;
+
+    FreeAndNil(FListEventHook);
+    FreeAndNil(FTabEventHook);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Object Inspector Form Free Notification. Set Nil and UnHook OK.');
+{$ENDIF}
   end;
 end;
 

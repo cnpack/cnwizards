@@ -635,7 +635,6 @@ end;
 destructor TCnBookmarkForm.Destroy;
 begin
   FList.Free;
-  CnBookmarkForm := nil;
   inherited;
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnBookmarkForm.Destroy');
