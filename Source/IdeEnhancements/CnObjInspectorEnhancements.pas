@@ -61,10 +61,8 @@ type
   private
     FEnhancePaint: Boolean;
     FShowCommentMenu: Boolean;
-    FInspectorComment: Boolean;
     FMenuHook: TCnMenuHook;
     FCommentWindowMenu: TCnMenuItemDef;
-    FCommentForm: TCnObjInspectorCommentForm;
     FCommentFont: TFont;
     FChangeFontSize: Boolean;
     FOriginalSize: Integer;
@@ -72,7 +70,6 @@ type
     procedure HookPropEditor;
     procedure UnhookPropEditor;
     procedure SetEnhancePaint(const Value: Boolean);
-    procedure SetInspectorComment(const Value: Boolean);
     function GetShowGridLine: Boolean;
     procedure SetShowGridLine(const Value: Boolean);
     procedure SetShowCommentMenu(const Value: Boolean);
@@ -111,10 +108,8 @@ type
     property ShowCommentMenu: Boolean read FShowCommentMenu write SetShowCommentMenu;
     {* 是否在对象查看器的右键菜单里插入显示备注窗体的菜单项}
 
-    property InspectorComment: Boolean read FInspectorComment write SetInspectorComment;
-    {* 是否显示对象查看器备注窗体}
     property CommentFont: TFont read FCommentFont write SetCommentFont;
-    {* 字体}
+    {* 对象查看器备注窗体的字体}
 
     property ChangeFontSize: Boolean read FChangeFontSize write SetChangeFontSize;
     {* 是否修改对象查看器的显示字号}
@@ -153,7 +148,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnCommon, CnObjectInspectorWrapper, CnWizNotifier, CnWizIdeUtils;
+  CnCommon, CnObjectInspectorWrapper, CnWizNotifier, CnWizIdeUtils,
+  CnWizIdeDock;
 
 const
   csEnhancePaint = 'EnhancePaint';
@@ -313,17 +309,21 @@ begin
   FCommentFont := TFont.Create;
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   ObjectInspectorWrapper.AddObjectInspectorCreatedNotifier(ObjectInspectorCreated);
+
+  IdeDockManager.RegisterDockableForm(TCnObjInspectorCommentForm, CnObjInspectorCommentForm,
+    'CnObjInspectorCommentForm');
 end;
 
 destructor TCnObjInspectorEnhanceWizard.Destroy;
 begin
+  IdeDockManager.UnRegisterDockableForm(CnObjInspectorCommentForm, 'CnObjInspectorCommentForm');
+
   ObjectInspectorWrapper.RemoveObjectInspectorCreatedNotifier(ObjectInspectorCreated);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   FCommentFont.Free;
 
   FMenuHook.Free;
-  if FCommentForm <> nil then
-    FCommentForm.Free;
+  FreeAndNil(CnObjInspectorCommentForm);
 
   UnhookPropEditor;
   inherited;
@@ -394,11 +394,28 @@ begin
 end;
 
 procedure TCnObjInspectorEnhanceWizard.SetActive(Value: Boolean);
+var
+  Old: Boolean;
 begin
+  Old := Active;
   inherited;
   AllowHook := Value and FEnhancePaint;
   UpdateObjectInspectorFontSize;
   FMenuHook.Active := ShowCommentMenu and Value;
+
+  if Old <> Active then
+  begin
+    if Active then
+    begin
+      IdeDockManager.RegisterDockableForm(TCnObjInspectorCommentForm, CnObjInspectorCommentForm,
+        'CnObjInspectorCommentForm');
+    end
+    else
+    begin
+      IdeDockManager.UnRegisterDockableForm(CnObjInspectorCommentForm, 'CnObjInspectorCommentForm');
+      FreeAndNil(CnObjInspectorCommentForm);
+    end;
+  end;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.Config;
@@ -465,28 +482,6 @@ begin
   ObjectInspectorWrapper.RepaintPropList;
 end;
 
-procedure TCnObjInspectorEnhanceWizard.SetInspectorComment(const Value: Boolean);
-begin
-  FInspectorComment := Value;
-
-  if FInspectorComment then
-  begin
-    if FCommentForm = nil then
-    begin
-      FCommentForm := TCnObjInspectorCommentForm.Create(Application);
-      FCommentForm.Wizard := Self;
-      FCommentForm.SetCommentFont(FCommentFont);
-    end;
-    FCommentForm.VisibleWithParent := True;
-    FCommentForm.BringToFront;
-  end
-  else
-  begin
-    if FCommentForm <> nil then
-      FCommentForm.Hide;
-  end;
-end;
-
 function TCnObjInspectorEnhanceWizard.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '属性,property,事件,event,';
@@ -533,7 +528,18 @@ end;
 procedure TCnObjInspectorEnhanceWizard.OnCommentWindowClick(
   Sender: TObject);
 begin
-  InspectorComment := not InspectorComment;
+  if CnObjInspectorCommentForm = nil then
+  begin
+    CnObjInspectorCommentForm := TCnObjInspectorCommentForm.Create(Application);
+    IdeDockManager.ShowForm(CnObjInspectorCommentForm);
+  end
+  else
+  begin
+    if CnObjInspectorCommentForm.VisibleWithParent then
+      CnObjInspectorCommentForm.Hide
+    else
+      IdeDockManager.ShowForm(CnObjInspectorCommentForm);
+  end;
 end;
 
 procedure TCnObjInspectorEnhanceWizard.OnMenuAfterPopup(Sender: TObject; Menu: TPopupMenu);
@@ -544,7 +550,8 @@ begin
   begin
     if Menu.Items.Items[I].Name = SCnObjInspectorCommentWindowMenuName then
     begin
-      Menu.Items.Items[I].Checked := (FCommentForm <> nil) and FCommentForm.VisibleWithParent;
+      Menu.Items.Items[I].Checked := (CnObjInspectorCommentForm <> nil)
+        and CnObjInspectorCommentForm.VisibleWithParent;
       Exit;
     end;
   end;
@@ -579,12 +586,12 @@ var
   T: TCnPropertyCommentType;
   P: TCnPropertyCommentItem;
 begin
-  if FCommentForm <> nil then
+  if CnObjInspectorCommentForm <> nil then
   begin
-    Results.Add('Type Count ' + IntToStr(FCommentForm.Manager.Count));
-    for I := 0 to FCommentForm.Manager.Count - 1 do
+    Results.Add('Type Count ' + IntToStr(CnObjInspectorCommentForm.Manager.Count));
+    for I := 0 to CnObjInspectorCommentForm.Manager.Count - 1 do
     begin
-      T := FCommentForm.Manager.Items[I];
+      T := CnObjInspectorCommentForm.Manager.Items[I];
       Results.Add(T.TypeName + ' - ' + T.Comment);
       Results.Add('Property Count ' + IntToStr(T.Count));
 

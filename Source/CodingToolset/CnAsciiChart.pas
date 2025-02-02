@@ -176,11 +176,13 @@ const
 constructor TCnAsciiChart.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
-
+  IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
+    'CnAsciiForm');
 end;
 
 destructor TCnAsciiChart.Destroy;
 begin
+  IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
   FreeAndNil(CnAsciiForm);
   inherited;
 end;

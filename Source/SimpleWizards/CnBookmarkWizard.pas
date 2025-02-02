@@ -253,11 +253,7 @@ end;
 destructor TCnBookmarkWizard.Destroy;
 begin
   IdeDockManager.UnRegisterDockableForm(CnBookmarkForm, csBrowseForm);
-  if CnBookmarkForm <> nil then
-  begin
-    CnBookmarkForm.Free;
-    CnBookmarkForm := nil;
-  end;
+  FreeAndNil(CnBookmarkForm);
 
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotifier);
   FHighlightFont.Free;

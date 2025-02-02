@@ -192,10 +192,13 @@ constructor TCnEditorCollector.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   Collector := Self;
+  IdeDockManager.RegisterDockableForm(TCnEditorCollectorForm, CnEditorCollectorForm,
+    csCnCollectorForm);
 end;
 
 destructor TCnEditorCollector.Destroy;
 begin
+  IdeDockManager.UnRegisterDockableForm(CnEditorCollectorForm, csCnCollectorForm);
   FreeAndNil(CnEditorCollectorForm);
 
   Collector := nil;
