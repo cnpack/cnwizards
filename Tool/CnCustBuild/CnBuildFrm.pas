@@ -39,7 +39,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, CheckLst, Buttons, ImgList, CnCommon, CnWizLangID,
   CnLangTranslator, CnLangMgr, CnClasses, CnLangStorage, CnHashLangStorage,
-  CnWideCtrls;
+  CnWideCtrls, CnWideStrings;
 
 type
 
@@ -69,6 +69,7 @@ type
     btnSelAll: TSpeedButton;
     btnDeselAll: TSpeedButton;
     btnInvert: TSpeedButton;
+    chkDisableFMX: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure chklstWizardsClick(Sender: TObject);

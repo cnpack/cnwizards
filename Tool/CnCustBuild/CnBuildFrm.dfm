@@ -558,6 +558,15 @@ object CnCustBuildForm: TCnCustBuildForm
     OnClick = btnHelpClick
     NumGlyphs = 2
   end
+  object chkDisableFMX: TCheckBox
+    Left = 136
+    Top = 88
+    Width = 153
+    Height = 17
+    Caption = 'Disable FMX Features'
+    TabOrder = 6
+    Visible = False
+  end
   object ilWizImages: TImageList
     Height = 32
     Width = 32
