@@ -215,7 +215,7 @@ object CnCustBuildForm: TCnCustBuildForm
     Left = 448
     Top = 268
     Width = 89
-    Height = 12
+    Height = 13
     AutoSize = False
   end
   object btnSelAll: TSpeedButton
