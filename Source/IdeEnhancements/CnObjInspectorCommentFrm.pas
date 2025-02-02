@@ -258,11 +258,14 @@ type
     procedure ShowCurrent;
     procedure SaveCurrentPropToManager;
 {$IFNDEF STAND_ALONE}
-    property Wizard: TCnBaseWizard read FWizard write FWizard;
+    property Wizard: TCnBaseWizard read FWizard;
 {$ENDIF}
     property Manager: TCnPropertyCommentManager read FManager;
     property GridMode: Boolean read FGridMode write SetGridMode;
   end;
+
+var
+  CnObjInspectorCommentForm: TCnObjInspectorCommentForm = nil;
 
 {$ENDIF CNWIZARDS_CNOBJINSPECTORENHANCEWIZARD}
 
@@ -275,7 +278,7 @@ implementation
 uses
   CnCommon {$IFDEF SUPPORT_FMX}, CnFmxUtils {$ENDIF}
   {$IFDEF DEBUG}, CnDebug {$ENDIF}
-  {$IFNDEF STAND_ALONE}, CnWizUtils, CnObjInspectorEnhancements {$ENDIF};
+  {$IFNDEF STAND_ALONE}, CnWizUtils, CnWizManager, CnObjInspectorEnhancements {$ENDIF};
 
 const
   csCommentDir = 'OIComm';
@@ -378,6 +381,10 @@ end;
 
 procedure TCnObjInspectorCommentForm.FormCreate(Sender: TObject);
 begin
+  FWizard := CnWizardMgr.WizardByClass(TCnObjInspectorEnhanceWizard);
+  if FWizard <> nil then
+    SetCommentFont((FWizard as TCnObjInspectorEnhanceWizard).CommentFont);
+
   FManager := TCnPropertyCommentManager.Create;
 {$IFDEF STAND_ALONE}
   FManager.DataDir := MakePath(ExtractFilePath(Application.ExeName) + csCommentDir);

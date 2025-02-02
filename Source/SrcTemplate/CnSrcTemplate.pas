@@ -722,7 +722,7 @@ var
   var
     Stream, Dest: TMemoryStream;
     Lex: TCnGeneralWidePasLex;
-    PosInit, PosFinal, PosEnd, LenInit, LenFinal, LenEnd, L: Integer;
+    PosInit, PosFinal, PosEnd, LenInit, L: Integer;
     Str: TCnIdeTokenString;
   begin
     Stream := nil;
@@ -744,8 +744,6 @@ var
       PosFinal := 0;
       PosEnd := 0;
       LenInit := 0;
-      LenFinal := 0;
-      LenEnd := 0;
 
       while Lex.TokenID <> tkNull do
       begin
@@ -758,12 +756,10 @@ var
           tkFinalization:
             begin
               PosFinal := Lex.TokenPos;  // 最后一个 finalization
-              LenFinal := Length(Lex.Token);
             end;
           tkEnd:
             begin
               PosEnd := Lex.TokenPos;    // 最后一个 end
-              LenEnd := Length(Lex.Token);
             end;
         end;
         Lex.NextNoJunk;
