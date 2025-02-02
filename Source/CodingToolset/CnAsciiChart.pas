@@ -176,35 +176,30 @@ const
 constructor TCnAsciiChart.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
-  IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
-    'CnAsciiForm');
+
 end;
 
 destructor TCnAsciiChart.Destroy;
 begin
-  IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
-  if CnAsciiForm <> nil then
-  begin
-    CnAsciiForm.Free;
-    CnAsciiForm := nil;
-  end;
+  FreeAndNil(CnAsciiForm);
   inherited;
 end;
 
 procedure TCnAsciiChart.Execute;
 begin
   if CnAsciiForm = nil then
-  begin
     CnAsciiForm := TCnAsciiForm.Create(nil);
-  end;
   IdeDockManager.ShowForm(CnAsciiForm);
 end;
 
 procedure TCnAsciiChart.SetActive(Value: Boolean);
+var
+  Old: Boolean;
 begin
-  if Value <> Active then
+  Old := Active;
+  inherited;
+  if Value <> Old then
   begin
-    inherited;
     if Value then
     begin
       IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
@@ -213,11 +208,7 @@ begin
     else
     begin
       IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
-      if CnAsciiForm <> nil then
-      begin
-        CnAsciiForm.Free;
-        CnAsciiForm := nil;
-      end;
+      FreeAndNil(CnAsciiForm);
     end;
   end;
 end;

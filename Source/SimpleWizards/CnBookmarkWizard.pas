@@ -469,9 +469,13 @@ begin
   try
     Ini.ReadSections(Sections);
     for I := 0 to Sections.Count - 1 do
+    begin
       if Pos(csItem, Sections[I]) > 0 then  // 清除文件不存在的标签
+      begin
         if not FileExists(Ini.ReadString(Sections[I], csFileName, '')) then
           Ini.EraseSection(Sections[I]);
+      end;
+    end;
   finally
     Sections.Free;
   end;
@@ -550,8 +554,7 @@ begin
     else
     begin
       IdeDockManager.UnRegisterDockableForm(CnBookmarkForm, csBrowseForm);
-      if Assigned(CnBookmarkForm) then
-        FreeAndNil(CnBookmarkForm);
+      FreeAndNil(CnBookmarkForm);
     end;
   end;
 end;

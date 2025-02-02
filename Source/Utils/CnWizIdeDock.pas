@@ -35,6 +35,8 @@ unit CnWizIdeDock;
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该窗体为支持 IDE 内部停靠的基窗体，部分内容移植自 GExperts
 *           其原始内容受 GExperts License 的保护
+*           一般不在专家的 Create/Destroy 里分别调用 IdeDockManager.RegisterDockableForm
+*           和 IdeDockManager.UnRegisterDockableForm，而在 SetActive 里调，防止重复调用
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式

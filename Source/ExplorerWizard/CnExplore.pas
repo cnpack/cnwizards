@@ -772,8 +772,7 @@ end;
 constructor TCnExplorerWizard.Create;
 begin
   inherited;
-  IdeDockManager.RegisterDockableForm(TCnExploreForm, CnExploreForm,
-    'CnExploreForm');
+
   FFilter := TStringList.Create;
   FFolder := TStringList.Create;
   FFolderList := TStringList.Create;
@@ -781,13 +780,8 @@ end;
 
 destructor TCnExplorerWizard.Destroy;
 begin
-  IdeDockManager.UnRegisterDockableForm(CnExploreForm, 'CnExploreForm');
+  FreeAndNil(CnExploreForm);
 
-  if CnExploreForm <> nil then
-  begin
-    CnExploreForm.Free;
-    CnExploreForm := nil;
-  end;
   Filter.Free;
   Folder.Free;
   FolderList.Free;
@@ -987,18 +981,17 @@ begin
   Old := Active;
   inherited;
   if Value <> Old then
-    Exit;
-
-  if Active then
   begin
-    IdeDockManager.RegisterDockableForm(TCnExploreForm, CnExploreForm,
-      csCnExploreForm);
-  end
-  else
-  begin
-    IdeDockManager.UnRegisterDockableForm(CnExploreForm, csCnExploreForm);
-    if CnExploreForm <> nil then
+    if Value then
+    begin
+      IdeDockManager.RegisterDockableForm(TCnExploreForm, CnExploreForm,
+        csCnExploreForm);
+    end
+    else
+    begin
+      IdeDockManager.UnRegisterDockableForm(CnExploreForm, csCnExploreForm);
       FreeAndNil(CnExploreForm);
+    end;
   end;
 end;
 

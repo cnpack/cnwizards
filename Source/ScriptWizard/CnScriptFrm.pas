@@ -930,11 +930,7 @@ begin
   _DestroyingScriptForm := True;
   try
     IdeDockManager.UnRegisterDockableForm(CnScriptForm, 'CnScriptForm');
-    if CnScriptForm <> nil then
-    begin
-      CnScriptForm.Free;
-      CnScriptForm := nil;
-    end;
+    FreeAndNil(CnScriptForm);
   finally
     _DestroyingScriptForm := False;
   end;
@@ -978,11 +974,7 @@ begin
       _DestroyingScriptForm := True;
       try
         IdeDockManager.UnRegisterDockableForm(CnScriptForm, 'CnScriptForm');
-        if CnScriptForm <> nil then
-        begin
-          CnScriptForm.Free;
-          CnScriptForm := nil;
-        end;
+        FreeAndNil(CnScriptForm);
       finally
         _DestroyingScriptForm := False;
       end;                      
