@@ -38,11 +38,10 @@ unit CnWizIdeDock;
 *
 *           一般要在专家的 Create/Destroy 里分别调用 IdeDockManager.RegisterDockableForm
 *           和 IdeDockManager.UnRegisterDockableForm，并且也要在 SetActive 里调（似乎可以
-*           重复调用），为的是防止 Destroy 时没调 UnReg 导致停靠状态下关闭 IDE 出错。
+*           重复调用），为的是防止 Destroy 时没调 UnReg，可能导致停靠状态下关闭 IDE 出错。
 *           且子类的停靠窗体，初始化动作需要在构造函数里做完，因为构造函数可能被 IDE 调用
 *
-*           注意：D567 下有 Bug：子类窗体停靠后直接关闭 IDE 会出错，且重新启动后不会恢复窗体
-*           D2005~DXE8 不会出错，但重新启动后也不会恢复窗体
+*           注意：D567 及 D2005~DXE8 下似乎有 Bug：重新启动后不会恢复窗体
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

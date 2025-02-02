@@ -92,6 +92,8 @@ type
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
+
+    procedure SetActive(Value: Boolean); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -122,7 +124,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox
+  CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock
   {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 //==============================================================================
@@ -152,13 +154,15 @@ end;
 constructor TCnAICoderWizard.Create;
 begin
   inherited;
-
+  IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
+    'CnAICoderChatForm');
 end;
 
 destructor TCnAICoderWizard.Destroy;
 begin
+  IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, 'CnAICoderChatForm');
+  FreeAndNil(CnAICoderChatForm);
   inherited;
-
 end;
 
 // 必须重载该方法来创建子菜单专家项
@@ -302,6 +306,27 @@ begin
     SubActions[Index].Checked := Active and (CnAICoderChatForm <> nil) and CnAICoderChatForm.VisibleWithParent
   else
     SubActions[Index].Enabled := Active and (CnOtaGetCurrentSelection <> '');
+end;
+
+procedure TCnAICoderWizard.SetActive(Value: Boolean);
+var
+  Old: Boolean;
+begin
+  Old := Active;
+  inherited;
+  if Old <> Active then
+  begin
+    if Active then
+    begin
+      IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
+        'CnAICoderChatForm');
+    end
+    else
+    begin
+      IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, 'CnAICoderChatForm');
+      FreeAndNil(CnAICoderChatForm);
+    end;
+  end;
 end;
 
 function TCnAICoderWizard.ValidateAIEngines: Boolean;
