@@ -779,7 +779,7 @@ var
       else if PosFinal > 0 then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('PosFinal %d. FinalLen %d', [PosFinal, LenFinal]);
+        CnDebugger.LogFmt('PosFinal %d.', [PosFinal]);
 {$ENDIF}
 
         // 没有 initialization，只有 finalization，在其前面插入 initialization 回车和代码及空行
@@ -789,7 +789,7 @@ var
       else if PosEnd > 0 then
       begin
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('PosEnd %d. EndLen %d', [PosEnd, LenEnd]);
+        CnDebugger.LogFmt('PosEnd %d.', [PosEnd]);
 {$ENDIF}
 
         // initialization 和 finalization 都没有，插最后一个 end 前插入 initialization 回车和代码及空行
