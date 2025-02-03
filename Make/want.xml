@@ -25,6 +25,7 @@ See http://www.suigeneris.org/want/ for details.
 注意：本文件不能有 BOM，否则 NSIS 不认！因而不能用会自动添加 BOM 的记事本编辑！
 另：目标说明中，不带具体更新 Update 包的均指其最新 Update 包。其余同大版本的目标均是无 Update 或某 Update 以下的旧版。
 另：D120A2/D120A 在 12 的 Update 2 及以上编译，因其有 AI 相关 OTA 接口因而在 dproj 及此脚本中定义 OTA_HAS_AISERVICE，未在 cfg 中定义。
+另：64 位的 rc 资源脚本编译成资源仍沿用 32 位的 brcc。
 
 -->
 <project name="cnwizards"
@@ -77,7 +78,6 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D120A2"     value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
   <property name="exe.D120A"      value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC32.EXE" unless="env.D120A" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
-  <property name="exe.brcc64"     value="${ProgramFiles}\Embarcadero\Studio\21.0\Bin\BRCC64.EXE" unless="env.brcc64" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
   <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
   <property name="exe.python"     value="%{env.python}" if="env.python" />
