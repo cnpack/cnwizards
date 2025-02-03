@@ -136,6 +136,9 @@ end;
 
 procedure TFormCheck.btnFreeClick(Sender: TObject);
 begin
+  FVFIntf := nil;
+  FFormatIntf := nil;
+
   FreeAndCheckADll(FFormatLib);
   FreeAndCheckADll(FPngLib);
   FreeAndCheckADll(FVclToFmxLib);
@@ -169,9 +172,6 @@ end;
 
 procedure TFormCheck.FormDestroy(Sender: TObject);
 begin
-  FVFIntf := nil;
-  FFormatIntf := nil;
-
   btnFree.Click;
 end;
 
