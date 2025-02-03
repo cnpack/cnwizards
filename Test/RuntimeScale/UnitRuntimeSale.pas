@@ -27,7 +27,7 @@ type
 var
   FormRuntimeTest: TFormRuntimeTest;
 
-  ScaleFactor: Single = 1.0;
+  GlobalScaleFactor: Single = 1.0;
 
 implementation
 
@@ -39,15 +39,15 @@ uses
 procedure TFormRuntimeTest.cbbScaleChange(Sender: TObject);
 begin
   try
-    ScaleFactor := StrToFloat(cbbScale.Text);
+    GlobalScaleFactor := StrToFloat(cbbScale.Text);
   except
-    ScaleFactor := 1.0;
+    GlobalScaleFactor := 1.0;
   end;
 end;
 
 procedure TFormRuntimeTest.FormCreate(Sender: TObject);
 begin
-  ScaleFactor := StrToFloat(cbbScale.Text);
+  GlobalScaleFactor := StrToFloat(cbbScale.Text);
 end;
 
 procedure TFormRuntimeTest.btn1Click(Sender: TObject);

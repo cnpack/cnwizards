@@ -381,9 +381,11 @@ end;
 
 procedure TCnObjInspectorCommentForm.FormCreate(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   FWizard := CnWizardMgr.WizardByClass(TCnObjInspectorEnhanceWizard);
   if FWizard <> nil then
     SetCommentFont((FWizard as TCnObjInspectorEnhanceWizard).CommentFont);
+{$ENDIF}
 
   FManager := TCnPropertyCommentManager.Create;
 {$IFDEF STAND_ALONE}

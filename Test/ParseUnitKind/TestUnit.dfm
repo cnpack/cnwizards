@@ -48,6 +48,7 @@ object FormParse: TFormParse
     OnClick = btnParseClick
   end
   object dlgOpen: TOpenDialog
+    Filter = 'Pascal File|*.pas|All Files|*.*'
     Left = 256
     Top = 24
   end

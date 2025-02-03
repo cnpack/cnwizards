@@ -89,8 +89,8 @@ uses
 procedure TEditorToolsForm.FormCreate(Sender: TObject);
 begin
   InitTools;
-  if ScaleFactor <> 1.0 then
-    ScaleForm(Self, ScaleFactor);
+  if GlobalScaleFactor <> 1.0 then
+    ScaleForm(Self, GlobalScaleFactor);
 end;
 
 procedure TEditorToolsForm.UpdateToolItem(Index: Integer);
@@ -142,16 +142,5 @@ function TEditorToolsForm.GetHelpTopic: string;
 begin
   Result := 'CnEditorWizard';
 end;
-
-initialization
-
-finalization
-{$IFDEF DEBUG}
-  CnDebugger.LogEnter('CnEditorWizard finalization.');
-{$ENDIF}
-
-{$IFDEF DEBUG}
-  CnDebugger.LogLeave('CnEditorWizard finalization.');
-{$ENDIF}
 
 end.

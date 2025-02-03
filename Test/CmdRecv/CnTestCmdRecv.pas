@@ -13,11 +13,10 @@ type
     mmo1: TMemo;
     procedure FormCreate(Sender: TObject);
   private
-    { Private declarations }
-    procedure OnCmdRecv(const Command: Cardinal; const SourceID: PChar;
-      const DestID: PChar; const IDESets: TCnCompilers; const Params: TStrings);
+    procedure OnCmdRecv(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
   public
-    { Public declarations }
+
   end;
 
 var
@@ -41,7 +40,7 @@ begin
 end;
 
 procedure TCnCmdRecvForm.OnCmdRecv(const Command: Cardinal; const SourceID,
-  DestID: PChar; const IDESets: TCnCompilers; const Params: TStrings);
+  DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 begin
   pnlDisp.Caption := Format('收到命令！消息号 $%s' + #13#10 + '来源：%s',
     [InttoHex(Command, 2), SourceID]);

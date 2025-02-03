@@ -42,7 +42,8 @@ interface
 
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
-  CnInetUtils, CnWizOptions, CnAICoderConfig, CnThreadPool, CnAICoderNetClient;
+  CnInetUtils, {$IFDEF TEST_APP} CnWizOptions, {$ENDIF} CnAICoderConfig,
+  CnThreadPool, CnAICoderNetClient;
 
 type
   TCnAIAnswerObject = class(TPersistent)

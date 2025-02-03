@@ -3,7 +3,7 @@ program ImgListEdtTest;
 uses
   Forms,
   Unit1 in 'Unit1.pas' {ImgListEdtTestForm},
-  CnImageProvider_IconFinder in '..\..\Source\Utils\CnImageProvider_IconFinder.pas',
+  CnImageProviderIconFinder in '..\..\Source\Utils\CnImageProviderIconFinder.pas',
   CnImageProviderMgr in '..\..\Source\Utils\CnImageProviderMgr.pas',
   CnPngUtilsIntf in '..\..\Source\Utils\CnPngUtilsIntf.pas',
   CnWizMultiLang in '..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
@@ -11,8 +11,8 @@ uses
   CnImageListEditorFrm in '..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
   CnWizHttpDownMgr in '..\..\Source\Utils\CnWizHttpDownMgr.pas',
   CnDesignEditorConsts in '..\..\Source\DesignEditors\CnDesignEditorConsts.pas',
-  CnImageProvider_FindIcons in '..\..\Source\Utils\CnImageProvider_FindIcons.pas',
-  CnImageProvider_LocalCache in '..\..\Source\Utils\CnImageProvider_LocalCache.pas';
+  CnImageProviderFindIcons in '..\..\Source\Utils\CnImageProviderFindIcons.pas',
+  CnImageProviderLocalCache in '..\..\Source\Utils\CnImageProviderLocalCache.pas';
 
 {$R *.res}
 

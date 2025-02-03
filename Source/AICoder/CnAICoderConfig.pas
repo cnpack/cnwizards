@@ -211,7 +211,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnSM4, CnAEAD, CnWizUtils;
+  CnSM4, CnAEAD {$IFNDEF TEST_APP}, CnWizUtils {$ENDIF};
 
 const
   SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
@@ -452,12 +452,16 @@ end;
 
 function TCnAIEngineOption.GetGenTestCasePrompt: string;
 begin
+{$IFDEF TEST_APP}
+  Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal']);
+{$ELSE}
   if CurrentSourceIsDelphi then
     Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal'])
   else if CurrentSourceIsC then
     Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['C/C++'])
   else // 不认识的文件名干脆也用 Pascal
-    Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal'])
+    Result := Format(SCnAICoderWizardUserMessageGenTestCaseFmt, ['Pascal']);
+{$ENDIF}
 end;
 
 function TCnAIEngineOption.GetSystemMessage: string;

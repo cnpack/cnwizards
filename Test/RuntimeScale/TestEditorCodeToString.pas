@@ -52,8 +52,8 @@ uses
 
 procedure TEditorCodeToStringForm.FormCreate(Sender: TObject);
 begin
-  if ScaleFactor <> 1.0 then
-    ScaleForm(Self, ScaleFactor);
+  if GlobalScaleFactor <> 1.0 then
+    ScaleForm(Self, GlobalScaleFactor);
 end;
 
 end.
