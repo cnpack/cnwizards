@@ -41,6 +41,10 @@ interface
 
 {$I CnWizards.inc}
 
+type
+  TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+  TCnConvertBmpToPngProc = function (BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+
 function CnPngLibLoaded: LongBool;
 
 function CnConvertPngToBmp(PngFile, BmpFile: string): LongBool; stdcall;
@@ -51,10 +55,6 @@ implementation
 
 uses
   Windows, SysUtils, CnCommon;
-
-type
-  TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
-  TCnConvertBmpToPngProc = function (BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
 
 var
   FModuleHandle: HMODULE;

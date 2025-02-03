@@ -106,6 +106,15 @@ object FormCheck: TFormCheck
         Width = 433
         Height = 313
         TabOrder = 0
+        object btnVclToFmxGetIntf: TButton
+          Left = 16
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = 'Get Intf'
+          TabOrder = 0
+          OnClick = btnVclToFmxGetIntfClick
+        end
       end
     end
     object tsWizHelper: TTabSheet
@@ -117,6 +126,15 @@ object FormCheck: TFormCheck
         Width = 433
         Height = 313
         TabOrder = 0
+        object btnWizHelperLibGetProc: TButton
+          Left = 16
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = 'Get Functions'
+          TabOrder = 0
+          OnClick = btnWizHelperLibGetProcClick
+        end
       end
     end
     object tsWizLoader: TTabSheet
@@ -150,6 +168,15 @@ object FormCheck: TFormCheck
         Width = 433
         Height = 313
         TabOrder = 0
+        object btnZipUtilsLibGetProc: TButton
+          Left = 16
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = 'Get Functions'
+          TabOrder = 0
+          OnClick = btnZipUtilsLibGetProcClick
+        end
       end
     end
   end

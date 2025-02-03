@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, CnFormatterIntf, CnPngUtilsIntf;
+  StdCtrls, ComCtrls, CnFormatterIntf, CnPngUtilsIntf, CnVclToFmxIntf, CnWizHelperIntf;
 
 type
   TFormCheck = class(TForm)
@@ -29,12 +29,18 @@ type
     grpZipUtils: TGroupBox;
     btnFormatGetProvider: TButton;
     btnPngLibGetProc: TButton;
+    btnVclToFmxGetIntf: TButton;
+    btnWizHelperLibGetProc: TButton;
+    btnZipUtilsLibGetProc: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnLoadClick(Sender: TObject);
     procedure btnFreeClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnFormatGetProviderClick(Sender: TObject);
     procedure btnPngLibGetProcClick(Sender: TObject);
+    procedure btnVclToFmxGetIntfClick(Sender: TObject);
+    procedure btnWizHelperLibGetProcClick(Sender: TObject);
+    procedure btnZipUtilsLibGetProcClick(Sender: TObject);
   private
     FFormatLib: THandle;
     FPngLib: THandle;
@@ -45,6 +51,16 @@ type
     FZipUtils: THandle;
 
     FGetProvider: TCnGetFormatterProvider;
+    FFormatIntf: ICnPascalFormatterIntf;
+    FConvertPngToBmpProc: TCnConvertPngToBmpProc;
+    FConvertBmpToPngProc: TCnConvertBmpToPngProc;
+    FVFConverter: TCnGetVclToFmxConverter;
+    FVFIntf: ICnVclToFmxIntf;
+    FWizInetGetFile: TFuncCnWizInetGetFile;
+    FWizStartZip: TProcCnWizStartZip;
+    FWizZipAddFile: TProcCnWizZipAddFile;
+    FWizZipSetComment: TProcCnWizZipSetComment;
+    FWizZipSaveAndClose: TFuncCnWizZipSaveAndClose;
   protected
     procedure UpdateGroupBox;
   public
@@ -89,14 +105,6 @@ const
   {$ENDIF}
 {$ENDIF}
   );
-
-type
-  TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
-  TCnConvertBmpToPngProc = function (BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
-
-var
-  FCnConvertPngToBmpProc: TCnConvertPngToBmpProc = nil;
-  FCnConvertBmpToPngProc: TCnConvertBmpToPngProc = nil;
 
 procedure TFormCheck.FormCreate(Sender: TObject);
 begin
@@ -161,6 +169,9 @@ end;
 
 procedure TFormCheck.FormDestroy(Sender: TObject);
 begin
+  FVFIntf := nil;
+  FFormatIntf := nil;
+
   btnFree.Click;
 end;
 
@@ -182,7 +193,11 @@ begin
     FGetProvider := TCnGetFormatterProvider(GetProcAddress(FFormatLib,
       'GetCodeFormatterProvider'));
     if Assigned(FGetProvider) then
-      ShowMessage('Format Provider Got');
+    begin
+      FFormatIntf := FGetProvider();
+      if FFormatIntf <> nil then
+        ShowMessage('Format Provider and Intf Got');
+    end;
   end
   else if FFormatLib = 0 then
     ShowMessage('NO FormatLib DLL');
@@ -190,17 +205,63 @@ end;
 
 procedure TFormCheck.btnPngLibGetProcClick(Sender: TObject);
 begin
-  if (FPngLib <> 0) and not Assigned(FCnConvertPngToBmpProc)
-    and not Assigned(FCnConvertBmpToPngProc) then
+  if (FPngLib <> 0) and not Assigned(FConvertPngToBmpProc)
+    and not Assigned(FConvertBmpToPngProc) then
   begin
-    FCnConvertPngToBmpProc := TCnConvertPngToBmpProc(GetProcAddress(FPngLib, 'CnConvertPngToBmp'));
-    FCnConvertBmpToPngProc := TCnConvertBmpToPngProc(GetProcAddress(FPngLib, 'CnConvertBmpToPng'));
+    FConvertPngToBmpProc := TCnConvertPngToBmpProc(GetProcAddress(FPngLib, 'CnConvertPngToBmp'));
+    FConvertBmpToPngProc := TCnConvertBmpToPngProc(GetProcAddress(FPngLib, 'CnConvertBmpToPng'));
 
-    if Assigned(FCnConvertPngToBmpProc) and Assigned(FCnConvertBmpToPngProc) then
+    if Assigned(FConvertPngToBmpProc) and Assigned(FConvertBmpToPngProc) then
       ShowMessage('PngLib Function Got');
   end
   else if FPngLib = 0 then
     ShowMessage('NO PngLib DLL');
+end;
+
+procedure TFormCheck.btnVclToFmxGetIntfClick(Sender: TObject);
+begin
+  if (FVclToFmxLib <> 0) and not Assigned(FVFConverter) then
+  begin
+    FVFConverter := TCnGetVclToFmxConverter(GetProcAddress(FVclToFmxLib, 'GetVclToFmxConverter'));
+    if Assigned(FVFConverter) then
+    begin
+      FVFIntf := FVFConverter();
+      if FVFIntf <> nil then
+        ShowMessage('VclToFmx Converter and Intf Got');
+    end;
+  end
+  else if FVclToFmxLib = 0 then
+    ShowMessage('NO VclToFmx DLL');;
+end;
+
+procedure TFormCheck.btnWizHelperLibGetProcClick(Sender: TObject);
+begin
+  if (FWizHelper <> 0) and not Assigned(FWizInetGetFile) then
+  begin
+    FWizInetGetFile := TFuncCnWizInetGetFile(GetProcAddress(FWizHelper, 'CnWiz_Inet_GetFile'));
+    if Assigned(FWizInetGetFile) then
+      ShowMessage('WizHelper Function Got');
+  end
+  else if FWizHelper = 0 then
+    ShowMessage('NO WizHelper DLL');
+end;
+
+procedure TFormCheck.btnZipUtilsLibGetProcClick(Sender: TObject);
+begin
+  if (FZipUtils <> 0) and not Assigned(FWizStartZip) and not Assigned(FWizZipAddFile)
+    and not Assigned(FWizZipSetComment) and not Assigned(FWizZipSaveAndClose) then
+  begin
+    FWizStartZip := TProcCnWizStartZip(GetProcAddress(FZipUtils, 'CnWizStartZip'));
+    FWizZipAddFile := TProcCnWizZipAddFile(GetProcAddress(FZipUtils, 'CnWizZipAddFile'));
+    FWizZipSetComment := TProcCnWizZipSetComment(GetProcAddress(FZipUtils, 'CnWizZipSetComment'));
+    FWizZipSaveAndClose := TFuncCnWizZipSaveAndClose(GetProcAddress(FZipUtils, 'CnWizZipSaveAndClose'));
+
+    if Assigned(FWizStartZip) and Assigned(FWizZipAddFile)
+      and Assigned(FWizZipSetComment) and Assigned(FWizZipSaveAndClose) then
+      ShowMessage('ZipUtils Function Got');
+  end
+  else if FZipUtils = 0 then
+    ShowMessage('NO ZipUtils DLL');
 end;
 
 end.

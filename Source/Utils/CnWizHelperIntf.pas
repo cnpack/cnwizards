@@ -47,6 +47,24 @@ const
   SCnWizZipDllName = 'CnZipUtils.Dll';
 {$ENDIF}
 
+type
+  TProcCnWizStartZip = procedure(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
+    RemovePath: Boolean); stdcall;
+  {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
+
+  TProcCnWizZipAddFile = procedure(FileName, ArchiveFileName: PAnsiChar); stdcall;
+  {* 添加文件到 Zip，参数为真实文件名以及要写入 Zip 文件的文件名
+    如果 ArchiveFileName 传 nil，则使用 FileName 并受 RemovePath 选项控制}
+
+  TProcCnWizZipSetComment = procedure(Comment: PAnsiChar); stdcall;
+  {* 设置 Zip 文件注释}
+
+  TFuncCnWizZipSaveAndClose = function: Boolean; stdcall;
+  {* 压缩保存 Zip 文件并释放内部对象}
+
+  TFuncCnWizInetGetFile = function(AURL, FileName: PAnsiChar): Boolean; stdcall;
+  {* 通过网络请求获取 URL 内容并保存到文件}
+
 function CnWizHelperLoaded: Boolean;
 
 function CnWizZipUtilsLoaded: Boolean;
@@ -85,23 +103,6 @@ implementation
 uses
   CnDebug;
 {$ENDIF}
-
-type
-  TProcCnWizStartZip = procedure(const SaveFileName: PAnsiChar; const Password: PAnsiChar;
-    RemovePath: Boolean); stdcall;
-  {* 开始一个 Zip，创建内部对象，指明文件名、密码等}
-
-  TProcCnWizZipAddFile = procedure(FileName, ArchiveFileName: PAnsiChar); stdcall;
-  {* 添加文件到 Zip，参数为真实文件名以及要写入 Zip 文件的文件名
-    如果 ArchiveFileName 传 nil，则使用 FileName 并受 RemovePath 选项控制}
-
-  TProcCnWizZipSetComment = procedure(Comment: PAnsiChar); stdcall;
-  {* 设置 Zip 文件注释}
-
-  TFuncCnWizZipSaveAndClose = function: Boolean; stdcall;
-  {* 压缩保存 Zip 文件并释放内部对象}
-
-  TFuncCnWizInetGetFile = function(AURL, FileName: PAnsiChar): Boolean; stdcall;
 
 var
   HelperDllHandle: HMODULE = 0;
