@@ -29,7 +29,7 @@ object FormCheck: TFormCheck
     Top = 56
     Width = 206
     Height = 13
-    Caption = '126: Dll NOT Exists; 193: not Win32 Format'
+    Caption = '126: Dll NOT Exists; 193: NOT Win32/64 Format'
   end
   object btnLoad: TButton
     Left = 24

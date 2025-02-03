@@ -14,7 +14,7 @@
 
 3.独立应用程序形式。每个用例须建立一单独目录。测试执行时直接编译目录内的工程文件即可。该类用例主要用来测试一些和 IDE 关联性不强的工具函数库。
 目前该批测试用例正在做 64 位适配，以满足未来 Delphi 可能移植至 64 位的情形。
-已基本做好 Win64 适配的：AICoder、AnsiUniLength、CaptionButton、CmdRecv、CmdSend、CodeFormatter、CompareProperties、CropComment、ElementList、ExtractStrings、FastList、FormParse、GroupReplace、ImgListEditor、LoadElements、ObjInspectorComment、ParseUnitKind、ParseXETemplate、Pas2Html、PascalAST、PngConvert、RuntimeScale、ToolbarResize、WideParse、WideStructParse、WizIni
+已基本做好 Win64 适配的：AICoder、AnsiUniLength、CaptionButton、CmdRecv、CmdSend、CodeFormatter、CompareProperties、CropComment、DllChecker、ElementList、ExtractStrings、FastList、FormParse、GroupReplace、ImgListEditor、LoadElements、ObjInspectorComment、ParseUnitKind、ParseXETemplate、Pas2Html、PascalAST、PngConvert、RuntimeScale、ToolbarResize、WideParse、WideStructParse、WizIni
 无需 Win64 适配的：AnsiStructureParse、ExtractBic、FormEvaluation、GenerateHugeProject、OTAConstConvert
 未做 Win64 适配的：Dcu32、Dcu110A、RegExpr、TypeInfo
 
