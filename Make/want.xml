@@ -77,6 +77,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D120A2"     value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
   <property name="exe.D120A"      value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC32.EXE" unless="env.D120A" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
+  <property name="exe.brcc64"     value="${ProgramFiles}\Embarcadero\Studio\21.0\Bin\BRCC64.EXE" unless="env.brcc64" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
   <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
   <property name="exe.python"     value="%{env.python}" if="env.python" />
@@ -219,6 +220,7 @@ Usage: want [target-name] [-Dname=value]
                  (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
+    resdll64   - Compile CnWizards 64-Bit Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnziputilsdll  - Compile CnWizards Zip DLL.
     cnpnglib   - Compile CnPngLib DLL.
@@ -1143,16 +1145,17 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <!-- 编译资源 DLL -->
+  <!-- 编译 32 位资源 DLL -->
   <target name="resdll" depends="-prepare" description="Compile CnWizards Resource DLL." >
     <dcc basedir="${tools}/CnWizRes" source="CnWizResGen.dpr" versions="5" usecfg="true" />
-
+    <!-- 编译并扫描图标目录生成 rc 资源脚本 -->
     <exec basedir="${tools}/CnWizRes" defaultfilters="true"
           executable="${tools}/CnWizRes/CnWizResGen.exe">
       <arg value="..\..\Bin\Icons\" />
       <arg value="CnWizIcons.rc" />
     </exec>
 
+    <!-- 编译 rc 资源脚本生成 res 资源文件 -->
     <brcc file="${tools}/CnWizRes/CnWizIcons.rc" output="${tools}/CnWizRes/CnWizIcons.res" />
 
     <property name="Ver.FileDescription"  value="CnWizards Resource DLL" />
@@ -1164,6 +1167,7 @@ Usage: want [target-name] [-Dname=value]
     <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizRes/CnWizRes.rc" />
     <brcc file="${tools}/CnWizRes/CnWizRes.rc" output="${tools}/CnWizRes/CnWizRes.res" />
 
+    <!-- 编译 res 资源生成 dll -->
     <dcc basedir="${tools}/CnWizRes" source="CnWizRes.dpr" versions="5" usecfg="true" />
 
     <delete dir="${tools}/CnWizRes">
@@ -1175,6 +1179,43 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnWizRes/CnWizRes.res" >
        <include name="${tools}/CnWizRes/CnWizRes.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 64 位资源 DLL -->
+  <target name="resdll64" depends="-prepare" description="Compile CnWizards 64-Bit Resource DLL." >
+    <dcc basedir="${tools}/CnWizRes" source="CnWizResGen.dpr" versions="5" usecfg="true" />
+    <!-- 编译并扫描图标目录生成 rc 资源脚本，同 32 位 -->
+    <exec basedir="${tools}/CnWizRes" defaultfilters="true"
+          executable="${tools}/CnWizRes/CnWizResGen.exe">
+      <arg value="..\..\Bin\Icons\" />
+      <arg value="CnWizIcons64.rc" />
+    </exec>
+
+    <!-- 用 32 位 brcc 编译 rc 资源脚本生成 res 资源文件 -->
+    <brcc file="${tools}/CnWizRes/CnWizIcons64.rc" output="${tools}/CnWizRes/CnWizIcons64.res" />
+
+    <property name="Ver.FileDescription"  value="CnWizards 64-Bit Resource DLL" />
+    <property name="Ver.InternalName"     value="CnWizRes64" />
+    <property name="Ver.OriginalFilename" value="CnWizRes64.DLL" />
+    <copy tofile="${tools}/CnWizRes/CnWizRes.res.old" >
+       <include name="${tools}/CnWizRes/CnWizRes.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizRes/CnWizRes64.rc" />
+    <brcc file="${tools}/CnWizRes/CnWizRes64.rc" output="${tools}/CnWizRes/CnWizRes64.res" />
+
+    <!-- 编译 res 资源生成 dll -->
+    <dcc basedir="${tools}/CnWizRes" source="CnWizRes64.dpr" exename="${exe.D104S_64}" usecfg="true" />
+
+    <delete dir="${tools}/CnWizRes">
+       <include name="*.exe" />
+       <include name="*.res" />
+       <include name="*.rc" />
+       <include name="*.drc" />
+       <include name="*.map" />
+    </delete>
+    <move tofile="${tools}/CnWizRes/CnWizRes64.res" >
+       <include name="${tools}/CnWizRes/CnWizRes64.res.old" />
     </move>
   </target>
 
@@ -1354,9 +1395,9 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <target name="cndebugviewer64" depends="-prepare" description="Compile 64-Bit CnDebugViewer." >
-    <property name="Ver.FileDescription"  value="CnWizards Debug Viewer" />
-    <property name="Ver.InternalName"     value="CnDebugViewer" />
-    <property name="Ver.OriginalFilename" value="CnDebugViewer.EXE" />
+    <property name="Ver.FileDescription"  value="CnWizards 64-Bit Debug Viewer" />
+    <property name="Ver.InternalName"     value="CnDebugViewer64" />
+    <property name="Ver.OriginalFilename" value="CnDebugViewer64.EXE" />
     <copy tofile="${tools}/CnDebugViewer/CnDebugViewer64.res.old" >
        <include name="${tools}/CnDebugViewer/CnDebugViewer64.res" />
     </copy>
