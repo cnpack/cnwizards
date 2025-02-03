@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-library CnWizLoader;
+library CnWizLoader64;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
@@ -29,9 +29,7 @@ library CnWizLoader;
 * 兼容测试：所有版本的 Delphi
 * 本 地 化：该单元无需本地化
 * 修改记录：2025.02.03 V1.1
-*               重构，把部分公用内容独立以做 64 位适配
-*           2020.05.13 V1.0
-*               创建单元，持续根据 Delphi 的新版及新 Update 包及新 Patch 包更新
+*               创建单元
 ================================================================================
 |</PRE>}
 
@@ -64,9 +62,9 @@ begin
 
   if (Dll <> '') and FileExists(Dll) then
   begin
-    OutputDebugString(PChar(Format('Get DLL: %s', [Dll])));
+    OutputDebugString(PChar(Format('Get 64 Bit DLL: %s', [Dll])));
 
-    DllInst := LoadLibraryA(PAnsiChar(Dll));
+    DllInst := LoadLibraryW(PChar(Dll));
     if DllInst <> 0 then
     begin
       Entry := TWizardEntryPoint(GetProcAddress(DllInst, WizardEntryPoint));
@@ -78,13 +76,13 @@ begin
         Terminate := LoaderTerminate;
       end
       else
-        OutputDebugString(PChar(Format('DLL Corrupted! No Entry %s', [WizardEntryPoint])));
+        OutputDebugString(PChar(Format('64 Bit DLL Corrupted! No Entry %s', [WizardEntryPoint])));
     end
     else
-      OutputDebugString(PChar(Format('DLL Loading Error! %d', [GetLastError])));
+      OutputDebugString(PChar(Format('64 Bit DLL Loading Error! %d', [GetLastError])));
   end
   else
-    OutputDebugString(PChar(Format('DLL %s NOT Found!', [Dll])));
+    OutputDebugString(PChar(Format('64 Bit DLL %s NOT Found!', [Dll])));
 end;
 
 exports

@@ -215,7 +215,8 @@ Usage: want [target-name] [-Dname=value]
     cleanobj   - Clean temp files.
     clean      - Clean output and temp files.
     gitpull    - Update all files.
-    cnwizloader  - Compile CnWizards Loader DLL.
+    cnwizloader    - Compile CnWizards Loader DLL.
+    cnwizloader64  - Compile CnWizards 64-Bit Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
                  (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
@@ -412,6 +413,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnWizLoader/CnWizLoader.res" >
        <include name="${tools}/CnWizLoader/CnWizLoader.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnWizards 64-Bit Loader DLL，目前缺 64 位 ToolsAPI 及对应 64 位 DesignIde 等包而未成功 -->
+  <target name="-cnwizloader64" depends="-cw_prepare" description="Compile CnWizards 64-Bit Loader DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards 64-Bit Loader DLL" />
+    <property name="Ver.InternalName"     value="CnWizLoader64" />
+    <property name="Ver.OriginalFilename" value="CnWizLoader64.DLL" />
+    <copy tofile="${tools}/CnWizLoader/CnWizLoader64.res.old" >
+       <include name="${tools}/CnWizLoader/CnWizLoader64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizLoader/CnWizLoader64.rc" />
+    <brcc file="${tools}/CnWizLoader/CnWizLoader64.rc" output="${tools}/CnWizLoader/CnWizLoader64.res" />
+    <dcc basedir="${tools}/CnWizLoader" source="CnWizLoader64.dpr" exename="${exe.D104S_64}" usecfg="true" arguments="${dcc_arg}"/>
+    <delete dir="${tools}/CnWizLoader">
+       <include name="CnWizLoader64.res" />
+       <include name="CnWizLoader64.rc" />
+       <include name="CnWizLoader64.drc" />
+    </delete>
+    <move tofile="${tools}/CnWizLoader/CnWizLoader64.res" >
+       <include name="${tools}/CnWizLoader/CnWizLoader64.res.old" />
     </move>
   </target>
 
