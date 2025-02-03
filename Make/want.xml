@@ -224,6 +224,7 @@ Usage: want [target-name] [-Dname=value]
     resdll64   - Compile CnWizards 64-Bit Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnziputilsdll  - Compile CnWizards Zip DLL.
+    cnziputilsdll64  - Compile CnWizards 64-Bit Zip DLL.
     cnpnglib     - Compile CnPngLib DLL.
     cnpnglib64   - Compile CnPngLib 64-Bit DLL.
     cnformatlib - Compile CnFormatLib DLL.
@@ -1281,6 +1282,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnZipUtils/CnZipUtils.res" >
        <include name="${tools}/CnZipUtils/CnZipUtils.res.old" />
+    </move>
+  </target>
+
+<!-- 编译 Zip64 DLL -->
+  <target name="cnziputilsdll64" depends="-prepare" description="Compile CnWizards 64-Bit Zip DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards 64-Bit Zip DLL" />
+    <property name="Ver.InternalName"     value="CnZipUtils64" />
+    <property name="Ver.OriginalFilename" value="CnZipUtils64.DLL" />
+    <copy tofile="${tools}/CnZipUtils/CnZipUtils64.res.old" >
+       <include name="${tools}/CnZipUtils/CnZipUtils64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnZipUtils/CnZipUtils64.rc" />
+    <brcc file="${tools}/CnZipUtils/CnZipUtils64.rc" output="${tools}/CnZipUtils/CnZipUtils64.res" />
+    <dcc basedir="${tools}/CnZipUtils" source="CnZipUtils64.dpr" exename="${exe.D104S_64}" usecfg="true" />
+    <delete dir="${tools}/CnZipUtils">
+       <include name="CnZipUtils64.res" />
+       <include name="CnZipUtils64.rc" />
+       <include name="CnZipUtils64.drc" />
+    </delete>
+    <move tofile="${tools}/CnZipUtils/CnZipUtils64.res" >
+       <include name="${tools}/CnZipUtils/CnZipUtils64.res.old" />
     </move>
   </target>
 
