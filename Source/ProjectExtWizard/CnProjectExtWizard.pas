@@ -182,7 +182,11 @@ uses
 const
   SCnViewDialogExecuteName = '@Viewdlg@TViewDialog@Execute$qqrv';
 {$IFDEF SUPPORT_FMX}
+  {$IFDEF WIN64}
+  SCnVclToFmxDllName = 'CnVclToFmx64.dll';
+  {$ELSE}
   SCnVclToFmxDllName = 'CnVclToFmx.dll';
+  {$ENDIF}
 {$ENDIF}
 
 //==============================================================================

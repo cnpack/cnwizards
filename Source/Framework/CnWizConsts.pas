@@ -150,7 +150,11 @@ resourcestring
   SCnWizCommentIniFile = 'Comments.ini';
   SCnWizUpgradeIniFile = 'Upgrade.ini';
   SCnWizTipOfDayIniFile = 'TipOfDay.ini';
+{$IFDEF WIN64}
   SCnWizResDllName = 'CnWizRes.dll';
+{$ELSE}
+  SCnWizResDllName = 'CnWizRes64.dll';
+{$ENDIF}
 
   // RegPath
   SCnPropEditorRegPath = 'CnPropEditor';

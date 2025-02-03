@@ -39,8 +39,13 @@ uses
   Windows, SysUtils, CnCommon;
 
 const
+{$IFDEF WIN64}
+  SCnWizHelperDllName = 'CnWizHelper64.Dll';
+  SCnWizZipDllName = 'CnZipUtils64.Dll';
+{$ELSE}
   SCnWizHelperDllName = 'CnWizHelper.Dll';
   SCnWizZipDllName = 'CnZipUtils.Dll';
+{$ENDIF}
 
 function CnWizHelperLoaded: Boolean;
 
