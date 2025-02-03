@@ -223,13 +223,15 @@ Usage: want [target-name] [-Dname=value]
     resdll     - Compile CnWizards Resource DLL.
     resdll64   - Compile CnWizards 64-Bit Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
+    cnwizhelperdll64 - Compile CnWizards 64-Bit Helper DLL.
     cnziputilsdll  - Compile CnWizards Zip DLL.
     cnziputilsdll64  - Compile CnWizards 64-Bit Zip DLL.
     cnpnglib     - Compile CnPngLib DLL.
     cnpnglib64   - Compile CnPngLib 64-Bit DLL.
-    cnformatlib - Compile CnFormatLib DLL.
+    cnformatlib  - Compile CnFormatLib DLL.
     cnformatlibw - Compile CnFormatLibW DLL for Unicode.
-    cnvcltofmx - Compile CnVclToFmx DLL.
+    cnvcltofmx   - Compile CnVclToFmx DLL.
+    cnvcltofmx64 - Compile CnVclToFmx 64-Bit DLL.
     cnconfigio - Compile CnConfigIO.
     cndebugviewer  - Compile CnDebugViewer.
     cndebugviewer64  - Compile 64-Bit CnDebugViewer.
@@ -1264,6 +1266,27 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
+  <!-- 编译 Helper64 DLL -->
+  <target name="cnwizhelperdll64" depends="-prepare" description="Compile CnWizards 64-Bit Helper DLL." >
+    <property name="Ver.FileDescription"  value="CnWizards 64-Bit Helper DLL" />
+    <property name="Ver.InternalName"     value="CnWizHelper64" />
+    <property name="Ver.OriginalFilename" value="CnWizHelper64.DLL" />
+    <copy tofile="${tools}/CnWizHelper/CnWizHelper64.res.old" >
+       <include name="${tools}/CnWizHelper/CnWizHelper64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizHelper/CnWizHelper64.rc" />
+    <brcc file="${tools}/CnWizHelper/CnWizHelper64.rc" output="${tools}/CnWizHelper/CnWizHelper64.res" />
+    <dcc basedir="${tools}/CnWizHelper" source="CnWizHelper64.dpr" exename="${exe.D104S_64}" usecfg="true" />
+    <delete dir="${tools}/CnWizHelper">
+       <include name="CnWizHelper64.res" />
+       <include name="CnWizHelper64.rc" />
+       <include name="CnWizHelper64.drc" />
+    </delete>
+    <move tofile="${tools}/CnWizHelper/CnWizHelper64.res" >
+       <include name="${tools}/CnWizHelper/CnWizHelper64.res.old" />
+    </move>
+  </target>
+
   <!-- 编译 Zip DLL -->
   <target name="cnziputilsdll" depends="-prepare" description="Compile CnWizards Zip DLL." >
     <property name="Ver.FileDescription"  value="CnWizards Zip DLL" />
@@ -1285,7 +1308,7 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-<!-- 编译 Zip64 DLL -->
+  <!-- 编译 Zip64 DLL -->
   <target name="cnziputilsdll64" depends="-prepare" description="Compile CnWizards 64-Bit Zip DLL." >
     <property name="Ver.FileDescription"  value="CnWizards 64-Bit Zip DLL" />
     <property name="Ver.InternalName"     value="CnZipUtils64" />
@@ -1408,6 +1431,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnVclToFmx/CnVclToFmx.res" >
        <include name="${tools}/CnVclToFmx/CnVclToFmx.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnVclToFmx64 DLL -->
+  <target name="cnvcltofmx64" depends="-prepare" description="Compile CnVclToFmx 64-Bit DLL." >
+    <property name="Ver.FileDescription"  value="CnVclToFmx64 DLL" />
+    <property name="Ver.InternalName"     value="CnVclToFmx64" />
+    <property name="Ver.OriginalFilename" value="CnVclToFmx64.DLL" />
+    <copy tofile="${tools}/CnVclToFmx/CnVclToFmx64.res.old" >
+       <include name="${tools}/CnVclToFmx/CnVclToFmx64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnVclToFmx/CnVclToFmx64.rc" />
+    <brcc file="${tools}/CnVclToFmx/CnVclToFmx64.rc" output="${tools}/CnVclToFmx/CnVclToFmx64.res" />
+    <dcc basedir="${tools}/CnVclToFmx" source="CnVclToFmx64.dpr" exename="${exe.D104S_64}"  usecfg="true" />
+    <delete dir="${tools}/CnVclToFmx">
+       <include name="CnVclToFmx64.res" />
+       <include name="CnVclToFmx64.rc" />
+       <include name="CnVclToFmx64.drc" />
+    </delete>
+    <move tofile="${tools}/CnVclToFmx/CnVclToFmx64.res" >
+       <include name="${tools}/CnVclToFmx/CnVclToFmx64.res.old" />
     </move>
   </target>
 
