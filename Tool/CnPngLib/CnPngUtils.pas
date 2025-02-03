@@ -21,24 +21,23 @@
 unit CnPngUtils;
 {* |<PRE>
 ================================================================================
-* 软件名称：CnWizards 辅助工具
+* 软件名称：CnPack IDE 专家包辅助工具
 * 单元名称：Png 格式支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
 * 备    注：由于 pngimage 已经被 Embarcadero 收购，新的许可协议似乎不再允许该项目
 *           开源。为了避免版权问题，此处在 D2010 下使用官方的 pngimage 编译一个
-*           DLL 来供低版本的 IDE 环境下使用。
-* 开发平台：Win7 + Delphi 2010
+*           DLL 来供低版本的 IDE 环境下使用，并在 D10.4 下编译 64 位版本。
+* 开发平台：Win7 + Delphi 2010/10.4
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
-* 单元标识：$Id: CnPngUtils.pas 763 2011-02-07 14:18:23Z (master@cnpack.org) $
-* 修改记录：2017.03.15 V1.1
+* 修改记录：2025.02.03 V1.2
+*               适配 64 位版本
+*           2017.03.15 V1.1
 *               用绘制的方式取代 Assign 以避免部分 PNG8 图片全黑的问题
 *           2011.07.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
-
-{//$I CnWizards.inc}
 
 interface
 
@@ -63,6 +62,7 @@ begin
   Result := False;
   if not FileExists(string(PngFile)) then
     Exit;
+
   Png := nil;
   Bmp := nil;
   try
@@ -106,6 +106,7 @@ begin
   Result := False;
   if not FileExists(string(BmpFile)) then
     Exit;
+
   Png := nil;
   Bmp := nil;
   try

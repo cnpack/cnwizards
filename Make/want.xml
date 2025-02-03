@@ -224,7 +224,8 @@ Usage: want [target-name] [-Dname=value]
     resdll64   - Compile CnWizards 64-Bit Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
     cnziputilsdll  - Compile CnWizards Zip DLL.
-    cnpnglib   - Compile CnPngLib DLL.
+    cnpnglib     - Compile CnPngLib DLL.
+    cnpnglib64   - Compile CnPngLib 64-Bit DLL.
     cnformatlib - Compile CnFormatLib DLL.
     cnformatlibw - Compile CnFormatLibW DLL for Unicode.
     cnvcltofmx - Compile CnVclToFmx DLL.
@@ -1301,6 +1302,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnPngLib/CnPngLib.res" >
        <include name="${tools}/CnPngLib/CnPngLib.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnPngLib64 DLL -->
+  <target name="cnpnglib64" depends="-prepare" description="Compile CnPngLib 64-Bit DLL." >
+    <property name="Ver.FileDescription"  value="CnPngLib64 DLL" />
+    <property name="Ver.InternalName"     value="CnPngLib64" />
+    <property name="Ver.OriginalFilename" value="CnPngLib64.DLL" />
+    <copy tofile="${tools}/CnPngLib/CnPngLib64.res.old" >
+       <include name="${tools}/CnPngLib/CnPngLib64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnPngLib/CnPngLib64.rc" />
+    <brcc file="${tools}/CnPngLib/CnPngLib64.rc" output="${tools}/CnPngLib/CnPngLib64.res" />
+    <dcc basedir="${tools}/CnPngLib" source="CnPngLib64.dpr" exename="${exe.D104S_64}" usecfg="true" />
+    <delete dir="${tools}/CnPngLib">
+       <include name="CnPngLib64.res" />
+       <include name="CnPngLib64.rc" />
+       <include name="CnPngLib64.drc" />
+    </delete>
+    <move tofile="${tools}/CnPngLib/CnPngLib64.res" >
+       <include name="${tools}/CnPngLib/CnPngLib64.res.old" />
     </move>
   </target>
 
