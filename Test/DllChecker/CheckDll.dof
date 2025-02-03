@@ -43,7 +43,7 @@ OutputDir=..\..\Bin
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=
+SearchPath=..\..\Source;..\..\Source\CodeFormatter;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=
 DebugSourceDirs=
@@ -78,9 +78,20 @@ ProductVersion=1.0.0.0
 Comments=
 [Excluded Packages]
 $(DELPHI)\Bin\dclite50.bpl=Borland Integrated Translation Environment
+[HistoryLists\hlDebugSourcePath]
+Count=2
+Item0=..\..\Source\CodeFormatter
+Item1=..\..\Source\Utils
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=5
+Item0=..\..\Source;..\..\Source\CodeFormatter;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
+Item1=..\..\Source;..\..\Source\CodeFormatter;..\..\Source\Utils;..\..\..\Source\Common;..\..\..\Source\Graphics;..\..\..\Source\Crypto
+Item2=..\..\Source;..\..\Source\CodeFormatter;..\..\Source\Utils
+Item3=..\..\Source;..\..\Source\CodeFormatter
+Item4=..\..\Source\CodeFormatter
 [HistoryLists\hlOutputDirectorry]
 Count=1
 Item0=..\..\Bin

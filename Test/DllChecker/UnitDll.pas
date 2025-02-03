@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls;
+  StdCtrls, ComCtrls, CnFormatterIntf, CnPngUtilsIntf;
 
 type
   TFormCheck = class(TForm)
@@ -12,10 +12,29 @@ type
     btnLoad: TButton;
     btnFree: TButton;
     lblError: TLabel;
+    pgcCheck: TPageControl;
+    tsForamtLib: TTabSheet;
+    tsPngLib: TTabSheet;
+    tsVclToFmx: TTabSheet;
+    tsWizHelper: TTabSheet;
+    tsWizLoader: TTabSheet;
+    tsWizRes: TTabSheet;
+    tsZipUtils: TTabSheet;
+    grpFormatLib: TGroupBox;
+    grpPngLib: TGroupBox;
+    grpVclToFmx: TGroupBox;
+    grpWizHelper: TGroupBox;
+    grpWizLoader: TGroupBox;
+    grpWizRes: TGroupBox;
+    grpZipUtils: TGroupBox;
+    btnFormatGetProvider: TButton;
+    btnPngLibGetProc: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnLoadClick(Sender: TObject);
     procedure btnFreeClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btnFormatGetProviderClick(Sender: TObject);
+    procedure btnPngLibGetProcClick(Sender: TObject);
   private
     FFormatLib: THandle;
     FPngLib: THandle;
@@ -24,6 +43,10 @@ type
     FWizLoader: THandle;
     FWizRes: THandle;
     FZipUtils: THandle;
+
+    FGetProvider: TCnGetFormatterProvider;
+  protected
+    procedure UpdateGroupBox;
   public
     procedure LoadAndCheckADll(const DllName: string; var H: THandle);
     procedure FreeAndCheckADll(var H: THandle);
@@ -67,6 +90,14 @@ const
 {$ENDIF}
   );
 
+type
+  TCnConvertPngToBmpProc = function (PngFile, BmpFile: PAnsiChar): LongBool; stdcall;
+  TCnConvertBmpToPngProc = function (BmpFile, PngFile: PAnsiChar): LongBool; stdcall;
+
+var
+  FCnConvertPngToBmpProc: TCnConvertPngToBmpProc = nil;
+  FCnConvertBmpToPngProc: TCnConvertBmpToPngProc = nil;
+
 procedure TFormCheck.FormCreate(Sender: TObject);
 begin
 {$IFDEF WIN64}
@@ -78,6 +109,8 @@ begin
   Caption := Caption + ' - Win32 Ansi';
   {$ENDIF}
 {$ENDIF}
+
+  UpdateGroupBox;
 end;
 
 procedure TFormCheck.btnLoadClick(Sender: TObject);
@@ -89,6 +122,8 @@ begin
   LoadAndCheckADll(DLLS[4], FWizLoader);
   LoadAndCheckADll(DLLS[5], FWizRes);
   LoadAndCheckADll(DLLS[6], FZipUtils);
+
+  UpdateGroupBox;
 end;
 
 procedure TFormCheck.btnFreeClick(Sender: TObject);
@@ -100,6 +135,8 @@ begin
   FreeAndCheckADll(FWizLoader);
   FreeAndCheckADll(FWizRes);
   FreeAndCheckADll(FZipUtils);
+
+  UpdateGroupBox;
 end;
 
 procedure TFormCheck.FreeAndCheckADll(var H: THandle);
@@ -125,6 +162,45 @@ end;
 procedure TFormCheck.FormDestroy(Sender: TObject);
 begin
   btnFree.Click;
+end;
+
+procedure TFormCheck.UpdateGroupBox;
+begin
+  grpFormatLib.Enabled := FFormatLib <> 0;
+  grpPngLib.Enabled    := FPngLib <> 0;
+  grpVclToFmx.Enabled  := FVclToFmxLib <> 0;
+  grpWizLoader.Enabled := FWizLoader <> 0;
+  grpWizHelper.Enabled := FWizHelper <> 0;
+  grpWizRes.Enabled    := FWizRes <> 0;
+  grpZipUtils.Enabled  := FZipUtils <> 0;
+end;
+
+procedure TFormCheck.btnFormatGetProviderClick(Sender: TObject);
+begin
+  if (FFormatLib <> 0) and not Assigned(FGetProvider) then
+  begin
+    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FFormatLib,
+      'GetCodeFormatterProvider'));
+    if Assigned(FGetProvider) then
+      ShowMessage('Format Provider Got');
+  end
+  else if FFormatLib = 0 then
+    ShowMessage('NO FormatLib DLL');
+end;
+
+procedure TFormCheck.btnPngLibGetProcClick(Sender: TObject);
+begin
+  if (FPngLib <> 0) and not Assigned(FCnConvertPngToBmpProc)
+    and not Assigned(FCnConvertBmpToPngProc) then
+  begin
+    FCnConvertPngToBmpProc := TCnConvertPngToBmpProc(GetProcAddress(FPngLib, 'CnConvertPngToBmp'));
+    FCnConvertBmpToPngProc := TCnConvertBmpToPngProc(GetProcAddress(FPngLib, 'CnConvertBmpToPng'));
+
+    if Assigned(FCnConvertPngToBmpProc) and Assigned(FCnConvertBmpToPngProc) then
+      ShowMessage('PngLib Function Got');
+  end
+  else if FPngLib = 0 then
+    ShowMessage('NO PngLib DLL');
 end;
 
 end.
