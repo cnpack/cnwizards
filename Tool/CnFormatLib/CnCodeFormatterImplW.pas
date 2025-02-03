@@ -26,6 +26,7 @@ unit CnCodeFormatterImplW;
 * 单元作者：CnPack开发组
 * 备    注：该单元实现代码格式化的对外接口，Unicode 版供 D2005~2007（UTF8版）
 *           以及 2009 以上（Utf16版）使用。由 D2009 编译
+*           另有 64 位 Unicode 版供 64 位专家包及 IDE 使用
 * 开发平台：WinXP + Delphi 2009
 * 兼容测试：not test yet
 * 本 地 化：not test hell

@@ -230,6 +230,7 @@ Usage: want [target-name] [-Dname=value]
     cnpnglib64   - Compile CnPngLib 64-Bit DLL.
     cnformatlib  - Compile CnFormatLib DLL.
     cnformatlibw - Compile CnFormatLibW DLL for Unicode.
+    cnformatlibw64 - Compile CnFormatLibW 64-Bit DLL for Unicode.
     cnvcltofmx   - Compile CnVclToFmx DLL.
     cnvcltofmx64 - Compile CnVclToFmx 64-Bit DLL.
     cnconfigio - Compile CnConfigIO.
@@ -1402,7 +1403,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnDll.template.rc" file="${tools}/CnFormatLib/CnFormatLibW.rc" />
     <brcc file="${tools}/CnFormatLib/CnFormatLibW.rc" output="${tools}/CnFormatLib/CnFormatLibW.res" />
-    <dcc basedir="${tools}/CnFormatLib" source="CnFormatLibW.dpr" exename="${exe.D2009}"  usecfg="true" />
+    <dcc basedir="${tools}/CnFormatLib" source="CnFormatLibW.dpr" exename="${exe.D2009}" usecfg="true" />
     <delete dir="${tools}/CnFormatLib">
        <include name="CnFormatLibW.res" />
        <include name="CnFormatLibW.rc" />
@@ -1410,6 +1411,27 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${tools}/CnFormatLib/CnFormatLibW.res" >
        <include name="${tools}/CnFormatLib/CnFormatLibW.res.old" />
+    </move>
+  </target>
+
+  <!-- 编译 CnFormatLibW64 DLL -->
+  <target name="cnformatlibw64" depends="-prepare" description="Compile CnFormatLibW 64-Bit DLL for Unicode." >
+    <property name="Ver.FileDescription"  value="CnFormatLibW64 DLL" />
+    <property name="Ver.InternalName"     value="CnFormatLibW64" />
+    <property name="Ver.OriginalFilename" value="CnFormatLibW64.DLL" />
+    <copy tofile="${tools}/CnFormatLib/CnFormatLibW64.res.old" >
+       <include name="${tools}/CnFormatLib/CnFormatLibW64.res" />
+    </copy>
+    <echo input="${tools}/CnDll.template.rc" file="${tools}/CnFormatLib/CnFormatLibW64.rc" />
+    <brcc file="${tools}/CnFormatLib/CnFormatLibW64.rc" output="${tools}/CnFormatLib/CnFormatLibW64.res" />
+    <dcc basedir="${tools}/CnFormatLib" source="CnFormatLibW64.dpr" exename="${exe.D104S_64}" usecfg="true" />
+    <delete dir="${tools}/CnFormatLib">
+       <include name="CnFormatLibW64.res" />
+       <include name="CnFormatLibW64.rc" />
+       <include name="CnFormatLibW64.drc" />
+    </delete>
+    <move tofile="${tools}/CnFormatLib/CnFormatLibW64.res" >
+       <include name="${tools}/CnFormatLib/CnFormatLibW64.res.old" />
     </move>
   </target>
 
