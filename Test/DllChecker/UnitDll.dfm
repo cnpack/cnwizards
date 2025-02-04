@@ -157,6 +157,21 @@ object FormCheck: TFormCheck
         Width = 433
         Height = 313
         TabOrder = 0
+        object imgWizRes: TImage
+          Left = 112
+          Top = 16
+          Width = 105
+          Height = 105
+        end
+        object btnWizResGet: TButton
+          Left = 16
+          Top = 16
+          Width = 75
+          Height = 25
+          Caption = 'WizRes Get'
+          TabOrder = 0
+          OnClick = btnWizResGetClick
+        end
       end
     end
     object tsZipUtils: TTabSheet

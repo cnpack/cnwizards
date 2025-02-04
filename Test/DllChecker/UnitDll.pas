@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, CnFormatterIntf, CnPngUtilsIntf, CnVclToFmxIntf, CnWizHelperIntf;
+  StdCtrls, ComCtrls, CnFormatterIntf, CnPngUtilsIntf, CnVclToFmxIntf, CnWizHelperIntf,
+  ExtCtrls;
 
 type
   TFormCheck = class(TForm)
@@ -32,6 +33,8 @@ type
     btnVclToFmxGetIntf: TButton;
     btnWizHelperLibGetProc: TButton;
     btnZipUtilsLibGetProc: TButton;
+    btnWizResGet: TButton;
+    imgWizRes: TImage;
     procedure FormCreate(Sender: TObject);
     procedure btnLoadClick(Sender: TObject);
     procedure btnFreeClick(Sender: TObject);
@@ -41,6 +44,7 @@ type
     procedure btnVclToFmxGetIntfClick(Sender: TObject);
     procedure btnWizHelperLibGetProcClick(Sender: TObject);
     procedure btnZipUtilsLibGetProcClick(Sender: TObject);
+    procedure btnWizResGetClick(Sender: TObject);
   private
     FFormatLib: THandle;
     FPngLib: THandle;
@@ -262,6 +266,42 @@ begin
   end
   else if FZipUtils = 0 then
     ShowMessage('NO ZipUtils DLL');
+end;
+
+procedure TFormCheck.btnWizResGetClick(Sender: TObject);
+const
+  RES_SAMPLE = 'TCNCPUWINENHANCEWIZARD';
+var
+  AIcon: TIcon;
+  HI: HICON;
+begin
+  if FWizRes = 0 then
+    Exit;
+
+  // 拿个图标出来画
+  AIcon := TIcon.Create;
+  try
+    HI := LoadImage(FWizRes, PChar(RES_SAMPLE), IMAGE_ICON, 32, 32, 0);
+    if HI <> 0 then
+    begin
+      AIcon.Handle := HI;
+      imgWizRes.Canvas.Draw(10, 10, AIcon);
+    end
+    else
+    begin
+      ShowMessage(Format('Load 32x32 Icon Error %s: %d', [RES_SAMPLE, GetLastError]));
+      HI := LoadImage(FWizRes, PChar(RES_SAMPLE), IMAGE_ICON, 16, 16, 0);
+      if HI <> 0 then
+      begin
+        AIcon.Handle := HI;
+        imgWizRes.Canvas.Draw(10, 10, AIcon);
+      end
+      else
+        ShowMessage(Format('Load 16x16 Icon Error %s: %d', [RES_SAMPLE, GetLastError]));
+    end;
+  finally
+    AIcon.Free;
+  end;
 end;
 
 end.
