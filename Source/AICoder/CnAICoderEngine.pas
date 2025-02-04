@@ -42,7 +42,7 @@ interface
 
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
-  CnInetUtils, {$IFNDEF TEST_APP} CnWizOptions, {$ENDIF} CnAICoderConfig,
+  CnInetUtils, {$IFNDEF STAND_ALONE} CnWizOptions, {$ENDIF} CnAICoderConfig,
   CnThreadPool, CnAICoderNetClient;
 
 type
