@@ -25,8 +25,8 @@ library CnWizLoader64;
 * 单元名称：CnWizard 专家 DLL 加载器实现单元
 * 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：
-* 开发平台：PWin7 + Delphi 5.0
-* 兼容测试：所有版本的 Delphi
+* 开发平台：PWin11 + Delphi 12
+* 兼容测试：64 位版本的 Delphi
 * 本 地 化：该单元无需本地化
 * 修改记录：2025.02.03 V1.1
 *               创建单元

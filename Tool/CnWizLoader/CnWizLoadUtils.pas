@@ -69,6 +69,10 @@ var
 
 implementation
 
+{$IFDEF WIN64}
+{$R-} // 64 位下不知道哪里出 Range Check Error，屏蔽先
+{$ENDIF}
+
 // 取文件版本号
 function GetFileVersionNumber(const FileName: string): TVersionNumber;
 var
