@@ -405,11 +405,15 @@ type
 
     // IOTARepositoryWizard methods
     function GetPage: string;
-    {$IFDEF COMPILER6_UP}
+{$IFDEF COMPILER6_UP}
+  {$IFDEF WIN64}
+    function GetGlyph: THandle;
+  {$ELSE}
     function GetGlyph: Cardinal;
-    {$ELSE}
+  {$ENDIF}
+{$ELSE}
     function GetGlyph: HICON;
-    {$ENDIF}
+{$ENDIF}
   end;
 
 //==============================================================================
@@ -1626,7 +1630,11 @@ end;
 
 // ·µ»ØÍ¼±ê¾ä±ú
 {$IFDEF COMPILER6_UP}
+{$IFDEF WIN64}
+function TCnRepositoryWizard.GetGlyph: THandle;
+{$ELSE}
 function TCnRepositoryWizard.GetGlyph: Cardinal;
+{$ENDIF}
 {$ELSE}
 function TCnRepositoryWizard.GetGlyph: HICON;
 {$ENDIF}

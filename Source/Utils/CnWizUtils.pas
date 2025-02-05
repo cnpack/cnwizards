@@ -151,10 +151,13 @@ function CnIntToObject(AInt: Integer): TObject;
 {* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
 function CnObjectToInt(AObject: TObject): Integer;
 {* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+
+{$IFNDEF WIN64}
 function CnIntToInterface(AInt: Integer): IUnknown;
-{* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+{* 供 Pascal Script 使用的将整型值转换成 IUnknown 的函数}
 function CnInterfaceToInt(Intf: IUnknown): Integer;
-{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+{* 供 Pascal Script 使用的将 IUnknown 转换成整型值的函数}
+{$ENDIF}
 function CnGetClassFromClassName(const AClassName: string): Integer;
 {* 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数}
 function CnGetClassFromObject(AObject: TObject): Integer;
@@ -614,8 +617,12 @@ function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boo
 function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用，不丢字符}
+
+{$IFNDEF CNWIZARDS_MINIMUM}
 function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
 {* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
+{$ENDIF}
+
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -1330,6 +1337,8 @@ begin
   Result := Integer(AObject);
 end;
 
+{$IFNDEF WIN64}
+
 // 供 Pascal Script 使用的将整型值转换成 Interface 的函数
 function CnIntToInterface(AInt: Integer): IUnknown;
 begin
@@ -1341,6 +1350,8 @@ function CnInterfaceToInt(Intf: IUnknown): Integer;
 begin
   Result := Integer(Intf);
 end;
+
+{$ENDIF}
 
 // 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数
 function CnGetClassFromClassName(const AClassName: string): Integer;
@@ -5029,6 +5040,8 @@ begin
   Result := True;
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
 var
   EditView: IOTAEditView;
@@ -5057,6 +5070,8 @@ begin
   CnOtaGotoEditPosAndRepaint(EditView, R, C);
   Result := True;
 end;
+
+{$ENDIF}
 
 // 在编辑器中退格
 procedure CnOtaEditBackspace(Many: Integer);
