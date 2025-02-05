@@ -52,7 +52,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, ToolsAPI, IniFiles,
   Forms, Menus, Clipbrd, ActnList, StdCtrls, ComCtrls, Imm, Math, TypInfo,
   CnPasCodeParser, CnCommon, CnConsts, CnWizUtils, CnWizConsts, CnWizOptions,
-  CnWizIdeUtils, CnEditControlWrapper, CnWizNotifier, CnWizMethodHook,
+  CnWizIdeUtils, CnEditControlWrapper, CnWizNotifier, CnWizMethodHook, CnNative,
   CnWizCompilerConst,
   {$IFDEF IDE_WIDECONTROL}
   CnWidePasParser, CnWideCppParser,
@@ -79,8 +79,7 @@ type
     FOnEnhConfig: TNotifyEvent;
     FAutoMatchEntered: Boolean;
     FAutoMatchType: TCnAutoMatchType;
-    FRepaintView: Cardinal; // 供传递重画参数用
-
+    FRepaintView: TCnNativeUInt; // 供传递重画参数用
     FSmartCopy: Boolean;
     FSmartPaste: Boolean;
     FPasteReplace: Boolean;
@@ -286,7 +285,11 @@ begin
         if Len > 0 then
         begin
           SetLength(WideText, Len);
+{$IFDEF WIN64}
+          TControl(AComp).Perform(WM_GETTEXT, (Len + 1) * SizeOf(Char), NativeUInt(WideText));
+{$ELSE}
           TControl(AComp).Perform(WM_GETTEXT, (Len + 1) * SizeOf(Char), Longint(WideText));
+{$ENDIF}
 
           FOldSearchText := string(WideText);
         end;
@@ -660,7 +663,8 @@ begin
         end;
 
         FAutoMatchEntered := True;
-        FRepaintView := Cardinal(View);
+
+        FRepaintView := TCnNativeUInt(View);
         CnWizNotifierServices.ExecuteOnApplicationIdle(ExecuteInsertCharOnIdle);
       end;
     end

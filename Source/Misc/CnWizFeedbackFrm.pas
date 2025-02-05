@@ -648,6 +648,8 @@ var
   TimerHi, TimerLo: DWORD;
   PriorityClass, Priority: Integer;
 begin
+  Result := 0;
+{$IFNDEF WIN64}
   try
     PriorityClass := GetPriorityClass(GetCurrentProcess());
     Priority := GetThreadPriority(GetCurrentThread());
@@ -675,8 +677,9 @@ begin
 
     Result := (TimerLo / DelayTime) * 999.1; // Inaccuracy in sleep
   except
-    Result := 0;
+    ;
   end;
+{$ENDIF}
 end;
 
 function GetCpuInfoString: string;

@@ -51,7 +51,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ToolsAPI, AppEvnts,
-  Contnrs, Consts, CnWizUtils, CnClasses;
+  Contnrs, Consts, CnWizUtils, CnClasses, CnNative;
 
 type
   TCnAvailableState = (asAvailable, asProcRunning, asOutOfScope, asNotAvailable);
@@ -755,7 +755,7 @@ begin
   FProcessIntf := AProcess.Process;
   FDebuggerNotifierServices := AProcess.FDebuggerNotifierServices;
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnOTAProcessNotifier Created. Process Intf '+ InttoStr(Integer(FProcessIntf)));
+  CnDebugger.LogMsg('TCnOTAProcessNotifier Created. Process Intf '+ InttoStr(TCnNativeInt(FProcessIntf)));
 {$ENDIF}
   // 保证 Notifier 拿到层层下放的接口实例
 end;
