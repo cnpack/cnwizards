@@ -776,12 +776,17 @@ const
 
 {$IFDEF BDS4_UP}
 const
+{$IFDEF WIN64}
+  SBeginBatchOpenCloseName = '_ZN10Editorform19BeginBatchOpenCloseEv';
+  SEndBatchOpenCloseName = '_ZN10Editorform17EndBatchOpenCloseEb';
+{$ELSE}
   SBeginBatchOpenCloseName = '@Editorform@BeginBatchOpenClose$qqrv';
   SEndBatchOpenCloseName = '@Editorform@EndBatchOpenClose$qqrv';
 
 {$IFDEF DELPHI120_ATHENS_UP}
   // D12.1 改名了，但 12 没改
   SEndBatchOpenCloseName121 = '@Editorform@EndBatchOpenClose$qqrxo';
+{$ENDIF}
 {$ENDIF}
 
 var
@@ -2415,9 +2420,11 @@ begin
   Assert(Assigned(BeginBatchOpenCloseProc), 'Failed to load BeginBatchOpenCloseProc from CorIdeModule');
 
   EndBatchOpenCloseProc := GetProcAddress(CorIdeModule, SEndBatchOpenCloseName);
+{$IFNDEF WIN64}
 {$IFDEF DELPHI120_ATHENS_UP}
   if not Assigned(EndBatchOpenCloseProc) then // D12.1 改名了，再找一次
     EndBatchOpenCloseProc := GetProcAddress(CorIdeModule, SEndBatchOpenCloseName121);
+{$ENDIF}
 {$ENDIF}
 
   Assert(Assigned(EndBatchOpenCloseProc), 'Failed to load EndBatchOpenCloseProc from CorIdeModule');
@@ -4192,10 +4199,12 @@ end;
 {$ENDIF}
 
 initialization
+OutputDebugString(PChar('cnWizIdeUtils enter'));
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
+OutputDebugString(PChar('cnWizIdeUtils to init ideapi'));
   InitIdeAPIs;
-
+OutputDebugString(PChar('cnWizIdeUtils after init ideapi'));
 {$IFDEF IDE_SUPPORT_HDPI}
   FOriginImages := TObjectList.Create(False);
   FVirtualImages := TObjectList.Create(False);

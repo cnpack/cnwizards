@@ -67,11 +67,15 @@ begin
     DllInst := LoadLibraryW(PChar(Dll));
     if DllInst <> 0 then
     begin
+      OutputDebugString(PChar('64 Bit DLL Loading OK. To Get Entry.'));
       Entry := TWizardEntryPoint(GetProcAddress(DllInst, WizardEntryPoint));
       if Assigned(Entry) then
       begin
         // 调用真正的 DLL 初始化，并接收其卸载过程的指针
+        OutputDebugString(PChar(Format('64 Bit DLL Entry Got, to Call %s', [WizardEntryPoint])));
         Result := Entry(BorlandIDEServices, RegisterProc, LoaderTerminateProc);
+
+        OutputDebugString(PChar('64 Bit DLL Entry Called.'));
         // IDE 的卸载过程则指给我们的
         Terminate := LoaderTerminate;
       end
