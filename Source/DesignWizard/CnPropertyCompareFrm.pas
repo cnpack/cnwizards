@@ -126,7 +126,7 @@ type
     property ShowEvents: Boolean read FShowEvents write FShowEvents;
     {* 是否显示事件}
     property GridFont: TFont read FGridFont write SetGridFont;
-    {* 显示的字体}
+    {* 显示的字体，可能为 nil}
   end;
 
 {$ENDIF}
@@ -520,7 +520,8 @@ begin
       FGridFont.Assign(Temp2);
     end;
 
-    GridFont := ReadFont('', csGridFont, FGridFont);
+    if FGridFont <> nil then
+      GridFont := ReadFont('', csGridFont, FGridFont);
   finally
     Temp2.Free;
     Temp1.Free;
@@ -600,7 +601,7 @@ end;
 
 procedure TCnPropertyCompareManager.SetGridFont(const Value: TFont);
 begin
-  if Value <> nil then
+  if (FGridFont <> nil) and (Value <> nil) then
     FGridFont.Assign(Value);
 end;
 
