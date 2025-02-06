@@ -3380,6 +3380,7 @@
   {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
   {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
+  {$DEFINE IMAGELIST_BEGINENDUPDATE}       // 2010 开始，ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
   {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 下的 DebuggerService 有 ProcessDebugEvents
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
