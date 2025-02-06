@@ -88,7 +88,7 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
 
 function CompareVersionNumber(const V1, V2: TVersionNumber): Integer;
 begin

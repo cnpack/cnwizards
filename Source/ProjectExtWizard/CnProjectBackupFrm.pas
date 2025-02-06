@@ -754,7 +754,7 @@ var
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnProjectBackupForm.CreateProjectList');
-{$ENDIF DEBUG}
+{$ENDIF}
 
   IProjectGroup := CnOtaGetProjectGroup;
   if IProjectGroup = nil then
@@ -809,7 +809,7 @@ begin
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnProjectBackupForm.CreateProjectList');
-{$ENDIF DEBUG}
+{$ENDIF}
 end;
 
 procedure TCnProjectBackupForm.InitComboBox;

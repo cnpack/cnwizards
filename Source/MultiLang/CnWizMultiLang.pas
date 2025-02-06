@@ -268,7 +268,7 @@ begin
     ; // 屏蔽自动检测语言文件时可能出的错
 {$IFDEF DEBUG}
     CnDebugger.LogMsgError('Language Storage Initialization Error.');
-{$ENDIF DEBUG}
+{$ENDIF}
   end;
 
   // 将 2052 调整至首位
@@ -811,14 +811,14 @@ procedure TCnTranslateForm.DoHelpError;
 begin
 {$IFNDEF TEST_APP}
   ErrorDlg(SCnNoHelpofThisLang);
-{$ENDIF TEST_APP}
+{$ENDIF}
 end;
 
 procedure TCnTranslateForm.ShowFormHelp;
 begin
 {$IFNDEF TEST_APP}
   FHelpAction.Execute;
-{$ENDIF TEST_APP}
+{$ENDIF}
 end;
 
 procedure TCnTranslateForm.Translate;
@@ -826,7 +826,7 @@ begin
 {$IFNDEF TEST_APP}
 {$IFDEF DEBUG}
   CnDebugger.LogEnter(ClassName + '|TCnTranslateForm.Translate');
-{$ENDIF DEBUG}
+{$ENDIF}
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
   begin
@@ -842,13 +842,13 @@ begin
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsgError('CnWizards Form MultiLang Initialization Error. Use English Font as default.');
-{$ENDIF DEBUG}
+{$ENDIF}
     // 因初始化失败而无语言条目，因原始窗体是英文，故设置为英文字体
     Font.Charset := DEFAULT_CHARSET;
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave(ClassName + '|TCnTranslateForm.Translate');
-{$ENDIF DEBUG}
+{$ENDIF}
 {$ENDIF TEST_APP}
 end;
 

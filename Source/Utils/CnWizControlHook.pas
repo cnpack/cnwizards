@@ -127,9 +127,9 @@ function CnWizControlServices: ICnWizControlServices;
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   CnWizUtils;
 
 type
@@ -305,9 +305,9 @@ procedure TCnWizHookObject.DoFree;
 begin
   if Updating then
   begin
-  {$IFDEF Debug}
-    CnDebugger.LogMsg('Free hook object delay');
-  {$ENDIF Debug}
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Free Hook Object Delay');
+  {$ENDIF}
     FAutoFree := True;
     try
     {$IFDEF DEBUG}
@@ -364,9 +364,9 @@ end;
 constructor TCnWizControlServices.Create(AOwner: TComponent);
 begin
   inherited;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizControlServices.Create');
-{$ENDIF Debug}
+{$ENDIF}
   FHookObjs := TList.Create;
   FDesignRoots := TList.Create;
   FDesignContainers := TList.Create;
@@ -374,16 +374,16 @@ begin
   FAfterNotifiers := TList.Create;
   NotifierServices := CnWizNotifierServices;
   NotifierServices.AddFormEditorNotifier(FormNotify);
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizControlServices.Create');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 destructor TCnWizControlServices.Destroy;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizControlServices.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
   NotifierServices.RemoveFormEditorNotifier(FormNotify);
   UnhookAll;
   ClearList(FBeforeNotifiers);
@@ -393,9 +393,9 @@ begin
   FDesignContainers.Free;
   FDesignRoots.Free;
   FHookObjs.Free;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizControlServices.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
   inherited;
 end;
 
@@ -511,9 +511,9 @@ begin
     // 只挂接正在设计的窗体、Frame、及注册的第三方模块，不考虑 Data Module
     if Component is TWinControl then
     begin
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       CnDebugger.LogMsg('Hook Editor: ' + Editor.GetFileName);
-    {$ENDIF Debug}
+    {$ENDIF}
       HookDesignRoot(Component);
     end;
   end;
@@ -792,15 +792,15 @@ end;
 initialization
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnWizControlHook finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
   FreeCnWizControlServices;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizControlHook finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
 {$ENDIF USE_CONTROLHOOK}
 end.

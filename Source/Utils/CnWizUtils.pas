@@ -3260,10 +3260,10 @@ end;
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 begin
   Result := (Instance <> nil) and Supports(Instance, Intf, Inst);
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   if not Result then
-    CnDebugger.LogMsgWithType('Query services interface fail: ' + GUIDToString(Intf), cmtError);
-{$ENDIF Debug}
+    CnDebugger.LogMsgWithType('Query Services Interface Fail: ' + GUIDToString(Intf), cmtError);
+{$ENDIF}
 end;
 
 // È¡ IOTAEditBuffer ½Ó¿Ú

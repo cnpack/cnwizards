@@ -255,9 +255,9 @@ function MyMessageDlgPosHelp(const Msg: string; DlgType: TMsgDlgType;
   Buttons: TMsgDlgButtons; HelpCtx: Longint; X, Y: Integer;
   const HelpFileName: string): Integer;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('MyMessageDlgPosHelp called');
-{$ENDIF Debug}
+{$ENDIF}
   Result := mrOk;
 end;
 

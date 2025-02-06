@@ -707,7 +707,7 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnProjectViewBaseForm ReadFont: ' + sFont);
     CnDebugger.LogMsg('TCnProjectViewBaseForm SelfFont: ' + FontToString(Self.Font));
-{$ENDIF DEBUG}
+{$ENDIF}
     if (sFont <> '') and (sFont <> FontToString(Self.Font)) then
     begin
       // 只有保存的字体不等于窗体字体的时候，也即用户设置过字体后，才载入

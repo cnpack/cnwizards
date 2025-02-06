@@ -638,7 +638,7 @@ begin
       PopupMenu.Images := GetIDEImageList;
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('Hooked ComponentPalette''s PopupMenu.');
-  {$ENDIF DEBUG}
+  {$ENDIF}
   end;
 
   UpdateCompPalette;
@@ -1016,7 +1016,6 @@ begin
 {$ENDIF}
 end;
 
-
 //------------------------------------------------------------------------------
 // 移动专家菜单项
 //------------------------------------------------------------------------------
@@ -1025,7 +1024,8 @@ procedure TCnPaletteEnhanceWizard.InitWizMenus;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InitWizMenus');
-{$ENDIF DEBUG}
+{$ENDIF}
+
   FEnableWizMenu := False;
   FWizMenuNames := TStringList.Create;
   FWizMenu := TMenuItem.Create(nil);
@@ -1043,9 +1043,10 @@ begin
   FWizOptionMenu.Free;
   FWizMenu.Free;
   FWizMenuNames.Free;
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('FinalWizMenus');
-{$ENDIF DEBUG}
+{$ENDIF}
 end;
 
 function TCnPaletteEnhanceWizard.GetMenuInsertIndex: Integer;
@@ -1076,7 +1077,8 @@ begin
   begin
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('RestoreWizMenus');
-  {$ENDIF DEBUG}
+  {$ENDIF}
+
     Idx := GetMenuInsertIndex;
     while FWizMenu.Count > 2 do
     begin
@@ -1101,7 +1103,7 @@ var
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('AdjustMainMenuBar');
-{$ENDIF DEBUG}
+{$ENDIF}
 
   ViewBar := (BorlandIDEServices as INTAServices).ToolBar[sViewToolBar];
   if Assigned(ViewBar) and (ViewBar.Parent is TControlBar) then
@@ -1109,11 +1111,13 @@ begin
     ControlBar := TControlBar(ViewBar.Parent);
     MenuBar := nil;
     for I := 0 to ControlBar.ControlCount - 1 do
+    begin
       if SameText(ControlBar.Controls[I].Name, sMenuBar) then
       begin
         MenuBar := TToolBar(ControlBar.Controls[I]);
         Break;
       end;
+    end;
 
     if not Assigned(MenuBar) then
       Exit;
@@ -1122,6 +1126,7 @@ begin
     List := TList.Create;
     try
       for I := 0 to ControlBar.ControlCount - 1 do
+      begin
         if (ControlBar.Controls[I] <> MenuBar) and
           (ControlBar.Controls[I].Top = MenuBar.Top) then
         begin
@@ -1131,6 +1136,7 @@ begin
             Inc(J);
           List.Insert(J, ControlBar.Controls[I]);
         end;
+      end;
 
       for I := 0 to List.Count - 1 do
       begin
@@ -1157,6 +1163,7 @@ var
     MenuItem: TMenuItem;
   begin
     for I := MainMenu.Items.Count - 1 downto 0 do
+    begin
       if SameText(MainMenu.Items[I].Name, AName) then
       begin
         MenuItem := MainMenu.Items[I];
@@ -1164,13 +1171,14 @@ var
         AMenu.Insert(0, MenuItem);
         Break;
       end;
+    end;
   end;
 begin
   RestoreWizMenus;
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('UpdateWizMenus');
-{$ENDIF DEBUG}
+{$ENDIF}
 
   MainMenu := GetIDEMainMenu;
   if Assigned(MainMenu) and Active and FEnableWizMenu and

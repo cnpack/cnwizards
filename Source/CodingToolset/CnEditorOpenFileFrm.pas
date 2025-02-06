@@ -91,7 +91,7 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
 
 function ShowOpenFileResultList(List: TStrings): Boolean;
 begin

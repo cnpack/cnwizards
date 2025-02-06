@@ -229,9 +229,9 @@ procedure FreeWizShortCutMgr;
 implementation
 
 uses
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebug,
-{$ENDIF Debug}
+{$ENDIF}
   IniFiles, Registry, CnWizUtils, CnWizOptions;
 
 const
@@ -246,9 +246,9 @@ const
 // 快捷键属性已变更，通知管理器重新绑定
 procedure TCnWizShortCut.Changed;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizShortCut.Changed: %s', [Name]);
-{$ENDIF Debug}
+{$ENDIF}
   if FOwner <> nil then
     FOwner.UpdateBinding;
 end;
@@ -373,18 +373,18 @@ end;
 procedure TCnKeyBinding.KeyProc(const Context: IOTAKeyContext;
   KeyCode: TShortcut; var BindingResult: TKeyBindingResult);
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnKeyBinding.KeyProc, KeyCode: %s', [ShortCutToText(KeyCode)]);
   CnDebugger.LogMsg('Call: ' + TCnWizShortCut(Context.GetContext).Name);
-{$ENDIF Debug}
+{$ENDIF}
   // 注册快捷键时已将快捷键对象传递给上下文
   if Assigned(TCnWizShortCut(Context.GetContext).KeyProc) then
     TCnWizShortCut(Context.GetContext).KeyProc(TObject(Context.GetContext))
   else
   begin
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogMsgWithType('KeyProc is nil', cmtWarning);
-  {$ENDIF Debug}
+  {$ENDIF}
   end;
   BindingResult := krHandled; // 声明该事件已被处理过了
 end;
@@ -405,7 +405,7 @@ end;
 procedure TCnKeyBinding.BindKeyboard(
   const BindingServices: IOTAKeyBindingServices);
 var
-  i: Integer;
+  I: Integer;
   KeyboardName: string;
 begin
 {$IFDEF COMPILER7_UP}
@@ -413,15 +413,17 @@ begin
 {$ELSE}
   KeyboardName := SCnKeyBindingName;
 {$ENDIF}
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnKeyBinding.BindKeyboard, Count: %d', [Owner.Count]);
-{$ENDIF Debug}
+{$ENDIF}
   // 注册快捷键时将快捷键对象传递给上下文
-  for i := 0 to Owner.Count - 1 do
-    if Owner.ShortCuts[i].ShortCut <> 0 then
-      BindingServices.AddKeyBinding([Owner.ShortCuts[i].ShortCut], KeyProc,
-        Owner.ShortCuts[i], kfImplicitShift or kfImplicitModifier or
-        kfImplicitKeypad, KeyboardName, Owner.ShortCuts[i].MenuName);
+  for I := 0 to Owner.Count - 1 do
+  begin
+    if Owner.ShortCuts[I].ShortCut <> 0 then
+      BindingServices.AddKeyBinding([Owner.ShortCuts[I].ShortCut], KeyProc,
+        Owner.ShortCuts[I], kfImplicitShift or kfImplicitModifier or
+        kfImplicitKeypad, KeyboardName, Owner.ShortCuts[I].MenuName);
+  end;
 end;
 
 // 取快捷键绑定显示名称
@@ -445,9 +447,9 @@ end;
 // 类构造器
 constructor TCnWizShortCutMgr.Create;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizShortCutMgr.Create');
-{$ENDIF Debug}
+{$ENDIF}
 
   inherited;
   FShortCuts := TList.Create;
@@ -460,17 +462,17 @@ begin
 
 {$IFDEF Debug}
   CnDebugger.LogLeave('TCnWizShortCutMgr.Create');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 // 类析构器
 destructor TCnWizShortCutMgr.Destroy;
 begin
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizShortCutMgr.Destroy');
   if Count > 0 then
     CnDebugger.LogFmtWithType('WizShortCutMgr.Count = %d', [Count], cmtWarning);
-{$ENDIF Debug}
+{$ENDIF}
 
   Clear;
   FSaveMenus.Free;
@@ -478,10 +480,10 @@ begin
   FShortCuts.Free;
   if Assigned(FMenuTimer) then FMenuTimer.Free;
   inherited;
-  
-{$IFDEF Debug}
+
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizShortCutMgr.Destroy');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -545,10 +547,10 @@ var
 begin
   if (Index >= 0) and (Index <= Count - 1) then
   begin
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogFmt('TCnWizShortCutMgr.Delete(%d): %s', [Index,
       ShortCuts[Index].Name]);
-  {$ENDIF Debug}
+  {$ENDIF}
     NeedUpdate := ShortCuts[Index].FShortCut <> 0;
     ShortCuts[Index].Free;
     FShortCuts.Delete(Index);
@@ -585,13 +587,17 @@ var
   I: Integer;
 begin
   Result := -1;
-  if AName = '' then Exit;
+  if AName = '' then
+    Exit;
+
   for I := 0 to Count - 1 do
+  begin
     if ShortCuts[I].Name = AName then
     begin
       Result := I;
       Exit;
     end;
+  end;
 end;
 
 // 取快捷键对应的索引号
@@ -643,10 +649,10 @@ begin
   for I := 0 to FSaveMenus.Count - 1 do
   begin
     TMenuItem(FSaveMenus[I]).ShortCut := TShortCut(FSaveShortCuts[I]);
-  {$IFDEF Debug}
+  {$IFDEF DEBUG}
     CnDebugger.LogMsg(Format('MenuItem ShortCut Restored: %s (%s)',
       [TMenuItem(FSaveMenus[I]).Caption, ShortCutToText(TShortCut(FSaveShortCuts[I]))]));
-  {$ENDIF Debug}
+  {$ENDIF}
   end;
 
   FSaveMenus.Clear;
@@ -672,20 +678,20 @@ var
 
   procedure DoSaveMenu(MenuItem: TMenuItem);
   var
-    i: Integer;
+    I: Integer;
   begin
     if (MenuItem.Action = nil) and (MenuItem.ShortCut <> 0) then
     begin
       FSaveMenus.Add(MenuItem);
       FSaveShortCuts.Add(Pointer(MenuItem.ShortCut));
-    {$IFDEF Debug}
+    {$IFDEF DEBUG}
       //CnDebugger.LogMsg(Format('MenuItem ShortCut Saved: %s (%s)',
       //  [MenuItem.Caption, ShortCutToText(MenuItem.ShortCut)]));
-    {$ENDIF Debug}
+    {$ENDIF}
     end;
     
-    for i := 0 to MenuItem.Count - 1 do
-      DoSaveMenu(MenuItem.Items[i]);
+    for I := 0 to MenuItem.Count - 1 do
+      DoSaveMenu(MenuItem.Items[I]);
   end;
 begin
   FSaveMenus.Clear;
@@ -699,17 +705,20 @@ end;
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
   KeySvcs: IOTAKeyboardServices;
-  i: Integer;
+  I: Integer;
   IsEmpty: Boolean;
 begin
   Assert(FKeyBindingIndex = csInvalidIndex);
   IsEmpty := True;
-  for i := 0 to Count - 1 do    // 判断是否存在快捷键
-    if ShortCuts[i].FShortCut <> 0 then
+  for I := 0 to Count - 1 do    // 判断是否存在快捷键
+  begin
+    if ShortCuts[I].FShortCut <> 0 then
     begin
       IsEmpty := False;
       Break;
     end;
+  end;
+
   if not IsEmpty then
   begin
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
@@ -764,17 +773,17 @@ begin
   if IdeClosing then
     Exit;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizShortCutMgr.UpdateBinding');
-{$ENDIF Debug}
+{$ENDIF}
   RemoveKeyBinding;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('RemoveKeyBinding succeed');
-{$ENDIF Debug}
+{$ENDIF}
   InstallKeyBinding;
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogMsg('InstallKeyBinding succeed');
-{$ENDIF Debug}
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------

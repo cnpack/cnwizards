@@ -146,7 +146,7 @@ implementation
 {$IFDEF DEBUG}
 uses
   CnDebug;
-{$ENDIF DEBUG}
+{$ENDIF}
 
 const
   csViewForms = 'ViewForms';

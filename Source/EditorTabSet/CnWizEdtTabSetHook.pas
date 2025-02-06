@@ -463,14 +463,14 @@ end;
 initialization
 
 finalization
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogEnter('CnEditorTabSetHook finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 
   if FEditorTabSetHook <> nil then
     FEditorTabSetHook.Free;
 
-{$IFDEF Debug}
+{$IFDEF DEBUG}
   CnDebugger.LogLeave('CnEditorTabSetHook finalization.');
-{$ENDIF Debug}
+{$ENDIF}
 end.

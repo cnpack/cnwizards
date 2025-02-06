@@ -4,19 +4,6 @@ inherited CnEditorOpenFileForm: TCnEditorOpenFileForm
   Caption = 'File Search Result'
   PixelsPerInch = 96
   TextHeight = 13
-  inherited lvList: TListView
-    Columns = <
-      item
-        Caption = 'Unit'
-        Width = 210
-      end
-      item
-        AutoSize = True
-        Caption = 'Path'
-      end>
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Panels = <
       item
@@ -28,6 +15,21 @@ inherited CnEditorOpenFileForm: TCnEditorOpenFileForm
         Width = 110
       end>
     OnDrawPanel = StatusBarDrawPanel
+  end
+  inherited pnlMain: TPanel
+    inherited lvList: TListView
+      Columns = <
+        item
+          Caption = 'Unit'
+          Width = 210
+        end
+        item
+          AutoSize = True
+          Caption = 'Path'
+        end>
+      OwnerData = True
+      OnData = lvListData
+    end
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction
