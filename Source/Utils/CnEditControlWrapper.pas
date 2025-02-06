@@ -662,10 +662,29 @@ end;
 const
   STEditViewClass = 'TEditView';
 {$IFDEF DELPHI10_SEATTLE_UP}
+  {$IFDEF WIN64}
+  SGetCanvas = '_ZN13Editorcontrol18TCustomEditControl9GetCanvasEv';
+  {$ELSE}
   SGetCanvas = '@Editorcontrol@TCustomEditControl@GetCanvas$qqrv';
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF COMPILER8_UP}
+  {$IFDEF WIN64}
+  SPaintLineName = '_ZN13Editorcontrol18TCustomEditControl9PaintLineERN2Ek13TPaintContextEiii';
+  SMarkLinesDirtyName = '_ZN13Editorcontrol18TCustomEditControl14MarkLinesDirtyEiti';
+  SEdRefreshName = '_ZN13Editorcontrol18TCustomEditControl9EdRefreshEb';
+  SGetTextAtLineName = '_ZN13Editorcontrol18TCustomEditControl13GetTextAtLineEi';
+  SGetOTAEditViewName = '_ZN12Editorbuffer9TEditView14GetOTAEditViewEv';
+  SSetEditViewName = '_ZN13Editorcontrol18TCustomEditControl11SetEditViewEPN12Editorbuffer9TEditViewE';
+  SGetAttributeAtPosName = '_ZN13Editorcontrol18TCustomEditControl17GetAttributeAtPosERKN2Ek6TEdPosERiS5_bb';
+
+  SLineIsElidedName = '_ZN13Editorcontrol18TCustomEditControl12LineIsElidedEi';
+  SPointFromEdPosName = '_ZN13Editorcontrol18TCustomEditControl14PointFromEdPosERKN2Ek6TEdPosEbb';
+  STabsChangedName = '_ZN10Editorform11TEditWindow11TabsChangedEPN6System7TObjectE';
+
+  SViewBarChangedName = '_ZN10Editorform11TEditWindow13ViewBarChangeEPN6System7TObjectEiRb';
+  {$ELSE}
   SPaintLineName = '@Editorcontrol@TCustomEditControl@PaintLine$qqrr16Ek@TPaintContextiii';
   SMarkLinesDirtyName = '@Editorcontrol@TCustomEditControl@MarkLinesDirty$qqriusi';
   SEdRefreshName = '@Editorcontrol@TCustomEditControl@EdRefresh$qqro';
@@ -679,9 +698,14 @@ const
   STabsChangedName = '@Editorform@TEditWindow@TabsChanged$qqrp14System@TObject';
 
   SViewBarChangedName = '@Editorform@TEditWindow@ViewBarChange$qqrp14System@TObjectiro';
+  {$ENDIF}
 
 {$IFDEF COMPILER10_UP}
+  {$IFDEF WIN64}
+  SIndexPosToCurPosName = '_ZN13Editorcontrol18TCustomEditControl16IndexPosToCurPosEsi';
+  {$ELSE}
   SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrsi';
+  {$ENDIF}
 {$ELSE}
   SIndexPosToCurPosName = '@Editorcontrol@TCustomEditControl@IndexPosToCurPos$qqrss';
 {$ENDIF}
@@ -701,8 +725,13 @@ const
 {$ENDIF}
 
 {$IFDEF IDE_EDITOR_ELIDE}
+  {$IFDEF WIN64}
+  SEditControlElideName = '_ZN13Editorcontrol18TCustomEditControl5ElideEi';
+  SEditControlUnElideName = '_ZN13Editorcontrol18TCustomEditControl7unElideEi';
+  {$ELSE}
   SEditControlElideName = '@Editorcontrol@TCustomEditControl@Elide$qqri';
   SEditControlUnElideName = '@Editorcontrol@TCustomEditControl@unElide$qqri';
+  {$ENDIF}
 {$ENDIF}
 
 type
@@ -1011,7 +1040,6 @@ begin
     IndexPosToCurPosProc := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SIndexPosToCurPosName));
     CnWizAssert(Assigned(IndexPosToCurPosProc), 'Load IndexPosToCurPos from FCorIdeModule');
 {$ENDIF}
-
 
     SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Load SetEditView from FCorIdeModule');
