@@ -368,16 +368,26 @@ end;
 
 procedure TCnWizardMgr.InternalCreate;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogEnter('InternalCreate');
+{$ENDIF}
+
   FWizards := TList.Create;
   FMenuWizards := TList.Create;
   FIDEEnhanceWizards := TList.Create;
   FRepositoryWizards := TList.Create;
 {$IFNDEF CNWIZARDS_MINIMUM}
   dmCnSharedImages := TdmCnSharedImages.Create(nil);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate ShareImg Copy To IDE');
+{$ENDIF}
   dmCnSharedImages.CopyToIDEMainImageList;
 {$ENDIF}
 
 {$IFDEF BDS}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate SpashBmp');
+{$ENDIF}
   FSplashBmp := TBitmap.Create;
   CnWizLoadBitmap(FSplashBmp, SCnSplashBmp);
   FAboutBmp := TBitmap.Create;
@@ -386,30 +396,58 @@ begin
   RegisterPluginInfo;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate CheckIDEVersion');
+{$ENDIF}
   CheckIDEVersion;
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate CreateIDEMenu');
+{$ENDIF}
   CreateIDEMenu;
 
   // 创建所有专家
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate InstallWizards');
+{$ENDIF}
   InstallWizards;
 
   // 加载所有专家设置并创建子菜单
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate LoadSettings');
+{$ENDIF}
   LoadSettings;
 
   // 创建杂项子菜单，菜单排序在外面后面做
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate CreateMiscMenu');
+{$ENDIF}
   CreateMiscMenu;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
   // 专家创建完毕并加载设置完毕后，主图标与子菜单图标才被塞进 IDE 的 ImageList 中，
   // 此时复制大号到 IDE 的主 ImageList 中才能保证不漏
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate ShareImg Copy Large To IDE');
+{$ENDIF}
   dmCnSharedImages.CopyLargeIDEImageList;
 {$ENDIF}
 
   // 创建完菜单项后再插入到 IDE 中，以解决 D7 下菜单点需要点击才能下拉的问题
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate InstallIDEMenu');
+{$ENDIF}
   InstallIDEMenu;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate InstallPropEditors');
+{$ENDIF}
   InstallPropEditors;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate InstallCompEditors');
+{$ENDIF}
   InstallCompEditors;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -428,8 +466,16 @@ begin
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
   // IDE 启动完成后调用 Loaded
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate IdleLoaded');
+{$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleLoaded);
 {$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.LogLeave('InternalCreate');
+{$ENDIF}
+
 end;
 
 // BDS 下注册插件产品信息
@@ -510,6 +556,9 @@ begin
 
 {$IFNDEF CNWIZARDS_MINIMUM}
   // 提前初始化多语
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizardMgr InitLanguage');
+{$ENDIF}
   CreateLanguageManager;
   if CnLanguageManager <> nil then
     InitLangManager;
@@ -523,17 +572,26 @@ begin
 
   WizShortCutMgr.BeginUpdate;
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizardMgr CnListBeginUpdate');
+{$ENDIF}
   CnListBeginUpdate;
 {$ENDIF}
   try
     InternalCreate;
   finally
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizardMgr CnListEndUpdate');
+{$ENDIF}
     CnListEndUpdate;
 {$ENDIF}
     WizShortCutMgr.EndUpdate;
   end;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizardMgr ConstructSortedMenu');
+{$ENDIF}
   ConstructSortedMenu;
 {$IFNDEF CNWIZARDS_MINIMUM}
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
@@ -577,15 +635,31 @@ begin
     CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
 {$ENDIF}
 
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Destroy WizShortCutMgr BeginUpdate');
+{$ENDIF}
     WizShortCutMgr.BeginUpdate;
     try
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Destroy FreeMiscMenu');
+{$ENDIF}
       FreeMiscMenu;
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Destroy FreeWizards');
+{$ENDIF}
       FreeWizards;
     finally
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Destroy WizShortCutMgr EndUpdate');
+{$ENDIF}
       WizShortCutMgr.EndUpdate;
     end;
 
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Destroy FreeMenu');
+{$ENDIF}
     FreeMenu;
+
 {$IFNDEF CNWIZARDS_MINIMUM}
     FreeAndNil(dmCnSharedImages);
 {$ENDIF}
@@ -598,8 +672,17 @@ begin
     FreeAndNil(FIDEEnhanceWizards);
     FreeAndNil(FMenuWizards);
     FreeAndNil(FWizards);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Destroy FreeWizActionMgr');
+{$ENDIF}
     FreeWizActionMgr;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Destroy FreeWizShortCutMgr');
+{$ENDIF}
     FreeWizShortCutMgr;
+
     FreeAndNil(WizOptions);
     FreeAndNil(FLaterLoadTimer);
     FreeAndNil(FTipTimer);
@@ -1026,62 +1109,74 @@ begin
     Exit;
   end;
 
-  while FWizards.Count > 0 do
+  if FWizards <> nil then
   begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg(TCnBaseWizard(FWizards[0]).ClassName + '.Free');
-  {$ENDIF}
-    try
+    while FWizards.Count > 0 do
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg(TCnBaseWizard(FWizards[0]).ClassName + '.Free');
+    {$ENDIF}
       try
-        TCnBaseWizard(FWizards[0]).Free;
-      finally
-        FWizards.Delete(0);
+        try
+          TCnBaseWizard(FWizards[0]).Free;
+        finally
+          FWizards.Delete(0);
+        end;
+      except
+        Continue;
       end;
-    except
-      Continue;
     end;
   end;
 
-  while FMenuWizards.Count > 0 do
+  if FMenuWizards <> nil then
   begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg(TCnMenuWizard(FMenuWizards[0]).ClassName + '.Free');
-  {$ENDIF}
-    try
+    while FMenuWizards.Count > 0 do
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg(TCnMenuWizard(FMenuWizards[0]).ClassName + '.Free');
+    {$ENDIF}
       try
-        TCnMenuWizard(FMenuWizards[0]).Free;
-      finally
-        FMenuWizards.Delete(0);
+        try
+          TCnMenuWizard(FMenuWizards[0]).Free;
+        finally
+          FMenuWizards.Delete(0);
+        end;
+      except
+        Continue;
       end;
-    except
-      Continue;
     end;
   end;
 
-  while FIDEEnhanceWizards.Count > 0 do
+  if FIDEEnhanceWizards <> nil then
   begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg(TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).ClassName + '.Free');
-  {$ENDIF}
-    try
+    while FIDEEnhanceWizards.Count > 0 do
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg(TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).ClassName + '.Free');
+    {$ENDIF}
       try
-        TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).Free;
-      finally
-        FIDEEnhanceWizards.Delete(0);
+        try
+          TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).Free;
+        finally
+          FIDEEnhanceWizards.Delete(0);
+        end;
+      except
+        Continue;
       end;
-    except
-      Continue;
     end;
   end;
 
-  while FRepositoryWizards.Count > 0 do
+  if FRepositoryWizards <> nil then
   begin
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg(TCnRepositoryWizard(FRepositoryWizards[0]).ClassName + '.Free');
-  {$ENDIF}
-    // 移除专家会自动释放掉
-    WizardSvcs.RemoveWizard(TCnRepositoryWizard(FRepositoryWizards[0]).WizardIndex);
-    FRepositoryWizards.Delete(0);
+    while FRepositoryWizards.Count > 0 do
+    begin
+    {$IFDEF DEBUG}
+      CnDebugger.LogMsg(TCnRepositoryWizard(FRepositoryWizards[0]).ClassName + '.Free');
+    {$ENDIF}
+      // 移除专家会自动释放掉
+      WizardSvcs.RemoveWizard(TCnRepositoryWizard(FRepositoryWizards[0]).WizardIndex);
+      FRepositoryWizards.Delete(0);
+    end;
   end;
 end;
 
