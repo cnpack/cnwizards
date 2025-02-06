@@ -65,7 +65,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property IsAddHead: Boolean read GetIsAddHead write SetIsAddHead;
     property IsAddInit: Boolean read GetIsAddInit write SetIsAddInit;
     property CreatorType: TCnCreatorType read GetCreatorType write SetCreatorType;

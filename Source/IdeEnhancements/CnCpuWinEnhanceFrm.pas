@@ -71,7 +71,7 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 function ShowCpuWinEnhanceForm(var CopyForm: TCopyFrom; var CopyTo: TCopyTo;

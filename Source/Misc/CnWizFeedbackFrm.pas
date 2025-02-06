@@ -129,7 +129,6 @@ type
       var AllowChange: Boolean);
     procedure CnWizardImageChange(Sender: TObject);
   private
-    { Private declarations }
     function GetFeedbackType: TFeedbackType;
     function GetDestinationEmail: string;
     procedure SetDescriptionInfo;

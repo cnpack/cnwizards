@@ -77,7 +77,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
-    { Private declarations }
     FWizard: TCnSubMenuWizard;
     FHelpStr: string;
     FHolders: TList;

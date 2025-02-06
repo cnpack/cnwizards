@@ -50,9 +50,9 @@ type
     edtType: TEdit;
     edtExtName: TEdit;
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 var

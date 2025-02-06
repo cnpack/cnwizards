@@ -64,11 +64,11 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}

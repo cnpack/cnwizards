@@ -63,11 +63,10 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure edtPrefixKeyPress(Sender: TObject; var Key: Char);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
   end;
 
 // 取得新的组件前缀名。RootName 不为空表示是 Form 的情形，修改的是 TForm 对应的前缀

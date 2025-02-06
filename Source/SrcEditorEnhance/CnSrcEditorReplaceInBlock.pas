@@ -56,7 +56,7 @@ type
     chkSaveToItem: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   public
     function GetHelpTopic: string; override;
   end;

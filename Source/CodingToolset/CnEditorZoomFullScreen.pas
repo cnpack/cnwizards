@@ -59,9 +59,9 @@ type
     chkAutoHideMainForm: TCheckBox;
     chkRestoreNormal: TCheckBox;
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 //==============================================================================

@@ -94,7 +94,6 @@ type
     procedure CopyValue(Sender: TObject);
     procedure editExit(Sender: TObject);
   private
-    { Private declarations }
     FSC: TShenSizeConstraints;
     FNowHeight: TConstraintSize;
     FNowWidth: TConstraintSize;
@@ -104,7 +103,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property SC: TShenSizeConstraints read FSC write SetSC;
     property NowHeight: TConstraintSize read FNowHeight write SetNowHeight;
     property NowWidth: TConstraintSize read FNowWidth write SetNowWidth;

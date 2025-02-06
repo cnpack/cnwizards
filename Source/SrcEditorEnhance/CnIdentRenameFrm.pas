@@ -61,11 +61,11 @@ type
     procedure edtRenameKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}

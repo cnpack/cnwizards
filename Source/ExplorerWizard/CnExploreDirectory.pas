@@ -60,9 +60,9 @@ type
     procedure btnNewClick(Sender: TObject);
     procedure lstDblClick(Sender: TObject);
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 var

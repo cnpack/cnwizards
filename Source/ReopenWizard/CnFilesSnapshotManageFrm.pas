@@ -112,7 +112,7 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 // 显示添加文件快照界面，若用户取消则返回空字符串

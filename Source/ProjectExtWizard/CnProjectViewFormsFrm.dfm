@@ -3,42 +3,12 @@ inherited CnProjectViewFormsForm: TCnProjectViewFormsForm
   Caption = 'Form List of Project Group'
   PixelsPerInch = 96
   TextHeight = 13
-  inherited lvList: TListView
-    Columns = <
-      item
-        Caption = 'Form'
-        Width = 140
-      end
-      item
-        Caption = 'Caption'
-        Width = 130
-      end
-      item
-        Caption = 'Type'
-        Width = 90
-      end
-      item
-        Caption = 'Project'
-        Width = 100
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'Size(Byte)'
-        Width = 80
-      end
-      item
-        Caption = 'Format'
-        Width = 62
-      end>
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     OnDrawPanel = StatusBarDrawPanel
   end
   inherited ToolBar: TToolBar
     object tbnSep2: TToolButton
-      Left = 355
+      Left = 378
       Top = 0
       Width = 8
       Caption = 'tbnSep2'
@@ -46,7 +16,7 @@ inherited CnProjectViewFormsForm: TCnProjectViewFormsForm
       Style = tbsSeparator
     end
     object tbnConvertToText: TToolButton
-      Left = 363
+      Left = 386
       Top = 0
       Hint = 'Convert Selected Binary Form to Text Form'
       Caption = 'Convert to &Text'
@@ -54,12 +24,44 @@ inherited CnProjectViewFormsForm: TCnProjectViewFormsForm
       OnClick = tbnConvertToTextClick
     end
     object tbnConvertToBinary: TToolButton
-      Left = 386
+      Left = 409
       Top = 0
       Hint = 'Convert Selected Text Form to Binary Form'
       Caption = 'Convert to &Binary'
       ImageIndex = 64
       OnClick = tbnConvertToBinaryClick
+    end
+  end
+  inherited pnlMain: TPanel
+    inherited lvList: TListView
+      Columns = <
+        item
+          Caption = 'Form'
+          Width = 140
+        end
+        item
+          Caption = 'Caption'
+          Width = 130
+        end
+        item
+          Caption = 'Type'
+          Width = 90
+        end
+        item
+          Caption = 'Project'
+          Width = 100
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Size(Byte)'
+          Width = 80
+        end
+        item
+          Caption = 'Format'
+          Width = 62
+        end>
+      OwnerData = True
+      OnData = lvListData
     end
   end
 end

@@ -68,9 +68,9 @@ type
     procedure seDispLinesKeyPress(Sender: TObject; var Key: Char);
     procedure btnListFontClick(Sender: TObject);
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 function ShowBookmarkConfigForm(var DispLines: Integer; var SaveBookmark,

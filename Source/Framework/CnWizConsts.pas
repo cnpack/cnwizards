@@ -257,6 +257,7 @@ resourcestring
   SCnProjExtPasImpl = 'implementation';
   SCnProjExtCppHead = 'h';
   SCnProjExtCppSource = 'cpp';
+  SCnProjExtNotSaved = 'Not Saved'; // ‘› ±≤ª∑≠“Î
 
   // CnFilesSnapshotWizard
   SCnFilesSnapshotAdd = 'CnFilesSnapshotAdd';

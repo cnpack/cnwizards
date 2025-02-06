@@ -70,13 +70,11 @@ type
     procedure ValueListEditor1DblClick(Sender: TObject);
     procedure lvFilterDblClick(Sender: TObject);
   private
-    { Private declarations }
     function GetSelected: Integer;
     procedure SetSelected(const Row: Integer);
     procedure LoadFilterSetting(const FileName: String);
     procedure SaveFilterSetting(const FileName: String);
   public
-    { Public declarations }
     function FindFilter(const FilterKey: String; var Row: Integer): Boolean;
     procedure GetFilter(const Row: Integer; var FilterKey, Value: String);
     property Selected: Integer read GetSelected write SetSelected;

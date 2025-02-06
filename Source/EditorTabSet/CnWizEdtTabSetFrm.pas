@@ -43,9 +43,8 @@ uses
 type
   TCnWizEdtTabSetForm = class(TCnTranslateForm)
   private
-    { Private declarations }
+
   public
-    { Public declarations }
     function GetTabCaption: string; virtual; abstract;
     function IsTabVisible(Editor: IOTASourceEditor; View: IOTAEditView): Boolean; virtual;
     procedure DoTabShow(Editor: IOTASourceEditor; View: IOTAEditView); virtual;

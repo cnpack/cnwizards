@@ -83,7 +83,6 @@ type
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); override;
   public
-    { Public declarations }
     class procedure ParseUnitInclude(const Source: string; UsesList: TStrings);
   end;
 

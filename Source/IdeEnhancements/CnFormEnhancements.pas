@@ -430,7 +430,6 @@ type
       Selected: Boolean);
     procedure btnDefaultClick(Sender: TObject);
   private
-    { Private declarations }
     FUpdating: Boolean;
     procedure InitControls;
     procedure UpdateListView;
@@ -441,7 +440,7 @@ type
     Wizard: TCnFormEnhanceWizard;
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNFORMENHANCEWIZARD}

@@ -134,7 +134,6 @@ type
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
   public
-    { Public declarations }
     procedure DrawStretchedAscii;
     procedure UpdateChart;
     procedure UpdateStatusBar;

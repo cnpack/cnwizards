@@ -276,7 +276,6 @@ type
     procedure DoLanguageChanged(Sender: TObject); override;
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile);
     property FileKind1: TFileKind read FFileKind1 write SetFileKind1;
     property FileKind2: TFileKind read FFileKind2 write SetFileKind2;

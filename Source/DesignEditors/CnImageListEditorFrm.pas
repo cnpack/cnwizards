@@ -171,7 +171,6 @@ type
     procedure lvSearchContextPopup(Sender: TObject; MousePos: TPoint;
       var Handled: Boolean);
   private
-    { Private declarations }
     FComponent: TCustomImageList;
     FIni: TCustomIniFile;
     FOnApply: TNotifyEvent; 

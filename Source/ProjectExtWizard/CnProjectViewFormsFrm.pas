@@ -130,7 +130,7 @@ type
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
-    { Public declarations }
+
   end;
 
 function ShowProjectViewForms(Ini: TCustomIniFile; out Hooked: Boolean): Boolean;

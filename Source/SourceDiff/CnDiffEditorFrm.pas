@@ -58,9 +58,9 @@ type
     procedure actSaveExecute(Sender: TObject);
     procedure actCancelExecute(Sender: TObject);
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNSOURCEDIFFWIZARD}

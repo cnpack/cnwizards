@@ -57,11 +57,11 @@ type
     rbMulti: TRadioButton;
     procedure btnHelpClick(Sender: TObject);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 //==============================================================================

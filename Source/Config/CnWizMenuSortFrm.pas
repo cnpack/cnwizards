@@ -95,7 +95,6 @@ type
     FSortFlag: array[0..3] of Boolean;
     FMWizards: TList;
     procedure InitMenusFromList(Sorted: TList);
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
@@ -103,7 +102,6 @@ type
     procedure SaveWizardCreateInfo;
     procedure ReSortMenuWizards;
     procedure ExchangeTwoListItems(A, B: TListItem);
-    { Public declarations }
   end;
 
 var

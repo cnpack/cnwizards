@@ -63,10 +63,8 @@ type
     procedure lvWizardsListClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    { Private declarations }
     procedure UpdateStatusBar;
   public
-    { Public declarations }
     procedure GetBootList(var ABoots: array of boolean);
   end;
 

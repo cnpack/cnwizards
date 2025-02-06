@@ -76,10 +76,9 @@ type
     btnCancel: TButton;
     procedure cbbDateTimeFmtChange(Sender: TObject);
   private
-    { Private declarations }
+
   public
     procedure UpdateDateTimeStr;
-    { Public declarations }
   end;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}

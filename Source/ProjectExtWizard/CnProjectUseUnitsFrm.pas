@@ -468,7 +468,7 @@ begin
       if Info.IsSaved then
         Add('')
       else
-        Add(SNotSaved);
+        Add(SCnProjExtNotSaved);
     end;
     RemoveListViewSubImages(Item);
   end;

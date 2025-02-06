@@ -60,11 +60,11 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 function SelectImportDir(var RootDir: string; var Ignore: Boolean;

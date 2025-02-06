@@ -62,11 +62,11 @@ type
     procedure shpSeparateLineMouseDown(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}

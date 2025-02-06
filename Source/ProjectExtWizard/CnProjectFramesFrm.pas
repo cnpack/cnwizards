@@ -66,7 +66,7 @@ type
     procedure CreateList; override;
     procedure UpdateStatusBar; override;
   public
-    { Public declarations }
+
   end;
 
 function ShowProjectInsertFrame(ASelf: TCustomForm): Boolean;

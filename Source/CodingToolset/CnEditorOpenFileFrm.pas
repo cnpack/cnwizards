@@ -74,7 +74,6 @@ type
     procedure DoUpdateListView; override;
     procedure DoSortListView; override;
   public
-    { Public declarations }
     constructor Create(Owner: TComponent; List: TStrings); reintroduce;
   end;
 

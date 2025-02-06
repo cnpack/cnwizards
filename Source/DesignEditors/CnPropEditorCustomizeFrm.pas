@@ -55,11 +55,11 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
-    { Private declarations }
+
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 function ShowPropEditorCustomizeForm(List: TStrings; IsComp: Boolean): Boolean;

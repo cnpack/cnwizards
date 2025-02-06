@@ -68,11 +68,9 @@ type
     procedure FormShow(Sender: TObject);
   private
     function GetExeKind: TPrefixExeKind;
-    { Private declarations }
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     property ExeKind: TPrefixExeKind read GetExeKind;
   end;
 

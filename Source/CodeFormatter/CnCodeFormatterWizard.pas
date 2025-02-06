@@ -193,7 +193,7 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}

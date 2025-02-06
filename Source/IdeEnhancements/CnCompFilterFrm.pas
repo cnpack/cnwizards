@@ -241,7 +241,6 @@ type
       State: TCustomDrawState; var DefaultDraw: Boolean);
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     procedure LoadComponentsList;
     procedure ClearCompList;
     procedure ClearTabList;

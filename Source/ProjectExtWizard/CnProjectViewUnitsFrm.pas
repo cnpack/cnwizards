@@ -123,19 +123,9 @@ type
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; override;
   public
-    { Public declarations }
+
   end;
 
-const
-  SUnitTypes: array[TCnUnitType] of string =
-    ('Unknown', 'Project', 'Package', 'DataModule', 'Unit(Form)', 'Unit',
-     'Asm ','C', 'H', 'RC');
-  SNotSaved = 'Not Saved';
-  csViewUnits = 'ViewUnits';
-
-  csUnitImageIndexs: array[TCnUnitType] of Integer =
-    (26, 76, 77, 73, 67, 78, 79, 80, 81, 89); // 26 means unknown
-  
 function ShowProjectViewUnits(Ini: TCustomIniFile; out Hooked: Boolean): Boolean;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
@@ -150,6 +140,15 @@ implementation
 uses
   CnDebug;
 {$ENDIF}
+
+const
+  SUnitTypes: array[TCnUnitType] of string =
+    ('Unknown', 'Project', 'Package', 'DataModule', 'Unit(Form)', 'Unit',
+     'Asm ','C', 'H', 'RC');
+  csViewUnits = 'ViewUnits';
+
+  csUnitImageIndexs: array[TCnUnitType] of Integer =
+    (26, 76, 77, 73, 67, 78, 79, 80, 81, 89); // 26 means unknown
 
 { TCnProjectViewUnitsForm }
 
@@ -557,7 +556,7 @@ begin
       if Info.Size > 0 then
         Add('')
       else
-        Add(SNotSaved);
+        Add(SCnProjExtNotSaved);
     end;
     RemoveListViewSubImages(Item);
   end;

@@ -19,32 +19,6 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
   inherited pnlHeader: TPanel
     Width = 606
   end
-  inherited lvList: TListView
-    Width = 606
-    Columns = <
-      item
-        Caption = 'Frame Name'
-        Width = 210
-      end
-      item
-        Caption = 'Type'
-        Width = 90
-      end
-      item
-        Caption = 'Project'
-        Width = 130
-      end
-      item
-        Alignment = taRightJustify
-        Caption = 'Size(Byte)'
-        Width = 100
-      end
-      item
-        Caption = 'Format'
-        Width = 72
-      end>
-    MultiSelect = False
-  end
   inherited StatusBar: TStatusBar
     Width = 606
   end
@@ -61,6 +35,35 @@ inherited CnProjectFramesForm: TCnProjectFramesForm
     end
     inherited tbnConvertToBinary: TToolButton
       Visible = False
+    end
+  end
+  inherited pnlMain: TPanel
+    Width = 606
+    inherited lvList: TListView
+      Width = 606
+      Columns = <
+        item
+          Caption = 'Frame Name'
+          Width = 210
+        end
+        item
+          Caption = 'Type'
+          Width = 90
+        end
+        item
+          Caption = 'Project'
+          Width = 130
+        end
+        item
+          Alignment = taRightJustify
+          Caption = 'Size(Byte)'
+          Width = 100
+        end
+        item
+          Caption = 'Format'
+          Width = 72
+        end>
+      MultiSelect = False
     end
   end
   inherited ActionList: TActionList

@@ -57,14 +57,12 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
-    { Private declarations }
     FUserFormatOpt: DWORD;
     FUserFormatStrBefore: string;
     FUserFormatStrAfter: string;
     function Getchk1Enabled: Boolean;
     procedure Setchk1Enabled(const Value: Boolean);
   public
-    { Public declarations }
     property UserFormatStrBefore: string read FUserFormatStrBefore write FUserFormatStrBefore;
     property UserFormatStrAfter: string read FUserFormatStrAfter write FUserFormatStrAfter;
     property UserFormatOpt: DWORD read FUserFormatOpt write FUserFormatOpt;

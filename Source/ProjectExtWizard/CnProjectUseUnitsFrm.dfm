@@ -46,29 +46,6 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
       Width = 171
     end
   end
-  inherited lvList: TListView
-    Width = 732
-    Height = 368
-    Columns = <
-      item
-        Caption = 'Unit'
-        Width = 240
-      end
-      item
-        Caption = 'Location'
-        Width = 340
-      end
-      item
-        Caption = 'Project'
-        Width = 60
-      end
-      item
-        Caption = 'File State'
-        Width = 66
-      end>
-    OwnerData = True
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Top = 434
     Width = 732
@@ -89,6 +66,33 @@ inherited CnProjectUseUnitsForm: TCnProjectUseUnitsForm
   end
   inherited ToolBar: TToolBar
     Width = 732
+  end
+  inherited pnlMain: TPanel
+    Width = 732
+    Height = 368
+    inherited lvList: TListView
+      Width = 732
+      Height = 368
+      Columns = <
+        item
+          Caption = 'Unit'
+          Width = 240
+        end
+        item
+          Caption = 'Location'
+          Width = 340
+        end
+        item
+          Caption = 'Project'
+          Width = 60
+        end
+        item
+          Caption = 'File State'
+          Width = 66
+        end>
+      OwnerData = True
+      OnData = lvListData
+    end
   end
   inherited ActionList: TActionList
     inherited actOpen: TAction

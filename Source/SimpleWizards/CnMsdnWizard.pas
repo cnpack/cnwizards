@@ -108,14 +108,12 @@ type
     procedure FormShow(Sender: TObject);
     procedure rbFollowClick(Sender: TObject);
   private
-    { Private declarations }
     FSelectedMsdn: string;
-
     FCnMsdnWizard: TCnMsdnWizard;
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
+
   end;
 
 //==============================================================================

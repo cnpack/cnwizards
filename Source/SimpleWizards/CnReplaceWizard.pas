@@ -87,7 +87,6 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure rbNormalClick(Sender: TObject);
   private
-    { Private declarations }
     FIni: TCustomIniFile;
     FSearcher: TCnSearcher;
     
@@ -104,7 +103,6 @@ type
   protected
     function GetHelpTopic: string; override;
   public
-    { Public declarations }
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile;
       ASearcher: TCnSearcher);
 
