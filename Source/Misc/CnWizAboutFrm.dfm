@@ -40,7 +40,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
   object lblWeb: TLabel
     Left = 96
     Top = 168
-    Width = 160
+    Width = 165
     Height = 13
     Cursor = crHandPoint
     Caption = 'WebSite: https://www.cnpack.org'
@@ -78,7 +78,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
   object lblBbs: TLabel
     Left = 96
     Top = 184
-    Width = 143
+    Width = 148
     Height = 13
     Cursor = crHandPoint
     Caption = 'Forum: https://bbs.cnpack.org'
@@ -115,7 +115,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Width = 48
     Height = 48
     Cursor = crHandPoint
-    Hint = 'Donate to CnPack Foundation'
+    Hint = 'Donate to CnPack Team'
     Anchors = [akRight, akBottom]
     ParentShowHint = False
     Picture.Data = {

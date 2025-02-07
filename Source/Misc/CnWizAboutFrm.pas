@@ -114,7 +114,12 @@ procedure TCnWizAboutForm.FormCreate(Sender: TObject);
 begin
   edtVer.Text := Format('%s %s.%s Build %s', [SCnVersion,
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
+
+{$IFDEF WIN64}
+  Caption := Caption + ' (64) - ' + _CnExtractFileName(WizOptions.DllName);
+{$ELSE}
   Caption := Caption + ' - ' + _CnExtractFileName(WizOptions.DllName);
+{$ENDIF}
 end;
 
 procedure TCnWizAboutForm.lblWebClick(Sender: TObject);
