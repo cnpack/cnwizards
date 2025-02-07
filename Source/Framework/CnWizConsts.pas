@@ -151,9 +151,9 @@ resourcestring
   SCnWizUpgradeIniFile = 'Upgrade.ini';
   SCnWizTipOfDayIniFile = 'TipOfDay.ini';
 {$IFDEF WIN64}
-  SCnWizResDllName = 'CnWizRes.dll';
-{$ELSE}
   SCnWizResDllName = 'CnWizRes64.dll';
+{$ELSE}
+  SCnWizResDllName = 'CnWizRes.dll';
 {$ENDIF}
 
   // RegPath
