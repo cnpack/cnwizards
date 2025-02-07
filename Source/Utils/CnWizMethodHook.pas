@@ -28,7 +28,10 @@ unit CnWizMethodHook;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2024.02.04
+* 修改记录：2025.02.07
+*               修正 GetBplMethodAddress 在 64 位下的错误，但跳转还是有问题
+*               先强行在 64 位下使用 DDetours
+*           2024.02.04
 *               将 64 位支持从 CnMethodHook 中移入。差异则是是否使用 DDetours
 *           2018.01.12
 *               加入初始化时不自动挂接的控制，加入接口函数的真实地址获取
@@ -44,6 +47,11 @@ unit CnWizMethodHook;
 interface
 
 {$I CnWizards.inc}
+
+{$IFDEF CPU64BITS}
+  // 64 位下支持不佳，得用 DDetours
+  {$DEFINE USE_DDETOURS_HOOK}
+{$ENDIF}
 
 uses
   Windows, SysUtils, Classes{$IFDEF USE_DDETOURS_HOOK}, DDetours{$ENDIF};
@@ -99,7 +107,8 @@ type
 
 function GetBplMethodAddress(Method: Pointer): Pointer;
 {* 返回在 BPL 中实际的方法地址。如专家包中用 @TPersistent.Assign 返回的其实是
-   一个 Jmp 跳转地址，该函数可以返回在 BPL 中方法的真实地址。}
+   一个 Jmp 跳转地址，该函数可以返回在 BPL 中方法的真实地址，支持 32 位和 64 位
+   其中 64 位下目前只处理了跳转是 JMP QWORD PTR [RIP + offset] 也即 $25FF 的情形}
 
 function GetInterfaceMethodAddress(const AIntf: IUnknown;
   MethodIndex: Integer): Pointer;
@@ -112,7 +121,9 @@ function GetInterfaceMethodAddress(const AIntf: IUnknown;
 implementation
 
 resourcestring
-  SMemoryWriteError = 'Error Writing Method Memory (%s).';
+  SCnMemoryWriteError = 'Error Writing Method Memory (%s).';
+  SCnFailInstallHook = 'Failed to Install Method Hook';
+  SCnFailUninstallHook = 'Failed to Uninstall Method Hook';
 
 const
   csJmpCode = $E9;              // 相对跳转指令机器码
@@ -125,17 +136,35 @@ type
   TCnAddressInt = Integer;
 {$ENDIF}
 
-  PJmpCode = ^TJmpCode;
+// 返回在 BPL 中实际的方法地址，支持 32 位和 64 位
+function GetBplMethodAddress(Method: Pointer): Pointer;
+type
   TJmpCode = packed record
     Code: Word;                 // 间接跳转指定，为 $25FF
-    Addr: ^Pointer;             // 跳转指针地址，指向保存目标地址的指针
+{$IFDEF CPU64BITS}
+    Addr: DWORD;                // 64 位下的跳转到的 8 字节地址所存储位置的相对偏移，也是 32 位
+{$ELSE}
+    Addr: ^Pointer;             // 32 位下的跳转指针地址，指向保存目标地址的指针
+{$ENDIF}
   end;
+  PJmpCode = ^TJmpCode;
 
-// 返回在 BPL 中实际的方法地址
-function GetBplMethodAddress(Method: Pointer): Pointer;
+{$IFDEF CPU64BITS}
+var
+  P: PPointer;
+{$ENDIF}
 begin
-  if PJmpCode(Method)^.Code = csJmp32Code then
-    Result := PJmpCode(Method)^.Addr^
+  if (Method <> nil) and (PJmpCode(Method)^.Code = csJmp32Code) then
+  begin
+{$IFDEF CPU64BITS}
+    // Addr 存放一个 32 位偏移，加上 RIP 也就是 Method 入口再加本跳转指令的 6 字节
+    // 就能得到一个绝对地址，该地址存放的 8 字节是真正的跳转目标地址
+    P := PPointer(NativeInt(Method) + SizeOf(TJmpCode) + Integer(PJmpCode(Method)^.Addr));
+    Result := P^;
+{$ELSE}
+    Result := PJmpCode(Method)^.Addr^;
+{$ENDIF}
+  end
   else
     Result := Method;
 end;
@@ -227,7 +256,13 @@ begin
   if UseDDteoursHook then
     raise Exception.Create('DDetours NOT Included. Can NOT Hook.');
 {$ENDIF}
+
+{$IFDEF CPU64BITS}
+  FUseDDteours := fALSE;
+{$ELSE}
   FUseDDteours := UseDDteoursHook;
+{$ENDIF}
+
   FHooked := False;
   FOldMethod := AOldMethod;
   FNewMethod := ANewMethod;
@@ -255,14 +290,14 @@ begin
 {$IFDEF USE_DDETOURS_HOOK}
     FTrampoline := DDetours.InterceptCreate(FOldMethod, FNewMethod);
     if not Assigned(FTrampoline) then
-      raise Exception.Create('Failed to install method hook');
+      raise Exception.Create(SCnFailInstallHook);
 {$ENDIF}
   end
   else
   begin
     // 设置代码页写访问权限
     if not VirtualProtect(FOldMethod, SizeOf(TCnLongJump), PAGE_EXECUTE_READWRITE, @OldProtection) then
-      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+      raise Exception.CreateFmt(SCnMemoryWriteError, [SysErrorMessage(GetLastError)]);
 
     try
       // 保存原来的代码
@@ -283,7 +318,7 @@ begin
     finally
       // 恢复代码页访问权限
       if not VirtualProtect(FOldMethod, SizeOf(TCnLongJump), OldProtection, @DummyProtection) then
-        raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+        raise Exception.CreateFmt(SCnMemoryWriteError, [SysErrorMessage(GetLastError)]);
     end;
   end;
 
@@ -301,7 +336,7 @@ begin
   begin
 {$IFDEF USE_DDETOURS_HOOK}
     if not DDetours.InterceptRemove(FTrampoline) then
-      raise Exception.Create('Failed to release method hook');
+      raise Exception.Create(SCnFailUninstallHook);
 {$ENDIF}
     FTrampoline := nil;
   end
@@ -309,7 +344,7 @@ begin
   begin
     // 设置代码页写访问权限
     if not VirtualProtect(FOldMethod, SizeOf(TCnLongJump), PAGE_READWRITE, @OldProtection) then
-      raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+      raise Exception.CreateFmt(SCnMemoryWriteError, [SysErrorMessage(GetLastError)]);
 
     try
       // 恢复原来的代码
@@ -317,7 +352,7 @@ begin
     finally
       // 恢复代码页访问权限
       if not VirtualProtect(FOldMethod, SizeOf(TCnLongJump), OldProtection, @DummyProtection) then
-        raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
+        raise Exception.CreateFmt(SCnMemoryWriteError, [SysErrorMessage(GetLastError)]);
     end;
 
     // 保存多处理器下指令缓冲区同步
@@ -328,3 +363,4 @@ begin
 end;
 
 end.
+
