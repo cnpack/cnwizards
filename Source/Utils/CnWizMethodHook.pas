@@ -25,6 +25,17 @@ unit CnWizMethodHook;
 * 单元名称：对象方法挂接单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元用来挂接 IDE 内部类的方法
+*           32 位下统一使用相对跳转也即 E9 加 32 位偏移，一般没啥问题。
+*           64 位下如果也用 E9 加 32 位偏移，那么 DLL 在内存空间中太远就会跳不过去
+*           64 位下有 25FF 加 RIP 偏移处的 8 字节作为绝对跳转地址的模式（BPL 就如此），
+*           但同样存在该 8 字节存储的位置离待挂接的方法太远的问题。
+*
+*           因而先在 64 位下强行使用 DDetours 来规避，未来考虑这种：
+*              push address.low32
+*              mov dword [rsp+4], address.high32
+*              ret
+*           好处是能覆盖所有空间不用担心太远，坏处是 14 个字节，远超 32 位下的 5 个。
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -61,7 +72,7 @@ type
   TCnLongJump = packed record
     JmpOp: Byte;        // Jmp 相对跳转指令，为 $E9，32 位和 64 位通用
 {$IFDEF CPU64BITS}
-    Addr: DWORD;        // 64 位下的跳转到的相对地址，也是 32 位，但不确定有无覆盖所有情况
+    Addr: DWORD;        // 64 位下的跳转到的相对地址，也是 32 位，但覆盖不到 DLL 布局太远的情况
 {$ELSE}
     Addr: Pointer;      // 跳转到的相对地址
 {$ENDIF}
@@ -124,6 +135,7 @@ resourcestring
   SCnMemoryWriteError = 'Error Writing Method Memory (%s).';
   SCnFailInstallHook = 'Failed to Install Method Hook';
   SCnFailUninstallHook = 'Failed to Uninstall Method Hook';
+  SCnErrorNoDDetours = 'DDetours NOT Included. Can NOT Hook.';
 
 const
   csJmpCode = $E9;              // 相对跳转指令机器码
@@ -254,11 +266,11 @@ begin
   inherited Create;
 {$IFNDEF USE_DDETOURS_HOOK}
   if UseDDteoursHook then
-    raise Exception.Create('DDetours NOT Included. Can NOT Hook.');
+    raise Exception.Create(SCnErrorNoDDetours);
 {$ENDIF}
 
 {$IFDEF CPU64BITS}
-  FUseDDteours := fALSE;
+  FUseDDteours := True;
 {$ELSE}
   FUseDDteours := UseDDteoursHook;
 {$ENDIF}
