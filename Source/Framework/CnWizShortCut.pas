@@ -34,10 +34,16 @@ unit CnWizShortCut;
 *               更新，仅在最后调用 EndUpdate 时更新一次。
 *             - 当不再需要快捷键时，调用 WizShortCutMgr.Delete(...) 来删除，绝对
 *               不要自己去释放快捷键对象。
+*
+*           注：这套键盘绑定方法似乎在 64 位下不稳定，考虑到我们和 IDE 自身用 Action
+*           已能满足大部分需要，干脆在 64 位下不用 ToolsAPI 进行键盘绑定。
+*
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2007.05.21 V1.4
+* 修改记录：2025.02.07 V1.5
+*               64 位下禁用 KeyBinding，待观察副作用。
+*           2007.05.21 V1.4
 *               去掉 PushKeyboard 调用，改为修改 AddKeyBinding 参数，解决某些快
 *               捷键无效的问题。
 *           2007.05.10 V1.3
@@ -420,9 +426,15 @@ begin
   for I := 0 to Owner.Count - 1 do
   begin
     if Owner.ShortCuts[I].ShortCut <> 0 then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnKeyBinding.BindKeyboard AddKeyBinding: %d, MenuName %s',
+        [I, Owner.ShortCuts[I].MenuName]);
+{$ENDIF}
       BindingServices.AddKeyBinding([Owner.ShortCuts[I].ShortCut], KeyProc,
         Owner.ShortCuts[I], kfImplicitShift or kfImplicitModifier or
         kfImplicitKeypad, KeyboardName, Owner.ShortCuts[I].MenuName);
+    end;
   end;
 end;
 
@@ -724,6 +736,7 @@ begin
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
+{$IFNDEF WIN64}
       try
         FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));
       {$IFNDEF COMPILER7_UP}
@@ -734,6 +747,7 @@ begin
       except
         ;
       end;
+{$ENDIF}
     finally
       RestoreMainMenuShortCuts;
     end;
