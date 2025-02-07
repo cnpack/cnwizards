@@ -4199,12 +4199,9 @@ end;
 {$ENDIF}
 
 initialization
-OutputDebugString(PChar('cnWizIdeUtils enter'));
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
-OutputDebugString(PChar('cnWizIdeUtils to init ideapi'));
   InitIdeAPIs;
-OutputDebugString(PChar('cnWizIdeUtils after init ideapi'));
 {$IFDEF IDE_SUPPORT_HDPI}
   FOriginImages := TObjectList.Create(False);
   FVirtualImages := TObjectList.Create(False);

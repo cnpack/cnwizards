@@ -830,7 +830,6 @@ end;
 
 procedure TCnEditFiler.ReadFromStreamW(Stream: TStream);
 var
-  Size: Integer;
   Utf8Text: AnsiString;
   List: TStringList;
   Utf16Text: string;
@@ -886,9 +885,8 @@ end;
 
 // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关。
 procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean);
-var
-  Size: Integer;
 {$IFDEF IDE_WIDECONTROL}
+var
   AnsiText: AnsiString;
   Utf8Text: AnsiString;
   Utf16Text: WideString;
