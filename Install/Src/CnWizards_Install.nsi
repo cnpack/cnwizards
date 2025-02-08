@@ -117,33 +117,33 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
-  !define FULL_VERSION    "1"
+!define FULL_VERSION    "1"
   
-  !define IDE_VERSION_D5  "1"
-  !define IDE_VERSION_D6  "1"
-  !define IDE_VERSION_D7  "1"
-  !define IDE_VERSION_D2005  "1"
-  !define IDE_VERSION_D2006 "1"
-  !define IDE_VERSION_D2007 "1"
-  !define IDE_VERSION_D2009 "1"
-  !define IDE_VERSION_D2010 "1"
-  !define IDE_VERSION_DXE "1"
-  !define IDE_VERSION_DXE2 "1"
-  !define IDE_VERSION_DXE3 "1"
-  !define IDE_VERSION_DXE4 "1"
-  !define IDE_VERSION_DXE5 "1"
-  !define IDE_VERSION_DXE6 "1"
-  !define IDE_VERSION_DXE7 "1"
-  !define IDE_VERSION_DXE8 "1"
-  !define IDE_VERSION_D10S "1"
-  !define IDE_VERSION_D101B "1"
-  !define IDE_VERSION_D102T "1"
-  !define IDE_VERSION_D103R "1"
-  !define IDE_VERSION_D104S "1"
-  !define IDE_VERSION_D110A "1"
-  !define IDE_VERSION_D120A "1"
-  !define IDE_VERSION_CB5 "1"
-  !define IDE_VERSION_CB6 "1"
+!define IDE_VERSION_D5  "1"
+!define IDE_VERSION_D6  "1"
+!define IDE_VERSION_D7  "1"
+!define IDE_VERSION_D2005  "1"
+!define IDE_VERSION_D2006 "1"
+!define IDE_VERSION_D2007 "1"
+!define IDE_VERSION_D2009 "1"
+!define IDE_VERSION_D2010 "1"
+!define IDE_VERSION_DXE "1"
+!define IDE_VERSION_DXE2 "1"
+!define IDE_VERSION_DXE3 "1"
+!define IDE_VERSION_DXE4 "1"
+!define IDE_VERSION_DXE5 "1"
+!define IDE_VERSION_DXE6 "1"
+!define IDE_VERSION_DXE7 "1"
+!define IDE_VERSION_DXE8 "1"
+!define IDE_VERSION_D10S "1"
+!define IDE_VERSION_D101B "1"
+!define IDE_VERSION_D102T "1"
+!define IDE_VERSION_D103R "1"
+!define IDE_VERSION_D104S "1"
+!define IDE_VERSION_D110A "1"
+!define IDE_VERSION_D120A "1"
+!define IDE_VERSION_CB5 "1"
+!define IDE_VERSION_CB6 "1"
 
 !endif
 !endif
@@ -171,108 +171,110 @@ RequestExecutionLevel admin
 !endif
 !endif
 
-  !define IDE_VERSION
+!ifndef FULL_VERSION
+!define IDE_VERSION
 
-  !ifdef IDE_VERSION_D5
-    !define IDE_SHORT_NAME "D5"
-    !define IDE_LONG_NAME "Delphi 5"
-  !endif
-  !ifdef IDE_VERSION_D6
-    !define IDE_SHORT_NAME "D6"
-    !define IDE_LONG_NAME "Delphi 6"
-  !endif
-  !ifdef IDE_VERSION_D7
-    !define IDE_SHORT_NAME "D7"
-    !define IDE_LONG_NAME "Delphi 7"
-  !endif
-  !ifdef IDE_VERSION_D2005
-    !define IDE_SHORT_NAME "D2005"
-    !define IDE_LONG_NAME "BDS 2005"
-  !endif
-  !ifdef IDE_VERSION_D2006
-    !define IDE_SHORT_NAME "D2006"
-    !define IDE_LONG_NAME "BDS 2006"
-  !endif
-  !ifdef IDE_VERSION_D2007
-    !define IDE_SHORT_NAME "D2007"
-    !define IDE_LONG_NAME "RAD Studio 2007"
-  !endif
-  !ifdef IDE_VERSION_D2009
-    !define IDE_SHORT_NAME "D2009"
-    !define IDE_LONG_NAME "RAD Studio 2009"
-  !endif
-  !ifdef IDE_VERSION_D2010
-    !define IDE_SHORT_NAME "D2010"
-    !define IDE_LONG_NAME "RAD Studio 2010"
-  !endif
-  !ifdef IDE_VERSION_DXE
-    !define IDE_SHORT_NAME "D2011"
-    !define IDE_LONG_NAME "RAD Studio XE"
-  !endif
-  !ifdef IDE_VERSION_DXE2
-    !define IDE_SHORT_NAME "D2012"
-    !define IDE_LONG_NAME "RAD Studio XE2"
-  !endif
-  !ifdef IDE_VERSION_DXE3
-    !define IDE_SHORT_NAME "D2013"
-    !define IDE_LONG_NAME "RAD Studio XE3"
-  !endif
-  !ifdef IDE_VERSION_DXE4
-    !define IDE_SHORT_NAME "DXE4"
-    !define IDE_LONG_NAME "RAD Studio XE4"
-  !endif
-  !ifdef IDE_VERSION_DXE5
-    !define IDE_SHORT_NAME "DXE5"
-    !define IDE_LONG_NAME "RAD Studio XE5"
-  !endif
-  !ifdef IDE_VERSION_DXE6
-    !define IDE_SHORT_NAME "DXE6"
-    !define IDE_LONG_NAME "RAD Studio XE6"
-  !endif
-  !ifdef IDE_VERSION_DXE7
-    !define IDE_SHORT_NAME "DXE7"
-    !define IDE_LONG_NAME "RAD Studio XE7"
-  !endif
-  !ifdef IDE_VERSION_DXE8
-    !define IDE_SHORT_NAME "DXE8"
-    !define IDE_LONG_NAME "RAD Studio XE8"
-  !endif
-  !ifdef IDE_VERSION_D10S
-    !define IDE_SHORT_NAME "D10S"
-    !define IDE_LONG_NAME "RAD Studio 10 Seattle"
-  !endif
-  !ifdef IDE_VERSION_D101B
-    !define IDE_SHORT_NAME "D101B"
-    !define IDE_LONG_NAME "RAD Studio 10.1 Berlin"
-  !endif
-  !ifdef IDE_VERSION_D102T
-    !define IDE_SHORT_NAME "D102T"
-    !define IDE_LONG_NAME "RAD Studio 10.2 Tokyo"
-  !endif
-  !ifdef IDE_VERSION_D103R
-    !define IDE_SHORT_NAME "D103R"
-    !define IDE_LONG_NAME "RAD Studio 10.3 Rio"
-  !endif
-  !ifdef IDE_VERSION_D104S
-    !define IDE_SHORT_NAME "D104S"
-    !define IDE_LONG_NAME "RAD Studio 10.4 Sydney"
-  !endif
-  !ifdef IDE_VERSION_D110A
-    !define IDE_SHORT_NAME "D110A"
-    !define IDE_LONG_NAME "RAD Studio 11 Alexandria"
-  !endif
-  !ifdef IDE_VERSION_D120A
-    !define IDE_SHORT_NAME "D120A"
-    !define IDE_LONG_NAME "RAD Studio 12 Athens"
-  !endif
-  !ifdef IDE_VERSION_CB5
-    !define IDE_SHORT_NAME "CB5"
-    !define IDE_LONG_NAME "C++Builder 5"
-  !endif
-  !ifdef IDE_VERSION_CB6
-    !define IDE_SHORT_NAME "CB6"
-    !define IDE_LONG_NAME "C++Builder 6"
-  !endif
+!ifdef IDE_VERSION_D5
+  !define IDE_SHORT_NAME "D5"
+  !define IDE_LONG_NAME "Delphi 5"
+!endif
+!ifdef IDE_VERSION_D6
+  !define IDE_SHORT_NAME "D6"
+  !define IDE_LONG_NAME "Delphi 6"
+!endif
+!ifdef IDE_VERSION_D7
+  !define IDE_SHORT_NAME "D7"
+  !define IDE_LONG_NAME "Delphi 7"
+!endif
+!ifdef IDE_VERSION_D2005
+  !define IDE_SHORT_NAME "D2005"
+  !define IDE_LONG_NAME "BDS 2005"
+!endif
+!ifdef IDE_VERSION_D2006
+  !define IDE_SHORT_NAME "D2006"
+  !define IDE_LONG_NAME "BDS 2006"
+!endif
+!ifdef IDE_VERSION_D2007
+  !define IDE_SHORT_NAME "D2007"
+  !define IDE_LONG_NAME "RAD Studio 2007"
+!endif
+!ifdef IDE_VERSION_D2009
+  !define IDE_SHORT_NAME "D2009"
+  !define IDE_LONG_NAME "RAD Studio 2009"
+!endif
+!ifdef IDE_VERSION_D2010
+  !define IDE_SHORT_NAME "D2010"
+  !define IDE_LONG_NAME "RAD Studio 2010"
+!endif
+!ifdef IDE_VERSION_DXE
+  !define IDE_SHORT_NAME "D2011"
+  !define IDE_LONG_NAME "RAD Studio XE"
+!endif
+!ifdef IDE_VERSION_DXE2
+  !define IDE_SHORT_NAME "D2012"
+  !define IDE_LONG_NAME "RAD Studio XE2"
+!endif
+!ifdef IDE_VERSION_DXE3
+  !define IDE_SHORT_NAME "D2013"
+  !define IDE_LONG_NAME "RAD Studio XE3"
+!endif
+!ifdef IDE_VERSION_DXE4
+  !define IDE_SHORT_NAME "DXE4"
+  !define IDE_LONG_NAME "RAD Studio XE4"
+!endif
+!ifdef IDE_VERSION_DXE5
+  !define IDE_SHORT_NAME "DXE5"
+  !define IDE_LONG_NAME "RAD Studio XE5"
+!endif
+!ifdef IDE_VERSION_DXE6
+  !define IDE_SHORT_NAME "DXE6"
+  !define IDE_LONG_NAME "RAD Studio XE6"
+!endif
+!ifdef IDE_VERSION_DXE7
+  !define IDE_SHORT_NAME "DXE7"
+  !define IDE_LONG_NAME "RAD Studio XE7"
+!endif
+!ifdef IDE_VERSION_DXE8
+  !define IDE_SHORT_NAME "DXE8"
+  !define IDE_LONG_NAME "RAD Studio XE8"
+!endif
+!ifdef IDE_VERSION_D10S
+  !define IDE_SHORT_NAME "D10S"
+  !define IDE_LONG_NAME "RAD Studio 10 Seattle"
+!endif
+!ifdef IDE_VERSION_D101B
+  !define IDE_SHORT_NAME "D101B"
+  !define IDE_LONG_NAME "RAD Studio 10.1 Berlin"
+!endif
+!ifdef IDE_VERSION_D102T
+  !define IDE_SHORT_NAME "D102T"
+  !define IDE_LONG_NAME "RAD Studio 10.2 Tokyo"
+!endif
+!ifdef IDE_VERSION_D103R
+  !define IDE_SHORT_NAME "D103R"
+  !define IDE_LONG_NAME "RAD Studio 10.3 Rio"
+!endif
+!ifdef IDE_VERSION_D104S
+  !define IDE_SHORT_NAME "D104S"
+  !define IDE_LONG_NAME "RAD Studio 10.4 Sydney"
+!endif
+!ifdef IDE_VERSION_D110A
+  !define IDE_SHORT_NAME "D110A"
+  !define IDE_LONG_NAME "RAD Studio 11 Alexandria"
+!endif
+!ifdef IDE_VERSION_D120A
+  !define IDE_SHORT_NAME "D120A"
+  !define IDE_LONG_NAME "RAD Studio 12 Athens"
+!endif
+!ifdef IDE_VERSION_CB5
+  !define IDE_SHORT_NAME "CB5"
+  !define IDE_LONG_NAME "C++Builder 5"
+!endif
+!ifdef IDE_VERSION_CB6
+  !define IDE_SHORT_NAME "CB6"
+  !define IDE_LONG_NAME "C++Builder 6"
+!endif
+!endif
 
 !ifdef IDE_VERSION
   !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
