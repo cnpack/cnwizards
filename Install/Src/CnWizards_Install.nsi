@@ -117,18 +117,6 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
-!ifdef  LITE
-  !define LITE_VERSION    "1"
-
-  !define IDE_VERSION_D6  "1"
-  !define IDE_VERSION_D7  "1"
-  !define IDE_VERSION_D2006 "1"
-  !define IDE_VERSION_D2007 "1"
-  !define IDE_VERSION_CB6 "1"
-  
-  !define NO_HELP         "1"
-  !define NO_LANG_FILE    "1"
-!else
   !define FULL_VERSION    "1"
   
   !define IDE_VERSION_D5  "1"
@@ -156,7 +144,6 @@ RequestExecutionLevel admin
   !define IDE_VERSION_D120A "1"
   !define IDE_VERSION_CB5 "1"
   !define IDE_VERSION_CB6 "1"
-!endif
 
 !endif
 !endif
@@ -184,8 +171,6 @@ RequestExecutionLevel admin
 !endif
 !endif
 
-!ifndef FULL_VERSION
-!ifndef LITE_VERSION
   !define IDE_VERSION
 
   !ifdef IDE_VERSION_D5
@@ -288,8 +273,6 @@ RequestExecutionLevel admin
     !define IDE_SHORT_NAME "CB6"
     !define IDE_LONG_NAME "C++Builder 6"
   !endif
-!endif
-!endif
 
 !ifdef IDE_VERSION
   !define VERSION_STRING "${VER_MAJOR}.${VER_MINOR}_${IDE_SHORT_NAME}"
@@ -656,10 +639,8 @@ InitOk:
   File "..\..\Bin\CnFormatLib.dll"
   File "..\..\Bin\CnFormatLibW.dll"
   File "..\..\Bin\CnVclToFmx.dll"
-!ifndef LITE_VERSION
   File "..\..\Bin\CnWizHelper.dll"
   File "..\..\Bin\CnZipUtils.dll"
-!endif
   File "..\..\License.*.txt"
 
   SetOutPath $INSTDIR\Data
@@ -685,19 +666,15 @@ InitOk:
   File "..\..\Bin\Lang\1046\*.*"
 !endif
 
-!ifndef LITE_VERSION
   SetOutPath $INSTDIR\Data\Templates
   File "..\..\Bin\Data\Templates\*.*"
-!endif
 
-!ifndef LITE_VERSION
   SetOutPath $INSTDIR\PSDecl
   File "..\..\Bin\PSDecl\*.*"
   SetOutPath $INSTDIR\PSDeclEx
   File "..\..\Bin\PSDeclEx\*.*"
   SetOutPath $INSTDIR\PSDemo
   File "..\..\Bin\PSDemo\*.*"
-!endif
 
   ; 删除 0.8.0 以前版本安装的图标文件，将于后续版本内去掉
   Delete "$INSTDIR\Icons\*.*"
@@ -1060,26 +1037,25 @@ SectionEnd
 Section "$(OTHERTOOLS)" SecTools
   SectionIn 1
   SetOutPath $INSTDIR
-!ifndef LITE_VERSION
+
   File "..\..\Bin\CnDfm6To5.exe"
   File "..\..\Bin\AsciiChart.exe"
   File "..\..\Bin\CnIdeBRTool.exe"
   File "..\..\Bin\CnManageWiz.exe"
   File "..\..\Bin\CnSelectLang.exe"
   File "..\..\Bin\CnSMR.exe"
-!endif
+
   File "..\..\Bin\CnConfigIO.exe"
   File "..\..\Bin\CnDebugViewer.exe"
   File "..\..\Bin\CnDebugViewer64.exe"
 
-!ifndef LITE_VERSION
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDFMCONVERTOR).lnk" "$INSTDIR\CnDfm6To5.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SIDEBRTOOL).lnk" "$INSTDIR\CnIdeBRTool.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SMANAGEWIZ).lnk" "$INSTDIR\CnManageWiz.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\${SSELECTLANG}.lnk" "$INSTDIR\CnSelectLang.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SRELATIONANALYZER).lnk" "$INSTDIR\CnSMR.exe"
-!endif
+
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
 

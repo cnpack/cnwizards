@@ -85,18 +85,11 @@ See http://www.suigeneris.org/want/ for details.
 
   <!-- 版本类型属性，由命令行传入，如 want -Dlite=true -->
   <property name="release.pro"    value="" />
-  <property name="release.pro"    value=""          if="full" />
-  <property name="release.pro"    value="_Lite"     if="lite" />
 
-  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-cb5,-cb6" unless="lite" />
-  <property name="cnwizards_list" value="-cnwizloader,-d6,-d7,-d2006,-d2007,-cb6" if="lite" />
-  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" unless="lite" />
-  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cnwizsetup" if="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnwizhelperdll,cnziputilsdll,cnpnglib,cnformatlib,cnformatlibw,cnvcltofmx,tools,makehelp,makeinst" unless="lite" />
-  <property name="all_list"       value="cnwizards,resdll,cnpnglib,cnformatlib,cnformatlibw,cnvcltofmx,tools,makeinst" if="lite" />
+  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-cb5,-cb6" />
+  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" />
+  <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,makeinst" />
 
-  <property name="install_lite"   value=""          unless="lite"/>
-  <property name="install_lite"   value="/DLITE"    if="lite"/>
 
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
   <property name="release.type"   value="_Unstable" if="unstable" />
@@ -138,11 +131,9 @@ See http://www.suigeneris.org/want/ for details.
   <!-- 定义编译时使用的条件编译宏 -->
   <property name="define._debug"    value=";DEBUG;CAPTURE_STACK" if="debug" />
   <property name="define._debug"    value=""               unless="debug" />
-  <property name="define._lite"     value=";CNWIZARDS_LITE" if="lite" />
-  <property name="define._lite"     value=""               unless="lite" />
   <property name="define._master"   value=";IS_MASTER"     if="ismaster" />
   <property name="define._master"   value=""               unless="ismaster" />
-  <property name="define.add"       value="AUTO_BUILD${define._debug}${define._lite}${define._master}"/>
+  <property name="define.add"       value="AUTO_BUILD${define._debug}${define._master}"/>
 
   <!-- 定义是否需要包括帮助文件的条件 -->
   <property name="install_arg"  value="/DMINI_HELP" if="unstable"/>
@@ -1748,7 +1739,6 @@ Usage: want [target-name] [-Dname=value]
       <arg value="/DVER_MINOR=${Ver.Str.Minor}" />
       <arg value="${install_arg}" />
       <arg value="${install_dbg}" />
-      <arg value="${install_lite}" />
       <arg value="CnWizards_Install.nsi" />
     </exec>
   </target>

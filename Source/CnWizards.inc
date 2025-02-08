@@ -20,12 +20,6 @@
 
 {$I CnPack.inc}
 
-{$IFDEF CNWIZARDS_LITE}
-
-{$I CnWizards_Lite.inc}
-
-{$ELSE}
-
 // Editor: All Design Editors
 {$DEFINE CNWIZARDS_DESIGNEDITOR}
 
@@ -154,7 +148,5 @@
 
 // Wizard: CnAICoderWizard
 {$DEFINE CNWIZARDS_CNAICODERWIZARD}
-
-{$ENDIF}
 
 {$I CnWizards_Def.inc}
