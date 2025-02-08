@@ -885,8 +885,8 @@ end;
 
 // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关。
 procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean);
-{$IFDEF IDE_WIDECONTROL}
 var
+{$IFDEF IDE_WIDECONTROL}
   AnsiText: AnsiString;
   Utf8Text: AnsiString;
   Utf16Text: WideString;
@@ -895,6 +895,8 @@ var
 {$ELSE}
   List: TCnWideStringList;
 {$ENDIF}
+{$ELSE}
+  Size: Integer;
 {$ENDIF}
 begin
   Assert(Stream <> nil);

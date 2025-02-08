@@ -123,7 +123,7 @@ type
   end;
 
   TCnDeepSeekAIEngine = class(TCnAIBaseEngine)
-  {* 深度求索 AI 引擎}
+  {* DeepSeek（深度求索）AI 引擎}
   public
     class function EngineName: string; override;
   end;
@@ -293,7 +293,7 @@ end;
 
 class function TCnDeepSeekAIEngine.EngineName: string;
 begin
-  Result := '深度求索';
+  Result := 'DeepSeek';
 end;
 
 { TCnMistralAIAIEngine }
@@ -651,6 +651,7 @@ begin
 end;
 
 initialization
+  RegisterAIEngine(TCnDeepSeekAIEngine);
   RegisterAIEngine(TCnOpenAIAIEngine);
   RegisterAIEngine(TCnMistralAIAIEngine);
   RegisterAIEngine(TCnGeminiAIEngine);
@@ -659,7 +660,6 @@ initialization
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
-  RegisterAIEngine(TCnDeepSeekAIEngine);
   RegisterAIEngine(TCnOllamaAIEngine);
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
