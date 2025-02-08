@@ -111,8 +111,8 @@ type
     FOffSet: array[0..3] of Integer;
     FSettingsLoaded: Boolean;
   {$IFDEF BDS}
-    FSplashBmp: TBitmap;
-    FAboutBmp: TBitmap;
+    FSplashBmp: TBitmap;   // 启动画面，24x24
+    FAboutBmp: TBitmap;    // IDE 关于窗口，36x36
   {$ENDIF}
     procedure DoLaterLoad(Sender: TObject);
     procedure DoFreeLaterLoadTimer(Sender: TObject);
