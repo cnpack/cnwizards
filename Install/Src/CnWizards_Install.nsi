@@ -643,6 +643,14 @@ InitOk:
   File "..\..\Bin\CnVclToFmx.dll"
   File "..\..\Bin\CnWizHelper.dll"
   File "..\..\Bin\CnZipUtils.dll"
+
+  File "..\..\Bin\CnWizRes64.dll"
+  File "..\..\Bin\CnPngLib64.dll"
+  File "..\..\Bin\CnFormatLibW64.dll"
+  File "..\..\Bin\CnVclToFmx64.dll"
+  File "..\..\Bin\CnWizHelper64.dll"
+  File "..\..\Bin\CnZipUtils64.dll"
+
   File "..\..\License.*.txt"
 
   SetOutPath $INSTDIR\Data
