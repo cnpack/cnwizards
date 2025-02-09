@@ -75,6 +75,8 @@ type
 {$ENDIF}
   end;
 
+{$IFDEF CPU64BITS}
+
   { 64 位下的变相长跳转汇编，占 14 字节
       PUSH addr.low32
       MOV DWORD [rsp+4], addr.high32
@@ -93,6 +95,8 @@ type
     RetOp: Byte;          // $C3
   end;
 
+{$ENDIF}
+
   TCnMethodHook = class
   {* 静态或 dynamic 方法挂接类，用于挂接类中静态方法或声明为 dynamic 的动态方法。
      该类通过修改原方法入口前 5/14 字节，改为跳转指令来实现方法挂接操作，在使用时
@@ -104,11 +108,11 @@ type
     FNewMethod: Pointer;
     FTrampoline: Pointer;
     FSaveData: TCnLongJump;
-    FSaveData64: TCnLongJump64; // 64 位远跳的保存数据
 {$IFDEF CPU64BITS}
+    FSaveData64: TCnLongJump64; // 64 位远跳的保存数据
     FFar: Boolean;              // 64 位下是否太远要用更长的跳转
-{$ENDIF}
     procedure InitLongJump64(JmpPtr: PCnLongJump64);
+{$ENDIF}
   public
     constructor Create(const AOldMethod, ANewMethod: Pointer; UseDDteoursHook: Boolean = False;
       DefaultHook: Boolean = True);
@@ -413,6 +417,8 @@ begin
   FHooked := True;
 end;
 
+{$IFDEF CPU64BITS}
+
 procedure TCnMethodHook.InitLongJump64(JmpPtr: PCnLongJump64);
 begin
   if JmpPtr <> nil then
@@ -422,6 +428,8 @@ begin
     JmpPtr^.RetOp := $C3;
   end;
 end;
+
+{$ENDIF}
 
 procedure TCnMethodHook.UnhookMethod;
 var
