@@ -52,7 +52,7 @@ begin
   TImageListAccess(ImageList1).Change;
   Method := TImageListAccess(ImageList1).Change;
   FImageListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
-    @MyImageListChange, True);
+    @MyImageListChange);
 end;
 
 procedure TFormHook.FormDestroy(Sender: TObject);
