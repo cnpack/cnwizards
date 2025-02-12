@@ -276,9 +276,6 @@ type
   protected
     function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
     function CheckIsCustomIdentifier(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
-
-//    procedure EditControlAfterMessage(Sender: TObject; Control: TControl;
-//      var Msg: TMessage; var Handled: Boolean);
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -625,6 +622,9 @@ type
     procedure SetCustomIdentifierBackground(const Value: TColor);
     procedure SetCustomIdentifierForeground(const Value: TColor);
   protected
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+    procedure GutterChangeRepaint(Sender: TObject);
+{$ENDIF}
     function CanSolidCurrentLineBlock: Boolean;
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -5048,31 +5048,6 @@ begin
 {$ENDIF}
     end;
   end;
-
-{$IFDEF DELPHI104_SYDNEY_UP}
-  if Operation = opInsert then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('EditControlNotify Insert, To Start a Thread to Repaint.');
-{$ENDIF}
-    TThread.CreateAnonymousThread(
-      procedure
-      begin
-        Sleep(1000);
-        try
-{$IFDEF DEBUG}
-          CnDebugger.LogMsg('A Repaint Thread to Repaint.');
-{$ENDIF}
-          EditControl.Invalidate;
-          Sleep(3000);
-          EditControl.Invalidate; // 重绘两次，这样无论编辑器跳变的动作出现早晚，理论上都能盖掉
-        except
-          ;
-        end;
-      end
-    ).Start;
-  end;
-{$ENDIF}
 end;
 
 procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -5104,6 +5079,28 @@ begin
     and (BlockHighlightStyle <> bsHotkey) and IsIdeEditorForm(Screen.ActiveForm) then
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnHighlightExec);
 end;
+
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+
+procedure TCnSourceHighlight.GutterChangeRepaint(Sender: TObject);
+var
+  Control: TControl;
+begin
+  Control := GetCurrentEditControl;
+  if Control <> nil then
+  begin
+    try
+      Control.Invalidate;
+    except
+      ;
+    end;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('SourceHighlight GutterChangeRepaint');
+{$ENDIF}
+  end;
+end;
+
+{$ENDIF}
 
 // EditorChange 时调用此事件去检查括号和结构高亮
 procedure TCnSourceHighlight.EditorChanged(Editor: TCnEditorObject;
@@ -5138,7 +5135,9 @@ begin
 
     CharSize := EditControlWrapper.GetCharSize;
 
-    if (ctFont in ChangeType) or (ctOptionChanged in ChangeType) then
+    if (ctFont in ChangeType) or (ctOptionChanged in ChangeType)
+     {$IFDEF IDE_EDITOR_CUSTOM_COLUMN} or (ctGutterWidthChanged in ChangeType) {$ENDIF}
+     then
     begin
       if ctFont in ChangeType then
       begin
@@ -5155,6 +5154,17 @@ begin
         UpdateTabWidth;
       end;
 {$ENDIF}
+
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+      if ctGutterWidthChanged in ChangeType then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Source Highlight Get Gutter Width Changed');
+{$ENDIF}
+        CnWizNotifierServices.ExecuteOnApplicationIdle(GutterChangeRepaint);
+      end;
+{$ENDIF}
+      // 都重绘
       RepaintEditors;
     end;
 
