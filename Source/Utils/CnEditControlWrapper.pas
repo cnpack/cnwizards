@@ -53,6 +53,13 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF OTA_CODEEDITOR_SERVICE}
+{$IFDEF WIN64}
+  // 只在 64 位下使用 11.3 之后新增的 ToolsAPI.Editor 接口
+  {$DEFINE USE_CODEEDITOR_SERVICE}
+{$ENDIF}
+{$ENDIF}
+
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
@@ -841,11 +848,15 @@ var
 begin
   Result := '';
   for AType := Low(AType) to High(AType) do
+  begin
     if AType in ChangeType then
+    begin
       if Result = '' then
         Result := GetEnumName(TypeInfo(TCnEditorChangeType), Ord(AType))
       else
         Result := Result + ', ' + GetEnumName(TypeInfo(TCnEditorChangeType), Ord(AType));
+    end;
+  end;
   Result := '[' + Result + ']';
 end;
 
@@ -2174,8 +2185,20 @@ end;
 
 function TCnEditControlWrapper.GetEditView(EditControl: TControl): IOTAEditView;
 var
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ELSE}
   Idx: Integer;
+{$ENDIF}
 begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  begin
+    Result := CES.GetEditView(TWinControl(EditControl));
+  end
+  else
+    Result := CnOtaGetTopMostEditView;
+{$ELSE}
   Idx := IndexOfEditor(EditControl);
   if Idx >= 0 then
     Result := Editors[Idx].EditView
@@ -2186,12 +2209,25 @@ begin
 {$ENDIF}
     Result := CnOtaGetTopMostEditView;
   end;
+{$ENDIF}
 end;
 
 function TCnEditControlWrapper.GetEditControl(EditView: IOTAEditView): TControl;
 var
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ELSE}
   Idx: Integer;
+{$ENDIF}
 begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  begin
+    Result := CES.GetEditControl(EditView);
+  end
+  else
+    Result := CnOtaGetCurrentEditControl;
+{$ELSE}
   Idx := IndexOfEditor(EditView);
   if Idx >= 0 then
     Result := Editors[Idx].EditControl
@@ -2202,14 +2238,23 @@ begin
 {$ENDIF}
     Result := CnOtaGetCurrentEditControl;
   end;
+{$ENDIF}
 end;
 
 function TCnEditControlWrapper.GetTopMostEditControl: TControl;
 var
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ELSE}
   Idx: Integer;
   EditView: IOTAEditView;
+{$ENDIF}
 begin
   Result := nil;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    Result := CES.GetTopEditor;
+{$ELSE}
   EditView := CnOtaGetTopMostEditView;
   for Idx := 0 to EditorCount - 1 do
   begin
@@ -2221,6 +2266,7 @@ begin
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogMsgWarning('GetTopMostEditControl: not found in list.');
+{$ENDIF}
 {$ENDIF}
 end;
 
