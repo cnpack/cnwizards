@@ -58,6 +58,7 @@ uses
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
+  {$IFDEF IDE_EDITOR_CUSTOM_COLUMN} ToolsAPI.Editor, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
   
@@ -99,6 +100,9 @@ type
 {$IFDEF IDE_EDITOR_ELIDE}
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided,               // 编辑器行展开，有限支持
+{$ENDIF}
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+    ctGutterWidthChanged,     // 编辑器左侧 Gutter 宽度改变
 {$ENDIF}
     ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
@@ -254,6 +258,10 @@ type
     FMouseNotifyAvailable: Boolean;
     FPaintLineHook: TCnMethodHook;
     FSetEditViewHook: TCnMethodHook;
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+    FRequestGutterHook: TCnMethodHook;
+    FRemoveGutterHook: TCnMethodHook;
+{$ENDIF}
     FCmpLines: TList;
     FMouseUpNotifiers: TList;
     FMouseDownNotifiers: TList;
@@ -559,6 +567,32 @@ begin
   Result := Length(IntToStr(LineCount));
 end;
 
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+
+function GetMethodAddress(const Instance: TObject; const MethodName: string): Pointer;
+var
+  RttiContext: TRttiContext;
+  RttiType: TRttiType;
+  RttiMethod: TRttiMethod;
+begin
+  Result := nil;
+
+  RttiContext := TRttiContext.Create;
+  try
+    RttiType := RttiContext.GetType(Instance.ClassType);
+    if RttiType = nil then
+      Exit;
+
+    RttiMethod := RttiType.GetMethod(MethodName);
+    if RttiMethod <> nil then
+      Result := RttiMethod.CodeAddress;
+  finally
+    RttiContext.Free;
+  end;
+end;
+
+{$ENDIF}
+
 { TCnEditorObject }
 
 constructor TCnEditorObject.Create(AEditControl: TControl;
@@ -768,6 +802,12 @@ type
   TEditControlUnElideProc = procedure(Self: TObject; Line: Integer);
 {$ENDIF}
 
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+  TRequestGutterColumnProc = function (Self: TObject; const NotifierIndex: Integer;
+    const Size: Integer; Position: Integer): Integer;
+  TRemoveGutterColumnProc = procedure (Self: TObject; const ColumnIndex: Integer);
+{$ENDIF}
+
 var
   PaintLine: TPaintLineProc = nil;
 {$IFDEF DELPHI10_SEATTLE_UP}
@@ -787,6 +827,10 @@ var
 {$IFDEF IDE_EDITOR_ELIDE}
   EditControlElide: TEditControlElideProc = nil;
   EditControlUnElide: TEditControlUnElideProc = nil;
+{$ENDIF}
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+  RequestGutterColumn: TRequestGutterColumnProc = nil;
+  RemoveGutterColumn: TRemoveGutterColumnProc = nil;
 {$ENDIF}
 
   PaintLineLock: TRTLCriticalSection;
@@ -893,6 +937,59 @@ begin
   end;
 end;
 
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+
+function MyRequestGutterColumn(Self: TObject; const NotifierIndex: Integer;
+  const Size: Integer; Position: Integer): Integer;
+var
+  I: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('MyRequestGutterColumn Called.');
+{$ENDIF}
+
+  if FEditControlWrapper.FRequestGutterHook.UseDDteours then
+    Result := TRequestGutterColumnProc(FEditControlWrapper.FRequestGutterHook.Trampoline)(Self, NotifierIndex, Size, Position)
+  else
+  begin
+    FEditControlWrapper.FRequestGutterHook.UnhookMethod;
+    try
+      Result := RequestGutterColumn(Self, NotifierIndex, Size, Position);
+    finally
+      FEditControlWrapper.FRequestGutterHook.HookMethod;
+    end;
+  end;
+
+  for I := 0 to FEditControlWrapper.EditorCount - 1 do
+    FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
+end;
+
+procedure MyRemoveGutterColumn(Self: TObject; const ColumnIndex: Integer);
+var
+  I: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('MyRemoveGutterColumn Called.');
+{$ENDIF}
+
+  if FEditControlWrapper.FRemoveGutterHook.UseDDteours then
+    TRemoveGutterColumnProc(FEditControlWrapper.FSetEditViewHook.Trampoline)(Self, ColumnIndex)
+  else
+  begin
+    FEditControlWrapper.FRemoveGutterHook.UnhookMethod;
+    try
+      RemoveGutterColumn(Self, ColumnIndex);
+    finally
+      FEditControlWrapper.FRemoveGutterHook.HookMethod;
+    end;
+  end;
+
+  for I := 0 to FEditControlWrapper.EditorCount - 1 do
+    FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
+end;
+
+{$ENDIF}
+
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
 var
   I: Integer;
@@ -962,12 +1059,19 @@ begin
     TObject(FBpClickQueue.Pop).Free;
   FBpClickQueue.Free;
 
-  if FCorIdeModule <> 0 then
-    FreeLibrary(FCorIdeModule);
   if FPaintLineHook <> nil then
     FPaintLineHook.Free;
   if FSetEditViewHook <> nil then
     FSetEditViewHook.Free;
+  if FCorIdeModule <> 0 then
+    FreeLibrary(FCorIdeModule);
+
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+  if FRequestGutterHook <> nil then
+    FRequestGutterHook.Free;
+  if FRemoveGutterHook <> nil then
+    FRemoveGutterHook.Free;
+{$ENDIF}
 
   FEditControlList.Free;
   FEditorList.Free;
@@ -993,6 +1097,11 @@ begin
 end;
 
 procedure TCnEditControlWrapper.InitEditControlHook;
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+var
+  Srv: INTACodeEditorServices;
+  Obj: TObject;
+{$ENDIF}
 begin
   try
     FCorIdeModule := LoadLibrary(CorIdeLibName);
@@ -1044,8 +1153,26 @@ begin
     SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Load SetEditView from FCorIdeModule');
 
-    FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
+{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+    if Supports(BorlandIDEServices, INTACodeEditorServices, Srv) then
+    begin
+      Obj := Srv as TObject;
+      RequestGutterColumn := GetMethodAddress(Obj, 'RequestGutterColumn');
+      if Assigned(RequestGutterColumn) then
+        FRequestGutterHook := TCnMethodHook.Create(@RequestGutterColumn, @MyRequestGutterColumn);
 
+      RemoveGutterColumn := GetMethodAddress(Obj, 'RemoveGutterColumn');
+      if Assigned(RemoveGutterColumn) then
+        FRemoveGutterHook := TCnMethodHook.Create(@RemoveGutterColumn, @MyRemoveGutterColumn);
+
+{$IFDEF DEBUG}
+      if (FRequestGutterHook <> nil) and (FRemoveGutterHook <> nil) then
+        CnDebugger.LogMsg('EditControl Gutter Column Functions Hooked');
+{$ENDIF}
+    end;
+{$ENDIF}
+
+    FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.PaintLine Hooked');
 {$ENDIF}
@@ -2507,9 +2634,7 @@ begin
       ChangeType := [ctHScroll];
 
     for I := 0 to EditorCount - 1 do
-    begin
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
-    end;
   end
 {$IFDEF IDE_SUPPORT_HDPI}
   else if (Msg.Msg = WM_DPICHANGED) and (Control = Application.MainForm) then
