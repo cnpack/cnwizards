@@ -35,9 +35,7 @@
   {$DEFINE SUPPORT_UINT64}    // UInt64
   {$DEFINE SUPPORT_32_AND_64} // 支持 32 和 64 位，可用 NativeInt 等
   {$DEFINE SUPPORT_ENCODING}  // Unicode 字符串支持 Encoding 转换
-  {$IFDEF SYSTEMINLINE}
-    {$DEFINE SUPPORT_INLINE}  // inline
-  {$ENDIF}
+  {$DEFINE SUPPORT_INLINE}  // 支持 inline
 
   {$DEFINE OBJECT_HAS_TOSTRING} // TObject.ToString
   {$DEFINE TBYTES_DEFINED}
