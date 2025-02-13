@@ -892,7 +892,8 @@ begin
     if FEditControlWrapper.FPaintLineHook.UseDDteours then
     begin
       try
-        Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self, Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
+        Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self,
+          Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
       except
         on E: Exception do
           DoHandleException(E.Message);
@@ -903,7 +904,8 @@ begin
       FEditControlWrapper.FPaintLineHook.UnhookMethod;
       try
         try
-          Result := PaintLine(Self, Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
+          Result := PaintLine(Self, Ek, LineNum, LogicLineNum,
+            V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
         except
           on E: Exception do
             DoHandleException(E.Message);

@@ -212,7 +212,6 @@ end;
 
 procedure TCnUsesIdentForm.actAttributeExecute(Sender: TObject);
 var
-  Info: TCnIdentUnitInfo;
   S: string;
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
   Wizard: TCnCodingToolsetWizard;

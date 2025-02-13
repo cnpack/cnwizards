@@ -2286,6 +2286,7 @@ var
 begin
   Result := 0;
   for I := 0 to Screen.CustomFormCount - 1 do
+  begin
     if IsIdeEditorForm(Screen.CustomForms[I]) then
     begin
       EditWindow := Screen.CustomForms[I];
@@ -2297,6 +2298,7 @@ begin
           Proc(EditWindow, EditControl, Context);
       end;
     end;
+  end;
 end;
 
 // 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见

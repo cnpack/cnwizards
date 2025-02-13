@@ -3444,15 +3444,15 @@ var
 begin
   if Assigned(Module) then
   begin
-      for I := 0 to Module.GetModuleFileCount - 1 do
+    for I := 0 to Module.GetModuleFileCount - 1 do
+    begin
+      Editor := CnOtaGetFileEditorForModule(Module, I);
+      if Supports(Editor, IOTAFormEditor, FormEditor) then
       begin
-        Editor := CnOtaGetFileEditorForModule(Module, I);
-        if Supports(Editor, IOTAFormEditor, FormEditor) then
-        begin
-          Result := FormEditor;
-          Exit;
-        end;
+        Result := FormEditor;
+        Exit;
       end;
+    end;
   end;
   Result := nil;
 end;
