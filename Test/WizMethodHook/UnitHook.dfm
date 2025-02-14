@@ -14,13 +14,22 @@ object FormHook: TFormHook
   OnDestroy = FormDestroy
   TextHeight = 15
   object Button1: TButton
-    Left = 208
-    Top = 104
-    Width = 75
+    Left = 72
+    Top = 64
+    Width = 185
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Test ImageList.Change Hook'
     TabOrder = 0
     OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 360
+    Top = 64
+    Width = 185
+    Height = 25
+    Caption = 'Test Method Call for ASM 64'
+    TabOrder = 1
+    OnClick = Button2Click
   end
   object ImageList1: TImageList
     Left = 384

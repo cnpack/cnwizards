@@ -12,11 +12,13 @@ type
     ImageList1: TImageList;
     VirtualImageList1: TVirtualImageList;
     Button1: TButton;
+    Button2: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
-
+    function TestFunc(A: Integer): string;
   public
     FImageListHook: TCnMethodHook;
   end;
@@ -45,6 +47,11 @@ begin
   TImageListAccess(ImageList1).Change;
 end;
 
+procedure TFormHook.Button2Click(Sender: TObject);
+begin
+  Caption := TestFunc(5);
+end;
+
 procedure TFormHook.FormCreate(Sender: TObject);
 var
   Method: TListChangeMethod;
@@ -58,6 +65,11 @@ end;
 procedure TFormHook.FormDestroy(Sender: TObject);
 begin
   FImageListHook.Free;
+end;
+
+function TFormHook.TestFunc(A: Integer): string;
+begin
+  Result := IntToStr(A);
 end;
 
 end.
