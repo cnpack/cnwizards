@@ -13,6 +13,7 @@ type
     VirtualImageList1: TVirtualImageList;
     Button1: TButton;
     Button2: TButton;
+    btnTestBplFunc: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -33,6 +34,12 @@ implementation
 type
   TImageListAccess = class(TCustomImageList);
   TListChangeMethod = procedure of object;
+
+  TTestProc = function (ASelf: TObject; AInt: Integer): string;
+
+var
+  HBpl: THandle;
+  TestProc: TTestProc = nil;
 
 procedure MyImageListChange(ASelf: TCustomImageList);
 begin
@@ -56,6 +63,12 @@ procedure TFormHook.FormCreate(Sender: TObject);
 var
   Method: TListChangeMethod;
 begin
+  HBpl := LoadLibrary('TestPackage.bpl');
+  if HBpl <> 0 then
+  begin
+    TestProc := TTestProc(GetProcAddress(HBpl, ''));
+  end;
+
   TImageListAccess(ImageList1).Change;
   Method := TImageListAccess(ImageList1).Change;
   FImageListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
@@ -65,6 +78,9 @@ end;
 procedure TFormHook.FormDestroy(Sender: TObject);
 begin
   FImageListHook.Free;
+
+  if HBpl <> 0 then
+    FreeLibrary(HBpl);
 end;
 
 function TFormHook.TestFunc(A: Integer): string;

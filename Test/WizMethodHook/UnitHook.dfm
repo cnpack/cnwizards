@@ -10,8 +10,10 @@ object FormHook: TFormHook
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
+  OldCreateOrder = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  PixelsPerInch = 96
   TextHeight = 15
   object Button1: TButton
     Left = 72
@@ -31,11 +33,21 @@ object FormHook: TFormHook
     TabOrder = 1
     OnClick = Button2Click
   end
+  object btnTestBplFunc: TButton
+    Left = 72
+    Top = 144
+    Width = 185
+    Height = 25
+    Caption = 'Test Load Bpl call Func'
+    TabOrder = 2
+  end
   object ImageList1: TImageList
     Left = 384
     Top = 208
   end
   object VirtualImageList1: TVirtualImageList
+    DisabledGrayscale = False
+    DisabledSuffix = '_Disabled'
     Images = <>
     Left = 208
     Top = 288
