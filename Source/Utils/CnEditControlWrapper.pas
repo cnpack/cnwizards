@@ -60,6 +60,10 @@ interface
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI10_SEATTLE_UP}
+  {$DEFINE PAINT_LINE_HAS_V3}
+{$ENDIF}
+
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
@@ -263,7 +267,12 @@ type
     FHighlights: TStringList;
     FPaintNotifyAvailable: Boolean;
     FMouseNotifyAvailable: Boolean;
-    FPaintLineHook: TCnMethodHook;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    FEvents: INTACodeEditorEvents;
+    FEventsIndex: Integer;
+{$ELSE}
+    FPaintLineHook: TCnMethodHook; // Win64 下该 Hook 有问题
+{$ENDIF}
     FSetEditViewHook: TCnMethodHook;
 {$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
     FRequestGutterHook: TCnMethodHook;
@@ -348,9 +357,15 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure CheckNewEditor(EditControl: TControl; View: IOTAEditView);
+    procedure CheckNewEditor(EditControl: TControl {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF});
     function AddEditor(EditControl: TControl; View: IOTAEditView): Integer;
     procedure DeleteEditor(EditControl: TControl);
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    procedure EditorPaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+      const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+      const Context: INTACodeEditorPaintContext);
+{$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -529,6 +544,19 @@ type
     {* 编辑器的文字背景色，实际上是 WhiteSpace 字体的背景色}
   end;
 
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+  TCnEditorEvents = class(TNTACodeEditorNotifier, INTACodeEditorEvents)
+  protected
+    function AllowedEvents: TCodeEditorEvents; override;
+    function AllowedLineStages: TPaintLineStages; override;
+  public
+    constructor Create(Wrapper: TCnEditControlWrapper);
+    destructor Destroy; override;
+  end;
+
+{$ENDIF}
+
 function EditControlWrapper: TCnEditControlWrapper;
 {* 获取全局编辑器封装对象}
 
@@ -694,12 +722,6 @@ begin
   Result := (EditControl <> nil) and (GetTopEditor = EditControl);
 end;
 
-//==============================================================================
-// 代码编辑器控件封装类
-//==============================================================================
-
-{ TCnEditControlWrapper }
-
 const
   STEditViewClass = 'TEditView';
 {$IFDEF DELPHI10_SEATTLE_UP}
@@ -781,7 +803,7 @@ type
   TGetCanvasProc = function (Self: TObject): TCanvas;
 {$ENDIF}
   TPaintLineProc = function (Self: TObject; Ek: Pointer;
-    LineNum, V1, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF}: Integer): Integer; register;
+    LineNum, V1, V2{$IFDEF PAINT_LINE_HAS_V3}, V3 {$ENDIF}: Integer): Integer; register;
   TMarkLinesDirtyProc = procedure(Self: TObject; LineNum: Integer; Count: Word;
     Flag: Integer); register;
   TEdRefreshProc = procedure(Self: TObject; DirtyOnly: Boolean); register;
@@ -860,6 +882,8 @@ begin
   Result := '[' + Result + ']';
 end;
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+
 // 替换掉的 TCustomEditControl.PaintLine 函数
 function MyPaintLine(Self: TObject; Ek: Pointer; LineNum, LogicLineNum, V2: Integer
   {$IFDEF DELPHI10_SEATTLE_UP}; V3: Integer {$ENDIF}): Integer;
@@ -893,7 +917,7 @@ begin
     begin
       try
         Result := TPaintLineProc(FEditControlWrapper.FPaintLineHook.Trampoline)(Self,
-          Ek, LineNum, LogicLineNum, V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
+          Ek, LineNum, LogicLineNum, V2{$IFDEF PAINT_LINE_HAS_V3}, V3 {$ENDIF});
       except
         on E: Exception do
           DoHandleException(E.Message);
@@ -905,7 +929,7 @@ begin
       try
         try
           Result := PaintLine(Self, Ek, LineNum, LogicLineNum,
-            V2{$IFDEF DELPHI10_SEATTLE_UP}, V3 {$ENDIF});
+            V2{$IFDEF PAINT_LINE_HAS_V3}, V3 {$ENDIF});
         except
           on E: Exception do
             DoHandleException(E.Message);
@@ -928,13 +952,23 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function MySetEditView(Self: TObject; EditView: TObject): Integer;
+var
+  View: IOTAEditView;
 begin
-  if Assigned(EditView) and (Self is TControl) and
+  // 64 位下 EditView 参数不靠谱，不能使用
+  if {$IFNDEF USE_CODEEDITOR_SERVICE} Assigned(EditView) and {$ENDIF} (Self is TControl) and
     (TControl(Self).Owner is TCustomForm) and
     IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
   begin
-    FEditControlWrapper.CheckNewEditor(TControl(Self), GetOTAEditView(EditView));
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    FEditControlWrapper.CheckNewEditor(TControl(Self));
+{$ELSE}
+    View := GetOTAEditView(EditView);
+    FEditControlWrapper.CheckNewEditor(TControl(Self), View);
+{$ENDIF}
   end;
 
   if FEditControlWrapper.FSetEditViewHook.UseDDteours then
@@ -957,10 +991,6 @@ function MyRequestGutterColumn(Self: TObject; const NotifierIndex: Integer;
 var
   I: Integer;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('MyRequestGutterColumn Called.');
-{$ENDIF}
-
   if FEditControlWrapper.FRequestGutterHook.UseDDteours then
     Result := TRequestGutterColumnProc(FEditControlWrapper.FRequestGutterHook.Trampoline)(Self, NotifierIndex, Size, Position)
   else
@@ -981,10 +1011,6 @@ procedure MyRemoveGutterColumn(Self: TObject; const ColumnIndex: Integer);
 var
   I: Integer;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('MyRemoveGutterColumn Called.');
-{$ENDIF}
-
   if FEditControlWrapper.FRemoveGutterHook.UseDDteours then
     TRemoveGutterColumnProc(FEditControlWrapper.FSetEditViewHook.Trampoline)(Self, ColumnIndex)
   else
@@ -1002,6 +1028,43 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+//==============================================================================
+// 代码编辑器控件通知类
+//==============================================================================
+
+{ TCnEditorEvents }
+
+constructor TCnEditorEvents.Create(Wrapper: TCnEditControlWrapper);
+begin
+  OnEditorPaintLine := Wrapper.EditorPaintLine;
+end;
+
+destructor TCnEditorEvents.Destroy;
+begin
+
+  inherited;
+end;
+
+function TCnEditorEvents.AllowedEvents: TCodeEditorEvents;
+begin
+  Result := [cevPaintLineEvents];
+end;
+
+function TCnEditorEvents.AllowedLineStages: TPaintLineStages;
+begin
+  Result := [plsBeginPaint, plsEndPaint];
+end;
+
+{$ENDIF}
+
+//==============================================================================
+// 代码编辑器控件封装类
+//==============================================================================
+
+{ TCnEditControlWrapper }
 
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
 var
@@ -1056,6 +1119,9 @@ end;
 destructor TCnEditControlWrapper.Destroy;
 var
   I: Integer;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ENDIF}
 begin
   for I := Low(Self.FFontArray) to High(FFontArray) do
     FFontArray[I].Free;
@@ -1072,8 +1138,17 @@ begin
     TObject(FBpClickQueue.Pop).Free;
   FBpClickQueue.Free;
 
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if (FEventsIndex >= 0) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  begin
+    CES.RemoveEditorEventsNotifier(FEventsIndex);
+    FEventsIndex := -1;
+    FEvents := nil;
+  end;
+{$ELSE}
   if FPaintLineHook <> nil then
     FPaintLineHook.Free;
+{$ENDIF}
   if FSetEditViewHook <> nil then
     FSetEditViewHook.Free;
   if FCorIdeModule <> 0 then
@@ -1112,7 +1187,7 @@ end;
 procedure TCnEditControlWrapper.InitEditControlHook;
 {$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
 var
-  Srv: INTACodeEditorServices;
+  CES: INTACodeEditorServices;
   Obj: TObject;
 {$ENDIF}
 begin
@@ -1167,9 +1242,9 @@ begin
     CnWizAssert(Assigned(SetEditView), 'Load SetEditView from FCorIdeModule');
 
 {$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
-    if Supports(BorlandIDEServices, INTACodeEditorServices, Srv) then
+    if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
-      Obj := Srv as TObject;
+      Obj := CES as TObject;
       RequestGutterColumn := GetMethodAddress(Obj, 'RequestGutterColumn');
       if Assigned(RequestGutterColumn) then
         FRequestGutterHook := TCnMethodHook.Create(@RequestGutterColumn, @MyRequestGutterColumn);
@@ -1185,9 +1260,19 @@ begin
     end;
 {$ENDIF}
 
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    // 使用 CodeEditorService 注册 PaintLine 的通知器
+    FEvents := TCnEditorEvents.Create(Self);
+    FEventsIndex := -1;
+    if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    begin
+      FEventsIndex := CES.AddEditorEventsNotifier(FEvents);
+    end;
+{$ELSE}
     FPaintLineHook := TCnMethodHook.Create(@PaintLine, @MyPaintLine);
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('EditControl.PaintLine Hooked');
+{$ENDIF}
 {$ENDIF}
 
     FSetEditViewHook := TCnMethodHook.Create(@SetEditView, @MySetEditView);
@@ -1205,20 +1290,41 @@ end;
 // 编辑器控件列表处理
 //------------------------------------------------------------------------------
 
-procedure TCnEditControlWrapper.CheckNewEditor(EditControl: TControl;
-  View: IOTAEditView);
+procedure TCnEditControlWrapper.CheckNewEditor(EditControl: TControl
+  {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF});
 var
   Idx: Integer;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+  View: IOTAEditView;
+{$ENDIF}
 begin
   Idx := IndexOfEditor(EditControl);
   if Idx >= 0 then
   begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    begin
+      View := CES.GetViewForEditor(TWinControl(EditControl));
+      Editors[Idx].SetEditView(View);
+      DoEditorChange(Editors[Idx], [ctView]);
+    end;
+{$ELSE}
     Editors[Idx].SetEditView(View);
     DoEditorChange(Editors[Idx], [ctView]);
+{$ENDIF}
   end
   else
   begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    begin
+      View := CES.GetViewForEditor(TWinControl(EditControl));
+      AddEditor(EditControl, View);
+    end;
+{$ELSE}
     AddEditor(EditControl, View);
+{$ENDIF}
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnEditControlWrapper: New EditControl.');
   {$ENDIF}
@@ -1538,6 +1644,33 @@ begin
     end;
   end;
 end;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+procedure TCnEditControlWrapper.EditorPaintLine(const Rect: TRect;
+  const Stage: TPaintLineStage; const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+  const Context: INTACodeEditorPaintContext);
+var
+  Idx: Integer;
+  Editor: TCnEditorObject;
+begin
+  Editor := nil;
+  Idx := FEditControlWrapper.IndexOfEditor(Context.EditControl);
+  if Idx >= 0 then
+  begin
+    Editor := FEditControlWrapper.GetEditors(Idx);
+  end;
+
+  if Editor <> nil then
+  begin
+    if BeforeEvent then
+      FEditControlWrapper.DoBeforePaintLine(Editor, Context.EditorLineNum, Context.LogicalLineNum)
+    else
+      FEditControlWrapper.DoAfterPaintLine(Editor, Context.EditorLineNum, Context.LogicalLineNum);
+  end;
+end;
+
+{$ENDIF}
 
 //------------------------------------------------------------------------------
 // 字体及高亮计算
@@ -2196,7 +2329,7 @@ begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
   if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
-    Result := CES.GetEditView(TWinControl(EditControl));
+    Result := CES.GetViewForEditor(TWinControl(EditControl));
   end
   else
     Result := CnOtaGetTopMostEditView;
@@ -2225,7 +2358,7 @@ begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
   if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
-    Result := CES.GetEditControl(EditView);
+    Result := CES.GetEditorForView(EditView);
   end
   else
     Result := CnOtaGetCurrentEditControl;
