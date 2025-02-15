@@ -77,7 +77,7 @@ uses
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
   {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
-  CnWizIdeUtils, CnWizOptions;
+  CnWizIdeUtils, CnWizOptions, CnIDEMirrorIntf;
   
 type
 
@@ -278,10 +278,8 @@ type
     FPaintLineHook: TCnMethodHook; // Win64 下该 Hook 有问题
 {$ENDIF}
     FSetEditViewHook: TCnMethodHook;
-{$IFDEF OTA_CODEEDITOR_SERVICE}
-    FRequestGutterHook: TCnMethodHook;
+    FRequestGutterHook: TCnMethodHook;  // 这俩 Hook 只在 11、12 以上分别使用
     FRemoveGutterHook: TCnMethodHook;
-{$ENDIF}
     FCmpLines: TList;
     FMouseUpNotifiers: TList;
     FMouseDownNotifiers: TList;
@@ -839,11 +837,9 @@ type
   TEditControlUnElideProc = procedure(Self: TObject; Line: Integer);
 {$ENDIF}
 
-{$IFDEF OTA_CODEEDITOR_SERVICE}
   TRequestGutterColumnProc = function (Self: TObject; const NotifierIndex: Integer;
     const Size: Integer; Position: Integer): Integer;
   TRemoveGutterColumnProc = procedure (Self: TObject; const ColumnIndex: Integer);
-{$ENDIF}
 
 var
   PaintLine: TPaintLineProc = nil;
@@ -865,10 +861,9 @@ var
   EditControlElide: TEditControlElideProc = nil;
   EditControlUnElide: TEditControlUnElideProc = nil;
 {$ENDIF}
-{$IFDEF OTA_CODEEDITOR_SERVICE}
+
   RequestGutterColumn: TRequestGutterColumnProc = nil;
   RemoveGutterColumn: TRemoveGutterColumnProc = nil;
-{$ENDIF}
 
   PaintLineLock: TRTLCriticalSection;
 
@@ -992,8 +987,6 @@ begin
   end;
 end;
 
-{$IFDEF OTA_CODEEDITOR_SERVICE}
-
 function MyRequestGutterColumn(Self: TObject; const NotifierIndex: Integer;
   const Size: Integer; Position: Integer): Integer;
 var
@@ -1034,8 +1027,6 @@ begin
   for I := 0 to FEditControlWrapper.EditorCount - 1 do
     FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
 end;
-
-{$ENDIF}
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
@@ -1162,12 +1153,10 @@ begin
   if FCorIdeModule <> 0 then
     FreeLibrary(FCorIdeModule);
 
-{$IFDEF OTA_CODEEDITOR_SERVICE}
   if FRequestGutterHook <> nil then
     FRequestGutterHook.Free;
   if FRemoveGutterHook <> nil then
     FRemoveGutterHook.Free;
-{$ENDIF}
 
   FEditControlList.Free;
   FEditorList.Free;
@@ -1196,6 +1185,11 @@ procedure TCnEditControlWrapper.InitEditControlHook;
 {$IFDEF OTA_CODEEDITOR_SERVICE}
 var
   CES: INTACodeEditorServices;
+  Obj: TObject;
+{$ENDIF}
+{$IFDEF DELPHI110_ALEXANDRIA}
+var
+  CES: ICnNTACodeEditorServices;
   Obj: TObject;
 {$ENDIF}
 begin
@@ -1253,6 +1247,7 @@ begin
     SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Load SetEditView from FCorIdeModule');
 
+    // 针对 12 或以上
 {$IFDEF OTA_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1268,6 +1263,27 @@ begin
 {$IFDEF DEBUG}
       if (FRequestGutterHook <> nil) and (FRemoveGutterHook <> nil) then
         CnDebugger.LogMsg('EditControl Gutter Column Functions Hooked');
+{$ENDIF}
+    end;
+{$ENDIF}
+
+    // 针对 11，判断能否拿到 11.3 的接口
+{$IFDEF DELPHI110_ALEXANDRIA}
+    if Supports(BorlandIDEServices, StringToGUID(GUID_INTACODEEDITORSERVICES), CES) then
+
+    begin
+      Obj := CES as TObject;
+      RequestGutterColumn := GetMethodAddress(Obj, 'RequestGutterColumn');
+      if Assigned(RequestGutterColumn) then
+        FRequestGutterHook := TCnMethodHook.Create(@RequestGutterColumn, @MyRequestGutterColumn);
+
+      RemoveGutterColumn := GetMethodAddress(Obj, 'RemoveGutterColumn');
+      if Assigned(RemoveGutterColumn) then
+        FRemoveGutterHook := TCnMethodHook.Create(@RemoveGutterColumn, @MyRemoveGutterColumn);
+
+{$IFDEF DEBUG}
+      if (FRequestGutterHook <> nil) and (FRemoveGutterHook <> nil) then
+        CnDebugger.LogMsg('EditControl Gutter Column Functions Hooked using Mirror');
 {$ENDIF}
     end;
 {$ENDIF}
