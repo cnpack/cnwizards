@@ -118,9 +118,7 @@ type
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided,               // 编辑器行展开，有限支持
 {$ENDIF}
-{$IFDEF OTA_CODEEDITOR_SERVICE}
-    ctGutterWidthChanged,     // 编辑器左侧 Gutter 宽度改变
-{$ENDIF}
+    ctGutterWidthChanged,     // 编辑器左侧 Gutter 宽度改变，目前仅 D12 或以上有效
     ctOptionChanged           // 编辑器设置对话框曾经打开过
     );
 

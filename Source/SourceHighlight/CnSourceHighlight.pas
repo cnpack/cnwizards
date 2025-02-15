@@ -622,9 +622,7 @@ type
     procedure SetCustomIdentifierBackground(const Value: TColor);
     procedure SetCustomIdentifierForeground(const Value: TColor);
   protected
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
     procedure GutterChangeRepaint(Sender: TObject);
-{$ENDIF}
     function CanSolidCurrentLineBlock: Boolean;
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -5080,8 +5078,6 @@ begin
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnHighlightExec);
 end;
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
-
 procedure TCnSourceHighlight.GutterChangeRepaint(Sender: TObject);
 var
   Control: TControl;
@@ -5099,8 +5095,6 @@ begin
 {$ENDIF}
   end;
 end;
-
-{$ENDIF}
 
 // EditorChange 时调用此事件去检查括号和结构高亮
 procedure TCnSourceHighlight.EditorChanged(Editor: TCnEditorObject;
@@ -5136,8 +5130,7 @@ begin
     CharSize := EditControlWrapper.GetCharSize;
 
     if (ctFont in ChangeType) or (ctOptionChanged in ChangeType)
-     {$IFDEF IDE_EDITOR_CUSTOM_COLUMN} or (ctGutterWidthChanged in ChangeType) {$ENDIF}
-     then
+     or (ctGutterWidthChanged in ChangeType) then
     begin
       if ctFont in ChangeType then
       begin
@@ -5155,7 +5148,6 @@ begin
       end;
 {$ENDIF}
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
       if ctGutterWidthChanged in ChangeType then
       begin
 {$IFDEF DEBUG}
@@ -5163,7 +5155,7 @@ begin
 {$ENDIF}
         CnWizNotifierServices.ExecuteOnApplicationIdle(GutterChangeRepaint);
       end;
-{$ENDIF}
+
       // 都重绘
       RepaintEditors;
     end;
