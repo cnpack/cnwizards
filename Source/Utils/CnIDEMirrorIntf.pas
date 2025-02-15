@@ -38,7 +38,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Windows, Forms, ToolsAPI {$IFDEF DELPHI102_TOKYO}, Themes {$ENDIF};
+  SysUtils, Classes, Windows, Forms, Controls, ToolsAPI
+  {$IFDEF DELPHI110_ALEXANDRIA}, System.Generics.Collections {$ENDIF}
+  {$IFDEF DELPHI102_TOKYO}, Themes {$ENDIF};
 
 {
   Delphi 10.2.2 的 IDE 开始支持主题，但 10.2.3 中才在 ToolsAPI 中提供主题接口，
@@ -56,12 +58,17 @@ uses
   但 IDE 内部真正触发 Notifier 时会检查传入的 Notifier 是否是指定接口，我们
   如果传的是仿写接口，会出错。对付这种情况我们写了个 ChangeIntfGUID，可以将
   某类所实现的指定接口的 GUID 替换成指定 GUID，以骗过 IDE 的检查。
+
+  同样，11.3 里也加了 11.0/1/2 里不支持的 INTACodeEditorServices 且编译无法区分
 }
 
 const
   GUID_INTAIDETHEMINGSERVICESNOTIFIER = '{4CBFAA40-89E6-412C-B667-9034666E2931}';
   GUID_IOTAIDETHEMINGSERVICES = '{DEAD2647-9B2C-4084-A61E-1E69A9179637}';
   GUID_IOTAIDETHEMINGSERVICES250 = '{DEAD2648-9B21-4084-771E-1E69A9176637}';
+
+  GUID_INTACODEEDITORSERVICES = '{449D7687-9D4C-454C-846E-FEC673605BF8}';
+  GUID_INTACODEEDITORSERVICES280 = '{E4501C03-CA9C-4887-98F4-F97B8938986A}';
 
 {$IFDEF DELPHI102_TOKYO}
 
@@ -91,6 +98,44 @@ type
   ICnOTAIDEThemingServices250 = interface(ICnOTAIDEThemingServices)
   {* 对应 IOTAIDEThemingServices250}
     procedure RegisterFormClass(AFormClass : TCustomFormClass);
+  end;
+
+{$ENDIF}
+
+{$IFDEF DELPHI110_ALEXANDRIA}
+
+type
+  ICnNTACodeEditorServices280 = interface
+    {* 对应 INTACodeEditorServices280}
+    ['{29C3C04F-8A49-448A-B311-95939B795798}']
+    function GetViewForEditor(const Editor: TWinControl): IOTAEditView;
+    function GetEditorForView(const View: IOTAEditView): TWinControl;
+    procedure FocusTopEditor;
+    function GetTopEditor: TWinControl;
+    function IsIDEEditor(const Control: TWinControl): Boolean;
+    function GetEditorState(const Editor: TWinControl): IInterface;
+    function GetKnownEditors: TList<TWinControl>;
+    function GetKnownViews: TList<IOTAEditView>;
+    function AddEditorEventsNotifier(const ANotifier: IInterface): Integer;
+    procedure RemoveEditorEventsNotifier(Index: Integer);
+    function GetCodeEditorOptions: IInterface;
+    function RequestGutterColumn(const NotifierIndex, Size: Integer; Position: Integer): Integer;
+    procedure RemoveGutterColumn(const ColumnIndex: Integer);
+    procedure InvalidateEditor(const Editor: TWinControl); overload;
+    procedure InvalidateEditorRect(const Editor: TWinControl; ARect: TRect); overload;
+    procedure InvalidateEditorLogicalLine(const Editor: TWinControl; const LogicalLine: Integer); overload;
+    procedure InvalidateTopEditor;
+    procedure InvalidateTopEditorRect(ARect: TRect);
+    procedure InvalidateTopEditorLogicalLine(const LogicalLine: Integer);
+
+    property TopEditor: TWinControl read GetTopEditor;
+    property EditorState[const Editor: TWinControl]: IInterface read GetEditorState;
+    property Options: IInterface read GetCodeEditorOptions;
+  end;
+
+  ICnNTACodeEditorServices = interface(ICnNTACodeEditorServices280)
+    {* 对应 INTACodeEditorServices}
+    ['{3577A7E0-D3A1-45D0-8813-210CCF1E2299}']
   end;
 
 {$ENDIF}
