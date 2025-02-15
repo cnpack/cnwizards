@@ -72,7 +72,7 @@ uses
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  {$IFDEF IDE_EDITOR_CUSTOM_COLUMN} ToolsAPI.Editor, {$ENDIF}
+  {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
   CnWizIdeUtils, CnWizOptions;
   
