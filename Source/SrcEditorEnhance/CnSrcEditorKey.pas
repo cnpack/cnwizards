@@ -213,8 +213,11 @@ type
 
 const
   SCnAutoIndentFile = 'AutoIndent.dat';
-
+  {$IFDEF WIN64}
+  SCnSrchDialogOKButtonClick = '_ZN7Srchdlg11TSrchDialog13OKButtonClickEPN6System7TObjectE';
+  {$ELSE}
   SCnSrchDialogOKButtonClick = '@Srchdlg@TSrchDialog@OKButtonClick$qqrp14System@TObject';
+  {$ENDIF}
   SCnSrchDialogComboName = 'SearchText';
   SCnHistoryPropComboBoxClassName = 'THistoryPropComboBox';
   SCnCaseSenseCheckBoxName = 'CaseSense';
@@ -228,13 +231,22 @@ const
   SCnSearchPanelRegExBoxName = 'RegExBox';
 
 {$IFDEF DELPHI120_ATHENS_UP}
+  {$IFDEF WIN64}
+  SCnEditWindowDoSearch = '_ZN10Editorform11TEditWindow8DoSearchEN6System13UnicodeStringE';
+  {$ELSE}
   SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqrx20System@UnicodeString';
+  {$ENDIF}
 {$ELSE}
   SCnEditWindowDoSearch = '@Editorform@TEditWindow@DoSearch$qqr20System@UnicodeString';
 {$ENDIF}
 
+  {$IFDEF WIN64}
+  SCnEditWindowSearchUpClick = '_ZN10Editorform11TEditWindow13SearchUpClickEPN6System7TObjectE';
+  SCnEditWindowSearchDnClick = '_ZN10Editorform11TEditWindow13SearchDnClickEPN6System7TObjectE';
+  {$ELSE}
   SCnEditWindowSearchUpClick = '@Editorform@TEditWindow@SearchUpClick$qqrp14System@TObject';
   SCnEditWindowSearchDnClick = '@Editorform@TEditWindow@SearchDnClick$qqrp14System@TObject';
+  {$ENDIF}
 {$ENDIF}
 
 var

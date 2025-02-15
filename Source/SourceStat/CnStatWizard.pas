@@ -193,12 +193,14 @@ begin
       // 挂接 Formread::FormReadError，返回 $2A 表示强行 IgnoreAll
       if ACorIdeModule <> 0 then
       begin
-        OldFormReadError := GetProcAddress(ACorIdeModule, SCnFormReadErrorName);
+        OldFormReadError := GetBplMethodAddress(GetProcAddress(ACorIdeModule, SCnFormReadErrorName));
         if OldFormReadError <> nil then
+          MethodHook := TCnMethodHook.Create(OldFormReadError, @HookedFormReadError)
+        else
         begin
-          OldFormReadError := GetBplMethodAddress(OldFormReadError);
-          if OldFormReadError <> nil then
-            MethodHook := TCnMethodHook.Create(OldFormReadError, @HookedFormReadError);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsgWarning('StatWizard: NO FormReadError Found.');
+{$ENDIF}
         end;
       end;
 

@@ -180,7 +180,12 @@ uses
   CnWizIdeUtils, CnWizOptions, CnWizMenuAction, CnProjectUseUnitsFrm;
 
 const
+{$IFDEF WIN64}
+  SCnViewDialogExecuteName = '_ZN7Viewdlg11TViewDialog7ExecuteEv';
+{$ELSE}
   SCnViewDialogExecuteName = '@Viewdlg@TViewDialog@Execute$qqrv';
+{$ENDIF}
+
 {$IFDEF SUPPORT_FMX}
   {$IFDEF WIN64}
   SCnVclToFmxDllName = 'CnVclToFmx64.dll';

@@ -771,7 +771,11 @@ const
   SSyncButtonName = 'SyncButton';
   SCodeTemplateListBoxName = 'CodeTemplateListBox';
 {$IFDEF IDE_SWITCH_BUG}
+  {$IFDEF WIN64}
+  SWaitDialogShow = '_ZN10Waitdialog14TIDEWaitDialog4ShowEN6System13UnicodeStringES2_b';
+  {$ELSE}
   SWaitDialogShow = '@Waitdialog@TIDEWaitDialog@Show$qqrx20System@UnicodeStringt1o';
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF BDS4_UP}
