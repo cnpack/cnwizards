@@ -28,7 +28,10 @@ unit CnEditControlWrapper;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2021.05.03 V1.8
+* 修改记录：2025.02.15 V1.9
+*               适配 64 位，绘制通知改用 ToolsAPI.Editors 接口，部分函数调用因
+*               64 位汇编的隐含参数问题失败，改为转换成事件方式调用
+*           2021.05.03 V1.8
 *               用新 RTTI 办法更精准地获取编辑器字符长宽
 *           2021.02.28 V1.7
 *               适应 10.4.2 下 ErroInsight 导致行距与字符高度改变以及通知
@@ -807,7 +810,11 @@ type
   TMarkLinesDirtyProc = procedure(Self: TObject; LineNum: Integer; Count: Word;
     Flag: Integer); register;
   TEdRefreshProc = procedure(Self: TObject; DirtyOnly: Boolean); register;
+{$IFDEF WIN64}
+  TGetTextAtLineProc = function(LineNum: Integer): string of object;
+{$ELSE}
   TGetTextAtLineProc = function(Self: TObject; LineNum: Integer): string; register;
+{$ENDIF}
   TGetOTAEditViewProc = function(Self: TObject): IOTAEditView; register;
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
@@ -1215,7 +1222,11 @@ begin
     EdRefresh := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SEdRefreshName));
     CnWizAssert(Assigned(EdRefresh), 'Load EdRefresh from FCorIdeModule');
 
+{$IFDEF WIN64}
+    TMethod(DoGetTextAtLine).Code := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetTextAtLineName));
+{$ELSE}
     DoGetTextAtLine := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetTextAtLineName));
+{$ENDIF}
     CnWizAssert(Assigned(DoGetTextAtLine), 'Load GetTextAtLine from FCorIdeModule');
 
 {$IFDEF IDE_EDITOR_ELIDE}
@@ -2490,7 +2501,14 @@ function TCnEditControlWrapper.GetTextAtLine(EditControl: TControl;
   LineNum: Integer): string;
 begin
   if Assigned(DoGetTextAtLine) then
+  begin
+{$IFDEF WIN64}
+    TMethod(DoGetTextAtLine).Data := EditControl;
+    Result := DoGetTextAtLine(LineNum);
+{$ELSE}
     Result := DoGetTextAtLine(EditControl, LineNum);
+{$ENDIF}
+  end;
 end;
 
 function TCnEditControlWrapper.IndexPosToCurPos(EditControl: TControl;
