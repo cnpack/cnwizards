@@ -44,7 +44,8 @@ interface
 
 {$IFDEF CNWIZARDS_CNSTATWIZARD}
 
-{$IFDEF DELPHIXE2_UP}
+{$IFDEF DELPHIXE_UP}
+  // XE 起 FormReadError 加了个字符串参数
   {$DEFINE FORM_READ_ERROR_V2}
 {$ENDIF}
 
@@ -193,7 +194,11 @@ begin
 
     MethodHook := nil;
 {$IFDEF BDS}
+  {$IFDEF DELPHIXE2_UP} // 这个函数在仨包内横跳
     ACorIdeModule := LoadLibrary(DesignIdeLibName);
+  {$ELSE}
+    ACorIdeModule := LoadLibrary(DphIdeLibName);
+  {$ENDIF}
 {$ELSE}
     ACorIdeModule := LoadLibrary(CorIdeLibName);
 {$ENDIF}
