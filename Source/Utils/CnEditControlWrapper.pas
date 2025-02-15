@@ -25,6 +25,9 @@ unit CnEditControlWrapper;
 * 单元名称：IDE 相关公共单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元封装了对 IDE 的 EditControl 的操作
+*           注意：10.4 新增了编辑器自定义 Gutter 注册，但 11.3 才开放相应 ToolsAPI
+*           的 Editors 接口，且编译条件无法区分 11.3 与之前的 11.0/1/2，我们只能 12
+*           及以后才能处理自定义 Gutter 注册导致的编辑器横向偏移问题。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -115,7 +118,7 @@ type
     ctElided,                 // 编辑器行折叠，有限支持
     ctUnElided,               // 编辑器行展开，有限支持
 {$ENDIF}
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
     ctGutterWidthChanged,     // 编辑器左侧 Gutter 宽度改变
 {$ENDIF}
     ctOptionChanged           // 编辑器设置对话框曾经打开过
@@ -277,7 +280,7 @@ type
     FPaintLineHook: TCnMethodHook; // Win64 下该 Hook 有问题
 {$ENDIF}
     FSetEditViewHook: TCnMethodHook;
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
     FRequestGutterHook: TCnMethodHook;
     FRemoveGutterHook: TCnMethodHook;
 {$ENDIF}
@@ -838,7 +841,7 @@ type
   TEditControlUnElideProc = procedure(Self: TObject; Line: Integer);
 {$ENDIF}
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
   TRequestGutterColumnProc = function (Self: TObject; const NotifierIndex: Integer;
     const Size: Integer; Position: Integer): Integer;
   TRemoveGutterColumnProc = procedure (Self: TObject; const ColumnIndex: Integer);
@@ -864,7 +867,7 @@ var
   EditControlElide: TEditControlElideProc = nil;
   EditControlUnElide: TEditControlUnElideProc = nil;
 {$ENDIF}
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
   RequestGutterColumn: TRequestGutterColumnProc = nil;
   RemoveGutterColumn: TRemoveGutterColumnProc = nil;
 {$ENDIF}
@@ -991,7 +994,7 @@ begin
   end;
 end;
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
 
 function MyRequestGutterColumn(Self: TObject; const NotifierIndex: Integer;
   const Size: Integer; Position: Integer): Integer;
@@ -1161,7 +1164,7 @@ begin
   if FCorIdeModule <> 0 then
     FreeLibrary(FCorIdeModule);
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
   if FRequestGutterHook <> nil then
     FRequestGutterHook.Free;
   if FRemoveGutterHook <> nil then
@@ -1192,7 +1195,7 @@ begin
 end;
 
 procedure TCnEditControlWrapper.InitEditControlHook;
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
 var
   CES: INTACodeEditorServices;
   Obj: TObject;
@@ -1252,7 +1255,7 @@ begin
     SetEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SSetEditViewName));
     CnWizAssert(Assigned(SetEditView), 'Load SetEditView from FCorIdeModule');
 
-{$IFDEF IDE_EDITOR_CUSTOM_COLUMN}
+{$IFDEF OTA_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
       Obj := CES as TObject;
@@ -2765,7 +2768,7 @@ begin
     Exit;
 
   if ChangeType * [ctView, ctWindow {$IFDEF BDS}, ctLineDigit {$ENDIF}
-    {$IFDEF IDE_EDITOR_CUSTOM_COLUMN}, ctGutterWidthChanged {$ENDIF}] <> [] then
+    {$IFDEF OTA_CODEEDITOR_SERVICE}, ctGutterWidthChanged {$ENDIF}] <> [] then
   begin
     Editor.FGutterChanged := True;  // 行位数发生变化时，会触发 Gutter 宽度变化
   end;
