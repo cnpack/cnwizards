@@ -455,7 +455,7 @@ begin
     end;
   except
     on E: Exception do
-      DoHandleException(E.Message);
+      DoHandleException('Compile Units ' + E.Message);
   end;
 end;
 
@@ -738,7 +738,7 @@ begin
     end;
   except
     on E: Exception do
-      DoHandleException(E.Message);
+      DoHandleException('Process Units ' + E.Message);
   end;
 end;
 
@@ -850,6 +850,7 @@ var
               begin
                 FormName := TComponent(Obj).Owner.Name;
                 for J := 0 to AProject.GetModuleCount - 1 do
+                begin
                   if SameText(AProject.GetModule(J).FormName, FormName) then
                   begin
                     UnitName := _CnChangeFileExt(_CnExtractFileName(
@@ -857,6 +858,7 @@ var
                     if Units.IndexOf(UnitName) < 0 then
                       Units.Add(UnitName);
                   end;
+                end;
               end;
             end
             else if Obj is TCollection then
@@ -893,7 +895,7 @@ begin
     end;
   except
     on E: Exception do
-      DoHandleException(E.Message);
+      DoHandleException('Get CompRef Units ' + E.Message);
   end;   
 end;
 

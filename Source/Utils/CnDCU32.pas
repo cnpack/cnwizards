@@ -360,7 +360,7 @@ begin
     end;
   except
     on E: Exception do
-      DoHandleException(E.Message);
+      DoHandleException('Dcu32 UsesInfo ' + E.Message);
   end;
 end;
 

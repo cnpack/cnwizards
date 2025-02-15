@@ -404,7 +404,7 @@ begin
       except
         on E: Exception do
         begin
-          DoHandleException(E.Message);
+          DoHandleException('CodingTool Creating: ' + E.Message);
           Continue;
         end;
       end;

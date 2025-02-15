@@ -981,6 +981,7 @@ var
 begin
   try
     for I := 0 to FTabControlList.Count - 1 do
+    begin
       if FTabControlList[I] is TXTabControl then
       begin
         TabControl := TXTabControl(FTabControlList[I]);
@@ -1007,9 +1008,10 @@ begin
           end;
         end;
       end;
+    end;
   except
     on E: Exception do
-      DoHandleException(E.Message);
+      DoHandleException('UpdateTabControlCaption ' + E.Message);
   end;
 end;
 

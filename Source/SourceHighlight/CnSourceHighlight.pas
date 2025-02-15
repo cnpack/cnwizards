@@ -5596,7 +5596,7 @@ begin
       SetForeAndBackColor(ASelf, Param1, Param2, Param3, Param4);
     except
       on E: Exception do
-        DoHandleException(E.Message);
+        DoHandleException('Source Highlight SetForeAndBackColor ' + E.Message);
     end;
   finally
     SetForeAndBackColorHook.HookMethod;

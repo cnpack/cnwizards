@@ -1042,7 +1042,7 @@ begin
       Execute;
   except
     on E: Exception do
-      DoHandleException(Format('%s Click Error. %s - %s',
+      DoHandleException(Format('WizClasses %s Click Error. %s - %s',
         [ClassName, E.ClassName, E.Message]));
   end;
 end;
@@ -1455,7 +1455,7 @@ begin
           except
             on E: Exception do
             begin
-              DoHandleException(Format('%s.SubActions[%d].Execute: %s - %s',
+              DoHandleException(Format('WizClasses %s.SubActions[%d].Execute: %s - %s',
                 [ClassName, I, E.ClassName, E.Message]));
             end;
           end;

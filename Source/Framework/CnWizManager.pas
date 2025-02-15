@@ -524,7 +524,7 @@ begin
   try
     Wizards[I].LaterLoaded;
   except
-    DoHandleException(Wizards[I].ClassName + '.OnLaterLoad');
+    DoHandleException('WizManager ' + Wizards[I].ClassName + '.OnLaterLoad');
   end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -1448,7 +1448,7 @@ begin
     try
       Wizards[I].Loaded;
     except
-      DoHandleException(Wizards[I].ClassName + '.Loaded');
+      DoHandleException('WizManager ' + Wizards[I].ClassName + '.Loaded');
     end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -1457,7 +1457,7 @@ begin
     try
       CnDesignEditorMgr.CompEditors[I].Loaded;
     except
-      DoHandleException(CnDesignEditorMgr.CompEditors[I].IDStr + '.Loaded');
+      DoHandleException('WizManager ' + CnDesignEditorMgr.CompEditors[I].IDStr + '.Loaded');
     end;
 
     // ◊∞‘ÿ Ù–‘±‡º≠∆˜…Ë÷√
@@ -1465,7 +1465,7 @@ begin
     try
       CnDesignEditorMgr.PropEditors[I].Loaded;
     except
-      DoHandleException(CnDesignEditorMgr.PropEditors[I].IDStr + '.Loaded');
+      DoHandleException('WizManager ' + CnDesignEditorMgr.PropEditors[I].IDStr + '.Loaded');
     end;
 {$ENDIF}
 
