@@ -44,6 +44,10 @@ interface
 
 {$IFDEF CNWIZARDS_CNSTATWIZARD}
 
+{$IFDEF DELPHIXE2_UP}
+  {$DEFINE FORM_READ_ERROR_V2}
+{$ENDIF}
+
 uses
   SysUtils, Classes, IniFiles, ToolsAPI, FileCtrl, Controls, ComCtrls, Windows,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
@@ -116,12 +120,17 @@ uses
 
 const
 {$IFDEF UNICODE}
+  {$IFDEF FORM_READ_ERROR_V2}
+  SCnFormReadErrorName = '@Formread@FormReadError$qqrx20System@UnicodeStringt1';
+  {$ELSE}
   SCnFormReadErrorName = '@Formread@FormReadError$qqrx20System@UnicodeString';
+  {$ENDIF}
 {$ELSE}
   SCnFormReadErrorName = '@Formread@FormReadError$qqrx17System@AnsiString';
 {$ENDIF}
 
-function HookedFormReadError(const Str: string): Integer;
+function HookedFormReadError(const Str: string
+  {$IFDEF FORM_READ_ERROR_V2}; const Str2: string {$ENDIF}): Integer;
 begin
   Result := $2A; // ±Ì æ IgnoreAll;
 end;
@@ -184,7 +193,7 @@ begin
 
     MethodHook := nil;
 {$IFDEF BDS}
-    ACorIdeModule := LoadLibrary(DphIdeLibName);
+    ACorIdeModule := LoadLibrary(DesignIdeLibName);
 {$ELSE}
     ACorIdeModule := LoadLibrary(CorIdeLibName);
 {$ENDIF}
@@ -199,7 +208,7 @@ begin
         else
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsgWarning('StatWizard: NO FormReadError Found.');
+          CnDebugger.LogMsgWarning('StatWizard: No FormReadError Found.');
 {$ENDIF}
         end;
       end;
