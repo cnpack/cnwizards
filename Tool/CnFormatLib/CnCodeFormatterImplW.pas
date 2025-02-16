@@ -28,9 +28,11 @@ unit CnCodeFormatterImplW;
 *           以及 2009 以上（Utf16版）使用。由 D2009 编译
 *           另有 64 位 Unicode 版供 64 位专家包及 IDE 使用
 * 开发平台：WinXP + Delphi 2009
-* 兼容测试：not test yet
-* 本 地 化：not test hell
-* 修改记录：2015.04.04 V1.0
+* 兼容测试：
+* 本 地 化：
+* 修改记录：2025.02.16 V1.1
+*               修正 64 位的支持
+*           2015.04.04 V1.0
 *               创建单元。
 ================================================================================
 |</PRE>}
@@ -40,7 +42,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  CnFormatterIntf, SysUtils, Classes, Windows;
+  CnFormatterIntf, SysUtils, Classes, Windows, CnNative;
 
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 
@@ -466,10 +468,11 @@ begin
       ; // 出错了，返回 nil 的结果
     end;
 
-    // GetTextStr 会导致在输出 Strings 最后一行是回车换行时又多出个回车换行，移除
+    // GetTextStr 会导致在输出 Strings 最后一行是回车换行时又多出个回车换行，移除\
+    // 4 作为判断使用，和 Uincode 以及 Win64 无关
     if OutStream.Size >= 4 * SizeOf(Char) then
     begin
-      ResPtr := PWideChar(Integer(OutStream.Memory) + OutStream.Size - 4 * SizeOf(Char));
+      ResPtr := PWideChar(TCnNativeInt(OutStream.Memory) + OutStream.Size - 4 * SizeOf(Char));
       if (ResPtr[0] = #13) and (ResPtr[1] = #10) and (ResPtr[2] = #13) and (ResPtr[3] = #10) then
         OutStream.Size := OutStream.Size - 2 * SizeOf(Char); 
     end;
@@ -539,7 +542,7 @@ begin
     // GetTextStr 会导致在输出 Strings 最后一行是回车换行时又多出个回车换行，移除
     if OutStream.Size >= 4 * SizeOf(Char) then
     begin
-      ResPtr := PWideChar(Integer(OutStream.Memory) + OutStream.Size - 4 * SizeOf(Char));
+      ResPtr := PWideChar(TCnNativeInt(OutStream.Memory) + OutStream.Size - 4 * SizeOf(Char));
       if (ResPtr[0] = #13) and (ResPtr[1] = #10) and (ResPtr[2] = #13) and (ResPtr[3] = #10) then
         OutStream.Size := OutStream.Size - 2 * SizeOf(Char); 
     end;
