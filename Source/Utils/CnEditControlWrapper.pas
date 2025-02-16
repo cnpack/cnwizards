@@ -27,7 +27,10 @@ unit CnEditControlWrapper;
 * 备    注：该单元封装了对 IDE 的 EditControl 的操作
 *           注意：10.4 新增了编辑器自定义 Gutter 注册，但 11.3 才开放相应 ToolsAPI
 *           的 Editors 接口，且编译条件无法区分 11.3 与之前的 11.0/1/2，我们只能 12
-*           及以后才能处理自定义 Gutter 注册导致的编辑器横向偏移问题。
+*           及以后才能直接用新接口来处理自定义 Gutter 注册导致的编辑器横向偏移问题。
+*           11.* 则用动态 Mirror 的方式。
+*           注意凡是返回 string 或 IInterface 的系统方法，在 64 位下都不能直接转
+*           带 Self 的函数，会因为隐藏参数的位置混乱导致出错，需要用 TMethod 替换。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -814,7 +817,11 @@ type
 {$ELSE}
   TGetTextAtLineProc = function(Self: TObject; LineNum: Integer): string; register;
 {$ENDIF}
+{$IFDEF WIN64}
+  TGetOTAEditViewProc = function: IOTAEditView of object;
+{$ELSE}
   TGetOTAEditViewProc = function(Self: TObject): IOTAEditView; register;
+{$ENDIF}
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
 
@@ -961,7 +968,8 @@ function MySetEditView(Self: TObject; EditView: TObject): Integer;
 var
   View: IOTAEditView;
 begin
-  // 64 位下 EditView 参数不靠谱，不能使用
+  // 64 位下调用 GetOTAEditView 传 EditView 参数结果出异常，不能使用
+  // 故此用新服务处理，后面虽然 GetOTAEditView 可能修复了但也不改了
   if {$IFNDEF USE_CODEEDITOR_SERVICE} Assigned(EditView) and {$ENDIF} (Self is TControl) and
     (TControl(Self).Owner is TCustomForm) and
     IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
@@ -1197,7 +1205,11 @@ begin
     FCorIdeModule := LoadLibrary(CorIdeLibName);
     CnWizAssert(FCorIdeModule <> 0, 'Load FCorIdeModule');
 
+{$IFDEF WIN64}
+    TMethod(GetOTAEditView).Code := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetOTAEditViewName));
+{$ELSE}
     GetOTAEditView := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetOTAEditViewName));
+{$ENDIF}
     CnWizAssert(Assigned(GetOTAEditView), 'Load GetOTAEditView from FCorIdeModule');
 
     DoGetAttributeAtPos := GetBplMethodAddress(GetProcAddress(FCorIdeModule, SGetAttributeAtPosName));
@@ -2448,7 +2460,12 @@ begin
     begin
       if Tabs.Objects[Index].ClassNameIs(STEditViewClass) then
       begin
+{$IFDEF WIN64}
+        TMethod(GetOTAEditView).Data := Tabs.Objects[Index];
+        Result := GetOTAEditView();
+{$ELSE}
         Result := GetOTAEditView(Tabs.Objects[Index]);
+{$ENDIF}
         Exit;
       end;
     end;
