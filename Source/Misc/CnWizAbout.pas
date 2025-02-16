@@ -39,8 +39,14 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF DEBUG}
+{$IFDEF WIN64}
+  {$DEFINE CN_INTERNAL_EVAL}
+{$ENDIF}
+{$ENDIF}
+
 uses
-  Windows, Messages, SysUtils, Classes, IniFiles,
+  Windows, Messages, SysUtils, Classes, IniFiles, Menus, Forms, Controls,
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizOptions;
 
 type
@@ -59,6 +65,9 @@ type
     FIdBbs: Integer;
     FIdMail: Integer;
     FIdDonate: Integer;
+{$IFDEF CN_INTERNAL_EVAL}
+    FIdEval: Integer;
+{$ENDIF}
     FIdAbout: Integer;
   protected
     procedure ConfigIO;
@@ -76,7 +85,8 @@ type
 implementation
 
 uses
-  CnWizAboutFrm, CnWizFeedbackFrm, CnWizUpgradeFrm, CnWizTipOfDayFrm;
+  CnWizAboutFrm, CnWizFeedbackFrm, CnWizUpgradeFrm, CnWizTipOfDayFrm
+  {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 { TCnWizAbout }
 
@@ -113,6 +123,10 @@ begin
   FIdMail := RegisterASubAction(SCnWizAboutMail, SCnWizAboutMailCaption, 0, SCnWizAboutMailHint);
   FIdDonate := RegisterASubAction(SCnWizAboutDonate, SCnWizAboutDonateCaption, 0, SCnWizAboutDonateHint);
   AddSepMenu;
+{$IFDEF CN_INTERNAL_EVAL}
+  FIdEval := RegisterASubAction('CnInternalEvaluate', 'Evaluate Control Under Cursor', TextToShortCut('Alt+1'),
+    '', '');
+{$ENDIF}
   FIdAbout := RegisterASubAction(SCnWizAboutAbout, SCnWizAboutAboutCaption, 0, SCnWizAboutAboutHint, ClassName);
 end;
 
@@ -159,6 +173,10 @@ begin
     MailTo(SCnPackEmail, SCnWizMailSubject)
   else if Index = FIdDonate then
     ShowHelp('Donation')
+{$IFDEF CN_INTERNAL_EVAL}
+  else if Index = FIdEval then
+    CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos)
+{$ENDIF}
   else if Index = FIdAbout then
     ShowCnWizAboutForm;
 end;
