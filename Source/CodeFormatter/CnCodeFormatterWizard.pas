@@ -211,7 +211,11 @@ uses
 
 const
 {$IFDEF UNICODE}
+  {$IFDEF WIN64}
+  DLLName: string = 'CnFormatLibW64.dll'; // 64 位用 64 位 DLL
+  {$ELSE}
   DLLName: string = 'CnFormatLibW.dll'; // D2009 ~ 最新 用 Unicode 版
+  {$ENDIF}
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
   DLLName: string = 'CnFormatLibW.dll'; // D2005 ~ 2007 也用 Unicode 版但用 UTF8
@@ -399,12 +403,14 @@ begin
   FBreakpoints := TObjectList.Create(True);
   FBookmarks := TObjectList.Create(True);
   FElideLines := TList.Create;
+
 {$IFDEF IDE_EDITOR_ELIDE}
   FElideTimer := TTimer.Create(nil);
   FElideTimer.Interval := 3000;
   FElideTimer.OnTimer := ElideOnTimer;
   FElideTimer.Enabled := False;
 {$ENDIF}
+
   FLibHandle := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + DLLName));
   if FLibHandle <> 0 then
     FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle,
@@ -425,7 +431,8 @@ begin
   FElideLines.Free;
   FBookmarks.Free;
   FBreakpoints.Free;
-  FreeLibrary(FLibHandle);
+  if FLibHandle <> 0 then
+    FreeLibrary(FLibHandle);
   inherited;
 end;
 

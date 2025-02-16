@@ -402,9 +402,9 @@ type
     function GetEditControlCanvas(EditControl: TControl): TCanvas;
     {* 返回编辑器的画布属性}
     function GetEditView(EditControl: TControl): IOTAEditView;
-    {* 返回指定编辑器当前关联的 EditView }
+    {* 返回指定编辑器当前关联的 EditView，EditControl 为 nil 则返回最前端 EditView}
     function GetEditControl(EditView: IOTAEditView): TControl;
-    {* 返回指定 EditView 当前关联的编辑器 }
+    {* 返回指定 EditView 当前关联的编辑器，View 为 nil 则返回最前端编辑器}
     function GetTopMostEditControl: TControl;
     {* 返回当前最前端的 EditControl}
     function GetEditViewFromTabs(TabControl: TXTabControl; Index: Integer):
@@ -2367,7 +2367,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
-  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  if (EditControl <> nil) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
     Result := CES.GetViewForEditor(TWinControl(EditControl));
   end
@@ -2396,7 +2396,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
-  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  if Assigned(EditView) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
     Result := CES.GetEditorForView(EditView);
   end

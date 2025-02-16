@@ -70,7 +70,7 @@ uses
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
-  RegExpr, mPasLex, mwBCBTokenList,
+  RegExpr, mPasLex, mwBCBTokenList, CnNative,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni, CnSearchCombo,
@@ -256,7 +256,7 @@ function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
-  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0;
+  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: TCnNativeInt = 0;
   ImgIndex: Integer = -1): TMenuItem;
 {* 创建一个子菜单项}
 function AddSepMenuItem(Menu: TMenuItem): TMenuItem;
@@ -2451,7 +2451,7 @@ end;
 // 创建一个子菜单项
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
-  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: Integer = 0;
+  ShortCut: TShortCut = 0; const Hint: string = ''; Tag: TCnNativeInt = 0;
   ImgIndex: Integer = -1): TMenuItem;
 begin
   Result := TMenuItem.Create(Menu);

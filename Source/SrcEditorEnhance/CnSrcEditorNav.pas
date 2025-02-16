@@ -49,7 +49,7 @@ uses
   {$ENDIF}
   CnWizUtils, CnConsts, CnWizIdeUtils, CnWizConsts, CnMenuHook, CnWizNotifier,
   CnEditControlWrapper, CnWizShareImages, CnPopupMenu, CnWizClasses, CnWizManager,
-  CnWizMenuAction;
+  CnWizMenuAction, CnNative;
 
 type
 
@@ -142,8 +142,10 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    // D567 那种安装到独立的编辑器窗口中
     procedure UpdateInstall;
 {$IFDEF BDS}
+    // 高版本 D 中安装到主窗体的工具栏上
     procedure DoUpdateInstallInAppBuilder(Sender: TObject);
     procedure FixButtonArrowInComplete(Sender: TObject);
 {$ENDIF}
@@ -237,7 +239,7 @@ begin
     Exit;
 
   if (AList.Count > 0) and (AList[AList.Count - 1] = AFileName) and
-    (Integer(AList.Objects[AList.Count - 1]) = ALine) then
+    (TCnNativeInt(AList.Objects[AList.Count - 1]) = ALine) then
     Exit;
 
   AList.AddObject(AFileName, TObject(ALine));
@@ -268,6 +270,12 @@ var
     end;
   end;
 
+  procedure RecordCurrent;
+  begin
+    FFileName := View.Buffer.FileName;
+    FLine := View.CursorPos.Line;
+  end;
+
 begin
   if not FUpdating and not FPause and Assigned(Owner) and
     TCustomForm(Owner).Active then
@@ -277,16 +285,22 @@ begin
     begin
       if FFileName = '' then
       begin
-        FFileName := View.Buffer.FileName;
-        FLine := View.CursorPos.Line;
+        RecordCurrent;
+        Exit;
+      end;
+
+      if not SameText(View.Buffer.FileName, FFileName) then
+      begin
+        // 文件不同，记下来
+        AddItem(FBackList, FFileName, FLine);
+        RecordCurrent;
       end
-      else if (not SameText(View.Buffer.FileName, FFileName) or
-        (Abs(View.CursorPos.Line - FLine) > FNavMgr.MinLineDiff)) and
+      else if (Abs(View.CursorPos.Line - FLine) > FNavMgr.MinLineDiff) and
         not IsSelectingBlock then
       begin
+        // 位置足够远且不在拖动选择时，记下来
         AddItem(FBackList, FFileName, FLine);
-        FFileName := View.Buffer.FileName;
-        FLine := View.CursorPos.Line;
+        RecordCurrent;
       end;
     end;
   end;
@@ -295,7 +309,7 @@ end;
 procedure TCnSrcEditorNav.GotoSourceLine(Idx: Integer; SrcList, DstList:
   TStringList);
 var
-  i: Integer;
+  I: Integer;
   AFileName: string;
   ALine: Integer;
   EditPos: TOTAEditPos;
@@ -308,10 +322,10 @@ begin
 
       AFileName := SrcList[Idx];
       ALine := Integer(SrcList.Objects[Idx]);
-      for i := SrcList.Count - 1 downto Idx + 1 do
+      for I := SrcList.Count - 1 downto Idx + 1 do
       begin
-        AddItem(DstList, SrcList[i], Integer(SrcList.Objects[i]));
-        SrcList.Delete(i);
+        AddItem(DstList, SrcList[I], Integer(SrcList.Objects[I]));
+        SrcList.Delete(I);
       end;
       SrcList.Delete(Idx);
 
@@ -400,17 +414,21 @@ begin
     AddMenuItem(AMenu.Items, AIDECaption, AOnIDE);
     Item := AddMenuItem(AMenu.Items, AIDEListCaption, nil);
     for I := 0 to AOldMenu.Items.Count - 1 do
+    begin
       with AOldMenu.Items[I] do
       begin
         AddMenuItem(Item, Caption, OnIDEListClick, nil, ShortCut, Hint,
           Integer(AOldMenu.Items[I]));
       end;
+    end;
     AddSepMenuItem(AMenu.Items);
   end;
 
   for I := AList.Count - 1 downto 0 do
+  begin
     AddMenuItem(AMenu.Items, Format('%s %d', [AList[I],
-      Integer(AList.Objects[I])]), AOnItem, nil, 0, '', I);
+      TCnNativeInt(AList.Objects[I])]), AOnItem, nil, 0, '', I);
+  end;
 
   AddSepMenuItem(AMenu.Items);
   AddMenuItem(AMenu.Items, SCnSrcEditorNavPause, OnPauseClick).Checked := FPause;
@@ -794,18 +812,18 @@ begin
   FExtendForwardBack := True;
   FActive := True;
   FList := TList.Create;
-  
+
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   UpdateInstall;
 end;
 
 destructor TCnSrcEditorNavMgr.Destroy;
 var
-  i: Integer;
+  I: Integer;
 begin
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
-  for i := FList.Count - 1 downto 0 do
-    TCnSrcEditorNav(FList[i]).Free;
+  for I := FList.Count - 1 downto 0 do
+    TCnSrcEditorNav(FList[I]).Free;
   FList.Free;
   inherited;
 end;
@@ -850,7 +868,7 @@ begin
       EditorNav := TCnSrcEditorNav.Create(GetIdeMainForm);
       EditorNav.Name := SCnSrcEditorNavName;
       EditorNav.FNavMgr := Self;
-      EditorNav.FEditControl := nil;
+      EditorNav.FEditControl := nil; // 主工具栏上，暂无当前 EditControl
       EditorNav.Install;
       FList.Add(EditorNav);
 
@@ -895,10 +913,12 @@ begin
           except
             ;
           end;
+
           SendMessage(ToolbarParent.Handle, WM_LBUTTONDOWN, 0, MakeLParam(P.X, P.Y));
           SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X + 1, P.Y));
           SendMessage(ToolbarParent.Handle, WM_MOUSEMOVE, 0, MakeLParam(P.X, P.Y));
           SendMessage(ToolbarParent.Handle, WM_LBUTTONUP, 0, MakeLParam(P.X, P.Y));
+
           if Wizard <> nil then
           try
             SetPropValue(Wizard, 'TempDisableLock', False);
@@ -932,10 +952,10 @@ end;
 
 procedure TCnSrcEditorNavMgr.UpdateControls;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FList.Count - 1 do
-    TCnSrcEditorNav(FList[i]).UpdateControls;
+  for I := 0 to FList.Count - 1 do
+    TCnSrcEditorNav(FList[I]).UpdateControls;
 end;
 
 //------------------------------------------------------------------------------
