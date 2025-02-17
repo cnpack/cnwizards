@@ -1070,19 +1070,44 @@ var
 {$ENDIF}
 
 {$IFDEF SUPPORT_ALPHACOLOR}
+
+  // 仿照系统 StringToAlphaColor 的写法但没有 StrToInt64 的抛异常
+  function MyStringToAlphaColor(const Value: string; out OutColor: TAlphaColor): Boolean;
+  var
+    LValue: string;
+    LColor: Integer;
+  begin
+    LValue := Value;
+    if LValue = #0 then
+      LValue := '$0'
+    else if (LValue <> '') and ((LValue.Chars[0] = '#') or (LValue.Chars[0] = 'x')) then
+      LValue := '$' + LValue.SubString(1);
+
+    if (not IdentToAlphaColor('cla' + LValue, LColor)) and (not IdentToAlphaColor(LValue, LColor)) then
+    begin
+      Val(LValue, LColor, E);
+      Result := E = 0;
+      if Result then
+        OutColor := TAlphaColor(LColor);
+    end
+    else
+    begin
+      OutColor := TAlphaColor(LColor);
+      Result := True;
+    end;
+  end;
+
   function IdentToAlphaColor(const ColorStr: string; out AColor: TColor): Boolean;
   var
     F: TAlphaColor;
   begin
-    try
-      F := StringToAlphaColor(ColorStr);
+    Result := MyStringToAlphaColor(ColorStr, F);
+    if Result then
+    begin
       TColorRec(AColor).R := TAlphaColorRec(F).R;
       TColorRec(AColor).G := TAlphaColorRec(F).G;
       TColorRec(AColor).B := TAlphaColorRec(F).B;
       TColorRec(AColor).A := 0;
-      Result := True;
-    except
-      Result := False;
     end;
   end;
 {$ENDIF}
