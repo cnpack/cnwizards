@@ -81,7 +81,7 @@ type
     FForwardMenu: TPopupMenu;
     FBackAction: TAction;
     FForwardAction: TAction;
-    FBackList: TStringList;
+    FBackList: TStringList;    // 用 Objects 属性存行号，64 位和 32 位下均可 Integer 转换
     FForwardList: TStringList;
     function ActionEnabled(AAction: TBasicAction): Boolean;
     function MenuEnabled(AMenu: Menus.TPopupMenu): Boolean;
@@ -418,7 +418,7 @@ begin
       with AOldMenu.Items[I] do
       begin
         AddMenuItem(Item, Caption, OnIDEListClick, nil, ShortCut, Hint,
-          Integer(AOldMenu.Items[I]));
+          TCnNativeInt(AOldMenu.Items[I]));
       end;
     end;
     AddSepMenuItem(AMenu.Items);

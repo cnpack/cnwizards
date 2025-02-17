@@ -861,13 +861,14 @@ begin
   FObjStrings.Sorted := True;
   FObjStrings.Duplicates := dupIgnore;
 
-{$IFNDEF STAND_ALONE}
+{$IFDEF STAND_ALONE}
+  FLines := TStringList.Create;
+{$ELSE}
   FProcToolBarObjects := TList.Create;
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
-{$ELSE}
-  FLines := TStringList.Create;
 {$ENDIF}
+
   FNeedReParse := True;
   FWizard := Self;
 end;
@@ -877,7 +878,9 @@ var
   I: Integer;
 begin
   FWizard := nil;
-{$IFNDEF STAND_ALONE}
+{$IFDEF STAND_ALONE}
+  FLines.Free;
+{$ELSE}
   CnWizNotifierServices.RemoveAfterThemeChangeNotifier(AfterThemeChange);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
   for I := 0 to FProcToolBarObjects.Count - 1 do
@@ -885,13 +888,14 @@ begin
   FreeAndNil(FProcToolBarObjects);
 
   FreeAndNil(FToolBarTimer);
-{$ELSE}
-  FLines.Free;
 {$ENDIF}
+
   FObjStrings.Free;
   for I := 0 to FElementList.Count - 1 do
+  begin
     if FElementList.Objects[I] <> nil then
       FElementList.Objects[I].Free;
+  end;
 
   FElementList.Free;
 

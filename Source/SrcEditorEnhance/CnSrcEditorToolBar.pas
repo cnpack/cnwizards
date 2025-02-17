@@ -1053,7 +1053,7 @@ begin
     begin
       ToolBar := TCnExternalSrcEditorToolBar.Create(EditWindow);
       ToolBar.Name := FToolBarTypes[I];
-      ToolBar.Tag := Integer(EditControl); // 用 Tag 记录和其对应的 EditoControl
+      ToolBar.Tag := TCnNativeInt(EditControl); // 用 Tag 记录和其对应的 EditoControl
 
       ToolBar.Parent := EditControl.Parent;
       (ToolBar as TCnExternalSrcEditorToolBar).InitControls;
@@ -1093,8 +1093,7 @@ begin
   else if Operation = opRemove then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnEditorToolBarObj EditControl Removed: %8.8x.',
-      [Integer(EditControl)]);
+    CnDebugger.LogMsg('TCnEditorToolBarObj EditControl Removed.');
 {$ENDIF}
     for I := FToolBarTypes.Count - 1 downto 0 do
     begin
@@ -1285,8 +1284,7 @@ begin
         FToolBars.Delete(I);
         FEditControls.Delete(I);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('TCnEditorToolBarObj Notification: ToolBar %d %8.8x Removed.',
-          [I, Integer(AComponent)]);
+        CnDebugger.LogFmt('TCnEditorToolBarObj Notification: ToolBar %d Removed.', [I]);
 {$ENDIF}
       end;
 end;
