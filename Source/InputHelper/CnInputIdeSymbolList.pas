@@ -45,7 +45,7 @@ interface
 uses
   Windows, SysUtils, Classes, Controls, ToolsApi, Math, Dialogs, Contnrs, TypInfo,
   Forms, CnHashMap, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
-  CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
+  CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier, CnNative;
 
 {$IFDEF DELPHI}
   {$DEFINE SUPPORT_IDESYMBOLLIST}
@@ -187,32 +187,47 @@ const
 {$IFDEF IDE_SUPPORT_LSP}
 const
   HashSize = 4096;
+{$IFDEF WIN64}
+  SDelphiLspGetCount = '_ZN11Lspcodcmplt17TLSPKibitzManager8GetCountEv';
+  SDelphiLspGetCodeCompEntry = '_ZN11Lspcodcmplt17TLSPKibitzManager16GetCodeCompEntryEi';
+
+  // 64 位下没这俩函数了？那咋办？
+  SBcbLspGetCount = '';
+  SBcbLspGetCodeCompEntry = '';
+
+{$ELSE}
   SDelphiLspGetCount = '@Lspcodcmplt@TLSPKibitzManager@GetCount$qqrv';
   SDelphiLspGetCodeCompEntry = '@Lspcodcmplt@TLSPKibitzManager@GetCodeCompEntry$qqri';
 
   SBcbLspGetCount = '@Cppcodcmplt2@TCppKibitzManager2@GetCount$qqrv';
   SBcbLspGetCodeCompEntry = '@Cppcodcmplt2@TCppKibitzManager2@GetCodeCompEntry$qqri';
+{$ENDIF}
 
 type
   TDelphiLSPKibitzManagerGetCount = function (ASelf: TObject): Integer;
   TBcbLSPKibitzManagerGetCount = function (ASelf: TObject): Integer;
 
+{$IFDEF WIN64}
+  TDelphiLSPKibitzManagerGetCodeCompEntry = function (Index: Integer): Pointer of object;
+  TBcbLSPKibitzManagerGetCodeCompEntry = function (Index: Integer): Pointer of object;
+{$ELSE}
   TDelphiLSPKibitzManagerGetCodeCompEntry = function (ASelf: TObject; Index: Integer): Pointer;
   TBcbLSPKibitzManagerGetCodeCompEntry = function (ASelf: TObject; Index: Integer): Pointer;
+{$ENDIF}
 
   TCnDelphiLspCodeCompEntry = packed record
   {* 反编译而来，LSPKibitzManager 每一项是一个结构，一个结构共 12 个四字节内容}
     SymbolName: PChar;            // 名称
-    SymbolFlag: LongWord;
+    SymbolFlag: TCnNativeUInt;
     SymbolType: PChar;            // 类型字符串，如 method 等
-    SymbolTypeFlag: LongWord;
+    SymbolTypeFlag: TCnNativeUInt;
     SymbolParam: PChar;           // 参数字符串！以前是拿不着的
-    SymbolDummy6: LongWord;
-    SymbolDummy7: LongWord;
-    SymbolDummy8: LongWord;
-    SymbolDummy9: LongWord;
-    SymbolDummy10: LongWord;
-    SymbolDummy11: LongWord;
+    SymbolDummy6: TCnNativeUInt;
+    SymbolDummy7: TCnNativeUInt;
+    SymbolDummy8: TCnNativeUInt;
+    SymbolDummy9: TCnNativeUInt;
+    SymbolDummy10: TCnNativeUInt;
+    SymbolDummy11: TCnNativeUInt;
     SymbolDummy12: PChar;
   end;
   PCnDelphiLspCodeCompEntry = ^TCnDelphiLspCodeCompEntry;
@@ -412,9 +427,16 @@ begin
         if C <= 0 then
           Exit;
 
+{$IFDEF WIN64}
+        TMethod(DelphiLspGetCodeCompEntry).Data := FAsyncManagerObj;
+{$ENDIF}
         for I := 0 to C - 1 do
         begin
+{$IFDEF WIN64}
+          PasEntry := DelphiLspGetCodeCompEntry(I);
+{$ELSE}
           PasEntry := DelphiLspGetCodeCompEntry(FAsyncManagerObj, I);
+{$ENDIF}
           if (PasEntry <> nil) and (PasEntry^.SymbolName <> nil) then
           begin
             Idx := Add(PasEntry^.SymbolName, SymbolClassTextToKind(PasEntry^.SymbolType),
@@ -444,9 +466,16 @@ begin
         if C <= 0 then
           Exit;
 
+{$IFDEF WIN64}
+        TMethod(BcbLspGetCodeCompEntry).Data := FAsyncManagerObj;
+{$ENDIF}
         for I := 0 to C - 1 do
         begin
+{$IFDEF WIN64}
+          CppEntry := BcbLspGetCodeCompEntry(I);
+{$ELSE}
           CppEntry := BcbLspGetCodeCompEntry(FAsyncManagerObj, I);
+{$ENDIF}
           if (CppEntry <> nil) and (CppEntry^.SymbolName <> nil) then
           begin;
             SName := ExtractStr(CppEntry^.SymbolName, CppEntry^.SymbolLength);
@@ -1361,14 +1390,22 @@ initialization
   if FDelphiLspHandle <> 0 then
   begin
     DelphiLspGetCount := TDelphiLSPKibitzManagerGetCount(GetProcAddress(FDelphiLspHandle, SDelphiLspGetCount));
+{$IFDEF WIN64}
+    TMethod(DelphiLspGetCodeCompEntry).Code := GetBplMethodAddress(GetProcAddress(FDelphiLspHandle, SDelphiLspGetCodeCompEntry));
+{$ELSE}
     DelphiLspGetCodeCompEntry := TDelphiLSPKibitzManagerGetCodeCompEntry(GetProcAddress(FDelphiLspHandle, SDelphiLspGetCodeCompEntry));
+{$ENDIF}
   end;
 
   FBcbLspHandle := GetModuleHandle(IdeBcbLspLibName);
   if FBcbLspHandle <> 0 then
   begin
     BcbLspGetCount := TBcbLSPKibitzManagerGetCount(GetProcAddress(FBcbLspHandle, SBcbLspGetCount));
+{$IFDEF WIN64}
+    TMethod(BcbLspGetCodeCompEntry).Code := GetBplMethodAddress(GetProcAddress(FBcbLspHandle, SBcbLspGetCodeCompEntry));
+{$ELSE}
     BcbLspGetCodeCompEntry := TBcbLSPKibitzManagerGetCodeCompEntry(GetProcAddress(FBcbLspHandle, SBcbLspGetCodeCompEntry));
+{$ENDIF}
   end;
   {$ENDIF}
 {$ENDIF}

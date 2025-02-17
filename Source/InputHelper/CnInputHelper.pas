@@ -2486,7 +2486,7 @@ begin
       FSymbolReloading := False; // Ò²»Ö¸´±ê¼Ç
     end;
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('UpdateSymbolList. Get Symbols %d.', [FSymbols.Count]);
+    CnDebugger.LogFmt('UpdateSymbolList. Get All Symbols %d.', [FSymbols.Count]);
 {$ENDIF}
   finally
     if HashList <> nil then
