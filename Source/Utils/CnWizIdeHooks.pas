@@ -29,6 +29,8 @@ unit CnWizIdeHooks;
 *           严重影响速度。特别是在 Delphi7 下，添加一张图片需要 70ms，对专家启动
 *           性能影响很大，故编写该 Hook，提供 BeginUpdate 和 EndUpdate 功能。
 *           另外，ActionList 也有类似的问题，同样处理。
+*           副作用则是拦截了当时所有的 ImageList 和 ActionList 实例，不仅仅只
+*           处理 IDE 的主 ImageList 和 ActionList
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -59,7 +61,9 @@ uses
 {$ENDIF}
 
 type
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
   TImageListAccess = class(TCustomImageList);
+{$ENDIF}
   TActionListAccess = class(TCustomActionList);
   TListChangeProc = procedure(Self: TCustomImageList);
   TListChangeMethod = procedure of object;
@@ -71,9 +75,11 @@ type
   end;
   
 var
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
   FImageLists: TThreadList = nil;
-  FActionLists: TThreadList = nil;
   FImageListHook: TCnMethodHook = nil;
+{$ENDIF}
+  FActionLists: TThreadList = nil;
   FActionListHook: TCnMethodHook = nil;
   FCnListComponent: TCnListComponent = nil;
   FUpdateCount: Integer = 0;
@@ -82,9 +88,13 @@ procedure TCnListComponent.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
   FImageLists.Remove(AComponent);
+{$ENDIF}
   FActionLists.Remove(AComponent);
 end;
+
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
 
 procedure MyImageListChange(Self: TCustomImageList);
 begin
@@ -98,6 +108,8 @@ begin
 //      ClearIDEBigImageList;
   end;
 end;
+
+{$ENDIF}
 
 procedure MyActionListChange(Self: TCustomActionList);
 begin
@@ -114,17 +126,22 @@ var
 begin
   if FUpdateCount = 0 then
   begin
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
     FImageLists := TThreadList.Create;
     FImageLists.Duplicates := dupIgnore;
+
+    Method := TImageListAccess(GetIDEImageList).Change;
+    FImageListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
+      @MyImageListChange);
+{$ELSE}
+    if GetIDEImageList <> nil then
+      GetIDEImageList.BeginUpdate;
+{$ENDIF}
 
     FActionLists := TThreadList.Create;
     FActionLists.Duplicates := dupIgnore;
 
     FCnListComponent := TCnListComponent.Create(nil);
-
-    Method := TImageListAccess(GetIDEImageList).Change;
-    FImageListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
-      @MyImageListChange);
       
     Method := TActionListAccess(GetIDEActionList).Change;
     FActionListHook := TCnMethodHook.Create(GetBplMethodAddress(TMethod(Method).Code),
@@ -142,10 +159,13 @@ begin
 
   if FUpdateCount = 0 then
   begin
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
     FreeAndNil(FImageListHook);
+{$ENDIF}
     FreeAndNil(FActionListHook);
     FreeAndNil(FCnListComponent);
 
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
     with FImageLists.LockList do
     try
       for I := Count - 1 downto 0 do
@@ -153,6 +173,10 @@ begin
     finally
       FImageLists.UnlockList;
     end;
+{$ELSE}
+    if GetIDEImageList <> nil then
+      GetIDEImageList.EndUpdate;
+{$ENDIF}
 
     with FActionLists.LockList do
     try
@@ -161,8 +185,10 @@ begin
     finally
       FActionLists.UnlockList;
     end;
-    
+
+{$IFNDEF IMAGELIST_BEGINENDUPDATE}
     FreeAndNil(FImageLists);
+{$ENDIF}
     FreeAndNil(FActionLists);
   end;
 end;
