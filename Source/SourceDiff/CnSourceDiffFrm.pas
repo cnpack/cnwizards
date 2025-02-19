@@ -799,30 +799,30 @@ procedure TCnSourceDiffForm.actCompareExecute(Sender: TObject);
 var
   I: Integer;
   HashList1, HashList2: TList;
-  optionsStr: string;
+  OptionsStr: string;
 begin
   FilesCompared := False;
   if (Lines1.Count = 0) or (Lines2.Count = 0) then Exit;
 
   if actIgnoreCase.Checked then
-    optionsStr := SCnSourceDiffCaseIgnored;
+    OptionsStr := SCnSourceDiffCaseIgnored;
   if actIgnoreBlanks.Checked then
   begin
-    if optionsStr = '' then
-      optionsStr := SCnSourceDiffBlanksIgnored
+    if OptionsStr = '' then
+      OptionsStr := SCnSourceDiffBlanksIgnored
     else
-      optionsStr := optionsStr + ', ' + SCnSourceDiffBlanksIgnored;
+      OptionsStr := OptionsStr + ', ' + SCnSourceDiffBlanksIgnored;
   end;
 
-  if optionsStr <> '' then
-    optionsStr := '  (' + optionsStr + ')';
+  if OptionsStr <> '' then
+    OptionsStr := '  (' + OptionsStr + ')';
 
   HashList1 := TList.Create;
   HashList2 := TList.Create;
   try
     // create the hash lists to compare...
-    HashList1.capacity := Lines1.Count;
-    HashList2.capacity := Lines2.Count;
+    HashList1.Capacity := Lines1.Count;
+    HashList2.Capacity := Lines2.Count;
     for I := 0 to Lines1.Count - 1 do
       HashList1.Add(HashLine(Lines1[I], actIgnoreCase.Checked,
         actIgnoreBlanks.Checked));
@@ -830,7 +830,7 @@ begin
       HashList2.Add(HashLine(Lines2[I], actIgnoreCase.Checked,
         actIgnoreBlanks.Checked));
 
-    screen.cursor := crHourglass;
+    Screen.Cursor := crHourglass;
     try
       actCancel.Enabled := True;
       // CALCULATE THE DIFFS HERE ...
@@ -840,12 +840,12 @@ begin
       FilesCompared := True;
       DisplayDiffs;
     finally
-      screen.cursor := crDefault;
+      Screen.Cursor := crDefault;
       actCancel.Enabled := False;
     end;
 
     Statusbar1.Panels[3].Text := Format(SCnSourceDiffChanges, [Diff.ChangeCount,
-      optionsStr]);
+      OptionsStr]);
   finally
     HashList1.Free;
     HashList2.Free;
@@ -992,14 +992,14 @@ begin
     pnlLeft.Align := alTop;
     pnlLeft.Height := pnlMain.ClientHeight div 2 - 1;
     Splitter1.Align := alTop;
-    Splitter1.cursor := crVSplit;
+    Splitter1.Cursor := crVSplit;
   end else
   begin
     pnlLeft.Align := alLeft;
     pnlLeft.Width := pnlMain.ClientWidth div 2 - 1;
     Splitter1.Align := alLeft;
     Splitter1.Left := 10;
-    Splitter1.cursor := crHSplit;
+    Splitter1.Cursor := crHSplit;
   end;
 end;
 

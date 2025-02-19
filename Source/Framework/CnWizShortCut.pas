@@ -122,38 +122,6 @@ type
   end;
 
 //==============================================================================
-// IDE 快捷键绑定接口实现类
-//==============================================================================
-
-{ TCnKeyBinding }
-
-  TCnKeyBinding = class(TNotifierObject, IOTAKeyboardBinding)
-  {* IDE 快捷键绑定接口实现类，在 CnWizards 中内部使用。
-     该类实现了 IOTAKeyboardBinding 接口，可被 IDE 调用以定义 IDE 的快捷键绑定。
-     该类仅在 IDE 快捷键管理器类 TCnWizShortCutMgr 内部使用，请不要直接使用。}
-  private
-    FOwner: TCnWizShortCutMgr;
-  protected
-    procedure KeyProc(const Context: IOTAKeyContext; KeyCode: TShortcut;
-      var BindingResult: TKeyBindingResult);
-    property Owner: TCnWizShortCutMgr read FOwner;
-  public
-    constructor Create(AOwner: TCnWizShortCutMgr);
-    {* 类构造器，传递 IDE 快捷键管理器作为参数}
-    destructor Destroy; override;
-
-    // IOTAKeyboardBinding methods
-    function GetBindingType: TBindingType;
-    {* 取绑定类型，必须实现的 IOTAKeyboardBinding 方法}
-    function GetDisplayName: string;
-    {* 取快捷键绑定显示名称，必须实现的 IOTAKeyboardBinding 方法}
-    function GetName: string;
-    {* 取快捷键绑定名称，必须实现的 IOTAKeyboardBinding 方法}
-    procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
-    {* 快捷键绑定过程，必须实现的 IOTAKeyboardBinding 方法}
-  end;
-
-//==============================================================================
 // IDE 快捷键管理器类
 //==============================================================================
 
@@ -242,6 +210,41 @@ uses
 
 const
   csInvalidIndex = -1;
+
+type
+
+//==============================================================================
+// IDE 快捷键绑定接口实现类
+//==============================================================================
+
+{ TCnKeyBinding }
+
+  TCnKeyBinding = class(TNotifierObject, IOTAKeyboardBinding)
+  {* IDE 快捷键绑定接口实现类，在 CnWizards 中内部使用。
+     该类实现了 IOTAKeyboardBinding 接口，可被 IDE 调用以定义 IDE 的快捷键绑定。
+     该类仅在 IDE 快捷键管理器类 TCnWizShortCutMgr 内部使用，请不要直接使用。}
+  private
+    FOwner: TCnWizShortCutMgr;
+  protected
+    procedure KeyProc(const Context: IOTAKeyContext; KeyCode: TShortcut;
+      var BindingResult: TKeyBindingResult);
+    property Owner: TCnWizShortCutMgr read FOwner;
+  public
+    constructor Create(AOwner: TCnWizShortCutMgr);
+    {* 类构造器，传递 IDE 快捷键管理器作为参数}
+    destructor Destroy; override;
+    {* 类析构器}
+
+    // IOTAKeyboardBinding methods
+    function GetBindingType: TBindingType;
+    {* 取绑定类型，必须实现的 IOTAKeyboardBinding 方法}
+    function GetDisplayName: string;
+    {* 取快捷键绑定显示名称，必须实现的 IOTAKeyboardBinding 方法}
+    function GetName: string;
+    {* 取快捷键绑定名称，必须实现的 IOTAKeyboardBinding 方法}
+    procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
+    {* 快捷键绑定过程，必须实现的 IOTAKeyboardBinding 方法}
+  end;
 
 //==============================================================================
 // IDE 快捷键定义类
@@ -428,8 +431,8 @@ begin
     if Owner.ShortCuts[I].ShortCut <> 0 then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('TCnKeyBinding.BindKeyboard AddKeyBinding: %d, MenuName %s',
-        [I, Owner.ShortCuts[I].MenuName]);
+//      CnDebugger.LogFmt('TCnKeyBinding.BindKeyboard AddKeyBinding: %d, MenuName %s',
+//        [I, Owner.ShortCuts[I].MenuName]);
 {$ENDIF}
       BindingServices.AddKeyBinding([Owner.ShortCuts[I].ShortCut], KeyProc,
         Owner.ShortCuts[I], kfImplicitShift or kfImplicitModifier or
@@ -736,6 +739,7 @@ begin
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
+      // 64 位下注册会出异常，只能先屏蔽
 {$IFNDEF WIN64}
       try
         FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));

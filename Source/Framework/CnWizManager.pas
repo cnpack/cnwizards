@@ -570,22 +570,28 @@ begin
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('CnWizardMgr WizShortCutMgr.BeginUpdate');
+{$ENDIF}
   WizShortCutMgr.BeginUpdate;
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFDEF DEBUG}
+  {$IFDEF DEBUG}
   CnDebugger.LogMsg('CnWizardMgr CnListBeginUpdate');
-{$ENDIF}
+  {$ENDIF}
   CnListBeginUpdate;
 {$ENDIF}
   try
     InternalCreate;
   finally
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('CnWizardMgr CnListEndUpdate');
-{$ENDIF}
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizardMgr CnListEndUpdate');
+  {$ENDIF}
     CnListEndUpdate;
 {$ENDIF}
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizardMgr WizShortCutMgr.EndUpdate');
+  {$ENDIF}
     WizShortCutMgr.EndUpdate;
   end;
 
