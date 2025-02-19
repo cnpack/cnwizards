@@ -56,14 +56,12 @@ type
 
 { compile-time registration functions }
 procedure SIRegister_TCnWizShortCutMgr(CL: TPSPascalCompiler);
-procedure SIRegister_TCnKeyBinding(CL: TPSPascalCompiler);
 procedure SIRegister_TCnWizShortCut(CL: TPSPascalCompiler);
 procedure SIRegister_CnWizShortCut(CL: TPSPascalCompiler);
 
 { run-time registration functions }
 procedure RIRegister_CnWizShortCut_Routines(S: TPSExec);
 procedure RIRegister_TCnWizShortCutMgr(CL: TPSRuntimeClassImporter);
-procedure RIRegister_TCnKeyBinding(CL: TPSRuntimeClassImporter);
 procedure RIRegister_TCnWizShortCut(CL: TPSRuntimeClassImporter);
 procedure RIRegister_CnWizShortCut(CL: TPSRuntimeClassImporter);
 
@@ -224,19 +222,6 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
-procedure RIRegister_TCnKeyBinding(CL: TPSRuntimeClassImporter);
-begin
-  with CL.Add(TCnKeyBinding) do
-  begin
-    RegisterConstructor(@TCnKeyBinding.Create, 'Create');
-    RegisterMethod(@TCnKeyBinding.GetBindingType, 'GetBindingType');
-    RegisterMethod(@TCnKeyBinding.GetDisplayName, 'GetDisplayName');
-    RegisterMethod(@TCnKeyBinding.GetName, 'GetName');
-    RegisterMethod(@TCnKeyBinding.BindKeyboard, 'BindKeyboard');
-  end;
-end;
-
-(*----------------------------------------------------------------------------*)
 procedure RIRegister_TCnWizShortCut(CL: TPSRuntimeClassImporter);
 begin
   with CL.Add(TCnWizShortCut) do
@@ -255,7 +240,6 @@ procedure RIRegister_CnWizShortCut(CL: TPSRuntimeClassImporter);
 begin
   with CL.Add(TCnWizShortCutMgr) do
   RIRegister_TCnWizShortCut(CL);
-  RIRegister_TCnKeyBinding(CL);
   RIRegister_TCnWizShortCutMgr(CL);
 end;
 

@@ -308,8 +308,10 @@ begin
   CL.AddTypeS('TCnCharSet', 'set of Char');
   CL.AddDelphiFunction('Function CnIntToObject(AInt : Integer) : TObject');
   CL.AddDelphiFunction('Function CnObjectToInt(AObject : TObject) : Integer');
+{$IFNDEF WIN64}
   CL.AddDelphiFunction('Function CnIntToInterface(AInt : Integer) : IUnknown');
   CL.AddDelphiFunction('Function CnInterfaceToInt(Intf : IUnknown) : Integer');
+{$ENDIF}
   CL.AddDelphiFunction('Function CnGetClassFromClassName(const AClassName : string) : Integer');
   CL.AddDelphiFunction('Function CnGetClassFromObject(AObject : TObject) : Integer');
   CL.AddDelphiFunction('Function CnGetClassNameFromClass(AClass : Integer) : string');
@@ -588,8 +590,10 @@ procedure RIRegister_CnWizUtils_Routines(S: TPSExec);
 begin
   S.RegisterDelphiFunction(@CnIntToObject, 'CnIntToObject', cdRegister);
   S.RegisterDelphiFunction(@CnObjectToInt, 'CnObjectToInt', cdRegister);
+{$IFNDEF WIN64}
   S.RegisterDelphiFunction(@CnIntToInterface, 'CnIntToInterface', cdRegister);
   S.RegisterDelphiFunction(@CnInterfaceToInt, 'CnInterfaceToInt', cdRegister);
+{$ENDIF}
   S.RegisterDelphiFunction(@CnGetClassFromClassName, 'CnGetClassFromClassName', cdRegister);
   S.RegisterDelphiFunction(@CnGetClassFromObject, 'CnGetClassFromObject', cdRegister);
   S.RegisterDelphiFunction(@CnGetClassNameFromClass, 'CnGetClassNameFromClass', cdRegister);

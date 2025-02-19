@@ -91,38 +91,6 @@ type
   end;
 
 //==============================================================================
-// IDE 快捷键绑定接口实现类
-//==============================================================================
-
-{ TCnKeyBinding }
-
-  TCnKeyBinding = class(TNotifierObject, IOTAKeyboardBinding)
-  {* IDE 快捷键绑定接口实现类，在 CnWizards 中内部使用。
-     该类实现了 IOTAKeyboardBinding 接口，可被 IDE 调用以定义 IDE 的快捷键绑定。
-     该类仅在 IDE 快捷键管理器类 TCnWizShortCutMgr 内部使用，请不要直接使用。}
-  private
-    FOwner: TCnWizShortCutMgr;
-  protected
-    procedure KeyProc(const Context: IOTAKeyContext; KeyCode: TShortcut;
-      var BindingResult: TKeyBindingResult);
-    property Owner: TCnWizShortCutMgr read FOwner;
-  public
-    constructor Create(AOwner: TCnWizShortCutMgr);
-    {* 类构造器，传递 IDE 快捷键管理器作为参数}
-    destructor Destroy; override;
-
-    // IOTAKeyboardBinding methods
-    function GetBindingType: TBindingType;
-    {* 取绑定类型，必须实现的 IOTAKeyboardBinding 方法}
-    function GetDisplayName: string;
-    {* 取快捷键绑定显示名称，必须实现的 IOTAKeyboardBinding 方法}
-    function GetName: string;
-    {* 取快捷键绑定名称，必须实现的 IOTAKeyboardBinding 方法}
-    procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
-    {* 快捷键绑定过程，必须实现的 IOTAKeyboardBinding 方法}
-  end;
-
-//==============================================================================
 // IDE 快捷键管理器类
 //==============================================================================
 
