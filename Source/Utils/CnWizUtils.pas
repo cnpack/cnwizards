@@ -4620,9 +4620,11 @@ var
 begin
   Result := '';
   if Assigned(Module) then
+  begin
     if not GetSourceEditorFileName then
       Result := Module.FileName
     else
+    begin
       for I := 0 to Module.GetModuleFileCount - 1 do
       begin
         Editor := Module.GetModuleFileEditor(I);
@@ -4632,6 +4634,8 @@ begin
           Break;
         end;
       end;
+    end;
+  end;
 end;
 
 // 取当前模块文件名

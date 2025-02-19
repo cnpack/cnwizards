@@ -34,7 +34,9 @@ program Setup;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串可处理为符合本地化处理方式
 * 单元标识：$Id: Setup.dpr,v 1.19 2009/04/18 13:42:17 zjy Exp $
-* 修改记录：2002.10.01 V1.1
+* 修改记录：2025.02.19 V1.2
+*               增加 64 位的支持
+*           2002.10.01 V1.1
 *               新增参数支持
 *           2002.09.28 V1.0
 *               创建单元，实现功能
@@ -93,11 +95,15 @@ const
     'CnWizards_CB6.DLL');
 
   csDllLoaderName = 'CnWizLoader.DLL';
+  csDllLoader64Name = 'CnWizLoader64.DLL';
   csDllLoaderKey = 'CnWizards_Loader';
 
   csLangDir = 'Lang\';
   csExperts = '\Experts';
+  csExperts64 = '\Experts x64';
   csLangFile = 'Setup.txt';
+
+  csCompiler64Begin = cnDelphi120A;
 
 var
   csHintStr: string = 'Hint';
@@ -202,9 +208,12 @@ var
   ParamCmdHelp :Boolean;
 
 // 取专家 DLL 完整文件名（已删除动态机制）
-function GetDllFullPathName(Compiler: TCnCompiler): string;
+function GetDllFullPathName(Compiler: TCnCompiler; Is64: Boolean = False): string;
 begin
-  Result := _CnExtractFilePath(ParamStr(0)) + csDllLoaderName;
+  if Is64 then
+    Result := _CnExtractFilePath(ParamStr(0)) + csDllLoader64Name
+  else
+    Result := _CnExtractFilePath(ParamStr(0)) + csDllLoaderName;
 end;
 
 // 取旧的专家名作为旧 Key
@@ -214,9 +223,9 @@ begin
 end;
 
 // 判断专家 DLL 是否存在
-function WizardExists(Compiler: TCnCompiler): Boolean;
+function WizardExists(Compiler: TCnCompiler; Is64: Boolean = False): Boolean;
 begin
-  Result := FileExists(GetDllFullPathName(Compiler));
+  Result := FileExists(GetDllFullPathName(Compiler, Is64));
 end;
 
 // 判断是否安装旧版专家 DLL
@@ -243,12 +252,14 @@ var
 begin
   Result := True;
   for Compiler := Low(Compiler) to High(Compiler) do
+  begin
     if WizardExists(Compiler) and RegKeyExists(SCnIDERegPaths[Compiler]) and
       not RegValueExists(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
     begin
       Result := False;
       Exit;
     end;
+  end;
 end;
 
 // 安装专家
@@ -280,6 +291,21 @@ begin
       if RegWriteStr(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey,
         GetDllFullPathName(Compiler)) then
         S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler];
+    end;
+
+    if Ord(Compiler) >= Ord(csCompiler64Begin) then
+    begin
+      if WizardExists(Compiler, True) and RegKeyExists(SCnIDERegPaths[Compiler]) then
+      begin
+        // 可能有 64 位版本，也得写，但不主动创建 Experts 64 的 Key
+        if RegKeyExists(SCnIDERegPaths[Compiler] + csExperts64) then
+        begin
+          // 写新格式的 64 位 Loader
+          if RegWriteStr(SCnIDERegPaths[Compiler] + csExperts64, csDllLoaderKey,
+            GetDllFullPathName(Compiler, True)) then
+            S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler] + ' (64 Bit)';
+        end;
+      end;
     end;
   end;
 
@@ -313,6 +339,14 @@ begin
     if RegValueExists(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) and
       RegDeleteValue(SCnIDERegPaths[Compiler] + csExperts, csDllLoaderKey) then
       S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler];
+
+    if Ord(Compiler) >= Ord(csCompiler64Begin) then
+    begin
+      // 可能有 64 位版本，也得删
+      if RegValueExists(SCnIDERegPaths[Compiler] + csExperts64, csDllLoaderKey) and
+        RegDeleteValue(SCnIDERegPaths[Compiler] + csExperts64, csDllLoaderKey) then
+        S := S + #13#10 + ' - ' + SCnCompilerNames[Compiler] + ' (64 Bit)';
+    end;
   end;
 
   if not ParamNoMsg then
