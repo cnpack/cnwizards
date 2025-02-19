@@ -1433,16 +1433,20 @@ var
 begin
   Result := [];
   // 源文件存在
-  if FileExists(FileName) then Include(Result, fkDiskFile);
+  if FileExists(FileName) then
+    Include(Result, fkDiskFile);
 
   // 备份文件存在
-  if FileExists(GetBakFileName(FileName)) then Include(Result, fkBackupFile);
+  if FileExists(GetBakFileName(FileName)) then
+    Include(Result, fkBackupFile);
 
-  // 文件在IDE中打开
+  // 文件在 IDE 中打开
   FModIntf := CnOtaGetModule(FileName);
   if FModIntf <> nil then
+  begin
     if CnOtaGetSourceEditorFromModule(FModIntf, FileName) <> nil then
       Include(Result, fkEditorBuff);
+  end;
 end;
 
 procedure TCnSourceDiffForm.SetFileKind1(const Value: TFileKind);
@@ -1548,6 +1552,7 @@ var
     Item.Tag := Tag;
     Menu.Items.Add(Item);
   end;
+
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
 
@@ -1562,6 +1567,8 @@ begin
   for I := 0 to iModuleServices.GetModuleCount - 1 do
   begin
     FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
+    if IsDProject(FileName) then
+      FileName := _CnChangeFileExt(FileName, '.dpr'); // 如果拿到 dproj，就改成 dpr
     UnitList.Add(FileName);
     CreateItem(FileName, csUnitIndex + I, OnClick);
   end;
