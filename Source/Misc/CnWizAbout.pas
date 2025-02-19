@@ -28,7 +28,9 @@ unit CnWizAbout;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2004.03.24 V1.1
+* 修改记录：2025.02.20 V1.2
+*               增加每日一帖
+*           2004.03.24 V1.1
 *               增加每日一帖
 *           2003.04.29 V1.0
 *               创建单元
@@ -41,7 +43,10 @@ interface
 
 {$IFDEF DEBUG}
 {$IFDEF WIN64}
+{$IFNDEF SUPPORT_PASCAL_SCRIPT}
+  // 64 位的 Debug 状态下，没脚本支持的话就加一个内部查看器供调试使用
   {$DEFINE CN_INTERNAL_EVAL}
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 

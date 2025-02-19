@@ -10,16 +10,20 @@ Script Wizard
 =============
 
 Depend on: RemObjects Pascal Script
-Revision : 157 (For D5-D2007)
-           252 (For D2009 and above)
+Revision : svn 157 (For D5-D2007)
+           svn 252 (For D2009 and above)
+           github: commit 9f7d3037260c48322ce7b5447911b7fd1c35384f (For x64)
 
 You'll need to obtain the exact revision from the ROPS Subversion repository:
 
 > cd CnPack\cnwizards\Source\ThirdParty
 > svn checkout -r 157 http://code.remobjects.com/svn/pascalscript/Source PascalScript
 > svn checkout -r 252 http://code.remobjects.com/svn/pascalscript/Source PascalScript_2009
+> git clone https://github.com/remobjects/pascalscript.git
 
-Note: 252 is currently latest when XE 2 beta is ready and can be compiled from 2009 to XE 2.
+Note: 
+svn 252 is currently latest when XE 2 beta is ready and can be compiled from 2009 to XE 2.
+github commit 9f7d3037260c48322ce7b5447911b7fd1c35384f is ready for x64 when Delphi x64 IDE published.
 
 Also, you'll need to open file CnPack\cnwizards\Source\CnWizards_Def.inc and
 remove or comment this line:
@@ -27,7 +31,7 @@ remove or comment this line:
 
 **********************************************************************
 
-Les fonctionnalit¨¦s de suivi d¨¦pendent des composants tiers:
+Les fonctionnalit  s de suivi d  pendent des composants tiers:
 
 Script Wizard
 =============
@@ -35,16 +39,18 @@ Script Wizard
 Depend on: RemObjects Pascal Script
 Revision : 157 (For D5-D2007)
            252 (For D2009 and above)
+           github: commit 9f7d3037260c48322ce7b5447911b7fd1c35384f (For x64)
 
-Vous devrez obtenir la r¨¦vision exacte du r¨¦f¨¦rentiel ROPS Subversion:
+Vous devrez obtenir la r  vision exacte du r  f  rentiel ROPS Subversion:
 
 > cd CnPack\cnwizards\Source\ThirdParty
 > svn checkout -r 157 http://code.remobjects.com/svn/pascalscript/Source PascalScript
 > svn checkout -r 252 http://code.remobjects.com/svn/pascalscript/Source PascalScript_2009
+> git clone https://github.com/remobjects/pascalscript.git
 
-Remarque: 252 est actuellement le dernier lorsque la version b¨ºta de XE 2 est pr¨ºte et peut ¨ºtre compil¨¦e de 2009 ¨¤ XE 2.
+Remarque: 252 est actuellement le dernier lorsque la version b  ta de XE 2 est pr  te et peut   tre compil  e de 2009    XE 2.
 
-Vous devrez ¨¦galement ouvrir le fichier CnPack \ cnwizards \ Source \ CnWizards_Def.inc et
+Vous devrez   galement ouvrir le fichier CnPack \ cnwizards \ Source \ CnWizards_Def.inc et
 supprimer ou commenter cette ligne:
   {$UNDEF SUPPORT_PASCAL_SCRIPT}
 
