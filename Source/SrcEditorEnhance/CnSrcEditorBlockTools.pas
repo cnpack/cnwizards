@@ -1080,8 +1080,8 @@ var
     LValue := Value;
     if LValue = #0 then
       LValue := '$0'
-    else if (LValue <> '') and ((LValue.Chars[0] = '#') or (LValue.Chars[0] = 'x')) then
-      LValue := '$' + LValue.SubString(1);
+    else if (LValue <> '') and ((LValue[1] = '#') or (LValue[1] = 'x')) then
+      LValue := '$' + Copy(LValue, 1, MaxInt);
 
     if (not IdentToAlphaColor('cla' + LValue, LColor)) and (not IdentToAlphaColor(LValue, LColor)) then
     begin
