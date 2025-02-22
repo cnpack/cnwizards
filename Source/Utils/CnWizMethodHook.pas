@@ -235,7 +235,7 @@ type
   TIntfJumpEntry = packed record
     case Integer of
       0: (ByteOpCode: Byte; Offset: LongInt);       // $E9 加四字节，32 位和 64 位通用
-      1: (WordOpCode: Word;  Addr: TRelativeAddr);  // $25FF 加四字节
+      1: (WordOpCode: Word; Addr: TRelativeAddr);   // $25FF 加四字节
   end;
   PIntfJumpEntry = ^TIntfJumpEntry;
   PPointer = ^Pointer;
