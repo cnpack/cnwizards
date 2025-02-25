@@ -30,7 +30,8 @@ freely, subject to the following restrictions:
 interface
 
 uses
-  DasmDefs,{DasmUtil,}x86Reg,x86Defs,x86Op;
+  SysUtils,DasmDefs,{DasmUtil,}x86Reg,x86Defs,DCU_In,
+  x86Op{$IFDEF OpSem},DasmCF,SemExpr{$ENDIF};
 
 {
 function ReadCommand: boolean;
@@ -89,13 +90,27 @@ const
     ArgCount: High(TwoByteArgs)+1; Args: @TwoByteArgs)
   );
 
+type
+  TOpSizeToDasmCodeTbl = array[TOpSize] of Integer;
+
+{$IFDEF OpSem}
+var
+  pOpSizeDasmCode: ^TOpSizeToDasmCodeTbl;
+{$ENDIF}
+
 implementation
 
 uses
-  DasmUtil, TypInfo;
+  DasmUtil, TypInfo{$IFDEF OpSem},FixUp,DCU_Out,DCURecs,DCU32{$ENDIF};
 
 const
   I64ToModes: array[Boolean]of TEntryModes = ([ee_r,ee_p],[ee_r,ee_p,ee_e]);
+
+const
+  OpSizeDasmCode: TOpSizeToDasmCodeTbl = (0{osNone},dsByte{osByte},dsWord{osWord},dsDbl{osDWord},
+    dsQWord{osQWord},dsByte{osBCD},dsDbl{osSingle},dsQWord{osDouble},dsTWord{osExtended},
+    dsPtr{osPtr16_16},dsPtr6b{osPtr16_32},dsTWord{!!!osPtr16_64},
+    0{osEnv16},0{osEnv32},0{osFPUState16},0{osFPUState32},0{osSIMDState});
 
 function HasPrefix(Pref: Byte): Integer;
 var
@@ -150,7 +165,7 @@ begin
               break;
             end ;
             if Exact and (M<>MV) then
-              Exact := false; //The choice of the syntax is not exact, some more specifix syntax is possible
+              Exact := false; //The choice of the syntax is not exact, some more specific syntax is possible
                 //Allows to select MOVSD instead of just MOVS
           end ;
         end ;
@@ -178,7 +193,6 @@ var
   Dep,DepBest: TEntryDependences;
   Syntaxes: POpcodeSyntaxes;
 begin
-  Result := -1;
   ValidModes := I64ToModes[modeI64];
   DepBest := [];
   iBest := -1;
@@ -191,6 +205,8 @@ begin
   //function SeeNextCodeByte: Integer{-1 => Error};
   for i:=0 to Count-1 do begin
     EP := @Entries^[i];
+    if EP^.Attr=ea_invd then
+      Continue; //Skip invalid entry
     ModeOk := false;
     if en_mode in EP^.Flags then begin
       if not(EP^.mode in ValidModes) then
@@ -211,6 +227,8 @@ begin
           Continue;
        end
       else if (NextCodeByte shr 3)and $7<>EP^.OpcdExt then
+        Continue;
+      if (EP^.mod_=em_nomem)and(NextCodeByte and $C0<>$C0) then
         Continue;
     end ;
     hPrefixCur := -1;
@@ -308,12 +326,6 @@ begin
   Result := -1;
 end ;
 
-const
-  OpSizeDasmCode: array[TOpSize] of Integer = (0{osNone},dsByte{osByte},dsWord{osWord},dsDbl{osDWord},
-    dsQWord{osQWord},dsByte{osBCD},dsDbl{osSingle},dsQWord{osDouble},dsTWord{osExtended},
-    dsPtr{osPtr16_16},dsPtr6b{osPtr16_32},dsTWord{!!!osPtr16_64},
-    0{osEnv16},0{osEnv32},0{osFPUState16},0{osFPUState32},0{osSIMDState});
-
 function ReadOp: Boolean;
 var
   IsTwoByte: Boolean;
@@ -401,8 +413,8 @@ begin
     AP := @OpTables[IsTwoByte].Args^[SP^.Base];
     APModR := Nil;
     A := -1;
-    ModRArg := -1;
     ArgType := rtNone;
+    ModRArg := -1;
     ModRVal := -1;
     for i:=0 to SP^.Count-1 do begin
       if not(afNoDispl in AP^.Flags) then begin
@@ -429,7 +441,7 @@ begin
         if AP^.Name=an_1 then
           SetCmdArg(1)
         else if AP^.Name=an_3 then
-          SetCmdArg(1)
+          SetCmdArg(3) //Int 3
         else if afNr in AP^.Flags then begin
           if AP^.A=am_None then begin
             if AP^.Name=an_ST then
@@ -488,9 +500,6 @@ begin
       end ;
       Inc(AP);
     end ;
-//od_Ptr,od_ModRM,od_I,od_J,od_ImOfs,od_Z,od_None
-  {if od_ModRM in EP^.FData then begin
-  end ;}
   end ;
   Result := true;
 end ;
@@ -607,7 +616,7 @@ function CheckCommandRefs(RegRef: TRegCommandRefProc; CmdOfs: Cardinal;
 
 var
   EP: POpcodeEntry;
-  SP: POpcodeSyntax;
+  //SP: POpcodeSyntax;
   Mnem: TOpcodeMnem;
 begin
   Result := -1;
@@ -661,4 +670,8 @@ begin
   end ;}
 end ;
 
+begin
+{$IFDEF OpSem}
+  pOpSizeDasmCode := @OpSizeDasmCode;
+{$ENDIF}
 end .

@@ -109,7 +109,7 @@ const
   iopShlI64 = diop1+$4C;
   iopShrI64 = diop1+$4D;
   iopLetCvtPtr1=diop1+$4E; //10Seattle
-  //?=diop1+$4F;
+  iopDecI64=diop1+$4F; //11Alexandria
   //?=diop1+$50;
   //?=diop1+$51;
   //?=diop1+$52;
@@ -241,7 +241,7 @@ const
   iopLetCvtPtrSArg = diop3+$C8; //Was used in an actual parameter of a procedure
   //? = diop3+$C9;
   //? = diop3+$CA;
-  //? = diop3+$CB;
+  iopUnknown1 = diop3+$CB; //Unknown
   //? = diop3+$CC;
   //? = diop3+$CD;
   iopPutClass = diop3+$CE;
@@ -265,7 +265,15 @@ const
 // %$IF Ver>=verD_XE8;
   iopLetCvtPtr = $EA-($20-$19);
   iopCvtConst = $EB-($20-$19);
+// %$END
+// %$IF Ver>=verD_10_3;
   iopInlineFCall = $EC-($20-$19);
+// %$END
+// %$IF Ver>=verD_12;
+  iopInlineUnknown1 = $ED-($20-$19);
+  iopInlineVar = $EE-($20-$19); //Comparison with D_11 shows, that this kind of operators was added
+    //to completely similar code e.g. TList<T>.Extract in System.Generics.Collections
+    //may be it marks the places of substitution of inline code of some method into this inline code
 // %$END
 
 type
@@ -489,7 +497,7 @@ end ;
 TInlineStrucGoToOperator = class(TInlineOperator)
  protected
   FTarget,FZ0,FZ1,FZ2: TInlineOpNDX;
-  class function OpName: String; virtual; abstract;
+  class function OpName: AnsiString; virtual; abstract;
  public
   constructor Load(const Parms: TInlineNodeLoadParms); override;
   procedure Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole); override;
@@ -497,12 +505,12 @@ end ;
 
 TInlineBreakOperator = class(TInlineStrucGoToOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineContinueOperator = class(TInlineStrucGoToOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineOneArgOperator = class(TInlineOperator)
@@ -526,7 +534,7 @@ end ;
 TInlineTwoArgOperator = class(TInlineOneArgOperator)
  protected
   FhArg1: TInlineOpNDX;
-  class function OpName: String; virtual; abstract;
+  class function OpName: AnsiString; virtual; abstract;
  public
   constructor Load(const Parms: TInlineNodeLoadParms); override;
   procedure Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole); override;
@@ -556,22 +564,22 @@ end ;
 
 TInlineIncOperator = class(TInlineTwoArgOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineDecOperator = class(TInlineTwoArgOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineIncludeOperator = class(TInlineTwoArgOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineExcludeOperator = class(TInlineTwoArgOperator)
  protected
-  class function OpName: String; override;
+  class function OpName: AnsiString; override;
 end ;
 
 TInlineBlockOperator = class(TInlineOperator)
@@ -662,10 +670,21 @@ TInlineInlineFCall = class(TInlineOperator)
  protected
   FhOp: TInlineOpNDX; //Operator to execute before expressions
   FhVal: TInlineOpNDX; //the expression (condition) itself
+  class function ExtraName: String; virtual;
  public
   constructor Load(const Parms: TInlineNodeLoadParms); override;
   procedure Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole); override;
 end ;
+
+TInlineInlineVar = class(TInlineInlineFCall)
+ protected
+  class function ExtraName: String; override;
+end;
+
+TInlineInlineUnknown1 = class(TInlineInlineFCall)
+ protected
+  class function ExtraName: String; override;
+end;
 
 TInlineTryFinallyOperator = class(TInlineOperator)
  protected
@@ -678,6 +697,15 @@ end ;
 TInlineTryCaseOperator = class(TInlineOperator)
  protected
   FhCode,FhNext,FhExcVar: TInlineOpNDX;
+  FhExcType: TNDX;
+ public
+  constructor Load(const Parms: TInlineNodeLoadParms); override;
+  procedure Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole); override;
+end ;
+
+TUnknown1Operator  = class(TInlineOperator)
+ protected
+  FhZ0,FhZ1,FhZ2: TInlineOpNDX;
   FhExcType: TNDX;
  public
   constructor Load(const Parms: TInlineNodeLoadParms); override;
@@ -995,7 +1023,7 @@ end ;
 procedure TInlineLetOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole);
 var
   Ofs0: Integer;
-  hAddr: Integer;
+  //hAddr: Integer;
   hDT: Integer;
   U: TUnit;
 begin
@@ -1061,13 +1089,13 @@ begin
 end ;
 
 { TInlineBreakOperator. }
-class function TInlineBreakOperator.OpName: String;
+class function TInlineBreakOperator.OpName: AnsiString;
 begin
   Result := 'Break';
 end ;
 
 { TInlineContinueOperator. }
-class function TInlineContinueOperator.OpName: String;
+class function TInlineContinueOperator.OpName: AnsiString;
 begin
   Result := 'Continue';
 end ;
@@ -1109,7 +1137,8 @@ begin
   FhArg1 := ReadUIndex;
 end ;
 
-procedure TInlineTwoArgOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole);
+procedure TInlineTwoArgOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Integer;
+  Role: TInlineNodeRole);
 var
   Ofs0: Integer;
 begin
@@ -1199,7 +1228,7 @@ var
 begin
   inherited Show(Info,ParentId,Id,Role);
   //IsMethod := false;
-  PD := Nil;
+  //PD := Nil;
   ShowFlags := [];
   if Role<irArgument then
     ShowFlags := [isfIndent];
@@ -1261,25 +1290,25 @@ begin
 end ;
 
 { TInlineIncOperator. }
-class function TInlineIncOperator.OpName: String;
+class function TInlineIncOperator.OpName: AnsiString;
 begin
   Result := 'Inc';
 end ;
 
 { TInlineDecOperator. }
-class function TInlineDecOperator.OpName: String;
+class function TInlineDecOperator.OpName: AnsiString;
 begin
   Result := 'Dec';
 end ;
 
 { TInlineIncludeOperator. }
-class function TInlineIncludeOperator.OpName: String;
+class function TInlineIncludeOperator.OpName: AnsiString;
 begin
   Result := 'Include';
 end ;
 
 { TInlineExcludeOperator. }
-class function TInlineExcludeOperator.OpName: String;
+class function TInlineExcludeOperator.OpName: AnsiString;
 begin
   Result := 'Exclude';
 end ;
@@ -1316,7 +1345,7 @@ end ;
 
 procedure TInlineBlockOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole);
 var
-  i,Ofs0: Integer;
+  i{,Ofs0}: Integer;
 begin
   inherited Show(Info,ParentId,Id,Role);
   {if Role<>irBlock then begin
@@ -1352,6 +1381,8 @@ var
 begin
   inherited Show(Info,ParentId,Id,Role);
   Line0 := Writer.OutLineNum;
+  if Role=irElse then
+    PutSpace;
   PutKWSp('if');
   Info.ShowInlineOp(FhCond,Id,irArgument,[isfIndent]{ShowFlags});
   if Line0<>Writer.OutLineNum then
@@ -1386,6 +1417,8 @@ begin
 //  inherited Show(Info,Id,Role);
   ShowBase(Info,ParentId,Role);
   Line0 := Writer.OutLineNum;
+  if Role=irElse then
+    PutSpace;
   PutKWSp('if');
   Info.ShowInlineOp(FhCond,Id,irArgument,[isfIndent]{ShowFlags});
   if Line0<>Writer.OutLineNum then
@@ -1465,7 +1498,7 @@ begin
   inherited Show(Info,ParentId,Id,Role);
  {Get the type of constants}
   DT := Nil;
-  hT := -1;
+  //hT := -1;
   ExprOp := Info.GetInlineOp(FhExpr,Id{ParentId});
   if (ExprOp<>Nil)and(ExprOp is TInlineNode) then begin
     hT := TInlineNode(ExprOp).FhDT;
@@ -1517,7 +1550,7 @@ begin
          break;
        Inc(hInterval);
      end ;
-    Writer.NLOfs := Ofs0;
+    Writer.NLOfs := Ofs0+2;
     PutS(':'+cSoftNL);
     Info.ShowInlineOp(FCode^[hC],Id,irOperator,[isfIndent{,isfNL}]{ShowFlags});
     PutCh(';');
@@ -1586,7 +1619,7 @@ procedure TInlineForOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Intege
 var
   Line0: Integer;
   StepObj: TObject;
-  S: String;
+  S: AnsiString;
 begin
   inherited Show(Info,ParentId,Id,Role);
   Line0 := Writer.OutLineNum;
@@ -1632,8 +1665,6 @@ procedure TInlineForInOperator.Show(Info: TInlineDeclModifier; ParentId,Id: Inte
 //the loop like in C for(;Cond;Step) Body which is used for implementation of for in
 var
   Line0: Integer;
-  StepObj: TObject;
-  S: String;
 begin
   inherited Show(Info,ParentId,Id,Role);
   Line0 := Writer.OutLineNum;
@@ -1662,7 +1693,7 @@ begin
   PutKW('end');
 end ;
 
-{ TInlineInlineFCallOperator. }
+{ TInlineInlineFCall. }
 constructor TInlineInlineFCall.Load(const Parms: TInlineNodeLoadParms);
 begin
   inherited Load(Parms);
@@ -1670,12 +1701,17 @@ begin
   FhVal := ReadUIndex;
 end ;
 
+class function TInlineInlineFCall.ExtraName: String;
+begin
+  Result := 'inline call';
+end;
+
 procedure TInlineInlineFCall.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole);
 {var
   Line0: Integer;}
 begin
   inherited Show(Info,ParentId,Id,Role);
-  PutKWSp('inline {call}');
+  PutKWSp(ExtraName);
   Info.ShowInlineOp(FhOp,Id,irBlock,[isfIndent,isfNL{,isfBeginEnd}]{ShowFlags});
     //!!!It makes the resulting Pascal code wrong, but it is better to analyze the code and replace it manually by the corresponding function call
   NL;
@@ -1683,6 +1719,17 @@ begin
   Info.ShowInlineOp(FhVal,Id,irArgument,[isfIndent]{ShowFlags});
 end ;
 
+{ TInlineInlineVar. }
+class function TInlineInlineVar.ExtraName: String;
+begin
+  Result := 'inline var';
+end;
+
+{ TInlineInlineX. }
+class function TInlineInlineUnknown1.ExtraName: String;
+begin
+  Result := 'inline unknown1';
+end;
 
 { TInlineTryFinallyOperator. }
 constructor TInlineTryFinallyOperator.Load(const Parms: TInlineNodeLoadParms);
@@ -1740,6 +1787,36 @@ begin
     Ofs0 := Writer.NLOfs;
     Writer.NLOfs := Ofs0-2;//Same level
     Info.ShowInlineOp(FhNext,Id,Role,[isfIndent,isfNL]);
+  end ;
+end ;
+
+{ TUnknown1Operator. }
+constructor TUnknown1Operator.Load(const Parms: TInlineNodeLoadParms);
+begin
+  inherited Load(Parms);
+  FhZ0 := ReadUIndex;
+  FhZ1 := ReadUIndex;
+  FhZ2 := ReadUIndex;
+  FhExcType := ReadUIndex;
+end ;
+
+procedure TUnknown1Operator.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Role: TInlineNodeRole);
+var
+  TR: PInlineTypeRec;
+  Ofs0: Integer;
+begin
+  inherited Show(Info,ParentId,Id,Role);
+  PutSFmt('Unknown1[#%d,#%d,#%d],#%d=',[FhZ0,FhZ1,FhZ2,FhExcType]);
+  TR := Info.GetTypeRec(FhExcType);
+  if TR=Nil then
+    PutCh('?')
+  else begin
+    PutSFmt('(Kind:%d; T:%d',[TR^.Kind,TR^.hType]);
+    if (TR^.Kind=2)and(TR^.hType<>0) then begin
+      PutCh('=');
+      CurUnit.ShowTypeName(TR^.hType);
+    end ;
+    PutCh(')');
   end ;
 end ;
 
@@ -1943,8 +2020,8 @@ procedure TPrefixOpExpr.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Ro
 var
   Oper: TInlineOperation;
   Prior: TInlineNodeRole;
-  sOper: String;
-  ch: Char;
+  sOper: AnsiString;
+  ch: AnsiChar;
   IsIdent: Boolean;
 begin
   Oper := InlineOpCodeToOperation(FTag);
@@ -2028,8 +2105,8 @@ procedure TInfixOpExpr.Show(Info: TInlineDeclModifier; ParentId,Id: Integer; Rol
 var
   Oper: TInlineOperation;
   Prior: TInlineNodeRole;
-  sOper: String;
-  ch: Char;
+  sOper: AnsiString;
+  ch: AnsiChar;
   IsIdent: Boolean;
 begin
   Oper := InlineOpCodeToOperation(FTag);
@@ -2164,10 +2241,8 @@ end ;
 procedure TInlineLeaCExpr.ShowOfs(Info: TInlineDeclModifier; Id: Integer);
 var
   hElType,hBaseType: Integer;
- // TR: PInlineTypeRec;
-  TD: TTypeDef;
+ // TD: TTypeDef;
   U: TUnit;
-  S: AnsiString;
 begin
   hElType := Info.GetTypeNDX(FhDT);
   if hElType<0 then
@@ -2196,7 +2271,6 @@ procedure TInlinePutFieldExpr.ShowRefOfs(Info: TInlineDeclModifier; Id: Integer)
 var
   hElType,hBaseType: Integer;
   ElSz: integer;
-  TD: TTypeDef;
   U: TUnit;
   S: AnsiString;
 begin
@@ -2643,10 +2717,10 @@ begin
    iopArgList: Result := TInlineArgList.Load(Parms);
    iopLet,iopLetF,iopLetShortStr,iopLetSet,iopLetStr,iopLetIntf,iopLetI64,
    iopLetCast,iopLetDynArray,iopLetT{,iopLetCvtPtr}: Result := TInlineLetOperator.Load(Parms);
-   iopLetCvtPtr,iopLetCvtPtr1,iopLetCvtPtrSArg: Result := TInlineLetCvtPtrOperator.Load(Parms);
+   iopLetCvtPtr,iopLetCvtPtr1,iopLetCvtPtrSArg{,iopLetCvtX}: Result := TInlineLetCvtPtrOperator.Load(Parms);
 
    iopInc: Result := TInlineIncOperator.Load(Parms);
-   iopDec: Result := TInlineDecOperator.Load(Parms);
+   iopDec,iopDecI64: Result := TInlineDecOperator.Load(Parms);
 
    iopNotB, iopNeg, iopNegI64, iopNotBI64,
    iopNot: Result := TPrefixOpExpr.Load(Parms);
@@ -2700,6 +2774,10 @@ begin
    iopCond: Result := TInlineOneArgOperator.Load(Parms);
    iopInlineFCall: if CurUnit.Ver>=verD_10_3 then
      Result := TInlineInlineFCall.Load(Parms);
+   iopInlineVar: if CurUnit.Ver>=verD_12 then
+     Result := TInlineInlineVar.Load(Parms);
+   iopInlineUnknown1: if CurUnit.Ver>=verD_12 then
+     Result := TInlineInlineUnknown1.Load(Parms);
    iopSetLabel: Result := TInlineSetLabelOperator.Load(Parms);
    iopGoTo: Result := TInlineGoToOperator.Load(Parms);
 
@@ -2713,6 +2791,7 @@ begin
    iopTryExcept: Result := TInlineTryExceptOperator.Load(Parms);
    iopTryFinally: Result := TInlineTryFinallyOperator.Load(Parms);
    iopTryCase: Result := TInlineTryCaseOperator.Load(Parms);
+   iopUnknown1: Result := TUnknown1Operator.Load(Parms);
    iopNOP: Result := TInlineNOPOperator.Load(Parms); //end try or catch block in try ... finally and try ... except and raise; argument
    iopObjIs,iopObjAs: Result := TInfixOpExpr.Load(Parms);
    iopOpenArrayArg: Result := TInlineOpenArrayArg.Load(Parms);
@@ -2769,10 +2848,8 @@ var
   AddrTbl: PInlineAddrTbl;
   TypeTbl: PInlineTypeTbl;
   NodeCnt: ulong;
-  S: AnsiString;
-  NP: PName;
 begin
-  Result := Nil;
+  //Result := Nil;
   with CurUnit do begin
     if (Ver>=verD2006)and(Ver<verK1) then begin
       ReadUIndex;

@@ -27,7 +27,7 @@ freely, subject to the following restrictions:
 interface
 
 uses
-  SysUtils, FixUp, DCU_In, DCU_Out;
+  {$IFDEF UNICODE}AnsiStrings,{$ENDIF}SysUtils, FixUp, DCU_In, DCU_Out;
 
 const
   UnwindVerMask = $7;
@@ -184,8 +184,6 @@ end ;
 procedure ShowPDataRec0(DP: Pointer; FixTbl: PFixupTbl);
 //Decompiler magic for .pdata
 //Show the PData section
-var
-  BlOfs: Cardinal;
 begin
   CurUnit.PutAddrStr(FixTbl^[0].Ndx,true{ShowNDX});
   PutSFmt('[$%x..$%x)',[PPDataRec(DP)^.Ofs0,PPDataRec(DP)^.Ofs1]);
@@ -271,11 +269,10 @@ var
   Fix: PFixupRec;
   hHandler: TNDX;
   HandlerName: PName;
-  S: String;
+  S: AnsiString;
   C: TUnwindCode;
   Inf: Integer;
-  VP: ^LongInt;
-  V: LongInt;
+  //VP: ^LongInt;
   Stop: Boolean;
   FxRes: array[0..3]of PFixupRec;
   ExcScope: PExcScope;
@@ -344,12 +341,12 @@ begin
       end ;
       PutS(')');
     end ;
-    Stop := true;
+    //Stop := true;
     if (UI^.VerFlags and UNW_FLAG_CHAININFO)<>0 then begin
       PutS(cSoftNL+'next:'+cSoftNL);
       ShowPDataRec0(TIncPtr(DP)+HdrSz,PFixupTbl(FixRd.FixTbl));
       Inc(HdrSz,12);
-      Stop := false;
+      //Stop := false;
       {Dec(FixCnt,3);
       Inc(PFixupRec(FixTbl),3);}
      end
@@ -397,7 +394,7 @@ begin
                  1: S := 'safecall';
                  2: S := 'catch';
                 else
-                  S := Format('Unknown %d',[ExcScope^.TableOffset]);
+                  S := {$IFDEF UNICODE}AnsiStrings.{$ENDIF}Format('Unknown %d',[ExcScope^.TableOffset]);
                 end;
                 PutS(S);
                end
@@ -658,7 +655,7 @@ function TWin64UnwindInfo.NextPDataRec(var Iter: TPDataIterator): Boolean;
 var
   Ofs,HdrSz,HandlerOfs,ExcCnt: DCU_In.ULong;
   UI: PUNWIND_INFO;
-  HandlerFix,Fix: PFixupRec;
+  HandlerFix{,Fix}: PFixupRec;
   HandlerName: PName;
 begin
   Result := false;
