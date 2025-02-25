@@ -3641,6 +3641,10 @@ procedure TUnit.ReadDeclList(LK: TDeclListKind; Owner: TDCURec;
             end;
         end;
         Tag := ReadTag;
+
+        // D 11.0, some drA7Info will add a Zero Byte
+        if (Ver >= verD_11_0) and (Tag1 = drA7Info) and (Tag = drStop) then
+          Tag := ReadTag;
       end;
     { if Embedded<>Nil then begin
       if IsMSIL and(LK=dlEmbedded)or //A lot of files contain additional
