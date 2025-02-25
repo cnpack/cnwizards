@@ -19,7 +19,8 @@ uses
   CnDCU32 in '..\..\Source\Utils\CnDCU32.pas',
   Win64SEH in '..\..\Source\ThirdParty\DCU32_110\Win64SEH.pas',
   DasmOpT in '..\..\Source\ThirdParty\DCU32_110\DasmOpT.pas',
-  InlineOp in '..\..\Source\ThirdParty\DCU32_110\InlineOp.pas';
+  InlineOp in '..\..\Source\ThirdParty\DCU32_110\InlineOp.pas',
+  DasmProc in '..\..\Source\ThirdParty\DCU32_110\DasmProc.pas';
 
 {$R *.RES}
 

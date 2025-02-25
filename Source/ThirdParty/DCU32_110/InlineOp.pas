@@ -27,6 +27,9 @@ freely, subject to the following restrictions:
 
 interface
 
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+
 uses
   SysUtils, DCU_In, DCU_Out, DCU32, DCURecs {$IFDEF ConditionalExpressions}, Variants{$ENDIF};
 

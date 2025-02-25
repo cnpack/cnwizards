@@ -25,6 +25,7 @@ freely, subject to the following restrictions:
    distribution.
 *)
 
+{$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 
 {$IFNDEF VER90}
