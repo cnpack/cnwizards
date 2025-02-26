@@ -167,6 +167,9 @@ type
     procedure SaveToDirectory(const Dir, BaseFileFmt: string);
     {* 独立运行时的保存总入口，将所有配置根据基础文件名存入指定目录}
 
+    function GetEngineByOption(Option: TCnAIEngineOption): TCnAIBaseEngine;
+    {* 根据选项对象查找对应引擎}
+
 {$IFNDEF STAND_ALONE}
     procedure LoadFromWizOptions;
     {* 专家包的加载总入口，动态加载所有配置，内部会分辨不同目录}
@@ -444,6 +447,22 @@ begin
 end;
 
 {$ENDIF}
+
+function TCnAIEngineManager.GetEngineByOption(
+  Option: TCnAIEngineOption): TCnAIBaseEngine;
+var
+  I: Integer;
+begin
+  for I := 0 to EngineCount - 1 do
+  begin
+    if Engines[I].Option = Option then
+    begin
+      Result := Engines[I];
+      Exit;
+    end;
+  end;
+  Result := nil;
+end;
 
 { TCnAIBaseEngine }
 

@@ -356,6 +356,7 @@ procedure TCnAICoderConfigForm.LoadFromOptions;
 var
   I, J, C: Integer;
   SL: TStringList;
+  Eng: TCnAIBaseEngine;
 begin
   chkProxy.Checked := CnAIEngineOptionManager.UseProxy;
   edtProxy.Text := CnAIEngineOptionManager.ProxyServer;
@@ -391,9 +392,17 @@ begin
 
       // 给每个 Frame 里的东西塞 Option 内容
       FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
-      FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
       FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
       FOptionFrames[I].edtTemperature.Text := FloatToStr(CnAIEngineOptionManager.Options[I].Temperature);
+      FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
+
+      // 如果不需要 APIKey 就禁用
+      Eng := CnAIEngineManager.GetEngineByOption(CnAIEngineOptionManager.Options[I]);
+      if (Eng <> nil) and not Eng.NeedApiKey then
+      begin
+        FOptionFrames[I].lblAPIKey.Enabled := False;
+        FOptionFrames[I].edtAPIKey.Enabled := False;
+      end;
 
       // 把该 Option 里的额外参数塞给 Frame 实例，并加载值
       C := CnAIEngineOptionManager.Options[I].GetExtraOptionCount;
