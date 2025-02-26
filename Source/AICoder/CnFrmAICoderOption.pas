@@ -54,6 +54,8 @@ type
     lblModel: TLabel;
     lblApply: TLabel;
     cbbModel: TComboBox;
+    edtTemperature: TEdit;
+    lblTemperature: TLabel;
     procedure lblApplyClick(Sender: TObject);
   private
     FWebAddr: string;
@@ -123,7 +125,7 @@ end;
 procedure TCnAICoderOptionFrame.CalcExtraPositions;
 begin
   // 注意此处都是屏幕实际尺寸，不考虑 HDPI 缩放
-  FVerticalDistance := lblAPIKey.Top - lblModel.Top;
+  FVerticalDistance := lblAPIKey.Top - lblTemperature.Top;
   FVerticalLabelStart := lblAPIKey.Top + FVerticalDistance;
   FVerticalEditStart := edtAPIKey.Top + FVerticalDistance;
   FHoriEditStart := edtAPIKey.Left;

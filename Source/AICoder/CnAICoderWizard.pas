@@ -393,6 +393,7 @@ begin
       FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
       FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
       FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
+      FOptionFrames[I].edtTemperature.Text := FloatToStr(CnAIEngineOptionManager.Options[I].Temperature);
 
       // 把该 Option 里的额外参数塞给 Frame 实例，并加载值
       C := CnAIEngineOptionManager.Options[I].GetExtraOptionCount;
@@ -434,6 +435,7 @@ begin
     CnAIEngineOptionManager.Options[I].URL := FOptionFrames[I].edtURL.Text;
     CnAIEngineOptionManager.Options[I].APIKey := FOptionFrames[I].edtAPIKey.Text;
     CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].cbbModel.Text;
+    CnAIEngineOptionManager.Options[I].Temperature := StrToFloat(FOptionFrames[I].edtTemperature.Text);
 
     // 存额外属性
     FOptionFrames[I].SaveExtraOptions;

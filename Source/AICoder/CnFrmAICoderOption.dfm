@@ -10,7 +10,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   end
   object lblAPIKey: TLabel
     Left = 16
-    Top = 88
+    Top = 120
     Width = 41
     Height = 13
     Caption = 'API Key:'
@@ -24,7 +24,7 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   end
   object lblApply: TLabel
     Left = 518
-    Top = 112
+    Top = 144
     Width = 82
     Height = 33
     Cursor = crHandPoint
@@ -42,6 +42,13 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     ParentFont = False
     OnClick = lblApplyClick
   end
+  object lblTemperature: TLabel
+    Left = 16
+    Top = 88
+    Width = 63
+    Height = 13
+    Caption = 'Temperature:'
+  end
   object edtURL: TEdit
     Left = 120
     Top = 20
@@ -52,11 +59,11 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
   end
   object edtAPIKey: TEdit
     Left = 120
-    Top = 84
+    Top = 116
     Width = 480
     Height = 21
     Anchors = [akLeft, akTop, akRight]
-    TabOrder = 2
+    TabOrder = 3
   end
   object cbbModel: TComboBox
     Left = 120
@@ -66,5 +73,13 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     Anchors = [akLeft, akTop, akRight]
     ItemHeight = 13
     TabOrder = 1
+  end
+  object edtTemperature: TEdit
+    Left = 120
+    Top = 84
+    Width = 480
+    Height = 21
+    Anchors = [akLeft, akTop, akRight]
+    TabOrder = 2
   end
 end
