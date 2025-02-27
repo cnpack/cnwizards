@@ -82,4 +82,12 @@ inherited CnAICoderOptionFrame: TCnAICoderOptionFrame
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 2
   end
+  object chkStreamMode: TCheckBox
+    Left = 120
+    Top = 148
+    Width = 97
+    Height = 17
+    Caption = 'Stream Mode'
+    TabOrder = 4
+  end
 end

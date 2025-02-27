@@ -56,6 +56,7 @@ type
     cbbModel: TComboBox;
     edtTemperature: TEdit;
     lblTemperature: TLabel;
+    chkStreamMode: TCheckBox;
     procedure lblApplyClick(Sender: TObject);
   private
     FWebAddr: string;
@@ -209,6 +210,7 @@ begin
     Edt.Parent := Self;
   end;
   lblApply.Top := lblApply.Top + FExtraOptions.Count * FVerticalDistance;
+  chkStreamMode.Top := chkStreamMode.Top + FExtraOptions.Count * FVerticalDistance;
 
   FExtraBuilt := True;
 end;

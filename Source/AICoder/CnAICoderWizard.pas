@@ -398,6 +398,7 @@ begin
       FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
       FOptionFrames[I].edtTemperature.Text := FloatToStr(CnAIEngineOptionManager.Options[I].Temperature);
       FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
+      FOptionFrames[I].chkStreamMode.Checked := CnAIEngineOptionManager.Options[I].Stream;
 
       // 如果不需要 APIKey 就禁用
       Eng := CnAIEngineManager.GetEngineByOption(CnAIEngineOptionManager.Options[I]);
@@ -448,6 +449,7 @@ begin
     CnAIEngineOptionManager.Options[I].APIKey := FOptionFrames[I].edtAPIKey.Text;
     CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].cbbModel.Text;
     CnAIEngineOptionManager.Options[I].Temperature := StrToFloat(FOptionFrames[I].edtTemperature.Text);
+    CnAIEngineOptionManager.Options[I].Stream := FOptionFrames[I].chkStreamMode.Checked;
 
     // 存额外属性
     FOptionFrames[I].SaveExtraOptions;
