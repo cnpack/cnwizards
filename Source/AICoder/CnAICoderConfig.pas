@@ -56,6 +56,7 @@ type
     FModel: string;
     FEngineName: string;
     FTemperature: Extended;
+    FStream: Boolean;
     FWebAddress: string;
     FModelList: string;
     function GetExplainCodePrompt: string;
@@ -104,6 +105,8 @@ type
     {* 模型名称}
     property Temperature: Extended read FTemperature write FTemperature;
     {* 温度参数}
+    property Stream: Boolean read FStream write FStream;
+    {* 是否走流式应答}
     property ModelList: string read FModelList write FModelList;
     {* 可用的模型名列表，半角逗号分隔}
 

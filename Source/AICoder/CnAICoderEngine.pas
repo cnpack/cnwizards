@@ -52,11 +52,16 @@ type
     FSendId: Integer;
     FAnswer: TBytes;
     FSuccess: Boolean;
+    FPartly: Boolean;
     FCallback: TCnAIAnswerCallback;
     FRequestType: TCnAIRequestType;
     FErrorCode: Cardinal;
     FTag: TObject;
+    FStreamMode: Boolean;
   public
+    property StreamMode: Boolean read FStreamMode write FStreamMode;
+    property Partly: Boolean read FPartly write FPartly;
+
     property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
@@ -73,7 +78,11 @@ type
     FPoolRef: TCnThreadPool; // 从 Manager 处拿来持有的线程池对象引用
     FOption: TCnAIEngineOption;
     FAnswerQueue: TCnObjectQueue;
+    FProcessingDataObj: TCnAINetRequestDataObject;
+    FProcessingThread: TCnPoolingThread;
     procedure CheckOptionPool;
+    procedure HttpProgressData(Sender: TObject; TotalSize, CurrSize: Integer;
+      Data: Pointer; DataLen: Integer; var Abort: Boolean);
   protected
     procedure DeleteAuthorizationHeader(Headers: TStringList);
     {* 供子类按需使用的，删除请求头里的 Authorization 字段，以备其他认证方式}
@@ -84,7 +93,7 @@ type
       是第一步组装好数据扔给线程池后，由线程池调度后在具体工作线程中被调用
       在一次完整的 AI 网络通讯过程中属于第三步，内部会根据结果回调 OnAINetDataResponse 事件}
 
-    procedure OnAINetDataResponse(Success: Boolean; Thread: TCnPoolingThread;
+    procedure OnAINetDataResponse(Success, Partly: Boolean; Thread: TCnPoolingThread;
       DataObj: TCnAINetRequestDataObject; Data: TBytes); virtual;
     {* AI 服务提供者进行网络通讯的结果回调，是在子线程中被调用的，内部应 Sync 给请求调用者
       Success 返回成功与否，成功则 Data 中是数据
@@ -104,10 +113,13 @@ type
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
 
-    function ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
+    function ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
       RequestType: TCnAIRequestType; const Response: TBytes): string; virtual;
-    {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者
-      同时允许根据返回的错误信息更改成功与否}
+    {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者，
+      同时允许根据返回的错误信息更改成功与否。
+      StreamMode 是请求发起时是否支持流式，姑且认为服务端会同样多次返回拼接。
+      Partly 为 True 表示此次数据是服务器返回的中间数据，注意数据过短时可能等于完整数据。
+      内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据}
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
@@ -484,6 +496,7 @@ begin
 
     // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
     Obj.Data := Text;
+    Obj.StreamMode := FOption.Stream;
 
     Obj.OnAnswer := AnswerCallback;
     Obj.OnResponse := OnAINetDataResponse;
@@ -494,7 +507,7 @@ begin
   else
   begin
     if Assigned(AnswerCallback) then // 没发送的数据就直接回调出错
-      AnswerCallback(False, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
+      AnswerCallback(FOption.Stream, False, False, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
   end;
 end;
 
@@ -514,6 +527,25 @@ begin
     raise Exception.Create('No Options for ' + EngineName);
 end;
 
+procedure TCnAIBaseEngine.HttpProgressData(Sender: TObject; TotalSize, CurrSize: Integer;
+  Data: Pointer; DataLen: Integer; var Abort: Boolean);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('*** HTTP Request OK Getting Progress ' + IntToStr(CurrSize));
+{$ENDIF}
+  if (FProcessingDataObj <> nil) and (FProcessingThread <> nil) then
+  begin
+    if Assigned(FProcessingDataObj.OnResponse) then
+    begin
+      if (Data <> nil) and (DataLen > 0) then
+      begin
+        FProcessingDataObj.OnResponse(True, True, FProcessingThread, FProcessingDataObj,
+          NewBytesFromMemory(Data, DataLen));
+      end;
+    end;
+  end;
+end;
+
 function TCnAIBaseEngine.ConstructRequest(RequestType: TCnAIRequestType;
   const Code: string): TBytes;
 var
@@ -525,6 +557,7 @@ begin
   try
     ReqRoot.AddPair('model', FOption.Model);
     ReqRoot.AddPair('temperature', FOption.Temperature);
+    ReqRoot.AddPair('stream', FOption.Stream);
     Arr := ReqRoot.AddArray('messages');
 
     Msg := TCnJSONObject.Create;
@@ -552,36 +585,76 @@ begin
   end;
 end;
 
-function TCnAIBaseEngine.ParseResponse(var Success: Boolean; var ErrorCode: Cardinal;
-  RequestType: TCnAIRequestType; const Response: TBytes): string;
+function TCnAIBaseEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
+  var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
+const
+  DATA_DONE = 'data:[DONE]';
 var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
   S: AnsiString;
+  HasPartly: Boolean;
+  JsonObjs: TObjectList;
+  I: Integer;
 begin
   Result := '';
   S := BytesToAnsi(Response);
-  RespRoot := CnJSONParse(S);
+
+  JsonObjs := TObjectList.Create(True);
+  CnJSONParse(S, JsonObjs);
+
+  RespRoot := nil;
+  if JsonObjs.Count > 0 then
+    RespRoot := TCnJSONObject(JsonObjs[0]);
+
   if RespRoot = nil then
   begin
-    // 一类原始错误，如账号达到最大并发等
+    // 流模式下如果单独碰到结束符，表示结束，啥都不做
+    if Partly and (Pos(DATA_DONE, S) = 1) then
+      Exit;
+
+    // 其他情况可能是一类原始错误，如账号达到最大并发等
     Result := S;
   end
   else
   begin
     try
       // 正常回应
-      if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
+      HasPartly := False;
+      if Partly then
       begin
-        Arr := TCnJSONArray(RespRoot['choices']);
-        if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+        // 流式模式下，可能有多个 Obj
+        for I := 0 to JsonObjs.Count - 1 do
         begin
-          Msg := TCnJSONObject(Arr[0]['message']);
-          Result := Msg['content'].AsString;
+          RespRoot := TCnJSONObject(JsonObjs[I]);
+          if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
+          begin
+            Arr := TCnJSONArray(RespRoot['choices']);
+            if (Arr.Count > 0) and (Arr[0]['delta'] <> nil) and (Arr[0]['delta'] is TCnJSONObject) then
+            begin
+              // 每一块回应拼起来
+              Msg := TCnJSONObject(Arr[0]['delta']);
+              Result := Result + Msg['content'].AsString;
+              HasPartly := True;
+            end;
+          end;
+        end;
+      end
+      else // 完整模式下
+      begin
+        if (RespRoot['choices'] <> nil) and (RespRoot['choices'] is TCnJSONArray) then
+        begin
+          Arr := TCnJSONArray(RespRoot['choices']);
+          if (Arr.Count > 0) and (Arr[0]['message'] <> nil) and (Arr[0]['message'] is TCnJSONObject) then
+          begin
+            // 整块回应
+            Msg := TCnJSONObject(Arr[0]['message']);
+            Result := Msg['content'].AsString;
+          end;
         end;
       end;
 
-      if Result = '' then
+      if not HasPartly and (Result = '') then
       begin
         // 只要没有正常回应，就说明出错了
         Success := False;
@@ -605,11 +678,11 @@ begin
         end;
       end;
 
-      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
-      if Result = '' then
+      // 兜底，整块模式下，所有解析都无效就直接用整个 JSON 作为返回信息
+      if not HasPartly and (Result = '') then
         Result := S;
     finally
-      RespRoot.Free;
+      JsonObjs.Free;
     end;
   end;
 
@@ -641,13 +714,24 @@ begin
   FOption := CnAIEngineOptionManager.GetOptionByEngine(EngineName)
 end;
 
-procedure TCnAIBaseEngine.OnAINetDataResponse(Success: Boolean;
+procedure TCnAIBaseEngine.OnAINetDataResponse(Success, Partly: Boolean;
   Thread: TCnPoolingThread; DataObj: TCnAINetRequestDataObject; Data: TBytes);
 var
   AnswerObj: TCnAIAnswerObject;
 begin
+  // 发送时如果声明了非 StreamMode，那么 Partly 返回数据时要忽略，等完整返回
+  if not TCnAINetRequestDataObject(DataObj).StreamMode and Partly then
+    Exit;
+
+  // 发送时如果声明了 StreamMode，那么只处理每次的 Partly 返回数据，不处理完整的
+  if TCnAINetRequestDataObject(DataObj).StreamMode and not Partly then
+    Exit;
+
   // 网络线程里拿到数据或结果后本事件被直接调用，适当包装后 Synchronize 返回给宿主
   AnswerObj := TCnAIAnswerObject.Create;
+  AnswerObj.StreamMode := TCnAINetRequestDataObject(DataObj).StreamMode;
+  AnswerObj.Partly := Partly;
+
   AnswerObj.Success := Success;
   AnswerObj.SendId := TCnAINetRequestDataObject(DataObj).SendId;
   AnswerObj.RequestType := TCnAINetRequestDataObject(DataObj).RequestType;
@@ -673,10 +757,12 @@ begin
   begin
     if Assigned(AnswerObj.Callback) then
     begin
-      Answer := ParseResponse(AnswerObj.FSuccess, AnswerObj.FErrorCode,
-        AnswerObj.RequestType, AnswerObj.Answer);
-      AnswerObj.Callback(AnswerObj.Success, AnswerObj.SendId, Answer,
-        AnswerObj.ErrorCode, AnswerObj.Tag);
+      // SyncCallback 被调用时就确保了不会在 StreamMode 为 False 时来 Partly 数据
+      // 以及不会在 StreamMode 为 True 时来完整数据
+      Answer := ParseResponse(AnswerObj.StreamMode, AnswerObj.Partly,
+        AnswerObj.FSuccess, AnswerObj.FErrorCode, AnswerObj.RequestType, AnswerObj.Answer);
+      AnswerObj.Callback(AnswerObj.StreamMode, AnswerObj.Partly, AnswerObj.Success,
+        AnswerObj.SendId, Answer, AnswerObj.ErrorCode, AnswerObj.Tag);
     end;
     AnswerObj.Free;
   end;
@@ -699,6 +785,7 @@ begin
     HTTP.ConnectTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
     HTTP.SendTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
     HTTP.ReceiveTimeOut := CnAIEngineOptionManager.TimeoutSec * 1000;
+    HTTP.OnProgressData := HttpProgressData;
 
     // 如有就设置代理
     if CnAIEngineOptionManager.UseProxy then
@@ -723,6 +810,9 @@ begin
     Stream := TMemoryStream.Create;
     AURL := GetRequestURL(TCnAINetRequestDataObject(DataObj));
 
+    // 临时记录 DataObj 的引用，因为 GetStream 过程中有回调需要使用
+    FProcessingDataObj := TCnAINetRequestDataObject(DataObj);
+    FProcessingThread := Thread;
     if HTTP.GetStream(AURL, Stream, TCnAINetRequestDataObject(DataObj).Data) then
     begin
 {$IFDEF DEBUG}
@@ -732,7 +822,7 @@ begin
       // 这里要把结果送给 UI 供处理，结果不能依赖于本线程，因为 UI 主线程的调用处理结果的时刻是不确定的，
       // 而离了本方法，Thread 的状态就未知了，搁 Thread 里的内容可能会因 Thread 被池子调度而被冲掉
       if Assigned(TCnAINetRequestDataObject(DataObj).OnResponse) then
-        TCnAINetRequestDataObject(DataObj).OnResponse(True, Thread, TCnAINetRequestDataObject(DataObj), StreamToBytes(Stream));
+        TCnAINetRequestDataObject(DataObj).OnResponse(True, False, Thread, TCnAINetRequestDataObject(DataObj), StreamToBytes(Stream));
     end
     else
     begin
@@ -740,9 +830,11 @@ begin
       CnDebugger.LogMsg('*** HTTP Request Fail.');
 {$ENDIF}
       if Assigned(TCnAINetRequestDataObject(DataObj).OnResponse) then
-        TCnAINetRequestDataObject(DataObj).OnResponse(False, Thread, TCnAINetRequestDataObject(DataObj), nil);
+        TCnAINetRequestDataObject(DataObj).OnResponse(False, False, Thread, TCnAINetRequestDataObject(DataObj), nil);
     end;
   finally
+    FProcessingThread := nil;
+    FProcessingDataObj := nil;
     Stream.Free;
     HTTP.Free;
   end;

@@ -66,9 +66,9 @@ type
     FChatBox: TCnChatBox;
     FAIChatBox: TCnChatBox;
     // 以下是综合测试
-    procedure AIOnExplainCodeAnswer(Success: Boolean; SendId: Integer;
+    procedure AIOnExplainCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
-    procedure AIOnReviewCodeAnswer(Success: Boolean; SendId: Integer;
+    procedure AIOnReviewCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure ShowData;
@@ -419,8 +419,8 @@ begin
     Msg, artExplainCode, AIOnExplainCodeAnswer);
 end;
 
-procedure TFormAITest.AIOnExplainCodeAnswer(Success: Boolean;
-  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+procedure TFormAITest.AIOnExplainCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
+  const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   if Success then
     mmoAI.Lines.Add(Format('Explain Code OK for Request %d: %s', [SendId, Answer]))
@@ -433,7 +433,12 @@ begin
 
   TCnChatMessage(Tag).Waiting := False;
   if Success then
-    TCnChatMessage(Tag).Text := Answer
+  begin
+    if Partly then
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+    else
+      TCnChatMessage(Tag).Text := Answer;
+  end
   else
     TCnChatMessage(Tag).Text := Format('Explain Code Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]);
@@ -512,7 +517,7 @@ begin
     Msg, artReviewCode, AIOnReviewCodeAnswer);
 end;
 
-procedure TFormAITest.AIOnReviewCodeAnswer(Success: Boolean; SendId: Integer;
+procedure TFormAITest.AIOnReviewCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
   const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   if Success then
@@ -525,7 +530,12 @@ begin
     Exit;
 
   if Success then
-    TCnChatMessage(Tag).Text := Answer
+  begin
+    if Partly then
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+    else
+      TCnChatMessage(Tag).Text := Answer;
+  end
   else
     TCnChatMessage(Tag).Text := Format('Review Code Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]);

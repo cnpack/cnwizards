@@ -48,14 +48,15 @@ type
 
   TCnAINetRequestDataObject = class;
 
-  TCnAIAnswerCallback = procedure(Success: Boolean; SendId: Integer;
+  TCnAIAnswerCallback = procedure(StreamMode, Partly, Success: Boolean; SendId: Integer;
     const Answer: string; ErrorCode: Cardinal; Tag: TObject) of object;
   {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容
-    Tag 是发送请求时传入的 Tag}
+    Partly 为 True 表示可能是多次返回中的一次，Tag 是发送请求时传入的 Tag}
 
-  TCnAINetDataResponse = procedure(Success: Boolean; Thread: TCnPoolingThread;
+  TCnAINetDataResponse = procedure(Success, Partly: Boolean; Thread: TCnPoolingThread;
     DataObj: TCnAINetRequestDataObject; Data: TBytes) of object;
-  {* 网络请求的回调，告诉成功与否，成功则 Data 中是数据}
+  {* 网络请求的回调，告诉成功与否，成功则 Data 中是数据
+    Partly 为 True 表示可能是多次返回中的一次}
 
   TCnAINetRequestThread = class(TCnPoolingThread)
   {* 线程池中的线程实例}
@@ -74,12 +75,16 @@ type
     FURL: string;
     FSendId: Integer;
     FData: TBytes;
+    FStreamMode: Boolean;
+    FTag: TObject;
     FOnResponse: TCnAINetDataResponse;
     FRequestType: TCnAIRequestType;
     FOnAnswer: TCnAIAnswerCallback;
-    FTag: TObject;
   public
     function Clone: TCnTaskDataObject; override;
+
+    property StreamMode: Boolean read FStreamMode write FStreamMode;
+    {* 请求是否是 Stream 模式，由服务器多次下发数据而不是一次性全回来}
 
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
     {* 请求类型}
@@ -117,6 +122,7 @@ begin
   TCnAINetRequestDataObject(Result).URL := FURL;
   TCnAINetRequestDataObject(Result).SendId := FSendId;
   TCnAINetRequestDataObject(Result).RequestType := FRequestType;
+  TCnAINetRequestDataObject(Result).StreamMode := FStreamMode;
   TCnAINetRequestDataObject(Result).OnResponse := FOnResponse;
   TCnAINetRequestDataObject(Result).OnAnswer := FOnAnswer;
 end;
