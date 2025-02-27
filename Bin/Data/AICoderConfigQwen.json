@@ -1,9 +1,9 @@
 ﻿{
     "EngineName": "通义千问",
-    "URL": "https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation",
+    "URL": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
     "ApiKey": "",
     "Model": "qwen-turbo",
-    "ModelList": "qwen-turbo,qwen-plus,qwen-max,qwen-max-0428,qwen-max-0403,qwen-max-0107,qwen-max-longcontext",
+    "ModelList": "qwen-coder-plus,qwen-coder-plus-latest,qwen-turbo,qwen-turbo-latest,qwen-plus,qwen-plus-latest,qwen-max,qwen-max-latest,qwen-long,qwen-omni-turbo,qwen-omni-turbo-latest,qwen-vl-max,qwen-vl-max-latest",
     "Temperature": 0.85,
     "WebAddress": "https://bailian.console.aliyun.com/"
 }

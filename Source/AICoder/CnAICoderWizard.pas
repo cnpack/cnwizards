@@ -98,10 +98,10 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    procedure ForCodeAnswer(Success: Boolean; SendId: Integer;
+    procedure ForCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回文字的回调}
-    procedure ForCodeGen(Success: Boolean; SendId: Integer;
+    procedure ForCodeGen(StreamMode, Partly, Success: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回代码的回调}
 
@@ -126,6 +126,9 @@ implementation
 uses
   CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock
   {$IFDEF DEBUG} , CnDebug {$ENDIF};
+
+const
+  MSG_WAITING = '...';
 
 //==============================================================================
 // AI 辅助编码菜单专家
@@ -270,7 +273,7 @@ begin
         Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
         Msg.From := CnAIEngineManager.CurrentEngineName;
         Msg.FromType := cmtYou;
-        Msg.Text := '...';
+        Msg.Text := MSG_WAITING;
         Msg.Waiting := True;
 
         if Index = FIdExplainCode then
@@ -459,7 +462,7 @@ begin
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;
 end;
 
-procedure TCnAICoderWizard.ForCodeAnswer(Success: Boolean;
+procedure TCnAICoderWizard.ForCodeAnswer(StreamMode, Partly, Success: Boolean;
   SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   EnsureChatWindowVisible;
@@ -468,7 +471,12 @@ begin
   begin
     TCnChatMessage(Tag).Waiting := False;
     if Success then
-      TCnChatMessage(Tag).Text := Answer
+    begin
+      if Partly and (TCnChatMessage(Tag).Text <> MSG_WAITING) then
+        TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+      else
+        TCnChatMessage(Tag).Text := Answer;
+    end
     else
       TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
   end
@@ -481,7 +489,7 @@ begin
   end;
 end;
 
-procedure TCnAICoderWizard.ForCodeGen(Success: Boolean; SendId: Integer;
+procedure TCnAICoderWizard.ForCodeGen(StreamMode, Partly, Success: Boolean; SendId: Integer;
   const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 var
   S: string;
@@ -491,7 +499,10 @@ begin
     TCnChatMessage(Tag).Waiting := False;
     if Success then
     begin
-      TCnChatMessage(Tag).Text := Answer;
+      if Partly and (TCnChatMessage(Tag).Text <> MSG_WAITING)then
+        TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+      else
+        TCnChatMessage(Tag).Text := Answer;
 
       // 挑出代码
       S := TCnAICoderChatForm.ExtractCode(TCnChatMessage(Tag));
