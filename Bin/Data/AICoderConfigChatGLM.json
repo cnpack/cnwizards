@@ -5,5 +5,6 @@
     "Model": "glm-4",
     "ModelList": "glm-4-0520,glm-4,glm-4-air,glm-4-airx,glm-4-flash,glm-4v,glm-3-turbo",
     "Temperature": 0.3,
+    "Stream": true,
     "WebAddress": "https://open.bigmodel.cn/usercenter/apikeys"
 }

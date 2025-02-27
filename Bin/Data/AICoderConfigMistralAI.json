@@ -5,5 +5,6 @@
     "Model": "mistral-large-latest",
     "ModelList": "mistral-large-latest,open-mistral-nemo,mistral-small-latest,mistral-medium-latest,codestral-latest",
     "Temperature": 0.3,
+    "Stream": true,
     "WebAddress": "https://console.mistral.ai/api-keys/"
 }

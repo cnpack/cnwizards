@@ -504,15 +504,18 @@ begin
       else
         TCnChatMessage(Tag).Text := Answer;
 
-      // 挑出代码
-      S := TCnAICoderChatForm.ExtractCode(TCnChatMessage(Tag));
-      if S <> '' then
+      // 结束再挑出代码
+      if not Partly or (Answer = CN_RESP_DATA_DONE) then
       begin
-        // 判断有无选择区，避免覆盖选择区内容
-        if CnOtaGetCurrentSelection <> '' then // 取消选择，并下移光标
-          CnOtaDeSelection(True);
+        S := TCnAICoderChatForm.ExtractCode(TCnChatMessage(Tag));
+        if S <> '' then
+        begin
+          // 判断有无选择区，避免覆盖选择区内容
+          if CnOtaGetCurrentSelection <> '' then // 取消选择，并下移光标
+            CnOtaDeSelection(True);
 
-        CnOtaInsertTextIntoEditor(#13#10 + S + #13#10);
+          CnOtaInsertTextIntoEditor(#13#10 + S + #13#10);
+        end;
       end;
     end
     else

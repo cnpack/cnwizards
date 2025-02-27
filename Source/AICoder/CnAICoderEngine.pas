@@ -45,6 +45,9 @@ uses
   CnInetUtils, {$IFNDEF STAND_ALONE} CnWizOptions, {$ENDIF} CnAICoderConfig,
   CnThreadPool, CnAICoderNetClient;
 
+const
+  CN_RESP_DATA_DONE = 'data:[DONE]';
+
 type
   TCnAIAnswerObject = class(TPersistent)
   {* 封装的 AI 应答结果}
@@ -587,8 +590,6 @@ end;
 
 function TCnAIBaseEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
   var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
-const
-  DATA_DONE = 'data:[DONE]';
 var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
@@ -609,9 +610,12 @@ begin
 
   if RespRoot = nil then
   begin
-    // 流模式下如果单独碰到结束符，表示结束，啥都不做
-    if Partly and (Pos(DATA_DONE, S) = 1) then
+    // 流模式下如果单独碰到结束符，表示结束，返回结束符
+    if Partly and (Pos(CN_RESP_DATA_DONE, S) = 1) then
+    begin
+      Result := CN_RESP_DATA_DONE;
       Exit;
+    end;
 
     // 其他情况可能是一类原始错误，如账号达到最大并发等
     Result := S;
