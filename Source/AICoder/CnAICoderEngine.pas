@@ -638,7 +638,8 @@ begin
             begin
               // 每一块回应拼起来
               Msg := TCnJSONObject(Arr[0]['delta']);
-              Result := Result + Msg['content'].AsString;
+              if  Msg['content'] <> nil then
+                Result := Result + Msg['content'].AsString;
               HasPartly := True;
             end;
           end;
@@ -653,7 +654,8 @@ begin
           begin
             // 整块回应
             Msg := TCnJSONObject(Arr[0]['message']);
-            Result := Msg['content'].AsString;
+            if Msg['content'] <> nil then
+              Result := Msg['content'].AsString;
           end;
         end;
       end;
@@ -723,13 +725,16 @@ procedure TCnAIBaseEngine.OnAINetDataResponse(Success, Partly: Boolean;
 var
   AnswerObj: TCnAIAnswerObject;
 begin
-  // 发送时如果声明了非 StreamMode，那么 Partly 返回数据时要忽略，等完整返回
-  if not TCnAINetRequestDataObject(DataObj).StreamMode and Partly then
-    Exit;
+  if Success then
+  begin
+    // 发送时如果声明了非 StreamMode，那么 Partly 返回成功数据时要忽略，等完整返回
+    if not TCnAINetRequestDataObject(DataObj).StreamMode and Partly then
+      Exit;
 
-  // 发送时如果声明了 StreamMode，那么只处理每次的 Partly 返回数据，不处理完整的
-  if TCnAINetRequestDataObject(DataObj).StreamMode and not Partly then
-    Exit;
+    // 发送时如果声明了 StreamMode，那么只处理每次的 Partly 返回数据，不处理完整的
+    if TCnAINetRequestDataObject(DataObj).StreamMode and not Partly then
+      Exit;
+  end;
 
   // 网络线程里拿到数据或结果后本事件被直接调用，适当包装后 Synchronize 返回给宿主
   AnswerObj := TCnAIAnswerObject.Create;
