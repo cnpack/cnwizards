@@ -322,7 +322,8 @@ type
     procedure FormatInlineVarDecl(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatProcedureDeclSection(PreSpaceCount: Byte = 0);
     procedure FormatSingleAttribute(PreSpaceCount: Byte = 0; LineEndSpaceCount: Byte = 0);
-    procedure FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False);
+    function FormatType(PreSpaceCount: Byte = 0; IgnoreDirective: Boolean = False): Boolean;
+    // 返回是否泛型 >= 结尾
     procedure FormatSetType(PreSpaceCount: Byte = 0);
     procedure FormatFileType(PreSpaceCount: Byte = 0);
     procedure FormatPointerType(PreSpaceCount: Byte = 0);
@@ -4343,12 +4344,13 @@ end;
 
        -> reference to ProcedureType
 }
-procedure TCnBasePascalFormatter.FormatType(PreSpaceCount: Byte;
-  IgnoreDirective: Boolean);
+function TCnBasePascalFormatter.FormatType(PreSpaceCount: Byte;
+  IgnoreDirective: Boolean): Boolean;
 var
   Bookmark: TScannerBookmark;
   AToken, OldLastToken: TPascalToken;
 begin
+  Result := False;
   if (Scanner.Token = tokSymbol) and (Scanner.ForwardToken = tokKeywordTo) and
     (LowerCase(Scanner.TokenString) = 'reference') then
   begin
@@ -4428,7 +4430,8 @@ begin
       else if AToken = tokLess then // 加入对<>泛型的支持
       begin
         FormatIdent;
-        FormatTypeParams;
+        Result := FormatTypeParams(0, True);
+
         if Scanner.Token = tokDot then
         begin
           Match(tokDot);
@@ -4445,7 +4448,7 @@ begin
   // 加入对 <> 泛型的支持
   if Scanner.Token = tokLess then
   begin
-    FormatTypeParams;
+    Result := FormatTypeParams(0, True);
     if Scanner.Token = tokDot then
     begin
       Match(tokDot);
@@ -4629,9 +4632,7 @@ begin
   // 加入对 <> 泛型的支持
   GreatEqual := False;
   if Scanner.Token = tokLess then
-  begin
     GreatEqual := FormatTypeParams(0, True);
-  end;
 
   if not GreatEqual then
     MatchOperator(tokEQUAL);
@@ -4777,6 +4778,7 @@ end;
 procedure TCnBasePascalFormatter.FormatConstantDecl(PreSpaceCount: Byte);
 var
   OldKeepOneBlankLine: Boolean;
+  GreatEqual: Boolean;
 begin
   FormatIdent(PreSpaceCount);
 
@@ -4801,14 +4803,17 @@ begin
       tokColon: // 无法直接区分 record/array/普通常量方式的初始化，需要内部解析
         begin
           Match(Scanner.Token);
-          FormatType;
+
+          GreatEqual := FormatType;
 
           // 类型表达式从冒号起就允许保持内部换行
           FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
           FNeedKeepLineBreak := True;
           try
             FCurrentTab := PreSpaceCount;
-            Match(tokEQUAL, 1, 1); // 等号前后空一格
+            if not GreatEqual then // 可能内部碰到泛型已经输出了等号，这里就不输出了
+              Match(tokEQUAL, 1, 1); // 等号前后空一格
+
             FormatTypedConstant; // 等号后空一格
           finally
             FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
