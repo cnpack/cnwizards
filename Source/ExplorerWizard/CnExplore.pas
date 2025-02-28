@@ -28,8 +28,7 @@ unit CnExplore;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：
-*           2003.12.03 by QSoft
+* 修改记录：2003.12.03 by QSoft
 *               移植到 D5
 *           2003.11.17
 *               修正了历史信息保存功能中的 Bug
@@ -51,9 +50,9 @@ unit CnExplore;
 *               2.增加"文件过滤"功能的菜单选择方式
 *               3.增加"文件夹"功能的菜单选择方式
 *           2003.10.05
-*               使用 Delphi的 Demo 中的资源管理器控件替换了 SCP1.7
+*               使用 Delphi 的 Demo 中的资源管理器控件替换了 SCP1.7
 *               其中文件夹的创建,文件(夹)的删除和过滤功能有待于进一步开发
-*               修正了窗口Dock后的控件 Resize 文件
+*               修正了窗口 Dock 后的控件 Resize 文件
 *               修改了窗口的加载方式
 *           2003.09.29
 *               创建文件.初步实现资源管理器,过滤和删除临时文件
@@ -195,9 +194,9 @@ type
 
     procedure ChangeListViewStyle(Index: Integer); // 改变 ListView 的 ViewStype
     function GetListViewStyle(): Integer; // 得到 ListView 的 ViewStype
-    function ChangeMenu(aValue: string; aStrList: TStringList): Boolean;
+    function ChangeMenu(AValue: string; AStrList: TStringList): Boolean;
     procedure PopupMenu(Sender: TObject; PopMenu: TPopupMenu);
-    procedure SetFilter(aValue, aKey: string);  // 设置文件过滤
+    procedure SetFilter(AValue, AKey: string);  // 设置文件过滤
     procedure LoadFileFilterState;              // 加载 FileFilter 菜单
     procedure LoadFolderState;                  // 加载 Folder 过滤菜单
     procedure ChangeShlstSet;  //改变 Shlsh 的 ObjectTypes 设置
@@ -283,14 +282,6 @@ const
 var
   CnExploreForm: TCnExploreForm;
 
-//==============================================================================
-// Explore工具窗体
-//==============================================================================
-
-{TCnExploreForm}
-
-//将文件扩展名字符串转换成TStringList
-
 procedure CopyCharDB(var APos: Integer; const ASource: string; var ADest:
   string);
 begin
@@ -304,47 +295,48 @@ begin
     ADest := ADest + ASource[APos];
     Inc(APos);
   end;
-end; {CopyCharDB}
+end;
 
-procedure GetCharsUpToNextCharDB(var aPos: Integer; aSource: string; var aDest:
-  string; aCharToFind: Char);
+procedure GetCharsUpToNextCharDB(var APos: Integer; ASource: string; var ADest:
+  string; CharToFind: Char);
 begin
-  aDest := '';
-  while (aSource[aPos] <> aCharToFind) and (aPos <= Length(aSource)) do
-    CopyCharDB(aPos, aSource, aDest);
-end; {GetCharsUpToNextCharDB}
+  ADest := '';
+  while (ASource[APos] <> CharToFind) and (APos <= Length(ASource)) do
+    CopyCharDB(APos, ASource, ADest);
+end
 
-procedure ExtensionsToTStrings(aExtensions: string; aExts: TStringList);
-var pos: Integer;
-  ext: string;
+// 将文件扩展名字符串转换成 TStringList
+procedure ExtensionsToTStrings(AExtensions: string; AExts: TStringList);
+var
+  Ps: Integer;
+  Ext: string;
 begin
-  pos := 1;
-  while (pos <= Length(aExtensions)) do
+  Ps := 1;
+  while (Ps <= Length(AExtensions)) do
   begin
-    GetCharsUpToNextCharDB(pos, aExtensions, ext, ';'); Inc(pos);
-    if (ext <> '') and (ext <> '*.*') then aExts.Add(ext);
+    GetCharsUpToNextCharDB(Ps, AExtensions, Ext, ';'); Inc(Ps);
+    if (Ext <> '') and (Ext <> '*.*') then AExts.Add(Ext);
   end;
 
-  aExts.Sorted := TRUE;
-  aExts.Duplicates := dupIgnore;
-end; {ExtensionsToTStrings}
-//将文件扩展名字符串转换成TStringList
+  AExts.Sorted := TRUE;
+  AExts.Duplicates := dupIgnore;
+end;
 
-//改变保存Menu信息StringList
-
-function TCnExploreForm.ChangeMenu(aValue: string; aStrList: TStringList):
+// 改变保存 Menu 信息到 StringList
+function TCnExploreForm.ChangeMenu(AValue: string; AStrList: TStringList):
   Boolean;
 var
   I, Loca: Integer;
 begin
-  Loca := aStrList.IndexOf(aValue);
+  Loca := AStrList.IndexOf(AValue);
   if Loca < 0 then
   begin
-    aStrList.Insert(0, aValue);
-    if aStrList.Count > 5 then
-      aStrList.Delete(5);
+    AStrList.Insert(0, AValue);
+    if AStrList.Count > 5 then
+      AStrList.Delete(5);
   end
   else
+  begin
     if Loca = 0 then
     begin
       Result := False;
@@ -353,21 +345,25 @@ begin
     else
     Begin
       for I := Loca - 1 downto 0 do
-        aStrList.Strings[I + 1] := aStrList.Strings[I];
-      aStrList.Strings[0] := aValue;
+        AStrList.Strings[I + 1] := AStrList.Strings[I];
+      AStrList.Strings[0] := AValue;
     end;
+  end;
   Result := True;
-end; {ChangeMenu}
+end;
 
-//按钮弹出菜单。
+//==============================================================================
+// Explorer 工具窗体
+//==============================================================================
 
+// 按钮弹出菜单
 procedure TCnExploreForm.PopupMenu(Sender: TObject; PopMenu: TPopupMenu);
 var
-  p: TPoint;
+  P: TPoint;
 begin
   P := TWinControl(Sender).ClientToScreen(Point(0, TWinControl(Sender).Height));
-  PopMenu.Popup(p.x, p.y);
-end; {TCnExploreForm.PopupMenu}
+  PopMenu.Popup(P.x, P.y);
+end;
 
 procedure TCnExploreForm.LoadFileFilterState;
 begin
@@ -397,40 +393,40 @@ begin
     actFolder5.Caption := FDirectoryMenu.Strings[4];
 end;
 
-procedure TCnExploreForm.SetFilter(aValue, aKey: string);
+procedure TCnExploreForm.SetFilter(AValue, AKey: string);
 var
-  s: string;
+  S: string;
 begin
-  s := FFileFilterVal;
-  FFileFilterVal := aValue;
-  if (s <> FFileFilterVal) then
+  S := FFileFilterVal;
+  FFileFilterVal := AValue;
+
+  if S <> FFileFilterVal then
   begin
     if not Assigned(FFileFilterList) then
       FFileFilterList := TStringList.Create
     else
       FFileFilterList.Clear;
 
-    ExtensionsToTStrings(aValue, FFileFilterList);
-    FFileFilterKey := aKey;
+    ExtensionsToTStrings(AValue, FFileFilterList);
+    FFileFilterKey := AKey;
 
     shlst.Refresh;
   end;
 
-  if ChangeMenu(aKey + '(' + aValue + ')', FFileFilterMenu) then
+  if ChangeMenu(AKey + '(' + AValue + ')', FFileFilterMenu) then
     LoadFileFilterState();
-end; {TCnExploreForm.SetFilter}
+end;
 
 procedure TCnExploreForm.ChangeListViewStyle(Index: Integer);
 begin
-  with shlst do
-    case Index of
-      0: ViewStyle := vsIcon;
-      1: ViewStyle := vsSmallIcon;
-      2: ViewStyle := vsList;
-      3: ViewStyle := vsReport;
-    end;
+  case Index of
+    0: shlst.ViewStyle := vsIcon;
+    1: shlst.ViewStyle := vsSmallIcon;
+    2: shlst.ViewStyle := vsList;
+    3: shlst.ViewStyle := vsReport;
+  end;
   btnListIcon.Tag := Index;
-end; {TCnExploreForm.ChangeListViewStyle}
+end;
 
 function TCnExploreForm.GetListViewStyle(): Integer;
 begin
@@ -443,7 +439,7 @@ begin
     Result := 2
   else if shlst.ViewStyle = vsReport then
     Result := 3;
-end; {TCnExploreForm.GetListViewStyle}
+end;
 
 procedure TCnExploreForm.btnListIconClick(Sender: TObject);
 begin
@@ -462,17 +458,17 @@ begin
     FDockState := dsUndocked
   else
     FDockState := dsDocked;
-end; {TCnExploreForm.FormEndDock}
+end;
 
 procedure TCnExploreForm.btnUpClick(Sender: TObject);
 var
-  target: TTreeNode;
+  Target: TTreeNode;
 begin
   if Assigned(shltv.Selected) and Assigned(shltv.Selected.Parent) then
   begin
-    target := shltv.Selected;
-    target := target.Parent;
-    target.Selected := TRUE;
+    Target := shltv.Selected;
+    Target := Target.Parent;
+    Target.Selected := TRUE;
   end;
 end;
 
@@ -605,13 +601,18 @@ procedure TCnExploreForm.shlstAddFolder(Sender: TObject;
         end;
       end;
   end;
+
 begin
   if FFileFilterList <> nil then
+  begin
     if FFileFilterList.Count > 0 then
+    begin
       if (FileinExtList(AFolder.DisplayName)) or (AFolder.IsFolder) then
         CanAdd := True
       else
-        CanAdd := False
+        CanAdd := False;
+    end;
+  end;
 end;
 
 procedure TCnExploreForm.actFilter1Update(Sender: TObject);
@@ -631,16 +632,16 @@ end;
 
 procedure TCnExploreForm.actFilter1Execute(Sender: TObject);
 var
-  Fvalue: string;
-  Fkey: string;
-  FPos: Integer;
+  AValue: string;
+  AKey: string;
+  APos: Integer;
 begin
-  FValue := FFileFilterMenu.Strings[(Sender as TAction).Tag];
-  FPos := 1;
-  GetCharsUpToNextCharDB(Fpos, FValue, FKey, '(');
-  inc(FPos);
-  GetCharsUpToNextCharDB(Fpos, FValue, FValue, ')');
-  SetFilter(FValue, FKey);
+  AValue := FFileFilterMenu.Strings[(Sender as TAction).Tag];
+  APos := 1;
+  GetCharsUpToNextCharDB(APos, AValue, AKey, '(');
+  inc(APos);
+  GetCharsUpToNextCharDB(APos, AValue, AValue, ')');
+  SetFilter(AValue, AKey);
 end;
 
 procedure TCnExploreForm.mnuitmFMoreClick(Sender: TObject);
@@ -807,13 +808,13 @@ begin
 
     for I := 0 to 4 do
     begin
-      T := ini.ReadString('FFilter', IntToStr(I + 1), '');
+      T := Ini.ReadString('FFilter', IntToStr(I + 1), '');
       if T <> '' then
         FFilter.Add(T);
     end;
     for I := 0 to 4 do
     begin
-      T := ini.ReadString('FFolder', IntToStr(I + 1), '');
+      T := Ini.ReadString('FFolder', IntToStr(I + 1), '');
       if T <> '' then
         FFolder.Add(T);
     end;
