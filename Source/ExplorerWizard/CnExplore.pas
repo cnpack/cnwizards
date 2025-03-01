@@ -28,7 +28,9 @@ unit CnExplore;
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.12.03 by QSoft
+* 修改记录：2024.03.01
+*               移植到 64 位并修正 Sys 目录定位问题
+*           2003.12.03 by QSoft
 *               移植到 D5
 *           2003.11.17
 *               修正了历史信息保存功能中的 Bug
@@ -303,7 +305,7 @@ begin
   ADest := '';
   while (ASource[APos] <> CharToFind) and (APos <= Length(ASource)) do
     CopyCharDB(APos, ASource, ADest);
-end
+end;
 
 // 将文件扩展名字符串转换成 TStringList
 procedure ExtensionsToTStrings(AExtensions: string; AExts: TStringList);
@@ -547,7 +549,11 @@ end;
 procedure TCnExploreForm.mnuitmFsysClick(Sender: TObject);
 begin
 {$IFDEF BDS}
+  {$IFDEF DELPHIXE_UP}
+  shltv.Path := WizOptions.CompilerPath + 'Source\Rtl\Sys';
+  {$ELSE}
   shltv.Path := WizOptions.CompilerPath + 'Source\Win32\Rtl\Sys';
+  {$ENDIF}
 {$ELSE}
   shltv.Path := WizOptions.CompilerPath + 'Source\Rtl\Sys';
 {$ENDIF}
