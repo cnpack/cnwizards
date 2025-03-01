@@ -68,8 +68,9 @@ type
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
 
     // Claude 的信息返回格式也不同
-    function ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
-      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
+    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
+      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
     class function OptionClass: TCnAIEngineOptionClass; override;
@@ -88,8 +89,9 @@ type
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
 
     // Claude 的信息返回格式也不同
-    function ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
-      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
+    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
+      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -128,8 +130,9 @@ type
   {* 本地或私有化部署的集成 Ollama 引擎}
   protected
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
-    function ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
-      RequestType: TCnAIRequestType; const Response: TBytes): string; override;
+    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
+      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
     class function NeedApiKey: Boolean; override;
@@ -242,8 +245,9 @@ begin
   Result := TCnClaudeAIEngineOption;
 end;
 
-function TCnClaudeAIEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
-  var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
+function TCnClaudeAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
@@ -363,8 +367,9 @@ begin
   Result := DataObj.URL + Option.Model + ':generateContent?key=' + Option.ApiKey;
 end;
 
-function TCnGeminiAIEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
-  var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
+function TCnGeminiAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Parts, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
@@ -494,8 +499,9 @@ begin
   Result := False;
 end;
 
-function TCnOllamaAIEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
-  var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
+function TCnOllamaAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
   S: AnsiString;

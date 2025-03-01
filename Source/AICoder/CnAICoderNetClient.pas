@@ -48,8 +48,8 @@ type
 
   TCnAINetRequestDataObject = class;
 
-  TCnAIAnswerCallback = procedure(StreamMode, Partly, Success: Boolean; SendId: Integer;
-    const Answer: string; ErrorCode: Cardinal; Tag: TObject) of object;
+  TCnAIAnswerCallback = procedure(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+    SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject) of object;
   {* 调用 AI 后返回的结果回调事件，Success 表示成功与否，如果成功，Answer 表示回复的内容
     Partly 为 True 表示可能是多次返回中的一次，Tag 是发送请求时传入的 Tag}
 

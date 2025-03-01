@@ -43,10 +43,7 @@ interface
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
   CnInetUtils, {$IFNDEF STAND_ALONE} CnWizOptions, {$ENDIF} CnAICoderConfig,
-  CnThreadPool, CnAICoderNetClient;
-
-const
-  CN_RESP_DATA_DONE = 'data:[DONE]';
+  CnThreadPool, CnAICoderNetClient, CnHashMap;
 
 type
   TCnAIAnswerObject = class(TPersistent)
@@ -61,12 +58,14 @@ type
     FErrorCode: Cardinal;
     FTag: TObject;
     FStreamMode: Boolean;
+    FIsStreamEnd: Boolean;
   public
     property StreamMode: Boolean read FStreamMode write FStreamMode;
     property Partly: Boolean read FPartly write FPartly;
 
     property Success: Boolean read FSuccess write FSuccess;
     property SendId: Integer read FSendId write FSendId;
+    property IsStreamEnd: Boolean read FIsStreamEnd write FIsStreamEnd;
     property RequestType: TCnAIRequestType read FRequestType write FRequestType;
     property ErrorCode: Cardinal read FErrorCode write FErrorCode;
     property Answer: TBytes read FAnswer write FAnswer;
@@ -83,6 +82,7 @@ type
     FAnswerQueue: TCnObjectQueue;
     FProcessingDataObj: TCnAINetRequestDataObject;
     FProcessingThread: TCnPoolingThread;
+    FPrevRespRemainMap: TCnStrToStrHashMap;
     procedure CheckOptionPool;
     procedure HttpProgressData(Sender: TObject; TotalSize, CurrSize: Integer;
       Data: Pointer; DataLen: Integer; var Abort: Boolean);
@@ -116,13 +116,14 @@ type
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
 
-    function ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
-      RequestType: TCnAIRequestType; const Response: TBytes): string; virtual;
+    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
+      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType; const Response: TBytes): string; virtual;
     {* 根据请求类型与原始回应，解析回应数据，一般是 JSON 格式，返回字符串给调用者，
-      同时允许根据返回的错误信息更改成功与否。
+      同时允许根据返回的错误信息更改成功与否。SendId 是发送时产生的随机标识符用来区分会话，
       StreamMode 是请求发起时是否支持流式，姑且认为服务端会同样多次返回拼接。
       Partly 为 True 表示此次数据是服务器返回的中间数据，注意数据过短时可能等于完整数据。
-      内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据}
+      内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据
+      IsEnd 由内部解析后返回流模式下本次回应是否是结尾数据}
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
@@ -225,6 +226,8 @@ uses
 const
   CRLF = #13#10;
   LF = #10;
+  RESP_DATA_DONE = 'data: [DONE]';
+
 
 type
   TThreadHack = class(TThread);
@@ -510,7 +513,7 @@ begin
   else
   begin
     if Assigned(AnswerCallback) then // 没发送的数据就直接回调出错
-      AnswerCallback(FOption.Stream, False, False, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
+      AnswerCallback(FOption.Stream, False, False, True, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
   end;
 end;
 
@@ -588,21 +591,39 @@ begin
   end;
 end;
 
-function TCnAIBaseEngine.ParseResponse(StreamMode, Partly: Boolean; var Success: Boolean;
-  var ErrorCode: Cardinal; RequestType: TCnAIRequestType; const Response: TBytes): string;
+function TCnAIBaseEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
+  RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
-  S: AnsiString;
+  S, Prev: AnsiString;
+  P: PAnsiChar;
   HasPartly: Boolean;
   JsonObjs: TObjectList;
-  I: Integer;
+  I, Step: Integer;
 begin
   Result := '';
-  S := BytesToAnsi(Response);
+  // 根据 SendId 找本次会话中留存的数据
+  if FPrevRespRemainMap.Find(IntToStr(SendId), Prev) then
+    S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
+  else
+    S := BytesToAnsi(Response);
 
   JsonObjs := TObjectList.Create(True);
-  CnJSONParse(S, JsonObjs);
+  Step := CnJSONParse(PAnsiChar(S), JsonObjs);
+  P := PAnsiChar(PAnsiChar(S) + Step);
+
+  if (P <> #0) and (Step < Length(S)) then
+  begin
+    // 步进没处理完（长度没满足），且不是结束符，说明有剩余内容
+    Prev := Copy(S, Step + 1, MaxInt);
+  end
+  else // 说明没剩余内容
+    Prev := '';
+
+  // 有无剩余都存起来
+  FPrevRespRemainMap.Add(IntToStr(SendId), Prev);
 
   RespRoot := nil;
   if JsonObjs.Count > 0 then
@@ -610,10 +631,12 @@ begin
 
   if RespRoot = nil then
   begin
-    // 流模式下如果单独碰到结束符，表示结束，返回结束符
-    if Partly and (Pos(CN_RESP_DATA_DONE, S) = 1) then
+    // 流模式下如果本次返回单独的 datadone，那么上面拼好再解析后 RespRoot 必然是 nil，
+    // 只要判断本次数据是否只剩下结束符，是则结束并返回结束标志，无内容返回
+    if Partly and (Trim(S) = RESP_DATA_DONE) then
     begin
-      Result := CN_RESP_DATA_DONE;
+      IsStreamEnd := True;
+      FPrevRespRemainMap.Delete(IntToStr(SendId)); // 清理缓存
       Exit;
     end;
 
@@ -643,6 +666,14 @@ begin
               HasPartly := True;
             end;
           end;
+        end;
+
+        // 多个回应完成后，剩下的 Prev 可能是 datadone 结束符，判断并返回此标志
+        if Trim(Prev) = RESP_DATA_DONE then
+        begin
+          IsStreamEnd := True;
+          FPrevRespRemainMap.Delete(IntToStr(SendId)); // 也清理缓存
+          Exit;
         end;
       end
       else // 完整模式下
@@ -703,6 +734,7 @@ begin
   FPoolRef := ANetPool;
 
   FAnswerQueue := TCnObjectQueue.Create(True);
+  FPrevRespRemainMap := TCnStrToStrHashMap.Create;
   InitOption;
 end;
 
@@ -711,6 +743,7 @@ begin
   while not FAnswerQueue.IsEmpty do
     FAnswerQueue.Pop.Free;
 
+  FPrevRespRemainMap.Free;
   FAnswerQueue.Free;
   inherited;
 end;
@@ -743,6 +776,7 @@ begin
 
   AnswerObj.Success := Success;
   AnswerObj.SendId := TCnAINetRequestDataObject(DataObj).SendId;
+  AnswerObj.IsStreamEnd := False; // 仅流模式下有效，让解析器确定本次是否结束数据
   AnswerObj.RequestType := TCnAINetRequestDataObject(DataObj).RequestType;
   AnswerObj.Callback := TCnAINetRequestDataObject(DataObj).OnAnswer;
   AnswerObj.Tag := TCnAINetRequestDataObject(DataObj).Tag;
@@ -768,10 +802,11 @@ begin
     begin
       // SyncCallback 被调用时就确保了不会在 StreamMode 为 False 时来 Partly 数据
       // 以及不会在 StreamMode 为 True 时来完整数据
-      Answer := ParseResponse(AnswerObj.StreamMode, AnswerObj.Partly,
-        AnswerObj.FSuccess, AnswerObj.FErrorCode, AnswerObj.RequestType, AnswerObj.Answer);
+      Answer := ParseResponse(AnswerObj.SendId, AnswerObj.StreamMode, AnswerObj.Partly,
+        AnswerObj.FSuccess, AnswerObj.FErrorCode, AnswerObj.FIsStreamEnd,
+        AnswerObj.RequestType, AnswerObj.Answer);
       AnswerObj.Callback(AnswerObj.StreamMode, AnswerObj.Partly, AnswerObj.Success,
-        AnswerObj.SendId, Answer, AnswerObj.ErrorCode, AnswerObj.Tag);
+        AnswerObj.IsStreamEnd, AnswerObj.SendId, Answer, AnswerObj.ErrorCode, AnswerObj.Tag);
     end;
     AnswerObj.Free;
   end;

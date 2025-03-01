@@ -98,11 +98,11 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
-    procedure ForCodeAnswer(StreamMode, Partly, Success: Boolean; SendId: Integer;
-      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure ForCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回文字的回调}
-    procedure ForCodeGen(StreamMode, Partly, Success: Boolean; SendId: Integer;
-      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure ForCodeGen(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回代码的回调}
 
     procedure AcquireSubActions; override;
@@ -464,7 +464,7 @@ begin
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;
 end;
 
-procedure TCnAICoderWizard.ForCodeAnswer(StreamMode, Partly, Success: Boolean;
+procedure TCnAICoderWizard.ForCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
   SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 begin
   EnsureChatWindowVisible;
@@ -491,8 +491,8 @@ begin
   end;
 end;
 
-procedure TCnAICoderWizard.ForCodeGen(StreamMode, Partly, Success: Boolean; SendId: Integer;
-  const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+procedure TCnAICoderWizard.ForCodeGen(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
 var
   S: string;
 begin
@@ -507,7 +507,7 @@ begin
         TCnChatMessage(Tag).Text := Answer;
 
       // 结束再挑出代码
-      if not Partly or (Answer = CN_RESP_DATA_DONE) then
+      if not Partly or IsStreamEnd then
       begin
         S := TCnAICoderChatForm.ExtractCode(TCnChatMessage(Tag));
         if S <> '' then
