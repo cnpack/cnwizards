@@ -598,6 +598,7 @@ var
   RespRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
   S, Prev: AnsiString;
+  PrevS: string;
   P: PAnsiChar;
   HasPartly: Boolean;
   JsonObjs: TObjectList;
@@ -605,8 +606,12 @@ var
 begin
   Result := '';
   // 根据 SendId 找本次会话中留存的数据
-  if FPrevRespRemainMap.Find(IntToStr(SendId), Prev) then
+  Prev := '';
+  if FPrevRespRemainMap.Find(IntToStr(SendId), PrevS) then
+  begin
+    Prev := AnsiString(PrevS);
     S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
+  end
   else
     S := BytesToAnsi(Response);
 
