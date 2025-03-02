@@ -1,10 +1,9 @@
 object FormAITest: TFormAITest
-  Left = 192
-  Top = 109
-  BorderStyle = bsDialog
+  Left = 128
+  Top = 84
+  Width = 1033
+  Height = 641
   Caption = 'AI Coder Test'
-  ClientHeight = 592
-  ClientWidth = 956
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,11 +16,12 @@ object FormAITest: TFormAITest
   PixelsPerInch = 96
   TextHeight = 13
   object pgcAICoder: TPageControl
-    Left = 16
-    Top = 16
-    Width = 921
-    Height = 553
+    Left = 8
+    Top = 8
+    Width = 1014
+    Height = 599
     ActivePage = tsHTTP
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsHTTP: TTabSheet
       Caption = 'HTTP Pool Test'
@@ -35,8 +35,9 @@ object FormAITest: TFormAITest
       object mmoHTTP: TMemo
         Left = 16
         Top = 56
-        Width = 881
-        Height = 449
+        Width = 982
+        Height = 503
+        Anchors = [akLeft, akTop, akRight, akBottom]
         ReadOnly = True
         TabOrder = 0
       end
@@ -81,8 +82,9 @@ object FormAITest: TFormAITest
       object mmoConfig: TMemo
         Left = 16
         Top = 56
-        Width = 881
-        Height = 449
+        Width = 982
+        Height = 503
+        Anchors = [akLeft, akTop, akRight, akBottom]
         ReadOnly = True
         TabOrder = 2
       end
@@ -145,7 +147,8 @@ object FormAITest: TFormAITest
         Left = 16
         Top = 56
         Width = 393
-        Height = 457
+        Height = 503
+        Anchors = [akLeft, akTop, akBottom]
         ReadOnly = True
         TabOrder = 4
       end
@@ -159,8 +162,9 @@ object FormAITest: TFormAITest
       object pnlAIChat: TPanel
         Left = 424
         Top = 56
-        Width = 473
-        Height = 457
+        Width = 574
+        Height = 503
+        Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 6
       end
@@ -180,8 +184,9 @@ object FormAITest: TFormAITest
       object pnlChat: TPanel
         Left = 16
         Top = 56
-        Width = 881
-        Height = 457
+        Width = 982
+        Height = 503
+        Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 0
       end
