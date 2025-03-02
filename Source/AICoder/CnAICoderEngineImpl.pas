@@ -364,48 +364,145 @@ end;
 function TCnGeminiAIEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;
 begin
   // 模型名和身份验证的 Key 均在 URL 里
-  Result := DataObj.URL + Option.Model + ':generateContent?key=' + Option.ApiKey;
+  if Option.Stream then
+    Result := DataObj.URL + Option.Model + ':streamGenerateContent?key=' + Option.ApiKey
+  else
+    Result := DataObj.URL + Option.Model + ':generateContent?key=' + Option.ApiKey;
 end;
 
 function TCnGeminiAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
   var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
   RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
-  RespRoot, Parts, Msg: TCnJSONObject;
+  RespRoot, Cont, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
-  S: AnsiString;
+  S, Prev: AnsiString;
+  PrevS: string;
+  P: PAnsiChar;
+  HasPartly: Boolean;
+  JsonObjs: TObjectList;
+  I, Step: Integer;
 begin
+// 格式，一开始一个 [，然后一堆 {},{},发过来，最后{}后还有个 ]，
+// 我们处理时一开始解析会跳过 [ 和中间的 , 但最后那个 ] 要特殊处理
+// {
+//  "candidates": [
+//    {
+//      "content": {
+//        "parts": [
+//          {
+//            "text": "Application"
+//          }
+//        ],
+//        "role": "model"
+//      },
+//      "finishReason": "STOP"
+//    }
+//  ],
+//  "usageMetadata": {
+//    "promptTokenCount": 46,
+//    "totalTokenCount": 46
+//  },
+//  "modelVersion": "gemini-1.5-flash-latest"
+// }
+
   Result := '';
-  S := BytesToAnsi(Response);
-  RespRoot := CnJSONParse(S);
+  // 根据 SendId 找本次会话中留存的数据
+  Prev := '';
+  if FPrevRespRemainMap.Find(IntToStr(SendId), PrevS) then
+  begin
+    Prev := AnsiString(PrevS);
+    S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
+  end
+  else
+    S := BytesToAnsi(Response);
+
+  JsonObjs := TObjectList.Create(True);
+  Step := CnJSONParse(PAnsiChar(S), JsonObjs);
+  P := PAnsiChar(PAnsiChar(S) + Step);
+
+  if (P <> #0) and (Step < Length(S)) then
+  begin
+    // 步进没处理完（长度没满足），且不是结束符，说明有剩余内容
+    Prev := Copy(S, Step + 1, MaxInt);
+  end
+  else // 说明没剩余内容
+    Prev := '';
+
+  // 有无剩余都存起来
+  FPrevRespRemainMap.Add(IntToStr(SendId), Prev);
+
+  RespRoot := nil;
+  if JsonObjs.Count > 0 then
+    RespRoot := TCnJSONObject(JsonObjs[0]);
+
   if RespRoot = nil then
   begin
-    // 一类原始错误，如账号达到最大并发等
-    Result := string(S);
+    // 一类原始错误，如账号达到最大并发等，注意流模式下没有单独的 datadone
+    if Trim(S) <> ']' then // 单独结尾的 ] 要忽略，
+      Result := string(S);
   end
   else
   begin
     try
       // 正常回应，Gemini 格式
-      if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
+      HasPartly := False;
+      if Partly then
       begin
-        Arr := TCnJSONArray(RespRoot['candidates']);
-        if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
+        // 流式模式下，可能有多个 Obj
+        for I := 0 to JsonObjs.Count - 1 do
         begin
-          Parts := TCnJSONObject(Arr[0]['content']);
-          if (Parts['parts'] <> nil) and (Parts['parts'] is TCnJSONArray) then
+          RespRoot := TCnJSONObject(JsonObjs[I]);
+          if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
           begin
-            Arr := TCnJSONArray(Parts['parts']);
-            if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+            Arr := TCnJSONArray(RespRoot['candidates']);
+            if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
             begin
-              Msg := TCnJSONObject(Arr[0]);
-              Result := Msg['text'].AsString;
+              Cont := TCnJSONObject(Arr[0]['content']);
+              if (Cont['parts'] <> nil) and (Cont['parts'] is TCnJSONArray) then
+              begin
+                Arr := TCnJSONArray(Cont['parts']);
+                if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+                begin
+                  Msg := TCnJSONObject(Arr[0]);
+                  Result := Result + Msg['text'].AsString;
+                  HasPartly := True;
+                end;
+              end;
+            end;
+
+            // 有 finishReason 字段表示结尾
+            Arr := TCnJSONArray(RespRoot['candidates']);
+            if (Arr.Count > 0) and (Arr[0]['finishReason'] <> nil) and (Arr[0]['finishReason'] is TCnJSONString) then
+            begin
+              IsStreamEnd := True;
+              FPrevRespRemainMap.Delete(IntToStr(SendId)); // 也清理缓存，但因为有数据，不能直接返回
+            end;
+          end;
+        end;
+      end
+      else // 完整模式
+      begin
+        if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
+        begin
+          Arr := TCnJSONArray(RespRoot['candidates']);
+          if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
+          begin
+            Cont := TCnJSONObject(Arr[0]['content']);
+            if (Cont['parts'] <> nil) and (Cont['parts'] is TCnJSONArray) then
+            begin
+              Arr := TCnJSONArray(Cont['parts']);
+              if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+              begin
+                Msg := TCnJSONObject(Arr[0]);
+                Result := Msg['text'].AsString;
+              end;
             end;
           end;
         end;
       end;
 
-      if Result = '' then
+      if not HasPartly and (Result = '') then
       begin
         // 只要没有正常回应，就说明出错了
         Success := False;
@@ -429,8 +526,8 @@ begin
         end;
       end;
 
-      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
-      if Result = '' then
+      // 兜底，整块模式下所有解析都无效就直接用整个 JSON 作为返回信息
+      if not HasPartly and (Result = '') then
         Result := string(S);
     finally
       RespRoot.Free;
@@ -573,8 +670,13 @@ begin
 
             HasPartly := True;
           end;
+
+          // 有 done 字段为 True 表示结尾
           if (RespRoot['done'] <> nil) and (RespRoot['done'] is TCnJSONTrue) then
+          begin
             IsStreamEnd := True;
+            FPrevRespRemainMap.Delete(IntToStr(SendId)); // 也清理缓存，但因为有数据，不能直接返回
+          end;
         end;
       end
       else // 整块模式，其简要格式和流模式有点类似

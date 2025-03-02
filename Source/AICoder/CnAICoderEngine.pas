@@ -678,7 +678,7 @@ begin
         begin
           IsStreamEnd := True;
           FPrevRespRemainMap.Delete(IntToStr(SendId)); // 也清理缓存
-          Exit;
+          Exit; // 无数据返回，因而可以直接 Exit
         end;
       end
       else // 完整模式下
