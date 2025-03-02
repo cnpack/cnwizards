@@ -54,7 +54,7 @@ type
     Partly 为 True 表示可能是多次返回中的一次，Tag 是发送请求时传入的 Tag}
 
   TCnAINetDataResponse = procedure(Success, Partly: Boolean; Thread: TCnPoolingThread;
-    DataObj: TCnAINetRequestDataObject; Data: TBytes) of object;
+    DataObj: TCnAINetRequestDataObject; Data: TBytes; ErrCode: Cardinal) of object;
   {* 网络请求的回调，告诉成功与否，成功则 Data 中是数据
     Partly 为 True 表示可能是多次返回中的一次}
 

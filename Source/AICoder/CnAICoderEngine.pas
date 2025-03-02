@@ -74,19 +74,21 @@ type
   end;
 
   TCnAIBaseEngine = class
-  {* 处理特定 AI 服务提供者的引擎基类，有自身的特定配置，
-    并有添加请求任务、发起网络请求、获得结果并回调的典型功能}
+  {* 处理特定 AI 服务提供者的引擎基类，有自身的特定配置，并有添加请求任务、
+     发起网络请求、获得结果并回调的典型功能。其中组装发送格式及接收数据解析格式
+     参照了目前最为广泛的 OpenAI 兼容格式为实现规则，子类则可能另有实现}
   private
     FPoolRef: TCnThreadPool; // 从 Manager 处拿来持有的线程池对象引用
     FOption: TCnAIEngineOption;
     FAnswerQueue: TCnObjectQueue;
     FProcessingDataObj: TCnAINetRequestDataObject;
     FProcessingThread: TCnPoolingThread;
-    FPrevRespRemainMap: TCnStrToStrHashMap;
     procedure CheckOptionPool;
     procedure HttpProgressData(Sender: TObject; TotalSize, CurrSize: Integer;
       Data: Pointer; DataLen: Integer; var Abort: Boolean);
   protected
+    FPrevRespRemainMap: TCnStrToStrHashMap;
+
     procedure DeleteAuthorizationHeader(Headers: TStringList);
     {* 供子类按需使用的，删除请求头里的 Authorization 字段，以备其他认证方式}
 
@@ -97,7 +99,7 @@ type
       在一次完整的 AI 网络通讯过程中属于第三步，内部会根据结果回调 OnAINetDataResponse 事件}
 
     procedure OnAINetDataResponse(Success, Partly: Boolean; Thread: TCnPoolingThread;
-      DataObj: TCnAINetRequestDataObject; Data: TBytes); virtual;
+      DataObj: TCnAINetRequestDataObject; Data: TBytes; ErrCode: Cardinal); virtual;
     {* AI 服务提供者进行网络通讯的结果回调，是在子线程中被调用的，内部应 Sync 给请求调用者
       Success 返回成功与否，成功则 Data 中是数据
       在一次完整的 AI 网络通讯过程中属于第四步}
@@ -123,7 +125,7 @@ type
       StreamMode 是请求发起时是否支持流式，姑且认为服务端会同样多次返回拼接。
       Partly 为 True 表示此次数据是服务器返回的中间数据，注意数据过短时可能等于完整数据。
       内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据
-      IsEnd 由内部解析后返回流模式下本次回应是否是结尾数据}
+      IsStreamEnd 由内部解析后返回流模式下本次回应是否是结尾数据}
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
@@ -228,13 +230,11 @@ const
   LF = #10;
   RESP_DATA_DONE = 'data: [DONE]';
 
-
 type
   TThreadHack = class(TThread);
 
 var
   FAIEngineManager: TCnAIEngineManager = nil;
-
   FAIEngines: TClassList = nil;
 
 procedure RegisterAIEngine(AIEngineClass: TCnAIBaseEngineClass);
@@ -546,7 +546,7 @@ begin
       if (Data <> nil) and (DataLen > 0) then
       begin
         FProcessingDataObj.OnResponse(True, True, FProcessingThread, FProcessingDataObj,
-          NewBytesFromMemory(Data, DataLen));
+          NewBytesFromMemory(Data, DataLen), 0);
       end;
     end;
   end;
@@ -698,7 +698,7 @@ begin
 
       if not HasPartly and (Result = '') then
       begin
-        // 只要没有正常回应，就说明出错了
+        // 整块模式下，只要没有正常回应，就说明出错了
         Success := False;
 
         // 一类业务错误，比如 Key 无效等
@@ -758,8 +758,8 @@ begin
   FOption := CnAIEngineOptionManager.GetOptionByEngine(EngineName)
 end;
 
-procedure TCnAIBaseEngine.OnAINetDataResponse(Success, Partly: Boolean;
-  Thread: TCnPoolingThread; DataObj: TCnAINetRequestDataObject; Data: TBytes);
+procedure TCnAIBaseEngine.OnAINetDataResponse(Success, Partly: Boolean; Thread: TCnPoolingThread;
+  DataObj: TCnAINetRequestDataObject; Data: TBytes; ErrCode: Cardinal);
 var
   AnswerObj: TCnAIAnswerObject;
 begin
@@ -776,6 +776,12 @@ begin
 
   // 网络线程里拿到数据或结果后本事件被直接调用，适当包装后 Synchronize 返回给宿主
   AnswerObj := TCnAIAnswerObject.Create;
+  if not Success then
+  begin
+    AnswerObj.ErrorCode := ErrCode;
+    // 典型的错误码中，12002 是超时，12029 是无法建立连接可能是 SSL 版本错等
+  end;
+
   AnswerObj.StreamMode := TCnAINetRequestDataObject(DataObj).StreamMode;
   AnswerObj.Partly := Partly;
 
@@ -786,10 +792,6 @@ begin
   AnswerObj.Callback := TCnAINetRequestDataObject(DataObj).OnAnswer;
   AnswerObj.Tag := TCnAINetRequestDataObject(DataObj).Tag;
   AnswerObj.Answer := Data; // 引用，但有计数，不会随便释放
-
-  if not Success then
-    AnswerObj.ErrorCode := GetLastError;
-  // 典型的错误码中，12002 是超时，12029 是无法建立连接可能是 SSL 版本错等
 
   FAnswerQueue.Push(AnswerObj);
   TThreadHack(Thread).Synchronize(SyncCallback);
@@ -810,6 +812,7 @@ begin
       Answer := ParseResponse(AnswerObj.SendId, AnswerObj.StreamMode, AnswerObj.Partly,
         AnswerObj.FSuccess, AnswerObj.FErrorCode, AnswerObj.FIsStreamEnd,
         AnswerObj.RequestType, AnswerObj.Answer);
+
       AnswerObj.Callback(AnswerObj.StreamMode, AnswerObj.Partly, AnswerObj.Success,
         AnswerObj.IsStreamEnd, AnswerObj.SendId, Answer, AnswerObj.ErrorCode, AnswerObj.Tag);
     end;
@@ -823,9 +826,11 @@ var
   HTTP: TCnHTTP;
   Stream: TMemoryStream;
   AURL: string;
+  Err: DWORD;
 begin
   HTTP := nil;
   Stream := nil;
+  Err := 0;
 
   try
     HTTP := TCnHTTP.Create;
@@ -862,7 +867,7 @@ begin
     // 临时记录 DataObj 的引用，因为 GetStream 过程中有回调需要使用
     FProcessingDataObj := TCnAINetRequestDataObject(DataObj);
     FProcessingThread := Thread;
-    if HTTP.GetStream(AURL, Stream, TCnAINetRequestDataObject(DataObj).Data) then
+    if HTTP.GetStream(AURL, Stream, TCnAINetRequestDataObject(DataObj).Data, @Err) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('*** HTTP Request OK Get Bytes ' + IntToStr(Stream.Size));
@@ -871,15 +876,17 @@ begin
       // 这里要把结果送给 UI 供处理，结果不能依赖于本线程，因为 UI 主线程的调用处理结果的时刻是不确定的，
       // 而离了本方法，Thread 的状态就未知了，搁 Thread 里的内容可能会因 Thread 被池子调度而被冲掉
       if Assigned(TCnAINetRequestDataObject(DataObj).OnResponse) then
-        TCnAINetRequestDataObject(DataObj).OnResponse(True, False, Thread, TCnAINetRequestDataObject(DataObj), StreamToBytes(Stream));
+        TCnAINetRequestDataObject(DataObj).OnResponse(Stream.Size > 0, False, Thread,
+          TCnAINetRequestDataObject(DataObj), StreamToBytes(Stream), Err);
     end
     else
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('*** HTTP Request Fail.');
+      CnDebugger.LogMsg('*** HTTP Request Fail: ' + IntToStr(Err));
 {$ENDIF}
       if Assigned(TCnAINetRequestDataObject(DataObj).OnResponse) then
-        TCnAINetRequestDataObject(DataObj).OnResponse(False, False, Thread, TCnAINetRequestDataObject(DataObj), nil);
+        TCnAINetRequestDataObject(DataObj).OnResponse(False, False, Thread,
+          TCnAINetRequestDataObject(DataObj), nil, Err);
     end;
   finally
     FProcessingThread := nil;

@@ -42,8 +42,8 @@ interface
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  SysUtils, Classes, CnNative, CnJSON, CnAICoderEngine, CnAICoderNetClient,
-  CnAICoderConfig;
+  SysUtils, Classes, Contnrs, CnNative, CnJSON, CnAICoderEngine,
+  CnAICoderNetClient, CnAICoderConfig;
 
 type
   TCnOpenAIAIEngine = class(TCnAIBaseEngine)
@@ -69,7 +69,7 @@ type
 
     // Claude 的信息返回格式也不同
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
-      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
       const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
@@ -90,7 +90,7 @@ type
 
     // Claude 的信息返回格式也不同
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
-      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
       const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
@@ -131,7 +131,7 @@ type
   protected
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
-      var ErrorCode: Cardinal; var IsEnd: Boolean; RequestType: TCnAIRequestType;
+      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
       const Response: TBytes): string; override;
   public
     class function EngineName: string; override;
@@ -246,7 +246,7 @@ begin
 end;
 
 function TCnClaudeAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
-  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
   RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
@@ -368,7 +368,7 @@ begin
 end;
 
 function TCnGeminiAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
-  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
   RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Parts, Msg: TCnJSONObject;
@@ -461,7 +461,7 @@ begin
   ReqRoot := TCnJSONObject.Create;
   try
     ReqRoot.AddPair('model', Option.Model);
-    ReqRoot.AddPair('stream', False);
+    ReqRoot.AddPair('stream', Option.Stream);
     Arr := ReqRoot.AddArray('messages');
 
     Msg := TCnJSONObject.Create;
@@ -500,31 +500,95 @@ begin
 end;
 
 function TCnOllamaAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
-  var Success: Boolean; var ErrorCode: Cardinal; var IsEnd: Boolean;
+  var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
   RequestType: TCnAIRequestType; const Response: TBytes): string;
 var
   RespRoot, Msg: TCnJSONObject;
-  S: AnsiString;
+  S, Prev: AnsiString;
+  PrevS: string;
+  P: PAnsiChar;
+  HasPartly: Boolean;
+  JsonObjs: TObjectList;
+  I, Step: Integer;
 begin
+// 流式格式如下：
+// {"model":"qwen2.5-coder","created_at":"2025-03-01T12:25:28.461904Z","message":
+//   {"role":"assistant","content":"。"},"done":false}
+// {"model":"qwen2.5-coder","created_at":"2025-03-01T12:25:29.178563Z","message":
+//   {"role":"assistant","content":""},"done_reason":"stop","done":true,"
+//   total_duration":104533692025,"load_duration":8214582022,"prompt_eval_count":35,
+//   "prompt_eval_duration":21698000000,"eval_count":99,"eval_duration":73967000000}
+
   Result := '';
-  S := BytesToAnsi(Response);
-  RespRoot := CnJSONParse(S);
+  // 根据 SendId 找本次会话中留存的数据
+  Prev := '';
+  if FPrevRespRemainMap.Find(IntToStr(SendId), PrevS) then
+  begin
+    Prev := AnsiString(PrevS);
+    S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
+  end
+  else
+    S := BytesToAnsi(Response);
+
+  JsonObjs := TObjectList.Create(True);
+  Step := CnJSONParse(PAnsiChar(S), JsonObjs);
+  P := PAnsiChar(PAnsiChar(S) + Step);
+
+  if (P <> #0) and (Step < Length(S)) then
+  begin
+    // 步进没处理完（长度没满足），且不是结束符，说明有剩余内容
+    Prev := Copy(S, Step + 1, MaxInt);
+  end
+  else // 说明没剩余内容
+    Prev := '';
+
+  // 有无剩余都存起来
+  FPrevRespRemainMap.Add(IntToStr(SendId), Prev);
+
+  RespRoot := nil;
+  if JsonObjs.Count > 0 then
+    RespRoot := TCnJSONObject(JsonObjs[0]);
+
   if RespRoot = nil then
   begin
-    // 一类原始错误，如账号达到最大并发等
+    // 一类原始错误，如账号达到最大并发等，注意流模式下没有单独的 datadone
     Result := string(S);
   end
   else
   begin
     try
-      // Ollama 的简要格式，message 下其实还有 role: assistant 但不管
-      if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONObject) then
+      // 正常回应
+      HasPartly := False;
+      if Partly then
       begin
-        Msg := TCnJSONObject(RespRoot['message']);
-        Result := Msg['content'].AsString;
+        // 流式模式下，可能有多个 Obj
+        for I := 0 to JsonObjs.Count - 1 do
+        begin
+          RespRoot := TCnJSONObject(JsonObjs[I]);
+          if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(RespRoot['message']);
+            if  Msg['content'] <> nil then
+              Result := Result + Msg['content'].AsString;
+
+            HasPartly := True;
+          end;
+          if (RespRoot['done'] <> nil) and (RespRoot['done'] is TCnJSONTrue) then
+            IsStreamEnd := True;
+        end;
+      end
+      else // 整块模式，其简要格式和流模式有点类似
+      begin
+        // Ollama 的简要格式，message 下其实还有 role: assistant 但不管
+        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONObject) then
+        begin
+          Msg := TCnJSONObject(RespRoot['message']);
+          if Msg['content'] <> nil then
+            Result := Msg['content'].AsString;
+        end;
       end;
 
-      if Result = '' then
+      if not HasPartly and (Result = '') then
       begin
         // Ollama 的简要错误格式
         if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
@@ -535,7 +599,7 @@ begin
       if Result = '' then
         Result := string(S);
     finally
-      RespRoot.Free;
+      JsonObjs.Free;
     end;
   end;
 
