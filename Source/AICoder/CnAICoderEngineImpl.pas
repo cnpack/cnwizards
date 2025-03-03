@@ -259,6 +259,11 @@ var
   JsonObjs: TObjectList;
   I, Step: Integer;
 begin
+// 流格式，省略了复杂的：
+// data: {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}
+// data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Hello"}}
+// data: {"type": "message_stop"}
+
   Result := '';
   // 根据 SendId 找本次会话中留存的数据
   Prev := '';
@@ -316,6 +321,17 @@ begin
               HasPartly := True;
             end;
           end;
+          if (RespRoot['content_block'] <> nil) and (RespRoot['content_block'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(RespRoot['content_block']);
+            if (Msg['text'] <> nil) and (Msg['text'] is TCnJSONString) then
+            begin
+              // 每一块回应拼起来
+              Result := Result + Msg['text'].AsString;
+              HasPartly := True;
+            end;
+          end;
+
           // 也找结束标记 type
           if (RespRoot['type'] <> nil) and (RespRoot['type'] is TCnJSONString) then
           begin
