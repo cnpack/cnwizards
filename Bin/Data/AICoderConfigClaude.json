@@ -3,7 +3,7 @@
     "URL": "https://api.anthropic.com/v1/messages",
     "ApiKey": "",
     "Model": "claude-3-5-sonnet-20240620",
-    "ModelList": "claude-3-opus-20240229,claude-3-sonnet-20240229,claude-3-haiku-20240307",
+    "ModelList": "claude-3-7-sonnet-latest,claude-3-5-sonnet-latest,claude-3-5-haiku-latest,claude-3-opus-latest,claude-3-opus-20240229,claude-3-sonnet-20240229,claude-3-haiku-20240307",
     "Temperature": 1.0,
     "MaxTokens": 4096,
     "AnthropicVersion": "2023-06-01",
