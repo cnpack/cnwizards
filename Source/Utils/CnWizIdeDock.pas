@@ -42,6 +42,8 @@ unit CnWizIdeDock;
 *           且子类的停靠窗体，初始化动作需要在构造函数里做完，因为构造函数可能被 IDE 调用
 *
 *           注意：D567 及 D2005~DXE8 下似乎有 Bug：重新启动后不会恢复窗体
+*           另外：TCnIdeDockForm 的子类，Create 时最好指定 Owner 为 nil
+*                 曾经见过 D5 下用 Application 结果退出时弹出错框的情形。
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6

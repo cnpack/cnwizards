@@ -108,7 +108,7 @@ type
   end;
 
 var
-  CnAICoderChatForm: TCnAICoderChatForm;
+  CnAICoderChatForm: TCnAICoderChatForm = nil;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 

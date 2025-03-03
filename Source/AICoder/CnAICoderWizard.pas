@@ -129,6 +129,7 @@ uses
 
 const
   MSG_WAITING = '...';
+  csAICoderChatForm = 'CnAICoderChatForm';
 
 //==============================================================================
 // AI ¸¨Öú±àÂë²Ëµ¥×¨¼Ò
@@ -158,12 +159,12 @@ constructor TCnAICoderWizard.Create;
 begin
   inherited;
   IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
-    'CnAICoderChatForm');
+    csAICoderChatForm);
 end;
 
 destructor TCnAICoderWizard.Destroy;
 begin
-  IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, 'CnAICoderChatForm');
+  IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, csAICoderChatForm);
   FreeAndNil(CnAICoderChatForm);
   inherited;
 end;
@@ -540,7 +541,7 @@ procedure TCnAICoderWizard.EnsureChatWindowVisible;
 begin
   if CnAICoderChatForm = nil then
   begin
-    CnAICoderChatForm := TCnAICoderChatForm.Create(Application);
+    CnAICoderChatForm := TCnAICoderChatForm.Create(nil);
     CnAICoderChatForm.Wizard := Self;
   end;
 
