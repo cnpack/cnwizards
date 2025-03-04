@@ -1149,13 +1149,14 @@ begin
 
           OldTab := FCurrentTab;
           try
-            // 加入这几句是为了在调用理的参数间回车换行时缩进，类似于
+            // 加入这几句是为了在调用里的参数间回车换行时缩进，类似于
             // Call(
             //   a,
             //   b);
+            // 注意这里给 FCurrentTab 赋值无需 Tab，回调中写回车时会进行一次 Tab
 
             if IsB then
-              FCurrentTab := Tab(IndentForAnonymous);
+              FCurrentTab := IndentForAnonymous;
 
             Match(Scanner.Token);
 
@@ -1186,9 +1187,9 @@ begin
           Match(tokHat);
         end;
       tokPlus, tokMinus: // 这里的加减号是啥目的？照理应该算 Term 之间的二元运算符才对
-        begin
+        begin            // 不管怎样先做上，并传入 IndentForAnonymous 供保留换行时正确缩进
           MatchOperator(Scanner.Token);
-          FormatExpression(0, PreSpaceCount);
+          FormatExpression(0, IndentForAnonymous);
         end;
     end; // case
   end; // while
