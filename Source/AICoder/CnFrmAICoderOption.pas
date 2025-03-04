@@ -39,7 +39,8 @@ interface
 
 uses 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, TypInfo, Contnrs, CnCommon, CnWizMultiLangFrame, CnAICoderConfig;
+  StdCtrls, TypInfo, Contnrs, Buttons, CnCommon, CnWizMultiLangFrame, CnWizConsts,
+  CnAICoderConfig;
 
 const
   WM_CALCEXTRA = WM_USER + $1234;
@@ -57,7 +58,9 @@ type
     edtTemperature: TEdit;
     lblTemperature: TLabel;
     chkStreamMode: TCheckBox;
+    btnReset: TSpeedButton;
     procedure lblApplyClick(Sender: TObject);
+    procedure btnResetClick(Sender: TObject);
   private
     FWebAddr: string;
     FExtraBuilt: Boolean;
@@ -67,6 +70,7 @@ type
     FVerticalEditStart: Integer;       // 纵向新增选项的 Edit 控件起始纵坐标
     FHoriLabelStart: Integer;          // 横向新增选项的 Label 控件的起始横坐标
     FHoriEditStart: Integer;           // 横向新增选项的 Edit 控件的起始横坐标
+    FEngine: TObject;           
     procedure CalcExtraPositions;      // 创建后计算纵向参数，均以运行期为准，避免 HDPI 影响
   protected
     procedure OnBuildExtra(var Msg: TMessage); message WM_BUILDEXTRA;
@@ -83,16 +87,23 @@ type
     procedure SaveExtraOptions;
     {* 将界面设置内容塞回外部属性去}
 
+    procedure LoadFromAnOption(Option: TCnAIEngineOption);
+    {* 从一个 Option 中加载通用属性}
+    procedure SaveToAnOption(Option: TCnAIEngineOption);
+    {* 将内容保存到一个通用 Option 中}
+
     property WebAddr: string read FWebAddr write FWebAddr;
+    {* 申请 APIKey 的网址}
+    property Engine: TObject read FEngine write FEngine;
+    {* 由外界设置的引擎实例}
   end;
 
 implementation
 
 {$R *.DFM}
 
-
 uses
-  CnWizOptions, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnAICoderEngine, CnWizOptions, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   CN_AI_CODER_SUPPORT_TYPES: TTypeKinds = [tkInteger, tkFloat, tkString];
@@ -156,6 +167,15 @@ procedure TCnAICoderOptionFrame.lblApplyClick(Sender: TObject);
 begin
   if FWebAddr <> '' then
     OpenUrl(FWebAddr);
+end;
+
+procedure TCnAICoderOptionFrame.LoadFromAnOption(Option: TCnAIEngineOption);
+begin
+  edtURL.Text := Option.URL;
+  cbbModel.Text := Option.Model;
+  edtTemperature.Text := FloatToStr(Option.Temperature);
+  edtAPIKey.Text := Option.APIKey;
+  chkStreamMode.Checked := Option.Stream;
 end;
 
 procedure TCnAICoderOptionFrame.OnBuildExtra(var Msg: TMessage);
@@ -280,6 +300,69 @@ begin
         Application.HandleException(Application);
       end;
     end;
+  end;
+end;
+
+procedure TCnAICoderOptionFrame.SaveToAnOption(Option: TCnAIEngineOption);
+begin
+  Option.URL := edtURL.Text;
+  Option.Model := cbbModel.Text;
+  try
+    Option.Temperature := StrToFloat(edtTemperature.Text);
+  except
+    Option.Temperature := 1.0;
+  end;
+  Option.APIKey := edtAPIKey.Text;
+  Option.Stream := chkStreamMode.Checked;
+end;
+
+procedure TCnAICoderOptionFrame.btnResetClick(Sender: TObject);
+var
+  I: Integer;
+  S: string;
+  Eng: TCnAIBaseEngine;
+  OrigOption: TCnAIEngineOption;
+  Item: TCnAIExtraItem;
+  Edt: TEdit;
+begin
+  if (Engine = nil) or not (Engine is TCnAIBaseEngine) then
+    Exit;
+
+  Eng := Engine as TCnAIBaseEngine;
+
+  // 加载原始数据文件
+  OrigOption := nil;
+  try
+    S := WizOptions.GetDataFileName(Format(SCnAICoderEngineOptionFileFmt, [Eng.EngineID]));
+    OrigOption := CnAIEngineOptionManager.CreateOptionFromFile(Eng.EngineName,
+      S, Eng.OptionClass, False); // 注意该原始配置对象无需进行管理，要在此用完后释放
+
+    // 加载通用属性
+    LoadFromAnOption(OrigOption);
+
+    // 遍历加载注册了的特殊属性
+    for I := 0 to FExtraOptions.Count - 1 do
+    begin
+      Item := TCnAIExtraItem(FExtraOptions[I]);
+      S := 'edt' + Item.OptionName;
+      Edt := TEdit(FindComponent(S));
+      if Edt = nil then
+        Continue;
+
+      try
+        S := '';
+        case Item.OptionType of
+          tkInteger: S := IntToStr(GetOrdProp(OrigOption, Item.OptionName));
+          tkFloat: S := FloatToStr(GetFloatProp(OrigOption, Item.OptionName));
+          tkString: S := GetStrProp(OrigOption, Item.OptionName);
+        end;
+        Edt.Text := S;
+      except
+        Application.HandleException(Application);
+      end;
+    end;
+  finally
+    OrigOption.Free;
   end;
 end;
 

@@ -381,6 +381,8 @@ begin
   try
     for I := 0 to CnAIEngineOptionManager.OptionCount - 1 do
     begin
+      Eng := CnAIEngineManager.GetEngineByOption(CnAIEngineOptionManager.Options[I]);
+
       // 给每个 Options 创建一个 Tab
       FTabsheets[I] := TTabSheet.Create(pgcAI);
       FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I]);
@@ -388,6 +390,7 @@ begin
 
       // 给每个 Tab 里塞一个 Frame
       FOptionFrames[I] := TCnAICoderOptionFrame.Create(FTabsheets[I]);
+      FOptionFrames[I].Engine := Eng;
       FOptionFrames[I].Name := 'CnAICoderOptionFrame' + IntToStr(I);
       FOptionFrames[I].Parent := FTabsheets[I];
       FOptionFrames[I].Top := 0;
@@ -395,14 +398,9 @@ begin
       FOptionFrames[I].Align := alClient;
 
       // 给每个 Frame 里的东西塞 Option 内容
-      FOptionFrames[I].edtURL.Text := CnAIEngineOptionManager.Options[I].URL;
-      FOptionFrames[I].cbbModel.Text := CnAIEngineOptionManager.Options[I].Model;
-      FOptionFrames[I].edtTemperature.Text := FloatToStr(CnAIEngineOptionManager.Options[I].Temperature);
-      FOptionFrames[I].edtAPIKey.Text := CnAIEngineOptionManager.Options[I].APIKey;
-      FOptionFrames[I].chkStreamMode.Checked := CnAIEngineOptionManager.Options[I].Stream;
+      FOptionFrames[I].LoadFromAnOption(CnAIEngineOptionManager.Options[I]);
 
       // 如果不需要 APIKey 就禁用
-      Eng := CnAIEngineManager.GetEngineByOption(CnAIEngineOptionManager.Options[I]);
       if (Eng <> nil) and not Eng.NeedApiKey then
       begin
         FOptionFrames[I].lblAPIKey.Enabled := False;
@@ -446,11 +444,7 @@ begin
   for I := 0 to Length(FOptionFrames) - 1 do
   begin
     // 存标准属性
-    CnAIEngineOptionManager.Options[I].URL := FOptionFrames[I].edtURL.Text;
-    CnAIEngineOptionManager.Options[I].APIKey := FOptionFrames[I].edtAPIKey.Text;
-    CnAIEngineOptionManager.Options[I].Model := FOptionFrames[I].cbbModel.Text;
-    CnAIEngineOptionManager.Options[I].Temperature := StrToFloat(FOptionFrames[I].edtTemperature.Text);
-    CnAIEngineOptionManager.Options[I].Stream := FOptionFrames[I].chkStreamMode.Checked;
+    FOptionFrames[I].SaveToAnOption(CnAIEngineOptionManager.Options[I]);
 
     // 存额外属性
     FOptionFrames[I].SaveExtraOptions;

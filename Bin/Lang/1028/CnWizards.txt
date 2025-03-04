@@ -2858,6 +2858,7 @@ TCnAICoderConfigForm.Caption=AI 輔助編碼設置
 TCnAICoderConfigForm.chkProxy.Caption=使用代理：
 TCnAICoderConfigForm.lblActiveEngine.Caption=當前 AI 引擎：
 TCnAICoderConfigForm.lblTimeout.Caption=超時秒數：
+TCnAICoderOptionFrame.btnReset.Hint=重置
 TCnAICoderOptionFrame.chkStreamMode.Caption=流式輸出
 TCnAICoderOptionFrame.lblAPIKey.Caption=API 密鑰：
 TCnAICoderOptionFrame.lblApply.Caption=申請
