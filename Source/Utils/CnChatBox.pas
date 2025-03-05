@@ -213,10 +213,13 @@ type
     function GetItem(Index: Integer): TCnChatItem;
     procedure SetItem(Index: Integer; const Value: TCnChatItem);
     procedure SetItems(const Value: TCnChatItems);
-    procedure FOnMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure FOnMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint;
+      var Handled: Boolean);
+    procedure FOnMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint;
+      var Handled: Boolean);
     procedure FOnMouseMoveEvent(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure FOnClick(Sender: TObject);
+    procedure FontChanged(var Message: TMessage); message CM_FONTCHANGED;
 
     procedure FOnMouseEnter(Sender: TObject);
     procedure FOnMouseLeave(Sender: TObject);
@@ -626,6 +629,15 @@ begin
   NeedRepaint;
 end;
 
+procedure TCnCustomChatBox.FontChanged(var Message: TMessage);
+var
+  I: Integer;
+begin
+  for I := FItems.Count - 1 downto 0 do
+    FItems[I].NeedCalc := True;
+  NeedRepaint;
+end;
+
 function TCnCustomChatBox.GetItem(Index: Integer): TCnChatItem;
 begin
   Result := FItems[Index];
@@ -697,12 +709,14 @@ begin
         // Limit.Inflate();
         FNeedImage := False;
         if FDrawImages then
+        begin
           if (FItems[I] is TCnChatMessage) then
           begin
             FNeedImage := ((FItems[I] as TCnChatMessage).FromType = cmtYou) or (CnGetRectWidth(ClientRect) >
               LimitWidth);
             CnSetRectWidth(Limit, CnGetRectWidth(Limit) - FImageMargin);
           end;
+        end;
 
         CnSetRectWidth(Limit, Min(500, CnGetRectWidth(Limit)));
         TxtRect := FItems[I].CalcRect(Canvas, Limit);
