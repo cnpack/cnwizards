@@ -3313,11 +3313,8 @@
   {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S and above integrate Castalia.
 {$ENDIF}
 
-{$IFDEF COMPILER21_UP}                  // COMPILER21 = XE7
-  {$DEFINE NOT_SUPPORT_BDE}             // 不集成 BDE 了
-{$ENDIF}
-
 {$IFDEF DELPHIXE7_UP}
+  {$DEFINE NOT_SUPPORT_BDE}             // 不集成 BDE 了
   {$DEFINE SUPPORT_TBYTES_OPERATION}    // XE7 的 TBytes 开始支持相加、插入等操作
   {$DEFINE FMX_CONTROL_HAS_SIZE}        // XE7 的 FMX 的 Control 才有 Size 属性
 {$ENDIF}
@@ -3346,43 +3343,41 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
+  {$IFNDEF DISABLE_FMX}
+    {$DEFINE SUPPORT_FMX}                      // XE2 有 FMX，按需启用
+  {$ENDIF}
+  {$DEFINE SUPPORT_CROSS_PLATFORM}             // XE2 支持跨平台
+  {$DEFINE SUPPORT_32_AND_64}                  // XE2 Support Win32 and Win64
   {$DEFINE SUPPORT_WIN64}                      // XE2 Supports Win64
   {$DEFINE SUPPORT_MACOS32}                    // XE2 Supports MacOS 32
-  {$DEFINE SUPPORT_UNITNAME_DOT}
+  {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 单元名开始带点
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
   {$DEFINE SUPPORT_GDIPLUS}                    // XE2 Supports GDI+
   {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 Defined Int64Array
   {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 System.UITypes Has TAlphaColors
+  {$DEFINE LIST_NEW_POINTER}                   // XE2 List has a New Pointer
+  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info
+  {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
+    // A Bug Can't get Correct Env Option Values for Current Platform.
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
-  {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property.
-  {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE ToolsAPI has Debugger Visualizer Interfaces.
+  {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property
+  {$DEFINE FONT_HAS_QUALITY}                   // XE TFont has Quality for AntiAliasing
+  {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE ToolsAPI has Debugger Visualizer Interfaces
   {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE has TStrings Visualizer for Debug
-{$ENDIF}
-
-{$IFDEF BDS2012_UP}                        // 2012 = XE2
-  {$DEFINE SUPPORT_32_AND_64}              // XE2 Support Win32 and Win64
-  {$IFNDEF DISABLE_FMX}
-    {$DEFINE SUPPORT_FMX}
-  {$ENDIF}
-  {$DEFINE SUPPORT_CROSS_PLATFORM}         // XE2 支持跨平台
-  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info.
-  {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
-    // A Bug Can't get Correct Env Option Values for Current Platform.
-  {$DEFINE LIST_NEW_POINTER}
 {$ENDIF}
 
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}
-  {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI.
-  {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'.
+  {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI
+  {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'
   {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
   {$DEFINE IMAGELIST_BEGINENDUPDATE}       // 2010 开始，ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
   {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 下的 DebuggerService 有 ProcessDebugEvents
-  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette.
+  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
   {$DEFINE IDE_HAS_DATETIME_HINT}          // TDate/TTime/TDateTime shows Normally in Debug Hint
 {$ENDIF}
@@ -3410,14 +3405,14 @@
   {$DEFINE IDE_CODEINSIGHT_AUTOINVOKE}
   // IDE Code Insight has Auto Invoke Option
   {$DEFINE EDITVIEW_CONVERTPOS_BUG}
-  // 2009 or Above IEditView.ConvertPos Incorrect when Meeting Unicode Chars.
+  // 2009 or Above IEditView.ConvertPos Incorrect when Meeting Unicode Chars
 
-  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug.
+  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug
     {$DEFINE PROJECT_VERSION_NUMBER_BUG}
   {$ENDIF}
   {$DEFINE OTA_DPKOPTION_SETVALUE_CORRUPT_BUG}
   // A OpenTools API Bug IOTAProjectOptions.SetOptionValue under 2009 or above:
-  // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt.
+  // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt
 {$ELSE}
   {$DEFINE ZLIB_STREAM_NOSIZE}           // 2007 及以下的 Zlib 的解压缩流不支持 Size 操作
 {$ENDIF}
