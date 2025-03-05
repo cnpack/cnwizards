@@ -154,7 +154,7 @@ type
     property CurIndentSpace: Integer read GetCurIndentSpace;
     {* 当前行最前面的空格数}
     property LastIndentSpaceWithOutComments: Integer read GetLastIndentSpaceWithOutComments;
-    {* 上一个非自动换以及非注释的行的最前面的空格数}
+    {* 上一个非自动换以及非注释的行的最前面的空格数，注意在保留换行时不准确}
     property CodeWrapMode: TCnCodeWrapMode read FCodeWrapMode write FCodeWrapMode;
     {* 代码换行的设置}
     property KeepLineBreak: Boolean read FKeepLineBreak write FKeepLineBreak;
@@ -469,8 +469,10 @@ var
   begin
     Result := True;
     for J := FAutoWrapLines.Count - 1 downto 0 do
+    begin
       if Integer(FAutoWrapLines[J]) = Line then
         Exit;
+    end;
 
     Result := False;
   end;
@@ -481,6 +483,10 @@ begin
   S := '';
   for I := FActualLines.Count - 1 downto 0 do
   begin
+    // 注意此处 IsAutoWrapLineNumber 的判断在保留换行为 True 时并不符合实际情况，
+    // 保留换行时多出来的行没有自动换行记录，因此 IsAutoWrapLineNumber 会返回 False
+    // 保留换行新增的行会被错误地当作主行处理，导致后面多出一块缩进。
+    // 所以该函数外部进行了判断以减少一次不必要的缩进
     if (FActualLines[I] <> '') and not IsAutoWrapLineNumber(I) and not
       LineIsEmptyOrComment(FActualLines[I]) then
     begin
@@ -497,10 +503,12 @@ begin
   if Len > 0 then
   begin
     for I := 1 to Len do
+    begin
       if S[I] in [' ', #09] then
         Inc(Result)
       else
         Exit;
+    end;
   end;
 end;
 
@@ -861,8 +869,8 @@ begin
     LastSpaces := LastIndentSpaceWithOutComments;
     if (HeadSpaceCount(Str) < LastSpaces) or (LastSpaces = 0) then
     begin
-      if FCodeWrapMode = cwmSimple then // uses 区无需进一步缩进
-        I := LastSpaces
+      if (FCodeWrapMode = cwmSimple) or KeepLineBreak then // uses 区无需进一步缩进
+        I := LastSpaces     // 注意：LastIndentSpaceWithOutComments 的判断因与保留换行为 True 冲突，得忽略一次缩进
       else
         I := LastSpaces + CnPascalCodeForRule.TabSpaceCount;
 
