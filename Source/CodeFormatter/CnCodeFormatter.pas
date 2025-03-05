@@ -3172,7 +3172,14 @@ begin
   try
     Match(tokLB, PreSpaceCount);
     FormatEnumeratedList;
-    Match(tokRB);
+
+
+    SpecifyElementType(pfetExprListRightBracket);
+    try
+      Match(tokRB);
+    finally
+      RestoreElementType;
+    end;
   finally
     FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
   end;
