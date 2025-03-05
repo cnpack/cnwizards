@@ -687,6 +687,9 @@ begin
   BeginPaint(Handle, lpPaint);
   with Canvas do
   begin
+{$IFDEF FONT_HAS_QUALITY}
+    Font.Quality := fqClearTypeNatural;
+{$ENDIF}
     if not FCalcOnly then
     begin
       Brush.Color := BaseColor;
