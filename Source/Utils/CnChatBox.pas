@@ -485,7 +485,7 @@ begin
   if not Focused then
     SetFocus;
 
-  if (not FDragItem) and (not FScrolling) and (FSelectionMode) then
+  if (not FDragItem) and (not FScrolling) and FSelectionMode then
   begin
     if FItemUnderMouse >= 0 then
       FItems[FItemUnderMouse].Selected := not FItems[FItemUnderMouse].Selected;
@@ -656,7 +656,7 @@ end;
 
 procedure TCnCustomChatBox.Paint;
 const
-  LimitWidth = 1000;
+  MAX_MSG_WIDTH = 800; // 消息最大宽度，避免太宽一行而难看
 var
   Rect, ItemRect, LastRect, TxtRect, Limit, ImageRect: TRect;
   BaseColor: TColor;
@@ -679,7 +679,7 @@ begin
   Rect := ClientRect;
 
   CnRectInflate(Rect, -BorderWidth, -BorderWidth);
-  // Rect.Inflate(-BorderWidth, -BorderWidth);
+
   Rect.Right := Rect.Right - 25; //scroll
   BaseColor := Color;
   FStartDraw := False;
@@ -687,9 +687,6 @@ begin
   BeginPaint(Handle, lpPaint);
   with Canvas do
   begin
-{$IFDEF FONT_HAS_QUALITY}
-    Font.Quality := fqClearTypeNatural;
-{$ENDIF}
     if not FCalcOnly then
     begin
       Brush.Color := BaseColor;
@@ -700,7 +697,6 @@ begin
     LastRect.Top := Rect.Bottom;
     LastRect.Right := Rect.Right;
     LastRect.Bottom := Rect.Bottom;
-    // LastRect := TRect.Create(Rect.Left, Rect.Bottom, Rect.Right, Rect.Bottom);
 
     FItemUnderMouse := -1;
     if FItems.Count > 0 then
@@ -709,37 +705,31 @@ begin
       begin
         Limit := Rect;
         CnRectInflate(Limit, -PaddingSize, -PaddingSize);
-        // Limit.Inflate();
+
         FNeedImage := False;
         if FDrawImages then
         begin
           if (FItems[I] is TCnChatMessage) then
           begin
-            FNeedImage := ((FItems[I] as TCnChatMessage).FromType = cmtYou) or (CnGetRectWidth(ClientRect) >
-              LimitWidth);
+            FNeedImage := ((FItems[I] as TCnChatMessage).FromType = cmtYou);
             CnSetRectWidth(Limit, CnGetRectWidth(Limit) - FImageMargin);
           end;
         end;
 
-        CnSetRectWidth(Limit, Min(500, CnGetRectWidth(Limit)));
+        CnSetRectWidth(Limit, Min(MAX_MSG_WIDTH, CnGetRectWidth(Limit)));
         TxtRect := FItems[I].CalcRect(Canvas, Limit);
 
         Brush.Color := FColorYou;
 
         ItemRect := TxtRect;
         CnRectInflate(ItemRect, PaddingSize, PaddingSize);
-        // ItemRect.Inflate();
         CnSetRectLocation(ItemRect, Rect.Left, LastRect.Top - CnGetRectHeight(ItemRect));
-        // ItemRect.Location := TPoint.Create(Rect.Left, LastRect.Top - ItemRect.Height);
+
         LastRect := ItemRect;
         if (FItems[I] is TCnChatInfo) then
-        begin
-          CnRectOffset(LastRect, 0, -20);
-          // LastRect.Offset(0, -20);
-        end
+          CnRectOffset(LastRect, 0, -20)
         else
           CnRectOffset(LastRect, 0, -10);
-        // LastRect.Offset(0, -10);
 
         if FSkip then
           Continue;
@@ -749,24 +739,19 @@ begin
         begin
           if (FItems[I] as TCnChatMessage).FromType = cmtMe then
           begin
-            if CnGetRectWidth(ClientRect) <= LimitWidth then
-              CnSetRectLocation(ItemRect, Rect.Right - CnGetRectWidth(ItemRect), ItemRect.Top)
-              // ItemRect.Location := TPoint.Create()
-            else if FNeedImage then
+            CnSetRectLocation(ItemRect, Rect.Right - CnGetRectWidth(ItemRect), ItemRect.Top);
+            if FNeedImage then
               CnSetRectLocation(ItemRect, ItemRect.Left + FImageMargin, ItemRect.Top);
-              // ItemRect.Location := TPoint.Create(ItemRect.Left + FImageMargin, ItemRect.Top);
+
             Brush.Color := FColorMe;
           end
           else if FNeedImage then
             CnSetRectLocation(ItemRect, ItemRect.Left + FImageMargin, ItemRect.Top);
-          // ItemRect.Location := TPoint.Create(ItemRect.Left + FImageMargin, ItemRect.Top);
         end
         else if (FItems[I] is TCnChatInfo) then
         begin
-          if CnGetRectWidth(ClientRect) <= LimitWidth then
-            CnRectOffset(ItemRect, CnGetRectCenter(Rect).X - (CnGetRectWidth(ItemRect) div 2 + BorderWidth), 0)
-          else
-            CnRectOffset(ItemRect, (LimitWidth div 2) div 2 - (CnGetRectWidth(ItemRect) div 2 + BorderWidth), 0);
+          CnRectOffset(ItemRect, CnGetRectCenter(Rect).X - (CnGetRectWidth(ItemRect) div 2 + BorderWidth), 0);
+
           if (FItems[I] as TCnChatInfo).FillColor = clNone then
             Brush.Color := FColorInfo
           else
@@ -794,13 +779,13 @@ begin
             Brush.Color := FColorSelection;
           if not FCalcOnly then
           begin
-            Pen.Color := Brush.Color; // ColorDarker(Brush.Color, 5);
+            Pen.Color := Brush.Color;
             CnCanvasRoundRect(Canvas, ItemRect, Radius, Radius);
-            // RoundRect(ItemRect, Radius, Radius);
+
             Brush.Style := bsClear;
           end;
           CnSetRectLocation(TxtRect, ItemRect.Left + PaddingSize, ItemRect.Top + PaddingSize);
-          // TxtRect.Location := TPoint.Create();
+
           if not FCalcOnly then
           begin
             FItems[I].DrawRect(Canvas, TxtRect);
@@ -812,7 +797,7 @@ begin
             ImageRect.Top := 0;
             ImageRect.Right := ImageMargin;
             ImageRect.Bottom := ImageMargin;
-            // ImageRect := TRect.Create(0, 0, ImageMargin, ImageMargin);
+
             CnSetRectLocation(ImageRect, ItemRect.Left - CnGetRectWidth(ImageRect) - 3, ItemRect.Bottom
               - CnGetRectHeight(ImageRect) + 2);
             if not FCalcOnly then
@@ -854,7 +839,6 @@ begin
         begin
           Pen.Color := Brush.Color;
           CnCanvasRoundRect(Canvas, ItemRect, 6, 6);
-          // RoundRect(ItemRect, 6, 6);
         end;
 
         LastRect := ItemRect; // ItemRect 现在是滚动条区域
@@ -862,8 +846,8 @@ begin
         FScrollLength := CnGetRectHeight(ItemRect) - CnGetRectHeight(LastRect);
 
         FScrollPos := Round((FScrollLength / 100) * ((100 / FMaxOffset) * FOffset));
-        CnSetRectLocation(LastRect, LastRect.Left, (ItemRect.Bottom - CnGetRectHeight(LastRect)) - FScrollPos);
-        // LastRect.Location := TPoint.Create();
+        CnSetRectLocation(LastRect, LastRect.Left,
+          (ItemRect.Bottom - CnGetRectHeight(LastRect)) - FScrollPos);
 
         if not FCalcOnly then
         begin
@@ -872,7 +856,6 @@ begin
           Brush.Color := FColorScrollButton;
           Pen.Color := Brush.Color;
           CnCanvasRoundRect(Canvas, LastRect, 6, 6);
-          // RoundRect(LastRect, 6, 6);
         end;
       end;
     end;
@@ -936,8 +919,6 @@ begin
       Pt := ClientToScreen(Point(0,0));
 
     PopupMenu.Popup(Pt.X, Pt.Y);
-    //TrackPopupMenu(PopupMenu.Items.Handle, TPM_LEFTALIGN or TPM_RIGHTBUTTON,
-    //  Pt.x, Pt.y, 0, 0, nil);
     Message.Result := 1;
   end;
 end;
