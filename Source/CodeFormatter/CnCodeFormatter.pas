@@ -35,6 +35,9 @@ unit CnCodeFormatter;
 *           如果语句间不因注释等，单纯多出现了空行，跟到 DoBlankLinesWhenSkip 多输出了空行
 *           则八成是外部应设 KeepOneBlankLine 为 False，而被嵌套的给盖掉了
 *
+*           如果语句内因为双斜杆注释导致下一行缩进错误，不保留换行时八成是 NeedPadding
+*           的位置计算时漏了该处，或 NeedPaddingAndUnIndent 结尾处需要反缩进时漏了
+*
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell

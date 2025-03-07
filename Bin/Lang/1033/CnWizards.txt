@@ -2434,6 +2434,7 @@ TCnProcListForm.actOpen.Caption=&Goto Implementation
 TCnProcListForm.actOpen.Hint=Goto Implementation of Selected Procedure
 TCnProcListForm.btnPreviewDown.Hint=Preview at Bottom
 TCnProcListForm.btnPreviewRight.Hint=Preview at Right
+TCnProcListForm.btnShowAnonymous.Hint=Show / Hide Anonymous
 TCnProcListForm.btnShowPreview.Hint=Show / Hide Preview
 TCnProcListForm.lblFiles.Caption=&Unit:
 TCnProcListForm.lblProject.Caption=&Classes:

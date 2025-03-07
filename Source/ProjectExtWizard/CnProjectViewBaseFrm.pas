@@ -1279,8 +1279,10 @@ var
   I: Integer;
 begin
   if FOutDataListRef = nil then // 有外部的 List 存在时则不能释放 Object
+  begin
     for I := 0 to DataList.Count - 1 do
       DataList.Objects[I].Free;
+  end;
   DataList.Clear;
 end;
 

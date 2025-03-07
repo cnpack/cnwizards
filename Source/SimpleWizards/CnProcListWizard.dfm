@@ -95,8 +95,17 @@ inherited CnProcListForm: TCnProcListForm
       Style = tbsCheck
       OnClick = btnShowPreviewClick
     end
-    object btn2: TToolButton
+    object btnShowAnonymous: TToolButton
       Left = 409
+      Top = 0
+      Hint = 'Show / Hide Anonymous'
+      Caption = 'btnShowAnonymous'
+      ImageIndex = 109
+      Style = tbsCheck
+      OnClick = btnShowAnonymousClick
+    end
+    object btn2: TToolButton
+      Left = 432
       Top = 0
       Width = 8
       Caption = 'btn2'
@@ -104,7 +113,7 @@ inherited CnProcListForm: TCnProcListForm
       Style = tbsSeparator
     end
     object btnPreviewRight: TToolButton
-      Left = 417
+      Left = 440
       Top = 0
       Hint = 'Preview at Right'
       Grouped = True
@@ -113,7 +122,7 @@ inherited CnProcListForm: TCnProcListForm
       OnClick = btnPreviewRightClick
     end
     object btnPreviewDown: TToolButton
-      Left = 440
+      Left = 463
       Top = 0
       Hint = 'Preview at Bottom'
       Grouped = True

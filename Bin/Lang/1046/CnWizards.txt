@@ -2434,6 +2434,7 @@ TCnProcListForm.actOpen.Caption=&Ir para Implementação
 TCnProcListForm.actOpen.Hint=Ir para Implementação do Procedimento Selecionado
 TCnProcListForm.btnPreviewDown.Hint=Vista previa abajo
 TCnProcListForm.btnPreviewRight.Hint=Vista previa a la derecha
+TCnProcListForm.btnShowAnonymous.Hint=Mostrar/Ocultar Anônimos
 TCnProcListForm.btnShowPreview.Hint=Mostrar/Ocultar Pré-visualização
 TCnProcListForm.lblFiles.Caption=&Unidade:
 TCnProcListForm.lblProject.Caption=&Classes:

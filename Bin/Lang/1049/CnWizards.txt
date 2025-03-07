@@ -2434,6 +2434,7 @@ TCnProcListForm.actOpen.Caption=Перейти к реализации
 TCnProcListForm.actOpen.Hint=Перейти к реализации выбранной процедуры
 TCnProcListForm.btnPreviewDown.Hint=Предварительный просмотр снизу
 TCnProcListForm.btnPreviewRight.Hint=Предварительный просмотр справа
+TCnProcListForm.btnShowAnonymous.Hint=Показать/убрать Анонимные
 TCnProcListForm.btnShowPreview.Hint=Показать/убрать реализацию
 TCnProcListForm.lblFiles.Caption=Модуль:
 TCnProcListForm.lblProject.Caption=Классы:

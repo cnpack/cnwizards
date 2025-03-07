@@ -2434,6 +2434,7 @@ TCnProcListForm.actOpen.Caption=跳轉(&G)
 TCnProcListForm.actOpen.Hint=跳轉至選定的過程
 TCnProcListForm.btnPreviewDown.Hint=預覽窗口在底部
 TCnProcListForm.btnPreviewRight.Hint=預覽窗口在右側
+TCnProcListForm.btnShowAnonymous.Hint=切換匿名函數的顯示
 TCnProcListForm.btnShowPreview.Hint=切換預覽視窗的顯示
 TCnProcListForm.lblFiles.Caption=單元(&U)：
 TCnProcListForm.lblProject.Caption=分類(&C)：

@@ -172,6 +172,7 @@ type
     btnPreviewRight: TToolButton;
     btnPreviewDown: TToolButton;
     btn2: TToolButton;
+    btnShowAnonymous: TToolButton;
     procedure FormDestroy(Sender: TObject);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure btnShowPreviewClick(Sender: TObject);
@@ -190,6 +191,7 @@ type
     procedure SplitterMoved(Sender: TObject);
     procedure btnPreviewRightClick(Sender: TObject);
     procedure btnPreviewDownClick(Sender: TObject);
+    procedure btnShowAnonymousClick(Sender: TObject);
   private
     FFileName: string;
 {$IFNDEF STAND_ALONE}
@@ -560,12 +562,14 @@ const
   csPreviewHeight = 'PreviewHeight';
   csPreviewWidth = 'PreviewWidth';
   csPreviewIsRight = 'PreviewIsRight';
+  csShowAnonymous = 'ShowAnonymous';
   csDropDown = 'DropDown';
   csClassComboWidth = 'ClassComboWidth';
   csProcComboWidth = 'ProcComboWidth';
 
   csCRLF = #13#10;
   csSep = ';';
+  csAnonymous = '<anonymous>';
 
   CnDropDownListCount = 7;
 
@@ -1851,6 +1855,7 @@ begin
 {$IFDEF STAND_ALONE}
   MatchMode := mmFuzzy;
   btnShowPreview.Down := True;
+  btnShowAnonymous.Down := True;
 {$ELSE}
   InitFileComboBox;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
@@ -3178,6 +3183,7 @@ begin
   FPreviewIsRight := Ini.ReadBool(aSection, csPreviewIsRight, False);
   FPreviewHeight := Ini.ReadInteger(aSection, csPreviewHeight, 0);
   FPreviewWidth := Ini.ReadInteger(aSection, csPreviewWidth, 0);
+  btnShowAnonymous.Down := Ini.ReadBool(aSection, csShowAnonymous, True);
   mmoContent.Visible := btnShowPreview.Down;
   Splitter.Visible := btnShowPreview.Down;
 end;
@@ -3277,6 +3283,7 @@ begin
     Ini.WriteInteger(aSection, csPreviewHeight, FPreviewHeight);
   if FPreviewWidth > 0 then
     Ini.WriteInteger(aSection, csPreviewWidth, FPreviewWidth);
+  Ini.WriteBool(aSection, csShowAnonymous, btnShowAnonymous.Down);
 end;
 
 procedure TCnProcListForm.UpdateComboBox;
@@ -3492,14 +3499,14 @@ begin
         // Check for an implementation procedural type
         if Length(TempStr) = 0 then
         begin
-          TempStr := '<anonymous>';
+          TempStr := csAnonymous;
         end;
         // Remove any trailing ';'
         if TempStr[Length(TempStr)] = ';' then
           Delete(TempStr, Length(TempStr), 1);
         TempStr := Trim(TempStr);
         if (LowerCase(TempStr) = 'procedure') or (LowerCase(TempStr) = 'function') then
-          TempStr := '<anonymous>';
+          TempStr := csAnonymous;
 
         ElementInfo.Text := TempStr;
         // Add to the object comboBox and set the object name in ElementInfo
@@ -3980,8 +3987,9 @@ var
 {$ENDIF}
 begin
   Result := False;
-  if (AMatchStr = '') and FIsObjAll then
+  if (AMatchStr = '') and FIsObjAll and btnShowAnonymous.Down then
   begin
+    // 显示匿名函数才直接跳出，不显示的情况下，Pascal 和 Cpp 都额外加了处理
     Result := True;
     Exit;
   end;
@@ -3997,10 +4005,25 @@ begin
         // 只搜函数名，不搜包括类名在内的函数名
         ProcName := GetMethodName(Info.Text);
         Offset := Pos(ProcName, Info.Text);
-      end;
 
+        // 先控制匿名函数显示与否
+        if not btnShowAnonymous.Down and (ProcName = csAnonymous) then
+          Exit;
+
+        if (AMatchStr = '') and FIsObjAll then // 再处理完整情况跳出
+        begin
+          Result := True;
+          Exit;
+        end;
+      end;
     ltCpp:
       begin
+        if (AMatchStr = '') and FIsObjAll then // Cpp 下可能上面未被跳出，再处理一下完整情况跳出
+        begin
+          Result := True;
+          Exit;
+        end;
+
         ProcName := Info.ProcName;
         Offset := Pos(ProcName, Info.Text);  // 如果是构造函数就会出现重复，导致 Offset 为 1，下面额外处理一下
         if Offset = 1 then
@@ -5008,6 +5031,11 @@ begin
     FProcCombo.Text := '';
   if FClassCombo <> nil then
     FClassCombo.Text := '';
+end;
+
+procedure TCnProcListForm.btnShowAnonymousClick(Sender: TObject);
+begin
+  UpdateListView;
 end;
 
 initialization
