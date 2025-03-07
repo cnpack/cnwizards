@@ -24,7 +24,7 @@ unit CnSrcEditorKey;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：代码编辑器按键扩展工具单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：当前编辑器的 IOTAEditPosition 的 SearchAgain 方法经常返回 False
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -3311,15 +3311,14 @@ begin
   Position.SearchOptions.CaseSensitive := FCaseSense;
   Position.SearchOptions.WordBoundary := FWholeWords;
   Position.SearchOptions.RegularExpression := FRegExp;
-  Position.SearchOptions.FromCursor := True; // 补上这一句以弥补 SearchAgain 失败的问题
+  Position.SearchOptions.WholeFile := True;
+  Position.SearchOptions.FromCursor := True; // 补上这两句以弥补 SearchAgain 失败的问题
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('F3 Search: Set Options: Case %d, Word %d, Reg %d.',
     [Integer(FCaseSense), Integer(FWholeWords), Integer(FRegExp)]);
-{$ENDIF}
-
-{$IFDEF DEBUG}
   CnDebugger.LogMsg('F3 Search: ' + SearchString);
 {$ENDIF}
+
   Found := False;
   FOldSearchText := Position.SearchOptions.SearchText;
 
@@ -3333,7 +3332,7 @@ begin
 
     if not Found and FSearchWrap then // 是否回绕查找
     begin
-      Found := Position.Move(1, 1);
+      Found := Position.Move(1, 1); // 复用 Found 变量
       if not Found then
       begin
 {$IFDEF DEBUG}
