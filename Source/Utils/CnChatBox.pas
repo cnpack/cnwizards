@@ -258,6 +258,7 @@ type
     function NeedDrawDownButton: Boolean;
     function GetShowDownButton: Boolean;
     procedure SetShowDownButton(const Value: Boolean);
+    function GetScaledFactor: Single;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure Paint; override;
@@ -643,6 +644,15 @@ begin
   Result := FItems[Index];
 end;
 
+function TCnCustomChatBox.GetScaledFactor: Single;
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+  Result := Self.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
+{$ELSE}
+  Result := 1.0; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
+{$ENDIF}
+end;
+
 function TCnCustomChatBox.GetShowDownButton: Boolean;
 begin
   Result := FShowDownButton;
@@ -656,7 +666,7 @@ end;
 
 procedure TCnCustomChatBox.Paint;
 const
-  MAX_MSG_WIDTH = 800; // 消息最大宽度，避免太宽一行而难看
+  MAX_MSG_WIDTH = 1200; // 消息最大宽度，避免太宽一行而难看，但现在暂时不用
 var
   Rect, ItemRect, LastRect, TxtRect, Limit, ImageRect: TRect;
   BaseColor: TColor;
@@ -678,9 +688,9 @@ begin
   Inc(FPaintCounter);
   Rect := ClientRect;
 
-  CnRectInflate(Rect, -BorderWidth, -BorderWidth);
+  CnRectInflate(Rect, Round(-BorderWidth * GetScaledFactor), Round(-BorderWidth * GetScaledFactor));
 
-  Rect.Right := Rect.Right - 25; //scroll
+  Rect.Right := Rect.Right - Round(25 * GetScaledFactor); //scroll
   BaseColor := Color;
   FStartDraw := False;
   FSkip := False;
@@ -704,7 +714,7 @@ begin
       for I := FItems.Count - 1 downto 0 do
       begin
         Limit := Rect;
-        CnRectInflate(Limit, -PaddingSize, -PaddingSize);
+        CnRectInflate(Limit, Round(-PaddingSize * GetScaledFactor), Round(-PaddingSize * GetScaledFactor));
 
         FNeedImage := False;
         if FDrawImages then
@@ -716,7 +726,8 @@ begin
           end;
         end;
 
-        CnSetRectWidth(Limit, Min(MAX_MSG_WIDTH, CnGetRectWidth(Limit)));
+        // 暂时取消消息最大限制宽度
+        // CnSetRectWidth(Limit, Min(MAX_MSG_WIDTH, CnGetRectWidth(Limit)));
         TxtRect := FItems[I].CalcRect(Canvas, Limit);
 
         Brush.Color := FColorYou;
