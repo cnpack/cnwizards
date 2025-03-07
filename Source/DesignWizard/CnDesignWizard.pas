@@ -1028,7 +1028,7 @@ begin
     end;
 
     for I := 0 to ControlList.Count - 1 do
-      TControl(ControlList[I]).Invalidate;
+      InvalidateControl(ControlList[I]);
     
     if IsModified then
     begin
