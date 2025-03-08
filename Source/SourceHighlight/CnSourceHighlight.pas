@@ -4110,6 +4110,13 @@ var
   end;
 
 begin
+  if LogicLineNum < 0 then
+  begin
+    // 64 位 D12 下在设计期界面打开窗体列表时，不知道怎的此处会进来多次绘制事件
+    // 且逻辑行号为 -1 导致我们出错，此处检测绕开
+    Exit;
+  end;
+
   with Editor do
   begin
     if IndexOfBlockMatch(EditControl) >= 0 then
