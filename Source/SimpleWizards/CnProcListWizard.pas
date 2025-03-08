@@ -275,6 +275,7 @@ type
     FMatchMode: TCnMatchMode;
     FInfoItems: TStrings; // 存储原始列表内容
     FDisableClickFlag: Boolean;
+    FShowAnonymous: Boolean;
     procedure CMHintShow(var Message: TMessage); message CM_HINTSHOW;
     procedure ListDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
@@ -295,6 +296,7 @@ type
     property InfoItems: TStrings read FInfoItems;
     property MatchStr: string read FMatchStr write SetMatchStr;
     property MatchMode: TCnMatchMode read FMatchMode write FMatchMode;
+    property ShowAnonymous: Boolean read FShowAnonymous write FShowAnonymous;
   end;
 
 //==============================================================================
@@ -411,6 +413,7 @@ type
     FPreviewLineCount: Integer;
     FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
     FObjStrings: TStringList;  // 存储当前 ProcToolbar 的类元素列表
+    FShowAnonymous: Boolean;
 {$IFNDEF STAND_ALONE}
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
@@ -486,6 +489,9 @@ type
     // 注：有其他的设置在 Form 的属性中，不完全在此地
     property PreviewLineCount: Integer read FPreviewLineCount write FPreviewLineCount;
     {* 预览窗口中的行数量}
+
+    property ShowAnonymous: Boolean read FShowAnonymous write FShowAnonymous;
+    {* 用来控制是否显示匿名函数，需要在对话框与下拉工具栏之间传递}
 
 {$IFNDEF STAND_ALONE}
     property UseEditorToolBar: Boolean read FUseEditorToolBar write SetUseEditorToolBar;
@@ -1633,6 +1639,8 @@ begin
 
   ToolbarClassComboWidth := Ini.ReadInteger('', csToolbarClassComboWidth, 0);
   ToolbarProcComboWidth := Ini.ReadInteger('', csToolbarProcComboWidth, 0);
+
+  ShowAnonymous := Ini.ReadBool('', csShowAnonymous, True);
 end;
 
 procedure TCnProcListWizard.OnToolBarTimer(Sender: TObject);
@@ -1776,6 +1784,7 @@ begin
     ProcCombo.SetTextWithoutChange('');
     ProcCombo.DropDownList.MatchStr := '';
     ProcCombo.DropDownList.MatchMode := GetMatchMode(Obj);
+    ProcCombo.DropDownList.ShowAnonymous := FWizard.ShowAnonymous;
     ProcCombo.DropDownList.UpdateDisplay;
     if ProcCombo.DropDownList.DisplayItems.Count > 0 then
     begin
@@ -1836,6 +1845,8 @@ begin
 
   Ini.WriteInteger('', csToolbarClassComboWidth, ToolbarClassComboWidth);
   Ini.WriteInteger('', csToolbarProcComboWidth, ToolbarProcComboWidth);
+
+  Ini.WriteBool('', csShowAnonymous, ShowAnonymous);
 end;
 
 {$ENDIF}
@@ -1855,7 +1866,6 @@ begin
 {$IFDEF STAND_ALONE}
   MatchMode := mmFuzzy;
   btnShowPreview.Down := True;
-  btnShowAnonymous.Down := True;
 {$ELSE}
   InitFileComboBox;
   actHookIDE.Visible := CnEditorToolBarService <> nil;
@@ -1890,6 +1900,7 @@ end;
 procedure TCnProcListForm.FormShow(Sender: TObject);
 begin
   inherited;
+  btnShowAnonymous.Down := FWizard.ShowAnonymous;
   UpdateItemPosition;
 
   if FPreviewIsRight then
@@ -3183,7 +3194,6 @@ begin
   FPreviewIsRight := Ini.ReadBool(aSection, csPreviewIsRight, False);
   FPreviewHeight := Ini.ReadInteger(aSection, csPreviewHeight, 0);
   FPreviewWidth := Ini.ReadInteger(aSection, csPreviewWidth, 0);
-  btnShowAnonymous.Down := Ini.ReadBool(aSection, csShowAnonymous, True);
   mmoContent.Visible := btnShowPreview.Down;
   Splitter.Visible := btnShowPreview.Down;
 end;
@@ -3283,7 +3293,6 @@ begin
     Ini.WriteInteger(aSection, csPreviewHeight, FPreviewHeight);
   if FPreviewWidth > 0 then
     Ini.WriteInteger(aSection, csPreviewWidth, FPreviewWidth);
-  Ini.WriteBool(aSection, csShowAnonymous, btnShowAnonymous.Down);
 end;
 
 procedure TCnProcListForm.UpdateComboBox;
@@ -4841,11 +4850,16 @@ var
   Info: TCnElementInfo;
 begin
   FDisplayItems.Clear;
+
+  // 要添加的：原来的匹配条件，且“显示匿名，或不显示匿名时名字非匿名”
   if MatchMode in [mmStart, mmAnywhere] then
   begin
     for I := 0 to FInfoItems.Count - 1 do
-      if RegExpContainsText(FRegExpr, FInfoItems[I], FMatchStr, MatchMode = mmStart) then
+    begin
+      if (ShowAnonymous or (FInfoItems[I] <> csAnonymous)) and
+        RegExpContainsText(FRegExpr, FInfoItems[I], FMatchStr, MatchMode = mmStart) then
         FDisplayItems.AddObject(FInfoItems[I], FInfoItems.Objects[I]);
+    end;
   end
   else
   begin
@@ -4853,7 +4867,8 @@ begin
     begin
       Info := TCnElementInfo(FInfoItems.Objects[I]);
       Info.MatchIndexes.Clear;
-      if (FMatchStr = '') or FuzzyMatchStr(FMatchStr, FInfoItems[I], Info.MatchIndexes) then
+      if (ShowAnonymous or (FInfoItems[I] <> csAnonymous)) and
+        ((FMatchStr = '') or FuzzyMatchStr(FMatchStr, FInfoItems[I], Info.MatchIndexes)) then
         FDisplayItems.AddObject(FInfoItems[I], Info);
     end;
   end;
@@ -5036,6 +5051,7 @@ end;
 procedure TCnProcListForm.btnShowAnonymousClick(Sender: TObject);
 begin
   UpdateListView;
+  FWizard.ShowAnonymous := btnShowAnonymous.Down;
 end;
 
 initialization
