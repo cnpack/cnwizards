@@ -433,8 +433,10 @@ begin
   InitializeLang;
 
   CnLangManager.AddChangeNotifier(LanguageChanged);
-      Left := 0; Width := Screen.Width;
-      Top := 0; Height := Screen.Height - 25;
+  Left := 0;
+  Width := Screen.Width;
+  Top := 0;
+  Height := Screen.Height - 25;
   Application.Title := Caption;
   statMain.Panels[1].Text := Format(SCnCPUSpeedFmt, [CPUClock]);
 
@@ -462,6 +464,18 @@ begin
           Self.Left := CnViewerOptions.Left;
           Self.Height := CnViewerOptions.Height;
           Self.Width := CnViewerOptions.Width;
+
+          if Screen.MonitorCount = 1 then // 单显示器下限定位置免得找不到
+          begin
+            if Self.Top > Screen.Height - 25 then // 太下面
+              Self.Top := 0;
+            if Self.Left > Screen.Width then      // 太右边
+              Self.Left := 0;
+            if Self.Top + Self.Height < 0 then    // 太上面
+              Self.Top := 0;
+            if Self.Left + Self.Width < 0 then    // 太左边
+              Self.Left := 0;
+          end;
         end;
       1: PostMessage(Self.Handle, WM_SYSCOMMAND, SC_MINIMIZE, 0);
       2: PostMessage(Self.Handle, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
