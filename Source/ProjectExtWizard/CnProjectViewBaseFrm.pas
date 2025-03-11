@@ -695,7 +695,10 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.LoadSettings(Ini: TCustomIniFile; aSection: string);
+const
+  MIN_WH = 200;
 var
+  TW, TH: Integer;
   sFont: string;
 begin
   with TCnIniFile.Create(Ini) do
@@ -722,8 +725,19 @@ begin
     lvList.CustomSort(nil, 0); // 按保存的设置排序
     ChangeColumnArrow;
 
-    Width := ReadInteger(aSection, csWidth, Width);
-    Height := ReadInteger(aSection, csHeight, Height);
+    TW := ReadInteger(aSection, csWidth, 0);
+    TH := ReadInteger(aSection, csHeight, 0);
+{$IFDEF IDE_SUPPORT_HDPI}
+    TW := Round(TW * IdeGetScaledFactor(Self));
+    TH := Round(TH * IdeGetScaledFactor(Self));
+{$ENDIF}
+    if TW > MIN_WH then Width := TW;
+    if TH > MIN_WH then Height := TH;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Load Width %d Height %d after Scale', [Width, Height]);
+{$ENDIF}
+
 {$IFNDEF STAND_ALONE}
     CenterForm(Self);
     if FListViewWidthOldStr = '' then // 保留旧宽度供判断是否改变过
@@ -747,6 +761,7 @@ procedure TCnProjectViewBaseForm.SaveSettings(Ini: TCustomIniFile; aSection: str
 {$IFNDEF STAND_ALONE}
 var
   S: string;
+  TW, TH: Integer;
 
   function CheckWidthValid: Boolean;
   var
@@ -776,8 +791,19 @@ begin
     else
       WriteString(aSection, csFont, '');
 
-    WriteInteger(aSection, csWidth, Width);
-    WriteInteger(aSection, csHeight, Height);
+    TW := Width;
+    TH := Height;
+{$IFDEF IDE_SUPPORT_HDPI}
+    TW := Round(TW / IdeGetScaledFactor(Self));
+    TH := Round(TH / IdeGetScaledFactor(Self));
+{$ENDIF}
+    WriteInteger(aSection, csWidth, TW);
+    WriteInteger(aSection, csHeight, TH);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Save Width %d Height %d before Scale.', [TW, TH]);
+{$ENDIF}
+
 {$IFNDEF STAND_ALONE}
     if CnIsGEDelphi11Dot3 then
     begin
