@@ -42,12 +42,13 @@ uses
   ExtCtrls, StdCtrls, Buttons, ComCtrls, ToolWin, ActnList, ImgList, Registry,
   Contnrs, ShellAPI, Menus, IniFiles, ActiveX,
   CnCommon, CnWizCompilerConst, CnShellUtils, CnLangStorage, CnHashLangStorage,
-  CnClasses, CnLangMgr, CnWizLangID, CnWizHelp, CnWideCtrls;
+  CnClasses, CnLangMgr, CnWizLangID, CnWizHelp, CnWideCtrls, CnPE;
 
 const
   csCnPackRegPath = '\Software\CnPack\CnWizards\';
 
   csCnPackDisabledExperts = 'DisabledExperts\';
+  csCnPackDisabledExperts64 = 'DisabledExperts64\';
 
 var
   IDEInstalled: array[TCnCompiler] of Boolean;
@@ -67,11 +68,13 @@ type
     FEnabled: Boolean;
     FWizardName: string;
     FWizardPath: string;
+    FIs64: Boolean;
   public
     property Removed: Boolean read FRemoved write FRemoved;
     property Enabled: Boolean read FEnabled write FEnabled;
     property WizardName: string read FWizardName write FWizardName;
     property WizardPath: string read FWizardPath write FWizardPath;
+    property Is64: Boolean read FIs64 write FIs64;
   end;
 
   TCnManageWizardForm = class(TForm)
@@ -173,7 +176,8 @@ type
     procedure InitialIDENames;
     procedure CheckCmdParam;
     procedure CheckIDEInstalled;
-    procedure LoadIDEWizards(IDE: TCnCompiler);
+    function IDESupports64Bit(IDE: TCnCompiler): Boolean;
+    procedure LoadIDEWizards(IDE: TCnCompiler; Include64: Boolean = False);
     procedure LoadIDEWizardsFromRoot(AReg: TRegistry; Root: string;
       WizardEnabled: Boolean; IDE: TCnCompiler);
     procedure ClearIDEWizardsRoot(AReg: TRegistry; Root: string);
@@ -316,6 +320,38 @@ begin
         Reg.CloseKey;
       end;
 
+      if IDESupports64Bit(IDE) then
+      begin
+        // 可能有 64 位，照样处理
+        // 删除原有的，逐个保存
+        ClearIDEWizardsRoot(Reg, SCnIDERegPaths[IDE] + '\Experts 64');
+        ClearIDEWizardsRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts64
+          + SCnCompilerNames[IDE]);
+
+        if Reg.OpenKey(SCnIDERegPaths[IDE] + '\Experts 64', True) then
+        begin
+          for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写使能的
+          begin
+            WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
+            if WItem.Enabled then
+              Reg.WriteString(WItem.WizardName, WItem.WizardPath);
+          end;
+          Reg.CloseKey;
+        end;
+
+        if Reg.OpenKey(csCnPackRegPath + csCnPackDisabledExperts64
+          + SCnCompilerNames[IDE], True) then
+        begin
+          for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写禁用的
+          begin
+            WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
+            if not WItem.Enabled then
+              Reg.WriteString(WItem.WizardName, WItem.WizardPath);
+          end;
+          Reg.CloseKey;
+        end;
+      end;
+
       IDEWizardsChanged[IDE] := False;
     end;
   end;
@@ -335,6 +371,8 @@ begin
     WItem.Removed := False;
     WItem.WizardName := _CnChangeFileExt(_CnExtractFileName(dlgOpenWizard.FileName), '');
     WItem.WizardPath := dlgOpenWizard.FileName;
+
+    WItem.Is64 := GetPEFileType(dlgOpenWizard.FileName) = cpet64Bit;
 
     IDEWizardsList[TCnCompiler(lstIDEs.ItemIndex)].Add(WItem);
     UpdateWizardstoListView(TCnCompiler(lstIDEs.ItemIndex));
@@ -517,8 +555,9 @@ begin
 end;
 
 // 从注册表中读入某个版本的 IDE 专家列表
-procedure TCnManageWizardForm.LoadIDEWizards(IDE: TCnCompiler);
+procedure TCnManageWizardForm.LoadIDEWizards(IDE: TCnCompiler; Include64: Boolean);
 var
+  K: Integer;
   Reg: TRegistry;
 
   procedure DeleteDuplicated;
@@ -539,7 +578,7 @@ var
       while J < IDEWizardsList[IDE].Count do
       begin
         WItem2 := TCnWizardItem(IDEWizardsList[IDE].Items[J]);
-        if WItem1.WizardName = WItem2.WizardName then
+        if (WItem1.WizardName = WItem2.WizardName) and (WItem1.Is64 <> WItem2.Is64) then
         begin
           if WItem1.Enabled and not WItem2.Enabled then // 前面的使能，覆盖了后面的不使能
           begin
@@ -560,6 +599,16 @@ begin
   LoadIDEWizardsFromRoot(Reg, SCnIDERegPaths[IDE] + '\Experts', True, IDE);
   LoadIDEWizardsFromRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts
     + SCnCompilerNames[IDE], False, IDE);
+
+  if Include64 then
+  begin
+    LoadIDEWizardsFromRoot(Reg, SCnIDERegPaths[IDE] + '\Experts 64', True, IDE);
+    LoadIDEWizardsFromRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts64
+      + SCnCompilerNames[IDE], False, IDE);
+
+    for K := 0 to IDEWizardsList[IDE].Count - 1 do
+      TCnWizardItem(IDEWizardsList[IDE].Items[K]).Is64 := True;
+  end;
 
   FreeAndNil(Reg);
   DeleteDuplicated;
@@ -628,11 +677,14 @@ begin
     LItem.SubItems.Add(WItem.WizardPath);
     LItem.Checked := WItem.Enabled;
     LItem.Data := WItem;
+
+    if WItem.Is64 then
+      LItem.Caption := LItem.Caption + ' [64]';
   end;
   lvWizards.Items.EndUpdate;
 end;
 
-// 将ListView的节点Check状态更新到WizardList中。
+// 将 ListView 的节点 Check 状态更新到 WizardList 中。
 procedure TCnManageWizardForm.lvWizardsChange(Sender: TObject;
   Item: TListItem; Change: TItemChange);
 var
@@ -903,6 +955,7 @@ end;
 procedure TCnManageWizardForm.lvWizardsDblClick(Sender: TObject);
 var
   Item: TListItem;
+  W: TCnWizardItem;
   S: string;
 begin
   Item := lvWizards.Selected;
@@ -914,7 +967,14 @@ begin
     if (S <> '') and (UpperCase(S) <> UpperCase(Item.SubItems[0])) then
     begin
       Item.SubItems[0] := S;
-      TCnWizardItem(Item.Data).WizardPath := S;
+      W := TCnWizardItem(Item.Data);
+      W.WizardPath := S;
+
+      if GetPEFileType(S) = cpet64Bit then
+        Item.Caption := W.WizardName + ' [64]'
+      else
+        Item.Caption := W.WizardName;
+
       IDEWizardsChanged[TCnCompiler(lstIDEs.ItemIndex)] := True;
       FSaved := False;
     end;
@@ -931,6 +991,11 @@ begin
     IDEWizardsList[C] := nil;
     IDEWizardsChanged[C] := False;
   end;
+end;
+
+function TCnManageWizardForm.IDESupports64Bit(IDE: TCnCompiler): Boolean;
+begin
+  Result := (Ord(IDE) >= Ord(cnDelphi120A)) and (Ord(IDE) < Ord(cnBCB5));
 end;
 
 initialization
