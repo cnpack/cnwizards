@@ -1,0 +1,30 @@
+Delphi环境的数字很复杂且混乱。安装目录里有个数字，安装文件名里有个数字，编译器定义的编译条件里还有个数字，产品名里曾经有数字后来没数字现在又有数字还带小数点后的部分，并且，它们竟然全都不相等，不得不列一张表格来记录。
+
+安装文件名里的数字指类似于coreide90.bpl这种。
+
+安装目录                     安装后文件  编译器定义  产品名称
+Borland\Delphi5              50          VER130      5     C++Builder 5类似
+Borland\Delphi6              60          VER140      6     C++Builder 6类似
+Borland\Delphi7              70          VER150      7
+Borland\BDS\3.0              90          VER170      2005
+Borland\BDS\4.0              100         VER180      2006
+CodeGear\RAD Studio\5.0      100         VER190      2007  注意2007和2006安装后文件的数字相同
+CodeGear\RAD Studio\6.0      120         VER200      2009
+Embarcadero\RAD Studio\7.0   140         VER210      2010
+Embarcadero\RAD Studio\8.0   150         VER220      XE
+Embarcadero\RAD Studio\9.0   160         VER230      XE2
+Embarcadero\RAD Studio\10.0  170         VER240      XE3
+Embarcadero\RAD Studio\11.0  180         VER250      XE4
+Embarcadero\RAD Studio\12.0  190         VER260      XE5
+Embarcadero\Studio\14.0      200         VER270      XE6
+Embarcadero\Studio\15.0      210         VER280      XE7
+Embarcadero\Studio\16.0      220         VER290      XE8   分2个不兼容的Update
+Embarcadero\Studio\17.0      230         VER300      10
+Embarcadero\Studio\18.0      240         VER310      10.1
+Embarcadero\Studio\19.0      250         VER320      10.2
+Embarcadero\Studio\20.0      260         VER330      10.3  分2个不兼容的Update
+Embarcadero\Studio\21.0      270         VER340      10.4  分3个不兼容的Update
+Embarcadero\Studio\22.0      280         VER350      11
+Embarcadero\Studio\23.0      290         VER360      12，  分3个不兼容的Update
+
+注：在专家包的打包编译环境中，不带_后缀的是该版本最新的编译器。带_1的是该版本最老的不兼容编译器，_2的次老，以此类推。
