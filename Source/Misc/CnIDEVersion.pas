@@ -117,9 +117,9 @@ const
   CoreIdeLatest: TVersionNumber =
     (Major: 5; Minor: 0; Release: 6; Build: 18);
 var
-  ReadFileVersion: TVersionNumber; // Update 1
+  ReadFileVersion: TVersionNumber; // Update 1，注意文件和其他 IDE 不同
 begin
-  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coride50.bpl');
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
   LatestUpdate := 'Update 1';
 end;
@@ -276,7 +276,7 @@ end;
 function IsDelphiXE3IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 17; Minor: 0; Release: 4771; Build: 56661); // Update 2
+    (Major: 17; Minor: 0; Release: 4770; Build: 56661); // Update 2
 var
   ReadFileVersion: TVersionNumber;
 begin
@@ -454,11 +454,11 @@ end;
 function IsDelphi120AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 53982; Build: 0329); // 12.2 Patch 1，注意文件换了
+    (Major: 29; Minor: 0; Release: 53982; Build: 0329); // 12.2 Patch 1
 var
   ReadFileVersion: TVersionNumber;
 begin
-  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\dcc32.exe');
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
   LatestUpdate := 'Update 2 (12.2) Patch 1';
 end;
