@@ -339,6 +339,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
       FF8CFFFF8DFFFF8DFFFF8DFFFF8DFFFF8DFFFF8DFFFF8DFFFF8EFFFF4CFFFF1C
       DCDC}
     ShowHint = True
+    Stretch = True
     OnClick = imgDonationClick
   end
   object lblSource: TLabel
