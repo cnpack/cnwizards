@@ -648,6 +648,7 @@ InitOk:
   File "..\..\Bin\CnWizHelper.dll"
   File "..\..\Bin\CnZipUtils.dll"
 
+  File "..\..\Bin\CnWizLoader64.dll"
   File "..\..\Bin\CnWizRes64.dll"
   File "..\..\Bin\CnPngLib64.dll"
   File "..\..\Bin\CnFormatLibW64.dll"

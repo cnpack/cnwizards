@@ -87,7 +87,7 @@ See http://www.suigeneris.org/want/ for details.
   <!-- 版本类型属性，由命令行传入，如 want -Dlite=true -->
   <property name="release.pro"    value="" />
 
-  <property name="cnwizards_list" value="-cnwizloader,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-d120a64,-cb5,-cb6" />
+  <property name="cnwizards_list" value="-cnwizloader,-cnwizloader64,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-d120a64,-cb5,-cb6" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" />
   <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,makeinst" />
 
@@ -332,6 +332,7 @@ Usage: want [target-name] [-Dname=value]
   <!-- 编译 CnWizards DLLs -->
   <target name="cnwizards" depends="-cw_prepare,${cnwizards_list},-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
   <target name="cnwizloader" depends="-cnwizloader,-cw_final" description="Compile CnWizards Loader." />
+  <target name="cnwizloader64" depends="-cnwizloader64,-cw_final" description="Compile CnWizards 64-Bit Loader." />
   <target name="d5" depends="-d5,-cw_final" description="Compile CnWizards for Delphi 5." />
   <target name="d6" depends="-d6,-cw_final" description="Compile CnWizards for Delphi 6." />
   <target name="d7" depends="-d7,-cw_final" description="Compile CnWizards for Delphi 7." />
@@ -414,7 +415,7 @@ Usage: want [target-name] [-Dname=value]
     </move>
   </target>
 
-  <!-- 编译 CnWizards 64-Bit Loader DLL，目前缺 64 位 ToolsAPI 及对应 64 位 DesignIde 等包而未成功 -->
+  <!-- 编译 CnWizards 64-Bit Loader DLL -->
   <target name="-cnwizloader64" depends="-cw_prepare" description="Compile CnWizards 64-Bit Loader DLL." >
     <property name="Ver.FileDescription"  value="CnWizards 64-Bit Loader DLL" />
     <property name="Ver.InternalName"     value="CnWizLoader64" />
@@ -424,7 +425,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnDll.template.rc" file="${tools}/CnWizLoader/CnWizLoader64.rc" />
     <brcc file="${tools}/CnWizLoader/CnWizLoader64.rc" output="${tools}/CnWizLoader/CnWizLoader64.res" />
-    <dcc basedir="${tools}/CnWizLoader" source="CnWizLoader64.dpr" exename="${exe.D104S_64}" usecfg="true" arguments="${dcc_arg}"/>
+    <dcc basedir="${tools}/CnWizLoader" source="CnWizLoader64.dpr" exename="${exe.D120A_64}" usecfg="true" arguments="${dcc_arg}"/>
     <delete dir="${tools}/CnWizLoader">
        <include name="CnWizLoader64.res" />
        <include name="CnWizLoader64.rc" />
