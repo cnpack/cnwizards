@@ -331,7 +331,7 @@ begin
         for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写使能的
         begin
           WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
-          if WItem.Enabled then
+          if WItem.Enabled and not WItem.Is64 then
             Reg.WriteString(WItem.WizardName, WItem.WizardPath);
         end;
         Reg.CloseKey;
@@ -343,7 +343,7 @@ begin
         for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写禁用的
         begin
           WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
-          if not WItem.Enabled then
+          if not WItem.Enabled and not WItem.Is64 then
             Reg.WriteString(WItem.WizardName, WItem.WizardPath);
         end;
         Reg.CloseKey;
@@ -362,7 +362,7 @@ begin
           for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写使能的
           begin
             WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
-            if WItem.Enabled then
+            if WItem.Enabled and WItem.Is64 then
               Reg.WriteString(WItem.WizardName, WItem.WizardPath);
           end;
           Reg.CloseKey;
@@ -374,7 +374,7 @@ begin
           for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写禁用的
           begin
             WItem := TCnWizardItem(IDEWizardsList[IDE].Items[I]);
-            if not WItem.Enabled then
+            if not WItem.Enabled and WItem.Is64 then
               Reg.WriteString(WItem.WizardName, WItem.WizardPath);
           end;
           Reg.CloseKey;
