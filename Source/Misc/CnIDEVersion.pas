@@ -454,13 +454,13 @@ end;
 function IsDelphi120AIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
   CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 53982; Build: 0329); // 12.2 Patch 1
+    (Major: 29; Minor: 0; Release: 55362; Build: 2017); // 12.3
 var
   ReadFileVersion: TVersionNumber;
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
-  LatestUpdate := 'Update 2 (12.2) Patch 1';
+  LatestUpdate := 'Update 3 (12.3)';
 end;
 
 function IsDelphi11GEDot3: Boolean;
