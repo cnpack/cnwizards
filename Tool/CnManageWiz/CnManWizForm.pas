@@ -176,7 +176,7 @@ type
     procedure InitialIDENames;
     procedure CheckCmdParam;
     procedure CheckIDEInstalled;
-    function IDESupports64Bit(IDE: TCnCompiler): Boolean;
+
     procedure LoadIDEWizards(IDE: TCnCompiler; Include64: Boolean = False);
     procedure LoadIDEWizardsFromRoot(AReg: TRegistry; Root: string;
       WizardEnabled: Boolean; IDE: TCnCompiler);
@@ -219,6 +219,16 @@ var
     'Author LiuXiao (master@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2025 CnPack Team';
 
+function IDESupports64Bit(IDE: TCnCompiler): Boolean;
+begin
+  Result := (Ord(IDE) >= Ord(cnDelphi120A)) and (Ord(IDE) < Ord(cnBCB5));
+end;
+
+function IDERegRootCurrentUser(IDE: TCnCompiler): Boolean;
+begin
+  Result := (Ord(IDE) >= Ord(cnDelphi104S)) and (Ord(IDE) < Ord(cnBCB5));
+end;
+
 function GetAppRootDir(IDE: TCnCompiler): string;
 var
   strAppFile: string;
@@ -226,23 +236,42 @@ var
 begin
   Result := '';
   Reg := TRegistry.Create; // 创建操作注册表对象
-  Reg.RootKey := HKEY_LOCAL_MACHINE;
-  if Reg.OpenKey(SCnIDERegPaths[IDE], False) then
-  begin
-    if Reg.ValueExists('App') then
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    if Reg.OpenKey(SCnIDERegPaths[IDE], False) then
     begin
-      strAppFile := Reg.ReadString('App');
-      if FileExists(strAppFile) and Reg.ValueExists('RootDir') then
+      if Reg.ValueExists('App') then
+      begin
+        strAppFile := Reg.ReadString('App');
+        if FileExists(strAppFile) and Reg.ValueExists('RootDir') then
+          Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
+      end;
+
+      // 10 Seattle do not have "App" Key
+      if (IDE in [cnDelphi10S]) and Reg.ValueExists('RootDir') then
         Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
+    end
+    else // 有些高版本只写 Current User 下，不写 Local Machine 了
+    begin
+      if IDERegRootCurrentUser(IDE) then
+      begin
+        Reg.RootKey := HKEY_CURRENT_USER;
+        if Reg.OpenKey(SCnIDERegPaths[IDE], False) then
+        begin
+          if Reg.ValueExists('App') then
+          begin
+            strAppFile := Reg.ReadString('App');
+            if FileExists(strAppFile) and Reg.ValueExists('RootDir') then
+              Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
+          end;
+        end;
+      end;
     end;
 
-    // 10 Seattle do not have "App" Key
-    if (IDE in [cnDelphi10S]) and Reg.ValueExists('RootDir') then
-      Result := IncludeTrailingBackslash(Reg.ReadString('RootDir'));
+    Reg.CloseKey;
+  finally
+    Reg.Free;
   end;
-
-  Reg.CloseKey;
-  FreeAndNil(Reg);
 end;
 
 procedure TCnManageWizardForm.actRefreshExecute(Sender: TObject);
@@ -992,11 +1021,6 @@ begin
     IDEWizardsList[C] := nil;
     IDEWizardsChanged[C] := False;
   end;
-end;
-
-function TCnManageWizardForm.IDESupports64Bit(IDE: TCnCompiler): Boolean;
-begin
-  Result := (Ord(IDE) >= Ord(cnDelphi120A)) and (Ord(IDE) < Ord(cnBCB5));
 end;
 
 initialization
