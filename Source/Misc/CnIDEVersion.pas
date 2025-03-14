@@ -227,7 +227,7 @@ end;
 
 function IsDelphi2009IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
-  CoreIdeLatest: TVersionNumber = // Update 4?
+  CoreIdeLatest: TVersionNumber = // Update 4
     (Major: 12; Minor: 0; Release: 3420; Build: 21218);
 var
   ReadFileVersion: TVersionNumber;
@@ -239,8 +239,8 @@ end;
 
 function IsDelphi2010IdeVersionLatest(out LatestUpdate: string): Boolean;
 const
-  CoreIdeLatest: TVersionNumber = // Update 4
-    (Major: 14; Minor: 0; Release: 3593; Build: 25826);
+  CoreIdeLatest: TVersionNumber = // Update 5
+    (Major: 14; Minor: 0; Release: 3615; Build: 26342);
 var
   ReadFileVersion: TVersionNumber;
 begin
@@ -251,8 +251,8 @@ end;
 
 function IsDelphiXEIdeVersionLatest(out LatestUpdate: string): Boolean;
 const
-  CoreIdeLatest: TVersionNumber = // Update 2
-    (Major: 15; Minor: 0; Release: 3809; Build: 34076);
+  CoreIdeLatest: TVersionNumber = // Update 2?
+    (Major: 15; Minor: 0; Release: 3953; Build: 35171);
 var
   ReadFileVersion: TVersionNumber;
 begin
