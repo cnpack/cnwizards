@@ -603,6 +603,10 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_D120A2.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D120A64.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D120A64.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 
 !endif
@@ -993,9 +997,11 @@ Section "RAD Studio 12 Athens" SecD120A
   File "..\..\Bin\CnWizards_D120A2.dll"
   File "..\..\Bin\CnWizards_D120A1.dll"
   File "..\..\Bin\CnWizards_D120A.dll"
+  File "..\..\Bin\CnWizards_D120A64.dll"
   ; 写入专家注册键值
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_D120A"
   WriteRegStr HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\23.0\Experts x64" "CnWizards_Loader" "$INSTDIR\CnWizLoader64.dll"
 SectionEnd
 !endif
 
@@ -1434,6 +1440,7 @@ Section "Uninstall"
 !ifdef IDE_VERSION_D120A
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_D120A"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_Loader"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts x64" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
