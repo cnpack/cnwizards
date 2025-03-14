@@ -179,7 +179,7 @@ type
 
     procedure LoadIDEWizards(IDE: TCnCompiler; Include64: Boolean = False);
     procedure LoadIDEWizardsFromRoot(AReg: TRegistry; Root: string;
-      WizardEnabled: Boolean; IDE: TCnCompiler);
+      WizardEnabled: Boolean; IDE: TCnCompiler; Is64: Boolean = False);
     procedure ClearIDEWizardsRoot(AReg: TRegistry; Root: string);
     procedure UpdateWizardstoListView(IDE: TCnCompiler);
 
@@ -283,7 +283,7 @@ begin
   begin
     IDE := TCnCompiler(lstIDEs.ItemIndex);
     if not IDEWizardsChanged[IDE] or
-       (Application.MessageBox(PChar(Format(SCnChangedRefreshFmt,[SCnCompilerNames[IDE]])),
+      (Application.MessageBox(PChar(Format(SCnChangedRefreshFmt,[SCnCompilerNames[IDE]])),
         PChar(SCnMessageHint), MB_YESNO + MB_ICONQUESTION) = IDYES) then
     begin
       if lvWizards.Selected <> nil then
@@ -296,7 +296,7 @@ begin
 
       IDEWizardsList[IDE].Clear;
 
-      LoadIDEWizards(IDE);
+      LoadIDEWizards(IDE, IDESupports64Bit(IDE));
       UpdateWizardstoListView(IDE);
 
       if (OldIndex > 0) and (OldIndex < lvWizards.Items.Count) then
@@ -631,13 +631,9 @@ begin
 
   if Include64 then
   begin
-    LoadIDEWizardsFromRoot(Reg, SCnIDERegPaths[IDE] + '\Experts 64', True, IDE);
+    LoadIDEWizardsFromRoot(Reg, SCnIDERegPaths[IDE] + '\Experts x64', True, IDE, True);
     LoadIDEWizardsFromRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts64
-      + SCnCompilerNames[IDE], False, IDE);
-
-    if IDEWizardsList[IDE] <> nil then
-      for K := 0 to IDEWizardsList[IDE].Count - 1 do
-        TCnWizardItem(IDEWizardsList[IDE].Items[K]).Is64 := True;
+      + SCnCompilerNames[IDE], False, IDE, True);
   end;
 
   FreeAndNil(Reg);
@@ -646,7 +642,7 @@ end;
 
 
 procedure TCnManageWizardForm.LoadIDEWizardsFromRoot(AReg: TRegistry;
-  Root: string; WizardEnabled: Boolean; IDE: TCnCompiler);
+  Root: string; WizardEnabled: Boolean; IDE: TCnCompiler; Is64: Boolean);
 var
   I: Integer;
   List: TStrings;
@@ -664,6 +660,9 @@ begin
       Item.WizardName := List[I];
       Item.WizardPath := AReg.ReadString(List[I]);;
       Item.Enabled := WizardEnabled;
+
+      if Is64 then
+        Item.Is64 := True;
 
       IDEWizardsList[IDE].Add(Item);
     end;
