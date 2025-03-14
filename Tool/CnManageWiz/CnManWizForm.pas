@@ -324,11 +324,11 @@ begin
       begin
         // 可能有 64 位，照样处理
         // 删除原有的，逐个保存
-        ClearIDEWizardsRoot(Reg, SCnIDERegPaths[IDE] + '\Experts 64');
+        ClearIDEWizardsRoot(Reg, SCnIDERegPaths[IDE] + '\Experts x64');
         ClearIDEWizardsRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts64
           + SCnCompilerNames[IDE]);
 
-        if Reg.OpenKey(SCnIDERegPaths[IDE] + '\Experts 64', True) then
+        if Reg.OpenKey(SCnIDERegPaths[IDE] + '\Experts x64', True) then
         begin
           for I := 0 to IDEWizardsList[IDE].Count - 1 do // 写使能的
           begin
@@ -447,7 +447,7 @@ begin
   CheckIDEInstalled;
 
   for Kind := Low(TCnCompiler) to High(TCnCompiler) do
-    LoadIDEWizards(Kind);
+    LoadIDEWizards(Kind, IDESupports64Bit(Kind));
 
   InitialIDENames;
   lstIDEs.OnClick(lstIDEs);
@@ -606,8 +606,9 @@ begin
     LoadIDEWizardsFromRoot(Reg, csCnPackRegPath + csCnPackDisabledExperts64
       + SCnCompilerNames[IDE], False, IDE);
 
-    for K := 0 to IDEWizardsList[IDE].Count - 1 do
-      TCnWizardItem(IDEWizardsList[IDE].Items[K]).Is64 := True;
+    if IDEWizardsList[IDE] <> nil then
+      for K := 0 to IDEWizardsList[IDE].Count - 1 do
+        TCnWizardItem(IDEWizardsList[IDE].Items[K]).Is64 := True;
   end;
 
   FreeAndNil(Reg);
