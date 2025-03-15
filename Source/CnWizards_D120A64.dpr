@@ -241,8 +241,7 @@ uses
   CnAICoderEngine in 'AICoder\CnAICoderEngine.pas',
   CnAICoderEngineImpl in 'AICoder\CnAICoderEngineImpl.pas',
   CnAICoderChatFrm in 'AICoder\CnAICoderChatFrm.pas' {CnAICoderChatForm},
-  CnFrmAICoderOption in 'AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame},
-  CnTestPaintLineWizard in '..\Test\CnTestPaintLineWizard.pas';
+  CnFrmAICoderOption in 'AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame};
 
 {$R *.RES}
 

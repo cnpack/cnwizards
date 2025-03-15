@@ -611,7 +611,6 @@
             <Form>CnAICoderOptionFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
-        <DCCReference Include="..\Test\CnTestPaintLineWizard.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
