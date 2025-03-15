@@ -27,10 +27,18 @@ unit CnChatBox;
 * 备    注：该单元自开源代码 https://github.com/HemulGM/Components 改写而来
 *           增加了低版本尤其是 D5 的支持
 *
+*           注意：计算每条消息所占据的矩形区域时，先是 ChatBox 根据自己的 ClientRect
+*           算出一个最大宽度，然后设置一个定宽的 Rect，具体位置不重要，拿着去调用
+*           每条 ChatItem 的 CalcRect 方法，后者用 DrawTextEx 函数以换行模式算出
+*           文本所占据的具体宽高并更改该 Rect 的宽高也就是右下角值。ChatBox 拿到后
+*           根据消息滚动的位置确定绘制的左上角点，将此矩形内容绘制出来。
+*
 * 开发平台：Win7 + Delphi 5.0
 * 兼容测试：暂无
 * 本 地 化：暂无
-* 修改记录：2024.06.12 V0.1
+* 修改记录：2025.03.15 V0.2
+*               加入文本自定义计算与绘制事件
+*           2024.06.12 V0.1
 *               移植单元，实现功能
 ================================================================================
 |</PRE>}
@@ -62,6 +70,7 @@ type
     FText: string;
     FColor: TColor;
     FWaiting: Boolean;
+    FAttachment: TObject;
     procedure SetOwner(const Value: TCnChatItems);
     procedure SetSelected(const Value: Boolean);
     procedure SetImageIndex(const Value: Integer);
@@ -74,8 +83,8 @@ type
     constructor Create(AOwner: TCnChatItems); virtual;
     destructor Destroy; override;
 
-    function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; virtual;
-    function DrawImage(Canvas: TCanvas; Rect: TRect): TRect; virtual;
+    procedure DrawRect(Canvas: TCanvas; Rect: TRect); virtual;
+    procedure DrawImage(Canvas: TCanvas; Rect: TRect); virtual;
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; virtual;
 
     property Owner: TCnChatItems read FOwner write SetOwner;
@@ -88,6 +97,9 @@ type
     property Color: TColor read FColor write SetColor;
     {* 每一条消息的颜色}
     property Waiting: Boolean read FWaiting write FWaiting;
+
+    property Attachment: TObject read FAttachment write FAttachment;
+    {* 外界挂的托管的对象}
   end;
 
   TCnChatMessage = class(TCnChatItem)
@@ -111,7 +123,8 @@ type
     destructor Destroy; override;
 
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; override;
-    function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; override;
+    procedure DrawRect(Canvas: TCanvas; Rect: TRect); override;
+
     property ShowFrom: Boolean read FShowFrom write SetShowFrom;
     {* 是否绘制消息发送者}
     property From: string read FFrom write SetFrom;
@@ -132,7 +145,7 @@ type
   public
     procedure SetFillColor(const Value: TColor);
     function CalcRect(Canvas: TCanvas; Rect: TRect): TRect; override;
-    function DrawRect(Canvas: TCanvas; Rect: TRect): TRect; override;
+    procedure DrawRect(Canvas: TCanvas; Rect: TRect); override;
     constructor Create(AOwner: TCnChatItems); override;
 
     property FillColor: TColor read FFillColor write SetFillColor;
@@ -165,7 +178,13 @@ type
     {* 本聊天内容列表属于哪个聊天控件}
   end;
 
-  TOnSelectionEvent = procedure(Sender: TObject; Count: Integer) of object;
+  TCnOnSelectionEvent = procedure(Sender: TObject; Count: Integer) of object;
+
+  TCnOnGetItemTextRect = procedure(Sender: TObject; Item: TCnChatItem; Canvas: TCanvas;
+    var ItemTextRect: TRect; var DefaultCalc: Boolean) of object;
+
+  TCnOnDrawItemText = procedure(Sender: TObject; Item: TCnChatItem; Canvas: TCanvas;
+    var ItemTextRect: TRect; var DefaultDraw: Boolean) of object;
 
   TCnCustomChatBox = class(TCustomControl)
   private
@@ -188,9 +207,9 @@ type
     FImageList: TImageList;
     FDrawImages: Boolean;
     FDragItem: Boolean;
-    FOnSelectionStart: TOnSelectionEvent;
-    FOnSelectionEnd: TOnSelectionEvent;
-    FOnSelectionChange: TOnSelectionEvent;
+    FOnSelectionStart: TCnOnSelectionEvent;
+    FOnSelectionEnd: TCnOnSelectionEvent;
+    FOnSelectionChange: TCnOnSelectionEvent;
     FColorMe: TColor;
     FColorInfo: TColor;
     FColorSelection: TColor;
@@ -210,6 +229,8 @@ type
     FUpdateCount: Integer;
     FOnListEnd: TNotifyEvent;
     FShowDownButton: Boolean;
+    FOnGetItemTextRect: TCnOnGetItemTextRect;
+    FOnDrawItemText: TCnOnDrawItemText;
     function GetItem(Index: Integer): TCnChatItem;
     procedure SetItem(Index: Integer; const Value: TCnChatItem);
     procedure SetItems(const Value: TCnChatItems);
@@ -238,9 +259,9 @@ type
     procedure NeedRepaint;
     procedure SetDrawImages(const Value: Boolean);
     procedure SelectionChange(Count: Integer);
-    procedure SetOnSelectionChange(const Value: TOnSelectionEvent);
-    procedure SetOnSelectionEnd(const Value: TOnSelectionEvent);
-    procedure SetOnSelectionStart(const Value: TOnSelectionEvent);
+    procedure SetOnSelectionChange(const Value: TCnOnSelectionEvent);
+    procedure SetOnSelectionEnd(const Value: TCnOnSelectionEvent);
+    procedure SetOnSelectionStart(const Value: TCnOnSelectionEvent);
     procedure WMSize(var Message: TWMSize); message WM_SIZE;
     procedure SetColorInfo(const Value: TColor);
     procedure SetColorMe(const Value: TColor);
@@ -280,9 +301,15 @@ type
     property ScrollBarVisible: Boolean read FScrollBarVisible write SetScrollBarVisible default True;
     property ImageList: TImageList read FImageList write SetImageList;
     property DrawImages: Boolean read FDrawImages write SetDrawImages default False;
-    property OnSelectionStart: TOnSelectionEvent read FOnSelectionStart write SetOnSelectionStart;
-    property OnSelectionChange: TOnSelectionEvent read FOnSelectionChange write SetOnSelectionChange;
-    property OnSelectionEnd: TOnSelectionEvent read FOnSelectionEnd write SetOnSelectionEnd;
+    property OnSelectionStart: TCnOnSelectionEvent read FOnSelectionStart write SetOnSelectionStart;
+    property OnSelectionChange: TCnOnSelectionEvent read FOnSelectionChange write SetOnSelectionChange;
+    property OnSelectionEnd: TCnOnSelectionEvent read FOnSelectionEnd write SetOnSelectionEnd;
+
+    property OnGetItemTextRect: TCnOnGetItemTextRect read FOnGetItemTextRect write FOnGetItemTextRect;
+    {* 文本消息的宽高计算事件，注意 ItemRect 值只有宽高起作用，与左上角位置无关}
+    property OnDrawItemText: TCnOnDrawItemText read FOnDrawItemText write FOnDrawItemText;
+    {* 文本消息的自定义绘制事件}
+
     property Color default $0020160F;
     property ColorInfo: TColor read FColorInfo write SetColorInfo default $003A2C1D;
     property ColorYou: TColor read FColorYou write SetColorYou default $00322519;
@@ -726,13 +753,13 @@ begin
           end;
         end;
 
-        // 暂时取消消息最大限制宽度
-        // CnSetRectWidth(Limit, Min(MAX_MSG_WIDTH, CnGetRectWidth(Limit)));
+        // 暂时取消消息最大限制宽度，拿到该消息的文本矩形，注意下面会被各种平移
         TxtRect := FItems[I].CalcRect(Canvas, Limit);
 
         Brush.Color := FColorYou;
 
         ItemRect := TxtRect;
+        // 将文本矩形本身放大一点，并移动到待绘制的位置
         CnRectInflate(ItemRect, PaddingSize, PaddingSize);
         CnSetRectLocation(ItemRect, Rect.Left, LastRect.Top - CnGetRectHeight(ItemRect));
 
@@ -745,22 +772,25 @@ begin
         if FSkip then
           Continue;
 
+        // ItemRect 此时的 Top 是要绘制的准确位置，但横坐标还要根据消息类型以及你我以及有无图标确定
         Radius := 4;
         if (FItems[I] is TCnChatMessage) then
         begin
           if (FItems[I] as TCnChatMessage).FromType = cmtMe then
           begin
+            // 我的消息，往右靠，如有头像再移动一下
             CnSetRectLocation(ItemRect, Rect.Right - CnGetRectWidth(ItemRect), ItemRect.Top);
             if FNeedImage then
               CnSetRectLocation(ItemRect, ItemRect.Left + FImageMargin, ItemRect.Top);
 
             Brush.Color := FColorMe;
           end
-          else if FNeedImage then
+          else if FNeedImage then // 你的消息，已靠左，如有头像再移动一下
             CnSetRectLocation(ItemRect, ItemRect.Left + FImageMargin, ItemRect.Top);
         end
         else if (FItems[I] is TCnChatInfo) then
         begin
+          // 不是消息只是提示，居中
           CnRectOffset(ItemRect, CnGetRectCenter(Rect).X - (CnGetRectWidth(ItemRect) div 2 + BorderWidth), 0);
 
           if (FItems[I] as TCnChatInfo).FillColor = clNone then
@@ -771,6 +801,7 @@ begin
         end;
         CnRectOffset(ItemRect, PaddingSize, FOffset);
 
+        // 这里计算出了该 Item 最终绘制的矩形的位置大小，看看是否在可视区域内
         if NeedDraw(ItemRect) then
         begin
           Limit := ItemRect;
@@ -797,10 +828,9 @@ begin
           end;
           CnSetRectLocation(TxtRect, ItemRect.Left + PaddingSize, ItemRect.Top + PaddingSize);
 
+          // 真正绘制文本内容，注意不关心 TxtRect 内部是否改了
           if not FCalcOnly then
-          begin
             FItems[I].DrawRect(Canvas, TxtRect);
-          end;
 
           if FNeedImage then
           begin
@@ -811,10 +841,9 @@ begin
 
             CnSetRectLocation(ImageRect, ItemRect.Left - CnGetRectWidth(ImageRect) - 3, ItemRect.Bottom
               - CnGetRectHeight(ImageRect) + 2);
+
             if not FCalcOnly then
-            begin
               FItems[I].DrawImage(Canvas, ImageRect);
-            end;
           end;
         end
         else if FStartDraw then
@@ -1068,17 +1097,17 @@ begin
   FOnPaint := Value;
 end;
 
-procedure TCnCustomChatBox.SetOnSelectionChange(const Value: TOnSelectionEvent);
+procedure TCnCustomChatBox.SetOnSelectionChange(const Value: TCnOnSelectionEvent);
 begin
   FOnSelectionChange := Value;
 end;
 
-procedure TCnCustomChatBox.SetOnSelectionEnd(const Value: TOnSelectionEvent);
+procedure TCnCustomChatBox.SetOnSelectionEnd(const Value: TCnOnSelectionEvent);
 begin
   FOnSelectionEnd := Value;
 end;
 
-procedure TCnCustomChatBox.SetOnSelectionStart(const Value: TOnSelectionEvent);
+procedure TCnCustomChatBox.SetOnSelectionStart(const Value: TCnOnSelectionEvent);
 begin
   FOnSelectionStart := Value;
 end;
@@ -1242,7 +1271,7 @@ begin
     Canvas.Font.Style := [];
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
       or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
-    // Canvas.TextRect(R, S, [tfLeft, tfCalcRect, tfWordBreak, tfEndEllipsis]);
+
     FCalcedRect := R;
     Result := R;
     FNeedCalc := False;
@@ -1251,7 +1280,7 @@ begin
     Result := FCalcedRect;
 end;
 
-function TCnChatItem.DrawImage(Canvas: TCanvas; Rect: TRect): TRect;
+procedure TCnChatItem.DrawImage(Canvas: TCanvas; Rect: TRect);
 begin
   with Canvas do
   begin
@@ -1261,7 +1290,7 @@ begin
   end;
 end;
 
-function TCnChatItem.DrawRect(Canvas: TCanvas; Rect: TRect): TRect;
+procedure TCnChatItem.DrawRect(Canvas: TCanvas; Rect: TRect);
 var
   R: TRect;
   S: string;
@@ -1280,8 +1309,6 @@ begin
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
     or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
-  // Canvas.TextRect(R, S, [tfLeft, tfWordBreak, tfEndEllipsis]);
-  Result := R;
 end;
 
 constructor TCnChatItem.Create(AOwner: TCnChatItems);
@@ -1299,6 +1326,7 @@ end;
 
 destructor TCnChatItem.Destroy;
 begin
+  FAttachment.Free;
   inherited;
 end;
 
@@ -1350,6 +1378,7 @@ function TCnChatMessage.CalcRect(Canvas: TCanvas; Rect: TRect): TRect;
 var
   R: TRect;
   S: string;
+  DefaultCalc: Boolean;
 begin
   if FNeedCalc then
   begin
@@ -1364,13 +1393,25 @@ begin
     else
       Canvas.Font.Size := FONT_DEF_SIZE;
 
-    Canvas.Font.Style := [];
-    DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
-      or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
-    // Canvas.TextRect(R, S, [tfLeft, tfCalcRect, tfWordBreak, tfEndEllipsis]);
+    // 给外界一个计算 Rect 宽高的机会
+    DefaultCalc := True;
+    if (FOwner.Owner <> nil) and Assigned(FOwner.Owner.OnGetItemTextRect) then
+      FOwner.Owner.OnGetItemTextRect(FOwner.Owner, Self, Canvas, R, DefaultCalc);
+
+    // 如果外界要求默认计算则自己算
+    if DefaultCalc then
+    begin
+      // 传进起始矩形，并通过模拟绘制，计算出多行文字的排版宽高搁回矩形中
+      Canvas.Font.Style := [];
+      DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
+        or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
+    end;
+
+    // 算的结果先放 Result，空出 R
     CnSetRectWidth(Result, CnGetRectWidth(R));
     CnSetRectHeight(Result, CnGetRectHeight(R));
 
+    // 如果要显示上面的名字，则把加粗的名字重新再画一个框，高和上面的框拼起来，宽则选大的。
     if (FromType = cmtYou) and FShowFrom then
     begin
       R := Rect;
@@ -1381,10 +1422,10 @@ begin
       Canvas.Font.Style := [fsBold];
       DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT or DT_CALCRECT
         or DT_SINGLELINE or DT_END_ELLIPSIS, nil);
-      // Canvas.TextRect(R, S, [tfLeft, tfCalcRect, tfSingleLine, tfEndEllipsis]);
+
       CnSetRectWidth(Result, Max(CnGetRectWidth(Result), CnGetRectWidth(R)));
       CnSetRectHeight(Result, CnGetRectHeight(Result) + CnGetRectHeight(R));
-      // Result.Height := Result.Height + R.Height;
+
       FCalcedFromHeight := CnGetRectHeight(R);
     end;
 
@@ -1395,20 +1436,23 @@ begin
     Result := FCalcedRect;
 end;
 
-function TCnChatMessage.DrawRect(Canvas: TCanvas; Rect: TRect): TRect;
+procedure TCnChatMessage.DrawRect(Canvas: TCanvas; Rect: TRect);
 var
   R: TRect;
   S: string;
+  DefaultDraw: Boolean;
 begin
   if (FromType = cmtYou) and FShowFrom then
   begin
     // 画对方名字，加粗
     S := From;
     R := Rect;
+
     if FOwner.Owner <> nil then
       Canvas.Font.Name := FOwner.Owner.Font.Name;
     Canvas.Font.Size := FONT_SENDER_SIZE;
     Canvas.Font.Style := [fsBold];
+
     if Selected then
       Canvas.Font.Color := FromColorSelect
     else
@@ -1416,14 +1460,13 @@ begin
 
     DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
       or DT_SINGLELINE or DT_END_ELLIPSIS, nil);
-    // Canvas.TextRect(R, S, [tfLeft, tfSingleLine, tfEndEllipsis]);
+
     Canvas.Font.Style := [];
   end;
 
   R := Rect;
   if (FromType = cmtYou) and FShowFrom then
     CnRectOffset(R, 0, FCalcedFromHeight);
-    // R.Offset(0, FCalcedFromHeight);
 
   // 画文字内容
   S := Text;
@@ -1437,13 +1480,16 @@ begin
 
   Canvas.Font.Style := [];
   Canvas.Font.Color := Color;
-  DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
-    or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
-  // Canvas.TextRect(R, S, [tfLeft, tfWordBreak, tfEndEllipsis]);
-  CnSetRectWidth(Rect, Max(CnGetRectWidth(Rect), CnGetRectWidth(R)));
-  CnSetRectHeight(Rect, CnGetRectHeight(Rect) + CnGetRectHeight(R));
 
-  Result := Rect;
+  // 给外界一个绘制的机会
+  DefaultDraw := True;
+  if (FOwner.Owner <> nil) and Assigned(FOwner.Owner.OnDrawItemText) then
+    FOwner.Owner.OnDrawItemText(FOwner.Owner, Self, Canvas, R, DefaultDraw);
+
+  // 如果外界要求默认绘制则自己绘制
+  if DefaultDraw then
+    DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
+      or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
 end;
 
 function TCnChatMessage.GetFromType: TCnChatMessageType;
@@ -1532,7 +1578,7 @@ begin
   FFillColor := clNone;
 end;
 
-function TCnChatInfo.DrawRect(Canvas: TCanvas; Rect: TRect): TRect;
+procedure TCnChatInfo.DrawRect(Canvas: TCanvas; Rect: TRect);
 var
   R: TRect;
   S: string;
@@ -1551,8 +1597,6 @@ begin
   Canvas.Font.Color := Color;
   DrawTextEx(Canvas.Handle, PChar(S), Length(S), R, DT_LEFT
     or DT_WORDBREAK or DT_END_ELLIPSIS, nil);
-  // Canvas.TextRect(R, S, [tfLeft, tfWordBreak, tfEndEllipsis]);
-  Result := R;
 end;
 
 procedure TCnChatInfo.SetFillColor(const Value: TColor);
