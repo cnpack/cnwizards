@@ -3357,9 +3357,9 @@
   {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 Defined Int64Array
   {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 System.UITypes Has TAlphaColors
   {$DEFINE LIST_NEW_POINTER}                   // XE2 List has a New Pointer
-  {$DEFINE VERSIONINFO_PER_CONFIGURATION}  // Every Configuruation can have a Version Info
+  {$DEFINE VERSIONINFO_PER_CONFIGURATION}      // Every Configuruation can have a Version Info
   {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
-    // A Bug Can't get Correct Env Option Values for Current Platform.
+  // A Bug Can't get Correct Env Option Values for Current Platform.
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
@@ -3371,15 +3371,15 @@
 
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}
-  {$DEFINE SUPPORT_ENHANCED_RTTI}          // New enhanced RTTI
-  {$DEFINE SUPPORT_EXTERNAL_DELAYED}       // External functions can be declared as 'delayed'
-  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}      // 2010 and above Supports class constructor and destructor
+  {$DEFINE SUPPORT_ENHANCED_RTTI}              // New enhanced RTTI
+  {$DEFINE SUPPORT_EXTERNAL_DELAYED}           // External functions can be declared as 'delayed'
+  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}          // 2010 and above Supports class constructor and destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
-  {$DEFINE IMAGELIST_BEGINENDUPDATE}       // 2010 开始，ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
-  {$DEFINE OTA_DEBUG_HAS_EVENTS}           // 2010 下的 DebuggerService 有 ProcessDebugEvents
-  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}  // IDE has a new style Component Palette
-  {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}     // Editor has a Search Panel
-  {$DEFINE IDE_HAS_DATETIME_HINT}          // TDate/TTime/TDateTime shows Normally in Debug Hint
+  {$DEFINE IMAGELIST_BEGINENDUPDATE}           // 2010 开始，ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
+  {$DEFINE OTA_DEBUG_HAS_EVENTS}               // 2010 下的 DebuggerService 有 ProcessDebugEvents
+  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}      // IDE has a new style Component Palette
+  {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}         // Editor has a Search Panel
+  {$DEFINE IDE_HAS_DATETIME_HINT}              // TDate/TTime/TDateTime shows Normally in Debug Hint
 {$ENDIF}
 
 {$IFDEF BDS2010}
@@ -3388,7 +3388,7 @@
 {$ENDIF}
 
 {$IFDEF BDS2009_UP}
-  {$DEFINE UNICODE_STRING}
+  {$DEFINE UNICODE_STRING}                       // 等同于 UNICODE
   {$DEFINE SUPPORT_ATTRIBUTE}                    // 支持 Attribute
   {$DEFINE SUPPORT_GENERIC}                      // 支持泛型
   {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}          // AnsiString 的声明支持指定代码页
@@ -3448,14 +3448,14 @@
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
 {$ENDIF}
 
+{$IFDEF BDS2006}
+  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // Project File is .bdsproj
+{$ENDIF}
+
 {$IFDEF BDS2005_UP}
   {$DEFINE OTA_PALETTE_API}              // 2005 and above Provides PaletteAPI.
   {$DEFINE IDE_EDITOR_ELIDE}             // 2005 或以上编辑器支持折叠
   {$DEFINE IDE_FILE_HISTORY}             // 2005 或以上版本会存储文件历史版本
-{$ENDIF}
-
-{$IFDEF BDS2006}
-  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // Project File is .bdsproj
 {$ENDIF}
 
 {$IFDEF BDS2005}
@@ -3466,7 +3466,7 @@
   {$DEFINE SUPPORT_PASCAL}
   {$DEFINE SUPPORT_CSHARP}
   {$DEFINE SUPPORT_INLINE}
-  {$DEFINE SUPPORT_UINT64}
+  {$DEFINE SUPPORT_UINT64}               // 虽然 Delphi 7 支持 UInt64，但声明赋值有缺陷，2005 后才完善
   {$DEFINE IDE_WIDECONTROL}              // 2005 及以上的编辑器内部是宽字符串且输出 UTF-8，无论是否 Unicode 编译器
   {$DEFINE IDE_EDITOR_SUPPORT_FOLDING}   // 2005 及以上的编辑器支持区域折叠
   {$DEFINE OTA_NEW_BREAKPOINT_NOBUG}     // 2005 及以上的 NewBreakpoint 才能工作
@@ -3508,7 +3508,7 @@
 {$ENDIF}
 
 {$IFDEF BCB5}
-  {$DEFINE BCB5OR6}  // 定义一个 BCB5OR6 以方便 BCB5 或 BCB6 使用
+  {$DEFINE BCB5OR6}     // 定义一个 BCB5OR6 以方便 BCB5 或 BCB6 使用
 {$ENDIF}
 
 {$IFDEF BCB6}
