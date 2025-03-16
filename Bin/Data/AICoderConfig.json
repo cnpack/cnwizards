@@ -1,6 +1,6 @@
 ﻿{
     "ActiveEngine": "月之暗面",
-    "TimeoutSec": 0,
+    "TimeoutSec": 60,
     "UseProxy": false,
     "ProxyServer": "",
     "ProxyUserName": "",

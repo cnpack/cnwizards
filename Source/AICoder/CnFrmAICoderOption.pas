@@ -87,7 +87,7 @@ type
     procedure SaveExtraOptions;
     {* 将界面设置内容塞回外部属性去}
 
-    procedure LoadFromAnOption(Option: TCnAIEngineOption);
+    procedure LoadFromAnOption(Option: TCnAIEngineOption; IgnoreEmptyAPIKey: Boolean = False);
     {* 从一个 Option 中加载通用属性}
     procedure SaveToAnOption(Option: TCnAIEngineOption);
     {* 将内容保存到一个通用 Option 中}
@@ -169,12 +169,15 @@ begin
     OpenUrl(FWebAddr);
 end;
 
-procedure TCnAICoderOptionFrame.LoadFromAnOption(Option: TCnAIEngineOption);
+procedure TCnAICoderOptionFrame.LoadFromAnOption(Option: TCnAIEngineOption;
+  IgnoreEmptyAPIKey: Boolean);
 begin
   edtURL.Text := Option.URL;
   cbbModel.Text := Option.Model;
   edtTemperature.Text := FloatToStr(Option.Temperature);
-  edtAPIKey.Text := Option.APIKey;
+  // IgnoreEmptyAPIKey 为 True 时，选项中的空 APIKey 不进界面，也就是 False 或非空就进
+  if not IgnoreEmptyAPIKey or (Option.ApiKey <> '') then
+    edtAPIKey.Text := Option.APIKey;
   chkStreamMode.Checked := Option.Stream;
 end;
 
@@ -338,7 +341,7 @@ begin
       S, Eng.OptionClass, False); // 注意该原始配置对象无需进行管理，要在此用完后释放
 
     // 加载通用属性
-    LoadFromAnOption(OrigOption);
+    LoadFromAnOption(OrigOption, True);
 
     // 遍历加载注册了的特殊属性
     for I := 0 to FExtraOptions.Count - 1 do
