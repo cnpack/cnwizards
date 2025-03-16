@@ -283,7 +283,7 @@ type
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure Paint; override;
-    // procedure UpdateStyleElements; override;
+
     procedure WMNCPaint(var Message: TMessage); message WM_NCPAINT;
     procedure WMContextMenu(var Message: TWMContextMenu); message WM_CONTEXTMENU;
   public
@@ -416,7 +416,7 @@ begin
   Height := 400;
   Color := $0020160F;
   UseDockManager := True;
-  // ParentBackground := False;
+
   DoubleBuffered := True;
   TabStop := True;
 

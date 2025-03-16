@@ -5,8 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
-  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox,
-  ExtCtrls, Menus;
+  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox, CnRichEdit,
+  CnMarkDown, ExtCtrls, Menus, Clipbrd;
 
 type
   TFormAITest = class(TForm)
@@ -44,6 +44,8 @@ type
     Copy1: TMenuItem;
     pmAIChat: TPopupMenu;
     CopyCode1: TMenuItem;
+    chkMarkDown: TCheckBox;
+    CopyAll1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -59,12 +61,29 @@ type
     procedure btnAddYouLongMsgClick(Sender: TObject);
     procedure btnAddMyLongMsgClick(Sender: TObject);
     procedure btnReviewCodeClick(Sender: TObject);
+    procedure chkMarkDownClick(Sender: TObject);
+    procedure CopyAll1Click(Sender: TObject);
+    procedure pmChatPopup(Sender: TObject);
+    procedure pmAIChatPopup(Sender: TObject);
+    procedure CopyCode1Click(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
     FAIConfig: TCnAIEngineOptionManager;
     FChatBox: TCnChatBox;
+    FChatItem: TCnChatItem;
     FAIChatBox: TCnChatBox;
+    FAIChatItem: TCnChatItem;
+    FRender: TCnRichEditRender;
+    FRtfStream: TMemoryStream;
+
+    class function ExtractCode(Item: TCnChatMessage): string;
+
+    procedure AIGetItemTextRect(Sender: TObject; Item: TCnChatItem; Canvas: TCanvas;
+      var ItemTextRect: TRect; var DefaultCalc: Boolean);
+    procedure AIDrawItemText(Sender: TObject; Item: TCnChatItem; Canvas: TCanvas;
+     var ItemTextRect: TRect; var DefaultDraw: Boolean);
+
     // 以下是综合测试
     procedure AIOnExplainCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
@@ -179,17 +198,20 @@ begin
   FAIChatBox.ColorYou := BK_COLOR;
   FAIChatBox.ColorMe := BK_COLOR;
   FAIChatBox.PopupMenu := pmAIChat;
+
+  FRender := TCnRichEditRender.Create;
+  FRtfStream := TMemoryStream.Create;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);
 begin
+  FRtfStream.Free;
+  FRender.Free;
   FAIConfig.Free;
-
   FNetPool.Free;
 
   while not FResQueue.IsEmpty do
     FResQueue.Pop.Free;
-
   FResQueue.Free;
 end;
 
@@ -491,7 +513,7 @@ begin
   with FChatBox.Items.AddMessage do
   begin
     From := 'AI';
-    FromType := cmtYou;
+    FromType := cmtMe;
     Text := '低代码开发方式具有丰富的UI界面编辑功能，通过可视化界面开发方式快速构建布局，可有效降低开发者的上手成本并提升开发者构建UI界面的效率。 '
       + '悠悠密西西比泾流经墨西哥，静静地流淌着，滋润着佛罗里达的土地，养育了南北战争中的百姓。这里水陆交通便捷，经济文化发达。' + #13#10
       + '①既往有对机体严重影响的疾病史(如心衰、严重脑梗死、心肌梗死等)；②既往有精神或神经方面疾病史，或有精神类药物依赖史；'
@@ -547,6 +569,158 @@ begin
   else
     TCnChatMessage(Tag).Text := Format('Review Code Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]);
+end;
+
+procedure TFormAITest.chkMarkDownClick(Sender: TObject);
+begin
+  if chkMarkDown.Checked then
+  begin
+    FAIChatBox.OnGetItemTextRect := AIGetItemTextRect;
+    FAIChatBox.OnDrawItemText := AIDrawItemText;
+  end
+  else
+  begin
+    FAIChatBox.OnGetItemTextRect := nil;
+    FAIChatBox.OnDrawItemText := nil;
+  end;
+end;
+
+procedure TFormAITest.AIDrawItemText(Sender: TObject; Item: TCnChatItem;
+  Canvas: TCanvas; var ItemTextRect: TRect; var DefaultDraw: Boolean);
+var
+  Bmp: TBitmap;
+begin
+  if Item.Attachment <> nil then
+  begin
+    Bmp := TBitmap(Item.Attachment);
+    Canvas.Draw(ItemTextRect.Left, ItemTextRect.Top, Bmp);
+    DefaultDraw := False;
+  end;
+end;
+
+procedure TFormAITest.AIGetItemTextRect(Sender: TObject; Item: TCnChatItem;
+  Canvas: TCanvas; var ItemTextRect: TRect; var DefaultCalc: Boolean);
+var
+  S: AnsiString;
+  Bmp: TBitmap;
+begin
+  FRtfStream.Size := 0;
+  S := Item.Text;
+  if S <> '' then
+  begin
+    S := CnMarkDownConvertToRTF(CnParseMarkDownString(S), 9);
+    FRtfStream.WriteBuffer(S[1], Length(S));
+    FRtfStream.Position := 0;
+
+    if Item.Attachment <> nil then
+    begin
+      Item.Attachment.Free;
+      Item.Attachment := nil;
+    end;
+
+    FRender.BackgroundColor := FAIChatBox.ColorYou;
+    Bmp := FRender.RenderRtfToBitmap(FRtfStream, ItemTextRect.Right - ItemTextRect.Left);
+    if Bmp <> nil then
+    begin
+      ItemTextRect.Bottom := ItemTextRect.Top + Bmp.Height;
+      ItemTextRect.Right := ItemTextRect.Left + Bmp.Width;
+      Item.Attachment := Bmp;
+
+      DefaultCalc := False;
+    end;
+  end;
+end;
+
+procedure TFormAITest.CopyAll1Click(Sender: TObject);
+begin
+  if FAIChatItem <> nil then
+  begin
+    try
+      if FAIChatItem is TCnChatMessage then
+        Clipboard.AsText := TCnChatMessage(FAIChatItem).Text;
+    except
+      ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
+    end;
+  end;
+end;
+
+procedure TFormAITest.pmChatPopup(Sender: TObject);
+begin
+  FChatItem := FChatBox.GetItemUnderMouse;
+end;
+
+procedure TFormAITest.pmAIChatPopup(Sender: TObject);
+begin
+  FAIChatItem := FAIChatBox.GetItemUnderMouse;
+end;
+
+procedure TFormAITest.CopyCode1Click(Sender: TObject);
+var
+  S: string;
+begin
+  if FAIChatItem <> nil then
+  begin
+    try
+      if FAIChatItem is TCnChatMessage then
+      begin
+        S := ExtractCode(TCnChatMessage(FAIChatItem));
+        if S <> '' then
+        begin
+          Clipboard.AsText := Trim(S);
+          Exit;
+        end;
+
+        ShowMessage('NO Code');
+      end;
+    except
+      ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
+    end;
+  end;
+end;
+
+class function TFormAITest.ExtractCode(Item: TCnChatMessage): string;
+const
+  CODE_BLOCK = '```';
+  DELPHI_PREFIX = 'delphi' + #13#10;
+  PASCAL_PREFIX = 'pascal' + #13#10;
+  C_PREFIX = 'c' + #13#10;
+  CPP_PREFIX = 'c++' + #13#10;
+var
+  S: string;
+  I1, I2: Integer;
+begin
+  Result := '';
+  if Item = nil then
+    Exit;
+
+  S := TCnChatMessage(Item).Text;
+  I1 := Pos(CODE_BLOCK, S);
+  if I1 > 0 then
+  begin
+    Delete(S, 1, I1 + Length(CODE_BLOCK) - 1);
+    I2 := Pos(CODE_BLOCK, S);
+    if I2 > 0 then
+    begin
+      S := Copy(S, 1, I2 - 1);
+      I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 delphi
+      if I2 = 1 then
+        Delete(S, 1, Length(DELPHI_PREFIX));
+
+      I2 := Pos(PASCAL_PREFIX, LowerCase(S)); // 去除第一个 ``` 后的 pascal
+      if I2 = 1 then
+        Delete(S, 1, Length(PASCAL_PREFIX));
+
+      I2 := Pos(C_PREFIX, LowerCase(S));      // 去除第一个 ``` 后的 C
+      if I2 = 1 then
+        Delete(S, 1, Length(C_PREFIX));
+
+      I2 := Pos(CPP_PREFIX, LowerCase(S));    // 去除第一个 ``` 后的 C++
+      if I2 = 1 then
+        Delete(S, 1, Length(CPP_PREFIX));
+
+      Result := Trim(S);
+    end;
+  end;
 end;
 
 end.

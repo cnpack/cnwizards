@@ -177,6 +177,15 @@ object FormAITest: TFormAITest
         TabOrder = 7
         OnClick = btnReviewCodeClick
       end
+      object chkMarkDown: TCheckBox
+        Left = 920
+        Top = 20
+        Width = 81
+        Height = 17
+        Caption = 'MarkDown'
+        TabOrder = 8
+        OnClick = chkMarkDownClick
+      end
     end
     object tsChat: TTabSheet
       Caption = 'Chat'
@@ -246,6 +255,7 @@ object FormAITest: TFormAITest
     Top = 16
   end
   object pmChat: TPopupMenu
+    OnPopup = pmChatPopup
     Left = 468
     Top = 16
     object Copy1: TMenuItem
@@ -253,10 +263,16 @@ object FormAITest: TFormAITest
     end
   end
   object pmAIChat: TPopupMenu
+    OnPopup = pmAIChatPopup
     Left = 512
     Top = 16
     object CopyCode1: TMenuItem
       Caption = 'Copy Code'
+      OnClick = CopyCode1Click
+    end
+    object CopyAll1: TMenuItem
+      Caption = 'Copy Text'
+      OnClick = CopyAll1Click
     end
   end
 end
