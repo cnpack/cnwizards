@@ -252,10 +252,7 @@ begin
     Config
   else if Index = FIdShowChatWindow then
   begin
-    if (CnAICoderChatForm <> nil) and CnAICoderChatForm.VisibleWithParent then
-      CnAICoderChatForm.VisibleWithParent := False
-    else
-      EnsureChatWindowVisible;
+    EnsureChatWindowVisible;
   end
   else
   begin
@@ -304,10 +301,8 @@ end;
 
 procedure TCnAICoderWizard.SubActionUpdate(Index: Integer);
 begin
-  if Index = FIdConfig then
+  if (Index = FIdConfig) or (Index = FIdShowChatWindow) then
     SubActions[Index].Enabled := Active
-  else if Index = FIdShowChatWindow then
-    SubActions[Index].Checked := Active and (CnAICoderChatForm <> nil) and CnAICoderChatForm.VisibleWithParent
   else
     SubActions[Index].Enabled := Active and (CnOtaGetCurrentSelection <> '');
 end;
