@@ -335,6 +335,7 @@ procedure TCnAICoderChatForm.cbbActiveEngineChange(Sender: TObject);
 begin
   CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
   CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+  UpdateCaption;
 end;
 
 class function TCnAICoderChatForm.ExtractCode(Item: TCnChatMessage): string;

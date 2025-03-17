@@ -144,7 +144,7 @@ type
     {* IDE 启动完成更迟一些后调用该方法，用于高版本 IDE 中处理 IDE 菜单项加载太迟的场合}
 
     class function IsInternalWizard: Boolean; virtual;
-    {* 该专家是否属于内部专家，不显示、不可配置 }
+    {* 该专家是否属于内部专家，如果是内部则不在列表中显示且不可配置 }
 
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string);
       virtual; {$IFNDEF BCB}abstract;{$ENDIF BCB}
@@ -804,7 +804,7 @@ begin
   Ini := CreateIniFile;
   try
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Loading settings: ' + ClassName);
+    CnDebugger.LogMsg('Loading Settings: ' + ClassName);
   {$ENDIF}
     LoadSettings(Ini);
   finally
@@ -819,7 +819,7 @@ begin
   Ini := CreateIniFile;
   try
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Saving settings: ' + ClassName);
+    CnDebugger.LogMsg('Saving Settings: ' + ClassName);
   {$ENDIF}
     SaveSettings(Ini);
   finally
@@ -837,7 +837,7 @@ begin
   List := TStringList.Create;
   try
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Reset settings: ' + ClassName);
+    CnDebugger.LogMsg('Reset Settings: ' + ClassName);
   {$ENDIF}
 
     if Ini is TRegistryIniFile then
@@ -845,7 +845,7 @@ begin
       with (Ini as TRegistryIniFile).RegIniFile do
       begin
   {$IFDEF DEBUG}
-        CnDebugger.LogMsg('Remove Registry entry: ' + FileName);
+        CnDebugger.LogMsg('Remove Registry Entry: ' + FileName);
   {$ENDIF}
 
         Reg := TRegistry.Create;
