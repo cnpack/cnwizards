@@ -63,6 +63,7 @@ type
     function GetSystemMessage: string;
     function GetReviewCodePrompt: string;
     function GetGenTestCasePrompt: string;
+    function GetReferSelectionPrompt: string;
   protected
     function GetCurrentLangName: string;
     // SM4-GCM 加十六进制加解密
@@ -87,6 +88,8 @@ type
 
     property SystemMessage: string read GetSystemMessage;
     {* 系统预设消息}
+    property ReferSelectionPrompt: string read GetReferSelectionPrompt;
+    {* 引用代码时的提示文字}
     property ExplainCodePrompt: string read GetExplainCodePrompt;
     {* 解释代码的提示文字}
     property ReviewCodePrompt: string read GetReviewCodePrompt;
@@ -147,6 +150,7 @@ type
     FUseProxy: Boolean;
     FChatFontStr: string;
     FTimeoutSec: Cardinal;
+    FReferSelection: Boolean;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -187,6 +191,8 @@ type
   published
     property ChatFontStr: string read FChatFontStr write FChatFontStr;
     {* 聊天窗口的字体}
+    property ReferSelection: Boolean read FReferSelection write FReferSelection;
+    {* 聊天窗口发送消息时是否引用编辑器中选中的代码}
 
     property ActiveEngine: string read FActiveEngine write FActiveEngine;
     {* 活动引擎名称，供存储载入后设置活动引擎，除此以外别无它用。}
@@ -602,6 +608,11 @@ end;
 function TCnAIEngineOption.GetExtraOptionType(Index: Integer): TTypeKind;
 begin
   Result := tkUnknown;
+end;
+
+function TCnAIEngineOption.GetReferSelectionPrompt: string;
+begin
+  Result := SCnAICoderWizardUserMessageReferSelection;
 end;
 
 { TCnClaudeAIEngineOption }

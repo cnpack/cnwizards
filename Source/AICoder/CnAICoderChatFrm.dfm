@@ -62,23 +62,38 @@ object CnAICoderChatForm: TCnAICoderChatForm
       ImageIndex = 2
       Style = tbsSeparator
     end
-    object btnFont: TToolButton
+    object btnReferSelection: TToolButton
       Left = 54
+      Top = 0
+      Hint = 'Attach Selected Code in Editor when Asking'
+      ImageIndex = 88
+      OnClick = btnReferSelectionClick
+    end
+    object btn3: TToolButton
+      Left = 77
+      Top = 0
+      Width = 8
+      Caption = 'btn3'
+      ImageIndex = 3
+      Style = tbsSeparator
+    end
+    object btnFont: TToolButton
+      Left = 85
       Top = 0
       Action = actFont
     end
     object btnOption: TToolButton
-      Left = 77
+      Left = 108
       Top = 0
       Action = actOption
     end
     object btnHelp: TToolButton
-      Left = 100
+      Left = 131
       Top = 0
       Action = actHelp
     end
     object btn2: TToolButton
-      Left = 123
+      Left = 154
       Top = 0
       Width = 8
       Caption = 'btn2'
@@ -86,7 +101,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Style = tbsSeparator
     end
     object cbbActiveEngine: TComboBox
-      Left = 131
+      Left = 162
       Top = 0
       Width = 126
       Height = 21

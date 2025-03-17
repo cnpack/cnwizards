@@ -75,6 +75,8 @@ type
     dlgFont: TFontDialog;
     cbbActiveEngine: TComboBox;
     btn2: TToolButton;
+    btnReferSelection: TToolButton;
+    btn3: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -89,6 +91,7 @@ type
     procedure actClearExecute(Sender: TObject);
     procedure actFontExecute(Sender: TObject);
     procedure cbbActiveEngineChange(Sender: TObject);
+    procedure btnReferSelectionClick(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -117,7 +120,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnAICoderNetClient, CnAICoderConfig, CnCommon, CnIniStrUtils;
+  CnAICoderNetClient, CnAICoderConfig, CnCommon, CnIniStrUtils, CnWizUtils;
 
 {$R *.DFM}
 
@@ -162,6 +165,7 @@ begin
     FChatBox.Font := EditControlWrapper.FontBasic;
     mmoSelf.Font := EditControlWrapper.FontBasic;
   end;
+  btnReferSelection.Down := CnAIEngineOptionManager.ReferSelection;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
 
@@ -200,6 +204,7 @@ end;
 procedure TCnAICoderChatForm.btnMsgSendClick(Sender: TObject);
 var
   Msg: TCnChatMessage;
+  S: string;
 begin
   if Trim(mmoSelf.Lines.Text) <> '' then
   begin
@@ -215,8 +220,17 @@ begin
     Msg.FromType := cmtYou;
     Msg.Text := '...';
 
-    CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoSelf.Lines.Text, Msg,
-      artRaw, FWizard.ForCodeAnswer);
+    S := CnOtaGetCurrentSelection;
+    if btnReferSelection.Down and (Trim(S) <> '') then
+    begin
+      S := (mmoSelf.Lines.Text + #13#10 +
+        CnAIEngineManager.CurrentEngine.Option.ReferSelectionPrompt + #13#10 + S);
+      CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg,
+        artRaw, FWizard.ForCodeAnswer);
+    end
+    else
+      CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoSelf.Lines.Text, Msg,
+        artRaw, FWizard.ForCodeAnswer);
     mmoSelf.Lines.Text := '';
   end;
 end;
@@ -381,6 +395,12 @@ begin
   end;
 
   UpdateCaption;
+end;
+
+procedure TCnAICoderChatForm.btnReferSelectionClick(Sender: TObject);
+begin
+  btnReferSelection.Down := not btnReferSelection.Down;
+  CnAIEngineOptionManager.ReferSelection := btnReferSelection.Down;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}

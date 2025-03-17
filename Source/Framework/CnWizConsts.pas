@@ -1828,6 +1828,7 @@ var
   SCnAICoderWizardConfigCaption: string = '&Options...';
   SCnAICoderWizardConfigHint: string = 'Options of AI Coder';
   SCnAICoderWizardSystemMessageFmt: string = 'You are an Expert of Delphi/C++Builder/RAD Studio. Now we use %s.';
+  SCnAICoderWizardUserMessageReferSelection: string = 'Below is the Related Code:';
   SCnAICoderWizardUserMessageExplainFmt: string = 'Please Explain the Code using %s: ';
   SCnAICoderWizardUserMessageReviewFmt: string = 'Please Conduct a Code Review for this Segment of Code. ' +
     'There is No Need to Explain its Functionality; instead, Please Analyze and Point out Issues using %s from Aspects such as Structure, Spelling, Performance and Safety etc. If the Code is too Short or has No Obvious Issues, Answer No Problem.';

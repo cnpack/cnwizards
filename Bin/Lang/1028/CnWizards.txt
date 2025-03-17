@@ -2881,6 +2881,7 @@ TCnAICoderChatForm.actOption.Hint=顯示 AI 輔助編碼設置
 TCnAICoderChatForm.actToggleSend.Caption=切換發送框(&T)
 TCnAICoderChatForm.actToggleSend.Hint=切換發送框的顯示
 TCnAICoderChatForm.btnMsgSend.Hint=回車發送消息，Ctrl+Enter換行
+TCnAICoderChatForm.btnReferSelection.Hint=提問時附上編輯器內選中的代碼
 TCnAICoderChatForm.Caption=AI 輔助編碼對話
 SCnInformation=提示
 SCnWarning=警告

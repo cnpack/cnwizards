@@ -1503,6 +1503,7 @@ begin
   TranslateStr(SCnAICoderWizardConfigCaption, 'SCnAICoderWizardConfigCaption');
   TranslateStr(SCnAICoderWizardConfigHint, 'SCnAICoderWizardConfigHint');
   TranslateStr(SCnAICoderWizardSystemMessageFmt, 'SCnAICoderWizardSystemMessageFmt');
+  TranslateStr(SCnAICoderWizardUserMessageReferSelection, 'SCnAICoderWizardUserMessageReferSelection');
   TranslateStr(SCnAICoderWizardUserMessageExplainFmt, 'SCnAICoderWizardUserMessageExplainFmt');
   TranslateStr(SCnAICoderWizardUserMessageReviewFmt, 'SCnAICoderWizardUserMessageReviewFmt');
   TranslateStr(SCnAICoderWizardUserMessageGenTestCaseFmt, 'SCnAICoderWizardUserMessageGenTestCaseFmt');

@@ -2881,6 +2881,7 @@ TCnAICoderChatForm.actOption.Hint=Einstellungen anzeigen
 TCnAICoderChatForm.actToggleSend.Caption=Sendebereich umschalten
 TCnAICoderChatForm.actToggleSend.Hint=Sendebereich umschalten
 TCnAICoderChatForm.btnMsgSend.Hint=Drücken Sie Enter zum Senden, Ctrl+Enter für eine neue Zeile
+TCnAICoderChatForm.btnReferSelection.Hint=Joindre le code sélectionné dans l'éditeur lors de la demande
 TCnAICoderChatForm.Caption=AI-Codierer Chat
 SCnInformation=Hint
 SCnWarning=Warning

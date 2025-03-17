@@ -2881,6 +2881,7 @@ TCnAICoderChatForm.actOption.Hint=Отобразить настройки
 TCnAICoderChatForm.actToggleSend.Caption=Переключить область отправки
 TCnAICoderChatForm.actToggleSend.Hint=Переключить область отправки
 TCnAICoderChatForm.btnMsgSend.Hint=Нажмите Enter для отправки, Ctrl+Enter для новой строки
+TCnAICoderChatForm.btnReferSelection.Hint=Прикрепить выбранный код из редактора при задании вопроса
 TCnAICoderChatForm.Caption=Чат с AI Кодером
 SCnInformation=Информация
 SCnWarning=Предупреждение

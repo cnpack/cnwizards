@@ -2881,6 +2881,7 @@ TCnAICoderChatForm.actOption.Hint=Display Options
 TCnAICoderChatForm.actToggleSend.Caption=&Toggle Send Area
 TCnAICoderChatForm.actToggleSend.Hint=Toggle Send Area
 TCnAICoderChatForm.btnMsgSend.Hint=Enter to Send, Ctrl+Enter to Make a New Line
+TCnAICoderChatForm.btnReferSelection.Hint=Attach Selected Code in Editor when Asking
 TCnAICoderChatForm.Caption=AI Coder Chat
 SCnInformation=Hint
 SCnWarning=Warning

@@ -2882,6 +2882,7 @@ TCnAICoderChatForm.actOption.Hint=Afficher les options
 TCnAICoderChatForm.actToggleSend.Caption=Basculer la zone d'envoi
 TCnAICoderChatForm.actToggleSend.Hint=Basculer la zone d'envoi
 TCnAICoderChatForm.btnMsgSend.Hint=Tapez Entrée pour envoyer, Ctrl+Entrée pour une nouvelle ligne
+TCnAICoderChatForm.btnReferSelection.Hint=Joindre le code sélectionné dans l'éditeur lors de la demande
 TCnAICoderChatForm.Caption=Chat avec AI Coder
 SCnInformation=Indication
 SCnWarning=Avertissement
