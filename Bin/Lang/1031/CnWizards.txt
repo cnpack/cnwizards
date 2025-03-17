@@ -4085,6 +4085,7 @@ SCnAICoderWizardChatWindowHint=AI Chat Fenster ein- oder ausblenden
 SCnAICoderWizardConfigCaption=&Optionen...
 SCnAICoderWizardConfigHint=Optionen für AI Coder
 SCnAICoderWizardSystemMessageFmt=Sie sind ein Experte für Delphi/C++Builder/RAD Studio. Jetzt verwenden wir %s.
+SCnAICoderWizardUserMessageReferSelection=Unten ist der verwandte Code:
 SCnAICoderWizard0UserMessageExplainFmt=Bitte erklären Sie den Code mit %s:
 SCnAICoderWizardUserMessageReviewFmt=Bitte führen Sie eine Code-Überprüfung für dieses Codesegment durch. Es ist nicht erforderlich, seine Funktionalität zu erklären; stattdessen bitte analysieren Sie und zeigen Sie Probleme unter Verwendung von %s aus Aspekte wie Struktur, Rechtschreibung, Performance und Sicherheit usw. heraus. Wenn der Code zu kurz ist oder keine offensichtliche Probleme hat, antworten Sie "No Problem".
 SCnAICoderWizardUserMessageGenTestCaseFmt=Bitte analysieren Sie die Funktionalität des folgenden Codes und erstellen Sie einen nicht-UI-interaktiven Testfall für diesen Code mit %s. Der Testfall sollte als einzelne Funktion bereitgestellt werden, die einige typische Szenarien und Grenzfälle abdeckt. Die Verwendung von Assert wird für Flexibilität empfohlen. Wenn der Code keine vollständige Funktion ist, antworten Sie bitte, dass er nicht generiert werden kann.

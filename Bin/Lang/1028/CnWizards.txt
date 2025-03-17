@@ -4085,6 +4085,7 @@ SCnAICoderWizardChatWindowHint=顯示或隱藏 AI 對話窗口
 SCnAICoderWizardConfigCaption=設置(&O)...
 SCnAICoderWizardConfigHint=AI 輔助編碼的設置選項
 SCnAICoderWizardSystemMessageFmt=你是一名 Delphi/C++Builder/RAD Studio 開發專家，目前正在使用 %s，負責回答其開發相關問題。
+SCnAICoderWizardUserMessageReferSelection=以下是和本問題相關的代碼：
 SCnAICoderWizardUserMessageExplainFmt=請使用 %s 解釋以下代碼：
 SCnAICoderWizardUserMessageReviewFmt=請針對這段代碼做Code Review，不需解釋其功能，需從其結構、拼寫、性能、安全性等方面加以分析並指出其問題。如果代碼太短或無明顯問題，則回答沒有問題。
 SCnAICoderWizardUserMessageGenTestCaseFmt=請分析以下代碼塊的功能並使用 %s 為該代碼塊生成一個不涉及UI交互的測試用例，用例請以單個函數的方式給出，要求覆蓋一些典型情況及邊界情況，可靈活使用Assert。如給出的代碼塊不是完整的函數，請回答無法生成。
