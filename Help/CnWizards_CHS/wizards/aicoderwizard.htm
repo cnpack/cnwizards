@@ -31,7 +31,7 @@
     <p class="text"><b>超时秒数</b>：网络通讯的超时秒数设置，0 表示使用系统默认值。</p>
   </li>
   <li>
-    <p class="text"><b>使用代理</b>：如勾选，则代表指定连接该 AI 引擎所需的代理服务器。暂不支持用户名密码。</p>
+    <p class="text"><b>使用代理</b>：如勾选，则代表指定连接该 AI 引擎所需的代理服务器，可以是 HTTP 或 SOCKS5 代理，格式如“192.168.1.1:1080”。暂不支持用户名密码。</p>
   </li>
   <li>
     <p class="text"><b>请求地址</b>：AI 引擎的 API 在线请求地址，由该 AI 引擎提供。</p>
@@ -40,10 +40,19 @@
     <p class="text"><b>模型名称</b>：选择该 AI 引擎提供的可用的模型名称。</p>
   </li>
   <li>
+    <p class="text"><b>采样温度</b>：即 Temperature 参数，控制 AI 思维的发散程度。</p>
+  </li>
+  <li>
     <p class="text"><b>API 密钥</b>：需填入在该 AI 引擎网站上注册并申请的合法 API 密钥。</p>
   </li>
   <li>
+    <p class="text"><b>流式输出</b>：不勾选则控制让 AI 引擎一次性返回完整应答数据，否则连续多次返回。</p>
+  </li>
+  <li>
     <p class="text"><b>申请</b>：点击申请链接可在线注册并申请该 AI 引擎的 API 密钥。</p>
+  </li>
+  <li>
+    <p class="text"><b>重置</b>：该按钮可将当前 AI 引擎的设置恢复至默认状态，但不清空 API 密钥。</p>
   </li>
 </ul>
 <p class="title" align="left">&nbsp;</p>
@@ -61,7 +70,7 @@
     <p class="text"><b>生成测试用例</b>：向当前 AI 引擎发送请求，让其针对编辑器中选中的代码块生成一个无界面交互的测试用例。返回的结果将插入当前编辑器光标所在处，同时也显示在 AI 对话窗口中，。</p>
   </li>
   <li>
-    <p class="text"><b>AI 对话窗口</b>：显示或隐藏 AI 对话窗口。</p>
+    <p class="text"><b>AI 对话窗口</b>：显示 AI 对话窗口。</p>
   </li>
   <li>
     <p class="text"><b>设置</b>：显示上文的设置对话框。</p>

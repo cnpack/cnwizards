@@ -31,7 +31,7 @@
     <p class="text"><b>超時秒數</b>：網絡通訊的超時秒數設置，0 表示使用系統默認值。</p>
   </li>
   <li>
-    <p class="text"><b>使用代理</b>：如勾選，則代表指定連接該 AI 引擎所需的代理服務器。暫不支持用戶名密碼。</p>
+    <p class="text"><b>使用代理</b>：如勾選，則代表指定連接該 AI 引擎所需的代理服務器，可以是 HTTP 或 SOCKS5 代理，格式如「192.168.1.1:1080」。暫不支持用戶名密碼。</p>
   </li>
   <li>
     <p class="text"><b>請求地址</b>：AI 引擎的 API 在線請求地址，由該 AI 引擎提供。</p>
@@ -40,10 +40,19 @@
     <p class="text"><b>模型名稱</b>：選擇該 AI 引擎提供的可用的模型名稱。</p>
   </li>
   <li>
+    <p class="text"><b>採樣溫度</b>：即 Temperature 參數，控制 AI 思維的發散程度。</p>
+  </li>
+  <li>
     <p class="text"><b>API 密鑰</b>：需填入在該 AI 引擎網站上註冊並申請的合法 API 密鑰。</p>
   </li>
   <li>
+    <p class="text"><b>流式輸出</b>：不勾選則控制讓 AI 引擎一次性返回完整應答數據，否則連續多次返回。</p>
+  </li>
+  <li>
     <p class="text"><b>申請</b>：點擊申請鏈接可在線註冊並申請該 AI 引擎的 API 密鑰。</p>
+  </li>
+  <li>
+    <p class="text"><b>重置</b>：該按鈕可將當前 AI 引擎的設置恢復至默認狀態，但不清空 API 密鑰。</p>
   </li>
 </ul>
 <p class="title" align="left">&nbsp;</p>
@@ -61,7 +70,7 @@
     <p class="text"><b>生成測試用例</b>：向當前 AI 引擎發送請求，讓其針對編輯器中選中的代碼塊生成一個無界面交互的測試用例。返回的結果將插入當前編輯器光標所在處，同時也顯示在 AI 對話窗口中，。</p>
   </li>
   <li>
-    <p class="text"><b>AI 對話窗口</b>：顯示或隱藏 AI 對話窗口。</p>
+    <p class="text"><b>AI 對話窗口</b>：顯示 AI 對話窗口。</p>
   </li>
   <li>
     <p class="text"><b>設置</b>：顯示上文的設置對話框。</p>

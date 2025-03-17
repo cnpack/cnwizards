@@ -34,7 +34,7 @@ Before using it, please first run the configuration of this wizard, enter the ap
     <p class="text"><b>Timeout Seconds</b>: Timeout for network communication with the unit seconds.</p>
   </li>
   <li>
-    <p class="text"><b>Use Proxy</b>: If checked, it represents that a proxy server is required for the specified connection to the AI Engine. Currently username and password are not supported.</p>
+    <p class="text"><b>Use Proxy</b>: If checked, it represents that a HTTP or SOCKS5 proxy server is required for the specified connection to the AI Engine, such as "192.168.1.1:1080". Currently username and password are not supported.</p>
   </li>
   <li>
     <p class="text"><b>URL</b>: The AI Engine API URL provided by this AI Engine.</p>
@@ -43,10 +43,19 @@ Before using it, please first run the configuration of this wizard, enter the ap
     <p class="text"><b>Model Name</b>: Select the model name provided by this AI Engine.</p>
   </li>
   <li>
+    <p class="text"><b>Temperature</b>: Set the Temperature for this AI Engine.</p>
+  </li>
+  <li>
     <p class="text"><b>API Key</b>: Must be a valid API Key applied from this AI Engine website.</p>
   </li>
   <li>
+    <p class="text"><b>Stream Mode</b>: By default, when we make a request to any AI Engine, it generates the model's entire output before sending it back in a single HTTP response. When generating long outputs, waiting for a response can take time. Streaming mode lets us start printing or processing the beginning of the AI Engine's output while it continues generating the full response.</p>
+  </li>
+  <li>
     <p class="text"><b>Apply</b>: Click to Apply the API Key for this AI Engine.</p>
+  </li>
+  <li>
+    <p class="text"><b>Reset</b></b>: Reset selected AI Engine settings to default without clearing API Key.</p>
   </li>
 </ul>
 <p class="title" align="left">&nbsp;</p>
@@ -64,7 +73,7 @@ Before using it, please first run the configuration of this wizard, enter the ap
     <p class="text"><b>Generate Test Case</b>: Send request to current AI engine to generate a Test Case for the code which is selected in Editor. The test case code will be insert to cursor and also shown in AI Chat Window.</p>
   </li>
   <li>
-    <p class="text"><b>AI Chat Window</b>: Show or hide AI Chat Window.</p>
+    <p class="text"><b>AI Chat Window</b>: Show AI Chat Window.</p>
   </li>
   <li>
     <p class="text"><b>Options</b>: Show AI Coder setting dialog.</p>
