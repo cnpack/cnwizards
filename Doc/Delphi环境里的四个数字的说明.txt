@@ -27,4 +27,6 @@ Embarcadero\Studio\21.0      270         VER340      10.4  分3个不兼容的Update
 Embarcadero\Studio\22.0      280         VER350      11
 Embarcadero\Studio\23.0      290         VER360      12，  分3个不兼容的Update
 
+ToolsAPI.pas中的接口名后面的数字一般指的是安装后的文件，也就是和coreide140这种类似。
+
 注：在专家包的打包编译环境中，不带_后缀的是该版本最新的编译器。带_1的是该版本最老的不兼容编译器，_2的次老，以此类推。
