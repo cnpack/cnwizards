@@ -96,6 +96,7 @@ type
 {$IFNDEF CNWIZARDS_MINIMUM}
     FRestoreSysMenu: TCnRestoreSystemMenu;
 {$ENDIF}
+    FProductVersion: Integer;
     FMenu: TMenuItem;
     FToolsMenu: TMenuItem;
     FWizards: TList;
@@ -114,6 +115,7 @@ type
     FSplashBmp: TBitmap;   // 启动画面，24x24
     FAboutBmp: TBitmap;    // IDE 关于窗口，36x36
   {$ENDIF}
+    procedure CalcProductVersion;
     procedure DoLaterLoad(Sender: TObject);
     procedure DoFreeLaterLoadTimer(Sender: TObject);
 
@@ -154,6 +156,7 @@ type
     procedure SetWizardCanCreate(WizardClassName: string;
       const Value: Boolean);
     function GetOffSet(Index: Integer): Integer;
+    function GetProductVersion: Integer;
   public
     constructor Create;
     {* 类构造器}
@@ -221,6 +224,9 @@ type
       write SetWizardCanCreate;
     {* 指定专家是否创建 }
     property OffSet[Index: Integer]: Integer read GetOffSet;
+
+    property ProductVersion: Integer read GetProductVersion;
+    {* 拿专家包的数字版本号，比如 1.2.3 版就返回 123}
   end;
 
 {$IFDEF COMPILER6_UP}
@@ -546,6 +552,8 @@ begin
 
   // 让专家可以在 Create 和其他过程中能够访问 CnWizardMgr 中的其他属性。
   CnWizardMgr := Self;
+  CalcProductVersion;
+
 {$IFNDEF CNWIZARDS_MINIMUM}
   RegisterThemeClass;
 {$ENDIF}
@@ -1704,6 +1712,49 @@ end;
 function TCnWizardMgr.GetName: string;
 begin
   Result := SCnWizardMgrName;
+end;
+
+procedure TCnWizardMgr.CalcProductVersion;
+var
+  V1, V2, V3, D: Integer;
+  S, T: string;
+begin
+  try
+    V1 := StrToInt(SCnWizardMajorVersion) * 100;
+    V2 := 0;
+    V3 := 0;
+    S := SCnWizardMinorVersion;
+    D := Pos('.', S);
+    if D > 1 then
+    begin
+      T := Copy(S, 1, D - 1);
+      V2 := StrToInt(T) * 10;
+      Delete(S, 1, D);
+
+      D := Pos('.', S);
+      if D > 1 then
+      begin
+        T := Copy(S, 1, D - 1);
+        V3 := StrToInt(T);
+      end;
+    end;
+
+    FProductVersion := V1 + V2 + V3;
+  except
+{$IFDEF DEBUG}
+    CnDebugger.LogError('NO CnWizards Version Found: ' + SCnWizardVersion);
+{$ENDIF}
+  end;
+end;
+
+// 取专家包数字版本号
+function TCnWizardMgr.GetProductVersion: Integer;
+
+begin
+  if FProductVersion = 0 then
+    CalcProductVersion;
+
+  Result := FProductVersion;
 end;
 
 // 返回专家状态

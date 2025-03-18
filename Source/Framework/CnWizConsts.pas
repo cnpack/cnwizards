@@ -65,7 +65,7 @@ const
   SCnWizardFullVersion = SCnWizardVersion + ' Build ' + SCnWizardBuildDate;
 
   SCnWizardCaption = 'CnPack IDE Wizards ' + SCnWizardVersion;
-  SCnWizardDesc = 'CnPack IDE Wizards for Delphi/C++Builder/BDS/Rad Studio' + #13#10 +
+  SCnWizardDesc = 'CnPack IDE Wizards for Delphi/C++Builder/BDS/RAD Studio' + #13#10 +
                   '' + #13#10 +
                   'Version: ' + SCnWizardFullVersion + #13#10 +
                   'Copyright: 2001-2025 CnPack Team' + #13#10 +
