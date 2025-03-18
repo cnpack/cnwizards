@@ -143,6 +143,12 @@ type
     procedure LaterLoaded; virtual;
     {* IDE 启动完成更迟一些后调用该方法，用于高版本 IDE 中处理 IDE 菜单项加载太迟的场合}
 
+    procedure VersionFirstRun; virtual;
+    {* 本版本号的专家第一次创建时被调用，在构造函数之后被专家管理器调用，供处理升级
+      子类可以使用 CnWizardMgr.ProductVersion 拿到当前数字版本号，使用
+      WizOptions.ReadInteger(SCnVersionFirstRun, Self.ClassName, 0) 拿到上一此跑的版本号
+      以进行对比并根据所需内容升级，如更新新版设置等}
+
     class function IsInternalWizard: Boolean; virtual;
     {* 该专家是否属于内部专家，如果是内部则不在列表中显示且不可配置 }
 
@@ -868,12 +874,12 @@ end;
 
 procedure TCnBaseWizard.Config;
 begin
-  // do nothing
+  // 基类啥也不干
 end;
 
 procedure TCnBaseWizard.LanguageChanged(Sender: TObject);
 begin
-  // do nothing
+  // 基类啥也不干
 end;
 
 procedure TCnBaseWizard.LoadSettings(Ini: TCustomIniFile);
@@ -898,17 +904,22 @@ end;
 
 procedure TCnBaseWizard.ResetSettings(Ini: TCustomIniFile);
 begin
-// do nothing
+// 基类啥也不干
 end;
 
 procedure TCnBaseWizard.Loaded;
 begin
-  // do nothing
+  // 基类啥也不干
 end;
 
 procedure TCnBaseWizard.LaterLoaded;
 begin
-  // do nothing
+  // 基类啥也不干
+end;
+
+procedure TCnBaseWizard.VersionFirstRun;
+begin
+  // 基类啥也不干
 end;
 
 //------------------------------------------------------------------------------

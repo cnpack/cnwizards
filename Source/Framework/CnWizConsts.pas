@@ -100,6 +100,7 @@ resourcestring
   SCnFormPositionHeight = '_Height';
 
   SCnCreateSection = 'Create';
+  SCnVersionFirstRun = 'VersionFirstRun';
   SCnBootLoadSection = 'BootLoad';
   SCnSplashBmp = 'CnWizSplash';
   SCnAboutBmp = 'CnWizAbout';

@@ -99,10 +99,10 @@ type
     FProductVersion: Integer;
     FMenu: TMenuItem;
     FToolsMenu: TMenuItem;
-    FWizards: TList;
-    FMenuWizards: TList;
-    FIDEEnhanceWizards: TList;
-    FRepositoryWizards: TList;
+    FWizards: TList;              // 专家实例被分别放在这四个 List 中，这是普通专家
+    FMenuWizards: TList;          // 菜单专家
+    FIDEEnhanceWizards: TList;    // 功能扩展型专家
+    FRepositoryWizards: TList;    // 模板向导专家
     FTipTimer: TTimer;
     FLaterLoadTimer: TTimer;
     FSepMenu: TMenuItem;
@@ -123,6 +123,7 @@ type
     procedure InstallIDEMenu;
     procedure FreeMenu;
     procedure InstallWizards;
+    procedure VersionFirstRunWizards;
     procedure FreeWizards;
     procedure CreateMiscMenu;
     procedure InstallMiscMenu;
@@ -210,7 +211,7 @@ type
     property RepositoryWizardCount: Integer read GetRepositoryWizardCount;
     {* TCnRepositoryWizard 模板向导专家及其子类的总数}
     property Wizards[Index: Integer]: TCnBaseWizard read GetWizards; default;
-    {* 专家数组，包含了管理器维护的所有专家}
+    {* 封装的专家数组，包含了管理器维护的所有专家}
     property MenuWizards[Index: Integer]: TCnMenuWizard read GetMenuWizards;
     {* 菜单专家数组，包含了 TCnMenuWizard 及其子类专家}
     property IDEEnhanceWizards[Index: Integer]: TCnIDEEnhanceWizard
@@ -419,6 +420,12 @@ begin
 {$ENDIF}
   InstallWizards;
 
+  // 检查专家的版本初始化
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InternalCreate VersionFirstRunWizards');
+{$ENDIF}
+  VersionFirstRunWizards;
+
   // 加载所有专家设置并创建子菜单
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate LoadSettings');
@@ -481,7 +488,6 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('InternalCreate');
 {$ENDIF}
-
 end;
 
 // BDS 下注册插件产品信息
@@ -1057,14 +1063,14 @@ begin
     begin
       try
         Wizard := TCnWizardClass(GetCnWizardClassByIndex(I)).Create;
-      {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogMsg('Wizard Created: ' + Wizard.ClassName);
-      {$ENDIF}
+{$ENDIF}
       except
-      {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogMsg('Wizard Create Fail: ' +
           TCnWizardClass(GetCnWizardClassByIndex(I)).ClassName);
-      {$ENDIF}
+{$ENDIF}
         Wizard := nil;
       end;
 
@@ -1090,9 +1096,9 @@ begin
       else
         FWizards.Add(Wizard);
 
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogFmt('Wizard [%d] Installed: %s', [I, Wizard.ClassName]);
-    {$ENDIF}
+{$ENDIF}
     end;
   end;
 
@@ -1104,6 +1110,35 @@ begin
   if UserBoot then
     SetLength(BootList, 0);
 end;
+
+procedure TCnWizardMgr.VersionFirstRunWizards;
+var
+  I, V: Integer;
+  Wizard: TCnBaseWizard;
+begin
+  for I := 0 to WizardCount - 1 do
+  begin
+    Wizard := Wizards[I];
+
+    // 检查注册表内，类名对应的值是否是本版本号，不是则执行并改注册表内的版本号
+    V := WizOptions.ReadInteger(SCnVersionFirstRun, Wizard.ClassName, 0);
+    if V <> CnWizardMgr.ProductVersion then
+    begin
+      try
+        Wizard.VersionFirstRun;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Wizard VersionFirstRun: ' + Wizard.ClassName);
+{$ENDIF}
+      except
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Wizard VersionFirstRun Exception: ' + Wizard.ClassName);
+{$ENDIF}
+      end;
+      // 只要执行了，无论是否出错都写本版本号，下次不再执行
+      WizOptions.WriteInteger(SCnVersionFirstRun, Wizard.ClassName, CnWizardMgr.ProductVersion);
+    end;
+  end;
+end;  
 
 function TCnWizardMgr.GetOffSet(Index: Integer): Integer;
 begin
@@ -1117,9 +1152,9 @@ var
 begin
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsgWithType('Query IOTAWizardServices Error', cmtError);
-  {$ENDIF}
+{$ENDIF}
     Exit;
   end;
 
@@ -1127,9 +1162,9 @@ begin
   begin
     while FWizards.Count > 0 do
     begin
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(TCnBaseWizard(FWizards[0]).ClassName + '.Free');
-    {$ENDIF}
+{$ENDIF}
       try
         try
           TCnBaseWizard(FWizards[0]).Free;
@@ -1146,9 +1181,9 @@ begin
   begin
     while FMenuWizards.Count > 0 do
     begin
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(TCnMenuWizard(FMenuWizards[0]).ClassName + '.Free');
-    {$ENDIF}
+{$ENDIF}
       try
         try
           TCnMenuWizard(FMenuWizards[0]).Free;
@@ -1165,9 +1200,9 @@ begin
   begin
     while FIDEEnhanceWizards.Count > 0 do
     begin
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).ClassName + '.Free');
-    {$ENDIF}
+{$ENDIF}
       try
         try
           TCnIDEEnhanceWizard(FIDEEnhanceWizards[0]).Free;
@@ -1184,9 +1219,9 @@ begin
   begin
     while FRepositoryWizards.Count > 0 do
     begin
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
       CnDebugger.LogMsg(TCnRepositoryWizard(FRepositoryWizards[0]).ClassName + '.Free');
-    {$ENDIF}
+{$ENDIF}
       // 移除专家会自动释放掉
       WizardSvcs.RemoveWizard(TCnRepositoryWizard(FRepositoryWizards[0]).WizardIndex);
       FRepositoryWizards.Delete(0);
@@ -1355,10 +1390,10 @@ begin
       with CnDesignEditorMgr.CompEditors[I] do
       begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
-      {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         if Active then
           CnDebugger.LogMsg('Component Editors Installed: ' + IDStr);
-      {$ENDIF}
+{$ENDIF}
         DoLoadSettings;
       end;
   finally
@@ -1387,10 +1422,10 @@ begin
       with CnDesignEditorMgr.PropEditors[I] do
       begin
         Active := ReadBool(SCnActiveSection, IDStr, True);
-      {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         if Active then
           CnDebugger.LogMsg('Property Editors Installed: ' + IDStr);
-      {$ENDIF}
+{$ENDIF}
         DoLoadSettings;
       end;
   finally
@@ -1742,7 +1777,7 @@ begin
     FProductVersion := V1 + V2 + V3;
   except
 {$IFDEF DEBUG}
-    CnDebugger.LogError('NO CnWizards Version Found: ' + SCnWizardVersion);
+    CnDebugger.LogMsgError('No CnWizards Version Found: ' + SCnWizardVersion);
 {$ENDIF}
   end;
 end;
