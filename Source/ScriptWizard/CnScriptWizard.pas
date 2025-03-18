@@ -953,7 +953,9 @@ begin
     while SubActionCount > IdBrowseDemo + 1 do
       DeleteSubAction(IdBrowseDemo + 1);
     for I := 0 to FScripts.Count - 1 do
+    begin
       with FScripts[I] do
+      begin
         if Enabled and not IsInternal and (smManual in Mode) then
         begin
           ActionIndex := RegisterASubAction(SCnScriptItem + IntToStr(I),
@@ -962,6 +964,8 @@ begin
         end
         else
           ActionIndex := -1;
+      end;
+    end;
   finally
     WizShortCutMgr.EndUpdate;
   end;

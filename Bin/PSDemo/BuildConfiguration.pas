@@ -50,11 +50,11 @@ begin
       end;
 
       Writeln('');
-      Writeln('VerInfo_IncludeVerInfo: ' + BC.GetValue('VerInfo_IncludeVerInfo'));
-      Writeln('VerInfo_MajorVer: ' + BC.GetValue('VerInfo_MajorVer'));
-      Writeln('VerInfo_MinorVer: ' + BC.GetValue('VerInfo_MinorVer'));
-      Writeln('VerInfo_Release: ' + BC.GetValue('VerInfo_Release'));
-      Writeln('VerInfo_Build: ' + BC.GetValue('VerInfo_Build'));
+      Writeln('VerInfo_IncludeVerInfo: ' + BC.GetValue('VerInfo_IncludeVerInfo', True));
+      Writeln('VerInfo_MajorVer: ' + BC.GetValue('VerInfo_MajorVer', True));
+      Writeln('VerInfo_MinorVer: ' + BC.GetValue('VerInfo_MinorVer', True));
+      Writeln('VerInfo_Release: ' + BC.GetValue('VerInfo_Release', True));
+      Writeln('VerInfo_Build: ' + BC.GetValue('VerInfo_Build', True));
 
       //BC.SetValue('VerInfo_Build', '2');
 
