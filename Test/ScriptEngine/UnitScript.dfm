@@ -34,6 +34,7 @@ object FormScriptEngine: TFormScriptEngine
       'begin'
       '  Writeln('#39'Test OK'#39');'
       '  Obj := TObject.Create;'
+      '  Writeln(Obj.ClassName);'
       '  Obj.Free;'
       'end.')
     TabOrder = 0
