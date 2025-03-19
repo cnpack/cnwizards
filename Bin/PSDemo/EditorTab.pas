@@ -29,7 +29,7 @@ begin
   if (Compiler = cnDelphi5) or (Compiler = cnDelphi6) or (Compiler = cnDelphi7)
     or (Compiler = cnBCB5) or (Compiler = cnBCB6) then
      TabControlClassName := 'TXTabControl'
-  else if (Compiler = cnDelphi9) then // BDS 2005
+  else if (Compiler = cnDelphi2005) then // BDS 2005
      TabControlClassName := 'TCodeEditorTabControl'
   else // BDS 2006/2007/2009 and above
      TabControlClassName := 'TIDEGradientTabSet';
@@ -56,7 +56,7 @@ begin
   end
   else
   begin
-    if Compiler = cnDelphi9 then
+    if Compiler = cnDelphi2005 then
       Tabs := TStrings(GetObjectProp(TabControl, 'Tabs'))
     else
       Tabs := TStrings(GetObjectProp(TabControl, 'Items'));

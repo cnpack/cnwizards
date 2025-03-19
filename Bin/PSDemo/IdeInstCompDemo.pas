@@ -29,6 +29,8 @@ var
 
 begin
   DB := TDatabase.Create(nil);
+  // 注意高版本 Delphi 中去除了 BDE 数据库引擎，这句会出错
+
   try
     DB.AliasName := 'Test';  // You can access published properties only!!!
   finally

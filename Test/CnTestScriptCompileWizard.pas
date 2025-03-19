@@ -102,7 +102,7 @@ begin
 
         try
           Sl := TStringList.Create;
-          Sl.LoadFromFile(Files[I]);
+          Sl.LoadFromFile(IncludeTrailingPathDelimiter(Dir) + Files[I]);
           Exec := TCnScriptExec.Create;
 
           Msg := '';
