@@ -365,6 +365,10 @@
 		<param name="Local" value="cnsmr\cnsmr.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="RemObjects Pascal Script License">
+		<param name="Local" value="licenses\ro_ps_lic.txt">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Repository List">
 		<param name="Local" value="wizards\repository.htm">
 		</OBJECT>

@@ -101,6 +101,10 @@
 		<param name="Local" value="wizards\msdnwizards.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="RemObjects Pascal Script 使用许可协议">
+		<param name="Local" value="licenses\ro_ps_lic.txt">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Repository 向导列表">
 		<param name="Local" value="wizards\repository.htm">
 		</OBJECT>

@@ -39,6 +39,10 @@
 				<param name="Local" value="licenses\gelicense.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="RemObjects Pascal Script 使用許可協議">
+				<param name="Local" value="licenses\ro_ps_lic.txt">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Mozilla Public License 1.1">
 				<param name="Local" value="licenses\MPL-1.1.txt">
 				</OBJECT>
