@@ -504,7 +504,7 @@ begin
     RegisterMethod('Function InstallAndroidSDK : Boolean', cdRegister);
     RegisterMethod('Function InstallAndroidSDKTools : Boolean', cdRegister);
     RegisterMethod('Function Install1(const CatalogId : string): Boolean', cdRegister);
-    RegisterMethod('Function Install(const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean', cdRegister);
+    RegisterMethod('Function Install2(const CatalogId : string; AutoCloseProgressDlg : Boolean) : Boolean', cdRegister);
   end;
 end;
 
@@ -1234,7 +1234,7 @@ begin
   //with RegInterfaceS(CL,'IOTACodeInsightServices270', 'IOTACodeInsightServices') do
   with CL.AddInterface(CL.FindInterface('IOTACodeInsightServices270'),IOTACodeInsightServices, 'IOTACodeInsightServices') do
   begin
-    RegisterMethod('Function HandlesFile( const AFileName, AIDString : string) : Boolean)', cdRegister);
+    RegisterMethod('Function HandlesFile( const AFileName, AIDString : string) : Boolean', cdRegister);
   end;
 end;
 
