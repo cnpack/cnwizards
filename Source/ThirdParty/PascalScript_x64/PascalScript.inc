@@ -11,7 +11,7 @@
 
 {$INCLUDE eDefines.inc}
 
-{$IFDEF FPC}{$MODE DELPHI}{$H+}{$ENDIF}
+{$IFDEF FPC}{$H+}{$ENDIF}
 
 {$IFDEF VER125}{C4}{$B-}{$X+}{$T-}{$H+}{$ENDIF}
 {$IFDEF VER110}{C3}{$B-}{$X+}{$T-}{$H+}{$ENDIF}

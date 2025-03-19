@@ -73,7 +73,7 @@ var
       btSingle: Result := 'Single';
       btDouble: Result := 'Double';
       btExtended: Result := 'Extended';
-      btString: Result := 'String';
+      btString: if TypeInfo(tbtString) = TypeInfo(AnsiString) then  Result := 'AnsiString' else Result := 'string';
       btRecord:
         begin
           Result := 'Record(';

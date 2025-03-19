@@ -18,7 +18,7 @@ Revision :
     svn 252 (For D2009 and above)
              http://code.remobjects.com/svn/pascalscript/Source
 
-    github: commit 9f7d3037260c48322ce7b5447911b7fd1c35384f (For 12.3 x64 and above)
+    github: commit 0fceeafb237d8ae54b7c3c3905e4158876d89d42 (For 12.3 x64 and above)
              https://github.com/remobjects/pascalscript.git
 
 **********************************************************************
@@ -35,7 +35,7 @@ Revision :    svn 157 (For D5-D2007)
     svn 252 (For D2009 and above)
              http://code.remobjects.com/svn/pascalscript/Source
 
-    github: commit 9f7d3037260c48322ce7b5447911b7fd1c35384f (For 12.3 x64 and above)
+    github: commit 0fceeafb237d8ae54b7c3c3905e4158876d89d42 (For 12.3 x64 and above)
              https://github.com/remobjects/pascalscript.git
 
 [EOF]

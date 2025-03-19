@@ -23,7 +23,21 @@ const
 
   PSAddrNegativeStackStart = 1073741824;
 type
-  TbtString = {$IFDEF DELPHI2009UP}AnsiString{$ELSE}String{$ENDIF};
+  {$IFDEF FPC}
+    {$IFDEF FPC_UNICODE}
+    tbtString = AnsiString;
+    tbtPChar  = PAnsiChar;
+    tbtChar   = AnsiChar;
+    {$ELSE}
+    tbtString = string;
+    tbtPChar  = PChar;
+    tbtChar   = Char;
+    {$ENDIF}
+  {$ELSE}
+  tbtString = {$IFDEF DELPHI2009UP}AnsiString{$ELSE}string{$ENDIF};
+  tbtPChar  = {$IFDEF DELPHI2009UP}PAnsiChar{$ELSE}PChar{$ENDIF};
+  tbtChar   = {$IFDEF DELPHI4UP}AnsiChar{$ELSE}CHAR{$ENDIF};
+  {$ENDIF}
 
   TPSBaseType = Byte;
 
@@ -295,7 +309,7 @@ type
 
   TbtSingle = Single;
 
-  TbtDouble = double;
+  TbtDouble = Double;
 
   TbtExtended = Extended;
 
@@ -306,13 +320,18 @@ type
   tbts64 = int64;
 {$ENDIF}
 
-  tbtchar = {$IFDEF DELPHI4UP}AnsiChar{$ELSE}CHAR{$ENDIF};
+
 {$IFNDEF PS_NOWIDESTRING}
+  tbtWideString = WideString;
 
-  tbtwidestring = widestring;
-  tbtunicodestring = {$IFDEF DELPHI2009UP}UnicodeString{$ELSE}widestring{$ENDIF};
+  tbtUnicodeString =
+    {$IFDEF FPC}
+      UnicodeString
+    {$ELSE}
+      {$IFDEF UNICODE}UnicodeString{$ELSE}WideString{$ENDIF}
+    {$ENDIF};
 
-  tbtwidechar = widechar;
+  tbtWideChar = WideChar;
   tbtNativeString = {$IFDEF DELPHI2009UP}tbtUnicodeString{$ELSE}tbtString{$ENDIF};
 {$ENDIF}
 {$IFDEF FPC}

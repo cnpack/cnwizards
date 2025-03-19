@@ -681,22 +681,23 @@ end;
 {$IFDEF DELPHI10UP}{$REGION 'TFilestream'}{$ENDIF}
 
 {$IFDEF class_helper_present}
+(*
 type
   TFilestream_PSHelper = class helper for TFilestream
   public
   {$IFDEF FPC}
-    function Create(filename: string; mode: word): TFileStream;
+    function Create(filename: string; mode: word): TFileStream; overload;
   {$ENDIF}
   end;
 
 {$IFDEF FPC}
 // mh: because FPC doesn't handle pointers to overloaded functions
-function TFileStream.Create(filename: string; mode: word): TFileStream;
+function TFilestream_PSHelper.Create(filename: string; mode: word): TFileStream;
 begin
-  result := TFilestream.Create(filename, mode);
+  result := Classes.TFileStream.Create(filename, mode);
 end;
 {$ENDIF}
-
+*)
 procedure RIRegisterTFILESTREAM(Cl: TPSRuntimeClassImporter);
 begin
   with Cl.Add(TFILESTREAM) do
@@ -737,13 +738,13 @@ end;
 {$ENDIF}
 
 {$IFDEF class_helper_present}
+{$IFDEF STRINGSTREAMFIX}
 type
   TStringStream_PSHelper = class helper for TStringStream
   public
     function CreateString(AHidden1: Pointer; AHidden2: Byte; const AString: string): TStringStream;
   end;
 
-{$IFDEF STRINGSTREAMFIX}
 function TStringStream_PSHelper.CreateString(AHidden1: Pointer; AHidden2: Byte; const AString: string): TStringStream;
 begin
   Result := TStringStream.Create(AString);

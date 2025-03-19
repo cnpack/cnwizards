@@ -99,6 +99,7 @@ type
 
     procedure PixelsR(var T: Longint; X,Y: Longint);
     procedure PixelsW(T, X, Y: Longint);
+    (*
     {$IFDEF FPC}
     procedure Arc(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer);
     procedure Chord(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer);
@@ -108,6 +109,7 @@ type
     procedure FillRect(Self : TCanvas; const Rect: TRect);
     procedure FloodFill(Self : TCanvas; X, Y: Integer; Color: TColor; FillStyle: TFillStyle);
     {$ENDIF}
+    *)
   end;
 
 {$IFNDEF CLX}
@@ -117,6 +119,7 @@ procedure TCanvas_PSHelper.HandleW(T: Longint); begin Self.Handle:= T; end;
 
 procedure TCanvas_PSHelper.PixelsR(var T: Longint; X,Y: Longint); begin T := Self.Pixels[X,Y]; end;
 procedure TCanvas_PSHelper.PixelsW(T, X, Y: Longint); begin Self.Pixels[X,Y]:= T; end;
+(*
 {$IFDEF FPC}
 procedure TCanvas_PSHelper.Arc(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer); begin Self.Arc(X1, Y1, X2, Y2, X3, Y3, X4, Y4); end;
 procedure TCanvas_PSHelper.Chord(Self : TCanvas; X1, Y1, X2, Y2, X3, Y3, X4, Y4: Integer); begin self.Chord(X1, Y1, X2, Y2, X3, Y3, X4, Y4); end;
@@ -126,7 +129,7 @@ procedure TCanvas_PSHelper.Ellipse(Self : TCanvas;X1, Y1, X2, Y2: Integer); begi
 procedure TCanvas_PSHelper.FillRect(Self : TCanvas; const Rect: TRect); begin self.FillRect(rect); end;
 procedure TCanvas_PSHelper.FloodFill(Self : TCanvas; X, Y: Integer; Color: TColor; FillStyle: TFillStyle); begin self.FloodFill(x,y,color,fillstyle); end;
 {$ENDIF}
-
+*)
 procedure RIRegisterTCanvas(cl: TPSRuntimeClassImporter); // requires TPersistent
 begin
   with Cl.Add(TCanvas) do
