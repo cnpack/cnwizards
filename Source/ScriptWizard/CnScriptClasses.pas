@@ -93,6 +93,8 @@ type
     destructor Destroy; override;
 
     function ExecScript(Script: string; var Msg: string): TCnExecResult;
+    function CompileScript(Script: string; var Msg: string): TCnExecResult;
+
     function FindFileInSearchPath(const OrgName, FileName: string;
       var OutName: string): Boolean;
 
@@ -350,6 +352,22 @@ procedure TCnScriptExec.PSScriptExecute(Sender: TPSScript);
 begin
   if Assigned(FOnExecute) then
     FOnExecute(Sender);
+end;
+
+function TCnScriptExec.CompileScript(Script: string;
+  var Msg: string): TCnExecResult;
+var
+  I: Integer;
+begin
+  PSScript.Script.Text := Script;
+  if PSScript.Compile then
+    Result := erSucc
+  else
+  begin
+    for I := 0 to PSScript.CompilerMessageCount - 1 do
+      Msg := Msg + string(PSScript.CompilerErrorToStr(I)) + #13#10;
+    Result := erCompileError;
+  end;
 end;
 
 function TCnScriptExec.ExecScript(Script: string; var Msg: string): TCnExecResult;
