@@ -174,7 +174,11 @@ end;
 
 procedure SIRegister_System(CL: TPSPascalCompiler);
 begin
+{$IFDEF WIN64}
+  CL.AddType('Pointer', btS64).ExportName := True;
+{$ELSE}
   CL.AddType('Pointer', btU32).ExportName := True;
+{$ENDIF}
   CL.AddTypeS('HRESULT', 'LongInt');
   CL.AddTypeS('TMethod', 'record Code : Pointer; Data : Pointer; end');
   CL.AddTypeS('TGUID', 'record D1 : LongWord; D2, D3 : Word; D4: array[0..7] of Byte; end');

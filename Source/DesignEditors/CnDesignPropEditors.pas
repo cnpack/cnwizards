@@ -58,7 +58,6 @@ uses
   CnConsts, CnDesignEditor, CnDesignEditorConsts {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
-  { TCnStringPropEditor }
   TCnStringPropEditor = class(TStringProperty)
   public
     function GetAttributes: TPropertyAttributes; override;
@@ -694,6 +693,9 @@ end;
 procedure TCnFontPropEditor.PropDrawName(ACanvas: TCanvas; const ARect: TRect;
   ASelected: Boolean);
 begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  ACanvas.FillRect(ARect);
+{$ENDIF}
   DefaultPropertyDrawName(Self, ACanvas, ARect);
 end;
 
@@ -708,9 +710,11 @@ begin
     ACanvas.Font.Charset := Font.Charset;
     if ColorToRGB(Font.Color) <> ColorToRGB(clBtnFace) then
       ACanvas.Font.Color := Font.Color;
-    //Canvas.Font.Name := Font.Name;
     ACanvas.Font.Style := Font.Style;
   end;
+{$IFDEF IDE_SUPPORT_THEMING}
+  ACanvas.FillRect(ARect);
+{$ENDIF}
   DefaultPropertyDrawValue(Self, ACanvas, ARect);
   inherited;
 end;
