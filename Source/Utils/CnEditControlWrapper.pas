@@ -291,6 +291,7 @@ type
     FNcPaintNotifiers: TList;
     FVScrollNotifiers: TList;
     FBackgroundColor: TColor;
+    FForegroundColor: TColor;
     FEditorList: TObjectList;
     FEditControlList: TList;
     FOptionChanged: Boolean;
@@ -340,6 +341,7 @@ type
     function GetFonts(Index: Integer): TFont;
     procedure SetFonts(const Index: Integer; const Value: TFont);
     function GetBackgroundColor: TColor;
+    function GetForegroundColor: TColor;
   protected
     procedure DoAfterPaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     procedure DoBeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
@@ -545,6 +547,8 @@ type
     property FontString: TFont index 8 read GetFonts write SetFonts;
     property FontSymbol: TFont index 9 read GetFonts write SetFonts;
 
+    property ForegroundColor: TColor read GetForegroundColor;
+    {* 由于 FontBaic 不包括文字的前景色，这里单独把普通标识符的颜色拿出来做前景色}
     property BackgroundColor: TColor read GetBackgroundColor;
     {* 编辑器的文字背景色，实际上是 WhiteSpace 字体的背景色}
   end;
@@ -1105,6 +1109,7 @@ begin
   for I := Low(Self.FFontArray) to High(FFontArray) do
     FFontArray[I] := TFont.Create;
   FBackgroundColor := clWhite;
+  FForegroundColor := clBlack;
 
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
@@ -3357,6 +3362,11 @@ begin
   Result := FBackgroundColor;
 end;
 
+function TCnEditControlWrapper.GetForegroundColor: TColor;
+begin
+  Result := FForegroundColor;
+end;
+
 procedure TCnEditControlWrapper.LoadFontFromRegistry;
 const
   ArrRegItems: array [0..9] of string = ('', 'Assembler', 'Comment', 'Preprocessor',
@@ -3390,6 +3400,10 @@ begin
 {$IFDEF DEBUG} // 没有 EditControl 实例时可能会因为拿不到信息被 Idle 频繁调用，不打
 //          CnDebugger.LogColor(FBackgroundColor, 'LoadFontFromRegistry Get Background');
 {$ENDIF}
+          end
+          else if I = 4 then // Identifier 的前景色
+          begin
+            FForegroundColor := AFont.Color;
           end;
         end;
       except
