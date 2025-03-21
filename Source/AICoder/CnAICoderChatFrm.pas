@@ -96,6 +96,7 @@ type
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
     FItemUnderMouse: TCnChatItem;
+    procedure OnEditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -180,6 +181,8 @@ begin
     cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineName);
 
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
+
+  EditControlWrapper.AddEditorChangeNotifier(OnEditorChange);
 end;
 
 procedure TCnAICoderChatForm.actToggleSendExecute(Sender: TObject);
@@ -270,6 +273,17 @@ begin
     Delete(S, I, MaxInt);
 
   Caption := S + SEP + CnAIEngineManager.CurrentEngineName;
+end;
+
+procedure TCnAICoderChatForm.OnEditorChange(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
+begin
+  if ctOptionChanged in ChangeType then
+  begin
+    mmoSelf.Font.Color := EditControlWrapper.ForegroundColor;
+    mmoSelf.Color := EditControlWrapper.BackgroundColor;
+    FChatBox.Color := EditControlWrapper.BackgroundColor;
+  end;
 end;
 
 procedure TCnAICoderChatForm.DoLanguageChanged(Sender: TObject);
