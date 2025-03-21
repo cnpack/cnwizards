@@ -92,6 +92,7 @@ type
     procedure actFontExecute(Sender: TObject);
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnReferSelectionClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -183,6 +184,11 @@ begin
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
 
   EditControlWrapper.AddEditorChangeNotifier(OnEditorChange);
+end;
+
+procedure TCnAICoderChatForm.FormDestroy(Sender: TObject);
+begin
+  EditControlWrapper.RemoveEditorChangeNotifier(OnEditorChange);
 end;
 
 procedure TCnAICoderChatForm.actToggleSendExecute(Sender: TObject);

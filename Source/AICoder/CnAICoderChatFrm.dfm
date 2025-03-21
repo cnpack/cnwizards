@@ -13,6 +13,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object spl1: TSplitter
