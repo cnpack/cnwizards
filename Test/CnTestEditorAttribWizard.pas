@@ -112,7 +112,7 @@ type
 implementation
 
 uses
-  CnDebug;
+  CnDebug, CnWideStrings;
 
 {$R *.DFM}
 
@@ -197,7 +197,11 @@ begin
   EditView := CnOtaGetTopMostEditView;
 
   Block := EditView.Block;
+{$IFDEF WIN64}
+  S := Format('Edit Block %16.16x. ', [NativeInt(Block)]);
+{$ELSE}
   S := Format('Edit Block %8.8x. ', [Integer(Block)]);
+{$ENDIF}
   if Block <> nil then
   begin
     if Block.IsValid then

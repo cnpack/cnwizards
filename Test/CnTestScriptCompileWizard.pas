@@ -38,8 +38,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, FileCtrl, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon;
+  Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, IniFiles,
+  ToolsAPI, FileCtrl, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon;
 
 type
 

@@ -146,7 +146,7 @@ var
   I: Integer;
 begin
   FChatBox := TCnChatBox.Create(Self);
-  FChatBox.Color := clWhite;
+  FChatBox.Color := EditControlWrapper.BackgroundColor;
   FChatBox.Parent := pnlChat;
   FChatBox.Align := alClient;
   FChatBox.ColorYou := BK_COLOR;
@@ -165,6 +165,12 @@ begin
     FChatBox.Font := EditControlWrapper.FontBasic;
     mmoSelf.Font := EditControlWrapper.FontBasic;
   end;
+
+  // 聊天框的文字颜色不随编辑器，因为有绿色背景框
+  // FChatBox.Font.Color := EditControlWrapper.ForegroundColor;
+
+  mmoSelf.Font.Color := EditControlWrapper.ForegroundColor;
+  mmoSelf.Color := EditControlWrapper.BackgroundColor;
   btnReferSelection.Down := CnAIEngineOptionManager.ReferSelection;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
@@ -326,7 +332,12 @@ begin
   if dlgFont.Execute then
   begin
     mmoSelf.Font := dlgFont.Font;
+    mmoSelf.Font.Color := EditControlWrapper.ForegroundColor;
     FChatBox.Font := dlgFont.Font;
+
+    // 聊天框的文字颜色不随编辑器，因为有绿色背景框
+    // FChatBox.Font.Color := EditControlWrapper.ForegroundColor;
+
     CnAIEngineOptionManager.ChatFontStr := FontToString(dlgFont.Font);
   end;
 end;
