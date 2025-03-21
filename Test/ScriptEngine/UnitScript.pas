@@ -39,6 +39,13 @@ var
   Eng: TCnScriptExec;
   S: string;
 begin
+{$IFDEF WIN64}
+  mmoResult.Lines.Add(Format('Application %16.16x', [NativeInt(Application)]));
+{$ELSE}
+  mmoResult.Lines.Add(Format('Application %8.8x', [Integer(Application)]));
+{$ENDIF}
+  Caption := Application.GetNamePath;
+
   Eng := TCnScriptExec.Create;
   Eng.OnWriteln := MyWriteln;
   try
