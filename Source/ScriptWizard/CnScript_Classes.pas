@@ -532,6 +532,8 @@ begin
   begin
     RegisterMethod('Procedure Assign( Source : TPersistent)');
     RegisterMethod('Function GetNamePath : string');
+    // 注意 GetNamePath 是 dynamic 方法不是 virtual 方法，脚本引擎目前
+    // 无法拿到正确的 GetNamePath 入口地址，注册了也不能调用这方法
   end;
 end;
 

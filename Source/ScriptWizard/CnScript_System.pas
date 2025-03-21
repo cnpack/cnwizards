@@ -61,6 +61,17 @@ procedure RIRegister_System(CL: TPSRuntimeClassImporter);
 
 implementation
 
+{$IFDEF WIN64}
+
+  // 凡是返回 string 的 method，在 Win64 下都不能用 PascalScript 默认的使用独立函数 _P
+  // 的方式包装，会造成 Self 和返回值隐藏参数的混淆，得写个新类用其新方法封装
+type
+  TObject_C = class
+    function ClassName_P: string;
+  end;
+
+{$ENDIF}
+
 function _PChar(P: Pointer): PChar;
 begin
   Result := PChar(P);
@@ -306,7 +317,12 @@ begin
     RegisterConstructor(@TObject.Create, 'Create');
     RegisterMethod(@TObject.Free, 'Free');
     // 脚本不支持 class function 和 ShortString
+  {$IFDEF WIN64}
+    // Win64 下返回 string 的方法会造成 Self 和返回值隐藏参数混淆，要用这种方式绕过
+    RegisterMethod(@TObject_C.ClassName_P, 'ClassName');
+  {$ELSE}
     RegisterMethod(@ClassName_P, 'ClassName');
+  {$ENDIF}
     RegisterMethod(@ClassNameIs_P, 'ClassNameIs');
     RegisterMethod(@ClassInfo_P, 'ClassInfo');
     RegisterMethod(@InstanceSize_P, 'InstanceSize');
@@ -372,6 +388,17 @@ begin
   RIRegister_System(ri);
   RIRegister_System_Routines(CompExec.Exec);
 end;
+
+{$IFDEF WIN64}
+
+{ TObject_C }
+
+function TObject_C.ClassName_P: string;
+begin
+  Result := Self.ClassName;
+end;
+
+{$ENDIF}
 
 end.
 
