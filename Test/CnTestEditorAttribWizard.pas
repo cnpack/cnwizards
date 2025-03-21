@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnCommon, CnWizClasses, CnWizUtils, CnWizConsts,
-  CnEditControlWrapper;
+  CnEditControlWrapper, StdCtrls, ExtCtrls, Buttons;
 
 type
 
@@ -61,6 +61,7 @@ type
     FIdLineElide: Integer;
     FIdLineUnElide: Integer;
 {$ENDIF}
+    FIdEditorFontColors: Integer;
     procedure TestAttributeAtCursor;
     procedure TestAttributeLine;
     procedure TestLinesElideInfo;
@@ -68,6 +69,7 @@ type
     procedure TestElideLine;
     procedure TestUnElideLine;
 {$ENDIF}
+    procedure TestEditorFontColors;
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -84,23 +86,53 @@ type
     procedure SubActionExecute(Index: Integer); override;
   end;
 
+  TCnTestEditorFontColorsForm = class(TForm)
+    mmo0: TMemo;
+    mmo1: TMemo;
+    mmo2: TMemo;
+    mmo3: TMemo;
+    mmo4: TMemo;
+    mmo5: TMemo;
+    mmo6: TMemo;
+    mmo7: TMemo;
+    mmo8: TMemo;
+    mmo9: TMemo;
+    shpFore: TShape;
+    shpBack: TShape;
+    lblFore: TLabel;
+    lblBack: TLabel;
+    btnRefresh: TSpeedButton;
+    procedure btnRefreshClick(Sender: TObject);
+  private
+
+  public
+    procedure UpdateFontColors;
+  end;
+
 implementation
 
 uses
   CnDebug;
 
+{$R *.DFM}
+
+var
+  CnTestEditorFontColorsForm: TCnTestEditorFontColorsForm = nil;
+
 const
   SCnAttribCommand = 'CnAttribCommand';
   SCnLineAttribCommand = 'CnLineAttribCommand';
   SCnLineElideInfoCommand = 'CnLineElideInfoCommand';
-  SCnElideLineCommand = 'SCnElideLineCommand';
-  SCnUnElideLineCommand = 'SCnUnElideLineCommand';
+  SCnElideLineCommand = 'CnElideLineCommand';
+  SCnUnElideLineCommand = 'CnUnElideLineCommand';
+  SCnEditorFontColorsCommand = 'CnEditorFontColorsCommand';
 
   SCnAttribCaption = 'Show Attribute at Cursor';
   SCnLineAttribCaption = 'Show Attribute in Whole Line';
   SCnLineElideInfoCaption = 'Show Lines Elide Info.';
   SCnElideLineCaption = 'Elide a Line Number...';
   SCnUnElideLineCaption = 'UnElide a Line Number...';
+  SCnEditorFontColorsCaption = 'Editor Font Colors...';
 
 //==============================================================================
 // 编辑器属性获取子菜单专家
@@ -117,6 +149,8 @@ begin
   FIdLineElide := RegisterASubAction(SCnElideLineCommand, SCnElideLineCaption);
   FIdLineUnElide := RegisterASubAction(SCnUnElideLineCommand, SCnUnElideLineCaption);
 {$ENDIF}
+  AddSepMenu;
+  FIdEditorFontColors := RegisterASubAction(SCnEditorFontColorsCommand, SCnEditorFontColorsCaption);
 end;
 
 procedure TCnTestEditorAttribWizard.Config;
@@ -132,6 +166,32 @@ var
   LineFlag, Element: Integer;
   S, T: string;
   Block: IOTAEditBlock;
+
+  function ElementToStr(Ele: Integer): string;
+  begin
+    case Ele of
+      0:  Result := 'atWhiteSpace  ';
+      1:  Result := 'atComment     ';
+      2:  Result := 'atReservedWord';
+      3:  Result := 'atIdentifier  ';
+      4:  Result := 'atSymbol      ';
+      5:  Result := 'atString      ';
+      6:  Result := 'atNumber      ';
+      7:  Result := 'atFloat       ';
+      8:  Result := 'atOctal       ';
+      9:  Result := 'atHex         ';
+      10: Result := 'atCharacter   ';
+      11: Result := 'atPreproc     ';
+      12: Result := 'atIllegal     ';
+      13: Result := 'atAssembler   ';
+      14: Result := 'SyntaxOff     ';
+      15: Result := 'MarkedBlock   ';
+      16: Result := 'SearchMatch   ';
+    else
+      Result := 'Unknown';
+    end;
+  end;
+
 begin
   EditControl := CnOtaGetCurrentEditControl;
   EditView := CnOtaGetTopMostEditView;
@@ -151,27 +211,7 @@ begin
 
   S := S + #13#10 +Format('EditPos Line %d, Col %d. LineFlag %d. Element: %d, ',
     [EditPos.Line, EditPos.Col, LineFlag, Element]);
-  case Element of
-    0:  T := 'atWhiteSpace  ';
-    1:  T := 'atComment     ';
-    2:  T := 'atReservedWord';
-    3:  T := 'atIdentifier  ';
-    4:  T := 'atSymbol      ';
-    5:  T := 'atString      ';
-    6:  T := 'atNumber      ';
-    7:  T := 'atFloat       ';
-    8:  T := 'atOctal       ';
-    9:  T := 'atHex         ';
-    10: T := 'atCharacter   ';
-    11: T := 'atPreproc     ';
-    12: T := 'atIllegal     ';
-    13: T := 'atAssembler   ';
-    14: T := 'SyntaxOff     ';
-    15: T := 'MarkedBlock   ';
-    16: T := 'SearchMatch   ';
-  else
-    T := 'Unknown';
-  end;
+  T := ElementToStr(Element);
   ShowMessage(S + T);
 
   if EditPos.Col > 1 then
@@ -181,27 +221,7 @@ begin
 
   S := Format('EditPos Line %d, Col %d. LineFlag %d. Element: %d, ',
     [EditPos.Line, EditPos.Col, LineFlag, Element]);
-  case Element of
-    0:  T := 'atWhiteSpace  ';
-    1:  T := 'atComment     ';
-    2:  T := 'atReservedWord';
-    3:  T := 'atIdentifier  ';
-    4:  T := 'atSymbol      ';
-    5:  T := 'atString      ';
-    6:  T := 'atNumber      ';
-    7:  T := 'atFloat       ';
-    8:  T := 'atOctal       ';
-    9:  T := 'atHex         ';
-    10: T := 'atCharacter   ';
-    11: T := 'atPreproc     ';
-    12: T := 'atIllegal     ';
-    13: T := 'atAssembler   ';
-    14: T := 'SyntaxOff     ';
-    15: T := 'MarkedBlock   ';
-    16: T := 'SearchMatch   ';
-  else
-    T := 'Unknown';
-  end;
+  T := ElementToStr(Element);
   ShowMessage(S + T);
 end;
 
@@ -262,6 +282,8 @@ begin
   else if Index = FIdLineUnElide then
     TestUnElideLine
 {$ENDIF}
+  else if Index = FIdEditorFontColors then
+    TestEditorFontColors;
 end;
 
 procedure TCnTestEditorAttribWizard.TestAttributeLine;
@@ -410,6 +432,40 @@ begin
 end;
 
 {$ENDIF}
+
+procedure TCnTestEditorAttribWizard.TestEditorFontColors;
+begin
+  // 显示窗体并刷新
+  if CnTestEditorFontColorsForm = nil then
+    CnTestEditorFontColorsForm := TCnTestEditorFontColorsForm.Create(Application);
+
+  CnTestEditorFontColorsForm.Show;
+  CnTestEditorFontColorsForm.UpdateFontColors;
+end;
+
+{ TCnTestEditorFontColorsForm }
+
+procedure TCnTestEditorFontColorsForm.UpdateFontColors;
+begin
+  shpFore.Brush.Color := EditControlWrapper.ForegroundColor;
+  shpBack.Brush.Color := EditControlWrapper.BackgroundColor;
+
+  mmo0.Font := EditControlWrapper.FontBasic;
+  mmo1.Font := EditControlWrapper.FontAssembler;
+  mmo2.Font := EditControlWrapper.FontComment;
+  mmo3.Font := EditControlWrapper.FontDirective;
+  mmo4.Font := EditControlWrapper.FontIdentifier;
+  mmo5.Font := EditControlWrapper.FontKeyWord;
+  mmo6.Font := EditControlWrapper.FontNumber;
+  mmo7.Font := EditControlWrapper.FontSpace;
+  mmo8.Font := EditControlWrapper.FontString;
+  mmo9.Font := EditControlWrapper.FontSymbol;
+end;
+
+procedure TCnTestEditorFontColorsForm.btnRefreshClick(Sender: TObject);
+begin
+  UpdateFontColors;
+end;
 
 initialization
   RegisterCnWizard(TCnTestEditorAttribWizard); // 注册专家

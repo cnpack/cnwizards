@@ -2039,7 +2039,7 @@ const
 
   {$IFDEF COMPILER7_UP}
   SCnIDEForeColor = 'Foreground Color New';
-  SCnIDEBackColor = 'Background Color New'; // ‘›Œ¥∂¡»°
+  SCnIDEBackColor = 'Background Color New';
   {$ELSE}
   SCnIDEForeColor = 'Foreground Color';
   SCnIDEBackColor = 'Background Color';
