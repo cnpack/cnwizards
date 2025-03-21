@@ -258,7 +258,7 @@ type
     procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
-    procedure FormatSetConstructor(PreSpaceCount: Byte = 0);
+    procedure FormatSetConstructor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
 
     // ·ºÐÍÖ§³Ö
     procedure FormatFormalTypeParamList(PreSpaceCount: Byte = 0);
@@ -1390,7 +1390,7 @@ begin
 
     tokSLB: // [
       begin
-        FormatSetConstructor(PreSpaceCount);
+        FormatSetConstructor(PreSpaceCount, IndentForAnonymous);
       end;
   else
     { Doesn't do anything to implemenation rule: '' Designator }
@@ -1546,16 +1546,17 @@ end;
   SetConstructor -> '[' [SetElement/','...] ']'
   SetElement -> Expression ['..' Expression]
 }
-procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte);
+procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte;
+ IndentForAnonymous: Byte);
 
   procedure FormatSetElement;
   begin
-    FormatExpression;
+    FormatExpression(PreSpaceCount, IndentForAnonymous);
 
     if Scanner.Token = tokRange then
     begin
       Match(tokRange);
-      FormatExpression;
+      FormatExpression(PreSpaceCount, IndentForAnonymous);
     end;
   end;
   
