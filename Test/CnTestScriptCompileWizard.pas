@@ -102,15 +102,24 @@ begin
 
         try
           Sl := TStringList.Create;
-          Sl.LoadFromFile(IncludeTrailingPathDelimiter(Dir) + Files[I]);
+          Sl.LoadFromFile(MakePath(Dir) + Files[I]);
           Exec := TCnScriptExec.Create;
 
           Msg := '';
           if Exec.CompileScript(Sl.Text, Msg) = erSucc then
-            CnDebugger.LogMsg('OK: ' + Files[I])
+          begin
+            CnDebugger.LogMsg('Compile OK: ' + Files[I]);
+            if Exec.ExecScript(Sl.Text, Msg) = erSucc then
+              CnDebugger.LogMsg('Exec OK: ' + Files[I])
+            else
+            begin
+              CnDebugger.LogMsgError('Exec Fail: ' + Files[I]);
+              CnDebugger.LogMsgError(Msg);
+            end;
+          end
           else
           begin
-            CnDebugger.LogMsgError('Fail: ' + Files[I]);
+            CnDebugger.LogMsgError('Compile Fail: ' + Files[I]);
             CnDebugger.LogMsgError(Msg);
           end;
         finally
