@@ -4,9 +4,9 @@
 !TranslationAuthorEmail=liuxiao@cnpack.org
 !TranslationDefaultFont=Tahoma,8,,,,
 csHintStr=提示
-csInstallSucc=CnPack 专家包已安装在以下环境中:<BR>
+csInstallSucc=CnPack 专家包已安装在以下环境中：<BR>
 csInstallSuccEnd=再次运行安装程序将卸载专家包！
-csUnInstallSucc=CnPack 专家包已从以下环境中反安装:<BR>
+csUnInstallSucc=CnPack 专家包已从以下环境中卸载：<BR>
 csUnInstallSuccEnd=再次运行安装程序将重新安装专家包！
 csInstallFail=没有找到可以安装 CnPack 专家包的编译器！
 csUnInstallFail=CnPack 专家包已经禁用！
