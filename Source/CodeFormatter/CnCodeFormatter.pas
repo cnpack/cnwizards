@@ -27,7 +27,9 @@ unit CnCodeFormatter;
 * 备    注：该单元实现了代码格式化的核心类
 *
 *           保留换行时如果某些语句没有注释但换行后顶格了没正确缩进，八成是少了一句
-*           FCurrentTab := PreSpaceCount; 得加上以让换行时缩进正确的格数
+*           FCurrentTab := PreSpaceCount 或 IndentForAnonymous; 得加上以让换行时缩进正确的格数。
+*           另外一种情况是格式化的过程没把 PreSpaceCount 或 IndentForAnonymous 传下去，
+*           需要在过程中加上。
 *
 *           保留换行时如果某些语句内部因为注释会多出空行来，八成是 IsInStatement
 *           或 IsInOpStatement 对注释前的符号判断是否在语句内有误导致没删除回车换行
@@ -2319,7 +2321,11 @@ begin
         Match(tokSemicolon, Tab(PreSpaceCount), 0, False, True);
       end
       else
+      begin
+        FTrimAfterSemicolon := True;  // 语句后的分号无需加尾部空格
         Match(tokSemicolon);
+        FTrimAfterSemicolon := False;
+      end;
       // 输出语句间的分割分号用，但如果前一句的子语句为空，如if True then ;
       // 则本句就可能顶行首去了，需要在 FormatStructStmt 里头标记并控制
 

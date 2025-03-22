@@ -158,7 +158,7 @@ begin
   CnPascalCodeForRule.TabSpaceCount := UpDown1.Position;
   CnPascalCodeForRule.KeywordStyle := TCnKeywordStyle(ComboBox1.ItemIndex);
   CnPascalCodeForRule.KeepUserLineBreak := chkKeepUserBreakLine.Checked;
-  CnPascalCodeForRule.SingleStatementToBlock := True;
+  // CnPascalCodeForRule.SingleStatementToBlock := True;
 
   if chkAutoWrap.Checked then
     CnPascalCodeForRule.CodeWrapMode := cwmAdvanced

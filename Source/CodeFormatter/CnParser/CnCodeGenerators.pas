@@ -216,7 +216,12 @@ begin
     S := FCode[FCode.Count - 1];
     Len := Length(S);
     if (Len > 0) and (S[Len] = ' ') then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CodeGen: BackSpaceLastSpaces');
+{$ENDIF}
       FCode[FCode.Count - 1] := TrimRight(S);
+    end;
   end;
   if FActualLines.Count > 0 then
   begin
