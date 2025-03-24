@@ -4,7 +4,7 @@
                  (C)Copyright 2001-2025 CnPack 开发组
 **********************************************************************
 
-                   RemObjects PascalScript 集成说明
+                 专家包 RemObjects PascalScript 集成说明
                            Revision 1.0.0.0
                        =========================
                          作者：刘啸 2025.03.25
@@ -328,7 +328,7 @@ TSizeConstraintsMaxHeight_R和TSizeConstraintsMaxHeight_W这两个函数又是什么东西？
 
 这种“写一个新函数做中转”的小把戏，读者们一定也觉得它会有更多用途。
 
-对，就是上一篇遗留的问题：如何处理class function或class procedure。
+对，就是前面遗留的问题：如何处理class function或class procedure。
 
 对于TObject的class function ClassName，它编译期省略了class：
 
