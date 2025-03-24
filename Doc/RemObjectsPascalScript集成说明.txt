@@ -1,0 +1,389 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                     中国人自己的免费第三方开发包
+                 (C)Copyright 2001-2025 CnPack 开发组
+**********************************************************************
+
+                   RemObjects PascalScript 集成说明
+                           Revision 1.0.0.0
+                       =========================
+                         作者：刘啸 2025.03.25
+
+
+======================================================================
+1. 引言
+======================================================================
+
+有朋友问Delphi是编译型还是解释型。
+在答出“编译型”这个答案时，忽然想到，这个问题本身就已经充分说明，Delphi已经没落好多年了。
+Delphi当年在Win32平台上起家，基于Object Pascal语言，以面向对象为原则，VCL框架与拖拽设计界面为基础，打造了一套全新快速的开发环境，当时甚至在开发界引起了轰动。
+那时候有个说法，真正的程序员用C/C++，而聪明的程序员用Delphi。
+但自从Delphi的首席架构师Anders跳槽后，Delphi的东家就不思进取了，Unicode没跟上、64位没跟上、跨平台没跟上、移动开发同样没跟上。那些年除了改名、买卖，就没做过什么显著的大动作。
+等他们醒过神来时，已经天翻地覆。
+虽然后来奋起直追，2009加上Unicode、XE2加上64位和FMX等，后面也陆续支持Android、iOS和Mac、Linux，但已经落后太多，再怎么赶也摘不掉“小众”的帽子，后继乏力了。
+不过本篇文章不是为了批判Delphi，而是要在“编译型”仨字上做一做文章。
+
+======================================================================
+2. 考察一个脚本引擎需要考虑哪些方面？
+======================================================================
+
+以浏览器端解释执行JavaScript为主的Web前端开发模式，因为有能够动态更新的特性，用户只要刷新页面就能立即感受到新版，这样的便利程度，确实是Delphi这种编译成二进制原生机器代码再跑的机制所比不上的。
+但很多情况下，我们发布的EXE，也需要动态执行代码，比如让用户自定义行为，比如通过配置实现千人千面等。甚至我们的CnPack IDE专家包，也经常收到很多用户的定制化需求，一看就不太可能在专家包里正式实现并集成，比如把Delphi主窗口的标题栏文字从“Delphi”改成“老板你拖欠年终奖”。
+于是，为了满足这些需求，脚本引擎（Script Engine)就应运而生了。
+Script翻译成“脚本”，这个“脚”的意思大概是指它能随时跑。
+比如Lua，就是一个巴西出品的、小巧而强大的脚本引擎，它被无数应用程序嵌入过，提供运行期动态执行Lua脚本的功能。
+那么，Delphi所基于的Object Pascal，是否也能动态执行？答案是肯定的。
+那就是今天要介绍的RemObjects出品的Pascal Script。
+
+考察一个脚本引擎是否好用，主要需看以下各个方面：
+
+----------------------------------------------------------------------
+2.1 首先，它解释啥语言？这语言好学不？
+----------------------------------------------------------------------
+
+比如Lua引擎，解释Lua语言，JavaScript引擎V8，解释JavaScript。Pascal Script引擎，解释的自然是Object Pascal。
+用户对该语言的熟悉程度，直接决定了脚本引擎受不受欢迎。如果我都不会这语言，我要这引擎干啥？
+使用Delphi的程序员自然熟悉Object Pascal，因此集成在Delphi中的CnPack IDE专家包，如果能让用户以自己熟悉的Object Pascal写脚本来自定义专家包或Delphi的行为，岂不是很惬意？
+所以我们义无反顾地选择了Pascal Script。
+
+----------------------------------------------------------------------
+2.2 其次，它是什么语言编写的？容易集成不？
+----------------------------------------------------------------------
+
+Lua的解释引擎是C语言写的，V8则是C++，Pascal Script则是Object Pascal。
+引擎实现语言，如果和我们所要集成的引用程序的编写语言一致，那么集成就容易一些，拿来一块编译就行。如果不一致，或者语言一致但编译器版本特性不一致，就只能各自编译好后再进行二进制形式的加载，比如Lua就经常直接编译成Lua.dll供Window程序使用。
+Pascal Script是Object Pascal编写的，直接和我们专家包一块编译就行了。
+
+----------------------------------------------------------------------
+2.3 第三，也是最重要的，脚本引擎如何和它外面的内容交互？
+----------------------------------------------------------------------
+
+我们在应用程序里集成一个脚本引擎，肯定不是为了只让它内部计算加减乘除，而是要通过脚本引擎动态执行代码来操纵应用程序里的其他资源，这就涉及到了集成脚本引擎所面临的最重要的问题：如何让脚本和外部内容交互？
+比如上面的例子，如果我们要用脚本，把Delphi的IDE主窗体的标题改成“老板你拖欠年终奖”，那么脚本里就得知道如何去操作IDE主窗体的标题，换个更专业点儿的说法就是，应用程序如何为脚本引擎提供所需的操作接口？
+一般来说，脚本引擎会对外提供“注册外部资源”的接口。应用程序运行起来初始化好脚本引擎后，可以按需将可操纵的外部资源注册到脚本引擎中，后者记录在案，在执行脚本时，如果碰到该脚本的特定语句写了要操作外部资源，就去自己注册在案的表格里寻找，找到的话，就调用该外部资源，完成脚本操纵它的功能。
+譬如在我们专家包集成好了Pascal Script引擎并完成各种外部资源注册后，要完成上面的特殊需求，竟然只需要在“脚本窗口”里执行编辑器中的这段代码：
+
+  program TestScript;
+  begin
+    Application.Title := '老板你拖欠年终奖';
+  end.
+
+出来的效果立竿见影：Delphi 的标题栏文字改了。
+接下来详细解释专家包是怎样和Pascal Script引擎一起做到这一点的。
+
+======================================================================
+3. 如何集成Pascal Script引擎？
+======================================================================
+
+我们CnPack IDE专家包集成了RemObjects出品的开源Pascal Script引擎，能够在专家包中提供让用户动态执行Pascal脚本的功能，它是以源码形式集成编译的，对方的源码约几十个文件，搁在我们专家包源码的ThirdParty目录下。针对不同的Delphi，集成了不同版本。
+
+----------------------------------------------------------------------
+3.1 集成编译，不难
+----------------------------------------------------------------------
+
+单纯要在程序里跑起脚本来也不难，主要使用其uPSComponent.pas中提供的TPSScript类，给它的Script这个TStrings属性赋脚本内容的字符串列表值，再调用Compile方法进行编译，编译成功后，调用Execute方法进行执行，类似如下：
+
+  var
+    PSScript: TPSScript;
+  begin
+    PSScript := TPSScript.Create(nil);
+    PSScript.Script.Text := 'program Test; begin end.';
+    if PSScript.Compile then
+      PSScript.Execute;
+    PSScript.Free;
+  end;
+
+但这只是万里长征开始了第一步，后面还有两万四千九百里来着。
+
+----------------------------------------------------------------------
+3.2 外部资源和注册机制
+----------------------------------------------------------------------
+
+单纯创建TPSScript实例不难，但当我们准备真跑一些脚本的时候，就会发现，这脚本似乎什么都干不了。
+为什么？因为几乎什么可用的“外部资源”都没提供。
+Delphi的VCL框架是Delphi编译专用，并不能在Pascal Script脚本中直接使用。而且，哪怕脱离VCL框架的Pascal语言的标准库中的函数，比如Writeln和Readln，也同样有问题。
+所以，丰富Pascal Script脚本可用性的原则，就是将“运行期一切可用的资源都注册到脚本引擎中”。
+如何注册呢？这里就要了解脚本引擎提供的“编译期注册”，和“运行期注册”的两种途径了。
+“编译期注册”的含义是，我告诉引擎，脚本需要调“声明是如此这般这般”的函数或类或方法或接口或常量变量。
+“运行期注册”的含义则是，“编译期注册”的那些函数或类或方法或接口或常量变量等内容，真正跑起来用到的时候，我告诉引擎要去哪些地方寻找它们。
+像不像头文件声明参与编译，及运行期动态链接？
+
+TPSScript类提供了两个事件，编译期注册事件OnCompImport和运行期注册事件OnExecImport，我们可以写这俩事件的处理函数：
+
+  PSScript.OnCompImport := PSScriptCompImport;
+  PSScript.OnExecImport := PSScriptExecImport;
+
+这里拿标准库里的Readln和Writeln两个函数为例，我们的目的是要在脚本中使用这两个函数进行基本的输入输出，那么我们就得这样写：
+
+在编译期注册这两个函数的声明，让引擎知道该怎么调：
+
+  procedure TCnScriptWrapper.PSScriptCompImport(Sender: TObject;
+    X: TIFPSPascalcompiler);
+  begin
+    X.AddFunction('function Readln(const Msg: string): string;');
+    X.AddFunction('procedure Writeln(const Text: string);');
+  end;
+
+运行期则注册这俩函数的真正实现，搭起一个桥梁让它能跑起来：
+
+  procedure TCnScriptExec.PSScriptExecImport(Sender: TObject; Exec: TIFPSExec;
+    X: TIFPSRuntimeClassImporter);
+  begin
+    Exec.RegisterFunctionName('Readln', _Readln, Self, nil);
+    Exec.RegisterFunctionName('Writeln', _Writeln, Self, nil);
+  end;
+
+桥梁里引用到的两个函数_Readln和_Writeln需要我们额外实现，我们在_Readln中使用InputQuery代替其输入功能，在_Writeln中用一个Memo接收输出的字符串，这样就形成了一个让脚本跑起来时能接收输入并显示输出的功能闭环。
+
+----------------------------------------------------------------------
+3.3 如何批量及自动注册外部资源
+----------------------------------------------------------------------
+
+按互联网的黑话来说，“闭环”完成了，下面该打“组合拳”了。
+如果每个脚本要用到的函数都要像Readln和Writeln那样写一大堆实现，势必相当麻烦，为了省事，Pascal Script引擎提供了Plugin的机制，以及自动生成注册Plugin的功能。
+它的机制用一句话就可以概括：我们可以继承uPSComponent.pas中的TPSPlugin类，在子类的CompileImport1方法中写好编译期注册内容，在ExecImport1方法中写好运行期注册内容，再把这子类创建个实例，给Add到TPSScript实例的Plugins属性中。这样脚本引擎实例跑起来的时候，就会遍历加到自身的Plugins实例，顺序调用其俩注册方法，把我们需要注册给引擎的东西统统塞进去。
+而且更为方便的是，Pascal Script引擎提供一Unit Importer功能，能够根据我们需要注册的单元内容，自动生成一个对应的Plugin单元，里面有自动生成的Plugin实现，供我们直接使用。
+这考虑到VCL框架，就稍微……有点省事了。
+思维灵活的朋友们一定想到了，我们集成脚本引擎的Delphi的EXE程序本身就使用到了完整的VCL框架，我们是否可以把VCL框架涉及到的单元“统统”注册到脚本引擎中，让脚本能完全自由使用呢？
+答案当然是（绝大部分）肯定的！
+（不把话说死的原因是，引擎有语法限制，确实有些东西注册不进去）
+这些微小的工作，CnPack IDE专家包中已经做得差不多了，我们源码的cnwizards\Source\ScriptWizard目录下有大量CnScript_*.pas文件，均是针对Delphi的VCL框架、Delphi的ToolsAPI接口、以及专家包本身的工具类等，所编写生成的脚本注册Plugin文件。
+举例说明，从System单元中声明的基础类TObject开始，我们在CnScript_System.pas单元里是这么写的：
+
+  procedure TPSImport_System.CompileImport1(CompExec: TPSScript);
+  begin
+    SIRegister_System(CompExec.Comp);
+  end;
+
+SIRegister_System的实现：
+
+  procedure SIRegister_System(CL: TPSPascalCompiler);
+  begin
+    ……
+    CL.AddTypeS('THandle', 'LongWord');
+    ……
+    SIRegister_TObject(CL);
+    ……
+  end;
+
+SIRegister_TObject的实现（注意RegisterMethod里没有class的字样，表示仅是普通function，后面会有补充说明）：
+
+  procedure SIRegister_TObject(CL: TPSPascalCompiler);
+  begin
+    with CL.AddClass(nil, TObject) do
+    begin
+      RegisterMethod('Constructor Create');
+      RegisterMethod('Procedure Free');
+      RegisterMethod('Function ClassName : string');
+      RegisterMethod('Function ClassNameIs( const Name : string) : Boolean');
+      RegisterMethod('Function ClassInfo : Pointer');
+      RegisterMethod('Function InstanceSize : Longint');
+      RegisterMethod('Function MethodAddress( const Name : string) : Pointer');
+      RegisterMethod('Function MethodName( Address : Pointer) : string');
+      RegisterMethod('Function FieldAddress( const Name : string) : Pointer');
+    end;
+  end;
+
+总而言之，这里把TObject类及其各个方法，包括构造函数、析构函数等，全都在编译期注册到脚本引擎中了。
+
+然后，运行期注册是这么写的：
+
+  procedure TPSImport_System.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
+  begin
+    RIRegister_System(ri);
+  end;
+
+RIRegister_System的实现是：
+
+  procedure RIRegister_System(CL: TPSRuntimeClassImporter);
+  begin
+    RIRegister_TObject(CL);
+  end;
+
+RIRegister_TObject的实现则是：
+
+  procedure RIRegister_TObject(CL: TPSRuntimeClassImporter);
+  begin
+    with CL.Add(TObject) do
+    begin
+      RegisterConstructor(@TObject.Create, 'Create');
+      RegisterMethod(@TObject.Free, 'Free');
+      ……
+    end;
+  end;
+
+可以看出，运行期注册的函数，将设计期注册的名为Create的方法，动态关联到了@TObject.Create上，Free方法也关联到了@TObject.Free，这样就在脚本引擎中给脚本及TObject类的方法都搭起了桥，我们就能在脚本中动态创建TObject及Free它了：
+
+  program TestObj;
+  var
+    Obj: TObject;
+  begin
+    Obj := TObject.Create;
+    Writeln(Obj.ClassName);
+    Obj.Free;
+  end;
+
+System单元中的TObject是较为简单的，我们还有SysUtils、Classes、Controls、Forms，甚至各个版本Delphi对应的ToolsAPI等单元的注册，几乎把大半个VCL框架都搬进来了。它们的第一个版本是使用UnitImporter生成的，后面则跟随Delphi版本升级而维护改动，持续为CnPack IDE专家包用户提供动态跑脚本操纵Delphi IDE的功能。
+
+----------------------------------------------------------------------
+4. 引擎中注册的桥梁机制
+----------------------------------------------------------------------
+
+细心的读者可能已经注意到，TObject在System.pas中的方法声明，绝大多数都是class function，可以脱离实例而调用，如：
+
+    class function ClassName: ShortString;
+    class function ClassNameIs(const Name: string): Boolean;
+    class function ClassParent: TClass;
+    class function ClassInfo: Pointer;
+    class function InstanceSize: Longint;
+
+但我们在编译期注册脚本时，写的内容却省掉了class，这样会不会出问题？
+答案是有问题，但被特定的小把戏绕过去了。
+原来，Pascal Script所实现的Object Pascal语法，离Delphi的还有差距，class function和class procedure便属于不支持之列。如果脚本要调用class function或class procedure，Unit Importer在根据源码文件生成注册的Plugin源码的时候，是使用了一点小把戏从而达到目的了的。
+
+----------------------------------------------------------------------
+4.1 注册简单类型声明和常量
+----------------------------------------------------------------------
+
+Pascal Script脚本引擎不光可以让我们注册类和其方法、属性至它内部供脚本调用，其他的情况也能处理，包括简单类型声明、常量、变量和上文提到的class function/class procedure等。
+对于简单类型的声明如结构、集合、枚举等，因为它们没有实现部分（别跟我说带方法的record，这种高版本Delphi特性它不支持），因而只需要在编译期直接注册即可，如：
+
+  CL.AddTypeS('TAlign', '( alNone, alTop, alBottom, alLeft, alRight, alClient )');
+  CL.AddTypeS('TAlignSet', 'set of TAlign');
+  CL.AddTypeS('TSearchRec', 'record Time : Integer; Size : Integer; Attr : Inte'
+    + 'ger; Name : TFileName; ExcludeAttr : Integer; FindHandle : THandle; FindDa'
+    + 'ta : TWin32FindData; end');
+
+不用管它们的实现部分与运行期注册。
+
+常量稍有不同，它可能拥有类型和值，需要写两步：
+
+  CL.AddConstantN('mrOk', 'Integer').SetInt(idOk);
+
+这句表示mrOk常量是Integer类型，其值等于idOk常量所代表的值，也很好理解。
+
+----------------------------------------------------------------------
+4.2 注册属性、事件和全局变量
+----------------------------------------------------------------------
+
+全局变量和属性、事件等则更有不同，它们在编译期注册的语法看上去还基本正常，比如TSizeConstraints类的MaxHeight属性也这样写：
+
+  with CL.AddClass(CL.FindClass('TPersistent'), TSizeConstraints) do
+  begin
+    ……
+    RegisterProperty('MaxHeight', 'TConstraintSize', iptrw);
+
+但对应的实现部分，则开始玩起小把戏了：
+
+  with CL.Add(TSizeConstraints) do
+  begin
+    ……
+    RegisterPropertyHelper(@TSizeConstraintsMaxHeight_R, @TSizeConstraintsMaxHeight_W, 'MaxHeight');
+
+TSizeConstraintsMaxHeight_R和TSizeConstraintsMaxHeight_W这两个函数又是什么东西？看看它们的实现：
+
+  procedure TSizeConstraintsMaxHeight_W(Self: TSizeConstraints; const T: TConstraintSize);
+  begin
+    Self.MaxHeight := T;
+  end;
+  
+  procedure TSizeConstraintsMaxHeight_R(Self: TSizeConstraints; var T: TConstraintSize);
+  begin
+    T := Self.MaxHeight;
+  end;
+
+原来，这两个函数给属性的读写搭了两座桥，也说明了Pascal Script引擎并不直接支持属性读写，而是通过新函数包装它对应的读写动作来实现。
+
+无独有偶，对于全局变量如Application、Mouse、Screen等，它也是这么玩了点小把戏来注册的（拿Application为例，不包括TApplication类的注册）：
+
+编译期：
+
+  CL.AddDelphiFunction('Function Application : TApplication;');
+
+注意在Forms.pas里，Application实际上是全局变量：
+
+  var
+    Application: TApplication;
+
+但脚本引擎对于全局变量看来也不直接支持，仍使用同名的全局函数进行包装。
+
+且在运行期声明“如何找到这位Application的函数的实现”时，也生成了一个新函数：
+
+  S.RegisterDelphiFunction(@Application_P, 'Application', cdRegister);
+
+这个由Unit Importer自动生成的函数的实现则是：
+
+  function Application_P: TApplication;
+  begin
+    Result := Forms.Application;
+  end;
+
+从上往下串起来，很顺利地达到了“以全局函数替代全局变量名，内部用新函数重定向到全局变量，以让脚本使用”的目的。
+
+再加上已经注册了TApplication对象的各种属性如Title方法，那么本文系列第一篇中给Application.Title赋值的脚本，便能跑得通、便能正确地给集成了脚本引擎的EXE程序里的Application全局变量的Title属性赋值了。
+
+----------------------------------------------------------------------
+4.3 如何处理不支持的class function/class procedure
+----------------------------------------------------------------------
+
+这种“写一个新函数做中转”的小把戏，读者们一定也觉得它会有更多用途。
+
+对，就是上一篇遗留的问题：如何处理class function或class procedure。
+
+对于TObject的class function ClassName，它编译期省略了class：
+
+  RegisterMethod('Function ClassName : string');
+
+运行期的注册也是关联到一个新写的函数：
+
+  RegisterMethod(@ClassName_P, 'ClassName');
+
+也就是说，脚本里调用ClassName时并不直接进TObject的ClassName方法，估计脚本没法直接区分对象和类，因此无法给class function或class procedure传正确的类Self指针，只能传Self对象指针。
+
+虽然脚本不能，但Delphi编译器能！
+
+所以Unit Importer生成了ClassName_P这个中转函数，在这个函数里，哪怕Self确实只是对象指针，Delphi编译器在此处也能正确地转换成类Self指针，从而以正确的姿势进入ClassName这个class function，拿到类名返回。
+
+  function ClassName_P(Self: TObject): string;
+  begin
+    Result := Self.ClassName;
+  end;
+
+这都是Pascal Script在简化版Pascal语法和强大的VCL框架之间搭起的桥梁，目的是尽量让它们可用。
+
+但是，这招，却是有坑的。
+
+----------------------------------------------------------------------
+4.4 我们发现的小把戏的坑及解决方案
+----------------------------------------------------------------------
+
+关注我们开发组系列文章的朋友们可能注意到了，这种“用单独函数代替方法调用”的小把戏，正好和我们《如何在没有DCP的情况下调用BPL里的对象方法》一文中的一个大坑呼应上了：
+
+> 64位汇编调用中，如果函数返回值是string或接口实例或var型参数，大概就会在编译过程中多生成一个参数，用来容纳该返回值。
+> 对于对象的方法，是先将隐藏参数Self搁RCX，再将隐藏参数返回值搁RDX，再处理其他参数于R8、R9等寄存器。
+> 但对于独立函数，则是先将隐藏参数返回值搁RCX，再处理其他参数于RDX、R8等寄存器。
+> 我们上面的调用机制，偏偏做了一次从对象方法到普通函数的转换，就导致了参数顺序混乱。
+
+随之而来的现象则是，脚本引擎在64位下，脚本中调用Object的ClassName方法，因为做了一次从对象方法到普通函数的转换，就导致了参数顺序混乱。调用进ClassName_P时，隐藏参数被当成了Self，必然出访问冲突。
+修补方法也从那篇文章中找到灵感：不用普通函数，改用类的方法。
+所以在64位中，TObject的ClassName在运行期的注册，被我们修改成了：
+
+  RegisterMethod(@TObject_C.ClassName_P, 'ClassName');
+
+这个TObject_C是我们新声明的类，它有个ClassName_P方法：
+
+  type
+    TObject_C = class
+      function ClassName_P: string;
+    end;
+
+其实现为：
+
+  function TObject_C.ClassName_P: string;
+  begin
+    Result := Self.ClassName;
+  end;
+
+这样就实现了“不经过普通函数”的方法调用重定向，消除了Self参数和隐藏参数的混乱。
+
+倘若这种机制，Unit Importer也能集成，就能够让更多的Pascal Script用户减少在这种情况下出问题的可能性了。
