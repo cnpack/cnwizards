@@ -148,9 +148,9 @@ var
 //==============================================================================
 
 {$IFDEF WIN64}
-function CnIntToObject(AInt: NativeInt): TObject;
+function CnIntToObject(AInt: Int64): TObject;
 {* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
-function CnObjectToInt(AObject: TObject): NativeInt;
+function CnObjectToInt(AObject: TObject): Int64;
 {* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
 {$ELSE}
 function CnIntToObject(AInt: Integer): TObject;
@@ -1334,15 +1334,15 @@ end;
 {$IFDEF WIN64}
 
 // 供 Pascal Script 使用的将整型值转换成 TObject 的函数
-function CnIntToObject(AInt: NativeInt): TObject;
+function CnIntToObject(AInt: Int64): TObject;
 begin
   Result := TObject(AInt);
 end;
 
 // 供 Pascal Script 使用的将 TObject 转换成整型值的函数
-function CnObjectToInt(AObject: TObject): NativeInt;
+function CnObjectToInt(AObject: TObject): Int64;
 begin
-  Result := NativeInt(AObject);
+  Result := Int64(AObject);
 end;
 
 {$ELSE}
