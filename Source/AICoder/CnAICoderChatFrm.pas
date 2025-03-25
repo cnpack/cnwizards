@@ -355,16 +355,19 @@ begin
 end;
 
 procedure TCnAICoderChatForm.actFontExecute(Sender: TObject);
+var
+  OldColor: TColor;
 begin
   dlgFont.Font := mmoSelf.Font;
   if dlgFont.Execute then
   begin
     mmoSelf.Font := dlgFont.Font;
     mmoSelf.Font.Color := EditControlWrapper.ForegroundColor;
-    FChatBox.Font := dlgFont.Font;
 
-    // 聊天框的文字颜色不随编辑器，因为有绿色背景框
-    // FChatBox.Font.Color := EditControlWrapper.ForegroundColor;
+    OldColor := FChatBox.Font.Color;
+    FChatBox.Font := dlgFont.Font;
+    FChatBox.Font.Color := OldColor;
+    // 聊天框的文字颜色不随编辑器和聊天框，因为有绿色背景框
 
     CnAIEngineOptionManager.ChatFontStr := FontToString(dlgFont.Font);
   end;
