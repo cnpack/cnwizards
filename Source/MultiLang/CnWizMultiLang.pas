@@ -346,7 +346,8 @@ begin
   for I := 0 to FStorage.LanguageCount - 1 do
   begin
     S := CnLanguages.NameFromLocaleID[FStorage.Languages[I].LanguageID];
-    S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
+    if Pos('中国', S) <= 0 then
+      S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
     FIndexes[I] := RegisterASubAction(csLanguage + InttoStr(I) + FStorage.
       Languages[I].Abbreviation, FStorage.Languages[I].LanguageName + ' - ' +
       S, 0, FStorage.Languages[I].LanguageName);
