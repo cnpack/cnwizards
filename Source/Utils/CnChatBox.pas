@@ -82,6 +82,7 @@ type
     procedure SetColor(const Value: TColor);
   protected
     procedure NotifyRedraw; virtual;
+    procedure NotifyFontChanged; virtual;
   public
     constructor Create(AOwner: TCnChatItems); virtual;
     destructor Destroy; override;
@@ -128,6 +129,8 @@ type
     procedure CheckMemo;
     function GetSelEnd: Integer;
     function GetSelStart: Integer;
+  protected
+    procedure NotifyFontChanged; override;
   public
     constructor Create(AOwner: TCnChatItems); override;
     destructor Destroy; override;
@@ -189,6 +192,8 @@ type
     function SelectCount: Integer;
     procedure Clear; override;
     procedure ClearNoWaiting;
+
+    procedure NotifyFontChanged;
 
     procedure DoChanged(Item: TCnChatItem);
     procedure NeedResize;
@@ -697,6 +702,7 @@ end;
 
 procedure TCnCustomChatBox.FontChanged(var Message: TMessage);
 begin
+  FItems.NotifyFontChanged;
   FItems.NeedResize;
   NeedRepaint;
 end;
@@ -1280,6 +1286,14 @@ begin
     Items[I].FNeedCalc := True;
 end;
 
+procedure TCnChatItems.NotifyFontChanged;
+var
+  I: Integer;
+begin
+  for I := 0 to Count - 1 do
+    Items[I].NotifyFontChanged;
+end;
+
 function TCnChatItems.SelectCount: Integer;
 var
   I: Integer;
@@ -1444,6 +1458,11 @@ begin
   if FOwner <> nil then
     if FOwner.Owner <> nil then
       FOwner.Owner.NeedRepaint;
+end;
+
+procedure TCnChatItem.NotifyFontChanged;
+begin
+
 end;
 
 { TCnChatMessage }
@@ -1656,15 +1675,18 @@ begin
     FMemo.BorderStyle := bsNone;
     FMemo.WordWrap := True;
     FMemo.ReadOnly := True;
+  end;
 
-    if FOwner.Owner <> nil then
+  if FOwner.Owner <> nil then
+  begin
+    if FMemo.Parent <> FOwner.Owner then
     begin
       FMemo.Parent := FOwner.Owner;
       FMemo.Font := FOwner.Owner.Font;
-
-      if FOwner.Owner.PopupMenu <> nil then
-        FMemo.PopupMenu := FOwner.Owner.PopupMenu;
     end;
+
+    if FOwner.Owner.PopupMenu <> nil then
+      FMemo.PopupMenu := FOwner.Owner.PopupMenu;
   end;
 end;
 
@@ -1678,6 +1700,12 @@ function TCnChatMessage.GetSelStart: Integer;
 begin
   CheckMemo;
   Result := FMemo.SelStart;
+end;
+
+procedure TCnChatMessage.NotifyFontChanged;
+begin
+  if (FMemo <> nil) and (FOwner.Owner <> nil) then
+    FMemo.Font := FOwner.Owner.Font;
 end;
 
 { TCnChatInfo }

@@ -298,12 +298,20 @@ begin
 end;
 
 procedure TCnAICoderChatForm.actCopyExecute(Sender: TObject);
+var
+  S: string;
 begin
   if FItemUnderMouse <> nil then
   begin
     try
       if FItemUnderMouse is TCnChatMessage then
-        Clipboard.AsText := TCnChatMessage(FItemUnderMouse).Text;
+      begin
+        S := TCnChatMessage(FItemUnderMouse).SelText;
+        if S = '' then
+          S := TCnChatMessage(FItemUnderMouse).Text;
+
+        Clipboard.AsText := S;
+      end;
     except
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
