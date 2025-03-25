@@ -260,6 +260,7 @@ object FormAITest: TFormAITest
     Top = 16
     object Copy1: TMenuItem
       Caption = 'Copy'
+      OnClick = Copy1Click
     end
   end
   object pmAIChat: TPopupMenu

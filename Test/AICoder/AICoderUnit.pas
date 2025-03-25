@@ -66,6 +66,7 @@ type
     procedure pmChatPopup(Sender: TObject);
     procedure pmAIChatPopup(Sender: TObject);
     procedure CopyCode1Click(Sender: TObject);
+    procedure Copy1Click(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -637,7 +638,12 @@ begin
   begin
     try
       if FAIChatItem is TCnChatMessage then
-        Clipboard.AsText := TCnChatMessage(FAIChatItem).Text;
+      begin
+        if TCnChatMessage(FAIChatItem).SelText <> '' then
+          Clipboard.AsText := TCnChatMessage(FAIChatItem).SelText
+        else
+          Clipboard.AsText := TCnChatMessage(FAIChatItem).Text;
+      end;
     except
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
@@ -719,6 +725,24 @@ begin
         Delete(S, 1, Length(CPP_PREFIX));
 
       Result := Trim(S);
+    end;
+  end;
+end;
+
+procedure TFormAITest.Copy1Click(Sender: TObject);
+begin
+  if FChatItem <> nil then
+  begin
+    try
+      if FChatItem is TCnChatMessage then
+      begin
+        if TCnChatMessage(FChatItem).SelText <> '' then
+          Clipboard.AsText := TCnChatMessage(FChatItem).SelText
+        else
+          Clipboard.AsText := TCnChatMessage(FChatItem).Text;
+      end;
+    except
+      ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
   end;
 end;
