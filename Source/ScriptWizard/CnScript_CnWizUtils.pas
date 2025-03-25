@@ -306,8 +306,14 @@ begin
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
+{$IFDEF WIN64}
+  CL.AddDelphiFunction('Function CnIntToObject(AInt : NativeInt) : TObject');
+  CL.AddDelphiFunction('Function CnObjectToInt(AObject : TObject) : NativeInt');
+{$ELSE}
   CL.AddDelphiFunction('Function CnIntToObject(AInt : Integer) : TObject');
   CL.AddDelphiFunction('Function CnObjectToInt(AObject : TObject) : Integer');
+{$ENDIF}
+
 {$IFNDEF WIN64}
   CL.AddDelphiFunction('Function CnIntToInterface(AInt : Integer) : IUnknown');
   CL.AddDelphiFunction('Function CnInterfaceToInt(Intf : IUnknown) : Integer');

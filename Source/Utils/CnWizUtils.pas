@@ -147,10 +147,17 @@ var
 // 公共信息函数
 //==============================================================================
 
+{$IFDEF WIN64}
+function CnIntToObject(AInt: NativeInt): TObject;
+{* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
+function CnObjectToInt(AObject: TObject): NativeInt;
+{* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+{$ELSE}
 function CnIntToObject(AInt: Integer): TObject;
 {* 供 Pascal Script 使用的将整型值转换成 TObject 的函数}
 function CnObjectToInt(AObject: TObject): Integer;
 {* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
+{$ENDIF}
 
 {$IFNDEF WIN64}
 function CnIntToInterface(AInt: Integer): IUnknown;
@@ -1324,6 +1331,22 @@ end;
 // 公共信息函数
 //==============================================================================
 
+{$IFDEF WIN64}
+
+// 供 Pascal Script 使用的将整型值转换成 TObject 的函数
+function CnIntToObject(AInt: NativeInt): TObject;
+begin
+  Result := TObject(AInt);
+end;
+
+// 供 Pascal Script 使用的将 TObject 转换成整型值的函数
+function CnObjectToInt(AObject: TObject): NativeInt;
+begin
+  Result := NativeInt(AObject);
+end;
+
+{$ELSE}
+
 // 供 Pascal Script 使用的将整型值转换成 TObject 的函数
 // （因为 Pascal Script 不支持 TObject(0) 这种语法）
 function CnIntToObject(AInt: Integer): TObject;
@@ -1336,6 +1359,8 @@ function CnObjectToInt(AObject: TObject): Integer;
 begin
   Result := Integer(AObject);
 end;
+
+{$ENDIF}
 
 {$IFNDEF WIN64}
 
