@@ -303,6 +303,7 @@ begin
   CL.AddConstantN('_UNICODE_STRING', 'Boolean').SetUInt(Ord(_UNICODE_STRING));
   CL.AddConstantN('_VERSIONINFO_PER_CONFIGURATION', 'Boolean').SetUInt(Ord(_VERSIONINFO_PER_CONFIGURATION));
   CL.AddConstantN('_CAPTURE_STACK', 'Boolean').SetUInt(Ord(_CAPTURE_STACK));
+  CL.AddConstantN('_IS64BIT', 'Boolean').SetUInt(Ord(_IS64BIT));
 
   CL.AddTypeS('TFormType', '( ftBinary, ftText, ftUnknown )');
   CL.AddTypeS('TCnCharSet', 'set of Char');
