@@ -702,8 +702,14 @@ begin
     CnDebugger.LogPointer(FManager.FSelection[0], 'TCnSelectCompareExecutor FManager.FSelection[0]');
 {$ENDIF}
     Comp := TComponent(FManager.FSelection[0]);
-    if Comp <> nil then
-      Result := Format(SCnPropertyCompareSelectCaptionFmt, [Comp.Name, Comp.ClassName]);
+    if Comp <> nil then // 有些组件出错，只能先屏蔽
+    begin
+      try
+        Result := Format(SCnPropertyCompareSelectCaptionFmt, [Comp.Name, Comp.ClassName]);
+      except
+        Result := Format(SCnPropertyCompareSelectCaptionFmt, ['<unknown>', '<Unknown>']);
+      end;
+    end;
   end;
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnSelectCompareExecutor GetCaption: ' + Result);
