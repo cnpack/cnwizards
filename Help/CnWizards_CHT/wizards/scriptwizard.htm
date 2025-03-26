@@ -181,7 +181,7 @@
 <p class="text" align="left">PascalScript 腳本的語法和 Object Pascal 大體相同，但有以下幾點是需要說明的：</p>
 <ul>
   <li>
-<p class="text" align="left">PascalScript 腳本語法不支持整型到對像類型間的強制類型轉換，也即不支持 TObject(0) 這樣的語法。欲實現這這種轉換，可以利用輔助函數 function CnIntToObject(AInt: Integer): TObject; 來完成。</p>
+<p class="text" align="left">PascalScript 腳本語法不支持整型到對像類型間的強制類型轉換，也即不支持 TObject(0) 這樣的語法。欲實現這這種轉換，可以利用輔助函數 function CnIntToObject(AInt: Integer): TObject; 來完成。64 位下該函數參數類型則為 Int64。</p>
   </li>
   <li>
 <p class="text" align="left">PascalScript 腳本語法不支持函數調用中的默認參數，也不支持 overload。</p>

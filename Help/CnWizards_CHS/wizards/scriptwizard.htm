@@ -181,7 +181,7 @@
 <p class="text" align="left">PascalScript 脚本的语法和 Object Pascal 大体相同，但有以下几点是需要说明的：</p>
 <ul>
   <li>
-<p class="text" align="left">PascalScript 脚本语法不支持整型到对象类型间的强制类型转换，也即不支持 TObject(0) 这样的语法。欲实现这这种转换，可以利用辅助函数 function CnIntToObject(AInt: Integer): TObject; 来完成。</p>
+<p class="text" align="left">PascalScript 脚本语法不支持整型到对象类型间的强制类型转换，也即不支持 TObject(0) 这样的语法。欲实现这这种转换，可以利用辅助函数 function CnIntToObject(AInt: Integer): TObject; 来完成。64 位下该函数参数类型则为 Int64。</p>
   </li>
   <li>
 <p class="text" align="left">PascalScript 脚本语法不支持函数调用中的默认参数，也不支持 overload。</p>
