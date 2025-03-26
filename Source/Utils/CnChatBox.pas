@@ -83,6 +83,7 @@ type
   protected
     procedure NotifyRedraw; virtual;
     procedure NotifyFontChanged; virtual;
+    procedure NotifyHide; virtual;
   public
     constructor Create(AOwner: TCnChatItems); virtual;
     destructor Destroy; override;
@@ -131,6 +132,7 @@ type
     function GetSelStart: Integer;
   protected
     procedure NotifyFontChanged; override;
+    procedure NotifyHide; override;
   public
     constructor Create(AOwner: TCnChatItems); override;
     destructor Destroy; override;
@@ -909,8 +911,12 @@ begin
               FItems[I].DrawImage(Canvas, ImageRect);
           end;
         end
-        else if FStartDraw then
+        else
+        begin
+          if FStartDraw then
           FSkip := True;
+          FItems[I].NotifyHide;
+        end;
       end;
     end;
     FMaxOffset := 0 - LastRect.Top;
@@ -1465,6 +1471,11 @@ begin
 
 end;
 
+procedure TCnChatItem.NotifyHide;
+begin
+
+end;
+
 { TCnChatMessage }
 
 function TCnChatMessage.CalcRect(Canvas: TCanvas; Rect: TRect): TRect;
@@ -1675,6 +1686,10 @@ begin
     FMemo.BorderStyle := bsNone;
     FMemo.WordWrap := True;
     FMemo.ReadOnly := True;
+
+{$IFDEF IDE_SUPPORT_THEMING}
+    FMemo.StyleElements := [];
+{$ENDIF}
   end;
 
   if FOwner.Owner <> nil then
@@ -1706,6 +1721,12 @@ procedure TCnChatMessage.NotifyFontChanged;
 begin
   if (FMemo <> nil) and (FOwner.Owner <> nil) then
     FMemo.Font := FOwner.Owner.Font;
+end;
+
+procedure TCnChatMessage.NotifyHide;
+begin
+  if FMemo <> nil then
+    FMemo.Visible := False;
 end;
 
 { TCnChatInfo }

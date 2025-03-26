@@ -169,7 +169,7 @@ begin
   end;
 
   // 聊天框的文字颜色不随编辑器，因为有绿色背景框
-  // FChatBox.Font.Color := EditControlWrapper.ForegroundColor;
+  FChatBox.Font.Color := clBlack;
 
   mmoSelf.Font.Color := EditControlWrapper.ForegroundColor;
   mmoSelf.Color := EditControlWrapper.BackgroundColor;
