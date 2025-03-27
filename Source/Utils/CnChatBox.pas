@@ -327,6 +327,7 @@ type
 
     function GetItemUnderMouse: TCnChatItem;
     function GetActualPadding: Integer;
+    function GetFromDPI(OrigSize: Integer): Integer;
 
     property Item[Index: Integer]: TCnChatItem read GetItem write SetItem;
     property Items: TCnChatItems read FItems write SetItems;
@@ -759,10 +760,9 @@ begin
   Rect := ClientRect;
 
   // 腾出 Margin
-  CnRectInflate(Rect, Round(-BorderWidth * GetScaledFactor), Round(-BorderWidth
-    * GetScaledFactor));
+  CnRectInflate(Rect, GetFromDPI(-BorderWidth), GetFromDPI(-BorderWidth));
 
-  Rect.Right := Rect.Right - Round(25 * GetScaledFactor); //scroll
+  Rect.Right := Rect.Right - GetFromDPI(25); //scroll
   BaseColor := Color;
   FStartDraw := False;
   FSkip := False;
@@ -816,15 +816,15 @@ begin
 
         LastRect := ItemRect;
         if (FItems[I] is TCnChatInfo) then
-          CnRectOffset(LastRect, 0, -20)
+          CnRectOffset(LastRect, 0, GetFromDPI(-20))
         else
-          CnRectOffset(LastRect, 0, -10);
+          CnRectOffset(LastRect, 0, GetFromDPI(-10));
 
         if FSkip then
           Continue;
 
         // ItemRect 此时的 Top 是要绘制的准确位置，但横坐标还要根据消息类型以及你我以及有无图标确定
-        Radius := 4;
+        Radius := GetFromDPI(4);
         if (FItems[I] is TCnChatMessage) then
         begin
           if (FItems[I] as TCnChatMessage).FromType = cmtMe then
@@ -932,9 +932,9 @@ begin
       begin
         Rect := ClientRect;
         ItemRect := Rect;
-        ItemRect.Left := ItemRect.Right - 12;  // 右侧宽 12 的区域作为滚动条
-        ItemRect.Right := ItemRect.Right - 4;
-        CnRectInflate(ItemRect, 0, -4);
+        ItemRect.Left := ItemRect.Right - GetFromDPI(12);  // 右侧宽 12 的区域作为滚动条
+        ItemRect.Right := ItemRect.Right - GetFromDPI(4);
+        CnRectInflate(ItemRect, 0, GetFromDPI(-4));
 
         if CnRectContains(ItemRect, FMousePos) or FScrolling then
         begin
@@ -947,7 +947,7 @@ begin
         if not FCalcOnly then
         begin
           Pen.Color := Brush.Color;
-          CnCanvasRoundRect(Canvas, ItemRect, 6, 6);
+          CnCanvasRoundRect(Canvas, ItemRect, GetFromDPI(6), GetFromDPI(6));
         end;
 
         LastRect := ItemRect; // ItemRect 现在是滚动条区域
@@ -964,7 +964,7 @@ begin
             FMouseInScrollButton := True;
           Brush.Color := FColorScrollButton;
           Pen.Color := Brush.Color;
-          CnCanvasRoundRect(Canvas, LastRect, 6, 6);
+          CnCanvasRoundRect(Canvas, LastRect, GetFromDPI(6), GetFromDPI(6));
         end;
       end;
     end;
@@ -972,10 +972,10 @@ begin
     if NeedDrawDownButton then // 画下按钮的区域
     begin
       Rect := ClientRect;
-      FDownButtonRect.Left := Rect.Right - 100;
-      FDownButtonRect.Top := Rect.Bottom - 100;
-      FDownButtonRect.Right := FDownButtonRect.Left + 40;
-      FDownButtonRect.Bottom := FDownButtonRect.Top + 40;
+      FDownButtonRect.Left := Rect.Right - GetFromDPI(100);
+      FDownButtonRect.Top := Rect.Bottom - GetFromDPI(100);
+      FDownButtonRect.Right := FDownButtonRect.Left + GetFromDPI(40);
+      FDownButtonRect.Bottom := FDownButtonRect.Top + GetFromDPI(40);
 
       FillRect(FDownButtonRect);
     end;
@@ -1341,6 +1341,11 @@ end;
 function TCnCustomChatBox.GetActualPadding: Integer;
 begin
   Result := Round(PaddingSize * GetScaledFactor);
+end;
+
+function TCnCustomChatBox.GetFromDPI(OrigSize: Integer): Integer;
+begin
+  Result := Round(OrigSize * GetScaledFactor);
 end;
 
 { TCnChatItem }
