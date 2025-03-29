@@ -198,13 +198,17 @@ type
 
     procedure ParseSource(ASource: PAnsiChar; AIsDpr, AKeyOnly: Boolean);
     {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
-    function FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
+
+    function FindCurrentDeclaration(LineNumber, CharIndex: Integer;
+      out Visibility: TTokenKind): AnsiString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
-       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
-    procedure FindCurrentBlock(LineNumber, CharIndex: Integer);
-    {* 根据当前光标位置查找当前块与当前嵌套/外层函数等。
+       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入
+       Visibility 参数返回为光标所在是 private/protected/public/published 还是 none}
+    function FindCurrentBlock(LineNumber, CharIndex: Integer): TTokenKind;
+    {* 根据当前光标位置查找当前块与当前嵌套/外层函数等，被 FindCurrentDeclaration 调用。
        LineNumber 1 开始，CharIndex 0 开始，类似于 CharPos
-       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入}
+       要求是 Ansi 的偏移量。D567 下可以用 ConvertPos 得到的 CharPos 传入
+       返回值为当前光标上部最近的是 private/protected/public/published 还是 none}
 
     procedure ParseString(ASource: PAnsiChar);
     {* 对代码进行针对字符串的解析，只生成字符串内容}
@@ -1279,11 +1283,12 @@ begin
   end;
 end;
 
-procedure TCnPasStructureParser.FindCurrentBlock(LineNumber, CharIndex:
-  Integer);
+function TCnPasStructureParser.FindCurrentBlock(LineNumber, CharIndex:
+  Integer): TTokenKind;
 var
   Token: TCnPasToken;
   CurrIndex: Integer;
+  Res: TTokenKind;
 
   procedure _BackwardFindDeclarePos;
   var
@@ -1297,6 +1302,12 @@ var
     for I := CurrIndex - 1 downto 0 do
     begin
       Token := Tokens[I];
+
+      // 回溯过程中碰到第一个范围，记录
+      if (Res = tkNone) and (Token.TokenID in
+        [tkPrivate, tkProtected, tkPublic, tkPublished]) then
+        Res := Token.TokenID;
+
       if Token.IsBlockStart then
       begin
         if StartInner and (Level = 0) then
@@ -1467,7 +1478,8 @@ begin
   FInnerBlockStartToken := nil;
   FCurrentMethod := '';
   FCurrentChildMethod := '';
-  
+  Res := tkNone;
+
   CurrIndex := 0;
   while CurrIndex < Count do
   begin
@@ -1503,6 +1515,8 @@ begin
       FCurrentChildMethod := _GetMethodName(FChildMethodStartToken, FChildMethodCloseToken);
     end;
   end;
+
+  Result := Res;
 end;
 
 function TCnPasStructureParser.IndexOfToken(Token: TCnPasToken): Integer;
@@ -1510,12 +1524,13 @@ begin
   Result := FList.IndexOf(Token);
 end;
 
-function TCnPasStructureParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer): AnsiString;
+function TCnPasStructureParser.FindCurrentDeclaration(LineNumber, CharIndex: Integer;
+  out Visibility: TTokenKind): AnsiString;
 var
   Idx: Integer;
 begin
   Result := '';
-  FindCurrentBlock(LineNumber, CharIndex);
+  Visibility := FindCurrentBlock(LineNumber, CharIndex);
   
   if InnerBlockStartToken <> nil then
   begin

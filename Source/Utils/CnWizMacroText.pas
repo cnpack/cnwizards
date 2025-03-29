@@ -103,7 +103,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizMacroUtils, CnWizUtils;
+  mPasLex, CnWizMacroUtils, CnWizUtils;
 
 const
   csDefArgList = '$k (Kind) $n (Name) $t (Type) $d (Default)';
@@ -340,6 +340,7 @@ var
   S: string;
   IsPasFile, IsCFile: Boolean;
   Guid: TGUID;
+  Vis: TTokenKind;
 begin
   Result := AMacro;
   if IsInternalMacro(AMacro, Macro) then
@@ -404,7 +405,7 @@ begin
 
               EditPos := EditView.CursorPos;
               EditView.ConvertPos(True, EditPos, CharPos);
-              Result := string(PasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
+              Result := string(PasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis));
               if Result = '' then
               begin
                 if PasParser.CurrentChildMethod <> '' then

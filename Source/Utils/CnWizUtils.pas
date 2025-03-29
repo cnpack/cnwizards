@@ -5203,6 +5203,7 @@ var
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   Parser: TCnPasStructureParser;
+  Vis: TTokenKind;
 begin
   Result := '';
   EditView := CnOtaGetTopMostEditView;
@@ -5221,7 +5222,7 @@ begin
 
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
-  Result := string(Parser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex));
+  Result := string(Parser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis));
   Parser.Free;
 end;
 

@@ -179,18 +179,21 @@ type
 
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
     {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
-    function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer): CnWideString;
+    function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer;
+      out Visibility: TTokenKind): CnWideString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
        但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
        Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
-       再转成 WideChar 的偏移}
-    procedure FindCurrentBlock(LineNumber, WideCharIndex: Integer);
+       再转成 WideChar 的偏移。
+       Visibility 参数返回为光标所在是 private/protected/public/published 等}
+    function FindCurrentBlock(LineNumber, WideCharIndex: Integer): TTokenKind;
     {* 查找指定光标位置所在的块，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
        但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
        Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
-       再转成 WideChar 的偏移}
+       再转成 WideChar 的偏移。
+       返回值为当前块上部最近的是 private/protected/public/published 还是 none}
 
     procedure ParseString(ASource: PWideChar);
     {* 对代码进行针对字符串的解析，只生成字符串内容}
@@ -1219,11 +1222,12 @@ begin
   end;
 end;
 
-procedure TCnWidePasStructParser.FindCurrentBlock(LineNumber, WideCharIndex:
-  Integer);
+function TCnWidePasStructParser.FindCurrentBlock(LineNumber, WideCharIndex:
+  Integer): TTokenKind;
 var
   Token: TCnWidePasToken;
   CurrIndex: Integer;
+  Res: TTokenKind;
 
   procedure _BackwardFindDeclarePos;
   var
@@ -1237,6 +1241,12 @@ var
     for I := CurrIndex - 1 downto 0 do
     begin
       Token := Tokens[I];
+
+      // 回溯过程中碰到第一个范围，记录
+      if (Res = tkNone) and (Token.TokenID in
+        [tkPrivate, tkProtected, tkPublic, tkPublished]) then
+        Res := Token.TokenID;
+
       if Token.IsBlockStart then
       begin
         if StartInner and (Level = 0) then
@@ -1407,6 +1417,7 @@ begin
   FInnerBlockStartToken := nil;
   FCurrentMethod := '';
   FCurrentChildMethod := '';
+  Res := tkNone;
 
   CurrIndex := 0;
   while CurrIndex < Count do
@@ -1443,6 +1454,8 @@ begin
       FCurrentChildMethod := _GetMethodName(FChildMethodStartToken, FChildMethodCloseToken);
     end;
   end;
+
+  Result := Res;
 end;
 
 function TCnWidePasStructParser.IndexOfToken(Token: TCnWidePasToken): Integer;
@@ -1451,12 +1464,12 @@ begin
 end;
 
 function TCnWidePasStructParser.FindCurrentDeclaration(LineNumber,
-  WideCharIndex: Integer): CnWideString;
+  WideCharIndex: Integer; out Visibility: TTokenKind): CnWideString;
 var
   Idx: Integer;
 begin
   Result := '';
-  FindCurrentBlock(LineNumber, WideCharIndex);
+  Visibility := FindCurrentBlock(LineNumber, WideCharIndex);
 
   if InnerBlockStartToken <> nil then
   begin

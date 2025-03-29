@@ -1661,6 +1661,7 @@ var
   Obj: TCnProcToolBarObj;
   DotPos: Integer;
   S: string;
+  Vis: TTokenKind;
 begin
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
   if Obj = nil then Exit;
@@ -1693,8 +1694,13 @@ begin
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
 
+    // 找光标处的当前声明
     if not Obj.ClassCombo.Focused then
-      Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex)));
+    begin
+      Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(
+        FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis)));
+      Obj.ClassCombo.Tag := Ord(Vis); // 将可视范围记录在 Tag 里供绘制使用
+    end;
 
     if not Obj.ProcCombo.Focused then
     begin
@@ -1706,6 +1712,7 @@ begin
         Obj.ProcCombo.SetTextWithoutChange(SCnProcListNoContent);
     end;
 
+    // 如果上面的当前声明为空，则以当前函数过程所属的类名为准
     if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
     begin
       DotPos := Pos('.', Obj.ProcCombo.Text);

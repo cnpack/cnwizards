@@ -148,6 +148,7 @@ var
   S: WideString;
   I: Integer;
   Token: TCnWidePasToken;
+  Visibility: TTokenKind;
 begin
   mmoPasResult.Lines.Clear;
   Parser := TCnWidePasStructParser.Create(chkWidePas.Checked);
@@ -157,7 +158,9 @@ begin
   S := mmoPasSrc.Lines.Text;
   try
     Parser.ParseSource(PWideChar(S), False, False);
-    Parser.FindCurrentBlock(mmoPasSrc.CaretPos.Y + 1, mmoPasSrc.CaretPos.X + 1);
+    Visibility := Parser.FindCurrentBlock(mmoPasSrc.CaretPos.Y + 1, mmoPasSrc.CaretPos.X + 1);
+    if Visibility <> tkNone then
+      ShowMessage(GetEnumName(TypeInfo(TTokenKind), Ord(Visibility)));
 
     for I := 0 to Parser.Count - 1 do
     begin

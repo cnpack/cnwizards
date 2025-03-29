@@ -162,6 +162,7 @@ var
   I: Integer;
   Token: TCnPasToken;
   SepList: TList;
+  Visibility: TTokenKind;
 begin
   mmoParsePas.Lines.Clear;
   Parser := TCnPasStructureParser.Create(chkWideIdentPas.Checked);
@@ -172,7 +173,9 @@ begin
     NilChar := 0;
     Stream.Write(NilChar, SizeOf(NilChar));
     Parser.ParseSource(Stream.Memory, chkIsDpr.Checked, False);
-    Parser.FindCurrentBlock(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1);
+    Visibility := Parser.FindCurrentBlock(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1);
+    if Visibility <> tkNone then
+      ShowMessage(GetEnumName(TypeInfo(TTokenKind), Ord(Visibility)));
 
     for I := 0 to Parser.Count - 1 do
     begin
