@@ -1835,6 +1835,7 @@ var
   Idx: Integer;
 begin
   Canvas.FillRect(PaddingRect);
+CnDebugger.LogRect(PaddingRect);
   if Sender is TCnProcListComboBox then
   begin
     if TCnProcListComboBox(Sender).Focused then
@@ -1851,7 +1852,7 @@ begin
     end;
 
     if Idx >= 0 then
-      dmCnSharedImages.ilProcToolBar.Draw(Canvas, PaddingRect.Left + 1,
+      dmCnSharedImages.ilProcToolBar.Draw(Canvas, PaddingRect.Left,
         PaddingRect.Top + 1, Idx);
   end;
 end;
