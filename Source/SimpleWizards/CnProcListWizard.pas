@@ -450,6 +450,7 @@ type
     procedure ProcComboDropDown(Sender: TObject);
     procedure DoIdleComboChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
+    procedure ClassComboPaintPadding(Sender: TObject; Canvas: TCanvas; PaddingRect: TRect);
 {$IFDEF IDE_SUPPORT_THEMING}
     procedure DoThemeChange(Sender: TObject);
 {$ENDIF}
@@ -1053,6 +1054,9 @@ begin
     Parent := ToolBar;
     Left := 108;
     Top := 0;
+    PaddingWidth := IdeGetScaledPixelsFromOrigin(16, Obj.ClassCombo); // 留个画图标的空
+    OnPaintPadding := ClassComboPaintPadding;
+
     if IdeGetScaledPixelsFromOrigin(FToolbarClassComboWidth, Obj.ClassCombo) > 50 then
       Width := IdeGetScaledPixelsFromOrigin(FToolbarClassComboWidth, Obj.ClassCombo)
     else
@@ -1659,7 +1663,8 @@ var
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   Obj: TCnProcToolBarObj;
-  DotPos: Integer;
+  DotPos, OldTag: Integer;
+  Decl: TCnIdeTokenString;
   S: string;
   Vis: TTokenKind;
 begin
@@ -1697,9 +1702,18 @@ begin
     // 找光标处的当前声明
     if not Obj.ClassCombo.Focused then
     begin
-      Obj.ClassCombo.SetTextWithoutChange(TCnIdeTokenString(
-        FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis)));
-      Obj.ClassCombo.Tag := Ord(Vis); // 将可视范围记录在 Tag 里供绘制使用
+      OldTag := Integer(Obj.ClassCombo.Tag);
+      Decl := TCnIdeTokenString(FCurrPasParser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis));
+      if Decl <> '' then
+      begin
+        Obj.ClassCombo.SetTextWithoutChange(Decl);
+        Obj.ClassCombo.Tag := Ord(Vis); // 将可视范围记录在 Tag 里供绘制使用
+      end
+      else
+        Obj.ClassCombo.Tag := 0;        // 无当前声明则塞 0，无论 vis 返回啥
+
+      if OldTag <> Obj.ClassCombo.Tag then  // 可见发生变化，则要重绘
+        Obj.ClassCombo.Invalidate;
     end;
 
     if not Obj.ProcCombo.Focused then
@@ -1715,6 +1729,7 @@ begin
     // 如果上面的当前声明为空，则以当前函数过程所属的类名为准
     if not Obj.ClassCombo.Focused and (Obj.ClassCombo.Text = '') then
     begin
+      Obj.ClassCombo.Tag := 0;
       DotPos := Pos('.', Obj.ProcCombo.Text);
       if DotPos > 1 then
         Obj.ClassCombo.SetTextWithoutChange(Copy(Obj.ProcCombo.Text, 1, DotPos - 1))
@@ -1811,6 +1826,34 @@ begin
   end;
 
   CnWizNotifierServices.ExecuteOnApplicationIdle(ProcCombo.RefreshDropBox);
+end;
+
+procedure TCnProcListWizard.ClassComboPaintPadding(Sender: TObject;
+  Canvas: TCanvas; PaddingRect: TRect);
+var
+  Vis: TTokenKind;
+  Idx: Integer;
+begin
+  Canvas.FillRect(PaddingRect);
+  if Sender is TCnProcListComboBox then
+  begin
+    if TCnProcListComboBox(Sender).Focused then
+      Exit;
+
+    // 有焦点时要输入，不能画
+    Vis := TTokenKind(TCnProcListComboBox(Sender).Tag);
+    Idx := -1;
+    case Vis of
+      tkPrivate: Idx := 10;
+      tkProtected: Idx := 11;
+      tkPublic: Idx := 12;
+      tkPublished: Idx := 13;
+    end;
+
+    if Idx >= 0 then
+      dmCnSharedImages.ilProcToolBar.Draw(Canvas, PaddingRect.Left + 1,
+        PaddingRect.Top + 1, Idx);
+  end;
 end;
 
 procedure TCnProcListWizard.RemoveProcToolBar(const ToolBarType: string;
