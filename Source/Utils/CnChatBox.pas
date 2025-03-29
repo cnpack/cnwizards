@@ -464,7 +464,6 @@ begin
 
   DoubleBuffered := True;
   TabStop := True;
-  Cursor := crIBeam;
 
   OnMouseWheelDown := FOnMouseWheelDown;
   OnMouseWheelUp := FOnMouseWheelUp;

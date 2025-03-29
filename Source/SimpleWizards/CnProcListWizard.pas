@@ -1835,7 +1835,6 @@ var
   Idx: Integer;
 begin
   Canvas.FillRect(PaddingRect);
-CnDebugger.LogRect(PaddingRect);
   if Sender is TCnProcListComboBox then
   begin
     if TCnProcListComboBox(Sender).Focused then
