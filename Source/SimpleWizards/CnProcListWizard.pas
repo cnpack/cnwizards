@@ -1158,7 +1158,11 @@ begin
   end;
 
   Obj.JumpsMenu := TPopupMenu.Create(Obj.InternalToolBar2);
+{$IFDEF IDE_SUPPORT_HDPI}
+  Obj.JumpsMenu.Images := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
+{$ELSE}
   Obj.JumpsMenu.Images := dmCnSharedImages.ilProcToolBar;
+{$ENDIF}
 
   for JP := Low(TCnJumpsPoint) to High(TCnJumpsPoint) do
   begin
