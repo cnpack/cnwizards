@@ -1571,7 +1571,11 @@ begin
   else
     G := gridLeft;
 
+{$IFDEF WIN64}
+  PostMessage(Handle, WM_SYNC_SELECT, NativeUInt(G), ARow);
+{$ELSE}
   PostMessage(Handle, WM_SYNC_SELECT, Integer(G), ARow);
+{$ENDIF}
   pbPos.Invalidate;
 end;
 
