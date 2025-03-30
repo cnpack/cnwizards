@@ -2207,7 +2207,8 @@ begin
       // BDS 2009 的 TControl 已经 Unicode 化了，直接用
       Result := TCustomControlHack(EditControl).Canvas;
     {$ELSE}
-      // BDS 2009 以下的 EditControl 不再继承自 TCustomControl，因此得用硬办法来获得画布
+      // BDS 2005、2006、2007 的 EditControl 支持宽字符，
+      // 并非继承自 Ansi 版的 TCustomControl，因此得用硬办法来获得画布
       Result := TCanvas((PInteger(Integer(EditControl) + CnWideControlCanvasOffset))^);
     {$ENDIF}
   {$ENDIF}

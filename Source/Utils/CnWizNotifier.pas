@@ -680,7 +680,7 @@ end;
 
 destructor TCnSourceEditorNotifier.Destroy;
 var
-  idx: Integer;
+  Idx: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnSourceEditorNotifier.Destroy');
@@ -688,12 +688,12 @@ begin
   NoRefCount(SourceEditor) := nil;
   with FNotifierServices.FSourceEditorIntfs do
   begin
-    idx := IndexOf(Self);
+    Idx := IndexOf(Self);
   {$IFDEF DEBUG}
-    CnDebugger.LogInteger(idx, 'IndexOf TCnSourceEditorNotifier');
+    CnDebugger.LogInteger(Idx, 'IndexOf TCnSourceEditorNotifier');
   {$ENDIF}
-    if idx >= 0 then
-      Delete(idx);
+    if Idx >= 0 then
+      Delete(Idx);
   end;
   inherited;
 {$IFDEF DEBUG}
@@ -764,7 +764,7 @@ end;
 
 destructor TCnFormEditorNotifier.Destroy;
 var
-  idx: Integer;
+  Idx: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnFormEditorNotifier.Destroy');
@@ -772,12 +772,12 @@ begin
   NoRefCount(FormEditor) := nil;
   with FNotifierServices.FFormEditorIntfs do
   begin
-    idx := IndexOf(Self);
+    Idx := IndexOf(Self);
   {$IFDEF DEBUG}
-    CnDebugger.LogInteger(idx, 'Index');
+    CnDebugger.LogInteger(Idx, 'Index');
   {$ENDIF}
-    if idx >= 0 then
-      Delete(idx);
+    if Idx >= 0 then
+      Delete(Idx);
   end;
   inherited;
 {$IFDEF DEBUG}

@@ -179,7 +179,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm,
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm, CnNative,
   CnWideStrings, CnProgressFrm, CnIDEStrings, CnPasCodeParser, CnWidePasParser;
 
 {$R *.DFM}
@@ -1170,7 +1170,7 @@ var
       if Lex.TokenID <> tkNull then
         Lex.Next;
       SetLength(Result, Lex.TokenPos - CPos);
-      Move((Pointer(Integer(Lex.Origin) + CPos * SizeOf(Char)))^, Result[1],
+      Move((Pointer(TCnNativeInt(Lex.Origin) + CPos * SizeOf(Char)))^, Result[1],
         (Lex.TokenPos - CPos) * SizeOf(Char));
 
 {$IFDEF DEBUG}

@@ -159,12 +159,28 @@ function CnObjectToInt(AObject: TObject): Integer;
 {* 供 Pascal Script 使用的将 TObject 转换成整型值的函数}
 {$ENDIF}
 
-{$IFNDEF WIN64}
+{$IFDEF WIN64}
+function CnIntToInterface(AInt: Int64): IUnknown;
+{* 供 Pascal Script 使用的将整型值转换成 IUnknown 的函数}
+function CnInterfaceToInt(Intf: IUnknown): Int64;
+{* 供 Pascal Script 使用的将 IUnknown 转换成整型值的函数}
+{$ELSE}
 function CnIntToInterface(AInt: Integer): IUnknown;
 {* 供 Pascal Script 使用的将整型值转换成 IUnknown 的函数}
 function CnInterfaceToInt(Intf: IUnknown): Integer;
 {* 供 Pascal Script 使用的将 IUnknown 转换成整型值的函数}
 {$ENDIF}
+
+{$IFDEF WIN64}
+function CnGetClassFromClassName(const AClassName: string): Int64;
+{* 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数}
+function CnGetClassFromObject(AObject: TObject): Int64;
+{* 供 Pascal Script 使用的从对象获取类信息并转换成整型值的函数}
+function CnGetClassNameFromClass(AClass: Int64): string;
+{* 供 Pascal Script 使用的从整型的类信息获取类名的函数}
+function CnGetClassParentFromClass(AClass: Int64): Integer;
+{* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
+{$ELSE}
 function CnGetClassFromClassName(const AClassName: string): Integer;
 {* 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数}
 function CnGetClassFromObject(AObject: TObject): Integer;
@@ -173,6 +189,7 @@ function CnGetClassNameFromClass(AClass: Integer): string;
 {* 供 Pascal Script 使用的从整型的类信息获取类名的函数}
 function CnGetClassParentFromClass(AClass: Integer): Integer;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
+{$ENDIF}
 
 function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
   UseDefault: Boolean = False; IgnoreDisabled: Boolean = False): Boolean;
@@ -1362,7 +1379,21 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF WIN64}
+{$IFDEF WIN64}
+
+// 供 Pascal Script 使用的将整型值转换成 Interface 的函数
+function CnIntToInterface(AInt: Int64): IUnknown;
+begin
+  Result := IUnknown(AInt);
+end;
+
+// 供 Pascal Script 使用的将 Interface 转换成整型值的函数
+function CnInterfaceToInt(Intf: IUnknown): Int64;
+begin
+  Result := Int64(Intf);
+end;
+
+{$ELSE}
 
 // 供 Pascal Script 使用的将整型值转换成 Interface 的函数
 function CnIntToInterface(AInt: Integer): IUnknown;
@@ -1377,6 +1408,34 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFDEF WIN64}
+
+// 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数
+function CnGetClassFromClassName(const AClassName: string): Int64;
+begin
+  Result := Int64(GetClass(AClassName));
+end;
+
+// 供 Pascal Script 使用的从对象获取类信息并转换成整型值的函数
+function CnGetClassFromObject(AObject: TObject): Int64;
+begin
+  Result := Int64(AObject.ClassType);
+end;
+
+// 供 Pascal Script 使用的从整型的类信息获取类名的函数
+function CnGetClassNameFromClass(AClass: Int64): string;
+begin
+  Result := TClass(AClass).ClassName;
+end;
+
+// 供 Pascal Script 使用的从整型的类信息获取父类信息的函数
+function CnGetClassParentFromClass(AClass: Int64): Int64;
+begin
+  Result := Int64(TClass(AClass).ClassParent);
+end;
+
+{$ELSE}
 
 // 供 Pascal Script 使用的从类名获取类信息并转换成整型值的函数
 function CnGetClassFromClassName(const AClassName: string): Integer;
@@ -1401,6 +1460,8 @@ function CnGetClassParentFromClass(AClass: Integer): Integer;
 begin
   Result := Integer(TClass(AClass).ClassParent);
 end;
+
+{$ENDIF}
 
 var
   FResInited: Boolean;

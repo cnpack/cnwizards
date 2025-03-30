@@ -193,8 +193,12 @@ begin
         Inc(P);
         if Assigned(Stream) then
         begin
-        {$IFDEF UNICODE}
+{$IFDEF UNICODE}
+        {$IFDEF WIN64}
+          PMem := PChar(NativeInt(Stream.Memory));
+        {$ELSE}
           PMem := PChar(Integer(Stream.Memory));
+        {$ENDIF}
           Size := Stream.Size + SizeOf(Char);
           Buf := GetMemory(Size);
           ZeroMemory(Buf, Size);
@@ -202,10 +206,14 @@ begin
 
           AllPos := Length(AnsiString(Buf));
           FreeMemory(Buf);
-        {$ELSE}
+{$ELSE}
           AllPos := Stream.Size;
-        {$ENDIF}
+{$ENDIF}
+        {$IFDEF WIN64}
+          PMem := PChar(NativeInt(Stream.Memory) + Stream.Size);
+        {$ELSE}
           PMem := PChar(Integer(Stream.Memory) + Stream.Size);
+        {$ENDIF}
           APos := 1;                    // 查找当前位置在当前行中的偏移
           while PMem > Stream.Memory do
           begin

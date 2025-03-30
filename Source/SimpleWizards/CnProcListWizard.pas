@@ -966,7 +966,11 @@ var
   JP: TCnJumpsPoint;
 begin
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+  CnDebugger.LogFmt('ProcList: Create Proc ToolBar from EditControl %16.16x', [NativeInt(EditControl)]);
+  {$ELSE}
   CnDebugger.LogFmt('ProcList: Create Proc ToolBar from EditControl %8.8x', [Integer(EditControl)]);
+  {$ENDIF}
 {$ENDIF}
   ToolBar.Top := 40; // 让其处于标准编辑器工具栏之下
   ToolBar.Images := dmCnSharedImages.ilProcToolBar;
@@ -1045,7 +1049,11 @@ begin
   ToolBar.PopupMenu := Obj.PopupMenu;
 
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+  CnDebugger.LogFmt('ProcList: Proc ToolBar Obj Created: %16.16x', [NativeInt(Obj)]);
+  {$ELSE}
   CnDebugger.LogFmt('ProcList: Proc ToolBar Obj Created: %8.8x', [Integer(Obj)]);
+  {$ENDIF}
 {$ENDIF}
 
   Obj.ClassCombo := TCnProcListComboBox.Create(ToolBar);
@@ -1483,13 +1491,21 @@ var
   Obj: TCnProcToolBarObj;
 begin
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+  CnDebugger.LogFmt('ProcList: Init Proc ToolBar from EditControl %16.16x', [NativeInt(EditControl)]);
+  {$ELSE}
   CnDebugger.LogFmt('ProcList: Init Proc ToolBar from EditControl %8.8x', [Integer(EditControl)]);
+  {$ENDIF}
 {$ENDIF}
   Obj := GetToolBarObjFromEditControl(EditControl);
   if Obj = nil then Exit;
 
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+  CnDebugger.LogFmt('ProcList: Obj found from EditControl %16.16x', [NativeInt(Obj)]);
+  {$ELSE}
   CnDebugger.LogFmt('ProcList: Obj found from EditControl %8.8x', [Integer(Obj)]);
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -1872,15 +1888,25 @@ var
   I: Integer;
 begin
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+  CnDebugger.LogFmt('ProcList: Prepare to Remove Objs from EditControl %16.16x',
+    [NativeInt(EditControl)]);
+  {$ELSE}
   CnDebugger.LogFmt('ProcList: Prepare to Remove Objs from EditControl %8.8x',
     [Integer(EditControl)]);
+  {$ENDIF}
 {$ENDIF}
   for I := FProcToolBarObjects.Count - 1 downto 0 do
     if TCnProcToolBarObj(FProcToolBarObjects[I]).EditControl = EditControl then
     begin
 {$IFDEF DEBUG}
+  {$IFDEF WIN64}
+      CnDebugger.LogFmt('ProcList: Remove Obj %16.16x from EditControl %16.16x',
+        [NativeInt(FProcToolBarObjects[I]), NativeInt(EditControl)]);
+  {$ELSE}
       CnDebugger.LogFmt('ProcList: Remove Obj %8.8x from EditControl %8.8x',
         [Integer(FProcToolBarObjects[I]), Integer(EditControl)]);
+  {$ENDIF}
 {$ENDIF}
       FProcToolBarObjects.Delete(I);
     end;

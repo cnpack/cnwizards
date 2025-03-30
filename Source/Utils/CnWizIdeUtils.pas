@@ -2466,8 +2466,15 @@ function ConvertIDETreeNodeToTreeNode(Node: TObject): TTreeNode;
 begin
 {$IFDEF DEBUG}
   if not (Node is TTreeNode) then
+  begin
+  {$IFDEF WIN64}
+    CnDebugger.LogFmt('Node ClassName %s. Value %16.16x. NOT our TreeNode. Manual Cast it.',
+      [Node.ClassName, NativeInt(Node)]);
+  {$ELSE}
     CnDebugger.LogFmt('Node ClassName %s. Value %8.8x. NOT our TreeNode. Manual Cast it.',
       [Node.ClassName, Integer(Node)]);
+  {$ENDIF}
+  end;
 {$ENDIF}
   Result := TTreeNode(Node);
 end;
@@ -2477,8 +2484,15 @@ function ConvertIDETreeNodesToTreeNodes(Nodes: TObject): TTreeNodes;
 begin
 {$IFDEF DEBUG}
   if not (Nodes is TTreeNodes) then
+  begin
+  {$IFDEF WIN64}
+    CnDebugger.LogFmt('Nodes ClassName %s. Value %16.16x. NOT our TreeNodes. Manual Cast it.',
+      [Nodes.ClassName, NativeInt(Nodes)]);
+  {$ELSE}
     CnDebugger.LogFmt('Nodes ClassName %s. Value %8.8x. NOT our TreeNodes. Manual Cast it.',
       [Nodes.ClassName, Integer(Nodes)]);
+  {$ENDIF}
+  end;
 {$ENDIF}
   Result := TTreeNodes(Nodes);
 end;

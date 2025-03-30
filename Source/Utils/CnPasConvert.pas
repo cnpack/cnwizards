@@ -378,10 +378,9 @@ implementation
 
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
-{$IFDEF DEBUG}
+
 uses
-  CnDebug;
-{$ENDIF}
+  CnNative {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   SCnPas2HtmlLineFeed = #13;
@@ -463,50 +462,50 @@ begin
     BodyEndPos := Pos(AnsiString('</body>'), PAnsiChar(TmpOutStream.Memory));
     outStream.Write(TmpOutStream.Memory^, BodyPos - 1);
     outStream.Write(AnsiString(SCnHtmlClipStart), Length(SCnHtmlClipStart));
-    outStream.Write((Pointer(Integer(TmpOutStream.Memory) + BodyPos - 1))^,
+    outStream.Write((Pointer(TCnNativeInt(TmpOutStream.Memory) + BodyPos - 1))^,
       BodyEndPos - BodyPos - 1);
     outStream.Write(AnsiString(SCnHtmlClipEnd), Length(SCnHtmlClipEnd));
-    outStream.Write((Pointer(Integer(TmpOutStream.Memory) + BodyEndPos - 1))^,
+    outStream.Write((Pointer(TCnNativeInt(TmpOutStream.Memory) + BodyEndPos - 1))^,
       TmpOutStream.Size - BodyEndPos + 1);
 
 {    // 写 StartHTML
     outStream.Seek(PosStartHTML, soFromBeginning);
     PCh := PChar(ToStrofPosLength(Pos('<!DOCTYPE ', PAnsiChar(outStream.Memory)) - 1));
     // 减 1 是因为 Pos 返回的以 1 为基准，以下同。
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh, PosLength);}
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh, PosLength);}
 
     // 写 EndHTML
     outStream.Seek(PosEndHTML, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(outStream.Size - 1));
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
     // 写 StartFragMent
     outStream.Seek(PosStartFragment, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipStart), PAnsiChar(outStream.Memory)) +
       Length(SCnHtmlClipStart) - 1));
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
     // 写 EndFragment
     outStream.Seek(PosEndFragment, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipEnd), PAnsiChar(outStream.Memory)) -
       1));
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
     // 用 StartFragMent 的值写 StartSelection
     outStream.Seek(PosStartSelection, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipStart), PAnsiChar(outStream.Memory)) +
       Length(SCnHtmlClipStart) - 1));
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
     // 用 EndFragMent 的值写 EndSelection
     outStream.Seek(PosEndSelection, soFromBeginning);
     PCh := PAnsiChar(ToStrofPosLength(Pos(AnsiString(SCnHtmlClipEnd), PAnsiChar(outStream.Memory)) -
       1));
-    CopyMemory(Pointer(Integer(outStream.Memory) + outStream.Position), PCh,
+    CopyMemory(Pointer(TCnNativeInt(outStream.Memory) + outStream.Position), PCh,
       PosLength);
 
     TmpOutStream.Free;
@@ -2091,7 +2090,7 @@ begin
   while I <= Len do
   begin
   {$IFDEF DEBUG}
-    CnDebugger.LogFmt('CurPtr[0x%x], StartPtr[0x%x]', [Integer(CurPtr), Integer(StartPtr)]);
+    CnDebugger.LogFmt('CurPtr[0x%x], StartPtr[0x%x]', [TCnNativeInt(CurPtr), TCnNativeInt(StartPtr)]);
     CnDebugger.LogFmt('CurPtr[%s], StartPtr[%s]', [CurPtr^, StartPtr^]);
   {$ENDIF}
     case CurPtr^ of

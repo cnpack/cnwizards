@@ -315,14 +315,26 @@ begin
   CL.AddDelphiFunction('Function CnObjectToInt(AObject : TObject) : Integer');
 {$ENDIF}
 
-{$IFNDEF WIN64}
+{$IFDEF WIN64}
+  CL.AddDelphiFunction('Function CnIntToInterface(AInt : Int64) : IUnknown');
+  CL.AddDelphiFunction('Function CnInterfaceToInt(Intf : IUnknown) : Int64');
+{$ELSE}
   CL.AddDelphiFunction('Function CnIntToInterface(AInt : Integer) : IUnknown');
   CL.AddDelphiFunction('Function CnInterfaceToInt(Intf : IUnknown) : Integer');
 {$ENDIF}
+
+{$IFDEF WIN64}
+  CL.AddDelphiFunction('Function CnGetClassFromClassName(const AClassName : string) : Int64');
+  CL.AddDelphiFunction('Function CnGetClassFromObject(AObject : TObject) : Int64');
+  CL.AddDelphiFunction('Function CnGetClassNameFromClass(AClass : Int64) : string');
+  CL.AddDelphiFunction('Function CnGetClassParentFromClass(AClass : Int64) : Int64');
+{$ELSE}
   CL.AddDelphiFunction('Function CnGetClassFromClassName(const AClassName : string) : Integer');
   CL.AddDelphiFunction('Function CnGetClassFromObject(AObject : TObject) : Integer');
   CL.AddDelphiFunction('Function CnGetClassNameFromClass(AClass : Integer) : string');
   CL.AddDelphiFunction('Function CnGetClassParentFromClass(AClass : Integer) : Integer');
+{$ENDIF}
+
   CL.AddDelphiFunction('Function CnWizLoadIcon( AIcon : TIcon; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function CnWizLoadBitmap( ABitmap : TBitmap; const ResName : string) : Boolean');
   CL.AddDelphiFunction('Function AddIconToImageList( AIcon : TIcon; ImageList : TCustomImageList) : Integer');
