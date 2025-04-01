@@ -1853,6 +1853,7 @@ procedure TCnProcListWizard.ClassComboPaintPadding(Sender: TObject;
 var
   Vis: TTokenKind;
   Idx: Integer;
+  Img: TImageList;
 begin
   Canvas.FillRect(PaddingRect);
   if Sender is TCnProcListComboBox then
@@ -1871,8 +1872,15 @@ begin
     end;
 
     if Idx >= 0 then
-      dmCnSharedImages.ilProcToolBar.Draw(Canvas, PaddingRect.Left,
-        PaddingRect.Top + 1, Idx);
+    begin
+{$IFDEF IDE_SUPPORT_HDPI}
+      Img := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
+      Img.Draw(Canvas, PaddingRect.Left, PaddingRect.Top + 2, Idx);
+{$ELSE}
+      Img := dmCnSharedImages.ilProcToolBar;
+      Img.Draw(Canvas, PaddingRect.Left, PaddingRect.Top + 1, Idx);
+{$ENDIF}
+    end;
   end;
 end;
 
