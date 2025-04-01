@@ -967,8 +967,20 @@ begin
     Exit;
 
   V := GET_APPCOMMAND_LPARAM(Msg.LParam);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Param ' + IntToStr(V));
+{$ENDIF}
+
   EditorNav := TCnSrcEditorNav(FindComponentByClass(Screen.ActiveCustomForm,
     TCnSrcEditorNav, SCnSrcEditorNavName));
+
+{$IFDEF DEBUG}
+  if EditorNav <> nil then
+    CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Get Active SrcEditorNav.')
+  else
+    CnDebugger.LogMsgWarning('TCnSrcEditorNavMgr.AppCommand: Active SrcEditorNav Not Found.');
+{$ENDIF}
 
   if V = APPCOMMAND_BROWSER_BACKWARD then
   begin
