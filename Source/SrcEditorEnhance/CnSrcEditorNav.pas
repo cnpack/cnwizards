@@ -136,10 +136,7 @@ type
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SetExtendForwardBack(const Value: Boolean);
-
-{$IFDEF SUPPORT_APPCOMMAND}
     procedure AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
-{$ENDIF}
   protected
     procedure SetActive(Value: Boolean);
     procedure DoUpdateInstall(EditWindow: TCustomForm; EditControl: TControl;
@@ -197,6 +194,21 @@ const
 
   csDefMinLineDiff = 5;
   csDefMaxItems = 20;
+
+{$IFNDEF SUPPORT_APPCOMMAND}
+  // D5 6 未定义
+  WM_APPCOMMAND = $0319;
+
+  // D2006 及以下未定义
+  APPCOMMAND_BROWSER_BACKWARD       = 1;
+  APPCOMMAND_BROWSER_FORWARD  = 2;
+
+function GET_APPCOMMAND_LPARAM(const lParam: LongInt): Shortint; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+begin
+  Result := LongRec(lParam).Hi and not $F000;
+end;
+
+{$ENDIF}
 
 { TCnSrcEditorNav }
 
@@ -821,9 +833,7 @@ begin
   FList := TList.Create;
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
-{$IFDEF SUPPORT_APPCOMMAND}
   CnWizNotifierServices.AddCallWndProcRetNotifier(AppCommand, [WM_APPCOMMAND]);
-{$ENDIF}
   UpdateInstall;
 end;
 
@@ -831,9 +841,7 @@ destructor TCnSrcEditorNavMgr.Destroy;
 var
   I: Integer;
 begin
-{$IFDEF SUPPORT_APPCOMMAND}
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(AppCommand);
-{$ENDIF}
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for I := FList.Count - 1 downto 0 do
     TCnSrcEditorNav(FList[I]).Free;
@@ -956,8 +964,6 @@ begin
   UpdateControls;
 end;
 
-{$IFDEF SUPPORT_APPCOMMAND}
-
 procedure TCnSrcEditorNavMgr.AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
 var
   V: Integer;
@@ -967,6 +973,7 @@ begin
     Exit;
 
   V := GET_APPCOMMAND_LPARAM(Msg.LParam);
+
   if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD]) then
     Exit;
 
@@ -990,16 +997,24 @@ begin
   if V = APPCOMMAND_BROWSER_BACKWARD then
   begin
     if (EditorNav <> nil) and (EditorNav.BackAction <> nil) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: To Execute BackAction.');
+{$ENDIF}
       EditorNav.BackAction.Execute;
+    end;
   end
   else if V = APPCOMMAND_BROWSER_FORWARD then
   begin
     if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: To Execute ForwardAction.');
+{$ENDIF}
       EditorNav.ForwardAction.Execute;
+    end;
   end;
 end;
-
-{$ENDIF}
 
 procedure TCnSrcEditorNavMgr.EditControlNotify(EditControl: TControl; EditWindow:
   TCustomForm; Operation: TOperation);
