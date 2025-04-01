@@ -967,10 +967,15 @@ begin
     Exit;
 
   V := GET_APPCOMMAND_LPARAM(Msg.LParam);
+  if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD]) then
+    Exit;
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Param ' + IntToStr(V));
 {$ENDIF}
+
+  if not IsEditControl(Control) then
+    Exit;
 
   EditorNav := TCnSrcEditorNav(FindComponentByClass(CnOtaGetCurrentEditWindow,
     TCnSrcEditorNav, SCnSrcEditorNavName));
@@ -984,12 +989,12 @@ begin
 
   if V = APPCOMMAND_BROWSER_BACKWARD then
   begin
-    if (EditorNav <> nil) and (EditorNav.BackAction <> nil) and IsEditControl(Control) then
+    if (EditorNav <> nil) and (EditorNav.BackAction <> nil) then
       EditorNav.BackAction.Execute;
   end
   else if V = APPCOMMAND_BROWSER_FORWARD then
   begin
-    if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) and IsEditControl(Control) then
+    if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) then
       EditorNav.ForwardAction.Execute;
   end;
 end;

@@ -278,7 +278,7 @@ type
     FEvents: INTACodeEditorEvents;
     FEventsIndex: Integer;
 {$ELSE}
-    FPaintLineHook: TCnMethodHook; // Win64 下该 Hook 有问题
+    FPaintLineHook: TCnMethodHook;
 {$ENDIF}
     FSetEditViewHook: TCnMethodHook;
     FRequestGutterHook: TCnMethodHook;  // 这俩 Hook 只在 11、12 以上分别使用
