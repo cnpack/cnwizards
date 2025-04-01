@@ -2627,13 +2627,16 @@ function FindComponentByClass(AWinControl: TWinControl;
 var
   I: Integer;
 begin
-  for I := 0 to AWinControl.ComponentCount - 1 do
+  if AWinControl <> nil then
   begin
-    if (AWinControl.Components[I] is AClass) and ((AComponentName = '') or
-      (SameText(AComponentName, AWinControl.Components[I].Name))) then
+    for I := 0 to AWinControl.ComponentCount - 1 do
     begin
-      Result := AWinControl.Components[I];
-      Exit;
+      if (AWinControl.Components[I] is AClass) and ((AComponentName = '') or
+        (SameText(AComponentName, AWinControl.Components[I].Name))) then
+      begin
+        Result := AWinControl.Components[I];
+        Exit;
+      end;
     end;
   end;
   Result := nil;

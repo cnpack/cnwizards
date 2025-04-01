@@ -972,7 +972,7 @@ begin
   CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Param ' + IntToStr(V));
 {$ENDIF}
 
-  EditorNav := TCnSrcEditorNav(FindComponentByClass(Screen.ActiveCustomForm,
+  EditorNav := TCnSrcEditorNav(FindComponentByClass(CnOtaGetCurrentEditWindow,
     TCnSrcEditorNav, SCnSrcEditorNavName));
 
 {$IFDEF DEBUG}
