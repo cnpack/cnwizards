@@ -178,7 +178,7 @@ function CnGetClassFromObject(AObject: TObject): Int64;
 {* 供 Pascal Script 使用的从对象获取类信息并转换成整型值的函数}
 function CnGetClassNameFromClass(AClass: Int64): string;
 {* 供 Pascal Script 使用的从整型的类信息获取类名的函数}
-function CnGetClassParentFromClass(AClass: Int64): Integer;
+function CnGetClassParentFromClass(AClass: Int64): Int64;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
 {$ELSE}
 function CnGetClassFromClassName(const AClassName: string): Integer;
