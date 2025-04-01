@@ -3309,28 +3309,28 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
-  {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
+  {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 及以上的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
   {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S and above integrate Castalia.
 {$ENDIF}
 
 {$IFDEF DELPHIXE7_UP}
-  {$DEFINE NOT_SUPPORT_BDE}             // 不集成 BDE 了
-  {$DEFINE SUPPORT_TBYTES_OPERATION}    // XE7 的 TBytes 开始支持相加、插入等操作
-  {$DEFINE FMX_CONTROL_HAS_SIZE}        // XE7 的 FMX 的 Control 才有 Size 属性
+  {$DEFINE NOT_SUPPORT_BDE}             // XE7 及以上不集成 BDE 了
+  {$DEFINE SUPPORT_TBYTES_OPERATION}    // XE7 及以上的 TBytes 开始支持相加、插入等操作
+  {$DEFINE FMX_CONTROL_HAS_SIZE}        // XE7 及以上的 FMX 的 Control 才有 Size 属性
 {$ENDIF}
 
 {$IFDEF DELPHIXE6_UP}
-  {$DEFINE SUPPORT_JSON}                // XE6 有 System.JSON 库，不考虑 DBX/REST 等
+  {$DEFINE SUPPORT_JSON}                // XE6 及以上有 System.JSON 库，不考虑 DBX/REST 等
 {$ENDIF}
 
 {$IFDEF DELPHIXE5_UP}
-  {$DEFINE SUPPORT_MOBILE}              // XE5 开始支持移动开发
+  {$DEFINE SUPPORT_MOBILE}              // XE5 及以上开始支持移动开发
   {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
 {$ENDIF}
 
 {$IFDEF DELPHIXE4_UP}
   {$IFNDEF DISABLE_FMX}
-    {$DEFINE SUPPORT_FMX_FRAME}         // XE4 FMX Supports FMX Frame
+    {$DEFINE SUPPORT_FMX_FRAME}         // XE4 及以上的 FMX 支持 FMX Frame
   {$ENDIF}
 {$ELSE}
   {$DEFINE MEMO_CARETPOS_BUG}           // Memo CaretPos Get Negative Error Value for Large File under XE3 or below
@@ -3344,13 +3344,13 @@
 
 {$IFDEF DELPHIXE2_UP}
   {$IFNDEF DISABLE_FMX}
-    {$DEFINE SUPPORT_FMX}                      // XE2 有 FMX，按需启用
+    {$DEFINE SUPPORT_FMX}                      // XE2 及以上有 FMX，按需启用
   {$ENDIF}
-  {$DEFINE SUPPORT_CROSS_PLATFORM}             // XE2 支持跨平台
-  {$DEFINE SUPPORT_32_AND_64}                  // XE2 Support Win32 and Win64
-  {$DEFINE SUPPORT_WIN64}                      // XE2 Supports Win64
-  {$DEFINE SUPPORT_MACOS32}                    // XE2 Supports MacOS 32
-  {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 单元名开始带点
+  {$DEFINE SUPPORT_CROSS_PLATFORM}             // XE2 及以上支持跨平台
+  {$DEFINE SUPPORT_32_AND_64}                  // XE2 及以上同时支持 Win32 和 Win64
+  {$DEFINE SUPPORT_WIN64}                      // XE2 及以上支持 Win64
+  {$DEFINE SUPPORT_MACOS32}                    // XE2 及以上支持 MacOS 32
+  {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 及以上的单元名开始带点
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
   {$DEFINE SUPPORT_GDIPLUS}                    // XE2 Supports GDI+
@@ -3375,8 +3375,8 @@
   {$DEFINE SUPPORT_EXTERNAL_DELAYED}           // External functions can be declared as 'delayed'
   {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}          // 2010 and above Supports class constructor and destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
-  {$DEFINE IMAGELIST_BEGINENDUPDATE}           // 2010 开始，ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
-  {$DEFINE OTA_DEBUG_HAS_EVENTS}               // 2010 下的 DebuggerService 有 ProcessDebugEvents
+  {$DEFINE IMAGELIST_BEGINENDUPDATE}           // 2010 及以上的 ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
+  {$DEFINE OTA_DEBUG_HAS_EVENTS}               // 2010 及以上的 DebuggerService 有 ProcessDebugEvents
   {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}      // IDE has a new style Component Palette
   {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}         // Editor has a Search Panel
   {$DEFINE IDE_HAS_DATETIME_HINT}              // TDate/TTime/TDateTime shows Normally in Debug Hint
@@ -3389,15 +3389,15 @@
 
 {$IFDEF BDS2009_UP}
   {$DEFINE UNICODE_STRING}                       // 等同于 UNICODE
-  {$DEFINE SUPPORT_ATTRIBUTE}                    // 支持 Attribute
-  {$DEFINE SUPPORT_GENERIC}                      // 支持泛型
-  {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}          // AnsiString 的声明支持指定代码页
-  {$DEFINE SUPPORT_ENCODING}                     // Unicode with TEncoding
-  {$DEFINE SUPPORT_PUINT64}                      // Has Pointer of UInt64
-  {$DEFINE OBJECT_HAS_TOSTRING}                  // TObject.ToString Function
-  {$DEFINE OBJECT_HAS_EQUAL}                     // TObject.Equal Function
-  {$DEFINE OBJECT_HAS_GETHASHCODE}               // TObject.GetHashCode Function
-  {$DEFINE TGRAPHIC_SUPPORT_PARTIALTRANSPARENCY} // TGraphic 类支持 Alpha 通道透明
+  {$DEFINE SUPPORT_ATTRIBUTE}                    // 2009 及以上支持 Attribute
+  {$DEFINE SUPPORT_GENERIC}                      // 2009 及以上支持泛型
+  {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}          // 2009 及以上的 AnsiString 的声明支持指定代码页
+  {$DEFINE SUPPORT_ENCODING}                     // 2009 及以上支持 TEncoding
+  {$DEFINE SUPPORT_PUINT64}                      // 2009 及以上的声明了 UInt64 的指针
+  {$DEFINE OBJECT_HAS_TOSTRING}                  // 2009 及以上的 TObject 有 ToString
+  {$DEFINE OBJECT_HAS_EQUAL}                     // 2009 及以上的 TObject 有 Equal
+  {$DEFINE OBJECT_HAS_GETHASHCODE}               // 2009 及以上的 TObject 有 GetHashCode
+  {$DEFINE TGRAPHIC_SUPPORT_PARTIALTRANSPARENCY} // 2009 及以上的 TGraphic 类支持 Alpha 通道透明
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
 
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
@@ -3426,8 +3426,9 @@
 
 {$IFDEF BDS2007_UP}
   {$DEFINE IDE_CONF_MANAGER}
-  {$DEFINE TBYTES_DEFINED}               // 2007 Defined TBytes = array of Byte;
-  {$DEFINE PROJECT_FILENAME_DPROJ}       // Project File is .dproj
+  {$DEFINE TBYTES_DEFINED}               // 2007 及以上定义了 TBytes = array of Byte;
+  {$DEFINE PROJECT_FILENAME_DPROJ}       // 2007 及以上的工程文件的扩展名是 .dproj
+  {$DEFINE SUPPORT_APPCOMMAND}           // 2007 及以上支持 APPCOMMAND 的消息解析
 {$ENDIF}
 
 {$IFDEF BDS2007}
@@ -3436,30 +3437,30 @@
 {$ENDIF}
 
 {$IFDEF BDS2006_UP}
-  {$DEFINE SUPPORT_CLASS_VAR}            // 2006 and above Supports class var
-  {$DEFINE TCONTROL_HAS_MARGINS}         // 2006 and above TControl has Margins
-  {$DEFINE TCONTROL_HAS_EXPLICIT_BOUNDS} // 2006 and above TControl has Explicit Bounds
-  {$DEFINE TCONTROL_HAS_MOUSEENTERLEAVE} // 2006 and above TControl has Mouse Enter/Leave Events
-  {$DEFINE OTA_CODE_TEMPLATE_API}        // 2006 and above Provides CodeTemplateAPI.
-  {$DEFINE OTA_DEBUG_HAS_ERBUSY}         // 2006 下的 Evaluate 有返回值 erBusy
-  {$DEFINE IDE_HAS_GUIDE_LINE}           // 2006 and above has Designer Guide Line
-  {$DEFINE IDE_SYNC_EDIT_BLOCK}          // 2006 and above Editor Supports Sync Block Edit
+  {$DEFINE SUPPORT_CLASS_VAR}            // 2006 及以上支持 class var
+  {$DEFINE TCONTROL_HAS_MARGINS}         // 2006 及以上的 TControl 有 Margins
+  {$DEFINE TCONTROL_HAS_EXPLICIT_BOUNDS} // 2006 及以上的 TControl 有 Explicit Bounds
+  {$DEFINE TCONTROL_HAS_MOUSEENTERLEAVE} // 2006 及以上的 TControl 有 Mouse Enter/Leave Events
+  {$DEFINE OTA_CODE_TEMPLATE_API}        // 2006 及以上有 CodeTemplateAPI
+  {$DEFINE OTA_DEBUG_HAS_ERBUSY}         // 2006 及以上的 Evaluate 有返回值 erBusy
+  {$DEFINE IDE_HAS_GUIDE_LINE}           // 2006 及以上的设计器有 Guide Line
+  {$DEFINE IDE_SYNC_EDIT_BLOCK}          // 2006 及以上的编辑器支持 Sync Block Edit
   {$DEFINE EDITOR_TAB_ONLYFROM_WINCONTROL}
   // From BDS 2006 IDEGraident Editor Tab is Only From WinControl, not TabSet/TabControl
 {$ENDIF}
 
 {$IFDEF BDS2006}
-  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // Project File is .bdsproj
+  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // 2006 的工程文件的扩展名是 .bdsproj
 {$ENDIF}
 
 {$IFDEF BDS2005_UP}
-  {$DEFINE OTA_PALETTE_API}              // 2005 and above Provides PaletteAPI.
-  {$DEFINE IDE_EDITOR_ELIDE}             // 2005 或以上编辑器支持折叠
-  {$DEFINE IDE_FILE_HISTORY}             // 2005 或以上版本会存储文件历史版本
+  {$DEFINE OTA_PALETTE_API}              // 2005 及以上有 PaletteAPI
+  {$DEFINE IDE_EDITOR_ELIDE}             // 2005 或以上的编辑器支持折叠
+  {$DEFINE IDE_FILE_HISTORY}             // 2005 或以上会存储文件历史版本
 {$ENDIF}
 
 {$IFDEF BDS2005}
-  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // Project File is .bdsproj
+  {$DEFINE PROJECT_FILENAME_BDSPROJ}     // 2005 的工程文件的扩展名是 .bdsproj
 {$ENDIF}
 
 {$IFDEF BDS}                             // 2005 及以上
@@ -3499,12 +3500,12 @@
 
 {$IFDEF DELPHI5_UP}
   {$IFNDEF BDS2005_UP}
-    {$DEFINE PROJECT_FILENAME_DPR}       // Delphi 5/6/7 Project File is .dpr
+    {$DEFINE PROJECT_FILENAME_DPR}       // Delphi 5/6/7 的工程文件的扩展名是 .dpr
   {$ENDIF}
 {$ENDIF}
 
 {$IFDEF COMPILER5}
-  {$DEFINE TSTREAM_LONGINT}              // D6 或以上的 TStream 是 Int64
+  {$DEFINE TSTREAM_LONGINT}              // D6 及以上的 TStream 是 Int64
 {$ENDIF}
 
 {$IFDEF BCB5}
