@@ -100,7 +100,7 @@ type
     procedure ForwardActionExecute(Sender: TObject);
     procedure ActionUpdate(Sender: TObject);
     procedure GotoSourceLine(Idx: Integer; SrcList, DstList: TStringList);
-    procedure AppIdle(Sender: TObject);
+    procedure AppIdle(Sender: TObject); // 针对每个 EditControl 的检查
     procedure AddItem(AList: TStringList; const AFileName: string; ALine: Integer);
 {$IFDEF BDS}
     function FindActionByNameFromActionManager(ActionManager: TActionManager; AName: string): TBasicAction;
@@ -117,6 +117,9 @@ type
     procedure Install;
     procedure Uninstall;
     procedure UpdateControls;
+
+    property BackAction: TAction read FBackAction;
+    property ForwardAction: TAction read FForwardAction;
   end;
 
 { TCnSrcEditorNavMgr }
@@ -133,6 +136,10 @@ type
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SetExtendForwardBack(const Value: Boolean);
+
+{$IFDEF SUPPORT_APPCOMMAND}
+    procedure AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
+{$ENDIF}
   protected
     procedure SetActive(Value: Boolean);
     procedure DoUpdateInstall(EditWindow: TCustomForm; EditControl: TControl;
@@ -814,6 +821,9 @@ begin
   FList := TList.Create;
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
+{$IFDEF SUPPORT_APPCOMMAND}
+  CnWizNotifierServices.AddCallWndProcRetNotifier(AppCommand, [WM_APPCOMMAND]);
+{$ENDIF}
   UpdateInstall;
 end;
 
@@ -821,6 +831,9 @@ destructor TCnSrcEditorNavMgr.Destroy;
 var
   I: Integer;
 begin
+{$IFDEF SUPPORT_APPCOMMAND}
+  CnWizNotifierServices.RemoveCallWndProcRetNotifier(AppCommand);
+{$ENDIF}
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for I := FList.Count - 1 downto 0 do
     TCnSrcEditorNav(FList[I]).Free;
@@ -942,6 +955,34 @@ begin
 {$ENDIF}
   UpdateControls;
 end;
+
+{$IFDEF SUPPORT_APPCOMMAND}
+
+procedure TCnSrcEditorNavMgr.AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
+var
+  V: Integer;
+  EditorNav: TCnSrcEditorNav;
+begin
+  if not Active or not FExtendForwardBack then
+    Exit;
+
+  V := GET_APPCOMMAND_LPARAM(Msg.LParam);
+  EditorNav := TCnSrcEditorNav(FindComponentByClass(Screen.ActiveCustomForm,
+    TCnSrcEditorNav, SCnSrcEditorNavName));
+
+  if V = APPCOMMAND_BROWSER_BACKWARD then
+  begin
+    if (EditorNav <> nil) and (EditorNav.BackAction <> nil) and IsEditControl(Control) then
+      EditorNav.BackAction.Execute;
+  end
+  else if V = APPCOMMAND_BROWSER_FORWARD then
+  begin
+    if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) and IsEditControl(Control) then
+      EditorNav.ForwardAction.Execute;
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnSrcEditorNavMgr.EditControlNotify(EditControl: TControl; EditWindow:
   TCustomForm; Operation: TOperation);
