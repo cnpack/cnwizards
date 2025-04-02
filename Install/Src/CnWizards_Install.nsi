@@ -1075,6 +1075,7 @@ Section "$(OTHERTOOLS)" SecTools
 
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SCONFIGIO).lnk" "$INSTDIR\CnConfigIO.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER).lnk" "$INSTDIR\CnDebugViewer.exe"
+  CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDEBUGVIEWER64).lnk" "$INSTDIR\CnDebugViewer64.exe"
 
   ; Ð´ÈëCnDebugViewerÂ·¾¶¼üÖµ
   WriteRegStr HKCU "Software\CnPack\CnDebug" "CnDebugViewer" "$INSTDIR\CnDebugViewer.exe"
