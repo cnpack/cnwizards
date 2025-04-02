@@ -40,7 +40,7 @@
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="RemObjects Pascal Script License">
-				<param name="Local" value="licenses\ro_ps_lic.htm">
+				<param name="Local" value="licenses\ro_ps_lic.txt">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
 				<param name="Name" value="Mozilla Public License 1.1">
