@@ -999,7 +999,8 @@ begin
     if (EditorNav <> nil) and (EditorNav.BackAction <> nil) then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: To Execute BackAction.');
+      CnDebugger.LogFmt('TCnSrcEditorNavMgr.AppCommand: To Execute BackAction. Enabled: %d',
+        [Ord(EditorNav.BackAction.Enabled)]);
 {$ENDIF}
       EditorNav.BackAction.Execute;
     end;
@@ -1009,7 +1010,8 @@ begin
     if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: To Execute ForwardAction.');
+      CnDebugger.LogFmt('TCnSrcEditorNavMgr.AppCommand: To Execute ForwardAction. Enabled: %d',
+        [Ord(EditorNav.ForwardAction.Enabled)]);
 {$ENDIF}
       EditorNav.ForwardAction.Execute;
     end;

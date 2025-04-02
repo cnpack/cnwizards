@@ -1730,7 +1730,10 @@ begin
         Obj.ClassCombo.Tag := Ord(Vis); // 将可视范围记录在 Tag 里供绘制使用
       end
       else
+      begin
+        Obj.ClassCombo.SetTextWithoutChange('');
         Obj.ClassCombo.Tag := 0;        // 无当前声明则塞 0，无论 vis 返回啥
+      end;
 
       if OldTag <> Obj.ClassCombo.Tag then  // 可见发生变化，则要重绘
         Obj.ClassCombo.Invalidate;
@@ -4292,12 +4295,16 @@ begin
 
   Idx := FComboToSearch.DropDownList.ItemIndex;
   if Idx = -1 then
+  begin
     for I  := 0 to FComboToSearch.DropDownList.Items.Count - 1 do
+    begin
       if FComboToSearch.DropDownList.Selected[I] then
       begin
         Idx := I;
         Break;
-      end;  
+      end;
+    end;
+  end;
       
   if Idx = -1 then
     Idx := FComboToSearch.DropDownList.DisplayItems.IndexOf(FComboToSearch.Text);
