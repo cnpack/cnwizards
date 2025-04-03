@@ -98,7 +98,7 @@ type
     procedure OnPauseClick(Sender: TObject);
     procedure BackActionExecute(Sender: TObject);
     procedure ForwardActionExecute(Sender: TObject);
-    procedure ActionUpdate(Sender: TObject);
+
     procedure GotoSourceLine(Idx: Integer; SrcList, DstList: TStringList);
     procedure AppIdle(Sender: TObject); // 针对每个 EditControl 的检查
     procedure AddItem(AList: TStringList; const AFileName: string; ALine: Integer);
@@ -117,6 +117,9 @@ type
     procedure Install;
     procedure Uninstall;
     procedure UpdateControls;
+
+    procedure InternalUpdateAction;
+    procedure ActionUpdate(Sender: TObject);
 
     property BackAction: TAction read FBackAction;
     property ForwardAction: TAction read FForwardAction;
@@ -139,8 +142,11 @@ type
     procedure AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
   protected
     procedure SetActive(Value: Boolean);
+
+    // 往 EditWindow 里安装，注意 BDS 下可能安装失败但组件实例仍附在里头
     procedure DoUpdateInstall(EditWindow: TCustomForm; EditControl: TControl;
       Context: Pointer);
+
     procedure DoEnhConfig;
   public
     constructor Create;
@@ -149,7 +155,7 @@ type
     // D567 那种安装到独立的编辑器窗口中
     procedure UpdateInstall;
 {$IFDEF BDS}
-    // 高版本 D 中安装到主窗体的工具栏上
+    // 高版本 Delphi 中安装到主窗体的工具栏上
     procedure DoUpdateInstallInAppBuilder(Sender: TObject);
     procedure FixButtonArrowInComplete(Sender: TObject);
 {$ENDIF}
@@ -382,10 +388,7 @@ procedure TCnSrcEditorNav.ActionUpdate(Sender: TObject);
 begin
   if GetTickCount - FLastUpdateTick > csUpdateInterval then
   begin
-    FBackAction.Enabled := (not FPause and (FBackList.Count > 0)) or
-      MenuEnabled(FOldBackMenu);
-    FForwardAction.Enabled := (not FPause and (FForwardList.Count > 0)) or
-      MenuEnabled(FOldForwardMenu);
+    InternalUpdateAction;
     FLastUpdateTick := GetTickCount;
   end;
 end;
@@ -540,6 +543,7 @@ var
   BrowserToolbar: TToolBar;
 {$ENDIF}
 begin
+  // 注意 Owner 在低版本里是 EditWindow，高版本里是 MainForm
   if Assigned(Owner) then
   begin
     BackButton := TToolButton(Owner.FindComponent(SBackToolButtonName));
@@ -589,6 +593,7 @@ begin
     end;
 
 {$IFDEF BDS}
+    // 高版本里如果 EditWindow 里没找到，则当成 MainForm 找
     if (BackButton = nil) and (ForwardButton = nil) then
     begin
       // In AppBuilder, install it to Toolbar.
@@ -821,6 +826,14 @@ begin
   end;
 end;
 
+procedure TCnSrcEditorNav.InternalUpdateAction;
+begin
+  FBackAction.Enabled := (not FPause and (FBackList.Count > 0)) or
+    MenuEnabled(FOldBackMenu);
+  FForwardAction.Enabled := (not FPause and (FForwardList.Count > 0)) or
+    MenuEnabled(FOldForwardMenu);
+end;
+
 { TCnSrcEditorNavMgr }
 
 constructor TCnSrcEditorNavMgr.Create;
@@ -864,7 +877,7 @@ begin
       EditorNav.Name := SCnSrcEditorNavName;
       EditorNav.FNavMgr := Self;
       EditorNav.FEditControl := EditControl;
-      EditorNav.Install;
+      EditorNav.Install; // 注意高版本 Delphi 里头 Install 可能失败但还存在
       FList.Add(EditorNav);
     end;
   end
@@ -974,29 +987,44 @@ begin
 
   V := GET_APPCOMMAND_LPARAM(Msg.LParam);
 
-  if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD]) then
+  if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD]) or not IsEditControl(Control) then
     Exit;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Param ' + IntToStr(V));
+  CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand on EditControl: Param ' + IntToStr(V));
 {$ENDIF}
-
-  if not IsEditControl(Control) then
-    Exit;
 
   EditorNav := TCnSrcEditorNav(FindComponentByClass(CnOtaGetCurrentEditWindow,
     TCnSrcEditorNav, SCnSrcEditorNavName));
 
 {$IFDEF DEBUG}
   if EditorNav <> nil then
-    CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Get Active SrcEditorNav.')
+    CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Get Active SrcEditorNav from EditWindow.')
   else
-    CnDebugger.LogMsgWarning('TCnSrcEditorNavMgr.AppCommand: Active SrcEditorNav Not Found.');
+    CnDebugger.LogMsgWarning('TCnSrcEditorNavMgr.AppCommand: Active SrcEditorNav Not Found in EditWindow.');
 {$ENDIF}
 
+  if (EditorNav = nil) or (EditorNav.FOldBackAction = nil) or (EditorNav.FOldForwardAction = nil) then
+  begin
+    // 当前编辑器窗体里没找到，或找到了但安装失败，则要去 MainForm 里找
+    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+      TCnSrcEditorNav, SCnSrcEditorNavName));
+
+{$IFDEF DEBUG}
+  if EditorNav <> nil then
+    CnDebugger.LogMsg('TCnSrcEditorNavMgr.AppCommand: Get Active SrcEditorNav from AppBuilder.')
+  else
+    CnDebugger.LogMsgWarning('TCnSrcEditorNavMgr.AppCommand: Active SrcEditorNav Not Found in AppBuilder.');
+{$ENDIF}
+  end;
+
+  if EditorNav = nil then
+    Exit;
+
+  EditorNav.InternalUpdateAction;
   if V = APPCOMMAND_BROWSER_BACKWARD then
   begin
-    if (EditorNav <> nil) and (EditorNav.BackAction <> nil) then
+    if EditorNav.BackAction <> nil then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('TCnSrcEditorNavMgr.AppCommand: To Execute BackAction. Enabled: %d',
@@ -1007,7 +1035,7 @@ begin
   end
   else if V = APPCOMMAND_BROWSER_FORWARD then
   begin
-    if (EditorNav <> nil) and (EditorNav.ForwardAction <> nil) then
+    if EditorNav.ForwardAction <> nil then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('TCnSrcEditorNavMgr.AppCommand: To Execute ForwardAction. Enabled: %d',
