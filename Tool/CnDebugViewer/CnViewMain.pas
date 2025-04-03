@@ -1281,7 +1281,6 @@ begin
     Reg.RootKey := HKEY_CURRENT_USER;
     if Reg.OpenKey('\Software\CnPack\CnDebug', True) then
       Reg.WriteString('CnDebugViewer', '"' + ParamStr(0) + '"');
-
   finally
     Reg.CloseKey;
     Reg.Free;

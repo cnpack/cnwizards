@@ -57,9 +57,9 @@ RootDir=
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=0
-MinorVer=9
-Release=4
+MajorVer=1
+MinorVer=0
+Release=0
 Build=0
 Debug=0
 PreRelease=0
@@ -71,7 +71,7 @@ CodePage=1200
 [Version Info Keys]
 CompanyName=CnPack Team
 FileDescription=CnWizards Debug Viewer
-FileVersion=0.9.3.0
+FileVersion=1.0.0.0
 InternalName=CnDebugViewer
 LegalCopyright=(C)Copyright 2001-2025 CnPack Team
 LegalTrademarks=CnPack
