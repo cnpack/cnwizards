@@ -188,4 +188,4 @@ SCnHTMFormatCharset=gb2312
 SCnHTMFormatStyle=.tabletext   { font-family: 宋体; font-size: 9pt; text-align: left; line-height: 13pt;<BR>               color: #000000; background-color: #FFFFF8 }<BR>.tablehead   { font-family: 宋体; font-size: 9pt; text-align: center; line-height: 13pt;<BR>                   color: #0000FF; background-color: #DDEEFF }<BR>;
 SCnHTMFormatTableHead=<tr><BR><td width="24pt" class="tablehead" valign="top">序号</td><BR><td width="9pt" class="tablehead" valign="top">Level</td><BR><td width="28pt" class="tablehead" valign="top">类型</td><BR><td width="32pt" class="tablehead" valign="top">线程</td><BR><td width="32pt" class="tablehead" valign="top">进程</td><BR><td width="28pt" class="tablehead" valign="top">Tag</td><BR><td width="60pt" class="tablehead" valign="top">时间戳</td><BR><td class="tablehead">内容</td><BR></tr>
 SCnDebugViewerAboutCaption=关于
-SCnDebugViewerAbout=CnDebugViewer 调试信息查看工具 1.9<BR><BR>该工具用来查看 CnDebug 单元输出的调试信息。<BR><BR>软件作者 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2025 CnPack 开发组
+SCnDebugViewerAbout=CnDebugViewer 调试信息查看工具 2.1<BR><BR>该工具用来查看 CnDebug 单元输出的调试信息。<BR><BR>软件作者 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2025 CnPack 开发组
