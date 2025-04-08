@@ -5325,7 +5325,7 @@ begin
       Ord(brAll)));
     FBlockMatchDelay := ReadInteger('', csBlockMatchDelay, 600);
     FBlockMatchLineLimit := ReadBool('', csBlockMatchLineLimit, True);
-    FBlockMatchMaxLines := ReadInteger('', csBlockMatchMaxLines, 60000);
+    FBlockMatchMaxLines := ReadInteger('', csBlockMatchMaxLines, 80000);
     FBlockHighlightStyle := TBlockHighlightStyle(ReadInteger('', csBlockHighlightStyle,
       Ord(bsNow)));
     FBlockMatchDrawLine := ReadBool('', csBlockMatchDrawLine, True);

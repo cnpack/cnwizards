@@ -1287,7 +1287,6 @@ begin
     // 针对 11，判断能否拿到 11.3 的接口
 {$IFDEF DELPHI110_ALEXANDRIA}
     if Supports(BorlandIDEServices, StringToGUID(GUID_INTACODEEDITORSERVICES), CES) then
-
     begin
       Obj := CES as TObject;
       RequestGutterColumn := GetMethodAddress(Obj, 'RequestGutterColumn');
