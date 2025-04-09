@@ -203,7 +203,7 @@ type
     procedure SubActionUpdate(Index: Integer); override;
     procedure SetActive(Value: Boolean); override;
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
-    procedure OnGetMsg(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    function OnGetMsg(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
     procedure FormNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
@@ -1106,11 +1106,12 @@ begin
     DrawControlTabOrder(TWinControl(FDrawControls.Extract(FDrawControls.First)));
 end;
 
-procedure TCnTabOrderWizard.OnGetMsg(Handle: HWND; Control: TWinControl;
-  Msg: TMessage);
+function TCnTabOrderWizard.OnGetMsg(Handle: HWND; Control: TWinControl;
+  Msg: TMessage): Boolean;
 var
   IsPaint: Boolean;
 begin
+  Result := False;
   if not Active then Exit;
 
   // 处理以前加到列表的控件

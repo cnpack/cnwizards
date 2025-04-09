@@ -328,7 +328,7 @@ type
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
-    procedure OnGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    function OnGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
     procedure OnIdle(Sender: TObject);
     function GetEditorCount: Integer;
     function GetEditors(Index: Integer): TCnEditorObject;
@@ -2896,13 +2896,14 @@ begin
   end;
 end;
 
-procedure TCnEditControlWrapper.OnGetMsgProc(Handle: HWND;
-  Control: TWinControl; Msg: TMessage);
+function TCnEditControlWrapper.OnGetMsgProc(Handle: HWND;
+  Control: TWinControl; Msg: TMessage): Boolean;
 var
   Idx: Integer;
   Editor: TCnEditorObject;
   P: TPoint;
 begin
+  Result := False; // 表示不改动消息，继续处理
   if FMouseNotifyAvailable and IsEditControl(Control) then
   begin
     Editor := nil;

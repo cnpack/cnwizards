@@ -28,12 +28,14 @@ unit CnWizNotifier;
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2018.03.20
-*               刘啸增加 IDE 主题切换通知机制
+* 修改记录：2025.04.09
+*               GetMsgHook 允许拦截消息
+*           2018.03.20
+*               增加 IDE 主题切换通知机制
 *           2008.05.05
-*               刘啸增加 StopExecuteOnApplicationIdle 机制
+*               增加 StopExecuteOnApplicationIdle 机制
 *           2006.10.06
-*               刘啸增加 Debug 进程和断点的事件通知服务
+*               增加 Debug 进程和断点的事件通知服务
 *           2005.05.06
 *               hubdog 增加编译事件通知服务
 *           2004.01.09
@@ -88,6 +90,10 @@ type
 
   TCnWizMsgHookNotifier = procedure (hwnd: HWND; Control: TWinControl;
     Msg: TMessage) of object;
+
+  TCnWizGetMsgHookNotifier = function (hwnd: HWND; Control: TWinControl;
+    Msg: TMessage): Boolean of object;
+  {* 针对 GetMsg 的 Hook 的处理通知，返回 True 表示吞掉此消息}
 
   TCnWizBeforeCompileNotifier = procedure (const Project: IOTAProject;
     IsCodeInsight: Boolean; var Cancel: Boolean) of object;
@@ -160,9 +166,9 @@ type
     procedure RemoveCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
     {* 删除一个 CallWndProcRet HOOK 通知事件}
 
-    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
+    procedure AddGetMsgNotifier(Notifier: TCnWizGetMsgHookNotifier; MsgIDs: array of Cardinal);
     {* 增加一个 GetMessage HOOK 通知事件}
-    procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure RemoveGetMsgNotifier(Notifier: TCnWizGetMsgHookNotifier);
     {* 删除一个 GetMessage HOOK 通知事件}
 
     procedure AddBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
@@ -454,8 +460,8 @@ type
     procedure RemoveCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
     procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier);
-    procedure AddGetMsgNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
-    procedure RemoveGetMsgNotifier(Notifier: TCnWizMsgHookNotifier);
+    procedure AddGetMsgNotifier(Notifier: TCnWizGetMsgHookNotifier; MsgIDs: array of Cardinal);
+    procedure RemoveGetMsgNotifier(Notifier: TCnWizGetMsgHookNotifier);
     procedure AddBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure RemoveBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure AddAfterThemeChangeNotifier(Notifier: TNotifyEvent);
@@ -507,9 +513,10 @@ type
     procedure DoApplicationIdle(Sender: TObject; var Done: Boolean);
     procedure DoApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure DoMsgHook(AList, MsgList: TList; Handle: HWND; Msg: TMessage);
+    function DoGetMsgHook(AList, MsgList: TList; Handle: HWND; Msg: TMessage): Boolean;
     procedure DoCallWndProc(Handle: HWND; Msg: TMessage);
     procedure DoCallWndProcRet(Handle: HWND; Msg: TMessage);
-    procedure DoGetMsg(Handle: HWND; Msg: TMessage);
+    function DoGetMsg(Handle: HWND; Msg: TMessage): Boolean;
     procedure DoActiveFormChange;
     procedure DoApplicationActivate(Sender: TObject);
     procedure DoApplicationDeactivate(Sender: TObject);
@@ -893,7 +900,10 @@ begin
       Msg.Msg := PMsg(lParam)^.message;
       Msg.LParam := PMsg(lParam)^.lParam;
       Msg.WParam := PMsg(lParam)^.wParam;
-      FCnWizNotifierServices.DoGetMsg(PMsg(lParam)^.hwnd, Msg);
+
+      // 如果有处理函数返回了 True，则吞掉该消息
+      if FCnWizNotifierServices.DoGetMsg(PMsg(lParam)^.hwnd, Msg) then
+        PMsg(lParam)^.message := WM_NULL;
     end;
   end;
 
@@ -1887,8 +1897,7 @@ begin
   end;
 end;
 
-procedure TCnWizNotifierServices.AppEventNotify(
-  EventType: TCnWizAppEventType; Data: Pointer);
+procedure TCnWizNotifierServices.AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer);
 var
   I: Integer;
 begin
@@ -1982,29 +1991,28 @@ end;
 // HOOK 通知
 //------------------------------------------------------------------------------
 
+function IsMsgRegistered(MsgList: TList; Msg: Cardinal): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to MsgList.Count - 1 do
+  begin
+    if Msg = Cardinal(MsgList[I]) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
 procedure TCnWizNotifierServices.DoMsgHook(AList, MsgList: TList; Handle: HWND;
   Msg: TMessage);
 var
   I: Integer;
   Control: TWinControl;
-
-  function IsMsgRegistered: Boolean;
-  var
-    I: Integer;
-  begin
-    Result := False;
-    for I := 0 to MsgList.Count - 1 do
-    begin
-      if Msg.Msg = Cardinal(MsgList[I]) then
-      begin
-        Result := True;
-        Exit;
-      end;
-    end;
-  end;
-
 begin
-  if not IdeClosing and (AList <> nil) and IsMsgRegistered then
+  if not IdeClosing and (AList <> nil) and IsMsgRegistered(MsgList, Msg.Msg) then
   begin
     Control := FindControl(Handle);
     for I := AList.Count - 1 downto 0 do
@@ -2013,6 +2021,28 @@ begin
         TCnWizMsgHookNotifier(Notifier)(Handle, Control, Msg);
     except
       DoHandleException('TCnWizNotifierServices.DoMsgHook[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+function TCnWizNotifierServices.DoGetMsgHook(AList, MsgList: TList; Handle: HWND;
+  Msg: TMessage): Boolean;
+var
+  I: Integer;
+  Control: TWinControl;
+  Handled: Boolean;
+begin
+  Result := False;
+  if not IdeClosing and (AList <> nil) and IsMsgRegistered(MsgList, Msg.Msg) then
+  begin
+    Control := FindControl(Handle);
+    for I := AList.Count - 1 downto 0 do
+    try
+      // 每个都通知，但只要有一个返回 True，就吞掉此消息
+      with PCnWizNotifierRecord(AList[I])^ do
+        Result := Result or TCnWizGetMsgHookNotifier(Notifier)(Handle, Control, Msg);
+    except
+      DoHandleException('TCnWizNotifierServices.DoGetMsgHook[' + IntToStr(I) + ']');
     end;
   end;
 end;
@@ -2053,20 +2083,20 @@ begin
 end;
 
 procedure TCnWizNotifierServices.AddGetMsgNotifier(
-  Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
+  Notifier: TCnWizGetMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
   AddNotifierEx(FGetMsgNotifiers, FGetMsgMsgList, TMethod(Notifier), MsgIDs);
 end;
 
 procedure TCnWizNotifierServices.RemoveGetMsgNotifier(
-  Notifier: TCnWizMsgHookNotifier);
+  Notifier: TCnWizGetMsgHookNotifier);
 begin
   CnWizRemoveNotifier(FGetMsgNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.DoGetMsg(Handle: HWND; Msg: TMessage);
+function TCnWizNotifierServices.DoGetMsg(Handle: HWND; Msg: TMessage): Boolean;
 begin
-  DoMsgHook(FGetMsgNotifiers, FGetMsgMsgList, Handle, Msg);
+  Result := DoGetMsgHook(FGetMsgNotifiers, FGetMsgMsgList, Handle, Msg);
 end;
 
 procedure TCnWizNotifierServices.BreakpointAdded(
@@ -2077,7 +2107,7 @@ begin
   if FBreakpointAddedNotifiers <> nil then
   begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnWizDebuggerNotifier.Breakpoint Added');
+    CnDebugger.LogMsg('TCnWizDebuggerNotifier.Breakpoint Added');
 {$ENDIF}
     for I := FBreakpointAddedNotifiers.Count - 1 downto 0 do
     try
@@ -2097,7 +2127,7 @@ begin
   if FBreakpointDeletedNotifiers <> nil then
   begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnWizDebuggerNotifier.Breakpoint Deleted');
+    CnDebugger.LogMsg('TCnWizDebuggerNotifier.Breakpoint Deleted');
 {$ENDIF}
     for I := FBreakpointDeletedNotifiers.Count - 1 downto 0 do
     try
@@ -2116,7 +2146,7 @@ begin
   if FProcessCreatedNotifiers <> nil then
   begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnWizDebuggerNotifier.Process Created');
+    CnDebugger.LogMsg('TCnWizDebuggerNotifier.Process Created');
 {$ENDIF}
     for I := FProcessCreatedNotifiers.Count - 1 downto 0 do
     try
@@ -2135,7 +2165,7 @@ begin
   if FProcessDestroyedNotifiers <> nil then
   begin
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnWizDebuggerNotifier.Process Destroyed');
+    CnDebugger.LogMsg('TCnWizDebuggerNotifier.Process Destroyed');
 {$ENDIF}
     for I := FProcessDestroyedNotifiers.Count - 1 downto 0 do
     try
