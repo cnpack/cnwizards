@@ -139,7 +139,7 @@ type
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure SetExtendForwardBack(const Value: Boolean);
-    procedure AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
+    procedure AppCommand(var Msg: TMsg; var Handled: Boolean);
   protected
     procedure SetActive(Value: Boolean);
 
@@ -846,7 +846,7 @@ begin
   FList := TList.Create;
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
-  CnWizNotifierServices.AddCallWndProcRetNotifier(AppCommand, [WM_APPCOMMAND]);
+  CnWizNotifierServices.AddApplicationMessageNotifier(AppCommand);
   UpdateInstall;
 end;
 
@@ -854,7 +854,7 @@ destructor TCnSrcEditorNavMgr.Destroy;
 var
   I: Integer;
 begin
-  CnWizNotifierServices.RemoveCallWndProcRetNotifier(AppCommand);
+  CnWizNotifierServices.RemoveApplicationMessageNotifier(AppCommand);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for I := FList.Count - 1 downto 0 do
     TCnSrcEditorNav(FList[I]).Free;
@@ -977,17 +977,18 @@ begin
   UpdateControls;
 end;
 
-procedure TCnSrcEditorNavMgr.AppCommand(Handle: HWND; Control: TWinControl; Msg: TMessage);
+procedure TCnSrcEditorNavMgr.AppCommand(var Msg: TMsg; var Handled: Boolean);
 var
   V: Integer;
   EditorNav: TCnSrcEditorNav;
 begin
-  if not Active or not FExtendForwardBack then
+  if not Active or not FExtendForwardBack or (Msg.message <> WM_APPCOMMAND) then
     Exit;
 
   V := GET_APPCOMMAND_LPARAM(Msg.LParam);
 
-  if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD]) or not IsEditControl(Control) then
+  if not (V in [APPCOMMAND_BROWSER_BACKWARD, APPCOMMAND_BROWSER_FORWARD])
+    or not IsEditControl(Screen.ActiveControl) then
     Exit;
 
 {$IFDEF DEBUG}
@@ -1031,6 +1032,7 @@ begin
         [Ord(EditorNav.BackAction.Enabled)]);
 {$ENDIF}
       EditorNav.BackAction.Execute;
+      Handled := True;
     end;
   end
   else if V = APPCOMMAND_BROWSER_FORWARD then
@@ -1042,6 +1044,7 @@ begin
         [Ord(EditorNav.ForwardAction.Enabled)]);
 {$ENDIF}
       EditorNav.ForwardAction.Execute;
+      Handled := True;
     end;
   end;
 end;
