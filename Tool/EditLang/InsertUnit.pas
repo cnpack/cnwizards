@@ -147,7 +147,7 @@ var
 
   function InsertOneLine(const Line: string): Boolean;
   var
-    J, Idx, Start, Res, P: Integer;
+    J, Idx: Integer;
     H: string;
   begin
     Result := False;
@@ -168,8 +168,7 @@ var
 
     for J := Idx to SL.Count - 1 do
     begin
-      Res := CompareStr(SL[J], Line);
-      if Res > 0 then
+      if CompareStr(SL[J], Line) > 0 then
       begin
         SL.Insert(J, Line);
         Result := True;
@@ -179,6 +178,7 @@ var
   end;
 
 begin
+  Result := False;
   SL := TStringList.Create;
   try
     SL.Clear;

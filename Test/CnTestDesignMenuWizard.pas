@@ -22,7 +22,7 @@ unit CnTestDesignMenuWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
-* 单元名称：测试设计器右键菜单项的测试用例单元
+* 单元名称：测试设计器右键菜单项及创建组件的测试用例单元
 * 单元作者：CnPack 开发组
 * 备    注：
 * 开发平台：WinXP + Delphi 7
@@ -46,7 +46,7 @@ uses
 type
 
 //==============================================================================
-// 测试设计器右键菜单项的菜单专家
+// 测试设计器右键菜单项及创建组件的菜单专家
 //==============================================================================
 
 { TCnTestDesignMenuWizard }
@@ -110,7 +110,7 @@ const
   SCnTestDesignCreateHint = 'Create All Components to Current Form';
 
 //==============================================================================
-// 测试设计器右键菜单项的菜单专家
+// 测试设计器右键菜单项及创建组件的菜单专家
 //==============================================================================
 
 { TCnTestDesignMenuWizard }
@@ -214,9 +214,10 @@ end;
 
 procedure TCnTestDesignMenuWizard.SubActionExecute(Index: Integer);
 var
-  I: Integer;
+  I, Suc, Fail: Integer;
   C: TStringList;
   FormEditor: IOTAFormEditor;
+  Res: IOTAComponent;
 begin
   if Index = FIdMenu then
     MenuExecute
@@ -228,8 +229,27 @@ begin
       FormEditor := CnOtaGetCurrentFormEditor;
       if FormEditor <> nil then
       begin
+        ShowMessage(Format('Will Create %d Components', [C.Count]));
+        Suc := 0;
+        Fail := 0;
+
         for I := 0 to C.Count - 1 do
-          FormEditor.CreateComponent(nil, C[I], 0, 0, 0, 0);
+        begin
+          Res := nil;
+          try
+            CnDebugger.LogMsg('TestDesign To Create ' + C[I]);
+            Res := FormEditor.CreateComponent(nil, C[I], 0, 0, 0, 0);
+          except
+            ;
+          end;
+
+          if Res <> nil then
+            Inc(Suc)
+          else
+            Inc(Fail);
+        end;
+
+        ShowMessage(Format('Create %d Success. %d Fail.', [Suc, Fail]));
       end;
     finally
       C.Free;
