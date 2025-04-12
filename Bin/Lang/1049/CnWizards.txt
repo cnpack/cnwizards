@@ -1275,6 +1275,7 @@ TCnListCompForm.actSelectInvert.Caption=Инвертировать выделе�
 TCnListCompForm.actSelectInvert.Hint=Инвертировать выделение
 TCnListCompForm.actSelectNone.Caption=Отменить выделение
 TCnListCompForm.actSelectNone.Hint=Отменить выделение
+TCnListCompForm.btnAttribute.Hint=Показать пустые имена
 TCnListCompForm.btnCopy.Hint=Скопировать имя выбранного компонента в буфер обмена
 TCnListCompForm.btnHookIDE.Hint=Запустить Селектор Компонентов
 TCnListCompForm.btnMatchAny.Caption=Фильтр по всему имени

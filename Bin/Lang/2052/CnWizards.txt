@@ -1275,6 +1275,7 @@ TCnListCompForm.actSelectInvert.Caption=反向选择(&V)
 TCnListCompForm.actSelectInvert.Hint=反向选择组件
 TCnListCompForm.actSelectNone.Caption=取消选择(&N)
 TCnListCompForm.actSelectNone.Hint=取消选择组件
+TCnListCompForm.btnAttribute.Hint=显示名称为空的组件
 TCnListCompForm.btnCopy.Hint=复制所选组件名称到剪贴板
 TCnListCompForm.btnHookIDE.Hint=运行组件选取工具以进行更灵活的选择
 TCnListCompForm.btnMatchAny.Caption=匹配所有(&A)
