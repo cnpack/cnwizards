@@ -2030,7 +2030,6 @@ function TCnWizNotifierServices.DoGetMsgHook(AList, MsgList: TList; Handle: HWND
 var
   I: Integer;
   Control: TWinControl;
-  Handled: Boolean;
 begin
   Result := False;
   if not IdeClosing and (AList <> nil) and IsMsgRegistered(MsgList, Msg.Msg) then

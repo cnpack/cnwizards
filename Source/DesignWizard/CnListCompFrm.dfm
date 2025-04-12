@@ -122,26 +122,6 @@ inherited CnListCompForm: TCnListCompForm
       Visible = False
     end
   end
-  inherited lvList: TListView
-    Width = 542
-    Height = 292
-    Columns = <
-      item
-        Caption = 'Component Name'
-        Width = 170
-      end
-      item
-        Caption = 'Component Classname'
-        Width = 180
-      end
-      item
-        Caption = 'Caption/Text'
-        Width = 160
-      end>
-    OwnerData = True
-    OnCustomDrawItem = nil
-    OnData = lvListData
-  end
   inherited StatusBar: TStatusBar
     Top = 358
     Width = 542
@@ -161,14 +141,8 @@ inherited CnListCompForm: TCnListCompForm
       Hint = 'Locate and Select Components'
       Caption = '&Select'
     end
-    inherited btnSep1: TToolButton
-      Visible = False
-    end
     inherited btnAttribute: TToolButton
-      Visible = False
-    end
-    inherited btnSep3: TToolButton
-      Visible = False
+      Hint = 'Show Empty Names'
     end
     inherited btnCopy: TToolButton
       Hint = 'Copy Selected Component Name to Clipboard'
@@ -192,7 +166,34 @@ inherited CnListCompForm: TCnListCompForm
       Visible = False
     end
   end
+  inherited pnlMain: TPanel
+    Width = 542
+    Height = 292
+    inherited lvList: TListView
+      Width = 542
+      Height = 292
+      Columns = <
+        item
+          Caption = 'Component Name'
+          Width = 170
+        end
+        item
+          Caption = 'Component Classname'
+          Width = 180
+        end
+        item
+          Caption = 'Caption/Text'
+          Width = 160
+        end>
+      OwnerData = True
+      OnCustomDrawItem = nil
+      OnData = lvListData
+    end
+  end
   inherited ActionList: TActionList
+    inherited actAttribute: TAction
+      ImageIndex = 91
+    end
     inherited actClose: TAction
       Caption = '&Exit'
     end
