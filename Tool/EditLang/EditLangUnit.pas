@@ -29,6 +29,9 @@ uses
   FileCtrl, CnCommon, ExtCtrls, StdCtrls, ComCtrls, Grids, ToolWin, ImgList,
   ActnList, Clipbrd;
 
+const
+  LANG_DIR = 'Lang\';
+
 type
   TEditLangForm = class(TForm)
     statMain: TStatusBar;
@@ -83,6 +86,9 @@ type
     btnPasteMultiLineRight: TToolButton;
     actPasteMultiLineLeft: TAction;
     actPasteMultiLineRight: TAction;
+    ToolButton1: TToolButton;
+    actInsertItems: TAction;
+    btnInsertItems: TToolButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -109,6 +115,7 @@ type
     procedure actPasteToRightByLeftExecute(Sender: TObject);
     procedure actPasteMultiLineLeftExecute(Sender: TObject);
     procedure actPasteMultiLineRightExecute(Sender: TObject);
+    procedure actInsertItemsExecute(Sender: TObject);
   private
     FLangRoot: string;
     FLangDirs: TStrings;
@@ -125,7 +132,6 @@ type
     procedure SyncRightGridToDisplay;
     procedure ChangeGridColumnSize;
     function LineEqual(const S1: string; const S2: string): Boolean;
-    procedure SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
     procedure RearrangeDisplays;
     // 根据 LeftContent/RightContent 实施对比，把对齐结果放到 LeftDisplay/RightDisplay 中
     procedure UpdateToGrid;
@@ -136,6 +142,8 @@ type
     procedure PasteToGridMultiLine(Col: Integer);
   end;
 
+procedure SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
+
 var
   EditLangForm: TEditLangForm;
 
@@ -143,9 +151,10 @@ implementation
 
 {$R *.DFM}
 
-const
-  LANG_DIR = 'Lang\';
+uses
+  InsertUnit;
 
+const
   LEFT_EDITING_COL = 1;
   RIGHT_EDITING_COL = 4;
 
@@ -208,6 +217,27 @@ begin
 
   P := Pos(SubFix, S);
   Result := (P > 0) and (P + Length(SubFix) - 1 = Length(S));
+end;
+
+procedure SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
+var
+  SearchRec: TSearchRec;
+  F: Integer;
+begin
+  F := FindFirst(IncludeTrailingPathDelimiter(Dir) + '*.*', faAnyFile, SearchRec);
+  List.Clear;
+  while F = 0 do
+  begin
+    if (SearchRec.Name <> '.') and (SearchRec.name <> '..') then
+    begin
+      if not IsDir and (SearchRec.Attr and faDirectory <> faDirectory) then
+        List.Add(ExtractFileName(SearchRec.Name))
+      else if IsDir and (SearchRec.Attr and faDirectory = faDirectory) then
+        List.Add(ExtractFileName(SearchRec.Name));
+    end;
+    F := FindNext(SearchRec);
+  end;
+  FindClose(SearchRec);
 end;
 
 procedure TEditLangForm.FormCreate(Sender: TObject);
@@ -293,27 +323,6 @@ begin
       Sl.Free;
     end;
   end;
-end;
-
-procedure TEditLangForm.SearchLangFiles(const Dir: string; List: TStrings; IsDir: Boolean);
-var
-  SearchRec: TSearchRec;
-  F: Integer;
-begin
-  F := FindFirst(IncludeTrailingPathDelimiter(Dir) + '*.*', faAnyFile, SearchRec);
-  List.Clear;
-  while F = 0 do
-  begin
-    if (SearchRec.Name <> '.') and (SearchRec.name <> '..') then
-    begin
-      if not IsDir and (SearchRec.Attr and faDirectory <> faDirectory) then
-        List.Add(ExtractFileName(SearchRec.Name))
-      else if IsDir and (SearchRec.Attr and faDirectory = faDirectory) then
-        List.Add(ExtractFileName(SearchRec.Name));
-    end;
-    F := FindNext(SearchRec);
-  end;
-  FindClose(SearchRec);
 end;
 
 procedure TEditLangForm.SearchLeftToRight(Line: Integer);
@@ -760,6 +769,16 @@ begin
   finally
     List.Free;
   end;
+end;
+
+procedure TEditLangForm.actInsertItemsExecute(Sender: TObject);
+begin
+  // Show a Form to Insert Items
+  with TInsertItemsForm.Create(nil) do
+  begin
+    ShowModal;
+    Free;
+  end
 end;
 
 procedure TEditLangForm.actNextDiffExecute(Sender: TObject);

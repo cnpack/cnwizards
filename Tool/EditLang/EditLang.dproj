@@ -53,6 +53,9 @@
 			<DCCReference Include="EditLangUnit.pas">
 				<Form>EditLangForm</Form>
 			</DCCReference>
+			<DCCReference Include="InsertUnit.pas">
+				<Form>InsertItemsForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
