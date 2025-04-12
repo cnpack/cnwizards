@@ -218,6 +218,10 @@ var
   C: TStringList;
   FormEditor: IOTAFormEditor;
   Res: IOTAComponent;
+{$IFDEF COMPILER6_UP}
+  Root: TPersistent;
+  OldGroup: TPersistentClass;
+{$ENDIF}
 begin
   if Index = FIdMenu then
     MenuExecute
@@ -230,6 +234,17 @@ begin
       if FormEditor <> nil then
       begin
         ShowMessage(Format('Will Create %d Components', [C.Count]));
+
+{$IFDEF COMPILER6_UP}
+        OldGroup := nil;
+        if FormEditor.GetSelComponent(0) <> nil then
+        begin
+          Root := TPersistent(FormEditor.GetSelComponent(0).GetComponentHandle);
+          if Root <> nil then
+            OldGroup := ActivateClassGroup(TPersistentClass(Root.ClassType));
+        end;
+{$ENDIF}
+
         Suc := 0;
         Fail := 0;
 
@@ -249,6 +264,11 @@ begin
             Inc(Fail);
         end;
 
+{$IFDEF COMPILER6_UP}
+      if OldGroup <> nil then
+        ActivateClassGroup(OldGroup);
+{$ENDIF}
+
         ShowMessage(Format('Create %d Success. %d Fail.', [Suc, Fail]));
       end;
     finally
@@ -259,7 +279,7 @@ end;
 
 procedure TCnTestDesignMenuWizard.AcquireSubActions;
 begin
-  FIdMenu := RegisterASubAction(SCnTestDesignMenuCommand, SCnDesignWizardMenuCaption,
+  FIdMenu := RegisterASubAction(SCnTestDesignMenuCommand, SCnTestDesignMenuCaption,
     0, SCnTestDesignMenuHint, SCnTestDesignMenuCommand);
   FIdCreate := RegisterASubAction(SCnTestDesignCreateCommand, SCnTestDesignCreateCaption,
     0, SCnTestDesignCreateHint, SCnTestDesignCreateCommand);

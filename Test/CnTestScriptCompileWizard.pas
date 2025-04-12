@@ -97,6 +97,9 @@ begin
 
       for I := 0 to Files.Count - 1 do
       begin
+        if LowerCase(ExtractFileExt(Files[I])) <> '.pas' then
+          Continue;
+
         Sl := nil;
         Exec := nil;
 
@@ -124,6 +127,7 @@ begin
           end;
         finally
           Exec.Free;
+          Sl.Free;
         end;
       end;
     finally
