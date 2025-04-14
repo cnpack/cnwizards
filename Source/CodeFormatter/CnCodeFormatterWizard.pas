@@ -130,6 +130,7 @@ type
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure AcquireSubActions; override;
+
     property DirectiveMode: TCnCompDirectiveMode read FDirectiveMode write FDirectiveMode;
     property KeywordStyle: TCnKeywordStyle read FKeywordStyle write FKeywordStyle;
     property BeginStyle: TCnBeginStyle read FBeginStyle write FBeginStyle;

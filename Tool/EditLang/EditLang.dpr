@@ -22,7 +22,8 @@ program EditLang;
 
 uses
   Forms,
-  EditLangUnit in 'EditLangUnit.pas' {EditLangForm};
+  EditLangUnit in 'EditLangUnit.pas' {EditLangForm},
+  InsertUnit in 'InsertUnit.pas' {InsertItemsForm};
 
 {$R *.RES}
 {$R ..\WindowsXP.RES}

@@ -68,6 +68,7 @@ type
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure actHookIDEExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure actAttributeExecute(Sender: TObject);
   private
     FSingleMode: Boolean;
 
@@ -87,6 +88,9 @@ type
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; override;
   public
+    procedure LoadSettings(Ini: TCustomIniFile; aSection: string); override;
+    procedure SaveSettings(Ini: TCustomIniFile; aSection: string); override;
+
     property SingleMode: Boolean read FSingleMode write FSingleMode;
   end;
 
@@ -111,6 +115,7 @@ uses
 
 const
   csListComp = 'ListComp';
+  csShowEmptyNames = 'ShowEmptyNames';
 
 type
   TCnCompInfo = class(TCnBaseElementInfo)
@@ -379,6 +384,12 @@ begin
   end;
 end;
 
+procedure TCnListCompForm.actAttributeExecute(Sender: TObject);
+begin
+  actAttribute.Checked := not actAttribute.Checked;
+  UpdateListView;
+end;
+
 procedure TCnListCompForm.FormShow(Sender: TObject);
 begin
   inherited;
@@ -405,12 +416,20 @@ begin
   Result := False;
   if AMatchStr = '' then
   begin
+    // 空名字且不显示空名字的话就退出
+    if not actAttribute.Checked and (DataList[DataListIndex] = '') then
+      Exit;
+
     Result := True;
     Exit;
   end;
 
   Info := TCnCompInfo(DataList.Objects[DataListIndex]);
   if Info = nil then
+    Exit;
+
+  // 空名字且不显示空名字的话就退出
+  if not actAttribute.Checked and (DataList[DataListIndex] = '') then
     Exit;
 
   if AMatchMode in [mmStart, mmAnywhere] then
@@ -462,6 +481,20 @@ begin
   else
     Result := 0;
   end;
+end;
+
+procedure TCnListCompForm.LoadSettings(Ini: TCustomIniFile;
+  aSection: string);
+begin
+  inherited;
+  actAttribute.Checked := Ini.ReadBool(aSection, csShowEmptyNames, True);
+end;
+
+procedure TCnListCompForm.SaveSettings(Ini: TCustomIniFile;
+  aSection: string);
+begin
+  inherited;
+  Ini.WriteBool(aSection, csShowEmptyNames, actAttribute.Checked);
 end;
 
 {$ENDIF CNWIZARDS_CNDESIGNWIZARD}

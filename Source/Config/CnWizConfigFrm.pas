@@ -429,7 +429,7 @@ var
   ARect: TRect;
   R: TRect;
   Wizard: TCnBaseWizard;
-  Idx, x, y: Integer;
+  Idx, X, Y: Integer;
   Bmp: TBitmap;
   EnableIndex, EnableIconMargin: Integer;
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -495,16 +495,16 @@ begin
 {$ENDIF}
     end;
 
-    x := R.Left + IdeGetScaledPixelsFromOrigin(CN_ITEM_ICON_WIDTH, Control);
-    y := R.Top + 2;
-    Canvas.TextOut(x, y, SCnWizardNameStr + Wizard.WizardName);
-    Inc(y, FDrawTextHeight + 2);
+    X := R.Left + IdeGetScaledPixelsFromOrigin(CN_ITEM_ICON_WIDTH, Control);
+    Y := R.Top + 2;
+    Canvas.TextOut(X, Y, SCnWizardNameStr + Wizard.WizardName);
+    Inc(Y, FDrawTextHeight + 2);
     if FActives[Idx] then
-      Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardActiveStr)
+      Canvas.TextOut(X, Y, SCnWizardStateStr + SCnWizardActiveStr)
     else
-      Canvas.TextOut(x, y, SCnWizardStateStr + SCnWizardDisActiveStr);
-    Inc(y, FDrawTextHeight + 2);
-    Canvas.TextOut(x, y, SCnWizardShortCutStr + ShortCutToText(FShortCuts[Idx]));
+      Canvas.TextOut(X, Y, SCnWizardStateStr + SCnWizardDisActiveStr);
+    Inc(Y, FDrawTextHeight + 2);
+    Canvas.TextOut(X, Y, SCnWizardShortCutStr + ShortCutToText(FShortCuts[Idx]));
 
     BitBlt(ListBox.Canvas.Handle, Rect.Left, Rect.Top, Bmp.Width, Bmp.Height,
       Canvas.Handle, 0, 0, SRCCOPY);
@@ -737,7 +737,7 @@ var
   R: TRect;
   ARect: TRect;
   Info: TCnDesignEditorInfo;
-  Idx, x, y: Integer;
+  Idx, X, Y: Integer;
   Bmp: TBitmap;
   EnableIndex, EnableIconMargin: Integer;
 begin
@@ -784,15 +784,15 @@ begin
     end;
 
     Canvas.RoundRect(R.Left, R.Top, R.Right, R.Bottom, 8, 8);
-    x := R.Left + 5;
-    y := R.Top + 2;
-    Canvas.TextOut(x, y, SCnDesignEditorNameStr + Info.Name);
-    Inc(y, FDrawTextHeight + 2);
+    X := R.Left + 5;
+    Y := R.Top + 2;
+    Canvas.TextOut(X, Y, SCnDesignEditorNameStr + Info.Name);
+    Inc(Y, FDrawTextHeight + 2);
 
     if FEditorActives[Idx] then
-      Canvas.TextOut(x, y, SCnDesignEditorStateStr + SCnWizardActiveStr)
+      Canvas.TextOut(X, Y, SCnDesignEditorStateStr + SCnWizardActiveStr)
     else
-      Canvas.TextOut(x, y, SCnDesignEditorStateStr + SCnWizardDisActiveStr);
+      Canvas.TextOut(X, Y, SCnDesignEditorStateStr + SCnWizardDisActiveStr);
 
     BitBlt(ListBox.Canvas.Handle, Rect.Left, Rect.Top, Bmp.Width, Bmp.Height,
       Canvas.Handle, 0, 0, SRCCOPY);
@@ -955,23 +955,24 @@ const
   SCnPackageFileName = 'Packages.txt';
   SCnComponentFileName = 'Components.txt';
 var
-  p, c: TStringList;
+  P, C: TStringList;
   Dir: String;
 begin
-  p := nil; c := nil;
+  P := nil;
+  C := nil;
   try
-    p := TStringList.Create;
-    c := TStringList.Create;
-    GetInstalledComponents(p, c);
+    P := TStringList.Create;
+    C := TStringList.Create;
+    GetInstalledComponents(P, C);
     if GetDirectory(SCnExportPCDirCaption, Dir) then
     begin
-      p.SaveToFile(MakePath(Dir) + SCnPackageFileName);
-      c.SaveToFile(MakePath(Dir) + SCnComponentFileName);
+      P.SaveToFile(MakePath(Dir) + SCnPackageFileName);
+      C.SaveToFile(MakePath(Dir) + SCnComponentFileName);
       InfoDlg(Format(SCnExportPCSucc, [SCnComponentFileName, SCnPackageFileName]));
     end;
   finally
-    p.Free;
-    c.Free;
+    P.Free;
+    C.Free;
   end;
 end;
 

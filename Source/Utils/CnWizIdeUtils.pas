@@ -1848,7 +1848,7 @@ var
   ProjectGroup: IOTAProjectGroup;
   Project: IOTAProject;
   Path: string;
-  I, j: Integer;
+  I, J: Integer;
   APaths: TStrings;
 begin
   Paths.Clear;
@@ -1875,9 +1875,9 @@ begin
           AddProjectPath(Project, Paths, 'IncludePath');
 
           // 增加工程中文件的路径
-          for j := 0 to Project.GetModuleCount - 1 do
+          for J := 0 to Project.GetModuleCount - 1 do
           begin
-            Path := _CnExtractFileDir(Project.GetModule(j).FileName);
+            Path := _CnExtractFileDir(Project.GetModule(J).FileName);
             if Paths.IndexOf(Path) < 0 then
               Paths.Add(Path);
           end;
@@ -2010,7 +2010,7 @@ end;
 procedure GetInstalledComponents(Packages, Components: TStrings);
 var
   PackSvcs: IOTAPackageServices;
-  I, j: Integer;
+  I, J: Integer;
 begin
   QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
   if Assigned(Packages) then
@@ -2023,8 +2023,10 @@ begin
     if Assigned(Packages) then
       Packages.Add(PackSvcs.PackageNames[I]);
     if Assigned(Components) then
-      for j := 0 to PackSvcs.ComponentCount[I] - 1 do
-        Components.Add(PackSvcs.ComponentNames[I, j]);
+    begin
+      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+        Components.Add(PackSvcs.ComponentNames[I, J]);
+    end;
   end;
 end;
 

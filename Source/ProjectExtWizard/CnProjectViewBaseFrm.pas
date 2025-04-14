@@ -231,15 +231,19 @@ type
     // === New Routines for refactor ===
     // 提前准备调用参数
     procedure PrepareSearchRange; virtual;
+
     // 实现根据匹配规则从 DataList 更新至 DisplayList的功能，一般无须重载
     procedure CommonUpdateListView; virtual;
+
     // 子类重载以返回在指定匹配字符、指定匹配模式下，DataList 中的指定项是否匹配
     // 调用此方法前 ProjectInfo 指定了下拉框所标识的工程范围
     function CanMatchDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList): Boolean; virtual;
+
     // 子类重载以返回此项是否可以作为优先选中的项，一般无须重载
     function CanSelectDataByIndex(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean; virtual;
+
     // 排序比较器，子类重载以实现根据 Object 比较的功能
     function SortItemCompare(ASortIndex: Integer; const AMatchStr: string;
       const S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer; virtual;
@@ -248,11 +252,14 @@ type
     function DefaultMatchHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer; var StartOffset: Integer; MatchedIndexes: TList;
       CaseSensitive: Boolean = False): Boolean;
+
     // 默认允许优先选择最头上匹配的项
     function DefaultSelectHandler(const AMatchStr: string; AMatchMode: TCnMatchMode;
       DataListIndex: Integer): Boolean;
+
     // 释放 DataList 供重新初始化的场合
     procedure ClearDataList;
+
     // 供子类决定绘制 Item 时可以修改部分绘制参数如颜色等
     procedure DrawListPreParam(Item: TListItem; ListCanvas: TCanvas); virtual;
     // === New Routines for refactor ===

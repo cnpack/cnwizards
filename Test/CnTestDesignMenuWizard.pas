@@ -22,7 +22,7 @@ unit CnTestDesignMenuWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包测试用例
-* 单元名称：测试设计器右键菜单项的测试用例单元
+* 单元名称：测试设计器右键菜单项及创建组件的测试用例单元
 * 单元作者：CnPack 开发组
 * 备    注：
 * 开发平台：WinXP + Delphi 7
@@ -46,15 +46,18 @@ uses
 type
 
 //==============================================================================
-// 测试设计器右键菜单项的菜单专家
+// 测试设计器右键菜单项及创建组件的菜单专家
 //==============================================================================
 
 { TCnTestDesignMenuWizard }
 
-  TCnTestDesignMenuWizard = class(TCnMenuWizard)
+  TCnTestDesignMenuWizard = class(TCnSubMenuWizard)
   private
+    FIdMenu: Integer;
+    FIdCreate: Integer;
     FExecutor: TCnContextMenuExecutor;
     FE1, FE2, FE3: TCnBaseMenuExecutor;
+    procedure MenuExecute;
     procedure Executor2Execute(Sender: TObject);
   protected
     function GetHasConfig: Boolean; override;
@@ -67,7 +70,9 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+
+    procedure AcquireSubActions; override;
+    procedure SubActionExecute(Index: Integer); override;
   end;
 
   TCnTestDesignMenu1 = class(TCnBaseMenuExecutor)
@@ -94,10 +99,18 @@ type
 implementation
 
 uses
-  CnDebug;
+  CnDebug, CnWizIdeUtils;
+
+const
+  SCnTestDesignMenuCommand = 'CnTestDesignMenuCommand';
+  SCnTestDesignMenuCaption = 'Toggle Designer Menu';
+  SCnTestDesignMenuHint = 'Toggle Designer Menu';
+  SCnTestDesignCreateCommand = 'CnTestDesignCreateCommand';
+  SCnTestDesignCreateCaption = 'Create All Components to Form';
+  SCnTestDesignCreateHint = 'Create All Components to Current Form';
 
 //==============================================================================
-// 测试设计器右键菜单项的菜单专家
+// 测试设计器右键菜单项及创建组件的菜单专家
 //==============================================================================
 
 { TCnTestDesignMenuWizard }
@@ -107,7 +120,7 @@ begin
   ShowMessage('No option for this test case.');
 end;
 
-procedure TCnTestDesignMenuWizard.Execute;
+procedure TCnTestDesignMenuWizard.MenuExecute;
 begin
   if FE1 = nil then
   begin
@@ -197,6 +210,79 @@ end;
 procedure TCnTestDesignMenuWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+procedure TCnTestDesignMenuWizard.SubActionExecute(Index: Integer);
+var
+  I, Suc, Fail: Integer;
+  C: TStringList;
+  FormEditor: IOTAFormEditor;
+  Res: IOTAComponent;
+{$IFDEF COMPILER6_UP}
+  Root: TPersistent;
+  OldGroup: TPersistentClass;
+{$ENDIF}
+begin
+  if Index = FIdMenu then
+    MenuExecute
+  else if Index = FIdCreate then
+  begin
+    C := TStringList.Create;
+    try
+      GetInstalledComponents(nil, C);
+      FormEditor := CnOtaGetCurrentFormEditor;
+      if FormEditor <> nil then
+      begin
+        ShowMessage(Format('Will Create %d Components', [C.Count]));
+
+{$IFDEF COMPILER6_UP}
+        OldGroup := nil;
+        if FormEditor.GetSelComponent(0) <> nil then
+        begin
+          Root := TPersistent(FormEditor.GetSelComponent(0).GetComponentHandle);
+          if Root <> nil then
+            OldGroup := ActivateClassGroup(TPersistentClass(Root.ClassType));
+        end;
+{$ENDIF}
+
+        Suc := 0;
+        Fail := 0;
+
+        for I := 0 to C.Count - 1 do
+        begin
+          Res := nil;
+          try
+            CnDebugger.LogMsg('TestDesign To Create ' + C[I]);
+            Res := FormEditor.CreateComponent(nil, C[I], 0, 0, 0, 0);
+          except
+            ;
+          end;
+
+          if Res <> nil then
+            Inc(Suc)
+          else
+            Inc(Fail);
+        end;
+
+{$IFDEF COMPILER6_UP}
+      if OldGroup <> nil then
+        ActivateClassGroup(OldGroup);
+{$ENDIF}
+
+        ShowMessage(Format('Create %d Success. %d Fail.', [Suc, Fail]));
+      end;
+    finally
+      C.Free;
+    end;
+  end;
+end;
+
+procedure TCnTestDesignMenuWizard.AcquireSubActions;
+begin
+  FIdMenu := RegisterASubAction(SCnTestDesignMenuCommand, SCnTestDesignMenuCaption,
+    0, SCnTestDesignMenuHint, SCnTestDesignMenuCommand);
+  FIdCreate := RegisterASubAction(SCnTestDesignCreateCommand, SCnTestDesignCreateCaption,
+    0, SCnTestDesignCreateHint, SCnTestDesignCreateCommand);
 end;
 
 { TCnTestDesignMenu1 }

@@ -1275,6 +1275,7 @@ TCnListCompForm.actSelectInvert.Caption=inverser la sélection
 TCnListCompForm.actSelectInvert.Hint=inverser la Sélection
 TCnListCompForm.actSelectNone.Caption=Annuler la séle&ction
 TCnListCompForm.actSelectNone.Hint=Annuler la sélection
+TCnListCompForm.btnAttribute.Hint=Afficher les noms vides
 TCnListCompForm.btnCopy.Hint=Copier le nom du composant sélectionné dans le presse-papiers
 TCnListCompForm.btnHookIDE.Hint=Exécuter le sélecteur de composants
 TCnListCompForm.btnMatchAny.Caption=correspondre à tout
