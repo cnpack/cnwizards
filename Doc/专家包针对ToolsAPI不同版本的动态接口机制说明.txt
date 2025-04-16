@@ -1,0 +1,317 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                     中国人自己的免费第三方开发包
+                 (C)Copyright 2001-2025 CnPack 开发组
+**********************************************************************
+
+               专家包针对ToolsAPI不同版本的动态接口机制说明
+                           Revision 1.0.0.0
+                       =========================
+                         作者：刘啸 2025.04.16
+
+
+本文主要介绍CnPack专家包中与不同版本的Delphi交互时设计的动态接口机制。
+
+作为铺垫，先介绍一下接口及ToolsAPI的基本工作原理：
+
+Delphi提供ToolsAPI系列大量接口，供我们开发者按照其接口写DLL或BPL，可以动态被Delphi的IDE加载，并使用它的服务，或提供服务给IDE使用。
+它的原理不算太复杂，比如ToolsAPI.pas里定义了一系列接口，这个接口提供编辑器服务，那个接口提供设计器服务，咋一看令人眼花缭乱，但只要抓住矛盾主线，就好理解。
+
+它们的总入口，是一个牛气冲天的接口声明：
+
+  IBorlandIDEServices = interface(IUnknown)
+    ['{7FD1CE92-E053-11D1-AB0B-00C04FB16FB3}']
+  end;
+
+别看这个接口啥方法都没有，但它却有一个独一无二的实现它的实例：
+
+var
+  BorlandIDEServices: IBorlandIDEServices;
+
+如果我们的DLL带包编译并uses了ToolsAPI.pas，就可以在我们的代码中直接访问BorlandIDEServices这个接口的实现实例了。
+
+可能读者要问，访问它有什么用？
+
+原来，Delphi的ToolsAPI的设计思想，就是用BorlandIDEServices这个变量作为所有接口提供服务的总入口。
+
+熟悉VCL代码的朋友应该了解，所有接口的基类，都有以下仨方法：
+
+  IUnknown = interface
+    ['{00000000-0000-0000-C000-000000000046}']
+    function QueryInterface(const IID: TGUID; out Obj): HResult; stdcall;
+    function _AddRef: Integer; stdcall;
+    function _Release: Integer; stdcall;
+  end;
+
+后面两个是熟悉的增加减少引用计数，用来控制实现接口的对象的动态释放，目前不是讨论的重点。
+
+前面那个QueryInterface才是上面的“总入口”机制的核心内容。
+
+原来，QueryInterface定义了接口的一项通用行为：如果我们声明的一个类实现了某一个或某一批接口，那么每个接口都应该有“通过我查询该类支持其他接口”的能力。
+
+同样，实现了接口的基类TInterfacedObject，它有个成员变量FRefCount，实现了IUnknown的三个方法，_AddRef中给FRefCount加一，_Release中给FRefCount减一，如果到0了就Destroy，这都很好理解。
+
+重点是，它实现了QueryInterface：
+
+  function TInterfacedObject.QueryInterface(const IID: TGUID; out Obj): HResult;
+  begin
+    if GetInterface(IID, Obj) then
+      Result := 0
+    else
+      Result := E_NOINTERFACE;
+  end;
+
+GetInterface是TObject提供的基本方法之一，能够根据本类编译后生成的的接口表条目，查询是否支持某个接口。
+
+声明接口、定义类、创建实例、支持查询接口，以上就构成了BorlandIDEServices充当服务总入口的完整机制。
+
+虽然我们没有BorlandIDEServices相关的实现代码，但我们可以基本上推测实现该接口的对象，类名大概叫TBorlandIDEServices（其实类名不重要）其声明大概也如下：
+
+  TBorlandIDEServices = class(TInterfacedObject, IBorlandIDEServices,
+    IOTAKeyboardServices, IOTAMessageServices, IOTADebuggerServices,
+    IOTAModuleServices, ……)
+  ……
+  end;
+
+它一个类实现了大量的提供服务的接口，我们只要拿到它的实例，就能通过这批接口的基类中的QueryInterface方法，从而拿到它所实现的其他接口实例，从而进行实际调用。
+
+  var
+    ModuleServices: IOTAModuleServices;
+  begin
+    if BorlandIDEServices.QueryInterface(IOTAModuleServices, ModuleServices) = S_OK then
+    begin
+      // ModuleServices 就可拿来调用其方法了
+    end;
+   end;
+
+如果我们要提供内容给Delphi的IDE调用，也是按其要求实现一个它声明的接口，并创建一个该接口的对象实例，扔给IDE去调用。
+
+不同的Delphi版本，一般会提供不同的ToolsAPI.pas的内容（其带包编译的DCP一般都叫designide包），并且版本之间不能混杂。你代码里如用Delphi 12的ToolsAPI里的新接口，在低版本比如Delphi 7中是编译不过的，更别说动态获取其接口实例进行调用了。
+
+虽然ToolsAPI是向前兼容的，旧版ToolsAPI接口在新版中绝大部分一定存在（少数有修改，比如单词拼错了），但带包编译使用它时，它所属的叫designide的DCP包，每个Delphi版本也不一样，哪怕我们每个DLL不用新接口，只用最基础的ToolsAPI内容，也要确保链接到正确版本的DCP，才能跑得起来。
+
+所以，我们的专家包DLL，针对每个Delphi的IDE版本，都单独编译了一个独立的DLL供加载，各版本之间绝不混杂。
+
+可能有读者要问，我用ToolsAPI，我不带包编译行不行？
+
+答案是不行。原因很简单，你不带包编译，BorlandIDEServices这个变量去哪实现呢？ToolsAPI.pas里只有它的定义，甚至都没有给它赋值的语句。
+
+它可不像Forms.pas里被声明的Application对象那样，会在Controls.pas里显式创建：
+
+  procedure InitControls;
+  begin
+    Mouse := TMouse.Create;
+    Screen := TScreen.Create(nil);
+    Application := TApplication.Create(nil);
+
+给BorlandIDEServices变量创建实例并赋值，只能是designide的这个DCP包里实现，或者说，桥接到了Delphi的IDE内部的实现里去了。
+
+以上就是基于接口的ToolsAPI的基本工作原理。
+
+这种设计期DLL或BPL和Delphi交互的机制，不光专家包，在各种第三方组件中都被广泛使用着。
+
+理论上，不同版本的Delphi，其ToolsAPI不能混用，否则哪怕侥幸编译过了，跑的时候也加载不起来。
+
+但是，大伙一定还记得之前我们吐槽过Delphi版本混乱的四个数字问题（见《Delphi环境里的四个数字的说明》一文），举例说：
+
+10和10.1，是两个截然不同的Delphi版本，对应相关的三个数字，包括安装目录名，安装文件名，编译器的VER定义，均不相同。
+
+而12和12.1，却又是同一个Delphi版本，对应相关的三个数字全一模一样，只不过后者是修复了部分问题的Update 1。
+
+麻烦的是，这种版本混乱，竟然影响到了ToolsAPI，导致我们碰上了“要不就是编译不过，要不就是加载不起来”的问题。
+
+一般来说，照Delphi的发布策略，Update包应当是用来修复该大版本的Bug，尤其是编译器、基础库相关的Bug，因而日常均推荐开发者更新到最新的Update包，再编译打包自己的产品。我们专家包也不例外。
+
+比如Delphi 2009有Update 1、Update 2、Update 3、Update 4。甚至还有Update没修复的微小内容，再加个HotFix也常见，比如Delphi XE2就有Update 4 HotFix 1。
+
+这些Update和HotFix，给我们专家包带来了一些困扰。我们默认Delphi是很注重至少同一个大版本内的兼容性的，也就是说，我们认为，我们用装了最新Update包编译出来的DLL，是应该能正常运行在用户安装的本大版本Delphi下的，无论用户是否安装了Update包，以及安装的是哪个Update包。
+
+否则就会有无数用户来投诉说“装了你们的专家包后Delphi咋跑不起来了？不装的时候都好好的”，让人头大。
+
+较为幸运的是，这么多年来Delphi大多数Update包确实也保持了这些兼容性。迄今为止，只有XE8、10.3、10.4、12，这四个大版本的Delphi的各个Update包中出现了十次无法兼容的基础库变更，也就是说，用这四个大版本Delphi的最新Update包编译的专家DLL，无法在没装Update包的同一版本的Delphi下直接跑起来。
+
+导致我们针对XE8不得不打两个专家包DLL、针对10.3也分开打两个、针对10.4和12则分开打三个。
+
+其实也够折腾的了。
+
+这里我们要说的重点问题，是基于Update包变化而带来的，而且目的是由高到低兼容。也就是说，想将高版本Update包的特性，应用于低版本Update包或未安装Update包的场景。
+
+问题表现有好几处，我们拿最简单的一个场合INTACodeEditorServices来说吧。
+
+这个问题源于自Delphi 10.4起的一个编辑器重画错位问题，我们曾经总结过一篇《CnPack IDE 专家包已知问题说明》，里面的第一号大问题就是它：
+
+https://www.cnpack.org/showdetail.php?id=959&lang=zh-cn
+
+简而言之就是，Delphi从10.4起，它的IDE启动后内部有个“突然改变编辑器左侧栏宽度”的机制，并且这个机制悄咪咪的没通知任何人。我们在编辑器上绘制高亮关键字啊、连线啊，瞬间就会和原始的内容错开，效果很滑稽。非得也同样实施一次全面重画才能消除。
+
+如何找到这个时机并实施全面重画，就成了解决这个问题的核心难点。
+
+然后，时光飞逝到了Delphi 11，又到了它的Update 1/2/3，我们在其Update 3包里，发现它的ToolsAPI更改了，新增了INTACodeEditorServices这个新接口，这个接口提供一个RequestGutterColumn方法，允许编辑器外部模块对编辑器左侧栏实施宽度改动，比如增加区域、减少区域等。
+
+当时我们就想，如果在专家包里拿到这个接口实例，再拿到其实现该接口的对象实例，再拿到该对象的RequestGutterColumn方法地址，再挂接它，在这个方法被调用的时候拿到通知来重画，是不是就可以解决这个重画时机的问题？
+
+说干就干，我们照着上篇的从BorlandIDEServices入口搞起，写了这块代码：
+
+  var
+    CES: INTACodeEditorServices;
+    Obj: TObject;
+  begin
+    if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    begin
+      Obj := CES as TObject;
+      RequestGutterColumn := GetMethodAddress(Obj, 'RequestGutterColumn');
+      if Assigned(RequestGutterColumn) then
+        FRequestGutterHook := TCnMethodHook.Create(@RequestGutterColumn, @MyRequestGutterColumn);
+        ...
+
+从BorlandIDEServices接口实例拿到INTACodeEditorServices接口实例，将其转换成对象实例，再获取其RequestGutterColumn方法地址，创建一个MethodHook，在我们自己写的MyRequestGutterColumn函数中通知重画即可。
+
+  function MyRequestGutterColumn(Self: TObject; const NotifierIndex: Integer;
+    const Size: Integer; Position: Integer): Integer;
+  begin
+    ...// 调用原 RequestGutterColumn 函数
+    for I := 0 to FEditControlWrapper.EditorCount - 1 do
+      FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
+
+果然，Delphi 11 Update 3下，该问题完美解决。
+
+但如果用户没安装Update 3呢？
+
+针对Delphi 11 Update 2、Update 1、没Update，甚至Delphi 10.4的用户，我们有没有办法也替它们解决这个问题？
+
+注意，这些环境中，是没有INTACodeEditorServices接口的声明与实现的的。而且，各Update包也不提供任何编译条件供我们区分。
+
+如果我们用Delphi 11 Update 3的编译环境，引用INTACodeEditorServices接口来写代码，虽然编译能通过，但这个DLL在Dephi 11 Update 2、Update 1、没Update下，就会冒出引用的运行函数不存在的问题，导致IDE无法启动。到时候投诉又多了。
+
+如果分开编译DLL，那又只有Delphi 11 Update 3的用户能看到此问题修复，低Update包的修不了，也让人头大。
+
+那最终的解决方法是什么？
+
+照理，对于低版本中没声明的内容，比如低版本的Delphi里Windows.pas的声明里可能缺少新的Windows SDK的声明一样，我们一般的解决办法是直接补上。
+
+像Delphi 5/6里没定义WM_APPCOMMAND，我们直接写上：
+
+  WM_APPCOMMAND = $0319;
+
+Delphi 2005及以下未定义APPCOMMAND_BROWSER_BACKWARD和APPCOMMAND_BROWSER_FORWARD，我们也可以直接写上：
+
+  APPCOMMAND_BROWSER_BACKWARD = 1;
+  APPCOMMAND_BROWSER_FORWARD  = 2;
+
+这几个常量就能直接使用。
+
+如果是结构record，也可以直接复制过来写上，届时将Windows里的API所使用的内容转换成此record，就和高版本Windows.pas里定义的结构 一样使用，无缝过渡。
+
+但是，接口，却不一样！
+
+Delphi 11 Update 3里的新接口声明如下：
+
+  INTACodeEditorServices280 = interface
+    function GetViewForEditor(const Editor: TWinControl): IOTAEditView;
+    function GetEditorForView(const View: IOTAEditView): TWinControl;
+    ……
+  end;
+  INTACodeEditorServices = interface(INTACodeEditorServices280)
+  end;
+
+如果我们声明一个和它一样的，只是加个前缀Cn的拿来用：
+
+  ICnNTACodeEditorServices280 = interface
+    function GetViewForEditor(const Editor: TWinControl): IOTAEditView;
+    function GetEditorForView(const View: IOTAEditView): TWinControl;
+    ……
+  end;
+  ICnNTACodeEditorServices = interface(ICnNTACodeEditorServices280)
+  end;
+
+看上去没啥问题，但等我们从BorlandIDEServices拿它时，却发现，拿！不！到！
+
+var
+  CES: ICnNTACodeEditorServices;
+begin
+  if Supports(BorlandIDEServices, ICnNTACodeEditorServices, CES) then
+  begin // 这里压根进不来
+
+为什么？这就涉及接口的全局GUID的机制了。
+
+本质上，判断某个接口变量是否支持某个接口，和判断某个对象是否是某个类，其目的性质是类似的，但实现却完全不同。
+
+熟悉Delphi的朋友们也知道，我们经常在事件里写if Sender is TButton这种代码，判断Sender这个对象是否是TButton类及其子类，这个is判断是如何做到的呢？
+
+很简单，Delphi编译器拿到is代码时，就把他变换成一个循环，从Sender对象所指的VMT表拿到其所属的类表，看看这个类表是不是TButton这个类的所在地，如果不是，再从类表里拿父类表，再比，一直比到命中，或没父类了为止。
+
+上面的其行为类似于class function TObject.InheritsFrom(AClass: TClass): Boolean;函数，如果看看这个函数的实现，就大体能明白。
+
+但既然是比对类地址，它便只能局限于本进程空间。
+
+而接口机制的设计来源于微软的COM，其思想是针对不同的类体系，甚至针对跨进程的类体系，完全不存在“接口声明所在地址对比”的可能性。
+
+哪怕接口变量也支持is和as操作符，它们的实现，也仍然不是“基于类地址对比”，而是——GUID！
+
+GUID是微软推出的，倒不仅用于接口，其目的是为了给“任何东西”都可以塞一个全球唯一标识符。
+
+Delphi在编程环境里也集成了这个能力，允许我们声明接口时生成用于标识该接口的GUID，然后在is或as或GetInterface中使用。
+
+我们注意到，接口基类的QueryInterface方法，实质上调用的是TObject的GetInterface方法：
+
+  function TInterfacedObject.QueryInterface(const IID: TGUID; out Obj): HResult;
+  begin
+    if GetInterface(IID, Obj) then
+      Result := 0
+    else
+      Result := E_NOINTERFACE;
+  end;
+
+而它和GetInterface方法的有关接口的参数均是const IID: TGUID
+
+function TObject.GetInterface(const IID: TGUID; out Obj): Boolean;
+
+但调用的时候，我们实际上传的参数是：
+
+if BorlandIDEServices.GetInterface(INTACodeEditorServices, CES) then
+
+要求的是GUID，传的是接口名称，不会出编译错误吗？
+
+答案是不会，Delphi编译器已经在此处替我们做好了转换，只要你的接口声明处生成了GUID，此处调用就会自动替换成那个GUID。GetInteface内部的实现代码里，也就会用这个GUID在对象的接口表里查找。
+
+我们自己声明的ICnNTACodeEditorServices哪怕生成了GUID，也和INTACodeEditorServices不同，QueryInterface自然找不着。
+
+而且，为了保障GUID和接口的全局唯一性，我们也不适合把INTACodeEditorServices的GUID直接复制过来作为ICnNTACodeEditorServices的GUID，那样太明目张胆了点儿。
+
+那变通的方案是什么呢？QueryInterface和GetInterface，它们既然支持GUID参数，那我们就传真正的GUID吧！
+
+我们从ToolsAPI里复制出INTACodeEditorServices的GUID：
+
+GUID_INTACODEEDITORSERVICES = '{449D7687-9D4C-454C-846E-FEC673605BF8}';
+
+代码里把原来的GetInterface调用改成：
+
+BorlandIDEServices.GetInterface(StringToGUID(GUID_INTACODEEDITORSERVICES), CES)
+
+这样就能根据一个GUID去查变量是否实现了该接口，而无需知道该接口的真正声明！
+
+用来承接该接口的Obj变量，声明也只是个无类型参数，并没有要求必须是INTACodeEditorServices型变量，我们就把它替换成我们声明的ICnNTACodeEditorServices型变量CES。
+
+这样，我们能用INTACodeEditorServices的GUID查到接口，并用声明完全相同的ICnNTACodeEditorServices型变量CES承接它，那CES就能直接用来调用原INTACodeEditorServices接口所提供的各种方法了。
+
+大功告成。
+
+以上方法是专家包里独创，在CnMirrorIntf.pas中声明并实现。核心思想就一句话：用真实GUID查接口，用模仿相同声明的接口变量承接。
+
+实践中，貌似的确如我们所言，Delphi 11起的BorlandIDEServices都实现了INTACodeEditorServices接口，尽管接口声明没开放，但我们只要把Update 3里获知的GUID拿去查询，就能查询得到。再用我们声明的一模一样的ICnNTACodeEditorServices接口型变量去承接，就能实现正确调用。
+
+再低版本的BorlandIDEServices没实现该接口，用GUID查不到，那就没法用，也正常。
+
+EMB这种“先实现某种功能，再在后续Update包里开放接口”的习惯，其实不是太恰当。
+
+最好的方式当然是“实现与接口开放同步进行”，这样我们专家包能用就用，不能用就不用，干脆得很。
+
+再不行，也最好通过明确的编译期开关或提示告知可用或不可用，我们好在代码里用开关控制。
+
+最怕的就是，一个Delphi大版本，不同的Update包，所有编译条件都一样，但就是跑起来的环境、接口不同，逼得我们想尽办法动态查询接口并调用。
+
+而且这个动态调用的过程，不能有新Update包的编译期内容参与，顶多只能把GUID复制过来用，实在是束手束脚。
+
+而且，如果新接口的方法的参数里还涉及到新接口（比如Delphi 10.2.2的主题相关接口在10.2.3中才提供，主题通知参数还有个新的INTAIDEThemingServicesNotifier），那就更麻烦了，还得进一步修改参数的GUID。
+
+这个就作为延伸的思考项，留给读者们研究吧。
