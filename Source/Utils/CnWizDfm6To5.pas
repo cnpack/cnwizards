@@ -29,7 +29,9 @@ unit CnWizDfm6To5;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2002.12.02 V1.1
+* 修改记录：2025.04.17 V1.2
+*               新增二进制与文本窗体格式的互相转换
+*           2002.12.02 V1.1
 *               新增对二进制文件格式的支持
 *           2002.11.17 V1.0
 *               创建单元
@@ -49,16 +51,17 @@ uses
 
 type
   TCnDFMConvertResult = (crSucc, crOpenError, crSaveError, crInvalidFormat);
+  {* 转换结果}
 
 function DFM6To5(const FileName: string): TCnDFMConvertResult;
 {* 将 Delphi6 及以后版本的窗体文件转换为兼容 Delphi5 的文件，
    支持文本和二进制格式的 DFM 文件}
 
 function TextToBin(const FileName: string): TCnDFMConvertResult;
-{* 将文本格式的窗体文件转换为二进制格式的窗体文件}
+{* 将文本格式的窗体文件转换为二进制格式的窗体文件，内部字符串转换成普通编码，IDE 打开时可自动识别}
 
 function BinToText(const FileName: string): TCnDFMConvertResult;
-{* 将二进制格式的窗体文件转换为文本格式的窗体文件}
+{* 将二进制格式的窗体文件转换为文本格式的窗体文件，内部字符串转换成普通编码，IDE 打开时可自动识别}
 
 implementation
 
@@ -838,7 +841,7 @@ function TextToBin(const FileName: string): TCnDFMConvertResult;
 var
   FileStream: TFileStream;
   MemStream: TMemoryStream;
-  Buffer: array[0..3] of AnsiChar; // DFM 二进制头为 ANSI 字符
+  H: AnsiChar;
 begin
   // 检查文件是否存在
   if not FileExists(FileName) then
@@ -856,12 +859,11 @@ begin
   end;
 
   try
-    // 检查是否为二进制格式（TPF0 头）
+    // 检查是否为文本头
     if FileStream.Size >= 4 then
     begin
-      FillChar(Buffer[0], SizeOf(Buffer), 0);
-      FileStream.Read(Buffer, 4);
-      if (Buffer[0] = 'T') and (Buffer[1] = 'P') and (Buffer[2] = 'F') and (Buffer[3] = '0') then
+      FileStream.Read(H, SizeOf(AnsiChar));
+      if not (H in ['o', 'O', 'i', 'I', ' ', #13, #11, #9]) then // 非文本格式的 DFM
       begin
         Result := crInvalidFormat;
         Exit;
@@ -874,7 +876,7 @@ begin
     try
       // 尝试文本转二进制
       try
-        ObjectTextToBinary(FileStream, MemStream);
+        ObjectTextToResource(FileStream, MemStream);
       except
         Result := crInvalidFormat;
         Exit;
@@ -902,7 +904,7 @@ function BinToText(const FileName: string): TCnDFMConvertResult;
 var
   FileStream: TFileStream;
   MemStream: TMemoryStream;
-  Buffer: array[0..3] of AnsiChar; // DFM 二进制头为 ANSI 字符
+  Buffer: array[0..1] of Byte; // DFM 二进制头
 begin
   // 检查文件是否存在
   if not FileExists(FileName) then
@@ -920,12 +922,12 @@ begin
   end;
 
   try
-    // 检查是否为二进制格式（TPF0 头）
+    // 检查是否为二进制格式（Res 头 FF0A）
     if FileStream.Size >= 4 then
     begin
       FillChar(Buffer[0], SizeOf(Buffer), 0);
-      FileStream.Read(Buffer, 4);
-      if (Buffer[0] <> 'T') or (Buffer[1] <> 'P') or (Buffer[2] <> 'F') or (Buffer[3] <> '0') then
+      FileStream.Read(Buffer, SizeOf(Buffer));
+      if (Buffer[0] <> $FF) or (Buffer[1] <> $0A) then
       begin
         Result := crInvalidFormat;
         Exit;
@@ -938,7 +940,7 @@ begin
     try
       // 尝试二进制转文本
       try
-        ObjectBinaryToText(FileStream, MemStream);
+        MyObjectResourceToText(FileStream, MemStream);
       except
         Result := crInvalidFormat;
         Exit;

@@ -155,6 +155,8 @@ begin
   finally
     Free;
   end;
+
+  Application.Title := Caption;
 end;
 
 procedure TCnDTMainForm.FormDestroy(Sender: TObject);

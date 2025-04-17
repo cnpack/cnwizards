@@ -196,7 +196,6 @@ object CnDTMainForm: TCnDTMainForm
     Anchors = [akRight, akBottom]
     Caption = 'Bin To &Text'
     TabOrder = 5
-    Visible = False
     OnClick = btnBinToTxtClick
   end
   object btnTxtToBin: TButton
@@ -207,7 +206,6 @@ object CnDTMainForm: TCnDTMainForm
     Anchors = [akRight, akBottom]
     Caption = 'Text To &Bin'
     TabOrder = 6
-    Visible = False
     OnClick = btnTxtToBinClick
   end
   object OpenDialog: TOpenDialog

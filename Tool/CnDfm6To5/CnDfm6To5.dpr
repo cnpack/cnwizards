@@ -35,7 +35,6 @@ uses
 
 begin
   Application.Initialize;
-  Application.Title := 'DFM 窗体转换工具';
   Application.CreateForm(TCnDTMainForm, CnDTMainForm);
   Application.Run;
 end.
