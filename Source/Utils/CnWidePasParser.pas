@@ -1554,7 +1554,31 @@ var
     PosInfo.Token := AnsiString(Lex.Token);
     PosInfo.TokenID := Lex.TokenID;
     if NoJunk then
-      Lex.NextNoJunk
+    begin
+      // 不能直接调用 Lex.NextNoJunk，会错误地越过注释而忽略了光标判断
+      repeat
+        Lex.Next;
+        if (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment]) and LexStillBeforeCursor then
+        begin
+          // 重复上面的
+          PosInfo.LastIdentPos := Lex.LastIdentPos;
+          PosInfo.LastNoSpace := Lex.LastNoSpace;
+          PosInfo.LastNoSpacePos := Lex.LastNoSpacePos;
+          PosInfo.LineNumber := Lex.LineNumber - 1; // 从 1 开始变成从 0 开始
+          PosInfo.LinePos := Lex.LineStartOffset;
+          PosInfo.TokenPos := Lex.TokenPos;
+          PosInfo.Token := AnsiString(Lex.Token);
+          PosInfo.TokenID := Lex.TokenID;
+
+          // 设置注释区域
+          if PosInfo.PosKind <> pkComment then
+          begin
+            SavePos := PosInfo.PosKind;
+            PosInfo.PosKind := pkComment;
+          end;
+        end;
+      until not (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment, tkCRLF, tkCRLFCo, tkSpace]);
+    end
     else
       Lex.Next;
 
@@ -1612,6 +1636,9 @@ begin
     // 但行相同时，Lex 需要先对这一行进行 Tab 展开
     while (Lex.TokenID <> tkNull) and LexStillBeforeCursor do
     begin
+      // 注意：循环里调用 DoNext(True) 时，原来的实现是直接 Lex.NextNoJunk 容易越过注释
+      // 导致光标在注释中时位置判断错误落在前一个了，现在 DoNext 里改成模拟调用并判断
+
       MyTokenID := Lex.TokenID;
 
       // 小修补，点号后的短关键字要当成普通标识符，才能保持 pkField

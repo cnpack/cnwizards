@@ -1607,7 +1607,31 @@ var
     Result.Token := Lex.Token;
     Result.TokenID := Lex.TokenID;
     if NoJunk then
-      Lex.NextNoJunk
+    begin
+      // 不能直接调用 Lex.NextNoJunk，会错误地越过注释而忽略了光标判断
+      repeat
+        Lex.Next;
+        if (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment]) and (Lex.TokenPos < CurrPos) then
+        begin
+          // 重复上面的
+          Result.LastIdentPos := Lex.LastIdentPos;
+          Result.LastNoSpace := Lex.LastNoSpace;
+          Result.LastNoSpacePos := Lex.LastNoSpacePos;
+          Result.LineNumber := Lex.LineNumber;
+          Result.LinePos := Lex.LinePos;
+          Result.TokenPos := Lex.TokenPos;
+          Result.Token := Lex.Token;
+          Result.TokenID := Lex.TokenID;
+
+          // 设置注释区域
+          if Result.PosKind <> pkComment then
+          begin
+            SavePos := Result.PosKind;
+            Result.PosKind := pkComment;
+          end;
+        end;
+      until not (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment, tkCRLF, tkCRLFCo, tkSpace]);
+    end
     else
       Lex.Next;
   end;
@@ -1655,6 +1679,9 @@ begin
 
     while (Lex.TokenPos < CurrPos) and (Lex.TokenID <> tkNull) do
     begin
+      // 注意：循环里调用 DoNext(True) 时，原来的实现是直接 Lex.NextNoJunk 容易越过注释
+      // 导致光标在注释中时位置判断错误落在前一个了，现在 DoNext 里改成模拟调用并判断
+
       // CnDebugger.LogFmt('Token ID %d, Pos %d, %s',[Integer(Lex.TokenID), Lex.TokenPos, Lex.Token]);
       MyTokenID := Lex.TokenID;
 
@@ -1686,7 +1713,7 @@ begin
               Result.AreaKind := akInterface;
               Result.PosKind := pkFlat;
             end
-            else if Lex.IsInterface then
+            else if Lex.IsInterface then  // 和 class/record 判断类似
             begin
               Result.PosKind := pkInterface;
               DoNext(True);
