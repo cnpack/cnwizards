@@ -2884,6 +2884,7 @@ TCnAICoderChatForm.actToggleSend.Hint=Alternar área de envio
 TCnAICoderChatForm.btnMsgSend.Hint=Pressione Enter para enviar, Ctrl+Enter para nova linha
 TCnAICoderChatForm.btnReferSelection.Hint=Anexar o código selecionado no editor ao fazer uma pergunta
 TCnAICoderChatForm.Caption=Chat com AI Coder
+SCnHint=Dica
 SCnInformation=Dica
 SCnWarning=Aviso
 SCnError=Erro

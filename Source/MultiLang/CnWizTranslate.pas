@@ -136,7 +136,7 @@ begin
 
   // Editors Comment
   TranslateStr(SCnStringPropEditorComment, 'SCnStringPropEditorComment');
-  TranslateStr(SCnHintPropEditorComment, 'sCnHintPropEditorComment');
+  TranslateStr(SCnHintPropEditorComment, 'SCnHintPropEditorComment');
   TranslateStr(SCnStringsPropEditorComment, 'SCnStringsPropEditorComment');
   TranslateStr(SCnFileNamePropEditorComment, 'SCnFileNamePropEditorComment');
   TranslateStr(SCnSizeConstraintsPropEditorComment, 'SCnSizeConstraintsPropEditorComment');
@@ -1532,6 +1532,7 @@ begin
 
   CnTranslateAuthorInfo;
 
+  TranslateStr(SCnHint, 'SCnHint');
   TranslateStr(SCnInformation, 'SCnInformation');
   TranslateStr(SCnWarning, 'SCnWarning');
   TranslateStr(SCnError, 'SCnError');
