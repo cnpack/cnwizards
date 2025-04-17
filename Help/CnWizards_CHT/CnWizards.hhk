@@ -127,11 +127,11 @@
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="插入顏色工具">
-		<param name="Local" value="wizards\projext\editorinsertcolor.htm">
+		<param name="Local" value="wizards\toolset\toolsetinsertcolor.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="插入日期時間工具">
-		<param name="Local" value="wizards\projext\editorinserttime.htm">
+		<param name="Local" value="wizards\toolset\toolsetinserttime.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="常用工具">
