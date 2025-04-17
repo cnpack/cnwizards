@@ -1,11 +1,11 @@
 object CnDTMainForm: TCnDTMainForm
-  Left = 185
-  Top = 92
+  Left = 365
+  Top = 194
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'DFM Convert Tool'
-  ClientHeight = 412
-  ClientWidth = 531
+  ClientHeight = 489
+  ClientWidth = 758
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,17 +21,19 @@ object CnDTMainForm: TCnDTMainForm
   TextHeight = 13
   object Label1: TLabel
     Left = 8
-    Top = 383
+    Top = 460
     Width = 124
     Height = 13
+    Anchors = [akLeft, akBottom]
     Caption = 'CnPack IDE Wizards Tools'
   end
   object lblURL: TLabel
     Left = 168
-    Top = 383
+    Top = 460
     Width = 81
     Height = 13
     Cursor = crHandPoint
+    Anchors = [akLeft, akBottom]
     Caption = 'www.cnpack.org'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlue
@@ -41,26 +43,36 @@ object CnDTMainForm: TCnDTMainForm
     ParentFont = False
     OnClick = lblURLClick
   end
+  object bvl1: TBevel
+    Left = 564
+    Top = 456
+    Width = 17
+    Height = 25
+    Shape = bsLeftLine
+  end
   object GroupBox1: TGroupBox
     Left = 8
     Top = 8
-    Width = 513
+    Width = 740
     Height = 153
+    Anchors = [akLeft, akTop, akRight]
     Caption = '&To Convert'
     TabOrder = 0
     object sbFile: TSpeedButton
-      Left = 482
+      Left = 709
       Top = 36
       Width = 20
       Height = 20
+      Anchors = [akTop, akRight]
       Caption = '...'
       OnClick = sbFileClick
     end
     object sbDir: TSpeedButton
-      Left = 482
+      Left = 709
       Top = 76
       Width = 20
       Height = 20
+      Anchors = [akTop, akRight]
       Caption = '...'
       OnClick = sbDirClick
     end
@@ -78,8 +90,9 @@ object CnDTMainForm: TCnDTMainForm
     object edtFile: TEdit
       Left = 26
       Top = 36
-      Width = 449
+      Width = 676
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
     end
     object rbDir: TRadioButton
@@ -94,8 +107,9 @@ object CnDTMainForm: TCnDTMainForm
     object edtDir: TEdit
       Left = 26
       Top = 76
-      Width = 449
+      Width = 676
       Height = 21
+      Anchors = [akLeft, akTop, akRight]
       TabOrder = 2
     end
     object cbSubDirs: TCheckBox
@@ -118,23 +132,25 @@ object CnDTMainForm: TCnDTMainForm
   object GroupBox2: TGroupBox
     Left = 8
     Top = 168
-    Width = 513
-    Height = 201
+    Width = 740
+    Height = 278
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Caption = 'Convert R&esult'
     TabOrder = 1
     object ListView: TListView
       Left = 10
       Top = 20
-      Width = 492
-      Height = 169
+      Width = 719
+      Height = 246
+      Anchors = [akLeft, akTop, akRight, akBottom]
       Columns = <
         item
           Caption = 'FileName'
-          Width = 400
+          Width = 600
         end
         item
           Caption = 'Result'
-          Width = 70
+          Width = 90
         end>
       ReadOnly = True
       RowSelect = True
@@ -143,31 +159,56 @@ object CnDTMainForm: TCnDTMainForm
     end
   end
   object btnStart: TButton
-    Left = 286
-    Top = 380
+    Left = 297
+    Top = 457
     Width = 75
     Height = 22
+    Anchors = [akRight, akBottom]
     Caption = 'Con&vert'
     TabOrder = 2
     OnClick = btnStartClick
   end
   object btnClose: TButton
-    Left = 446
-    Top = 380
+    Left = 673
+    Top = 457
     Width = 75
     Height = 22
+    Anchors = [akRight, akBottom]
     Caption = '&Close'
     TabOrder = 4
     OnClick = btnCloseClick
   end
   object btnAbout: TButton
-    Left = 366
-    Top = 380
+    Left = 585
+    Top = 457
     Width = 75
     Height = 22
+    Anchors = [akRight, akBottom]
     Caption = '&About'
     TabOrder = 3
     OnClick = btnAboutClick
+  end
+  object btnBinToTxt: TButton
+    Left = 385
+    Top = 457
+    Width = 75
+    Height = 22
+    Anchors = [akRight, akBottom]
+    Caption = 'Bin To &Text'
+    TabOrder = 5
+    Visible = False
+    OnClick = btnBinToTxtClick
+  end
+  object btnTxtToBin: TButton
+    Left = 473
+    Top = 457
+    Width = 75
+    Height = 22
+    Anchors = [akRight, akBottom]
+    Caption = 'Text To &Bin'
+    TabOrder = 6
+    Visible = False
+    OnClick = btnTxtToBinClick
   end
   object OpenDialog: TOpenDialog
     DefaultExt = '*.DFM'

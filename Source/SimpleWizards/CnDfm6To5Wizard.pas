@@ -86,7 +86,7 @@ uses
 procedure TCnDfm6To5Wizard.Execute;
 var
   OpenDialog: TOpenDialog;
-  i: Integer;
+  I: Integer;
   Fn: string;
   ActionSvcs: IOTAActionServices;
 begin
@@ -96,33 +96,38 @@ begin
     begin
       DefaultExt := 'dfm';
       FilterIndex := 1;
-      Filter := 'Delphi/C++Builder form (*.dfm)|*.dfm';
+      Filter := 'Delphi/C++Builder Form (*.dfm)|*.dfm';
       Options := [ofHideReadOnly, ofAllowMultiSelect, ofEnableSizing];
       Title := 'Open';
     end;
+
     if OpenDialog.Execute then
     begin
       QuerySvcs(BorlandIDEServices, IOTAActionServices, ActionSvcs);
-      for i := 0 to OpenDialog.Files.Count - 1 do
-       if IsDfm(OpenDialog.Files[i]) then
-         case DFM6To5(OpenDialog.Files[i]) of
-           crSucc:
-             begin
-               Fn := _CnChangeFileExt(OpenDialog.Files[i], '.pas'); // 相关的 Pas 文件
-               if not FileExists(Fn) then
-                 Fn := _CnChangeFileExt(OpenDialog.Files[i], '.cpp'); // 相关的 Cpp 文件
-               if not FileExists(Fn) then
-                 Fn := OpenDialog.Files[i]; // 没有相关的单元文件，打开窗体本身
-               ActionSvcs.CloseFile(Fn); // 先关闭相关单元
-               ActionSvcs.OpenFile(Fn);  // 再重新打开
-             end;
-           crOpenError:
-             ErrorDlg(Format(SCnDfm6To5OpenError, [OpenDialog.Files[i]]));
-           crSaveError:
-             ErrorDlg(Format(SCnDfm6To5SaveError, [OpenDialog.Files[i]]));
-           crInvalidFormat:
-             ErrorDlg(Format(SCnDfm6To5InvalidFormat, [OpenDialog.Files[i]]))
-       end;
+      for I := 0 to OpenDialog.Files.Count - 1 do
+      begin
+        if IsDfm(OpenDialog.Files[I]) then
+        begin
+          case DFM6To5(OpenDialog.Files[I]) of
+            crSucc:
+              begin
+                Fn := _CnChangeFileExt(OpenDialog.Files[I], '.pas');   // 相关的 Pas 文件
+                if not FileExists(Fn) then
+                  Fn := _CnChangeFileExt(OpenDialog.Files[I], '.cpp'); // 相关的 Cpp 文件
+                if not FileExists(Fn) then
+                  Fn := OpenDialog.Files[I]; // 没有相关的单元文件，打开窗体本身
+                ActionSvcs.CloseFile(Fn);    // 先关闭相关单元
+                ActionSvcs.OpenFile(Fn);     // 再重新打开
+              end;
+            crOpenError:
+              ErrorDlg(Format(SCnDfm6To5OpenError, [OpenDialog.Files[I]]));
+            crSaveError:
+              ErrorDlg(Format(SCnDfm6To5SaveError, [OpenDialog.Files[I]]));
+            crInvalidFormat:
+              ErrorDlg(Format(SCnDfm6To5InvalidFormat, [OpenDialog.Files[I]]))
+          end;
+        end;
+      end;
     end;
   finally
     OpenDialog.Free;
@@ -169,9 +174,9 @@ end;
 
 initialization
 
-{$IFDEF COMPILER5}                    // 仅在 Delphi5/BCB5 下才注册该专家
-  RegisterCnWizard(TCnDfm6To5Wizard); // 注册专家
-{$ENDIF COMPILER5}
+{$IFDEF COMPILER5}
+  RegisterCnWizard(TCnDfm6To5Wizard); // 仅在 Delphi5/BCB5 下才注册该专家
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNDFM6TO5WIZARD}
 end.

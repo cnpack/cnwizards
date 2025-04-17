@@ -48,11 +48,17 @@ uses
   Classes, Consts, SysUtils, TypInfo;
 
 type
-  TDFMConvertResult = (crSucc, crOpenError, crSaveError, crInvalidFormat);
+  TCnDFMConvertResult = (crSucc, crOpenError, crSaveError, crInvalidFormat);
 
-function DFM6To5(const FileName: string): TDFMConvertResult;
+function DFM6To5(const FileName: string): TCnDFMConvertResult;
 {* 将 Delphi6 及以后版本的窗体文件转换为兼容 Delphi5 的文件，
    支持文本和二进制格式的 DFM 文件}
+
+function TextToBin(const FileName: string): TCnDFMConvertResult;
+{* 将文本格式的窗体文件转换为二进制格式的窗体文件}
+
+function BinToText(const FileName: string): TCnDFMConvertResult;
+{* 将二进制格式的窗体文件转换为文本格式的窗体文件}
 
 implementation
 
@@ -761,7 +767,7 @@ end;
 // 将 Delphi6 及以后版本的窗体文件转换为 Delphi5 支持的文件
 //------------------------------------------------------------------------------
 
-function DFM6To5(const FileName: string): TDFMConvertResult;
+function DFM6To5(const FileName: string): TCnDFMConvertResult;
 var
   InStrm, OutStrm: TMemoryStream;
   C: Char;
@@ -769,15 +775,18 @@ begin
   InStrm := nil;
   OutStrm := nil;
   Result := crInvalidFormat;
+
   try
     InStrm := TMemoryStream.Create;
     OutStrm := TMemoryStream.Create;
+
     try
       InStrm.LoadFromFile(FileName);
     except
       Result := crOpenError;
       Exit;
     end;
+
     if InStrm.Size > 0 then
     begin
       C := PChar(InStrm.Memory)^;
@@ -808,18 +817,148 @@ begin
           Result := crInvalidFormat;
           Exit;
         end;
+
         try
           InStrm.SaveToFile(FileName);
         except
           Result := crSaveError;
           Exit;
         end;
+
         Result := crSucc;
       end;
     end;
   finally
-    if InStrm <> nil then InStrm.Free;
-    if OutStrm <> nil then OutStrm.Free;
+    InStrm.Free;
+    OutStrm.Free;
+  end;
+end;
+
+function TextToBin(const FileName: string): TCnDFMConvertResult;
+var
+  FileStream: TFileStream;
+  MemStream: TMemoryStream;
+  Buffer: array[0..3] of AnsiChar; // DFM 二进制头为 ANSI 字符
+begin
+  // 检查文件是否存在
+  if not FileExists(FileName) then
+  begin
+    Result := crOpenError;
+    Exit;
+  end;
+
+  // 尝试打开文件流
+  try
+    FileStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+  except
+    Result := crOpenError;
+    Exit;
+  end;
+
+  try
+    // 检查是否为二进制格式（TPF0 头）
+    if FileStream.Size >= 4 then
+    begin
+      FillChar(Buffer[0], SizeOf(Buffer), 0);
+      FileStream.Read(Buffer, 4);
+      if (Buffer[0] = 'T') and (Buffer[1] = 'P') and (Buffer[2] = 'F') and (Buffer[3] = '0') then
+      begin
+        Result := crInvalidFormat;
+        Exit;
+      end;
+      FileStream.Position := 0;
+    end;
+
+    // 准备转换流
+    MemStream := TMemoryStream.Create;
+    try
+      // 尝试文本转二进制
+      try
+        ObjectTextToBinary(FileStream, MemStream);
+      except
+        Result := crInvalidFormat;
+        Exit;
+      end;
+
+      FreeAndNil(FileStream);
+
+      try
+        MemStream.SaveToFile(FileName);
+      except
+        Result := crSaveError;
+        Exit;
+      end;
+
+      Result := crSucc;
+    finally
+      MemStream.Free;
+    end;
+  finally
+    FileStream.Free;
+  end;
+end;
+
+function BinToText(const FileName: string): TCnDFMConvertResult;
+var
+  FileStream: TFileStream;
+  MemStream: TMemoryStream;
+  Buffer: array[0..3] of AnsiChar; // DFM 二进制头为 ANSI 字符
+begin
+  // 检查文件是否存在
+  if not FileExists(FileName) then
+  begin
+    Result := crOpenError;
+    Exit;
+  end;
+
+  // 尝试打开文件流
+  try
+    FileStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+  except
+    Result := crOpenError;
+    Exit;
+  end;
+
+  try
+    // 检查是否为二进制格式（TPF0 头）
+    if FileStream.Size >= 4 then
+    begin
+      FillChar(Buffer[0], SizeOf(Buffer), 0);
+      FileStream.Read(Buffer, 4);
+      if (Buffer[0] <> 'T') or (Buffer[1] <> 'P') or (Buffer[2] <> 'F') or (Buffer[3] <> '0') then
+      begin
+        Result := crInvalidFormat;
+        Exit;
+      end;
+      FileStream.Position := 0;
+    end;
+
+    // 准备转换流
+    MemStream := TMemoryStream.Create;
+    try
+      // 尝试二进制转文本
+      try
+        ObjectBinaryToText(FileStream, MemStream);
+      except
+        Result := crInvalidFormat;
+        Exit;
+      end;
+
+      FreeAndNil(FileStream);
+
+      try
+        MemStream.SaveToFile(FileName);
+      except
+        Result := crSaveError;
+        Exit;
+      end;
+
+      Result := crSucc;
+    finally
+      MemStream.Free;
+    end;
+  finally
+    FileStream.Free;
   end;
 end;
 
