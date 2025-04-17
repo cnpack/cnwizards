@@ -4,9 +4,11 @@
 !TranslationAuthorEmail=ralf@schroedter-online.de
 !TranslationDefaultFont=Tahoma,8,,,,
 TCnDTMainForm.btnAbout.Caption=&Info
+TCnDTMainForm.btnBinToTxt.Caption=Binär zu &Text
 TCnDTMainForm.btnClose.Caption=s&chließen
 TCnDTMainForm.btnStart.Caption=kon&vertieren
 TCnDTMainForm.Caption=DFM Konvertierungswerkzeug
+TCnDTMainForm.btnTxtToBin.Caption=Text zu &Binär
 TCnDTMainForm.cbReadOnly.Caption=ve&rarbeite schreibgeschützte Dateien
 TCnDTMainForm.cbSubDirs.Caption=&inklusive Unterordner
 TCnDTMainForm.GroupBox1.Caption=zu konver&tieren
@@ -31,4 +33,4 @@ SCnSucc=Konvertierung erfolgreich.
 SCnOpenFail=Öffnen fehlgeschlagen.
 SCnSaveFail=Speichern fehlgeschlagen.
 SCnInvalidFormat=ungültiges Dateiformat.
-SCnAbout=DFM Datei Konvertierungs Werkzeug<BR><BR>Dieses Werkzeug konvertiert Formulare die mit Delphi 6/7 <BR>oder C++Bilder 6 erstellt wurden in das Delphi 5 oder C++ Builder 5 Format.<BR>Text and Binär Formate werden beide unterstützt.<BR><BR>Author: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2025 CnPack Team
+SCnAbout=DFM Datei Konvertierungs Werkzeug<BR><BR>Dieses Werkzeug konvertiert Formulare die mit Delphi 6/7 <BR>oder C++Bilder 6 oder höher generiert wurden in das Delphi 5 oder C++ Builder 5 Format.<BR>Unterstützt auch Text- und Binärformat-Konvertierungen.<BR><BR>Author: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: LiuXiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2025 CnPack Team

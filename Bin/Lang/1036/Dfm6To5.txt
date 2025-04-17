@@ -4,9 +4,11 @@
 !TranslationAuthorEmail=FranckLGR@Gmail.fr, 1980dcaouette@gmail.com
 !TranslationDefaultFont=Tahoma,8,,,,
 TCnDTMainForm.btnAbout.Caption=&A Propos
+TCnDTMainForm.btnBinToTxt.Caption=Binaire vers &Texte
 TCnDTMainForm.btnClose.Caption=&Fermer
 TCnDTMainForm.btnStart.Caption=Con&vertir
 TCnDTMainForm.Caption=Outil de convertion de DFM
+TCnDTMainForm.btnTxtToBin.Caption=Texte vers &Binaire
 TCnDTMainForm.cbReadOnly.Caption=Fichie&rs de processus en lecture seule
 TCnDTMainForm.cbSubDirs.Caption=&Inclure les sous-dossiers
 TCnDTMainForm.GroupBox1.Caption=&Convertir
@@ -31,4 +33,4 @@ SCnSucc=Conversion réussie.
 SCnOpenFail=Échec ouverture.
 SCnSaveFail=Enregistrer l'échec.
 SCnInvalidFormat=Format de fichier non valide.
-SCnAbout=Outil de conversion de fichier DFM<BR><BR>Cet outil peut être utilisé pour convertir des Form générés<BR> par Delphi 6/7 ou C ++ Builder 6<BR>en format Delphi 5 ou C ++ Builder 5.<BR>Le texte et le format sont binaire.<BR><BR>Auteur: Zhou JingYu (zjy@cnpack.org) <BR> Multilang: LiuXiao (liuxiao@cnpack.org)<BR>Droits d'auteur (C) 2001-2019 Équipe CnPack 
+SCnAbout=Outil de conversion de fichier DFM<BR><BR>Cet outil peut être utilisé pour convertir des Form générés<BR> par Delphi 6/7 ou C ++ Builder 6 ou versions ultérieures<BR>en format Delphi 5 ou C ++ Builder 5.<BR>Les conversions de formats texte et binaire sont également prises en charge.<BR><BR>Auteur: Zhou JingYu (zjy@cnpack.org) <BR> Multilang: Liu Xiao (liuxiao@cnpack.org)<BR>Droits d'auteur (C) 2001-2025 Équipe CnPack
