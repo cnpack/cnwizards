@@ -2,9 +2,9 @@
     "EngineName": "火山引擎",
     "URL": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
     "ApiKey": "",
-    "Model": "doubao-1.5-thinking-pro",
-    "ModelList": "doubao-1.5-thinking-pro,doubao-1.5-pro,doubao-pro,doubao-lite,deepseek-r1",
-    "Temperature": 1.0,
+    "Model": "doubao-1-5-pro-256k-250115",
+    "ModelList": "doubao-1-5-thinking-pro-250415,doubao-1-5-pro-32k-250115,doubao-1-5-pro-256k-250115,doubao-pro-4k-240515,deepseek-r1-250120,deepseek-v3-250324",
+    "Temperature": 0.5,
     "Stream": true,
     "WebAddress": "https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey"
 }

@@ -666,8 +666,10 @@ begin
             begin
               // 每一块回应拼起来
               Msg := TCnJSONObject(Arr[0]['delta']);
-              if  Msg['content'] <> nil then
-                Result := Result + Msg['content'].AsString;
+              if (Msg['content'] <> nil) and (Msg['content'].AsString <> '') then
+                Result := Result + Msg['content'].AsString
+              else if Msg['reasoning_content'] <> nil then // 也可能是内容空，先来推理数据
+                Result := Result + Msg['reasoning_content'].AsString;
               HasPartly := True;
             end;
           end;
@@ -690,8 +692,10 @@ begin
           begin
             // 整块回应
             Msg := TCnJSONObject(Arr[0]['message']);
-            if Msg['content'] <> nil then
-              Result := Msg['content'].AsString;
+            if (Msg['content'] <> nil) and (Msg['content'].AsString <> '') then
+              Result := Msg['content'].AsString
+            else if Msg['reasoning_content'] <> nil then // 也可能是先来推理数据
+              Result := Result + Msg['reasoning_content'].AsString;
           end;
         end;
       end;
