@@ -126,6 +126,12 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnVolceAIEngine = class(TCnAIBaseEngine)
+  {* 火山引擎}
+  public
+    class function EngineName: string; override;
+  end;
+
   TCnOllamaAIEngine = class(TCnAIBaseEngine)
   {* 本地或私有化部署的集成 Ollama 引擎}
   protected
@@ -188,6 +194,13 @@ end;
 class function TCnDeepSeekAIEngine.EngineName: string;
 begin
   Result := 'DeepSeek';
+end;
+
+{ TCnVolceAIEngine }
+
+class function TCnVolceAIEngine.EngineName: string;
+begin
+  Result := '火山引擎';
 end;
 
 { TCnMistralAIAIEngine }
@@ -798,6 +811,7 @@ initialization
   RegisterAIEngine(TCnGeminiAIEngine);
   RegisterAIEngine(TCnClaudeAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
+  RegisterAIEngine(TCnVolceAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);

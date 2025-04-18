@@ -1,0 +1,10 @@
+﻿{
+    "EngineName": "火山引擎",
+    "URL": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+    "ApiKey": "",
+    "Model": "doubao-1.5-thinking-pro",
+    "ModelList": "doubao-1.5-thinking-pro,doubao-1.5-pro,doubao-pro,doubao-lite,deepseek-r1",
+    "Temperature": 1.0,
+    "Stream": true,
+    "WebAddress": "https://console.volcengine.com/ark/region:ark+cn-beijing/apiKey"
+}
