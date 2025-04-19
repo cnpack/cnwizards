@@ -1360,10 +1360,7 @@ begin
     R := Rect;
     S := Text;
     if FOwner.Owner <> nil then
-    begin
-      Canvas.Font.Name := FOwner.Owner.Font.Name;
-      Canvas.Font.Size := FOwner.Owner.Font.Size;
-    end
+      Canvas.Font := FOwner.Owner.Font
     else
       Canvas.Font.Size := FONT_DEF_SIZE;
 
@@ -1397,10 +1394,7 @@ begin
   R := Rect;
   S := Text;
   if FOwner.Owner <> nil then
-  begin
-    Canvas.Font.Name := FOwner.Owner.Font.Name;
-    Canvas.Font.Size := FOwner.Owner.Font.Size;
-  end
+    Canvas.Font := FOwner.Owner.Font
   else
     Canvas.Font.Size := FONT_DEF_SIZE;
 
@@ -1496,10 +1490,7 @@ begin
     S := Text;
 
     if FOwner.Owner <> nil then
-    begin
-      Canvas.Font.Name := FOwner.Owner.Font.Name;
-      Canvas.Font.Size := FOwner.Owner.Font.Size;
-    end
+      Canvas.Font := FOwner.Owner.Font
     else
       Canvas.Font.Size := FONT_DEF_SIZE;
 
@@ -1562,7 +1553,7 @@ begin
     R := Rect;
 
     if FOwner.Owner <> nil then
-      Canvas.Font.Name := FOwner.Owner.Font.Name;
+      Canvas.Font := FOwner.Owner.Font;
     Canvas.Font.Size := FONT_SENDER_SIZE;
     Canvas.Font.Style := [fsBold];
 
@@ -1583,10 +1574,7 @@ begin
 
   // 设置文字内容并显示
   if FOwner.Owner <> nil then
-  begin
-    Canvas.Font.Name := FOwner.Owner.Font.Name;
-    Canvas.Font.Size := FOwner.Owner.Font.Size;
-  end
+    Canvas.Font := FOwner.Owner.Font
   else
     Canvas.Font.Size := FONT_DEF_SIZE;
 
@@ -1748,10 +1736,7 @@ begin
     R := Rect;
     S := Text;
     if FOwner.Owner <> nil then
-    begin
-      Canvas.Font.Name := FOwner.Owner.Font.Name;
-      Canvas.Font.Size := FOwner.Owner.Font.Size;
-    end
+      Canvas.Font := FOwner.Owner.Font
     else
       Canvas.Font.Size := FONT_DEF_SIZE;
 
@@ -1782,10 +1767,7 @@ begin
   R := Rect;
   S := Text;
   if FOwner.Owner <> nil then
-  begin
-    Canvas.Font.Name := FOwner.Owner.Font.Name;
-    Canvas.Font.Size := FOwner.Owner.Font.Size;
-  end
+    Canvas.Font := FOwner.Owner.Font
   else
     Canvas.Font.Size := FONT_DEF_SIZE;
 
