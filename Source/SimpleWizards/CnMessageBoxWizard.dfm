@@ -99,6 +99,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C104210421042104210421042104210421F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C}
+          Stretch = True
           Transparent = True
         end
         object Image2: TImage
@@ -175,6 +176,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C104210421042104210421042104210421F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C}
+          Stretch = True
           Transparent = True
         end
         object Image3: TImage
@@ -251,6 +253,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C1F7C1F7C0000000000001F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C}
+          Stretch = True
           Transparent = True
         end
         object Image4: TImage
@@ -327,6 +330,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C004000400040004000400040004000401F7C1F7C1F7C1F7C1F7C1F7C
             1F7C1F7C1F7C1F7C1F7C1F7C1F7C}
+          Stretch = True
           Transparent = True
         end
         object rbIconNone: TRadioButton
