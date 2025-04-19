@@ -401,9 +401,7 @@ end;
 procedure TCnObjectInspectorWrapper.ActiveFormChanged(Sender: TObject);
 var
   I: Integer;
-  IsNil: Boolean;
 begin
-  IsNil := FObjectInspectorForm = nil;
   CheckObjectInspector;
   if FObjectInspectorForm <> nil then
   begin

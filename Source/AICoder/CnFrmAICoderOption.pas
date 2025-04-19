@@ -149,7 +149,6 @@ constructor TCnAICoderOptionFrame.Create(AOwner: TComponent);
 begin
   inherited;
   FExtraOptions := TObjectList.Create(True);
-  CnEnlargeButtonGlyphForHDPI(btnReset);
 end;
 
 procedure TCnAICoderOptionFrame.CreateWnd;

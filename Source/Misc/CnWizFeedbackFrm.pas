@@ -337,16 +337,17 @@ end;
 
 procedure TCnWizFeedbackForm.SetDefaultConfigurationData;
 var
-  i: Integer;
+  I: Integer;
   CheckBox: TCheckBox;
 begin
   CheckBox := nil;
-  for i := 0 to gbConfigurationData.ControlCount - 1 do
+  for I := 0 to gbConfigurationData.ControlCount - 1 do
   begin
-    if gbConfigurationData.Controls[i] is TCheckBox then
-      CheckBox := gbConfigurationData.Controls[i] as TCheckBox
+    if gbConfigurationData.Controls[I] is TCheckBox then
+      CheckBox := gbConfigurationData.Controls[I] as TCheckBox
     else
       Continue;
+
     if FeedbackType = fbBug then
       CheckBox.Checked := True
     else
@@ -451,12 +452,12 @@ end;
 procedure TCnWizFeedbackForm.GenerateReport;
 var
   Report: string;
-  i: Integer;
+  I: Integer;
 begin
   Report := '';
-  for i := 0 to Notebook.Pages.Count - 1 do
-    if IsValidPage(i) then
-      Report := Report + GetPageReportText(i);
+  for I := 0 to Notebook.Pages.Count - 1 do
+    if IsValidPage(I) then
+      Report := Report + GetPageReportText(I);
   memReport.Lines.Text := Report;
 end;
 
@@ -476,16 +477,16 @@ end;
 procedure TCnWizFeedbackForm.CnWizardImageChanging(Sender: TObject;
   NewItemIndex: Integer; var AllowChange: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
   if NewItemIndex < Notebook.PageIndex then
     AllowChange := True
   else
   begin
     AllowChange := True;
-    for i := Notebook.PageIndex to NewItemIndex - 1 do
+    for I := Notebook.PageIndex to NewItemIndex - 1 do
     begin
-      if IsValidPage(i) and not CanProceed(i) then
+      if IsValidPage(I) and not CanProceed(I) then
       begin
         AllowChange := False;
         Exit;
@@ -641,11 +642,13 @@ begin
 end;
 
 function GetCPUSpeed: Extended;
+{$IFNDEF WIN64}
 const
   DelayTime = 250;
 var
   TimerHi, TimerLo: DWORD;
   PriorityClass, Priority: Integer;
+{$ENDIF}
 begin
   Result := 0;
 {$IFNDEF WIN64}

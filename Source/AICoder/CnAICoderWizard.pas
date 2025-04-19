@@ -425,6 +425,8 @@ begin
         FOptionFrames[I].WebAddr := CnAIEngineOptionManager.Options[I].WebAddress
       else
         FOptionFrames[I].lblApply.Visible := False;
+
+      CnEnlargeButtonGlyphForHDPI(FOptionFrames[I].btnReset);
     end;
   finally
     SL.Free;
