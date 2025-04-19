@@ -103,7 +103,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnAICoderEngine, CnWizOptions, CnWizIdeUtils {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnAICoderEngine, CnWizOptions, CnWizUtils, CnWizIdeUtils
+  {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   CN_AI_CODER_SUPPORT_TYPES: TTypeKinds = [tkInteger, tkFloat, tkString];
@@ -148,6 +149,7 @@ constructor TCnAICoderOptionFrame.Create(AOwner: TComponent);
 begin
   inherited;
   FExtraOptions := TObjectList.Create(True);
+  CnEnlargeButtonGlyphForHDPI(btnReset);
 end;
 
 procedure TCnAICoderOptionFrame.CreateWnd;
