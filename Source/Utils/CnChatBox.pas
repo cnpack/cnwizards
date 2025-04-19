@@ -761,7 +761,7 @@ begin
   // 腾出 Margin
   CnRectInflate(Rect, GetFromDPI(-BorderWidth), GetFromDPI(-BorderWidth));
 
-  Rect.Right := Rect.Right - GetFromDPI(25); //scroll
+  Rect.Right := Rect.Right - GetFromDPI(25); // scroll
   BaseColor := Color;
   FStartDraw := False;
   FSkip := False;
@@ -811,13 +811,14 @@ begin
         ItemRect := TxtRect;
         // 将内容矩形本身放大一点，并移动到待绘制的位置
         CnRectInflate(ItemRect, PaddingSize, PaddingSize);
-        CnSetRectLocation(ItemRect, Rect.Left, LastRect.Top - CnGetRectHeight(ItemRect));
+        CnSetRectLocation(ItemRect, Rect.Left, LastRect.Top - CnGetRectHeight(ItemRect) -  GetFromDPI(10));
+        // 多往上移 10，留点下边距
 
         LastRect := ItemRect;
         if (FItems[I] is TCnChatInfo) then
           CnRectOffset(LastRect, 0, GetFromDPI(-20))
         else
-          CnRectOffset(LastRect, 0, GetFromDPI(-10));
+          CnRectOffset(LastRect, 0, GetFromDPI(-10));  // 这里控制相邻消息的上下距离
 
         if FSkip then
           Continue;
@@ -1602,7 +1603,9 @@ begin
   begin
     CheckMemo;
     FMemo.Lines.Text := Text;
-    FMemo.SetBounds(R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top);
+    if (FMemo.Left <> R.Left) or (FMemo.Top <> R.Top) or (FMemo.Width <> R.Right - R.Left)
+      or (FMemo.Height <> R.Bottom - R.Top) then
+      FMemo.SetBounds(R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top);
     HideCaret(FMemo.Handle);
 
     if FromType = cmtYou then

@@ -46,6 +46,8 @@ type
     CopyCode1: TMenuItem;
     chkMarkDown: TCheckBox;
     CopyAll1: TMenuItem;
+    btnAddYourStream: TButton;
+    tmrSteam: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -67,6 +69,8 @@ type
     procedure pmAIChatPopup(Sender: TObject);
     procedure CopyCode1Click(Sender: TObject);
     procedure Copy1Click(Sender: TObject);
+    procedure btnAddYourStreamClick(Sender: TObject);
+    procedure tmrSteamTimer(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -77,6 +81,8 @@ type
     FAIChatItem: TCnChatItem;
     FRender: TCnRichEditRender;
     FRtfStream: TMemoryStream;
+    FStreamMsg: TCnChatMessage;
+    FStreamCnt: Integer;
 
     class function ExtractCode(Item: TCnChatMessage): string;
 
@@ -744,6 +750,28 @@ begin
     except
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
+  end;
+end;
+
+procedure TFormAITest.btnAddYourStreamClick(Sender: TObject);
+begin
+  FStreamMsg := FChatBox.Items.AddMessage;
+  FStreamMsg.From := 'AI';
+  FStreamMsg.FromType := cmtYou;
+  FStreamCnt := 0;
+
+  tmrSteam.Enabled := True;
+end;
+
+procedure TFormAITest.tmrSteamTimer(Sender: TObject);
+begin
+  if FStreamMsg <> nil then
+  begin
+    FStreamMsg.Text := FStreamMsg.Text + '吃饭喝水 ';
+    Inc(FStreamCnt);
+
+    if FStreamCnt >= 100 then
+      tmrSteam.Enabled := False;
   end;
 end;
 

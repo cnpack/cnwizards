@@ -1,8 +1,8 @@
 object FormAITest: TFormAITest
   Left = 128
   Top = 84
-  Width = 1033
-  Height = 641
+  Width = 1064
+  Height = 680
   Caption = 'AI Coder Test'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,8 +18,8 @@ object FormAITest: TFormAITest
   object pgcAICoder: TPageControl
     Left = 8
     Top = 8
-    Width = 1014
-    Height = 599
+    Width = 1034
+    Height = 620
     ActivePage = tsHTTP
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
@@ -244,6 +244,15 @@ object FormAITest: TFormAITest
         TabOrder = 5
         OnClick = btnAddMyLongMsgClick
       end
+      object btnAddYourStream: TButton
+        Left = 496
+        Top = 16
+        Width = 97
+        Height = 25
+        Caption = 'Your Stream Msg'
+        TabOrder = 6
+        OnClick = btnAddYourStreamClick
+      end
     end
   end
   object dlgSave1: TSaveDialog
@@ -275,5 +284,12 @@ object FormAITest: TFormAITest
       Caption = 'Copy Text'
       OnClick = CopyAll1Click
     end
+  end
+  object tmrSteam: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = tmrSteamTimer
+    Left = 420
+    Top = 72
   end
 end
