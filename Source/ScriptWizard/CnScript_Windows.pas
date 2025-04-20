@@ -5743,17 +5743,17 @@ begin
   CL.AddConstantN('WNCON_NOTROUTED','LongInt').SetInt( 2);
   CL.AddConstantN('WNCON_SLOWLINK','LongInt').SetInt( 4);
   CL.AddConstantN('WNCON_DYNAMIC','LongInt').SetInt( 8);
-  CL.AddConstantN('WM_DDE_FIRST','LongWord').SetUInt( $03E0);
-  CL.AddConstantN('WM_DDE_INITIATE','LongInt').SetInt( WM_DDE_FIRST);
-  CL.AddConstantN('WM_DDE_TERMINATE','LongInt').SetInt( WM_DDE_FIRST + 1);
-  CL.AddConstantN('WM_DDE_ADVISE','LongInt').SetInt( WM_DDE_FIRST + 2);
-  CL.AddConstantN('WM_DDE_UNADVISE','LongInt').SetInt( WM_DDE_FIRST + 3);
-  CL.AddConstantN('WM_DDE_ACK','LongInt').SetInt( WM_DDE_FIRST + 4);
-  CL.AddConstantN('WM_DDE_DATA','LongInt').SetInt( WM_DDE_FIRST + 5);
-  CL.AddConstantN('WM_DDE_REQUEST','LongInt').SetInt( WM_DDE_FIRST + 6);
-  CL.AddConstantN('WM_DDE_POKE','LongInt').SetInt( WM_DDE_FIRST + 7);
-  CL.AddConstantN('WM_DDE_EXECUTE','LongInt').SetInt( WM_DDE_FIRST + 8);
-  CL.AddConstantN('WM_DDE_LAST','LongInt').SetInt( WM_DDE_FIRST + 8);
+  CL.AddConstantN('WM_DDE_FIRST','LongWord').SetUInt( $03E0); // 5 和 7 都有但 6 没有？
+  CL.AddConstantN('WM_DDE_INITIATE','LongInt').SetInt( $03E0);
+  CL.AddConstantN('WM_DDE_TERMINATE','LongInt').SetInt( $03E0 + 1);
+  CL.AddConstantN('WM_DDE_ADVISE','LongInt').SetInt( $03E0 + 2);
+  CL.AddConstantN('WM_DDE_UNADVISE','LongInt').SetInt( $03E0 + 3);
+  CL.AddConstantN('WM_DDE_ACK','LongInt').SetInt( $03E0 + 4);
+  CL.AddConstantN('WM_DDE_DATA','LongInt').SetInt( $03E0 + 5);
+  CL.AddConstantN('WM_DDE_REQUEST','LongInt').SetInt( $03E0 + 6);
+  CL.AddConstantN('WM_DDE_POKE','LongInt').SetInt( $03E0 + 7);
+  CL.AddConstantN('WM_DDE_EXECUTE','LongInt').SetInt( $03E0 + 8);
+  CL.AddConstantN('WM_DDE_LAST','LongInt').SetInt( $03E0 + 8);
   CL.AddConstantN('dde_AppReturnCode','LongWord').SetUInt( $00FF);
   CL.AddConstantN('dde_Busy','LongWord').SetUInt( $4000);
   CL.AddConstantN('dde_Ack','LongWord').SetUInt( $8000);
