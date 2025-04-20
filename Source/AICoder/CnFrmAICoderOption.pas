@@ -24,7 +24,10 @@ unit CnFrmAICoderOption;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：AI 辅助编码选项 Frame 单元
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：注意该 Frame 中有 SpeedButton，照理应该 Create 时调用 CnWizUtils 中的
+*           CnEnlargeButtonGlyphForHDPI 来做高 HDPI 下的图像放大，但该 Frame 是
+*           运行期手工创建的，SpeedButton 的 PPI 没及时拿到正确值导致判断缩放比例
+*           始终为 1，只能延迟到外部调用。
 * 开发平台：PWin7 + Delphi 5
 * 兼容测试：PWin7/10/11 + Delphi + C++Builder
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
