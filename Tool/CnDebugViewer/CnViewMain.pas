@@ -257,6 +257,7 @@ type
     procedure actSwtAddToBlackExecute(Sender: TObject);
     procedure actSwtAddToWhiteExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure pnlChildContainerDblClick(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -1555,6 +1556,11 @@ procedure TCnMainViewer.OnShowChild(var Message: TMessage);
 begin
   if CurrentChild <> nil then
     CurrentChild.pnlTree.OnResize(CurrentChild.pnlTree);
+end;
+
+procedure TCnMainViewer.pnlChildContainerDblClick(Sender: TObject);
+begin
+  actOpen.Execute;
 end;
 
 end.

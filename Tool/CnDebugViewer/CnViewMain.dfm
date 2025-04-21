@@ -21,7 +21,7 @@ object CnMainViewer: TCnMainViewer
   TextHeight = 13
   object statMain: TStatusBar
     Left = 0
-    Top = 394
+    Top = 404
     Width = 643
     Height = 19
     AutoHint = True
@@ -226,7 +226,7 @@ object CnMainViewer: TCnMainViewer
   end
   object pnlSwitch: TPanel
     Left = 0
-    Top = 374
+    Top = 384
     Width = 643
     Height = 20
     Align = alBottom
@@ -258,11 +258,12 @@ object CnMainViewer: TCnMainViewer
     Left = 0
     Top = 29
     Width = 643
-    Height = 345
+    Height = 355
     Align = alClient
     BevelOuter = bvNone
     Color = clAppWorkSpace
     TabOrder = 3
+    OnDblClick = pnlChildContainerDblClick
   end
   object mmMain: TMainMenu
     AutoHotkeys = maManual
