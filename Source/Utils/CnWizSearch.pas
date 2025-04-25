@@ -33,8 +33,9 @@ unit CnWizSearch;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：文本查找单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：该单元修改自 GExperts 1.2a Src GX_Search.pas ，仅移植了查找基类
+* 备    注：该单元修改自 GExperts 1.2a Src GX_Search.pas，仅移植了查找基类
 *           其原始内容受 GExperts License 的保护
+*           该单元的 TCnSearcher 仅针对 Ansi 字符串
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
@@ -74,7 +75,7 @@ type
     procedure SignalFoundMatch(LineNo: Integer; const Line: string; SPos,
       FEditReaderPos: Integer); virtual;
   protected
-    BLine: PAnsiChar; // 当前查找的文本行，已经做过大小写转换了
+    BLine: PAnsiChar;   // 当前查找的文本行，已经做过大小写转换了
     OrgLine: PAnsiChar; // 当前查找的原始文本行
     FLineNo: Integer;
     FEof: Boolean;
@@ -138,22 +139,24 @@ const
 { Generic routines }
 
 {$IFDEF UNICODE}
+
 function StrAlloc(Size: Cardinal): PAnsiChar;
 begin
   Result := AnsiStrAlloc(Size);
 end;
+
 {$ENDIF}
 
-function ANSILoCase(const Ch: AnsiChar): AnsiChar;
+function ANSILowerCase(const Ch: AnsiChar): AnsiChar;
 var
-  w: WORD;
+  W: WORD;
 begin
-  w := MakeWord(Ord(Ch), 0);
-  CharLower(PChar(@w));
-  Result := AnsiChar(Lo(w));
+  W := MakeWord(Ord(Ch), 0);
+  CharLower(PChar(@W));
+  Result := AnsiChar(Lo(W));
 end;
 
-function ASCIILoCase(const Ch: AnsiChar): AnsiChar;
+function ASCIILowerCase(const Ch: AnsiChar): AnsiChar;
 begin
   if Ch in ['A'..'Z'] then
     Result := AnsiChar(Ord(Ch) + 32)
@@ -171,7 +174,7 @@ begin
   BLine := StrAlloc(SearchLineSize);
   OrgLine := StrAlloc(SearchLineSize);
   FPattern := StrAlloc(GrepPatternSize);
-  LoCase := ASCIILoCase;
+  LoCase := ASCIILowerCase;
 end;
 
 destructor TCnSearcher.Destroy;
@@ -194,9 +197,9 @@ end;
 procedure TCnSearcher.SetANSICompatible(const Value: Boolean);
 begin
   if Value then
-    LoCase := ANSILoCase
+    LoCase := ANSILowerCase
   else
-    LoCase := ASCIILoCase;
+    LoCase := ASCIILowerCase;
 end;
 
 procedure TCnSearcher.FillBuffer(Stream: TStream);
@@ -265,7 +268,7 @@ end;
 
 procedure TCnSearcher.Search(Stream: TStream);
 var
-  i: Integer;
+  I: Integer;
   LPos: Integer;
 begin
   SignalStartSearch;
@@ -295,11 +298,11 @@ begin
     
     if FEof then Exit;
     
-    i := FBufferSearchPos;
+    I := FBufferSearchPos;
     FLineStartPos := FBufStartPos + FBufferSearchPos;
-    while i < FBufferDataCount do
+    while I < FBufferDataCount do
     begin
-      case FSearchBuffer[i] of
+      case FSearchBuffer[I] of
         #0:
           begin
             FBufferSearchPos := FBufferDataCount + 1;
@@ -307,12 +310,12 @@ begin
           end;
         #10:
           begin
-            FBufferSearchPos := i + 1;
+            FBufferSearchPos := I + 1;
             Break;
           end;
         #13:
           begin
-            FBufferSearchPos := i + 1;
+            FBufferSearchPos := I + 1;
             if FSearchBuffer[FBufferSearchPos] = #10 then Inc(FBufferSearchPos);
             Break;
           end;
@@ -320,19 +323,19 @@ begin
 
       if not (soCaseSensitive in SearchOptions) then
       begin
-        BLine[LPos] := LoCase(FSearchBuffer[i]);
-        OrgLine[LPos] := FSearchBuffer[i];
+        BLine[LPos] := LoCase(FSearchBuffer[I]);
+        OrgLine[LPos] := FSearchBuffer[I];
       end
       else
-        BLine[LPos] := FSearchBuffer[i];
+        BLine[LPos] := FSearchBuffer[I];
         
       Inc(LPos);
       if LPos >= SearchLineSize - 1 then // Enforce maximum line length constraint
         Exit;                         // Binary, not text file
-      Inc(i);
+      Inc(I);
     end;
     
-    if FSearchBuffer[i] <> #0 then Inc(FLineNo);
+    if FSearchBuffer[I] <> #0 then Inc(FLineNo);
     
     BLine[LPos] := #0;
     OrgLine[LPos] := #0;
@@ -340,7 +343,7 @@ begin
     if BLine[0] <> #0 then PatternMatch;
     
     LPos := 0;
-    if FBufferSearchPos < i then FBufferSearchPos := i;
+    if FBufferSearchPos < I then FBufferSearchPos := I;
   end;
 end;
 
@@ -368,9 +371,9 @@ var
 
   procedure cclass;
   var
-    cstart: Integer;
+    CStart: Integer;
   begin
-    cstart := SourceCharIndex;
+    CStart := SourceCharIndex;
     Inc(SourceCharIndex);
     if Source[SourceCharIndex] = '^' then
       Store(opNClass)
@@ -380,7 +383,7 @@ var
     while (SourceCharIndex <= Length(Source)) and (Source[SourceCharIndex] <> ']') do
     begin
       if (Source[SourceCharIndex] = '-') and
-        (SourceCharIndex - cstart > 1) and
+        (SourceCharIndex - CStart > 1) and
         (Source[SourceCharIndex + 1] <> ']') and
         (SourceCharIndex < Length(Source)) then
       begin
@@ -398,7 +401,7 @@ var
     end;
 
     if (Source[SourceCharIndex] <> ']') or (SourceCharIndex > Length(Source)) then
-      raise EPatternError.CreateFmt(SCnClassNotTerminated, [cstart]);
+      raise EPatternError.CreateFmt(SCnClassNotTerminated, [CStart]);
 
     Inc(SourceCharIndex);               // To push past close bracket
   end;
@@ -499,8 +502,8 @@ end;
 
 procedure TCnSearcher.PatternMatch;
 var
-  l, p: Integer;                        // Line and pattern pointers
-  op: AnsiChar;                             // Pattern operation
+  L, P: Integer;                        // Line and pattern pointers
+  OP: AnsiChar;                             // Pattern operation
   LinePos: Integer;
 
   procedure IsFound;
@@ -512,7 +515,7 @@ var
     if soWholeWord in SearchOptions then
     begin
       S := LinePos - 2;
-      E := l;
+      E := L;
       if (S > 0) then
       begin
         TestChar := BLine[S];
@@ -529,9 +532,9 @@ var
     end;
 
     if soCaseSensitive in SearchOptions then
-      SignalFoundMatch(FLineNo, string(BLine), LinePos, l)
+      SignalFoundMatch(FLineNo, string(BLine), LinePos, L)
     else
-      SignalFoundMatch(FLineNo, string(OrgLine), LinePos, l);
+      SignalFoundMatch(FLineNo, string(OrgLine), LinePos, L);
   end;
 
 begin
@@ -542,115 +545,117 @@ begin
   // Don't bother pattern matching if first search is opChar, just go to first
   // match directly. This results in about a 5% to 10% speed increase.
   if (FPattern[0] = opChar) and not (soCaseSensitive in SearchOptions) then
+  begin
     while (FPattern[1] <> BLine[LinePos]) and (BLine[LinePos] <> #0) do
       Inc(LinePos);
+  end;
 
   while BLine[LinePos] <> #0 do
   begin
-    l := LinePos;
-    p := 0;
-    op := FPattern[p];
-    while op <> opEndPat do
+    L := LinePos;
+    P := 0;
+    OP := FPattern[P];
+    while OP <> opEndPat do
     begin
-      case op of
+      case OP of
         opChar:
           begin
-            if not (BLine[l] = FPattern[p + 1]) then
+            if not (BLine[L] = FPattern[P + 1]) then
               Break;
-            Inc(p, 2);
+            Inc(P, 2);
           end;
 
         opBOL:
           begin
-            Inc(p);
+            Inc(P);
           end;
 
         opEOL:
           begin
-            if BLine[l] in [#0, #10, #13] then
-              Inc(p)
+            if BLine[L] in [#0, #10, #13] then
+              Inc(P)
             else
               Break;
           end;
 
         opAny:
           begin
-            if BLine[l] in [#0, #10, #13] then
+            if BLine[L] in [#0, #10, #13] then
               Break;
-            Inc(p);
+            Inc(P);
           end;
 
         opClass:
           begin
-            Inc(p);
+            Inc(P);
             // Compare letters to find a match
-            while (FPattern[p] > LastPatternChar) and (FPattern[p] <> BLine[l]) do
-              Inc(p);
+            while (FPattern[P] > LastPatternChar) and (FPattern[P] <> BLine[L]) do
+              Inc(P);
             // Was a match found?
-            if FPattern[p] <= LastPatternChar then
+            if FPattern[P] <= LastPatternChar then
               Break;
             // Move pattern pointer to next opcode
-            while FPattern[p] > LastPatternChar do
-              Inc(p);
+            while FPattern[P] > LastPatternChar do
+              Inc(P);
           end;
 
         opNClass:
           begin
-            Inc(p);
+            Inc(P);
             // Compare letters to find a match
-            while (FPattern[p] > LastPatternChar) and (FPattern[p] <> BLine[l]) do
-              Inc(p);
-            if FPattern[p] > LastPatternChar then
+            while (FPattern[P] > LastPatternChar) and (FPattern[P] <> BLine[L]) do
+              Inc(P);
+            if FPattern[P] > LastPatternChar then
               Break;
           end;
 
         opAlpha:
           begin
-            if not IsCharAlphaA(BLine[l]) then
+            if not IsCharAlphaA(BLine[L]) then
               Break;
-            Inc(p);
+            Inc(P);
           end;
 
         opDigit:
           begin
-            if not (BLine[l] in ['0'..'9']) then
+            if not (BLine[L] in ['0'..'9']) then
               Break;
-            Inc(p);
+            Inc(P);
           end;
 
         opAlphaNum:
           begin
-            if IsCharAlphaNumericA(BLine[l]) then
-              Inc(p)
+            if IsCharAlphaNumericA(BLine[L]) then
+              Inc(P)
             else
               Break;
           end;
 
         opPunct:
           begin
-            if (BLine[l] = ' ') or (BLine[l] > #64) then
+            if (BLine[L] = ' ') or (BLine[L] > #64) then
               Break;
-            Inc(p);
+            Inc(P);
           end;
 
         opRange:
           begin
-            if (BLine[l] < FPattern[p + 1]) or (BLine[l] > FPattern[p + 2]) then
+            if (BLine[L] < FPattern[P + 1]) or (BLine[L] > FPattern[P + 2]) then
               Break;
-            Inc(p, 3);
+            Inc(P, 3);
           end;
       else
-        Inc(p);
+        Inc(P);
       end;                              // case
 
-      if (op = opBOL) and not (BLine[l] in [#9, #32]) then
+      if (OP = opBOL) and not (BLine[L] in [#9, #32]) then
         Exit;                           // Means that we did not match at start.
 
-      op := FPattern[p];
-      Inc(l);
+      OP := FPattern[P];
+      Inc(L);
     end;                                // while op <> opEndPat
     Inc(LinePos);
-    if op = opEndPat then
+    if OP = opEndPat then
       IsFound;
   end;                                  // while BLine[LinePos] <> #0
 end;
@@ -665,8 +670,7 @@ procedure TCnSearcher.SignalFoundMatch(LineNo: Integer; const Line: string;
   SPos, FEditReaderPos: Integer);
 begin
   if Assigned(FOnFound) then
-    FOnFound(Self, LineNo, FLineStartPos, Line, SPos,
-      FEditReaderPos);
+    FOnFound(Self, LineNo, FLineStartPos, Line, SPos, FEditReaderPos);
 end;
 
 function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer): Boolean;

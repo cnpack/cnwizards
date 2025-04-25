@@ -51,7 +51,7 @@ type
 
 { TCnReplaceWizardForm }
 
-  TReplaceStyle = (rsUnit, rsProjectGroups, rsProject, rsOpenUnits, rsDir);
+  TCnReplaceStyle = (rsUnit, rsProjectGroups, rsProject, rsOpenUnits, rsDir);
 
   TCnReplaceWizardForm = class(TCnTranslateForm)
     tbOptions: TGroupBox;
@@ -94,7 +94,7 @@ type
     function GetDir: string;
     function GetFileMask: string;
     function GetIncludeSubDirs: Boolean;
-    function GetReplaceStyle: TReplaceStyle;
+    function GetReplaceStyle: TCnReplaceStyle;
     function GetSearchOption: TSearchOptions;
     function GetSourceText: string;
     procedure LoadSettings;
@@ -107,7 +107,7 @@ type
       ASearcher: TCnSearcher);
 
     property SearchOption: TSearchOptions read GetSearchOption;
-    property ReplaceStyle: TReplaceStyle read GetReplaceStyle;
+    property ReplaceStyle: TCnReplaceStyle read GetReplaceStyle;
     property SourceText: string read GetSourceText;
     property DestText: string read GetDestText;
     property Dir: string read GetDir;
@@ -299,11 +299,11 @@ end;
 
 procedure TCnReplaceWizardForm.SaveSettings;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to ComponentCount - 1 do
-    if Components[i] is TComboBox then
-      AddComboBoxTextToItems(TComboBox(Components[i]));
+  for I := 0 to ComponentCount - 1 do
+    if Components[I] is TComboBox then
+      AddComboBoxTextToItems(TComboBox(Components[I]));
 
   with TCnIniFile.Create(FIni) do
   try
@@ -349,10 +349,10 @@ end;
 
 procedure TCnReplaceWizardForm.rgReplaceStyleClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to gbDir.ControlCount - 1 do
-    gbDir.Controls[i].Enabled := ReplaceStyle = rsDir;
+  for I := 0 to gbDir.ControlCount - 1 do
+    gbDir.Controls[I].Enabled := ReplaceStyle = rsDir;
 end;
 
 procedure TCnReplaceWizardForm.rbNormalClick(Sender: TObject);
@@ -366,7 +366,7 @@ end;
 
 procedure TCnReplaceWizardForm.cbbDirDropDown(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   MaxWidth: Integer;
   Bitmap: Graphics.TBitmap;
 begin
@@ -374,8 +374,8 @@ begin
   Bitmap := Graphics.TBitmap.Create;
   try
     Bitmap.Canvas.Font.Assign(cbbDir.Font);
-    for i := 0 to cbbDir.Items.Count - 1 do
-      MaxWidth := Max(MaxWidth, Bitmap.Canvas.TextWidth(cbbDir.Items[i]) + 10);
+    for I := 0 to cbbDir.Items.Count - 1 do
+      MaxWidth := Max(MaxWidth, Bitmap.Canvas.TextWidth(cbbDir.Items[I]) + 10);
   finally;
     Bitmap.Free;
   end;
@@ -413,9 +413,9 @@ begin
   Result := cbSubDirs.Checked;
 end;
 
-function TCnReplaceWizardForm.GetReplaceStyle: TReplaceStyle;
+function TCnReplaceWizardForm.GetReplaceStyle: TCnReplaceStyle;
 begin
-  Result := TReplaceStyle(rgReplaceStyle.ItemIndex);
+  Result := TCnReplaceStyle(rgReplaceStyle.ItemIndex);
 end;
 
 function TCnReplaceWizardForm.GetSearchOption: TSearchOptions;
@@ -457,6 +457,7 @@ var
 begin
   FSearcher := nil;
   FRegExpr := nil;
+
   try
     FSearcher := TCnSearcher.Create;
     FRegExpr := TRegExpr.Create;
@@ -536,6 +537,7 @@ begin
     FInStream.Size := 0;
     try
       Reader.SaveToStream(FInStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF});
+      // 拿到的 FInStream 确保为 Ansi
     except
       on E: Exception do
       begin
@@ -629,18 +631,19 @@ end;
 
 procedure TCnReplaceWizard.ReplaceProject(Project: IOTAProject);
 var
-  i: Integer;
+  I: Integer;
   FileName: string;
 begin
-  if not Assigned(Project) then Exit;
+  if not Assigned(Project) then
+    Exit;
 
   if IsDpr(Project.FileName) then
     ReplaceFile(Project.FileName);        // 处理 dpr 工程文件自身，但不处理 bdsproj/dproj 等
   if FAbort then Exit;
   
-  for i := 0 to Project.GetModuleCount - 1 do
+  for I := 0 to Project.GetModuleCount - 1 do
   begin
-    FileName := Project.GetModule(i).FileName;
+    FileName := Project.GetModule(I).FileName;
     if IsSourceModule(FileName) then
       ReplaceFile(FileName);
 {$IFDEF BCB}
@@ -658,13 +661,13 @@ end;
 procedure TCnReplaceWizard.ReplaceProjectGroup(
   ProjectGroup: IOTAProjectGroup);
 var
-  i: Integer;
+  I: Integer;
 begin
   if not Assigned(ProjectGroup) then Exit;
 
-  for i := 0 to ProjectGroup.ProjectCount - 1 do
+  for I := 0 to ProjectGroup.ProjectCount - 1 do
   begin
-    ReplaceProject(ProjectGroup.Projects[i]);
+    ReplaceProject(ProjectGroup.Projects[I]);
     if FAbort then Exit;
   end;
 end;
@@ -672,14 +675,14 @@ end;
 procedure TCnReplaceWizard.ReplaceOpenUnits;
 var
   iModuleServices: IOTAModuleServices;
-  i: Integer;
+  I: Integer;
   FileName: string;
 begin
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
 
-  for i := 0 to iModuleServices.GetModuleCount - 1 do
+  for I := 0 to iModuleServices.GetModuleCount - 1 do
   begin
-    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(i));
+    FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
     ReplaceFile(FileName);
     if FAbort then Exit;
   end;
