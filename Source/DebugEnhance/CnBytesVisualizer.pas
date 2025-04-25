@@ -391,6 +391,10 @@ begin
   FHexEditor := TCnHexEditor.Create(Self);
   FHexEditor.Align := alClient;
   FHexEditor.Parent := tsHex;
+{$IFDEF IDE_SUPPORT_HDPI}
+  // IDE 里 Frame 里动态创建时，似乎字号有个动态放大的过程，这里要先缩小
+  FHexEditor.Font.Size := IdeGetOriginPixelsFromScaled(12);
+{$ENDIF}
 end;
 
 destructor TCnBytesViewerFrame.Destroy;
