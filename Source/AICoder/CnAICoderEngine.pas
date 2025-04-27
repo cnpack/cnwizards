@@ -115,7 +115,7 @@ type
     procedure PrepareRequestHeader(Headers: TStringList); virtual;
     {* 请求发送前，给子类一个处理自定义 HTTP 头的机会}
 
-    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; virtual;
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string = ''): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
 
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
@@ -126,6 +126,9 @@ type
       Partly 为 True 表示此次数据是服务器返回的中间数据，注意数据过短时可能等于完整数据。
       内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据
       IsStreamEnd 由内部解析后返回流模式下本次回应是否是结尾数据}
+
+    function GetModelListURL(const OrigURL: string): string; virtual;
+    {* 从 API 调用地址获取 ModelList 调用地址，不同提供商可能有不同规则}
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
@@ -142,14 +145,19 @@ type
     procedure InitOption;
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
-    function AskAIEngine(const Text: TBytes; Tag: TObject;
-      AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
+    function AskAIEngine(const URL: string; const Text: TBytes; StreamMode: Boolean;
+      RequestType: TCnAIRequestType; Tag: TObject; AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 用户调用的与 AI 通讯的过程，传入原始通讯数据，内部会组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
 
     function AskAIEngineForCode(const Code: string; Tag: TObject; RequestType: TCnAIRequestType;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 进一步封装的用户调用的解释代码或检查代码的过程，内部将 Code 转换为 JSON 后调用 AskAIEngine，也算第一步}
+
+    function AskAIEngineForModelList(Tag: TObject; AlterOption: TCnAIEngineOption = nil;
+      AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
+    {* 进一步封装的设置界面由用户调用的获取模型列表的过程，内部组装调整后调用 AskAIEngine，也算第一步
+       加一 AlterOption 参数的目的是为了允许临时指定参数，不用本 Engine 默认参数以适合灵活场合}
 
     property Option: TCnAIEngineOption read FOption;
     {* 引擎配置，根据名字从配置管理器中取来的引用}
@@ -220,10 +228,8 @@ implementation
 
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnCommon {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 const
   CRLF = #13#10;
@@ -484,43 +490,47 @@ end;
 
 { TCnAIBaseEngine }
 
-function TCnAIBaseEngine.AskAIEngine(const Text: TBytes; Tag: TObject;
+function TCnAIBaseEngine.AskAIEngine(const URL: string; const Text: TBytes;
+  StreamMode: Boolean; RequestType: TCnAIRequestType; Tag: TObject;
   AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
 begin
   CheckOptionPool;
-  Result := 0;
 
-  if Length(Text) > 0 then
-  begin
-    Obj := TCnAINetRequestDataObject.Create;
-    Obj.URL := FOption.URL;
-    Obj.Tag := Tag;
-    Randomize;
-    Obj.SendId := 10000000 + Random(100000000);
+  Obj := TCnAINetRequestDataObject.Create;
+  Obj.URL := URL;
+  Obj.Tag := Tag;
+  Obj.RequestType := RequestType;
+  Randomize;
+  Obj.SendId := 10000000 + Random(100000000);
 
-    // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
-    Obj.Data := Text;
-    Obj.StreamMode := FOption.Stream;
+  // 拼装 JSON 格式的请求作为 Post 的负载内容搁 Data 里
+  Obj.Data := Text;
+  Obj.StreamMode := StreamMode;
 
-    Obj.OnAnswer := AnswerCallback;
-    Obj.OnResponse := OnAINetDataResponse;
-    FPoolRef.AddRequest(Obj);
+  Obj.OnAnswer := AnswerCallback;
+  Obj.OnResponse := OnAINetDataResponse;
+  FPoolRef.AddRequest(Obj);
 
-    Result := Obj.SendId;
-  end
-  else
-  begin
-    if Assigned(AnswerCallback) then // 没发送的数据就直接回调出错
-      AnswerCallback(FOption.Stream, False, False, True, -1, 'No Message to Send', ERROR_INVALID_DATA, Tag);
-  end;
+  Result := Obj.SendId;
 end;
 
 function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
   RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
 begin
-  Result := AskAIEngine(ConstructRequest(RequestType, Code), Tag, AnswerCallback);
+  Result := AskAIEngine(FOption.URL, ConstructRequest(RequestType, Code),
+    FOption.Stream, RequestType, Tag, AnswerCallback);
+end;
+
+function TCnAIBaseEngine.AskAIEngineForModelList(Tag: TObject;
+  AlterOption: TCnAIEngineOption; AnswerCallback: TCnAIAnswerCallback): Integer;
+begin
+  if AlterOption = nil then
+    AlterOption := FOption;
+
+  Result := AskAIEngine(GetModelListURL(AlterOption.URL), ConstructRequest(artModelList),
+    AlterOption.Stream, artModelList, Tag, AnswerCallback);
 end;
 
 procedure TCnAIBaseEngine.CheckOptionPool;
@@ -561,31 +571,39 @@ var
 begin
   ReqRoot := TCnJSONObject.Create;
   try
-    ReqRoot.AddPair('model', FOption.Model);
-    ReqRoot.AddPair('temperature', FOption.Temperature);
-    ReqRoot.AddPair('stream', FOption.Stream);
-    Arr := ReqRoot.AddArray('messages');
+    if RequestType = artModelList then
+    begin
+      // 组装模型列表请求，默认内容为空，也就是无需额外参数
+      Result := nil;
+    end
+    else
+    begin
+      ReqRoot.AddPair('model', FOption.Model);
+      ReqRoot.AddPair('temperature', FOption.Temperature);
+      ReqRoot.AddPair('stream', FOption.Stream);
+      Arr := ReqRoot.AddArray('messages');
 
-    Msg := TCnJSONObject.Create;
-    Msg.AddPair('role', 'system');
-    Msg.AddPair('content', FOption.SystemMessage);
-    Arr.AddValue(Msg);
+      Msg := TCnJSONObject.Create;
+      Msg.AddPair('role', 'system');
+      Msg.AddPair('content', FOption.SystemMessage);
+      Arr.AddValue(Msg);
 
-    Msg := TCnJSONObject.Create;
-    Msg.AddPair('role', 'user');
-    if RequestType = artExplainCode then
-      Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code)
-    else if RequestType = artReviewCode then
-      Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code)
-    else if RequestType = artGenTestCase then
-      Msg.AddPair('content', FOption.GenTestCasePrompt + #13#10 + Code)
-    else if RequestType = artRaw then
-      Msg.AddPair('content', Code);
+      Msg := TCnJSONObject.Create;
+      Msg.AddPair('role', 'user');
+      if RequestType = artExplainCode then
+        Msg.AddPair('content', FOption.ExplainCodePrompt + #13#10 + Code)
+      else if RequestType = artReviewCode then
+        Msg.AddPair('content', FOption.ReviewCodePrompt + #13#10 + Code)
+      else if RequestType = artGenTestCase then
+        Msg.AddPair('content', FOption.GenTestCasePrompt + #13#10 + Code)
+      else if RequestType = artRaw then
+        Msg.AddPair('content', Code);
 
-    Arr.AddValue(Msg);
+      Arr.AddValue(Msg);
 
-    S := ReqRoot.ToJSON;
-    Result := AnsiToBytes(S);
+      S := ReqRoot.ToJSON;
+      Result := AnsiToBytes(S);
+    end;
   finally
     ReqRoot.Free;
   end;
@@ -651,6 +669,30 @@ begin
   else
   begin
     try
+      if RequestType = artModelList then
+      begin
+        // 从 RespRoot 中解析出模型列表，拼成逗号分隔的字符串并直接返回，
+        // 注意会跳过最后的回车换行处理因为不需要
+        if (RespRoot['data'] <> nil) and (RespRoot['data'] is TCnJSONArray) then
+        begin
+          Arr := TCnJSONArray(RespRoot['data']);
+          if Arr.Count > 0 then
+          begin
+            for I := 0 to Arr.Count - 1 do
+            begin
+              if (Arr[I]['id'] <> nil) and (Arr[I]['id'] is TCnJSONString) then
+              begin
+                if I = 0 then
+                  Result := Arr[I]['id'].AsString
+                else
+                  Result := Result + ',' + Arr[I]['id'].AsString;
+              end;
+            end;
+          end;
+        end;
+        Exit;
+      end;
+
       // 正常回应
       HasPartly := False;
       if Partly then
@@ -952,6 +994,20 @@ begin
       Headers.Delete(I);
       Exit;
     end;
+  end;
+end;
+
+function TCnAIBaseEngine.GetModelListURL(const OrigURL: string): string;
+const
+  CHAT_COMP = 'chat/completions';
+  MODEL = 'models';
+begin
+  // 采取古怪规则拼接 ModelList 的 URL，可能子类有更多办法
+  Result := OrigURL;
+  if StrEndWith(Result, CHAT_COMP) then
+  begin
+    Delete(Result, Pos(CHAT_COMP, Result), MaxInt);
+    Result := Result + MODEL;
   end;
 end;
 

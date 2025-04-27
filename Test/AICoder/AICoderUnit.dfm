@@ -135,9 +135,9 @@ object FormAITest: TFormAITest
         OnClick = btnSaveAIConfigClick
       end
       object btnExplainCode: TButton
-        Left = 704
+        Left = 680
         Top = 16
-        Width = 89
+        Width = 73
         Height = 25
         Caption = 'Explain Code'
         TabOrder = 3
@@ -169,22 +169,31 @@ object FormAITest: TFormAITest
         TabOrder = 6
       end
       object btnReviewCode: TButton
-        Left = 808
+        Left = 768
         Top = 16
-        Width = 89
+        Width = 73
         Height = 25
         Caption = 'Review Code'
         TabOrder = 7
         OnClick = btnReviewCodeClick
       end
       object chkMarkDown: TCheckBox
-        Left = 920
+        Left = 944
         Top = 20
         Width = 81
         Height = 17
         Caption = 'MarkDown'
         TabOrder = 8
         OnClick = chkMarkDownClick
+      end
+      object btnModelList: TButton
+        Left = 856
+        Top = 16
+        Width = 73
+        Height = 25
+        Caption = 'Model List'
+        TabOrder = 9
+        OnClick = btnModelListClick
       end
     end
     object tsChat: TTabSheet

@@ -48,6 +48,7 @@ type
     CopyAll1: TMenuItem;
     btnAddYourStream: TButton;
     tmrSteam: TTimer;
+    btnModelList: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -71,6 +72,7 @@ type
     procedure Copy1Click(Sender: TObject);
     procedure btnAddYourStreamClick(Sender: TObject);
     procedure tmrSteamTimer(Sender: TObject);
+    procedure btnModelListClick(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -95,6 +97,8 @@ type
     procedure AIOnExplainCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnReviewCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnModelListAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure ShowData;
@@ -773,6 +777,22 @@ begin
     if FStreamCnt >= 100 then
       tmrSteam.Enabled := False;
   end;
+end;
+
+procedure TFormAITest.btnModelListClick(Sender: TObject);
+begin
+  CnAIEngineManager.CurrentEngine.AskAIEngineForModelList(nil, nil, AIOnModelListAnswer);
+end;
+
+procedure TFormAITest.AIOnModelListAnswer(StreamMode, Partly, Success,
+  IsStreamEnd: Boolean; SendId: Integer; const Answer: string;
+  ErrorCode: Cardinal; Tag: TObject);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Model List OK for Request %d: %s', [SendId, Answer]))
+  else
+    mmoAI.Lines.Add(Format('Model List Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]));
 end;
 
 end.
