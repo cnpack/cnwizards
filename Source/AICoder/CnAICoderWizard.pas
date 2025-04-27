@@ -427,6 +427,7 @@ begin
         FOptionFrames[I].lblApply.Visible := False;
 
       CnEnlargeButtonGlyphForHDPI(FOptionFrames[I].btnReset);
+      CnEnlargeButtonGlyphForHDPI(FOptionFrames[I].btnFetchModel);
     end;
   finally
     SL.Free;

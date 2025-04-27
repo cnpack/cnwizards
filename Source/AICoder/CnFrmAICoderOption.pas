@@ -43,7 +43,7 @@ interface
 uses 
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, TypInfo, Contnrs, Buttons, CnCommon, CnWizMultiLangFrame, CnWizConsts,
-  CnAICoderConfig;
+  CnAICoderConfig, CnConsts;
 
 const
   WM_CALCEXTRA = WM_USER + $1234;
@@ -62,10 +62,13 @@ type
     lblTemperature: TLabel;
     chkStreamMode: TCheckBox;
     btnReset: TSpeedButton;
+    btnFetchModel: TSpeedButton;
     procedure lblApplyClick(Sender: TObject);
     procedure btnResetClick(Sender: TObject);
+    procedure btnFetchModelClick(Sender: TObject);
   private
     FWebAddr: string;
+    FListChanged: Boolean;
     FExtraBuilt: Boolean;
     FExtraOptions: TObjectList;        // 容纳额外选项的列表
     FVerticalDistance: Integer;        // 纵向新增选项的 Top 增量
@@ -75,6 +78,8 @@ type
     FHoriEditStart: Integer;           // 横向新增选项的 Edit 控件的起始横坐标
     FEngine: TObject;           
     procedure CalcExtraPositions;      // 创建后计算纵向参数，均以运行期为准，避免 HDPI 影响
+    procedure FetchModelAnswerCallBack(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure OnBuildExtra(var Msg: TMessage); message WM_BUILDEXTRA;
     procedure CreateWnd; override;
@@ -311,16 +316,34 @@ begin
 end;
 
 procedure TCnAICoderOptionFrame.SaveToAnOption(Option: TCnAIEngineOption);
+var
+  S: string;
+  I: Integer;
 begin
   Option.URL := edtURL.Text;
   Option.Model := cbbModel.Text;
+
   try
     Option.Temperature := StrToFloat(edtTemperature.Text);
   except
     Option.Temperature := 1.0;
   end;
+
   Option.APIKey := edtAPIKey.Text;
   Option.Stream := chkStreamMode.Checked;
+
+  if FListChanged then
+  begin
+    S := '';
+    for I := 0 to cbbModel.Items.Count - 1 do
+    begin
+      if I = 0 then
+        S := cbbModel.Items[I]
+      else
+        S := S + ',' + cbbModel.Items[I];
+    end;
+    Option.ModelList := S;
+  end;
 end;
 
 procedure TCnAICoderOptionFrame.btnResetClick(Sender: TObject);
@@ -371,6 +394,53 @@ begin
   finally
     OrigOption.Free;
   end;
+end;
+
+procedure TCnAICoderOptionFrame.btnFetchModelClick(Sender: TObject);
+var
+  I: Integer;
+  S: string;
+  Eng: TCnAIBaseEngine;
+  AnOption: TCnAIEngineOption;
+  Item: TCnAIExtraItem;
+  Edt: TEdit;
+begin
+  if (Engine = nil) or not (Engine is TCnAIBaseEngine) then
+    Exit;
+
+  Eng := Engine as TCnAIBaseEngine;
+  AnOption := TCnAIEngineOption.Create;
+  try
+    SaveToAnOption(AnOption); // 假设取 ModelList 只需要基类中的参数
+
+    Eng.AskAIEngineForModelList(nil, AnOption, FetchModelAnswerCallBack);
+  finally
+    AnOption.Free;
+  end;
+end;
+
+procedure TCnAICoderOptionFrame.FetchModelAnswerCallBack(StreamMode,
+  Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+  const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+var
+  SL: TStringList;
+begin
+  if Success then
+  begin
+    SL := TStringList.Create;
+    try
+      ExtractStrings([','], [' '], PChar(Answer), SL);
+      if SL.Count > 0 then
+      begin
+        cbbModel.Items.Assign(SL);
+        FListChanged := True;
+      end;
+    finally
+      SL.Free;
+    end;
+  end
+  else
+    ErrorDlg(SCnError + ' ' + IntToStr(ErrorCode) + ' ' + Answer);
 end;
 
 end.

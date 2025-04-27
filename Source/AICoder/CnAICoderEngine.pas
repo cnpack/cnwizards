@@ -146,7 +146,8 @@ type
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
     function AskAIEngine(const URL: string; const Text: TBytes; StreamMode: Boolean;
-      RequestType: TCnAIRequestType; Tag: TObject; AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
+      RequestType: TCnAIRequestType;  const APIKey: string; Tag: TObject;
+      AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 用户调用的与 AI 通讯的过程，传入原始通讯数据，内部会组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
 
@@ -491,8 +492,8 @@ end;
 { TCnAIBaseEngine }
 
 function TCnAIBaseEngine.AskAIEngine(const URL: string; const Text: TBytes;
-  StreamMode: Boolean; RequestType: TCnAIRequestType; Tag: TObject;
-  AnswerCallback: TCnAIAnswerCallback): Integer;
+  StreamMode: Boolean; RequestType: TCnAIRequestType; const APIKey: string;
+  Tag: TObject; AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
 begin
@@ -502,6 +503,7 @@ begin
   Obj.URL := URL;
   Obj.Tag := Tag;
   Obj.RequestType := RequestType;
+  Obj.APIKey := APIKey;
   Randomize;
   Obj.SendId := 10000000 + Random(100000000);
 
@@ -520,7 +522,7 @@ function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
   RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
 begin
   Result := AskAIEngine(FOption.URL, ConstructRequest(RequestType, Code),
-    FOption.Stream, RequestType, Tag, AnswerCallback);
+    FOption.Stream, RequestType, FOption.ApiKey, Tag, AnswerCallback);
 end;
 
 function TCnAIBaseEngine.AskAIEngineForModelList(Tag: TObject;
@@ -530,7 +532,7 @@ begin
     AlterOption := FOption;
 
   Result := AskAIEngine(GetModelListURL(AlterOption.URL), ConstructRequest(artModelList),
-    AlterOption.Stream, artModelList, Tag, AnswerCallback);
+    AlterOption.Stream, artModelList, AlterOption.ApiKey, Tag, AnswerCallback);
 end;
 
 procedure TCnAIBaseEngine.CheckOptionPool;
@@ -690,7 +692,9 @@ begin
             end;
           end;
         end;
-        Exit;
+
+        if Result <> '' then
+          Exit;
       end;
 
       // 正常回应
@@ -901,8 +905,8 @@ begin
         HTTP.ProxyMode := pmIE;
     end;
 
-    if FOption.ApiKey <> '' then
-      HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + FOption.ApiKey);
+    if TCnAINetRequestDataObject(DataObj).APIKey <> '' then
+      HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + TCnAINetRequestDataObject(DataObj).APIKey);
     // 大多数 AI 引擎的身份验证都是这句。少数不是的，可以在子类的 PrepareRequestHeader 里删掉这句再加
 
     PrepareRequestHeader(HTTP.HttpRequestHeaders);
