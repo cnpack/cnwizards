@@ -2860,6 +2860,7 @@ TCnAICoderConfigForm.Caption=AI 辅助编码设置
 TCnAICoderConfigForm.chkProxy.Caption=使用代理：
 TCnAICoderConfigForm.lblActiveEngine.Caption=当前 AI 引擎：
 TCnAICoderConfigForm.lblTimeout.Caption=超时秒数：
+TCnAICoderOptionFrame.btnFetchModel.Hint=在线获取模型列表
 TCnAICoderOptionFrame.btnReset.Hint=重置
 TCnAICoderOptionFrame.chkStreamMode.Caption=流式输出
 TCnAICoderOptionFrame.lblAPIKey.Caption=API 密钥：

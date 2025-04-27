@@ -2860,6 +2860,7 @@ TCnAICoderConfigForm.Caption=AI Coder Settings
 TCnAICoderConfigForm.chkProxy.Caption=Use Proxy:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Active AI Engine:
 TCnAICoderConfigForm.lblTimeout.Caption=Timeout Seconds:
+TCnAICoderOptionFrame.btnFetchModel.Hint=Fetch Model List
 TCnAICoderOptionFrame.btnReset.Hint=Reset
 TCnAICoderOptionFrame.chkStreamMode.Caption=Stream Mode
 TCnAICoderOptionFrame.lblAPIKey.Caption=API Key:

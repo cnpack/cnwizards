@@ -2860,6 +2860,7 @@ TCnAICoderConfigForm.Caption=Configurações do Codificador IA
 TCnAICoderConfigForm.chkProxy.Caption=Usar Proxy:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Motor IA Ativo:
 TCnAICoderConfigForm.lblTimeout.Caption=Segundos Excedidos:
+TCnAICoderOptionFrame.btnFetchModel.Hint=Buscar lista de modelos
 TCnAICoderOptionFrame.btnReset.Hint=Redefinir
 TCnAICoderOptionFrame.chkStreamMode.Caption=Modo de Fluxo
 TCnAICoderOptionFrame.lblAPIKey.Caption=Chave da API:
