@@ -251,11 +251,11 @@ begin
     try
       if CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME) <> nil then
       begin
-        CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME).URL := NewGerminiOption.URL;
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('TCnAICoderWizard Upgrade Gemini from %s to %s',
           [CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME).URL, NewGerminiOption.URL]);
 {$ENDIF}
+        CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME).URL := NewGerminiOption.URL;
       end;
     finally
       NewGerminiOption.Free;

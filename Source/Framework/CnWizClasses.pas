@@ -144,10 +144,11 @@ type
     {* IDE 启动完成更迟一些后调用该方法，用于高版本 IDE 中处理 IDE 菜单项加载太迟的场合}
 
     procedure VersionFirstRun; virtual;
-    {* 本版本号的专家第一次创建时被调用，在构造函数之后被专家管理器调用，供处理升级
+    {* 本版本号的专家第一次创建时被调用，调用时机是在构造函数之后被专家管理器调用，供处理升级。
       子类可以使用 CnWizardMgr.ProductVersion 拿到当前数字版本号，使用
       WizOptions.ReadInteger(SCnVersionFirstRun, Self.ClassName, 0) 拿到上一次跑的版本号
-      以进行对比并根据所需内容升级，如更新新版设置等}
+      以进行对比并根据所需内容升级，如更新新版设置等。
+      注意该调用不区分 Delphi 版本，只区分专家包版本。也就是说不同版本的 Delphi 也只最先运行的那个调用一次}
 
     class function IsInternalWizard: Boolean; virtual;
     {* 该专家是否属于内部专家，如果是内部则不在列表中显示且不可配置 }
