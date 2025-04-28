@@ -61,6 +61,8 @@ type
   TCnClaudeAIEngine = class(TCnAIBaseEngine)
   {* Claude 引擎}
   protected
+    class function GetModelListURL(const OrigURL: string): string; override;
+
     // Claude 的身份验证头信息和其他几个不同
     procedure PrepareRequestHeader(Headers: TStringList); override;
 
@@ -143,6 +145,9 @@ type
 implementation
 
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
+
+uses
+  CnCommon;
 
 const
   CRLF = #13#10;
@@ -287,6 +292,21 @@ end;
 class function TCnClaudeAIEngine.EngineName: string;
 begin
   Result := 'Claude';
+end;
+
+class function TCnClaudeAIEngine.GetModelListURL(
+  const OrigURL: string): string;
+const
+  MSGS = 'messages';
+  MODEL = 'models';
+begin
+  // 采取古怪规则拼接 ModelList 的 URL
+  Result := OrigURL;
+  if StrEndWith(Result, MSGS) then
+  begin
+    Delete(Result, Pos(MSGS, Result), MaxInt);
+    Result := Result + MODEL;
+  end;
 end;
 
 class function TCnClaudeAIEngine.OptionClass: TCnAIEngineOptionClass;
