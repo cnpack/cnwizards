@@ -47,17 +47,11 @@ uses
 
 type
   TCnUsesInitTreeForm = class(TCnTranslateForm)
-    grpFilter: TGroupBox;
-    chkProjectPath: TCheckBox;
-    chkSystemPath: TCheckBox;
-    grpTree: TGroupBox;
-    tvTree: TTreeView;
     pnlTop: TPanel;
     lblProject: TLabel;
     cbbProject: TComboBox;
     tlbUses: TToolBar;
     btnGenerateUsesTree: TToolButton;
-    grpInfo: TGroupBox;
     actlstUses: TActionList;
     actGenerateUsesTree: TAction;
     actHelp: TAction;
@@ -65,12 +59,6 @@ type
     btn1: TToolButton;
     btnHelp: TToolButton;
     btnExit: TToolButton;
-    lblSourceFile: TLabel;
-    lblDcuFile: TLabel;
-    lblSearchType: TLabel;
-    lblUsesType: TLabel;
-    lblSearchTypeText: TLabel;
-    lblUsesTypeText: TLabel;
     actExport: TAction;
     actSearch: TAction;
     btnSearch: TToolButton;
@@ -107,11 +95,27 @@ type
     OpeninExplorer2: TMenuItem;
     Help2: TMenuItem;
     SearchNext2: TMenuItem;
-    mmoSourceFileText: TMemo;
-    mmoDcuFileText: TMemo;
     statUses: TStatusBar;
+    pnlMain: TPanel;
+    grpTree: TGroupBox;
+    tvTree: TTreeView;
+    spl1: TSplitter;
     grpOrder: TGroupBox;
     mmoOrder: TMemo;
+    spl2: TSplitter;
+    pnlRight: TPanel;
+    grpFilter: TGroupBox;
+    chkProjectPath: TCheckBox;
+    chkSystemPath: TCheckBox;
+    grpInfo: TGroupBox;
+    lblSourceFile: TLabel;
+    lblDcuFile: TLabel;
+    lblSearchType: TLabel;
+    lblUsesType: TLabel;
+    lblSearchTypeText: TLabel;
+    lblUsesTypeText: TLabel;
+    mmoSourceFileText: TMemo;
+    mmoDcuFileText: TMemo;
     procedure actGenerateUsesTreeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

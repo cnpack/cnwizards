@@ -1,10 +1,10 @@
 inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
-  Left = 233
-  Top = 101
+  Left = 201
+  Top = 102
   AutoScroll = False
   Caption = 'Uses Initialization Tree'
-  ClientHeight = 554
-  ClientWidth = 988
+  ClientHeight = 571
+  ClientWidth = 1025
   Font.Charset = ANSI_CHARSET
   Icon.Data = {
     0000010001001010100000000000280100001600000028000000100000002000
@@ -22,66 +22,14 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object grpFilter: TGroupBox
-    Left = 645
-    Top = 40
-    Width = 342
-    Height = 81
-    Anchors = [akTop, akRight]
-    Caption = 'Display &Filter'
-    TabOrder = 0
-    object chkProjectPath: TCheckBox
-      Left = 16
-      Top = 24
-      Width = 193
-      Height = 17
-      Caption = 'Units in Project Search Path'
-      Checked = True
-      State = cbChecked
-      TabOrder = 0
-      OnClick = chkSystemPathClick
-    end
-    object chkSystemPath: TCheckBox
-      Left = 16
-      Top = 48
-      Width = 193
-      Height = 17
-      Caption = 'Units in System Search Path'
-      TabOrder = 1
-      OnClick = chkSystemPathClick
-    end
-  end
-  object grpTree: TGroupBox
-    Left = 8
-    Top = 40
-    Width = 417
-    Height = 486
-    Anchors = [akLeft, akTop, akRight, akBottom]
-    Caption = 'Initialization &Tree'
-    TabOrder = 1
-    object tvTree: TTreeView
-      Left = 8
-      Top = 16
-      Width = 401
-      Height = 462
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      HideSelection = False
-      Indent = 19
-      PopupMenu = pmTree
-      ReadOnly = True
-      RightClickSelect = True
-      TabOrder = 0
-      OnChange = tvTreeChange
-    end
-  end
   object pnlTop: TPanel
     Left = 0
     Top = 0
-    Width = 988
+    Width = 1025
     Height = 28
     Align = alTop
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 0
     object lblProject: TLabel
       Left = 12
       Top = 8
@@ -176,130 +124,215 @@ inherited CnUsesInitTreeForm: TCnUsesInitTreeForm
       end
     end
   end
-  object grpInfo: TGroupBox
-    Left = 645
-    Top = 124
-    Width = 342
-    Height = 402
-    Anchors = [akTop, akRight, akBottom]
-    Caption = 'Unit &Info'
-    TabOrder = 3
-    object lblSourceFile: TLabel
-      Left = 16
-      Top = 24
-      Width = 64
-      Height = 13
-      Caption = 'Source File:'
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object lblDcuFile: TLabel
-      Left = 16
-      Top = 128
-      Width = 46
-      Height = 13
-      Caption = 'Dcu File:'
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object lblSearchType: TLabel
-      Left = 16
-      Top = 224
-      Width = 82
-      Height = 13
-      Caption = 'Location Type:'
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object lblUsesType: TLabel
-      Left = 16
-      Top = 304
-      Width = 61
-      Height = 13
-      Caption = 'Uses Type:'
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object lblSearchTypeText: TLabel
-      Left = 16
-      Top = 240
-      Width = 318
-      Height = 49
-      Anchors = [akLeft, akTop, akRight]
-      AutoSize = False
-      ShowAccelChar = False
-    end
-    object lblUsesTypeText: TLabel
-      Left = 16
-      Top = 320
-      Width = 318
-      Height = 49
-      Anchors = [akLeft, akTop, akRight]
-      AutoSize = False
-      ShowAccelChar = False
-    end
-    object mmoSourceFileText: TMemo
-      Left = 16
-      Top = 48
-      Width = 313
-      Height = 65
-      BorderStyle = bsNone
-      Color = clBtnFace
-      ReadOnly = True
-      TabOrder = 0
-    end
-    object mmoDcuFileText: TMemo
-      Left = 16
-      Top = 152
-      Width = 313
-      Height = 65
-      BorderStyle = bsNone
-      Color = clBtnFace
-      ReadOnly = True
-      TabOrder = 1
-    end
-  end
   object statUses: TStatusBar
     Left = 0
-    Top = 535
-    Width = 988
+    Top = 552
+    Width = 1025
     Height = 19
     Panels = <>
     SimplePanel = True
   end
-  object grpOrder: TGroupBox
-    Left = 432
-    Top = 40
-    Width = 206
-    Height = 486
-    Anchors = [akTop, akRight, akBottom]
-    Caption = 'Initialization &Order'
-    TabOrder = 5
-    object mmoOrder: TMemo
+  object pnlMain: TPanel
+    Left = 0
+    Top = 28
+    Width = 1025
+    Height = 524
+    Align = alClient
+    BevelOuter = bvNone
+    BorderWidth = 8
+    TabOrder = 2
+    object spl1: TSplitter
+      Left = 425
+      Top = 8
+      Width = 5
+      Height = 508
+      Cursor = crHSplit
+    end
+    object spl2: TSplitter
+      Left = 636
+      Top = 8
+      Width = 5
+      Height = 508
+      Cursor = crHSplit
+    end
+    object grpTree: TGroupBox
       Left = 8
-      Top = 16
-      Width = 190
-      Height = 462
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      ReadOnly = True
-      ScrollBars = ssVertical
+      Top = 8
+      Width = 417
+      Height = 508
+      Align = alLeft
+      Caption = 'Initialization &Tree'
       TabOrder = 0
+      object tvTree: TTreeView
+        Left = 8
+        Top = 16
+        Width = 401
+        Height = 484
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        HideSelection = False
+        Indent = 19
+        PopupMenu = pmTree
+        ReadOnly = True
+        RightClickSelect = True
+        TabOrder = 0
+        OnChange = tvTreeChange
+      end
+    end
+    object grpOrder: TGroupBox
+      Left = 430
+      Top = 8
+      Width = 206
+      Height = 508
+      Align = alLeft
+      Caption = 'Initialization &Order'
+      TabOrder = 1
+      object mmoOrder: TMemo
+        Left = 8
+        Top = 16
+        Width = 190
+        Height = 484
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+      end
+    end
+    object pnlRight: TPanel
+      Left = 641
+      Top = 8
+      Width = 376
+      Height = 508
+      Align = alClient
+      BevelOuter = bvNone
+      TabOrder = 2
+      object grpFilter: TGroupBox
+        Left = 0
+        Top = 0
+        Width = 376
+        Height = 81
+        Align = alTop
+        Caption = 'Display &Filter'
+        TabOrder = 0
+        object chkProjectPath: TCheckBox
+          Left = 16
+          Top = 24
+          Width = 193
+          Height = 17
+          Caption = 'Units in Project Search Path'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+          OnClick = chkSystemPathClick
+        end
+        object chkSystemPath: TCheckBox
+          Left = 16
+          Top = 48
+          Width = 193
+          Height = 17
+          Caption = 'Units in System Search Path'
+          TabOrder = 1
+          OnClick = chkSystemPathClick
+        end
+      end
+      object grpInfo: TGroupBox
+        Left = 0
+        Top = 90
+        Width = 376
+        Height = 418
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Caption = 'Unit &Info'
+        TabOrder = 1
+        object lblSourceFile: TLabel
+          Left = 16
+          Top = 24
+          Width = 64
+          Height = 13
+          Caption = 'Source File:'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object lblDcuFile: TLabel
+          Left = 16
+          Top = 128
+          Width = 46
+          Height = 13
+          Caption = 'Dcu File:'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object lblSearchType: TLabel
+          Left = 16
+          Top = 224
+          Width = 82
+          Height = 13
+          Caption = 'Location Type:'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object lblUsesType: TLabel
+          Left = 16
+          Top = 304
+          Width = 61
+          Height = 13
+          Caption = 'Uses Type:'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object lblSearchTypeText: TLabel
+          Left = 16
+          Top = 240
+          Width = 352
+          Height = 49
+          Anchors = [akLeft, akTop, akRight]
+          AutoSize = False
+          ShowAccelChar = False
+        end
+        object lblUsesTypeText: TLabel
+          Left = 16
+          Top = 320
+          Width = 352
+          Height = 49
+          Anchors = [akLeft, akTop, akRight]
+          AutoSize = False
+          ShowAccelChar = False
+        end
+        object mmoSourceFileText: TMemo
+          Left = 16
+          Top = 48
+          Width = 313
+          Height = 65
+          BorderStyle = bsNone
+          Color = clBtnFace
+          ReadOnly = True
+          TabOrder = 0
+        end
+        object mmoDcuFileText: TMemo
+          Left = 16
+          Top = 152
+          Width = 313
+          Height = 65
+          BorderStyle = bsNone
+          Color = clBtnFace
+          ReadOnly = True
+          TabOrder = 1
+        end
+      end
     end
   end
   object actlstUses: TActionList
