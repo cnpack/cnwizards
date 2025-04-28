@@ -1,6 +1,6 @@
 ﻿{
     "EngineName": "Gemini",
-    "URL": "https://generativelanguage.googleapis.com/v1beta/models/",
+    "URL": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     "ApiKey": "",
     "Model": "gemini-1.5-flash-latest",
     "ModelList": "gemini-2.0-flash,gemini-2.0-flash-lite,gemini-1.5-pro-latest,gemini-1.5-pro,gemini-1.5-flash-latest,gemini-1.5-flash,gemini-1.5-flash-8b,text-embedding-004,aqa",

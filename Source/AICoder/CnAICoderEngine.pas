@@ -43,7 +43,7 @@ interface
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
   CnInetUtils, {$IFNDEF STAND_ALONE} CnWizOptions, {$ENDIF} CnAICoderConfig,
-  CnThreadPool, CnAICoderNetClient, CnHashMap;
+  CnThreadPool, CnAICoderNetClient, CnHashMap, CnConsts;
 
 type
   TCnAIAnswerObject = class(TPersistent)
@@ -127,8 +127,12 @@ type
       内部机制确保了不会在 StreamMode 为 False 时来 Partly 为 True 的数据，不会在 StreamMode 为 True 时来完整数据
       IsStreamEnd 由内部解析后返回流模式下本次回应是否是结尾数据}
 
-    function GetModelListURL(const OrigURL: string): string; virtual;
-    {* 从 API 调用地址获取 ModelList 调用地址，不同提供商可能有不同规则}
+    function ParseModelList(ResponseRoot: TCnJSONObject): string; virtual;
+    {* 单独挑出 ModelList 的应答解析过程，子类按需重载，如引擎不支持，直接返回空字符串即可}
+
+    class function GetModelListURL(const OrigURL: string): string; virtual;
+    {* 从 API 调用地址获取 ModelList 调用地址，不同提供商可能有不同规则。
+      如引擎不支持，直接返回空字符串即可}
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
@@ -527,11 +531,21 @@ end;
 
 function TCnAIBaseEngine.AskAIEngineForModelList(Tag: TObject;
   AlterOption: TCnAIEngineOption; AnswerCallback: TCnAIAnswerCallback): Integer;
+var
+  URL: string;
 begin
   if AlterOption = nil then
     AlterOption := FOption;
 
-  Result := AskAIEngine(GetModelListURL(AlterOption.URL), ConstructRequest(artModelList),
+  URL := GetModelListURL(AlterOption.URL);
+  if Trim(URL) = '' then
+  begin
+    if Assigned(AnswerCallback) then
+      AnswerCallback(False, False, False, True, 0, SCnNotSupport, 0, nil);
+    Exit;
+  end;
+
+  Result := AskAIEngine(URL, ConstructRequest(artModelList),
     AlterOption.Stream, artModelList, AlterOption.ApiKey, Tag, AnswerCallback);
 end;
 
@@ -673,26 +687,8 @@ begin
     try
       if RequestType = artModelList then
       begin
-        // 从 RespRoot 中解析出模型列表，拼成逗号分隔的字符串并直接返回，
+        Result := ParseModelList(RespRoot);
         // 注意会跳过最后的回车换行处理因为不需要
-        if (RespRoot['data'] <> nil) and (RespRoot['data'] is TCnJSONArray) then
-        begin
-          Arr := TCnJSONArray(RespRoot['data']);
-          if Arr.Count > 0 then
-          begin
-            for I := 0 to Arr.Count - 1 do
-            begin
-              if (Arr[I]['id'] <> nil) and (Arr[I]['id'] is TCnJSONString) then
-              begin
-                if I = 0 then
-                  Result := Arr[I]['id'].AsString
-                else
-                  Result := Result + ',' + Arr[I]['id'].AsString;
-              end;
-            end;
-          end;
-        end;
-
         if Result <> '' then
           Exit;
       end;
@@ -781,6 +777,38 @@ begin
   // 处理一下回车换行
   if Pos(CRLF, Result) <= 0 then
     Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
+end;
+
+function TCnAIBaseEngine.ParseModelList(ResponseRoot: TCnJSONObject): string;
+const
+  MODEL = 'models/';
+var
+  I: Integer;
+  Arr: TCnJSONArray;
+  S: string;
+begin
+  // 从 RespRoot 中解析出模型列表，拼成逗号分隔的字符串并直接返回，
+  if (ResponseRoot['data'] <> nil) and (ResponseRoot['data'] is TCnJSONArray) then
+  begin
+    Arr := TCnJSONArray(ResponseRoot['data']);
+    if Arr.Count > 0 then
+    begin
+      for I := 0 to Arr.Count - 1 do
+      begin
+        if (Arr[I]['id'] <> nil) and (Arr[I]['id'] is TCnJSONString) then
+        begin
+          S := Arr[I]['id'].AsString;
+          if Pos(MODEL, S) = 1 then   // 有些引擎会在前面加个前缀，删掉
+            Delete(S, 1, Length(MODEL));
+
+          if I = 0 then
+            Result := S
+          else
+            Result := Result + ',' + S;
+        end;
+      end;
+    end;
+  end;
 end;
 
 constructor TCnAIBaseEngine.Create(ANetPool: TCnThreadPool);
@@ -1001,7 +1029,7 @@ begin
   end;
 end;
 
-function TCnAIBaseEngine.GetModelListURL(const OrigURL: string): string;
+class function TCnAIBaseEngine.GetModelListURL(const OrigURL: string): string;
 const
   CHAT_COMP = 'chat/completions';
   MODEL = 'models';

@@ -77,27 +77,15 @@ type
   end;
 
   TCnGeminiAIEngine = class(TCnAIBaseEngine)
-  {* Gemini 引擎}
-  protected
-    // Gemini 的 URL 和其他几个不同
-    function GetRequestURL(DataObj: TCnAINetRequestDataObject): string; override;
-
-    // Gemini 的身份验证头信息和其他几个不同
-    procedure PrepareRequestHeader(Headers: TStringList); override;
-
-    // Gemini 的 HTTP 接口的 JSON 格式和其他几个有所不同
-    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
-
-    // Gemini 的信息返回格式也不同
-    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
-      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
-      const Response: TBytes): string; override;
+  {* Gemini 引擎。现阶段号称已改成兼容 OpenAI 了}
   public
     class function EngineName: string; override;
   end;
 
   TCnQWenAIEngine = class(TCnAIBaseEngine)
   {* 通义千问 AI 引擎}
+  protected
+    class function GetModelListURL(const OrigURL: string): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -110,12 +98,16 @@ type
 
   TCnChatGLMAIEngine = class(TCnAIBaseEngine)
   {* 智谱清言 AI 引擎}
+  protected
+    class function GetModelListURL(const OrigURL: string): string; override;
   public
     class function EngineName: string; override;
   end;
 
   TCnBaiChuanAIEngine = class(TCnAIBaseEngine)
   {* 百川智能 AI 引擎}
+  protected
+    function ParseModelList(ResponseRoot: TCnJSONObject): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -128,6 +120,8 @@ type
 
   TCnVolceAIEngine = class(TCnAIBaseEngine)
   {* 火山引擎}
+  protected
+    class function GetModelListURL(const OrigURL: string): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -163,6 +157,11 @@ end;
 
 { TCnQWenAIEngine }
 
+class function TCnQWenAIEngine.GetModelListURL(const OrigURL: string): string;
+begin
+  Result := ''; // 通义千问不支持模型列表获取操作
+end;
+
 class function TCnQWenAIEngine.EngineName: string;
 begin
   Result := '通义千问';
@@ -177,12 +176,43 @@ end;
 
 { TCnChatGLMAIEngine }
 
+class function TCnChatGLMAIEngine.GetModelListURL(const OrigURL: string): string;
+begin
+  Result := ''; // 智谱清言不支持模型列表获取操作
+end;
+
 class function TCnChatGLMAIEngine.EngineName: string;
 begin
   Result := '智谱清言';
 end;
 
 { TCnBaiChuanAIEngine }
+
+function TCnBaiChuanAIEngine.ParseModelList(ResponseRoot: TCnJSONObject): string;
+var
+  I: Integer;
+  Arr: TCnJSONArray;
+begin
+  // 从 RespRoot 中解析出模型列表，拼成逗号分隔的字符串并直接返回
+  // 该引擎该接口的字段名是 model_show_name 而不是 id
+  if (ResponseRoot['data'] <> nil) and (ResponseRoot['data'] is TCnJSONArray) then
+  begin
+    Arr := TCnJSONArray(ResponseRoot['data']);
+    if Arr.Count > 0 then
+    begin
+      for I := 0 to Arr.Count - 1 do
+      begin
+        if (Arr[I]['model_show_name'] <> nil) and (Arr[I]['model_show_name'] is TCnJSONString) then
+        begin
+          if I = 0 then
+            Result := Arr[I]['model_show_name'].AsString
+          else
+            Result := Result + ',' + Arr[I]['model_show_name'].AsString;
+        end;
+      end;
+    end;
+  end;
+end;
 
 class function TCnBaiChuanAIEngine.EngineName: string;
 begin
@@ -197,6 +227,11 @@ begin
 end;
 
 { TCnVolceAIEngine }
+
+class function TCnVolceAIEngine.GetModelListURL(const OrigURL: string): string;
+begin
+  Result := ''; // 火山引擎不支持模型列表获取操作
+end;
 
 class function TCnVolceAIEngine.EngineName: string;
 begin
@@ -414,230 +449,9 @@ end;
 
 { TCnGeminiAIEngine }
 
-function TCnGeminiAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
-  const Code: string): TBytes;
-var
-  ReqRoot, Msg, Txt: TCnJSONObject;
-  Cont, Part: TCnJSONArray;
-  S: AnsiString;
-begin
-  ReqRoot := TCnJSONObject.Create;
-  try
-    Cont := ReqRoot.AddArray('contents');
-
-    // Gemini 不支持 system role，一块搁 user 里
-    Msg := TCnJSONObject.Create;
-    Msg.AddPair('role', 'user');
-    Part := Msg.AddArray('parts');
-    Txt := TCnJSONObject.Create;
-
-    if RequestType = artExplainCode then
-      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ExplainCodePrompt + #13#10 + Code)
-    else if RequestType = artReviewCode then
-      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.ReviewCodePrompt + #13#10 + Code)
-    else if RequestType = artGenTestCase then
-      Txt.AddPair('text', Option.SystemMessage + #13#10 + Option.GenTestCasePrompt + #13#10 + Code)
-    else if RequestType = artRaw then
-      Txt.AddPair('text', Option.SystemMessage + #13#10 + Code);
-
-    Part.AddValue(Txt);
-    Cont.AddValue(Msg);
-
-    S := ReqRoot.ToJSON;
-    Result := AnsiToBytes(S);
-  finally
-    ReqRoot.Free;
-  end;
-end;
-
 class function TCnGeminiAIEngine.EngineName: string;
 begin
   Result := 'Gemini';
-end;
-
-function TCnGeminiAIEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;
-begin
-  // 模型名和身份验证的 Key 均在 URL 里
-  if Option.Stream then
-    Result := DataObj.URL + Option.Model + ':streamGenerateContent?key=' + Option.ApiKey
-  else
-    Result := DataObj.URL + Option.Model + ':generateContent?key=' + Option.ApiKey;
-end;
-
-function TCnGeminiAIEngine.ParseResponse(SendId: Integer; StreamMode, Partly: Boolean;
-  var Success: Boolean; var ErrorCode: Cardinal; var IsStreamEnd: Boolean;
-  RequestType: TCnAIRequestType; const Response: TBytes): string;
-var
-  RespRoot, Cont, Msg: TCnJSONObject;
-  Arr: TCnJSONArray;
-  S, Prev: AnsiString;
-  PrevS: string;
-  P: PAnsiChar;
-  HasPartly: Boolean;
-  JsonObjs: TObjectList;
-  I, Step: Integer;
-begin
-// 格式，一开始一个 [，然后一堆 {},{},发过来，最后{}后还有个 ]，
-// 我们处理时一开始解析会跳过 [ 和中间的 , 但最后那个 ] 要特殊处理
-// {
-//  "candidates": [
-//    {
-//      "content": {
-//        "parts": [
-//          {
-//            "text": "Application"
-//          }
-//        ],
-//        "role": "model"
-//      },
-//      "finishReason": "STOP"
-//    }
-//  ],
-//  "usageMetadata": {
-//    "promptTokenCount": 46,
-//    "totalTokenCount": 46
-//  },
-//  "modelVersion": "gemini-1.5-flash-latest"
-// }
-
-  Result := '';
-  // 根据 SendId 找本次会话中留存的数据
-  Prev := '';
-  if FPrevRespRemainMap.Find(IntToStr(SendId), PrevS) then
-  begin
-    Prev := AnsiString(PrevS);
-    S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
-  end
-  else
-    S := BytesToAnsi(Response);
-
-  JsonObjs := TObjectList.Create(True);
-  Step := CnJSONParse(PAnsiChar(S), JsonObjs);
-  P := PAnsiChar(PAnsiChar(S) + Step);
-
-  if (P <> #0) and (Step < Length(S)) then
-  begin
-    // 步进没处理完（长度没满足），且不是结束符，说明有剩余内容
-    Prev := Copy(S, Step + 1, MaxInt);
-  end
-  else // 说明没剩余内容
-    Prev := '';
-
-  // 有无剩余都存起来
-  FPrevRespRemainMap.Add(IntToStr(SendId), Prev);
-
-  RespRoot := nil;
-  if JsonObjs.Count > 0 then
-    RespRoot := TCnJSONObject(JsonObjs[0]);
-
-  if RespRoot = nil then
-  begin
-    // 一类原始错误，如账号达到最大并发等，注意流模式下没有单独的 datadone
-    if Trim(S) <> ']' then // 单独结尾的 ] 要忽略，
-      Result := string(S);
-  end
-  else
-  begin
-    try
-      // 正常回应，Gemini 格式
-      HasPartly := False;
-      if Partly then
-      begin
-        // 流式模式下，可能有多个 Obj
-        for I := 0 to JsonObjs.Count - 1 do
-        begin
-          RespRoot := TCnJSONObject(JsonObjs[I]);
-          if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
-          begin
-            Arr := TCnJSONArray(RespRoot['candidates']);
-            if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
-            begin
-              Cont := TCnJSONObject(Arr[0]['content']);
-              if (Cont['parts'] <> nil) and (Cont['parts'] is TCnJSONArray) then
-              begin
-                Arr := TCnJSONArray(Cont['parts']);
-                if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
-                begin
-                  Msg := TCnJSONObject(Arr[0]);
-                  Result := Result + Msg['text'].AsString;
-                  HasPartly := True;
-                end;
-              end;
-            end;
-
-            // 有 finishReason 字段表示结尾
-            Arr := TCnJSONArray(RespRoot['candidates']);
-            if (Arr.Count > 0) and (Arr[0]['finishReason'] <> nil) and (Arr[0]['finishReason'] is TCnJSONString) then
-            begin
-              IsStreamEnd := True;
-              FPrevRespRemainMap.Delete(IntToStr(SendId)); // 也清理缓存，但因为有数据，不能直接返回
-            end;
-          end;
-        end;
-      end
-      else // 完整模式
-      begin
-        if (RespRoot['candidates'] <> nil) and (RespRoot['candidates'] is TCnJSONArray) then
-        begin
-          Arr := TCnJSONArray(RespRoot['candidates']);
-          if (Arr.Count > 0) and (Arr[0]['content'] <> nil) and (Arr[0]['content'] is TCnJSONObject) then
-          begin
-            Cont := TCnJSONObject(Arr[0]['content']);
-            if (Cont['parts'] <> nil) and (Cont['parts'] is TCnJSONArray) then
-            begin
-              Arr := TCnJSONArray(Cont['parts']);
-              if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
-              begin
-                Msg := TCnJSONObject(Arr[0]);
-                Result := Msg['text'].AsString;
-              end;
-            end;
-          end;
-        end;
-      end;
-
-      if not HasPartly and (Result = '') then
-      begin
-        // 只要没有正常回应，就说明出错了
-        Success := False;
-
-        // 一类业务错误，比如 Key 无效等
-        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
-        begin
-          Msg := TCnJSONObject(RespRoot['error']);
-          Result := Msg['message'].AsString;
-        end;
-
-        // 一类网络错误，比如 URL 错了等
-        if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
-          Result := RespRoot['error'].AsString;
-        if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
-        begin
-          if Result = '' then
-            Result := RespRoot['message'].AsString
-          else
-            Result := Result + ', ' + RespRoot['message'].AsString;
-        end;
-      end;
-
-      // 兜底，整块模式下所有解析都无效就直接用整个 JSON 作为返回信息
-      if not HasPartly and (Result = '') then
-        Result := string(S);
-    finally
-      RespRoot.Free;
-    end;
-  end;
-
-  // 处理一下回车换行
-  if Pos(CRLF, Result) <= 0 then
-    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
-end;
-
-procedure TCnGeminiAIEngine.PrepareRequestHeader(Headers: TStringList);
-begin
-  inherited;
-  // 删原有的 Authorization，因为身份认证在 URL 里
-  DeleteAuthorizationHeader(Headers);
 end;
 
 { TCnOllamaAIEngine }
