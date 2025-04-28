@@ -43,7 +43,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
-  CnFrmAICoderOption, CnWizMultiLang;
+  CnFrmAICoderOption, CnWizMultiLang, CnWizManager;
 
 type
   TCnAICoderConfigForm = class(TCnTranslateForm)
@@ -83,6 +83,7 @@ type
     FIdGenTestCase: Integer;
     FIdShowChatWindow: Integer;
     FIdConfig: Integer;
+    FNeedUpgradeGemini: Boolean;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
     procedure EnsureChatWindowVisible;
@@ -113,6 +114,8 @@ type
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
+
+    procedure VersionFirstRun; override;
   end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
@@ -224,11 +227,40 @@ begin
 end;
 
 procedure TCnAICoderWizard.LoadSettings(Ini: TCustomIniFile);
+const
+  UPGRADE_GEMINIIDNAME = 'Gemini'; // 引擎 ID 和 NAME 都是它
+var
+  NewGerminiOption: TCnAIEngineOption;
+  S: string;
 begin
   CnAIEngineManager.LoadFromWizOptions;
 
   // 这句很重要，手动设置存储的活动引擎名称
   CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+
+  if FNeedUpgradeGemini then
+  begin
+    // 手动更新 Gemini 的设置的 URL 为专家包自带的配置的 URL
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnAICoderWizard Load Settings for 161. Upgrade Gemini.');
+{$ENDIF}
+
+    S := WizOptions.GetDataFileName(Format(SCnAICoderEngineOptionFileFmt, [UPGRADE_GEMINIIDNAME]));
+    NewGerminiOption := CnAIEngineOptionManager.CreateOptionFromFile(UPGRADE_GEMINIIDNAME, S, nil, False);
+
+    try
+      if CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME) <> nil then
+      begin
+        CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME).URL := NewGerminiOption.URL;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('TCnAICoderWizard Upgrade Gemini from %s to %s',
+          [CnAIEngineOptionManager.GetOptionByEngine(UPGRADE_GEMINIIDNAME).URL, NewGerminiOption.URL]);
+{$ENDIF}
+      end;
+    finally
+      NewGerminiOption.Free;
+    end;
+  end;
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('CnAIEngineOptionManager Load %d Options.', [CnAIEngineOptionManager.OptionCount]);
@@ -559,6 +591,18 @@ end;
 function TCnAICoderConfigForm.GetHelpTopic: string;
 begin
   Result := 'CnAICoderWizard';
+end;
+
+procedure TCnAICoderWizard.VersionFirstRun;
+begin
+  if (CnWizardMgr.ProductVersion >= 161) and // 161 版开始的部分 AI 参数要升级，如 Gemini 的地址
+    (WizOptions.ReadInteger(SCnVersionFirstRun, Self.ClassName, 0) < 161) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnAICoderWizard.VersionFirstRun for 161. To Upgrade Setting.');
+{$ENDIF}
+    FNeedUpgradeGemini := True;
+  end;
 end;
 
 initialization

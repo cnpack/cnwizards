@@ -403,7 +403,6 @@ var
   Eng: TCnAIBaseEngine;
   AnOption: TCnAIEngineOption;
   Item: TCnAIExtraItem;
-  Edt: TEdit;
 begin
   if (Engine = nil) or not (Engine is TCnAIBaseEngine) then
     Exit;
