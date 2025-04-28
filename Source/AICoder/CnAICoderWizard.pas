@@ -380,7 +380,11 @@ begin
 
       // 给每个 Options 创建一个 Tab
       FTabsheets[I] := TTabSheet.Create(pgcAI);
-      FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I]);
+      if I < 10 then
+        FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName + Format(' (&%d)', [I])
+      else
+        FTabsheets[I].Caption := CnAIEngineOptionManager.Options[I].EngineName
+          + Format(' (&%s)', [Chr(Ord('A') + I - 10)]);
       FTabsheets[I].PageControl := pgcAI;
 
       // 给每个 Tab 里塞一个 Frame

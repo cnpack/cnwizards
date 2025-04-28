@@ -1546,6 +1546,7 @@ begin
   TranslateStr(SCnMsgDlgNoToAll, 'SCnMsgDlgNoToAll');
   TranslateStr(SCnVersion, 'SCnVersion');
   TranslateStr(SCnNeedAdmin, 'SCnNeedAdmin');
+  TranslateStr(SCnNotSupport, 'SCnNotSupport');
   
   //----------------------------------------------------------------------------
   //  Feedback
