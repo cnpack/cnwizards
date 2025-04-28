@@ -80,7 +80,7 @@ type
     FOnResponse: TCnAINetDataResponse;
     FRequestType: TCnAIRequestType;
     FOnAnswer: TCnAIAnswerCallback;
-    FAPIKey: string;
+    FApiKey: string;
   public
     function Clone: TCnTaskDataObject; override;
 
@@ -96,7 +96,7 @@ type
     {* 请求 ID 备用}
     property URL: string read FURL write FURL;
     {* 请求地址}
-    property APIKey: string read FAPIKey write FAPIKey;
+    property ApiKey: string read FApiKey write FApiKey;
     {* API Key}
 
     property Tag: TObject read FTag write FTag;
@@ -127,7 +127,7 @@ begin
   TCnAINetRequestDataObject(Result).SendId := FSendId;
   TCnAINetRequestDataObject(Result).RequestType := FRequestType;
   TCnAINetRequestDataObject(Result).StreamMode := FStreamMode;
-  TCnAINetRequestDataObject(Result).APIKey := FAPIKey;
+  TCnAINetRequestDataObject(Result).ApiKey := FApiKey;
   TCnAINetRequestDataObject(Result).OnResponse := FOnResponse;
   TCnAINetRequestDataObject(Result).OnAnswer := FOnAnswer;
 end;

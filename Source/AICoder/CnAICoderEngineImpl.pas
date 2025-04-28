@@ -64,7 +64,7 @@ type
     class function GetModelListURL(const OrigURL: string): string; override;
 
     // Claude 的身份验证头信息和其他几个不同
-    procedure PrepareRequestHeader(Headers: TStringList); override;
+    procedure PrepareRequestHeader(const APIKey: string; Headers: TStringList); override;
 
     // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
@@ -459,11 +459,11 @@ begin
     Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
-procedure TCnClaudeAIEngine.PrepareRequestHeader(Headers: TStringList);
+procedure TCnClaudeAIEngine.PrepareRequestHeader(const ApiKey: string; Headers: TStringList);
 begin
   inherited;
   DeleteAuthorizationHeader(Headers); // 删除原有的认证头，换新头
-  Headers.Add('x-api-key: ' + Option.ApiKey);
+  Headers.Add('x-api-key: ' + ApiKey);
   Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
 end;
 

@@ -112,8 +112,9 @@ type
     function GetRequestURL(DataObj: TCnAINetRequestDataObject): string; virtual;
     {* 请求发送前，给子类一个处理自定义 URL  的机会}
 
-    procedure PrepareRequestHeader(Headers: TStringList); virtual;
-    {* 请求发送前，给子类一个处理自定义 HTTP 头的机会}
+    procedure PrepareRequestHeader(const ApiKey: string; Headers: TStringList); virtual;
+    {* 请求发送前，给子类一个处理自定义 HTTP 头的机会。ApiKey 是发起请求时指定的，
+      有可能特殊场合和 FOptions 里的 ApiKey 不同，优先以此为准。}
 
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string = ''): TBytes; virtual;
     {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
@@ -150,7 +151,7 @@ type
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
     function AskAIEngine(const URL: string; const Text: TBytes; StreamMode: Boolean;
-      RequestType: TCnAIRequestType;  const APIKey: string; Tag: TObject;
+      RequestType: TCnAIRequestType;  const ApiKey: string; Tag: TObject;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 用户调用的与 AI 通讯的过程，传入原始通讯数据，内部会组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
@@ -496,7 +497,7 @@ end;
 { TCnAIBaseEngine }
 
 function TCnAIBaseEngine.AskAIEngine(const URL: string; const Text: TBytes;
-  StreamMode: Boolean; RequestType: TCnAIRequestType; const APIKey: string;
+  StreamMode: Boolean; RequestType: TCnAIRequestType; const ApiKey: string;
   Tag: TObject; AnswerCallback: TCnAIAnswerCallback): Integer;
 var
   Obj: TCnAINetRequestDataObject;
@@ -507,7 +508,7 @@ begin
   Obj.URL := URL;
   Obj.Tag := Tag;
   Obj.RequestType := RequestType;
-  Obj.APIKey := APIKey;
+  Obj.ApiKey := ApiKey;
   Randomize;
   Obj.SendId := 10000000 + Random(100000000);
 
@@ -933,11 +934,11 @@ begin
         HTTP.ProxyMode := pmIE;
     end;
 
-    if TCnAINetRequestDataObject(DataObj).APIKey <> '' then
-      HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + TCnAINetRequestDataObject(DataObj).APIKey);
+    if TCnAINetRequestDataObject(DataObj).ApiKey <> '' then
+      HTTP.HttpRequestHeaders.Add('Authorization: Bearer ' + TCnAINetRequestDataObject(DataObj).ApiKey);
     // 大多数 AI 引擎的身份验证都是这句。少数不是的，可以在子类的 PrepareRequestHeader 里删掉这句再加
 
-    PrepareRequestHeader(HTTP.HttpRequestHeaders);
+    PrepareRequestHeader(TCnAINetRequestDataObject(DataObj).ApiKey, HTTP.HttpRequestHeaders);
 
     Stream := TMemoryStream.Create;
     AURL := GetRequestURL(TCnAINetRequestDataObject(DataObj));
@@ -974,7 +975,7 @@ begin
   end;
 end;
 
-procedure TCnAIBaseEngine.PrepareRequestHeader(Headers: TStringList);
+procedure TCnAIBaseEngine.PrepareRequestHeader(const ApiKey: string; Headers: TStringList);
 begin
   Headers.Add('Content-Type: application/json');
 end;
