@@ -287,7 +287,8 @@ type
     procedure UpdateCompDirectiveList; // 找出编译指令
     procedure UpdateCustomIdentifierList;   // 找出自定义标识符
 
-    procedure CheckLineMatch(View: IOTAEditView; IgnoreClass, IgnoreNamespace: Boolean);
+    procedure CheckLineMatch(View: IOTAEditView; IgnoreClass, IgnoreNamespace: Boolean;
+      NeedProcedure: Boolean = False);
     procedure CheckCompDirectiveMatch(View: IOTAEditView);
     procedure ConvertLineList;          // 将解析出的关键字与当前标识符转换成按行方式快速访问的
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
@@ -2065,7 +2066,7 @@ begin
 end;
 
 procedure TCnBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass,
-  IgnoreNamespace: Boolean);
+  IgnoreNamespace: Boolean; NeedProcedure: Boolean);
 var
   I: Integer;
   Pair, PrevPair, IfThenPair: TCnBlockLinePair;
@@ -2131,6 +2132,25 @@ begin
         for I := 0 to FKeyTokenList.Count - 1 do
         begin
           Token := TCnGeneralPasToken(FKeyTokenList[I]);
+
+          // 高亮之外的场合需要加入 procedure 的时候
+          if NeedProcedure and Token.IsMethodStart and
+            (Token.TokenID in [tkProcedure, tkFunction, tkOperator]) then
+          begin
+            Pair := CreateLinePair;
+            Pair.Layer := Token.MethodLayer - 1;
+            // 注意解析器里的 ItemLayer 在 procedure 等关键字处都为 0，这里用 MethodLayer - 1，努力保持和实际 ItemLayer - 1 一致
+            Pair.StartToken := Token;
+            Pair.StartLeft := Token.EditCol;
+            Pair.EndToken := Token;
+            Pair.EndLeft := Token.EditCol;
+
+            Pair.Top := Token.EditLine;
+            Pair.Left := Token.EditCol;
+            Pair.Bottom := Token.EditLine;
+            LineInfo.AddPair(Pair);
+          end;
+
           if Token.IsBlockStart then
           begin
             Pair := CreateLinePair;
@@ -2248,6 +2268,7 @@ begin
             end;
           end;
         end;
+
         LineInfo.ConvertLineList;
         LineInfo.FindCurrentPair(View, FIsCppSource);
       finally
