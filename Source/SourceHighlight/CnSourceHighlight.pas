@@ -379,6 +379,8 @@ type
 
     procedure Clear;
     procedure AddMidToken(const Token: TCnGeneralPasToken; const LineLeft: Integer);
+    procedure DeleteMidToken(Index: Integer);
+
     function IsInMiddle(const LineNum: Integer): Boolean;
     function IndexOfMiddleToken(const Token: TCnGeneralPasToken): Integer;
 
@@ -438,6 +440,10 @@ type
     {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
        与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken。
        注意对 Unicode 标识符可能有问题。}
+
+    procedure SortPairs;
+    {* 外界调用的，将 Pairs 对象按 StartToken 位置排序，本高亮单元中暂不使用}
+
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
     property Pairs[Index: Integer]: TCnBlockLinePair read GetPairs;
@@ -5906,6 +5912,11 @@ begin
   FMiddleTokens := TList.Create;
 end;
 
+procedure TCnBlockLinePair.DeleteMidToken(Index: Integer);
+begin
+  FMiddleTokens.Delete(Index);
+end;
+
 destructor TCnBlockLinePair.Destroy;
 begin
   FMiddleTokens.Free;
@@ -6162,6 +6173,35 @@ begin
       TCnList(FKeyLineList[J]).Add(Pair);
     end;
   end;
+end;
+
+function PairCompare(Item1, Item2: Pointer): Integer;
+var
+  P1, P2: TCnBlockLinePair;
+begin
+  P1 := TCnBlockLinePair(Item1);
+  P2 := TCnBlockLinePair(Item2);
+
+  if (P1 <> nil) and (P2 = nil) then
+    Result := 1
+  else if (P1 = nil) and (P2 <> nil) then
+    Result := -1
+  else if (P1 = nil) and (P2 = nil) then
+    Result := 0
+  else
+  begin
+    if P1.StartToken.EditLine > P2.StartToken.EditLine then
+      Result := 1
+    else if P1.StartToken.EditLine < P2.StartToken.EditLine then
+      Result := -1
+    else
+      Result := P1.StartToken.EditCol - P2.StartToken.EditCol;
+  end;
+end;
+
+procedure TCnBlockLineInfo.SortPairs;
+begin
+  FPairList.Sort(PairCompare);
 end;
 
 { TCnCurLineInfo }

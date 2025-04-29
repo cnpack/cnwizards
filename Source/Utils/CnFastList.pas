@@ -42,9 +42,10 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, {$IFDEF COMPILER6_UP}RTLConsts{$ELSE}Consts{$ENDIF}, SysUtils;
+  Classes, {$IFDEF COMPILER6_UP} RTLConsts {$ELSE} Consts {$ENDIF}, SysUtils;
 
 {$IFDEF BDS2012_UP}
+
 const
   MaxListSize = Maxint div 16;
 
@@ -82,6 +83,8 @@ type
     procedure Insert(Index: Integer; Item: Pointer);
     function Last: Pointer;
 
+    procedure Sort(Compare: TListSortCompare);
+
     procedure StackPush(Item: Pointer);
     function StackPop: Pointer;
     function StackPeek: Pointer;
@@ -109,6 +112,36 @@ type
   end;
 
 implementation
+
+procedure QuickSort(SortList: PCnPointerList; L, R: Integer;
+  SCompare: TListSortCompare);
+var
+  I, J: Integer;
+  P, T: Pointer;
+begin
+  repeat
+    I := L;
+    J := R;
+    P := SortList^[(L + R) shr 1];
+    repeat
+      while SCompare(SortList^[I], P) < 0 do
+        Inc(I);
+      while SCompare(SortList^[J], P) > 0 do
+        Dec(J);
+      if I <= J then
+      begin
+        T := SortList^[I];
+        SortList^[I] := SortList^[J];
+        SortList^[J] := T;
+        Inc(I);
+        Dec(J);
+      end;
+    until I > J;
+    if L < J then
+      QuickSort(SortList, L, J, SCompare);
+    L := I;
+  until I >= R;
+end;
 
 { TCnBaseList }
 
@@ -311,6 +344,12 @@ begin
       (FCount - Index) * SizeOf(Pointer));
   FList^[Index] := Item;
   Inc(FCount);
+end;
+
+procedure TCnBaseList.Sort(Compare: TListSortCompare);
+begin
+  if (FList <> nil) and (Count > 0) then
+    QuickSort(FList, 0, Count - 1, Compare);
 end;
 
 { TCnList }
