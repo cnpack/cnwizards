@@ -3350,6 +3350,7 @@
   {$DEFINE SUPPORT_32_AND_64}                  // XE2 及以上同时支持 Win32 和 Win64
   {$DEFINE SUPPORT_WIN64}                      // XE2 及以上支持 Win64
   {$DEFINE SUPPORT_MACOS32}                    // XE2 及以上支持 MacOS 32
+  {$DEFINE SUPPORT_THEME}                      // XE2 及以上支持 StyleService 的主题
   {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 及以上的单元名开始带点
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
