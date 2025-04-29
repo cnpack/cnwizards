@@ -54,7 +54,6 @@ type
     FSelectStep: Integer;
     FTimer: TTimer;
     FNeedReparse: Boolean;
-    FWholeLines: Boolean;
     FSelecting: Boolean;
     FStartPos, FEndPos: TOTACharPos;
     procedure FixPair(APair: TCnBlockLinePair);
@@ -72,9 +71,6 @@ type
     function GetHint: string; override;
     procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
-
-    property WholeLines: Boolean read FWholeLines write FWholeLines;
-    {* 块选择时是否是整行模式}
   end;
 
 implementation
@@ -548,6 +544,7 @@ begin
                       SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
                       Exit;
                     end;
+                    Break; // 已经找到了同级 if 等语句，不用再找 function/procedure 了
                   end;
 
                   // 继续找同级上面相邻的 function/procedure
@@ -561,6 +558,7 @@ begin
                       SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
                       Exit;
                     end;
+                    Break;
                   end;
                 end;
               end;
