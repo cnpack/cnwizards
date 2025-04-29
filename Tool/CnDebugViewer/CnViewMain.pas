@@ -1495,6 +1495,7 @@ end;
 
 procedure TCnMainViewer.TerminateThread;
 begin
+  DebugDebuggerLog('MainViewer Before TerminateThread');
   if FThread <> nil then
   begin
     FThread.Terminate;
@@ -1516,6 +1517,7 @@ begin
     end;
     // FDbgThread := nil;
   end;
+  DebugDebuggerLog('MainViewer After TerminateThread');
 end;
 
 procedure TCnMainViewer.ShowAndHideOtherChildren(ExceptChild: TForm);

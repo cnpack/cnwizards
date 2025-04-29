@@ -667,8 +667,11 @@ end;
 
 destructor TCnMsgStore.Destroy;
 begin
+  DebugDebuggerLog('MsgStore Destroy Free Times');
   FTimes.Free;
+  DebugDebuggerLog('MsgStore Destroy Free Msgs');
   FMsgs.Free;
+  DebugDebuggerLog('MsgStore Destroy Inherited');
   inherited;
 end;
 
@@ -825,8 +828,11 @@ end;
 
 destructor TCnMsgManager.Destroy;
 begin
+  DebugDebuggerLog('MsgManager Destroy Free Watches');
   FWatches.Free;
+  DebugDebuggerLog('MsgManager Destroy Free Stores');
   FStores.Free;
+  DebugDebuggerLog('MsgManager Destroy Inherited');
   inherited;
 end;
 
@@ -898,12 +904,16 @@ var
 begin
   Result := -1;
   if AStore <> nil then
+  begin
     for I := 0 to FStores.Count - 1 do
+    begin
       if FStores[I] = AStore then
       begin
         Result := I;
         Exit;
       end;
+    end;
+  end;
 end;
 
 procedure TCnMsgManager.PutWatch(const VarName, Value: string);
@@ -927,7 +937,7 @@ begin
   Result := (AItem <> nil);
   if Result then
   begin
-    // DONE: 判断该 Item 是否应该被过滤掉
+    // 判断该 Item 是否应该被过滤掉
     Result := (AItem.Level <= FLevel)
       and ((FMsgTypes = []) or (AItem.MsgType in FMsgTypes))
       and ((FThreadId = 0) or (AItem.ThreadId = FThreadId))
@@ -1052,6 +1062,7 @@ end;
 {$IFDEF DEBUGDEBUGGER}
 var
   F: TFileStream = nil;
+  Exiting: Boolean = False;
 {$ENDIF}
 
 procedure DebugDebuggerLog(const S: string);
@@ -1065,6 +1076,9 @@ var
 {$ENDIF}
 begin
 {$IFDEF DEBUGDEBUGGER}
+  if Exiting then
+    Exit;
+
   if F = nil then
   begin
     FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
@@ -1080,7 +1094,6 @@ begin
     B := TEncoding.Default.GetBytes(T);
     F.Write(B, Length(B));
     F.Write(CRLF[1], 2);
-
   finally
     // F.Free;
   end;
@@ -1090,9 +1103,12 @@ end;
 initialization
 
 finalization
+  DebugDebuggerLog('CnMsgClasses Before finalization');
   FreeAndNil(FCnMsgManager);
+  DebugDebuggerLog('CnMsgClasses After finalization');
 {$IFDEF DEBUGDEBUGGER}
-  F.Free;
+  Exiting := True;
+  FreeAndNil(F);
 {$ENDIF}
 
 end.
