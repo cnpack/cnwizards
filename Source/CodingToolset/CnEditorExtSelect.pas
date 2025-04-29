@@ -28,7 +28,9 @@ unit CnEditorExtSelect;
 * 开发平台：PWin7 SP2 + Delphi 5.01
 * 兼容测试：PWin7 + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2021.10.06 V1.0
+* 修改记录：2025.04.29 V1.1
+*               完善部分 Pascal 代码的功能
+*           2021.10.06 V1.0
 *               创建单元，实现功能
 ================================================================================
 |</PRE>}
@@ -48,15 +50,17 @@ uses
 type
   TCnEditorExtendingSelect = class(TCnBaseCodingToolset)
   private
-    FLevel: Integer;
+    FEditPos: TOTAEditPos;
+    FSelectStep: Integer;
     FTimer: TTimer;
     FNeedReparse: Boolean;
     FWholeLines: Boolean;
     FSelecting: Boolean;
     FStartPos, FEndPos: TOTACharPos;
+    procedure FixPair(APair: TCnBlockLinePair);
     procedure CheckModifiedAndReparse;
-    procedure EditorChanged(Editor: TEditorObject; ChangeType:
-      TEditorChangeTypes);
+    procedure EditorChanged(Editor: TCnEditorObject; ChangeType:
+      TCnEditorChangeTypes);
     procedure OnSelectTimer(Sender: TObject);
   protected
     function GetDefShortCut: TShortCut; override;
@@ -76,9 +80,21 @@ type
 implementation
 
 uses
-  CnDebug;
+  CnIDEStrings {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 { TCnEditorExtendingSelect }
+
+procedure TCnEditorExtendingSelect.FixPair(APair: TCnBlockLinePair);
+begin
+  if APair.MiddleCount > 0 then
+  begin
+    if APair.EndToken.TokenID in [tkElse, tkExcept, tkFinally, tkCase] then
+    begin
+      APair.EndToken := APair.MiddleToken[APair.MiddleCount - 1];
+      APair.DeleteMidToken(APair.MiddleCount - 1);
+    end;
+  end;
+end;
 
 procedure TCnEditorExtendingSelect.CheckModifiedAndReparse;
 const
@@ -86,33 +102,222 @@ const
 var
   EditView: IOTAEditView;
   EditControl: TControl;
-  CurrIndex, I: Integer;
+  CurrIndex, I, J, InnerIdx, PairLevel, Step: Integer;
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
-  EditPos: TOTAEditPos;
   CharPos: TOTACharPos;
-  CurrentToken: TCnGeneralPasToken;
+  CurrentToken, T1, T2: TCnGeneralPasToken;
   CurrentTokenName: TCnIdeTokenString;
-  CurIsPas, CurIsCpp: Boolean;
+  CurIsPas, CurIsCpp, BeginEndFound, AreaFound, CursorInPair: Boolean;
   CurrentTokenIndex: Integer;
   BlockMatchInfo: TCnBlockMatchInfo;
   MaxInnerLayer, MinOutLayer: Integer;
-  Pair: TCnBlockLinePair;
+  Pair, TmpPair, InnerPair: TCnBlockLinePair;
   LastS: string;
 
-  // 判断一个 Pair 是否包括了光标位置
-  function EditPosInPair(AEditPos: TOTAEditPos; APair: TCnBlockLinePair): Boolean;
+  // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
+  function EditPosInPairClose(AEditPos: TOTAEditPos; APairStart, APairEnd: TCnGeneralPasToken): Boolean;
   var
     AfterStart, BeforeEnd: Boolean;
   begin
-    AfterStart := (AEditPos.Line > APair.StartToken.EditLine) or
-      ((AEditPos.Line = APair.StartToken.EditLine) and (AEditPos.Col >= APair.StartToken.EditCol));
-    BeforeEnd := (AEditPos.Line < APair.EndToken.EditLine) or
-      ((AEditPos.Line = APair.EndToken.EditLine) and
-      (AEditPos.Col <= APair.EndToken.EditEndCol));
+    AfterStart := (AEditPos.Line > APairStart.EditLine) or
+      ((AEditPos.Line = APairStart.EditLine) and (AEditPos.Col >= APairStart.EditCol));
+    BeforeEnd := (AEditPos.Line < APairEnd.EditLine) or
+      ((AEditPos.Line = APairEnd.EditLine) and (AEditPos.Col <= APairEnd.EditEndCol));
 
     Result := AfterStart and BeforeEnd;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('EditPosInPairClose Step %d. Is %d %d in Open %d %d to %d %d? %d',
+//      [Step, AEditPos.Line, AEditPos.Col, APairStart.EditLine, APairStart.EditCol,
+//      APairEnd.EditLine, APairEnd.EditEndCol, Ord(Result)]);
+{$ENDIF}
+  end;
+
+  // 判断一个 Pair 是否包括了光标位置，不包括头尾关键字，开区间（注意头关键字后、尾关键字前，算包括）。
+  function EditPosInPairOpen(AEditPos: TOTAEditPos; APairStart, APairEnd: TCnGeneralPasToken): Boolean;
+  var
+    AfterStart, BeforeEnd: Boolean;
+  begin
+    AfterStart := (AEditPos.Line > APairStart.EditLine) or
+      ((AEditPos.Line = APairStart.EditLine) and (AEditPos.Col >= APairStart.EditEndCol));
+    BeforeEnd := (AEditPos.Line < APairEnd.EditLine) or
+      ((AEditPos.Line = APairEnd.EditLine) and (AEditPos.Col <= APairEnd.EditCol));
+
+    Result := AfterStart and BeforeEnd;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('EditPosInPairOpen Step %d. Is %d %d in Open %d %d to %d %d? %d',
+//      [Step, AEditPos.Line, AEditPos.Col, APairStart.EditLine, APairStart.EditEndCol,
+//      APairEnd.EditLine, APairEnd.EditCol, Ord(Result)]);
+{$ENDIF}
+  end;
+
+  procedure SetStartEndPos(StartToken, EndToken: TCnGeneralPasToken; Open: Boolean);
+  begin
+    if Open then
+    begin
+      FStartPos.Line := StartToken.EditLine;
+      FStartPos.CharIndex := StartToken.EditEndCol;
+      FEndPos.Line := EndToken.EditLine;
+      FEndPos.CharIndex := EndToken.EditCol;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Success! Open at Step %d. %s ... %s', [Step, StartToken.Token, EndToken.Token]);
+{$ENDIF}
+    end
+    else
+    begin
+      FStartPos.Line := StartToken.EditLine;
+      FStartPos.CharIndex := StartToken.EditCol;
+      FEndPos.Line := EndToken.EditLine;
+      FEndPos.CharIndex := EndToken.EditEndCol;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Success! Close at Step %d at %s ... %s', [Step, StartToken.Token, EndToken.Token]);
+{$ENDIF}
+    end;
+    AreaFound := True;
+  end;
+
+  // 拿到一个 Pair 后，步进 Step 以各种开闭区间搜，
+  // 内部使用 Step 步进、FLevel 比较、AreaFound 输出是否找到等外部变量
+  procedure SearchInAPair(APair: TCnBlockLinePair);
+  var
+    I: Integer;
+  begin
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('Search A Pair with MiddleCount %d. Step Start From %d to Meet Dest Step %d',
+//      [APair.MiddleCount, Step, FSelectStep]);
+{$ENDIF}
+    if APair.MiddleCount = 0 then
+    begin
+      // 普通 Pair，找头尾开区间，Step + 1，判断
+      if EditPosInPairOpen(FEditPos, APair.StartToken, APair.EndToken) then
+      begin
+        Inc(Step);
+        if Step = FSelectStep then
+        begin
+          SetStartEndPos(APair.StartToken, APair.EndToken, True);
+          Exit;
+        end;
+      end;
+
+      // 普通 Pair，找头尾闭区间，Step + 1， 判断
+      if EditPosInPairClose(FEditPos, APair.StartToken, APair.EndToken) then
+      begin
+        Inc(Step);
+        if Step = FSelectStep then
+        begin
+          SetStartEndPos(APair.StartToken, APair.EndToken, False);
+          Exit;
+        end;
+      end;
+    end
+    else
+    begin
+      // 多结构 Pair，找所在头尾的开、闭区间，Step + 1，判断
+      for I := 0 to APair.MiddleCount - 1 do
+      begin
+        if I = 0 then
+        begin
+          // 第一个中间，开始和第一个中间的开区间判断
+          if EditPosInPairOpen(FEditPos, APair.StartToken, APair.MiddleToken[I]) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.StartToken, APair.MiddleToken[I], True);
+              Exit;
+            end;
+          end;
+
+          // 第一个中间，开始和第一个中间的闭区间判断
+          if EditPosInPairClose(FEditPos, APair.StartToken, APair.MiddleToken[I]) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.StartToken, APair.MiddleToken[I], False);
+              Exit;
+            end;
+          end;
+        end;
+
+        if I = APair.MiddleCount - 1 then // 注意不能 else if
+        begin
+          // 最后一个中间，最后一个中间和结尾的开区间判断
+          if EditPosInPairOpen(FEditPos, APair.MiddleToken[I], APair.EndToken) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.MiddleToken[I], APair.EndToken, True);
+              Exit;
+            end;
+          end;
+
+          // 最后一个中间，最后一个中间和结尾的闭区间判断
+          if EditPosInPairClose(FEditPos, APair.MiddleToken[I], APair.EndToken) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.MiddleToken[I], APair.EndToken, False);
+              Exit;
+            end;
+          end;
+        end;
+
+        if (APair.MiddleCount > 1) and (I < APair.MiddleCount - 1) then
+        begin
+          // 某中间且后面有中间，本中间和下一个中间的开区间判断
+          if EditPosInPairOpen(FEditPos, APair.MiddleToken[I], APair.MiddleToken[I + 1]) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.MiddleToken[I], APair.MiddleToken[I + 1], True);
+              Exit;
+            end;
+          end;
+
+          // 某中间且后面有中间，最后一个中间和结尾的闭区间判断
+          if EditPosInPairClose(FEditPos, APair.MiddleToken[I], APair.MiddleToken[I + 1]) then
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(APair.MiddleToken[I], APair.MiddleToken[I + 1], False);
+              Exit;
+            end;
+          end;
+        end;
+      end;
+
+      // 如果没找到，则找多结构 Pair 的整个头尾
+      if not AreaFound then
+      begin
+        // 头和结尾的开区间，Step + 1，判断
+        if EditPosInPairOpen(FEditPos, APair.StartToken, APair.EndToken) then
+        begin
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(APair.StartToken, APair.EndToken, True);
+            Exit;
+          end;
+        end;
+
+        // 头和结尾的闭区间，Step + 1，判断
+        if EditPosInPairClose(FEditPos, APair.StartToken, APair.EndToken) then
+        begin
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(APair.StartToken, APair.EndToken, False);
+            Exit;
+          end;
+        end;
+      end;
+    end;
   end;
 
 begin
@@ -183,34 +388,60 @@ begin
 
     // 把有用的 Token 加入 BlockMatchInfo 中
     for I := 0 to PasParser.Count - 1 do
-      if PasParser.Tokens[I].TokenID in csKeyTokens + [tkSemiColon] then
+    begin
+      if PasParser.Tokens[I].TokenID in csKeyTokens + [tkProcedure, tkFunction, tkOperator, tkSemiColon] then
         BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
+    end;
 
     // 转换一下
     for I := 0 to BlockMatchInfo.KeyCount - 1 do
       ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
 
-    // 检查配对
+    // 检查配对，生成多个 Pair，注意加入了 Procedure 作为 Pair
     BlockMatchInfo.IsCppSource := CurIsCpp;
-    BlockMatchInfo.CheckLineMatch(EditView, False, False);
+    BlockMatchInfo.CheckLineMatch(EditView, False, False, True);
 
-    // BlockMatchInfo 的输出是 LineInfo 内的内容
+    // BlockMatchInfo 的输出是 LineInfo 内的内容，生成多个 Pair
+
+    // 去掉每个 Pair 尾部不合理的内容比如 else
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+      FixPair(BlockMatchInfo.LineInfo.Pairs[I]);
+    BlockMatchInfo.LineInfo.SortPairs;
+
+{$IFDEF DEBUG}
+//    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+//    begin
+//      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+//      CnDebugger.LogFmt('Dump Pairs: #%d From %d %d ~ %d %d, ^%d %s ~ %s', [I,
+//        Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
+//        Pair.StartToken.EditCol, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token]);
+//    end;
+{$ENDIF}
 
     FStartPos.Line := -1;
     FEndPos.Line := -1;
     MaxInnerLayer := NO_LAYER; // -2 不存在
     MinOutLayer := MaxInt;
-    EditPos := EditView.CursorPos;
+
+    // 只有在初始按下热键时才记录光标并作为搜索起始光标，自己扩展选择区域造成的光标移动不算
+    if (FSelectStep <= 1) or ((FEditPos.Line = -1) and (FEditPos.Col = -1)) then
+      FEditPos := EditView.CursorPos;
 
     // 得到光标所在 Pair 的最深层
+    InnerPair := nil;
+    InnerIdx := -1;
     for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
     begin
-      // 先找跨光标位置的最内层也就是 Layer 最高的 Pair
+      // 先找跨光标位置的最内层也就是 Layer 最大的 Pair
       Pair := BlockMatchInfo.LineInfo.Pairs[I];
-      if EditPosInPair(EditPos, Pair) then
+      if EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
       begin
         if Pair.Layer > MaxInnerLayer then
+        begin
           MaxInnerLayer := Pair.Layer;
+          InnerPair := Pair;
+          InnerIdx := I;
+        end;
         if Pair.Layer < MinOutLayer then
           MinOutLayer := Pair.Layer;
       end;
@@ -223,34 +454,132 @@ begin
     if (MaxInnerLayer = NO_LAYER) or (MinOutLayer = MaxInt) then
       Exit;
 
-    // Layer 从 MinOutLayer（可能 -1 或 0） 到 MaxInnerLayer ，FLevel 从 1 往外，FLevel 和 Layer 有个线性对应关系
-    // FLevel 1 <=> MaxInnerLayer，FLevel 2 <=> MaxInnerLayer - 1，... MaxLevel <=> MinOutLayer
-    // 所以 FLevel + Layer = 1 + MaxInnerLayer 并且 MaxLevel := MaxInnerLayer + 1 - MinOutLayer
-    if FLevel > MaxInnerLayer + 1 - MinOutLayer then
+    // 从内往外逐次递增找适合 FLevel 的，但递增有讲究，并非每个 Layer 只递增 1
+    Step := 0;
+
+    // TODO: 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
+
+    // 从 InnerPair 的光标所在开区间到光标所在闭区间，如果 InnerPair 是多结构语句则下一个是整个闭区间
+    AreaFound := False;
+    if InnerPair <> nil then
     begin
-      // 全选整个文件
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('To Search Current Inner Pair %d %d to %d %d with Level %d',
+//        [InnerPair.StartToken.EditLine, InnerPair.StartToken.EditCol,
+//        InnerPair.EndToken.EditLine, InnerPair.StartToken.EditCol, InnerPair.Layer]);
+{$ENDIF}
+      SearchInAPair(InnerPair);
+
+      if not AreaFound then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('InnerPair Search Complete. To Search Other Pairs');
+{$ENDIF}
+        PairLevel := InnerPair.Layer;
+        while PairLevel >= 0 do
+        begin
+{$IFDEF DEBUG}
+//          CnDebugger.LogMsg('In Loop To Find Another Pair with Level ' + IntToStr(PairLevel));
+{$ENDIF}
+          for I := InnerIdx downto 0 do
+          begin
+            // 每退一层 Pair，找开区间，Step + 1，判断，再找闭区间，Step + 1，判断
+            // 再判断该 Pair 是否有同级的 procedure/function，有则闭区间 Step + 1，判断
+            // 再进外一层重复上述循环。注意起始条件会包括已经搜过的 InnerPair
+
+            Pair := BlockMatchInfo.LineInfo.Pairs[I];
+            CursorInPair := False;
+{$IFDEF DEBUG}
+//            CnDebugger.LogFmt('To Check Pair with Level %d. Is %d %d in From %d %d %s to %d %d %s',
+//              [Pair.Layer, FEditPos.Line, FEditPos.Col,
+//              Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.StartToken.Token,
+//              Pair.EndToken.EditLine, Pair.EndToken.EditEndCol, Pair.EndToken.Token]);
+{$ENDIF}
+            if (Pair <> InnerPair) and EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
+            begin
+              // 不搜已经搜过的 InnerPair
+              CursorInPair := True;
+              if Pair.Layer = PairLevel then
+              begin
+{$IFDEF DEBUG}
+//                CnDebugger.LogFmt('Level Match In Pair %d %d to %d %d. To Search in this Pair with Level %d',
+//                  [Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine, Pair.EndToken.EditCol, Pair.Layer]);
+{$ENDIF}
+                SearchInAPair(Pair);
+              end;
+            end;
+            if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
+              CursorInPair := True;
+
+            // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其同级的 if 等
+            if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and (Pair.MiddleCount = 0) and
+              (Pair.StartToken.TokenID = tkBegin) and (Pair.EndToken.TokenID = tkEnd) then
+            begin
+{$IFDEF DEBUG}
+              CnDebugger.LogMsg('Not Found in This Pair. Check other Pairs with Same Level ' + IntToStr(Pair.Layer));
+{$ENDIF}
+              // 找有无和 Pair 这对 begin end 同级的 if/then、while/do、procedure/function，中间不能再碰见同级的 begin end
+              for J := I - 1 downto 0 do
+              begin
+                TmpPair := BlockMatchInfo.LineInfo.Pairs[J];
+                if TmpPair.Layer = Pair.Layer then
+                begin
+                  // 如有同级的 begin end 表示后面即使有 if 什么的也不是在一块的
+                  if (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
+                    Break;
+
+                  if ((TmpPair.StartToken.TokenID = tkIf) and (TmpPair.EndToken.TokenID = tkThen))
+                    or ((TmpPair.StartToken.TokenID = tkWhile) and (TmpPair.EndToken.TokenID = tkDo))
+                    or ((TmpPair.StartToken.TokenID = tkFor) and (TmpPair.EndToken.TokenID = tkDo))
+                    or ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) then
+                  begin
+{$IFDEF DEBUG}
+                    CnDebugger.LogMsg('Get Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+{$ENDIF}
+                    Inc(Step);
+                    if Step = FSelectStep then
+                    begin
+                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, True);
+                      Exit;
+                    end;
+                    Inc(Step);
+                    if Step = FSelectStep then
+                    begin
+                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
+                      Exit;
+                    end;
+                  end;
+
+                  // 继续找同级上面相邻的 function/procedure
+                  if (TmpPair.StartToken.TokenID in [tkProcedure, tkFunction, tkOperator])
+                    and (TmpPair.EndToken.TokenID in [tkProcedure, tkFunction, tkOperator]) then
+                  begin
+                    Inc(Step);
+                    if Step = FSelectStep then
+                    begin
+                      // 函数过程就闭区间，没有开区间
+                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
+                      Exit;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+          Dec(PairLevel); // 是否在本层？
+        end;
+      end;
+    end;
+
+    if not AreaFound then
+    begin
+      // 没有所在的层，或啥都没找到，直接全选整个文件
       FStartPos.Line := 1;
       FStartPos.CharIndex := 0;
       FEndPos.Line := EditView.Buffer.GetLinesInBuffer;
       LastS := CnOtaGetLineText(FEndPos.Line, EditView.Buffer);
       FEndPos.CharIndex := Length(LastS);
       Exit;
-    end;
-
-    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
-    begin
-      // 先找跨光标位置的最内层也就是 Layer 最高的 Pair
-      Pair := BlockMatchInfo.LineInfo.Pairs[I];
-      if Pair.Layer = MaxInnerLayer + 1 - FLevel then
-      begin
-        if EditPosInPair(EditPos, Pair) then
-        begin
-          FStartPos.Line := Pair.StartToken.EditLine;
-          FStartPos.CharIndex := Pair.StartToken.EditCol;
-          FEndPos.Line := Pair.EndToken.EditLine;
-          FEndPos.CharIndex := Pair.EndToken.EditEndCol;
-        end;
-      end;
     end;
   finally
     BlockMatchInfo.LineInfo.Free;
@@ -277,13 +606,18 @@ begin
   inherited;
 end;
 
-procedure TCnEditorExtendingSelect.EditorChanged(Editor: TEditorObject;
-  ChangeType: TEditorChangeTypes);
+procedure TCnEditorExtendingSelect.EditorChanged(Editor: TCnEditorObject;
+  ChangeType: TCnEditorChangeTypes);
 begin
   if ChangeType * [ctView, ctModified, ctTopEditorChanged, ctOptionChanged] <> [] then
     FNeedReparse := True;
+
   if not FSelecting and (ChangeType * [ctBlock] <> []) then
-    FLevel := 0;
+  begin
+    FSelectStep := 0;
+    FEditPos.Line := -1;
+    FEditPos.Col := -1;
+  end;
 end;
 
 procedure TCnEditorExtendingSelect.Execute;
@@ -318,9 +652,9 @@ begin
       end;
     end;
 
-    Inc(FLevel);
+    Inc(FSelectStep);
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('EditorExtendingSelect To Select Level %d.', [FLevel]);
+    CnDebugger.LogFmt('EditorExtendingSelect To Select Step %d.', [FSelectStep]);
 {$ENDIF}
 
     CheckModifiedAndReparse;
