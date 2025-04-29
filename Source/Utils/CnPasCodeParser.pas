@@ -1750,7 +1750,17 @@ begin
             if Result.AreaKind in [akIntfUses, akImplUses] then
             begin
               while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in [tkNull, tkSemiColon]) do
+              begin
+                if IsProgram and (Lex.TokenID = tkString) then
+                begin
+                  if Result.PosKind <> pkString then
+                  begin
+                    SavePos := Result.PosKind;
+                    Result.PosKind := pkString;
+                  end;
+                end;
                 DoNext;
+              end;
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
               begin
                 if Result.AreaKind = akIntfUses then

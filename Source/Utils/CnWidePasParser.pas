@@ -1706,7 +1706,17 @@ begin
             if PosInfo.AreaKind in [akIntfUses, akImplUses] then
             begin
               while LexStillBeforeCursor and not (Lex.TokenID in [tkNull, tkSemiColon]) do
+              begin
+                if IsProgram and (Lex.TokenID = tkString) then
+                begin
+                  if PosInfo.PosKind <> pkString then
+                  begin
+                    SavePos := PosInfo.PosKind;
+                    PosInfo.PosKind := pkString;
+                  end;
+                end;
                 DoNext;
+              end;
               if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
               begin
                 if PosInfo.AreaKind = akIntfUses then
