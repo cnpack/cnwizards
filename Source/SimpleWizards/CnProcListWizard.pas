@@ -316,7 +316,6 @@ type
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
     procedure UpdateDropPosition;
-    procedure UpdateColorFromTheme;
     procedure ThemeChanged(Sender: TObject);
     procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
@@ -333,6 +332,7 @@ type
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
     procedure ShowDropBox;
     procedure SetTextWithoutChange(const AText: TCnIdeTokenString);
+    procedure UpdateColorFromTheme;
 
     property DropDownList: TCnProcDropDownBox read FDropDownList;
     property OnKillFocus: TNotifyEvent read FOnKillFocus write FOnKillFocus;
@@ -1518,11 +1518,18 @@ begin
 {$ENDIF}
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('ProcList: ClassCombo Font Size %d', [Obj.ClassCombo.Font.Size]);
+  CnDebugger.LogFmt('ProcList: Before Scale, ClassCombo Font Size %d', [Obj.ClassCombo.Font.Size]);
 {$ENDIF}
 
   IdeScaleToolbarComboFontSize(Obj.ClassCombo);
   IdeScaleToolbarComboFontSize(Obj.ProcCombo);
+
+  Obj.ClassCombo.UpdateColorFromTheme;
+  Obj.ProcCombo.UpdateColorFromTheme;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProcList: After Scale, ProcCombo Font Size %d', [Obj.ProcCombo.Font.Size]);
+{$ENDIF}
 
   Obj.ToolBtnProcList.Action := FindIDEAction('act' + Copy(ClassName, 2, MaxInt)); // ȥ T
   Obj.ToolBtnProcList.Visible := Action <> nil;
@@ -1861,9 +1868,11 @@ var
   Idx: Integer;
   Img: TImageList;
 begin
-  Canvas.FillRect(PaddingRect);
   if Sender is TCnProcListComboBox then
   begin
+    Canvas.Brush.Color := TCnProcListComboBox(Sender).Color;
+    Canvas.FillRect(PaddingRect);
+
     if TCnProcListComboBox(Sender).Focused then
       Exit;
 
@@ -4860,7 +4869,6 @@ begin
   FDropDownList.OnDblClick := DropDownListDblClick;
   FDropDownList.OnClick := DropDownListClick;
 
-  UpdateColorFromTheme;
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
 {$IFDEF IDE_SUPPORT_THEMING}
   CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
