@@ -300,6 +300,7 @@
         <DCCReference Include="CodingToolset\CnEditorExtractString.pas">
             <Form>CnExtractStringForm</Form>
         </DCCReference>
+        <DCCReference Include="CodingToolset\CnEditorExtSelect.pas"/>
         <DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
             <Form>CnMsdnConfigForm</Form>
         </DCCReference>

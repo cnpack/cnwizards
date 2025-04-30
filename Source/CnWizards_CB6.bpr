@@ -84,7 +84,8 @@
       ..\Dcu\CnEditorInsertTime.obj ..\Dcu\CnEditorCollector.obj 
       ..\Dcu\CnGroupReplace.obj ..\Dcu\CnSrcEditorReplaceInBlock.obj ..\Dcu\CnEditorSortLines.obj 
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
-      ..\Dcu\CnEditorFontZoom.obj ..\Dcu\CnEditorDuplicateUnit.obj ..\Dcu\CnEditorExtractString.obj 
+      ..\Dcu\CnEditorFontZoom.obj ..\Dcu\CnEditorDuplicateUnit.obj 
+      ..\Dcu\CnEditorExtractString.obj ..\Dcu\CnEditorExtSelect.obj 
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnSourceHighlight.obj 
       ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
@@ -403,6 +404,7 @@
       <FILE FILENAME="CodingToolset\CnEditorFontZoom.pas" FORMNAME="" UNITNAME="CnEditorFontZoom" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorDuplicateUnit.pas" FORMNAME="" UNITNAME="CnEditorDuplicateUnit" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorExtractString.pas" FORMNAME="CnExtractStringForm" UNITNAME="CnEditorExtractString" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="CodingToolset\CnEditorExtSelect.pas" FORMNAME="" UNITNAME="CnEditorExtSelect" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorKey.pas" FORMNAME="" UNITNAME="CnSrcEditorKey" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnIdentRenameFrm.pas" FORMNAME="CnIdentRenameForm" UNITNAME="CnIdentRenameFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnIdeEnhanceMenu.pas" FORMNAME="" UNITNAME="CnIdeEnhanceMenu" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

@@ -87,7 +87,7 @@
       ..\Dcu\CnSrcEditorReplaceInBlock.obj ..\Dcu\CnEditorSortLines.obj 
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
       ..\Dcu\CnEditorFontZoom.obj ..\Dcu\CnEditorDuplicateUnit.obj 
-      ..\Dcu\CnEditorExtractString.obj ..\Dcu\CnSrcEditorKey.obj 
+      ..\Dcu\CnEditorExtractString.obj ..\Dcu\CnEditorExtSelect.obj ..\Dcu\CnSrcEditorKey.obj 
       ..\Dcu\CnIdentRenameFrm.obj ..\Dcu\CnIdeEnhanceMenu.obj 
       ..\Dcu\CnIdeBRWizard.obj ..\Dcu\CnSourceHighlightFrm.obj 
       ..\Dcu\CnHighlightLineFrm.obj ..\Dcu\CnHighlightSeparateLineFrm.obj 
