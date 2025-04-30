@@ -659,7 +659,12 @@ begin
 
     // 选择 FLevel 对应的区
     if (FStartPos.Line >= 0) and (FEndPos.Line >= 0) then
+    begin
       CnOtaMoveAndSelectBlock(FStartPos, FEndPos);
+{$IFDEF WIN64}
+      EditView.Paint;
+{$ENDIF}
+    end;
   finally
     FTimer.Enabled := False;
     FTimer.Enabled := True; // 半秒钟后重置 FSelecting
