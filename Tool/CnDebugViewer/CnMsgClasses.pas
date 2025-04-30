@@ -1085,7 +1085,13 @@ begin
     if not FileExists(FN) then
       F := TFileStream.Create(FN, fmCreate or fmShareDenyWrite)
     else
-      F := TFileStream.Create(FN, fmOpenWrite or fmShareDenyWrite);
+    begin
+      try
+        F := TFileStream.Create(FN, fmOpenWrite or fmShareDenyWrite);
+      except
+        Exit; // 如果文件冲突则放弃
+      end;
+    end;
   end;
 
   try
