@@ -471,7 +471,7 @@ begin
     // 无发送端时间戳，近似采用接收端时间戳
     ADesc.Annex.TimeStampType := Ord(ttDateTime);
     ADesc.Annex.MsgDateTime := Date + Time;
-    Len := StrLen(PStr);
+    Len := StrLen(PStr) * SizeOf(Char);
     if Len >= DbWinBufferSize - SizeOf(DWORD) then
       Len := DbWinBufferSize - SizeOf(DWORD);
     Move(PStr^, ADesc.Msg[0], Len);

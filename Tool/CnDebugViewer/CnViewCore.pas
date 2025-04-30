@@ -384,6 +384,9 @@ procedure TranslateStrings;
 
 implementation
 
+uses
+  CnMsgClasses;
+
 function GetCPUPeriod: Int64; assembler;
 asm
   DB 0FH;
@@ -837,7 +840,10 @@ initialization
   CnViewerOptions := TCnViewerOptions.Create;
 
 finalization
+  DebugDebuggerLog('CnViewCore Before finalization');
   FreeAndNil(CnViewerOptions);
+  DebugDebuggerLog('CnViewCore In finalization');
   FinalizeCore;
+  DebugDebuggerLog('CnViewCore After finalization');
 
 end.
