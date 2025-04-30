@@ -495,16 +495,20 @@ end;
 
 function IsDelphi12Dot3GEHotFix: Boolean;
 {$IFDEF DELPHI120_ATHENS}
-const
-  CoreIdeLatest: TVersionNumber =
-    (Major: 29; Minor: 0; Release: 55362; Build: 2017); // 12.3 没 HotFix 的
 var
-  ReadFileVersion: TVersionNumber;
+  Year, Month, Day: Word;
+  D: TDateTime;
 {$ENDIF}
 begin
 {$IFDEF DELPHI120_ATHENS}
-  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
-  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) > 0;
+  Year := 1970;
+  Month := 1;
+  Day := 1;
+
+  // 12.3 无论有无 HotFix，版本号都一样，只能用文件的日期来判断
+  D := GetFileDateTime(GetIdeRootDirectory + 'Bin\coreide290.bpl');
+  DecodeDate(D, Year, Month, Day);
+  Result := (Year = 2025) and (Month >= 4);
 {$ELSE}
   Result := False;
 {$ENDIF};
@@ -634,6 +638,8 @@ begin
 
   CnIsDelphi11GEDot3 := IsDelphi11GEDot3;
   CnIsGEDelphi11Dot3 := IsGEDelphi11Dot3;
+
+  CnIsDelphi12Dot3GEHotFix := IsDelphi12Dot3GEHotFix;
 end;
 
 function GetIdeExeVersion: string;
