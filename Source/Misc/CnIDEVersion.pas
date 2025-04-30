@@ -73,6 +73,9 @@ function IsDelphi10Dot4GEDot2: Boolean;
 function IsDelphi11GEDot3: Boolean;
 {* 返回是否 Delphi 11.3 或 11 的更高的子版本，用于某些古怪判断}
 
+function IsDelphi12Dot3GEHotFix: Boolean;
+{* 返回是否 Delphi 12.3 的 HotFix 或更高的子版本，用于某些古怪判断}
+
 var
   CnIdeVersionDetected: Boolean = False;
   CnIdeVersionIsLatest: Boolean = False;
@@ -82,6 +85,7 @@ var
 
   CnIsDelphi11GEDot3: Boolean = False; // 是否 D11 下的 .3，不包括 D12
   CnIsGEDelphi11Dot3: Boolean = False; // 是否大于等于 D11.3，包括 D12
+  CnIsDelphi12Dot3GEHotFix: Boolean = False;
 
 implementation
 
@@ -486,6 +490,23 @@ begin
   Result := True;
 {$ELSE}
   Result := IsDelphi11GEDot3;
+{$ENDIF};
+end;
+
+function IsDelphi12Dot3GEHotFix: Boolean;
+{$IFDEF DELPHI120_ATHENS}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 29; Minor: 0; Release: 55362; Build: 2017); // 12.3 没 HotFix 的
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI120_ATHENS}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide290.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) > 0;
+{$ELSE}
+  Result := False;
 {$ENDIF};
 end;
 

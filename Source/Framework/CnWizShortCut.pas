@@ -206,7 +206,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  IniFiles, Registry, CnWizUtils, CnWizOptions;
+  IniFiles, Registry, CnWizUtils, CnWizOptions, CnWizCompilerConst, CnIDEVersion;
 
 const
   csInvalidIndex = -1;
@@ -739,19 +739,21 @@ begin
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
-      // 64 位下注册会出异常，只能先屏蔽
-{$IFNDEF WIN64}
-      try
-        FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));
-      {$IFNDEF COMPILER7_UP}
-        // todo: Delphi 5/6 下不调用 PushKeyboard 会导致某些快捷键失效
-        // 调用又会导致按 Alt+G 后键盘失效，暂时先调用
-        KeySvcs.PushKeyboard(SCnKeyBindingName);
-      {$ENDIF}
-      except
-        ;
+      // 12.3 非 HotFix 版的 64 位下注册会出异常，必须先屏蔽
+      // 之后还要加上 13 及更高版本的判断
+      if not _IS64BIT or IsDelphi12Dot3GEHotFix then
+      begin
+        try
+          FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));
+        {$IFNDEF COMPILER7_UP}
+          // todo: Delphi 5/6 下不调用 PushKeyboard 会导致某些快捷键失效
+          // 调用又会导致按 Alt+G 后键盘失效，暂时先调用
+          KeySvcs.PushKeyboard(SCnKeyBindingName);
+        {$ENDIF}
+        except
+          ;
+        end;
       end;
-{$ENDIF}
     finally
       RestoreMainMenuShortCuts;
     end;
