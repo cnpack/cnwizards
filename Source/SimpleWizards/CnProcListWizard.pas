@@ -71,6 +71,7 @@ uses
   CnProjectViewBaseFrm, CnIni, mPasLex,  mwBCBTokenList, Contnrs, Clipbrd, CnPasCodeParser,
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, RegExpr, CnIDEStrings,
+  {$IFDEF IDE_SUPPORT_THEMING} Vcl.Themes, {$ENDIF}
 {$IFNDEF STAND_ALONE}
   ToolsAPI, CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
   CnWizMenuAction, CnWizIdeUtils, CnFloatWindow,
@@ -315,6 +316,8 @@ type
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
     procedure UpdateDropPosition;
+    procedure UpdateColorFromTheme;
+    procedure ThemeChanged(Sender: TObject);
     procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
   protected
@@ -4857,13 +4860,44 @@ begin
   FDropDownList.OnDblClick := DropDownListDblClick;
   FDropDownList.OnClick := DropDownListClick;
 
+  UpdateColorFromTheme;
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
+{$IFDEF IDE_SUPPORT_THEMING}
+  CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
+{$ENDIF}
 end;
 
 destructor TCnProcListComboBox.Destroy;
 begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
+{$ENDIF}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   inherited;
+end;
+
+procedure TCnProcListComboBox.UpdateColorFromTheme;
+{$IFDEF IDE_SUPPORT_THEMING}
+var
+  Theme: IOTAIDEThemingServices;
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_THEMING}
+  if Supports(BorlandIDEServices, IOTAIDEThemingServices, Theme) then
+  begin
+    if Theme.IDEThemingEnabled then
+    begin
+      Color := Theme.StyleServices.GetStyleColor(scEdit);
+      Font.Color := Theme.StyleServices.GetStyleFontColor(sfEditBoxTextNormal);
+    end;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnProcListComboBox.ThemeChanged(Sender: TObject);
+begin
+  UpdateColorFromTheme;
+  Invalidate;
 end;
 
 procedure TCnProcListComboBox.RefreshDropBox(Sender: TObject);
