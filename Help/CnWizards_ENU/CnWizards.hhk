@@ -177,6 +177,10 @@
 		<param name="Local" value="wizards\explorer.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Extending Select Tool">
+		<param name="Local" value="wizards\toolset\toolsetextselect.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Extract String Tool">
 		<param name="Local" value="wizards\toolset\extractstring.htm">
 		</OBJECT>

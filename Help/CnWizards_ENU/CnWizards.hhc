@@ -329,6 +329,10 @@
 				<param name="Name" value="Extract String Tool">
 				<param name="Local" value="wizards\toolset\extractstring.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="Extending Select Tool">
+				<param name="Local" value="wizards\toolset\toolsetextselect.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Editor Enhancements Wizard">

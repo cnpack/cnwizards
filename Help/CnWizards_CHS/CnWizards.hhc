@@ -329,6 +329,10 @@
 				<param name="Name" value="抽取字符串工具">
 				<param name="Local" value="wizards\toolset\extractstring.htm">
 				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="扩展式选择工具">
+				<param name="Local" value="wizards\toolset\toolsetextselect.htm">
+				</OBJECT>
 		</UL>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="代码编辑器扩展">

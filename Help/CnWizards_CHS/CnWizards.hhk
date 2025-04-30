@@ -273,6 +273,10 @@
 		<param name="Local" value="other\donation.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="扩展式选择工具">
+		<param name="Local" value="wizards\toolset\toolsetextselect.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="历史更新记录">
 		<param name="Local" value="other\history.htm">
 		</OBJECT>
