@@ -729,9 +729,6 @@ var
   SourceStream, DestStream: TMemoryStream;
   P, PP: PChar;
   CCR, CLF, CZ: AnsiChar;
-{$IFDEF UNICODE}
-  Text: AnsiString;
-{$ENDIF}
 begin
   Result := False;
   SourceStream := nil;

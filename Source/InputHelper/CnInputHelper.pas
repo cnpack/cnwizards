@@ -1478,7 +1478,10 @@ begin
     // 提前获得是否是点号
     Key := Msg.wParam;
     if not CheckImmRun and (Key = VK_PROCESSKEY) then
+    begin
+      ScanCode := (Msg.lParam and $00FF0000) shr 16;
       Key := MapVirtualKey(ScanCode, 1);
+    end;
 
     if (Key = VK_DECIMAL) or (Key = MY_VK_DOT_KEY) then
     begin

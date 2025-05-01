@@ -98,15 +98,12 @@ const
 var
   EditView: IOTAEditView;
   EditControl: TControl;
-  CurrIndex, I, J, InnerIdx, PairLevel, Step: Integer;
+  I, J, InnerIdx, PairLevel, Step: Integer;
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
-  CurrentToken, T1, T2: TCnGeneralPasToken;
-  CurrentTokenName: TCnIdeTokenString;
-  CurIsPas, CurIsCpp, BeginEndFound, AreaFound, CursorInPair: Boolean;
-  CurrentTokenIndex: Integer;
+  CurIsPas, CurIsCpp, AreaFound, CursorInPair: Boolean;
   BlockMatchInfo: TCnBlockMatchInfo;
   MaxInnerLayer, MinOutLayer: Integer;
   Pair, TmpPair, InnerPair: TCnBlockLinePair;

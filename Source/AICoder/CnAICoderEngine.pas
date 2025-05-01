@@ -543,6 +543,7 @@ begin
   begin
     if Assigned(AnswerCallback) then
       AnswerCallback(False, False, False, True, 0, SCnNotSupport, 0, nil);
+    Result := 0;
     Exit;
   end;
 

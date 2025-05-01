@@ -398,11 +398,8 @@ end;
 
 procedure TCnAICoderOptionFrame.btnFetchModelClick(Sender: TObject);
 var
-  I: Integer;
-  S: string;
   Eng: TCnAIBaseEngine;
   AnOption: TCnAIEngineOption;
-  Item: TCnAIExtraItem;
 begin
   if (Engine = nil) or not (Engine is TCnAIBaseEngine) then
     Exit;

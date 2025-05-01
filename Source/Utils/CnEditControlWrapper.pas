@@ -969,8 +969,10 @@ end;
 {$ENDIF}
 
 function MySetEditView(Self: TObject; EditView: TObject): Integer;
+{$IFNDEF USE_CODEEDITOR_SERVICE}
 var
   View: IOTAEditView;
+{$ENDIF}
 begin
   // 64 位下调用 GetOTAEditView 传 EditView 参数结果出异常，不能使用
   // 故此用新服务处理，后面虽然 GetOTAEditView 可能修复了但也不改了
@@ -2882,7 +2884,7 @@ begin
     // 将系统 DPI 改变的通知转化为字体大小选项变化，并且为了避免多次调用，只判断主窗体
     FOptionChanged := True;
     for I := 0 to EditorCount - 1 do
-      DoEditorChange(Editor, ChangeType + CheckEditorChanges(Editors[I]));
+      DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
   end
 {$ENDIF}
   else if (Msg.Msg = WM_NCPAINT) and IsEditControl(Control) then
