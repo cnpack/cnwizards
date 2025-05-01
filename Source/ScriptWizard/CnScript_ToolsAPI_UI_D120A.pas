@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnScript_ToolsAPI_UI_D120A.pas;
+unit CnScript_ToolsAPI_UI_D120A;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
@@ -71,7 +71,7 @@ uses
   ,Forms
   ,Dialogs
   ,TitleBarCtrls
-  ,ToolsAPI_UI
+  ,ToolsAPI.UI
   ;
 
 

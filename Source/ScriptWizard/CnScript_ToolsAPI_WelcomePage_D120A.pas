@@ -93,8 +93,6 @@ implementation
 
 uses
   ToolsAPI.WelcomePage
-  ,SysUtils
-  ,Classes
   ,Types
   ,Forms
   ,Controls
