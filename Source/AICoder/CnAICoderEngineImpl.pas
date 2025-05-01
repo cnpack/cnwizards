@@ -131,6 +131,9 @@ type
   TCnOllamaAIEngine = class(TCnAIBaseEngine)
   {* 本地或私有化部署的集成 Ollama 引擎}
   protected
+    class function GetModelListURL(const OrigURL: string): string; override;
+    function ParseModelList(ResponseRoot: TCnJSONObject): string; override;
+
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
       var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
@@ -475,6 +478,46 @@ begin
 end;
 
 { TCnOllamaAIEngine }
+
+class function TCnOllamaAIEngine.GetModelListURL(const OrigURL: string): string;
+const
+  CHAT = 'api/chat';
+  MODEL = 'api/tags';
+begin
+  // 采取古怪规则拼接 ModelList 的 URL
+  Result := OrigURL;
+  if StrEndWith(Result, CHAT) then
+  begin
+    Delete(Result, Pos(CHAT, Result), MaxInt);
+    Result := Result + MODEL;
+  end;
+end;
+
+function TCnOllamaAIEngine.ParseModelList(ResponseRoot: TCnJSONObject): string;
+var
+  I: Integer;
+  Arr: TCnJSONArray;
+begin
+  // 从 RespRoot 中解析出模型列表，拼成逗号分隔的字符串并直接返回
+  // 该引擎该接口的数组名是 models 而不是 data，字段名是 name 而不是 id
+  if (ResponseRoot['models'] <> nil) and (ResponseRoot['models'] is TCnJSONArray) then
+  begin
+    Arr := TCnJSONArray(ResponseRoot['data']);
+    if Arr.Count > 0 then
+    begin
+      for I := 0 to Arr.Count - 1 do
+      begin
+        if (Arr[I]['name'] <> nil) and (Arr[I]['name'] is TCnJSONString) then
+        begin
+          if I = 0 then
+            Result := Arr[I]['name'].AsString
+          else
+            Result := Result + ',' + Arr[I]['name'].AsString;
+        end;
+      end;
+    end;
+  end;
+end;
 
 function TCnOllamaAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
   const Code: string): TBytes;
