@@ -753,6 +753,12 @@ begin
         except
           ;
         end;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsgWarning('Do NOT AddKeyboardBinding for IDE Bug.');
+{$ENDIF}
       end;
     finally
       RestoreMainMenuShortCuts;
