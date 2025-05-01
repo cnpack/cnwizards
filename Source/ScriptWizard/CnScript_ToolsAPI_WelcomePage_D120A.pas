@@ -460,6 +460,8 @@ begin
   SIRegister_INTAWelcomePageBackgroundService280(CL);
   SIRegister_INTAWelcomePageBackgroundService(CL);
   SIRegister_TWelcomePageMetrics(CL);
+  CL.AddDelphiFunction('Function WelcomePagePluginService : INTAWelcomePagePluginService');
+  CL.AddDelphiFunction('Function WelcomePageSettings : INTAWelcomePageSettings');
 end;
 
 (* === run-time registration functions === *)
@@ -546,7 +548,21 @@ begin
   RIRegister_TWelcomePageMetrics(CL);
 end;
 
+function WelcomePagePluginService: INTAWelcomePagePluginService;
+begin
+  Result := ToolsAPI.WelcomePage.WelcomePagePluginService;
+end;
 
+function WelcomePageSettings: INTAWelcomePageSettings;
+begin
+  Result := ToolsAPI.WelcomePage.WelcomePageSettings;
+end;
+
+procedure SIRegister_ToolsAPI_WelcomePage_Routines(S: TPSExec);
+begin
+ S.RegisterDelphiFunction(@WelcomePagePluginService, 'INTAWelcomePagePluginService', cdRegister);
+ S.RegisterDelphiFunction(@WelcomePageSettings, 'INTAWelcomePageSettings', cdRegister);
+end;
 
 { TPSImport_ToolsAPI_WelcomePage }
 (*----------------------------------------------------------------------------*)
@@ -557,6 +573,7 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure TPSImport_ToolsAPI_WelcomePage.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
 begin
+  SIRegister_ToolsAPI_WelcomePage_Routines(CompExec.Exec);
 end;
 (*----------------------------------------------------------------------------*)
 
