@@ -1963,7 +1963,7 @@ begin
             Assigned(Parser.InnerBlockCloseToken);
 
           FrmModalResult := ShowModal = mrOk;
-          NewName := edtRename.Text;
+          NewName := Trim(edtRename.Text);
 
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
@@ -2224,7 +2224,7 @@ begin
             or (IsH(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.cpp')));
 
           FrmModalResult := ShowModal = mrOk;
-          NewName := edtRename.Text;
+          NewName := Trim(edtRename.Text);
 
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
@@ -2667,7 +2667,7 @@ begin
             Assigned(Parser.InnerBlockCloseToken);
 
           FrmModalResult := ShowModal = mrOk;
-          NewName := edtRename.Text;
+          NewName := Trim(edtRename.Text);
 
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc
@@ -2943,7 +2943,7 @@ begin
             or (IsH(F) and CnOtaIsFileOpen(_CnChangeFileExt(F, '.cpp')));
 
           FrmModalResult := ShowModal = mrOk;
-          NewName := edtRename.Text;
+          NewName := Trim(edtRename.Text);
 
           if rbCurrentProc.Checked then
             Rit := ritCurrentProc

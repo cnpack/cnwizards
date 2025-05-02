@@ -71,6 +71,7 @@ type
     function GetHint: string; override;
     procedure GetToolsetInfo(var Name, Author, Email: string); override;
     procedure Execute; override;
+    function GetState: TWizardState; override;
   end;
 
 implementation
@@ -689,6 +690,16 @@ end;
 function TCnEditorExtendingSelect.GetHint: string;
 begin
   Result := SCnEditorExtendingSelectMenuHint;
+end;
+
+function TCnEditorExtendingSelect.GetState: TWizardState;
+begin
+  Result := inherited GetState;
+  if wsEnabled in Result then
+  begin
+    if not CurrentIsSource then
+      Result := [];
+  end;
 end;
 
 procedure TCnEditorExtendingSelect.OnSelectTimer(Sender: TObject);
