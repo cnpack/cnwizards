@@ -79,6 +79,9 @@ implementation
 uses
   CnIDEStrings {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
+const
+  csProcTokens = [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor];
+
 { TCnEditorExtendingSelect }
 
 procedure TCnEditorExtendingSelect.FixPair(APair: TCnBlockLinePair);
@@ -444,7 +447,7 @@ begin
     // 把有用的 Token 加入 BlockMatchInfo 中
     for I := 0 to PasParser.Count - 1 do
     begin
-      if PasParser.Tokens[I].TokenID in csKeyTokens + [tkProcedure, tkFunction, tkOperator, tkSemiColon] then
+      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
         BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
     end;
 
@@ -683,8 +686,8 @@ begin
                   end;
 
                   // 继续找同级上面相邻的 function/procedure
-                  if (TmpPair.StartToken.TokenID in [tkProcedure, tkFunction, tkOperator])
-                    and (TmpPair.EndToken.TokenID in [tkProcedure, tkFunction, tkOperator]) then
+                  if (TmpPair.StartToken.TokenID in csProcTokens)
+                    and (TmpPair.EndToken.TokenID in csProcTokens) then
                   begin
                     Inc(Step);
                     if Step = FSelectStep then
