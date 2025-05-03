@@ -195,7 +195,7 @@ implementation
 
 uses
   {$IFDEF DEBUG}CnDebug, {$ENDIF}
-  CnWizManager, CnWizDfmParser, CnMath,
+  CnWizManager, CnWizDfmParser,
   CnPrefixNewFrm, CnPrefixEditFrm, CnPrefixConfigFrm, CnPrefixCompFrm;
 
 const
@@ -1695,6 +1695,14 @@ var
     end;
   end;
 
+  function IntAbs(N: Integer): Integer;
+  begin
+    if N < 0 then
+      Result := -N
+    else
+      Result := N;
+  end;
+
 begin
   Result := ANewName;
   if (AComp = nil) or (Clipboard.AsText = '') then
@@ -1825,7 +1833,7 @@ begin
         SLeft := StrToIntDef(Leaf.PropertyValue['Left'], 0);
         STop := StrToIntDef(Leaf.PropertyValue['Top'], 0);
 
-        Distance := CnIntAbs(CLeft - SLeft) + CnIntAbs(CTop - STop);
+        Distance := IntAbs(CLeft - SLeft) + IntAbs(CTop - STop);
         if Distance < MinDistance then
         begin
           MinDistance := Distance;
