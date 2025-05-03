@@ -97,7 +97,7 @@ uses
   ,Forms
   ,Controls
   ,Menus
-  ,ImageCollection
+  ,Vcl.ImageCollection
   ,Graphics
   ;
 

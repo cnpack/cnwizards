@@ -70,7 +70,7 @@ uses
    Graphics
   ,Forms
   ,Dialogs
-  ,TitleBarCtrls
+  ,Vcl.TitleBarCtrls
   ,ToolsAPI.UI
   ;
 
