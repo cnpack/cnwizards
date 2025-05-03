@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, Menus, ToolsAPI,
+  StdCtrls, ExtCtrls, IniFiles, Menus, ToolsAPI, Contnrs,
   CnWizUtils, CnConsts, CnCommon, CnWizManager, CnWizEditFiler,
   CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
@@ -99,7 +99,7 @@ const
 var
   EditView: IOTAEditView;
   EditControl: TControl;
-  I, J, InnerIdx, PairLevel, Step: Integer;
+  I, J, C, InnerIdx, PairLevel, Step: Integer;
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
@@ -108,6 +108,9 @@ var
   BlockMatchInfo: TCnBlockMatchInfo;
   MaxInnerLayer, MinOutLayer: Integer;
   Pair, TmpPair, InnerPair: TCnBlockLinePair;
+  LeftBrace, RightBrace: TList;
+  InnerStartGot: Boolean;
+  T: TCnGeneralPasToken;
   LastS: string;
 
   // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
@@ -169,6 +172,64 @@ var
 {$ENDIF}
     end;
     AreaFound := True;
+  end;
+
+  // 从列表中删除配对的括号，IsSmall 表示小括号还是中括号
+  // IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之
+  procedure RemoveMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+  var
+    T: TCnGeneralPasToken;
+    BT, B1, B2: TTokenKind;
+    I: Integer;
+    Stack: TStack;
+  begin
+    if (Tokens = nil) or (Tokens.Count <= 1) then
+      Exit;
+
+    if IsSmall then
+    begin
+      B1 := tkRoundOpen;
+      B2 := tkRoundClose;
+    end
+    else
+    begin
+      B1 := tkSquareOpen;
+      B2 := tkSquareClose;
+    end;
+
+    if IsReverse then
+    begin
+      BT := B1;
+      B1 := B2;
+      B2 := BT;
+    end;
+
+    // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
+    I := 0;
+    Stack := TStack.Create;
+    try
+      while I < Tokens.Count do
+      begin
+        T := TCnGeneralPasToken(Tokens[I]);
+        if T.TokenID = B1 then
+          Stack.Push(T)
+        else if T.TokenID = B2 then
+        begin
+          if Stack.Count > 0 then
+          begin
+            Tokens.Delete(I); // 删了一个，不用 Inc了
+            T := Stack.Pop;
+            Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
+            Dec(I);
+            Continue;
+          end;
+        end;
+
+        Inc(I);
+      end;
+    finally
+      Stack.Free;
+    end;
   end;
 
   // 拿到一个 Pair 后，步进 Step 以各种开闭区间搜，
@@ -451,9 +512,85 @@ begin
     // 从内往外逐次递增找适合 FLevel 的，但递增有讲究，并非每个 Layer 只递增 1
     Step := 0;
 
-    // TODO: 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
+    // 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
+    if InnerPair <> nil then
+    begin
+      // 把 InnerPair 内的 Token 都找出来，准备匹配小括号和中括号
+      LeftBrace := nil;
+      RightBrace := nil;
 
-    // 从 InnerPair 的光标所在开区间到光标所在闭区间，如果 InnerPair 是多结构语句则下一个是整个闭区间
+      try
+        LeftBrace := TList.Create;
+        RightBrace := TList.Create;
+        InnerStartGot := False;
+
+        for I := 0 to PasParser.Count - 1 do
+        begin
+          T := PasParser.Tokens[I];
+          if T = InnerPair.EndToken then
+            Break;
+
+          if InnerStartGot then
+          begin
+            if T.TokenID in [tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose] then
+            begin
+              ConvertGeneralTokenPos(Pointer(EditView), T);
+
+              // Token 开头位置小于光标，也就是光标位置大于 Token 开头的左右括号，逆向加到左边
+              if ((FEditPos.Line > T.EditLine) or
+                ((FEditPos.Line = T.EditLine) and (FEditPos.Col > T.EditCol))) then
+                LeftBrace.Insert(0, T);
+
+              // Token 结尾位置小于光标，也就是光标位置小于 Token 尾巴的左右括号，加到右边
+              if ((FEditPos.Line < T.EditLine) or
+                ((FEditPos.Line = T.EditLine) and (FEditPos.Col < T.EditEndCol))) then
+                RightBrace.Add(T);
+            end;
+          end;
+
+          if T = InnerPair.StartToken then
+            InnerStartGot := True;
+        end;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Extract All Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+{$ENDIF}
+        // 拿到光标前后的左右括号，下标低的离光标近，先干掉抵消的中括号和小括号部分
+        RemoveMatchedBraces(LeftBrace, True, True);
+        RemoveMatchedBraces(LeftBrace, False, True);
+        RemoveMatchedBraces(RightBrace, True, False);
+        RemoveMatchedBraces(RightBrace, False, False);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Removed Matched Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+{$ENDIF}
+
+        C := LeftBrace.Count;
+        if RightBrace.Count < C then
+          C := RightBrace.Count;
+
+        for I := 0 to C - 1 do // 如果 C 为 0 则进不来
+        begin
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), True);
+            Exit;
+          end;
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
+            Exit;
+          end;
+        end;
+      finally
+        RightBrace.Free;
+        LeftBrace.Free;
+      end;
+    end;
+
+    // InnerPair 内的括号处理完毕，如果没中，则从 InnerPair 的光标所在开区间到光标所在闭区间，
+    // 如果 InnerPair 是多结构语句则下一个是整个闭区间
     AreaFound := False;
     if InnerPair <> nil then
     begin
