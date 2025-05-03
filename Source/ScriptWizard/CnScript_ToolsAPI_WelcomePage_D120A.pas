@@ -560,8 +560,8 @@ end;
 
 procedure SIRegister_ToolsAPI_WelcomePage_Routines(S: TPSExec);
 begin
- S.RegisterDelphiFunction(@WelcomePagePluginService, 'INTAWelcomePagePluginService', cdRegister);
- S.RegisterDelphiFunction(@WelcomePageSettings, 'INTAWelcomePageSettings', cdRegister);
+ S.RegisterDelphiFunction(@WelcomePagePluginService, 'WelcomePagePluginService', cdRegister);
+ S.RegisterDelphiFunction(@WelcomePageSettings, 'WelcomePageSettings', cdRegister);
 end;
 
 { TPSImport_ToolsAPI_WelcomePage }
