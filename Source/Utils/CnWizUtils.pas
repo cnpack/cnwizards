@@ -1147,21 +1147,16 @@ procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
-procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
+procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
 {* 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
-  输出 CharPos，以备让 EditView 转换成 EditPos}
-
-procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
-  Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
-{* 封装的把 Cpp Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
-  输出 CharPos，以备让 EditView 转换成 EditPos}
+  输出 CharPos，以备让 EditView 转换成 EditPos。Token 可以是 C/C++ 的 TCnGeneralCppToken}
 
 procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
-{* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos}
+{* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos，可以是 C/C++ 的 TCnGeneralCppToken}
 
 function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
-{* 获取一个 GeneralPasToken 的 AnsiCol}
+{* 获取一个 GeneralPasToken 的 AnsiCol，可以是 C/C++ 的 TCnGeneralCppToken}
 
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 {* 分析源代码中引用的单元，FileName 是完整文件名}
@@ -8388,7 +8383,7 @@ end;
 
 // 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
 // 输出 CharPos，以备让 EditView 转换成 EditPos
-procedure CnConvertPasTokenPositionToCharPos(EditViewPtr: Pointer;
+procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
 {$IFDEF IDE_STRING_ANSI_UTF8}
 var
@@ -8427,48 +8422,6 @@ begin
 {$ENDIF}
 end;
 
-// 封装的把 Cpp Token 解析出来的位置参数转换成 IDE 所需的 CharPos 的过程
-procedure CnConvertCppTokenPositionToCharPos(EditViewPtr: Pointer;
-  Token: TCnGeneralCppToken; out CharPos: TOTACharPos);
-{$IFDEF IDE_STRING_ANSI_UTF8}
-var
-  Text: string;
-  W: WideString;
-  EditControl: TControl;
-{$ENDIF}
-begin
-  if Token = nil then
-    Exit;
-
-  CharPos.Line := Token.LineNumber + 1; // 0 开始变成 1 开始
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  {$IFDEF IDE_STRING_ANSI_UTF8}
-  CharPos.CharIndex := Token.CharIndex; // 先使用 0 开始的 WideChar 偏移
-
-  // CharPos 需要 Utf8，把基于 WideChar 的 CharIndex 转换过来
-  EditControl := EditControlWrapper.GetEditControl(IOTAEditView(EditViewPtr));
-  if EditControl <> nil then
-  begin
-    Text := EditControlWrapper.GetTextAtLine(EditControl, CharPos.Line);
-    // 得到 Utf8 的 Text，转成 WideString 并截取再转回来求长度
-    W := Utf8Decode(Text);
-    W := Copy(W, 1, CharPos.CharIndex - 1);
-    CharPos.CharIndex := Length(Utf8Encode(W));
-  end;
-  {$ELSE}
-  CharPos.CharIndex := Token.AnsiIndex; // 使用 WideToken 的 Ansi 偏移，都是 0 开始
-  {$ENDIF}
-{$ELSE}
-  CharPos.CharIndex := Token.CharIndex; // 均是 Ansi 偏移，都是 0 开始
-{$ENDIF}
-
-{$IFDEF DEBUG}
-//  CnDebugger.LogFmt('CnConvertCppTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
-//    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-//     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
-{$ENDIF}
-end;
-
 // 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos
 procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 var
@@ -8476,7 +8429,7 @@ var
   CharPos: TOTACharPos;
 begin
   // 将解析器解析出来的字符偏移转换成 CharPos
-  CnConvertPasTokenPositionToCharPos(EditView, AToken, CharPos);
+  CnConvertGeneralTokenPositionToCharPos(EditView, AToken, CharPos);
   // 再把 CharPos 转换成 EditPos
   CnOtaConvertEditViewCharPosToEditPos(EditView,
     CharPos.Line, CharPos.CharIndex, EditPos);

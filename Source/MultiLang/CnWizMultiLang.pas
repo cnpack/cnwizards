@@ -408,11 +408,13 @@ var
   I: Integer;
 begin
   for I := Low(FIndexes) to High(FIndexes) do
+  begin
     if FIndexes[I] = Index then
     begin
       CnLanguageManager.CurrentLanguageIndex := I;
       WizOptions.CurrentLangID := FStorage.Languages[I].LanguageID;
     end;
+  end;
 end;
 
 procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
@@ -420,8 +422,10 @@ var
   I: Integer;
 begin
   for I := Low(FIndexes) to High(FIndexes) do
+  begin
     SubActions[I].Checked := WizOptions.CurrentLangID =
       FStorage.Languages[I].LanguageID;
+  end;
 end;
 
 {$ENDIF}

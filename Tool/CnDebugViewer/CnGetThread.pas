@@ -108,7 +108,7 @@ var
 
   function ListToStr(Lines: string): string;
   var
-    i: Integer;
+    I: Integer;
     AList: TStringList;
     S: string;
   begin
@@ -118,9 +118,9 @@ var
       if AList.Count > 0 then
       begin
         Result := '\';
-        for i := 0 to AList.Count - 1 do
+        for I := 0 to AList.Count - 1 do
         begin
-          S := LowerCase(AList[i]);
+          S := LowerCase(AList[I]);
           if ExtractFileExt(S) = '' then
             S := S + '.exe';
           Result := Result + S + '\';
@@ -132,6 +132,7 @@ var
       AList.Free;
     end;
   end;
+
 begin
   if (CnViewerOptions <> nil) and (CnViewerOptions.ChangeCount <> FChangeCountCache) then
   begin
@@ -217,6 +218,7 @@ begin
     if AStore = nil then
     begin
       if Application.MainForm <> nil then
+      begin
         if not (csDestroying in Application.MainForm.ComponentState) then
         begin
           AStore := CnMsgManager.AddStore(0, SCnNoneProcName);
@@ -228,6 +230,7 @@ begin
           PostMessage(Application.MainForm.Handle, WM_USER_NEW_FORM, Integer(AStore), 0);
 {$ENDIF}
         end;
+      end;
     end;
 
     if not StoreInited and (AStore <> nil) then

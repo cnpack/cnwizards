@@ -360,7 +360,8 @@ type
   end;
 
   TCnBlockLinePair = class(TObject)
-  {* 描述一根配对的线所对应的多个 Token 标记，Token 均为引用}
+  {* 描述一根配对的线所对应的多个 Token 标记，Token 均为引用，同时用于 Pascal 和 C/C++。
+    也就是说 StartToken/EndTokne/MiddleToken 等可以是 TCnGeneralCppToken 实例}
   private
     FTop: Integer;
     FLeft: Integer;
@@ -2135,7 +2136,7 @@ begin
 
           // 高亮之外的场合需要加入 procedure 的时候
           if NeedProcedure and Token.IsMethodStart and
-            (Token.TokenID in [tkProcedure, tkFunction, tkOperator]) then
+            (Token.TokenID in [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor]) then
           begin
             Pair := CreateLinePair;
             Pair.Layer := Token.MethodLayer - 1;

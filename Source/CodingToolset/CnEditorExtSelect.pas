@@ -61,6 +61,9 @@ type
     procedure EditorChanged(Editor: TCnEditorObject; ChangeType:
       TCnEditorChangeTypes);
     procedure OnSelectTimer(Sender: TObject);
+
+    procedure RemovePasMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+    procedure RemoveCppMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
   protected
     function GetDefShortCut: TShortCut; override;
   public
@@ -177,65 +180,7 @@ var
     AreaFound := True;
   end;
 
-  // 从列表中删除配对的括号，IsSmall 表示小括号还是中括号
-  // IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之
-  procedure RemoveMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
-  var
-    T: TCnGeneralPasToken;
-    BT, B1, B2: TTokenKind;
-    I: Integer;
-    Stack: TStack;
-  begin
-    if (Tokens = nil) or (Tokens.Count <= 1) then
-      Exit;
-
-    if IsSmall then
-    begin
-      B1 := tkRoundOpen;
-      B2 := tkRoundClose;
-    end
-    else
-    begin
-      B1 := tkSquareOpen;
-      B2 := tkSquareClose;
-    end;
-
-    if IsReverse then
-    begin
-      BT := B1;
-      B1 := B2;
-      B2 := BT;
-    end;
-
-    // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
-    I := 0;
-    Stack := TStack.Create;
-    try
-      while I < Tokens.Count do
-      begin
-        T := TCnGeneralPasToken(Tokens[I]);
-        if T.TokenID = B1 then
-          Stack.Push(T)
-        else if T.TokenID = B2 then
-        begin
-          if Stack.Count > 0 then
-          begin
-            Tokens.Delete(I); // 删了一个，不用 Inc了
-            T := Stack.Pop;
-            Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
-            Dec(I);
-            Continue;
-          end;
-        end;
-
-        Inc(I);
-      end;
-    finally
-      Stack.Free;
-    end;
-  end;
-
-  // 拿到一个 Pair 后，步进 Step 以各种开闭区间搜，
+  // 拿到一个 Pair 后，步进 Step 以各种开闭区间搜，照理适用于 Pascal 和 C/C++ 只是后者大概没 MiddleTokens 只有大括号配对
   // 内部使用 Step 步进、FLevel 比较、AreaFound 输出是否找到等外部变量
   procedure SearchInAPair(APair: TCnBlockLinePair);
   var
@@ -444,24 +389,36 @@ begin
     BlockMatchInfo := TCnBlockMatchInfo.Create(EditControl);
     BlockMatchInfo.LineInfo := TCnBlockLineInfo.Create(EditControl);
 
-    // 把有用的 Token 加入 BlockMatchInfo 中
-    for I := 0 to PasParser.Count - 1 do
+    if CurIsPas then
     begin
-      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
-        BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
+      // 把有用的 Token 加入 BlockMatchInfo 中
+      for I := 0 to PasParser.Count - 1 do
+      begin
+        if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+          BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
+      end;
+    end
+    else if CurIsCpp then
+    begin
+      // 把有用的 Token 加入 BlockMatchInfo 中
+      for I := 0 to CppParser.Count - 1 do
+      begin
+        if CppParser.Tokens[I].CppTokenKind <> ctkUnknown then
+          BlockMatchInfo.AddToKeyList(CppParser.Tokens[I]);
+      end;
     end;
 
     // 转换一下
     for I := 0 to BlockMatchInfo.KeyCount - 1 do
       ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
 
-    // 检查配对，生成多个 Pair，注意加入了 Procedure 作为 Pair
+    // 检查配对，生成多个 Pair，注意最后一个 True 表示 Pascal 中加入了 Procedure 等作为 Pair
     BlockMatchInfo.IsCppSource := CurIsCpp;
     BlockMatchInfo.CheckLineMatch(EditView, False, False, True);
 
     // BlockMatchInfo 的输出是 LineInfo 内的内容，生成多个 Pair
 
-    // 去掉每个 Pair 尾部不合理的内容比如 else
+    // 去掉每个 Pair 尾部不合理的内容比如 Pascal 的 else 再排序
     for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
       FixPair(BlockMatchInfo.LineInfo.Pairs[I]);
     BlockMatchInfo.LineInfo.SortPairs;
@@ -480,6 +437,7 @@ begin
     FEndPos.Line := -1;
     MaxInnerLayer := NO_LAYER; // -2 不存在
     MinOutLayer := MaxInt;
+    AreaFound := False;
 
     // 只有在初始按下热键时才记录光标并作为搜索起始光标，自己扩展选择区域造成的光标移动不算
     if (FSelectStep <= 1) or ((FEditPos.Line = -1) and (FEditPos.Col = -1)) then
@@ -509,28 +467,29 @@ begin
     CnDebugger.LogFmt('CheckModifiedAndReparse Get Layer from %d to %d.', [MinOutLayer, MaxInnerLayer]);
 {$ENDIF}
 
-    if (MaxInnerLayer = NO_LAYER) or (MinOutLayer = MaxInt) then
-      Exit;
+//    没找到层也不能退出，需要单独找括号
+//    if (MaxInnerLayer = NO_LAYER) or (MinOutLayer = MaxInt) then
+//      Exit;
 
     // 从内往外逐次递增找适合 FLevel 的，但递增有讲究，并非每个 Layer 只递增 1
     Step := 0;
 
-    // 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
-    if InnerPair <> nil then
+    if CurIsPas then
     begin
-      // 把 InnerPair 内的 Token 都找出来，准备匹配小括号和中括号
+      // 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
+      // 把 InnerPair 内的 Token 都找出来，如无 InnerPair 则全找出来，准备匹配小括号和中括号
       LeftBrace := nil;
       RightBrace := nil;
 
       try
         LeftBrace := TList.Create;
         RightBrace := TList.Create;
-        InnerStartGot := False;
+        InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
 
         for I := 0 to PasParser.Count - 1 do
         begin
           T := PasParser.Tokens[I];
-          if T = InnerPair.EndToken then
+          if (InnerPair <> nil) and (T = InnerPair.EndToken) then
             Break;
 
           if InnerStartGot then
@@ -551,20 +510,20 @@ begin
             end;
           end;
 
-          if T = InnerPair.StartToken then
+          if (InnerPair <> nil) and (T = InnerPair.StartToken) then
             InnerStartGot := True;
         end;
 
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('Extract All Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+        CnDebugger.LogFmt('Extract All Pascal Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
 {$ENDIF}
         // 拿到光标前后的左右括号，下标低的离光标近，先干掉抵消的中括号和小括号部分
-        RemoveMatchedBraces(LeftBrace, True, True);
-        RemoveMatchedBraces(LeftBrace, False, True);
-        RemoveMatchedBraces(RightBrace, True, False);
-        RemoveMatchedBraces(RightBrace, False, False);
+        RemovePasMatchedBraces(LeftBrace, True, True);
+        RemovePasMatchedBraces(LeftBrace, False, True);
+        RemovePasMatchedBraces(RightBrace, True, False);
+        RemovePasMatchedBraces(RightBrace, False, False);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('Removed Matched Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+        CnDebugger.LogFmt('Removed Pascal Matched Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
 {$ENDIF}
 
         C := LeftBrace.Count;
@@ -590,119 +549,175 @@ begin
         RightBrace.Free;
         LeftBrace.Free;
       end;
-    end;
 
-    // InnerPair 内的括号处理完毕，如果没中，则从 InnerPair 的光标所在开区间到光标所在闭区间，
-    // 如果 InnerPair 是多结构语句则下一个是整个闭区间
-    AreaFound := False;
-    if InnerPair <> nil then
-    begin
+      // InnerPair 内或所有的括号处理完毕，如果没中，则从 InnerPair 的光标所在开区间到光标所在闭区间，
+      // 如果 InnerPair 是多结构语句则下一个是整个闭区间
+      if InnerPair <> nil then
+      begin
 {$IFDEF DEBUG}
-//      CnDebugger.LogFmt('To Search Current Inner Pair %d %d to %d %d with Level %d',
+//      CnDebugger.LogFmt('To Search Current Pascal Inner Pair %d %d to %d %d with Level %d',
 //        [InnerPair.StartToken.EditLine, InnerPair.StartToken.EditCol,
 //        InnerPair.EndToken.EditLine, InnerPair.StartToken.EditCol, InnerPair.Layer]);
 {$ENDIF}
-      SearchInAPair(InnerPair);
+        SearchInAPair(InnerPair);
 
-      if not AreaFound then
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('InnerPair Search Complete. To Search Other Pairs');
-{$ENDIF}
-        PairLevel := InnerPair.Layer;
-        while PairLevel >= 0 do
+        if not AreaFound then
         begin
 {$IFDEF DEBUG}
-//          CnDebugger.LogMsg('In Loop To Find Another Pair with Level ' + IntToStr(PairLevel));
+          CnDebugger.LogMsg('Pascal InnerPair Search Complete. To Search Other Pairs');
 {$ENDIF}
-          for I := InnerIdx downto 0 do
+          PairLevel := InnerPair.Layer;
+          while PairLevel >= 0 do
           begin
-            // 每退一层 Pair，找开区间，Step + 1，判断，再找闭区间，Step + 1，判断
-            // 再判断该 Pair 是否有同级的 procedure/function，有则闭区间 Step + 1，判断
-            // 再进外一层重复上述循环。注意起始条件会包括已经搜过的 InnerPair
-
-            Pair := BlockMatchInfo.LineInfo.Pairs[I];
-            CursorInPair := False;
 {$IFDEF DEBUG}
-//            CnDebugger.LogFmt('To Check Pair with Level %d. Is %d %d in From %d %d %s to %d %d %s',
+//          CnDebugger.LogMsg('In Loop To Find Another Pascal Pair with Level ' + IntToStr(PairLevel));
+{$ENDIF}
+            for I := InnerIdx downto 0 do
+            begin
+              // 每退一层 Pair，找开区间，Step + 1，判断，再找闭区间，Step + 1，判断
+              // 再判断该 Pair 是否有同级的 procedure/function，有则闭区间 Step + 1，判断
+              // 再进外一层重复上述循环。注意起始条件会包括已经搜过的 InnerPair
+
+              Pair := BlockMatchInfo.LineInfo.Pairs[I];
+              CursorInPair := False;
+{$IFDEF DEBUG}
+//            CnDebugger.LogFmt('To Check Pascal Pair with Level %d. Is %d %d in From %d %d %s to %d %d %s',
 //              [Pair.Layer, FEditPos.Line, FEditPos.Col,
 //              Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.StartToken.Token,
 //              Pair.EndToken.EditLine, Pair.EndToken.EditEndCol, Pair.EndToken.Token]);
 {$ENDIF}
-            if (Pair <> InnerPair) and EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
-            begin
-              // 不搜已经搜过的 InnerPair
-              CursorInPair := True;
-              if Pair.Layer = PairLevel then
+              if (Pair <> InnerPair) and EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
               begin
+                // 不搜已经搜过的 InnerPair
+                CursorInPair := True;
+                if Pair.Layer = PairLevel then
+                begin
 {$IFDEF DEBUG}
-//                CnDebugger.LogFmt('Level Match In Pair %d %d to %d %d. To Search in this Pair with Level %d',
+//                CnDebugger.LogFmt('Level Match In Pascal Pair %d %d to %d %d. To Search in this Pair with Level %d',
 //                  [Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine, Pair.EndToken.EditCol, Pair.Layer]);
 {$ENDIF}
-                SearchInAPair(Pair);
+                  SearchInAPair(Pair);
+                end;
               end;
-            end;
-            if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
-              CursorInPair := True;
+              if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
+                CursorInPair := True;
 
-            // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其同级的 if 等
-            if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and (Pair.MiddleCount = 0) and
-              (Pair.StartToken.TokenID = tkBegin) and (Pair.EndToken.TokenID = tkEnd) then
-            begin
-{$IFDEF DEBUG}
-              CnDebugger.LogMsg('Not Found in This Pair. Check other Pairs with Same Level ' + IntToStr(Pair.Layer));
-{$ENDIF}
-              // 找有无和 Pair 这对 begin end 同级的 if/then、while/do、procedure/function，中间不能再碰见同级的 begin end
-              for J := I - 1 downto 0 do
+              // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其同级的 if 等
+              if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and (Pair.MiddleCount = 0) and
+                (Pair.StartToken.TokenID = tkBegin) and (Pair.EndToken.TokenID = tkEnd) then
               begin
-                TmpPair := BlockMatchInfo.LineInfo.Pairs[J];
-                if TmpPair.Layer = Pair.Layer then
-                begin
-                  // 如有同级的 begin end 表示后面即使有 if 什么的也不是在一块的
-                  if (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
-                    Break;
-
-                  if ((TmpPair.StartToken.TokenID = tkIf) and (TmpPair.EndToken.TokenID = tkThen))
-                    or ((TmpPair.StartToken.TokenID = tkWhile) and (TmpPair.EndToken.TokenID = tkDo))
-                    or ((TmpPair.StartToken.TokenID = tkFor) and (TmpPair.EndToken.TokenID = tkDo))
-                    or ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) then
-                  begin
 {$IFDEF DEBUG}
-                    CnDebugger.LogMsg('Get Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+                CnDebugger.LogMsg('Not Found in This Pair. Check other Pairs with Same Level ' + IntToStr(Pair.Layer));
 {$ENDIF}
-                    Inc(Step);
-                    if Step = FSelectStep then
-                    begin
-                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, True);
-                      Exit;
-                    end;
-                    Inc(Step);
-                    if Step = FSelectStep then
-                    begin
-                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
-                      Exit;
-                    end;
-                    Break; // 已经找到了同级 if 等语句，不用再找 function/procedure 了
-                  end;
-
-                  // 继续找同级上面相邻的 function/procedure
-                  if (TmpPair.StartToken.TokenID in csProcTokens)
-                    and (TmpPair.EndToken.TokenID in csProcTokens) then
+                // 找有无和 Pair 这对 begin end 同级的 if/then、while/do、procedure/function，中间不能再碰见同级的 begin end
+                for J := I - 1 downto 0 do
+                begin
+                  TmpPair := BlockMatchInfo.LineInfo.Pairs[J];
+                  if TmpPair.Layer = Pair.Layer then
                   begin
-                    Inc(Step);
-                    if Step = FSelectStep then
+                    // 如有同级的 begin end 表示后面即使有 if 什么的也不是在一块的
+                    if (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
+                      Break;
+
+                    if ((TmpPair.StartToken.TokenID = tkIf) and (TmpPair.EndToken.TokenID = tkThen))
+                      or ((TmpPair.StartToken.TokenID = tkWhile) and (TmpPair.EndToken.TokenID = tkDo))
+                      or ((TmpPair.StartToken.TokenID = tkFor) and (TmpPair.EndToken.TokenID = tkDo))
+                      or ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) then
                     begin
-                      // 函数过程就闭区间，没有开区间
-                      SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
-                      Exit;
+{$IFDEF DEBUG}
+                      CnDebugger.LogMsg('Get Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+{$ENDIF}
+                      Inc(Step);
+                      if Step = FSelectStep then
+                      begin
+                        SetStartEndPos(TmpPair.StartToken, Pair.EndToken, True);
+                        Exit;
+                      end;
+                      Inc(Step);
+                      if Step = FSelectStep then
+                      begin
+                        SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
+                        Exit;
+                      end;
+                      Break; // 已经找到了同级 if 等语句，不用再找 function/procedure 了
                     end;
-                    Break;
+
+                    // 继续找同级上面相邻的 function/procedure
+                    if (TmpPair.StartToken.TokenID in csProcTokens)
+                      and (TmpPair.EndToken.TokenID in csProcTokens) then
+                    begin
+                      Inc(Step);
+                      if Step = FSelectStep then
+                      begin
+                        // 函数过程就闭区间，没有开区间
+                        SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
+                        Exit;
+                      end;
+                      Break;
+                    end;
                   end;
                 end;
               end;
             end;
+            Dec(PairLevel); // 是否在本层？
           end;
-          Dec(PairLevel); // 是否在本层？
+        end;
+      end;
+    end
+    else if CurIsCpp then
+    begin
+      if InnerPair <> nil then
+      begin
+{$IFDEF DEBUG}
+//      CnDebugger.LogFmt('To Search Current C/C++ Inner Pair %d %d to %d %d with Level %d',
+//        [InnerPair.StartToken.EditLine, InnerPair.StartToken.EditCol,
+//        InnerPair.EndToken.EditLine, InnerPair.StartToken.EditCol, InnerPair.Layer]);
+{$ENDIF}
+        SearchInAPair(InnerPair);
+
+        if not AreaFound then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('C/C++ InnerPair Search Complete. To Search Other Pairs');
+{$ENDIF}
+          PairLevel := InnerPair.Layer;
+          while PairLevel >= 0 do
+          begin
+{$IFDEF DEBUG}
+//          CnDebugger.LogMsg('In Loop To Find Another C/C++ Pair with Level ' + IntToStr(PairLevel));
+{$ENDIF}
+            for I := InnerIdx downto 0 do
+            begin
+              // 每退一层 Pair，找开区间，Step + 1，判断，再找闭区间，Step + 1，判断
+              // 再进外一层重复上述循环。注意起始条件会包括已经搜过的 InnerPair
+
+              Pair := BlockMatchInfo.LineInfo.Pairs[I];
+              CursorInPair := False;
+{$IFDEF DEBUG}
+//            CnDebugger.LogFmt('To Check C/C++ Pair with Level %d. Is %d %d in From %d %d %s to %d %d %s',
+//              [Pair.Layer, FEditPos.Line, FEditPos.Col,
+//              Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.StartToken.Token,
+//              Pair.EndToken.EditLine, Pair.EndToken.EditEndCol, Pair.EndToken.Token]);
+{$ENDIF}
+              if (Pair <> InnerPair) and EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
+              begin
+                // 不搜已经搜过的 InnerPair
+                CursorInPair := True;
+                if Pair.Layer = PairLevel then
+                begin
+{$IFDEF DEBUG}
+//                CnDebugger.LogFmt('Level Match In C/C++ Pair %d %d to %d %d. To Search in this Pair with Level %d',
+//                  [Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine, Pair.EndToken.EditCol, Pair.Layer]);
+{$ENDIF}
+                  SearchInAPair(Pair);
+                end;
+              end;
+
+              if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
+                CursorInPair := True;
+            end;
+            Dec(PairLevel); // 是否在本层？
+          end;
         end;
       end;
     end;
@@ -845,6 +860,122 @@ end;
 procedure TCnEditorExtendingSelect.OnSelectTimer(Sender: TObject);
 begin
   FSelecting := False;
+end;
+
+procedure TCnEditorExtendingSelect.RemoveCppMatchedBraces(Tokens: TList;
+  IsSmall, IsReverse: Boolean);
+var
+  T: TCnGeneralCppToken;
+  BT, B1, B2: TCTokenKind;
+  I: Integer;
+  Stack: TStack;
+begin
+  if (Tokens = nil) or (Tokens.Count <= 1) then
+    Exit;
+
+  if IsSmall then
+  begin
+    B1 := ctkroundopen;
+    B2 := ctkroundclose;
+  end
+  else
+  begin
+    B1 := ctksquareopen;
+    B2 := ctksquareclose;
+  end;
+
+  if IsReverse then
+  begin
+    BT := B1;
+    B1 := B2;
+    B2 := BT;
+  end;
+
+  // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
+  I := 0;
+  Stack := TStack.Create;
+  try
+    while I < Tokens.Count do
+    begin
+      T := TCnGeneralCppToken(Tokens[I]);
+      if T.CppTokenKind = B1 then
+        Stack.Push(T)
+      else if T.CppTokenKind = B2 then
+      begin
+        if Stack.Count > 0 then
+        begin
+          Tokens.Delete(I); // 删了一个，不用 Inc了
+          T := Stack.Pop;
+          Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
+          Dec(I);
+          Continue;
+        end;
+      end;
+
+      Inc(I);
+    end;
+  finally
+    Stack.Free;
+  end;
+end;
+
+// 从列表中删除配对的括号，IsSmall 表示小括号还是中括号
+// IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之
+procedure TCnEditorExtendingSelect.RemovePasMatchedBraces(Tokens: TList;
+  IsSmall, IsReverse: Boolean);
+var
+  T: TCnGeneralPasToken;
+  BT, B1, B2: TTokenKind;
+  I: Integer;
+  Stack: TStack;
+begin
+  if (Tokens = nil) or (Tokens.Count <= 1) then
+    Exit;
+
+  if IsSmall then
+  begin
+    B1 := tkRoundOpen;
+    B2 := tkRoundClose;
+  end
+  else
+  begin
+    B1 := tkSquareOpen;
+    B2 := tkSquareClose;
+  end;
+
+  if IsReverse then
+  begin
+    BT := B1;
+    B1 := B2;
+    B2 := BT;
+  end;
+
+  // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
+  I := 0;
+  Stack := TStack.Create;
+  try
+    while I < Tokens.Count do
+    begin
+      T := TCnGeneralPasToken(Tokens[I]);
+      if T.TokenID = B1 then
+        Stack.Push(T)
+      else if T.TokenID = B2 then
+      begin
+        if Stack.Count > 0 then
+        begin
+          Tokens.Delete(I); // 删了一个，不用 Inc了
+          T := Stack.Pop;
+          Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
+          Dec(I);
+          Continue;
+        end;
+      end;
+
+      Inc(I);
+    end;
+  finally
+    Stack.Free;
+  end;
 end;
 
 initialization

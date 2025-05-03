@@ -889,7 +889,7 @@ begin
       for I := 0 to PasParser.Count - 1 do
       begin
         // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
+        CnConvertGeneralTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
         // 再把 CharPos 转换成 EditPos
         CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
           CharPos.Line, CharPos.CharIndex, EditPos);
@@ -952,7 +952,7 @@ begin
       for I := 0 to CppParser.Count - 1 do
       begin
         // 将解析器解析出来的字符偏移转换成 CharPos
-        CnConvertPasTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
+        CnConvertGeneralTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
         // 再把 CharPos 转换成 EditPos
         CnOtaConvertEditViewCharPosToEditPos(Pointer(EditView),
           CharPos.Line, CharPos.CharIndex, EditPos);
