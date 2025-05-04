@@ -119,7 +119,7 @@ var
   Pair, TmpPair, InnerPair: TCnBlockLinePair;
   LeftBrace, RightBrace: TList;
   InnerStartGot: Boolean;
-  PT: TCnGeneralPasToken;
+  PT, PT1: TCnGeneralPasToken;
   CT: TCnGeneralCppToken;
   LastS: string;
   CurrIndex: Integer;
@@ -185,9 +185,23 @@ var
     AreaFound := True;
   end;
 
+  function GetPascalPairStartPrevOne(APair: TCnBlockLinePair; Offset: Integer = 1): TCnGeneralPasToken;
+  begin
+    Result := nil;
+    if (APair <> nil) and (APair.StartToken <> nil) and (APair.StartToken.ItemIndex >= Offset) then
+      Result := PasParser.Tokens[APair.StartToken.ItemIndex - Offset];
+  end;
+
+  function GetPascalPairEndNextOne(APair: TCnBlockLinePair; Offset: Integer = 1): TCnGeneralPasToken;
+  begin
+    Result := nil;
+    if (APair <> nil) and (APair.EndToken <> nil) and (APair.EndToken.ItemIndex < PasParser.Count - Offset) then
+      Result := PasParser.Tokens[APair.EndToken.ItemIndex + Offset];
+  end;
+
   // 拿到一个 Pair 后，步进 Step 以各种开闭区间搜，照理适用于 Pascal 和 C/C++ 只是后者大概没 MiddleTokens 只有大括号配对
   // 内部使用 Step 步进、FLevel 比较、AreaFound 输出是否找到等外部变量
-  procedure SearchInAPair(APair: TCnBlockLinePair);
+  procedure SearchInAPair(APair: TCnBlockLinePair; NextTokenAfterPairEnd: TCnGeneralPasToken = nil);
   var
     I: Integer;
   begin
@@ -323,6 +337,20 @@ var
             SetStartEndPos(APair.StartToken, APair.EndToken, False);
             Exit;
           end;
+        end;
+      end;
+    end;
+
+    // 如果 APair 的尾巴是 end，找外界传入的紧跟的有无分号，有则加一层闭区间
+    if not AreaFound and (NextTokenAfterPairEnd <> nil) then
+    begin
+      if NextTokenAfterPairEnd.TokenID = tkSemiColon then
+      begin
+        Inc(Step);
+        if Step = FSelectStep then
+        begin
+          SetStartEndPos(APair.StartToken, NextTokenAfterPairEnd, False);
+          Exit;
         end;
       end;
     end;
@@ -584,7 +612,44 @@ begin
 //        [InnerPair.StartToken.EditLine, InnerPair.StartToken.EditCol,
 //        InnerPair.EndToken.EditLine, InnerPair.StartToken.EditCol, InnerPair.Layer]);
 {$ENDIF}
-        SearchInAPair(InnerPair);
+        SearchInAPair(InnerPair, GetPascalPairEndNextOne(InnerPair));
+
+        // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
+        if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
+        begin
+          PT := GetPascalPairStartPrevOne(InnerPair);
+          if PT.TokenID = tkEqual then
+          begin
+            PT := GetPascalPairStartPrevOne(InnerPair, 2);
+            if PT.TokenID = tkIdentifier then
+            begin
+              ConvertGeneralTokenPos(Pointer(EditView), PT); // 该标识符位置可能没整好
+              // 从标识符到 end
+              Inc(Step);
+              if Step = FSelectStep then
+              begin
+                SetStartEndPos(PT, InnerPair.EndToken, False);
+                Exit;
+              end;
+
+              // 如果声明是 end 结尾且尾巴上有分号，再来一个闭
+              if InnerPair.EndToken.TokenID = tkEnd then
+              begin
+                PT1 := GetPascalPairEndNextOne(InnerPair);
+                if (PT1 <> nil) and (PT1.TokenID = tkSemiColon) then
+                begin
+                  Inc(Step);
+                  if Step = FSelectStep then
+                  begin
+                    // 函数过程后如果有分号，再来一个闭
+                    SetStartEndPos(PT, PT1, False);
+                    Exit;
+                  end;
+                end;
+              end;
+            end;
+          end;
+        end;
 
         if not AreaFound then
         begin
@@ -621,7 +686,44 @@ begin
 //                CnDebugger.LogFmt('Level Match In Pascal Pair %d %d to %d %d. To Search in this Pair with Level %d',
 //                  [Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine, Pair.EndToken.EditCol, Pair.Layer]);
 {$ENDIF}
-                  SearchInAPair(Pair);
+                  SearchInAPair(Pair, GetPascalPairEndNextOne(Pair));
+
+                  // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
+                  if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
+                  begin
+                    PT := GetPascalPairStartPrevOne(Pair);
+                    if PT.TokenID = tkEqual then
+                    begin
+                      PT := GetPascalPairStartPrevOne(Pair, 2);
+                      if PT.TokenID = tkIdentifier then
+                      begin
+                        ConvertGeneralTokenPos(Pointer(EditView), PT); // 该标识符位置可能没整好
+                        // 从标识符到 end
+                        Inc(Step);
+                        if Step = FSelectStep then
+                        begin
+                          SetStartEndPos(PT, Pair.EndToken, False);
+                          Exit;
+                        end;
+
+                        // 如果声明是 end 结尾且尾巴上有分号，再来一个闭
+                        if Pair.EndToken.TokenID = tkEnd then
+                        begin
+                          PT1 := GetPascalPairEndNextOne(Pair);
+                          if (PT1 <> nil) and (PT1.TokenID = tkSemiColon) then
+                          begin
+                            Inc(Step);
+                            if Step = FSelectStep then
+                            begin
+                              // 函数过程后如果有分号，再来一个闭
+                              SetStartEndPos(PT, PT1, False);
+                              Exit;
+                            end;
+                          end;
+                        end;
+                      end;
+                    end;
+                  end;
                 end;
               end;
               if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
@@ -677,6 +779,18 @@ begin
                         // 函数过程就闭区间，没有开区间
                         SetStartEndPos(TmpPair.StartToken, Pair.EndToken, False);
                         Exit;
+                      end;
+
+                      PT := GetPascalPairEndNextOne(Pair);
+                      if (PT <> nil) and (PT.TokenID = tkSemiColon) then
+                      begin
+                        Inc(Step);
+                        if Step = FSelectStep then
+                        begin
+                          // 函数过程后如果有分号，再来一个闭
+                          SetStartEndPos(TmpPair.StartToken, PT, False);
+                          Exit;
+                        end;
                       end;
                       Break;
                     end;
@@ -792,7 +906,7 @@ begin
 //        [InnerPair.StartToken.EditLine, InnerPair.StartToken.EditCol,
 //        InnerPair.EndToken.EditLine, InnerPair.StartToken.EditCol, InnerPair.Layer]);
 {$ENDIF}
-        SearchInAPair(InnerPair);
+        SearchInAPair(InnerPair); // 大括号后无需分号
 
         if not AreaFound then
         begin
