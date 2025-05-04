@@ -370,7 +370,7 @@ begin
     NilChar := 0;
     Stream.Write(NilChar, SizeOf(NilChar));
     Parser.ParseSource(Stream.Memory, Stream.Size, mmoC.CaretPos.Y + 1,
-      mmoC.CaretPos.X + 1, True);
+      mmoC.CaretPos.X + 1, True, True);
 
     for I := 0 to Parser.Count - 1 do
     begin

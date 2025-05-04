@@ -45,13 +45,14 @@ uses
   CnWizUtils, CnConsts, CnCommon, CnWizManager, CnWizEditFiler,
   CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex,
-  CnCppCodeParser, mwBCBTokenList;
+  CnCppCodeParser, mwBCBTokenList, CnIDEStrings;
 
 type
   TCnEditorExtendingSelect = class(TCnBaseCodingToolset)
   private
     FEditPos: TOTAEditPos;
     FSelectStep: Integer;
+    FCurrTokenStr: TCnIdeTokenString;
     FTimer: TTimer;
     FNeedReparse: Boolean;
     FSelecting: Boolean;
@@ -79,8 +80,10 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
 uses
-  CnIDEStrings {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnDebug;
+{$ENDIF}
 
 const
   csProcTokens = [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor];
@@ -116,8 +119,10 @@ var
   Pair, TmpPair, InnerPair: TCnBlockLinePair;
   LeftBrace, RightBrace: TList;
   InnerStartGot: Boolean;
-  T: TCnGeneralPasToken;
+  PT: TCnGeneralPasToken;
+  CT: TCnGeneralCppToken;
   LastS: string;
+  CurrIndex: Integer;
 
   // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
   function EditPosInPairClose(AEditPos: TOTAEditPos; APairStart, APairEnd: TCnGeneralPasToken): Boolean;
@@ -372,9 +377,10 @@ begin
       // 解析当前显示的源文件
       if CurIsPas then
         CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
-          or IsInc(EditView.Buffer.FileName), False);
-      if CurIsCpp then
-        CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
+          or IsInc(EditView.Buffer.FileName), False)
+      else if CurIsCpp then
+        CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line,
+          EditView.CursorPos.Col, True, True);
     finally
       Stream.Free;
     end;
@@ -488,29 +494,29 @@ begin
 
         for I := 0 to PasParser.Count - 1 do
         begin
-          T := PasParser.Tokens[I];
-          if (InnerPair <> nil) and (T = InnerPair.EndToken) then
+          PT := PasParser.Tokens[I];
+          if (InnerPair <> nil) and (PT = InnerPair.EndToken) then
             Break;
 
           if InnerStartGot then
           begin
-            if T.TokenID in [tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose] then
+            if PT.TokenID in [tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose] then
             begin
-              ConvertGeneralTokenPos(Pointer(EditView), T);
+              ConvertGeneralTokenPos(Pointer(EditView), PT);
 
               // Token 开头位置小于光标，也就是光标位置大于 Token 开头的左右括号，逆向加到左边
-              if ((FEditPos.Line > T.EditLine) or
-                ((FEditPos.Line = T.EditLine) and (FEditPos.Col > T.EditCol))) then
-                LeftBrace.Insert(0, T);
+              if ((FEditPos.Line > PT.EditLine) or
+                ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditCol))) then
+                LeftBrace.Insert(0, PT);
 
               // Token 结尾位置小于光标，也就是光标位置小于 Token 尾巴的左右括号，加到右边
-              if ((FEditPos.Line < T.EditLine) or
-                ((FEditPos.Line = T.EditLine) and (FEditPos.Col < T.EditEndCol))) then
-                RightBrace.Add(T);
+              if ((FEditPos.Line < PT.EditLine) or
+                ((FEditPos.Line = PT.EditLine) and (FEditPos.Col < PT.EditEndCol))) then
+                RightBrace.Add(PT);
             end;
           end;
 
-          if (InnerPair <> nil) and (T = InnerPair.StartToken) then
+          if (InnerPair <> nil) and (PT = InnerPair.StartToken) then
             InnerStartGot := True;
         end;
 
@@ -532,17 +538,36 @@ begin
 
         for I := 0 to C - 1 do // 如果 C 为 0 则进不来
         begin
-          Inc(Step);
-          if Step = FSelectStep then
+          // 第一轮里，如果光标下最初有标识符、且最开始一对左右括号同行、且距离等于标识符长度，则这次不走开区间，避免重复选择
+          if (I = 0) and (FCurrTokenStr <> '') and
+            (TCnGeneralPasToken(LeftBrace[0]).LineNumber = TCnGeneralPasToken(RightBrace[0]).LineNumber)
+            and (TCnGeneralPasToken(RightBrace[0]).EditCol - TCnGeneralPasToken(LeftBrace[0]).EditEndCol
+            = Length(FCurrTokenStr)) then
           begin
-            SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), True);
-            Exit;
-          end;
-          Inc(Step);
-          if Step = FSelectStep then
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Pascal #%d Step %d Matched Braces is Current Token. No Open.', [I, Step]);
+{$ENDIF}
+            Inc(Step);
+            if Step = FSelectStep then // 仅走闭区间
+            begin
+              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
+              Exit;
+            end;
+          end
+          else
           begin
-            SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
-            Exit;
+            Inc(Step);
+            if Step = FSelectStep then  // 常规先开
+            begin
+              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), True);
+              Exit;
+            end;
+            Inc(Step);
+            if Step = FSelectStep then  // 常规后闭
+            begin
+              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
+              Exit;
+            end;
           end;
         end;
       finally
@@ -666,6 +691,100 @@ begin
     end
     else if CurIsCpp then
     begin
+      // 扩大小括号、中括号选区，看是否在 InnerPair 内，在则递增 Step 并和 FLevel 比较判断
+      // 把 InnerPair 内的 Token 都找出来，如无 InnerPair 则全找出来，准备匹配小括号和中括号
+      LeftBrace := nil;
+      RightBrace := nil;
+
+      try
+        LeftBrace := TList.Create;
+        RightBrace := TList.Create;
+        InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
+
+        for I := 0 to CppParser.Count - 1 do
+        begin
+          CT := CppParser.Tokens[I];
+          if (InnerPair <> nil) and (CT = InnerPair.EndToken) then
+            Break;
+
+          if InnerStartGot then
+          begin
+            if CT.CppTokenKind in [ctkroundopen, ctkroundClose, ctksquareopen, ctksquareclose] then
+            begin
+              ConvertGeneralTokenPos(Pointer(EditView), CT);
+
+              // Token 开头位置小于光标，也就是光标位置大于 Token 开头的左右括号，逆向加到左边
+              if ((FEditPos.Line > CT.EditLine) or
+                ((FEditPos.Line = CT.EditLine) and (FEditPos.Col > CT.EditCol))) then
+                LeftBrace.Insert(0, CT);
+
+              // Token 结尾位置小于光标，也就是光标位置小于 Token 尾巴的左右括号，加到右边
+              if ((FEditPos.Line < CT.EditLine) or
+                ((FEditPos.Line = CT.EditLine) and (FEditPos.Col < CT.EditEndCol))) then
+                RightBrace.Add(CT);
+            end;
+          end;
+
+          if (InnerPair <> nil) and (CT = InnerPair.StartToken) then
+            InnerStartGot := True;
+        end;
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Extract All C/C++ Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+{$ENDIF}
+        // 拿到光标前后的左右括号，下标低的离光标近，先干掉抵消的中括号和小括号部分
+        RemoveCppMatchedBraces(LeftBrace, True, True);
+        RemoveCppMatchedBraces(LeftBrace, False, True);
+        RemoveCppMatchedBraces(RightBrace, True, False);
+        RemoveCppMatchedBraces(RightBrace, False, False);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Removed C/C++ Matched Braces in InnerPair: Left %d, Right %d', [LeftBrace.Count, RightBrace.Count]);
+{$ENDIF}
+
+        C := LeftBrace.Count;
+        if RightBrace.Count < C then
+          C := RightBrace.Count;
+
+        for I := 0 to C - 1 do // 如果 C 为 0 则进不来
+        begin
+          // 第一轮里，如果光标下最初有标识符、且最开始一对左右括号同行、且距离等于标识符长度，则这次不走开区间，避免重复选择
+          if (I = 0) and (FCurrTokenStr <> '') and
+            (TCnGeneralCppToken(LeftBrace[0]).LineNumber = TCnGeneralCppToken(RightBrace[0]).LineNumber)
+            and (TCnGeneralCppToken(RightBrace[0]).EditCol - TCnGeneralCppToken(LeftBrace[0]).EditEndCol
+            = Length(FCurrTokenStr)) then
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('C/C++ #%d Step %d Matched Braces is Current Token. No Open.', [I, Step]);
+{$ENDIF}
+            Inc(Step);
+            if Step = FSelectStep then // 仅走闭区间
+            begin
+              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), False);
+              Exit;
+            end;
+          end
+          else
+          begin
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), True);
+              Exit;
+            end;
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), False);
+              Exit;
+            end;
+          end;
+        end;
+      finally
+        RightBrace.Free;
+        LeftBrace.Free;
+      end;
+
+      // 小括号和中括号处理完毕
       if InnerPair <> nil then
       begin
 {$IFDEF DEBUG}
@@ -768,6 +887,7 @@ begin
     FSelectStep := 0;
     FEditPos.Line := -1;
     FEditPos.Col := -1;
+    FCurrTokenStr := '';
   end;
 end;
 
@@ -775,7 +895,6 @@ procedure TCnEditorExtendingSelect.Execute;
 var
   CurrIndex: Integer;
   EditView: IOTAEditView;
-  CurrTokenStr: TCnIdeTokenString;
 begin
   EditView := CnOtaGetTopMostEditView;
   if EditView = nil then
@@ -792,9 +911,10 @@ begin
   try
     if (EditView.Block = nil) or not EditView.Block.IsValid then
     begin
-      if CnOtaGeneralGetCurrPosToken(CurrTokenStr, CurrIndex) then
+      // 记录下最初的标识符
+      if CnOtaGeneralGetCurrPosToken(FCurrTokenStr, CurrIndex) then
       begin
-        if CurrTokenStr <> '' then
+        if FCurrTokenStr <> '' then
         begin
           // 光标下有标识符，选中
           CnOtaSelectCurrentToken;

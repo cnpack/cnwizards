@@ -1138,9 +1138,9 @@ procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
 {* 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理}
 
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream; CurrLine: Integer = 0;
-  CurCol: Integer = 0; ParseCurrent: Boolean = False);
-{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理。
+  Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
+  ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
+{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号。
    Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
 
 procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
@@ -8354,16 +8354,18 @@ end;
 
 // 封装的解析器解析 Cpp 代码的过程
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream; CurrLine: Integer = 0;
-  CurCol: Integer = 0; ParseCurrent: Boolean = False);
+  Stream: TMemoryStream; CurrLine: Integer; CurCol: Integer;
+  ParseCurrent: Boolean; NeedRoundSquare: Boolean);
 begin
   if (Parser = nil) or (Stream = nil) then
     Exit;
 
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar), CurrLine, CurCol, ParseCurrent);
+  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
+    CurrLine, CurCol, ParseCurrent, NeedRoundSquare);
 {$ELSE}
-  Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol, ParseCurrent);
+  Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol,
+    ParseCurrent, NeedRoundSquare);
 {$ENDIF}
 end;
 

@@ -83,7 +83,7 @@ begin
   try
     S := mmoCppSrc.Lines.Text;
     Parser.ParseSource(PWideChar(S), Length(S), mmoCppSrc.CaretPos.Y + 1,
-      mmoCppSrc.CaretPos.X + 1, True);
+      mmoCppSrc.CaretPos.X + 1, True, True);
 
     for I := 0 to Parser.Count - 1 do
     begin

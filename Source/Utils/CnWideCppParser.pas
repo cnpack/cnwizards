@@ -96,7 +96,8 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure ParseSource(ASource: PWideChar; Size: Integer; CurrLine: Integer = 0;
-      CurCol: Integer = 0; ParseCurrent: Boolean = False);
+      CurCol: Integer = 0; ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
+    {* 解析代码结构。NeedRoundSquare 表示需要解析小括号和中括号}
 
     procedure ParseString(ASource: PWideChar; Size: Integer);
     {* 对代码进行针对字符串的解析，只生成字符串内容}
@@ -297,7 +298,7 @@ begin
 end;
 
 procedure TCnWideCppStructParser.ParseSource(ASource: PWideChar; Size: Integer;
-  CurrLine: Integer; CurCol: Integer; ParseCurrent: Boolean);
+  CurrLine: Integer; CurCol: Integer; ParseCurrent: Boolean; NeedRoundSquare: Boolean);
 const
   IdentToIgnore: array[0..2] of string = ('CATCH', 'CATCH_ALL', 'AND_CATCH_ALL');
 var
@@ -528,6 +529,10 @@ begin
           begin
             NewToken(CParser, ASource, Layer);
           end;
+      else
+        // 如果外界需要解析小中括号，则判断后加入
+        if NeedRoundSquare and (CParser.RunID in [ctkroundopen, ctkroundclose, ctkroundpair, ctksquareopen, ctksquareclose]) then
+          NewToken(CParser, ASource, Layer);
       end;
 
       CParser.NextNonJunk;
