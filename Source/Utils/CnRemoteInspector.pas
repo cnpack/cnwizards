@@ -214,7 +214,7 @@ var
   Buf: TBytes;
   BufPtr: PByte;
   Hies: TStringList;
-  AProp: TCnPropertyObject;
+  // AProp: TCnPropertyObject;
   Is32: Boolean;
 begin
   if FObjectExpr = '' then

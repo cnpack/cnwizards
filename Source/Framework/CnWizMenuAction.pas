@@ -193,8 +193,9 @@ type
     {* 根据 Action 命令名查找索引号，返回的索引号只能在 WizActions 数组对象中使用。}
     function IndexOfShortCut(AShortCut: TShortCut): Integer; 
     {* 根据快捷键键值查找索引号，返回的索引号只能在 WizActions 数组对象中使用。}
-    procedure ArrangeMenuItems(RootItem: TMenuItem; MaxItems: Integer = 0);
-    {* 为过长的菜单增加分隔菜单项 }
+    procedure ArrangeMenuItems(RootItem: TMenuItem; MaxItems: Integer = 0; IsSub: Boolean = False);
+    {* 为过长的菜单增加分隔菜单项，MaxItems 为 0 表示根据屏幕高度自动计算。
+      注意子菜单和主菜单的高度在自动计算时要分开处理，因此需要 IsSub 参数进行区分 }
 
     property IdeActionCount: Integer read GetIdeActionCount;
     {* 整个 IDE 的主 ActionList 包含的项目数}
@@ -656,7 +657,8 @@ begin
 end;
 
 procedure TCnWizActionMgr.ArrangeMenuItems(RootItem: TMenuItem;
-  MaxItems: Integer);
+  MaxItems: Integer; IsSub: Boolean);
+
 {$IFDEF COMPILER7_UP}
   function NewMoreItem: TMenuItem;
   begin
@@ -665,7 +667,7 @@ procedure TCnWizActionMgr.ArrangeMenuItems(RootItem: TMenuItem;
   end;
 
 var
-  I: Integer;
+  I, Offset: Integer;
   ScreenRect: TRect;
   ScreenHeight: Integer;
   MoreMenuItem: TMenuItem;
@@ -678,10 +680,16 @@ begin
 {$IFDEF COMPILER7_UP}
   if MaxItems < 8 then
   begin
+    if IsSub then       // 子菜单多给点空间
+      Offset := 250
+    else
+      Offset := 75;
+
     ScreenRect := GetWorkRect(GetIdeMainForm);
-    ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - 75;
+    ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - Offset;
     MaxItems := ScreenHeight div GetMainMenuItemHeight;
-    if MaxItems < 8 then MaxItems := 8;
+    if MaxItems < 8 then
+      MaxItems := 8;
   end;
 
 {$IFDEF DEBUG}

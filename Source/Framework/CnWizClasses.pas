@@ -1282,7 +1282,7 @@ begin
   if FActive then
   begin
     AcquireSubActions;
-    WizActionMgr.ArrangeMenuItems(Menu);
+    WizActionMgr.ArrangeMenuItems(Menu, 0, True);
   end
   else
     ClearSubActions;

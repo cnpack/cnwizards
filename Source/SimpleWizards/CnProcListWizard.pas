@@ -316,7 +316,9 @@ type
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
     procedure UpdateDropPosition;
+{$IFDEF IDE_SUPPORT_THEMING}
     procedure ThemeChanged(Sender: TObject);
+{$ENDIF}
     procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
   protected
@@ -4902,11 +4904,15 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF IDE_SUPPORT_THEMING}
+
 procedure TCnProcListComboBox.ThemeChanged(Sender: TObject);
 begin
   UpdateColorFromTheme;
   Invalidate;
 end;
+
+{$ENDIF}
 
 procedure TCnProcListComboBox.RefreshDropBox(Sender: TObject);
 begin

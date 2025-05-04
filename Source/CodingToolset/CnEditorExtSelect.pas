@@ -122,7 +122,6 @@ var
   PT, PT1: TCnGeneralPasToken;
   CT: TCnGeneralCppToken;
   LastS: string;
-  CurrIndex: Integer;
 
   // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
   function EditPosInPairClose(AEditPos: TOTAEditPos; APairStart, APairEnd: TCnGeneralPasToken): Boolean;
@@ -695,12 +694,13 @@ begin
                   // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
                   if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
                   begin
-                    if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (InnerPair.StartToken.TokenID = tkRecord))) then
+                    PT := GetPascalPairStartPrevOne(Pair);
+                    if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (Pair.StartToken.TokenID = tkRecord))) then
                     begin
                       if PT.TokenID = tkPacked then
-                        PT := GetPascalPairStartPrevOne(InnerPair, 3)
+                        PT := GetPascalPairStartPrevOne(Pair, 3)
                       else
-                        PT := GetPascalPairStartPrevOne(InnerPair, 2);
+                        PT := GetPascalPairStartPrevOne(Pair, 2);
 
                       if (PT <> nil) and (PT.TokenID = tkIdentifier) then
                       begin
@@ -932,7 +932,6 @@ begin
               // 再进外一层重复上述循环。注意起始条件会包括已经搜过的 InnerPair
 
               Pair := BlockMatchInfo.LineInfo.Pairs[I];
-              CursorInPair := False;
 {$IFDEF DEBUG}
 //            CnDebugger.LogFmt('To Check C/C++ Pair with Level %d. Is %d %d in From %d %d %s to %d %d %s',
 //              [Pair.Layer, FEditPos.Line, FEditPos.Col,
@@ -942,7 +941,6 @@ begin
               if (Pair <> InnerPair) and EditPosInPairClose(FEditPos, Pair.StartToken, Pair.EndToken) then
               begin
                 // 不搜已经搜过的 InnerPair
-                CursorInPair := True;
                 if Pair.Layer = PairLevel then
                 begin
 {$IFDEF DEBUG}
@@ -952,9 +950,6 @@ begin
                   SearchInAPair(Pair);
                 end;
               end;
-
-              if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
-                CursorInPair := True;
             end;
             Dec(PairLevel); // 是否在本层？
           end;
