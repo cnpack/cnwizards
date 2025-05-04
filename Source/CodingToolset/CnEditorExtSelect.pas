@@ -618,10 +618,14 @@ begin
         if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
         begin
           PT := GetPascalPairStartPrevOne(InnerPair);
-          if PT.TokenID = tkEqual then
+          if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (InnerPair.StartToken.TokenID = tkRecord))) then
           begin
-            PT := GetPascalPairStartPrevOne(InnerPair, 2);
-            if PT.TokenID = tkIdentifier then
+            if PT.TokenID = tkPacked then
+              PT := GetPascalPairStartPrevOne(InnerPair, 3)
+            else
+              PT := GetPascalPairStartPrevOne(InnerPair, 2);
+
+            if (PT <> nil) and (PT.TokenID = tkIdentifier) then
             begin
               ConvertGeneralTokenPos(Pointer(EditView), PT); // 该标识符位置可能没整好
               // 从标识符到 end
@@ -691,11 +695,14 @@ begin
                   // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
                   if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
                   begin
-                    PT := GetPascalPairStartPrevOne(Pair);
-                    if PT.TokenID = tkEqual then
+                    if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (InnerPair.StartToken.TokenID = tkRecord))) then
                     begin
-                      PT := GetPascalPairStartPrevOne(Pair, 2);
-                      if PT.TokenID = tkIdentifier then
+                      if PT.TokenID = tkPacked then
+                        PT := GetPascalPairStartPrevOne(InnerPair, 3)
+                      else
+                        PT := GetPascalPairStartPrevOne(InnerPair, 2);
+
+                      if (PT <> nil) and (PT.TokenID = tkIdentifier) then
                       begin
                         ConvertGeneralTokenPos(Pointer(EditView), PT); // 该标识符位置可能没整好
                         // 从标识符到 end
