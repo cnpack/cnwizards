@@ -63,7 +63,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ToolsAPI, ActnList,
+  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls,
+  {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} ActnList,
   CnWizConsts, CnCommon;
 
 type
@@ -206,10 +207,13 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  IniFiles, Registry, CnWizUtils, CnWizOptions, CnWizCompilerConst, CnIDEVersion;
+  IniFiles, Registry, {$IFNDEF STAND_ALONE} CnWizUtils, CnIDEVersion, {$ENDIF}
+  CnWizOptions, CnWizCompilerConst;
 
 const
   csInvalidIndex = -1;
+
+{$IFNDEF STAND_ALONE}
 
 type
 
@@ -245,6 +249,8 @@ type
     procedure BindKeyboard(const BindingServices: IOTAKeyBindingServices);
     {* 快捷键绑定过程，必须实现的 IOTAKeyboardBinding 方法}
   end;
+
+{$ENDIF}
 
 //==============================================================================
 // IDE 快捷键定义类
@@ -358,6 +364,8 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 //==============================================================================
 // IDE 快捷键绑定接口实现类
 //==============================================================================
@@ -453,6 +461,8 @@ begin
   Result := SCnKeyBindingName;
 end;
 
+{$ENDIF}
+
 //==============================================================================
 // IDE 快捷键管理器类
 //==============================================================================
@@ -545,7 +555,13 @@ begin
 {$ENDIF}
 
   if IndexOfName(AName) >= 0 then // 重名，如果为空则忽略
+  begin
+{$IFNDEF STAND_ALONE}
     raise ECnDuplicateShortCutName.CreateFmt(SCnDuplicateShortCutName, [AName]);
+{$ELSE}
+    raise Exception.CreateFmt(SCnDuplicateShortCutName, [AName]);
+{$ENDIF}
+  end;
 
   Result := TCnWizShortCut.Create(Self, AName, AShortCut, AKeyProc, AMenuName, ATag);
   Result.Action := AnAction;
@@ -688,7 +704,9 @@ end;
 
 procedure TCnWizShortCutMgr.SaveMainMenuShortCuts;
 var
+{$IFNDEF STAND_ALONE}
   Svcs40: INTAServices40;
+{$ENDIF}
   MainMenu: TMainMenu;
 
   procedure DoSaveMenu(MenuItem: TMenuItem);
@@ -708,18 +726,23 @@ var
     for I := 0 to MenuItem.Count - 1 do
       DoSaveMenu(MenuItem.Items[I]);
   end;
+
 begin
   FSaveMenus.Clear;
   FSaveShortCuts.Clear;
+{$IFNDEF STAND_ALONE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   MainMenu := Svcs40.MainMenu;
   DoSaveMenu(MainMenu.Items);
+{$ENDIF}
 end;
 
 // 安装键盘绑定
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
+{$IFNDEF STAND_ALONE}
   KeySvcs: IOTAKeyboardServices;
+{$ENDIF}
   I: Integer;
   IsEmpty: Boolean;
 begin
@@ -736,6 +759,7 @@ begin
 
   if not IsEmpty then
   begin
+{$IFNDEF STAND_ALONE}
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
@@ -763,23 +787,28 @@ begin
     finally
       RestoreMainMenuShortCuts;
     end;
+{$ENDIF}
   end;
 end;
 
 // 反安装键盘绑定
 procedure TCnWizShortCutMgr.RemoveKeyBinding;
+{$IFNDEF STAND_ALONE}
 var
   KeySvcs: IOTAKeyboardServices;
+{$ENDIF}
 begin
   if FKeyBindingIndex <> csInvalidIndex then
   begin
     SaveMainMenuShortCuts;
     try
+{$IFNDEF STAND_ALONE}
       QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     {$IFNDEF COMPILER7_UP}
       KeySvcs.PopKeyboard(SCnKeyBindingName);
     {$ENDIF}
       KeySvcs.RemoveKeyboardBinding(FKeyBindingIndex);
+{$ENDIF}
       FKeyBindingIndex := csInvalidIndex;
     finally
       RestoreMainMenuShortCuts;
@@ -795,9 +824,11 @@ begin
     FUpdated := True;
     Exit;
   end;
-  
+
+{$IFNDEF STAND_ALONE}
   if IdeClosing then
     Exit;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizShortCutMgr.UpdateBinding');
