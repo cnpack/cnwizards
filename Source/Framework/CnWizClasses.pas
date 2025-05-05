@@ -80,11 +80,15 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, ToolsAPI,
-  Registry, ComCtrls, Forms, CnHashMap, CnWizIni,
+  Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, Dialogs,
+  {$IFNDEF STAND_ALONE} ToolsAPI, CnWizIni, {$ENDIF}
+  Registry, ComCtrls, Forms, CnHashMap,
   CnWizShortCut, CnWizMenuAction, CnIni, CnWizConsts, CnPopupMenu;
 
 type
+{$IFDEF STAND_ALONE}
+  TWizardState = set of (wsEnabled, wsChecked);
+{$ENDIF}
 
 //==============================================================================
 // 专家包专家抽象基类
@@ -94,7 +98,7 @@ type
 
 {$M+}
 
-  TCnBaseWizard = class(TNotifierObject, IOTAWizard)
+  TCnBaseWizard = class{$IFNDEF STAND_ALONE}(TNotifierObject, IOTAWizard){$ENDIF}
   {* CnWizard 专家抽象基类，定义了专家最基本的公共内容 }
   private
     FActive: Boolean;
@@ -398,7 +402,7 @@ type
 
 { TCnRepositoryWizard }
 
-  TCnRepositoryWizard = class(TCnIconWizard, IOTARepositoryWizard)
+  TCnRepositoryWizard = class(TCnIconWizard {$IFNDEF STAND_ALONE} , IOTARepositoryWizard {$ENDIF})
   {* CnWizard 模板向导抽象基类 }
   protected
     FIconHandle: HICON;
@@ -429,7 +433,8 @@ type
 
 { TCnUnitWizard }
 
-  TCnUnitWizard = class(TCnRepositoryWizard, {$IFDEF DELPHI10_UP}IOTAProjectWizard{$ELSE}IOTAFormWizard{$ENDIF});
+  TCnUnitWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE},
+    {$IFDEF DELPHI10_UP}IOTAProjectWizard{$ELSE}IOTAFormWizard{$ENDIF} {$ENDIF});
   {* 必须实现 IOTAFormWizard 才能在 New 对话框中出现, BDS2006 则要求 IOTAProjectWizard}
 
 //==============================================================================
@@ -438,7 +443,7 @@ type
 
 { TCnFormWizard }
 
-  TCnFormWizard = class(TCnRepositoryWizard, IOTAFormWizard);
+  TCnFormWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE}, IOTAFormWizard {$ENDIF});
 
 //==============================================================================
 // 工程模板向导基类
@@ -446,7 +451,7 @@ type
 
 { TCnProjectWizard }
 
-  TCnProjectWizard = class(TCnRepositoryWizard, IOTAProjectWizard);
+  TCnProjectWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE}, IOTAProjectWizard {$ENDIF});
 
 //==============================================================================
 // 设计器或编辑器右键菜单执行条目的基类，子类可重载相应方法实现功能
@@ -553,10 +558,10 @@ procedure AdjustCnWizardsClassOrder;
 implementation
 
 uses
-  CnWizUtils, CnWizOptions, CnCommon
-{$IFNDEF CNWIZARDS_MINIMUM}
+  {$IFNDEF STAND_ALONE} CnWizUtils, {$ENDIF} CnWizOptions, CnCommon
+{$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF STAND_ALONE}
   , CnWizCommentFrm, CnWizSubActionShortCutFrm
-{$ENDIF}
+{$ENDIF} {$ENDIF}
   {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 //==============================================================================
@@ -801,7 +806,12 @@ begin
     Path := MakePath(MakePath(WizOptions.RegPath) + GetIDStr) + WizOptions.CompilerID
   else
     Path := MakePath(WizOptions.RegPath) + GetIDStr;
+
+{$IFDEF STAND_ALONE}
+  Result := TCnIniFile.Create(Path);
+{$ELSE}
   Result := TCnWizIniFile.Create(Path, KEY_ALL_ACCESS, FDefaultsMap);
+{$ENDIF}
 end;
 
 procedure TCnBaseWizard.DoLoadSettings;
@@ -1004,8 +1014,10 @@ end;
 // 根据类名初始化图标，可重载
 procedure TCnIconWizard.InitIcon(AIcon, ASmallIcon: TIcon);
 begin
+{$IFNDEF STAND_ALONE}
   if AIcon <> nil then
     CnWizLoadIcon(AIcon, ASmallIcon, GetIconName, True);
+{$ENDIF}
 end;
 
 //==============================================================================
@@ -1049,13 +1061,20 @@ end;
 procedure TCnActionWizard.Click(Sender: TObject);
 begin
   try
-    if Active and Action.Enabled and (IsInternalWizard {$IFNDEF CNWIZARDS_MINIMUM} or
-      ShowCnWizCommentForm(Self) {$ENDIF} ) then
+    if Active and Action.Enabled and (IsInternalWizard {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} or
+      ShowCnWizCommentForm(Self) {$ENDIF} {$ENDIF}) then
       Execute;
   except
     on E: Exception do
+    begin
+{$IFDEF STAND_ALONE}
+      ShowMessage(Format('WizClasses %s Click Error. %s - %s',
+        [ClassName, E.ClassName, E.Message]));
+{$ELSE}
       DoHandleException(Format('WizClasses %s Click Error. %s - %s',
         [ClassName, E.ClassName, E.Message]));
+{$ENDIF}
+    end;
   end;
 end;
 
@@ -1175,15 +1194,20 @@ end;
 
 // 类构造器
 constructor TCnSubMenuWizard.Create;
+{$IFNDEF STAND_ALONE}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
   inherited;
   FList := TList.Create;
   // 当该专家被放到工具栏上时，点击按钮弹出的菜单
   FPopupMenu := TPopupMenu.Create(nil);
+
+{$IFNDEF STAND_ALONE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   FPopupMenu.Images := Svcs40.ImageList;
+{$ENDIF}
 
   // 用于关联到工具栏上按钮的 Action，图标应和主 Action 图标一样，为避免重复创建
   FPopupAction := WizActionMgr.AddAction(GetIDStr + '1', GetCaption, 0, OnPopup,
@@ -1460,15 +1484,20 @@ begin
         begin
           try
             // 内部专家不提示
-            if IsInternalWizard {$IFNDEF CNWIZARDS_MINIMUM} or ShowCnWizCommentForm(WizardName + ' - ' +
+            if IsInternalWizard {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} or ShowCnWizCommentForm(WizardName + ' - ' +
               GetCaptionOrgStr(SubActions[I].Caption), SubActions[I].Icon,
-              SubActions[I].Command) {$ENDIF} then
+              SubActions[I].Command) {$ENDIF} {$ENDIF} then
               SubActionExecute(I);
           except
             on E: Exception do
             begin
+{$IFDEF STAND_ALONE}
+              ShowMessage(Format('WizClasses %s.SubActions[%d].Execute: %s - %s',
+                [ClassName, I, E.ClassName, E.Message]));
+{$ELSE}
               DoHandleException(Format('WizClasses %s.SubActions[%d].Execute: %s - %s',
                 [ClassName, I, E.ClassName, E.Message]));
+{$ENDIF}
             end;
           end;
         end;
@@ -1500,10 +1529,14 @@ end;
 // 显示快捷键设置对话框
 function TCnSubMenuWizard.ShowShortCutDialog(const HelpStr: string): Boolean;
 begin
-{$IFNDEF CNWIZARDS_MINIMUM}
-  Result := SubActionShortCutConfig(Self, HelpStr);
-{$ELSE}
+{$IFDEF STAND_ALONE}
   Result := False;
+{$ELSE}
+  {$IFNDEF CNWIZARDS_MINIMUM}
+  Result := SubActionShortCutConfig(Self, HelpStr);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
 {$ENDIF}
 end;
 
