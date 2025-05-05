@@ -45,8 +45,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList, ToolsAPI, 
-  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
+  {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
+  {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
@@ -129,12 +130,14 @@ type
     FWizMenuActions: TList;
     FMoreAction: TAction;
     FDeleting: Boolean;
-    function GetIdeActions(Index: Integer): TContainedAction;
-    function GetWizActions(Index: Integer): TCnWizAction;
-    function GetWizMenuActions(Index: Integer): TCnWizMenuAction;
+{$IFNDEF STAND_ALONE}
     function GetIdeActionCount: Integer;
+    function GetIdeActions(Index: Integer): TContainedAction;
+{$ENDIF}
     function GetWizActionCount: Integer;
+    function GetWizActions(Index: Integer): TCnWizAction;
     function GetWizMenuActionCount: Integer;
+    function GetWizMenuActions(Index: Integer): TCnWizMenuAction;
     procedure MoreActionExecute(Sender: TObject);
   protected
     procedure InitAction(AWizAction: TCnWizAction; const ACommand,
@@ -197,21 +200,26 @@ type
     {* 为过长的菜单增加分隔菜单项，MaxItems 为 0 表示根据屏幕高度自动计算。
       注意子菜单和主菜单的高度在自动计算时要分开处理，因此需要 IsSub 参数进行区分 }
 
+{$IFNDEF STAND_ALONE}
     property IdeActionCount: Integer read GetIdeActionCount;
     {* 整个 IDE 的主 ActionList 包含的项目数}
-    property WizActionCount: Integer read GetWizActionCount;
-    {* 管理器列表中 TCnWizAction 对象和 TCnWizMenuAction 对象的总数}
-    property WizMenuActionCount: Integer read GetWizMenuActionCount;
-    {* 管理器列表中 TCnWizMenuAction 对象的项目数}
     property IdeActions[Index: Integer]: TContainedAction read GetIdeActions;
     {* 整个 IDE 的主 ActionList 包含的 Action 数组，包含了 WizActions 和
        WizMenuActions 所包含的对象}
+{$ENDIF}
+
+    property WizActionCount: Integer read GetWizActionCount;
+    {* 管理器列表中 TCnWizAction 对象和 TCnWizMenuAction 对象的总数}
     property WizActions[Index: Integer]: TCnWizAction read GetWizActions;
     {* 管理器列表中 TCnWizAction 及子类对象数组，也包含了 TCnWizMenuAction 对象}
+
+    property WizMenuActionCount: Integer read GetWizMenuActionCount;
+    {* 管理器列表中 TCnWizMenuAction 对象的项目数}
     property WizMenuActions[Index: Integer]: TCnWizMenuAction read GetWizMenuActions;
     {* 管理器列表中 TCnWizMenuAction 对象数组}
+
     property MoreAction: TAction read FMoreAction;
-    {* 用于解决菜单过长而设置的分隔菜单 Action }
+    {* 用于解决菜单过长而设置的分隔菜单 Action}
   end;
 
 function WizActionMgr: TCnWizActionMgr;
@@ -219,18 +227,23 @@ function WizActionMgr: TCnWizActionMgr;
    创建 TCnWizActionMgr 的实例，而应该用该函数来访问。}
 
 procedure FreeWizActionMgr;
-{* 释放管理器实例}
+{* 释放 Action 管理器实例}
 
 implementation
 
 uses
-{$IFDEF DEBUG}
-  CnDebug,
-{$ENDIF}
-  CnWizUtils, CnWizIdeUtils;
+  {$IFDEF DEBUG} CnDebug, {$ENDIF}
+  {$IFNDEF STAND_ALONE} CnWizUtils, CnWizIdeUtils, {$ENDIF}
+  CnWizCompilerConst;
 
 const
   csUpdateInterval = 100;
+
+var
+  FWizActionMgr: TCnWizActionMgr = nil;
+{$IFDEF STAND_ALONE}
+  FStandAloneActionList: TActionList = nil; // 独立运行时没有 IDE ActionList
+{$ENDIF}
 
 //==============================================================================
 // CnWizards IDE Action 封装类
@@ -394,7 +407,7 @@ end;
 procedure TCnWizActionMgr.Notification(AComponent: TComponent;
   Operation: TOperation);
 var
-  i: Integer;
+  I: Integer;
 begin
   inherited;
   if FDeleting then Exit;
@@ -403,30 +416,34 @@ begin
   CnDebugger.LogFmt('TCnWizActionMgr.Notification: (%s: %s)',
     [AComponent.Name, AComponent.ClassName]);
 {$ENDIF}
-  for i := 0 to FWizActions.Count - 1 do
-    if FWizActions[i] = AComponent then
+  for I := 0 to FWizActions.Count - 1 do
+  begin
+    if FWizActions[I] = AComponent then
     begin
-      FWizActions.Delete(i);
+      FWizActions.Delete(I);
       {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnWizActionMgr FWizActions.Delete.');
       {$ENDIF}
       Exit;
     end;
+  end;
 
-  for i := 0 to FWizMenuActions.Count - 1 do
-    if FWizMenuActions[i] = AComponent then
+  for I := 0 to FWizMenuActions.Count - 1 do
+  begin
+    if FWizMenuActions[I] = AComponent then
     begin
-      FWizMenuActions.Delete(i);
+      FWizMenuActions.Delete(I);
       {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnWizActionMgr FWizMenuActions.Delete.');
       {$ENDIF}
       Exit;
     end
-    else if TCnWizMenuAction(FWizMenuActions[i]).FMenu = AComponent then
+    else if TCnWizMenuAction(FWizMenuActions[I]).FMenu = AComponent then
     begin
-      TCnWizMenuAction(FWizMenuActions[i]).FMenu := nil;
+      TCnWizMenuAction(FWizMenuActions[I]).FMenu := nil;
       Exit;
     end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -437,10 +454,14 @@ end;
 procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
   const ACommand, ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
   const IcoName, AHint: string; UseDefaultIcon: Boolean);
+{$IFNDEF STAND_ALONE}
 var
   Svcs40: INTAServices40;
   NewName: string;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
+  // IDE 内部要名称判重
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   if Trim(ACommand) <> '' then
   begin
@@ -451,22 +472,30 @@ begin
         AWizAction.Name := NewName;
       except
       {$IFDEF DEBUG}
-        CnDebugger.LogMsgWithType('Rename action error: ' + NewName, cmtError);
+        CnDebugger.LogMsgWithType('Rename Action Error: ' + NewName, cmtError);
       {$ENDIF}
       end;
     end
     else
     {$IFDEF DEBUG}
-      CnDebugger.LogMsgWithType('Component is already exists: ' + NewName, cmtError);
+      CnDebugger.LogMsgWithType('Component Already Exists: ' + NewName, cmtError);
     {$ENDIF}
   end;
+{$ENDIF}
+
   AWizAction.Caption := ACaption;
   AWizAction.Hint := AHint;
   AWizAction.Category := SCnWizardsActionCategory;
   AWizAction.OnExecute := OnExecute;
   AWizAction.OnUpdate := OnUpdate;
-  
+
+{$IFDEF STAND_ALONE}
+  AWizAction.ActionList := FStandAloneActionList;
+{$ELSE}
   AWizAction.ActionList := Svcs40.ActionList;
+{$ENDIF}
+
+{$IFNDEF STAND_ALONE}
   if CnWizLoadIcon(nil, AWizAction.FIcon, IcoName, UseDefaultIcon) then
   begin
 {$IFDEF DEBUG}
@@ -474,14 +503,18 @@ begin
       AWizAction.FIcon.Height]);
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF IDE_SUPPORT_HDPI}
-    AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList)
+    AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList);
 {$ELSE}
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False)
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
+{$ENDIF}
 {$ENDIF}
   end
   else
+{$ENDIF}
     AWizAction.ImageIndex := -1;
+
   AWizAction.FCommand := ACommand;
 end;
 
@@ -489,17 +522,31 @@ end;
 function TCnWizActionMgr.AddMenuAction(const ACommand, ACaption, AMenuName: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
   AHint: string; UseDefaultIcon: Boolean): TCnWizMenuAction;
+{$IFNDEF STAND_ALONE}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Add WizMenuAction: %s', [ACommand]);
 {$ENDIF}
+
   if IndexOfCommand(ACommand) >= 0 then
+  begin
+{$IFDEF STAND_ALONE}
+    raise Exception.CreateFmt(SCnDuplicateCommand, [ACommand]);
+{$ELSE}
     raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
-    
+{$ENDIF}
+  end;
+
+{$IFDEF STAND_ALONE}
+  Result := TCnWizMenuAction.Create(FStandAloneActionList);
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizMenuAction.Create(Svcs40.ActionList);
+{$ENDIF}
+
   Result.FreeNotification(Self);
 
   Result.FUpdating := True;         // 开始更新
@@ -527,17 +574,30 @@ end;
 function TCnWizActionMgr.AddAction(const ACommand, ACaption: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
   AHint: string; UseDefaultIcon: Boolean): TCnWizAction;
+{$IFNDEF STAND_ALONE}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizActionMgr.Add WizAction: %s', [ACommand]);
 {$ENDIF}
+
   if IndexOfCommand(ACommand) >= 0 then
+  begin
+{$IFDEF STAND_ALONE}
+    raise Exception.CreateFmt(SCnDuplicateCommand, [ACommand]);
+{$ELSE}
     raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
-    
+{$ENDIF}
+  end;
+
+{$IFDEF STAND_ALONE}
+  Result := TCnWizAction.Create(FStandAloneActionList);
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizAction.Create(Svcs40.ActionList);
+{$ENDIF}
   Result.FreeNotification(Self);
 
   Result.FUpdating := True;         // 开始更新
@@ -629,11 +689,13 @@ begin
   Result := -1;
   if ACommand = '' then Exit;
   for I := 0 to WizActionCount - 1 do
+  begin
     if WizActions[I].FCommand = ACommand then
     begin
       Result := I;
       Exit;
     end;
+  end;
 end;
 
 // 根据快捷键键值查找索引号
@@ -644,11 +706,13 @@ begin
   Result := -1;
   if AShortCut = 0 then Exit;
   for I := 0 to WizActionCount - 1 do
+  begin
     if WizActions[I].ShortCut = AShortCut then
     begin
       Result := I;
       Exit;
     end;
+  end;
 end;
 
 procedure TCnWizActionMgr.MoreActionExecute(Sender: TObject);
@@ -735,6 +799,8 @@ end;
 // 属性读写方法
 //------------------------------------------------------------------------------
 
+{$IFNDEF STAND_ALONE}
+
 // IdeActionCount 属性读方法
 function TCnWizActionMgr.GetIdeActionCount: Integer;
 var
@@ -752,6 +818,8 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList.Actions[Index];
 end;
+
+{$ENDIF}
 
 // WizActionCount 属性读方法
 function TCnWizActionMgr.GetWizActionCount: Integer;
@@ -786,9 +854,6 @@ begin
     Result := TCnWizMenuAction(FWizMenuActions[Index]);
 end;
 
-var
-  FWizActionMgr: TCnWizActionMgr = nil;
-
 // 返回当前的 IDE Action 管理器实例
 function WizActionMgr: TCnWizActionMgr;
 begin
@@ -804,6 +869,15 @@ begin
     FreeAndNil(FWizActionMgr);
 end;
 
+{$IFDEF STAND_ALONE}
+
+initialization
+  FStandAloneActionList := TActionList.Create(nil);
+
+finalization
+  FStandAloneActionList.Free;
+
+{$ENDIF}
 end.
 
 
