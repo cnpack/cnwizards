@@ -105,6 +105,9 @@ type
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 {* 粗略判断一个 Unicode 宽字符是否占两个字符宽度，行为尽量朝 IDE 靠近}
 
+function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
+{* 获取一个 GeneralPasToken 的 AnsiCol，可以是 C/C++ 的 TCnGeneralCppToken}
+
 implementation
 
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
@@ -126,6 +129,16 @@ begin
       ((C >= $25A0) and (C <= $25BF) and (C <> $25B3) and (C <> $25BD)) then
       Result := False;
   end;
+{$ENDIF}
+end;
+
+// 获取一个 GeneralPasToken 的 AnsiCol
+function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
+begin
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := AToken.EditAnsiCol;
+{$ELSE}
+  Result := AToken.EditCol;
 {$ENDIF}
 end;
 

@@ -215,6 +215,8 @@ type
 
   TCnCompDirectiveInfo = class;
 
+{$IFNDEF STAND_ALONE}
+
   TCnBlockMatchInfo = class(TObject)
   {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息，注意 Tokens 均是引用}
   private
@@ -363,6 +365,8 @@ type
     {* 编译指令的配对信息，解析关键字高亮时顺便也解析，由外界设置与释放}
   end;
 
+{$ENDIF}
+
   TCnBlockLinePair = class(TObject)
   {* 描述一根配对的线所对应的多个 Token 标记，Token 均为引用，同时用于 Pascal 和 C/C++。
     也就是说 StartToken/EndTokne/MiddleToken 等可以是 TCnGeneralCppToken 实例}
@@ -482,6 +486,8 @@ type
     property Control: TControl read FControl;
     property CurrentLine: Integer read FCurrentLine write FCurrentLine;
   end;
+
+{$IFNDEF STAND_ALONE}
 
 { TCnSourceHighlight }
 
@@ -768,6 +774,8 @@ type
 function LoadIDEDefaultCurrentColor: TColor;
 {* 根据 IDE 配色方案自动调整的初始化高亮背景色}
 
+{$ENDIF}
+
 procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
   AStyle: TCnLineStyle);
 {* 高亮专用的画线函数，TinyDot 时不画斜线}
@@ -779,9 +787,11 @@ function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
   NextToken: TCnGeneralPasToken = nil): Boolean;
 {* 判断是否是条件编译指令，NextToken 用于 #pragma region/end_region 的情形}
 
+{$IFNDEF STAND_ALONE}
 {$IFNDEF BDS}
 procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
   Param1, Param2, Param3, Param4: Cardinal);
+{$ENDIF}
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
@@ -790,11 +800,15 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
+{$IFNDEF STAND_ALONE}
+
 uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
   CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus;
+
+{$ENDIF}
 
 type
   TBracketChars = array[0..1] of AnsiChar;
@@ -892,7 +906,10 @@ const
   csCustomIdentifiers = 'CustomIdentifiers';
 
 var
+{$IFNDEF STAND_ALONE}
   FHighlight: TCnSourceHighlight = nil;
+{$ENDIF}
+
   GlobalIgnoreClass: Boolean = False;
   GlobalIgnoreNamespace: Boolean = False;
 {$IFNDEF BDS}
@@ -900,11 +917,15 @@ var
   PaintingControl: TControl = nil;
   ColorChanged: Boolean;
   OldBkColor: TColor = clWhite;
+
+{$IFNDEF STAND_ALONE}
   EVFillRect: TEVFillRectProc = nil;
   EVFRHook: TCnMethodHook = nil;
 
   SetForeAndBackColor: TSetForeAndBackColorProc = nil;
   SetForeAndBackColorHook: TCnMethodHook = nil;
+{$ENDIF}
+
   {$IFDEF DEBUG}
   // CurrentLineNum: Integer = -1;
   {$ENDIF}
@@ -959,67 +980,6 @@ begin
 {$ELSE}
     Result := lstrcmpiA(S1, S2) = 0;
 {$ENDIF}
-  end;
-end;
-
-function TCnBlockMatchInfo.CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  if AToken = nil then
-    Exit;
-
-  if IsCpp then // 区分大小写
-  begin
-    if AToken.CppTokenKind in csCppFlowTokenKinds then // 先比关键字
-    begin
-      Result := True;
-{$IFDEF DEBUG}
-//    CnDebugger.LogFmt('Cpp TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
-{$ENDIF}
-      Exit;
-    end
-    else
-    begin
-      for I := Low(csCppFlowTokenStr) to High(csCppFlowTokenStr) do
-      begin
-        if EqualIdeToken(AToken.Token, @((csCppFlowTokenStr[I])[1]), True) then
-        begin
-{$IFDEF DEBUG}
-//        CnDebugger.LogFmt('Cpp is Flow. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
-{$ENDIF}
-          Result := True;
-          Exit;
-        end;
-      end;
-    end;
-  end
-  else // 不区分大小写
-  begin
-    if AToken.TokenID in csPasFlowTokenKinds then // 也先比关键字
-    begin
-{$IFDEF DEBUG}
-//    CnDebugger.LogFmt('Pascal TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
-{$ENDIF}
-      Result := True;
-      Exit;
-    end
-    else
-    begin
-      for I := Low(csPasFlowTokenStr) to High(csPasFlowTokenStr) do
-      begin
-        Result := EqualIdeToken(AToken.Token, @((csPasFlowTokenStr[I])[1]));
-
-        if Result then
-        begin
-{$IFDEF DEBUG}
-//        CnDebugger.LogFmt('Pascal is Flow. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
-{$ENDIF}
-          Exit;
-        end;
-      end;
-    end;
   end;
 end;
 
@@ -1327,6 +1287,47 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+{$IFNDEF BDS}
+
+procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject; Param1,
+  Param2, Param3, Param4: Cardinal);
+begin
+  SetForeAndBackColorHook.UnhookMethod;
+  try
+    try
+      // 不管咋样都要调用旧的
+      SetForeAndBackColor(ASelf, Param1, Param2, Param3, Param4);
+    except
+      on E: Exception do
+        DoHandleException('Source Highlight SetForeAndBackColor ' + E.Message);
+    end;
+  finally
+    SetForeAndBackColorHook.HookMethod;
+  end;
+
+  // 旧的调用完毕后根据需要设置背景填充色
+  if CanDrawCurrentLine and (ASelf = PaintingControl) and FHighlight.Active
+    and FHighlight.HighLightCurrentLine then
+  begin
+    // 如果是当前被画的编辑器的当前行
+    if TCustomControlHack(ASelf).Canvas.Brush.Color <> FHighlight.HighLightLineColor then
+    begin
+      OldBkColor := TCustomControlHack(ASelf).Canvas.Brush.Color;
+      TCustomControlHack(ASelf).Canvas.Brush.Color := FHighlight.HighLightLineColor;
+      ColorChanged := True;
+
+{$IFDEF DEBUG}
+//    Cndebugger.LogFmt('Source Highlight: Set Current Line %d Back Color to Control %8.8x.',
+//      [CurrentLineNum, Integer(PaintingControl)]);
+{$ENDIF}
+    end;
+  end;
+end;
+
+{$ENDIF}
+{$ENDIF}
+
 { TCnBracketInfo }
 
 constructor TCnBracketInfo.Create(AControl: TControl);
@@ -1335,7 +1336,88 @@ begin
   FControl := AControl;
 end;
 
+{$IFNDEF STAND_ALONE}
+
+function LoadIDEDefaultCurrentColor: TColor;
+var
+  AHighlight: TCnHighlightItem;
+begin
+  Result := $00E6FFFA;  // 默认
+  if EditControlWrapper.IndexOfHighlight(csWhiteSpace) >= 0 then
+  begin
+    AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csWhiteSpace)];
+
+    case AHighlight.ColorBk of
+      clWhite: Result := $00E6FFFA;
+      clNavy:  Result := $009999CC;
+      clBlack: Result := $00505050;
+      clAqua:  Result := $00CCFFCC;
+    end;
+  end;
+end;
+
 { TCnBlockMatchInfo }
+
+function TCnBlockMatchInfo.CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  if AToken = nil then
+    Exit;
+
+  if IsCpp then // 区分大小写
+  begin
+    if AToken.CppTokenKind in csCppFlowTokenKinds then // 先比关键字
+    begin
+      Result := True;
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('Cpp TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+{$ENDIF}
+      Exit;
+    end
+    else
+    begin
+      for I := Low(csCppFlowTokenStr) to High(csCppFlowTokenStr) do
+      begin
+        if EqualIdeToken(AToken.Token, @((csCppFlowTokenStr[I])[1]), True) then
+        begin
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('Cpp is Flow. TokenType %d, Token: %s', [Integer(AToken.CppTokenKind), AToken.Token]);
+{$ENDIF}
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end
+  else // 不区分大小写
+  begin
+    if AToken.TokenID in csPasFlowTokenKinds then // 也先比关键字
+    begin
+{$IFDEF DEBUG}
+//    CnDebugger.LogFmt('Pascal TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+{$ENDIF}
+      Result := True;
+      Exit;
+    end
+    else
+    begin
+      for I := Low(csPasFlowTokenStr) to High(csPasFlowTokenStr) do
+      begin
+        Result := EqualIdeToken(AToken.Token, @((csPasFlowTokenStr[I])[1]));
+
+        if Result then
+        begin
+{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('Pascal is Flow. TokenType %d, Token: %s', [Integer(AToken.TokenID), AToken.Token]);
+{$ENDIF}
+          Exit;
+        end;
+      end;
+    end;
+  end;
+end;
 
 // 分析检查本 EditControl 中的结构高亮信息
 function TCnBlockMatchInfo.CheckBlockMatch(
@@ -1441,9 +1523,9 @@ begin
       CaseSensitive := True;
       Stream := TMemoryStream.Create;
       try
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogMsg('Parse Cpp Source file: ' + EditView.Buffer.FileName);
-  {$ENDIF}
+{$ENDIF}
 
         {$IFDEF BDS}
         CppParser.UseTabKey := True; // FHighlight.FUseTabKey;
@@ -1498,16 +1580,16 @@ begin
       if LineInfo <> nil then
       begin
         CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, GlobalIgnoreClass, GlobalIgnoreNamespace);
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogInteger(LineInfo.Count, 'HighLight Cpp LinePairs Count.');
-    {$ENDIF}
+{$ENDIF}
       end;
       if CompDirectiveInfo <> nil then
       begin
         CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
-    {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Cpp CompDirectivePairs Count.');
-    {$ENDIF}
+{$ENDIF}
       end;
     end;
   end
@@ -2747,6 +2829,195 @@ begin
       TCnList(FCompDirectiveLineList[Token.EditLine]).Add(Token);
     end;
   end;
+end;
+
+procedure TCnBlockMatchInfo.AddToCustomIdentifierList(AToken: TCnGeneralPasToken);
+begin
+  FCustomIdentifierTokenList.Add(AToken);
+end;
+
+procedure TCnBlockMatchInfo.ConvertCustomIdentifierLineList;
+var
+  I: Integer;
+  Token: TCnGeneralPasToken;
+  MaxLine: Integer;
+begin
+  MaxLine := 0;
+  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    if CustomIdentifierTokens[I].EditLine > MaxLine then
+      MaxLine := CustomIdentifierTokens[I].EditLine;
+  FCustomIdentifierLineList.Count := MaxLine + 1;
+
+  if FHighlight.HighlightCustomIdentifier then
+  begin
+    for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    begin
+      Token := CustomIdentifierTokens[I];
+      if FCustomIdentifierLineList[Token.EditLine] = nil then
+        FCustomIdentifierLineList[Token.EditLine] := TCnList.Create;
+      TCnList(FCustomIdentifierLineList[Token.EditLine]).Add(Token);
+    end;
+  end;
+end;
+
+function TCnBlockMatchInfo.GetCustomIdentifierTokenCount: Integer;
+begin
+  Result := FCustomIdentifierTokenList.Count;
+end;
+
+function TCnBlockMatchInfo.GetCustomIdentifierLines(LineNum: Integer): TCnList;
+begin
+  Result := TCnList(FCustomIdentifierLineList[LineNum]);
+end;
+
+function TCnBlockMatchInfo.GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
+begin
+  Result := TCnGeneralPasToken(FCustomIdentifierTokenList[Index]);
+end;
+
+procedure TCnBlockMatchInfo.UpdateCustomIdentifierList;
+var
+  EditView: IOTAEditView;
+  Bold: Boolean;
+  I: Integer;
+begin
+  FCurMethodStartToken := nil;
+  FCurMethodCloseToken := nil;
+
+  if FControl = nil then Exit;
+
+  try
+    EditView := EditControlWrapper.GetEditView(FControl);
+  except
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetEditView Error');
+  {$ENDIF}
+    Exit;
+  end;
+
+  if EditView = nil then
+    Exit;
+
+  FCustomIdentifierTokenList.Clear;
+  if not FIsCppSource then
+  begin
+    if Assigned(PasParser) then
+    begin
+      // 搜索当前所有标识符，不受高亮范围控制
+      for I := 0 to PasParser.Count - 1 do
+        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+
+      for I := 0 to PasParser.Count - 1 do
+      begin
+        Bold := False;
+        if CheckIsCustomIdentifier(PasParser.Tokens[I], FIsCppSource, Bold) then
+        begin
+          FCustomIdentifierTokenList.Add(PasParser.Tokens[I]);
+          if Bold then
+            PasParser.Tokens[I].Tag := 1  // 如果设置要求加粗，用 Tag 存储加粗标志
+          else
+            PasParser.Tokens[I].Tag := 0;
+        end;
+      end;
+    end;
+
+    FCustomIdentifierLineList.Clear;
+    ConvertCustomIdentifierLineList;
+  end
+  else // 做 C/C++ 中的当前解析，将所需高亮的自定义标识符解析出来
+  begin
+    for I := 0 to CppParser.Count - 1 do
+      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+
+    for I := 0 to CppParser.Count - 1 do
+    begin
+      if CheckIsCustomIdentifier(CppParser.Tokens[I], FIsCppSource, Bold) then
+      begin
+        FCustomIdentifierTokenList.Add(CppParser.Tokens[I]);
+        if Bold then
+          CppParser.Tokens[I].Tag := 1
+        else
+          CppParser.Tokens[I].Tag := 0;
+      end;
+    end;
+
+    FCustomIdentifierLineList.Clear;
+    ConvertCustomIdentifierLineList;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('FCustomIdentifierTokenList.Count: %d', [FCustomIdentifierTokenList.Count]);
+{$ENDIF}
+
+  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierTokenList[I]).EditLine);
+end;
+
+function TCnBlockMatchInfo.GetCustomIdentifierLineCount: Integer;
+begin
+  Result := FCustomIdentifierLineList.Count;
+end;
+
+function TCnBlockMatchInfo.CheckIsCustomIdentifier(AToken: TCnGeneralPasToken;
+  IsCpp: Boolean; out Bold: Boolean): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  if AToken = nil then
+    Exit;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005 2006 2007 下使用宽字符串列表进行比对
+  if IsCpp then // 区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomWideIdentfiers[I])[1]), True) then
+      begin
+        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end
+  else // 不区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomWideIdentfiers[I])[1])) then
+      begin
+        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+{$ELSE}
+  if IsCpp then // 区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomIdentifiers[I])[1]), True) then
+      begin
+        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end
+  else // 不区分大小写
+  begin
+    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    begin
+      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomIdentifiers[I])[1])) then
+      begin
+        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+{$ENDIF}
 end;
 
 { TCnSourceHighlight }
@@ -5643,41 +5914,6 @@ end;
 
 {$IFNDEF BDS}
 
-procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject; Param1,
-  Param2, Param3, Param4: Cardinal);
-begin
-  SetForeAndBackColorHook.UnhookMethod;
-  try
-    try
-      // 不管咋样都要调用旧的
-      SetForeAndBackColor(ASelf, Param1, Param2, Param3, Param4);
-    except
-      on E: Exception do
-        DoHandleException('Source Highlight SetForeAndBackColor ' + E.Message);
-    end;
-  finally
-    SetForeAndBackColorHook.HookMethod;
-  end;
-
-  // 旧的调用完毕后根据需要设置背景填充色
-  if CanDrawCurrentLine and (ASelf = PaintingControl) and FHighlight.Active
-    and FHighlight.HighLightCurrentLine then
-  begin
-    // 如果是当前被画的编辑器的当前行
-    if TCustomControlHack(ASelf).Canvas.Brush.Color <> FHighlight.HighLightLineColor then
-    begin
-      OldBkColor := TCustomControlHack(ASelf).Canvas.Brush.Color;
-      TCustomControlHack(ASelf).Canvas.Brush.Color := FHighlight.HighLightLineColor;
-      ColorChanged := True;
-
-{$IFDEF DEBUG}
-//    Cndebugger.LogFmt('Source Highlight: Set Current Line %d Back Color to Control %8.8x.',
-//      [CurrentLineNum, Integer(PaintingControl)]);
-{$ENDIF}
-    end;
-  end;
-end;
-
 procedure TCnSourceHighlight.SetHighLightCurrentLine(const Value: Boolean);
 begin
   if FHighLightCurrentLine <> Value then
@@ -5774,11 +6010,13 @@ var
   I: Integer;
 begin
   for I := 0 to FCurLineList.Count - 1 do
+  begin
     if TCnCurLineInfo(FCurLineList[I]).Control = EditControl then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 
@@ -5815,24 +6053,6 @@ begin
 end;
 
 {$ENDIF}
-
-function LoadIDEDefaultCurrentColor: TColor;
-var
-  AHighlight: TCnHighlightItem;
-begin
-  Result := $00E6FFFA;  // 默认
-  if EditControlWrapper.IndexOfHighlight(csWhiteSpace) >= 0 then
-  begin
-    AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csWhiteSpace)];
-
-    case AHighlight.ColorBk of
-      clWhite: Result := $00E6FFFA;
-      clNavy:  Result := $009999CC;
-      clBlack: Result := $00505050;
-      clAqua:  Result := $00CCFFCC;
-    end;
-  end;
-end;
 
 procedure TCnSourceHighlight.SetHilightSeparateLine(const Value: Boolean);
 begin
@@ -5905,11 +6125,28 @@ begin
   GlobalIgnoreNamespace := not Value;
 end;
 
+procedure TCnSourceHighlight.SetCustomIdentifierBackground(const Value: TColor);
+begin
+  FCustomIdentifierBackground := Value;
+end;
+
+procedure TCnSourceHighlight.SetCustomIdentifierForeground(const Value: TColor);
+begin
+  FCustomIdentifierForeground := Value;
+end;
+
+function TCnSourceHighlight.CanSolidCurrentLineBlock: Boolean;
+begin
+  Result := FBlockMatchLineSolidCurrent and (FBlockMatchLineStyle <> lsSolid); // 其他画线风格时，允许当前块画线用实线
+end;
+
 function TCnSourceHighlight.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '括号,匹配,标识符,关键字,划线,画线,空行,分隔,结构,编译指令,行号,'
     + 'bracket,match,identifier,keyword,line,draw,structure,blank,compiler,directive,';
 end;
+
+{$ENDIF}
 
 { TCnBlockLinePair }
 
@@ -6363,212 +6600,10 @@ begin
   end;
 end;
 
-function TCnSourceHighlight.CanSolidCurrentLineBlock: Boolean;
-begin
-  Result := FBlockMatchLineSolidCurrent and (FBlockMatchLineStyle <> lsSolid); // 其他画线风格时，允许当前块画线用实线
-end;
-
-procedure TCnBlockMatchInfo.AddToCustomIdentifierList(AToken: TCnGeneralPasToken);
-begin
-  FCustomIdentifierTokenList.Add(AToken);
-end;
-
-procedure TCnBlockMatchInfo.ConvertCustomIdentifierLineList;
-var
-  I: Integer;
-  Token: TCnGeneralPasToken;
-  MaxLine: Integer;
-begin
-  MaxLine := 0;
-  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
-    if CustomIdentifierTokens[I].EditLine > MaxLine then
-      MaxLine := CustomIdentifierTokens[I].EditLine;
-  FCustomIdentifierLineList.Count := MaxLine + 1;
-
-  if FHighlight.HighlightCustomIdentifier then
-  begin
-    for I := 0 to FCustomIdentifierTokenList.Count - 1 do
-    begin
-      Token := CustomIdentifierTokens[I];
-      if FCustomIdentifierLineList[Token.EditLine] = nil then
-        FCustomIdentifierLineList[Token.EditLine] := TCnList.Create;
-      TCnList(FCustomIdentifierLineList[Token.EditLine]).Add(Token);
-    end;
-  end;
-end;
-
-function TCnBlockMatchInfo.GetCustomIdentifierTokenCount: Integer;
-begin
-  Result := FCustomIdentifierTokenList.Count;
-end;
-
-function TCnBlockMatchInfo.GetCustomIdentifierLines(LineNum: Integer): TCnList;
-begin
-  Result := TCnList(FCustomIdentifierLineList[LineNum]);
-end;
-
-function TCnBlockMatchInfo.GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
-begin
-  Result := TCnGeneralPasToken(FCustomIdentifierTokenList[Index]);
-end;
-
-procedure TCnBlockMatchInfo.UpdateCustomIdentifierList;
-var
-  EditView: IOTAEditView;
-  Bold: Boolean;
-  I: Integer;
-begin
-  FCurMethodStartToken := nil;
-  FCurMethodCloseToken := nil;
-
-  if FControl = nil then Exit;
-
-  try
-    EditView := EditControlWrapper.GetEditView(FControl);
-  except
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('GetEditView Error');
-  {$ENDIF}
-    Exit;
-  end;
-
-  if EditView = nil then
-    Exit;
-
-  FCustomIdentifierTokenList.Clear;
-  if not FIsCppSource then
-  begin
-    if Assigned(PasParser) then
-    begin
-      // 搜索当前所有标识符，不受高亮范围控制
-      for I := 0 to PasParser.Count - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
-
-      for I := 0 to PasParser.Count - 1 do
-      begin
-        Bold := False;
-        if CheckIsCustomIdentifier(PasParser.Tokens[I], FIsCppSource, Bold) then
-        begin
-          FCustomIdentifierTokenList.Add(PasParser.Tokens[I]);
-          if Bold then
-            PasParser.Tokens[I].Tag := 1  // 如果设置要求加粗，用 Tag 存储加粗标志
-          else
-            PasParser.Tokens[I].Tag := 0;
-        end;
-      end;
-    end;
-
-    FCustomIdentifierLineList.Clear;
-    ConvertCustomIdentifierLineList;
-  end
-  else // 做 C/C++ 中的当前解析，将所需高亮的自定义标识符解析出来
-  begin
-    for I := 0 to CppParser.Count - 1 do
-      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
-
-    for I := 0 to CppParser.Count - 1 do
-    begin
-      if CheckIsCustomIdentifier(CppParser.Tokens[I], FIsCppSource, Bold) then
-      begin
-        FCustomIdentifierTokenList.Add(CppParser.Tokens[I]);
-        if Bold then
-          CppParser.Tokens[I].Tag := 1
-        else
-          CppParser.Tokens[I].Tag := 0;
-      end;
-    end;
-
-    FCustomIdentifierLineList.Clear;
-    ConvertCustomIdentifierLineList;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('FCustomIdentifierTokenList.Count: %d', [FCustomIdentifierTokenList.Count]);
-{$ENDIF}
-
-  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
-    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierTokenList[I]).EditLine);
-end;
-
-function TCnBlockMatchInfo.GetCustomIdentifierLineCount: Integer;
-begin
-  Result := FCustomIdentifierLineList.Count;
-end;
-
-procedure TCnSourceHighlight.SetCustomIdentifierBackground(const Value: TColor);
-begin
-  FCustomIdentifierBackground := Value;
-end;
-
-procedure TCnSourceHighlight.SetCustomIdentifierForeground(const Value: TColor);
-begin
-  FCustomIdentifierForeground := Value;
-end;
-
-function TCnBlockMatchInfo.CheckIsCustomIdentifier(AToken: TCnGeneralPasToken;
-  IsCpp: Boolean; out Bold: Boolean): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  if AToken = nil then
-    Exit;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  // BDS 2005 2006 2007 下使用宽字符串列表进行比对
-  if IsCpp then // 区分大小写
-  begin
-    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
-    begin
-      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomWideIdentfiers[I])[1]), True) then
-      begin
-        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
-        Result := True;
-        Exit;
-      end;
-    end;
-  end
-  else // 不区分大小写
-  begin
-    for I := 0 to FHighlight.FCustomWideIdentfiers.Count - 1 do
-    begin
-      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomWideIdentfiers[I])[1])) then
-      begin
-        Bold := FHighlight.FCustomWideIdentfiers.Objects[I] <> nil;
-        Result := True;
-        Exit;
-      end;
-    end;
-  end;
-{$ELSE}
-  if IsCpp then // 区分大小写
-  begin
-    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
-    begin
-      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomIdentifiers[I])[1]), True) then
-      begin
-        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
-        Result := True;
-        Exit;
-      end;
-    end;
-  end
-  else // 不区分大小写
-  begin
-    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
-    begin
-      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomIdentifiers[I])[1])) then
-      begin
-        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
-        Result := True;
-        Exit;
-      end;
-    end;
-  end;
-{$ENDIF}
-end;
-
 initialization
+{$IFNDEF STAND_ALONE}
   RegisterCnWizard(TCnSourceHighlight);
+{$ENDIF}
   PairPool := TCnList.Create;
 
 finalization

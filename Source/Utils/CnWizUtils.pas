@@ -1130,9 +1130,6 @@ procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
 procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 {* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos，可以是 C/C++ 的 TCnGeneralCppToken}
 
-function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
-{* 获取一个 GeneralPasToken 的 AnsiCol，可以是 C/C++ 的 TCnGeneralCppToken}
-
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 {* 分析源代码中引用的单元，FileName 是完整文件名}
 
@@ -8417,16 +8414,6 @@ begin
   // D2005~2007 下 EditPos 的 Col 是 Utf8 的，但绘制需要 Ansi 的，
   // 所以额外开个属性使用其 AnsiIndex
   AToken.EditAnsiCol := AToken.AnsiIndex + 1;
-{$ENDIF}
-end;
-
-// 获取一个 GeneralPasToken 的 AnsiCol
-function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
-begin
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  Result := AToken.EditAnsiCol;
-{$ELSE}
-  Result := AToken.EditCol;
 {$ENDIF}
 end;
 
