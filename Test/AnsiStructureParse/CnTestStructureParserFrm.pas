@@ -41,6 +41,7 @@ type
     btnPasPosInfo: TButton;
     chkIsDpr: TCheckBox;
     btnPair: TButton;
+    btnPairCpp: TButton;
     procedure btnLoadPasClick(Sender: TObject);
     procedure btnParsePasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -55,6 +56,7 @@ type
     procedure btnIncClick(Sender: TObject);
     procedure btnPasPosInfoClick(Sender: TObject);
     procedure btnPairClick(Sender: TObject);
+    procedure btnPairCppClick(Sender: TObject);
   private
     { Private declarations }
     procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
@@ -74,15 +76,6 @@ uses
 {$R *.DFM}
 
 const
-  csKeyTokens: set of TTokenKind = [
-    tkIf, tkThen, tkElse,
-    tkRecord, tkObject, tkClass, tkInterface, tkDispInterface,
-    tkFor, tkWith, tkOn, tkWhile, tkDo,
-    tkAsm, tkBegin, tkEnd,
-    tkTry, tkExcept, tkFinally,
-    tkCase, tkOf,
-    tkRepeat, tkUntil];
-
   csProcTokens = [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor];
 
 procedure TCnTestStructureForm.btnLoadPasClick(Sender: TObject);
@@ -549,12 +542,13 @@ end;
 
 procedure TCnTestStructureForm.btnPairClick(Sender: TObject);
 var
-  I: Integer;
+  I, J: Integer;
   PasParser: TCnPasStructureParser;
   Stream: TMemoryStream;
   NilChar: Byte;
   BlockMatchInfo: TCnBlockMatchInfo;
   Pair: TCnBlockLinePair;
+  S: string;
 begin
   mmoParsePas.Lines.Clear;
 
@@ -587,19 +581,99 @@ begin
       Pair.StartToken.EditCol := Pair.StartToken.CharIndex;
       Pair.EndToken.EditLine := Pair.EndToken.LineNumber + 1;
       Pair.EndToken.EditCol := Pair.EndToken.CharIndex;
+
+      for J := 0 to Pair.MiddleCount - 1 do
+      begin
+        Pair.MiddleToken[J].EditLine := Pair.MiddleToken[J].LineNumber + 1;
+        Pair.MiddleToken[J].EditCol := Pair.MiddleToken[J].CharIndex;
+      end;
     end;
     BlockMatchInfo.LineInfo.SortPairs;
 
     for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
     begin
       Pair := BlockMatchInfo.LineInfo.Pairs[I];
-      mmoParsePas.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, ^%d %s ~ %s', [I,
+      S := '';
+      for J := 0 to Pair.MiddleCount - 1 do
+        S := S + ', ' + Pair.MiddleToken[J].Token;
+
+      mmoParsePas.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
         Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
-        Pair.StartToken.EditCol, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token]));
+        Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
     end;
   finally
     Stream.Free;
     PasParser.Free;
+    BlockMatchInfo.LineInfo.Free;
+    BlockMatchInfo.LineInfo := nil;
+    BlockMatchInfo.Free; // LineInfo 设 nil 后这里的 Clear 才能进行
+  end;
+end;
+
+procedure TCnTestStructureForm.btnPairCppClick(Sender: TObject);
+var
+  I, J: Integer;
+  CppParser: TCnCppStructureParser;
+  Stream: TMemoryStream;
+  NilChar: Byte;
+  BlockMatchInfo: TCnBlockMatchInfo;
+  Pair: TCnBlockLinePair;
+  S: string;
+begin
+  mmoParseCpp.Lines.Clear;
+
+  CppParser := TCnCppStructureParser.Create(chkWideIdentCpp.Checked);
+  Stream := TMemoryStream.Create;
+  BlockMatchInfo := TCnBlockMatchInfo.Create(nil);
+  BlockMatchInfo.LineInfo := TCnBlockLineInfo.Create(nil);
+
+  try
+    mmoC.Lines.SaveToStream(Stream);
+    NilChar := 0;
+    Stream.Write(NilChar, SizeOf(NilChar));
+
+    CppParser.ParseSource(Stream.Memory, Stream.Size, mmoC.CaretPos.Y + 1,
+      mmoC.CaretPos.X + 1, True, True);;
+
+    for I := 0 to CppParser.Count - 1 do
+    begin
+      if CppParser.Tokens[I].CppTokenKind <> ctkUnknown then
+        BlockMatchInfo.AddToKeyList(CppParser.Tokens[I]);
+    end;
+    BlockMatchInfo.IsCppSource := True;
+    BlockMatchInfo.CheckLineMatch(mmoC.CaretPos.Y + 1, mmoC.CaretPos.X + 1, False, False, True);
+
+    // 代替 ConvertPos 的行为
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      Pair.StartToken.EditLine := Pair.StartToken.LineNumber + 1;
+      Pair.StartToken.EditCol := Pair.StartToken.CharIndex;
+      Pair.EndToken.EditLine := Pair.EndToken.LineNumber + 1;
+      Pair.EndToken.EditCol := Pair.EndToken.CharIndex;
+
+      for J := 0 to Pair.MiddleCount - 1 do
+      begin
+        Pair.MiddleToken[J].EditLine := Pair.MiddleToken[J].LineNumber + 1;
+        Pair.MiddleToken[J].EditCol := Pair.MiddleToken[J].CharIndex;
+      end;
+    end;
+    BlockMatchInfo.LineInfo.SortPairs;
+
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      S := '';
+      for J := 0 to Pair.MiddleCount - 1 do
+        S := S + ', ' + Pair.MiddleToken[J].Token;
+
+      mmoParseCpp.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
+        Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
+        Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
+    end;
+  finally
+    Stream.Free;
+    CppParser.Free;
     BlockMatchInfo.LineInfo.Free;
     BlockMatchInfo.LineInfo := nil;
     BlockMatchInfo.Free; // LineInfo 设 nil 后这里的 Clear 才能进行

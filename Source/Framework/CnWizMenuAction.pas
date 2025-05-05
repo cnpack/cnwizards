@@ -749,9 +749,18 @@ begin
     else
       Offset := 75;
 
+{$IFDEF STAND_ALONE}
+    ScreenRect := GetWorkRect(Application.MainForm);
+{$ELSE}
     ScreenRect := GetWorkRect(GetIdeMainForm);
+{$ENDIF}
     ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - Offset;
+
+{$IFDEF STAND_ALONE}
+    MaxItems := ScreenHeight div 24;  // 独立运行模式下先写死
+{$ELSE}
     MaxItems := ScreenHeight div GetMainMenuItemHeight;
+{$ENDIF}
     if MaxItems < 8 then
       MaxItems := 8;
   end;

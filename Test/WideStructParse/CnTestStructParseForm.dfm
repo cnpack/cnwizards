@@ -83,7 +83,7 @@ object TeststructParseForm: TTeststructParseForm
         Width = 73
         Height = 25
         Caption = 'Parse'
-        TabOrder = 1
+        TabOrder = 2
         OnClick = btnParsePasClick
       end
       object mmoPasResult: TMemo
@@ -93,7 +93,7 @@ object TeststructParseForm: TTeststructParseForm
         Height = 302
         Anchors = [akLeft, akTop, akRight, akBottom]
         ScrollBars = ssVertical
-        TabOrder = 2
+        TabOrder = 7
       end
       object btnGetUses: TButton
         Left = 416
@@ -101,7 +101,7 @@ object TeststructParseForm: TTeststructParseForm
         Width = 75
         Height = 25
         Caption = 'Get Uses'
-        TabOrder = 3
+        TabOrder = 4
         OnClick = btnGetUsesClick
       end
       object chkWidePas: TCheckBox
@@ -112,7 +112,7 @@ object TeststructParseForm: TTeststructParseForm
         Caption = 'Wide Identifier'
         Checked = True
         State = cbChecked
-        TabOrder = 4
+        TabOrder = 6
       end
       object btnPosInfoW: TButton
         Left = 664
@@ -129,8 +129,17 @@ object TeststructParseForm: TTeststructParseForm
         Width = 41
         Height = 25
         Caption = 'Open'
-        TabOrder = 6
+        TabOrder = 1
         OnClick = btnOpenPasClick
+      end
+      object btnPair: TButton
+        Left = 328
+        Top = 176
+        Width = 73
+        Height = 25
+        Caption = 'Pair'
+        TabOrder = 3
+        OnClick = btnPairClick
       end
     end
     object tsCpp: TTabSheet
@@ -149,6 +158,7 @@ object TeststructParseForm: TTeststructParseForm
         Top = 7
         Width = 857
         Height = 158
+        Anchors = [akLeft, akTop, akRight]
         Lines.Strings = (
           '#include <stdio.h>'
           'void do_some(int a)'
@@ -162,7 +172,6 @@ object TeststructParseForm: TTeststructParseForm
           'Test Comment'
           '*/ Test();'
           '}')
-        Anchors = [akLeft, akTop, akRight]
         ScrollBars = ssVertical
         TabOrder = 0
         OnChange = mmoCppSrcChange
@@ -174,7 +183,7 @@ object TeststructParseForm: TTeststructParseForm
         Width = 73
         Height = 25
         Caption = 'Parse'
-        TabOrder = 1
+        TabOrder = 2
         OnClick = btnParseCppClick
       end
       object mmoCppResult: TMemo
@@ -184,7 +193,7 @@ object TeststructParseForm: TTeststructParseForm
         Height = 302
         Anchors = [akLeft, akTop, akRight, akBottom]
         ScrollBars = ssVertical
-        TabOrder = 2
+        TabOrder = 5
       end
       object chkWideCpp: TCheckBox
         Left = 568
@@ -194,7 +203,7 @@ object TeststructParseForm: TTeststructParseForm
         Caption = 'Wide Identifier'
         Checked = True
         State = cbChecked
-        TabOrder = 3
+        TabOrder = 4
       end
       object btnOpenC: TButton
         Left = 8
@@ -202,8 +211,17 @@ object TeststructParseForm: TTeststructParseForm
         Width = 41
         Height = 25
         Caption = 'Open'
-        TabOrder = 4
+        TabOrder = 1
         OnClick = btnOpenCClick
+      end
+      object btnPairCpp: TButton
+        Left = 448
+        Top = 176
+        Width = 73
+        Height = 25
+        Caption = 'Pair'
+        TabOrder = 3
+        OnClick = btnPairCppClick
       end
     end
   end

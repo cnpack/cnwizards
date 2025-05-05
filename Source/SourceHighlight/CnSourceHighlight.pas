@@ -600,8 +600,7 @@ type
     procedure OnHighlightTimer(Sender: TObject);
     procedure OnHighlightExec(Sender: TObject);
     procedure OnCurrentTokenValidateTimer(Sender: TObject);
-    procedure BeginUpdateEditor(Editor: TCnEditorObject);
-    procedure EndUpdateEditor(Editor: TCnEditorObject);
+
     // 标记一行代码需要重画，只有在 BeginUpdateEditor 和 EndUpdateEditor 之间调用有效
     procedure EditorMarkLineDirty(LineNum: Integer);
     procedure RefreshCurrentTokens(Info: TCnBlockMatchInfo);
@@ -611,6 +610,8 @@ type
       Operation: TOperation);
 
 {$IFNDEF STAND_ALONE}
+    procedure BeginUpdateEditor(Editor: TCnEditorObject);
+    procedure EndUpdateEditor(Editor: TCnEditorObject);
     procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
@@ -812,15 +813,12 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
-{$IFNDEF STAND_ALONE}
+
 
 uses
-{$IFDEF DEBUG}
-  CnDebug,
-{$ENDIF}
-  CnWizMethodHook, CnSourceHighlightFrm, CnWizCompilerConst, CnEventBus;
-
-{$ENDIF}
+  {$IFDEF DEBUG} CnDebug, {$ENDIF}
+  {$IFNDEF STAND_ALONE}CnWizMethodHook, CnSourceHighlightFrm, CnEventBus, {$ENDIF}
+  CnWizCompilerConst;
 
 type
   TBracketChars = array[0..1] of AnsiChar;
@@ -5569,7 +5567,9 @@ begin
       RepaintEditors;
     end;
 
+{$IFNDEF STAND_ALONE}
     BeginUpdateEditor(Editor);
+{$ENDIF}
     try
       if FViewChangedList.IndexOf(Editor) >= 0 then
       begin
@@ -5589,7 +5589,9 @@ begin
       end;
 {$ENDIF}
     finally
+{$IFNDEF STAND_ALONE}
       EndUpdateEditor(Editor);
+{$ENDIF}
     end;
   end;
 end;
@@ -5859,6 +5861,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnSourceHighlight.BeginUpdateEditor(Editor: TCnEditorObject);
 begin
   if FDirtyList = nil then
@@ -5916,7 +5920,7 @@ begin
     NeedRefresh := FDirtyList.Count > 0;
     for I := 0 to FDirtyList.Count - 1 do
       EditControlWrapper.MarkLinesDirty(EditControl, Integer(FDirtyList[I])
-        {$IFNDEF STAND_ALONE} - EditView.TopRow {$ENDIF}, 1);
+        - EditView.TopRow, 1);
   {$ENDIF}
 
     if NeedRefresh then
@@ -5925,6 +5929,8 @@ begin
     FreeAndNil(FDirtyList);
   end;
 end;
+
+{$ENDIF}
 
 procedure TCnSourceHighlight.EditorMarkLineDirty(LineNum: Integer);
 begin

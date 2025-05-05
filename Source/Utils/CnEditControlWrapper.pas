@@ -956,10 +956,13 @@ var
   DoGetTextAtLine: TGetTextAtLineProc = nil;
   SetEditView: TSetEditViewProc = nil;
   LineIsElided: TLineIsElidedProc = nil;
+{$IFNDEF STAND_ALONE}
 {$IFDEF BDS}
   PointFromEdPos: TPointFromEdPosProc = nil;
   IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
 {$ENDIF}
+{$ENDIF}
+
 {$IFDEF IDE_EDITOR_ELIDE}
   EditControlElide: TEditControlElideProc = nil;
   EditControlUnElide: TEditControlUnElideProc = nil;
@@ -2701,6 +2704,7 @@ end;
 function TCnEditControlWrapper.IndexPosToCurPos(EditControl: TControl;
   Col, Line: Integer): Integer;
 begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF BDS}
   if Assigned(IndexPosToCurPosProc) then
   begin
@@ -2710,6 +2714,7 @@ begin
   {$ENDIF}
   end
   else
+{$ENDIF}
 {$ENDIF}
   begin
     Result := Col;

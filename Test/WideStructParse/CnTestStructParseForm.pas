@@ -2,6 +2,8 @@ unit CnTestStructParseForm;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, TypInfo;
@@ -26,6 +28,8 @@ type
     btnOpenPas: TButton;
     dlgOpen1: TOpenDialog;
     btnOpenC: TButton;
+    btnPair: TButton;
+    btnPairCpp: TButton;
     procedure btnParsePasClick(Sender: TObject);
     procedure mmoPasSrcChange(Sender: TObject);
     procedure btnGetUsesClick(Sender: TObject);
@@ -37,6 +41,8 @@ type
     procedure btnPosInfoWClick(Sender: TObject);
     procedure btnOpenPasClick(Sender: TObject);
     procedure btnOpenCClick(Sender: TObject);
+    procedure btnPairClick(Sender: TObject);
+    procedure btnPairCppClick(Sender: TObject);
   private
     procedure ShowCursorPos;
   public
@@ -50,9 +56,12 @@ implementation
 
 uses
   CnWidePasParser, mPasLex, CnWideCppParser, mwBCBTokenList, CnPasWideLex,
-  CnPasCodeParser, CnCommon;
+  CnPasCodeParser, CnCommon, CnSourceHighlight;
 
 {$R *.dfm}
+
+const
+  csProcTokens = [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor];
 
 procedure TTeststructParseForm.btnGetUsesClick(Sender: TObject);
 var
@@ -265,6 +274,152 @@ begin
   dlgOpen1.Filter := 'C++|*.cpp';
   if dlgOpen1.Execute then
     mmoCppSrc.Lines.LoadFromFile(dlgOpen1.FileName);
+end;
+
+procedure TTeststructParseForm.btnPairClick(Sender: TObject);
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+var
+  I, J: Integer;
+  PasParser: TCnWidePasStructParser;
+  NilChar: Byte;
+  BlockMatchInfo: TCnBlockMatchInfo;
+  Pair: TCnBlockLinePair;
+  S: WideString;
+{$ENDIF}
+begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  mmoPasResult.Lines.Clear;
+
+  PasParser := TCnWidePasStructParser.Create(chkWidePas.Checked);
+  PasParser.UseTabKey := True;
+  PasParser.TabWidth := 2;
+
+  BlockMatchInfo := TCnBlockMatchInfo.Create(nil);
+  BlockMatchInfo.LineInfo := TCnBlockLineInfo.Create(nil);
+
+  S := mmoPasSrc.Lines.Text;
+  try
+    PasParser.ParseSource(PWideChar(S), False, False);
+    PasParser.FindCurrentBlock(mmoPasSrc.CaretPos.Y + 1, mmoPasSrc.CaretPos.X + 1);
+
+    for I := 0 to PasParser.Count - 1 do
+    begin
+      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+        BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
+    end;
+    BlockMatchInfo.IsCppSource := False;
+    BlockMatchInfo.CheckLineMatch(mmoPasSrc.CaretPos.Y + 1, mmoPasSrc.CaretPos.X + 1, False, False, True);
+
+    // 代替 ConvertPos 的行为
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      Pair.StartToken.EditLine := Pair.StartToken.LineNumber + 1;
+      Pair.StartToken.EditCol := Pair.StartToken.CharIndex;
+      Pair.EndToken.EditLine := Pair.EndToken.LineNumber + 1;
+      Pair.EndToken.EditCol := Pair.EndToken.CharIndex;
+
+      for J := 0 to Pair.MiddleCount - 1 do
+      begin
+        Pair.MiddleToken[J].EditLine := Pair.MiddleToken[J].LineNumber + 1;
+        Pair.MiddleToken[J].EditCol := Pair.MiddleToken[J].CharIndex;
+      end;
+    end;
+    BlockMatchInfo.LineInfo.SortPairs;
+
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      S := '';
+      for J := 0 to Pair.MiddleCount - 1 do
+        S := S + ', ' + Pair.MiddleToken[J].Token;
+
+      mmoPasResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
+        Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
+        Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
+    end;
+  finally
+    PasParser.Free;
+    BlockMatchInfo.LineInfo.Free;
+    BlockMatchInfo.LineInfo := nil;
+    BlockMatchInfo.Free; // LineInfo 设 nil 后这里的 Clear 才能进行
+  end;
+{$ELSE}
+  ShowMessage('Only Support BDS with WideTokens');
+{$ENDIF}
+end;
+
+procedure TTeststructParseForm.btnPairCppClick(Sender: TObject);
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+var
+  I, J: Integer;
+  CppParser: TCnWideCppStructParser;
+  NilChar: Byte;
+  BlockMatchInfo: TCnBlockMatchInfo;
+  Pair: TCnBlockLinePair;
+  S: WideString;
+{$ENDIF}
+begin
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  mmoCppResult.Lines.Clear;
+
+  CppParser := TCnWideCppStructParser.Create(chkWideCpp.Checked);
+  CppParser.UseTabKey := True;
+  CppParser.TabWidth := 2;
+
+  BlockMatchInfo := TCnBlockMatchInfo.Create(nil);
+  BlockMatchInfo.LineInfo := TCnBlockLineInfo.Create(nil);
+
+  S := mmoCppSrc.Lines.Text;
+  try
+    CppParser.ParseSource(PWideChar(S), Length(S), mmoCppSrc.CaretPos.Y + 1,
+      mmoCppSrc.CaretPos.X + 1, True, True);;
+
+    for I := 0 to CppParser.Count - 1 do
+    begin
+      if CppParser.Tokens[I].CppTokenKind <> ctkUnknown then
+        BlockMatchInfo.AddToKeyList(CppParser.Tokens[I]);
+    end;
+    BlockMatchInfo.IsCppSource := True;
+    BlockMatchInfo.CheckLineMatch(mmoCppSrc.CaretPos.Y + 1, mmoCppSrc.CaretPos.X + 1, False, False, True);
+
+    // 代替 ConvertPos 的行为
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      Pair.StartToken.EditLine := Pair.StartToken.LineNumber + 1;
+      Pair.StartToken.EditCol := Pair.StartToken.CharIndex;
+      Pair.EndToken.EditLine := Pair.EndToken.LineNumber + 1;
+      Pair.EndToken.EditCol := Pair.EndToken.CharIndex;
+
+      for J := 0 to Pair.MiddleCount - 1 do
+      begin
+        Pair.MiddleToken[J].EditLine := Pair.MiddleToken[J].LineNumber + 1;
+        Pair.MiddleToken[J].EditCol := Pair.MiddleToken[J].CharIndex;
+      end;
+    end;
+    BlockMatchInfo.LineInfo.SortPairs;
+
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      S := '';
+      for J := 0 to Pair.MiddleCount - 1 do
+        S := S + ', ' + Pair.MiddleToken[J].Token;
+
+      mmoCppResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
+        Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
+        Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
+    end;
+  finally
+    CppParser.Free;
+    BlockMatchInfo.LineInfo.Free;
+    BlockMatchInfo.LineInfo := nil;
+    BlockMatchInfo.Free; // LineInfo 设 nil 后这里的 Clear 才能进行
+  end;
+{$ELSE}
+  ShowMessage('Only Support BDS with WideTokens');
+{$ENDIF}
 end;
 
 end.

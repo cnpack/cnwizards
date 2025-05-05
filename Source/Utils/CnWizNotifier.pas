@@ -434,7 +434,6 @@ type
     FDebuggerNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
-{$ENDIF}
 
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -444,6 +443,7 @@ type
     {$ELSE}
     FCnIDEThemingServicesNotifier: INTAIDEThemingServicesNotifier;
     {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
     FLastControl: TWinControl;

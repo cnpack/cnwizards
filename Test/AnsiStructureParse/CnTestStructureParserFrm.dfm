@@ -106,7 +106,7 @@ object CnTestStructureForm: TCnTestStructureForm
           'end.')
         ParentFont = False
         ScrollBars = ssVertical
-        TabOrder = 1
+        TabOrder = 9
         OnChange = mmoPasChange
         OnClick = mmoPasChange
       end
@@ -131,7 +131,7 @@ object CnTestStructureForm: TCnTestStructureForm
         Font.Style = []
         ParentFont = False
         ScrollBars = ssVertical
-        TabOrder = 3
+        TabOrder = 10
         WordWrap = False
       end
       object btnUses: TButton
@@ -140,7 +140,7 @@ object CnTestStructureForm: TCnTestStructureForm
         Width = 67
         Height = 25
         Caption = 'Get Uses'
-        TabOrder = 4
+        TabOrder = 1
         OnClick = btnUsesClick
       end
       object btnWideParse: TButton
@@ -149,7 +149,7 @@ object CnTestStructureForm: TCnTestStructureForm
         Width = 67
         Height = 25
         Caption = 'Wide Lex'
-        TabOrder = 5
+        TabOrder = 4
         OnClick = btnWideParseClick
       end
       object btnAnsiLex: TButton
@@ -158,24 +158,24 @@ object CnTestStructureForm: TCnTestStructureForm
         Width = 67
         Height = 25
         Caption = 'Ansi Lex'
-        TabOrder = 6
+        TabOrder = 3
         OnClick = btnAnsiLexClick
       end
       object chkWideIdentPas: TCheckBox
-        Left = 700
+        Left = 704
         Top = 20
         Width = 77
         Height = 17
         Caption = 'Wide Ident'
-        TabOrder = 7
+        TabOrder = 8
       end
       object btnPasPosInfo: TButton
-        Left = 840
+        Left = 848
         Top = 16
-        Width = 65
+        Width = 57
         Height = 25
         Caption = 'PosInfo'
-        TabOrder = 8
+        TabOrder = 6
         OnClick = btnPasPosInfoClick
       end
       object chkIsDpr: TCheckBox
@@ -184,15 +184,15 @@ object CnTestStructureForm: TCnTestStructureForm
         Width = 73
         Height = 17
         Caption = 'Is Program'
-        TabOrder = 9
+        TabOrder = 7
       end
       object btnPair: TButton
-        Left = 776
+        Left = 784
         Top = 16
         Width = 57
         Height = 25
         Caption = 'Pair'
-        TabOrder = 10
+        TabOrder = 5
         OnClick = btnPairClick
       end
     end
@@ -224,7 +224,7 @@ object CnTestStructureForm: TCnTestStructureForm
       object mmoC: TMemo
         Left = 16
         Top = 56
-        Width = 881
+        Width = 889
         Height = 201
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -233,61 +233,70 @@ object CnTestStructureForm: TCnTestStructureForm
         Font.Style = []
         ParentFont = False
         ScrollBars = ssVertical
-        TabOrder = 1
+        TabOrder = 7
         OnChange = mmoPasChange
         OnClick = mmoPasChange
       end
       object btnParseCpp: TButton
-        Left = 440
+        Left = 424
         Top = 16
         Width = 75
         Height = 25
         Caption = 'Ansi Parse'
-        TabOrder = 2
+        TabOrder = 1
         OnClick = btnParseCppClick
       end
       object mmoParseCpp: TMemo
         Left = 16
         Top = 272
-        Width = 881
+        Width = 889
         Height = 265
         ScrollBars = ssVertical
-        TabOrder = 3
+        TabOrder = 8
       end
       object btnTokenList: TButton
-        Left = 526
+        Left = 508
         Top = 16
         Width = 83
         Height = 25
         Caption = 'Ansi Tokenize'
-        TabOrder = 4
+        TabOrder = 2
         OnClick = btnTokenListClick
       end
       object btnWideTokenize: TButton
-        Left = 622
+        Left = 598
         Top = 16
         Width = 83
         Height = 25
         Caption = 'Wide Tokenize'
-        TabOrder = 5
+        TabOrder = 3
         OnClick = btnWideTokenizeClick
       end
       object btnInc: TButton
-        Left = 806
+        Left = 822
         Top = 16
         Width = 83
         Height = 25
         Caption = 'Get Includes'
-        TabOrder = 6
+        TabOrder = 5
         OnClick = btnIncClick
       end
       object chkWideIdentCpp: TCheckBox
-        Left = 712
+        Left = 684
         Top = 20
-        Width = 81
+        Width = 73
         Height = 17
         Caption = 'Wide Ident'
-        TabOrder = 7
+        TabOrder = 6
+      end
+      object btnPairCpp: TButton
+        Left = 760
+        Top = 16
+        Width = 57
+        Height = 25
+        Caption = 'Pair'
+        TabOrder = 4
+        OnClick = btnPairCppClick
       end
     end
   end
