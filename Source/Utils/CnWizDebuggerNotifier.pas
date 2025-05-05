@@ -568,11 +568,13 @@ var
 begin
   Result := -1;
   for I := 0 to List.Count - 1 do
+  begin
     if CompareMem(List[I], @Notifier, SizeOf(TMethod)) then
     begin
       Result := I;
       Exit;
     end;
+  end;
 end;
 
 procedure TCnWizDebuggerNotifierServices.AddProcessNotifier(
@@ -712,8 +714,10 @@ begin
     FProcess.RemoveNotifier(FProcessNotifierIndex);
 
   for I := FThreads.Count - 1 downto 0 do
+  begin
     if FThreads[I] <> nil then
       TCnOTAThread(FThreads[I]).Free;
+  end;
 
   FThreads.Free;
 {$IFDEF DEBUG}

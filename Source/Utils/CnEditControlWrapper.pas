@@ -74,13 +74,13 @@ interface
 {$ENDIF}
 
 uses
-  Windows, Messages, Classes, Controls, SysUtils, Graphics, ToolsAPI, ExtCtrls,
+  Windows, Messages, Classes, Controls, SysUtils, Graphics, ExtCtrls,
   ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
-  CnCommon, CnWizMethodHook, CnWizUtils, CnWizCompilerConst, CnWizNotifier,
-  CnWizIdeUtils, CnWizOptions, CnIDEMirrorIntf;
+  {$IFNDEF STAND_ALONE} ToolsAPI,  CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
+  {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
+  CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
 type
 
@@ -131,7 +131,9 @@ type
     TopRow: Integer;               // 视觉上第一行的行号
     BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
+{$IFNDEF STAND_ALONE}
     CurPos: TOTAEditPos;
+{$ENDIF}
     LineCount: Integer;            // 记录编辑器里的文字总行数
     LineText: string;
     ModTime: TDateTime;
@@ -157,18 +159,22 @@ type
     FContext: TCnEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
+{$IFNDEF STAND_ALONE}
     FEditView: IOTAEditView;
+{$ENDIF}
     FGutterWidth: Integer;
     FGutterChanged: Boolean;
     FLastValid: Boolean;
+{$IFNDEF STAND_ALONE}
     procedure SetEditView(AEditView: IOTAEditView);
+{$ENDIF}
     function GetGutterWidth: Integer;
     function GetViewLineNumber(Index: Integer): Integer;
     function GetViewLineCount: Integer;
     function GetViewBottomLine: Integer;
     function GetTopEditor: TControl;
   public
-    constructor Create(AEditControl: TControl; AEditView: IOTAEditView);
+    constructor Create(AEditControl: TControl {$IFNDEF STAND_ALONE}; AEditView: IOTAEditView {$ENDIF});
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
     procedure NotifyIDEGutterChanged;
@@ -176,7 +182,9 @@ type
     property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
+{$IFNDEF STAND_ALONE}
     property EditView: IOTAEditView read FEditView;
+{$ENDIF}
     property GutterWidth: Integer read GetGutterWidth;
 
     // 当前显示在最前面的编辑控件
@@ -209,9 +217,12 @@ type
     LineNum, LogicLineNum: Integer) of object;
   {* EditControl 控件单行绘制通知事件，用户可以此进行自定义绘制}
 
+{$IFNDEF STAND_ALONE}
+
   TCnEditorPaintNotifier = procedure (EditControl: TControl; EditView: IOTAEditView)
     of object;
   {* EditControl 控件完整绘制通知事件，用户可以此进行自定义绘制}
+{$ENDIF}
 
   TCnEditorNotifier = procedure (EditControl: TControl; EditWindow: TCustomForm;
     Operation: TOperation) of object;
@@ -252,11 +263,15 @@ type
   private
     FBpPosY: Integer;
     FBpDeltaLine: Integer;
+{$IFNDEF STAND_ALONE}
     FBpEditView: IOTAEditView;
+{$ENDIF}
     FBpEditControl: TControl;
   public
     property BpEditControl: TControl read FBpEditControl write FBpEditControl;
+{$IFNDEF STAND_ALONE}
     property BpEditView: IOTAEditView read FBpEditView write FBpEditView;
+{$ENDIF}
     property BpPosY: Integer read FBpPosY write FBpPosY;
     property BpDeltaLine: Integer read FBpDeltaLine write FBpDeltaLine;
   end;
@@ -274,6 +289,7 @@ type
     FHighlights: TStringList;
     FPaintNotifyAvailable: Boolean;
     FMouseNotifyAvailable: Boolean;
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     FEvents: INTACodeEditorEvents;
     FEventsIndex: Integer;
@@ -283,6 +299,7 @@ type
     FSetEditViewHook: TCnMethodHook;
     FRequestGutterHook: TCnMethodHook;  // 这俩 Hook 只在 11、12 以上分别使用
     FRemoveGutterHook: TCnMethodHook;
+{$ENDIF}
     FCmpLines: TList;
     FMouseUpNotifiers: TList;
     FMouseDownNotifiers: TList;
@@ -307,36 +324,49 @@ type
     FEditorBaseFont: TFont;
     procedure ScrollAndClickEditControl(Sender: TObject);
 
+{$IFNDEF STAND_ALONE}
     function CalcCharSize: Boolean;
     // 计算字符串尺寸，核心思想是从注册表里拿各种高亮设置计算，取其大者
+
     procedure GetHighlightFromReg;
     procedure InitEditControlHook;
-    procedure CheckAndSetEditControlMouseHookFlag;
+
     function UpdateCharSize: Boolean;
+{$ENDIF}
+    procedure CheckAndSetEditControlMouseHookFlag;
+
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
       TControl; Context: Pointer);
+{$IFNDEF STAND_ALONE}
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TCnEditorObject): TCnEditorContext;
+
     function CheckViewLinesChange(Editor: TCnEditorObject; Context: TCnEditorContext): Boolean;
     // 检查某个 View 中的具体行号分布有无改变，包括纵向滚动、纵向伸缩、折叠等，不包括单行内改动
 
     function CheckEditorChanges(Editor: TCnEditorObject): TCnEditorChangeTypes;
+{$ENDIF}
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
+{$IFNDEF STAND_ALONE}
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
+    procedure OnIdle(Sender: TObject);
+{$ENDIF}
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     function OnGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
-    procedure OnIdle(Sender: TObject);
+
     function GetEditorCount: Integer;
     function GetEditors(Index: Integer): TCnEditorObject;
     function GetHighlight(Index: Integer): TCnHighlightItem;
     function GetHighlightCount: Integer;
     function GetHighlightName(Index: Integer): string;
     procedure ClearHighlights;
+{$IFNDEF STAND_ALONE}
     procedure LoadFontFromRegistry;
+{$ENDIF}
     procedure ResetFontsFromBasic(ABasicFont: TFont);
     function GetFonts(Index: Integer): TFont;
     procedure SetFonts(const Index: Integer; const Value: TFont);
@@ -364,21 +394,28 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure CheckNewEditor(EditControl: TControl {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF});
+    procedure CheckNewEditor(EditControl: TControl {$IFNDEF STAND_ALONE}
+      {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
+{$IFNDEF STAND_ALONE}
     function AddEditor(EditControl: TControl; View: IOTAEditView): Integer;
+{$ENDIF}
     procedure DeleteEditor(EditControl: TControl);
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     procedure EditorPaintLine(const Rect: TRect; const Stage: TPaintLineStage;
       const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
       const Context: INTACodeEditorPaintContext);
 {$ENDIF}
+{$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    function IndexOfEditor(EditControl: TControl): Integer; overload;
+    function IndexOfEditor(EditControl: TControl): Integer; {$IFNDEF STAND_ALONE} overload; {$ENDIF}
+{$IFNDEF STAND_ALONE}
     function IndexOfEditor(EditView: IOTAEditView): Integer; overload;
+{$ENDIF}
     function GetEditorObject(EditControl: TControl): TCnEditorObject;
     property Editors[Index: Integer]: TCnEditorObject read GetEditors;
     property EditorCount: Integer read GetEditorCount;
@@ -397,18 +434,22 @@ type
     {* 返回编辑器行高和字宽 }
     function GetEditControlInfo(EditControl: TControl): TCnEditControlInfo;
     {* 返回编辑器当前信息 }
+{$IFNDEF STAND_ALONE}
     function GetEditControlCharHeight(EditControl: TControl): Integer;
     {* 返回编辑器内的字符高度也就是行高}
     function GetEditControlSupportsSyntaxHighlight(EditControl: TControl): Boolean;
     {* 返回编辑器是否支持语法高亮 }
+{$ENDIF}
     function GetEditControlCanvas(EditControl: TControl): TCanvas;
     {* 返回编辑器的画布属性}
+
+{$IFNDEF STAND_ALONE}
+    function GetTopMostEditControl: TControl;
+    {* 返回当前最前端的 EditControl}
     function GetEditView(EditControl: TControl): IOTAEditView;
     {* 返回指定编辑器当前关联的 EditView，EditControl 为 nil 则返回最前端 EditView}
     function GetEditControl(EditView: IOTAEditView): TControl;
     {* 返回指定 EditView 当前关联的编辑器，View 为 nil 则返回最前端编辑器}
-    function GetTopMostEditControl: TControl;
-    {* 返回当前最前端的 EditControl}
     function GetEditViewFromTabs(TabControl: TXTabControl; Index: Integer):
       IOTAEditView;
     {* 返回 TabControl 指定页关联的 EditView }
@@ -422,6 +463,7 @@ type
     function GetLineIsElided(EditControl: TControl; LineNum: Integer): Boolean;
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
+{$ENDIF}
 
 {$IFDEF IDE_EDITOR_ELIDE}
     procedure ElideLine(EditControl: TControl; LineNum: Integer);
@@ -429,6 +471,8 @@ type
     procedure UnElideLine(EditControl: TControl; LineNum: Integer);
     {* 展开某行，行号必须是可折叠区的首行}
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
 
 {$IFDEF BDS}
     function GetPointFromEdPos(EditControl: TControl; APos: TOTAEditPos): TPoint;
@@ -438,6 +482,7 @@ type
     function GetLineFromPoint(Point: TPoint; EditControl: TControl;
       EditView: IOTAEditView = nil): Integer;
     {* 返回编辑器控件内鼠标座标对应的行，行结果从一开始，返回 -1 表示失败}
+{$ENDIF}
 
     procedure MarkLinesDirty(EditControl: TControl; Line: Integer; Count: Integer);
     {* 标记编辑器指定行需要重绘，屏幕可见第一行为 0 }
@@ -611,6 +656,31 @@ begin
   Result := Length(IntToStr(LineCount));
 end;
 
+{$IFDEF STAND_ALONE}
+
+// 为了独立运行时不引用，自己写个本地的
+function IsEditControl(AControl: TComponent): Boolean;
+begin
+  Result := (AControl <> nil) and AControl.ClassNameIs('TEditControl')
+    and SameText(AControl.Name, 'Editor');
+end;
+
+// 为了独立运行时不引用，自己写个本地的
+procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
+begin
+{$IFDEF DEBUG}
+  if E = nil then
+    CnDebugger.LogMsgWithType('Error: ' + ErrorMsg, cmtError)
+  else
+  begin
+    CnDebugger.LogMsgWithType('Error ' + ErrorMsg + ' : ' + E.Message, cmtError);
+    CnDebugger.LogStackFromAddress(ExceptAddr, 'Call Stack');
+  end;
+{$ENDIF}
+end;
+
+{$ENDIF}
+
 {$IFDEF SUPPORT_ENHANCED_RTTI}
 
 function GetMethodAddress(const Instance: TObject; const MethodName: string): Pointer;
@@ -639,25 +709,30 @@ end;
 
 { TCnEditorObject }
 
-constructor TCnEditorObject.Create(AEditControl: TControl;
-  AEditView: IOTAEditView);
+constructor TCnEditorObject.Create(AEditControl: TControl {$IFNDEF STAND_ALONE};
+  AEditView: IOTAEditView {$ENDIF});
 begin
   inherited Create;
   FLines := TList.Create;
   FEditControl := AEditControl;
   FEditWindow := TCustomForm(AEditControl.Owner);
+{$IFNDEF STAND_ALONE}
   SetEditView(AEditView);
+{$ENDIF}
 end;
 
 destructor TCnEditorObject.Destroy;
 begin
+{$IFNDEF STAND_ALONE}
   SetEditView(nil);
+{$ENDIF}
   FLines.Free;
   inherited;
 end;
 
 function TCnEditorObject.GetGutterWidth: Integer;
 begin
+{$IFNDEF STAND_ALONE}
   if FGutterChanged and Assigned(FEditView) then
   begin
 {$IFDEF BDS}
@@ -675,6 +750,7 @@ begin
 {$ENDIF}
     FGutterChanged := False;
   end;
+{$ENDIF}
   Result := FGutterWidth;
 end;
 
@@ -696,10 +772,14 @@ begin
   Result := FLines.Count;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnEditorObject.SetEditView(AEditView: IOTAEditView);
 begin
   NoRefCount(FEditView) := NoRefCount(AEditView);
 end;
+
+{$ENDIF}
 
 function TCnEditorObject.GetTopEditor: TControl;
 var
@@ -821,13 +901,19 @@ type
 {$ELSE}
   TGetTextAtLineProc = function(Self: TObject; LineNum: Integer): string; register;
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
 {$IFDEF WIN64}
   TGetOTAEditViewProc = function: IOTAEditView of object;
 {$ELSE}
   TGetOTAEditViewProc = function(Self: TObject): IOTAEditView; register;
 {$ENDIF}
+{$ENDIF}
+
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
+
+{$IFNDEF STAND_ALONE}
 
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
@@ -841,6 +927,8 @@ type
 {$ELSE}
   TGetAttributeAtPosProc = procedure(Self: TObject; const EdPos: TOTAEditPos;
     var Element, LineFlag: Integer; B1: Boolean);
+{$ENDIF}
+
 {$ENDIF}
 
 {$IFDEF IDE_EDITOR_ELIDE}
@@ -857,8 +945,12 @@ var
 {$IFDEF DELPHI10_SEATTLE_UP}
   GetCanvas: TGetCanvasProc = nil;
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
   GetOTAEditView: TGetOTAEditViewProc = nil;
   DoGetAttributeAtPos: TGetAttributeAtPosProc = nil;
+{$ENDIF}
+
   DoMarkLinesDirty: TMarkLinesDirtyProc = nil;
   EdRefresh: TEdRefreshProc = nil;
   DoGetTextAtLine: TGetTextAtLineProc = nil;
@@ -895,6 +987,8 @@ begin
   end;
   Result := '[' + Result + ']';
 end;
+
+{$IFNDEF STAND_ALONE}
 
 {$IFNDEF USE_CODEEDITOR_SERVICE}
 
@@ -1042,6 +1136,8 @@ begin
     FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
 end;
 
+{$ENDIF}
+
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
 //==============================================================================
@@ -1102,7 +1198,9 @@ begin
   FVScrollNotifiers := TList.Create;
 
   FEditorList := TObjectList.Create;
+{$IFNDEF STAND_ALONE}
   InitEditControlHook;
+{$ENDIF}
 
   FHighlights := TStringList.Create;
   FBpClickQueue := TQueue.Create;
@@ -1113,7 +1211,9 @@ begin
   FBackgroundColor := clWhite;
   FForegroundColor := clBlack;
 
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
+{$ENDIF}
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.AddAfterThemeChangeNotifier(AfterThemeChange);
   CnWizNotifierServices.AddGetMsgNotifier(OnGetMsgProc, [WM_MOUSEMOVE, WM_NCMOUSEMOVE,
@@ -1123,11 +1223,13 @@ begin
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE {$IFDEF IDE_SUPPORT_HDPI}, WM_DPICHANGED {$ENDIF}]);
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
   UpdateEditControlList;
   GetHighlightFromReg;
   LoadFontFromRegistry;
+{$ENDIF}
 end;
 
 destructor TCnEditControlWrapper.Destroy;
@@ -1140,18 +1242,22 @@ begin
   for I := Low(Self.FFontArray) to High(FFontArray) do
     FFontArray[I].Free;
 
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
+{$ENDIF}
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsgProc);
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
-
+{$ENDIF}
   FEditorBaseFont.Free;
   while FBpClickQueue.Count > 0 do
     TObject(FBpClickQueue.Pop).Free;
   FBpClickQueue.Free;
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   if (FEventsIndex >= 0) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
@@ -1172,6 +1278,7 @@ begin
     FRequestGutterHook.Free;
   if FRemoveGutterHook <> nil then
     FRemoveGutterHook.Free;
+{$ENDIF}
 
   FEditControlList.Free;
   FEditorList.Free;
@@ -1195,6 +1302,8 @@ begin
   FCmpLines.Free;
   inherited;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnEditControlWrapper.InitEditControlHook;
 {$IFDEF OTA_CODEEDITOR_SERVICE}
@@ -1332,22 +1441,27 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 编辑器控件列表处理
 //------------------------------------------------------------------------------
 
 procedure TCnEditControlWrapper.CheckNewEditor(EditControl: TControl
-  {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF});
+  {$IFNDEF STAND_ALONE} {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
 var
   Idx: Integer;
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   CES: INTACodeEditorServices;
   View: IOTAEditView;
+{$ENDIF}
 {$ENDIF}
 begin
   Idx := IndexOfEditor(EditControl);
   if Idx >= 0 then
   begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1359,9 +1473,11 @@ begin
     Editors[Idx].SetEditView(View);
     DoEditorChange(Editors[Idx], [ctView]);
 {$ENDIF}
+{$ENDIF}
   end
   else
   begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1371,17 +1487,22 @@ begin
 {$ELSE}
     AddEditor(EditControl, View);
 {$ENDIF}
+{$ENDIF}
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnEditControlWrapper: New EditControl.');
   {$ENDIF}
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 function TCnEditControlWrapper.AddEditor(EditControl: TControl;
   View: IOTAEditView): Integer;
 begin
   Result := FEditorList.Add(TCnEditorObject.Create(EditControl, View));
 end;
+
+{$ENDIF}
 
 procedure TCnEditControlWrapper.DeleteEditor(EditControl: TControl);
 var
@@ -1397,6 +1518,8 @@ begin
   {$ENDIF}
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnEditControlWrapper.GetEditorContext(Editor: TCnEditorObject):
   TCnEditorContext;
@@ -1423,6 +1546,8 @@ begin
 {$ENDIF}
   end;
 end;
+
+{$ENDIF}
 
 function TCnEditControlWrapper.GetEditorCount: Integer;
 begin
@@ -1460,6 +1585,8 @@ begin
   end;
   Result := -1;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnEditControlWrapper.IndexOfEditor(EditView: IOTAEditView): Integer;
 var
@@ -2045,6 +2172,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function TCnEditControlWrapper.GetCharHeight: Integer;
 begin
   Result := GetCharSize.cy;
@@ -2052,7 +2181,9 @@ end;
 
 function TCnEditControlWrapper.GetCharSize: TSize;
 begin
+{$IFNDEF STAND_ALONE}
   UpdateCharSize;
+{$ENDIF}
   Result := FCharSize;
 end;
 
@@ -2075,10 +2206,14 @@ begin
     Result.LineDigit := GetLineDigit(Result.LineCount);
 {$ENDIF}
   except
+{$IFNDEF STAND_ALONE}
     on E: Exception do
       DoHandleException(E.Message);
+{$ENDIF}
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnEditControlWrapper.GetEditControlCharHeight(
   EditControl: TControl): Integer;
@@ -2194,8 +2329,9 @@ begin
     Result := False;
 end;
 
-function TCnEditControlWrapper.GetEditControlCanvas(
-  EditControl: TControl): TCanvas;
+{$ENDIF}
+
+function TCnEditControlWrapper.GetEditControlCanvas(EditControl: TControl): TCanvas;
 begin
   Result := nil;
   if EditControl = nil then Exit;
@@ -2280,6 +2416,8 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnEditControlWrapper.UpdateEditControlList;
 begin
   EnumEditControl(EditControlProc, nil);
@@ -2351,6 +2489,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnEditControlWrapper.AfterThemeChange(Sender: TObject);
 begin
 {$IFDEF DEBUG}
@@ -2361,9 +2501,13 @@ end;
 
 procedure TCnEditControlWrapper.OnActiveFormChange(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   UpdateEditControlList;
   CheckOptionDlg;
+{$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnEditControlWrapper.GetEditView(EditControl: TControl): IOTAEditView;
 var
@@ -2447,7 +2591,7 @@ begin
     end;
   end;
 {$IFDEF DEBUG}
-  CnDebugger.LogMsgWarning('GetTopMostEditControl: not found in list.');
+  CnDebugger.LogMsgWarning('GetTopMostEditControl: Not Found in List.');
 {$ENDIF}
 {$ENDIF}
 end;
@@ -2521,6 +2665,8 @@ begin
   if Assigned(PointFromEdPos) then
     Result := PointFromEdPos(EditControl, APos, True, True);
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -2599,8 +2745,10 @@ begin
   if ActualLineNum <= 0 then
     Exit;
 
+{$IFNDEF STAND_ALONE}
   if EditControl = nil then
     EditControl := CnOtaGetCurrentEditControl;
+{$ENDIF}
 
   if EditControl = nil then
     Exit;
@@ -2642,7 +2790,9 @@ begin
     Item.BpDeltaLine := ActualLineNum - Obj.ViewLineNumber[0];
 
     Item.BpEditControl := EditControl;
+{$IFNDEF STAND_ALONE}
     Item.BpEditView := Obj.EditView;
+{$ENDIF}
     Item.BpPosY := GetCharHeight div 2;
 
     FBpClickQueue.Push(Item);
@@ -2854,7 +3004,10 @@ end;
 procedure TCnEditControlWrapper.OnCallWndProcRet(Handle: HWND;
   Control: TWinControl; Msg: TMessage);
 var
-  I, Idx: Integer;
+{$IFNDEF STAND_ALONE}
+  I: Integer;
+{$ENDIF}
+  Idx: Integer;
   Editor: TCnEditorObject;
   ChangeType: TCnEditorChangeTypes;
 begin
@@ -2874,8 +3027,10 @@ begin
     else
       ChangeType := [ctHScroll];
 
+{$IFNDEF STAND_ALONE}
     for I := 0 to EditorCount - 1 do
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
+{$ENDIF}
   end
 {$IFDEF IDE_SUPPORT_HDPI}
   else if (Msg.Msg = WM_DPICHANGED) and (Control = Application.MainForm) then
@@ -3043,7 +3198,7 @@ begin
   while FBpClickQueue.Count > 0 do
   begin
     Item := TCnBreakPointClickItem(FBpClickQueue.Pop);
-    if (Item = nil) or (Item.BpEditControl = nil) or (Item.BpEditView = nil)
+    if (Item = nil) or (Item.BpEditControl = nil) {$IFNDEF STAND_ALONE} or (Item.BpEditView = nil) {$ENDIF}
        or (Item.BpDeltaLine = 0) then
        Continue;
 
@@ -3052,14 +3207,18 @@ begin
       CN_BP_CLICK_POS_X, Item.BpPosY]);
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
     Item.BpEditView.Scroll(Item.BpDeltaLine, 0);
+{$ENDIF}
 
     // EditControl 上做点击
     Item.BpEditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
     Item.BpEditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
 
+{$IFNDEF STAND_ALONE}
     // 滚回去
     Item.BpEditView.Scroll(-Item.BpDeltaLine, 0);
+{$ENDIF}
     Item.Free;
   end;
 end;
@@ -3248,6 +3407,8 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 function TCnEditControlWrapper.GetLineFromPoint(Point: TPoint;
   EditControl: TControl; EditView: IOTAEditView): Integer;
 var
@@ -3270,9 +3431,13 @@ begin
     Result := EditView.TopRow + Result;
 end;
 
+{$ENDIF}
+
 function TCnEditControlWrapper.GetTabWidth: Integer;
+{$IFNDEF STAND_ALONE}
 var
   Options: IOTAEnvironmentOptions;
+{$ENDIF}
 
 {$IFDEF BDS}
 
@@ -3309,6 +3474,7 @@ var
 
 begin
   Result := 2;
+{$IFNDEF STAND_ALONE}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3322,13 +3488,17 @@ begin
       ;
     end;
   end;
+{$ENDIF}
 end;
 
 function TCnEditControlWrapper.GetBlockIndent: Integer;
+{$IFNDEF STAND_ALONE}
 var
   Options: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
   Result := 2;
+{$IFNDEF STAND_ALONE}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3338,13 +3508,17 @@ begin
       ;
     end;
   end;
+{$ENDIF}
 end;
 
 function TCnEditControlWrapper.GetUseTabKey: Boolean;
+{$IFNDEF STAND_ALONE}
 var
   Options: IOTAEnvironmentOptions;
   S: string;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3352,6 +3526,7 @@ begin
     Result := (S = 'True') or (S = '-1'); // D567 is -1
   end
   else
+{$ENDIF}
     Result := False;
 end;
 
@@ -3369,6 +3544,8 @@ function TCnEditControlWrapper.GetForegroundColor: TColor;
 begin
   Result := FForegroundColor;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnEditControlWrapper.LoadFontFromRegistry;
 const
@@ -3417,6 +3594,8 @@ begin
     AFont.Free;
   end;
 end;
+
+{$ENDIF}
 
 procedure TCnEditControlWrapper.ResetFontsFromBasic(ABasicFont: TFont);
 var

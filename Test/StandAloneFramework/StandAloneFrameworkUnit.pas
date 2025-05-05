@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMenuAction, CnWizShortCut, CnWizConsts, CnWizCompilerConst, CnWizOptions,
-  CnWizClasses, CnWizNotifier;
+  CnWizClasses, CnWizNotifier, CnEditControlWrapper;
 
 type
   TFormFramework = class(TForm)
