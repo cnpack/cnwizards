@@ -74,8 +74,6 @@ type
   TCnWizSizeEnlarge = (wseOrigin, wsOneQuarter, wseAddHalf, wseDouble, wseDoubleHalf, wseTriple);
   {* 屏幕字体放大倍数，1、1.25、1.5、2、2.5、3}
 
-{$IFNDEF STAND_ALONE}
-
   TCnWizOptions = class(TObject)
   {* 专家环境参数类}
   private
@@ -302,8 +300,6 @@ var
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 
-{$ENDIF}
-
 implementation
 
 uses
@@ -315,8 +311,6 @@ uses
   {$IFNDEF CNWIZARDS_MINIMUM} CnWizShareImages, {$ENDIF}
 {$ENDIF}
   CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNative;
-
-{$IFNDEF STAND_ALONE}
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 begin
@@ -403,14 +397,19 @@ const
 var
   ModuleName, SHUserDir: array[0..MAX_Path - 1] of Char;
   DefDir: string;
-  Svcs: IOTAServices;
   I: Integer;
   S: string;
+{$IFNDEF STAND_ALONE}
+  Svcs: IOTAServices;
+{$ENDIF}
 begin
   inherited;
+{$IFNDEF STAND_ALONE}
   Svcs := BorlandIDEServices as IOTAServices;
   Assert(Assigned(Svcs));
   FCompilerRegPath := Svcs.GetBaseRegistryKey;
+{$ENDIF}
+
   GetModuleFileName(hInstance, ModuleName, MAX_PATH);
   FDllName := ModuleName;
   FDllPath := _CnExtractFilePath(FDllName);
@@ -871,7 +870,9 @@ begin
   if Value <> FUseToolsMenu then
   begin
     FUseToolsMenu := Value;
+{$IFNDEF STAND_ALONE}
     CnWizardMgr.UpdateMenuPos(Value);
+{$ENDIF}
   end;
 end;
 
@@ -924,11 +925,13 @@ begin
   if AToolBar = nil then
     Exit;
 
+{$IFNDEF STAND_ALONE}
   if FUseLargeIcon then
   begin
     AToolBar.ButtonHeight := IdeGetScaledPixelsFromOrigin(csLargeButtonHeight, AToolBar);
     AToolBar.ButtonWidth := IdeGetScaledPixelsFromOrigin(csLargeButtonWidth, AToolBar);
   end;
+{$ENDIF}
 
 {$IFDEF IDE_SUPPORT_HDPI}
   NeedNew := True;
@@ -972,6 +975,7 @@ begin
   end;
 
 {$ELSE}
+  {$IFNDEF STAND_ALONE}
   if FUseLargeIcon then
   begin
     if AToolBar.Images = dmCnSharedImages.Images then
@@ -979,6 +983,7 @@ begin
     if AToolBar.DisabledImages = dmCnSharedImages.DisabledImages then
       AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
   end;
+  {$ENDIF}
 {$ENDIF}
 
   if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then
@@ -1008,7 +1013,5 @@ begin
   Infos.Add('CompilerID: ' + CompilerID);
   Infos.Add('CompilerRegPath: ' + CompilerRegPath);
 end;
-
-{$ENDIF}
 
 end.
