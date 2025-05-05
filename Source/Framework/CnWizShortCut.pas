@@ -703,11 +703,11 @@ begin
 end;
 
 procedure TCnWizShortCutMgr.SaveMainMenuShortCuts;
-var
 {$IFNDEF STAND_ALONE}
+var
   Svcs40: INTAServices40;
-{$ENDIF}
   MainMenu: TMainMenu;
+{$ENDIF}
 
   procedure DoSaveMenu(MenuItem: TMenuItem);
   var
