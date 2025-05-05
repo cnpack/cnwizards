@@ -179,7 +179,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnWizEditFiler, mPasLex;
+  CnWizEditFiler, mPasLex, CnIDEStrings;
 
 const
   csCIMgrNames = ';pascal;';

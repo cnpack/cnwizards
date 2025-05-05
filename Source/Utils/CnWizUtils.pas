@@ -90,31 +90,6 @@ type
   IDesigner = IFormDesigner;
 {$ENDIF}
 
-  // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
-  TCnGeneralPasToken = TCnWidePasToken;
-  TCnGeneralCppToken = TCnWideCppToken;
-  TCnGeneralPasStructParser = TCnWidePasStructParser;
-  TCnGeneralCppStructParser = TCnWideCppStructParser;
-  TCnGeneralWidePasLex = TCnPasWideLex;
-  TCnGeneralWideBCBTokenList = TCnBCBWideTokenList;
-{$ELSE}                               // 5 6 7
-  TCnGeneralPasToken = TCnPasToken;
-  TCnGeneralCppToken = TCnCppToken;
-  TCnGeneralPasStructParser = TCnPasStructureParser;
-  TCnGeneralCppStructParser = TCnCppStructureParser;
-  TCnGeneralWidePasLex = TmwPasLex;
-  TCnGeneralWideBCBTokenList = TBCBTokenList;
-{$ENDIF}
-
-{$IFDEF UNICODE}
-  TCnGeneralPasLex = TCnPasWideLex; // TCnGeneralPasLex 在 2005~2007 下仍用 TmwPasLex
-  TCnGeneralBCBTokenList = TCnBCBWideTokenList; // TCnGeneralBCBTokenList 也类似
-{$ELSE}
-  TCnGeneralPasLex = TmwPasLex;     // 配合 EditFilerSaveFileToStream 系列使用，Ansi/Ansi/Utf16
-  TCnGeneralBCBTokenList = TBCBTokenList;
-{$ENDIF}
-
   TCnBookmarkObject = class
   private
     FLine: Integer;

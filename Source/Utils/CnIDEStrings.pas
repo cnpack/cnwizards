@@ -24,7 +24,7 @@ unit CnIDEStrings;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：IDE 相关的字符串定义与处理单元
 * 单元作者：CnPack 开发组 (master@cnpack.org)
-* 备    注：
+* 备    注：该单元务必要与 IDE 脱离编译关系以做到独立测试
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
@@ -38,7 +38,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, CnWideStrings;
+  SysUtils, Classes, CnWideStrings, mPasLex, CnPasWideLex, mwBCBTokenList,
+  CnBCBWideTokenList, CnPasCodeParser, CnCppCodeParser, CnWidePasParser,
+  CnWideCppParser;
 
 type
 {$IFDEF IDE_STRING_ANSI_UTF8}
@@ -59,6 +61,31 @@ type
   {$ENDIF}
 {$ENDIF}
   PCnIdeTokenInt = ^TCnIdeTokenInt;
+
+  // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
+  TCnGeneralPasToken = TCnWidePasToken;
+  TCnGeneralCppToken = TCnWideCppToken;
+  TCnGeneralPasStructParser = TCnWidePasStructParser;
+  TCnGeneralCppStructParser = TCnWideCppStructParser;
+  TCnGeneralWidePasLex = TCnPasWideLex;
+  TCnGeneralWideBCBTokenList = TCnBCBWideTokenList;
+{$ELSE}                               // 5 6 7
+  TCnGeneralPasToken = TCnPasToken;
+  TCnGeneralCppToken = TCnCppToken;
+  TCnGeneralPasStructParser = TCnPasStructureParser;
+  TCnGeneralCppStructParser = TCnCppStructureParser;
+  TCnGeneralWidePasLex = TmwPasLex;
+  TCnGeneralWideBCBTokenList = TBCBTokenList;
+{$ENDIF}
+
+{$IFDEF UNICODE}
+  TCnGeneralPasLex = TCnPasWideLex;             // TCnGeneralPasLex 在 2005~2007 下仍用 TmwPasLex
+  TCnGeneralBCBTokenList = TCnBCBWideTokenList; // TCnGeneralBCBTokenList 也类似
+{$ELSE}
+  TCnGeneralPasLex = TmwPasLex;                 // 配合 EditFilerSaveFileToStream 系列使用，Ansi/Ansi/Utf16
+  TCnGeneralBCBTokenList = TBCBTokenList;
+{$ENDIF}
 
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 {* 粗略判断一个 Unicode 宽字符是否占两个字符宽度，行为尽量朝 IDE 靠近}

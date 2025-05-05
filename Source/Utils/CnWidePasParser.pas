@@ -45,7 +45,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, mPasLex, CnPasWideLex, mwBCBTokenList,
-  Contnrs, CnFastList, CnPasCodeParser, CnContainers, CnIDEStrings;
+  Contnrs, CnFastList, CnPasCodeParser, CnContainers;
 
 type
   TCnWidePasToken = class(TPersistent)
@@ -243,6 +243,9 @@ procedure ParseUnitUsesW(const Source: CnWideString; UsesList: TStrings;
 {* 分析源代码中引用的单元，Soure 是 UTF16 格式的文件内容，使用较少}
 
 implementation
+
+uses
+  CnIDEStrings;
 
 type
   TCnProcObj = class

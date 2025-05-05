@@ -93,7 +93,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnNative, CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils, mPasLex;
+  CnNative, CnCommon, CnWizUtils, CnWizConsts, CnWizIdeUtils, mPasLex, CnIDEStrings;
 
 const
   csArgKind = '$k';
