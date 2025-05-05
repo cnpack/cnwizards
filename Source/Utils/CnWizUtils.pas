@@ -115,7 +115,7 @@ const
 
 var
   CnNoIconList: TStrings;
-  IdeClosing: Boolean;
+  IdeClosing: Boolean = False;
   CnLoadIconProc: TCnLoadIconProc = nil; // 加载完每一个图标后调用，给外部一个机会修改图标内容
 
 //==============================================================================

@@ -56,9 +56,10 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, Forms, ToolsAPI, AppEvnts,
-  Consts, ExtCtrls, Contnrs, CnWizUtils, CnClasses
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF};
+  Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
+  {$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, {$ENDIF} AppEvnts,
+  Consts, CnClasses {$IFNDEF STAND_ALONE}
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
   PCnWizNotifierRecord = ^TCnWizNotifierRecord;
@@ -67,13 +68,17 @@ type
   end;
 
   NoRefCount = Pointer; // 使用指针类型来强制为接口变量赋值，不增加引用计数
-  
+
+{$IFNDEF STAND_ALONE}
+
   TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
     const FileName: string) of object;
   {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名}
 
   TCnWizSourceEditorNotifyType = (setOpened, setClosing, setModified,
     setEditViewInsert, setEditViewRemove, setEditViewActivated);
+  {* SourceEditor 通知类型}
+
   TCnWizSourceEditorNotifier = procedure (SourceEditor: IOTASourceEditor;
     NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView) of object;
   {* SourceEditor 通知事件，SourceEditor 为源码编辑器接口，NotifyType 为类型}
@@ -81,11 +86,25 @@ type
   TCnWizFormEditorNotifyType = (fetOpened, fetClosing, fetModified,
     fetActivated, fetSaving, fetComponentCreating, fetComponentCreated,
     fetComponentDestorying, fetComponentRenamed, fetComponentSelectionChanged);
+
   TCnWizFormEditorNotifier = procedure (FormEditor: IOTAFormEditor;
     NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
     Component: TComponent; const OldName, NewName: string) of object;
 
+  TCnWizBeforeCompileNotifier = procedure (const Project: IOTAProject;
+    IsCodeInsight: Boolean; var Cancel: Boolean) of object;
+
+  TCnWizAfterCompileNotifier = procedure (Succeeded: Boolean; IsCodeInsight:
+    Boolean) of object;
+
+  TCnWizProcessNotifier = procedure (Process: IOTAProcess) of object;
+
+  TCnWizBreakpointNotifier = procedure (Breakpoint: IOTABreakpoint) of object;
+
+{$ENDIF}
+
   TCnWizAppEventType = (aeActivate, aeDeactivate, aeMinimize, aeRestore, aeHint, aeShowHint);
+
   TCnWizAppEventNotifier = procedure (EventType: TCnWizAppEventType; Data: Pointer) of object;
 
   TCnWizMsgHookNotifier = procedure (hwnd: HWND; Control: TWinControl;
@@ -95,17 +114,12 @@ type
     Msg: TMessage): Boolean of object;
   {* 针对 GetMsg 的 Hook 的处理通知，返回 True 表示吞掉此消息}
 
-  TCnWizBeforeCompileNotifier = procedure (const Project: IOTAProject;
-    IsCodeInsight: Boolean; var Cancel: Boolean) of object;
-  TCnWizAfterCompileNotifier = procedure (Succeeded: Boolean; IsCodeInsight:
-    Boolean) of object;
-
-  TCnWizProcessNotifier = procedure (Process: IOTAProcess) of object;
-  TCnWizBreakpointNotifier = procedure (Breakpoint: IOTABreakpoint) of object;
-
   ICnWizNotifierServices = interface(IUnknown)
   {* IDE 通知服务接口}
     ['{18C4DD6A-802A-48D7-AC93-A2487411CA79}']
+
+{$IFNDEF STAND_ALONE}
+
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     {* 增加一个文件通知事件}
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
@@ -130,6 +144,29 @@ type
     {* 增加一个窗体编辑器通知事件}
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     {* 删除一个窗体编辑器通知事件}
+
+    procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
+    {* 增加一个被调试进程启动的通知事件}
+    procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
+    {* 删除一个被调试进程启动的通知事件}
+    procedure AddProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
+    {* 增加一个被调试进程终止的通知事件}
+    procedure RemoveProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
+    {* 删除一个被调试进程终止的通知事件}
+
+    procedure AddBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
+    {* 增加一个增加断点的通知事件}
+    procedure RemoveBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
+    {* 删除一个增加断点的通知事件}
+    procedure AddBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
+    {* 增加一个删除断点的通知事件}
+    procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
+    {* 删除一个删除断点的通知事件}
+
+    function GetCurrentCompilingProject: IOTAProject;
+    {* 获取当前正在编译的工程、不是当前工程，使用通知内记录而来}
+
+{$ENDIF}
 
     procedure AddActiveFormNotifier(Notifier: TNotifyEvent);
     {* 增加一个窗体活跃通知事件}
@@ -180,31 +217,10 @@ type
     procedure RemoveAfterThemeChangeNotifier(Notifier: TNotifyEvent);
     {* 删除一个 IDE 主题变化后的通知事件}
 
-    procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
-    {* 增加一个被调试进程启动的通知事件}
-    procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
-    {* 删除一个被调试进程启动的通知事件}
-    procedure AddProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
-    {* 增加一个被调试进程终止的通知事件}
-    procedure RemoveProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
-    {* 删除一个被调试进程终止的通知事件}
-
-    procedure AddBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
-    {* 增加一个增加断点的通知事件}
-    procedure RemoveBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
-    {* 删除一个增加断点的通知事件}
-    procedure AddBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
-    {* 增加一个删除断点的通知事件}
-    procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
-    {* 删除一个删除断点的通知事件}
-    
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     {* 将一个方法在应用程序空闲时执行}
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
     {* 将一个已经设置为空闲时执行的方法在它执行前通知停止执行，如已执行则此调用无效}
-
-    function GetCurrentCompilingProject: IOTAProject;
-    {* 获取当前正在编译的工程、不是当前工程，使用通知内记录而来}
   end;
 
 function CnWizNotifierServices: ICnWizNotifierServices;
@@ -233,6 +249,8 @@ const
   csIdleMinInterval = 50;
 
 type
+
+{$IFNDEF STAND_ALONE}
 
 //==============================================================================
 // IDE 通知器类（私有类）
@@ -374,6 +392,8 @@ type
     OldName, NewName: string;
   end;
 
+{$ENDIF}
+
 //==============================================================================
 // 通知器服务类（私有类）
 //==============================================================================
@@ -408,10 +428,14 @@ type
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
     FEvents: TApplicationEvents;
+
+{$IFNDEF STAND_ALONE}
     FIdeNotifierIndex: Integer;
     FDebuggerNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
     FCnWizDebuggerNotifier: TCnWizDebuggerNotifier;
+{$ENDIF}
+
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
     FThemingNotifierIndex: Integer;
@@ -429,13 +453,18 @@ type
     FCompNotifyList: TComponentList;
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
+{$IFNDEF STAND_ALONE}
     FCurrentCompilingProject: IOTAProject;
+{$ENDIF}
     procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure CheckActiveControl;
+{$IFNDEF STAND_ALONE}
     procedure CheckDesignerSelection;
+{$ENDIF}
     procedure DoIdleNotifiers;
   protected
     // ICnWizNotifierServices
+{$IFNDEF STAND_ALONE}
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
     procedure AddBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
@@ -446,6 +475,16 @@ type
     procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
+    procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
+    procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
+    procedure AddProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
+    procedure RemoveProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
+    procedure AddBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
+    procedure RemoveBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
+    procedure AddBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
+    procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
+    function GetCurrentCompilingProject: IOTAProject;
+{$ENDIF}
     procedure AddActiveFormNotifier(Notifier: TNotifyEvent);
     procedure RemoveActiveFormNotifier(Notifier: TNotifyEvent);
     procedure AddActiveControlNotifier(Notifier: TNotifyEvent);
@@ -466,18 +505,10 @@ type
     procedure RemoveBeforeThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure AddAfterThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure RemoveAfterThemeChangeNotifier(Notifier: TNotifyEvent);
-    procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
-    procedure RemoveProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
-    procedure AddProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
-    procedure RemoveProcessDestroyedNotifier(Notifier: TCnWizProcessNotifier);
-    procedure AddBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
-    procedure RemoveBreakpointAddedNotifier(Notifier: TCnWizBreakpointNotifier);
-    procedure AddBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
-    procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
-    function GetCurrentCompilingProject: IOTAProject;
 
+{$IFNDEF STAND_ALONE}
     procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -505,6 +536,8 @@ type
     procedure CheckCompNotifyObj;
     procedure FormEditorFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
+{$ENDIF}
+
     procedure AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer = nil);
 
     procedure DoBeforeThemeChange;
@@ -534,7 +567,27 @@ type
 
 var
   FIsReleased: Boolean = False;
-  FCnWizNotifierServices: TCnWizNotifierServices;
+  FCnWizNotifierServices: TCnWizNotifierServices = nil;
+
+{$IFDEF STAND_ALONE}
+  IdeClosing: Boolean = False; // 独立运行时无此变量，冒充一个
+
+
+// 独立运行时无此方法，也冒充一个，处理一些执行方法中的异常
+procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
+begin
+{$IFDEF DEBUG}
+  if E = nil then
+    CnDebugger.LogMsgWithType('Error: ' + ErrorMsg, cmtError)
+  else
+  begin
+    CnDebugger.LogMsgWithType('Error ' + ErrorMsg + ' : ' + E.Message, cmtError);
+    CnDebugger.LogStackFromAddress(ExceptAddr, 'Call Stack');
+  end;
+{$ENDIF}
+end;
+
+{$ENDIF}
 
 function CnWizNotifierServices: ICnWizNotifierServices;
 begin
@@ -610,6 +663,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 //==============================================================================
 // IDE 通知器类（私有类）
@@ -829,6 +884,22 @@ begin
 end;
 
 //==============================================================================
+// 组件通知对象
+//==============================================================================
+
+{ TCnWizCompNotifyObj }
+
+procedure TCnWizCompNotifyObj.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited;
+  if (AComponent = Component) and (Operation = opRemove) then
+    Free;
+end;
+
+{$ENDIF}
+
+//==============================================================================
 // Windows HOOK
 //==============================================================================
 
@@ -911,26 +982,13 @@ begin
 end;
 
 //==============================================================================
-// 组件通知对象
-//==============================================================================
-
-{ TCnWizCompNotifyObj }
-
-procedure TCnWizCompNotifyObj.Notification(AComponent: TComponent;
-  Operation: TOperation);
-begin
-  inherited;
-  if (AComponent = Component) and (Operation = opRemove) then
-    Free;
-end;
-
-//==============================================================================
 // 通知器服务类（私有类）
 //==============================================================================
 
 { TCnWizNotifierServices }
 
 constructor TCnWizNotifierServices.Create;
+{$IFNDEF STAND_ALONE}
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
@@ -943,11 +1001,14 @@ var
   {$ENDIF}
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 begin
   inherited;
+{$IFNDEF STAND_ALONE}
   IServices := BorlandIDEServices as IOTAServices;
   IDebuggerService := BorlandIDEServices as IOTADebuggerServices;
   Assert(Assigned(IServices) and Assigned(IDebuggerService));
+{$ENDIF}
 
   FBeforeCompileNotifiers := TList.Create;
   FAfterCompileNotifiers := TList.Create;
@@ -987,6 +1048,8 @@ begin
   FDesignerSelection := TList.Create;
   FLastDesignerSelection := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
+
+{$IFNDEF STAND_ALONE}
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
   FIdeNotifierIndex := IServices.AddNotifier(FCnWizIdeNotifier as IOTAIDENotifier);
   FCnWizDebuggerNotifier := TCnWizDebuggerNotifier.Create(Self);
@@ -1000,6 +1063,8 @@ begin
   end;
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
   CallWndProcHook := SetWindowsHookEx(WH_CALLWNDPROC, CallWndProc, 0, GetCurrentThreadId);
   CallWndProcRetHook := SetWindowsHookEx(WH_CALLWNDPROCRET, CallWndProcRet, 0, GetCurrentThreadId);
   GetMsgHook := SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, 0, GetCurrentThreadId);
@@ -1011,6 +1076,7 @@ begin
 end;
 
 destructor TCnWizNotifierServices.Destroy;
+{$IFNDEF STAND_ALONE}
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
@@ -1024,6 +1090,7 @@ var
   {$ENDIF}
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizNotifierServices.Destroy');
@@ -1035,6 +1102,7 @@ begin
   UnhookWindowsHookEx(GetMsgHook);
   GetMsgHook := 0;
 
+{$IFNDEF STAND_ALONE}
   IServices := BorlandIDEServices as IOTAServices;
   if Assigned(IServices) then
     IServices.RemoveNotifier(FIdeNotifierIndex);
@@ -1050,6 +1118,7 @@ begin
       ThemingService.RemoveNotifier(FThemingNotifierIndex);
   end;
   FCnIDEThemingServicesNotifier := nil;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
@@ -1082,6 +1151,7 @@ begin
   CnWizClearAndFreeList(FAfterThemeChangeNotifiers);
   CnWizClearAndFreeList(FIdleMethods);
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FFormEditorIntfs.Count, 'Remove FormEditorNotifiers');
 {$ENDIF}
@@ -1117,6 +1187,7 @@ begin
     end;
   end;
   FreeAndNil(FSourceEditorIntfs);
+{$ENDIF}
 
   inherited;
 {$IFDEF DEBUG}
@@ -1140,6 +1211,8 @@ begin
       MsgList.Add(Pointer(MsgIDs[I]));
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 //------------------------------------------------------------------------------
 // IDE 文件通知
@@ -1209,22 +1282,10 @@ begin
   CnWizAddNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.AddAfterThemeChangeNotifier(
-  Notifier: TNotifyEvent);
-begin
-  CnWizAddNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
-end;
-
 procedure TCnWizNotifierServices.AddBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
   CnWizAddNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
-end;
-
-procedure TCnWizNotifierServices.AddBeforeThemeChangeNotifier(
-  Notifier: TNotifyEvent);
-begin
-  CnWizAddNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.RemoveAfterCompileNotifier(
@@ -1233,22 +1294,10 @@ begin
   CnWizRemoveNotifier(FAfterCompileNotifiers, TMethod(Notifier));
 end;
 
-procedure TCnWizNotifierServices.RemoveAfterThemeChangeNotifier(
-  Notifier: TNotifyEvent);
-begin
-  CnWizRemoveNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
-end;
-
 procedure TCnWizNotifierServices.RemoveBeforeCompileNotifier(
   Notifier: TCnWizBeforeCompileNotifier);
 begin
   CnWizRemoveNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
-end;
-
-procedure TCnWizNotifierServices.RemoveBeforeThemeChangeNotifier(
-  Notifier: TNotifyEvent);
-begin
-  CnWizRemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnWizNotifierServices.AfterCompile(Succeeded,
@@ -1589,7 +1638,7 @@ var
   Module: IOTAModule;
   Editor: IOTAEditor;
   FormEditor: IOTAFormEditor;
-  I, J, k: Integer;
+  I, J, K: Integer;
   Exists: Boolean;
 begin
   Assert(Assigned(BorlandIDEServices));
@@ -1611,8 +1660,8 @@ begin
       if Assigned(Editor) and Supports(Editor, IOTAFormEditor, FormEditor) then
       begin
         Exists := False;
-        for k := 0 to FFormEditorIntfs.Count - 1 do
-          if TCnFormEditorNotifier(FFormEditorIntfs[k]).FormEditor =
+        for K := 0 to FFormEditorIntfs.Count - 1 do
+          if TCnFormEditorNotifier(FFormEditorIntfs[K]).FormEditor =
             FormEditor then
           begin
             Exists := True;
@@ -1710,6 +1759,8 @@ begin
     FLastDesignerSelection.Add(FDesignerSelection[I]);
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // ActiveControl、ActiveForm 通知
 //------------------------------------------------------------------------------
@@ -1773,11 +1824,13 @@ procedure TCnWizNotifierServices.DoActiveFormChange;
 var
   I: Integer;
 begin
+{$IFNDEF STAND_ALONE}
   // 由于窗体 View as Text 再打开后，原通知器就没有了，故在每次设计期窗体活跃时
   // 检查是否有新的 FormEditor 出现。
   if Assigned(Screen.ActiveCustomForm) and (csDesigning in
     Screen.ActiveCustomForm.ComponentState) then
     CheckNewFormEditor;
+{$ENDIF}
 
   if not IdeClosing and (FActiveFormNotifiers <> nil) then
   begin
@@ -1856,8 +1909,10 @@ end;
 procedure TCnWizNotifierServices.DoApplicationIdle(Sender: TObject;
   var Done: Boolean);
 begin
+{$IFNDEF STAND_ALONE}
   CheckCompNotifyObj;
   CheckDesignerSelection;
+{$ENDIF}
   DoIdleExecute;
 
   if Abs(GetTickCount - FLastIdleTick) > csIdleMinInterval then
@@ -1962,11 +2017,6 @@ end;
 procedure TCnWizNotifierServices.StopExecuteOnApplicationIdle(Method: TNotifyEvent);
 begin
   CnWizRemoveNotifier(FIdleMethods, TMethod(Method));
-end;
-
-function TCnWizNotifierServices.GetCurrentCompilingProject: IOTAProject;
-begin
-  Result := FCurrentCompilingProject;
 end;
 
 procedure TCnWizNotifierServices.DoIdleExecute;
@@ -2098,6 +2148,32 @@ begin
   Result := DoGetMsgHook(FGetMsgNotifiers, FGetMsgMsgList, Handle, Msg);
 end;
 
+procedure TCnWizNotifierServices.AddAfterThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizAddNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.AddBeforeThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizAddNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveAfterThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizRemoveNotifier(FAfterThemeChangeNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveBeforeThemeChangeNotifier(
+  Notifier: TNotifyEvent);
+begin
+  CnWizRemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
+end;
+
+{$IFNDEF STAND_ALONE}
+
 procedure TCnWizNotifierServices.BreakpointAdded(
   Breakpoint: IOTABreakpoint);
 var
@@ -2224,6 +2300,13 @@ begin
   CnWizRemoveNotifier(FProcessDestroyedNotifiers, TMethod(Notifier));
 end;
 
+function TCnWizNotifierServices.GetCurrentCompilingProject: IOTAProject;
+begin
+  Result := FCurrentCompilingProject;
+end;
+
+{$ENDIF}
+
 procedure TCnWizNotifierServices.DoAfterThemeChange;
 var
   I: Integer;
@@ -2261,6 +2344,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 { TCnWizDebuggerNotifier }
 
@@ -2347,6 +2432,7 @@ begin
 
 end;
 
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
