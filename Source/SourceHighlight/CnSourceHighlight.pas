@@ -111,11 +111,10 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
-  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings,
-  {$IFNDEF STAND_ALONE} CnControlHook, CnWizClasses, CnEditControlWrapper,
-  CnWizNotifier, CnWizUtils, CnWizIdeUtils, CnWizShortCut, ToolsAPI,
-  {$ENDIF}
-  CnIni, CnCommon, CnConsts, CnWizConsts,  mPasLex, CnPasWideLex,
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
+  CnWideStrings, CnWizClasses, CnWizShortCut, CnWizNotifier,
+  {$IFNDEF STAND_ALONE} ToolsAPI, CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
+  CnIni, CnCommon, CnConsts, CnWizConsts, CnEditControlWrapper, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
   CnCppCodeParser, CnWideCppParser, CnGraphUtils, CnFastList, CnIDEStrings;
 
@@ -215,8 +214,6 @@ type
 
   TCnCompDirectiveInfo = class;
 
-{$IFNDEF STAND_ALONE}
-
   TCnBlockMatchInfo = class(TObject)
   {* 每个 EditControl 对应一个，解析并管理本编辑器中所有的结构高亮信息，注意 Tokens 均是引用}
   private
@@ -284,12 +281,14 @@ type
     constructor Create(AControl: TControl);
     destructor Destroy; override;
 
+{$IFNDEF STAND_ALONE}
     function CheckBlockMatch(BlockHighlightRange: TBlockHighlightRange): Boolean; // 找出关键字，并调用下面五个函数
     procedure UpdateSeparateLineList;  // 找出空行
     procedure UpdateFlowTokenList;     // 找出流程控制标识符
     procedure UpdateCurTokenList;      // 找出和光标下相同的标识符
     procedure UpdateCompDirectiveList; // 找出编译指令
     procedure UpdateCustomIdentifierList;   // 找出自定义标识符
+{$ENDIF}
 
     procedure CheckLineMatch(ViewCursorPosLine: Integer;
       ViewCursorPosCol: SmallInt; IgnoreClass, IgnoreNamespace: Boolean;
@@ -364,8 +363,6 @@ type
     property CompDirectiveInfo: TCnCompDirectiveInfo read FCompDirectiveInfo write FCompDirectiveInfo;
     {* 编译指令的配对信息，解析关键字高亮时顺便也解析，由外界设置与释放}
   end;
-
-{$ENDIF}
 
   TCnBlockLinePair = class(TObject)
   {* 描述一根配对的线所对应的多个 Token 标记，Token 均为引用，同时用于 Pascal 和 C/C++。
@@ -487,8 +484,6 @@ type
     property CurrentLine: Integer read FCurrentLine write FCurrentLine;
   end;
 
-{$IFNDEF STAND_ALONE}
-
 { TCnSourceHighlight }
 
   TCnSourceHighlight = class(TCnIDEEnhanceWizard)
@@ -576,6 +571,8 @@ type
     FCustomWideIdentfiers: TCnWideStringList;
 {$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
+
+{$IFNDEF STAND_ALONE}
     function EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
       {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
       var ARect: TRect): Boolean;
@@ -584,11 +581,13 @@ type
       LineText 是 Ansi/Utf8/Utf16，AText 是解析的 Token，是 Ansi/Utf16/Utf16}
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: AnsiString;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic, AUnderline: Boolean);
-    function IndexOfBracket(EditControl: TControl): Integer;
+
     function GetBracketMatch(EditView: IOTAEditView; EditBuffer: IOTAEditBuffer;
       EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
     procedure CheckBracketMatch(Editor: TCnEditorObject);
+{$ENDIF}
 
+    function IndexOfBracket(EditControl: TControl): Integer;
     function IndexOfBlockMatch(EditControl: TControl): Integer;
     function IndexOfBlockLine(EditControl: TControl): Integer;
     function IndexOfCompDirectiveLine(EditControl: TControl): Integer;
@@ -606,30 +605,39 @@ type
     // 标记一行代码需要重画，只有在 BeginUpdateEditor 和 EndUpdateEditor 之间调用有效
     procedure EditorMarkLineDirty(LineNum: Integer);
     procedure RefreshCurrentTokens(Info: TCnBlockMatchInfo);
-    procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure ActiveFormChanged(Sender: TObject);
     procedure AfterCompile(Succeeded: Boolean; IsCodeInsight: Boolean);
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
+
+{$IFNDEF STAND_ALONE}
+    procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
+    procedure PaintBracketMatch(Editor: TCnEditorObject;
+      LineNum, LogicLineNum: Integer; AElided: Boolean);
+{$ENDIF}
+
     procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     procedure ClearHighlight(Editor: TCnEditorObject);
-    procedure PaintBracketMatch(Editor: TCnEditorObject;
-      LineNum, LogicLineNum: Integer; AElided: Boolean);
+
+{$IFNDEF STAND_ALONE}
     procedure PaintBlockMatchKeyword(Editor: TCnEditorObject; // 其他非匹配的高亮都在里头画
       LineNum, LogicLineNum: Integer; AElided: Boolean);
     procedure PaintBlockMatchLine(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
     procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
+{$ENDIF}
     function GetBlockMatchHotkey: TShortCut;
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
     procedure ReloadIDEFonts;
     procedure SetHilightSeparateLine(const Value: Boolean);
 {$IFNDEF BDS}
+{$IFNDEF STAND_ALONE}
     procedure BeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
+{$ENDIF}
     procedure SetHighLightCurrentLine(const Value: Boolean);
     procedure SetHighLightLineColor(const Value: TColor);
 {$ENDIF}
@@ -642,7 +650,9 @@ type
     procedure SetCustomIdentifierBackground(const Value: TColor);
     procedure SetCustomIdentifierForeground(const Value: TColor);
   protected
+{$IFNDEF STAND_ALONE}
     procedure GutterChangeRepaint(Sender: TObject);
+{$ENDIF}
     function CanSolidCurrentLineBlock: Boolean;
     procedure DoEnhConfig;
     procedure SetActive(Value: Boolean); override;
@@ -770,6 +780,8 @@ type
 
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
+
+{$IFNDEF STAND_ALONE}
 
 function LoadIDEDefaultCurrentColor: TColor;
 {* 根据 IDE 配色方案自动调整的初始化高亮背景色}
@@ -906,9 +918,7 @@ const
   csCustomIdentifiers = 'CustomIdentifiers';
 
 var
-{$IFNDEF STAND_ALONE}
   FHighlight: TCnSourceHighlight = nil;
-{$ENDIF}
 
   GlobalIgnoreClass: Boolean = False;
   GlobalIgnoreNamespace: Boolean = False;
@@ -961,6 +971,17 @@ begin
   for I := 0 to PairPool.Count - 1 do
     TObject(PairPool[I]).Free;
 end;
+
+{$IFDEF STAND_ALONE}
+
+// 为了独立运行时不引用，自己写个本地的判断指定窗体是否编辑器窗体
+function IsIdeEditorForm(AForm: TCustomForm): Boolean;
+begin
+  Result := (AForm <> nil) and (Pos('EditWindow_', AForm.Name) = 1) and
+    (AForm.ClassName = 'TEditWindow') and (not (csDesigning in AForm.ComponentState));
+end;
+
+{$ENDIF}
 
 function EqualIdeToken(S1, S2: PCnIdeTokenChar; CaseSensitive: Boolean = False): Boolean;
   {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
@@ -1356,6 +1377,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 { TCnBlockMatchInfo }
 
 function TCnBlockMatchInfo.CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
@@ -1418,6 +1441,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 // 分析检查本 EditControl 中的结构高亮信息
 function TCnBlockMatchInfo.CheckBlockMatch(
@@ -2154,6 +2179,8 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCompDirectiveTokenList[I]).EditLine);
 end;
 
+{$ENDIF}
+
 procedure TCnBlockMatchInfo.CheckLineMatch(ViewCursorPosLine: Integer;
   ViewCursorPosCol: SmallInt; IgnoreClass, IgnoreNamespace: Boolean;
   NeedProcedure: Boolean);
@@ -2875,6 +2902,8 @@ begin
   Result := TCnGeneralPasToken(FCustomIdentifierTokenList[Index]);
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnBlockMatchInfo.UpdateCustomIdentifierList;
 var
   EditView: IOTAEditView;
@@ -2952,6 +2981,8 @@ begin
   for I := 0 to FCustomIdentifierTokenList.Count - 1 do
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierTokenList[I]).EditLine);
 end;
+
+{$ENDIF}
 
 function TCnBlockMatchInfo.GetCustomIdentifierLineCount: Integer;
 begin
@@ -3121,6 +3152,7 @@ begin
   FCurrentTokenValidateTimer.Interval := FCurrentTokenDelay;
   FCurrentTokenValidateTimer.OnTimer := OnCurrentTokenValidateTimer;
 
+{$IFNDEF STAND_ALONE}
 {$IFNDEF BDS}
   FCorIdeModule := LoadLibrary(CorIdeLibName);
   if GetProcAddress(FCorIdeModule, SSetForeAndBackColorName) <> nil then
@@ -3130,17 +3162,24 @@ begin
   SetForeAndBackColorHook := TCnMethodHook.Create(@SetForeAndBackColor,
     @MyEditorsCustomEditControlSetForeAndBackColor);
 {$ENDIF}
+{$ENDIF}
 
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
+{$IFNDEF STAND_ALONE}
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+{$ENDIF}
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
+{$IFNDEF STAND_ALONE}
   EditControlWrapper.AddBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
+{$ENDIF}
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.AddAfterCompileNotifier(AfterCompile);
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
+{$ENDIF}
 end;
 
 destructor TCnSourceHighlight.Destroy;
@@ -3167,22 +3206,30 @@ begin
   FViewChangedList.Free;
 {$IFNDEF BDS}
   FCurLineList.Free;
+{$IFNDEF STAND_ALONE}
   SetForeAndBackColorHook.Free;
   if FCorIdeModule <> 0 then
     FreeLibrary(FCorIdeModule);
 {$ENDIF}
+{$ENDIF}
 
   WizShortCutMgr.DeleteShortCut(FBlockShortCut);
+{$IFNDEF STAND_ALONE}
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
   CnWizNotifierServices.RemoveAfterCompileNotifier(AfterCompile);
+{$ENDIF}
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
+{$IFNDEF STAND_ALONE}
   EditControlWrapper.RemoveBeforePaintLineNotifier(BeforePaintLine);
 {$ENDIF}
+{$ENDIF}
+{$IFNDEF STAND_ALONE}
   EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
+{$ENDIF}
   FHighlight := nil;
   inherited;
 end;
@@ -3192,6 +3239,8 @@ begin
   if Assigned(FOnEnhConfig) then
     FOnEnhConfig(Self);
 end;
+
+{$IFNDEF STAND_ALONE}
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
   {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
@@ -3366,6 +3415,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 括号匹配高亮
 //------------------------------------------------------------------------------
@@ -3384,6 +3435,8 @@ begin
   end;
   Result := -1;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 // 以下代码使用 EditControlWrapper.GetTextAtLine 来取得某一行的代码，
 // 因为使用 EditView.CharPosToPos 转换线性位置在大文件时很慢
@@ -3945,6 +3998,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 结构高亮显示
 //------------------------------------------------------------------------------
@@ -4036,6 +4091,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 // Editor 情况发生变化时被调用，如果内容改变，则重新进行语法分析
 procedure TCnSourceHighlight.UpdateHighlight(Editor: TCnEditorObject;
@@ -4266,6 +4323,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // 上面的延时到时间了，开始解析
 procedure TCnSourceHighlight.OnHighlightTimer(Sender: TObject);
 var
@@ -4289,7 +4348,9 @@ begin
       if Info.FChanged then
       begin
         try
+{$IFNDEF STAND_ALONE}
           Info.CheckBlockMatch(BlockHighlightRange);
+{$ENDIF}
         except
           ; // Hide an Unknown exception.
         end;
@@ -4335,7 +4396,9 @@ begin
           end;
           Info.FChanged := True;
           Info.FModified := True;
+{$IFNDEF STAND_ALONE}
           Info.CheckBlockMatch(BlockHighlightRange);
+{$ENDIF}
         except
           ;
         end;
@@ -4359,6 +4422,8 @@ begin
   Result := FHighLightColors[ ALayer mod 6 ];
    // HSLToRGB(ALayer / 7, 1, 0.5);
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -5327,6 +5392,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 通知事件
 //------------------------------------------------------------------------------
@@ -5376,6 +5443,8 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnSourceHighlight.SourceEditorNotify(SourceEditor: IOTASourceEditor;
   NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
 begin
@@ -5386,6 +5455,8 @@ begin
     FStructureTimer.OnTimer := OnHighlightTimer;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 procedure TCnSourceHighlight.ActiveFormChanged(Sender: TObject);
 begin
@@ -5406,6 +5477,8 @@ begin
     CnWizNotifierServices.ExecuteOnApplicationIdle(OnHighlightExec);
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure TCnSourceHighlight.GutterChangeRepaint(Sender: TObject);
 var
   Control: TControl;
@@ -5424,6 +5497,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // EditorChange 时调用此事件去检查括号和结构高亮
 procedure TCnSourceHighlight.EditorChanged(Editor: TCnEditorObject;
   ChangeType: TCnEditorChangeTypes);
@@ -5439,6 +5514,7 @@ begin
       FCurrentTokenInvalid := True;
     end;
 
+{$IFNDEF STAND_ALONE}
     // 仅 View 切换时调用底层函数可能是不安全的，所有高亮需要重新刷新
     if ChangeType = [ctView] then
     begin
@@ -5454,6 +5530,7 @@ begin
       end;
       Exit;
     end;
+{$ENDIF}
 
     CharSize := EditControlWrapper.GetCharSize;
 
@@ -5463,9 +5540,11 @@ begin
       if ctFont in ChangeType then
       begin
         ReloadIDEFonts;
+{$IFNDEF STAND_ALONE}
 {$IFNDEF BDS}
         if FHighLightLineColor = FDefaultHighLightLineColor then
           FHighLightLineColor := LoadIDEDefaultCurrentColor;
+{$ENDIF}
 {$ENDIF}
       end;
 {$IFDEF BDS}
@@ -5481,7 +5560,9 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('Source Highlight Get Gutter Width Changed');
 {$ENDIF}
+{$IFNDEF STAND_ALONE}
         CnWizNotifierServices.ExecuteOnApplicationIdle(GutterChangeRepaint);
+{$ENDIF}
       end;
 
       // 都重绘
@@ -5497,6 +5578,7 @@ begin
         ChangeType := ChangeType + [ctView];
       end;
 
+{$IFNDEF STAND_ALONE}
       CheckBracketMatch(Editor);
 
       if FStructureHighlight or FBlockMatchDrawLine or FBlockMatchHighlight
@@ -5505,11 +5587,14 @@ begin
       begin
         UpdateHighlight(Editor, ChangeType);
       end;
+{$ENDIF}
     finally
       EndUpdateEditor(Editor);
     end;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnSourceHighlight.PaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
@@ -5559,6 +5644,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 多语及设置
 //------------------------------------------------------------------------------
@@ -5581,7 +5668,9 @@ end;
 
 procedure TCnSourceHighlight.Config;
 begin
+{$IFNDEF STAND_ALONE}
   ShowSourceHighlightForm(Self);
+{$ENDIF}
 end;
 
 procedure TCnSourceHighlight.LoadSettings(Ini: TCustomIniFile);
@@ -5611,7 +5700,9 @@ begin
     FSeparateLineStyle := TCnLineStyle(ReadInteger('', csSeparateLineStyle, Ord(lsSmallDot)));
     FSeparateLineWidth := ReadInteger('', csSeparateLineWidth, 1);
 {$IFNDEF BDS}
+{$IFNDEF STAND_ALONE}
     FHighLightLineColor := ReadColor('', csHighLightLineColor, LoadIDEDefaultCurrentColor);
+{$ENDIF}
     FHighLightCurrentLine := ReadBool('', csHighLightCurrentLine, True);
 {$ENDIF}
     FHighlightFlowStatement := ReadBool('', csHighlightFlowStatement, True);
@@ -5762,8 +5853,10 @@ begin
     OnHighlightExec(nil);
   end;
 
+{$IFNDEF STAND_ALONE}
   if not FShowTokenPosAtGutter then
     EventBus.PostEvent(EVENT_HIGHLIGHT_IDENT_POSITION);
+{$ENDIF}
 end;
 
 procedure TCnSourceHighlight.BeginUpdateEditor(Editor: TCnEditorObject);
@@ -5787,8 +5880,10 @@ begin
   {$IFDEF BDS}
     // 去掉被折叠的行
     for I := FDirtyList.Count - 1 downto 0 do
+    begin
       if EditControlWrapper.GetLineIsElided(EditControl, Integer(FDirtyList[I])) then
         FDirtyList.Delete(I);
+    end;
 
     // 检查代码折叠
     NeedRefresh := False;
@@ -5821,7 +5916,7 @@ begin
     NeedRefresh := FDirtyList.Count > 0;
     for I := 0 to FDirtyList.Count - 1 do
       EditControlWrapper.MarkLinesDirty(EditControl, Integer(FDirtyList[I])
-        - EditView.TopRow, 1);
+        {$IFNDEF STAND_ALONE} - EditView.TopRow {$ENDIF}, 1);
   {$ENDIF}
 
     if NeedRefresh then
@@ -5919,6 +6014,7 @@ begin
   if FHighLightCurrentLine <> Value then
   begin
     FHighLightCurrentLine := Value;
+{$IFNDEF STAND_ALONE}
     // 这段基本没用了因为 Create 时就已经 Hook 了
     if Value and (SetForeAndBackColorHook = nil) then
       SetForeAndBackColorHook := TCnMethodHook.Create(@SetForeAndBackColor,
@@ -5931,6 +6027,7 @@ begin
       else
         SetForeAndBackColorHook.UnhookMethod;
     end;
+{$ENDIF}
   end;
 end;
 
@@ -5942,6 +6039,8 @@ begin
     // RepaintEditors;
   end;
 end;
+
+{$IFNDEF STAND_ALONE}
 
 procedure TCnSourceHighlight.BeforePaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
@@ -6004,6 +6103,8 @@ begin
 
   SetForeAndBackColorHook.HookMethod;
 end;
+
+{$ENDIF}
 
 function TCnSourceHighlight.IndexOfCurLine(EditControl: TControl): Integer;
 var
@@ -6145,8 +6246,6 @@ begin
   Result := inherited GetSearchContent + '括号,匹配,标识符,关键字,划线,画线,空行,分隔,结构,编译指令,行号,'
     + 'bracket,match,identifier,keyword,line,draw,structure,blank,compiler,directive,';
 end;
-
-{$ENDIF}
 
 { TCnBlockLinePair }
 
@@ -6308,12 +6407,16 @@ begin
   FCurrentPair := nil;
   FCurrentToken := nil;
 
+  Text := '';
+  if FControl <> nil then
+  begin
 {$IFDEF UNICODE}
-  // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
-  Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
+    // Unicode 环境下转成替换过的字符串供搜索标识符用，不直接转 Ansi 以免无法处理宽字符的变宽度的情形
+    Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(GetStrProp(FControl, 'LineText')), 'C');
 {$ELSE}
-  Text := GetStrProp(FControl, 'LineText');
+    Text := GetStrProp(FControl, 'LineText');
 {$ENDIF}
+  end;
 
   Col := ViewCursorPosCol;
 

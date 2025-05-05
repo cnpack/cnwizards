@@ -48,7 +48,7 @@ object CnTestStructureForm: TCnTestStructureForm
       object mmoPas: TMemo
         Left = 16
         Top = 56
-        Width = 881
+        Width = 889
         Height = 201
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -122,7 +122,7 @@ object CnTestStructureForm: TCnTestStructureForm
       object mmoParsePas: TMemo
         Left = 16
         Top = 272
-        Width = 881
+        Width = 889
         Height = 268
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -162,7 +162,7 @@ object CnTestStructureForm: TCnTestStructureForm
         OnClick = btnAnsiLexClick
       end
       object chkWideIdentPas: TCheckBox
-        Left = 708
+        Left = 700
         Top = 20
         Width = 77
         Height = 17
@@ -170,7 +170,7 @@ object CnTestStructureForm: TCnTestStructureForm
         TabOrder = 7
       end
       object btnPasPosInfo: TButton
-        Left = 832
+        Left = 840
         Top = 16
         Width = 65
         Height = 25
@@ -185,6 +185,15 @@ object CnTestStructureForm: TCnTestStructureForm
         Height = 17
         Caption = 'Is Program'
         TabOrder = 9
+      end
+      object btnPair: TButton
+        Left = 776
+        Top = 16
+        Width = 57
+        Height = 25
+        Caption = 'Pair'
+        TabOrder = 10
+        OnClick = btnPairClick
       end
     end
     object tsCpp: TTabSheet
@@ -222,21 +231,6 @@ object CnTestStructureForm: TCnTestStructureForm
         Font.Height = -12
         Font.Name = 'Courier New'
         Font.Style = []
-        Lines.Strings = (
-          '#include <stdio.h>'
-          '#include "io.h"'
-          ''
-          'void do_some(int a)'
-          '{'
-          '    printf("Test.\n"); // Test'
-          '#define XXXX \'
-          '    yyyy'
-          '        Move(); {   ;  \'
-          '    }'
-          '/*'
-          'Test Comment'
-          '*/ Test();'
-          '}')
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 1

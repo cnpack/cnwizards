@@ -9,7 +9,8 @@ uses
   mPasLex in '..\..\Source\ThirdParty\mPasLex.pas',
   CnPasWideLex in '..\..\Source\Utils\CnPasWideLex.pas',
   mwBCBTokenList in '..\..\Source\ThirdParty\mwBCBTokenList.pas',
-  CnBCBWideTokenList in '..\..\Source\Utils\CnBCBWideTokenList.pas';
+  CnBCBWideTokenList in '..\..\Source\Utils\CnBCBWideTokenList.pas',
+  CnSourceHighlight in '..\..\Source\SourceHighlight\CnSourceHighlight.pas';
 
 {$R *.RES}
 

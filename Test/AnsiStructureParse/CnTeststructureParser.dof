@@ -43,18 +43,14 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Source;..\..\Source\ThirdParty;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics
+SearchPath=..\..\Source;..\..\Source\ThirdParty;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\Source\Framework;..\..\Source\Utils
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
-Conditionals=
+Conditionals=STAND_ALONE
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
 RunParams=
 HostApplication=
-[Language]
-ActiveLang=
-ProjectLang=$00000804
-RootDir=
 [Version Info]
 IncludeVerInfo=0
 AutoIncBuild=0
@@ -80,17 +76,21 @@ OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
+[Excluded Packages]
+$(DELPHI)\Bin\dclite50.bpl=Borland Integrated Translation Environment
 [HistoryLists\hlConditionals]
-Count=1
-Item0=DEBUG;CAPTURE_STACK
+Count=2
+Item0=STAND_ALONE
+Item1=DEBUG;CAPTURE_STACK
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=3
-Item0=..\..\Source
-Item1=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
-Item2=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
+Count=4
+Item0=..\..\Source;..\..\Source\ThirdParty;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\Source\Framework;..\..\Source\Utils
+Item1=..\..\Source
+Item2=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
+Item3=$(DELPHI)\Source\Toolsapi;..\..\cnpack\Source\Common;..\..\cnpack\Source\NonVisual;..\..\cnpack\Source\MultiLang;..\..\cnpack\Source\Graphics;..\..\cnpack\Source\NetComm;..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu

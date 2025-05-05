@@ -40,6 +40,7 @@ type
     OpenDialog1: TOpenDialog;
     btnPasPosInfo: TButton;
     chkIsDpr: TCheckBox;
+    btnPair: TButton;
     procedure btnLoadPasClick(Sender: TObject);
     procedure btnParsePasClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -53,6 +54,7 @@ type
     procedure btnWideTokenizeClick(Sender: TObject);
     procedure btnIncClick(Sender: TObject);
     procedure btnPasPosInfoClick(Sender: TObject);
+    procedure btnPairClick(Sender: TObject);
   private
     { Private declarations }
     procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
@@ -67,9 +69,21 @@ var
 implementation
 
 uses
-  CnCppCodeParser, mwBCBTokenList, CnBCBWideTokenList;
+  CnCppCodeParser, mwBCBTokenList, CnBCBWideTokenList, CnSourceHighlight;
 
 {$R *.DFM}
+
+const
+  csKeyTokens: set of TTokenKind = [
+    tkIf, tkThen, tkElse,
+    tkRecord, tkObject, tkClass, tkInterface, tkDispInterface,
+    tkFor, tkWith, tkOn, tkWhile, tkDo,
+    tkAsm, tkBegin, tkEnd,
+    tkTry, tkExcept, tkFinally,
+    tkCase, tkOf,
+    tkRepeat, tkUntil];
+
+  csProcTokens = [tkProcedure, tkFunction, tkOperator, tkConstructor, tkDestructor];
 
 procedure TCnTestStructureForm.btnLoadPasClick(Sender: TObject);
 begin
@@ -530,6 +544,65 @@ begin
     mmoParsePas.Lines.Add('Current ColumnNumber: ' + IntToStr(TokenPos - LinePos));
     mmoParsePas.Lines.Add('Previous Token: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)));
     mmoParsePas.Lines.Add('Current Token: ' + string(Token));
+  end;
+end;
+
+procedure TCnTestStructureForm.btnPairClick(Sender: TObject);
+var
+  I: Integer;
+  PasParser: TCnPasStructureParser;
+  Stream: TMemoryStream;
+  NilChar: Byte;
+  BlockMatchInfo: TCnBlockMatchInfo;
+  Pair: TCnBlockLinePair;
+begin
+  mmoParsePas.Lines.Clear;
+
+  PasParser := TCnPasStructureParser.Create(chkWideIdentPas.Checked);
+  Stream := TMemoryStream.Create;
+  BlockMatchInfo := TCnBlockMatchInfo.Create(nil);
+  BlockMatchInfo.LineInfo := TCnBlockLineInfo.Create(nil);
+
+  try
+    mmoPas.Lines.SaveToStream(Stream);
+    NilChar := 0;
+    Stream.Write(NilChar, SizeOf(NilChar));
+
+    PasParser.ParseSource(Stream.Memory, chkIsDpr.Checked, False);
+    PasParser.FindCurrentBlock(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1);
+
+    for I := 0 to PasParser.Count - 1 do
+    begin
+      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+        BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
+    end;
+    BlockMatchInfo.IsCppSource := False;
+    BlockMatchInfo.CheckLineMatch(mmoPas.CaretPos.Y + 1, mmoPas.CaretPos.X + 1, False, False, True);
+
+    // 代替 ConvertPos 的行为
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      Pair.StartToken.EditLine := Pair.StartToken.LineNumber + 1;
+      Pair.StartToken.EditCol := Pair.StartToken.CharIndex;
+      Pair.EndToken.EditLine := Pair.EndToken.LineNumber + 1;
+      Pair.EndToken.EditCol := Pair.EndToken.CharIndex;
+    end;
+    BlockMatchInfo.LineInfo.SortPairs;
+
+    for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+    begin
+      Pair := BlockMatchInfo.LineInfo.Pairs[I];
+      mmoParsePas.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, ^%d %s ~ %s', [I,
+        Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
+        Pair.StartToken.EditCol, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token]));
+    end;
+  finally
+    Stream.Free;
+    PasParser.Free;
+    BlockMatchInfo.LineInfo.Free;
+    BlockMatchInfo.LineInfo := nil;
+    BlockMatchInfo.Free; // LineInfo 设 nil 后这里的 Clear 才能进行
   end;
 end;
 
