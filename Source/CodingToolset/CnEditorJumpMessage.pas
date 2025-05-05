@@ -700,8 +700,8 @@ begin
     end;
 
     BlockMatchInfo.IsCppSource := CurIsCpp;
-    BlockMatchInfo.CheckLineMatch(EditView, False, False);
-    BlockMatchInfo.CheckCompDirectiveMatch(EditView);
+    BlockMatchInfo.CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, False, False);
+    BlockMatchInfo.CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
 
     // 解析完毕，准备定位
     DestToken := nil;

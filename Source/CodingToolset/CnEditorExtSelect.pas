@@ -447,7 +447,7 @@ begin
 
     // 检查配对，生成多个 Pair，注意最后一个 True 表示 Pascal 中加入了 Procedure 等作为 Pair
     BlockMatchInfo.IsCppSource := CurIsCpp;
-    BlockMatchInfo.CheckLineMatch(EditView, False, False, True);
+    BlockMatchInfo.CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, False, False, True);
 
     // BlockMatchInfo 的输出是 LineInfo 内的内容，生成多个 Pair
 

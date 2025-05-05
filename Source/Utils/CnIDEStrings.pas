@@ -87,6 +87,21 @@ type
   TCnGeneralBCBTokenList = TBCBTokenList;
 {$ENDIF}
 
+{$IFDEF STAND_ALONE}
+
+  // 独立运行时，把 ToolsAPI 里的一些基础定义搬移过来
+
+  TOTAEditPos = packed record
+    Col: SmallInt;       // 1 开始
+    Line: Longint;       // 1 开始
+  end;
+
+  TOTACharPos = packed record
+    CharIndex: SmallInt; // 0 开始
+    Line: Longint;       // 1 开始
+  end;
+{$ENDIF}
+
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
 {* 粗略判断一个 Unicode 宽字符是否占两个字符宽度，行为尽量朝 IDE 靠近}
 

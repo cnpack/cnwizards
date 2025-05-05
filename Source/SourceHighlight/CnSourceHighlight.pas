@@ -110,10 +110,12 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
-  ToolsAPI, IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
-  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings, CnControlHook,
-  CnWizClasses, CnEditControlWrapper, CnWizNotifier, CnIni, CnWizUtils, CnCommon,
-  CnConsts, CnWizConsts, CnWizIdeUtils, CnWizShortCut, mPasLex, CnPasWideLex,
+  IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
+  {$IFDEF COMPILER6_UP} Variants, {$ENDIF} CnWideStrings,
+  {$IFNDEF STAND_ALONE} CnControlHook, CnWizClasses, CnEditControlWrapper,
+  CnWizNotifier, CnWizUtils, CnWizIdeUtils, CnWizShortCut, ToolsAPI,
+  {$ENDIF}
+  CnIni, CnCommon, CnConsts, CnWizConsts,  mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
   CnCppCodeParser, CnWideCppParser, CnGraphUtils, CnFastList, CnIDEStrings;
 
@@ -287,9 +289,11 @@ type
     procedure UpdateCompDirectiveList; // 找出编译指令
     procedure UpdateCustomIdentifierList;   // 找出自定义标识符
 
-    procedure CheckLineMatch(View: IOTAEditView; IgnoreClass, IgnoreNamespace: Boolean;
+    procedure CheckLineMatch(ViewCursorPosLine: Integer;
+      ViewCursorPosCol: SmallInt; IgnoreClass, IgnoreNamespace: Boolean;
       NeedProcedure: Boolean = False);
-    procedure CheckCompDirectiveMatch(View: IOTAEditView);
+    procedure CheckCompDirectiveMatch(ViewCursorPosLine: Integer;
+      ViewCursorPosCol: SmallInt);
     procedure ConvertLineList;          // 将解析出的关键字与当前标识符转换成按行方式快速访问的
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
     procedure ConvertFlowLineList;      // 将解析出的流程控制标识符转换成按行方式快速访问的
@@ -438,7 +442,8 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure AddPair(Pair: TCnBlockLinePair);
-    procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); virtual;
+    procedure FindCurrentPair(ViewCursorPosLine: Integer;
+      ViewCursorPosCol: SmallInt; IsCppModule: Boolean = False); virtual;
     {* 寻找其中一个标识符在光标下的一组关键字对，使用 Ansi 模式，直接拿当前光标值
        与当前行文字计算而来，不涉及到语法解析，输出为 FCurrentPair 与 FCurrentToken。
        注意对 Unicode 标识符可能有问题。}
@@ -460,7 +465,8 @@ type
   {* 每个 EditControl 对应一个，由对应的 BlockMatchInfo 转换而来，包括多个
      TCompDirectivePair. 实现上沿用 TBlockLineInfo，但输出的 TBlockLinePair
      实际上是 TCompDirectivePair}
-    procedure FindCurrentPair(View: IOTAEditView; IsCppModule: Boolean = False); override;
+    procedure FindCurrentPair(ViewCursorPosLine: Integer;
+      ViewCursorPosCol: SmallInt; IsCppModule: Boolean = False); override;
     {* 寻找其中一个编译指令在光标下的一组编译指令对，使用 Ansi 模式}
   end;
 
@@ -1491,14 +1497,14 @@ begin
       ConvertLineList;
       if LineInfo <> nil then
       begin
-        CheckLineMatch(EditView, GlobalIgnoreClass, GlobalIgnoreNamespace);
+        CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, GlobalIgnoreClass, GlobalIgnoreNamespace);
     {$IFDEF DEBUG}
         CnDebugger.LogInteger(LineInfo.Count, 'HighLight Cpp LinePairs Count.');
     {$ENDIF}
       end;
       if CompDirectiveInfo <> nil then
       begin
-        CheckCompDirectiveMatch(EditView);
+        CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
     {$IFDEF DEBUG}
         CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Cpp CompDirectivePairs Count.');
     {$ENDIF}
@@ -1602,7 +1608,7 @@ begin
 
     if LineInfo <> nil then
     begin
-      CheckLineMatch(EditView, GlobalIgnoreClass, GlobalIgnoreNamespace);
+      CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, GlobalIgnoreClass, GlobalIgnoreNamespace);
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(LineInfo.Count, 'HighLight Pas LinePairs Count.');
     {$ENDIF}
@@ -1610,7 +1616,7 @@ begin
 
     if CompDirectiveInfo <> nil then
     begin
-      CheckCompDirectiveMatch(EditView);
+      CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Pas CompDirectivePairs Count.');
     {$ENDIF}
@@ -2066,8 +2072,9 @@ begin
     FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCompDirectiveTokenList[I]).EditLine);
 end;
 
-procedure TCnBlockMatchInfo.CheckLineMatch(View: IOTAEditView; IgnoreClass,
-  IgnoreNamespace: Boolean; NeedProcedure: Boolean);
+procedure TCnBlockMatchInfo.CheckLineMatch(ViewCursorPosLine: Integer;
+  ViewCursorPosCol: SmallInt; IgnoreClass, IgnoreNamespace: Boolean;
+  NeedProcedure: Boolean);
 var
   I: Integer;
   Pair, PrevPair, IfThenPair: TCnBlockLinePair;
@@ -2121,7 +2128,7 @@ begin
           end;
         end;
         LineInfo.ConvertLineList;
-        LineInfo.FindCurrentPair(View, FIsCppSource);
+        LineInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
       finally
         for I := 0 to FStack.Count - 1 do
           FreeLinePair(FStack.Pop);
@@ -2271,7 +2278,7 @@ begin
         end;
 
         LineInfo.ConvertLineList;
-        LineInfo.FindCurrentPair(View, FIsCppSource);
+        LineInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
       finally
         for I := 0 to FIfThenStack.Count - 1 do
           FIfThenStack.Pop;
@@ -2282,7 +2289,8 @@ begin
   end;
 end;
 
-procedure TCnBlockMatchInfo.CheckCompDirectiveMatch(View: IOTAEditView);
+procedure TCnBlockMatchInfo.CheckCompDirectiveMatch(ViewCursorPosLine: Integer;
+  ViewCursorPosCol: SmallInt);
 var
   I: Integer;
   PToken: TCnGeneralPasToken;
@@ -2356,7 +2364,7 @@ begin
         end;
       end;
       CompDirectiveInfo.ConvertLineList;
-      CompDirectiveInfo.FindCurrentPair(View, FIsCppSource);
+      CompDirectiveInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
         TCnCompDirectivePair(FStack.Pop).Free;
@@ -2424,7 +2432,7 @@ begin
         end;
       end;
       CompDirectiveInfo.ConvertLineList;
-      CompDirectiveInfo.FindCurrentPair(View, FIsCppSource);
+      CompDirectiveInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
         TCnCompDirectivePair(FStack.Pop).Free;
@@ -3915,7 +3923,7 @@ begin
         if (Line <> nil) and (EditView <> nil) then
         begin
           OldPair := Line.CurrentPair;
-          Line.FindCurrentPair(EditView); // 暂时不处理 C/C++ 的情况
+          Line.FindCurrentPair(EditView.CursorPos.Line, EditView.CursorPos.Col); // 暂时不处理 C/C++ 的情况
           NewPair := Line.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -3952,7 +3960,7 @@ begin
         if (CompDirective <> nil) and (EditView <> nil) then
         begin
           OldPair := CompDirective.CurrentPair;
-          CompDirective.FindCurrentPair(EditView); // 暂时不处理 C/C++ 的情况
+          CompDirective.FindCurrentPair(EditView.CursorPos.Line, EditView.CursorPos.Col); // 暂时不处理 C/C++ 的情况
           NewPair := CompDirective.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -6011,8 +6019,8 @@ begin
   inherited;
 end;
 
-procedure TCnBlockLineInfo.FindCurrentPair(View: IOTAEditView;
-  IsCppModule: Boolean);
+procedure TCnBlockLineInfo.FindCurrentPair(ViewCursorPosLine: Integer;
+  ViewCursorPosCol: SmallInt; IsCppModule: Boolean);
 var
   I: Integer;
   Col: SmallInt;
@@ -6070,7 +6078,7 @@ begin
   Text := GetStrProp(FControl, 'LineText');
 {$ENDIF}
 
-  Col := View.CursorPos.Col;
+  Col := ViewCursorPosCol;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
   // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
@@ -6084,7 +6092,7 @@ begin
   end;
 {$ENDIF}
 
-  LineNo := View.CursorPos.Line;
+  LineNo := ViewCursorPosLine;
 
   // 不知为何需如此处理但有效
   if IsCppModule then
@@ -6241,8 +6249,8 @@ end;
 
 { TCnCompDirectiveInfo }
 
-procedure TCnCompDirectiveInfo.FindCurrentPair(View: IOTAEditView;
-  IsCppModule: Boolean);
+procedure TCnCompDirectiveInfo.FindCurrentPair(ViewCursorPosLine: Integer;
+  ViewCursorPosCol: SmallInt; IsCppModule: Boolean);
 var
   I: Integer;
   Col: SmallInt;
@@ -6299,7 +6307,7 @@ begin
   Text := AnsiString(GetStrProp(FControl, 'LineText'));
 {$ENDIF}
 
-  Col := View.CursorPos.Col;
+  Col := ViewCursorPosCol;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
   // D2005~2007 与以下版本获得的是 UTF8 字符串与 Pos，都需要转换成 Ansi 的
@@ -6313,7 +6321,7 @@ begin
   end;
 {$ENDIF}
 
-  LineNo := View.CursorPos.Line;
+  LineNo := ViewCursorPosLine;
 
   // 不知为何需如此处理但有效
   if IsCppModule then
