@@ -91,6 +91,8 @@ const
 { TCnEditorExtendingSelect }
 
 procedure TCnEditorExtendingSelect.FixPair(APair: TCnBlockLinePair);
+var
+  I: Integer;
 begin
   if APair.MiddleCount > 0 then
   begin
@@ -98,6 +100,16 @@ begin
     begin
       APair.EndToken := APair.MiddleToken[APair.MiddleCount - 1];
       APair.DeleteMidToken(APair.MiddleCount - 1);
+    end;
+
+    // record of of end 这种解析出的结果要调整
+    if (APair.StartToken.TokenID = tkRecord) and (APair.EndToken.TokenID = tkEnd) then
+    begin
+      for I := APair.MiddleCount - 1 downto 0 do
+      begin
+        if APair.MiddleToken[I].TokenID = tkOf then
+          APair.DeleteMidToken(I);
+      end;
     end;
   end;
 end;

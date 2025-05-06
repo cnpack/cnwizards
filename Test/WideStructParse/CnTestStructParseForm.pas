@@ -334,7 +334,7 @@ begin
       for J := 0 to Pair.MiddleCount - 1 do
         S := S + ', ' + Pair.MiddleToken[J].Token;
 
-      mmoPasResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
+      mmoPasResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d %s ~ %s %s', [I,
         Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
         Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
     end;
@@ -407,7 +407,7 @@ begin
       for J := 0 to Pair.MiddleCount - 1 do
         S := S + ', ' + Pair.MiddleToken[J].Token;
 
-      mmoCppResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d  %s ~ %s %s', [I,
+      mmoCppResult.Lines.Add(Format('Pairs: #%3.3d From %4.4d %3.3d ~ %4.4d %3.3d, +%d ^%d %s ~ %s %s', [I,
         Pair.StartToken.EditLine, Pair.StartToken.EditCol, Pair.EndToken.EditLine,
         Pair.EndToken.EditCol, Pair.MiddleCount, Pair.Layer, Pair.StartToken.Token, Pair.EndToken.Token, S]));
     end;
