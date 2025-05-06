@@ -181,10 +181,14 @@ type
     procedure actAddDirExecute(Sender: TObject);
   private
     FCustomFiles: TCnBackupProjectInfo;
-    FProjectList: TCnBackupProjectList;
+    FProjectList: TCnBackupProjectList; // 根列表，里头有多个 ProjectInfo，每个里有有多个 FileInfo
     FExt: string;
     FListViewWidthStr: string;
-
+    FSortIndex: Integer;
+    FSortDown: Boolean;
+    FUpArrow: TBitmap;
+    FDownArrow: TBitmap;
+    FNoArrow: TBitmap;
     FRemovePath: Boolean;
     FUsePassword: Boolean;
     FRememberPass: Boolean;
@@ -218,6 +222,13 @@ type
     procedure SimpleEncode(var Pass: string);
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
+
+    procedure InitArrowBitmaps;
+    procedure ClearColumnArrow;
+    procedure ChangeColumnArrow;
+    procedure lvFileViewColumnClick(Sender: TObject; Column: TListColumn);
+    procedure lvFileViewCompare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
   protected
     FLastBackupFile: string;
     FLastBackupTime: TDateTime;
@@ -285,8 +296,14 @@ const
   csComments = '<Comments>';
   csAfterCmd = '<externfile.exe>';
 
+  {CommCtrl Constants For Windows >= XP }
+  HDF_SORTUP              = $0400;
+  HDF_SORTDOWN            = $0200;
+
 var
   FileList: TStrings = nil;
+  GlobalSortIndex: Integer;
+  GlobalSortDown: Boolean;
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 begin
@@ -495,15 +512,15 @@ function TCnBackupProjectList.GetItem(Index: Integer): TCnBackupProjectInfo;
 begin
   Result := TCnBackupProjectInfo(FProjectList.Items[index]);
 end;
- 
-//==============================================================================
-// 工程备份主窗口类
-//==============================================================================
 
 procedure TCnBackupProjectList.Delete(Index: Integer);
 begin
   FProjectList.Delete(Index);
 end;
+
+//==============================================================================
+// 工程备份主窗口类
+//==============================================================================
 
 { TCnProjectBackupForm }
 
@@ -513,6 +530,16 @@ var
   FileInfo: TSHFileInfo;
 begin
   WizOptions.ResetToolbarWithLargeIcons(tlbMain);
+
+{$IFNDEF COMPILER5}
+  // D5 下不支持 OnCompare 事件，没法按列排序
+  FUpArrow := TBitmap.Create;
+  FDownArrow := TBitmap.Create;
+  FNoArrow := TBitmap.Create;
+
+  lvFileView.OnColumnClick := lvFileViewColumnClick;
+  lvFileView.OnCompare := lvFileViewCompare;
+{$ENDIF}
 
   Screen.Cursor := crHourGlass;
   try
@@ -545,6 +572,10 @@ begin
   CnWizNotifierServices.RemoveApplicationMessageNotifier(OnAppMessage);
   FreeAndNil(FProjectList);
   FreeAndNil(FCustomFiles);
+
+  FNoArrow.Free;
+  FDownArrow.Free;
+  FUpArrow.Free;
   inherited;
 end;
 
@@ -782,7 +813,7 @@ begin
 
       ProjectInfo := TCnBackupProjectInfo.Create;
       ProjectInfo.SetFileInfo(IProject.FileName);
-      FProjectList.Add(ProjectInfo);
+      FProjectList.Add(ProjectInfo); // 先加工程文件
 
       for J := 0 to IProject.GetModuleFileCount - 1 do
       begin
@@ -790,7 +821,7 @@ begin
         Assert(IEditor <> nil);
 
         FileName := IEditor.FileName;
-        if FileName <> '' then
+        if FileName <> '' then       // 再加工程中的每一个源文件
           ProjectInfo.AddFiles(IEditor.FileName, '', '');
       end;
 
@@ -800,7 +831,7 @@ begin
         Assert(IModuleInfo <> nil);
 
         FileName := IModuleInfo.FileName;
-        if FileName <> '' then
+        if FileName <> '' then      // 再加工程中的每一个窗体文件
           ProjectInfo.AddFiles(IModuleInfo.FileName, '', IModuleInfo.FormName);
       end;
     end;
@@ -1480,6 +1511,115 @@ begin
       [FLastBackupFile, DateTimeToStr(FLastBackupTime)])
   else
     lblLast.Caption := '';
+end;
+
+
+procedure TCnProjectBackupForm.ChangeColumnArrow;
+var
+  Header: HWND;
+  Item: THDItem;
+begin
+  if (FSortIndex >= 0) and (FSortIndex < lvFileView.Columns.Count) then
+  begin
+    Header := ListView_GetHeader(lvFileView.Handle);
+    ZeroMemory(@Item, SizeOf(Item));
+    Item.Mask := HDI_FORMAT or HDI_BITMAP;
+
+    Header_GetItem(Header, FSortIndex, Item);
+
+{$IFDEF BDS2007_UP}  // D2007 CommCtrl 才支持 SORTUP/DOWN 标记
+    Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
+    if FSortDown then
+      Item.fmt := Item.fmt or HDF_SORTUP
+    else
+      Item.fmt := Item.fmt or HDF_SORTDOWN;
+{$ELSE}
+    Item.fmt := Item.fmt or HDF_BITMAP_ON_RIGHT or HDF_BITMAP;
+    if FSortDown then
+      Item.hbm := FUpArrow.Handle
+    else
+      Item.hbm := FDownArrow.Handle;
+{$ENDIF}
+
+    Header_SetItem(Header, FSortIndex, Item);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ChangeColumnArrow for Column ' + IntToStr(FSortIndex));
+{$ENDIF}
+  end;
+end;
+
+procedure TCnProjectBackupForm.ClearColumnArrow;
+var
+  Header: HWND;
+  Item: THDItem;
+begin
+  if (FSortIndex >= 0) and (FSortIndex < lvFileView.Columns.Count) then
+  begin
+    Header := ListView_GetHeader(lvFileView.Handle);
+    ZeroMemory(@Item, SizeOf(Item));
+    Item.Mask := HDI_FORMAT or HDI_BITMAP;
+
+    Header_GetItem(Header, FSortIndex, Item);
+    Item.fmt := Item.fmt and not (HDF_SORTUP or HDF_SORTDOWN);
+
+{$IFNDEF BDS2007_UP} // D2007 CommCtrl 才支持 SORTUP/DOWN 标记
+    Item.fmt := Item.fmt or HDF_BITMAP_ON_RIGHT or HDF_BITMAP;
+    Item.hbm := FNoArrow.Handle;
+{$ENDIF}
+
+    Header_SetItem(Header, FSortIndex, Item);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ClearColumnArrow for Column ' + IntToStr(FSortIndex));
+{$ENDIF}
+  end;
+end;
+
+procedure TCnProjectBackupForm.InitArrowBitmaps;
+
+  procedure MakeBitmap(Bmp: TBitmap; Idx: Integer);
+  begin
+    Bmp.Width := dmCnSharedImages.ilColumnHeader.Width;
+    Bmp.Height := dmCnSharedImages.ilColumnHeader.Height;
+    with Bmp.Canvas do
+    begin
+      Brush.COlor := clBtnface;
+      Brush.Style := bsSolid;
+      FillRect(ClipRect);
+    end;
+    dmCnSharedImages.ilColumnHeader.Draw(Bmp.Canvas, 0, 0, Idx);
+  end;
+
+begin
+  MakeBitmap(FUpArrow, 0);
+  MakeBitmap(FDownArrow, 1);
+  MakeBitmap(FNoArrow, 2);
+end;
+
+procedure TCnProjectBackupForm.lvFileViewColumnClick(Sender: TObject;
+  Column: TListColumn);
+begin
+  ClearColumnArrow;
+  if FSortIndex = Column.Index then
+    FSortDown := not FSortDown
+  else
+    FSortIndex := Column.Index;
+
+  // 根据 FSortIndex 和 FSortDown 排序
+  lvFileView.AlphaSort;
+  ChangeColumnArrow;
+end;
+
+procedure TCnProjectBackupForm.lvFileViewCompare(Sender: TObject; Item1,
+  Item2: TListItem; Data: Integer; var Compare: Integer);
+begin
+  if FSortIndex = 0 then
+    Compare := CompareText(Item1.Caption, Item2.Caption)
+  else
+    Compare := CompareText(Item1.SubItems[FSortIndex - 1], Item2.SubItems[FSortIndex - 1]);
+
+  if FSortDown then
+    Compare := -Compare;
 end;
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
