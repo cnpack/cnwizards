@@ -44,14 +44,10 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Buttons, ComCtrls, ToolWin, ExtCtrls, IniFiles, ImgList, ActnList,
-  Menus,
-  CnWizMultiLang, CnWizShareImages, CnRoOptions, CnRoFrmFileList,CnRoClasses,
-  CnRoInterfaces;
+  Menus, CnWizMultiLang, CnWizShareImages, CnRoOptions, CnRoFrmFileList,
+  CnRoClasses, CnRoInterfaces;
 
 type
-
-  TRecentFileType = (rfBPG, rfDPR, rfPAS, rfDPK, rfOther);
-
   TCnFilesListForm = class(TCnTranslateForm)
     actDelete: TAction;
     actExit: TAction;
@@ -93,10 +89,9 @@ type
     procedure tvMenuChange(Sender: TObject; Node: TTreeNode);
     procedure tvMenuCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse: Boolean);
     procedure tvMenuDragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure tvMenuDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept:
-            Boolean);
-    procedure FormKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure tvMenuDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
+      var Accept: Boolean);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     FActiveFrame: TCnRecentFilesFrame;
     FOptions: ICnRoOptions;
@@ -262,6 +257,9 @@ end;
 procedure TCnFilesListForm.FormCreate(Sender: TObject);
 var
   I: Integer;
+{$IFNDEF BDS}
+  S: string;
+{$ENDIF}
 begin
   WizOptions.ResetToolbarWithLargeIcons(tlb1);
 
@@ -271,10 +269,21 @@ begin
   ReadFiles(frDPK, SPackge);
   ReadFiles(frOTH, SOther);
   ReadFiles(frFAV, SFavorite);
-  
+
+  // D 5 6 7 等不支持 bdsproj 和 dproj 的，过滤掉
+{$IFNDEF BDS}
+  for I := frDPR.lvFile.Items.Count - 1 downto 0 do
+  begin
+    S := frDPR.lvFile.Items[I].Caption;
+    S := LowerCase(_CnExtractFileExt(S));
+    if (S = '.dproj') or (S = '.bdsproj') then
+      frDPR.lvFile.Items.Delete(I);
+  end;
+{$ENDIF}
+
   for I := 0 to ComponentCount - 1 do
   begin
-    if (Components[I] is TCnRecentFilesFrame) then
+    if Components[I] is TCnRecentFilesFrame then
     begin
       with TCnRecentFilesFrame(Components[I]) do
       begin
