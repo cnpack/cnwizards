@@ -387,10 +387,16 @@ implementation
 uses
   CnMsgClasses;
 
+// 该 RDTSC 指令在 32 位和 64 位下都有效，且行为一致：高 32 位存入 EDX，低 32 位存入 EAX
+// 64 位系统中 Int64 直接通过 RAX 返回因此会丢高 32 位，需要补处理代码
 function GetCPUPeriod: Int64; assembler;
 asm
   DB 0FH;
   DB 031H;
+{$IFDEF WIN64}
+  SHL RDX, 32
+  OR RAX, RDX
+{$ENDIF}
 end;
 
 function InitializeCore: TCnCoreInitResults;
