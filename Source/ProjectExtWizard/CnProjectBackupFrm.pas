@@ -1633,7 +1633,7 @@ begin
     Compare := I1 - I2;
   end;
 
-  if FSortDown then
+  if not FSortDown then
     Compare := -Compare;
 end;
 
