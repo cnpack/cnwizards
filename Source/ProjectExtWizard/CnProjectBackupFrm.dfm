@@ -99,7 +99,6 @@ inherited CnProjectBackupForm: TCnProjectBackupForm
       item
         Width = 150
       end>
-    SimplePanel = False
   end
   object lvFileView: TListView
     Left = 0

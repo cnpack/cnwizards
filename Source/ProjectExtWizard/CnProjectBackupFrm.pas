@@ -186,9 +186,11 @@ type
     FListViewWidthStr: string;
     FSortIndex: Integer;
     FSortDown: Boolean;
+{$IFNDEF COMPILER5}
     FUpArrow: TBitmap;
     FDownArrow: TBitmap;
     FNoArrow: TBitmap;
+{$ENDIF}
     FRemovePath: Boolean;
     FUsePassword: Boolean;
     FRememberPass: Boolean;
@@ -222,13 +224,14 @@ type
     procedure SimpleEncode(var Pass: string);
     procedure DoFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
-
+{$IFNDEF COMPILER5}
     procedure InitArrowBitmaps;
     procedure ClearColumnArrow;
     procedure ChangeColumnArrow;
     procedure lvFileViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure lvFileViewCompare(Sender: TObject; Item1, Item2: TListItem;
       Data: Integer; var Compare: Integer);
+{$ENDIF}
   protected
     FLastBackupFile: string;
     FLastBackupTime: TDateTime;
@@ -536,6 +539,7 @@ begin
   FUpArrow := TBitmap.Create;
   FDownArrow := TBitmap.Create;
   FNoArrow := TBitmap.Create;
+  InitArrowBitmaps;
 
   lvFileView.OnColumnClick := lvFileViewColumnClick;
   lvFileView.OnCompare := lvFileViewCompare;
@@ -573,9 +577,11 @@ begin
   FreeAndNil(FProjectList);
   FreeAndNil(FCustomFiles);
 
+{$IFNDEF COMPILER5}
   FNoArrow.Free;
   FDownArrow.Free;
   FUpArrow.Free;
+{$ENDIF}
   inherited;
 end;
 
@@ -1513,6 +1519,7 @@ begin
     lblLast.Caption := '';
 end;
 
+{$IFNDEF COMPILER5}
 
 procedure TCnProjectBackupForm.ChangeColumnArrow;
 var
@@ -1606,21 +1613,31 @@ begin
     FSortIndex := Column.Index;
 
   // ¸ù¾Ý FSortIndex ºÍ FSortDown ÅÅÐò
-  lvFileView.AlphaSort;
+  lvFileView.CustomSort(nil, 0);
   ChangeColumnArrow;
 end;
 
 procedure TCnProjectBackupForm.lvFileViewCompare(Sender: TObject; Item1,
   Item2: TListItem; Data: Integer; var Compare: Integer);
+var
+  I1, I2: Integer;
 begin
   if FSortIndex = 0 then
     Compare := CompareText(Item1.Caption, Item2.Caption)
-  else
-    Compare := CompareText(Item1.SubItems[FSortIndex - 1], Item2.SubItems[FSortIndex - 1]);
+  else if FSortIndex in [1, 2] then
+    Compare := CompareText(Item1.SubItems[FSortIndex - 1], Item2.SubItems[FSortIndex - 1])
+  else if FSortIndex = 3 then
+  begin
+    I1 := StrSpToInt(Item1.SubItems[FSortIndex - 1]);
+    I2 := StrSpToInt(Item2.SubItems[FSortIndex - 1]);
+    Compare := I1 - I2;
+  end;
 
   if FSortDown then
     Compare := -Compare;
 end;
+
+{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNPROJECTEXTWIZARD}
 end.
