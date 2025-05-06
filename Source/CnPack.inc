@@ -31,13 +31,14 @@
 
 {$IFDEF FPC}
   // Free Pascal Compiler 3.x Up Definitions
-  {$DEFINE SUPPORT_PASCAL}    // Pascal
-  {$DEFINE SUPPORT_UINT64}    // UInt64
-  {$DEFINE SUPPORT_32_AND_64} // 支持 32 和 64 位，可用 NativeInt 等
-  {$DEFINE SUPPORT_ENCODING}  // Unicode 字符串支持 Encoding 转换
-  {$DEFINE SUPPORT_INLINE}  // 支持 inline
+  {$DEFINE SUPPORT_PASCAL}          // Pascal
+  {$DEFINE SUPPORT_UINT64}          // UInt64
+  {$DEFINE SUPPORT_32_AND_64}       // 支持 32 和 64 位，可用 NativeInt 等
+  {$DEFINE SUPPORT_ENCODING}        // Unicode 字符串支持 Encoding 转换
+  {$DEFINE SUPPORT_INLINE}          // 支持 inline
 
-  {$DEFINE OBJECT_HAS_TOSTRING} // TObject.ToString
+  {$DEFINE OBJECT_HAS_TOSTRING}     // TObject.ToString
+  {$DEFINE OBJECT_HAS_GETHASHCODE}  // TObject.GetHashCode
   {$DEFINE TBYTES_DEFINED}
 
   // 以下是 CPU 定义从 FPC 映射到 Delphi
