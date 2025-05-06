@@ -2,9 +2,9 @@ inherited CnFilesListForm: TCnFilesListForm
   Top = 131
   Anchors = [akLeft, akTop, akRight, akBottom]
   AutoScroll = False
+  Caption = 'Open Historical Files'
   ClientHeight = 529
   ClientWidth = 770
-  Caption = 'Open Historical Files'
   Icon.Data = {
     0000010001002020100000000000E80200001600000028000000200000004000
     0000010004000000000080020000000000000000000000000000000000000000
@@ -41,14 +41,14 @@ inherited CnFilesListForm: TCnFilesListForm
     Left = 121
     Top = 26
     Width = 3
-    Height = 515
+    Height = 503
     Cursor = crHSplit
   end
   object tvMenu: TTreeView
     Left = 0
     Top = 26
     Width = 121
-    Height = 515
+    Height = 503
     Align = alLeft
     DragMode = dmAutomatic
     Images = ilProjectImages
@@ -74,7 +74,7 @@ inherited CnFilesListForm: TCnFilesListForm
   object clbr1: TCoolBar
     Left = 0
     Top = 0
-    Width = 778
+    Width = 770
     Height = 26
     AutoSize = True
     Bands = <
@@ -82,14 +82,14 @@ inherited CnFilesListForm: TCnFilesListForm
         Control = tlb1
         ImageIndex = -1
         MinHeight = 26
-        Width = 778
+        Width = 770
       end>
     EdgeInner = esNone
     EdgeOuter = esNone
     object tlb1: TToolBar
       Left = 9
       Top = 0
-      Width = 765
+      Width = 757
       Height = 26
       AutoSize = True
       BorderWidth = 1
@@ -146,72 +146,72 @@ inherited CnFilesListForm: TCnFilesListForm
   object pnlFrame: TPanel
     Left = 124
     Top = 26
-    Width = 654
-    Height = 515
+    Width = 646
+    Height = 503
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2
-    inline frOTH: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frOTH: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
     end
-    inline frBPG: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frBPG: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       TabOrder = 1
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
     end
-    inline frDPR: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frDPR: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       TabOrder = 2
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
     end
-    inline frPAS: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frPAS: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       TabOrder = 3
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
     end
-    inline frDPK: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frDPK: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       TabOrder = 4
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
       inherited ImageList1: TImageList
         Left = 49
         Top = 45
       end
     end
-    inline frFAV: TRecentFilesFrame
-      Width = 654
-      Height = 515
+    inline frFAV: TCnRecentFilesFrame
+      Width = 646
+      Height = 503
       Align = alClient
       TabOrder = 5
       inherited lvFile: TListView
-        Width = 654
-        Height = 515
+        Width = 646
+        Height = 503
       end
       inherited ImageList1: TImageList
         Top = 81

@@ -30,9 +30,9 @@ unit CnRoFrmFileList;
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 修改记录：
 *           2005-05-04 V1.2 by hubdog
-*               修改ExploreDir的使用为采用ExploreFile
+*               修改 ExploreDir 的使用为采用 ExploreFile
 *           2004-12-12 V1.1
-*               修改为IRoOptions处理
+*               修改为 IRoOptions 处理
 *           2004-03-02 V1.0
 *               创建并移植单元
 ================================================================================
@@ -50,7 +50,7 @@ uses
   CnRoInterfaces, CnPopupMenu;
 
 type
-  TRecentFilesFrame = class(TFrame)
+  TCnRecentFilesFrame = class(TFrame)
     actCopyFolder: TAction;
     actCopyName: TAction;
     actlstFiles: TActionList;
@@ -70,8 +70,8 @@ type
     procedure actOpenFileExecute(Sender: TObject);
     procedure actOpenFolderExecute(Sender: TObject);
     procedure lvFileColumnClick(Sender: TObject; Column: TListColumn);
-    procedure lvFileCompare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare:
-            Integer);
+    procedure lvFileCompare(Sender: TObject; Item1, Item2: TListItem;
+      Data: Integer; var Compare: Integer);
     procedure lvFileDblClick(Sender: TObject);
     procedure lvFileKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure actlstFilesUpdate(Action: TBasicAction;
@@ -101,9 +101,9 @@ implementation
 uses
   ToolsAPI, CnWizShareImages, CnCommon, CnWizUtils;
 
-{*************************************** TRecentFilesFrame ********************}
+{***************************** TRecentFilesFrame ******************************}
 
-procedure TRecentFilesFrame.actCopyFolderExecute(Sender: TObject);
+procedure TCnRecentFilesFrame.actCopyFolderExecute(Sender: TObject);
 var
   I: Integer;
 begin
@@ -123,7 +123,7 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.actCopyNameExecute(Sender: TObject);
+procedure TCnRecentFilesFrame.actCopyNameExecute(Sender: TObject);
 var
   I: Integer;
 begin
@@ -143,12 +143,13 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.actOpenFileExecute(Sender: TObject);
+procedure TCnRecentFilesFrame.actOpenFileExecute(Sender: TObject);
 begin
-  if lvFile.SelCount > 0 then OpenSelectedItem;
+  if lvFile.SelCount > 0 then
+    OpenSelectedItem;
 end;
 
-procedure TRecentFilesFrame.actOpenFolderExecute(Sender: TObject);
+procedure TCnRecentFilesFrame.actOpenFolderExecute(Sender: TObject);
 begin
   if lvFile.Selected <> nil then
   begin
@@ -159,9 +160,9 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.CloseForm(AFileName: string);
+procedure TCnRecentFilesFrame.CloseForm(AFileName: string);
 begin
-  //todo: check favorate file is project's file then close form.
+  // TODO: check favorate file is project's file then close form.
   if (IsProject(AFileName) or IsDpk(AFileName)
     or IsBdsProject(AFileName) or IsDProject(AFileName) or 
     IsCbProject(AFileName) or IsBpg(AFileName)) then
@@ -170,7 +171,7 @@ begin
     TForm(Owner).BringToFront;
 end;
 
-procedure TRecentFilesFrame.DeleteSelectedItems;
+procedure TCnRecentFilesFrame.DeleteSelectedItems;
 var
   I, J: Integer;
 begin
@@ -179,12 +180,14 @@ begin
     if SelCount > 1 then
     begin
       for I := Items.Count - 1 downto 0 do
+      begin
         if Items[i].Selected then
         begin
           J := Files.IndexOf(Items[i].SubItems[0] + Items[i].Caption);
           if J > -1 then Files.Delete(J);
           Items.Delete(I);
         end;
+      end;
       if (Items.Count <> 0) then
         Items[0].Selected := True;
     end
@@ -202,22 +205,22 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.GetSortMemento;
+procedure TCnRecentFilesFrame.GetSortMemento;
 var
   S: string;
-  j: Integer;
+  J: Integer;
 begin
   S := Files.ColumnSorting;
-  j := Pos(',', s);
-  if j = 0 then
-    j := Length(s) + 1;
-  ColumnToSort := StrToIntDef(Copy(s, 1, j - 1), 1);
-  S         := Copy(S, j + 1, length(S));
+  J := Pos(',', s);
+  if J = 0 then
+    J := Length(s) + 1;
+  ColumnToSort := StrToIntDef(Copy(s, 1, J - 1), 1);
+  S := Copy(S, J + 1, length(S));
   SortOrder := StrToIntDef(S, 1);
   lvFile.AlphaSort;
 end;
 
-procedure TRecentFilesFrame.lvFileColumnClick(Sender: TObject; Column: TListColumn);
+procedure TCnRecentFilesFrame.lvFileColumnClick(Sender: TObject; Column: TListColumn);
 begin
   lvFile.Column[ColumnToSort].ImageIndex := -1;
   ColumnToSort := Column.Index;
@@ -241,10 +244,10 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.lvFileCompare(Sender: TObject;
+procedure TCnRecentFilesFrame.lvFileCompare(Sender: TObject;
   Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
 var
-  ix: Integer;
+  I: Integer;
 begin
   if ColumnToSort = 0 then
   begin
@@ -255,20 +258,20 @@ begin
   end
   else
   begin
-    ix := ColumnToSort - 1;
+    I := ColumnToSort - 1;
     if SortOrder = 0 then
-      Compare := CompareText(Item1.SubItems[ix], Item2.SubItems[ix])
+      Compare := CompareText(Item1.SubItems[I], Item2.SubItems[I])
     else
-      Compare := CompareText(Item2.SubItems[ix], Item1.SubItems[ix])
+      Compare := CompareText(Item2.SubItems[I], Item1.SubItems[I])
   end;
 end;
 
-procedure TRecentFilesFrame.lvFileDblClick(Sender: TObject);
+procedure TCnRecentFilesFrame.lvFileDblClick(Sender: TObject);
 begin
   actOpenFile.Execute;
 end;
 
-procedure TRecentFilesFrame.lvFileKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
+procedure TCnRecentFilesFrame.lvFileKeyUp(Sender: TObject; var Key: word; Shift: TShiftState);
 begin
   if (lvFile.Selected = nil) or (lvFile.SelCount <= 0) then
     Exit;
@@ -278,7 +281,7 @@ begin
     OpenSelectedItems;
 end;
 
-procedure TRecentFilesFrame.OpenSelectedItem;
+procedure TCnRecentFilesFrame.OpenSelectedItem;
 var
   S: string;
 begin
@@ -296,7 +299,7 @@ begin
   CloseForm(S);
 end;
 
-procedure TRecentFilesFrame.OpenSelectedItems;
+procedure TCnRecentFilesFrame.OpenSelectedItems;
 var
   I: Integer;
   S: string;
@@ -323,12 +326,12 @@ begin
   end;
 end;
 
-procedure TRecentFilesFrame.SetSortMemento;
+procedure TCnRecentFilesFrame.SetSortMemento;
 begin
   Files.ColumnSorting := IntToStr(ColumnToSort) + ',' + IntToStr(SortOrder);
 end;
 
-procedure TRecentFilesFrame.actlstFilesUpdate(Action: TBasicAction;
+procedure TCnRecentFilesFrame.actlstFilesUpdate(Action: TBasicAction;
   var Handled: Boolean);
 begin
   if (Action = actOpenFile) or (Action = actCopyFolder) or

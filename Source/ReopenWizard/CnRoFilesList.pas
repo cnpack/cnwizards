@@ -67,12 +67,12 @@ type
     btnOpen: TToolButton;
     btnOptions: TToolButton;
     clbr1: TCoolBar;
-    frBPG: TRecentFilesFrame;
-    frDPK: TRecentFilesFrame;
-    frDPR: TRecentFilesFrame;
-    frFAV: TRecentFilesFrame;
-    frOTH: TRecentFilesFrame;
-    frPAS: TRecentFilesFrame;
+    frBPG: TCnRecentFilesFrame;
+    frDPK: TCnRecentFilesFrame;
+    frDPR: TCnRecentFilesFrame;
+    frFAV: TCnRecentFilesFrame;
+    frOTH: TCnRecentFilesFrame;
+    frPAS: TCnRecentFilesFrame;
     ilProjectImages: TImageList;
     pnlFrame: TPanel;
     Splitter1: TSplitter;
@@ -98,7 +98,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
   private
-    FActiveFrame: TRecentFilesFrame;
+    FActiveFrame: TCnRecentFilesFrame;
     FOptions: ICnRoOptions;
     procedure AddToFavorites(Source: TListView);
     procedure MoveMenu(var Key: Word);
@@ -189,7 +189,7 @@ end;
 
 procedure TCnFilesListForm.AddToFavorites(Source: TListView);
 var
-  j, Index: Integer;
+  J, Index: Integer;
   Files: ICnRoFiles;
   DroppedFile: string;
 begin
@@ -204,14 +204,12 @@ begin
     if Files.Capacity <= Files.Count then
     begin
       if Files.Count = Files.Capacity then
-      begin
-        Files.Delete(0);
-      end
+        Files.Delete(0)
       else
-        for j := 0 to (Files.Count - Files.Capacity) do
-        begin
-          Files.Delete(j);
-        end;
+      begin
+        for J := 0 to (Files.Count - Files.Capacity) do
+          Files.Delete(J);
+      end;
     end;
     Files.AddFile(DroppedFile);
     with frFAV.lvFile.Items.Add do
@@ -276,9 +274,9 @@ begin
   
   for I := 0 to ComponentCount - 1 do
   begin
-    if (Components[I] is TRecentFilesFrame) then
+    if (Components[I] is TCnRecentFilesFrame) then
     begin
-      with TRecentFilesFrame(Components[I]) do
+      with TCnRecentFilesFrame(Components[I]) do
       begin
         if FOptions.SortPersistance then
           GetSortMemento;
@@ -286,7 +284,7 @@ begin
           lvFile.Items[0].Selected := True;
       end;
     end;
-  end; //end for
+  end;
 end;
 
 procedure TCnFilesListForm.FormShow(Sender: TObject);
@@ -299,7 +297,7 @@ begin
     Items[4].Data := frDPK;
     Items[5].Data := frOTH;
     Items[6].Data := frFAV;
-  end; //end with
+  end;
   
   tvMenu.FullExpand;
   tvMenu.Items[FOptions.DefaultPage + 1].Selected := True;
@@ -308,12 +306,14 @@ begin
   
   ActiveControl := FActiveFrame.lvFile;
   with FActiveFrame.lvFile do
+  begin
     if Items.Count >  0 then
     begin
       SetFocus;
       Items[0].Selected := True;
       Items[0].Focused := True;
     end;
+  end;
 end;
 
 procedure TCnFilesListForm.frOTHMenuItem3Click(Sender: TObject);
@@ -338,8 +338,8 @@ var
   Files: ICnRoFiles;
 begin
   Files := FOptions.Files[ASection];
-  TRecentFilesFrame(AFrame).Files := Files;
-  with TRecentFilesFrame(AFrame).lvFile do
+  TCnRecentFilesFrame(AFrame).Files := Files;
+  with TCnRecentFilesFrame(AFrame).lvFile do
   begin
     Items.Clear;
     for I := 0 to Files.Count - 1 do
@@ -364,13 +364,13 @@ end;
 
 procedure TCnFilesListForm.tvMenuChange(Sender: TObject; Node: TTreeNode);
 begin
-  if (Node = tvMenu.TopItem) then Exit;
-  TRecentFilesFrame(Node.Data).BringToFront;
-  FActiveFrame := TRecentFilesFrame(Node.Data);
+  if Node = tvMenu.TopItem then Exit;
+  TCnRecentFilesFrame(Node.Data).BringToFront;
+  FActiveFrame := TCnRecentFilesFrame(Node.Data);
 end;
 
-procedure TCnFilesListForm.tvMenuCollapsing(Sender: TObject; Node: TTreeNode; var AllowCollapse:
-        Boolean);
+procedure TCnFilesListForm.tvMenuCollapsing(Sender: TObject; Node: TTreeNode;
+  var AllowCollapse: Boolean);
 begin
   AllowCollapse := Node.Index <> 0;
 end;
@@ -381,8 +381,8 @@ begin
     AddToFavorites(Source as TListView);
 end;
 
-procedure TCnFilesListForm.tvMenuDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
-  var Accept: Boolean);
+procedure TCnFilesListForm.tvMenuDragOver(Sender, Source: TObject;
+  X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
   Accept := False;
   if (tvMenu.GetNodeAt(X, Y) = nil) then Exit;
@@ -406,6 +406,7 @@ end;
 procedure TCnFilesListForm.MoveMenu(var Key: Word);
 begin
   with tvMenu do
+  begin
     if Key = VK_LEFT then
     begin
       if Selected = nil then
@@ -416,8 +417,8 @@ begin
         else if Selected.HasChildren then
           Selected.getFirstChild.Selected := True;
       end;
-    end else
-    if Key = VK_RIGHT then
+    end
+    else if Key = VK_RIGHT then
     begin
       if Selected = nil then
         tvMenu.Items.GetFirstNode.Selected := True
@@ -428,6 +429,7 @@ begin
           Selected.GetLastChild.Selected := True;
       end;
     end;
+  end;
   FActiveFrame.lvFile.SetFocus;
 end;
 

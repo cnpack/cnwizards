@@ -37,11 +37,11 @@ unit CnRoClasses;
 * 修改记录：2019-05-04 by liuxiao
 *               修正高版本的 Delphi 下 Ini 读出的 Objects 里无 Strings 的问题
 *           2012-09-19 by shenloqi
-*               移植到Delphi XE3
+*               移植到 Delphi XE3
 *           2004-12-12 V1.1
 *               去除TMyStringList，改用TList来管理。
-*               添加节点管理器，以及提取接口的Map
-*               将TCnIniContainer移动到此文件
+*               添加节点管理器，以及提取接口的 Map
+*               将 TCnIniContainer 移动到此文件
 *           2004-03-02 V1.0
 *               创建并移植单元
 ================================================================================
@@ -840,7 +840,8 @@ begin
   if (I >= 0) then
   begin
     ASetTime(vFiles, I, GetLocalDate);
-  end else
+  end
+  else
   begin
     if (GetIgnoreDefaultUnits) and (IsDefaultUnit(AFileName)) then
       Exit;
@@ -848,10 +849,12 @@ begin
     if vFiles.Count = vFiles.Capacity then
       vFiles.Delete(0)
     else if vFiles.Capacity < vFiles.Count then
+    begin
       for I := 0 to (vFiles.Count - vFiles.Capacity) do
       begin
         vFiles.Delete(I);
       end;
+    end;
     SetTime(AFileName, vFiles.Count - 1);
   end;
 end;

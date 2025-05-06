@@ -1,4 +1,4 @@
-object RecentFilesFrame: TRecentFilesFrame
+object CnRecentFilesFrame: TCnRecentFilesFrame
   Left = 0
   Top = 0
   Width = 605
