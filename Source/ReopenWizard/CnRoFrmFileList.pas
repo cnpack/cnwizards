@@ -101,7 +101,7 @@ implementation
 uses
   ToolsAPI, CnWizShareImages, CnCommon, CnWizUtils;
 
-{***************************** TRecentFilesFrame ******************************}
+{*************************** TCnRecentFilesFrame ******************************}
 
 procedure TCnRecentFilesFrame.actCopyFolderExecute(Sender: TObject);
 var

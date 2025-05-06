@@ -354,7 +354,7 @@
       <FILE FILENAME="ReopenWizard\CnFilesSnapshotManageFrm.pas" FORMNAME="CnProjectFilesSnapshotManageForm" UNITNAME="Cnfilessnapshotmanagefrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoClasses.pas" FORMNAME="" UNITNAME="CnRoClasses" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoFilesList.pas" FORMNAME="" UNITNAME="CnRoFilesList" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="ReopenWizard\CnRoFrmFileList.pas" FORMNAME="RecentFilesFrame" UNITNAME="Cnrofrmfilelist" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
+      <FILE FILENAME="ReopenWizard\CnRoFrmFileList.pas" FORMNAME="CnRecentFilesFrame" UNITNAME="Cnrofrmfilelist" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoInterfaces.pas" FORMNAME="" UNITNAME="CnRoInterfaces" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoOptions.pas" FORMNAME="" UNITNAME="CnRoOptions" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ReopenWizard\CnRoWizard.pas" FORMNAME="" UNITNAME="CnRoWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

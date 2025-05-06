@@ -390,7 +390,7 @@
 			</DCCReference>
 			<DCCReference Include="ReopenWizard\CnRoClasses.pas"/>
 			<DCCReference Include="ReopenWizard\CnRoFrmFileList.pas">
-				<Form>RecentFilesFrame</Form>
+				<Form>CnRecentFilesFrame</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
 			<DCCReference Include="ReopenWizard\CnRoInterfaces.pas"/>

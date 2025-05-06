@@ -124,7 +124,7 @@ USEUNIT("ReopenWizard\CnFilesSnapshot.pas");
 USEFORMNS("ReopenWizard\CnFilesSnapshotManageFrm.pas", Cnfilessnapshotmanagefrm, CnProjectFilesSnapshotManageForm);
 USEUNIT("ReopenWizard\CnRoClasses.pas");
 USEUNIT("ReopenWizard\CnRoFilesList.pas");
-USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, RecentFilesFrame); /* TFrame: File Type */
+USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, CnRecentFilesFrame); /* TFrame: File Type */
 USEUNIT("ReopenWizard\CnRoInterfaces.pas");
 USEUNIT("ReopenWizard\CnRoOptions.pas");
 USEUNIT("ReopenWizard\CnRoWizard.pas");

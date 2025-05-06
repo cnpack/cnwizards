@@ -162,7 +162,7 @@ uses
   CnExploreFilterEditor in 'ExplorerWizard\CnExploreFilterEditor.pas' {CnExploreFilterEditorForm},
   CnProjectDelTempFrm in 'ProjectExtWizard\CnProjectDelTempFrm.pas' {CnProjectDelTempForm},
   CnRoClasses in 'ReopenWizard\CnRoClasses.pas',
-  CnRoFrmFileList in 'ReopenWizard\CnRoFrmFileList.pas' {RecentFilesFrame: TFrame},
+  CnRoFrmFileList in 'ReopenWizard\CnRoFrmFileList.pas' {CnRecentFilesFrame: TFrame},
   CnRoInterfaces in 'ReopenWizard\CnRoInterfaces.pas',
   CnRoWizard in 'ReopenWizard\CnRoWizard.pas',
   CnRoFilesList in 'ReopenWizard\CnRoFilesList.pas' {CnFilesListForm},

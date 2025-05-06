@@ -71,7 +71,7 @@ USEFORMNS("ExplorerWizard\CnExploreFilter.pas", Cnexplorefilter, CnExploreFilter
 USEFORMNS("ExplorerWizard\CnExploreFilterEditor.pas", Cnexplorefiltereditor, CnExploreFilterEditorForm);
 USEFORMNS("ProjectExtWizard\CnProjectViewBaseFrm.pas", Cnprojectviewbasefrm, CnProjectViewBaseForm);
 USEFORMNS("ReopenWizard\CnFilesSnapshotManageFrm.pas", Cnfilessnapshotmanagefrm, CnProjectFilesSnapshotManageForm);
-USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, RecentFilesFrame); /* TFrame: File Type */
+USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, CnRecentFilesFrame); /* TFrame: File Type */
 USEFORMNS("IdeEnhancements\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorEnhance.pas", Cnsrceditorenhance, CnSrcEditorEnhanceForm);
 USEFORMNS("ProjectExtWizard\CnProjectBackupFrm.pas", Cnprojectbackupfrm, CnProjectBackupForm);
