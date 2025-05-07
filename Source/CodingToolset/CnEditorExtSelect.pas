@@ -626,7 +626,7 @@ begin
         SearchInAPair(InnerPair, GetPascalPairEndNextOne(InnerPair));
 
         // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
-        if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
+        if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispInterface] then
         begin
           PT := GetPascalPairStartPrevOne(InnerPair);
           if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (InnerPair.StartToken.TokenID = tkRecord))) then
@@ -704,7 +704,7 @@ begin
                   SearchInAPair(Pair, GetPascalPairEndNextOne(Pair));
 
                   // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
-                  if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface] then
+                  if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispInterface] then
                   begin
                     PT := GetPascalPairStartPrevOne(Pair);
                     if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (Pair.StartToken.TokenID = tkRecord))) then
@@ -748,7 +748,7 @@ begin
               if Pair = InnerPair then // 已经搜过的 InnerPair，光标必然在此 Pair 内
                 CursorInPair := True;
 
-              // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其同级的 if 等
+              // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其前面同级的 if 等
               if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and (Pair.MiddleCount = 0) and
                 (Pair.StartToken.TokenID = tkBegin) and (Pair.EndToken.TokenID = tkEnd) then
               begin
@@ -771,7 +771,7 @@ begin
                       or ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) then
                     begin
 {$IFDEF DEBUG}
-                      CnDebugger.LogMsg('Get Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+                      CnDebugger.LogMsg('Get Backward Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
 {$ENDIF}
                       Inc(Step);
                       if Step = FSelectStep then
@@ -814,6 +814,47 @@ begin
                       Break;
                     end;
                   end;
+                end;
+              end
+              else if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and
+                (Pair.MiddleCount = 0) and (I < BlockMatchInfo.LineInfo.Count - 1) and (  // 后面得还有 Pair
+                ((Pair.StartToken.TokenID = tkIf) and (Pair.EndToken.TokenID = tkThen)) or
+                ((Pair.StartToken.TokenID = tkFor) and (Pair.EndToken.TokenID = tkDo)) or
+                ((Pair.StartToken.TokenID = tkWith) and (Pair.EndToken.TokenID = tkDo)) or
+                ((Pair.StartToken.TokenID = tkWhile) and (Pair.EndToken.TokenID = tkDo)) ) then
+              begin
+                // 只要它是符合级别的 if then/for do/with do/while do，且包含光标位置，就要搜其后面紧跟的同级 begin end
+                TmpPair := BlockMatchInfo.LineInfo.Pairs[I + 1];
+                if (TmpPair.Layer = Pair.Layer) and
+                  (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
+                begin
+{$IFDEF DEBUG}
+                  CnDebugger.LogMsg('Get Forward Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+{$ENDIF}
+                  Inc(Step);
+                  if Step = FSelectStep then
+                  begin
+                    SetStartEndPos(Pair.StartToken, TmpPair.EndToken, True);
+                    Exit;
+                  end;
+                  Inc(Step);
+                  if Step = FSelectStep then
+                  begin
+                    SetStartEndPos(Pair.StartToken, TmpPair.EndToken, False);
+                    Exit;
+                  end;
+                  // begin end 块后有分号再加一层
+                  PT := GetPascalPairEndNextOne(TmpPair);
+                  if PT.TokenID = tkSemiColon then
+                  begin
+                    Inc(Step);
+                    if Step = FSelectStep then
+                    begin
+                      SetStartEndPos(Pair.StartToken, PT, False);
+                      Exit;
+                    end;
+                  end;
+                  Break;
                 end;
               end;
             end;
