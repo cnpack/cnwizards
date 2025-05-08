@@ -367,6 +367,30 @@ var
     end;
   end;
 
+  function TokenOnCursor(AToken: TCnGeneralPasToken): Boolean;
+  begin
+    Result := (FEditPos.Line = AToken.EditLine) and
+      (FEditPos.Col <= AToken.EditEndCol) and (FEditPos.Col >= AToken.EditCol);
+  end;
+
+  function PairKeysOnCursor(APair: TCnBlockLinePair): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := TokenOnCursor(APair.StartToken) or TokenOnCursor(APair.EndToken);
+    if not Result then
+    begin
+      for I := 0 to APair.MiddleCount - 1 do
+      begin
+        if TokenOnCursor(APair.MiddleToken[I]) then
+        begin
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
 begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
@@ -623,9 +647,10 @@ begin
         LeftBrace.Free;
       end;
 
-      // ****** 找单独语句，但不进块声明 ******
+      // ****** 找单独语句，但不进块声明，且光标下不是 Pair 的关键字 ******
       if (InnerPair <> nil) and not (InnerPair.StartToken.TokenID in
-        [tkClass, tkRecord, tkInterface, tkDispInterface]) then
+        [tkClass, tkRecord, tkInterface, tkDispInterface]) and not
+        PairKeysOnCursor(InnerPair) then
       begin
         // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
         // 后结束符是分号、无分号则 end/else 前，前则是分号或其他关键字
@@ -912,38 +937,69 @@ begin
                 ((Pair.StartToken.TokenID = tkWith) and (Pair.EndToken.TokenID = tkDo)) or
                 ((Pair.StartToken.TokenID = tkWhile) and (Pair.EndToken.TokenID = tkDo)) ) then
               begin
-                // 只要它是符合级别的 if then/for do/with do/while do，且包含光标位置，就要搜其后面紧跟的同级 begin end
-                TmpPair := BlockMatchInfo.LineInfo.Pairs[I + 1];
-                if (TmpPair.Layer = Pair.Layer) and
-                  (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
+                // 只要它是符合级别的 if then/for do/with do/while do，且包含光标位置，
+                // 就要往后搜其后面紧跟的连续的同级 begin end 或其他 if then/for do/with do/while do
+                // 注意这个同级其实是解析器得出的表示连续的不确切结论，这里只能用上了
+                TmpPair := Pair;
+                for J := I + 1 to BlockMatchInfo.LineInfo.Count - 1 do
                 begin
+                  // 如果 BlockMatchInfo.LineInfo.Pairs[J] 和 TmpPair 中间有其他内容，说明不是一个逻辑，需要跳走
 {$IFDEF DEBUG}
-                  CnDebugger.LogMsg('Get Forward Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+                  CnDebugger.LogFmt('Check Forward Pair %d %s to Previous %d %s ',
+                    [BlockMatchInfo.LineInfo.Pairs[J].StartToken.ItemIndex,
+                    BlockMatchInfo.LineInfo.Pairs[J].StartToken.Token,
+                    TmpPair.EndToken.ItemIndex, TmpPair.EndToken.Token]);
 {$ENDIF}
-                  Inc(Step);
-                  if Step = FSelectStep then
+                  if BlockMatchInfo.LineInfo.Pairs[J].StartToken.ItemIndex - TmpPair.EndToken.ItemIndex <> 1 then
                   begin
-                    SetStartEndPos(Pair.StartToken, TmpPair.EndToken, True);
-                    Exit;
+{$IFDEF DEBUG}
+                    CnDebugger.LogMsg('Forward Next Level but Far Away. Break for ' + IntToStr(Pair.Layer) + ' ' + BlockMatchInfo.LineInfo.Pairs[J].StartToken.Token);
+{$ENDIF}
+                    Break;
                   end;
-                  Inc(Step);
-                  if Step = FSelectStep then
+
+                  TmpPair := BlockMatchInfo.LineInfo.Pairs[J];
+                  if (TmpPair.Layer = Pair.Layer) and (
+                    ((TmpPair.StartToken.TokenID = tkIf) and (TmpPair.EndToken.TokenID = tkThen)) or
+                    ((TmpPair.StartToken.TokenID = tkWhile) and (TmpPair.EndToken.TokenID = tkDo)) or
+                    ((TmpPair.StartToken.TokenID = tkFor) and (TmpPair.EndToken.TokenID = tkDo)) or
+                    ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) or
+                    ((TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd)) ) then
                   begin
-                    SetStartEndPos(Pair.StartToken, TmpPair.EndToken, False);
-                    Exit;
-                  end;
-                  // begin end 块后有分号再加一层
-                  PT := GetPascalPairEndNextOne(TmpPair);
-                  if PT.TokenID = tkSemiColon then
-                  begin
+{$IFDEF DEBUG}
+                    CnDebugger.LogMsg('Get Forward Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);
+{$ENDIF}
                     Inc(Step);
                     if Step = FSelectStep then
                     begin
-                      SetStartEndPos(Pair.StartToken, PT, False);
+                      SetStartEndPos(Pair.StartToken, TmpPair.EndToken, True);
                       Exit;
                     end;
+                    Inc(Step);
+                    if Step = FSelectStep then
+                    begin
+                      SetStartEndPos(Pair.StartToken, TmpPair.EndToken, False);
+                      Exit;
+                    end;
+
+                    // begin end 块后有分号再加一层
+                    if TmpPair.EndToken.TokenID = tkEnd then
+                    begin
+                      PT := GetPascalPairEndNextOne(TmpPair);
+                      if PT.TokenID = tkSemiColon then
+                      begin
+                        Inc(Step);
+                        if Step = FSelectStep then
+                        begin
+                          SetStartEndPos(Pair.StartToken, PT, False);
+                          Exit;
+                        end;
+                      end;
+                    end;
                   end;
-                  Break;
+
+                  if TmpPair.Layer <> Pair.Layer then
+                    Break;
                 end;
               end;
             end;
