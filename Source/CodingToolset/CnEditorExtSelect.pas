@@ -688,12 +688,15 @@ begin
 
         if (PStStart <> nil) and (PStEnd <> nil) then
         begin
-          // 找到语句首尾了且都是包括的闭
-          Inc(Step);
-          if Step = FSelectStep then
+          // 找到语句首尾了且都是包括的闭，且不要和当前光标标识符重复
+          if (FCurrTokenStr = '') or (PStStart <> PStEnd) then
           begin
-            SetStartEndPos(PStStart, PStEnd, False);
-            Exit;
+            Inc(Step);
+            if Step = FSelectStep then
+            begin
+              SetStartEndPos(PStStart, PStEnd, False);
+              Exit;
+            end;
           end;
         end;
       end;
@@ -1045,7 +1048,7 @@ begin
       end;
 
       // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
-      // 后结束符是分号，前则是分号或 {
+      // 后结束符是分号，前则是分号或 { 等
       CStStart := nil;
       CStEnd := nil;
       StStartIdx := -1;
@@ -1054,7 +1057,7 @@ begin
       for I := 0 to CppParser.Count - 1 do
       begin
         CT := CppParser.Tokens[I];
-        if CT.CppTokenKind in [ctksemicolon, ctkbraceopen] then // 只挑出符合条件的来转换并比较位置
+        if CT.CppTokenKind in [ctksemicolon, ctkbraceopen, ctkelse] then // 只挑出符合条件的来转换并比较位置
           ConvertGeneralTokenPos(Pointer(EditView), CT);
 
         if ((FEditPos.Line < CT.EditLine) or // Token 开头位置后于光标的，往后找
@@ -1067,7 +1070,7 @@ begin
         if ((FEditPos.Line > CT.EditLine) or // Token 结尾位置前于光标的，往前找
           ((FEditPos.Line = CT.EditLine) and (FEditPos.Col > CT.EditEndCol))) then
         begin
-          if CT.CppTokenKind in [ctksemicolon, ctkbraceopen] then
+          if CT.CppTokenKind in [ctksemicolon, ctkbraceopen, ctkelse] then
           begin
             CStStart := CT;
             StStartIdx := I + 1; // 后一个才是真正的语句开头
@@ -1098,12 +1101,15 @@ begin
 
       if (CStStart <> nil) and (CStEnd <> nil) then
       begin
-        // 找到语句首尾了且都是包括的闭
-        Inc(Step);
-        if Step = FSelectStep then
+        // 找到语句首尾了且都是包括的闭，且不要和当前光标标识符重复
+        if (FCurrTokenStr = '') or (CStStart <> CStEnd) then
         begin
-          SetStartEndPos(CStStart, CStEnd, False);
-          Exit;
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(CStStart, CStEnd, False);
+            Exit;
+          end;
         end;
       end;
 
