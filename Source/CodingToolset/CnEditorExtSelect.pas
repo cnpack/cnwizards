@@ -648,9 +648,9 @@ begin
       end;
 
       // ****** 找单独语句，但不进块声明，且光标下不是 Pair 的关键字 ******
-      if (InnerPair <> nil) and not (InnerPair.StartToken.TokenID in
+      if (InnerPair = nil) or (not (InnerPair.StartToken.TokenID in
         [tkClass, tkRecord, tkInterface, tkDispInterface]) and not
-        PairKeysOnCursor(InnerPair) then
+        PairKeysOnCursor(InnerPair)) then
       begin
         // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
         // 后结束符是分号、无分号则 end/else 前，前则是分号或其他关键字
@@ -662,7 +662,7 @@ begin
         for I := 0 to PasParser.Count - 1 do
         begin
           PT := PasParser.Tokens[I];
-          if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then // 只挑出符合条件的来转换并比较位置
+          if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkVar, tkConst] then // 只挑出符合条件的来转换并比较位置
             ConvertGeneralTokenPos(Pointer(EditView), PT);
 
           if ((FEditPos.Line < PT.EditLine) or // Token 开头位置后于光标的，往后找
@@ -672,7 +672,7 @@ begin
             begin
               PStEnd := PT;
             end
-            else if (PStEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo]) then // 无分号，不包括 else/end 及其他复合语句结尾
+            else if (PStEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo, tkVar, tkConst]) then // 无分号，不包括 else/end 及其他复合语句结尾
             begin
               PStEnd := PT;
               StEndIdx := I - 1;  // 前一个才是真正的语句结尾
@@ -682,7 +682,7 @@ begin
           if ((FEditPos.Line > PT.EditLine) or // Token 结尾位置前于光标的，往前找
             ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditEndCol))) then
           begin
-            if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+            if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkVar, tkConst] then
             begin
               PStStart := PT;
               StStartIdx := I + 1; // 后一个才是真正的语句开头
@@ -724,6 +724,12 @@ begin
             end;
           end;
         end;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Do Not Search Pascal Statement for No Pair or Decl/Cursor on Pair Keywords.');
+{$ENDIF}
       end;
 
       // ****** 找最内的层次区间 ******
@@ -864,19 +870,19 @@ begin
 
               // 无论是不是搜过的 InnerPair，只要它是符合级别的 begin/end，且包含光标位置，就要搜其前面同级的 if 等
               if not AreaFound and CursorInPair and (Pair.Layer = PairLevel) and (Pair.MiddleCount = 0) and
-                (Pair.StartToken.TokenID = tkBegin) and (Pair.EndToken.TokenID = tkEnd) then
+                (Pair.StartToken.TokenID in [tkBegin, tkAsm]) and (Pair.EndToken.TokenID = tkEnd) then
               begin
 {$IFDEF DEBUG}
                 CnDebugger.LogMsg('Not Found in This Pair. Check other Pairs with Same Level ' + IntToStr(Pair.Layer));
 {$ENDIF}
-                // 找有无和 Pair 这对 begin end 同级的 if/then、while/do、procedure/function，中间不能再碰见同级的 begin end
+                // 找前面有无和 Pair 这对 begin end 同级的 if/then、while/do、procedure/function，中间不能再碰见同级的 begin end
                 for J := I - 1 downto 0 do
                 begin
                   TmpPair := BlockMatchInfo.LineInfo.Pairs[J];
                   if TmpPair.Layer = Pair.Layer then
                   begin
                     // 如有同级的 begin end 表示后面即使有 if 什么的也不是在一块的
-                    if (TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd) then
+                    if (TmpPair.StartToken.TokenID in [tkBegin, tkAsm]) and (TmpPair.EndToken.TokenID = tkEnd) then
                       Break;
 
                     if ((TmpPair.StartToken.TokenID = tkIf) and (TmpPair.EndToken.TokenID = tkThen))
@@ -964,7 +970,7 @@ begin
                     ((TmpPair.StartToken.TokenID = tkWhile) and (TmpPair.EndToken.TokenID = tkDo)) or
                     ((TmpPair.StartToken.TokenID = tkFor) and (TmpPair.EndToken.TokenID = tkDo)) or
                     ((TmpPair.StartToken.TokenID = tkWith) and (TmpPair.EndToken.TokenID = tkDo)) or
-                    ((TmpPair.StartToken.TokenID = tkBegin) and (TmpPair.EndToken.TokenID = tkEnd)) ) then
+                    ((TmpPair.StartToken.TokenID in [tkBegin, tkAsm]) and (TmpPair.EndToken.TokenID = tkEnd)) ) then
                   begin
 {$IFDEF DEBUG}
                     CnDebugger.LogMsg('Get Forward Same Level ' + IntToStr(Pair.Layer) + ' ' + TmpPair.StartToken.Token);

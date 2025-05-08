@@ -619,7 +619,7 @@ begin
         ((not (PrevTokenID in [tkAmpersand, tkAddressOp])) and (Lex.TokenID in
         [tkProcedure, tkFunction, tkConstructor, tkDestructor, tkOperator,
         tkInitialization, tkFinalization,
-        tkBegin, tkAsm,
+        tkBegin, tkAsm, tkVar, tkConst,
         tkCase, tkTry, tkRepeat, tkIf, tkFor, tkWith, tkOn, tkWhile,
         tkRecord, tkObject, tkOf, tkEqual,
         tkClass, tkInterface, tkDispinterface,
