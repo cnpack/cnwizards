@@ -131,8 +131,8 @@ var
   Pair, TmpPair, InnerPair: TCnBlockLinePair;
   LeftBrace, RightBrace: TList;
   InnerStartGot: Boolean;
-  PT, PT1, StStart, StEnd: TCnGeneralPasToken;
-  CT: TCnGeneralCppToken;
+  PT, PT1, PStStart, PStEnd: TCnGeneralPasToken;
+  CT, CStStart, CStEnd: TCnGeneralCppToken;
   LastS: string;
 
   // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
@@ -537,8 +537,8 @@ begin
         RightBrace := TList.Create;
         InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
 
-        StStart := nil;
-        StEnd := nil;
+        PStStart := nil;
+        PStEnd := nil;
 
         for I := 0 to PasParser.Count - 1 do
         begin
@@ -623,74 +623,78 @@ begin
         LeftBrace.Free;
       end;
 
-      // ****** 找单独语句 ******
-      // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
-      // 后结束符是分号、无分号则 end/else 前，前则是分号或其他关键字
-      StStart := nil;
-      StEnd := nil;
-      StStartIdx := -1;
-      StEndIdx := -1;
-
-      for I := 0 to PasParser.Count - 1 do
+      // ****** 找单独语句，但不进块声明 ******
+      if (InnerPair <> nil) and not (InnerPair.StartToken.TokenID in
+        [tkClass, tkRecord, tkInterface, tkDispInterface]) then
       begin
-        PT := PasParser.Tokens[I];
-        if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then // 只挑出符合条件的来转换并比较位置
-          ConvertGeneralTokenPos(Pointer(EditView), PT);
+        // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
+        // 后结束符是分号、无分号则 end/else 前，前则是分号或其他关键字
+        PStStart := nil;
+        PStEnd := nil;
+        StStartIdx := -1;
+        StEndIdx := -1;
 
-        if ((FEditPos.Line < PT.EditLine) or // Token 开头位置后于光标的，往后找
-          ((FEditPos.Line = PT.EditLine) and (FEditPos.Col <= PT.EditCol))) then
+        for I := 0 to PasParser.Count - 1 do
         begin
-          if (StEnd = nil) and (PT.TokenID = tkSemiColon) then  // 包括分号
+          PT := PasParser.Tokens[I];
+          if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then // 只挑出符合条件的来转换并比较位置
+            ConvertGeneralTokenPos(Pointer(EditView), PT);
+
+          if ((FEditPos.Line < PT.EditLine) or // Token 开头位置后于光标的，往后找
+            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col <= PT.EditCol))) then
           begin
-            StEnd := PT;
-          end
-          else if (StEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo]) then // 无分号，不包括 else/end 及其他复合语句结尾
-          begin
-            StEnd := PT;
-            StEndIdx := I - 1;  // 前一个才是真正的语句结尾
+            if (PStEnd = nil) and (PT.TokenID = tkSemiColon) then  // 包括分号
+            begin
+              PStEnd := PT;
+            end
+            else if (PStEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo]) then // 无分号，不包括 else/end 及其他复合语句结尾
+            begin
+              PStEnd := PT;
+              StEndIdx := I - 1;  // 前一个才是真正的语句结尾
+            end;
           end;
+
+          if ((FEditPos.Line > PT.EditLine) or // Token 结尾位置前于光标的，往前找
+            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditEndCol))) then
+          begin
+            if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+            begin
+              PStStart := PT;
+              StStartIdx := I + 1; // 后一个才是真正的语句开头
+            end;
+          end;
+
+          if (PStStart <> nil) and (PStEnd <> nil) then // 前后都找到了，结束
+            Break;
         end;
 
-        if ((FEditPos.Line > PT.EditLine) or // Token 结尾位置前于光标的，往前找
-          ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditEndCol))) then
+        if (StStartIdx >= 0) and (StStartIdx < PasParser.Count) then // 修正边界
         begin
-          if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
-          begin
-            StStart := PT;
-            StStartIdx := I + 1; // 后一个才是真正的语句开头
-          end;
+          PStStart := PasParser.Tokens[StStartIdx];
+          ConvertGeneralTokenPos(Pointer(EditView), PStStart);
         end;
-
-        if (StStart <> nil) and (StEnd <> nil) then // 前后都找到了，结束
-          Break;
-      end;
-
-      if (StStartIdx >= 0) and (StStartIdx < PasParser.Count) then // 修正边界
-      begin
-        StStart := PasParser.Tokens[StStartIdx];
-        ConvertGeneralTokenPos(Pointer(EditView), StStart);
-      end;
-      if (StEndIdx >= 0) and (StEndIdx < PasParser.Count) then     // 修正边界
-      begin
-        StEnd := PasParser.Tokens[StEndIdx];
-        ConvertGeneralTokenPos(Pointer(EditView), StEnd);
-      end;
+        if (StEndIdx >= 0) and (StEndIdx < PasParser.Count) then     // 修正边界
+        begin
+          PStEnd := PasParser.Tokens[StEndIdx];
+          ConvertGeneralTokenPos(Pointer(EditView), PStEnd);
+        end;
 
 {$IFDEF DEBUG}
-      if (StStart <> nil) and (StEnd <> nil) then
-        CnDebugger.LogFmt('Get Current Pascal Statement %d %d %s to %d %d %s',
-          [StStart.EditLine, StStart.EditCol, StStart.Token,
-          StEnd.EditLine, StEnd.EditCol, StEnd.Token]);
+        if (PStStart <> nil) and (PStEnd <> nil) then
+          CnDebugger.LogFmt('Get Current Pascal Statement %d %d %s to %d %d %s',
+            [PStStart.EditLine, PStStart.EditCol, PStStart.Token,
+            PStEnd.EditLine, PStEnd.EditCol, PStEnd.Token]);
 {$ENDIF}
 
-      if (StStart <> nil) and (StEnd <> nil) then
-      begin
-        // 找到语句首尾了且都是包括的闭
-        Inc(Step);
-        if Step = FSelectStep then
+        if (PStStart <> nil) and (PStEnd <> nil) then
         begin
-          SetStartEndPos(StStart, StEnd, False);
-          Exit;
+          // 找到语句首尾了且都是包括的闭
+          Inc(Step);
+          if Step = FSelectStep then
+          begin
+            SetStartEndPos(PStStart, PStEnd, False);
+            Exit;
+          end;
         end;
       end;
 
@@ -1038,6 +1042,69 @@ begin
       finally
         RightBrace.Free;
         LeftBrace.Free;
+      end;
+
+      // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
+      // 后结束符是分号，前则是分号或 {
+      CStStart := nil;
+      CStEnd := nil;
+      StStartIdx := -1;
+      StEndIdx := -1;
+
+      for I := 0 to CppParser.Count - 1 do
+      begin
+        CT := CppParser.Tokens[I];
+        if CT.CppTokenKind in [ctksemicolon, ctkbraceopen] then // 只挑出符合条件的来转换并比较位置
+          ConvertGeneralTokenPos(Pointer(EditView), CT);
+
+        if ((FEditPos.Line < CT.EditLine) or // Token 开头位置后于光标的，往后找
+          ((FEditPos.Line = CT.EditLine) and (FEditPos.Col <= CT.EditCol))) then
+        begin
+          if (CStEnd = nil) and (CT.CppTokenKind = ctksemicolon) then  // 包括分号
+            CStEnd := CT;
+        end;
+
+        if ((FEditPos.Line > CT.EditLine) or // Token 结尾位置前于光标的，往前找
+          ((FEditPos.Line = CT.EditLine) and (FEditPos.Col > CT.EditEndCol))) then
+        begin
+          if CT.CppTokenKind in [ctksemicolon, ctkbraceopen] then
+          begin
+            CStStart := CT;
+            StStartIdx := I + 1; // 后一个才是真正的语句开头
+          end;
+        end;
+
+        if (CStStart <> nil) and (CStEnd <> nil) then // 前后都找到了，结束
+          Break;
+      end;
+
+      if (StStartIdx >= 0) and (StStartIdx < CppParser.Count) then // 修正边界
+      begin
+        CStStart := CppParser.Tokens[StStartIdx];
+        ConvertGeneralTokenPos(Pointer(EditView), CStStart);
+      end;
+      if (StEndIdx >= 0) and (StEndIdx < PasParser.Count) then     // 修正边界
+      begin
+        CStEnd := CppParser.Tokens[StEndIdx];
+        ConvertGeneralTokenPos(Pointer(EditView), CStEnd);
+      end;
+
+{$IFDEF DEBUG}
+      if (CStStart <> nil) and (CStEnd <> nil) then
+        CnDebugger.LogFmt('Get Current C/C++ Statement %d %d %s to %d %d %s',
+          [CStStart.EditLine, CStStart.EditCol, CStStart.Token,
+          CStEnd.EditLine, CStEnd.EditCol, CStEnd.Token]);
+{$ENDIF}
+
+      if (CStStart <> nil) and (CStEnd <> nil) then
+      begin
+        // 找到语句首尾了且都是包括的闭
+        Inc(Step);
+        if Step = FSelectStep then
+        begin
+          SetStartEndPos(CStStart, CStEnd, False);
+          Exit;
+        end;
       end;
 
       // 小括号和中括号处理完毕

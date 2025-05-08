@@ -1115,7 +1115,7 @@ procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
   ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
-{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号。
+{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号分号。
    Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
 
 procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
