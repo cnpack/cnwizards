@@ -646,7 +646,7 @@ begin
       begin
         for I := PasParser.InnerBlockStartToken.ItemIndex to
           PasParser.InnerBlockCloseToken.ItemIndex do
-          if PasParser.Tokens[I].TokenID in csKeyTokens then
+          if PasParser.Tokens[I].TokenID in csKeyTokens + [tkPrivate, tkProtected, tkPublic, tkPublished] then
             BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
       end;
 

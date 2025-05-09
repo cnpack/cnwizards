@@ -2346,6 +2346,24 @@ begin
               end;
             end;
 
+            if Token.TokenID in [tkPrivate, tkProtected, tkPublic, tkPublished] then
+            begin
+              // 同样处理几个中间带高亮语句的情形
+              if FStack.Count > 0 then
+              begin
+                Pair := TCnBlockLinePair(FStack.Peek);
+                if Pair <> nil then
+                begin
+                  if Pair.Layer = Token.ItemLayer - 1 then
+                  begin
+                    // 同一层次的，加入 MidToken
+                    Pair.AddMidToken(Token, Token.EditCol);
+                    Added := True;
+                  end;
+                end;
+              end;
+            end;
+
             if not Added and (Token.TokenID = tkElse) and (FIfThenStack.Count > 0) then
             begin
               // 有 Else 并且上面没处理掉的话，找最近的一个同层的 if then 并重新配对，无需更高层的

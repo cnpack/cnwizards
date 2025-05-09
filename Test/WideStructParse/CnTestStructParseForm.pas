@@ -304,7 +304,7 @@ begin
 
     for I := 0 to PasParser.Count - 1 do
     begin
-      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkPrivate, tkProtected, tkPublic, tkPublished] then
         BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
     end;
     BlockMatchInfo.IsCppSource := False;

@@ -58,11 +58,10 @@ type
     procedure btnPairClick(Sender: TObject);
     procedure btnPairCppClick(Sender: TObject);
   private
-    { Private declarations }
     procedure FindSeparateLineList(Parser: TCnPasStructureParser; SeparateLineList: TList);
     function GetMemoCursorLinearPos(Memo: TMemo): Integer;
   public
-    { Public declarations }
+
   end;
 
 var
@@ -567,7 +566,7 @@ begin
 
     for I := 0 to PasParser.Count - 1 do
     begin
-      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon] then
+      if PasParser.Tokens[I].TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkPrivate, tkProtected, tkPublic, tkPublished] then
         BlockMatchInfo.AddToKeyList(PasParser.Tokens[I]);
     end;
     BlockMatchInfo.IsCppSource := False;
