@@ -802,8 +802,8 @@ var
   SCnEditorJumpImplName: string = 'Jump to Implementation Tool';
 
   // CnEditorJumpMatchedKeyword
-  SCnEditorJumpMatchedKeywordMenuCaption: string = 'Jump to Matched &Keyword';
-  SCnEditorJumpMatchedKeywordMenuHint: string = 'Jump to Matched Keyword under Cursor';
+  SCnEditorJumpMatchedKeywordMenuCaption: string = 'Jump to Matched &Keyword or Bracket';
+  SCnEditorJumpMatchedKeywordMenuHint: string = 'Jump to Matched Keyword or Bracket under Cursor';
   SCnEditorJumpMatchedKeywordName: string = 'Jump to Matched Keyword Tool';
 
   // CnEditorJumpPrevIdent
