@@ -178,7 +178,8 @@ type
     procedure Clear;
 
     procedure ParseSource(ASource: PWideChar; AIsDpr, AKeyOnly: Boolean);
-    {* 对代码进行常规解析，不生成关键字与标识符之外的内容}
+    {* 对代码进行常规解析，AKeyOnly 为 True 表示只生成关键字内容，否则还加上标识符及运算符、括号等内容}
+
     function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer;
       out Visibility: TTokenKind): CnWideString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，

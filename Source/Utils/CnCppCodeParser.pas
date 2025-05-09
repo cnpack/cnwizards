@@ -106,7 +106,8 @@ type
     procedure Clear;
     procedure ParseSource(ASource: PAnsiChar; Size: Integer; CurrLine: Integer = 0;
       CurCol: Integer = 0; ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
-    {* 解析代码结构，行列均以 1 开始。NeedRoundSquare 表示需要解析小括号和中括号以及分号}
+    {* 解析代码结构，行列均以 1 开始。ParseCurrent 指是否解析当前函数等内容，
+      NeedRoundSquare 表示需要解析小括号和中括号以及分号}
 
     procedure ParseString(ASource: PAnsiChar; Size: Integer);
     {* 对代码进行针对字符串的解析，只生成字符串内容}

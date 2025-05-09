@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, CnWideStrings, mPasLex, CnPasWideLex, mwBCBTokenList,
+  SysUtils, Classes, Contnrs, CnWideStrings, mPasLex, CnPasWideLex, mwBCBTokenList,
   CnBCBWideTokenList, CnPasCodeParser, CnCppCodeParser, CnWidePasParser,
   CnWideCppParser;
 
@@ -108,6 +108,14 @@ function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPO
 function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
 {* 获取一个 GeneralPasToken 的 AnsiCol，可以是 C/C++ 的 TCnGeneralCppToken}
 
+procedure RemovePasMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+{* 删除一 Pascal Token 列表中配对的小括号或中括号，IsSmall 表示小括号或中括号，
+  IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之}
+
+procedure RemoveCppMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+{* 删除一 C/C++ Token 列表中配对的小括号或中括号，IsSmall 表示小括号或中括号，
+  IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之}
+
 implementation
 
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
@@ -140,6 +148,118 @@ begin
 {$ELSE}
   Result := AToken.EditCol;
 {$ENDIF}
+end;
+
+procedure RemoveCppMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+var
+  T: TCnGeneralCppToken;
+  BT, B1, B2: TCTokenKind;
+  I: Integer;
+  Stack: TStack;
+begin
+  if (Tokens = nil) or (Tokens.Count <= 1) then
+    Exit;
+
+  if IsSmall then
+  begin
+    B1 := ctkroundopen;
+    B2 := ctkroundclose;
+  end
+  else
+  begin
+    B1 := ctksquareopen;
+    B2 := ctksquareclose;
+  end;
+
+  if IsReverse then
+  begin
+    BT := B1;
+    B1 := B2;
+    B2 := BT;
+  end;
+
+  // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
+  I := 0;
+  Stack := TStack.Create;
+  try
+    while I < Tokens.Count do
+    begin
+      T := TCnGeneralCppToken(Tokens[I]);
+      if T.CppTokenKind = B1 then
+        Stack.Push(T)
+      else if T.CppTokenKind = B2 then
+      begin
+        if Stack.Count > 0 then
+        begin
+          Tokens.Delete(I); // 删了一个，不用 Inc了
+          T := Stack.Pop;
+          Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
+          Dec(I);
+          Continue;
+        end;
+      end;
+
+      Inc(I);
+    end;
+  finally
+    Stack.Free;
+  end;
+end;
+
+procedure RemovePasMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
+var
+  T: TCnGeneralPasToken;
+  BT, B1, B2: TTokenKind;
+  I: Integer;
+  Stack: TStack;
+begin
+  if (Tokens = nil) or (Tokens.Count <= 1) then
+    Exit;
+
+  if IsSmall then
+  begin
+    B1 := tkRoundOpen;
+    B2 := tkRoundClose;
+  end
+  else
+  begin
+    B1 := tkSquareOpen;
+    B2 := tkSquareClose;
+  end;
+
+  if IsReverse then
+  begin
+    BT := B1;
+    B1 := B2;
+    B2 := BT;
+  end;
+
+  // 从 List 的 0 往后找，先记录 B1 入堆栈，碰到 B2 则判断弹栈，有则两个都删
+  I := 0;
+  Stack := TStack.Create;
+  try
+    while I < Tokens.Count do
+    begin
+      T := TCnGeneralPasToken(Tokens[I]);
+      if T.TokenID = B1 then
+        Stack.Push(T)
+      else if T.TokenID = B2 then
+      begin
+        if Stack.Count > 0 then
+        begin
+          Tokens.Delete(I); // 删了一个，不用 Inc了
+          T := Stack.Pop;
+          Tokens.Remove(T); // 又删了之前的一个，非但不 Inc，还得 Dec
+          Dec(I);
+          Continue;
+        end;
+      end;
+
+      Inc(I);
+    end;
+  finally
+    Stack.Free;
+  end;
 end;
 
 end.

@@ -564,9 +564,11 @@ var
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
+  EditPos: TOTAEditPos;
   CharPos: TOTACharPos;
   I: Integer;
-  DestToken: TCnGeneralPasToken;
+  CurToken, DestToken: TCnGeneralPasToken;
+  Braces: TList;
   TokenIndex: Integer;
   CurIsPas, CurIsCpp: Boolean;
   HighlightWizard: TCnSourceHighlight;
@@ -616,12 +618,12 @@ begin
   try
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
-    // 解析当前显示的源文件
+    // 解析当前显示的源文件，确保括号都进来
     if CurIsPas then
       CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
         or IsInc(EditView.Buffer.FileName), False);
     if CurIsCpp then
-      CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
+      CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col, False, True);
   finally
     Stream.Free;
   end;
@@ -770,6 +772,183 @@ begin
 {$ENDIF}
 
       CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+      Exit;
+    end;
+
+    // 再找光标下是否括号，是的话再找括号配对
+    EditPos := EditView.CursorPos;
+    CurToken := nil;
+    if CurIsPas then
+    begin
+      for I := 0 to PasParser.Count - 1 do
+      begin
+        if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose] then
+        begin
+          ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+          if (PasParser.Tokens[I].EditLine = EditPos.Line) and
+            ((PasParser.Tokens[I].EditCol = EditPos.Col) or (PasParser.Tokens[I].EditEndCol = EditPos.Col)) then
+          begin
+            CurToken := PasParser.Tokens[I];
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Current Pascal Token Is Brace %d:%d - %s.', [CurToken.EditLine,
+              CurToken.EditCol, CurToken.Token]);
+{$ENDIF}
+            Break;
+          end;
+        end;
+      end;
+
+      if CurToken <> nil then
+      begin
+        Braces := TList.Create;
+        try
+          if CurToken.TokenID in [tkRoundOpen, tkSquareOpen] then
+          begin
+            // 要往后找匹配的右括号，把后面的左右括号都顺加到列表
+            for I := CurToken.ItemIndex + 1 to PasParser.Count - 1 do
+            begin
+              if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkSquareOpen, tkRoundClose, tkSquareClose] then
+              begin
+                ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+                Braces.Add(PasParser.Tokens[I]);
+              end;
+            end;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Get Forward Pascal Brace Count %d.', [Braces.Count]);
+{$ENDIF}
+            RemovePasMatchedBraces(Braces, True, False);
+            RemovePasMatchedBraces(Braces, False, False);
+          end
+          else
+          begin
+            // 要往前找匹配的左括号，逆加到左边
+            for I := CurToken.ItemIndex - 1 downto 0 do
+            begin
+              if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkSquareOpen, tkRoundClose, tkSquareClose] then
+              begin
+                ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+                Braces.Add(PasParser.Tokens[I]);
+              end;
+            end;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Get Backward Pascal Brace Count %d.', [Braces.Count]);
+{$ENDIF}
+            RemovePasMatchedBraces(Braces, True, True);
+            RemovePasMatchedBraces(Braces, False, True);
+          end;
+
+          if Braces.Count > 0 then
+          begin
+            for I := 0 to Braces.Count - 1 do
+            begin
+              if ((CurToken.TokenID = tkRoundOpen) and (TCnGeneralPasToken(Braces[I]).TokenID = tkRoundClose))
+                or ((CurToken.TokenID = tkRoundClose) and (TCnGeneralPasToken(Braces[I]).TokenID = tkRoundOpen))
+                or ((CurToken.TokenID = tkSquareOpen) and (TCnGeneralPasToken(Braces[I]).TokenID = tkSquareClose))
+                or ((CurToken.TokenID = tkSquareClose) and (TCnGeneralPasToken(Braces[I]).TokenID = tkSquareOpen)) then
+              begin
+                DestToken := TCnGeneralPasToken(Braces[0]);
+                Break;
+              end;
+            end;
+          end;
+        finally
+          Braces.Free;
+        end;
+      end;
+    end;
+
+    if CurIsCpp then
+    begin
+      for I := 0 to CppParser.Count - 1 do
+      begin
+        if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctkroundclose, ctksquareopen, ctksquareclose] then
+        begin
+          ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+          if (CppParser.Tokens[I].EditLine = EditPos.Line) and
+            ((CppParser.Tokens[I].EditCol = EditPos.Col) or (CppParser.Tokens[I].EditEndCol = EditPos.Col)) then
+          begin
+            CurToken := CppParser.Tokens[I];
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Current C/C++ Token Is Brace %d:%d - %s.', [CurToken.EditLine,
+              CurToken.EditCol, CurToken.Token]);
+{$ENDIF}
+            Break;
+          end;
+        end;
+      end;
+
+      if CurToken <> nil then
+      begin
+        Braces := TList.Create;
+        try
+          if CurToken.CppTokenKind in [ctkroundopen, ctksquareopen] then
+          begin
+            // 要往后找匹配的右括号，顺加到右边
+            for I := CurToken.ItemIndex + 1 to CppParser.Count - 1 do
+            begin
+              if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctksquareopen, ctkroundclose, ctksquareclose] then
+              begin
+                ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+                Braces.Add(CppParser.Tokens[I]);
+              end;
+            end;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Get Forward C/C++ Brace Count %d.', [Braces.Count]);
+{$ENDIF}
+            RemoveCppMatchedBraces(Braces, True, False);
+            RemoveCppMatchedBraces(Braces, False, False);
+          end
+          else
+          begin
+            // 要往前找匹配的左括号，逆加到左边
+            for I := CurToken.ItemIndex - 1 downto 0 do
+            begin
+              if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctksquareopen, ctkroundclose, ctksquareclose] then
+              begin
+                ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+                Braces.Add(CppParser.Tokens[I]);
+              end;
+            end;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Get Backward C/C++ Brace Count %d.', [Braces.Count]);
+{$ENDIF}
+            RemoveCppMatchedBraces(Braces, True, True);
+            RemoveCppMatchedBraces(Braces, False, True);
+          end;
+
+          if Braces.Count > 0 then
+          begin
+            for I := 0 to Braces.Count - 1 do
+            begin
+              if ((CurToken.CppTokenKind = ctkroundopen) and (TCnGeneralCppToken(Braces[I]).CppTokenKind = ctkroundclose))
+                or ((CurToken.CppTokenKind = ctkroundclose) and (TCnGeneralCppToken(Braces[I]).CppTokenKind = ctkroundopen))
+                or ((CurToken.CppTokenKind = ctksquareopen) and (TCnGeneralCppToken(Braces[I]).CppTokenKind = ctksquareclose))
+                or ((CurToken.CppTokenKind = ctksquareclose) and (TCnGeneralCppToken(Braces[I]).CppTokenKind = ctksquareopen)) then
+              begin
+                DestToken := TCnGeneralPasToken(Braces[I]);
+                Break;
+              end;
+            end;
+          end;
+        finally
+          Braces.Free;
+        end;
+      end;
+    end;
+
+    if DestToken <> nil then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Jump Brace Matching. Destination Token %d:%d - %s.', [DestToken.EditLine,
+        DestToken.EditCol, DestToken.Token]);
+{$ENDIF}
+
+      if (CurIsPas and (DestToken.TokenID in [tkRoundOpen, tkSquareOpen]))
+        or (CurIsCpp and (DestToken.CppTokenKind in [ctkroundopen, ctksquareopen])) then
+        CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol + 1) // 光标放左括号右边
+      else
+        CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+      Exit;
     end;
   finally
     FreeAndNil(BlockMatchInfo);
