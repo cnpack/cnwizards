@@ -649,7 +649,7 @@ begin
 
       // ****** 找单独语句，但不进块声明，且光标下不是 Pair 的关键字 ******
       if (InnerPair = nil) or (not (InnerPair.StartToken.TokenID in
-        [tkClass, tkRecord, tkInterface, tkDispInterface]) and not
+        [tkClass, tkRecord, tkInterface, tkDispinterface]) and not
         PairKeysOnCursor(InnerPair)) then
       begin
         // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
@@ -745,7 +745,7 @@ begin
         SearchInAPair(InnerPair, GetPascalPairEndNextOne(InnerPair));
 
         // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
-        if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispInterface] then
+        if InnerPair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispinterface] then
         begin
           PT := GetPascalPairStartPrevOne(InnerPair);
           if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (InnerPair.StartToken.TokenID = tkRecord))) then
@@ -824,7 +824,7 @@ begin
                   SearchInAPair(Pair, GetPascalPairEndNextOne(Pair));
 
                   // class/record/interface 的 Pair，往前扩大范围找 = 及标识符，大概每次调 SearchInAPair 都要做一次，代码略有重复
-                  if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispInterface] then
+                  if Pair.StartToken.TokenID in [tkClass, tkRecord, tkPacked, tkInterface, tkDispinterface] then
                   begin
                     PT := GetPascalPairStartPrevOne(Pair);
                     if (PT <> nil) and ((PT.TokenID = tkEqual) or ((PT.TokenID = tkPacked) and (Pair.StartToken.TokenID = tkRecord))) then

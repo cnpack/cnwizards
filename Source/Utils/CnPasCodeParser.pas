@@ -681,6 +681,7 @@ begin
         tkRecord, tkObject, tkOf, tkEqual,
         tkClass, tkInterface, tkDispinterface,
         tkExcept, tkFinally, tkElse,
+        tkPrivate, tkProtected, tkPublic, tkPublished,
         tkEnd, tkUntil, tkThen, tkDo])) then
       begin
         Token := NewToken(Lex, ASource, CurrBlock, CurrMethod, CurrBracketLevel);
@@ -974,6 +975,17 @@ begin
           tkExcept, tkFinally:
             begin
               if (CurrBlock = nil) or (CurrBlock.TokenID <> tkTry) then
+                DiscardToken
+              else if CurrMidBlock = nil then
+              begin
+                CurrMidBlock := Token;
+              end
+              else
+                DiscardToken;
+            end;
+          tkPrivate, tkProtected, tkPublic, tkPublished:
+            begin
+              if (CurrBlock = nil) or not (CurrBlock.TokenID in [tkClass, tkRecord, tkInterface, tkDispinterface]) then
                 DiscardToken
               else if CurrMidBlock = nil then
               begin
