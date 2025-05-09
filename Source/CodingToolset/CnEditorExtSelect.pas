@@ -720,6 +720,33 @@ begin
               Exit;
             end;
           end;
+
+          // 从 PStStart 往前找头尾都在前面的紧邻的 Pair 是否 if/then 这种，是则选择这 Pair 头和 PStEnd
+          for I := 0 to BlockMatchInfo.LineInfo.Count - 1 do
+          begin
+            TmpPair := BlockMatchInfo.LineInfo.Pairs[I];
+            if TmpPair.EndToken.TokenID in [tkThen, tkDo, tkOf] then
+            begin
+              PT := GetPascalPairEndNextOne(TmpPair);
+              if PT = PStStart then
+              begin
+{$IFDEF DEBUG}
+                CnDebugger.LogFmt('Get Previous Pair End %d %d %s for Pascal Statement.',
+                  [TmpPair.EndToken.EditLine, TmpPair.EndToken.EditCol, TmpPair.EndToken.Token]);
+{$ENDIF}
+                Inc(Step);
+                if Step = FSelectStep then
+                begin
+                  SetStartEndPos(TmpPair.StartToken, PStEnd, False);
+                  Exit;
+                end;
+                Break; // 找到匹配了，如果不跳，则跳出循环
+              end;
+            end;
+
+            if TmpPair.EndToken.LineNumber > FEditPos.Line then // 超过光标后了，提前跳出
+              Break;
+          end;
         end;
       end
       else

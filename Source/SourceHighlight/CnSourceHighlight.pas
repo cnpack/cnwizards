@@ -454,12 +454,17 @@ type
 
     property Control: TControl read FControl;
     property Count: Integer read GetCount;
+    {* Pairs 数量}
     property Pairs[Index: Integer]: TCnBlockLinePair read GetPairs;
+    {* 获取每一个 Pair}
     property LineCount: Integer read GetLineCount;
+    {* 行数}
     property Lines[LineNum: Integer]: TCnList read GetLines;
+    {* 获取每一行索引}
     property CurrentPair: TCnBlockLinePair read FCurrentPair;
     {* 代表光标下的标识符是块分界标识符，并非光标在块的内部}
     property CurrentToken: TCnGeneralPasToken read FCurrentToken;
+    {* 光标下的标识符}
   end;
 
   TCnCompDirectiveInfo = class(TCnBlockLineInfo)
