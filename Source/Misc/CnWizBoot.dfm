@@ -1,10 +1,11 @@
 inherited CnWizBootForm: TCnWizBootForm
   Left = 215
   Top = 134
-  Width = 549
-  Height = 392
+  Width = 552
+  Height = 412
   BorderIcons = [biSystemMenu]
   Caption = 'CnWizards Loader'
+  OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
@@ -12,8 +13,8 @@ inherited CnWizBootForm: TCnWizBootForm
   object lvWizardsList: TListView
     Left = 0
     Top = 22
-    Width = 541
-    Height = 324
+    Width = 544
+    Height = 339
     Align = alClient
     Checkboxes = True
     Columns = <
@@ -42,7 +43,7 @@ inherited CnWizBootForm: TCnWizBootForm
   object ToolBar1: TToolBar
     Left = 0
     Top = 0
-    Width = 541
+    Width = 544
     Height = 22
     AutoSize = True
     Caption = 'ToolBar1'
@@ -113,8 +114,8 @@ inherited CnWizBootForm: TCnWizBootForm
   end
   object stbStatusbar: TStatusBar
     Left = 0
-    Top = 346
-    Width = 541
+    Top = 361
+    Width = 544
     Height = 19
     AutoHint = True
     Panels = <

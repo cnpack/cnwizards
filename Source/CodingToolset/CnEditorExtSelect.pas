@@ -128,8 +128,8 @@ var
   Pair, TmpPair, InnerPair: TCnBlockLinePair;
   LeftBrace, RightBrace: TList;
   InnerStartGot: Boolean;
-  PT, PT1, PStStart, PStEnd: TCnGeneralPasToken;
-  CT, CStStart, CStEnd: TCnGeneralCppToken;
+  PT, PT1, PStStart, PStEnd, POuterLeftBrace, POuterRightBrace: TCnGeneralPasToken;
+  CT, CStStart, CStEnd, COuterLeftBrace, COuterRightBrace: TCnGeneralCppToken;
   LastS: string;
 
   // 判断一个 Pair 是否包括了光标位置，关键字也包括进去了，闭区间
@@ -556,6 +556,8 @@ begin
       try
         LeftBrace := TList.Create;
         RightBrace := TList.Create;
+        POuterLeftBrace:= nil;
+        POuterRightBrace := nil;
         InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
 
         PStStart := nil;
@@ -617,24 +619,28 @@ begin
             CnDebugger.LogFmt('Pascal #%d Step %d Matched Braces is Current Token. No Open.', [I, Step]);
 {$ENDIF}
             Inc(Step);
+            POuterLeftBrace:= TCnGeneralPasToken(LeftBrace[I]);
+            POuterRightBrace := TCnGeneralPasToken(RightBrace[I]);
             if Step = FSelectStep then // 仅走闭区间
             begin
-              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
+              SetStartEndPos(POuterLeftBrace, POuterRightBrace, False);
               Exit;
             end;
           end
           else
           begin
             Inc(Step);
+            POuterLeftBrace:= TCnGeneralPasToken(LeftBrace[I]);
+            POuterRightBrace := TCnGeneralPasToken(RightBrace[I]);
             if Step = FSelectStep then  // 常规先开
             begin
-              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), True);
+              SetStartEndPos(POuterLeftBrace, POuterRightBrace, True);
               Exit;
             end;
             Inc(Step);
             if Step = FSelectStep then  // 常规后闭
             begin
-              SetStartEndPos(TCnGeneralPasToken(LeftBrace[I]), TCnGeneralPasToken(RightBrace[I]), False);
+              SetStartEndPos(POuterLeftBrace,POuterRightBrace, False);
               Exit;
             end;
           end;
@@ -644,13 +650,14 @@ begin
         LeftBrace.Free;
       end;
 
-      // ****** 找单独语句，但不进块声明，且光标下不是 Pair 的关键字 ******
+      // ****** 括号找完了，找单独语句，但不进块声明，且光标下不是 Pair 的关键字 ******
       if (InnerPair = nil) or (not (InnerPair.StartToken.TokenID in
         [tkClass, tkRecord, tkInterface, tkDispinterface]) and not
         PairKeysOnCursor(InnerPair)) then
       begin
         // InnerPair 内或所有的括号处理完毕，如果没中，再从 Tokens 中找前后语句结束符，
         // 后结束符是分号、无分号则 end/else 前，前则是分号或其他关键字
+        // 注意找到的前后结束符，必须超出上面找到的最外层括号（如果有的话）
         PStStart := nil;
         PStEnd := nil;
         StStartIdx := -1;
@@ -659,30 +666,40 @@ begin
         for I := 0 to PasParser.Count - 1 do
         begin
           PT := PasParser.Tokens[I];
-          if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkVar, tkConst] then // 只挑出符合条件的来转换并比较位置
+          if PT.TokenID in csKeyTokens + [tkSemiColon, tkVar, tkConst] then // 只挑出符合条件的来转换并比较位置
             ConvertGeneralTokenPos(Pointer(EditView), PT);
 
-          if ((FEditPos.Line < PT.EditLine) or // Token 开头位置后于光标的，往后找
-            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col <= PT.EditCol))) then
+          if (FEditPos.Line < PT.EditLine) or // Token 开头位置后于光标的，往后找
+            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col <= PT.EditCol)) then
           begin
-            if (PStEnd = nil) and (PT.TokenID = tkSemiColon) then  // 包括分号
+            // 要在已经找到过的最外层右括号之后才符合条件
+            if (POuterRightBrace = nil) or ((POuterRightBrace.EditLine < PT.EditLine) or
+              ((POuterRightBrace.EditLine = PT.EditLine) and (POuterRightBrace.EditCol < PT.EditCol))) then
             begin
-              PStEnd := PT;
-            end
-            else if (PStEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo, tkVar, tkConst]) then // 无分号，不包括 else/end 及其他复合语句结尾
-            begin
-              PStEnd := PT;
-              StEndIdx := I - 1;  // 前一个才是真正的语句结尾
+              if (PStEnd = nil) and (PT.TokenID = tkSemiColon) then  // 包括分号
+              begin
+                PStEnd := PT;
+              end
+              else if (PStEnd = nil) and (PT.TokenID in [tkEnd, tkElse, tkThen, tkDo, tkVar, tkConst]) then // 无分号，不包括 else/end 及其他复合语句结尾
+              begin
+                PStEnd := PT;
+                StEndIdx := I - 1;  // 前一个才是真正的语句结尾
+              end;
             end;
           end;
 
-          if ((FEditPos.Line > PT.EditLine) or // Token 结尾位置前于光标的，往前找
-            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditEndCol))) then
+          if (FEditPos.Line > PT.EditLine) or // Token 结尾位置前于光标的，往前找
+            ((FEditPos.Line = PT.EditLine) and (FEditPos.Col > PT.EditEndCol)) then
           begin
-            if PT.TokenID in csKeyTokens + csProcTokens + [tkSemiColon, tkVar, tkConst] then
+            // 要在已经找到过的最外层左括号之前的才符合条件
+            if (POuterLeftBrace = nil) or ((POuterLeftBrace.EditLine > PT.EditLine) or
+              ((POuterLeftBrace.EditLine = PT.EditLine) and (POuterLeftBrace.EditCol > PT.EditCol))) then
             begin
-              PStStart := PT;
-              StStartIdx := I + 1; // 后一个才是真正的语句开头
+              if PT.TokenID in csKeyTokens + [tkSemiColon, tkVar, tkConst] then
+              begin
+                PStStart := PT;
+                StStartIdx := I + 1; // 后一个才是真正的语句开头
+              end;
             end;
           end;
 
@@ -1048,6 +1065,8 @@ begin
       try
         LeftBrace := TList.Create;
         RightBrace := TList.Create;
+        COuterLeftBrace := nil;
+        COuterRightBrace := nil;
         InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
 
         for I := 0 to CppParser.Count - 1 do
@@ -1106,24 +1125,28 @@ begin
             CnDebugger.LogFmt('C/C++ #%d Step %d Matched Braces is Current Token. No Open.', [I, Step]);
 {$ENDIF}
             Inc(Step);
+            COuterLeftBrace:= TCnGeneralCppToken(LeftBrace[I]);
+            COuterRightBrace := TCnGeneralCppToken(RightBrace[I]);
             if Step = FSelectStep then // 仅走闭区间
             begin
-              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), False);
+              SetStartEndPos(COuterLeftBrace, COuterRightBrace, False);
               Exit;
             end;
           end
           else
           begin
             Inc(Step);
+            COuterLeftBrace:= TCnGeneralCppToken(LeftBrace[I]);
+            COuterRightBrace := TCnGeneralCppToken(RightBrace[I]);
             if Step = FSelectStep then
             begin
-              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), True);
+              SetStartEndPos(COuterLeftBrace, COuterRightBrace, True);
               Exit;
             end;
             Inc(Step);
             if Step = FSelectStep then
             begin
-              SetStartEndPos(TCnGeneralCppToken(LeftBrace[I]), TCnGeneralCppToken(RightBrace[I]), False);
+              SetStartEndPos(COuterLeftBrace, COuterRightBrace, False);
               Exit;
             end;
           end;
@@ -1149,17 +1172,27 @@ begin
         if ((FEditPos.Line < CT.EditLine) or // Token 开头位置后于光标的，往后找
           ((FEditPos.Line = CT.EditLine) and (FEditPos.Col <= CT.EditCol))) then
         begin
-          if (CStEnd = nil) and (CT.CppTokenKind = ctksemicolon) then  // 包括分号
-            CStEnd := CT;
+          // 要在已经找到过的最外层右括号之后才符合条件
+          if (COuterRightBrace = nil) or ((COuterRightBrace.EditLine < CT.EditLine) or
+            ((COuterRightBrace.EditLine = CT.EditLine) and (COuterRightBrace.EditCol < CT.EditCol))) then
+          begin
+            if (CStEnd = nil) and (CT.CppTokenKind = ctksemicolon) then  // 包括分号
+              CStEnd := CT;
+          end;
         end;
 
         if ((FEditPos.Line > CT.EditLine) or // Token 结尾位置前于光标的，往前找
           ((FEditPos.Line = CT.EditLine) and (FEditPos.Col > CT.EditEndCol))) then
         begin
-          if CT.CppTokenKind in [ctksemicolon, ctkbraceopen, ctkelse] then
+          // 要在已经找到过的最外层左括号之前的才符合条件
+          if (COuterLeftBrace = nil) or ((COuterLeftBrace.EditLine > CT.EditLine) or
+            ((COuterLeftBrace.EditLine = CT.EditLine) and (COuterLeftBrace.EditCol > CT.EditCol))) then
           begin
-            CStStart := CT;
-            StStartIdx := I + 1; // 后一个才是真正的语句开头
+            if CT.CppTokenKind in [ctksemicolon, ctkbraceopen, ctkelse] then
+            begin
+              CStStart := CT;
+              StStartIdx := I + 1; // 后一个才是真正的语句开头
+            end;
           end;
         end;
 

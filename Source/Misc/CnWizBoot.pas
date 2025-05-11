@@ -62,6 +62,7 @@ type
     procedure tbnReverseSelectClick(Sender: TObject);
     procedure lvWizardsListClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
   private
     procedure UpdateStatusBar;
   public
@@ -175,6 +176,11 @@ procedure TCnWizBootForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #27 then
     tbtnCancelClick(nil);
+end;
+
+procedure TCnWizBootForm.FormCreate(Sender: TObject);
+begin
+  WizOptions.ResetToolbarWithLargeIcons(ToolBar1);
 end;
 
 end.
