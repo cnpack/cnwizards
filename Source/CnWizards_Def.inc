@@ -35,3 +35,11 @@
   // 因而为了保险起见，定义 10.3 或以上才支持该接口
 {$ENDIF}
 
+{$IFDEF OTA_CODEEDITOR_SERVICE}
+  {$IFDEF DELPHI120_ATHENS}
+  {$IFDEF WIN64}
+  // 暂时只在 64 位的 D120 下使用 11.3 之后新增的 ToolsAPI.Editor 接口，未来 13 再加
+  {$DEFINE USE_CODEEDITOR_SERVICE}
+  {$ENDIF}
+  {$ENDIF}
+{$ENDIF}

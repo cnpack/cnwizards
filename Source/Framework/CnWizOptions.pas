@@ -931,7 +931,6 @@ begin
     AToolBar.ButtonHeight := IdeGetScaledPixelsFromOrigin(csLargeButtonHeight, AToolBar);
     AToolBar.ButtonWidth := IdeGetScaledPixelsFromOrigin(csLargeButtonWidth, AToolBar);
   end;
-{$ENDIF}
 
 {$IFDEF IDE_SUPPORT_HDPI}
   NeedNew := True;
@@ -984,6 +983,7 @@ begin
       AToolBar.DisabledImages := dmCnSharedImages.DisabledLargeImages;
   end;
   {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 
   if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then

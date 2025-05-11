@@ -62,13 +62,6 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF OTA_CODEEDITOR_SERVICE}
-{$IFDEF WIN64}
-  // 只在 64 位下使用 11.3 之后新增的 ToolsAPI.Editor 接口
-  {$DEFINE USE_CODEEDITOR_SERVICE}
-{$ENDIF}
-{$ENDIF}
-
 {$IFDEF DELPHI10_SEATTLE_UP}
   {$DEFINE PAINT_LINE_HAS_V3}
 {$ENDIF}
@@ -598,6 +591,7 @@ type
     {* 编辑器的文字背景色，实际上是 WhiteSpace 字体的背景色}
   end;
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
   TCnEditorEvents = class(TNTACodeEditorNotifier, INTACodeEditorEvents)
@@ -609,6 +603,7 @@ type
     destructor Destroy; override;
   end;
 
+{$ENDIF}
 {$ENDIF}
 
 function EditControlWrapper: TCnEditControlWrapper;
@@ -1139,8 +1134,6 @@ begin
     FEditControlWrapper.DoEditorChange(FEditControlWrapper.Editors[I], [ctGutterWidthChanged]);
 end;
 
-{$ENDIF}
-
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
 //==============================================================================
@@ -1169,6 +1162,8 @@ function TCnEditorEvents.AllowedLineStages: TPaintLineStages;
 begin
   Result := [plsBeginPaint, plsEndPaint];
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -1238,8 +1233,10 @@ end;
 destructor TCnEditControlWrapper.Destroy;
 var
   I: Integer;
+{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   CES: INTACodeEditorServices;
+{$ENDIF}
 {$ENDIF}
 begin
   for I := Low(Self.FFontArray) to High(FFontArray) do
@@ -3037,6 +3034,7 @@ begin
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
 {$ENDIF}
   end
+{$IFNDEF STAND_ALONE}
 {$IFDEF IDE_SUPPORT_HDPI}
   else if (Msg.Msg = WM_DPICHANGED) and (Control = Application.MainForm) then
   begin
@@ -3046,6 +3044,7 @@ begin
     for I := 0 to EditorCount - 1 do
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
   end
+{$ENDIF}
 {$ENDIF}
   else if (Msg.Msg = WM_NCPAINT) and IsEditControl(Control) then
   begin

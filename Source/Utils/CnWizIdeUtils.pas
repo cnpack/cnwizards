@@ -2519,9 +2519,13 @@ begin
   end;
 
   if Recursive then
+  begin
     for I := 0 to ToolBar.ControlCount - 1 do
+    begin
       if ToolBar.Controls[I] is TToolBar then
         ApplyThemeOnToolbar(ToolBar.Controls[I] as TToolBar);
+    end;
+  end;
 {$ENDIF}
 end;
 
