@@ -300,6 +300,15 @@ type
     FMouseLeaveNotifiers: TList;
     FNcPaintNotifiers: TList;
     FVScrollNotifiers: TList;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    FEditor2BeginPaintNotifiers: TList;
+    FEditor2EndPaintNotifiers: TList;
+    FEditor2PaintLineNotifiers: TList;
+    FEditor2PaintGutterNotifiers: TList;
+    FEditor2PaintTextNotifiers: TList;
+{$ENDIF}
+
     FBackgroundColor: TColor;
     FForegroundColor: TColor;
     FEditorList: TObjectList;
@@ -396,9 +405,18 @@ type
 
 {$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
-    procedure EditorPaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+    procedure Editor2BeginPaint(const Editor: TWinControl;
+      const ForceFullRepaint: Boolean);
+    procedure Editor2EndPaint(const Editor: TWinControl);
+    procedure Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
       const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
       const Context: INTACodeEditorPaintContext);
+    procedure Editor2PaintGutter(const Rect: TRect; const Stage: TPaintGutterStage;
+      const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+      const Context: INTACodeEditorPaintContext);
+    procedure Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
+      const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
+      var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 {$ENDIF}
 {$ENDIF}
   public
@@ -572,6 +590,25 @@ type
     {* 返回编辑器的鼠标事件通知服务是否可用 }
     property EditorBaseFont: TFont read FEditorBaseFont;
     {* 一个 TFont 对象，持有编辑器的基础字体供外界使用}
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+    // 根据新版 ToolsAPI.Editor 提供的新服务，为了区分，都加上了 2
+    procedure AddEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+    procedure RemoveEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+
+    procedure AddEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+    procedure RemoveEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+
+    procedure AddEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+    procedure RemoveEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+
+    procedure AddEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+    procedure RemoveEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+
+    procedure AddEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+    procedure RemoveEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+{$ENDIF}
 
     // 以下是维护的注册表中的编辑器各类元素的字体，和 Highlights 有一定重叠，但无背景色属性
     property FontBasic: TFont index 0 read GetFonts write SetFonts; // 基本字体无前景色
@@ -1144,7 +1181,11 @@ end;
 
 constructor TCnEditorEvents.Create(Wrapper: TCnEditControlWrapper);
 begin
-  OnEditorPaintLine := Wrapper.EditorPaintLine;
+  OnEditorBeginPaint := Wrapper.Editor2BeginPaint;
+  OnEditorEndPaint := Wrapper.Editor2EndPaint;
+  OnEditorPaintLine := Wrapper.Editor2PaintLine;
+  OnEditorPaintGutter := Wrapper.Editor2PaintGutter;
+  OnEditorPaintText := Wrapper.Editor2PaintText;
 end;
 
 destructor TCnEditorEvents.Destroy;
@@ -1155,12 +1196,12 @@ end;
 
 function TCnEditorEvents.AllowedEvents: TCodeEditorEvents;
 begin
-  Result := [cevPaintLineEvents];
+  Result := [cevBeginEndPaintEvents, cevPaintLineEvents, cevPaintGutterEvents, cevPaintTextEvents];
 end;
 
 function TCnEditorEvents.AllowedLineStages: TPaintLineStages;
 begin
-  Result := [plsBeginPaint, plsEndPaint];
+  Result := [plsBeginPaint, plsEndPaint, plsBackground]; // 先整这么几个
 end;
 
 {$ENDIF}
@@ -1194,6 +1235,14 @@ begin
   FEditControlList := TList.Create;
   FNcPaintNotifiers := TList.Create;
   FVScrollNotifiers := TList.Create;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  FEditor2BeginPaintNotifiers := TList.Create;
+  FEditor2EndPaintNotifiers := TList.Create;
+  FEditor2PaintLineNotifiers := TList.Create;
+  FEditor2PaintGutterNotifiers := TList.Create;
+  FEditor2PaintTextNotifiers := TList.Create;
+{$ENDIF}
 
   FEditorList := TObjectList.Create;
 {$IFNDEF STAND_ALONE}
@@ -1285,6 +1334,14 @@ begin
 
   ClearHighlights;
   FHighlights.Free;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CnWizClearAndFreeList(FEditor2BeginPaintNotifiers);
+  CnWizClearAndFreeList(FEditor2EndPaintNotifiers);
+  CnWizClearAndFreeList(FEditor2PaintLineNotifiers);
+  CnWizClearAndFreeList(FEditor2PaintGutterNotifiers);
+  CnWizClearAndFreeList(FEditor2PaintTextNotifiers);
+{$ENDIF}
 
   CnWizClearAndFreeList(FVScrollNotifiers);
   CnWizClearAndFreeList(FNcPaintNotifiers);
@@ -1820,11 +1877,44 @@ end;
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
-procedure TCnEditControlWrapper.EditorPaintLine(const Rect: TRect;
+procedure TCnEditControlWrapper.Editor2BeginPaint(const Editor: TWinControl;
+  const ForceFullRepaint: Boolean);
+var
+  I: Integer;
+begin
+  for I := 0 to FEditor2BeginPaintNotifiers.Count - 1 do
+  begin
+    try
+      with PCnWizNotifierRecord(FEditor2BeginPaintNotifiers[I])^ do
+        TEditorBeginPaintEvent(Notifier)(Editor, ForceFullRepaint);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.Editor2BeginPaint[' + IntToStr(I) + ']', E);
+    end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.Editor2EndPaint(const Editor: TWinControl);
+var
+  I: Integer;
+begin
+  for I := 0 to FEditor2EndPaintNotifiers.Count - 1 do
+  begin
+    try
+      with PCnWizNotifierRecord(FEditor2EndPaintNotifiers[I])^ do
+        TEditorEndPaintEvent(Notifier)(Editor);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.Editor2EndPaint[' + IntToStr(I) + ']', E);
+    end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.Editor2PaintLine(const Rect: TRect;
   const Stage: TPaintLineStage; const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
   const Context: INTACodeEditorPaintContext);
 var
-  Idx: Integer;
+  I, Idx: Integer;
   Editor: TCnEditorObject;
 begin
   Editor := nil;
@@ -1840,6 +1930,55 @@ begin
       FEditControlWrapper.DoBeforePaintLine(Editor, Context.EditorLineNum, Context.LogicalLineNum)
     else
       FEditControlWrapper.DoAfterPaintLine(Editor, Context.EditorLineNum, Context.LogicalLineNum);
+  end;
+
+  for I := 0 to FEditor2PaintLineNotifiers.Count - 1 do
+  begin
+    try
+      with PCnWizNotifierRecord(FEditor2PaintLineNotifiers[I])^ do
+        TEditorPaintLineEvent(Notifier)(Rect, Stage, BeforeEvent, AllowDefaultPainting, Context);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.Editor2PaintLine[' + IntToStr(I) + ']', E);
+    end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.Editor2PaintGutter(const Rect: TRect;
+  const Stage: TPaintGutterStage; const BeforeEvent: Boolean;
+  var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+var
+  I: Integer;
+begin
+  for I := 0 to FEditor2PaintGutterNotifiers.Count - 1 do
+  begin
+    try
+      with PCnWizNotifierRecord(FEditor2PaintGutterNotifiers[I])^ do
+        TEditorPaintGutterEvent(Notifier)(Rect, Stage, BeforeEvent, AllowDefaultPainting, Context);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.Editor2PaintGutter[' + IntToStr(I) + ']', E);
+    end;
+  end;
+end;
+
+procedure TCnEditControlWrapper.Editor2PaintText(const Rect: TRect;
+  const ColNum: SmallInt; const Text: string; const SyntaxCode: TOTASyntaxCode;
+  const Hilight, BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+  const Context: INTACodeEditorPaintContext);
+var
+  I: Integer;
+begin
+  for I := 0 to FEditor2PaintTextNotifiers.Count - 1 do
+  begin
+    try
+      with PCnWizNotifierRecord(FEditor2PaintTextNotifiers[I])^ do
+        TEditorPaintTextEvent(Notifier)(Rect, ColNum, Text, SyntaxCode, Hilight,
+          BeforeEvent, AllowDefaultPainting, Context);
+    except
+      on E: Exception do
+        DoHandleException('TCnEditControlWrapper.Editor2PaintText[' + IntToStr(I) + ']', E);
+    end;
   end;
 end;
 
@@ -3410,6 +3549,60 @@ begin
     end;
   end;
 end;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+procedure TCnEditControlWrapper.AddEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+begin
+  CnWizAddNotifier(FEditor2BeginPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+begin
+  CnWizRemoveNotifier(FEditor2BeginPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+begin
+  CnWizAddNotifier(FEditor2EndPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+begin
+  CnWizRemoveNotifier(FEditor2EndPaintNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+begin
+  CnWizAddNotifier(FEditor2PaintLineNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+begin
+  CnWizRemoveNotifier(FEditor2PaintLineNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+begin
+  CnWizAddNotifier(FEditor2PaintGutterNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+begin
+  CnWizRemoveNotifier(FEditor2PaintGutterNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+begin
+  CnWizAddNotifier(FEditor2PaintTextNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+begin
+  CnWizRemoveNotifier(FEditor2PaintTextNotifiers, TMethod(Notifier));
+end;
+
+{$ENDIF}
 
 {$IFNDEF STAND_ALONE}
 

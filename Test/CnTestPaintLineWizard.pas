@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnWizIdeUtils,
-  CnEditControlWrapper;
+  CnEditControlWrapper {$IFDEF USE_CODEEDITOR_SERVICE}, ToolsAPI.Editor {$ENDIF};
 
 type
 
@@ -51,15 +51,45 @@ type
 
 { TCnTestPaintLineMenuWizard }
 
-  TCnTestPaintLineMenuWizard = class(TCnMenuWizard)
+  TCnTestPaintLineMenuWizard = class(TCnSubMenuWizard)
   private
+    FIdPaintLine: Integer;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    FId2BeginPaint: Integer;
+    FId2EndPaint: Integer;
+    FId2PaintLine: Integer;
+    FId2PaintGutter: Integer;
+    FId2PaintText: Integer;
+    FAddedBeginPaint: Boolean;
+    FAddedEndPaint: Boolean;
+    FAddedPaintLine: Boolean;
+    FAddedPaintGutter: Boolean;
+    FAddedPaintText: Boolean;
+{$ENDIF}
     FTest: Integer;
     FCharSize: TSize;
     FGutterWidth: Integer;
-    FAdded: Boolean;
+    FPaintLineAdded: Boolean;
+    procedure PaintLineExecute;
+
     procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     procedure EditorPaintText(EditControl: TControl; ARect: TRect; AText: string;
       AColor, AColorBk, AColorBd: TColor; ABold, AItalic: Boolean);
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    procedure Editor2BeginPaint(const Editor: TWinControl;
+      const ForceFullRepaint: Boolean);
+    procedure Editor2EndPaint(const Editor: TWinControl);
+    procedure Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+      const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+      const Context: INTACodeEditorPaintContext);
+    procedure Editor2PaintGutter(const Rect: TRect; const Stage: TPaintGutterStage;
+      const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+      const Context: INTACodeEditorPaintContext);
+    procedure Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
+      const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
+      var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+{$ENDIF}
   protected
     function GetHasConfig: Boolean; override;
   public
@@ -72,7 +102,9 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+
+    procedure AcquireSubActions; override;
+    procedure SubActionExecute(Index: Integer); override;
   end;
 
 implementation
@@ -86,6 +118,25 @@ uses
 
 { TCnTestPaintLineMenuWizard }
 
+procedure TCnTestPaintLineMenuWizard.AcquireSubActions;
+begin
+  FIdPaintLine := RegisterASubAction('CnTestPaintLine', 'Test Paint Line',
+    0, 'Test Paint Line');
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  FId2BeginPaint := RegisterASubAction('CnTestEditor2BeginPaint', 'Test Begin Paint',
+    0, 'Test Begin Paint');
+  FId2EndPaint := RegisterASubAction('CnTestEditor2EndPaint', 'Test End Paint',
+    0, 'Test End Paint');
+  FId2PaintLine := RegisterASubAction('CnTestEditor2PaintLine', 'Test Paint Line 2',
+    0, 'Test Paint Line 2');
+  FId2PaintGutter := RegisterASubAction('CnTestEditor2PaintGutter', 'Test Paint Gutter',
+    0, 'Test Paint Gutter');
+  FId2PaintText := RegisterASubAction('CnTestEditor2PaintText', 'Test Paint Text',
+    0, 'Test Paint Text');
+{$ENDIF}
+end;
+
 procedure TCnTestPaintLineMenuWizard.Config;
 begin
   ShowMessage('No option for this test case.');
@@ -93,7 +144,19 @@ end;
 
 destructor TCnTestPaintLineMenuWizard.Destroy;
 begin
-  if FAdded then
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if FAddedBeginPaint then
+    EditControlWrapper.RemoveEditor2BeginPaintNotifier(Editor2BeginPaint);
+  if FAddedEndPaint then
+    EditControlWrapper.RemoveEditor2EndPaintNotifier(Editor2EndPaint);
+  if  FAddedPaintLine then
+    EditControlWrapper.RemoveEditor2PaintLineNotifier(Editor2PaintLine);
+  if  FAddedPaintGutter then
+    EditControlWrapper.RemoveEditor2PaintGutterNotifier(Editor2PaintGutter);
+  if FAddedPaintText then
+    EditControlWrapper.RemoveEditor2PaintTextNotifier(Editor2PaintText);
+{$ENDIF}
+  if FPaintLineAdded then
     EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
   inherited;
 end;
@@ -156,7 +219,49 @@ begin
   end;
 end;
 
-procedure TCnTestPaintLineMenuWizard.Execute;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+procedure TCnTestPaintLineMenuWizard.Editor2BeginPaint(const Editor: TWinControl;
+  const ForceFullRepaint: Boolean);
+begin
+  CnDebugger.LogMsg('Editor2BeginPaint ForceFullRepaint ' + IntToStr(Ord(ForceFullRepaint)));
+end;
+
+procedure TCnTestPaintLineMenuWizard.Editor2EndPaint(const Editor: TWinControl);
+begin
+  CnDebugger.LogMsg('Editor2EndPaint');
+end;
+
+procedure TCnTestPaintLineMenuWizard.Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+  const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+  const Context: INTACodeEditorPaintContext);
+begin
+  CnDebugger.LogFmt('Editor2PaintLine #%d:%d Rect %d %d ~ %d %d. Stage %d CellSize %d %d. BeforeEvent %d. AllowDefaultPaint %d',
+    [Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom, Ord(Stage),
+    Context.CellSize.cx, Context.CellSize.cy, Ord(BeforeEvent), Ord(AllowDefaultPainting)]);
+end;
+
+procedure TCnTestPaintLineMenuWizard.Editor2PaintGutter(const Rect: TRect; const Stage: TPaintGutterStage;
+  const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+  const Context: INTACodeEditorPaintContext);
+begin
+  CnDebugger.LogFmt('Editor2PaintGutter #%d:%d. Rect %d %d ~ %d %d. Stage %d CellSize %d %d',
+    [Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom,
+    Ord(Stage), Context.CellSize.cx, Context.CellSize.cy]);
+end;
+
+procedure TCnTestPaintLineMenuWizard.Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
+  const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
+  var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+begin
+  CnDebugger.LogFmt('Editor2PaintText #%d:%d. Rect %d %d ~ %d %d. Cols %d SyntaxCode %d Hilight %d: %s',
+    [Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom,
+    ColNum,  Ord(SyntaxCode), Ord(Hilight), Text]);
+end;
+
+{$ENDIF}
+
+procedure TCnTestPaintLineMenuWizard.PaintLineExecute;
 var
   EditView: IOTAEditView;
   I: Integer;
@@ -171,15 +276,15 @@ begin
     CnDebugger.TraceFmt('Line %d Elided? %d', [I, Integer(EditControlWrapper.GetLineIsElided(EditControl, I))]);
   FCharSize := EditControlWrapper.GetCharSize;
 
-  if not FAdded then
+  if not FPaintLineAdded then
   begin
     EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
-    FAdded := True;
+    FPaintLineAdded := True;
   end
   else
   begin
     EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
-    FAdded := False;
+    FPaintLineAdded := False;
   end;
 end;
 
@@ -254,6 +359,55 @@ end;
 procedure TCnTestPaintLineMenuWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+procedure TCnTestPaintLineMenuWizard.SubActionExecute(Index: Integer);
+begin
+  if Index = FIdPaintLine then
+    PaintLineExecute;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Index = FId2BeginPaint then
+  begin
+    if not FAddedBeginPaint then
+      EditControlWrapper.AddEditor2BeginPaintNotifier(Editor2BeginPaint)
+    else
+      EditControlWrapper.RemoveEditor2BeginPaintNotifier(Editor2BeginPaint);
+    FAddedBeginPaint := not FAddedBeginPaint;
+  end
+  else if Index = FId2EndPaint then
+  begin
+    if not FAddedEndPaint then
+      EditControlWrapper.RemoveEditor2EndPaintNotifier(Editor2EndPaint)
+    else
+      EditControlWrapper.RemoveEditor2EndPaintNotifier(Editor2EndPaint);
+    FAddedEndPaint := not FAddedEndPaint;
+  end
+  else if Index = FId2PaintLine then
+  begin
+    if not FAddedPaintLine then
+      EditControlWrapper.AddEditor2PaintLineNotifier(Editor2PaintLine)
+    else
+      EditControlWrapper.RemoveEditor2PaintLineNotifier(Editor2PaintLine);
+    FAddedPaintLine := not FAddedPaintLine;
+  end
+  else if Index = FId2PaintGutter then
+  begin
+    if not FAddedPaintGutter then
+      EditControlWrapper.AddEditor2PaintGutterNotifier(Editor2PaintGutter)
+    else
+      EditControlWrapper.RemoveEditor2PaintGutterNotifier(Editor2PaintGutter);
+    FAddedPaintGutter := not FAddedPaintGutter;
+  end
+  else if Index = FId2PaintText  then
+  begin
+    if not FAddedPaintText then
+      EditControlWrapper.AddEditor2PaintTextNotifier(Editor2PaintText)
+    else
+      EditControlWrapper.RemoveEditor2PaintTextNotifier(Editor2PaintText);
+    FAddedPaintText := not FAddedPaintText;
+  end;
+{$ENDIF}
 end;
 
 initialization
