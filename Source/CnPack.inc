@@ -3326,7 +3326,12 @@
 
 {$IFDEF DELPHIXE5_UP}
   {$DEFINE SUPPORT_MOBILE}              // XE5 及以上开始支持移动开发
+  {$DEFINE FMX_HAS_GRAPHICS}            // XE5 及以上 FMX 才有 Graphics 单元
   {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
+{$ENDIF}
+
+{$IFDEF DELPHIXE5}
+  {$DEFINE FMX_PIXELFORMATS}            // XE5 FMX 有独立的 PixelFormats 单元，XE 6 才没
 {$ENDIF}
 
 {$IFDEF DELPHIXE4_UP}
@@ -3337,10 +3342,18 @@
   {$DEFINE MEMO_CARETPOS_BUG}           // Memo CaretPos Get Negative Error Value for Large File under XE3 or below
 {$ENDIF}
 
+{$IFDEF DELPHIXE4}
+  {$DEFINE FMX_PIXELFORMATS}            // XE4 FMX 有独立的 PixelFormats 单元，XE 6 才没
+{$ENDIF}
+
 {$IFDEF DELPHIXE3_UP}
   {$DEFINE SUPPORT_ATOMIC}              // XE3 has Atomic Routines
   {$DEFINE TCONTROL_HAS_STYLEELEMENTS}  // XE3 TControl has StyleElements Property
   {$DEFINE IDE_NP_FMX_DESIGN_BUG}       // XE3 FMX Designer Cut/Copy/Paste cause AV Bug for -np switch
+{$ENDIF}
+
+{$IFDEF DELPHIXE3}
+  {$DEFINE FMX_PIXELFORMATS}            // XE3 FMX 有独立的 PixelFormats 单元，XE 6 才没
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
