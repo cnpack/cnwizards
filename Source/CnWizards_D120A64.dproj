@@ -95,7 +95,7 @@
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_DebugInformation>0</DCC_DebugInformation>
-        <DCC_Define>RELEASE;I64;ENABLE_UIINTERACT;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;$(DCC_Define)</DCC_Define>
+        <DCC_Define>RELEASE;I64;ENABLE_UIINTERACT;ENABLE_FMX;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -116,7 +116,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
-        <DCC_Define>DEBUG;I64;ENABLE_UIINTERACT;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;CAPTURE_STACK;$(DCC_Define)</DCC_Define>
+        <DCC_Define>DEBUG;I64;ENABLE_UIINTERACT;ENABLE_FMX;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;CAPTURE_STACK;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
