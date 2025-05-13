@@ -52,9 +52,21 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, IniFiles, Menus, Forms, Controls,
-  CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizOptions;
+  CnConsts, CnWizClasses, CnWizManager, CnWizConsts, CnWizUtils, CnCommon,
+  CnWizOptions, CnWizIdeUtils;
 
 type
+
+{$IFDEF DEBUG}
+
+  TCnEvaluationExecutor = class(TCnContextMenuExecutor)
+  {* 针对一个选中组件的查看菜单项}
+  public
+    function GetActive: Boolean; override;
+    function GetCaption: string; override;
+  end;
+
+{$ENDIF}
 
 { TCnWizAbout }
 
@@ -74,11 +86,17 @@ type
     FIdEval: Integer;
 {$ENDIF}
     FIdAbout: Integer;
+{$IFDEF DEBUG}
+    FEvaluationExecutor: TCnEvaluationExecutor;
+    procedure EvalExecute(Sender: TObject);
+{$ENDIF}
   protected
     procedure ConfigIO;
     procedure SubActionExecute(Index: Integer); override;
   public
     constructor Create; override;
+    destructor Destroy; override;
+
     procedure AcquireSubActions; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     class function IsInternalWizard: Boolean; override;
@@ -91,7 +109,7 @@ implementation
 
 uses
   CnWizAboutFrm, CnWizFeedbackFrm, CnWizUpgradeFrm, CnWizTipOfDayFrm
-  {$IFDEF DEBUG}, CnDebug{$ENDIF};
+  {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 { TCnWizAbout }
 
@@ -111,7 +129,42 @@ begin
   inherited;
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
   AcquireSubActions;
+
+{$IFDEF DEBUG}
+  FEvaluationExecutor := TCnEvaluationExecutor.Create;
+  FEvaluationExecutor.OnExecute := EvalExecute;
+  RegisterDesignMenuExecutor(FEvaluationExecutor);
+{$ENDIF}
 end;
+
+destructor TCnWizAbout.Destroy;
+begin
+{$IFDEF DEBUG}
+  UnRegisterDesignMenuExecutor(FEvaluationExecutor);
+  FEvaluationExecutor := nil;
+{$ENDIF}
+  inherited;
+end;
+
+{$IFDEF DEBUG}
+
+procedure TCnWizAbout.EvalExecute(Sender: TObject);
+var
+  Sel: TList;
+begin
+  Sel := TList.Create;
+  try
+    IdeGetFormSelection(Sel);
+    if Sel.Count > 0 then
+      CnDebugger.EvaluateObject(Sel[0])
+    else
+      CnDebugger.EvaluateObject(IdeGetDesignedForm);
+  finally
+    Sel.Free;
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnWizAbout.AcquireSubActions;
 begin
@@ -185,6 +238,22 @@ begin
   else if Index = FIdAbout then
     ShowCnWizAboutForm;
 end;
+
+{$IFDEF DEBUG}
+
+{ TCnEvaluationExecutor }
+
+function TCnEvaluationExecutor.GetActive: Boolean;
+begin
+  Result := True;
+end;
+
+function TCnEvaluationExecutor.GetCaption: string;
+begin
+  Result := 'Evaluate Selected Component';
+end;
+
+{$ENDIF}
 
 end.
 

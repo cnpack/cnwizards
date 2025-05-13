@@ -1514,6 +1514,7 @@ var
         // Form->PageControl->TabSheet->FrameTTraditionalEditorFrame1->TComponentContainer
         // 需要找到用来容纳各个组件的 TComponentContainer 实例
         for I := 0 to AControl.ControlCount - 1 do
+        begin
           if AControl.Controls[I].ClassNameIs('TComponentContainer')
             and (AControl.Controls[I] is TWinControl) then
           begin
@@ -1521,6 +1522,7 @@ var
             ParentHandle := AControl.Handle;
             Break;
           end;
+        end;
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('AControl %d, Handle %d, Children %d',
           [Integer(AControl), ParentHandle, AControl.ControlCount]);
@@ -1537,6 +1539,7 @@ var
           [Integer(AForm), AForm.ControlCount]);
 {$ENDIF}
       for I := 0 to AForm.ControlCount - 1 do
+      begin
         if AForm.Controls[I].ClassNameIs('TComponentContainer')
           and (AForm.Controls[I] is TWinControl) then
         begin
@@ -1544,9 +1547,11 @@ var
           ParentHandle := AControl.Handle;
           Break;
         end;
+      end;
     end;
 {$ENDIF}
 
+    // ParentHandle 总之是个大容器的 Handle
     InternalH2 := 0;
     InternalH1 := GetWindow(ParentHandle, GW_CHILD);
     InternalH1 := GetWindow(InternalH1, GW_HWNDLAST);
