@@ -595,19 +595,30 @@ type
 
     // 根据新版 ToolsAPI.Editor 提供的新服务，为了区分，都加上了 2
     procedure AddEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+    {* 增加编辑器开始重画的事件}
     procedure RemoveEditor2BeginPaintNotifier(Notifier: TEditorBeginPaintEvent);
+    {* 删除编辑器开始重画的事件}
 
     procedure AddEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+    {* 增加编辑器结束重画的事件}
     procedure RemoveEditor2EndPaintNotifier(Notifier: TEditorEndPaintEvent);
+    {* 删除编辑器开始重画的事件}
 
     procedure AddEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+    {* 增加编辑器重画行的事件，同一行会分区域分阶段多次调用}
     procedure RemoveEditor2PaintLineNotifier(Notifier: TEditorPaintLineEvent);
+    {* 删除编辑器重画行的事件}
 
     procedure AddEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+    {* 增加编辑器重画侧边栏的事件，同一行会分区域分阶段多次调用}
     procedure RemoveEditor2PaintGutterNotifier(Notifier: TEditorPaintGutterEvent);
+    {* 增加编辑器重画侧边栏的事件}
 
     procedure AddEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+    {* 增加编辑器重画行内文本块的事件，同一行会分区域分阶段多次调用}
     procedure RemoveEditor2PaintTextNotifier(Notifier: TEditorPaintTextEvent);
+    {* 增加编辑器重画行内文本块的事件}
+
 {$ENDIF}
 
     // 以下是维护的注册表中的编辑器各类元素的字体，和 Highlights 有一定重叠，但无背景色属性
@@ -639,6 +650,12 @@ type
     constructor Create(Wrapper: TCnEditControlWrapper);
     destructor Destroy; override;
   end;
+
+function PaintLineStageToStr(Stage: TPaintLineStage): string;
+
+function PaintGutterStageToStr(Stage: TPaintGutterStage): string;
+
+function CodeEditorEventToStr(Event: TCodeEditorEvent): string;
 
 {$ENDIF}
 {$ENDIF}
@@ -1202,6 +1219,27 @@ end;
 function TCnEditorEvents.AllowedLineStages: TPaintLineStages;
 begin
   Result := [plsBeginPaint, plsEndPaint, plsBackground]; // 先整这么几个
+end;
+
+function PaintLineStageToStr(Stage: TPaintLineStage): string;
+begin
+  Result := GetEnumName(TypeInfo(TPaintLineStage), Ord(Stage));
+  if Length(Result) > 3 then
+    Delete(Result ,1, 3);
+end;
+
+function PaintGutterStageToStr(Stage: TPaintGutterStage): string;
+begin
+  Result := GetEnumName(TypeInfo(TPaintGutterStage), Ord(Stage));
+  if Length(Result) > 3 then
+    Delete(Result ,1, 3);
+end;
+
+function CodeEditorEventToStr(Event: TCodeEditorEvent): string;
+begin
+  Result := GetEnumName(TypeInfo(TCodeEditorEvent), Ord(Event));
+  if Length(Result) > 3 then
+    Delete(Result ,1, 3);
 end;
 
 {$ENDIF}
@@ -1924,6 +1962,7 @@ begin
     Editor := FEditControlWrapper.GetEditors(Idx);
   end;
 
+  // 模拟实现旧版的绘制事件前后通知
   if Editor <> nil then
   begin
     if BeforeEvent then
@@ -1932,6 +1971,7 @@ begin
       FEditControlWrapper.DoAfterPaintLine(Editor, Context.EditorLineNum, Context.LogicalLineNum);
   end;
 
+  // 再分发新版的行绘制通知
   for I := 0 to FEditor2PaintLineNotifiers.Count - 1 do
   begin
     try

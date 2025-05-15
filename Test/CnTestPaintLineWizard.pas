@@ -124,6 +124,7 @@ begin
     0, 'Test Paint Line');
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
+  AddSepMenu;
   FId2BeginPaint := RegisterASubAction('CnTestEditor2BeginPaint', 'Test Begin Paint',
     0, 'Test Begin Paint');
   FId2EndPaint := RegisterASubAction('CnTestEditor2EndPaint', 'Test End Paint',

@@ -111,6 +111,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
   IniFiles, Contnrs, ExtCtrls, TypInfo, Math,
+  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWideStrings, CnWizClasses, CnWizShortCut, CnWizNotifier,
   {$IFNDEF STAND_ALONE} ToolsAPI, CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
@@ -635,6 +636,14 @@ type
       LineNum, LogicLineNum: Integer; AElided: Boolean);
     procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
 {$ENDIF}
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    // 用新的绘制接口
+    procedure Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+      const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+      const Context: INTACodeEditorPaintContext);
+{$ENDIF}
+
     function GetBlockMatchHotkey: TShortCut;
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
@@ -3189,6 +3198,9 @@ begin
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 {$IFNDEF STAND_ALONE}
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+  {$IFDEF USE_CODEEDITOR_SERVICE}
+  EditControlWrapper.AddEditor2PaintLineNotifier(Editor2PaintLine);
+  {$ENDIF}
 {$ENDIF}
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
 {$IFNDEF BDS}
@@ -3249,6 +3261,9 @@ begin
 {$ENDIF}
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
+  {$IFDEF USE_CODEEDITOR_SERVICE}
+  EditControlWrapper.RemoveEditor2PaintLineNotifier(Editor2PaintLine);
+  {$ENDIF}
   EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
 {$ENDIF}
   FHighlight := nil;
@@ -4533,6 +4548,8 @@ begin
       SaveFontStyles := [];
       EditCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+
       if FHilightSeparateLine and (LogicLineNum <= Info.FSeparateLineList.Count - 1)
         and (Integer(Info.FSeparateLineList[LogicLineNum]) = CN_LINE_SEPARATE_FLAG)
         and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
@@ -4559,6 +4576,7 @@ begin
             R.Left + 2048, (R.Top + R.Bottom) div 2, FSeparateLineStyle);
         end;
       end;
+{$ENDIF}
 
       if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
         or (Info.FlowTokenCount > 0) or (Info.CustomIdentifierTokenCount > 0) then
@@ -6180,6 +6198,43 @@ begin
     CnDebugger.LogMsg('SourceHighlight: Editor Option Changed. Get UseTabKey is '
       + BoolToStr(FUseTabKey));
 {$ENDIF}
+end;
+
+{$ENDIF}
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
+  const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
+  const Context: INTACodeEditorPaintContext);
+var
+  Idx: Integer;
+  Info: TCnBlockMatchInfo;
+  ACanvas: TCanvas;
+begin
+  if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground) then
+  begin
+    Idx := IndexOfBlockMatch(Context.EditControl);
+    if Idx >= 0 then
+    begin
+      // 找到该 EditControl 对应的 BlockMatch 列表
+      Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+      if FHilightSeparateLine and (Context.LogicalLineNum < Info.FSeparateLineList.Count)
+        and (Integer(Info.FSeparateLineList[Context.LogicalLineNum]) = CN_LINE_SEPARATE_FLAG)
+        and (Trim(Context.LineState.Text) = '') then
+      begin
+        // 用默认的背景色填充再划线并阻止默认绘制，均会影响到 Gutter 区
+        Context.Canvas.FillRect(Rect);
+
+        Context.Canvas.Pen.Color := FSeparateLineColor;
+        Context.Canvas.Pen.Width := FSeparateLineWidth;
+        HighlightCanvasLine(Context.Canvas, Rect.Left, (Rect.Top + Rect.Bottom) div 2,
+          Rect.Right, (Rect.Top + Rect.Bottom) div 2, FSeparateLineStyle);
+
+        AllowDefaultPainting := False;
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF}
