@@ -2359,9 +2359,31 @@ begin
 end;
 
 function TCnEditControlWrapper.GetCharSize: TSize;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+var
+  CES: INTACodeEditorServices;
+  Edit: TWinControl;
+  State: INTACodeEditorState;
+{$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
+  {$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+  begin
+    Edit := CES.TopEditor;
+    if Edit <> nil then
+    begin
+      State := CES.GetEditorState(Edit);
+      if State <> nil then
+      begin
+        FCharSize.cx := State.CharWidth;
+        FCharSize.cy := State.CharHeight;
+      end;
+    end;
+  end;
+  {$ELSE}
   UpdateCharSize;
+  {$ENDIF}
 {$ENDIF}
   Result := FCharSize;
 end;
