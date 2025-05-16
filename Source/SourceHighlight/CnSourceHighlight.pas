@@ -4549,7 +4549,7 @@ begin
       EditCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
 
 {$IFNDEF USE_CODEEDITOR_SERVICE}
-
+      // 高版本下使用新 API 绘制分隔线
       if FHilightSeparateLine and (LogicLineNum <= Info.FSeparateLineList.Count - 1)
         and (Integer(Info.FSeparateLineList[LogicLineNum]) = CN_LINE_SEPARATE_FLAG)
         and (Trim(EditControlWrapper.GetTextAtLine(EditControl, LogicLineNum)) = '') then
@@ -6226,11 +6226,14 @@ begin
         // 用默认的背景色填充再划线并阻止默认绘制，均会影响到 Gutter 区
         Context.Canvas.FillRect(Rect);
 
-        Context.Canvas.Pen.Color := FSeparateLineColor;
-        Context.Canvas.Pen.Width := FSeparateLineWidth;
-        HighlightCanvasLine(Context.Canvas, Rect.Left, (Rect.Top + Rect.Bottom) div 2,
-          Rect.Right, (Rect.Top + Rect.Bottom) div 2, FSeparateLineStyle);
-
+        // 避免画到 Gutter 区
+        if Rect.Left >= Context.EditorState.CodeLeftEdge then
+        begin
+          Context.Canvas.Pen.Color := FSeparateLineColor;
+          Context.Canvas.Pen.Width := FSeparateLineWidth;
+          HighlightCanvasLine(Context.Canvas, Rect.Left, (Rect.Top + Rect.Bottom) div 2,
+            Rect.Right, (Rect.Top + Rect.Bottom) div 2, FSeparateLineStyle);
+        end;
         AllowDefaultPainting := False;
       end;
     end;

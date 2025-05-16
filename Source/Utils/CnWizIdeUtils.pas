@@ -68,6 +68,7 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
+  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnWizEditFiler, CnCommon,
@@ -2203,9 +2204,18 @@ end;
 
 // 判断指定控件是否代码编辑器控件
 function IsEditControl(AControl: TComponent): Boolean;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+var
+  CES: INTACodeEditorServices;
+{$ENDIF}
 begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if (AControl is TWinControl) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    Result := CES.IsIDEEditor(TWinControl(AControl));
+{$ELSE}
   Result := (AControl <> nil) and AControl.ClassNameIs(SCnEditControlClassName)
     and SameText(AControl.Name, SCnEditControlName);
+{$ENDIF}
 end;
 
 // 判断指定控件是否编辑器窗口的 TabControl 控件

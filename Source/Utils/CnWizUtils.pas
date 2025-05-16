@@ -66,7 +66,7 @@ uses
   Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF}
-  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
@@ -3948,9 +3948,19 @@ end;
 // 取当前的 EditControl 控件
 function CnOtaGetCurrentEditControl: TWinControl;
 var
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ELSE}
   EditWindow: TCustomForm;
   Comp: TComponent;
+{$ENDIF}
 begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    Result := CES.GetTopEditor
+  else
+    Result := nil;
+{$ELSE}
   EditWindow := CnOtaGetCurrentEditWindow;
   if EditWindow <> nil then
   begin
@@ -3962,6 +3972,7 @@ begin
     end;
   end;
   Result := nil;
+{$ENDIF}
 end;
 
 // 返回单元名称
