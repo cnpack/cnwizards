@@ -639,7 +639,6 @@ type
     {* 编辑器的文字背景色，实际上是 WhiteSpace 字体的背景色}
   end;
 
-{$IFNDEF STAND_ALONE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
   TCnEditorEvents = class(TNTACodeEditorNotifier, INTACodeEditorEvents)
@@ -657,7 +656,6 @@ function PaintGutterStageToStr(Stage: TPaintGutterStage): string;
 
 function CodeEditorEventToStr(Event: TCodeEditorEvent): string;
 
-{$ENDIF}
 {$ENDIF}
 
 function EditControlWrapper: TCnEditControlWrapper;
