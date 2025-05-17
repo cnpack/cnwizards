@@ -642,6 +642,9 @@ type
     procedure Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
       const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
       const Context: INTACodeEditorPaintContext);
+    procedure Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
+      const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
+      var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 {$ENDIF}
 
     function GetBlockMatchHotkey: TShortCut;
@@ -650,6 +653,7 @@ type
     procedure ReloadIDEFonts;
     procedure SetHilightSeparateLine(const Value: Boolean);
 {$IFNDEF BDS}
+    // 当前行的底色功能仅针对 Delphi 567 等低版本
 {$IFNDEF STAND_ALONE}
     procedure BeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
 {$ENDIF}
@@ -3200,6 +3204,7 @@ begin
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
   {$IFDEF USE_CODEEDITOR_SERVICE}
   EditControlWrapper.AddEditor2PaintLineNotifier(Editor2PaintLine);
+  EditControlWrapper.AddEditor2PaintTextNotifier(Editor2PaintText);
   {$ENDIF}
 {$ENDIF}
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
@@ -3262,6 +3267,7 @@ begin
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
   {$IFDEF USE_CODEEDITOR_SERVICE}
+  EditControlWrapper.RemoveEditor2PaintTextNotifier(Editor2PaintText);
   EditControlWrapper.RemoveEditor2PaintLineNotifier(Editor2PaintLine);
   {$ENDIF}
   EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
@@ -4581,6 +4587,8 @@ begin
       if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
         or (Info.FlowTokenCount > 0) or (Info.CustomIdentifierTokenCount > 0) then
       begin
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+        // 高版本下使用新 API 绘制关键字高亮及匹配高亮
         // 同时做关键字背景匹配高亮，可能由 MarkLinesDirty 调用
         KeyPair := nil;
         if FBlockMatchHighlight then
@@ -4597,6 +4605,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
         CompDirectivePair := nil;
         if FHighlightCompDirective then
@@ -4629,6 +4638,8 @@ begin
           CanvasSaved := True;
         end;
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+        // 高版本下使用新 API 绘制关键字高亮及匹配高亮
         // BlockMatch 里有多个 TCnGeneralPasToken
         if (LogicLineNum < Info.LineCount) and (Info.Lines[LogicLineNum] <> nil) then
         begin
@@ -4712,6 +4723,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
         // 如果有需要高亮绘制的标识符内容
         if FCurrentTokenHighlight and not FCurrentTokenInvalid and
@@ -6209,8 +6221,8 @@ procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TP
   const Context: INTACodeEditorPaintContext);
 var
   Idx: Integer;
+  C: TCanvas;
   Info: TCnBlockMatchInfo;
-  ACanvas: TCanvas;
 begin
   if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground) then
   begin
@@ -6224,17 +6236,121 @@ begin
         and (Trim(Context.LineState.Text) = '') then
       begin
         // 用默认的背景色填充再划线并阻止默认绘制，均会影响到 Gutter 区
-        Context.Canvas.FillRect(Rect);
+        C := Context.Canvas;
+        C.FillRect(Rect);
 
         // 避免画到 Gutter 区
         if Rect.Left >= Context.EditorState.CodeLeftEdge then
         begin
-          Context.Canvas.Pen.Color := FSeparateLineColor;
-          Context.Canvas.Pen.Width := FSeparateLineWidth;
-          HighlightCanvasLine(Context.Canvas, Rect.Left, (Rect.Top + Rect.Bottom) div 2,
+          C.Pen.Color := FSeparateLineColor;
+          C.Pen.Width := FSeparateLineWidth;
+          HighlightCanvasLine(C, Rect.Left, (Rect.Top + Rect.Bottom) div 2,
             Rect.Right, (Rect.Top + Rect.Bottom) div 2, FSeparateLineStyle);
         end;
         AllowDefaultPainting := False;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
+  const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
+  var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+var
+  I, L, Idx, Layer: Integer;
+  ColorFg, ColorBk: TColor;
+  Info: TCnBlockMatchInfo;
+  LineInfo: TCnBlockLineInfo;
+  KeyPair: TCnBlockLinePair;
+  Token: TCnGeneralPasToken;
+  C: TCanvas;
+begin
+  if BeforeEvent or Hilight or (Length(Text) = 0) then // 只绘制事后无选择区的
+    Exit;
+
+  if not FStructureHighlight and not FBlockMatchHighlight and not FCurrentTokenHighlight
+    and not FHighlightFlowStatement and not FHighlightCompDirective and not FHighlightCustomIdentifier then
+    Exit;
+
+  Idx := IndexOfBlockMatch(Context.EditControl);
+  if Idx < 0 then
+    Exit;
+
+  // 找到该 EditControl 对应的 BlockMatch 列表
+  Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+
+  // 画关键字嵌套以及光标下关键字匹配高亮
+  if (FStructureHighlight or FBlockMatchHighlight) and (SyntaxCode = atReservedWord)
+    and (Info.KeyCount > 0) then
+  begin
+    L := Context.LogicalLineNum;
+    KeyPair := nil;
+    if FBlockMatchHighlight then
+    begin
+      Idx := IndexOfBlockLine(Context.EditControl);
+      if Idx >= 0 then
+      begin
+        LineInfo := TCnBlockLineInfo(FBlockLineList[Idx]);
+        if (LineInfo <> nil) and (LineInfo.CurrentPair <> nil) and ((LineInfo.CurrentPair.Top = L)
+          or (LineInfo.CurrentPair.Bottom = L)
+          or (LineInfo.CurrentPair.IsInMiddle(L))) then
+        begin
+          // 寻找当前行已经配对的 Pair
+          KeyPair := LineInfo.CurrentPair;
+        end;
+      end;
+    end;
+
+    if (L < Info.LineCount) and (Info.Lines[L] <> nil) then
+    begin
+      Token := nil;
+      for I := 0 to Info.Lines[L].Count - 1 do
+      begin
+        if TCnGeneralPasToken(Info.Lines[L][I]).EditCol = ColNum then
+        begin
+          Token := TCnGeneralPasToken(Info.Lines[L][I]);
+          Break;
+        end;
+      end;
+
+      if Token <> nil then  // 该位置是我们解析出来的关键字的位置
+      begin
+        Layer := Token.ItemLayer - 1;
+        if FStructureHighlight then
+          ColorFg := GetColorFg(Layer)
+        else
+          ColorFg := FKeywordHighlight.ColorFg;
+
+        ColorBk := clNone; // 只有当前 Token 在当前 KeyPair 内才高亮背景
+        if KeyPair <> nil then
+        begin
+          if (KeyPair.StartToken = Token) or (KeyPair.EndToken = Token) or
+            (KeyPair.IndexOfMiddleToken(Token) >= 0) then
+            ColorBk := FBlockMatchBackground;
+        end;
+
+        // 不层次高亮时，如无当前背景高亮，则不画
+        if FStructureHighlight or (ColorBk <> clNone) then
+        begin
+          C := Context.Canvas;
+          C.Font.Style := [];
+          if FKeywordHighlight.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FKeywordHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FKeywordHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+
+          C.Font.Color := ColorFg;
+          if ColorBk <> clNone then
+          begin
+            C.Brush.Color := ColorBk;
+            C.Brush.Style := bsSolid;
+            C.FillRect(Rect);
+          end;
+          C.Brush.Style := bsClear;
+          C.TextOut(Rect.Left, Rect.Top, Text);
+        end;
       end;
     end;
   end;
