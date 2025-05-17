@@ -831,8 +831,6 @@ implementation
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
-
-
 uses
   {$IFDEF DEBUG} CnDebug, {$ENDIF}
   {$IFNDEF STAND_ALONE}CnWizMethodHook, CnSourceHighlightFrm, CnEventBus, {$ENDIF}
@@ -4852,6 +4850,7 @@ begin
           end;
         end;
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
         // 如果有需要高亮绘制的流程控制标识符的内容
         if FHighlightFlowStatement and (LogicLineNum < Info.FlowLineCount) and
           (Info.FlowLines[LogicLineNum] <> nil) then
@@ -4957,6 +4956,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
         // 如果有需要高亮的条件编译指令
         if FHighlightCompDirective and (LogicLineNum < Info.CompDirectiveLineCount) and
@@ -6207,8 +6207,8 @@ begin
   FTabWidth := EditControlWrapper.GetTabWidth;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('SourceHighlight: Editor Option Changed. Get UseTabKey is '
-      + BoolToStr(FUseTabKey));
+  CnDebugger.LogMsg('SourceHighlight: Editor Option Changed. Get UseTabKey is '
+    + BoolToStr(FUseTabKey));
 {$ENDIF}
 end;
 
@@ -6220,20 +6220,22 @@ procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TP
   const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
   const Context: INTACodeEditorPaintContext);
 var
-  Idx: Integer;
+  L, Idx: Integer;
   C: TCanvas;
   Info: TCnBlockMatchInfo;
 begin
-  if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground) then
+  if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground)
+    and (Context.LogicalLineNum >= 0)then
   begin
     Idx := IndexOfBlockMatch(Context.EditControl);
     if Idx >= 0 then
     begin
+      L := Context.LogicalLineNum;
       // 找到该 EditControl 对应的 BlockMatch 列表
       Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
-      if FHilightSeparateLine and (Context.LogicalLineNum < Info.FSeparateLineList.Count)
-        and (Integer(Info.FSeparateLineList[Context.LogicalLineNum]) = CN_LINE_SEPARATE_FLAG)
-        and (Trim(Context.LineState.Text) = '') then
+      if FHilightSeparateLine and (L < Info.FSeparateLineList.Count)
+        and (Integer(Info.FSeparateLineList[L]) = CN_LINE_SEPARATE_FLAG)
+        and (Context.LineState <> nil) and (Trim(Context.LineState.Text) = '') then
       begin
         // 用默认的背景色填充再划线并阻止默认绘制，均会影响到 Gutter 区
         C := Context.Canvas;
@@ -6265,7 +6267,7 @@ var
   Token: TCnGeneralPasToken;
   C: TCanvas;
 begin
-  if BeforeEvent or Hilight or (Length(Text) = 0) then // 只绘制事后无选择区的
+  if BeforeEvent or Hilight or (Length(Text) = 0) or (Context.LogicalLineNum < 0) then // 只绘制事后无选择区的
     Exit;
 
   if not FStructureHighlight and not FBlockMatchHighlight and not FCurrentTokenHighlight
@@ -6307,6 +6309,7 @@ begin
       for I := 0 to Info.Lines[L].Count - 1 do
       begin
         // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
         Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
           TCnGeneralPasToken(Info.Lines[L][I]).EditCol, @IDEWideCharIsWideLength);
         if Utf8Col = ColNum then
@@ -6354,6 +6357,64 @@ begin
           C.Brush.Style := bsClear;
           C.TextOut(Rect.Left, Rect.Top, Text);
         end;
+      end;
+    end;
+  end;
+
+  if FHighlightFlowStatement and (SyntaxCode in [atReservedWord, atIdentifier])
+    and (Info.FlowTokenCount > 0) then
+  begin
+    L := Context.LogicalLineNum;
+    if (L < Info.FlowLineCount) and (Info.FlowLines[L] <> nil) then
+    begin
+      Token := nil;
+      for I := 0 to Info.FlowLines[L].Count - 1 do
+      begin
+        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        if Utf8Col = ColNum then
+        begin
+          Token := TCnGeneralPasToken(Info.FlowLines[L][I]);
+          Break;
+        end;
+      end;
+
+      if Token <> nil then  // 该位置是我们解析出来的流程控制标识符的位置
+      begin
+        C := Context.Canvas;
+        if FFlowStatementBackground <> clNone then
+        begin
+          C.Brush.Color := FFlowStatementBackground;
+          C.Brush.Style := bsSolid;
+          C.FillRect(Rect);
+        end;
+
+        // TODO: 注意绘制标识符时 Text 大概率不是标识符本身而是有前后空格，不能单纯按上面的 Col 比较来
+        if SyntaxCode = atIdentifier then
+        begin
+          C.Font.Style := [];
+          C.Font.Color := FIdentifierHighlight.ColorFg;
+          if FIdentifierHighlight.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FIdentifierHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FIdentifierHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+        end
+        else if SyntaxCode = atReservedWord then
+        begin
+          C.Font.Style := [];
+          C.Font.Color := FKeywordHighlight.ColorFg;
+          if FKeywordHighlight.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FKeywordHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FKeywordHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+        end;
+        C.Font.Color := FFlowStatementForeground;
+        C.TextOut(Rect.Left, Rect.Top, Text);
       end;
     end;
   end;
