@@ -2099,7 +2099,7 @@ begin
           FCurTokenList.Add(AToken);
           FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
           if FHighlight.ShowTokenPosAtGutter then
-              FCurTokenListEditCol.Add(Pointer(AToken.EditCol));
+            FCurTokenListEditCol.Add(Pointer(AToken.EditCol));
         end;
       end;
     end;
@@ -6257,7 +6257,7 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, Idx, Layer: Integer;
+  I, L, Idx, Layer, Utf8Col: Integer;
   ColorFg, ColorBk: TColor;
   Info: TCnBlockMatchInfo;
   LineInfo: TCnBlockLineInfo;
@@ -6306,7 +6306,10 @@ begin
       Token := nil;
       for I := 0 to Info.Lines[L].Count - 1 do
       begin
-        if TCnGeneralPasToken(Info.Lines[L][I]).EditCol = ColNum then
+        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.Lines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        if Utf8Col = ColNum then
         begin
           Token := TCnGeneralPasToken(Info.Lines[L][I]);
           Break;

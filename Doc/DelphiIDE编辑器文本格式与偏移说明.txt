@@ -104,4 +104,6 @@ EditLine/EditCol 属性       EditCol 为 Ansi         EditCol 为 Utf8            E
 
 7、线性 Position “不超过行尾”的含义是，如果当前光标位置超出行尾，用该光标位置 ConvertPos 再 CharPosToPos 得到的线性位置，对应到的是行尾，而不是超出行尾的具体位置。
 
-8、CnPack 语法解析器，D7 及以下使用 Ansi 版的 Lex 与 Parser，以上均使用 Wide 版的 Lex 和 Parser，所以 2005 或以上版本的相关表现均一致，无论是否 Unicode 环境。
+8、Delphi 12 新增的 ToolsAPI.Editor 里新增的 PaintText 通知，其 ColNum 是 1 开始的、本行字符串 UTF8 的偏移量，与编辑器光标显示的 Ansi 偏移量有差别。
+
+9、CnPack 语法解析器，D7 及以下使用 Ansi 版的 Lex 与 Parser，以上均使用 Wide 版的 Lex 和 Parser，所以 2005 或以上版本的相关表现均一致，无论是否 Unicode 环境。
