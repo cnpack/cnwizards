@@ -103,6 +103,7 @@ type
     FTrimAfterSemicolon: Boolean;   // 用来控制本行分号后仍有其他内容的情形
     FNamesMap: TCnStrToStrHashMap;
     FDisableCorrectName: Boolean;
+    FDotMakeLineBreak: Boolean;
     FInputLineMarks: TList;         // 源与结果的行映射关系中的源行
     FOutputLineMarks: TList;        // 源与结果的行映射关系中的结果行
     FNeedKeepLineBreak: Boolean;    // 控制当前区域是否属于可保留换行的区域，为 True 时表示遇到换行事件时会照例写入换行，一般在分号后会切回 False
@@ -1158,10 +1159,16 @@ begin
             // Call(
             //   a,
             //   b);
-            // 注意这里给 FCurrentTab 赋值无需 Tab，回调中写回车时会进行一次 Tab
+            // 注意这里一般情况给 FCurrentTab 赋值无需 Tab，回调中写回车时会进行一次 Tab
 
             if IsB then
-              FCurrentTab := IndentForAnonymous;
+            begin
+              // 但级联函数调用的情况下没地方记录级联的进一步 Tab，只能根据点号的记录加上
+              if CnPascalCodeForRule.KeepUserLineBreak and FDotMakeLineBreak then
+                FCurrentTab := Tab(IndentForAnonymous)
+              else
+                FCurrentTab := IndentForAnonymous;
+            end;
 
             Match(Scanner.Token);
 
@@ -1428,7 +1435,17 @@ begin
 
   while CanHaveUnitQual and (Scanner.Token = tokDot) do
   begin
+    // 输出点前后，如果换行缩进了，先记录下来，语句结束时清除该标记，以下俩情况都要正确记录
+    // MyFunc().         或   MyFunc()
+    //  Test(                  .Test(
+    //    A,                     A,
+    //    B);                    B);
+
+    FDotMakeLineBreak := FCodeGen.KeepLineBreakIndentWritten;
     Match(tokDot);
+    if not FDotMakeLineBreak then
+      FDotMakeLineBreak := FCodeGen.KeepLineBreakIndentWritten;
+
     FDisableCorrectName := True;        // 点号后的标识符暂时无法与同名的独立变量区分，只能先禁用大小写纠正
     try
       if Scanner.Token = tokAmpersand then // & 表示后面的声明使用的关键字是转义的
@@ -1586,8 +1603,6 @@ end;
 { SimpleExpression -> ['+' | '-' | '^'] Term [AddOp Term]... }
 procedure TCnBasePascalFormatter.FormatSimpleExpression(
   PreSpaceCount: Byte; IndentForAnonymous: Byte);
-var
-  OldTab: Integer;
 begin
   if Scanner.Token in [tokPlus, tokMinus, tokHat] then // ^H also support
   begin
@@ -1603,7 +1618,6 @@ begin
 
     // 匿名函数内部改为不保留换行
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
-    OldTab := FCurrentTab;
     FNeedKeepLineBreak := False;
     try
       // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
@@ -1613,7 +1627,6 @@ begin
         FormatFunctionDecl(Tab(IndentForAnonymous), True);
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
-      FCurrentTab := OldTab;
     end;
   end
   else
@@ -2291,7 +2304,7 @@ begin
   begin
     FormatStructStmt(PreSpaceCount);
   end;
-  { Do not raise error here, Statement maybe empty }
+  FDotMakeLineBreak := False; // 清除点号换行的标记
 end;
 
 { StmtList -> Statement/';'... }
@@ -3182,7 +3195,6 @@ begin
   try
     Match(tokLB, PreSpaceCount);
     FormatEnumeratedList;
-
 
     SpecifyElementType(pfetExprListRightBracket);
     try

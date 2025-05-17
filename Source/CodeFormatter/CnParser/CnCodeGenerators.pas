@@ -129,7 +129,7 @@ type
     {* 单独针对 Directive 无句末分号而写的，删除尾部所有纯空格行的方法，需严格限制使用以避免副作用}
     procedure BackSpaceSpaceLineIndent(Indent: Integer = 2);
     {* 如果最后一行全是空格，且空格数比 Indent 多，则清除 Indent 个空格，
-      单独针对保留换行时函数调用的末括号而言的，，需严格限制使用以避免副作用}
+      单独针对保留换行时函数调用的末括号而言的，需严格限制使用以避免副作用}
 
     function IsLastLineEmpty: Boolean;
     {* 最后一行是否就是一个完全的空行，不算回车换行}
