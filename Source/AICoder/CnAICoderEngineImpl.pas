@@ -67,7 +67,8 @@ type
     procedure PrepareRequestHeader(const APIKey: string; Headers: TStringList); override;
 
     // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
-    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string;
+      History: TStrings = nil): TBytes; override;
 
     // Claude 的信息返回格式也不同
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
@@ -134,7 +135,8 @@ type
     class function GetModelListURL(const OrigURL: string): string; override;
     function ParseModelList(ResponseRoot: TCnJSONObject): string; override;
 
-    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string): TBytes; override;
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string;
+      History: TStrings = nil): TBytes; override;
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
       var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
       const Response: TBytes): string; override;
@@ -256,11 +258,12 @@ end;
 { TCnClaudeAIEngine }
 
 function TCnClaudeAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
-  const Code: string): TBytes;
+  const Code: string; History: TStrings): TBytes;
 var
   ReqRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
   S: AnsiString;
+  I: Integer;
 begin
   ReqRoot := TCnJSONObject.Create;
   try
@@ -284,6 +287,21 @@ begin
       Msg.AddPair('content', Code);
 
     Arr.AddValue(Msg);
+
+    // 加历史
+    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+    begin
+      for I := 0 to History.Count - 1 do
+      begin
+        if Trim(History[I]) <> '' then
+        begin
+          Msg := TCnJSONObject.Create;
+          Msg.AddPair('role', 'user');
+          Msg.AddPair('content', History[I]);
+          Arr.AddValue(Msg);
+        end;
+      end;
+    end;
 
     S := ReqRoot.ToJSON;
     Result := AnsiToBytes(S);
@@ -520,11 +538,12 @@ begin
 end;
 
 function TCnOllamaAIEngine.ConstructRequest(RequestType: TCnAIRequestType;
-  const Code: string): TBytes;
+  const Code: string; History: TStrings): TBytes;
 var
   ReqRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
   S: AnsiString;
+  I: Integer;
 begin
   ReqRoot := TCnJSONObject.Create;
   try
@@ -549,6 +568,21 @@ begin
       Msg.AddPair('content', Code);
 
     Arr.AddValue(Msg);
+
+    // 加历史
+    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+    begin
+      for I := 0 to History.Count - 1 do
+      begin
+        if Trim(History[I]) <> '' then
+        begin
+          Msg := TCnJSONObject.Create;
+          Msg.AddPair('role', 'user');
+          Msg.AddPair('content', History[I]);
+          Arr.AddValue(Msg);
+        end;
+      end;
+    end;
 
     S := ReqRoot.ToJSON;
     Result := AnsiToBytes(S);

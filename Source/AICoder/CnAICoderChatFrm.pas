@@ -220,6 +220,7 @@ procedure TCnAICoderChatForm.btnMsgSendClick(Sender: TObject);
 var
   Msg: TCnChatMessage;
   S: string;
+  His: TStrings;
 begin
   if Trim(mmoSelf.Lines.Text) <> '' then
   begin
@@ -236,17 +237,24 @@ begin
     Msg.Text := '...';
 
     S := CnOtaGetCurrentSelection;
-    if btnReferSelection.Down and (Trim(S) <> '') then
-    begin
-      S := (mmoSelf.Lines.Text + #13#10 +
-        CnAIEngineManager.CurrentEngine.Option.ReferSelectionPrompt + #13#10 + S);
-      CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg,
-        artRaw, FWizard.ForCodeAnswer);
-    end
-    else
-      CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoSelf.Lines.Text, Msg,
-        artRaw, FWizard.ForCodeAnswer);
-    mmoSelf.Lines.Text := '';
+    His := TStringList.Create;
+    try
+      FChatBox.GetRecentMessages(His, CnAIEngineOptionManager.HistoryCount);
+
+      if btnReferSelection.Down and (Trim(S) <> '') then
+      begin
+        S := (mmoSelf.Lines.Text + #13#10 +
+          CnAIEngineManager.CurrentEngine.Option.ReferSelectionPrompt + #13#10 + S);
+        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, His, Msg,
+          artRaw, FWizard.ForCodeAnswer);
+      end
+      else
+        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoSelf.Lines.Text, His, Msg,
+          artRaw, FWizard.ForCodeAnswer);
+      mmoSelf.Lines.Text := '';
+    finally
+      His.Free;
+    end;
   end;
 end;
 

@@ -307,9 +307,9 @@ begin
         Msg.Waiting := True;
 
         if Index = FIdExplainCode then
-          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artExplainCode, ForCodeAnswer)
+          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artExplainCode, ForCodeAnswer)
         else
-          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artReviewCode, ForCodeAnswer);
+          CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artReviewCode, ForCodeAnswer);
       end;
     end
     else if Index = FIdGenTestCase then
@@ -325,7 +325,7 @@ begin
         Msg.Text := '...';
         Msg.Waiting := True;
 
-        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, Msg, artGenTestCase, ForCodeGen);
+        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artGenTestCase, ForCodeGen);
       end;
     end;
   end;

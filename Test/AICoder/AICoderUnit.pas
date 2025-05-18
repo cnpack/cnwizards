@@ -49,6 +49,10 @@ type
     btnAddYourStream: TButton;
     tmrSteam: TTimer;
     btnModelList: TButton;
+    btnChatFont: TButton;
+    dlgFont1: TFontDialog;
+    lblMe: TLabel;
+    edtChatMessage: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -73,6 +77,8 @@ type
     procedure btnAddYourStreamClick(Sender: TObject);
     procedure tmrSteamTimer(Sender: TObject);
     procedure btnModelListClick(Sender: TObject);
+    procedure btnChatFontClick(Sender: TObject);
+    procedure edtChatMessageKeyPress(Sender: TObject; var Key: Char);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -98,6 +104,8 @@ type
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnReviewCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnRawAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnModelListAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
@@ -449,7 +457,7 @@ begin
     CnAIEngineOptionManager.UseProxy := False;
 
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
-    Msg, artExplainCode, AIOnExplainCodeAnswer);
+    nil, Msg, artExplainCode, AIOnExplainCodeAnswer);
 end;
 
 procedure TFormAITest.AIOnExplainCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
@@ -551,7 +559,7 @@ begin
     CnAIEngineOptionManager.UseProxy := False;
 
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Application.CreateForm(TForm1, Form1);',
-    Msg, artReviewCode, AIOnReviewCodeAnswer);
+    nil, Msg, artReviewCode, AIOnReviewCodeAnswer);
 end;
 
 procedure TFormAITest.AIOnReviewCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
@@ -793,6 +801,74 @@ begin
   else
     mmoAI.Lines.Add(Format('Model List Fail for Request %d: Error Code: %d. Error Msg: %s',
       [SendId, ErrorCode, Answer]));
+end;
+
+procedure TFormAITest.btnChatFontClick(Sender: TObject);
+begin
+  dlgFont1.Font := FChatBox.Font;
+  if dlgFont1.Execute then
+  begin
+    FAIChatBox.Font := dlgFont1.Font;
+    FChatBox.Font := dlgFont1.Font;
+  end;
+end;
+
+procedure TFormAITest.edtChatMessageKeyPress(Sender: TObject;
+  var Key: Char);
+var
+  Msg: TCnChatMessage;
+  His: TStrings;
+begin
+  if Key = #13 then
+  begin
+    Key := #0;
+
+    if Trim(edtChatMessage.Text) <> '' then
+    begin
+      // 发出的消息
+      Msg := FAIChatBox.Items.AddMessage;
+      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.Text := edtChatMessage.Text;
+      Msg.FromType := cmtMe;
+
+      // 回来的消息
+      Msg := FAIChatBox.Items.AddMessage;
+      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.FromType := cmtYou;
+      Msg.Text := '...';
+
+      His := TStringList.Create;
+      try
+        FAIChatBox.GetRecentMessages(His, CnAIEngineOptionManager.HistoryCount);
+
+        CnAIEngineManager.CurrentEngine.AskAIEngineForCode(edtChatMessage.Text, His, Msg,
+          artRaw, AIOnRawAnswer);
+
+        edtChatMessage.Text := '';
+      finally
+        His.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure TFormAITest.AIOnRawAnswer(StreamMode, Partly, Success,
+  IsStreamEnd: Boolean; SendId: Integer; const Answer: string;
+  ErrorCode: Cardinal; Tag: TObject);
+begin
+  if (Tag <> nil) and (Tag is TCnChatMessage) then
+  begin
+    TCnChatMessage(Tag).Waiting := False;
+    if Success then
+    begin
+      if Partly and (TCnChatMessage(Tag).Text <> '...') then
+        TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+      else
+        TCnChatMessage(Tag).Text := Answer;
+    end
+    else
+      TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
+  end;
 end;
 
 end.

@@ -116,8 +116,9 @@ type
     {* 请求发送前，给子类一个处理自定义 HTTP 头的机会。ApiKey 是发起请求时指定的，
       有可能特殊场合和 FOptions 里的 ApiKey 不同，优先以此为准。}
 
-    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string = ''): TBytes; virtual;
-    {* 根据请求类型与原始代码，组装 Post 的数据，一般是 JSON 格式}
+    function ConstructRequest(RequestType: TCnAIRequestType; const Code: string = '';
+      History: TStrings = nil): TBytes; virtual;
+    {* 根据请求类型与原始代码及历史信息，组装 Post 的数据，一般是 JSON 格式}
 
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
       var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType; const Response: TBytes): string; virtual;
@@ -151,13 +152,13 @@ type
     {* 根据引擎名去设置管理类中取自身的设置对象}
 
     function AskAIEngine(const URL: string; const Text: TBytes; StreamMode: Boolean;
-      RequestType: TCnAIRequestType;  const ApiKey: string; Tag: TObject;
+      RequestType: TCnAIRequestType; const ApiKey: string; Tag: TObject;
       AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 用户调用的与 AI 通讯的过程，传入原始通讯数据，内部会组装成请求对象扔给线程池，返回一个请求 ID
       在一次完整的 AI 网络通讯过程中属于第一步；第二步是线程池调度的 ProcessRequest 转发}
 
-    function AskAIEngineForCode(const Code: string; Tag: TObject; RequestType: TCnAIRequestType;
-      AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
+    function AskAIEngineForCode(const Code: string; History: TStrings; Tag: TObject;
+      RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback = nil): Integer; virtual;
     {* 进一步封装的用户调用的解释代码或检查代码的过程，内部将 Code 转换为 JSON 后调用 AskAIEngine，也算第一步}
 
     function AskAIEngineForModelList(Tag: TObject; AlterOption: TCnAIEngineOption = nil;
@@ -523,8 +524,8 @@ begin
   Result := Obj.SendId;
 end;
 
-function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; Tag: TObject;
-  RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
+function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; History: TStrings;
+  Tag: TObject; RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
 begin
   Result := AskAIEngine(FOption.URL, ConstructRequest(RequestType, Code),
     FOption.Stream, RequestType, FOption.ApiKey, Tag, AnswerCallback);
@@ -581,11 +582,12 @@ begin
 end;
 
 function TCnAIBaseEngine.ConstructRequest(RequestType: TCnAIRequestType;
-  const Code: string): TBytes;
+  const Code: string; History: TStrings): TBytes;
 var
   ReqRoot, Msg: TCnJSONObject;
   Arr: TCnJSONArray;
   S: AnsiString;
+  I: Integer;
 begin
   ReqRoot := TCnJSONObject.Create;
   try
@@ -618,6 +620,21 @@ begin
         Msg.AddPair('content', Code);
 
       Arr.AddValue(Msg);
+
+      // 加历史
+      if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+      begin
+        for I := 0 to History.Count - 1 do
+        begin
+          if Trim(History[I]) <> '' then
+          begin
+            Msg := TCnJSONObject.Create;
+            Msg.AddPair('role', 'user');
+            Msg.AddPair('content', History[I]);
+            Arr.AddValue(Msg);
+          end;
+        end;
+      end;
 
       S := ReqRoot.ToJSON;
       Result := AnsiToBytes(S);

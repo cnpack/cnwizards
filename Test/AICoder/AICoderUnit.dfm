@@ -106,6 +106,13 @@ object FormAITest: TFormAITest
         Height = 13
         Caption = 'Proxy:'
       end
+      object lblMe: TLabel
+        Left = 432
+        Top = 56
+        Width = 18
+        Height = 13
+        Caption = 'Me:'
+      end
       object btnLoadAIConfig: TButton
         Left = 16
         Top = 16
@@ -121,7 +128,7 @@ object FormAITest: TFormAITest
         Width = 145
         Height = 21
         Style = csDropDownList
-        ItemHeight = 13
+        ItemHeight = 0
         TabOrder = 1
         OnChange = cbbAIEnginesChange
       end
@@ -161,9 +168,9 @@ object FormAITest: TFormAITest
       end
       object pnlAIChat: TPanel
         Left = 424
-        Top = 56
+        Top = 88
         Width = 574
-        Height = 503
+        Height = 471
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelOuter = bvNone
         TabOrder = 6
@@ -194,6 +201,14 @@ object FormAITest: TFormAITest
         Caption = 'Model List'
         TabOrder = 9
         OnClick = btnModelListClick
+      end
+      object edtChatMessage: TEdit
+        Left = 456
+        Top = 56
+        Width = 545
+        Height = 21
+        TabOrder = 10
+        OnKeyPress = edtChatMessageKeyPress
       end
     end
     object tsChat: TTabSheet
@@ -262,6 +277,16 @@ object FormAITest: TFormAITest
         TabOrder = 6
         OnClick = btnAddYourStreamClick
       end
+      object btnChatFont: TButton
+        Left = 936
+        Top = 16
+        Width = 75
+        Height = 25
+        Anchors = [akTop, akRight]
+        Caption = 'Font'
+        TabOrder = 7
+        OnClick = btnChatFontClick
+      end
     end
   end
   object dlgSave1: TSaveDialog
@@ -300,5 +325,16 @@ object FormAITest: TFormAITest
     OnTimer = tmrSteamTimer
     Left = 420
     Top = 72
+  end
+  object dlgFont1: TFontDialog
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    MinFontSize = 0
+    MaxFontSize = 0
+    Left = 900
+    Top = 48
   end
 end

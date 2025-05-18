@@ -151,6 +151,7 @@ type
     FChatFontStr: string;
     FTimeoutSec: Cardinal;
     FReferSelection: Boolean;
+    FHistoryCount: Integer;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -199,6 +200,9 @@ type
 
     property TimeoutSec: Cardinal read FTimeoutSec write FTimeoutSec;
     {* 网络超时秒数，0 为系统默认}
+
+    property HistoryCount: Integer read FHistoryCount write FHistoryCount;
+    {* 聊天时的用户历史消息条数}
 
     property UseProxy: Boolean read FUseProxy write FUseProxy;
     {* 是否使用代理服务器；否表示直连，是的情况下如果 FProxyServer 为空，表示使用系统设置}
