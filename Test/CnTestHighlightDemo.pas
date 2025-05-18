@@ -7,12 +7,15 @@ implementation
 procedure Test1;
 begin
 if h = '¡ø' then
+  Break;
 if h = '¡÷' then
   Exit;
 begin  ¡÷  ¡ø   end;
   var ³Ô·¹: string := 'Test';
   ³Ô·¹ := '';
+    raise Exception.Create('Error Message');
   begin  ¡ø  ¡÷  end;
+
 end;
 
 

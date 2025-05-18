@@ -6259,13 +6259,33 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, Idx, Layer, Utf8Col: Integer;
+  I, L, Idx, Layer, Utf8Col, HSC: Integer;
   ColorFg, ColorBk: TColor;
   Info: TCnBlockMatchInfo;
   LineInfo: TCnBlockLineInfo;
   KeyPair: TCnBlockLinePair;
   Token: TCnGeneralPasToken;
   C: TCanvas;
+  R: TRect;
+  OldColor: TColor;
+
+  function GetHeaderSpaceCount(const Str: string): Integer;
+  var
+    J: Integer;
+  begin
+    Result := 0;
+    if Length(Str) > 0 then
+    begin
+      for J := 1 to Length(Str) do
+      begin
+        if Str[J] in [#9, ' '] then
+          Inc(Result)
+        else
+          Exit;
+      end;
+    end;
+  end;
+
 begin
   if BeforeEvent or Hilight or (Length(Text) = 0) or (Context.LogicalLineNum < 0) then // 只绘制事后无选择区的
     Exit;
@@ -6347,6 +6367,7 @@ begin
           if FKeywordHighlight.Underline then
             C.Font.Style := C.Font.Style + [fsUnderline];
 
+          OldColor := C.Font.Color;
           C.Font.Color := ColorFg;
           if ColorBk <> clNone then
           begin
@@ -6356,6 +6377,7 @@ begin
           end;
           C.Brush.Style := bsClear;
           C.TextOut(Rect.Left, Rect.Top, Text);
+          C.Font.Color := OldColor;
         end;
       end;
     end;
@@ -6365,6 +6387,8 @@ begin
     and (Info.FlowTokenCount > 0) then
   begin
     L := Context.LogicalLineNum;
+    HSC := GetHeaderSpaceCount(Text);
+
     if (L < Info.FlowLineCount) and (Info.FlowLines[L] <> nil) then
     begin
       Token := nil;
@@ -6373,7 +6397,8 @@ begin
         // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
         Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
           TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol, @IDEWideCharIsWideLength);
-        if Utf8Col = ColNum then
+
+        if Utf8Col = ColNum + HSC then
         begin
           Token := TCnGeneralPasToken(Info.FlowLines[L][I]);
           Break;
@@ -6385,12 +6410,20 @@ begin
         C := Context.Canvas;
         if FFlowStatementBackground <> clNone then
         begin
+          OldColor := C.Brush.Color;
           C.Brush.Color := FFlowStatementBackground;
           C.Brush.Style := bsSolid;
-          C.FillRect(Rect);
+
+          R := Rect;
+          if HSC > 0 then
+            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+          C.FillRect(R);
+          C.Brush.Color := OldColor;
         end;
 
-        // TODO: 注意绘制标识符时 Text 大概率不是标识符本身而是有前后空格，不能单纯按上面的 Col 比较来
+        // 注意绘制标识符时 Text 大概率不是标识符本身而是有前后空格，不能单纯按上面的 Col 比较来
+        OldColor := C.Font.Color;
         if SyntaxCode = atIdentifier then
         begin
           C.Font.Style := [];
@@ -6413,8 +6446,12 @@ begin
           if FKeywordHighlight.Underline then
             C.Font.Style := C.Font.Style + [fsUnderline];
         end;
-        C.Font.Color := FFlowStatementForeground;
+
+        C.Brush.Style := bsClear;
+        if FFlowStatementBackground <> clNone then // 有背景色则使用固定前景色，好看点
+          C.Font.Color := FFlowStatementForeground;
         C.TextOut(Rect.Left, Rect.Top, Text);
+        C.Font.Color := OldColor;
       end;
     end;
   end;
