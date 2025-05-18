@@ -527,7 +527,7 @@ end;
 function TCnAIBaseEngine.AskAIEngineForCode(const Code: string; History: TStrings;
   Tag: TObject; RequestType: TCnAIRequestType; AnswerCallback: TCnAIAnswerCallback): Integer;
 begin
-  Result := AskAIEngine(FOption.URL, ConstructRequest(RequestType, Code),
+  Result := AskAIEngine(FOption.URL, ConstructRequest(RequestType, Code, History),
     FOption.Stream, RequestType, FOption.ApiKey, Tag, AnswerCallback);
 end;
 
@@ -608,6 +608,21 @@ begin
       Msg.AddPair('content', FOption.SystemMessage);
       Arr.AddValue(Msg);
 
+      // 先加历史
+      if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+      begin
+        for I := History.Count - 1 downto 0 do
+        begin
+          if Trim(History[I]) <> '' then
+          begin
+            Msg := TCnJSONObject.Create;
+            Msg.AddPair('role', 'user');
+            Msg.AddPair('content', History[I]);
+            Arr.AddValue(Msg);
+          end;
+        end;
+      end;
+
       Msg := TCnJSONObject.Create;
       Msg.AddPair('role', 'user');
       if RequestType = artExplainCode then
@@ -620,21 +635,6 @@ begin
         Msg.AddPair('content', Code);
 
       Arr.AddValue(Msg);
-
-      // 加历史
-      if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
-      begin
-        for I := 0 to History.Count - 1 do
-        begin
-          if Trim(History[I]) <> '' then
-          begin
-            Msg := TCnJSONObject.Create;
-            Msg.AddPair('role', 'user');
-            Msg.AddPair('content', History[I]);
-            Arr.AddValue(Msg);
-          end;
-        end;
-      end;
 
       S := ReqRoot.ToJSON;
       Result := AnsiToBytes(S);

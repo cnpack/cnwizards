@@ -56,6 +56,8 @@ uses
 type
   TCnChatMessageType = (cmtYou, cmtMe);
 
+  TCnChatMessageTypes = set of TCnChatMessageType;
+
   TCnChatItems = class;
 
   TCnCustomChatBox = class;
@@ -328,6 +330,10 @@ type
     function GetItemUnderMouse: TCnChatItem;
     function GetActualPadding: Integer;
     function GetFromDPI(OrigSize: Integer): Integer;
+
+    procedure GetRecentMessages(OutList: TStrings; MsgCount: Integer;
+      Types: TCnChatMessageTypes = [cmtMe]);
+    {* 获取聊天列表中最近的指定数目指定类型的消息至 OutList 中，最新的在最头上}
 
     property Item[Index: Integer]: TCnChatItem read GetItem write SetItem;
     property Items: TCnChatItems read FItems write SetItems;
@@ -651,11 +657,13 @@ begin
     if not FDragItem then
     begin
       if ssLeft in Shift then
+      begin
         if FItemUnderMouse >= 0 then
         begin
           FDragItem := True;
           FPreviousSelectedItem := -1;
         end;
+      end;
     end;
     if FDragItem then
     begin
@@ -1346,6 +1354,28 @@ end;
 function TCnCustomChatBox.GetFromDPI(OrigSize: Integer): Integer;
 begin
   Result := Round(OrigSize * GetScaledFactor);
+end;
+
+procedure TCnCustomChatBox.GetRecentMessages(OutList: TStrings;
+  MsgCount: Integer; Types: TCnChatMessageTypes);
+var
+  I: Integer;
+begin
+  if (MsgCount <= 0) or (OutList = nil) then
+    Exit;
+
+  for I := Items.Count - 1 downto 0 do
+  begin
+    if Items[I] is TCnChatMessage then
+    begin
+      if TCnChatMessage(Items[I]).FromType in Types then
+      begin
+        OutList.Add(TCnChatMessage(Items[I]).Text);
+        if OutList.Count >= MsgCount then
+          Exit;
+      end;
+    end;
+  end;
 end;
 
 { TCnChatItem }

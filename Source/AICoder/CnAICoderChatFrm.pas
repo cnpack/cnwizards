@@ -224,22 +224,23 @@ var
 begin
   if Trim(mmoSelf.Lines.Text) <> '' then
   begin
-    // 发出的消息
-    Msg := ChatBox.Items.AddMessage;
-    Msg.From := CnAIEngineManager.CurrentEngineName;
-    Msg.Text := mmoSelf.Lines.Text;
-    Msg.FromType := cmtMe;
-
-    // 回来的消息
-    Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
-    Msg.From := CnAIEngineManager.CurrentEngineName;
-    Msg.FromType := cmtYou;
-    Msg.Text := '...';
-
-    S := CnOtaGetCurrentSelection;
     His := TStringList.Create;
     try
       FChatBox.GetRecentMessages(His, CnAIEngineOptionManager.HistoryCount);
+
+      // 发出的消息
+      Msg := FChatBox.Items.AddMessage;
+      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.Text := mmoSelf.Lines.Text;
+      Msg.FromType := cmtMe;
+
+      // 回来的消息
+      Msg := FChatBox.Items.AddMessage;
+      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.FromType := cmtYou;
+      Msg.Text := '...';
+
+      S := CnOtaGetCurrentSelection;
 
       if btnReferSelection.Down and (Trim(S) <> '') then
       begin

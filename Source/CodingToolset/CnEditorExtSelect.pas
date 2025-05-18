@@ -560,9 +560,6 @@ begin
         POuterRightBrace := nil;
         InnerStartGot := InnerPair = nil; // 有 InnerPair 则从它开始，否则搜全局
 
-        PStStart := nil;
-        PStEnd := nil;
-
         for I := 0 to PasParser.Count - 1 do
         begin
           PT := PasParser.Tokens[I];

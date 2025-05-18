@@ -825,21 +825,21 @@ begin
 
     if Trim(edtChatMessage.Text) <> '' then
     begin
-      // 发出的消息
-      Msg := FAIChatBox.Items.AddMessage;
-      Msg.From := CnAIEngineManager.CurrentEngineName;
-      Msg.Text := edtChatMessage.Text;
-      Msg.FromType := cmtMe;
-
-      // 回来的消息
-      Msg := FAIChatBox.Items.AddMessage;
-      Msg.From := CnAIEngineManager.CurrentEngineName;
-      Msg.FromType := cmtYou;
-      Msg.Text := '...';
-
       His := TStringList.Create;
       try
         FAIChatBox.GetRecentMessages(His, CnAIEngineOptionManager.HistoryCount);
+
+        // 发出的消息
+        Msg := FAIChatBox.Items.AddMessage;
+        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.Text := edtChatMessage.Text;
+        Msg.FromType := cmtMe;
+
+        // 回来的消息
+        Msg := FAIChatBox.Items.AddMessage;
+        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.FromType := cmtYou;
+        Msg.Text := '...';
 
         CnAIEngineManager.CurrentEngine.AskAIEngineForCode(edtChatMessage.Text, His, Msg,
           artRaw, AIOnRawAnswer);

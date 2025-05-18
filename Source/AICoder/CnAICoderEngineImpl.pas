@@ -275,6 +275,21 @@ begin
     ReqRoot.AddPair('system', Option.SystemMessage); // Claude 额外放 System 消息
     Arr := ReqRoot.AddArray('messages');
 
+    // 先加历史
+    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+    begin
+      for I := History.Count - 1 downto 0 do
+      begin
+        if Trim(History[I]) <> '' then
+        begin
+          Msg := TCnJSONObject.Create;
+          Msg.AddPair('role', 'user');
+          Msg.AddPair('content', History[I]);
+          Arr.AddValue(Msg);
+        end;
+      end;
+    end;
+
     Msg := TCnJSONObject.Create;
     Msg.AddPair('role', 'user');
     if RequestType = artExplainCode then
@@ -287,21 +302,6 @@ begin
       Msg.AddPair('content', Code);
 
     Arr.AddValue(Msg);
-
-    // 加历史
-    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
-    begin
-      for I := 0 to History.Count - 1 do
-      begin
-        if Trim(History[I]) <> '' then
-        begin
-          Msg := TCnJSONObject.Create;
-          Msg.AddPair('role', 'user');
-          Msg.AddPair('content', History[I]);
-          Arr.AddValue(Msg);
-        end;
-      end;
-    end;
 
     S := ReqRoot.ToJSON;
     Result := AnsiToBytes(S);
@@ -556,6 +556,21 @@ begin
     Msg.AddPair('content', Option.SystemMessage);
     Arr.AddValue(Msg);
 
+    // 先加历史
+    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
+    begin
+      for I := History.Count - 1 downto 0 do
+      begin
+        if Trim(History[I]) <> '' then
+        begin
+          Msg := TCnJSONObject.Create;
+          Msg.AddPair('role', 'user');
+          Msg.AddPair('content', History[I]);
+          Arr.AddValue(Msg);
+        end;
+      end;
+    end;
+
     Msg := TCnJSONObject.Create;
     Msg.AddPair('role', 'user');
     if RequestType = artExplainCode then
@@ -568,21 +583,6 @@ begin
       Msg.AddPair('content', Code);
 
     Arr.AddValue(Msg);
-
-    // 加历史
-    if (RequestType = artRaw) and (History <> nil) and (History.Count > 0) then
-    begin
-      for I := 0 to History.Count - 1 do
-      begin
-        if Trim(History[I]) <> '' then
-        begin
-          Msg := TCnJSONObject.Create;
-          Msg.AddPair('role', 'user');
-          Msg.AddPair('content', History[I]);
-          Arr.AddValue(Msg);
-        end;
-      end;
-    end;
 
     S := ReqRoot.ToJSON;
     Result := AnsiToBytes(S);
