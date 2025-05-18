@@ -1509,7 +1509,8 @@ begin
     end;
 
     // 算的结果先放 Result，空出 R
-    CnSetRectWidth(Result, CnGetRectWidth(R));
+    // 注意这里多搞点儿宽度，避免 Memo 放置时因自身有未知 Padding 造成过窄而换行
+    CnSetRectWidth(Result, CnGetRectWidth(R) + 10);
     CnSetRectHeight(Result, CnGetRectHeight(R));
 
     // 如果要显示上面的名字，则把加粗的名字重新再画一个框，高和上面的框拼起来，宽则选大的。
