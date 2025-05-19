@@ -23,25 +23,25 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = 'Active AI Engine:'
   end
   object lblTimeout: TLabel
-    Left = 336
+    Left = 328
     Top = 16
-    Width = 86
+    Width = 113
     Height = 13
     Caption = 'Timeout Seconds:'
   end
   object lblHisCount: TLabel
-    Left = 640
+    Left = 624
     Top = 16
-    Width = 130
+    Width = 161
     Height = 13
     Caption = 'Send History Count in Chat:'
   end
   object lblMaxFav: TLabel
-    Left = 640
+    Left = 624
     Top = 40
-    Width = 98
+    Width = 161
     Height = 13
-    Caption = 'Max Favorite Countt:'
+    Caption = 'Max Favorite Count:'
   end
   object cbbActiveEngine: TComboBox
     Left = 112
@@ -95,9 +95,9 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
-    Left = 318
+    Left = 310
     Top = 40
-    Width = 124
+    Width = 139
     Height = 17
     Anchors = [akTop, akRight]
     Caption = 'Use Proxy:'

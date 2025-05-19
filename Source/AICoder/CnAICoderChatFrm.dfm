@@ -304,16 +304,19 @@ object CnAICoderChatForm: TCnAICoderChatForm
     end
     object actAddMsgToFavorite: TAction
       Caption = '&Add to Favorite'
+      Hint = 'Add Message to Favorite'
       ImageIndex = 14
       OnExecute = actAddMsgToFavoriteExecute
     end
     object actAddDraftToFavorite: TAction
       Caption = '&Add to Favorite'
+      Hint = 'Add Draft to Favorite'
       ImageIndex = 14
       OnExecute = actAddDraftToFavoriteExecute
     end
     object actClearFavorite: TAction
       Caption = 'Clear &Favorite'
+      Hint = 'Clear All Favorite Items'
       ImageIndex = 31
       OnExecute = actClearFavoriteExecute
     end
