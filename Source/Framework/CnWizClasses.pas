@@ -820,10 +820,23 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Loading Settings: ' + ClassName);
-  {$ENDIF}
-    LoadSettings(Ini);
+{$ENDIF}
+    try
+      LoadSettings(Ini);
+    except
+      on E: Exception do
+      begin
+{$IFDEF STAND_ALONE}
+        ShowMessage(Format('WizClasses %s LoadSettings Error. %s - %s',
+          [ClassName, E.ClassName, E.Message]));
+{$ELSE}
+        DoHandleException(Format('WizClasses %s LoadSettings Error. %s - %s',
+          [ClassName, E.ClassName, E.Message]));
+{$ENDIF}
+      end;
+    end;
   finally
     Ini.Free;
   end;
@@ -835,10 +848,23 @@ var
 begin
   Ini := CreateIniFile;
   try
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Saving Settings: ' + ClassName);
-  {$ENDIF}
-    SaveSettings(Ini);
+{$ENDIF}
+    try
+      SaveSettings(Ini);
+    except
+      on E: Exception do
+      begin
+{$IFDEF STAND_ALONE}
+        ShowMessage(Format('WizClasses %s SaveSettings Error. %s - %s',
+          [ClassName, E.ClassName, E.Message]));
+{$ELSE}
+        DoHandleException(Format('WizClasses %s SaveSettings Error. %s - %s',
+          [ClassName, E.ClassName, E.Message]));
+{$ENDIF}
+      end;
+    end;
   finally
     Ini.Free;
   end;
