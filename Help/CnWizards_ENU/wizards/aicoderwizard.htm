@@ -37,6 +37,12 @@ Before using it, please first run the configuration of this wizard, enter the ap
     <p class="text"><b>Use Proxy</b>: If checked, it represents that a HTTP or SOCKS5 proxy server is required for the specified connection to the AI Engine, such as "192.168.1.1:1080". Currently username and password are not supported.</p>
   </li>
   <li>
+    <p class="text"><b>Send History Count in Chat</b>: Attach chat history message count for context when talking to AI in Chat Window.</p>
+  </li>
+  <li>
+    <p class="text"><b>Max Favorite Count</b>: The max number of favorite item count in Chat Window. 0 means no limitation.</p>
+  </li>
+  <li>
     <p class="text"><b>URL</b>: The AI Engine API URL provided by this AI Engine.</p>
   </li>
   <li>
@@ -105,6 +111,18 @@ Before using it, please first run the configuration of this wizard, enter the ap
   <li>
     <p class="text"><b>Help</b>: Show this Help.</p>
   </li>
+  <li>
+    <p class="text"><b>Favorite Menu</b>: Display favorite menu to enter favorite text quickly.</p>
+  </li>
+  <li>
+    <p class="text"><b>Add to Favorite</b>: Add text in message sending area to favorite.</p>
+  </li>
+  <li>
+    <p class="text"><b>Clear Favorite</b>: Delete all favorite items.</p>
+  </li>
+  <li>
+    <p class="text"><b>Send</b>: Send current messages to current AI engine.</p>
+  </li>
 </ul>
 <p class="title" align="left">&nbsp;</p>
 <p class="text" align="left">Right click the message body to popup context menu:</p>
@@ -114,6 +132,9 @@ Before using it, please first run the configuration of this wizard, enter the ap
   </li>
   <li>
     <p class="text"><b>Copy Code</b>: Copy the content between ``` in selected message body.</p>
+  </li>
+  <li>
+    <p class="text"><b>Add to Favorite</b>: Add text in selected message body to favorite.</p>
   </li>
 </ul>
 
