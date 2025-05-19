@@ -432,7 +432,10 @@ begin
   // 加载收藏的词儿
   S := WizOptions.GetUserFileName(SCnAICoderFavoritesFile, True);
   if FileExists(S) then
+  begin
     CnAIEngineOptionManager.LoadFavorite(S);
+    CnAIEngineOptionManager.ShrinkFavorite;
+  end;
 
   // 挨个根据引擎 ID，修改文件名，创建并加载其对应 Option
   for I := 0 to EngineCount - 1 do
@@ -474,6 +477,7 @@ begin
 
   // 保存收藏的词儿
   S := WizOptions.GetUserFileName(SCnAICoderFavoritesFile, False);
+  CnAIEngineOptionManager.ShrinkFavorite;
   CnAIEngineOptionManager.SaveFavorite(S);
 
   // 挨个根据引擎 ID，修改文件名，保存其对应 Option

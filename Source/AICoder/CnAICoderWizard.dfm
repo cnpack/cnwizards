@@ -25,21 +25,21 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object lblTimeout: TLabel
     Left = 328
     Top = 16
-    Width = 113
+    Width = 86
     Height = 13
     Caption = 'Timeout Seconds:'
   end
   object lblHisCount: TLabel
     Left = 624
     Top = 16
-    Width = 161
+    Width = 130
     Height = 13
     Caption = 'Send History Count in Chat:'
   end
   object lblMaxFav: TLabel
     Left = 624
     Top = 40
-    Width = 161
+    Width = 95
     Height = 13
     Caption = 'Max Favorite Count:'
   end
@@ -99,16 +99,14 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Top = 40
     Width = 139
     Height = 17
-    Anchors = [akTop, akRight]
     Caption = 'Use Proxy:'
     TabOrder = 8
   end
   object edtProxy: TEdit
-    Left = 455
+    Left = 456
     Top = 38
     Width = 142
     Height = 21
-    Anchors = [akTop, akRight]
     TabOrder = 5
   end
   object edtTimeout: TEdit
