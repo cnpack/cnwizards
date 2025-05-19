@@ -152,6 +152,8 @@ type
     FTimeoutSec: Cardinal;
     FReferSelection: Boolean;
     FHistoryCount: Integer;
+    FMaxFavCount: Integer;
+    FFavorites: TStringList; // 注意确保内部存储不包括回车换行
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -167,6 +169,24 @@ type
 
     procedure AddOption(Option: TCnAIEngineOption);
     {* 增加一个外界创建并设置好的 AI 引擎设置对象，内部会判断其 EngineName 是否重复}
+
+    procedure LoadFavorite(const FileName: string);
+    {* 加载收藏的词儿}
+    procedure SaveFavorite(const FileName: string);
+    {* 保存收藏的词儿}
+
+    procedure AddToFavorite(const Fav: string);
+    {* 增加一个收藏}
+    procedure DeleteFavorite(Index: Integer);
+    {* 删除一个收藏}
+    function GetFavorite(Index: Integer): string;
+    {* 获取一个收藏条目内容}
+    function GetFavoriteCount: Integer;
+    {* 获取收藏条目数}
+    procedure ClearFavorites;
+    {* 清空全部收藏条目}
+    procedure ShrinkFavorite;
+    {* 根据最大条目限制修正收藏内容}
 
     procedure LoadFromFile(const FileName: string);
     {* 从 JSON 文件中加载基本设置}
@@ -203,6 +223,8 @@ type
 
     property HistoryCount: Integer read FHistoryCount write FHistoryCount;
     {* 聊天时的用户历史消息条数}
+    property MaxFavCount: Integer read FMaxFavCount write FMaxFavCount;
+    {* 收藏最大条数}
 
     property UseProxy: Boolean read FUseProxy write FUseProxy;
     {* 是否使用代理服务器；否表示直连，是的情况下如果 FProxyServer 为空，表示使用系统设置}
@@ -251,15 +273,33 @@ begin
   FOptions.Add(Option);
 end;
 
+procedure TCnAIEngineOptionManager.AddToFavorite(const Fav: string);
+var
+  S: string;
+begin
+  S := StringReplace(Fav, #13#10, '<BR>', [rfReplaceAll]);
+  if (Trim(S) <> '') and (FFavorites.IndexOf(S) < 0) then
+  begin
+    FFavorites.Add(S);
+    ShrinkFavorite;
+  end;
+end;
+
 procedure TCnAIEngineOptionManager.Clear;
 begin
   FOptions.Clear;
+end;
+
+procedure TCnAIEngineOptionManager.ClearFavorites;
+begin
+  FFavorites.Clear;
 end;
 
 constructor TCnAIEngineOptionManager.Create;
 begin
   inherited;
   FOptions := TObjectList.Create(True);
+  FFavorites := TStringList.Create;
 end;
 
 function TCnAIEngineOptionManager.CreateOptionFromFile(const EngineName,
@@ -291,10 +331,27 @@ begin
     AddOption(Result);
 end;
 
+procedure TCnAIEngineOptionManager.DeleteFavorite(Index: Integer);
+begin
+  FFavorites.Delete(Index);
+end;
+
 destructor TCnAIEngineOptionManager.Destroy;
 begin
+  FFavorites.Free;
   FOptions.Free;
   inherited;
+end;
+
+function TCnAIEngineOptionManager.GetFavorite(Index: Integer): string;
+begin
+  Result := FFavorites[Index];
+  Result := StringReplace(Result, '<BR>', #13#10, [rfReplaceAll]);
+end;
+
+function TCnAIEngineOptionManager.GetFavoriteCount: Integer;
+begin
+  Result := FFavorites.Count;
 end;
 
 function TCnAIEngineOptionManager.GetOption(Index: Integer): TCnAIEngineOption;
@@ -320,6 +377,11 @@ end;
 function TCnAIEngineOptionManager.GetOptionCount: Integer;
 begin
   Result := FOptions.Count;
+end;
+
+procedure TCnAIEngineOptionManager.LoadFavorite(const FileName: string);
+begin
+  FFavorites.LoadFromFile(FileName);
 end;
 
 procedure TCnAIEngineOptionManager.LoadFromFile(const FileName: string);
@@ -353,6 +415,14 @@ begin
   end;
 end;
 
+procedure TCnAIEngineOptionManager.SaveFavorite(const FileName: string);
+begin
+  if FFavorites.Count > 0 then
+    FFavorites.SaveToFile(FileName)
+  else if FileExists(FileName) then
+    DeleteFile(FileName);
+end;
+
 procedure TCnAIEngineOptionManager.SaveOptionToFile(const EngineName,
   FileName: string);
 var
@@ -380,6 +450,15 @@ begin
     Result := CnJSONConstruct(Root);
   finally
     Root.Free;
+  end;
+end;
+
+procedure TCnAIEngineOptionManager.ShrinkFavorite;
+begin
+  if (FMaxFavCount > 0) and (FFavorites.Count > FMaxFavCount) then
+  begin
+    while FFavorites.Count > FMaxFavCount do
+      FFavorites.Delete(0);
   end;
 end;
 

@@ -58,6 +58,12 @@ type
     lblTimeout: TLabel;
     edtTimeout: TEdit;
     udTimeout: TUpDown;
+    lblHisCount: TLabel;
+    edtHisCount: TEdit;
+    udHisCount: TUpDown;
+    edtMaxFav: TEdit;
+    lblMaxFav: TLabel;
+    udMaxFav: TUpDown;
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
@@ -399,6 +405,8 @@ begin
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
 
   udTimeout.Position := CnAIEngineOptionManager.TimeoutSec;
+  udHisCount.Position := CnAIEngineOptionManager.HistoryCount;
+  udMaxFav.Position := CnAIEngineOptionManager.MaxFavCount;
 
   // 给每个 Options 创建一个 Tab，每个 Tab 里塞一个 Frame，给 Frame 里的东西塞 Option 内容
   SetLength(FTabsheets, CnAIEngineOptionManager.OptionCount);
@@ -488,6 +496,8 @@ begin
   CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
 
   CnAIEngineOptionManager.TimeoutSec := udTimeout.Position;
+  CnAIEngineOptionManager.HistoryCount := udHisCount.Position;
+  CnAIEngineOptionManager.MaxFavCount := udMaxFav.Position;
 
   CnAIEngineOptionManager.UseProxy := chkProxy.Checked;
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;

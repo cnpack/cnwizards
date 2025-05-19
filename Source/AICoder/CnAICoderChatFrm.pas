@@ -54,7 +54,6 @@ type
     pnlTop: TPanel;
     spl1: TSplitter;
     mmoSelf: TMemo;
-    btnMsgSend: TSpeedButton;
     actCopy: TAction;
     btnToggleSend: TToolButton;
     btnOption: TToolButton;
@@ -77,6 +76,17 @@ type
     btn2: TToolButton;
     btnReferSelection: TToolButton;
     btn3: TToolButton;
+    pnlSend: TPanel;
+    btnMsgSend: TSpeedButton;
+    tlbSend: TToolBar;
+    actAddDraftToFavorite: TAction;
+    actClearFavorite: TAction;
+    btnFavorite: TToolButton;
+    btnAddToFavorite: TToolButton;
+    btnClearFavorite: TToolButton;
+    pmFavorite: TPopupMenu;
+    AddMsgtoFavorite1: TMenuItem;
+    actAddMsgToFavorite: TAction;
     procedure FormCreate(Sender: TObject);
     procedure actToggleSendExecute(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
@@ -93,6 +103,9 @@ type
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnReferSelectionClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure actClearFavoriteExecute(Sender: TObject);
+    procedure actAddDraftToFavoriteExecute(Sender: TObject);
+    procedure actAddMsgToFavoriteExecute(Sender: TObject);
   private
     FChatBox: TCnChatBox;
     FWizard: TCnAICoderWizard;
@@ -101,6 +114,9 @@ type
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
+
+    procedure BuildFavoriteMenu;
+    procedure FavoriteItemClick(Sender: TObject);
   public
     class function ExtractCode(Item: TCnChatMessage): string;
     procedure NotifySettingChanged;
@@ -182,6 +198,7 @@ begin
     cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineName);
 
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
+  BuildFavoriteMenu;
 
   EditControlWrapper.AddEditorChangeNotifier(OnEditorChange);
 end;
@@ -214,6 +231,12 @@ begin
 //    // 选中内容里有无 ```
 //  else if Action = actSend then
 //    (Action as TAction).Enabled := mmoSelf.Lines.Text <> '';
+  if Action = actClear then
+    TAction(Action).Enabled := FChatBox.Items.Count > 0
+  else if Action = actClearFavorite then
+    TAction(Action).Enabled := CnAIEngineOptionManager.GetFavoriteCount > 0
+  else if Action = actAddDraftToFavorite then
+    TAction(Action).Enabled := mmoSelf.Lines.Text <> '';
 end;
 
 procedure TCnAICoderChatForm.btnMsgSendClick(Sender: TObject);
@@ -324,6 +347,7 @@ begin
     except
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
+    FItemUnderMouse := nil;
   end;
 end;
 
@@ -332,6 +356,7 @@ begin
   FItemUnderMouse := FChatBox.GetItemUnderMouse;
   actCopy.Enabled := FItemUnderMouse <> nil;
   actCopyCode.Enabled := FItemUnderMouse <> nil;
+  actAddMsgToFavorite.Enabled := FItemUnderMouse <> nil;
 end;
 
 procedure TCnAICoderChatForm.actCopyCodeExecute(Sender: TObject);
@@ -355,12 +380,14 @@ begin
     except
       ; // 弹出时记录的鼠标下的 Item，万一执行时被释放了，就可能出异常，要抓住
     end;
+    FItemUnderMouse := nil;
   end;
 end;
 
 procedure TCnAICoderChatForm.actClearExecute(Sender: TObject);
 begin
   FChatBox.Items.ClearNoWaiting;
+  FItemUnderMouse := nil;
 end;
 
 procedure TCnAICoderChatForm.actFontExecute(Sender: TObject);
@@ -453,6 +480,62 @@ procedure TCnAICoderChatForm.btnReferSelectionClick(Sender: TObject);
 begin
   btnReferSelection.Down := not btnReferSelection.Down;
   CnAIEngineOptionManager.ReferSelection := btnReferSelection.Down;
+end;
+
+procedure TCnAICoderChatForm.BuildFavoriteMenu;
+var
+  I: Integer;
+  Item: TMenuItem;
+  S: string;
+begin
+  pmFavorite.Items.Clear;
+  for I := 0 to CnAIEngineOptionManager.GetFavoriteCount - 1 do
+  begin
+    S := CnAIEngineOptionManager.GetFavorite(I);
+    if Length(S) > 6 then
+      S := Copy(S, 1, 6) + '...';
+
+    Item := TMenuItem.Create(pmFavorite);
+    Item.Caption := '&' + IntToStr(I + 1) + ' ' + S;
+    Item.Tag := I;
+    Item.OnClick := FavoriteItemClick;
+    pmFavorite.Items.Add(Item);
+  end;
+  btnFavorite.Enabled := pmFavorite.Items.Count > 0;
+end;
+
+procedure TCnAICoderChatForm.FavoriteItemClick(Sender: TObject);
+var
+  Idx: Integer;
+begin
+  Idx := (Sender as TComponent).Tag;
+  if (Idx >= 0) and (Idx < CnAIEngineOptionManager.GetFavoriteCount) then
+    mmoSelf.Lines.Text := CnAIEngineOptionManager.GetFavorite(Idx);
+end;
+
+procedure TCnAICoderChatForm.actClearFavoriteExecute(Sender: TObject);
+begin
+  CnAIEngineOptionManager.ClearFavorites;
+  BuildFavoriteMenu;
+end;
+
+procedure TCnAICoderChatForm.actAddDraftToFavoriteExecute(Sender: TObject);
+begin
+  if Trim(mmoSelf.Lines.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.AddToFavorite(mmoSelf.Lines.Text);
+    BuildFavoriteMenu;
+  end;
+end;
+
+procedure TCnAICoderChatForm.actAddMsgToFavoriteExecute(Sender: TObject);
+begin
+  if FChatBox.Focused and (FItemUnderMouse <> nil) and (FItemUnderMouse is TCnChatMessage)
+    and (TCnChatMessage(FItemUnderMouse).FromType = cmtMe) then
+  begin
+    CnAIEngineOptionManager.AddToFavorite(TCnChatMessage(FItemUnderMouse).Text);
+    BuildFavoriteMenu;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}

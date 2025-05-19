@@ -401,6 +401,7 @@ resourcestring
   SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
   SCnAICoderEngineOptionFileFmt = 'AICoderConfig%s.json';
+  SCnAICoderFavoritesFile = 'AICoderFavorites.txt';
 
 //==============================================================================
 // Event Names used around CnEventBus

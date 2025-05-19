@@ -429,6 +429,11 @@ begin
   if FileExists(S) then
     CnAIEngineOptionManager.LoadFromFile(S);
 
+  // 加载收藏的词儿
+  S := WizOptions.GetUserFileName(SCnAICoderFavoritesFile, True);
+  if FileExists(S) then
+    CnAIEngineOptionManager.LoadFavorite(S);
+
   // 挨个根据引擎 ID，修改文件名，创建并加载其对应 Option
   for I := 0 to EngineCount - 1 do
   begin
@@ -461,11 +466,15 @@ var
   I: Integer;
   S, F: string;
 begin
-  // OptionManager 加载基本设置
+  // OptionManager 保存基本设置
   F := Format(SCnAICoderEngineOptionFileFmt, ['']);
   S := WizOptions.GetUserFileName(F, False);
   CnAIEngineOptionManager.SaveToFile(S);
   WizOptions.CheckUserFile(F);
+
+  // 保存收藏的词儿
+  S := WizOptions.GetUserFileName(SCnAICoderFavoritesFile, False);
+  CnAIEngineOptionManager.SaveFavorite(S);
 
   // 挨个根据引擎 ID，修改文件名，保存其对应 Option
   for I := 0 to EngineCount - 1 do
