@@ -1417,6 +1417,8 @@ var
   Sign: Boolean;
   E: Integer;
   M: UInt64;
+  S: string;
+  V: Extended;
 begin
   CheckExtendedSize;
 
@@ -1425,11 +1427,19 @@ begin
 
   if (FExtSize > 0) and (FExtSize = CnRemoteProcessEvaluator.ReadProcessMemory(Ar, FExtSize, Buf[0])) then
   begin
+    S := OldEvalResult;
+    if (FExtSize = CN_EXTENDED_SIZE_10) and (SizeOf(Extended) = CN_EXTENDED_SIZE_10) then
+    begin
+      // 当目标进程和宿主的扩展精度都是 10 时，采用更精确的内容
+      Move(Buf[0], V, SizeOf(Extended));
+      S := ExtendedToStr(V);
+    end;
+
     ExtractFloatExtended(@Buf[0], FExtSize, Sign, E, M);
     if Sign then
-      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+      Result := S + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
     else
-      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+      Result := S + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
   end
   else
     Result := OldEvalResult;
