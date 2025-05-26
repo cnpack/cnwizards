@@ -1267,11 +1267,8 @@ end;
 function HexTrimZero(N: TUInt64): string;
 begin
   Result := UInt64ToHex(N);
-  if Length(Result) > 0 then
-  begin
-    while Result[1] = '0' do
-      Delete(Result, 1, 1);
-  end;
+  while (Length(Result) > 0) and (Result[1] = '0') do
+    Delete(Result, 1, 1);
 end;
 
 function GetDebugEnhanceFloatEnable: Boolean;
@@ -1420,29 +1417,32 @@ var
   S: string;
   V: Extended;
 begin
-  CheckExtendedSize;
+  Result := OldEvalResult;
 
-  // NewEvalResult 应该是拿到一个地址的$开头的十六进制整数形式
-  Ar := TCnOTAAddress(StrToUInt64(NewEvalResult));
-
-  if (FExtSize > 0) and (FExtSize = CnRemoteProcessEvaluator.ReadProcessMemory(Ar, FExtSize, Buf[0])) then
+  if NewEvalResult <> '' then
   begin
-    S := OldEvalResult;
-    if (FExtSize = CN_EXTENDED_SIZE_10) and (SizeOf(Extended) = CN_EXTENDED_SIZE_10) then
-    begin
-      // 当目标进程和宿主的扩展精度都是 10 时，采用更精确的内容
-      Move(Buf[0], V, SizeOf(Extended));
-      S := ExtendedToStr(V);
-    end;
+    CheckExtendedSize;
 
-    ExtractFloatExtended(@Buf[0], FExtSize, Sign, E, M);
-    if Sign then
-      Result := S + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
-    else
-      Result := S + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
-  end
-  else
-    Result := OldEvalResult;
+    // NewEvalResult 应该是拿到一个地址的 $ 开头的十六进制整数形式
+    Ar := TCnOTAAddress(StrToUInt64(NewEvalResult));
+
+    if (FExtSize > 0) and (FExtSize = CnRemoteProcessEvaluator.ReadProcessMemory(Ar, FExtSize, Buf[0])) then
+    begin
+      S := OldEvalResult;
+      if (FExtSize = CN_EXTENDED_SIZE_10) and (SizeOf(Extended) = CN_EXTENDED_SIZE_10) then
+      begin
+        // 当目标进程和宿主的扩展精度都是 10 时，采用更精确的内容
+        Move(Buf[0], V, SizeOf(Extended));
+        S := ExtendedToStr(V);
+      end;
+
+      ExtractFloatExtended(@Buf[0], FExtSize, Sign, E, M);
+      if Sign then
+        Result := S + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+      else
+        Result := S + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+    end;
+  end;
 end;
 
 function TCnDebuggerFloatExtendedValueReplacer.GetNewExpression(
