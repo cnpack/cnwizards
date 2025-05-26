@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=Unit Name
 TCnBookmarkForm.ListView.Columns.Item1.Caption=Positionsmarke
 TCnBookmarkForm.ListView.Columns.Item2.Caption=Zeile
 TCnBookmarkForm.ListView.Columns.Item3.Caption=Quelltext
+TCnBookmarkForm.btnClear.Hint=Alle Lesezeichen löschen
 TCnBookmarkForm.btnDelete.Hint=Lösche Positionsmarken
 TCnBookmarkForm.btnRefresh.Hint=Refresh Positionsmarken
 TCnBookmarkForm.tbClose.Hint=Fenster schließen

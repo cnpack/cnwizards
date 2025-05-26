@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=Nom de l'Unit
 TCnBookmarkForm.ListView.Columns.Item1.Caption=Signet
 TCnBookmarkForm.ListView.Columns.Item2.Caption=Num. ligne
 TCnBookmarkForm.ListView.Columns.Item3.Caption=Code Source
+TCnBookmarkForm.btnClear.Hint=Effacer tous les signets
 TCnBookmarkForm.btnDelete.Hint=Supprimer le signet
 TCnBookmarkForm.btnRefresh.Hint=Actualiser la liste des signets
 TCnBookmarkForm.tbClose.Hint=Quitter

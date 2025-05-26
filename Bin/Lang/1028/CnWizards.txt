@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=單元名
 TCnBookmarkForm.ListView.Columns.Item1.Caption=書籤
 TCnBookmarkForm.ListView.Columns.Item2.Caption=行號
 TCnBookmarkForm.ListView.Columns.Item3.Caption=源代碼
+TCnBookmarkForm.btnClear.Hint=清空所有書籤
 TCnBookmarkForm.btnDelete.Hint=刪除書籤
 TCnBookmarkForm.btnRefresh.Hint=刷新顯示
 TCnBookmarkForm.tbClose.Hint=關閉窗口

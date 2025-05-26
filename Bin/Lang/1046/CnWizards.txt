@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=Nome da Unidade
 TCnBookmarkForm.ListView.Columns.Item1.Caption=Favorito
 TCnBookmarkForm.ListView.Columns.Item2.Caption=Linha No.
 TCnBookmarkForm.ListView.Columns.Item3.Caption=Código-Fonte
+TCnBookmarkForm.btnClear.Hint=Limpar todos os favoritos
 TCnBookmarkForm.btnDelete.Hint=Excluir favoritos
 TCnBookmarkForm.btnRefresh.Hint=Atualizar lista de favoritos
 TCnBookmarkForm.tbClose.Hint=Fechar Janela

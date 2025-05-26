@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=Unit Name
 TCnBookmarkForm.ListView.Columns.Item1.Caption=Bookmark
 TCnBookmarkForm.ListView.Columns.Item2.Caption=Line No.
 TCnBookmarkForm.ListView.Columns.Item3.Caption=Source Code
+TCnBookmarkForm.btnClear.Hint=Clear All Bookmarks
 TCnBookmarkForm.btnDelete.Hint=Delete Bookmarks
 TCnBookmarkForm.btnRefresh.Hint=Refresh Bookmark List
 TCnBookmarkForm.tbClose.Hint=Close Window

@@ -275,6 +275,7 @@ TCnBookmarkForm.ListView.Columns.Item0.Caption=Модуль
 TCnBookmarkForm.ListView.Columns.Item1.Caption=Закладка
 TCnBookmarkForm.ListView.Columns.Item2.Caption=Строка
 TCnBookmarkForm.ListView.Columns.Item3.Caption=Код
+TCnBookmarkForm.btnClear.Hint=Удалить все закладки
 TCnBookmarkForm.btnDelete.Hint=Удалить закладки
 TCnBookmarkForm.btnRefresh.Hint=Обновить список закладок
 TCnBookmarkForm.tbClose.Hint=Выход

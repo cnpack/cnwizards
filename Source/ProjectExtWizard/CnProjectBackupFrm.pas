@@ -184,9 +184,9 @@ type
     FProjectList: TCnBackupProjectList; // 根列表，里头有多个 ProjectInfo，每个里有有多个 FileInfo
     FExt: string;
     FListViewWidthStr: string;
+{$IFNDEF COMPILER5}
     FSortIndex: Integer;
     FSortDown: Boolean;
-{$IFNDEF COMPILER5}
     FUpArrow: TBitmap;
     FDownArrow: TBitmap;
     FNoArrow: TBitmap;

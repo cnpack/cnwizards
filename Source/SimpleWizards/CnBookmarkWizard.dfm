@@ -1,8 +1,8 @@
 inherited CnBookmarkForm: TCnBookmarkForm
   Left = 328
   Top = 164
-  Width = 515
-  Height = 423
+  Width = 618
+  Height = 496
   Caption = 'Browse Bookmarks'
   KeyPreview = True
   Position = poScreenCenter
@@ -16,7 +16,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 507
+    Width = 610
     Height = 30
     AutoSize = True
     BorderWidth = 2
@@ -56,50 +56,57 @@ inherited CnBookmarkForm: TCnBookmarkForm
       ImageIndex = 13
       OnClick = btnDeleteClick
     end
-    object ToolButton2: TToolButton
+    object btnClear: TToolButton
       Left = 77
+      Top = 0
+      Hint = 'Clear All Bookmarks'
+      ImageIndex = 31
+      OnClick = btnClearClick
+    end
+    object ToolButton2: TToolButton
+      Left = 100
       Top = 0
       Width = 8
       ImageIndex = 8
       Style = tbsSeparator
     end
     object tbConfig: TToolButton
-      Left = 85
+      Left = 108
       Top = 0
       Hint = 'Tools Settings'
       ImageIndex = 2
       OnClick = tbConfigClick
     end
     object ToolButton3: TToolButton
-      Left = 108
+      Left = 131
       Top = 0
       Width = 8
       ImageIndex = 6
       Style = tbsSeparator
     end
     object tbHelp: TToolButton
-      Left = 116
+      Left = 139
       Top = 0
       Hint = 'Help'
       ImageIndex = 1
       OnClick = tbHelpClick
     end
     object tbClose: TToolButton
-      Left = 139
+      Left = 162
       Top = 0
       Hint = 'Close Window'
       ImageIndex = 0
       OnClick = tbCloseClick
     end
     object ToolButton1: TToolButton
-      Left = 162
+      Left = 185
       Top = 0
       Width = 8
       ImageIndex = 7
       Style = tbsSeparator
     end
     object cbbUnit: TComboBox
-      Left = 170
+      Left = 193
       Top = 0
       Width = 164
       Height = 21
@@ -111,8 +118,8 @@ inherited CnBookmarkForm: TCnBookmarkForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 377
-    Width = 507
+    Top = 445
+    Width = 610
     Height = 19
     Panels = <>
     ParentFont = True
@@ -122,15 +129,15 @@ inherited CnBookmarkForm: TCnBookmarkForm
   object Panel1: TPanel
     Left = 0
     Top = 30
-    Width = 507
-    Height = 347
+    Width = 610
+    Height = 415
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     object Splitter: TSplitter
       Left = 0
-      Top = 243
-      Width = 507
+      Top = 311
+      Width = 610
       Height = 5
       Cursor = crVSplit
       Align = alBottom
@@ -141,25 +148,25 @@ inherited CnBookmarkForm: TCnBookmarkForm
     object ListView: TListView
       Left = 0
       Top = 0
-      Width = 507
-      Height = 243
+      Width = 610
+      Height = 311
       Align = alClient
       Columns = <
         item
           Caption = 'Unit Name'
-          Width = 100
+          Width = 120
         end
         item
           Caption = 'Bookmark'
-          Width = 60
+          Width = 80
         end
         item
           Caption = 'Line No.'
-          Width = 60
+          Width = 80
         end
         item
           Caption = 'Source Code'
-          Width = 270
+          Width = 300
         end>
       ColumnClick = False
       HideSelection = False
@@ -173,8 +180,8 @@ inherited CnBookmarkForm: TCnBookmarkForm
     end
     object mmoPreview: TMemo
       Left = 0
-      Top = 248
-      Width = 507
+      Top = 316
+      Width = 610
       Height = 99
       Align = alBottom
       Constraints.MinHeight = 30
@@ -207,5 +214,13 @@ inherited CnBookmarkForm: TCnBookmarkForm
     MaxFontSize = 0
     Left = 56
     Top = 326
+  end
+  object actlstBookmark: TActionList
+    OnUpdate = actlstBookmarkUpdate
+    Left = 96
+    Top = 326
+    object actDummy: TAction
+      Caption = 'actDummy'
+    end
   end
 end

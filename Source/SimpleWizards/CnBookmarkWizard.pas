@@ -50,7 +50,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, ExtCtrls, Math, ToolWin, ImgList, ToolsAPI, IniFiles,
-  CnWizClasses, CnWizNotifier, CnWizMultiLang, CnWizIdeDock, Contnrs;
+  CnWizClasses, CnWizNotifier, CnWizMultiLang, CnWizIdeDock, Contnrs,
+  ActnList;
 
 type
 
@@ -98,6 +99,9 @@ type
     btnDelete: TToolButton;
     tmrRefresh: TTimer;
     dlgFont: TFontDialog;
+    btnClear: TToolButton;
+    actlstBookmark: TActionList;
+    actDummy: TAction;
     procedure cbbUnitChange(Sender: TObject);
     procedure ListViewChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
@@ -113,6 +117,9 @@ type
     procedure SplitterMoved(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure btnClearClick(Sender: TObject);
+    procedure actlstBookmarkUpdate(Action: TBasicAction;
+      var Handled: Boolean);
   private
     FList: TObjectList;
     FUpdateCount: Integer;
@@ -1126,6 +1133,55 @@ procedure TCnBookmarkForm.FormCreate(Sender: TObject);
 begin
   WizOptions.ResetToolbarWithLargeIcons(ToolBar);
   IdeScaleToolbarComboFontSize(cbbUnit);
+end;
+
+procedure TCnBookmarkForm.btnClearClick(Sender: TObject);
+var
+  I: Integer;
+  BkObj: TCnBookmarkObj;
+  SavePos: TOTAEditPos;
+  EditPos: TOTAEditPos;
+  Buffer: IOTAEditBuffer;
+  View: IOTAEditView;
+  BkID: Integer;
+begin
+  if ListView.Items.Count <= 0 then
+    Exit;
+
+  if not QueryDlg(SCnClearConfirm) then
+    Exit;
+
+  for I := ListView.Items.Count - 1 downto 0 do
+  begin
+    BkObj := TCnBookmarkObj(ListView.Items[I].Data);
+    Buffer := GetBufferFromFile(BkObj.Parent.FileName);
+    if Assigned(Buffer) and Assigned(Buffer.TopView) then
+    begin
+      View := Buffer.TopView;
+      BkID := BkObj.BookmarkID;
+      SavePos := View.CursorPos;
+      if View.BookmarkPos[BkID].Line > 0 then
+      begin
+        EditPos := View.CursorPos;
+        EditPos.Line := View.BookmarkPos[BkID].Line;
+        View.CursorPos := EditPos;
+        View.BookmarkToggle(BkID);
+      end;
+      View.CursorPos := SavePos;
+      View.Paint;
+    end;
+    BkObj.Parent.FList.Remove(BkObj);
+    ListView.Items.Delete(I);
+  end;
+end;
+
+procedure TCnBookmarkForm.actlstBookmarkUpdate(Action: TBasicAction;
+  var Handled: Boolean);
+begin
+  // 似乎没起作用，但也无碍
+  btnClear.Enabled := ListView.Items.Count > 0;
+  btnDelete.Enabled := ListView.SelCount > 0;
+  tbGoto.Enabled := ListView.Selected <> nil;
 end;
 
 initialization
