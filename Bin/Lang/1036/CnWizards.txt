@@ -2765,6 +2765,7 @@ TCnDebugEnhanceForm.chkAutoClose.Caption=Fermer automatiquement la cible en cour
 TCnDebugEnhanceForm.chkAutoReset.Caption=Réinitialiser automatiquement la cible de débogage avant la compilation ou la construction
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Activer la visionneuse TBytes/RawByteString (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkDataSetViewer.Caption=Activer la visionneuse TDataSet (Delphi XE ou version supérieure)
+TCnDebugEnhanceForm.chkEnhanceFloat.Caption=Améliorer l'indication des nombres à virgule flottante pour afficher le signe, l'exposant et la mantisse (Delphi XE ou version supérieure)
 TCnDebugEnhanceForm.chkMemoryStreamViewer.Caption=Activer la visionneuse TMemoryStream (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkStringsViewer.Caption=Activer la visionneuse TStrings
 TCnDebugEnhanceForm.chkWideViewer.Caption=Activer la visionneuse WideString/UnicodeString (Delphi XE ou version supérieure)

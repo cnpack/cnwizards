@@ -2764,6 +2764,7 @@ TCnDebugEnhanceForm.chkAutoClose.Caption=Автоматически закрыт
 TCnDebugEnhanceForm.chkAutoReset.Caption=Автоматически сбросить цель отладки перед компиляцией или сборкой
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Включить просмотр TBytes/RawByteString (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkDataSetViewer.Caption=Включить просмотр TDataSet (Delphi XE и выше)
+TCnDebugEnhanceForm.chkEnhanceFloat.Caption=Улучшить подсказку числа с плавающей точкой для отображения знака, показателя степени и мантиссы (Delphi XE и выше)
 TCnDebugEnhanceForm.chkMemoryStreamViewer.Caption=Включить просмотр TMemoryStream (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkStringsViewer.Caption=Включить просмотр TStrings
 TCnDebugEnhanceForm.chkWideViewer.Caption=Включить просмотр WideString/UnicodeString (Delphi XE и выше)

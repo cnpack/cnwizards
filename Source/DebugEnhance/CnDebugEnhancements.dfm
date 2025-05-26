@@ -216,7 +216,9 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Width = 415
           Height = 17
           Anchors = [akLeft, akTop, akRight]
-          Caption = 'Enhance Float Hint to Show Sign, Exponent and Mantissa'
+          Caption = 
+            'Enhance Float Hint to Show Sign, Exponent and Mantissa (Delphi X' +
+            'E or Above)'
           TabOrder = 2
         end
       end

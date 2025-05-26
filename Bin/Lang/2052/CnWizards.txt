@@ -2764,6 +2764,7 @@ TCnDebugEnhanceForm.chkAutoClose.Caption=在编译或构建前自动关闭正在
 TCnDebugEnhanceForm.chkAutoReset.Caption=在编译或构建前自动重置被调试的目标程序
 TCnDebugEnhanceForm.chkBytesViewer.Caption=启用 TBytes/RawByteString 查看器（仅适用于 Delphi XE ～ 10.4）
 TCnDebugEnhanceForm.chkDataSetViewer.Caption=启用 TDataSet 查看器（仅适用于 Delphi XE 及以上）
+TCnDebugEnhanceForm.chkEnhanceFloat.Caption=为浮点数增加显示符号、指数与有效数字（仅适用于 Delphi XE 及以上）
 TCnDebugEnhanceForm.chkMemoryStreamViewer.Caption=启用 TMemoryStream 查看器（仅适用于 Delphi XE ～ 10.4）
 TCnDebugEnhanceForm.chkStringsViewer.Caption=启用 TStrings 查看器
 TCnDebugEnhanceForm.chkWideViewer.Caption=启用 WideString/UnicodeString 查看器（仅适用于 Delphi XE 及以上）

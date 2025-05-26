@@ -2764,6 +2764,7 @@ TCnDebugEnhanceForm.chkAutoClose.Caption=Automatisch schließen ausgeführtes Zi
 TCnDebugEnhanceForm.chkAutoReset.Caption=Automatisch zurücksetzen des Debug-Ziels vor dem Kompilieren oder Erstellen
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Aktivieren TBytes/RawByteString-Viewer (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkDataSetViewer.Caption=Aktivieren TDataSet-Viewer (Delphi XE oder höher)
+TCnDebugEnhanceForm.chkEnhanceFloat.Caption=Erweiterten Float-Hinweis anzeigen, um Vorzeichen, Exponenten und Mantisse anzuzeigen (Delphi XE oder höher)
 TCnDebugEnhanceForm.chkMemoryStreamViewer.Caption=Aktivieren TMemoryStream-Viewer (Delphi XE ~ 10.4)
 TCnDebugEnhanceForm.chkStringsViewer.Caption=Aktivieren TStrings-Viewer
 TCnDebugEnhanceForm.chkWideViewer.Caption=Aktivieren WideString/UnicodeString-Viewer (Delphi XE oder höher)
