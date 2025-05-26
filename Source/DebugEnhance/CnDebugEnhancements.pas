@@ -47,7 +47,7 @@ uses
   CnHashMap, CnWizConsts, CnWizClasses, CnWizOptions, CnWizDebuggerNotifier,
   CnDataSetVisualizer, CnStringsVisualizer, CnBytesVisualizer, CnWideVisualizer,
   CnMemoryStreamVisualizer, CnWizMultiLang, CnWizShareImages, CnWizUtils,
-  CnWizNotifier, CnActionListHook;
+  CnWizManager, CnWizNotifier, CnActionListHook;
 
 type
   TCnDebugEnhanceWizard = class(TCnSubMenuWizard)
@@ -81,11 +81,13 @@ type
     FMemoryStreamViewer: IOTADebuggerVisualizer;
     FMemoryStreamRegistered: Boolean;
     FEnableMemoryStream: Boolean;
+    FEnableFloat: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
     procedure SetEnableStrings(const Value: Boolean);
     procedure SetEnableBytes(const Value: Boolean);
     procedure SetEnableWide(const Value: Boolean);
     procedure SetEnableMemoryStream(const Value: Boolean);
+    procedure SetEnableFloat(const Value: Boolean);
     procedure CheckViewersRegistration;
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -128,6 +130,8 @@ type
     {* 是否启用 UnicodeString Viewer}
     property EnableMemoryStream: Boolean read FEnableMemoryStream write SetEnableMemoryStream;
     {* 是否启用 MemoryStream Viewer}
+    property EnableFloat: Boolean read FEnableFloat write SetEnableFloat;
+    {* 是否扩展 Float 浮点数的显示}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
@@ -144,6 +148,11 @@ type
   private
     FActive: Boolean;
   protected
+    function GetActive: Boolean; virtual;
+    {* 供子类重载控制是否使能}
+    procedure SetActive(const Value: Boolean); virtual;
+    {* 供子类重载控制是否使能}
+
     function GetEvalType: string; virtual; abstract;
     {* 返回支持的类型名，带 T 前缀}
     function GetNewExpression(const Expression, TypeName,
@@ -153,7 +162,10 @@ type
       NewEvalResult: string): string; virtual;
     {* 重新求值成功后调用，给子类一个调整显示的机会。默认实现是“旧: 新”}
   public
-    property Active: Boolean read FActive write FActive;
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    property Active: Boolean read GetActive write SetActive;
     {* 是否启用}
   end;
 
@@ -229,6 +241,7 @@ type
     lblHint: TLabel;
     chkWideViewer: TCheckBox;
     chkMemoryStreamViewer: TCheckBox;
+    chkEnhanceFloat: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -260,7 +273,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnCommon, CnRemoteInspector {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnCommon, CnFloat, CnNative, CnRemoteInspector {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   csAutoClose = 'AutoClose';
@@ -286,6 +299,43 @@ begin
   if FDebuggerValueReplacerClass.IndexOf(ReplacerClass) < 0 then
     FDebuggerValueReplacerClass.Add(ReplacerClass);
 end;
+
+type
+  TCnDebuggerFloatSingleValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  {* 单精度浮点数调试显示扩展}
+  protected
+    function GetActive: Boolean; override;
+    function GetEvalType: string; override;
+    function GetNewExpression(const Expression, TypeName,
+      OldEvalResult: string): string; override;
+    function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
+      NewEvalResult: string): string; override;
+  end;
+
+  TCnDebuggerFloatDoubleValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  {* 双精度浮点数调试显示扩展}
+  protected
+    function GetActive: Boolean; override;
+    function GetEvalType: string; override;
+    function GetNewExpression(const Expression, TypeName,
+      OldEvalResult: string): string; override;
+    function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
+      NewEvalResult: string): string; override;
+  end;
+
+  TCnDebuggerFloatExtendedValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  {* 扩展精度浮点数调试显示扩展}
+  private
+    FExtSize: Integer;
+    procedure CheckExtendedSize;
+  protected
+    function GetActive: Boolean; override;
+    function GetEvalType: string; override;
+    function GetNewExpression(const Expression, TypeName,
+      OldEvalResult: string): string; override;
+    function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
+      NewEvalResult: string): string; override;
+  end;
 
 {$ENDIF}
 
@@ -321,6 +371,12 @@ procedure TCnDebugEnhanceWizard.SetEnableMemoryStream(const Value: Boolean);
 begin
   FEnableMemoryStream := Value;
   CheckViewersRegistration;
+end;
+
+procedure TCnDebugEnhanceWizard.SetEnableFloat(const Value: Boolean);
+begin
+  FEnableFloat := Value;
+  // 由 Float 子类来判断使能
 end;
 
 procedure TCnDebugEnhanceWizard.CheckViewersRegistration;
@@ -433,6 +489,7 @@ begin
   {$ELSE}
     chkBytesViewer.Checked := FEnableBytes;
   {$ENDIF}
+    chkEnhanceFloat.Checked := FEnableFloat;
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
@@ -442,6 +499,7 @@ begin
     chkBytesViewer.Enabled := False;
     chkWideViewer.Enabled := False;
     chkMemoryStreamViewer.Enabled := False;
+    chkEnhanceFloat.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
@@ -454,6 +512,7 @@ begin
       EnableBytes := chkBytesViewer.Checked;
       EnableWide := chkWideViewer.Checked;
       EnableMemoryStream := chkMemoryStreamViewer.Checked;
+      EnableFloat := chkEnhanceFloat.Checked;
 
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
       if Active and FReplaceRegistered then // 重新注册以让新条目生效
@@ -738,7 +797,7 @@ begin
   if Index < FReplaceItems.Count then
     TypeName := FReplaceItems.Names[Index]
   else if Index < FReplaceItems.Count + FReplacers.Count then
-    TypeName := (FReplacers[Index] as TCnDebuggerBaseValueReplacer).GetEvalType;
+    TypeName := (FReplacers[Index - FReplaceItems.Count] as TCnDebuggerBaseValueReplacer).GetEvalType;
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnDebuggerValueReplaceManager.GetSupportedType #%d: %s', [Index, TypeName]);
@@ -842,10 +901,32 @@ end;
 
 { TCnDebuggerBaseValueReplacer }
 
+constructor TCnDebuggerBaseValueReplacer.Create;
+begin
+  inherited;
+  FActive := True;
+end;
+
+destructor TCnDebuggerBaseValueReplacer.Destroy;
+begin
+
+  inherited;
+end;
+
+function TCnDebuggerBaseValueReplacer.GetActive: Boolean;
+begin
+  Result := FActive;
+end;
+
 function TCnDebuggerBaseValueReplacer.GetFinalResult(const OldExpression,
   TypeName, OldEvalResult, NewEvalResult: string): string;
 begin
   Result := OldEvalResult + ': ' + NewEvalResult;
+end;
+
+procedure TCnDebuggerBaseValueReplacer.SetActive(const Value: Boolean);
+begin
+  FActive := Value;
 end;
 
 {$ENDIF}
@@ -1181,9 +1262,193 @@ begin
   ShowFormHelp;
 end;
 
+{$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
+function HexTrimZero(N: TUInt64): string;
+begin
+  Result := UInt64ToHex(N);
+  if Length(Result) > 0 then
+  begin
+    while Result[1] = '0' do
+      Delete(Result, 1, 1);
+  end;
+end;
+
+function GetDebugEnhanceFloatEnable: Boolean;
+var
+  W: TCnBaseWizard;
+begin
+  Result := False;
+  W := CnWizardMgr.WizardByClass(TCnDebugEnhanceWizard);
+  if (W <> nil) and (W is TCnDebugEnhanceWizard) then
+    Result := TCnDebugEnhanceWizard(W).Active and TCnDebugEnhanceWizard(W).EnableFloat;
+end;
+
+{ TCnDebuggerFloatSingleValueReplacer }
+
+function TCnDebuggerFloatSingleValueReplacer.GetActive: Boolean;
+begin
+  Result := GetDebugEnhanceFloatEnable;
+end;
+
+function TCnDebuggerFloatSingleValueReplacer.GetEvalType: string;
+begin
+  Result := 'Single';
+end;
+
+function TCnDebuggerFloatSingleValueReplacer.GetFinalResult(
+  const OldExpression, TypeName, OldEvalResult,
+  NewEvalResult: string): string;
+var
+  C: Cardinal;
+  F: Single;
+  Sign: Boolean;
+  E: Integer;
+  M: Cardinal;
+begin
+  if NewEvalResult <> '' then
+  begin
+    C := StrToUInt(NewEvalResult);
+    Move(C, F, SizeOf(Cardinal));
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('FloatSingleValueReplacer GetFinalResult. New Value %s. Cardinal %d, Float %f',
+      [NewEvalResult, C, F]);
+{$ENDIF}
+
+    ExtractFloatSingle(F, Sign, E, M);
+    if Sign then
+      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+    else
+      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+  end
+  else
+    Result := OldEvalResult;
+end;
+
+function TCnDebuggerFloatSingleValueReplacer.GetNewExpression(
+  const Expression, TypeName, OldEvalResult: string): string;
+begin
+  // 求 PCardinal(@Expression)^ 的值，去拿到一个代表四字节无符号整数的十进制值
+  Result := Format('PCardinal(@%s)^', [Expression]);
+end;
+
+{ TCnDebuggerFloatDoubleValueReplacer }
+
+function TCnDebuggerFloatDoubleValueReplacer.GetActive: Boolean;
+begin
+  Result := GetDebugEnhanceFloatEnable;
+end;
+
+function TCnDebuggerFloatDoubleValueReplacer.GetEvalType: string;
+begin
+  Result := 'Double';
+end;
+
+function TCnDebuggerFloatDoubleValueReplacer.GetFinalResult(
+  const OldExpression, TypeName, OldEvalResult,
+  NewEvalResult: string): string;
+var
+  C: UInt64;
+  F: Double;
+  Sign: Boolean;
+  E: Integer;
+  M: UInt64;
+begin
+  if NewEvalResult <> '' then
+  begin
+    C := StrToUInt64(NewEvalResult);
+    Move(C, F, SizeOf(UInt64));
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('FloatDoubleValueReplacer GetFinalResult. New Value %s. Cardinal %d, Float %f',
+      [NewEvalResult, C, F]);
+{$ENDIF}
+
+    ExtractFloatDouble(F, Sign, E, M);
+    if Sign then
+      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+    else
+      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+  end
+  else
+    Result := OldEvalResult;
+end;
+
+function TCnDebuggerFloatDoubleValueReplacer.GetNewExpression(
+  const Expression, TypeName, OldEvalResult: string): string;
+begin
+  // 求 PUInt64(@Expression)^ 的值，去拿到一个代表八字节无符号整数的十进制值
+  Result := Format('PUInt64(@%s)^', [Expression]);
+end;
+
+{ TCnDebuggerFloatExtendedValueReplacer }
+
+function TCnDebuggerFloatExtendedValueReplacer.GetActive: Boolean;
+begin
+  Result := GetDebugEnhanceFloatEnable;
+end;
+
+function TCnDebuggerFloatExtendedValueReplacer.GetEvalType: string;
+begin
+  Result := 'Extended';
+end;
+
+procedure TCnDebuggerFloatExtendedValueReplacer.CheckExtendedSize;
+var
+  S: string;
+begin
+  S := CnRemoteProcessEvaluator.EvaluateExpression('SizeOf(Extended)');
+  if S <> '' then
+  begin
+    FExtSize := StrToIntDef(S, 0);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnDebuggerFloatExtendedValueReplacer Get Extended Size %d', [FExtSize]);
+{$ENDIF}
+  end;
+end;
+
+function TCnDebuggerFloatExtendedValueReplacer.GetFinalResult(
+  const OldExpression, TypeName, OldEvalResult,
+  NewEvalResult: string): string;
+var
+  Ar: TCnOTAAddress;
+  Buf: array[0..15] of Byte;
+  Sign: Boolean;
+  E: Integer;
+  M: UInt64;
+begin
+  CheckExtendedSize;
+
+  // NewEvalResult 应该是拿到一个地址的$开头的十六进制整数形式
+  Ar := TCnOTAAddress(StrToUInt64(NewEvalResult));
+
+  if (FExtSize > 0) and (FExtSize = CnRemoteProcessEvaluator.ReadProcessMemory(Ar, FExtSize, Buf[0])) then
+  begin
+    ExtractFloatExtended(@Buf[0], FExtSize, Sign, E, M);
+    if Sign then
+      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+    else
+      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+  end
+  else
+    Result := OldEvalResult;
+end;
+
+function TCnDebuggerFloatExtendedValueReplacer.GetNewExpression(
+  const Expression, TypeName, OldEvalResult: string): string;
+begin
+  Result := Format('@(%s)', [Expression]); // 去取地址准备读内存
+end;
+
+{$ENDIF}
+
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   FDebuggerValueReplacerClass := TList.Create;
+  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatSingleValueReplacer);
+  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatDoubleValueReplacer);
+  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatExtendedValueReplacer);
 {$ENDIF}
 
 {$IFDEF DELPHI}

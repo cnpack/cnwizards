@@ -210,6 +210,15 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
           Caption = 'Auto Reset Debugging Target Before Compiling or Building'
           TabOrder = 1
         end
+        object chkEnhanceFloat: TCheckBox
+          Left = 16
+          Top = 72
+          Width = 415
+          Height = 17
+          Anchors = [akLeft, akTop, akRight]
+          Caption = 'Enhance Float Hint to Show Sign, Exponent and Mantissa'
+          TabOrder = 2
+        end
       end
     end
   end
