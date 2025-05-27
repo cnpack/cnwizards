@@ -248,6 +248,7 @@ type
     procedure actAddHintExecute(Sender: TObject);
     procedure lvReplacersDblClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   protected
@@ -1452,6 +1453,11 @@ begin
 end;
 
 {$ENDIF}
+
+procedure TCnDebugEnhanceForm.FormCreate(Sender: TObject);
+begin
+  WizOptions.ResetToolbarWithLargeIcons(tlbHint);
+end;
 
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
