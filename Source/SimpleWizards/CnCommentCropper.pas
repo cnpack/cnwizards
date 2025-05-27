@@ -336,6 +336,12 @@ begin
     begin
       if IsSourceModule(Project.GetModule(I).FileName) then
         CropAUnit(Project.GetModule(I).FileName);
+      if IsC(Project.GetModule(I).FileName) or IsCpp(Project.GetModule(I).FileName) then
+      begin
+        if FileExists(_CnChangeFileExt(Project.GetModule(I).FileName, '.h')) or
+          CnOtaIsFileOpen(_CnChangeFileExt(Project.GetModule(I).FileName, '.h')) then
+          CropAUnit(_CnChangeFileExt(Project.GetModule(I).FileName, '.h'));
+      end;
     end;
   end;
 end;
@@ -345,8 +351,10 @@ var
   I: Integer;
 begin
   if ProjectGroup <> nil then
+  begin
     for I := 0 to ProjectGroup.ProjectCount - 1 do
       CropAProject(ProjectGroup.Projects[I]);
+  end;
 end;
 
 procedure TCnCommentCropperWizard.CropSelected;
