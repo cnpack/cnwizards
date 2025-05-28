@@ -54,13 +54,15 @@ type
     Build: Word;
   end;
 
+function IsDebuggerPresent: BOOL; stdcall; external 'kernel32.dll';
+
 // 取文件版本号
 function GetFileVersionNumber(const FileName: string): TVersionNumber;
 
 // 加载器 DLL 卸载函数，执行专家包 DLL 的卸载过程并卸载专家包 DLL
 procedure LoaderTerminate;
 
-// 包含 32 位和 64 位在内的所有版本 DLL 的判断
+// 包含 32 位和 64 位在内的所有版本 DLL 的判断并返回完整路径和名称
 function GetWizardDll: string;
 
 var
@@ -131,8 +133,16 @@ var
   Dir, Exe: string;
   V: TVersionNumber;
 begin
-  GetModuleFileNameA(HInstance, @FullPath[0], MAX_PATH);
-  Dir := ExtractFilePath(FullPath);
+  if IsDebuggerPresent then // 调试期，指向开发路径
+  begin
+    OutputDebugString('Is Under Debugger. Use Developing Dll.');
+    Dir := 'C:\CnPack\cnwizards\Bin\';
+  end
+  else
+  begin
+    GetModuleFileNameA(HInstance, @FullPath[0], MAX_PATH);
+    Dir := ExtractFilePath(FullPath);
+  end;
 
   // 判断 IDE 类型与版本号
   V := GetFileVersionNumber(Application.ExeName);
