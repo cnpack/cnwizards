@@ -643,10 +643,10 @@ begin
   FEnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, True);
 {$ENDIF}
   FEnableWide := Ini.ReadBool('', csEnableWide, True);
+  FEnableFloat := Ini.ReadBool('', csEnableFloat, False);
 {$ENDIF}
   FAutoClose := Ini.ReadBool('', csAutoClose, False);
   FAutoReset := Ini.ReadBool('', csAutoReset, False);
-  FEnableFloat := Ini.ReadBool('', csEnableFloat, False);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -665,10 +665,10 @@ begin
   Ini.WriteBool('', csEnableBytes, FEnableBytes);
   Ini.WriteBool('', csEnableWide, FEnableWide);
   Ini.WriteBool('', csEnableMemoryStream, FEnableMemoryStream);
+  Ini.WriteBool('', csEnableFloat, FEnableFloat);
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
-  Ini.WriteBool('', csEnableFloat, FEnableFloat);
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
