@@ -279,6 +279,7 @@ uses
 const
   csAutoClose = 'AutoClose';
   csAutoReset = 'AutoReset';
+  csEnableFloat = 'EnableFloat';
 
   SCnRunResetActionName = 'RunResetCommand';
   SCnCompileActionNames: array[0..4] of string = ('ProjectCompileCommand',
@@ -645,6 +646,7 @@ begin
 {$ENDIF}
   FAutoClose := Ini.ReadBool('', csAutoClose, False);
   FAutoReset := Ini.ReadBool('', csAutoReset, False);
+  FEnableFloat := Ini.ReadBool('', csEnableFloat, False);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -666,6 +668,7 @@ begin
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
+  Ini.WriteBool('', csEnableFloat, FEnableFloat);
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
@@ -784,12 +787,15 @@ begin
   CnDebugger.LogMsg('TCnDebuggerValueReplaceManager to Evaluate: ' + NewExpr);
 {$ENDIF}
 
-  S := FEvaluator.EvaluateExpression(NewExpr);
+  if NewExpr <> '' then // 如果表达式空，表示不额外求值
+  begin
+    S := FEvaluator.EvaluateExpression(NewExpr);
 
-  if Replacer <> nil then
-    Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, S)
-  else
-    Result := EvalResult + ': ' + S;
+    if Replacer <> nil then
+      Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, S)
+    else
+      Result := EvalResult + ': ' + S;
+  end;
 end;
 
 procedure TCnDebuggerValueReplaceManager.GetSupportedType(Index: Integer;
@@ -1298,20 +1304,34 @@ function TCnDebuggerFloatSingleValueReplacer.GetFinalResult(
   const OldExpression, TypeName, OldEvalResult,
   NewEvalResult: string): string;
 var
+{$IFDEF WIN64}
+  Ar: TCnOTAAddress;
+  Buf: array[0..15] of Byte;
+{$ELSE}
   C: Cardinal;
+{$ENDIF}
   F: Single;
   Sign: Boolean;
   E: Integer;
   M: Cardinal;
 begin
+  Result := OldEvalResult;
   if NewEvalResult <> '' then
   begin
-    C := StrToUInt(NewEvalResult);
-    Move(C, F, SizeOf(Cardinal));
+{$IFDEF WIN64}
+    // NewEvalResult 应该是拿到一个地址的 $ 开头的十六进制整数形式
+    Ar := TCnOTAAddress(StrToUInt64(NewEvalResult));
+    if CnRemoteProcessEvaluator.ReadProcessMemory(Ar, SizeOf(Single), Buf[0]) <> SizeOf(Single) then
+      Exit;
 
+    Move(Buf[0], F, SizeOf(Single));
+{$ELSE}
+    C := StrToUInt(NewEvalResult);
+    Move(C, F, SizeOf(Single));
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('FloatSingleValueReplacer GetFinalResult. New Value %s. Cardinal %d, Float %f',
       [NewEvalResult, C, F]);
+{$ENDIF}
 {$ENDIF}
 
     ExtractFloatSingle(F, Sign, E, M);
@@ -1319,16 +1339,20 @@ begin
       Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
     else
       Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
-  end
-  else
-    Result := OldEvalResult;
+  end;
 end;
 
 function TCnDebuggerFloatSingleValueReplacer.GetNewExpression(
   const Expression, TypeName, OldEvalResult: string): string;
 begin
+{$IFDEF WIN64}
+  // 64 位 IDE 下不支持对方^取值，只能先拿地址
+  if IsValidDotIdentifier(Expression) then
+    Result := Format('@%s', [Expression]);
+{$ELSE}
   // 求 PCardinal(@Expression)^ 的值，去拿到一个代表四字节无符号整数的十进制值
   Result := Format('PCardinal(@%s)^', [Expression]);
+{$ENDIF}
 end;
 
 { TCnDebuggerFloatDoubleValueReplacer }
@@ -1347,20 +1371,34 @@ function TCnDebuggerFloatDoubleValueReplacer.GetFinalResult(
   const OldExpression, TypeName, OldEvalResult,
   NewEvalResult: string): string;
 var
+{$IFDEF WIN64}
+  Ar: TCnOTAAddress;
+  Buf: array[0..15] of Byte;
+{$ELSE}
   C: UInt64;
+{$ENDIF}
   F: Double;
   Sign: Boolean;
   E: Integer;
   M: UInt64;
 begin
+  Result := OldEvalResult;
   if NewEvalResult <> '' then
   begin
+{$IFDEF WIN64}
+    // NewEvalResult 应该是拿到一个地址的 $ 开头的十六进制整数形式
+    Ar := TCnOTAAddress(StrToUInt64(NewEvalResult));
+    if CnRemoteProcessEvaluator.ReadProcessMemory(Ar, SizeOf(Double), Buf[0]) <> SizeOf(Double) then
+      Exit;
+
+    Move(Buf[0], F, SizeOf(Double));
+{$ELSE}
     C := StrToUInt64(NewEvalResult);
     Move(C, F, SizeOf(UInt64));
-
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('FloatDoubleValueReplacer GetFinalResult. New Value %s. Cardinal %d, Float %f',
       [NewEvalResult, C, F]);
+{$ENDIF}
 {$ENDIF}
 
     ExtractFloatDouble(F, Sign, E, M);
@@ -1368,16 +1406,20 @@ begin
       Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
     else
       Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
-  end
-  else
-    Result := OldEvalResult;
+  end;
 end;
 
 function TCnDebuggerFloatDoubleValueReplacer.GetNewExpression(
   const Expression, TypeName, OldEvalResult: string): string;
 begin
+{$IFDEF WIN64}
+  // 64 位 IDE 下不支持对方^取值，只能先拿地址
+  if IsValidDotIdentifier(Expression) then
+    Result := Format('@%s', [Expression]);
+{$ELSE}
   // 求 PUInt64(@Expression)^ 的值，去拿到一个代表八字节无符号整数的十进制值
   Result := Format('PUInt64(@%s)^', [Expression]);
+{$ENDIF}
 end;
 
 { TCnDebuggerFloatExtendedValueReplacer }
@@ -1449,7 +1491,12 @@ end;
 function TCnDebuggerFloatExtendedValueReplacer.GetNewExpression(
   const Expression, TypeName, OldEvalResult: string): string;
 begin
+{$IFDEF WIN64}
+  if IsValidDotIdentifier(Expression) then
+    Result := Format('@%s', [Expression]);
+{$ELSE}
   Result := Format('@(%s)', [Expression]); // 去取地址准备读内存
+{$ENDIF}
 end;
 
 {$ENDIF}

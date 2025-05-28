@@ -719,6 +719,9 @@ function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = [];
 
 {$ENDIF}
 
+function IsValidDotIdentifier(const Ident: string): Boolean;
+{* 是否是符合当前 Delphi 版本的合法标识符，允许加点但点不能在最前后}
+
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
 {* 选择一个代码块，貌似不特别可靠}
 function CnOtaMoveAndSelectBlock(const Start, After: TOTACharPos; View: IOTAEditView = nil): Boolean;
@@ -6051,6 +6054,38 @@ begin
 end;
 
 {$ENDIF}
+
+// 是否是符合当前 Delphi 版本的合法标识符，允许加点但点不能在最前后
+function IsValidDotIdentifier(const Ident: string): Boolean;
+const
+  Alpha = ['A'..'Z', 'a'..'z', '_'];
+  AlphaNumeric = Alpha + ['0'..'9', '.'];
+var
+  I: Integer;
+begin
+  Result := False;
+{$IFDEF UNICODE} // Unicode Identifier Supports
+  if (Length(Ident) = 0) or not (CharInSet(Ident[1], Alpha) or (Ord(Ident[1]) > 127)) then
+    Exit;
+  for I := 2 to Length(Ident) do
+  begin
+    if not (CharInSet(Ident[I], AlphaNumeric) or (Ord(Ident[I]) > 127)) then
+      Exit;
+  end;
+{$ELSE}
+  if (Length(Ident) = 0) or not CharInSet(Ident[1], Alpha) then
+    Exit;
+  for I := 2 to Length(Ident) do
+  begin
+    if not CharInSet(Ident[I], AlphaNumeric) then
+      Exit;
+  end;
+{$ENDIF}
+  Result := True;
+
+  if Result and (Ident[Length(Ident)] = '.') then
+    Result := False;
+end;
 
 // 选择一个代码块
 procedure CnOtaSelectBlock(const Editor: IOTASourceEditor; const Start, After: TOTACharPos);
