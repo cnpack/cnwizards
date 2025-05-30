@@ -503,6 +503,10 @@ begin
 
   // at 只在 raise 后面才算关键字
   FKeywordsValidArray[tokKeywordAt] := [pfetRaiseAt];
+
+  // final 只在 Directive 中才算关键字
+  FKeywordsValidArray[tokKeywordFinal] := [pfetDirective];
+
   // 未列出的关键字，表示在哪都是关键字
 end;
 
