@@ -833,7 +833,7 @@ end;
 function TCnPasWideLex.Func42: TTokenKind;
 begin
   if KeyComp('Final') then
-    Result := tkElse
+    Result := tkFinal
   else
     Result := tkIdentifier;
 end;
