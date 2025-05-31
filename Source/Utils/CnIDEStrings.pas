@@ -133,6 +133,7 @@ begin
       ((C >= $16A0) and (C <= $16FF)) or
       ((C >= $1D00) and (C <= $1FFF)) or
       ((C >= $20A0) and (C <= $20BF)) or
+      ((C >= $2200) and (C <= $22FF)) or  // ÊıÑ§·ûºÅ
       ((C >= $2550) and (C <= $256D)) or
       ((C >= $25A0) and (C <= $25BF) and (C <> $25B3) and (C <> $25BD)) then
       Result := False;
