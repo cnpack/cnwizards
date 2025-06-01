@@ -298,6 +298,8 @@ begin
       Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
     else if RequestType = artGenTestCase then
       Msg.AddPair('content', Option.GenTestCasePrompt + #13#10 + Code)
+    else if RequestType = artContinueCoding then
+      Msg.AddPair('content', Option.ContinueCodingPrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Msg.AddPair('content', Code);
 
@@ -579,6 +581,8 @@ begin
       Msg.AddPair('content', Option.ReviewCodePrompt + #13#10 + Code)
     else if RequestType = artGenTestCase then
       Msg.AddPair('content', Option.GenTestCasePrompt + #13#10 + Code)
+    else if RequestType = artContinueCoding then
+      Msg.AddPair('content', Option.ContinueCodingPrompt + #13#10 + Code)
     else if RequestType = artRaw then
       Msg.AddPair('content', Code);
 

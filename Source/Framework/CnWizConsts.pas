@@ -398,6 +398,7 @@ resourcestring
   SCnAICoderWizardExplainCode = 'CnAICoderWizardExplainCode';
   SCnAICoderWizardReviewCode = 'CnAICoderWizardReviewCode';
   SCnAICoderWizardGenTestCase = 'CnAICoderWizardGenTestCase';
+  SCnAICoderWizardContinueCoding = 'CnAICoderWizardContinueCoding';
   SCnAICoderWizardChatWindow = 'CnAICoderWizardChatWindow';
   SCnAICoderWizardConfig = 'CnAICoderWizardConfig';
   SCnAICoderEngineOptionFileFmt = 'AICoderConfig%s.json';
@@ -1825,6 +1826,8 @@ var
   SCnAICoderWizardReviewCodeHint: string = 'Review Selected Code';
   SCnAICoderWizardGenTestCaseCaption: string = 'Generate &Test Case...';
   SCnAICoderWizardGenTestCaseHint: string = 'Generate a Test Case for Selected Code';
+  SCnAICoderWizardContinueCodingCaption: string = 'Continue Co&ding';
+  SCnAICoderWizardContinueCodingHint: string = 'Continue Coding for Current Code Position';
   SCnAICoderWizardChatWindowCaption: string = 'AI &Chat Window';
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
   SCnAICoderWizardConfigCaption: string = '&Options...';
@@ -1837,6 +1840,9 @@ var
   SCnAICoderWizardUserMessageGenTestCaseFmt: string = 'Please Analyze the Functionality of the Following Code and Generate a non-UI Interactive Test Case for this Code using %s. ' +
     'The Test Case should be Provided as a Single Function, Covering some Typical Scenarios and Boundary Conditions. ' +
     'Using Assert is Encouraged for Flexibility. If the Code is not a Complete Function, please Answer that it cannot be Generated.';
+  SCnAICoderWizardUserMessageContinueCodingFmt: string = 'Please continue writing the code based on the following content.' +
+   ' The content may be a code snippet or a combination of code and comments. If the end is a comment, continue writing the code according to the requirements specified in the comment.' +
+   ' If it is a code snippet, analyze its functionality and extend it accordingly. Note that your output must be in pure code format, and any explanatory comments should be embedded in the code using valid comment syntax.';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';

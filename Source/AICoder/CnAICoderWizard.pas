@@ -87,6 +87,7 @@ type
     FIdExplainCode: Integer;
     FIdReviewCode: Integer;
     FIdGenTestCase: Integer;
+    FIdContinueCoding: Integer;
     FIdShowChatWindow: Integer;
     FIdConfig: Integer;
     FNeedUpgradeGemini: Boolean;
@@ -95,6 +96,11 @@ type
     procedure EnsureChatWindowVisible;
     {* 确保创建 ChatWindow 且其 Visible 为 True 及其所有 Parent 的 Visible 全为 True
       以确保聊天窗口可见}
+    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
+
+    procedure ContinueCurrentFile;
+    {* 续写当前代码的入口}
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -133,8 +139,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock
-  {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock,
+  CnEditControlWrapper {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 const
   MSG_WAITING = '...';
@@ -167,6 +173,7 @@ end;
 constructor TCnAICoderWizard.Create;
 begin
   inherited;
+  EditControlWrapper.AddSysKeyDownNotifier(EditorKeyDown);
   IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
     csAICoderChatForm);
 end;
@@ -174,6 +181,7 @@ end;
 destructor TCnAICoderWizard.Destroy;
 begin
   IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, csAICoderChatForm);
+  EditControlWrapper.RemoveSysKeyDownNotifier(EditorKeyDown);
   FreeAndNil(CnAICoderChatForm);
   inherited;
 end;
@@ -192,6 +200,10 @@ begin
   FIdGenTestCase := RegisterASubAction(SCnAICoderWizardGenTestCase,
     SCnAICoderWizardGenTestCaseCaption, 0,
     SCnAICoderWizardGenTestCaseHint, SCnAICoderWizardGenTestCase);
+
+  FIdContinueCoding := RegisterASubAction(SCnAICoderWizardContinueCoding,
+    SCnAICoderWizardContinueCodingCaption, 0,
+    SCnAICoderWizardContinueCodingHint, SCnAICoderWizardContinueCoding);
 
   // 创建分隔菜单
   AddSepMenu;
@@ -333,7 +345,9 @@ begin
 
         CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artGenTestCase, ForCodeGen);
       end;
-    end;
+    end
+    else if Index = FIdContinueCoding then
+      ContinueCurrentFile;
   end;
 end;
 
@@ -613,6 +627,33 @@ begin
 {$ENDIF}
     FNeedUpgradeGemini := True;
   end;
+end;
+
+procedure TCnAICoderWizard.EditorKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  if not Active then
+    Exit;
+
+  if Key = VK_RETURN then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Alt+Enter Pressed to Continue AI Coding');
+{$ENDIF}
+    if not ValidateAIEngines then
+    begin
+      Config;
+      Exit;
+    end;
+
+    ContinueCurrentFile;
+    Handled := True;
+  end;
+end;
+
+procedure TCnAICoderWizard.ContinueCurrentFile;
+begin
+  // 收集本文件内容，并发送，并编辑器接收回应
 end;
 
 initialization

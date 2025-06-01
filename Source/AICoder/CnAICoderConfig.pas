@@ -64,6 +64,7 @@ type
     function GetReviewCodePrompt: string;
     function GetGenTestCasePrompt: string;
     function GetReferSelectionPrompt: string;
+    function GetContinueCodingPrompt: string;
   protected
     function GetCurrentLangName: string;
     // SM4-GCM 加十六进制加解密
@@ -96,6 +97,8 @@ type
     {* 检查代码的提示文字}
     property GenTestCasePrompt: string read GetGenTestCasePrompt;
     {* 生成测试用例的提示文字}
+    property ContinueCodingPrompt: string read GetContinueCodingPrompt;
+    {* 续写代码提示文字}
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -696,6 +699,11 @@ end;
 function TCnAIEngineOption.GetReferSelectionPrompt: string;
 begin
   Result := SCnAICoderWizardUserMessageReferSelection;
+end;
+
+function TCnAIEngineOption.GetContinueCodingPrompt: string;
+begin
+  Result := SCnAICoderWizardUserMessageContinueCodingFmt;
 end;
 
 { TCnClaudeAIEngineOption }

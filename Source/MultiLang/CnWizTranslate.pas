@@ -1498,6 +1498,8 @@ begin
   TranslateStr(SCnAICoderWizardReviewCodeHint, 'SCnAICoderWizardReviewCodeHint');
   TranslateStr(SCnAICoderWizardGenTestCaseCaption, 'SCnAICoderWizardGenTestCaseCaption');
   TranslateStr(SCnAICoderWizardGenTestCaseHint, 'SCnAICoderWizardGenTestCaseHint');
+  TranslateStr(SCnAICoderWizardContinueCodingCaption, 'SCnAICoderWizardContinueCodingCaption');
+  TranslateStr(SCnAICoderWizardContinueCodingHint, 'SCnAICoderWizardContinueCodingHint');
   TranslateStr(SCnAICoderWizardChatWindowCaption, 'SCnAICoderWizardChatWindowCaption');
   TranslateStr(SCnAICoderWizardChatWindowHint, 'SCnAICoderWizardChatWindowHint');
   TranslateStr(SCnAICoderWizardConfigCaption, 'SCnAICoderWizardConfigCaption');
@@ -1507,6 +1509,7 @@ begin
   TranslateStr(SCnAICoderWizardUserMessageExplainFmt, 'SCnAICoderWizardUserMessageExplainFmt');
   TranslateStr(SCnAICoderWizardUserMessageReviewFmt, 'SCnAICoderWizardUserMessageReviewFmt');
   TranslateStr(SCnAICoderWizardUserMessageGenTestCaseFmt, 'SCnAICoderWizardUserMessageGenTestCaseFmt');
+  TranslateStr(SCnAICoderWizardUserMessageContinueCodingFmt, 'SCnAICoderWizardUserMessageContinueCodingFmt');
   TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
   TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
   TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');
