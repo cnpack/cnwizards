@@ -278,6 +278,8 @@ type
     FEditorChangeNotifiers: TList;
     FKeyDownNotifiers: TList;
     FKeyUpNotifiers: TList;
+    FSysKeyDownNotifiers: TList;
+    FSysKeyUpNotifiers: TList;
     FCharSize: TSize;
     FHighlights: TStringList;
     FPaintNotifyAvailable: Boolean;
@@ -524,14 +526,24 @@ type
     {* 点击编辑器控件左侧指定行的断点栏以增加/删除断点}
 
     procedure AddKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
-    {* 增加编辑器按键通知 }
+    {* 增加编辑器按键按下通知}
     procedure RemoveKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
-    {* 删除编辑器按键通知 }
+    {* 删除编辑器按键按下通知}
+
+    procedure AddSysKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
+    {* 增加编辑器系统按键按下通知}
+    procedure RemoveSysKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
+    {* 删除编辑器系统按键按下通知}
 
     procedure AddKeyUpNotifier(Notifier: TCnKeyMessageNotifier);
-    {* 增加编辑器按键后通知 }
+    {* 增加编辑器按键弹起通知 }
     procedure RemoveKeyUpNotifier(Notifier: TCnKeyMessageNotifier);
-    {* 删除编辑器按键后通知 }
+    {* 删除编辑器按键弹起通知 }
+
+    procedure AddSysKeyUpNotifier(Notifier: TCnKeyMessageNotifier);
+    {* 增加编辑器系统按键弹起通知}
+    procedure RemoveSysKeyUpNotifier(Notifier: TCnKeyMessageNotifier);
+    {* 删除编辑器系统按键弹起通知}
 
     procedure AddBeforePaintLineNotifier(Notifier: TCnEditorPaintLineNotifier);
     {* 增加编辑器单行重绘前通知 }
@@ -1264,6 +1276,8 @@ begin
   FEditorChangeNotifiers := TList.Create;
   FKeyDownNotifiers := TList.Create;
   FKeyUpNotifiers := TList.Create;
+  FSysKeyDownNotifiers := TList.Create;
+  FSysKeyUpNotifiers := TList.Create;
   FMouseUpNotifiers := TList.Create;
   FMouseDownNotifiers := TList.Create;
   FMouseMoveNotifiers := TList.Create;
@@ -1391,6 +1405,8 @@ begin
   CnWizClearAndFreeList(FEditorChangeNotifiers);
   CnWizClearAndFreeList(FKeyDownNotifiers);
   CnWizClearAndFreeList(FKeyUpNotifiers);
+  CnWizClearAndFreeList(FSysKeyDownNotifiers);
+  CnWizClearAndFreeList(FSysKeyUpNotifiers);
 
   FCmpLines.Free;
   inherited;
@@ -3184,10 +3200,22 @@ begin
   CnWizAddNotifier(FKeyDownNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnEditControlWrapper.AddSysKeyDownNotifier(
+  Notifier: TCnKeyMessageNotifier);
+begin
+  CnWizAddNotifier(FSysKeyDownNotifiers, TMethod(Notifier));
+end;
+
 procedure TCnEditControlWrapper.AddKeyUpNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
   CnWizAddNotifier(FKeyUpNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.AddSysKeyUpNotifier(
+  Notifier: TCnKeyMessageNotifier);
+begin
+  CnWizAddNotifier(FSysKeyUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.RemoveKeyDownNotifier(
@@ -3196,10 +3224,22 @@ begin
   CnWizRemoveNotifier(FKeyDownNotifiers, TMethod(Notifier));
 end;
 
+procedure TCnEditControlWrapper.RemoveSysKeyDownNotifier(
+  Notifier: TCnKeyMessageNotifier);
+begin
+  CnWizRemoveNotifier(FSysKeyDownNotifiers, TMethod(Notifier));
+end;
+
 procedure TCnEditControlWrapper.RemoveKeyUpNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
   CnWizRemoveNotifier(FKeyUpNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnEditControlWrapper.RemoveSysKeyUpNotifier(
+  Notifier: TCnKeyMessageNotifier);
+begin
+  CnWizRemoveNotifier(FSysKeyUpNotifiers, TMethod(Notifier));
 end;
 
 procedure TCnEditControlWrapper.OnCallWndProcRet(Handle: HWND;
@@ -3362,7 +3402,8 @@ var
   Shift: TShiftState;
   List: TList;
 begin
-  if ((Msg.message = WM_KEYDOWN) or (Msg.message = WM_KEYUP)) and
+  if ((Msg.message = WM_KEYDOWN) or (Msg.message = WM_KEYUP) or
+    (Msg.message = WM_SYSKEYDOWN) or (Msg.message = WM_SYSKEYUP)) and
     IsEditControl(Screen.ActiveControl) then
   begin
     Key := Msg.wParam;
@@ -3375,10 +3416,20 @@ begin
       Key := MapVirtualKey(ScanCode, 1);
     end;
 
-    if Msg.message = WM_KEYDOWN then
-      List := FKeyDownNotifiers
-    else
-      List := FKeyUpNotifiers;
+    List := nil;
+    case Msg.message of
+      WM_KEYDOWN:
+        List := FKeyDownNotifiers;
+      WM_KEYUP:
+        List := FKeyUpNotifiers;
+      WM_SYSKEYDOWN:
+        List := FSysKeyDownNotifiers;
+      WM_SYSKEYUP:
+        List := FSysKeyUpNotifiers;
+    end;
+
+    if List = nil then
+      Exit;
 
     for I := 0 to List.Count - 1 do
     begin

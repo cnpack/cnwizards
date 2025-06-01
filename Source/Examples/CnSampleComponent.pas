@@ -145,7 +145,9 @@ type
     property Hint: AnsiString read FHint write FHint;
     property WideHint: WideString read FWideHint write FWideHint;
     property VarValue: Variant read FVarValue write FVarValue;
+{$IFNDEF FPC}
     property Point: TPoint read FPoint write FPoint;
+{$ENDIF}
     property IntfValue: IUnknown read FIntfValue write FIntfValue;
     property Int64Value: Int64 read FInt64Value write FInt64Value;
 {$IFDEF UNICODE}
@@ -168,7 +170,9 @@ type
     property ReadOnlyHint: AnsiString read FReadOnlyHint;
     property ReadOnlyWideHint: WideString read FReadOnlyWideHint;
     property ReadOnlyVarValue: Variant read FReadOnlyVarValue;
+{$IFNDEF FPC}
     property ReadOnlyPoint: TPoint read FReadOnlyPoint;
+{$ENDIF}
     property ReadOnlyIntfValue: IUnknown read FReadOnlyIntfValue;
     property ReadOnlyInt64Value: Int64 read FReadOnlyInt64Value;
     property ReadOnlyFont: TFont read FReadOnlyFont;
@@ -262,4 +266,4 @@ begin
 end;
 
 end.
- 
+
