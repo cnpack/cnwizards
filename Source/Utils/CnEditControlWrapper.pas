@@ -1069,9 +1069,7 @@ begin
     begin
       Idx := FEditControlWrapper.IndexOfEditor(TControl(Self));
       if Idx >= 0 then
-      begin
         Editor := FEditControlWrapper.GetEditors(Idx);
-      end;
     end;
 
     if Editor <> nil then

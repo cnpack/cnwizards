@@ -3328,7 +3328,7 @@ begin
       InBound(AnsiPos.Col, EditView.LeftColumn, EditView.RightColumn) then
     begin
 {$IFDEF BDS}
-      EditCanvas := EditControlWrapper.GetEditControlCanvas(Editor.EditControl);
+      EditCanvas := EditControlWrapper.GetEditControlCanvas(EditControl);
       TotalLeftWidth := 0;
 
   {$IFDEF UNICODE}
@@ -6223,7 +6223,36 @@ var
   L, Idx: Integer;
   C: TCanvas;
   Info: TCnBlockMatchInfo;
+  BracketInfo: TCnBracketInfo;
+  Editor: TCnEditorObject;
 begin
+  if FMatchedBracket and not BeforeEvent and (Stage = plsBackground)
+    and (Context.LogicalLineNum >= 0) then
+  begin
+    Idx := IndexOfBracket(Context.EditControl);
+    if Idx >= 0 then
+    begin
+      BracketInfo := TCnBracketInfo(FBracketList[Idx]);
+      if BracketInfo.IsMatch then
+      begin
+        Idx := EditControlWrapper.IndexOfEditor(Context.EditControl);
+        if Idx >= 0 then
+        begin
+          Editor := EditControlWrapper.GetEditors(Idx);
+          if (Context.LogicalLineNum = Info.TokenPos.Line) and EditorGetTextRect(Editor,
+            OTAEditPos(Info.TokenPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Info.TokenStr), R) then
+            EditorPaintText(EditControl, R, Info.TokenStr, BracketColor,
+              BracketColorBk, BracketColorBd, BracketBold, False, False);
+
+          if (Context.LogicalLineNum = Info.TokenMatchPos.Line) and EditorGetTextRect(Editor,
+            OTAEditPos(Info.TokenMatchPos.Col, LineNum), {$IFDEF BDS}FRawLineText, {$ENDIF} TCnIdeTokenString(Info.TokenMatchStr), R) then
+            EditorPaintText(EditControl, R, Info.TokenMatchStr, BracketColor,
+              BracketColorBk, BracketColorBd, BracketBold, False, False);
+        end;
+      end;
+    end;
+  end;
+
   if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground)
     and (Context.LogicalLineNum >= 0)then
   begin
@@ -6231,6 +6260,7 @@ begin
     if Idx >= 0 then
     begin
       L := Context.LogicalLineNum;
+
       // 找到该 EditControl 对应的 BlockMatch 列表
       Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
       if FHilightSeparateLine and (L < Info.FSeparateLineList.Count)
