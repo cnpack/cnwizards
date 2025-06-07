@@ -6236,7 +6236,7 @@ procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TP
   const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
   const Context: INTACodeEditorPaintContext);
 var
-  L, Idx: Integer;
+  I, J, L, Idx: Integer;
   C: TCanvas;
   Info: TCnBlockMatchInfo;
   LineInfo: TCnBlockLineInfo;
@@ -6248,7 +6248,6 @@ var
   SavePenWidth: Integer;
   SavePenStyle: TPenStyle;
   EditPos1, EditPos2: TOTAEditPos;
-  C: TCanvas;
   LineFirstToken: TCnGeneralPasToken;
   EndLineStyle: TCnLineStyle;
   PairIsInKeyPair: Boolean;
@@ -6380,7 +6379,7 @@ begin
               end;
             end;
 
-            EditPos1 := OTAEditPos(Pair.Left, LineNum); // 用实际行去计算座标
+            EditPos1 := OTAEditPos(Pair.Left, Context.EditorLineNum); // 用实际行去计算座标
             // 得到 R1，是 Left 需要绘制的位置
             if not EditorGetEditPoint(EditPos1, R1) then
               Continue;
@@ -6389,7 +6388,7 @@ begin
             if L = Pair.Top then
             begin
               // 画配对头，横向从 Left 到 StartLeft
-              EditPos2 := OTAEditPos(Pair.StartLeft, LineNum);
+              EditPos2 := OTAEditPos(Pair.StartLeft, Context.EditorLineNum);
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
 
@@ -6423,7 +6422,7 @@ begin
             else if L = Pair.Bottom then
             begin
               // 画配对尾，横向从 Left 到 EndLeft
-              EditPos2 := OTAEditPos(Pair.EndLeft, LineNum);
+              EditPos2 := OTAEditPos(Pair.EndLeft, Context.EditorLineNum);
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
 
@@ -6479,7 +6478,7 @@ begin
                 begin
                   if L = Pair.MiddleToken[J].EditLine then
                   begin
-                    EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, LineNum);
+                    EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, Context.EditorLineNum);
                     if not EditorGetEditPoint(EditPos2, R2) then
                       Continue;
 
