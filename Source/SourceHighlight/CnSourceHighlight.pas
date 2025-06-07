@@ -621,8 +621,10 @@ type
     procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
+{$IFNDEF USE_CODEEDITOR_SERVICE}
     procedure PaintBracketMatch(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
+{$ENDIF}
 {$ENDIF}
 
     procedure EditorChanged(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
@@ -632,8 +634,10 @@ type
 {$IFNDEF STAND_ALONE}
     procedure PaintBlockMatchKeyword(Editor: TCnEditorObject; // 其他非匹配的高亮都在里头画
       LineNum, LogicLineNum: Integer; AElided: Boolean);
+{$IFNDEF USE_CODEEDITOR_SERVICE}
     procedure PaintBlockMatchLine(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
+{$ENDIF}
     procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
 {$ENDIF}
 
@@ -4004,6 +4008,8 @@ begin
   end;
 end;
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+
 procedure TCnSourceHighlight.PaintBracketMatch(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
@@ -4037,6 +4043,8 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -5190,6 +5198,8 @@ begin
   end;
 end;
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+
 procedure TCnSourceHighlight.PaintBlockMatchLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
 var
@@ -5445,6 +5455,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 通知事件
 //------------------------------------------------------------------------------
@@ -5696,8 +5708,10 @@ begin
       or FHilightSeparateLine or FHighlightFlowStatement or FHighlightCompDirective
       or FHighlightCustomIdentifier then // 里头顺便做背景匹配高亮
       PaintBlockMatchKeyword(Editor, LineNum, LogicLineNum, AElided);
+{$IFNDEF USE_CODEEDITOR_SERVICE}
     if FBlockMatchDrawLine then
       PaintBlockMatchLine(Editor, LineNum, LogicLineNum, AElided);
+{$ENDIF}
   end;
 end;
 
@@ -6225,34 +6239,281 @@ var
   L, Idx: Integer;
   C: TCanvas;
   Info: TCnBlockMatchInfo;
+  LineInfo: TCnBlockLineInfo;
   BracketInfo: TCnBracketInfo;
   Editor: TCnEditorObject;
-  R: TRect;
+  R, R1, R2: TRect;
+  Pair: TCnBlockLinePair;
+  SavePenColor: TColor;
+  SavePenWidth: Integer;
+  SavePenStyle: TPenStyle;
+  EditPos1, EditPos2: TOTAEditPos;
+  C: TCanvas;
+  LineFirstToken: TCnGeneralPasToken;
+  EndLineStyle: TCnLineStyle;
+  PairIsInKeyPair: Boolean;
+
+  function EditorGetEditPoint(APos: TOTAEditPos; var ARect: TRect): Boolean;
+  begin
+    with Editor, Editor.EditView do
+    begin
+      if InBound(APos.Line, TopRow, BottomRow) and
+        InBound(APos.Col, LeftColumn, RightColumn) then
+      begin
+        ARect := Bounds(GutterWidth + (APos.Col - LeftColumn) * CharSize.cx,
+          (APos.Line - TopRow) * CharSize.cy, CharSize.cx * 1,
+          CharSize.cy); // 得到 EditPos 处一个字符所在的绘制框框
+        Result := True;
+      end
+      else
+        Result := False;
+    end;
+  end;
+
 begin
-  if FMatchedBracket and not BeforeEvent and (Stage = plsEndPaint)
+  // 画括号和配对线
+  if (FMatchedBracket or FBlockMatchDrawLine) and not BeforeEvent and (Stage = plsEndPaint)
     and (Context.LogicalLineNum >= 0) then
   begin
-    Idx := IndexOfBracket(Context.EditControl);
-    if Idx >= 0 then
+    // 括号
+    Editor := nil;
+    if FMatchedBracket then
     begin
-      BracketInfo := TCnBracketInfo(FBracketList[Idx]);
-      if BracketInfo.IsMatch then
+      Idx := IndexOfBracket(Context.EditControl);
+      if Idx >= 0 then
+      begin
+        BracketInfo := TCnBracketInfo(FBracketList[Idx]);
+        if BracketInfo.IsMatch then
+        begin
+          Idx := EditControlWrapper.IndexOfEditor(Context.EditControl);
+          if Idx >= 0 then
+          begin
+            Editor := EditControlWrapper.Editors[Idx];
+            if (Context.LogicalLineNum = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
+              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
+              TCnIdeTokenString(BracketInfo.TokenStr), R) then
+              EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
+                BracketColorBk, BracketColorBd, BracketBold, False, False);
+
+            if (Context.LogicalLineNum = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
+              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
+              TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
+              EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
+                BracketColorBk, BracketColorBd, BracketBold, False, False);
+          end;
+        end;
+      end;
+    end;
+
+    if FBlockMatchDrawLine then
+    begin
+      Info := nil;
+      LineInfo := nil;
+      Idx := IndexOfBlockMatch(Context.EditControl);
+      if Idx >= 0 then
+        Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+      Idx := IndexOfBlockLine(Context.EditControl);
+      if Idx >= 0 then
+        LineInfo := TCnBlockLineInfo(FBlockLineList[Idx]);
+      if Editor = nil then
       begin
         Idx := EditControlWrapper.IndexOfEditor(Context.EditControl);
         if Idx >= 0 then
-        begin
           Editor := EditControlWrapper.Editors[Idx];
-          if (Context.LogicalLineNum = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
-            OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
-            TCnIdeTokenString(BracketInfo.TokenStr), R) then
-            EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
-              BracketColorBk, BracketColorBd, BracketBold, False, False);
+      end;
 
-          if (Context.LogicalLineNum = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-            OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
-            TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
-            EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
-              BracketColorBk, BracketColorBd, BracketBold, False, False);
+      if (Editor <> nil) and (LineInfo <> nil) and (LineInfo.Count > 0) then
+      begin
+        L := Context.LogicalLineNum;
+        if (L < LineInfo.LineCount) and (LineInfo.Lines[L] <> nil) then
+        begin
+          C := Context.Canvas;
+          SavePenColor := C.Pen.Color;
+          SavePenWidth := C.Pen.Width;
+          SavePenStyle := C.Pen.Style;
+
+          C.Pen.Width := FBlockMatchLineWidth; // 线宽
+
+          // 开始循环画当前行所涉及到的每个 Pair 在当前行里的线条
+          for I := 0 to LineInfo.Lines[L].Count - 1 do
+          begin
+            // 一个 EditControl 的 LineInfo 中有多个配对画线的信息 LinePair
+            Pair := TCnBlockLinePair(LineInfo.Lines[L][I]);
+            C.Pen.Color := GetColorFg(Pair.Layer);
+
+            // 判断当前要画的 Pair 是否受光标下的 KeyPair 影响，如果受影响，要改变画线风格
+            PairIsInKeyPair := False;
+            if (LineInfo.CurrentPair <> nil) and CanSolidCurrentLineBlock then
+              PairIsInKeyPair := (Pair.Top >= LineInfo.CurrentPair.Top) and (Pair.Bottom <= LineInfo.CurrentPair.Bottom)
+                and (Pair.Left = LineInfo.CurrentPair.Left);
+
+            if FBlockExtendLeft and (Info <> nil) and (L = Pair.Top)
+              and (Pair.EndToken.EditLine > Pair.StartToken.EditLine) then
+            begin
+              // 处理前面还有 token 的情形，找 Start/End Token 所在行的第一个 Token
+              if Info.Lines[L].Count > 0 then
+              begin
+                LineFirstToken := TCnGeneralPasToken(Info.Lines[L][0]);
+                if LineFirstToken <> Pair.StartToken then
+                begin
+                  if Pair.Left > LineFirstToken.EditCol then
+                  begin
+                    Pair.Left := LineFirstToken.EditCol;
+                  end;
+                end;
+              end;
+
+              if Pair.EndToken.EditLine < Info.LineCount then
+              begin
+                if Info.Lines[Pair.EndToken.EditLine].Count > 0 then
+                begin
+                  LineFirstToken := TCnGeneralPasToken(Info.Lines[Pair.EndToken.EditLine][0]);
+
+                  if LineFirstToken <> Pair.EndToken then
+                  begin
+                    if Pair.Left > LineFirstToken.EditCol then
+                    begin
+                      Pair.Left := LineFirstToken.EditCol;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+
+            EditPos1 := OTAEditPos(Pair.Left, LineNum); // 用实际行去计算座标
+            // 得到 R1，是 Left 需要绘制的位置
+            if not EditorGetEditPoint(EditPos1, R1) then
+              Continue;
+
+            // 画配对头尾
+            if L = Pair.Top then
+            begin
+              // 画配对头，横向从 Left 到 StartLeft
+              EditPos2 := OTAEditPos(Pair.StartLeft, LineNum);
+              if not EditorGetEditPoint(EditPos2, R2) then
+                Continue;
+
+              if FBlockMatchLineEnd and (Pair.Top <> Pair.Bottom) then // 在文字头上画方框
+              begin
+                if FBlockMatchLineHoriDot and (Pair.StartLeft <> Pair.Left) then
+                  EndLineStyle := lsTinyDot // 和主竖线不同列时，用虚线画框
+                else if PairIsInKeyPair then
+                  EndLineStyle := lsSolid
+                else
+                  EndLineStyle := FBlockMatchLineStyle;
+
+                // HighlightCanvasLine(EditorCanvas, R2.Left, R2.Bottom - 1,
+                //  R2.Right, R2.Bottom - 1, EndLineStyle); 头不画底
+                HighlightCanvasLine(C, R2.Left, R2.Top,
+                  R2.Right, R2.Top, EndLineStyle);
+                HighlightCanvasLine(C, R2.Left, R2.Top,
+                  R2.Left, R2.Bottom, EndLineStyle);
+              end;
+
+              if FBlockMatchLineHori and (Pair.Top <> Pair.Bottom) then  // 往右端画底
+              begin
+                if FBlockMatchLineHoriDot then // 右端底用虚线
+                  HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                    R2.Left, R2.Bottom - 1, lsTinyDot)
+                else
+                  HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                    R2.Left, R2.Bottom - 1, FBlockMatchLineStyle);
+              end;
+            end
+            else if L = Pair.Bottom then
+            begin
+              // 画配对尾，横向从 Left 到 EndLeft
+              EditPos2 := OTAEditPos(Pair.EndLeft, LineNum);
+              if not EditorGetEditPoint(EditPos2, R2) then
+                Continue;
+
+              if FBlockMatchLineEnd  and (Pair.Top <> Pair.Bottom) then // 在文字头上画方框
+              begin
+                if FBlockMatchLineHoriDot and (Pair.EndLeft <> Pair.Left) then
+                  EndLineStyle := lsTinyDot // 和主竖线不同列时，用虚线画框
+                else if PairIsInKeyPair then
+                  EndLineStyle := lsSolid
+                else
+                  EndLineStyle := FBlockMatchLineStyle;
+
+                HighlightCanvasLine(C, R2.Left, R2.Bottom - 1,
+                  R2.Right, R2.Bottom - 1, EndLineStyle);
+                // HighlightCanvasLine(EditorCanvas, R2.Left, R2.Top,
+                //   R2.Right, R2.Top, EndLineStyle); 尾不画顶
+
+                if Pair.EndLeft = Pair.Left then
+                  HighlightCanvasLine(C, R2.Left, R2.Top,
+                    R2.Left, R2.Bottom - 1, EndLineStyle); // 左不同列时尾不画竖
+              end;
+
+              if Pair.Left <> Pair.EndLeft then
+                HighlightCanvasLine(C, R1.Left, R1.Top, R1.Left,
+                  R1.Bottom, FBlockMatchLineStyle);
+
+              if FBlockMatchLineHori and (Pair.Top <> Pair.Bottom) and (Pair.Left <> Pair.EndLeft) then  // 往右端画底，已经包括了竖线上画底的情况
+              begin
+                if FBlockMatchLineHoriDot then // 右端底用虚线
+                  HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                    R2.Left, R2.Bottom - 1, lsTinyDot)
+                else
+                  HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                    R2.Left, R2.Bottom - 1, FBlockMatchLineStyle);
+              end;
+            end
+            else if (L < Pair.Bottom) and (L > Pair.Top) then
+            begin
+              // 在不画 [ 时，有时候不需要画配对中的竖线，竖向画 Left 线
+              if not Pair.DontDrawVert or FBlockMatchLineEnd then
+              begin
+                if PairIsInKeyPair then // 光标下当前配对的，画实线
+                  HighlightCanvasLine(C, R1.Left, R1.Top, R1.Left,
+                    R1.Bottom, lsSolid)
+                else
+                  HighlightCanvasLine(C, R1.Left, R1.Top, R1.Left,
+                    R1.Bottom, FBlockMatchLineStyle);
+              end;
+
+              if FBlockMatchLineHori and (Pair.MiddleCount > 0) then
+              begin
+                for J := 0 to Pair.MiddleCount - 1 do
+                begin
+                  if L = Pair.MiddleToken[J].EditLine then
+                  begin
+                    EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, LineNum);
+                    if not EditorGetEditPoint(EditPos2, R2) then
+                      Continue;
+
+                    // 画中央的横线
+                    if FBlockMatchLineHoriDot then
+                      HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                        R2.Left, R2.Bottom - 1, lsTinyDot)
+                    else
+                      HighlightCanvasLine(C, R1.Left, R1.Bottom - 1,
+                        R2.Left, R2.Bottom - 1, FBlockMatchLineStyle);
+
+                    if FBlockMatchLineEnd then // 在文字头上画方框
+                    begin
+                      if FBlockMatchLineHoriDot and (Pair.MiddleToken[J].EditCol <> Pair.Left) then
+                        EndLineStyle := lsTinyDot // 和主竖线不同列时，用虚线画框
+                      else
+                        EndLineStyle := FBlockMatchLineStyle;
+
+                      HighlightCanvasLine(C, R2.Left, R2.Bottom - 1,
+                        R2.Right, R2.Bottom - 1, EndLineStyle);
+                      // HighlightCanvasLine(EditorCanvas, R2.Left, R2.Top,
+                      //   R2.Right, R2.Top, EndLineStyle);
+                      // HighlightCanvasLine(EditorCanvas, R2.Left, R2.Top,
+                      //   R2.Left, R2.Bottom - 1, EndLineStyle);
+                      // 中只画底
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+          C.Pen.Color := SavePenColor;
+          C.Pen.Width := SavePenWidth;
+          C.Pen.Style := SavePenStyle;
         end;
       end;
     end;
