@@ -262,7 +262,7 @@ procedure TCnTestPaintLineMenuWizard.Editor2PaintText(const Rect: TRect; const C
     // IDE 的 Bug，Text 中是经过瞎编码的内容
     if Length(Utf8WideStr) > 0 then
     begin
-      Ansi := AnsiString(Utf8WideChar);
+      Ansi := AnsiString(Utf8WideStr);
       Result := CnUtf8DecodeToWideString(Ansi);
     end
     else
