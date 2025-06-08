@@ -4611,7 +4611,6 @@ begin
             end;
           end;
         end;
-{$ENDIF}
 
         CompDirectivePair := nil;
         if FHighlightCompDirective then
@@ -4628,6 +4627,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
         if not CanvasSaved then
         begin
@@ -4964,7 +4964,6 @@ begin
             end;
           end;
         end;
-{$ENDIF}
 
         // 如果有需要高亮的条件编译指令
         if FHighlightCompDirective and (LogicLineNum < Info.CompDirectiveLineCount) and
@@ -5072,6 +5071,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
         // 如果有需要高亮绘制的自定义标识符的内容
         if FHighlightCustomIdentifier and (LogicLineNum < Info.CustomIdentifierLineCount) and
@@ -6558,6 +6558,8 @@ var
   ColorFg, ColorBk: TColor;
   Info: TCnBlockMatchInfo;
   LineInfo: TCnBlockLineInfo;
+  CompDirectiveInfo: TCnCompDirectiveInfo;
+  CompDirectivePair: TCnCompDirectivePair;
   KeyPair: TCnBlockLinePair;
   Token: TCnGeneralPasToken;
   C: TCanvas;
@@ -6627,6 +6629,7 @@ begin
         // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
         Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
           TCnGeneralPasToken(Info.Lines[L][I]).EditCol, @IDEWideCharIsWideLength);
+
         if Utf8Col = ColNum then
         begin
           Token := TCnGeneralPasToken(Info.Lines[L][I]);
@@ -6678,11 +6681,86 @@ begin
     end;
   end;
 
+  HSC := -1;
+
+  // 条件编译指令高亮
+  if FHighlightCompDirective and (SyntaxCode in [atPreproc, atComment]) and
+    (FCompDirectiveBackground <> clNone) and (Info.CompDirectiveTokenCount > 0) then
+  begin
+    L := Context.LogicalLineNum;
+    CompDirectivePair := nil;
+    Idx := IndexOfCompDirectiveLine(Context.EditControl);
+    if Idx >= 0 then
+    begin
+      CompDirectiveInfo := TCnCompDirectiveInfo(FCompDirectiveList[Idx]);
+      if (CompDirectiveInfo <> nil) and (CompDirectiveInfo.CurrentPair <> nil) and ((CompDirectiveInfo.CurrentPair.Top = L)
+        or (CompDirectiveInfo.CurrentPair.Bottom = L)
+        or (CompDirectiveInfo.CurrentPair.IsInMiddle(L))) then
+      begin
+        // 寻找当前行已经配对的条件编译指令 Pair
+        CompDirectivePair := TCnCompDirectivePair(CompDirectiveInfo.CurrentPair);
+      end;
+    end;
+
+    if (L < Info.CompDirectiveLineCount) and (Info.CompDirectiveLines[L] <> nil)
+      and (CompDirectivePair <> nil) then
+    begin
+      Token := nil;
+      HSC := GetHeaderSpaceCount(Text);
+
+      for I := 0 to Info.CompDirectiveLines[L].Count - 1 do
+      begin
+        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+
+        if Utf8Col = ColNum + HSC then
+        begin
+          Token := TCnGeneralPasToken(Info.CompDirectiveLines[L][I]);
+          Break;
+        end;
+
+        if (Token <> nil) and ((CompDirectivePair.StartToken = Token) or
+          (CompDirectivePair.EndToken = Token) or (CompDirectivePair.IndexOfMiddleToken(Token) >= 0)) then
+        begin
+          // 光标在高亮范围内才画高亮背景色和位子，和关键字不管光标在不在都要画前景颜色的情形不同
+          OldColor := C.Brush.Color;
+          C.Brush.Color := FCompDirectiveBackground;
+          C.Brush.Style := bsSolid;
+
+          R := Rect;
+          if HSC > 0 then
+            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+          C.FillRect(R);
+          C.Brush.Color := OldColor;
+          // 画完高亮背景了
+
+          C.Font.Style := [];
+          C.Font.Color := CompDirectiveHighlightRef.ColorFg;
+          if CompDirectiveHighlightRef.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if CompDirectiveHighlightRef.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if CompDirectiveHighlightRef.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+
+          C.Brush.Style := bsClear;
+          C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
+          C.Font.Color := OldColor;
+        end;
+      end;
+    end;
+  end;
+
   if FHighlightFlowStatement and (SyntaxCode in [atReservedWord, atIdentifier])
     and (Info.FlowTokenCount > 0) then
   begin
     L := Context.LogicalLineNum;
-    HSC := GetHeaderSpaceCount(Text);
+    if HSC = -1 then
+      HSC := GetHeaderSpaceCount(Text);
+    // 部分流程控制标识符可能和前面的内容遗留下来的空格一起单独画
+    // 还有种没处理的情况可能是和前面的标识符一样一块画
 
     if (L < Info.FlowLineCount) and (Info.FlowLines[L] <> nil) then
     begin
