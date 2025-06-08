@@ -305,8 +305,6 @@ const
 
 var
   FileList: TStrings = nil;
-  GlobalSortIndex: Integer;
-  GlobalSortDown: Boolean;
 
 function ShowProjectBackupForm(Ini: TCustomIniFile): Boolean;
 begin

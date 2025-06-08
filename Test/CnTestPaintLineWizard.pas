@@ -110,7 +110,7 @@ type
 implementation
 
 uses
-  CnDebug;
+  CnDebug, CnWideStrings;
 
 //==============================================================================
 // 测试 CnEditControlWrapper 的 PaintLine 的菜单专家
@@ -254,10 +254,25 @@ end;
 procedure TCnTestPaintLineMenuWizard.Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+
+  function DecodeUtf8WideStrToString(const Utf8WideStr: string): string;
+  var
+    Ansi: AnsiString;
+  begin
+    // IDE 的 Bug，Text 中是经过瞎编码的内容
+    if Length(Utf8WideStr) > 0 then
+    begin
+      Ansi := AnsiString(Utf8WideChar);
+      Result := CnUtf8DecodeToWideString(Ansi);
+    end
+    else
+      Result := '';
+  end;
+
 begin
   CnDebugger.LogFmt('Editor2PaintText #%d:%d. Rect %d %d ~ %d %d. Cols %d SyntaxCode %d Hilight %d: %s',
     [Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom,
-    ColNum,  Ord(SyntaxCode), Ord(Hilight), Text]);
+    ColNum,  Ord(SyntaxCode), Ord(Hilight), DecodeUtf8WideStrToString(Text)]);
 end;
 
 {$ENDIF}
@@ -346,12 +361,12 @@ begin
   P := EditControlWrapper.GetPointFromEdPos(Editor.EditControl, APos);
   CnDebugger.TracePoint(P, '');
   ARect := Bounds(P.X + (APos.Col - 1) * FCharSize.cx,
-        (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
-        FCharSize.cy);
+    (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
+    FCharSize.cy);
 {$ELSE}
   ARect := Bounds(FGutterWidth + (APos.Col - Editor.EditView.LeftColumn) * FCharSize.cx,
-        (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
-        FCharSize.cy);
+    (APos.Line - Editor.EditView.TopRow) * FCharSize.cy, FCharSize.cx * Length(S),
+    FCharSize.cy);
 {$ENDIF}
   CnDebugger.TraceRect(ARect, Format('%d line: ', [LineNum]));
   EditorPaintText(Editor.EditControl, ARect, S, clGreen, clYellow, clNone, True, False);
