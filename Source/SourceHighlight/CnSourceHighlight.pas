@@ -6712,43 +6712,44 @@ begin
       begin
         // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
         Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+          TCnGeneralPasToken(Info.CompDirectiveLines[L][I]).EditCol, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum + HSC then
         begin
           Token := TCnGeneralPasToken(Info.CompDirectiveLines[L][I]);
           Break;
         end;
+      end;
 
-        if (Token <> nil) and ((CompDirectivePair.StartToken = Token) or
-          (CompDirectivePair.EndToken = Token) or (CompDirectivePair.IndexOfMiddleToken(Token) >= 0)) then
-        begin
-          // 光标在高亮范围内才画高亮背景色和位子，和关键字不管光标在不在都要画前景颜色的情形不同
-          OldColor := C.Brush.Color;
-          C.Brush.Color := FCompDirectiveBackground;
-          C.Brush.Style := bsSolid;
+      if (Token <> nil) and ((CompDirectivePair.StartToken = Token) or
+        (CompDirectivePair.EndToken = Token) or (CompDirectivePair.IndexOfMiddleToken(Token) >= 0)) then
+      begin
+        // 光标在高亮范围内才画高亮背景色和位子，和关键字不管光标在不在都要画前景颜色的情形不同
+        C := Context.Canvas;
+        OldColor := C.Brush.Color;
+        C.Brush.Color := FCompDirectiveBackground;
+        C.Brush.Style := bsSolid;
 
-          R := Rect;
-          if HSC > 0 then
-            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
-          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
-          C.FillRect(R);
-          C.Brush.Color := OldColor;
-          // 画完高亮背景了
+        R := Rect;
+        if HSC > 0 then
+          R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+        R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+        C.FillRect(R);
+        C.Brush.Color := OldColor;
+        // 画完高亮背景了
 
-          C.Font.Style := [];
-          C.Font.Color := FCompDirectiveHighlight.ColorFg;
-          if FCompDirectiveHighlight.Bold then
-            C.Font.Style := C.Font.Style + [fsBold];
-          if FCompDirectiveHighlight.Italic then
-            C.Font.Style := C.Font.Style + [fsItalic];
-          if FCompDirectiveHighlight.Underline then
-            C.Font.Style := C.Font.Style + [fsUnderline];
+        C.Font.Style := [];
+        C.Font.Color := FCompDirectiveHighlight.ColorFg;
+        if FCompDirectiveHighlight.Bold then
+          C.Font.Style := C.Font.Style + [fsBold];
+        if FCompDirectiveHighlight.Italic then
+          C.Font.Style := C.Font.Style + [fsItalic];
+        if FCompDirectiveHighlight.Underline then
+          C.Font.Style := C.Font.Style + [fsUnderline];
 
-          C.Brush.Style := bsClear;
-          C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
-          C.Font.Color := OldColor;
-        end;
+        C.Brush.Style := bsClear;
+        C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
+        C.Font.Color := OldColor;
       end;
     end;
   end;
