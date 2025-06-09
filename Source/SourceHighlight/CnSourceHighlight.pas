@@ -6737,12 +6737,12 @@ begin
           // ª≠ÕÍ∏ﬂ¡¡±≥æ∞¡À
 
           C.Font.Style := [];
-          C.Font.Color := CompDirectiveHighlightRef.ColorFg;
-          if CompDirectiveHighlightRef.Bold then
+          C.Font.Color := FCompDirectiveHighlight.ColorFg;
+          if FCompDirectiveHighlight.Bold then
             C.Font.Style := C.Font.Style + [fsBold];
-          if CompDirectiveHighlightRef.Italic then
+          if FCompDirectiveHighlight.Italic then
             C.Font.Style := C.Font.Style + [fsItalic];
-          if CompDirectiveHighlightRef.Underline then
+          if FCompDirectiveHighlight.Underline then
             C.Font.Style := C.Font.Style + [fsUnderline];
 
           C.Brush.Style := bsClear;
