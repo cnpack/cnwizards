@@ -359,6 +359,8 @@ procedure TCnAICoderWizard.SubActionUpdate(Index: Integer);
 begin
   if (Index = FIdConfig) or (Index = FIdShowChatWindow) then
     SubActions[Index].Enabled := Active
+  else if (Index = FIdContinueCoding then
+    SubActions[Index].Enabled := Active and CurrentIsSource
   else
     SubActions[Index].Enabled := Active and (CnOtaGetCurrentSelection <> '');
 end;
