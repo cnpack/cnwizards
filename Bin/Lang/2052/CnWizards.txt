@@ -4105,6 +4105,7 @@ SCnAICoderWizardUserMessageReferSelection=以下是和本问题相关的代码�
 SCnAICoderWizardUserMessageExplainFmt=请使用 %s 解释以下代码：
 SCnAICoderWizardUserMessageReviewFmt=请针对这段代码做Code Review，不需解释其功能，需从其结构、拼写、性能、安全性等方面加以分析并指出其问题。如果代码太短或无明显问题，则回答没有问题。
 SCnAICoderWizardUserMessageGenTestCaseFmt=请分析以下代码块的功能并使用 %s 为该代码块生成一个不涉及UI交互的测试用例，用例请以单个函数的方式给出，要求覆盖一些典型情况及边界情况，可灵活使用Assert。如给出的代码块不是完整的函数，请回答无法生成。
+SCnAICoderWizardUserMessageContinueCodingFmt=请根据以下内容续写代码。以下内容可能是代码片段，也可能是代码和注释的混合内容。如果末尾是注释，请根据注释的要求续写代码。如果是代码片段，请分析片段的功能，续写其内容。注意你输出的内容需要是纯代码的形式，不要重复出现已经提交给你的内容。如有注释说明，要以合法注释的格式嵌入在输出的代码中。
 SCnAICoderWizardErrorNoEngine=缺少合法的 AI 引擎或选项。
 SCnAICoderWizardErrorURLFmt=AI 引擎 %s 请求地址错误。
 SCnAICoderWizardErrorAPIKeyFmt=AI 引擎 %s 的 API Key 错误或缺失。
