@@ -93,7 +93,7 @@ type
     FNeedUpgradeGemini: Boolean;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
-    procedure EnsureChatWindowVisible;
+    procedure EnsureChatWindowVisible(OnlyCreate: Boolean = False);
     {* 确保创建 ChatWindow 且其 Visible 为 True 及其所有 Parent 的 Visible 全为 True
       以确保聊天窗口可见}
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
@@ -117,6 +117,10 @@ type
     procedure ForCodeGen(StreamMode, Partly, Success, IsStreamEnd: Boolean;
       SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回代码的回调}
+
+    procedure ForContinueAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    {* 续写代码的回调}
 
     procedure AcquireSubActions; override;
     function GetState: TWizardState; override;
@@ -589,13 +593,16 @@ begin
   end;
 end;
 
-procedure TCnAICoderWizard.EnsureChatWindowVisible;
+procedure TCnAICoderWizard.EnsureChatWindowVisible(OnlyCreate: Boolean);
 begin
   if CnAICoderChatForm = nil then
   begin
     CnAICoderChatForm := TCnAICoderChatForm.Create(nil);
     CnAICoderChatForm.Wizard := Self;
   end;
+
+  if OnlyCreate then
+    Exit;
 
   CnAICoderChatForm.VisibleWithParent := True;
   CnAICoderChatForm.BringToFront;
@@ -652,8 +659,88 @@ begin
 end;
 
 procedure TCnAICoderWizard.ContinueCurrentFile;
+var
+  S: string;
+  SL: TStringList;
+  Mem: TMemoryStream;
+  View: IOTAEditView;
+  P: TOTAEditPos;
+  Msg: TCnChatMessage;
 begin
-  // 收集本文件内容，并发送，并编辑器接收回应
+  // 收集本文件从开始到光标这行的内容，并发送，并编辑器接收回应
+  View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+  S := '';
+  Mem := nil;
+  SL := nil;
+
+  try
+    Mem := TMemoryStream.Create;
+    SL := TStringList.Create;
+    CnGeneralSaveEditorToStream(nil, Mem);
+    Mem.Position := 0;
+
+    SL.LoadFromStream(Mem);
+    P := View.CursorPos;
+
+    while SL.Count > P.Line do
+      SL.Delete(SL.Count - 1);
+
+    S := SL.Text;
+  finally
+    SL.Free;
+    Mem.Free;
+  end;
+
+  EnsureChatWindowVisible(True);
+  Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
+  Msg.From := CnAIEngineManager.CurrentEngineName;
+  Msg.FromType := cmtYou;
+  Msg.Text := MSG_WAITING;
+  Msg.Waiting := True;
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswer);
+end;
+
+procedure TCnAICoderWizard.ForContinueAnswer(StreamMode, Partly, Success,
+  IsStreamEnd: Boolean; SendId: Integer; const Answer: string;
+  ErrorCode: Cardinal; Tag: TObject);
+begin
+  if (Tag <> nil) and (Tag is TCnChatMessage) then
+  begin
+    TCnChatMessage(Tag).Waiting := False;
+    if Success then
+    begin
+      if Partly and (TCnChatMessage(Tag).Text <> MSG_WAITING)then
+        TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+      else
+        TCnChatMessage(Tag).Text := Answer;
+
+      if Answer <> '' then
+      begin
+        // 判断有无选择区，避免覆盖选择区内容
+        if CnOtaGetCurrentSelection <> '' then // 取消选择，并下移光标
+          CnOtaDeSelection(True);
+
+        CnOtaInsertTextIntoEditor(Answer);
+      end;
+    end
+    else
+    begin
+      EnsureChatWindowVisible;
+      TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
+    end;
+  end
+  else
+  begin
+    EnsureChatWindowVisible;
+    if Success then
+      CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
+    else
+      CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
+  end;
 end;
 
 initialization
