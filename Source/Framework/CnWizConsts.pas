@@ -1826,7 +1826,7 @@ var
   SCnAICoderWizardReviewCodeHint: string = 'Review Selected Code';
   SCnAICoderWizardGenTestCaseCaption: string = 'Generate &Test Case...';
   SCnAICoderWizardGenTestCaseHint: string = 'Generate a Test Case for Selected Code';
-  SCnAICoderWizardContinueCodingCaption: string = 'Continue Co&ding';
+  SCnAICoderWizardContinueCodingCaption: string = 'Continue Co&ding...';
   SCnAICoderWizardContinueCodingHint: string = 'Continue Coding for Current Code Position';
   SCnAICoderWizardChatWindowCaption: string = 'AI &Chat Window';
   SCnAICoderWizardChatWindowHint: string = 'Show or Hide AI Chat Window';
