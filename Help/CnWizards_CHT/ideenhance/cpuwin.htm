@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<table width="100%" border="0" cellpadding="4" id="table1">
+<table width="100%" border="0" cellpadding="4">
   <tr>
     <td class="head" height="16">CPU 窗口擴展專家</td>
   </tr>
@@ -19,26 +19,29 @@
   </tr>
 </table>
 <p class="title">CPU 窗口擴展專家</p>
-<p class="text">CPU 視窗擴展專家為 CPU 視窗提供了彙編代碼複製功能，允許從彙編指令視窗中複製多行內容。</p>
-<p class="text">在 CPU 視窗彙編指令面板中點擊右鍵，彈出菜單如下圖所示：</p>
+<p class="text">CPU 窗口擴展專家為 CPU 窗口提供了彙編代碼複製及內存區數據複製功能，允許從彙編指令窗口和內存窗口中複製多行內容。</p>
+<p class="text">在 CPU 窗口彙編指令面板中點擊右鍵，彈出菜單如下圖所示：</p>
 <p align="center" class="text">
 <img src="cpuwinmenu.png"></p>
 <ul>
   <p class="text">　</p>
   <li>
-    <p class="text"><b>複製30行到剪貼板</b>：從彙編代碼面板中複製指定行數的內容到剪貼板或檔，該功能表執行的操作可能受後面設置的影響。</p>
+    <p class="text"><b>複製30行到剪貼板</b>：從彙編代碼面板中複製指定行數的內容到剪貼板或文件，該菜單執行的操作可能受後面設置的影響。</p>
   </li>
   <li>
     <p class="text"><b>複製代碼...</b>：自定義方式從彙編代碼面板中複製代碼。</p>
   </li>
+  <li>
+    <p class="text"><b>複製5行到剪貼板</b>：內存區的右鍵菜單項，從內存區中複製指定行數的十六進制內容到剪貼板。</p>
+  </li>
 </ul>
-    <p class="text">執行“複製代碼”後，顯示如下圖所示視窗。</p>
+    <p class="text">執行「複製代碼」後，或執行設置功能後，顯示如下圖所示窗口。</p>
 <p class="text" align="center">
 <img src="cpuwinconf.png"></p>
 <p class="text">　</p>
 <ul>
   <li>
-<p class="text"><b>複製行數</b>：要複製的彙編代碼行數。</p>
+<p class="text"><b>複製行數</b>：要複製的彙編代碼行數及內存區數據行數。</p>
   </li>
   <li>
 <p class="text"><b>從第一行</b>：從彙編代碼面板顯示的第一行開始複製。</p>
@@ -50,13 +53,13 @@
 <p class="text"><b>複製到剪貼板</b>：複製結果放到剪貼板。</p>
   </li>
   <li>
-<p class="text"><b>複製到檔</b>：複製結果保存到檔中。</p>
+<p class="text"><b>複製到文件</b>：複製結果保存到文件中。</p>
   </li>
   <li>
-<p class="text"><b>應用設置為默認操作</b>：如果選擇該項，當前設置的複製方式會自動應用到前述第一個功能表項。</p>
+<p class="text"><b>應用設置為默認操作</b>：如果選擇該項，當前設置的複製方式會自動應用到前述第一個菜單項。</p>
   </li>
   <li>
-<p class="text"><b>確定</b>：如果該視窗在“複製代碼...”功能表項被調用，將執行代碼複製操作。如果在設置介面中調用，將保存當前參數設置。</p>
+<p class="text"><b>確定</b>：如果該窗口在「複製代碼...」菜單項被調用，將執行代碼複製操作。如果在設置界面中調用，將保存當前參數設置。</p>
   </li>
   <li>
 <p class="text"><b>取消</b>：放棄當前操作。</p>
