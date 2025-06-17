@@ -332,6 +332,7 @@ resourcestring
   SCnMenuCopy30LinesName = 'CnCopy30Lines';
   SCnMenuCopyLinesName = 'CnCopyLines';
   SCnDumpViewCopyName = 'CnDumpViewCopy';
+  SCnDumpViewCopyLinesName = 'CnDumpViewCopyLines';
   SCnDumpViewCopyCaption = '&Copy';   // DO NOT Localize and Translate
 
   // CnWizMultiLang
@@ -1510,6 +1511,7 @@ var
   SCnMenuCopyLinesToClipboard: string = 'Copy %d Lines';
   SCnMenuCopyLinesToFile: string = 'Copy %d Lines to File...';
   SCnMenuCopyLinesCaption: string = 'Copy ASM Code...';
+  SCnMenuCopyDataLinesCaption: string = 'Copy %d Lines';
 
   // CnResourceMgrWizard
   SCnResMgrWizardMenuCaption: string = 'Resource Manager';

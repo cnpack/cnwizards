@@ -40,8 +40,6 @@ interface
 
 {$IFDEF CNWIZARDS_CNCPUWINENHANCEWIZARD}
 
-{$IFNDEF BDS}
-
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ComCtrls, ExtCtrls, CnSpin, CnWizUtils, CnWizMultiLang;
@@ -50,20 +48,26 @@ type
 
 { TCnCpuWinEnhanceForm }
 
-  TCopyFrom = (cfTopAddr, cfSelectAddr);
-  TCopyTo = (ctClipboard, ctFile);
+  TCnCopyFromMode = (cfTopAddr, cfSelectAddr);
+  TCnCopyToMode = (ctClipboard, ctFile);
 
   TCnCpuWinEnhanceForm = class(TCnTranslateForm)
-    CopyParam: TGroupBox;
-    rbTopAddr: TRadioButton;
-    rbSelectAddr: TRadioButton;
-    cbSettingToAll: TCheckBox;
-    Label1: TLabel;
-    seCopyLineCount: TCnSpinEdit;
-    rgCopyToMode: TRadioGroup;
     btnOK: TButton;
     btnCancel: TButton;
     btnHelp: TButton;
+    pgcCpu: TPageControl;
+    tsASM: TTabSheet;
+    tsMemory: TTabSheet;
+    CopyParam: TGroupBox;
+    Label1: TLabel;
+    rbTopAddr: TRadioButton;
+    rbSelectAddr: TRadioButton;
+    seCopyLineCount: TCnSpinEdit;
+    rgCopyToMode: TRadioGroup;
+    cbSettingToAll: TCheckBox;
+    GroupBox1: TGroupBox;
+    lblCopyMem: TLabel;
+    seCopyMemLine: TCnSpinEdit;
     procedure btnHelpClick(Sender: TObject);
     procedure seCopyLineCountKeyPress(Sender: TObject; var Key: Char);
   private
@@ -74,10 +78,8 @@ type
 
   end;
 
-function ShowCpuWinEnhanceForm(var CopyForm: TCopyFrom; var CopyTo: TCopyTo;
-  var CopyLineCount: Integer; var SettingToAll: Boolean): Boolean;
-
-{$ENDIF}
+function ShowCpuWinEnhanceForm(var CopyForm: TCnCopyFromMode; var CopyTo: TCnCopyToMode;
+  var CopyLineCount: Integer; var SettingToAll: Boolean; var CopyMemLine: Integer): Boolean;
 
 {$ENDIF CNWIZARDS_CNCPUWINENHANCEWIZARD}
 
@@ -85,12 +87,10 @@ implementation
 
 {$IFDEF CNWIZARDS_CNCPUWINENHANCEWIZARD}
 
-{$IFNDEF BDS}
-
 {$R *.DFM}
 
-function ShowCpuWinEnhanceForm(var CopyForm: TCopyFrom; var CopyTo: TCopyTo;
-  var CopyLineCount: Integer; var SettingToAll: Boolean): Boolean;
+function ShowCpuWinEnhanceForm(var CopyForm: TCnCopyFromMode; var CopyTo: TCnCopyToMode;
+  var CopyLineCount: Integer; var SettingToAll: Boolean; var CopyMemLine: Integer): Boolean;
 begin
   with TCnCpuWinEnhanceForm.Create(nil) do
   try
@@ -100,6 +100,8 @@ begin
     rgCopyToMode.ItemIndex := Ord(CopyTo);
     cbSettingToAll.Checked := SettingToAll;
 
+    seCopyMemLine.Value := CopyMemLine;
+
     Result := ShowModal = mrOk;
     if Result then
     begin
@@ -108,8 +110,10 @@ begin
       else
         CopyForm := cfSelectAddr;
       CopyLineCount := seCopyLineCount.Value;
-      CopyTo := TCopyTo(rgCopyToMode.ItemIndex);
+      CopyTo := TCnCopyToMode(rgCopyToMode.ItemIndex);
       SettingToAll := cbSettingToAll.Checked;
+
+      CopyMemLine := seCopyMemLine.Value;
     end;
   finally
     Free;
@@ -141,8 +145,6 @@ begin
     Key := #0;
   end
 end;
-
-{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNCPUWINENHANCEWIZARD}
 

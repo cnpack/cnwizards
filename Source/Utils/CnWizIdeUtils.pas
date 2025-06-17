@@ -95,6 +95,7 @@ const
   SCnDesignControlClassName = 'TEditorFormDesigner';
   SCnWelcomePageClassName = 'TWelcomePageFrame';
   SCnDisassemblyViewClassName = 'TDisassemblyView';
+  SCnDisassemblyViewName = 'CPU';
   SCnEditorStatusBarName = 'StatusBar';
 
 {$IFDEF BDS}
@@ -430,6 +431,9 @@ function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
 
 function GetCurrentEditControl: TControl;
 {* 返回当前的代码编辑器控件 }
+
+function GetCPUViewFromEditorForm(AForm: TCustomForm): TControl;
+{* 返回编辑器窗口的 CPU 查看器控件 }
 
 function GetTabControlFromEditorForm(AForm: TCustomForm): TXTabControl;
 {* 返回编辑器窗口的 TabControl 控件 }
@@ -2230,6 +2234,13 @@ function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
 begin
   Result := TControl(FindComponentByClassName(AForm, SCnEditControlClassName,
     SCnEditControlName));
+end;
+
+// 返回编辑器窗口的 CPU 查看器控件
+function GetCPUViewFromEditorForm(AForm: TCustomForm): TControl;
+begin
+  Result := TControl(FindComponentByClassName(AForm, SCnDisassemblyViewClassName,
+    SCnDisassemblyViewName));
 end;
 
 // 从编辑器控件获得其所属的编辑器窗口的状态栏

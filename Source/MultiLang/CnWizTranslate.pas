@@ -1183,6 +1183,7 @@ begin
   TranslateStr(SCnMenuCopyLinesToClipboard, 'SCnMenuCopyLinesToClipboard');
   TranslateStr(SCnMenuCopyLinesToFile, 'SCnMenuCopyLinesToFile');
   TranslateStr(SCnMenuCopyLinesCaption, 'SCnMenuCopyLinesCaption');
+  TranslateStr(SCnMenuCopyDataLinesCaption, 'SCnMenuCopyDataLinesCaption');
 
   // CnResourceMgrWizard
   TranslateStr(SCnResMgrWizardMenuCaption, 'SCnResMgrWizardMenuCaption');
