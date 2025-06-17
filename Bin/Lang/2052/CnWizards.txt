@@ -3746,6 +3746,7 @@ SCnCpuWinEnhanceWizardComment=允许从 CPU 窗口中复制汇编代码。
 SCnMenuCopyLinesToClipboard=复制 %d 行到剪贴板
 SCnMenuCopyLinesToFile=复制 %d 行到文件...
 SCnMenuCopyLinesCaption=复制代码...
+SCnMenuCopyDataLinesCaption=复制 %d 行到剪贴板
 SCnPropertyEditor=属性编辑器
 SCnComponentEditor=组件编辑器
 SCnDesignEditorNameStr=名称：

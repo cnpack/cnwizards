@@ -3746,6 +3746,7 @@ SCnCpuWinEnhanceWizardComment=Copy ASM Code in CPU Window
 SCnMenuCopyLinesToClipboard=Copy %d Lines
 SCnMenuCopyLinesToFile=Copy %d Lines to File...
 SCnMenuCopyLinesCaption=Copy ASM Code...
+SCnMenuCopyDataLinesCaption=Copy %d Lines
 SCnPropertyEditor=Property Editor
 SCnComponentEditor=Component Editor
 SCnDesignEditorNameStr=Name:

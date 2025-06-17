@@ -3746,6 +3746,7 @@ SCnCpuWinEnhanceWizardComment=Скопировать ASM-код из окна CP
 SCnMenuCopyLinesToClipboard=Скопировано строк %d
 SCnMenuCopyLinesToFile=Скопировано строк в файл: %d...
 SCnMenuCopyLinesCaption=Скопировать ASM-код...
+SCnMenuCopyDataLinesCaption=Скопировано строк %d
 SCnPropertyEditor=Редактор свойств
 SCnComponentEditor=Редактор компонентов
 SCnDesignEditorNameStr=Имя: 
