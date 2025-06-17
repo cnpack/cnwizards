@@ -1,3 +1,3 @@
-  SCnWizardBuildDate = '2025.06.10';
+  SCnWizardBuildDate = '2025.06.17';
   SCnWizardMajorVersion = '1';
-  SCnWizardMinorVersion = '6.1.1262_Unstable';
+  SCnWizardMinorVersion = '6.1.1263_Unstable';
