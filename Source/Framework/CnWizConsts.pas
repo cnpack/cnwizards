@@ -1164,11 +1164,12 @@ var
   SCnWebSearchFileDef: string = 'WebSearch_ENU.xml';
   SCnSrcBlockMisc: string = '&Others';
   SCnSrcBlockAddToCollector: string = 'Add to Co&llector...';
-  SCnSrcBlockCompareToClipboard: string = 'Compare to C&lipboard...';
+  SCnSrcBlockCompareToClipboard: string = 'Compare to Cl&ipboard...';
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
   SCnSrcBlockDeleteLines: string = 'Delete &Lines';
   SCnSrcBlockDisableStructualHighlight: string = 'Disable IDE &Structual Highlight';
+  SCnSrcBlockErrorNoContent: string = 'No Content to Compare';
 
   // CnSrcEditorKey
   SCnRenameVarCaption: string = 'Rename Identifier';

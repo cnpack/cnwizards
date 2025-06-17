@@ -413,7 +413,7 @@ procedure TCnSrcEditorBlockTools.OnEditCompareToClipboard(Sender: TObject);
 var
   Wizard: TCnBaseWizard;
 begin
-  if Clipboard.AsText <> '' then
+  if (Clipboard.AsText <> '') and (CnOtaGetCurrentSelection <> '') then
   begin
     Wizard := CnWizardMgr.WizardByClass(TCnSourceDiffWizard);
     if Wizard <> nil then
@@ -424,7 +424,9 @@ begin
       CnSourceDiffForm.SetRightString(Clipboard.AsText);
       CnSourceDiffForm.actCompare.Execute;
     end;
-  end;
+  end
+  else
+    ErrorDlg(SCnSrcBlockErrorNoContent);
 end;
 
 {$ENDIF}
