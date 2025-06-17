@@ -829,7 +829,8 @@ begin
   TranslateStr(SCnSrcBlockSearch, 'SCnSrcBlockSearch');
   TranslateStr(SCnWebSearchFileDef, 'SCnWebSearchFileDef');
   TranslateStr(SCnSrcBlockMisc, 'SCnSrcBlockMisc');
-  TranslateStr(SCnSrcblockAddToCollector, 'SCnSrcblockAddToCollector');
+  TranslateStr(SCnSrcBlockAddToCollector, 'SCnSrcBlockAddToCollector');
+  TranslateStr(SCnSrcBlockCompareToClipboard, 'SCnSrcBlockCompareToClipboard');
   TranslateStr(SCnSrcBlockMoveUp, 'SCnSrcBlockMoveUp');
   TranslateStr(SCnSrcBlockMoveDown, 'SCnSrcBlockMoveDown');
   TranslateStr(SCnSrcBlockDeleteLines, 'SCnSrcBlockDeleteLines');

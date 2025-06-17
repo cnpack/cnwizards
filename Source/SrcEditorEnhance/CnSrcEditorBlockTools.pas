@@ -55,11 +55,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
-  IniFiles, Forms, Menus, ActnList, Math, {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
+  Clipbrd, IniFiles, Forms, Menus, ActnList, Math, {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
   {$IFDEF SUPPORT_ALPHACOLOR} System.UITypes, System.UIConsts, {$ENDIF}
   CnCommon, CnWizUtils, CnWizIdeUtils, CnWizConsts, CnEditControlWrapper,
   CnWizFlatButton, CnConsts, CnWizNotifier, CnWizShortCut, CnPopupMenu,
-  CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch,
+  CnSrcEditorCodeWrap, CnSrcEditorGroupReplace, CnSrcEditorWebSearch, CnWizClasses,
   CnEventBus, CnWizManager, CnWizMenuAction, CnWizShareImages;
 
 type
@@ -73,6 +73,7 @@ type
     btFormatCode, btCodeSwap, btEvalAlign, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD} btAddToCollector, {$ENDIF}
     {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
+    {$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD} btCompareToClipboard, {$ENDIF}
     btBlockMoveUp, btBlockMoveDown, btBlockDelLines, btDisableHighlight,
     btShortCutConfig);
   // 通过 AddMenuItemWithAction 添加的菜单项也需在此增加类型，但除了映射外暂无实际作用
@@ -89,6 +90,9 @@ type
     FToggleCaseShortCut: TCnWizShortCut;
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
     FAddToCollectorShortCut: TCnWizShortCut;
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+    FCompareToClipboardShortCut: TCnWizShortCut;
 {$ENDIF}
 {$IFDEF BDS}
     FBlockMoveUpShortCut: TCnWizShortCut;
@@ -132,6 +136,9 @@ type
     procedure OnEditBlockDelLines(Sender: TObject);
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
     procedure OnEditAddToCollector(Sender: TObject);
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+    procedure OnEditCompareToClipboard(Sender: TObject);
 {$ENDIF}
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
@@ -187,6 +194,7 @@ implementation
 
 uses
   CnWizSubActionShortCutFrm, CnScriptWizard, CnScriptFrm, CnAICoderWizard,
+  {$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD} CnSourceDiffWizard, CnSourceDiffFrm, {$ENDIF}
   CnCodingToolsetWizard, CnEditorCollector {$IFDEF DEBUG}, CnDebug{$ENDIF};
 
 const
@@ -229,6 +237,10 @@ begin
   if FAddToCollectorShortCut = nil then
     FAddToCollectorShortCut := WizShortCutMgr.Add('CnAddToCollector', 0, OnEditAddToCollector);
 {$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+  if FCompareToClipboardShortCut = nil then
+    FCompareToClipboardShortCut := WizShortCutMgr.Add('CnCompareToClipboard', 0, OnEditCompareToClipboard);
+{$ENDIF}
 
 {$IFDEF BDS}
   if FBlockMoveUpShortCut = nil then
@@ -249,6 +261,9 @@ begin
   WizShortCutMgr.DeleteShortCut(FBlockDelLinesShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveDownShortCut);
   WizShortCutMgr.DeleteShortCut(FBlockMoveUpShortCut);
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+  WizShortCutMgr.DeleteShortCut(FCompareToClipboardShortCut);
 {$ENDIF}
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
   WizShortCutMgr.DeleteShortCut(FAddToCollectorShortCut);
@@ -388,6 +403,28 @@ begin
   Collector.Execute;
   if CnEditorCollectorForm <> nil then
     CnEditorCollectorForm.btnImport.Click;
+end;
+
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+
+procedure TCnSrcEditorBlockTools.OnEditCompareToClipboard(Sender: TObject);
+var
+  Wizard: TCnBaseWizard;
+begin
+  if Clipboard.AsText <> '' then
+  begin
+    Wizard := CnWizardMgr.WizardByClass(TCnSourceDiffWizard);
+    if Wizard <> nil then
+    begin
+      Wizard.Execute;
+
+      CnSourceDiffForm.SetLeftString(CnOtaGetCurrentSelection);
+      CnSourceDiffForm.SetRightString(Clipboard.AsText);
+      CnSourceDiffForm.actCompare.Execute;
+    end;
+  end;
 end;
 
 {$ENDIF}
@@ -807,6 +844,9 @@ begin
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
       btAddToCollector: OnEditAddToCollector(nil);
 {$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+      btCompareToClipboard: OnEditCompareToClipboard(nil);
+{$ENDIF}
     else
       ExecuteMenu(FMiscMenu, Kind);
     end;
@@ -1011,7 +1051,11 @@ begin
 {$ENDIF}
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
-  DoAddMenuItem(FMiscMenu, SCnSrcblockAddToCollector, btAddToCollector, 0, 'actCnEditorCollector');
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockAddToCollector, btAddToCollector, 0, 'actCnEditorCollector');
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+  DoAddMenuItem(FMiscMenu, SCnSrcBlockCompareToClipboard, btCompareToClipboard, 0, 'actCnCompareToClipboard');
 {$ENDIF}
 
 {$IFDEF BDS} // Only for BDS because of bug. ;-(
@@ -1412,7 +1456,12 @@ begin
     Holder := TCnShortCutHolder.Create(SCnSrcBlockToggleCase, FToggleCaseShortCut);
     List.Add(Holder);
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
-    Holder := TCnShortCutHolder.Create(SCnSrcblockAddToCollector, FAddToCollectorShortCut);
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockAddToCollector, FAddToCollectorShortCut);
+    List.Add(Holder);
+{$ENDIF}
+
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+    Holder := TCnShortCutHolder.Create(SCnSrcBlockCompareToClipboard, FCompareToClipboardShortCut);
     List.Add(Holder);
 {$ENDIF}
 
