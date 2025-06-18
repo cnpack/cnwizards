@@ -94,6 +94,7 @@ type
     btnExternalFunction: TButton;
     btnGeneric: TButton;
     btnAttribute: TButton;
+    btnVarDeclDirective: TButton;
     procedure FormDestroy(Sender: TObject);
     procedure btnUsesClauseClick(Sender: TObject);
     procedure btnUsesDeclClick(Sender: TObject);
@@ -160,6 +161,7 @@ type
     procedure btnExternalFunctionClick(Sender: TObject);
     procedure btnGenericClick(Sender: TObject);
     procedure btnAttributeClick(Sender: TObject);
+    procedure btnVarDeclDirectiveClick(Sender: TObject);
   private
     FAST: TCnPasAstGenerator;
     procedure SaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
@@ -984,6 +986,14 @@ begin
     '[ComponentPlatformsAttribute(pidWin32 or pidWin64), ComponentType: Unknown]'
   );
   FAST.BuildSingleAttribute;
+  SynTree;
+end;
+
+procedure TFormAST.btnVarDeclDirectiveClick(Sender: TObject);
+begin
+  ReInitAst('var IsWow64Process: function(Handle: THandle; var Res: BOOL): BOOL; stdcall;'
+    + 'GetNativeSystemInfo: procedure(var lpSystemInfo: TSystemInfo) stdcall;');
+  FAST.BuildVarSection;
   SynTree;
 end;
 

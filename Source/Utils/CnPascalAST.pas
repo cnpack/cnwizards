@@ -1207,7 +1207,14 @@ begin
       MatchCreateLeafAndStep(tkObject);
     end;
 
-    BuildDirectives;
+    // 可能有分号，要判断分号后是否是 Directives
+    if (FLex.TokenID = tkSemicolon) and (ForwardToken in DirectiveTokens) then
+    begin
+      MatchCreateLeafAndStep(tkSemicolon);
+      BuildDirectives(False);
+    end
+    else
+      BuildDirectives(False); // 不能吃掉分号，要留下来作为每个声明的分界
   finally
     PopLeaf;
   end;
@@ -3533,7 +3540,14 @@ begin
       BuildTypedConstant;
     end;
 
-    BuildDirectives(False);
+    // 可能有分号，要判断分号后是否是 Directives，是则也进去
+    if (FLex.TokenID = tkSemicolon) and (ForwardToken in DirectiveTokens) then
+    begin
+      MatchCreateLeafAndStep(tkSemicolon);
+      BuildDirectives(False);
+    end
+    else // 没分号直接进去
+      BuildDirectives(False);
   finally
     PopLeaf;
   end;

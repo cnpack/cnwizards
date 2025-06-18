@@ -49,7 +49,7 @@ object FormAST: TFormAST
         Indent = 19
         PopupMenu = pm1
         ReadOnly = True
-        TabOrder = 1
+        TabOrder = 3
         OnChange = tvPasChange
       end
       object grpTest: TGroupBox
@@ -59,7 +59,7 @@ object FormAST: TFormAST
         Height = 625
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Test Part'
-        TabOrder = 2
+        TabOrder = 1
         object btnUsesClause: TButton
           Left = 16
           Top = 24
@@ -75,7 +75,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Uses Decl'
-          TabOrder = 1
+          TabOrder = 3
           OnClick = btnUsesDeclClick
         end
         object btnInitSeletion: TButton
@@ -84,7 +84,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Init Seletion'
-          TabOrder = 2
+          TabOrder = 4
           OnClick = btnInitSeletionClick
         end
         object btnTypeDecl: TButton
@@ -93,7 +93,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Type Decl'
-          TabOrder = 3
+          TabOrder = 8
           OnClick = btnTypeDeclClick
         end
         object btnSetElement: TButton
@@ -102,7 +102,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Set Element'
-          TabOrder = 4
+          TabOrder = 9
           OnClick = btnSetElementClick
         end
         object btnSetConstructor: TButton
@@ -111,7 +111,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Set Constructor'
-          TabOrder = 5
+          TabOrder = 12
           OnClick = btnSetConstructorClick
         end
         object btnFactor: TButton
@@ -120,7 +120,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Factor'
-          TabOrder = 6
+          TabOrder = 13
           OnClick = btnFactorClick
         end
         object grpSimpleStatement: TGroupBox
@@ -129,7 +129,7 @@ object FormAST: TFormAST
           Width = 105
           Height = 185
           Caption = 'Simple Statement'
-          TabOrder = 8
+          TabOrder = 1
           object btnAssign: TButton
             Left = 16
             Top = 24
@@ -191,14 +191,14 @@ object FormAST: TFormAST
           Width = 185
           Height = 185
           Caption = 'Type'
-          TabOrder = 10
+          TabOrder = 2
           object btnRecordType: TButton
             Left = 96
             Top = 24
             Width = 75
             Height = 25
             Caption = 'Record'
-            TabOrder = 6
+            TabOrder = 1
             OnClick = btnRecordTypeClick
           end
           object btnArrayType: TButton
@@ -216,7 +216,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Set'
-            TabOrder = 1
+            TabOrder = 2
             OnClick = btnSetTypeClick
           end
           object btnFileType: TButton
@@ -225,7 +225,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'File'
-            TabOrder = 2
+            TabOrder = 4
             OnClick = btnFileTypeClick
           end
           object btnPointerType: TButton
@@ -234,7 +234,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Pointer'
-            TabOrder = 3
+            TabOrder = 6
             OnClick = btnPointerTypeClick
           end
           object btnStringType: TButton
@@ -243,7 +243,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'String'
-            TabOrder = 4
+            TabOrder = 8
             OnClick = btnStringTypeClick
           end
           object btnSubrangeType: TButton
@@ -252,7 +252,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Subrange'
-            TabOrder = 5
+            TabOrder = 3
             OnClick = btnSubrangeTypeClick
           end
           object btnInterfaceType: TButton
@@ -261,7 +261,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Interface'
-            TabOrder = 7
+            TabOrder = 5
             OnClick = btnInterfaceTypeClick
           end
           object btnClassType: TButton
@@ -270,7 +270,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Class'
-            TabOrder = 8
+            TabOrder = 7
             OnClick = btnClassTypeClick
           end
           object btnTypeSection: TButton
@@ -307,7 +307,7 @@ object FormAST: TFormAST
           Width = 185
           Height = 105
           Caption = 'Class'
-          TabOrder = 11
+          TabOrder = 10
           object btnPropety: TButton
             Left = 16
             Top = 24
@@ -323,7 +323,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Const Section'
-            TabOrder = 2
+            TabOrder = 1
             OnClick = btnConstSectionClick
           end
           object btnVarSection: TButton
@@ -332,7 +332,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Var Section'
-            TabOrder = 1
+            TabOrder = 3
             OnClick = btnVarSectionClick
           end
           object btnStrings: TButton
@@ -341,7 +341,7 @@ object FormAST: TFormAST
             Width = 75
             Height = 25
             Caption = 'Strings'
-            TabOrder = 3
+            TabOrder = 2
             OnClick = btnStringsClick
           end
           object btnGeneric: TButton
@@ -369,7 +369,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Exports'
-          TabOrder = 12
+          TabOrder = 5
           OnClick = btnExportsClick
         end
         object grpConst: TGroupBox
@@ -378,7 +378,7 @@ object FormAST: TFormAST
           Width = 113
           Height = 161
           Caption = 'Const'
-          TabOrder = 13
+          TabOrder = 11
           object btnConst: TButton
             Left = 16
             Top = 24
@@ -440,7 +440,7 @@ object FormAST: TFormAST
           Width = 185
           Height = 185
           Caption = 'Struct Statement'
-          TabOrder = 15
+          TabOrder = 17
           object btnExceptionHandler: TButton
             Left = 16
             Top = 24
@@ -556,7 +556,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Interface'
-          TabOrder = 16
+          TabOrder = 6
           OnClick = btnInterfaceClick
         end
         object btnImplementation: TButton
@@ -565,25 +565,25 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Implementation'
-          TabOrder = 17
+          TabOrder = 7
           OnClick = btnImplementationClick
         end
         object btnProgram: TButton
           Left = 16
-          Top = 360
+          Top = 384
           Width = 75
           Height = 25
           Caption = 'Program'
-          TabOrder = 18
+          TabOrder = 19
           OnClick = btnProgramClick
         end
         object btnUnit: TButton
           Left = 16
-          Top = 384
+          Top = 408
           Width = 75
           Height = 25
           Caption = 'Unit'
-          TabOrder = 19
+          TabOrder = 21
           OnClick = btnUnitClick
         end
         object btnOpen: TButton
@@ -592,7 +592,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Open'
-          TabOrder = 20
+          TabOrder = 24
           OnClick = btnOpenClick
         end
         object grpDecls: TGroupBox
@@ -601,7 +601,7 @@ object FormAST: TFormAST
           Width = 113
           Height = 129
           Caption = 'Decls'
-          TabOrder = 21
+          TabOrder = 20
           object btnProcedure: TButton
             Left = 16
             Top = 24
@@ -645,7 +645,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Designator'
-          TabOrder = 7
+          TabOrder = 15
           OnClick = btnDesignatorClick
         end
         object btnExpressionList: TButton
@@ -654,7 +654,7 @@ object FormAST: TFormAST
           Width = 75
           Height = 25
           Caption = 'Expression List'
-          TabOrder = 9
+          TabOrder = 16
           OnClick = btnExpressionListClick
         end
         object btnParse: TButton
@@ -685,7 +685,16 @@ object FormAST: TFormAST
           Top = 528
           Width = 297
           Height = 57
-          TabOrder = 24
+          TabOrder = 23
+        end
+        object btnVarDeclDirective: TButton
+          Left = 16
+          Top = 346
+          Width = 75
+          Height = 25
+          Caption = 'Var Directive'
+          TabOrder = 18
+          OnClick = btnVarDeclDirectiveClick
         end
       end
       object pgcRes: TPageControl
@@ -695,7 +704,7 @@ object FormAST: TFormAST
         Height = 625
         ActivePage = tsPascal
         Anchors = [akTop, akRight, akBottom]
-        TabOrder = 3
+        TabOrder = 2
         object tsPascal: TTabSheet
           Caption = 'Pascal'
           object mmoPasRes: TMemo
