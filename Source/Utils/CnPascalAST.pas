@@ -25,10 +25,16 @@ unit CnPascalAST;
 * 单元名称：Pascal 代码抽象语法树生成单元
 * 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：同时支持 Unicode 和非 Unicode 编译器
-*           不支持 Attribute，不支持匿名函数，不支持 class 内的 var/const/type 等
+*           不支持匿名函数，不支持 class 内的 var/const/type 等
 *           不支持泛型、不支持内联 var
 *           不支持 asm（仅跳过），注释还原度较低
-* 开发平台：2024.09.07 V1.4
+*           如果碰到关键字做标识符导致解析失败的情况，可以搜 TODO，改三处
+* 开发平台：PWin7Pro + Delphi 7
+* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 本 地 化：该单元中的字符串均符合本地化处理方式
+* 修改记录：2025.06.19 V1.5
+*               修正部分关键字做标识符的与 Directives 有无分号的支持
+*           2024.09.07 V1.4
 *               加入对 Attribute 的支持
 *           2023.07.29 V1.3
 *               加入对多行字符串的支持
@@ -607,7 +613,7 @@ const
 
   StatementTokens = [tkLabel] + SimpleStatementTokens + StructStatementTokens;
 
-  CanBeIdentifierTokens = DirectiveTokens + [tkIdentifier]; // 部分关键字可以做变量名，待补充
+  CanBeIdentifierTokens = DirectiveTokens + [tkIdentifier, tkContains]; // TODO: 部分关键字可以做变量名，待补充
 
 function PascalAstNodeTypeToString(AType: TCnPasNodeType): string;
 begin
@@ -1018,7 +1024,7 @@ begin
             PopLeaf;
           end;
         end;
-      tkIdentifier, tkNil, tkKeyString, tkIndex: // TODO: 还有部分关键字可以做变量名
+      tkIdentifier, tkNil, tkKeyString, tkIndex, tkContains: // TODO: 还有部分关键字可以做变量名
         begin
           BuildDesignator;
           if FLex.TokenID = tkRoundOpen then
@@ -1229,7 +1235,7 @@ begin
     case FLex.TokenID of
       tkKeyString:
         MatchCreateLeafAndStep(FLex.TokenID); // TODO: 还有一些关键字可以做强制类型转换或函数调用名
-      tkNil, tkIdentifier, tkIndex, tkAmpersand:           // TODO: 还有一些关键字可以做变量名
+      tkNil, tkIdentifier, tkIndex, tkContains, tkAmpersand:           // TODO: 还有一些关键字可以做变量名
         BuildIdent;
       tkRoundOpen:
         begin
