@@ -705,6 +705,7 @@ InitOk:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "URLUpdateInfo" "https://www.cnpack.org"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\CnWizards" "UninstallString" '"$INSTDIR\uninst.exe"'
 
+  WriteRegStr HKCU "Software\CnPack\CnWizards" "InstallDir" $INSTDIR
   WriteRegDWORD HKCU "Software\CnPack\CnWizards\Option" "CurrentLangID" $LANGUAGE
 
   ; 删除以前的开始菜单项
