@@ -28,7 +28,9 @@ unit CnWizCompilerConst;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2013.04.25 by liuxiao
+* 修改记录：20225.06.23 by liuxiao
+*               增加几个 Lazarus 相关变量
+*           2013.04.25 by liuxiao
 *               增加几个特性变量
 *           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
@@ -143,6 +145,7 @@ const
   _DELPHI = {$IFDEF DELPHI}True{$ELSE}False{$ENDIF};
   _BCB = {$IFDEF BCB}True{$ELSE}False{$ENDIF};
   _BDS = {$IFDEF BDS}True{$ELSE}False{$ENDIF};
+  _LAZARUS = {$IFDEF LAZARUS}True{$ELSE}False{$ENDIF};
 
   _DELPHI1 = {$IFDEF DELPHI1}True{$ELSE}False{$ENDIF};
   _DELPHI2 = {$IFDEF DELPHI2}True{$ELSE}False{$ENDIF};
@@ -532,7 +535,8 @@ const
                                                     CompilerName = 'C++BUILDER 6';
                                                     CompilerShortName = 'CB6';
                                                   {$ELSE}
-                                                    {$IFDEF FPC}
+                                                    {$IFDEF LAZARUS}
+                                                      // 注意 Lazarus 中的 FPC 编译器并非和 IDE 强绑定，未来估计要动态设置这些值
                                                       Compiler: TCnCompiler = cnLazarus4;
                                                       CompilerKind: TCnCompilerKind = ckLazarus;
                                                       CompilerName = 'Lazarus 4.0';

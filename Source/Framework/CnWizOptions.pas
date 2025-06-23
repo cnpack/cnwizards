@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, IniFiles,
   FileCtrl, Forms, Registry, ComCtrls
-  {$IFNDEF STAND_ALONE}, ToolsAPI {$ENDIF}
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE}, ToolsAPI {$ENDIF} {$ENDIF}
   {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
 const
@@ -138,11 +138,11 @@ type
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
 {$IFNDEF CNWIZARDS_MINIMUM}
-
+{$IFNDEF LAZARUS}
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
     {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，也可用于编辑器工具栏
       前提是 AToolbar 已经设好了 Parent 并且 Scale 过}
-
+{$ENDIF}
 {$ENDIF}
 
     // 参数读写方法
@@ -206,6 +206,7 @@ type
     property DllPath: string read FDllPath;
     {* 专家 DLL 所在的目录}
     property CompilerPath: string read FCompilerPath;
+    {* 专家对应的 IDE 的可执行文件所在路径，并非编译器 dcc32 那种}
 
     // 当前语言 ID
     property CurrentLangID: Cardinal read FCurrentLangID write SetCurrentLangID;
@@ -242,7 +243,7 @@ type
     property CompilerID: string read FCompilerID;
     {* 编译器缩写，如 D5}
     property CompilerRegPath: string read FCompilerRegPath;
-    {* 编译器 IDE 使用的注册表路径}
+    {* 编译器 IDE 使用的注册表路径，在 Lazarus 下为空}
 
     // 用户设置
     property DelphiExt: string read FDelphiExt write FDelphiExt;
@@ -306,9 +307,11 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
+{$IFNDEF LAZARUS}
 {$IFNDEF STAND_ALONE}
   CnWizUtils, CnWizIdeUtils, CnWizManager,
   {$IFNDEF CNWIZARDS_MINIMUM} CnWizShareImages, {$ENDIF}
+{$ENDIF}
 {$ENDIF}
   CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNative;
 
@@ -400,19 +403,48 @@ var
   I: Integer;
   S: string;
 {$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  Reg: TRegistry;
+{$ELSE}
   Svcs: IOTAServices;
+{$ENDIF}
 {$ENDIF}
 begin
   inherited;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
   Svcs := BorlandIDEServices as IOTAServices;
   Assert(Assigned(Svcs));
   FCompilerRegPath := Svcs.GetBaseRegistryKey;
 {$ENDIF}
+{$ENDIF}
 
+{$IFDEF LAZARUS}
+  // Lazarus 因没 DLL 存在，改从注册表里读安装程序写入的 InstallDir
+  Reg := TRegistry.Create; // 创建注册表对象
+  try
+    Reg.RootKey := HKEY_CURRENT_USER; // 设置根键为 HKCU
+
+    if Reg.OpenKeyReadOnly('Software\CnPack\CnWizards') then
+    begin
+      // 检查键是否存在并读取
+      if Reg.ValueExists('InstallDir') then
+      begin
+        FDllPath := Reg.ReadString('InstallDir');
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Laz WizOption Get Installation Path: ' + FDllPath);
+{$ENDIF}
+      end;
+      Reg.CloseKey;
+    end;
+  finally
+    Reg.Free;
+  end;
+{$ELSE}
   GetModuleFileName(hInstance, ModuleName, MAX_PATH);
   FDllName := ModuleName;
   FDllPath := _CnExtractFilePath(FDllName);
+{$ENDIF}
   FCompilerPath := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
 
   FLangPath := MakePath(FDllPath + SCnWizLangPath);
@@ -871,7 +903,10 @@ begin
   begin
     FUseToolsMenu := Value;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
+    // TODO: CnWizardMgr 对 Lazarus 支持好后再启用此处
     CnWizardMgr.UpdateMenuPos(Value);
+{$ENDIF}
 {$ENDIF}
   end;
 end;
@@ -915,6 +950,7 @@ begin
 end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
 
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -990,6 +1026,7 @@ begin
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 procedure TCnWizOptions.DumpToStrings(Infos: TStrings);

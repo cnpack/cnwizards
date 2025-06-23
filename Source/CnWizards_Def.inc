@@ -2,6 +2,11 @@
 // 功能设置
 //==============================================================================
 
+{$IFDEF FPC}
+  // 专家包的编译器如果是 FPC 则表示要安装到 Lazarus 里
+  {$DEFINE LAZARUS}
+{$ENDIF}
+
 {$IFDEF COMPILER5_UP}
   {$DEFINE SUPPORT_PASCAL_SCRIPT}
 {$ENDIF}

@@ -40,6 +40,7 @@
   {$DEFINE OBJECT_HAS_TOSTRING}     // TObject.ToString
   {$DEFINE OBJECT_HAS_GETHASHCODE}  // TObject.GetHashCode
   {$DEFINE TBYTES_DEFINED}
+  {$DEFINE NO_OLDCREATEORDER}
 
   // 以下是 CPU 定义从 FPC 映射到 Delphi
   {$IFDEF CPU386}     // Intel 32 CPU

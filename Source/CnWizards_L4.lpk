@@ -8,7 +8,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto"/>
+        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -27,6 +27,14 @@
       <Item>
         <Filename Value="Framework\CnWizConsts.pas"/>
         <UnitName Value="CnWizConsts"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizCompilerConst.pas"/>
+        <UnitName Value="CnWizCompilerConst"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizOptions.pas"/>
+        <UnitName Value="CnWizOptions"/>
       </Item>
     </Files>
     <RequiredPkgs>
