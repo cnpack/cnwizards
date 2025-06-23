@@ -18,17 +18,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnWizBplEntry;
+unit CnLazPkgEntry;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：CnWizard 专家 BPL 入口单元
+* 单元名称：CnWizard 专家 Lazarus 注册入口单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：
-* 开发平台：PWin2000Pro + Delphi 5.01
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 开发平台：PWin7Pro + Lazarus 4.0
+* 兼容测试：PWin9X/2000/XP + Lazarus 4.0
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2002.12.07 V1.0
+* 修改记录：2025.06.23 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -37,18 +37,46 @@ interface
 
 {$I CnWizards.inc}
 
+uses
+  LazarusPackageIntf;
+
 procedure Register;
+
+procedure CnWizardMgrRegister;
 
 implementation
 
+{$IFDEF DEBUG}
 uses
-  ToolsApi,
-  CnWizards;
+  CnDebug;
+{$ENDIF}
 
 procedure Register;
 begin
-  CnWizardMgr := TCnWizardMgr.Create;
-  RegisterPackageWizard(CnWizardMgr as IOTAWizard);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Laz Register Unit');
+{$ENDIF}
+  RegisterUnit('CnLazPkgEntry', @CnWizardMgrRegister);
 end;
+
+procedure CnWizardMgrRegister;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Laz Register CnWizardMgr');
+{$ENDIF}
+  // CnWizardMgr := TCnWizardMgr.Create;
+end;
+
+initialization
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Laz Register Package');
+{$ENDIF}
+  RegisterPackage('CnPack IDE Wizards', @Register);
+
+finalization
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('Laz CnLazPkgEntry Finalization');
+{$ENDIF}
+  // FreeAndNil(CnWizardMgr);
 
 end.
