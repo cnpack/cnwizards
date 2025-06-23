@@ -42,8 +42,6 @@ uses
 
 procedure Register;
 
-procedure CnWizardMgrRegister;
-
 implementation
 
 {$IFDEF DEBUG}
@@ -56,22 +54,10 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Laz Register Unit');
 {$ENDIF}
-  RegisterUnit('CnLazPkgEntry', @CnWizardMgrRegister);
-end;
-
-procedure CnWizardMgrRegister;
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('Laz Register CnWizardMgr');
-{$ENDIF}
   // CnWizardMgr := TCnWizardMgr.Create;
 end;
 
 initialization
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('Laz Register Package');
-{$ENDIF}
-  RegisterPackage('CnPack IDE Wizards', @Register);
 
 finalization
 {$IFDEF DEBUG}
