@@ -12,9 +12,13 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
-        <CustomOptions Value="-dDEBUG"/>
-        <OtherDefines Count="1">
+        <CustomOptions Value="-dDEBUG
+-dSUPPORT_EVALUATE
+-dENABLE_UIINTERACT"/>
+        <OtherDefines Count="3">
           <Define0 Value="DEBUG"/>
+          <Define1 Value="SUPPORT_EVALUATE"/>
+          <Define2 Value="ENABLE_UIINTERACT"/>
         </OtherDefines>
       </Other>
     </CompilerOptions>
@@ -42,6 +46,9 @@
       </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="IDEIntf"/>
+      </Item>
       <Item>
         <PackageName Value="LCLBase"/>
       </Item>

@@ -8,7 +8,7 @@ unit CnWizards_L4;
 interface
 
 uses
-  CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut,
+  CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut, 
   LazarusPackageIntf;
 
 implementation

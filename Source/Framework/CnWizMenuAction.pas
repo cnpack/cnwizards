@@ -47,7 +47,7 @@ interface
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
   {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
-  {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF}
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
@@ -90,7 +90,7 @@ type
     {* Action 命令字符串，用来唯一标识一个 Action，同时也是快捷键对象的名字}
     property Icon: TIcon read FIcon;
     {* Action 关联的图标，加载时 16x16，可在其它地方使用，但请不要更改图标内容}
-    property ShortCut: TShortCut read GetShortCut write {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
+    property ShortCut: TShortCut read GetShortCut write {$IFDEF DELPHIXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF};
     {* Action 关联的快捷键}
   end;
 
@@ -233,7 +233,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} CnDebug, {$ENDIF}
-  {$IFNDEF STAND_ALONE} CnWizUtils, CnWizIdeUtils, {$ENDIF}
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils, CnWizIdeUtils, {$ENDIF} {$ENDIF}
   CnWizCompilerConst;
 
 const
@@ -332,7 +332,7 @@ begin
 end;
 
 // ShortCut 属性写方法
-procedure TCnWizAction.{$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
+procedure TCnWizAction.{$IFDEF DELPHIXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
 begin
   Assert(Assigned(FWizShortCut));
   if FWizShortCut.ShortCut <> Value then
@@ -455,12 +455,17 @@ procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
   const ACommand, ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
   const IcoName, AHint: string; UseDefaultIcon: Boolean);
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
   NewName: string;
 {$ENDIF}
+{$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  // TODO:
+{$ELSE}
   // IDE 内部要名称判重
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   if Trim(ACommand) <> '' then
@@ -481,6 +486,7 @@ begin
       CnDebugger.LogMsgWithType('Component Already Exists: ' + NewName, cmtError);
     {$ENDIF}
   end;
+{$ENDIF}
 {$ENDIF}
 
   AWizAction.Caption := ACaption;

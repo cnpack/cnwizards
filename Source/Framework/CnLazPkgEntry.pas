@@ -38,7 +38,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  LazarusPackageIntf;
+  Classes, LCLType, Forms, Controls,
+  IDEWindowIntf, IDEOptionsIntf, IDEOptEditorIntf, MenuIntf, IDEImagesIntf,
+  LazIDEIntf, IDECommands;
 
 procedure Register;
 
@@ -49,11 +51,27 @@ uses
   CnDebug;
 {$ENDIF}
 
+procedure MenuExecute(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos);
+{$ENDIF}
+end;
+
 procedure Register;
+var
+  Catgory: TIDECommandCategory;
+  Cmd: TIDECommand;
+  SC: TIDEShortCut;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Laz Register Unit');
 {$ENDIF}
+  SC := IDEShortCut(VK_1, [ssAlt]);
+  Catgory := RegisterIDECommandCategory(nil, 'CnPack', 'CnPack Category');
+  Cmd := RegisterIDECommand(Catgory, 'Test', 'Test Entry', nil, @MenuExecute);
+
+  RegisterIDEMenuCommand(itmSecondaryTools{ mnuTools}, 'CnPackTest', 'CnPack Test...', nil, nil, Cmd);
   // CnWizardMgr := TCnWizardMgr.Create;
 end;
 
