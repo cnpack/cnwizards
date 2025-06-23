@@ -24,11 +24,13 @@ unit CnWizOptions;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：CnWizards 公共参数类单元
 * 单元作者：CnPack 开发组
-* 备    注：
+* 备    注：Lazarus 下没有专家包 DLL 的概念，改从注册表里读安装路径
 * 开发平台：PWin2000Pro + Delphi 5.01
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6 + Lazarus 4.0
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2018.06.30 V1.1
+* 修改记录：2025.06.23 V1.2
+*               加入对 Lazarus 的支持
+*           2018.06.30 V1.1
 *               加入对命令行中指定用户存储目录的支持
 *           2002.11.07 V1.0
 *               创建单元
@@ -202,14 +204,15 @@ type
 
     // 专家 DLL 属性
     property DllName: string read FDllName;
-    {* 专家 DLL 完整文件名}
+    {* 专家 DLL 完整文件名，Lazarus 下为空}
     property DllPath: string read FDllPath;
-    {* 专家 DLL 所在的目录}
+    {* 专家 DLL 所在的目录，Lazarus 下为专家包安装目录}
     property CompilerPath: string read FCompilerPath;
     {* 专家对应的 IDE 的可执行文件所在路径，并非编译器 dcc32 那种}
 
-    // 当前语言 ID
+    // 专家使用的语言
     property CurrentLangID: Cardinal read FCurrentLangID write SetCurrentLangID;
+    {* 当前语言 ID}
 
     // 专家使用的目录名
     property LangPath: string read FLangPath;

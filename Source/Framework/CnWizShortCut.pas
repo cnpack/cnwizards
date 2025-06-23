@@ -36,12 +36,15 @@ unit CnWizShortCut;
 *               不要自己去释放快捷键对象。
 *
 *           注：这套键盘绑定方法似乎在 64 位下不稳定，考虑到我们和 IDE 自身用 Action
-*           已能满足大部分需要，干脆在 64 位下不用 ToolsAPI 进行键盘绑定。
+*           已能满足大部分需要，当时干脆决定在 64 位下不用 ToolsAPI 进行键盘绑定。
+*           后 D12.3 的四月补丁修了这个问题于是在四月版本后又绑定了。
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6 + Lazarus 4.0
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2025.02.07 V1.5
+* 修改记录：2025.06.23 V1.6
+*               移植到 Lazarus，同样禁用 KeyBinding，待观察效果。
+*           2025.02.07 V1.5
 *               64 位下禁用 KeyBinding，待观察副作用。
 *           2007.05.21 V1.4
 *               去掉 PushKeyboard 调用，改为修改 AddKeyBinding 参数，解决某些快
@@ -63,8 +66,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls,
-  {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} ActnList,
+  Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ActnList,
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} {$ELSE} LCLProc, {$ENDIF}
   CnWizConsts, CnCommon;
 
 type
@@ -207,13 +210,15 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  IniFiles, Registry, {$IFNDEF STAND_ALONE} CnWizUtils, CnIDEVersion, {$ENDIF}
+  IniFiles, Registry,
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils, CnIDEVersion, {$ENDIF} {$ENDIF}
   CnWizOptions, CnWizCompilerConst;
 
 const
   csInvalidIndex = -1;
 
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 
 type
 
@@ -250,6 +255,7 @@ type
     {* 快捷键绑定过程，必须实现的 IOTAKeyboardBinding 方法}
   end;
 
+{$ENDIF}
 {$ENDIF}
 
 //==============================================================================
@@ -365,6 +371,7 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 
 //==============================================================================
 // IDE 快捷键绑定接口实现类
@@ -462,6 +469,7 @@ begin
 end;
 
 {$ENDIF}
+{$ENDIF}
 
 //==============================================================================
 // IDE 快捷键管理器类
@@ -557,7 +565,12 @@ begin
   if IndexOfName(AName) >= 0 then // 重名，如果为空则忽略
   begin
 {$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+    // TODO: 等 CnWizUtils 移植完毕后恢复
+    raise Exception.CreateFmt(SCnDuplicateShortCutName, [AName]);
+{$ELSE}
     raise ECnDuplicateShortCutName.CreateFmt(SCnDuplicateShortCutName, [AName]);
+{$ENDIF}
 {$ELSE}
     raise Exception.CreateFmt(SCnDuplicateShortCutName, [AName]);
 {$ENDIF}
@@ -704,9 +717,11 @@ end;
 
 procedure TCnWizShortCutMgr.SaveMainMenuShortCuts;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
   MainMenu: TMainMenu;
+{$ENDIF}
 {$ENDIF}
 
   procedure DoSaveMenu(MenuItem: TMenuItem);
@@ -731,9 +746,11 @@ begin
   FSaveMenus.Clear;
   FSaveShortCuts.Clear;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   MainMenu := Svcs40.MainMenu;
   DoSaveMenu(MainMenu.Items);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -741,7 +758,9 @@ end;
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
   KeySvcs: IOTAKeyboardServices;
+{$ENDIF}
 {$ENDIF}
   I: Integer;
   IsEmpty: Boolean;
@@ -760,6 +779,7 @@ begin
   if not IsEmpty then
   begin
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
@@ -788,14 +808,17 @@ begin
       RestoreMainMenuShortCuts;
     end;
 {$ENDIF}
+{$ENDIF}
   end;
 end;
 
 // 反安装键盘绑定
 procedure TCnWizShortCutMgr.RemoveKeyBinding;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 var
   KeySvcs: IOTAKeyboardServices;
+{$ENDIF}
 {$ENDIF}
 begin
   if FKeyBindingIndex <> csInvalidIndex then
@@ -803,11 +826,13 @@ begin
     SaveMainMenuShortCuts;
     try
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
       QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     {$IFNDEF COMPILER7_UP}
       KeySvcs.PopKeyboard(SCnKeyBindingName);
     {$ENDIF}
       KeySvcs.RemoveKeyboardBinding(FKeyBindingIndex);
+{$ENDIF}
 {$ENDIF}
       FKeyBindingIndex := csInvalidIndex;
     finally
@@ -826,8 +851,10 @@ begin
   end;
 
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
   if IdeClosing then
     Exit;
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}

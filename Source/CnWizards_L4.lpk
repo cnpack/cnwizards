@@ -36,6 +36,10 @@
         <Filename Value="Framework\CnWizOptions.pas"/>
         <UnitName Value="CnWizOptions"/>
       </Item>
+      <Item>
+        <Filename Value="Framework\CnWizShortCut.pas"/>
+        <UnitName Value="CnWizShortCut"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
