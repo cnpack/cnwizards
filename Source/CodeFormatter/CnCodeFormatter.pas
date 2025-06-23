@@ -1386,14 +1386,14 @@ begin
           Match(tokKeywordNot, 0, 1)
         else
           Match(tokKeywordNot);
-        FormatFactor;
+        FormatFactor(PreSpaceCount, IndentForAnonymous);
       end;
 
     tokLB: // (  需要判断是带括号嵌套的 Designator 还是 Expression.
       begin
         // 暂且修改了 Expression 内部，使其支持^和[]了。
         Match(tokLB, PreSpaceCount);
-        FormatExpression;
+        FormatExpression(PreSpaceCount, IndentForAnonymous);
         Match(tokRB);
 
         // 修补处理 (Expression)^^ 这种语法
