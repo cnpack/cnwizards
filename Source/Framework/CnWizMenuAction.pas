@@ -31,9 +31,11 @@ unit CnWizMenuAction;
 *             - 当不再需要 Action 时，调用 WizActionMgr.Delete(...) 来删除，绝对
 *               不要自己去释放 Action 对象。
 * 开发平台：PWin2000Pro + Delphi 5.01
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6 + Lazarus 4.0
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2012.09.19 by shenloqi
+* 修改记录：2025.06.24
+*               移植到 Lazarus 4.0
+*           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
 *           2002.09.17 V1.0
 *               创建单元，实现功能
@@ -47,11 +49,13 @@ interface
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
   {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} {$ENDIF}
+  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
 type
+  ECnDuplicateCommandException = class(Exception);
+
 //==============================================================================
 // CnWizards IDE Action 封装类
 //==============================================================================
@@ -71,7 +75,7 @@ type
     FLastUpdateTick: Cardinal;
     procedure SetInheritedShortCut;
     function GetShortCut: TShortCut;
-    procedure {$IFDEF DelphiXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
+    procedure {$IFDEF DELPHIXE3_UP}_CnSetShortCut{$ELSE}SetShortCut{$ENDIF}(const Value: TShortCut);
     {* Delphi XE3 引入了 SetShortCut 基方法，为避免同名带入的问题，故将此方法改名}
     procedure OnShortCut(Sender: TObject);
   protected
@@ -242,7 +246,10 @@ const
 var
   FWizActionMgr: TCnWizActionMgr = nil;
 {$IFDEF STAND_ALONE}
-  FStandAloneActionList: TActionList = nil; // 独立运行时没有 IDE ActionList
+  FCnWizardsActionList: TActionList = nil; // 独立运行时没有 IDE ActionList
+{$ENDIF}
+{$IFDEF LAZARUS}
+  FCnWizardsActionList: TActionList = nil; // Lazarus 里没有 IDE ActionList
 {$ENDIF}
 
 //==============================================================================
@@ -454,12 +461,10 @@ end;
 procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
   const ACommand, ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
   const IcoName, AHint: string; UseDefaultIcon: Boolean);
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Svcs40: INTAServices40;
   NewName: string;
-{$ENDIF}
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
@@ -495,13 +500,14 @@ begin
   AWizAction.OnExecute := OnExecute;
   AWizAction.OnUpdate := OnUpdate;
 
-{$IFDEF STAND_ALONE}
-  AWizAction.ActionList := FStandAloneActionList;
+{$IFDEF NO_DELPHI_OTA}
+  AWizAction.ActionList := FCnWizardsActionList;
 {$ELSE}
   AWizAction.ActionList := Svcs40.ActionList;
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
   if CnWizLoadIcon(nil, AWizAction.FIcon, IcoName, UseDefaultIcon) then
   begin
 {$IFDEF DEBUG}
@@ -519,6 +525,7 @@ begin
   end
   else
 {$ENDIF}
+{$ENDIF}
     AWizAction.ImageIndex := -1;
 
   AWizAction.FCommand := ACommand;
@@ -528,7 +535,7 @@ end;
 function TCnWizActionMgr.AddMenuAction(const ACommand, ACaption, AMenuName: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
   AHint: string; UseDefaultIcon: Boolean): TCnWizMenuAction;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
@@ -538,16 +545,10 @@ begin
 {$ENDIF}
 
   if IndexOfCommand(ACommand) >= 0 then
-  begin
-{$IFDEF STAND_ALONE}
-    raise Exception.CreateFmt(SCnDuplicateCommand, [ACommand]);
-{$ELSE}
-    raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
-{$ENDIF}
-  end;
+    raise ECnDuplicateCommandException.CreateFmt(SCnDuplicateCommand, [ACommand]);
 
-{$IFDEF STAND_ALONE}
-  Result := TCnWizMenuAction.Create(FStandAloneActionList);
+{$IFDEF NO_DELPHI_OTA}
+  Result := TCnWizMenuAction.Create(FCnWizardsActionList);
 {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizMenuAction.Create(Svcs40.ActionList);
@@ -562,7 +563,9 @@ begin
     Result.FMenu.FreeNotification(Self);
     Result.FMenu.Name := AMenuName;
     Result.FMenu.Action := Result;
+{$IFNDEF LAZARUS}
     Result.FMenu.AutoHotkeys := maManual;
+{$ENDIF}
     Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut,
       AMenuName, 0, Result);
 
@@ -581,8 +584,10 @@ function TCnWizActionMgr.AddAction(const ACommand, ACaption: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
   AHint: string; UseDefaultIcon: Boolean): TCnWizAction;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
@@ -590,19 +595,17 @@ begin
 {$ENDIF}
 
   if IndexOfCommand(ACommand) >= 0 then
-  begin
-{$IFDEF STAND_ALONE}
-    raise Exception.CreateFmt(SCnDuplicateCommand, [ACommand]);
-{$ELSE}
-    raise ECnDuplicateCommand.CreateFmt(SCnDuplicateCommand, [ACommand]);
-{$ENDIF}
-  end;
+    raise ECnDuplicateCommandException.CreateFmt(SCnDuplicateCommand, [ACommand]);
 
 {$IFDEF STAND_ALONE}
-  Result := TCnWizAction.Create(FStandAloneActionList);
+  Result := TCnWizAction.Create(FCnWizardsActionList);
 {$ELSE}
+  {$IFDEF LAZARUS}
+  Result := TCnWizAction.Create(FCnWizardsActionList);
+  {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := TCnWizAction.Create(Svcs40.ActionList);
+  {$ENDIF}
 {$ENDIF}
   Result.FreeNotification(Self);
 
@@ -818,20 +821,32 @@ end;
 
 // IdeActionCount 属性读方法
 function TCnWizActionMgr.GetIdeActionCount: Integer;
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  Result := 0;
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList.ActionCount;
+{$ENDIF}
 end;
 
 // IdeActions 属性读方法
 function TCnWizActionMgr.GetIdeActions(Index: Integer): TContainedAction;
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  Result := nil;
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList.Actions[Index];
+{$ENDIF}
 end;
 
 {$ENDIF}
@@ -887,10 +902,10 @@ end;
 {$IFDEF STAND_ALONE}
 
 initialization
-  FStandAloneActionList := TActionList.Create(nil);
+  FCnWizardsActionList := TActionList.Create(nil);
 
 finalization
-  FStandAloneActionList.Free;
+  FCnWizardsActionList.Free;
 
 {$ENDIF}
 end.

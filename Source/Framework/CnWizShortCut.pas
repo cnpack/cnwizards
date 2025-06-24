@@ -67,10 +67,14 @@ interface
 
 uses
   Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ActnList,
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, {$ENDIF} {$ELSE} LCLProc, {$ENDIF}
+  {$IFNDEF STAND_ALONE}
+  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, {$ENDIF}
+  {$ENDIF}
   CnWizConsts, CnCommon;
 
 type
+  ECnDuplicateShortCutNameException = class(Exception);
+
 //==============================================================================
 // IDE 快捷键定义类
 //==============================================================================
@@ -93,6 +97,10 @@ type
     FAction: TAction;
     FName: string;
     FTag: Integer;
+{$IFDEF LAZARUS}
+    FLazShortCut: TIDEShortCut; // 结构，无需释放
+    FLazCommand: TIDECommand;   // 注册的对象，如何释放？
+{$ENDIF}
     procedure SetKeyProc(const Value: TNotifyEvent);
     procedure SetShortCut(const Value: TShortCut);
     procedure SetMenuName(const Value: string);
@@ -217,8 +225,7 @@ uses
 const
   csInvalidIndex = -1;
 
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 
 type
 
@@ -256,7 +263,6 @@ type
   end;
 
 {$ENDIF}
-{$ENDIF}
 
 //==============================================================================
 // IDE 快捷键定义类
@@ -266,12 +272,24 @@ type
 
 // 快捷键属性已变更，通知管理器重新绑定
 procedure TCnWizShortCut.Changed;
+{$IFDEF LAZARUS}
+var
+  Key: Word;
+  Shift: TShiftState;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnWizShortCut.Changed: %s', [Name]);
 {$ENDIF}
+
+{$IFDEF LAZARUS}
+  // Lazarus 下先行同步快捷键保存，暂时不塞给 IDE
+  ShortCutToKey(FShortCut, Key, Shift);
+  FLazShortCut := IDEShortCut(Key, Shift);
+{$ELSE}
   if FOwner <> nil then
     FOwner.UpdateBinding;
+{$ENDIF}
 end;
 
 // 类构造器
@@ -370,8 +388,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // IDE 快捷键绑定接口实现类
@@ -469,7 +486,6 @@ begin
 end;
 
 {$ENDIF}
-{$ENDIF}
 
 //==============================================================================
 // IDE 快捷键管理器类
@@ -563,18 +579,7 @@ begin
 {$ENDIF}
 
   if IndexOfName(AName) >= 0 then // 重名，如果为空则忽略
-  begin
-{$IFNDEF STAND_ALONE}
-{$IFDEF LAZARUS}
-    // TODO: 等 CnWizUtils 移植完毕后恢复
-    raise Exception.CreateFmt(SCnDuplicateShortCutName, [AName]);
-{$ELSE}
-    raise ECnDuplicateShortCutName.CreateFmt(SCnDuplicateShortCutName, [AName]);
-{$ENDIF}
-{$ELSE}
-    raise Exception.CreateFmt(SCnDuplicateShortCutName, [AName]);
-{$ENDIF}
-  end;
+    raise ECnDuplicateShortCutNameException.CreateFmt(SCnDuplicateShortCutName, [AName]);
 
   Result := TCnWizShortCut.Create(Self, AName, AShortCut, AKeyProc, AMenuName, ATag);
   Result.Action := AnAction;
@@ -716,12 +721,10 @@ begin
 end;
 
 procedure TCnWizShortCutMgr.SaveMainMenuShortCuts;
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Svcs40: INTAServices40;
   MainMenu: TMainMenu;
-{$ENDIF}
 {$ENDIF}
 
   procedure DoSaveMenu(MenuItem: TMenuItem);
@@ -745,22 +748,18 @@ var
 begin
   FSaveMenus.Clear;
   FSaveShortCuts.Clear;
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   MainMenu := Svcs40.MainMenu;
   DoSaveMenu(MainMenu.Items);
-{$ENDIF}
 {$ENDIF}
 end;
 
 // 安装键盘绑定
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
   KeySvcs: IOTAKeyboardServices;
-{$ENDIF}
 {$ENDIF}
   I: Integer;
   IsEmpty: Boolean;
@@ -778,8 +777,7 @@ begin
 
   if not IsEmpty then
   begin
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
@@ -808,31 +806,26 @@ begin
       RestoreMainMenuShortCuts;
     end;
 {$ENDIF}
-{$ENDIF}
   end;
 end;
 
 // 反安装键盘绑定
 procedure TCnWizShortCutMgr.RemoveKeyBinding;
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 var
   KeySvcs: IOTAKeyboardServices;
-{$ENDIF}
 {$ENDIF}
 begin
   if FKeyBindingIndex <> csInvalidIndex then
   begin
     SaveMainMenuShortCuts;
     try
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
       QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     {$IFNDEF COMPILER7_UP}
       KeySvcs.PopKeyboard(SCnKeyBindingName);
     {$ENDIF}
       KeySvcs.RemoveKeyboardBinding(FKeyBindingIndex);
-{$ENDIF}
 {$ENDIF}
       FKeyBindingIndex := csInvalidIndex;
     finally
@@ -850,11 +843,9 @@ begin
     Exit;
   end;
 
-{$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
   if IdeClosing then
     Exit;
-{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}

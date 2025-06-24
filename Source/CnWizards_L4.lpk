@@ -44,6 +44,14 @@
         <Filename Value="Framework\CnWizShortCut.pas"/>
         <UnitName Value="CnWizShortCut"/>
       </Item>
+      <Item>
+        <Filename Value="Framework\CnWizMenuAction.pas"/>
+        <UnitName Value="CnWizMenuAction"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizClasses.pas"/>
+        <UnitName Value="CnWizClasses"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

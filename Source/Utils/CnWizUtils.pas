@@ -77,12 +77,10 @@ uses
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
 type
-  ECnWizardException = class(Exception);
-  ECnDuplicateShortCutName = class(ECnWizardException);
-  ECnDuplicateCommand = class(ECnWizardException);
   ECnEmptyCommand = class(ECnWizardException);
 
   TFormType = (ftBinary, ftText, ftUnknown);
+
   TShortCutDuplicated = (sdNoDuplicated, sdDuplicatedIgnore, sdDuplicatedStop);
   // 快捷键冲突的三种状态
 

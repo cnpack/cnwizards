@@ -9,7 +9,7 @@ interface
 
 uses
   CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut, 
-  LazarusPackageIntf;
+  CnWizMenuAction, CnWizClasses, LazarusPackageIntf;
 
 implementation
 
