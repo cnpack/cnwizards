@@ -181,7 +181,7 @@ begin
             EditorForm.WindowState := wsNormal
           else
           begin
-            IdeMainForm := GetIdeMainForm;
+            IdeMainForm := GetIDEMainForm;
             if Assigned(IdeMainForm) then     // 找到 IDE 主窗口时设置在主窗口下方
             begin
               IdeBottom := IdeMainForm.Top + IdeMainForm.Height;
@@ -298,7 +298,7 @@ var
   end;
 
 begin
-  IdeMainForm := GetIdeMainForm;
+  IdeMainForm := GetIDEMainForm;
   // 代码窗口全屏最大化且主窗口没有最大化时才自动隐藏
   Result := Active and FAutoHideMainForm and Assigned(IdeMainForm) and
     (IdeMainForm.WindowState = wsNormal) and FullScreen and IsEditorMaximized;
@@ -326,7 +326,7 @@ begin
   Result := False;
   if GetCursorPos(MousePos) then
   begin
-    IdeMainForm := GetIdeMainForm;
+    IdeMainForm := GetIDEMainForm;
     if Assigned(IdeMainForm) then
     begin
       with IdeMainForm do
@@ -353,7 +353,7 @@ var
   MouseEnter: Boolean;
   IdeMainForm: TCustomForm;
 begin
-  IdeMainForm := GetIdeMainForm;
+  IdeMainForm := GetIDEMainForm;
   if NeedAutoHide then
   begin
     if not FLastAutoHideMainForm then
@@ -399,7 +399,7 @@ begin
 
   FUpdating := True;
   try
-    IdeMainForm := GetIdeMainForm;
+    IdeMainForm := GetIDEMainForm;
     if Assigned(IdeMainForm) then
     begin
       if IdeMainForm.WindowState = wsNormal then

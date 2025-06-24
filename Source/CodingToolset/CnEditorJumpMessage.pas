@@ -1348,7 +1348,7 @@ begin
   begin
     CnOtaShowDesignerForm; // 先尝试切到设计器，因为 IDE Insight 在非设计器界面无法搜索设计器界面组件，而编辑器没啥可搜的
 
-    Bar := GetIdeInsightBar;
+    Bar := GetIDEInsightBar;
     if (Bar <> nil) and (Bar is TCustomEdit) then
     begin
       (Bar as TCustomEdit).Text := S;

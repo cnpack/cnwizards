@@ -761,7 +761,7 @@ begin
 {$IFDEF STAND_ALONE}
     ScreenRect := GetWorkRect(Application.MainForm);
 {$ELSE}
-    ScreenRect := GetWorkRect(GetIdeMainForm);
+    ScreenRect := GetWorkRect(GetIDEMainForm);
 {$ENDIF}
     ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - Offset;
 

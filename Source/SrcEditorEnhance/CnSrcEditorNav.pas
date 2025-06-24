@@ -457,7 +457,7 @@ begin
   AddMenuItem(AMenu.Items, SCnEditorEnhanceConfig, OnEnhConfig);
 
 {$IFDEF COMPILER7_UP}
-  ScreenRect := GetWorkRect(GetIdeMainForm);
+  ScreenRect := GetWorkRect(GetIDEMainForm);
   ScreenHeight := ScreenRect.Bottom - ScreenRect.Top - 200; // 去除 IDE 主窗体高度
   MaxItems := ScreenHeight div GetMainMenuItemHeight;
   if MaxItems < 8 then MaxItems := 8;
@@ -893,13 +893,13 @@ procedure TCnSrcEditorNavMgr.DoUpdateInstallInAppBuilder(Sender: TObject);
 var
   EditorNav: TCnSrcEditorNav;
 begin
-  EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+  EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIDEMainForm,
     TCnSrcEditorNav, SCnSrcEditorNavName));
   if Active and ExtendForwardBack then
   begin
     if not Assigned(EditorNav) then
     begin
-      EditorNav := TCnSrcEditorNav.Create(GetIdeMainForm);
+      EditorNav := TCnSrcEditorNav.Create(GetIDEMainForm);
       EditorNav.Name := SCnSrcEditorNavName;
       EditorNav.FNavMgr := Self;
       EditorNav.FEditControl := nil; // 主工具栏上，暂无当前 EditControl
@@ -925,7 +925,7 @@ var
 begin
   if Active and ExtendForwardBack then
   begin
-    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIDEMainForm,
       TCnSrcEditorNav, SCnSrcEditorNavName));
     if EditorNav <> nil then
     begin
@@ -1008,7 +1008,7 @@ begin
   if (EditorNav = nil) or (EditorNav.FOldBackAction = nil) or (EditorNav.FOldForwardAction = nil) then
   begin
     // 当前编辑器窗体里没找到，或找到了但安装失败，则要去 MainForm 里找
-    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIdeMainForm,
+    EditorNav := TCnSrcEditorNav(FindComponentByClass(GetIDEMainForm,
       TCnSrcEditorNav, SCnSrcEditorNavName));
 
 {$IFDEF DEBUG}

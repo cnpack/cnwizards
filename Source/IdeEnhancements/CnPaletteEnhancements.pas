@@ -666,7 +666,7 @@ begin
   if Assigned(ComponentPalette) then
   begin
     H := 0;
-    AForm := GetIdeMainForm;
+    AForm := GetIDEMainForm;
     if AForm <> nil then
       H := AForm.Height;
 
@@ -730,7 +730,7 @@ var
   AForm: TCustomForm;
   I, J, MainTop, HeightDelta: Integer;
 begin
-  AForm := GetIdeMainForm;
+  AForm := GetIDEMainForm;
   if AForm = nil then Exit;
   HeightDelta := AForm.Height - OldHeight;
   if HeightDelta = 0 then Exit;
@@ -807,7 +807,7 @@ var
   IndexTab, DivCount: Integer;
 begin
   MenuItem.Visible := TabsMenu;
-  DivCount := (Screen.Height - TForm(GetIdeMainForm).Height) div GetMainMenuItemHeight;
+  DivCount := (Screen.Height - TForm(GetIDEMainForm).Height) div GetMainMenuItemHeight;
   if TabsMenu then
   begin
     List := TStringList.Create;
@@ -882,7 +882,7 @@ begin
     end;
     FTabOnClick(FTabPopupItem);
     // 此步骤后，Tabs 子菜单已创建，注意如果有其他专家也挂接此事件，则冲突
-    DivCount := (Screen.Height - TForm(GetIdeMainForm).Height - 75) div GetMainMenuItemHeight - 1;
+    DivCount := (Screen.Height - TForm(GetIDEMainForm).Height - 75) div GetMainMenuItemHeight - 1;
 
     if FTabPopupItem.Count > DivCount then // 分页
     begin
@@ -977,7 +977,7 @@ var
   AForm: TCustomForm;
   I: Integer;
 begin
-  AForm := GetIdeMainForm;
+  AForm := GetIDEMainForm;
   FMenuBar := nil;
   if AForm <> nil then
   begin
@@ -1604,7 +1604,7 @@ var
   I: Integer;
   Main: TCustomForm;
 begin
-  Main := GetIdeMainForm;
+  Main := GetIDEMainForm;
   if Main <> nil then
   begin
     for I := 0 to Main.ControlCount - 1 do
@@ -1656,7 +1656,7 @@ var
   I: Integer;
   Main: TCustomForm;
 begin
-  Main := GetIdeMainForm;
+  Main := GetIDEMainForm;
   if Main <> nil then
   begin
     for I := 0 to Main.ControlCount - 1 do

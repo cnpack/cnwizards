@@ -1264,7 +1264,7 @@ begin
   // 即使 GetVCLParentMenuItem 函数里从只找 Menu/Frame 改为全递归，也仍然存在
   // Owner 为 nil 的 PopupMenu 无法被找到的问题。
 {$IFDEF DELPHI103_RIO_UP}
-  Obj.MatchFrame := TCnMatchButtonFrame.Create(GetIdeMainForm);
+  Obj.MatchFrame := TCnMatchButtonFrame.Create(GetIDEMainForm);
   Obj.MatchFrame.Name := Obj.MatchFrame.Name + FormatDateTime('yyyyMMddhhmmss', Now);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Create ProcToolbar: MatchFrame Name: ' + Obj.MatchFrame.Name);
