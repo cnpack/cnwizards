@@ -313,10 +313,10 @@ var
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
 
-function GetIdeMainForm: TCustomForm;
+function GetIDEMainForm: TCustomForm;
 {* 返回 IDE 主窗体 (TAppBuilder) }
 
-function GetIdeEdition: string;
+function GetIDEEdition: string;
 {* 返回 IDE 版本}
 
 function GetComponentPaletteTabControl: TTabControl;
@@ -340,7 +340,7 @@ function GetComponentPalettePopupMenu: TPopupMenu;
 function GetComponentPaletteControlBar: TControlBar;
 {* 返回组件面板所在的 ControlBar，可能为空}
 
-function GetIdeInsightBar: TWinControl;
+function GetIDEInsightBar: TWinControl;
 {* 返回 IDE Insight 搜索框控件对象}
 
 function GetExpandableEvalViewForm: TCustomForm;
@@ -1338,7 +1338,7 @@ end;
 //==============================================================================
 
 // 返回 IDE 主窗体 (TAppBuilder)
-function GetIdeMainForm: TCustomForm;
+function GetIDEMainForm: TCustomForm;
 begin
   Assert(Assigned(Application));
   Result := Application.FindComponent('AppBuilder') as TCustomForm;
@@ -1349,7 +1349,7 @@ begin
 end;
 
 // 取 IDE 版本
-function GetIdeEdition: string;
+function GetIDEEdition: string;
 begin
   Result := '';
 
@@ -1373,7 +1373,7 @@ var
 begin
   Result := nil;
 
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
     Result := MainForm.FindComponent('TabControl') as TTabControl;
 
@@ -1390,7 +1390,7 @@ var
 begin
   Result := nil;
 
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
     Result := MainForm.FindComponent(SCnNewPaletteFrameName) as TWinControl;
   if Result <> nil then
@@ -1409,7 +1409,7 @@ var
 begin
   Result := nil;
 
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
     Result := MainForm.FindComponent(SCnNewPaletteFrameName) as TWinControl;
   if Result <> nil then
@@ -1441,7 +1441,7 @@ end;
 // 返回对象检查器窗体，可能为空
 function GetObjectInspectorForm: TCustomForm;
 begin
-  Result := GetIdeMainForm;
+  Result := GetIDEMainForm;
   if Result <> nil then  // 大部分版本下 ObjectInspector 是 AppBuilder 的子控件
     Result := TCustomForm(Result.FindComponent(SCnPropertyInspectorName));
   if Result = nil then // D2007 或某些版本下 ObjectInspector 是 Application 的子控件
@@ -1458,7 +1458,7 @@ var
   MainForm: TCustomForm;
 begin
   Result := nil;
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
     Result := TPopupMenu(MainForm.FindComponent('PaletteMenu'));
 {$IFDEF DEBUG}
@@ -1475,7 +1475,7 @@ var
 begin
   Result := nil;
 
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
     for I := 0 to MainForm.ComponentCount - 1 do
       if MainForm.Components[I] is TControlBar then
@@ -1505,7 +1505,7 @@ begin
   Result := nil;
 end;
 
-function GetIdeInsightBar: TWinControl;
+function GetIDEInsightBar: TWinControl;
 {$IFDEF IDE_HAS_INSIGHT}
 var
   MainForm: TCustomForm;
@@ -1514,7 +1514,7 @@ var
 begin
   Result := nil;
 {$IFDEF IDE_HAS_INSIGHT}
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   if MainForm <> nil then
   begin
     AComp := MainForm.FindComponent(SCnIDEInsightBarName);
@@ -1534,7 +1534,7 @@ var
 begin
 {$IFDEF COMPILER7_UP}
   Result := 23;
-  MainForm := GetIdeMainForm;
+  MainForm := GetIDEMainForm;
   Component := nil;
   if MainForm <> nil then
     Component := MainForm.FindComponent('MenuBar');

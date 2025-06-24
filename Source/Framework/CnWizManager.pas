@@ -57,12 +57,10 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
-  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry, ToolsAPI, Contnrs,
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, DesignMenus,
-  {$ELSE}
-  DsgnIntf,
-  {$ENDIF}
+  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
+  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI,
+  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
+  DsgnIntf,{$ENDIF} {$ENDIF}
   CnWizClasses, CnWizConsts, CnWizMenuAction
   {$IFNDEF CNWIZARDS_MINIMUM}, CnLangMgr, CnRestoreSystemMenu, CnWizIdeHooks {$ENDIF};
 
@@ -88,7 +86,7 @@ type
 
 { TCnWizardMgr }
 
-  TCnWizardMgr = class(TNotifierObject, IOTAWizard)
+  TCnWizardMgr = class{$IFNDEF NO_DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
   {* CnWizardMgr 专家管理器类，用于维护专家列表。
      请不要直接创建该类的实例，该类的实例在专家 DLL 注册时自动创建，请使用全局
      变量 CnWizardMgr 来访问管理器实例。}

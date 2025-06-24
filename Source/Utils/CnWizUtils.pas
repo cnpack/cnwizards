@@ -2203,11 +2203,13 @@ begin
   if MainMenu <> nil then
   begin
     for I := 0 to MainMenu.Items.Count - 1 do
+    begin
       if AnsiCompareText(SToolsMenuName, MainMenu.Items[I].Name) = 0 then
       begin
         Result := MainMenu.Items[I];
         Exit;
-      end
+      end;
+    end;
   end;
   Result := nil;
 end;
@@ -2230,13 +2232,19 @@ begin
   Result := nil;
   ActionList := GetIDEActionList;
   if ActionList <> nil then
+  begin
     for I := 0 to ActionList.ActionCount - 1 do
+    begin
       if ActionList.Actions[I] is TCustomAction then
+      begin
         if TCustomAction(ActionList.Actions[I]).Name = AName then
         begin
           Result := TCustomAction(ActionList.Actions[I]);
           Exit;
         end;
+      end;
+    end;
+  end;
 end;
 
 // 取得 IDE 主 ActionList 中指定快捷键的 Action
@@ -2248,13 +2256,19 @@ begin
   Result := nil;
   ActionList := GetIDEActionList;
   if ActionList <> nil then
+  begin
     for I := 0 to ActionList.ActionCount - 1 do
+    begin
       if ActionList.Actions[I] is TCustomAction then
+      begin
         if TCustomAction(ActionList.Actions[I]).ShortCut = ShortCut then
         begin
           Result := TCustomAction(ActionList.Actions[I]);
           Exit;
         end;
+      end;
+    end;
+  end;
 end;
 
 // 取得 IDE 根目录

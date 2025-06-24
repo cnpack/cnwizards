@@ -92,6 +92,10 @@ type
 
 {$IFDEF NO_DELPHI_OTA}
   TWizardState = set of (wsEnabled, wsChecked);
+
+  TOTAFileNotification = (ofnFileOpening, ofnFileOpened, ofnFileClosing,
+    ofnDefaultDesktopLoad, ofnDefaultDesktopSave, ofnProjectDesktopLoad,
+    ofnProjectDesktopSave, ofnPackageInstalled, ofnPackageUninstalled);
 {$ENDIF}
 
 //==============================================================================
@@ -102,7 +106,7 @@ type
 
 {$M+}
 
-  TCnBaseWizard = class{$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS}(TNotifierObject, IOTAWizard){$ENDIF}{$ENDIF}
+  TCnBaseWizard = class{$IFNDEF NO_DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
   {* CnWizard 专家抽象基类，定义了专家最基本的公共内容 }
   private
     FActive: Boolean;
@@ -407,7 +411,7 @@ type
 
 { TCnRepositoryWizard }
 
-  TCnRepositoryWizard = class(TCnIconWizard {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS} , IOTARepositoryWizard {$ENDIF}{$ENDIF})
+  TCnRepositoryWizard = class(TCnIconWizard {$IFNDEF NO_DELPHI_OTA}, IOTARepositoryWizard {$ENDIF})
   {* CnWizard 模板向导抽象基类 }
   protected
     FIconHandle: HICON;
@@ -438,8 +442,8 @@ type
 
 { TCnUnitWizard }
 
-  TCnUnitWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS},
-    {$IFDEF DELPHI10_UP}IOTAProjectWizard{$ELSE}IOTAFormWizard{$ENDIF} {$ENDIF}{$ENDIF});
+  TCnUnitWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA},
+    {$IFDEF DELPHI10_UP}IOTAProjectWizard{$ELSE}IOTAFormWizard{$ENDIF} {$ENDIF});
   {* 必须实现 IOTAFormWizard 才能在 New 对话框中出现, BDS2006 则要求 IOTAProjectWizard}
 
 //==============================================================================
@@ -448,7 +452,7 @@ type
 
 { TCnFormWizard }
 
-  TCnFormWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS}, IOTAFormWizard {$ENDIF}{$ENDIF});
+  TCnFormWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA}, IOTAFormWizard {$ENDIF});
 
 //==============================================================================
 // 工程模板向导基类
@@ -456,7 +460,7 @@ type
 
 { TCnProjectWizard }
 
-  TCnProjectWizard = class(TCnRepositoryWizard {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS}, IOTAProjectWizard {$ENDIF}{$ENDIF});
+  TCnProjectWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA}, IOTAProjectWizard {$ENDIF});
 
 //==============================================================================
 // 设计器或编辑器右键菜单执行条目的基类，子类可重载相应方法实现功能
@@ -563,10 +567,10 @@ procedure AdjustCnWizardsClassOrder;
 implementation
 
 uses
-  {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS} CnWizUtils, {$ENDIF}{$ENDIF} CnWizOptions, CnCommon
-{$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS}
+  {$IFNDEF NO_DELPHI_OTA} CnWizUtils, {$ENDIF} CnWizOptions, CnCommon
+{$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF NO_DELPHI_OTA}
   , CnWizCommentFrm, CnWizSubActionShortCutFrm
-{$ENDIF} {$ENDIF}{$ENDIF}
+{$ENDIF}{$ENDIF}
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 //==============================================================================

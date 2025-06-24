@@ -26,9 +26,11 @@ unit CnFastList;
 * 单元作者：周劲羽 zjy@cnpack.org
 * 备    注：该单元定义了 快速列表类 TCnFastList
 * 开发平台：PWinXP SP3 + Delphi 7
-* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
+* 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6 + Lazarus 4.0
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2017.01.11 V1.2
+* 修改记录：2025.06.24 V1.3
+*               Lazarus 下编译通过
+*           2017.01.11 V1.2
 *               增加作为队列和栈使用的 Push/Pop/Peek 方法
 *           2015.06.29 V1.1
 *               去除几处边界检查操作以增加性能，略危险
@@ -42,7 +44,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, {$IFDEF COMPILER6_UP} RTLConsts {$ELSE} Consts {$ENDIF}, SysUtils;
+  Classes, {$IFDEF COMPILER6_UP} RTLConsts {$ELSE}
+  {$IFDEF LAZARUS} RTLConsts {$ELSE} Consts {$ENDIF} {$ENDIF}, SysUtils;
 
 {$IFDEF BDS2012_UP}
 
