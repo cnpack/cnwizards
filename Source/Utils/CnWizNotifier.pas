@@ -57,8 +57,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
+  {$IFNDEF LAZARUS} AppEvnts, {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} Consts, ToolsAPI, {$ENDIF}
-  CnWizUtils, {$ELSE} AppEvnts, {$ENDIF} CnClasses {$IFNDEF STAND_ALONE}
+  CnWizUtils, {$ENDIF} CnClasses {$IFNDEF STAND_ALONE}
   {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type

@@ -219,7 +219,8 @@ uses
   CnDebug,
 {$ENDIF}
   IniFiles, Registry,
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils, CnIDEVersion, {$ENDIF} {$ENDIF}
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils,
+  {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF} {$ENDIF}
   CnWizOptions, CnWizCompilerConst;
 
 const
@@ -783,7 +784,7 @@ begin
     try
       // 12.3 非 HotFix 版的 64 位下注册会出异常，必须先屏蔽
       // 之后还要加上 13 及更高版本的判断
-      if not _IS64BIT or IsDelphi12Dot3GEHotFix then
+      if not _IS64BIT {$IFNDEF CNWIZARDS_MINIMUM} or IsDelphi12Dot3GEHotFix {$ENDIF} then
       begin
         try
           FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));

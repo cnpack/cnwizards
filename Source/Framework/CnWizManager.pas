@@ -285,13 +285,14 @@ uses
 {$IFDEF DEBUG}
   CnDebug, 
 {$ENDIF}
-  CnWizOptions, CnWizShortCut, CnCommon, CnWizTranslate, CnWizMultiLang,
-{$IFNDEF LAZARUS} {$IFNDEF CNWIZARDS_MINIMUM}
-  CnWizConfigFrm, CnWizUpgradeFrm,
-  CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
+  CnWizOptions, CnWizShortCut, CnCommon,
+{$IFNDEF CNWIZARDS_MINIMUM}
+  CnWizAbout, CnWizShareImages, CnDesignEditor, CnWizMultiLang, CnWizBoot, CnWizTranslate,
+  {$IFNDEF LAZARUS}
+  CnWizConfigFrm, CnWizUpgradeFrm, CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
+  {$ENDIF}
 {$ENDIF}
-  CnWizNotifier, {$ENDIF} CnWizAbout, CnWizBoot, CnDesignEditor,
-  CnWizShareImages, CnWizCompilerConst;
+  CnWizNotifier, CnWizCompilerConst;
 
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
@@ -389,7 +390,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate ShareImg Copy To IDE');
 {$ENDIF}
-  dmCnSharedImages.CopyToIDEMainImageList;
+  // TODO: dmCnSharedImages.CopyToIDEMainImageList;
 {$ENDIF}
 
 {$IFNDEF LAZARUS}
