@@ -183,7 +183,8 @@ const
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
     'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0',
     'BDS\12.0', 'BDS\14.0', 'BDS\15.0', 'BDS\16.0', 'BDS\17.0', 'BDS\18.0', 'BDS\19.0',
-    'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0', 'C++Builder\5.0', 'C++Builder\6.0');
+    'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0', 'C++Builder\5.0', 'C++Builder\6.0',
+    '');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -199,7 +200,7 @@ begin
   FCanClose := True;
   // 使窗体可接受文件拖放
   DragAcceptFiles(Handle, True);
-  //
+
   Application.Title := SCnAppTitle + SCnAppVer;
   Caption := Application.Title;
   pgcMain.SendToBack;
