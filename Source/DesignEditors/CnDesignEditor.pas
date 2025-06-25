@@ -45,12 +45,10 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, IniFiles, Registry, TypInfo, Contnrs,
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors,
-  {$ELSE}
-  DsgnIntf,
+  {$IFNDEF LAZARUS} ToolsAPI,
+  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   {$ENDIF}
-  ToolsAPI, CnCommon, CnConsts, CnDesignEditorConsts, CnWizOptions, CnWizUtils,
+  CnCommon, CnConsts, CnDesignEditorConsts, CnWizOptions, CnWizUtils,
   CnIni, CnWizNotifier, CnEventBus;
 
 type

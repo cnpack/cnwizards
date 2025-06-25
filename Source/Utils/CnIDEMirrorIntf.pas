@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Windows, Forms, Controls, ToolsAPI
+  SysUtils, Classes, Windows, Forms, Controls {$IFNDEF NO_DELPHI_OTA}, ToolsAPI {$ENDIF}
   {$IFDEF DELPHI110_ALEXANDRIA}, System.Generics.Collections {$ENDIF}
   {$IFDEF DELPHI102_TOKYO}, Themes {$ENDIF};
 
@@ -152,6 +152,7 @@ var
   I: Integer;
   IntfTable: PInterfaceTable;
   IntfEntry: PInterfaceEntry;
+  IIDP: Pointer;
   OldProtection, DummyProtection: DWORD;
 begin
   Result := False;
@@ -161,15 +162,24 @@ begin
     for I := 0 to IntfTable.EntryCount-1 do
     begin
       IntfEntry := @IntfTable.Entries[I];
-      if CompareMem(@IntfEntry^.IID, @OldGUID, SizeOf(TGUID)) then
+{$IFDEF FPC}
+      IIDP := IntfEntry^.IID;
+{$ELSE}
+      IIDP := @(IntfEntry^.IID);
+{$ENDIF}
+      if CompareMem(IIDP, @OldGUID, SizeOf(TGUID)) then
       begin
-        if not VirtualProtect(@IntfEntry^.IID, SizeOf(TGUID), PAGE_EXECUTE_READWRITE, @OldProtection) then
+        if not VirtualProtect(IIDP, SizeOf(TGUID), PAGE_EXECUTE_READWRITE, @OldProtection) then
           raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
 
         try
+{$IFDEF FPC}
+          IntfEntry^.IID^ := NewGUID;
+{$ELSE}
           IntfEntry^.IID := NewGUID;
+{$ENDIF}
         finally
-          if not VirtualProtect(@IntfEntry^.IID, SizeOf(TGUID), OldProtection, @DummyProtection) then
+          if not VirtualProtect(IIDP, SizeOf(TGUID), OldProtection, @DummyProtection) then
             raise Exception.CreateFmt(SMemoryWriteError, [SysErrorMessage(GetLastError)]);
         end;
 

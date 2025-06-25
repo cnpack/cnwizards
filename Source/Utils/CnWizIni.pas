@@ -41,6 +41,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, IniFiles, Registry,
+  {$IFDEF LAZARUS} Variants, {$ENDIF}
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF UNICODE} RTLConsts, {$ENDIF}
   CnCommon, CnHashMap;

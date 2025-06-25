@@ -63,18 +63,21 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
-  Forms, ImgList, ExtCtrls, ExptIntf, ToolsAPI, ComObj, IniFiles, FileCtrl, Buttons,
+  Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
+  {$IFDEF LAZARUS} {$ELSE} ExptIntf, ToolsAPI, RegExpr, CnSearchCombo,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
-  RegExpr, mPasLex, mwBCBTokenList, CnNative,
+  {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF} {$ENDIF}
+  mPasLex, mwBCBTokenList, CnNative,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
-  CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni, CnSearchCombo,
+  CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
+
+{$IFNDEF LAZARUS}
 
 type
   ECnEmptyCommand = class(ECnWizardException);
@@ -211,6 +214,8 @@ procedure EnsureFormVisible(const Form: TCustomForm);
 {* 保证窗体可见}
 function GetCaptionOrgStr(const Caption: string): string;
 {* 删除标题中热键信息}
+{$ENDIF}
+
 function GetIDEImageList: TCustomImageList;
 {* 取得 IDE 主 ImageList}
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -225,14 +230,16 @@ function GetIDEMainMenu: TMainMenu;
 {* 取得 IDE 主菜单}
 function GetIDEToolsMenu: TMenuItem;
 {* 取得 IDE 主菜单下的 Tools 菜单}
+function GetIdeRootDirectory: string;
+{* 取得 IDE 根目录}
+
+{$IFNDEF LAZARUS}
 function GetIDEActionList: TCustomActionList;
 {* 取得 IDE 主 ActionList}
 function GetIDEActionFromName(const AName: string): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定名称的 Action}
 function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定快捷键的 Action}
-function GetIdeRootDirectory: string;
-{* 取得 IDE 根目录}
 function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
 {* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
 procedure SaveIDEActionListToFile(const FileName: string);
@@ -262,6 +269,8 @@ procedure SortListByMenuOrder(List: TList);
 {* 根据 TCnMenuWizard 列表中的 MenuOrder 值进行由小到大的排序}
 function IsTextForm(const FileName: string): Boolean;
 {* 返回 DFM 文件是否文本格式}
+{$ENDIF}
+
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 {* 处理一些执行方法中的异常}
 function FindComponentByClass(AWinControl: TWinControl;
@@ -270,6 +279,8 @@ function FindComponentByClass(AWinControl: TWinControl;
 function FindComponentByClassName(AWinControl: TWinControl;
   const AClassName: string; const AComponentName: string = ''): TComponent;
 {* 在窗口控件中查找指定类名的子组件}
+
+{$IFNDEF LAZARUS}
 function ScreenHasModalForm: Boolean;
 {* 存在模式窗口}
 procedure SetFormNoTitle(Form: TForm);
@@ -1246,6 +1257,8 @@ function CnWizInputMultiLineQuery(const ACaption, APrompt: string;
 function CnWizInputMultiLineBox(const ACaption, APrompt, ADefault: string): string;
 {* 封装的输入多行字符串的对话框，内部允许回调设置放大等}
 
+{$ENDIF}
+
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
@@ -1261,11 +1274,11 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnWizEditFiler, CnWizScaler, CnGraphUtils, CnWizIdeUtils, CnWizShortCut
-{$IFNDEF CNWIZARDS_MINIMUM}
+  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils
+  {$IFNDEF LAZARUS}, CnWizEditFiler, CnWizScaler {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizDebuggerNotifier, CnEditControlWrapper,
   CnLangStorage, CnHashLangStorage, CnWizHelp, CnIDEVersion
-{$ENDIF}
+  {$ENDIF} {$ENDIF}
   ;
 
 const
@@ -1275,6 +1288,8 @@ const
 type
   TControlAccess = class(TControl);
   TGraphicHack = class(TGraphic);
+
+{$IFNDEF LAZARUS}
 
 var
 {$IFDEF COMPILER7_UP}
@@ -2117,13 +2132,21 @@ begin
   Result := StringReplace(Result, '&', '', [rfReplaceAll]);
 end;
 
+{$ENDIF}
+
 //取得 IDE 主 ImageList
 function GetIDEImageList: TCustomImageList;
+{$IFNDEF LAZARUS}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ImageList;
+{$ENDIF}
 end;
 
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -2187,10 +2210,27 @@ end;
 // 取得 IDE 主菜单
 function GetIDEMainMenu: TMainMenu;
 var
+{$IFDEF LAZARUS}
+  I: Integer;
+  F: TCustomForm;
+{$ELSE}
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  F := GetIDEMainForm;
+  for I := 0 to F.ComponentCount - 1 do
+  begin
+    if F.Components[I] is TMainMenu then
+    begin
+      Result := F.Components[I] as TMainMenu;
+      Exit;
+    end;
+  end;
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.MainMenu;
+{$ENDIF}
 end;
 
 // 取得 IDE 主菜单下的 Tools 菜单
@@ -2199,7 +2239,7 @@ var
   MainMenu: TMainMenu;
   I: Integer;
 begin
-  MainMenu := GetIDEMainMenu; // IDE主菜单
+  MainMenu := GetIDEMainMenu; // IDE 主菜单
   if MainMenu <> nil then
   begin
     for I := 0 to MainMenu.Items.Count - 1 do
@@ -2213,6 +2253,14 @@ begin
   end;
   Result := nil;
 end;
+
+// 取得 IDE 根目录
+function GetIdeRootDirectory: string;
+begin
+  Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
+end;
+
+{$IFNDEF LAZARUS}
 
 // 取得 IDE 主 ActionList
 function GetIDEActionList: TCustomActionList;
@@ -2269,12 +2317,6 @@ begin
       end;
     end;
   end;
-end;
-
-// 取得 IDE 根目录
-function GetIdeRootDirectory: string;
-begin
-  Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
 end;
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
@@ -2589,6 +2631,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // 处理一些执行方法中的异常
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 begin
@@ -2641,6 +2685,8 @@ begin
   end;
   Result := nil;
 end;
+
+{$IFNDEF LAZARUS}
 
 // 存在模式窗口
 function ScreenHasModalForm: Boolean;
@@ -9144,6 +9190,8 @@ begin
   Result := CnInputMultiLineBox(ACaption, APrompt, ADefault, FormCallBack);
 end;
 
+{$ENDIF}
+
 // 封装 Assert 判断
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 begin
@@ -9157,12 +9205,14 @@ begin
 end;
 
 initialization
+{$IFNDEF LAZARUS}
   CnNoIconList := TStringList.Create;
   AddNoIconToList('TMenuItem'); // TMenuItem 等在专家加载之前已注册
   AddNoIconToList('TField');
   AddNoIconToList('TAction');
   OldRegisterNoIconProc := RegisterNoIconProc;
   RegisterNoIconProc := CnRegisterNoIconProc;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Initialization Done: CnWizUtils.');
@@ -9179,10 +9229,13 @@ finalization
 {$ENDIF}
 {$ENDIF}
 
+{$IFNDEF LAZARUS}
   RegisterNoIconProc := OldRegisterNoIconProc;
   FreeAndNil(CnNoIconList);
-  
+
   FreeResDll;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizUtils finalization.');
 {$ENDIF}

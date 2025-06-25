@@ -59,8 +59,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Tabs, Contnrs,
-  Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ToolsAPI, ImgList,
+  Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
+  Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
+  {$IFNDEF LAZARUS} ToolsAPI, Tabs, CnWizEditFiler,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF COMPILER6_UP}
@@ -68,10 +69,10 @@ uses
   {$ELSE}
   DsgnIntf, LibIntf,
   {$ENDIF}
-  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
+  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} {$ENDIF}
   {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
-  mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnWizEditFiler, CnCommon,
+  mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnCommon,
   CnWideStrings, CnWizOptions, CnWizCompilerConst, CnIDEStrings;
 
 //==============================================================================
@@ -178,6 +179,10 @@ const
   SCnUseUnitActionName = 'FileIncludeUnitHdrCommand';
 {$ENDIF}
 
+  // Lazarus 主窗体
+  SCnLazMainFormClassName = 'TMainIDEBar';
+  SCnLazMainFormName = 'MainIDE';
+
   SCnColor16Table: array[0..15] of TColor =
   ( clBlack, clMaroon, clGreen, clOlive,
     clNavy, clPurple, clTeal, clLtGray, clDkGray, clRed, clLime,
@@ -233,6 +238,8 @@ type
     Sorted: TStringList;
     Unsorted: TStringList;
   end;
+
+{$IFNDEF LAZARUS}
 
 //==============================================================================
 // IDE 代码编辑器功能函数
@@ -309,12 +316,16 @@ var
   {* 标记当前是否是嵌入式设计窗体模式，initiliazation 时被初始化，请勿手工修改其值。
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
 
+{$ENDIF}
+
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
 
 function GetIDEMainForm: TCustomForm;
-{* 返回 IDE 主窗体 (TAppBuilder) }
+{* 返回 IDE 主窗体（TAppBuilder 或 TMainIDEBar）}
+
+{$IFNDEF LAZARUS}
 
 function GetIDEEdition: string;
 {* 返回 IDE 版本}
@@ -763,6 +774,7 @@ function JoinUsesOrInclude(IsCpp, FileHasUses: Boolean; IsHFromSystem: Boolean;
   FileHasUses 只对 Pascal 代码有效、IsHFromSystem 只对 Cpp 文件有效}
 
 {$ENDIF}
+{$ENDIF}
 
 implementation
 
@@ -770,7 +782,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  Registry, CnGraphUtils, CnWizNotifier;
+  Registry, CnGraphUtils {$IFNDEF LAZARUS}, CnWizNotifier {$ENDIF};
 
 const
   SSyncButtonName = 'SyncButton';
@@ -833,6 +845,8 @@ end;
 type
   TControlHack = class(TControl);
   TCustomControlHack = class(TCustomControl);
+
+{$IFNDEF LAZARUS}
 
 //==============================================================================
 // IDE功能函数
@@ -1333,20 +1347,28 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
 
-// 返回 IDE 主窗体 (TAppBuilder)
+// 返回 IDE 主窗体（TAppBuilder 或 TMainIDEBar）
 function GetIDEMainForm: TCustomForm;
 begin
   Assert(Assigned(Application));
+{$IFDEF LAZARUS}
+  Result := Application.FindComponent('MainIDE') as TCustomForm;
+{$ELSE}
   Result := Application.FindComponent('AppBuilder') as TCustomForm;
+{$ENDIF}
 {$IFDEF DEBUG}
   if Result = nil then
-    CnDebugger.LogMsgError('Unable to Find AppBuilder!');
+    CnDebugger.LogMsgError('Unable to Find IDE Main Form!');
 {$ENDIF}
 end;
+
+{$IFNDEF LAZARUS}
 
 // 取 IDE 版本
 function GetIDEEdition: string;
@@ -4288,5 +4310,7 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizIdeUtils finalization.');
 {$ENDIF}
+{$ENDIF}
+
 end.
 
