@@ -4126,6 +4126,10 @@ begin
           Match(Scanner.Token);
           ProcessBlank;
           FormatTypeID;
+
+          // 加入对 <> 泛型的支持
+          if Scanner.Token = tokLess then
+            FormatTypeParams(0, True);
         end;
 
         tokComplexDefault:
