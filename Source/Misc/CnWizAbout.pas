@@ -86,9 +86,11 @@ type
     FIdEval: Integer;
 {$ENDIF}
     FIdAbout: Integer;
+{$IFNDEF LAZARUS}
 {$IFDEF DEBUG}
     FEvaluationExecutor: TCnEvaluationExecutor;
     procedure EvalExecute(Sender: TObject);
+{$ENDIF}
 {$ENDIF}
   protected
     procedure ConfigIO;
@@ -130,22 +132,27 @@ begin
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
   AcquireSubActions;
 
+{$IFNDEF LAZARUS}
 {$IFDEF DEBUG}
   FEvaluationExecutor := TCnEvaluationExecutor.Create;
   FEvaluationExecutor.OnExecute := EvalExecute;
   RegisterDesignMenuExecutor(FEvaluationExecutor);
 {$ENDIF}
+{$ENDIF}
 end;
 
 destructor TCnWizAbout.Destroy;
 begin
+{$IFNDEF LAZARUS}
 {$IFDEF DEBUG}
   UnRegisterDesignMenuExecutor(FEvaluationExecutor);
   FEvaluationExecutor := nil;
 {$ENDIF}
+{$ENDIF}
   inherited;
 end;
 
+{$IFNDEF LAZARUS}
 {$IFDEF DEBUG}
 
 procedure TCnWizAbout.EvalExecute(Sender: TObject);
@@ -164,6 +171,7 @@ begin
   end;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 procedure TCnWizAbout.AcquireSubActions;

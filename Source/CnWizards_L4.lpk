@@ -8,7 +8,7 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics"/>
+        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -51,6 +51,26 @@
       <Item>
         <Filename Value="Framework\CnWizClasses.pas"/>
         <UnitName Value="CnWizClasses"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnPasCodeParser.pas"/>
+        <UnitName Value="CnPasCodeParser"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnPasWideLex.pas"/>
+        <UnitName Value="CnPasWideLex"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWidePasParser.pas"/>
+        <UnitName Value="CnWidePasParser"/>
+      </Item>
+      <Item>
+        <Filename Value="ThirdParty\mPasLex.pas"/>
+        <UnitName Value="mPasLex"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizManager.pas"/>
+        <UnitName Value="CnWizManager"/>
       </Item>
     </Files>
     <RequiredPkgs>

@@ -58,11 +58,11 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
-  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI,
+  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, CnRestoreSystemMenu, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF}
-  CnWizClasses, CnWizConsts, CnWizMenuAction
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnLangMgr, CnRestoreSystemMenu, CnWizIdeHooks {$ENDIF};
+  CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnLangMgr {$ENDIF};
 
 const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时
@@ -92,7 +92,9 @@ type
      变量 CnWizardMgr 来访问管理器实例。}
   private
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
     FRestoreSysMenu: TCnRestoreSystemMenu;
+{$ENDIF}
 {$ENDIF}
     FProductVersion: Integer;
     FMenu: TMenuItem;
@@ -283,13 +285,13 @@ uses
 {$IFDEF DEBUG}
   CnDebug, 
 {$ENDIF}
-  CnWizUtils, CnWizOptions, CnWizShortCut, CnCommon,
-{$IFNDEF CNWIZARDS_MINIMUM}
-  CnWizConfigFrm, CnWizAbout, CnWizShareImages,
-  CnWizUpgradeFrm, CnDesignEditor, CnWizMultiLang, CnWizBoot,
-  CnWizCommentFrm, CnWizTranslate, CnWizTipOfDayFrm, CnIDEVersion,
+  CnWizOptions, CnWizShortCut, CnCommon, CnWizTranslate, CnWizMultiLang,
+{$IFNDEF LAZARUS} {$IFNDEF CNWIZARDS_MINIMUM}
+  CnWizConfigFrm, CnWizUpgradeFrm,
+  CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
 {$ENDIF}
-  CnWizNotifier, CnWizCompilerConst;
+  CnWizNotifier, {$ENDIF} CnWizAbout, CnWizBoot, CnDesignEditor,
+  CnWizShareImages, CnWizCompilerConst;
 
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';
@@ -381,6 +383,7 @@ begin
   FMenuWizards := TList.Create;
   FIDEEnhanceWizards := TList.Create;
   FRepositoryWizards := TList.Create;
+
 {$IFNDEF CNWIZARDS_MINIMUM}
   dmCnSharedImages := TdmCnSharedImages.Create(nil);
 {$IFDEF DEBUG}
@@ -389,6 +392,7 @@ begin
   dmCnSharedImages.CopyToIDEMainImageList;
 {$ENDIF}
 
+{$IFNDEF LAZARUS}
 {$IFDEF BDS}
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate SpashBmp');
@@ -409,6 +413,7 @@ begin
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate CreateIDEMenu');
+{$ENDIF}
 {$ENDIF}
   CreateIDEMenu;
 
@@ -436,6 +441,7 @@ begin
 {$ENDIF}
   CreateMiscMenu;
 
+{$IFNDEF LAZARUS}
 {$IFNDEF CNWIZARDS_MINIMUM}
   // 专家创建完毕并加载设置完毕后，主图标与子菜单图标才被塞进 IDE 的 ImageList 中，
   // 此时复制大号到 IDE 的主 ImageList 中才能保证不漏
@@ -443,6 +449,7 @@ begin
   CnDebugger.LogMsg('InternalCreate ShareImg Copy Large To IDE');
 {$ENDIF}
   dmCnSharedImages.CopyLargeIDEImageList;
+{$ENDIF}
 {$ENDIF}
 
   // 创建完菜单项后再插入到 IDE 中，以解决 D7 下菜单点需要点击才能下拉的问题
@@ -468,11 +475,14 @@ begin
     // 注意，无需 Languages 条目存在，由被调用者判断。当前语言索引可为 -1
     RefreshLanguage;
     ChangeWizardLanguage;
+{$IFNDEF LAZARUS}
     CnDesignEditorMgr.LanguageChanged(CnLanguageManager);
+{$ENDIF}
   end;
 {$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   // 文件通知
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
@@ -481,6 +491,7 @@ begin
   CnDebugger.LogMsg('InternalCreate IdleLoaded');
 {$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleLoaded);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -538,7 +549,9 @@ begin
   end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   CnWizNotifierServices.ExecuteOnApplicationIdle(DoFreeLaterLoadTimer);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -559,7 +572,9 @@ begin
   CalcProductVersion;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   RegisterThemeClass;
+{$ENDIF}  
 {$ENDIF}
   WizOptions := TCnWizOptions.Create;
   // 处理封面窗口
@@ -587,20 +602,26 @@ begin
 {$ENDIF}
   WizShortCutMgr.BeginUpdate;
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   {$IFDEF DEBUG}
   CnDebugger.LogMsg('CnWizardMgr CnListBeginUpdate');
   {$ENDIF}
   CnListBeginUpdate;
 {$ENDIF}
+{$ENDIF}
+
   try
     InternalCreate;
   finally
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnWizardMgr CnListEndUpdate');
   {$ENDIF}
     CnListEndUpdate;
 {$ENDIF}
+{$ENDIF}
+
   {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnWizardMgr WizShortCutMgr.EndUpdate');
   {$ENDIF}
@@ -612,7 +633,9 @@ begin
 {$ENDIF}
   ConstructSortedMenu;
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
+{$ENDIF}
 {$ENDIF}
 
   // Create LaterLoaded Timer
@@ -650,7 +673,9 @@ begin
       SaveSettings;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
     CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -705,8 +730,11 @@ begin
     FreeAndNil(FLaterLoadTimer);
     FreeAndNil(FTipTimer);
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
     FreeAndNil(FRestoreSysMenu);
 {$ENDIF}
+{$ENDIF}
+
     inherited Destroy;
   finally
     if hMutex <> 0 then
@@ -731,7 +759,9 @@ begin
   FMenu := TMenuItem.Create(nil);
   Menu.Name := SCnWizardsMenuName;
   Menu.Caption := SCnWizardsMenuCaption;
+{$IFNDEF LAZARUS}
   Menu.AutoHotkeys := maManual;
+{$ENDIF}
 end;
 
 // 安装 IDE 菜单项
@@ -773,8 +803,10 @@ begin
   WizActionMgr.MoreAction.Hint := StripHotkey(SCnMoreMenu);
 
   for I := 0 to WizardCount - 1 do
+  begin
     if Wizards[I] is TCnActionWizard then
       TCnActionWizard(Wizards[I]).RefreshAction;
+  end;
 end;
 
 // 调用专家的语言改变事件，由专家自己处理语言变化
@@ -847,14 +879,13 @@ end;
 procedure TCnWizardMgr.UpdateMenuPos(UseToolsMenu: Boolean);
 var
   MainMenu: TMainMenu;
-  Svcs40: INTAServices40;
 begin
   if FToolsMenu <> nil then
   begin
-    if not QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40) then
+    MainMenu := GetIDEMainMenu;
+    if MainMenu = nil then
       Exit;
 
-    MainMenu := Svcs40.MainMenu; // IDE主菜单
     if UseToolsMenu then
     begin
       MainMenu.Items.Remove(FMenu);
@@ -1007,7 +1038,9 @@ var
   MenuWizard: TCnMenuWizard;
   IDEEnhanceWizard: TCnIDEEnhanceWizard;
   RepositoryWizard: TCnRepositoryWizard;
+{$IFNDEF NO_DELPHI_OTA}
   WizardSvcs: IOTAWizardServices;
+{$ENDIF}
 {$IFNDEF CNWIZARDS_MINIMUM}
   FrmBoot: TCnWizBootForm;
   KeyState: TKeyboardState;
@@ -1015,6 +1048,7 @@ var
   UserBoot: Boolean;
   BootList: array of Boolean;
 begin
+{$IFNDEF NO_DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
   {$IFDEF DEBUG}
@@ -1022,6 +1056,7 @@ begin
   {$ENDIF}
     Exit;
   end;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Adjust Wizards Class Order');
@@ -1079,7 +1114,11 @@ begin
       begin
         RepositoryWizard := TCnRepositoryWizard(Wizard);
         FRepositoryWizards.Add(RepositoryWizard);
+{$IFDEF LAZARUS}
+        // TODO: 注册 Lazarus 下的 Repository 专家
+{$ELSE}
         RepositoryWizard.WizardIndex := WizardSvcs.AddWizard(RepositoryWizard);
+{$ENDIF}
       end
       else if Wizard is TCnMenuWizard then // 菜单类专家
       begin
@@ -1145,9 +1184,12 @@ end;
 
 // 释放专家列表
 procedure TCnWizardMgr.FreeWizards;
+{$IFNDEF NO_DELPHI_OTA}
 var
   WizardSvcs: IOTAWizardServices;
+{$ENDIF}
 begin
+{$IFNDEF NO_DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
 {$IFDEF DEBUG}
@@ -1155,6 +1197,7 @@ begin
 {$ENDIF}
     Exit;
   end;
+{$ENDIF}
 
   if FWizards <> nil then
   begin
@@ -1220,8 +1263,13 @@ begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg(TCnRepositoryWizard(FRepositoryWizards[0]).ClassName + '.Free');
 {$ENDIF}
+
+{$IFDEF NO_DELPHI_OTA}
+      TObject(FRepositoryWizards[0]).Free;
+{$ELSE}
       // 移除专家会自动释放掉
       WizardSvcs.RemoveWizard(TCnRepositoryWizard(FRepositoryWizards[0]).WizardIndex);
+{$ENDIF}
       FRepositoryWizards.Delete(0);
     end;
   end;
@@ -1448,7 +1496,9 @@ procedure TCnWizardMgr.ShowTipofDay(Sender: TObject);
 begin
   FreeAndNil(FTipTimer);
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   ShowCnWizTipOfDayForm(False);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -1458,9 +1508,13 @@ var
   LatestUpdate: string;
 begin
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   if not IsIdeVersionLatest(LatestUpdate) then
+  begin
     ShowSimpleCommentForm('', Format(SCnIDENOTLatest, [LatestUpdate]),
       SCnCheckIDEVersion + CompilerShortName);
+  end;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -1488,7 +1542,9 @@ begin
 
   WizShortCutMgr.BeginUpdate;
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   CnListBeginUpdate;
+{$ENDIF}
 {$ENDIF}
   try
     for I := 0 to WizardCount - 1 do
@@ -1518,7 +1574,9 @@ begin
 
   finally
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
     CnListEndUpdate;
+{$ENDIF}
 {$ENDIF}
     WizShortCutMgr.UpdateBinding;   // IDE 启动后强制重新绑定一次
     WizShortCutMgr.EndUpdate;
@@ -1533,6 +1591,7 @@ begin
   FSettingsLoaded := True;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   // 检查升级
   if (WizOptions.UpgradeStyle = usAllUpgrade) or (WizOptions.UpgradeStyle =
     usUserDefine) and (WizOptions.UpgradeContent <> []) then
@@ -1540,6 +1599,7 @@ begin
 
   // 显示每日一帖
   SetTipShowing;
+{$ENDIF}
 {$ENDIF}
 
   FLaterLoadTimer.Enabled := True;
@@ -1553,16 +1613,20 @@ end;
 // 显示专家设置对话框
 procedure TCnWizardMgr.OnConfig(Sender: TObject);
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
 var
   I: Integer;
 {$ENDIF}
+{$ENDIF}
 begin
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFNDEF LAZARUS}
   I := WizActionMgr.IndexOfCommand(SCnWizConfigCommand);
   if I >= 0 then
     ShowCnWizConfigForm(WizActionMgr.WizActions[I].Icon)
   else
     ShowCnWizConfigForm;
+{$ENDIF}
 {$ENDIF}
 end;
 

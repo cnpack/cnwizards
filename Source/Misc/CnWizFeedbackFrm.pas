@@ -52,10 +52,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, ToolsAPI, CnConsts, CnWizConsts,
-  CnWizOptions, CnWizUtils, CnWizCompilerConst, Clipbrd, ActnList, ShellAPI,
-  Registry, Math, TypInfo, CnCommon, CnWizIdeUtils, CnLangMgr,
-  CnWizMultiLang, CnWizManager, CnEditControlWrapper;
+  ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, Registry, Math, TypInfo,
+  Clipbrd, ActnList, ShellAPI,
+  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, CnEditControlWrapper, {$ENDIF}
+  CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnWizCompilerConst,
+  CnCommon, CnWizIdeUtils, CnLangMgr, CnWizMultiLang, CnWizManager;
 
 type
   TFeedbackType = (fbBug, fbFeature);
@@ -184,13 +185,37 @@ begin
 end;
 
 function GetLocaleChar(Locale, LocaleType: Integer; Default: Char): Char;
+{$IFDEF FPC}
+var
+  Buffer: array[0..1] of Char;
+{$ENDIF}
 begin
+{$IFDEF FPC}
+  if GetLocaleInfo(Locale, LocaleType, Buffer, 2) > 0 then
+    Result := Buffer[0]
+  else
+    Result := Default;
+{$ELSE}
   Result := SysUtils.GetLocaleChar(Locale, LocaleType, Default);
+{$ENDIF}
 end;
 
 function GetLocaleStr(Locale, LocaleType: Integer; const Default: string): string;
+{$IFDEF FPC}
+var
+  L: Integer;
+  Buffer: array[0..255] of Char;
+{$ENDIF}
 begin
+{$IFDEF FPC}
+  L := GetLocaleInfo(Locale, LocaleType, Buffer, SizeOf(Buffer));
+  if L > 0 then
+    SetString(Result, Buffer, L - 1)
+  else
+    Result := Default;
+{$ELSE}
   Result := SysUtils.GetLocaleStr(Locale, LocaleType, Default);
+{$ENDIF}
 end;
 
 { TCnWizFeedBackForm }
@@ -795,10 +820,13 @@ begin
 end;
 
 function GetEditorSettingString: string;
+{$IFNDEF NO_DELPHI_OTA}
 var
   Option: IOTAEditOptions;
+{$ENDIF}
 begin
   Result := SOutEditorSettings + SCRLF;
+{$IFNDEF NO_DELPHI_OTA}
   Option := CnOtaGetEditOptions;
   if Option <> nil then
   begin
@@ -809,6 +837,7 @@ begin
   Result := Result + '  Char Width: ' + IntToStr(Integer(EditControlWrapper.GetCharWidth)) + SCRLF;
   Result := Result + '  Use Tab: ' + IntToStr(Integer(EditControlWrapper.GetUseTabKey)) + SCRLF;
   Result := Result + '  Tab Width: ' + IntToStr(EditControlWrapper.GetTabWidth) + SCRLF;
+{$ENDIF}
 end;
 
 function TCnWizFeedbackForm.GetSystemConfigurationString: string;

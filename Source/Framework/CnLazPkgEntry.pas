@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, LCLType, Forms, Controls,
+  Classes, LCLType, Forms, Controls, CnWizManager,
   IDEWindowIntf, IDEOptionsIntf, IDEOptEditorIntf, MenuIntf, IDEImagesIntf,
   LazIDEIntf, IDECommands;
 
@@ -54,7 +54,8 @@ uses
 procedure MenuExecute(Sender: TObject);
 begin
 {$IFDEF DEBUG}
-  CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos);
+  //CnDebugger.EvaluateControlUnderPos(Mouse.CursorPos);
+  CnDebugger.EvaluateObject(Application.MainForm);
 {$ENDIF}
 end;
 
@@ -71,8 +72,9 @@ begin
   Catgory := RegisterIDECommandCategory(nil, 'CnPack', 'CnPack Category');
   Cmd := RegisterIDECommand(Catgory, 'Test', 'Test Entry', nil, @MenuExecute);
 
-  RegisterIDEMenuCommand(itmSecondaryTools{ mnuTools}, 'CnPackTest', 'CnPack Test...', nil, nil, Cmd);
-  // CnWizardMgr := TCnWizardMgr.Create;
+  RegisterIDEMenuCommand( mnuTools, 'CnPackTest', 'CnPack Test...', nil, nil, Cmd);
+
+  CnWizardMgr := TCnWizardMgr.Create;
 end;
 
 initialization
@@ -81,6 +83,6 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Laz CnLazPkgEntry Finalization');
 {$ENDIF}
-  // FreeAndNil(CnWizardMgr);
+  CnWizardMgr.Free;
 
 end.

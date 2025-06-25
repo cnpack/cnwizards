@@ -190,7 +190,9 @@ begin
           else
             P := nil;
           FText := P;
+{$IFNDEF FPC}
           SendDockNotification(Msg, WParam, LParam);
+{$ENDIF}
         end;
     end;
 end;
@@ -309,7 +311,9 @@ begin
   if (Flags and DT_CALCRECT <> 0) and ((Text = '') or FShowAccelChar and
     (Text[1] = '&') and (Text[2] = #0)) then Text := Text + ' ';
   if not FShowAccelChar then Flags := Flags or DT_NOPREFIX;
+{$IFNDEF FPC}
   Flags := DrawTextBiDiModeFlags(Flags);
+{$ENDIF}
   Canvas.Font := Font;
   if not Enabled then
   begin

@@ -57,8 +57,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  {$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, {$ENDIF} AppEvnts,
-  Consts, CnClasses {$IFNDEF STAND_ALONE}
+  {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} Consts, ToolsAPI, {$ENDIF}
+  CnWizUtils, {$ELSE} AppEvnts, {$ENDIF} CnClasses {$IFNDEF STAND_ALONE}
   {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
@@ -69,7 +69,7 @@ type
 
   NoRefCount = Pointer; // 使用指针类型来强制为接口变量赋值，不增加引用计数
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
   TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
     const FileName: string) of object;
@@ -118,7 +118,7 @@ type
   {* IDE 通知服务接口}
     ['{18C4DD6A-802A-48D7-AC93-A2487411CA79}']
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     {* 增加一个文件通知事件}
@@ -183,10 +183,12 @@ type
     procedure RemoveApplicationIdleNotifier(Notifier: TNotifyEvent);
     {* 删除一个应用程序空闲通知事件}
 
+{$IFNDEF LAZARUS}
     procedure AddApplicationMessageNotifier(Notifier: TMessageEvent);
     {* 增加一个应用程序消息通知事件}
     procedure RemoveApplicationMessageNotifier(Notifier: TMessageEvent);
     {* 删除一个应用程序消息通知事件}
+{$ENDIF}
 
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     {* 增加一个应用程序事件通知事件}
@@ -250,7 +252,7 @@ const
 
 type
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // IDE 通知器类（私有类）
@@ -427,9 +429,11 @@ type
     FBeforeThemeChangeNotifiers: TList;
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
+{$IFNDEF LAZARUS}
     FEvents: TApplicationEvents;
+{$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     FIdeNotifierIndex: Integer;
     FDebuggerNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
@@ -453,18 +457,18 @@ type
     FCompNotifyList: TComponentList;
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     FCurrentCompilingProject: IOTAProject;
 {$ENDIF}
     procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure CheckActiveControl;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure CheckDesignerSelection;
 {$ENDIF}
     procedure DoIdleNotifiers;
   protected
     // ICnWizNotifierServices
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
     procedure AddBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
@@ -491,8 +495,10 @@ type
     procedure RemoveActiveControlNotifier(Notifier: TNotifyEvent);
     procedure AddApplicationIdleNotifier(Notifier: TNotifyEvent);
     procedure RemoveApplicationIdleNotifier(Notifier: TNotifyEvent);
+{$IFNDEF LAZARUS}
     procedure AddApplicationMessageNotifier(Notifier: TMessageEvent);
     procedure RemoveApplicationMessageNotifier(Notifier: TMessageEvent);
+{$ENDIF}
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
@@ -508,7 +514,7 @@ type
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -569,7 +575,7 @@ var
   FIsReleased: Boolean = False;
   FCnWizNotifierServices: TCnWizNotifierServices = nil;
 
-{$IFDEF STAND_ALONE}
+{$IFDEF NO_DELPHI_OTA}
   IdeClosing: Boolean = False; // 独立运行时无此变量，冒充一个
 
 
@@ -664,7 +670,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // IDE 通知器类（私有类）
@@ -988,7 +994,7 @@ end;
 { TCnWizNotifierServices }
 
 constructor TCnWizNotifierServices.Create;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
@@ -1004,7 +1010,7 @@ var
 {$ENDIF}
 begin
   inherited;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   IServices := BorlandIDEServices as IOTAServices;
   IDebuggerService := BorlandIDEServices as IOTADebuggerServices;
   Assert(Assigned(IServices) and Assigned(IDebuggerService));
@@ -1018,6 +1024,7 @@ begin
   FBreakpointDeletedNotifiers := TList.Create;
 
   FFileNotifiers := TList.Create;
+{$IFNDEF LAZARUS}
   FEvents := TApplicationEvents.Create(nil);
   FEvents.OnIdle := DoApplicationIdle;
   FEvents.OnMessage := DoApplicationMessage;
@@ -1027,6 +1034,7 @@ begin
   FEvents.OnRestore := DoApplicationRestore;
   FEvents.OnHint := DoApplicationHint;
   FEvents.OnShowHint := DoApplicationShowHint;
+{$ENDIF}
   FSourceEditorNotifiers := TList.Create;
   FSourceEditorIntfs := TList.Create;
   FFormEditorNotifiers := TList.Create;
@@ -1049,7 +1057,7 @@ begin
   FLastDesignerSelection := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
   FIdeNotifierIndex := IServices.AddNotifier(FCnWizIdeNotifier as IOTAIDENotifier);
   FCnWizDebuggerNotifier := TCnWizDebuggerNotifier.Create(Self);
@@ -1076,7 +1084,7 @@ begin
 end;
 
 destructor TCnWizNotifierServices.Destroy;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
@@ -1102,7 +1110,7 @@ begin
   UnhookWindowsHookEx(GetMsgHook);
   GetMsgHook := 0;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   IServices := BorlandIDEServices as IOTAServices;
   if Assigned(IServices) then
     IServices.RemoveNotifier(FIdeNotifierIndex);
@@ -1123,7 +1131,9 @@ begin
 {$ENDIF}
 
   FreeAndNil(FCompNotifyList);
+{$IFNDEF LAZARUS}
   FreeAndNil(FEvents);
+{$ENDIF}
   FDesignerSelection.Free;
   FLastDesignerSelection.Free;
 
@@ -1151,7 +1161,7 @@ begin
   CnWizClearAndFreeList(FAfterThemeChangeNotifiers);
   CnWizClearAndFreeList(FIdleMethods);
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FFormEditorIntfs.Count, 'Remove FormEditorNotifiers');
 {$ENDIF}
@@ -1212,7 +1222,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 //------------------------------------------------------------------------------
 // IDE 文件通知
@@ -1824,7 +1834,7 @@ procedure TCnWizNotifierServices.DoActiveFormChange;
 var
   I: Integer;
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   // 由于窗体 View as Text 再打开后，原通知器就没有了，故在每次设计期窗体活跃时
   // 检查是否有新的 FormEditor 出现。
   if Assigned(Screen.ActiveCustomForm) and (csDesigning in
@@ -1860,6 +1870,8 @@ begin
   CnWizRemoveNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
 end;
 
+{$IFNDEF LAZARUS}
+
 procedure TCnWizNotifierServices.AddApplicationMessageNotifier(
   Notifier: TMessageEvent);
 begin
@@ -1871,6 +1883,8 @@ procedure TCnWizNotifierServices.RemoveApplicationMessageNotifier(
 begin
   CnWizRemoveNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
 end;
+
+{$ENDIF}
 
 procedure TCnWizNotifierServices.AddAppEventNotifier(
   Notifier: TCnWizAppEventNotifier);
@@ -1909,7 +1923,7 @@ end;
 procedure TCnWizNotifierServices.DoApplicationIdle(Sender: TObject;
   var Done: Boolean);
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   CheckCompNotifyObj;
   CheckDesignerSelection;
 {$ENDIF}
@@ -1929,6 +1943,7 @@ var
 begin
   CheckActiveControl;
 
+{$IFNDEF LAZARUS}
   // FEvents.OnActivate 有可能被其它程序替换掉了，在此处进行处理
   if Msg.hwnd = Application.Handle then
   begin
@@ -1950,6 +1965,7 @@ begin
       DoHandleException('TCnWizNotifierServices.DoApplicationMessage[' + IntToStr(I) + ']');
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer);
@@ -2172,7 +2188,7 @@ begin
   CnWizRemoveNotifier(FBeforeThemeChangeNotifiers, TMethod(Notifier));
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnWizNotifierServices.BreakpointAdded(
   Breakpoint: IOTABreakpoint);
@@ -2345,7 +2361,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 { TCnWizDebuggerNotifier }
 

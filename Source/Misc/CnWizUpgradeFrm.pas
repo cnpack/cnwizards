@@ -460,28 +460,31 @@ var
   
   function GetBuildNo(const VerStr: string): Integer;
   var
-    s, s1: string;
+    S, S1: string;
     I: Integer;
   begin
     Result := 0;
     with TStringList.Create do
     try
-      Text := StringReplace(VerStr, '.', CRLF, [rfReplaceAll]);
+      Text := StringReplace(VerStr, '.', #13#10, [rfReplaceAll]);
       if Count = 4 then
       begin
-        s := Trim(Strings[3]);
-        s1 := '';
-        for I := 1 to Length(s) do
-          if CharInSet(s[I], ['0'..'9']) then
-            s1 := s1 + s[I]
+        S := Trim(Strings[3]);
+        S1 := '';
+        for I := 1 to Length(S) do
+        begin
+          if CharInSet(S[I], ['0'..'9']) then
+            S1 := S1 + S[I]
           else
             Break;
-        Result := StrToIntDef(s1, 0);
+        end;
+        Result := StrToIntDef(S1, 0);
       end;
     finally
       Free;
     end;   
   end;
+
 begin
   // 避免因网络问题导致连接失败时出错
   if FUpgradeCollection.Count = 0 then Exit;

@@ -45,7 +45,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, IniFiles, Registry, TypInfo, Contnrs,
-  {$IFNDEF LAZARUS} ToolsAPI,
+  {$IFDEF LAZARUS} PropEdits, ComponentEditors, {$ELSE} ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   {$ENDIF}
   CnCommon, CnConsts, CnDesignEditorConsts, CnWizOptions, CnWizUtils,
@@ -612,11 +612,15 @@ var
   AClass: TClass;
   AName, CName, PName: string;
   AInfo: PPropInfo;
+  Tp: PTypeInfo;
   Success: Boolean;
 begin
   UnRegister;
 
+{$IFNDEF LAZARUS}
   FGroup := NewEditorGroup;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FGroup, 'NewEditorGroup');
 {$ENDIF}
@@ -649,8 +653,13 @@ begin
               begin
                 Success := False;
                 AInfo := GetPropInfo(AClass, PName);
-                if (AInfo <> nil) and (AInfo.PropType^ <> nil) then
-                  PropEditors[I].CustomRegProc(AInfo.PropType^, AClass, PName, Success)
+{$IFDEF FPC}
+                Tp := AInfo.PropType;
+{$ELSE}
+                Tp := AInfo.PropType^;
+{$ENDIF}
+                if (AInfo <> nil) and (Tp <> nil) then
+                  PropEditors[I].CustomRegProc(Tp, AClass, PName, Success)
                 else
                   PropEditors[I].CustomRegProc(nil, AClass, PName, Success);
 {$IFDEF DEBUG}
@@ -692,10 +701,12 @@ begin
     end;
   end;
 
+{$IFNDEF LAZARUS}
   // 为了避免反注册时把其它模块中的编辑器也反注册掉（一个可能的情况是 CodeRush
   // 注册的组件编辑器），此处建一个新组。这样虽然可能导致有多余的空组，不过对
   // 使用 TBit 来保存组信息的 IDE 来说没什么影响。
   NewEditorGroup;
+{$ENDIF}
 end;
 
 procedure TCnDesignEditorMgr.UnRegister;
@@ -707,12 +718,14 @@ begin
 {$ENDIF}
 
     try
+{$IFNDEF LAZARUS}
 {$IFDEF BDS}
       // D8/D2005 下在 DLL 释放时调用可能会出异常
       if FNeedUnRegister then
         FreeEditorGroup(FGroup);
 {$ELSE}
       FreeEditorGroup(FGroup);
+{$ENDIF}
 {$ENDIF}
     except
       ;

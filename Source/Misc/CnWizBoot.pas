@@ -180,7 +180,9 @@ end;
 
 procedure TCnWizBootForm.FormCreate(Sender: TObject);
 begin
+{$IFNDEF LAZARUS}
   WizOptions.ResetToolbarWithLargeIcons(ToolBar1);
+{$ENDIF}
 end;
 
 end.

@@ -47,7 +47,7 @@ uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF SUPPORT_GDIPLUS} WinApi.GDIPOBJ, WinApi.GDIPAPI, {$ENDIF}
-  {$IFNDEF STAND_ALONE} CnWizUtils, CnWizOptions, CnWizIdeUtils, {$ENDIF}
+  {$IFNDEF STAND_ALONE} CnWizOptions, CnWizUtils, CnWizIdeUtils, {$ENDIF}
   CnGraphUtils;
 
 type
@@ -434,8 +434,10 @@ begin
     ImageList.BkColor := Save;
   end;
 
+{$IFNDEF LAZARUS}
   // 调整按钮位图以解决有些按钮 Disabled 时无图标的问题
   AdjustButtonGlyph(Button.Glyph);
+{$ENDIF}
   Button.NumGlyphs := 2;
 end;
 

@@ -218,8 +218,13 @@ begin
     DbgFrm := TForm.Create(Application);
     with DbgFrm do
     begin
+{$IFDEF LAZARUS}
+      Width := 550;
+      Height := 400;
+{$ELSE}
       Width := IdeGetScaledPixelsFromOrigin(550);
       Height := IdeGetScaledPixelsFromOrigin(400);
+{$ENDIF}
       Position := poScreenCenter;
       BorderStyle := bsSizeToolWin;
       Caption := 'CnPack IDE Wizard Debug Command Window';

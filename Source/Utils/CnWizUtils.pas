@@ -206,6 +206,7 @@ function SameFileName(const S1, S2: string): Boolean;
 {* 文件名相同}
 function CompressWhiteSpace(const Str: string): string;
 {* 压缩字符串中间的空白字符}
+{$ENDIF}
 procedure ShowHelp(const Topic: string);
 {* 显示指定主题的帮助内容}
 procedure CenterForm(const Form: TCustomForm);
@@ -214,7 +215,6 @@ procedure EnsureFormVisible(const Form: TCustomForm);
 {* 保证窗体可见}
 function GetCaptionOrgStr(const Caption: string): string;
 {* 删除标题中热键信息}
-{$ENDIF}
 
 function GetIDEImageList: TCustomImageList;
 {* 取得 IDE 主 ImageList}
@@ -258,6 +258,8 @@ function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
+{$ENDIF}
+
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
   ShortCut: TShortCut = 0; const Hint: string = ''; Tag: TCnNativeInt = 0;
@@ -269,7 +271,6 @@ procedure SortListByMenuOrder(List: TList);
 {* 根据 TCnMenuWizard 列表中的 MenuOrder 值进行由小到大的排序}
 function IsTextForm(const FileName: string): Boolean;
 {* 返回 DFM 文件是否文本格式}
-{$ENDIF}
 
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 {* 处理一些执行方法中的异常}
@@ -1274,10 +1275,10 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils
+  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizHelp
   {$IFNDEF LAZARUS}, CnWizEditFiler, CnWizScaler {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnLangMgr, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnLangStorage, CnHashLangStorage, CnWizHelp, CnIDEVersion
+  CnLangStorage, CnHashLangStorage, CnIDEVersion
   {$ENDIF} {$ENDIF}
   ;
 
@@ -2067,6 +2068,8 @@ begin
   SetLength(Result, NextResultChar - 1);
 end;
 
+{$ENDIF}
+
 // 显示指定主题的帮助内容
 procedure ShowHelp(const Topic: string);
 begin
@@ -2131,8 +2134,6 @@ begin
 
   Result := StringReplace(Result, '&', '', [rfReplaceAll]);
 end;
-
-{$ENDIF}
 
 //取得 IDE 主 ImageList
 function GetIDEImageList: TCustomImageList;
@@ -2242,6 +2243,9 @@ begin
   MainMenu := GetIDEMainMenu; // IDE 主菜单
   if MainMenu <> nil then
   begin
+{$IFDEF LAZARUS}
+    Result := MainMenu.Items[8]; // Lazarus 下写死这个
+{$ELSE}
     for I := 0 to MainMenu.Items.Count - 1 do
     begin
       if AnsiCompareText(SToolsMenuName, MainMenu.Items[I].Name) = 0 then
@@ -2250,6 +2254,7 @@ begin
         Exit;
       end;
     end;
+{$ENDIF}
   end;
   Result := nil;
 end;
@@ -2558,6 +2563,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // 创建一个子菜单项
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
   OnClick: TNotifyEvent = nil; Action: TContainedAction = nil;
@@ -2630,8 +2637,6 @@ begin
     ;
   end;
 end;
-
-{$ENDIF}
 
 // 处理一些执行方法中的异常
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
