@@ -92,7 +92,8 @@ const
     'CnWizards_D110A.DLL',
     'CnWizards_D120A.DLL',
     'CnWizards_CB5.DLL',
-    'CnWizards_CB6.DLL');
+    'CnWizards_CB6.DLL',
+    '');
 
   csDllLoaderName = 'CnWizLoader.DLL';
   csDllLoader64Name = 'CnWizLoader64.DLL';
