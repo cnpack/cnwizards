@@ -774,6 +774,7 @@ begin
   if MainMenu <> nil then
   begin
     FToolsMenu := GetIDEToolsMenu;
+
     if WizOptions.UseToolsMenu and Assigned(FToolsMenu) then
       FToolsMenu.Insert(0, Menu)
     else if Assigned(FToolsMenu) then // 新菜单插在 Tools 菜单后面

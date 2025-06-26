@@ -61,16 +61,16 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
-  {$IFNDEF LAZARUS} ToolsAPI, Tabs, CnWizEditFiler,
+  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
   {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE}
   DsgnIntf, LibIntf,
-  {$ENDIF}
+  {$ENDIF} {$ENDIF}
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} {$ENDIF}
-  {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnCommon,
   CnWideStrings, CnWizOptions, CnWizCompilerConst, CnIDEStrings;
@@ -294,6 +294,8 @@ function IsGeneralCurrentToken(AView: Pointer; AControl: TControl;
     Token: TCnGeneralPasToken): Boolean;
 {* 判断标识符是否在光标下，囊括以上两种情况}
 
+{$IFNDEF NO_DELPHI_OTA}
+
 //==============================================================================
 // IDE 窗体编辑器功能函数
 //==============================================================================
@@ -315,6 +317,8 @@ var
   IdeIsEmbeddedDesigner: Boolean = False;
   {* 标记当前是否是嵌入式设计窗体模式，initiliazation 时被初始化，请勿手工修改其值。
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -390,6 +394,8 @@ function GetBDSUserDataDir: string;
 procedure GetProjectLibPath(Paths: TStrings);
 {* 取当前工程组的相关 Path 内容}
 
+{$IFNDEF NO_DELPHI_OTA}
+
 function GetProjectDcuPath(AProject: IOTAProject): string;
 {* 取当前工程的输出目录}
 
@@ -402,6 +408,14 @@ function GetFileNameSearchTypeFromModuleName(AName: string;
 
 function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
 {* 获取当前项目中的版本信息键值}
+
+function GetCurrentCompilingProject: IOTAProject;
+{* 返回当前正在编译的工程，注意不一定是当前工程}
+
+function CompileProject(AProject: IOTAProject): Boolean;
+{* 编译工程，返回编译是否成功}
+
+{$ENDIF}
 
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
 {* 取环境设置中的 LibraryPath 内容}
@@ -479,12 +493,6 @@ function IsCurrentEditorInSyncMode: Boolean;
 
 function IsKeyMacroRunning: Boolean;
 {* 当前是否在键盘宏的录制或回放，不支持或不在返回 False}
-
-function GetCurrentCompilingProject: IOTAProject;
-{* 返回当前正在编译的工程，注意不一定是当前工程}
-
-function CompileProject(AProject: IOTAProject): Boolean;
-{* 编译工程，返回编译是否成功}
 
 type
   TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
@@ -1256,6 +1264,8 @@ begin
     CalcAnsiDisplayLengthFromWideString(Token.Token));
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 //==============================================================================
 // IDE 窗体编辑器功能函数
 //==============================================================================
@@ -1349,6 +1359,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
@@ -1357,10 +1369,14 @@ end;
 function GetIDEMainForm: TCustomForm;
 begin
   Assert(Assigned(Application));
+{$IFDEF STAND_ALONE}
+  Result := CnStubRefMainForm;
+{$ELSE}
 {$IFDEF LAZARUS}
   Result := Application.FindComponent('MainIDE') as TCustomForm;
 {$ELSE}
   Result := Application.FindComponent('AppBuilder') as TCustomForm;
+{$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
   if Result = nil then
@@ -1717,21 +1733,6 @@ begin
 end;
 {$ENDIF}
 
-function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
-var
-  Options: IOTAProjectOptions;
-  PKeys: Integer;
-begin
-  Result := nil;
-  Options := CnOtaGetActiveProjectOptions(Project);
-  if not Assigned(Options) then Exit;
-  PKeys := Options.GetOptionValue('Keys');
-{$IFDEF DEBUG}
-  CnDebugger.LogInteger(PKeys, 'CnOtaGetVersionInfoKeys');
-{$ENDIF}
-  Result := Pointer(PKeys);
-end;
-
 // 取环境设置中的 LibraryPath 内容，注意 XE2 以上版本，GetEnvironmentOptions 里头
 // 得到的值并不是当前工程的 Platform 对应的值，所以只能改成根据工程平台从注册表里读。
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean);
@@ -1921,6 +1922,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 function GetProjectDcuPath(AProject: IOTAProject): string;
 begin
   if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
@@ -1967,12 +1970,14 @@ begin
   if AProject <> nil then
   begin
     for I := 0 to AProject.GetModuleCount - 1 do
+    begin
       if SameFileName(_CnExtractFileName(AProject.GetModule(I).FileName), AName) then
       begin
         Result := AProject.GetModule(I).FileName;
         SearchType := mstInProject;
         Exit;
       end;
+    end;
 
     ProjectPath := MakePath(_CnExtractFilePath(AProject.FileName));
     if FileExists(ProjectPath + AName) then
@@ -2009,6 +2014,36 @@ begin
     Paths.Free;
   end;
 end;
+
+function CnOtaGetVersionInfoKeys(Project: IOTAProject = nil): TStrings;
+var
+  Options: IOTAProjectOptions;
+  PKeys: Integer;
+begin
+  Result := nil;
+  Options := CnOtaGetActiveProjectOptions(Project);
+  if not Assigned(Options) then Exit;
+  PKeys := Options.GetOptionValue('Keys');
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(PKeys, 'CnOtaGetVersionInfoKeys');
+{$ENDIF}
+  Result := Pointer(PKeys);
+end;
+
+// 编译工程，返回编译是否成功
+function CompileProject(AProject: IOTAProject): Boolean;
+begin
+  Result := not AProject.ProjectBuilder.ShouldBuild or
+    AProject.ProjectBuilder.BuildProject(cmOTAMake, False);
+end;
+
+// 返回当前正在编译的工程，注意不一定是当前工程
+function GetCurrentCompilingProject: IOTAProject;
+begin
+  Result := CnWizNotifierServices.GetCurrentCompilingProject;
+end;
+
+{$ENDIF}
 
 // 取组件定义所在的单元名
 function GetComponentUnitName(const ComponentName: string): string;
@@ -2417,19 +2452,6 @@ begin
     if Rec <> nil then
       Result := Rec.IsPlaying or Rec.IsRecording;
   end;
-end;
-
-// 编译工程，返回编译是否成功
-function CompileProject(AProject: IOTAProject): Boolean;
-begin
-  Result := not AProject.ProjectBuilder.ShouldBuild or
-    AProject.ProjectBuilder.BuildProject(cmOTAMake, False);
-end;
-
-// 返回当前正在编译的工程，注意不一定是当前工程
-function GetCurrentCompilingProject: IOTAProject;
-begin
-  Result := CnWizNotifierServices.GetCurrentCompilingProject;
 end;
 
 // 取当前编辑窗口顶层页面类型，传入编辑器父控件

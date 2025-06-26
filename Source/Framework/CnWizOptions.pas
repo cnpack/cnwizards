@@ -434,6 +434,8 @@ begin
       if Reg.ValueExists('InstallDir') then
       begin
         FDllPath := Reg.ReadString('InstallDir');
+        if FDllPath <> '' then
+          FDllPath := MakePath(FDllPath);  // 确保尾部有斜杠
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('Laz WizOption Get Installation Path: ' + FDllPath);
 {$ENDIF}

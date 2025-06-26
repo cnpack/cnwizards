@@ -237,7 +237,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} CnDebug, {$ENDIF}
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils, CnWizIdeUtils, {$ENDIF} {$ENDIF}
+  {$IFNDEF STAND_ALONE} CnWizUtils, CnWizIdeUtils, {$ENDIF}
   CnWizCompilerConst;
 
 const
@@ -507,7 +507,6 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-{$IFNDEF LAZARUS}
   if CnWizLoadIcon(nil, AWizAction.FIcon, IcoName, UseDefaultIcon) then
   begin
 {$IFDEF DEBUG}
@@ -519,12 +518,15 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
     AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList);
 {$ELSE}
+  {$IFDEF LAZARUS}
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
+  {$ELSE}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
+  {$ENDIF}
 {$ENDIF}
 {$ENDIF}
   end
   else
-{$ENDIF}
 {$ENDIF}
     AWizAction.ImageIndex := -1;
 

@@ -64,9 +64,9 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF LAZARUS} {$ELSE} ExptIntf, ToolsAPI, RegExpr, CnSearchCombo,
+  {$IFDEF LAZARUS} {$ELSE} RegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
-  {$ELSE} DsgnIntf, LibIntf,{$ENDIF}
+  {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
@@ -77,7 +77,15 @@ uses
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
   CnPasCodeParser, CnCppCodeParser, CnWidePasParser, CnWideCppParser;
 
-{$IFNDEF LAZARUS}
+const
+  CRLF = #13#10;
+  SAllAlphaNumericChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+
+  InvalidNotifierIndex = -1;
+  NonvisualClassNamePattern = 'TContainer';
+
+  // 最大源代码行长度
+  csMaxLineLength = 1023;
 
 type
   ECnEmptyCommand = class(ECnWizardException);
@@ -86,9 +94,12 @@ type
 
   TShortCutDuplicated = (sdNoDuplicated, sdDuplicatedIgnore, sdDuplicatedStop);
   // 快捷键冲突的三种状态
+  TCnLoadIconProc = procedure(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
 
+{$IFNDEF NO_DELPHI_OTA}
 {$IFNDEF COMPILER6_UP}
   IDesigner = IFormDesigner;
+{$ENDIF}
 {$ENDIF}
 
   TCnBookmarkObject = class
@@ -102,22 +113,12 @@ type
     property Col: Integer read FCol write FCol;
   end;
 
-  TCnLoadIconProc = procedure(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
-
-const
-  CRLF = #13#10;
-  SAllAlphaNumericChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-
-  InvalidNotifierIndex = -1;
-  NonvisualClassNamePattern = 'TContainer';
-
-  // 最大源代码行长度
-  csMaxLineLength = 1023;
-
 var
   CnNoIconList: TStrings;
   IdeClosing: Boolean = False;
   CnLoadIconProc: TCnLoadIconProc = nil; // 加载完每一个图标后调用，给外部一个机会修改图标内容
+
+{$IFNDEF LAZARUS}
 
 //==============================================================================
 // 公共信息函数
@@ -167,6 +168,8 @@ function CnGetClassParentFromClass(AClass: Integer): Integer;
 {* 供 Pascal Script 使用的从整型的类信息获取父类信息的函数}
 {$ENDIF}
 
+{$ENDIF}
+
 function CnWizLoadIcon(AIcon: TIcon; ASmallIcon: TIcon; const ResName: string;
   UseDefault: Boolean = False; IgnoreDisabled: Boolean = False): Boolean;
 {* 从资源或文件中装载图标，执行时先从图标目录中查找，如果失败再从资源中查找，
@@ -180,6 +183,7 @@ function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
   Stretch: Boolean = True): Integer;
 {* 增加图标到 ImageList 中，可使用平滑处理}
 
+{$IFNDEF LAZARUS}
 {$IFDEF IDE_SUPPORT_HDPI}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
@@ -240,8 +244,12 @@ function GetIDEActionFromName(const AName: string): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定名称的 Action}
 function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定快捷键的 Action}
+
+{$IFNDEF NO_DELPHI_OTA}
 function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
 {* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
+{$ENDIF}
+
 procedure SaveIDEActionListToFile(const FileName: string);
 {* 保存 IDE ActionList 中的内容到指定文件}
 procedure SaveIDEOptionsNameToFile(const FileName: string);
@@ -328,7 +336,6 @@ procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
 
-
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
 //==============================================================================
@@ -339,8 +346,10 @@ function IsDelphiRuntime: Boolean;
 function IsCSharpRuntime: Boolean;
 {* 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False}
 
+{$IFNDEF NO_DELPHI_OTA}
 function IsDelphiProject(Project: IOTAProject): Boolean;
 {* 判断当前是否是 Delphi 工程}
+{$ENDIF}
 
 //==============================================================================
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
@@ -365,8 +374,12 @@ function CurrentSourceIsDelphiOrCSource: Boolean;
 {* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
+
+{$IFNDEF NO_DELPHI_OTA}
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
 {* 窗体编辑器对象是否 VCL 窗体（非 .NET 窗体）}
+{$ENDIF}
+
 function ExtractUpperFileExt(const FileName: string): string;
 {* 取大写文件扩展名}
 procedure AssertIsDprOrPas(const FileName: string);
@@ -441,6 +454,8 @@ function ObjectIsInheritedFromClass(AObj: TObject; const AClassName: string): Bo
 {* 使用字符串的方式判断对象是否继承自此类}
 function FindControlByClassName(AParent: TWinControl; const AClassName: string): TControl;
 {* 使用字符串的方式判断控件是否包含指定类名的子控件，存在则返回最上面一个}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // OTA 接口操作相关函数
@@ -779,6 +794,8 @@ function CnOtaGetBaseModuleFileName(const FileName: string): string;
 function CnOtaIsPersistentBlocks: Boolean;
 {* 当前 PersistentBlocks 是否为 True}
 
+{$ENDIF}
+
 //==============================================================================
 // 源代码操作相关函数
 //==============================================================================
@@ -835,6 +852,8 @@ function ConvertEditorTextToTextW(const Text: AnsiString): string;
 {* 转换编辑器使用的字符串（Utf8）为 Unicode 字符串，D2009 以上版本使用}
 
 {$ENDIF}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 function CnOtaGetCurrentSourceFile: string;
 {* 取当前编辑的源文件。编辑器活动时返回在编辑的源文件，
@@ -1117,6 +1136,8 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 
 {$ENDIF}
 
+{$ENDIF}
+
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
 {* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
@@ -1145,6 +1166,8 @@ procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 {* 分析源代码中引用的单元，FileName 是完整文件名}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -1229,6 +1252,8 @@ procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObj
 procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
 {* 从 ObjectList 中替换一部分 EditView 中的书签}
 
+{$ENDIF}
+
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
 {* 判断正则表达式匹配}
@@ -1265,6 +1290,13 @@ procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 
 var
   CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
+
+{$IFDEF STAND_ALONE}
+  CnStubRefMainForm: TCustomForm = nil;
+  CnStubRefMainMenu: TMainMenu = nil;
+  CnStubRefImageList: TCustomImageList = nil;
+  CnStubRefActionList: TActionList = nil;
+{$ENDIF}
 
 implementation
 
@@ -1444,6 +1476,8 @@ function CnGetClassParentFromClass(AClass: Integer): Integer;
 begin
   Result := Integer(TClass(AClass).ClassParent);
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -1771,6 +1805,7 @@ begin
     Result := -1;
 end;
 
+{$IFNDEF LAZARUS}
 {$IFDEF IDE_SUPPORT_HDPI}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
@@ -2142,11 +2177,15 @@ var
   Svcs40: INTAServices40;
 {$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := CnStubRefImageList;
+{$ELSE}
 {$IFDEF LAZARUS}
-
+  Result := GetIDEMainMenu.Images;
 {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ImageList;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -2218,6 +2257,9 @@ var
   Svcs40: INTAServices40;
 {$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := CnStubRefMainMenu;
+{$ELSE}
 {$IFDEF LAZARUS}
   F := GetIDEMainForm;
   for I := 0 to F.ComponentCount - 1 do
@@ -2232,6 +2274,7 @@ begin
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.MainMenu;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 取得 IDE 主菜单下的 Tools 菜单
@@ -2244,7 +2287,8 @@ begin
   if MainMenu <> nil then
   begin
 {$IFDEF LAZARUS}
-    Result := MainMenu.Items[8]; // Lazarus 下写死这个
+    Result := MainMenu.Items.Items[8]; // Lazarus 下写死这个
+    Exit;
 {$ELSE}
     for I := 0 to MainMenu.Items.Count - 1 do
     begin
@@ -2269,11 +2313,17 @@ end;
 
 // 取得 IDE 主 ActionList
 function GetIDEActionList: TCustomActionList;
+{$IFNDEF STAND_ALONE}
 var
   Svcs40: INTAServices40;
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := CnStubRefActionList;
+{$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList;
+{$ENDIF}
 end;
 
 // 取得 IDE 主 ActionList 中指定名称的 Action
@@ -2323,6 +2373,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF NO_DELPHI_OTA}
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
 function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
@@ -2389,6 +2441,7 @@ begin
   Result := StringReplace(Path, SCnIDEPathMacro, MakeDir(GetIdeRootDirectory),
     [rfReplaceAll, rfIgnoreCase]);
 end;
+{$ENDIF}
 {$ENDIF}
 
 // 保存 IDE ActionList 中的内容到指定文件
@@ -3067,6 +3120,8 @@ begin
   Result := IsForm(CnOtaGetCurrentSourceFile);
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 // 窗体编辑器对象是否 VCL 窗体（非 .NET 窗体）
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
 begin
@@ -3081,6 +3136,8 @@ begin
 {$ENDIF}
   end;
 end;
+
+{$ENDIF}
 
 function ExtractUpperFileExt(const FileName: string): string;
 begin
@@ -3372,6 +3429,7 @@ begin
   Result := nil;
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // OTA 接口操作相关函数
@@ -6683,6 +6741,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 //==============================================================================
 // 源代码操作相关函数
 //==============================================================================
@@ -6987,6 +7047,8 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 // 取当前编辑的源文件  (来自 GExperts Src 1.12，有改动)
 function CnOtaGetCurrentSourceFile: string;
@@ -8405,6 +8467,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 // 封装的解析器解析 Pascal 代码的过程
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
@@ -8543,6 +8607,8 @@ begin
     Stream.Free;
   end;
 end;
+
+{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -8918,6 +8984,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 // 判断当前是否是 Delphi 工程
 function IsDelphiProject(Project: IOTAProject): Boolean;
 {$IFDEF COMPILER9_UP}
@@ -8937,6 +9005,8 @@ begin
 {$ENDIF}
   end;
 end;
+
+{$ENDIF}
 
 const
   MAX_BOOKMARK_COUNT = 20; // 20 是因为 Toggle Var/Uses 使用到了 19 和 20
@@ -9062,6 +9132,8 @@ begin
     EditView.CursorPos := SavePos;
   end;
 end;
+
+{$ENDIF}
 
 // 判断正则表达式匹配
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
@@ -9237,9 +9309,8 @@ finalization
 {$IFNDEF LAZARUS}
   RegisterNoIconProc := OldRegisterNoIconProc;
   FreeAndNil(CnNoIconList);
-
-  FreeResDll;
 {$ENDIF}
+  FreeResDll;
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizUtils finalization.');

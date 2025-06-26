@@ -575,7 +575,7 @@ function TCnWizShortCutMgr.Add(const AName: string; AShortCut: TShortCut;
   AnAction: TAction): TCnWizShortCut;
 begin
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnWizShortCutMgr.Add: %s (%s)', [AName,
+  CnDebugger.LogFmt('TCnWizShortCutMgr.Add: %s %d (%s)', [AName, AShortCut,
     ShortCutToText(AShortCut)]);
 {$ENDIF}
 
