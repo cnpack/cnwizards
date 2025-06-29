@@ -252,6 +252,8 @@ function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): st
 
 procedure SaveIDEActionListToFile(const FileName: string);
 {* 保存 IDE ActionList 中的内容到指定文件}
+
+{$IFNDEF NO_DELPHI_OTA}
 procedure SaveIDEOptionsNameToFile(const FileName: string);
 {* 保存 IDE 环境设置变量名到指定文件}
 procedure SaveProjectOptionsNameToFile(const FileName: string);
@@ -266,6 +268,7 @@ function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
+{$ENDIF}
 {$ENDIF}
 
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
@@ -336,6 +339,8 @@ procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
 
+{$IFNDEF NO_DELPHI_OTA}
+
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
 //==============================================================================
@@ -346,9 +351,9 @@ function IsDelphiRuntime: Boolean;
 function IsCSharpRuntime: Boolean;
 {* 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False}
 
-{$IFNDEF NO_DELPHI_OTA}
 function IsDelphiProject(Project: IOTAProject): Boolean;
 {* 判断当前是否是 Delphi 工程}
+
 {$ENDIF}
 
 //==============================================================================
@@ -360,6 +365,7 @@ resourcestring
   SCnDefCppSourceMask = '.CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
   SCnDefSourceMask = '.PAS;.DPR;CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
 
+{$IFNDEF NO_DELPHI_OTA}
 function CurrentIsDelphiSource: Boolean;
 {* 当前编辑的文件是 Delphi 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentIsCSource: Boolean;
@@ -374,8 +380,6 @@ function CurrentSourceIsDelphiOrCSource: Boolean;
 {* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
-
-{$IFNDEF NO_DELPHI_OTA}
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
 {* 窗体编辑器对象是否 VCL 窗体（非 .NET 窗体）}
 {$ENDIF}
@@ -803,9 +807,11 @@ function CnOtaIsPersistentBlocks: Boolean;
 function ConvertNtaEditorStringToAnsi(const LineText: string; UseAlterChar: Boolean = False): AnsiString;
 {* 将通过 Nta 方法获得的字符串 AnsiString/AnsiUtf8/Utf16 尽量转换为 AnsiString}
 
+{$IFNDEF NO_DELPHI_OTA}
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
   Wrap: Boolean; MaxLen: Integer = 0; AddAtHead: Boolean = False): string;
 {* 字符串转为源代码串}
+{$ENDIF}
 
 function CodeAutoWrap(Code: string; Width, Indent: Integer;
   IndentOnceOnly: Boolean): string;
@@ -1156,6 +1162,8 @@ procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
+{$IFNDEF NO_DELPHI_OTA}
+
 procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
 {* 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
@@ -1166,8 +1174,6 @@ procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
 
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 {* 分析源代码中引用的单元，FileName 是完整文件名}
-
-{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -1307,11 +1313,12 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizHelp
-  {$IFNDEF LAZARUS}, CnWizEditFiler, CnWizScaler {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizMultiLang, CnLangMgr, CnWizDebuggerNotifier, CnEditControlWrapper,
-  CnLangStorage, CnHashLangStorage, CnIDEVersion
-  {$ENDIF} {$ENDIF}
+  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizHelp,
+  CnLangMgr, CnLangStorage, CnHashLangStorage
+  {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS}, CnWizEditFiler, CnWizScaler
+  {$IFNDEF CNWIZARDS_MINIMUM}
+  CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
+  {$ENDIF} {$ENDIF} {$ENDIF}
   ;
 
 const
@@ -2172,7 +2179,7 @@ end;
 
 //取得 IDE 主 ImageList
 function GetIDEImageList: TCustomImageList;
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
@@ -2249,12 +2256,14 @@ end;
 
 // 取得 IDE 主菜单
 function GetIDEMainMenu: TMainMenu;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   I: Integer;
   F: TCustomForm;
 {$ELSE}
   Svcs40: INTAServices40;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF STAND_ALONE}
@@ -2466,6 +2475,8 @@ begin
   end;
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 // 保存 IDE 环境设置变量名到指定文件
 procedure SaveIDEOptionsNameToFile(const FileName: string);
 var
@@ -2616,6 +2627,7 @@ begin
   end;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 // 创建一个子菜单项
@@ -3069,6 +3081,8 @@ begin
   end;
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 //==============================================================================
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
 //==============================================================================
@@ -3119,8 +3133,6 @@ function CurrentIsForm: Boolean;
 begin
   Result := IsForm(CnOtaGetCurrentSourceFile);
 end;
-
-{$IFNDEF NO_DELPHI_OTA}
 
 // 窗体编辑器对象是否 VCL 窗体（非 .NET 窗体）
 function IsVCLFormEditor(FormEditor: IOTAFormEditor = nil): Boolean;
@@ -6771,6 +6783,7 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
 // 字符串转为源代码串
 function StrToSourceCode(const Str, ADelphiReturn, ACReturn: string;
   Wrap: Boolean; MaxLen: Integer; AddAtHead: Boolean): string;
@@ -6904,6 +6917,7 @@ begin
     Strings.Free;
   end;
 end;
+{$ENDIF}
 
 // 长代码自动切换为多行代码
 function CodeAutoWrap(Code: string; Width, Indent: Integer;
@@ -8528,6 +8542,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 // 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
 // 输出 CharPos，以备让 EditView 转换成 EditPos
 procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
@@ -8607,8 +8623,6 @@ begin
     Stream.Free;
   end;
 end;
-
-{$IFNDEF NO_DELPHI_OTA}
 
 //==============================================================================
 // 窗体操作相关函数
@@ -8935,6 +8949,8 @@ begin
   Result := (a <> $FFFFFFFF) and (a and FILE_ATTRIBUTE_DIRECTORY = 0);
 end;
 
+{$IFNDEF NO_DELPHI_OTA}
+
 // 用各种法子判断当前 IDE/BDS 是否是 Delphi，是则返回 True，C++Builder 则返回 False
 function IsDelphiRuntime: Boolean;
 {$IFDEF COMPILER9_UP}
@@ -8983,8 +8999,6 @@ begin
   end;
 {$ENDIF}
 end;
-
-{$IFNDEF NO_DELPHI_OTA}
 
 // 判断当前是否是 Delphi 工程
 function IsDelphiProject(Project: IOTAProject): Boolean;
@@ -9240,8 +9254,10 @@ end;
 
 procedure FormCallBack(Sender: TObject);
 begin
+{$IFNDEF STAND_ALONE}
   if Sender is TForm then
     ScaleForm(Sender as TForm, IdeGetScaledFactor);
+{$ENDIF}
 end;
 
 function CnWizInputQuery(const ACaption, APrompt: string;
