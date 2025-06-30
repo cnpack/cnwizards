@@ -1,0 +1,64 @@
+object FormFramework: TFormFramework
+  Left = 192
+  Height = 563
+  Top = 112
+  Width = 979
+  Caption = 'Stand Alone Framework Test'
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Menu = mmStub
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object actlstStub: TActionList
+    Left = 144
+    Top = 80
+  end
+  object mmStub: TMainMenu
+    Left = 104
+    Top = 80
+    object File1: TMenuItem
+      Caption = 'File'
+      object Exit1: TMenuItem
+        Caption = 'Exit'
+        OnClick = Exit1Click
+      end
+    end
+    object Edit1: TMenuItem
+      Caption = 'Edit'
+    end
+    object Search1: TMenuItem
+      Caption = 'Search'
+    end
+    object View1: TMenuItem
+      Caption = 'View'
+    end
+    object Project1: TMenuItem
+      Caption = 'Project'
+    end
+    object Run1: TMenuItem
+      Caption = 'Run'
+    end
+    object Component1: TMenuItem
+      Caption = 'Component'
+    end
+    object Database1: TMenuItem
+      Caption = 'Database'
+    end
+    object ToolsMenu: TMenuItem
+      Caption = 'Tools'
+    end
+    object Window1: TMenuItem
+      Caption = 'Window'
+    end
+    object Help1: TMenuItem
+      Caption = 'Help'
+    end
+  end
+  object ilStub: TImageList
+    Left = 184
+    Top = 80
+  end
+end

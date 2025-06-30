@@ -245,11 +245,8 @@ const
 
 var
   FWizActionMgr: TCnWizActionMgr = nil;
-{$IFDEF STAND_ALONE}
-  FCnWizardsActionList: TActionList = nil; // 独立运行时没有 IDE ActionList
-{$ENDIF}
-{$IFDEF LAZARUS}
-  FCnWizardsActionList: TActionList = nil; // Lazarus 里没有 IDE ActionList
+{$IFDEF NO_DELPHI_OTA}
+  FCnWizardsActionList: TActionList = nil; // 独立运行时及 Lazarus 里没有 IDE ActionList
 {$ENDIF}
 
 //==============================================================================

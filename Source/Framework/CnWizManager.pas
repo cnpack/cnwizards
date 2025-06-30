@@ -58,7 +58,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
-  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE}
+  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, {$ENDIF} {$ELSE}
   {$IFNDEF NO_DELPHI_OTA} ToolsAPI,  CnRestoreSystemMenu, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}

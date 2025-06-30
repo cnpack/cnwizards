@@ -68,7 +68,7 @@ interface
 
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ExtCtrls,
-  ComCtrls, TypInfo, Forms, Tabs, Registry, Contnrs,
+  ComCtrls, TypInfo, Forms, {$IFNDEF LAZARUS} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
   {$IFNDEF STAND_ALONE} ToolsAPI,  CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
@@ -1317,8 +1317,8 @@ begin
     WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE {$IFDEF IDE_SUPPORT_HDPI}, WM_DPICHANGED {$ENDIF}]);
-  CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
 {$IFNDEF STAND_ALONE}
+  CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
   UpdateEditControlList;
@@ -1345,8 +1345,8 @@ begin
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsgProc);
-  CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
 {$IFNDEF STAND_ALONE}
+  CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 {$ENDIF}
   FEditorBaseFont.Free;

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="StandAloneFramework.dpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="21" Y="13"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="StandAloneFrameworkUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormFramework"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="40"/>
+        <CursorPos X="15" Y="46"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\cnvcl\Source\Common\CnCommon.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="77"/>
+        <CursorPos X="9" Y="93"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="340"/>
+        <CursorPos X="25" Y="338"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Framework\CnWizOptions.pas"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="406"/>
+        <CursorPos X="24" Y="411"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="236"/>
+        <CursorPos X="23" Y="249"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Framework\CnWizClasses.pas"/>
+        <EditorIndex Value="5"/>
+        <CursorPos X="4"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1309"/>
+        <CursorPos X="75" Y="1321"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Utils\CnWizNotifier.pas"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="173"/>
+        <CursorPos X="44" Y="188"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Framework\CnWizManager.pas"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="49"/>
+        <CursorPos X="72" Y="61"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\MultiLang\CnWizLangID.pas"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="51"/>
+        <CursorPos X="118" Y="66"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+    </Units>
+    <OtherDefines Count="1">
+      <Define0 Value="STAND_ALONE"/>
+    </OtherDefines>
+    <JumpHistory HistoryIndex="27">
+      <Position>
+        <Filename Value="StandAloneFrameworkUnit.pas"/>
+        <Caret Line="11" Column="3"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\..\cnvcl\Source\Common\CnCommon.pas"/>
+        <Caret Line="93" Column="9" TopLine="77"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="70" Column="25" TopLine="59"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="102" Column="17" TopLine="90"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="287" Column="10" TopLine="277"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizOptions.pas"/>
+        <Caret Line="425" Column="22" TopLine="412"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizOptions.pas"/>
+        <Caret Line="411" Column="24" TopLine="406"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="291" Column="15" TopLine="280"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="100" TopLine="91"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="297" Column="9" TopLine="280"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
+        <Caret Line="338" Column="25" TopLine="340"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <Caret Line="249" Column="23" TopLine="234"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <Caret Line="252" Column="23" TopLine="234"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <Caret Line="503" Column="22" TopLine="484"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <Caret Line="501" Column="38" TopLine="486"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
+        <Caret Line="249" Column="23" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizClasses.pas"/>
+        <Caret Line="84" Column="59" TopLine="70"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="71" Column="61" TopLine="59"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizClasses.pas"/>
+        <Caret Column="4"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1320" Column="25" TopLine="1308"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1348" Column="43" TopLine="1337"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1349" Column="19" TopLine="1337"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1348" Column="25" TopLine="1336"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1320" Column="25" TopLine="1309"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1349" Column="78" TopLine="1337"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Utils\CnEditControlWrapper.pas"/>
+        <Caret Line="1321" Column="75" TopLine="1309"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\Source\Framework\CnWizManager.pas"/>
+        <Caret Line="61" Column="72" TopLine="49"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

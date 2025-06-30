@@ -81,7 +81,7 @@ interface
 
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, Dialogs,
-  {$IFNDEF STAND_ALONE}
+  {$IFDEF STAND_ALONE} {$IFDEF LAZARUS} LCLProc, {$ENDIF} {$ELSE}
   {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, CnWizIni, {$ENDIF}
   {$ENDIF}
   Registry, ComCtrls, Forms, CnHashMap, CnWizShortCut, CnWizMenuAction,

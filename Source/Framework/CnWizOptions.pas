@@ -405,12 +405,10 @@ var
   DefDir: string;
   I: Integer;
   S: string;
-{$IFNDEF STAND_ALONE}
-{$IFDEF LAZARUS}
+{$IFDEF NO_DELPHI_OTA}
   Reg: TRegistry;
 {$ELSE}
   Svcs: IOTAServices;
-{$ENDIF}
 {$ENDIF}
 begin
   inherited;
@@ -422,7 +420,7 @@ begin
 {$ENDIF}
 {$ENDIF}
 
-{$IFDEF LAZARUS}
+{$IFDEF NO_DELPHI_OTA}
   // Lazarus 因没 DLL 存在，改从注册表里读安装程序写入的 InstallDir
   Reg := TRegistry.Create; // 创建注册表对象
   try

@@ -69,7 +69,7 @@ uses
   Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ActnList,
   {$IFNDEF STAND_ALONE}
   {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, {$ENDIF}
-  {$ENDIF}
+  {$ELSE} {$IFDEF LAZARUS} LCLProc, {$ENDIF} {$ENDIF}
   CnWizConsts, CnCommon;
 
 type
@@ -97,9 +97,11 @@ type
     FAction: TAction;
     FName: string;
     FTag: Integer;
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
     FLazShortCut: TIDEShortCut; // 结构，无需释放
     FLazCommand: TIDECommand;   // 注册的对象，如何释放？
+{$ENDIF}
 {$ENDIF}
     procedure SetKeyProc(const Value: TNotifyEvent);
     procedure SetShortCut(const Value: TShortCut);
@@ -283,6 +285,7 @@ begin
   CnDebugger.LogFmt('TCnWizShortCut.Changed: %s', [Name]);
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
   // Lazarus 下先行同步快捷键保存，暂时不塞给 IDE
   ShortCutToKey(FShortCut, Key, Shift);
@@ -290,6 +293,7 @@ begin
 {$ELSE}
   if FOwner <> nil then
     FOwner.UpdateBinding;
+{$ENDIF}
 {$ENDIF}
 end;
 
