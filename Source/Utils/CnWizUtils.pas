@@ -1317,7 +1317,7 @@ uses
   CnLangMgr, CnLangStorage, CnHashLangStorage
   {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS}, CnWizEditFiler, CnWizScaler
   {$IFNDEF CNWIZARDS_MINIMUM}
-  CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
+  , CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
   {$ENDIF} {$ENDIF} {$ENDIF}
   ;
 
