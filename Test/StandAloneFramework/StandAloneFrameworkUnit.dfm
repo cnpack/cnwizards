@@ -27,6 +27,7 @@ object FormFramework: TFormFramework
       Caption = 'File'
       object Exit1: TMenuItem
         Caption = 'Exit'
+        OnClick = Exit1Click
       end
     end
     object Edit1: TMenuItem

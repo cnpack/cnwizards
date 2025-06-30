@@ -27,6 +27,7 @@ type
     Exit1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure Exit1Click(Sender: TObject);
   private
 
   public
@@ -56,6 +57,11 @@ end;
 procedure TFormFramework.FormDestroy(Sender: TObject);
 begin
   CnWizardMgr.Free;
+end;
+
+procedure TFormFramework.Exit1Click(Sender: TObject);
+begin
+  Application.Terminate;
 end;
 
 end.

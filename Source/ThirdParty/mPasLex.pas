@@ -94,11 +94,12 @@ type
     tkHelper, tkIdentifier, tkIf, tkImplementation, tkImplements, tkIn, tkIndex,
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
-    tkMod, tkMultiLineString, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNot, tkNotEqual, tkNull,
-    tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload, tkOverride, tkPackage,
-    tkPacked, tkPascal, tkPlatform, tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure,
-    tkProgram, tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead,
-    tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat, tkRequires, tkResident,
+    tkMod, tkMultiLineString, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNoReturn,
+    tkNot, tkNotEqual, tkNull, tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr,
+    tkOut, tkOverload, tkOverride, tkPackage, tkPacked, tkPascal, tkPlatform,
+    tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure, tkProgram,
+    tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead, tkReadonly,
+    tkRecord, tkRegister, tkReintroduce, tkRepeat, tkRequires, tkResident,
     tkResourcestring, tkRoundClose, tkRoundOpen, tkSafecall, tkSealed, tkSemiColon, tkSet,
     tkShl, tkShr, tkSlash, tkSlashesComment, tkStatic, tkStrict, tkSquareClose, tkSquareOpen,
     tkSpace, tkStar, tkStdcall, tkStored, tkString, tkStringresource, tkSymbol,
@@ -118,6 +119,8 @@ type
       解决方案：暂无
     新问题六：不支持新语法中的三个单引号括起来的多行字符串新语法
       解决方案：加上了 tkMultiLineString
+    新问题七：不支持新语法中的 noreturn
+      解决方案：加上了 tkNoReturn
   ***}
 
   TTokenKinds = set of TTokenKind;
@@ -247,6 +250,7 @@ type
     function Func108: TTokenKind; // Added by LiuXiao
     function Func112: TTokenKind; // Added by LiuXiao
     function Func117: TTokenKind;
+    function Func125: TTokenKind; // Added by LiuXiao
     function Func126: TTokenKind;
     function Func129: TTokenKind;
     function Func132: TTokenKind;
@@ -441,6 +445,7 @@ begin
       108: fIdentFuncTable[I]:=Func108;
       112: fIdentFuncTable[I]:=Func112;
       117: fIdentFuncTable[I]:=Func117;
+      125: fIdentFuncTable[I]:=Func125;
       126: fIdentFuncTable[I]:=Func126;
       129: fIdentFuncTable[I]:=Func129;
       132: fIdentFuncTable[I]:=Func132;
@@ -906,6 +911,14 @@ begin
   if KeyComp('Exports')then Result:=tkExports else Result:=tkIdentifier;
 end;
 
+function TmwPasLex.Func125: TTokenKind;
+begin
+  if KeyComp('NoReturn') then
+    Result:=tkNoReturn
+  else
+    Result:=tkIdentifier;
+end;
+
 function TmwPasLex.Func126: TTokenKind;
 begin
   if KeyComp('Implements') then
@@ -966,7 +979,7 @@ end;
 
 function TmwPasLex.AltFunc: TTokenKind;
 begin
-  Result:=tkIdentifier
+  Result:=tkIdentifier;
 end;
 
 function TmwPasLex.IdentKind(MayBe: PAnsiChar): TTokenKind;

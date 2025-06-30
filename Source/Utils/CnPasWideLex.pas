@@ -102,9 +102,11 @@ unit CnPasWideLex;
 *           当 SupportUnicodeIdent 为 False 时，Unicode 字符挨个作为 tkUnknown 解析
 *           为 True 时整个作为 Identifier 解析。支持 Unicode/非 Unicode 编译器。
 * 开发平台：Windows 7 + Delphi XE
-* 兼容测试：PWin9X/2000/XP/7 + Delphi 2009 ~
+* 兼容测试：PWin7/10/11 + Delphi 5 ~ Delphi 2009 ~ 以上 + Lazarus 4.0
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2022.10.19 V1.7
+* 修改记录：2025.06.30 V1.8
+*               支持新关键字 noreturn，均同步 mPasLex
+*           2022.10.19 V1.7
 *               增加几个关键字的支持，修正 tkKeyString 和 tkString 的混淆
 *               修正 #$0A 的判断错误，修正字符串内单引号的判断错误，均同步 mPasLex
 *           2022.09.09 V1.6
@@ -285,6 +287,7 @@ type
     function Func108: TTokenKind;
     function Func112: TTokenKind;
     function Func117: TTokenKind;
+    function Func125: TTokenKind;
     function Func126: TTokenKind;
     function Func129: TTokenKind;
     function Func132: TTokenKind;
@@ -596,6 +599,8 @@ begin
         FIdentFuncTable[I] := Func112;
       117:
         FIdentFuncTable[I] := Func117;
+      125:
+        FIdentFuncTable[I] := Func125;
       126:
         FIdentFuncTable[I] := Func126;
       129:
@@ -1315,6 +1320,14 @@ begin
     Result := tkIdentifier;
 end;
 
+function TCnPasWideLex.Func125: TTokenKind;
+begin
+  if KeyComp('Noreturn') then
+    Result := tkNoReturn
+  else
+    Result := tkIdentifier;
+end;
+
 function TCnPasWideLex.Func126: TTokenKind;
 begin
   if KeyComp('Implements') then
@@ -1401,7 +1414,7 @@ end;
 
 function TCnPasWideLex.AltFunc: TTokenKind;
 begin
-  Result := tkIdentifier
+  Result := tkIdentifier;
 end;
 
 function TCnPasWideLex.IdentKind(MayBe: PWideChar): TTokenKind;
