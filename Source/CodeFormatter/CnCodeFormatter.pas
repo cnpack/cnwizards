@@ -1223,12 +1223,25 @@ begin
   end;
 end;
 
-{ Expression -> SimpleExpression [RelOp SimpleExpression]... }
+{ Expression -> SimpleExpression [RelOp SimpleExpression]...
+             -> IF Expression THEN Expression ELSE Expression}
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
 begin
   SpecifyElementType(pfetExpression);
   try
+    if Scanner.Token = tokKeywordIf then
+    begin
+      // ÐÂÓï·¨ IF expression THEN expression ELSE expression
+      Match(tokKeywordIf);
+      FormatExpression(PreSpaceCount, IndentForAnonymous);
+      Match(tokKeywordThen);
+      FormatExpression(PreSpaceCount, IndentForAnonymous);
+      Match(tokKeywordElse);
+      FormatExpression(PreSpaceCount, IndentForAnonymous);
+      Exit;
+    end;
+
     FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
 
     while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
