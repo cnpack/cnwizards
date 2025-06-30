@@ -195,6 +195,7 @@ type
     tokDirectiveFORWARD,
     tokDirectiveMESSAGE,
     tokDirectiveNEAR,
+    tokDirectiveNORETURN,
     tokDirectiveOVERRIDE,
     tokDirectiveOVERLOAD,
     tokDirectivePASCAL,
@@ -524,6 +525,7 @@ const
     (Value: Integer(tokDirectiveFORWARD);      Name: 'FORWARD'),
     (Value: Integer(tokDirectiveMESSAGE);      Name: 'MESSAGE'),
     (Value: Integer(tokDirectiveNEAR);         Name: 'NEAR'),
+    (Value: Integer(tokDirectiveNORETURN);     Name: 'NORETURN'),
     (Value: Integer(tokDirectiveOVERRIDE);     Name: 'OVERRIDE'),
     (Value: Integer(tokDirectiveOVERLOAD);     Name: 'OVERLOAD'),
     (Value: Integer(tokDirectivePASCAL);       Name: 'PASCAL'),
@@ -538,7 +540,7 @@ const
     (Value: Integer(tokDirectiveWINAPI);       Name: 'WINAPI'),
     (Value: Integer(tokDirective_END);         Name: ''),
                                                               
-    //Complex Keyword, it can be keyword or directive or symbol(variant/proc name)
+    // Complex Keyword, it can be keyword or directive or symbol(variant/proc name)
     (Value: Integer(tokComplex_BEGIN);         Name: ''),
     (Value: Integer(tokComplexContains);       Name: 'Contains'),
     (Value: Integer(tokComplexDefault);        Name: 'Default'),
