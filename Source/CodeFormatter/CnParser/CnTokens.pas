@@ -260,7 +260,7 @@ const
     tokDirectiveRegister, tokDirectiveForward];
   
   RelOpTokens = [tokGreat, tokLess, tokGreatOrEqu, tokLessOrEqu, tokNotEqual,
-    tokEqual, tokKeywordIn, tokKeywordAs, tokKeywordIs];
+    tokEqual, tokKeywordIn, tokKeywordAs, tokKeywordIs]; // 注意这里没有 not，但语法中有 not in
   AddOPTokens = [tokPlus, tokMinus, tokKeywordOR, tokKeywordXOR];
   MulOpTokens = [tokStar, tokKeywordDIV, tokDiv, tokKeywordMod, tokKeywordAnd];
   ShiftOpTokens = [tokKeywordShl, tokKeywordShr];

@@ -725,7 +725,6 @@ end;
 
 function TCnAbstractCodeFormatter.Space(Count: Word): string;
 begin
-  Result := 'a'#10'a'#13'sd'; // ???
   if SmallInt(Count) > 0 then
     Result := StringOfChar(' ', Count)
   else
@@ -1027,17 +1026,34 @@ begin
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
     FNeedKeepLineBreak := True;
     try
+      if Scanner.Token = tokKeywordIf then
+      begin
+        // 新语法 IF expression THEN expression ELSE expression
+        Match(tokKeywordIf);
+        FormatExpression(PreSpaceCount, IndentForAnonymous);
+        Match(tokKeywordThen);
+        FormatExpression(PreSpaceCount, IndentForAnonymous);
+        Match(tokKeywordElse);
+        FormatExpression(PreSpaceCount, IndentForAnonymous);
+        Exit;
+      end;
+
       // 从 FormatExpression 复制而来，为了区分来源
       FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
     end;
 
-    while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
+    while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot, tokKeywordNot] do
     begin
       // 这块对泛型的处理已移动到内部以处理 function call 的情形
-
-      if Scanner.Token in RelOpTokens then
+      if Scanner.Token = tokKeywordNot then // not in 是新语法
+      begin
+        Match(tokKeywordNot, 0, 1);
+        Match(tokKeywordIn, 0, 1);
+        FormatSimpleExpression;
+      end
+      else if Scanner.Token in RelOpTokens then
       begin
         MatchOperator(Scanner.Token);
         FormatSimpleExpression;
@@ -1244,11 +1260,17 @@ begin
 
     FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
 
-    while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot] do
+    while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot, tokKeywordNot] do
     begin
       // 这块对泛型的处理已移动到内部以处理 function call 的情形
 
-      if Scanner.Token in RelOpTokens then
+      if Scanner.Token = tokKeywordNot then // not in 是新语法
+      begin
+        Match(tokKeywordNot, 0, 1);
+        Match(tokKeywordIn, 0, 1);
+        FormatSimpleExpression;
+      end
+      else if Scanner.Token in RelOpTokens then
       begin
         MatchOperator(Scanner.Token);
         FormatSimpleExpression;
