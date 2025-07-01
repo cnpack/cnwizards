@@ -2516,11 +2516,14 @@ begin
   end;
 end;
 
+{$IFNDEF STAND_ALONE}
 var
   CorIdeModule: HMODULE;
+{$ENDIF}
 
 procedure InitIdeAPIs;
 begin
+{$IFNDEF STAND_ALONE}
   CorIdeModule := LoadLibrary(CorIdeLibName);
   Assert(CorIdeModule <> 0, 'Failed to load CorIdeModule');
 
@@ -2538,13 +2541,16 @@ begin
 
   Assert(Assigned(EndBatchOpenCloseProc), 'Failed to load EndBatchOpenCloseProc from CorIdeModule');
 {$ENDIF}
+{$ENDIF}
 end;
 
 procedure FinalIdeAPIs;
 begin
+{$IFNDEF STAND_ALONE}
   if CorIdeModule <> 0 then
     FreeLibrary(CorIdeModule);
-end;  
+{$ENDIF}
+end;
 
 // 开始批量打开或关闭文件
 procedure BeginBatchOpenClose;
