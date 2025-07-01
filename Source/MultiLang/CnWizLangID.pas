@@ -39,7 +39,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Windows, Registry, CnCommon, CnConsts;
+  SysUtils, Classes, Windows, Registry, CnCommon, CnConsts, CnRegIni;
 
 function GetWizardsLanguageID: DWORD;
 {* 从注册表中读取当前 CnWizards 的语言 ID }
@@ -57,7 +57,7 @@ const
 // 从注册表中读取当前 CnWizards 的语言 ID
 function GetWizardsLanguageID: DWORD;
 begin
-  with TRegistryIniFile.Create(MakePath(MakePath(SCnPackRegPath) + csWizardRegPath)) do
+  with TCnRegistryIniFile.Create(MakePath(MakePath(SCnPackRegPath) + csWizardRegPath)) do
   begin
     Result := ReadInteger(csOptionSection, csLangID, GetSystemDefaultLCID);
     Free;
@@ -67,7 +67,7 @@ end;
 // 设置注册表中的当前 CnWizards 的语言 ID
 procedure SetWizardsLanguageID(LangID: DWORD);
 begin
-  with TRegistryIniFile.Create(MakePath(MakePath(SCnPackRegPath) + csWizardRegPath)) do
+  with TCnRegistryIniFile.Create(MakePath(MakePath(SCnPackRegPath) + csWizardRegPath)) do
   begin
     WriteInteger(csOptionSection, csLangID, LangID);
     Free;

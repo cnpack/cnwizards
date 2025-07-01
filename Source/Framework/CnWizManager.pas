@@ -847,11 +847,10 @@ begin
   FSepMenu.Caption := '-';
   FConfigAction := WizActionMgr.AddMenuAction(SCnWizConfigCommand, SCnWizConfigCaption,
     SCnWizConfigMenuName, 0, OnConfig, SCnWizConfigIcon, SCnWizConfigHint);
-{$IFNDEF STAND_ALONE}
+
 {$IFNDEF CNWIZARDS_MINIMUM}
   FWizMultiLang := TCnWizMultiLang.Create;
   FWizAbout := TCnWizAbout.Create;
-{$ENDIF}
 {$ENDIF}
 end;
 

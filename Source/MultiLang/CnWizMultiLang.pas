@@ -66,20 +66,18 @@ uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
 {$IFNDEF TEST_APP}
 {$IFNDEF STAND_ALONE}
-  CnConsts, CnWizClasses, CnWizManager, CnWizUtils, CnWizOptions, CnDesignEditor,
-  CnWizTranslate, CnLangUtils, CnWizScaler,
+  CnWizUtils, CnDesignEditor, CnWizScaler,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
 {$ELSE}
-  CnWizLangID,
+  CnWizLangID, 
 {$ENDIF}
+  CnConsts, CnWizClasses, CnLangUtils, CnWizTranslate, CnWizManager, CnWizOptions,
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
 {$ENDIF}
   StdCtrls, ComCtrls, IniFiles;
 
 type
-
-{$IFNDEF STAND_ALONE}  // 非独立模式才定义 TCnWizMultiLang
 
 { TCnWizMultiLang }
 
@@ -100,8 +98,6 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
   end;
-
-{$ENDIF}
 
   TCnTranslateForm = class(TForm)
 {$IFNDEF TEST_APP}
@@ -193,15 +189,8 @@ implementation
 
 {$R *.DFM}
 
-{$IFNDEF STAND_ALONE}
 uses
   CnWizShareImages {$IFDEF DEBUG}, CnDebug {$ENDIF};
-{$ELSE}
-{$IFDEF DEBUG}
-uses
-  CnDebug;
-{$ENDIF}
-{$ENDIF}
 
 type
   TControlHack = class(TControl);
@@ -318,8 +307,6 @@ begin
 end;
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 { TCnWizMultiLang }
 
 constructor TCnWizMultiLang.Create;
@@ -394,7 +381,9 @@ begin
     CnTranslateConsts(Sender);
     CnWizardMgr.RefreshLanguage;
     CnWizardMgr.ChangeWizardLanguage;
+{$IFNDEF STAND_ALONE}
     CnDesignEditorMgr.LanguageChanged(Sender);
+{$ENDIF}
   end;
 end;
 
@@ -427,8 +416,6 @@ begin
       FStorage.Languages[I].LanguageID;
   end;
 end;
-
-{$ENDIF}
 
 {$IFNDEF TEST_APP}
 
@@ -967,7 +954,11 @@ end;
 
 function TCnTranslateForm.NeedAdjustRightBottomMargin: Boolean;
 begin
+{$IFDEF LAZARUS}
+  Result := False;
+{$ELSE}
   Result := True;
+{$ENDIF}
 end;
 
 initialization

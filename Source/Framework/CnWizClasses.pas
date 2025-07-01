@@ -567,7 +567,7 @@ procedure AdjustCnWizardsClassOrder;
 implementation
 
 uses
-  {$IFNDEF NO_DELPHI_OTA} CnWizUtils, {$ENDIF} CnWizOptions, CnCommon
+  {$IFNDEF NO_DELPHI_OTA} CnWizUtils, {$ENDIF} CnWizOptions, CnCommon, CnRegIni
 {$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF NO_DELPHI_OTA}
   , CnWizCommentFrm, CnWizSubActionShortCutFrm
 {$ENDIF}{$ENDIF}
@@ -892,9 +892,9 @@ begin
     CnDebugger.LogMsg('Reset Settings: ' + ClassName);
   {$ENDIF}
 
-    if Ini is TRegistryIniFile then
+    if Ini is TCnRegistryIniFile then
     begin
-      with (Ini as TRegistryIniFile).RegIniFile do
+      with (Ini as TCnRegistryIniFile).RegIniFile do
       begin
   {$IFDEF DEBUG}
         CnDebugger.LogMsg('Remove Registry Entry: ' + FileName);

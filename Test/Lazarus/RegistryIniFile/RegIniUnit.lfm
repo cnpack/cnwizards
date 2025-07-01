@@ -1,0 +1,9 @@
+object FormRegIni: TFormRegIni
+  Left = 248
+  Height = 240
+  Top = 145
+  Width = 320
+  Caption = 'Test for RegIni'
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
+end

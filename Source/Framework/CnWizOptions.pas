@@ -316,7 +316,7 @@ uses
   {$IFNDEF CNWIZARDS_MINIMUM} CnWizShareImages, {$ENDIF}
 {$ENDIF}
 {$ENDIF}
-  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnNative;
+  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnRegIni, CnNative;
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 begin
@@ -817,16 +817,16 @@ end;
 
 function TCnWizOptions.CreateRegIniFile: TCustomIniFile;
 begin
-  Result := TRegistryIniFile.Create(FRegPath);
+  Result := TCnRegistryIniFile.Create(FRegPath);
 end;
 
 function TCnWizOptions.CreateRegIniFile(const APath: string;
   CompilerSection: Boolean): TCustomIniFile;
 begin
   if CompilerSection then
-    Result := TRegistryIniFile.Create(MakePath(APath) + CompilerID)
+    Result := TCnRegistryIniFile.Create(MakePath(APath) + CompilerID)
   else
-    Result := TRegistryIniFile.Create(APath);
+    Result := TCnRegistryIniFile.Create(APath);
 end;
 
 function TCnWizOptions.ReadBool(const Section, Ident: string;
