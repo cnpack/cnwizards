@@ -1416,7 +1416,6 @@ begin
     Menu.Add(FSepMenu);
   end;
 
-{$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
   EnsureNoParent(FConfigAction.Menu);
   EnsureNoParent(FWizMultiLang.Menu);
@@ -1426,7 +1425,7 @@ begin
   Menu.Add(FWizMultiLang.Menu);
   Menu.Add(FWizAbout.Menu);
 {$ENDIF}
-{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('Install Misc Menu Leave Successed.');
 {$ENDIF}

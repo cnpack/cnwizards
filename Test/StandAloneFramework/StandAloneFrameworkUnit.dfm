@@ -17,10 +17,12 @@ object FormFramework: TFormFramework
   PixelsPerInch = 96
   TextHeight = 13
   object actlstStub: TActionList
+    Images = ilStub
     Left = 144
     Top = 80
   end
   object mmStub: TMainMenu
+    Images = ilStub
     Left = 104
     Top = 80
     object File1: TMenuItem

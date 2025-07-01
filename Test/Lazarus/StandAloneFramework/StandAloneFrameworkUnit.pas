@@ -43,7 +43,6 @@ var
 
 implementation
 
-
 {$R *.lfm}
 
 uses

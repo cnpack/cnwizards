@@ -21,9 +21,6 @@
     </RunParams>
     <RequiredPackages>
       <Item>
-        <PackageName Value="CnWizards_L4"/>
-      </Item>
-      <Item>
         <PackageName Value="LCL"/>
       </Item>
     </RequiredPackages>
@@ -56,6 +53,11 @@
         <SyntaxMode Value="Delphi"/>
       </SyntaxOptions>
     </Parsing>
+    <CodeGeneration>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
     <Linking>
       <Debugging>
         <DebugInfoType Value="dsDwarf3"/>
