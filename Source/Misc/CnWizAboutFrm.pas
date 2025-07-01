@@ -115,10 +115,16 @@ begin
   edtVer.Text := Format('%s %s.%s Build %s', [SCnVersion,
     SCnWizardMajorVersion, SCnWizardMinorVersion, SCnWizardBuildDate]);
 
+{$IFDEF FPC}
+{$IFDEF WIN64}
+  Caption := Caption + ' (64)';
+{$ENDIF}
+{$ELSE}
 {$IFDEF WIN64}
   Caption := Caption + ' (64) - ' + _CnExtractFileName(WizOptions.DllName);
 {$ELSE}
   Caption := Caption + ' - ' + _CnExtractFileName(WizOptions.DllName);
+{$ENDIF}
 {$ENDIF}
 end;
 

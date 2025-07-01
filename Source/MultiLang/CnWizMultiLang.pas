@@ -99,6 +99,8 @@ type
     function GetHint: string; override;
   end;
 
+  { TCnTranslateForm }
+
   TCnTranslateForm = class(TForm)
 {$IFNDEF TEST_APP}
   private
@@ -118,6 +120,14 @@ type
 
     procedure ProcessSizeEnlarge;
     procedure ProcessGlyphForHDPI(AControl: TControl);
+    procedure ProcessLazarusFormClientSize;
+    {* 该函数是为在 FPC 中复用 Delphi 设计的窗体所进行的修补。
+       Delphi 设计窗体在部分情况下会将尺寸保存至 ClientHeight 和 ClientWidth 属性中，
+       而不是 Width 和 Height。但 FPC 并不使用 DFM/LFM 中记录的 ClientHeight 和 ClientWidth属性
+       来设置自身尺寸，导致窗体子类创建后的尺寸永远是基类尺寸。
+       此处做一下修补，在窗体 Loading 完成后，我们再读取分析一下本窗体的 DFM 资源字符串，
+       找出其中的 ClientHeight 和 ClientWidth 属性的值，对窗体的 Width 和 Height 属性重新赋值。}
+
 {$IFNDEF STAND_ALONE}
     function GetEnlarged: Boolean;
 {$ENDIF}
@@ -476,6 +486,8 @@ begin
 
   ProcessSizeEnlarge;
   ProcessGlyphForHDPI(Self);
+
+  ProcessLazarusFormClientSize;
 
   if NeedAdjustRightBottomMargin then
     AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
@@ -948,6 +960,97 @@ begin
     W := AControl as TWinControl;
     for I := 0 to W.ControlCount - 1 do
       ProcessGlyphForHDPI(W.Controls[I]);
+  end;
+{$ENDIF}
+end;
+
+procedure TCnTranslateForm.ProcessLazarusFormClientSize;
+{$IFDEF FPC}
+var
+  ResName, Head, S: string;
+  ResInstance: HRSRC;
+  Stream: TResourceStream;
+  Mem: TMemoryStream;
+  Ref: TCustomMemoryStream;
+  DFMs: TStringList;
+  I, V: Integer;
+
+  function ParseIntValue(const Line: string; const NeedPropName: string;
+    out IntValue: Integer): Boolean;
+  var
+    E: Integer;
+    H, T: string;
+  begin
+    Result := False;
+    E := Pos('=', Line);
+    if E > 0 then
+    begin
+      H := Trim(Copy(Line, 1, E - 1));
+      if H = NeedPropName then
+      begin
+        T := Trim(Copy(Line, E + 1, MaxInt));
+        Val(T, IntValue, E);
+        Result := E = 0;
+      end;
+    end;
+  end;
+
+{$ENDIF}
+begin
+{$IFDEF FPC}
+  if BorderStyle in [bsSizeable, bsSizeToolWin] then // 暂时只处理尺寸不可变的
+    Exit;
+
+  ResName := UpperCase(ClassName);
+  ResInstance := FindResource(HInstance, PChar(ResName), RT_RCDATA);
+  if ResInstance <> 0 then
+  begin
+    Mem := nil;
+    Stream := nil;
+    DFMs := nil;
+
+    try
+      Stream := TResourceStream.Create(HInstance, ResName, RT_RCDATA);
+      if Stream.Size > 4 then
+      begin
+        // 判断 TPF0
+        SetLength(Head, 4);
+        Move(Stream.Memory^, Head[1], 4);
+        if Head = 'TPF0' then
+        begin
+          Mem := TMemoryStream.Create;
+          ObjectBinaryToText(Stream, Mem);
+          Mem.Position := 0;
+          Ref := Mem;
+        end
+        else
+        begin
+          Ref := Stream;
+        end;
+        SetLength(S, Ref.Size);
+        Move(Ref.Memory^, S[1], Ref.Size);
+
+        DFMs := TStringList.Create;
+        DFMs.Text := S;
+        for I := 1 to DFMs.Count - 1 do // 第一行 object 或 inherited 窗体名不处理
+        begin
+          if ParseIntValue(DFMs[I], 'ClientHeight', V) then
+          begin
+            Height := V; // + GetSystemMetrics(SM_CYCAPTION);
+          end
+          else if ParseIntValue(DFMs[I], 'ClientWidth', V) then
+          begin
+            Width := V;
+          end;
+          if Copy(Trim(DFMs[I]), 1, Length('object')) = 'object' then
+            Break;
+        end;
+      end;
+    finally
+      DFMs.Free;
+      Stream.Free;
+      Mem.Free;
+    end;
   end;
 {$ENDIF}
 end;
