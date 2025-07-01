@@ -1,0 +1,10 @@
+﻿{
+    "EngineName": "腾讯混元",
+    "URL": "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "hunyuan-turbos-latest",
+    "ModelList": "hunyuan-t1-latest,hunyuan-a13b,hunyuan-turbos-latest,hunyuan-large,hunyuan-standard,hunyuan-lite",
+    "Temperature": 0.3,
+    "Stream": true,
+    "WebAddress": "https://console.cloud.tencent.com/hunyuan/start"
+}

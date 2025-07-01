@@ -129,6 +129,12 @@ type
     class function EngineName: string; override;
   end;
 
+  TCnHunYuanAIEngine = class(TCnAIBaseEngine)
+  {* 腾讯混元 AI 引擎}
+  public
+    class function EngineName: string; override;
+  end;
+
   TCnOllamaAIEngine = class(TCnAIBaseEngine)
   {* 本地或私有化部署的集成 Ollama 引擎}
   protected
@@ -719,6 +725,13 @@ begin
     Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
+{ TCnHunYuanAIEngine }
+
+class function TCnHunYuanAIEngine.EngineName: string;
+begin
+  Result := '腾讯混元';
+end;
+
 initialization
   RegisterAIEngine(TCnDeepSeekAIEngine);
   RegisterAIEngine(TCnOpenAIAIEngine);
@@ -727,6 +740,7 @@ initialization
   RegisterAIEngine(TCnClaudeAIEngine);
   RegisterAIEngine(TCnQWenAIEngine);
   RegisterAIEngine(TCnVolceAIEngine);
+  RegisterAIEngine(TCnHunYuanAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
