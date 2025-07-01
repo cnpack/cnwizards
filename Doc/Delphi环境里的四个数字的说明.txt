@@ -64,6 +64,7 @@ Embarcadero\Studio\20.0      260         VER330      10.3  分2个不兼容的Update
 Embarcadero\Studio\21.0      270         VER340      10.4  分3个不兼容的Update
 Embarcadero\Studio\22.0      280         VER350      11
 Embarcadero\Studio\23.0      290         VER360      12，  分3个不兼容的Update
+Embarcadero\Studio\37.0      370         VER370      13，  目录文件等大幅升级至37和VER一致
 
 ToolsAPI.pas 中的接口名后面的数字一般指的是安装后的文件，也就是和 coreide140 这种类似。
 

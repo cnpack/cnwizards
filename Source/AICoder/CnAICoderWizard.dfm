@@ -4,7 +4,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   BorderStyle = bsDialog
   Caption = 'AI Coder Settings'
   ClientHeight = 541
-  ClientWidth = 857
+  ClientWidth = 900
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,21 +23,21 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = 'Active AI Engine:'
   end
   object lblTimeout: TLabel
-    Left = 328
+    Left = 376
     Top = 16
     Width = 86
     Height = 13
     Caption = 'Timeout Seconds:'
   end
   object lblHisCount: TLabel
-    Left = 624
+    Left = 672
     Top = 16
     Width = 130
     Height = 13
     Caption = 'Send History Count in Chat:'
   end
   object lblMaxFav: TLabel
-    Left = 624
+    Left = 672
     Top = 40
     Width = 95
     Height = 13
@@ -46,7 +46,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object cbbActiveEngine: TComboBox
     Left = 112
     Top = 14
-    Width = 177
+    Width = 185
     Height = 21
     Style = csDropDownList
     Anchors = [akLeft, akTop, akRight]
@@ -57,13 +57,13 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object pgcAI: TPageControl
     Left = 8
     Top = 72
-    Width = 837
+    Width = 880
     Height = 425
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 9
   end
   object btnOK: TButton
-    Left = 609
+    Left = 652
     Top = 509
     Width = 75
     Height = 21
@@ -74,7 +74,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 10
   end
   object btnCancel: TButton
-    Left = 689
+    Left = 732
     Top = 509
     Width = 75
     Height = 21
@@ -85,7 +85,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 11
   end
   object btnHelp: TButton
-    Left = 769
+    Left = 812
     Top = 509
     Width = 75
     Height = 21
@@ -95,7 +95,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
-    Left = 310
+    Left = 358
     Top = 40
     Width = 139
     Height = 17
@@ -103,14 +103,14 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     TabOrder = 8
   end
   object edtProxy: TEdit
-    Left = 456
+    Left = 504
     Top = 38
     Width = 142
     Height = 21
     TabOrder = 5
   end
   object edtTimeout: TEdit
-    Left = 456
+    Left = 504
     Top = 14
     Width = 33
     Height = 21
@@ -118,7 +118,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Text = '0'
   end
   object udTimeout: TUpDown
-    Left = 489
+    Left = 537
     Top = 14
     Width = 15
     Height = 21
@@ -130,7 +130,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Wrap = False
   end
   object edtHisCount: TEdit
-    Left = 792
+    Left = 840
     Top = 14
     Width = 33
     Height = 21
@@ -138,7 +138,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Text = '0'
   end
   object udHisCount: TUpDown
-    Left = 825
+    Left = 873
     Top = 14
     Width = 15
     Height = 21
@@ -150,7 +150,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Wrap = False
   end
   object edtMaxFav: TEdit
-    Left = 792
+    Left = 840
     Top = 38
     Width = 33
     Height = 21
@@ -158,7 +158,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Text = '0'
   end
   object udMaxFav: TUpDown
-    Left = 825
+    Left = 873
     Top = 38
     Width = 15
     Height = 21

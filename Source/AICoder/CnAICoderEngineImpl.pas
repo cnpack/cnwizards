@@ -131,6 +131,8 @@ type
 
   TCnHunYuanAIEngine = class(TCnAIBaseEngine)
   {* 腾讯混元 AI 引擎}
+  protected
+    class function GetModelListURL(const OrigURL: string): string; override;
   public
     class function EngineName: string; override;
   end;
@@ -323,8 +325,7 @@ begin
   Result := 'Claude';
 end;
 
-class function TCnClaudeAIEngine.GetModelListURL(
-  const OrigURL: string): string;
+class function TCnClaudeAIEngine.GetModelListURL(const OrigURL: string): string;
 const
   MSGS = 'messages';
   MODEL = 'models';
@@ -730,6 +731,12 @@ end;
 class function TCnHunYuanAIEngine.EngineName: string;
 begin
   Result := '腾讯混元';
+end;
+
+class function TCnHunYuanAIEngine.GetModelListURL(
+  const OrigURL: string): string;
+begin
+  Result := ''; // 腾讯混元似乎也不支持模型列表获取操作
 end;
 
 initialization
