@@ -891,7 +891,7 @@ function CnOtaGetCurrentSourceFileName: string;
 
 {$ENDIF}
 
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 {* 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式}
@@ -7236,7 +7236,7 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 
 // 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
