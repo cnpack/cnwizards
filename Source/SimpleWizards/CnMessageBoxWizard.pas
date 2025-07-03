@@ -48,7 +48,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, ToolsAPI,
+  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus,
+  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizIdeUtils,
   CnSpin, CnWizOptions, CnWizMultiLang, CnWizIni;
 
@@ -584,13 +585,17 @@ end;
 // 取当前允许的返回值个数
 function TCnMessageBoxForm.GetResultCount: Integer;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := 0;
-  for i := 0 to gbResult.ControlCount - 1 do
-    if gbResult.Controls[i] is TCheckBox then
-      if TCheckBox(gbResult.Controls[i]).Enabled then
+  for I := 0 to gbResult.ControlCount - 1 do
+  begin
+    if gbResult.Controls[I] is TCheckBox then
+    begin
+      if TCheckBox(gbResult.Controls[I]).Enabled then
         Inc(Result);
+    end;
+  end;
 end;
 
 // 模板导出
@@ -1077,14 +1082,11 @@ begin
 end;
 
 // 专家执行主过程
-// 很报歉，这段又臭又长的代码写得很难看懂:-(
-// 现在只是把功能实现了，格式处理全部硬编码很繁琐。
-// 等把源代码格式化专家完成后，我会重新把它改造一番的。
 procedure TCnMessageBoxWizard.Execute;
 var
   Ini: TCustomIniFile;
   IsDelphi, IsWideVer, IsBds: Boolean;
-  s, Code, RetStr, sPChar, sMsgBox: string;
+  S, Code, RetStr, sPChar, sMsgBox: string;
   Value: TCnMsgBoxResultKind;
   Kind: TCnMsgBoxResultKind;
   SetCount: Integer;
@@ -1097,7 +1099,7 @@ var
   // 判断是否 Format 字符串
   function IsFormatStr(const Str: string; var FormatStr: string): Boolean;
   var
-    i: Integer;
+    I: Integer;
   begin
     try
       Format(Str, []);
@@ -1109,12 +1111,16 @@ var
     if Result then
     begin
       FormatStr := '';
-      for i := 1 to Length(Str) do
-        if Str[i] = '%' then
+      for I := 1 to Length(Str) do
+      begin
+        if Str[I] = '%' then
+        begin
           if FormatStr = '' then
             FormatStr := '['
           else
             FormatStr := FormatStr + ', ';
+        end;
+      end;
 
       if FormatStr = '' then
         FormatStr := '[]'
@@ -1129,8 +1135,8 @@ var
     csDelphiFlag = ' + ';
     csCFlag = '" "';
   var
-    s, Flag, Return: string;
-    i: Integer;
+    S, Flag, Return: string;
+    I: Integer;
   begin
     Result := CodeAutoWrap(Code, WrapWidth - Col, Indent, True);
 
@@ -1141,7 +1147,7 @@ var
         Return := #13#10
       else
         Return := ADelphiReturn;
-      s := Return + Flag + Return;
+      S := Return + Flag + Return;
     end
     else
     begin
@@ -1150,14 +1156,14 @@ var
         Return := '\n'
       else
         Return := ACReturn;
-      s := Return + Flag;
+      S := Return + Flag;
     end;
 
-    i := Pos(s, Result);
-    while i > 0 do                       // 将多行字符串连成一行
+    I := Pos(S, Result);
+    while I > 0 do                       // 将多行字符串连成一行
     begin
-      Delete(Result, i + Length(Return), Length(Flag));  // 删去空格
-      i := Pos(s, Result);
+      Delete(Result, I + Length(Return), Length(Flag));  // 删去空格
+      I := Pos(S, Result);
     end;
   end;
 
@@ -1169,24 +1175,28 @@ var
   begin
     Result := 0;
     for Kind := Low(Kind) to High(Kind) do
+    begin
       if Kind in Value then
       begin
         Inc(Result);
         if Result = 1 then             // 返回集合中的第一个值供生成 if 语句用
           AValue := Kind
       end;
+    end;
   end;
 
   function TextIsExp(const AText: string): Boolean;
   var
-    i: Integer;
+    I: Integer;
   begin
-    for i := 1 to Length(AText) do
-      if (Ord(AText[i]) < $20) or (Ord(AText[i]) >= $7F) then
+    for I := 1 to Length(AText) do
+    begin
+      if (Ord(AText[I]) < $20) or (Ord(AText[I]) >= $7F) then
       begin
         Result := False;
         Exit;
       end;
+    end;
     Result := True;
   end;
 
@@ -1204,13 +1214,18 @@ begin
 
       if ShowModal = mrOk then
       begin
+{$IFDEF NO_DELPHI_OTA}
+        IsDelphi := True; // 独立运行或 Laz 下，默认生成 Pascal 代码
+{$ELSE}
         IsDelphi := CurrentIsDelphiSource;
+{$ENDIF}
         if IsDelphi then
         begin
           Indent := DelphiIndent;
           WrapWidth := DelphiWrap;
         end
-        else begin
+        else
+        begin
           Indent := CIndent;
           WrapWidth := CWrap;
         end;
@@ -1219,8 +1234,6 @@ begin
           RetStr := ''
         else
           RetStr := CRLF;
-
-        { TODO -o周劲羽 -c优化 : 当前代码使用硬编码来生成代码，以后考虑用统一的方式来封装实现 }
 
         // 函数名
         sPChar := 'PChar';
@@ -1295,30 +1308,30 @@ begin
           else
           begin
             if IsDelphi then                 // Delphi 将 ' 号转换为 ''
-              s := StringReplace(MsgBoxCaption, '''', '''''', [rfReplaceAll])
+              S := StringReplace(MsgBoxCaption, '''', '''''', [rfReplaceAll])
             else                           // C++Builder 将 " 号转换为 \"
-              s := StringReplace(MsgBoxCaption, '"', '\"', [rfReplaceAll]);
+              S := StringReplace(MsgBoxCaption, '"', '\"', [rfReplaceAll]);
 
             if IsDelphi then
             begin
               if CheckFormat and IsFormatStr(MsgBoxCaption, FmtStr) then
               begin
                 if IsBds and IsWideVer then
-                  Code := Format('%s' + sPChar + '(WideFormat(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+                  Code := Format('%s' + sPChar + '(WideFormat(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
                 else
-                  Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, s, FmtStr])
+                  Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
               end
               else if UsePChar then
-                Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, s])
+                Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, S])
               else
-                Code := Format('%s''%s'', ' + RetStr, [Code, s]);
+                Code := Format('%s''%s'', ' + RetStr, [Code, S]);
             end
             else
             begin
               if IsWideVer then
-                Code := Format('%sL"%s", ' + RetStr, [Code, s])
+                Code := Format('%sL"%s", ' + RetStr, [Code, S])
               else
-                Code := Format('%s"%s", ' + RetStr, [Code, s]);
+                Code := Format('%s"%s", ' + RetStr, [Code, S]);
             end;
           end;
         end;
@@ -1328,15 +1341,15 @@ begin
           Code := Code + MsgBoxButtonKindStrs[MsgBoxButton];
 
         if MsgBoxCodeKind = ckMsgDlg then
-          s := MsgDlgTypeKindStrs[MsgBoxIcon]
+          S := MsgDlgTypeKindStrs[MsgBoxIcon]
         else
-          s := MsgBoxIconKindStrs[MsgBoxIcon];
+          S := MsgBoxIconKindStrs[MsgBoxIcon];
 
-        if s <> '' then
+        if S <> '' then
         begin
           if MsgBoxCodeKind = ckMsgDlg then
           begin
-            Code := Format('%s %s', [Code, s]);
+            Code := Format('%s %s', [Code, S]);
             if IsDelphi then
             begin
               Code := Format('%s, %s, 0)', [Code, MsgDlgButtonKindDelphiStrs[MsgBoxButton]]);
@@ -1347,23 +1360,23 @@ begin
             end;
           end
           else
-            Code := Format('%s + %s', [Code, s]);
+            Code := Format('%s + %s', [Code, S]);
         end;
 
         // 默认按钮
         if MsgBoxCodeKind <> ckMsgDlg then
         begin
-          s := MsgBoxDefaultButtonStrs[MsgBoxDefaultButton];
-          if s <> '' then
-            Code := Format('%s + %s', [Code, s]);
+          S := MsgBoxDefaultButtonStrs[MsgBoxDefaultButton];
+          if S <> '' then
+            Code := Format('%s + %s', [Code, S]);
         end;
 
         // 增加扩展风格
         if MsgBoxCodeKind <> ckMsgDlg then
         begin
-          s := MsgBoxTopMostStrs[MsgBoxTopMost];
-          if s <> '' then
-            Code := Format('%s + %s', [Code, s]);
+          S := MsgBoxTopMostStrs[MsgBoxTopMost];
+          if S <> '' then
+            Code := Format('%s + %s', [Code, S]);
           Code := Code + ')';
         end;
 
@@ -1501,6 +1514,7 @@ begin
           end;
 
           for Kind := Low(Kind) to High(Kind) do // 生成 case 语句
+          begin
             if Kind in MsgBoxResult then
             begin
               CnOtaSetCurSourceCol(Col + Indent);
@@ -1543,6 +1557,7 @@ begin
                 end;
               end;
             end;
+          end;
           CnOtaSetCurSourceCol(Col);
 
           if IsDelphi then

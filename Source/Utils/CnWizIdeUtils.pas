@@ -90,8 +90,14 @@ const
   SCnMenuOpenFileAtCursorName = 'ecOpenFileAtCursor';
 
   // Editor 窗口相关类名
+{$IFDEF LAZARUS}
+  SCnEditorFormClassName = 'TSourceNotebook';
+  SCnEditControlName = 'SourceNotebook';
+{$ELSE}
   SCnEditorFormClassName = 'TEditWindow';
   SCnEditControlName = 'Editor';
+{$ENDIF}
+
   SCnEditControlClassName = 'TEditControl';
   SCnDesignControlClassName = 'TEditorFormDesigner';
   SCnWelcomePageClassName = 'TWelcomePageFrame';
@@ -364,6 +370,8 @@ function GetExpandableEvalViewForm: TCustomForm;
 function GetMainMenuItemHeight: Integer;
 {* 返回主菜单项高度 }
 
+{$ENDIF}
+
 function IsIdeEditorForm(AForm: TCustomForm): Boolean;
 {* 判断指定窗体是否编辑器窗体}
 
@@ -372,6 +380,8 @@ function IsIdeDesignForm(AForm: TCustomForm): Boolean;
 
 procedure BringIdeEditorFormToFront;
 {* 将源码编辑器设为活跃}
+
+{$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
 {* 关闭调试时提示信息大窗口}
@@ -1606,6 +1616,8 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 // 判断指定窗体是否是设计期窗体
 function IsIdeDesignForm(AForm: TCustomForm): Boolean;
 begin
@@ -1616,7 +1628,11 @@ end;
 function IsIdeEditorForm(AForm: TCustomForm): Boolean;
 begin
   Result := (AForm <> nil) and
+{$IFDEF LAZARUS}
+            (Pos('SCnEditControlName', AForm.Name) = 1) and
+{$ELSE}
             (Pos('EditWindow_', AForm.Name) = 1) and
+{$ENDIF}
             (AForm.ClassName = SCnEditorFormClassName) and
             (not (csDesigning in AForm.ComponentState));
 end;
@@ -1635,6 +1651,8 @@ begin
     end;
   end;
 end;
+
+{$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
 var

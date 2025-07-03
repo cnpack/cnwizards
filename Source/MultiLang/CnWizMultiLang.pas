@@ -998,13 +998,22 @@ var
 {$ENDIF}
 begin
 {$IFDEF FPC}
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize');
+{$ENDIF}
   if BorderStyle in [bsSizeable, bsSizeToolWin] then // 暂时只处理尺寸不可变的
     Exit;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Form Need to Process.');
+{$ENDIF}
   ResName := UpperCase(ClassName);
   ResInstance := FindResource(HInstance, PChar(ResName), RT_RCDATA);
   if ResInstance <> 0 then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Found Resoure Instance.');
+{$ENDIF}
     Mem := nil;
     Stream := nil;
     DFMs := nil;
@@ -1018,6 +1027,9 @@ begin
         Move(Stream.Memory^, Head[1], 4);
         if Head = 'TPF0' then
         begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Binary Stream to Convert.');
+{$ENDIF}
           Mem := TMemoryStream.Create;
           ObjectBinaryToText(Stream, Mem);
           Mem.Position := 0;
@@ -1025,6 +1037,9 @@ begin
         end
         else
         begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Text Stream.');
+{$ENDIF}
           Ref := Stream;
         end;
         SetLength(S, Ref.Size);
@@ -1032,15 +1047,24 @@ begin
 
         DFMs := TStringList.Create;
         DFMs.Text := S;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. DFM Lines ' + IntToStr(DFMs.Count));
+{$ENDIF}
         for I := 1 to DFMs.Count - 1 do // 第一行 object 或 inherited 窗体名不处理
         begin
           if ParseIntValue(DFMs[I], 'ClientHeight', V) then
           begin
             Height := V; // + GetSystemMetrics(SM_CYCAPTION);
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Set Height to ' + IntToStr(V));
+{$ENDIF}
           end
           else if ParseIntValue(DFMs[I], 'ClientWidth', V) then
           begin
             Width := V;
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Set Width to ' + IntToStr(V));
+{$ENDIF}
           end;
           if Copy(Trim(DFMs[I]), 1, Length('object')) = 'object' then
             Break;

@@ -31,7 +31,9 @@ unit CnDesignWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2021.08.11 by LiuXiao
+* 修改记录：2025.07.03 by LiuXiao
+*               不可视组件增加对 FMX 的支持，使用 DesignInfo 结合界面切换实现
+*           2021.08.11 by LiuXiao
 *               增加组件比较的入口
 *           2011.10.03 by LiuXiao
 *               使用一批封装 Control 操作的函数以支持 FMX 框架
@@ -165,6 +167,12 @@ type
     procedure SetComponentGeneralPos(Form: TCustomForm; Component: TComponent; APos: TPoint);
     {* 封装的设置组件左上角位置的函数，支持可视组件与不可视组件}
     function GetDesignerForm: TCustomForm;
+    {* 拿当前设计期的窗体或 DataModule 的容器，注意不适合 FMX 的 Form 体系}
+
+{$IFDEF SUPPORT_FMX}
+    function GetFmxDesignerForm: TComponent;
+    {* 拿 FMX 的设计期窗体}
+{$ENDIF}
 
     function GetNonVisualComponentsFromCurrentForm(List: TList): Boolean;
     function GetNonVisualSelComponentsFromCurrentForm(List: TList): Boolean;
@@ -1206,6 +1214,7 @@ begin
 {$IFDEF COMPILER6_UP}
   AContainer := FormDesigner.Root;
 
+  // 注意 FMX 下这里能拿到 Root，但过不了以下判断，需要另起
   if (AContainer is TWinControl) or ObjectIsInheritedFromClass(AContainer, 'TWidgetControl') then
     Result := TCustomForm(AContainer)
   else if (AContainer.Owner <> nil)
@@ -1221,12 +1230,39 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF SUPPORT_FMX}
+
+function TCnDesignWizard.GetFmxDesignerForm: TComponent;
+var
+  FormDesigner: IDesigner;
+  AContainer: TComponent;
+begin
+  Result := nil;
+  FormDesigner := CnOtaGetFormDesigner;
+  if FormDesigner = nil then Exit;
+
+  AContainer := FormDesigner.Root;
+
+  // 注意 FMX 下这里能拿到 Root 且要判断是否是 FMX 的Form
+  if CnFmxIsInheritedFromCommonCustomForm(AContainer) then
+  begin
+    Result := AContainer;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Get Fmx Form ' + AContainer.ClassName);
+{$ENDIF}
+  end;
+end;
+
+{$ENDIF}
+
 procedure TCnDesignWizard.ArrangeNonVisualComponents;
 var
   CompList: TList;
-  I, Rows, Cols, cRow, cCol: Integer;
+  I, Rows, Cols, cRow, cCol, ContainerWidth, ContainerHeight: Integer;
   CompPosArray: array of TPoint;
   AForm: TCustomForm;
+  AFmxForm: TComponent;
   AllWidth, AllHeight, OffSetX, OffSetY: Integer;
 {$IFDEF COMPILER6_UP}
   FormDesigner: IDesigner;
@@ -1238,8 +1274,13 @@ begin
   if FormDesigner = nil then Exit;
 
   AForm := GetDesignerForm;
+{$IFDEF SUPPORT_FMX}
+  AFmxForm := GetFmxDesignerForm;
+{$ELSE}
+  AFmxForm := nil;
+{$ENDIF}
 
-  if AForm = nil then
+  if (AForm = nil) {$IFDEF SUPPORT_FMX} and (AFmxForm = nil) {$ENDIF} then
   begin
     ErrorDlg(SCnNonNonVisualNotSupport);
     Exit;
@@ -1306,9 +1347,20 @@ begin
     if FNonArrangeStyle = asCol then
       if cCol = 1 then Rows := cRow - 1;
 
-    // 现在的Rows和Cols记录了实际排列的行列数。
+    // 现在的 Rows 和 Cols 记录了实际排列的行列数。
     AllWidth := Cols * (csNonVisualSize + FColSpace) - FColSpace;
     AllHeight := Rows * (csNonVisualSize + FRowSpace) - FRowSpace;
+
+    if AForm <> nil then
+    begin
+      ContainerWidth := AForm.ClientWidth;
+      ContainerHeight := AForm.ClientHeight;
+    end;
+
+{$IFDEF SUPPORT_FMX}
+    if AFmxForm <> nil then
+      CnFmxGetFormClientSize(AFmxForm, ContainerWidth, ContainerHeight);
+{$ENDIF}
 
     OffSetX := 0; OffSetY := 0;
     case FNonMoveStyle of
@@ -1319,23 +1371,23 @@ begin
         end;
       msRightTop:
         begin
-          OffSetX := AForm.ClientWidth - AllWidth - FSizeSpace;
+          OffSetX := ContainerWidth - AllWidth - FSizeSpace;
           OffSetY := FSizeSpace;
         end;
       msLeftBottom:
         begin
           OffSetX := FSizeSpace;
-          OffSetY := AForm.ClientHeight - AllHeight - FSizeSpace;
+          OffSetY := ContainerHeight - AllHeight - FSizeSpace;
         end;
       msRightBottom:
         begin
-          OffSetX := AForm.ClientWidth - AllWidth - FSizeSpace;
-          OffSetY := AForm.ClientHeight - AllHeight - FSizeSpace;
+          OffSetX := ContainerWidth - AllWidth - FSizeSpace;
+          OffSetY := ContainerHeight - AllHeight - FSizeSpace;
         end;
       msCenter:
         begin
-          OffSetX := (AForm.ClientWidth - AllWidth) div 2;
-          OffSetY := (AForm.ClientHeight - AllHeight) div 2
+          OffSetX := (ContainerWidth - AllWidth) div 2;
+          OffSetY := (ContainerHeight - AllHeight) div 2;
         end;
     end;
 
@@ -1353,6 +1405,16 @@ begin
     end;
 
     FormDesigner.Modified;
+
+    if AFmxForm <> nil then
+    begin
+      // SetNonVisualPos 在 FMX 设计器中无法直接修改位置，只能修改 DesignInfo
+      // 这里要触发一次 View as Text 再 View as Form 来让其生效
+      // 也就是连续执行两次 ViewSwapSourceFormCommand 这个 Action
+      ExecuteIDEAction('ViewSwapSourceFormCommand');
+      Sleep(0);
+      ExecuteIDEAction('ViewSwapSourceFormCommand');
+    end;
   finally
     SetLength(CompPosArray, 0);
     CompList.Free;
@@ -1386,7 +1448,8 @@ begin
         (TObject(IComponent.GetComponentHandle) is TComponent) then
       begin
         Component := TObject(IComponent.GetComponentHandle) as TComponent;
-        if Assigned(Component) and not (Component is TControl) and
+        if Assigned(Component) and not (Component is TControl)
+          {$IFDEF SUPPORT_FMX} and not CnFmxIsInheritedFromControl(Component) {$ENDIF} and
           (CompList.IndexOf(Component.ClassName) >= 0) then
           List.Add(Component);
       end;
@@ -1422,7 +1485,8 @@ begin
         (TObject(IComponent.GetComponentHandle) is TComponent) then
       begin
         Component := TObject(IComponent.GetComponentHandle) as TComponent;
-        if Assigned(Component) and not (Component is TControl) and
+        if Assigned(Component) and not (Component is TControl)
+          {$IFDEF SUPPORT_FMX} and not CnFmxIsInheritedFromControl(Component) {$ENDIF}  and
           (CompList.IndexOf(Component.ClassName) >= 0) then
           List.Add(Component);
       end;
@@ -1610,19 +1674,30 @@ var
     end;
   end;
 begin
-  if ObjectIsInheritedFromClass(Form, 'TWidgetControl') then
+  if (Form <> nil) and ObjectIsInheritedFromClass(Form, 'TWidgetControl') then
   begin
     ErrorDlg(SCnNonNonVisualNotSupport);
     Exit;
   end;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('NonVisualArrange Get DesignInfo %8.8x', [Component.DesignInfo]);
+{$ENDIF}
+
   P := TSmallPoint(Component.DesignInfo);
   // 根据当前组件的位置查找 TContainer 句柄（如果原组件位置重合，可能会误判断）
-  GetComponentContainerHandle(Form, P.x, P.y, H1, H2, Offset);
+  if Form = nil then
+  begin
+    H1 := 0;
+    H2 := 0;
+  end
+  else
+    GetComponentContainerHandle(Form, P.x, P.y, H1, H2, Offset);
   Component.DesignInfo := Integer(PointToSmallPoint(Point(X, Y)));
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('NonVisualArrange Get Handles H1 %d, H2 %d', [H1, H2]);
+  CnDebugger.LogFmt('NonVisualArrange SetDesignInfo %8.8x. Get Handles H1 %d, H2 %d',
+    [Component.DesignInfo, H1, H2]);
 {$ENDIF}
 
   // 设置组件窗体位置

@@ -65,9 +65,6 @@ interface
   {$WARN UNSAFE_TYPE OFF} // Suppress .Net warnings
   {$WARN UNSAFE_CODE OFF} // Suppress .Net warnings
 {$ENDIF}
-{$IFDEF FPC}
- {$MODE DELPHI} // Delphi-compatible mode in FreePascal
-{$ENDIF}
 
 // ======== Define options for TRegExpr engine
 {$DEFINE UniCode} // Unicode support
