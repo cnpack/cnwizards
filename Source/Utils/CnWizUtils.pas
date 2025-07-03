@@ -64,7 +64,8 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF LAZARUS} SrcEditorIntf, {$ELSE} RegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
+  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} SrcEditorIntf, {$ENDIF}
+  {$ELSE} RegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
@@ -369,6 +370,7 @@ resourcestring
   SCnDefCppSourceMask = '.CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
   SCnDefSourceMask = '.PAS;.DPR;CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
 
+{$IFNDEF STAND_ALONE}
 function CurrentIsDelphiSource: Boolean;
 {* 当前编辑的文件是 Delphi 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentIsCSource: Boolean;
@@ -383,6 +385,7 @@ function CurrentSourceIsDelphiOrCSource: Boolean;
 {* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
+{$ENDIF}
 
 function ExtractUpperFileExt(const FileName: string): string;
 {* 取大写文件扩展名}
@@ -782,8 +785,12 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {* 打开未保存的窗体}
 {$ENDIF}
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
+{$ENDIF}
+
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
 procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean = False);
@@ -872,6 +879,8 @@ function ConvertEditorTextToTextW(const Text: AnsiString): string;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 function CnOtaGetCurrentSourceFile: string;
 {* 取当前编辑的源文件。编辑器活动时返回在编辑的源文件，
   在设计窗体活动时，会返回 dfm 或类似文件，不是源码文件}
@@ -879,6 +888,8 @@ function CnOtaGetCurrentSourceFile: string;
 function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 Cpp 源文件，判断限制较多。
   如取到 dfm 等，会判断对应 pas/cpp 源文件是否打开，打开则返回对应源文件}
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -905,6 +916,8 @@ type
    ipLineHead    - 当前行首
    ipLineEnd     - 当前行尾
  |</PRE>}
+
+{$IFNDEF STAND_ALONE}
 
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos
   = ipCur): Boolean;
@@ -941,6 +954,8 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Pos: TInsertPos        - 光标位置
    Offset: Integer        - 偏移量
  |</PRE>}
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -3104,6 +3119,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 //==============================================================================
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
 //==============================================================================
@@ -3154,6 +3171,8 @@ function CurrentIsForm: Boolean;
 begin
   Result := IsForm(CnOtaGetCurrentSourceFile);
 end;
+
+{$ENDIF}
 
 function ExtractUpperFileExt(const FileName: string): string;
 begin
@@ -6537,6 +6556,8 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 // 判断文件是否打开
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 var
@@ -6584,6 +6605,8 @@ begin
   end;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
@@ -7122,6 +7145,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 // 取当前编辑的源文件  (来自 GExperts Src 1.12，有改动)
 function CnOtaGetCurrentSourceFile: string;
 {$IFNDEF LAZARUS}
@@ -7209,6 +7234,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 {$IFNDEF LAZARUS}
 
 // 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
@@ -7267,6 +7294,8 @@ end;
 {$ENDIF}
 
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
 
 // 插入一段文本到当前正在编辑的源文件中，返回成功标志
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos): Boolean;
@@ -7496,6 +7525,8 @@ begin
   end;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
