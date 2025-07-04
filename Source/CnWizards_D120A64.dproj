@@ -86,7 +86,7 @@
         <UsePackages>true</UsePackages>
         <Manifest_File>(None)</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-        <DCC_UsePackage>rtl;vcl;vclx;designide;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
         <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32_110;ThirdParty\DDetours;ThirdParty\PascalScript_x64;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;IdeEnhancements;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
         <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>

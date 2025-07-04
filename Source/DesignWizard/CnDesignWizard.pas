@@ -1236,7 +1236,6 @@ function TCnDesignWizard.GetFmxDesignerForm: TComponent;
 var
   FormDesigner: IDesigner;
   AContainer: TComponent;
-  IsFromFmx: Boolean;
 begin
   Result := nil;
   FormDesigner := CnOtaGetFormDesigner;
@@ -1244,15 +1243,8 @@ begin
 
   AContainer := FormDesigner.Root;
 
-  // 注意 FMX 下这里能拿到 Root 且要判断是否是 FMX 的Form
-{$IFDEF WIN64}
-  IsFromFmx := InheritsFromClassName(AContainer, 'TCommonCustomForm');
-  // 64 位下以下判断竟然会是 False，不得不改用字符串形式的判断。
-{$ELSE}
-  IsFromFmx := CnFmxIsInheritedFromCommonCustomForm(AContainer);
-{$ENDIF}
-
-  if IsFromFmx then
+  // 注意 FMX 下这里也能拿到 Root 且要判断是否是 FMX 的 Form
+  if IsCnFmxIsInheritedFromCommonCustomForm(AContainer) then
   begin
     Result := AContainer;
 
