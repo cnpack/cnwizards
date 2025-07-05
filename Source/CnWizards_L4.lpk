@@ -8,17 +8,21 @@
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
+        <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
+        <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
+        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
         <CustomOptions Value="-dDEBUG
 -dSUPPORT_EVALUATE
--dENABLE_UIINTERACT"/>
-        <OtherDefines Count="3">
+-dENABLE_UIINTERACT
+-dCAPTURE_STACK"/>
+        <OtherDefines Count="4">
           <Define0 Value="DEBUG"/>
           <Define1 Value="SUPPORT_EVALUATE"/>
           <Define2 Value="ENABLE_UIINTERACT"/>
+          <Define3 Value="CAPTURE_STACK"/>
         </OtherDefines>
       </Other>
     </CompilerOptions>
@@ -72,8 +76,38 @@
         <Filename Value="Framework\CnWizManager.pas"/>
         <UnitName Value="CnWizManager"/>
       </Item>
+      <Item>
+        <Filename Value="Utils\CnWizIdeUtils.pas"/>
+        <UnitName Value="CnWizIdeUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizUtils.pas"/>
+        <UnitName Value="CnWizUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="..\..\cnvcl\Source\Common\CnRTL.pas"/>
+        <UnitName Value="CnRTL"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizAbout.pas"/>
+        <UnitName Value="CnWizAbout"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizAboutFrm.pas"/>
+        <UnitName Value="CnWizAboutFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizards\CnMessageBoxWizard.pas"/>
+        <UnitName Value="CnMessageBoxWizard"/>
+      </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="dclCnPack_FPC3"/>
+      </Item>
+      <Item>
+        <PackageName Value="CnPack_FPC3"/>
+      </Item>
       <Item>
         <PackageName Value="IDEIntf"/>
       </Item>
