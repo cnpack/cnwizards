@@ -356,7 +356,11 @@ const
   csUseOneCPUDefault = False;
 {$ENDIF}
 
+{$IFDEF FPC}
+  csDelphiExtDefault = '.pas;.dpr;.inc;.lpr;.pp';
+{$ELSE}
   csDelphiExtDefault = '.pas;.dpr;.inc';
+{$ENDIF}
   csCppExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
 
   csUpgradeURL = 'URL';

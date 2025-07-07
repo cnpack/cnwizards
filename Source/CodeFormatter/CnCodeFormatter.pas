@@ -258,7 +258,7 @@ type
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
     procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
-    procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
+    procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True; NeedGeneric: Boolean = False);
     procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
     procedure FormatSetConstructor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
@@ -1503,14 +1503,18 @@ end;
 
 { IdentList -> Ident/','... }
 procedure TCnBasePascalFormatter.FormatIdentList(PreSpaceCount: Byte;
-  const CanHaveUnitQual: Boolean);
+  const CanHaveUnitQual: Boolean; NeedGeneric: Boolean);
 begin
   FormatIdent(PreSpaceCount, CanHaveUnitQual);
+  if NeedGeneric and (Scanner.Token = tokLess) then
+    FormatTypeParams(PreSpaceCount);
 
   while Scanner.Token = tokComma do
   begin
     Match(tokComma);
     FormatIdent(0, CanHaveUnitQual);
+    if NeedGeneric and (Scanner.Token = tokLess) then
+      FormatTypeParams(PreSpaceCount);
   end;
 end;
 
@@ -1704,7 +1708,7 @@ begin
   if Scanner.Token = tokColon then // ConstraintList
   begin
     Match(tokColon);
-    FormatIdentList(PreSpaceCount, True);
+    FormatIdentList(PreSpaceCount, True, True); // 可能有泛型
   end;
 end;
 
