@@ -1169,7 +1169,11 @@ procedure CnOtaConvertEditViewCharPosToEditPos(EditViewPtr: Pointer;
 
 procedure CnOtaConvertEditPosToParserCharPos(EditViewPtr: Pointer; var EditPos:
   TOTAEditPos; var CharPos: TOTACharPos);
-{* 将 EditPos 转换成为 StructureParser 所需的 CharPos，暂无用处}
+{* 将 EditPos 转换成为 StructureParser 所需的 CharPos，未完善，暂未使用}
+
+function CnOtaConvertEditPosToLinearPos(EditViewPtr: Pointer; var EditPos: TOTAEditPos;
+  out Position: Integer): Boolean;
+{* 将 EditPos 转换成为 EditWriter 所需的线性 Pos，内部封装 Unicode 环境下当前行宽字符偏差}
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
@@ -8312,7 +8316,6 @@ begin
   end;
 end;
 
-// 插入文本到当前 IOTASourceEditor，允许多行文本。
 procedure CnOtaInsertTextIntoEditor(const Text: string);
 var
   EditView: IOTAEditView;
@@ -8323,8 +8326,10 @@ begin
   EditView := CnOtaGetTopMostEditView;
   Assert(Assigned(EditView));
   EditPos := EditView.CursorPos;
-  EditView.ConvertPos(True, EditPos, CharPos);
-  Position := EditView.CharPosToPos(CharPos);
+
+  if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
+    Exit;
+
 {$IFDEF UNICODE}
   CnOtaInsertTextIntoEditorAtPosW(Text, Position);
 {$ELSE}
@@ -8677,6 +8682,50 @@ begin
   {$IFDEF IDE_STRING_ANSI_UTF8}
     // TODO: Convert Utf8 CharIndex to WideCharIndex
   {$ENDIF}
+{$ENDIF}
+end;
+
+function CnOtaConvertEditPosToLinearPos(EditViewPtr: Pointer; var EditPos: TOTAEditPos;
+  out Position: Integer): Boolean;
+var
+  EditView: IOTAEditView;
+  EditControl: TControl;
+  Text: string;
+  CharPos: TOTACharPos;
+begin
+  Result := False;
+  if EditViewPtr = nil then
+    EditViewPtr := Pointer(CnOtaGetTopMostEditView);
+  if EditViewPtr = nil then
+    Exit;
+  EditControl := EditControlWrapper.GetEditControl(IOTAEditView(EditViewPtr));
+  if EditControl = nil then
+    Exit;
+
+  Text := EditControlWrapper.GetTextAtLine(EditControl, EditPos.Line);
+  // 获得当前行内容，Ansi/Utf8/Utf16
+{$IFDEF UNICODE}
+  CharPos.Line := EditPos.Line;
+  CharPos.CharIndex := 0; // 先获得行头的线性位置
+
+  EditView := IOTAEditView(EditViewPtr);
+  Position := EditView.CharPosToPos(CharPos);
+
+  // 根据当前行光标前的宽字符数量，增加 Position
+  Inc(Position, CalcUtf8LengthFromWideStringOffset(PWideChar(Text), EditPos.Col));
+  Result := True;
+{$ELSE}
+  EditView := IOTAEditView(EditViewPtr);
+  try
+    EditView.ConvertPos(True, EditPos, CharPos);
+  except
+    // D5/6 下 ConvertPos 在只有一个大于号时会出错，只能屏蔽
+    CharPos.Line := EditPos.Line;
+    CharPos.CharIndex := EditPos.Col - 1;
+  end;
+
+  Position := EditView.CharPosToPos(CharPos);
+  Result := True;
 {$ENDIF}
 end;
 
