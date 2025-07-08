@@ -1023,7 +1023,8 @@ function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryS
 function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用
+  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用。
+  如果是 MemoryStream，其 Memory 可直接转换成 PCnIdeTokenChar，同样是 Ansi/Wide/Wide
   如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
   需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
 

@@ -91,6 +91,7 @@ type
     FIdShowChatWindow: Integer;
     FIdConfig: Integer;
     FNeedUpgradeGemini: Boolean;
+    FFirstAnswer: Boolean;
     function ValidateAIEngines: Boolean;
     {* 调用各个功能前检查 AI 引擎及配置}
     procedure EnsureChatWindowVisible(OnlyCreate: Boolean = False);
@@ -144,7 +145,7 @@ implementation
 
 uses
   CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock,
-  CnEditControlWrapper {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnIDEStrings, CnEditControlWrapper {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 const
   MSG_WAITING = '...';
@@ -663,6 +664,7 @@ end;
 procedure TCnAICoderWizard.ContinueCurrentFile;
 var
   S: string;
+  PIde: PCnIdeTokenChar;
   SL: TStringList;
   Mem: TMemoryStream;
   View: IOTAEditView;
@@ -682,9 +684,8 @@ begin
     Mem := TMemoryStream.Create;
     SL := TStringList.Create;
     CnGeneralSaveEditorToStream(nil, Mem);
-    Mem.Position := 0;
-
-    SL.LoadFromStream(Mem);
+    PIde := PCnIdeTokenChar(Mem.Memory);
+    SL.Text := string(PIde);
     P := View.CursorPos;
 
     while SL.Count > P.Line do
@@ -702,6 +703,7 @@ begin
   Msg.FromType := cmtYou;
   Msg.Text := MSG_WAITING;
   Msg.Waiting := True;
+  FFirstAnswer := True;
 
   CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswer);
 end;
@@ -726,7 +728,11 @@ begin
         if CnOtaGetCurrentSelection <> '' then // 取消选择，并下移光标
           CnOtaDeSelection(True);
 
-        CnOtaInsertTextIntoEditor(Answer);
+        if FFirstAnswer then // 第一个回应前加个回车，避免在本行续写代码
+          CnOtaInsertTextIntoEditor(#13#10 + Answer)
+        else
+          CnOtaInsertTextIntoEditor(Answer);
+        FFirstAnswer := False;
       end;
     end
     else
