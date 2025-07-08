@@ -55,6 +55,7 @@ type
     FIdInsertLineIntoEditor: Integer;
     FIdReplaceCurrentSelection: Integer;
     FIdInsertTextToCurSource: Integer;
+    FIdInsertMoreTexts: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -104,6 +105,8 @@ begin
   FIdInsertTextToCurSource := RegisterASubAction('CnOtaInsertTextToCurSource',
     'Test CnOtaInsertTextToCurSource', 0, 'Test CnOtaInsertTextToCurSource',
     'CnOtaInsertTextToCurSource');
+  FIdInsertMoreTexts := RegisterASubAction('CnOtaInsertMoreTexts',
+    'Test Insert More Texts', 0, 'Test Insert More Texts', 'CnOtaInsertMoreTexts');
 end;
 
 function TCnTestEditorInsertTextWizard.GetCaption: string;
@@ -172,6 +175,18 @@ begin
     APos.Line := 27; APos.Col := 31;
     CnOtaGetTopMostEditView.CursorPos := APos;
     CnOtaInsertTextToCurSource(S);
+  end
+  else if Index = FIdInsertMoreTexts then
+  begin
+    S := '¸ô200';
+    CnOtaInsertTextIntoEditor(S);
+    Sleep(0);
+    S := 'ºÁÃëÏÔÊ¾Ò»¸ö';
+    CnOtaInsertTextIntoEditor(S);
+    Sleep(0);
+    S := '×Ö·û' + #13#10 + '  end';
+    CnOtaInsertTextIntoEditor(S);
+    Sleep(0);
   end;
 end;
 

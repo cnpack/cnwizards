@@ -1244,7 +1244,7 @@ begin
   AContainer := FormDesigner.Root;
 
   // 注意 FMX 下这里也能拿到 Root 且要判断是否是 FMX 的 Form
-  if IsCnFmxIsInheritedFromCommonCustomForm(AContainer) then
+  if CnFmxIsInheritedFromCommonCustomForm(AContainer) then
   begin
     Result := AContainer;
 
