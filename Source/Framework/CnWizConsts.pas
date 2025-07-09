@@ -1844,9 +1844,15 @@ var
   SCnAICoderWizardUserMessageGenTestCaseFmt: string = 'Please Analyze the Functionality of the Following Code and Generate a non-UI Interactive Test Case for this Code using %s. ' +
     'The Test Case should be Provided as a Single Function, Covering some Typical Scenarios and Boundary Conditions. ' +
     'Using Assert is Encouraged for Flexibility. If the Code is not a Complete Function, please Answer that it cannot be Generated.';
-  SCnAICoderWizardUserMessageContinueCodingFmt: string = 'Please continue writing the code based on the following content.' +
-   ' The content may be a code snippet or a combination of code and comments. If the end is a comment, continue writing the code according to the requirements specified in the comment.' +
-   ' If it is a code snippet, analyze its functionality and extend it accordingly. Note that your output must be in pure code format, and any explanatory comments should be embedded in the code using valid comment syntax.';
+  SCnAICoderWizardUserMessageContinueCodingFmt: string = 'Please continue writing the code based on the following content. ' +
+    'The content may be a code snippet, or a mixture of code and comments. The position where code needs to be inserted is marked ' +
+    'by the text ''%s'' along with blank lines before and after it. If there are comments above the marker, please continue writing the ' +
+    'code according to the comment requirements. If there are code snippets above the marker, please analyze the functionality of the ' +
+    'snippet and continue writing accordingly. Note that the content you output should be in pure code format, ' +
+    'which can be legally inserted at the marker to replace it. Do not repeat any content already provided to you, ' +
+    'especially avoid including Markdown formatting markers or unnecessary begin and end tags. ' +
+    'If there are comment instructions, they should be embedded in the outputted code using a valid comment format.';
+  SCnAICoderWizardFlagContinueCoding: string = '<Please Write Code Here.>';
   SCnAICoderWizardErrorNoEngine: string = 'No Active AI Engine or Option Exists.';
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';

@@ -157,6 +157,8 @@ type
     FHistoryCount: Integer;
     FMaxFavCount: Integer;
     FFavorites: TStringList; // 注意确保内部存储不包括回车换行
+    FContCodeKey1: Boolean;
+    FContCodeKey2: Boolean; 
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -237,6 +239,11 @@ type
     {* 代理服务器用户名}
     property ProxyPassword: string read FProxyPassword write FProxyPassword;
     {* 代理服务器密码}
+
+    property ContCodeKey1: Boolean read FContCodeKey1 write FContCodeKey1;
+    {* 是否快捷键 Alt+Enter 在当前编辑器续写代码}
+    property ContCodeKey2: Boolean read FContCodeKey2 write FContCodeKey2;
+    {* 是否快捷键 Ctrl+Alt+Enter 在聊天窗口续写代码}
   end;
 
 function CnAIEngineOptionManager: TCnAIEngineOptionManager;
@@ -303,6 +310,8 @@ begin
   inherited;
   FOptions := TObjectList.Create(True);
   FFavorites := TStringList.Create;
+  FContCodeKey1 := True;
+  FContCodeKey2 := True;
 end;
 
 function TCnAIEngineOptionManager.CreateOptionFromFile(const EngineName,
@@ -703,7 +712,7 @@ end;
 
 function TCnAIEngineOption.GetContinueCodingPrompt: string;
 begin
-  Result := SCnAICoderWizardUserMessageContinueCodingFmt;
+  Result := Format(SCnAICoderWizardUserMessageContinueCodingFmt, [SCnAICoderWizardFlagContinueCoding]);
 end;
 
 { TCnClaudeAIEngineOption }

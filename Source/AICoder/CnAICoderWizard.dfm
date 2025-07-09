@@ -60,7 +60,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Width = 880
     Height = 425
     Anchors = [akLeft, akTop, akRight, akBottom]
-    TabOrder = 9
+    TabOrder = 10
   end
   object btnOK: TButton
     Left = 652
@@ -71,7 +71,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = '&OK'
     Default = True
     ModalResult = 1
-    TabOrder = 10
+    TabOrder = 11
   end
   object btnCancel: TButton
     Left = 732
@@ -82,7 +82,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 11
+    TabOrder = 12
   end
   object btnHelp: TButton
     Left = 812
@@ -91,7 +91,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Height = 21
     Anchors = [akRight, akBottom]
     Caption = '&Help'
-    TabOrder = 12
+    TabOrder = 13
     OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
@@ -168,5 +168,13 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Position = 0
     TabOrder = 7
     Wrap = False
+  end
+  object chkAltEnterContCode: TCheckBox
+    Left = 8
+    Top = 40
+    Width = 289
+    Height = 17
+    Caption = '(Ctrl+) Alt+Enter to Continue Coding in Editor'
+    TabOrder = 9
   end
 end

@@ -1513,6 +1513,7 @@ begin
   TranslateStr(SCnAICoderWizardUserMessageReviewFmt, 'SCnAICoderWizardUserMessageReviewFmt');
   TranslateStr(SCnAICoderWizardUserMessageGenTestCaseFmt, 'SCnAICoderWizardUserMessageGenTestCaseFmt');
   TranslateStr(SCnAICoderWizardUserMessageContinueCodingFmt, 'SCnAICoderWizardUserMessageContinueCodingFmt');
+  TranslateStr(SCnAICoderWizardFlagContinueCoding, 'SCnAICoderWizardFlagContinueCoding');
   TranslateStr(SCnAICoderWizardErrorNoEngine, 'SCnAICoderWizardErrorNoEngine');
   TranslateStr(SCnAICoderWizardErrorURLFmt, 'SCnAICoderWizardErrorURLFmt');
   TranslateStr(SCnAICoderWizardErrorAPIKeyFmt, 'SCnAICoderWizardErrorAPIKeyFmt');

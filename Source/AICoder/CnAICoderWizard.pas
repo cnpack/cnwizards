@@ -64,6 +64,7 @@ type
     edtMaxFav: TEdit;
     lblMaxFav: TLabel;
     udMaxFav: TUpDown;
+    chkAltEnterContCode: TCheckBox;
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
   private
@@ -97,10 +98,12 @@ type
     procedure EnsureChatWindowVisible(OnlyCreate: Boolean = False);
     {* 确保创建 ChatWindow 且其 Visible 为 True 及其所有 Parent 的 Visible 全为 True
       以确保聊天窗口可见}
+    procedure EditorSysKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
     procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
 
-    procedure ContinueCurrentFile;
+    procedure ContinueCurrentFile(UseChat: Boolean = False);
     {* 续写当前代码的入口}
   protected
     function GetHasConfig: Boolean; override;
@@ -119,9 +122,12 @@ type
       SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     {* 返回代码的回调}
 
-    procedure ForContinueAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+    procedure ForContinueAnswerToEditor(StreamMode, Partly, Success, IsStreamEnd: Boolean;
       SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
-    {* 续写代码的回调}
+    {* 续写代码的回调，输出至编辑器}
+    procedure ForContinueAnswerToChat(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+      SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    {* 续写代码的回调，输出至聊天窗口}
 
     procedure AcquireSubActions; override;
     function GetState: TWizardState; override;
@@ -178,7 +184,8 @@ end;
 constructor TCnAICoderWizard.Create;
 begin
   inherited;
-  EditControlWrapper.AddSysKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.AddSysKeyDownNotifier(EditorSysKeyDown);
   IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
     csAICoderChatForm);
 end;
@@ -186,7 +193,8 @@ end;
 destructor TCnAICoderWizard.Destroy;
 begin
   IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, csAICoderChatForm);
-  EditControlWrapper.RemoveSysKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.RemoveSysKeyDownNotifier(EditorSysKeyDown);
   FreeAndNil(CnAICoderChatForm);
   inherited;
 end;
@@ -428,6 +436,7 @@ begin
   udTimeout.Position := CnAIEngineOptionManager.TimeoutSec;
   udHisCount.Position := CnAIEngineOptionManager.HistoryCount;
   udMaxFav.Position := CnAIEngineOptionManager.MaxFavCount;
+  chkAltEnterContCode.Checked := CnAIEngineOptionManager.ContCodeKey1 or CnAIEngineOptionManager.ContCodeKey2;
 
   // 给每个 Options 创建一个 Tab，每个 Tab 里塞一个 Frame，给 Frame 里的东西塞 Option 内容
   SetLength(FTabsheets, CnAIEngineOptionManager.OptionCount);
@@ -519,6 +528,8 @@ begin
   CnAIEngineOptionManager.TimeoutSec := udTimeout.Position;
   CnAIEngineOptionManager.HistoryCount := udHisCount.Position;
   CnAIEngineOptionManager.MaxFavCount := udMaxFav.Position;
+  CnAIEngineOptionManager.ContCodeKey1 := chkAltEnterContCode.Checked;
+  CnAIEngineOptionManager.ContCodeKey2 := chkAltEnterContCode.Checked;
 
   CnAIEngineOptionManager.UseProxy := chkProxy.Checked;
   CnAIEngineOptionManager.ProxyServer := edtProxy.Text;
@@ -642,7 +653,29 @@ end;
 procedure TCnAICoderWizard.EditorKeyDown(Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 begin
-  if not Active then
+  if not Active or not CnAIEngineOptionManager.ContCodeKey2 then
+    Exit;
+
+  if (Key = VK_RETURN) and (ssCtrl in Shift) and (ssAlt in Shift) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Ctrl+Alt+Enter Pressed to Continue AI Coding');
+{$ENDIF}
+    if not ValidateAIEngines then
+    begin
+      Config;
+      Exit;
+    end;
+
+    ContinueCurrentFile(True);
+    Handled := True;
+  end;
+end;
+
+procedure TCnAICoderWizard.EditorSysKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  if not Active or not CnAIEngineOptionManager.ContCodeKey1 then
     Exit;
 
   if Key = VK_RETURN then
@@ -661,7 +694,7 @@ begin
   end;
 end;
 
-procedure TCnAICoderWizard.ContinueCurrentFile;
+procedure TCnAICoderWizard.ContinueCurrentFile(UseChat: Boolean);
 var
   S: string;
   PIde: PCnIdeTokenChar;
@@ -688,8 +721,12 @@ begin
     SL.Text := string(PIde);
     P := View.CursorPos;
 
-    while SL.Count > P.Line do
-      SL.Delete(SL.Count - 1);
+    if P.Line <= SL.Count then
+    begin
+      SL.Insert(P.Line, '');
+      SL.Insert(P.Line, SCnAICoderWizardFlagContinueCoding);
+      SL.Insert(P.Line, '');
+    end;
 
     S := SL.Text;
   finally
@@ -697,7 +734,7 @@ begin
     Mem.Free;
   end;
 
-  EnsureChatWindowVisible(True);
+  EnsureChatWindowVisible(not UseChat);
   Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
   Msg.From := CnAIEngineManager.CurrentEngineName;
   Msg.FromType := cmtYou;
@@ -705,10 +742,13 @@ begin
   Msg.Waiting := True;
   FFirstAnswer := True;
 
-  CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswer);
+  if UseChat then
+    CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswerToChat)
+  else
+    CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswerToEditor);
 end;
 
-procedure TCnAICoderWizard.ForContinueAnswer(StreamMode, Partly, Success,
+procedure TCnAICoderWizard.ForContinueAnswerToEditor(StreamMode, Partly, Success,
   IsStreamEnd: Boolean; SendId: Integer; const Answer: string;
   ErrorCode: Cardinal; Tag: TObject);
 begin
@@ -722,6 +762,7 @@ begin
       else
         TCnChatMessage(Tag).Text := Answer;
 
+      // 本回调要写入编辑区
       if Answer <> '' then
       begin
         // 判断有无选择区，避免覆盖选择区内容
@@ -734,6 +775,36 @@ begin
           CnOtaInsertTextIntoEditor(Answer);
         FFirstAnswer := False;
       end;
+    end
+    else
+    begin
+      EnsureChatWindowVisible;
+      TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
+    end;
+  end
+  else
+  begin
+    EnsureChatWindowVisible;
+    if Success then
+      CnAICoderChatForm.AddMessage(Answer, CnAIEngineManager.CurrentEngineName)
+    else
+      CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
+  end;
+end;
+
+procedure TCnAICoderWizard.ForContinueAnswerToChat(StreamMode, Partly,
+  Success, IsStreamEnd: Boolean; SendId: Integer; const Answer: string;
+  ErrorCode: Cardinal; Tag: TObject);
+begin
+  if (Tag <> nil) and (Tag is TCnChatMessage) then
+  begin
+    TCnChatMessage(Tag).Waiting := False;
+    if Success then
+    begin
+      if Partly and (TCnChatMessage(Tag).Text <> MSG_WAITING)then
+        TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer
+      else
+        TCnChatMessage(Tag).Text := Answer;
     end
     else
     begin

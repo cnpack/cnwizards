@@ -8321,7 +8321,6 @@ procedure CnOtaInsertTextIntoEditor(const Text: string);
 var
   EditView: IOTAEditView;
   Position: Longint;
-  CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
 begin
   EditView := CnOtaGetTopMostEditView;
