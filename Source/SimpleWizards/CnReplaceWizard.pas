@@ -24,7 +24,7 @@ unit CnReplaceWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：批量文件替换专家单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：内部均是 Ansi 替换，哪怕是 Unicode 环境中
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
@@ -44,7 +44,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, RegExpr,
-  CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
+  CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler, CnNative,
   CnWizSearch, CnIni, CnWizMultiLang {$IFDEF IDE_WIDECONTROL}, CnWideStrings {$ENDIF};
 
 type
@@ -614,9 +614,24 @@ begin
     begin
       try
         // 保存为文件时去掉流尾部的 #0 字符
-        if PByte(Integer(FOutStream.Memory) + FOutStream.Size - 1)^ = 0 then
+        if PByte(TCnNativeUInt(FOutStream.Memory) + FOutStream.Size - 1)^ = 0 then
           FOutStream.Size := FOutStream.Size - 1;
-        FOutStream.SaveToFile(FileName);
+
+        // 用 Reader 保存，以在 BDS 以上保持编码
+        Reader := TCnEditFiler.Create(FileName);
+        try
+          FOutStream.Position := 0;
+          try
+            Reader.ReadFromStream(FOutStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF});
+          except
+            on E: Exception do
+            begin
+              QueryContinue(E.Message);
+            end;
+          end;
+        finally
+          Reader.Free;
+        end;
 
         Inc(FFileCount);
         Inc(FFoundCount, FCurrCount);
@@ -719,8 +734,10 @@ begin
   FSearcher.Search(FInStream);
 
   if FLastInStreamPos > 0 then
-    FOutStream.Write(Pointer(Integer(FInStream.Memory) + FLastInStreamPos)^,
+  begin
+    FOutStream.Write(Pointer(TCnNativeInt(FInStream.Memory) + FLastInStreamPos)^,
       FInStream.Size - FLastInStreamPos);
+  end;
 end;
 
 procedure TCnReplaceWizard.OnFound(Sender: TObject; LineNo: Integer;
@@ -736,7 +753,7 @@ begin
   CnDebugger.LogMsg('Line: ' + Line);
 {$ENDIF}
 
-  FOutStream.Write(Pointer(Integer(FInStream.Memory) + FLastInStreamPos)^,
+  FOutStream.Write(Pointer(TCnNativeInt(FInStream.Memory) + FLastInStreamPos)^,
     LineOffset + SPos - FLastInStreamPos - 1);
 
 {$IFDEF UNICODE}
