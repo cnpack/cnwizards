@@ -2863,6 +2863,7 @@ TCnAICoderConfigForm.btnCancel.Caption=取消(&C)
 TCnAICoderConfigForm.btnHelp.Caption=帮助(&H)
 TCnAICoderConfigForm.btnOK.Caption=确定(&O)
 TCnAICoderConfigForm.Caption=AI 辅助编码设置
+TCnAICoderConfigForm.chkAltEnterContCode.Caption=编辑器中使用快捷键 (Ctrl +) Alt + Enter 续写代码
 TCnAICoderConfigForm.chkProxy.Caption=使用代理：
 TCnAICoderConfigForm.lblActiveEngine.Caption=当前 AI 引擎：
 TCnAICoderConfigForm.lblHisCount.Caption=对话时发送历史消息数：

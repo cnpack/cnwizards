@@ -2863,6 +2863,7 @@ TCnAICoderConfigForm.btnCancel.Caption=&Cancel
 TCnAICoderConfigForm.btnHelp.Caption=&Help
 TCnAICoderConfigForm.btnOK.Caption=&OK
 TCnAICoderConfigForm.Caption=AI Coder Settings
+TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Enter to Continue Coding in Editor
 TCnAICoderConfigForm.chkProxy.Caption=Use Proxy:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Active AI Engine:
 TCnAICoderConfigForm.lblHisCount.Caption=Send History Count in Chat:

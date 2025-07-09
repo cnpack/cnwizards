@@ -2863,6 +2863,7 @@ TCnAICoderConfigForm.btnCancel.Caption=&Abbruch
 TCnAICoderConfigForm.btnHelp.Caption=&Hilfe
 TCnAICoderConfigForm.btnOK.Caption=&OK
 TCnAICoderConfigForm.Caption=AI-Codierer-Einstellungen
+TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Enter um im Editor weiterzuprogrammieren
 TCnAICoderConfigForm.chkProxy.Caption=Proxy verwenden:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Aktiver AI-Engine:
 TCnAICoderConfigForm.lblHisCount.Caption=Sendungsverlauf Anzahl im Chat:

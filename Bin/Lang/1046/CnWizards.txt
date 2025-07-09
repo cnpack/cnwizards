@@ -2863,6 +2863,7 @@ TCnAICoderConfigForm.btnCancel.Caption=&Cancelar
 TCnAICoderConfigForm.btnHelp.Caption=&Ajuda
 TCnAICoderConfigForm.btnOK.Caption=&OK
 TCnAICoderConfigForm.Caption=Configurações do Codificador IA
+TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Enter para continuar codificando no editor
 TCnAICoderConfigForm.chkProxy.Caption=Usar Proxy:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Motor IA Ativo:
 TCnAICoderConfigForm.lblHisCount.Caption=Contagem de Histórico de Envio no Chat:

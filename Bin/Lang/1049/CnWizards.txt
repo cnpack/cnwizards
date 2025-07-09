@@ -2863,6 +2863,7 @@ TCnAICoderConfigForm.btnCancel.Caption=Отмена
 TCnAICoderConfigForm.btnHelp.Caption=Справка
 TCnAICoderConfigForm.btnOK.Caption=&OK
 TCnAICoderConfigForm.Caption=Настройки AI Кодера
+TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Enter для продолжения написания кода в редакторе
 TCnAICoderConfigForm.chkProxy.Caption=Использовать прокси:
 TCnAICoderConfigForm.lblActiveEngine.Caption=Активный движок AI:
 TCnAICoderConfigForm.lblHisCount.Caption=Отправить количество истории в чате:

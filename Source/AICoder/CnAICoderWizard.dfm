@@ -172,9 +172,9 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
   object chkAltEnterContCode: TCheckBox
     Left = 8
     Top = 40
-    Width = 289
+    Width = 329
     Height = 17
-    Caption = '(Ctrl+) Alt+Enter to Continue Coding in Editor'
+    Caption = '(Ctrl +) Alt + Enter to Continue Coding in Editor'
     TabOrder = 9
   end
 end
