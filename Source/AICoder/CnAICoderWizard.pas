@@ -696,6 +696,7 @@ end;
 
 procedure TCnAICoderWizard.ContinueCurrentFile(UseChat: Boolean);
 var
+  I, LastLine: Integer;
   S: string;
   PIde: PCnIdeTokenChar;
   SL: TStringList;
@@ -703,6 +704,10 @@ var
   View: IOTAEditView;
   P: TOTAEditPos;
   Msg: TCnChatMessage;
+  PasParser: TCnGeneralPasStructParser;
+  CppParser: TCnGeneralCppStructParser;
+  CurIsPas, CurIsCpp: Boolean;
+  CharPos: TOTACharPos;
 begin
   // 收集本文件从开始到光标这行的内容，并发送，并编辑器接收回应
   View := CnOtaGetTopMostEditView;
@@ -712,24 +717,123 @@ begin
   S := '';
   Mem := nil;
   SL := nil;
+  PasParser := nil;
+  CppParser := nil;
+  LastLine := -1;
 
   try
     Mem := TMemoryStream.Create;
     SL := TStringList.Create;
     CnGeneralSaveEditorToStream(nil, Mem);
+
+    // 找光标外的最外层
+    CurIsPas := IsDprOrPas(View.Buffer.FileName) or IsInc(View.Buffer.FileName);
+    CurIsCpp := IsCppSourceModule(View.Buffer.FileName);
+
+    // 解析
+
+    if CurIsPas then
+    begin
+      PasParser := TCnGeneralPasStructParser.Create;
+  {$IFDEF BDS}
+      PasParser.UseTabKey := True;
+      PasParser.TabWidth := EditControlWrapper.GetTabWidth;
+  {$ENDIF}
+    end;
+
+    if CurIsCpp then
+    begin
+      CppParser := TCnGeneralCppStructParser.Create;
+  {$IFDEF BDS}
+      CppParser.UseTabKey := True;
+      CppParser.TabWidth := EditControlWrapper.GetTabWidth;
+  {$ENDIF}
+    end;
+
+    // 解析当前显示的源文件
+    if CurIsPas then
+    begin
+      CnPasParserParseSource(PasParser, Mem, IsDpr(View.Buffer.FileName)
+        or IsInc(View.Buffer.FileName), False);
+
+      // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+      CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+      PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+
+      if PasParser.BlockCloseToken <> nil then
+        LastLine := PasParser.BlockCloseToken.LineNumber;
+
+    end
+    else if CurIsCpp then
+    begin
+      CnCppParserParseSource(CppParser, Mem, View.CursorPos.Line,
+        View.CursorPos.Col, True, True);
+
+      if CppParser.BlockCloseToken <> nil then
+        LastLine := CppParser.BlockCloseToken.LineNumber;
+    end;
+
     PIde := PCnIdeTokenChar(Mem.Memory);
     SL.Text := string(PIde);
     P := View.CursorPos;
 
+    // 如果没拿到，光标所在最外层的 Token 尾，则硬性搜索 end
+    if (LastLine < 0) and (P.Line <= SL.Count) then
+    begin
+      for I := P.Line + 1 to SL.Count - 1 do
+      begin
+        S := SL[I];
+        if Length(S) = 4 then
+        begin
+          if (LowerCase(S) = 'end;') or (LowerCase(S) = 'end.') then
+          begin
+            LastLine := I;
+            Break;
+          end
+          else if Length(S) > 4 then
+          begin
+            if (LowerCase(Copy(S, 1, 4)) = 'end;') or (LowerCase(Copy(S, 1, 4)) = 'end.')
+              and (S[5] in [' ', '/', '{']) then // end; 或 end. 后是空格注释之类的
+            begin
+              LastLine := I;
+              Break;
+            end;
+          end;
+        end;
+      end;
+    end;
+
+    // 找到末尾行
+    if (LastLine > 0) and (LastLine > P.Line) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Continue Current File, Find Last Line at ' + IntToStr(LastLine));
+{$ENDIF}
+      for I := SL.Count - 1 downto LastLine + 1 do
+        SL.Delete(SL.Count - 1);
+    end;
+
+    // 加入代码插入位置的标记
     if P.Line <= SL.Count then
     begin
       SL.Insert(P.Line, '');
       SL.Insert(P.Line, SCnAICoderWizardFlagContinueCoding);
       SL.Insert(P.Line, '');
+    end
+    else
+    begin
+      SL.Add('');
+      SL.Add(SCnAICoderWizardFlagContinueCoding);
+      SL.Add('');
     end;
 
     S := SL.Text;
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Continue Current File. Sending Code Chars ' + IntToStr(Length(S)));
+{$ENDIF}
   finally
+    CppParser.Free;
+    PasParser.Free;
     SL.Free;
     Mem.Free;
   end;
