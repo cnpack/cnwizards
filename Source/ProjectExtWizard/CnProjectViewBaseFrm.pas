@@ -738,6 +738,11 @@ begin
     TW := Round(TW * IdeGetScaledFactor(Self));
     TH := Round(TH * IdeGetScaledFactor(Self));
 {$ENDIF}
+    if TW > Screen.Width - 150 then   // 限制不能比屏幕大
+      TW := Screen.Width - 150;
+    if TH > Screen.Height - 120 then
+      TH := Screen.Height - 120;
+
     if TW > MIN_WH then Width := TW;
     if TH > MIN_WH then Height := TH;
 
