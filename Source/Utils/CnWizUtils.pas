@@ -427,6 +427,8 @@ function IsBpg(const FileName: string): Boolean;
 {* 判断是否 .bpg 文件}
 function IsPas(const FileName: string): Boolean;
 {* 判断是否 .pas 文件}
+function IsPp(const FileName: string): Boolean;
+{* 判断是否 .pp 文件}
 function IsDcu(const FileName: string): Boolean;
 {* 判断是否 .dcu 文件}
 function IsInc(const FileName: string): Boolean;
@@ -3317,6 +3319,14 @@ var
 begin
   FileExt := ExtractUpperFileExt(FileName);
   Result := (FileExt = '.PAS');
+end;
+
+function IsPp(const FileName: string): Boolean;
+var
+  FileExt: string;
+begin
+  FileExt := ExtractUpperFileExt(FileName);
+  Result := (FileExt = '.PP');
 end;
 
 function IsDcu(const FileName: string): Boolean;
