@@ -3620,6 +3620,7 @@
   {$DEFINE OBJECT_HAS_TOSTRING}                  // 2009 及以上的 TObject 有 ToString
   {$DEFINE OBJECT_HAS_EQUAL}                     // 2009 及以上的 TObject 有 Equal
   {$DEFINE OBJECT_HAS_GETHASHCODE}               // 2009 及以上的 TObject 有 GetHashCode
+  {$DEFINE EXCEPTION_HAS_STACKTRACE_PROC}        // 2009 及以上的 Exception 有 StackTrace 相关过程指针但没实现
   {$DEFINE TGRAPHIC_SUPPORT_PARTIALTRANSPARENCY} // 2009 及以上的 TGraphic 类支持 Alpha 通道透明
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
 
