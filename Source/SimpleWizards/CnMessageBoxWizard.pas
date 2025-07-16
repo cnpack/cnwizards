@@ -1093,7 +1093,9 @@ var
   Indent, WrapWidth: Integer;
   Col, Row: Integer;
   Col1, Row1: Integer;
+{$IFNDEF NO_DELPHI_OTA}
   IEditView: IOTAEditView;
+{$ENDIF}
   FmtStr: string;
 
   // ÅÐ¶ÏÊÇ·ñ Format ×Ö·û´®
@@ -1572,8 +1574,11 @@ begin
         end;
       end;
 
+{$IFNDEF NO_DELPHI_OTA}
       IEditView := CnOtaGetTopMostEditView;
       if Assigned(IEditView) then IEditView.Paint;
+{$ENDIF}
+
       BringIdeEditorFormToFront;
     finally
       Free;

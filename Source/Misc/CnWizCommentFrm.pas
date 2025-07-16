@@ -43,6 +43,7 @@ uses
   CnWizIni, CnWideStrings;
 
 type
+
 //==============================================================================
 // 专家功能提示窗体
 //==============================================================================
@@ -75,6 +76,7 @@ function ShowCnWizCommentForm(Wizard: TCnBaseWizard;
    Command: string          - 要执行的命令，默认为空，即专家主执行命令
    Result: Boolean          - 如果用户点击“继续”返回为真，否则为假
  |</PRE>}
+
 function ShowCnWizCommentForm(const ACaption: string; AIcon: TIcon;
   Command: string): Boolean; overload;
 {* 显示专家功能提示窗体，如果用户以前显示过该窗体并选择了以后不再显示，则调用该
@@ -120,14 +122,25 @@ const
 // 显示专家功能提示窗体
 function ShowCnWizCommentForm(const ACaption: string; AIcon: TIcon;
   Command: string): Boolean;
+{$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
+{$IFNDEF CNWIZARDS_MINIMUM}
 var
   FileName: string;
   Comment: string;
   Show: Boolean;
   CRLF: string;
   Indent: Integer;
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
 begin
   Result := True;
+
+{$IFNDEF STAND_ALONE}
+{$IFNDEF LAZARUS}
+{$IFNDEF CNWIZARDS_MINIMUM}
+
   if not WizOptions.ShowWizComment then Exit;
   if Command = '' then Exit;
 
@@ -136,6 +149,7 @@ begin
   begin
     FileName := GetFileFromLang(SCnWizCommentIniFile);
     if FileExists(FileName) then
+    begin
       with TCnWideMemIniFile.Create(FileName) do
       try
         if not CheckWinVista and not ValueExists(csComment, Command) then
@@ -175,7 +189,11 @@ begin
           UpdateFile;
         Free;
       end;
+    end;
   end;
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
 end;
 
 // 显示专家功能提示窗体

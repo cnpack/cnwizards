@@ -2202,18 +2202,22 @@ end;
 // 删除标题中热键信息
 function GetCaptionOrgStr(const Caption: string): string;
 var
-  I, l: Integer;
+  I, L: Integer;
 begin
   Result := Caption;
   for I := Length(Result) downto 1 do
+  begin
     if Result[I] = '.' then
       Delete(Result, I, 1);
+  end;
 
-  l := Length(Result);
-  if l > 4 then
-    if CharInSet(Result[l - 3], ['(', '[']) and (Result[l - 2] = '&') and
-      CharInSet(Result[l], [')', ']']) then
-      Delete(Result, l - 3, 4);
+  L := Length(Result);
+  if L > 4 then
+  begin
+    if CharInSet(Result[L - 3], ['(', '[']) and (Result[L - 2] = '&') and
+      CharInSet(Result[L], [')', ']']) then
+      Delete(Result, L - 3, 4);
+  end;
 
   Result := StringReplace(Result, '&', '', [rfReplaceAll]);
 end;
@@ -7050,17 +7054,17 @@ end;
 // 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串
 function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
 var
-  I, l, Len: Cardinal;
+  I, L, Len: Cardinal;
   IsMultiBytes: Boolean;
   P: PDWORD;
 begin
   if Text <> '' then
   begin
     Len := Length(Text);
-    l := Len and $FFFFFFFC;
+    L := Len and $FFFFFFFC;
     P := PDWORD(@Text[1]);
     IsMultiBytes := False;
-    for I := 0 to l div 4 do
+    for I := 0 to L div 4 do
     begin
       if P^ and $80808080 <> 0 then
       begin
@@ -7072,7 +7076,7 @@ begin
     
     if not IsMultiBytes then
     begin
-      for I := l + 1 to Len do
+      for I := L + 1 to Len do
       begin
         if Ord(Text[I]) and $80 <> 0 then
         begin

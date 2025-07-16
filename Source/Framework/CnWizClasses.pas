@@ -567,9 +567,9 @@ procedure AdjustCnWizardsClassOrder;
 implementation
 
 uses
-  {$IFNDEF NO_DELPHI_OTA} CnWizUtils, {$ENDIF} CnWizOptions, CnCommon, CnRegIni
-{$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF NO_DELPHI_OTA}
-  , CnWizCommentFrm, CnWizSubActionShortCutFrm
+  CnWizUtils, CnWizOptions, CnCommon, CnRegIni
+{$IFNDEF CNWIZARDS_MINIMUM}, CnWizCommentFrm {$IFNDEF NO_DELPHI_OTA}
+  , CnWizSubActionShortCutFrm
 {$ENDIF}{$ENDIF}
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
@@ -1096,8 +1096,8 @@ end;
 procedure TCnActionWizard.Click(Sender: TObject);
 begin
   try
-    if Active and Action.Enabled and (IsInternalWizard {$IFNDEF STAND_ALONE}{$IFNDEF LAZARUS} {$IFNDEF CNWIZARDS_MINIMUM} or
-      ShowCnWizCommentForm(Self) {$ENDIF} {$ENDIF} {$ENDIF}) then
+    if Active and Action.Enabled and (IsInternalWizard or
+      ShowCnWizCommentForm(Self)) then
       Execute;
   except
     on E: Exception do
@@ -1519,9 +1519,9 @@ begin
         begin
           try
             // 内部专家不提示
-            if IsInternalWizard {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} {$IFNDEF CNWIZARDS_MINIMUM} or ShowCnWizCommentForm(WizardName + ' - ' +
+            if IsInternalWizard or ShowCnWizCommentForm(WizardName + ' - ' +
               GetCaptionOrgStr(SubActions[I].Caption), SubActions[I].Icon,
-              SubActions[I].Command) {$ENDIF} {$ENDIF} {$ENDIF} then
+              SubActions[I].Command) then
               SubActionExecute(I);
           except
             on E: Exception do

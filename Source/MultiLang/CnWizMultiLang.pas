@@ -127,6 +127,8 @@ type
        来设置自身尺寸，导致窗体子类创建后的尺寸永远是基类尺寸。
        此处做一下修补，在窗体 Loading 完成后，我们再读取分析一下本窗体的 DFM 资源字符串，
        找出其中的 ClientHeight 和 ClientWidth 属性的值，对窗体的 Width 和 Height 属性重新赋值。}
+    procedure ProcessLazarusGroupBoxOffset;
+    {* Delphi 和 Lazarus 的 TGroupBox，内部控件的 Y 坐标有偏差，大约 16，需要减去}
 
 {$IFNDEF STAND_ALONE}
     function GetEnlarged: Boolean;
@@ -488,6 +490,7 @@ begin
   ProcessGlyphForHDPI(Self);
 
   ProcessLazarusFormClientSize;
+  ProcessLazarusGroupBoxOffset;
 
   if NeedAdjustRightBottomMargin then
     AdjustRightBottomMargin;   // inherited 中会调用 FormCreate 事件，有可能改变了 Width/Height
@@ -1074,6 +1077,31 @@ begin
       DFMs.Free;
       Stream.Free;
       Mem.Free;
+    end;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnTranslateForm.ProcessLazarusGroupBoxOffset;
+{$IFDEF FPC}
+const
+  OFFSET = 16;
+var
+  I, J: Integer;
+  G: TGroupBox;
+{$ENDIF}
+begin
+{$IFDEF FPC}
+  for I := 0 to ComponentCount - 1 do
+  begin
+    if Components[I] is TGroupBox then
+    begin
+      G := TGroupBox(Components[I]);
+      for J := 0 to G.ControlCount - 1 do // 暂不嵌套处理
+      begin
+        if G.Controls[J].Top >= OFFSET then
+          G.Controls[J].Top := G.Controls[J].Top - OFFSET;
+      end;
     end;
   end;
 {$ENDIF}
