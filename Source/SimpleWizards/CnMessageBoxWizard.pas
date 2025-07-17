@@ -387,8 +387,10 @@ var
 begin
   Result := 0;
   for Kind := Low(Kind) to High(Kind) do
+  begin
     if Kind in Value then
       Include(TIntegerSet(Result), Ord(Kind));
+  end;
 end;
 
 // 整数转为对话框返回值集合
@@ -398,8 +400,10 @@ var
 begin
   Result := [];
   for Kind := Low(Kind) to High(Kind) do
+  begin
     if Ord(Kind) in TIntegerSet(Value) then
       Include(Result, Kind);
+  end;
 end;
 
 //==============================================================================
@@ -503,6 +507,7 @@ end;
 procedure TCnMessageBoxForm.btnDeleteProjectClick(Sender: TObject);
 begin
   if cbbProjects.ItemIndex >= 0 then
+  begin
     if cbbProjects.Text = SCnMsgBoxProjectLastName then
       ErrorDlg(SCnMsgBoxCannotDelLastProject)
     else if QueryDlg(SCnMsgBoxDeleteProject) then
@@ -512,6 +517,7 @@ begin
       if cbbProjects.ItemIndex < 0 then
         cbbProjects.ItemIndex := 0;
     end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1433,7 +1439,8 @@ begin
               CnOtaSetCurSourceCol(Col);
               CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
             end
-            else begin
+            else
+            begin
               CnOtaSetCurSourceCol(Col);
               CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF, ipCur);
             end;
@@ -1480,7 +1487,8 @@ begin
               CnOtaInsertTextToCurSource('}' + CRLF + 'else {' + CRLF + CRLF +
                 '}' + CRLF, ipCur);
             end
-            else begin
+            else
+            begin
               CnOtaSetCurSourceCol(Col);
               CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF + 'else' +
                 CRLF + '{' + CRLF + CRLF + '}' + CRLF, ipCur);

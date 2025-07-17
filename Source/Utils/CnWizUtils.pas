@@ -370,7 +370,6 @@ resourcestring
   SCnDefCppSourceMask = '.CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
   SCnDefSourceMask = '.PAS;.DPR;CPP;.C;.HPP;.H;.CXX;.CC;.HXX;.HH;.ASM';
 
-{$IFNDEF STAND_ALONE}
 function CurrentIsDelphiSource: Boolean;
 {* 当前编辑的文件是 Delphi 源文件，但可能在设计器里取到 dfm 等而判断为 False}
 function CurrentIsCSource: Boolean;
@@ -385,7 +384,6 @@ function CurrentSourceIsDelphiOrCSource: Boolean;
 {* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
 {* 当前编辑的文件是窗体文件}
-{$ENDIF}
 
 function ExtractUpperFileExt(const FileName: string): string;
 {* 取大写文件扩展名}
@@ -788,10 +786,8 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {$ENDIF}
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
-{$ENDIF}
 
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
@@ -881,8 +877,6 @@ function ConvertEditorTextToTextW(const Text: AnsiString): string;
 
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 function CnOtaGetCurrentSourceFile: string;
 {* 取当前编辑的源文件。编辑器活动时返回在编辑的源文件，
   在设计窗体活动时，会返回 dfm 或类似文件，不是源码文件}
@@ -890,8 +884,6 @@ function CnOtaGetCurrentSourceFile: string;
 function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 Cpp 源文件，判断限制较多。
   如取到 dfm 等，会判断对应 pas/cpp 源文件是否打开，打开则返回对应源文件}
-
-{$ENDIF}
 
 {$IFNDEF NO_DELPHI_OTA}
 
@@ -918,8 +910,6 @@ type
    ipLineHead    - 当前行首
    ipLineEnd     - 当前行尾
  |</PRE>}
-
-{$IFNDEF STAND_ALONE}
 
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos
   = ipCur): Boolean;
@@ -956,8 +946,6 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Pos: TInsertPos        - 光标位置
    Offset: Integer        - 偏移量
  |</PRE>}
-
-{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -3130,8 +3118,6 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 //==============================================================================
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
 //==============================================================================
@@ -3182,8 +3168,6 @@ function CurrentIsForm: Boolean;
 begin
   Result := IsForm(CnOtaGetCurrentSourceFile);
 end;
-
-{$ENDIF}
 
 function ExtractUpperFileExt(const FileName: string): string;
 begin
@@ -6575,10 +6559,9 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 // 判断文件是否打开
 function CnOtaIsFileOpen(const FileName: string): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   Editor: TSourceEditorInterface;
@@ -6589,8 +6572,10 @@ var
   FileEditor: IOTAEditor;
 {$ENDIF}
   I: Integer;
+{$ENDIF}
 begin
-  Result := False;
+  Result := False; // 独立模式下直接返回未打开
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
   for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
   begin
@@ -6623,9 +6608,8 @@ begin
     end;
   end;
 {$ENDIF}
-end;
-
 {$ENDIF}
+end;
 
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
@@ -7164,10 +7148,9 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 // 取当前编辑的源文件  (来自 GExperts Src 1.12，有改动)
 function CnOtaGetCurrentSourceFile: string;
+{$IFNDEF STAND_ALONE}
 {$IFNDEF LAZARUS}
 {$IFDEF COMPILER6_UP}
 var
@@ -7175,7 +7158,11 @@ var
   iEditor: IOTAEditor;
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := 'C:\CnPack\Unit1.pas'; // 独立运行模式下模拟返回一个固定文件名
+{$ELSE}
 {$IFDEF LAZARUS}
   if SourceEditorManagerIntf.ActiveEditor <> nil then
     Result := SourceEditorManagerIntf.ActiveEditor.FileName
@@ -7202,6 +7189,7 @@ begin
 {$ELSE}
   // Delphi5/BCB5/K1 下仍然要采用旧的方式
   Result := ToolServices.GetCurrentFile;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 end;
@@ -7252,8 +7240,6 @@ begin
     end;
   end;
 end;
-
-{$ENDIF}
 
 {$IFNDEF NO_DELPHI_OTA}
 
@@ -7314,22 +7300,33 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
-
 // 插入一段文本到当前正在编辑的源文件中，返回成功标志
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos): Boolean;
-{$IFDEF LAZARUS}
-
-{$ELSE}
+{$IFNDEF STAND_ALONE}
 var
+{$IFDEF LAZARUS}
+  P: TPoint;
+  Editor: TSourceEditorInterface;
+{$ELSE}
   iEditPosition: IOTAEditPosition;
   iEditView: IOTAEditView;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := True; // 独立运行模式下啥都不做直接返回成功
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-
   if not CnOtaMovePosInCurSource(InsertPos, 0, 0) then Exit;
+
+  Editor := SourceEditorManagerIntf.ActiveEditor;
+  if Assigned(Editor) then
+  begin
+    P := Editor.CursorTextXY;
+    Editor.ReplaceText(P, P, Text);
+    Result := True;
+  end;
 {$ELSE}
   try
     iEditPosition := CnOtaGetEditPosition;
@@ -7344,10 +7341,12 @@ begin
     ;
   end;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 获得当前编辑的源文件中光标的位置，返回成功标志
 function CnOtaGetCurSourcePos(var Col, Row: Integer): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   P: TPoint;
@@ -7355,7 +7354,13 @@ var
 {$ELSE}
   iEditPosition: IOTAEditPosition;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Col := 1;
+  Row := 1;
+  Result := True; // 独立运行模式下模拟返回固定位置
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
   Editor := SourceEditorManagerIntf.ActiveEditor;
@@ -7377,10 +7382,12 @@ begin
     ;
   end;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 设定当前编辑的源文件中光标的位置，返回成功标志
 function CnOtaSetCurSourcePos(Col, Row: Integer): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   P: TPoint;
@@ -7388,7 +7395,11 @@ var
 {$ELSE}
   iEditPosition: IOTAEditPosition;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := True; // 独立运行模式下暂时啥都不做
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
   Editor := SourceEditorManagerIntf.ActiveEditor;
@@ -7409,10 +7420,12 @@ begin
     ;
   end;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 设定当前编辑的源文件中光标的位置，返回成功标志
 function CnOtaSetCurSourceCol(Col: Integer): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   P: TPoint;
@@ -7420,7 +7433,11 @@ var
 {$ELSE}
   iEditPosition: IOTAEditPosition;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := True; // 独立运行模式下暂时啥都不做
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
   Editor := SourceEditorManagerIntf.ActiveEditor;
@@ -7441,10 +7458,12 @@ begin
     ;
   end;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 设定当前编辑的源文件中光标的位置，返回成功标志
 function CnOtaSetCurSourceRow(Row: Integer): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   P: TPoint;
@@ -7452,7 +7471,11 @@ var
 {$ELSE}
   iEditPosition: IOTAEditPosition;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := True; // 独立运行模式下暂时啥都不做
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
   Editor := SourceEditorManagerIntf.ActiveEditor;
@@ -7473,10 +7496,12 @@ begin
     ;
   end;
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 在当前源文件中移动光标
 function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   P: TPoint;
@@ -7484,7 +7509,11 @@ var
 {$ELSE}
   iEditPosition: IOTAEditPosition;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := True; // 独立运行模式下暂时啥都不做
+{$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
   Editor := SourceEditorManagerIntf.ActiveEditor;
@@ -7543,9 +7572,8 @@ begin
     ;
   end;
 {$ENDIF}
-end;
-
 {$ENDIF}
+end;
 
 {$IFNDEF LAZARUS}
 
