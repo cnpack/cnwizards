@@ -26,13 +26,20 @@
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="StandAloneFramework.dpr"/>
+        <Filename Value="StandAloneFramework.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="StandAloneFrameworkUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormFramework"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\SimpleWizards\CnMessageBoxWizard.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CnMessageBoxForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
@@ -44,7 +51,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphics;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;$(ProjOutDir)"/>
       <Libraries Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphics;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm"/>
-      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphics;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm"/>
+      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphics;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\SimpleWizards"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       <ObjectPath Value="..\..\..\Source"/>
     </SearchPaths>
@@ -69,9 +76,11 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dSTAND_ALONE"/>
-      <OtherDefines Count="1">
+      <CustomOptions Value="-dSTAND_ALONE
+-dDEBUG"/>
+      <OtherDefines Count="2">
         <Define0 Value="STAND_ALONE"/>
+        <Define1 Value="DEBUG"/>
       </OtherDefines>
     </Other>
   </CompilerOptions>

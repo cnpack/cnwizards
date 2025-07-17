@@ -4,6 +4,8 @@ object FormFramework: TFormFramework
   Top = 112
   Width = 979
   Caption = 'Stand Alone Framework Test'
+  ClientHeight = 563
+  ClientWidth = 979
   Color = clBtnFace
   Font.Color = clWindowText
   Font.Height = -11
@@ -12,6 +14,41 @@ object FormFramework: TFormFramework
   LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  object Button1: TButton
+    Left = 40
+    Height = 25
+    Top = 32
+    Width = 120
+    Caption = 'Test FileExt Match'
+    TabOrder = 0
+    OnClick = Button1Click
+  end
+  object SpinEdit1: TSpinEdit
+    Left = 208
+    Height = 21
+    Top = 36
+    Width = 50
+    TabOrder = 1
+  end
+  object GroupBox1: TGroupBox
+    Left = 336
+    Height = 105
+    Top = 32
+    Width = 185
+    Caption = 'GroupBox1'
+    ClientHeight = 87
+    ClientWidth = 181
+    ParentBackground = False
+    TabOrder = 2
+    object Button2: TButton
+      Left = 16
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'Button2'
+      TabOrder = 0
+    end
+  end
   object actlstStub: TActionList
     Images = ilStub
     Left = 144

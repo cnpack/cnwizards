@@ -9,7 +9,7 @@ uses
 {$ELSE}
   Interfaces,
 {$ENDIF}
-  Forms,
+  Forms, CnMessageBoxWizard,
   StandAloneFrameworkUnit in 'StandAloneFrameworkUnit.pas' {FormFramework};
 
 {$R *.res}
