@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMenuAction, CnWizShortCut, CnWizConsts, CnWizCompilerConst, CnWizOptions,
   CnWizClasses, CnWizNotifier, CnEditControlWrapper, ImgList, Menus,
-  ActnList;
+  ActnList, CnMessageBoxWizard, ComCtrls;
 
 type
   TFormFramework = class(TForm)

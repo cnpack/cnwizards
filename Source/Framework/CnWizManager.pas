@@ -291,9 +291,9 @@ uses
   CnWizOptions, CnWizShortCut, CnCommon,
 {$IFNDEF CNWIZARDS_MINIMUM}
   {$IFNDEF STAND_ALONE} CnDesignEditor, {$ENDIF}
-  CnWizAbout, CnWizShareImages, CnWizMultiLang, CnWizBoot, CnWizTranslate,
+  CnWizAbout, CnWizShareImages, CnWizMultiLang, CnWizBoot, CnWizTranslate, CnWizConfigFrm,
   {$IFNDEF LAZARUS}{$IFNDEF STAND_ALONE}
-  CnWizConfigFrm, CnWizUpgradeFrm, CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
+  CnWizUpgradeFrm, CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
   {$ENDIF}{$ENDIF}
 {$ENDIF}
   CnWizNotifier, CnWizCompilerConst;
@@ -1666,25 +1666,17 @@ end;
 
 // 显示专家设置对话框
 procedure TCnWizardMgr.OnConfig(Sender: TObject);
-{$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
 var
   I: Integer;
 {$ENDIF}
-{$ENDIF}
-{$ENDIF}
 begin
-{$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
   I := WizActionMgr.IndexOfCommand(SCnWizConfigCommand);
   if I >= 0 then
     ShowCnWizConfigForm(WizActionMgr.WizActions[I].Icon)
   else
     ShowCnWizConfigForm;
-{$ENDIF}
-{$ENDIF}
 {$ENDIF}
 end;
 

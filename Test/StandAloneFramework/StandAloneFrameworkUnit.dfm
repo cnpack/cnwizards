@@ -1,6 +1,6 @@
 object FormFramework: TFormFramework
   Left = 192
-  Top = 112
+  Top = 113
   Width = 979
   Height = 563
   Caption = 'Stand Alone Framework Test'

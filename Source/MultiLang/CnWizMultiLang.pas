@@ -104,9 +104,7 @@ type
   TCnTranslateForm = class(TForm)
 {$IFNDEF TEST_APP}
   private
-{$IFNDEF STAND_ALONE}
     FEnlarge: TCnWizSizeEnlarge;
-{$ENDIF}
     FActionList: TActionList;
     FHelpAction: TAction;
     procedure LanguageChanged(Sender: TObject);
@@ -130,9 +128,7 @@ type
     procedure ProcessLazarusGroupBoxOffset;
     {* Delphi 和 Lazarus 的 TGroupBox，内部控件的 Y 坐标有偏差，大约 16，需要减去}
 
-{$IFNDEF STAND_ALONE}
     function GetEnlarged: Boolean;
-{$ENDIF}
 {$ENDIF}
   protected
 {$IFNDEF TEST_APP}
@@ -163,7 +159,6 @@ type
     procedure ShowFormHelp;
     {* 显示帮助内容}
 
-{$IFNDEF STAND_ALONE}
     procedure EnlargeListViewColumns(ListView: TListView);
     {* 如果子类中有 ListView，可以用此方法来放大 ListView 的列宽}
 
@@ -176,7 +171,7 @@ type
     {* 供专家包子类窗口使用的缩放比例}
     property Enlarged: Boolean read GetEnlarged;
     {* 是否有缩放}
-{$ENDIF}
+
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -912,8 +907,6 @@ begin
 {$ENDIF}
 end;
 
-{$IFNDEF STAND_ALONE}
-
 procedure TCnTranslateForm.EnlargeListViewColumns(ListView: TListView);
 var
   I: Integer;
@@ -922,8 +915,10 @@ begin
     Exit;
 
   for I := 0 to ListView.Columns.Count - 1 do
+  begin
     if ListView.Columns[I].Width > 0 then
       ListView.Columns[I].Width := Round(ListView.Columns[I].Width * GetFactorFromSizeEnlarge(FEnlarge));
+  end;
 end;
 
 function TCnTranslateForm.CalcIntEnlargedValue(Value: Integer): Integer;
@@ -936,16 +931,10 @@ begin
   Result := WizOptions.CalcIntUnEnlargedValue(FEnlarge, Value);
 end;
 
-{$ENDIF}
-
-{$IFNDEF STAND_ALONE}
-
 function TCnTranslateForm.GetEnlarged: Boolean;
 begin
   Result := FEnlarge <> wseOrigin;
 end;
-
-{$ENDIF}
 
 procedure TCnTranslateForm.ProcessGlyphForHDPI(AControl: TControl);
 {$IFDEF IDE_SUPPORT_HDPI}

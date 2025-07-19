@@ -56,6 +56,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Menus, ExtCtrls, ComCtrls, ToolWin, StdCtrls, ImgList, Buttons,
+  {$IFDEF FPC} LCLType, LCLProc, CnHotKey, {$ENDIF}
   CnDesignEditor, CnWizMultiLang, CnWizClasses, CnDesignEditorConsts, CnWizMenuAction;
 
 type
@@ -617,10 +618,16 @@ begin
   end;
 
   if Idx >= 0 then
+  begin
+{$IFDEF NO_DELPHI_OTA}
+    FShortCuts[Idx] := HotKeyWizard.HotKey;
+{$ELSE}
     if CheckQueryShortCutDuplicated(HotKeyWizard.HotKey, WizardAction) <> sdDuplicatedStop then
       FShortCuts[Idx] := HotKeyWizard.HotKey
     else
       HotKeyWizard.SetFocus;
+{$ENDIF}
+  end;
 end;
 
 // 设置专家活跃
@@ -951,13 +958,16 @@ begin
 end;
 
 procedure TCnWizConfigForm.btnExportComponentsClick(Sender: TObject);
+{$IFNDEF STAND_ALONE}
 const
   SCnPackageFileName = 'Packages.txt';
   SCnComponentFileName = 'Components.txt';
 var
   P, C: TStringList;
-  Dir: String;
+  Dir: string;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   P := nil;
   C := nil;
   try
@@ -974,6 +984,7 @@ begin
     P.Free;
     C.Free;
   end;
+{$ENDIF}
 end;
 
 procedure TCnWizConfigForm.btnSortClick(Sender: TObject);

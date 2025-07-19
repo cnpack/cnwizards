@@ -238,23 +238,19 @@ function GetIDEToolsMenu: TMenuItem;
 function GetIdeRootDirectory: string;
 {* 取得 IDE 根目录}
 
-{$IFNDEF LAZARUS}
 function GetIDEActionList: TCustomActionList;
-{* 取得 IDE 主 ActionList}
+{* 取得 IDE 主 ActionList，Lazarus 下为 nil}
 function GetIDEActionFromName(const AName: string): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定名称的 Action}
 function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 {* 取得 IDE 主 ActionList 中指定快捷键的 Action}
 
-{$IFNDEF NO_DELPHI_OTA}
-function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
-{* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
-{$ENDIF}
-
 procedure SaveIDEActionListToFile(const FileName: string);
 {* 保存 IDE ActionList 中的内容到指定文件}
 
 {$IFNDEF NO_DELPHI_OTA}
+function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
+{* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
 procedure SaveIDEOptionsNameToFile(const FileName: string);
 {* 保存 IDE 环境设置变量名到指定文件}
 procedure SaveProjectOptionsNameToFile(const FileName: string);
@@ -269,7 +265,6 @@ function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
-{$ENDIF}
 {$ENDIF}
 
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
@@ -1326,7 +1321,8 @@ procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 var
   CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
 
-{$IFDEF STAND_ALONE}
+{$IFDEF NO_DELPHI_OTA}
+  // 几个模拟替换的变量
   CnStubRefMainForm: TCustomForm = nil;
   CnStubRefMainMenu: TMainMenu = nil;
   CnStubRefImageList: TCustomImageList = nil;
@@ -2351,16 +2347,14 @@ begin
   Result := _CnExtractFilePath(_CnExtractFileDir(Application.ExeName));
 end;
 
-{$IFNDEF LAZARUS}
-
 // 取得 IDE 主 ActionList
 function GetIDEActionList: TCustomActionList;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
 begin
-{$IFDEF STAND_ALONE}
+{$IFDEF NO_DELPHI_OTA}
   Result := CnStubRefActionList;
 {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
@@ -2413,6 +2407,33 @@ begin
         end;
       end;
     end;
+  end;
+end;
+
+// 保存 IDE ActionList 中的内容到指定文件
+procedure SaveIDEActionListToFile(const FileName: string);
+var
+  ActionList: TCustomActionList;
+  I: Integer;
+  List: TStrings;
+begin
+  ActionList := GetIDEActionList;
+  if ActionList = nil then
+    Exit;
+
+  List := TStringList.Create;
+  try
+    for I := 0 to ActionList.ActionCount - 1 do
+    begin
+      if ActionList.Actions[I] is TCustomAction then
+        with ActionList.Actions[I] as TCustomAction do
+          List.Add(Name + ' | ' + Caption)
+      else
+        List.Add(ActionList.Actions[I].Name);
+    end;
+    List.SaveToFile(FileName);
+  finally
+    List.Free;
   end;
 end;
 
@@ -2484,31 +2505,6 @@ begin
     [rfReplaceAll, rfIgnoreCase]);
 end;
 {$ENDIF}
-{$ENDIF}
-
-// 保存 IDE ActionList 中的内容到指定文件
-procedure SaveIDEActionListToFile(const FileName: string);
-var
-  ActionList: TCustomActionList;
-  I: Integer;
-  List: TStrings;
-begin
-  ActionList := GetIDEActionList;
-  List := TStringList.Create;
-  try
-    for I := 0 to ActionList.ActionCount - 1 do
-      if ActionList.Actions[I] is TCustomAction then
-        with ActionList.Actions[I] as TCustomAction do
-          List.Add(Name + ' | ' + Caption)
-      else
-        List.Add(ActionList.Actions[I].Name);
-    List.SaveToFile(FileName);
-  finally
-    List.Free;
-  end;
-end;
-
-{$IFNDEF NO_DELPHI_OTA}
 
 // 保存 IDE 环境设置变量名到指定文件
 procedure SaveIDEOptionsNameToFile(const FileName: string);
@@ -2660,7 +2656,6 @@ begin
   end;
 end;
 
-{$ENDIF}
 {$ENDIF}
 
 // 创建一个子菜单项

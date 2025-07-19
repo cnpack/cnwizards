@@ -759,6 +759,8 @@ procedure EnableWaitDialogShow;
 
 {$ENDIF}
 
+{$ENDIF}
+
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl = nil): Integer;
 {* IDE 中根据 DPI 与缩放设置，计算原始像素数的真实所需像素数用于绘制
   支持 Windows 中的缩放比，支持 IDE 运行在 DPI Ware/Unware 下
@@ -788,6 +790,8 @@ function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
   IgnoreWizLargeOption 表示不处理专家包设置中的使用大图标}
 
 {$ENDIF}
+
+{$IFNDEF LAZARUS}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
@@ -3906,6 +3910,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -4030,6 +4036,8 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFNDEF LAZARUS}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 

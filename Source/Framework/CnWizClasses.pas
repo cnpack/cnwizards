@@ -82,10 +82,10 @@ interface
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, Dialogs,
   {$IFDEF STAND_ALONE} {$IFDEF LAZARUS} LCLProc, {$ENDIF} {$ELSE}
-  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, CnWizIni, {$ENDIF}
+  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, {$ENDIF}
   {$ENDIF}
   Registry, ComCtrls, Forms, CnHashMap, CnWizShortCut, CnWizMenuAction,
-  {$IFNDEF LAZARUS} CnPopupMenu, {$ENDIF} CnIni, CnWizConsts;
+  {$IFNDEF LAZARUS} CnPopupMenu, {$ENDIF} CnIni, CnWizIni, CnWizConsts;
 
 type
   ECnWizardException = class(Exception);
@@ -816,11 +816,7 @@ begin
   else
     Path := MakePath(WizOptions.RegPath) + GetIDStr;
 
-{$IFDEF NO_DELPHI_OTA}
-  Result := TCnIniFile.Create(Path);
-{$ELSE}
   Result := TCnWizIniFile.Create(Path, KEY_ALL_ACCESS, FDefaultsMap);
-{$ENDIF}
 end;
 
 procedure TCnBaseWizard.DoLoadSettings;

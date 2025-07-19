@@ -9,8 +9,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMenuAction, CnWizShortCut, CnWizConsts, CnWizCompilerConst, CnWizOptions,
-  CnWizClasses, CnWizNotifier, CnEditControlWrapper, ImgList, Menus,
-  ActnList, StdCtrls, Spin, CnSpin;
+  CnWizClasses, CnWizNotifier, CnEditControlWrapper, ImgList, Menus, CnWizIdeUtils,
+  ActnList, StdCtrls, Spin, ComCtrls, CnSpin, CnHotKey;
 
 type
 
@@ -42,6 +42,7 @@ type
     procedure Exit1Click(Sender: TObject);
   private
     FSpin: TCnSpinEdit;
+    FHotKey: THotKey;
   public
 
   end;
@@ -65,6 +66,12 @@ begin
 
   FSpin := TCnSpinEdit.Create(Self);
   FSpin.Parent := Self;
+
+  FHotKey := THotKey.Create(Self);
+  FHotKey.Top := 80;
+  FHotKey.Left := 120;
+  FHotKey.Parent := Self;
+
   CnWizardMgr := TCnWizardMgr.Create;
 end;
 

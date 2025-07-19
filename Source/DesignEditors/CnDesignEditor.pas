@@ -45,9 +45,9 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, IniFiles, Registry, TypInfo, Contnrs,
-  {$IFDEF LAZARUS} PropEdits, ComponentEditors, {$ELSE} ToolsAPI,
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} PropEdits, ComponentEditors, {$ELSE} ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
-  {$ENDIF}
+  {$ENDIF}{$ENDIF}
   CnCommon, CnConsts, CnDesignEditorConsts, CnWizOptions, CnWizUtils,
   CnIni, CnWizNotifier, CnEventBus;
 
@@ -130,6 +130,11 @@ type
 
 {$M-}
 
+{$IFDEF NO_DELPHI_OTA}
+  TComponentEditorClass = TClass;
+  TPropertyEditorClass = TClass;
+{$ENDIF}
+
 { TCnPropEditorInfo }
 
   TCnPropEditorInfo = class(TCnDesignEditorInfo)
@@ -191,7 +196,6 @@ type
     function GetPropEditor(Index: Integer): TCnPropEditorInfo;
     function GetPropEditorByClass(AEditor: TPropertyEditorClass): TCnPropEditorInfo;
     function GetPropEditorActive(AEditor: TPropertyEditorClass): Boolean;
-
     function GetCompEditorCount: Integer;
     function GetCompEditor(Index: Integer): TCnCompEditorInfo;
     function GetCompEditorByClass(AEditor: TComponentEditorClass): TCnCompEditorInfo;
@@ -617,7 +621,7 @@ var
 begin
   UnRegister;
 
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
   FGroup := NewEditorGroup;
 {$ENDIF}
 
@@ -625,6 +629,7 @@ begin
   CnDebugger.LogInteger(FGroup, 'NewEditorGroup');
 {$ENDIF}
   for I := 0 to PropEditorCount - 1 do
+  begin
     if PropEditors[I].Active then
     begin
       if Assigned(PropEditors[I].RegEditorProc) then
@@ -672,6 +677,7 @@ begin
         end;
       end;
     end;
+  end;
 
   for I := 0 to CompEditorCount - 1 do
   begin
@@ -690,7 +696,9 @@ begin
           AClass := GetClass(AName);
           if AClass <> nil then
           begin
+{$IFNDEF NO_DELPHI_OTA}
             RegisterComponentEditor(TComponentClass(AClass), CompEditors[I].GetEditorClass);
+{$ENDIF}
 {$IFDEF DEBUG}
             CnDebugger.LogFmt('ComponentEditor CustomRegister: %s Succ: %s',
               [AName, BoolToStr(Success, True)]);
@@ -701,7 +709,7 @@ begin
     end;
   end;
 
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
   // 为了避免反注册时把其它模块中的编辑器也反注册掉（一个可能的情况是 CodeRush
   // 注册的组件编辑器），此处建一个新组。这样虽然可能导致有多余的空组，不过对
   // 使用 TBit 来保存组信息的 IDE 来说没什么影响。
@@ -718,7 +726,7 @@ begin
 {$ENDIF}
 
     try
-{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF BDS}
       // D8/D2005 下在 DLL 释放时调用可能会出异常
       if FNeedUnRegister then
