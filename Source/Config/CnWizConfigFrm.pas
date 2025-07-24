@@ -214,7 +214,9 @@ const
 
 type
   TCnActionWizardHack = class(TCnActionWizard);
+{$IFDEF IDE_SUPPORT_HDPI}
   TControlHack = class(TControl);
+{$ENDIF}
 
 {$R *.DFM}
 
@@ -257,7 +259,10 @@ begin
       FShortCuts[I] := 0;
     lbWizards.Items.AddObject(CnWizardMgr[I].WizardName, CnWizardMgr[I]);
   end;
-  lbWizards.ItemIndex := WizOptions.ReadInteger(SCnOptionSection, csLastSelectedItem, 0);
+  I := WizOptions.ReadInteger(SCnOptionSection, csLastSelectedItem, 0);
+  if (I >= 0) and (I < lbWizards.ItemIndex) then
+    lbWizards.ItemIndex := I;
+
   lbWizardsClick(lbWizards);
   ActiveControl := lbWizards;
 
@@ -277,7 +282,8 @@ begin
       CnDesignEditorMgr.CompEditors[I].Active;
     lbDesignEditors.Items.AddObject(CnDesignEditorMgr.CompEditors[I].Name, CnDesignEditorMgr.CompEditors[I]);
   end;
-  lbDesignEditors.ItemIndex := 0;
+  if lbDesignEditors.Count > 0 then
+    lbDesignEditors.ItemIndex := 0;
   lbDesignEditorsClick(lbDesignEditors);
 
   // 环境设置页面

@@ -253,7 +253,7 @@ type
     procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatTerm(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatFactor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
-    procedure FormatDesignator(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatDesignator(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; FromAt: Boolean = False);
     procedure FormatDesignatorList(PreSpaceCount: Byte = 0);
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
@@ -1109,16 +1109,37 @@ end;
   注：虽然有 Designator -> '(' Designator ')' 的情况，但已经包含在 QualId 的处理中了。
 }
 procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
-  IndentForAnonymous: Byte);
+  IndentForAnonymous: Byte; FromAt: Boolean);
 var
   IsB, IsGeneric: Boolean;
   GenericBookmark: TScannerBookmark;
   LessCount, OldTab: Integer;
 begin
-  if Scanner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
+  if FromAt and (Scanner.Token in [tokKeywordFunction, tokKeywordProcedure]) then
+  begin
+    // 如果是 @ 进来的且是匿名函数就处理，从 FormatSimpleExpression 中复制而来
+    if CnPascalCodeForRule.KeepUserLineBreak then
+      FCodeGen.TrimLastEmptyLine;  // 保留换行时，前面的内容可能多输出了空格，要删除
+
+    EnsureWriteln; // 保留换行时，匿名函数前面可能有回车，不能直接 Writeln 以避免出现俩回车
+
+    // 匿名函数内部改为不保留换行
+    FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
+    FNeedKeepLineBreak := False;
+    try
+      // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
+      if Scanner.Token = tokKeywordProcedure then
+        FormatProcedureDecl(Tab(IndentForAnonymous), True)
+      else
+        FormatFunctionDecl(Tab(IndentForAnonymous), True);
+    finally
+      FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
+    end;
+  end
+  else  if Scanner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
     Match(tokAtSign, PreSpaceCount);
-    FormatDesignator(0, IndentForAnonymous);
+    FormatDesignator(0, IndentForAnonymous, True);
     Exit;
   end
   else if Scanner.Token = tokKeywordInherited then // 处理 (inherited a).a; 这种语法
