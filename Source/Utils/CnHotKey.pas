@@ -1,35 +1,35 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
-{                     ä¸­å›½äººè‡ªå·±çš„å¼€æ”¾æºç ç¬¬ä¸‰æ–¹å¼€å‘åŒ…                         }
-{                   (C)Copyright 2001-2025 CnPack å¼€å‘ç»„                       }
+{                     ÖĞ¹úÈË×Ô¼ºµÄ¿ª·ÅÔ´ÂëµÚÈı·½¿ª·¢°ü                         }
+{                   (C)Copyright 2001-2025 CnPack ¿ª·¢×é                       }
 {                   ------------------------------------                       }
 {                                                                              }
-{            æœ¬å¼€å‘åŒ…æ˜¯å¼€æºçš„è‡ªç”±è½¯ä»¶ï¼Œæ‚¨å¯ä»¥éµç…§ CnPack çš„å‘å¸ƒåè®®æ¥ä¿®        }
-{        æ”¹å’Œé‡æ–°å‘å¸ƒè¿™ä¸€ç¨‹åºã€‚                                                }
+{            ±¾¿ª·¢°üÊÇ¿ªÔ´µÄ×ÔÓÉÈí¼ş£¬Äú¿ÉÒÔ×ñÕÕ CnPack µÄ·¢²¼Ğ­ÒéÀ´ĞŞ        }
+{        ¸ÄºÍÖØĞÂ·¢²¼ÕâÒ»³ÌĞò¡£                                                }
 {                                                                              }
-{            å‘å¸ƒè¿™ä¸€å¼€å‘åŒ…çš„ç›®çš„æ˜¯å¸Œæœ›å®ƒæœ‰ç”¨ï¼Œä½†æ²¡æœ‰ä»»ä½•æ‹…ä¿ã€‚ç”šè‡³æ²¡æœ‰        }
-{        é€‚åˆç‰¹å®šç›®çš„è€Œéšå«çš„æ‹…ä¿ã€‚æ›´è¯¦ç»†çš„æƒ…å†µè¯·å‚é˜… CnPack å‘å¸ƒåè®®ã€‚        }
+{            ·¢²¼ÕâÒ»¿ª·¢°üµÄÄ¿µÄÊÇÏ£ÍûËüÓĞÓÃ£¬µ«Ã»ÓĞÈÎºÎµ£±£¡£ÉõÖÁÃ»ÓĞ        }
+{        ÊÊºÏÌØ¶¨Ä¿µÄ¶øÒşº¬µÄµ£±£¡£¸üÏêÏ¸µÄÇé¿öÇë²ÎÔÄ CnPack ·¢²¼Ğ­Òé¡£        }
 {                                                                              }
-{            æ‚¨åº”è¯¥å·²ç»å’Œå¼€å‘åŒ…ä¸€èµ·æ”¶åˆ°ä¸€ä»½ CnPack å‘å¸ƒåè®®çš„å‰¯æœ¬ã€‚å¦‚æœ        }
-{        è¿˜æ²¡æœ‰ï¼Œå¯è®¿é—®æˆ‘ä»¬çš„ç½‘ç«™ï¼š                                            }
+{            ÄúÓ¦¸ÃÒÑ¾­ºÍ¿ª·¢°üÒ»ÆğÊÕµ½Ò»·İ CnPack ·¢²¼Ğ­ÒéµÄ¸±±¾¡£Èç¹û        }
+{        »¹Ã»ÓĞ£¬¿É·ÃÎÊÎÒÃÇµÄÍøÕ¾£º                                            }
 {                                                                              }
-{            ç½‘ç«™åœ°å€ï¼šhttps://www.cnpack.org                                  }
-{            ç”µå­é‚®ä»¶ï¼šmaster@cnpack.org                                       }
+{            ÍøÕ¾µØÖ·£ºhttps://www.cnpack.org                                  }
+{            µç×ÓÓÊ¼ş£ºmaster@cnpack.org                                       }
 {                                                                              }
 {******************************************************************************}
 
 unit CnHotKey;
 {* |<PRE>
 ================================================================================
-* è½¯ä»¶åç§°ï¼šCnPack ä¸“å®¶åŒ…
-* å•å…ƒåç§°ï¼šTHotKey ç§»æ¤å®ç°ç±»
-* å•å…ƒä½œè€…ï¼šCnPack å¼€å‘ç»„
-* å¤‡    æ³¨ï¼šè¯¥å•å…ƒç§»æ¤è‡ª Delphi 5ï¼Œæ›¿ä»£è§£å†³Lazarusä¸‹æ²¡æœ‰THotKeyæ§ä»¶çš„é—®é¢˜ã€‚
-* å¼€å‘å¹³å°ï¼šWin7 + Lazarus 4.0
-* å…¼å®¹æµ‹è¯•ï¼šæš‚æ— 
-* æœ¬ åœ° åŒ–ï¼šæš‚æ— 
-* ä¿®æ”¹è®°å½•ï¼š2025.07.19 V1.0
-*               ç§»æ¤å•å…ƒï¼Œå®ç°åŠŸèƒ½
+* Èí¼şÃû³Æ£ºCnPack ×¨¼Ò°ü
+* µ¥ÔªÃû³Æ£ºTHotKey ÒÆÖ²ÊµÏÖÀà
+* µ¥Ôª×÷Õß£ºCnPack ¿ª·¢×é
+* ±¸    ×¢£º¸Ãµ¥Ôª½â¾ö Lazarus ÏÂÃ»ÓĞ THotKey ¿Ø¼şµÄÎÊÌâ¡£
+* ¿ª·¢Æ½Ì¨£ºWin7 + Lazarus 4.0
+* ¼æÈİ²âÊÔ£ºÔİÎŞ
+* ±¾ µØ »¯£ºÔİÎŞ
+* ĞŞ¸Ä¼ÇÂ¼£º2025.07.26 V1.0
+*               ´´½¨µ¥Ôª£¬ÊµÏÖ¹¦ÄÜ
 ================================================================================
 |</PRE>}
 
@@ -38,212 +38,338 @@ interface
 {$I CnPack.inc}
 
 uses
-  Messages, Windows, SysUtils, Classes, Controls, Forms, LCLType,
-  Menus, Graphics, StdCtrls, ToolWin, CommCtrl;
+  Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Windows, Menus;
 
 type
-  THKModifier = (hkShift, hkCtrl, hkAlt, hkExt);
-  THKModifiers = set of THKModifier;
-  THKInvalidKey = (hcNone, hcShift, hcCtrl, hcAlt, hcShiftCtrl,
-    hcShiftAlt, hcCtrlAlt, hcShiftCtrlAlt);
-  THKInvalidKeys = set of THKInvalidKey;
-
-  TCustomHotKey = class(TWinControl)
+  THotKey = class(TCustomEdit)
   private
-    FAutoSize: Boolean;
-    FModifiers: THKModifiers;
-    FInvalidKeys: THKInvalidKeys;
-    FHotKey: Word;
-    procedure AdjustHeight;
-    procedure SetAutoSize(Value: Boolean);
-    procedure SetInvalidKeys(Value: THKInvalidKeys);
-    procedure SetModifiers(Value: THKModifiers);
-    procedure UpdateHeight;
+    FCapturing: Boolean;
+    FVirtKey: Word;
+    FModifiers: TShiftState;
+    FOnChange: TNotifyEvent;
+    FOriginalHotKey: TShortCut;
+    procedure UpdateDisplay;
+    procedure StartCapture;
+    procedure EndCapture(Cancel: Boolean);
     function GetHotKey: TShortCut;
-    procedure SetHotKey(Value: TShortCut);
-    procedure ShortCutToHotKey(Value: TShortCut);
-    function HotKeyToShortCut(Value: Longint): TShortCut;
+    procedure SetHotKey(const Value: TShortCut);
+    function ShiftStateToModifiers(Shift: TShiftState): TShiftState;
+    function ModifiersToShiftState: TShiftState;
+    function ShortCutToText(ShortCut: TShortCut): string;
+    function VirtualKeyToString(VKey: Word): string;
+    function GetModifiersText(Modifiers: TShiftState): string;
   protected
-    procedure CreateParams(var Params: TCreateParams); override;
-    procedure CreateWnd; override;
-    property AutoSize: Boolean read FAutoSize write SetAutoSize default True;
-    property InvalidKeys: THKInvalidKeys read FInvalidKeys write SetInvalidKeys;
-    property Modifiers: THKModifiers read FModifiers write SetModifiers;
-    property HotKey: TShortCut read GetHotKey write SetHotKey;
-    property TabStop default True;
+    procedure DoEnter; override;
+    procedure DoExit; override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure KeyUp(var Key: Word; Shift: TShiftState); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
-  end;
-
-  THotKey = class(TCustomHotKey)
+    property VirtKey: Word read FVirtKey;
+    property Modifiers: TShiftState read FModifiers;
   published
+    property HotKey: TShortCut read GetHotKey write SetHotKey;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property Align;
     property Anchors;
-    property AutoSize;
-    property BiDiMode;
+    property BorderStyle;
+    property Color;
     property Constraints;
     property Enabled;
-    property Hint;
-    property HotKey;
-    property InvalidKeys;
-    property Modifiers;
-    property ParentBiDiMode;
+    property Font;
+    property ParentColor;
+    property ParentFont;
     property ParentShowHint;
     property PopupMenu;
+    property ReadOnly;
     property ShowHint;
     property TabOrder;
     property TabStop;
     property Visible;
-    property OnContextPopup;
-    property OnEnter;
-    property OnExit;
-    property OnMouseDown;
-    property OnMouseMove;
-    property OnMouseUp;
   end;
-  
+
 implementation
 
-function InitCommonControl(CC: Integer): Boolean;
-var
-  ICC: TInitCommonControlsEx;
-begin
-  ICC.dwSize := SizeOf(TInitCommonControlsEx);
-  ICC.dwICC := CC;
-  Result := InitCommonControlsEx(ICC);
-  if not Result then InitCommonControls;
-end;
+{ THotKey }
 
-constructor TCustomHotKey.Create(AOwner: TComponent);
+constructor THotKey.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  Width := 121;
-  Height := 25;
+  ReadOnly := True;
   TabStop := True;
-  ParentColor := False;
-  FAutoSize := True;
-  FInvalidKeys := [hcNone, hcShift];
-  FModifiers := [hkAlt];
-  FHotKey := $0041;     // default - 'Alt+A'
-  AdjustHeight;
+  Width := 120;
+  Height := 21;
+  FCapturing := False;
+  FVirtKey := 0;
+  FModifiers := [];
 end;
 
-procedure TCustomHotKey.CreateParams(var Params: TCreateParams);
+procedure THotKey.DoEnter;
 begin
-  InitCommonControl(ICC_HOTKEY_CLASS);
-  inherited CreateParams(Params);
-  CreateSubClass(Params, HOTKEYCLASS);
-  with Params.WindowClass do
-    style := style and not (CS_HREDRAW or CS_VREDRAW);
+  inherited DoEnter;
+  if not FCapturing then
+    StartCapture;
 end;
 
-procedure TCustomHotKey.CreateWnd;
+procedure THotKey.DoExit;
 begin
-  inherited CreateWnd;
-  SendMessage(Handle, HKM_SETRULES, Byte(FInvalidKeys), MakeLong(Byte(FModifiers), 0));
-  SendMessage(Handle, HKM_SETHOTKEY, MakeWord(Byte(FHotKey), Byte(FModifiers)), 0);
+  inherited DoExit;
+  if FCapturing then
+    EndCapture(True); // Cancel on exit
 end;
 
-procedure TCustomHotKey.SetAutoSize(Value: Boolean);
+procedure THotKey.StartCapture;
 begin
-  if FAutoSize <> Value then
-  begin
-    FAutoSize := Value;
-    UpdateHeight;
-  end;
+  FCapturing := True;
+  FOriginalHotKey := GetHotKey;
+  FVirtKey := 0;
+  FModifiers := [];
+  Text := '';
+  Color := TColor($80FFFF);
 end;
 
-procedure TCustomHotKey.SetModifiers(Value: THKModifiers);
+procedure THotKey.EndCapture(Cancel: Boolean);
 begin
-  if Value <> FModifiers then
-  begin
-    FModifiers := Value;
-    SendMessage(Handle, HKM_SETRULES, Byte(FInvalidKeys), MakeLong(Byte(Value), 0));
-    SendMessage(Handle, HKM_SETHOTKEY, MakeWord(Byte(FHotKey), Byte(FModifiers)), 0);
-  end;
+  if not FCapturing then Exit;
+
+  FCapturing := False;
+  Color := clWindow;
+
+  if Cancel then
+    SetHotKey(FOriginalHotKey)
+  else
+    UpdateDisplay;
 end;
 
-procedure TCustomHotKey.SetInvalidKeys(Value: THKInvalidKeys);
+function THotKey.GetHotKey: TShortCut;
 begin
-  if Value <> FInvalidKeys then
-  begin
-    FInvalidKeys := Value;
-    SendMessage(Handle, HKM_SETRULES, Byte(Value), MakeLong(Byte(FModifiers), 0));
-    SendMessage(Handle, HKM_SETHOTKEY, MakeWord(Byte(FHotKey), Byte(FModifiers)), 0);
-  end;
+  Result := Menus.ShortCut(FVirtKey, ModifiersToShiftState);
 end;
 
-function TCustomHotKey.GetHotKey: TShortCut;
+procedure THotKey.SetHotKey(const Value: TShortCut);
 var
-  HK: Longint;
+  Key: Word;
+  Shift: TShiftState;
 begin
-  HK := SendMessage(Handle, HKM_GETHOTKEY, 0, 0);
-  Result := HotKeyToShortCut(HK);
+  Menus.ShortCutToKey(Value, Key, Shift);
+  FVirtKey := Key;
+  FModifiers := ShiftStateToModifiers(Shift);
+  UpdateDisplay;
+
+  if Assigned(FOnChange) then
+    FOnChange(Self);
 end;
 
-procedure TCustomHotKey.SetHotKey(Value: TShortCut);
+procedure THotKey.UpdateDisplay;
 begin
-  ShortCutToHotKey(Value);
-  SendMessage(Handle, HKM_SETHOTKEY, MakeWord(Byte(FHotKey), Byte(FModifiers)), 0);
-end;
-
-procedure TCustomHotKey.UpdateHeight;
-begin
-  if AutoSize then
+  if FCapturing then
   begin
-    ControlStyle := ControlStyle + [csFixedHeight];
-    AdjustHeight;
-  end else
-    ControlStyle := ControlStyle - [csFixedHeight];
-end;
-
-procedure TCustomHotKey.AdjustHeight;
-var
-  DC: HDC;
-  SaveFont: HFont;
-  I: Integer;
-{$IFDEF FPC}
-  SysMetrics, Metrics: Windows.TTextMetric;
-{$ELSE}
-  SysMetrics, Metrics: TTextMetric;
-{$ENDIF}
-begin
-  DC := GetDC(0);
-  GetTextMetrics(DC, SysMetrics);
-  SaveFont := SelectObject(DC, Font.Handle);
-  GetTextMetrics(DC, Metrics);
-  SelectObject(DC, SaveFont);
-  ReleaseDC(0, DC);
-  if NewStyleControls then
-  begin
-    // if Ctl3D then I := 8 else I := 6;
-    I := GetSystemMetrics(SM_CYBORDER) * 8;
+    // ²¶»ñÄ£Ê½ÏÂµÄÌØÊâÏÔÊ¾
+    if FVirtKey = 0 then
+    begin
+      // Ö»ÓĞĞŞÊÎ¼üÃ»ÓĞÖ÷¼üÊ±
+      if FModifiers <> [] then
+        Text := GetModifiersText(FModifiers) + '+'
+      else
+        Text := '';
+    end
+    else
+      Text := ShortCutToText(GetHotKey);
   end
   else
   begin
-    I := SysMetrics.tmHeight;
-    if I > Metrics.tmHeight then I := Metrics.tmHeight;
-    I := I div 4 + GetSystemMetrics(SM_CYBORDER) * 4;
+    // ·Ç²¶»ñÄ£Ê½ÏÂµÄÏÔÊ¾
+    if FVirtKey = 0 then
+      Text := ''
+    else
+      Text := ShortCutToText(GetHotKey);
   end;
-  Height := Metrics.tmHeight + I;
 end;
 
-procedure TCustomHotKey.ShortCutToHotKey(Value: TShortCut);
+function THotKey.ModifiersToShiftState: TShiftState;
 begin
-  FHotKey := Value and not (scShift + scCtrl + scAlt);
-  FModifiers := [];
-  if Value and scShift <> 0 then Include(FModifiers, hkShift);
-  if Value and scCtrl <> 0 then Include(FModifiers, hkCtrl);
-  if Value and scAlt <> 0 then Include(FModifiers, hkAlt);
+  Result := [];
+  if ssCtrl in FModifiers then Include(Result, ssCtrl);
+  if ssAlt in FModifiers then Include(Result, ssAlt);
+  if ssShift in FModifiers then Include(Result, ssShift);
 end;
 
-function TCustomHotKey.HotKeyToShortCut(Value: Longint): TShortCut;
+function THotKey.ShiftStateToModifiers(Shift: TShiftState): TShiftState;
 begin
-  Byte(FModifiers) := LoWord(HiByte(Value));
-  FHotKey := LoWord(LoByte(Value));
-  Result := FHotKey;
-  if hkShift in FModifiers then Inc(Result, scShift);
-  if hkCtrl in FModifiers then Inc(Result, scCtrl);
-  if hkAlt in FModifiers then Inc(Result, scAlt);
+  Result := [];
+  if ssCtrl in Shift then Include(Result, ssCtrl);
+  if ssAlt in Shift then Include(Result, ssAlt);
+  if ssShift in Shift then Include(Result, ssShift);
+end;
+
+function THotKey.GetModifiersText(Modifiers: TShiftState): string;
+begin
+  Result := '';
+  if ssCtrl in Modifiers then Result := Result + 'Ctrl+';
+  if ssAlt in Modifiers then Result := Result + 'Alt+';
+  if ssShift in Modifiers then Result := Result + 'Shift+';
+
+  // ÒÆ³ıÄ©Î²¶àÓàµÄ¼ÓºÅ
+  if (Result <> '') and (Result[Length(Result)] = '+') then
+    Delete(Result, Length(Result), 1);
+end;
+
+function THotKey.ShortCutToText(ShortCut: TShortCut): string;
+var
+  Key: Word;
+  Shift: TShiftState;
+begin
+  Menus.ShortCutToKey(ShortCut, Key, Shift);
+  Result := GetModifiersText(Shift) + '+' + VirtualKeyToString(Key);
+end;
+
+function THotKey.VirtualKeyToString(VKey: Word): string;
+begin
+  case VKey of
+    VK_F1: Result := 'F1';
+    VK_F2: Result := 'F2';
+    VK_F3: Result := 'F3';
+    VK_F4: Result := 'F4';
+    VK_F5: Result := 'F5';
+    VK_F6: Result := 'F6';
+    VK_F7: Result := 'F7';
+    VK_F8: Result := 'F8';
+    VK_F9: Result := 'F9';
+    VK_F10: Result := 'F10';
+    VK_F11: Result := 'F11';
+    VK_F12: Result := 'F12';
+    VK_F13: Result := 'F13';
+    VK_F14: Result := 'F14';
+    VK_F15: Result := 'F15';
+    VK_F16: Result := 'F16';
+    VK_F17: Result := 'F17';
+    VK_F18: Result := 'F18';
+    VK_F19: Result := 'F19';
+    VK_F20: Result := 'F20';
+    VK_F21: Result := 'F21';
+    VK_F22: Result := 'F22';
+    VK_F23: Result := 'F23';
+    VK_F24: Result := 'F24';
+
+    VK_INSERT:     Result := 'Ins';
+    VK_DELETE:     Result := 'Del';
+    VK_HOME:       Result := 'Home';
+    VK_END:        Result := 'End';
+    VK_PRIOR:      Result := 'PgUp';
+    VK_NEXT:       Result := 'PgDn';
+    VK_UP:         Result := '¡ü';
+    VK_DOWN:       Result := '¡ı';
+    VK_LEFT:       Result := '¡û';
+    VK_RIGHT:      Result := '¡ú';
+    VK_RETURN:     Result := 'Enter';
+    VK_ESCAPE:     Result := 'Esc';
+    VK_BACK:       Result := 'Back';
+    VK_SPACE:      Result := 'Space';
+    VK_TAB:        Result := 'Tab';
+    VK_CAPITAL:    Result := 'Caps';
+    VK_NUMLOCK:    Result := 'Num';
+    VK_SCROLL:     Result := 'Scroll';
+    VK_PAUSE:      Result := 'Pause';
+    VK_SNAPSHOT:   Result := 'PrtSc';
+    VK_APPS:       Result := 'Menu';
+
+    VK_NUMPAD0:    Result := 'Num0';
+    VK_NUMPAD1:    Result := 'Num1';
+    VK_NUMPAD2:    Result := 'Num2';
+    VK_NUMPAD3:    Result := 'Num3';
+    VK_NUMPAD4:    Result := 'Num4';
+    VK_NUMPAD5:    Result := 'Num5';
+    VK_NUMPAD6:    Result := 'Num6';
+    VK_NUMPAD7:    Result := 'Num7';
+    VK_NUMPAD8:    Result := 'Num8';
+    VK_NUMPAD9:    Result := 'Num9';
+    VK_DECIMAL:    Result := 'Num.';
+    VK_DIVIDE:     Result := 'Num/';
+    VK_MULTIPLY:   Result := 'Num*';
+    VK_SUBTRACT:   Result := 'Num-';
+    VK_ADD:        Result := 'Num+';
+
+    VK_OEM_COMMA:  Result := ',';
+    VK_OEM_PERIOD: Result := '.';
+    VK_OEM_MINUS:  Result := '-';
+    VK_OEM_PLUS:   Result := '+';
+
+    0:             Result := '';
+
+  else
+    // ´¦Àí×ÖÄ¸ºÍÊı×Ö¼ü
+    if (VKey >= Ord('A')) and (VKey <= Ord('Z')) then
+      Result := Chr(VKey)
+    else if (VKey >= Ord('0')) and (VKey <= Ord('9')) then
+      Result := Chr(VKey)
+    else
+      Result := '[' + IntToStr(VKey) + ']'; // Î´Öª¼üÏÔÊ¾¼üÂë
+  end;
+end;
+
+procedure THotKey.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+  inherited KeyDown(Key, Shift);
+
+  if not FCapturing then Exit;
+
+  // ´¦ÀíÌØÊâ¼ü
+  case Key of
+    VK_SHIFT, VK_CONTROL, VK_MENU: // Shift, Ctrl, Alt
+    begin
+      FModifiers := ShiftStateToModifiers(Shift);
+      UpdateDisplay; // ÊµÊ±¸üĞÂĞŞÊÎ¼üÏÔÊ¾
+    end;
+
+    VK_ESCAPE:
+      EndCapture(True); // Cancel
+
+    VK_TAB:
+    begin
+      // ÔÊĞíTabÇĞ»»¿Ø¼ş
+      EndCapture(False);
+      inherited;
+    end;
+
+    else
+    begin
+      // ºöÂÔÎŞĞ§¼ü
+      if Key in [VK_CAPITAL, VK_NUMLOCK, VK_SCROLL] then
+        Exit;
+
+      // ±£´æ°´¼ü
+      FVirtKey := Key;
+      FModifiers := ShiftStateToModifiers(Shift);
+      EndCapture(False); // Confirm
+    end;
+  end;
+
+  Key := 0; // ×èÖ¹Ä¬ÈÏ´¦Àí
+end;
+
+procedure THotKey.KeyUp(var Key: Word; Shift: TShiftState);
+begin
+  inherited KeyUp(Key, Shift);
+
+  if not FCapturing then Exit;
+
+  // ¸üĞÂĞŞÊÎ¼ü×´Ì¬
+  if Key in [VK_SHIFT, VK_CONTROL, VK_MENU] then
+  begin
+    FModifiers := ShiftStateToModifiers(Shift);
+    UpdateDisplay; // ÊµÊ±¸üĞÂĞŞÊÎ¼üÏÔÊ¾
+  end;
+
+  Key := 0; // ×èÖ¹Ä¬ÈÏ´¦Àí
+end;
+
+procedure THotKey.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+  if not FCapturing and Focused then
+    StartCapture;
 end;
 
 end.

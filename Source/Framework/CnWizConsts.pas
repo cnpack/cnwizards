@@ -177,11 +177,11 @@ resourcestring
 {$ENDIF}
 {$ENDIF}
 
-  SCnWizOnlineHelpUrl = 'http://help.cnpack.org/cnwizards/';
+  SCnWizOnlineHelpUrl = 'https://help.cnpack.org/cnwizards/';
 
   // CnWizUpgrade
-  SCnWizDefUpgradeURL = 'http://upgrade.cnpack.org/cnwizards/upgrade.php';
-  SCnWizDefNightlyBuildUrl = 'http://upgrade.cnpack.org/cnwizards/latest/';
+  SCnWizDefUpgradeURL = 'https://upgrade.cnpack.org/cnwizards/upgrade.php';
+  SCnWizDefNightlyBuildUrl = 'https://upgrade.cnpack.org/cnwizards/latest/';
   SCnWizUpgradeVersion = 'Ver %s Build %s';
 
   // CnMessageBoxWizard
