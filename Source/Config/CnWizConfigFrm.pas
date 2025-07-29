@@ -282,7 +282,7 @@ begin
       CnDesignEditorMgr.CompEditors[I].Active;
     lbDesignEditors.Items.AddObject(CnDesignEditorMgr.CompEditors[I].Name, CnDesignEditorMgr.CompEditors[I]);
   end;
-  if lbDesignEditors.Count > 0 then
+  if lbDesignEditors.Items.Count > 0 then
     lbDesignEditors.ItemIndex := 0;
   lbDesignEditorsClick(lbDesignEditors);
 
