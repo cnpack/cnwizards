@@ -153,7 +153,6 @@ end;
 
 procedure TCnTestEditorTextWizard.SubActionExecute(Index: Integer);
 var
-  U: UnicodeString;
   S: string;
   P, P1: TPoint;
   S1, S2: Integer;
@@ -196,11 +195,9 @@ begin
   end
   else if Index = FIdEditorInsertText then
   begin
-    U := '³Ô·¹Ë¯¾õ' + #13#10 + 'A Cup of µ°¸â';
-    S := Utf8Encode(U);
-    P := Editor.BlockBegin;
-    P1 := Editor.BlockEnd;
-    Editor.ReplaceText(P, P1, S);
+    S := 'a := ''³Ô·¹Ë¯¾õ''' + #13#10 + 'b := ''A Cup of µ°¸â'';';
+    P := Editor.CursorTextXY;
+    Editor.ReplaceText(P, P, S);
   end;
 end;
 
