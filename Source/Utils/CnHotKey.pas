@@ -42,6 +42,12 @@ uses
   Windows, Menus;
 
 type
+  THKModifier = (hkShift, hkCtrl, hkAlt, hkExt);
+  THKModifiers = set of THKModifier;
+  THKInvalidKey = (hcNone, hcShift, hcCtrl, hcAlt, hcShiftCtrl,
+    hcShiftAlt, hcCtrlAlt, hcShiftCtrlAlt);
+  THKInvalidKeys = set of THKInvalidKey;
+
   THotKey = class(TCustomEdit)
   private
     FCapturing: Boolean;
@@ -49,6 +55,7 @@ type
     FModifiers: TShiftState;
     FOnChange: TNotifyEvent;
     FOriginalHotKey: TShortCut;
+    FInvalidKeys: THKInvalidKeys;
     procedure UpdateDisplay;
     procedure StartCapture;
     procedure EndCapture(Cancel: Boolean);
@@ -68,10 +75,13 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     property VirtKey: Word read FVirtKey;
-    property Modifiers: TShiftState read FModifiers;
   published
     property HotKey: TShortCut read GetHotKey write SetHotKey;
+    property InvalidKeys: THKInvalidKeys read FInvalidKeys write FInvalidKeys;
+    property Modifiers: TShiftState read FModifiers write FModifiers;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnEnter;
+    property OnExit;
     property Align;
     property Anchors;
     property BorderStyle;
@@ -126,8 +136,8 @@ begin
   FOriginalHotKey := GetHotKey;
   FVirtKey := 0;
   FModifiers := [];
-  Text := '';
-  Color := TColor($80FFFF);
+  // Text := '';
+  // Color := TColor($80FFFF);
 end;
 
 procedure THotKey.EndCapture(Cancel: Boolean);
@@ -135,7 +145,7 @@ begin
   if not FCapturing then Exit;
 
   FCapturing := False;
-  Color := clWindow;
+  // Color := clWindow;
 
   if Cancel then
     SetHotKey(FOriginalHotKey)

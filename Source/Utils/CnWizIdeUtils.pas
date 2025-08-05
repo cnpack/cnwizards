@@ -61,7 +61,8 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
+  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} PackageIntf, ComponentReg, {$ENDIF} {$ELSE}
+  {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
@@ -381,6 +382,9 @@ function IsIdeDesignForm(AForm: TCustomForm): Boolean;
 procedure BringIdeEditorFormToFront;
 {* 将源码编辑器设为活跃}
 
+procedure GetInstalledComponents(Packages, Components: TStrings);
+{* 取已安装的包和组件，参数允许为 nil（忽略）}
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -427,9 +431,6 @@ function CompileProject(AProject: IOTAProject): Boolean;
 
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
 {* 取环境设置中的 LibraryPath 内容}
-
-procedure GetInstalledComponents(Packages, Components: TStrings);
-{* 取已安装的包和组件，参数允许为 nil（忽略）}
 
 {$ENDIF}
 
@@ -1656,6 +1657,56 @@ begin
   end;
 end;
 
+// 取已安装的包和组件
+procedure GetInstalledComponents(Packages, Components: TStrings);
+{$IFNDEF STAND_ALONE}
+var
+{$IFDEF FPC}
+  Pkg: TIDEPackage;
+  Comp: TRegisteredComponent;
+{$ELSE}
+  PackSvcs: IOTAPackageServices;
+{$ENDIF}
+  I, J: Integer;
+{$ENDIF}
+begin
+  if Assigned(Packages) then
+    Packages.Clear;
+  if Assigned(Components) then
+    Components.Clear;
+{$IFNDEF STAND_ALONE}
+{$IFDEF FPC}
+  for I := 0 to PackageEditingInterface.GetPackageCount - 1 do
+  begin
+    Pkg := PackageEditingInterface.GetPackages(I);
+    if Assigned(Packages) then
+      Packages.Add(Pkg.Name);
+
+    if Assigned(Components) then
+    begin
+      for J := 0 to IDEComponentPalette.Comps.Count - 1 do
+      begin
+        Comp := IDEComponentPalette.Comps[J];
+        Components.Add(Comp.ComponentClass.ClassName);
+      end;
+    end;
+  end;
+{$ELSE}
+  QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
+  for I := 0 to PackSvcs.PackageCount - 1 do
+  begin
+    if Assigned(Packages) then
+      Packages.Add(PackSvcs.PackageNames[I]);
+    if Assigned(Components) then
+    begin
+      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
+        Components.Add(PackSvcs.ComponentNames[I, J]);
+    end;
+  end;
+{$ENDIF}
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -2087,30 +2138,6 @@ end;
 function GetCurrentCompilingProject: IOTAProject;
 begin
   Result := CnWizNotifierServices.GetCurrentCompilingProject;
-end;
-
-// 取已安装的包和组件
-procedure GetInstalledComponents(Packages, Components: TStrings);
-var
-  PackSvcs: IOTAPackageServices;
-  I, J: Integer;
-begin
-  QuerySvcs(BorlandIDEServices, IOTAPackageServices, PackSvcs);
-  if Assigned(Packages) then
-    Packages.Clear;
-  if Assigned(Components) then
-    Components.Clear;
-    
-  for I := 0 to PackSvcs.PackageCount - 1 do
-  begin
-    if Assigned(Packages) then
-      Packages.Add(PackSvcs.PackageNames[I]);
-    if Assigned(Components) then
-    begin
-      for J := 0 to PackSvcs.ComponentCount[I] - 1 do
-        Components.Add(PackSvcs.ComponentNames[I, J]);
-    end;
-  end;
 end;
 
 {$ENDIF}

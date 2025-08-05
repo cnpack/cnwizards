@@ -68,7 +68,11 @@ type
     BitBtn2: TBitBtn;
     BitBtn3: TBitBtn;
     procedure ResetActionExecute(Sender: TObject);
+{$IFDEF FPC}
+    procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
+{$ELSE}
     procedure ActionListUpdate(Action: TBasicAction; var Handled: Boolean);
+{$ENDIF}
     procedure btnHelpClick(Sender: TObject);
     procedure UpActionExecute(Sender: TObject);
     procedure DownActionExecute(Sender: TObject);
@@ -109,7 +113,8 @@ var
 
 implementation
 
-uses CnWizManager, CnWizConsts, CnWizClasses;
+uses
+  CnWizManager, CnWizConsts, CnWizClasses;
 
 {$R *.DFM}
 
@@ -171,8 +176,13 @@ begin
   InitMenusFromList(FMWizards);
 end;
 
+{$IFDEF FPC}
+procedure TCnMenuSortForm.ActionListUpdate(AAction: TBasicAction;
+  var Handled: Boolean);
+{$ELSE}
 procedure TCnMenuSortForm.ActionListUpdate(Action: TBasicAction;
   var Handled: Boolean);
+{$ENDIF}
 begin
   UpAction.Enabled := (lvMenuWizards.SelCount = 1)
     and (lvMenuWizards.Selected.Index > 0);
