@@ -57,6 +57,7 @@ type
     FIdEditorCurrentLine: Integer;
     FIdEditorSelection: Integer;
     FIdEditorInsertText: Integer;
+    FIdEditorSaveStream: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -112,6 +113,9 @@ begin
   FIdEditorInsertText := RegisterASubAction('CnLazEditorInsertText',
     'Test CnLazEditorInsertText', 0, 'Test CnLazEditorInsertText',
     'CnLazEditorInsertText');
+  FIdEditorSaveStream := RegisterASubAction('CnLazEditorSaveStream',
+    'Test CnLazEditorSaveStream', 0, 'Test CnLazEditorSaveStream',
+    'CnLazEditorSaveStream');
 end;
 
 function TCnTestEditorTextWizard.GetCaption: string;
@@ -158,6 +162,7 @@ var
   P, P1: TPoint;
   S1, S2: Integer;
   Editor: TSourceEditorInterface;
+  Stream: TMemoryStream;
 begin
   if not Active then Exit;
 
@@ -204,6 +209,16 @@ begin
     // CnOtaInsertTextToCurSource(S, ipCur);
     P := Editor.CursorTextXY;
     Editor.ReplaceText(P, P, S);
+  end
+  else if Index = FIdEditorSaveStream then
+  begin
+    Stream := TMemoryStream.Create;
+    try
+      CnGeneralSaveEditorToStream(nil, Stream);
+      CnDebugger.LogMemDump(Stream.Memory, Stream.Size);
+    finally
+      Stream.Free;
+    end;
   end;
 end;
 

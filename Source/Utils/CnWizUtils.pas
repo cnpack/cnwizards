@@ -1005,14 +1005,6 @@ function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryS
   D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
   不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
 
-function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
-  Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
-{* 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-  也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用。
-  如果是 MemoryStream，其 Memory 可直接转换成 PCnIdeTokenChar，同样是 Ansi/Wide/Wide
-  如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
-  需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
-
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
 procedure CnOtaSaveReaderToWideStream(EditReader: IOTAEditReader; Stream:
@@ -1298,6 +1290,23 @@ procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 {* 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn}
 
 {$ENDIF}
+
+{$IFDEF LAZARUS}
+
+function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False; CheckUtf8: Boolean = False): Boolean;
+{* Lazarus 下保存编辑器文本到流中，不支持 Ansi 模式。
+  CheckUtf8 为 True 时为 Utf8 格式带 #0，否则为 Utf16 格式带宽 #0}
+
+{$ENDIF}
+
+function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+  Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
+{* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
+  也就是 Ansi/Utf16/Utf16，Lazarus 下也返回 Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用。
+  如果是 MemoryStream，其 Memory 可直接转换成 PCnIdeTokenChar，同样是 Ansi/Wide/Wide
+  如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
+  需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
 
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile = nil;
@@ -7848,7 +7857,7 @@ end;
 
 // 保存编辑器文本到流中
 function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
+  FromCurrPos: Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
 var
   IPos: Integer;
   PreSize: Integer;
@@ -7888,7 +7897,7 @@ end;
 
 // 保存当前编辑器文本到流中
 function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
-  Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
+  Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
 begin
   Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8, AlternativeWideChar);
 end;
@@ -7969,21 +7978,6 @@ begin
   end;
 {$ENDIF}
   Result := Stream.Size > 0;
-end;
-
-// 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-function CnGeneralSaveEditorToStream(Editor: IOTASourceEditor;
-  Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
-begin
-{$IFDEF UNICODE}
-  Result := CnOtaSaveEditorToStreamW(Editor, Stream, FromCurrPos);
-{$ELSE}
-  {$IFDEF IDE_STRING_ANSI_UTF8}
-  Result := CnOtaSaveEditorToWideStream(Editor, Stream, FromCurrPos);
-  {$ELSE}
-  Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
-  {$ENDIF}
-{$ENDIF}
 end;
 
 {$IFDEF UNICODE}
@@ -9580,6 +9574,69 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFDEF LAZARUS}
+
+function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
+  FromCurrPos: Boolean; CheckUtf8: Boolean): Boolean;
+var
+  Utf8Text: string;
+  Utf16Text: WideString;
+begin
+  Assert(Stream <> nil);
+  Result := False;
+
+  if Editor = nil then
+  begin
+    Editor := SourceEditorManagerIntf.ActiveEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  Utf8Text := Editor.SourceText;
+  if FromCurrPos then
+    Utf8Text := Copy(Utf8Text, Editor.SelStart, MaxInt);
+
+  if Length(Utf8Text) > 0 then
+  begin
+    if CheckUtf8 then
+    begin
+      // 直接写入 Utf8
+      Stream.Write(Utf8Text[1], Length(Utf8Text) + 1);
+      Result := True;
+    end
+    else
+    begin
+      Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
+      if Length(Utf16Text) > 0 then
+      begin
+        Stream.Write(Utf16Text[1], (Length(Utf16Text) + 1) * SizeOf(WideChar));
+        Result := True;
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
+
+// 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
+function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+  Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
+begin
+{$IFDEF LAZARUS}
+  Result := CnLazSaveEditorToStream(Editor, Stream, FromCurrPos);
+{$ELSE}
+{$IFDEF UNICODE}
+  Result := CnOtaSaveEditorToStreamW(Editor, Stream, FromCurrPos);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnOtaSaveEditorToWideStream(Editor, Stream, FromCurrPos);
+  {$ELSE}
+  Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
+  {$ENDIF}
+{$ENDIF}
+{$ENDIF}
+end;
 
 procedure FormCallBack(Sender: TObject);
 begin
