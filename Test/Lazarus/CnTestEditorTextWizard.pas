@@ -39,7 +39,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon, SrcEditorIntf;
+  IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon, CnWideStrings,
+  SrcEditorIntf;
 
 type
 
@@ -195,7 +196,12 @@ begin
   end
   else if Index = FIdEditorInsertText then
   begin
+    // 注意 S 的内容随本源文件编码变化而变化，如果是 Utf8 则无需转换，因为 Lazarus 需要 Utf8
     S := 'a := ''吃饭睡觉''' + #13#10 + 'b := ''A Cup of 蛋糕'';';
+    CnDebugger.LogRawString(S);
+    S := CnAnsiToUtf8(S);
+    CnDebugger.LogRawString(S);
+    // CnOtaInsertTextToCurSource(S, ipCur);
     P := Editor.CursorTextXY;
     Editor.ReplaceText(P, P, S);
   end;

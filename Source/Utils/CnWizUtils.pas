@@ -908,8 +908,8 @@ type
 
 function CnOtaInsertTextToCurSource(const Text: string; InsertPos: TInsertPos
   = ipCur): Boolean;
-{* 插入一段文本到当前正在编辑的源文件中，返回成功标志。
-  注意插入多行文本时可能出现不必要的缩进，是 EditPosition.InsertText 的局限
+{* 插入一段文本到当前正在编辑的源文件中，返回成功标志。注意 Lazarus 下 Text 需要 Utf8 格式。
+   另外 Delphi 中插入多行文本时可能出现不必要的缩进，是 EditPosition.InsertText 的局限
  |<PRE>
    Text: string           - 文本内容
    InsertPos: TInsertPos  - 插入位置，默认为 ipCurr 当前位置

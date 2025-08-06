@@ -5,22 +5,28 @@
 **********************************************************************
 
                    Lazarus IDE编辑器文本格式与偏移说明
-                           Revision 1.0.0.0
+                           Revision 1.0.0.1
                        =========================
-                         作者：刘啸 2025.08.05
+                         作者：刘啸 2025.08.06
 
 
 Lazarus 的 IDE 接口文档较为缺乏，通过写部分测试插件单元，总结了编辑器文本及偏移相关的信息，以 4.0 或以上版本为准。
 
-Lazarus 的 SrcEditorIntf 单元提供了 SourceEditorManagerIntf 全局变量，可据此获得其 ActiveEditor 或根据 SourceEditorCount 遍历所有 SourceEditors，获得其代表一编辑器的 TSourceEditorInterface 实例。该实例有不少供操作编辑器文本的属性、方法，说明如下。
+首先，Lazarus 内部的 string 以 AnsiString 模式编译，从编辑器中获取到的文本大多为 Utf8 格式，但存放在 Ansi 格式的 string 中。而且特别要注意的是，Edit 这种标准控件，其 Text 属性也是 Utf8 格式，一个汉字占三个字节，这和 Delphi 无论是低版本的纯 AnsiString 还是高版本的 Utf16 格式的 UnicodeString 都是显著不同的。
 
-Lazarus 内部的 string 以 AnsiString 模式编译，从编辑器中获取到的文本大多为 Utf8 格式，但存放在 Ansi 格式的 string 中。
+如果代码里写死给 string 类型的变量赋值汉字，则汉字编码会随着源码文件的编码而变，当源码文件编码是 Utf8 时，这字符串也是 Utf8 格式。这点也和高版本的 Delphi 不同，高版本的 Delphi 里的字符串内容是不随源文件编码变化而变化的。
+
+如果把一个内容是 Ansi 编码的 string 转换成 UnicodeString，直接用 UnicodeString 进行强制类型转换是乱码的，必须先将其转换为 Utf8 格式才行。也就是说 UnicodeString 强制转换的类型必须是 Utf8 内容的 string，内容才能是合法的 Utf16。
+
+Lazarus 的 SrcEditorIntf 单元提供了 SourceEditorManagerIntf 全局变量，可据此获得其 ActiveEditor 或根据 SourceEditorCount 遍历所有 SourceEditors，获得其代表一编辑器的 TSourceEditorInterface 实例。该实例有不少供操作编辑器文本的属性、方法，说明如下。
 
 Lazarus 状态栏上显示的光标行、列值均以 1 开始，列宽是 Ansi 模式，也就是汉字占两列，英文数字等占一列。
 
 TSourceEditorInterface 的 CursorTextXY 属性能获取光标在文本中所在的当前列行位置，均以 1 开始，但它的列是 Utf8 的列，也就是说碰上一个汉字会增加 3 列。
 
 针对选择区，TSourceEditorInterface 的 BlockStart 和 BlockEnd 分别代表选择区在文本中所在的列行位置，也以 1 开始，列也是 Utf8 的列。SelStart 和 SelEnd 则是线性位置，是以 1 开始的全 Utf8 偏移。也就是说选择区前面的汉字会因为编码成 Utf8 而影响 SelStart 和 SelEnd 的值。
+
+插入文字或替换文字时，ReplaceText 方法的参数也要求是 Utf8 字符串，反倒和被插入的编辑器内的源码文件编码无关。
 
 既然内部 Utf8 了，我们的解析器适合将其转换为 UnicodeString 进行解析，避免转 AnsiString 导致丢字符。
 
