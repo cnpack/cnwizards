@@ -942,18 +942,20 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
-{$IFNDEF LAZARUS}
-
-{$IFNDEF NO_DELPHI_OTA}
-
-function CnGeneralGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
+  {$ELSE} IOTASourceEditor {$ENDIF} = nil): Integer;
 {* 与 CnGeneralSaveEditorToStream 且 FromCurrPos 为 False 时配合使用的、
   返回当前光标在 Stream 中的字符偏移量，0 开始，与 Stream 格式对应为 Ansi/Utf16/Utf16}
 
-function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
-{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
-  本来在 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
+function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
+  {$ELSE} IOTASourceEditor {$ENDIF} = nil): Integer;
+{* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下也为 Utf8
+  本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
+
+{$IFNDEF LAZARUS}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 指定编辑位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
@@ -1307,6 +1309,11 @@ function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInter
   如果是 MemoryStream，其 Memory 可直接转换成 PCnIdeTokenChar，同样是 Ansi/Wide/Wide
   如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
   需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
+
+function CnGeneralSaveEditorToUtf8Stream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+  Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
+{* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 Utf8，D567 还是不得不使用 Ansi。
+  也就是 Ansi/Utf8/Utf8，Lazarus 下也返回 Utf8，末尾均有结束字符 #0}
 
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile = nil;
@@ -3577,7 +3584,7 @@ begin
   Result := nil;
 end;
 
-// 取指定编辑器最前端的IOTAEditView接口
+// 取指定编辑器最前端的 IOTAEditView 接口
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView;
 var
   EditBuffer: IOTAEditBuffer;
@@ -7579,11 +7586,8 @@ begin
 {$ENDIF}
 end;
 
-{$IFNDEF LAZARUS}
-
-{$IFNDEF NO_DELPHI_OTA}
-
-function CnGeneralGetCurrLinearPos(SourceEditor: IOTASourceEditor = nil): Integer;
+function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
+  {$ELSE} IOTASourceEditor {$ENDIF}): Integer;
 {$IFDEF BDS}
 var
   Stream: TMemoryStream;
@@ -7599,7 +7603,7 @@ begin
 
   Stream := TMemoryStream.Create;
   try
-    CnGeneralSaveEditorToStream(SourceEditor, Stream);
+    CnGeneralSaveEditorToUtf8Stream(SourceEditor, Stream); // 返回 Stream 是 Utf8
     if Stream.Size <= 0 then
       Exit;
 
@@ -7617,11 +7621,27 @@ begin
 end;
 
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
-function CnOtaGetCurrLinearPos(SourceEditor: IOTASourceEditor): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
+  {$ELSE} IOTASourceEditor {$ENDIF}): Integer;
 var
+{$IFDEF LAZARUS}
+  Editor: TSourceEditorInterface;
+{$ELSE}
   IEditView: IOTAEditView;
   EditPos: TOTAEditPos;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  if not Assigned(SourceEditor) then
+    SourceEditor := SourceEditorManagerIntf.ActiveEditor;
+
+  if SourceEditor <> nil then
+  begin
+    Result := SourceEditor.SelStart;
+  end
+  else
+    Result := 0;
+{$ELSE}
   if not Assigned(SourceEditor) then
     SourceEditor := CnOtaGetCurrentSourceEditor;
   if SourceEditor.EditViewCount > 0 then
@@ -7634,7 +7654,12 @@ begin
   end
   else
     Result := 0;
+{$ENDIF}
 end;
+
+{$IFNDEF LAZARUS}
+
+{$IFNDEF NO_DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos;
   SourceEditor: IOTASourceEditor): Integer;
@@ -9635,6 +9660,16 @@ begin
   Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+end;
+
+function CnGeneralSaveEditorToUtf8Stream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+  Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
+begin
+{$IFDEF LAZARUS}
+  Result := CnLazSaveEditorToStream(Editor, Stream, FromCurrPos, True);
+{$ELSE}
+  Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
 {$ENDIF}
 end;
 
