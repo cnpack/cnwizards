@@ -43,6 +43,13 @@ uses
   CnWideCppParser;
 
 type
+{$IFDEF LAZARUS}
+  TCnIdeTokenString = UnicodeString; // UnicodeString for Utf8 Conversion
+  PCnIdeTokenChar = PWideChar;
+  TCnIdeTokenChar = WideChar;
+  TCnIdeStringList = TCnWideStringList;
+  TCnIdeTokenInt = Word;
+{$ELSE}
 {$IFDEF IDE_STRING_ANSI_UTF8}
   TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
   PCnIdeTokenChar = PWideChar;
@@ -60,9 +67,18 @@ type
   TCnIdeTokenInt = Byte;
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
   PCnIdeTokenInt = ^TCnIdeTokenInt;
 
-  // Ansi/Utf16/Utf16，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16
+  // Ansi/Utf16/Utf16/Utf16(Lazarus)，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16/Utf16(Lazarus)
+{$IFDEF LAZARUS}
+  TCnGeneralPasToken = TCnWidePasToken;
+  TCnGeneralCppToken = TCnWideCppToken;
+  TCnGeneralPasStructParser = TCnWidePasStructParser;
+  TCnGeneralCppStructParser = TCnWideCppStructParser;
+  TCnGeneralWidePasLex = TCnPasWideLex;
+  TCnGeneralWideBCBTokenList = TCnBCBWideTokenList;
+{$ELSE}
 {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
   TCnGeneralPasToken = TCnWidePasToken;
   TCnGeneralCppToken = TCnWideCppToken;
@@ -78,6 +94,7 @@ type
   TCnGeneralWidePasLex = TmwPasLex;
   TCnGeneralWideBCBTokenList = TBCBTokenList;
 {$ENDIF}
+{$ENDIF}
 
 {$IFDEF UNICODE}
   TCnGeneralPasLex = TCnPasWideLex;             // TCnGeneralPasLex 在 2005~2007 下仍用 TmwPasLex
@@ -87,9 +104,9 @@ type
   TCnGeneralBCBTokenList = TBCBTokenList;
 {$ENDIF}
 
-{$IFDEF STAND_ALONE}
+{$IFDEF NO_DELPHI_OTA}
 
-  // 独立运行时，把 ToolsAPI 里的一些基础定义搬移过来
+  // 独立运行或 Lazarus 中，把 ToolsAPI 里的一些基础定义搬移过来
 
   TOTAEditPos = packed record
     Col: SmallInt;       // 1 开始
@@ -100,6 +117,7 @@ type
     CharIndex: SmallInt; // 0 开始
     Line: Longint;       // 1 开始
   end;
+
 {$ENDIF}
 
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}

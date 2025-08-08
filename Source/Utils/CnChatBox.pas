@@ -51,7 +51,7 @@ interface
 
 uses
   Messages, Windows, SysUtils, Classes, Contnrs, Controls, Forms, Menus,
-  Graphics, StdCtrls, ImgList, ShellAPI, Dialogs;
+  {$IFDEF FPC} LCLType, {$ENDIF} Graphics, StdCtrls, ImgList, ShellAPI, Dialogs;
 
 type
   TCnChatMessageType = (cmtYou, cmtMe);
@@ -773,7 +773,11 @@ begin
   BaseColor := Color;
   FStartDraw := False;
   FSkip := False;
+{$IFDEF FPC}
+  BeginPaint(Handle, @lpPaint);
+{$ELSE}
   BeginPaint(Handle, lpPaint);
+{$ENDIF}
   with Canvas do
   begin
     if not FCalcOnly then
@@ -988,7 +992,11 @@ begin
       FillRect(FDownButtonRect);
     end;
   end;
+{$IFDEF FPC}
+  EndPaint(Handle, @lpPaint);
+{$ELSE}
   EndPaint(Handle, lpPaint);
+{$ENDIF}
 end;
 
 function TCnCustomChatBox.NeedDrawDownButton: Boolean;
@@ -1032,7 +1040,9 @@ begin
       end;
     end;
 
+{$IFNDEF FPC}
     SendCancelMode(nil);
+{$ENDIF}
     PopupMenu.PopupComponent := Self;
     if Pt.X < 0 then
       Pt := ClientToScreen(Point(0, 0));

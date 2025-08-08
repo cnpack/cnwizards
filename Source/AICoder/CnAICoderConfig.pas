@@ -640,8 +640,11 @@ begin
       PropInfo := PropList^[PropIdx];
       if PropInfo^.SetProc = nil then // 自身该属性不能写的跳过
         Continue;
-
+{$IFDEF FPC}
+      AKind := PropInfo^.PropType^.Kind;
+{$ELSE}
       AKind := PropInfo^.PropType^^.Kind;
+{$ENDIF}
       case AKind of
         tkInteger, tkChar, tkWChar, tkClass, tkEnumeration, tkSet:
           begin

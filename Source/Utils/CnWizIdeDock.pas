@@ -20,7 +20,7 @@
 
 {******************************************************************************}
 { Unit Note:                                                                   }
-{    This file is partly derived from GExperts 1.2                                    }
+{    This file is partly derived from GExperts 1.2                             }
 {                                                                              }
 { Original author:                                                             }
 {    GExperts, Inc  http://www.gexperts.org/                                   }
@@ -66,11 +66,16 @@ interface
 uses
   Windows, SysUtils, Classes, IniFiles, Forms, Controls, Menus, Messages,
   ActnList, ComCtrls, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
-  CnLangCollection, CnLangStorage, CnWizOptions, CnWizScaler,
+  CnLangCollection, CnLangStorage, CnWizOptions, CnWizScaler
+  {$IFDEF LAZARUS} , CnWizMultiLang {$ELSE}
   // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
-  DockForm;
+  , DockForm {$ENDIF};
 
 type
+
+{$IFDEF LAZARUS}
+  TCnIdeDockForm = class(TCnTranslateForm);
+{$ELSE}
 
 { TDummyPopupMenu }
 
@@ -179,7 +184,11 @@ type
 
 function IdeDockManager: IIdeDockManager;
 
+{$ENDIF}
+
 implementation
+
+{$IFNDEF LAZARUS}
 
 uses
 {$IFDEF DEBUG}
@@ -626,5 +635,6 @@ initialization
 finalization
   FreeAndNil(PrivateIdeDockManager);
 
+{$ENDIF}
 end.
 
