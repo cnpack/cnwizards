@@ -3517,7 +3517,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
-  {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 及以上的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 LongInt 改为 Integer
+  {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 及以上的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 Longint 改为 Integer
   {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S and above integrate Castalia.
 {$ENDIF}
 
@@ -3729,7 +3729,7 @@
 {$ENDIF}
 
 {$IFDEF COMPILER5}
-  {$DEFINE TSTREAM_LONGINT}              // D6 及以上的 TStream 是 Int64
+  {$DEFINE TSTREAM_LONGINT}              // D6 及以上的 TStream 的 Size 和 Position 是 Int64
 {$ENDIF}
 
 {$IFDEF BCB5}
