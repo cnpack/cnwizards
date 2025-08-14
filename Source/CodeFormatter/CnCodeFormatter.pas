@@ -40,6 +40,8 @@ unit CnCodeFormatter;
 *           如果语句内因为双斜杆注释导致下一行缩进错误，不保留换行时八成是 NeedPadding
 *           的位置计算时漏了该处，或 NeedPaddingAndUnIndent 结尾处需要反缩进时漏了
 *
+*           CodeGen.BackSpaceSpaceLineIndent 会删除已经输出的内容，使用时尤其要慎重
+*
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
 * 本 地 化：not test hell
@@ -232,11 +234,12 @@ type
   TCnBasePascalFormatter = class(TCnAbstractCodeFormatter)
   private
     FGoalType: TCnGoalType;
-    FNextBeginShouldIndent: Boolean; // 控制是否本 begin 必须换行即使设置为 SameLine
-    FStructStmtEmptyEnd: Boolean;    // 标记结构语句的结束语句是否是空语句，用来控制后面单个分号的位置
-    FStoreIdent: Boolean;            // 控制是否把标识符存入大小写控制的 HashMap 中供后文使用
+    FNextBeginShouldIndent: Boolean;  // 控制是否本 begin 必须换行即使设置为 SameLine
+    FStructStmtEmptyEnd: Boolean;     // 标记结构语句的结束语句是否是空语句，用来控制后面单个分号的位置
+    FStoreIdent: Boolean;             // 控制是否把标识符存入大小写控制的 HashMap 中供后文使用
     FIdentBackupListRef: TObjectList; // 指向当前用来存储备份 HashMap 中的内容的 ObjectList，元素是 TCnIdentBackupObj
     FIsSingleStatement: Boolean;
+    FStatementLBCount: Integer;                // 记录语句内部左括号数量以控制缩进
     procedure CheckAddIdentBackup(List: TObjectList; const Ident: string);
     procedure RestoreIdentBackup(List: TObjectList);
     function IsTokenAfterAttributesInSet(InTokens: TPascalTokenSet): Boolean;
@@ -1189,10 +1192,10 @@ begin
             FormatTypeParams;
         end;
 
-      tokLB, tokSLB: // [ ] ()
+      tokLB, tokSLB: // [  (
         begin
           { DONE: deal with index visit and function/procedure call}
-          IsB := (Scanner.Token = tokLB);
+          IsB := (Scanner.Token in [tokLB, tokSLB]);
 
           OldTab := FCurrentTab;
           try
@@ -1208,7 +1211,21 @@ begin
               if CnPascalCodeForRule.KeepUserLineBreak and FDotMakeLineBreak then
                 FCurrentTab := Tab(IndentForAnonymous)
               else
-                FCurrentTab := IndentForAnonymous;
+              begin
+                // 普通情况下，参数列表里再套参数列表，根据括号数量进行额外缩进，以做到以下 A 缩进的效果
+                // Call(
+                //   Test.Create(
+                //     A,
+                //     B
+                //   )
+                // );
+                if FStatementLBCount > 0 then
+                  FCurrentTab := Tab(FCurrentTab)
+                else
+                  FCurrentTab := IndentForAnonymous;
+              end;
+
+              Inc(FStatementLBCount);
             end;
 
             Match(Scanner.Token);
@@ -1630,7 +1647,9 @@ end;
   SetElement -> Expression ['..' Expression]
 }
 procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte;
- IndentForAnonymous: Byte);
+  IndentForAnonymous: Byte);
+var
+  OldTab: Integer;
 
   procedure FormatSetElement;
   begin
@@ -1642,8 +1661,11 @@ procedure TCnBasePascalFormatter.FormatSetConstructor(PreSpaceCount: Byte;
       FormatExpression(PreSpaceCount, IndentForAnonymous);
     end;
   end;
-  
+
 begin
+  OldTab := FCurrentTab;
+  FCurrentTab := Tab(FCurrentTab);
+
   Match(tokSLB);
   SpecifyElementType(pfetSetConstructor);
   try
@@ -1657,6 +1679,11 @@ begin
       MatchOperator(tokComma);
       FormatSetElement;
     end;
+    FCurrentTab := OldTab;
+
+    // 注意这句删俩空格，只有保留换行的情况下，Set 最后一个元素后的右中括号前换行时才有效
+    if CnPascalCodeForRule.KeepUserLineBreak then
+      FCodeGen.BackSpaceSpaceLineIndent(CnPascalCodeForRule.TabSpaceCount);
 
     Match(tokSRB);
   finally
@@ -2360,6 +2387,8 @@ begin
     Writeln;
   end;
 
+  FStatementLBCount := 0;
+
   // 允许语句以部分关键字开头，比如变量名等
   if Scanner.Token in SimpStmtTokens + DirectiveTokens + ComplexTokens +
     StmtKeywordTokens + CanBeNewIdentifierTokens then
@@ -2368,6 +2397,7 @@ begin
   begin
     FormatStructStmt(PreSpaceCount);
   end;
+  FStatementLBCount := 0;
   FDotMakeLineBreak := False; // 清除点号换行的标记
 end;
 
