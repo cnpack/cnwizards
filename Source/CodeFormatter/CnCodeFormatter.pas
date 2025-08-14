@@ -40,7 +40,8 @@ unit CnCodeFormatter;
 *           如果语句内因为双斜杆注释导致下一行缩进错误，不保留换行时八成是 NeedPadding
 *           的位置计算时漏了该处，或 NeedPaddingAndUnIndent 结尾处需要反缩进时漏了
 *
-*           CodeGen.BackSpaceSpaceLineIndent 会删除已经输出的内容，使用时尤其要慎重
+*           CodeGen 的 BackSpaceSpaceLineIndent 和 TrimLastEmptyLine
+*           会删除已经输出的内容，使用时尤其要慎重
 *
 * 开发平台：Win2003 + Delphi 5.0
 * 兼容测试：not test yet
@@ -2891,6 +2892,10 @@ begin
       Match(Scanner.Token);
       FormatTypedConstant(PreSpaceCount);
     end;
+
+    // 注意这句删俩空格，只有保留换行的情况下，数组最后一个元素后的右括号前换行时才有效
+    if CnPascalCodeForRule.KeepUserLineBreak then
+      FCodeGen.BackSpaceSpaceLineIndent(CnPascalCodeForRule.TabSpaceCount);
 
     Match(tokRB);
   finally
