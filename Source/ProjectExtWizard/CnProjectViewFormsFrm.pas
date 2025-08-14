@@ -730,8 +730,10 @@ begin
       end;
     mmAnywhere:
       begin
-        Result := (Pos(UpperMatch, UpperCase(DataList[DataListIndex])) > 0)
-         or (Pos(UpperMatch, UpperCase(Info.DfmInfo.Caption)) > 0);
+        if FMatchAnyWhereSepList = nil then
+          FMatchAnyWhereSepList := TStringList.Create;
+        Result := AnyWhereSepMatchStr(UpperMatch, DataList[DataListIndex], FMatchAnyWhereSepList, MatchedIndexes, False)
+         or AnyWhereSepMatchStr(UpperMatch,  UpperCase(Info.DfmInfo.Caption), FMatchAnyWhereSepList, nil, False);
       end;
     mmFuzzy:
       begin

@@ -238,7 +238,10 @@ begin
       end;
     mmAnywhere:
       begin
-        Result := (Pos(UpperCase(AMatchStr), UpperCase(DataList[DataListIndex])) > 0);
+        if FMatchAnyWhereSepList = nil then
+          FMatchAnyWhereSepList := TStringList.Create;
+        Result := AnyWhereSepMatchStr(AMatchStr, DataList[DataListIndex],
+          FMatchAnyWhereSepList, MatchedIndexes, False);
       end;
     mmFuzzy:
       begin

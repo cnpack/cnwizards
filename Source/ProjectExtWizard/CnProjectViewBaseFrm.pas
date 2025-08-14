@@ -27,7 +27,7 @@ unit CnProjectViewBaseFrm;
 * 备    注：保存与加载列宽时，部分高版本的 Delphi 在 HDPI 下会出现列宽计算错误，
 *           因而用了个 WindowProc 的 Hook 拦截 ListView 的列宽改变消息才保存，
 *           但 D12 下这个消息拦截不到，因而 D12 下只能接受可能有的列宽误差。
-* 开发平台：PWin2000Pro + Delphi 5.5
+* 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
 * 修改记录：2019.12.10 V1.2
@@ -217,6 +217,7 @@ type
     procedure ListViewWindowProc(var Message: TMessage);
   protected
     FRegExpr: TRegExpr;
+    FMatchAnyWhereSepList: TStringList;
     NeedInitProjectControls: Boolean;
     FProjectListSelectedAllProject: Boolean;
     ProjectList: TObjectList;     // 存储 ProjectInfo 的列表
@@ -285,6 +286,8 @@ type
     procedure SaveProjectSettings(Ini: TCustomIniFile; aSection: string);
   public
     constructor Create(AOwner: TComponent; ADataList: TStringList = nil); reintroduce;
+    destructor Destroy; override;
+
     procedure AfterConstruction; override;
 
     procedure SelectOpenedItem;
@@ -1139,7 +1142,7 @@ begin
     for I := 0 to DataList.Count - 1 do
     begin
       Indexes := nil;
-      if (AMatchMode = mmFuzzy) and (DataList.Objects[I] <> nil) and
+      if (AMatchMode in [mmAnywhere, mmFuzzy]) and (DataList.Objects[I] <> nil) and
         ObjectIsBaseElementInfo(DataList.Objects[I]) then
       begin
         TCnBaseElementInfo(DataList.Objects[I]).FuzzyScore := 0;
@@ -1221,17 +1224,39 @@ begin
   if CaseSensitive then
   begin
     case AMatchMode of
-      mmStart:    Result := Pos(AMatchStr, S) = 1;
-      mmAnywhere: Result := Pos(AMatchStr, S) > 0;
-      mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+      mmStart:
+        begin
+          Result := Pos(AMatchStr, S) = 1;
+        end;
+      mmAnywhere:
+        begin
+          if FMatchAnyWhereSepList = nil then
+            FMatchAnyWhereSepList := TStringList.Create;
+          Result := AnyWhereSepMatchStr(AMatchStr, S, FMatchAnyWhereSepList, MatchedIndexes, True);
+        end;
+      mmFuzzy:
+        begin
+          Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+        end;
     end
   end
   else
   begin
     case AMatchMode of
-      mmStart:    Result := Pos(UpperCase(AMatchStr), UpperCase(S)) = 1;
-      mmAnywhere: Result := Pos(UpperCase(AMatchStr), UpperCase(S)) > 0;
-      mmFuzzy:    Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+      mmStart:
+        begin
+          Result := Pos(UpperCase(AMatchStr), UpperCase(S)) = 1;
+        end;
+      mmAnywhere:
+        begin
+          if FMatchAnyWhereSepList = nil then
+            FMatchAnyWhereSepList := TStringList.Create;
+          Result := AnyWhereSepMatchStr(AMatchStr, S, FMatchAnyWhereSepList, MatchedIndexes, False);
+        end;
+      mmFuzzy:
+        begin
+          Result := FuzzyMatchStr(AMatchStr, S, MatchedIndexes);
+        end;
     end
   end;
 end;
@@ -1486,7 +1511,14 @@ begin
     end;
 
     // 绘制匹配文字
-    if MatchMode in [mmStart, mmAnywhere] then
+    if MatchMode = mmStart then
+    begin
+      if AStartOffset > 1 then
+        DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, nil, AStartOffset)
+      else
+        DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed);
+    end
+    else if (MatchMode = mmAnywhere) and ((MatchedIndexesRef = nil) or (MatchedIndexesRef.Count = 0)) then
     begin
       if AStartOffset > 1 then
         DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, nil, AStartOffset)
@@ -1494,7 +1526,12 @@ begin
         DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed);
     end
     else if MatchedIndexesRef <> nil then
-      DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexesRef)
+    begin
+for I := 0 to MatchedIndexesRef.Count - 1 do
+CnDebugger.LogInteger(Integer(MatchedIndexesRef[I]));
+cndebugger.LogSeparator;
+      DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexesRef);
+    end
     else
       Bmp.Canvas.TextOut(X, Y, Item.Caption);
 
@@ -1587,6 +1624,12 @@ end;
 procedure TCnProjectViewBaseForm.DoOpenSelect;
 begin
   OpenSelect;
+end;
+
+destructor TCnProjectViewBaseForm.Destroy;
+begin
+  FMatchAnyWhereSepList.Free;
+  inherited;
 end;
 
 { TCnBaseElementInfo }
