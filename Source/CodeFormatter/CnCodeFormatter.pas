@@ -4255,13 +4255,20 @@ procedure TCnBasePascalFormatter.FormatRecordConstant(PreSpaceCount: Byte);
 begin
   Match(tokLB);
 
-  // 保留换行时，右括号之前的上一行如果因为保留换行而多输出了空格缩进，此处要删除，以让下面的换行正确处理，避免多出来一行
+  // 保留换行时左括号后不能多出回车来
+  // 不保留换行时会自动回车因而下一行有缩进不能 TrimLastEmptyLine
   if CnPascalCodeForRule.KeepUserLineBreak then
-    FCodeGen.TrimLastEmptyLine;
-  CheckKeepLineBreakWriteln;
+    FCodeGen.TrimLastEmptyLine
+  else
+    CheckKeepLineBreakWriteln;
 
-  FormatRecordFieldConstant(Tab(PreSpaceCount));
-  if Scanner.Token = tokSemicolon then Match(Scanner.Token);
+  if CnPascalCodeForRule.KeepUserLineBreak then
+    FormatRecordFieldConstant() // 保留换行时不额外换行，因而内部避免多出缩进
+  else
+    FormatRecordFieldConstant(Tab(PreSpaceCount));
+
+  if Scanner.Token = tokSemicolon then
+    Match(Scanner.Token);
 
   while Scanner.Token in ([tokSymbol] + KeywordTokens + ComplexTokens) do // 标识符允许此等名字
   begin
@@ -4270,21 +4277,27 @@ begin
       FormatRecordFieldConstant()
     else
       FormatRecordFieldConstant(Tab(PreSpaceCount));
-    if Scanner.Token = tokSemicolon then Match(Scanner.Token);
+
+    if Scanner.Token = tokSemicolon then
+      Match(Scanner.Token);
   end;
 
   // 保留换行时，右括号之前的上一行如果因为保留换行而多输出了空格缩进，此处要删除，以让下面的换行正确处理，避免多出来一行
+  // 但现在改成均不换行，所以注释掉
   if CnPascalCodeForRule.KeepUserLineBreak then
   begin
-    FCodeGen.TrimLastEmptyLine;
-
+    // FCodeGen.TrimLastEmptyLine;
     // 右括号前源文件里如果有回车符，保留换行时会同样输出，此处不能用 Writeln 多换一行
-    CheckKeepLineBreakWriteln;
+    // CheckKeepLineBreakWriteln;
+
+    // 保留换行时不额外换行，因而内部避免多出缩进
+    Match(tokRB);
   end
   else
+  begin
     Writeln; // 不保留换行时，最后的右括号之前要换行
-
-  Match(tokRB, PreSpaceCount);
+    Match(tokRB, PreSpaceCount);
+  end;
 end;
 
 { RecordFieldConstant -> Ident ':' TypedConstant }
