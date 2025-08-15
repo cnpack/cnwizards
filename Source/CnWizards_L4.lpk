@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
-        <OtherUnitFiles Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Nonvisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards;Config;..\Test\Lazarus;AICoder"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -85,10 +85,6 @@
         <UnitName Value="CnWizUtils"/>
       </Item>
       <Item>
-        <Filename Value="..\..\cnvcl\Source\Common\CnRTL.pas"/>
-        <UnitName Value="CnRTL"/>
-      </Item>
-      <Item>
         <Filename Value="Misc\CnWizAbout.pas"/>
         <UnitName Value="CnWizAbout"/>
       </Item>
@@ -100,11 +96,36 @@
         <Filename Value="SimpleWizards\CnMessageBoxWizard.pas"/>
         <UnitName Value="CnMessageBoxWizard"/>
       </Item>
+      <Item>
+        <Filename Value="Config\CnWizConfigFrm.pas"/>
+        <UnitName Value="CnWizConfigFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="..\Test\Lazarus\CnTestEditorTextWizard.pas"/>
+        <UnitName Value="CnTestEditorTextWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizIdeDock.pas"/>
+        <UnitName Value="CnWizIdeDock"/>
+      </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderEngine.pas"/>
+        <UnitName Value="CnAICoderEngine"/>
+      </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderEngineImpl.pas"/>
+        <UnitName Value="CnAICoderEngineImpl"/>
+      </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderNetClient.pas"/>
+        <UnitName Value="CnAICoderNetClient"/>
+      </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderConfig.pas"/>
+        <UnitName Value="CnAICoderConfig"/>
+      </Item>
     </Files>
     <RequiredPkgs>
-      <Item>
-        <PackageName Value="dclCnPack_FPC3"/>
-      </Item>
       <Item>
         <PackageName Value="CnPack_FPC3"/>
       </Item>

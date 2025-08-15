@@ -10,8 +10,10 @@ interface
 uses
   CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut, 
   CnWizMenuAction, CnWizClasses, CnPasCodeParser, CnPasWideLex, 
-  CnWidePasParser, mPasLex, CnWizManager, CnWizIdeUtils, CnWizUtils, CnRTL, 
-  CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, LazarusPackageIntf;
+  CnWidePasParser, mPasLex, CnWizManager, CnWizIdeUtils, CnWizUtils, 
+  CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, 
+  CnTestEditorTextWizard, CnWizIdeDock, CnAICoderEngine, CnAICoderEngineImpl, 
+  CnAICoderNetClient, CnAICoderConfig, LazarusPackageIntf;
 
 implementation
 
