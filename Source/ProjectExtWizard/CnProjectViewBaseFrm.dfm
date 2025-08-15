@@ -242,10 +242,10 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
     Height = 348
     Align = alClient
     BevelOuter = bvNone
-    TabOrder = 4
+    TabOrder = 2
     object lvList: TListView
       Left = 0
-      Top = 66
+      Top = 0
       Width = 622
       Height = 348
       Align = alClient
@@ -278,7 +278,7 @@ inherited CnProjectViewBaseForm: TCnProjectViewBaseForm
       RowSelect = True
       SmallImages = dmCnSharedImages.Images
       SortType = stText
-      TabOrder = 1
+      TabOrder = 0
       ViewStyle = vsReport
       OnColumnClick = lvListColumnClick
       OnCustomDrawItem = lvListCustomDrawItem

@@ -468,17 +468,17 @@ procedure RegisterSymbolList(AClass: TCnSymbolListClass);
 
 const
   csDefScopeRate = 15;
-  csIdentFirstSet: TAnsiCharSet = Alpha;
-  csIdentCharSet: TAnsiCharSet = AlphaNumeric;
+  csIdentFirstSet: TAnsiCharSet = CN_ALPHA_CHARS;
+  csIdentCharSet: TAnsiCharSet = CN_ALPHANUMERIC;
   csCompDirectFirstSet: TAnsiCharSet = ['{'];
-  csCompDirectCharSet: TAnsiCharSet = ['$', '+', '-'] + AlphaNumeric;
+  csCompDirectCharSet: TAnsiCharSet = ['$', '+', '-'] + CN_ALPHANUMERIC;
   csCppCompDirectFirstSet: TAnsiCharSet = ['#'];
-  csCppCompDirectCharSet: TAnsiCharSet = AlphaNumeric;
+  csCppCompDirectCharSet: TAnsiCharSet = CN_ALPHANUMERIC;
   csCommentFirstSet: TAnsiCharSet = ['/'];
-  csCommentCharSet: TAnsiCharSet = ['/'] + AlphaNumeric;
+  csCommentCharSet: TAnsiCharSet = ['/'] + CN_ALPHANUMERIC;
   csJavaDocFirstSet: TAnsiCharSet = ['{'];
   csJavaDocTagFirstSet: TAnsiCharSet = ['@'];
-  csJavaDocCharSet: TAnsiCharSet = ['*', '-'] + AlphaNumeric;
+  csJavaDocCharSet: TAnsiCharSet = ['*', '-'] + CN_ALPHANUMERIC;
 
 {$ENDIF CNWIZARDS_CNINPUTHELPER}
 

@@ -4166,11 +4166,33 @@ begin
     Exit;
   end;
 
-  if AMatchMode in [mmStart, mmAnywhere] then
+  if AMatchMode = mmStart then
   begin
     // 因为不搜类名，所以要将偏移传出去
     Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart);
     StartOffset := Offset;
+  end
+  else if AMatchMode = mmAnywhere then
+  begin
+    if not StrContainsRegExpr(AMatchStr) and (Pos(' ', Trim(AMatchStr)) > 1) then
+    begin
+      // 非正则、且内部有空格，采用分开匹配机制
+      Result := AnyWhereSepMatchStr(AMatchStr, ProcName, FMatchAnyWhereSepList, MatchedIndexes, False);
+
+      // 因为不搜类名，所以查找到的 MatchedIndexes 要加上偏移
+      if Result and (Offset > 0) then
+      begin
+        Dec(Offset);
+        for I := 0 to MatchedIndexes.Count - 1 do
+          MatchedIndexes[I] := Pointer(Integer(MatchedIndexes[I]) + Offset);
+      end;
+    end
+    else
+    begin
+      // 因为不搜类名，所以要将偏移传出去
+      Result := RegExpContainsText(FRegExpr, ProcName, AMatchStr, AMatchMode = mmStart);
+      StartOffset := Offset;
+    end;
   end
   else
   begin

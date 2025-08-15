@@ -666,8 +666,8 @@ var
 begin
   Result := '';
   for I := 1 to Length(AName) do
-    if CharInSet(AName[I], Alpha) or (Result <> '') and
-      CharInSet(AName[I], AlphaNumeric) then
+    if CharInSet(AName[I], CN_ALPHA_CHARS) or (Result <> '') and
+      CharInSet(AName[I], CN_ALPHANUMERIC) then
       Result := Result + AName[I]; 
 end;
 

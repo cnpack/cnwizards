@@ -2827,9 +2827,9 @@ begin
       if Item.Kind in [skConstant..skClass] then
       begin
         if DelLeft then
-          CnOtaDeleteCurrTokenLeft(CalcFirstSet(Alpha, FPosInfo.IsPascal), CalcCharSet(AlphaNumeric, @FPosInfo))
+          CnOtaDeleteCurrTokenLeft(CalcFirstSet(CN_ALPHA_CHARS, FPosInfo.IsPascal), CalcCharSet(CN_ALPHANUMERIC, @FPosInfo))
         else
-          CnOtaDeleteCurrToken(CalcFirstSet(Alpha, FPosInfo.IsPascal), CalcCharSet(AlphaNumeric, @FPosInfo));
+          CnOtaDeleteCurrToken(CalcFirstSet(CN_ALPHA_CHARS, FPosInfo.IsPascal), CalcCharSet(CN_ALPHANUMERIC, @FPosInfo));
       end
       else
       begin

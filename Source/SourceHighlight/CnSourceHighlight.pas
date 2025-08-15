@@ -7126,12 +7126,12 @@ begin
   StartIndex := CharIndex;
   if not IsCppModule then
   begin
-    while (StartIndex > 0) and (Text[StartIndex] in AlphaNumeric) do
+    while (StartIndex > 0) and (Text[StartIndex] in CN_ALPHANUMERIC) do
       Dec(StartIndex);
   end
   else
   begin
-    while (StartIndex > 0) and (Text[StartIndex] in AlphaNumeric + ['{', '}']) do
+    while (StartIndex > 0) and (Text[StartIndex] in CN_ALPHANUMERIC + ['{', '}']) do
       Dec(StartIndex);
   end;
 
@@ -7139,8 +7139,8 @@ begin
   while EndIndex < Len do
   begin
     // 本来是找到非字母数字就跳出，但变成非字母数字，并且不是在首字母之前的
-    if (not (Text[EndIndex] in AlphaNumeric)) and not
-     ((EndIndex = CharIndex) and (Text[EndIndex + 1] in AlphaNumeric)) then
+    if (not (Text[EndIndex] in CN_ALPHANUMERIC)) and not
+     ((EndIndex = CharIndex) and (Text[EndIndex + 1] in CN_ALPHANUMERIC)) then
       Break;
     Inc(EndIndex);
   end;

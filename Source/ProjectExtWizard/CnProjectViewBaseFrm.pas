@@ -1527,9 +1527,6 @@ begin
     end
     else if MatchedIndexesRef <> nil then
     begin
-for I := 0 to MatchedIndexesRef.Count - 1 do
-CnDebugger.LogInteger(Integer(MatchedIndexesRef[I]));
-cndebugger.LogSeparator;
       DrawMatchText(Bmp.Canvas, edtMatchSearch.Text, Item.Caption, X, Y, clRed, MatchedIndexesRef);
     end
     else
