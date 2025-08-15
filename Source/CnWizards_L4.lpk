@@ -127,6 +127,9 @@
     </Files>
     <RequiredPkgs>
       <Item>
+        <PackageName Value="dclCnPack_FPC3"/>
+      </Item>
+      <Item>
         <PackageName Value="CnPack_FPC3"/>
       </Item>
       <Item>

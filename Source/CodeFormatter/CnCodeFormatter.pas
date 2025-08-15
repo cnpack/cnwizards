@@ -4252,14 +4252,17 @@ end;
 
 { RecordConstant -> '(' RecordFieldConstant/';'... ')' }
 procedure TCnBasePascalFormatter.FormatRecordConstant(PreSpaceCount: Byte);
+var
+  OldTab: Integer;
 begin
+  OldTab := FCurrentTab;
+  FCurrentTab := Tab(PreSpaceCount);
+
   Match(tokLB);
 
   // 保留换行时左括号后不能多出回车来
-  // 不保留换行时会自动回车因而下一行有缩进不能 TrimLastEmptyLine
-  if CnPascalCodeForRule.KeepUserLineBreak then
-    FCodeGen.TrimLastEmptyLine
-  else
+  // 不保留换行时会自动回车因而下一行需要有缩进不能 TrimLastEmptyLine
+  if not CnPascalCodeForRule.KeepUserLineBreak then
     CheckKeepLineBreakWriteln;
 
   if CnPascalCodeForRule.KeepUserLineBreak then
@@ -4282,13 +4285,14 @@ begin
       Match(Scanner.Token);
   end;
 
+  FCurrentTab := OldTab;
+
   // 保留换行时，右括号之前的上一行如果因为保留换行而多输出了空格缩进，此处要删除，以让下面的换行正确处理，避免多出来一行
   // 但现在改成均不换行，所以注释掉
   if CnPascalCodeForRule.KeepUserLineBreak then
   begin
-    // FCodeGen.TrimLastEmptyLine;
-    // 右括号前源文件里如果有回车符，保留换行时会同样输出，此处不能用 Writeln 多换一行
-    // CheckKeepLineBreakWriteln;
+    // 注意这句删俩空格，只有保留换行的情况下，最后一个参数后的右括号前换行时才有效
+    FCodeGen.BackSpaceSpaceLineIndent(CnPascalCodeForRule.TabSpaceCount);
 
     // 保留换行时不额外换行，因而内部避免多出缩进
     Match(tokRB);
@@ -6495,7 +6499,7 @@ end;
 
 function TCnAbstractCodeFormatter.CalcNeedPadding: Boolean;
 begin
-  Result := (FElementType in [pfetExpression, pfetEnumList,pfetArrayConstant,
+  Result := (FElementType in [pfetExpression, pfetEnumList, pfetArrayConstant,
     pfetSetConstructor, pfetFormalParameters, pfetUsesList, pfetFieldDecl, pfetClassField,
     pfetThen, pfetDo, pfetExprListRightBracket, pfetFormalParametersRightBracket,
     pfetRecVarFieldListRightBracket, pfetIfAfterElse])

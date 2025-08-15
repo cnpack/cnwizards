@@ -727,8 +727,10 @@ var
       Exit;
 
     for I := 1 to Length(S) do
+    begin
       if not (S[I] in [' ', #09, #13, #10]) then
         Exit;
+    end;
 
     Result := True;
     I := LastDelimiter(#10, S);
@@ -744,10 +746,12 @@ var
     if Length(S) > 0 then
     begin
       for I := 1 to Length(S) do
+      begin
         if S[I] = ' ' then
           Inc(Result)
         else
           Exit;
+      end;
     end;
   end;
 
