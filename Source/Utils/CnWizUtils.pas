@@ -942,6 +942,8 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
+{$IFNDEF STAND_ALONE}
+
 function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
   {$ELSE} IOTASourceEditor {$ENDIF} = nil): Integer;
 {* 与 CnGeneralSaveEditorToStream 且 FromCurrPos 为 False 时配合使用的、
@@ -952,6 +954,8 @@ function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInter
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下也为 Utf8
   本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -1302,6 +1306,8 @@ function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemory
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
@@ -1314,6 +1320,8 @@ function CnGeneralSaveEditorToUtf8Stream(Editor: {$IFDEF LAZARUS} TSourceEditorI
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 Utf8，D567 还是不得不使用 Ansi。
   也就是 Ansi/Utf8/Utf8，Lazarus 下也返回 Utf8，末尾均有结束字符 #0}
+
+{$ENDIF}
 
 function CnWizInputQuery(const ACaption, APrompt: string;
   var Value: string; Ini: TCustomIniFile = nil;
@@ -7586,6 +7594,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF STAND_ALONE}
+
 function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
   {$ELSE} IOTASourceEditor {$ENDIF}): Integer;
 {$IFDEF BDS}
@@ -7656,6 +7666,8 @@ begin
     Result := 0;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -9644,6 +9656,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 // 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
 function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
   Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
@@ -9672,6 +9686,8 @@ begin
   Result := CnOtaSaveEditorToStream(Editor, Stream, FromCurrPos, False);
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 procedure FormCallBack(Sender: TObject);
 begin
