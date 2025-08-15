@@ -42,7 +42,7 @@ ExeDescription=
 OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
-SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=
 DebugSourceDirs=
@@ -87,7 +87,7 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=4
-Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils
+Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils
 Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
 Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]

@@ -42,7 +42,7 @@ ExeDescription=
 OutputDir=..\..\Bin
 UnitOutputDir=..\..\Dcu
 PackageDLLOutputDir=
-SearchPath=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Nonvisual
+SearchPath=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\NonVisual
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=STAND_ALONE
 DebugSourceDirs=
@@ -87,8 +87,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=3
-Item0=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Nonvisual
-Item1=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Nonvisual
+Item0=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\NonVisual
+Item1=..\..\Source;..\..\Source\Framework;..\..\Source\MultiLang;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\NonVisual
 Item2=..\..\Source
 [HistoryLists\hlUnitOutputDirectory]
 Count=1

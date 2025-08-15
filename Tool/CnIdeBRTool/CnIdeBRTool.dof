@@ -87,8 +87,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=7
-Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\Source;..\..\Source\MultiLang;..\..\Source\Framework;..\..\Source\ThirdParty
-Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\Nonvisual;..\..\Source;..\..\Source\MultiLang;..\..\Source\Framework
+Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\Source;..\..\Source\MultiLang;..\..\Source\Framework;..\..\Source\ThirdParty
+Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\Source;..\..\Source\MultiLang;..\..\Source\Framework
 Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\Source;..\..\Source\MultiLang;..\..\Source\Framework
 Item3=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang;..\..\Source\Framework
 Item4=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\MultiLang;..\..\Source\MultiLang
