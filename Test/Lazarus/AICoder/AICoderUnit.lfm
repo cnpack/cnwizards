@@ -1,288 +1,296 @@
 object FormAITest: TFormAITest
   Left = 128
+  Height = 680
   Top = 84
   Width = 1064
-  Height = 680
   Caption = 'AI Coder Test'
+  ClientHeight = 680
+  ClientWidth = 1064
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
-  Font.Style = []
-  OldCreateOrder = False
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
-  TextHeight = 13
   object pgcAICoder: TPageControl
     Left = 8
+    Height = 620
     Top = 8
     Width = 1034
-    Height = 620
     ActivePage = tsHTTP
-    Anchors = [akLeft, akTop, akRight, akBottom]
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabIndex = 0
     TabOrder = 0
     object tsHTTP: TTabSheet
       Caption = 'HTTP Pool Test'
+      ClientHeight = 594
+      ClientWidth = 1026
       object lblTestProxy: TLabel
         Left = 128
+        Height = 13
         Top = 20
         Width = 29
-        Height = 13
         Caption = 'Proxy:'
       end
       object mmoHTTP: TMemo
         Left = 16
+        Height = 477
         Top = 56
-        Width = 982
-        Height = 503
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Width = 974
+        Anchors = [akTop, akLeft, akRight, akBottom]
         ReadOnly = True
         TabOrder = 0
       end
       object btnAddHttps: TButton
         Left = 16
+        Height = 25
         Top = 16
         Width = 97
-        Height = 25
         Caption = 'Add Many HTTPS'
         TabOrder = 1
         OnClick = btnAddHttpsClick
       end
       object edtTestProxy: TEdit
         Left = 168
+        Height = 21
         Top = 16
         Width = 121
-        Height = 21
         TabOrder = 2
       end
     end
     object tsAIConfig: TTabSheet
       Caption = 'AI Config Test'
+      ClientHeight = 594
+      ClientWidth = 1026
       ImageIndex = 1
       object btnAIConfigSave: TButton
         Left = 16
+        Height = 25
         Top = 16
         Width = 97
-        Height = 25
         Caption = 'AI Config Save'
         TabOrder = 0
         OnClick = btnAIConfigSaveClick
       end
       object btnAIConfigLoad: TButton
         Left = 136
+        Height = 25
         Top = 16
         Width = 97
-        Height = 25
         Caption = 'AI Config Load'
         TabOrder = 1
         OnClick = btnAIConfigLoadClick
       end
       object mmoConfig: TMemo
         Left = 16
+        Height = 477
         Top = 56
-        Width = 982
-        Height = 503
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Width = 974
+        Anchors = [akTop, akLeft, akRight, akBottom]
         ReadOnly = True
         TabOrder = 2
       end
     end
     object tsEngine: TTabSheet
       Caption = 'AI Engine Test'
+      ClientHeight = 594
+      ClientWidth = 1026
       ImageIndex = 2
       object lblAIName: TLabel
         Left = 144
+        Height = 13
         Top = 20
         Width = 44
-        Height = 13
         Caption = 'AI Name:'
       end
       object lblProxy: TLabel
         Left = 504
+        Height = 13
         Top = 20
         Width = 29
-        Height = 13
         Caption = 'Proxy:'
       end
       object lblMe: TLabel
         Left = 432
+        Height = 13
         Top = 56
         Width = 18
-        Height = 13
         Caption = 'Me:'
       end
       object btnLoadAIConfig: TButton
         Left = 16
+        Height = 25
         Top = 16
         Width = 105
-        Height = 25
         Caption = 'Load AI Config'
         TabOrder = 0
         OnClick = btnLoadAIConfigClick
       end
       object cbbAIEngines: TComboBox
         Left = 200
+        Height = 21
         Top = 16
         Width = 145
-        Height = 21
-        Style = csDropDownList
         ItemHeight = 13
+        Style = csDropDownList
         TabOrder = 1
         OnChange = cbbAIEnginesChange
       end
       object btnSaveAIConfig: TButton
         Left = 376
+        Height = 25
         Top = 16
         Width = 105
-        Height = 25
         Caption = 'Save AI Config'
         TabOrder = 2
         OnClick = btnSaveAIConfigClick
       end
       object btnExplainCode: TButton
         Left = 680
+        Height = 25
         Top = 16
         Width = 73
-        Height = 25
         Caption = 'Explain Code'
         TabOrder = 3
         OnClick = btnExplainCodeClick
       end
       object mmoAI: TMemo
         Left = 16
+        Height = 477
         Top = 56
         Width = 393
-        Height = 503
-        Anchors = [akLeft, akTop, akBottom]
+        Anchors = [akTop, akLeft, akBottom]
         ReadOnly = True
-        ScrollBars = ssVertical
         TabOrder = 4
       end
       object edtProxy: TEdit
         Left = 544
+        Height = 21
         Top = 16
         Width = 121
-        Height = 21
         TabOrder = 5
       end
       object pnlAIChat: TPanel
         Left = 424
+        Height = 445
         Top = 88
-        Width = 574
-        Height = 471
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Width = 566
+        Anchors = [akTop, akLeft, akRight, akBottom]
         BevelOuter = bvNone
+        ParentBackground = False
         TabOrder = 6
       end
       object btnReviewCode: TButton
         Left = 768
+        Height = 25
         Top = 16
         Width = 73
-        Height = 25
         Caption = 'Review Code'
         TabOrder = 7
         OnClick = btnReviewCodeClick
       end
       object chkMarkDown: TCheckBox
         Left = 944
-        Top = 20
-        Width = 81
         Height = 17
+        Top = 20
+        Width = 72
         Caption = 'MarkDown'
         TabOrder = 8
         OnClick = chkMarkDownClick
       end
       object btnModelList: TButton
         Left = 856
+        Height = 25
         Top = 16
         Width = 73
-        Height = 25
         Caption = 'Model List'
         TabOrder = 9
         OnClick = btnModelListClick
       end
       object edtChatMessage: TEdit
         Left = 456
+        Height = 21
         Top = 56
         Width = 545
-        Height = 21
         TabOrder = 10
         OnKeyPress = edtChatMessageKeyPress
       end
     end
     object tsChat: TTabSheet
       Caption = 'Chat'
+      ClientHeight = 594
+      ClientWidth = 1026
       ImageIndex = 3
       object pnlChat: TPanel
         Left = 16
+        Height = 477
         Top = 56
-        Width = 982
-        Height = 503
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Width = 974
+        Anchors = [akTop, akLeft, akRight, akBottom]
         BevelOuter = bvNone
+        ParentBackground = False
         TabOrder = 0
       end
       object btnAddInfo: TButton
         Left = 16
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Caption = 'Add Info'
         TabOrder = 1
         OnClick = btnAddInfoClick
       end
       object btnAddMyMsg: TButton
         Left = 112
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Caption = 'Add My Msg'
         TabOrder = 2
         OnClick = btnAddMyMsgClick
       end
       object btnAddYouMsg: TButton
         Left = 208
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Caption = 'Add Your Msg'
         TabOrder = 3
         OnClick = btnAddYouMsgClick
       end
       object btnAddYouLongMsg: TButton
         Left = 304
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Caption = 'Your Long Msg'
         TabOrder = 4
         OnClick = btnAddYouLongMsgClick
       end
       object btnAddMyLongMsg: TButton
         Left = 400
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Caption = 'My Long Msg'
         TabOrder = 5
         OnClick = btnAddMyLongMsgClick
       end
       object btnAddYourStream: TButton
         Left = 496
+        Height = 25
         Top = 16
         Width = 97
-        Height = 25
         Caption = 'Your Stream Msg'
         TabOrder = 6
         OnClick = btnAddYourStreamClick
       end
       object btnChatFont: TButton
-        Left = 936
+        Left = 928
+        Height = 25
         Top = 16
         Width = 75
-        Height = 25
         Anchors = [akTop, akRight]
         Caption = 'Font'
         TabOrder = 7
@@ -328,11 +336,9 @@ object FormAITest: TFormAITest
     Top = 72
   end
   object dlgFont1: TFontDialog
-    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'MS Sans Serif'
-    Font.Style = []
     MinFontSize = 0
     MaxFontSize = 0
     Left = 900

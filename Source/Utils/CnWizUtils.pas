@@ -1297,6 +1297,8 @@ procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 {$IFDEF LAZARUS}
 
 function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
@@ -1305,8 +1307,6 @@ function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemory
   CheckUtf8 为 True 时为 Utf8 格式带 #0，否则为 Utf16 格式带宽 #0}
 
 {$ENDIF}
-
-{$IFNDEF STAND_ALONE}
 
 function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
@@ -9612,6 +9612,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
+
 {$IFDEF LAZARUS}
 
 function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
@@ -9655,8 +9657,6 @@ begin
 end;
 
 {$ENDIF}
-
-{$IFNDEF STAND_ALONE}
 
 // 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
 function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};

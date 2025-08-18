@@ -25,6 +25,7 @@ unit CnAICoderEngineImpl;
 * 单元名称：AI 辅助编码专家的引擎实现单元
 * 单元作者：CnPack 开发组
 * 备    注：就 Claude/Gemini 两个怪胎不支持 OpenAI 兼容格式
+*           注意本文件因编码非 Utf8 原因，其中的汉字字符串在 FPC 下应其要求改写成了 Utf8 硬编码
 * 开发平台：PWin7 + Delphi 5.01
 * 兼容测试：PWin7/10/11 + Delphi/C++Builder
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -182,14 +183,22 @@ end;
 
 class function TCnQWenAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E9#$80#$9A#$E4#$B9#$89#$E5#$8D#$83#$E9#$97#$AE;
+{$ELSE}
   Result := '通义千问';
+{$ENDIF}
 end;
 
 { TCnMoonshotAIEngine }
 
 class function TCnMoonshotAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E6#$9C#$88#$E4#$B9#$8B#$E6#$9A#$97#$E9#$9D#$A2;
+{$ELSE}
   Result := '月之暗面';
+{$ENDIF}
 end;
 
 { TCnChatGLMAIEngine }
@@ -201,7 +210,11 @@ end;
 
 class function TCnChatGLMAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E6#$99#$BA#$E8#$B0#$B1#$E6#$B8#$85#$E8#$A8#$80;
+{$ELSE}
   Result := '智谱清言';
+{$ENDIF}
 end;
 
 { TCnBaiChuanAIEngine }
@@ -234,7 +247,11 @@ end;
 
 class function TCnBaiChuanAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E7#$99#$BE#$E5#$B7#$9D#$E6#$99#$BA#$E8#$83#$BD;
+{$ELSE}
   Result := '百川智能';
+{$ENDIF}
 end;
 
 { TCnDeepSeekAIEngine }
@@ -253,7 +270,11 @@ end;
 
 class function TCnVolceAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E7#$81#$AB#$E5#$B1#$B1#$E5#$BC#$95#$E6#$93#$8E;
+{$ELSE}
   Result := '火山引擎';
+{$ENDIF}
 end;
 
 { TCnMistralAIAIEngine }
@@ -730,7 +751,11 @@ end;
 
 class function TCnHunYuanAIEngine.EngineName: string;
 begin
+{$IFDEF FPC}
+  Result := #$E8#$85#$BE#$E8#$AE#$AF#$E6#$B7#$B7#$E5#$85#$83;
+{$ELSE}
   Result := '腾讯混元';
+{$ENDIF}
 end;
 
 class function TCnHunYuanAIEngine.GetModelListURL(

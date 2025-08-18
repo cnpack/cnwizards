@@ -1,11 +1,15 @@
-unit AICoderUnit;
+ï»¿unit AICoderUnit;
+
+//{$IFDEF FPC}
+//  {$MODE Delphi}
+//{$ENDIF}
 
 interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
-  CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox, CnRichEdit,
+  CnChatBox, CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl,
   CnMarkDown, ExtCtrls, Menus, Clipbrd;
 
 type
@@ -87,7 +91,6 @@ type
     FChatItem: TCnChatItem;
     FAIChatBox: TCnChatBox;
     FAIChatItem: TCnChatItem;
-    FRender: TCnRichEditRender;
     FRtfStream: TMemoryStream;
     FStreamMsg: TCnChatMessage;
     FStreamCnt: Integer;
@@ -99,7 +102,7 @@ type
     procedure AIDrawItemText(Sender: TObject; Item: TCnChatItem; Canvas: TCanvas;
      var ItemTextRect: TRect; var DefaultDraw: Boolean);
 
-    // ÒÔÏÂÊÇ×ÛºÏ²âÊÔ
+    // ä»¥ä¸‹æ˜¯ç»¼åˆæµ‹è¯•
     procedure AIOnExplainCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnReviewCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
@@ -128,11 +131,11 @@ type
 
   TSendDataResponse = procedure(Success: Boolean; Thread: TCnPoolingThread;
     SendId: Integer; Data: TBytes) of object;
-  {* ÍøÂçÇëÇóµÄ»Øµ÷£¬¸æËß³É¹¦Óë·ñ£¬³É¹¦Ôò Data ÖĞÊÇÊı¾İ}
+  {* ç½‘ç»œè¯·æ±‚çš„å›è°ƒï¼Œå‘Šè¯‰æˆåŠŸä¸å¦ï¼ŒæˆåŠŸåˆ™ Data ä¸­æ˜¯æ•°æ®}
 
   TSendDataObject = class(TCnTaskDataObject)
-  {* ´ú±íÍøÂçÇëÇóµÄÈÎÎñÀà£¬ÓÉ·¢ÆğÕß¸ù¾İÍøÂçÇëÇó²ÎÊı´´½¨£¬²¢ÈÓ¸øÏß³Ì³Ø
-    ÓĞ½á¹ûÊ±Ïß³Ì»á»Øµ÷ OnResponse ÊÂ¼ş}
+  {* ä»£è¡¨ç½‘ç»œè¯·æ±‚çš„ä»»åŠ¡ç±»ï¼Œç”±å‘èµ·è€…æ ¹æ®ç½‘ç»œè¯·æ±‚å‚æ•°åˆ›å»ºï¼Œå¹¶æ‰”ç»™çº¿ç¨‹æ± 
+    æœ‰ç»“æœæ—¶çº¿ç¨‹ä¼šå›è°ƒ OnResponse äº‹ä»¶}
   private
     FURL: string;
     FSendId: Integer;
@@ -144,11 +147,11 @@ type
     property URL: string read FURL write FURL;
 
     property OnResponse: TSendDataResponse read FOnResponse write FOnResponse;
-    {* ÊÕµ½ÍøÂçÊı¾İÊ±µÄ»Øµ÷ÊÂ¼ş£¬×¢ÒâÊÇÔÚ×ÓÏß³ÌÖĞ±»µ÷ÓÃµÄ£¬´¦ÀíÊ±ÈçĞè Synchronize µ½Ö÷Ïß³ÌÔòĞè¼°Ê±±£´æÊı¾İ}
+    {* æ”¶åˆ°ç½‘ç»œæ•°æ®æ—¶çš„å›è°ƒäº‹ä»¶ï¼Œæ³¨æ„æ˜¯åœ¨å­çº¿ç¨‹ä¸­è¢«è°ƒç”¨çš„ï¼Œå¤„ç†æ—¶å¦‚éœ€ Synchronize åˆ°ä¸»çº¿ç¨‹åˆ™éœ€åŠæ—¶ä¿å­˜æ•°æ®}
   end;
 
   TResponseDataObject = class(TObject)
-  {* ÍøÂç»Øµ÷½á¹ûµÄ·â×°£¬ÓÃÓÚµİ¸øÖ÷Ïß³Ì¹©´¦Àí}
+  {* ç½‘ç»œå›è°ƒç»“æœçš„å°è£…ï¼Œç”¨äºé€’ç»™ä¸»çº¿ç¨‹ä¾›å¤„ç†}
   private
     FSendId: Integer;
     FData: TBytes;
@@ -166,7 +169,7 @@ var
 
 implementation
 
-{$R *.DFM}
+{$R *.lfm}
 
 uses
   CnDebug, CnAICoderNetClient;
@@ -188,7 +191,7 @@ begin
   FNetPool.ThreadsMinCount := 0;
   FNetPool.ThreadsMaxCount := 5;
   FNetPool.TerminateWaitTime := 2 * 1000;
-  FNetPool.ForceTerminate := True; // ÔÊĞíÇ¿ÖÆ½áÊø
+  FNetPool.ForceTerminate := True; // å…è®¸å¼ºåˆ¶ç»“æŸ
 
   FResQueue := TCnObjectQueue.Create(True);
 
@@ -218,14 +221,12 @@ begin
   FAIChatBox.ColorMe := BK_COLOR;
   FAIChatBox.PopupMenu := pmAIChat;
 
-  FRender := TCnRichEditRender.Create;
   FRtfStream := TMemoryStream.Create;
 end;
 
 procedure TFormAITest.FormDestroy(Sender: TObject);
 begin
   FRtfStream.Free;
-  FRender.Free;
   FAIConfig.Free;
   FNetPool.Free;
 
@@ -259,8 +260,8 @@ begin
     begin
       CnDebugger.LogMsgWithTag('*** HTTP Request OK Get Bytes ' + IntToStr(Stream.Size), DBG_TAG);
 
-      // ÕâÀïÒª°Ñ½á¹ûËÍ¸ø UI ¹©´¦Àí£¬½á¹û²»ÄÜÒÀÀµÓÚ±¾Ïß³Ì£¬ÒòÎª UI Ö÷Ïß³ÌµÄµ÷ÓÃ´¦Àí½á¹ûµÄÊ±¿ÌÊÇ²»È·¶¨µÄ£¬
-      // ¶øÀëÁË±¾·½·¨£¬Thread µÄ×´Ì¬¾ÍÎ´ÖªÁË£¬¸é Thread ÀïµÄÄÚÈİ¿ÉÄÜ»áÒò Thread ±»³Ø×Óµ÷¶È¶ø±»³åµô
+      // è¿™é‡Œè¦æŠŠç»“æœé€ç»™ UI ä¾›å¤„ç†ï¼Œç»“æœä¸èƒ½ä¾èµ–äºæœ¬çº¿ç¨‹ï¼Œå› ä¸º UI ä¸»çº¿ç¨‹çš„è°ƒç”¨å¤„ç†ç»“æœçš„æ—¶åˆ»æ˜¯ä¸ç¡®å®šçš„ï¼Œ
+      // è€Œç¦»äº†æœ¬æ–¹æ³•ï¼ŒThread çš„çŠ¶æ€å°±æœªçŸ¥äº†ï¼Œæ Thread é‡Œçš„å†…å®¹å¯èƒ½ä¼šå›  Thread è¢«æ± å­è°ƒåº¦è€Œè¢«å†²æ‰
       if Assigned(TSendDataObject(DataObj).OnResponse) then
         TSendDataObject(DataObj).OnResponse(True, Thread, TSendDataObject(DataObj).SendId, StreamToBytes(Stream));
     end
@@ -313,9 +314,9 @@ procedure TFormAITest.MyResponse(Success: Boolean; Thread: TCnPoolingThread;
 var
   Res: TResponseDataObject;
 begin
-  // ¸ÃÊÂ¼şÊÇÔÚ×ÓÏß³ÌÖĞµ÷ÓÃµÄ¡£
-  // ÈçĞè Synchronize È¥Ö÷Ïß³Ì£¬ÔòĞè±£´æ SendId ¼° Data ºóÈÓ¹ıÈ¥
-  // Õâ¸ö±£´æ¹À¼ÆµÃÓÃ¶ÓÁĞ£¬Õâ±ßÈë£¬Ö÷Ïß³ÌÈ¡
+  // è¯¥äº‹ä»¶æ˜¯åœ¨å­çº¿ç¨‹ä¸­è°ƒç”¨çš„ã€‚
+  // å¦‚éœ€ Synchronize å»ä¸»çº¿ç¨‹ï¼Œåˆ™éœ€ä¿å­˜ SendId åŠ Data åæ‰”è¿‡å»
+  // è¿™ä¸ªä¿å­˜ä¼°è®¡å¾—ç”¨é˜Ÿåˆ—ï¼Œè¿™è¾¹å…¥ï¼Œä¸»çº¿ç¨‹å–
   if Success and (Length(Data) > 0) then
   begin
     Res := TResponseDataObject.Create;
@@ -367,20 +368,20 @@ begin
   Option.URL := 'https://api.moonshot.cn/v1/chat/completions';
   Option.ApiKey := 'sk-*****************';
   Option.WebAddress := 'https://platform.moonshot.cn/console';
-  // Option.SystemMessage := 'ÄãÊÇÒ»Ãû Delphi ×¨¼Ò';
+  // Option.SystemMessage := 'ä½ æ˜¯ä¸€å Delphi ä¸“å®¶';
   Option.Temperature := 0.3;
-  // Option.ExplainCodePrompt := 'Çë½âÊÍÒÔÏÂ´úÂë£º';
+  // Option.ExplainCodePrompt := 'è¯·è§£é‡Šä»¥ä¸‹ä»£ç ï¼š';
 
   FAIConfig.AddOption(Option);
 
   Option := TCnAIEngineOption.Create;
-  Option.EngineName := '°¤¶öµÄÒıÇæ';
+  Option.EngineName := 'æŒ¨é¥¿çš„å¼•æ“';
   Option.Model := 'cnpack-noai-9.8';
   Option.URL := 'https://upgrade.cnpack.org/';
   Option.ApiKey := '{ACED92D0-6D09-4B88-BEA7-B963A8301CA4}';
-  // Option.SystemMessage := 'ÄãÊÇÒ»Ãû C++Builder ×¨¼Ò';
+  // Option.SystemMessage := 'ä½ æ˜¯ä¸€å C++Builder ä¸“å®¶';
   Option.Temperature := 0.3;
-  // Option.ExplainCodePrompt := 'Çë½âÊÍÒÔÏÂ´úÂë£º';
+  // Option.ExplainCodePrompt := 'è¯·è§£é‡Šä»¥ä¸‹ä»£ç ï¼š';
 
   FAIConfig.AddOption(Option);
   FAIConfig.ActiveEngine := 'Moonshot';
@@ -409,7 +410,7 @@ begin
   if SelectDirectory('', '', S) then
   begin
     CnAIEngineManager.LoadFromDirectory(IncludeTrailingBackslash(S), AI_FILE_FMT);
-    mmoAI.Lines.Add(CnUtf8ToAnsi(CnAIEngineOptionManager.SaveToJSON));
+    mmoAI.Lines.Add(CnAIEngineOptionManager.SaveToJSON);
 
     cbbAIEngines.Items.Clear;
     for I := 0 to CnAIEngineManager.EngineCount - 1 do
@@ -421,7 +422,7 @@ begin
     edtProxy.Text := CnAIEngineOptionManager.ProxyServer;
 
     for I := 0 to CnAIEngineManager.EngineCount - 1 do
-      mmoAI.Lines.Add(CnUtf8ToAnsi(CnAIEngineManager.Engines[I].Option.SaveToJSON));
+      mmoAI.Lines.Add(CnAIEngineManager.Engines[I].Option.SaveToJSON);
   end;
 end;
 
@@ -534,11 +535,11 @@ begin
   begin
     From := 'AI';
     FromType := cmtMe;
-    Text := 'µÍ´úÂë¿ª·¢·½Ê½¾ßÓĞ·á¸»µÄUI½çÃæ±à¼­¹¦ÄÜ£¬Í¨¹ı¿ÉÊÓ»¯½çÃæ¿ª·¢·½Ê½¿ìËÙ¹¹½¨²¼¾Ö£¬¿ÉÓĞĞ§½µµÍ¿ª·¢ÕßµÄÉÏÊÖ³É±¾²¢ÌáÉı¿ª·¢Õß¹¹½¨UI½çÃæµÄĞ§ÂÊ¡£ '
-      + 'ÓÆÓÆÃÜÎ÷Î÷±ÈãşÁ÷¾­Ä«Î÷¸ç£¬¾²¾²µØÁ÷ÌÊ×Å£¬×ÌÈó×Å·ğÂŞÀï´ïµÄÍÁµØ£¬ÑøÓıÁËÄÏ±±Õ½ÕùÖĞµÄ°ÙĞÕ¡£ÕâÀïË®Â½½»Í¨±ã½İ£¬¾­¼ÃÎÄ»¯·¢´ï¡£' + #13#10
-      + '¢Ù¼ÈÍùÓĞ¶Ô»úÌåÑÏÖØÓ°ÏìµÄ¼²²¡Ê·(ÈçĞÄË¥¡¢ÑÏÖØÄÔ¹£ËÀ¡¢ĞÄ¼¡¹£ËÀµÈ)£»¢Ú¼ÈÍùÓĞ¾«Éñ»òÉñ¾­·½Ãæ¼²²¡Ê·£¬»òÓĞ¾«ÉñÀàÒ©ÎïÒÀÀµÊ·£»'
-      + '¢Û½üÆÚ·şÓÃ¹ıÓ°Ïì´óÄÔÉñ¾­¹¦ÄÜµÄÒ©Îï£¬½ÓÊÜÏà¹Ø²âÊÔÇ°24 hÄÚÒûÓÃº¬¾Æ¾«ÀàÒûÆ·£»¢Ü¼ÈÍùÓĞÆäËûË¯ÃßÏà¹Ø¼²²¡Ê·£»'
-      + '¢İÒò¸÷ÖÖÔ­Òò²»ÄÜÅäºÏÑĞ¾¿Õß£»¢ŞÊı¾İÈ±Ê§»ò²»È«Õß¡£';
+    Text := 'ä½ä»£ç å¼€å‘æ–¹å¼å…·æœ‰ä¸°å¯Œçš„UIç•Œé¢ç¼–è¾‘åŠŸèƒ½ï¼Œé€šè¿‡å¯è§†åŒ–ç•Œé¢å¼€å‘æ–¹å¼å¿«é€Ÿæ„å»ºå¸ƒå±€ï¼Œå¯æœ‰æ•ˆé™ä½å¼€å‘è€…çš„ä¸Šæ‰‹æˆæœ¬å¹¶æå‡å¼€å‘è€…æ„å»ºUIç•Œé¢çš„æ•ˆç‡ã€‚ '
+      + 'æ‚ æ‚ å¯†è¥¿è¥¿æ¯”æ³¾æµç»å¢¨è¥¿å“¥ï¼Œé™é™åœ°æµæ·Œç€ï¼Œæ»‹æ¶¦ç€ä½›ç½—é‡Œè¾¾çš„åœŸåœ°ï¼Œå…»è‚²äº†å—åŒ—æˆ˜äº‰ä¸­çš„ç™¾å§“ã€‚è¿™é‡Œæ°´é™†äº¤é€šä¾¿æ·ï¼Œç»æµæ–‡åŒ–å‘è¾¾ã€‚' + #13#10
+      + 'â‘ æ—¢å¾€æœ‰å¯¹æœºä½“ä¸¥é‡å½±å“çš„ç–¾ç—…å²(å¦‚å¿ƒè¡°ã€ä¸¥é‡è„‘æ¢—æ­»ã€å¿ƒè‚Œæ¢—æ­»ç­‰)ï¼›â‘¡æ—¢å¾€æœ‰ç²¾ç¥æˆ–ç¥ç»æ–¹é¢ç–¾ç—…å²ï¼Œæˆ–æœ‰ç²¾ç¥ç±»è¯ç‰©ä¾èµ–å²ï¼›'
+      + 'â‘¢è¿‘æœŸæœç”¨è¿‡å½±å“å¤§è„‘ç¥ç»åŠŸèƒ½çš„è¯ç‰©ï¼Œæ¥å—ç›¸å…³æµ‹è¯•å‰24 hå†…é¥®ç”¨å«é…’ç²¾ç±»é¥®å“ï¼›â‘£æ—¢å¾€æœ‰å…¶ä»–ç¡çœ ç›¸å…³ç–¾ç—…å²ï¼›'
+      + 'â‘¤å› å„ç§åŸå› ä¸èƒ½é…åˆç ”ç©¶è€…ï¼›â‘¥æ•°æ®ç¼ºå¤±æˆ–ä¸å…¨è€…ã€‚';
   end;
 end;
 
@@ -593,12 +594,12 @@ end;
 
 procedure TFormAITest.chkMarkDownClick(Sender: TObject);
 begin
-  if chkMarkDown.Checked then
-  begin
-    FAIChatBox.OnGetItemTextRect := AIGetItemTextRect;
-    FAIChatBox.OnDrawItemText := AIDrawItemText;
-  end
-  else
+  //if False then
+  //begin
+  //  FAIChatBox.OnGetItemTextRect := AIGetItemTextRect;
+  //  FAIChatBox.OnDrawItemText := AIDrawItemText;
+  //end
+  //else
   begin
     FAIChatBox.OnGetItemTextRect := nil;
     FAIChatBox.OnDrawItemText := nil;
@@ -638,16 +639,16 @@ begin
       Item.Attachment := nil;
     end;
 
-    FRender.BackgroundColor := FAIChatBox.ColorYou;
-    Bmp := FRender.RenderRtfToBitmap(FRtfStream, ItemTextRect.Right - ItemTextRect.Left);
-    if Bmp <> nil then
-    begin
-      ItemTextRect.Bottom := ItemTextRect.Top + Bmp.Height;
-      ItemTextRect.Right := ItemTextRect.Left + Bmp.Width;
-      Item.Attachment := Bmp;
-
-      DefaultCalc := False;
-    end;
+    //FRender.BackgroundColor := FAIChatBox.ColorYou;
+    //Bmp := FRender.RenderRtfToBitmap(FRtfStream, ItemTextRect.Right - ItemTextRect.Left);
+    //if Bmp <> nil then
+    //begin
+    //  ItemTextRect.Bottom := ItemTextRect.Top + Bmp.Height;
+    //  ItemTextRect.Right := ItemTextRect.Left + Bmp.Width;
+    //  Item.Attachment := Bmp;
+    //
+    //  DefaultCalc := False;
+    //end;
   end;
 end;
 
@@ -664,7 +665,7 @@ begin
           Clipboard.AsText := TCnChatMessage(FAIChatItem).Text;
       end;
     except
-      ; // µ¯³öÊ±¼ÇÂ¼µÄÊó±êÏÂµÄ Item£¬ÍòÒ»Ö´ĞĞÊ±±»ÊÍ·ÅÁË£¬¾Í¿ÉÄÜ³öÒì³££¬Òª×¥×¡
+      ; // å¼¹å‡ºæ—¶è®°å½•çš„é¼ æ ‡ä¸‹çš„ Itemï¼Œä¸‡ä¸€æ‰§è¡Œæ—¶è¢«é‡Šæ”¾äº†ï¼Œå°±å¯èƒ½å‡ºå¼‚å¸¸ï¼Œè¦æŠ“ä½
     end;
   end;
 end;
@@ -698,7 +699,7 @@ begin
         ShowMessage('NO Code');
       end;
     except
-      ; // µ¯³öÊ±¼ÇÂ¼µÄÊó±êÏÂµÄ Item£¬ÍòÒ»Ö´ĞĞÊ±±»ÊÍ·ÅÁË£¬¾Í¿ÉÄÜ³öÒì³££¬Òª×¥×¡
+      ; // å¼¹å‡ºæ—¶è®°å½•çš„é¼ æ ‡ä¸‹çš„ Itemï¼Œä¸‡ä¸€æ‰§è¡Œæ—¶è¢«é‡Šæ”¾äº†ï¼Œå°±å¯èƒ½å‡ºå¼‚å¸¸ï¼Œè¦æŠ“ä½
     end;
   end;
 end;
@@ -727,19 +728,19 @@ begin
     if I2 > 0 then
     begin
       S := Copy(S, 1, I2 - 1);
-      I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // È¥³ıµÚÒ»¸ö ``` ºóµÄ delphi
+      I2 := Pos(DELPHI_PREFIX, LowerCase(S)); // å»é™¤ç¬¬ä¸€ä¸ª ``` åçš„ delphi
       if I2 = 1 then
         Delete(S, 1, Length(DELPHI_PREFIX));
 
-      I2 := Pos(PASCAL_PREFIX, LowerCase(S)); // È¥³ıµÚÒ»¸ö ``` ºóµÄ pascal
+      I2 := Pos(PASCAL_PREFIX, LowerCase(S)); // å»é™¤ç¬¬ä¸€ä¸ª ``` åçš„ pascal
       if I2 = 1 then
         Delete(S, 1, Length(PASCAL_PREFIX));
 
-      I2 := Pos(C_PREFIX, LowerCase(S));      // È¥³ıµÚÒ»¸ö ``` ºóµÄ C
+      I2 := Pos(C_PREFIX, LowerCase(S));      // å»é™¤ç¬¬ä¸€ä¸ª ``` åçš„ C
       if I2 = 1 then
         Delete(S, 1, Length(C_PREFIX));
 
-      I2 := Pos(CPP_PREFIX, LowerCase(S));    // È¥³ıµÚÒ»¸ö ``` ºóµÄ C++
+      I2 := Pos(CPP_PREFIX, LowerCase(S));    // å»é™¤ç¬¬ä¸€ä¸ª ``` åçš„ C++
       if I2 = 1 then
         Delete(S, 1, Length(CPP_PREFIX));
 
@@ -761,7 +762,7 @@ begin
           Clipboard.AsText := TCnChatMessage(FChatItem).Text;
       end;
     except
-      ; // µ¯³öÊ±¼ÇÂ¼µÄÊó±êÏÂµÄ Item£¬ÍòÒ»Ö´ĞĞÊ±±»ÊÍ·ÅÁË£¬¾Í¿ÉÄÜ³öÒì³££¬Òª×¥×¡
+      ; // å¼¹å‡ºæ—¶è®°å½•çš„é¼ æ ‡ä¸‹çš„ Itemï¼Œä¸‡ä¸€æ‰§è¡Œæ—¶è¢«é‡Šæ”¾äº†ï¼Œå°±å¯èƒ½å‡ºå¼‚å¸¸ï¼Œè¦æŠ“ä½
     end;
   end;
 end;
@@ -780,7 +781,7 @@ procedure TFormAITest.tmrSteamTimer(Sender: TObject);
 begin
   if FStreamMsg <> nil then
   begin
-    FStreamMsg.Text := FStreamMsg.Text + '³Ô·¹ºÈË® ';
+    FStreamMsg.Text := FStreamMsg.Text + 'åƒé¥­å–æ°´ ';
     Inc(FStreamCnt);
 
     if FStreamCnt >= 100 then
@@ -830,13 +831,13 @@ begin
       try
         FAIChatBox.GetRecentMessages(His, CnAIEngineOptionManager.HistoryCount);
 
-        // ·¢³öµÄÏûÏ¢
+        // å‘å‡ºçš„æ¶ˆæ¯
         Msg := FAIChatBox.Items.AddMessage;
         Msg.From := CnAIEngineManager.CurrentEngineName;
         Msg.Text := edtChatMessage.Text;
         Msg.FromType := cmtMe;
 
-        // »ØÀ´µÄÏûÏ¢
+        // å›æ¥çš„æ¶ˆæ¯
         Msg := FAIChatBox.Items.AddMessage;
         Msg.From := CnAIEngineManager.CurrentEngineName;
         Msg.FromType := cmtYou;
