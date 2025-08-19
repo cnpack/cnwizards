@@ -370,7 +370,8 @@ var
     SetLength(Result, ((Size div 16) + 1 ) * ( 3 * 16 + 2 + 16 + 2 ));
     FillChar(Result[1], Length(Result), 0);
 
-    DestP := 0; PrevLineStart := 0;
+    DestP := 0;
+    PrevLineStart := 0;
     for I := 0 to Size - 1 do
     begin
       AChar := (PAnsiChar(TCnNativeInt(AMem) + I))^;

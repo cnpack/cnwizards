@@ -62,9 +62,11 @@
       </Options>
     </Linking>
     <Other>
-      <CustomOptions Value="-dSTAND_ALONE"/>
-      <OtherDefines Count="1">
+      <CustomOptions Value="-dSTAND_ALONE
+-dDEBUG"/>
+      <OtherDefines Count="2">
         <Define0 Value="STAND_ALONE"/>
+        <Define1 Value="DEBUG"/>
       </OtherDefines>
     </Other>
   </CompilerOptions>

@@ -162,6 +162,7 @@ object FormAITest: TFormAITest
         Width = 393
         Anchors = [akTop, akLeft, akBottom]
         ReadOnly = True
+        ScrollBars = ssVertical
         TabOrder = 4
       end
       object edtProxy: TEdit
