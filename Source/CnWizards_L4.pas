@@ -13,7 +13,7 @@ uses
   CnWidePasParser, mPasLex, CnWizManager, CnWizIdeUtils, CnWizUtils, 
   CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, 
   CnTestEditorTextWizard, CnWizIdeDock, CnAICoderEngine, CnAICoderEngineImpl, 
-  CnAICoderNetClient, CnAICoderConfig, LazarusPackageIntf;
+  CnAICoderNetClient, CnAICoderConfig, CnAICoderChatFrm, LazarusPackageIntf;
 
 implementation
 

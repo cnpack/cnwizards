@@ -385,6 +385,9 @@ procedure BringIdeEditorFormToFront;
 procedure GetInstalledComponents(Packages, Components: TStrings);
 {* 取已安装的包和组件，参数允许为 nil（忽略）}
 
+function IsEditControl(AControl: TComponent): Boolean;
+{* 判断指定控件是否代码编辑器控件 }
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -455,9 +458,6 @@ function IsDesignWinControl(AControl: TWinControl): Boolean;
 type
   TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
     TControl; Context: Pointer) of object;
-
-function IsEditControl(AControl: TComponent): Boolean;
-{* 判断指定控件是否代码编辑器控件 }
 
 function IsXTabControl(AControl: TComponent): Boolean;
 {* 判断指定控件是否编辑器窗口的 TabControl 控件 }
@@ -1707,6 +1707,22 @@ begin
 {$ENDIF}
 end;
 
+// 判断指定控件是否代码编辑器控件
+function IsEditControl(AControl: TComponent): Boolean;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+var
+  CES: INTACodeEditorServices;
+{$ENDIF}
+begin
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if (AControl is TWinControl) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    Result := CES.IsIDEEditor(TWinControl(AControl));
+{$ELSE}
+  Result := (AControl <> nil) and AControl.ClassNameIs(SCnEditControlClassName)
+    and SameText(AControl.Name, SCnEditControlName);
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -2334,22 +2350,6 @@ begin
     not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
     ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
     (csDesigning in AControl.Owner.ComponentState);
-end;
-
-// 判断指定控件是否代码编辑器控件
-function IsEditControl(AControl: TComponent): Boolean;
-{$IFDEF USE_CODEEDITOR_SERVICE}
-var
-  CES: INTACodeEditorServices;
-{$ENDIF}
-begin
-{$IFDEF USE_CODEEDITOR_SERVICE}
-  if (AControl is TWinControl) and Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
-    Result := CES.IsIDEEditor(TWinControl(AControl));
-{$ELSE}
-  Result := (AControl <> nil) and AControl.ClassNameIs(SCnEditControlClassName)
-    and SameText(AControl.Name, SCnEditControlName);
-{$ENDIF}
 end;
 
 // 判断指定控件是否编辑器窗口的 TabControl 控件

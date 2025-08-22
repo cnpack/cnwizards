@@ -71,7 +71,8 @@ uses
   ComCtrls, TypInfo, Forms, {$IFNDEF LAZARUS} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  {$IFNDEF STAND_ALONE} ToolsAPI,  CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
+  {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} ToolsAPI, {$ENDIF}
+  CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
   {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
@@ -124,7 +125,7 @@ type
     TopRow: Integer;               // 视觉上第一行的行号
     BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     CurPos: TOTAEditPos;
 {$ENDIF}
     LineCount: Integer;            // 记录编辑器里的文字总行数
@@ -152,13 +153,13 @@ type
     FContext: TCnEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     FEditView: IOTAEditView;
 {$ENDIF}
     FGutterWidth: Integer;
     FGutterChanged: Boolean;
     FLastValid: Boolean;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure SetEditView(AEditView: IOTAEditView);
 {$ENDIF}
     function GetGutterWidth: Integer;
@@ -167,7 +168,7 @@ type
     function GetViewBottomLine: Integer;
     function GetTopEditor: TControl;
   public
-    constructor Create(AEditControl: TControl {$IFNDEF STAND_ALONE}; AEditView: IOTAEditView {$ENDIF});
+    constructor Create(AEditControl: TControl {$IFNDEF NO_DELPHI_OTA}; AEditView: IOTAEditView {$ENDIF});
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
     procedure NotifyIDEGutterChanged;
@@ -175,7 +176,7 @@ type
     property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     property EditView: IOTAEditView read FEditView;
 {$ENDIF}
     property GutterWidth: Integer read GetGutterWidth;
@@ -210,7 +211,7 @@ type
     LineNum, LogicLineNum: Integer) of object;
   {* EditControl 控件单行绘制通知事件，用户可以此进行自定义绘制}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
   TCnEditorPaintNotifier = procedure (EditControl: TControl; EditView: IOTAEditView)
     of object;
@@ -256,13 +257,13 @@ type
   private
     FBpPosY: Integer;
     FBpDeltaLine: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     FBpEditView: IOTAEditView;
 {$ENDIF}
     FBpEditControl: TControl;
   public
     property BpEditControl: TControl read FBpEditControl write FBpEditControl;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     property BpEditView: IOTAEditView read FBpEditView write FBpEditView;
 {$ENDIF}
     property BpPosY: Integer read FBpPosY write FBpPosY;
@@ -328,7 +329,7 @@ type
     FEditorBaseFont: TFont;
     procedure ScrollAndClickEditControl(Sender: TObject);
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     function CalcCharSize: Boolean;
     // 计算字符串尺寸，核心思想是从注册表里拿各种高亮设置计算，取其大者
 
@@ -341,7 +342,7 @@ type
 
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
       TControl; Context: Pointer);
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure UpdateEditControlList;
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TCnEditorObject): TCnEditorContext;
@@ -353,7 +354,7 @@ type
 {$ENDIF}
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure OnIdle(Sender: TObject);
@@ -368,7 +369,7 @@ type
     function GetHighlightCount: Integer;
     function GetHighlightName(Index: Integer): string;
     procedure ClearHighlights;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     procedure LoadFontFromRegistry;
 {$ENDIF}
     procedure ResetFontsFromBasic(ABasicFont: TFont);
@@ -398,14 +399,14 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure CheckNewEditor(EditControl: TControl {$IFNDEF STAND_ALONE}
+    procedure CheckNewEditor(EditControl: TControl {$IFNDEF NO_DELPHI_OTA}
       {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     function AddEditor(EditControl: TControl; View: IOTAEditView): Integer;
 {$ENDIF}
     procedure DeleteEditor(EditControl: TControl);
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     procedure Editor2BeginPaint(const Editor: TWinControl;
       const ForceFullRepaint: Boolean);
@@ -425,8 +426,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    function IndexOfEditor(EditControl: TControl): Integer; {$IFNDEF STAND_ALONE} overload; {$ENDIF}
-{$IFNDEF STAND_ALONE}
+    function IndexOfEditor(EditControl: TControl): Integer; {$IFNDEF NO_DELPHI_OTA} overload; {$ENDIF}
+{$IFNDEF NO_DELPHI_OTA}
     function IndexOfEditor(EditView: IOTAEditView): Integer; overload;
 {$ENDIF}
     function GetEditorObject(EditControl: TControl): TCnEditorObject;
@@ -447,7 +448,7 @@ type
     {* 返回编辑器行高和字宽 }
     function GetEditControlInfo(EditControl: TControl): TCnEditControlInfo;
     {* 返回编辑器当前信息 }
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     function GetEditControlCharHeight(EditControl: TControl): Integer;
     {* 返回编辑器内的字符高度也就是行高}
     function GetEditControlSupportsSyntaxHighlight(EditControl: TControl): Boolean;
@@ -456,7 +457,7 @@ type
     function GetEditControlCanvas(EditControl: TControl): TCanvas;
     {* 返回编辑器的画布属性}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     function GetTopMostEditControl: TControl;
     {* 返回当前最前端的 EditControl}
     function GetEditView(EditControl: TControl): IOTAEditView;
@@ -485,7 +486,7 @@ type
     {* 展开某行，行号必须是可折叠区的首行}
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 {$IFDEF BDS}
     function GetPointFromEdPos(EditControl: TControl; APos: TOTAEditPos): TPoint;
@@ -768,21 +769,21 @@ end;
 
 { TCnEditorObject }
 
-constructor TCnEditorObject.Create(AEditControl: TControl {$IFNDEF STAND_ALONE};
+constructor TCnEditorObject.Create(AEditControl: TControl {$IFNDEF NO_DELPHI_OTA};
   AEditView: IOTAEditView {$ENDIF});
 begin
   inherited Create;
   FLines := TList.Create;
   FEditControl := AEditControl;
   FEditWindow := TCustomForm(AEditControl.Owner);
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   SetEditView(AEditView);
 {$ENDIF}
 end;
 
 destructor TCnEditorObject.Destroy;
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   SetEditView(nil);
 {$ENDIF}
   FLines.Free;
@@ -791,7 +792,7 @@ end;
 
 function TCnEditorObject.GetGutterWidth: Integer;
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   if FGutterChanged and Assigned(FEditView) then
   begin
 {$IFDEF BDS}
@@ -831,7 +832,7 @@ begin
   Result := FLines.Count;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnEditorObject.SetEditView(AEditView: IOTAEditView);
 begin
@@ -961,7 +962,7 @@ type
   TGetTextAtLineProc = function(Self: TObject; LineNum: Integer): string; register;
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF WIN64}
   TGetOTAEditViewProc = function: IOTAEditView of object;
 {$ELSE}
@@ -972,7 +973,7 @@ type
   TSetEditViewProc = function(Self: TObject; EditView: TObject): Integer;
   TLineIsElidedProc = function(Self: TObject; LineNum: Integer): Boolean;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 {$IFDEF BDS}
   TPointFromEdPosProc = function(Self: TObject; const EdPos: TOTAEditPos;
@@ -1005,7 +1006,7 @@ var
   GetCanvas: TGetCanvasProc = nil;
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   GetOTAEditView: TGetOTAEditViewProc = nil;
   DoGetAttributeAtPos: TGetAttributeAtPosProc = nil;
 {$ENDIF}
@@ -1015,7 +1016,7 @@ var
   DoGetTextAtLine: TGetTextAtLineProc = nil;
   SetEditView: TSetEditViewProc = nil;
   LineIsElided: TLineIsElidedProc = nil;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF BDS}
   PointFromEdPos: TPointFromEdPosProc = nil;
   IndexPosToCurPosProc: TIndexPosToCurPosProc = nil;
@@ -1050,7 +1051,7 @@ begin
   Result := '[' + Result + ']';
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 {$IFNDEF USE_CODEEDITOR_SERVICE}
 
@@ -1293,7 +1294,7 @@ begin
 {$ENDIF}
 
   FEditorList := TObjectList.Create;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   InitEditControlHook;
 {$ENDIF}
 
@@ -1306,7 +1307,7 @@ begin
   FBackgroundColor := clWhite;
   FForegroundColor := clBlack;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
 {$ENDIF}
   CnWizNotifierServices.AddActiveFormNotifier(OnActiveFormChange);
@@ -1317,7 +1318,7 @@ begin
     WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE {$IFDEF IDE_SUPPORT_HDPI}, WM_DPICHANGED {$ENDIF}]);
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
@@ -1330,7 +1331,7 @@ end;
 destructor TCnEditControlWrapper.Destroy;
 var
   I: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   CES: INTACodeEditorServices;
 {$ENDIF}
@@ -1339,13 +1340,13 @@ begin
   for I := Low(Self.FFontArray) to High(FFontArray) do
     FFontArray[I].Free;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   CnWizNotifierServices.RemoveSourceEditorNotifier(OnSourceEditorNotify);
 {$ENDIF}
   CnWizNotifierServices.RemoveActiveFormNotifier(OnActiveFormChange);
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsgProc);
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 {$ENDIF}
@@ -1410,7 +1411,7 @@ begin
   inherited;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnEditControlWrapper.InitEditControlHook;
 {$IFDEF OTA_CODEEDITOR_SERVICE}
@@ -1555,10 +1556,10 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TCnEditControlWrapper.CheckNewEditor(EditControl: TControl
-  {$IFNDEF STAND_ALONE} {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
+  {$IFNDEF NO_DELPHI_OTA} {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
 var
   Idx: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   CES: INTACodeEditorServices;
   View: IOTAEditView;
@@ -1568,7 +1569,7 @@ begin
   Idx := IndexOfEditor(EditControl);
   if Idx >= 0 then
   begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1584,7 +1585,7 @@ begin
   end
   else
   begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1601,7 +1602,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.AddEditor(EditControl: TControl;
   View: IOTAEditView): Integer;
@@ -1626,7 +1627,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.GetEditorContext(Editor: TCnEditorObject):
   TCnEditorContext;
@@ -1693,7 +1694,7 @@ begin
   Result := -1;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.IndexOfEditor(EditView: IOTAEditView): Integer;
 var
@@ -2378,7 +2379,7 @@ var
   State: INTACodeEditorState;
 {$ENDIF}
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   {$IFDEF USE_CODEEDITOR_SERVICE}
   if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
   begin
@@ -2426,7 +2427,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.GetEditControlCharHeight(
   EditControl: TControl): Integer;
@@ -2629,7 +2630,7 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnEditControlWrapper.UpdateEditControlList;
 begin
@@ -2714,13 +2715,13 @@ end;
 
 procedure TCnEditControlWrapper.OnActiveFormChange(Sender: TObject);
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   UpdateEditControlList;
   CheckOptionDlg;
 {$ENDIF}
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.GetEditView(EditControl: TControl): IOTAEditView;
 var
@@ -2960,7 +2961,7 @@ begin
   if ActualLineNum <= 0 then
     Exit;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   if EditControl = nil then
     EditControl := CnOtaGetCurrentEditControl;
 {$ENDIF}
@@ -3005,7 +3006,7 @@ begin
     Item.BpDeltaLine := ActualLineNum - Obj.ViewLineNumber[0];
 
     Item.BpEditControl := EditControl;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     Item.BpEditView := Obj.EditView;
 {$ENDIF}
     Item.BpPosY := GetCharHeight div 2;
@@ -3266,12 +3267,12 @@ begin
     else
       ChangeType := [ctHScroll];
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     for I := 0 to EditorCount - 1 do
       DoEditorChange(Editors[I], ChangeType + CheckEditorChanges(Editors[I]));
 {$ENDIF}
   end
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
   else if (Msg.Msg = WM_DPICHANGED) and (Control = Application.MainForm) then
   begin
@@ -3450,7 +3451,7 @@ begin
   while FBpClickQueue.Count > 0 do
   begin
     Item := TCnBreakPointClickItem(FBpClickQueue.Pop);
-    if (Item = nil) or (Item.BpEditControl = nil) {$IFNDEF STAND_ALONE} or (Item.BpEditView = nil) {$ENDIF}
+    if (Item = nil) or (Item.BpEditControl = nil) {$IFNDEF NO_DELPHI_OTA} or (Item.BpEditView = nil) {$ENDIF}
        or (Item.BpDeltaLine = 0) then
        Continue;
 
@@ -3459,7 +3460,7 @@ begin
       CN_BP_CLICK_POS_X, Item.BpPosY]);
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     Item.BpEditView.Scroll(Item.BpDeltaLine, 0);
 {$ENDIF}
 
@@ -3467,7 +3468,7 @@ begin
     Item.BpEditControl.Perform(WM_LBUTTONDOWN, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
     Item.BpEditControl.Perform(WM_LBUTTONUP, 0, MakeLParam(CN_BP_CLICK_POS_X, Item.BpPosY));
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     // 滚回去
     Item.BpEditView.Scroll(-Item.BpDeltaLine, 0);
 {$ENDIF}
@@ -3713,7 +3714,7 @@ end;
 
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnEditControlWrapper.GetLineFromPoint(Point: TPoint;
   EditControl: TControl; EditView: IOTAEditView): Integer;
@@ -3740,7 +3741,7 @@ end;
 {$ENDIF}
 
 function TCnEditControlWrapper.GetTabWidth: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
 {$ENDIF}
@@ -3780,7 +3781,7 @@ var
 
 begin
   Result := 2;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3798,13 +3799,13 @@ begin
 end;
 
 function TCnEditControlWrapper.GetBlockIndent: Integer;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
 {$ENDIF}
 begin
   Result := 2;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3818,13 +3819,13 @@ begin
 end;
 
 function TCnEditControlWrapper.GetUseTabKey: Boolean;
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
   S: string;
 {$ENDIF}
 begin
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Options <> nil then
   begin
@@ -3851,7 +3852,7 @@ begin
   Result := FForegroundColor;
 end;
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnEditControlWrapper.LoadFontFromRegistry;
 const

@@ -140,11 +140,9 @@ type
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
 
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
     procedure ResetToolbarWithLargeIcons(AToolBar: TToolBar);
     {* 封装的根据是否使用大图标来调整普通窗体上部的工具栏的方法，也可用于编辑器工具栏
       前提是 AToolbar 已经设好了 Parent 并且 Scale 过}
-{$ENDIF}
 {$ENDIF}
 
     // 参数读写方法
@@ -957,14 +955,16 @@ begin
 end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
 
 procedure TCnWizOptions.ResetToolbarWithLargeIcons(AToolBar: TToolBar);
+{$IFNDEF LAZARUS}
 {$IFDEF IDE_SUPPORT_HDPI}
 var
   NeedNew: Boolean;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFNDEF LAZARUS}
   if AToolBar = nil then
     Exit;
 
@@ -1031,9 +1031,9 @@ begin
 
   if FUseLargeIcon and (AToolBar.Height <= AToolBar.ButtonHeight) then
     AToolBar.Height := AToolBar.ButtonHeight + csLargeToolbarHeightDelta;
+{$ENDIF}
 end;
 
-{$ENDIF}
 {$ENDIF}
 
 procedure TCnWizOptions.DumpToStrings(Infos: TStrings);

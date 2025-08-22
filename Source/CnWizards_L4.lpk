@@ -124,6 +124,10 @@
         <Filename Value="AICoder\CnAICoderConfig.pas"/>
         <UnitName Value="CnAICoderConfig"/>
       </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderChatFrm.pas"/>
+        <UnitName Value="CnAICoderChatFrm"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

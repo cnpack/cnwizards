@@ -461,15 +461,22 @@ function ObjectIsInheritedFromClass(AObj: TObject; const AClassName: string): Bo
 function FindControlByClassName(AParent: TWinControl; const AClassName: string): TControl;
 {* 使用字符串的方式判断控件是否包含指定类名的子控件，存在则返回最上面一个}
 
-{$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
-
 //==============================================================================
 // OTA 接口操作相关函数
 //==============================================================================
 
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 {* 查询输入的服务接口并返回一个指定接口实例，如果失败，返回 False}
+function CnOtaGetCurrentSelection: string;
+{* 取当前选择的文本}
+{$IFNDEF CNWIZARDS_MINIMUM}
+function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
+{* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
+{$ENDIF}
+
+{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
+
 function CnOtaGetEditBuffer: IOTAEditBuffer;
 {* 取 IOTAEditBuffer 接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
@@ -633,8 +640,6 @@ function CnOtaGetEditorFromModule(Module: IOTAModule; const FileName: string): I
 {* 返回指定模块指定文件名的编辑器}
 function CnOtaGetEditActionsFromModule(Module: IOTAModule = nil): IOTAEditActions;
 {* 返回指定模块的 EditActions }
-function CnOtaGetCurrentSelection: string;
-{* 取当前选择的文本}
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
 function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
@@ -648,11 +653,6 @@ function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boo
 function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用，不丢字符}
-
-{$IFNDEF CNWIZARDS_MINIMUM}
-function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
-{* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
-{$ENDIF}
 
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
@@ -955,6 +955,31 @@ function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInter
   本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
 
+procedure CnOtaInsertTextIntoEditor(const Text: string);
+{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
+  注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
+
+procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
+{* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
+
+procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream);
+{* 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理}
+
+procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
+  ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
+{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号分号。
+   Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
+
+procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream);
+{* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
+
+function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
+{* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos，也就是行 1 开始，列 0 开始}
+
 {$ENDIF}
 
 {$IFNDEF LAZARUS}
@@ -1078,10 +1103,6 @@ procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
   EditView: IOTAEditView = nil);
 {* 插入一行文本当前 IOTASourceEditor，Line 为行号，Text 为单行 }
 
-procedure CnOtaInsertTextIntoEditor(const Text: string);
-{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
-  注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
-
 procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
 {* 插入文本到当前 IOTASourceEditor，允许多行文本。
   可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditor 以避免转成 Ansi 而可能丢字符的问题}
@@ -1159,32 +1180,7 @@ function CnOtaConvertEditPosToLinearPos(EditViewPtr: Pointer; var EditPos: TOTAE
   out Position: Integer): Boolean;
 {* 将 EditPos 转换成为 EditWriter 所需的线性 Pos，内部封装 Unicode 环境下当前行宽字符偏差}
 
-function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
-{* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos}
-
 {$ENDIF}
-
-{$ENDIF}
-
-procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
-  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
-{* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
-
-procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
-  Stream: TMemoryStream);
-{* 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理}
-
-procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
-  ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
-{* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号分号。
-   Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
-
-procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream);
-{* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
-
-{$IFNDEF NO_DELPHI_OTA}
 
 procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
@@ -1292,10 +1288,10 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {* 加载指定的语言文件翻译窗体}
 {$ENDIF}
 
+{$ENDIF}
+
 procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 {* 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn}
-
-{$ENDIF}
 
 {$IFNDEF STAND_ALONE}
 
@@ -3508,12 +3504,9 @@ begin
   Result := nil;
 end;
 
-{$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
-
 //==============================================================================
 // OTA 接口操作相关函数
-// 以下大部分代码修改自 GxExperts Src 1.11
+// 以下部分代码修改自 GxExperts Src 1.11，并持续加入 Lazarus 的支持
 //==============================================================================
 
 // 查询输入的服务接口并返回一个指定接口实例，如果失败，返回假
@@ -3525,6 +3518,88 @@ begin
     CnDebugger.LogMsgWithType('Query Services Interface Fail: ' + GUIDToString(Intf), cmtError);
 {$ENDIF}
 end;
+
+// 取当前选择的文本
+function CnOtaGetCurrentSelection: string;
+{$IFNDEF NO_DELPHI_OTA}
+var
+  EditView: IOTAEditView;
+  EditBlock: IOTAEditBlock;
+{$ENDIF}
+begin
+  Result := '';
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor <> nil then
+    Result := SourceEditorManagerIntf.ActiveEditor.Selection;
+{$ELSE}
+  EditView := CnOtaGetTopMostEditView;
+  if not Assigned(EditView) then
+    Exit;
+
+  EditBlock := EditView.Block;
+  if Assigned(EditBlock) then
+    Result := EditBlock.Text;
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnUtf8ToAnsi2(Result);
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+end;
+
+{$IFNDEF CNWIZARDS_MINIMUM}
+
+function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
+{$IFNDEF NO_DELPHI_OTA}
+var
+  EditView: IOTAEditView;
+  R, C: Integer;
+{$ENDIF}
+begin
+  Result := False;
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  begin
+    if SourceEditorManagerIntf.ActiveEditor.SelStart <> SourceEditorManagerIntf.ActiveEditor.SelEnd then
+    begin;
+      if CursorStopAtEnd then
+        SourceEditorManagerIntf.ActiveEditor.SelStart := SourceEditorManagerIntf.ActiveEditor.SelEnd
+      else
+        SourceEditorManagerIntf.ActiveEditor.SelEnd := SourceEditorManagerIntf.ActiveEditor.SelStart;
+    end;
+  end;
+{$ELSE}
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+  if EditView.Block = nil then
+    Exit;
+
+  if CursorStopAtEnd then
+  begin
+    R := EditView.Block.EndingRow;
+    C := EditView.Block.EndingColumn;
+  end
+  else
+  begin
+    R := EditView.Block.StartingRow;
+    C := EditView.Block.StartingColumn;
+  end;
+
+  EditView.Block.Reset;
+  CnOtaGotoEditPosAndRepaint(EditView, R, C);
+  Result := True;
+{$ENDIF}
+{$ENDIF}
+end;
+
+{$ENDIF}
+
+{$IFNDEF LAZARUS}
+{$IFNDEF NO_DELPHI_OTA}
 
 // 取 IOTAEditBuffer 接口
 function CnOtaGetEditBuffer: IOTAEditBuffer;
@@ -5122,27 +5197,6 @@ begin
   Result := nil;
 end;
 
-// 取当前选择的文本
-function CnOtaGetCurrentSelection: string;
-var
-  EditView: IOTAEditView;
-  EditBlock: IOTAEditBlock;
-begin
-  Result := '';
-
-  EditView := CnOtaGetTopMostEditView;
-  if not Assigned(EditView) then
-    Exit;
-
-  EditBlock := EditView.Block;
-  if Assigned(EditBlock) then
-    Result := EditBlock.Text;
-
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  Result := CnUtf8ToAnsi2(Result);
-{$ENDIF}
-end;
-
 // 删除选中的文本
 procedure CnOtaDeleteCurrentSelection;
 var
@@ -5314,39 +5368,6 @@ begin
   end;
   Result := True;
 end;
-
-{$IFNDEF CNWIZARDS_MINIMUM}
-
-function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
-var
-  EditView: IOTAEditView;
-  R, C: Integer;
-begin
-  Result := False;
-  EditView := CnOtaGetTopMostEditView;
-  if EditView = nil then
-    Exit;
-
-  if EditView.Block = nil then
-    Exit;
-
-  if CursorStopAtEnd then
-  begin
-    R := EditView.Block.EndingRow;
-    C := EditView.Block.EndingColumn;
-  end
-  else
-  begin
-    R := EditView.Block.StartingRow;
-    C := EditView.Block.StartingColumn;
-  end;
-
-  EditView.Block.Reset;
-  CnOtaGotoEditPosAndRepaint(EditView, R, C);
-  Result := True;
-end;
-
-{$ENDIF}
 
 // 在编辑器中退格
 procedure CnOtaEditBackspace(Many: Integer);
@@ -7667,6 +7688,160 @@ begin
 {$ENDIF}
 end;
 
+procedure CnOtaInsertTextIntoEditor(const Text: string);
+{$IFNDEF NO_DELPHI_OTA}
+var
+  EditView: IOTAEditView;
+  Position: Longint;
+  EditPos: TOTAEditPos;
+{$ENDIF}
+begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  begin
+    SourceEditorManagerIntf.ActiveEditor.ReplaceText(SourceEditorManagerIntf.ActiveEditor.CursorTextXY,
+      SourceEditorManagerIntf.ActiveEditor.CursorTextXY, Text);
+  end;
+{$ELSE}
+  EditView := CnOtaGetTopMostEditView;
+  Assert(Assigned(EditView));
+  EditPos := EditView.CursorPos;
+
+  if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
+    Exit;
+
+{$IFDEF UNICODE}
+  CnOtaInsertTextIntoEditorAtPosW(Text, Position);
+{$ELSE}
+  CnOtaInsertTextIntoEditorAtPos(Text, Position);
+{$ENDIF}
+  EditView.MoveViewToCursor;
+  EditView.Paint;
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 封装的解析器解析 Pascal 代码的过程
+procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF LAZARUS}
+  Parser.ParseSource(PWideChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ELSE}
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseSource(PWideChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ELSE}
+  Parser.ParseSource(PAnsiChar(Stream.Memory), AIsDpr, AKeyOnly);
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理
+procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+  Stream: TMemoryStream);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF LAZARUS}
+  Parser.ParseString(PWideChar(Stream.Memory));
+{$ELSE}
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseString(PWideChar(Stream.Memory));
+{$ELSE}
+  Parser.ParseString(PAnsiChar(Stream.Memory));
+{$ENDIF}
+{$ENDIF}
+end;
+
+
+// 封装的解析器解析 Cpp 代码的过程
+procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream; CurrLine: Integer; CurCol: Integer;
+  ParseCurrent: Boolean; NeedRoundSquare: Boolean);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF LAZARUS}
+  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
+    CurrLine, CurCol, ParseCurrent, NeedRoundSquare);
+{$ELSE}
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
+    CurrLine, CurCol, ParseCurrent, NeedRoundSquare);
+{$ELSE}
+  Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol,
+    ParseCurrent, NeedRoundSquare);
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理
+procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+  Stream: TMemoryStream);
+begin
+  if (Parser = nil) or (Stream = nil) then
+    Exit;
+
+{$IFDEF LAZARUS}
+  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar));
+{$ELSE}
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar));
+{$ELSE}
+  Parser.ParseString(PAnsiChar(Stream.Memory), Stream.Size);
+{$ENDIF}
+{$ENDIF}
+end;
+
+function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
+var
+  Text: string;
+  LineNo: Integer;
+  CharIndex: Integer;
+begin
+  Result := False;
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  begin
+    Text := SourceEditorManagerIntf.ActiveEditor.CurrentLineText;
+    CharPos.Line := SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y;
+    CharPos.CharIndex := 0;
+
+    // Text 从 1 到 x - 1 的 Copy 子串
+    CharIndex := SourceEditorManagerIntf.ActiveEditor.CursorTextXY.X;
+    if CharIndex > 0 then
+    begin
+      Text := Copy(Text, 1, CharIndex - 1);
+      CharPos.CharIndex := Length(Utf8Decode(Text));
+    end;
+    Result := True;
+  end;
+{$ELSE}
+{$IFDEF UNICODE}
+  if not CnNtaGetCurrLineTextW(Text, LineNo, CharIndex) then
+    Exit;
+{$ELSE}
+  if not CnNtaGetCurrLineText(Text, LineNo, CharIndex) then
+    Exit;
+
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    // CharIndex is Utf8, convert to Utf16
+    Delete(Text, CharIndex + 1, MaxInt);
+    CharIndex := Length(UTF8Decode(Text));
+  {$ENDIF}
+{$ENDIF}
+  CharPos.Line := LineNo;
+  CharPos.CharIndex := CharIndex;
+  Result := True;
+{$ENDIF}
+end;
+
 {$ENDIF}
 
 {$IFNDEF LAZARUS}
@@ -8385,28 +8560,6 @@ begin
   end;
 end;
 
-procedure CnOtaInsertTextIntoEditor(const Text: string);
-var
-  EditView: IOTAEditView;
-  Position: Longint;
-  EditPos: TOTAEditPos;
-begin
-  EditView := CnOtaGetTopMostEditView;
-  Assert(Assigned(EditView));
-  EditPos := EditView.CursorPos;
-
-  if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
-    Exit;
-
-{$IFDEF UNICODE}
-  CnOtaInsertTextIntoEditorAtPosW(Text, Position);
-{$ELSE}
-  CnOtaInsertTextIntoEditorAtPos(Text, Position);
-{$ENDIF}
-  EditView.MoveViewToCursor;
-  EditView.Paint;
-end;
-
 procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
 var
   EditView: IOTAEditView;
@@ -8797,95 +8950,7 @@ begin
 {$ENDIF}
 end;
 
-function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
-var
-  Text: string;
-  LineNo: Integer;
-  CharIndex: Integer;
-begin
-  Result := False;
-{$IFDEF UNICODE}
-  if not CnNtaGetCurrLineTextW(Text, LineNo, CharIndex) then
-    Exit;
-{$ELSE}
-  if not CnNtaGetCurrLineText(Text, LineNo, CharIndex) then
-    Exit;
-
-  {$IFDEF IDE_STRING_ANSI_UTF8}
-    // CharIndex is Utf8, convert to Utf16
-    Delete(Text, CharIndex + 1, MaxInt);
-    CharIndex := Length(UTF8Decode(Text));
-  {$ENDIF}
 {$ENDIF}
-  CharPos.Line := LineNo;
-  CharPos.CharIndex := CharIndex;
-  Result := True;
-end;
-
-{$ENDIF}
-
-{$ENDIF}
-
-// 封装的解析器解析 Pascal 代码的过程
-procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
-  Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
-begin
-  if (Parser = nil) or (Stream = nil) then
-    Exit;
-
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseSource(PWideChar(Stream.Memory), AIsDpr, AKeyOnly);
-{$ELSE}
-  Parser.ParseSource(PAnsiChar(Stream.Memory), AIsDpr, AKeyOnly);
-{$ENDIF}
-end;
-
-// 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理
-procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
-  Stream: TMemoryStream);
-begin
-  if (Parser = nil) or (Stream = nil) then
-    Exit;
-
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseString(PWideChar(Stream.Memory));
-{$ELSE}
-  Parser.ParseString(PAnsiChar(Stream.Memory));
-{$ENDIF}
-end;
-
-// 封装的解析器解析 Cpp 代码的过程
-procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream; CurrLine: Integer; CurCol: Integer;
-  ParseCurrent: Boolean; NeedRoundSquare: Boolean);
-begin
-  if (Parser = nil) or (Stream = nil) then
-    Exit;
-
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseSource(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar),
-    CurrLine, CurCol, ParseCurrent, NeedRoundSquare);
-{$ELSE}
-  Parser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size, CurrLine, CurCol,
-    ParseCurrent, NeedRoundSquare);
-{$ENDIF}
-end;
-
-// 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理
-procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
-  Stream: TMemoryStream);
-begin
-  if (Parser = nil) or (Stream = nil) then
-    Exit;
-
-{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
-  Parser.ParseString(PWideChar(Stream.Memory), Stream.Size div SizeOf(WideChar));
-{$ELSE}
-  Parser.ParseString(PAnsiChar(Stream.Memory), Stream.Size);
-{$ENDIF}
-end;
-
-{$IFNDEF NO_DELPHI_OTA}
 
 // 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
 // 输出 CharPos，以备让 EditView 转换成 EditPos
@@ -9556,6 +9621,9 @@ begin
     Storage.Free;
   end;
 end;
+
+{$ENDIF}
+
 {$ENDIF}
 
 // 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn
@@ -9609,8 +9677,6 @@ begin
     Bmp.Free;
   end;
 end;
-
-{$ENDIF}
 
 {$IFNDEF STAND_ALONE}
 

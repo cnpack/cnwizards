@@ -41,8 +41,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles,ComCtrls, StdCtrls,
-  CnConsts, CnWizClasses, CnWizUtils,
+  {$IFDEF NO_DELPHI_OTA} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF}
+  IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
   CnFrmAICoderOption, CnWizMultiLang, CnWizManager;
 
@@ -187,13 +187,17 @@ begin
   inherited;
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
   EditControlWrapper.AddSysKeyDownNotifier(EditorSysKeyDown);
+{$IFNDEF NO_DELPHI_OTA}
   IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
     csAICoderChatForm);
+{$ENDIF}
 end;
 
 destructor TCnAICoderWizard.Destroy;
 begin
+{$IFNDEF NO_DELPHI_OTA}
   IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, csAICoderChatForm);
+{$ENDIF}
   EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
   EditControlWrapper.RemoveSysKeyDownNotifier(EditorSysKeyDown);
   FreeAndNil(CnAICoderChatForm);
@@ -383,6 +387,7 @@ begin
   inherited;
   if Old <> Active then
   begin
+{$IFNDEF NO_DELPHI_OTA}
     if Active then
     begin
       IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
@@ -393,6 +398,7 @@ begin
       IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, 'CnAICoderChatForm');
       FreeAndNil(CnAICoderChatForm);
     end;
+{$ENDIF}
   end;
 end;
 
@@ -619,7 +625,11 @@ begin
   if OnlyCreate then
     Exit;
 
+{$IFDEF LAZARUS}
+  CnAICoderChatForm.Visible := True;
+{$ELSE}
   CnAICoderChatForm.VisibleWithParent := True;
+{$ENDIF}
   CnAICoderChatForm.BringToFront;
 end;
 
@@ -702,7 +712,9 @@ var
   PIde: PCnIdeTokenChar;
   SL: TStringList;
   Mem: TMemoryStream;
+{$IFNDEF NO_DELPHI_OTA}
   View: IOTAEditView;
+{$ENDIF}
   P: TOTAEditPos;
   Msg: TCnChatMessage;
   PasParser: TCnGeneralPasStructParser;
@@ -711,9 +723,14 @@ var
   CharPos: TOTACharPos;
 begin
   // 收集本文件从开始到光标这行的内容，并发送，并编辑器接收回应
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor = nil then
+    Exit;
+{$ELSE}
   View := CnOtaGetTopMostEditView;
   if View = nil then
     Exit;
+{$ENDIF}
 
   S := '';
   Mem := nil;
@@ -728,8 +745,13 @@ begin
     CnGeneralSaveEditorToStream(nil, Mem);
 
     // 找光标外的最外层
+{$IFDEF LAZARUS}
+    CurIsPas := IsDprOrPas(SourceEditorManagerIntf.ActiveEditor.FileName) or IsInc(SourceEditorManagerIntf.ActiveEditor.FileName);
+    CurIsCpp := IsCppSourceModule(SourceEditorManagerIntf.ActiveEditor.FileName);
+{$ELSE}
     CurIsPas := IsDprOrPas(View.Buffer.FileName) or IsInc(View.Buffer.FileName);
     CurIsCpp := IsCppSourceModule(View.Buffer.FileName);
+{$ENDIF}
 
     // 解析
 
@@ -754,8 +776,13 @@ begin
     // 解析当前显示的源文件
     if CurIsPas then
     begin
+{$IFDEF LAZARUS}
+      CnPasParserParseSource(PasParser, Mem, IsDpr(SourceEditorManagerIntf.ActiveEditor.FileName)
+        or IsInc(SourceEditorManagerIntf.ActiveEditor.FileName), False);
+{$ELSE}
       CnPasParserParseSource(PasParser, Mem, IsDpr(View.Buffer.FileName)
         or IsInc(View.Buffer.FileName), False);
+{$ENDIF}
 
       // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
       CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
@@ -767,16 +794,25 @@ begin
     end
     else if CurIsCpp then
     begin
+{$IFDEF LAZARUS}
+      CnCppParserParseSource(CppParser, Mem, SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y,
+        SourceEditorManagerIntf.ActiveEditor.CursorTextXY.X, True, True);
+{$ELSE}
       CnCppParserParseSource(CppParser, Mem, View.CursorPos.Line,
         View.CursorPos.Col, True, True);
-
+{$ENDIF}
       if CppParser.BlockCloseToken <> nil then
         LastLine := CppParser.BlockCloseToken.LineNumber;
     end;
 
     PIde := PCnIdeTokenChar(Mem.Memory);
     SL.Text := string(PIde);
+{$IFDEF LAZARUS}
+    P.Line := SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y;
+    P.Col := SourceEditorManagerIntf.ActiveEditor.CursorTextXY.X;
+{$ELSE}
     P := View.CursorPos;
+{$ENDIF}
 
     // 如果没拿到，光标所在最外层的 Token 尾，则硬性搜索 end
     if (LastLine < 0) and (P.Line <= SL.Count) then
