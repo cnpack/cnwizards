@@ -138,7 +138,8 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnAICoderNetClient, CnAICoderConfig, CnCommon, CnIniStrUtils, CnWizUtils;
+  CnAICoderNetClient, CnAICoderConfig, CnCommon, CnIniStrUtils, CnWizUtils,
+  CnStrings;
 
 {$R *.DFM}
 
@@ -253,13 +254,13 @@ begin
 
       // 发出的消息
       Msg := FChatBox.Items.AddMessage;
-      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
       Msg.Text := mmoSelf.Lines.Text;
       Msg.FromType := cmtMe;
 
       // 回来的消息
       Msg := FChatBox.Items.AddMessage;
-      Msg.From := CnAIEngineManager.CurrentEngineName;
+      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
       Msg.FromType := cmtYou;
       Msg.Text := '...';
 

@@ -128,6 +128,10 @@
         <Filename Value="AICoder\CnAICoderChatFrm.pas"/>
         <UnitName Value="CnAICoderChatFrm"/>
       </Item>
+      <Item>
+        <Filename Value="AICoder\CnAICoderWizard.pas"/>
+        <UnitName Value="CnAICoderWizard"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

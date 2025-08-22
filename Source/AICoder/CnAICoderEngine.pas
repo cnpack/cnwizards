@@ -42,8 +42,8 @@ interface
 
 uses
   SysUtils, Classes, Contnrs, Windows, CnNative, CnContainers, CnJSON, CnWizConsts,
-  CnInetUtils, {$IFNDEF STAND_ALONE} CnWizOptions, {$ENDIF} CnAICoderConfig,
-  CnThreadPool, CnAICoderNetClient, CnHashMap, CnConsts;
+  CnInetUtils, CnWizOptions, CnAICoderConfig, CnThreadPool, CnAICoderNetClient,
+  CnHashMap, CnConsts;
 
 type
   TCnAIAnswerObject = class(TPersistent)
@@ -203,15 +203,14 @@ type
     function GetEngineByOption(Option: TCnAIEngineOption): TCnAIBaseEngine;
     {* 根据选项对象查找对应引擎}
 
-{$IFNDEF STAND_ALONE}
     procedure LoadFromWizOptions;
     {* 专家包的加载总入口，动态加载所有配置，内部会分辨不同目录}
     procedure SaveToWizOptions;
     {* 专家包的保存总入口，动态保存所有配置到用户目录}
-{$ENDIF}
 
     property CurrentEngineName: string read GetCurrentEngineName write SetCurrentEngineName;
-    {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎}
+    {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎。
+       注意在 FPC 下，该字符串编码是 Utf8}
     property CurrentIndex: Integer read FCurrentIndex write SetCurrentIndex;
     {* 当前活动引擎的索引号，供外界切换设置}
     property CurrentEngine: TCnAIBaseEngine read GetCurrentEngine;
@@ -416,8 +415,6 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
-
 procedure TCnAIEngineManager.LoadFromWizOptions;
 var
   I: Integer;
@@ -489,8 +486,6 @@ begin
     WizOptions.CheckUserFile(F);
   end;
 end;
-
-{$ENDIF}
 
 function TCnAIEngineManager.GetEngineByOption(
   Option: TCnAIEngineOption): TCnAIBaseEngine;

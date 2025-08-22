@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  {$IFDEF NO_DELPHI_OTA} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF} {$ENDIF}
   IniFiles,ComCtrls, StdCtrls, CnConsts, CnWizClasses, CnWizUtils,
   CnWizConsts, CnCommon, CnAICoderConfig, CnThreadPool, CnAICoderEngine,
   CnFrmAICoderOption, CnWizMultiLang, CnWizManager;
@@ -152,7 +152,7 @@ implementation
 
 uses
   CnWizOptions, CnAICoderNetClient, CnAICoderChatFrm, CnChatBox, CnWizIdeDock,
-  CnIDEStrings, CnEditControlWrapper {$IFDEF DEBUG} , CnDebug {$ENDIF};
+  CnStrings, CnIDEStrings, CnEditControlWrapper {$IFDEF DEBUG} , CnDebug {$ENDIF};
 
 const
   MSG_WAITING = '...';
@@ -337,7 +337,7 @@ begin
       begin
         EnsureChatWindowVisible;
         Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
-        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
         Msg.FromType := cmtYou;
         Msg.Text := MSG_WAITING;
         Msg.Waiting := True;
@@ -356,7 +356,7 @@ begin
         EnsureChatWindowVisible;
 
         Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
-        Msg.From := CnAIEngineManager.CurrentEngineName;
+        Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
         Msg.FromType := cmtYou;
         Msg.Text := '...';
         Msg.Waiting := True;
@@ -706,6 +706,7 @@ begin
 end;
 
 procedure TCnAICoderWizard.ContinueCurrentFile(UseChat: Boolean);
+{$IFNDEF STAND_ALONE}
 var
   I, LastLine: Integer;
   S: string;
@@ -721,7 +722,9 @@ var
   CppParser: TCnGeneralCppStructParser;
   CurIsPas, CurIsCpp: Boolean;
   CharPos: TOTACharPos;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   // 收集本文件从开始到光标这行的内容，并发送，并编辑器接收回应
 {$IFDEF LAZARUS}
   if SourceEditorManagerIntf.ActiveEditor = nil then
@@ -877,7 +880,7 @@ begin
 
   EnsureChatWindowVisible(not UseChat);
   Msg := CnAICoderChatForm.ChatBox.Items.AddMessage;
-  Msg.From := CnAIEngineManager.CurrentEngineName;
+  Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
   Msg.FromType := cmtYou;
   Msg.Text := MSG_WAITING;
   Msg.Waiting := True;
@@ -887,6 +890,7 @@ begin
     CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswerToChat)
   else
     CnAIEngineManager.CurrentEngine.AskAIEngineForCode(S, nil, Msg, artContinueCoding, ForContinueAnswerToEditor);
+{$ENDIF}
 end;
 
 procedure TCnAICoderWizard.ForContinueAnswerToEditor(StreamMode, Partly, Success,

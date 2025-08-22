@@ -9,8 +9,9 @@ uses
 {$ELSE}
   Interfaces,
 {$ENDIF}
-  Forms, CnMessageBoxWizard,
-  StandAloneFrameworkUnit in 'StandAloneFrameworkUnit.pas' {FormFramework};
+  Forms, CnMessageBoxWizard, CnAICoderChatFrm, CnAICoderConfig, CnAICoderEngine,
+  CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption, CnAICoderWizard,
+  StandAloneFrameworkUnit {FormFramework};
 
 {$R *.res}
 

@@ -256,7 +256,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnSM4, CnAEAD {$IFNDEF TEST_APP}, CnWizUtils {$ENDIF};
+  CnSM4, CnAEAD, CnStrings {$IFNDEF TEST_APP}, CnWizUtils {$ENDIF};
 
 const
   SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
@@ -551,12 +551,12 @@ end;
 
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
-  Result := Format(SCnAICoderWizardUserMessageExplainFmt, [GetCurrentLangName]);
+  Result := Format(SCnAICoderWizardUserMessageExplainFmt, [UIStringToNativeString(GetCurrentLangName)]);
 end;
 
 function TCnAIEngineOption.GetReviewCodePrompt: string;
 begin
-  Result := Format(SCnAICoderWizardUserMessageReviewFmt, [GetCurrentLangName]);
+  Result := Format(SCnAICoderWizardUserMessageReviewFmt, [UIStringToNativeString(GetCurrentLangName)]);
 end;
 
 function TCnAIEngineOption.GetGenTestCasePrompt: string;

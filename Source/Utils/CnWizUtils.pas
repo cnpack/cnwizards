@@ -942,6 +942,10 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
    Offset: Integer        - 偏移量
  |</PRE>}
 
+ procedure CnOtaInsertTextIntoEditor(const Text: string);
+{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
+  注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
+
 {$IFNDEF STAND_ALONE}
 
 function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
@@ -954,10 +958,6 @@ function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInter
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下也为 Utf8
   本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
-
-procedure CnOtaInsertTextIntoEditor(const Text: string);
-{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
-  注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
 
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
@@ -7615,6 +7615,40 @@ begin
 {$ENDIF}
 end;
 
+procedure CnOtaInsertTextIntoEditor(const Text: string);
+{$IFNDEF NO_DELPHI_OTA}
+var
+  EditView: IOTAEditView;
+  Position: Longint;
+  EditPos: TOTAEditPos;
+{$ENDIF}
+begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  begin
+    SourceEditorManagerIntf.ActiveEditor.ReplaceText(SourceEditorManagerIntf.ActiveEditor.CursorTextXY,
+      SourceEditorManagerIntf.ActiveEditor.CursorTextXY, Text);
+  end;
+{$ELSE}
+  EditView := CnOtaGetTopMostEditView;
+  Assert(Assigned(EditView));
+  EditPos := EditView.CursorPos;
+
+  if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
+    Exit;
+
+{$IFDEF UNICODE}
+  CnOtaInsertTextIntoEditorAtPosW(Text, Position);
+{$ELSE}
+  CnOtaInsertTextIntoEditorAtPos(Text, Position);
+{$ENDIF}
+  EditView.MoveViewToCursor;
+  EditView.Paint;
+{$ENDIF}
+{$ENDIF}
+end;
+
 {$IFNDEF STAND_ALONE}
 
 function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
@@ -7685,40 +7719,6 @@ begin
   end
   else
     Result := 0;
-{$ENDIF}
-end;
-
-procedure CnOtaInsertTextIntoEditor(const Text: string);
-{$IFNDEF NO_DELPHI_OTA}
-var
-  EditView: IOTAEditView;
-  Position: Longint;
-  EditPos: TOTAEditPos;
-{$ENDIF}
-begin
-{$IFNDEF STAND_ALONE}
-{$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
-  begin
-    SourceEditorManagerIntf.ActiveEditor.ReplaceText(SourceEditorManagerIntf.ActiveEditor.CursorTextXY,
-      SourceEditorManagerIntf.ActiveEditor.CursorTextXY, Text);
-  end;
-{$ELSE}
-  EditView := CnOtaGetTopMostEditView;
-  Assert(Assigned(EditView));
-  EditPos := EditView.CursorPos;
-
-  if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
-    Exit;
-
-{$IFDEF UNICODE}
-  CnOtaInsertTextIntoEditorAtPosW(Text, Position);
-{$ELSE}
-  CnOtaInsertTextIntoEditorAtPos(Text, Position);
-{$ENDIF}
-  EditView.MoveViewToCursor;
-  EditView.Paint;
-{$ENDIF}
 {$ENDIF}
 end;
 

@@ -49,15 +49,49 @@ object FormFramework: TFormFramework
       TabOrder = 0
     end
   end
+  object btnSetHotKey: TButton
+    Left = 79
+    Height = 25
+    Top = 135
+    Width = 75
+    Caption = 'Set HotKey'
+    TabOrder = 3
+  end
+  object Edit2: TEdit
+    Left = 195
+    Height = 21
+    Top = 138
+    Width = 80
+    TabOrder = 4
+    Text = 'Edit2'
+  end
+  object Button3: TButton
+    Left = 196
+    Height = 25
+    Top = 171
+    Width = 75
+    Caption = 'Check Text'
+    TabOrder = 5
+    OnClick = Button3Click
+  end
+  object btnCreateMgr: TButton
+    Left = 560
+    Height = 25
+    Top = 16
+    Width = 200
+    Caption = 'Create Wizard Manager'
+    TabOrder = 6
+    OnClick = btnCreateMgrClick
+  end
   object actlstStub: TActionList
     Images = ilStub
-    Left = 144
-    Top = 80
+    Left = 608
+    Top = 72
   end
   object mmStub: TMainMenu
     Images = ilStub
-    Left = 104
-    Top = 80
+    Left = 568
+    Top = 72
     object File1: TMenuItem
       Caption = 'File'
       object Exit1: TMenuItem
@@ -97,7 +131,11 @@ object FormFramework: TFormFramework
     end
   end
   object ilStub: TImageList
-    Left = 184
-    Top = 80
+    Left = 648
+    Top = 72
+  end
+  object ActionList1: TActionList
+    Left = 688
+    Top = 72
   end
 end
