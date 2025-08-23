@@ -111,7 +111,7 @@ const
     'RADStudio120A',
     'BCB5',
     'BCB6',
-    'Lazarus4');
+    'L4');
 
   SCnIDERegPaths: array[TCnCompiler] of string = (
     '\Software\Borland\Delphi\5.0',
@@ -540,7 +540,7 @@ const
                                                       Compiler: TCnCompiler = cnLazarus4;
                                                       CompilerKind: TCnCompilerKind = ckLazarus;
                                                       CompilerName = 'Lazarus 4.0';
-                                                      CompilerShortName = 'Lazarus4';
+                                                      CompilerShortName = 'L4';
                                                     {$ELSE}
                                                       {$MESSAGE ERROR 'Unknow Compiler!'}
                                                     {$ENDIF}

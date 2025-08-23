@@ -1869,7 +1869,20 @@ begin
     end;
   end
   else if not AIcon.Empty then
-    Result := ImageList.AddIcon(AIcon)
+  begin
+{$IFDEF LAZARUS}
+    DstBmp := nil;
+    try
+      DstBmp := CreateEmptyBmp24(16, 16, MaskColor);
+      DstBmp.Canvas.Draw(0, 0, AIcon);
+      Result := ImageList.AddMasked(DstBmp, MaskColor);
+    finally
+      DstBmp.Free;
+    end;
+{$ELSE}
+    Result := ImageList.AddIcon(AIcon);
+{$ENDIF}
+  end
   else
     Result := -1;
 end;

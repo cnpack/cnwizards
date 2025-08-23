@@ -47,8 +47,7 @@ uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF SUPPORT_GDIPLUS} WinApi.GDIPOBJ, WinApi.GDIPAPI, {$ENDIF}
-  {$IFNDEF STAND_ALONE} CnWizOptions, CnWizUtils, CnWizIdeUtils, {$ENDIF}
-  CnGraphUtils;
+  CnWizOptions, CnWizUtils, CnWizIdeUtils, CnGraphUtils;
 
 type
   TdmCnSharedImages = class(TDataModule)
@@ -82,10 +81,12 @@ type
     FIDELargeVirtualImages: TVirtualImageList;   // 对应 IDELargeImages 与 IDELargeDisabledImages，非放大时不创建
     FLargeIDEOffset: Integer; // D110A 之后大图标偏移值不同
 {$ENDIF}
-{$IFNDEF STAND_ALONE}
+
     FIdxUnknownInIDE: Integer;
     FIDEOffset: Integer;      // D110A 之前，无论是否大图标都用这个值
     FCopied: Boolean;         // 记录我们的 ImageList 有无塞到 IDE 的 ImageList 中
+
+{$IFNDEF STAND_ALONE}
     FLargeCopied: Boolean;    // 记录 IDE 的 ImageList 有无复制一份大的
     FLargeCopiedCount: Integer; // 记录 IDE 的 ImageList 复制一份大的数量
     function GetIdxUnknownInIDE: Integer;
@@ -101,11 +102,13 @@ type
     procedure CenterCopyTo(SrcImageList, DstImageList: TCustomImageList);
     {* 供将小尺寸 ImageList 原尺寸居中绘制到大的 ImageList 上}
 
+    procedure CopyToIDEMainImageList;
+    // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
+    // 注意这些图标不是菜单图标，那个由 WizMenuAction 复制进 IDE 的 ImageList。
+
 {$IFNDEF STAND_ALONE}
     procedure GetSpeedButtonGlyph(Button: TSpeedButton; ImageList: TImageList; 
       EmptyIdx: Integer);
-    procedure CopyToIDEMainImageList;
-    // Images 会被复制进 IDE 的 ImageList 供图标被同时使用的场合，FIDEOffset 表示偏移量
     procedure CopyLargeIDEImageList(Force: Boolean = False);
     // 由专家全部创建并加载菜单项后调用，把 IDE 的 ImageList 再复制一份大的
     // 注意这个会被至少重复调两次，一次靠前以初始化专家管理器相关，一次 IDE 加载完成以反映最新图标
@@ -340,44 +343,7 @@ begin
     StretchCopyToLarge(DisabledImages, DisabledLargeImages);
 {$ENDIF}
   end;
-
 {$ENDIF}
-end;
-
-{$IFNDEF STAND_ALONE}
-
-function TdmCnSharedImages.CalcMixedImageIndex(
-  ImageIndex: Integer): Integer;
-begin
-  if FCopied and (ImageIndex >= 0) then
-  begin
-    Result := ImageIndex + FIDEOffset;
-{$IFDEF IDE_SUPPORT_HDPI}
-    if WizOptions.UseLargeIcon then
-      Result := ImageIndex + FLargeIDEOffset;
-{$ENDIF}
-  end
-  else
-    Result := ImageIndex;
-end;
-
-function TdmCnSharedImages.GetMixedImageList(ForceSmall: Boolean): TCustomImageList;
-begin
-  if FCopied then
-  begin
-    if WizOptions.UseLargeIcon and not ForceSmall and FLargeCopied then
-    begin
-{$IFDEF IDE_SUPPORT_HDPI}
-      Result := FIDELargeVirtualImages;
-{$ELSE}
-      Result := IDELargeImages;
-{$ENDIF}
-    end
-    else
-      Result := GetIDEImageList;
-  end
-  else
-    Result := Images;
 end;
 
 procedure TdmCnSharedImages.CopyToIDEMainImageList;
@@ -417,6 +383,42 @@ begin
     FIDEOffset := Cnt;
     FCopied := True;
   end;
+end;
+
+{$IFNDEF STAND_ALONE}
+
+function TdmCnSharedImages.CalcMixedImageIndex(
+  ImageIndex: Integer): Integer;
+begin
+  if FCopied and (ImageIndex >= 0) then
+  begin
+    Result := ImageIndex + FIDEOffset;
+{$IFDEF IDE_SUPPORT_HDPI}
+    if WizOptions.UseLargeIcon then
+      Result := ImageIndex + FLargeIDEOffset;
+{$ENDIF}
+  end
+  else
+    Result := ImageIndex;
+end;
+
+function TdmCnSharedImages.GetMixedImageList(ForceSmall: Boolean): TCustomImageList;
+begin
+  if FCopied then
+  begin
+    if WizOptions.UseLargeIcon and not ForceSmall and FLargeCopied then
+    begin
+{$IFDEF IDE_SUPPORT_HDPI}
+      Result := FIDELargeVirtualImages;
+{$ELSE}
+      Result := IDELargeImages;
+{$ENDIF}
+    end
+    else
+      Result := GetIDEImageList;
+  end
+  else
+    Result := Images;
 end;
 
 procedure TdmCnSharedImages.GetSpeedButtonGlyph(Button: TSpeedButton;

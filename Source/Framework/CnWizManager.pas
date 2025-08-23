@@ -292,8 +292,9 @@ uses
 {$IFNDEF CNWIZARDS_MINIMUM}
   {$IFNDEF STAND_ALONE} CnDesignEditor, {$ENDIF}
   CnWizAbout, CnWizShareImages, CnWizMultiLang, CnWizBoot, CnWizTranslate, CnWizConfigFrm,
+  CnWizUpgradeFrm, CnWizCommentFrm, CnWizTipOfDayFrm,
   {$IFNDEF LAZARUS}{$IFNDEF STAND_ALONE}
-  CnWizUpgradeFrm, CnWizCommentFrm, CnWizTipOfDayFrm, CnIDEVersion,
+  CnIDEVersion,
   {$ENDIF}{$ENDIF}
 {$ENDIF}
   CnWizNotifier, CnWizCompilerConst;
@@ -394,7 +395,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate ShareImg Copy To IDE');
 {$ENDIF}
-  // TODO: dmCnSharedImages.CopyToIDEMainImageList;
+  dmCnSharedImages.CopyToIDEMainImageList;
 {$ENDIF}
 
 {$IFNDEF LAZARUS}
@@ -1529,9 +1530,7 @@ begin
   FreeAndNil(FTipTimer);
 {$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
   ShowCnWizTipOfDayForm(False);
-{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 end;
@@ -1644,7 +1643,6 @@ begin
 
 {$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
   // 检查升级
   if (WizOptions.UpgradeStyle = usAllUpgrade) or (WizOptions.UpgradeStyle =
     usUserDefine) and (WizOptions.UpgradeContent <> []) then
@@ -1652,7 +1650,6 @@ begin
 
   // 显示每日一帖
   SetTipShowing;
-{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
