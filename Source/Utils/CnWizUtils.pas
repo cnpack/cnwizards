@@ -458,7 +458,8 @@ function IsSpecifiedExt(const FileName: string; const Ext: string): Boolean;
 {* 判断是否是指定扩展名的文件，Ext 参数要带点号}
 function ObjectIsInheritedFromClass(AObj: TObject; const AClassName: string): Boolean;
 {* 使用字符串的方式判断对象是否继承自此类}
-function FindControlByClassName(AParent: TWinControl; const AClassName: string): TControl;
+function FindControlByClassName(AParent: TWinControl; const AClassName: string;
+  const AComponentName: string = ''): TControl;
 {* 使用字符串的方式判断控件是否包含指定类名的子控件，存在则返回最上面一个}
 
 //==============================================================================
@@ -538,9 +539,9 @@ function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
 function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
 function CnOtaGetCurrentEditWindow: TCustomForm;
-{* 取当前的 EditWindow}
+{* 以 OTA 的方式取当前的 EditWindow}
 function CnOtaGetCurrentEditControl: TWinControl;
-{* 取当前的 EditControl 控件}
+{* 以 OTA 的方式取当前的 EditControl 控件}
 function CnOtaGetUnitName(Editor: IOTASourceEditor): string;
 {* 返回单元名称}
 function CnOtaGetProjectGroup: IOTAProjectGroup;
@@ -2788,7 +2789,7 @@ end;
 
 // 在窗口控件中查找指定类名的子组件
 function FindComponentByClassName(AWinControl: TWinControl;
-  const AClassName: string; const AComponentName: string = ''): TComponent;
+  const AClassName: string; const AComponentName: string): TComponent;
 var
   I: Integer;
 begin
@@ -3486,7 +3487,8 @@ begin
 end;
 
 // 使用字符串的方式判断控件是否包含指定类名的子控件，存在则返回最上面一个
-function FindControlByClassName(AParent: TWinControl; const AClassName: string): TControl;
+function FindControlByClassName(AParent: TWinControl; const AClassName: string;
+  const AComponentName: string): TControl;
 var
   I: Integer;
 begin
@@ -3494,7 +3496,8 @@ begin
   begin
     for I := AParent.ControlCount - 1 downto 0 do // 倒序以先找到最上面的
     begin
-      if AParent.Controls[I].ClassNameIs(AClassName) then
+      if AParent.Controls[I].ClassNameIs(AClassName) and
+        ((AComponentName = '') or (AParent.Controls[I].Name = AComponentName)) then
       begin
         Result := AParent.Controls[I];
         Exit;
@@ -4205,7 +4208,7 @@ begin
   end;
 end;
 
-// 取当前的 EditWindow
+// 以 OTA 的方式取当前的 EditWindow
 function CnOtaGetCurrentEditWindow: TCustomForm;
 var
   EditView: IOTAEditView;
@@ -4224,7 +4227,7 @@ begin
   Result := nil;
 end;
 
-// 取当前的 EditControl 控件
+// 以 OTA 的方式取当前的 EditControl 控件
 function CnOtaGetCurrentEditControl: TWinControl;
 var
 {$IFDEF USE_CODEEDITOR_SERVICE}

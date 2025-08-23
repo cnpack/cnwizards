@@ -342,8 +342,9 @@ type
 
     procedure EditControlProc(EditWindow: TCustomForm; EditControl:
       TControl; Context: Pointer);
-{$IFNDEF NO_DELPHI_OTA}
     procedure UpdateEditControlList;
+
+{$IFNDEF NO_DELPHI_OTA}
     procedure CheckOptionDlg;
     function GetEditorContext(Editor: TCnEditorObject): TCnEditorContext;
 
@@ -377,6 +378,8 @@ type
     procedure SetFonts(const Index: Integer; const Value: TFont);
     function GetBackgroundColor: TColor;
     function GetForegroundColor: TColor;
+    function GetEditControlCount: Integer;
+    function GetEditControls(Index: Integer): TControl;
   protected
     procedure DoAfterPaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
     procedure DoBeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
@@ -433,6 +436,9 @@ type
     function GetEditorObject(EditControl: TControl): TCnEditorObject;
     property Editors[Index: Integer]: TCnEditorObject read GetEditors;
     property EditorCount: Integer read GetEditorCount;
+
+    property EditControlCount: Integer read GetEditControlCount;
+    property EditControls[Index: Integer]: TControl read GetEditControls;
 
     // 以下几项是封装的编辑器高亮显示的不同元素的属性，但不包括字体本身，需要结合 EditorBaseFont 属性使用
     function IndexOfHighlight(const Name: string): Integer;
@@ -1318,6 +1324,7 @@ begin
     WM_NCRBUTTONUP, WM_NCMBUTTONDOWN, WM_NCMBUTTONUP, WM_MOUSELEAVE, WM_NCMOUSELEAVE]);
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_VSCROLL, WM_HSCROLL, WM_NCPAINT, WM_NCACTIVATE {$IFDEF IDE_SUPPORT_HDPI}, WM_DPICHANGED {$ENDIF}]);
+
 {$IFNDEF NO_DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
@@ -1665,6 +1672,16 @@ end;
 function TCnEditControlWrapper.GetEditors(Index: Integer): TCnEditorObject;
 begin
   Result := TCnEditorObject(FEditorList[Index]);
+end;
+
+function TCnEditControlWrapper.GetEditControlCount: Integer;
+begin
+  Result := FEditControlList.Count;
+end;
+
+function TCnEditControlWrapper.GetEditControls(Index: Integer): TControl;
+begin
+  Result := TControl(FEditControlList[Index]);
 end;
 
 function TCnEditControlWrapper.GetEditorObject(
@@ -2630,12 +2647,12 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
-
 procedure TCnEditControlWrapper.UpdateEditControlList;
 begin
   EnumEditControl(EditControlProc, nil);
 end;
+
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnEditControlWrapper.OnSourceEditorNotify(
   SourceEditor: IOTASourceEditor; NotifyType: TCnWizSourceEditorNotifyType;
@@ -2715,8 +2732,8 @@ end;
 
 procedure TCnEditControlWrapper.OnActiveFormChange(Sender: TObject);
 begin
-{$IFNDEF NO_DELPHI_OTA}
   UpdateEditControlList;
+{$IFNDEF NO_DELPHI_OTA}
   CheckOptionDlg;
 {$ENDIF}
 end;

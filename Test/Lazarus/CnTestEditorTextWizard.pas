@@ -24,7 +24,7 @@ unit CnTestEditorTextWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：测试编辑器中插入字符串的子菜单专家测试单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元测试在编辑器中插入字符串，分 Ansi/Utf8/Unicode 三种。
+* 备    注：该单元测试在 Lazarus 编辑器中插入字符串，必须是 Utf8。
 * 开发平台：Win7 + Delphi 5.01
 * 兼容测试：Win7 + D5/2007/2009
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式

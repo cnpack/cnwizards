@@ -93,13 +93,20 @@ const
   // Editor 窗口相关类名
 {$IFDEF LAZARUS}
   SCnEditorFormClassName = 'TSourceNotebook';
-  SCnEditControlName = 'SourceNotebook';
+  SCnEditorFormName = 'SourceNotebook';    // 似乎单窗口实例
+  SCnEditControlClassName = 'TIDESynEditor';
+  SCnEditControlNamePrefix = 'SynEdit';    // 一窗口多个编辑器实例，因此是前缀，名称后面还有数字
+
+  // Lazarus 编辑器里是一个 PageControl，每个 TabSheet 里一个编辑器实例
+  SCnEditWindowPageControlClassName = 'TExtendedNotebook';
+  SCnEditWindowPageControlName = 'SrcEditNotebook';
 {$ELSE}
   SCnEditorFormClassName = 'TEditWindow';
+  SCnEditorFormNamePrefix = 'EditWindow_'; // 多窗口实例，因此是前缀，名称后面还有数字
+  SCnEditControlClassName = 'TEditControl';
   SCnEditControlName = 'Editor';
 {$ENDIF}
 
-  SCnEditControlClassName = 'TEditControl';
   SCnDesignControlClassName = 'TEditorFormDesigner';
   SCnWelcomePageClassName = 'TWelcomePageFrame';
   SCnDisassemblyViewClassName = 'TDisassemblyView';
@@ -237,6 +244,9 @@ type
 
   TCnUnitCallback = procedure(const AUnitFullName: string; Exists: Boolean;
     FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType) of object;
+
+  TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
+    TControl; Context: Pointer) of object;
 
 type
   PCnUnitsInfoRec = ^TCnUnitsInfoRec;
@@ -388,6 +398,26 @@ procedure GetInstalledComponents(Packages, Components: TStrings);
 function IsEditControl(AControl: TComponent): Boolean;
 {* 判断指定控件是否代码编辑器控件 }
 
+function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
+  EditorMustExists: Boolean = True): Integer;
+{* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数 }
+
+{$IFDEF LAZARUS}
+
+function GetEditControlsFromEditorForm(AForm: TCustomForm; EditControls: TObjectList): Integer;
+{* Lazarus 下返回编辑器窗口的编辑器控件列表，因为一个窗体多个 Tab，每个 Tab 都有一个 Edit 控件。}
+
+{$ELSE}
+
+function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
+{* 返回编辑器窗口的编辑器控件，注意 Lazarus 下因为一个窗体多个 Tab，每个 Tab 都有一个 Edit 控件，
+  因而本函数只能返回找到的第一个符合条件的控件，意义不大，直接在 Lazarus 下禁用，只在 Delphi 中使用。}
+
+{$ENDIF}
+
+function GetCurrentEditControl: TControl;
+{* 返回当前的代码编辑器控件 }
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -455,22 +485,8 @@ function IsDesignControl(AControl: TControl): Boolean;
 function IsDesignWinControl(AControl: TWinControl): Boolean;
 {* 判断一 WinControl 是否是设计期 WinControl}
 
-type
-  TEnumEditControlProc = procedure (EditWindow: TCustomForm; EditControl:
-    TControl; Context: Pointer) of object;
-
 function IsXTabControl(AControl: TComponent): Boolean;
 {* 判断指定控件是否编辑器窗口的 TabControl 控件 }
-
-function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
-{* 返回编辑器窗口的编辑器控件 }
-
-{$IFNDEF NO_DELPHI_OTA}
-
-function GetCurrentEditControl: TControl;
-{* 返回当前的代码编辑器控件 }
-
-{$ENDIF}
 
 function GetCPUViewFromEditorForm(AForm: TCustomForm): TControl;
 {* 返回编辑器窗口的 CPU 查看器控件 }
@@ -486,10 +502,6 @@ function GetEditorTabTabIndex(ATab: TXTabControl): Integer;
 
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 {* 从编辑器控件获得其所属的编辑器窗口的状态栏}
-
-function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
-  EditorMustExists: Boolean = True): Integer;
-{* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数 }
 
 {$IFNDEF NO_DELPHI_OTA}
 
@@ -1634,9 +1646,9 @@ function IsIdeEditorForm(AForm: TCustomForm): Boolean;
 begin
   Result := (AForm <> nil) and
 {$IFDEF LAZARUS}
-            (Pos('SCnEditControlName', AForm.Name) = 1) and
+            (AForm.Name = SCnEditorFormName) and
 {$ELSE}
-            (Pos('EditWindow_', AForm.Name) = 1) and
+            (Pos(SCnEditorFormNamePrefix, AForm.Name) = 1) and
 {$ENDIF}
             (AForm.ClassName = SCnEditorFormClassName) and
             (not (csDesigning in AForm.ComponentState));
@@ -1719,7 +1731,132 @@ begin
     Result := CES.IsIDEEditor(TWinControl(AControl));
 {$ELSE}
   Result := (AControl <> nil) and AControl.ClassNameIs(SCnEditControlClassName)
-    and SameText(AControl.Name, SCnEditControlName);
+    and {$IFDEF LAZARUS} (Pos(SCnEditControlNamePrefix, AControl.Name) = 1)
+    {$ELSE} SameText(AControl.Name, SCnEditControlName) {$ENDIF};
+{$ENDIF}
+end;
+
+// 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数
+function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
+  EditorMustExists: Boolean): Integer;
+var
+  I: Integer;
+  EditWindow: TCustomForm;
+  EditControl: TControl;
+{$IFDEF LAZARUS}
+  J: Integer;
+  List: TObjectList;
+{$ENDIF}
+begin
+  Result := 0;
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    if IsIdeEditorForm(Screen.CustomForms[I]) then
+    begin
+      EditWindow := Screen.CustomForms[I];
+{$IFDEF LAZARUS}
+      List := TObjectList.Create(False);
+      try
+        GetEditControlsFromEditorForm(EditWindow, List);
+        if List.Count > 0 then
+        begin
+          for J := 0 to List.Count - 1 do
+          begin
+            EditControl := TControl(List[J]);
+            if Assigned(EditControl) or not EditorMustExists then
+            begin
+              Inc(Result);
+              if Assigned(Proc) then
+                Proc(EditWindow, EditControl, Context);
+            end;
+          end;
+        end;
+      finally
+        List.Free;
+      end;
+{$ELSE}
+      EditControl := GetEditControlFromEditorForm(EditWindow);
+      if Assigned(EditControl) or not EditorMustExists then
+      begin
+        Inc(Result);
+        if Assigned(Proc) then
+          Proc(EditWindow, EditControl, Context);
+      end;
+{$ENDIF}
+    end;
+  end;
+end;
+
+{$IFDEF LAZARUS}
+
+// Lazarus 下返回编辑器窗口的编辑器控件列表
+function GetEditControlsFromEditorForm(AForm: TCustomForm; EditControls: TObjectList): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to AForm.ComponentCount - 1 do
+  begin
+    if AForm.Components[I] is TControl then
+    begin
+      if IsEditControl(AForm.Components[I]) then
+        EditControls.Add(AForm.Components[I]);
+    end;
+  end;
+
+  Result := EditControls.Count;
+end;
+
+{$ELSE}
+
+// 返回编辑器窗口的编辑器控件
+function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
+begin
+{$IFDEF LAZARUS}
+  Result := TControl(FindComponentByClassName(AForm, SCnEditControlClassName));
+  if Result <> nil then
+    if Pos(SCnEditControlNamePrefix, Result.Name) <> 1 then
+      Result := nil;
+{$ELSE}
+  Result := TControl(FindComponentByClassName(AForm, SCnEditControlClassName,
+    SCnEditControlName));
+{$ENDIF}
+end;
+
+{$ENDIF}
+
+// 返回当前的代码编辑器控件
+function GetCurrentEditControl: TControl;
+var
+{$IFDEF LAZARUS}
+  I: Integer;
+  EditWindow: TCustomForm;
+  Pgc: TPageControl;
+  Tb: TTabSheet;
+{$ELSE}
+  View: IOTAEditView;
+{$ENDIF}
+begin
+  Result := nil;
+{$IFDEF LAZARUS}
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    if IsIdeEditorForm(Screen.CustomForms[I]) then
+    begin
+      EditWindow := Screen.CustomForms[I];
+      Pgc := TPageControl(FindComponentByClassName(EditWindow,
+        SCnEditWindowPageControlClassName, SCnEditWindowPageControlName));
+      if Pgc <> nil then
+      begin
+        Tb := Pgc.ActivePage;
+        if Tb <> nil then
+          Result := TControl(FindControlByClassName(Tb, SCnEditControlClassName));
+      end;
+    end;
+  end;
+{$ELSE}
+  View := CnOtaGetTopMostEditView;
+  if (View <> nil) and (View.GetEditWindow <> nil) then
+    Result := GetEditControlFromEditorForm(View.GetEditWindow.Form);
 {$ENDIF}
 end;
 
@@ -2359,13 +2496,6 @@ begin
     and SameText(AControl.Name, SCnXTabControlName);
 end;
 
-// 返回编辑器窗口的编辑器控件
-function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
-begin
-  Result := TControl(FindComponentByClassName(AForm, SCnEditControlClassName,
-    SCnEditControlName));
-end;
-
 // 返回编辑器窗口的 CPU 查看器控件
 function GetCPUViewFromEditorForm(AForm: TCustomForm): TControl;
 begin
@@ -2386,21 +2516,6 @@ begin
       Result := AComp as TStatusBar;
   end;
 end;
-
-{$IFNDEF NO_DELPHI_OTA}
-
-// 返回当前的代码编辑器控件
-function GetCurrentEditControl: TControl;
-var
-  View: IOTAEditView;
-begin
-  Result := nil;
-  View := CnOtaGetTopMostEditView;
-  if (View <> nil) and (View.GetEditWindow <> nil) then
-    Result := GetEditControlFromEditorForm(View.GetEditWindow.Form);
-end;
-
-{$ENDIF}
 
 // 返回编辑器窗口的 TabControl 控件
 function GetTabControlFromEditorForm(AForm: TCustomForm): TXTabControl;
@@ -2434,31 +2549,6 @@ begin
 {$ELSE}
     Result := ATab.TabIndex;
 {$ENDIF}
-  end;
-end;
-
-// 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数
-function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
-  EditorMustExists: Boolean): Integer;
-var
-  I: Integer;
-  EditWindow: TCustomForm;
-  EditControl: TControl;
-begin
-  Result := 0;
-  for I := 0 to Screen.CustomFormCount - 1 do
-  begin
-    if IsIdeEditorForm(Screen.CustomForms[I]) then
-    begin
-      EditWindow := Screen.CustomForms[I];
-      EditControl := GetEditControlFromEditorForm(EditWindow);
-      if Assigned(EditControl) or not EditorMustExists then
-      begin
-        Inc(Result);
-        if Assigned(Proc) then
-          Proc(EditWindow, EditControl, Context);
-      end;
-    end;
   end;
 end;
 

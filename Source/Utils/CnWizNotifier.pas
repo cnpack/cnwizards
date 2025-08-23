@@ -63,6 +63,10 @@ uses
   {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
+{$IFDEF LAZARUS}
+  TMessageEvent = procedure (var Msg: TMsg; var Handled: Boolean) of object;
+{$ENDIF}
+
   PCnWizNotifierRecord = ^TCnWizNotifierRecord;
   TCnWizNotifierRecord = record
     Notifier: TMethod;
@@ -184,12 +188,10 @@ type
     procedure RemoveApplicationIdleNotifier(Notifier: TNotifyEvent);
     {* 删除一个应用程序空闲通知事件}
 
-{$IFNDEF LAZARUS}
     procedure AddApplicationMessageNotifier(Notifier: TMessageEvent);
-    {* 增加一个应用程序消息通知事件}
+    {* 增加一个应用程序消息通知事件，Lazarus 下暂时无效}
     procedure RemoveApplicationMessageNotifier(Notifier: TMessageEvent);
-    {* 删除一个应用程序消息通知事件}
-{$ENDIF}
+    {* 删除一个应用程序消息通知事件，Lazarus 下暂时无效}
 
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     {* 增加一个应用程序事件通知事件}
@@ -430,7 +432,11 @@ type
     FBeforeThemeChangeNotifiers: TList;
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
-{$IFNDEF LAZARUS}
+{$IFDEF LAZARUS}
+    FEvents: TApplicationProperties;
+    FOldScreenActiveFormChange: TNotifyEvent;
+    FOldScreenActiveControlChange: TNotifyEvent;
+{$ELSE}
     FEvents: TApplicationEvents;
 {$ENDIF}
 
@@ -496,10 +502,10 @@ type
     procedure RemoveActiveControlNotifier(Notifier: TNotifyEvent);
     procedure AddApplicationIdleNotifier(Notifier: TNotifyEvent);
     procedure RemoveApplicationIdleNotifier(Notifier: TNotifyEvent);
-{$IFNDEF LAZARUS}
+
     procedure AddApplicationMessageNotifier(Notifier: TMessageEvent);
     procedure RemoveApplicationMessageNotifier(Notifier: TMessageEvent);
-{$ENDIF}
+
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
@@ -545,6 +551,10 @@ type
       const FileName: string);
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+    procedure ScreenActiveFormChange(Sender: TObject);
+    procedure ScreenActiveControlChange(Sender: TObject);
+{$ENDIF}
     procedure AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer = nil);
 
     procedure DoBeforeThemeChange;
@@ -565,6 +575,7 @@ type
     procedure DoApplicationHint(Sender: TObject);
     procedure DoApplicationShowHint(var HintStr: string; var CanShow: Boolean;
       var HintInfo: THintInfo);
+
     procedure DoActiveControlChange;
     procedure DoIdleExecute;
   public
@@ -1025,7 +1036,14 @@ begin
   FBreakpointDeletedNotifiers := TList.Create;
 
   FFileNotifiers := TList.Create;
-{$IFNDEF LAZARUS}
+{$IFDEF LAZARUS}
+  FEvents := TApplicationProperties.Create(nil);
+  FEvents.OnIdle := DoApplicationIdle;
+  FEvents.OnMinimize := DoApplicationMinimize;
+  FEvents.OnRestore := DoApplicationRestore;
+  FEvents.OnHint := DoApplicationHint;
+  FEvents.OnShowHint := DoApplicationShowHint;
+{$ELSE}
   FEvents := TApplicationEvents.Create(nil);
   FEvents.OnIdle := DoApplicationIdle;
   FEvents.OnMessage := DoApplicationMessage;
@@ -1057,6 +1075,13 @@ begin
   FDesignerSelection := TList.Create;
   FLastDesignerSelection := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
+
+{$IFDEF LAZARUS}
+  FOldScreenActiveFormChange := Screen.OnActiveFormChange;
+  Screen.OnActiveFormChange := ScreenActiveFormChange;
+  FOldScreenActiveControlChange := Screen.OnActiveControlChange;
+  Screen.OnActiveControlChange := ScreenActiveControlChange;
+{$ENDIF}
 
 {$IFNDEF NO_DELPHI_OTA}
   FCnWizIdeNotifier := TCnWizIdeNotifier.Create(Self);
@@ -1110,6 +1135,11 @@ begin
   CallWndProcRetHook := 0;
   UnhookWindowsHookEx(GetMsgHook);
   GetMsgHook := 0;
+
+{$IFDEF LAZARUS}
+  Screen.OnActiveFormChange := FOldScreenActiveFormChange;
+  Screen.OnActiveControlChange := FOldScreenActiveControlChange;
+{$ENDIF}
 
 {$IFNDEF NO_DELPHI_OTA}
   IServices := BorlandIDEServices as IOTAServices;
@@ -1871,8 +1901,6 @@ begin
   CnWizRemoveNotifier(FApplicationIdleNotifiers, TMethod(Notifier));
 end;
 
-{$IFNDEF LAZARUS}
-
 procedure TCnWizNotifierServices.AddApplicationMessageNotifier(
   Notifier: TMessageEvent);
 begin
@@ -1884,8 +1912,6 @@ procedure TCnWizNotifierServices.RemoveApplicationMessageNotifier(
 begin
   CnWizRemoveNotifier(FApplicationMessageNotifiers, TMethod(Notifier));
 end;
-
-{$ENDIF}
 
 procedure TCnWizNotifierServices.AddAppEventNotifier(
   Notifier: TCnWizAppEventNotifier);
@@ -1968,6 +1994,34 @@ begin
   end;
 {$ENDIF}
 end;
+
+{$IFDEF LAZARUS}
+
+procedure TCnWizNotifierServices.ScreenActiveFormChange(Sender: TObject);
+begin
+  if Screen.ActiveForm <> FLastForm then
+  begin
+    DoActiveFormChange;
+    FLastForm := Screen.ActiveForm;
+  end;
+
+  if Assigned(FOldScreenActiveFormChange) then
+    FOldScreenActiveFormChange(Sender);
+end;
+
+procedure TCnWizNotifierServices.ScreenActiveControlChange(Sender: TObject);
+begin
+  if Screen.ActiveControl <> FLastControl then
+  begin
+    DoActiveControlChange;
+    FLastControl := Screen.ActiveControl;
+  end;
+
+  if Assigned(FOldScreenActiveControlChange) then
+    FOldScreenActiveControlChange(Sender);
+end;
+
+{$ENDIF}
 
 procedure TCnWizNotifierServices.AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer);
 var

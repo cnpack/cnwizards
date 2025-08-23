@@ -1,0 +1,27 @@
+object CnTestEditControlWrapperForm: TCnTestEditControlWrapperForm
+  Left = 248
+  Height = 295
+  Top = 145
+  Width = 437
+  Caption = 'CnTestEditControlWrapperForm'
+  ClientHeight = 295
+  ClientWidth = 437
+  LCLVersion = '4.0.0.4'
+  object MemoTest: TMemo
+    Left = 0
+    Height = 295
+    Top = 0
+    Width = 437
+    Align = alClient
+    Lines.Strings = (
+      ''
+    )
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 63
+    Top = 52
+  end
+end
