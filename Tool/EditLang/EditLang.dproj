@@ -21,7 +21,7 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_DependencyCheckOutputName>..\..\Bin\EditLang.exe</DCC_DependencyCheckOutputName>
-			<DCC_UnitSearchPath>..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphic;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UsePackage>Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>

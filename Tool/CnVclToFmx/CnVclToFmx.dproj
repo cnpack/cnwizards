@@ -65,7 +65,7 @@
         <GenDll>true</GenDll>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;$(DCC_Namespace)</DCC_Namespace>
         <SanitizedProjectName>CnVclToFmx</SanitizedProjectName>
-        <DCC_UnitSearchPath>..\..\Source;..\..\Source\Utils;..\..\Source\ThirdParty;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\Source;..\..\Source\Utils;..\..\Source\ThirdParty;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphic;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Locale>2052</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>

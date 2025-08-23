@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\Crypto
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Graphic;..\..\..\cnvcl\Source\Crypto
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=ENABLE_UIINTERACT
 DebugSourceDirs=
@@ -90,9 +90,9 @@ Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 Count=5
 Item0=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto
 Item1=..\..\Source
-Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;CodeFormatter;ScriptWizard
-Item3=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;ScriptWizard
-Item4=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils
+Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;CodeFormatter;ScriptWizard
+Item3=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;ScriptWizard
+Item4=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu

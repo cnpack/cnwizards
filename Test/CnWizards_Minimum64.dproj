@@ -53,7 +53,7 @@
         <VerInfo_Locale>2057</VerInfo_Locale>
         <VerInfo_MinorVer>9</VerInfo_MinorVer>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
-        <DCC_UnitSearchPath>$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\Source\ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;..\Source\ThirdParty\DDetours;..\Source\Utils;..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\Source\ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;..\Source\ThirdParty\DDetours;..\Source\Utils;..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_S>false</DCC_S>
         <VerInfo_Keys>CompanyName=CnPack Team;FileDescription=CnWizards For Delphi 5;FileVersion=0.9.0.0;InternalName=CnWizards_D5;LegalCopyright=(C)Copyright 2001-2009 CnPack Develop Team;LegalTrademarks=CnPack;OriginalFilename=CnWizards_D5.DLL;ProductName=CnWizards;ProductVersion=1.0.0.0;Comments=https://www.cnpack.org</VerInfo_Keys>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>

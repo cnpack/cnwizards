@@ -43,7 +43,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\..\..\Source"/>
-      <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\AICoder;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\Config;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Graphics;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\NonVisual"/>
+      <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\AICoder;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\Config;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\NonVisual"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

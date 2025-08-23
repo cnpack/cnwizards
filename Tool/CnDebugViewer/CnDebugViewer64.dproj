@@ -70,7 +70,7 @@
         <DCC_SymbolReferenceInfo>1</DCC_SymbolReferenceInfo>
         <DCC_ExeOutput>..\..\Bin</DCC_ExeOutput>
         <DCC_DcuOutput>..\..\Dcu</DCC_DcuOutput>
-        <DCC_UnitSearchPath>..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils;.\VirtualTree;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphic;..\..\..\cnvcl\Source\MultiLang;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\NetComm;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\ThirdParty;..\..\Source\Utils;.\VirtualTree;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_UsePackage>Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5;$(DCC_UsePackage)</DCC_UsePackage>
         <SanitizedProjectName>CnDebugViewer64</SanitizedProjectName>
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Xml.Internal;$(DCC_Namespace)</DCC_Namespace>

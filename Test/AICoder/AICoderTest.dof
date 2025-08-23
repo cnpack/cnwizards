@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphics;..\..\Source;..\..\Source\Framework;..\..\Source\Utils
+SearchPath=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphic;..\..\Source;..\..\Source\Framework;..\..\Source\Utils
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;CnPack_D5
 Conditionals=DEBUG;STAND_ALONE;TEST_APP
 DebugSourceDirs=
@@ -88,8 +88,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=7
-Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphics;..\..\Source;..\..\Source\Framework;..\..\Source\Utils
-Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphics;..\..\Source;..\..\Source\Framework
+Item0=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphic;..\..\Source;..\..\Source\Framework;..\..\Source\Utils
+Item1=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\..\cnvcl\Source\Graphic;..\..\Source;..\..\Source\Framework
 Item2=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source;..\..\Source\Framework
 Item3=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual;..\..\Source
 Item4=..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\NetComm;..\..\..\cnvcl\Source\NonVisual

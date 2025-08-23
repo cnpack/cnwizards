@@ -89,8 +89,8 @@ Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=3
 Item0=..\..\Source
-Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;ScriptWizard
-Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils
+Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils;ScriptWizard
+Item2=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\DDetours;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu

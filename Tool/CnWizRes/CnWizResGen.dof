@@ -42,7 +42,7 @@ ExeDescription=
 OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
-SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphics;..\..\..\cnvcl\Source\MultiLang;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils
+SearchPath=..\..\Source;..\..\..\cnvcl\Source\Common;..\..\..\cnvcl\Source\Crypto;..\..\..\cnvcl\Source\Graphic;..\..\..\cnvcl\Source\MultiLang;..\..\Source\Framework;..\..\Source\MultiLang;..\..\Source\Utils
 Packages=
 Conditionals=
 DebugSourceDirs=
@@ -84,8 +84,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=2
-Item0=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;Utils
-Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphics;..\..\cnvcl\Source\NetComm;ThirdParty;ThirdParty\JCL;Utils
+Item0=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;Utils
+Item1=$(DELPHI)\Source\Toolsapi;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;ThirdParty;ThirdParty\JCL;Utils
 [HistoryLists\hlUnitOutputDirectory]
 Count=1
 Item0=..\Dcu

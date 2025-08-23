@@ -124,7 +124,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\cnvcl\Source\Graphics\CnRichEdit.pas"/>
+        <Filename Value="..\..\..\..\cnvcl\Source\Graphic\CnRichEdit.pas"/>
         <EditorIndex Value="17"/>
         <TopLine Value="34"/>
         <CursorPos X="85" Y="49"/>
