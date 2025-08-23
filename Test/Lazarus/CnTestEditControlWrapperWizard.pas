@@ -64,7 +64,17 @@ type
 
   TCnTestEditControlWrapperWizard = class(TCnSubMenuWizard)
   private
+    FAdded: Boolean;
     FIdEditControlDump: Integer;
+    FIdKeyNotifier: Integer;
+    procedure OnKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
+    procedure OnKeyUp(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
+    procedure OnSysKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
+    procedure OnSysKeyUp(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -97,6 +107,7 @@ procedure TCnTestEditControlWrapperForm.Timer1Timer(Sender: TObject);
 var
   I: Integer;
   E: TControl;
+  O: TCnEditorObject;
 begin
   with MemoTest.Lines do
   begin
@@ -113,6 +124,17 @@ begin
       Add('No Current EditControl')
     else
       Add('Current EditControl is ' + E.Name);
+
+    Add('======================');
+    Add(Format('EditorObject Count %d', [EditControlWrapper.EditorCount]));
+    for I := 0 to EditControlWrapper.EditControlCount - 1 do
+    begin
+      O := EditControlWrapper.Editors[I];
+      if O <> nil then
+        Add(Format('  #%d %s owner %s', [I, O.ClassName, O.EditWindow.ClassName]))
+      else
+        Add('  #%d nil');
+    end;
   end;
 end;
 
@@ -138,11 +160,38 @@ begin
   FIdEditControlDump := RegisterASubAction('CnLazEditControlDump',
     'Test CnLazEditControlDump', 0, 'Test CnLazEditControlDump',
     'CnLazEditControlDump');
+  FIdKeyNotifier := RegisterASubAction('CnLazEditControlKeyNotifier',
+    'Test CnLazEditControlKeyNotifier', 0, 'Test CnLazEditControlKeyNotifier',
+    'CnLazEditControlKeyNotifier');
 end;
 
 function TCnTestEditControlWrapperWizard.GetCaption: string;
 begin
   Result := 'Test EditControlWrapper';
+end;
+
+procedure TCnTestEditControlWrapperWizard.OnKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  CnDebugger.TraceFmt('KeyDown %d ScanCode %d', [Key, ScanCode]);
+end;
+
+procedure TCnTestEditControlWrapperWizard.OnKeyUp(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  CnDebugger.TraceFmt('KeyUp %d ScanCode %d', [Key, ScanCode]);
+end;
+
+procedure TCnTestEditControlWrapperWizard.OnSysKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  CnDebugger.TraceFmt('SysKeyDown %d ScanCode %d', [Key, ScanCode]);
+end;
+
+procedure TCnTestEditControlWrapperWizard.OnSysKeyUp(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+begin
+  CnDebugger.TraceFmt('SysKeyUp %d ScanCode %d', [Key, ScanCode]);
 end;
 
 function TCnTestEditControlWrapperWizard.GetHasConfig: Boolean;
@@ -188,6 +237,27 @@ begin
       CnTestEditControlWrapperForm := TCnTestEditControlWrapperForm.Create(Application);
     CnTestEditControlWrapperForm.Show;
   end
+  else if Index = FIdKeyNotifier then
+  begin
+    if FAdded then
+    begin
+      EditControlWrapper.RemoveKeyDownNotifier(OnKeyDown);
+      EditControlWrapper.RemoveKeyUpNotifier(OnKeyUp);
+      EditControlWrapper.RemoveSysKeyDownNotifier(OnSysKeyDown);
+      EditControlWrapper.RemoveSysKeyUpNotifier(OnSysKeyUp);
+      FAdded := False;
+      ShowMessage('Key Hook Removed');
+    end
+    else
+    begin
+      EditControlWrapper.AddKeyDownNotifier(OnKeyDown);
+      EditControlWrapper.AddKeyUpNotifier(OnKeyUp);
+      EditControlWrapper.AddSysKeyDownNotifier(OnSysKeyDown);
+      EditControlWrapper.AddSysKeyUpNotifier(OnSysKeyUp);
+      FAdded := True;
+      ShowMessage('Key Hook Added');
+    end;
+  end;
 end;
 
 procedure TCnTestEditControlWrapperWizard.SubActionUpdate(Index: Integer);

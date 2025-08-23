@@ -5,18 +5,44 @@
 **********************************************************************
 
                    Lazarus IDE编辑器文本格式与偏移说明
-                           Revision 1.0.0.1
+                           Revision 1.0.0.2
                        =========================
-                         作者：刘啸 2025.08.06
+                         作者：刘啸 2025.08.23
 
 
-Lazarus 的 IDE 接口文档较为缺乏，通过写部分测试插件单元，总结了编辑器文本及偏移相关的信息，以 4.0 或以上版本为准。
+Lazarus 的 IDE 接口文档较为缺乏，通过写部分测试插件单元，总结了编辑器结构、文本及偏移相关的信息，以 4.0 或以上版本为准。
+
+============
+一、基础说明
+============
 
 首先，Lazarus 内部的 string 以 AnsiString 模式编译，从编辑器中获取到的文本大多为 Utf8 格式，但存放在 Ansi 格式的 string 中。而且特别要注意的是，Edit 这种标准控件，其 Text 属性也是 Utf8 格式，一个汉字占三个字节，这和 Delphi 无论是低版本的纯 AnsiString 还是高版本的 Utf16 格式的 UnicodeString 都是显著不同的。
 
 如果代码里写死给 string 类型的变量赋值汉字，则汉字编码会随着源码文件的编码而变，当源码文件编码是 Utf8 时，这字符串也是 Utf8 格式。这点也和高版本的 Delphi 不同，高版本的 Delphi 里的字符串内容是不随源文件编码变化而变化的。
 
 如果把一个内容是 Ansi 编码的 string 转换成 UnicodeString，直接用 UnicodeString 进行强制类型转换是乱码的，必须先将其转换为 Utf8 格式才行。也就是说 UnicodeString 强制转换的类型必须是 Utf8 内容的 string，内容才能是合法的 Utf16。
+
+========================
+二、编辑器窗体与控件结构
+========================
+
+Lazarus 的编辑器窗口和控件的结构迥异于 Delphi。
+
+Delphi 可以开多个编辑器窗口，每个窗口是一个独立 Form，其 ClassName 是 TEditWindow，Name 则以 EditWindow_ 为前缀，后面加数字。
+
+虽然 TEditWindow 的上部是一堆 Tab，但只是一个 TabSet，并不是具体容器，它下面的编辑器控件只有一个大的实例，内容随 Tab 切换而动态变化。
+
+Delphi 的编辑器控件，其 ClassName 是 TEditControl，Name 是 Editor。
+
+Lazarus 的编辑器窗口则似乎只能有一个，也是独立 Form，其 ClassName 是 TSourceNotebook，Name 则是 SourceNotebook。
+
+TSourceNotebook 窗口上部的一堆 Tab 货真价实，是一个 Name 为 SrcEditNotebook 的 TPageControl 子类 TExtendedNotebook，拥有多个 TabSheet 容器，每个 TabSheet 里都有个独立的大编辑器控件。
+
+Lazarus 的编辑器控件，其 ClassName 是 TIDESynEditor，Name 则以 SynEdit 为前缀，后面加数字。
+
+========================
+二、编辑器光标及偏移说明
+========================
 
 Lazarus 的 SrcEditorIntf 单元提供了 SourceEditorManagerIntf 全局变量，可据此获得其 ActiveEditor 或根据 SourceEditorCount 遍历所有 SourceEditors，获得其代表一编辑器的 TSourceEditorInterface 实例。该实例有不少供操作编辑器文本的属性、方法，说明如下。
 

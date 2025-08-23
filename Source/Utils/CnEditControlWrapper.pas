@@ -70,10 +70,9 @@ uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ExtCtrls,
   ComCtrls, TypInfo, Forms, {$IFNDEF LAZARUS} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
-  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF}
-  {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} ToolsAPI, {$ENDIF}
-  CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
-  {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
+  {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF}
+  CnWizMethodHook, {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
 type
@@ -153,22 +152,21 @@ type
     FContext: TCnEditorContext;
     FEditControl: TControl;
     FEditWindow: TCustomForm;
-{$IFNDEF NO_DELPHI_OTA}
-    FEditView: IOTAEditView;
-{$ENDIF}
+    FEditView: TCnEditViewSourceInterface;
     FGutterWidth: Integer;
     FGutterChanged: Boolean;
     FLastValid: Boolean;
-{$IFNDEF NO_DELPHI_OTA}
-    procedure SetEditView(AEditView: IOTAEditView);
+{$IFDEF LAZARUS}
+    FHook: TCnControlHook;
 {$ENDIF}
+    procedure SetEditView(AEditView: TCnEditViewSourceInterface);
     function GetGutterWidth: Integer;
     function GetViewLineNumber(Index: Integer): Integer;
     function GetViewLineCount: Integer;
     function GetViewBottomLine: Integer;
     function GetTopEditor: TControl;
   public
-    constructor Create(AEditControl: TControl {$IFNDEF NO_DELPHI_OTA}; AEditView: IOTAEditView {$ENDIF});
+    constructor Create(AEditControl: TControl; AEditView: TCnEditViewSourceInterface);
     destructor Destroy; override;
     function EditorIsOnTop: Boolean;
     procedure NotifyIDEGutterChanged;
@@ -176,9 +174,7 @@ type
     property Context: TCnEditorContext read FContext;
     property EditControl: TControl read FEditControl;
     property EditWindow: TCustomForm read FEditWindow;
-{$IFNDEF NO_DELPHI_OTA}
-    property EditView: IOTAEditView read FEditView;
-{$ENDIF}
+    property EditView: TCnEditViewSourceInterface read FEditView;
     property GutterWidth: Integer read GetGutterWidth;
 
     // 当前显示在最前面的编辑控件
@@ -360,6 +356,10 @@ type
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
     procedure OnIdle(Sender: TObject);
 {$ENDIF}
+{$IFDEF LAZARUS}
+    procedure OnBeforeEditControlMessage(Sender: TObject; Control: TControl;
+      var Msg: TMessage; var Handled: Boolean);
+{$ENDIF}
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     function OnGetMsgProc(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
@@ -404,9 +404,7 @@ type
 
     procedure CheckNewEditor(EditControl: TControl {$IFNDEF NO_DELPHI_OTA}
       {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
-{$IFNDEF NO_DELPHI_OTA}
-    function AddEditor(EditControl: TControl; View: IOTAEditView): Integer;
-{$ENDIF}
+    function AddEditor(EditControl: TControl; View: TCnEditViewSourceInterface): Integer;
     procedure DeleteEditor(EditControl: TControl);
 
 {$IFNDEF NO_DELPHI_OTA}
@@ -725,13 +723,6 @@ end;
 {$IFDEF STAND_ALONE}
 
 // 为了独立运行时不引用，自己写个本地的
-function IsEditControl(AControl: TComponent): Boolean;
-begin
-  Result := (AControl <> nil) and AControl.ClassNameIs('TEditControl')
-    and SameText(AControl.Name, 'Editor');
-end;
-
-// 为了独立运行时不引用，自己写个本地的
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
 begin
 {$IFDEF DEBUG}
@@ -775,23 +766,27 @@ end;
 
 { TCnEditorObject }
 
-constructor TCnEditorObject.Create(AEditControl: TControl {$IFNDEF NO_DELPHI_OTA};
-  AEditView: IOTAEditView {$ENDIF});
+constructor TCnEditorObject.Create(AEditControl: TControl;
+  AEditView: TCnEditViewSourceInterface);
 begin
   inherited Create;
   FLines := TList.Create;
   FEditControl := AEditControl;
   FEditWindow := TCustomForm(AEditControl.Owner);
-{$IFNDEF NO_DELPHI_OTA}
   SetEditView(AEditView);
+{$IFDEF LAZARUS}
+  FHook := TCnControlHook.Create(nil);
+  FHook.BeforeMessage := EditControlWrapper.OnBeforeEditControlMessage;
+  FHook.Hook(FEditControl);
 {$ENDIF}
 end;
 
 destructor TCnEditorObject.Destroy;
 begin
-{$IFNDEF NO_DELPHI_OTA}
-  SetEditView(nil);
+{$IFDEF LAZARUS}
+  FHook.Free;
 {$ENDIF}
+  SetEditView(nil);
   FLines.Free;
   inherited;
 end;
@@ -838,14 +833,10 @@ begin
   Result := FLines.Count;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
-
-procedure TCnEditorObject.SetEditView(AEditView: IOTAEditView);
+procedure TCnEditorObject.SetEditView(AEditView: TCnEditViewSourceInterface);
 begin
   NoRefCount(FEditView) := NoRefCount(AEditView);
 end;
-
-{$ENDIF}
 
 function TCnEditorObject.GetTopEditor: TControl;
 var
@@ -1564,19 +1555,37 @@ end;
 
 procedure TCnEditControlWrapper.CheckNewEditor(EditControl: TControl
   {$IFNDEF NO_DELPHI_OTA} {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
+{$IFNDEF STAND_ALONE}
 var
   Idx: Integer;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF NO_DELPHI_OTA}
+  I: Integer;
+  Editor: TSourceEditorInterface;
+{$ELSE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
   CES: INTACodeEditorServices;
   View: IOTAEditView;
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   Idx := IndexOfEditor(EditControl);
   if Idx >= 0 then
   begin
-{$IFNDEF NO_DELPHI_OTA}
+    // 已经存在，更新 EditorObject 里的对应关系
+{$IFDEF NO_DELPHI_OTA}
+    // Lazarus
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      Editor := SourceEditorManagerIntf.SourceEditors[I];
+      if (Editor.EditorControl = EditControl) and (Editors[Idx].EditView <> Editor) then
+      begin
+        Editors[Idx].SetEditView(Editor);
+        DoEditorChange(Editors[Idx], [ctView]);
+      end;
+    end;
+{$ELSE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1592,7 +1601,19 @@ begin
   end
   else
   begin
-{$IFNDEF NO_DELPHI_OTA}
+    // 不存在，创建新的 EditorObject
+{$IFDEF NO_DELPHI_OTA}
+    // Lazarus
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      Editor := SourceEditorManagerIntf.SourceEditors[I];
+      if Editor.EditorControl = EditControl then
+      begin
+        AddEditor(EditControl, Editor);
+        Break;
+      end;
+    end;
+{$ELSE}
 {$IFDEF USE_CODEEDITOR_SERVICE}
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
@@ -1607,17 +1628,14 @@ begin
     CnDebugger.LogMsg('TCnEditControlWrapper: New EditControl.');
   {$ENDIF}
   end;
+{$ENDIF}
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
-
 function TCnEditControlWrapper.AddEditor(EditControl: TControl;
-  View: IOTAEditView): Integer;
+  View: TCnEditViewSourceInterface): Integer;
 begin
   Result := FEditorList.Add(TCnEditorObject.Create(EditControl, View));
 end;
-
-{$ENDIF}
 
 procedure TCnEditControlWrapper.DeleteEditor(EditControl: TControl);
 var
@@ -2643,6 +2661,10 @@ begin
   {$ENDIF}
     FEditControlList.Add(EditControl);
     EditControl.FreeNotification(Self);
+{$IFDEF LAZARUS}
+    CheckNewEditor(EditControl);
+    // Lazarus 中没有 SetEditView 这种接口供拦截，只能在此处判断是否新的以创建对应的 EditorObject
+{$ENDIF}
     DoEditControlNotify(EditControl, opInsert);
   end;
 end;
@@ -3408,6 +3430,62 @@ begin
     end;
   end;
 end;
+
+{$IFDEF LAZARUS}
+
+procedure TCnEditControlWrapper.OnBeforeEditControlMessage(Sender: TObject; Control: TControl;
+  var Msg: TMessage; var Handled: Boolean);
+var
+  I: Integer;
+  Key: Word;
+  ScanCode: Word;
+  Shift: TShiftState;
+  List: TList;
+begin
+  if ((Msg.msg = WM_KEYDOWN) or (Msg.msg = WM_KEYUP) or
+    (Msg.msg = WM_SYSKEYDOWN) or (Msg.msg = WM_SYSKEYUP)) and
+    IsEditControl(Control) then
+  begin
+    Key := Msg.wParam;
+    ScanCode := (Msg.lParam and $00FF0000) shr 16;
+    Shift := KeyDataToShiftState(Msg.lParam);
+
+    // 处理输入法送回的按键
+    if Key = VK_PROCESSKEY then
+    begin
+      Key := MapVirtualKey(ScanCode, 1);
+    end;
+
+    List := nil;
+    case Msg.msg of
+      WM_KEYDOWN:
+        List := FKeyDownNotifiers;
+      WM_KEYUP:
+        List := FKeyUpNotifiers;
+      WM_SYSKEYDOWN:
+        List := FSysKeyDownNotifiers;
+      WM_SYSKEYUP:
+        List := FSysKeyUpNotifiers;
+    end;
+
+    if List = nil then
+      Exit;
+
+    for I := 0 to List.Count - 1 do
+    begin
+      try
+        with PCnWizNotifierRecord(List[I])^ do
+          TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
+        if Handled then Break;
+      except
+        on E: Exception do
+          DoHandleException('TCnEditControlWrapper.BeforeKeyMessage[' + IntToStr(I) + ']', E);
+      end;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnEditControlWrapper.ApplicationMessage(var Msg: TMsg;
   var Handled: Boolean);

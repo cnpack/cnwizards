@@ -1826,6 +1826,7 @@ end;
 
 // 返回当前的代码编辑器控件
 function GetCurrentEditControl: TControl;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   I: Integer;
@@ -1835,8 +1836,10 @@ var
 {$ELSE}
   View: IOTAEditView;
 {$ENDIF}
+{$ENDIF}
 begin
   Result := nil;
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
   for I := 0 to Screen.CustomFormCount - 1 do
   begin
@@ -1857,6 +1860,7 @@ begin
   View := CnOtaGetTopMostEditView;
   if (View <> nil) and (View.GetEditWindow <> nil) then
     Result := GetEditControlFromEditorForm(View.GetEditWindow.Form);
+{$ENDIF}
 {$ENDIF}
 end;
 

@@ -103,6 +103,17 @@ type
 {$ENDIF}
 {$ENDIF}
 
+  // 封装的一个 EditView 和 SourceEditorInterface 的定义
+{$IFDEF STAND_ALONE}
+  TCnEditViewSourceInterface = Pointer;
+{$ELSE}
+  {$IFDEF LAZARUS}
+  TCnEditViewSourceInterface = TSourceEditorInterface;
+  {$ELSE}
+  TCnEditViewSourceInterface = IOTAEditView;
+  {$ENDIF}
+{$ENDIF}
+
   TCnBookmarkObject = class
   private
     FLine: Integer;
@@ -470,6 +481,8 @@ function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boole
 {* 查询输入的服务接口并返回一个指定接口实例，如果失败，返回 False}
 function CnOtaGetCurrentSelection: string;
 {* 取当前选择的文本}
+function CnOtaGetTopMostEditView: TCnEditViewSourceInterface; overload;
+{* 取当前最前端的 IOTAEditView 接口或 Lazarus 的活动编辑器}
 {$IFNDEF CNWIZARDS_MINIMUM}
 function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
 {* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
@@ -484,10 +497,8 @@ function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取 IOTAEditPosition 接口}
 function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): IOTAEditView;
 {* 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
-function CnOtaGetTopMostEditView: IOTAEditView; overload;
-{* 取当前最前端的IOTAEditView接口}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
-{* 取指定编辑器最前端的IOTAEditView接口}
+{* 取指定编辑器最前端的 IOTAEditView 接口}
 function CnOtaEditViewSupportsSyntaxHighlight(EditView: IOTAEditView = nil): Boolean;
 {* 取指定 IOTAEditView 是否使用语法高亮}
 function CnOtaGetTopMostEditActions: IOTAEditActions;
@@ -3551,6 +3562,30 @@ begin
 {$ENDIF}
 end;
 
+// 取当前最前端的 IOTAEditView 接口或 Lazarus 的活动编辑器
+function CnOtaGetTopMostEditView: TCnEditViewSourceInterface;
+{$IFNDEF NO_DELPHI_OTA}
+var
+  iEditBuffer: IOTAEditBuffer;
+{$ENDIF}
+begin
+{$IFDEF STAND_ALONE}
+  Result := nil;
+{$ELSE}
+{$IFDEF LAZARUS}
+  Result := SourceEditorManagerIntf.ActiveEditor;
+{$ELSE}
+  iEditBuffer := CnOtaGetEditBuffer;
+  if iEditBuffer <> nil then
+  begin
+    Result := iEditBuffer.GetTopView;
+    Exit;
+  end;
+  Result := nil;
+{$ENDIF}
+{$ENDIF}
+end;
+
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
@@ -3654,20 +3689,6 @@ begin
     Exit;
 
   Result := SrcEditor.EditViews[0];
-end;
-
-// 取当前最前端的IOTAEditView接口
-function CnOtaGetTopMostEditView: IOTAEditView;
-var
-  iEditBuffer: IOTAEditBuffer;
-begin
-  iEditBuffer := CnOtaGetEditBuffer;
-  if iEditBuffer <> nil then
-  begin
-    Result := iEditBuffer.GetTopView;
-    Exit;
-  end;
-  Result := nil;
 end;
 
 // 取指定编辑器最前端的 IOTAEditView 接口
