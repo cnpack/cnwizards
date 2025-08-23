@@ -572,7 +572,7 @@ var
 
   // CnMenuAction
   SCnDuplicateCommand: string = 'Duplicated Command: %s';
-  SCnWizSubActionShortCutFormCaption: string = '%s - Hotkey Configuration';
+  SCnWizSubActionShortCutFormCaption: string = '%s - Shortcut Configuration';
 
   // CnWizConfigForm
   SCnWizConfigCaption: string = '&Options...';

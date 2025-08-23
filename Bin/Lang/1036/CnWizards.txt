@@ -2863,6 +2863,7 @@ TCnCodeFormatterForm.tsPascal.Caption=Pascal
 TCnAICoderConfigForm.btnCancel.Caption=&Annuler
 TCnAICoderConfigForm.btnHelp.Caption=&Aide
 TCnAICoderConfigForm.btnOK.Caption=&OK
+TCnAICoderConfigForm.btnShortCut.Caption=&Raccourci
 TCnAICoderConfigForm.Caption=Paramètres du codeur IA
 TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Entrée pour continuer le codage dans l'éditeur
 TCnAICoderConfigForm.chkProxy.Caption=Utiliser un proxy:

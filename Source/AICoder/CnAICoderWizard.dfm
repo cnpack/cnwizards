@@ -1,6 +1,6 @@
 object CnAICoderConfigForm: TCnAICoderConfigForm
   Left = 192
-  Top = 107
+  Top = 108
   BorderStyle = bsDialog
   Caption = 'AI Coder Settings'
   ClientHeight = 541
@@ -71,7 +71,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Caption = '&OK'
     Default = True
     ModalResult = 1
-    TabOrder = 11
+    TabOrder = 12
   end
   object btnCancel: TButton
     Left = 732
@@ -82,7 +82,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 12
+    TabOrder = 13
   end
   object btnHelp: TButton
     Left = 812
@@ -91,7 +91,7 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Height = 21
     Anchors = [akRight, akBottom]
     Caption = '&Help'
-    TabOrder = 13
+    TabOrder = 14
     OnClick = btnHelpClick
   end
   object chkProxy: TCheckBox
@@ -176,5 +176,15 @@ object CnAICoderConfigForm: TCnAICoderConfigForm
     Height = 17
     Caption = '(Ctrl +) Alt + Enter to Continue Coding in Editor'
     TabOrder = 9
+  end
+  object btnShortCut: TButton
+    Left = 8
+    Top = 509
+    Width = 75
+    Height = 21
+    Anchors = [akLeft, akBottom]
+    Caption = '&Shortcut'
+    TabOrder = 11
+    OnClick = btnShortCutClick
   end
 end

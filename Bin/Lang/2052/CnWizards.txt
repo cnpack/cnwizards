@@ -2862,6 +2862,7 @@ TCnCodeFormatterForm.tsPascal.Caption=Pascal 代码
 TCnAICoderConfigForm.btnCancel.Caption=取消(&C)
 TCnAICoderConfigForm.btnHelp.Caption=帮助(&H)
 TCnAICoderConfigForm.btnOK.Caption=确定(&O)
+TCnAICoderConfigForm.btnShortCut.Caption=快捷键(&K)
 TCnAICoderConfigForm.Caption=AI 辅助编码设置
 TCnAICoderConfigForm.chkAltEnterContCode.Caption=编辑器中使用快捷键 (Ctrl +) Alt + Enter 续写代码
 TCnAICoderConfigForm.chkProxy.Caption=使用代理：

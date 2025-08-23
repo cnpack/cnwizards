@@ -2862,6 +2862,7 @@ TCnCodeFormatterForm.tsPascal.Caption=Pascal
 TCnAICoderConfigForm.btnCancel.Caption=Отмена
 TCnAICoderConfigForm.btnHelp.Caption=Справка
 TCnAICoderConfigForm.btnOK.Caption=&OK
+TCnAICoderConfigForm.btnShortCut.Caption=Гор. кл
 TCnAICoderConfigForm.Caption=Настройки AI Кодера
 TCnAICoderConfigForm.chkAltEnterContCode.Caption=(Ctrl +) Alt + Enter для продолжения написания кода в редакторе
 TCnAICoderConfigForm.chkProxy.Caption=Использовать прокси:

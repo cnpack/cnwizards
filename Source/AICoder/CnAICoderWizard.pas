@@ -66,8 +66,10 @@ type
     lblMaxFav: TLabel;
     udMaxFav: TUpDown;
     chkAltEnterContCode: TCheckBox;
+    btnShortCut: TButton;
     procedure cbbActiveEngineChange(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure btnShortCutClick(Sender: TObject);
   private
     FTabsheets: array of TTabSheet;
     FOptionFrames: array of TCnAICoderOptionFrame;
@@ -965,6 +967,15 @@ begin
     else
       CnAICoderChatForm.AddMessage(Format('%d %s', [ErrorCode, Answer]), CnAIEngineManager.CurrentEngineName);
   end;
+end;
+
+procedure TCnAICoderConfigForm.btnShortCutClick(Sender: TObject);
+var
+  AWizard: TCnAICoderWizard;
+begin
+  AWizard := TCnAICoderWizard(CnWizardMgr.WizardByClass(TCnAICoderWizard));
+  if (AWizard <> nil) and AWizard.ShowShortCutDialog(GetHelpTopic) then
+    AWizard.DoSaveSettings;
 end;
 
 initialization
