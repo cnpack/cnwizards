@@ -50,7 +50,8 @@ uses
   StrUtils,
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
-{$IFNDEF STAND_ALONE} ToolsAPI, CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
+{$IFNDEF STAND_ALONE} {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
+  CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
   CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
 
@@ -492,16 +493,16 @@ end;
 
 procedure TCnProjectViewBaseForm.actCopyExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   AList: TStringList;
 begin
   AList := TStringList.Create;
   try
     with lvList do
     begin
-      for i := 0 to Pred(Items.Count) do
-        if Items.Item[i].Selected and (Items.Item[i].Caption <> '') then
-          AList.Add(Items[i].Caption);
+      for I := 0 to Pred(Items.Count) do
+        if Items.Item[I].Selected and (Items.Item[I].Caption <> '') then
+          AList.Add(Items[I].Caption);
     end;
   finally
     if AList.Count > 0 then
@@ -512,11 +513,11 @@ end;
 
 procedure TCnProjectViewBaseForm.actSelectAllExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   with lvList do
-    for i := 0 to Pred(Items.Count) do
-      Items[i].Selected := True;
+    for I := 0 to Pred(Items.Count) do
+      Items[I].Selected := True;
 end;
 
 procedure TCnProjectViewBaseForm.actSelectNoneExecute(Sender: TObject);
@@ -526,11 +527,11 @@ end;
 
 procedure TCnProjectViewBaseForm.actSelectInvertExecute(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
 begin
   with lvList do
-    for i := Pred(Items.Count) downto 0 do
-      Items[i].Selected := not Items[i].Selected;
+    for I := Pred(Items.Count) downto 0 do
+      Items[I].Selected := not Items[I].Selected;
 end;
 
 procedure TCnProjectViewBaseForm.actAttributeExecute(Sender: TObject);
@@ -819,7 +820,7 @@ begin
     CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Save Width %d Height %d before Scale.', [TW, TH]);
 {$ENDIF}
 
-{$IFNDEF STAND_ALONE}
+{$IFNDEF NO_DELPHI_OTA}
     if CnIsGEDelphi11Dot3 then
     begin
       S := GetListViewWidthString2(lvList, GetFactorFromSizeEnlarge(Enlarge)); // 获取正确的宽度值
@@ -870,7 +871,7 @@ end;
 
 procedure TCnProjectViewBaseForm.SelectOpenedItem;
 var
-  i: Integer;
+  I: Integer;
   aCurrentName: string;
 begin
   with lvList do
@@ -884,15 +885,17 @@ begin
     if aCurrentName = '' then
       Exit;
 
-    for i := 0 to Pred(Items.Count) do
-      if AnsiSameText(Items[i].Caption, aCurrentName) then
+    for I := 0 to Pred(Items.Count) do
+    begin
+      if AnsiSameText(Items[I].Caption, aCurrentName) then
       begin
         Selected := nil;
-        Items[i].Selected := True;
+        Items[I].Selected := True;
         ItemFocused := Selected;
         Selected.MakeVisible(False);
         Break;
       end;
+    end;
   end;
 end;
 

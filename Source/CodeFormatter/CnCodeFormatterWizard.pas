@@ -43,14 +43,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, StdCtrls, ComCtrls, Menus, TypInfo, Contnrs, ExtCtrls,
-  mPasLex, CnSpin, CnConsts, CnCommon, CnWizConsts, CnWizClasses, CnWizMultiLang,
-  CnWizOptions,
-{$IFDEF CNWIZARDS_CNINPUTHELPER}
-  CnWizManager, CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
-{$ENDIF}
+  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ELSE} LCLProc, {$ENDIF} IniFiles, StdCtrls, ComCtrls, Menus,
+  TypInfo, Contnrs, ExtCtrls, mPasLex, CnSpin, CnConsts, CnCommon, CnWizConsts,
+  CnWizClasses, CnWizMultiLang, CnWizOptions, CnWizManager,
+{$IFDEF CNWIZARDS_CNINPUTHELPER} {$IFNDEF NO_DELPHI_OTA}
+  CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
+{$ENDIF} {$ENDIF}
   CnStrings, CnPasCodeParser, CnWizUtils, CnFormatterIntf, CnCodeFormatRules,
-  CnWizDebuggerNotifier, CnEditControlWrapper;
+  {$IFNDEF NO_DELPHI_OTA} CnWizDebuggerNotifier, {$ENDIF} CnEditControlWrapper;
 
 type
   TCnCodeFormatterWizard = class(TCnSubMenuWizard)
@@ -86,13 +86,17 @@ type
 {$ENDIF}
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
+{$IFNDEF NO_DELPHI_OTA}
     FInputHelper: TCnInputHelper;
     FSymbolListMgr: TCnSymbolListMgr;
     FPreNamesList: TCnAnsiStringList;  // Lazy Create
     FPreNamesArray: array of PAnsiChar;
     procedure CheckObtainIDESymbols;
 {$ENDIF}
+{$ENDIF}
 
+
+{$IFNDEF NO_DELPHI_OTA}
     // 获取指定文件中的断点信息
     procedure ObtainBreakpointsByFile(const FileName: string);
     // 获取行的折叠信息
@@ -102,15 +106,17 @@ type
     procedure RestoreBreakpoints(LineMarks: PDWORD; Count: Integer = MaxInt);
     // 根据 DWORD 数组以及之前存储的 FBookmarks 还原书签信息
     procedure RestoreBookmarks(EditView: IOTAEditView; LineMarks: PDWORD);
+
 {$IFDEF IDE_EDITOR_ELIDE}
     // 根据 DWORD 数组以及折叠行数量还原折叠状态
     procedure RestoreElideLines(LineMarks: PDWORD);
     procedure ElideOnTimer(Sender: TObject);
 {$ENDIF}
-
-    function PutPascalFormatRules: Boolean;
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
       View: IOTAEditView): Boolean;
+{$ENDIF}
+
+    function PutPascalFormatRules: Boolean;
     function GetErrorStr(Err: Integer): string;
   protected
     function GetHasConfig: Boolean; override;
@@ -211,18 +217,22 @@ uses
 {$ENDIF}
 
 const
+{$IFDEF LAZARUS}
+  DLLName: string = 'CnFormatLibW.dll';   // Lazarus 用 Unicode 版
+{$ELSE}
 {$IFDEF UNICODE}
   {$IFDEF WIN64}
   DLLName: string = 'CnFormatLibW64.dll'; // 64 位用 64 位 DLL
   {$ELSE}
-  DLLName: string = 'CnFormatLibW.dll'; // D2009 ~ 最新 用 Unicode 版
+  DLLName: string = 'CnFormatLibW.dll';   // D2009 ~ 最新 用 Unicode 版
   {$ENDIF}
 {$ELSE}
   {$IFDEF IDE_STRING_ANSI_UTF8}
-  DLLName: string = 'CnFormatLibW.dll'; // D2005 ~ 2007 也用 Unicode 版但用 UTF8
+  DLLName: string = 'CnFormatLibW.dll';   // D2005 ~ 2007 也用 Unicode 版但用 UTF8
   {$ELSE}
-  DLLName: string = 'CnFormatLib.dll';  // D5~7 下用 Ansi 版
+  DLLName: string = 'CnFormatLib.dll';    // D5~7 下用 Ansi 版
   {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 
   csUsesUnitSingleLine = 'UsesUnitSingleLine';
@@ -253,6 +263,8 @@ begin
   FIdOptions := RegisterASubAction(SCnCodeFormatterWizardConfig,
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
 end;
+
+{$IFNDEF NO_DELPHI_OTA}
 
 function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos, EndPos:
   TOTACharPos; View: IOTAEditView): Boolean;
@@ -341,6 +353,8 @@ begin
   Result := True;
 end;
 
+{$ENDIF}
+
 procedure TCnCodeFormatterWizard.Config;
 begin
   with TCnCodeFormatterForm.Create(nil) do
@@ -421,8 +435,10 @@ end;
 destructor TCnCodeFormatterWizard.Destroy;
 begin
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
+{$IFNDEF NO_DELPHI_OTA}
   FPreNamesList.Free;
   SetLength(FPreNamesArray, 0);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF IDE_EDITOR_ELIDE}
@@ -572,6 +588,7 @@ begin
 end;
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
+{$IFNDEF NO_DELPHI_OTA}
 
 procedure TCnCodeFormatterWizard.CheckObtainIDESymbols;
 var
@@ -667,6 +684,7 @@ begin
     FPreNamesArray[I] := PAnsiChar(FPreNamesList[I]);
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 function TCnCodeFormatterWizard.PutPascalFormatRules: Boolean;

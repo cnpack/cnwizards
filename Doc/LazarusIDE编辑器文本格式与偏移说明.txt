@@ -12,9 +12,9 @@
 
 Lazarus µÄ IDE ½Ó¿ÚÎÄµµ½ÏÎªÈ±·¦£¬Í¨¹ýÐ´²¿·Ö²âÊÔ²å¼þµ¥Ôª£¬×Ü½áÁË±à¼­Æ÷½á¹¹¡¢ÎÄ±¾¼°Æ«ÒÆÏà¹ØµÄÐÅÏ¢£¬ÒÔ 4.0 »òÒÔÉÏ°æ±¾Îª×¼¡£
 
-============
+======================================================================
 Ò»¡¢»ù´¡ËµÃ÷
-============
+======================================================================
 
 Ê×ÏÈ£¬Lazarus ÄÚ²¿µÄ string ÒÔ AnsiString Ä£Ê½±àÒë£¬´Ó±à¼­Æ÷ÖÐ»ñÈ¡µ½µÄÎÄ±¾´ó¶àÎª Utf8 ¸ñÊ½£¬µ«´æ·ÅÔÚ Ansi ¸ñÊ½µÄ string ÖÐ¡£¶øÇÒÌØ±ðÒª×¢ÒâµÄÊÇ£¬Edit ÕâÖÖ±ê×¼¿Ø¼þ£¬Æä Text ÊôÐÔÒ²ÊÇ Utf8 ¸ñÊ½£¬Ò»¸öºº×ÖÕ¼Èý¸ö×Ö½Ú£¬ÕâºÍ Delphi ÎÞÂÛÊÇµÍ°æ±¾µÄ´¿ AnsiString »¹ÊÇ¸ß°æ±¾µÄ Utf16 ¸ñÊ½µÄ UnicodeString ¶¼ÊÇÏÔÖø²»Í¬µÄ¡£
 
@@ -22,9 +22,9 @@ Lazarus µÄ IDE ½Ó¿ÚÎÄµµ½ÏÎªÈ±·¦£¬Í¨¹ýÐ´²¿·Ö²âÊÔ²å¼þµ¥Ôª£¬×Ü½áÁË±à¼­Æ÷½á¹¹¡¢ÎÄ±¾¼
 
 Èç¹û°ÑÒ»¸öÄÚÈÝÊÇ Ansi ±àÂëµÄ string ×ª»»³É UnicodeString£¬Ö±½ÓÓÃ UnicodeString ½øÐÐÇ¿ÖÆÀàÐÍ×ª»»ÊÇÂÒÂëµÄ£¬±ØÐëÏÈ½«Æä×ª»»Îª Utf8 ¸ñÊ½²ÅÐÐ¡£Ò²¾ÍÊÇËµ UnicodeString Ç¿ÖÆ×ª»»µÄÀàÐÍ±ØÐëÊÇ Utf8 ÄÚÈÝµÄ string£¬ÄÚÈÝ²ÅÄÜÊÇºÏ·¨µÄ Utf16¡£
 
-========================
+======================================================================
 ¶þ¡¢±à¼­Æ÷´°ÌåÓë¿Ø¼þ½á¹¹
-========================
+======================================================================
 
 Lazarus µÄ±à¼­Æ÷´°¿ÚºÍ¿Ø¼þµÄ½á¹¹åÄÒìÓÚ Delphi¡£
 
@@ -40,9 +40,9 @@ TSourceNotebook ´°¿ÚÉÏ²¿µÄÒ»¶Ñ Tab »õÕæ¼ÛÊµ£¬ÊÇÒ»¸ö Name Îª SrcEditNotebook µÄ T
 
 Lazarus µÄ±à¼­Æ÷¿Ø¼þ£¬Æä ClassName ÊÇ TIDESynEditor£¬Name ÔòÒÔ SynEdit ÎªÇ°×º£¬ºóÃæ¼ÓÊý×Ö¡£
 
-========================
-¶þ¡¢±à¼­Æ÷¹â±ê¼°Æ«ÒÆËµÃ÷
-========================
+======================================================================
+Èý¡¢±à¼­Æ÷¹â±ê¼°Æ«ÒÆËµÃ÷
+======================================================================
 
 Lazarus µÄ SrcEditorIntf µ¥ÔªÌá¹©ÁË SourceEditorManagerIntf È«¾Ö±äÁ¿£¬¿É¾Ý´Ë»ñµÃÆä ActiveEditor »ò¸ù¾Ý SourceEditorCount ±éÀúËùÓÐ SourceEditors£¬»ñµÃÆä´ú±íÒ»±à¼­Æ÷µÄ TSourceEditorInterface ÊµÀý¡£¸ÃÊµÀýÓÐ²»ÉÙ¹©²Ù×÷±à¼­Æ÷ÎÄ±¾µÄÊôÐÔ¡¢·½·¨£¬ËµÃ÷ÈçÏÂ¡£
 

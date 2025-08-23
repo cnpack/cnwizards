@@ -64,7 +64,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} SrcEditorIntf, {$ENDIF}
+  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf, SrcEditorIntf, {$ENDIF}
   {$ELSE} RegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
@@ -106,11 +106,14 @@ type
   // 封装的一个 EditView 和 SourceEditorInterface 的定义
 {$IFDEF STAND_ALONE}
   TCnEditViewSourceInterface = Pointer;
+  TCnIDEProjectInterface = Pointer;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
+  TCnIDEProjectInterface = TLazProject;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
+  TCnIDEProjectInterface = IOTAProject;
   {$ENDIF}
 {$ENDIF}
 
@@ -259,13 +262,6 @@ function GetIDEActionFromShortCut(ShortCut: TShortCut): TCustomAction;
 procedure SaveIDEActionListToFile(const FileName: string);
 {* 保存 IDE ActionList 中的内容到指定文件}
 
-{$IFNDEF NO_DELPHI_OTA}
-function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
-{* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
-procedure SaveIDEOptionsNameToFile(const FileName: string);
-{* 保存 IDE 环境设置变量名到指定文件}
-procedure SaveProjectOptionsNameToFile(const FileName: string);
-{* 保存当前工程环境设置变量名到指定文件}
 function FindIDEAction(const ActionName: string): TContainedAction;
 {* 根据 IDE Action 名，返回对象}
 procedure FindIDEActionByShortCut(AShortCut: TShortCut; Actions: TObjectList);
@@ -276,6 +272,14 @@ function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
   有冲突则弹框询问，返回无冲突、有冲突但用户同意、有冲突用户停止}
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
+
+{$IFNDEF NO_DELPHI_OTA}
+function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
+{* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
+procedure SaveIDEOptionsNameToFile(const FileName: string);
+{* 保存 IDE 环境设置变量名到指定文件}
+procedure SaveProjectOptionsNameToFile(const FileName: string);
+{* 保存当前工程环境设置变量名到指定文件}
 {$ENDIF}
 
 function AddMenuItem(Menu: TMenuItem; const Caption: string;
@@ -298,24 +302,6 @@ function FindComponentByClass(AWinControl: TWinControl;
 function FindComponentByClassName(AWinControl: TWinControl;
   const AClassName: string; const AComponentName: string = ''): TComponent;
 {* 在窗口控件中查找指定类名的子组件}
-
-{$IFNDEF LAZARUS}
-function ScreenHasModalForm: Boolean;
-{* 存在模式窗口}
-procedure SetFormNoTitle(Form: TForm);
-{* 去掉窗体的标题}
-procedure SendKey(vk: Word);
-{* 发送一个按键事件}
-function IMMIsActive: Boolean;
-{* 判断输入法是否打开}
-function GetCaretPosition(var Pt: TPoint): Boolean;
-{* 取编辑光标在屏幕的坐标}
-procedure GetCursorList(List: TStrings);
-{* 取 Cursor 标识符列表 }
-procedure GetCharsetList(List: TStrings);
-{* 取 FontCharset 标识符列表 }
-procedure GetColorList(List: TStrings);
-{* 取 Color 标识符列表 }
 
 //==============================================================================
 // 控件处理函数
@@ -342,6 +328,24 @@ function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
 {* ListView 当前选择项是否允许下移}
 procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 {* 修改 ListView 当前选择项}
+
+{$IFNDEF LAZARUS}
+function ScreenHasModalForm: Boolean;
+{* 存在模式窗口}
+procedure SetFormNoTitle(Form: TForm);
+{* 去掉窗体的标题}
+procedure SendKey(vk: Word);
+{* 发送一个按键事件}
+function IMMIsActive: Boolean;
+{* 判断输入法是否打开}
+function GetCaretPosition(var Pt: TPoint): Boolean;
+{* 取编辑光标在屏幕的坐标}
+procedure GetCursorList(List: TStrings);
+{* 取 Cursor 标识符列表 }
+procedure GetCharsetList(List: TStrings);
+{* 取 FontCharset 标识符列表 }
+procedure GetColorList(List: TStrings);
+{* 取 Color 标识符列表 }
 
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
@@ -488,6 +492,15 @@ function CnOtaDeSelection(CursorStopAtEnd: Boolean = True): Boolean;
 {* 取消当前选择，光标根据 CursorStopAtEnd 值按需停留在选择区尾部或头部。如无选择区则返回 False}
 {$ENDIF}
 
+function CnOtaGetCurrentProject: TCnIDEProjectInterface;
+{* 取当前工程接口，支持 Delphi 和 Lazarus。}
+function CnOtaGetCurrentProjectName: string;
+{* 取当前工程名称，无扩展名，支持 Delphi 和 Lazarus。}
+function CnOtaGetCurrentProjectFileName: string;
+{* 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj，支持 Delphi 和 Lazarus。}
+function CnOtaGetCurrentProjectFileNameEx: string;
+{* 取当前工程文件名称扩展，支持 Delphi 和 Lazarus。}
+
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
 
@@ -565,8 +578,6 @@ function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
 function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
 {* 取工程版本号字符串}
-function CnOtaGetCurrentProject: IOTAProject;
-{* 取当前工程}
 function CnOtaGetProject: IOTAProject;
 {* 取第一个工程}
 function CnOtaGetProjectCountFromGroup: Integer;
@@ -609,12 +620,6 @@ function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出完整路径}
 procedure CnOtaGetProjectList(const List: TInterfaceList);
 {* 取得所有工程列表}
-function CnOtaGetCurrentProjectName: string;
-{* 取当前工程名称，无扩展名}
-function CnOtaGetCurrentProjectFileName: string;
-{* 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj}
-function CnOtaGetCurrentProjectFileNameEx: string;
-{* 取当前工程文件名称扩展}
 function CnOtaGetCurrentFormName: string;
 {* 取当前窗体名称}
 function CnOtaGetCurrentFormFileName: string;
@@ -784,8 +789,6 @@ function CnOtaCurrBlockEmpty: Boolean;
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
   View: IOTAEditView = nil): Boolean;
 {* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
-function CnOtaOpenFile(const FileName: string): Boolean;
-{* 打开文件}
 function CnOtaCloseFileByAction(const FileName: string): Boolean;
 {* 用 ActionService 来关闭文件}
 function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
@@ -793,6 +796,8 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {$ENDIF}
 {$ENDIF}
 
+function CnOtaOpenFile(const FileName: string): Boolean;
+{* 打开文件}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
 
@@ -2469,99 +2474,9 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
-
-// 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
-function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
-{$IFDEF COMPILER6_UP}
-var
-  Vars: TStringList;
-  I: Integer;
-{$IFDEF DELPHI2011_UP}
-  BC: IOTAProjectOptionsConfigurations;
-{$ENDIF}
-begin
-  Result := Path;
-  Vars := TStringList.Create;
-  try
-    GetEnvironmentVars(Vars, True);
-    for I := 0 to Vars.Count - 1 do
-    begin
-{$IFDEF DELPHIXE6_UP}
-      // There's a $(Platform) values '' in XE6, will make Platform Empty.
-      if Trim(Vars.Values[Vars.Names[I]]) = '' then
-        Continue;
-{$ENDIF}
-      Result := StringReplace(Result, '$(' + Vars.Names[I] + ')',
-        Vars.Values[Vars.Names[I]], [rfReplaceAll, rfIgnoreCase]);
-    end;
-
-{$IFDEF DELPHI2011_UP}
-    BC := CnOtaGetActiveProjectOptionsConfigurations(Project);
-    if BC <> nil then
-    begin
-      if BC.GetActiveConfiguration <> nil then
-      begin
-        Result := StringReplace(Result, '$(Config)',
-          BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
-  {$IFDEF DELPHI2012_UP}
-        if BC.GetActiveConfiguration.GetPlatform <> '' then
-        begin
-          Result := StringReplace(Result, '$(Platform)',
-            BC.GetActiveConfiguration.GetPlatform, [rfReplaceAll, rfIgnoreCase]);
-        end
-        else if Project <> nil then
-        begin
-          Result := StringReplace(Result, '$(Platform)',
-            Project.CurrentPlatform, [rfReplaceAll, rfIgnoreCase]);
-        end;
-  {$ENDIF}
-      end;
-    end;
-{$ENDIF}
-
-    if Project <> nil then
-    begin
-      Result := StringReplace(Result, '$(MSBuildProjectName)',
-        _CnChangeFileExt(_CnExtractFileName(Project.FileName), ''),
-        [rfReplaceAll, rfIgnoreCase]);
-    end;
-  finally
-    Vars.Free;
-  end;
-end;
-{$ELSE}
-begin
-  // Delphi5 下不支持环境变量
-  Result := StringReplace(Path, SCnIDEPathMacro, MakeDir(GetIdeRootDirectory),
-    [rfReplaceAll, rfIgnoreCase]);
-end;
-{$ENDIF}
-
-// 保存 IDE 环境设置变量名到指定文件
-procedure SaveIDEOptionsNameToFile(const FileName: string);
-var
-  Options: IOTAEnvironmentOptions;
-begin
-  Options := CnOtaGetEnvironmentOptions;
-  if Assigned(Options) then
-    SaveStringToFile(CnOtaGetOptionsNames(Options), FileName);
-end;
-
-// 保存当前工程环境设置变量名到指定文件
-procedure SaveProjectOptionsNameToFile(const FileName: string);
-var
-  Options: IOTAProjectOptions;
-begin
-  Options := CnOtaGetActiveProjectOptions;
-  if Assigned(Options) then
-    SaveStringToFile(CnOtaGetOptionsNames(Options), FileName);
-end;
-
 // 根据 IDE Action 名，返回对象
 function FindIDEAction(const ActionName: string): TContainedAction;
 var
-  Svcs40: INTAServices40;
   ActionList: TCustomActionList;
   I: Integer;
 begin
@@ -2571,14 +2486,16 @@ begin
     Exit;
   end;
 
-  QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
-  ActionList := Svcs40.ActionList;
-  for I := 0 to ActionList.ActionCount - 1 do
+  ActionList := GetIDEActionList;
+  if ActionList <> nil then
   begin
-    if SameText(ActionList.Actions[I].Name, ActionName) then
+    for I := 0 to ActionList.ActionCount - 1 do
     begin
-      Result := ActionList.Actions[I];
-      Exit;
+      if SameText(ActionList.Actions[I].Name, ActionName) then
+      begin
+        Result := ActionList.Actions[I];
+        Exit;
+      end;
     end;
   end;
   Result := nil;
@@ -2686,6 +2603,95 @@ begin
     CnDebugger.LogMsgError('ExecuteIDEAction can NOT Find ' + ActionName);
 {$ENDIF}
   end;
+end;
+
+{$IFNDEF NO_DELPHI_OTA}
+
+// 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
+function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
+{$IFDEF COMPILER6_UP}
+var
+  Vars: TStringList;
+  I: Integer;
+{$IFDEF DELPHI2011_UP}
+  BC: IOTAProjectOptionsConfigurations;
+{$ENDIF}
+begin
+  Result := Path;
+  Vars := TStringList.Create;
+  try
+    GetEnvironmentVars(Vars, True);
+    for I := 0 to Vars.Count - 1 do
+    begin
+{$IFDEF DELPHIXE6_UP}
+      // There's a $(Platform) values '' in XE6, will make Platform Empty.
+      if Trim(Vars.Values[Vars.Names[I]]) = '' then
+        Continue;
+{$ENDIF}
+      Result := StringReplace(Result, '$(' + Vars.Names[I] + ')',
+        Vars.Values[Vars.Names[I]], [rfReplaceAll, rfIgnoreCase]);
+    end;
+
+{$IFDEF DELPHI2011_UP}
+    BC := CnOtaGetActiveProjectOptionsConfigurations(Project);
+    if BC <> nil then
+    begin
+      if BC.GetActiveConfiguration <> nil then
+      begin
+        Result := StringReplace(Result, '$(Config)',
+          BC.GetActiveConfiguration.GetName, [rfReplaceAll, rfIgnoreCase]);
+  {$IFDEF DELPHI2012_UP}
+        if BC.GetActiveConfiguration.GetPlatform <> '' then
+        begin
+          Result := StringReplace(Result, '$(Platform)',
+            BC.GetActiveConfiguration.GetPlatform, [rfReplaceAll, rfIgnoreCase]);
+        end
+        else if Project <> nil then
+        begin
+          Result := StringReplace(Result, '$(Platform)',
+            Project.CurrentPlatform, [rfReplaceAll, rfIgnoreCase]);
+        end;
+  {$ENDIF}
+      end;
+    end;
+{$ENDIF}
+
+    if Project <> nil then
+    begin
+      Result := StringReplace(Result, '$(MSBuildProjectName)',
+        _CnChangeFileExt(_CnExtractFileName(Project.FileName), ''),
+        [rfReplaceAll, rfIgnoreCase]);
+    end;
+  finally
+    Vars.Free;
+  end;
+end;
+{$ELSE}
+begin
+  // Delphi5 下不支持环境变量
+  Result := StringReplace(Path, SCnIDEPathMacro, MakeDir(GetIdeRootDirectory),
+    [rfReplaceAll, rfIgnoreCase]);
+end;
+{$ENDIF}
+
+// 保存 IDE 环境设置变量名到指定文件
+procedure SaveIDEOptionsNameToFile(const FileName: string);
+var
+  Options: IOTAEnvironmentOptions;
+begin
+  Options := CnOtaGetEnvironmentOptions;
+  if Assigned(Options) then
+    SaveStringToFile(CnOtaGetOptionsNames(Options), FileName);
+end;
+
+// 保存当前工程环境设置变量名到指定文件
+procedure SaveProjectOptionsNameToFile(const FileName: string);
+var
+  Options: IOTAProjectOptions;
+begin
+  Options := CnOtaGetActiveProjectOptions;
+  if Assigned(Options) then
+    SaveStringToFile(CnOtaGetOptionsNames(Options), FileName);
 end;
 
 {$ENDIF}
@@ -2816,6 +2822,190 @@ begin
   Result := nil;
 end;
 
+
+//==============================================================================
+// 控件处理函数
+//==============================================================================
+
+// 返回组件的标题
+function CnGetComponentText(Component: TComponent): string;
+var
+  Text: string;
+
+  function GetCompPropText(const PropName: string; var AText: string): Boolean;
+  var
+    PInfo: PPropInfo;
+  begin
+    Result := False;
+    PInfo := GetPropInfo(Component, PropName, [tkString, tkLString, tkWString
+      {$IFDEF UNICODE}, tkUString{$ENDIF}]);
+    if PInfo <> nil then
+    begin
+      AText := GetStrProp(Component, PInfo);
+      Result := AText <> '';
+    end;
+  end;
+
+begin
+  Result := '';
+  if Assigned(Component) then
+  begin
+    if Component is TCustomAction then
+      Result := TCustomAction(Component).Caption
+    else if Component is TMenuItem then
+      Result := TMenuItem(Component).Caption
+  {$IFDEF COMPILER6_UP}
+    else if Component is TLabeledEdit then
+      Result := TLabeledEdit(Component).EditLabel.Caption
+  {$ENDIF}
+    else if GetCompPropText('Caption', Text) or GetCompPropText('Text', Text) or
+      GetCompPropText('Title', Text) or GetCompPropText('Filter', Text) or
+      GetCompPropText('FieldName', Text) or GetCompPropText('TableName', Text) then
+      Result := Text
+    else if Component is TControl then
+      Result := TControlAccess(Component).Text;
+  end;
+end;
+
+// 取控件关联的 Action
+function CnGetComponentAction(Component: TComponent): TBasicAction;
+begin
+  if Component is TControl then
+    Result := TControl(Component).Action
+  else if Component is TMenuItem then
+    Result := TMenuItem(Component).Action
+  else
+    Result := nil;
+end;
+
+// 更新 ListView 控件，去除子项的 SubItemImages
+procedure RemoveListViewSubImages(ListView: TListView);
+{$IFDEF BDS}
+var
+  I, J: Integer;
+{$ENDIF}
+begin
+{$IFDEF BDS}
+  for I := 0 to ListView.Items.Count - 1 do
+  begin
+    for J := 0 to ListView.Items[I].SubItems.Count - 1 do
+      ListView.Items[I].SubItemImages[J] := -1;
+  end;
+{$ENDIF}
+end;
+
+// 更新 ListItem，去除子项的 SubItemImages
+procedure RemoveListViewSubImages(ListItem: TListItem);
+{$IFDEF BDS}
+var
+  I: Integer;
+{$ENDIF}
+begin
+{$IFDEF BDS}
+  for I := 0 to ListItem.SubItems.Count - 1 do
+    ListItem.SubItemImages[I] := -1;
+{$ENDIF}
+end;
+
+{* 转换 ListView 子项宽度为字符串 }
+function GetListViewWidthString(AListView: TListView; DivFactor: Single): string;
+var
+  I: Integer;
+  Lines: TStringList;
+begin
+  Lines := TStringList.Create;
+  try
+    if SingleEqual(DivFactor, 1.0) then
+      for I := 0 to AListView.Columns.Count - 1 do
+        Lines.Add(IntToStr(AListView.Columns[I].Width))
+    else
+      for I := 0 to AListView.Columns.Count - 1 do
+        Lines.Add(IntToStr(Round(AListView.Columns[I].Width / DivFactor)));
+
+    Result := Lines.CommaText;
+  finally
+    Lines.Free;
+  end;
+end;
+
+{* 转换字符串为 ListView 子项宽度 }
+procedure SetListViewWidthString(AListView: TListView; const Text: string;
+  MulFactor: Single);
+var
+  I: Integer;
+  Lines: TStringList;
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.CommaText := Text;
+    if SingleEqual(MulFactor, 1.0) then
+    begin
+      for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
+        AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width);
+    end
+    else
+    begin
+      for I := 0 to AListView.Columns.Count - 1 do
+      begin
+        if I < Lines.Count then
+          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], AListView.Columns[I].Width) * MulFactor)
+        else // 无设置，则按原始情况放大
+          AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+      end;
+    end;
+  finally
+    Lines.Free;
+  end;
+end;
+
+// ListView 当前选择项是否允许上移
+function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 1 to AListView.Items.Count - 1 do
+  begin
+    if AListView.Items[I].Selected and not AListView.Items[I - 1].Selected then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+// ListView 当前选择项是否允许下移
+function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := AListView.Items.Count - 2 downto 0 do
+  begin
+    if AListView.Items[I].Selected and not AListView.Items[I + 1].Selected then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+// 修改 ListView 当前选择项
+procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
+var
+  I: Integer;
+begin
+  for I := 0 to AListView.Items.Count - 1 do
+  begin
+    if Mode = smAll then
+      AListView.Items[I].Selected := True
+    else if Mode = smNothing then
+      AListView.Items[I].Selected := False
+    else
+      AListView.Items[I].Selected := not AListView.Items[I].Selected;
+  end;
+end;
+
 {$IFNDEF LAZARUS}
 
 // 存在模式窗口
@@ -2922,109 +3112,6 @@ begin
   end;
 end;
 
-//==============================================================================
-// 控件处理函数
-//==============================================================================
-
-// 返回组件的标题
-function CnGetComponentText(Component: TComponent): string;
-var
-  Text: string;
-
-  function GetCompPropText(const PropName: string; var AText: string): Boolean;
-  var
-    PInfo: PPropInfo;
-  begin
-    Result := False;
-    PInfo := GetPropInfo(Component, PropName, [tkString, tkLString, tkWString
-      {$IFDEF UNICODE}, tkUString{$ENDIF}]);
-    if PInfo <> nil then
-    begin
-      AText := GetStrProp(Component, PInfo);
-      Result := AText <> '';
-    end;
-  end;
-
-begin
-  Result := '';
-  if Assigned(Component) then
-  begin
-    if Component is TCustomAction then
-      Result := TCustomAction(Component).Caption
-    else if Component is TMenuItem then
-      Result := TMenuItem(Component).Caption
-  {$IFDEF COMPILER6_UP}
-    else if Component is TLabeledEdit then
-      Result := TLabeledEdit(Component).EditLabel.Caption
-  {$ENDIF}
-    else if GetCompPropText('Caption', Text) or GetCompPropText('Text', Text) or
-      GetCompPropText('Title', Text) or GetCompPropText('Filter', Text) or
-      GetCompPropText('FieldName', Text) or GetCompPropText('TableName', Text) then
-      Result := Text
-    else if Component is TControl then
-      Result := TControlAccess(Component).Text;
-  end;
-end;
-
-// 取控件关联的 Action
-function CnGetComponentAction(Component: TComponent): TBasicAction;
-begin
-  if Component is TControl then
-    Result := TControl(Component).Action
-  else if Component is TMenuItem then
-    Result := TMenuItem(Component).Action
-  else
-    Result := nil;
-end;
-
-// 更新 ListView 控件，去除子项的 SubItemImages
-procedure RemoveListViewSubImages(ListView: TListView); overload;
-{$IFDEF BDS}
-var
-  I, J: Integer;
-{$ENDIF}
-begin
-{$IFDEF BDS}
-  for I := 0 to ListView.Items.Count - 1 do
-    for J := 0 to ListView.Items[I].SubItems.Count - 1 do
-      ListView.Items[I].SubItemImages[J] := -1;
-{$ENDIF}
-end;
-
-// 更新 ListItem，去除子项的 SubItemImages
-procedure RemoveListViewSubImages(ListItem: TListItem); overload;
-{$IFDEF BDS}
-var
-  I: Integer;
-{$ENDIF}
-begin
-{$IFDEF BDS}
-  for I := 0 to ListItem.SubItems.Count - 1 do
-    ListItem.SubItemImages[I] := -1;
-{$ENDIF}
-end;
-
-{* 转换 ListView 子项宽度为字符串 }
-function GetListViewWidthString(AListView: TListView; DivFactor: Single): string;
-var
-  I: Integer;
-  Lines: TStringList;
-begin
-  Lines := TStringList.Create;
-  try
-    if SingleEqual(DivFactor, 1.0) then
-      for I := 0 to AListView.Columns.Count - 1 do
-        Lines.Add(IntToStr(AListView.Columns[I].Width))
-    else
-      for I := 0 to AListView.Columns.Count - 1 do
-        Lines.Add(IntToStr(Round(AListView.Columns[I].Width / DivFactor)));
-
-    Result := Lines.CommaText;
-  finally
-    Lines.Free;
-  end;
-end;
-
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {$IFDEF IDE_SUPPORT_HDPI}
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -3063,84 +3150,6 @@ begin
 {$ELSE}
   Result := GetListViewWidthString(AListView, DivFactor);
 {$ENDIF}
-end;
-
-{* 转换字符串为 ListView 子项宽度 }
-procedure SetListViewWidthString(AListView: TListView; const Text: string;
-  MulFactor: Single);
-var
-  I: Integer;
-  Lines: TStringList;
-begin
-  Lines := TStringList.Create;
-  try
-    Lines.CommaText := Text;
-    if SingleEqual(MulFactor, 1.0) then
-    begin
-      for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
-        AListView.Columns[I].Width := StrToIntDef(Lines[I], AListView.Columns[I].Width);
-    end
-    else
-    begin
-      for I := 0 to AListView.Columns.Count - 1 do
-      begin
-        if I < Lines.Count then
-          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], AListView.Columns[I].Width) * MulFactor)
-        else // 无设置，则按原始情况放大
-          AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
-      end;
-    end;
-  finally
-    Lines.Free;
-  end;
-end;
-
-// ListView 当前选择项是否允许上移
-function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  for I := 1 to AListView.Items.Count - 1 do
-  begin
-    if AListView.Items[I].Selected and not AListView.Items[I - 1].Selected then
-    begin
-      Result := True;
-      Exit;
-    end;
-  end;
-end;
-
-// ListView 当前选择项是否允许下移
-function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  for I := AListView.Items.Count - 2 downto 0 do
-  begin
-    if AListView.Items[I].Selected and not AListView.Items[I + 1].Selected then
-    begin
-      Result := True;
-      Exit;
-    end;
-  end;
-end;
-
-// 修改 ListView 当前选择项
-procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
-var
-  I: Integer;
-begin
-  for I := 0 to AListView.Items.Count - 1 do
-  begin
-    if Mode = smAll then
-      AListView.Items[I].Selected := True
-    else if Mode = smNothing then
-      AListView.Items[I].Selected := False
-    else
-      AListView.Items[I].Selected := not AListView.Items[I].Selected;
-  end;
 end;
 
 {$ENDIF}
@@ -3635,6 +3644,93 @@ begin
 end;
 
 {$ENDIF}
+
+// 取当前工程
+function CnOtaGetCurrentProject: TCnIDEProjectInterface;
+{$IFNDEF NO_DELPHI_OTA}
+var
+  IProjectGroup: IOTAProjectGroup;
+{$ENDIF}
+begin
+{$IFDEF STAND_ALONE}
+  Result := nil;
+{$ELSE}
+  {$IFDEF LAZARUS}
+  Result := LazarusIDE.ActiveProject;
+  {$ELSE}
+  IProjectGroup := CnOtaGetProjectGroup;
+  if Assigned(IProjectGroup) then
+  begin
+    try
+      // This raises exceptions in D5 with .bat projects active
+      Result := IProjectGroup.ActiveProject;
+      Exit;
+    except
+      ;
+    end;
+  end;
+  Result := nil;
+  {$ENDIF}
+{$ENDIF}
+end;
+
+// 取当前工程名称，无扩展名
+function CnOtaGetCurrentProjectName: string;
+var
+  IProject: TCnIDEProjectInterface;
+begin
+  Result := '';
+{$IFNDEF STAND_ALONE}
+  IProject := CnOtaGetCurrentProject;
+  if Assigned(IProject) then
+  begin
+{$IFDEF LAZARUS}
+    Result := _CnExtractFileName(IProject.MainFile.FileName);
+{$ELSE}
+    Result := _CnExtractFileName(IProject.FileName);
+{$ENDIF}
+    Result := _CnChangeFileExt(Result, '');
+  end;
+{$ENDIF}
+end;
+
+// 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj
+function CnOtaGetCurrentProjectFileName: string;
+var
+  CurrentProject: TCnIDEProjectInterface;
+begin
+{$IFNDEF STAND_ALONE}
+  CurrentProject := CnOtaGetCurrentProject;
+  if Assigned(CurrentProject) then
+  begin
+{$IFDEF LAZARUS}
+    Result := CurrentProject.MainFile.FileName;
+{$ELSE}
+    Result := CurrentProject.FileName;
+{$ENDIF}
+  end
+  else
+    Result := '';
+{$ENDIF}
+end;
+
+// 取当前工程文件名称扩展
+function CnOtaGetCurrentProjectFileNameEx: string;
+begin
+  // 修改以符合返回全路径的规则
+  Result := _CnChangeFileExt((CnOtaGetCurrentProjectFileName), '');
+{$IFNDEF NO_DELPHI_OTA}
+  if Result <> '' then
+    Exit;
+
+  Result := _CnChangeFileExt((CnOtaGetProject.FileName), '');
+  if Result <> '' then
+    Exit;
+
+  Result := Trim(Application.MainForm.Caption);
+  Delete(Result, 1, AnsiPos('-', Result) + 1);
+{$ENDIF}
+end;
 
 {$IFNDEF LAZARUS}
 {$IFNDEF NO_DELPHI_OTA}
@@ -4412,25 +4508,6 @@ begin
   end;
 end;
 
-// 取当前工程
-function CnOtaGetCurrentProject: IOTAProject;
-var
-  IProjectGroup: IOTAProjectGroup;
-begin
-  IProjectGroup := CnOtaGetProjectGroup;
-  if Assigned(IProjectGroup) then
-  begin
-    try
-      // This raises exceptions in D5 with .bat projects active
-      Result := IProjectGroup.ActiveProject;
-      Exit;
-    except
-      ;
-    end;
-  end;
-  Result := nil;
-end;
-
 //设定项目配置值
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
@@ -4623,11 +4700,13 @@ begin
   Names := Options.GetOptionNames;
   try
     for I := Low(Names) to High(Names) do
+    begin
       if IncludeType then
         List.Add(Names[I].Name + ': ' + GetEnumName(TypeInfo(TTypeKind),
           Ord(Names[I].Kind)))
       else
         List.Add(Names[I].Name);
+    end;
   finally
     Names := nil;
   end;
@@ -4875,56 +4954,14 @@ begin
 
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
   if IModuleServices <> nil then
+  begin
     for I := 0 to IModuleServices.ModuleCount - 1 do
     begin
       IModule := IModuleServices.Modules[I];
       if Supports(IModule, IOTAProject, IProject) then
         List.Add(IProject);
     end;
-end;
-
-// 取当前工程名称，无扩展名
-function CnOtaGetCurrentProjectName: string;
-var
-  IProject: IOTAProject;
-begin
-  Result := '';
-
-  IProject := CnOtaGetCurrentProject;
-  if Assigned(IProject) then
-  begin
-    Result := _CnExtractFileName(IProject.FileName);
-    Result := _CnChangeFileExt(Result, '');
   end;
-end;
-
-// 取当前工程文件名称，扩展名可能是 dpr/bdsproj/dproj
-function CnOtaGetCurrentProjectFileName: string;
-var
-  CurrentProject: IOTAProject;
-begin
-  CurrentProject := CnOtaGetCurrentProject;
-  if Assigned(CurrentProject) then
-    Result := CurrentProject.FileName
-  else
-    Result := '';
-end;
-
-// 取当前工程文件名称扩展
-function CnOtaGetCurrentProjectFileNameEx: string;
-begin
-  // 修改以符合返回全路径的规则
-  Result := _CnChangeFileExt((CnOtaGetCurrentProjectFileName), '');
-
-  if Result <> '' then
-    Exit;
-
-  Result := _CnChangeFileExt((CnOtaGetProject.FileName), '');
-  if Result <> '' then
-    Exit;
-
-  Result := Trim(Application.MainForm.Caption);
-  Delete(Result, 1, AnsiPos('-', Result) + 1);
 end;
 
 // 取当前窗体名称
@@ -6551,34 +6588,6 @@ begin
   end;
 end;
 
-// 打开文件
-function CnOtaOpenFile(const FileName: string): Boolean;
-var
-  ActionServices: IOTAActionServices;
-begin
-  Result := False;
-  try
-    ActionServices := BorlandIDEServices as IOTAActionServices;
-    if ActionServices <> nil then
-    begin
-      try
-{$IFNDEF CNWIZARDS_MINIMUM}
-        DisableWaitDialogShow;
-{$ENDIF}
-        // 10.4.2 下打开文件时可能 IDE 会被莫名其妙塞到后台
-        // 需要通过 Hook 掉 WaitDialogService 的方式去掉
-        Result := ActionServices.OpenFile(FileName);
-      finally
-{$IFNDEF CNWIZARDS_MINIMUM}
-        EnableWaitDialogShow; // 恢复 WaitDialogService
-{$ENDIF}
-      end;
-    end;
-  except
-    ;
-  end;
-end;
-
 // 用 ActionService 来关闭文件
 function CnOtaCloseFileByAction(const FileName: string): Boolean;
 var
@@ -6622,6 +6631,42 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+// 打开文件
+function CnOtaOpenFile(const FileName: string): Boolean;
+{$IFNDEF NO_DELPHI_OTA}
+var
+  ActionServices: IOTAActionServices;
+{$ENDIF}
+begin
+  Result := False;
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  LazarusIDE.DoOpenEditorFile(FileName, -1, -1, []);
+{$ELSE}
+  try
+    ActionServices := BorlandIDEServices as IOTAActionServices;
+    if ActionServices <> nil then
+    begin
+      try
+{$IFNDEF CNWIZARDS_MINIMUM}
+        DisableWaitDialogShow;
+{$ENDIF}
+        // 10.4.2 下打开文件时可能 IDE 会被莫名其妙塞到后台
+        // 需要通过 Hook 掉 WaitDialogService 的方式去掉
+        Result := ActionServices.OpenFile(FileName);
+      finally
+{$IFNDEF CNWIZARDS_MINIMUM}
+        EnableWaitDialogShow; // 恢复 WaitDialogService
+{$ENDIF}
+      end;
+    end;
+  except
+    ;
+  end;
+{$ENDIF}
+{$ENDIF}
+end;
 
 // 判断文件是否打开
 function CnOtaIsFileOpen(const FileName: string): Boolean;

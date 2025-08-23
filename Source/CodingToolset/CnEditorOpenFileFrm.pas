@@ -44,10 +44,10 @@ uses
 {$IFDEF COMPILER6_UP}
   StrUtils,
 {$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
-  Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
-  CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm, CnWizEditFiler,
-  ImgList, ActnList;
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF} Graphics, ImgList, ActnList,
+  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
+  CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm;
 
 type
 
@@ -115,12 +115,18 @@ end;
 { TCnEditorOpenFileForm }
 
 function TCnEditorOpenFileForm.DoSelectOpenedItem: string;
+{$IFNDEF NO_DELPHI_OTA}
 var
   CurrentModule: IOTAModule;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  Result := CnOtaGetCurrentSourceFile;
+{$ELSE}
   CurrentModule := CnOtaGetCurrentModule;
   if CurrentModule <> nil then
     Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+{$ENDIF}
 end;
 
 function TCnEditorOpenFileForm.GetSelectedFileName: string;
