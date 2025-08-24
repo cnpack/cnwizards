@@ -14,7 +14,8 @@ uses
   CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, 
   CnTestEditorTextWizard, CnWizIdeDock, CnAICoderEngine, CnAICoderEngineImpl, 
   CnAICoderNetClient, CnAICoderConfig, CnAICoderChatFrm, CnAICoderWizard, 
-  LazarusPackageIntf;
+  CnTestEnvProjPathWizard, CnCodingToolsetWizard, CnProjectViewBaseFrm, 
+  CnEditorOpenFile, CnEditorOpenFileFrm, LazarusPackageIntf;
 
 implementation
 

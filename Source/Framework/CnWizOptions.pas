@@ -98,6 +98,7 @@ type
     FShowWizComment: Boolean;
     FDelphiExt: string;
     FCppExt: string;
+    FLazarusExt: string;
     FCompilerName: string;
     FCompilerID: string;
     FUpgradeReleaseOnly: Boolean;
@@ -251,6 +252,8 @@ type
     {* 用户定义的 Delphi 文件扩展名}
     property CppExt: string read FCppExt write FCppExt;
     {* 用户定义的 C/C++ 文件扩展名}
+    property LazarusExt: string read FLazarusExt write FLazarusExt;
+    {* 用户定义的 Lazarus 文件扩展名}
     property ShowHint: Boolean read FShowHint write FShowHint;
     {* 是否显示控件 Hint，各窗体应在 Create 时设置 TForm.ShowHint 等于该值}
     property ShowWizComment: Boolean read FShowWizComment write FShowWizComment;
@@ -342,6 +345,7 @@ const
   csShowTipOfDay = 'ShowTipOfDay';
   csDelphiExt = 'DelphiExt';
   csCppExt = 'CppExt';
+  csLazarusExt = 'LazarusExt';
   csUseToolsMenu = 'UseToolsMenu';
   csFixThreadLocale = 'FixThreadLocale';
   csUseOneCPUCore = 'UseOneCPUCore';
@@ -354,12 +358,9 @@ const
   csUseOneCPUDefault = False;
 {$ENDIF}
 
-{$IFDEF FPC}
-  csDelphiExtDefault = '.pas;.dpr;.inc;.lpr;.pp';
-{$ELSE}
   csDelphiExtDefault = '.pas;.dpr;.inc';
-{$ENDIF}
   csCppExtDefault = '.c;.cpp;.h;.hpp;.cc;.hh';
+  csLazarusExtDefault = '.pas;.dpr;.inc;.lpr;.pp';
 
   csUpgradeURL = 'URL';
   csNightlyBuildURL = 'URL';
@@ -510,6 +511,8 @@ begin
     if FDelphiExt = '' then FDelphiExt := csDelphiExtDefault;
     FCppExt := ReadString(SCnOptionSection, csCppExt, csCppExtDefault);
     if FCppExt = '' then FCppExt := csCppExtDefault;
+    FLazarusExt := ReadString(SCnOptionSection, csLazarusExt, csLazarusExtDefault);
+    if FLazarusExt = '' then FLazarusExt := csLazarusExtDefault;
     FUseToolsMenu := ReadBool(SCnOptionSection, csUseToolsMenu, False);
     FixThreadLocale := ReadBool(SCnOptionSection, csFixThreadLocale, False);
     FUseLargeIcon := ReadBool(SCnOptionSection, csUseLargeIcon, False);
@@ -583,6 +586,7 @@ begin
     WriteBool(SCnOptionSection, csShowTipOfDay, FShowTipOfDay);
     WriteString(SCnOptionSection, csDelphiExt, FDelphiExt);
     WriteString(SCnOptionSection, csCppExt, FCppExt);
+    WriteString(SCnOptionSection, csLazarusExt, FLazarusExt);
     WriteBool(SCnOptionSection, csUseToolsMenu, FUseToolsMenu);
     WriteBool(SCnOptionSection, csFixThreadLocale, FFixThreadLocale);
 

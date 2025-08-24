@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnCommon,
-  Math, RegExpr;
+  Math, AsRegExpr;
 
 type
   TCnImageProviderLocalCache = class(TCnBaseImageProvider)

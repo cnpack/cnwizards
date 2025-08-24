@@ -76,7 +76,7 @@ implementation
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
-  CnWizIdeUtils, CnOTACreators, CnWizEditFiler, RegExpr {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizIdeUtils, CnOTACreators, CnWizEditFiler, AsRegExpr {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   TCnDuplicateCreator = class(TCnRawCreator, IOTAModuleCreator)

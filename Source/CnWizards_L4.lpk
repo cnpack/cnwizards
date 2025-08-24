@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards;Config;..\Test\Lazarus;AICoder"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -132,14 +132,28 @@
         <Filename Value="AICoder\CnAICoderWizard.pas"/>
         <UnitName Value="CnAICoderWizard"/>
       </Item>
+      <Item>
+        <Filename Value="..\Test\Lazarus\CnTestEnvProjPathWizard.pas"/>
+        <UnitName Value="CnTestEnvProjPathWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnCodingToolsetWizard.pas"/>
+        <UnitName Value="CnCodingToolsetWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="ProjectExtWizard\CnProjectViewBaseFrm.pas"/>
+        <UnitName Value="CnProjectViewBaseFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorOpenFile.pas"/>
+        <UnitName Value="CnEditorOpenFile"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorOpenFileFrm.pas"/>
+        <UnitName Value="CnEditorOpenFileFrm"/>
+      </Item>
     </Files>
     <RequiredPkgs>
-      <Item>
-        <PackageName Value="dclCnPack_FPC3"/>
-      </Item>
-      <Item>
-        <PackageName Value="CnPack_FPC3"/>
-      </Item>
       <Item>
         <PackageName Value="IDEIntf"/>
       </Item>

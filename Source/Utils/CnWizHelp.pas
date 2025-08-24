@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, IniFiles, ShellAPI,
+  Windows, Messages, SysUtils, IniFiles, ShellAPI, Registry,
   CnCommon, CnLangMgr, CnWideStrings;
 
 const
@@ -50,8 +50,13 @@ function ShowHelp(const Topic: string; const Section: string = csSection): Boole
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 const
-  csCnWizOnlineHelpUrl = 'http://help.cnpack.org/cnwizards/';
+  csCnWizOnlineHelpUrl = 'https://help.cnpack.org/cnwizards/';
   csLangPath = 'Lang\';
   csHelpPath = 'Help\';
   csWizHelpIniFile = 'Help.ini';
@@ -67,18 +72,50 @@ end;
 
 // 根据语言取文件名
 function GetFileFromLang(const FileName: string): string;
+var
+{$IFDEF LAZARUS}
+  Reg: TRegistry;
+{$ENDIF}
+  S: string;
 begin
+{$IFDEF LAZARUS}
+  // Lazarus 因没 DLL 存在，改从注册表里读安装程序写入的 InstallDir
+  Reg := TRegistry.Create; // 创建注册表对象
+  try
+    Reg.RootKey := HKEY_CURRENT_USER; // 设置根键为 HKCU
+
+    if Reg.OpenKeyReadOnly('Software\CnPack\CnWizards') then
+    begin
+      // 检查键是否存在并读取
+      if Reg.ValueExists('InstallDir') then
+      begin
+        S := Reg.ReadString('InstallDir');
+        if S <> '' then
+          S := MakePath(S);  // 确保尾部有斜杠
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Laz WizHelp Get Installation Path: ' + S);
+{$ENDIF}
+      end;
+      Reg.CloseKey;
+    end;
+  finally
+    Reg.Free;
+  end;
+{$ELSE}
+  S := ModulePath;
+{$ENDIF}
+
   if (CnLanguageManager.LanguageStorage <> nil) and
     (CnLanguageManager.LanguageStorage.CurrentLanguage <> nil) then
   begin
-    Result := IncludeTrailingBackslash(ModulePath + csLangPath +
+    Result := IncludeTrailingBackslash(S + csLangPath +
       CnLanguageManager.LanguageStorage.CurrentLanguage.LanguageDirName)
       + FileName;
   end
   else
   begin
     // 如语言初始化失败，则返回英文的内容，因为默认的界面是英文的
-    Result := ModulePath + csLangPath + '1033\' + FileName;
+    Result := S + csLangPath + '1033\' + FileName;
   end;
 end;
 

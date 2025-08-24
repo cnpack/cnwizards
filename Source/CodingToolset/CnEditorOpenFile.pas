@@ -285,10 +285,15 @@ begin
   begin
     Ext := UpperCase(_CnExtractFileExt(FileName));
 
+{$IFDEF LAZARUS}
+    if IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.LazarusExt)) > 0) then
+      FFileList.Add(FileName);
+{$ELSE}
     if IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.DelphiExt)) > 0) then
       FFileList.Add(FileName)
     else if not IsDelphiRuntime and (Pos(Ext, UpperCase(WizOptions.CppExt)) > 0) then
       FFileList.Add(FileName);
+{$ENDIF}
   end;
 end;
 

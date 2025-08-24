@@ -40,7 +40,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-  CnCommon, RegExpr;
+  CnCommon, AsRegExpr;
 
 type
   TCnImageProviderFindIcons = class(TCnBaseImageProvider)

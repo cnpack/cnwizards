@@ -2031,8 +2031,12 @@ begin
   List := TStringList.Create;
   try
 {$IFDEF LAZARUS}
-    // 拿环境里的 FPC 的 source 目录
+    // 拿环境里的 FPC 的 source 目录，以及 lcl 目录
     Text := LinkPath(_CnExtractFilePath(IDEEnvironmentOptions.GetParsedCompilerFilename), '..\..\source\rtl\');
+    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
+    AddList(List);
+
+    Text := MakePath(IDEEnvironmentOptions.GetParsedLazarusDirectory) + 'lcl\';
     List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
     AddList(List);
 {$ELSE}
