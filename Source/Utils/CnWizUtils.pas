@@ -329,7 +329,14 @@ function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
 procedure ListViewSelectItems(AListView: TListView; Mode: TCnSelectMode);
 {* 修改 ListView 当前选择项}
 
+function IsDelphiRuntime: Boolean;
+{* 用各种法子判断当前 IDE 是否是 Delphi(.NET)，是则返回 True，其他则返回 False。Lazarus 也返回 True}
+
+function IsCSharpRuntime: Boolean;
+{* 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False。Lazarus 也返回 False}
+
 {$IFNDEF LAZARUS}
+
 function ScreenHasModalForm: Boolean;
 {* 存在模式窗口}
 procedure SetFormNoTitle(Form: TForm);
@@ -350,17 +357,11 @@ procedure GetColorList(List: TStrings);
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
 
-{$IFNDEF NO_DELPHI_OTA}
-
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
 //==============================================================================
 
-function IsDelphiRuntime: Boolean;
-{* 用各种法子判断当前 IDE 是否是 Delphi(.NET)，是则返回 True，其他则返回 False}
-
-function IsCSharpRuntime: Boolean;
-{* 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False}
+{$IFNDEF NO_DELPHI_OTA}
 
 function IsDelphiProject(Project: IOTAProject): Boolean;
 {* 判断当前是否是 Delphi 工程}
@@ -3017,6 +3018,60 @@ begin
     else
       AListView.Items[I].Selected := not AListView.Items[I].Selected;
   end;
+end;
+
+
+// 用各种法子判断当前 IDE/BDS 是否是 Delphi，是则返回 True，C++Builder 则返回 False
+function IsDelphiRuntime: Boolean;
+{$IFDEF COMPILER9_UP}
+var
+  Project: IOTAProject;
+  Personality: string;
+{$ENDIF}
+begin
+{$IFDEF LAZARUS}
+  Result := True;
+{$ELSE}
+{$IFNDEF COMPILER9_UP} // 不是 BDS 2005/2006 或以上，则以编译期为准
+  {$IFDEF DELPHI}
+  Result := True;
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
+  Exit;
+{$ELSE} // 是 BDS 2005/2006 或以上则需要动态判断
+  Result := CurrentSourceIsDelphi;
+  Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    Personality := Project.Personality;
+    if (Personality = sDelphiPersonality) or (Personality = sDelphiDotNetPersonality) then
+      Result := True
+    else if (Personality = sCBuilderPersonality) or (Personality = sCSharpPersonality) then
+      Result := False;
+  end;
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False
+function IsCSharpRuntime: Boolean;
+{$IFDEF COMPILER9_UP}
+var
+  Project: IOTAProject;
+  Personality: string;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF COMPILER9_UP}
+  Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    Personality := Project.Personality;
+    if Personality = sCSharpPersonality then
+      Result := True;
+  end;
+{$ENDIF}
 end;
 
 {$IFNDEF LAZARUS}
@@ -9440,55 +9495,6 @@ begin
 end;
 
 {$IFNDEF NO_DELPHI_OTA}
-
-// 用各种法子判断当前 IDE/BDS 是否是 Delphi，是则返回 True，C++Builder 则返回 False
-function IsDelphiRuntime: Boolean;
-{$IFDEF COMPILER9_UP}
-var
-  Project: IOTAProject;
-  Personality: string;
-{$ENDIF}
-begin
-{$IFNDEF COMPILER9_UP} // 不是 BDS 2005/2006 或以上，则以编译期为准
-  {$IFDEF DELPHI}
-  Result := True;
-  {$ELSE}
-  Result := False;
-  {$ENDIF}
-  Exit;
-{$ELSE} // 是 BDS 2005/2006 或以上则需要动态判断
-  Result := CurrentSourceIsDelphi;
-  Project := CnOtaGetCurrentProject;
-  if Project <> nil then
-  begin
-    Personality := Project.Personality;
-    if (Personality = sDelphiPersonality) or (Personality = sDelphiDotNetPersonality) then
-      Result := True
-    else if (Personality = sCBuilderPersonality) or (Personality = sCSharpPersonality) then
-      Result := False;
-  end;
-{$ENDIF}
-end;
-
-// 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False
-function IsCSharpRuntime: Boolean;
-{$IFDEF COMPILER9_UP}
-var
-  Project: IOTAProject;
-  Personality: string;
-{$ENDIF}
-begin
-  Result := False;
-{$IFDEF COMPILER9_UP}
-  Project := CnOtaGetCurrentProject;
-  if Project <> nil then
-  begin
-    Personality := Project.Personality;
-    if Personality = sCSharpPersonality then
-      Result := True;
-  end;
-{$ENDIF}
-end;
 
 // 判断当前是否是 Delphi 工程
 function IsDelphiProject(Project: IOTAProject): Boolean;

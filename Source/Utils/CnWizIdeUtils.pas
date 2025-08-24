@@ -61,8 +61,8 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
-  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} PackageIntf, ComponentReg, {$ENDIF} {$ELSE}
-  {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
+  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} PackageIntf, ComponentReg, IDEOptionsIntf,
+  {$ENDIF} {$ELSE} {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
@@ -418,6 +418,15 @@ function GetEditControlFromEditorForm(AForm: TCustomForm): TControl;
 function GetCurrentEditControl: TControl;
 {* 返回当前的代码编辑器控件 }
 
+procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
+{* 取环境设置中的 LibraryPath 内容}
+
+procedure GetProjectLibPath(Paths: TStrings);
+{* 取当前工程组的相关 Path 内容}
+
+function GetProjectDcuPath(AProject: TCnIDEProjectInterface): string;
+{* 取当前工程的输出目录，支持 Delphi 和 Lazarus}
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -440,12 +449,6 @@ function GetBDSUserDataDir: string;
 
 {$IFNDEF NO_DELPHI_OTA}
 
-procedure GetProjectLibPath(Paths: TStrings);
-{* 取当前工程组的相关 Path 内容}
-
-function GetProjectDcuPath(AProject: IOTAProject): string;
-{* 取当前工程的输出目录}
-
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
 
@@ -461,9 +464,6 @@ function GetCurrentCompilingProject: IOTAProject;
 
 function CompileProject(AProject: IOTAProject): Boolean;
 {* 编译工程，返回编译是否成功}
-
-procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean = True);
-{* 取环境设置中的 LibraryPath 内容}
 
 {$ENDIF}
 
@@ -1864,6 +1864,330 @@ begin
 {$ENDIF}
 end;
 
+type
+  TCnProjPathType = (pptSrc, pptUnit, pptLib, pptInclude);
+  {* pptSrc 和 pptUnit 对应 UnitDir，也就是 Unit Search Path，
+     pptInclude 对应 IncludeDir，也就是 $I 等的文件}
+
+procedure AddProjectPath(Project: TCnIDEProjectInterface; Paths: TStrings; PathType: TCnProjPathType);
+{$IFNDEF STAND_ALONE}
+var
+  IDStr, APath: string;
+  APaths: TStrings;
+  I: Integer;
+
+  function GetProjPathIDFromType(APathType: TCnProjPathType): string;
+  begin
+    case APathType of
+      pptSrc: Result := 'SrcDir';
+      pptUnit: Result := 'UnitDir';
+      pptLib: Result := 'LibPath';
+      pptInclude: Result := 'IncludePath';
+    else
+      Result := 'LibPath';
+    end;
+  end;
+{$ENDIF}
+begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if not Assigned(Project.LazCompilerOptions) then
+    Exit;
+
+  case PathType of
+    pptSrc: APath := Project.LazCompilerOptions.SrcPath;
+    pptUnit: APath := Project.LazCompilerOptions.OtherUnitFiles;
+    pptLib: APath := Project.LazCompilerOptions.Libraries;
+    pptInclude: APath := Project.LazCompilerOptions.IncludePath;
+  end;
+
+  if APath <> '' then
+  begin
+    // TODO: 多个路径里替换宏
+
+    // 处理路径中的相对路径
+    APaths := TStringList.Create;
+    try
+      APaths.Text := StringReplace(APath, ';', #13#10, [rfReplaceAll]);
+      for I := 0 to APaths.Count - 1 do
+      begin
+        if Trim(APaths[I]) <> '' then   // 无效目录
+        begin
+          APath := MakePath(Trim(APaths[I]));
+          if (Length(APath) > 2) and (APath[2] = ':') then // 全路径目录
+          begin
+            if Paths.IndexOf(APath) < 0 then
+              Paths.Add(APath);
+          end
+          else  // 相对路径
+          begin
+            APath := LinkPath(_CnExtractFilePath(Project.Directory), APath);
+            if Paths.IndexOf(APath) < 0 then
+              Paths.Add(APath);
+          end;
+        end;
+      end;
+    finally
+      APaths.Free;
+    end;
+  end;
+{$ELSE}
+  if not Assigned(Project.ProjectOptions) then
+    Exit;
+
+  IDStr := GetProjPathIDFromType(PathType);
+  APath := Project.ProjectOptions.GetOptionValue(IdStr);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('AddProjectPath: %s '#13#10 + APath, [IdStr]);
+{$ENDIF}
+
+  if APath <> '' then
+  begin
+    APath := ReplaceToActualPath(APath, Project); // 多个路径也一并替换
+
+    // 处理路径中的相对路径
+    APaths := TStringList.Create;
+    try
+      APaths.Text := StringReplace(APath, ';', #13#10, [rfReplaceAll]);
+      for I := 0 to APaths.Count - 1 do
+      begin
+        if Trim(APaths[I]) <> '' then   // 无效目录
+        begin
+          APath := MakePath(Trim(APaths[I]));
+          if (Length(APath) > 2) and (APath[2] = ':') then // 全路径目录
+          begin
+            if Paths.IndexOf(APath) < 0 then
+              Paths.Add(APath);
+          end
+          else                          // 相对路径
+          begin
+            APath := LinkPath(_CnExtractFilePath(Project.FileName), APath);
+            if Paths.IndexOf(APath) < 0 then
+              Paths.Add(APath);
+          end;
+        end;
+      end;
+    finally
+      APaths.Free;
+    end;
+  end;
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 取环境设置中的 LibraryPath 内容，注意 XE2 以上版本，GetEnvironmentOptions 里头
+// 得到的值并不是当前工程的 Platform 对应的值，所以只能改成根据工程平台从注册表里读。
+procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean);
+var
+{$IFNDEF NO_DELPHI_OTA}
+  Svcs: IOTAServices;
+  Options: IOTAEnvironmentOptions;
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+  CurPlatform: string;
+  Project: IOTAProject;
+{$ENDIF}
+{$ENDIF}
+  Text: string;
+  List: TStrings;
+
+  procedure AddList(AList: TStrings);
+  var
+    S: string;
+    I: Integer;
+  begin
+    for I := 0 to AList.Count - 1 do
+    begin
+      S := Trim(MakePath(AList[I]));
+      if (S <> '') and (Paths.IndexOf(S) < 0) then
+        Paths.Add(S);
+    end;
+  end;
+
+begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  if IDEEnvironmentOptions = nil then
+    Exit;
+{$ELSE}
+  Svcs := BorlandIDEServices as IOTAServices;
+  if not Assigned(Svcs) then Exit;
+  Options := Svcs.GetEnvironmentOptions;
+  if not Assigned(Options) then Exit;
+
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+  CurPlatform := '';
+  Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    CurPlatform := Project.CurrentPlatform;
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('Project.CurrentPlatform  is ' + CurPlatform);
+  {$ENDIF}
+  end;
+{$ENDIF}
+{$ENDIF}
+
+  List := TStringList.Create;
+  try
+{$IFDEF LAZARUS}
+    // 拿环境里的 FPC 的 source 目录
+    Text := LinkPath(_CnExtractFilePath(IDEEnvironmentOptions.GetParsedCompilerFilename), '..\..\source\rtl\');
+    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
+    AddList(List);
+{$ELSE}
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+    if CurPlatform = '' then
+      Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'))
+    else
+      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
+        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Search Path', ''));
+{$ELSE}
+    Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'));
+{$ENDIF}
+
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('LibraryPath' + #13#10 + Text);
+  {$ENDIF}
+    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
+    AddList(List);
+
+{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
+    if CurPlatform = '' then
+      Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'))
+    else
+      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
+        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Browsing Path', ''));
+{$ELSE}
+    Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'));
+{$ENDIF}
+
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('BrowsingPath' + #13#10 + Text);
+  {$ENDIF}
+    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
+    AddList(List);
+{$ENDIF}
+
+    if IncludeProjectPath then
+    begin
+      GetProjectLibPath(List);
+      AddList(List);
+    end;
+  finally
+    List.Free;
+  end;
+{$IFDEF DEBUG}
+  CnDebugger.LogStrings(Paths, 'Paths');
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 取当前工程组的相关 Path 内容
+procedure GetProjectLibPath(Paths: TStrings);
+var
+{$IFNDEF NO_DELPHI_OTA}
+  ProjectGroup: IOTAProjectGroup;
+{$ENDIF}
+  Project: TCnIDEProjectInterface;
+  Path: string;
+  I, J: Integer;
+  APaths: TStrings;
+begin
+  Paths.Clear;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogEnter('GetProjectLibPath');
+{$ENDIF}
+
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  // 把当前工程的几个路径都加进来
+  Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    AddProjectPath(Project, Paths, pptSrc);
+    AddProjectPath(Project, Paths, pptUnit);
+    AddProjectPath(Project, Paths, pptLib);
+    AddProjectPath(Project, Paths, pptInclude);
+
+    for I := 0 to Project.FileCount - 1 do
+    begin
+      Path := _CnExtractFileDir(Project.Files[I].Filename);
+      if Paths.IndexOf(Path) < 0 then
+        Paths.Add(Path);
+    end;
+  end;
+
+{$ELSE}
+  // 处理当前工程组中的路径设置
+  ProjectGroup := CnOtaGetProjectGroup;
+  if Assigned(ProjectGroup) then
+  begin
+    APaths := TStringList.Create;
+    try
+      for I := 0 to ProjectGroup.GetProjectCount - 1 do
+      begin
+        Project := ProjectGroup.Projects[I];
+        if Assigned(Project) then
+        begin
+          // 增加工程搜索路径
+          AddProjectPath(Project, Paths, pptSrc);
+          AddProjectPath(Project, Paths, pptUnit);
+          AddProjectPath(Project, Paths, pptLib);
+          AddProjectPath(Project, Paths, pptInclude);
+
+          // 增加工程中文件的路径
+          for J := 0 to Project.GetModuleCount - 1 do
+          begin
+            Path := _CnExtractFileDir(Project.GetModule(J).FileName);
+            if Paths.IndexOf(Path) < 0 then
+              Paths.Add(Path);
+          end;
+        end;
+      end;
+    finally
+      APaths.Free;
+    end;
+  end;
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF DEBUG}
+  CnDebugger.LogStrings(Paths, 'Paths');
+  CnDebugger.LogLeave('GetProjectLibPath');
+{$ENDIF}
+end;
+
+function GetProjectDcuPath(AProject: TCnIDEProjectInterface): string;
+begin
+{$IFDEF STAND_ALONE}
+  Result := '';
+{$ELSE}
+{$IFDEF LAZARUS}
+  if (AProject <> nil) and (AProject.LazCompilerOptions <> nil) then
+  begin
+    Result := AProject.LazCompilerOptions.GetUnitOutputDirectory(True);
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
+  {$ENDIF}
+  end;
+{$ELSE}
+  if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
+  begin
+    Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
+    if Result <> '' then
+      Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
+  {$ENDIF}
+  end
+  else
+    Result := '';
+{$ENDIF}
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -1988,211 +2312,6 @@ end;
 
 {$IFNDEF NO_DELPHI_OTA}
 
-// 取环境设置中的 LibraryPath 内容，注意 XE2 以上版本，GetEnvironmentOptions 里头
-// 得到的值并不是当前工程的 Platform 对应的值，所以只能改成根据工程平台从注册表里读。
-procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean);
-var
-  Svcs: IOTAServices;
-  Options: IOTAEnvironmentOptions;
-  Text: string;
-  List: TStrings;
-{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
-  CurPlatform: string;
-  Project: IOTAProject;
-{$ENDIF}
-
-  procedure AddList(AList: TStrings);
-  var
-    S: string;
-    I: Integer;
-  begin
-    for I := 0 to List.Count - 1 do
-    begin
-      S := Trim(MakePath(List[I]));
-      if (S <> '') and (Paths.IndexOf(S) < 0) then
-        Paths.Add(S);
-    end;
-  end;
-
-begin
-  Svcs := BorlandIDEServices as IOTAServices;
-  if not Assigned(Svcs) then Exit;
-  Options := Svcs.GetEnvironmentOptions;
-  if not Assigned(Options) then Exit;
-
-{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
-  CurPlatform := '';
-  Project := CnOtaGetCurrentProject;
-  if Project <> nil then
-  begin
-    CurPlatform := Project.CurrentPlatform;
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Project.CurrentPlatform  is ' + CurPlatform);
-  {$ENDIF}
-  end;
-{$ENDIF}
-
-  List := TStringList.Create;
-  try
-{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
-    if CurPlatform = '' then
-      Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'))
-    else
-      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
-        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Search Path', ''));
-{$ELSE}
-    Text := ReplaceToActualPath(Options.GetOptionValue('LibraryPath'));
-{$ENDIF}
-
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('LibraryPath' + #13#10 + Text);
-  {$ENDIF}
-    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
-    AddList(List);
-
-{$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
-    if CurPlatform = '' then
-      Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'))
-    else
-      Text := ReplaceToActualPath(RegReadStringDef(HKEY_CURRENT_USER,
-        WizOptions.CompilerRegPath + '\Library\' + CurPlatform, 'Browsing Path', ''));
-{$ELSE}
-    Text := ReplaceToActualPath(Options.GetOptionValue('BrowsingPath'));
-{$ENDIF}
-
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('BrowsingPath' + #13#10 + Text);
-  {$ENDIF}
-    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
-    AddList(List);
-
-    if IncludeProjectPath then
-    begin
-      GetProjectLibPath(List);
-      AddList(List);
-    end;
-  finally
-    List.Free;
-  end;
-{$IFDEF DEBUG}
-  CnDebugger.LogStrings(Paths, 'Paths');
-{$ENDIF}
-end;
-
-procedure AddProjectPath(Project: IOTAProject; Paths: TStrings; IDStr: string);
-var
-  APath: string;
-  APaths: TStrings;
-  I: Integer;
-begin
-  if not Assigned(Project.ProjectOptions) then
-    Exit;
-
-  APath := Project.ProjectOptions.GetOptionValue(IdStr);
-
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('AddProjectPath: %s '#13#10 + APath, [IdStr]);
-{$ENDIF}
-
-  if APath <> '' then
-  begin
-    APath := ReplaceToActualPath(APath, Project);
-      
-    // 处理路径中的相对路径
-    APaths := TStringList.Create;
-    try
-      APaths.Text := StringReplace(APath, ';', #13#10, [rfReplaceAll]);
-      for I := 0 to APaths.Count - 1 do
-      begin
-        if Trim(APaths[I]) <> '' then   // 无效目录
-        begin
-          APath := MakePath(Trim(APaths[I]));
-          if (Length(APath) > 2) and (APath[2] = ':') then // 全路径目录
-          begin
-            if Paths.IndexOf(APath) < 0 then
-              Paths.Add(APath);
-          end
-          else                          // 相对路径
-          begin
-            APath := LinkPath(_CnExtractFilePath(Project.FileName), APath);
-            if Paths.IndexOf(APath) < 0 then
-              Paths.Add(APath);
-          end;
-        end;          
-      end;
-    finally
-      APaths.Free;
-    end;                
-  end;
-end;
-
-// 取当前工程组的相关 Path 内容
-procedure GetProjectLibPath(Paths: TStrings);
-var
-  ProjectGroup: IOTAProjectGroup;
-  Project: IOTAProject;
-  Path: string;
-  I, J: Integer;
-  APaths: TStrings;
-begin
-  Paths.Clear;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogEnter('GetProjectLibPath');
-{$ENDIF}
-
-  // 处理当前工程组中的路径设置
-  ProjectGroup := CnOtaGetProjectGroup;
-  if Assigned(ProjectGroup) then
-  begin
-    APaths := TStringList.Create;
-    try
-      for I := 0 to ProjectGroup.GetProjectCount - 1 do
-      begin
-        Project := ProjectGroup.Projects[I];
-        if Assigned(Project) then
-        begin
-          // 增加工程搜索路径
-          AddProjectPath(Project, Paths, 'SrcDir');
-          AddProjectPath(Project, Paths, 'UnitDir');
-          AddProjectPath(Project, Paths, 'LibPath');
-          AddProjectPath(Project, Paths, 'IncludePath');
-
-          // 增加工程中文件的路径
-          for J := 0 to Project.GetModuleCount - 1 do
-          begin
-            Path := _CnExtractFileDir(Project.GetModule(J).FileName);
-            if Paths.IndexOf(Path) < 0 then
-              Paths.Add(Path);
-          end;
-        end;
-      end;
-    finally
-      APaths.Free;
-    end;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogStrings(Paths, 'Paths');
-  CnDebugger.LogLeave('GetProjectLibPath');
-{$ENDIF}
-end;
-
-function GetProjectDcuPath(AProject: IOTAProject): string;
-begin
-  if (AProject <> nil) and (AProject.ProjectOptions <> nil) then
-  begin
-    Result := ReplaceToActualPath(AProject.ProjectOptions.Values['UnitOutputDir'], AProject);
-    if Result <> '' then
-      Result := MakePath(LinkPath(_CnExtractFilePath(AProject.FileName), Result));
-  {$IFDEF DEBUG}
-    CnDebugger.LogMsg('GetProjectDcuPath: ' + Result);
-  {$ENDIF}
-  end
-  else
-    Result := '';
-end;
-
 // 根据模块名获得完整文件名
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 var
@@ -2245,7 +2364,7 @@ begin
   Paths := TStringList.Create;
   try
     if Assigned(AProject) then  // 加入工程搜索路径
-      AddProjectPath(AProject, Paths, 'SrcDir');
+      AddProjectPath(AProject, Paths, pptSrc);
 
     ProjectSrcIdx := Paths.Count; // 前 ProjectSrcIdx 个，也就是 0 到 ProjectSrcIdx - 1 是工程搜索路径
 

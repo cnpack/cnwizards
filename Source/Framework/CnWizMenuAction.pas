@@ -514,7 +514,8 @@ begin
 {$ELSE}
   {$IFDEF LAZARUS}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
-  {$ELSE}
+  {$ENDIF}
+  {$IFNDEF NO_DELPHI_OTA}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
   {$ENDIF}
 {$ENDIF}

@@ -199,8 +199,9 @@ var
       SrcFile := F;
       DstFile := '';
       Found := False;
-
+{$IFNDEF NO_DELPHI_OTA}
       FindFile(MakePath(GetInstallDir) + 'Source\', '*.*', DoFindFile, nil, True, True);
+{$ENDIF}
       if Found and DoOpenFile(DstFile) then
         Exit
       else
@@ -260,9 +261,9 @@ begin
     GetLibraryPath(Paths);
     for I := 0 to Paths.Count - 1 do
       FindFile(MakePath(Paths[I]), '*' + FileName + '*', DoFindFileList, nil, True, True);
-
+{$IFNDEF NO_DELPHI_OTA}
     FindFile(MakePath(GetInstallDir) + 'Source\', '*' + FileName + '*', DoFindFileList, nil, True, True);
-
+{$ENDIF}
     Result := FFileList.Count > 0;
   finally
     Paths.Free;
