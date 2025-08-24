@@ -14,7 +14,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ActnList, Buttons, ClipBrd, ComCtrls, ExtCtrls, ComObj, ExtDlgs, IniFiles,
   Menus, Printers, Registry, StdCtrls, TypInfo, ToolsAPI, CnDebug,
-  RegExpr, ScriptEvent, CnCommon, CnWizClasses, CnWizUtils, CnWizIdeUtils,
+  AsRegExpr, ScriptEvent, CnCommon, CnWizClasses, CnWizUtils, CnWizIdeUtils,
   CnWizShortCut, CnWizOptions;
 
   // If need to access IDE Components, please uses IdeInstComp

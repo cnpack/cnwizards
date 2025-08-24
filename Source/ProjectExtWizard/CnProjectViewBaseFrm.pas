@@ -53,7 +53,7 @@ uses
 {$IFNDEF STAND_ALONE} {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
-  CnWizShareImages, CnIniStrUtils, RegExpr, CnStrings;
+  CnWizShareImages, CnIniStrUtils, AsRegExpr, CnStrings;
 
 type
 

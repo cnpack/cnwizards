@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, RegExpr,
+  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, AsRegExpr,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler, CnNative,
   CnWizSearch, CnIni, CnWizMultiLang {$IFDEF IDE_WIDECONTROL}, CnWideStrings {$ENDIF};
 

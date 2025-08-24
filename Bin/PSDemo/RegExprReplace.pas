@@ -11,7 +11,7 @@ program RegExprReplace;
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  Buttons, StdCtrls, IniFiles, Registry, RegExpr, CnCommon, ToolsAPI;
+  Buttons, StdCtrls, IniFiles, Registry, AsRegExpr, CnCommon, ToolsAPI;
 
 const
   csDefExpression =

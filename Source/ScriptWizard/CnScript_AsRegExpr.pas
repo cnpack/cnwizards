@@ -18,11 +18,11 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnScript_RegExpr;
+unit CnScript_AsRegExpr;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：脚本扩展 RegExpr 注册类
+* 单元名称：脚本扩展 AsRegExpr 注册类
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元由 UnitParser v0.7 自动生成的文件修改而来
 * 开发平台：PWinXP SP2 + Delphi 5.01
@@ -40,11 +40,11 @@ interface
 {$DEFINE UniCode}
 
 uses
-  Windows, SysUtils, Classes, RegExpr, uPSComponent, uPSRuntime, uPSCompiler;
+  Windows, SysUtils, Classes, AsRegExpr, uPSComponent, uPSRuntime, uPSCompiler;
 
 type
 
-  TPSImport_RegExpr = class(TPSPlugin)
+  TPSImport_AsRegExpr = class(TPSPlugin)
   public
     procedure CompileImport1(CompExec: TPSScript); override;
     procedure ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter); override;
@@ -87,14 +87,14 @@ end;
 
  
  
-{ TPSImport_RegExpr }
+{ TPSImport_AsRegExpr }
 (*----------------------------------------------------------------------------*)
-procedure TPSImport_RegExpr.CompileImport1(CompExec: TPSScript);
+procedure TPSImport_AsRegExpr.CompileImport1(CompExec: TPSScript);
 begin
   SIRegister_RegExpr(CompExec.Comp);
 end;
 (*----------------------------------------------------------------------------*)
-procedure TPSImport_RegExpr.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
+procedure TPSImport_AsRegExpr.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
 begin
   RIRegister_RegExpr_Routines(CompExec.Exec); // comment it if no routines
 end;

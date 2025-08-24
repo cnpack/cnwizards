@@ -53,7 +53,7 @@ uses
   LibIntf,
   {$ENDIF}
   CnWizUtils, CnWizMultiLang, CnWizShareImages, CnWizConsts, CnWizIdeUtils,
-  CnWizNotifier, CnCommon, CnPopupMenu, RegExpr, CnStrings, CnWizOptions,
+  CnWizNotifier, CnCommon, CnPopupMenu, AsRegExpr, CnStrings, CnWizOptions,
   CnFrmMatchButton;
 
 type

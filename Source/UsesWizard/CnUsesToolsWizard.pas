@@ -56,7 +56,7 @@ uses
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
   CnWizOptions, CnHashMap, mPasLex, {$IFDEF UNICODE} CnPasWideLex, {$ENDIF}
-  Math, TypInfo, RegExpr, ActnList {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
+  Math, TypInfo, AsRegExpr, ActnList {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
 
 type
 

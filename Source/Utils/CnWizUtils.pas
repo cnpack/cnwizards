@@ -65,7 +65,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf, SrcEditorIntf, {$ENDIF}
-  {$ELSE} RegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
+  {$ELSE} AsRegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}

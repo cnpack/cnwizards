@@ -288,7 +288,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  RegExpr, CnCRC32, CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
+  AsRegExpr, CnCRC32, CnEditControlWrapper, CnWizIdeUtils, CnInetUtils, CnFeedWizardFrm;
 
 const
   SCnFeedStatusPanel = 'CnFeedStatusPanel';

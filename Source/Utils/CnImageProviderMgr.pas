@@ -39,7 +39,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms, CnCommon,
-  {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} RegExpr, ActiveX,
+  {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} AsRegExpr, ActiveX,
   CnMD5, CnThreadTaskMgr, CnPngUtilsIntf, CnDesignEditorConsts;
 
 type
