@@ -228,7 +228,7 @@ uses
 const
   csInvalidIndex = -1;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 type
 
@@ -393,7 +393,7 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // IDE 快捷键绑定接口实现类
@@ -726,7 +726,7 @@ begin
 end;
 
 procedure TCnWizShortCutMgr.SaveMainMenuShortCuts;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
   MainMenu: TMainMenu;
@@ -753,7 +753,7 @@ var
 begin
   FSaveMenus.Clear;
   FSaveShortCuts.Clear;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   MainMenu := Svcs40.MainMenu;
   DoSaveMenu(MainMenu.Items);
@@ -763,7 +763,7 @@ end;
 // 安装键盘绑定
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   KeySvcs: IOTAKeyboardServices;
 {$ENDIF}
   I: Integer;
@@ -782,7 +782,7 @@ begin
 
   if not IsEmpty then
   begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
     try
@@ -816,7 +816,7 @@ end;
 
 // 反安装键盘绑定
 procedure TCnWizShortCutMgr.RemoveKeyBinding;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   KeySvcs: IOTAKeyboardServices;
 {$ENDIF}
@@ -825,7 +825,7 @@ begin
   begin
     SaveMainMenuShortCuts;
     try
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
       QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     {$IFNDEF COMPILER7_UP}
       KeySvcs.PopKeyboard(SCnKeyBindingName);
@@ -848,7 +848,7 @@ begin
     Exit;
   end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if IdeClosing then
     Exit;
 {$ENDIF}

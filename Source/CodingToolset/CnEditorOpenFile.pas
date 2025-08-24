@@ -47,7 +47,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, IniFiles, {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF} CnConsts, CnWizUtils,
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnConsts, CnWizUtils,
   CnCodingToolsetWizard, CnWizConsts, CnEditorOpenFileFrm, CnCommon, CnWizOptions;
 
 type
@@ -199,7 +199,7 @@ var
       SrcFile := F;
       DstFile := '';
       Found := False;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
       FindFile(MakePath(GetInstallDir) + 'Source\', '*.*', DoFindFile, nil, True, True);
 {$ENDIF}
       if Found and DoOpenFile(DstFile) then
@@ -261,7 +261,7 @@ begin
     GetLibraryPath(Paths);
     for I := 0 to Paths.Count - 1 do
       FindFile(MakePath(Paths[I]), '*' + FileName + '*', DoFindFileList, nil, True, True);
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     FindFile(MakePath(GetInstallDir) + 'Source\', '*' + FileName + '*', DoFindFileList, nil, True, True);
 {$ENDIF}
     Result := FFileList.Count > 0;

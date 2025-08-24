@@ -50,7 +50,7 @@ uses
   StrUtils,
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
-{$IFNDEF STAND_ALONE} {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
+{$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
   CnWizShareImages, CnIniStrUtils, AsRegExpr, CnStrings;
@@ -820,7 +820,7 @@ begin
     CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Save Width %d Height %d before Scale.', [TW, TH]);
 {$ENDIF}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     if CnIsGEDelphi11Dot3 then
     begin
       S := GetListViewWidthString2(lvList, GetFactorFromSizeEnlarge(Enlarge)); // 获取正确的宽度值

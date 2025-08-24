@@ -86,7 +86,7 @@ type
     FIdEval: Integer;
 {$ENDIF}
     FIdAbout: Integer;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
     FEvaluationExecutor: TCnEvaluationExecutor;
     procedure EvalExecute(Sender: TObject);
@@ -132,7 +132,7 @@ begin
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
   AcquireSubActions;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
   FEvaluationExecutor := TCnEvaluationExecutor.Create;
   FEvaluationExecutor.OnExecute := EvalExecute;
@@ -143,7 +143,7 @@ end;
 
 destructor TCnWizAbout.Destroy;
 begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
   UnRegisterDesignMenuExecutor(FEvaluationExecutor);
   FEvaluationExecutor := nil;
@@ -152,7 +152,7 @@ begin
   inherited;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
 
 procedure TCnWizAbout.EvalExecute(Sender: TObject);

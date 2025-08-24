@@ -3,9 +3,8 @@
 //==============================================================================
 
 {$IFDEF FPC}
-  // 专家包的编译器如果是 FPC 则表示要安装到 Lazarus 里
+  // 专家包编译时如果是 FPC 则表示要安装到 Lazarus 里，但 cnvcl 不是
   {$DEFINE LAZARUS}
-  {$DEFINE NO_DELPHI_OTA}
 {$ENDIF}
 
 {$IFDEF COMPILER5_UP}
@@ -50,7 +49,13 @@
   {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI}
+  // 非独立的 Delphi 编译，表示有 OTA 接口
+  {$DEFINE DELPHI_OTA}
+{$ENDIF}
+
 {$IFDEF STAND_ALONE}
   {$UNDEF USE_CODEEDITOR_SERVICE}
-  {$DEFINE NO_DELPHI_OTA}
+  // 独立的则表示没有 OTA 接口
+  {$UNDEF DELPHI_OTA}
 {$ENDIF}

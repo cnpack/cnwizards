@@ -45,7 +45,7 @@ uses
   StrUtils,
 {$ENDIF}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF} Graphics, ImgList, ActnList,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Graphics, ImgList, ActnList,
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm;
 
@@ -115,7 +115,7 @@ end;
 { TCnEditorOpenFileForm }
 
 function TCnEditorOpenFileForm.DoSelectOpenedItem: string;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   CurrentModule: IOTAModule;
 {$ENDIF}

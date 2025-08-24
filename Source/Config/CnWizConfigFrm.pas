@@ -625,7 +625,7 @@ begin
 
   if Idx >= 0 then
   begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
     FShortCuts[Idx] := HotKeyWizard.HotKey;
 {$ELSE}
     if CheckQueryShortCutDuplicated(HotKeyWizard.HotKey, WizardAction) <> sdDuplicatedStop then

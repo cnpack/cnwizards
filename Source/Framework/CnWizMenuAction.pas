@@ -49,7 +49,7 @@ interface
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
   {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
@@ -244,7 +244,7 @@ const
 
 var
   FWizActionMgr: TCnWizActionMgr = nil;
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   FCnWizardsActionList: TActionList = nil; // 独立运行时及 Lazarus 里没有 IDE ActionList
 {$ENDIF}
 
@@ -457,7 +457,7 @@ end;
 procedure TCnWizActionMgr.InitAction(AWizAction: TCnWizAction;
   const ACommand, ACaption: string; OnExecute: TNotifyEvent; OnUpdate: TNotifyEvent;
   const IcoName, AHint: string; UseDefaultIcon: Boolean);
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
   NewName: string;
@@ -496,7 +496,7 @@ begin
   AWizAction.OnExecute := OnExecute;
   AWizAction.OnUpdate := OnUpdate;
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   AWizAction.ActionList := FCnWizardsActionList;
 {$ELSE}
   AWizAction.ActionList := Svcs40.ActionList;
@@ -515,7 +515,7 @@ begin
   {$IFDEF LAZARUS}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
   {$ENDIF}
-  {$IFNDEF NO_DELPHI_OTA}
+  {$IFDEF DELPHI_OTA}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
   {$ENDIF}
 {$ENDIF}
@@ -530,7 +530,7 @@ end;
 function TCnWizActionMgr.AddMenuAction(const ACommand, ACaption, AMenuName: string;
   AShortCut: TShortCut; OnExecute: TNotifyEvent; const IcoName,
   AHint: string; UseDefaultIcon: Boolean): TCnWizMenuAction;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
@@ -542,7 +542,7 @@ begin
   if IndexOfCommand(ACommand) >= 0 then
     raise ECnDuplicateCommandException.CreateFmt(SCnDuplicateCommand, [ACommand]);
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   Result := TCnWizMenuAction.Create(FCnWizardsActionList);
 {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);

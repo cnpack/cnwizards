@@ -43,14 +43,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ELSE} LCLProc, {$ENDIF} IniFiles, StdCtrls, ComCtrls, Menus,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ELSE} LCLProc, {$ENDIF} IniFiles, StdCtrls, ComCtrls, Menus,
   TypInfo, Contnrs, ExtCtrls, mPasLex, CnSpin, CnConsts, CnCommon, CnWizConsts,
   CnWizClasses, CnWizMultiLang, CnWizOptions, CnWizManager,
-{$IFDEF CNWIZARDS_CNINPUTHELPER} {$IFNDEF NO_DELPHI_OTA}
+{$IFDEF CNWIZARDS_CNINPUTHELPER} {$IFDEF DELPHI_OTA}
   CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
 {$ENDIF} {$ENDIF}
   CnStrings, CnPasCodeParser, CnWizUtils, CnFormatterIntf, CnCodeFormatRules,
-  {$IFNDEF NO_DELPHI_OTA} CnWizDebuggerNotifier, {$ENDIF} CnEditControlWrapper;
+  {$IFDEF DELPHI_OTA} CnWizDebuggerNotifier, {$ENDIF} CnEditControlWrapper;
 
 type
   TCnCodeFormatterWizard = class(TCnSubMenuWizard)
@@ -86,7 +86,7 @@ type
 {$ENDIF}
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     FInputHelper: TCnInputHelper;
     FSymbolListMgr: TCnSymbolListMgr;
     FPreNamesList: TCnAnsiStringList;  // Lazy Create
@@ -96,7 +96,7 @@ type
 {$ENDIF}
 
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     // 获取指定文件中的断点信息
     procedure ObtainBreakpointsByFile(const FileName: string);
     // 获取行的折叠信息
@@ -264,7 +264,7 @@ begin
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos, EndPos:
   TOTACharPos; View: IOTAEditView): Boolean;
@@ -435,7 +435,7 @@ end;
 destructor TCnCodeFormatterWizard.Destroy;
 begin
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   FPreNamesList.Free;
   SetLength(FPreNamesArray, 0);
 {$ENDIF}
@@ -588,7 +588,7 @@ begin
 end;
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 procedure TCnCodeFormatterWizard.CheckObtainIDESymbols;
 var

@@ -256,7 +256,7 @@ type
     Unsorted: TStringList;
   end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // IDE 代码编辑器功能函数
@@ -356,7 +356,7 @@ function GetNewComponentPaletteTabControl: TWinControl;
 function GetNewComponentPaletteComponentPanel: TWinControl;
 {* 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
 {* 返回编辑器窗口下方的状态栏，可能为空}
@@ -447,7 +447,7 @@ function GetBDSUserDataDir: string;
 {* 取得 BDS (Delphi8以后版本) 的用户数据目录 }
 {$ENDIF}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
@@ -503,7 +503,7 @@ function GetEditorTabTabIndex(ATab: TXTabControl): Integer;
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 {* 从编辑器控件获得其所属的编辑器窗口的状态栏}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function GetCurrentSyncButton: TControl;
 {* 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见}
@@ -519,7 +519,7 @@ function GetCodeTemplateListBox: TControl;
 function GetCodeTemplateListBoxVisible: Boolean;
 {* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function IsCurrentEditorInSyncMode: Boolean;
 {* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
@@ -554,7 +554,7 @@ function GetErrorInsightRenderStyle: Integer;
 {* 返回 ErrorInsight 的当前类型，返回值为 csErrorInsightRenderStyle* 系列常数
    -1 为不支持，1 时会影响编辑器行高，影响程度和显示 Leve 以及是否侧边栏显示均无关}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean = False;
   SearchTypes: TCnModuleSearchTypes = [mstInProject, mstProjectSearch, mstSystemSearch]): Boolean;
@@ -578,7 +578,7 @@ type
     procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
   end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 组件面板封装类
@@ -808,7 +808,7 @@ function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function SearchUsesInsertPosInPasFile(const FileName: string; IsIntf: Boolean;
   out HasUses: Boolean; out LinearPos: Integer): Boolean;
@@ -904,7 +904,7 @@ type
   TControlHack = class(TControl);
   TCustomControlHack = class(TCustomControl);
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // IDE功能函数
@@ -1505,7 +1505,7 @@ begin
 {$ENDIF}
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 返回编辑器窗口下方的状态栏，可能为空
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
@@ -1980,7 +1980,7 @@ end;
 // 得到的值并不是当前工程的 Platform 对应的值，所以只能改成根据工程平台从注册表里读。
 procedure GetLibraryPath(Paths: TStrings; IncludeProjectPath: Boolean);
 var
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   Svcs: IOTAServices;
   Options: IOTAEnvironmentOptions;
 {$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
@@ -2090,7 +2090,7 @@ end;
 // 取当前工程组的相关 Path 内容
 procedure GetProjectLibPath(Paths: TStrings);
 var
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   ProjectGroup: IOTAProjectGroup;
 {$ENDIF}
   Project: TCnIDEProjectInterface;
@@ -2314,7 +2314,7 @@ begin
 end;
 {$ENDIF}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 根据模块名获得完整文件名
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
@@ -2679,7 +2679,7 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见
 function GetCurrentSyncButton: TControl;
@@ -2722,7 +2722,7 @@ begin
     Result := Control.Visible;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False
 function IsCurrentEditorInSyncMode: Boolean;
@@ -2975,7 +2975,7 @@ begin
   FUnitCallback(FileName, True, FCurrFileType, FCurrSearchType);
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean;
   SearchTypes: TCnModuleSearchTypes): Boolean;
@@ -3150,7 +3150,7 @@ begin
     inherited;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 组件面板封装类
@@ -4285,7 +4285,7 @@ end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function SearchUsesInsertPosInPasFile(const FileName: string; IsIntf: Boolean;
   out HasUses: Boolean; out LinearPos: Integer): Boolean;
@@ -4616,7 +4616,7 @@ end;
 {$ENDIF}
 
 initialization
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
 {$ENDIF}
@@ -4647,7 +4647,7 @@ finalization
   FWaitDialogHook.Free;
 {$ENDIF}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if FCnPaletteWrapper <> nil then
     FreeAndNil(FCnPaletteWrapper);
 

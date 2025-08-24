@@ -130,7 +130,7 @@ type
 
 {$M-}
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   TComponentEditorClass = TClass;
   TPropertyEditorClass = TClass;
 {$ENDIF}
@@ -621,7 +621,7 @@ var
 begin
   UnRegister;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   FGroup := NewEditorGroup;
 {$ENDIF}
 
@@ -696,7 +696,7 @@ begin
           AClass := GetClass(AName);
           if AClass <> nil then
           begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
             RegisterComponentEditor(TComponentClass(AClass), CompEditors[I].GetEditorClass);
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -709,7 +709,7 @@ begin
     end;
   end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   // 为了避免反注册时把其它模块中的编辑器也反注册掉（一个可能的情况是 CodeRush
   // 注册的组件编辑器），此处建一个新组。这样虽然可能导致有多余的空组，不过对
   // 使用 TBit 来保存组信息的 IDE 来说没什么影响。
@@ -726,7 +726,7 @@ begin
 {$ENDIF}
 
     try
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
       // D8/D2005 下在 DLL 释放时调用可能会出异常
       if FNeedUnRegister then

@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Windows, Forms, Controls {$IFNDEF NO_DELPHI_OTA}, ToolsAPI {$ENDIF}
+  SysUtils, Classes, Windows, Forms, Controls {$IFDEF DELPHI_OTA}, ToolsAPI {$ENDIF}
   {$IFDEF DELPHI110_ALEXANDRIA}, System.Generics.Collections {$ENDIF}
   {$IFDEF DELPHI102_TOKYO}, Themes {$ENDIF};
 

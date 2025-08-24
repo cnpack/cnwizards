@@ -104,7 +104,7 @@ type
   TCnGeneralBCBTokenList = TBCBTokenList;
 {$ENDIF}
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
 
   // 独立运行或 Lazarus 中，把 ToolsAPI 里的一些基础定义搬移过来
 

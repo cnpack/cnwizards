@@ -54,7 +54,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, CnWizardImage, StdCtrls, ComCtrls, Registry, Math, TypInfo,
   Clipbrd, ActnList, ShellAPI,
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, CnEditControlWrapper, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, CnEditControlWrapper, {$ENDIF}
   CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnWizCompilerConst,
   CnCommon, CnWizIdeUtils, CnLangMgr, CnWizMultiLang, CnWizManager;
 
@@ -820,13 +820,13 @@ begin
 end;
 
 function GetEditorSettingString: string;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Option: IOTAEditOptions;
 {$ENDIF}
 begin
   Result := SOutEditorSettings + SCRLF;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   Option := CnOtaGetEditOptions;
   if Option <> nil then
   begin

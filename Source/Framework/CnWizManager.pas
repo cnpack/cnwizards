@@ -59,7 +59,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, {$ENDIF} {$ELSE}
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI,  CnRestoreSystemMenu, CnWizIdeHooks,
+  {$IFDEF DELPHI_OTA} ToolsAPI,  CnRestoreSystemMenu, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
   CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
@@ -87,13 +87,13 @@ type
 
 { TCnWizardMgr }
 
-  TCnWizardMgr = class{$IFNDEF NO_DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
+  TCnWizardMgr = class{$IFDEF DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
   {* CnWizardMgr 专家管理器类，用于维护专家列表。
      请不要直接创建该类的实例，该类的实例在专家 DLL 注册时自动创建，请使用全局
      变量 CnWizardMgr 来访问管理器实例。}
   private
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     FRestoreSysMenu: TCnRestoreSystemMenu;
 {$ENDIF}
 {$ENDIF}
@@ -231,7 +231,7 @@ type
     {* 拿专家包的数字版本号，比如 1.2.3 版就返回 123}
   end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER6_UP}
 
   TCnDesignSelectionManager = class(TBaseSelectionEditor, ISelectionEditor)
@@ -649,7 +649,7 @@ begin
 {$ENDIF}
   ConstructSortedMenu;
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   FRestoreSysMenu := TCnRestoreSystemMenu.Create(nil);
 {$ENDIF}
 {$ENDIF}
@@ -748,7 +748,7 @@ begin
     FreeAndNil(FLaterLoadTimer);
     FreeAndNil(FTipTimer);
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     FreeAndNil(FRestoreSysMenu);
 {$ENDIF}
 {$ENDIF}
@@ -1058,7 +1058,7 @@ var
   MenuWizard: TCnMenuWizard;
   IDEEnhanceWizard: TCnIDEEnhanceWizard;
   RepositoryWizard: TCnRepositoryWizard;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   WizardSvcs: IOTAWizardServices;
 {$ENDIF}
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -1068,7 +1068,7 @@ var
   UserBoot: Boolean;
   BootList: array of Boolean;
 begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
   {$IFDEF DEBUG}
@@ -1206,12 +1206,12 @@ end;
 
 // 释放专家列表
 procedure TCnWizardMgr.FreeWizards;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   WizardSvcs: IOTAWizardServices;
 {$ENDIF}
 begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAWizardServices, WizardSvcs) then
   begin
 {$IFDEF DEBUG}
@@ -1286,7 +1286,7 @@ begin
       CnDebugger.LogMsg(TCnRepositoryWizard(FRepositoryWizards[0]).ClassName + '.Free');
 {$ENDIF}
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
       TObject(FRepositoryWizards[0]).Free;
 {$ELSE}
       // 移除专家会自动释放掉
@@ -2022,7 +2022,7 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER6_UP}
 
 //==============================================================================

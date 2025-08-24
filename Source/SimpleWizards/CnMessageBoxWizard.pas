@@ -49,7 +49,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus,
-  {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizIdeUtils,
   CnSpin, CnWizOptions, CnWizMultiLang, CnWizIni;
 
@@ -1099,7 +1099,7 @@ var
   Indent, WrapWidth: Integer;
   Col, Row: Integer;
   Col1, Row1: Integer;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   IEditView: IOTAEditView;
 {$ENDIF}
   FmtStr: string;
@@ -1222,7 +1222,7 @@ begin
 
       if ShowModal = mrOk then
       begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
         IsDelphi := True; // 独立运行或 Laz 下，默认生成 Pascal 代码
 {$ELSE}
         IsDelphi := CurrentIsDelphiSource;
@@ -1582,7 +1582,7 @@ begin
         end;
       end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
       IEditView := CnOtaGetTopMostEditView;
       if Assigned(IEditView) then IEditView.Paint;
 {$ENDIF}

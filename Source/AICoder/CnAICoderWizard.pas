@@ -189,7 +189,7 @@ begin
   inherited;
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
   EditControlWrapper.AddSysKeyDownNotifier(EditorSysKeyDown);
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
     csAICoderChatForm);
 {$ENDIF}
@@ -197,7 +197,7 @@ end;
 
 destructor TCnAICoderWizard.Destroy;
 begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   IdeDockManager.UnRegisterDockableForm(CnAICoderChatForm, csAICoderChatForm);
 {$ENDIF}
   EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
@@ -389,7 +389,7 @@ begin
   inherited;
   if Old <> Active then
   begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
     if Active then
     begin
       IdeDockManager.RegisterDockableForm(TCnAICoderChatForm, CnAICoderChatForm,
@@ -715,7 +715,7 @@ var
   PIde: PCnIdeTokenChar;
   SL: TStringList;
   Mem: TMemoryStream;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   View: IOTAEditView;
 {$ENDIF}
   P: TOTAEditPos;

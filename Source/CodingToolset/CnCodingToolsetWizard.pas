@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, ComCtrls, IniFiles, {$IFNDEF NO_DELPHI_OTA} ToolsAPI, {$ENDIF}
+  StdCtrls, ComCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   {$IFDEF LAZARUS} LCLProc, CnHotKey, {$ENDIF}
   Registry, CnWizClasses, CnConsts, CnIni, CnWizConsts, CnWizMenuAction,
   ExtCtrls, CnWizMultiLang, CnWizManager, CnHashMap, CnWizIni;

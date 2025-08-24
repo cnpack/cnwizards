@@ -90,7 +90,7 @@ uses
 type
   ECnWizardException = class(Exception);
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   TWizardState = set of (wsEnabled, wsChecked);
 
   TOTAFileNotification = (ofnFileOpening, ofnFileOpened, ofnFileClosing,
@@ -106,7 +106,7 @@ type
 
 {$M+}
 
-  TCnBaseWizard = class{$IFNDEF NO_DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
+  TCnBaseWizard = class{$IFDEF DELPHI_OTA}(TNotifierObject, IOTAWizard){$ENDIF}
   {* CnWizard 专家抽象基类，定义了专家最基本的公共内容 }
   private
     FActive: Boolean;
@@ -411,7 +411,7 @@ type
 
 { TCnRepositoryWizard }
 
-  TCnRepositoryWizard = class(TCnIconWizard {$IFNDEF NO_DELPHI_OTA}, IOTARepositoryWizard {$ENDIF})
+  TCnRepositoryWizard = class(TCnIconWizard {$IFDEF DELPHI_OTA}, IOTARepositoryWizard {$ENDIF})
   {* CnWizard 模板向导抽象基类 }
   protected
     FIconHandle: HICON;
@@ -442,7 +442,7 @@ type
 
 { TCnUnitWizard }
 
-  TCnUnitWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA},
+  TCnUnitWizard = class(TCnRepositoryWizard {$IFDEF DELPHI_OTA},
     {$IFDEF DELPHI10_UP}IOTAProjectWizard{$ELSE}IOTAFormWizard{$ENDIF} {$ENDIF});
   {* 必须实现 IOTAFormWizard 才能在 New 对话框中出现, BDS2006 则要求 IOTAProjectWizard}
 
@@ -452,7 +452,7 @@ type
 
 { TCnFormWizard }
 
-  TCnFormWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA}, IOTAFormWizard {$ENDIF});
+  TCnFormWizard = class(TCnRepositoryWizard {$IFDEF DELPHI_OTA}, IOTAFormWizard {$ENDIF});
 
 //==============================================================================
 // 工程模板向导基类
@@ -460,7 +460,7 @@ type
 
 { TCnProjectWizard }
 
-  TCnProjectWizard = class(TCnRepositoryWizard {$IFNDEF NO_DELPHI_OTA}, IOTAProjectWizard {$ENDIF});
+  TCnProjectWizard = class(TCnRepositoryWizard {$IFDEF DELPHI_OTA}, IOTAProjectWizard {$ENDIF});
 
 //==============================================================================
 // 设计器或编辑器右键菜单执行条目的基类，子类可重载相应方法实现功能
@@ -568,7 +568,7 @@ implementation
 
 uses
   CnWizUtils, CnWizOptions, CnCommon, CnRegIni
-{$IFNDEF CNWIZARDS_MINIMUM}, CnWizCommentFrm {$IFNDEF NO_DELPHI_OTA}
+{$IFNDEF CNWIZARDS_MINIMUM}, CnWizCommentFrm {$IFDEF DELPHI_OTA}
   , CnWizSubActionShortCutFrm
 {$ENDIF}{$ENDIF}
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
@@ -833,7 +833,7 @@ begin
     except
       on E: Exception do
       begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
         ShowMessage(Format('WizClasses %s LoadSettings Error. %s - %s',
           [ClassName, E.ClassName, E.Message]));
 {$ELSE}
@@ -861,7 +861,7 @@ begin
     except
       on E: Exception do
       begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
         ShowMessage(Format('WizClasses %s SaveSettings Error. %s - %s',
           [ClassName, E.ClassName, E.Message]));
 {$ELSE}
@@ -1045,7 +1045,7 @@ end;
 // 根据类名初始化图标，可重载
 procedure TCnIconWizard.InitIcon(AIcon, ASmallIcon: TIcon);
 begin
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if AIcon <> nil then
     CnWizLoadIcon(AIcon, ASmallIcon, GetIconName, True);
 {$ENDIF}
@@ -1098,7 +1098,7 @@ begin
   except
     on E: Exception do
     begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
       ShowMessage(Format('WizClasses %s Click Error. %s - %s',
         [ClassName, E.ClassName, E.Message]));
 {$ELSE}
@@ -1225,7 +1225,7 @@ end;
 
 // 类构造器
 constructor TCnSubMenuWizard.Create;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
@@ -1235,7 +1235,7 @@ begin
   // 当该专家被放到工具栏上时，点击按钮弹出的菜单
   FPopupMenu := TPopupMenu.Create(nil);
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   FPopupMenu.Images := Svcs40.ImageList;
 {$ENDIF}
@@ -1522,7 +1522,7 @@ begin
           except
             on E: Exception do
             begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
               ShowMessage(Format('WizClasses %s.SubActions[%d].Execute: %s - %s',
                 [ClassName, I, E.ClassName, E.Message]));
 {$ELSE}
@@ -1560,7 +1560,7 @@ end;
 // 显示快捷键设置对话框
 function TCnSubMenuWizard.ShowShortCutDialog(const HelpStr: string): Boolean;
 begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   Result := False;
 {$ELSE}
   {$IFNDEF CNWIZARDS_MINIMUM}

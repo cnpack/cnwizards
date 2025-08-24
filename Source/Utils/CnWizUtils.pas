@@ -97,7 +97,7 @@ type
   // 快捷键冲突的三种状态
   TCnLoadIconProc = procedure(ABigIcon: TIcon; ASmallIcon: TIcon; const IconName: string);
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 {$IFNDEF COMPILER6_UP}
   IDesigner = IFormDesigner;
 {$ENDIF}
@@ -273,7 +273,7 @@ function CheckQueryShortCutDuplicated(AShortCut: TShortCut;
 function ExecuteIDEAction(const ActionName: string): Boolean;
 {* 根据 IDE Action 名，执行它}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
 {* 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径}
 procedure SaveIDEOptionsNameToFile(const FileName: string);
@@ -361,7 +361,7 @@ function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0):
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
 //==============================================================================
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function IsDelphiProject(Project: IOTAProject): Boolean;
 {* 判断当前是否是 Delphi 工程}
@@ -503,7 +503,7 @@ function CnOtaGetCurrentProjectFileNameEx: string;
 {* 取当前工程文件名称扩展，支持 Delphi 和 Lazarus。}
 
 {$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function CnOtaGetEditBuffer: IOTAEditBuffer;
 {* 取 IOTAEditBuffer 接口}
@@ -803,7 +803,7 @@ function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
 
 {$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean = False);
 {* 保存文件}
 function CnOtaSaveFileByAction(const FileName: string): Boolean;
@@ -898,7 +898,7 @@ function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 Cpp 源文件，判断限制较多。
   如取到 dfm 等，会判断对应 pas/cpp 源文件是否打开，打开则返回对应源文件}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
 {* 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式}
@@ -1002,7 +1002,7 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 
 {$IFNDEF LAZARUS}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
 {* 返回 SourceEditor 指定编辑位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，
@@ -1359,7 +1359,7 @@ procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 var
   CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
 
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   // 几个模拟替换的变量
   CnStubRefMainForm: TCustomForm = nil;
   CnStubRefMainMenu: TMainMenu = nil;
@@ -2259,7 +2259,7 @@ end;
 
 //取得 IDE 主 ImageList
 function GetIDEImageList: TCustomImageList;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
@@ -2400,12 +2400,12 @@ end;
 
 // 取得 IDE 主 ActionList
 function GetIDEActionList: TCustomActionList;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   Svcs40: INTAServices40;
 {$ENDIF}
 begin
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   Result := CnStubRefActionList;
 {$ELSE}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
@@ -2619,7 +2619,7 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
 function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
@@ -3612,7 +3612,7 @@ end;
 
 // 取当前选择的文本
 function CnOtaGetCurrentSelection: string;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   EditView: IOTAEditView;
   EditBlock: IOTAEditBlock;
@@ -3641,7 +3641,7 @@ end;
 
 // 取当前最前端的 IOTAEditView 接口或 Lazarus 的活动编辑器
 function CnOtaGetTopMostEditView: TCnEditViewSourceInterface;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   iEditBuffer: IOTAEditBuffer;
 {$ENDIF}
@@ -3666,7 +3666,7 @@ end;
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   EditView: IOTAEditView;
   R, C: Integer;
@@ -3715,7 +3715,7 @@ end;
 
 // 取当前工程
 function CnOtaGetCurrentProject: TCnIDEProjectInterface;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   IProjectGroup: IOTAProjectGroup;
 {$ENDIF}
@@ -3787,7 +3787,7 @@ function CnOtaGetCurrentProjectFileNameEx: string;
 begin
   // 修改以符合返回全路径的规则
   Result := _CnChangeFileExt((CnOtaGetCurrentProjectFileName), '');
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
   if Result <> '' then
     Exit;
 
@@ -3801,7 +3801,7 @@ begin
 end;
 
 {$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 取 IOTAEditBuffer 接口
 function CnOtaGetEditBuffer: IOTAEditBuffer;
@@ -6702,7 +6702,7 @@ end;
 
 // 打开文件
 function CnOtaOpenFile(const FileName: string): Boolean;
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   ActionServices: IOTAActionServices;
 {$ENDIF}
@@ -6789,7 +6789,7 @@ begin
 end;
 
 {$IFNDEF LAZARUS}
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 保存文件
 procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean);
@@ -7055,7 +7055,7 @@ var
   IsDelphi: Boolean;
 begin
   Result := '';
-{$IFDEF NO_DELPHI_OTA}
+{$IFNDEF DELPHI_OTA}
   IsDelphi := True; // 独立运行或 Laz 下，默认生成 Pascal 代码
 {$ELSE}
   IsDelphi := CurrentIsDelphiSource;
@@ -7418,7 +7418,7 @@ begin
   end;
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 在 EditPosition 中插入一段文本，支持 D2005 下使用 utf-8 格式
 procedure CnOtaPositionInsertText(EditPosition: IOTAEditPosition; const Text: string);
@@ -7753,7 +7753,7 @@ begin
 end;
 
 procedure CnOtaInsertTextIntoEditor(const Text: string);
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 var
   EditView: IOTAEditView;
   Position: Longint;
@@ -7983,7 +7983,7 @@ end;
 
 {$IFNDEF LAZARUS}
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos;
   SourceEditor: IOTASourceEditor): Integer;
@@ -9494,7 +9494,7 @@ begin
   Result := (a <> $FFFFFFFF) and (a and FILE_ATTRIBUTE_DIRECTORY = 0);
 end;
 
-{$IFNDEF NO_DELPHI_OTA}
+{$IFDEF DELPHI_OTA}
 
 // 判断当前是否是 Delphi 工程
 function IsDelphiProject(Project: IOTAProject): Boolean;
