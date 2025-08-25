@@ -40,7 +40,8 @@ interface
 
 uses
   Classes, Windows, Controls, SysUtils, Messages, Graphics, StdCtrls, Math,
-  CnCommon {$IFNDEF STAND_ALONE} , {$IFDEF DELPHI104_SYDNEY_UP} Vcl.Themes, {$ENDIF}
+  {$IFDEF LAZARUS} LCLType, {$ENDIF}
+  CnCommon {$IFNDEF STAND_ALONE}, {$IFDEF DELPHI104_SYDNEY_UP} Vcl.Themes, {$ENDIF}
   CnWizIdeUtils, CnEditControlWrapper {$ENDIF};
 
 const
@@ -80,8 +81,9 @@ type
   protected
     procedure CreateParams(var Params: TCreateParams); override;
     procedure CreateWnd; override;
-
+{$IFNDEF FPC}
     function CanResize(var NewWidth, NewHeight: Integer): Boolean; override;
+{$ENDIF}
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -181,12 +183,16 @@ begin
   Result := Max((AHeight - BorderSize) div ItemHeight, 4) * ItemHeight + BorderSize;
 end;
 
+{$IFNDEF FPC}
+
 function TCnFloatListBox.CanResize(var NewWidth,
   NewHeight: Integer): Boolean;
 begin
   NewHeight := AdjustHeight(NewHeight);
   Result := True;
 end;
+
+{$ENDIF}
 
 procedure TCnFloatListBox.CloseUp;
 begin
@@ -204,7 +210,11 @@ var
 begin
   with Message.DrawItemStruct^ do
   begin
+{$IFDEF FPC}
+    State := TOwnerDrawState(itemState);
+{$ELSE}
     State := TOwnerDrawState(LongRec(itemState).Lo);
+{$ENDIF}
     Canvas.Handle := hDC;
     Canvas.Font := Font;
     Canvas.Brush := Brush;
@@ -324,7 +334,7 @@ begin
     Exit;
   end;
 
-{$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
   // 拿编辑器背景色给 FBackColor，普通标识符文字色给 FFontColor
   Control := GetCurrentEditControl;
   if Control <> nil then

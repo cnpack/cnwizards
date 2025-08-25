@@ -134,26 +134,6 @@ type
 
 {$IFDEF STAND_ALONE} // 独立运行时重新声明一些框架内的东西
   TCnMenuWizard = class(TObject);
-
-  {$IFDEF IDE_STRING_ANSI_UTF8}
-  TCnIdeTokenString = WideString; // WideString for Utf8 Conversion
-  PCnIdeTokenChar = PWideChar;
-  {$ELSE}
-  TCnIdeTokenString = string;     // Ansi/Utf16
-  PCnIdeTokenChar = PChar;
-  {$ENDIF}
-
-  {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}  // 2005 以上
-  TCnGeneralPasToken = TCnWidePasToken;
-  TCnGeneralCppToken = TCnWideCppToken;
-  TCnGeneralPasStructParser = TCnWidePasStructParser;
-  TCnGeneralCppStructParser = TCnWideCppStructParser;
-  {$ELSE}                               // 5 6 7
-  TCnGeneralPasToken = TCnPasToken;
-  TCnGeneralCppToken = TCnCppToken;
-  TCnGeneralPasStructParser = TCnPasStructureParser;
-  TCnGeneralCppStructParser = TCnCppStructureParser;
-  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF USE_CUSTOMIZED_SPLITTER}
@@ -177,7 +157,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure lvListData(Sender: TObject; Item: TListItem);
     procedure btnShowPreviewClick(Sender: TObject);
-    //procedure lvListColumnClick(Sender: TObject; Column: TListColumn);
+    // procedure lvListColumnClick(Sender: TObject; Column: TListColumn);
     procedure FormCreate(Sender: TObject);
     procedure cbbMatchSearchChange(Sender: TObject);
     procedure cbbMatchSearchKeyDown(Sender: TObject; var Key: Word;
@@ -243,9 +223,10 @@ type
     procedure SaveSettings(Ini: TCustomIniFile; aSection: string); override;
     procedure UpdateMemoSize(Sender: TObject);
     property FileName: string read FFileName write SetFileName;
-    //property Language: TCnSourceLanguageType read FLanguage write FLanguage;
-    //property IsCurrentFile: Boolean read FIsCurrentFile write SetIsCurrentFile;
+    // property Language: TCnSourceLanguageType read FLanguage write FLanguage;
+    // property IsCurrentFile: Boolean read FIsCurrentFile write SetIsCurrentFile;
     {* 是否是只显示当前文件 }
+
     property CurrentFile: string read FCurrentFile write FCurrentFile;
     {* 只显示当前文件时，当前的文件名 }
     property SelIsCurFile: Boolean read FSelIsCurFile write FSelIsCurFile;

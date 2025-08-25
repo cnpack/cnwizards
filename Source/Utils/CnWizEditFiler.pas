@@ -37,14 +37,14 @@ unit CnWizEditFiler;
 *           其原始内容受 GExperts License 的保护
 *
 *           EditFilerLoadFileFromStream 对 Stream 的编码要求：
-*                        D567            D2005~2007               D2009 或以上
-*           磁盘文件     Ansi            Utf8（可指定成 Ansi）    Utf16
-*           IDE 内存     Ansi            Utf8（可指定成 Ansi）    Utf16
+*                        D567            D2005~2007               D2009 或以上  Lazarus
+*           磁盘文件     Ansi            Utf8（可指定成 Ansi）    Utf16         Utf8
+*           IDE 内存     Ansi            Utf8（可指定成 Ansi）    Utf16         Utf8
 *
 *           EditFilerSaveFileToStream 得到的 Stream 的编码行为：
-*                        D567            D2005~2007               D2009 或以上
-*           磁盘文件     Ansi            Utf8（可解码成 Ansi）    Utf16
-*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    Utf16
+*                        D567            D2005~2007               D2009 或以上  Lazarus
+*           磁盘文件     Ansi            Utf8（可解码成 Ansi）    Utf16         Utf8
+*           IDE 内存     Ansi            Utf8（可解码成 Ansi）    Utf16         Utf8
 *
 *           注意控制 Utf8 指定或解码成 Ansi 时，需将 IsAnsi/NeedAnsi 参数设为 True
 *
@@ -71,8 +71,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Math, ToolsAPI, CnWizConsts
-  {$IFDEF BDS}, CnWideStrings {$ENDIF};
+  SysUtils, Classes, Math, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizConsts,
+  CnWideStrings {$IFDEF LAZARUS}, SrcEditorIntf {$ENDIF};
 
 type
   TModuleMode = (mmModule, mmFile);
@@ -81,11 +81,16 @@ type
   {* 只支持 Module 级别的编辑器文件，不支持 dfm 之类的}
   private
     FSourceInterfaceAllocated: Boolean;
+{$IFDEF DELPHI_OTA}
     FModuleNotifier: IOTAModuleNotifier;
     FEditIntf: IOTASourceEditor;
     FEditRead: IOTAEditReader;
     FEditWrite: IOTAEditWriter;
     FModIntf: IOTAModule;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    FEditor: TSourceEditorInterface;
+{$ENDIF}
     FNotifierIndex: Integer;
     FBuf: Pointer;
     FBufSize: Integer;
@@ -93,22 +98,29 @@ type
     FMode: TModuleMode;
     FStreamFile: TStream;
     procedure AllocateFileData;
-    function GetLineCount: Integer;
     procedure SetBufSize(New: Integer);
+    function GetLineCount: Integer;
+{$IFDEF DELPHI_OTA}
     procedure InternalGotoLine(Line: Integer; Offset: Boolean);
+{$ENDIF}
     function GetFileSize: Integer;
   protected
     procedure SetFileName(const Value: string);
+ {$IFDEF DELPHI_OTA}
     procedure ReleaseModuleNotifier;
+ {$ENDIF}
   public
     constructor Create(const FileName: string);
     destructor Destroy; override;
     procedure FreeFileData;
     procedure Reset;
+{$IFDEF DELPHI_OTA}
     procedure GotoLine(L: Integer);
     procedure GotoOffsetLine(L: Integer);
     procedure ShowSource;
     procedure ShowForm;
+{$ENDIF}
+
 {$IFDEF UNICODE}
     procedure SaveToStreamW(Stream: TStream);
     // 将文件内容存入流中，存成没 BOM 的 UTF16 格式，尾部 #0
@@ -121,9 +133,11 @@ type
     // BDS 里（2005 以上，无论是否 Unicode 编译器），无论文件在 IDE 里打开还是磁盘形式，
     // CheckUtf8 是 True 时，文件编码或 IDE 内部 Utf8 编码会转换成 Ansi，否则统一为 Utf8。
 
+{$IFDEF DELPHI_OTA}
     // TODO: 以下两函数暂未做 UTF8 适配，不推荐使用
-    procedure SaveToStreamFromPos(Stream: TStream);
-    procedure SaveToStreamToPos(Stream: TStream);
+    procedure SaveToStreamFromPos(Stream: TStream); deprecated;
+    procedure SaveToStreamToPos(Stream: TStream); deprecated;
+{$ENDIF}
 
 {$IFDEF UNICODE}
     procedure ReadFromStreamW(Stream: TStream);
@@ -135,15 +149,17 @@ type
     procedure ReadFromStream(Stream: TStream; CheckUtf8: Boolean = False);
     // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关，
     // 要求流中是 Ansi 或 Utf8，无 BOM，不要求 Stream 尾 #0（准确来讲不能是 #0 否则会出现多余字符）
-    // 写缓冲时如果是 BDS 且 Stream 内容如果是 Ansi，则 CheckUtf8 得设为 True 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
+    // 写缓冲时如果是 BDS/Lazarus 且 Stream 内容如果是 Ansi，则 CheckUtf8 得设为 True 以进行 Ansi 到 Utf8 的转换以适合编辑器缓冲。
     // 写文件时是磁盘形式时，目前 D567 只支持 Ansi 照常写，BDS 或以上则支持 Ansi（需 CheckUtf8 为 True） 或 Utf8
     // 内部会统一转 UTF8 再转 UTF16 再判断文件编码写入。
 
+{$IFDEF DELPHI_OTA}
     // TODO: 以下两函数暂未做 UTF8 适配，不推荐使用
-    procedure ReadFromStreamInPos(Stream: TStream);
-    procedure ReadFromStreamInsertToPos(Stream: TStream);
+    procedure ReadFromStreamInPos(Stream: TStream); deprecated;
+    procedure ReadFromStreamInsertToPos(Stream: TStream); deprecated;
 
     function GetCurrentBufferPos: Integer;
+{$ENDIF}
     property BufSize: Integer read FBufSize write SetBufSize;
     property FileName: string read FFileName write SetFileName;
     property LineCount: Integer read GetLineCount;
@@ -156,11 +172,12 @@ procedure EditFilerLoadFileFromStream(const FileName: string; Stream: TStream; I
   如果是 BDS 2005 到 2007 里且 Stream 内容是 Ansi 格式，则可由 IsAnsi 设为 True
   来进行 Ansi 到 Utf8 的转换以适合编辑器缓冲，如果是文件模式也内部自动适配编码，不会转换。
   D5/6/7 与 Unicode 环境下会忽略 IsAnsi，Stream 中的内容必须固定为 Ansi 及 Utf16。
+  Lazarus 下内容必须是 Utf8，因此 IsAnsi 如果 True 时，Stream 内容会转换成 Utf8。
   以上行为无论文件是磁盘还是 IDE 内部打开均如此。}
 
 procedure EditFilerSaveFileToStream(const FileName: string; Stream: TStream; NeedAnsi: Boolean = False);
 {* 封装的用 Filer 读出文件内容至流，流中均为无 BOM 的原始格式（Ansi、Ansi/Utf8、Utf16），尾部有 #0。
-  在 BDS 2005 到 2007 里，如将 NeedAnsi 设为 True 时，该函数会将 Utf8 会转换成 Ansi，否则保持 Utf8，
+  在 Lazarus/BDS 2005 到 2007 里，如将 NeedAnsi 设为 True 时，该函数会将 Utf8 会转换成 Ansi，否则保持 Utf8，
   而 Unicode 环境下会忽略 NeedAnsi 参数，输出的 Stream 中的内容固定为 Utf16。
   以上行为无论文件是磁盘还是 IDE 内部打开均如此。}
 
@@ -199,6 +216,8 @@ begin
     Free;
   end;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 type
   TModuleFreeNotifier = class(TNotifierObject, IOTAModuleNotifier)
@@ -239,6 +258,8 @@ begin
   // We might want to handle this and change the stored file name
 end;
 
+{$ENDIF}
+
 resourcestring
   SNoEditReader = 'FEditRead: No Editor Reader Interface';
   SNoEditWriter = 'FEditWrite: No Editor Writer Interface';
@@ -268,13 +289,14 @@ end;
 procedure TCnEditFiler.FreeFileData;
 begin
   FreeAndNil(FStreamFile);
+{$IFDEF DELPHI_OTA}
   FEditRead := nil;
   FEditWrite := nil;
   FEditIntf := nil;
 
   ReleaseModuleNotifier;
   FModIntf := nil;
-
+{$ENDIF}
   FSourceInterfaceAllocated := False;
 end;
 
@@ -284,10 +306,12 @@ begin
 
   if FBuf <> nil then
     FreeMem(FBuf);
+
+{$IFDEF DELPHI_OTA}
   FBuf := nil;
   FEditRead := nil;
   FEditWrite := nil;
-
+{$ENDIF}
   inherited Destroy;
 end;
 
@@ -310,6 +334,17 @@ begin
   if FSourceInterfaceAllocated then
     Exit;
 
+{$IFDEF LAZARUS}
+  // 遍历 Editors 找是否有该文件
+  FEditor := CnOtaGetEditor(FFileName);
+  if FEditor = nil then
+  begin
+    AllocateFromDisk;
+    Exit;
+  end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   if BorlandIDEServices = nil then
   begin
     AllocateFromDisk;
@@ -388,6 +423,7 @@ begin
         raise Exception.Create(SNoEditWriter);
     end;
   end;
+{$ENDIF}
 
   FSourceInterfaceAllocated := True;
 end;
@@ -414,6 +450,8 @@ begin
   // 32K is the max we can read from an edit reader at once
   // Assert(FBufSize <= 1024 * 32);
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnEditFiler.ShowSource;
 begin
@@ -489,14 +527,23 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function TCnEditFiler.GetLineCount: Integer;
 begin
+  Result := -1;
   if FMode = mmModule then
   begin
     AllocateFileData;
+{$IFDEF DELPHI_OTA}
     Assert(FEditIntf <> nil);
-
     Result := FEditIntf.GetLinesInBuffer;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    if FEditor <> nil then
+      Result := FEditor.Lines.Count;
+{$ENDIF}
   end
   else
     Result := -1;
@@ -528,6 +575,10 @@ var
   List: TCnWideStringList;
   Utf16Text: WideString;
 {$ENDIF}
+{$ELSE}
+  Text, Utf8Text: AnsiString;
+  List: TCnWideStringList;
+  Utf16Text: WideString;
 {$ENDIF}
 begin
   Assert(Stream <> nil);
@@ -579,16 +630,39 @@ begin
       List.Free;
     end
   {$ELSE}
+    {$IFDEF LAZARUS}
+    // Lazarus 下，用 TCnWideStringList 检测文件内容编码并加载为 UTF16
+    List := TCnWideStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile);
+      Utf16Text := List.Text;
+
+      if CheckUtf8 then
+        Text := AnsiString(Utf16Text)                // 再根据参数将 Utf16 转为 Utf8
+      else
+        Text := CnUtf8EncodeWideString(Utf16Text);   // 或直接转为 AnsiString
+
+      Stream.Write(Text[1], Length(Text) * SizeOf(AnsiChar));
+      Stream.Write(TheEnd, 1);
+    finally
+      List.Free;
+    end;
+    {$ELSE}
     // D567下只支持 Ansi，无需额外处理
     FStreamFile.Position := 0;
     Stream.CopyFrom(FStreamFile, FStreamFile.Size);
     Stream.Write(TheEnd, 1);
+    {$ENDIF}
   {$ENDIF}
 {$ENDIF}
   end
   else
   begin
     Pos := 0;
+{$IFDEF LAZARUS}
+    // FEditor
+{$ELSE}
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
     if FEditRead = nil then
@@ -613,6 +687,7 @@ begin
       Stream.Write(FBuf^, Size);
     end;
     Stream.Write(TheEnd, 1);
+{$ENDIF}
 
 {$IFDEF IDE_WIDECONTROL}
     if CheckUtf8 then
@@ -710,6 +785,8 @@ begin
 end;
 
 {$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 
 function TCnEditFiler.GetCurrentBufferPos: Integer;
 var
@@ -826,6 +903,8 @@ begin
   FModuleNotifier := nil;
 end;
 
+{$ENDIF}
+
 {$IFDEF UNICODE}
 
 procedure TCnEditFiler.ReadFromStreamW(Stream: TStream);
@@ -886,7 +965,6 @@ end;
 // 从 Stream 整个写到文件或缓冲中，覆盖原有内容，与 Stream 的 Position 和光标位置无关。
 procedure TCnEditFiler.ReadFromStream(Stream: TStream; CheckUtf8: Boolean);
 var
-{$IFDEF IDE_WIDECONTROL}
   AnsiText: AnsiString;
   Utf8Text: AnsiString;
   Utf16Text: WideString;
@@ -895,9 +973,7 @@ var
 {$ELSE}
   List: TCnWideStringList;
 {$ENDIF}
-{$ELSE}
   Size: Integer;
-{$ENDIF}
 begin
   Assert(Stream <> nil);
 
@@ -905,6 +981,24 @@ begin
 
   AllocateFileData;
 
+{$IFDEF LAZARUS}
+  // 和 IDE_WIDE_CONTROL 等同
+  // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
+  Stream.Position := 0;
+  if CheckUtf8 then
+  begin
+    // Stream 内容是 Ansi，一次全部读入后转成 Utf8
+    SetLength(AnsiText, Stream.Size);
+    Stream.Read(AnsiText[1], Stream.Size);
+    Utf8Text := CnAnsiToUtf8(AnsiText);
+  end
+  else
+  begin
+    // Stream 内容是 Utf8，一次全部读入
+    SetLength(Utf8Text, Stream.Size);
+    Stream.Read(Utf8Text[1], Stream.Size);
+  end;
+{$ELSE}
 {$IFDEF IDE_WIDECONTROL}
   // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
   Stream.Position := 0;
@@ -922,11 +1016,30 @@ begin
     Stream.Read(Utf8Text[1], Stream.Size);
   end;
 {$ENDIF}
+{$ENDIF}
 
   if Mode = mmFile then
   begin
     Assert(FStreamFile <> nil);
+{$IFDEF LAZARUS}
+    // 和 IDE_WIDE_CONTROL 等同
+    // 此时 Utf8Text 里是 Utf8 内容且末尾有 #0，要转 UTF16 以放到 StringList 里
+    Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
 
+    // D2005~2007 下，要给 CnWideStringList 赋值，让其根据文件的 BOM，转换 UTF16 的内容写入文件
+    List := TCnWideStringList.Create;
+    try
+      FStreamFile.Position := 0;
+      List.LoadFromStream(FStreamFile); // List 内容是 Utf16，并记录了文件编码
+
+      List.Text := Utf16Text;
+
+      FStreamFile.Size := 0;
+      List.SaveToStream(FStreamFile, List.LoadFormat); // List 保存时根据之前记录的文件编码转换后保存
+    finally
+      List.Free;
+    end;
+{$ELSE}
 {$IFDEF IDE_WIDECONTROL}
     // 此时 Utf8Text 里是 Utf8 内容且末尾有 #0，要转 UTF16 以放到 StringList 里
     Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
@@ -964,9 +1077,17 @@ begin
     FStreamFile.Size := 0;
     FStreamFile.CopyFrom(Stream, Stream.Size);
 {$ENDIF}
+{$ENDIF}
   end
   else
   begin
+{$IFDEF LAZARUS}
+    // 文件打开状态下，写入 Utf8 内容
+    if FEditor = nil then
+      raise Exception.Create(SNoEditWriter);
+
+    FEditor.Lines.Text := Utf8Text;
+{$ELSE}
     if FEditWrite = nil then
       raise Exception.Create(SNoEditWriter);
 
@@ -990,8 +1111,11 @@ begin
       until Size <> BufSize;
     end;
 {$ENDIF}
+{$ENDIF}
   end;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 // 流的内容覆盖当前位置的文本
 procedure TCnEditFiler.ReadFromStreamInPos(Stream: TStream);
@@ -1077,6 +1201,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function TCnEditFiler.GetFileSize: Integer;
 var
   Size: Integer;
@@ -1091,6 +1217,13 @@ begin
   end
   else
   begin
+{$IFDEF LAZARUS}
+    Result := 0;
+    if FEditor <> nil then
+      Result := Length(FEditor.Lines.Text);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
     Result := 0;
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
@@ -1115,6 +1248,7 @@ begin
         Inc(Result, Size);
       end;
     end;
+{$ENDIF}
   end;
 end;
 

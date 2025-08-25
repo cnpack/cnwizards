@@ -106,13 +106,16 @@ type
   // 封装的一个 EditView 和 SourceEditorInterface 的定义
 {$IFDEF STAND_ALONE}
   TCnEditViewSourceInterface = Pointer;
+  TCnSourceEditorInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
+  TCnSourceEditorInterface = TSourceEditorInterface;
   TCnIDEProjectInterface = TLazProject;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
+  TCnSourceEditorInterface = IOTAEditor;
   TCnIDEProjectInterface = IOTAProject;
   {$ENDIF}
 {$ENDIF}
@@ -502,6 +505,9 @@ function CnOtaGetCurrentProjectFileName: string;
 function CnOtaGetCurrentProjectFileNameEx: string;
 {* 取当前工程文件名称扩展，支持 Delphi 和 Lazarus。}
 
+function CnOtaGetEditor(const FileName: string): TCnSourceEditorInterface;
+{* 根据文件名返回编辑器接口，支持 Delphi 和 Lazarus。}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -509,7 +515,7 @@ function CnOtaGetEditBuffer: IOTAEditBuffer;
 {* 取 IOTAEditBuffer 接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取 IOTAEditPosition 接口}
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): IOTAEditView;
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): TCnEditViewSourceInterface;
 {* 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
 {* 取指定编辑器最前端的 IOTAEditView 接口}
@@ -557,8 +563,6 @@ function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
 {* 取当前工程中模块数，无工程返回 -1}
 function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
 {* 取当前工程中的第 Index 个模块信息，从 0 开始}
-function CnOtaGetEditor(const FileName: string): IOTAEditor;
-{* 根据文件名返回编辑器接口}
 function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
 {* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例。它应该是其上的设计期及运行期组件的 Owner}
 function CnOtaGetFormDesignerGridOffset: TPoint;
@@ -3800,6 +3804,49 @@ begin
 {$ENDIF}
 end;
 
+// 根据文件名返回编辑器接口
+function CnOtaGetEditor(const FileName: string): TCnSourceEditorInterface;
+var
+{$IFDEF DELPHI_OTA}
+  ModuleServices: IOTAModuleServices;
+  Module: IOTAModule;
+{$ENDIF}
+  I, J: Integer;
+begin
+{$IFDEF LAZARUS}
+  for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+  begin
+    if SourceEditorManagerIntf.SourceEditors[I].FileName = FileName then
+    begin
+      Result := SourceEditorManagerIntf.SourceEditors[I];
+      Exit;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
+  if ModuleServices <> nil then
+  begin
+    for I := 0 to ModuleServices.ModuleCount - 1 do
+    begin
+      Module := ModuleServices.Modules[I];
+      for J := 0 to Module.GetModuleFileCount - 1 do
+      begin
+        if Module.GetModuleFileEditor(J) <> nil then
+        begin
+          if SameFileName(FileName, Module.GetModuleFileEditor(J).FileName) then
+          begin
+            Result := Module.GetModuleFileEditor(J);
+            Exit;
+          end;
+        end;
+      end;
+    end;
+  end;
+{$ENDIF}
+  Result := nil;
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -3833,12 +3880,21 @@ end;
 
 // 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil
 function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string;
-  ForceOpen: Boolean): IOTAEditView;
+  ForceOpen: Boolean): TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
 var
   Editor: IOTAEditor;
   SrcEditor: IOTASourceEditor;
+{$ENDIF}
 begin
   Result := nil;
+{$IFDEF LAZARUS}
+  Result := CnOtaGetEditor(FileName);
+  if (Result = nil) and ForceOpen then
+    CnOtaOpenFile(FileName);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   Editor := CnOtaGetEditor(FileName);
   if (Editor = nil) and not ForceOpen then
     Exit;
@@ -3853,6 +3909,7 @@ begin
     Exit;
 
   Result := SrcEditor.EditViews[0];
+{$ENDIF}
 end;
 
 // 取指定编辑器最前端的 IOTAEditView 接口
@@ -4319,33 +4376,6 @@ begin
     Result := Project.GetModule(Index)
   else
     Result := nil;
-end;
-
-// 根据文件名返回编辑器接口
-function CnOtaGetEditor(const FileName: string): IOTAEditor;
-var
-  ModuleServices: IOTAModuleServices;
-  I, J: Integer;
-  Module: IOTAModule;
-begin
-  QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
-  if ModuleServices <> nil then
-    for I := 0 to ModuleServices.ModuleCount - 1 do
-    begin
-      Module := ModuleServices.Modules[I];
-      for J := 0 to Module.GetModuleFileCount - 1 do
-      begin
-        if Module.GetModuleFileEditor(J) <> nil then
-        begin
-          if SameFileName(FileName, Module.GetModuleFileEditor(J).FileName) then
-          begin
-            Result := Module.GetModuleFileEditor(J);
-            Exit;
-          end;
-        end;
-      end;
-    end;
-  Result := nil;
 end;
 
 // 返回窗体编辑器设计窗体组件

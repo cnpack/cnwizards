@@ -1991,6 +1991,7 @@ var
   Text: string;
   List: TStrings;
 
+
   procedure AddList(AList: TStrings);
   var
     S: string;
