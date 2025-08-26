@@ -3919,14 +3919,15 @@ end;
 // 取指定行的源代码，行号以 1 开始，返回结果在 Delphi 下为 Ansi/Unicode，非 UTF8，在 Lazarus 下为 Utf8
 function CnOtaGetLineText(LineNum: Integer; EditBuffer: TCnEditBufferInterface;
   Count: Integer): string;
-var
 {$IFDEF DELPHI_OTA}
+var
   L1, L2: Integer;
   Reader: IOTAEditReader;
   View: IOTAEditView;
   OutStr: AnsiString;
 {$ENDIF}
 {$IFDEF LAZARUS}
+var
   I: Integer;
   List: TStringList;
 {$ENDIF}
