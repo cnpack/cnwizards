@@ -47,10 +47,10 @@ unit CnWizMacroUtils;
 
 interface
 
-uses
-  Windows, SysUtils, Classes, ToolsAPI;
-
 {$I CnWizards.inc}
+
+uses
+  Windows, SysUtils, Classes {$IFDEF DELPHI_OTA}, ToolsAPI {$ENDIF};
 
 type
   TCnEditorInsertPos = (ipCurrPos, ipBOL, ipEOL, ipBOF, ipEOF, ipProcHead);
@@ -70,7 +70,9 @@ function EdtGetProjectGroupName: string;
 function EdtGetUnitName: string;
 function EdtGetUnitPath: string;
 function EdtGetProcName: string;
+{$IFDEF DELPHI_OTA}
 function EdtGetCurrProcName: string;
+{$ENDIF}
 function EdtGetResult: string;
 function EdtGetArguments: string;
 function EdtGetArgList(FormatStr: string): string;
@@ -82,10 +84,12 @@ function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
   var ResultType: string): Boolean;
 {* 从当前光标往后找第一个函数的声明内容}
 
+{$IFDEF DELPHI_OTA}
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
 {* AContent 是待插入的内容；InsertPos 是待插入的位置
    ASavePos 是否插入后光标回到原处，如为 False，则根据 PosInText 调整光标位置}
+{$ENDIF}
 
 implementation
 
@@ -213,18 +217,26 @@ end;
 
 function EdtGetProjectGroupDir: string;
 begin
+{$IFDEF DELPHI_OTA}
   Result := _CnExtractFilePath(CnOtaGetProjectGroupFileName);
   if Result = '' then
     Result := SCnUnknownNameResult;
+{$ELSE}
+  Result := '';
+{$ENDIF}
 end;
 
 function EdtGetProjectGroupName: string;
 begin
+{$IFDEF DELPHI_OTA}
   Result := _CnExtractFileName(CnOtaGetProjectGroupFileName);
   if Result = '' then
     Result := SCnUnknownNameResult
   else
     Result := _CnChangeFileExt(Result, '');
+{$ELSE}
+  Result := '';
+{$ENDIF}
 end;
 
 function EdtGetUnitName: string;
@@ -257,6 +269,8 @@ begin
   else
     Result := SCnUnknownNameResult;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 function EdtGetCurrProcName: string;
 var
@@ -317,6 +331,8 @@ begin
   if Result = '' then
     Result := SCnUnknownNameResult;
 end;
+
+{$ENDIF}
 
 function EdtGetResult: string;
 var
@@ -395,11 +411,18 @@ end;
 
 function EdtGetCodeLines: string;
 var
-  ISourceEditor: IOTASourceEditor;
+  ISourceEditor: TCnSourceEditorInterface;
 begin
   ISourceEditor := CnOtaGetCurrentSourceEditor;
   if Assigned(ISourceEditor) then
-    Result := IntToStr(ISourceEditor.GetLinesInBuffer)
+  begin
+{$IFDEF LAZARUS}
+    Result := IntToStr(ISourceEditor.Lines.Count);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+    Result := IntToStr(ISourceEditor.GetLinesInBuffer);
+{$ENDIF}
+  end
   else
     Result := SCnUnknownNameResult;
 end;
@@ -513,6 +536,8 @@ begin
   CnDebugger.LogLeave('EdtGetProcInfo');
 {$ENDIF}
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer);
@@ -631,5 +656,7 @@ begin
   EditView.Paint;
   BringIdeEditorFormToFront;
 end;
+
+{$ENDIF}
 
 end.

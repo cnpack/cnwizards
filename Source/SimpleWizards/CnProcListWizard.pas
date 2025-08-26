@@ -72,11 +72,9 @@ uses
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, AsRegExpr, CnIDEStrings,
   {$IFDEF IDE_SUPPORT_THEMING} Vcl.Themes, {$ENDIF}
-{$IFNDEF STAND_ALONE}
-  ToolsAPI, CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
-  CnWizMenuAction, CnWizIdeUtils, CnFloatWindow,
-{$ENDIF}
-  CnFrmMatchButton, CnWizOptions;
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ELSE} SrcEditorIntf, LCLType, {$ENDIF}
+  CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
+  CnWizMenuAction, CnWizIdeUtils, CnFloatWindow, CnFrmMatchButton, CnWizOptions;
 
 type
   TCnSourceLanguageType = (ltUnknown, ltPas, ltCpp);
@@ -785,8 +783,11 @@ begin
   CheckReparse;
   ClassCombo := Sender as TCnProcListComboBox;
   ClassCombo.DropDownList.InfoItems.Clear;
-
+{$IFDEF DELPHI_OTA}
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
+{$ELSE}
+  Obj := GetToolBarObjFromEditControl(GetCurrentEditControl);
+{$ENDIF}
   if Obj = nil then Exit;
 
   for I := 0 to FElementList.Count - 1 do
@@ -1386,7 +1387,7 @@ begin
       if ShowModal = mrOK then
       begin
         // BringIdeEditorFormToFront;
-{$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
         CnOtaMakeSourceVisible(CurrentFile);
 {$ENDIF}
       end;
@@ -1672,7 +1673,7 @@ end;
 
 procedure TCnProcListWizard.ParseCurrent;
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
   Obj: TCnProcToolBarObj;
@@ -1681,7 +1682,11 @@ var
   S: string;
   Vis: TTokenKind;
 begin
+{$IFDEF DELPHI_OTA}
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
+{$ELSE}
+  Obj := GetToolBarObjFromEditControl(GetCurrentEditControl);
+{$ENDIF}
   if Obj = nil then Exit;
 
   EditView := CnOtaGetTopMostEditView;
@@ -1693,8 +1698,13 @@ begin
   else
     FCurrStream.Clear;
 
+{$IFDEF DELPHI_OTA}
   CnGeneralSaveEditorToStream(EditView.Buffer, FCurrStream);
   S := EditView.Buffer.FileName;
+{$ELSE}
+  CnGeneralSaveEditorToStream(EditView, FCurrStream);
+  S := EditView.FileName;
+{$ENDIF}
 
   FLanguage := ltUnknown;
   if IsPas(S) or IsDpr(S) or IsInc(S) then
@@ -1709,8 +1719,13 @@ begin
 
     CnPasParserParseSource(FCurrPasParser, FCurrStream, IsDpr(S) or IsInc(S), False);
 
+{$IFDEF DELPHI_OTA}
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
+{$ELSE}
+    CharPos.Line := EditView.CursorTextXY.Y;
+    CharPos.CharIndex := EditView.CursorTextXY.X - 1;
+{$ENDIF}
 
     // 找光标处的当前声明
     if not Obj.ClassCombo.Focused then
@@ -1758,9 +1773,13 @@ begin
     if FCurrCppParser = nil then
       FCurrCppParser := TCnGeneralCppStructParser.Create;
 
+{$IFDEF DELPHI_OTA}
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
-    // 是否需要转换？
+{$ELSE}
+    CharPos.Line := EditView.CursorTextXY.Y;
+    CharPos.CharIndex := EditView.CursorTextXY.X - 1;
+{$ENDIF}
 
     CnCppParserParseSource(FCurrCppParser, FCurrStream,
       CharPos.Line, CharPos.CharIndex, True);
@@ -1804,8 +1823,11 @@ begin
   CheckReparse;
   ProcCombo := Sender as TCnProcListComboBox;
   ProcCombo.DropDownList.InfoItems.Clear;
-
+{$IFDEF DELPHI_OTA}
   Obj := GetToolBarObjFromEditControl(CnOtaGetCurrentEditControl);
+{$ELSE}
+  Obj := GetToolBarObjFromEditControl(GetCurrentEditControl);
+{$ENDIF}
   if Obj = nil then Exit;
 
   for I := 0 to FElementList.Count - 1 do
@@ -1961,7 +1983,12 @@ begin
   FObjectList.Duplicates := dupIgnore;
 
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
   EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
+{$ELSE}
+  EditorCanvas := EditControlWrapper.GetEditControlCanvas(GetCurrentEditControl);
+{$ENDIF}
+
   if EditorCanvas <> nil then
   begin
     if EditorCanvas.Font.Name <> mmoContent.Font.Name then
@@ -3288,10 +3315,12 @@ procedure TCnProcListForm.OpenSelect;
 {$IFNDEF STAND_ALONE}
 var
   ProcInfo: TCnElementInfo;
-  Module: IOTAModule;
-  SourceEditor: IOTASourceEditor;  
-  View: IOTAEditView;
   I: Integer;
+{$IFDEF DELPHI_OTA}
+  Module: IOTAModule;
+  SourceEditor: IOTASourceEditor;
+{$ENDIF}
+  View: TCnEditViewSourceInterface;
 {$ENDIF}
 begin
 {$IFNDEF STAND_ALONE}
@@ -3305,13 +3334,19 @@ begin
         View := CnOtaGetTopMostEditView;
         if View <> nil then
         begin
+{$IFDEF DELPHI_OTA}
           View.Position.GotoLine(ProcInfo.LineNo);
           if ProcInfo.ElementType in [etRecord, etClass, etInterface] then
             View.Position.MoveEOL;
           View.Center(ProcInfo.LineNo, 1);
           View.Paint;
+{$ENDIF}
+{$IFDEF LAZARUS}
+          // TODO:
+{$ENDIF}
         end;
 
+{$IFDEF DELPHI_OTA}
         if FFiler = nil then
         begin
           FFiler := TCnEditFiler.Create(ProcInfo.AllName);
@@ -3320,6 +3355,7 @@ begin
           FFiler.ShowSource;
           FFiler.FreeFileData;
         end;
+{$ENDIF}
       end
       else
       begin
@@ -3330,6 +3366,7 @@ begin
         if not CnOtaIsFileOpen(ProcInfo.AllName) then // 文件已经打开
           CnOtaOpenFile(ProcInfo.AllName);
 
+{$IFDEF DELPHI_OTA}
         Module := CnOtaGetModule(ProcInfo.AllName);
         if Module = nil then Exit;
         SourceEditor := CnOtaGetSourceEditorFromModule(Module);
@@ -3345,6 +3382,10 @@ begin
         FFiler.GotoLine(ProcInfo.LineNo);
         FFiler.ShowSource;
         FFiler.FreeFileData;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        // TODO:
+{$ENDIF}
       end;
 
       // 只在此处赋值
@@ -3400,13 +3441,15 @@ const
 var
   ProcInfo: TCnElementInfo;
   AfterLine: Integer;
+  Buffer: TCnEditBufferInterface;
 {$IFDEF STAND_ALONE}
   K, ML: Integer;
 {$ELSE}
+{$IFDEF DELPHI_OTA}
   Module: IOTAModule;
   SourceEditor: IOTASourceEditor;
   EditView: IOTAEditView;
-  Buffer: IOTAEditBuffer;
+{$ENDIF}
 {$ENDIF}
 begin
   ProcInfo := nil;
@@ -3436,6 +3479,7 @@ begin
       // 是另一文件，检查此文件是否打开
       if CnOtaIsFileOpen(ProcInfo.AllName) then // 文件已经打开
       begin
+{$IFDEF DELPHI_OTA}
         Module := CnOtaGetModule(ProcInfo.AllName);
         if Module <> nil then
         begin
@@ -3457,6 +3501,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
       end;
       // 文件未打开，不宜先打开
       mmoContent.Lines.Text := SCnProcListErrorPreview;
@@ -3841,7 +3886,9 @@ begin
   cbbFiles.Items.Clear;
   cbbFiles.Items.Add(SCnProcListCurrentFile);
   cbbFiles.Items.Add(SCnProcListAllFileInProject);
+{$IFDEF DELPHI_OTA}
   cbbFiles.Items.Add(SCnProcListAllFileInProjectGroup);
+{$ENDIF}
   cbbFiles.Items.Add(SCnProcListAllFileOpened);
   cbbFiles.ItemIndex := 0;
 end;
@@ -3849,8 +3896,10 @@ end;
 procedure TCnProcListForm.LoadFileComboBox;
 var
   I, J: Integer;
+{$IFDEF DELPHI_OTA}
   ModuleInfo: IOTAModuleInfo;
-  Project: IOTAProject;
+{$ENDIF}
+  Project: TCnIDEProjectInterface;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
 {$ENDIF}
@@ -3874,12 +3923,17 @@ var
     end;
   end;
 begin
+{$IFDEF DELPHI_OTA}
   ProjectInterfaceList := TInterfaceList.Create;
   try
     CnOtaGetProjectList(ProjectInterfaceList);
     for I := 0 to ProjectInterfaceList.Count - 1 do
     begin
-      Project := IOTAProject(ProjectInterfaceList[I]);
+      Project := TCnIDEProjectInterface(ProjectInterfaceList[I]);
+{$ENDIF}
+{$IFDEF LAZARUS}
+      Project := CnOtaGetCurrentProject;
+{$ENDIF}
       if Project <> nil then
       begin
 {$IFDEF BDS}
@@ -3887,6 +3941,8 @@ begin
         if Supports(Project, IOTAProjectGroup, ProjectGroup) then
           Continue;
 {$ENDIF}
+
+{$IFDEF DELPHI_OTA}
         AddAFileToComboBox(Project.FileName, Project.FileName);
         for J := 0 to Project.GetModuleCount - 1 do
         begin
@@ -3894,24 +3950,43 @@ begin
           if ModuleInfo <> nil then
             AddAFileToComboBox(ModuleInfo.FileName, Project.FileName);
         end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        AddAFileToComboBox(Project.MainFile.Filename, Project.MainFile.Filename);
+        for J := 0 to Project.FileCount - 1 do
+        begin
+          if Project.Files[J] <> nil then
+            AddAFileToComboBox(Project.Files[J].Filename, Project.MainFile.Filename);
+        end;
+{$ENDIF}
       end;
+{$IFDEF DELPHI_OTA}
     end;
   finally
     ProjectInterfaceList.Free;
   end;
+{$ENDIF}
 end;
 
 {$ENDIF}
 
 procedure TCnProcListForm.cbbFilesChange(Sender: TObject);
+const
+{$IFDEF DELPHI_OTA}
+  FILE_OPEN_INDEX = 3;
+{$ELSE}
+  FILE_OPEN_INDEX = 2;
+{$ENDIF}
 {$IFNDEF STAND_ALONE}
 var
   I, J: Integer;
   aFile: string;
-  Project: IOTAProject;
+  Project: TCnIDEProjectInterface;
+{$IFDEF DELPHI_OTA}
   ProjectGroup: IOTAProjectGroup;
   ModuleInfo: IOTAModuleInfo;
   ModuleServices: IOTAModuleServices;
+{$ENDIF}
   FirstFile: Boolean;
 {$ENDIF}
 begin
@@ -3939,6 +4014,7 @@ begin
         Project := CnOtaGetCurrentProject;
         if Project <> nil then
         begin
+{$IFDEF DELPHI_OTA}
           for I := 0 to Project.GetModuleCount - 1 do
           begin
             ModuleInfo := Project.GetModule(I);
@@ -3954,8 +4030,26 @@ begin
               end;
             end;
           end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+          for I := 0 to Project.FileCount - 1 do
+          begin
+            if Project.Files[I] <> nil then
+            begin
+              aFile := Project.Files[I].Filename;
+              if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
+                or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+              begin
+                Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+                Wizard.UpdateDataListImageIndex(DataList);
+                FirstFile := False;
+              end;
+            end;
+          end;
+{$ENDIF}
         end;
       end;
+{$IFDEF DELPHI_OTA}
     2: // 当前工程组
       begin
         FIsCurrentFile := False;
@@ -3986,9 +4080,11 @@ begin
           end;
         end;
       end;
-    3: // 所有打开的单元
+{$ENDIF}
+    FILE_OPEN_INDEX: // 所有打开的单元
       begin
         FIsCurrentFile := False;
+{$IFDEF DELPHI_OTA}
         QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
         for I := 0 to ModuleServices.GetModuleCount - 1 do
         begin
@@ -4001,6 +4097,20 @@ begin
             FirstFile := False;
           end;
         end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+        begin
+          aFile := SourceEditorManagerIntf.SourceEditors[I].FileName;
+          if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
+            or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+          begin
+            Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+            Wizard.UpdateDataListImageIndex(DataList);
+            FirstFile := False;
+          end;
+        end;
+{$ENDIF}
       end;
     end;
   end;
@@ -4336,20 +4446,30 @@ end;
 procedure TCnProcListWizard.CurrentGotoLineAndFocusEditControl(
   Info: TCnElementInfo);
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   EditControl: TControl;
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
 begin
   if Info = nil then Exit;
 
   View := CnOtaGetTopMostEditView;
   if View <> nil then
   begin
+{$IFDEF DELPHI_OTA}
     View.Position.GotoLine(Info.LineNo);
     if Info.ElementType in [etRecord, etInterface, etClass] then
       View.Position.MoveEOL;
     View.Center(Info.LineNo, 1);
     View.Paint;
+{$ENDIF}
 
+{$IFDEF LAZARUS}
+    P.Y := Info.LineNo;
+    P.X := Length(View.Lines[Info.LineNo - 1]);
+    View.CursorTextXY := P;
+{$ENDIF}
     EditControl := GetCurrentEditControl;
     if (EditControl <> nil) and (EditControl is TWinControl) then
     try
@@ -4362,19 +4482,34 @@ end;
 
 procedure TCnProcListWizard.CurrentGotoLineAndFocusEditControl(Line: Integer);
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   EditControl: TControl;
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
 begin
   View := CnOtaGetTopMostEditView;
   if View <> nil then
   begin
+{$IFDEF DELPHI_OTA}
     View.Position.GotoLine(Line);
     View.Center(Line, 1);
     View.Paint;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    P.Y := Line;
+    P.X := 1;
+    View.CursorTextXY := P;
+{$ENDIF}
 
     EditControl := GetCurrentEditControl;
     if (EditControl <> nil) and (EditControl is TWinControl) then
+    try
       (EditControl as TWinControl).SetFocus;
+    except
+      ;
+    end;
   end;
 end;
 
@@ -4873,19 +5008,22 @@ begin
   FDropDownList.Parent := Application.MainForm;
   FDropDownList.OnDblClick := DropDownListDblClick;
   FDropDownList.OnClick := DropDownListClick;
-
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
 {$IFDEF IDE_SUPPORT_THEMING}
   CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
+{$ENDIF}
 {$ENDIF}
 end;
 
 destructor TCnProcListComboBox.Destroy;
 begin
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_THEMING}
   CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
 {$ENDIF}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
+{$ENDIF}
   inherited;
 end;
 
@@ -5107,7 +5245,7 @@ begin
         Msg.wParam := 0;
         Msg.lParam := 0;
       end;
-    { 暂时先不处理其他消息导致List关闭的情况
+    { 暂时先不处理其他消息导致 List 关闭的情况
     WM_SYSKEYDOWN, WM_SETFOCUS:
       if FDropDownList.Visible then
         FDropDownList.CloseUp;

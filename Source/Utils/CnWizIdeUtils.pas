@@ -235,6 +235,8 @@ type
   TXTreeView = TTreeView;
 {$ENDIF BDS}
 
+  TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
+
   TCnModuleSearchType = (mstInvalid, mstInProject, mstProjectSearch, mstSystemSearch);
   {* 搜索到的源码位置类型：非法、工程内、工程搜索目录内、系统搜索目录内（包括安装目录的系统库）}
 
@@ -325,6 +327,8 @@ function IdeGetFormSelection(Selections: TList; Designer: IDesigner = nil;
   ExcludeForm: Boolean = True): Boolean;
 {* 取得当前设计窗体上已选择的组件 }
 
+{$ENDIF}
+
 function IdeGetIsEmbeddedDesigner: Boolean;
 {* 取得当前是否是嵌入式设计窗体模式}
 
@@ -332,8 +336,6 @@ var
   IdeIsEmbeddedDesigner: Boolean = False;
   {* 标记当前是否是嵌入式设计窗体模式，initiliazation 时被初始化，请勿手工修改其值。
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
-
-{$ENDIF}
 
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
@@ -426,6 +428,9 @@ procedure GetProjectLibPath(Paths: TStrings);
 
 function GetProjectDcuPath(AProject: TCnIDEProjectInterface): string;
 {* 取当前工程的输出目录，支持 Delphi 和 Lazarus}
+
+function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
+{* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
 {$IFNDEF LAZARUS}
 
@@ -528,12 +533,6 @@ function IsKeyMacroRunning: Boolean;
 {* 当前是否在键盘宏的录制或回放，不支持或不在返回 False}
 
 {$ENDIF}
-
-type
-  TCnSrcEditorPage = (epCode, epDesign, epCPU, epWelcome, epOthers);
-
-function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
-{* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
 procedure BeginBatchOpenClose;
 {* 开始批量打开或关闭文件 }
@@ -1384,6 +1383,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // 取得当前是否是嵌入式设计窗体模式
 function IdeGetIsEmbeddedDesigner: Boolean;
 {$IFDEF BDS}
@@ -1401,11 +1402,9 @@ begin
   Result := S = 'True';
   {$ENDIF}
 {$ELSE}
-  Result := False;  // D7 或以下不支持嵌入
+  Result := False;  // D7 以下或 Lazarus 不支持嵌入
 {$ENDIF}
 end;
-
-{$ENDIF}
 
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数
@@ -2193,6 +2192,32 @@ begin
 {$ENDIF}
 end;
 
+// 取当前编辑窗口顶层页面类型，传入编辑器父控件
+function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
+var
+  I: Integer;
+  Ctrl: TControl;
+begin
+  // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
+  Result := epOthers;
+  for I := AControl.ControlCount - 1 downto 0 do
+  begin
+    Ctrl := AControl.Controls[I];
+    if Ctrl.Visible and (Ctrl.Align = alClient) then
+    begin
+      if Ctrl.ClassNameIs(SCnEditControlClassName) then
+        Result := epCode
+      else if Ctrl.ClassNameIs(SCnDisassemblyViewClassName) then
+        Result := epCPU
+      else if Ctrl.ClassNameIs(SCnDesignControlClassName) then
+        Result := epDesign
+      else if Ctrl.ClassNameIs(SCnWelcomePageClassName) then
+        Result := epWelcome;
+      Break;
+    end;
+  end;
+end;
+
 {$IFNDEF LAZARUS}
 
 procedure CloseExpandableEvalViewForm;
@@ -2756,32 +2781,6 @@ begin
 end;
 
 {$ENDIF}
-
-// 取当前编辑窗口顶层页面类型，传入编辑器父控件
-function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
-var
-  I: Integer;
-  Ctrl: TControl;
-begin
-  // 从头搜索第一个 Align 是 Client 的东西，是编辑器则显示
-  Result := epOthers;
-  for I := AControl.ControlCount - 1 downto 0 do
-  begin
-    Ctrl := AControl.Controls[I];
-    if Ctrl.Visible and (Ctrl.Align = alClient) then
-    begin
-      if Ctrl.ClassNameIs(SCnEditControlClassName) then
-        Result := epCode
-      else if Ctrl.ClassNameIs(SCnDisassemblyViewClassName) then
-        Result := epCPU
-      else if Ctrl.ClassNameIs(SCnDesignControlClassName) then
-        Result := epDesign
-      else if Ctrl.ClassNameIs(SCnWelcomePageClassName) then
-        Result := epWelcome;
-      Break;
-    end;
-  end;
-end;
 
 {$IFNDEF STAND_ALONE}
 var

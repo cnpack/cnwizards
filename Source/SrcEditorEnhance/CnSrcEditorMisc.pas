@@ -516,7 +516,7 @@ begin
   FMenuHook.AddMenuItemDef(FThumbnailMenu);
 
   FSelAllMenu := TCnMenuItemDef.Create(SCnMenuSelAllName, SCnMenuSelAllCaption,
-    OnSelectAll, ipAfter, SCnMenuEditPasteItemName);
+    OnSelectAll, ipAfter, SCnMenuEditPasteItemName {$IFDEF COMPILER5} , '', nil, -1, TextToShortCut('Ctrl+A') {$ENDIF});
   FMenuHook.AddMenuItemDef(FSelAllMenu);
 
   FCopyFileNameMenu := TCnMenuItemDef.Create(SCnCopyFileNameMenuName,

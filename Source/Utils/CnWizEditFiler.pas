@@ -135,8 +135,8 @@ type
 
 {$IFDEF DELPHI_OTA}
     // TODO: 以下两函数暂未做 UTF8 适配，不推荐使用
-    procedure SaveToStreamFromPos(Stream: TStream); deprecated;
-    procedure SaveToStreamToPos(Stream: TStream); deprecated;
+    procedure SaveToStreamFromPos(Stream: TStream); {$IFDEF SUPPORT_DEPRECATED} deprecated; {$ENDIF}
+    procedure SaveToStreamToPos(Stream: TStream); {$IFDEF SUPPORT_DEPRECATED} deprecated; {$ENDIF}
 {$ENDIF}
 
 {$IFDEF UNICODE}
@@ -155,8 +155,8 @@ type
 
 {$IFDEF DELPHI_OTA}
     // TODO: 以下两函数暂未做 UTF8 适配，不推荐使用
-    procedure ReadFromStreamInPos(Stream: TStream); deprecated;
-    procedure ReadFromStreamInsertToPos(Stream: TStream); deprecated;
+    procedure ReadFromStreamInPos(Stream: TStream); {$IFDEF SUPPORT_DEPRECATED} deprecated; {$ENDIF}
+    procedure ReadFromStreamInsertToPos(Stream: TStream); {$IFDEF SUPPORT_DEPRECATED} deprecated; {$ENDIF}
 
     function GetCurrentBufferPos: Integer;
 {$ENDIF}

@@ -1,3 +1,4 @@
+
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
@@ -41,9 +42,9 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, CnIni,
-  ComCtrls, ToolWin, ToolsAPI, IniFiles, CnEditControlWrapper, CnWizNotifier,
-  CnWizManager, CnWizMenuAction, CnWizClasses, CnWizIni, CnWizIdeUtils, CnPopupMenu,
-  CnConsts, CnNative;
+  ComCtrls, ToolWin, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles,
+  CnEditControlWrapper, CnWizNotifier, CnWizManager, CnWizMenuAction, CnWizClasses,
+  CnWizIni, CnWizIdeUtils, CnPopupMenu, CnConsts, CnNative;
 
 type
 
@@ -148,7 +149,9 @@ type
       Operation: TOperation);
     procedure SetWrapable(Value: Boolean);
   protected
+{$IFDEF DELPHI_OTA}
     procedure ThemeChanged(Sender: TObject);
+{$ENDIF}
     procedure DoEnhConfig;
     function CanShowToolBar: Boolean;
     function CanShowDesignToolBar: Boolean;
@@ -339,7 +342,9 @@ begin
   ShowHint := True;
   EdgeBorders := [ebBottom];
   Flat := True;
+{$IFDEF DELPHI_OTA}
   ApplyThemeOnToolBar(Self);
+{$ENDIF}
 
 {$IFDEF BDS2006_UP}
   barStdTool := (BorlandIDEServices as INTAServices).ToolBar[sStandardToolBar];
@@ -488,7 +493,9 @@ var
   MenuObj: TObject;
   Act: TBasicAction;
   Actions: TStringList;
+{$IFDEF DELPHI_OTA}
   Svcs40: INTAServices40;
+{$ENDIF}
   IDEToolBarParent: TWinControl;
 
   // 查找 IDE 中的相应的 ToolButton
@@ -527,9 +534,13 @@ begin
     Actions := FToolBarMgr.FToolBarActions
   else
     Actions := FToolBarMgr.FDesignToolBarActions;
+
+  IDEToolBarParent := nil;
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   if Svcs40.ToolBar[sStandardToolBar] <> nil then
     IDEToolBarParent := Svcs40.ToolBar[sStandardToolBar].Parent;
+{$ENDIF}
 
   for I := Actions.Count - 1 downto 0 do
   begin
@@ -628,8 +639,9 @@ begin
   FToolBarActions := TStringList.Create;
   FDesignToolBarActions := TStringList.Create;
   FList := TList.Create;
-
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddAfterThemeChangeNotifier(ThemeChanged);
+{$ENDIF}
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   InstallToolBars;
 end;
@@ -639,7 +651,9 @@ var
   I: Integer;
 begin
   CnSrcEditorToolBarMgr := nil;
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.RemoveAfterThemeChangeNotifier(ThemeChanged);
+{$ENDIF}
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
   for I := FList.Count - 1 downto 0 do
     TCnSrcEditorToolBar(FList[I]).Free;
@@ -1003,6 +1017,8 @@ begin
   end;
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnSrcEditorToolBarMgr.ThemeChanged(Sender: TObject);
 var
   I: Integer;
@@ -1010,6 +1026,8 @@ begin
   for I := 0 to Count - 1 do
     ApplyThemeOnToolBar(ToolBars[I]);
 end;
+
+{$ENDIF}
 
 { TCnExternalEditorToolBarMgr }
 
@@ -1206,12 +1224,16 @@ begin
   EnumEditControl(DoUpdateToolbarTheme, nil);
 end;
 
+
 procedure TCnExternalEditorToolBarMgr.DoUpdateToolbarTheme(
   EditWindow: TCustomForm; EditControl: TControl; Context: Pointer);
+{$IFDEF DELPHI_OTA}
 var
   I: Integer;
   ToolBar: TToolBar;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   for I := 0 to FToolBarTypes.Count - 1 do
   begin
     ToolBar := TToolBar(EditWindow.FindComponent(FToolBarTypes[I]));
@@ -1219,6 +1241,7 @@ begin
     if ToolBar <> nil then
       ApplyThemeOnToolBar(ToolBar);
   end;
+{$ENDIF}
 end;
 
 { TCnEditorToolBarObj }
@@ -1271,7 +1294,9 @@ var
 begin
   inherited;
   if Operation = opRemove then
+  begin
     for I := ToolBarCount - 1 downto 0 do
+    begin
       if AComponent = FToolBars[I] then
       begin
         // 删除 ToolBar 时，调用 RemoveEvent 通知释放其它东西
@@ -1287,6 +1312,8 @@ begin
         CnDebugger.LogFmt('TCnEditorToolBarObj Notification: ToolBar %d Removed.', [I]);
 {$ENDIF}
       end;
+    end;
+  end;
 end;
 
 procedure TCnEditorToolBarObj.RemoveEditControlFromIndex(Index: Integer);

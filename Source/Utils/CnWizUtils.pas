@@ -65,14 +65,14 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf, SrcEditorIntf, {$ENDIF}
-  {$ELSE} AsRegExpr, CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
+  {$ELSE}  CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF} {$ENDIF}
-  mPasLex, mwBCBTokenList, CnNative,
+  mPasLex, mwBCBTokenList, AsRegExpr, CnNative,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
@@ -106,16 +106,22 @@ type
   // 封装的一个 EditView 和 SourceEditorInterface 的定义
 {$IFDEF STAND_ALONE}
   TCnEditViewSourceInterface = Pointer;
+  TCnIDEEditorInterface = Pointer;
   TCnSourceEditorInterface = Pointer;
+  TCnEditBufferInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
+  TCnIDEEditorInterface = TSourceEditorInterface;
   TCnSourceEditorInterface = TSourceEditorInterface;
+  TCnEditBufferInterface = TSourceEditorInterface;
   TCnIDEProjectInterface = TLazProject;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
-  TCnSourceEditorInterface = IOTAEditor;
+  TCnIDEEditorInterface = IOTAEditor;
+  TCnSourceEditorInterface = IOTASourceEditor;
+  TCnEditBufferInterface = IOTAEditBuffer;
   TCnIDEProjectInterface = IOTAProject;
   {$ENDIF}
 {$ENDIF}
@@ -224,11 +230,14 @@ procedure AdjustButtonGlyph(Glyph: TBitmap);
 {* Delphi 的按钮在 Disabled 状态时，显示的图像很难看，该函数通过在该位图的基础上
    创建一个新的灰度位图来解决这一问题。调整完成后 Glyph 宽度变为高度的两倍，需要
    设置 Button.NumGlyphs := 2 }
+
+{$ENDIF}
+
 function SameFileName(const S1, S2: string): Boolean;
 {* 文件名相同}
 function CompressWhiteSpace(const Str: string): string;
 {* 压缩字符串中间的空白字符}
-{$ENDIF}
+
 procedure ShowHelp(const Topic: string);
 {* 显示指定主题的帮助内容}
 procedure CenterForm(const Form: TCustomForm);
@@ -505,18 +514,25 @@ function CnOtaGetCurrentProjectFileName: string;
 function CnOtaGetCurrentProjectFileNameEx: string;
 {* 取当前工程文件名称扩展，支持 Delphi 和 Lazarus。}
 
-function CnOtaGetEditor(const FileName: string): TCnSourceEditorInterface;
+function CnOtaGetEditor(const FileName: string): TCnIDEEditorInterface;
 {* 根据文件名返回编辑器接口，支持 Delphi 和 Lazarus。}
+function CnOtaGetCurrentSourceEditor: TCnSourceEditorInterface;
+{* 取当前源码编辑器，支持 Delphi 和 Lazarus。}
+function CnOtaGetEditBuffer: TCnEditBufferInterface;
+{* 取 IOTAEditBuffer 接口，支持 Delphi 和 Lazarus。}
+
+function CnOtaGetLineText(LineNum: Integer; EditBuffer: TCnEditBufferInterface = nil;
+  Count: Integer = 1): string;
+{* 取指定行的源代码，行号以 1 开始，返回结果在 Delphi 下为 Ansi/Unicode，非 UTF8，在 Lazarus 下为 Utf8}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
-function CnOtaGetEditBuffer: IOTAEditBuffer;
-{* 取 IOTAEditBuffer 接口}
 function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取 IOTAEditPosition 接口}
 function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): TCnEditViewSourceInterface;
-{* 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
+{* 根据文件名返回编辑器中打开的第一个 EditView，支持 Delphi 和 Lazarus。
+  未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
 {* 取指定编辑器最前端的 IOTAEditView 接口}
 function CnOtaEditViewSupportsSyntaxHighlight(EditView: IOTAEditView = nil): Boolean;
@@ -525,8 +541,6 @@ function CnOtaGetTopMostEditActions: IOTAEditActions;
 {* 取当前最前端的 IOTAEditActions 接口}
 function CnOtaGetCurrentModule: IOTAModule;
 {* 取当前模块}
-function CnOtaGetCurrentSourceEditor: IOTASourceEditor;
-{* 取当前源码编辑器}
 function CnOtaGetFileEditorForModule(Module: IOTAModule; Index: Integer): IOTAEditor;
 {* 取模块编辑器}
 function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
@@ -687,9 +701,6 @@ function CnOtaGetCurrentProcedure: string;
 {* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
 function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
-function CnOtaGetLineText(LineNum: Integer; EditBuffer: IOTAEditBuffer = nil;
-  Count: Integer = 1): string;
-{* 取指定行的源代码，行号以 1 开始，返回结果为 Ansi/Unicode，非 UTF8}
 function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
 {* 取当前行源代码}
@@ -970,13 +981,11 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
 
 {$IFNDEF STAND_ALONE}
 
-function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
-  {$ELSE} IOTASourceEditor {$ENDIF} = nil): Integer;
+function CnGeneralGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface = nil): Integer;
 {* 与 CnGeneralSaveEditorToStream 且 FromCurrPos 为 False 时配合使用的、
   返回当前光标在 Stream 中的字符偏移量，0 开始，与 Stream 格式对应为 Ansi/Utf16/Utf16}
 
-function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
-  {$ELSE} IOTASourceEditor {$ENDIF} = nil): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface = nil): Integer;
 {* 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下也为 Utf8
   本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
@@ -1300,10 +1309,6 @@ procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: T
 
 {$ENDIF}
 
-function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
-  APattern: string; IsMatchStart: Boolean = False): Boolean;
-{* 判断正则表达式匹配}
-
 {$IFNDEF CNWIZARDS_MINIMUM}
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
   LangID: Cardinal);
@@ -1311,6 +1316,10 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {$ENDIF}
 
 {$ENDIF}
+
+function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
+  APattern: string; IsMatchStart: Boolean = False): Boolean;
+{* 判断正则表达式匹配}
 
 procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 {* 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn}
@@ -1326,7 +1335,7 @@ function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemory
 
 {$ENDIF}
 
-function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+function CnGeneralSaveEditorToStream(Editor: TCnSourceEditorInterface;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
   也就是 Ansi/Utf16/Utf16，Lazarus 下也返回 Utf16，末尾均有结束字符 #0，供 Ansi 与 Wide 版的语法分析用。
@@ -1334,7 +1343,7 @@ function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInter
   如果要在 FromCurrPos 为 False 的情况下获取当前光标在 Stream 中的偏移量
   需用 CnGeneralGetCurrLinearPos 函数，偏移量也符合 Ansi/Utf16/Utf16}
 
-function CnGeneralSaveEditorToUtf8Stream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+function CnGeneralSaveEditorToUtf8Stream(Editor: TCnSourceEditorInterface;
   Stream: TMemoryStream; FromCurrPos: Boolean = False): Boolean;
 {* 封装的一通用方法保存编辑器文本到流中，Lazarus 和 BDS 以上均使用 Utf8，D567 还是不得不使用 Ansi。
   也就是 Ansi/Utf8/Utf8，Lazarus 下也返回 Utf8，末尾均有结束字符 #0}
@@ -2144,6 +2153,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 // 文件名相同
 function SameFileName(const S1, S2: string): Boolean;
 begin
@@ -2189,8 +2200,6 @@ begin
     Exit;
   SetLength(Result, NextResultChar - 1);
 end;
-
-{$ENDIF}
 
 // 显示指定主题的帮助内容
 procedure ShowHelp(const Topic: string);
@@ -3805,7 +3814,7 @@ begin
 end;
 
 // 根据文件名返回编辑器接口
-function CnOtaGetEditor(const FileName: string): TCnSourceEditorInterface;
+function CnOtaGetEditor(const FileName: string): TCnIDEEditorInterface;
 var
 {$IFDEF DELPHI_OTA}
   ModuleServices: IOTAModuleServices;
@@ -3813,6 +3822,7 @@ var
 {$ENDIF}
   I, J: Integer;
 begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
   for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
   begin
@@ -3844,17 +3854,39 @@ begin
     end;
   end;
 {$ENDIF}
+{$ENDIF}
   Result := nil;
 end;
 
-{$IFNDEF LAZARUS}
+// 取当前源码编辑器
+function CnOtaGetCurrentSourceEditor: TCnSourceEditorInterface;
 {$IFDEF DELPHI_OTA}
+var
+  EditBuffer: IOTAEditBuffer;
+{$ENDIF}
+begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  Result := SourceEditorManagerIntf.ActiveEditor;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  EditBuffer := CnOtaGetEditBuffer;
+  if Assigned(EditBuffer) and (EditBuffer.FileName <> '') then
+    Result := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, EditBuffer.FileName);
+  if Result = nil then
+    Result := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule);
+{$ENDIF}
+{$ENDIF}
+end;
 
 // 取 IOTAEditBuffer 接口
-function CnOtaGetEditBuffer: IOTAEditBuffer;
+function CnOtaGetEditBuffer: TCnEditBufferInterface;
+{$IFDEF DELPHI_OTA}
 var
   iEditorServices: IOTAEditorServices;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAEditorServices, iEditorServices);
   if iEditorServices <> nil then
   begin
@@ -3862,7 +3894,87 @@ begin
     Exit;
   end;
   Result := nil;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := SourceEditorManagerIntf.ActiveEditor;
+{$ENDIF}
 end;
+
+// 取指定行的源代码，行号以 1 开始，返回结果在 Delphi 下为 Ansi/Unicode，非 UTF8，在 Lazarus 下为 Utf8
+function CnOtaGetLineText(LineNum: Integer; EditBuffer: TCnEditBufferInterface;
+  Count: Integer): string;
+var
+{$IFDEF DELPHI_OTA}
+  L1, L2: Integer;
+  Reader: IOTAEditReader;
+  View: IOTAEditView;
+  OutStr: AnsiString;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  I: Integer;
+  List: TStringList;
+{$ENDIF}
+begin
+  Result := '';
+  if LineNum < 1 then
+  begin
+    Count := Count + LineNum - 1;
+    LineNum := 1;
+  end;
+  if Count <= 0 then Exit;
+
+  if not Assigned(EditBuffer) then
+    EditBuffer := CnOtaGetEditBuffer;
+{$IFDEF DELPHI_OTA}
+  if LineNum >= EditBuffer.GetLinesInBuffer then Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if LineNum >= EditBuffer.Lines.Count then Exit;
+{$ENDIF}
+
+  if Assigned(EditBuffer) then
+  begin
+{$IFDEF DELPHI_OTA}
+    View := EditBuffer.TopView;
+    if Assigned(View) then
+    begin
+      L1 := View.CharPosToPos(OTACharPos(0, LineNum));
+      L2 := View.CharPosToPos(OTACharPos(csMaxLineLength, Min(LineNum +
+        Count - 1, EditBuffer.GetLinesInBuffer)));
+      SetLength(OutStr , L2 - L1);
+      Reader := EditBuffer.CreateReader;
+      try
+        Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
+      finally
+        Reader := nil;
+      end;
+      {$IFDEF UNICODE}
+      Result := ConvertEditorTextToTextW(OutStr);
+      {$ELSE}
+      Result := string(ConvertEditorTextToText(OutStr));
+      {$ENDIF}
+
+    {$IFDEF UNICODE}
+      // 此函数在 D2009 下 Result 长度不对，需要 TrimRight
+      Result := TrimRight(Result);
+    {$ENDIF}
+    end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    List := TStringList.Create;
+    try
+      for I := 0 to Count - 1 do
+        List.Add(EditBuffer.Lines[LineNum - 1 + I]);
+      Result := List.Text;
+    finally
+      List.Free;
+    end;
+{$ENDIF}
+  end;
+end;
+
+{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 // 取 IOTAEditPosition 接口
 function CnOtaGetEditPosition: IOTAEditPosition;
@@ -3984,18 +4096,6 @@ begin
     Exit;
   end;
   Result := nil;
-end;
-
-// 取当前源码编辑器
-function CnOtaGetCurrentSourceEditor: IOTASourceEditor;
-var
-  EditBuffer: IOTAEditBuffer;
-begin
-  EditBuffer := CnOtaGetEditBuffer;
-  if Assigned(EditBuffer) and (EditBuffer.FileName <> '') then
-    Result := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule, EditBuffer.FileName);
-  if Result = nil then
-    Result := CnOtaGetSourceEditorFromModule(CnOtaGetCurrentModule);
 end;
 
 // 取模块编辑器 (来自 GExperts Src 1.12)
@@ -5650,56 +5750,6 @@ begin
   EditView.ConvertPos(True, EditPos, CharPos);
   Result := string(Parser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis));
   Parser.Free;
-end;
-
-// 取指定行的源代码，行号以 1 开始，返回结果为 Ansi/Unicode，非 UTF8
-function CnOtaGetLineText(LineNum: Integer; EditBuffer: IOTAEditBuffer = nil;
-  Count: Integer = 1): string;
-var
-  L1, L2: Integer;
-  Reader: IOTAEditReader;
-  View: IOTAEditView;
-  OutStr: AnsiString;
-begin
-  Result := '';
-  if LineNum < 1 then
-  begin
-    Count := Count + LineNum - 1;
-    LineNum := 1;
-  end;
-  if Count <= 0 then Exit;
-
-  if not Assigned(EditBuffer) then
-    EditBuffer := CnOtaGetEditBuffer;
-  if LineNum > EditBuffer.GetLinesInBuffer then Exit;
-
-  if Assigned(EditBuffer) then
-  begin
-    View := EditBuffer.TopView;
-    if Assigned(View) then
-    begin
-      L1 := View.CharPosToPos(OTACharPos(0, LineNum));
-      L2 := View.CharPosToPos(OTACharPos(csMaxLineLength, Min(LineNum +
-        Count - 1, EditBuffer.GetLinesInBuffer)));
-      SetLength(OutStr , L2 - L1);
-      Reader := EditBuffer.CreateReader;
-      try
-        Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
-      finally
-        Reader := nil;
-      end;
-      {$IFDEF UNICODE}
-      Result := ConvertEditorTextToTextW(OutStr);
-      {$ELSE}
-      Result := string(ConvertEditorTextToText(OutStr));
-      {$ENDIF}
-
-    {$IFDEF UNICODE}
-      // 此函数在 D2009 下 Result 长度不对，需要 TrimRight
-      Result := TrimRight(Result);
-    {$ENDIF}
-    end;
-  end;
 end;
 
 // 取当前行源代码
@@ -7818,8 +7868,7 @@ end;
 
 {$IFNDEF STAND_ALONE}
 
-function CnGeneralGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
-  {$ELSE} IOTASourceEditor {$ENDIF}): Integer;
+function CnGeneralGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface): Integer;
 {$IFDEF BDS}
 var
   Stream: TMemoryStream;
@@ -7853,8 +7902,7 @@ begin
 end;
 
 // 返回 SourceEditor 当前光标位置的线性地址，均为 0 开始的 Ansi/Utf8/Utf8
-function CnOtaGetCurrLinearPos(SourceEditor: {$IFDEF LAZARUS} TSourceEditorInterface
-  {$ELSE} IOTASourceEditor {$ENDIF}): Integer;
+function CnOtaGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface): Integer;
 var
 {$IFDEF LAZARUS}
   Editor: TSourceEditorInterface;
@@ -9690,24 +9738,6 @@ end;
 
 {$ENDIF}
 
-// 判断正则表达式匹配
-function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
-  APattern: string; IsMatchStart: Boolean = False): Boolean;
-begin
-  Result := True;
-  if (APattern = '') or (ARegExpr = nil) then Exit;
-
-  if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
-    APattern := '^' + APattern;
-
-  ARegExpr.Expression := APattern;
-  try
-    Result := ARegExpr.Exec(AText);
-  except
-    Result := False;
-  end;
-end;
-
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 // 加载指定的语言文件翻译窗体
@@ -9743,6 +9773,24 @@ end;
 {$ENDIF}
 
 {$ENDIF}
+
+// 判断正则表达式匹配
+function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
+  APattern: string; IsMatchStart: Boolean = False): Boolean;
+begin
+  Result := True;
+  if (APattern = '') or (ARegExpr = nil) then Exit;
+
+  if IsMatchStart and (APattern[1] <> '^') then // 额外的从头匹配
+    APattern := '^' + APattern;
+
+  ARegExpr.Expression := APattern;
+  try
+    Result := ARegExpr.Exec(AText);
+  except
+    Result := False;
+  end;
+end;
 
 // 根据 HDPI 设置，放大 Button 中的 Glyph，Button 只能是 SpeedButton 或 BitBtn
 procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
@@ -9843,7 +9891,7 @@ end;
 {$ENDIF}
 
 // 封装的一通用方法保存编辑器文本到流中，BDS 以上均使用 WideChar，D567 使用 AnsiChar，均不带 UTF8
-function CnGeneralSaveEditorToStream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+function CnGeneralSaveEditorToStream(Editor: TCnSourceEditorInterface;
   Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
 begin
 {$IFDEF LAZARUS}
@@ -9861,7 +9909,7 @@ begin
 {$ENDIF}
 end;
 
-function CnGeneralSaveEditorToUtf8Stream(Editor: {$IFDEF LAZARUS} TSourceEditorInterface {$ELSE} IOTASourceEditor {$ENDIF};
+function CnGeneralSaveEditorToUtf8Stream(Editor: TCnSourceEditorInterface;
   Stream: TMemoryStream; FromCurrPos: Boolean): Boolean;
 begin
 {$IFDEF LAZARUS}

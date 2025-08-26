@@ -54,7 +54,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus,
   StdCtrls, ExtCtrls, ComCtrls, ActnList, Buttons, IniFiles,
-  {$IFDEF DELPHIXE3_UP}Actions,{$ENDIF}
+  {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF} {$IFDEF LAZARUS} LCLType, {$ENDIF}
   CnSpin, CnWizUtils, CnCommon, CnWizConsts, CnWizOptions, CnWizMultiLang,
   CnWizIdeUtils;
 
