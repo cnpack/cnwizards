@@ -54,6 +54,11 @@
   {$DEFINE DELPHI_OTA}
 {$ENDIF}
 
+{$IFDEF BCB5OR6}
+  // 非独立的 BCB5/6 编译，也表示有 OTA 接口
+  {$DEFINE DELPHI_OTA}
+{$ENDIF}
+
 {$IFDEF STAND_ALONE}
   {$UNDEF USE_CODEEDITOR_SERVICE}
   // 独立的则表示没有 OTA 接口
