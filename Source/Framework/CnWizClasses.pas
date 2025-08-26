@@ -1419,6 +1419,7 @@ begin
     // LiuXiao: 子菜单专家会释放其 Action，父会重复释放它导致错误。
     try
       if Assigned(WizAction) and (WizAction is TCnWizMenuAction) and
+        (TCnWizMenuAction(WizAction).Menu <> nil) and
         (TCnWizMenuAction(WizAction).Menu.Count > 0) then
         Menu.Remove(TCnWizMenuAction(WizAction).Menu)
       else

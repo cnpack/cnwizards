@@ -524,15 +524,15 @@ function CnOtaGetEditBuffer: TCnEditBufferInterface;
 function CnOtaGetLineText(LineNum: Integer; EditBuffer: TCnEditBufferInterface = nil;
   Count: Integer = 1): string;
 {* 取指定行的源代码，行号以 1 开始，返回结果在 Delphi 下为 Ansi/Unicode，非 UTF8，在 Lazarus 下为 Utf8}
+function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): TCnEditViewSourceInterface;
+{* 根据文件名返回编辑器中打开的第一个 EditView，支持 Delphi 和 Lazarus。
+  未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
 function CnOtaGetEditPosition: IOTAEditPosition;
 {* 取 IOTAEditPosition 接口}
-function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen: Boolean = True): TCnEditViewSourceInterface;
-{* 根据文件名返回编辑器中打开的第一个 EditView，支持 Delphi 和 Lazarus。
-  未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 function CnOtaGetTopMostEditView(SourceEditor: IOTASourceEditor): IOTAEditView; overload;
 {* 取指定编辑器最前端的 IOTAEditView 接口}
 function CnOtaEditViewSupportsSyntaxHighlight(EditView: IOTAEditView = nil): Boolean;
@@ -816,6 +816,8 @@ function CnOtaOpenFile(const FileName: string): Boolean;
 {* 打开文件}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
 {* 判断文件是否打开}
+function CnOtaGetBaseModuleFileName(const FileName: string): string;
+{* 取模块的单元文件名}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -835,8 +837,7 @@ function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer = 0): Boo
 {* 让指定文件可见。如果 Lines 参数大于 0，则滚动到让第 Lines 行垂直居中}
 function CnOtaIsDebugging: Boolean;
 {* 当前是否在调试状态}
-function CnOtaGetBaseModuleFileName(const FileName: string): string;
-{* 取模块的单元文件名}
+
 function CnOtaIsPersistentBlocks: Boolean;
 {* 当前 PersistentBlocks 是否为 True}
 
@@ -1327,6 +1328,9 @@ procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 {$IFNDEF STAND_ALONE}
 
 {$IFDEF LAZARUS}
+
+procedure CnLazSourceEditorCenterLine(Editor: TSourceEditorInterface; LineNo: Integer);
+{* Lazarus 下将光标跳至编辑器指定行的行首并将其垂直居中定位。}
 
 function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
   FromCurrPos: Boolean = False; CheckUtf8: Boolean = False): Boolean;
@@ -3634,7 +3638,7 @@ begin
   Result := '';
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
     Result := SourceEditorManagerIntf.ActiveEditor.Selection;
 {$ELSE}
   EditView := CnOtaGetTopMostEditView;
@@ -3663,7 +3667,10 @@ begin
   Result := nil;
 {$ELSE}
 {$IFDEF LAZARUS}
-  Result := SourceEditorManagerIntf.ActiveEditor;
+  if SourceEditorManagerIntf <> nil then
+    Result := SourceEditorManagerIntf.ActiveEditor
+  else
+    Result := nil;
 {$ELSE}
   iEditBuffer := CnOtaGetEditBuffer;
   if iEditBuffer <> nil then
@@ -3688,7 +3695,7 @@ begin
   Result := False;
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
   begin
     if SourceEditorManagerIntf.ActiveEditor.SelStart <> SourceEditorManagerIntf.ActiveEditor.SelEnd then
     begin;
@@ -3824,12 +3831,15 @@ var
 begin
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+  if SourceEditorManagerIntf <> nil then
   begin
-    if SourceEditorManagerIntf.SourceEditors[I].FileName = FileName then
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
     begin
-      Result := SourceEditorManagerIntf.SourceEditors[I];
-      Exit;
+      if SourceEditorManagerIntf.SourceEditors[I].FileName = FileName then
+      begin
+        Result := SourceEditorManagerIntf.SourceEditors[I];
+        Exit;
+      end;
     end;
   end;
 {$ENDIF}
@@ -3867,7 +3877,10 @@ var
 begin
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  Result := SourceEditorManagerIntf.ActiveEditor;
+  if SourceEditorManagerIntf <> nil then
+    Result := SourceEditorManagerIntf.ActiveEditor
+  else
+    Result := nil;
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
   EditBuffer := CnOtaGetEditBuffer;
@@ -3896,7 +3909,10 @@ begin
   Result := nil;
 {$ENDIF}
 {$IFDEF LAZARUS}
-  Result := SourceEditorManagerIntf.ActiveEditor;
+  if SourceEditorManagerIntf <> nil then
+    Result := SourceEditorManagerIntf.ActiveEditor
+  else
+    Result := nil;
 {$ENDIF}
 end;
 
@@ -3973,23 +3989,6 @@ begin
   end;
 end;
 
-{$IFNDEF LAZARUS}
-{$IFDEF DELPHI_OTA}
-
-// 取 IOTAEditPosition 接口
-function CnOtaGetEditPosition: IOTAEditPosition;
-var
-  iEditBuffer: IOTAEditBuffer;
-begin
-  iEditBuffer := CnOtaGetEditBuffer;
-  if iEditBuffer <> nil then
-  begin
-    Result := iEditBuffer.GetEditPosition;
-    Exit;
-  end;
-  Result := nil;
-end;
-
 // 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil
 function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string;
   ForceOpen: Boolean): TCnEditViewSourceInterface;
@@ -4022,6 +4021,23 @@ begin
 
   Result := SrcEditor.EditViews[0];
 {$ENDIF}
+end;
+
+{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
+
+// 取 IOTAEditPosition 接口
+function CnOtaGetEditPosition: IOTAEditPosition;
+var
+  iEditBuffer: IOTAEditBuffer;
+begin
+  iEditBuffer := CnOtaGetEditBuffer;
+  if iEditBuffer <> nil then
+  begin
+    Result := iEditBuffer.GetEditPosition;
+    Exit;
+  end;
+  Result := nil;
 end;
 
 // 取指定编辑器最前端的 IOTAEditView 接口
@@ -6834,17 +6850,20 @@ begin
   Result := False; // 独立模式下直接返回未打开
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+  if SourceEditorManagerIntf <> nil then
   begin
-    Editor := SourceEditorManagerIntf.SourceEditors[I];
-    EditorPath := Editor.FileName;
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      Editor := SourceEditorManagerIntf.SourceEditors[I];
+      EditorPath := Editor.FileName;
 
-    if EditorPath = '' then
-      Continue;
+      if EditorPath = '' then
+        Continue;
 
-    Result := CompareText(FileName, Editor.FileName) = 0;
-    if Result then
-      Exit;
+      Result := CompareText(FileName, Editor.FileName) = 0;
+      if Result then
+        Exit;
+    end;
   end;
 {$ELSE}
   ModuleServices := BorlandIDEServices as IOTAModuleServices;
@@ -6866,6 +6885,25 @@ begin
   end;
 {$ENDIF}
 {$ENDIF}
+end;
+
+// 取模块的单元文件名
+function CnOtaGetBaseModuleFileName(const FileName: string): string;
+var
+  AltName: string;
+begin
+  Result := FileName;
+  if IsForm(FileName) then
+  begin
+    {$IFDEF BCB}
+    AltName := _CnChangeFileExt(FileName, '.cpp');
+    if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
+      Result := AltName;
+    {$ENDIF BCB}
+    AltName := _CnChangeFileExt(FileName, '.pas');
+    if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
+      Result := AltName;
+  end;
 end;
 
 {$IFNDEF LAZARUS}
@@ -6929,29 +6967,12 @@ var
 begin
   Result := False;
   for I := 0 to AModule.GetModuleFileCount - 1 do
+  begin
     if AModule.GetModuleFileEditor(I).Modified then
     begin
       Result := True;
       Exit;
     end;
-end;
-
-// 取模块的单元文件名
-function CnOtaGetBaseModuleFileName(const FileName: string): string;
-var
-  AltName: string;
-begin
-  Result := FileName;
-  if IsForm(FileName) then
-  begin
-    {$IFDEF BCB}
-    AltName := _CnChangeFileExt(FileName, '.cpp');
-    if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
-      Result := AltName;
-    {$ENDIF BCB}
-    AltName := _CnChangeFileExt(FileName, '.pas');
-    if CnOtaIsFileOpen(AltName) or FileExists(AltName) then
-      Result := AltName;
   end;
 end;
 
@@ -7421,7 +7442,7 @@ begin
   Result := 'C:\CnPack\Unit1.pas'; // 独立运行模式下模拟返回一个固定文件名
 {$ELSE}
 {$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
     Result := SourceEditorManagerIntf.ActiveEditor.FileName
   else
     Result := '';
@@ -7464,33 +7485,44 @@ begin
       Result := TmpName
     else
     begin
-      TmpName := _CnChangeFileExt(Result, '.cpp');
+{$IFDEF LAZARUS}
+      TmpName := _CnChangeFileExt(Result, '.pp');
       if CnOtaIsFileOpen(TmpName) then
         Result := TmpName
       else
       begin
-        TmpName := _CnChangeFileExt(Result, '.h');
+{$ENDIF}
+        TmpName := _CnChangeFileExt(Result, '.cpp');
         if CnOtaIsFileOpen(TmpName) then
           Result := TmpName
         else
         begin
-          TmpName := _CnChangeFileExt(Result, '.cc');
+          TmpName := _CnChangeFileExt(Result, '.h');
           if CnOtaIsFileOpen(TmpName) then
             Result := TmpName
           else
           begin
-            TmpName := _CnChangeFileExt(Result, '.hh');
+            TmpName := _CnChangeFileExt(Result, '.cc');
             if CnOtaIsFileOpen(TmpName) then
               Result := TmpName
+            else
+            begin
+              TmpName := _CnChangeFileExt(Result, '.hh');
+              if CnOtaIsFileOpen(TmpName) then
+                Result := TmpName
+            end;
           end;
         end;
+{$IFDEF LAZARUS}
       end;
+{$ENDIF}
     end;
   end
   else
   begin
     if not (IsDprOrPas(Result) or IsTypeLibrary(Result) or IsInc(Result)
-      or IsCpp(Result) or IsC(Result) or IsHpp(Result) or IsH(Result)) then
+      or IsCpp(Result) or IsC(Result) or IsHpp(Result) or IsH(Result)
+      {$IFDEF LAZARUS} or IsPp(Result) or IsLpr(Result) {$ENDIF}) then
     begin
       // ErrorDlg(SPasOrDprOrCPPOnly, mtError, [mbOK], 0)
       Result := '';
@@ -7577,7 +7609,9 @@ begin
 {$IFDEF LAZARUS}
   if not CnOtaMovePosInCurSource(InsertPos, 0, 0) then Exit;
 
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P := Editor.CursorTextXY;
@@ -7620,7 +7654,9 @@ begin
 {$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P := Editor.CursorTextXY;
@@ -7659,7 +7695,9 @@ begin
 {$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P.X := Col;
@@ -7697,7 +7735,9 @@ begin
 {$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P.X := Col;
@@ -7735,7 +7775,9 @@ begin
 {$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P.X := Editor.CursorTextXY.X;
@@ -7773,7 +7815,9 @@ begin
 {$ELSE}
   Result := False;
 {$IFDEF LAZARUS}
-  Editor := SourceEditorManagerIntf.ActiveEditor;
+  Editor := nil;
+  if SourceEditorManagerIntf <> nil then
+    Editor := SourceEditorManagerIntf.ActiveEditor;
   if Assigned(Editor) then
   begin
     P := Editor.CursorTextXY;
@@ -7842,7 +7886,7 @@ var
 begin
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
   begin
     SourceEditorManagerIntf.ActiveEditor.ReplaceText(SourceEditorManagerIntf.ActiveEditor.CursorTextXY,
       SourceEditorManagerIntf.ActiveEditor.CursorTextXY, Text);
@@ -7912,7 +7956,7 @@ var
 {$ENDIF}
 begin
 {$IFDEF LAZARUS}
-  if not Assigned(SourceEditor) then
+  if not Assigned(SourceEditor) and (SourceEditorManagerIntf <> nil) then
     SourceEditor := SourceEditorManagerIntf.ActiveEditor;
 
   if SourceEditor <> nil then
@@ -8022,7 +8066,7 @@ var
 begin
   Result := False;
 {$IFDEF LAZARUS}
-  if SourceEditorManagerIntf.ActiveEditor <> nil then
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
   begin
     Text := SourceEditorManagerIntf.ActiveEditor.CurrentLineText;
     CharPos.Line := SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y;
@@ -9848,6 +9892,27 @@ end;
 
 {$IFDEF LAZARUS}
 
+procedure CnLazSourceEditorCenterLine(Editor: TSourceEditorInterface; LineNo: Integer);
+var
+  P: TPoint;
+  L: Integer;
+begin
+  if Editor <> nil then
+  begin
+    if LineNo > Editor.LineCount then
+      LineNo := Editor.LineCount;
+
+    P.X := 1;
+    P.Y := LineNo;
+    Editor.CursorTextXY := P;
+
+    L := LineNo - (Editor.LinesInWindow div 2);
+    if L < 0 then
+      L := 1;
+    Editor.TopLine := L;
+  end;
+end;
+
 function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemoryStream;
   FromCurrPos: Boolean; CheckUtf8: Boolean): Boolean;
 var
@@ -9857,12 +9922,11 @@ begin
   Assert(Stream <> nil);
   Result := False;
 
-  if Editor = nil then
-  begin
+  if (Editor = nil) and (SourceEditorManagerIntf <> nil) then
     Editor := SourceEditorManagerIntf.ActiveEditor;
-    if Editor = nil then
-      Exit;
-  end;
+
+  if Editor = nil then
+    Exit;
 
   Utf8Text := Editor.SourceText;
   if FromCurrPos then

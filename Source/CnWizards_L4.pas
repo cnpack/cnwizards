@@ -15,7 +15,9 @@ uses
   CnTestEditorTextWizard, CnWizIdeDock, CnAICoderEngine, CnAICoderEngineImpl, 
   CnAICoderNetClient, CnAICoderConfig, CnAICoderChatFrm, CnAICoderWizard, 
   CnTestEnvProjPathWizard, CnCodingToolsetWizard, CnProjectViewBaseFrm, 
-  CnEditorOpenFile, CnEditorOpenFileFrm, LazarusPackageIntf;
+  CnEditorOpenFile, CnEditorOpenFileFrm, CnFloatWindow, CnSourceCropper, 
+  CnPascalAST, CnLineParser, CnWizEditFiler, CnProcListWizard, 
+  CnSrcEditorToolBar, CnFlatToolbarConfigFrm, LazarusPackageIntf;
 
 implementation
 

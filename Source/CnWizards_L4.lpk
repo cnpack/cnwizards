@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditors"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditors;SimpleWizards;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancements"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -151,6 +151,38 @@
       <Item>
         <Filename Value="CodingToolset\CnEditorOpenFileFrm.pas"/>
         <UnitName Value="CnEditorOpenFileFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnFloatWindow.pas"/>
+        <UnitName Value="CnFloatWindow"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnSourceCropper.pas"/>
+        <UnitName Value="CnSourceCropper"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnPascalAST.pas"/>
+        <UnitName Value="CnPascalAST"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnLineParser.pas"/>
+        <UnitName Value="CnLineParser"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizEditFiler.pas"/>
+        <UnitName Value="CnWizEditFiler"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizards\CnProcListWizard.pas"/>
+        <UnitName Value="CnProcListWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="SrcEditorEnhance\CnSrcEditorToolBar.pas"/>
+        <UnitName Value="CnSrcEditorToolBar"/>
+      </Item>
+      <Item>
+        <Filename Value="IdeEnhancements\CnFlatToolbarConfigFrm.pas"/>
+        <UnitName Value="CnFlatToolbarConfigFrm"/>
       </Item>
     </Files>
     <RequiredPkgs>

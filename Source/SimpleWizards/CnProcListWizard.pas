@@ -1386,7 +1386,9 @@ begin
 
       if ShowModal = mrOK then
       begin
-        // BringIdeEditorFormToFront;
+{$IFDEF LAZARUS}
+        SourceEditorManagerIntf.ShowActiveWindowOnTop;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
         CnOtaMakeSourceVisible(CurrentFile);
 {$ENDIF}
@@ -1451,11 +1453,13 @@ begin
   Result := nil;
   // 倒序来，容易找点儿，同时避免某些未是否的东西在 FProcToolBarObjects 中重复出错
   for I := FProcToolBarObjects.Count - 1 downto 0 do
+  begin
     if TCnProcToolBarObj(FProcToolBarObjects[I]).EditControl = EditControl then
     begin
       Result := TCnProcToolBarObj(FProcToolBarObjects[I]);
       Exit;
     end;
+  end;
 end;
 
 class procedure TCnProcListWizard.GetWizardInfo(var Name, Author, Email,
@@ -3342,7 +3346,8 @@ begin
           View.Paint;
 {$ENDIF}
 {$IFDEF LAZARUS}
-          // TODO:
+        // 定位到行
+        CnLazSourceEditorCenterLine(View, ProcInfo.LineNo);
 {$ENDIF}
         end;
 
@@ -3363,7 +3368,7 @@ begin
         FreeAndNil(FFiler);
         FFiler := TCnEditFiler.Create(ProcInfo.AllName);
 
-        if not CnOtaIsFileOpen(ProcInfo.AllName) then // 文件已经打开
+        if not CnOtaIsFileOpen(ProcInfo.AllName) then // 文件未打开则打开
           CnOtaOpenFile(ProcInfo.AllName);
 
 {$IFDEF DELPHI_OTA}
@@ -3384,7 +3389,11 @@ begin
         FFiler.FreeFileData;
 {$ENDIF}
 {$IFDEF LAZARUS}
-        // TODO:
+        // 找到该文件对应的编辑器并切换到它
+        View := CnOtaGetTopOpenedEditViewFromFileName(ProcInfo.AllName);
+        SourceEditorManagerIntf.ActiveEditor := View;
+        // 定位到行
+        CnLazSourceEditorCenterLine(View, ProcInfo.LineNo);
 {$ENDIF}
       end;
 
@@ -3549,11 +3558,13 @@ begin
   FObjectList.Free;
 
   for I := 0 to cbbFiles.Items.Count - 1 do
+  begin
     if cbbFiles.Items.Objects[I] <> nil then
     begin
       TCnFileInfo(cbbFiles.Items.Objects[I]).Free;
       cbbFiles.Items.Objects[I] := nil;
     end;
+  end;
 end;
 
 procedure TCnProcListForm.SetFileName(const Value: string);
@@ -4099,15 +4110,18 @@ begin
         end;
 {$ENDIF}
 {$IFDEF LAZARUS}
-        for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+        if SourceEditorManagerIntf <> nil then
         begin
-          aFile := SourceEditorManagerIntf.SourceEditors[I].FileName;
-          if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
-            or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+          for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
           begin
-            Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
-            Wizard.UpdateDataListImageIndex(DataList);
-            FirstFile := False;
+            aFile := SourceEditorManagerIntf.SourceEditors[I].FileName;
+            if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
+              or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+            begin
+              Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+              Wizard.UpdateDataListImageIndex(DataList);
+              FirstFile := False;
+            end;
           end;
         end;
 {$ENDIF}

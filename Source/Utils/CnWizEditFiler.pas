@@ -255,7 +255,7 @@ end;
 
 procedure TModuleFreeNotifier.ModuleRenamed(const NewName: String);
 begin
-  // We might want to handle this and change the stored file name
+
 end;
 
 {$ENDIF}
@@ -275,17 +275,6 @@ begin
     SetFileName(FileName);
 end;
 
-// Use the FreeFileData to release the references
-// to the internal editor buffer or the external
-// file on disk in order not to block the file
-// or track the editor (which may disappear) for
-// possibly extended periods of time.
-//
-// Calls to edit reader will always (re-)allocate
-// references again by calling the "AllocateFileData"
-// method, so calling "FreeFileData" essentially comes
-// for free, only reducing the length a reference
-// is held to an entity.
 procedure TCnEditFiler.FreeFileData;
 begin
   FreeAndNil(FStreamFile);
@@ -399,12 +388,6 @@ begin
       ReleaseModuleNotifier;
       FModIntf := nil;
 
-      // Should we do this instead?
-      //FreeFileData;
-
-      // Sometimes causes "Instance of TEditClass has a dangling reference count of 3"
-      // Happens in BCB5 when trying to focus a .h when the .dfm is being vewed as text
-      // Maybe fixed in 1.0?
       raise Exception.CreateFmt(SCnNoEditorInterface, [FFileName]);
     end;
 
@@ -435,7 +418,6 @@ begin
 
   FreeFileData;
 
-  // Assigning an empty string clears allocation.
   if Value = '' then
     Exit;
 
@@ -447,8 +429,6 @@ procedure TCnEditFiler.SetBufSize(New: Integer);
 begin
   if (FBuf = nil) and (New <> FBufSize) then
     FBufSize := New;
-  // 32K is the max we can read from an edit reader at once
-  // Assert(FBufSize <= 1024 * 32);
 end;
 
 {$IFDEF DELPHI_OTA}
@@ -491,7 +471,6 @@ var
 begin
   AllocateFileData;
 
-  //{$IFDEF Debug} CnDebugger.LogMsg('LineCount ' + IntToStr(LineCount)); {$ENDIF}
   if Line > LineCount then Exit;
   if Line < 1 then
     Line := 1;
@@ -553,8 +532,6 @@ procedure TCnEditFiler.Reset;
 begin
   if FMode = mmFile then
   begin
-    // We do not need to allocate file data
-    // in order to set the stream position
     if FStreamFile <> nil then
       FStreamFile.Position := 0;
   end;
@@ -562,10 +539,11 @@ end;
 
 procedure TCnEditFiler.SaveToStream(Stream: TStream; CheckUtf8: Boolean);
 const
-  TheEnd: AnsiChar = AnsiChar(#0); // Leave typed constant as is - needed for streaming code
+  TheEnd: AnsiChar = AnsiChar(#0);
 var
   Pos: Integer;
   Size: Integer;
+  NeedCheck: Boolean;
 {$IFDEF IDE_WIDECONTROL}
   Text, Utf8Text: AnsiString;
 {$IFDEF UNICODE}
@@ -661,7 +639,10 @@ begin
   begin
     Pos := 0;
 {$IFDEF LAZARUS}
-    // FEditor
+    Utf8Text := FEditor.Lines.Text;
+    if Length(Utf8Text) > 0 then
+      Stream.Write(Utf8Text[1], Length(Utf8Text));
+    Stream.Write(TheEnd, 1);
 {$ELSE}
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
@@ -689,8 +670,15 @@ begin
     Stream.Write(TheEnd, 1);
 {$ENDIF}
 
+    NeedCheck := False;
 {$IFDEF IDE_WIDECONTROL}
-    if CheckUtf8 then
+    NeedCheck := True;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    NeedCheck := True;
+{$ENDIF}
+
+    if NeedCheck and CheckUtf8 then
     begin
       // 缓冲区里读出的是 Utf8 格式的流，有 #0，读成字符串后因为尾部有 #0 了，所以少读一个
       SetLength(Utf8Text, Stream.Size - 1);
@@ -705,7 +693,6 @@ begin
       Stream.Position := 0;
       Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
     end;
-{$ENDIF}
   end;
 end;
 
@@ -974,6 +961,7 @@ var
   List: TCnWideStringList;
 {$ENDIF}
   Size: Integer;
+  NeedCheck: Boolean;
 begin
   Assert(Stream <> nil);
 
@@ -981,48 +969,39 @@ begin
 
   AllocateFileData;
 
+  NeedCheck := False;
 {$IFDEF LAZARUS}
-  // 和 IDE_WIDE_CONTROL 等同
-  // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
-  Stream.Position := 0;
-  if CheckUtf8 then
-  begin
-    // Stream 内容是 Ansi，一次全部读入后转成 Utf8
-    SetLength(AnsiText, Stream.Size);
-    Stream.Read(AnsiText[1], Stream.Size);
-    Utf8Text := CnAnsiToUtf8(AnsiText);
-  end
-  else
-  begin
-    // Stream 内容是 Utf8，一次全部读入
-    SetLength(Utf8Text, Stream.Size);
-    Stream.Read(Utf8Text[1], Stream.Size);
-  end;
-{$ELSE}
+  NeedCheck := True;
+{$ENDIF}
 {$IFDEF IDE_WIDECONTROL}
-  // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
-  Stream.Position := 0;
-  if CheckUtf8 then
+  NeedCheck := True;
+{$ENDIF}
+
+  if NeedCheck then
   begin
-    // Stream 内容是 Ansi，一次全部读入后转成 Utf8
-    SetLength(AnsiText, Stream.Size);
-    Stream.Read(AnsiText[1], Stream.Size);
-    Utf8Text := CnAnsiToUtf8(AnsiText);
-  end
-  else
-  begin
-    // Stream 内容是 Utf8，一次全部读入
-    SetLength(Utf8Text, Stream.Size);
-    Stream.Read(Utf8Text[1], Stream.Size);
+    // 改用 Read/Write 搬内容到 AnsiText 或 Utf8Text 中，脱离 TMemoryStream 限制
+    Stream.Position := 0;
+    if CheckUtf8 then
+    begin
+      // Stream 内容是 Ansi，一次全部读入后转成 Utf8
+      SetLength(AnsiText, Stream.Size);
+      Stream.Read(AnsiText[1], Stream.Size);
+      Utf8Text := CnAnsiToUtf8(AnsiText);
+    end
+    else
+    begin
+      // Stream 内容是 Utf8，一次全部读入
+      SetLength(Utf8Text, Stream.Size);
+      Stream.Read(Utf8Text[1], Stream.Size);
+    end;
   end;
-{$ENDIF}
-{$ENDIF}
 
   if Mode = mmFile then
   begin
     Assert(FStreamFile <> nil);
+
 {$IFDEF LAZARUS}
-    // 和 IDE_WIDE_CONTROL 等同
+    // 和 IDE_WIDE_CONTROL 里的非 UNICODE 部分等同
     // 此时 Utf8Text 里是 Utf8 内容且末尾有 #0，要转 UTF16 以放到 StringList 里
     Utf16Text := CnUtf8DecodeToWideString(Utf8Text);
 

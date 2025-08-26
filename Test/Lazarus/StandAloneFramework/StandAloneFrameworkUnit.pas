@@ -19,6 +19,7 @@ type
   TFormFramework = class(TForm)
     ActionList1: TActionList;
     actlstStub: TActionList;
+    ApplicationProperties1: TApplicationProperties;
     btnSetHotKey: TButton;
     Button1: TButton;
     Button2: TButton;
@@ -41,6 +42,10 @@ type
     Help1: TMenuItem;
     ilStub: TImageList;
     Exit1: TMenuItem;
+    procedure ApplicationProperties1ActionExecute(AAction: TBasicAction;
+      var Handled: Boolean);
+    procedure ApplicationProperties1Idle(Sender: TObject; var Done: Boolean);
+    procedure ApplicationProperties1UserInput(Sender: TObject; Msg: Cardinal);
     procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure btnCreateMgrClick(Sender: TObject);
@@ -93,6 +98,24 @@ procedure TFormFramework.Button1Click(Sender: TObject);
 begin
   if FileMatchesExts('unit1.pas', '.pas;.dpr;.inc') then
     Caption := 'Matched';
+end;
+
+procedure TFormFramework.ApplicationProperties1ActionExecute(
+  AAction: TBasicAction; var Handled: Boolean);
+begin
+
+end;
+
+procedure TFormFramework.ApplicationProperties1Idle(Sender: TObject;
+  var Done: Boolean);
+begin
+
+end;
+
+procedure TFormFramework.ApplicationProperties1UserInput(Sender: TObject;
+  Msg: Cardinal);
+begin
+
 end;
 
 procedure TFormFramework.Button3Click(Sender: TObject);
