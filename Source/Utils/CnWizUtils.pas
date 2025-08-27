@@ -991,6 +991,8 @@ function CnOtaGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface = nil): In
   本来在Delphi 的 Unicode 环境下当前位置之前有宽字符时 CharPosToPos 其值不靠谱，但函数中
   做了处理，将当前行的 Utf8 偏移量单独计算了，凑合着保证了 Unicode 环境下的 Utf8}
 
+{$ENDIF}
+
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
 {* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
@@ -1011,8 +1013,6 @@ procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos，也就是行 1 开始，列 0 开始}
-
-{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -3899,6 +3899,9 @@ var
   iEditorServices: IOTAEditorServices;
 {$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := nil;
+{$ELSE}
 {$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAEditorServices, iEditorServices);
   if iEditorServices <> nil then
@@ -3913,6 +3916,7 @@ begin
     Result := SourceEditorManagerIntf.ActiveEditor
   else
     Result := nil;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -3933,6 +3937,7 @@ var
 {$ENDIF}
 begin
   Result := '';
+{$IFNDEF STAND_ALONE}
   if LineNum < 1 then
   begin
     Count := Count + LineNum - 1;
@@ -3988,6 +3993,7 @@ begin
     end;
 {$ENDIF}
   end;
+{$ENDIF}
 end;
 
 // 根据文件名返回编辑器中打开的第一个 EditView，未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil
@@ -7982,6 +7988,8 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 // 封装的解析器解析 Pascal 代码的过程
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
@@ -8066,6 +8074,7 @@ var
   CharIndex: Integer;
 begin
   Result := False;
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
   if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
   begin
@@ -8100,9 +8109,8 @@ begin
   CharPos.CharIndex := CharIndex;
   Result := True;
 {$ENDIF}
-end;
-
 {$ENDIF}
+end;
 
 {$IFNDEF LAZARUS}
 

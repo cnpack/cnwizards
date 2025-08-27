@@ -107,7 +107,16 @@ object CnLoadElementForm: TCnLoadElementForm
         Height = 345
         ReadOnly = True
         ScrollBars = ssBoth
+        TabOrder = 3
+      end
+      object btnBrowsePas: TButton
+        Left = 696
+        Top = 64
+        Width = 75
+        Height = 25
+        Caption = 'Browse Pas'
         TabOrder = 2
+        OnClick = btnBrowsePasClick
       end
     end
     object tsCPP: TTabSheet
@@ -166,8 +175,21 @@ object CnLoadElementForm: TCnLoadElementForm
         Height = 345
         ReadOnly = True
         ScrollBars = ssBoth
+        TabOrder = 3
+      end
+      object btnBrowseCpp: TButton
+        Left = 696
+        Top = 64
+        Width = 75
+        Height = 25
+        Caption = 'Browse Cpp'
         TabOrder = 2
+        OnClick = btnBrowseCppClick
       end
     end
+  end
+  object dlgOpen1: TOpenDialog
+    Left = 700
+    Top = 200
   end
 end

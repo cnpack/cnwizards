@@ -3,12 +3,60 @@ program StandAloneFramework;
 uses
   Forms,
   StandAloneFrameworkUnit in 'StandAloneFrameworkUnit.pas' {FormFramework},
-  CnMessageBoxWizard in '..\..\Source\SimpleWizards\CnMessageBoxWizard.pas';
+  CnMessageBoxWizard in '..\..\Source\SimpleWizards\CnMessageBoxWizard.pas',
+  CnWizClasses in '..\..\Source\Framework\CnWizClasses.pas',
+  CnWizCompilerConst in '..\..\Source\Framework\CnWizCompilerConst.pas',
+  CnWizConsts in '..\..\Source\Framework\CnWizConsts.pas',
+  CnWizManager in '..\..\Source\Framework\CnWizManager.pas',
+  CnWizMenuAction in '..\..\Source\Framework\CnWizMenuAction.pas',
+  CnWizOptions in '..\..\Source\Framework\CnWizOptions.pas',
+  CnWizShortCut in '..\..\Source\Framework\CnWizShortCut.pas',
+  CnIDEVersion in '..\..\Source\Misc\CnIDEVersion.pas',
+  CnWizAbout in '..\..\Source\Misc\CnWizAbout.pas',
+  CnWizAboutFrm in '..\..\Source\Misc\CnWizAboutFrm.pas',
+  CnWizBoot in '..\..\Source\Misc\CnWizBoot.pas',
+  CnWizCommentFrm in '..\..\Source\Misc\CnWizCommentFrm.pas',
+  CnWizFeedbackFrm in '..\..\Source\Misc\CnWizFeedbackFrm.pas',
+  CnWizShareImages in '..\..\Source\Misc\CnWizShareImages.pas' {dmCnSharedImages: TDataModule},
+  CnWizSplash in '..\..\Source\Misc\CnWizSplash.pas',
+  CnWizTipOfDayFrm in '..\..\Source\Misc\CnWizTipOfDayFrm.pas',
+  CnWizUpgradeFrm in '..\..\Source\Misc\CnWizUpgradeFrm.pas',
+  CnWizLangID in '..\..\Source\MultiLang\CnWizLangID.pas',
+  CnWizMultiLang in '..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
+  CnWizMultiLangFrame in '..\..\Source\MultiLang\CnWizMultiLangFrame.pas' {CnTranslateFrame: TFrame},
+  CnWizTranslate in '..\..\Source\MultiLang\CnWizTranslate.pas',
+  CnSourceCropper in '..\..\Source\Utils\CnSourceCropper.pas',
+  CnFloatWindow in '..\..\Source\Utils\CnFloatWindow.pas',
+  CnEditControlWrapper in '..\..\Source\Utils\CnEditControlWrapper.pas',
+  CnWizNotifier in '..\..\Source\Utils\CnWizNotifier.pas',
+  CnWizHelp in '..\..\Source\Utils\CnWizHelp.pas',
+  CnChatBox in '..\..\Source\Utils\CnChatBox.pas',
+  CnPasWideLex in '..\..\Source\Utils\CnPasWideLex.pas',
+  CnPasCodeParser in '..\..\Source\Utils\CnPasCodeParser.pas',
+  CnPascalAST in '..\..\Source\Utils\CnPascalAST.pas',
+  CnWideCppParser in '..\..\Source\Utils\CnWideCppParser.pas',
+  CnWidePasParser in '..\..\Source\Utils\CnWidePasParser.pas',
+  CnCppCodeParser in '..\..\Source\Utils\CnCppCodeParser.pas',
+  CnBCBWideTokenList in '..\..\Source\Utils\CnBCBWideTokenList.pas',
+  CnLineParser in '..\..\Source\Utils\CnLineParser.pas',
+  AsRegExpr in '..\..\Source\ThirdParty\AsRegExpr.pas',
+  mPasLex in '..\..\Source\ThirdParty\mPasLex.pas',
+  mwBCBTokenList in '..\..\Source\ThirdParty\mwBCBTokenList.pas',
+  CnAICoderChatFrm in '..\..\Source\AICoder\CnAICoderChatFrm.pas' {CnAICoderChatForm},
+  CnAICoderConfig in '..\..\Source\AICoder\CnAICoderConfig.pas',
+  CnAICoderEngine in '..\..\Source\AICoder\CnAICoderEngine.pas',
+  CnAICoderEngineImpl in '..\..\Source\AICoder\CnAICoderEngineImpl.pas',
+  CnAICoderNetClient in '..\..\Source\AICoder\CnAICoderNetClient.pas',
+  CnAICoderWizard in '..\..\Source\AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
+  CnFrmAICoderOption in '..\..\Source\AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame},
+  CnProcListWizard in '..\..\Source\SimpleWizards\CnProcListWizard.pas',
+  CnProjectViewBaseFrm in '..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm};
 
 {$R *.RES}
 
 begin
   Application.Initialize;
   Application.CreateForm(TFormFramework, FormFramework);
+  Application.CreateForm(TdmCnSharedImages, dmCnSharedImages);
   Application.Run;
 end.

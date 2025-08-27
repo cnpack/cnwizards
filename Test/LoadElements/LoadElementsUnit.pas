@@ -23,10 +23,15 @@ type
     btnLoadCppElement: TButton;
     mmoPasRes: TMemo;
     mmoCppRes: TMemo;
+    dlgOpen1: TOpenDialog;
+    btnBrowsePas: TButton;
+    btnBrowseCpp: TButton;
     procedure btnLoadPasElementsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnLoadCppElementClick(Sender: TObject);
+    procedure btnBrowsePasClick(Sender: TObject);
+    procedure btnBrowseCppClick(Sender: TObject);
   private
     procedure LoadElements;
   public
@@ -1441,6 +1446,18 @@ begin
   end;
 
   MessageBox(Handle, PChar(FElementList.Text), 'LoadElements', MB_OK);
+end;
+
+procedure TCnLoadElementForm.btnBrowsePasClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+    mmoPas.Lines.LoadFromFile(dlgOpen1.FileName);
+end;
+
+procedure TCnLoadElementForm.btnBrowseCppClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+    mmoCpp.Lines.LoadFromFile(dlgOpen1.FileName);
 end;
 
 end.

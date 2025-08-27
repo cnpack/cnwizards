@@ -72,8 +72,10 @@ uses
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, AsRegExpr, CnIDEStrings,
   {$IFDEF IDE_SUPPORT_THEMING} Vcl.Themes, {$ENDIF}
-  {$IFDEF DELPHI_OTA} ToolsAPI, {$ELSE} SrcEditorIntf, LCLType, {$ENDIF}
-  CnWizClasses, CnWizManager, CnWizEditFiler, CnEditControlWrapper, CnWizUtils,
+  {$IFDEF LAZARUS} LCLType, {$ENDIF}
+  {$IFNDEF STAND_ALONE} CnWizEditFiler, {$IFDEF DELPHI_OTA} ToolsAPI,
+  {$ELSE} SrcEditorIntf, {$ENDIF} {$ENDIF}
+  CnWizClasses, CnWizManager, CnEditControlWrapper, CnWizUtils,
   CnWizMenuAction, CnWizIdeUtils, CnFloatWindow, CnFrmMatchButton, CnWizOptions;
 
 type
@@ -129,10 +131,6 @@ type
   end;
 
   TCnProcListWizard = class;
-
-{$IFDEF STAND_ALONE} // 独立运行时重新声明一些框架内的东西
-  TCnMenuWizard = class(TObject);
-{$ENDIF}
 
 {$IFDEF USE_CUSTOMIZED_SPLITTER}
   TCnCustomizedSplitter = TCnSplitter;
@@ -241,8 +239,6 @@ type
 
   TCnItemHintEvent = procedure (Sender: TObject; Index: Integer;
     var HintStr: string) of object;
-
-{$IFNDEF STAND_ALONE}
 
   // 工具栏中的下拉列表框的下拉列表
   TCnProcDropDownBox = class(TCnFloatListBox)
@@ -369,15 +365,12 @@ type
     property PopupMenu: TPopupMenu read FPopupMenu write FPopupMenu;
   end;
 
-{$ENDIF}
-
   TCnProcListWizard = class(TCnMenuWizard)
   private
     FNeedReParse: Boolean;
     FCurrPasParser: TCnGeneralPasStructParser;
     FCurrCppParser: TCnGeneralCppStructParser;
     FCurrStream: TMemoryStream;
-{$IFNDEF STAND_ALONE}
     FEditorToolBarType: string;
     FUseEditorToolBar: Boolean;
     FToolBarTimer: TTimer;
@@ -391,15 +384,17 @@ type
     FToolbarProcComboWidth: Integer;
     FHistoryCount: Integer;
     FFileIndex: Integer;
-{$ELSE}
+{$IFDEF STAND_ALONE}
     FLines: TStringList;
 {$ENDIF}
     FPreviewLineCount: Integer;
     FElementList: TStringList; // 存储当前 ProcToolbar 的原始元素列表
     FObjStrings: TStringList;  // 存储当前 ProcToolbar 的类元素列表
     FShowAnonymous: Boolean;
-{$IFNDEF STAND_ALONE}
+
+    procedure SetUseEditorToolBar(const Value: Boolean);
     function GetToolBarObjFromEditControl(EditControl: TControl): TCnProcToolBarObj;
+
     procedure RemoveToolBarObjFromEditControl(EditControl: TControl);
     procedure ToolBarCanShow(Sender: TObject; APage: TCnSrcEditorPage; var ACanShow: Boolean);
     procedure SplitterMoved(Sender: TObject);
@@ -417,7 +412,6 @@ type
     procedure PopupEditorEnhanceConfigItemClick(Sender: TObject);
 
     procedure EditorToolBarEnable(const Value: Boolean);
-    procedure SetUseEditorToolBar(const Value: Boolean);
 
     procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     procedure ParseCurrent;
@@ -438,17 +432,15 @@ type
 {$IFDEF IDE_SUPPORT_THEMING}
     procedure DoThemeChange(Sender: TObject);
 {$ENDIF}
-{$ENDIF}
+
     procedure ClearObjectStrings(ObjectList: TStringList);
   protected
-{$IFNDEF STAND_ALONE}
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
-{$ENDIF}
   public
-    constructor Create; {$IFNDEF STAND_ALONE} override; {$ENDIF}
+    constructor Create; override;
     destructor Destroy; override;
-{$IFNDEF STAND_ALONE}
+
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
@@ -459,10 +451,9 @@ type
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
 
-    function GetCurrentToolBarObj: TCnProcToolBarObj;
-{$ENDIF}
-    procedure Execute; {$IFNDEF STAND_ALONE} override; {$ENDIF}
+    procedure Execute; override;
 
+    function GetCurrentToolBarObj: TCnProcToolBarObj;
     procedure LoadElements(ElementList, ObjectList: TStringList; aFileName: string;
       ToClear: Boolean = True);
     procedure UpdateDataListImageIndex(ADataList: TStringList);
@@ -478,7 +469,6 @@ type
     property ShowAnonymous: Boolean read FShowAnonymous write FShowAnonymous;
     {* 用来控制是否显示匿名函数，需要在对话框与下拉工具栏之间传递}
 
-{$IFNDEF STAND_ALONE}
     property UseEditorToolBar: Boolean read FUseEditorToolBar write SetUseEditorToolBar;
     {* 是否显示编辑器中的过程函数列表工具栏}
     property HistoryCount: Integer read FHistoryCount write FHistoryCount;
@@ -495,7 +485,6 @@ type
     // 工具栏列表框宽度
     property ToolbarClassComboWidth: Integer read FToolbarClassComboWidth write FToolbarClassComboWidth;
     property ToolbarProcComboWidth: Integer read FToolbarProcComboWidth write FToolbarProcComboWidth;
-{$ENDIF}
   end;
 
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
@@ -505,8 +494,8 @@ implementation
 {$IFDEF CNWIZARDS_CNPROCLISTWIZARD}
 
 uses
-  CnConsts, CnWizConsts, CnCommon, CnLangMgr,
-  {$IFNDEF STAND_ALONE} CnWizMacroUtils, CnSrcEditorToolBar, CnWizNotifier, {$ENDIF}
+  CnConsts, CnWizConsts, CnCommon, CnLangMgr, CnWizNotifier,
+  {$IFNDEF STAND_ALONE} CnWizMacroUtils, CnSrcEditorToolBar, {$ENDIF}
   CnWizShareImages, CnPasWideLex, CnBCBWideTokenList
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
@@ -588,8 +577,6 @@ var
 
   FWizard: TCnProcListWizard = nil;
 
-{$IFNDEF STAND_ALONE}
-
 function GetMatchMode(Obj: TCnProcToolBarObj): TCnMatchMode;
 begin
   if Obj <> nil then
@@ -597,8 +584,6 @@ begin
   else
     Result := mmFuzzy;
 end;
-
-{$ENDIF}
 
 function InfoCompare(List: TStringList; Index1, Index2: Integer): Integer;
 begin
@@ -672,8 +657,6 @@ begin
 end;
 
 { TCnProcListWizard }
-
-{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListWizard.CheckCurrentFile(Sender: TObject);
 var
@@ -849,8 +832,6 @@ begin
 
 end;
 
-{$ENDIF}
-
 constructor TCnProcListWizard.Create;
 begin
   inherited;
@@ -889,10 +870,13 @@ begin
 {$ENDIF}
 
   FObjStrings.Free;
-  for I := 0 to FElementList.Count - 1 do
+  if FElementList <> nil then
   begin
-    if FElementList.Objects[I] <> nil then
-      FElementList.Objects[I].Free;
+    for I := 0 to FElementList.Count - 1 do
+    begin
+      if FElementList.Objects[I] <> nil then
+        FElementList.Objects[I].Free;
+    end;
   end;
 
   FElementList.Free;
@@ -908,8 +892,6 @@ begin
   ObjectList.Clear;
   ObjectList.Add(SCnProcListObjsAll);
 end;
-
-{$IFNDEF STAND_ALONE}
 
 procedure TCnProcListWizard.ToolBarCanShow(Sender: TObject;
   APage: TCnSrcEditorPage; var ACanShow: Boolean);
@@ -962,8 +944,11 @@ begin
   ToolBar.Top := 40; // 让其处于标准编辑器工具栏之下
   ToolBar.Images := dmCnSharedImages.ilProcToolBar;
   ToolBar.Wrapable := False;
+
+{$IFNDEF STAND_ALONE}
   if ToolBar is TCnExternalSrcEditorToolBar then
     TCnExternalSrcEditorToolBar(ToolBar).OnCanShow := ToolBarCanShow;
+{$ENDIF}
 
   Obj := TCnProcToolBarObj.Create;
   Obj.EditControl := EditControl;
@@ -971,7 +956,11 @@ begin
 
   // 手工创建弹出菜单
   Obj.PopupMenu := TPopupMenu.Create(ToolBar);
+{$IFDEF STAND_ALONE}
+  Obj.PopupMenu.Images := dmCnSharedImages.Images;
+{$ELSE}
   Obj.PopupMenu.Images := dmCnSharedImages.GetMixedImageList;
+{$ENDIF}
 
   // 排序
   Item := TMenuItem.Create(Obj.PopupMenu);
@@ -1010,7 +999,9 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListExportMenuCaption;
   Item.OnClick := PopupExportItemClick;
+{$IFNDEF STAND_ALONE}
   Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(46);
+{$ENDIF}
   Obj.PopupMenu.Items.Add(Item);
 
   // 分割线
@@ -1030,7 +1021,9 @@ begin
   Item := TMenuItem.Create(Obj.PopupMenu);
   Item.Caption := SCnProcListCloseMenuCaption;
   Item.OnClick := PopupCloseItemClick;
+{$IFNDEF STAND_ALONE}
   Item.ImageIndex := dmCnSharedImages.CalcMixedImageIndex(13);
+{$ENDIF}
   Obj.PopupMenu.Items.Add(Item);
 
   ToolBar.PopupMenu := Obj.PopupMenu;
@@ -1105,6 +1098,8 @@ begin
     Left := Obj.ProcCombo.Left + Obj.ProcCombo.Width + 2;
     onMoved := SplitterMoved;
   end;
+
+{$IFNDEF STAND_ALONE}
 
   Obj.InternalToolBar2 := TCnExternalSrcEditorToolBar.Create(ToolBar);
   with Obj.InternalToolBar2 do
@@ -1273,6 +1268,7 @@ begin
 
   // 注意必须设置完 Parent 后再调用此函数
   WizOptions.ResetToolbarWithLargeIcons(Obj.MatchFrame.tlb1);
+{$ENDIF}
 
   FProcToolBarObjects.Add(Obj);
 {$IFDEF DEBUG}
@@ -1316,7 +1312,13 @@ begin
   end;  
 end;
 
+procedure TCnProcListWizard.SetActive(Value: Boolean);
+begin
+  inherited;
+{$IFNDEF STAND_ALONE}
+  EditorToolBarEnable(Active and FUseEditorToolBar);
 {$ENDIF}
+end;
 
 procedure TCnProcListWizard.Execute;
 var
@@ -1386,11 +1388,13 @@ begin
 
       if ShowModal = mrOK then
       begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
         SourceEditorManagerIntf.ShowActiveWindowOnTop;
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
         CnOtaMakeSourceVisible(CurrentFile);
+{$ENDIF}
 {$ENDIF}
       end;
 
@@ -1410,21 +1414,18 @@ begin
   end;
 end;
 
-{$IFNDEF STAND_ALONE}
-
 function TCnProcListWizard.GetCaption: string;
 begin
   Result := SCnProcListWizardMenuCaption;
 end;
 
-function TCnProcListWizard.GetCurrentToolBarObj: TCnProcToolBarObj;
-begin
-  Result := GetToolBarObjFromEditControl(GetCurrentEditControl);
-end;
-
 function TCnProcListWizard.GetDefShortCut: TShortCut;
 begin
+{$IFDEF LAZARUS}
+  Result := ShortCut(Word('P'), [ssCtrl, ssShift]);
+{$ELSE}
   Result := ShortCut(Word('D'), [ssCtrl]);
+{$ENDIF}
 end;
 
 function TCnProcListWizard.GetHasConfig: Boolean;
@@ -1445,6 +1446,59 @@ begin
     Result := [];
 end;
 
+class procedure TCnProcListWizard.GetWizardInfo(var Name, Author, Email,
+  Comment: string);
+begin
+  Name := SCnProcListWizardName;
+  Author := SCnPack_LiuXiao + ';GExperts Team';
+  Email := SCnPack_LiuXiaoEmail;
+  Comment := SCnProcListWizardComment;
+end;
+
+procedure TCnProcListWizard.LoadSettings(Ini: TCustomIniFile);
+begin
+  UseEditorToolBar := Ini.ReadBool('', csUseEditorToolbar, True);
+  PreviewLineCount := Ini.ReadInteger('', csPreviewLineCount, csDefPreviewLineCount);
+  HistoryCount := Ini.ReadInteger('', csHistoryCount, csDefHistoryCount);
+
+  ProcComboHeight := Ini.ReadInteger('', csProcHeight, 0);
+  ProcComboWidth := Ini.ReadInteger('', csProcWidth, 0);
+  ClassComboHeight := Ini.ReadInteger('', csClassHeight, 0);
+  ClassComboWidth := Ini.ReadInteger('', csClassWidth, 0);
+
+  ToolbarClassComboWidth := Ini.ReadInteger('', csToolbarClassComboWidth, 0);
+  ToolbarProcComboWidth := Ini.ReadInteger('', csToolbarProcComboWidth, 0);
+
+  ShowAnonymous := Ini.ReadBool('', csShowAnonymous, True);
+end;
+
+procedure TCnProcListWizard.SaveSettings(Ini: TCustomIniFile);
+begin
+  Ini.WriteBool('', csUseEditorToolbar, UseEditorToolBar);
+  Ini.WriteInteger('', csPreviewLineCount, PreviewLineCount);
+  Ini.WriteInteger('', csHistoryCount, HistoryCount);
+
+  Ini.WriteInteger('', csProcHeight, ProcComboHeight);
+  Ini.WriteInteger('', csProcWidth, ProcComboWidth);
+  Ini.WriteInteger('', csClassHeight, ClassComboHeight);
+  Ini.WriteInteger('', csClassWidth, ClassComboWidth);
+
+  Ini.WriteInteger('', csToolbarClassComboWidth, ToolbarClassComboWidth);
+  Ini.WriteInteger('', csToolbarProcComboWidth, ToolbarProcComboWidth);
+
+  Ini.WriteBool('', csShowAnonymous, ShowAnonymous);
+end;
+
+function TCnProcListWizard.GetSearchContent: string;
+begin
+  Result := inherited GetSearchContent + '属性,元素,property,function,element,';
+end;
+
+function TCnProcListWizard.GetCurrentToolBarObj: TCnProcToolBarObj;
+begin
+  Result := GetToolBarObjFromEditControl(GetCurrentEditControl);
+end;
+
 function TCnProcListWizard.GetToolBarObjFromEditControl(
   EditControl: TControl): TCnProcToolBarObj;
 var
@@ -1460,20 +1514,6 @@ begin
       Exit;
     end;
   end;
-end;
-
-class procedure TCnProcListWizard.GetWizardInfo(var Name, Author, Email,
-  Comment: string);
-begin
-  Name := SCnProcListWizardName;
-  Author := SCnPack_LiuXiao + ';GExperts Team';
-  Email := SCnPack_LiuXiaoEmail;
-  Comment := SCnProcListWizardComment;
-end;
-
-function TCnProcListWizard.GetSearchContent: string;
-begin
-  Result := inherited GetSearchContent + '属性,元素,property,function,element,';
 end;
 
 procedure TCnProcListWizard.InitProcToolBar(const ToolBarType: string;
@@ -1499,10 +1539,12 @@ begin
   {$ENDIF}
 {$ENDIF}
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF IDE_SUPPORT_HDPI}
   InitSizeIfLargeIcon(ToolBar, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
 {$ELSE}
   InitSizeIfLargeIcon(ToolBar, dmCnSharedImages.ilProcToolbarLarge);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -1525,10 +1567,12 @@ begin
   Obj.ToolBtnListUsed.Action := FindIDEAction('act' + SCnProjExtListUsed);
   Obj.ToolBtnListUsed.Visible := Action <> nil;
 
+{$IFNDEF STAND_ALONE}
   if Obj.ToolBtnProcList.ImageIndex < 0 then
     Obj.ToolBtnProcList.ImageIndex := dmCnSharedImages.IdxUnknownInIDE; // 确保有个图标
   if Obj.ToolBtnListUsed.ImageIndex < 0 then
     Obj.ToolBtnListUsed.ImageIndex := dmCnSharedImages.IdxUnknownInIDE;
+{$ENDIF}
 
   Obj.ToolBtnSep1.Visible := (Obj.ToolBtnProcList.Visible or Obj.ToolBtnListUsed.Visible);
   Obj.InternalToolBar1.Visible := Obj.ToolBtnSep1.Visible;
@@ -1648,23 +1692,6 @@ begin
     ErrorDlg(SCnProcListErrorNoIntf);
 end;
 
-procedure TCnProcListWizard.LoadSettings(Ini: TCustomIniFile);
-begin
-  UseEditorToolBar := Ini.ReadBool('', csUseEditorToolbar, True);
-  PreviewLineCount := Ini.ReadInteger('', csPreviewLineCount, csDefPreviewLineCount);
-  HistoryCount := Ini.ReadInteger('', csHistoryCount, csDefHistoryCount);
-
-  ProcComboHeight := Ini.ReadInteger('', csProcHeight, 0);
-  ProcComboWidth := Ini.ReadInteger('', csProcWidth, 0);
-  ClassComboHeight := Ini.ReadInteger('', csClassHeight, 0);
-  ClassComboWidth := Ini.ReadInteger('', csClassWidth, 0);
-
-  ToolbarClassComboWidth := Ini.ReadInteger('', csToolbarClassComboWidth, 0);
-  ToolbarProcComboWidth := Ini.ReadInteger('', csToolbarProcComboWidth, 0);
-
-  ShowAnonymous := Ini.ReadBool('', csShowAnonymous, True);
-end;
-
 procedure TCnProcListWizard.OnToolBarTimer(Sender: TObject);
 begin
   try
@@ -1702,12 +1729,17 @@ begin
   else
     FCurrStream.Clear;
 
+{$IFNDEF STAND_ALONE}
 {$IFDEF DELPHI_OTA}
   CnGeneralSaveEditorToStream(EditView.Buffer, FCurrStream);
   S := EditView.Buffer.FileName;
 {$ELSE}
   CnGeneralSaveEditorToStream(EditView, FCurrStream);
   S := EditView.FileName;
+{$ENDIF}
+
+{$ELSE}
+  // TODO: 加载文件及文件名
 {$ENDIF}
 
   FLanguage := ltUnknown;
@@ -1723,12 +1755,17 @@ begin
 
     CnPasParserParseSource(FCurrPasParser, FCurrStream, IsDpr(S) or IsInc(S), False);
 
+{$IFDEF STAND_ALONE}
+    CharPos.Line := 1;
+    CharPos.CharIndex := 1;
+{$ELSE}
 {$IFDEF DELPHI_OTA}
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
 {$ELSE}
     CharPos.Line := EditView.CursorTextXY.Y;
     CharPos.CharIndex := EditView.CursorTextXY.X - 1;
+{$ENDIF}
 {$ENDIF}
 
     // 找光标处的当前声明
@@ -1777,12 +1814,17 @@ begin
     if FCurrCppParser = nil then
       FCurrCppParser := TCnGeneralCppStructParser.Create;
 
+{$IFDEF STAND_ALONE}
+    CharPos.Line := 1;
+    CharPos.CharIndex := 1;
+{$ELSE}
 {$IFDEF DELPHI_OTA}
     EditPos := EditView.CursorPos;
     EditView.ConvertPos(True, EditPos, CharPos);
 {$ELSE}
     CharPos.Line := EditView.CursorTextXY.Y;
     CharPos.CharIndex := EditView.CursorTextXY.X - 1;
+{$ENDIF}
 {$ENDIF}
 
     CnCppParserParseSource(FCurrCppParser, FCurrStream,
@@ -1944,26 +1986,7 @@ begin
     end;
 end;
 
-procedure TCnProcListWizard.SaveSettings(Ini: TCustomIniFile);
-begin
-  Ini.WriteBool('', csUseEditorToolbar, UseEditorToolBar);
-  Ini.WriteInteger('', csPreviewLineCount, PreviewLineCount);
-  Ini.WriteInteger('', csHistoryCount, HistoryCount);
-
-  Ini.WriteInteger('', csProcHeight, ProcComboHeight);
-  Ini.WriteInteger('', csProcWidth, ProcComboWidth);
-  Ini.WriteInteger('', csClassHeight, ClassComboHeight);
-  Ini.WriteInteger('', csClassWidth, ClassComboWidth);
-
-  Ini.WriteInteger('', csToolbarClassComboWidth, ToolbarClassComboWidth);
-  Ini.WriteInteger('', csToolbarProcComboWidth, ToolbarProcComboWidth);
-
-  Ini.WriteBool('', csShowAnonymous, ShowAnonymous);
-end;
-
-{$ENDIF}
-
-{ TCnProcListFrm }
+{ TCnProcListForm }
 
 procedure TCnProcListForm.FormCreate(Sender: TObject);
 {$IFNDEF STAND_ALONE}
@@ -3451,13 +3474,13 @@ var
   ProcInfo: TCnElementInfo;
   AfterLine: Integer;
   Buffer: TCnEditBufferInterface;
+  EditView: TCnEditViewSourceInterface;
 {$IFDEF STAND_ALONE}
   K, ML: Integer;
 {$ELSE}
 {$IFDEF DELPHI_OTA}
   Module: IOTAModule;
   SourceEditor: IOTASourceEditor;
-  EditView: IOTAEditView;
 {$ENDIF}
 {$ENDIF}
 begin
@@ -3509,6 +3532,16 @@ begin
               end;
             end;
           end;
+        end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        EditView := CnOtaGetTopOpenedEditViewFromFileName(ProcInfo.AllName);
+        if EditView <> nil then
+        begin
+          mmoContent.Lines.Text := CnOtaGetLineText(ProcInfo.LineNo - CnBeforeLine,
+            TCnEditBufferInterface(EditView), CnBeforeLine + AfterLine);
+          SelectMemoOneLine(mmoContent, CnBeforeLine);
+          Exit;
         end;
 {$ENDIF}
       end;
@@ -3574,7 +3607,8 @@ procedure TCnProcListForm.SetFileName(const Value: string);
     FileExt: string;
   begin
     FileExt := UpperCase(_CnExtractFileExt(AFile));
-    Result := (FileExt = '.INC') or (FileExt = '.DPR') or (FileExt = '.PAS');
+    Result := (FileExt = '.INC') or (FileExt = '.DPR') or (FileExt = '.PAS')
+      {$IFDEF LAZARUS} or (FileExt = '.PP') {$ENDIF};
   end;
 
 begin
@@ -4048,12 +4082,15 @@ begin
             if Project.Files[I] <> nil then
             begin
               aFile := Project.Files[I].Filename;
-              if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
-                or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+              if FileExists(aFile) or CnOtaIsFileOpen(aFile) then
               begin
-                Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
-                Wizard.UpdateDataListImageIndex(DataList);
-                FirstFile := False;
+                if IsDpr(aFile) or IsPas(aFile) or IsCpp(aFile) or IsC(aFile)
+                  or IsTypeLibrary(aFile) or IsInc(aFile) or IsPp(aFile) or IsLpr(aFile) then
+                begin
+                  Wizard.LoadElements(DataList, FObjectList, aFile, FirstFile);
+                  Wizard.UpdateDataListImageIndex(DataList);
+                  FirstFile := False;
+                end;
               end;
             end;
           end;
@@ -4302,6 +4339,7 @@ begin
   else
   begin
     Result := FuzzyMatchStr(AMatchStr, ProcName, MatchedIndexes);
+
     // 因为不搜类名，所以查找到的 MatchedIndexes 要加上偏移
     if Result and (Offset > 0) then
     begin
@@ -4368,6 +4406,12 @@ begin
   FPreviewIsRight := False;
 end;
 
+procedure TCnProcListForm.btnShowAnonymousClick(Sender: TObject);
+begin
+  UpdateListView;
+  FWizard.ShowAnonymous := btnShowAnonymous.Down;
+end;
+
 procedure TCnProcListForm.UpdateMemoSize(Sender: TObject);
 const
   csStep = 5;
@@ -4415,14 +4459,14 @@ end;
 
 { TCnProcListWizard }
 
-{$IFNDEF STAND_ALONE}
-
 procedure TCnProcListWizard.SetUseEditorToolBar(const Value: Boolean);
 begin
   if FUseEditorToolBar <> Value then
   begin
     FUseEditorToolBar := Value;
+{$IFNDEF STAND_ALONE}
     EditorToolBarEnable(Active and FUseEditorToolBar);
+{$ENDIF}
   end;
 end;
 
@@ -4471,6 +4515,7 @@ begin
   View := CnOtaGetTopMostEditView;
   if View <> nil then
   begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF DELPHI_OTA}
     View.Position.GotoLine(Info.LineNo);
     if Info.ElementType in [etRecord, etInterface, etClass] then
@@ -4478,12 +4523,13 @@ begin
     View.Center(Info.LineNo, 1);
     View.Paint;
 {$ENDIF}
-
 {$IFDEF LAZARUS}
     P.Y := Info.LineNo;
     P.X := Length(View.Lines[Info.LineNo - 1]);
     View.CursorTextXY := P;
 {$ENDIF}
+{$ENDIF}
+
     EditControl := GetCurrentEditControl;
     if (EditControl <> nil) and (EditControl is TWinControl) then
     try
@@ -4505,16 +4551,17 @@ begin
   View := CnOtaGetTopMostEditView;
   if View <> nil then
   begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF DELPHI_OTA}
     View.Position.GotoLine(Line);
     View.Center(Line, 1);
     View.Paint;
 {$ENDIF}
-
 {$IFDEF LAZARUS}
     P.Y := Line;
     P.X := 1;
     View.CursorTextXY := P;
+{$ENDIF}
 {$ENDIF}
 
     EditControl := GetCurrentEditControl;
@@ -4597,6 +4644,7 @@ end;
 
 procedure TCnProcListWizard.EditorToolBarEnable(const Value: Boolean);
 begin
+{$IFDEF DELPHI_OTA}
   if CnEditorToolBarService <> nil then
   begin
     if Value then
@@ -4624,13 +4672,8 @@ begin
     end;
   end
   else
+{$ENDIF}
     FUseEditorToolBar := False;
-end;
-
-procedure TCnProcListWizard.SetActive(Value: Boolean);
-begin
-  inherited;
-  EditorToolBarEnable(Active and FUseEditorToolBar);
 end;
 
 //==============================================================================
@@ -4932,10 +4975,6 @@ begin
 end;
 
 {$ENDIF}
-
-{$ENDIF}
-
-{$IFNDEF STAND_ALONE}
 
 { TCnProcListComboBox }
 
@@ -5346,16 +5385,9 @@ begin
     FClassCombo.Text := '';
 end;
 
-procedure TCnProcListForm.btnShowAnonymousClick(Sender: TObject);
-begin
-  UpdateListView;
-  FWizard.ShowAnonymous := btnShowAnonymous.Down;
-end;
-
 initialization
   RegisterCnWizard(TCnProcListWizard); // 注册专家
 
-{$ENDIF}
 {$ENDIF CNWIZARDS_CNPROCLISTWIZARD}
 end.
 

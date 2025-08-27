@@ -27,6 +27,7 @@ unit CnProjectViewBaseFrm;
 * 备    注：保存与加载列宽时，部分高版本的 Delphi 在 HDPI 下会出现列宽计算错误，
 *           因而用了个 WindowProc 的 Hook 拦截 ListView 的列宽改变消息才保存，
 *           但 D12 下这个消息拦截不到，因而 D12 下只能接受可能有的列宽误差。
+*           另外，ListView 虽然采用虚拟模式，但 OnData 事件是子类中实现的。
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
@@ -774,10 +775,10 @@ begin
 end;
 
 procedure TCnProjectViewBaseForm.SaveSettings(Ini: TCustomIniFile; aSection: string);
-{$IFNDEF STAND_ALONE}
 var
   S: string;
   TW, TH: Integer;
+{$IFNDEF STAND_ALONE}
 
   function CheckWidthValid: Boolean;
   var

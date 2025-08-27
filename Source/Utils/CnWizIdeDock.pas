@@ -67,13 +67,12 @@ uses
   Windows, SysUtils, Classes, IniFiles, Forms, Controls, Menus, Messages,
   ActnList, ComCtrls, CnWizUtils, CnClasses, CnLangMgr, CnFormScaler,
   CnLangCollection, CnLangStorage, CnWizOptions, CnWizScaler
-  {$IFDEF LAZARUS} , CnWizMultiLang {$ELSE}
-  // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
-  , DockForm {$ENDIF};
+  {$IFDEF DELPHI_OTA} // 该单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
+  , DockForm {$ELSE}, CnWizMultiLang {$ENDIF};
 
 type
 
-{$IFDEF LAZARUS}
+{$IFNDEF DELPHI_OTA}
   TCnIdeDockForm = class(TCnTranslateForm);
 {$ELSE}
 
@@ -188,13 +187,13 @@ function IdeDockManager: IIdeDockManager;
 
 implementation
 
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnCommon, CnWizConsts, CnWizNotifier,
+  CnCommon, CnWizConsts, CnWizNotifier ,
   // 以下单元编译在 DsnIdeXX/DesignIde 包中，专家必须与它相连接
   DeskForm, DeskUtil;
 

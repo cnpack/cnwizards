@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, IniFiles, Registry,
-  {$IFDEF LAZARUS} Variants, {$ENDIF}
+  {$IFDEF FPC} Variants, CnRegIni, {$ENDIF}
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF UNICODE} RTLConsts, {$ENDIF}
   CnCommon, CnHashMap;
@@ -66,7 +66,7 @@ type
   
 {$ENDIF}
 
-  TCnWizIniFile = class(TRegistryIniFile)
+  TCnWizIniFile = class({$IFDEF FPC} TCnRegistryIniFile {$ELSE} TRegistryIniFile {$ENDIF})
   {* 带控制写入值和 Default 相等时是否真正写入的功能，但忽略 Section 值}
   private
     FDefaultsMap: TCnBaseHashMap;

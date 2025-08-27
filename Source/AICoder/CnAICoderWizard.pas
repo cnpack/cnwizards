@@ -627,10 +627,10 @@ begin
   if OnlyCreate then
     Exit;
 
-{$IFDEF LAZARUS}
-  CnAICoderChatForm.Visible := True;
-{$ELSE}
+{$IFDEF DELPHI_OTA}
   CnAICoderChatForm.VisibleWithParent := True;
+{$ELSE}
+  CnAICoderChatForm.Visible := True;
 {$ENDIF}
   CnAICoderChatForm.BringToFront;
 end;

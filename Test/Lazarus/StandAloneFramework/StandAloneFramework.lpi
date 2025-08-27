@@ -76,6 +76,19 @@
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CnProjectViewBaseForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\SimpleWizards\CnProcListWizard.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -84,7 +97,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;$(ProjOutDir)"/>
       <Libraries Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm"/>
-      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\Config;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\SimpleWizards;..\..\..\Source\AICoder"/>
+      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\Config;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\SimpleWizards;..\..\..\Source\AICoder;..\..\..\Source\ProjectExtWizard"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       <ObjectPath Value="..\..\..\Source"/>
     </SearchPaths>
