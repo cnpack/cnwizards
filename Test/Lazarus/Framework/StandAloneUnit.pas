@@ -1,4 +1,4 @@
-unit StandAloneFrameworkUnit;
+unit StandAloneUnit;
 
 {$IFDEF FPC}
   {$MODE Delphi}

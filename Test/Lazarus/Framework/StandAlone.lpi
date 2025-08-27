@@ -5,7 +5,7 @@
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="StandAloneFramework"/>
+      <Title Value="StandAlone"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -26,11 +26,11 @@
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="StandAloneFramework.lpr"/>
+        <Filename Value="StandAlone.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="StandAloneFrameworkUnit.pas"/>
+        <Filename Value="StandAloneUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormFramework"/>
         <HasResources Value="True"/>

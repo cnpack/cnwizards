@@ -1,4 +1,4 @@
-program StandAloneFramework;
+program StandAlone;
 
 {$IFDEF FPC}
   {$MODE Delphi}
@@ -13,7 +13,7 @@ uses
   CnAICoderConfig, CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient,
   CnFrmAICoderOption, CnAICoderWizard, CnProjectViewBaseFrm,
   CnCodingToolsetWizard, CnEditorOpenFile, CnEditorOpenFileFrm,
-  StandAloneFrameworkUnit {FormFramework};
+  StandAloneUnit {FormFramework};
 
 {$R *.res}
 
