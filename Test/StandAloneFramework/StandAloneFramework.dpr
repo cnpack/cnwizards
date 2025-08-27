@@ -50,13 +50,17 @@ uses
   CnAICoderWizard in '..\..\Source\AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
   CnFrmAICoderOption in '..\..\Source\AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame},
   CnProcListWizard in '..\..\Source\SimpleWizards\CnProcListWizard.pas',
-  CnProjectViewBaseFrm in '..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm};
+  CnProjectViewBaseFrm in '..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm},
+  CnCodingToolsetWizard in '..\..\Source\CodingToolset\CnCodingToolsetWizard.pas' {CnEditorToolsForm},
+  CnEditorOpenFile in '..\..\Source\CodingToolset\CnEditorOpenFile.pas',
+  CnEditorOpenFileFrm in '..\..\Source\CodingToolset\CnEditorOpenFileFrm.pas' {CnEditorOpenFileForm},
+  CnWizIdeUtils in '..\..\Source\Utils\CnWizIdeUtils.pas',
+  CnWizUtils in '..\..\Source\Utils\CnWizUtils.pas';
 
 {$R *.RES}
 
 begin
   Application.Initialize;
   Application.CreateForm(TFormFramework, FormFramework);
-  Application.CreateForm(TdmCnSharedImages, dmCnSharedImages);
   Application.Run;
 end.

@@ -1329,6 +1329,15 @@ var
 begin
 {$IFDEF STAND_ALONE}
   TmpFileName := ParamStr(1);
+  if TmpFileName = '' then
+  begin
+    with TOpenDialog.Create(nil) do
+    begin
+      if Execute then
+        TmpFileName := FileName;
+      Free;
+    end;
+  end;
 {$ELSE}
   TmpFileName := CnOtaGetCurrentSourceFileName;
 {$ENDIF}

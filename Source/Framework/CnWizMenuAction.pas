@@ -512,11 +512,10 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
     AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList);
 {$ELSE}
-  {$IFDEF LAZARUS}
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
-  {$ENDIF}
   {$IFDEF DELPHI_OTA}
     AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
+  {$ELSE}
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
   {$ENDIF}
 {$ENDIF}
   end

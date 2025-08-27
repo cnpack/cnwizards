@@ -77,6 +77,21 @@
         <HasResources Value="True"/>
       </Unit>
       <Unit>
+        <Filename Value="..\..\..\Source\CodingToolset\CnCodingToolsetWizard.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\CodingToolset\CnEditorOpenFile.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\CodingToolset\CnEditorOpenFileFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
         <Filename Value="..\..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="CnProjectViewBaseForm"/>
@@ -97,7 +112,7 @@
     <SearchPaths>
       <IncludeFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;$(ProjOutDir)"/>
       <Libraries Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm"/>
-      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\Config;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\SimpleWizards;..\..\..\Source\AICoder;..\..\..\Source\ProjectExtWizard"/>
+      <OtherUnitFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\Config;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\SimpleWizards;..\..\..\Source\AICoder;..\..\..\Source\ProjectExtWizard;..\..\..\Source\CodingToolset"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       <ObjectPath Value="..\..\..\Source"/>
     </SearchPaths>

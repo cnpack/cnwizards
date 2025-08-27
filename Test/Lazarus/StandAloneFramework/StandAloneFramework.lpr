@@ -12,6 +12,7 @@ uses
   Forms, CnMessageBoxWizard, CnProcListWizard, CnAICoderChatFrm,
   CnAICoderConfig, CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient,
   CnFrmAICoderOption, CnAICoderWizard, CnProjectViewBaseFrm,
+  CnCodingToolsetWizard, CnEditorOpenFile, CnEditorOpenFileFrm,
   StandAloneFrameworkUnit {FormFramework};
 
 {$R *.res}

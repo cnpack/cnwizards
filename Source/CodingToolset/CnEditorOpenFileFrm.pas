@@ -120,12 +120,16 @@ var
   CurrentModule: IOTAModule;
 {$ENDIF}
 begin
+{$IFDEF STAND_ALONE}
+  Result := '';
+{$ELSE}
 {$IFDEF LAZARUS}
   Result := CnOtaGetCurrentSourceFile;
 {$ELSE}
   CurrentModule := CnOtaGetCurrentModule;
   if CurrentModule <> nil then
     Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+{$ENDIF}
 {$ENDIF}
 end;
 

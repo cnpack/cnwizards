@@ -11,13 +11,13 @@ uses
   CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut, 
   CnWizMenuAction, CnWizClasses, CnPasCodeParser, CnPasWideLex, 
   CnWidePasParser, mPasLex, CnWizManager, CnWizIdeUtils, CnWizUtils, 
-  CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, 
-  CnTestEditorTextWizard, CnWizIdeDock, CnAICoderEngine, CnAICoderEngineImpl, 
-  CnAICoderNetClient, CnAICoderConfig, CnAICoderChatFrm, CnAICoderWizard, 
-  CnTestEnvProjPathWizard, CnCodingToolsetWizard, CnProjectViewBaseFrm, 
-  CnEditorOpenFile, CnEditorOpenFileFrm, CnFloatWindow, CnSourceCropper, 
-  CnPascalAST, CnLineParser, CnWizEditFiler, CnProcListWizard, 
-  CnSrcEditorToolBar, CnFlatToolbarConfigFrm, LazarusPackageIntf;
+  CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, CnWizIdeDock, 
+  CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient, CnAICoderConfig, 
+  CnAICoderChatFrm, CnAICoderWizard, CnCodingToolsetWizard, 
+  CnProjectViewBaseFrm, CnEditorOpenFile, CnEditorOpenFileFrm, CnFloatWindow, 
+  CnSourceCropper, CnPascalAST, CnLineParser, CnWizEditFiler, 
+  CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
+  LazarusPackageIntf;
 
 implementation
 

@@ -101,10 +101,6 @@
         <UnitName Value="CnWizConfigFrm"/>
       </Item>
       <Item>
-        <Filename Value="..\Test\Lazarus\CnTestEditorTextWizard.pas"/>
-        <UnitName Value="CnTestEditorTextWizard"/>
-      </Item>
-      <Item>
         <Filename Value="Utils\CnWizIdeDock.pas"/>
         <UnitName Value="CnWizIdeDock"/>
       </Item>
@@ -131,10 +127,6 @@
       <Item>
         <Filename Value="AICoder\CnAICoderWizard.pas"/>
         <UnitName Value="CnAICoderWizard"/>
-      </Item>
-      <Item>
-        <Filename Value="..\Test\Lazarus\CnTestEnvProjPathWizard.pas"/>
-        <UnitName Value="CnTestEnvProjPathWizard"/>
       </Item>
       <Item>
         <Filename Value="CodingToolset\CnCodingToolsetWizard.pas"/>
