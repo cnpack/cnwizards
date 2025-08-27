@@ -1093,7 +1093,7 @@ procedure TCnActionWizard.Click(Sender: TObject);
 begin
   try
     if Active and Action.Enabled and (IsInternalWizard or
-      ShowCnWizCommentForm(Self)) then
+      {$IFDEF CNWIZARDS_MINIMUM} True {$ELSE} ShowCnWizCommentForm(Self) {$ENDIF}) then
       Execute;
   except
     on E: Exception do
@@ -1516,9 +1516,9 @@ begin
         begin
           try
             // 内部专家不提示
-            if IsInternalWizard or ShowCnWizCommentForm(WizardName + ' - ' +
+            if IsInternalWizard or {$IFDEF CNWIZARDS_MINIMUM} True {$ELSE} ShowCnWizCommentForm(WizardName + ' - ' +
               GetCaptionOrgStr(SubActions[I].Caption), SubActions[I].Icon,
-              SubActions[I].Command) then
+              SubActions[I].Command) {$ENDIF} then
               SubActionExecute(I);
           except
             on E: Exception do

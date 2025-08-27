@@ -23,15 +23,15 @@ library CnWizards_Minimum64;
 // dcc64 CnWizards_Minimum64.dpr < CnWizards_Minimum64.cfg
 
 uses
-  CnWizDllEntry in '..\Source\Framework\CnWizDllEntry.pas',
-  CnWizConsts in '..\Source\Framework\CnWizConsts.pas',
-  CnWizCompilerConst in '..\Source\Framework\CnWizCompilerConst.pas',
-  CnWizShortCut in '..\Source\Framework\CnWizShortCut.pas',
-  CnWizMenuAction in '..\Source\Framework\CnWizMenuAction.pas',
-  CnWizClasses in '..\Source\Framework\CnWizClasses.pas',
-  CnWizManager in '..\Source\Framework\CnWizManager.pas',
-  CnWizOptions in '..\Source\Framework\CnWizOptions.pas',
-  CnWizSplash in '..\Source\Misc\CnWizSplash.pas';
+  CnWizDllEntry in '..\..\..\Source\Framework\CnWizDllEntry.pas',
+  CnWizConsts in '..\..\..\Source\Framework\CnWizConsts.pas',
+  CnWizCompilerConst in '..\..\..\Source\Framework\CnWizCompilerConst.pas',
+  CnWizShortCut in '..\..\..\Source\Framework\CnWizShortCut.pas',
+  CnWizMenuAction in '..\..\..\Source\Framework\CnWizMenuAction.pas',
+  CnWizClasses in '..\..\..\Source\Framework\CnWizClasses.pas',
+  CnWizManager in '..\..\..\Source\Framework\CnWizManager.pas',
+  CnWizOptions in '..\..\..\Source\Framework\CnWizOptions.pas',
+  CnWizSplash in '..\..\..\Source\Misc\CnWizSplash.pas';
 
 {$R *.RES}
 

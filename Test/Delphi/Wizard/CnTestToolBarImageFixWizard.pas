@@ -18,13 +18,13 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnTestToolBarImageFix;
+unit CnTestToolBarImageFixWizard;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：编辑器工具栏测试修复IDE图标显示不完整的问题
+* 单元名称：编辑器工具栏测试修复 IDE 图标显示不完整的问题
 * 单元作者：CnPack 开发组
-* 备    注：该单元是编辑器外部工具栏的附属测试单元，BDS或以上版本中执行
+* 备    注：该单元是编辑器外部工具栏的附属测试单元，BDS 或以上版本中执行
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
@@ -48,9 +48,9 @@ type
 // 编辑器工具栏修复图标显示问题的菜单专家
 //==============================================================================
 
-{ TCnTestToolBarImageFix }
+{ TCnTestToolBarImageFixWizard }
 
-  TCnTestToolBarImageFix = class(TCnMenuWizard)
+  TCnTestToolBarImageFixWizard = class(TCnMenuWizard)
   private
 
   protected
@@ -78,20 +78,20 @@ uses
 // 编辑器工具栏修复图标显示问题的菜单专家
 //==============================================================================
 
-{ TCnTestIdeTookBarFix }
+{ TCnTestToolBarImageFixWizard }
 
-procedure TCnTestToolBarImageFix.Config;
+procedure TCnTestToolBarImageFixWizard.Config;
 begin
   ShowMessage('Test option.');
   { TODO -oAnyone : 在此显示配置窗口 }
 end;
 
-destructor TCnTestToolBarImageFix.Destroy;
+destructor TCnTestToolBarImageFixWizard.Destroy;
 begin
   inherited;
 end;
 
-procedure TCnTestToolBarImageFix.Execute;
+procedure TCnTestToolBarImageFixWizard.Execute;
 var
   BrowserToolbar: TToolBar;
   ToolbarParent: TWinControl;
@@ -134,59 +134,52 @@ begin
       end;
     end;
   end;
-  { TODO -oAnyone : 该专家的主执行过程 }
 end;
 
-function TCnTestToolBarImageFix.GetCaption: string;
+function TCnTestToolBarImageFixWizard.GetCaption: string;
 begin
   Result := 'Fix IDE Toolbar Image';
-  { TODO -oAnyone : 返回专家菜单的标题，字符串请进行本地化处理 }
 end;
 
-function TCnTestToolBarImageFix.GetDefShortCut: TShortCut;
+function TCnTestToolBarImageFixWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
-  { TODO -oAnyone : 返回默认的快捷键 }
 end;
 
-function TCnTestToolBarImageFix.GetHasConfig: Boolean;
+function TCnTestToolBarImageFixWizard.GetHasConfig: Boolean;
 begin
   Result := False;
-  { TODO -oAnyone : 返回专家是否有配置窗口 }
 end;
 
-function TCnTestToolBarImageFix.GetHint: string;
+function TCnTestToolBarImageFixWizard.GetHint: string;
 begin
   Result := 'Register an Editor ToolBar Type';
-  { TODO -oAnyone : 返回专家菜单提示信息，字符串请进行本地化处理 }
 end;
 
-function TCnTestToolBarImageFix.GetState: TWizardState;
+function TCnTestToolBarImageFixWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
-  { TODO -oAnyone : 返回专家菜单状态，可根据指定条件来设定 }
 end;
 
-class procedure TCnTestToolBarImageFix.GetWizardInfo(var Name, Author, Email, Comment: string);
+class procedure TCnTestToolBarImageFixWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
 begin
   Name := 'TestToolBarImageFix';
   Author := 'CnPack Team';
   Email := 'master@cnpack.org';
   Comment := 'Test Fix IDE Toolbar Image';
-  { TODO -oAnyone : 返回专家的名称、作者、邮箱及备注，字符串请进行本地化处理 }
 end;
 
-procedure TCnTestToolBarImageFix.LoadSettings(Ini: TCustomIniFile);
+procedure TCnTestToolBarImageFixWizard.LoadSettings(Ini: TCustomIniFile);
 begin
-  { TODO -oAnyone : 在此装载专家内部用到的参数，专家创建时自动被调用 }
+
 end;
 
-procedure TCnTestToolBarImageFix.SaveSettings(Ini: TCustomIniFile);
+procedure TCnTestToolBarImageFixWizard.SaveSettings(Ini: TCustomIniFile);
 begin
-  { TODO -oAnyone : 在此保存专家内部用到的参数，专家释放时自动被调用 }
+
 end;
 
 initialization
-  RegisterCnWizard(TCnTestToolBarImageFix); // 注册专家
+  RegisterCnWizard(TCnTestToolBarImageFixWizard); // 注册专家
 
 end.

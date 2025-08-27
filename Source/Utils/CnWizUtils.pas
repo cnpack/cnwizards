@@ -1011,8 +1011,12 @@ procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos，也就是行 1 开始，列 0 开始}
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
@@ -7903,8 +7907,10 @@ begin
   Assert(Assigned(EditView));
   EditPos := EditView.CursorPos;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   if not CnOtaConvertEditPosToLinearPos(Pointer(EditView), EditPos, Position) then
     Exit;
+{$ENDIF}
 
 {$IFDEF UNICODE}
   CnOtaInsertTextIntoEditorAtPosW(Text, Position);
@@ -8067,6 +8073,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
 var
   Text: string;
@@ -8111,6 +8119,8 @@ begin
 {$ENDIF}
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 {$IFNDEF LAZARUS}
 
