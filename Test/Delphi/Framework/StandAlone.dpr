@@ -1,8 +1,8 @@
-program StandAloneFramework;
+program StandAlone;
 
 uses
   Forms,
-  StandAloneFrameworkUnit in 'StandAloneFrameworkUnit.pas' {FormFramework},
+  StandAloneUnit in 'StandAloneUnit.pas' {FormFramework},
   CnMessageBoxWizard in '..\..\..\Source\SimpleWizards\CnMessageBoxWizard.pas',
   CnWizClasses in '..\..\..\Source\Framework\CnWizClasses.pas',
   CnWizCompilerConst in '..\..\..\Source\Framework\CnWizCompilerConst.pas',
