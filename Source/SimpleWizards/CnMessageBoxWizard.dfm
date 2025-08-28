@@ -1,6 +1,6 @@
 inherited CnMessageBoxForm: TCnMessageBoxForm
-  Left = 253
-  Top = 125
+  Left = 473
+  Top = 121
   BorderStyle = bsDialog
   Caption = 'MessageBox Designer'
   ClientHeight = 510
@@ -15,6 +15,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
     Width = 457
     Height = 465
     ActivePage = tsDesigner
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object tsDesigner: TTabSheet
       Caption = '&MessageBox'
@@ -381,6 +382,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 8
         Width = 305
         Height = 61
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Dialog &Title'
         TabOrder = 1
         object cbCaptionIsVar: TCheckBox
@@ -421,6 +423,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 289
           Height = 61
+          Anchors = [akLeft, akTop, akRight, akBottom]
           ScrollBars = ssVertical
           TabOrder = 0
           WordWrap = False
@@ -430,6 +433,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 80
           Width = 177
           Height = 17
+          Anchors = [akLeft, akBottom]
           Caption = 'Text as Variable'
           TabOrder = 1
         end
@@ -439,6 +443,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 177
         Height = 121
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Dialog &Button'
         ItemIndex = 0
         Items.Strings = (
@@ -469,6 +474,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 121
         Height = 157
+        Anchors = [akTop, akRight]
         Caption = '&Return Value'
         TabOrder = 4
         object cbResultOK: TCheckBox
@@ -551,6 +557,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 352
         Width = 121
         Height = 73
+        Anchors = [akLeft, akTop, akBottom]
         Caption = 'User Tem&plates'
         TabOrder = 8
         object btnDeleteProject: TButton
@@ -587,6 +594,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 403
         Width = 75
         Height = 21
+        Anchors = [akRight, akBottom]
         Caption = 'Pre&view'
         TabOrder = 9
         OnClick = btnPreviewClick
@@ -612,6 +620,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 312
         Width = 177
         Height = 113
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Procedure to &Use'
         TabOrder = 7
         object rbCodeAPI: TRadioButton
@@ -669,6 +678,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 88
         Width = 433
         Height = 73
+        Anchors = [akLeft, akTop, akRight]
         Caption = '&Delphi Code Settings'
         TabOrder = 1
         object Label1: TLabel
@@ -683,6 +693,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 24
           Width = 85
           Height = 13
+          Anchors = [akTop, akRight]
           Caption = 'Wordwrap Width:'
         end
         object cbUsePChar: TCheckBox
@@ -709,6 +720,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 21
           Width = 105
           Height = 22
+          Anchors = [akTop, akRight]
           MaxLength = 3
           MaxValue = 200
           MinValue = 0
@@ -720,6 +732,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 48
           Width = 209
           Height = 17
+          Anchors = [akTop, akRight]
           Caption = 'Process Format string.'
           TabOrder = 3
         end
@@ -729,6 +742,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 8
         Width = 433
         Height = 73
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Carriage &Return'
         TabOrder = 0
         object Label6: TLabel
@@ -750,6 +764,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 321
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 0
           Text = #13#10
         end
@@ -758,6 +773,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 42
           Width = 321
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           TabOrder = 1
           Text = '\n'
         end
@@ -767,6 +783,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 248
         Width = 433
         Height = 73
+        Anchors = [akLeft, akTop, akRight]
         Caption = '&Wordwrap Mode'
         ItemIndex = 0
         Items.Strings = (
@@ -779,6 +796,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 168
         Width = 433
         Height = 73
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'C++&Builder Code &Settings'
         TabOrder = 2
         object Label8: TLabel
@@ -793,6 +811,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 24
           Width = 85
           Height = 13
+          Anchors = [akTop, akRight]
           Caption = 'Wordwrap Width:'
         end
         object cbLineEndBrace: TCheckBox
@@ -819,6 +838,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 21
           Width = 105
           Height = 22
+          Anchors = [akTop, akRight]
           MaxLength = 3
           MaxValue = 200
           MinValue = 0
@@ -831,6 +851,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 328
         Width = 433
         Height = 49
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'O&ther Settings'
         TabOrder = 4
         object cbLoadLast: TCheckBox
@@ -846,6 +867,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 75
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Export'
           TabOrder = 1
           OnClick = btnExportClick
@@ -855,6 +877,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 75
           Height = 21
+          Anchors = [akTop, akRight]
           Caption = '&Import'
           TabOrder = 2
           OnClick = btnImportClick
@@ -867,6 +890,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
     Top = 481
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 3
     OnClick = btnHelpClick
@@ -876,6 +900,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
     Top = 481
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&OK'
     Default = True
     ModalResult = 1
@@ -886,6 +911,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
     Top = 481
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2

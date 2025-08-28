@@ -300,7 +300,7 @@ type
   end;
 
 var
-  WizOptions: TCnWizOptions;
+  WizOptions: TCnWizOptions = nil;
   {* 专家环境参数对象}
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;

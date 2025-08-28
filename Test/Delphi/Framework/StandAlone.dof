@@ -39,8 +39,8 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=
-UnitOutputDir=
+OutputDir=..\..\..\Bin
+UnitOutputDir=..\..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Config;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm
@@ -97,8 +97,10 @@ Item5=..\..\..\Source
 Item6=$(DELPHI)\Source\Toolsapi;..\..\..\cnpack\Source\Common;..\..\..\cnpack\Source\NonVisual;..\..\..\cnpack\Source\MultiLang;..\..\..\cnpack\Source\Graphic;..\..\..\cnpack\Source\NetComm;..\..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils;ScriptWizard
 Item7=$(DELPHI)\Source\Toolsapi;..\..\..\cnpack\Source\Common;..\..\..\cnpack\Source\NonVisual;..\..\..\cnpack\Source\MultiLang;..\..\..\cnpack\Source\Graphic;..\..\..\cnpack\Source\NetComm;..\..\..\cnpack\Source\ObjRep;ThirdParty;ThirdParty\JCL;ThirdParty\DCU32;ThirdParty\PascalScript;Utils
 [HistoryLists\hlUnitOutputDirectory]
-Count=1
-Item0=..\Dcu
+Count=2
+Item0=..\..\..\Dcu
+Item1=..\Dcu
 [HistoryLists\hlOutputDirectorry]
-Count=1
-Item0=..\Bin
+Count=2
+Item0=..\..\..\Bin
+Item1=..\Bin
