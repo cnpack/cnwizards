@@ -993,12 +993,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize');
 {$ENDIF}
-  if BorderStyle in [bsSizeable, bsSizeToolWin] then // 暂时只处理尺寸不可变的
-    Exit;
 
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Form Need to Process.');
-{$ENDIF}
   ResName := UpperCase(ClassName);
   ResInstance := FindResource(HInstance, PChar(ResName), RT_RCDATA);
   if ResInstance <> 0 then
@@ -1020,7 +1015,7 @@ begin
         if Head = 'TPF0' then
         begin
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Binary Stream to Convert.');
+          CnDebugger.LogMsg('TCnTranslateForm.ProcessLazarusFormClientSize. Binary Stream to Convert.');
 {$ENDIF}
           Mem := TMemoryStream.Create;
           ObjectBinaryToText(Stream, Mem);

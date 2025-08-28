@@ -246,6 +246,9 @@ var
   I: Integer;
 begin
   PageControl.ActivePageIndex := 0;
+{$IFDEF FPC}
+  lbWizards.Color := clWindow;
+{$ENDIF}
 
   // 专家设置页面
   SetLength(FShortCuts, CnWizardMgr.WizardCount);
@@ -261,7 +264,9 @@ begin
   end;
   I := WizOptions.ReadInteger(SCnOptionSection, csLastSelectedItem, 0);
   if (I >= 0) and (I < lbWizards.ItemIndex) then
-    lbWizards.ItemIndex := I;
+    lbWizards.ItemIndex := I
+  else if lbWizards.Items.Count > 0 then
+    lbWizards.ItemIndex := 0;
 
   lbWizardsClick(lbWizards);
   ActiveControl := lbWizards;

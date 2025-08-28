@@ -1045,10 +1045,8 @@ end;
 // 根据类名初始化图标，可重载
 procedure TCnIconWizard.InitIcon(AIcon, ASmallIcon: TIcon);
 begin
-{$IFDEF DELPHI_OTA}
   if AIcon <> nil then
     CnWizLoadIcon(AIcon, ASmallIcon, GetIconName, True);
-{$ENDIF}
 end;
 
 //==============================================================================
