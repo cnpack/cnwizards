@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, Menus, ActnList, CnWizMultiLang, CnWizClasses, CnWizUtils,
-  CnWizShortCut, CnWizMenuAction, CnWizConsts;
+  CnWizShortCut, CnWizMenuAction, CnWizConsts {$IFDEF FPC}, LCLProc, CnHotKey {$ENDIF};
 
 type
   TCnShortCutHolder = class(TObject)

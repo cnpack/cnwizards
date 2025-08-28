@@ -1,10 +1,11 @@
 inherited CnMessageBoxForm: TCnMessageBoxForm
   Left = 473
   Top = 121
-  BorderStyle = bsDialog
+  Width = 480
+  Height = 542
   Caption = 'MessageBox Designer'
-  ClientHeight = 510
-  ClientWidth = 472
+  Constraints.MinHeight = 542
+  Constraints.MinWidth = 480
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -398,6 +399,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
           Top = 16
           Width = 289
           Height = 21
+          Anchors = [akLeft, akTop, akRight]
           ItemHeight = 13
           TabOrder = 0
           Items.Strings = (
@@ -416,6 +418,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 76
         Width = 305
         Height = 101
+        Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Text Information'
         TabOrder = 2
         object memText: TMemo
@@ -443,7 +446,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 177
         Height = 121
-        Anchors = [akLeft, akTop, akRight]
+        Anchors = [akLeft, akRight, akBottom]
         Caption = 'Dialog &Button'
         ItemIndex = 0
         Items.Strings = (
@@ -474,7 +477,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 184
         Width = 121
         Height = 157
-        Anchors = [akTop, akRight]
+        Anchors = [akRight, akBottom]
         Caption = '&Return Value'
         TabOrder = 4
         object cbResultOK: TCheckBox
@@ -620,7 +623,7 @@ inherited CnMessageBoxForm: TCnMessageBoxForm
         Top = 312
         Width = 177
         Height = 113
-        Anchors = [akLeft, akTop, akRight]
+        Anchors = [akLeft, akRight, akBottom]
         Caption = 'Procedure to &Use'
         TabOrder = 7
         object rbCodeAPI: TRadioButton

@@ -137,14 +137,25 @@ resourcestring
   SCnWizConfigIcon = 'CnWizConfig';
   SCnWizConfigMenuName = 'CnWizConfig';
 
+{$IFDEF LAZARUS}
+  SCnWizardRegPath = 'CnLazards';  // Lazarus 下使用独立的注册表分支名
+{$ELSE}
   SCnWizardRegPath = 'CnWizards';
+{$ENDIF}
+
   SCnWizLangPath = 'Lang';
   SCnWizDataPath = 'Data';
   SCnWizTemplatePath = 'Data\Templates';
   SCnWizIconPath = 'Icons';
   SCnWizHelpPath = 'Help';
   SCnWizUserPath = 'User';
+
+{$IFDEF LAZARUS}
+  SCnWizCustomUserPath = 'CnLazards'; // Lazarus 下使用独立的用户目录
+{$ELSE}
   SCnWizCustomUserPath = 'CnWizards';
+{$ENDIF}
+
   SCnWizCommentPath = 'Comment';
   SCnWizLangFile = 'CnWizards.txt';
   SCnWizHelpIniFile = 'Help.ini';
