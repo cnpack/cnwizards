@@ -2039,6 +2039,10 @@ begin
     Text := MakePath(IDEEnvironmentOptions.GetParsedLazarusDirectory) + 'lcl\';
     List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
     AddList(List);
+
+    Text := MakePath(IDEEnvironmentOptions.GetParsedLazarusDirectory) + 'components\';
+    List.Text := StringReplace(Text, ';', #13#10, [rfReplaceAll]);
+    AddList(List);
 {$ELSE}
 {$IFDEF OTA_ENVOPTIONS_PLATFORM_BUG}
     if CurPlatform = '' then
