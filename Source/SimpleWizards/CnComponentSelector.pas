@@ -48,12 +48,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, ToolsAPI,
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors,
-  {$ELSE}
-  DsgnIntf,
+  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus,
+  {$IFDEF DELPHI_OTA} ToolsAPI,
+  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   {$ENDIF}
+  {$IFDEF LAZARUS} IDEIntf, FormEditingIntf, PropEdits, {$ENDIF}
   ActnList, TypInfo, Contnrs, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils,
   CnCommon, CnSpin, CnSearchCombo, CnWizOptions, CnWizMultiLang, CnWizManager;
 
@@ -142,7 +141,7 @@ type
     procedure btnHelpClick(Sender: TObject);
   private
     FIni: TCustomIniFile;
-    FSourceList, FDestList: IDesignerSelections;
+    FSourceList, FDestList: TCnDesignerSelectionList;
     FContainerWindow: TWinControl;
     FCurrList: TStrings;
     FCbbByClass: TCnSearchComboBox;
@@ -156,14 +155,14 @@ type
     procedure UpdateSourceOrders;
   protected
     property Ini: TCustomIniFile read FIni;
-    property SourceList: IDesignerSelections read FSourceList;
-    property DestList: IDesignerSelections read FDestList;
+    property SourceList: TCnDesignerSelectionList read FSourceList;
+    property DestList: TCnDesignerSelectionList read FDestList;
     property ContainerWindow: TWinControl read FContainerWindow;
     property CurrList: TStrings read FCurrList;
     function GetHelpTopic: string; override;
   public
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile; ASourceList,
-      ADestList: IDesignerSelections; AContainerWindow: TWinControl);
+      ADestList: TCnDesignerSelectionList; AContainerWindow: TWinControl);
     procedure LoadSettings(Ini: TCustomIniFile; const Section: string); virtual;
     procedure SaveSettings(Ini: TCustomIniFile; const Section: string); virtual;
   end;
@@ -213,7 +212,7 @@ uses
 
 // 扩展的构造器，增加了输入输出组件列表、设计窗体
 constructor TCnComponentSelectorForm.CreateEx(AOwner: TComponent;
-  AIni: TCustomIniFile; ASourceList, ADestList: IDesignerSelections;
+  AIni: TCustomIniFile; ASourceList, ADestList: TCnDesignerSelectionList;
   AContainerWindow: TWinControl);
 begin
   Create(AOwner);
@@ -250,20 +249,32 @@ begin
   if lbDest.Items.Count > 0 then       // 选择列表不为空
   begin
     for I := 0 to lbDest.Items.Count - 1 do
+    begin
+{$IFDEF LAZARUS}
+      DestList.Add(TComponent(lbDest.Items.Objects[I]));
+{$ELSE}
     {$IFDEF COMPILER6_UP}
       DestList.Add(TComponent(lbDest.Items.Objects[I]));
     {$ELSE}
       DestList.Add(MakeIPersistent(TComponent(lbDest.Items.Objects[I])));
     {$ENDIF}
+{$ENDIF}
+    end;
   end
   else if cbDefaultSelAll.Checked then // 无选择结果时自动返回所有内容
   begin
     for I := 0 to lbSource.Items.Count - 1 do
+    begin
+{$IFDEF LAZARUS}
+      DestList.Add(TComponent(lbDest.Items.Objects[I]));
+{$ELSE}
     {$IFDEF COMPILER6_UP}
       DestList.Add(TComponent(lbSource.Items.Objects[I]));
     {$ELSE}
       DestList.Add(MakeIPersistent(TComponent(lbSource.Items.Objects[I])));
     {$ENDIF}
+{$ENDIF}
+    end;
   end;
   ModalResult := mrOk;
 end;
@@ -319,10 +330,14 @@ begin
   SelIsEmpty := True;
   for I := 0 to SourceList.Count - 1 do
   begin
-{$IFDEF COMPILER6_UP}
+{$IFDEF LAZARUS}
     Component := TComponent(SourceList[I]);
 {$ELSE}
+  {$IFDEF COMPILER6_UP}
+    Component := TComponent(SourceList[I]);
+  {$ELSE}
     Component := TryExtractComponent(SourceList[I]);
+  {$ENDIF}
 {$ENDIF}
     if Component = ContainerWindow then
       Break; // 选择部分包含窗体本身
@@ -380,9 +395,11 @@ begin
     // 初始化类列表
     cbbByClass.Items.Clear;
     for I := 0 to ContainerWindow.ComponentCount - 1 do
+    begin
       with ContainerWindow.Components[I] do
         if cbbByClass.Items.IndexOf(ClassName) < 0 then
           cbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
+    end;
 
     // 初始化事件列表
     cbbByEvent.Items.Clear;
@@ -477,7 +494,7 @@ var
   // 增加一项条目
   procedure AddItem(AComponent: TComponent; IncludeChildren: Boolean = False);
   var
-    s: string;
+    S: string;
     I: Integer;
   begin
     // 判断是否匹配
@@ -485,25 +502,32 @@ var
       and MatchEvent(AComponent) and MatchTag(AComponent.Tag)
       and (CurrList.IndexOfObject(AComponent) < 0) then
     begin
-      s := AComponent.Name + ': ' + AComponent.ClassName;
-      CurrList.AddObject(s, AComponent);  // 增加到当前过滤列表
-      if lbDest.Items.IndexOf(s) < 0 then
-        lbSource.Items.AddObject(s, AComponent); // 只增加不在已选择列表中的项
+      S := AComponent.Name + ': ' + AComponent.ClassName;
+      CurrList.AddObject(S, AComponent);  // 增加到当前过滤列表
+      if lbDest.Items.IndexOf(S) < 0 then
+        lbSource.Items.AddObject(S, AComponent); // 只增加不在已选择列表中的项
     end;
+
     // 递归增加子控件
     if IncludeChildren and (AComponent is TWinControl) then
+    begin
       with TWinControl(AComponent) do
         for I := 0 to ControlCount - 1 do
           AddItem(Controls[I], True);
+    end;
   end;
+
 begin
   BeginUpdateList;
   try
     SelStrs := TStringList.Create;
     try
       for I := 0 to lbSource.Items.Count - 1 do // 保存当前已选择的列表
+      begin
         if lbSource.Selected[I] then
           SelStrs.Add(lbSource.Items[I]);
+      end;
+
       CurrList.Clear;
       lbSource.Clear;
       if rbCurrForm.Checked then       // 窗体上所有组件
@@ -515,11 +539,15 @@ begin
       begin
         for I := 0 to SourceList.Count - 1 do
         begin
+{$IFDEF LAZARUS}
+          Component := TComponent(SourceList[I]);
+{$ELSE}
         {$IFDEF COMPILER6_UP}
           Component := TComponent(SourceList[I]);
         {$ELSE}
           Component := TryExtractComponent(SourceList[I]);
         {$ENDIF}
+{$ENDIF}
           if Component is TWinControl then
           begin
             WinControl := TWinControl(Component);
@@ -623,20 +651,26 @@ var
 begin
   SelStrs := nil;
   OrderStrs := nil;
+
   try
     SelStrs := TStringList.Create;
     OrderStrs := TStringList.Create;
     for I := 0 to ListBox.Items.Count - 1 do // 保存选择的条目
+    begin
       if ListBox.Selected[I] then
         SelStrs.Add(ListBox.Items[I]);       // ListBox.Items 是 ListBoxStrings 类型
+    end;
+
     OrderStrs.Assign(ListBox.Items);         // 不能直接排序，通过 TStringList 来进行
     TStringList(OrderStrs).CustomSort(DoSortProc);
     ListBox.Items.Assign(OrderStrs);
     for I := 0 to ListBox.Items.Count - 1 do // 恢复选择的条目
       ListBox.Selected[I] := SelStrs.IndexOf(ListBox.Items[I]) >= 0;
   finally
-    if SelStrs <> nil then SelStrs.Free;
-    if OrderStrs <> nil then OrderStrs.Free;
+    if SelStrs <> nil then
+      SelStrs.Free;
+    if OrderStrs <> nil then
+      OrderStrs.Free;
   end;
 end;
 
@@ -653,6 +687,7 @@ begin
     SortDir := sdDown
   else
     SortDir := sdUp;
+
   DoSortListBox(lbSource);
 end;
 
@@ -921,12 +956,14 @@ begin
   try
     J := 0;
     for I := 0 to lbDest.Items.Count - 1 do
+    begin
       if lbDest.Selected[I] then
       begin
         lbDest.Items.Move(I, J);
         lbDest.Selected[J] := True;
         Inc(J);
       end;
+    end;
   finally
     EndUpdateList;
   end;
@@ -941,12 +978,14 @@ begin
   try
     J := lbDest.Items.Count - 1;
     for I := lbDest.Items.Count - 1 downto 0 do
+    begin
       if lbDest.Selected[I] then
       begin
         lbDest.Items.Move(I, J);
         lbDest.Selected[J] := True;
         Dec(J);
       end;
+    end;
   finally
     EndUpdateList;
   end;
@@ -960,11 +999,13 @@ begin
   BeginUpdateList;
   try
     for I := 1 to lbDest.Items.Count - 1 do
+    begin
       if lbDest.Selected[I] and not lbDest.Selected[I - 1] then
       begin
         lbDest.Items.Move(I, I - 1);
         lbDest.Selected[I - 1] := True;
       end;
+    end;
   finally
     EndUpdateList;
   end;
@@ -978,11 +1019,13 @@ begin
   BeginUpdateList;
   try
     for I := lbDest.Items.Count - 2 downto 0 do
+    begin
       if lbDest.Selected[I] and not lbDest.Selected[I + 1] then
       begin
         lbDest.Items.Move(I, I + 1);
         lbDest.Selected[I + 1] := True;
       end;
+    end;
   finally
     EndUpdateList;
   end;
@@ -993,8 +1036,8 @@ function SelectComponentsWithSelector(Selections: TComponentList): Boolean;
 var
   Ini: TCustomIniFile;
   Root: TComponent;
-  FormDesigner: IDesigner;
-  SourceList, DestList: IDesignerSelections;
+  FormDesigner: TCnIDEDesigner;
+  SourceList, DestList: TCnDesignerSelectionList;
   I: Integer;
   Component: TComponent;
   Wizard: TCnComponentSelector;
@@ -1011,15 +1054,29 @@ begin
     Ini := nil;
 
   try
+{$IFDEF LAZARUS}
+    Root := TComponent(GlobalDesignHook.LookupRoot);
+{$ELSE}
     Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
+{$ENDIF}
+
 {$IFDEF DEBUG}
     if Root <> nil then
       CnDebugger.LogFmt('SelectComponents GetRoot %s: %s', [Root.ClassName, Root.Name]);
+  {$IFDEF LAZARUS}
+    CnDebugger.LogFmt('SelectComponents Root Class: %s', [GlobalDesignHook.GetRootClassName]);
+  {$ELSE}
     CnDebugger.LogFmt('SelectComponents Root Class: %s', [FormDesigner.GetRootClassName]);
+  {$ENDIF}
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+    SourceList := TCnDesignerSelectionList.Create;
+    DestList := TCnDesignerSelectionList.Create;
+{$ELSE}
     SourceList := CreateSelectionList;
     DestList := CreateSelectionList;
+{$ENDIF}
     // FormDesigner.GetSelections(SourceList); // 手工选择时无需提前拎出被选择控件
 
     with TCnComponentSelectorForm.CreateEx(nil, Ini, SourceList, DestList,
@@ -1032,10 +1089,14 @@ begin
 
         for I := 0 to DestList.Count - 1 do
         begin
+{$IFDEF LAZARUS}
+          Component := TComponent(DestList[I]);
+{$ELSE}
 {$IFDEF COMPILER6_UP}
           Component := TComponent(DestList[I]);
 {$ELSE}
           Component := TryExtractComponent(DestList[I]);
+{$ENDIF}
 {$ENDIF}
           Selections.Add(Component);
         end;
@@ -1060,15 +1121,20 @@ procedure TCnComponentSelector.Execute;
 var
   Ini: TCustomIniFile;
   Root: TComponent;
-  FormDesigner: IDesigner;
-  SourceList, DestList: IDesignerSelections;
+  FormDesigner: TCnIDEDesigner;
+  SourceList, DestList: TCnDesignerSelectionList;
 begin
   if not Active and not Action.Enabled then
     Exit;
 
   Ini := CreateIniFile;
   try
+{$IFDEF LAZARUS}
+    Root := TComponent(GlobalDesignHook.LookupRoot);
+{$ELSE}
     Root := CnOtaGetRootComponentFromEditor(CnOtaGetCurrentFormEditor);
+{$ENDIF}
+
 {$IFDEF DEBUG}
     if Root <> nil then
       CnDebugger.LogFmt('ComponentSelector GetRoot %s: %s', [Root.ClassName, Root.Name]);
@@ -1078,19 +1144,35 @@ begin
     if FormDesigner = nil then Exit;
 
 {$IFDEF DEBUG}
+  {$IFDEF LAZARUS}
+    CnDebugger.LogFmt('ComponentSelector Root Class: %s', [GlobalDesignHook.GetRootClassName]);
+  {$ELSE}
     CnDebugger.LogFmt('ComponentSelector Root Class: %s', [FormDesigner.GetRootClassName]);
+  {$ENDIF}
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+    SourceList := TCnDesignerSelectionList.Create;
+    DestList := TCnDesignerSelectionList.Create;
+    GlobalDesignHook.GetSelection(SourceList);
+{$ELSE}
     SourceList := CreateSelectionList;
     DestList := CreateSelectionList;
     FormDesigner.GetSelections(SourceList);
-    
+{$ENDIF}
+
     with TCnComponentSelectorForm.CreateEx(nil, Ini, SourceList, DestList,
       TWinControl(Root)) do
     try
       ShowHint := WizOptions.ShowHint;
       if ShowModal = mrOK then
+      begin
+{$IFDEF LAZARUS}
+        GlobalDesignHook.SetSelection(DestList);
+{$ELSE}
         FormDesigner.SetSelections(DestList);
+{$ENDIF}
+      end;
     finally
       Free;
     end;
@@ -1135,10 +1217,14 @@ end;
 
 function TCnComponentSelector.GetState: TWizardState;
 begin
+  Result := [];
+{$IFDEF LAZARUS}
+  if CnOtaGetFormDesigner <> nil then
+    Result := [wsEnabled];
+{$ELSE}
   if CurrentIsForm then
-    Result := [wsEnabled]              // 当前编辑的文件是窗体时才启用
-  else
-    Result := [];
+    Result := [wsEnabled];              // 当前编辑的文件是窗体时才启用
+{$ENDIF}
 end;
 
 // 返回专家信息

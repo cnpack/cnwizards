@@ -24,11 +24,11 @@ unit CnTestEditControlWrapperWizard;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：测试 EditControlWrapper 的子菜单专家测试单元
 * 单元作者：CnPack 开发组
-* 备    注：该单元测试在编辑器中插入字符串，分 Ansi/Utf8/Unicode 三种。
-* 开发平台：Win7 + Delphi 5.01
-* 兼容测试：Win7 + D5/2007/2009
+* 备    注：该单元测试 Lazarus 中的 EditControlWrapper。
+* 开发平台：Win7 + Lazarus 4
+* 兼容测试：Win7 + Lazarus 4
 * 本 地 化：该窗体中的字符串暂不支持本地化处理方式
-* 修改记录：2015.04.21 V1.0
+* 修改记录：2025.08.23 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}

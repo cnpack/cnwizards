@@ -64,15 +64,16 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf, SrcEditorIntf, {$ENDIF}
-  {$ELSE}  CnSearchCombo, {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
+  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf,
+  SrcEditorIntf, FormEditingIntf, PropEdits, {$ENDIF}
+  {$ELSE} {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF} {$ENDIF}
-  mPasLex, mwBCBTokenList, AsRegExpr, CnNative,
+  mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
@@ -110,6 +111,9 @@ type
   TCnSourceEditorInterface = Pointer;
   TCnEditBufferInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
+
+  TCnIDEDesigner = Pointer;
+  TCnDesignerSelectionList = Pointer;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
@@ -117,12 +121,18 @@ type
   TCnSourceEditorInterface = TSourceEditorInterface;
   TCnEditBufferInterface = TSourceEditorInterface;
   TCnIDEProjectInterface = TLazProject;
+
+  TCnIDEDesigner = TIDesigner;
+  TCnDesignerSelectionList = TPersistentSelectionList;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
   TCnIDEEditorInterface = IOTAEditor;
   TCnSourceEditorInterface = IOTASourceEditor;
   TCnEditBufferInterface = IOTAEditBuffer;
   TCnIDEProjectInterface = IOTAProject;
+
+  TCnIDEDesigner = IDesigner;
+  TCnDesignerSelectionList = IDesignerSelections;
   {$ENDIF}
 {$ENDIF}
 
@@ -528,6 +538,9 @@ function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen
 {* 根据文件名返回编辑器中打开的第一个 EditView，支持 Delphi 和 Lazarus。
   未打开时如 ForceOpen 为 True 则尝试打开，否则返回 nil}
 
+function CnOtaGetFormDesigner({$IFDEF DELPHI_OTA} FormEditor: IOTAFormEditor = nil {$ENDIF}): TCnIDEDesigner;
+{* 取当前的窗体设计器}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -563,8 +576,6 @@ function CnOtaShowFormForModule(const Module: IOTAModule): Boolean;
 {* 显示指定模块的窗体 (来自 GExperts Src 1.2)}
 procedure CnOtaShowDesignerForm;
 {* 显示当前设计窗体 }
-function CnOtaGetFormDesigner(FormEditor: IOTAFormEditor = nil): IDesigner;
-{* 取当前的窗体设计器}
 function CnOtaGetActiveDesignerType: string;
 {* 取当前设计器的类型，返回字符串 dfm 或 xfm}
 function CnOtaGetComponentName(Component: IOTAComponent; var Name: string): Boolean;
@@ -1297,9 +1308,6 @@ function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
 function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 {* 判断一控件窗口是否是非可视化控件}
 
-procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
-{* 将一个 Combo 复制为 CnSearchCombo，供调用者替换掉}
-
 function FileExists(const Filename: string): Boolean;
 {* Tests for file existance, a lot faster than the RTL implementation }
 
@@ -1321,6 +1329,9 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {$ENDIF}
 
 {$ENDIF}
+
+procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
+{* 将一个 Combo 复制为 CnSearchCombo，供调用者替换掉}
 
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
@@ -4034,6 +4045,39 @@ begin
 {$ENDIF}
 end;
 
+// 取当前的窗体设计器
+function CnOtaGetFormDesigner({$IFDEF DELPHI_OTA} FormEditor: IOTAFormEditor {$ENDIF}): TCnIDEDesigner;
+{$IFDEF DELPHI_OTA}
+var
+  NTAFormEditor: INTAFormEditor;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  if not Assigned(FormEditor) then
+    FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
+
+  if (FormEditor = nil) or not IsVCLFormEditor(FormEditor) then
+  begin
+    Result := nil;
+    Exit;
+  end;
+  QuerySvcs(FormEditor, INTAFormEditor, NTAFormEditor);
+  if NTAFormEditor <> nil then
+  begin
+    Result := NTAFormEditor.GetFormDesigner;
+    Exit;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if FormEditingHook <> nil then
+  begin
+    Result := FormEditingHook.GetCurrentDesigner;
+    Exit;
+  end;
+{$ENDIF}
+  Result := nil;
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -4368,28 +4412,6 @@ begin
     FormEditor.Show;
     Result := True;
   end;
-end;
-
-// 取当前的窗体设计器
-function CnOtaGetFormDesigner(FormEditor: IOTAFormEditor): IDesigner;
-var
-  NTAFormEditor: INTAFormEditor;
-begin
-  if not Assigned(FormEditor) then
-    FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
-
-  if (FormEditor = nil) or not IsVCLFormEditor(FormEditor) then
-  begin
-    Result := nil;
-    Exit;
-  end;
-  QuerySvcs(FormEditor, INTAFormEditor, NTAFormEditor);
-  if NTAFormEditor <> nil then
-  begin
-    Result := NTAFormEditor.GetFormDesigner;
-    Exit;
-  end;
-  Result := nil;
 end;
 
 // 取当前设计器的类型，返回字符串 dfm 或 xfm
@@ -9609,23 +9631,6 @@ begin
   Result := string(AClassName) = NonvisualClassNamePattern;
 end;
 
-procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
-begin
-  ASearchCombo := TCnSearchComboBox.Create(ACombo.Owner);
-  ASearchCombo.MatchMode := mmAnywhere;
-
-  ASearchCombo.Parent := ACombo.Parent;
-  ASearchCombo.Top := ACombo.Top;
-  ASearchCombo.Left := ACombo.Left;
-  ASearchCombo.Width := ACombo.Width;
-  ASearchCombo.Height := ACombo.Height;
-  ASearchCombo.DropDownList.Width := ASearchCombo.Width;
-  ASearchCombo.OnSelect := ACombo.OnChange;
-
-  ASearchCombo.Visible := True;
-  ACombo.Visible := False;
-end;
-
 // Tests for file existance, a lot faster than the RTL implementation
 function FileExists(const Filename: string): Boolean;
 var
@@ -9836,6 +9841,23 @@ end;
 {$ENDIF}
 
 {$ENDIF}
+
+procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
+begin
+  ASearchCombo := TCnSearchComboBox.Create(ACombo.Owner);
+  ASearchCombo.MatchMode := mmAnywhere;
+
+  ASearchCombo.Parent := ACombo.Parent;
+  ASearchCombo.Top := ACombo.Top;
+  ASearchCombo.Left := ACombo.Left;
+  ASearchCombo.Width := ACombo.Width;
+  ASearchCombo.Height := ACombo.Height;
+  ASearchCombo.DropDownList.Width := ASearchCombo.Width;
+  ASearchCombo.OnSelect := ACombo.OnChange;
+
+  ASearchCombo.Visible := True;
+  ACombo.Visible := False;
+end;
 
 // 判断正则表达式匹配
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
