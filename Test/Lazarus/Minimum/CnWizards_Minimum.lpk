@@ -2,15 +2,15 @@
 <CONFIG>
   <Package Version="5">
     <PathDelim Value="\"/>
-    <Name Value="CnWizards_L4"/>
+    <Name Value="CnWizards_Minimum"/>
     <Type Value="DesignTime"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
       <SearchPaths>
-        <IncludeFiles Value="..\..\..\..\cnvcl\Source\Common"/>
+        <IncludeFiles Value="..\..\..\Source"/>
         <Libraries Value="..\..\..\Source\Framework;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\Utils"/>
-        <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\ObjRep;..\..\..\..\cnvcl\Source\MultiLang"/>
+        <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\ObjRep;..\..\..\..\cnvcl\Source\MultiLang"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -28,44 +28,44 @@
     </CompilerOptions>
     <Files>
       <Item>
-        <Filename Value="Framework\CnLazPkgEntry.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnLazPkgEntry.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="CnLazPkgEntry"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizConsts.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizConsts.pas"/>
         <UnitName Value="CnWizConsts"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizCompilerConst.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizCompilerConst.pas"/>
         <UnitName Value="CnWizCompilerConst"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizOptions.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizOptions.pas"/>
         <UnitName Value="CnWizOptions"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizShortCut.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizShortCut.pas"/>
         <UnitName Value="CnWizShortCut"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizMenuAction.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizMenuAction.pas"/>
         <UnitName Value="CnWizMenuAction"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizClasses.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizClasses.pas"/>
         <UnitName Value="CnWizClasses"/>
       </Item>
       <Item>
-        <Filename Value="Framework\CnWizManager.pas"/>
+        <Filename Value="..\..\..\Source\Framework\CnWizManager.pas"/>
         <UnitName Value="CnWizManager"/>
       </Item>
       <Item>
-        <Filename Value="Utils\CnWizIdeUtils.pas"/>
+        <Filename Value="..\..\..\Source\Utils\CnWizIdeUtils.pas"/>
         <UnitName Value="CnWizIdeUtils"/>
       </Item>
       <Item>
-        <Filename Value="Utils\CnWizUtils.pas"/>
+        <Filename Value="..\..\..\Source\Utils\CnWizUtils.pas"/>
         <UnitName Value="CnWizUtils"/>
       </Item>
     </Files>
