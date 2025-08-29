@@ -160,12 +160,13 @@ type
     procedure cbbProjectsChange(Sender: TObject);
     procedure btnAddProjectClick(Sender: TObject);
     procedure btnDeleteProjectClick(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure btnExportClick(Sender: TObject);
     procedure btnImportClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
-    FIni: TCustomIniFile;
+    FIni: TCustomIniFile;  // 外部传入，自己管理释放
     FPrjIni: TMemIniFile;
     FConfigOnly: Boolean;
     FDataName: string;
@@ -217,10 +218,11 @@ type
     procedure UpdateResultCheckBoxCaption(IsMsgDlg: Boolean);
     function GetWideVer: Boolean;
     procedure SetWideVer(const Value: Boolean);
+    procedure SetConfigOnly(const Value: Boolean);
   protected
     function GetHelpTopic: string; override;
     property Ini: TCustomIniFile read FIni;
-    property ConfigOnly: Boolean read FConfigOnly;
+    property ConfigOnly: Boolean read FConfigOnly write SetConfigOnly;
   public
     constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile; AConfigOnly: Boolean);
     procedure LoadProject(Ini: TMemIniFile; const Section: string); virtual;
@@ -264,11 +266,13 @@ type
 
   TCnMessageBoxWizard = class(TCnMenuWizard)
   private
-
+    FForm: TCnMessageBoxForm;
   protected
     function GetHasConfig: Boolean; override;
   public
     constructor Create; override;
+    destructor Destroy; override;
+
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
@@ -412,13 +416,18 @@ end;
 
 { TCnMessageBoxForm }
 
-// 扩展的构造器，增加了 INI 参数
+// 扩展的构造器，增加了 INI 参数，自行管理释放
 constructor TCnMessageBoxForm.CreateEx(AOwner: TComponent;
   AIni: TCustomIniFile; AConfigOnly: Boolean);
 begin
   Create(AOwner);
   FIni := AIni;
-  FConfigOnly := AConfigOnly;
+  ConfigOnly := AConfigOnly;
+end;
+
+procedure TCnMessageBoxForm.SetConfigOnly(const Value: Boolean);
+begin
+  FConfigOnly := Value;
 
   if FConfigOnly then
   begin
@@ -443,8 +452,8 @@ begin
   UpdateResultCheckBoxCaption(rbMsgDlg.Checked);
 end;
 
-// 窗体释放
-procedure TCnMessageBoxForm.FormDestroy(Sender: TObject);
+procedure TCnMessageBoxForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
 begin
   if (ModalResult = mrOk) and Assigned(Ini) then
     SaveSettings(Ini, '');
@@ -454,6 +463,11 @@ begin
     SaveProject(FPrjIni, SCnMsgBoxProjectLastName); // 保存最后一次设置
     FPrjIni.UpdateFile;
   end;
+end;
+
+procedure TCnMessageBoxForm.FormDestroy(Sender: TObject);
+begin
+  FIni.Free;
   FPrjIni.Free;
 end;
 
@@ -611,6 +625,7 @@ var
 begin
   if SaveDialog.FileName = '' then
     SaveDialog.FileName := FDataName;
+
   if SaveDialog.Execute then
   begin
     Strs := TStringList.Create;
@@ -630,6 +645,7 @@ var
 begin
   if OpenDialog.FileName = '' then
     OpenDialog.FileName := FDataName;
+
   if OpenDialog.Execute then
   begin
     Strs := TStringList.Create;
@@ -1075,6 +1091,28 @@ begin
   chkWideVer.Checked := Value;
 end;
 
+procedure TCnMessageBoxForm.UpdateResultCheckBoxCaption(IsMsgDlg: Boolean);
+var
+  I: Integer;
+begin
+  if IsMsgDlg then
+  begin
+    for I := 0 to gbResult.ControlCount - 1 do
+    begin
+      if gbResult.Controls[I] is TCheckBox then
+        (gbResult.Controls[I] as TCheckBox).Caption := MsgDlgResultStrs[TCnMsgBoxResultKind(I)];
+    end;
+  end
+  else
+  begin
+    for I := 0 to gbResult.ControlCount - 1 do
+    begin
+      if gbResult.Controls[I] is TCheckBox then
+        (gbResult.Controls[I] as TCheckBox).Caption := MsgBoxResultStrs[TCnMsgBoxResultKind(I)];
+    end;
+  end;
+end;
+
 //==============================================================================
 // MessageBox 专家类
 //==============================================================================
@@ -1214,385 +1252,387 @@ begin
 {$ELSE}
   IsBds := False;
 {$ENDIF}
-  Ini := CreateIniFile;
-  try
-    with TCnMessageBoxForm.CreateEx(nil, Ini, False) do
-    try
-      ShowHint := WizOptions.ShowHint;
 
-      if ShowModal = mrOk then
-      begin
+  if FForm = nil then
+  begin
+    Ini := CreateIniFile;
+    FForm := TCnMessageBoxForm.CreateEx(nil, Ini, False);
+  end
+  else
+    FForm.ConfigOnly := False;
+
+  with FForm do
+  begin
+    ShowHint := WizOptions.ShowHint;
+
+    if ShowModal = mrOk then
+    begin
 {$IFNDEF DELPHI_OTA}
-        IsDelphi := True; // 独立运行或 Laz 下，默认生成 Pascal 代码
+      IsDelphi := True; // 独立运行或 Laz 下，默认生成 Pascal 代码
 {$ELSE}
-        IsDelphi := CurrentIsDelphiSource;
+      IsDelphi := CurrentIsDelphiSource;
 {$ENDIF}
+      if IsDelphi then
+      begin
+        Indent := DelphiIndent;
+        WrapWidth := DelphiWrap;
+      end
+      else
+      begin
+        Indent := CIndent;
+        WrapWidth := CWrap;
+      end;
+
+      if AutoWrap then               // 按宽度换行在后面统一进行
+        RetStr := ''
+      else
+        RetStr := CRLF;
+
+      // 函数名
+      sPChar := 'PChar';
+      IsWideVer := False;
+      if MsgBoxCodeKind = ckAPI then
+      begin
+        if WideVer then
+        begin
+          sMsgBox := 'MessageBoxW';
+          sPChar := 'PWideChar';
+          IsWideVer := True;
+        end
+        else
+          sMsgBox := 'MessageBox';
+        if UseHandle then
+          Code := sMsgBox + '(Handle, ' + RetStr
+        else
+          Code := sMsgBox + '(0, ' + RetStr;
+      end
+      else if MsgBoxCodeKind = ckMsgDlg then
+      begin
+        Code := 'MessageDlg(' + RetStr;
+      end
+      else if IsDelphi then
+        Code := 'Application.MessageBox(' + RetStr
+      else
+        Code := 'Application->MessageBox(' + RetStr;
+
+      if not AutoWrap then           // 不是按宽度换行在此处理缩进
+        Code := Code + Spc(Indent);
+
+      // Text 参数
+      if MsgBoxTextIsVar and TextIsExp(MsgBoxText) then
+      begin
         if IsDelphi then
-        begin
-          Indent := DelphiIndent;
-          WrapWidth := DelphiWrap;
-        end
+          Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxText])
         else
+          Code := Format('%s%s, ' + RetStr, [Code, MsgBoxText])
+      end
+      else
+      begin
+        if IsDelphi and CheckFormat and IsFormatStr(MsgBoxText, FmtStr) then
         begin
-          Indent := CIndent;
-          WrapWidth := CWrap;
-        end;
-
-        if AutoWrap then               // 按宽度换行在后面统一进行
-          RetStr := ''
-        else
-          RetStr := CRLF;
-
-        // 函数名
-        sPChar := 'PChar';
-        IsWideVer := False;
-        if MsgBoxCodeKind = ckAPI then
-        begin
-          if WideVer then
-          begin
-            sMsgBox := 'MessageBoxW';
-            sPChar := 'PWideChar';
-            IsWideVer := True;
-          end
+          if IsBds and IsWideVer then
+            Code := Format('%s' + sPChar + '(WideFormat(%s, %s)), ' + RetStr, [Code,
+              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
           else
-            sMsgBox := 'MessageBox';
-          if UseHandle then
-            Code := sMsgBox + '(Handle, ' + RetStr
-          else
-            Code := sMsgBox + '(0, ' + RetStr;
+            Code := Format('%s' + sPChar + '(Format(%s, %s)), ' + RetStr, [Code,
+              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
         end
-        else if MsgBoxCodeKind = ckMsgDlg then
-        begin
-          Code := 'MessageDlg(' + RetStr;
-        end
-        else if IsDelphi then
-          Code := 'Application.MessageBox(' + RetStr
+        else if IsDelphi and UsePChar then
+          Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code,
+            StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
+        else if not IsDelphi and IsWideVer then
+          Code := Format('%sL%s, ' + RetStr, [Code,
+            StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
         else
-          Code := 'Application->MessageBox(' + RetStr;
+          Code := Format('%s%s, ' + RetStr, [Code,
+            StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)]);
+      end;
 
-        if not AutoWrap then           // 不是按宽度换行在此处理缩进
-          Code := Code + Spc(Indent);
-
-        // Text 参数
-        if MsgBoxTextIsVar and TextIsExp(MsgBoxText) then
+      // Caption 参数
+      if MsgBoxCodeKind <> ckMsgDlg then
+      begin
+        if MsgBoxCaptionIsVar and TextIsExp(MsgBoxCaption) then
         begin
           if IsDelphi then
-            Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxText])
+            Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxCaption])
           else
-            Code := Format('%s%s, ' + RetStr, [Code, MsgBoxText])
+            Code := Format('%s%s, ' + RetStr, [Code, MsgBoxCaption])
         end
         else
         begin
-          if IsDelphi and CheckFormat and IsFormatStr(MsgBoxText, FmtStr) then
-          begin
-            if IsBds and IsWideVer then
-              Code := Format('%s' + sPChar + '(WideFormat(%s, %s)), ' + RetStr, [Code,
-                StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
-            else
-              Code := Format('%s' + sPChar + '(Format(%s, %s)), ' + RetStr, [Code,
-                StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap), FmtStr])
-          end
-          else if IsDelphi and UsePChar then
-            Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code,
-              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
-          else if not IsDelphi and IsWideVer then
-            Code := Format('%sL%s, ' + RetStr, [Code,
-              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)])
-          else
-            Code := Format('%s%s, ' + RetStr, [Code,
-              StrToSourceCode(MsgBoxText, DelphiReturn, CReturn, not AutoWrap)]);
-        end;
+          if IsDelphi then                 // Delphi 将 ' 号转换为 ''
+            S := StringReplace(MsgBoxCaption, '''', '''''', [rfReplaceAll])
+          else                           // C++Builder 将 " 号转换为 \"
+            S := StringReplace(MsgBoxCaption, '"', '\"', [rfReplaceAll]);
 
-        // Caption 参数
-        if MsgBoxCodeKind <> ckMsgDlg then
-        begin
-          if MsgBoxCaptionIsVar and TextIsExp(MsgBoxCaption) then
+          if IsDelphi then
           begin
-            if IsDelphi then
-              Code := Format('%s' + sPChar + '(%s), ' + RetStr, [Code, MsgBoxCaption])
-            else
-              Code := Format('%s%s, ' + RetStr, [Code, MsgBoxCaption])
-          end
-          else
-          begin
-            if IsDelphi then                 // Delphi 将 ' 号转换为 ''
-              S := StringReplace(MsgBoxCaption, '''', '''''', [rfReplaceAll])
-            else                           // C++Builder 将 " 号转换为 \"
-              S := StringReplace(MsgBoxCaption, '"', '\"', [rfReplaceAll]);
-
-            if IsDelphi then
+            if CheckFormat and IsFormatStr(MsgBoxCaption, FmtStr) then
             begin
-              if CheckFormat and IsFormatStr(MsgBoxCaption, FmtStr) then
-              begin
-                if IsBds and IsWideVer then
-                  Code := Format('%s' + sPChar + '(WideFormat(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
-                else
-                  Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
-              end
-              else if UsePChar then
-                Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, S])
+              if IsBds and IsWideVer then
+                Code := Format('%s' + sPChar + '(WideFormat(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
               else
-                Code := Format('%s''%s'', ' + RetStr, [Code, S]);
+                Code := Format('%s' + sPChar + '(Format(''%s'', %s)), ' + RetStr, [Code, S, FmtStr])
             end
+            else if UsePChar then
+              Code := Format('%s' + sPChar + '(''%s''), ' + RetStr, [Code, S])
             else
-            begin
-              if IsWideVer then
-                Code := Format('%sL"%s", ' + RetStr, [Code, S])
-              else
-                Code := Format('%s"%s", ' + RetStr, [Code, S]);
-            end;
-          end;
-        end;
-
-        // 增加标志
-        if MsgBoxCodeKind <> ckMsgDlg then
-          Code := Code + MsgBoxButtonKindStrs[MsgBoxButton];
-
-        if MsgBoxCodeKind = ckMsgDlg then
-          S := MsgDlgTypeKindStrs[MsgBoxIcon]
-        else
-          S := MsgBoxIconKindStrs[MsgBoxIcon];
-
-        if S <> '' then
-        begin
-          if MsgBoxCodeKind = ckMsgDlg then
-          begin
-            Code := Format('%s %s', [Code, S]);
-            if IsDelphi then
-            begin
-              Code := Format('%s, %s, 0)', [Code, MsgDlgButtonKindDelphiStrs[MsgBoxButton]]);
-            end
-            else
-            begin
-              Code := Format('%s, TMsgDlgButtons() %s, 0)', [Code, MsgDlgButtonKindBCBStrs[MsgBoxButton]]);
-            end;
-          end
-          else
-            Code := Format('%s + %s', [Code, S]);
-        end;
-
-        // 默认按钮
-        if MsgBoxCodeKind <> ckMsgDlg then
-        begin
-          S := MsgBoxDefaultButtonStrs[MsgBoxDefaultButton];
-          if S <> '' then
-            Code := Format('%s + %s', [Code, S]);
-        end;
-
-        // 增加扩展风格
-        if MsgBoxCodeKind <> ckMsgDlg then
-        begin
-          S := MsgBoxTopMostStrs[MsgBoxTopMost];
-          if S <> '' then
-            Code := Format('%s + %s', [Code, S]);
-          Code := Code + ')';
-        end;
-
-        // 增加头尾
-        CnOtaGetCurSourcePos(Col, Row);
-        SetCount := GetSetCount(MsgBoxResult, Value);
-        if SetCount = 0 then           // 无返回值
-        begin
-          Code := Code + ';';
-          if AutoWrap then             // 自动换行
-            Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
-          Code := Code + CRLF;
-          CnOtaInsertTextToCurSource(Code, ipCur);
-          CnOtaSetCurSourceCol(Col);        // 光标移到缩进前的位置
-        end
-        else if SetCount = 1 then      // 一个返回值
-        begin
-          if IsDelphi then
-          begin
-            if MsgBoxCodeKind = ckMsgDlg then
-              Code := Format('if %s = %s then', [Code, MsgDlgResultStrs[Value]])
-            else
-              Code := Format('if %s = %s then', [Code, MsgBoxResultStrs[Value]]);
+              Code := Format('%s''%s'', ' + RetStr, [Code, S]);
           end
           else
           begin
-            if MsgBoxCodeKind = ckMsgDlg then
-              Code := Format('if (%s == %s)', [Code, MsgDlgResultStrs[Value]])
+            if IsWideVer then
+              Code := Format('%sL"%s", ' + RetStr, [Code, S])
             else
-              Code := Format('if (%s == %s)', [Code, MsgBoxResultStrs[Value]]);
+              Code := Format('%s"%s", ' + RetStr, [Code, S]);
           end;
-
-          if AutoWrap then             // 自动换行
-            Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
-
-          if IsDelphi or not LineEndBrace then
-            Code := Code + CRLF;
-
-          CnOtaInsertTextToCurSource(Code, ipCur);
-          CnOtaGetCurSourcePos(Col1, Row1);
-
-          if IsDelphi then
-          begin
-            CnOtaSetCurSourceCol(Col);
-            CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
-          end
-          else // C++Builder
-          begin
-            if LineEndBrace then       // { 放在行末
-            begin
-              CnOtaInsertTextToCurSource(' {' + CRLF + CRLF, ipCur);
-              CnOtaSetCurSourceCol(Col);
-              CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
-            end
-            else
-            begin
-              CnOtaSetCurSourceCol(Col);
-              CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF, ipCur);
-            end;
-          end;
-          CnOtaSetCurSourcePos(Col + Indent, Row1 + 1); // 光标移动到 begin 下一行
-        end
-        else if (SetCount = 2) and (GetResultCount = 2) then
-        begin                          // 二个返回值且只有两个按钮
-          if IsDelphi then
-          begin
-            if MsgBoxCodeKind = ckMsgDlg then
-              Code := Format('if %s = %s then', [Code, MsgDlgResultStrs[Value]])
-            else
-              Code := Format('if %s = %s then', [Code, MsgBoxResultStrs[Value]])
-          end
-          else
-          begin
-            if MsgBoxCodeKind = ckMsgDlg then
-              Code := Format('if (%s == %s)', [Code, MsgDlgResultStrs[Value]])
-            else
-              Code := Format('if (%s == %s)', [Code, MsgBoxResultStrs[Value]]);
-          end;
-
-          if AutoWrap then
-            Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
-
-          if IsDelphi or not LineEndBrace then
-            Code := Code + CRLF;
-          CnOtaInsertTextToCurSource(Code, ipCur);
-          CnOtaGetCurSourcePos(Col1, Row1);
-
-          if IsDelphi then
-          begin
-            CnOtaSetCurSourceCol(Col);
-            CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end' + CRLF + 'else' +
-              CRLF + 'begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
-          end
-          else // C++Builder
-          begin
-            if LineEndBrace then       // { 放在行末
-            begin
-              CnOtaInsertTextToCurSource(' {' + CRLF + CRLF, ipCur);
-              CnOtaSetCurSourceCol(Col);
-              CnOtaInsertTextToCurSource('}' + CRLF + 'else {' + CRLF + CRLF +
-                '}' + CRLF, ipCur);
-            end
-            else
-            begin
-              CnOtaSetCurSourceCol(Col);
-              CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF + 'else' +
-                CRLF + '{' + CRLF + CRLF + '}' + CRLF, ipCur);
-            end;
-          end;
-          CnOtaSetCurSourcePos(Col + Indent, Row1 + 1); // 光标移动到 begin 下一行
-        end
-        else                           // 其它情况
-        begin
-          if IsDelphi then
-            Code := Format('case %s of', [Code])
-          else
-            Code := Format('switch (%s)', [Code]);
-
-          if AutoWrap then
-            Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
-
-          if IsDelphi or not LineEndBrace then
-            Code := Code + CRLF;
-
-          CnOtaInsertTextToCurSource(Code, ipCur);
-          CnOtaGetCurSourcePos(Col1, Row1);
-          if not IsDelphi then
-          begin
-            if LineEndBrace then
-              CnOtaInsertTextToCurSource(' {' + CRLF, ipCur)
-            else
-            begin
-              CnOtaSetCurSourceCol(Col);
-              CnOtaInsertTextToCurSource('{' + CRLF, ipCur);
-              Inc(Row1);
-            end;
-          end;
-
-          for Kind := Low(Kind) to High(Kind) do // 生成 case 语句
-          begin
-            if Kind in MsgBoxResult then
-            begin
-              CnOtaSetCurSourceCol(Col + Indent);
-              if IsDelphi then
-              begin
-                if MsgBoxCodeKind = ckMsgDlg then
-                  CnOtaInsertTextToCurSource(MsgDlgResultStrs[Kind] + ':' + CRLF, ipCur)
-                else
-                  CnOtaInsertTextToCurSource(MsgBoxResultStrs[Kind] + ':' + CRLF, ipCur);
-                CnOtaSetCurSourceCol(Col + Indent * 2);
-                CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
-              end
-              else // C++Builder
-              begin
-                if LineEndBrace then
-                begin
-                  if MsgBoxCodeKind = ckMsgDlg then
-                    CnOtaInsertTextToCurSource('case ' + MsgDlgResultStrs[Kind] + ': {'
-                      + CRLF + CRLF, ipCur)
-                  else
-                    CnOtaInsertTextToCurSource('case ' + MsgBoxResultStrs[Kind] + ': {'
-                      + CRLF + CRLF, ipCur);
-                  CnOtaSetCurSourceCol(Col + Indent * 2);
-                  CnOtaInsertTextToCurSource('break;' + CRLF, ipCur);
-                  CnOtaSetCurSourceCol(Col + Indent);
-                  CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
-                end
-                else
-                begin
-                  if MsgBoxCodeKind = ckMsgDlg then
-                    CnOtaInsertTextToCurSource('case ' + MsgDlgResultStrs[Kind] + ':' + CRLF, ipCur)
-                  else
-                    CnOtaInsertTextToCurSource('case ' + MsgBoxResultStrs[Kind] + ':' + CRLF, ipCur);
-
-                  CnOtaSetCurSourceCol(Col + Indent);
-                  CnOtaInsertTextToCurSource('{' + CRLF + CRLF + Spc(Indent) + 'break;'
-                    + CRLF, ipCur);
-                  CnOtaSetCurSourceCol(Col + Indent);
-                  CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
-                end;
-              end;
-            end;
-          end;
-          CnOtaSetCurSourceCol(Col);
-
-          if IsDelphi then
-            CnOtaInsertTextToCurSource('end;' + CRLF, ipCur)
-          else
-            CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
-
-          if IsDelphi then
-            CnOtaSetCurSourcePos(Col + Indent * 3, Row1 + 2) // 光标移动到 begin 下一行
-          else
-            CnOtaSetCurSourcePos(Col + Indent * 2, Row1 + 2);
         end;
       end;
 
+      // 增加标志
+      if MsgBoxCodeKind <> ckMsgDlg then
+        Code := Code + MsgBoxButtonKindStrs[MsgBoxButton];
+
+      if MsgBoxCodeKind = ckMsgDlg then
+        S := MsgDlgTypeKindStrs[MsgBoxIcon]
+      else
+        S := MsgBoxIconKindStrs[MsgBoxIcon];
+
+      if S <> '' then
+      begin
+        if MsgBoxCodeKind = ckMsgDlg then
+        begin
+          Code := Format('%s %s', [Code, S]);
+          if IsDelphi then
+          begin
+            Code := Format('%s, %s, 0)', [Code, MsgDlgButtonKindDelphiStrs[MsgBoxButton]]);
+          end
+          else
+          begin
+            Code := Format('%s, TMsgDlgButtons() %s, 0)', [Code, MsgDlgButtonKindBCBStrs[MsgBoxButton]]);
+          end;
+        end
+        else
+          Code := Format('%s + %s', [Code, S]);
+      end;
+
+      // 默认按钮
+      if MsgBoxCodeKind <> ckMsgDlg then
+      begin
+        S := MsgBoxDefaultButtonStrs[MsgBoxDefaultButton];
+        if S <> '' then
+          Code := Format('%s + %s', [Code, S]);
+      end;
+
+      // 增加扩展风格
+      if MsgBoxCodeKind <> ckMsgDlg then
+      begin
+        S := MsgBoxTopMostStrs[MsgBoxTopMost];
+        if S <> '' then
+          Code := Format('%s + %s', [Code, S]);
+        Code := Code + ')';
+      end;
+
+      // 增加头尾
+      CnOtaGetCurSourcePos(Col, Row);
+      SetCount := GetSetCount(MsgBoxResult, Value);
+      if SetCount = 0 then           // 无返回值
+      begin
+        Code := Code + ';';
+        if AutoWrap then             // 自动换行
+          Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
+        Code := Code + CRLF;
+        CnOtaInsertTextToCurSource(Code, ipCur);
+        CnOtaSetCurSourceCol(Col);        // 光标移到缩进前的位置
+      end
+      else if SetCount = 1 then      // 一个返回值
+      begin
+        if IsDelphi then
+        begin
+          if MsgBoxCodeKind = ckMsgDlg then
+            Code := Format('if %s = %s then', [Code, MsgDlgResultStrs[Value]])
+          else
+            Code := Format('if %s = %s then', [Code, MsgBoxResultStrs[Value]]);
+        end
+        else
+        begin
+          if MsgBoxCodeKind = ckMsgDlg then
+            Code := Format('if (%s == %s)', [Code, MsgDlgResultStrs[Value]])
+          else
+            Code := Format('if (%s == %s)', [Code, MsgBoxResultStrs[Value]]);
+        end;
+
+        if AutoWrap then             // 自动换行
+          Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
+
+        if IsDelphi or not LineEndBrace then
+          Code := Code + CRLF;
+
+        CnOtaInsertTextToCurSource(Code, ipCur);
+        CnOtaGetCurSourcePos(Col1, Row1);
+
+        if IsDelphi then
+        begin
+          CnOtaSetCurSourceCol(Col);
+          CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
+        end
+        else // C++Builder
+        begin
+          if LineEndBrace then       // { 放在行末
+          begin
+            CnOtaInsertTextToCurSource(' {' + CRLF + CRLF, ipCur);
+            CnOtaSetCurSourceCol(Col);
+            CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
+          end
+          else
+          begin
+            CnOtaSetCurSourceCol(Col);
+            CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF, ipCur);
+          end;
+        end;
+        CnOtaSetCurSourcePos(Col + Indent, Row1 + 1); // 光标移动到 begin 下一行
+      end
+      else if (SetCount = 2) and (GetResultCount = 2) then
+      begin                          // 二个返回值且只有两个按钮
+        if IsDelphi then
+        begin
+          if MsgBoxCodeKind = ckMsgDlg then
+            Code := Format('if %s = %s then', [Code, MsgDlgResultStrs[Value]])
+          else
+            Code := Format('if %s = %s then', [Code, MsgBoxResultStrs[Value]])
+        end
+        else
+        begin
+          if MsgBoxCodeKind = ckMsgDlg then
+            Code := Format('if (%s == %s)', [Code, MsgDlgResultStrs[Value]])
+          else
+            Code := Format('if (%s == %s)', [Code, MsgBoxResultStrs[Value]]);
+        end;
+
+        if AutoWrap then
+          Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
+
+        if IsDelphi or not LineEndBrace then
+          Code := Code + CRLF;
+        CnOtaInsertTextToCurSource(Code, ipCur);
+        CnOtaGetCurSourcePos(Col1, Row1);
+
+        if IsDelphi then
+        begin
+          CnOtaSetCurSourceCol(Col);
+          CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end' + CRLF + 'else' +
+            CRLF + 'begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
+        end
+        else // C++Builder
+        begin
+          if LineEndBrace then       // { 放在行末
+          begin
+            CnOtaInsertTextToCurSource(' {' + CRLF + CRLF, ipCur);
+            CnOtaSetCurSourceCol(Col);
+            CnOtaInsertTextToCurSource('}' + CRLF + 'else {' + CRLF + CRLF +
+              '}' + CRLF, ipCur);
+          end
+          else
+          begin
+            CnOtaSetCurSourceCol(Col);
+            CnOtaInsertTextToCurSource('{' + CRLF + CRLF + '}' + CRLF + 'else' +
+              CRLF + '{' + CRLF + CRLF + '}' + CRLF, ipCur);
+          end;
+        end;
+        CnOtaSetCurSourcePos(Col + Indent, Row1 + 1); // 光标移动到 begin 下一行
+      end
+      else                           // 其它情况
+      begin
+        if IsDelphi then
+          Code := Format('case %s of', [Code])
+        else
+          Code := Format('switch (%s)', [Code]);
+
+        if AutoWrap then
+          Code := DoAutoWrap(Code, DelphiReturn, CReturn, WrapWidth - Col, Indent);
+
+        if IsDelphi or not LineEndBrace then
+          Code := Code + CRLF;
+
+        CnOtaInsertTextToCurSource(Code, ipCur);
+        CnOtaGetCurSourcePos(Col1, Row1);
+        if not IsDelphi then
+        begin
+          if LineEndBrace then
+            CnOtaInsertTextToCurSource(' {' + CRLF, ipCur)
+          else
+          begin
+            CnOtaSetCurSourceCol(Col);
+            CnOtaInsertTextToCurSource('{' + CRLF, ipCur);
+            Inc(Row1);
+          end;
+        end;
+
+        for Kind := Low(Kind) to High(Kind) do // 生成 case 语句
+        begin
+          if Kind in MsgBoxResult then
+          begin
+            CnOtaSetCurSourceCol(Col + Indent);
+            if IsDelphi then
+            begin
+              if MsgBoxCodeKind = ckMsgDlg then
+                CnOtaInsertTextToCurSource(MsgDlgResultStrs[Kind] + ':' + CRLF, ipCur)
+              else
+                CnOtaInsertTextToCurSource(MsgBoxResultStrs[Kind] + ':' + CRLF, ipCur);
+              CnOtaSetCurSourceCol(Col + Indent * 2);
+              CnOtaInsertTextToCurSource('begin' + CRLF + CRLF + 'end;' + CRLF, ipCur);
+            end
+            else // C++Builder
+            begin
+              if LineEndBrace then
+              begin
+                if MsgBoxCodeKind = ckMsgDlg then
+                  CnOtaInsertTextToCurSource('case ' + MsgDlgResultStrs[Kind] + ': {'
+                    + CRLF + CRLF, ipCur)
+                else
+                  CnOtaInsertTextToCurSource('case ' + MsgBoxResultStrs[Kind] + ': {'
+                    + CRLF + CRLF, ipCur);
+                CnOtaSetCurSourceCol(Col + Indent * 2);
+                CnOtaInsertTextToCurSource('break;' + CRLF, ipCur);
+                CnOtaSetCurSourceCol(Col + Indent);
+                CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
+              end
+              else
+              begin
+                if MsgBoxCodeKind = ckMsgDlg then
+                  CnOtaInsertTextToCurSource('case ' + MsgDlgResultStrs[Kind] + ':' + CRLF, ipCur)
+                else
+                  CnOtaInsertTextToCurSource('case ' + MsgBoxResultStrs[Kind] + ':' + CRLF, ipCur);
+
+                CnOtaSetCurSourceCol(Col + Indent);
+                CnOtaInsertTextToCurSource('{' + CRLF + CRLF + Spc(Indent) + 'break;'
+                  + CRLF, ipCur);
+                CnOtaSetCurSourceCol(Col + Indent);
+                CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
+              end;
+            end;
+          end;
+        end;
+        CnOtaSetCurSourceCol(Col);
+
+        if IsDelphi then
+          CnOtaInsertTextToCurSource('end;' + CRLF, ipCur)
+        else
+          CnOtaInsertTextToCurSource('}' + CRLF, ipCur);
+
+        if IsDelphi then
+          CnOtaSetCurSourcePos(Col + Indent * 3, Row1 + 2) // 光标移动到 begin 下一行
+        else
+          CnOtaSetCurSourcePos(Col + Indent * 2, Row1 + 2);
+      end;
+    end;
+
 {$IFDEF DELPHI_OTA}
-      IEditView := CnOtaGetTopMostEditView;
-      if Assigned(IEditView) then IEditView.Paint;
+    IEditView := CnOtaGetTopMostEditView;
+    if Assigned(IEditView) then IEditView.Paint;
 {$ENDIF}
 
-      BringIdeEditorFormToFront;
-    finally
-      Free;
-    end;
-  finally
-    Ini.Free;
+    BringIdeEditorFormToFront;
   end;
 end;
 
@@ -1605,18 +1645,19 @@ procedure TCnMessageBoxWizard.Config;
 var
   Ini: TCustomIniFile;
 begin
-  Ini := CreateIniFile;
-  try
-    with TCnMessageBoxForm.CreateEx(nil, Ini, True) do
-    try
-      ShowHint := WizOptions.ShowHint;
-      ShowModal;
-      DoSaveSettings;
-    finally
-      Free;
-    end;
-  finally
-    Ini.Free;
+  if FForm = nil then
+  begin
+    Ini := CreateIniFile;
+    FForm := TCnMessageBoxForm.CreateEx(nil, Ini, True);
+  end
+  else
+    FForm.ConfigOnly := True;
+
+  with FForm do
+  begin
+    ShowHint := WizOptions.ShowHint;
+    ShowModal;
+    DoSaveSettings;
   end;
 end;
 
@@ -1663,32 +1704,16 @@ begin
   Comment := SCnMsgBoxComment;
 end;
 
-procedure TCnMessageBoxForm.UpdateResultCheckBoxCaption(IsMsgDlg: Boolean);
-var
-  I: Integer;
-begin
-  if IsMsgDlg then
-  begin
-    for I := 0 to gbResult.ControlCount - 1 do
-    begin
-      if gbResult.Controls[I] is TCheckBox then
-        (gbResult.Controls[I] as TCheckBox).Caption := MsgDlgResultStrs[TCnMsgBoxResultKind(I)];
-    end;
-  end
-  else
-  begin
-    for I := 0 to gbResult.ControlCount - 1 do
-    begin
-      if gbResult.Controls[I] is TCheckBox then
-        (gbResult.Controls[I] as TCheckBox).Caption := MsgBoxResultStrs[TCnMsgBoxResultKind(I)];
-    end;
-  end;
-end;
-
 function TCnMessageBoxWizard.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '弹窗,信息,提示框,' +
     'messagedlg,info,query,warning,error,yesno,ok,cancel,abort,retry,ignore,';
+end;
+
+destructor TCnMessageBoxWizard.Destroy;
+begin
+  FreeAndNil(FForm);
+  inherited;
 end;
 
 initialization

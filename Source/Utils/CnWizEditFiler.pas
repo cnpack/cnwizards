@@ -521,11 +521,11 @@ begin
 
 {$IFDEF LAZARUS}
     if FEditor <> nil then
-      Result := FEditor.Lines.Count;
+      Result := FEditor.Lines.Count
+    else
+      Result := -1;
 {$ENDIF}
-  end
-  else
-    Result := -1;
+  end;
 end;
 
 procedure TCnEditFiler.Reset;
