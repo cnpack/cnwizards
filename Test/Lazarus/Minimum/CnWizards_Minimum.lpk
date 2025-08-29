@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <PathDelim Value="\"/>
+    <Name Value="CnWizards_L4"/>
+    <Type Value="DesignTime"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <PathDelim Value="\"/>
+      <SearchPaths>
+        <IncludeFiles Value="..\..\..\..\cnvcl\Source\Common"/>
+        <Libraries Value="..\..\..\Source\Framework;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\Utils"/>
+        <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\ObjRep;..\..\..\..\cnvcl\Source\MultiLang"/>
+        <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <Other>
+        <CustomOptions Value="-dDEBUG
+-dSUPPORT_EVALUATE
+-dENABLE_UIINTERACT
+-dCNWIZARDS_MINIMUM"/>
+        <OtherDefines Count="4">
+          <Define0 Value="DEBUG"/>
+          <Define1 Value="SUPPORT_EVALUATE"/>
+          <Define2 Value="ENABLE_UIINTERACT"/>
+          <Define3 Value="CNWIZARDS_MINIMUM"/>
+        </OtherDefines>
+      </Other>
+    </CompilerOptions>
+    <Files>
+      <Item>
+        <Filename Value="Framework\CnLazPkgEntry.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="CnLazPkgEntry"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizConsts.pas"/>
+        <UnitName Value="CnWizConsts"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizCompilerConst.pas"/>
+        <UnitName Value="CnWizCompilerConst"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizOptions.pas"/>
+        <UnitName Value="CnWizOptions"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizShortCut.pas"/>
+        <UnitName Value="CnWizShortCut"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizMenuAction.pas"/>
+        <UnitName Value="CnWizMenuAction"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizClasses.pas"/>
+        <UnitName Value="CnWizClasses"/>
+      </Item>
+      <Item>
+        <Filename Value="Framework\CnWizManager.pas"/>
+        <UnitName Value="CnWizManager"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizIdeUtils.pas"/>
+        <UnitName Value="CnWizIdeUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizUtils.pas"/>
+        <UnitName Value="CnWizUtils"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="IDEIntf"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCLBase"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
