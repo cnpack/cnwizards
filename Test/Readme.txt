@@ -7,8 +7,8 @@
 1. 菜单专家形式，统一放在各平台目录下的 Wizard 子目录下。执行测试用例时只需要将此用例加入专家包工程后重编译加载即可从 CnPack 菜单下点击执行。
 多个子用例可写成子菜单专家。
 
-简单菜单专家的实例可参考 Source\Examples\CnSampleMenuWizard.pas
-简单子菜单专家的实例可参考 Source\Examples\CnSampleSubMenuWizard.pas
+简单菜单专家的实例可参考 Source\Example\CnSampleMenuWizard.pas
+简单子菜单专家的实例可参考 Source\Example\CnSampleSubMenuWizard.pas
 
 菜单专家形式的测试用例，源码文件命名推荐 CnTest 开头，Wizard 结束，如 CnTestXXXWizard。
 
