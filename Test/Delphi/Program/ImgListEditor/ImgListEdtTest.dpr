@@ -8,9 +8,9 @@ uses
   CnPngUtilsIntf in '..\..\..\..\Source\Utils\CnPngUtilsIntf.pas',
   CnWizMultiLang in '..\..\..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
   CnWizLangID in '..\..\..\..\Source\MultiLang\CnWizLangID.pas',
-  CnImageListEditorFrm in '..\..\..\..\Source\DesignEditors\CnImageListEditorFrm.pas' {CnImageListEditorForm},
+  CnImageListEditorFrm in '..\..\..\..\Source\DesignEditor\CnImageListEditorFrm.pas' {CnImageListEditorForm},
   CnWizHttpDownMgr in '..\..\..\..\Source\Utils\CnWizHttpDownMgr.pas',
-  CnDesignEditorConsts in '..\..\..\..\Source\DesignEditors\CnDesignEditorConsts.pas',
+  CnDesignEditorConsts in '..\..\..\..\Source\DesignEditor\CnDesignEditorConsts.pas',
   CnImageProviderFindIcons in '..\..\..\..\Source\Utils\CnImageProviderFindIcons.pas',
   CnImageProviderLocalCache in '..\..\..\..\Source\Utils\CnImageProviderLocalCache.pas';
 

@@ -223,7 +223,7 @@
         <UsageCount Value="121"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\DesignEditors\CnDesignEditor.pas"/>
+        <Filename Value="..\..\..\Source\DesignEditor\CnDesignEditor.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="615"/>
         <CursorPos X="19" Y="625"/>

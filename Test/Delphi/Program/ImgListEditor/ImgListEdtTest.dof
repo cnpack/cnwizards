@@ -43,7 +43,7 @@ OutputDir=..\..\..\..\Bin
 UnitOutputDir=..\..\..\..\Dcu
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditors;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\..\cnvcl\Source\MultiLang
+SearchPath=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditor;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\..\cnvcl\Source\MultiLang
 Packages=vcl;rtl;vclx;indy;inet;xmlrtl;vclie;inetdbbde;inetdbxpress;dbrtl;dsnap;dsnapcon;vcldb;soaprtl;VclSmp;dbexpress;dbxcds;inetdb;bdertl;vcldbx;webdsnap;websnap;adortl;ibxpress;teeui;teedb;tee;dss;visualclx;visualdbclx;vclactnband;vclshlctrls;IntrawebDB_50_70;Intraweb_50_70;Rave50CLX;Rave50VCL;dclOfficeXP;RxCtl7;RxDB7;RxBDE7;VirtualTreesD7;cxBarEditItemD7;cxEditorsVCLD7;cxLibraryVCLD7;dxThemeD7;cxDataD7;cxExtEditorsVCLD7;dxGDIPlusD7;dxCoreD7;dxBarD7;dxBarDBNavD7;dxBarExtDBItemsD7;dxBarExtItemsD7;dxDockingD7;dxNavBarD7;dxRibbonD7;dxSkinsCoreD7;dxSkinscxPCPainterD7;cxPageControlVCLD7;dxSkinsdxDLPainterD7;dxSkinsdxRibbonPainterD7;dxSkinsdxBarPainterD7;dxSkinsdxNavBar2PainterD7;dxSkinD7;CnPack_D7
 Conditionals=TEST_APP;STAND_ALONE
 DebugSourceDirs=
@@ -90,8 +90,8 @@ Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
 Count=7
-Item0=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditors;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\..\cnvcl\Source\MultiLang
-Item1=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditors;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual
+Item0=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditor;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\..\cnvcl\Source\MultiLang
+Item1=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\Source\Framework;..\..\..\..\Source\MultiLang;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditor;..\..\..\..\Source\Misc;..\..\..\..\..\cnvcl\Source\NonVisual
 Item2=..\..\..\..\Source;..\..\..\..\Source\Utils;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm
 Item3=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\NetComm
 Item4=..\..\..\..\Source;..\..\..\..\Source\ThirdParty
