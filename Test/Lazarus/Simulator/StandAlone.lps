@@ -331,7 +331,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\IdeEnhancements\CnFormEnhancements.pas"/>
+        <Filename Value="..\..\..\Source\IdeEnhancement\CnFormEnhancements.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="522"/>
         <CursorPos X="33" Y="534"/>
@@ -710,7 +710,7 @@
         <UsageCount Value="11"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\IdeEnhancements\CnFlatToolbarConfigFrm.pas"/>
+        <Filename Value="..\..\..\Source\IdeEnhancement\CnFlatToolbarConfigFrm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="45"/>
         <CursorPos X="77" Y="57"/>

@@ -209,7 +209,7 @@
 				<Form>CnMultiLineEditorToolsOptionForm</Form>
 			</DCCReference>
 			<DCCReference Include="DesignEditor\CnAlignPropEditor.pas"/>
-			<DCCReference Include="IdeEnhancements\CnFastCodeWizard.pas"/>
+			<DCCReference Include="IdeEnhancement\CnFastCodeWizard.pas"/>
 			<DCCReference Include="DesignWizard\CnDesignWizard.pas">
 				<Form>CnNonArrangeForm</Form>
 			</DCCReference>
@@ -348,17 +348,17 @@
 			<DCCReference Include="SrcEditorEnhance\CnSrcEditorEnhance.pas">
 				<Form>CnSrcEditorEnhanceForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnFormEnhancements.pas">
+			<DCCReference Include="IdeEnhancement\CnFormEnhancements.pas">
 				<Form>CnFormEnhanceConfigForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnFlatToolbarConfigFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnFlatToolbarConfigFrm.pas">
 				<Form>CnFlatToolbarConfigForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnPaletteEnhancements.pas"/>
-			<DCCReference Include="IdeEnhancements\CnPaletteEnhanceFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnPaletteEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancement\CnPaletteEnhanceFrm.pas">
 				<Form>CnPalEnhanceForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnCompFilterFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnCompFilterFrm.pas">
 				<Form>CnCompFilterForm</Form>
 			</DCCReference>
 			<DCCReference Include="CorProperty\CnCorPropWizard.pas"/>
@@ -395,14 +395,14 @@
 				<Form>CnCommentCropForm</Form>
 			</DCCReference>
 			<DCCReference Include="Utils\CnSourceCropper.pas"/>
-			<DCCReference Include="IdeEnhancements\CnCpuWinEnhancements.pas"/>
-			<DCCReference Include="IdeEnhancements\CnCpuWinEnhanceFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnCpuWinEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancement\CnCpuWinEnhanceFrm.pas">
 				<Form>CnCpuWinEnhanceForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnObjInspectorEnhancements.pas">
+			<DCCReference Include="IdeEnhancement\CnObjInspectorEnhancements.pas">
 				<Form>CnObjInspectorConfigForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnObjInspectorCommentFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnObjInspectorCommentFrm.pas">
 				<Form>CnObjInspectorCommentForm</Form>
 			</DCCReference>
 			<DCCReference Include="Utils\CnObjectInspectorWrapper.pas"/>
@@ -458,7 +458,7 @@
 			<DCCReference Include="ReopenWizard\CnFilesSnapshotManageFrm.pas">
 				<Form>CnProjectFilesSnapshotManageForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnWinTopRoller.pas">
+			<DCCReference Include="IdeEnhancement\CnWinTopRoller.pas">
 				<Form>CnTopRollerForm</Form>
 			</DCCReference>
 			<DCCReference Include="EditorTabSet\CnWizEdtTabSetHook.pas"/>
@@ -522,8 +522,8 @@
 			<DCCReference Include="SimpleWizard\CnProcListWizard.pas">
 				<Form>CnProcListForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnVerEnhancements.pas"/>
-			<DCCReference Include="IdeEnhancements\CnVerEnhanceFrm.pas">
+			<DCCReference Include="IdeEnhancement\CnVerEnhancements.pas"/>
+			<DCCReference Include="IdeEnhancement\CnVerEnhanceFrm.pas">
 				<Form>CnVerEnhanceForm</Form>
 			</DCCReference>
 			<DCCReference Include="DebugEnhance\CnDebugEnhancements.pas">
@@ -568,7 +568,7 @@
 			<DCCReference Include="UsesWizard\CnUsesIdentFrm.pas">
 				<Form>CnUsesIdentForm</Form>
 			</DCCReference>
-			<DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
+			<DCCReference Include="IdeEnhancement\CnIdeEnhanceMenu.pas"/>
 			<DCCReference Include="SimpleWizard\CnIdeBRWizard.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptWizard.pas">
 				<Form>CnScriptWizardForm</Form>

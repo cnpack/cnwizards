@@ -78,15 +78,15 @@ USEFORMNS("PrefixWizard\CnPrefixExecuteFrm.pas", Cnprefixexecutefrm, CnPrefixExe
 USEUNIT("PrefixWizard\CnPrefixList.pas");
 USEFORMNS("PrefixWizard\CnPrefixNewFrm.pas", Cnprefixnewfrm, CnPrefixNewForm);
 USEUNIT("PrefixWizard\CnPrefixWizard.pas");
-USEUNIT("IdeEnhancements\CnFlatToolbarConfigFrm.pas");
-USEFORMNS("IdeEnhancements\CnFormEnhancements.pas", Cnformenhancements, CnFormEnhanceConfFrm);
-USEUNIT("IdeEnhancements\CnPaletteEnhancements.pas");
-USEFORMNS("IdeEnhancements\CnPaletteEnhanceFrm.pas", Cnpaletteenhancefrm, CnPalEnhanceFrm);
+USEUNIT("IdeEnhancement\CnFlatToolbarConfigFrm.pas");
+USEFORMNS("IdeEnhancement\CnFormEnhancements.pas", Cnformenhancements, CnFormEnhanceConfFrm);
+USEUNIT("IdeEnhancement\CnPaletteEnhancements.pas");
+USEFORMNS("IdeEnhancement\CnPaletteEnhanceFrm.pas", Cnpaletteenhancefrm, CnPalEnhanceFrm);
 USEUNIT("ScriptWizard\CnScriptClasses.pas");
 USEUNIT("ScriptWizard\CnScriptRegister.pas");
 USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
-USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
+USEFORMNS("IdeEnhancement\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
 USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);
 USEFORMNS("CorProperty\CnCorPropFrm.pas", Cncorpropfrm, CnCorPropForm);
 USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CnCorPropRuleForm);
@@ -99,12 +99,12 @@ USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProje
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
 USEFORMNS("SimpleWizard\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
 USEUNIT("Utils\CnSourceCropper.pas");
-USEUNIT("IdeEnhancements\CnCpuWinEnhancements.pas");
-USEFORMNS("IdeEnhancements\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
+USEUNIT("IdeEnhancement\CnCpuWinEnhancements.pas");
+USEFORMNS("IdeEnhancement\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
 USEFORMNS("DesignEditor\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
 USEFORMNS("DesignEditor\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
-USEFORMNS("IdeEnhancements\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
-USEFORMNS("IdeEnhancements\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
+USEFORMNS("IdeEnhancement\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
+USEFORMNS("IdeEnhancement\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
 USEUNIT("Utils\CnObjectInspectorWrapper.pas");
 USEUNIT("RepositoryWiz\CnRepositoryMenu.pas");
 USEUNIT("RepositoryWiz\CnDUnitWizard.pas");
@@ -128,7 +128,7 @@ USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, CnRecentFilesFram
 USEUNIT("ReopenWizard\CnRoInterfaces.pas");
 USEUNIT("ReopenWizard\CnRoOptions.pas");
 USEUNIT("ReopenWizard\CnRoWizard.pas");
-USEFORMNS("IdeEnhancements\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
+USEFORMNS("IdeEnhancement\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
 USEUNIT("DesignEditor\CnAlignPropEditor.pas");
 USERES("CnWizards_CB5.res");
 USEUNIT("Utils\CnPasCodeParser.pas");
@@ -148,8 +148,8 @@ USEUNIT("SrcEditorEnhance\CnSrcEditorBlockTools.pas");
 USEFORMNS("SimpleWizard\CnProcListWizard.pas", Cnproclistwizard, CnProcListFrm);
 USEUNIT("Utils\CnWizDfmParser.pas");
 USEUNIT("DesignEditor\CnNamePropEditor.pas");
-USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
-USEUNIT("IdeEnhancements\CnVerEnhancements.pas");
+USEFORMNS("IdeEnhancement\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
+USEUNIT("IdeEnhancement\CnVerEnhancements.pas");
 USEFORMNS("DebugEnhance\CnDebugEnhancements.pas", Cndebugenhancements, CnDebugEnhanceForm);
 USEFORMNS("DebugEnhance\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
 USEFORMNS("DebugEnhance\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */
@@ -177,7 +177,7 @@ USEFORMNS("CodingToolset\CnEditorExtractString.pas", Cnextractstringform, CnExtr
 USEUNIT("CodingToolset\CnEditorExtSelect.pas");
 USEUNIT("SrcEditorEnhance\CnSrcEditorKey.pas");
 USEFORMNS("SrcEditorEnhance\CnIdentRenameFrm.pas", Cnidentrenamefrm, CnIdentRenameForm);
-USEUNIT("IdeEnhancements\CnIdeEnhanceMenu.pas");
+USEUNIT("IdeEnhancement\CnIdeEnhanceMenu.pas");
 USEUNIT("SimpleWizard\CnIdeBRWizard.pas");
 USEFORMNS("SourceHighlight\CnSourceHighlightFrm.pas", Cnsourcehighlightfrm, CnSourceHighlightForm);
 USEFORMNS("SourceHighlight\CnHighlightLineFrm.pas", Cnhighlightlinefrm, CnHighlightLineForm);

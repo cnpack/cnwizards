@@ -43,9 +43,9 @@ USEFORMNS("PrefixWizard\CnPrefixConfigFrm.pas", Cnprefixconfigfrm, CnPrefixConfi
 USEFORMNS("PrefixWizard\CnPrefixEditFrm.pas", Cnprefixeditfrm, CnPrefixEditForm);
 USEFORMNS("PrefixWizard\CnPrefixExecuteFrm.pas", Cnprefixexecutefrm, CnPrefixExecuteForm);
 USEFORMNS("PrefixWizard\CnPrefixNewFrm.pas", Cnprefixnewfrm, CnPrefixNewForm);
-USEFORMNS("IdeEnhancements\CnFormEnhancements.pas", Cnformenhancements, CnFormEnhanceConfFrm);
-USEFORMNS("IdeEnhancements\CnPaletteEnhanceFrm.pas", Cnpaletteenhancefrm, CnPalEnhanceFrm);
-USEFORMNS("IdeEnhancements\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
+USEFORMNS("IdeEnhancement\CnFormEnhancements.pas", Cnformenhancements, CnFormEnhanceConfFrm);
+USEFORMNS("IdeEnhancement\CnPaletteEnhanceFrm.pas", Cnpaletteenhancefrm, CnPalEnhanceFrm);
+USEFORMNS("IdeEnhancement\CnCompFilterFrm.pas", Cncompfilterfrm, CnCompFilterForm);
 USEFORMNS("CorProperty\CnCorPropCfgFrm.pas", Cncorpropcfgfrm, CnCorPropCfgForm);
 USEFORMNS("CorProperty\CnCorPropFrm.pas", Cncorpropfrm, CnCorPropForm);
 USEFORMNS("CorProperty\CnCorPropRulesFrm.pas", Cncorproprulesfrm, CnCorPropRuleForm);
@@ -55,11 +55,11 @@ USEFORMNS("ProjectExtWizard\CnProjectUseUnitsFrm.pas", Cnprojectuseunitsfrm, CnP
 USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProjectFramesForm);
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
 USEFORMNS("SimpleWizard\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
-USEFORMNS("IdeEnhancements\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
+USEFORMNS("IdeEnhancement\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
 USEFORMNS("DesignEditor\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
 USEFORMNS("DesignEditor\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
-USEFORMNS("IdeEnhancements\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
-USEFORMNS("IdeEnhancements\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
+USEFORMNS("IdeEnhancement\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
+USEFORMNS("IdeEnhancement\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
 USEFORMNS("RepositoryWiz\CnIniFilerFrm.pas", Cninifilerfrm, CnIniFilerForm);
 USEFORMNS("RepositoryWiz\CnTestWizard.pas", Cntestwizard, CnTestWizardForm);
@@ -72,12 +72,12 @@ USEFORMNS("ExplorerWizard\CnExploreFilterEditor.pas", Cnexplorefiltereditor, CnE
 USEFORMNS("ProjectExtWizard\CnProjectViewBaseFrm.pas", Cnprojectviewbasefrm, CnProjectViewBaseForm);
 USEFORMNS("ReopenWizard\CnFilesSnapshotManageFrm.pas", Cnfilessnapshotmanagefrm, CnProjectFilesSnapshotManageForm);
 USEFORMNS("ReopenWizard\CnRoFrmFileList.pas", Cnrofrmfilelist, CnRecentFilesFrame); /* TFrame: File Type */
-USEFORMNS("IdeEnhancements\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
+USEFORMNS("IdeEnhancement\CnWinTopRoller.pas", Cnwintoproller, CnFrmTopRoller);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorEnhance.pas", Cnsrceditorenhance, CnSrcEditorEnhanceForm);
 USEFORMNS("ProjectExtWizard\CnProjectBackupFrm.pas", Cnprojectbackupfrm, CnProjectBackupForm);
 USEFORMNS("ProjectExtWizard\CnProjectBackupSaveFrm.pas", Cnprojectbackupsavefrm, CnProjectBackupSaveForm);
 USEFORMNS("SimpleWizard\CnProcListWizard.pas", Cnproclistwizard, CnProcListFrm);
-USEFORMNS("IdeEnhancements\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
+USEFORMNS("IdeEnhancement\CnVerEnhanceFrm.pas", Cnverenhancefrm, CnVerEnhanceForm);
 USEFORMNS("DebugEnhance\CnDebugEnhancements.pas", Cndebugenhancements, CnDebugEnhanceForm);
 USEFORMNS("DebugEnhance\CnDataSetVisualizer.pas", Cndatasetvisualizer, CnDataSetViewerFrame); /* TFrame: File Type */
 USEFORMNS("DebugEnhance\CnStringsVisualizer.pas", Cnstringsvisualizer, CnStringsViewerFrame); /* TFrame: File Type */

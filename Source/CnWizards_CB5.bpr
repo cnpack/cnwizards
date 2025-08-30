@@ -133,9 +133,9 @@
       SourceStat\CnStatFrm.dfm SourceStat\CnStatResultFrm.dfm 
       PrefixWizard\CnPrefixCompFrm.dfm PrefixWizard\CnPrefixConfigFrm.dfm 
       PrefixWizard\CnPrefixEditFrm.dfm PrefixWizard\CnPrefixExecuteFrm.dfm 
-      PrefixWizard\CnPrefixNewFrm.dfm IdeEnhancements\CnFormEnhancements.dfm 
-      IdeEnhancements\CnPaletteEnhanceFrm.dfm ScriptWizard\CnScriptFrm.dfm 
-      ScriptWizard\CnScriptWizard.dfm IdeEnhancements\CnCompFilterFrm.dfm 
+      PrefixWizard\CnPrefixNewFrm.dfm IdeEnhancement\CnFormEnhancements.dfm 
+      IdeEnhancement\CnPaletteEnhanceFrm.dfm ScriptWizard\CnScriptFrm.dfm 
+      ScriptWizard\CnScriptWizard.dfm IdeEnhancement\CnCompFilterFrm.dfm 
       CorProperty\CnCorPropCfgFrm.dfm CorProperty\CnCorPropFrm.dfm 
       CorProperty\CnCorPropRulesFrm.dfm 
       ProjectExtWizard\CnProjectViewFormsFrm.dfm 
@@ -144,8 +144,8 @@
       ProjectExtWizard\CnProjectFramesFrm.dfm 
       ProjectExtWizard\CnProjectListUsedFrm.dfm 
       SimpleWizard\CnCommentCropper.dfm 
-      IdeEnhancements\CnCpuWinEnhanceFrm.dfm IdeEnhancements\CnObjInspectorEnhancements.dfm 
-      IdeEnhancements\CnObjInspectorCommentFrm.dfm 
+      IdeEnhancement\CnCpuWinEnhanceFrm.dfm IdeEnhancement\CnObjInspectorEnhancements.dfm 
+      IdeEnhancement\CnObjInspectorCommentFrm.dfm 
       DesignEditor\CnMultiLineEdtToolOptFrm.dfm 
       DesignEditor\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
       RepositoryWiz\CnIniFilerFrm.dfm RepositoryWiz\CnTestWizard.dfm 
@@ -154,10 +154,10 @@
       ExplorerWizard\CnExploreFilter.dfm 
       ExplorerWizard\CnExploreFilterEditor.dfm ProjectExtWizard\CnProjectViewBaseFrm.dfm 
       ReopenWizard\CnFilesSnapshotManageFrm.dfm ReopenWizard\CnRoFrmFileList.dfm 
-      IdeEnhancements\CnWinTopRoller.dfm SrcEditorEnhance\CnSrcEditorEnhance.dfm 
+      IdeEnhancement\CnWinTopRoller.dfm SrcEditorEnhance\CnSrcEditorEnhance.dfm 
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
-      SimpleWizard\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
+      SimpleWizard\CnProcListWizard.dfm IdeEnhancement\CnVerEnhanceFrm.dfm 
       DebugEnhance\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
       DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm 
       DebugEnhance\CnWideVisualizer.dfm 
@@ -183,7 +183,7 @@
     <PACKAGES value="vcl50.bpi vclx50.bpi vcldb50.bpi vcldbx50.bpi vclbde50.bpi dsnide50.bpi 
       vclmid50.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;DesignWizard;CodingToolset;SimpleWizard;SrcTemplate;SourceDiff;DesignEditor;SourceStat;PrefixWizard;IdeEnhancements;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;DebugEnhance;SourceHighlight;InputHelper;CodeFormatter;AICoder"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;DesignWizard;CodingToolset;SimpleWizard;SrcTemplate;SourceDiff;DesignEditor;SourceStat;PrefixWizard;IdeEnhancement;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;DebugEnhance;SourceHighlight;InputHelper;CodeFormatter;AICoder"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -192,15 +192,15 @@
     <USERDEFINES value="ENABLE_UIINTERACT;SUPPORT_EVALUATE;${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB5.bpf"/>
-    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
-    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-IAICoder -ICodeFormatter -IScriptWizard -ISrcTemplate -IReopenWizard 
       -ISimpleWizard -IConfig -IMultiLang -IMisc -ISrcEditorEnhance 
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
-      -IIdeEnhancements -IPrefixWizard -ISourceStat -IDesignEditor 
+      -IIdeEnhancement -IPrefixWizard -ISourceStat -IDesignEditor 
       -IDesignWizard -IDebugEnhance -ISourceDiff -ICodingToolset 
       -ISourceHighlight -IInputHelper -IUtils -IFramework -I$(BCB)\include 
       -I$(BCB)\include\vcl -I$(BCB)\source\toolsapi -Ithirdparty 

@@ -3,7 +3,7 @@ program TestComment;
 uses
   Forms,
   UnitComment in 'UnitComment.pas' {FormTestComment},
-  CnObjInspectorCommentFrm in '..\..\..\..\Source\IdeEnhancements\CnObjInspectorCommentFrm.pas' {CnObjInspectorCommentForm};
+  CnObjInspectorCommentFrm in '..\..\..\..\Source\IdeEnhancement\CnObjInspectorCommentFrm.pas' {CnObjInspectorCommentForm};
 
 {$R *.RES}
 
