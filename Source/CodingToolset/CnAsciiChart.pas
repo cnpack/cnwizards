@@ -175,13 +175,17 @@ const
 constructor TCnAsciiChart.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
   IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
     'CnAsciiForm');
+{$ENDIF}
 end;
 
 destructor TCnAsciiChart.Destroy;
 begin
+{$IFDEF DELPHI_OTA}
   IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
+{$ENDIF}
   FreeAndNil(CnAsciiForm);
   inherited;
 end;
@@ -190,7 +194,12 @@ procedure TCnAsciiChart.Execute;
 begin
   if CnAsciiForm = nil then
     CnAsciiForm := TCnAsciiForm.Create(nil);
+
+{$IFDEF DELPHI_OTA}
   IdeDockManager.ShowForm(CnAsciiForm);
+{$ELSE}
+  CnAsciiForm.Show;
+{$ENDIF}
 end;
 
 procedure TCnAsciiChart.SetActive(Value: Boolean);
@@ -203,12 +212,16 @@ begin
   begin
     if Value then
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
         'CnAsciiForm');
+{$ENDIF}
     end
     else
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
+{$ENDIF}
       FreeAndNil(CnAsciiForm);
     end;
   end;
@@ -235,17 +248,17 @@ procedure TCnAsciiChart.ParentActiveChanged(ParentActive: Boolean);
 begin
   if ParentActive then
   begin
+{$IFDEF DELPHI_OTA}
     IdeDockManager.RegisterDockableForm(TCnAsciiForm, CnAsciiForm,
       'CnAsciiForm');
+{$ENDIF}
   end
   else
   begin
+{$IFDEF DELPHI_OTA}
     IdeDockManager.UnRegisterDockableForm(CnAsciiForm, 'CnAsciiForm');
-    if CnAsciiForm <> nil then
-    begin
-      CnAsciiForm.Free;
-      CnAsciiForm := nil;
-    end;
+{$ENDIF}
+    FreeAndNil(CnAsciiForm);
   end;
 end;
 
