@@ -7,7 +7,7 @@ SET ROOTDIR=%~dp0
 ECHO ROOTDIR=!ROOTDIR!
 SET DCC32="C:\Program Files\Borland\Delphi5\Bin\dcc32.exe"
 SET DCC7_32="C:\Program Files\Borland\Delphi7\Bin\dcc32.exe"
-SET DCCR_32="C:\Program Files\Embarcadero\RAD Studio\9.0\bin\dcc32.exe"
+SET DCCR_32="C:\Program Files\Embarcadero\Studio\20.0\bin\dcc32.exe"
 
 CD %ROOTDIR%\Delphi\Program
 CD
@@ -58,6 +58,16 @@ FOR /D %%D IN (.\*) DO (
   )
   CD ..
 )
+
+CD %ROOTDIR%\Delphi\Simulator
+CD ..\..\..
+CALL CleanInplace.bat 2> NUL
+CD %ROOTDIR%\Delphi\Simulator
+ECHO =====================================
+ECHO Enter Simulator
+ECHO Building StandAlone.dpr with StandAlone.cfg in Simulator
+%DCC32% StandAlone.dpr < StandAlone.cfg
+
 ECHO Build CnPack IDE Wizards Delphi Stand Alone Test Cases Complete.
 :END
 CD %ROOTDIR%
