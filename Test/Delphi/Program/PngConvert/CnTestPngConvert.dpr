@@ -3,7 +3,7 @@ program CnTestPngConvert;
 uses
   Forms,
   CnPngConvert in 'CnPngConvert.pas' {FormTestPng},
-  CnPngUtils in '..\..\Tool\CnPngLib\CnPngUtils.pas';
+  CnPngUtils in '..\..\..\..\Tool\CnPngLib\CnPngUtils.pas';
 
 {$R *.res}
 

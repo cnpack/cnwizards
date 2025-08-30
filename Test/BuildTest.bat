@@ -28,7 +28,7 @@ FOR /D %%D IN (.\*) DO (
         %DCC7_32% "%%F"
         IF !ERRORLEVEL! NEQ 0 GOTO END
       ) ELSE (
-        IF "!DIRNAME:~-4!" == "_FMX" (
+        IF "!DIRNAME!" == ".\WizMethodHook" (
           %DCCR_32% "%%F"
           IF !ERRORLEVEL! NEQ 0 GOTO END
         ) ELSE (

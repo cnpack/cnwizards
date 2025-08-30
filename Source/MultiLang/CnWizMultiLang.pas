@@ -64,7 +64,6 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
-{$IFNDEF TEST_APP}
 {$IFNDEF STAND_ALONE}
   CnWizUtils, CnDesignEditor, CnWizScaler,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
@@ -74,7 +73,6 @@ uses
   CnConsts, CnWizClasses, CnLangUtils, CnWizTranslate, CnWizManager, CnWizOptions,
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
   CnFormScaler, CnWizIni, CnLangCollection,
-{$ENDIF}
   StdCtrls, ComCtrls, IniFiles;
 
 type
@@ -102,7 +100,6 @@ type
   { TCnTranslateForm }
 
   TCnTranslateForm = class(TForm)
-{$IFNDEF TEST_APP}
   private
     FEnlarge: TCnWizSizeEnlarge;
     FActionList: TActionList;
@@ -129,9 +126,8 @@ type
     {* Delphi 和 Lazarus 的 TGroupBox，内部控件的 Y 坐标有偏差，大约 16，需要减去}
 
     function GetEnlarged: Boolean;
-{$ENDIF}
+
   protected
-{$IFNDEF TEST_APP}
     FScaler: TCnFormScaler;
 
     procedure Loaded; override;
@@ -141,7 +137,6 @@ type
 
     function NeedAdjustRightBottomMargin: Boolean; virtual;
     {* 控制子类是否要调整右下方向边距}
-{$ENDIF}
 
 {$IFDEF CREATE_PARAMS_BUG}
     procedure CreateParams(var Params: TCreateParams); override;
@@ -179,8 +174,6 @@ type
     {* 进行全窗体翻译}
   end;
 
-{$IFNDEF TEST_APP}
-
 function CnWizLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
 
@@ -189,8 +182,6 @@ procedure InitLangManager;
 function GetFileFromLang(const FileName: string): string;
 
 procedure RegisterThemeClass;
-
-{$ENDIF}
 
 implementation
 
@@ -215,7 +206,6 @@ const
   csHelpDir = 'Help\';
 {$ENDIF}
 
-{$IFNDEF TEST_APP}
 var
   FStorage: TCnHashLangFileStorage;
   FDefaultFontSize: Integer = 8;
@@ -312,7 +302,6 @@ function GetFileFromLang(const FileName: string): string;
 begin
   Result := CnWizHelp.GetFileFromLang(FileName);
 end;
-{$ENDIF}
 
 { TCnWizMultiLang }
 
@@ -423,8 +412,6 @@ begin
       FStorage.Languages[I].LanguageID;
   end;
 end;
-
-{$IFNDEF TEST_APP}
 
 { TCnTranslateForm }
 
@@ -784,8 +771,6 @@ begin
   DoLanguageChanged(Sender);
 end;
 
-{$ENDIF TEST_APP}
-
 procedure TCnTranslateForm.InitFormControls;
 {$IFDEF COMBOBOX_CHS_BUG}
 var
@@ -811,21 +796,16 @@ end;
 
 procedure TCnTranslateForm.DoHelpError;
 begin
-{$IFNDEF TEST_APP}
   ErrorDlg(SCnNoHelpofThisLang);
-{$ENDIF}
 end;
 
 procedure TCnTranslateForm.ShowFormHelp;
 begin
-{$IFNDEF TEST_APP}
   FHelpAction.Execute;
-{$ENDIF}
 end;
 
 procedure TCnTranslateForm.Translate;
 begin
-{$IFNDEF TEST_APP}
 {$IFDEF DEBUG}
   CnDebugger.LogEnter(ClassName + '|TCnTranslateForm.Translate');
 {$ENDIF}
@@ -851,7 +831,6 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogLeave(ClassName + '|TCnTranslateForm.Translate');
 {$ENDIF}
-{$ENDIF TEST_APP}
 end;
 
 function TCnTranslateForm.GetNeedPersistentPosition: Boolean;
@@ -867,8 +846,6 @@ begin
   inherited;
   // 避免 Loaded 时还未获得 FEnlarge 值
 end;
-
-{$IFNDEF TEST_APP}
 
 procedure TCnTranslateForm.ProcessSizeEnlarge;
 {$IFNDEF STAND_ALONE}
@@ -1121,6 +1098,4 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizMultiLang finalization.');
 {$ENDIF}
-
-{$ENDIF TEST_APP}
 end.

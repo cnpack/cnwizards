@@ -39,7 +39,7 @@ MaxStackSize=1048576
 ImageBase=4194304
 ExeDescription=
 [Directories]
-OutputDir=..\..\Bin
+OutputDir=..\..\..\..\Bin
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=

@@ -1641,6 +1641,9 @@ var
 
 begin
   Result := False;
+  if WizOptions = nil then
+    Exit;
+
   if WizOptions.DisableIcons and not IgnoreDisabled then // 参数可强制忽略 WizOptions.DisableIcons
     Exit;
 

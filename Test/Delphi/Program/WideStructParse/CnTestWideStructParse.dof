@@ -43,7 +43,7 @@ OutputDir=
 UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
-SearchPath=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto
+SearchPath=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\Source\Misc;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditors;..\..\..\..\Source\MultiLang
 Packages=Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50
 Conditionals=STAND_ALONE
 DebugSourceDirs=
@@ -78,13 +78,17 @@ ProductVersion=1.0.0.0
 Comments=
 [Excluded Packages]
 $(DELPHI)\Bin\dclite50.bpl=Borland Integrated Translation Environment
+[HistoryLists\hlConditionals]
+Count=1
+Item0=STAND_ALONE
 [HistoryLists\hlUnitAliases]
 Count=1
 Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
 [HistoryLists\hlSearchPath]
-Count=5
-Item0=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto
-Item1=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto
-Item2=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils;..\..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto
-Item3=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils
-Item4=..\..\..\..\Source
+Count=6
+Item0=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\Source\Misc;..\..\..\..\Source\Config;..\..\..\..\Source\DesignEditors;..\..\..\..\Source\MultiLang
+Item1=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\Crypto
+Item2=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto
+Item3=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils;..\..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Crypto
+Item4=..\..\..\..\Source;..\..\..\..\Source\ThirdParty;..\..\..\..\Source\Utils
+Item5=..\..\..\..\Source
