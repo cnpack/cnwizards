@@ -25,7 +25,7 @@ unit CnComponentSelector;
 * 单元名称：组件选择工具专家单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：WizOptions.UseSearchCombo 为 True 时，cbbByClass 和 cbbByEvent
-*           会被 SearchComboBox 替之
+*           会被 SearchComboBox 替之，但 Lazarus 下先禁用
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
@@ -366,7 +366,7 @@ begin
   end;
   rbSpecControl.Enabled := cbbFilterControl.Items.Count > 0;
 
-  if WizOptions.UseSearchCombo then
+  if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
   begin
     CloneSearchCombo(FCbbByClass, cbbByClass);
     CloneSearchCombo(FCbbByEvent, cbbByEvent);
@@ -374,9 +374,13 @@ begin
     // 初始化类列表
     FCbbByClass.Items.Clear;
     for I := 0 to ContainerWindow.ComponentCount - 1 do
+    begin
       with ContainerWindow.Components[I] do
+      begin
         if FCbbByClass.Items.IndexOf(ClassName) < 0 then
           FCbbByClass.Items.AddObject(ClassName, Pointer(ClassType));
+      end;
+    end;
 
     // 初始化事件列表
     FCbbByEvent.Items.Clear;
@@ -433,7 +437,7 @@ var
   // 类型是否匹配
   function MatchClass(AObject: TObject): Boolean;
   begin
-    if WizOptions.UseSearchCombo then
+    if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
       Result := not cbByClass.Checked or (FcbbByClass.Text = '') or
       AObject.ClassNameIs(FcbbByClass.Text) or
       (cbSubClass.Checked and AObject.InheritsFrom(
@@ -452,7 +456,7 @@ var
     EvtTxt: string;
   begin
     Result := True;
-    if WizOptions.UseSearchCombo then
+    if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
       EvtTxt := FcbbByEvent.Text
     else
       EvtTxt := cbbByEvent.Text;
@@ -604,7 +608,7 @@ begin
   seTagEnd.Visible := cbbByTag.ItemIndex = 3;
   lblTag.Visible := cbbByTag.ItemIndex = 3;
 
-  if WizOptions.UseSearchCombo then
+  if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
   begin
     FcbbByClass.Enabled := cbByClass.Checked;
     FcbbByEvent.Enabled := chkByEvent.Checked;
@@ -761,14 +765,14 @@ begin
   Ini.WriteString(Section, csByNameText, edtByName.Text);
   Ini.WriteBool(Section, csByClass, cbByClass.Checked);
 
-  if WizOptions.UseSearchCombo then
+  if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
     Ini.WriteString(Section, csByClassText, FcbbByClass.Text)
   else
     Ini.WriteString(Section, csByClassText, cbbByClass.Text);
   Ini.WriteBool(Section, csSubClass, cbSubClass.Checked);
   Ini.WriteBool(Section, csByEvent, chkByEvent.Checked);
 
-  if WizOptions.UseSearchCombo then
+  if {$IFDEF LAZARUS} False and {$ENDIF} WizOptions.UseSearchCombo then
     Ini.WriteInteger(Section, csByEvent, FcbbByEvent.ItemIndex)
   else
     Ini.WriteInteger(Section, csByEvent, cbbByEvent.ItemIndex);
