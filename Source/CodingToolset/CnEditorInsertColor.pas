@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
-  CnWizConsts, CnSelectionCodeTool, CnIni;
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizUtils, CnConsts,
+  CnCommon, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnIni,
+  CnWizClasses;
 
 type
 

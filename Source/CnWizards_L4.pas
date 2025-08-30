@@ -17,7 +17,8 @@ uses
   CnProjectViewBaseFrm, CnEditorOpenFile, CnEditorOpenFileFrm, CnFloatWindow, 
   CnSourceCropper, CnPascalAST, CnLineParser, CnWizEditFiler, 
   CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
-  CnTestFormDesignerWizard, CnComponentSelector, LazarusPackageIntf;
+  CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
+  CnEditorCodeSwap, CnEditorCodeToString, LazarusPackageIntf;
 
 implementation
 

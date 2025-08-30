@@ -45,8 +45,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnCodingToolsetWizard, CnWizConsts;
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizClasses,
+  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnWizConsts, CnWideStrings;
 
 type
 
@@ -155,8 +155,15 @@ procedure TCnSelectionCodeTool.Execute;
 const
   SCnOtaBatchSize = $7FFF;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
   Block: IOTAEditBlock;
+  Reader: IOTAEditReader;
+  Writer: IOTAEditWriter;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  BBegin, BEnd: TPoint;
+{$ENDIF}
   BlockText: string;
   OrigText: AnsiString;
   HasTab: Boolean;
@@ -164,192 +171,294 @@ var
   Buf: PAnsiChar;
   I, BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos, ReadStart: Integer;
-  Reader: IOTAEditReader;
-  Writer: IOTAEditWriter;
   Row, Col, Len, ASize: Integer;
   NewRow, NewCol: Integer;
   Stream: TMemoryStream;
 begin
   View := CnOtaGetTopMostEditView;
-  if View <> nil then
+  if View = nil then
   begin
-    Block := View.Block;
-    StartPos := 0;
-    EndPos := 0;
-    BlockStartLine := 0;
-    BlockEndLine := 0;
-    NewRow := 0;
-    NewCol := 0;
-    if GetStyle = csLine then
-    begin
-{$IFDEF DEBUG}
-      if Block = nil then
-        CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is nil.')
-      else if Block.IsValid then
-        CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is Valid.');
+    ErrorDlg(SCnEditorCodeToolSelIsEmpty);
+    Exit;
+  end;
+
+{$IFDEF DELPHI_OTA}
+  Block := View.Block;
 {$ENDIF}
-      if (Block <> nil) and Block.IsValid then
-      begin             // 选择文本扩大到整行
-        BlockStartLine := Block.StartingRow;
-        StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, BlockStartLine), View);
-        BlockEndLine := Block.EndingRow;
-        // 光标不在行首时，处理到下一行行首
-        if Block.EndingColumn > 1 then
+
+  StartPos := 0;
+  EndPos := 0;
+  BlockStartLine := 0;
+  BlockEndLine := 0;
+  NewRow := 0;
+  NewCol := 0;
+
+  if GetStyle = csLine then
+  begin
+{$IFDEF DELPHI_OTA}
+{$IFDEF DEBUG}
+    if Block = nil then
+      CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is nil.')
+    else if Block.IsValid then
+      CnDebugger.LogMsg('TCnSelectionCodeTool.Execute: Block is Valid.');
+{$ENDIF}
+
+    if (Block <> nil) and Block.IsValid then
+    begin             // 选择文本扩大到整行
+      BlockStartLine := Block.StartingRow;
+      StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, BlockStartLine), View);
+      BlockEndLine := Block.EndingRow;
+      // 光标不在行首时，处理到下一行行首
+      if Block.EndingColumn > 1 then
+      begin
+        if BlockEndLine < View.Buffer.GetLinesInBuffer then
         begin
-          if BlockEndLine < View.Buffer.GetLinesInBuffer then
-          begin
-            Inc(BlockEndLine);
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, BlockEndLine), View);
-          end
-          else
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, BlockEndLine), View);
-        end
-        else
+          Inc(BlockEndLine);
           EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, BlockEndLine), View);
-      end
-      else
-      begin    // 未选择表示转换整行。
-        if CnOtaGetCurSourcePos(Col, Row) then
-        begin
-          StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, Row), View);
-          if Row < View.Buffer.GetLinesInBuffer then
-          begin
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Row + 1), View);
-            NewRow := Row; 
-            NewCol := Col;
-            GetNewPos(NewRow, NewCol); // 让子类确定一下位置变化
-          end
-          else
-            EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, Row), View);
         end
         else
-        begin
-          ErrorDlg(SCnEditorCodeToolNoLine);
-          Exit;
-        end;
-      end;
-    end
-    else if GetStyle = csSelText then
-    begin
-      if (Block <> nil) and (Block.IsValid) then
-      begin
-        // 仅处理选择的文本。但这个机制在代码中包含 Tab 字符时有差错需要绕过
-        StartPos := CnOtaEditPosToLinePos(OTAEditPos(Block.StartingColumn,
-          Block.StartingRow), View);
-        EndPos := CnOtaEditPosToLinePos(OTAEditPos(Block.EndingColumn,
-          Block.EndingRow), View);
-      end;
-    end
-    else
-    begin
-      StartPos := 0;
-      Stream := TMemoryStream.Create;
-      CnOtaSaveCurrentEditorToStream(Stream, False);
-      EndPos := Stream.Size - 1; // 用笨办法得到编辑的长度，
-      // 减一是为了去掉 SaveToStream 时尾部加的 #0 的一
-      Stream.Free;
-    end;
-
-    HasTab := False;
-    if (GetStyle = csSelText) and (Block <> nil) and (Block.IsValid) then
-    begin
-      BlockText := Block.Text;
-      if Length(BlockText) > 0 then
-      begin
-        for I := 0 to Length(BlockText) - 1 do
-        begin
-          if BlockText[I] = #09 then
-          begin
-            HasTab := True;
-            Break;
-          end;
-        end;
-      end;
-    end;
-
-    if HasTab then
-    begin
-{$IFDEF DEBUG}
-      CnDebugger.LogMsg('TCnSelectionCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
-{$ENDIF}
-      // 直接得到 Ansi/Utf8/UnicodeString
-      OrigText := AnsiString(BlockText);
-    end
-    else
-    begin
-      // Reader 读出的是 Ansi/Utf8/Utf8
-      Len := EndPos - StartPos;
-{$IFDEF DEBUG}
-      CnDebugger.LogFmt('TCnSelectionCodeTool.Execute StartPos %d, EndPos %d.', [StartPos, EndPos]);
-{$ENDIF}
-      Assert(Len >= 0);
-      SetLength(OrigText, Len);
-      Buf := Pointer(OrigText);
-      ReadStart := StartPos;
-      Reader := View.Buffer.CreateReader;
-      try
-        while Len > SCnOtaBatchSize do // 逐次读取
-        begin
-          ASize := Reader.GetText(ReadStart, Buf, SCnOtaBatchSize);
-          Inc(Buf, ASize);
-          Inc(ReadStart, ASize);
-          Dec(Len, ASize);
-        end;
-        if Len > 0 then // 读最后剩余的
-          Reader.GetText(ReadStart, Buf, Len);
-      finally
-        Reader := nil;
-      end;
-    end;
-
-    if OrigText <> '' then
-    begin
-    {$IFDEF UNICODE}
-      if HasTab then
-        Text := ProcessText(string(OrigText))  // 处理 UnicodeString 文本
+          EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, BlockEndLine), View);
+      end
       else
-        Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理 Utf8 转成 UnicodeString 的文本
-    {$ELSE}
-      Text := ProcessText(ConvertEditorTextToText(OrigText)); // 处理 Ansi / Utf8转成的Ansi 文本
-    {$ENDIF}
-
-      if not HasTab then
+        EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, BlockEndLine), View);
+    end
+    else
+    begin    // 未选择表示转换整行。
+      if CnOtaGetCurSourcePos(Col, Row) then
       begin
-        Writer := View.Buffer.CreateUndoableWriter;
-        try
-          Writer.CopyTo(StartPos);
-          // 把 Ansi/Ansi/UnicodeString 转换成 Ansi/Utf8/Utf8 再用 Writer 写入
-          {$IFDEF UNICODE}
-          Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
-          {$ELSE}
-          Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
-          {$ENDIF}
-          Writer.DeleteTo(EndPos);
-        finally
-          Writer := nil;
-        end;
+        StartPos := CnOtaEditPosToLinePos(OTAEditPos(1, Row), View);
+        if Row < View.Buffer.GetLinesInBuffer then
+        begin
+          EndPos := CnOtaEditPosToLinePos(OTAEditPos(1, Row + 1), View);
+          NewRow := Row; 
+          NewCol := Col;
+          GetNewPos(NewRow, NewCol); // 让子类确定一下位置变化
+        end
+        else
+          EndPos := CnOtaEditPosToLinePos(OTAEditPos(255, Row), View);
       end
       else
       begin
-        // 有 Tab 键时上面这样按位置插入会有偏差，各个 IDE 下都有，换成替换当前选区
-        CnOtaReplaceCurrentSelection(Text, True, False, False);
+        ErrorDlg(SCnEditorCodeToolNoLine);
+        Exit;
       end;
     end;
+{$ENDIF}
 
-    if (NewRow > 0) and (NewCol > 0) then
+{$IFDEF LAZARUS}
+    OrigText := View.Selection;
+    if OrigText = '' then                // 未选择则本行
     begin
-      View.CursorPos := OTAEditPos(NewCol, NewRow);
+      OrigText := View.CurrentLineText;
+
+      // 再扩展选择区，本行首到下一行行首
+      BBegin.X := 1;
+      BBegin.Y := View.CursorTextXY.Y;
+
+      BEnd.X := 1;
+      BEnd.Y := View.CursorTextXY.Y + 1;
+
+      View.BlockBegin := BBegin;
+      View.BlockEnd := BEnd;
     end
-    else if (BlockStartLine > 0) and (BlockEndLine > 0) then
+    else
     begin
-      CnOtaSelectBlock(View.Buffer, OTACharPos(0, BlockStartLine),
-        OTACharPos(0, BlockEndLine));
-    end;
+      // 有选择，从选择开始头，到选择结束行的下一行行首，先取内容
+      if View.SelStart < View.SelEnd then
+      begin
+        StartPos := View.BlockBegin.Y;
+        EndPos := View.BlockEnd.Y;
+      end
+      else if View.SelStart > View.SelEnd then
+      begin
+        StartPos := View.BlockEnd.Y;
+        EndPos := View.BlockBegin.Y;
+      end;
 
-    View.Paint;
+      OrigText := '';
+      for I := StartPos to EndPos do
+      begin
+        if I = StartPos then
+          OrigText := View.Lines[I - 1]
+        else if (I <> EndPos) and (View.Lines[I - 1] <> '') then // 最后一行如果是回车换行就不加
+          OrigText := OrigText + #13#10 + View.Lines[I - 1];
+      end;
+
+      // 再扩展选择区
+      BBegin := View.BlockBegin;
+      BEnd := View.BlockEnd;
+
+      if BBegin.X > 1 then
+      begin
+        BBegin.X := 1;
+        View.BlockBegin := BBegin;
+      end;
+
+      if BEnd.X > 1 then
+      begin
+        BEnd.Y := BEnd.Y + 1;
+        BEnd.X := 1;
+        View.BlockEnd := BEnd;
+      end;
+
+      // 是否要加个回车换行？
+    end;
+{$ENDIF}
+  end
+  else if GetStyle = csSelText then
+  begin
+{$IFDEF DELPHI_OTA}
+    if (Block <> nil) and (Block.IsValid) then
+    begin
+      // 仅处理选择的文本。但这个机制在代码中包含 Tab 字符时有差错需要绕过
+      StartPos := CnOtaEditPosToLinePos(OTAEditPos(Block.StartingColumn,
+        Block.StartingRow), View);
+      EndPos := CnOtaEditPosToLinePos(OTAEditPos(Block.EndingColumn,
+        Block.EndingRow), View);
+    end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    OrigText := View.Selection;    // 直接是选择区
+{$ENDIF}
   end
   else
-    ErrorDlg(SCnEditorCodeToolSelIsEmpty);
+  begin
+{$IFDEF DELPHI_OTA}
+    StartPos := 0;
+    Stream := TMemoryStream.Create;
+    CnOtaSaveCurrentEditorToStream(Stream, False);
+    EndPos := Stream.Size - 1; // 用笨办法得到编辑的长度，
+    // 减一是为了去掉 SaveToStream 时尾部加的 #0 的一
+    Stream.Free;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    OrigText := View.Lines.Text;   // 直接是整个文件内容
+{$ENDIF}
+  end;
+
+{$IFDEF DELPHI_OTA}
+  HasTab := False;
+  if (GetStyle = csSelText) and (Block <> nil) and (Block.IsValid) then
+  begin
+    BlockText := Block.Text;
+    if Length(BlockText) > 0 then
+    begin
+      for I := 0 to Length(BlockText) - 1 do
+      begin
+        if BlockText[I] = #09 then
+        begin
+          HasTab := True;
+          Break;
+        end;
+      end;
+    end;
+  end;
+
+  if HasTab then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnSelectionCodeTool.Execute has Tab Chars for Selection. Using Block Text.');
+{$ENDIF}
+    // 直接得到 Ansi/Utf8/UnicodeString
+    OrigText := AnsiString(BlockText);
+  end
+  else
+  begin
+    // Reader 读出的是 Ansi/Utf8/Utf8
+    Len := EndPos - StartPos;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnSelectionCodeTool.Execute StartPos %d, EndPos %d.', [StartPos, EndPos]);
+{$ENDIF}
+    Assert(Len >= 0);
+    SetLength(OrigText, Len);
+    Buf := Pointer(OrigText);
+    ReadStart := StartPos;
+    Reader := View.Buffer.CreateReader;
+    try
+      while Len > SCnOtaBatchSize do // 逐次读取
+      begin
+        ASize := Reader.GetText(ReadStart, Buf, SCnOtaBatchSize);
+        Inc(Buf, ASize);
+        Inc(ReadStart, ASize);
+        Dec(Len, ASize);
+      end;
+      if Len > 0 then // 读最后剩余的
+        Reader.GetText(ReadStart, Buf, Len);
+    finally
+      Reader := nil;
+    end;
+  end;
+{$ENDIF}
+
+  // 拿到最终的 OrigText
+  if OrigText <> '' then
+  begin
+{$IFDEF LAZARUS}
+    Text := ProcessText(CnUtf8ToAnsi2(OrigText));                 // 处理 Utf8 转成 Ansi 的文本
+{$ELSE}
+  {$IFDEF UNICODE}
+    if HasTab then
+      Text := ProcessText(string(OrigText))                      // 处理 UnicodeString 文本
+    else
+      Text := ProcessText((ConvertEditorTextToTextW(OrigText))); // 处理 Utf8 转成 UnicodeString 的文本
+  {$ELSE}
+    Text := ProcessText(ConvertEditorTextToText(OrigText));      // 处理 Ansi / Utf8转成的Ansi 文本
+  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // 替换选区或在当前光标插入
+    if View.SelStart = View.SelEnd then
+      View.ReplaceText(View.CursorTextXY, View.CursorTextXY, Text)
+    else
+      View.ReplaceText(View.BlockBegin, View.BlockEnd, Text);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+    if not HasTab then
+    begin
+      Writer := View.Buffer.CreateUndoableWriter;
+      try
+        Writer.CopyTo(StartPos);
+        // 把 Ansi/Ansi/UnicodeString 转换成 Ansi/Utf8/Utf8 再用 Writer 写入
+        {$IFDEF UNICODE}
+        Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+        {$ELSE}
+        Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+        {$ENDIF}
+        Writer.DeleteTo(EndPos);
+      finally
+        Writer := nil;
+      end;
+    end
+    else
+    begin
+      // 有 Tab 键时上面这样按位置插入会有偏差，各个 IDE 下都有，换成替换当前选区
+      CnOtaReplaceCurrentSelection(Text, True, False, False);
+    end;
+{$ENDIF}
+  end;
+
+  // 移动光标到新位置
+{$IFDEF DELPHI_OTA}
+  if (NewRow > 0) and (NewCol > 0) then
+  begin
+    View.CursorPos := OTAEditPos(NewCol, NewRow);
+  end
+  else if (BlockStartLine > 0) and (BlockEndLine > 0) then
+  begin
+    CnOtaSelectBlock(View.Buffer, OTACharPos(0, BlockStartLine),
+      OTACharPos(0, BlockEndLine));
+  end;
+
+  View.Paint;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // 似乎暂时用不着
+{$ENDIF}
 end;
 
 function TCnSelectionCodeTool.GetState: TWizardState;
@@ -365,7 +474,7 @@ end;
 
 procedure TCnSelectionCodeTool.GetNewPos(var ARow, ACol: Integer);
 begin
-// 基类啥都不做，不改变值
+  // 基类啥都不做，不改变值
 end;
 
 {$ENDIF CNWIZARDS_CNCODINGTOOLSETWIZARD}

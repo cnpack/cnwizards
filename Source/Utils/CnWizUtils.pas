@@ -811,8 +811,6 @@ function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
 {* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
    如果起行列大于止行列，内部会互换}
-function CnOtaCurrBlockEmpty: Boolean;
-{* 返回当前选择的块是否为空}
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
   View: IOTAEditView = nil): Boolean;
 {* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
@@ -823,6 +821,8 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {$ENDIF}
 {$ENDIF}
 
+function CnOtaCurrBlockEmpty: Boolean;
+{* 返回当前选择的块是否为空}
 function CnOtaOpenFile(const FileName: string): Boolean;
 {* 打开文件}
 function CnOtaIsFileOpen(const FileName: string): Boolean;
@@ -6744,17 +6744,6 @@ begin
   Result := CnOtaMoveAndSelectBlock(Start, After, View);
 end;
 
-// 返回当前选择的块是否为空
-function CnOtaCurrBlockEmpty: Boolean;
-var
-  View: IOTAEditView;
-begin
-  Result := True;
-  View := CnOtaGetTopMostEditView;
-  if Assigned(View) and View.Block.IsValid then
-    Result := False;
-end;
-
 // 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
   View: IOTAEditView = nil): Boolean;
@@ -6828,6 +6817,22 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+// 返回当前选择的块是否为空
+function CnOtaCurrBlockEmpty: Boolean;
+var
+  View: TCnEditViewSourceInterface;
+begin
+  Result := True;
+  View := CnOtaGetTopMostEditView;
+{$IFDEF DELPHI_OTA}
+  if Assigned(View) and View.Block.IsValid then
+    Result := False;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := (View.SelStart = View.SelEnd);
+{$ENDIF}
+end;
 
 // 打开文件
 function CnOtaOpenFile(const FileName: string): Boolean;

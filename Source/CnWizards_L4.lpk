@@ -177,12 +177,28 @@
         <UnitName Value="CnFlatToolbarConfigFrm"/>
       </Item>
       <Item>
-        <Filename Value="..\Test\Lazarus\Wizard\CnTestFormDesignerWizard.pas"/>
-        <UnitName Value="CnTestFormDesignerWizard"/>
-      </Item>
-      <Item>
         <Filename Value="SimpleWizards\CnComponentSelector.pas"/>
         <UnitName Value="CnComponentSelector"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnAsciiChart.pas"/>
+        <UnitName Value="CnAsciiChart"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnSelectionCodeTool.pas"/>
+        <UnitName Value="CnSelectionCodeTool"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorInsertColor.pas"/>
+        <UnitName Value="CnEditorInsertColor"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorCodeSwap.pas"/>
+        <UnitName Value="CnEditorCodeSwap"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorCodeToString.pas"/>
+        <UnitName Value="CnEditorCodeToString"/>
       </Item>
     </Files>
     <RequiredPkgs>
