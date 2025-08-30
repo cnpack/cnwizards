@@ -325,7 +325,7 @@ function TCnWizShortCut.ReadShortCut(const Name: string; DefShortCut: TShortCut)
   TShortCut;
 begin
   Result := DefShortCut;
-  if Name = '' then Exit;
+  if (Name = '') or (WizOptions = nil) then Exit;
 
   with WizOptions.CreateRegIniFile do
   try
