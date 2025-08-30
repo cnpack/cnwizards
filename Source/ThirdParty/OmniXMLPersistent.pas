@@ -31,15 +31,9 @@ interface
 // the following compiler directive {.$DEFINE USE_MSXML}
 
 uses
-  Classes, SysUtils, Controls, TypInfo,
-{$IFDEF COMPILER6_UP}
-  Variants,
-{$ENDIF}
-  OmniXML,
-{$IFDEF USE_MSXML}
-  OmniXML_MSXML,
-{$ENDIF}
-  OmniXMLUtils;
+  Classes, SysUtils, Controls, TypInfo, {$IFDEF COMPILER6_UP} Variants,{$ENDIF}
+  {$IFDEF FPC} Variants,{$ENDIF} OmniXML,
+  {$IFDEF USE_MSXML} OmniXML_MSXML, {$ENDIF} OmniXMLUtils;
 
 type
   TPropsFormat = (pfAuto, pfAttributes, pfNodes);
@@ -316,10 +310,14 @@ var
 
 begin
   if (PPropInfo(PropInfo)^.SetProc <> nil) and (PPropInfo(PropInfo)^.GetProc <> nil) then begin
+{$IFDEF FPC}
+    PropType := PPropInfo(PropInfo)^.PropType;
+{$ELSE}
     PropType := PPropInfo(PropInfo)^.PropType^;
+{$ENDIF}
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: WriteOrdProp;
-      tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: WriteStrProp;
+      tkString, tkLString, tkWString {$IFDEF FPC}, tkAString {$ENDIF} {$IFDEF UNICODE}, tkUString {$ENDIF}: WriteStrProp;
       tkFloat:
         if (PropType = System.TypeInfo(TDateTime)) or (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) then
           WriteDateTimeProp
@@ -621,10 +619,14 @@ var
 
 begin
   if (PPropInfo(PropInfo)^.SetProc <> nil) and (PPropInfo(PropInfo)^.GetProc <> nil) then begin
+{$IFDEF FPC}
+    PropType := PPropInfo(PropInfo)^.PropType;
+{$ELSE}
     PropType := PPropInfo(PropInfo)^.PropType^;
+{$ENDIF}
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: ReadOrdProp;
-      tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: ReadStrProp;
+      tkString, tkLString, tkWString {$IFDEF FPC}, tkAString {$ENDIF} {$IFDEF UNICODE}, tkUString {$ENDIF}: ReadStrProp;
       tkFloat:
         if (PropType = System.TypeInfo(TDateTime)) or (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) then
           ReadDateTimeProp
