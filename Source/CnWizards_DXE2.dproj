@@ -148,31 +148,31 @@
 			<DCCReference Include="Config\CnWizSubActionShortCutFrm.pas">
 				<Form>CnWizSubActionShortCutForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnDesignEditor.pas"/>
-			<DCCReference Include="DesignEditors\CnDesignEditorConsts.pas"/>
-			<DCCReference Include="DesignEditors\CnDesignEditorUtils.pas"/>
-			<DCCReference Include="DesignEditors\CnPropEditorCustomizeFrm.pas">
+			<DCCReference Include="DesignEditor\CnDesignEditor.pas"/>
+			<DCCReference Include="DesignEditor\CnDesignEditorConsts.pas"/>
+			<DCCReference Include="DesignEditor\CnDesignEditorUtils.pas"/>
+			<DCCReference Include="DesignEditor\CnPropEditorCustomizeFrm.pas">
 				<Form>CnPropEditorCustomizeForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnHintEditorFrm.pas">
+			<DCCReference Include="DesignEditor\CnHintEditorFrm.pas">
 				<Form>CnHintEditorForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnMultiLineEditorFrm.pas">
+			<DCCReference Include="DesignEditor\CnMultiLineEditorFrm.pas">
 				<Form>CnMultiLineEditorForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnSetPropEditor.pas"/>
-			<DCCReference Include="DesignEditors\CnDesignPropEditors.pas"/>
-			<DCCReference Include="DesignEditors\CnDesignStringModule.pas"/>
-			<DCCReference Include="DesignEditors\CnSizeConstraintsEditorFrm.pas">
+			<DCCReference Include="DesignEditor\CnSetPropEditor.pas"/>
+			<DCCReference Include="DesignEditor\CnDesignPropEditors.pas"/>
+			<DCCReference Include="DesignEditor\CnDesignStringModule.pas"/>
+			<DCCReference Include="DesignEditor\CnSizeConstraintsEditorFrm.pas">
 				<Form>CnSizeConstraintsEditorForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnMultiLineEdtUserFmtFrm.pas">
+			<DCCReference Include="DesignEditor\CnMultiLineEdtUserFmtFrm.pas">
 				<Form>CnMultiLineEditorUserFmtForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnMultiLineEdtToolOptFrm.pas">
+			<DCCReference Include="DesignEditor\CnMultiLineEdtToolOptFrm.pas">
 				<Form>CnMultiLineEditorToolsOptionForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnAlignPropEditor.pas"/>
+			<DCCReference Include="DesignEditor\CnAlignPropEditor.pas"/>
 			<DCCReference Include="IdeEnhancements\CnFastCodeWizard.pas"/>
 			<DCCReference Include="DesignWizard\CnDesignWizard.pas">
 				<Form>CnNonArrangeForm</Form>
@@ -308,7 +308,7 @@
 			<DCCReference Include="PrefixWizard\CnPrefixCompFrm.pas">
 				<Form>CnPrefixCompForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnNamePropEditor.pas"/>
+			<DCCReference Include="DesignEditor\CnNamePropEditor.pas"/>
 			<DCCReference Include="SrcEditorEnhance\CnSrcEditorEnhance.pas">
 				<Form>CnSrcEditorEnhanceForm</Form>
 			</DCCReference>
@@ -543,10 +543,10 @@
 			</DCCReference>
 			<DCCReference Include="ScriptWizard\CnScriptClasses.pas"/>
 			<DCCReference Include="ScriptWizard\CnScriptRegister.pas"/>
-			<DCCReference Include="DesignEditors\CnImageListEditorFrm.pas">
+			<DCCReference Include="DesignEditor\CnImageListEditorFrm.pas">
 				<Form>CnImageListEditorForm</Form>
 			</DCCReference>
-			<DCCReference Include="DesignEditors\CnImageListEditor.pas"/>
+			<DCCReference Include="DesignEditor\CnImageListEditor.pas"/>
 			<DCCReference Include="Utils\CnImageProviderMgr.pas"/>
 			<DCCReference Include="Utils\CnImageProviderIconFinder.pas"/>
 			<DCCReference Include="Utils\CnImageProviderFindIcons.pas"/>

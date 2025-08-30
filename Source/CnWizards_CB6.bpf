@@ -29,9 +29,9 @@ USEFORMNS("CodingToolset\CnEditorZoomFullScreen.pas", Cneditorzoomfullscreen, Cn
 USEFORMNS("SimpleWizards\CnReplaceWizard.pas", Cnreplacewizard, CnReplaceWizardForm);
 USEFORMNS("SourceDiff\CnDiffEditorFrm.pas", Cndiffeditorfrm, CnDiffEditorForm);
 USEFORMNS("SourceDiff\CnSourceDiffFrm.pas", Cnsourcedifffrm, CnSourceDiffForm);
-USEFORMNS("DesignEditors\CnHintEditorFrm.pas", Cnhinteditorfrm, CnHintEditorForm);
-USEFORMNS("DesignEditors\CnMultiLineEditorFrm.pas", Cnmultilineeditorfrm, CnMultiLineEditorForm);
-USEFORMNS("DesignEditors\CnSizeConstraintsEditorFrm.pas", Cnsizeconstraintseditorfrm, CnSizeConstraintsEditorForm);
+USEFORMNS("DesignEditor\CnHintEditorFrm.pas", Cnhinteditorfrm, CnHintEditorForm);
+USEFORMNS("DesignEditor\CnMultiLineEditorFrm.pas", Cnmultilineeditorfrm, CnMultiLineEditorForm);
+USEFORMNS("DesignEditor\CnSizeConstraintsEditorFrm.pas", Cnsizeconstraintseditorfrm, CnSizeConstraintsEditorForm);
 USEFORMNS("CodingToolset\CnEditorCodeToString.pas", Cneditorcodetostring, CnEditorCodeToStringForm);
 USEFORMNS("CodingToolset\CnEditorCodeDelBlank.pas", Cneditorcodedelblank, CnDelBlankFrm);
 USEFORMNS("CodingToolset\CnEditorCodeComment.pas", Cneditorcodecomment, CnEditorCodeCommentForm);
@@ -56,8 +56,8 @@ USEFORMNS("ProjectExtWizard\CnProjectFramesFrm.pas", Cnprojectframesfrm, CnProje
 USEFORMNS("ProjectExtWizard\CnProjectListUsedFrm.pas", Cnprojectlistusedfrm, CnProjectListUsedForm);
 USEFORMNS("SimpleWizards\CnCommentCropper.pas", Cncommentcropper, CnCommentCropFrm);
 USEFORMNS("IdeEnhancements\CnCpuWinEnhanceFrm.pas", Cncpuwinenhancefrm, CnCpuWinEnhanceForm);
-USEFORMNS("DesignEditors\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
-USEFORMNS("DesignEditors\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
+USEFORMNS("DesignEditor\CnMultiLineEdtToolOptFrm.pas", Cnmultilineedttooloptfrm, CnMultiLineEditorToolsOptionFrm);
+USEFORMNS("DesignEditor\CnMultiLineEdtUserFmtFrm.pas", Cnmultilineedtuserfmtfrm, CnMultiLineEditorUserFmtFrm);
 USEFORMNS("IdeEnhancements\CnObjInspectorEnhancements.pas", Cnobjinspectorenhancements, CnObjInspectorConfigForm);
 USEFORMNS("IdeEnhancements\CnObjInspectorCommentFrm.pas", Cnobjinspectorcommentfrm, CnObjInspectorCommentForm);
 USEFORMNS("RepositoryWiz\CnDUnitSetFrm.pas", Cndunitsetfrm, CnDUnitSetForm);
@@ -99,10 +99,10 @@ USEFORMNS("SourceHighlight\CnHighlightCustomIdentFrm.pas", Cnhighlightcustomiden
 USEFORMNS("InputHelper\CnInputHelperEditFrm.pas", Cninputhelpereditfrm, CnInputHelperEditForm);
 USEFORMNS("InputHelper\CnInputHelperFrm.pas", Cninputhelperfrm, CnInputHelperForm);
 USEFORMNS("SrcEditorEnhance\CnSrcEditorWebSearch.pas", Cnsrceditorwebsearch, CnSrcEditorWebSearchForm);
-USEFORMNS("DesignEditors\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm, CnPropEditorCustomizeForm);
+USEFORMNS("DesignEditor\CnPropEditorCustomizeFrm.pas", Cnpropeditorcustomizefrm, CnPropEditorCustomizeForm);
 USEFORMNS("ScriptWizard\CnScriptFrm.pas", Cnscriptfrm, CnScriptForm);
 USEFORMNS("ScriptWizard\CnScriptWizard.pas", Cnscriptwizard, CnScriptWizardForm);
-USEFORMNS("DesignEditors\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
+USEFORMNS("DesignEditor\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImageListEditorForm);
 USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);
 USEFORMNS("AICoder\CnAICoderWizard.pas", Cnaicoderwizard, CnAICoderConfigForm);
 USEFORMNS("AICoder\CnAICoderChatFrm.pas", Cnaicoderchatfrm, CnAICoderChatForm);

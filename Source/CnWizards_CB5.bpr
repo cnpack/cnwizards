@@ -124,9 +124,9 @@
       SimpleWizards\CnPasConvertTypeFrm.dfm 
       SimpleWizards\CnPas2HtmlConfigFrm.dfm CodingToolset\CnEditorZoomFullScreen.dfm 
       SimpleWizards\CnReplaceWizard.dfm SourceDiff\CnDiffEditorFrm.dfm 
-      SourceDiff\CnSourceDiffFrm.dfm DesignEditors\CnHintEditorFrm.dfm 
-      DesignEditors\CnMultiLineEditorFrm.dfm 
-      DesignEditors\CnSizeConstraintsEditorFrm.dfm 
+      SourceDiff\CnSourceDiffFrm.dfm DesignEditor\CnHintEditorFrm.dfm 
+      DesignEditor\CnMultiLineEditorFrm.dfm 
+      DesignEditor\CnSizeConstraintsEditorFrm.dfm 
       CodingToolset\CnEditorCodeToString.dfm 
       CodingToolset\CnEditorCodeDelBlank.dfm 
       CodingToolset\CnEditorCodeComment.dfm CodingToolset\CnAsciiChart.dfm 
@@ -146,8 +146,8 @@
       SimpleWizards\CnCommentCropper.dfm 
       IdeEnhancements\CnCpuWinEnhanceFrm.dfm IdeEnhancements\CnObjInspectorEnhancements.dfm 
       IdeEnhancements\CnObjInspectorCommentFrm.dfm 
-      DesignEditors\CnMultiLineEdtToolOptFrm.dfm 
-      DesignEditors\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
+      DesignEditor\CnMultiLineEdtToolOptFrm.dfm 
+      DesignEditor\CnMultiLineEdtUserFmtFrm.dfm RepositoryWiz\CnDUnitSetFrm.dfm 
       RepositoryWiz\CnIniFilerFrm.dfm RepositoryWiz\CnTestWizard.dfm 
       ProjectExtWizard\CnProjectDelTempFrm.dfm Utils\CnWizIdeDock.dfm 
       ExplorerWizard\CnExplore.dfm ExplorerWizard\CnExploreDirectory.dfm 
@@ -172,9 +172,9 @@
       SourceHighlight\CnHighlightSeparateLineFrm.dfm 
       SourceHighlight\CnHighlightCustomIdentFrm.dfm 
       SrcEditorEnhance\CnSrcEditorWebSearch.dfm 
-      DesignEditors\CnPropEditorCustomizeFrm.dfm 
+      DesignEditor\CnPropEditorCustomizeFrm.dfm 
       InputHelper\CnInputHelperEditFrm.dfm InputHelper\CnInputHelperFrm.dfm 
-      DesignEditors\CnImageListEditorFrm.dfm 
+      DesignEditor\CnImageListEditorFrm.dfm 
       CodeFormatter\CnCodeFormatterWizard.dfm AICoder\CnAICoderWizard.dfm 
       AICoder\CnAICoderChatFrm.dfm AICoder\CnFrmAICoderOption.dfm"/>
     <LIBFILES value=""/>
