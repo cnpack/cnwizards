@@ -220,7 +220,7 @@ object FormProjectEdit: TFormProjectEdit
         Height = 20
         TabOrder = 10
         Text = 
-          'USEFORMNS("SimpleWizards\CnBookmarkWizard.pas", Cnbookmarkwizard' +
+          'USEFORMNS("SimpleWizard\CnBookmarkWizard.pas", Cnbookmarkwizard' +
           ', CnBookmarkForm);'
       end
       object btnCWBpfAdd: TButton

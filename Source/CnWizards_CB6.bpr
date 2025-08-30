@@ -115,14 +115,14 @@
       DesignWizard\CnDesignWizard.dfm CodingToolset\CnCodingToolsetWizard.dfm 
       DesignWizard\CnListCompFrm.dfm DesignWizard\CnPropertyCompareFrm.dfm 
       DesignWizard\CnPropertyCompConfigFrm.dfm DesignWizard\CnCompToCodeFrm.dfm 
-      SimpleWizards\CnMessageBoxWizard.dfm SimpleWizards\CnComponentSelector.dfm 
-      SimpleWizards\CnTabOrderWizard.dfm SimpleWizards\CnBookmarkWizard.dfm 
-      SimpleWizards\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
+      SimpleWizard\CnMessageBoxWizard.dfm SimpleWizard\CnComponentSelector.dfm 
+      SimpleWizard\CnTabOrderWizard.dfm SimpleWizard\CnBookmarkWizard.dfm 
+      SimpleWizard\CnBookmarkConfigFrm.dfm SrcTemplate\CnSrcTemplate.dfm 
       SrcTemplate\CnSrcTemplateEditFrm.dfm CodingToolset\CnEditorOpenFileFrm.dfm 
-      SimpleWizards\CnMsdnWizard.dfm SimpleWizards\CnPas2HtmlWizard.dfm 
-      SimpleWizards\CnPasConvertTypeFrm.dfm 
-      SimpleWizards\CnPas2HtmlConfigFrm.dfm CodingToolset\CnEditorZoomFullScreen.dfm 
-      SimpleWizards\CnReplaceWizard.dfm SourceDiff\CnDiffEditorFrm.dfm 
+      SimpleWizard\CnMsdnWizard.dfm SimpleWizard\CnPas2HtmlWizard.dfm 
+      SimpleWizard\CnPasConvertTypeFrm.dfm 
+      SimpleWizard\CnPas2HtmlConfigFrm.dfm CodingToolset\CnEditorZoomFullScreen.dfm 
+      SimpleWizard\CnReplaceWizard.dfm SourceDiff\CnDiffEditorFrm.dfm 
       SourceDiff\CnSourceDiffFrm.dfm DesignEditor\CnHintEditorFrm.dfm 
       DesignEditor\CnMultiLineEditorFrm.dfm 
       DesignEditor\CnSizeConstraintsEditorFrm.dfm 
@@ -141,7 +141,7 @@
       ProjectExtWizard\CnProjectUseUnitsFrm.dfm 
       ProjectExtWizard\CnProjectFramesFrm.dfm 
       ProjectExtWizard\CnProjectListUsedFrm.dfm 
-      SimpleWizards\CnCommentCropper.dfm 
+      SimpleWizard\CnCommentCropper.dfm 
       IdeEnhancements\CnCpuWinEnhanceFrm.dfm IdeEnhancements\CnObjInspectorEnhancements.dfm 
       IdeEnhancements\CnObjInspectorCommentFrm.dfm 
       DesignEditor\CnMultiLineEdtToolOptFrm.dfm 
@@ -155,7 +155,7 @@
       IdeEnhancements\CnWinTopRoller.dfm SrcEditorEnhance\CnSrcEditorEnhance.dfm 
       ProjectExtWizard\CnProjectBackupFrm.dfm 
       ProjectExtWizard\CnProjectBackupSaveFrm.dfm 
-      SimpleWizards\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
+      SimpleWizard\CnProcListWizard.dfm IdeEnhancements\CnVerEnhanceFrm.dfm 
       DebugEnhance\CnDebugEnhancements.dfm DebugEnhance\CnDataSetVisualizer.dfm 
       DebugEnhance\CnStringsVisualizer.dfm DebugEnhance\CnBytesVisualizer.dfm 
       DebugEnhance\CnWideVisualizer.dfm DebugEnhance\CnMemoryStreamVisualizer.dfm 
@@ -192,7 +192,7 @@
       soaprtl.lib dbxcds.lib dclocx.lib indy.lib bcb2kaxserver.lib"/>
     <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi vclsmp.bpi designide.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;SourceHighlight;InputHelper;Utils;IdeEnhancements;SimpleWizards;CodingToolset;SrcTemplate;SourceDiff;DesignEditor;DesignWizard;DebugEnhance;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard;CodeFormatter;AICoder"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;SourceHighlight;InputHelper;Utils;IdeEnhancements;SimpleWizard;CodingToolset;SrcTemplate;SourceDiff;DesignEditor;DesignWizard;DebugEnhance;SourceStat;PrefixWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;ScriptWizard;CodeFormatter;AICoder"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -201,14 +201,14 @@
     <USERDEFINES value="ENABLE_UIINTERACT;SUPPORT_EVALUATE;${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB6.bpf"/>
-    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
-    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizards;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancements;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\fastcode;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-IAICoder -ICodeFormatter -IScriptWizard -ISrcTemplate -IReopenWizard 
-      -ISimpleWizards -IConfig -IMultiLang -IMisc -ISrcEditorEnhance -IDebugEnhance 
+      -ISimpleWizard -IConfig -IMultiLang -IMisc -ISrcEditorEnhance -IDebugEnhance 
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
       -IIdeEnhancements -IPrefixWizard -ISourceStat -IDesignEditor -IDesignWizard -ISourceDiff 
       -ICodingToolset -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
@@ -264,13 +264,13 @@
       <FILE FILENAME="DesignWizard\CnPropertyCompareFrm.pas" FORMNAME="CnPropertyCompareForm" UNITNAME="CnPropertyCompareFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignWizard\CnPropertyCompConfigFrm.pas" FORMNAME="CnPropertyCompConfigForm" UNITNAME="CnPropertyCompConfigFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignWizard\CnCompToCodeFrm.pas" FORMNAME="" UNITNAME="CnCompToCodeFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnMessageBoxWizard.pas" FORMNAME="CnMessageBoxForm" UNITNAME="Cnmessageboxwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnComponentSelector.pas" FORMNAME="CnComponentSelectorForm" UNITNAME="Cncomponentselector" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnTabOrderWizard.pas" FORMNAME="CnTabOrderForm" UNITNAME="Cntaborderwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnBookmarkWizard.pas" FORMNAME="CnBookmarkForm" UNITNAME="Cnbookmarkwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnMessageBoxWizard.pas" FORMNAME="CnMessageBoxForm" UNITNAME="Cnmessageboxwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnComponentSelector.pas" FORMNAME="CnComponentSelectorForm" UNITNAME="Cncomponentselector" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnTabOrderWizard.pas" FORMNAME="CnTabOrderForm" UNITNAME="Cntaborderwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnBookmarkWizard.pas" FORMNAME="CnBookmarkForm" UNITNAME="Cnbookmarkwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizNotifier.pas" FORMNAME="" UNITNAME="CnWizNotifier" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizControlHook.pas" FORMNAME="" UNITNAME="CnWizControlHook" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnBookmarkConfigFrm.pas" FORMNAME="CnBookmarkConfigForm" UNITNAME="Cnbookmarkconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnBookmarkConfigFrm.pas" FORMNAME="CnBookmarkConfigForm" UNITNAME="Cnbookmarkconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizIdeUtils.pas" FORMNAME="" UNITNAME="CnWizIdeUtils" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcTemplate\CnSrcTemplate.pas" FORMNAME="CnSrcTemplateForm" UNITNAME="Cnsrctemplate" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcTemplate\CnSrcTemplateEditFrm.pas" FORMNAME="CnSrcTemplateEditForm" UNITNAME="Cnsrctemplateeditfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -278,13 +278,13 @@
       <FILE FILENAME="CodingToolset\CnEditorOpenFileFrm.pas" FORMNAME="CnEditorOpenFileForm" UNITNAME="CnEditorOpenFileFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorCodeSwap.pas" FORMNAME="" UNITNAME="CnEditorCodeSwap" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizEditFiler.pas" FORMNAME="" UNITNAME="CnWizEditFiler" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnMsdnWizard.pas" FORMNAME="CnMsdnConfigForm" UNITNAME="Cnmsdnwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnPas2HtmlWizard.pas" FORMNAME="CnPas2HtmlForm" UNITNAME="Cnpas2htmlwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnPasConvertTypeFrm.pas" FORMNAME="CnPasConvertTypeForm" UNITNAME="Cnpasconverttypefrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnPas2HtmlConfigFrm.pas" FORMNAME="CnPas2HtmlConfigForm" UNITNAME="Cnpas2htmlconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnMsdnWizard.pas" FORMNAME="CnMsdnConfigForm" UNITNAME="Cnmsdnwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnPas2HtmlWizard.pas" FORMNAME="CnPas2HtmlForm" UNITNAME="Cnpas2htmlwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnPasConvertTypeFrm.pas" FORMNAME="CnPasConvertTypeForm" UNITNAME="Cnpasconverttypefrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnPas2HtmlConfigFrm.pas" FORMNAME="CnPas2HtmlConfigForm" UNITNAME="Cnpas2htmlconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorZoomFullScreen.pas" FORMNAME="CnEditorZoomFullScreenForm" UNITNAME="Cneditorzoomfullscreen" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizSearch.pas" FORMNAME="" UNITNAME="CnWizSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnReplaceWizard.pas" FORMNAME="CnReplaceWizardForm" UNITNAME="Cnreplacewizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnReplaceWizard.pas" FORMNAME="CnReplaceWizardForm" UNITNAME="Cnreplacewizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SourceDiff\CnDiffEditorFrm.pas" FORMNAME="CnDiffEditorForm" UNITNAME="Cndiffeditorfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SourceDiff\CnSourceDiffFrm.pas" FORMNAME="CnSourceDiffForm" UNITNAME="Cnsourcedifffrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SourceDiff\CnSourceDiffWizard.pas" FORMNAME="" UNITNAME="CnSourceDiffWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -328,7 +328,7 @@
       <FILE FILENAME="ProjectExtWizard\CnProjectUseUnitsFrm.pas" FORMNAME="CnProjectUseUnitsForm" UNITNAME="Cnprojectuseunitsfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectFramesFrm.pas" FORMNAME="CnProjectFramesForm" UNITNAME="Cnprojectframesfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ProjectExtWizard\CnProjectListUsedFrm.pas" FORMNAME="CnProjectListUsedForm" UNITNAME="Cnprojectlistusedfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnCommentCropper.pas" FORMNAME="CnCommentCropFrm" UNITNAME="Cncommentcropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnCommentCropper.pas" FORMNAME="CnCommentCropFrm" UNITNAME="Cncommentcropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnSourceCropper.pas" FORMNAME="" UNITNAME="CnSourceCropper" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnCpuWinEnhancements.pas" FORMNAME="" UNITNAME="CnCpuWinEnhancements" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnCpuWinEnhanceFrm.pas" FORMNAME="" UNITNAME="CnCpuWinEnhanceFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -375,7 +375,7 @@
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorThumbnail.pas" FORMNAME="" UNITNAME="CnSrcEditorThumbnail" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizFlatButton.pas" FORMNAME="" UNITNAME="CnWizFlatButton" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorBlockTools.pas" FORMNAME="" UNITNAME="CnSrcEditorBlockTools" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnProcListWizard.pas" FORMNAME="CnProcListFrm" UNITNAME="Cnproclistwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnProcListWizard.pas" FORMNAME="CnProcListFrm" UNITNAME="Cnproclistwizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizDfmParser.pas" FORMNAME="" UNITNAME="CnWizDfmParser" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditor\CnNamePropEditor.pas" FORMNAME="" UNITNAME="CnNamePropEditor" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="IdeEnhancements\CnVerEnhanceFrm.pas" FORMNAME="CnVerEnhanceForm" UNITNAME="CnVerEnhanceFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
@@ -420,7 +420,7 @@
       <FILE FILENAME="InputHelper\CnInputIdeSymbolList.pas" FORMNAME="" UNITNAME="CnInputIdeSymbolList.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="InputHelper\CnInputBcbIdeSymbolList.pas" FORMNAME="" UNITNAME="CnInputBcbIdeSymbolList" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcEditorEnhance\CnSrcEditorWebSearch.pas" FORMNAME="CnSrcEditorWebSearchForm" UNITNAME="CnSrcEditorWebSearch" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="SimpleWizards\CnIdeBRWizard.pas" FORMNAME="" UNITNAME="CnIdeBRWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="SimpleWizard\CnIdeBRWizard.pas" FORMNAME="" UNITNAME="CnIdeBRWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="DesignEditor\CnPropEditorCustomizeFrm.pas" FORMNAME="CnPropEditorCustomizeForm" UNITNAME="CnPropEditorCustomizeFrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ScriptWizard\CnScriptClasses.pas" FORMNAME="" UNITNAME="CnScriptClasses.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ScriptWizard\CnScriptRegister.pas" FORMNAME="" UNITNAME="CnScriptRegister.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

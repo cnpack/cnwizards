@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizards;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancements;..\Test\Lazarus\Wizard"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancements;..\Test\Lazarus\Wizard"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -93,7 +93,7 @@
         <UnitName Value="CnWizAboutFrm"/>
       </Item>
       <Item>
-        <Filename Value="SimpleWizards\CnMessageBoxWizard.pas"/>
+        <Filename Value="SimpleWizard\CnMessageBoxWizard.pas"/>
         <UnitName Value="CnMessageBoxWizard"/>
       </Item>
       <Item>
@@ -165,7 +165,7 @@
         <UnitName Value="CnWizEditFiler"/>
       </Item>
       <Item>
-        <Filename Value="SimpleWizards\CnProcListWizard.pas"/>
+        <Filename Value="SimpleWizard\CnProcListWizard.pas"/>
         <UnitName Value="CnProcListWizard"/>
       </Item>
       <Item>
@@ -177,7 +177,7 @@
         <UnitName Value="CnFlatToolbarConfigFrm"/>
       </Item>
       <Item>
-        <Filename Value="SimpleWizards\CnComponentSelector.pas"/>
+        <Filename Value="SimpleWizard\CnComponentSelector.pas"/>
         <UnitName Value="CnComponentSelector"/>
       </Item>
       <Item>

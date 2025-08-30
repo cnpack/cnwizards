@@ -239,20 +239,20 @@
         <DCCReference Include="DesignWizard\CnCompToCodeFrm.pas">
             <Form>CnCompToCodeForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnMessageBoxWizard.pas">
+        <DCCReference Include="SimpleWizard\CnMessageBoxWizard.pas">
             <Form>CnMessageBoxForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnComponentSelector.pas">
+        <DCCReference Include="SimpleWizard\CnComponentSelector.pas">
             <Form>CnComponentSelectorForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnTabOrderWizard.pas">
+        <DCCReference Include="SimpleWizard\CnTabOrderWizard.pas">
             <Form>CnTabOrderForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnBookmarkWizard.pas">
+        <DCCReference Include="SimpleWizard\CnBookmarkWizard.pas">
             <Form>CnBookmarkForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnWizControlHook.pas"/>
-        <DCCReference Include="SimpleWizards\CnBookmarkConfigFrm.pas">
+        <DCCReference Include="SimpleWizard\CnBookmarkConfigFrm.pas">
             <Form>CnBookmarkConfigForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnWizMacroFrm.pas">
@@ -305,21 +305,21 @@
             <Form>CnExtractStringForm</Form>
         </DCCReference>
         <DCCReference Include="CodingToolset\CnEditorExtSelect.pas"/>
-        <DCCReference Include="SimpleWizards\CnMsdnWizard.pas">
+        <DCCReference Include="SimpleWizard\CnMsdnWizard.pas">
             <Form>CnMsdnConfigForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnPas2HtmlWizard.pas">
+        <DCCReference Include="SimpleWizard\CnPas2HtmlWizard.pas">
             <Form>CnPas2HtmlForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnPasConvertTypeFrm.pas">
+        <DCCReference Include="SimpleWizard\CnPasConvertTypeFrm.pas">
             <Form>CnPasConvertTypeForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnPas2HtmlConfigFrm.pas">
+        <DCCReference Include="SimpleWizard\CnPas2HtmlConfigFrm.pas">
             <Form>CnPas2HtmlConfigForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnPasConvert.pas"/>
         <DCCReference Include="Utils\CnWizEditFiler.pas"/>
-        <DCCReference Include="SimpleWizards\CnReplaceWizard.pas">
+        <DCCReference Include="SimpleWizard\CnReplaceWizard.pas">
             <Form>CnReplaceWizardForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnWizSearch.pas"/>
@@ -403,7 +403,7 @@
         </DCCReference>
         <DCCReference Include="Utils\CnWizDfmParser.pas"/>
         <DCCReference Include="VclToFmx\CnVclToFmxIntf.pas"/>
-        <DCCReference Include="SimpleWizards\CnCommentCropper.pas">
+        <DCCReference Include="SimpleWizard\CnCommentCropper.pas">
             <Form>CnCommentCropForm</Form>
         </DCCReference>
         <DCCReference Include="Utils\CnSourceCropper.pas"/>
@@ -531,7 +531,7 @@
         <DCCReference Include="SourceHighlight\CnHighlightCustomIdentFrm.pas">
             <Form>CnHighlightCustomIdentForm</Form>
         </DCCReference>
-        <DCCReference Include="SimpleWizards\CnProcListWizard.pas">
+        <DCCReference Include="SimpleWizard\CnProcListWizard.pas">
             <Form>CnProcListForm</Form>
         </DCCReference>
         <DCCReference Include="IdeEnhancements\CnVerEnhancements.pas"/>
@@ -581,7 +581,7 @@
             <Form>CnUsesIdentForm</Form>
         </DCCReference>
         <DCCReference Include="IdeEnhancements\CnIdeEnhanceMenu.pas"/>
-        <DCCReference Include="SimpleWizards\CnIdeBRWizard.pas"/>
+        <DCCReference Include="SimpleWizard\CnIdeBRWizard.pas"/>
         <DCCReference Include="ScriptWizard\CnScriptWizard.pas">
             <Form>CnScriptWizardForm</Form>
         </DCCReference>

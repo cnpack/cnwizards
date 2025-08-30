@@ -27,7 +27,7 @@
         <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnMessageBoxWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnMessageBoxWizard.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="CnMessageBoxForm"/>
         <HasResources Value="True"/>
@@ -339,7 +339,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnFeedWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnFeedWizard.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="414"/>
         <CursorPos X="52" Y="426"/>
@@ -687,7 +687,7 @@
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnProcListWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnProcListWizard.pas"/>
         <EditorIndex Value="8"/>
         <TopLine Value="1663"/>
         <CursorPos X="13" Y="1675"/>
@@ -744,15 +744,15 @@
         <Caret Line="1404" Column="5" TopLine="1386"/>
       </Position>
       <Position>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnProcListWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnProcListWizard.pas"/>
         <Caret Line="788" Column="62" TopLine="774"/>
       </Position>
       <Position>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnProcListWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnProcListWizard.pas"/>
         <Caret Line="1389" Column="5" TopLine="1378"/>
       </Position>
       <Position>
-        <Filename Value="..\..\..\Source\SimpleWizards\CnProcListWizard.pas"/>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnProcListWizard.pas"/>
         <Caret Line="1675" Column="13" TopLine="1663"/>
       </Position>
       <Position>

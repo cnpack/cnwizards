@@ -49,7 +49,7 @@ Conditionals=STAND_ALONE;TEST_APP
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams=C:\CnPack\cnwizards\Source\SimpleWizards\CnProcListWizard.pas
+RunParams=C:\CnPack\cnwizards\Source\SimpleWizard\CnProcListWizard.pas
 HostApplication=
 [Version Info]
 IncludeVerInfo=0

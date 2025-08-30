@@ -3,7 +3,7 @@ program StandAlone;
 uses
   Forms,
   StandAloneUnit in 'StandAloneUnit.pas' {FormFramework},
-  CnMessageBoxWizard in '..\..\..\Source\SimpleWizards\CnMessageBoxWizard.pas',
+  CnMessageBoxWizard in '..\..\..\Source\SimpleWizard\CnMessageBoxWizard.pas',
   CnWizClasses in '..\..\..\Source\Framework\CnWizClasses.pas',
   CnWizCompilerConst in '..\..\..\Source\Framework\CnWizCompilerConst.pas',
   CnWizConsts in '..\..\..\Source\Framework\CnWizConsts.pas',
@@ -49,7 +49,7 @@ uses
   CnAICoderNetClient in '..\..\..\Source\AICoder\CnAICoderNetClient.pas',
   CnAICoderWizard in '..\..\..\Source\AICoder\CnAICoderWizard.pas' {CnAICoderConfigForm},
   CnFrmAICoderOption in '..\..\..\Source\AICoder\CnFrmAICoderOption.pas' {CnAICoderOptionFrame: TFrame},
-  CnProcListWizard in '..\..\..\Source\SimpleWizards\CnProcListWizard.pas',
+  CnProcListWizard in '..\..\..\Source\SimpleWizard\CnProcListWizard.pas',
   CnProjectViewBaseFrm in '..\..\..\Source\ProjectExtWizard\CnProjectViewBaseFrm.pas' {CnProjectViewBaseForm},
   CnCodingToolsetWizard in '..\..\..\Source\CodingToolset\CnCodingToolsetWizard.pas' {CnEditorToolsForm},
   CnEditorOpenFile in '..\..\..\Source\CodingToolset\CnEditorOpenFile.pas',

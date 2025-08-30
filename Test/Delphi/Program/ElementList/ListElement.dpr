@@ -7,7 +7,7 @@ uses
   CnWizMultiLang in '..\..\..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
   CnWizLangID in '..\..\..\..\Source\MultiLang\CnWizLangID.pas',
   CnWizShareImages in '..\..\..\..\Source\Misc\CnWizShareImages.pas' {dmCnSharedImages: TDataModule},
-  CnProcListWizard in '..\..\..\..\Source\SimpleWizards\CnProcListWizard.pas' {CnProcListForm};
+  CnProcListWizard in '..\..\..\..\Source\SimpleWizard\CnProcListWizard.pas' {CnProcListForm};
 
 var
   Wizard: TCnProcListWizard;
