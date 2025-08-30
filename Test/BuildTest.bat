@@ -9,15 +9,16 @@ SET DCC32="C:\Program Files\Borland\Delphi5\Bin\dcc32.exe"
 SET DCC7_32="C:\Program Files\Borland\Delphi7\Bin\dcc32.exe"
 SET DCCR_32="C:\Program Files\Embarcadero\RAD Studio\9.0\bin\dcc32.exe"
 
-CD %ROOTDIR%
+CD %ROOTDIR%\Delphi\Program
+CD
 SET DPR="NOVALUE"
 SET DIRNAME="NODIR"
 FOR /D %%D IN (.\*) DO (
   ECHO =====================================
   ECHO Enter %%D
-  CD ..
+  CD ..\..\..
   CALL CleanInplace.bat 2> NUL
-  CD Test\%%D
+  CD Test\Delphi\Program\%%D
   SET DIRNAME=%%D
   FOR %%F IN (.\*.dpr) DO (
     SET DPR=%%F
@@ -57,7 +58,7 @@ FOR /D %%D IN (.\*) DO (
   )
   CD ..
 )
-ECHO Build CnPack IDE Wizards Stand Alone Test Cases Complete.
+ECHO Build CnPack IDE Wizards Delphi Stand Alone Test Cases Complete.
 :END
 CD %ROOTDIR%
 PAUSE
