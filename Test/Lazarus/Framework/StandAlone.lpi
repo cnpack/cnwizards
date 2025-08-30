@@ -104,11 +104,49 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Config\CnWizConfigFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Config\CnWizMenuSortFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\Config\CnWizSubActionShortCutFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\MultiLang\CnWizMultiLang.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CnTranslateForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\MultiLang\CnWizLangID.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\MultiLang\CnWizMultiLangFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\MultiLang\CnWizTranslate.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="..\..\..\Bin\StandAlone.exe"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;$(ProjOutDir)"/>
       <Libraries Value="..\..\..\Source;..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\Misc;..\..\..\Source\DesignEditors;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm"/>
