@@ -35,6 +35,8 @@ unit CnTokens;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Classes, SysUtils;
 

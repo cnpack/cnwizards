@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="CnCodeFormatterTestPrj.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <TopLine Value="98"/>
+        <CursorPos X="10" Y="116"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnFormatterIntf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnScanners.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnTokens.pas"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="22"/>
+        <CursorPos Y="39"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnCodeFormatter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="49"/>
+        <CursorPos Y="58"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnCodeFormatRules.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="13"/>
+        <CursorPos X="19" Y="9"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnCompDirectiveTree.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="CnCodeFormatterTestPrj.dpr"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="26"/>
+        <CursorPos X="16" Y="33"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\..\..\cnvcl\Source\Common\CnPropSheetFrm.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4341"/>
+        <CursorPos X="20" Y="4353"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="CnCodeFormatterTest.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos X="48" Y="18"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit>
+    </Units>
+    <OtherDefines Count="1">
+      <Define0 Value="ENABLE_UIINTERACT"/>
+    </OtherDefines>
+    <JumpHistory HistoryIndex="26">
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="249" Column="3" TopLine="246"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="248" Column="3" TopLine="245"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="247" Column="3" TopLine="244"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="246" Column="3" TopLine="243"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="245" Column="3" TopLine="242"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="244" Column="3" TopLine="241"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="243" Column="3" TopLine="240"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="242" Column="3" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="241" Column="3" TopLine="238"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="240" Column="3" TopLine="237"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="239" Column="3" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="238" Column="3" TopLine="235"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="237" Column="3" TopLine="234"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="62" Column="29" TopLine="52"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnCodeFormatter.pas"/>
+        <Caret Line="61" Column="49" TopLine="49"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="240" TopLine="229"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="257" TopLine="249"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="283" TopLine="272"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="55" Column="28" TopLine="45"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="74" Column="22" TopLine="54"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="78" Column="16" TopLine="58"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="96" Column="32" TopLine="76"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="97" Column="26" TopLine="77"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="113" Column="72" TopLine="101"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="137" Column="32" TopLine="117"/>
+      </Position>
+      <Position>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\CnCodeFormatter.pas"/>
+        <Caret Line="61" Column="49" TopLine="49"/>
+      </Position>
+      <Position>
+        <Filename Value="CnCodeFormatterTest.pas"/>
+        <Caret Line="165" Column="36" TopLine="145"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>
