@@ -65,7 +65,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf,
-  SrcEditorIntf, FormEditingIntf, PropEdits, {$ENDIF}
+  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, {$ENDIF}
   {$ELSE} {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
@@ -111,7 +111,7 @@ type
   TCnSourceEditorInterface = Pointer;
   TCnEditBufferInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
-
+  TCnIDEProjectOptionsInterface = Pointer;
   TCnIDEDesigner = Pointer;
   TCnDesignerSelectionList = Pointer;
 {$ELSE}
@@ -121,7 +121,7 @@ type
   TCnSourceEditorInterface = TSourceEditorInterface;
   TCnEditBufferInterface = TSourceEditorInterface;
   TCnIDEProjectInterface = TLazProject;
-
+  TCnIDEProjectOptionsInterface = TLazCompilerOptions;
   TCnIDEDesigner = TIDesigner;
   TCnDesignerSelectionList = TPersistentSelectionList;
   {$ELSE}
@@ -130,6 +130,7 @@ type
   TCnSourceEditorInterface = IOTASourceEditor;
   TCnEditBufferInterface = IOTAEditBuffer;
   TCnIDEProjectInterface = IOTAProject;
+  TCnIDEProjectOptionsInterface = IOTAProjectOptions;
 
   TCnIDEDesigner = IDesigner;
   TCnDesignerSelectionList = IDesignerSelections;
@@ -540,6 +541,10 @@ function CnOtaGetTopOpenedEditViewFromFileName(const FileName: string; ForceOpen
 
 function CnOtaGetFormDesigner({$IFDEF DELPHI_OTA} FormEditor: IOTAFormEditor = nil {$ENDIF}): TCnIDEDesigner;
 {* 取当前的窗体设计器}
+function CnOtaGetProjectVersion(Project: TCnIDEProjectInterface = nil): string;
+{* 取工程版本号字符串}
+function CnOtaGetActiveProjectOptions(Project: TCnIDEProjectInterface = nil): TCnIDEProjectOptionsInterface;
+{* 取当前工程选项}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -606,8 +611,6 @@ function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
 {* 取工程的源码文件 dpr/dpk}
 function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
 {* 取工程资源}
-function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
-{* 取工程版本号字符串}
 function CnOtaGetProject: IOTAProject;
 {* 取第一个工程}
 function CnOtaGetProjectCountFromGroup: Integer;
@@ -667,8 +670,6 @@ procedure CnOtaSetEnvironmentOptionValue(const OptionName: string; OptionValue: 
 {* 设置当前环境的指定设置值}
 function CnOtaGetEditOptions: IOTAEditOptions;
 {* 取当前编辑器设置}
-function CnOtaGetActiveProjectOptions(Project: IOTAProject = nil): IOTAProjectOptions;
-{* 取当前工程选项}
 function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): Boolean;
 {* 取当前工程指定选项}
 function CnOtaGetPackageServices: IOTAPackageServices;
@@ -708,8 +709,6 @@ procedure CnOtaEditDelete(Many: Integer);
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
-function CnOtaGetCurrentProcedure: string;
-{* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
 function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
 function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
@@ -821,6 +820,8 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {$ENDIF}
 {$ENDIF}
 
+function CnOtaGetCurrentProcedure: string;
+{* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空}
 function CnOtaOpenFile(const FileName: string): Boolean;
@@ -1006,11 +1007,11 @@ function CnOtaGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface = nil): In
 
 procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
-{* 封装的解析器解析 Pascal 代码的过程，不包括对当前光标的处理}
+{* 封装的解析器解析 Pascal 代码的过程，要求 Stream 里是 Ansi/Utf16/Utf16，不包括对当前光标的处理}
 
 procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream);
-{* 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理}
+{* 封装的解析器解析 Pascal 代码中的字符串的过程，要求 Stream 里是 Ansi/Utf16/Utf16，不包括对当前光标的处理}
 
 procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
@@ -1028,6 +1029,14 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 {* 获取当前光标位置并将其转换成为 StructureParser 所需的 CharPos，也就是行 1 开始，列 0 开始}
 
 {$ENDIF}
+
+function CnOtaSaveEditorToStream(Editor: TCnSourceEditorInterface; Stream: TMemoryStream;
+  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
+{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
+
+function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
+  Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
+{* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 {$IFNDEF LAZARUS}
 
@@ -1061,14 +1070,6 @@ procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
 {* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
-
-function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
-
-function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
-  Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
@@ -4055,6 +4056,7 @@ var
   NTAFormEditor: INTAFormEditor;
 {$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF DELPHI_OTA}
   if not Assigned(FormEditor) then
     FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
@@ -4078,7 +4080,75 @@ begin
     Exit;
   end;
 {$ENDIF}
+{$ENDIF}
   Result := nil;
+end;
+
+// 取工程版本号字符串
+function CnOtaGetProjectVersion(Project: TCnIDEProjectInterface): string;
+var
+  Options: TCnIDEProjectOptionsInterface;
+begin
+  Result := '';
+
+  Options := CnOtaGetActiveProjectOptions(Project);
+  if not Assigned(Options) then
+    Exit;
+
+  try
+    if Project = nil then
+      Project := CnOtaGetCurrentProject;
+{$IFDEF DELPHI_OTA}
+{$IFDEF VERSIONINFO_PER_CONFIGURATION}
+    Result := Format('%d.%d.%d.%d',
+      [StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MajorVer')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MinorVer')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Release')), 0),
+      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Build')), 0)]);
+{$ELSE}
+    Result := Format('%d.%d.%d.%d',
+      [StrToIntDef(VarToStr(Options.GetOptionValue('MajorVersion')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('MinorVersion')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('Release')), 0),
+      StrToIntDef(VarToStr(Options.GetOptionValue('Build')), 0)]);
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // TODO: 实在找不到如何拿
+    Result := '0.0.0.0';
+{$ENDIF}
+  except
+    ;
+  end;
+end;
+
+// 取当前工程选项
+function CnOtaGetActiveProjectOptions(Project: TCnIDEProjectInterface): TCnIDEProjectOptionsInterface;
+begin
+{$IFNDEF STAND_ALONE}
+  if Assigned(Project) then
+  begin
+{$IFDEF LAZARUS}
+    Result := Project.LazCompilerOptions;
+{$ELSE}
+    Result := Project.ProjectOptions;
+{$ENDIF}
+    Exit;
+  end;
+
+  Project := CnOtaGetCurrentProject;
+  if Assigned(Project) then
+  begin
+{$IFDEF LAZARUS}
+    Result := Project.LazCompilerOptions;
+{$ELSE}
+    Result := Project.ProjectOptions;
+{$ENDIF}
+  end
+  else
+{$ENDIF}
+    Result := nil;
 end;
 
 {$IFNDEF LAZARUS}
@@ -4726,38 +4796,6 @@ begin
   Result := nil;
 end;
 
-// 取工程版本号字符串
-function CnOtaGetProjectVersion(Project: IOTAProject = nil): string;
-var
-  Options: IOTAProjectOptions;
-begin
-  Result := '';
-  Options := CnOtaGetActiveProjectOptions(Project);
-  if not Assigned(Options) then
-    Exit;
-
-  try
-{$IFDEF VERSIONINFO_PER_CONFIGURATION}
-    if Project = nil then
-      Project := CnOtaGetCurrentProject;
-
-    Result := Format('%d.%d.%d.%d',
-      [StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MajorVer')), 0),
-      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_MinorVer')), 0),
-      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Release')), 0),
-      StrToIntDef(VarToStr(CnOtaGetProjectCurrentBuildConfigurationValue(Project, 'VerInfo_Build')), 0)]);
-{$ELSE}
-    Result := Format('%d.%d.%d.%d',
-      [StrToIntDef(VarToStr(Options.GetOptionValue('MajorVersion')), 0),
-      StrToIntDef(VarToStr(Options.GetOptionValue('MinorVersion')), 0),
-      StrToIntDef(VarToStr(Options.GetOptionValue('Release')), 0),
-      StrToIntDef(VarToStr(Options.GetOptionValue('Build')), 0)]);
-{$ENDIF}
-  except
-    ;
-  end;
-end;
-
 //设定项目配置值
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
@@ -5358,22 +5396,6 @@ begin
     Result := nil;
 end;
 
-// 取当前工程选项
-function CnOtaGetActiveProjectOptions(Project: IOTAProject = nil): IOTAProjectOptions;
-begin
-  if Assigned(Project) then
-  begin
-    Result := Project.ProjectOptions;
-    Exit;
-  end;
-
-  Project := CnOtaGetCurrentProject;
-  if Assigned(Project) then
-    Result := Project.ProjectOptions
-  else
-    Result := nil;
-end;
-
 // 取当前工程指定选项
 function CnOtaGetActiveProjectOption(const Option: string; var Value: Variant): Boolean;
 var
@@ -5713,65 +5735,6 @@ begin
 end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
-
-// 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域
-function CnOtaGetCurrentProcedure: string;
-var
-  EditView: IOTAEditView;
-  Stream: TMemoryStream;
-  CharPos: TOTACharPos;
-  EditPos: TOTAEditPos;
-  PasParser: TCnPasStructureParser;
-  CParser: TCnCppStructureParser;
-  S: string;
-begin
-  Result := '';
-  EditView := CnOtaGetTopMostEditView;
-  if EditView = nil then
-    Exit;
-
-  S := EditView.Buffer.FileName;
-  Stream := TMemoryStream.Create;
-  CnOtaSaveEditorToStream(EditView.Buffer, Stream);
-  try
-    if IsDprOrPas(S) or IsInc(S) then
-    begin
-      PasParser := TCnPasStructureParser.Create;
-      try
-        PasParser.ParseSource(PAnsiChar(Stream.Memory),
-          IsDpr(EditView.Buffer.FileName), False);
-
-        EditPos := EditView.CursorPos;
-        EditView.ConvertPos(True, EditPos, CharPos);
-        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
-        if PasParser.CurrentChildMethod <> '' then
-          Result := string(PasParser.CurrentChildMethod)
-        else if PasParser.CurrentMethod <> '' then
-          Result := string(PasParser.CurrentMethod);
-      finally
-        PasParser.Free;
-      end;
-    end
-    else if IsCppSourceModule(S) then
-    begin
-      CParser := TCnCppStructureParser.Create;
-
-      try
-        EditPos := EditView.CursorPos;
-        EditView.ConvertPos(True, EditPos, CharPos);
-        // 是否需要转换？
-        CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
-          CharPos.Line, CharPos.CharIndex, True);
-
-        Result := string(CParser.CurrentMethod);
-      finally
-        CParser.Free;
-      end;
-    end;
-  finally
-    Stream.Free;
-  end;
-end;
 
 // 获取当前光标所在的类名或声明
 function CnOtaGetCurrentOuterBlock: string;
@@ -6821,12 +6784,92 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+// 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域
+function CnOtaGetCurrentProcedure: string;
+var
+  EditView: TCnEditViewSourceInterface;
+  Stream: TMemoryStream;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  PasParser: TCnPasStructureParser;
+  CParser: TCnCppStructureParser;
+  S: string;
+begin
+  Result := '';
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
+{$IFDEF LAZARUS}
+  S := EditView.FileName;
+{$ELSE}
+  S := EditView.Buffer.FileName;
+{$ENDIF}
+
+  Stream := TMemoryStream.Create;
+{$IFDEF LAZARUS}
+  CnOtaSaveEditorToStream(EditView, Stream);
+{$ELSE}
+  CnOtaSaveEditorToStream(EditView.Buffer, Stream);
+{$ENDIF}
+
+  try
+    if IsDprOrPas(S) or IsInc(S) then
+    begin
+      PasParser := TCnPasStructureParser.Create;
+      try
+        PasParser.ParseSource(PAnsiChar(Stream.Memory),
+          IsDpr(S), False);
+
+{$IFDEF LAZARUS}
+        PasParser.FindCurrentBlock(EditView.CursorTextXY.Y, EditView.CursorTextXY.X);
+{$ELSE}
+        EditPos := EditView.CursorPos;
+        EditView.ConvertPos(True, EditPos, CharPos);
+        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+{$ENDIF}
+
+        if PasParser.CurrentChildMethod <> '' then
+          Result := string(PasParser.CurrentChildMethod)
+        else if PasParser.CurrentMethod <> '' then
+          Result := string(PasParser.CurrentMethod);
+      finally
+        PasParser.Free;
+      end;
+    end
+    else if IsCppSourceModule(S) then
+    begin
+      CParser := TCnCppStructureParser.Create;
+
+      try
+{$IFDEF LAZARUS}
+        CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+          EditView.CursorTextXY.Y, EditView.CursorTextXY.X, True);
+{$ELSE}
+        EditPos := EditView.CursorPos;
+        EditView.ConvertPos(True, EditPos, CharPos);
+        // 是否需要转换？
+        CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
+          CharPos.Line, CharPos.CharIndex, True);
+{$ENDIF}
+
+        Result := string(CParser.CurrentMethod);
+      finally
+        CParser.Free;
+      end;
+    end;
+  finally
+    Stream.Free;
+  end;
+end;
+
 // 返回当前选择的块是否为空
 function CnOtaCurrBlockEmpty: Boolean;
 var
   View: TCnEditViewSourceInterface;
 begin
   Result := True;
+{$IFNDEF STAND_ALONE}
   View := CnOtaGetTopMostEditView;
 {$IFDEF DELPHI_OTA}
   if Assigned(View) and View.Block.IsValid then
@@ -6834,6 +6877,7 @@ begin
 {$ENDIF}
 {$IFDEF LAZARUS}
   Result := (View.SelStart = View.SelEnd);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -8152,6 +8196,117 @@ end;
 
 {$ENDIF}
 
+// 保存编辑器文本到流中
+function CnOtaSaveEditorToStream(Editor: TCnSourceEditorInterface; Stream: TMemoryStream;
+  FromCurrPos: Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
+{$IFNDEF STAND_ALONE}
+var
+{$IFDEF LAZARUS}
+  I, X, Y: Integer;
+  Utf8Text, Text: string;
+  UniText: UnicodeString;
+  List: TStringList;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  IPos: Integer;
+  PreSize: Integer;
+{$ENDIF}
+{$ENDIF}
+begin
+  Assert(Stream <> nil);
+  Result := False;
+{$IFNDEF STAND_ALONE}
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+{$IFDEF DELPHI_OTA}
+  if Editor.EditViewCount > 0 then
+  begin
+    if FromCurrPos then
+      IPos := CnOtaGetCurrLinearPos(Editor)
+    else
+      IPos := 0;
+
+    // 如果此文件未保存，则会出现 FileSize 与其不一致的情况，
+    // 可能导致 PreSize 为负从而出现问题
+    if FileExists(Editor.FileName) then
+      PreSize := Round(GetFileSize(Editor.FileName) * 1.5) - IPos
+    else
+      PreSize := 0;
+
+    // 修补上述问题
+    if PreSize < 0 then
+      PreSize := 0;
+
+    CnOtaSaveEditorToStreamEx(Editor, Stream, IPos, 0, PreSize, CheckUtf8, AlternativeWideChar);
+    Result := True;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if FromCurrPos then
+  begin
+    X := Editor.CursorTextXY.X;
+    Y := Editor.CursorTextXY.Y;
+
+    List := TStringList.Create;
+    try
+      // Y - 1 行的 X 列到尾，Y 行到尾
+      List.Add(Copy(Editor.Lines[Y - 1], X, MaxInt));
+      for I := Y to Editor.Lines.Count - 1 do
+        List.Add(Editor.Lines[I]);
+
+      Utf8Text := List.Text;
+    finally
+      List.Free;
+    end;
+  end
+  else
+    Utf8Text := Editor.Lines.Text;
+
+  if CheckUtf8 then
+  begin
+    AlternativeWideChar := AlternativeWideChar and _UNICODE_STRING and CodePageOnlySupportsEnglish;
+
+    if AlternativeWideChar then
+    begin
+      // 纯英文 OS 下不能按照后面的转 Ansi，以免丢字符。
+      // 需要转成 UTF16 的再硬替成 Ansi。
+      UniText := UnicodeString(Utf8Text);
+      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(UniText));
+    end
+    else
+    begin
+      Text := CnUtf8ToAnsi2(Utf8Text);
+    end;
+
+    // 写 Text
+    Stream.Size := Length(Text) + 1;
+    Stream.Position := 0;
+    Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+  end
+  else
+  begin
+    // 直接写 Utf8Text
+    Stream.Size := Length(Utf8Text) + 1;
+    Stream.Position := 0;
+    Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text) + 1);
+  end;
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 保存当前编辑器文本到流中
+function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
+  Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
+begin
+  Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8, AlternativeWideChar);
+end;
+
 {$IFNDEF LAZARUS}
 
 {$IFDEF DELPHI_OTA}
@@ -8373,53 +8528,6 @@ begin
   end;
 
   CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
-end;
-
-// 保存编辑器文本到流中
-function CnOtaSaveEditorToStream(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
-var
-  IPos: Integer;
-  PreSize: Integer;
-begin
-  Assert(Stream <> nil);
-  Result := False;
-
-  if Editor = nil then
-  begin
-    Editor := CnOtaGetCurrentSourceEditor;
-    if Editor = nil then
-      Exit;
-  end;
-
-  if Editor.EditViewCount > 0 then
-  begin
-    if FromCurrPos then
-      IPos := CnOtaGetCurrLinearPos(Editor)
-    else
-      IPos := 0;
-
-    // 如果此文件未保存，则会出现 FileSize 与其不一致的情况，
-    // 可能导致 PreSize 为负从而出现问题
-    if FileExists(Editor.FileName) then
-      PreSize := Round(GetFileSize(Editor.FileName) * 1.5) - IPos
-    else
-      PreSize := 0;
-
-    // 修补上述问题
-    if PreSize < 0 then
-      PreSize := 0;
-
-    CnOtaSaveEditorToStreamEx(Editor, Stream, IPos, 0, PreSize, CheckUtf8, AlternativeWideChar);
-    Result := True;
-  end;
-end;
-
-// 保存当前编辑器文本到流中
-function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
-  Boolean; CheckUtf8: Boolean; AlternativeWideChar: Boolean): Boolean;
-begin
-  Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8, AlternativeWideChar);
 end;
 
 // 取得当前编辑器源代码

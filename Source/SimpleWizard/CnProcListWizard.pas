@@ -4009,7 +4009,7 @@ begin
         AddAFileToComboBox(Project.MainFile.Filename, Project.MainFile.Filename);
         for J := 0 to Project.FileCount - 1 do
         begin
-          if Project.Files[J] <> nil then
+          if (Project.Files[J] <> nil) and Project.Files[J].IsPartOfProject then
             AddAFileToComboBox(Project.Files[J].Filename, Project.MainFile.Filename);
         end;
 {$ENDIF}

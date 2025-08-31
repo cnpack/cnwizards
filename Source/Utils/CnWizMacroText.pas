@@ -38,7 +38,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, TypInfo, ActiveX, ToolsAPI,
+  Windows, SysUtils, Classes, TypInfo, ActiveX, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnWizConsts, CnCommon, CnWizCompilerConst, CnPasCodeParser, CnCppCodeParser;
 
 type
@@ -235,6 +235,7 @@ begin
       end;
       Continue;
     end;
+
     if Assigned(Stream) then
       Stream.Write(P^, SizeOf(Char));
     Inc(P);
@@ -339,10 +340,12 @@ function TCnWizMacroText.GetMacroValue(const AMacro: string; APos, AllPos:
 var
   Macro: TCnWizMacro;
   IPos: Integer;
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
   Stream: TMemoryStream;
+{$IFDEF DELPHI_OTA}
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
+{$ENDIF}
   PasParser: TCnPasStructureParser;
   CParser: TCnCppStructureParser;
   S: string;
@@ -380,6 +383,7 @@ begin
         Result := EdtGetArgList(GetMacroParam(AMacro));
       cwmRetType:
         Result := EdtGetRetType(GetMacroParam(AMacro));
+{$IFDEF DELPHI_OTA}
       cwmCurrProcName:
         Result := EdtGetCurrProcName;
       cwmCurrMethodName:
@@ -398,7 +402,7 @@ begin
             Exit;
 
           S := EditView.Buffer.FileName;
-          IsPasFile := IsPas(S) or IsDpr(S) or IsInc(S);
+          IsPasFile := IsPas(S) or IsDpr(S) or IsInc(S) {$IFDEF FPC} or IsPp(S) or IsLpr(S) {$ENDIF};
           IsCFile := IsCppSourceModule(S);
 
           Stream := TMemoryStream.Create;
@@ -449,6 +453,7 @@ begin
 
           Stream.Free;
         end;
+{$ENDIF}
       cwmCurrIDEName:
         Result := CompilerName;
       cwmUser:
@@ -456,21 +461,21 @@ begin
       cwmDateTime:
         Result := DateTimeToStr(Now);
       cwmDate:
-        Result := DateToStr(Date);
+        Result := DateToStr(SysUtils.Date);
       cwmYear:
-        Result := FormatDateTime('yyyy', Date);
+        Result := FormatDateTime('yyyy', SysUtils.Date);
       cwmMonth:
-        Result := FormatDateTime('mm', Date);
+        Result := FormatDateTime('mm', SysUtils.Date);
       cwmMonthShortName:
-        Result := FormatDateTime('mmm', Date);
+        Result := FormatDateTime('mmm', SysUtils.Date);
       cwmMonthLongName:
-        Result := FormatDateTime('mmmm', Date);
+        Result := FormatDateTime('mmmm', SysUtils.Date);
       cwmDay:
-        Result := FormatDateTime('dd', Date);
+        Result := FormatDateTime('dd', SysUtils.Date);
       cwmDayShortName:
-        Result := FormatDateTime('ddd', Date);
+        Result := FormatDateTime('ddd', SysUtils.Date);
       cwmDayLongName:
-        Result := FormatDateTime('dddd', Date);
+        Result := FormatDateTime('dddd', SysUtils.Date);
       cwmHour:
         Result := FormatDateTime('hh', Time);
       cwmMinute:

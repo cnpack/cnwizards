@@ -769,11 +769,11 @@ begin
   if not condition then begin
     tsWindowsError := GetLastError;
     if tsWindowsError <> ERROR_SUCCESS then
-      Error := EGpTextStream.CreateFmtHelp(sStreamFailed+SOSError,
+      Error := EGpTextStream.CreateFmtHelp(sStreamFailed+ {$IFDEF COMPILER5} SWin32Error {$ELSE} SOSError {$ENDIF},
         [StreamName(method),tsWindowsError,SysErrorMessage(tsWindowsError)],
         hcTFWindowsError)
     else
-      Error := EGpTextStream.CreateFmtHelp(sStreamFailed+SUnkOSError,
+      Error := EGpTextStream.CreateFmtHelp(sStreamFailed+ {$IFDEF COMPILER5} SUnkWin32Error {$ELSE} SUnkOSError {$ENDIF},
         [StreamName(method)],hcTFUnknownWindowsError);
     raise Error;
   end;

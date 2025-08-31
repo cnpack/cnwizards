@@ -43,13 +43,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, IniFiles, ToolsAPI, Menus, OmniXML, OmniXMLPersistent,
-  CnWizMultiLang, CnWizMacroUtils, CnWizClasses, CnConsts, CnWizConsts, CnWizUtils,
-  CnWizManager {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
+  StdCtrls, ComCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
+  OmniXML, OmniXMLPersistent, CnWizMultiLang, CnWizMacroUtils, CnWizClasses,
+  CnConsts, CnWizConsts, CnWizUtils, CnWizManager
+  {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
 
 type
 
-{ TCnEditorItem }
+{ TCnTemplateItem }
 
   TCnSrcTemplate = class;
   TCnTemplateCollection = class;
@@ -82,7 +83,7 @@ type
     property Hint: string read FHint write FHint;
     property IconName: string read FIconName write FIconName;
 
-    property ForDelphi: Boolean read FForDelphi write FForDelphi default {$IFDEF BDS} True {$ELSE} {$IFDEF DELPHI} True {$ELSE} False {$ENDIF} {$ENDIF};
+    property ForDelphi: Boolean read FForDelphi write FForDelphi default {$IFDEF BCB5OR6} False {$ELSE} True {$ENDIF};
     property ForBcb: Boolean read FForBcb write FForBcb default {$IFDEF BDS} True {$ELSE} {$IFDEF DELPHI} False {$ELSE} True {$ENDIF} {$ENDIF};
   end;
 

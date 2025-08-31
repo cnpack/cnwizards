@@ -42,7 +42,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, ActnList,
   StdCtrls, ComCtrls, Buttons, CnSrcTemplate, CnWizConsts, CnCommon, CnWizUtils,
-  CnWizManager, CnWizMacroText, CnWizOptions, CnWizMultiLang, CnWizMacroUtils;
+  CnWizManager, CnWizMacroText, CnWizOptions, CnWizMultiLang, CnWizMacroUtils,
+  CnHotKey;
 
 type
   TCnSrcTemplateEditForm = class(TCnTranslateForm)
@@ -121,6 +122,7 @@ begin
     chkForDelphi.Checked := TemplateItem.ForDelphi;
     chkForBcb.Checked := TemplateItem.ForBcb;
     Result := ShowModal = mrOk;
+
     if Result then
     begin
       TemplateItem.Caption := edtCaption.Text;
@@ -158,6 +160,7 @@ begin
     chkForDelphi.Checked := AForDelphi;
     chkForBcb.Checked := AForBcb;
     Result := ShowModal = mrOk;
+
     if Result then
     begin
       ACaption := edtCaption.Text;
@@ -185,10 +188,12 @@ var
 begin
   ItemIndex := -1;
   cbbInsertPos.Clear;
+
   for InsertPos := Low(InsertPos) to High(InsertPos) do
     cbbInsertPos.Items.Add(csEditorInsertPosDescs[InsertPos]^);
   cbbInsertPos.ItemIndex := 0;
   cbbMacro.Clear;
+
   for Macro := Low(Macro) to High(Macro) do
     cbbMacro.Items.Add(Format('%s - %s', [GetMacroEx(Macro),
       csCnWizMacroDescs[Macro]^]));
@@ -197,15 +202,16 @@ end;
 
 procedure TCnSrcTemplateEditForm.btnInsertClick(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   Macro: string;
 begin
   if cbbMacro.ItemIndex >= 0 then
   begin
     Macro := GetMacro(GetMacroDefText(TCnWizMacro(cbbMacro.ItemIndex)));
-    for i := 1 to Length(Macro) do
-      mmoContent.Perform(WM_CHAR, Ord(Macro[i]), 0); 
+    for I := 1 to Length(Macro) do
+      mmoContent.Perform(WM_CHAR, Ord(Macro[I]), 0);
   end;
+
   mmoContent.SetFocus;
 end;
 
@@ -247,8 +253,10 @@ begin
 
   Wizard := nil;
   if CnWizardMgr.WizardByClass(TCnSrcTemplate) <> nil then
+  begin
     if CnWizardMgr.WizardByClass(TCnSrcTemplate) is TCnSrcTemplate then
       Wizard := TCnSrcTemplate(CnWizardMgr.WizardByClass(TCnSrcTemplate));
+  end;
 
   if Wizard = nil then
     Exit;

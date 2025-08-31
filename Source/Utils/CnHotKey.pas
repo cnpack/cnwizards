@@ -37,6 +37,8 @@ interface
 
 {$I CnPack.inc}
 
+{$IFDEF FPC}
+
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, StdCtrls,
   Windows, Menus;
@@ -100,7 +102,11 @@ type
     property Visible;
   end;
 
+{$ENDIF FPC}
+
 implementation
+
+{$IFDEF FPC}
 
 { THotKey }
 
@@ -382,4 +388,5 @@ begin
     StartCapture;
 end;
 
+{$ENDIF FPC}
 end.
