@@ -3133,8 +3133,12 @@ begin
     else
       Match(Scanner.Token, BackTab(PreSpaceCount));
   end;
-  
-  repeat
+
+  // 注意 var 后不能 repeat until，得 while do，因为 var 后可能是空的
+  // 出现这些，认为 class var 区结束，包括 record 可能出现的 case
+  while not (Scanner.Token in ClassMethodTokens + ClassVisibilityTokens + [tokKeywordEnd,
+    tokEOF, tokKeywordCase, tokKeywordConst, tokKeywordProperty]) do
+  begin
     Writeln;
     
     FormatClassVarIdentList(PreSpaceCount);
@@ -3160,9 +3164,7 @@ begin
 
     if Scanner.Token = tokSemicolon then
       Match(tokSemicolon);
-  until Scanner.Token in ClassMethodTokens + ClassVisibilityTokens + [tokKeywordEnd,
-    tokEOF, tokKeywordCase, tokKeywordConst, tokKeywordProperty];
-    // 出现这些，认为 class var 区结束，包括 record 可能出现的 case
+  end;
 end;
 
 { IdentList -> [Attribute] Ident/','... }
