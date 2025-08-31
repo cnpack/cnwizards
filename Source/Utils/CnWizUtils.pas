@@ -1005,21 +1005,21 @@ function CnOtaGetCurrLinearPos(SourceEditor: TCnSourceEditorInterface = nil): In
 
 {$ENDIF}
 
-procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+procedure CnGeneralPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
 {* 封装的解析器解析 Pascal 代码的过程，要求 Stream 里是 Ansi/Utf16/Utf16，不包括对当前光标的处理}
 
-procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+procedure CnGeneralPasParserParseString(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 Pascal 代码中的字符串的过程，要求 Stream 里是 Ansi/Utf16/Utf16，不包括对当前光标的处理}
 
-procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+procedure CnGeneralCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer = 0; CurCol: Integer = 0;
   ParseCurrent: Boolean = False; NeedRoundSquare: Boolean = False);
 {* 封装的解析器解析 Cpp 代码的过程，包括了对当前光标的处理，以及是否需要小中括号分号。
    Line 和 Col 为 Cpp 解析器使用的 Ansi/Wide/Wide 偏移，1 开始}
 
-procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+procedure CnGeneralCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
@@ -8071,7 +8071,7 @@ end;
 {$ENDIF}
 
 // 封装的解析器解析 Pascal 代码的过程
-procedure CnPasParserParseSource(Parser: TCnGeneralPasStructParser;
+procedure CnGeneralPasParserParseSource(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream; AIsDpr, AKeyOnly: Boolean);
 begin
   if (Parser = nil) or (Stream = nil) then
@@ -8089,7 +8089,7 @@ begin
 end;
 
 // 封装的解析器解析 Pascal 代码中的字符串的过程，不包括对当前光标的处理
-procedure CnPasParserParseString(Parser: TCnGeneralPasStructParser;
+procedure CnGeneralPasParserParseString(Parser: TCnGeneralPasStructParser;
   Stream: TMemoryStream);
 begin
   if (Parser = nil) or (Stream = nil) then
@@ -8108,7 +8108,7 @@ end;
 
 
 // 封装的解析器解析 Cpp 代码的过程
-procedure CnCppParserParseSource(Parser: TCnGeneralCppStructParser;
+procedure CnGeneralCppParserParseSource(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream; CurrLine: Integer; CurCol: Integer;
   ParseCurrent: Boolean; NeedRoundSquare: Boolean);
 begin
@@ -8130,7 +8130,7 @@ begin
 end;
 
 // 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理
-procedure CnCppParserParseString(Parser: TCnGeneralCppStructParser;
+procedure CnGeneralCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 begin
   if (Parser = nil) or (Stream = nil) then

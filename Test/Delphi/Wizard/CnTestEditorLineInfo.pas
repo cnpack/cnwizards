@@ -377,7 +377,7 @@ begin
 
   try
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-    CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+    CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
       or IsInc(EditView.Buffer.FileName), False);
 
     CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);

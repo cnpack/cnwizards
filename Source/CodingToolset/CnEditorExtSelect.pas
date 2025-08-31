@@ -436,10 +436,10 @@ begin
 
       // 解析当前显示的源文件
       if CurIsPas then
-        CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+        CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
           or IsInc(EditView.Buffer.FileName), False)
       else if CurIsCpp then
-        CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line,
+        CnGeneralCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line,
           EditView.CursorPos.Col, True, True);
     finally
       Stream.Free;

@@ -1021,7 +1021,7 @@ begin
 {$ENDIF}
 
     // 解析当前显示的源文件中的字符串
-    CnPasParserParseString(FPasParser, FEditStream);
+    CnGeneralPasParserParseString(FPasParser, FEditStream);
     for I := 0 to FPasParser.Count - 1 do
     begin
       Token := FPasParser.Tokens[I];
@@ -1135,7 +1135,7 @@ begin
 {$ENDIF}
 
   // 解析当前显示的源文件中的字符串
-  CnCppParserParseString(FCppParser, FEditStream);
+  CnGeneralCppParserParseString(FCppParser, FEditStream);
   for I := 0 to FCppParser.Count - 1 do
   begin
     Token := FCppParser.Tokens[I];

@@ -759,7 +759,6 @@ begin
 {$ENDIF}
 
     // ½âÎö
-
     if CurIsPas then
     begin
       PasParser := TCnGeneralPasStructParser.Create;
@@ -782,10 +781,10 @@ begin
     if CurIsPas then
     begin
 {$IFDEF LAZARUS}
-      CnPasParserParseSource(PasParser, Mem, IsDpr(SourceEditorManagerIntf.ActiveEditor.FileName)
+      CnGeneralPasParserParseSource(PasParser, Mem, IsDpr(SourceEditorManagerIntf.ActiveEditor.FileName)
         or IsInc(SourceEditorManagerIntf.ActiveEditor.FileName), False);
 {$ELSE}
-      CnPasParserParseSource(PasParser, Mem, IsDpr(View.Buffer.FileName)
+      CnGeneralPasParserParseSource(PasParser, Mem, IsDpr(View.Buffer.FileName)
         or IsInc(View.Buffer.FileName), False);
 {$ENDIF}
 
@@ -795,15 +794,14 @@ begin
 
       if PasParser.BlockCloseToken <> nil then
         LastLine := PasParser.BlockCloseToken.LineNumber;
-
     end
     else if CurIsCpp then
     begin
 {$IFDEF LAZARUS}
-      CnCppParserParseSource(CppParser, Mem, SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y,
+      CnGeneralCppParserParseSource(CppParser, Mem, SourceEditorManagerIntf.ActiveEditor.CursorTextXY.Y,
         SourceEditorManagerIntf.ActiveEditor.CursorTextXY.X, True, True);
 {$ELSE}
-      CnCppParserParseSource(CppParser, Mem, View.CursorPos.Line,
+      CnGeneralCppParserParseSource(CppParser, Mem, View.CursorPos.Line,
         View.CursorPos.Col, True, True);
 {$ENDIF}
       if CppParser.BlockCloseToken <> nil then

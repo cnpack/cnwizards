@@ -1576,7 +1576,7 @@ begin
         {$ENDIF}
 
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
-        CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
+        CnGeneralCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col);
       finally
         Stream.Free;
       end;
@@ -1656,7 +1656,7 @@ begin
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
         // 解析当前显示的源文件，需要高亮当前标识符时不设置 KeyOnly
-        CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
+        CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
           not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
       finally
         Stream.Free;

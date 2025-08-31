@@ -1762,7 +1762,7 @@ begin
     if FCurrPasParser = nil then
       FCurrPasParser := TCnGeneralPasStructParser.Create;
 
-    CnPasParserParseSource(FCurrPasParser, FCurrStream, IsDpr(S) or IsInc(S), False);
+    CnGeneralPasParserParseSource(FCurrPasParser, FCurrStream, IsDpr(S) or IsInc(S), False);
 
 {$IFDEF STAND_ALONE}
     CharPos.Line := 1;
@@ -1836,7 +1836,7 @@ begin
 {$ENDIF}
 {$ENDIF}
 
-    CnCppParserParseSource(FCurrCppParser, FCurrStream,
+    CnGeneralCppParserParseSource(FCurrCppParser, FCurrStream,
       CharPos.Line, CharPos.CharIndex, True);
 
     // 记录并显示当前类与当前函数名

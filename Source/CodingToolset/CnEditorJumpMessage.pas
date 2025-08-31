@@ -620,10 +620,10 @@ begin
 
     // 解析当前显示的源文件，确保括号都进来
     if CurIsPas then
-      CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+      CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
         or IsInc(EditView.Buffer.FileName), False);
     if CurIsCpp then
-      CnCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col, False, True);
+      CnGeneralCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col, False, True);
   finally
     Stream.Free;
   end;
@@ -1062,7 +1062,7 @@ begin
     // 解析当前显示的源文件
     if CurIsPas then
     begin
-      CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
+      CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
         or IsInc(EditView.Buffer.FileName), False);
 
       for I := 0 to PasParser.Count - 1 do
@@ -1125,7 +1125,7 @@ begin
     begin
       CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
       // 将当前光标位置转换成 Ansi/Utf16/Utf16 供 CppParser 使用
-      CnCppParserParseSource(CppParser, Stream, CharPos.Line, CharPos.CharIndex + 1);
+      CnGeneralCppParserParseSource(CppParser, Stream, CharPos.Line, CharPos.CharIndex + 1);
       // 转出来的 CharIndex 是 0 开始，但 CppParser 要求 1 开始，所以加一。
 
       for I := 0 to CppParser.Count - 1 do

@@ -631,7 +631,7 @@ begin
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
 
     // 解析当前显示的源文件
-    CnPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName), False);
+    CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName), False);
     CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
     PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
 
