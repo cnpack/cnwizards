@@ -643,7 +643,9 @@ begin
     if Length(Utf8Text) > 0 then
       Stream.Write(Utf8Text[1], Length(Utf8Text));
     Stream.Write(TheEnd, 1);
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
     if FEditRead = nil then
@@ -1066,7 +1068,9 @@ begin
       raise Exception.Create(SNoEditWriter);
 
     FEditor.Lines.Text := Utf8Text;
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
     if FEditWrite = nil then
       raise Exception.Create(SNoEditWriter);
 

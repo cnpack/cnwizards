@@ -546,6 +546,10 @@ function CnOtaGetProjectVersion(Project: TCnIDEProjectInterface = nil): string;
 function CnOtaGetActiveProjectOptions(Project: TCnIDEProjectInterface = nil): TCnIDEProjectOptionsInterface;
 {* 取当前工程选项}
 
+function CnOtaGetProjectSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean = True; Project: TCnIDEProjectInterface = nil): Boolean;
+{* 获取指定工程所包含的源码文件完整路径名称并放入 Sources，如不指定工程则用当前工程，返回是否获取成功}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -617,9 +621,6 @@ function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
 {* 取当前工程组中的第 Index 个工程，从 0 开始}
-function CnOtaGetProjectSourceFiles(Sources: TStrings;
-  IncludeDpr: Boolean = True; Project: IOTAProject = nil): Boolean;
-{* 获取指定工程所包含的源码文件并放入 Sources，如不指定工程则用当前工程，返回是否获取成功}
 function CnOtaGetProjectGroupSourceFiles(Sources: TStrings;
   IncludeDpr: Boolean = True): Boolean;
 {* 获取当前工程组里所有工程中的源码文件并放入 Sources，返回是否获取成功}
@@ -1038,6 +1039,30 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
   Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
 {* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
+procedure CnOtaGotoPosition(Position: Longint; EditView: TCnEditViewSourceInterface = nil;
+  Middle: Boolean = True);
+{* 移动光标到指定位置，如果 EditView 为空使用当前值。Position 是线性位置，一般都是 Ansi 或 Utf文字8
+  Middle 为 True 时表示垂直方向上滚动至居中，False 表示仅滚动到最近可见，如本来可见就不滚动}
+
+procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
+  SourceEditor: TCnSourceEditorInterface = nil);
+{* 在指定位置处插入文本，内部会根据需要做 Utf8 转换，如果 SourceEditor 为空使用当前值。
+  Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
+
+procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
+  EditView: TCnEditViewSourceInterface = nil);
+{* 插入一行文本到当前 EditView，Line 为行号，Text 为单行文本}
+
+function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{* 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 BDS 以上均使用 WideChar，
+  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾不能有结束字符 #0。
+  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用}
+
+function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
+  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
+  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
+
 {$IFNDEF LAZARUS}
 
 {$IFDEF DELPHI_OTA}
@@ -1073,16 +1098,6 @@ procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
 
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
-
-function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
-{* 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 BDS 以上均使用 WideChar，
-  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾不能有结束字符 #0。
-  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用}
-
-function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
-{* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
-  D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
-  不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -1147,21 +1162,12 @@ procedure CnOtaInsertLineIntoEditor(const Text: string);
 {* 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
    它会替换当前所选的文本。}
 
-procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
-  EditView: IOTAEditView = nil);
-{* 插入一行文本当前 IOTASourceEditor，Line 为行号，Text 为单行 }
-
 procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
 {* 插入文本到当前 IOTASourceEditor，允许多行文本。
   可在 D2005~2007 下替代上面的 CnOtaInsertTextIntoEditor 以避免转成 Ansi 而可能丢字符的问题}
 
 function CnOtaGetEditWriterForSourceEditor(SourceEditor: IOTASourceEditor = nil): IOTAEditWriter;
 {* 为指定 SourceEditor 返回一个 Writer，如果输入为空返回当前值。}
-
-procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
-  SourceEditor: IOTASourceEditor = nil);
-{* 在指定位置处插入文本，内部会根据需要做 Utf8 转换，如果 SourceEditor 为空使用当前值。
-  Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
 
 procedure CnOtaInsertTextIntoEditorAtPosUtf8(const Utf8Text: AnsiString; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
@@ -1182,11 +1188,6 @@ procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Intege
 {* 光标跳至指定的行与列并重画，行列均是 1 开始。EditPosCol 为 0 时表示行首}
 
 {$ENDIF}
-
-procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView = nil;
-  Middle: Boolean = True);
-{* 移动光标到指定位置，如果 EditView 为空使用当前值。
-  Middle 为 True 时表示垂直方向上滚动至居中，False 表示仅滚动到最近可见，如本来可见就不滚动}
 
 function CnOtaGetEditPos(EditView: IOTAEditView): TOTAEditPos;
 {* 返回当前光标位置，如果 EditView 为空使用当前值。 }
@@ -1410,8 +1411,8 @@ uses
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizHelp,
-  CnLangMgr, CnLangStorage, CnHashLangStorage
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} {$ELSE}, CnWizEditFiler, CnWizScaler
+  CnLangMgr, CnLangStorage, CnHashLangStorage, CnWizEditFiler
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} {$ELSE}, CnWizScaler
   {$IFNDEF CNWIZARDS_MINIMUM}
   , CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
   {$ENDIF} {$ENDIF} {$ENDIF}
@@ -4151,6 +4152,49 @@ begin
     Result := nil;
 end;
 
+// 获取指定工程所包含的源码文件完整路径名称并放入 Sources，如不指定工程则用当前工程，返回是否获取成功
+function CnOtaGetProjectSourceFiles(Sources: TStrings;
+  IncludeDpr: Boolean; Project: TCnIDEProjectInterface): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  Sources.Clear;
+
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+{$IFDEF LAZARUS}
+  if IncludeDpr and IsSourceModule(Project.MainFile.Filename) then
+    Sources.Add(Project.MainFile.Filename);
+
+  for I := 0 to Project.FileCount - 1 do
+  begin
+    if Project.Files[I].IsPartOfProject and IsSourceModule(Project.Files[I].FileName) then
+      Sources.Add(Project.Files[I].FileName);
+  end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  if IncludeDpr and IsSourceModule(Project.FileName) then
+    Sources.Add(Project.FileName);
+{$IFDEF BDS}
+  if IncludeDpr and not IsDpr(Project.FileName) then
+    Sources.Add(_CnChangeFileExt(Project.FileName, '.dpr'));
+{$ENDIF}
+
+  for I := 0 to Project.GetModuleCount - 1 do
+  begin
+    if IsSourceModule(Project.GetModule(I).FileName) then
+      Sources.Add(Project.GetModule(I).FileName);
+  end;
+{$ENDIF}
+
+  Result := Sources.Count > 0;
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -5050,35 +5094,6 @@ begin
     Result := CnOtaGetProjectGroup.GetProject(Index)
   else
     Result := nil;
-end;
-
-// 获取指定工程所包含的源码文件并放入 Sources，如不指定工程则用当前工程，返回是否获取成功
-function CnOtaGetProjectSourceFiles(Sources: TStrings;
-  IncludeDpr: Boolean; Project: IOTAProject): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  Sources.Clear;
-
-  if Project = nil then
-    Project := CnOtaGetCurrentProject;
-  if Project = nil then
-    Exit;
-
-  if IncludeDpr and IsSourceModule(Project.FileName) then
-    Sources.Add(Project.FileName);
-{$IFDEF BDS}
-  if IncludeDpr and not IsDpr(Project.FileName) then
-    Sources.Add(_CnChangeFileExt(Project.FileName, '.dpr'));
-{$ENDIF}
-
-  for I := 0 to Project.GetModuleCount - 1 do
-  begin
-    if IsSourceModule(Project.GetModule(I).FileName) then
-      Sources.Add(Project.GetModule(I).FileName);
-  end;
-  Result := Sources.Count > 0;
 end;
 
 // 获取当前工程组里所有工程中的源码文件并放入 Sources，返回是否获取成功
@@ -6802,14 +6817,16 @@ begin
 
 {$IFDEF LAZARUS}
   S := EditView.FileName;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   S := EditView.Buffer.FileName;
 {$ENDIF}
 
   Stream := TMemoryStream.Create;
 {$IFDEF LAZARUS}
   CnOtaSaveEditorToStream(EditView, Stream);
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   CnOtaSaveEditorToStream(EditView.Buffer, Stream);
 {$ENDIF}
 
@@ -6822,8 +6839,10 @@ begin
           IsDpr(S), False);
 
 {$IFDEF LAZARUS}
-        PasParser.FindCurrentBlock(EditView.CursorTextXY.Y, EditView.CursorTextXY.X);
-{$ELSE}
+        CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+        PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         EditPos := EditView.CursorPos;
         EditView.ConvertPos(True, EditPos, CharPos);
         PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
@@ -6845,7 +6864,8 @@ begin
 {$IFDEF LAZARUS}
         CParser.ParseSource(PAnsiChar(Stream.Memory), Stream.Size,
           EditView.CursorTextXY.Y, EditView.CursorTextXY.X, True);
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         EditPos := EditView.CursorPos;
         EditView.ConvertPos(True, EditPos, CharPos);
         // 是否需要转换？
@@ -8307,6 +8327,165 @@ begin
   Result := CnOtaSaveEditorToStream(nil, Stream, FromCurrPos, CheckUtf8, AlternativeWideChar);
 end;
 
+// 移动光标到指定位置，如果 EditView 为空使用当前值。
+procedure CnOtaGotoPosition(Position: Longint; EditView: TCnEditViewSourceInterface; Middle: Boolean);
+var
+  CurPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+begin
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+  Assert(Assigned(EditView));
+
+{$IFDEF LAZARUS}
+  EditView.SelStart := Position;
+  EditView.SelEnd := Position;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  CharPos := CnOtaGetCharPosFromPos(Position, EditView);
+  CurPos.Col := CharPos.CharIndex + 1;
+  CurPos.Line := CharPos.Line;
+  CnOtaGotoEditPos(CurPos, EditView, Middle);
+{$ENDIF}
+end;
+
+// 在指定位置处插入文本，如果 SourceEditor 为空使用当前值。
+procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
+  SourceEditor: TCnSourceEditorInterface);
+{$IFDEF DELPHI_OTA}
+var
+  EditWriter: IOTAEditWriter;
+{$ENDIF}
+begin
+  if Text = '' then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  EditWriter := CnOtaGetEditWriterForSourceEditor(SourceEditor);
+  try
+    EditWriter.CopyTo(Position);
+  {$IFDEF UNICODE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+  {$ELSE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+  {$ENDIF}
+  finally
+    EditWriter := nil;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if SourceEditor = nil then
+    SourceEditor := CnOtaGetCurrentSourceEditor;
+
+  if SourceEditor <> nil then
+  begin
+    SourceEditor.SelStart := Position;
+    SourceEditor.SelEnd := Position;
+
+    SourceEditor.ReplaceText(SourceEditor.CursorTextXY, SourceEditor.CursorTextXY, Text);
+  end;
+{$ENDIF}
+end;
+
+// 插入一行文本到当前 EditView，Line 为行号，Text 为单行文本
+procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
+  EditView: TCnEditViewSourceInterface);
+begin
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+
+  if Assigned(EditView) then
+  begin
+{$IFDEF DELPHI_OTA}
+    if Line > 1 then
+    begin
+      // 先插入一个换行
+      EditView.Position.Move(Line - 1, 1);
+      EditView.Position.MoveEOL;
+    end
+    else
+    begin
+      EditView.Position.Move(1, 1);
+    end;
+    CnOtaPositionInsertText(EditView.Position, CRLF);
+    // 再插入文本以避免下一行自动缩进
+    EditView.Position.Move(Line, 1);
+    CnOtaPositionInsertText(EditView.Position, Text);
+    EditView.Paint;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    EditView.InsertLine(Line, Text);
+{$ENDIF}
+  end;
+end;
+
+// 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 Ansi/Utf16/Utf16，
+// 末尾不能有结束字符 #0。不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用
+function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Utf8: AnsiString;
+  Text: WideString;
+{$ENDIF}
+begin
+  Result := False;
+  if Stream.Size <= 0 then
+    Exit;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005~2007 的 Stream 要求是 Utf8，需要从 Utf16 转换而来
+  SetLength(Text, Stream.Size div SizeOf(WideChar));
+  Move(Stream.Memory^, Text[1], Length(Text) * SizeOf(WideChar));
+  Utf8 := CnUtf8EncodeWideString(Text);
+
+  Stream.Size := Length(Utf8);
+  Stream.Position := 0;
+  Stream.Write(PAnsiChar(Utf8)^, (Length(Utf8)));
+  Stream.Position := 0;
+{$ENDIF}
+  EditFilerLoadFileFromStream(FileName, Stream, False);
+  Result := True;
+end;
+
+// 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，Ansi/Utf16/Utf16，末尾均有结束字符 #0，
+// 不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用
+function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+var
+  Utf8: AnsiString;
+  Text: WideString;
+{$ENDIF}
+begin
+  EditFilerSaveFileToStream(FileName, Stream, False);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // BDS 2005~2007 的 Stream 如从 IDE 中读出，则可能是 Utf8，需要转换成 Utf16
+  if Stream.Size > 0 then
+  begin
+    SetLength(Utf8, Stream.Size);
+    Move(Stream.Memory^, Utf8[1], Stream.Size);
+    Text := CnUtf8DecodeToWideString(Utf8);
+
+    if Text <> '' then
+    begin
+      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+      Stream.Position := 0;
+      Stream.Write(Pointer(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+    end
+    else
+    begin
+      // 如果转 UTF16 失败，说明不是 Utf8，当成 Ansi 处理，直接转换为 WideString
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnGeneralFilerSaveFileToStream Utf8 to Wide Fail, use Ansi to Wide.');
+{$ENDIF}
+      Text := WideString(Utf8);
+    end;
+  end;
+{$ENDIF}
+  Result := Stream.Size > 0;
+end;
+
 {$IFNDEF LAZARUS}
 
 {$IFDEF DELPHI_OTA}
@@ -8542,70 +8721,6 @@ begin
   finally
     Strm.Free;
   end;
-end;
-
-// 封装的一通用方法，使用 Filer 将流内容加载入指定文件。流要求 Ansi/Utf16/Utf16，
-// 末尾不能有结束字符 #0。不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法处理后写入文件用
-function CnGeneralFilerLoadFileFromStream(const FileName: string; Stream: TMemoryStream): Boolean;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-var
-  Utf8: AnsiString;
-  Text: WideString;
-{$ENDIF}
-begin
-  Result := False;
-  if Stream.Size <= 0 then
-    Exit;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  // BDS 2005~2007 的 Stream 要求是 Utf8，需要从 Utf16 转换而来
-  SetLength(Text, Stream.Size div SizeOf(WideChar));
-  Move(Stream.Memory^, Text[1], Length(Text) * SizeOf(WideChar));
-  Utf8 := CnUtf8EncodeWideString(Text);
-
-  Stream.Size := Length(Utf8);
-  Stream.Position := 0;
-  Stream.Write(PAnsiChar(Utf8)^, (Length(Utf8)));
-  Stream.Position := 0;
-{$ENDIF}
-  EditFilerLoadFileFromStream(FileName, Stream, False);
-  Result := True;
-end;
-
-// 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，Ansi/Utf16/Utf16，末尾均有结束字符 #0，
-// 不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用
-function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryStream): Boolean;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-var
-  Utf8: AnsiString;
-  Text: WideString;
-{$ENDIF}
-begin
-  EditFilerSaveFileToStream(FileName, Stream, False);
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  // BDS 2005~2007 的 Stream 如从 IDE 中读出，则可能是 Utf8，需要转换成 Utf16
-  if Stream.Size > 0 then
-  begin
-    SetLength(Utf8, Stream.Size);
-    Move(Stream.Memory^, Utf8[1], Stream.Size);
-    Text := CnUtf8DecodeToWideString(Utf8);
-
-    if Text <> '' then
-    begin
-      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
-      Stream.Position := 0;
-      Stream.Write(Pointer(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
-    end
-    else
-    begin
-      // 如果转 UTF16 失败，说明不是 Utf8，当成 Ansi 处理，直接转换为 WideString
-{$IFDEF DEBUG}
-      CnDebugger.LogMsg('CnGeneralFilerSaveFileToStream Utf8 to Wide Fail, use Ansi to Wide.');
-{$ENDIF}
-      Text := WideString(Utf8);
-    end;
-  end;
-{$ENDIF}
-  Result := Stream.Size > 0;
 end;
 
 {$IFDEF UNICODE}
@@ -8950,32 +9065,6 @@ begin
   end;
 end;
 
-// 插入一行文本当前 IOTASourceEditor，Line 为行号，Text 为单行
-procedure CnOtaInsertSingleLine(Line: Integer; const Text: string;
-  EditView: IOTAEditView = nil);
-begin
-  if not Assigned(EditView) then
-    EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) then
-  begin
-    if Line > 1 then
-    begin
-      // 先插入一个换行
-      EditView.Position.Move(Line - 1, 1);
-      EditView.Position.MoveEOL;
-    end
-    else
-    begin
-      EditView.Position.Move(1, 1);
-    end;
-    CnOtaPositionInsertText(EditView.Position, CRLF);
-    // 再插入文本以避免下一行自动缩进
-    EditView.Position.Move(Line, 1);
-    CnOtaPositionInsertText(EditView.Position, Text);
-    EditView.Paint;
-  end;
-end;
-
 procedure CnOtaInsertTextIntoEditorUtf8(const Utf8Text: AnsiString);
 var
   EditView: IOTAEditView;
@@ -9003,27 +9092,6 @@ begin
   if Assigned(SourceEditor) then
     Result := SourceEditor.CreateUndoableWriter;
   Assert(Assigned(Result), SEditWriterNotAvail);
-end;
-
-// 在指定位置处插入文本，如果 SourceEditor 为空使用当前值。
-procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
-  SourceEditor: IOTASourceEditor);
-var
-  EditWriter: IOTAEditWriter;
-begin
-  if Text = '' then
-    Exit;
-  EditWriter := CnOtaGetEditWriterForSourceEditor(SourceEditor);
-  try
-    EditWriter.CopyTo(Position);
-  {$IFDEF UNICODE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
-  {$ELSE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
-  {$ENDIF}
-  finally
-    EditWriter := nil;
-  end;
 end;
 
 procedure CnOtaInsertTextIntoEditorAtPosUtf8(const Utf8Text: AnsiString; Position: Longint;
@@ -9096,22 +9164,6 @@ begin
 end;
 
 {$ENDIF}
-
-// 移动光标到指定位置，如果 EditView 为空使用当前值。
-procedure CnOtaGotoPosition(Position: Longint; EditView: IOTAEditView; Middle: Boolean);
-var
-  CurPos: TOTAEditPos;
-  CharPos: TOTACharPos;
-begin
-  if not Assigned(EditView) then
-    EditView := CnOtaGetTopMostEditView;
-  Assert(Assigned(EditView));
-
-  CharPos := CnOtaGetCharPosFromPos(Position, EditView);
-  CurPos.Col := CharPos.CharIndex + 1;
-  CurPos.Line := CharPos.Line;
-  CnOtaGotoEditPos(CurPos, EditView, Middle);
-end;
 
 // 返回当前光标位置，如果 EditView 为空使用当前值。
 function CnOtaGetEditPos(EditView: IOTAEditView): TOTAEditPos;

@@ -55,6 +55,7 @@ type
     FIdPrintSysPath: Integer;
     FIdPrintProjPath: Integer;
     FIdPrintProjFile: Integer;
+    FIdPrintProjData: Integer;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -104,6 +105,9 @@ begin
   FIdPrintProjFile := RegisterASubAction('CnLazPrintProjFiles',
     'Test CnLazPrintProjFiles', 0, 'Test CnLazPrintProjFiles',
     'CnLazPrintProjFiles');
+  FIdPrintProjData := RegisterASubAction('CnLazPrintProjData',
+    'Test CnLazPrintProjData', 0, 'Test CnLazPrintProjData',
+    'CnLazPrintProjData');
 end;
 
 function TCnTestEnvProjPathWizard.GetCaption: string;
@@ -147,6 +151,7 @@ end;
 procedure TCnTestEnvProjPathWizard.SubActionExecute(Index: Integer);
 var
   I: Integer;
+  B: string;
 begin
   if not Active then Exit;
 
@@ -213,12 +218,21 @@ begin
     begin
       for I := 0 to LazarusIDE.ActiveProject.FileCount - 1 do
       begin
-        if CnOtaIsFileOpen(LazarusIDE.ActiveProject.Files[I].Filename) then
-          CnDebugger.TraceFmt('# %d * %s', [I, LazarusIDE.ActiveProject.Files[I].Filename])
+        if LazarusIDE.ActiveProject.Files[I].IsPartOfProject then
+          B := '!'
         else
-          CnDebugger.TraceFmt('# %d   %s', [I, LazarusIDE.ActiveProject.Files[I].Filename]);
+          B := ' ';
+        if CnOtaIsFileOpen(LazarusIDE.ActiveProject.Files[I].Filename) then
+          CnDebugger.TraceFmt('# %d %s  *  %s', [I, B, LazarusIDE.ActiveProject.Files[I].Filename])
+        else
+          CnDebugger.TraceFmt('# %d %s     %s', [I, B, LazarusIDE.ActiveProject.Files[I].Filename]);
       end;
     end;
+  end
+  else if Index = FIdPrintProjData then
+  begin
+    CnDebugger.TraceFmt('Custom Data %s', [LazarusIDE.ActiveProject.CustomData.AsText]);
+    CnDebugger.TraceFmt('Custom Session Data %s', [LazarusIDE.ActiveProject.CustomSessionData.AsText]);
   end;
 end;
 

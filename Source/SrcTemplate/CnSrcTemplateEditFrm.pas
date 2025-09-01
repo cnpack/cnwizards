@@ -208,8 +208,14 @@ begin
   if cbbMacro.ItemIndex >= 0 then
   begin
     Macro := GetMacro(GetMacroDefText(TCnWizMacro(cbbMacro.ItemIndex)));
+{$IFDEF FPC}
+    I := mmoContent.SelStart;
+    mmoContent.SelText := Macro;
+    mmoContent.SelStart := I + Length(Macro);
+{$ELSE}
     for I := 1 to Length(Macro) do
       mmoContent.Perform(WM_CHAR, Ord(Macro[I]), 0);
+{$ENDIF}
   end;
 
   mmoContent.SetFocus;

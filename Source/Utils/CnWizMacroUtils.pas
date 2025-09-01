@@ -84,12 +84,10 @@ function EdtGetProcInfo(var Name: string; var Args: TCnProcArguments;
   var ResultType: string): Boolean;
 {* 从当前光标往后找第一个函数的声明内容}
 
-{$IFDEF DELPHI_OTA}
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer = 0);
 {* AContent 是待插入的内容；InsertPos 是待插入的位置
    ASavePos 是否插入后光标回到原处，如为 False，则根据 PosInText 调整光标位置}
-{$ENDIF}
 
 implementation
 
@@ -537,12 +535,10 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF DELPHI_OTA}
-
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer);
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
   SavePos: Integer;
   Position: Integer;
   CharPos: TOTACharPos;
@@ -613,6 +609,28 @@ begin
 
   EditView := CnOtaGetTopMostEditView;
   Assert(Assigned(EditView));
+
+{$IFDEF LAZARUS}
+  Position := EditView.SelStart;
+  CnOtaInsertTextIntoEditorAtPos(S, Position);
+
+  if ASavePos then
+    CnOtaGotoPosition(SavePos, EditView, False)
+  else
+  begin
+    if PosInText > 0 then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('EdtInsertTextToCurSource Position %d, PosInText %d.',
+        [Position, PosInText]);
+{$ENDIF}
+      CnOtaGotoPosition(Position + PosInText, EditView, False); // 必须减 1。并且垂直方向上不强制居中
+    end;
+    CnLazSourceEditorCenterLine(EditView, EditView.CursorTextXY.Y);
+  end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   EditPos := EditView.CursorPos;
   EditView.ConvertPos(True, EditPos, CharPos);
   Position := EditView.CharPosToPos(CharPos);
@@ -654,9 +672,9 @@ begin
     EditView.MoveViewToCursor;
   end;
   EditView.Paint;
+{$ENDIF}
+
   BringIdeEditorFormToFront;
 end;
-
-{$ENDIF}
 
 end.

@@ -45,7 +45,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
   OmniXML, OmniXMLPersistent, CnWizMultiLang, CnWizMacroUtils, CnWizClasses,
-  CnConsts, CnWizConsts, CnWizUtils, CnWizManager
+  CnConsts, CnWizConsts, CnWizUtils, CnWizManager {$IFDEF LAZARUS} , LCLProc {$ENDIF}
   {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
 
 type
@@ -207,7 +207,7 @@ uses
 
 {$R *.DFM}
 
-{ TCnEditorItem }
+{ TCnTemplateItem }
 
 procedure TCnTemplateItem.Assign(Source: TPersistent);
 begin
@@ -237,6 +237,9 @@ begin
   FActionIndex := -1;
   FIconName := SCnSrcTemplateIconName;
 
+{$IFDEF LAZARUS}
+  FForDelphi := True;
+{$ELSE}
 {$IFDEF BDS}
   FForDelphi := True;
   FForBcb := True;
@@ -247,13 +250,14 @@ begin
   FForBcb := True;
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.TraceObject(Self);
 {$ENDIF}
 end;
 
-{ TCnEditorCollection }
+{ TCnTemplateCollection }
 
 function TCnTemplateCollection.Add: TCnTemplateItem;
 begin
@@ -584,7 +588,7 @@ const
 var
   I, J: Integer;
   S, T, ProcName: string;
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
   Stream: TMemoryStream;
   PasParser: TCnGeneralPasStructParser;
   CharPos: TOTACharPos;
@@ -596,7 +600,13 @@ begin
   if EditView = nil then
     Exit;
 
-  if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
+{$IFDEF DELPHI_OTA}
+  S := EditView.Buffer.FileName;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  S := EditView.FileName;
+{$ENDIF}
+  if not IsDprOrPas(S) and not IsInc(S) then
   begin
     ErrorDlg(SCnSrcTemplateSourceTypeNotSupport);
     Exit;
@@ -628,10 +638,17 @@ begin
     PasParser.TabWidth := EditControlWrapper.GetTabWidth;;
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
+    S := EditView.Buffer.FileName;
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    S := EditView.FileName;
+    CnGeneralSaveEditorToStream(EditView, Stream);
+{$ENDIF}
 
     // 解析当前显示的源文件
-    CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName), False);
+    CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(S) {$IFDEF LAZARUS} or IsLpr(S) {$ENDIF}, False);
     CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
     PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
 

@@ -252,7 +252,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     end
     object cbbMacro: TComboBox
       Left = 72
-      Top = 15
+      Top = 16
       Width = 433
       Height = 21
       Style = csDropDownList
@@ -262,7 +262,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
     end
     object btnInsert: TButton
       Left = 517
-      Top = 15
+      Top = 16
       Width = 75
       Height = 21
       Anchors = [akTop, akRight]
