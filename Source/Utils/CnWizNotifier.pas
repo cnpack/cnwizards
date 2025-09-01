@@ -57,13 +57,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  {$IFNDEF LAZARUS} AppEvnts, {$ENDIF}
+  {$IFNDEF FPC} AppEvnts, {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} Consts, ToolsAPI, {$ENDIF}
   CnWizUtils, {$ENDIF} CnClasses {$IFNDEF STAND_ALONE}
   {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
-{$IFDEF LAZARUS}
+{$IFDEF FPC}
   TMessageEvent = procedure (var Msg: TMsg; var Handled: Boolean) of object;
 {$ENDIF}
 
@@ -432,7 +432,7 @@ type
     FBeforeThemeChangeNotifiers: TList;
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
-{$IFDEF LAZARUS}
+{$IFDEF FPC}
     FEvents: TApplicationProperties;
     FOldScreenActiveFormChange: TNotifyEvent;
     FOldScreenActiveControlChange: TNotifyEvent;
@@ -1036,7 +1036,7 @@ begin
   FBreakpointDeletedNotifiers := TList.Create;
 
   FFileNotifiers := TList.Create;
-{$IFDEF LAZARUS}
+{$IFDEF FPC}
   FEvents := TApplicationProperties.Create(nil);
   FEvents.OnIdle := DoApplicationIdle;
   FEvents.OnMinimize := DoApplicationMinimize;

@@ -68,7 +68,7 @@ interface
 
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, ExtCtrls,
-  ComCtrls, TypInfo, Forms, {$IFNDEF LAZARUS} Tabs, {$ENDIF} Registry, Contnrs,
+  ComCtrls, TypInfo, Forms, {$IFDEF DELPHI} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
   {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF}

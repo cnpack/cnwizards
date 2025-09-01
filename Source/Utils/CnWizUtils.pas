@@ -64,15 +64,15 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} LazIDEIntf, ProjectIntf,
-  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, {$ENDIF}
-  {$ELSE} {$IFNDEF STAND_ALONE} ExptIntf, ToolsAPI,
+  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf,
+  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, {$ENDIF} {$ENDIF}
+  {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF} {$ENDIF}
+  {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
   mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,

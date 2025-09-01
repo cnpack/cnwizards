@@ -45,7 +45,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
   OmniXML, OmniXMLPersistent, CnWizMultiLang, CnWizMacroUtils, CnWizClasses,
-  CnConsts, CnWizConsts, CnWizUtils, CnWizManager {$IFDEF LAZARUS} , LCLProc {$ENDIF}
+  CnConsts, CnWizConsts, CnWizUtils, CnWizManager {$IFDEF FPC} , LCLProc {$ENDIF}
   {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
 
 type

@@ -61,17 +61,15 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
-  {$IFDEF LAZARUS} {$IFNDEF STAND_ALONE} PackageIntf, ComponentReg, IDEOptionsIntf,
-  {$ENDIF} {$ELSE} {$IFNDEF STAND_ALONE} ToolsAPI, CnWizEditFiler, {$ENDIF} Tabs,
+  {$IFDEF LAZARUS} PackageIntf, ComponentReg, IDEOptionsIntf, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, CnWizEditFiler, {$IFDEF COMPILER6_UP}
+  DesignIntf, DesignEditors, ComponentDesigner, Variants,
+  {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
+  {$IFDEF FPC} LCLType, {$ELSE} Tabs, {$ENDIF}
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
-  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF}
-  {$IFDEF COMPILER6_UP}
-  DesignIntf, DesignEditors, ComponentDesigner, Variants,
-  {$ELSE}
-  DsgnIntf, LibIntf,
-  {$ENDIF} {$ENDIF}
-  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF}
+  {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnCommon,
   CnWideStrings, CnWizOptions, CnWizCompilerConst, CnIDEStrings;
@@ -344,7 +342,7 @@ var
 function GetIDEMainForm: TCustomForm;
 {* 返回 IDE 主窗体（TAppBuilder 或 TMainIDEBar）}
 
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 function GetIDEEdition: string;
 {* 返回 IDE 版本}
@@ -358,12 +356,8 @@ function GetNewComponentPaletteTabControl: TWinControl;
 function GetNewComponentPaletteComponentPanel: TWinControl;
 {* 返回 2010 或以上的新组件面板下半部分容纳组件列表的容器对象，可能为空}
 
-{$IFDEF DELPHI_OTA}
-
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
 {* 返回编辑器窗口下方的状态栏，可能为空}
-
-{$ENDIF}
 
 function GetObjectInspectorForm: TCustomForm;
 {* 返回对象检查器窗体，可能为空}
@@ -432,7 +426,7 @@ function GetProjectDcuPath(AProject: TCnIDEProjectInterface): string;
 function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
 {* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 procedure CloseExpandableEvalViewForm;
 {* 关闭调试时提示信息大窗口}
@@ -452,8 +446,6 @@ function GetBDSUserDataDir: string;
 {* 取得 BDS (Delphi8以后版本) 的用户数据目录 }
 {$ENDIF}
 
-{$IFDEF DELPHI_OTA}
-
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 {* 根据模块名获得完整文件名}
 
@@ -469,8 +461,6 @@ function GetCurrentCompilingProject: IOTAProject;
 
 function CompileProject(AProject: IOTAProject): Boolean;
 {* 编译工程，返回编译是否成功}
-
-{$ENDIF}
 
 function GetComponentUnitName(const ComponentName: string): string;
 {* 取组件定义所在的单元名}
@@ -508,15 +498,11 @@ function GetEditorTabTabIndex(ATab: TXTabControl): Integer;
 function GetStatusBarFromEditor(EditControl: TControl): TStatusBar;
 {* 从编辑器控件获得其所属的编辑器窗口的状态栏}
 
-{$IFDEF DELPHI_OTA}
-
 function GetCurrentSyncButton: TControl;
 {* 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见}
 
 function GetCurrentSyncButtonVisible: Boolean;
 {* 获取当前最前端编辑器的语法编辑按钮是否可见，无按钮或不可见均返回 False}
-
-{$ENDIF}
 
 function GetCodeTemplateListBox: TControl;
 {* 返回编辑器中的代码模板自动输入框}
@@ -524,15 +510,11 @@ function GetCodeTemplateListBox: TControl;
 function GetCodeTemplateListBoxVisible: Boolean;
 {* 返回编辑器中的代码模板自动输入框是否可见，无或不可见均返回 False}
 
-{$IFDEF DELPHI_OTA}
-
 function IsCurrentEditorInSyncMode: Boolean;
 {* 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False}
 
 function IsKeyMacroRunning: Boolean;
 {* 当前是否在键盘宏的录制或回放，不支持或不在返回 False}
-
-{$ENDIF}
 
 procedure BeginBatchOpenClose;
 {* 开始批量打开或关闭文件 }
@@ -553,14 +535,10 @@ function GetErrorInsightRenderStyle: Integer;
 {* 返回 ErrorInsight 的当前类型，返回值为 csErrorInsightRenderStyle* 系列常数
    -1 为不支持，1 时会影响编辑器行高，影响程度和显示 Leve 以及是否侧边栏显示均无关}
 
-{$IFDEF DELPHI_OTA}
-
 function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean = False;
   SearchTypes: TCnModuleSearchTypes = [mstInProject, mstProjectSearch, mstSystemSearch]): Boolean;
 {* 遍历 Uses 单元，可根据 SearchTypes 指定范围。返回的文件名可能是 IDE 中打开的还未保存的
   Delphi 会遍历 pas 和 dcu，C++Builder 会遍历 h/hpp，均会在 UnitCallback 中指明}
-
-{$ENDIF}
 
 procedure CorrectCaseFromIdeModules(UnitFilesList: TStringList; IsCpp: Boolean = False);
 {* 根据文件名获得的系统 Uses 的单元名大小写可能不正确，此处通过遍历 IDE 模块来更新
@@ -576,8 +554,6 @@ type
   private
     procedure CNKeyDown(var Message: TWMKeyDown); message CN_KEYDOWN;
   end;
-
-{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 组件面板封装类
@@ -768,8 +744,6 @@ procedure DisableWaitDialogShow;
 
 procedure EnableWaitDialogShow;
 {* 以解除 Hook 方式启用 WaitDialog}
-
-{$ENDIF}
 
 {$ENDIF}
 
@@ -1429,7 +1403,7 @@ begin
 {$ENDIF}
 end;
 
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 // 取 IDE 版本
 function GetIDEEdition: string;
@@ -1504,8 +1478,6 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF DELPHI_OTA}
-
 // 返回编辑器窗口下方的状态栏，可能为空
 function GetEditWindowStatusBar(EditWindow: TCustomForm = nil): TStatusBar;
 var
@@ -1522,8 +1494,6 @@ begin
   if (AComp <> nil) and (AComp is TStatusBar) then
     Result := AComp as TStatusBar;
 end;
-
-{$ENDIF}
 
 // 返回对象检查器窗体，可能为空
 function GetObjectInspectorForm: TCustomForm;
@@ -2222,7 +2192,7 @@ begin
   end;
 end;
 
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI_OTA}
 
 procedure CloseExpandableEvalViewForm;
 var
@@ -2344,8 +2314,6 @@ begin
 end;
 {$ENDIF}
 
-{$IFDEF DELPHI_OTA}
-
 // 根据模块名获得完整文件名
 function GetFileNameFromModuleName(AName: string; AProject: IOTAProject = nil): string;
 var
@@ -2449,8 +2417,6 @@ function GetCurrentCompilingProject: IOTAProject;
 begin
   Result := CnWizNotifierServices.GetCurrentCompilingProject;
 end;
-
-{$ENDIF}
 
 // 取组件定义所在的单元名
 function GetComponentUnitName(const ComponentName: string): string;
@@ -2709,8 +2675,6 @@ begin
   end;
 end;
 
-{$IFDEF DELPHI_OTA}
-
 // 获取当前最前端编辑器的语法编辑按钮，注意语法编辑按钮存在不等于可见
 function GetCurrentSyncButton: TControl;
 var
@@ -2733,8 +2697,6 @@ begin
     Result := Button.Visible;
 end;
 
-{$ENDIF}
-
 // 返回编辑器中的代码模板自动输入框
 function GetCodeTemplateListBox: TControl;
 begin
@@ -2751,8 +2713,6 @@ begin
   if Control <> nil then
     Result := Control.Visible;
 end;
-
-{$IFDEF DELPHI_OTA}
 
 // 当前编辑器是否在语法块编辑模式下，不支持或不在块模式下返回 False
 function IsCurrentEditorInSyncMode: Boolean;
@@ -2784,12 +2744,8 @@ begin
   end;
 end;
 
-{$ENDIF}
-
-{$IFNDEF STAND_ALONE}
 var
   CorIdeModule: HMODULE;
-{$ENDIF}
 
 procedure InitIdeAPIs;
 begin
@@ -2979,8 +2935,6 @@ begin
   FUnitCallback(FileName, True, FCurrFileType, FCurrSearchType);
 end;
 
-{$IFDEF DELPHI_OTA}
-
 function IdeEnumUsesIncludeUnits(UnitCallback: TCnUnitCallback; IsCpp: Boolean;
   SearchTypes: TCnModuleSearchTypes): Boolean;
 var
@@ -3111,8 +3065,6 @@ begin
   end;
 end;
 
-{$ENDIF}
-
 procedure CorrectCaseFromIdeModules(UnitFilesList: TStringList; IsCpp: Boolean);
 var
   Data: TCnUnitsInfoRec;
@@ -3153,8 +3105,6 @@ begin
   if not HandleEditShortCut(Self, AShortCut) then
     inherited;
 end;
-
-{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 组件面板封装类
@@ -4158,8 +4108,6 @@ end;
 
 {$ENDIF}
 
-{$ENDIF}
-
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -4623,9 +4571,9 @@ initialization
 {$IFDEF DELPHI_OTA}
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
+  InitIdeAPIs;
 {$ENDIF}
 
-  InitIdeAPIs;
 {$IFDEF IDE_SUPPORT_HDPI}
   FOriginImages := TObjectList.Create(False);
   FVirtualImages := TObjectList.Create(False);
@@ -4660,9 +4608,9 @@ finalization
 
   if FThemeWrapper <> nil then
     FreeAndNil(FThemeWrapper);
-{$ENDIF}
 
   FinalIdeAPIs;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizIdeUtils finalization.');

@@ -2,11 +2,6 @@
 // 功能设置
 //==============================================================================
 
-{$IFDEF FPC}
-  // 专家包编译时如果是 FPC 则表示要安装到 Lazarus 里，但 cnvcl 不是
-  {$DEFINE LAZARUS}
-{$ENDIF}
-
 {$IFDEF COMPILER5_UP}
   {$DEFINE SUPPORT_PASCAL_SCRIPT}
 {$ENDIF}
@@ -59,8 +54,15 @@
   {$DEFINE DELPHI_OTA}
 {$ENDIF}
 
+{$IFDEF FPC}
+  // 非独立的 FPC 编译，表示有 Lazarus 接口
+  {$DEFINE LAZARUS}
+{$ENDIF}
+
 {$IFDEF STAND_ALONE}
   {$UNDEF USE_CODEEDITOR_SERVICE}
   // 独立的则表示没有 OTA 接口
   {$UNDEF DELPHI_OTA}
+  // 独立的表示没有 LAZARUS 接口
+  {$UNDEF LAZARUS}
 {$ENDIF}

@@ -45,7 +45,7 @@ interface
 
 uses
   Classes, {$IFDEF COMPILER6_UP} RTLConsts {$ELSE}
-  {$IFDEF LAZARUS} RTLConsts {$ELSE} Consts {$ENDIF} {$ENDIF}, SysUtils;
+  {$IFDEF FPC} RTLConsts {$ELSE} Consts {$ENDIF} {$ENDIF}, SysUtils;
 
 {$IFDEF BDS2012_UP}
 

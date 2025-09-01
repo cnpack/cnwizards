@@ -535,7 +535,7 @@ const
                                                     CompilerName = 'C++BUILDER 6';
                                                     CompilerShortName = 'CB6';
                                                   {$ELSE}
-                                                    {$IFDEF LAZARUS}
+                                                    {$IFDEF FPC}
                                                       // 注意 Lazarus 中的 FPC 编译器并非和 IDE 强绑定，未来估计要动态设置这些值
                                                       Compiler: TCnCompiler = cnLazarus4;
                                                       CompilerKind: TCnCompilerKind = ckLazarus;

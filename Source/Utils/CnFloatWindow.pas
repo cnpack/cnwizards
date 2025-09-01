@@ -40,7 +40,7 @@ interface
 
 uses
   Classes, Windows, Controls, SysUtils, Messages, Graphics, StdCtrls, Math,
-  {$IFDEF LAZARUS} LCLType, {$ENDIF}
+  {$IFDEF FPC} LCLType, {$ENDIF}
   CnCommon {$IFNDEF STAND_ALONE}, {$IFDEF DELPHI104_SYDNEY_UP} Vcl.Themes, {$ENDIF}
   CnWizIdeUtils, CnEditControlWrapper {$ENDIF};
 

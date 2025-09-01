@@ -81,11 +81,10 @@ interface
 
 uses
   Windows, Classes, Sysutils, Graphics, Menus, ActnList, IniFiles, Dialogs,
-  {$IFDEF STAND_ALONE} {$IFDEF LAZARUS} LCLProc, {$ENDIF} {$ELSE}
-  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, {$ENDIF}
-  {$ENDIF}
+  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} IDECommands, {$ENDIF} {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Registry, ComCtrls, Forms, CnHashMap, CnWizShortCut, CnWizMenuAction,
-  {$IFNDEF LAZARUS} CnPopupMenu, {$ENDIF} CnIni, CnWizIni, CnWizConsts;
+  {$IFNDEF FPC} CnPopupMenu, {$ENDIF} CnIni, CnWizIni, CnWizConsts;
 
 type
   ECnWizardException = class(Exception);

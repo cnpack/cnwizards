@@ -188,6 +188,7 @@ begin
     ResultType := SCnNoneResult;
   end;
 
+{$IFNDEF STAND_ALONE}
   MemStream := TMemoryStream.Create;
   try
     CnGeneralSaveEditorToStream(nil, MemStream, True); // Ansi/Utf16/Utf16
@@ -195,6 +196,7 @@ begin
   finally
     MemStream.Free;
   end;
+{$ENDIF}
 end;
 
 function EdtGetProjectDir: string;
@@ -537,6 +539,7 @@ end;
 
 procedure EdtInsertTextToCurSource(const AContent: string;
   InsertPos: TCnEditorInsertPos; ASavePos: Boolean; PosInText: Integer);
+{$IFNDEF STAND_ALONE}
 var
   EditView: TCnEditViewSourceInterface;
   SavePos: Integer;
@@ -586,7 +589,9 @@ var
       MemStream.Free;
     end;
   end;
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
   SavePos := CnOtaGetCurrLinearPos;
   case InsertPos of
     ipBOL:
@@ -675,6 +680,7 @@ begin
 {$ENDIF}
 
   BringIdeEditorFormToFront;
+{$ENDIF}
 end;
 
 end.

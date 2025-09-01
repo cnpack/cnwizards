@@ -72,9 +72,8 @@ uses
   {$IFDEF USE_CUSTOMIZED_SPLITTER} CnSplitter, {$ENDIF} CnWidePasParser, CnWideCppParser,
   CnPopupMenu, CnCppCodeParser, CnStrings, CnEdit, AsRegExpr, CnIDEStrings,
   {$IFDEF IDE_SUPPORT_THEMING} Vcl.Themes, {$ENDIF}
-  {$IFDEF LAZARUS} LCLType, {$ENDIF}
-  {$IFNDEF STAND_ALONE} CnWizEditFiler, {$IFDEF DELPHI_OTA} ToolsAPI,
-  {$ELSE} SrcEditorIntf, {$ENDIF} {$ENDIF}
+  {$IFDEF FPC} LCLType, {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF} {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizEditFiler,
   CnWizClasses, CnWizManager, CnEditControlWrapper, CnWizUtils,
   CnWizMenuAction, CnWizIdeUtils, CnFloatWindow, CnFrmMatchButton, CnWizOptions;
 
@@ -171,10 +170,8 @@ type
     procedure btnShowAnonymousClick(Sender: TObject);
   private
     FFileName: string;
-{$IFNDEF STAND_ALONE}
     FFiler: TCnEditFiler;
     FFilesGot: Boolean;
-{$ENDIF}
     FCurrentFile: string;
     FSelIsCurFile: Boolean;
     FWizard: TCnProcListWizard;

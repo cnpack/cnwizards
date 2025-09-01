@@ -557,7 +557,7 @@ begin
     Result.FMenu.FreeNotification(Self);
     Result.FMenu.Name := AMenuName;
     Result.FMenu.Action := Result;
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI}
     Result.FMenu.AutoHotkeys := maManual;
 {$ENDIF}
     Result.FWizShortCut := WizShortCutMgr.Add(ACommand, AShortCut, Result.OnShortCut,

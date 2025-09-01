@@ -67,9 +67,8 @@ interface
 
 uses
   Windows, Messages, Classes, SysUtils, Menus, ExtCtrls, ActnList,
-  {$IFNDEF STAND_ALONE}
-  {$IFDEF LAZARUS} LCLProc, IDECommands, {$ELSE} ToolsAPI, {$ENDIF}
-  {$ELSE} {$IFDEF LAZARUS} LCLProc, {$ENDIF} {$ENDIF}
+  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} IDECommands, {$ENDIF} {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnWizConsts, CnCommon;
 
 type

@@ -777,7 +777,7 @@ begin
   FMenu := TMenuItem.Create(nil);
   Menu.Name := SCnWizardsMenuName;
   Menu.Caption := SCnWizardsMenuCaption;
-{$IFNDEF LAZARUS}
+{$IFDEF DELPHI}
   Menu.AutoHotkeys := maManual;
 {$ENDIF}
 end;
