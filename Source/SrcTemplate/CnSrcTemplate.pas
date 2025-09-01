@@ -237,7 +237,7 @@ begin
   FActionIndex := -1;
   FIconName := SCnSrcTemplateIconName;
 
-{$IFDEF LAZARUS}
+{$IFDEF FPC}
   FForDelphi := True;
 {$ELSE}
 {$IFDEF BDS}
@@ -534,6 +534,9 @@ var
     if not Item.Enabled then
       Exit;
 
+{$IFDEF FPC}
+   Result := Item.ForDelphi;
+{$ELSE}
 {$IFDEF BDS}
    Result := Item.ForDelphi or Item.ForBcb;
 {$ELSE}
@@ -542,6 +545,7 @@ var
   {$ELSE}
   Result := Item.ForBcb;
   {$ENDIF}
+{$ENDIF}
 {$ENDIF}
   end;
 begin
@@ -945,6 +949,10 @@ begin
   ASavePos := False;
   AContent := '';
 
+{$IFDEF FPC}
+  AForDelphi := True;
+  AForBcb := False;
+{$ENDIF}
 {$IFDEF BDS}
   AForDelphi := True;
   AForBcb := True;
@@ -957,8 +965,10 @@ begin
   AForBcb := True;
   {$ENDIF}
 {$ENDIF}
+
   if ShowEditorEditForm(ACaption, AHint, AIconName, AShortCut, AInsertPos,
     AEnabled, ASavePos, AContent, AForDelphi, AForBcb) then
+  begin
     with FWizard.FCollection.Add do
     begin
       FCaption := ACaption;
@@ -976,6 +986,7 @@ begin
       ListView.Selected := ListView.Items[ListView.Items.Count - 1];
       FItemChanged := True;
     end;
+  end;
 end;
 
 procedure TCnSrcTemplateForm.btnDeleteClick(Sender: TObject);

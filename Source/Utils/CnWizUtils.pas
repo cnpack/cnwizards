@@ -1908,7 +1908,7 @@ begin
   end
   else if not AIcon.Empty then
   begin
-{$IFDEF LAZARUS}
+{$IFDEF FPC}
     DstBmp := nil;
     try
       DstBmp := CreateEmptyBmp24(16, 16, MaskColor);

@@ -15,7 +15,7 @@ uses
   CnCodingToolsetWizard, CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart,
   CnWizConfigFrm, CnWizMenuSortFrm, CnWizSubActionShortCutFrm, CnWizLangID,
   CnWizMultiLang, CnWizMultiLangFrame, CnWizTranslate, CnSrcTemplate,
-  CnSrcTemplateEditFrm, StandAloneUnit {FormFramework};
+  CnSrcTemplateEditFrm, StandAloneUnit, TestFormUnit {FormFramework};
 
 {$R *.res}
 

@@ -162,6 +162,13 @@
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="TestFormUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="CnTranslateForm1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
