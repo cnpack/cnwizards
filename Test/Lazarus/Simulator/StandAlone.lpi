@@ -155,7 +155,9 @@
       <Unit>
         <Filename Value="..\..\..\Source\SrcTemplate\CnSrcTemplate.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="CnSrcTemplateForm"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit>
       <Unit>
         <Filename Value="..\..\..\Source\SrcTemplate\CnSrcTemplateEditFrm.pas"/>
@@ -168,6 +170,11 @@
         <ComponentName Value="CnTranslateForm1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="..\..\..\Source\SimpleWizard\CnCommentCropper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
       </Unit>
     </Units>
   </ProjectOptions>

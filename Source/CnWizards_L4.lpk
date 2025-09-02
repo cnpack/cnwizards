@@ -208,6 +208,10 @@
         <Filename Value="SrcTemplate\CnSrcTemplateEditFrm.pas"/>
         <UnitName Value="CnSrcTemplateEditFrm"/>
       </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnCommentCropper.pas"/>
+        <UnitName Value="CnCommentCropper"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

@@ -550,6 +550,9 @@ function CnOtaGetProjectSourceFiles(Sources: TStrings;
   IncludeDpr: Boolean = True; Project: TCnIDEProjectInterface = nil): Boolean;
 {* 获取指定工程所包含的源码文件完整路径名称并放入 Sources，如不指定工程则用当前工程，返回是否获取成功}
 
+procedure CnOtaDeleteCurrentSelection;
+{* 删除选中的文本}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -689,8 +692,6 @@ function CnOtaGetEditorFromModule(Module: IOTAModule; const FileName: string): I
 {* 返回指定模块指定文件名的编辑器}
 function CnOtaGetEditActionsFromModule(Module: IOTAModule = nil): IOTAEditActions;
 {* 返回指定模块的 EditActions }
-procedure CnOtaDeleteCurrentSelection;
-{* 删除选中的文本}
 function CnOtaReplaceCurrentSelection(const Text: string; NoSelectionInsert: Boolean = True;
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本。
@@ -990,7 +991,7 @@ function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer)
  |</PRE>}
 
  procedure CnOtaInsertTextIntoEditor(const Text: string);
-{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。
+{* 插入文本到当前 IOTASourceEditor 的当前光标位置，允许多行文本。Lazarus 中要求 Text 格式是 Utf8
   注意该方法内部使用了当前光标的线性位置，线性位置转换结果有不会超过行尾的限制，因此该方法插入文本时会往当前行的左边靠。}
 
 {$IFNDEF STAND_ALONE}
@@ -3349,7 +3350,7 @@ var
 begin
   FileExt := ExtractUpperFileExt(FileName);
   Result := ((FileExt = '.PAS') or (FileExt = '.DPR')
-    {$IFDEF LAZARUS} or (FileExt = '.LPR'){$ENDIF});
+    {$IFDEF FPC} or (FileExt = '.LPR') or (FileExt = '.PP') {$ENDIF});
 end;
 
 function IsDpr(const FileName: string): Boolean;
@@ -4193,6 +4194,30 @@ begin
 {$ENDIF}
 
   Result := Sources.Count > 0;
+end;
+
+// 删除选中的文本
+procedure CnOtaDeleteCurrentSelection;
+var
+  EditView: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
+  EditBlock: IOTAEditBlock;
+{$ENDIF}
+begin
+  EditView := CnOtaGetTopMostEditView;
+  if not Assigned(EditView) then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  EditBlock := EditView.Block;
+  if Assigned(EditBlock) then
+    EditBlock.Delete;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if EditView.SelStart <> EditView.SelEnd then
+    EditView.ReplaceText(EditView.BlockBegin, EditView.BlockEnd, '');
+{$ENDIF}
 end;
 
 {$IFNDEF LAZARUS}
@@ -5543,21 +5568,6 @@ begin
     end;
   end;
   Result := nil;
-end;
-
-// 删除选中的文本
-procedure CnOtaDeleteCurrentSelection;
-var
-  EditView: IOTAEditView;
-  EditBlock: IOTAEditBlock;
-begin
-  EditView := CnOtaGetTopMostEditView;
-  if not Assigned(EditView) then
-    Exit;
-
-  EditBlock := EditView.Block;
-  if Assigned(EditBlock) then
-    EditBlock.Delete;
 end;
 
 // 用文本替换选中的文本

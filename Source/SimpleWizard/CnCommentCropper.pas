@@ -50,8 +50,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ToolsApi, FileCtrl,
-  CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon,
+  StdCtrls, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} FileCtrl,
+  {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWideStrings,
   CnWizIdeUtils, CnIni, IniFiles, CnWizEditFiler, CnSourceCropper, CnWizMultiLang;
 
 type
@@ -178,8 +179,10 @@ type
     procedure CropSelected;
     procedure CropCurrentUnit;
     procedure CropOpenedUnits;
-    procedure CropAProject(Project: IOTAProject);
+    procedure CropAProject(Project: TCnIDEProjectInterface);
+{$IFDEF DELPHI_OTA}
     procedure CropAProjectGroup(ProjectGroup: IOTAProjectGroup);
+{$ENDIF}
     procedure CropInDirectories;
 
     property CropStyle: TCropStyle read FCropStyle write FCropStyle;
@@ -290,7 +293,9 @@ begin
       csCropCurrent:        CropCurrentUnit;
       csCropOpened:         CropOpenedUnits;
       csCropProject:        CropAProject(CnOtaGetCurrentProject);
+{$IFDEF DELPHI_OTA}
       csCropProjectGroup:   CropAProjectGroup(CnOtaGetProjectGroup);
+{$ENDIF}
       csDirectory:          CropInDirectories;
     end;
   finally
@@ -310,20 +315,38 @@ end;
 procedure TCnCommentCropperWizard.CropOpenedUnits;
 var
   I: Integer;
+{$IFDEF DELPHI_OTA}
   iModuleServices: IOTAModuleServices;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
   for I := 0 to iModuleServices.GetModuleCount - 1 do
+  begin
     if IsSourceModule(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I))) then
       CropAUnit(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I)));
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.SourceEditorCount > 0) then
+  begin
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin;
+      if IsSourceModule(SourceEditorManagerIntf.SourceEditors[I].FileName) then
+        CropAUnit(SourceEditorManagerIntf.SourceEditors[I].FileName);
+    end;
+  end;
+{$ENDIF}
 end;
 
-procedure TCnCommentCropperWizard.CropAProject(Project: IOTAProject);
+procedure TCnCommentCropperWizard.CropAProject(Project: TCnIDEProjectInterface);
 var
   I: Integer;
 begin
   if Project <> nil then
   begin
+{$IFDEF DELPHI_OTA}
     // 这里 BDS 后会拿到 dproj，而不是 dpr，需要额外处理
     if IsSourceModule(Project.FileName) then
       CropAUnit(Project.FileName);
@@ -343,8 +366,19 @@ begin
           CropAUnit(_CnChangeFileExt(Project.GetModule(I).FileName, '.h'));
       end;
     end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    for I := 0 to Project.FileCount - 1 do
+    begin
+      if Project.Files[I].IsPartOfProject and IsSourceModule(Project.Files[I].Filename) then
+        CropAUnit(Project.Files[I].Filename);
+    end;
+{$ENDIF}
   end;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnCommentCropperWizard.CropAProjectGroup(ProjectGroup: IOTAProjectGroup);
 var
@@ -357,59 +391,79 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnCommentCropperWizard.CropSelected;
 var
   InStream, OutStream: TMemoryStream;
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
   Block: IOTAEditBlock;
+{$ENDIF}
   Text: AnsiString;
   Cropper: TCnSourceCropper;
 begin
   View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  Block := View.Block;
+  if (Block = nil) or (Block.Size <= 0) then
+    Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.Selection = '' then
+    Exit;
+{$ENDIF}
+
   Cropper := nil;
-  if View <> nil then
-  begin
-    Block := View.Block;
-    if (Block <> nil) and (Block.Size > 0) then
-    begin
-      InStream := TMemoryStream.Create;
-      OutStream := TMemoryStream.Create;
-      try
-        Text := AnsiString(Block.Text);
-        InStream.Write(Text[1], Length(Text));
+  InStream := nil;
+  OutStream := nil;
+
+  try
+    InStream := TMemoryStream.Create;
+    OutStream := TMemoryStream.Create;
+
+{$IFDEF DELPHI_OTA}
+    Text := AnsiString(Block.Text);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    Text := CnUtf8ToAnsi2(View.Selection);
+{$ENDIF}
+    InStream.Write(Text[1], Length(Text));
+
 {$IFDEF DEBUG}
-//      CnDebugger.LogMemDump(InStream.Memory, InStream.Size);
+//  CnDebugger.LogMemDump(InStream.Memory, InStream.Size);
 {$ENDIF}
 
-        if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
-          Cropper := TCnPasCropper.Create
-        else
-          Cropper := TCnCppCropper.Create;
+    if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) then
+      Cropper := TCnPasCropper.Create
+    else
+      Cropper := TCnCppCropper.Create;
 
-        Cropper.InStream := InStream;
-        Cropper.OutStream := OutStream;
-        Cropper.CropOption := FCropOption;
-        Cropper.CropDirective := FCropDirective;
-        Cropper.CropTodoList := FCropTodoList;
-        Cropper.Reserve := FReserve;
-        Cropper.ReserveItems.Text := StringReplace(FReserveStr, ',',
-          #13#10, [rfReplaceAll]);
+    Cropper.InStream := InStream;
+    Cropper.OutStream := OutStream;
+    Cropper.CropOption := FCropOption;
+    Cropper.CropDirective := FCropDirective;
+    Cropper.CropTodoList := FCropTodoList;
+    Cropper.Reserve := FReserve;
+    Cropper.ReserveItems.Text := StringReplace(FReserveStr, ',',
+      #13#10, [rfReplaceAll]);
 
-        Cropper.Parse;
-        if FMergeBlank then
-          MergeBlankStream(OutStream);
+    Cropper.Parse;
+    if FMergeBlank then
+      MergeBlankStream(OutStream);
 {$IFDEF DEBUG}
-//      CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size);
+//  CnDebugger.LogMemDump(OutStream.Memory, OutStream.Size);
 {$ENDIF}
 
-        CnOtaDeleteCurrentSelection;
-        CnOtaInsertTextIntoEditor(string(PAnsiChar(OutStream.Memory)));
-      finally
-        InStream.Free;
-        OutStream.Free;
-        Cropper.Free;
-      end;
-    end;
+    CnOtaDeleteCurrentSelection;
+    CnOtaInsertTextIntoEditor(string(PAnsiChar(OutStream.Memory)));
+  finally
+    InStream.Free;
+    OutStream.Free;
+    Cropper.Free;
   end;
 end;
 
@@ -608,19 +662,35 @@ procedure TCnCommentCropForm.FormCreate(Sender: TObject);
 begin
   rbSelEdit.Enabled := False;
   if CurrentIsSource then
+  begin
     if CnOtaGetTopMostEditView <> nil then
+    begin
+{$IFDEF DELPHI_OTA}
       if CnOtaGetTopMostEditView.Block <> nil then
+      begin
         if CnOtaGetTopMostEditView.Block.Size > 0 then
         begin
           rbSelEdit.Enabled := True;
           rbSelEdit.Checked := True;
         end;
+      end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+      if CnOtaGetTopMostEditView.Selection <> '' then
+      begin
+        rbSelEdit.Enabled := True;
+        rbSelEdit.Checked := True;
+      end;
+{$ENDIF}
+    end;
+  end;
 
   chkCropDirective.Enabled := IsDelphiRuntime;
   rbCurrUnit.Enabled := CnOtaGetTopMostEditView <> nil;
   rbOpenedUnits.Enabled := rbCurrUnit.Enabled;
   rbCurrProject.Enabled := CnOtaGetCurrentProject <> nil;
-  rbProjectGroup.Enabled := CnOtaGetProjectGroup <> nil;
+  rbProjectGroup.Enabled := {$IFDEF DELPHI_OTA} CnOtaGetProjectGroup <> nil {$ELSE} False {$ENDIF};
   edReserveStr.Enabled := chkReserve.Checked;
   chkCropProjectSrc.Enabled := rbCurrProject.Checked or rbProjectGroup.Checked;
 

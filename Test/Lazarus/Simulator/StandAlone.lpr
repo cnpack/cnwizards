@@ -9,9 +9,9 @@ uses
 {$ELSE}
   Interfaces,
 {$ENDIF}
-  Forms, CnMessageBoxWizard, CnProcListWizard, CnAICoderChatFrm,
-  CnAICoderConfig, CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient,
-  CnFrmAICoderOption, CnAICoderWizard, CnProjectViewBaseFrm,
+  Forms, CnMessageBoxWizard, CnProcListWizard, CnCommentCropper,
+  CnAICoderChatFrm, CnAICoderConfig, CnAICoderEngine, CnAICoderEngineImpl,
+  CnAICoderNetClient, CnFrmAICoderOption, CnAICoderWizard, CnProjectViewBaseFrm,
   CnCodingToolsetWizard, CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart,
   CnWizConfigFrm, CnWizMenuSortFrm, CnWizSubActionShortCutFrm, CnWizLangID,
   CnWizMultiLang, CnWizMultiLangFrame, CnWizTranslate, CnSrcTemplate,

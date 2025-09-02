@@ -19,7 +19,7 @@ uses
   CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
   CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
   CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
-  LazarusPackageIntf;
+  CnCommentCropper, LazarusPackageIntf;
 
 implementation
 

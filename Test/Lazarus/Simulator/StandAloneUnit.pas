@@ -25,6 +25,7 @@ type
     Button2: TButton;
     Button3: TButton;
     btnCreateMgr: TButton;
+    Button4: TButton;
     Edit2: TEdit;
     GroupBox1: TGroupBox;
     mmStub: TMainMenu;
@@ -49,6 +50,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure btnCreateMgrClick(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Exit1Click(Sender: TObject);
@@ -67,7 +69,7 @@ implementation
 {$R *.lfm}
 
 uses
-  CnWizUtils, CnWizManager, CnCommon, CnDebug, CnWideStrings;
+  CnWizUtils, CnWizManager, CnCommon, CnDebug, CnWideStrings, TestFormUnit;
 
 procedure TFormFramework.FormCreate(Sender: TObject);
 var
@@ -142,6 +144,15 @@ begin
   end
   else
     ShowMessage('Error. Already Created');
+end;
+
+procedure TFormFramework.Button4Click(Sender: TObject);
+begin
+  with TCnTranslateForm1.Create(nil) do
+  begin
+    ShowModal;
+    Free;
+  end;
 end;
 
 procedure TFormFramework.FormDestroy(Sender: TObject);

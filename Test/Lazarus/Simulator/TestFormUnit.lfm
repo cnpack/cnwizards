@@ -1,0 +1,146 @@
+inherited CnTranslateForm1: TCnTranslateForm1
+  Left = 434
+  Height = 508
+  Top = 194
+  Width = 525
+  OnCreate = FormCreate
+  object ToggleBox1: TToggleBox[0]
+    Left = 23
+    Height = 25
+    Top = 20
+    Width = 75
+    Caption = 'ToggleBox1'
+    TabOrder = 0
+  end
+  object ToggleBox2: TToggleBox[1]
+    Left = 24
+    Height = 25
+    Top = 60
+    Width = 100
+    Caption = 'ToggleBox2'
+    TabOrder = 1
+    OnChange = ToggleBox2Change
+  end
+  object ToggleBox3: TToggleBox[2]
+    Left = 23
+    Height = 25
+    Top = 100
+    Width = 125
+    Caption = 'ToggleBox3'
+    TabOrder = 2
+  end
+  object ToggleBox4: TToggleBox[3]
+    Left = 23
+    Height = 25
+    Top = 140
+    Width = 150
+    Caption = 'ToggleBox4'
+    TabOrder = 3
+  end
+  object ToggleBox5: TToggleBox[4]
+    Left = 23
+    Height = 25
+    Top = 180
+    Width = 175
+    Caption = 'ToggleBox5'
+    TabOrder = 4
+    OnChange = ToggleBox5Change
+  end
+  object ToggleBox6: TToggleBox[5]
+    Left = 23
+    Height = 25
+    Top = 220
+    Width = 200
+    Caption = 'ToggleBox6'
+    TabOrder = 5
+    OnChange = ToggleBox6Change
+  end
+  object GroupBox1: TGroupBox[6]
+    Left = 256
+    Height = 225
+    Top = 18
+    Width = 248
+    Caption = 'GroupBox1'
+    ClientHeight = 207
+    ClientWidth = 244
+    ParentBackground = False
+    TabOrder = 6
+    object ToggleBox7: TToggleBox
+      Left = 22
+      Height = 25
+      Top = 19
+      Width = 75
+      Caption = 'ToggleBox7'
+      TabOrder = 0
+    end
+    object Button1: TButton
+      Left = 155
+      Height = 25
+      Top = 168
+      Width = 75
+      Anchors = [akRight, akBottom]
+      Caption = 'Button1'
+      TabOrder = 1
+    end
+  end
+  object PageControl1: TPageControl[7]
+    Left = 24
+    Height = 200
+    Top = 264
+    Width = 480
+    ActivePage = TabSheet1
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabIndex = 0
+    TabOrder = 7
+    object TabSheet1: TTabSheet
+      Caption = 'TabSheet1'
+      ClientHeight = 174
+      ClientWidth = 472
+      object GroupBox2: TGroupBox
+        Left = 24
+        Height = 120
+        Top = 16
+        Width = 408
+        Caption = 'GroupBox2'
+        ClientHeight = 102
+        ClientWidth = 404
+        ParentBackground = False
+        TabOrder = 0
+        object ToggleBox8: TToggleBox
+          Left = 22
+          Height = 25
+          Top = 19
+          Width = 75
+          Caption = 'ToggleBox7'
+          TabOrder = 0
+        end
+        object Button3: TButton
+          Left = 315
+          Height = 25
+          Top = 63
+          Width = 75
+          Anchors = [akRight, akBottom]
+          Caption = 'Button1'
+          TabOrder = 1
+        end
+        object Edit1: TEdit
+          Left = 168
+          Height = 21
+          Top = 24
+          Width = 80
+          TabOrder = 2
+          Text = 'Edit1'
+        end
+      end
+    end
+  end
+  object Button2: TButton[8]
+    Left = 429
+    Height = 25
+    Top = 472
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'Button2'
+    TabOrder = 8
+  end
+end

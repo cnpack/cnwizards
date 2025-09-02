@@ -55,7 +55,8 @@ uses
   CnEditorOpenFile in '..\..\..\Source\CodingToolset\CnEditorOpenFile.pas',
   CnEditorOpenFileFrm in '..\..\..\Source\CodingToolset\CnEditorOpenFileFrm.pas' {CnEditorOpenFileForm},
   CnWizIdeUtils in '..\..\..\Source\Utils\CnWizIdeUtils.pas',
-  CnWizUtils in '..\..\..\Source\Utils\CnWizUtils.pas';
+  CnWizUtils in '..\..\..\Source\Utils\CnWizUtils.pas',
+  CnCommentCropper in '..\..\..\Source\SimpleWizard\CnCommentCropper.pas' {CnCommentCropForm};
 
 {$R *.RES}
 

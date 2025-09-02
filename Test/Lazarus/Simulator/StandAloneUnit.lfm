@@ -83,6 +83,15 @@ object FormFramework: TFormFramework
     TabOrder = 6
     OnClick = btnCreateMgrClick
   end
+  object Button4: TButton
+    Left = 560
+    Height = 25
+    Top = 130
+    Width = 112
+    Caption = 'Show a Test Form'
+    TabOrder = 7
+    OnClick = Button4Click
+  end
   object actlstStub: TActionList
     Images = ilStub
     Left = 608
