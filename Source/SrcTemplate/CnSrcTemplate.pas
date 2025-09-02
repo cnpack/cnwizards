@@ -710,7 +710,7 @@ begin
 
     for I := Lines.Count - 1 downto 0 do
     begin
-      T := StringReplace(S, PROC_NAME, ProcNames[I], [rfReplaceAll]);
+      T := StringReplace(FProcBatchCode, PROC_NAME, ProcNames[I], [rfReplaceAll]);
 
       if Integer(Cols[I]) > 0 then      // 和 begin 的缩进相同
         T := Spc(Integer(Cols[I])) + T;

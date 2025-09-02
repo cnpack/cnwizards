@@ -1,9 +1,10 @@
 inherited CnMessageBoxForm: TCnMessageBoxForm
   Left = 473
   Top = 121
-  Width = 480
-  Height = 542
+  AutoScroll = False
   Caption = 'MessageBox Designer'
+  ClientHeight = 510
+  ClientWidth = 472
   Constraints.MinHeight = 542
   Constraints.MinWidth = 480
   Icon.Data = {

@@ -617,7 +617,7 @@ begin
 
 {$IFDEF LAZARUS}
   Position := EditView.SelStart;
-  CnOtaInsertTextIntoEditorAtPos(S, Position);
+  CnOtaInsertTextIntoEditorAtPos(AContent, Position);
 
   if ASavePos then
     CnOtaGotoPosition(SavePos, EditView, False)

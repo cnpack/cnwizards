@@ -1,9 +1,10 @@
 inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   Left = 189
   Top = 97
-  Width = 624
-  Height = 472
+  AutoScroll = False
   Caption = 'Source Template Editor'
+  ClientHeight = 452
+  ClientWidth = 618
   Icon.Data = {
     0000010001001010000001000800680500001600000028000000100000002000
     0000010008000000000040010000000000000000000000000000000000000000
@@ -54,7 +55,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   TextHeight = 13
   object btnHelp: TButton
     Left = 534
-    Top = 416
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -64,7 +65,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   end
   object btnOK: TButton
     Left = 374
-    Top = 416
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]
@@ -75,7 +76,7 @@ inherited CnSrcTemplateEditForm: TCnSrcTemplateEditForm
   end
   object btnCancel: TButton
     Left = 454
-    Top = 416
+    Top = 420
     Width = 75
     Height = 21
     Anchors = [akRight, akBottom]

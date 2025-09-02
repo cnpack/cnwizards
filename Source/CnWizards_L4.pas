@@ -18,7 +18,8 @@ uses
   CnSourceCropper, CnPascalAST, CnLineParser, CnWizEditFiler, 
   CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
   CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
-  CnEditorCodeSwap, CnEditorCodeToString, LazarusPackageIntf;
+  CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
+  LazarusPackageIntf;
 
 implementation
 
