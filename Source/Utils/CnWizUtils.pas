@@ -65,7 +65,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf,
-  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, {$ENDIF} {$ENDIF}
+  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, ProjectGroupIntf, {$ENDIF} {$ENDIF}
   {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
@@ -110,8 +110,10 @@ type
   TCnIDEEditorInterface = Pointer;
   TCnSourceEditorInterface = Pointer;
   TCnEditBufferInterface = Pointer;
+  TCnIDEProjectGroupInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
   TCnIDEProjectOptionsInterface = Pointer;
+  TCnIDEProjectResourceInterface = Pointer;
   TCnIDEDesigner = Pointer;
   TCnDesignerSelectionList = Pointer;
 {$ELSE}
@@ -120,8 +122,10 @@ type
   TCnIDEEditorInterface = TSourceEditorInterface;
   TCnSourceEditorInterface = TSourceEditorInterface;
   TCnEditBufferInterface = TSourceEditorInterface;
+  TCnIDEProjectGroupInterface = TProjectGroup;
   TCnIDEProjectInterface = TLazProject;
   TCnIDEProjectOptionsInterface = TLazCompilerOptions;
+  TCnIDEProjectResourceInterface = TObject;
   TCnIDEDesigner = TIDesigner;
   TCnDesignerSelectionList = TPersistentSelectionList;
   {$ELSE}
@@ -129,9 +133,10 @@ type
   TCnIDEEditorInterface = IOTAEditor;
   TCnSourceEditorInterface = IOTASourceEditor;
   TCnEditBufferInterface = IOTAEditBuffer;
+  TCnIDEProjectGroupInterface = IOTAProjectGroup;
   TCnIDEProjectInterface = IOTAProject;
   TCnIDEProjectOptionsInterface = IOTAProjectOptions;
-
+  TCnIDEProjectResourceInterface = IOTAProjectResource;
   TCnIDEDesigner = IDesigner;
   TCnDesignerSelectionList = IDesignerSelections;
   {$ENDIF}
@@ -553,6 +558,17 @@ function CnOtaGetProjectSourceFiles(Sources: TStrings;
 procedure CnOtaDeleteCurrentSelection;
 {* 删除选中的文本}
 
+function CnOtaGetProjectGroup: TCnIDEProjectGroupInterface;
+{* 取当前工程组}
+function CnOtaGetProjectGroupFileName: string;
+{* 取当前工程组文件名}
+function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
+{* 取工程的源码文件 dpr/dpk}
+function CnOtaGetProjectResource(Project: TCnIDEProjectInterface): TCnIDEProjectResourceInterface;
+{* 取工程资源}
+function CnOtaGetProject: TCnIDEProjectInterface;
+{* 取第一个工程}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -610,16 +626,6 @@ function CnOtaGetCurrentEditControl: TWinControl;
 {* 以 OTA 的方式取当前的 EditControl 控件}
 function CnOtaGetUnitName(Editor: IOTASourceEditor): string;
 {* 返回单元名称}
-function CnOtaGetProjectGroup: IOTAProjectGroup;
-{* 取当前工程组}
-function CnOtaGetProjectGroupFileName: string;
-{* 取当前工程组文件名}
-function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
-{* 取工程的源码文件 dpr/dpk}
-function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
-{* 取工程资源}
-function CnOtaGetProject: IOTAProject;
-{* 取第一个工程}
 function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
@@ -833,6 +839,10 @@ function CnOtaIsFileOpen(const FileName: string): Boolean;
 function CnOtaGetBaseModuleFileName(const FileName: string): string;
 {* 取模块的单元文件名}
 
+function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer = 0): Boolean;
+{* 让指定文件可见。如果 Lines 参数大于 0，则滚动到让第 Lines 行垂直居中。
+   注意 Delphi 下支持源码文件和窗体文件，Lazarus 中只支持源码文件。}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 procedure CnOtaSaveFile(const FileName: string; ForcedSave: Boolean = False);
@@ -847,8 +857,6 @@ function CnOtaIsModuleModified(AModule: IOTAModule): Boolean;
 {* 判断模块是否已被修改}
 function CnOtaModuleIsShowingFormSource(Module: IOTAModule): Boolean;
 {* 指定模块是否以文本窗体方式显示, Lines 为转到指定行，<= 0 忽略}
-function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer = 0): Boolean;
-{* 让指定文件可见。如果 Lines 参数大于 0，则滚动到让第 Lines 行垂直居中}
 function CnOtaIsDebugging: Boolean;
 {* 当前是否在调试状态}
 
@@ -1296,18 +1304,6 @@ function CnOtaGetIDEThemingEnabled: Boolean;
 function CnOtaGetActiveThemeName: string;
 {* 获得 IDE 当前主题名称}
 
-function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
-{* 返回一个位置值}
-
-function OTAEditPos(Col: SmallInt; Line: Longint): TOTAEditPos;
-{* 返回一个编辑位置值 }
-
-function SameEditPos(Pos1, Pos2: TOTAEditPos): Boolean;
-{* 判断两个编辑位置是否相等 }
-
-function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
-{* 判断两个字符位置是否相等 }
-
 function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 {* 判断一控件窗口是否是非可视化控件}
 
@@ -1332,6 +1328,18 @@ procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFil
 {$ENDIF}
 
 {$ENDIF}
+
+function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
+{* 返回一个位置值}
+
+function OTAEditPos(Col: SmallInt; Line: Longint): TOTAEditPos;
+{* 返回一个编辑位置值 }
+
+function SameEditPos(Pos1, Pos2: TOTAEditPos): Boolean;
+{* 判断两个编辑位置是否相等 }
+
+function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
+{* 判断两个字符位置是否相等 }
 
 procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
 {* 将一个 Combo 复制为 CnSearchCombo，供调用者替换掉}
@@ -2379,7 +2387,8 @@ var
 {$IFDEF LAZARUS}
   I: Integer;
   F: TCustomForm;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Svcs40: INTAServices40;
 {$ENDIF}
 {$ENDIF}
@@ -2397,7 +2406,8 @@ begin
       Exit;
     end;
   end;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.MainMenu;
 {$ENDIF}
@@ -2443,9 +2453,10 @@ var
   Svcs40: INTAServices40;
 {$ENDIF}
 begin
-{$IFNDEF DELPHI_OTA}
+{$IFDEF STAND_ALONE}
   Result := CnStubRefActionList;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
   Result := Svcs40.ActionList;
 {$ENDIF}
@@ -3650,22 +3661,24 @@ end;
 
 // 取当前选择的文本
 function CnOtaGetCurrentSelection: string;
-{$IFDEF DELPHI_OTA}
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
   EditBlock: IOTAEditBlock;
 {$ENDIF}
 begin
   Result := '';
 {$IFNDEF STAND_ALONE}
-{$IFDEF LAZARUS}
-  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
-    Result := SourceEditorManagerIntf.ActiveEditor.Selection;
-{$ELSE}
   EditView := CnOtaGetTopMostEditView;
   if not Assigned(EditView) then
     Exit;
 
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
+    Result := SourceEditorManagerIntf.ActiveEditor.Selection;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   EditBlock := EditView.Block;
   if Assigned(EditBlock) then
     Result := EditBlock.Text;
@@ -3692,7 +3705,9 @@ begin
     Result := SourceEditorManagerIntf.ActiveEditor
   else
     Result := nil;
-{$ELSE}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   iEditBuffer := CnOtaGetEditBuffer;
   if iEditBuffer <> nil then
   begin
@@ -3707,14 +3722,18 @@ end;
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaDeSelection(CursorStopAtEnd: Boolean): Boolean;
-{$IFDEF DELPHI_OTA}
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
   R, C: Integer;
 {$ENDIF}
 begin
   Result := False;
 {$IFNDEF STAND_ALONE}
+  EditView := CnOtaGetTopMostEditView;
+  if EditView = nil then
+    Exit;
+
 {$IFDEF LAZARUS}
   if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
   begin
@@ -3726,11 +3745,9 @@ begin
         SourceEditorManagerIntf.ActiveEditor.SelEnd := SourceEditorManagerIntf.ActiveEditor.SelStart;
     end;
   end;
-{$ELSE}
-  EditView := CnOtaGetTopMostEditView;
-  if EditView = nil then
-    Exit;
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
   if EditView.Block = nil then
     Exit;
 
@@ -3764,9 +3781,11 @@ begin
 {$IFDEF STAND_ALONE}
   Result := nil;
 {$ELSE}
-  {$IFDEF LAZARUS}
+{$IFDEF LAZARUS}
   Result := LazarusIDE.ActiveProject;
-  {$ELSE}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   IProjectGroup := CnOtaGetProjectGroup;
   if Assigned(IProjectGroup) then
   begin
@@ -3779,7 +3798,7 @@ begin
     end;
   end;
   Result := nil;
-  {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -3795,7 +3814,8 @@ begin
   begin
 {$IFDEF LAZARUS}
     Result := _CnExtractFileName(IProject.MainFile.FileName);
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     Result := _CnExtractFileName(IProject.FileName);
 {$ENDIF}
     Result := _CnChangeFileExt(Result, '');
@@ -3814,7 +3834,8 @@ begin
   begin
 {$IFDEF LAZARUS}
     Result := CurrentProject.MainFile.FileName;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     Result := CurrentProject.FileName;
 {$ENDIF}
   end
@@ -4218,6 +4239,168 @@ begin
   if EditView.SelStart <> EditView.SelEnd then
     EditView.ReplaceText(EditView.BlockBegin, EditView.BlockEnd, '');
 {$ENDIF}
+end;
+
+// 取当前工程组
+function CnOtaGetProjectGroup: TCnIDEProjectGroupInterface;
+{$IFDEF DELPHI_OTA}
+var
+  IModuleServices: IOTAModuleServices;
+{$IFNDEF BDS}
+  IModule: IOTAModule;
+  I: Integer;
+{$ENDIF}
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
+{$IFDEF BDS}
+  Result := IModuleServices.MainProjectGroup;
+{$ELSE}
+  if IModuleServices <> nil then
+  begin
+    for I := 0 to IModuleServices.ModuleCount - 1 do
+    begin
+      IModule := IModuleServices.Modules[I];
+      if Supports(IModule, IOTAProjectGroup, Result) then
+        Exit;
+    end;
+  end;
+  Result := nil;
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if ProjectGroupManager <> nil then
+    Result := ProjectGroupManager.CurrentProjectGroup
+  else
+    Result := nil;
+{$ENDIF}
+end;
+
+// 取当前工程组文件名
+function CnOtaGetProjectGroupFileName: string;
+{$IFDEF DELPHI_OTA}
+var
+  IModuleServices: IOTAModuleServices;
+  IModule: IOTAModule;
+  IProjectGroup: IOTAProjectGroup;
+  I: Integer;
+{$ENDIF}
+begin
+  Result := '';
+{$IFDEF LAZARUS}
+  if ProjectGroupManager <> nil then
+    Result := ProjectGroupManager.CurrentProjectGroup.FileName;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  IModuleServices := BorlandIDEServices as IOTAModuleServices;
+  if IModuleServices = nil then Exit;
+
+  IProjectGroup := nil;
+  for I := 0 to IModuleServices.ModuleCount - 1 do
+  begin
+    IModule := IModuleServices.Modules[I];
+    if IModule.QueryInterface(IOTAProjectGroup, IProjectGroup) = S_OK then
+      Break;
+  end;
+  // Delphi 5 does not return the file path when querying IOTAProjectGroup directly
+  if IProjectGroup <> nil then
+    Result := IModule.FileName;
+{$ENDIF}
+end;
+
+// 取工程的源码文件 dpr/dpk
+function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
+{$IFNDEF PROJECT_FILENAME_DPR}
+var
+  I: Integer;
+{$ENDIF}
+begin
+  Result := '';
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+{$IFDEF PROJECT_FILENAME_DPR}
+  // D567 下 Project 的 FileName 就是 dpr/dpk
+  if IsDpr(Project.FileName) or IsDpk(Project.FileName) then
+    Result := Project.FileName;
+{$ELSE}
+  // 跳过 bdsproj/dproj，找 dpr/dpk
+  for I := 0 to Project.GetModuleFileCount - 1 do
+  begin
+    if IsDpr(Project.GetModuleFileEditor(I).FileName) or
+      IsDpk(Project.GetModuleFileEditor(I).FileName) then
+    begin
+      Result := Project.GetModuleFileEditor(I).FileName;
+      Exit;
+    end;
+  end;
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  Result := Project.MainFile.Filename;
+{$ENDIF}
+end;
+
+// 取工程资源
+function CnOtaGetProjectResource(Project: TCnIDEProjectInterface): TCnIDEProjectResourceInterface;
+{$IFDEF DELPHI_OTA}
+var
+  I: Integer;
+  IEditor: IOTAEditor;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  for I:= 0 to Project.GetModuleFileCount - 1 do
+  begin
+    IEditor := Project.GetModuleFileEditor(I);
+    if Supports(IEditor, IOTAProjectResource, Result) then
+      Exit;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project <> nil then
+  begin
+    Result := Project.Resources;
+    Exit;
+  end;
+{$ENDIF}
+  Result := nil;
+end;
+
+// 取第一个工程
+function CnOtaGetProject: TCnIDEProjectInterface;
+{$IFDEF DELPHI_OTA}
+var
+  IModuleServices: IOTAModuleServices;
+  IModule: IOTAModule;
+  I: Integer;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
+  if IModuleServices <> nil then
+  begin
+    for I := 0 to IModuleServices.ModuleCount - 1 do
+    begin
+      IModule := IModuleServices.Modules[I];
+      if Supports(IModule, IOTAProject, Result) then
+        Exit;
+    end;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := CnOtaGetCurrentProject;
+{$ENDIF}
+  Result := nil;
 end;
 
 {$IFNDEF LAZARUS}
@@ -4769,102 +4952,6 @@ begin
   Result := _CnExtractFileName(Editor.FileName);
 end;
 
-// 取当前工程组
-function CnOtaGetProjectGroup: IOTAProjectGroup;
-var
-  IModuleServices: IOTAModuleServices;
-{$IFNDEF BDS}
-  IModule: IOTAModule;
-  I: Integer;
-{$ENDIF}
-begin
-  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
-{$IFDEF BDS}
-  Result := IModuleServices.MainProjectGroup;
-{$ELSE}
-  if IModuleServices <> nil then
-  begin
-    for I := 0 to IModuleServices.ModuleCount - 1 do
-    begin
-      IModule := IModuleServices.Modules[I];
-      if Supports(IModule, IOTAProjectGroup, Result) then
-        Exit;
-    end;
-  end;
-  Result := nil;
-{$ENDIF}
-end;
-
-// 取当前工程组文件名
-function CnOtaGetProjectGroupFileName: string;
-var
-  IModuleServices: IOTAModuleServices;
-  IModule: IOTAModule;
-  IProjectGroup: IOTAProjectGroup;
-  I: Integer;
-begin
-  Result := '';
-  IModuleServices := BorlandIDEServices as IOTAModuleServices;
-  if IModuleServices = nil then Exit;
-
-  IProjectGroup := nil;
-  for I := 0 to IModuleServices.ModuleCount - 1 do
-  begin
-    IModule := IModuleServices.Modules[I];
-    if IModule.QueryInterface(IOTAProjectGroup, IProjectGroup) = S_OK then
-      Break;
-  end;
-  // Delphi 5 does not return the file path when querying IOTAProjectGroup directly
-  if IProjectGroup <> nil then
-    Result := IModule.FileName;
-end;
-
-// 取工程的源码文件 dpr/dpk
-function CnOtaGetProjectSourceFileName(Project: IOTAProject): string;
-{$IFNDEF PROJECT_FILENAME_DPR}
-var
-  I: Integer;
-{$ENDIF}
-begin
-  Result := '';
-  if Project = nil then
-    Project := CnOtaGetCurrentProject;
-  if Project = nil then
-    Exit;
-
-{$IFDEF PROJECT_FILENAME_DPR}
-  // D567 下 Project 的 FileName 就是 dpr/dpk
-  if IsDpr(Project.FileName) or IsDpk(Project.FileName) then
-    Result := Project.FileName;
-{$ELSE}
-  // 跳过 bdsproj/dproj，找 dpr/dpk
-  for I := 0 to Project.GetModuleFileCount - 1 do
-  begin
-    if IsDpr(Project.GetModuleFileEditor(I).FileName) or
-      IsDpk(Project.GetModuleFileEditor(I).FileName) then
-    begin
-      Result := Project.GetModuleFileEditor(I).FileName;
-      Exit;
-    end;
-  end;
-{$ENDIF}
-end;
-
-// 取工程资源
-function CnOtaGetProjectResource(Project: IOTAProject): IOTAProjectResource;
-var
-  I: Integer;
-  IEditor: IOTAEditor;
-begin
-  for I:= 0 to Project.GetModuleFileCount - 1 do
-  begin
-    IEditor := Project.GetModuleFileEditor(I);
-    if Supports(IEditor, IOTAProjectResource, Result) then
-      Exit;
-  end;
-  Result := nil;
-end;
-
 //设定项目配置值
 procedure CnOtaSetProjectOptionValue(Options: IOTAProjectOptions; const AOption,
   AValue: string);
@@ -5082,26 +5169,6 @@ begin
   finally
     List.Free;
   end;
-end;
-
-// 取第一个工程
-function CnOtaGetProject: IOTAProject;
-var
-  IModuleServices: IOTAModuleServices;
-  IModule: IOTAModule;
-  I: Integer;
-begin
-  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
-  if IModuleServices <> nil then
-  begin
-    for I := 0 to IModuleServices.ModuleCount - 1 do
-    begin
-      IModule := IModuleServices.Modules[I];
-      if Supports(IModule, IOTAProject, Result) then
-        Exit;
-    end;
-  end;
-  Result := nil;
 end;
 
 // 取当前工程组中工程数，无工程组返回 -1
@@ -7021,6 +7088,118 @@ begin
   end;
 end;
 
+// 让指定文件可见
+function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer): Boolean;
+var
+{$IFDEF DELPHI_OTA}
+  EditActions: IOTAEditActions;
+  Module: IOTAModule;
+  FormEditor: IOTAFormEditor;
+  FileEditor: IOTAEditor;
+  SourceEditor: IOTASourceEditor;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  View: TCnEditViewSourceInterface;
+{$ENDIF}
+  I: Integer;
+  BaseFileName: string;
+begin
+  Result := False;
+{$IFDEF DELPHI_OTA}
+  BaseFileName := CnOtaGetBaseModuleFileName(FileName);
+  Module := CnOtaGetModule(BaseFileName);
+
+  if Module <> nil then
+  begin
+    if IsForm(FileName) then
+    begin
+      if not CnOtaModuleIsShowingFormSource(Module) then
+      begin
+        SourceEditor := CnOtaGetSourceEditorFromModule(Module, BaseFileName);
+        if Assigned(SourceEditor) then
+          SourceEditor.Show;
+        SourceEditor := nil;
+        EditActions := CnOtaGetEditActionsFromModule(Module);
+        if EditActions <> nil then
+        begin
+          FormEditor := CnOtaGetFormEditorFromModule(Module);
+          FormEditor.Show;
+          EditActions.SwapSourceFormView;
+          Result := True;
+        end;
+      end;
+    end
+    else // We are focusing a regular text file, not a form
+    begin
+      if CnOtaModuleIsShowingFormSource(Module) then
+      begin
+        SourceEditor := CnOtaGetSourceEditorFromModule(Module);
+        if Assigned(SourceEditor) then
+          SourceEditor.Show;
+        SourceEditor := nil;
+        EditActions := CnOtaGetEditActionsFromModule(Module);
+        if EditActions <> nil then
+        begin
+          EditActions.SwapSourceFormView;
+          Result := True;
+        end;
+      end
+      else
+        Result := True;
+    end;
+  end;
+
+  if not CnOtaIsFileOpen(BaseFileName) then
+    Result := CnOtaOpenFile(FileName);
+
+  // D5 sometimes delays opening the file until messages are processed
+  Application.ProcessMessages;
+
+  if Result then
+  begin
+    Module := CnOtaGetModule(BaseFileName);
+    if Module <> nil then
+    begin
+      for I := 0 to Module.GetModuleFileCount-1 do
+      begin
+        FileEditor := Module.GetModuleFileEditor(I);
+        Assert(Assigned(FileEditor));
+
+        if CompareText(FileEditor.FileName, FileName) = 0 then
+        begin
+          FileEditor.Show;
+          if Lines > 0 then
+          begin
+            Supports(FileEditor, IOTASourceEditor, SourceEditor);
+            if (SourceEditor <> nil) and (SourceEditor.EditViewCount > 0) then
+            begin
+              SourceEditor.EditViews[0].Center(Lines, 1);
+              SourceEditor.EditViews[0].Paint;
+            end;
+          end;
+          Exit;
+        end;
+      end;
+    end;
+    Result := False;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // Lazarus 不支持窗体文件切换成源文件
+  if not CnOtaIsFileOpen(FileName) then
+    Result := CnOtaOpenFile(FileName);
+
+  View := CnOtaGetTopOpenedEditViewFromFileName(FileName);
+  if View <> nil then
+  begin
+    SourceEditorManagerIntf.ActiveEditor := View;
+    if Lines > 0 then
+      CnLazSourceEditorCenterLine(View, Lines);
+  end;
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -7100,98 +7279,6 @@ begin
   QuerySvcs(BorlandIDEServices, IOTADebuggerServices, DebugScvs);
   if Assigned(DebugScvs) then
     Result := DebugScvs.ProcessCount > 0;
-end;
-
-// 让指定文件可见
-function CnOtaMakeSourceVisible(const FileName: string; Lines: Integer): Boolean;
-var
-  EditActions: IOTAEditActions;
-  Module: IOTAModule;
-  FormEditor: IOTAFormEditor;
-  SourceEditor: IOTASourceEditor;
-  FileEditor: IOTAEditor;
-  I: Integer;
-  BaseFileName: string;
-begin
-  Result := False;
-
-  BaseFileName := CnOtaGetBaseModuleFileName(FileName);
-  Module := CnOtaGetModule(BaseFileName);
-
-  if Module <> nil then
-  begin
-    if IsForm(FileName) then
-    begin
-      if not CnOtaModuleIsShowingFormSource(Module) then
-      begin
-        SourceEditor := CnOtaGetSourceEditorFromModule(Module, BaseFileName);
-        if Assigned(SourceEditor) then
-          SourceEditor.Show;
-        SourceEditor := nil;
-        EditActions := CnOtaGetEditActionsFromModule(Module);
-        if EditActions <> nil then
-        begin
-          FormEditor := CnOtaGetFormEditorFromModule(Module);
-          FormEditor.Show;
-          EditActions.SwapSourceFormView;
-          Result := True;
-        end;
-      end;
-    end
-    else // We are focusing a regular text file, not a form
-    begin
-      if CnOtaModuleIsShowingFormSource(Module) then
-      begin
-        SourceEditor := CnOtaGetSourceEditorFromModule(Module);
-        if Assigned(SourceEditor) then
-          SourceEditor.Show;
-        SourceEditor := nil;
-        EditActions := CnOtaGetEditActionsFromModule(Module);
-        if EditActions <> nil then
-        begin
-          EditActions.SwapSourceFormView;
-          Result := True;
-        end;
-      end
-      else
-        Result := True;
-    end;
-  end;
-
-  if not CnOtaIsFileOpen(BaseFileName) then
-    Result := CnOtaOpenFile(FileName);
-
-  // D5 sometimes delays opening the file until messages are processed
-  Application.ProcessMessages;
-
-  if Result then
-  begin
-    Module := CnOtaGetModule(BaseFileName);
-    if Module <> nil then
-    begin
-      for I := 0 to Module.GetModuleFileCount-1 do
-      begin
-        FileEditor := Module.GetModuleFileEditor(I);
-        Assert(Assigned(FileEditor));
-
-        if CompareText(FileEditor.FileName, FileName) = 0 then
-        begin
-          FileEditor.Show;
-          if Lines > 0 then
-          begin
-            Supports(FileEditor, IOTASourceEditor, SourceEditor);
-            if (SourceEditor <> nil) and (SourceEditor.EditViewCount > 0) then
-            begin
-              SourceEditor.EditViews[0].Center(Lines, 1);
-              SourceEditor.EditViews[0].Paint;
-            end;
-          end;
-          Exit;
-        end;
-      end;
-    end;
-    Result := False;
-  end;
 end;
 
 // 指定模块是否以文本窗体方式显示
@@ -9773,32 +9860,6 @@ begin
 {$ENDIF}
 end;
 
-// 返回一个位置值
-function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
-begin
-  Result.CharIndex := CharIndex;
-  Result.Line := Line;
-end;
-
-// 返回一个编辑位置值
-function OTAEditPos(Col: SmallInt; Line: Longint): TOTAEditPos;
-begin
-  Result.Col := Col;
-  Result.Line := Line;
-end;
-
-// 判断两个编辑位置是否相等
-function SameEditPos(Pos1, Pos2: TOTAEditPos): Boolean;
-begin
-  Result := (Pos1.Col = Pos2.Col) and (Pos1.Line = Pos2.Line);
-end;
-
-// 判断两个字符位置是否相等
-function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
-begin
-  Result := (Pos1.CharIndex = Pos2.CharIndex) and (Pos1.Line = Pos2.Line);
-end;
-
 // 判断一控件窗口是否是非可视化控件
 function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 var
@@ -10019,6 +10080,32 @@ end;
 {$ENDIF}
 
 {$ENDIF}
+
+// 返回一个位置值
+function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
+begin
+  Result.CharIndex := CharIndex;
+  Result.Line := Line;
+end;
+
+// 返回一个编辑位置值
+function OTAEditPos(Col: SmallInt; Line: Longint): TOTAEditPos;
+begin
+  Result.Col := Col;
+  Result.Line := Line;
+end;
+
+// 判断两个编辑位置是否相等
+function SameEditPos(Pos1, Pos2: TOTAEditPos): Boolean;
+begin
+  Result := (Pos1.Col = Pos2.Col) and (Pos1.Line = Pos2.Line);
+end;
+
+// 判断两个字符位置是否相等
+function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
+begin
+  Result := (Pos1.CharIndex = Pos2.CharIndex) and (Pos1.Line = Pos2.Line);
+end;
 
 procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
 begin

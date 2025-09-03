@@ -1,8 +1,8 @@
 inherited CnBookmarkForm: TCnBookmarkForm
   Left = 328
   Top = 164
-  Width = 618
-  Height = 496
+  Width = 714
+  Height = 549
   Caption = 'Browse Bookmarks'
   KeyPreview = True
   Position = poScreenCenter
@@ -16,7 +16,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 610
+    Width = 706
     Height = 30
     AutoSize = True
     BorderWidth = 2
@@ -118,8 +118,8 @@ inherited CnBookmarkForm: TCnBookmarkForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 445
-    Width = 610
+    Top = 498
+    Width = 706
     Height = 19
     Panels = <>
     ParentFont = True
@@ -129,15 +129,15 @@ inherited CnBookmarkForm: TCnBookmarkForm
   object Panel1: TPanel
     Left = 0
     Top = 30
-    Width = 610
-    Height = 415
+    Width = 706
+    Height = 468
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
     object Splitter: TSplitter
       Left = 0
-      Top = 311
-      Width = 610
+      Top = 364
+      Width = 706
       Height = 5
       Cursor = crVSplit
       Align = alBottom
@@ -148,8 +148,8 @@ inherited CnBookmarkForm: TCnBookmarkForm
     object ListView: TListView
       Left = 0
       Top = 0
-      Width = 610
-      Height = 311
+      Width = 706
+      Height = 364
       Align = alClient
       Columns = <
         item
@@ -180,8 +180,8 @@ inherited CnBookmarkForm: TCnBookmarkForm
     end
     object mmoPreview: TMemo
       Left = 0
-      Top = 316
-      Width = 610
+      Top = 369
+      Width = 706
       Height = 99
       Align = alBottom
       Constraints.MinHeight = 30

@@ -48,10 +48,10 @@ interface
 {$IFDEF CNWIZARDS_CNBOOKMARKWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, ExtCtrls, Math, ToolWin, ImgList, ToolsAPI, IniFiles,
-  CnWizClasses, CnWizNotifier, CnWizMultiLang, CnWizIdeDock, Contnrs,
-  ActnList;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Contnrs,
+  StdCtrls, ComCtrls, ExtCtrls, Math, ToolWin, ImgList, ActnList, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  CnIDEStrings, CnWizUtils, CnWizClasses, CnWizNotifier, CnWizMultiLang, CnWizIdeDock;
 
 type
 
@@ -74,7 +74,7 @@ type
   TCnBookmarkObj = class
     Parent: TCnBookmarkEditorObj;
     BookmarkID: Integer;
-    Pos: TOTACharPos;
+    CharPos: TOTACharPos;
     Line: string;
     constructor Create(AParent: TCnBookmarkEditorObj);
   end;
@@ -130,18 +130,20 @@ type
     FSavedBookmark: Integer;
     procedure SortList(AList: TObjectList);
     function UpdateBookmarkList: Boolean;
-    function GetBufferFromFile(const AFileName: string): IOTAEditBuffer;
+    function GetBufferFromFile(const AFileName: string): TCnEditBufferInterface;
     procedure UpdateComboBox;
     procedure UpdateListView;
     procedure UpdateStatusBar;
     procedure UpdatePreview;
     procedure SyncSettings;
   protected
-    Editor: IOTASourceEditor;
+    Editor: TCnSourceEditorInterface;
     APos: TOTACharPos;
     function GetHelpTopic: string; override;
+{$IFDEF DELPHI_OTA}
     procedure DoLoadWindowState(Desktop: TCustomIniFile); override;
     procedure DoSaveWindowState(Desktop: TCustomIniFile; IsProject: Boolean); override;
+{$ENDIF}
     procedure DoLanguageChanged(Sender: TObject); override;
   public
     procedure UpdateConfig;
@@ -168,10 +170,10 @@ type
     FWidthString: string;
     FCurrentSource: string;
     FSourceFileChanged: Boolean;
-    procedure SourceEditorNotifier(SourceEditor: IOTASourceEditor;
-      NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
-    procedure LoadBookmark(SourceEditor: IOTASourceEditor);
-    procedure SaveBookmark(SourceEditor: IOTASourceEditor);
+    procedure SourceEditorNotifier(SourceEditor: TCnSourceEditorInterface;
+      NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
+    procedure LoadBookmark(SourceEditor: TCnSourceEditorInterface);
+    procedure SaveBookmark(SourceEditor: TCnSourceEditorInterface);
     function FindSection(Ini: TCustomIniFile; const FileName: string;
       var Section: string): Boolean;
     function CharPosToStr(CharPos: TOTACharPos): string;
@@ -205,7 +207,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnIni, CnWizUtils, CnWizConsts, CnConsts, CnCommon, CnWizOptions, CnWizIdeUtils,
+  CnIni, CnWizConsts, CnConsts, CnCommon, CnWizOptions, CnWizIdeUtils,
   CnBookmarkConfigFrm, CnWizShareImages, CnWizManager;
 
 {$R *.DFM}
@@ -236,14 +238,18 @@ const
 { TCnBookmarkWizard }
 
 constructor TCnBookmarkWizard.Create;
+{$IFDEF DELPHI_OTA}
 var
   Options: IOTAEditOptions;
+{$ENDIF}
 begin
   inherited;
   FSourceFont := TFont.Create;
+{$IFDEF DELPHI_OTA}
   Options := CnOtaGetEditOptions;
   if Assigned(Options) then
     FSourceFont.Name := Options.FontName;
+{$ENDIF}
   FSourceFont.Size := 9;
   FHighlightFont := TFont.Create;
   FHighlightFont.Assign(FSourceFont);
@@ -253,16 +259,20 @@ begin
   FRefreshInterval := 1000;
 
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotifier);
+{$IFDEF DELPHI_OTA}
   IdeDockManager.RegisterDockableForm(TCnBookmarkForm, CnBookmarkForm,
     csBrowseForm);
+{$ENDIF}
 end;
 
 destructor TCnBookmarkWizard.Destroy;
 begin
+{$IFDEF DELPHI_OTA}
   IdeDockManager.UnRegisterDockableForm(CnBookmarkForm, csBrowseForm);
-  FreeAndNil(CnBookmarkForm);
-
+{$ENDIF}
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotifier);
+
+  FreeAndNil(CnBookmarkForm);
   FHighlightFont.Free;
   FSourceFont.Free;
   FListFont.Free;
@@ -273,7 +283,11 @@ procedure TCnBookmarkWizard.Execute;
 begin
   if CnBookmarkForm = nil then
     CnBookmarkForm := TCnBookmarkForm.Create(nil);
+{$IFDEF DELPHI_OTA}
   IdeDockManager.ShowForm(CnBookmarkForm);
+{$ELSE}
+  CnBookmarkForm.Show;
+{$ENDIF}
 end;
 
 function TCnBookmarkWizard.CharPosToStr(CharPos: TOTACharPos): string;
@@ -301,13 +315,18 @@ begin
   try
     Ini.ReadSections(Sections);
     for I := 0 to Sections.Count - 1 do
+    begin
       if Pos(csItem, Sections[I]) > 0 then
+      begin
         if SameFileName(Ini.ReadString(Sections[I], csFileName, ''), FileName) then
         begin
           Section := Sections[I];
           Result := True;
           Break;
         end;
+      end;
+    end;
+
     if not Result then
     begin
       I := 0;
@@ -325,20 +344,29 @@ begin
   end;
 end;
 
-procedure TCnBookmarkWizard.LoadBookmark(SourceEditor: IOTASourceEditor);
+procedure TCnBookmarkWizard.LoadBookmark(SourceEditor: TCnSourceEditorInterface);
 var
   I: Integer;
-  View: IOTAEditView;
-  Pos: TOTACharPos;
+  View: TCnEditViewSourceInterface;
+  APos: TOTACharPos;
+{$IFDEF DELPHI_OTA}
   EditPos, SavePos: TOTAEditPos;
+{$ENDIF}
   Ini: TCustomIniFile;
   Section: string;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnBookmarkWizard.LoadBookmark');
+{$ENDIF}
+
+{$IFDEF DEBUG}
+{$IFDEF DELPHI_OTA}
   if SourceEditor.GetEditViewCount = 0 then
     CnDebugger.LogMsgWithType('SourceEditor.GetEditViewCount = 0', cmtWarning);
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   if Active and FileExists(SourceEditor.FileName) and
     (SourceEditor.GetEditViewCount > 0) then
   begin
@@ -354,11 +382,11 @@ begin
         SavePos := View.CursorPos;
         for I := 0 to 9 do
         begin
-          Pos := StrToCharPos(Ini.ReadString(Section, csBookmark + IntToStr(I), ''));
-          if (Pos.CharIndex <> 0) or (Pos.Line <> 0) then
+          APos := StrToCharPos(Ini.ReadString(Section, csBookmark + IntToStr(I), ''));
+          if (APos.CharIndex <> 0) or (APos.Line <> 0) then
           begin
-            EditPos.Col := Pos.CharIndex + 1;
-            EditPos.Line := Pos.Line;
+            EditPos.Col := APos.CharIndex + 1;
+            EditPos.Line := APos.Line;
             View.SetCursorPos(EditPos);
             View.BookmarkRecord(I);
           end;
@@ -369,25 +397,64 @@ begin
       Ini.Free;
     end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if Active and FileExists(SourceEditor.FileName) then
+  begin
+    Ini := CreateIniFile;
+    try
+      if FindSection(Ini, SourceEditor.FileName, Section) then
+      begin
+      {$IFDEF DEBUG}
+        CnDebugger.LogMsg('Load bookmark: ' + SourceEditor.FileName);
+        CnDebugger.LogMsg('Section: ' + Section);
+      {$ENDIF}
+
+        for I := 0 to 9 do
+        begin
+          APos := StrToCharPos(Ini.ReadString(Section, csBookmark + IntToStr(I), ''));
+          if (APos.CharIndex <> 0) or (APos.Line <> 0) then
+          begin
+            SourceEditor.SetBookMark(I, APos.CharIndex, APos.Line);
+          end;
+        end;
+      end;
+    finally
+      Ini.Free;
+    end;
+  end;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnBookmarkWizard.LoadBookmark');
 {$ENDIF}
 end;
 
-procedure TCnBookmarkWizard.SaveBookmark(SourceEditor: IOTASourceEditor);
+procedure TCnBookmarkWizard.SaveBookmark(SourceEditor: TCnSourceEditorInterface);
 var
   I: Integer;
-  View: IOTAEditView;
-  Pos: TOTACharPos;
+{$IFDEF LAZARUS}
+  X, Y: Integer;
+{$ENDIF}
+  View: TCnEditViewSourceInterface;
+  APos: TOTACharPos;
   Ini: TCustomIniFile;
   FileNameSaved: Boolean;
   Section: string;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnBookmarkWizard.SaveBookmark');
+{$ENDIF}
+
+{$IFDEF DEBUG}
+{$IFDEF DELPHI_OTA}
   if SourceEditor.GetEditViewCount = 0 then
     CnDebugger.LogMsgWithType('SourceEditor.GetEditViewCount = 0', cmtWarning);
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   if Active and FileExists(SourceEditor.FileName) and
     (SourceEditor.GetEditViewCount > 0) then
   begin
@@ -399,8 +466,8 @@ begin
       FileNameSaved := False;
       for I := 0 to 9 do
       begin
-        Pos := View.BookmarkPos[I];
-        if (Pos.CharIndex <> 0) or (Pos.Line <> 0) then
+        APos := View.BookmarkPos[I];
+        if (APos.CharIndex <> 0) or (APos.Line <> 0) then
         begin
           if not FileNameSaved then
           begin
@@ -411,20 +478,61 @@ begin
             Ini.WriteString(Section, csFileName, SourceEditor.FileName);
             FileNameSaved := True;
           end;
-          Ini.WriteString(Section, csBookmark + IntToStr(I), CharPosToStr(Pos));
+          Ini.WriteString(Section, csBookmark + IntToStr(I), CharPosToStr(APos));
         end;
       end;
     finally
       Ini.Free;
     end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if Active and FileExists(SourceEditor.FileName) then
+  begin
+    Ini := CreateIniFile;
+    try
+      if FindSection(Ini, SourceEditor.FileName, Section) then
+        Ini.EraseSection(Section); // 如果已经存在则先删除
+      FileNameSaved := False;
+
+      for I := 0 to 9 do
+      begin
+        X := 0;
+        Y := 0;
+        if not SourceEditor.GetBookMark(I, X, Y) then
+          Continue;
+
+        if (X <> 0) or (Y <> 0) then
+        begin
+          if not FileNameSaved then
+          begin
+          {$IFDEF DEBUG}
+            CnDebugger.LogMsg('Save bookmark: ' + SourceEditor.FileName);
+            CnDebugger.LogMsg('Section: ' + Section);
+          {$ENDIF}
+            Ini.WriteString(Section, csFileName, SourceEditor.FileName);
+            FileNameSaved := True;
+          end;
+          APos.CharIndex := X;
+          APos.Line := Y;
+          Ini.WriteString(Section, csBookmark + IntToStr(I), CharPosToStr(APos));
+        end;
+      end;
+    finally
+      Ini.Free;
+    end;
+  end;
+
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnBookmarkWizard.SaveBookmark');
 {$ENDIF}
 end;
 
-procedure TCnBookmarkWizard.SourceEditorNotifier(SourceEditor: IOTASourceEditor;
-  NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
+procedure TCnBookmarkWizard.SourceEditorNotifier(SourceEditor: TCnSourceEditorInterface;
+  NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
 var
   S: string;
 begin
@@ -551,12 +659,16 @@ begin
   begin
     if Value then
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.RegisterDockableForm(TCnBookmarkForm, CnBookmarkForm,
         csBrowseForm);
+{$ENDIF}
     end
     else
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.UnRegisterDockableForm(CnBookmarkForm, csBrowseForm);
+{$ENDIF}
       FreeAndNil(CnBookmarkForm);
     end;
   end;
@@ -679,14 +791,19 @@ begin
 end;
 
 function TCnBookmarkForm.GetBufferFromFile(
-  const AFileName: string): IOTAEditBuffer;
+  const AFileName: string): TCnEditBufferInterface;
 var
-  Editor: IOTAEditor;
+  Editor: TCnIDEEditorInterface;
 begin
   Result := nil;
   Editor := CnOtaGetEditor(AFileName);
+{$IFDEF DELPHI_OTA}
   if Assigned(Editor) then
-    Supports(Editor, IOTAEditBuffer, Result); 
+    Supports(Editor, IOTAEditBuffer, Result);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := Editor;
+{$ENDIF}
 end;
 
 function TCnBookmarkForm.UpdateBookmarkList: Boolean;
@@ -694,10 +811,15 @@ var
   EditorObj: TCnBookmarkEditorObj;
   BkObj: TCnBookmarkObj;
   I, J, K: Integer;
+{$IFDEF DELPHI_OTA}
   ModuleSvcs: IOTAModuleServices;
   Module: IOTAModule;
   Buffer: IOTAEditBuffer;
-  Pos: TOTACharPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  X, Y: Integer;
+{$ENDIF}
+  APos: TOTACharPos;
   NewList: TObjectList;
 
   function SameEditorList(List1, List2: TObjectList): Boolean;
@@ -728,7 +850,7 @@ var
         Bk1 := TCnBookmarkObj(Edt1.FList[J]);
         Bk2 := TCnBookmarkObj(Edt2.FList[J]);
         if (Bk1.BookmarkID <> Bk2.BookmarkID) or
-          not SameCharPos(Bk1.Pos, Bk2.Pos) then
+          not SameCharPos(Bk1.CharPos, Bk2.CharPos) then
         begin
           Result := False;
           Exit;
@@ -739,6 +861,8 @@ var
   end;
 begin
   Result := False;
+
+{$IFDEF DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleSvcs) then
     Exit;
 
@@ -757,8 +881,8 @@ begin
             begin
               for K := 0 to 9 do
               begin
-                Pos := Buffer.TopView.BookmarkPos[K];
-                if (Pos.CharIndex <> 0) or (Pos.Line <> 0) then
+                APos := Buffer.TopView.BookmarkPos[K];
+                if (APos.CharIndex <> 0) or (APos.Line <> 0) then
                 begin
                   if EditorObj = nil then
                   begin
@@ -768,8 +892,8 @@ begin
                   end;
                   BkObj := TCnBookmarkObj.Create(EditorObj);
                   BkObj.BookmarkID := K;
-                  BkObj.Pos := Pos;
-                  BkObj.Line := CnOtaGetLineText(Pos.Line, Buffer);
+                  BkObj.CharPos := APos;
+                  BkObj.Line := CnOtaGetLineText(APos.Line, Buffer);
                   EditorObj.FList.Add(BkObj);
                 end;
               end;
@@ -792,6 +916,59 @@ begin
   finally
     NewList.Free;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf = nil) or (SourceEditorManagerIntf.SourceEditorCount <= 0) then
+    Exit;
+
+NewList := TObjectList.Create;
+try
+  try
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      EditorObj := nil;
+      for K := 0 to 9 do
+      begin
+        X := 0;
+        Y := 0;
+        if SourceEditorManagerIntf.SourceEditors[I].GetBookMark(K, X, Y) then
+        begin
+          if (X <> 0) or (Y <> 0) then
+          begin
+            if EditorObj = nil then
+            begin
+              EditorObj := TCnBookmarkEditorObj.Create;
+              EditorObj.FileName := SourceEditorManagerIntf.SourceEditors[I].FileName;
+              NewList.Add(EditorObj);
+            end;
+
+            BkObj := TCnBookmarkObj.Create(EditorObj);
+            BkObj.BookmarkID := K;
+            BkObj.CharPos.CharIndex := X;
+            BkObj.CharPos.Line := Y;
+            BkObj.Line := CnOtaGetLineText(Y, TCnEditBufferInterface(SourceEditorManagerIntf.SourceEditors[I]));
+            EditorObj.FList.Add(BkObj);
+          end;
+        end;
+      end;
+    end;
+    SortList(NewList);
+
+    Result := not SameEditorList(FList, NewList);
+    if Result then
+    begin
+      FList.Clear;
+      while NewList.Count > 0 do
+        FList.Add(NewList.Extract(NewList.First));
+    end;
+  except
+    ;
+  end;
+finally
+  NewList.Free;
+end;
+{$ENDIF}
 end;
 
 procedure TCnBookmarkForm.UpdateComboBox;
@@ -847,7 +1024,7 @@ var
       begin
         Caption := _CnExtractFileName(AEditor.FileName);
         SubItems.Add(IntToStr(BkObj.BookmarkID));
-        SubItems.Add(IntToStr(BkObj.Pos.Line));
+        SubItems.Add(IntToStr(BkObj.CharPos.Line));
         SubItems.Add(BkObj.Line);
         Data := BkObj;
       end;
@@ -877,8 +1054,10 @@ begin
     else if cbbUnit.ItemIndex = 1 then
     begin
       for I := 0 to FList.Count - 1 do
+      begin
         if TCnBookmarkEditorObj(FList[I]).FileName = FWizard.FCurrentSource then
           AddBookmarksFromEditor(TCnBookmarkEditorObj(FList[I]));
+      end;
     end
     else
     begin
@@ -927,7 +1106,7 @@ procedure TCnBookmarkForm.UpdatePreview;
 var
   Line1, Line2, Line3: string;
   FromLine: Integer;
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
 begin
   if FUpdateCount > 0 then Exit;
   mmoPreview.Perform(WM_SETREDRAW, 0, 0);
@@ -939,10 +1118,10 @@ begin
       Buffer := GetBufferFromFile(Parent.FileName);
       if Assigned(Buffer) then
       begin
-        Line1 := CnOtaGetLineText(Pos.Line - FWizard.FDispLines, Buffer,
+        Line1 := CnOtaGetLineText(CharPos.Line - FWizard.FDispLines, Buffer,
           FWizard.FDispLines);
-        Line2 := CnOtaGetLineText(Pos.Line, Buffer, 1);
-        Line3 := CnOtaGetLineText(Pos.Line + 1, Buffer, FWizard.FDispLines);
+        Line2 := CnOtaGetLineText(CharPos.Line, Buffer, 1);
+        Line3 := CnOtaGetLineText(CharPos.Line + 1, Buffer, FWizard.FDispLines);
 
         mmoPreview.Lines.Add(Line1);
         FromLine := mmoPreview.Lines.Count;
@@ -999,19 +1178,26 @@ end;
 
 procedure TCnBookmarkForm.ListViewDblClick(Sender: TObject);
 var
-  CharPos: TOTACharPos;
+  ACharPos: TOTACharPos;
   EditPos: TOTAEditPos;
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
 begin
   if Assigned(ListView.Selected) then
   begin
     Buffer := GetBufferFromFile(TCnBookmarkObj(ListView.Selected.Data).Parent.FileName);
-    if Assigned(Buffer) and Assigned(Buffer.TopView) then
+    if Assigned(Buffer) {$IFDEF DELPHI_OTA} and Assigned(Buffer.TopView) {$ENDIF} then
     begin
-      CharPos := TCnBookmarkObj(ListView.Selected.Data).Pos;
-      Buffer.TopView.ConvertPos(False, EditPos, CharPos);
+      ACharPos := TCnBookmarkObj(ListView.Selected.Data).CharPos;
+{$IFDEF DELPHI_OTA}
+      Buffer.TopView.ConvertPos(False, EditPos, ACharPos);
       Buffer.TopView.SetCursorPos(EditPos);
       Buffer.TopView.Center(EditPos.Line, EditPos.Col);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+      CnLazSourceEditorCenterLine(Buffer, ACharPos.Line);
+      BringIdeEditorFormToFront;
+{$ENDIF}
       CnOtaMakeSourceVisible(Buffer.FileName);
     end;      
   end;
@@ -1023,8 +1209,10 @@ var
   BkObj: TCnBookmarkObj;
   SavePos: TOTAEditPos;
   EditPos: TOTAEditPos;
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
+{$IFDEF DELPHI_OTA}
   View: IOTAEditView;
+{$ENDIF}
   BkID: Integer;
 begin
   if (ListView.SelCount > 1) and not QueryDlg(SCnDeleteConfirm) then
@@ -1036,10 +1224,12 @@ begin
     begin
       BkObj := TCnBookmarkObj(ListView.Items[I].Data);
       Buffer := GetBufferFromFile(BkObj.Parent.FileName);
-      if Assigned(Buffer) and Assigned(Buffer.TopView) then
+
+      if Assigned(Buffer) {$IFDEF DELPHI_OTA} and Assigned(Buffer.TopView) {$ENDIF} then
       begin
-        View := Buffer.TopView;
         BkID := BkObj.BookmarkID;
+{$IFDEF DELPHI_OTA}
+        View := Buffer.TopView;
         SavePos := View.CursorPos;
         if View.BookmarkPos[BkID].Line > 0 then
         begin
@@ -1050,6 +1240,11 @@ begin
         end;
         View.CursorPos := SavePos;
         View.Paint;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+        Buffer.SetBookMark(BkID, -1, -1);
+{$ENDIF}
       end;
       BkObj.Parent.FList.Remove(BkObj);
       ListView.Items.Delete(I);
@@ -1072,6 +1267,8 @@ begin
   ShowFormHelp;
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnBookmarkForm.DoLoadWindowState(Desktop: TCustomIniFile);
 begin
   inherited;
@@ -1087,6 +1284,8 @@ begin
   Desktop.WriteInteger(csBrowseForm, csEditHeight, mmoPreview.Height);
   Desktop.WriteString(csBrowseForm, csColumnWidth, GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
 end;
+
+{$ENDIF}
 
 procedure TCnBookmarkForm.DoLanguageChanged(Sender: TObject);
 var
@@ -1141,8 +1340,10 @@ var
   BkObj: TCnBookmarkObj;
   SavePos: TOTAEditPos;
   EditPos: TOTAEditPos;
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
+{$IFDEF DELPHI_OTA}
   View: IOTAEditView;
+{$ENDIF}
   BkID: Integer;
 begin
   if ListView.Items.Count <= 0 then
@@ -1155,10 +1356,11 @@ begin
   begin
     BkObj := TCnBookmarkObj(ListView.Items[I].Data);
     Buffer := GetBufferFromFile(BkObj.Parent.FileName);
-    if Assigned(Buffer) and Assigned(Buffer.TopView) then
+    if Assigned(Buffer) {$IFDEF DELPHI_OTA} and Assigned(Buffer.TopView) {$ENDIF} then
     begin
-      View := Buffer.TopView;
       BkID := BkObj.BookmarkID;
+{$IFDEF DELPHI_OTA}
+      View := Buffer.TopView;
       SavePos := View.CursorPos;
       if View.BookmarkPos[BkID].Line > 0 then
       begin
@@ -1169,6 +1371,11 @@ begin
       end;
       View.CursorPos := SavePos;
       View.Paint;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+      Buffer.SetBookMark(BkID, -1, -1);
+{$ENDIF}
     end;
     BkObj.Parent.FList.Remove(BkObj);
     ListView.Items.Delete(I);

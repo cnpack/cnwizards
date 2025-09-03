@@ -57,10 +57,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  {$IFNDEF FPC} AppEvnts, {$ENDIF}
-  {$IFNDEF STAND_ALONE} {$IFNDEF LAZARUS} Consts, ToolsAPI, {$ENDIF}
-  CnWizUtils, {$ENDIF} CnClasses {$IFNDEF STAND_ALONE}
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
+  {$IFDEF DELPHI} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
+  CnWizUtils, {$ENDIF} CnClasses
+  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
 {$IFDEF FPC}
@@ -74,19 +74,19 @@ type
 
   NoRefCount = Pointer; // 使用指针类型来强制为接口变量赋值，不增加引用计数
 
+  TCnWizSourceEditorNotifyType = (setOpened, setClosing, setModified,
+    setEditViewInsert, setEditViewRemove, setEditViewActivated);
+  {* SourceEditor 通知类型，Lazarus 下有改变与封装以映射保持一致}
+
+  TCnWizSourceEditorNotifier = procedure (SourceEditor: TCnSourceEditorInterface;
+    NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF}) of object;
+  {* SourceEditor 通知事件，SourceEditor 为源码编辑器接口，NotifyType 为类型}
+
 {$IFDEF DELPHI_OTA}
 
   TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
     const FileName: string) of object;
   {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名}
-
-  TCnWizSourceEditorNotifyType = (setOpened, setClosing, setModified,
-    setEditViewInsert, setEditViewRemove, setEditViewActivated);
-  {* SourceEditor 通知类型}
-
-  TCnWizSourceEditorNotifier = procedure (SourceEditor: IOTASourceEditor;
-    NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView) of object;
-  {* SourceEditor 通知事件，SourceEditor 为源码编辑器接口，NotifyType 为类型}
 
   TCnWizFormEditorNotifyType = (fetOpened, fetClosing, fetModified,
     fetActivated, fetSaving, fetComponentCreating, fetComponentCreated,
@@ -140,11 +140,6 @@ type
     procedure RemoveAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
     {* 删除一个编译后通知事件}
 
-    procedure AddSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
-    {* 增加一个源代码编辑器通知事件}
-    procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
-    {* 删除一个源代码编辑器通知事件}
-
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     {* 增加一个窗体编辑器通知事件}
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
@@ -172,6 +167,11 @@ type
     {* 获取当前正在编译的工程、不是当前工程，使用通知内记录而来}
 
 {$ENDIF}
+
+    procedure AddSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
+    {* 增加一个源代码编辑器通知事件}
+    procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
+    {* 删除一个源代码编辑器通知事件}
 
     procedure AddActiveFormNotifier(Notifier: TNotifyEvent);
     {* 增加一个窗体活跃通知事件}
@@ -482,8 +482,6 @@ type
     procedure RemoveBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
     procedure AddAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
     procedure RemoveAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
-    procedure AddSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
-    procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
@@ -496,6 +494,8 @@ type
     procedure RemoveBreakpointDeletedNotifier(Notifier: TCnWizBreakpointNotifier);
     function GetCurrentCompilingProject: IOTAProject;
 {$ENDIF}
+    procedure AddSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
+    procedure RemoveSourceEditorNotifier(Notifier: TCnWizSourceEditorNotifier);
     procedure AddActiveFormNotifier(Notifier: TNotifyEvent);
     procedure RemoveActiveFormNotifier(Notifier: TNotifyEvent);
     procedure AddActiveControlNotifier(Notifier: TNotifyEvent);
@@ -521,6 +521,8 @@ type
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
 
+    procedure SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
+      NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF});
 {$IFDEF DELPHI_OTA}
     procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
@@ -535,8 +537,6 @@ type
 
     procedure SourceEditorOpened(SourceEditor: IOTASourceEditor;
       CalledByNotifier: Boolean);
-    procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
-      NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView = nil);
     procedure SourceEditorFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
 
@@ -554,6 +554,25 @@ type
 {$IFDEF LAZARUS}
     procedure ScreenActiveFormChange(Sender: TObject);
     procedure ScreenActiveControlChange(Sender: TObject);
+
+    // EditorWindow 系列，Sender 是 TSourceNoteBook
+    procedure SourceEditorWindowCreate(Sender: TObject);
+    procedure SourceEditorWindowDestroy(Sender: TObject);
+    procedure SourceEditorWindowActivate(Sender: TObject);
+    procedure SourceEditorWindowFocused(Sender: TObject);
+    procedure SourceEditorWindowShow(Sender: TObject);
+    procedure SourceEditorWindowHide(Sender: TObject);
+    // Editor 系列，Sender 是 TSourceEditor 或 nil（目前看上去在 Activate 中可能 nil）
+    procedure SourceEditorCreate(Sender: TObject);
+    procedure SourceEditorDestroy(Sender: TObject);
+    procedure SourceEditorOptsChanged(Sender: TObject);
+    procedure SourceEditorActivate(Sender: TObject);
+    procedure SourceEditorStatus(Sender: TObject);
+    procedure SourceEditorMouseDown(Sender: TObject);
+    procedure SourceEditorMouseUp(Sender: TObject);
+    procedure SourceEditorMoved(Sender: TObject);
+    procedure SourceEditorCloned(Sender: TObject);
+    procedure SourceEditorReConfigured(Sender: TObject);
 {$ENDIF}
     procedure AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer = nil);
 
@@ -1047,8 +1066,8 @@ begin
   FEvents := TApplicationEvents.Create(nil);
   FEvents.OnIdle := DoApplicationIdle;
   FEvents.OnMessage := DoApplicationMessage;
-  //FEvents.OnActivate := DoApplicationActivate;
-  //FEvents.OnDeactivate := DoApplicationDeactivate;
+  // FEvents.OnActivate := DoApplicationActivate;
+  // FEvents.OnDeactivate := DoApplicationDeactivate;
   FEvents.OnMinimize := DoApplicationMinimize;
   FEvents.OnRestore := DoApplicationRestore;
   FEvents.OnHint := DoApplicationHint;
@@ -1081,6 +1100,23 @@ begin
   Screen.OnActiveFormChange := ScreenActiveFormChange;
   FOldScreenActiveControlChange := Screen.OnActiveControlChange;
   Screen.OnActiveControlChange := ScreenActiveControlChange;
+
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
+  SourceEditorManagerIntf.RegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorCreate, SourceEditorCreate);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorActivate, SourceEditorActivate);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorStatus, SourceEditorStatus);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMoved, SourceEditorMoved);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorCloned, SourceEditorCloned);
+  SourceEditorManagerIntf.RegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
 {$ENDIF}
 
 {$IFDEF DELPHI_OTA}
@@ -1137,6 +1173,23 @@ begin
   GetMsgHook := 0;
 
 {$IFDEF LAZARUS}
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCloned, SourceEditorCloned);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMoved, SourceEditorMoved);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorStatus, SourceEditorStatus);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorActivate, SourceEditorActivate);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCreate, SourceEditorCreate);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
+  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+
   Screen.OnActiveFormChange := FOldScreenActiveFormChange;
   Screen.OnActiveControlChange := FOldScreenActiveControlChange;
 {$ENDIF}
@@ -1250,6 +1303,40 @@ begin
   begin
     if MsgList.IndexOf(Pointer(MsgIDs[I])) < 0 then
       MsgList.Add(Pointer(MsgIDs[I]));
+  end;
+end;
+
+procedure TCnWizNotifierServices.AddSourceEditorNotifier(
+  Notifier: TCnWizSourceEditorNotifier);
+begin
+  CnWizAddNotifier(FSourceEditorNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveSourceEditorNotifier(
+  Notifier: TCnWizSourceEditorNotifier);
+begin
+  CnWizRemoveNotifier(FSourceEditorNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
+  NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
+var
+  I: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('SourceEditorNotifier: %s (%s)',
+    [GetEnumName(TypeInfo(TCnWizSourceEditorNotifyType), Ord(NotifyType)),
+    SourceEditor.FileName]);
+{$ENDIF}
+  if FSourceEditorNotifiers <> nil then
+  begin
+    for I := FSourceEditorNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FSourceEditorNotifiers[I])^ do
+        TCnWizSourceEditorNotifier(Notifier)(SourceEditor, NotifyType {$IFDEF DELPHI_OTA}, EditView {$ENDIF});
+    except
+      DoHandleException('TCnWizNotifierServices.SourceEditorNotify[' + IntToStr(I) + ']');
+    end;
   end;
 end;
 
@@ -1402,40 +1489,6 @@ end;
 //------------------------------------------------------------------------------
 // SourceEditor 通知
 //------------------------------------------------------------------------------
-
-procedure TCnWizNotifierServices.AddSourceEditorNotifier(
-  Notifier: TCnWizSourceEditorNotifier);
-begin
-  CnWizAddNotifier(FSourceEditorNotifiers, TMethod(Notifier));
-end;
-
-procedure TCnWizNotifierServices.RemoveSourceEditorNotifier(
-  Notifier: TCnWizSourceEditorNotifier);
-begin
-  CnWizRemoveNotifier(FSourceEditorNotifiers, TMethod(Notifier));
-end;
-
-procedure TCnWizNotifierServices.SourceEditorNotify(SourceEditor: IOTASourceEditor;
-  NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView = nil);
-var
-  I: Integer;
-begin
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('SourceEditorNotifier: %s (%s)',
-    [GetEnumName(TypeInfo(TCnWizSourceEditorNotifyType), Ord(NotifyType)),
-    SourceEditor.FileName]);
-{$ENDIF}
-  if FSourceEditorNotifiers <> nil then
-  begin
-    for I := FSourceEditorNotifiers.Count - 1 downto 0 do
-    try
-      with PCnWizNotifierRecord(FSourceEditorNotifiers[I])^ do
-        TCnWizSourceEditorNotifier(Notifier)(SourceEditor, NotifyType, EditView);
-    except
-      DoHandleException('TCnWizNotifierServices.SourceEditorNotify[' + IntToStr(I) + ']');
-    end;
-  end;
-end;
 
 procedure TCnWizNotifierServices.SourceEditorOpened(
   SourceEditor: IOTASourceEditor; CalledByNotifier: Boolean);
@@ -2019,6 +2072,166 @@ begin
 
   if Assigned(FOldScreenActiveControlChange) then
     FOldScreenActiveControlChange(Sender);
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowCreate(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowCreate: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowCreate: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowDestroy(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowDestroy: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowDestroy: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowActivate(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowActivate: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowActivate: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowFocused(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowFocused: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowFocused: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowShow(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowShow: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowShow: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorWindowHide(Sender: TObject);
+begin
+  if Sender <> nil then
+    CnDebugger.TraceMsg('SourceEditorWindowHide: ' + Sender.ClassName)
+  else
+    CnDebugger.TraceMsg('SourceEditorWindowHide: ');
+end;
+
+procedure TCnWizNotifierServices.SourceEditorCreate(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.logMsg('SourceEditorCreate: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.LogMsg('SourceEditorCreate: ');
+{$ENDIF}
+
+  // 映射成 setOpened
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    SourceEditorNotify(TSourceEditorInterface(Sender), setOpened);
+end;
+
+procedure TCnWizNotifierServices.SourceEditorDestroy(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorDestroy: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorDestroy: ');
+{$ENDIF}
+
+  // 映射成 setClosing
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    SourceEditorNotify(TSourceEditorInterface(Sender), setClosing);
+end;
+
+procedure TCnWizNotifierServices.SourceEditorOptsChanged(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorOptsChanged: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorOptsChanged: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorActivate(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.LogMsg('SourceEditorActivate: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.LogMsg('SourceEditorActivate: ');
+{$ENDIF}
+
+  // 映射成 EditViewActivated，注意一次切换可能 Lazarus 有多次重复调用
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    SourceEditorNotify(TSourceEditorInterface(Sender), setEditViewActivated);
+end;
+
+procedure TCnWizNotifierServices.SourceEditorStatus(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorStatus: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorStatus: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorMouseDown(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorMouseDown: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorMouseDown: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorMouseUp(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorMouseUp: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorMouseUp: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorMoved(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorMoved: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorMoved: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorCloned(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorCloned: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorCloned: ');
+{$ENDIF}
+end;
+
+procedure TCnWizNotifierServices.SourceEditorReConfigured(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+    CnDebugger.TraceMsg('SourceEditorReConfigured: ' + TSourceEditorInterface(Sender).FileName)
+  else
+    CnDebugger.TraceMsg('SourceEditorReConfigured: ');
+{$ENDIF}
 end;
 
 {$ENDIF}
