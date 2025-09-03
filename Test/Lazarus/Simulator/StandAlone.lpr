@@ -10,12 +10,13 @@ uses
   Interfaces,
 {$ENDIF}
   Forms, CnMessageBoxWizard, CnProcListWizard, CnCommentCropper,
-  CnAICoderChatFrm, CnAICoderConfig, CnAICoderEngine, CnAICoderEngineImpl,
-  CnAICoderNetClient, CnFrmAICoderOption, CnAICoderWizard, CnProjectViewBaseFrm,
-  CnCodingToolsetWizard, CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart,
-  CnWizConfigFrm, CnWizMenuSortFrm, CnWizSubActionShortCutFrm, CnWizLangID,
-  CnWizMultiLang, CnWizMultiLangFrame, CnWizTranslate, CnSrcTemplate,
-  CnSrcTemplateEditFrm, StandAloneUnit, TestFormUnit {FormFramework};
+  CnBookmarkConfigFrm, CnBookmarkWizard, CnAICoderChatFrm, CnAICoderConfig,
+  CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption,
+  CnAICoderWizard, CnProjectViewBaseFrm, CnCodingToolsetWizard,
+  CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart, CnWizConfigFrm,
+  CnWizMenuSortFrm, CnWizSubActionShortCutFrm, CnWizLangID, CnWizMultiLang,
+  CnWizMultiLangFrame, CnWizTranslate, CnSrcTemplate, CnSrcTemplateEditFrm,
+  CnStatFrm, CnStatResultFrm, CnStatWizard, StandAloneUnit, TestFormUnit {FormFramework};
 
 {$R *.res}
 

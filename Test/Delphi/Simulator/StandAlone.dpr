@@ -56,7 +56,12 @@ uses
   CnEditorOpenFileFrm in '..\..\..\Source\CodingToolset\CnEditorOpenFileFrm.pas' {CnEditorOpenFileForm},
   CnWizIdeUtils in '..\..\..\Source\Utils\CnWizIdeUtils.pas',
   CnWizUtils in '..\..\..\Source\Utils\CnWizUtils.pas',
-  CnCommentCropper in '..\..\..\Source\SimpleWizard\CnCommentCropper.pas' {CnCommentCropForm};
+  CnCommentCropper in '..\..\..\Source\SimpleWizard\CnCommentCropper.pas' {CnCommentCropForm},
+  CnBookmarkConfigFrm in '..\..\..\Source\SimpleWizard\CnBookmarkConfigFrm.pas' {CnBookmarkConfigForm},
+  CnBookmarkWizard in '..\..\..\Source\SimpleWizard\CnBookmarkWizard.pas',
+  CnStatFrm in '..\..\..\Source\SourceStat\CnStatFrm.pas' {CnStatForm},
+  CnStatResultFrm in '..\..\..\Source\SourceStat\CnStatResultFrm.pas' {CnStatResultForm},
+  CnStatWizard in '..\..\..\Source\SourceStat\CnStatWizard.pas';
 
 {$R *.RES}
 
