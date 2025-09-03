@@ -19,7 +19,8 @@ uses
   CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
   CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
   CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
-  CnCommentCropper, LazarusPackageIntf;
+  CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
+  CnStatResultFrm, CnStatWizard, LazarusPackageIntf;
 
 implementation
 

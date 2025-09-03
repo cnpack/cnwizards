@@ -167,17 +167,17 @@ type
     procedure SearchFileActionExecute(Sender: TObject);
     procedure FindDialogFind(Sender: TObject);
   private
-    FStatStyle: TStatStyle;
+    FStatStyle: TCnStatStyle;
     FSaveMode: TCnStatSaveMode;
     FCSVTSVSep: Char;
     FCnStatWizard: TCnStatWizard;
     FStaticEnd: Boolean;
-    procedure SetStatStyle(const Value: TStatStyle);
+    procedure SetStatStyle(const Value: TCnStatStyle);
   protected
     procedure DoLanguageChanged(Sender: TObject); override;
     function GetHelpTopic: string; override;
   public
-    StatusBarRec: TSourceStatRec;
+    StatusBarRec: TCnSourceStatRec;
     procedure ClearResult;
     function GetLastNodeFromLevel(ATreeView: TTreeView; const Level: Integer): TTreeNode;
     procedure SetDPRGroupBox(ToEnabled: Boolean);
@@ -185,20 +185,21 @@ type
     procedure UpdateStatusBar;
     procedure UpdateFileSearchCount(ACount: Integer);
 
-    procedure DoAFileStat(SumRec, AFileRec: PSourceStatRec);
-    procedure DoAProjectStat(AProjectNode: TTreeNode; ARec: PSourceStatRec);
-    procedure DoTheBPGStat(ARec: PSourceStatRec);
-    procedure UpdateAFileStat(PRec: PSourceStatRec);
-    procedure UpdateAProjectStat(AProjectNode: TTreeNode; ARec: PSourceStatRec);
+    procedure DoAFileStat(SumRec, AFileRec: PCnSourceStatRec);
+    procedure DoAProjectStat(AProjectNode: TTreeNode; ARec: PCnSourceStatRec);
+    procedure DoTheBPGStat(ARec: PCnSourceStatRec);
+    procedure UpdateAFileStat(PRec: PCnSourceStatRec);
+    procedure UpdateAProjectStat(AProjectNode: TTreeNode; ARec: PCnSourceStatRec);
     procedure UpdateABPGStat(AProjectNode: TTreeNode);
 
-    procedure CombinedRecToList(PRec: PSourceStatRec; AList: TStringList; Level: Integer = 0; StatFileStyle: TStatStyle = ssUnit);
+    procedure CombinedRecToList(PRec: PCnSourceStatRec; AList: TStringList; Level: Integer = 0;
+      StatFileStyle: TCnStatStyle = ssUnit);
     procedure CombinedFileStatStr(ANode: TTreeNode; AList: TStringList);
     procedure CombinedProjectStatStr(ANode: TTreeNode; AList: TStringList);
     procedure CombinedProjectGroupStatStr(ANode: TTreeNode; AList: TStringList);
     procedure AddCSVHeader(AList: TStringList; SepChar: Char = ',');
 
-    property StatStyle: TStatStyle read FStatStyle write SetStatStyle;
+    property StatStyle: TCnStatStyle read FStatStyle write SetStatStyle;
     property StaticEnd: Boolean read FStaticEnd write FStaticEnd;
   end;
 
@@ -240,6 +241,7 @@ begin
     TreeView.Items.EndUpdate;
     Screen.Cursor := crDefault;
   end;
+
   StatusBar.SimpleText := '';
   StatusBar.Repaint;
   FillChar(StatusBarRec, SizeOf(StatusBarRec), 0);
@@ -282,7 +284,7 @@ begin
   Action := caHide;
 end;
 
-procedure TCnStatResultForm.SetStatStyle(const Value: TStatStyle);
+procedure TCnStatResultForm.SetStatStyle(const Value: TCnStatStyle);
 begin
   FStatStyle := Value;
   case Value of
@@ -316,12 +318,14 @@ end;
 
 procedure TCnStatResultForm.SetBPGGroupBox(ToEnabled: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
   GroupBoxBPG.Enabled := ToEnabled;
-  for i := 0 to GroupBoxBPG.ControlCount - 1 do
-    if GroupBoxBPG.Controls[i] is TLabel then
-       (GroupBoxBPG.Controls[i] as TLabel).Caption := '';
+  for I := 0 to GroupBoxBPG.ControlCount - 1 do
+  begin
+    if GroupBoxBPG.Controls[I] is TLabel then
+       (GroupBoxBPG.Controls[I] as TLabel).Caption := '';
+  end;
 
   if not ToEnabled then
     LabelProjectGroupName.Caption := SCnStatNoProjectGroup;
@@ -329,12 +333,14 @@ end;
 
 procedure TCnStatResultForm.SetDPRGroupBox(ToEnabled: Boolean);
 var
-  i: Integer;
+  I: Integer;
 begin
   GroupBoxDPR.Enabled := ToEnabled;
-  for i := 0 to GroupBoxDPR.ControlCount - 1 do
-    if GroupBoxDPR.Controls[i] is TLabel then
-       (GroupBoxDPR.Controls[i] as TLabel).Caption := '';
+  for I := 0 to GroupBoxDPR.ControlCount - 1 do
+  begin
+    if GroupBoxDPR.Controls[I] is TLabel then
+       (GroupBoxDPR.Controls[I] as TLabel).Caption := '';
+  end;
 
   if not ToEnabled then
     LabelProjectName.Caption := SCnStatNoProject;
@@ -345,10 +351,10 @@ procedure TCnStatResultForm.TreeViewDeletion(Sender: TObject;
 begin
   if Node.Data <> nil then
   begin
-    if PSourceStatRec(Node.Data)^.ProjectStatRec <> nil then
-      Dispose(PSourceStatRec(Node.Data)^.ProjectStatRec);
-    if PSourceStatRec(Node.Data)^.ProjectGroupStatRec <> nil then
-      Dispose(PSourceStatRec(Node.Data)^.ProjectGroupStatRec);
+    if PCnSourceStatRec(Node.Data)^.ProjectStatRec <> nil then
+      Dispose(PCnSourceStatRec(Node.Data)^.ProjectStatRec);
+    if PCnSourceStatRec(Node.Data)^.ProjectGroupStatRec <> nil then
+      Dispose(PCnSourceStatRec(Node.Data)^.ProjectGroupStatRec);
     Dispose(Node.Data);
   end;
 end;
@@ -356,16 +362,16 @@ end;
 function TCnStatResultForm.GetLastNodeFromLevel(ATreeView: TTreeView;
   const Level: Integer): TTreeNode;
 var
-  i: Integer;
+  I: Integer;
 begin
   Result := nil;
   if (ATreeView <> nil) and (Level >= 0) then
   begin
-    for i := ATreeView.Items.Count - 1 downto 0 do
+    for I := ATreeView.Items.Count - 1 downto 0 do
     begin
-      if ATreeView.Items.Item[i].Level = Level then
+      if ATreeView.Items.Item[I].Level = Level then
       begin
-        Result := ATreeView.Items.Item[i];
+        Result := ATreeView.Items.Item[I];
         Exit;
       end;
     end;
@@ -383,11 +389,11 @@ end;
 procedure TCnStatResultForm.TreeViewChange(Sender: TObject; Node: TTreeNode);
 var
   ANode: TTreeNode;
-  ARec: PSourceStatRec;
+  ARec: PCnSourceStatRec;
 begin
   if (Node <> nil) and (Node.Data <> nil) then
   begin
-    UpdateAFileStat(PSourceStatRec(Node.Data));
+    UpdateAFileStat(PCnSourceStatRec(Node.Data));
     ANode := Node;
     if ANode <> nil then
     begin
@@ -398,23 +404,23 @@ begin
 
         if StaticEnd then
         begin
-          if PSourceStatRec(ANode.Data)^.ProjectStatRec <> nil then
+          if PCnSourceStatRec(ANode.Data)^.ProjectStatRec <> nil then
           begin
-            Dispose(PSourceStatRec(ANode.Data)^.ProjectStatRec);
-            PSourceStatRec(ANode.Data)^.ProjectStatRec := nil;
+            Dispose(PCnSourceStatRec(ANode.Data)^.ProjectStatRec);
+            PCnSourceStatRec(ANode.Data)^.ProjectStatRec := nil;
           end;
           StaticEnd := False;
         end;
 
-        if PSourceStatRec(ANode.Data)^.ProjectStatRec = nil then
+        if PCnSourceStatRec(ANode.Data)^.ProjectStatRec = nil then
         begin
           New(ARec);
-          FillChar(ARec^, SizeOf(TSourceStatRec), 0);
+          FillChar(ARec^, SizeOf(TCnSourceStatRec), 0);
           DoAProjectStat(ANode, ARec);
-          PSourceStatRec(ANode.Data)^.ProjectStatRec := ARec;
+          PCnSourceStatRec(ANode.Data)^.ProjectStatRec := ARec;
         end
         else
-          ARec := PSourceStatRec(ANode.Data)^.ProjectStatRec;
+          ARec := PCnSourceStatRec(ANode.Data)^.ProjectStatRec;
         UpdateAProjectStat(ANode, ARec);
       end
       else if StatStyle = ssProjectGroup then
@@ -433,7 +439,7 @@ begin
   end;
 end;
 
-procedure TCnStatResultForm.UpdateAFileStat(PRec: PSourceStatRec);
+procedure TCnStatResultForm.UpdateAFileStat(PRec: PCnSourceStatRec);
 begin
   if PRec <> nil then
   begin
@@ -496,6 +502,7 @@ end;
 
 procedure TCnStatResultForm.StatProjectGroupActionExecute(Sender: TObject);
 begin
+{$IFDEF DELPHI_OTA}
   if FCnStatWizard <> nil then
   begin
     ClearResult;
@@ -511,6 +518,7 @@ begin
         CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TCnStatResultForm.StatProjectActionExecute(Sender: TObject);
@@ -567,7 +575,7 @@ begin
   if (Action = StatUnitAction) or (Action = StatOpenUnitsAction) then
     (Action as TAction).Enabled := CnOtaGetCurrentSourceEditor <> nil
   else if Action = StatProjectGroupAction then
-    (Action as TAction).Enabled := CnOtaGetProjectGroup <> nil
+    (Action as TAction).Enabled := {$IFDEF LAZARUS} False {$ELSE} CnOtaGetProjectGroup <> nil {$ENDIF}
   else if Action = StatProjectAction then
     (Action as TAction).Enabled := CnOtaGetCurrentProject <> nil
   else if (Action = SaveCurResultAction) or
@@ -587,8 +595,8 @@ var
 begin
   if (TreeView.Selected <> nil) and (TreeView.Selected.Data <> nil) then
   begin
-    AFileName := PSourceStatRec(TreeView.Selected.Data)^.FileDir + '\' +
-      PSourceStatRec(TreeView.Selected.Data)^.FileName;
+    AFileName := PCnSourceStatRec(TreeView.Selected.Data)^.FileDir + '\' +
+      PCnSourceStatRec(TreeView.Selected.Data)^.FileName;
     if CnOtaIsFileOpen(AFileName) then
       CnOtaMakeSourceVisible(AFileName)
     else if FileExists(AFileName) then
@@ -616,7 +624,7 @@ begin
   begin
     if TreeView.Selected.Data <> nil then
     begin
-      SaveDialog.FileName := _CnChangeFileExt(PSourceStatRec
+      SaveDialog.FileName := _CnChangeFileExt(PCnSourceStatRec
         (TreeView.Selected.Data)^.FileName, '');
     end
     else
@@ -661,12 +669,12 @@ begin
 end;
 
 procedure TCnStatResultForm.UpdateAProjectStat(AProjectNode: TTreeNode;
-  ARec: PSourceStatRec);
+  ARec: PCnSourceStatRec);
 begin
   if AProjectNode <> nil then
   begin
     LabelProjectName.Caption := Format(SCnStatProjectName,
-      [PSourceStatRec(AProjectNode.Data)^.FileName]);
+      [PCnSourceStatRec(AProjectNode.Data)^.FileName]);
     LabelProjectFiles.Caption := Format(SCnStatProjectFiles,
       [IntToStrSp(AProjectNode.Count + 1), IntToStrSp(ARec^.Bytes)]);
   end
@@ -697,7 +705,7 @@ end;
 -------------------------------------------------------------------------------}
 procedure TCnStatResultForm.UpdateABPGStat(AProjectNode: TTreeNode);
 var
-  ARec, BRec, CRec: PSourceStatRec;
+  ARec, BRec, CRec: PCnSourceStatRec;
   ANode: TTreeNode;
   SepPos: Integer;
 begin
@@ -705,23 +713,23 @@ begin
   begin
     if StaticEnd then
     begin
-      if PSourceStatRec(AProjectNode.Data)^.ProjectStatRec <> nil then
+      if PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec <> nil then
       begin
-        Dispose(PSourceStatRec(AProjectNode.Data)^.ProjectStatRec);
-        PSourceStatRec(AProjectNode.Data)^.ProjectStatRec := nil;
+        Dispose(PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec);
+        PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec := nil;
       end;
       StaticEnd := False;
     end;
 
-    if PSourceStatRec(AProjectNode.Data)^.ProjectStatRec = nil then
+    if PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec = nil then
     begin
       New(ARec);
-      FillChar(ARec^, SizeOf(TSourceStatRec), 0);
+      FillChar(ARec^, SizeOf(TCnSourceStatRec), 0);
       DoAProjectStat(AProjectNode, ARec);
-      PSourceStatRec(AProjectNode.Data)^.ProjectStatRec := ARec;
+      PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec := ARec;
     end
     else
-      ARec := PSourceStatRec(AProjectNode.Data)^.ProjectStatRec;
+      ARec := PCnSourceStatRec(AProjectNode.Data)^.ProjectStatRec;
     UpdateAProjectStat(AProjectNode, ARec);
   end;
 
@@ -730,48 +738,48 @@ begin
   if ANode <> nil then
   begin
     LabelProjectGroupName.Caption := Format(SCnStatProjectGroupName,
-      [PSourceStatRec(ANode.Data)^.FileName]);  // 这里ANode是顶层的bgp节点。
+      [PCnSourceStatRec(ANode.Data)^.FileName]);  // 这里ANode是顶层的bgp节点。
 
     ANode := ANode.getFirstChild; // 获得第一个Project节点
     if StaticEnd then
     begin
-      if PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec <> nil then
+      if PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec <> nil then
       begin
-        Dispose(PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec);
-        PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec := nil;
+        Dispose(PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec);
+        PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec := nil;
       end;
     end;
 
-    if PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec = nil then
+    if PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec = nil then
     begin
       while ANode <> nil do // 循环统计Project节点
       begin
         if StaticEnd then
         begin
-          if PSourceStatRec(ANode.Data)^.ProjectStatRec <> nil then
+          if PCnSourceStatRec(ANode.Data)^.ProjectStatRec <> nil then
           begin
-            Dispose(PSourceStatRec(ANode.Data)^.ProjectStatRec);
-            PSourceStatRec(ANode.Data)^.ProjectStatRec := nil;
+            Dispose(PCnSourceStatRec(ANode.Data)^.ProjectStatRec);
+            PCnSourceStatRec(ANode.Data)^.ProjectStatRec := nil;
           end;
         end;
 
-        if PSourceStatRec(ANode.Data)^.ProjectStatRec = nil then
+        if PCnSourceStatRec(ANode.Data)^.ProjectStatRec = nil then
         begin
           New(BRec);
-          FillChar(BRec^, SizeOf(TSourceStatRec), 0);
+          FillChar(BRec^, SizeOf(TCnSourceStatRec), 0);
           DoAProjectStat(ANode, BRec);
-          PSourceStatRec(ANode.Data)^.ProjectStatRec := BRec;
+          PCnSourceStatRec(ANode.Data)^.ProjectStatRec := BRec;
         end; // 如果该节点工程内容未统计，则先自行统计。
         // DoAProjectStat(ANode, CRec);
         // 不能直接这样把本节点数据统计入工程组中，因为没法子检测重复。
         ANode := ANode.GetNextSibling;
       end; // 此时ANode是循环变量，不是第一节点了。
 
-      // 此处从头统计不重复的节点入CRec中。
+      // 此处从头统计不重复的节点入 CRec 中。
       New(CRec);
-      FillChar(CRec^, SizeOf(TSourceStatRec), 0);
+      FillChar(CRec^, SizeOf(TCnSourceStatRec), 0);
       DoTheBPGStat(CRec); // 单独再统计整个BPG。
-      PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec := CRec;
+      PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec := CRec;
       SepPos := Pos(' (', TreeView.Items[0].Text);
       if SepPos = 0 then
       begin
@@ -785,7 +793,7 @@ begin
       end;
     end
     else
-      CRec := PSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec;
+      CRec := PCnSourceStatRec(TreeView.Items[0].Data)^.ProjectGroupStatRec;
 
     StaticEnd := False;  
     LabelProjectGroupFiles.Caption := Format(SCnStatProjectGroupFiles,
@@ -800,24 +808,24 @@ begin
 end;
 
 procedure TCnStatResultForm.DoAProjectStat(AProjectNode: TTreeNode;
-  ARec: PSourceStatRec);
+  ARec: PCnSourceStatRec);
 var
   I: Integer;
 begin
-  DoAFileStat(ARec, PSourceStatRec(AProjectNode.Data));
+  DoAFileStat(ARec, PCnSourceStatRec(AProjectNode.Data));
   for I := 0 to AProjectNode.Count - 1 do
-    DoAFileStat(ARec, PSourceStatRec(AProjectNode.Item[I].Data));
-  AProjectNode.Text := PSourceStatRec(AProjectNode.Data).FileName + ' (' + IntToStrSp(ARec^.EffectiveLines) + ')';
+    DoAFileStat(ARec, PCnSourceStatRec(AProjectNode[I].Data));
+  AProjectNode.Text := PCnSourceStatRec(AProjectNode.Data).FileName + ' (' + IntToStrSp(ARec^.EffectiveLines) + ')';
 end;
 
 procedure TCnStatResultForm.CombinedFileStatStr(ANode: TTreeNode;
   AList: TStringList);
 var
-  PRec: PSourceStatRec;
+  PRec: PCnSourceStatRec;
 begin
   if (ANode.Data <> nil) and (AList <> nil) then
   begin
-    PRec := PSourceStatRec(ANode.Data);
+    PRec := PCnSourceStatRec(ANode.Data);
     CombinedRecToList(PRec, AList);
   end;
 end;
@@ -834,26 +842,25 @@ end;
 procedure TCnStatResultForm.CombinedProjectGroupStatStr(
   ANode: TTreeNode; AList: TStringList);
 var
-  i: Integer;
-  PRec: PSourceStatRec;
+  I: Integer;
+  PRec: PCnSourceStatRec;
 begin
   if ANode <> nil then
   begin
-    PRec := PSourceStatRec(ANode.Data)^.ProjectGroupStatRec;
+    PRec := PCnSourceStatRec(ANode.Data)^.ProjectGroupStatRec;
     if PRec = nil then
     begin
       TreeView.Selected := TreeView.Items[0];
-      PRec := PSourceStatRec(ANode.Data)^.ProjectGroupStatRec;
+      PRec := PCnSourceStatRec(ANode.Data)^.ProjectGroupStatRec;
     end;
 
     CombinedRecToList(PRec, AList, 0, ssProjectGroup);  // 输出工程总体数据
-
-    CombinedRecToList(PSourceStatRec(ANode.Data), AList);
+    CombinedRecToList(PCnSourceStatRec(ANode.Data), AList);
 
     if ANode.Count > 0 then
     begin
-      for i := 0 to ANode.Count - 1 do
-        CombinedProjectStatStr(ANode.Item[i], AList); // 分别统计工程数据。
+      for I := 0 to ANode.Count - 1 do
+        CombinedProjectStatStr(ANode[I], AList); // 分别统计工程数据。
     end;
   end;
 end;
@@ -869,16 +876,16 @@ end;
 procedure TCnStatResultForm.CombinedProjectStatStr(ANode: TTreeNode;
   AList: TStringList);
 var
-  i, Level: Integer;
-  PRec: PSourceStatRec;
+  I, Level: Integer;
+  PRec: PCnSourceStatRec;
 begin
   if (ANode <> nil) and (ANode.Data <> nil) then
   begin
-    PRec := PSourceStatRec(ANode.Data)^.ProjectStatRec;
+    PRec := PCnSourceStatRec(ANode.Data)^.ProjectStatRec;
     if PRec = nil then
     begin
       TreeView.Selected := TreeView.Items[0];
-      PRec := PSourceStatRec(ANode.Data)^.ProjectStatRec;
+      PRec := PCnSourceStatRec(ANode.Data)^.ProjectStatRec;
     end;
     Level := 0;
     if StatStyle = ssProjectGroup then
@@ -887,50 +894,50 @@ begin
       Level := 0;
 
     CombinedRecToList(PRec, AList, Level, ssProject);  // 统计工程总体数据
-    CombinedRecToList(PSourceStatRec(ANode.Data), AList, Level);
+    CombinedRecToList(PCnSourceStatRec(ANode.Data), AList, Level);
     // 统计工程文件本身
 
     if ANode.Count > 0 then
     begin
-      for i := 0 to ANode.Count - 1 do   // 循环输出各个文件统计结果。
-        CombinedRecToList(PSourceStatRec(ANode.Item[i].Data), AList, Level + 1);
+      for I := 0 to ANode.Count - 1 do   // 循环输出各个文件统计结果。
+        CombinedRecToList(PCnSourceStatRec(ANode[I].Data), AList, Level + 1);
     end;
   end;
 end;
 
-procedure TCnStatResultForm.CombinedRecToList(PRec: PSourceStatRec;
-  AList: TStringList;  Level: Integer; StatFileStyle: TStatStyle);
+procedure TCnStatResultForm.CombinedRecToList(PRec: PCnSourceStatRec;
+  AList: TStringList;  Level: Integer; StatFileStyle: TCnStatStyle);
 var
-  s, sFileName, sDir: String;
+  S, sFileName, sDir: String;
 begin
   if FSaveMode = smTXT then
   begin
     case Level of
-    0: s := '';
-    1: s := '  ';
-    2: s := '    ';
+    0: S := '';
+    1: S := '  ';
+    2: S := '    ';
     end;
     if PRec^.FileName <> '' then
     begin
-      AList.Add(s + Format(SCnStatExpFileName, [PRec^.FileName]));
+      AList.Add(S + Format(SCnStatExpFileName, [PRec^.FileName]));
       AList.Add('');
       if PRec^.FileDir <> '' then
-        AList.Add(s + Format(SCnStatExpFileDir, [PRec^.FileDir]));
+        AList.Add(S + Format(SCnStatExpFileDir, [PRec^.FileDir]));
     end
     else if StatFileStyle = ssProject then
-      AList.Add(s + Format(SCnStatExpProject, [PRec^.FileName]))
+      AList.Add(S + Format(SCnStatExpProject, [PRec^.FileName]))
     else if StatFileStyle = ssProjectGroup then
-      AList.Add(s + Format(SCnStatExpProjectGroup, [PRec^.FileName]));
+      AList.Add(S + Format(SCnStatExpProjectGroup, [PRec^.FileName]));
 
-    AList.Add(s + Format(SCnStatExpFileBytes, [IntToStrSp(PRec^.Bytes)]));
-    AList.Add(s + Format(SCnStatExpFileCodeBytes, [IntToStrSp(PRec^.CodeBytes)]));
-    AList.Add(s + Format(SCnStatExpFileCommentBytes, [IntToStrSp(PRec^.CommentBytes)]));
-    AList.Add(s + Format(SCnStatExpFileAllLines, [IntToStrSp(PRec^.AllLines)]));
-    AList.Add(s + Format(SCnStatExpFileEffectiveLines, [IntToStrSp(PRec^.EffectiveLines)]));
-    AList.Add(s + Format(SCnStatExpFileBlankLines, [IntToStrSp(PRec^.BlankLines)]));
-    AList.Add(s + Format(SCnStatExpFileCodeLines, [IntToStrSp(PRec^.CodeLines)]));
-    AList.Add(s + Format(SCnStatExpFileCommentLines, [IntToStrSp(PRec^.CommentLines)]));
-    AList.Add(s + Format(SCnStatExpFileCommentBlocks, [IntToStrSp(PRec^.CommentBlocks)]));
+    AList.Add(S + Format(SCnStatExpFileBytes, [IntToStrSp(PRec^.Bytes)]));
+    AList.Add(S + Format(SCnStatExpFileCodeBytes, [IntToStrSp(PRec^.CodeBytes)]));
+    AList.Add(S + Format(SCnStatExpFileCommentBytes, [IntToStrSp(PRec^.CommentBytes)]));
+    AList.Add(S + Format(SCnStatExpFileAllLines, [IntToStrSp(PRec^.AllLines)]));
+    AList.Add(S + Format(SCnStatExpFileEffectiveLines, [IntToStrSp(PRec^.EffectiveLines)]));
+    AList.Add(S + Format(SCnStatExpFileBlankLines, [IntToStrSp(PRec^.BlankLines)]));
+    AList.Add(S + Format(SCnStatExpFileCodeLines, [IntToStrSp(PRec^.CodeLines)]));
+    AList.Add(S + Format(SCnStatExpFileCommentLines, [IntToStrSp(PRec^.CommentLines)]));
+    AList.Add(S + Format(SCnStatExpFileCommentBlocks, [IntToStrSp(PRec^.CommentBlocks)]));
     AList.Add(SCnStatExpSeparator);
   end
   else
@@ -964,13 +971,13 @@ end;
 procedure TCnStatResultForm.SaveAllResultActionExecute(Sender: TObject);
 var
   AList: TStringList;
-  i: Integer;
+  I: Integer;
 begin
   if TreeView.Items.Count > 0 then
   begin
     if (TreeView.Items[0].Data <> nil) and ((StatStyle <> ssDir) and (StatStyle <> ssOpenUnits)) then
     begin
-      SaveDialog.FileName := _CnChangeFileExt(PSourceStatRec
+      SaveDialog.FileName := _CnChangeFileExt(PCnSourceStatRec
         (TreeView.Items[0].Data)^.FileName, '');
     end
     else
@@ -1012,8 +1019,8 @@ begin
         else if StatStyle = ssProject then
           CombinedProjectStatStr(TreeView.Items[0], AList)
         else
-          for i := 0 to TreeView.Items.Count - 1 do
-            CombinedRecToList(PSourceStatRec(TreeView.Items[i].Data), AList);
+          for I := 0 to TreeView.Items.Count - 1 do
+            CombinedRecToList(PCnSourceStatRec(TreeView.Items[I].Data), AList);
 
         AList.SaveToFile(SaveDialog.FileName);
       finally
@@ -1049,52 +1056,52 @@ begin
   end;
 end;
 
-procedure TCnStatResultForm.DoTheBPGStat(ARec: PSourceStatRec);
+procedure TCnStatResultForm.DoTheBPGStat(ARec: PCnSourceStatRec);
 var
-  i, j, k, p: Integer;
+  I, J, K, P: Integer;
   sFileName, sRecFName: String;
   HasSame: Boolean;
 begin
   if TreeView.Items[0].Count > 0 then
   begin
     // 对所有Project进行统计检查。
-    for i := 0 to TreeView.Items[0].Count - 1 do
+    for I := 0 to TreeView.Items[0].Count - 1 do
     begin
-      if i = 0 then
+      if I = 0 then
       begin
         // 第一个工程不会有重复现象，因此不需要查找，可以直接使用
         // ProjectStatRec的统计结果（如果有的话）。
-        if PSourceStatRec(TreeView.Items[0].Item[i].Data)^.ProjectStatRec <> nil then
-          DoAFileStat(ARec, PSourceStatRec(TreeView.Items[0].Item[i].Data)^.ProjectStatRec)
+        if PCnSourceStatRec(TreeView.Items[0][I].Data)^.ProjectStatRec <> nil then
+          DoAFileStat(ARec, PCnSourceStatRec(TreeView.Items[0][I].Data)^.ProjectStatRec)
         else
-          DoAProjectStat(TreeView.Items[0].Item[i], ARec);
+          DoAProjectStat(TreeView.Items[0][I], ARec);
       end
       else
       begin
         // dpr文件不会有重复，因此可以直接统计。
-        if TreeView.Items[0].Item[i].Data <> nil then
-          DoAFileStat(ARec, PSourceStatRec(TreeView.Items[0].Item[i].Data));
+        if TreeView.Items[0][I].Data <> nil then
+          DoAFileStat(ARec, PCnSourceStatRec(TreeView.Items[0][I].Data));
         // 其中TreeView.Items[0].Item[i]是当前ProjectNode.
-        if TreeView.Items[0].Item[i].Count > 0 then
+        if TreeView.Items[0][I].Count > 0 then
         begin
-          for j := 0 to TreeView.Items[0].Item[i].Count - 1 do // 统计本工程中的所有文件。
+          for J := 0 to TreeView.Items[0][I].Count - 1 do // 统计本工程中的所有文件。
           begin
             // TreeView.Items[0].Item[i].Item[j] 是当前Project的当前文件节点
             HasSame := False;
-            sFileName := PSourceStatRec(TreeView.Items[0].Item[i].Item[j].Data)^.FileDir
-              + '\' + PSourceStatRec(TreeView.Items[0].Item[i].Item[j].Data)^.FileName;
+            sFileName := PCnSourceStatRec(TreeView.Items[0][I][J].Data)^.FileDir
+              + '\' + PCnSourceStatRec(TreeView.Items[0][I][J].Data)^.FileName;
 
             // 检查第0个ProjectNode到第i-1个ProjectNode中的所有文件
             // 是否和当前文件相同，不同则统计。
-            for k := 0 to i - 1 do
+            for K := 0 to I - 1 do
             begin
               // TreeView.Items[0].Item[k]是当前受检查的ProjectNode
-              if TreeView.Items[0].Item[k].Count > 0 then
-                for p := 0 to TreeView.Items[0].Item[k].Count - 1 do
+              if TreeView.Items[0][K].Count > 0 then
+                for P := 0 to TreeView.Items[0][K].Count - 1 do
                 begin
                   // TreeView.Items[0].Item[k].Item[p]是当前受检查的文件名
-                  sRecFName := PSourceStatRec(TreeView.Items[0].Item[k].Item[p].Data)^.FileDir
-                    + '\' + PSourceStatRec(TreeView.Items[0].Item[k].Item[p].Data)^.FileName;;
+                  sRecFName := PCnSourceStatRec(TreeView.Items[0][K][P].Data)^.FileDir
+                    + '\' + PCnSourceStatRec(TreeView.Items[0][K][P].Data)^.FileName;
                   if sRecFName = sFileName then
                   begin
                      HasSame := True;
@@ -1107,7 +1114,7 @@ begin
             end; // 检查完毕。
 
             if not HasSame then
-              DoAFileStat(ARec, PSourceStatRec(TreeView.Items[0].Item[i].Item[j].Data));
+              DoAFileStat(ARec, PCnSourceStatRec(TreeView.Items[0][I][J].Data));
 
           end;
         end;
@@ -1116,7 +1123,7 @@ begin
   end;
 end;
 
-procedure TCnStatResultForm.DoAFileStat(SumRec, AFileRec: PSourceStatRec);
+procedure TCnStatResultForm.DoAFileStat(SumRec, AFileRec: PCnSourceStatRec);
 begin
   Inc(SumRec^.Bytes, AFileRec^.Bytes);
   Inc(SumRec^.AllLines, AFileRec^.AllLines);
@@ -1163,54 +1170,58 @@ end;
 
 procedure TCnStatResultForm.FindDialogFind(Sender: TObject);
 var
-  i: Integer;
+  I: Integer;
   sToFind, sText: String;
 begin
   if (frDown in FindDialog.Options) then
   begin  // 从当前向下找
     if TreeView.Selected.AbsoluteIndex < TreeView.Items.Count - 1 then
-      for i := TreeView.Selected.AbsoluteIndex + 1 to TreeView.Items.Count - 1 do
+    begin
+      for I := TreeView.Selected.AbsoluteIndex + 1 to TreeView.Items.Count - 1 do
       begin
         if not (frMatchCase in FindDialog.Options) then
         begin
           sToFind := UpperCase(FindDialog.FindText);
-          sText := UpperCase(TreeView.Items.Item[i].Text);
+          sText := UpperCase(TreeView.Items.Item[I].Text);
         end
         else
         begin
           sToFind := FindDialog.FindText;
-          sText := TreeView.Items.Item[i].Text;
+          sText := TreeView.Items.Item[I].Text;
         end;
 
         if Pos(sToFind, sText) > 0 then
         begin
-          TreeView.Items.Item[i].Selected := True;
+          TreeView.Items.Item[I].Selected := True;
           Exit;
         end;
       end;
+    end;
   end
   else
   begin
     if TreeView.Selected.AbsoluteIndex > 0 then // 从当前向上找
-      for i := TreeView.Selected.AbsoluteIndex - 1 downto 0 do
+    begin
+      for I := TreeView.Selected.AbsoluteIndex - 1 downto 0 do
       begin
         if not (frMatchCase in FindDialog.Options) then
         begin
           sToFind := UpperCase(FindDialog.FindText);
-          sText := UpperCase(TreeView.Items.Item[i].Text);
+          sText := UpperCase(TreeView.Items.Item[I].Text);
         end
         else
         begin
           sToFind := FindDialog.FindText;
-          sText := TreeView.Items.Item[i].Text;
+          sText := TreeView.Items.Item[I].Text;
         end;
 
         if Pos(sToFind, sText) > 0 then
         begin
-          TreeView.Items.Item[i].Selected := True;
+          TreeView.Items.Item[I].Selected := True;
           Exit;
         end;
       end;
+    end;
   end;
   ErrorDlg(Format(SCnErrorNoFind, [FindDialog.FindText]));
 end;

@@ -50,22 +50,23 @@ interface
 {$ENDIF}
 
 uses
-  SysUtils, Classes, IniFiles, ToolsAPI, FileCtrl, Controls, ComCtrls, Windows,
-  CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler,
-  Forms, Dialogs, CnLineParser, CnWizCompilerConst;
+  SysUtils, Classes, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} FileCtrl,
+  Controls, ComCtrls, Windows, {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  CnConsts, CnCommon, CnWizClasses, CnWizConsts,
+  CnWizUtils, CnWizEditFiler, Forms, Dialogs, CnLineParser, CnWizCompilerConst;
  
 type
-  TStatStyle = (ssUnit, ssProjectGroup, ssProject, ssOpenUnits, ssDir);
+  TCnStatStyle = (ssUnit, ssProjectGroup, ssProject, ssOpenUnits, ssDir);
 
-  PSourceStatRec = ^TSourceStatRec;
-  TSourceStatRec = record
+  PCnSourceStatRec = ^TCnSourceStatRec;
+  TCnSourceStatRec = record
     FileName, FileDir: string;
     Bytes, CommentBytes, CodeBytes, CommentBlocks: Integer;
     AllLines, EffectiveLines, CodeLines: Integer;
     BlankLines, CommentLines: Integer;
     InterfaceLines, ImplementationLines: Integer;
-    ProjectStatRec: PSourceStatRec;
-    ProjectGroupStatRec: PSourceStatRec;
+    ProjectStatRec: PCnSourceStatRec;
+    ProjectGroupStatRec: PCnSourceStatRec;
     IsValidSource: Boolean;
   end;
 
@@ -81,7 +82,7 @@ type
     procedure SetActive(Value: Boolean); override;
     procedure ProcessAFile(const FileName: string; const Level: Integer;
       IsDirMode: Boolean = False; const Dir: string = '');
-    procedure StatAStream(inStream: TStream; PStatRec: PSourceStatRec;
+    procedure StatAStream(inStream: TStream; PStatRec: PCnSourceStatRec;
       IsCppSource: Boolean); virtual;
     function GetDefFileMask: string; virtual;
   public
@@ -98,7 +99,9 @@ type
 
     procedure StatUnit;
     procedure StatProject;
+{$IFDEF DELPHI_OTA}
     procedure StatProjectGroup;
+{$ENDIF}
     procedure StatOpenUnits;
     procedure StatDir;
 
@@ -176,7 +179,7 @@ begin
     CnStatForm := TCnStatForm.CreateEx(nil, FIni);
 
   if CnStatForm.Visible then CnStatForm.Hide;
-  if CnStatForm.ShowModal = mrOk then // 如果统计，则由StatResultFrm负责释放
+  if CnStatForm.ShowModal = mrOk then // 如果统计，则由 StatResultFrm 负责释放
   begin
     if CnStatResultForm = nil then
     begin
@@ -193,6 +196,8 @@ begin
     CnStatResultForm.Update;
 
     MethodHook := nil;
+
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
   {$IFDEF DELPHIXE2_UP} // 这个函数在仨包内横跳
     ACorIdeModule := LoadLibrary(DesignIdeLibName);
@@ -202,8 +207,12 @@ begin
 {$ELSE}
     ACorIdeModule := LoadLibrary(CorIdeLibName);
 {$ENDIF}
+{$ENDIF}
+
     try
       CnStatResultForm.StatStyle := CnStatForm.StatStyle;
+
+{$IFDEF DELPHI_OTA}
       // 挂接 Formread::FormReadError，返回 $2A 表示强行 IgnoreAll
       if ACorIdeModule <> 0 then
       begin
@@ -217,20 +226,25 @@ begin
 {$ENDIF}
         end;
       end;
+{$ENDIF}
 
       case CnStatForm.StatStyle of
         ssUnit:            Self.StatUnit;
+{$IFDEF DELPHI_OTA}
         ssProjectGroup:    Self.StatProjectGroup;
+{$ENDIF}
         ssProject:         Self.StatProject;
         ssOpenUnits:       Self.StatOpenUnits;
         ssDir:             Self.StatDir;
       end;
     finally
       CnStatResultForm.StaticEnd := True;
+{$IFDEF DELPHI_OTA}
       // 恢复挂接
       MethodHook.Free;
       if ACorIdeModule <> 0 then
         FreeLibrary(ACorIdeModule);
+{$ENDIF}
     end;
   end
   else  // 取消了则自行先释放
@@ -293,7 +307,7 @@ end;
 procedure TCnStatWizard.ProcessAFile(const FileName: string;
   const Level: Integer; IsDirMode: Boolean; const Dir: string);
 var
-  PRec: PSourceStatRec;
+  PRec: PCnSourceStatRec;
   AParentNode, AddedNode: TTreeNode;
   Reader: TCnEditFiler;
   InStream: TMemoryStream;
@@ -319,7 +333,7 @@ begin
     IsBpr(FileName) then
   begin
     New(PRec);
-    FillChar(PRec^, SizeOf(TSourceStatRec), 0);
+    FillChar(PRec^, SizeOf(TCnSourceStatRec), 0);
     PRec^.FileName := _CnExtractFileName(FileName);
     PRec^.FileDir := _CnExtractFileDir(FileName);
     PRec^.IsValidSource := False;
@@ -339,7 +353,7 @@ begin
       end;
 
       New(PRec);
-      FillChar(PRec^, SizeOf(TSourceStatRec), 0);
+      FillChar(PRec^, SizeOf(TCnSourceStatRec), 0);
 
       PRec^.FileName := _CnExtractFileName(FileName);
       PRec^.FileDir := _CnExtractFileDir(FileName);
@@ -407,7 +421,7 @@ begin
 end;
 
 procedure TCnStatWizard.StatAStream(inStream: TStream;
-  PStatRec: PSourceStatRec; IsCppSource: Boolean);
+  PStatRec: PCnSourceStatRec; IsCppSource: Boolean);
 var
   Parser: TCnLineParser;
 begin
@@ -491,148 +505,189 @@ end;
 procedure TCnStatWizard.StatOpenUnits;
 var
   I, J: Integer;
+  sName: string;
+{$IFDEF DELPHI_OTA}
   Module: IOTAModule;
   Editor: IOTAEditor;
-  SourceEditor: IOTASourceEditor;
-  sName: string;
   iModuleServices: IOTAModuleServices;
+  SourceEditor: IOTASourceEditor;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
   if iModuleServices.GetModuleCount = 0 then
-    ErrorDlg(SCnErrorNoFile)
-  else
   begin
-    CnStatResultForm.ClearResult;
-    Screen.Cursor := crHourGlass;
-    CnStatResultForm.TreeView.Items.BeginUpdate;
-    try
-      for I := 0 to iModuleServices.GetModuleCount - 1 do
+    ErrorDlg(SCnErrorNoFile);
+    Exit;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf = nil) or (SourceEditorManagerIntf.SourceEditorCount <= 0) then
+  begin
+    ErrorDlg(SCnErrorNoFile);
+    Exit;
+  end;
+{$ENDIF}
+
+  CnStatResultForm.ClearResult;
+  Screen.Cursor := crHourGlass;
+  CnStatResultForm.TreeView.Items.BeginUpdate;
+
+  try
+{$IFDEF DELPHI_OTA}
+    for I := 0 to iModuleServices.GetModuleCount - 1 do
+    begin
+      Module := iModuleServices.GetModule(I);
+      if Module <> nil then
       begin
-        Module := iModuleServices.GetModule(I);
-        if Module <> nil then
+        for J := 0 to Module.GetModuleFileCount - 1 do
         begin
-          for J := 0 to Module.GetModuleFileCount - 1 do
+          Editor := Module.GetModuleFileEditor(J);
+          if Supports(Editor, IOTASourceEditor, SourceEditor) then
           begin
-            Editor := Module.GetModuleFileEditor(J);
-            if Supports(Editor, IOTASourceEditor, SourceEditor) then
-            begin
-              sName := SourceEditor.FileName;
-              if (sName = '') or (UpperCase(_CnExtractFileExt(sName)) = '.BPG') or
-                ((not (IsDelphiSourceModule(sName) or IsDpk(sName)))
-                and (not (IsCppSourceModule(sName)) or IsBpk(sName))) then
-                Continue;
-              Self.ProcessAFile(sName, 0);
-            end;
+            sName := SourceEditor.FileName;
+            if (sName = '') or (UpperCase(_CnExtractFileExt(sName)) = '.BPG') or
+              ((not (IsDelphiSourceModule(sName) or IsDpk(sName)))
+              and (not (IsCppSourceModule(sName)) or IsBpk(sName))) then
+              Continue;
+            Self.ProcessAFile(sName, 0);
           end;
         end;
       end;
-
-      CnStatResultForm.StaticEnd := True;
-      if CnStatResultForm.TreeView.Items.Count > 0 then
-      begin
-        CnStatResultForm.TreeView.Items[0].Expand(True);
-        CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
-        if Assigned(CnStatResultForm.TreeView.OnChange) then
-          CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
-      end;
-    finally
-      Screen.Cursor := crDefault;
-      CnStatResultForm.TreeView.Items.EndUpdate;
     end;
+ {$ENDIF}
+
+ {$IFDEF LAZARUS}
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin;
+      if IsSourceModule(SourceEditorManagerIntf.SourceEditors[I].FileName) then
+        ProcessAFile(SourceEditorManagerIntf.SourceEditors[I].FileName, 0);
+    end;
+ {$ENDIF}
+
+    CnStatResultForm.StaticEnd := True;
+    if CnStatResultForm.TreeView.Items.Count > 0 then
+    begin
+      CnStatResultForm.TreeView.Items[0].Expand(True);
+      CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
+      if Assigned(CnStatResultForm.TreeView.OnChange) then
+        CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
+    end;
+  finally
+    Screen.Cursor := crDefault;
+    CnStatResultForm.TreeView.Items.EndUpdate;
   end;
 end;
 
 procedure TCnStatWizard.StatProject;
 var
   I, J: Integer;
+  Project: TCnIDEProjectInterface;
+  Opened: Boolean;
+{$IFDEF DELPHI_OTA}
   Module: IOTAModule;
   Editor: IOTAEditor;
   SrcEditor: IOTASourceEditor;
-  Project: IOTAProject;
-  Opened: Boolean;
+{$ENDIF}
 begin
   Project := CnOtaGetCurrentProject;
-  if Project <> nil then
+  if Project = nil then
   begin
-    CnStatResultForm.ClearResult;
-    Screen.Cursor := crHourGlass;
-    CnStatResultForm.TreeView.Items.BeginUpdate;
-    try
+    ErrorDlg(SCnErrorNoFile);
+    Exit;
+  end;
+
+  CnStatResultForm.ClearResult;
+  Screen.Cursor := crHourGlass;
+  CnStatResultForm.TreeView.Items.BeginUpdate;
+
+  try
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
-      if IsBdsProject(Project.FileName) or IsDProject(Project.FileName) then
-      begin
-        if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
-          ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 0)
-        else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
-          ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 0);
-      end
-      else if IsCbProject(Project.FileName) then // BCB 工程的主文件
-      begin
-        if FileExists(_CnChangeFileExt(Project.FileName, '.cpp')) then
-          ProcessAFile(_CnChangeFileExt(Project.FileName, '.cpp'), 0);
-      end;
+    if IsBdsProject(Project.FileName) or IsDProject(Project.FileName) then
+    begin
+      if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
+        ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 0)
+      else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
+        ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 0);
+    end
+    else if IsCbProject(Project.FileName) then // BCB 工程的主文件
+    begin
+      if FileExists(_CnChangeFileExt(Project.FileName, '.cpp')) then
+        ProcessAFile(_CnChangeFileExt(Project.FileName, '.cpp'), 0);
+    end;
 {$ELSE}
-      Self.ProcessAFile(Project.FileName, 0);
+    Self.ProcessAFile(Project.FileName, 0);
 {$ENDIF}
-      for I := 0 to Project.GetModuleCount - 1 do
+
+    for I := 0 to Project.GetModuleCount - 1 do
+    begin
+      if (Project.GetModule(I).FileName = '') or
+        (not (IsDelphiSourceModule(Project.GetModule(I).FileName) or
+          IsPackage(Project.GetModule(I).FileName))) and
+        (not IsCppSourceModule(Project.GetModule(I).FileName)) then
+        Continue;
+
+      Opened := CnOtaIsFileOpen(Project.GetModule(I).FileName);
+      try
+        Module := Project.GetModule(I).OpenModule;
+      except
+        Module := nil;
+      end;
+
+      if Module <> nil then
       begin
-        if (Project.GetModule(I).FileName = '') or
-          (not (IsDelphiSourceModule(Project.GetModule(I).FileName) or
-            IsPackage(Project.GetModule(I).FileName))) and
-          (not IsCppSourceModule(Project.GetModule(I).FileName)) then
-          Continue;
-
-        Opened := CnOtaIsFileOpen(Project.GetModule(I).FileName);
-        try
-          Module := Project.GetModule(I).OpenModule;
-        except
-          Module := nil;
-        end;
-
-        if Module <> nil then
+        for J := 0 to Module.GetModuleFileCount - 1 do
         begin
-          for J := 0 to Module.GetModuleFileCount - 1 do
+          Editor := Module.GetModuleFileEditor(J);
+          if Supports(Editor, IOTASourceEditor, SrcEditor) then
           begin
-            Editor := Module.GetModuleFileEditor(J);
-            if Supports(Editor, IOTASourceEditor, SrcEditor) then
+            if IsDelphiSourceModule(SrcEditor.FileName)
+              or IsPackage(SrcEditor.FileName)
+              or IsCppSourceModule(SrcEditor.FileName) then
             begin
-              if IsDelphiSourceModule(SrcEditor.FileName)
-                or IsPackage(SrcEditor.FileName)
-                or IsCppSourceModule(SrcEditor.FileName) then
-              begin
-                ProcessAFile(SrcEditor.FileName, 1);
-              end;
+              ProcessAFile(SrcEditor.FileName, 1);
             end;
           end;
         end;
-
-        if not Opened then
-        begin
-          try
-            Module.CloseModule(True);
-          except
-            ;
-          end;
-          Module := nil;
-        end;
       end;
 
-      CnStatResultForm.StaticEnd := True;
-      if CnStatResultForm.TreeView.Items.Count > 0 then
+      if not Opened then
       begin
-        CnStatResultForm.TreeView.Items[0].Expand(True);
-        CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
-        if Assigned(CnStatResultForm.TreeView.OnChange) then
-          CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
+        try
+          Module.CloseModule(True);
+        except
+          ;
+        end;
+        Module := nil;
       end;
-    finally
-      Screen.Cursor := crDefault;
-      CnStatResultForm.TreeView.Items.EndUpdate;
     end;
-  end
-  else
-    ErrorDlg(SCnErrorNoFile);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    for I := 0 to Project.FileCount - 1 do
+    begin
+      if Project.Files[I].IsPartOfProject and IsSourceModule(Project.Files[I].Filename) then
+        ProcessAFile(Project.Files[I].Filename, 1);
+    end;
+{$ENDIF}
+
+    CnStatResultForm.StaticEnd := True;
+    if CnStatResultForm.TreeView.Items.Count > 0 then
+    begin
+      CnStatResultForm.TreeView.Items[0].Expand(True);
+      CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
+      if Assigned(CnStatResultForm.TreeView.OnChange) then
+        CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
+    end;
+  finally
+    Screen.Cursor := crDefault;
+    CnStatResultForm.TreeView.Items.EndUpdate;
+  end;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnStatWizard.StatProjectGroup;
 var
@@ -645,106 +700,112 @@ var
   Opened: Boolean;
 begin
   ProjectGroup := CnOtaGetProjectGroup;
-  if ProjectGroup <> nil then
+  if ProjectGroup = nil then
   begin
-    CnStatResultForm.ClearResult;
-    Screen.Cursor := crHourGlass;
-    CnStatResultForm.TreeView.Items.BeginUpdate;
-    try
-      Self.ProcessAFile(ProjectGroup.FileName, 0);
+    ErrorDlg(SCnErrorNoFile);
+    Exit;
+  end;
+
+  CnStatResultForm.ClearResult;
+  Screen.Cursor := crHourGlass;
+  CnStatResultForm.TreeView.Items.BeginUpdate;
+
+  try
+    Self.ProcessAFile(ProjectGroup.FileName, 0);
 {$IFDEF DEBUG}
-      CnDebugger.LogInteger(ProjectGroup.ProjectCount, 'Project Count');
+    CnDebugger.LogInteger(ProjectGroup.ProjectCount, 'Project Count');
 {$ENDIF}
-      for I := 0 to ProjectGroup.ProjectCount - 1 do
+    for I := 0 to ProjectGroup.ProjectCount - 1 do
+    begin
+      Project := ProjectGroup.Projects[I];
+      if Project <> nil then
       begin
-        Project := ProjectGroup.Projects[I];
-        if Project <> nil then
-        begin
 {$IFDEF BDS}
-          if IsBdsProject(Project.FileName) or IsDProject(Project.FileName)
-            or IsCbProject(Project.FileName) then
-          begin
-            if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
-              ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 1)
-            else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
-              ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 1);
-          end;
+        if IsBdsProject(Project.FileName) or IsDProject(Project.FileName)
+          or IsCbProject(Project.FileName) then
+        begin
+          if FileExists(_CnChangeFileExt(Project.FileName, '.dpr')) then
+            ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpr'), 1)
+          else if FileExists(_CnChangeFileExt(Project.FileName, '.dpk')) then
+            ProcessAFile(_CnChangeFileExt(Project.FileName, '.dpk'), 1);
+        end;
 {$ELSE}
-          Self.ProcessAFile(Project.FileName, 1);
+        Self.ProcessAFile(Project.FileName, 1);
 {$ENDIF}
-          for J := 0 to Project.GetModuleCount - 1 do
-          begin
+        for J := 0 to Project.GetModuleCount - 1 do
+        begin
 {$IFDEF DEBUG}
-            CnDebugger.LogFmt('Project [%d] has %d Module', [I, Project.GetModuleCount]);
+          CnDebugger.LogFmt('Project [%d] has %d Module', [I, Project.GetModuleCount]);
 {$ENDIF}
-            if (Project.GetModule(J).FileName = '')  or
-              (not (IsDelphiSourceModule(Project.GetModule(J).FileName) or
-                IsPackage(Project.GetModule(J).FileName))) and
-              (not IsCppSourceModule(Project.GetModule(J).FileName)) then
-              Continue;
+          if (Project.GetModule(J).FileName = '')  or
+            (not (IsDelphiSourceModule(Project.GetModule(J).FileName) or
+              IsPackage(Project.GetModule(J).FileName))) and
+            (not IsCppSourceModule(Project.GetModule(J).FileName)) then
+            Continue;
 
-            Opened := CnOtaIsFileOpen(Project.GetModule(J).FileName);
-            try
-              Module := Project.GetModule(J).OpenModule;
-            except
-              Module := nil;
-            end;
+          Opened := CnOtaIsFileOpen(Project.GetModule(J).FileName);
+          try
+            Module := Project.GetModule(J).OpenModule;
+          except
+            Module := nil;
+          end;
 
-            if Module <> nil then
+          if Module <> nil then
+          begin
+            for K := 0 to Module.GetModuleFileCount - 1 do
             begin
-              for K := 0 to Module.GetModuleFileCount - 1 do
+              Editor := Module.GetModuleFileEditor(K);
+              if Supports(Editor, IOTASourceEditor, SrcEditor) then
               begin
-                Editor := Module.GetModuleFileEditor(K);
-                if Supports(Editor, IOTASourceEditor, SrcEditor) then
+                if IsDelphiSourceModule(SrcEditor.FileName)
+                  or IsPackage(SrcEditor.FileName)
+                  or IsCppSourceModule(SrcEditor.FileName) then
                 begin
-                  if IsDelphiSourceModule(SrcEditor.FileName)
-                    or IsPackage(SrcEditor.FileName)
-                    or IsCppSourceModule(SrcEditor.FileName) then
-                  begin
-                    ProcessAFile(SrcEditor.FileName, 2);
-                  end;
+                  ProcessAFile(SrcEditor.FileName, 2);
                 end;
               end;
             end;
-
-            if not Opened then
-            begin
-              try
-                Module.CloseModule(True);
-              except
-                ;
-              end;
-              Module := nil;
-            end;
           end;
-        end
-        else
-          ErrorDlg(SCnErrorNoFile);
-      end;
 
-      CnStatResultForm.StaticEnd := True;
-      if CnStatResultForm.TreeView.Items.Count > 0 then
-      begin
-        CnStatResultForm.TreeView.Items[0].Expand(True);
-        CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
-        if Assigned(CnStatResultForm.TreeView.OnChange) then
-          CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
-      end;
-    finally
-      Screen.Cursor := crDefault;
-      CnStatResultForm.TreeView.Items.EndUpdate;
+          if not Opened then
+          begin
+            try
+              Module.CloseModule(True);
+            except
+              ;
+            end;
+            Module := nil;
+          end;
+        end;
+      end
+      else
+        ErrorDlg(SCnErrorNoFile);
     end;
-  end
-  else
-    ErrorDlg(SCnErrorNoFile);
+
+    CnStatResultForm.StaticEnd := True;
+    if CnStatResultForm.TreeView.Items.Count > 0 then
+    begin
+      CnStatResultForm.TreeView.Items[0].Expand(True);
+      CnStatResultForm.TreeView.Selected := CnStatResultForm.TreeView.Items[0];
+      if Assigned(CnStatResultForm.TreeView.OnChange) then
+        CnStatResultForm.TreeView.OnChange(CnStatResultForm.TreeView, CnStatResultForm.TreeView.Selected);
+    end;
+  finally
+    Screen.Cursor := crDefault;
+    CnStatResultForm.TreeView.Items.EndUpdate;
+  end;
 end;
+
+{$ENDIF}
 
 procedure TCnStatWizard.StatUnit;
 begin
   CnStatResultForm.ClearResult;
+{$IFNDEF STAND_ALONE}
   if (CnOtaGetCurrentSourceEditor <> nil) and (CnOtaGetCurrentSourceEditor.FileName <> '') then
     ProcessAFile(CnOtaGetCurrentSourceEditor.FileName, 0)
   else
+{$ENDIF}
     ErrorDlg(SCnErrorNoFile);
 end;
 

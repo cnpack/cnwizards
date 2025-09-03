@@ -58,8 +58,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
   {$IFDEF DELPHI} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
-  {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
-  CnWizUtils, {$ENDIF} CnClasses
+  {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF} CnWizUtils, CnClasses
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
@@ -1326,7 +1325,7 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('SourceEditorNotifier: %s (%s)',
     [GetEnumName(TypeInfo(TCnWizSourceEditorNotifyType), Ord(NotifyType)),
-    SourceEditor.FileName]);
+    {$IFDEF STAND_ALONE} '' {$ELSE} SourceEditor.FileName {$ENDIF}]);
 {$ENDIF}
   if FSourceEditorNotifiers <> nil then
   begin

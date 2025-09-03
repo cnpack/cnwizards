@@ -63,14 +63,14 @@ type
     procedure btnHelpClick(Sender: TObject);
   private
     FIni: TCustomIniFile;
-    function GetStatStyle: TStatStyle;
+    function GetStatStyle: TCnStatStyle;
     procedure LoadSettings;
     procedure SaveSettings;
   protected
     function GetHelpTopic: string; override;
   public
-    constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile);  
-    property StatStyle: TStatStyle read GetStatStyle;
+    constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile);
+    property StatStyle: TCnStatStyle read GetStatStyle;
   end;
 
 var
@@ -84,9 +84,9 @@ implementation
 
 {$R *.DFM}
 
-function TCnStatForm.GetStatStyle: TStatStyle;
+function TCnStatForm.GetStatStyle: TCnStatStyle;
 begin
-  Result := TStatStyle(rgStatStyle.ItemIndex);
+  Result := TCnStatStyle(rgStatStyle.ItemIndex);
 end;
 
 procedure TCnStatForm.rgStatStyleClick(Sender: TObject);
@@ -145,8 +145,10 @@ var
   I: Integer;
 begin
   for I := 0 to ComponentCount - 1 do
+  begin
     if Components[I] is TComboBox then
       AddComboBoxTextToItems(TComboBox(Components[I]));
+  end;
 
   with TCnIniFile.Create(FIni) do
   try

@@ -301,7 +301,6 @@ inherited CnStatResultForm: TCnStatResultForm
     UseSystemFont = False
   end
   object MainMenu: TMainMenu
-    AutoHotkeys = maManual
     Images = dmCnSharedImages.Images
     Left = 56
     Top = 80

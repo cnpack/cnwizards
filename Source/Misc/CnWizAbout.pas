@@ -52,6 +52,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, IniFiles, Menus, Forms, Controls,
+  {$IFDEF FPC} LCLProc, {$ENDIF}
   CnConsts, CnWizClasses, CnWizManager, CnWizConsts, CnWizUtils, CnCommon,
   CnWizOptions, CnWizIdeUtils;
 

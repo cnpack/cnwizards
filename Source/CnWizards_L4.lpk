@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -211,6 +211,26 @@
       <Item>
         <Filename Value="SimpleWizard\CnCommentCropper.pas"/>
         <UnitName Value="CnCommentCropper"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnBookmarkWizard.pas"/>
+        <UnitName Value="CnBookmarkWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizNotifier.pas"/>
+        <UnitName Value="CnWizNotifier"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceStat\CnStatFrm.pas"/>
+        <UnitName Value="CnStatFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceStat\CnStatResultFrm.pas"/>
+        <UnitName Value="CnStatResultFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceStat\CnStatWizard.pas"/>
+        <UnitName Value="CnStatWizard"/>
       </Item>
     </Files>
     <RequiredPkgs>

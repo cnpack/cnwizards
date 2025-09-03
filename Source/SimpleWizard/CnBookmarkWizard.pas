@@ -1198,7 +1198,10 @@ begin
       CnLazSourceEditorCenterLine(Buffer, ACharPos.Line);
       BringIdeEditorFormToFront;
 {$ENDIF}
+
+{$IFNDEF STAND_ALONE}
       CnOtaMakeSourceVisible(Buffer.FileName);
+{$ENDIF}
     end;      
   end;
 end;
