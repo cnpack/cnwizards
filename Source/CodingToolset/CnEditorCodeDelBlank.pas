@@ -41,8 +41,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizMultiLang;
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizClasses,
+  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnWizConsts,
+  CnSelectionCodeTool, CnWizMultiLang;
 
 type
   TCnDelBlankForm = class(TCnTranslateForm)
@@ -101,18 +102,27 @@ implementation
 
 procedure TCnEditorCodeDelBlank.Execute;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   SelBlock: Boolean;
 begin
   View := CnOtaGetTopMostEditView;
-  if View = nil then Exit;
+  if View = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
   SelBlock := (View.Block <> nil) and (View.Block.Size > 0);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  SelBlock := View.Selection <> '';
+{$ENDIF}
 
   with TCnDelBlankForm.Create(nil) do
   begin
     rbSel.Enabled := SelBlock;
     rbSel.Checked := SelBlock;
     rbAll.Checked := not SelBlock;
+
     if ShowModal = mrOK then
     begin
       if rbAll.Checked then

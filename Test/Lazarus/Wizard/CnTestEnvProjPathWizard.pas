@@ -167,6 +167,8 @@ begin
 
     CnDebugger.TraceMsg('ParsedFppkgConfig:');
     CnDebugger.TraceMsg(IDEEnvironmentOptions.GetParsedFppkgConfig);
+
+    CnDebugger.EvaluateObject(IDEEnvironmentOptions);
   end
   else if Index = FIdPrintProjPath then
   begin

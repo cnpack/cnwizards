@@ -41,8 +41,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  Menus, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool;
+  StdCtrls, IniFiles, Menus, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizClasses,
+  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool;
 
 type
 
@@ -110,14 +110,19 @@ end;
 
 procedure TCnEditorCodeIndent.Execute;
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
 begin
   EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) and (EditView.Block <> nil) then
+  if EditView = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  if EditView.Block <> nil then
   begin
     EditView.Block.Indent(CnOtaGetBlockIndent);
     EditView.Paint;
   end;
+{$ENDIF}
 end;
 
 { TCnEditorCodeUnIndent }
@@ -148,14 +153,19 @@ end;
 
 procedure TCnEditorCodeUnIndent.Execute;
 var
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
 begin
   EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) and (EditView.Block <> nil) then
+  if EditView = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  if EditView.Block <> nil then
   begin
     EditView.Block.Indent(-CnOtaGetBlockIndent);
     EditView.Paint;
   end;
+{$ENDIF}
 end;
 
 initialization

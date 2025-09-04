@@ -43,9 +43,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
-  Menus, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizMultiLang,
-  ExtCtrls;
+  StdCtrls, IniFiles, Menus, ExtCtrls, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  CnWizClasses, CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnWizConsts,
+  CnSelectionCodeTool, CnWizMultiLang;
 
 type
   TCnIndentMode = (imInsertToHead, imInsertToNonSpace, imReplaceHeadSpace);

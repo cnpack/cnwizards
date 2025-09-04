@@ -1100,22 +1100,25 @@ begin
   FOldScreenActiveControlChange := Screen.OnActiveControlChange;
   Screen.OnActiveControlChange := ScreenActiveControlChange;
 
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
-  SourceEditorManagerIntf.RegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorCreate, SourceEditorCreate);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorActivate, SourceEditorActivate);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorStatus, SourceEditorStatus);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorMoved, SourceEditorMoved);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorCloned, SourceEditorCloned);
-  SourceEditorManagerIntf.RegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
+  if SourceEditorManagerIntf <> nil then
+  begin
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
+    SourceEditorManagerIntf.RegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorCreate, SourceEditorCreate);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorActivate, SourceEditorActivate);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorStatus, SourceEditorStatus);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorMoved, SourceEditorMoved);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorCloned, SourceEditorCloned);
+    SourceEditorManagerIntf.RegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
+  end;
 {$ENDIF}
 
 {$IFDEF DELPHI_OTA}
@@ -1172,22 +1175,25 @@ begin
   GetMsgHook := 0;
 
 {$IFDEF LAZARUS}
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCloned, SourceEditorCloned);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMoved, SourceEditorMoved);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorStatus, SourceEditorStatus);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorActivate, SourceEditorActivate);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCreate, SourceEditorCreate);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
-  SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+  if SourceEditorManagerIntf <> nil then
+  begin
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorReConfigured, SourceEditorReConfigured);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCloned, SourceEditorCloned);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMoved, SourceEditorMoved);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseUp, SourceEditorMouseUp);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorMouseDown, SourceEditorMouseDown);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorStatus, SourceEditorStatus);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorActivate, SourceEditorActivate);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorOptsChanged, SourceEditorOptsChanged);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorDestroy, SourceEditorDestroy);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semEditorCreate, SourceEditorCreate);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowHide, SourceEditorWindowHide);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowShow, SourceEditorWindowShow);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowFocused, SourceEditorWindowFocused);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
+    SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+  end;
 
   Screen.OnActiveFormChange := FOldScreenActiveFormChange;
   Screen.OnActiveControlChange := FOldScreenActiveControlChange;
