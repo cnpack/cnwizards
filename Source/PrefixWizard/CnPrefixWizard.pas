@@ -29,7 +29,9 @@ unit CnPrefixWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2006.08.09 V1.6 ZJY
+* 修改记录：2025.09.05 V1.3
+*               增加批量处理时使用父类前缀的选项
+*           2006.08.09 V1.6 ZJY
 *               增加根据 Action, DataField 重命名的功能 
 *           2004.06.14 V1.5 LiuXiao
 *               增加前缀是否大小写敏感的选项，默认为敏感。
@@ -86,7 +88,6 @@ type
     FPrefixCaseSensitive: Boolean;
     FCompKind: TPrefixCompKind;
     FUpdating: Boolean;
-
     FPrefixList: TCnPrefixList;
     FRenameList: TList;
     FOnRenameListAdded: TNotifyEvent;
@@ -99,6 +100,7 @@ type
     FRenameAction: TCnWizAction;
     FEditDialogWidth: Integer;
     FEditDialogHeight: Integer;
+    FUseAncestor: Boolean;
     procedure OnConfig(Sender: TObject);
     procedure AddFormToList(const ProjectName: string; FormEditor: IOTAFormEditor;
       List: TCnPrefixCompList);
@@ -146,7 +148,7 @@ type
     procedure SetActive(Value: Boolean); override;
   public
     procedure AddCompToList(const ProjectName: string; FormEditor: IOTAFormEditor;
-      Component: TComponent; List: TCnPrefixCompList);
+      Component: TComponent; List: TCnPrefixCompList; SearchAncestor: Boolean = False);
     constructor Create; override;
     destructor Destroy; override;
 
@@ -176,6 +178,7 @@ type
     property CompKind: TPrefixCompKind read FCompKind write FCompKind;
     property PrefixCaseSensitive: Boolean read FPrefixCaseSensitive write FPrefixCaseSensitive;
     property F2Rename: Boolean read FF2Rename write SetF2Rename;
+    property UseAncestor: Boolean read FUseAncestor write FUseAncestor;
 
     property EditDialogWidth: Integer read FEditDialogWidth write FEditDialogWidth;
     {* 弹出的改名框的窗体宽度，注意是存缩放之前的}
@@ -1204,7 +1207,7 @@ begin
 end;
 
 procedure TCnPrefixWizard.AddCompToList(const ProjectName: string; FormEditor:
-  IOTAFormEditor; Component: TComponent; List: TCnPrefixCompList);
+  IOTAFormEditor; Component: TComponent; List: TCnPrefixCompList; SearchAncestor: Boolean);
 var
   Ignore, Succ: Boolean;
   Prefix: string;
@@ -1225,7 +1228,12 @@ begin
 
   // 取组件前缀
   Ignore := False;
-  Prefix := PrefixList.Prefixs[Component.ClassName];
+
+  if SearchAncestor then
+    Prefix := PrefixList.PrefixsWithParent[Component.ClassType]
+  else
+    Prefix := PrefixList.Prefixs[Component.ClassName];
+
   if (Prefix = '') and PopPrefixDefine then
   begin
     // 如果未定义弹出定义前缀的界面
@@ -1344,8 +1352,10 @@ begin
   // 处理窗体上所有组件
   AComponent := FormEditor.GetRootComponent;
   for I := 0 to AComponent.GetComponentCount - 1 do
-    AddCompToList(AProjectName, FormEditor,
-      TComponent(AComponent.GetComponent(I).GetComponentHandle), List);
+  begin
+    AddCompToList(AProjectName, FormEditor, TComponent(AComponent.GetComponent(I).GetComponentHandle),
+      List, FUseAncestor);
+  end;
 end;
 
 procedure TCnPrefixWizard.AddProjectToList(Project: IOTAProject;
@@ -1443,8 +1453,10 @@ begin
 
     // 处理选择的控件
     for I := 0 to FormEditor.GetSelCount - 1 do
-      AddCompToList(ProjectName, FormEditor,
-        TComponent(FormEditor.GetSelComponent(I).GetComponentHandle), List);
+    begin
+      AddCompToList(ProjectName, FormEditor, TComponent(FormEditor.GetSelComponent(I).GetComponentHandle),
+        List, FUseAncestor);
+    end;
   end;
 end;
 
@@ -1466,6 +1478,7 @@ const
   csPrefixCaseSensitive = 'PrefixCaseSensitive';
   csCompKind = 'CompKind';
   csF2Rename = 'F2Rename';
+  csUseAncestor = 'UseAncestor';
   csEditDialogWidth = 'EditDialogWidth';
   csEditDialogHeight = 'EditDialogHeight';
 
@@ -1485,6 +1498,7 @@ begin
   FCompKind := TPrefixCompKind(Ini.ReadInteger('', csCompKind, 0));
   FPrefixCaseSensitive := Ini.ReadBool('', csPrefixCaseSensitive, True);
   FF2Rename := Ini.ReadBool('', csF2Rename, True);
+  FUseAncestor := Ini.ReadBool('', csUseAncestor, False);
   FEditDialogWidth := Ini.ReadInteger('', csEditDialogWidth, 0);
   FEditDialogHeight := Ini.ReadInteger('', csEditDialogHeight, 0);
 
@@ -1507,6 +1521,7 @@ begin
   Ini.WriteInteger('', csCompKind, Ord(FCompKind));
   Ini.WriteBool('', csPrefixCaseSensitive, FPrefixCaseSensitive);
   Ini.WriteBool('', csF2Rename, FF2Rename);
+  Ini.WriteBool('', csUseAncestor, FUseAncestor);
   Ini.WriteInteger('', csEditDialogWidth, FEditDialogWidth);
   Ini.WriteInteger('', csEditDialogHeight, FEditDialogHeight);
 

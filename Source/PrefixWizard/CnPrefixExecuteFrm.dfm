@@ -1,16 +1,16 @@
 inherited CnPrefixExecuteForm: TCnPrefixExecuteForm
-  Left = 331
-  Top = 202
+  Left = 381
+  Top = 216
   BorderStyle = bsDialog
   Caption = 'Component Prefix Wizard'
-  ClientHeight = 260
-  ClientWidth = 369
+  ClientHeight = 268
+  ClientWidth = 370
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton
     Left = 46
-    Top = 232
+    Top = 236
     Width = 73
     Height = 21
     Caption = '&Process'
@@ -20,7 +20,7 @@ inherited CnPrefixExecuteForm: TCnPrefixExecuteForm
   end
   object btnCancel: TButton
     Left = 206
-    Top = 232
+    Top = 236
     Width = 75
     Height = 21
     Cancel = True
@@ -30,7 +30,7 @@ inherited CnPrefixExecuteForm: TCnPrefixExecuteForm
   end
   object btnHelp: TButton
     Left = 286
-    Top = 232
+    Top = 236
     Width = 75
     Height = 21
     Caption = '&Help'
@@ -39,7 +39,7 @@ inherited CnPrefixExecuteForm: TCnPrefixExecuteForm
   end
   object btnConfig: TButton
     Left = 126
-    Top = 232
+    Top = 236
     Width = 75
     Height = 21
     Cancel = True

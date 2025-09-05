@@ -28,7 +28,9 @@ unit CnPrefixConfigFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2023.02.21 V1.2
+* 修改记录：2025.09.05 V1.3
+*               增加批量处理时使用父类前缀的选项
+*           2023.02.21 V1.2
 *               增加 F2 改名的选项
 *           2003.05.11 V1.1
 *               增加下划线选项
@@ -53,7 +55,7 @@ type
 { TCnPrefixConfigForm }
 
   TCnPrefixConfigForm = class(TCnTranslateForm)
-    grp_Config: TGroupBox;
+    grpConfig: TGroupBox;
     gbList: TGroupBox;
     cbAutoPopSuggestDlg: TCheckBox;
     cbPopPrefixDefine: TCheckBox;
@@ -80,6 +82,7 @@ type
     chkWatchFieldLink: TCheckBox;
     chkF2Rename: TCheckBox;
     bvl1: TBevel;
+    chkUseAncestor: TCheckBox;
     procedure ListViewClick(Sender: TObject);
     procedure btnModifyClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -134,6 +137,7 @@ begin
     chkUseFieldName.Checked := Wizard.UseFieldName;
     chkWatchFieldLink.Checked := Wizard.WatchFieldLink;
     chkF2Rename.Checked := Wizard.F2Rename;
+    chkUseAncestor.Checked := Wizard.UseAncestor;
     FList := Wizard.PrefixList;
 
     Result := ShowModal = mrOk;
@@ -152,6 +156,7 @@ begin
       Wizard.UseFieldName := chkUseFieldName.Checked;
       Wizard.WatchFieldLink := chkWatchFieldLink.Checked;
       Wizard.F2Rename := chkF2Rename.Checked;
+      Wizard.UseAncestor := chkUseAncestor.Checked;
 
       Wizard.DoSaveSettings;
     end;
