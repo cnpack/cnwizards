@@ -69,6 +69,7 @@ type
     function GetPrefix(ComponentClass: string): string;
     procedure SetIgnore(ComponentClass: string; const Value: Boolean);
     procedure SetPrefix(ComponentClass: string; const Value: string);
+    function GetPrefixsWithParent(ComponentClass: TClass): string;
   protected
 
   public
@@ -84,7 +85,11 @@ type
     property Items[Index: Integer]: TCnPrefixItem read GetItem; default;
     property Count: Integer read GetCount;
     property Prefixs[ComponentClass: string]: string read GetPrefix write SetPrefix;
+    {* 根据类名查找对应前缀}
     property Ignore[ComponentClass: string]: Boolean read GetIgnore write SetIgnore;
+    {* 根据类名查找哪些要忽略前缀}
+    property PrefixsWithParent[ComponentClass: TClass]: string read GetPrefixsWithParent;
+    {* 根据类及其父类查找最靠近顶级 TObject 的匹配前缀}
   end;
 
 { TCnPrefixCompItem }
@@ -222,16 +227,33 @@ begin
     Result := '';
 end;
 
+function TCnPrefixList.GetPrefixsWithParent(ComponentClass: TClass): string;
+var
+  S, R: string;
+begin
+  repeat
+    S := ComponentClass.ClassName;
+
+    R := Prefixs[S];
+    if R <> '' then  // 哪怕找到也要往下找，以尽量靠近顶级 TObject 的匹配前缀
+      Result := R;
+
+    ComponentClass := ComponentClass.ClassParent;
+  until ComponentClass = nil;
+end;
+
 function TCnPrefixList.IndexOf(const ComponentClass: string): Integer;
 var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
+  begin
     if SameText(Items[I].ComponentClass, ComponentClass) then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 

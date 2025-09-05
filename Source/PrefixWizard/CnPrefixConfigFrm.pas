@@ -196,14 +196,21 @@ begin
       GetInstalledComponents(nil, CompList);
       for I := 0 to CnNoIconList.Count - 1 do
         CompList.Add(CnNoIconList[I]);
+
+      // 加入仨基类
+      CompList.Add('TComponent');
+      CompList.Add('TControl');
+      CompList.Add('TWinControl');
         
       for I := 0 to CompList.Count - 1 do
+      begin
         with ListView.Items.Add do
         begin
           Caption := CompList[I];
           Checked := not List.Ignore[CompList[I]];
           SubItems.Add(List.Prefixs[CompList[I]]);
         end;
+      end;
 
       if ListView.Items.Count > 0 then
         ListView.Selected := ListView.Items[0];
