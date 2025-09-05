@@ -230,6 +230,7 @@ Settings dialog of this wizard is as below:</p>
       <li><p><b>Use DataField as New Name if this Property Exists</b>: If checked and if the component has an DataField property, use the prefix + DataField value as the new name of this component.</p></li>
       <li><p><b>Auto Rename when DataField Changed</b>: If checked and when the DataField property of an unnamed component, or named but does not have a correct prefix, or has a prefix + digital, changed (except to ''), component name will be renamed to prefix + DataField value.</p></li>
       <li><p><b>Use F2 Key to Rename Selected Component in Designer.</b>: If checked, we can use F2 Key in designer to rename selected component.</p></li>
+      <li><p><b>Force to Use Ancestor Prefix like TControl/TComponent when Batch Processing</b>: Caution! If this option is checked, the prefix of the parent class (e.g., TControl/TComponent) will be prioritized when batch-processing component prefixes. For example, if the prefix for class TControl is set to "ctl" and this option is checked, all subclasses of TControl, such as TButton, will use "ctl" instead of their own prefixes (e.g., "btn") during batch processing.</p></li>
     </ul>
   </li>
   <li>

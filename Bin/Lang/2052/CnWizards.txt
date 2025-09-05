@@ -1193,6 +1193,7 @@ TCnPrefixConfigForm.cbPrefixCaseSens.Caption=前缀区分大小写。
 TCnPrefixConfigForm.cbUseUnderLine.Caption=初次更名时在组件名称前缀后添加下划线。
 TCnPrefixConfigForm.chkF2Rename.Caption=设计器中按 F2 键可修改选中的组件名称。
 TCnPrefixConfigForm.chkUseActionName.Caption=重命名组件时允许参照关联的 Action 的名称。
+TCnPrefixConfigForm.chkUseAncestor.Caption=批量处理时强行使用父类如 TControl/TComponent 等的前缀。
 TCnPrefixConfigForm.chkUseFieldName.Caption=重命名组件时允许参照 DataField 属性的内容。
 TCnPrefixConfigForm.chkWatchActionLink.Caption=当组件关联 Action 时自动重命名。
 TCnPrefixConfigForm.chkWatchFieldLink.Caption=当组件的 DataField 属性变更时自动重命名。

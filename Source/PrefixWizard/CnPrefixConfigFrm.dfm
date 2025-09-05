@@ -1,20 +1,19 @@
 inherited CnPrefixConfigForm: TCnPrefixConfigForm
-  Left = 295
-  Top = 135
+  Left = 322
+  Top = 126
   BorderStyle = bsDialog
   Caption = 'Component Prefix Wizard Settings'
-  ClientHeight = 529
-  ClientWidth = 503
+  ClientHeight = 562
+  ClientWidth = 506
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object grp_Config: TGroupBox
+  object grpConfig: TGroupBox
     Left = 8
     Top = 8
-    Width = 488
-    Height = 265
-    Anchors = [akLeft, akTop, akRight]
+    Width = 490
+    Height = 286
     Caption = '&Display Settings'
     TabOrder = 0
     object cbAutoPopSuggestDlg: TCheckBox
@@ -117,13 +116,23 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
       TabOrder = 11
       OnClick = cbAutoPrefixClick
     end
+    object chkUseAncestor: TCheckBox
+      Left = 8
+      Top = 256
+      Width = 465
+      Height = 17
+      Caption = 
+        'Force to Use Ancestor Prefix like TControl/TComponent when Batch' +
+        ' Processing.'
+      TabOrder = 12
+      OnClick = cbAutoPrefixClick
+    end
   end
   object gbList: TGroupBox
     Left = 8
-    Top = 276
-    Width = 488
-    Height = 217
-    Anchors = [akLeft, akRight, akBottom]
+    Top = 300
+    Width = 490
+    Height = 220
     Caption = 'Component &Prefix Settings'
     TabOrder = 1
     object lbl1: TLabel
@@ -150,8 +159,8 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
     object ListView: TListView
       Left = 8
       Top = 48
-      Width = 472
-      Height = 145
+      Width = 474
+      Height = 148
       Anchors = [akLeft, akTop, akRight, akBottom]
       Checkboxes = True
       Columns = <
@@ -191,7 +200,7 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
       OnClick = btnModifyClick
     end
     object btnImport: TButton
-      Left = 319
+      Left = 321
       Top = 20
       Width = 75
       Height = 21
@@ -201,7 +210,7 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
       OnClick = btnImportClick
     end
     object btnExport: TButton
-      Left = 399
+      Left = 401
       Top = 20
       Width = 75
       Height = 21
@@ -212,32 +221,29 @@ inherited CnPrefixConfigForm: TCnPrefixConfigForm
     end
   end
   object btnOK: TButton
-    Left = 261
-    Top = 500
+    Left = 263
+    Top = 532
     Width = 75
     Height = 21
-    Anchors = [akRight, akBottom]
     Caption = '&OK'
     TabOrder = 2
     OnClick = btnOKClick
   end
   object btnCancel: TButton
-    Left = 341
-    Top = 500
+    Left = 343
+    Top = 532
     Width = 75
     Height = 21
-    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
   object btnHelp: TButton
-    Left = 421
-    Top = 500
+    Left = 423
+    Top = 532
     Width = 75
     Height = 21
-    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick

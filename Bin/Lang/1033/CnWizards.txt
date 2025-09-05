@@ -1193,6 +1193,7 @@ TCnPrefixConfigForm.cbPrefixCaseSens.Caption=Prefix Case Sensitive.
 TCnPrefixConfigForm.cbUseUnderLine.Caption=Add Underscore after Prefix when Renaming.
 TCnPrefixConfigForm.chkF2Rename.Caption=Use F2 Key to Rename Selected Component in Designer.
 TCnPrefixConfigForm.chkUseActionName.Caption=Use Action Name as New Name if Connected to an Action.
+TCnPrefixConfigForm.chkUseAncestor.Caption=Force to Use Ancestor Prefix like TControl/TComponent when Batch Processing.
 TCnPrefixConfigForm.chkUseFieldName.Caption=Use DataField as New Name if this Property Exists.
 TCnPrefixConfigForm.chkWatchActionLink.Caption=Auto Rename when Action Changed.
 TCnPrefixConfigForm.chkWatchFieldLink.Caption=Auto Rename when DataField Changed.

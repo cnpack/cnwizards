@@ -111,7 +111,7 @@ type
     procedure CreateCurrProjectList(List: TCnPrefixCompList);
     procedure CreateProjectGroupList(List: TCnPrefixCompList);
     function GetNewName(const ComponentType, Prefix,
-      OldName: string): string;
+      OldName: string; IsAncestor: Boolean = False): string;
     function IsUnnamed(APrefix, AName: string): Boolean;
     function HasPrefix(const Prefix, Name: string): Boolean;
     function IsValidComponent(AObj: TObject): Boolean;
@@ -449,7 +449,8 @@ begin
 end;
 
 // 根据前缀计算默认的新组件名称
-function TCnPrefixWizard.GetNewName(const ComponentType, Prefix, OldName: string): string;
+function TCnPrefixWizard.GetNewName(const ComponentType, Prefix, OldName: string;
+  IsAncestor: Boolean): string;
 var
   CName: string;
   I: Integer;
@@ -463,8 +464,8 @@ var
 
 begin
   CName := RemoveClassPrefix(ComponentType);
-  // 如果原名称为 IDE 默认组件名，去掉前面的组件名称和后面的数字
-  if Pos(UpperCase(CName), UpperCase(OldName)) = 1 then
+  // 如果原名称为 IDE 默认组件名，且不是父类通配命名，则去掉前面的组件名称和后面的数字
+  if (Pos(UpperCase(CName), UpperCase(OldName)) = 1) and not IsAncestor then
   begin
     if Self.FUseUnderLine then
       Result := RemoveAfterNum(Prefix + '_' + Copy(OldName, Length(CName) + 1, MaxInt))
@@ -1268,7 +1269,7 @@ begin
   else
   begin
     // 计算新名称
-    NewBase := GetNewName(Component.ClassName, Prefix, OldName);
+    NewBase := GetNewName(Component.ClassName, Prefix, OldName, SearchAncestor);
 
     if NeedFieldRename(Component) then
     begin

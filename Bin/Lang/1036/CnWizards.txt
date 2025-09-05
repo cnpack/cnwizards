@@ -1193,6 +1193,7 @@ TCnPrefixConfigForm.cbPrefixCaseSens.Caption=Préfixe sensible à  la case.
 TCnPrefixConfigForm.cbUseUnderLine.Caption=Ajoutez un soulignement après le préfixe lors du changement de nom.
 TCnPrefixConfigForm.chkF2Rename.Caption=Utilisez la touche F2 pour renommer le composant sélectionné dans Designer.
 TCnPrefixConfigForm.chkUseActionName.Caption=Utilis. le nom de l'action comme nouveau nom si connecté à  une action.
+TCnPrefixConfigForm.chkUseAncestor.Caption=Forcer l'utilisation du préfixe de l'ancêtre comme TControl/TComponent lors du traitement par lots.
 TCnPrefixConfigForm.chkUseFieldName.Caption=Utilisez DataField comme nouveau nom si cette propriété existe.
 TCnPrefixConfigForm.chkWatchActionLink.Caption=Renommer automatiquement lorsque l'action est modifiée.
 TCnPrefixConfigForm.chkWatchFieldLink.Caption=Renommer automatiquement lorsque DataField a changé.
