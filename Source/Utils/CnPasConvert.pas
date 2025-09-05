@@ -294,6 +294,8 @@ type
     {this should be override}
     procedure SetPreFixAndPosFix(AFont: TFont; ATokenType: TCnPasConvertTokenType);
       virtual; abstract;
+
+    procedure WriteConstStrToOutStream(const Str: string);
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -1591,6 +1593,18 @@ begin
   FOutStream := Value;
 end;
 
+procedure TCnSourceConversion.WriteConstStrToOutStream(const Str: string);
+begin
+  if (FOutStream = nil) or (Length(Str) <= 0) then
+    Exit;
+
+{$IFDEF FPC}
+  FOutStream.WriteBuffer(Str[1], Length(Str));
+{$ELSE}
+  FOutStream.WriteBuffer(AnsiString(Str), Length(Str));
+{$ENDIF}
+end;
+
 procedure TCnSourceConversion.SetSpaceFont(const Value: TFont);
 begin
   FSpaceFont.Assign(Value);
@@ -1834,8 +1848,7 @@ begin
           Inc(FSize, nCount);
           nCount := 0;
 
-          FOutStream.WriteBuffer(AnsiString('&lt;'), 4);
-
+          WriteConstStrToOutStream('&lt;');
           Inc(FSize, 4);
 
           StartPtr := CurPtr + 1;
@@ -1848,8 +1861,7 @@ begin
           Inc(FSize, nCount);
           nCount := 0;
 
-          FOutStream.WriteBuffer(AnsiString('&gt;'), 4);
-
+          WriteConstStrToOutStream('&gt;');
           Inc(FSize, 4);
 
           StartPtr := CurPtr + 1;
@@ -1862,8 +1874,7 @@ begin
           Inc(FSize, nCount);
           nCount := 0;
 
-          FOutStream.WriteBuffer(AnsiString('&amp;'), 5);
-
+          WriteConstStrToOutStream('&amp;');
           Inc(FSize, 5);
 
           StartPtr := CurPtr + 1;
@@ -1880,12 +1891,12 @@ begin
           if CurPtr^ = #9 then {Tab}
           begin
             for J := 1 to FTabSpace do
-              FOutStream.WriteBuffer(AnsiString('&nbsp;'), 6);
+              WriteConstStrToOutStream('&nbsp;');
             Inc(FSize, 6 * FTabSpace);
           end
           else
           begin
-            FOutStream.WriteBuffer(AnsiString('&nbsp;'), 6);
+            WriteConstStrToOutStream('&nbsp;');
             Inc(FSize, 6);
           end;
 
@@ -1906,7 +1917,7 @@ begin
 
           if FIsMulti then
           begin
-            FOutStream.WriteBuffer(AnsiString('<br>'), 4);
+            WriteConstStrToOutStream('<br>');
             Inc(FSize, 4);
           end;
 
@@ -2098,7 +2109,7 @@ begin
         begin
           WriteAnsiToStream;
 
-          FOutStream.WriteBuffer(AnsiString('\{'), 2);
+          WriteConstStrToOutStream('\{');
           Inc(FSize, 2);
           StartPtr := CurPtr + 1;
         end;
@@ -2106,7 +2117,7 @@ begin
         begin
           WriteAnsiToStream;
 
-          FOutStream.WriteBuffer(AnsiString('\}'), 2);
+          WriteConstStrToOutStream('\}');
           Inc(FSize, 2);
           StartPtr := CurPtr + 1;
         end;
@@ -2114,7 +2125,7 @@ begin
         begin
           WriteAnsiToStream;
 
-          FOutStream.WriteBuffer(AnsiString('\\'), 2);
+          WriteConstStrToOutStream('\\');
           Inc(FSize, 2);
           StartPtr := CurPtr + 1;
         end;
@@ -2127,12 +2138,12 @@ begin
           begin
             // Write space char
             for J := 1 to FTabSpace do
-              FOutStream.WriteBuffer(AnsiString(' ' + ''), 1);
+              WriteConstStrToOutStream(' ' + '');
             Inc(FSize, 1 * FTabSpace);
           end
           else
           begin
-            FOutStream.WriteBuffer(AnsiString(' ' + ''), 1);
+            WriteConstStrToOutStream(' ' + '');
             Inc(FSize, 1);
           end;
 
@@ -2153,7 +2164,7 @@ begin
 
           if FIsMulti then
           begin
-            FOutStream.WriteBuffer(AnsiString('\par '), 5);
+            WriteConstStrToOutStream('\par ');
             Inc(FSize, 5);
           end;
 

@@ -232,6 +232,30 @@
         <Filename Value="SourceStat\CnStatWizard.pas"/>
         <UnitName Value="CnStatWizard"/>
       </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorCodeComment.pas"/>
+        <UnitName Value="CnEditorCodeComment"/>
+      </Item>
+      <Item>
+        <Filename Value="..\Test\Lazarus\Wizard\CnTestIDEOptionWizard.pas"/>
+        <UnitName Value="CnTestIDEOptionWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="..\Test\Lazarus\Wizard\CnTestEnvProjPathWizard.pas"/>
+        <UnitName Value="CnTestEnvProjPathWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnPas2HtmlConfigFrm.pas"/>
+        <UnitName Value="CnPas2HtmlConfigFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnPas2HtmlWizard.pas"/>
+        <UnitName Value="CnPas2HtmlWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnPasConvertTypeFrm.pas"/>
+        <UnitName Value="CnPasConvertTypeFrm"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

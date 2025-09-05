@@ -43,8 +43,7 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, IniFiles,
-  FileCtrl, Forms, Registry, ComCtrls
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE}, ToolsAPI {$ENDIF} {$ENDIF}
+  FileCtrl, Forms, Registry, ComCtrls {$IFDEF DELPHI_OTA} , ToolsAPI {$ENDIF}
   {$IFDEF COMPILER6_UP}, SHFolder {$ENDIF};
 
 const

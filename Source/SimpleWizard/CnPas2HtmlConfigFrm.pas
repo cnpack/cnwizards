@@ -52,7 +52,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Registry,
   Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls, CnWizUtils, CnWizMultiLang,
-  CnWizManager, CnWizIdeUtils;
+  CnWizManager, CnWizIdeUtils {$IFDEF FPC}, CnHotKey {$ENDIF};
 
 type
 

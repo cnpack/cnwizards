@@ -20,7 +20,9 @@ uses
   CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
   CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
   CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
-  CnStatResultFrm, CnStatWizard, LazarusPackageIntf;
+  CnStatResultFrm, CnStatWizard, CnEditorCodeComment, CnTestIDEOptionWizard, 
+  CnTestEnvProjPathWizard, CnPas2HtmlConfigFrm, CnPas2HtmlWizard, 
+  CnPasConvertTypeFrm, LazarusPackageIntf;
 
 implementation
 

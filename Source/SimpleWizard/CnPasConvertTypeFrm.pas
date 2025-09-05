@@ -42,10 +42,10 @@ interface
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Classes, CnPasConvert, Clipbrd, ToolsAPI,
+  Windows, Messages, SysUtils, Classes, Forms, Dialogs, Controls, Clipbrd, Graphics,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} StdCtrls, ComCtrls, IniFiles, FileCtrl,
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWizIdeUtils,
-  Forms, Dialogs, Controls, StdCtrls, ComCtrls, CnIni, IniFiles,
-  FileCtrl, Graphics, CnWizEditFiler, CnWizMultiLang, ExtCtrls;
+  CnIni, CnPasConvert, CnWizEditFiler, CnWizMultiLang, ExtCtrls;
 
 type
 

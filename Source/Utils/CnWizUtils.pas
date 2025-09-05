@@ -568,6 +568,8 @@ function CnOtaGetProjectResource(Project: TCnIDEProjectInterface): TCnIDEProject
 {* 取工程资源}
 function CnOtaGetProject: TCnIDEProjectInterface;
 {* 取第一个工程}
+function CnOtaGetUnitName(Editor: TCnSourceEditorInterface): string;
+{* 返回单元名称}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -624,8 +626,6 @@ function CnOtaGetCurrentEditWindow: TCustomForm;
 {* 以 OTA 的方式取当前的 EditWindow}
 function CnOtaGetCurrentEditControl: TWinControl;
 {* 以 OTA 的方式取当前的 EditControl 控件}
-function CnOtaGetUnitName(Editor: IOTASourceEditor): string;
-{* 返回单元名称}
 function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
@@ -1042,11 +1042,11 @@ function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos):
 
 function CnOtaSaveEditorToStream(Editor: TCnSourceEditorInterface; Stream: TMemoryStream;
   FromCurrPos: Boolean = False; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
+{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，包括 Lazarus，否则为 Ansi/Utf8/Utf8/Utf8}
 
 function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
   Boolean; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False): Boolean;
-{* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
+{* 保存当前编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，包括 Lazarus，否则为 Ansi/Utf8/Utf8/Utf8}
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: TCnEditViewSourceInterface = nil;
   Middle: Boolean = True);
@@ -4403,6 +4403,16 @@ begin
   Result := nil;
 end;
 
+// 返回单元名称
+function CnOtaGetUnitName(Editor: TCnSourceEditorInterface): string;
+begin
+{$IFDEF STAND_ALONE}
+  Result := '';
+{$ELSE}
+  Result := _CnExtractFileName(Editor.FileName);
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -4944,12 +4954,6 @@ begin
   end;
   Result := nil;
 {$ENDIF}
-end;
-
-// 返回单元名称
-function CnOtaGetUnitName(Editor: IOTASourceEditor): string;
-begin
-  Result := _CnExtractFileName(Editor.FileName);
 end;
 
 //设定项目配置值
@@ -8332,7 +8336,7 @@ var
 begin
   Assert(Stream <> nil);
   Result := False;
-{$IFNDEF STAND_ALONE}
+
   if Editor = nil then
   begin
     Editor := CnOtaGetCurrentSourceEditor;
@@ -8413,7 +8417,6 @@ begin
     Stream.Position := 0;
     Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text) + 1);
   end;
-{$ENDIF}
 {$ENDIF}
 end;
 

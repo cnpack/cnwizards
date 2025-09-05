@@ -50,11 +50,11 @@ interface
 {$IFDEF CNWIZARDS_CNPAS2HTMLWIZARD}
 
 uses
-  Windows, Messages, SysUtils, Classes, Clipbrd, ToolsAPI, Forms, Dialogs,
-  Controls, IniFiles, ShellAPI, StdCtrls, ComCtrls, FileCtrl, Graphics,
-  CnCommon, CnPasConvert, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils,
-  {$IFDEF IDE_STRING_ANSI_UTF8} CnWideStrings, {$ENDIF}  CnIni, CnWizIdeUtils,
-  CnWizEditFiler, CnWizMultiLang, CnPasConvertTypeFrm;
+  Windows, Messages, SysUtils, Classes, Clipbrd, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  Forms, Dialogs, Controls, IniFiles, ShellAPI, StdCtrls, ComCtrls, FileCtrl, Graphics,
+  {$IFDEF FPC} LCLType, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF} CnCommon,
+  CnPasConvert, CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnWideStrings, CnIni,
+  CnWizIdeUtils, CnWizEditFiler, CnWizMultiLang, CnPasConvertTypeFrm;
 
 type
 
@@ -66,7 +66,9 @@ type
     FIdExportUnit: Integer;
     FIdExportOpened: Integer;
     FIdExportDPR: Integer;
+ {$IFDEF DELPHI_OTA}
     FIdExportBPG: Integer;
+ {$ENDIF}
     FIdConfig: Integer;
     FDispGauge: Boolean;
     FAutoSave: Boolean;
@@ -79,7 +81,7 @@ type
     procedure CopyHTMLToClipBoard(HtmlStrBuf: PAnsiChar; SizeH: Integer;
       StrBuf: PAnsiChar; SizeT: Integer);
     function InternalProcessAFile(const Filename, OutputDir: string): Boolean;
-    procedure ProcessAProject(Project: IOTAProject; const sDir: string; OpenDir: Boolean = False);
+    procedure ProcessAProject(Project: TCnIDEProjectInterface; const sDir: string; OpenDir: Boolean = False);
     procedure SetConversionFonts(Conversion: TCnSourceConversion);
     procedure ProcessGauge(Process: Integer);
     function GetFonts(const Index: Integer): TFont;
@@ -167,7 +169,11 @@ begin
     ExportUnitShortCut := SubActions[FIdExportUnit].ShortCut;
     ExportOpenedShortCut := SubActions[FIdExportOpened].ShortCut;
     ExportDPRShortCut := SubActions[FIdExportDPR].ShortCut;
+{$IFDEF DELPHI_OTA}
     ExportBPGShortCut := SubActions[FIdExportBPG].ShortCut;
+{$ELSE}
+    hkExportBPG.Enabled := False;
+{$ENDIF}
     ConfigShortCut := SubActions[FIdConfig].ShortCut;
     DispGauge := Self.FDispGauge;
     AutoSave := Self.FAutoSave;
@@ -191,7 +197,9 @@ begin
       SubActions[FIdExportUnit].ShortCut := ExportUnitShortCut;
       SubActions[FIdExportOpened].ShortCut := ExportOpenedShortCut;
       SubActions[FIdExportDPR].ShortCut := ExportDPRShortCut;
+{$IFDEF DELPHI_OTA}
       SubActions[FIdExportBPG].ShortCut := ExportBPGShortCut;
+{$ENDIF}
       SubActions[FIdConfig].ShortCut := ConfigShortCut;
       Self.FDispGauge := DispGauge;
       Self.FAutoSave := AutoSave;
@@ -268,8 +276,10 @@ begin
     SCnPas2HtmlWizardExportOpenedCaption, 0, SCnPas2HtmlWizardExportOpenedHint);
   FIdExportDPR := RegisterASubAction(SCnPas2HtmlWizardExportDPR,
     SCnPas2HtmlWizardExportDPRCaption, 0, SCnPas2HtmlWizardExportDPRHint);
+{$IFDEF DELPHI_OTA}
   FIdExportBPG := RegisterASubAction(SCnPas2HtmlWizardExportBPG,
     SCnPas2HtmlWizardExportBPGCaption, 0, SCnPas2HtmlWizardExportBPGHint);
+{$ENDIF}
   AddSepMenu;
   FIdConfig := RegisterASubAction(SCnPas2HtmlWizardConfig,
     SCnPas2HtmlWizardConfigCaption, 0, SCnPas2HtmlWizardConfigHint);
@@ -337,12 +347,15 @@ end;
 procedure TCnPas2HtmlWizard.SubActionExecute(Index: Integer);
 var
   InMStream, OutMStream, tmpOutMStream: TMemoryStream;
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
+  Project: TCnIDEProjectInterface;
+  SrcEditor: TCnSourceEditorInterface;
+  HasBlock: Boolean;
+{$IFDEF DELPHI_OTA}
   Block: IOTAEditBlock;
-  SrcEditor: IOTASourceEditor;
-  Project: IOTAProject;
   ProjectGroup: IOTAProjectGroup;
   iModuleServices: IOTAModuleServices;
+{$ENDIF}
   sName, sGroupDir: string;
 {$IFDEF UNICODE}
   S: string;
@@ -356,44 +369,60 @@ begin
   begin
     FConvertType := ctHTML;
     View := CnOtaGetTopMostEditView;
-    if View <> nil then
-    begin
-      Block := View.Block;
-      if (Block <> nil) and (Block.Size > 0) then
-      begin
-        if not CurrentIsDelphiSource and not IsDpk(CnOtaGetCurrentSourceFile) and not CurrentIsCSource then
-        begin
-          ErrorDlg(SCnPas2HtmlErrorNOTSupport);
-          Exit;
-        end;
+    if View = nil then
+      Exit;
 
-        InMStream := TMemoryStream.Create;
-        tmpOutMStream := TMemoryStream.Create;
-        OutMStream := TMemoryStream.Create;
-        try
-          // Block.Text 是 Ansi/Utf8/Utf16，需要转成 Ansi/Ansi/Utf16
-          S := Block.Text;
-{$IFDEF IDE_STRING_ANSI_UTF8} // 只有 2005~2007 需要将 Utf8 转换成 Ansi
-          S := CnUtf8ToAnsi(Block.Text);
+    HasBlock := False;
+{$IFDEF DELPHI_OTA}
+    Block := View.Block;
+    if (Block <> nil) and (Block.Size > 0) then
+      HasBlock := True;
 {$ENDIF}
-          InMStream.Write(S[1], (Length(S) + 1)* SizeOf(Char));
 
-          if CurrentIsDelphiSource or IsDpk(CnOtaGetCurrentSourceFile) then
-            SourceType := stPas
-          else
-            SourceType := stCpp;
+{$IFDEF LAZARUS}
+    if View.Selection <> '' then
+      HasBlock := True;
+{$ENDIF}
+    if HasBlock then
+    begin
+      if not CurrentIsDelphiSource and not IsDpk(CnOtaGetCurrentSourceFile) and not CurrentIsCSource then
+      begin
+        ErrorDlg(SCnPas2HtmlErrorNOTSupport);
+        Exit;
+      end;
 
-          ConvertStream(SourceType, '', InMStream, tmpOutMStream);
-          // 此时 tmpOutStream 中已经是 HTML 字符串了。
-          ConvertHTMLToClipBoardHtml(tmpOutMStream, OutMStream);
-          // 此时 OutStream 中已经是 HTML 剪贴板字符串了。
-          CopyHTMLToClipBoard(PAnsiChar(OutMStream.Memory), OutMStream.Size,
-            PAnsiChar(InMStream.Memory), InMStream.Size);
-        finally
-          InMStream.Free;
-          tmpOutMStream.Free;
-          OutMStream.Free;
-        end;
+      InMStream := TMemoryStream.Create;
+      tmpOutMStream := TMemoryStream.Create;
+      OutMStream := TMemoryStream.Create;
+      try
+{$IFDEF DELPHI_OTA}
+        // Block.Text 是 Ansi/Utf8/Utf16，需要转成 Ansi/Ansi/Utf16
+        S := Block.Text;
+{$IFDEF IDE_STRING_ANSI_UTF8} // 只有 2005~2007 需要将 Utf8 转换成 Ansi
+        S := CnUtf8ToAnsi(Block.Text);
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+        S := CnUtf8ToAnsi2(View.Selection);
+{$ENDIF}
+        InMStream.Write(S[1], (Length(S) + 1)* SizeOf(Char));
+
+        if CurrentIsDelphiSource or IsDpk(CnOtaGetCurrentSourceFile) then
+          SourceType := stPas
+        else
+          SourceType := stCpp;
+
+        ConvertStream(SourceType, '', InMStream, tmpOutMStream);
+        // 此时 tmpOutStream 中已经是 HTML 字符串了。
+        ConvertHTMLToClipBoardHtml(tmpOutMStream, OutMStream);
+        // 此时 OutStream 中已经是 HTML 剪贴板字符串了。
+        CopyHTMLToClipBoard(PAnsiChar(OutMStream.Memory), OutMStream.Size,
+          PAnsiChar(InMStream.Memory), InMStream.Size);
+      finally
+        InMStream.Free;
+        tmpOutMStream.Free;
+        OutMStream.Free;
       end;
     end;
     Exit;
@@ -468,14 +497,21 @@ begin
 {$ELSE}
           CnOtaSaveEditorToStream(SrcEditor, InMStream);
 {$ENDIF}
+
+{$IFDEF STAND_ALONE}
+          ConvertStream(SourceType, 'stand_alone_test.pas', InMStream, OutMStream);
+{$ELSE}
           ConvertStream(SourceType, SrcEditor.FileName, InMStream, OutMStream);
+{$ENDIF}
+
           OutMStream.SaveToFile(CnPas2HtmlForm.SaveDialog.FileName);
           if FOpenAfterConvert then
             ShellExecute(0, 'open', PChar(CnPas2HtmlForm.SaveDialog.FileName), nil,
               PChar(_CnExtractFileDir(CnPas2HtmlForm.SaveDialog.FileName)), SW_SHOWNORMAL);
         end;
       finally
-        CnPas2HtmlForm.Close;
+        if Assigned(CnPas2HtmlForm) then
+          CnPas2HtmlForm.Close;
         FreeAndNil(CnPas2HtmlForm);
         InMStream.Free;
         OutMStream.Free;
@@ -484,7 +520,14 @@ begin
   end
   else if Index = FIdExportOpened then
   begin
+{$IFDEF DELPHI_OTA}
     QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    if (SourceEditorManagerIntf = nil) or (SourceEditorManagerIntf.SourceEditorCount <= 0) then
+      Exit;
+{$ENDIF}
+
     if GetDirectory(SCnSelectDirCaption, FDir) then
     begin
       FDir := MakePath(FDir);
@@ -499,19 +542,23 @@ begin
             CnPas2HtmlForm.Update;
           end;
         end;
+
+{$IFDEF DELPHI_OTA}
         for I := 0 to iModuleServices.GetModuleCount - 1 do
         begin
           sName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
+
           if (UpperCase(_CnExtractFileExt(sName)) = '.BPG')
 {$IFDEF BDS}
-           or (UpperCase(_CnExtractFileExt(sName)) = '.BDSPROJ')
-           or (UpperCase(_CnExtractFileExt(sName)) = '.DPROJ')
-           or (UpperCase(_CnExtractFileExt(sName)) = '.CBPROJ')
-           or (UpperCase(_CnExtractFileExt(sName)) = '.BDSGROUP')
-           or (UpperCase(_CnExtractFileExt(sName)) = '.GROUPPROJ')
-           or (UpperCase(_CnExtractFileExt(sName)) = '.HTM')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.BDSPROJ')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.DPROJ')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.CBPROJ')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.BDSGROUP')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.GROUPPROJ')
+            or (UpperCase(_CnExtractFileExt(sName)) = '.HTM')
 {$ENDIF}
-           then Continue;
+            then
+            Continue;
           // 不处理 BPG/BDSPROJ/DPROJ/CBPROJ/BDSGROUP/GROUPPROJ文件。
 
 {$IFDEF DEBUG}
@@ -525,8 +572,28 @@ begin
 
           if not InternalProcessAFile(sName, FDir) then
             ErrorDlg(Format(SCnPas2HtmlErrorConvert, [sName]));
+        end;
+{$ENDIF}
 
-        end; // end of for
+{$IFDEF LAZARUS}
+        for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+        begin
+          sName := SourceEditorManagerIntf.SourceEditors[I].FileName;
+
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Filename in AllOpened. %s', [sName]);
+{$ENDIF}
+          if not IsDprOrPas(sName) and not IsCppSourceModule(sName) then
+          begin
+            ErrorDlg(SCnPas2HtmlErrorNOTSupport);
+            Continue;
+          end;
+
+          if not InternalProcessAFile(sName, FDir) then
+            ErrorDlg(Format(SCnPas2HtmlErrorConvert, [sName]));
+        end;
+{$ENDIF}
+
         if FOpenAfterConvert then
           ExploreDir(FDir);
       finally
@@ -536,7 +603,7 @@ begin
           FreeAndNil(CnPas2HtmlForm);
         end;
         Screen.Cursor := crDefault;
-      end; // end of try
+      end;
     end;
   end
   else if Index = FIdExportDPR then
@@ -565,6 +632,7 @@ begin
       // 在转换内部打开目录
     end;
   end
+{$IFDEF DELPHI_OTA}
   else if Index = FIdExportBPG then
   begin
     ProjectGroup := CnOtaGetProjectGroup;
@@ -607,14 +675,17 @@ begin
         ExploreDir(sGroupDir);
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TCnPas2HtmlWizard.SubActionUpdate(Index: Integer);
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
+  Project: TCnIDEProjectInterface;
+{$IFDEF DELPHI_OTA}
   Block: IOTAEditBlock;
   ProjectGroup: IOTAProjectGroup;
-  Project: IOTAProject;
+{$ENDIF}
 begin
   SubActions[Index].Visible := Active;
   if not Active or not Action.Enabled then
@@ -630,8 +701,13 @@ begin
       View := CnOtaGetTopMostEditView;
       if View <> nil then
       begin
+ {$IFDEF DELPHI_OTA}
         Block := View.Block;
         SubActions[Index].Enabled := (Block <> nil) and (Block.Size > 0);
+ {$ENDIF}
+ {$IFDEF LAZARUS}
+        SubActions[Index].Enabled := (View.SelStart <> View.SelEnd);
+ {$ENDIF}
       end
       else
         SubActions[Index].Enabled := False;
@@ -655,12 +731,14 @@ begin
     Project := CnOtaGetCurrentProject;
     SubActions[Index].Enabled := Project <> nil;
   end
+{$IFDEF DELPHI_OTA}
   else if Index = FIdExportBPG then
   begin
     // 当前有工程组
     ProjectGroup := CnOtaGetProjectGroup;
     SubActions[Index].Enabled := ProjectGroup <> nil;
   end
+{$ENDIF}
   else if Index = FIdConfig then
     SubActions[Index].Enabled := True;
 end;
@@ -865,7 +943,7 @@ begin
   end;
 end;
 
-procedure TCnPas2HtmlWizard.ProcessAProject(Project: IOTAProject;
+procedure TCnPas2HtmlWizard.ProcessAProject(Project: TCnIDEProjectInterface;
   const sDir: string; OpenDir: Boolean);
 var
   I: Integer;
@@ -883,7 +961,12 @@ begin
       end;
     end;
 
+{$IFDEF LAZARUS}
+    sPFileName := _CnChangeFileExt(_CnExtractFileName(Project.MainFile.FileName), '');
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     sPFileName := _CnChangeFileExt(_CnExtractFileName(Project.FileName), '');
+{$ENDIF}
     case FConvertType of
       ctHTML: sOutPutDir := sDir + sPFileName + '_Html\';
       ctRTF:  sOutPutDir := sDir + sPFileName + '_RTF\';
@@ -894,9 +977,15 @@ begin
       CreateDir(sOutPutDir);
 
     // 以下开始创建 DPR 的转换 html 文件。
+{$IFDEF LAZARUS}
+    sFileName := Project.MainFile.FileName;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     sFileName := Project.FileName;
-    if IsBdsProject(Project.FileName) or IsDProject(Project.FileName) then // 不是 BDS Project 才行
-      sFileName := _CnChangeFileExt(Project.FileName, '.dpr');
+{$ENDIF}
+
+    if IsBdsProject(sFileName) or IsDProject(sFileName) then // 不是 BDS Project 才行
+      sFileName := _CnChangeFileExt(sFileName, '.dpr');
 
     if Assigned(CnPas2HtmlForm) then
       CnPas2HtmlForm.ConvertingFileName := sFileName;
@@ -909,6 +998,7 @@ begin
     end;
 
     // 然后循环处理各个源文件。
+{$IFDEF DELPHI_OTA}
     for I := 0 to Project.GetModuleCount - 1 do
     begin
       if Trim(Project.GetModule(I).FileName) = '' then Continue;
@@ -927,7 +1017,30 @@ begin
         Continue;
       end;
     end;
+ {$ENDIF}
 
+ {$IFDEF LAZARUS}
+    for I := 0 to Project.FileCount - 1 do
+    begin
+      if Project.Files[I].IsPartOfProject and IsSourceModule(Project.Files[I].Filename) then
+      begin
+        sFileName := _CnExtractFileName(Project.Files[I].Filename);
+
+        if not IsDelphiSourceModule(Project.Files[I].Filename)
+          and not IsCppSourceModule(Project.Files[I].Filename) then
+          Continue;                       // 不处理非PAS/C/CPP等文件。
+
+        if Assigned(CnPas2HtmlForm) then
+          CnPas2HtmlForm.ConvertingFileName := sFileName;
+
+        if not InternalProcessAFile(Project.Files[I].Filename, sOutPutDir) then
+        begin
+          ErrorDlg(Format(SCnPas2HtmlErrorConvert, [Project.Files[I].Filename]));
+          Continue;
+        end;
+      end;
+    end;
+ {$ENDIF}
     if OpenDir then
       ExploreDir(sOutPutDir);
   finally
