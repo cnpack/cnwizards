@@ -1594,6 +1594,10 @@ begin
 end;
 
 procedure TCnSourceConversion.WriteConstStrToOutStream(const Str: string);
+{$IFNDEF FPC}
+var
+  S: AnsiString;
+{$ENDIF}
 begin
   if (FOutStream = nil) or (Length(Str) <= 0) then
     Exit;
@@ -1601,7 +1605,9 @@ begin
 {$IFDEF FPC}
   FOutStream.WriteBuffer(Str[1], Length(Str));
 {$ELSE}
-  FOutStream.WriteBuffer(AnsiString(Str), Length(Str));
+  S := AnsiString(Str);
+  if Length(S) > 0 then
+    FOutStream.WriteBuffer(S[1], Length(S));
 {$ENDIF}
 end;
 
