@@ -10,13 +10,16 @@ uses
   Interfaces,
 {$ENDIF}
   Forms, CnMessageBoxWizard, CnProcListWizard, CnCommentCropper,
-  CnBookmarkConfigFrm, CnBookmarkWizard, CnAICoderChatFrm, CnAICoderConfig,
-  CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption,
-  CnAICoderWizard, CnProjectViewBaseFrm, CnCodingToolsetWizard,
-  CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart, CnWizConfigFrm,
-  CnWizMenuSortFrm, CnWizSubActionShortCutFrm, CnWizLangID, CnWizMultiLang,
-  CnWizMultiLangFrame, CnWizTranslate, CnSrcTemplate, CnSrcTemplateEditFrm,
-  CnStatFrm, CnStatResultFrm, CnStatWizard, StandAloneUnit, TestFormUnit {FormFramework};
+  CnBookmarkConfigFrm, CnBookmarkWizard, CnPas2HtmlConfigFrm, CnPas2HtmlWizard,
+  CnPasConvertTypeFrm, CnAICoderChatFrm, CnAICoderConfig, CnAICoderEngine,
+  CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption, CnAICoderWizard,
+  CnProjectViewBaseFrm, CnCodingToolsetWizard, CnEditorOpenFile,
+  CnEditorOpenFileFrm, CnAsciiChart, CnEditorCodeComment, CnEditorCodeDelBlank,
+  CnEditorCodeIndent, CnWizConfigFrm, CnWizMenuSortFrm,
+  CnWizSubActionShortCutFrm, CnWizLangID, CnWizMultiLang, CnWizMultiLangFrame,
+  CnWizTranslate, CnSrcTemplate, CnSrcTemplateEditFrm, CnStatFrm,
+  CnStatResultFrm, CnStatWizard, CnCodeFormatterWizard, CnFormatterIntf,
+  StandAloneUnit, TestFormUnit {FormFramework};
 
 {$R *.res}
 

@@ -818,9 +818,6 @@ function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
 {* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
    如果起行列大于止行列，内部会互换}
-function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
-  View: IOTAEditView = nil): Boolean;
-{* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
 function CnOtaCloseFileByAction(const FileName: string): Boolean;
 {* 用 ActionService 来关闭文件}
 function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
@@ -828,6 +825,9 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {$ENDIF}
 {$ENDIF}
 
+function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
+  View: TCnEditViewSourceInterface = nil): Boolean;
+{* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
 function CnOtaGetCurrentProcedure: string;
 {* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
 function CnOtaCurrBlockEmpty: Boolean;
@@ -1072,7 +1072,23 @@ function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryS
   D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
   不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
 
-{$IFNDEF LAZARUS}
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
+{* 取得当前编辑器源代码}
+
+procedure CnOtaSetCurrentEditorSource(const Text: string);
+{* 设置当前编辑器源代码，可在各版本使用，要求根据编译器版本内容是对应的 Ansi/Ansi/Utf16
+   Lazarus 下则要求 Text 是 Utf8 编码。在 2005~2007 下内部有多余的 Ansi 到 Utf8 转换可能导致丢内容
+   另外注意内容中如果一行太长譬如超过 1024，可能会被 Delphi IDE 截断，以下同}
+
+function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: TCnEditViewSourceInterface = nil): Integer; {$IFDEF UNICODE} deprecated; {$ENDIF}
+{* 编辑位置（ Delphi 下类似于 Ansi 的直观列，但 Lazarus 下是 Utf8 列，均以 1 开始）转换为线性位置，
+   均为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下的线性位置也为 Utf8
+   在 Delphi 下的 Unicode 环境下该位置之前有宽字符时其值不靠谱，因而不推荐使用}
+
+function CnOtaLinePosToEditPos(LinePos: Integer; EditView: TCnEditViewSourceInterface = nil): TOTAEditPos; {$IFDEF UNICODE} deprecated; {$ENDIF}
+{* 线性位置转换为编辑位置（ Delphi 下类似于 Ansi 的直观列，但 Lazarus 下是 Utf8 列，均以 1 开始），
+   线性位置要求为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下的线性位置也要求为 Utf8
+   在 Delphi 下的 Unicode 环境下该位置之前有宽字符时传参没法靠谱，因而不推荐使用}
 
 {$IFDEF DELPHI_OTA}
 
@@ -1083,14 +1099,6 @@ function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASour
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
-
-function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer; {$IFDEF UNICODE} deprecated; {$ENDIF}
-{* 编辑位置转换为线性位置，均为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
-   在 Unicode 环境下该位置之前有宽字符时其值不靠谱，不推荐使用}
-
-function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos; {$IFDEF UNICODE} deprecated; {$ENDIF}
-{* 线性位置转换为编辑位置，线性位置要求为 0 开始的 Ansi/Utf8/Utf8 混合 Ansi
-   在 Unicode 环境下该位置之前有宽字符时传参没法靠谱}
 
 procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
@@ -1104,9 +1112,6 @@ procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
   TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
   PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
 {* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
-
-function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
-{* 取得当前编辑器源代码}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -1160,12 +1165,8 @@ procedure CnOtaSetCurrentEditorSourceW(const Text: string);
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 procedure CnOtaSetCurrentEditorSourceUtf8(const Text: string);
-{* 设置当前编辑器源代码，只在 D2005~2007 版本使用，参数为原始 UTF8 内容}
+{* 设置当前编辑器源代码，只在 D2005~2007 版本使用，参数为原始 Utf8 内容}
 {$ENDIF}
-
-procedure CnOtaSetCurrentEditorSource(const Text: string);
-{* 设置当前编辑器源代码，可在各版本使用，但有多余的转换可能导致丢内容
-   另外注意内容中如果一行太长譬如超过 1024，可能会被 IDE 截断，以下同}
 
 procedure CnOtaInsertLineIntoEditor(const Text: string);
 {* 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
@@ -1325,8 +1326,6 @@ procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: T
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
   LangID: Cardinal);
 {* 加载指定的语言文件翻译窗体}
-{$ENDIF}
-
 {$ENDIF}
 
 function OTACharPos(CharIndex: SmallInt; Line: Longint): TOTACharPos;
@@ -6806,36 +6805,6 @@ begin
   Result := CnOtaMoveAndSelectBlock(Start, After, View);
 end;
 
-// 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区
-function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
-  View: IOTAEditView = nil): Boolean;
-var
-  Block: IOTAEditBlock;
-begin
-  Result := False;
-  if View = nil then
-    View := CnOtaGetTopMostEditView;
-  if Assigned(View) and View.Block.IsValid then
-  begin
-    Block := View.Block;
-    StartPos.Line := Block.StartingRow;
-    StartPos.CharIndex := 1;
-    EndPos.Line := Block.EndingRow;
-    EndPos.CharIndex := Block.EndingColumn;
-    if EndPos.CharIndex > 1 then
-    begin
-      if EndPos.Line < View.Buffer.GetLinesInBuffer then
-      begin
-        Inc(EndPos.Line);
-        EndPos.CharIndex := 1;
-      end
-      else
-        EndPos.CharIndex := 1024; // 用个大数代替行尾
-    end;
-    Result := True;
-  end;
-end;
-
 // 用 ActionService 来关闭文件
 function CnOtaCloseFileByAction(const FileName: string): Boolean;
 var
@@ -6879,6 +6848,62 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+// 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区
+function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
+  View: TCnEditViewSourceInterface): Boolean;
+{$IFDEF DELPHI_OTA}
+var
+  Block: IOTAEditBlock;
+{$ENDIF}
+begin
+  Result := False;
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+
+{$IFDEF DELPHI_OTA}
+  if Assigned(View) and View.Block.IsValid then
+  begin
+    Block := View.Block;
+    StartPos.Line := Block.StartingRow;
+    StartPos.CharIndex := 1;
+    EndPos.Line := Block.EndingRow;
+    EndPos.CharIndex := Block.EndingColumn;
+    if EndPos.CharIndex > 1 then
+    begin
+      if EndPos.Line < View.Buffer.GetLinesInBuffer then
+      begin
+        Inc(EndPos.Line);
+        EndPos.CharIndex := 1;
+      end
+      else
+        EndPos.CharIndex := 1024; // 用个大数代替行尾
+    end;
+    Result := True;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.SelStart <> View.SelEnd then
+  begin
+    StartPos.Line := View.BlockBegin.Y;
+    StartPos.CharIndex := 1;
+    EndPos.Line := View.BlockEnd.Y;
+    EndPos.CharIndex := View.BlockEnd.X;
+
+    if EndPos.CharIndex > 1 then
+    begin
+      if EndPos.Line < View.LineCount then
+      begin
+        Inc(EndPos.Line);
+        EndPos.CharIndex := 1;
+      end
+      else
+        EndPos.CharIndex := 1024; // 用个大数代替行尾
+    end;
+    Result := True;
+  end;
+{$ENDIF}
+end;
 
 // 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域
 function CnOtaGetCurrentProcedure: string;
@@ -8387,7 +8412,7 @@ begin
     end;
   end
   else
-    Utf8Text := Editor.Lines.Text;
+    Utf8Text := Editor.SourceText;
 
   if CheckUtf8 then
   begin
@@ -8417,6 +8442,7 @@ begin
     Stream.Position := 0;
     Stream.Write(PAnsiChar(Utf8Text)^, Length(Utf8Text) + 1);
   end;
+  Result := True;
 {$ENDIF}
 end;
 
@@ -8586,7 +8612,148 @@ begin
   Result := Stream.Size > 0;
 end;
 
-{$IFNDEF LAZARUS}
+// 取得当前编辑器源代码
+function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
+var
+  Strm: TMemoryStream;
+begin
+  Strm := TMemoryStream.Create;
+  try
+    if CnOtaSaveCurrentEditorToStream(Strm, False, CheckUtf8) then
+      Result := string(PAnsiChar(Strm.Memory));
+  finally
+    Strm.Free;
+  end;
+end;
+
+// 设置当前编辑器源代码
+procedure CnOtaSetCurrentEditorSource(const Text: string);
+{$IFDEF DELPHI_OTA}
+var
+  EditWriter: IOTAEditWriter;
+{$ENDIF}
+begin
+  if Text = '' then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
+  try
+    EditWriter.DeleteTo(MaxInt);
+  {$IFDEF UNICODE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+  {$ELSE}
+    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+  {$ENDIF}
+  finally
+    EditWriter := nil;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if CnOtaGetCurrentSourceEditor <> nil then
+    CnOtaGetCurrentSourceEditor.Lines.Text := Text;
+{$ENDIF}
+end;
+
+// 编辑位置转换为线性位置
+function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: TCnEditViewSourceInterface): Integer;
+{$IFNDEF STAND_ALONE}
+var
+{$IFDEF DELPHI_OTA}
+  CharPos: TOTACharPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  I: Integer;
+  P: TPoint;
+{$ENDIF}
+{$ENDIF}
+begin
+  Result := 0;
+  if EditView = nil then
+    EditView := CnOtaGetTopMostEditView;
+
+{$IFDEF DELPHI_OTA}
+  if Assigned(EditView) then
+  begin
+    EditView.ConvertPos(True, EditPos, CharPos);
+    Result := EditView.CharPosToPos(CharPos);
+  end
+  else
+    Result := 0;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // 都是 Utf8 无需编解码了
+  P.X := EditPos.Col;
+  P.Y := EditPos.Line;
+
+  // 从首行到当前行前一行的所有长度（包括每行尾的回车换行）
+  if P.Y > 1 then
+  begin
+    for I := 0 to P.Y - 2 do
+      Result := Result + Length(EditView.Lines[I]) + 2; // Lines 的下标、前一行，因而各减一
+  end;
+
+  if P.X > 1 then
+    Result := Result + P.X - 1;
+{$ENDIF}
+end;
+
+// 线性位置转换为编辑位置
+function CnOtaLinePosToEditPos(LinePos: Integer; EditView: TCnEditViewSourceInterface): TOTAEditPos;
+{$IFNDEF STAND_ALONE}
+var
+{$IFDEF DELPHI_OTA}
+  CharPos: TOTACharPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  I, T: Integer;
+  P: TPoint;
+{$ENDIF}
+{$ENDIF}
+begin
+  if EditView = nil then
+    EditView := CnOtaGetTopMostEditView;
+
+{$IFDEF DELPHI_OTA}
+  if Assigned(EditView) then
+  begin
+    CharPos := CnOtaGetCharPosFromPos(LinePos, EditView);
+    EditView.ConvertPos(False, Result, CharPos);
+  end
+  else
+  begin
+    Result.Col := 0;
+    Result.Line := 0;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // 都是 Utf8 无需编解码了
+
+  // 叠加计算每行的长度（包括每行尾的回车换行）
+  Result.Line := 1;
+  Result.Col := 1;
+  T := 0;
+
+  for I := 0 to EditView.LineCount - 1 do
+  begin
+    T := T + Length(EditView.Lines[I]) + 2; // Lines 的下标、前一行，因而各减一
+    // T 拿到本行尾
+
+    if T >= LinePos then // 如果本行尾超出需要找的位置，说明位置在本行
+    begin
+      Result.Line := I + 1;
+      if T > LinePos then
+      begin
+        T := T - (Length(EditView.Lines[I]) + 2); // T 回到本行头
+        Result.Col := LinePos - T;
+      end;
+    end;
+  end;
+{$ENDIF}
+end;
 
 {$IFDEF DELPHI_OTA}
 
@@ -8663,41 +8830,6 @@ begin
   else
   begin
     Result.CharIndex := 0;
-    Result.Line := 0;
-  end;
-end;
-
-// 编辑位置转换为线性位置
-function CnOtaEditPosToLinePos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil): Integer;
-var
-  CharPos: TOTACharPos;
-begin
-  if EditView = nil then
-    EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) then
-  begin
-    EditView.ConvertPos(True, EditPos, CharPos);
-    Result := EditView.CharPosToPos(CharPos);
-  end
-  else
-    Result := 0;
-end;
-
-// 线性位置转换为编辑位置
-function CnOtaLinePosToEditPos(LinePos: Integer; EditView: IOTAEditView = nil): TOTAEditPos;
-var
-  CharPos: TOTACharPos;
-begin
-  if EditView = nil then
-    EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) then
-  begin
-    CharPos := CnOtaGetCharPosFromPos(LinePos, EditView);
-    EditView.ConvertPos(False, Result, CharPos);
-  end
-  else
-  begin
-    Result.Col := 0;
     Result.Line := 0;
   end;
 end;
@@ -8807,20 +8939,6 @@ begin
   end;
 
   CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
-end;
-
-// 取得当前编辑器源代码
-function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
-var
-  Strm: TMemoryStream;
-begin
-  Strm := TMemoryStream.Create;
-  try
-    if CnOtaSaveCurrentEditorToStream(Strm, False, CheckUtf8) then
-      Result := string(PAnsiChar(Strm.Memory));
-  finally
-    Strm.Free;
-  end;
 end;
 
 {$IFDEF UNICODE}
@@ -9130,27 +9248,6 @@ begin
 end;
 
 {$ENDIF}
-
-// 设置当前编辑器源代码
-procedure CnOtaSetCurrentEditorSource(const Text: string);
-var
-  EditWriter: IOTAEditWriter;
-begin
-  if Text = '' then
-    Exit;
-
-  EditWriter := CnOtaGetEditWriterForSourceEditor(nil);
-  try
-    EditWriter.DeleteTo(MaxInt);
-  {$IFDEF UNICODE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
-  {$ELSE}
-    EditWriter.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
-  {$ENDIF}
-  finally
-    EditWriter := nil;
-  end;
-end;
 
 // 插入一个字符串到当前 IOTASourceEditor，仅在 Text 为单行文本时有用
 procedure CnOtaInsertLineIntoEditor(const Text: string);
@@ -10079,8 +10176,6 @@ begin
     Storage.Free;
   end;
 end;
-
-{$ENDIF}
 
 {$ENDIF}
 

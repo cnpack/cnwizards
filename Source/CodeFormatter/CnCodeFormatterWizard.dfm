@@ -25,7 +25,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Top = 8
         Width = 409
         Height = 307
-        Anchors = [akLeft, akTop, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Common Settings'
         TabOrder = 0
         object lblKeyword: TLabel
@@ -205,7 +205,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Top = 322
         Width = 409
         Height = 83
-        Anchors = [akLeft, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'ASM Settings'
         TabOrder = 1
         object lblAsmHeadIndent: TLabel
@@ -248,7 +248,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Top = 416
         Width = 281
         Height = 17
-        Anchors = [akLeft, akBottom]
         Caption = 'Do NOT Format Contents between {(*} and {*)}'
         TabOrder = 2
       end

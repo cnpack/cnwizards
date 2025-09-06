@@ -45,7 +45,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ELSE} LCLProc, {$ENDIF} IniFiles, StdCtrls, ComCtrls, Menus,
   TypInfo, Contnrs, ExtCtrls, mPasLex, CnSpin, CnConsts, CnCommon, CnWizConsts,
-  CnWizClasses, CnWizMultiLang, CnWizOptions, CnWizManager,
+  CnWizClasses, CnWizMultiLang, CnWizOptions, CnWizManager, CnIDEStrings,
 {$IFDEF CNWIZARDS_CNINPUTHELPER} {$IFDEF DELPHI_OTA}
   CnInputHelper, CnInputSymbolList, CnInputIdeSymbolList,
 {$ENDIF} {$ENDIF}
@@ -112,9 +112,9 @@ type
     procedure RestoreElideLines(LineMarks: PDWORD);
     procedure ElideOnTimer(Sender: TObject);
 {$ENDIF}
-    function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
-      View: IOTAEditView): Boolean;
 {$ENDIF}
+    function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
+      View: TCnEditViewSourceInterface): Boolean;
 
     function PutPascalFormatRules: Boolean;
     function GetErrorStr(Err: Integer): string;
@@ -264,10 +264,8 @@ begin
     SCnCodeFormatterWizardConfigCaption, 0, SCnCodeFormatterWizardConfigHint);
 end;
 
-{$IFDEF DELPHI_OTA}
-
 function TCnCodeFormatterWizard.CheckSelectionPosition(StartPos, EndPos:
-  TOTACharPos; View: IOTAEditView): Boolean;
+  TOTACharPos; View: TCnEditViewSourceInterface): Boolean;
 const
   InvalidTokens: set of TTokenKind =
     [tkBorComment, tkAnsiComment];
@@ -303,7 +301,13 @@ begin
   Stream := TMemoryStream.Create;
   Lex := TmwPasLex.Create;
   try
+{$IFDEF DELPHI_OTA}
     CnOtaSaveEditorToStream(View.Buffer, Stream);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    CnOtaSaveEditorToStream(View, Stream);
+{$ENDIF}
+
     Lex.Origin := PAnsiChar(Stream.Memory);
 
     PrevToken := tkUnknown;
@@ -352,8 +356,6 @@ begin
   end;
   Result := True;
 end;
-
-{$ENDIF}
 
 procedure TCnCodeFormatterWizard.Config;
 begin
@@ -802,15 +804,21 @@ end;
 procedure TCnCodeFormatterWizard.SubActionExecute(Index: Integer);
 var
   Formatter: ICnPascalFormatterIntf;
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   Src: string;
   Res: PChar;
   I, Idx, ErrCode, SourceLine, SourceCol, SourcePos: Integer;
   CurrentToken: PAnsiChar;
-  Block: IOTAEditBlock;
   StartPos, EndPos, StartPosIn, EndPosIn: Integer;
+  HasSel: Boolean;
   StartRec, EndRec: TOTACharPos;
+{$IFDEF DELPHI_OTA}
+  Block: IOTAEditBlock;
   EP, ErrPos: TOTAEditPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
   ErrLine: string;
   BpBmLineMarks: array of Cardinal;
   OutLineMarks: PDWORD;
@@ -841,11 +849,23 @@ var
 
   // 将解析器中返回的出错列转换成 IDE 里显示的列供显示，均是 Ansi
   function ConvertToVisibleCol(const Line: string; Col: Integer): Integer;
-{$IFDEF BDS}
+{$IFNDEF DELPHI_OTA}
   var
+{$IFDEF LAZARUS}
+    S: UnicodeString;
+{$ENDIF}
+{$IFDEF BDS}
     S: WideString;
 {$ENDIF}
+{$ENDIF}
   begin
+{$IFDEF LAZARUS}
+    // Col 返回的是 Unicode 的列，Line 是 Utf8 的，需要转成 Ansi 的列
+    S := UnicodeString(Line);
+    S := Copy(S, 1, Col);
+    Result := Length(AnsiString(S));
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_STRING_ANSI_UTF8}
     // Col 返回的是 Unicode 的列，Line 是 Ansi 的，需要转成 Ansi 的列
     S := WideString(Line);
@@ -859,6 +879,7 @@ var
   {$ELSE}
     Result := Col;
   {$ENDIF}
+{$ENDIF}
 {$ENDIF}
   end;
 
@@ -881,6 +902,7 @@ begin
     FElideMarks := nil;
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
     // 记录断点、书签、折叠行、光标信息
     ObtainBreakpointsByFile(CnOtaGetCurrentSourceFileName);
     SaveBookMarksToObjectList(View, FBookmarks);
@@ -895,8 +917,14 @@ begin
       FPreNamesList.Clear;
     end;
 {$ENDIF}
+    HasSel := (View.Block <> nil) and View.Block.IsValid;
+{$ENDIF}
 
-    if (View.Block = nil) or not View.Block.IsValid then // 无选择区
+{$IFDEF LAZARUS}
+    HasSel := Length(View.Selection) > 0;
+{$ENDIF}
+
+    if not HasSel then // 无选择区
     begin
       try
         Screen.Cursor := crHourGlass;
@@ -904,14 +932,19 @@ begin
         // 传递当前光标的行号、断点、书签、折叠开始的行号
         SetLength(BpBmLineMarks, 1 + FBreakpoints.Count + FBookmarks.Count
           + FElideLines.Count + 1); // 末尾多一个 0
-
+{$IFDEF DELPHI_OTA}
         EP := View.CursorPos;
         BpBmLineMarks[0] := EP.Line;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        BpBmLineMarks[0] := View.CursorTextXY.Y;
+{$ENDIF}
         Idx := 1;
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('Before Format. Cursor Line: %d', [EP.Line]);
+        CnDebugger.LogFmt('Before Format. Cursor Line: %d', [BpBmLineMarks[0]]);
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
         if FBreakpoints.Count > 0 then
         begin
           for I := 0 to FBreakpoints.Count - 1 do
@@ -941,6 +974,7 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('Before Format. Elide Line Count: %d', [FElideLines.Count]);
 {$ENDIF}
+{$ENDIF}
 
         Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
 {$IFDEF DEBUG}
@@ -948,6 +982,19 @@ begin
         CnDebugger.LogCardinalArray(BpBmLineMarks, 'In Line Marks:');
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+        // Src/Res Utf8
+        Src := CnOtaGetCurrentEditorSource(False);
+        Res := Formatter.FormatOnePascalUnitUtf8(PAnsiChar(Src), Length(Src));
+
+        // Remove EF BB BF BOM if exist
+        if (Res <> nil) and (StrLen(Res) > 3) and
+          (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+          Inc(Res, 3);
+
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
         // Src/Res Utf16
         Src := CnOtaGetCurrentEditorSourceW;
@@ -974,12 +1021,20 @@ begin
         Res := Formatter.FormatOnePascalUnit(PAnsiChar(Src), Length(Src));
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
         if Res <> nil then
         begin
           // hq200306 补充，未发生变化时不进行改动
           if TrimRight(Src) = TrimRight(string(Res)) then
             Exit;
 
+{$IFDEF LAZARUS}
+          // Utf8 直接写入
+          CnOtaSetCurrentEditorSource(string(Res));
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
           // Utf16 内部转 Utf8 写入
           CnOtaSetCurrentEditorSourceW(string(Res));
@@ -992,6 +1047,8 @@ begin
           CnOtaSetCurrentEditorSource(string(Res));
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
           // 恢复光标、断点、书签与折叠信息
           OutLineMarks := Formatter.RetrieveOutputLinkMarks;
 {$IFDEF DEBUG}
@@ -999,13 +1056,24 @@ begin
 {$ENDIF}
 
           // 恢复光标位置
+{$IFDEF DELPHI_OTA}
           EP.Line := OutLineMarks^;
           View.SetCursorPos(EP);
+{$ENDIF}
+{$IFDEF LAZARUS}
+          P := View.CursorTextXY;
+          P.Y := OutLineMarks^;
+          View.CursorTextXY := P;
+          CnLazSourceEditorCenterLine(View, View.CursorTextXY.Y);
+{$ENDIF}
           Inc(OutLineMarks);
+{$IFNDEF STAND_ALONE}
 {$IFDEF DEBUG}
-          CnDebugger.LogFmt('After Format. Restore Cursor Line: %d', [EP.Line]);
+          CnDebugger.LogFmt('After Format. Restore Cursor Line: %d', [View.CursorTextXY.Y]);
+{$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
           // 恢复断点
           Idx := FBreakpoints.Count;
           if Idx > 0 then
@@ -1034,6 +1102,7 @@ begin
 
           View.MoveViewToCursor;
           View.Paint;
+{$ENDIF}
         end
         else // 如果没有结果
         begin
@@ -1043,9 +1112,19 @@ begin
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('Format Error at Line %d, Col %d', [SourceLine, SourceCol]);
 {$ENDIF}
+
+{$IFDEF DELPHI_OTA}
           ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
           CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
             SourceLine), nil, False);
+{$ENDIF}
+{$IFDEF LAZARUS}
+          ErrLine := CnOtaGetLineText(SourceLine, View);
+          P := View.CursorTextXY;
+          P.X := SourceCol;
+          View.CursorTextXY := P;
+{$ENDIF}
+
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
             ConvertToVisibleCol(ErrLine, SourceCol),
             GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
@@ -1059,6 +1138,11 @@ begin
     begin
       try
         Screen.Cursor := crHourGlass;
+{$IFDEF LAZARUS}
+        // Src/Res Utf8
+        Src := CnOtaGetCurrentEditorSource(False);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
         // Src/Res Utf16
         Src := CnOtaGetCurrentEditorSourceW;
@@ -1071,12 +1155,20 @@ begin
         Src := CnOtaGetCurrentEditorSource(True);
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 
         View := CnOtaGetTopMostEditView;
         if View <> nil then
         begin
+          HasSel := False;
+{$IFDEF DELPHI_OTA}
           Block := View.Block;
-          if (Block <> nil) and Block.IsValid then
+          HasSel := (Block <> nil) and Block.IsValid;
+{$ENDIF}
+{$IFDEF LAZARUS}
+          HasSel := Length(View.Selection) > 0;
+{$ENDIF}
+          if HasSel then
           begin
             // 选择块起止位置延伸到行模式
             if not CnOtaGetBlockOffsetForLineMode(StartRec, EndRec, View) then
@@ -1089,27 +1181,33 @@ begin
               Exit;
             end;
 
+{$IFDEF DELPHI_OTA}
             // 传递选择区间断点的行号
             if FBreakpoints.Count > 0 then
             begin
               for I := FBreakpoints.Count - 1 downto 0 do
+              begin
                 if not TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber in
                   [StartRec.Line, EndRec.Line] then
                   FBreakpoints.Delete(I);
+              end;
             end;
 
             if FBookmarks.Count > 0 then
             begin
               for I := FBookmarks.Count - 1 downto 0 do
+              begin
                 if not TCnBookmarkObject(FBookmarks[I]).Line in
                   [StartRec.Line, EndRec.Line] then
                   FBookmarks.Delete(I);
+              end;
             end;
 
             if FBreakpoints.Count + FBookmarks.Count > 0 then
             begin
               SetLength(BpBmLineMarks, FBreakpoints.Count + FBookmarks.Count + 1);
-                // 末尾多一个 0
+              // 末尾多一个 0
+
               for I := 0 to FBreakpoints.Count - 1 do
                 BpBmLineMarks[I] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
               for I := 0 to FBookmarks.Count - 1 do
@@ -1126,6 +1224,10 @@ begin
             end
             else
               Formatter.SetInputLineMarks(nil);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            Formatter.SetInputLineMarks(nil);
+{$ENDIF}
             SetLength(BpBmLineMarks, 0);
 
             StartPos := CnOtaEditPosToLinePos(OTAEditPos(StartRec.CharIndex,
@@ -1177,13 +1279,20 @@ begin
 {$IFDEF DEBUG}
               // CnDebugger.LogRawString('Format Selection Result: ' + Res);
 {$ENDIF}
+
+{$IFDEF DELPHI_OTA}
               {$IFDEF IDE_STRING_ANSI_UTF8}
               CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
               {$ELSE}
               // Ansi/Unicode 均可用
               CnOtaReplaceCurrentSelection(Res, True, True, True);
               {$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+              View.ReplaceLines(View.BlockBegin.Y, View.BlockEnd.Y, Res, True);
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
               // 恢复断点与书签信息
               OutLineMarks := Formatter.RetrieveOutputLinkMarks;
 {$IFDEF DEBUG}
@@ -1198,6 +1307,7 @@ begin
                 Inc(OutLineMarks, FBreakpoints.Count);
                 RestoreBookmarks(View, OutLineMarks);
               end;
+{$ENDIF}
             end
             else // 格式化选择区失败
             begin
@@ -1207,13 +1317,22 @@ begin
 {$IFDEF DEBUG}
               CnDebugger.LogFmt('Format Error at Line %d, Col %d', [SourceLine, SourceCol]);
 {$ENDIF}
+{$IFDEF DELPHI_OTA}
               ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
               ErrPos := OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol), SourceLine);
 {$IFDEF DEBUG}
               CnDebugger.LogFmt('Format Error Converted EditPos is Line %d, Col %d', [ErrPos.Line, ErrPos.Col]);
 {$ENDIF}
-
               CnOtaGotoEditPos(ErrPos);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+              ErrLine := CnOtaGetLineText(SourceLine, View);
+              P := View.CursorTextXY;
+              P.X := SourceCol;
+              View.CursorTextXY := P;
+{$ENDIF}
+
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
                 ConvertToVisibleCol(ErrLine, SourceCol),
                 GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
@@ -1281,6 +1400,8 @@ procedure TCnCodeFormatterForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnCodeFormatterWizard.ObtainBreakpointsByFile(const FileName: string);
 var
@@ -1454,9 +1575,10 @@ begin
 end;
 
 {$ENDIF}
+{$ENDIF}
 
 initialization
-{$IFNDEF BCB5}  // 目前只支持 Delphi。
+{$IFNDEF BCB5}  // 目前只支持 Delphi/Lazarus。
 {$IFNDEF BCB6}
   RegisterCnWizard(TCnCodeFormatterWizard);
 {$ENDIF}

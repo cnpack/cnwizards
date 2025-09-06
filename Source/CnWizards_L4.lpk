@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -237,14 +237,6 @@
         <UnitName Value="CnEditorCodeComment"/>
       </Item>
       <Item>
-        <Filename Value="..\Test\Lazarus\Wizard\CnTestIDEOptionWizard.pas"/>
-        <UnitName Value="CnTestIDEOptionWizard"/>
-      </Item>
-      <Item>
-        <Filename Value="..\Test\Lazarus\Wizard\CnTestEnvProjPathWizard.pas"/>
-        <UnitName Value="CnTestEnvProjPathWizard"/>
-      </Item>
-      <Item>
         <Filename Value="SimpleWizard\CnPas2HtmlConfigFrm.pas"/>
         <UnitName Value="CnPas2HtmlConfigFrm"/>
       </Item>
@@ -255,6 +247,18 @@
       <Item>
         <Filename Value="SimpleWizard\CnPasConvertTypeFrm.pas"/>
         <UnitName Value="CnPasConvertTypeFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="CodeFormatter\CnCodeFormatRules.pas"/>
+        <UnitName Value="CnCodeFormatRules"/>
+      </Item>
+      <Item>
+        <Filename Value="CodeFormatter\CnCodeFormatterWizard.pas"/>
+        <UnitName Value="CnCodeFormatterWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="CodeFormatter\CnFormatterIntf.pas"/>
+        <UnitName Value="CnFormatterIntf"/>
       </Item>
     </Files>
     <RequiredPkgs>

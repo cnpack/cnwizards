@@ -2182,10 +2182,11 @@ end;
 procedure TCnWizNotifierServices.SourceEditorStatus(Sender: TObject);
 begin
 {$IFDEF DEBUG}
-  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
-    CnDebugger.TraceMsg('SourceEditorStatus: ' + TSourceEditorInterface(Sender).FileName)
-  else
-    CnDebugger.TraceMsg('SourceEditorStatus: ');
+//  太多了不打
+//  if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+//    CnDebugger.TraceMsg('SourceEditorStatus: ' + TSourceEditorInterface(Sender).FileName)
+//  else
+//    CnDebugger.TraceMsg('SourceEditorStatus: ');
 {$ENDIF}
 end;
 
