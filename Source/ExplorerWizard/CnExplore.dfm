@@ -4,13 +4,14 @@ inherited CnExploreForm: TCnExploreForm
   Width = 263
   Height = 495
   Caption = 'Explorer'
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnEndDock = FormEndDock
   PixelsPerInch = 96
   TextHeight = 13
   object stat: TStatusBar
     Left = 0
-    Top = 449
+    Top = 444
     Width = 255
     Height = 19
     Panels = <
@@ -24,9 +25,8 @@ inherited CnExploreForm: TCnExploreForm
   object ToolBar: TToolBar
     Left = 0
     Top = 0
-    Width = 115
+    Width = 255
     Height = 23
-    Align = alTop
     AutoSize = True
     ButtonHeight = 23
     EdgeInner = esNone
@@ -35,7 +35,7 @@ inherited CnExploreForm: TCnExploreForm
     Images = il
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 0
+    TabOrder = 2
     object btnUp: TToolButton
       Left = 0
       Top = 0
@@ -82,7 +82,7 @@ inherited CnExploreForm: TCnExploreForm
     Left = 0
     Top = 23
     Width = 255
-    Height = 426
+    Height = 421
     Align = alClient
     BevelOuter = bvNone
     Caption = 'pnlClient'
@@ -106,7 +106,6 @@ inherited CnExploreForm: TCnExploreForm
       UseShellImages = True
       Align = alTop
       AutoRefresh = True
-      ChangeDelay = 50
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -125,7 +124,7 @@ inherited CnExploreForm: TCnExploreForm
       Left = 0
       Top = 191
       Width = 255
-      Height = 235
+      Height = 230
       AutoRefresh = True
       ObjectTypes = [otFolders, otNonFolders, otHidden]
       Root = 'rfDesktop'

@@ -847,12 +847,12 @@ var
 
   // 将解析器中返回的出错列转换成 IDE 里显示的列供显示，均是 Ansi
   function ConvertToVisibleCol(const Line: string; Col: Integer): Integer;
-{$IFNDEF DELPHI_OTA}
+{$IFNDEF STAND_ALONE}
   var
 {$IFDEF LAZARUS}
     S: UnicodeString;
 {$ENDIF}
-{$IFDEF BDS}
+{$IFDEF DELPHI_OTA}
     S: WideString;
 {$ENDIF}
 {$ENDIF}

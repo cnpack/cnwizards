@@ -75,8 +75,9 @@ interface
 uses
   Forms, SysUtils, Messages, Windows, Classes, Controls, ExtCtrls, ComCtrls,
   IniFiles, StdCtrls, Menus, ToolWin, ActnList, ImgList,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
-  CnWizIdeDock, CnShellCtrls, CnWizClasses, ToolsAPI, CnConsts, CnWizConsts, CnPopupMenu;
+  CnWizIdeDock, CnShellCtrls, CnWizClasses, CnConsts, CnWizConsts, CnPopupMenu;
 
 //==============================================================================
 // Explore 工具窗体
@@ -181,6 +182,7 @@ type
     procedure mnuitmFCurFileClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure actCreateDirExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     FWizard: TCnExplorerWizard;
 
@@ -322,6 +324,13 @@ begin
 
   AExts.Sorted := TRUE;
   AExts.Duplicates := dupIgnore;
+end;
+
+procedure TCnExploreForm.FormCreate(Sender: TObject);
+begin
+{$IFNDEF FPC}
+  shltv.ChangeDelay := 50;
+{$ENDIF}
 end;
 
 // 改变保存 Menu 信息到 StringList
@@ -497,7 +506,12 @@ procedure TCnExploreForm.mnuitmFCurFileClick(Sender: TObject);
 var
   CurPath: string;
 begin
+{$IFDEF DELPHI_OTA}
   CurPath := _CnExtractFilePath(CnOtaGetFileNameOfCurrentModule);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  CurPath := _CnExtractFilePath(CnOtaGetCurrentSourceFile);
+{$ENDIF}
   if CurPath <> '' then
     shltv.Path := CurPath;
 end;
@@ -891,7 +905,11 @@ begin
     CnExploreForm.LoadFileFilterState;
     CnExploreForm.LoadFolderState;
   end;
+{$IFDEF DELPHI_OTA}
   IdeDockManager.ShowForm(CnExploreForm);
+{$ELSE}
+  CnExploreForm.Show;
+{$ENDIF}
 end; 
 
 function TCnExplorerWizard.GetState: TWizardState;
@@ -991,12 +1009,16 @@ begin
   begin
     if Value then
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.RegisterDockableForm(TCnExploreForm, CnExploreForm,
         csCnExploreForm);
+{$ENDIF}
     end
     else
     begin
+{$IFDEF DELPHI_OTA}
       IdeDockManager.UnRegisterDockableForm(CnExploreForm, csCnExploreForm);
+{$ENDIF}
       FreeAndNil(CnExploreForm);
     end;
   end;
