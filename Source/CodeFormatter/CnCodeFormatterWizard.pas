@@ -95,7 +95,6 @@ type
 {$ENDIF}
 {$ENDIF}
 
-
 {$IFDEF DELPHI_OTA}
     // 获取行的折叠信息
     procedure ObtainLineElideInfo(List: TList);
@@ -111,6 +110,7 @@ type
     procedure ElideOnTimer(Sender: TObject);
 {$ENDIF}
 {$ENDIF}
+
     function CheckSelectionPosition(StartPos: TOTACharPos; EndPos: TOTACharPos;
       View: TCnEditViewSourceInterface): Boolean;
 
@@ -1547,11 +1547,10 @@ end;
 {$ENDIF}
 
 initialization
-{$IFNDEF BCB5}  // 目前只支持 Delphi/Lazarus。
-{$IFNDEF BCB6}
+{$IFNDEF BCB5OR6}  // 目前只支持 Delphi/Lazarus。
   RegisterCnWizard(TCnCodeFormatterWizard);
 {$ENDIF}
-{$ENDIF}
+
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}
 end.
 
