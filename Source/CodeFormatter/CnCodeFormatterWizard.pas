@@ -1117,17 +1117,20 @@ begin
           ErrLine := CnOtaGetLineText(SourceLine, View.Buffer);
           CnOtaGotoEditPos(OTAEditPos(ConvertToEditorCol(ErrLine, SourceCol),
             SourceLine), nil, False);
-{$ENDIF}
-{$IFDEF LAZARUS}
-          ErrLine := CnOtaGetLineText(SourceLine, View);
-          P := View.CursorTextXY;
-          P.X := SourceCol;
-          View.CursorTextXY := P;
-{$ENDIF}
 
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
             ConvertToVisibleCol(ErrLine, SourceCol),
             GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+{$ENDIF}
+{$IFDEF LAZARUS}
+          P := View.CursorTextXY;
+          P.X := SourceCol;   // 都是 Utf8，无需转换
+          P.Y := SourceLine;
+          View.CursorTextXY := P;
+
+          ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+            GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+{$ENDIF}
         end;
       finally
         Formatter := nil;
@@ -1239,6 +1242,21 @@ begin
 //          CnDebugger.LogRawString('Format Selection To Process: ' + Src);
 {$ENDIF}
             // 此时 StartPos 和 EndPos 标记了当前选择区内要处理的文本
+
+{$IFDEF LAZARUS}
+        // Src/Res Utf8
+        StartPosIn := StartPos;
+        EndPosIn := EndPos;
+        Res := Formatter.FormatPascalBlockUtf8(PAnsiChar(Src), Length(Src),
+          StartPosIn, EndPosIn);
+
+        // Remove EF BB BF BOM if exist
+        if (Res <> nil) and (StrLen(Res) > 3) and
+          (Res[0] = #$EF) and (Res[1] = #$BB) and (Res[2] = #$BF) then
+          Inc(Res, 3);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
             // Src/Res Utf16，俩 LinearPos 是 Utf8 的偏移量，需要转换
             StartPosIn := Length(UTF8Decode(Copy(Utf8Encode(Src), 1, StartPos + 1))) - 1;
@@ -1269,6 +1287,7 @@ begin
             Res := Formatter.FormatPascalBlock(PAnsiChar(Src), Length(Src),
               StartPosIn, EndPosIn);
   {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
             CnDebugger.LogFmt('Format StartPos %d, EndPos %d.', [StartPosIn, EndPosIn]);
@@ -1324,18 +1343,20 @@ begin
               CnDebugger.LogFmt('Format Error Converted EditPos is Line %d, Col %d', [ErrPos.Line, ErrPos.Col]);
 {$ENDIF}
               CnOtaGotoEditPos(ErrPos);
-{$ENDIF}
-
-{$IFDEF LAZARUS}
-              ErrLine := CnOtaGetLineText(SourceLine, View);
-              P := View.CursorTextXY;
-              P.X := SourceCol;
-              View.CursorTextXY := P;
-{$ENDIF}
-
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
                 ConvertToVisibleCol(ErrLine, SourceCol),
                 GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+              P := View.CursorTextXY;
+              P.X := SourceCol;
+              P.Y := SourceLine;
+              View.CursorTextXY := P;
+
+              ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
+                GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+{$ENDIF}
             end;
           end;
         end;
