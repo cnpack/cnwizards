@@ -97,8 +97,6 @@ type
 
 
 {$IFDEF DELPHI_OTA}
-    // 获取指定文件中的断点信息
-    procedure ObtainBreakpointsByFile(const FileName: string);
     // 获取行的折叠信息
     procedure ObtainLineElideInfo(List: TList);
 
@@ -904,7 +902,7 @@ begin
 
 {$IFDEF DELPHI_OTA}
     // 记录断点、书签、折叠行、光标信息
-    ObtainBreakpointsByFile(CnOtaGetCurrentSourceFileName);
+    CnWizGetBreakpointsByFile(CnOtaGetCurrentSourceFileName, FBreakpoints);
     SaveBookMarksToObjectList(View, FBookmarks);
     ObtainLineElideInfo(FElideLines);
 
@@ -1423,56 +1421,6 @@ begin
 end;
 
 {$IFDEF DELPHI_OTA}
-
-procedure TCnCodeFormatterWizard.ObtainBreakpointsByFile(const FileName: string);
-var
-  DS: IOTADebuggerServices;
-  SB: IOTASourceBreakpoint;
-  BD: TCnBreakpointDescriptor;
-  I: Integer;
-
-  function CheckDuplicated(const AFileName: string; ALineNumber: Integer):
-    TCnBreakpointDescriptor;
-  var
-    I: Integer;
-    B: TCnBreakpointDescriptor;
-  begin
-    Result := nil;
-    for I := 0 to FBreakpoints.Count - 1 do
-    begin
-      B := TCnBreakpointDescriptor(FBreakpoints[I]);
-      if (B.FileName = AFileName) and (B.LineNumber = ALineNumber) then
-      begin
-        Result := B;
-        Exit;
-      end;
-    end;
-  end;
-
-begin
-  FBreakpoints.Clear;
-  if BorlandIDEServices.QueryInterface(IOTADebuggerServices, DS) <> S_OK then
-    Exit;
-
-  for I := 0 to DS.SourceBkptCount - 1 do
-  begin
-    SB := DS.SourceBkpts[I];
-    if (FileName = '') or (SB.FileName = FileName) then
-    begin
-      BD := CheckDuplicated(SB.FileName, SB.LineNumber);
-      if BD <> nil then
-        BD.Enabled := SB.Enabled
-      else
-      begin
-        BD := TCnBreakpointDescriptor.Create;
-        BD.FileName := SB.FileName;
-        BD.LineNumber := SB.LineNumber;
-        BD.Enabled := SB.Enabled;
-        FBreakpoints.Add(BD);
-      end;
-    end;
-  end;
-end;
 
 procedure TCnCodeFormatterWizard.RestoreBreakpoints(LineMarks: PDWORD; Count: Integer);
 var

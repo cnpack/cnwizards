@@ -185,6 +185,9 @@ function CnWizDebuggerNotifierServices: ICnWizDebuggerNotifierServices;
 function CnRemoteProcessEvaluator: TCnRemoteProcessEvaluator;
 {* 全局求值实例}
 
+function CnWizGetBreakpointsByFile(const FileName: string; Breakpoints: TObjectList): Boolean;
+{* 获取某源文件的断点信息，并创建 TCnBreakpointDescriptor 实例加入 Breakpoints 列表，返回是否成功获取有效断点}
+
 implementation
 
 uses
@@ -1175,6 +1178,58 @@ begin
 {$ELSE}
   Result := True;
 {$ENDIF}
+end;
+
+function CnWizGetBreakpointsByFile(const FileName: string; Breakpoints: TObjectList): Boolean;
+var
+  DS: IOTADebuggerServices;
+  SB: IOTASourceBreakpoint;
+  BD: TCnBreakpointDescriptor;
+  I: Integer;
+
+  function CheckDuplicated(const AFileName: string; ALineNumber: Integer):
+    TCnBreakpointDescriptor;
+  var
+    I: Integer;
+    B: TCnBreakpointDescriptor;
+  begin
+    Result := nil;
+    for I := 0 to Breakpoints.Count - 1 do
+    begin
+      B := TCnBreakpointDescriptor(Breakpoints[I]);
+      if (B.FileName = AFileName) and (B.LineNumber = ALineNumber) then
+      begin
+        Result := B;
+        Exit;
+      end;
+    end;
+  end;
+
+begin
+  Result := False;
+  Breakpoints.Clear;
+  if BorlandIDEServices.QueryInterface(IOTADebuggerServices, DS) <> S_OK then
+    Exit;
+
+  for I := 0 to DS.SourceBkptCount - 1 do
+  begin
+    SB := DS.SourceBkpts[I];
+    if (FileName = '') or (SB.FileName = FileName) then
+    begin
+      BD := CheckDuplicated(SB.FileName, SB.LineNumber);
+      if BD <> nil then
+        BD.Enabled := SB.Enabled
+      else
+      begin
+        BD := TCnBreakpointDescriptor.Create;
+        BD.FileName := SB.FileName;
+        BD.LineNumber := SB.LineNumber;
+        BD.Enabled := SB.Enabled;
+        Breakpoints.Add(BD);
+      end;
+    end;
+  end;
+  Result := Breakpoints.Count > 0;
 end;
 
 initialization
