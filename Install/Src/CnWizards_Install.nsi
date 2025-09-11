@@ -34,6 +34,7 @@
 ;    IDE_VERSION_D104S
 ;    IDE_VERSION_D110A
 ;    IDE_VERSION_D120A
+;    IDE_VERSION_D130F
 ;    IDE_VERSION_CB5
 ;    IDE_VERSION_CB6
 ;    NO_HELP  -- 定义时不打任何帮助文件
@@ -114,6 +115,7 @@ RequestExecutionLevel admin
 !ifndef IDE_VERSION_D104S
 !ifndef IDE_VERSION_D110A
 !ifndef IDE_VERSION_D120A
+!ifndef IDE_VERSION_D130F
 !ifndef IDE_VERSION_CB5
 !ifndef IDE_VERSION_CB6
 
@@ -142,9 +144,11 @@ RequestExecutionLevel admin
 !define IDE_VERSION_D104S "1"
 !define IDE_VERSION_D110A "1"
 !define IDE_VERSION_D120A "1"
+!define IDE_VERSION_D130F "1"
 !define IDE_VERSION_CB5 "1"
 !define IDE_VERSION_CB6 "1"
 
+!endif
 !endif
 !endif
 !endif
@@ -265,6 +269,10 @@ RequestExecutionLevel admin
 !ifdef IDE_VERSION_D120A
   !define IDE_SHORT_NAME "D120A"
   !define IDE_LONG_NAME "RAD Studio 12 Athens"
+!endif
+!ifdef IDE_VERSION_D130F
+  !define IDE_SHORT_NAME "D130F"
+  !define IDE_LONG_NAME "RAD Studio 13 Florence"
 !endif
 !ifdef IDE_VERSION_CB5
   !define IDE_SHORT_NAME "CB5"
@@ -609,6 +617,16 @@ FileLoop:
   FileClose $0
 !endif
 
+!ifdef IDE_VERSION_D130F
+  IfFileExists "$INSTDIR\CnWizards_D130F.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D130F.dll" a
+  IfErrors FileInUse
+  FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D130F64.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D130F64.dll" a
+  IfErrors FileInUse
+  FileClose $0
+!endif
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -1007,6 +1025,19 @@ Section "RAD Studio 12 Athens" SecD120A
 SectionEnd
 !endif
 
+!ifdef IDE_VERSION_D130F
+Section "RAD Studio 13 Florence" SecD130F
+  SectionIn 1 2
+  SetOutPath $INSTDIR
+  File "..\..\Bin\CnWizards_D130F.dll"
+  File "..\..\Bin\CnWizards_D130F64.dll"
+  ; 写入专家注册键值
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_D130F"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"
+  WriteRegStr HKCU "Software\Embarcadero\BDS\37.0\Experts x64" "CnWizards_Loader" "$INSTDIR\CnWizLoader64.dll"
+SectionEnd
+!endif
+
 !endif
 
 !ifdef IDE_VERSION_CB5
@@ -1208,6 +1239,10 @@ Function .onMouseOverSection
     ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 12 Athens" "+" $R0
     !insertmacro MUI_DESCRIPTION_TEXT ${SecD120A} $R0
   !endif
+  !ifdef IDE_VERSION_D130F
+    ${WordReplace} "$(DESDLL)" "#DLL#" "RAD Studio 13 Florence" "+" $R0
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecD130F} $R0
+  !endif
 !endif
   !ifdef IDE_VERSION_CB5
     ${WordReplace} "$(DESDLL)" "#DLL#" "C++Builder 5" "+" $R0
@@ -1319,6 +1354,9 @@ Function SetCheckBoxes
 !endif
 !ifdef IDE_VERSION_D120A
   !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\23.0" "RootDir" ${SecD120A}
+!endif
+!ifdef IDE_VERSION_D130F
+  !insertmacro SET_COMPILER_CHECKBOX HKCU "Software\Embarcadero\BDS\37.0" "RootDir" ${SecD130F}
 !endif
 !endif
 !ifdef IDE_VERSION_CB5
@@ -1444,6 +1482,11 @@ Section "Uninstall"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_D120A"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts" "CnWizards_Loader"
   DeleteRegValue HKCU "Software\Embarcadero\BDS\23.0\Experts x64" "CnWizards_Loader"
+!endif
+!ifdef IDE_VERSION_D130F
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_D130F"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_Loader"
+  DeleteRegValue HKCU "Software\Embarcadero\BDS\37.0\Experts x64" "CnWizards_Loader"
 !endif
 !ifdef IDE_VERSION_CB5
   DeleteRegValue HKCU "Software\Borland\C++Builder\5.0\Experts" "CnWizards_CB5"
