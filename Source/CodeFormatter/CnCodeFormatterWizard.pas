@@ -1065,7 +1065,7 @@ begin
           CnLazSourceEditorCenterLine(View, View.CursorTextXY.Y);
 {$ENDIF}
           Inc(OutLineMarks);
-{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('After Format. Restore Cursor Line: %d', [View.CursorTextXY.Y]);
 {$ENDIF}
