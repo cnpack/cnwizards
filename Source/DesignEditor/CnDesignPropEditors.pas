@@ -49,6 +49,7 @@ interface
 uses
   Windows, SysUtils, Classes, ToolsAPI, StdCtrls, Graphics, Controls, Buttons,
   Menus, Forms, Grids, Dialogs, TypInfo, CnCommon,
+  {$IFDEF DELPHI130_FLORENCE_UP} ImgList, {$ENDIF}
   CnMultiLineEditorFrm, CnHintEditorFrm, CnSizeConstraintsEditorFrm,
 {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, VCLEditors,
@@ -385,7 +386,11 @@ var
   S, Tmp: string;
 {$IFDEF DELPHI2009_UP}
   I, Index, ImgIndex: Integer;
+{$IFDEF DELPHI130_FLORENCE_UP}
+  Images: ImgList.TCustomImageList;
+{$ELSE}
   Images: TImageList;
+{$ENDIF}
 {$ENDIF}
 begin
   with TCnHintEditorForm.Create(nil) do
