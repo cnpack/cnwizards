@@ -20,7 +20,7 @@ C++Builder/BDS для повышения эффективности разраб
 
     CnPack IDE-Мастер предназначен для разработчиков, использующих 
 Delphi 5 6 7, C++Builder 5 6 и BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2, XE3, XE4, XE5, XE6, XE7, XE8, 
-10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens.
+10 Seattle, 10.1 Berlin, 10.2 Tokyo, 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens, 13 Florence.
 
     Официальная версия CnPack IDE-Мастера включает следующие языки: 
 Китайский (упрощенный и традиционный), Английский, Русский,

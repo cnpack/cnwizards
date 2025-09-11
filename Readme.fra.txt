@@ -21,7 +21,7 @@ C ++ Builder / BDS pour améliorer l'efficacité du développement.
     CnWizards est conçu pour aider les programmeurs qui utilisent Delphi 5 6 7,
 C ++ Builder 5 6 et BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2,
 XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
-10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens.
+10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens, 13 Florence.
 
     La version officielle de CnWizards comprend les langues suivantes:
 Chinois simplifié, chinois traditionnel, anglais, russe, allemand, Français

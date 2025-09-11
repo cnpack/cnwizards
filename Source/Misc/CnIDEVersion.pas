@@ -467,6 +467,18 @@ begin
   LatestUpdate := 'Update 3 (12.3)';
 end;
 
+function IsDelphi130AIdeVersionLatest(out LatestUpdate: string): Boolean;
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 37; Minor: 0; Release: 57242; Build: 3601); // 13.0
+var
+  ReadFileVersion: TVersionNumber;
+begin
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide370.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+  LatestUpdate := '13.0';
+end;
+
 function IsDelphi11GEDot3: Boolean;
 {$IFDEF DELPHI110_ALEXANDRIA}
 const
@@ -627,6 +639,10 @@ begin
 
 {$IFDEF DELPHI120_ATHENS}
   CnIdeVersionIsLatest := IsDelphi120AIdeVersionLatest(LatestUpdate);
+{$ENDIF}
+
+{$IFDEF DELPHI130_FLORENCE}
+  CnIdeVersionIsLatest := IsDelphi130AIdeVersionLatest(LatestUpdate);
 {$ENDIF}
 
   Result := CnIdeVersionIsLatest;

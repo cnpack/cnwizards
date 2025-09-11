@@ -125,7 +125,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
         Caption = 
           'Now Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006, RAD Studio' +
           ' 2007/2009/2010/XE/XE2/XE3'#13#10'/XE4/XE5/XE6/XE7/XE8/10 Seattle/10.1' +
-          ' Berlin/10.2 Tokyo/10.3 Rio/10.4 Sydney/11 Alexandria/12 Athens Supported.'#13#10'And, IDE His' +
+          ' Berlin/10.2 Tokyo/10.3 Rio/10.4 Sydney/11 Alexandria/12 Athens/13 Florence Supported.'#13#10'And, IDE His' +
           'tory Cleaner also Included Here.'
       end
       object rbBackup: TRadioButton
@@ -382,7 +382,7 @@ object CnIdeBRMainForm: TCnIdeBRMainForm
           'This Tool can be Used to Clean IDE Opened Projects and Files His' +
           'tory.'#13#10'Delphi 5/6/7/8, C++Builder 5/6 and BDS 2005/2006 RAD Stud' +
           'io 2007/2009/2010/XE/XE2/XE3/ '#13#10'XE4/XE5/XE6/XE7/XE8/10 Seattle/1' +
-          '0.1 Berlin/10.2 Tokyo/10.3 Rio/10.4 Sydney/11 Alexandria/12 Athens are Supported.'#13#10'Notic' +
+          '0.1 Berlin/10.2 Tokyo/10.3 Rio/10.4 Sydney/11 Alexandria/12 Athens/13 Florence are Supported.'#13#10'Notic' +
           'e: Please make sure that IDE are NOT running when executing this' +
           ' Tool.'
         WordWrap = True
