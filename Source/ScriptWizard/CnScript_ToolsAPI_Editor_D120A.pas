@@ -89,6 +89,11 @@ uses
   ,ToolsAPI.Editor
   ;
 
+{$IFDEF DELPHI130_FLORENCE_UP}
+type
+  TEditorMouseUpEvent = TEditorMouseEvent;
+  TEditorMouseDownEvent = TEditorMouseEvent;
+{$ENDIF}
 
 procedure Register;
 begin
