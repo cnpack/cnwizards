@@ -84,6 +84,7 @@ const {My own (AX) codes for Delphi/Kylix versions, the Delphi codes
   verD_10_4=27; //10.4 Sydney
   verD_11=28; //11 Alexandria
   verD_12=29; //12 Athens
+  verD_13=37; //13 Florence
   verK1=100; //Kylix 1.0
   verK2=101; //Kylix 2.0
   verK3=102; //Kylix 3.0
@@ -4457,7 +4458,7 @@ begin
      //which we describe here:
       BVer := Magic shr 24;
       PlMagic := Magic and $FF;
-      if (BVer<=$24{12Athens})and(BVer>=$1B{XE6})and(PlMagic=$4D)or
+      if (BVer<=37{13Florence})and(BVer>=$1B{XE6})and(PlMagic=$4D)or
          (BVer<=$1A{XE5})and(BVer>=$17{XE2})and(PlMagic=$4B)
       then begin
         PlMagic := (Magic shr 8)and $FF;
