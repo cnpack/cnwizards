@@ -223,6 +223,14 @@ begin
           Result := Dir + 'CnWizards_D120A.DLL'; // 12.2 Patch 1
 {$ENDIF}
       end;
+    37:
+      begin
+{$IFDEF WIN64}
+        Result := Dir + 'CnWizards_D130F64.DLL'; // 64 位 IDE 用这个
+{$ELSE}
+        Result := Dir + 'CnWizards_D130F.DLL';   // 13.0
+{$ENDIF}
+      end;
   end;
 end;
 
