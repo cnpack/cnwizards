@@ -78,6 +78,8 @@ See http://www.suigeneris.org/want/ for details.
   <property name="exe.D120A2"     value="${ProgramFiles}\Embarcadero\Studio\23.0_2\Bin\DCC32.EXE" unless="env.D120A2" />
   <property name="exe.D120A"      value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC32.EXE" unless="env.D120A" />
   <property name="exe.D120A_64"   value="${ProgramFiles}\Embarcadero\Studio\23.0\Bin\DCC64.EXE" unless="env.D120A_64" />
+  <property name="exe.D130F"      value="${ProgramFiles}\Embarcadero\Studio\37.0\Bin\DCC32.EXE" unless="env.D130F" />
+  <property name="exe.D130F_64"   value="${ProgramFiles}\Embarcadero\Studio\37.0\Bin\DCC64.EXE" unless="env.D130F_64" />
   <property name="exe.brcc32"     value="%{BRCC32}" />
   <property name="exe.git"        value="%{env.git}" if="env.git" />
   <property name="exe.git"        value="${ProgramFiles}\Git\bin\git.exe" unless="env.git" />
@@ -210,7 +212,7 @@ Usage: want [target-name] [-Dname=value]
     cnwizloader    - Compile CnWizards Loader DLL.
     cnwizloader64  - Compile CnWizards 64-Bit Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
-                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, d120a64, cb5, cb6 also)
+                 (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, d120a64, d130f, d130f64, cb5, cb6 also)
     cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     resdll64   - Compile CnWizards 64-Bit Resource DLL.
@@ -363,6 +365,8 @@ Usage: want [target-name] [-Dname=value]
   <target name="d120a2" depends="-d120a2,-cw_final" description="Compile CnWizards for RAD Studio 12.2 Athens." />
   <target name="d120a" depends="-d120a,-cw_final" description="Compile CnWizards for RAD Studio 12.3 Athens." />
   <target name="d120a64" depends="-d120a64,-cw_final" description="Compile CnWizards for RAD Studio 12.3 Athens 64-Bit." />
+  <target name="d130f" depends="-d130f,-cw_final" description="Compile CnWizards for RAD Studio 13 Florence." />
+  <target name="d130f64" depends="-d130f64,-cw_final" description="Compile CnWizards for RAD Studio 13 Florence 64-Bit." />
   <target name="cb5" depends="-cb5,-cw_final" description="Compile CnWizards for C++Builder 5." />
   <target name="cb6" depends="-cb6,-cw_final" description="Compile CnWizards for C++Builder 6." />
 
@@ -1093,6 +1097,50 @@ Usage: want [target-name] [-Dname=value]
     </delete>
     <move tofile="${src}/CnWizards_D120A64.res" >
        <include name="${src}/CnWizards_D120A64.res.old" />
+    </move>
+  </target>
+
+  <target name="-d130f" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 13 Florence" />
+    <property name="Ver.InternalName"     value="CnWizards_D130F" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D130F.DLL" />
+    <copy tofile="${src}/CnWizards_D130F.res.old" >
+       <include name="${src}/CnWizards_D130F.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D130F.rc" />
+    <brcc file="${src}/CnWizards_D130F.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D130F.res" />
+    <dcc basedir="${src}" source="CnWizards_D130F.dpr" exename="${exe.D130F}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add};I64;OTA_HAS_AISERVICE" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D130F.res" />
+       <include name="CnWizards_D130F.rc" />
+       <include name="CnWizards_D130F.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D130F.res" >
+       <include name="${src}/CnWizards_D130F.res.old" />
+    </move>
+  </target>
+
+  <target name="-d130f64" depends="-cw_prepare" >
+    <property name="Ver.FileDescription"  value="CnWizards For RAD Studio 13 Florence 64-Bit" />
+    <property name="Ver.InternalName"     value="CnWizards_D130F64" />
+    <property name="Ver.OriginalFilename" value="CnWizards_D130F64.DLL" />
+    <copy tofile="${src}/CnWizards_D130F64.res.old" >
+       <include name="${src}/CnWizards_D130F64.res" />
+    </copy>
+    <echo input="${src}/CnWizards.template.rc" file="${src}/CnWizards_D130F64.rc" />
+    <brcc file="${src}/CnWizards_D130F64.rc" exename="${exe.brcc32}" output="${src}/CnWizards_D130F64.res" />
+    <dcc basedir="${src}" source="CnWizards_D130F64.dpr" exename="${exe.D130F_64}" usecfg="true" arguments="${dcc_arg}" >
+      <define name="${define.add};I64;OTA_HAS_AISERVICE" />
+    </dcc>
+    <delete dir="${src}">
+       <include name="CnWizards_D130F64.res" />
+       <include name="CnWizards_D130F64.rc" />
+       <include name="CnWizards_D130F64.drc" />
+    </delete>
+    <move tofile="${src}/CnWizards_D130F64.res" >
+       <include name="${src}/CnWizards_D130F64.res.old" />
     </move>
   </target>
 
