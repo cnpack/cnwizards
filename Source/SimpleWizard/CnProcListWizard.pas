@@ -4737,12 +4737,15 @@ begin
 
     Info := TCnElementInfo(FDisplayItems.Objects[Index]);
     Canvas.FillRect(Rect);
+
+    // TODO: HDPI 下，原始尺寸画在放大后的画布上，会显得图标小
     M := (Rect.Bottom - Rect.Top - dmCnSharedImages.Images.Height) div 2;
     if M < 0 then
       M := 0;
 
     dmCnSharedImages.Images.Draw(Canvas, Rect.Left + M + 2,
       Rect.Top + M, GetListImageIndex(Info));
+
     Canvas.Brush.Style := bsClear;
     Canvas.Font.Style := [fsBold];
 

@@ -662,8 +662,28 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_IOTAGetItService(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'IOTAGetItService230', 'IOTAGetItService') do
-  with CL.AddInterface(CL.FindInterface('IOTAGetItService230'),IOTAGetItService, 'IOTAGetItService') do
+  //with RegInterfaceS(CL,'IOTAGetItService370', 'IOTAGetItService') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService370'),IOTAGetItService, 'IOTAGetItService') do
+  begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService370(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService240', 'IOTAGetItService370') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService240'),IOTAGetItService370, 'IOTAGetItService370') do
+  begin
+    RegisterMethod('Function GetIsResolvingDependencies : Boolean', cdRegister);
+    RegisterMethod('Procedure SetIsResolvingDependencies( const Value : Boolean)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_IOTAGetItService240(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTAGetItService230', 'IOTAGetItService240') do
+  with CL.AddInterface(CL.FindInterface('IOTAGetItService230'),IOTAGetItService240, 'IOTAGetItService240') do
   begin
     RegisterMethod('Procedure CheckProjectDependencies( const Project : IOTAProject)', cdRegister);
     RegisterMethod('Function InstallAndroidSDK : Boolean', cdRegister);
@@ -5814,6 +5834,7 @@ begin
  CL.AddConstantN('cDefEdStyleSheet','String').SetString( cDefEdOptions + 'StyleSheet');
  CL.AddConstantN('cDefEdINI','String').SetString( cDefEdOptions + 'INI');
  CL.AddConstantN('cDefEdPHP','String').SetString( cDefEdOptions + 'PHP');
+ CL.AddConstantN('cDefEdJSON','String').SetString( cDefEdOptions + 'JSON');
  CL.AddConstantN('dcAlign','String').SetString( 'Align');
  CL.AddConstantN('dcSize','String').SetString( 'Size');
  CL.AddConstantN('dcScale','String').SetString( 'Scale');
@@ -6487,6 +6508,8 @@ begin
   SIRegister_IOTAProjectUnitScopes(CL);
   SIRegister_IOTAGetItService220(CL);
   SIRegister_IOTAGetItService230(CL);
+  SIRegister_IOTAGetItService240(CL);
+  SIRegister_IOTAGetItService370(CL);
   SIRegister_IOTAGetItService(CL);
   SIRegister_INTAIDEThemingServicesNotifier(CL);
   SIRegister_IOTAExtensionsNotifier(CL);
