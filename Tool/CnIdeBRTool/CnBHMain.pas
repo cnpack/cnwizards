@@ -136,7 +136,7 @@ type
     procedure btnHelpClick(Sender: TObject);
   private
     FCanClose: Boolean;
-    FAbiTypeRestore: TAbiType;
+    FAbiTypeRestore: TCnAbiType;
     FDone: Boolean;
     FOldSel: Integer;
     function GetEntryValue(const AValue: string): string;
@@ -183,8 +183,8 @@ const
     ('Delphi\5.0', 'Delphi\6.0', 'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0',
     'BDS\5.0', 'BDS\6.0', 'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0',
     'BDS\12.0', 'BDS\14.0', 'BDS\15.0', 'BDS\16.0', 'BDS\17.0', 'BDS\18.0', 'BDS\19.0',
-    'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0', 'C++Builder\5.0', 'C++Builder\6.0',
-    '');
+    'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0', 'BDS\37.0',
+    'C++Builder\5.0', 'C++Builder\6.0', '');
   SCnRegHisProject = '\Closed Projects';
   SCnRegHisFiles = '\Closed Files';
 
@@ -207,9 +207,9 @@ begin
   pgcMain.ActivePageIndex := 0;
 
   // 查看系统中已安装的 AppBuilder
-  for I := Ord(Low(TAbiType)) to Ord(High(TAbiType)) do
+  for I := Ord(Low(TCnAbiType)) to Ord(High(TCnAbiType)) do
   begin
-    RootDir := GetAppRootDir(TAbiType(I));
+    RootDir := GetAppRootDir(TCnAbiType(I));
     if RootDir <> '' then
     begin
       lbxSelectApp.Items.AddObject(Format('%-20s ( %s )',[SCnAppName[I], RootDir]), TObject(1));
@@ -220,7 +220,7 @@ begin
     end;
   end;
 
-  for I := Ord(Low(TAbiType)) to Ord(High(TAbiType)) do
+  for I := Ord(Low(TCnAbiType)) to Ord(High(TCnAbiType)) do
   begin
     if FindCmdLineSwitch('I' + SCnAppAbName[I], ['-', '/'], True) then
       if lbxSelectApp.Items.Objects[I] = TObject(1) then
@@ -277,7 +277,7 @@ begin
       end;
     end;
 //    备份时似乎 IDE 在运行也不要紧？
-//    if IsAppBuilderRunning(TAbiType(lbxSelectApp.ItemIndex)) then
+//    if IsAppBuilderRunning(TCnAbiType(lbxSelectApp.ItemIndex)) then
 //    begin
 //      ErrorDlg(Format(SCnErrorIDERunningFmt, [SCnAppName[lbxSelectApp.ItemIndex]]);
 //      Exit;
@@ -337,7 +337,7 @@ begin
     // 创建 TAppBuilderInfo 对象
     try
       Abi := TAppBuilderInfo.Create(
-          Handle, TAbiType(lbxSelectApp.ItemIndex));
+          Handle, TCnAbiType(lbxSelectApp.ItemIndex));
       if lbxBackupOptions.Checked[0] then
         Abi.AbiOptions := [aoCodeTemp];
       if lbxBackupOptions.Checked[1] then
@@ -636,7 +636,7 @@ begin
       Canvas.Font.Color := clGray;
       
     // 图像
-    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + Integer(High(TAbiType)) + 1); // 前面 许多个是 IDE 图标
+    il16.Draw(Canvas, Rect.Left + 3, Rect.Top + 2, Index + Integer(High(TCnAbiType)) + 1); // 前面 许多个是 IDE 图标
     // 绘制出文字
     SetBkMode(Canvas.Handle, TRANSPARENT);
     Canvas.TextOut(Rect.Left + 22, Rect.Top + (Rect.Bottom

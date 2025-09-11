@@ -54,7 +54,7 @@ type
   TAppBuilderInfo = class(TObject)
   private
     FOwnerHandle: THandle;    // 调用者的句柄
-    FAbiType: TAbiType;       // AppBuilder 类型
+    FAbiType: TCnAbiType;       // AppBuilder 类型
     FAbiOptions: TAbiOptions; // 备份/恢复选项
     FTempPath: string;        // 临时文件存放目录
     FRootDir: string;         // AppBuilder 安装目录
@@ -78,7 +78,7 @@ type
     procedure OnFindRestoreDskFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
   public
-    constructor Create(hOwner: THandle; AbiType: TAbiType);
+    constructor Create(hOwner: THandle; AbiType: TCnAbiType);
     destructor Destroy; override;
 
     // 保存所有信息到文件
@@ -95,22 +95,22 @@ type
 //------------------------------------------------------------------------------
 
 // 获取 AppBuilder 安装目录
-function GetAppRootDir(AbiType: TAbiType): string;
+function GetAppRootDir(AbiType: TCnAbiType): string;
 // 分析备份文件
 function ParseBackFile(const BackFileName: string;
-  var RootDir, AppName: string; var AbiType: TAbiType): TAbiOptions;
+  var RootDir, AppName: string; var AbiType: TCnAbiType): TAbiOptions;
 // 操作结果的字符串
 function OpResult(Res: Boolean): string;
 // 临时目录
 function MyGetTempPath: string;
 // AppBuilder 是否在运行中
-function IsAppBuilderRunning(AbiType: TAbiType): boolean;
+function IsAppBuilderRunning(AbiType: TCnAbiType): boolean;
 // 查看指定文件是否在进程列表中
 function FileInProcessList(const AFileName: string): Boolean;
 // 清除 IDE 打开过的工程/文件历史记录
-function ClearOpenedHistory(AbiType: TAbiType): Boolean;
+function ClearOpenedHistory(AbiType: TCnAbiType): Boolean;
 // 获得 IDE 的注册表路径
-function GetRegIDEBaseFromAt(AbiType: TAbiType): string;
+function GetRegIDEBaseFromAt(AbiType: TCnAbiType): string;
 
 implementation
 
@@ -119,7 +119,7 @@ uses
 
 { TAppBuilderInfo }
 
-constructor TAppBuilderInfo.Create(hOwner: THandle; AbiType: TAbiType);
+constructor TAppBuilderInfo.Create(hOwner: THandle; AbiType: TCnAbiType);
 var
   TmpPath: string;
 begin
@@ -127,7 +127,7 @@ begin
   FAbiType := AbiType; // AppBuilder 名称
 
   // 初始化变量
-  if Integer(AbiType) <= Integer(High(TAbiType)) then
+  if Integer(AbiType) <= Integer(High(TCnAbiType)) then
   begin
     FAppName := SCnAppName[Integer(AbiType)];
     FAppAbName := SCnAppAbName[Integer(AbiType)];
@@ -667,7 +667,7 @@ end;
 
 // 分析备份文件
 function ParseBackFile(const BackFileName: string;
-  var RootDir, AppName: string; var AbiType: TAbiType): TAbiOptions;
+  var RootDir, AppName: string; var AbiType: TCnAbiType): TAbiOptions;
 var
   Header: THeaderStruct;
   CheckSum: Byte;
@@ -694,9 +694,9 @@ begin
     Exit;
   end;
 
-  AbiType := TAbiType(Header.btAbiType - 1);
+  AbiType := TCnAbiType(Header.btAbiType - 1);
   // AppBuilder 的名称
-  if AbiType In [Low(TAbiType)..High(TAbiType)] then
+  if AbiType In [Low(TCnAbiType)..High(TCnAbiType)] then
     AppName := SCnAppName[Integer(AbiType)]
   else
     AppName := SCnUnkownName;
@@ -997,7 +997,7 @@ end;
 //---------------------------------------------------------------------------
 
 // 查看 AppBuilder 是否在运行中
-function IsAppBuilderRunning(AbiType: TAbiType): Boolean;
+function IsAppBuilderRunning(AbiType: TCnAbiType): Boolean;
 var
   hAppBuilder: THandle;
   Buf: array[0..255] of Char;
@@ -1035,7 +1035,7 @@ begin
 end;
 
 // AppBuilder 的安装根目录
-function GetAppRootDir(AbiType: TAbiType): string;
+function GetAppRootDir(AbiType: TCnAbiType): string;
 var
   Res: Boolean;
   AppFile: string;
@@ -1144,7 +1144,7 @@ begin
 end;
 
 // 清除IDE打开过的工程/文件历史记录
-function ClearOpenedHistory(AbiType: TAbiType): Boolean;
+function ClearOpenedHistory(AbiType: TCnAbiType): Boolean;
 var
   reg: TRegistry;
 begin
@@ -1159,7 +1159,7 @@ begin
   FreeAndNil(reg);
 end;
 
-function GetRegIDEBaseFromAt(AbiType: TAbiType): string;
+function GetRegIDEBaseFromAt(AbiType: TCnAbiType): string;
 begin
   if Integer(AbiType) >= Integer(atDelphiXE) then
     Result := '\Software\Embarcadero\'

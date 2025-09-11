@@ -37,15 +37,15 @@ interface
 
 type
   // AppBuilder ¿‡–Õ
-  TAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
+  TCnAbiType = (atBCB5, atBCB6, atDelphi5, atDelphi6, atDelphi7, atDelphi8,
     atBDS2005, atBDS2006, atDelphi2007, atDelphi2009, atDelphi2010, atDelphiXE,
     atDelphiXE2, atDelphiXE3, atDelphiXE4, atDelphiXE5, atDelphiXE6, atDelphiXE7,
     atDelphiXE8, atDelphi10S, atDelphi101B, atDelphi102T, atDelphi103R, atDelphi104S,
-    atDelphi110A, atDelphi120A);
-  TAbiTypes = set of TAbiType; // at := [BCB5, BCB6];
+    atDelphi110A, atDelphi120A, atDelphi130F);
+  TAbiTypes = set of TCnAbiType; // at := [BCB5, BCB6];
 
 var
-  SCnAppName: array [0..Integer(High(TAbiType))] of string =
+  SCnAppName: array [0..Integer(High(TCnAbiType))] of string =
   (
       'C++Builder 5.0 ', 'C++Builder 6.0 ', 'Delphi 5.0 ', 'Delphi 6.0 ',
       'Delphi 7.0 ', 'Delphi 8.0 ', 'BDS 2005 ', 'BDS 2006 ', 'RAD Studio 2007',
@@ -53,10 +53,11 @@ var
       'RAD Studio XE3', 'RAD Studio XE4', 'RAD Studio XE5', 'RAD Studio XE6',
       'RAD Studio XE7', 'RAD Studio XE8', 'RAD Studio 10 Seattle',
       'RAD Studio 10.1 Berlin', 'RAD Studio 10.2 Tokyo', 'RAD Studio 10.3 Rio',
-      'RAD Studio 10.4 Sydney', 'RAD Studio 11 Alexandria', 'RAD Studio 12 Athens'
+      'RAD Studio 10.4 Sydney', 'RAD Studio 11 Alexandria', 'RAD Studio 12 Athens',
+      'RAD Studio 13 Florence'
   );
 
-  SCnAppAbName: array[0..Integer(High(TAbiType))] of string =
+  SCnAppAbName: array[0..Integer(High(TCnAbiType))] of string =
   (
       'BCB5', 'BCB6', 'Delphi5', 'Delphi6', 'Delphi7',
       'Delphi8', 'BDS2005', 'BDS2006', 'RADStudio2007',
@@ -65,16 +66,16 @@ var
       'RADStudioXE5', 'RADStudioXE6', 'RADStudioXE7',
       'RADStudioXE8', 'RADStudio10Seattle', 'RADStudio101Berlin',
       'RADStudio102Tokyo', 'RADStudio103Rio', 'RADStudio104Sydney',
-      'RADStudio110Alexandria', 'RADStudio120Athens'
+      'RADStudio110Alexandria', 'RADStudio120Athens', 'RADStudio130Florence'
   );
 
-  SCnRegPath: array[0..Integer(High(TAbiType))] of string =
+  SCnRegPath: array[0..Integer(High(TCnAbiType))] of string =
   (
       'C++Builder\5.0', 'C++Builder\6.0', 'Delphi\5.0', 'Delphi\6.0',
       'Delphi\7.0', 'BDS\2.0', 'BDS\3.0', 'BDS\4.0', 'BDS\5.0', 'BDS\6.0',
       'BDS\7.0', 'BDS\8.0', 'BDS\9.0', 'BDS\10.0', 'BDS\11.0', 'BDS\12.0',
       'BDS\14.0', 'BDS\15.0', 'BDS\16.0', 'BDS\17.0', 'BDS\18.0', 'BDS\19.0',
-      'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0'
+      'BDS\20.0', 'BDS\21.0', 'BDS\22.0', 'BDS\23.0', 'BDS\37.0'
   );
 
   SCnOpResult: array[0..1] of string =
