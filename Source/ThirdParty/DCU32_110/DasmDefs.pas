@@ -42,7 +42,7 @@ type
   TRegVarInfoProc = function(ProcOfs: integer; hReg: THBMName; Ofs,Size: integer;
     var hDecl: integer): AnsiString of object;
 
-const
+var
   GetRegVarInfo: TRegVarInfoProc = Nil;
 
 const
