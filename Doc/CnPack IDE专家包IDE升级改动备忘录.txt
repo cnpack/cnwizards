@@ -5,9 +5,9 @@
 **********************************************************************
 
                     CnPack IDE专家包IDE升级改动备忘录
-                           Revision 1.0.0.4
+                           Revision 1.0.0.5
                        =========================
-                         作者：刘啸 2023.11.10
+                         作者：刘啸 2025.09.08
 
 
 
@@ -29,9 +29,9 @@
   四、专家包安装工具。cnwizards\Tools\CnWizSetup\Setup.dpr 中加入新的 IDE 的定义。
 
   五、专家包设置备份工具。cnwizards\Tools\CnIDEBRTool 目录下，CnBHConst.pas 中加入新的定义，
-      CnBHMain.pas、CleanClass.pas 与 CnAppBuilderInfo.pas 中在各个 IDE 的常量使用处加入新的常量。
+      CnBHMain.pas、CleanClass.pas 与 CnAppBuilderInfo.pas 中在各个 IDE 的常量使用处加入新的常量，主窗体并加入新的图标。
 
-  六、专家包外部专家管理工具。cnwizards\Tools\CnManageWiz\CnManWizForm.pas 中加入新的定义。
+  六、专家包外部专家管理工具。cnwizards\Tools\CnManageWiz\CnManWizForm.pas 中加入新的定义（后经重构，复用专家包中的，不用改了），并加上新的图标。
 
   七、want脚本。cnwizards\Make\want.xml。加入新的 Target 定义。
 
