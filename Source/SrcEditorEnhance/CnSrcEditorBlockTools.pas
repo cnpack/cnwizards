@@ -69,7 +69,8 @@ type
     btLowerCase, btUpperCase, btToggleCase,
     btIndent, btIndentEx, btUnindent, btUnindentEx,
     btCommentCode, btUnCommentCode, btToggleComment, btCommentCropper,
-    btAICoderExplainCode, btAICoderReviewCode, btAICoderGenTestCase, btAICoderToggleChatWindow, btAICoderSetting,
+    btAICoderExplainCode, btAICoderReviewCode, btAICoderGenTestCase, btAICoderContinueCoding,
+    btAICoderToggleChatWindow, btAICoderSetting,
     btFormatCode, btCodeSwap, btEvalAlign, btCodeToString, btInsertColor, btInsertDateTime,
     btSortLines, btUsesFromIdent, {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD} btAddToCollector, {$ENDIF}
     {$IFDEF IDE_HAS_INSIGHT} btSearchInsight, {$ENDIF}
@@ -1031,6 +1032,7 @@ begin
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardExplainCode', btAICoderExplainCode);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardReviewCode', btAICoderReviewCode);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardGenTestCase', btAICoderGenTestCase);
+    AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardContinueCoding', btAICoderContinueCoding);
 
     AddSepMenuItem(FAICoderMenu);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardChatWindow', btAICoderToggleChatWindow);
