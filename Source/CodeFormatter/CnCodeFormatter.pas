@@ -4802,7 +4802,7 @@ end;
 procedure TCnBasePascalFormatter.FormatTypeSection(PreSpaceCount: Byte);
 const
   IsTypeStartTokens = [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
-    + KeywordTokens - NOTExpressionTokens;
+    + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens;
 var
   FirstType: Boolean;
 begin
@@ -4991,7 +4991,7 @@ end;
 procedure TCnBasePascalFormatter.FormatConstSection(PreSpaceCount: Byte);
 const
   IsConstStartTokens = [tokSymbol, tokSLB] + ComplexTokens + DirectiveTokens
-    + KeywordTokens - NOTExpressionTokens;
+    + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens;
 var
   OldKeepOneBlankLine: Boolean;
 begin
@@ -5545,7 +5545,7 @@ end;
 procedure TCnBasePascalFormatter.FormatVarSection(PreSpaceCount: Byte; IsGlobal: Boolean);
 const
   IsVarStartTokens = [tokSymbol, tokSLB, tokAmpersand] + ComplexTokens + DirectiveTokens
-    + KeywordTokens - NOTExpressionTokens;
+    + KeywordTokens - NOTExpressionTokens - NOTClassTypeConstTokens;
 var
   OldKeepOneBlankLine: Boolean;
 begin
