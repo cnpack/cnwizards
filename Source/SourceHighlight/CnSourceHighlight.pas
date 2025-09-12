@@ -394,8 +394,8 @@ type
 
     property StartToken: TCnGeneralPasToken read FStartToken write FStartToken;
     property EndToken: TCnGeneralPasToken read FEndToken write FEndToken;
-    //property EndIsFirstTokenInLine: Boolean read FEndIsFirstTokenInLine write FEndIsFirstTokenInLine;
-    //{* 末尾是否是第一个 Token}
+    // property EndIsFirstTokenInLine: Boolean read FEndIsFirstTokenInLine write FEndIsFirstTokenInLine;
+    // {* 末尾是否是第一个 Token}
 
     property StartLeft: Integer read FStartLeft write FStartLeft;
     {* 配对起始 Token 的 Column}
@@ -4530,7 +4530,7 @@ var
     Result := Token.EditCol;
     // D567 与 D2005~2007 下分别是 Ansi/Utf8，符合 GetAttributeAtPos 的要求
 {$IFDEF UNICODE}
-    // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的Pos，因此进行 Col 的 UTF8 转换
+    // D2009 或以上 GetAttributeAtPos 需要的是 UTF8 的 Pos，因此进行 Col 的 UTF8 转换
     if FRawLineText <> '' then
       Result := ConvertAnsiPositionToUtf8OnUnicodeText(FRawLineText, Token.EditCol);
 {$ENDIF}

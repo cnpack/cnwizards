@@ -36,11 +36,15 @@
 {$ENDIF}
 
 {$IFDEF OTA_CODEEDITOR_SERVICE}
-  {$IFDEF DELPHI120_ATHENS_UP}
+  {$IFDEF DELPHI120_ATHENS}
   {$IFDEF WIN64}
-  // 只在 64 位的 D120 及以上版本使用 11.3 之后新增的 ToolsAPI.Editor 接口
-  {$DEFINE USE_CODEEDITOR_SERVICE}
+    // 在 64 位的 D120 使用 11.3 之后新增的 ToolsAPI.Editor 接口
+    {$DEFINE USE_CODEEDITOR_SERVICE}
   {$ENDIF}
+  {$ENDIF}
+  {$IFDEF DELPHI130_FLORENCE_UP}
+    // 在 D130 及以上版本使用 11.3 之后新增的 ToolsAPI.Editor 接口，无论 32 位还是 64 位
+    {$DEFINE USE_CODEEDITOR_SERVICE}
   {$ENDIF}
 {$ENDIF}
 
