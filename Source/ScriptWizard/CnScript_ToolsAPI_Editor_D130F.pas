@@ -18,17 +18,17 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnScript_ToolsAPI_Editor_D120A;
+unit CnScript_ToolsAPI_Editor_D130F;
 { |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：脚本扩展 ToolsAPI.Editor 注册类
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元由 UnitParser v0.7 自动生成的文件修改而来
-* 开发平台：PWin7 + Delphi 12
-* 兼容测试：PWin7/10 + Delphi 12
+* 开发平台：PWin7 + Delphi 13
+* 兼容测试：PWin7/10 + Delphi 13
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2025.05.01 V1.0
+* 修改记录：2025.09.12 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -44,24 +44,28 @@ uses
   ,uPSRuntime
   ,uPSCompiler
   ;
-
-type
+ 
+type 
 (*----------------------------------------------------------------------------*)
   TPSImport_ToolsAPI_Editor = class(TPSPlugin)
   protected
     procedure CompileImport1(CompExec: TPSScript); override;
     procedure ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter); override;
   end;
-
-
+ 
+ 
 { compile-time registration functions }
 procedure SIRegister_TNTACodeEditorNotifier(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorServices(CL: TPSPascalCompiler);
+procedure SIRegister_INTACodeEditorServices290(CL: TPSPascalCompiler);
+procedure SIRegister_INTACodeEditorScrollbarAnnotation(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorServices280(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorOptions(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorOptions280(CL: TPSPascalCompiler);
+procedure SIRegister_INTACodeEditorEvents370(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorEvents(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorPaintContext(CL: TPSPascalCompiler);
+procedure SIRegister_INTACodeEditorPaintContext290(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorPaintContext280(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorState(CL: TPSPascalCompiler);
 procedure SIRegister_INTACodeEditorState290(CL: TPSPascalCompiler);
@@ -88,7 +92,8 @@ uses
   ,Graphics
   ,ToolsAPI.Editor
   ;
-
+ 
+ 
 procedure Register;
 begin
   RegisterComponents('Pascal Script', [TPSImport_ToolsAPI_Editor]);
@@ -105,9 +110,14 @@ begin
     RegisterProperty('OnEditorResized', 'TEditorResizedEvent', iptrw);
     RegisterProperty('OnEditorElided', 'TEditorElidedEvent', iptrw);
     RegisterProperty('OnEditorUnElided', 'TEditorElidedEvent', iptrw);
-    RegisterProperty('OnEditorMouseDown', 'TEditorMouseDownEvent', iptrw);
-    RegisterProperty('OnEditorMouseUp', 'TEditorMouseUpEvent', iptrw);
+    RegisterProperty('OnEditorMouseDown', 'TEditorMouseEvent', iptrw);
+    RegisterProperty('OnEditorMouseUp', 'TEditorMouseEvent', iptrw);
     RegisterProperty('OnEditorMouseMove', 'TEditorMouseMoveEvent', iptrw);
+    RegisterProperty('OnEditorMouseDownEx', 'TEditorMouseExEvent', iptrw);
+    RegisterProperty('OnEditorMouseUpEx', 'TEditorMouseExEvent', iptrw);
+    RegisterProperty('OnEditorKeyDown', 'TEditorKeyboardEvent', iptrw);
+    RegisterProperty('OnEditorKeyUp', 'TEditorKeyboardEvent', iptrw);
+    RegisterProperty('OnEditorSetCaretPos', 'TEditorCaretPosEvent', iptrw);
     RegisterProperty('OnEditorBeginPaint', 'TEditorBeginPaintEvent', iptrw);
     RegisterProperty('OnEditorEndPaint', 'TEditorEndPaintEvent', iptrw);
     RegisterProperty('OnEditorPaintGutter', 'TEditorPaintGutterEvent', iptrw);
@@ -119,9 +129,41 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTACodeEditorServices(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'INTACodeEditorServices280', 'INTACodeEditorServices') do
-  with CL.AddInterface(CL.FindInterface('INTACodeEditorServices280'),INTACodeEditorServices, 'INTACodeEditorServices') do
+  //with RegInterfaceS(CL,'INTACodeEditorServices290', 'INTACodeEditorServices') do
+  with CL.AddInterface(CL.FindInterface('INTACodeEditorServices290'),INTACodeEditorServices, 'INTACodeEditorServices') do
   begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTACodeEditorServices290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTACodeEditorServices280', 'INTACodeEditorServices290') do
+  with CL.AddInterface(CL.FindInterface('INTACodeEditorServices280'),INTACodeEditorServices290, 'INTACodeEditorServices290') do
+  begin
+    RegisterMethod('Function RegisterScrollbarAnnotation( const AScrollbarAnnotation : INTACodeEditorScrollbarAnnotation) : Integer', cdRegister);
+    RegisterMethod('Procedure RemoveScrollbarAnnotation( AIndex : Integer)', cdRegister);
+    RegisterMethod('Procedure AddScrollbarAnnotationEntry( const AEditor : TWinControl; AIndex, ALineNumber : Integer; AColor : TColor)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTACodeEditorScrollbarAnnotation(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'IOTANotifier', 'INTACodeEditorScrollbarAnnotation') do
+  with CL.AddInterface(CL.FindInterface('IOTANotifier'),INTACodeEditorScrollbarAnnotation, 'INTACodeEditorScrollbarAnnotation') do
+  begin
+    RegisterMethod('Function GetEnabled : Boolean', cdRegister);
+    RegisterMethod('Procedure SetEnabled( const Value : Boolean)', cdRegister);
+    RegisterMethod('Function GetName : string', cdRegister);
+    RegisterMethod('Function GetWidth : Integer', cdRegister);
+    RegisterMethod('Procedure SetWidth( const Value : Integer)', cdRegister);
+    RegisterMethod('Function GetStart : Integer', cdRegister);
+    RegisterMethod('Procedure SetStart( const Value : Integer)', cdRegister);
+    RegisterMethod('Function GetColor : TColor', cdRegister);
+    RegisterMethod('Function GetCustomDraw : Boolean', cdRegister);
+    RegisterMethod('Procedure DrawMark( const AEditor : TWinControl; LineNum : Integer; ACanvas : TCanvas; ARect : TRect)', cdRegister);
+    RegisterMethod('Procedure GetScrollbarAnnotations( const AEditor : TWinControl)', cdRegister);
   end;
 end;
 
@@ -180,6 +222,20 @@ begin
 end;
 
 (*----------------------------------------------------------------------------*)
+procedure SIRegister_INTACodeEditorEvents370(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTACodeEditorEvents', 'INTACodeEditorEvents370') do
+  with CL.AddInterface(CL.FindInterface('INTACodeEditorEvents'),INTACodeEditorEvents370, 'INTACodeEditorEvents370') do
+  begin
+    RegisterMethod('Procedure EditorMouseDown( const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EditorMouseUp( const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EditorKeyDown( const Editor : TWinControl; Key : Word; Shift : TShiftState; var Handled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EditorKeyUp( const Editor : TWinControl; Key : Word; Shift : TShiftState; var Handled : Boolean)', cdRegister);
+    RegisterMethod('Procedure EditorSetCaretPos( const Editor : TWinControl; X, Y : Integer)', cdRegister);
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
 procedure SIRegister_INTACodeEditorEvents(CL: TPSPascalCompiler);
 begin
   //with RegInterfaceS(CL,'IOTANotifier', 'INTACodeEditorEvents') do
@@ -207,9 +263,19 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_INTACodeEditorPaintContext(CL: TPSPascalCompiler);
 begin
-  //with RegInterfaceS(CL,'INTACodeEditorPaintContext280', 'INTACodeEditorPaintContext') do
-  with CL.AddInterface(CL.FindInterface('INTACodeEditorPaintContext280'),INTACodeEditorPaintContext, 'INTACodeEditorPaintContext') do
+  //with RegInterfaceS(CL,'INTACodeEditorPaintContext290', 'INTACodeEditorPaintContext') do
+  with CL.AddInterface(CL.FindInterface('INTACodeEditorPaintContext290'),INTACodeEditorPaintContext, 'INTACodeEditorPaintContext') do
   begin
+  end;
+end;
+
+(*----------------------------------------------------------------------------*)
+procedure SIRegister_INTACodeEditorPaintContext290(CL: TPSPascalCompiler);
+begin
+  //with RegInterfaceS(CL,'INTACodeEditorPaintContext280', 'INTACodeEditorPaintContext290') do
+  with CL.AddInterface(CL.FindInterface('INTACodeEditorPaintContext280'),INTACodeEditorPaintContext290, 'INTACodeEditorPaintContext290') do
+  begin
+    RegisterMethod('Function GetCellSize : TSize', cdRegister);
   end;
 end;
 
@@ -344,7 +410,7 @@ begin
   SIRegister_INTACodeEditorState(CL);
   CL.AddTypeS('TCodeEditorEvent', '( cevWindowEvents, cevMouseEvents, cevBeginE'
    +'ndPaintEvents, cevPaintLineEvents, cevPaintGutterEvents, cevPaintTextEvent'
-   +'s )');
+   +'s, cevKeyboardEvents )');
   CL.AddTypeS('TCodeEditorEvents', 'set of TCodeEditorEvent');
   CL.AddTypeS('TPaintLineStage', '( plsBeginPaint, plsEndPaint, plsBackground, '
    +'plsMarks, plsHighlightPairChars, plsRightMargin, plsFoldedBox )');
@@ -361,23 +427,32 @@ begin
    +'nt, gclBeforeLineNumbers, gclAfterLineNumbers )');
   CL.AddTypeS('TGutterColumnPositions', 'set of TGutterColumnPosition');
   SIRegister_INTACodeEditorPaintContext280(CL);
+  SIRegister_INTACodeEditorPaintContext290(CL);
   SIRegister_INTACodeEditorPaintContext(CL);
   SIRegister_INTACodeEditorEvents(CL);
+  SIRegister_INTACodeEditorEvents370(CL);
   SIRegister_INTACodeEditorOptions280(CL);
   SIRegister_INTACodeEditorOptions(CL);
   SIRegister_INTACodeEditorServices280(CL);
+  SIRegister_INTACodeEditorScrollbarAnnotation(CL);
+  SIRegister_INTACodeEditorServices290(CL);
   SIRegister_INTACodeEditorServices(CL);
   CL.AddTypeS('TEditorScrolledEvent', 'Procedure ( const Editor : TWinControl; '
    +'const Direction : TCodeEditorScrollDirection)');
   CL.AddTypeS('TEditorResizedEvent', 'Procedure ( const Editor : TWinControl)');
   CL.AddTypeS('TEditorElidedEvent', 'Procedure ( const Editor : TWinControl; co'
    +'nst LogicalLineNum : Integer)');
-  CL.AddTypeS('TEditorMouseDownEvent', 'Procedure ( const Editor : TWinControl;'
-   +' Button : TMouseButton; Shift : TShiftState; X, Y : Integer)');
-  CL.AddTypeS('TEditorMouseUpEvent', 'Procedure ( const Editor : TWinControl; B'
-   +'utton : TMouseButton; Shift : TShiftState; X, Y : Integer)');
+  CL.AddTypeS('TEditorMouseEvent', 'Procedure ( const Editor : TWinControl; But'
+   +'ton : TMouseButton; Shift : TShiftState; X, Y : Integer)');
+  CL.AddTypeS('TEditorMouseExEvent', 'Procedure ( const Editor : TWinControl; B'
+   +'utton : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : B'
+   +'oolean)');
   CL.AddTypeS('TEditorMouseMoveEvent', 'Procedure ( const Editor : TWinControl;'
    +' Shift : TShiftState; X, Y : Integer)');
+  CL.AddTypeS('TEditorKeyboardEvent', 'Procedure ( const Editor : TWinControl; '
+   +'Key : Word; Shift : TShiftState; var Handled : Boolean)');
+  CL.AddTypeS('TEditorCaretPosEvent', 'Procedure ( const Editor : TWinControl; '
+   +'X, Y : Integer)');
   CL.AddTypeS('TEditorBeginPaintEvent', 'Procedure ( const Editor : TWinControl'
    +'; const ForceFullRepaint : Boolean)');
   CL.AddTypeS('TEditorEndPaintEvent', 'Procedure ( const Editor : TWinControl)');
@@ -438,6 +513,46 @@ procedure TNTACodeEditorNotifierOnEditorBeginPaint_R(Self: TNTACodeEditorNotifie
 begin T := Self.OnEditorBeginPaint; end;
 
 (*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorSetCaretPos_W(Self: TNTACodeEditorNotifier; const T: TEditorCaretPosEvent);
+begin Self.OnEditorSetCaretPos := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorSetCaretPos_R(Self: TNTACodeEditorNotifier; var T: TEditorCaretPosEvent);
+begin T := Self.OnEditorSetCaretPos; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorKeyUp_W(Self: TNTACodeEditorNotifier; const T: TEditorKeyboardEvent);
+begin Self.OnEditorKeyUp := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorKeyUp_R(Self: TNTACodeEditorNotifier; var T: TEditorKeyboardEvent);
+begin T := Self.OnEditorKeyUp; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorKeyDown_W(Self: TNTACodeEditorNotifier; const T: TEditorKeyboardEvent);
+begin Self.OnEditorKeyDown := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorKeyDown_R(Self: TNTACodeEditorNotifier; var T: TEditorKeyboardEvent);
+begin T := Self.OnEditorKeyDown; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorMouseUpEx_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseExEvent);
+begin Self.OnEditorMouseUpEx := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorMouseUpEx_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseExEvent);
+begin T := Self.OnEditorMouseUpEx; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorMouseDownEx_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseExEvent);
+begin Self.OnEditorMouseDownEx := T; end;
+
+(*----------------------------------------------------------------------------*)
+procedure TNTACodeEditorNotifierOnEditorMouseDownEx_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseExEvent);
+begin T := Self.OnEditorMouseDownEx; end;
+
+(*----------------------------------------------------------------------------*)
 procedure TNTACodeEditorNotifierOnEditorMouseMove_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseMoveEvent);
 begin Self.OnEditorMouseMove := T; end;
 
@@ -446,19 +561,19 @@ procedure TNTACodeEditorNotifierOnEditorMouseMove_R(Self: TNTACodeEditorNotifier
 begin T := Self.OnEditorMouseMove; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TNTACodeEditorNotifierOnEditorMouseUp_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseUpEvent);
+procedure TNTACodeEditorNotifierOnEditorMouseUp_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseEvent);
 begin Self.OnEditorMouseUp := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TNTACodeEditorNotifierOnEditorMouseUp_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseUpEvent);
+procedure TNTACodeEditorNotifierOnEditorMouseUp_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseEvent);
 begin T := Self.OnEditorMouseUp; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TNTACodeEditorNotifierOnEditorMouseDown_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseDownEvent);
+procedure TNTACodeEditorNotifierOnEditorMouseDown_W(Self: TNTACodeEditorNotifier; const T: TEditorMouseEvent);
 begin Self.OnEditorMouseDown := T; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TNTACodeEditorNotifierOnEditorMouseDown_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseDownEvent);
+procedure TNTACodeEditorNotifierOnEditorMouseDown_R(Self: TNTACodeEditorNotifier; var T: TEditorMouseEvent);
 begin T := Self.OnEditorMouseDown; end;
 
 (*----------------------------------------------------------------------------*)
@@ -494,6 +609,22 @@ procedure TNTACodeEditorNotifierOnEditorScrolled_R(Self: TNTACodeEditorNotifier;
 begin T := Self.OnEditorScrolled; end;
 
 (*----------------------------------------------------------------------------*)
+Procedure TNTACodeEditorNotifierEditorMouseUp1_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean);
+Begin Self.EditorMouseUp(Editor, Button, Shift, X, Y, Handled); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure TNTACodeEditorNotifierEditorMouseDown1_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean);
+Begin Self.EditorMouseDown(Editor, Button, Shift, X, Y, Handled); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure TNTACodeEditorNotifierEditorMouseUp_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
+Begin Self.EditorMouseUp(Editor, Button, Shift, X, Y); END;
+
+(*----------------------------------------------------------------------------*)
+Procedure TNTACodeEditorNotifierEditorMouseDown_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
+Begin Self.EditorMouseDown(Editor, Button, Shift, X, Y); END;
+
+(*----------------------------------------------------------------------------*)
 Procedure INTACodeEditorServices280InvalidateEditorLogicalLine_P(Self: INTACodeEditorServices280;  const Editor : TWinControl; const LogicalLine : Integer);
 Begin Self.InvalidateEditorLogicalLine(Editor, LogicalLine); END;
 
@@ -523,6 +654,11 @@ begin
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorMouseDown_R,@TNTACodeEditorNotifierOnEditorMouseDown_W,'OnEditorMouseDown');
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorMouseUp_R,@TNTACodeEditorNotifierOnEditorMouseUp_W,'OnEditorMouseUp');
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorMouseMove_R,@TNTACodeEditorNotifierOnEditorMouseMove_W,'OnEditorMouseMove');
+    RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorMouseDownEx_R,@TNTACodeEditorNotifierOnEditorMouseDownEx_W,'OnEditorMouseDownEx');
+    RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorMouseUpEx_R,@TNTACodeEditorNotifierOnEditorMouseUpEx_W,'OnEditorMouseUpEx');
+    RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorKeyDown_R,@TNTACodeEditorNotifierOnEditorKeyDown_W,'OnEditorKeyDown');
+    RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorKeyUp_R,@TNTACodeEditorNotifierOnEditorKeyUp_W,'OnEditorKeyUp');
+    RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorSetCaretPos_R,@TNTACodeEditorNotifierOnEditorSetCaretPos_W,'OnEditorSetCaretPos');
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorBeginPaint_R,@TNTACodeEditorNotifierOnEditorBeginPaint_W,'OnEditorBeginPaint');
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorEndPaint_R,@TNTACodeEditorNotifierOnEditorEndPaint_W,'OnEditorEndPaint');
     RegisterPropertyHelper(@TNTACodeEditorNotifierOnEditorPaintGutter_R,@TNTACodeEditorNotifierOnEditorPaintGutter_W,'OnEditorPaintGutter');
