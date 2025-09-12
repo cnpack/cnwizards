@@ -609,22 +609,6 @@ procedure TNTACodeEditorNotifierOnEditorScrolled_R(Self: TNTACodeEditorNotifier;
 begin T := Self.OnEditorScrolled; end;
 
 (*----------------------------------------------------------------------------*)
-Procedure TNTACodeEditorNotifierEditorMouseUp1_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean);
-Begin Self.EditorMouseUp(Editor, Button, Shift, X, Y, Handled); END;
-
-(*----------------------------------------------------------------------------*)
-Procedure TNTACodeEditorNotifierEditorMouseDown1_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer; var Handled : Boolean);
-Begin Self.EditorMouseDown(Editor, Button, Shift, X, Y, Handled); END;
-
-(*----------------------------------------------------------------------------*)
-Procedure TNTACodeEditorNotifierEditorMouseUp_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
-Begin Self.EditorMouseUp(Editor, Button, Shift, X, Y); END;
-
-(*----------------------------------------------------------------------------*)
-Procedure TNTACodeEditorNotifierEditorMouseDown_P(Self: TNTACodeEditorNotifier;  const Editor : TWinControl; Button : TMouseButton; Shift : TShiftState; X, Y : Integer);
-Begin Self.EditorMouseDown(Editor, Button, Shift, X, Y); END;
-
-(*----------------------------------------------------------------------------*)
 Procedure INTACodeEditorServices280InvalidateEditorLogicalLine_P(Self: INTACodeEditorServices280;  const Editor : TWinControl; const LogicalLine : Integer);
 Begin Self.InvalidateEditorLogicalLine(Editor, LogicalLine); END;
 
