@@ -38,7 +38,6 @@ uses
   Classes,
   Windows,
   Forms,
-  ToolsAPI,
   CnWizLoadUtils in 'CnWizLoadUtils.pas';
 
 {$R *.RES}

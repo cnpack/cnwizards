@@ -37,12 +37,22 @@ unit CnWizLoadUtils;
 interface
 
 uses
-  SysUtils, Windows, Forms, ToolsAPI;
+  SysUtils, Windows, Forms {$IFNDEF WIN64} , ToolsAPI {$ENDIF};
 
 const
   SCnNoCnWizardsSwitch = 'nocn';
+{$IFDEF WIN64}
+  WizardEntryPoint = 'INITWIZARD0001';
+{$ENDIF}
 
 type
+{$IFDEF WIN64}
+  // 64 位下 ToolsAPI 强引用了 DockForm 等和 IDE 版本绑定紧密的包，得剔除
+  TWizardRegisterProc = function(const Wizard: IInterface): Boolean;
+  TWizardTerminateProc = procedure;
+  IBorlandIDEServices = IInterface;
+{$ENDIF}
+
   TWizardEntryPoint = function (const BorlandIDEServices: IBorlandIDEServices;
     RegisterProc: TWizardRegisterProc; var Terminate: TWizardTerminateProc): Boolean; stdcall;
 
