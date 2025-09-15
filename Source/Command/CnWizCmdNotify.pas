@@ -217,7 +217,12 @@ begin
     GetSystemMetrics(SM_CYSCREEN) div 2,
     0, 0, 0, 0, HInstance, nil);
 
+{$IFDEF WIN64}
+  SetWindowLong(FHandle, GWL_WNDPROC, NativeInt(FObjectInstance));
+{$ELSE}
   SetWindowLong(FHandle, GWL_WNDPROC, Longint(FObjectInstance));
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('WizCmdNotifier: Create Window %8.8x', [FHandle]);
 {$ENDIF}

@@ -215,7 +215,11 @@ end;
 function TCnWideControl.GetTextBuf(Buffer: PWideChar;
   BufSize: Integer): Integer;
 begin
+{$IFDEF WIN64}
+  Result := Perform(WM_GETTEXT, BufSize, NativeInt(Buffer));
+{$ELSE}
   Result := Perform(WM_GETTEXT, BufSize, Longint(Buffer));
+{$ENDIF}
 end;
 
 function TCnWideControl.GetTextLen: Integer;
@@ -237,7 +241,11 @@ end;
 
 procedure TCnWideControl.SetTextBuf(Buffer: PWideChar);
 begin
+{$IFDEF WIN64}
+  Perform(WM_SETTEXT, 0, NativeInt(Buffer));
+{$ELSE}
   Perform(WM_SETTEXT, 0, Longint(Buffer));
+{$ENDIF}
   Perform(CM_TEXTCHANGED, 0, 0);
 end;
 

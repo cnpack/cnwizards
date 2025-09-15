@@ -328,7 +328,11 @@ destructor TAbstractScanner.Destroy;
 begin
   if FBuffer <> nil then
   begin
+{$IFDEF WIN64}
+    FStream.Seek(NativeInt(FTokenPtr) - NativeInt(FBufPtr), 1);
+{$ELSE}
     FStream.Seek(Longint(FTokenPtr) - Longint(FBufPtr), 1);
+{$ENDIF}
     FreeMem(FBuffer);
   end;
 
