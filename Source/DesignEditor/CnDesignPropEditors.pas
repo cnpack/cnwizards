@@ -346,7 +346,13 @@ begin
     try
       AList.Assign(TStringList(Pointer(GetOrdValue)));
       if CnPropertyGetStrings(AList, Ident, Component, GetName) then
+      begin
+{$IFDEF WIN64}
+        SetOrdValue(NativeInt(Pointer(AList)));
+{$ELSE}
         SetOrdValue(Longint(Pointer(AList)));
+{$ENDIF}
+      end;
     finally
       AList.Free;
     end;
