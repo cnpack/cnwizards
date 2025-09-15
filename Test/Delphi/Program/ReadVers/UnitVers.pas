@@ -11,8 +11,11 @@ type
     mmoFiles: TMemo;
     mmoVers: TMemo;
     btnRead: TButton;
+    btnAdd: TButton;
+    dlgOpen1: TOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure btnReadClick(Sender: TObject);
+    procedure btnAddClick(Sender: TObject);
   private
     procedure ReadVersions;
   public
@@ -52,6 +55,12 @@ end;
 procedure TFormVers.btnReadClick(Sender: TObject);
 begin
   ReadVersions;
+end;
+
+procedure TFormVers.btnAddClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+    mmoFiles.Lines.Add(dlgOpen1.FileName);
 end;
 
 end.
