@@ -254,12 +254,15 @@ end;
 procedure TCnTestPaintLineMenuWizard.Editor2PaintText(const Rect: TRect; const ColNum: SmallInt; const Text: string;
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
+var
+  S: string;
 
   function DecodeUtf8WideStrToString(const Utf8WideStr: string): string;
   var
     Ansi: AnsiString;
   begin
-    // IDE 的 Bug，Text 中是经过瞎编码的内容
+  {$IFDEF DELPHI12_ATHENS}
+    // D12 的 Bug，Text 中是经过瞎编码的内容
     if Length(Utf8WideStr) > 0 then
     begin
       Ansi := AnsiString(Utf8WideStr);
@@ -267,11 +270,20 @@ procedure TCnTestPaintLineMenuWizard.Editor2PaintText(const Rect: TRect; const C
     end
     else
       Result := '';
+  {$ELSE}
+    // D13 里修复了
+    Result := Utf8WideStr;
+  {$ENDIF}
   end;
 
 begin
-  CnDebugger.LogFmt('Editor2PaintText #%d:%d. Rect %d %d ~ %d %d. Cols %d SyntaxCode %d Hilight %d: %s',
-    [Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom,
+  if BeforeEvent then
+    S := 'Before'
+  else
+    S := 'After ';
+
+  CnDebugger.LogFmt('%s Editor2PaintText #%d:%d. Rect %d %d ~ %d %d. Cols %d SyntaxCode %d Selected %d: %s',
+    [S, Context.EditorLineNum, Context.LogicalLineNum, Rect.Left, Rect.Top, Rect.Right, Rect.Bottom,
     ColNum,  Ord(SyntaxCode), Ord(Hilight), DecodeUtf8WideStrToString(Text)]);
 end;
 
