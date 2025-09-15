@@ -137,6 +137,12 @@ begin
   begin
     OutputDebugString('Is Under Debugger. Use Developing Dll.');
     Dir := 'C:\CnPack\cnwizards\Bin\';
+    if not DirectoryExists(Dir) then
+    begin
+      OutputDebugString('But NO Developing Directory. Use Normal Again.');
+      GetModuleFileNameA(HInstance, @FullPath[0], MAX_PATH);
+      Dir := ExtractFilePath(FullPath);
+    end;
   end
   else
   begin
