@@ -1030,18 +1030,6 @@ begin
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
     FNeedKeepLineBreak := True;
     try
-      if Scanner.Token = tokKeywordIf then
-      begin
-        // 新语法 IF expression THEN expression ELSE expression
-        Match(tokKeywordIf);
-        FormatExpression(PreSpaceCount, IndentForAnonymous);
-        Match(tokKeywordThen);
-        FormatExpression(PreSpaceCount, IndentForAnonymous);
-        Match(tokKeywordElse);
-        FormatExpression(PreSpaceCount, IndentForAnonymous);
-        Exit;
-      end;
-
       // 从 FormatExpression 复制而来，为了区分来源
       FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
     finally
@@ -1278,25 +1266,12 @@ begin
   end;
 end;
 
-{ Expression -> SimpleExpression [RelOp SimpleExpression]...
-             -> IF Expression THEN Expression ELSE Expression}
+{ Expression -> SimpleExpression [RelOp SimpleExpression]...}
 procedure TCnBasePascalFormatter.FormatExpression(PreSpaceCount: Byte;
   IndentForAnonymous: Byte);
 begin
   SpecifyElementType(pfetExpression);
   try
-    if Scanner.Token = tokKeywordIf then
-    begin
-      // 新语法 IF expression THEN expression ELSE expression
-      Match(tokKeywordIf);
-      FormatExpression(PreSpaceCount, IndentForAnonymous);
-      Match(tokKeywordThen);
-      FormatExpression(PreSpaceCount, IndentForAnonymous);
-      Match(tokKeywordElse);
-      FormatExpression(PreSpaceCount, IndentForAnonymous);
-      Exit;
-    end;
-
     FormatSimpleExpression(PreSpaceCount, IndentForAnonymous);
 
     while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot, tokKeywordNot] do
@@ -1385,6 +1360,7 @@ end;
          -> SetConstructor
          -> TypeId '(' Expression ')'
          -> INHERITED Expression
+         -> IF Expression THEN Expression ELSE Expression
 
   这里同样有无法直接区分 '(' Expression ')' 和带括号的 Designator
   例子就是(str1+str2)[1] 等诸如此类的表达式，先姑且判断一下后续的方括号
@@ -1403,14 +1379,27 @@ begin
     tokDirective_BEGIN..tokDirective_END,
     tokComplex_BEGIN..tokComplex_END:
       begin
-        FormatDesignator(PreSpaceCount, IndentForAnonymous);
-
-        if Scanner.Token = tokLB then
+        if Scanner.Token = tokKeywordIf then
         begin
-          { TODO: deal with function call node }
-          Match(tokLB);
-          FormatExprList;
-          Match(tokRB);
+          // 新语法 IF expression THEN expression ELSE expression
+          Match(tokKeywordIf);
+          FormatExpression(PreSpaceCount, IndentForAnonymous);
+          Match(tokKeywordThen);
+          FormatExpression(PreSpaceCount, IndentForAnonymous);
+          Match(tokKeywordElse);
+          FormatExpression(PreSpaceCount, IndentForAnonymous);
+        end
+        else
+        begin
+          FormatDesignator(PreSpaceCount, IndentForAnonymous);
+
+          if Scanner.Token = tokLB then
+          begin
+            { TODO: deal with function call node }
+            Match(tokLB);
+            FormatExprList;
+            Match(tokRB);
+          end;
         end;
       end;
 

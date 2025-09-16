@@ -358,7 +358,7 @@ const
   CanBeNewIdentifierTokens = [tokInteger, tokFloat]; // 新语法允许 1.toString 这种
 
   // 这批关键字后可跟表达式，所以后面需要空格
-  NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor,
+  NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor, tokKeywordThen, tokKeywordElse,
     tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto, tokKeywordUntil];
 
   NonEffectiveTokens = [tokBlank, tokCRLF, tokLineComment, tokBlockComment, tokCompDirective];
