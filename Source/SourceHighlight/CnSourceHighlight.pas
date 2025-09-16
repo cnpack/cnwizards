@@ -29,10 +29,10 @@ unit CnSourceHighlight;
 *           Shenloqi
 * 备    注：BDS 下 UTF8 的问题有三个地方需要标明：
 *
-*                              D7 或以下、  D2009 以下的BDS、 D2009：
-*           LineText 属性：    AnsiString、 UTF8、            UncodeString
-*           EditView.CusorPos：Ansi 字节、  UTF8 的字节 Col、 转成 Ansi 的字符 Col
-*           GetAttributeAtPos：Ansi 字节、  UTF8 的字节 Col、 UTF8 的字节 Col
+*                              D7 或以下、  D2009 以下的 BDS、 D2009 及以上：
+*           LineText 属性：    AnsiString、 UTF8、             UncodeString
+*           EditView.CusorPos：Ansi 字节、  UTF8 的字节 Col、  转成 Ansi 的字符 Col
+*           GetAttributeAtPos：Ansi 字节、  UTF8 的字节 Col、  UTF8 的字节 Col
 *               因此 D2009 下处理时，需要额外将获得的 UnicodeString 的 LineText
 *               转成 UTF8 来适应相关的 CursorPos 和 GetAttributeAtPos
 *
@@ -46,8 +46,10 @@ unit CnSourceHighlight;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2024.08.03
-*               Unicode 下多处调用 DisplayLength 系列函数的场景指定 IDE 相关的宽度计算。
+* 修改记录：2025.09.16
+*               将绘制机制逐步改造为新 API，Delphi 13 及以上才完整支持。
+*           2024.08.03
+*               Unicode下多处调用 DisplayLength 系列函数的场景指定 IDE 相关的宽度计算。
 *           2024.07.02
 *               增加 ControlHook 拦截窗口位置变化消息重新计算左侧栏位宽度的机制避免绘制错位然而似乎无效。
 *           2022.02.26
@@ -108,6 +110,18 @@ interface
 {$I CnWizards.inc}
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  {$IFDEF CODEEDITOR_PAINTTEXT_BUG}
+  {$DEFINE RAW_WIDECHAR_IDENT_SUPPORT}
+  {$ENDIF}
+{$ELSE}
+  {$DEFINE RAW_WIDECHAR_IDENT_SUPPORT}
+{$ENDIF}
+
+// RAW_WIDECHAR_IDENT_SUPPORT 是指高亮当前及自定义标识符时因需要支持汉字
+// 因而低版本下、和高版本为了躲过 D12 的 Bug，都得使用 PaintLine 的 Hook
+// D13 开始才正常。
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
@@ -4737,7 +4751,7 @@ begin
         end;
 {$ENDIF}
 
-{$IFNDEF USE_CODEEDITOR_SERVICE}
+{$IFDEF RAW_WIDECHAR_IDENT_SUPPORT}
         // 如果有需要高亮绘制的当前标识符内容
         if FCurrentTokenHighlight and not FCurrentTokenInvalid and
           (LogicLineNum < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[LogicLineNum] <> nil) then
@@ -5083,7 +5097,7 @@ begin
         end;
 {$ENDIF}
 
-{$IFNDEF USE_CODEEDITOR_SERVICE}
+{$IFDEF RAW_WIDECHAR_IDENT_SUPPORT}
         // 如果有需要高亮绘制的自定义标识符的内容
         if FHighlightCustomIdent and (LogicLineNum < Info.CustomIdentLineCount) and
           (Info.CustomIdentLines[LogicLineNum] <> nil) then
@@ -6566,7 +6580,9 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, Idx, Layer, Utf8Col, HSC: Integer;
+  I, L, Idx, Layer, Utf8Col, Utf8Len, TL, HSC: Integer;
+  Utf8Text: RawByteString;
+  Utf16Text: string;
   ColorFg, ColorBk: TColor;
   Info: TCnBlockMatchInfo;
   LineInfo: TCnBlockLineInfo;
@@ -6637,10 +6653,11 @@ begin
       Token := nil;
       for I := 0 to Info.Lines[L].Count - 1 do
       begin
-        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
         // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.Lines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
+        // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.Lines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum then
         begin
@@ -6722,9 +6739,10 @@ begin
 
       for I := 0 to Info.CompDirectiveLines[L].Count - 1 do
       begin
-        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.CompDirectiveLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
+        // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.CompDirectiveLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum + HSC then
         begin
@@ -6781,9 +6799,10 @@ begin
       Token := nil;
       for I := 0 to Info.FlowLines[L].Count - 1 do
       begin
-        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
+        // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum + HSC then
         begin
@@ -6843,6 +6862,9 @@ begin
     end;
   end;
 
+{$IFNDEF CODEEDITOR_PAINTTEXT_BUG}
+  // D12 下有 Bug，Text 包含汉字时乱码，以下俩不能启用，注意整个函数都在 USE_CODEEDITOR_SERVICE 的定义里
+
   // 画高亮当前标识符。注意需要查找到标识符，并且前后是有效分隔符才对
   if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier, atSymbol])
     and (Info.CurrentIdentTokenCount > 0) then // 小括号开头的 Text 可能是 Symbol
@@ -6851,75 +6873,86 @@ begin
     if (L < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[L] <> nil) then
     begin
       C := Context.Canvas;
+      Utf8Len := CalcUtf8LengthFromWideString(PChar(Text));
+
       for I := 0 to Info.CurrentIdentLines[L].Count - 1 do
       begin
         // 这一行里我们解析出的多个 Token，都需要在 Text 中 Pos 匹配到且前后有标识符隔离符，
         // 且 ColNum 要比 Token 的 Utf8Col 小或等才说明这个 Token 在本 Text 中。
         // 然后根据 Pos 的结果，计算出其 Rect
 
-        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.CurrentIdentLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
+        // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.CurrentIdentLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
+        // ColNum 是此次要画的文本所在列头，这个文本可能命中 CurrentIdentLines[L] 里的一个或多个
+        // 下一次可能有个更大的 ColNum，命中 CurrentIdentLines[L] 里的更后面的
+        // 所以，本 Token 的命中条件是，Utf8Col 在 [ColNum, ColNum + Utf8Length(Text)] 中
         Token := nil;
-        if ColNum <= Utf8Col then
+        if (ColNum <= Utf8Col) and (Utf8Col <= ColNum + Utf8Len) then
         begin
-          // 找 Text 中第 I + 1 个 Token 的位置，并判别其是否是整字匹配
-          HSC := CnPosEx(TCnGeneralPasToken(Info.CurrentIdentLines[L][I]).Token, Text, False, True, I + 1);
-          if HSC > 0 then
+
+          Token := TCnGeneralPasToken(Info.CurrentIdentLines[L][I]);
+
+          // 这个 Token 符合条件要画，但如何确定其在 Text 中的位置？
+          // 求 Utf8 列的差  Utf8Col - ColNum，将 Text 转 Utf8，Copy(1, 列差）后拿到子串，再转换为 AnsiDisplay 宽度
+          TL := Utf8Col - ColNum;
+          if TL > 0 then
           begin
-            Token := TCnGeneralPasToken(Info.CurrentIdentLines[L][I]);
+            Utf8Text := Copy(UTF8Encode(Text), 1, TL);  // 拿到 Utf8 子串
+            Utf16Text := UTF8Decode(Utf8Text);
+            HSC := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
+          end
+          else
+            HSC := 0;
 
-            // 这个 Token 符合条件要画
-            if (FCurrentTokenBackground <> clNone) or (FCurrentTokenBorderColor <> clNone) then
+          if (FCurrentTokenBackground <> clNone) or (FCurrentTokenBorderColor <> clNone) then
+          begin
+            R := Rect;
+            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+            R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+
+            // 画背景
+            if FCurrentTokenBackground <> clNone then
             begin
-              R := Rect;
-              // R.Left 要前进 HSC - 1 个 Utf16 字符，要转 Ansi 宽度
-              HSC := CalcAnsiDisplayLengthFromWideStringOffset(PChar(Text), HSC - 1);
-              R.Left := R.Left + HSC * Context.EditorState.CharWidth;
-              R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
-
-              // 画背景
-              if FCurrentTokenBackground <> clNone then
-              begin
-                OldColor := C.Brush.Color;
-                C.Brush.Color := FCurrentTokenBackground;
-                C.Brush.Style := bsSolid;
-                C.FillRect(R);
-                C.Brush.Color := OldColor;
-              end;
-
-              // 画边框
-              if (FCurrentTokenBorderColor <> clNone) and
-                (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
-              begin
-                OldColor := C.Pen.Color;
-                C.Pen.Color := FCurrentTokenBorderColor;
-
-                C.Rectangle(R);
-                C.Pen.Color := OldColor;
-              end;
-
-              // 在计算出来的框里画字
-              OldColor := C.Font.Color;
-              if SyntaxCode in [atIdentifier, atSymbol] then
-              begin
-                C.Font.Style := [];
-                C.Font.Color := FIdentifierHighlight.ColorFg;
-                if FIdentifierHighlight.Bold then
-                  C.Font.Style := C.Font.Style + [fsBold];
-                if FIdentifierHighlight.Italic then
-                  C.Font.Style := C.Font.Style + [fsItalic];
-                if FIdentifierHighlight.Underline then
-                  C.Font.Style := C.Font.Style + [fsUnderline];
-              end;
-
-              C.Brush.Style := bsClear;
-              if FCurrentTokenBackground <> clNone then // 有背景色则使用固定前景色，好看点
-                C.Font.Color := FCurrentTokenForeground;
-              C.TextOut(R.Left, R.Top, Token.Token);
-              C.Font.Color := OldColor;
+              OldColor := C.Brush.Color;
+              C.Brush.Color := FCurrentTokenBackground;
+              C.Brush.Style := bsSolid;
+              C.FillRect(R);
+              C.Brush.Color := OldColor;
             end;
+
+            // 画边框
+            if (FCurrentTokenBorderColor <> clNone) and
+              (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
+            begin
+              OldColor := C.Pen.Color;
+              C.Pen.Color := FCurrentTokenBorderColor;
+
+              C.Rectangle(R);
+              C.Pen.Color := OldColor;
+            end;
+
+            // 在计算出来的框里画字
+            OldColor := C.Font.Color;
+            if SyntaxCode in [atIdentifier, atSymbol] then
+            begin
+              C.Font.Style := [];
+              C.Font.Color := FIdentifierHighlight.ColorFg;
+              if FIdentifierHighlight.Bold then
+                C.Font.Style := C.Font.Style + [fsBold];
+              if FIdentifierHighlight.Italic then
+                C.Font.Style := C.Font.Style + [fsItalic];
+              if FIdentifierHighlight.Underline then
+                C.Font.Style := C.Font.Style + [fsUnderline];
+            end;
+
+            C.Brush.Style := bsClear;
+            if FCurrentTokenBackground <> clNone then // 有背景色则使用固定前景色，好看点
+              C.Font.Color := FCurrentTokenForeground;
+            C.TextOut(R.Left, R.Top, Token.Token);
+            C.Font.Color := OldColor;
           end;
         end;
       end;
@@ -6934,72 +6967,80 @@ begin
     if (L < Info.CustomIdentLineCount) and (Info.CustomIdentLines[L] <> nil) then
     begin
       C := Context.Canvas;
+      Utf8Len := CalcUtf8LengthFromWideString(PChar(Text));
+
       for I := 0 to Info.CustomIdentLines[L].Count - 1 do
       begin
-        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.CustomIdentLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+        // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
+        // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.CustomIdentLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         Token := nil;
-        if ColNum <= Utf8Col then
+        if (ColNum <= Utf8Col) and (Utf8Col <= ColNum + Utf8Len) then
         begin
-          // 找 Text 中第 I + 1 个 Token 的位置，并判别其是否是整字匹配
-          HSC := CnPosEx(TCnGeneralPasToken(Info.CustomIdentLines[L][I]).Token, Text, False, True, I + 1);
-          if HSC > 0 then
+          Token := TCnGeneralPasToken(Info.CustomIdentLines[L][I]);
+          // 这个 Token 符合条件要画，但如何确定其在 Text 中的位置？
+          // 求 Utf8 列的差  Utf8Col - ColNum，将 Text 转 Utf8，Copy(1, 列差）后拿到子串，再转换为 AnsiDisplay 宽度
+          TL := Utf8Col - ColNum;
+          if TL > 0 then
           begin
-            Token := TCnGeneralPasToken(Info.CustomIdentLines[L][I]);
+            Utf8Text := Copy(UTF8Encode(Text), 1, TL);  // 拿到 Utf8 子串
+            Utf16Text := UTF8Decode(Utf8Text);
+            HSC := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
+          end
+          else
+            HSC := 0;
 
-            R := Rect;
-            // R.Left 要前进 HSC - 1 个 Utf16 字符，要转 Ansi 宽度
-            HSC := CalcAnsiDisplayLengthFromWideStringOffset(PChar(Text), HSC - 1);
-            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
-            R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+          R := Rect;
+          R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
 
-            // 画背景框
-            if FCustomIdentBackground <> clNone then
-            begin
-              OldColor := C.Brush.Color;
-              C.Brush.Color := FCustomIdentBackground;
-              C.Brush.Style := bsSolid;
+          // 画背景框
+          if FCustomIdentBackground <> clNone then
+          begin
+            OldColor := C.Brush.Color;
+            C.Brush.Color := FCustomIdentBackground;
+            C.Brush.Style := bsSolid;
 
-              C.FillRect(R);
-              C.Brush.Color := OldColor;
-            end;
-
-            OldColor := C.Font.Color;
-            if SyntaxCode in [atIdentifier, atSymbol] then
-            begin
-              C.Font.Style := [];
-              C.Font.Color := FIdentifierHighlight.ColorFg;
-              if FIdentifierHighlight.Bold or (Token.Tag <> 0) then // 自定义的标识符如果用 Tag 传递了设置加粗则加粗
-                C.Font.Style := C.Font.Style + [fsBold];
-              if FIdentifierHighlight.Italic then
-                C.Font.Style := C.Font.Style + [fsItalic];
-              if FIdentifierHighlight.Underline then
-                C.Font.Style := C.Font.Style + [fsUnderline];
-            end
-            else if SyntaxCode = atReservedWord then
-            begin
-              C.Font.Style := [];
-              C.Font.Color := FKeywordHighlight.ColorFg;
-              if FKeywordHighlight.Bold then
-                C.Font.Style := C.Font.Style + [fsBold];
-              if FKeywordHighlight.Italic then
-                C.Font.Style := C.Font.Style + [fsItalic];
-              if FKeywordHighlight.Underline then
-                C.Font.Style := C.Font.Style + [fsUnderline];
-            end;
-
-            C.Brush.Style := bsClear;
-            if FCustomIdentBackground <> clNone then // 有背景色则使用固定前景色，好看点
-              C.Font.Color := FCustomIdentForeground;
-            C.TextOut(R.Left, R.Top, Token.Token);
-            C.Font.Color := OldColor;
+            C.FillRect(R);
+            C.Brush.Color := OldColor;
           end;
+
+          OldColor := C.Font.Color;
+          if SyntaxCode in [atIdentifier, atSymbol] then
+          begin
+            C.Font.Style := [];
+            C.Font.Color := FIdentifierHighlight.ColorFg;
+            if FIdentifierHighlight.Bold or (Token.Tag <> 0) then // 自定义的标识符如果用 Tag 传递了设置加粗则加粗
+              C.Font.Style := C.Font.Style + [fsBold];
+            if FIdentifierHighlight.Italic then
+              C.Font.Style := C.Font.Style + [fsItalic];
+            if FIdentifierHighlight.Underline then
+              C.Font.Style := C.Font.Style + [fsUnderline];
+          end
+          else if SyntaxCode = atReservedWord then
+          begin
+            C.Font.Style := [];
+            C.Font.Color := FKeywordHighlight.ColorFg;
+            if FKeywordHighlight.Bold then
+              C.Font.Style := C.Font.Style + [fsBold];
+            if FKeywordHighlight.Italic then
+              C.Font.Style := C.Font.Style + [fsItalic];
+            if FKeywordHighlight.Underline then
+              C.Font.Style := C.Font.Style + [fsUnderline];
+          end;
+
+          C.Brush.Style := bsClear;
+          if FCustomIdentBackground <> clNone then // 有背景色则使用固定前景色，好看点
+            C.Font.Color := FCustomIdentForeground;
+          C.TextOut(R.Left, R.Top, Token.Token);
+          C.Font.Color := OldColor;
         end;
       end;
     end;
   end;
+{$ENDIF}
 end;
 
 {$ENDIF}
