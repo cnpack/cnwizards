@@ -4390,8 +4390,11 @@ begin
         begin
           Info.UpdateCurTokenList;
         end
+{$IFNDEF DELPHI130_FLORENCE_UP}
+        // D13 下改用新机制了，大概不需要如此刷新了
         else if ctVScroll in ChangeType then
           RefreshCurrentTokens(Info);
+{$ENDIF}
       end;
     end;
   end;
