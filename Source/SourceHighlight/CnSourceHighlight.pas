@@ -319,9 +319,9 @@ type
     {* 高亮关键字列表}
     property KeyCount: Integer read GetKeyCount;
     {* 高亮关键字列表数目}
-    property CurTokens[Index: Integer]: TCnGeneralPasToken read GetCurrentIdentTokens;
+    property CurrentIdentTokens[Index: Integer]: TCnGeneralPasToken read GetCurrentIdentTokens;
     {* 和当前标识符相同的标识符列表}
-    property CurTokenCount: Integer read GetCurrentIdentTokenCount;
+    property CurrentIdentTokenCount: Integer read GetCurrentIdentTokenCount;
     {* 和当前标识符相同的标识符列表数目}
     property FlowTokens[Index: Integer]: TCnGeneralPasToken read GetFlowTokens;
     {* 流程控制的标识符列表}
@@ -2838,13 +2838,13 @@ begin
   begin
     MaxLine := 0;
     for I := 0 to FCurTokenList.Count - 1 do
-      if CurTokens[I].EditLine > MaxLine then
-        MaxLine := CurTokens[I].EditLine;
+      if CurrentIdentTokens[I].EditLine > MaxLine then
+        MaxLine := CurrentIdentTokens[I].EditLine;
     FIdLineList.Count := MaxLine + 1;
 
     for I := 0 to FCurTokenList.Count - 1 do
     begin
-      Token := CurTokens[I];
+      Token := CurrentIdentTokens[I];
       if FIdLineList[Token.EditLine] = nil then
         FIdLineList[Token.EditLine] := TCnList.Create;
       TCnList(FIdLineList[Token.EditLine]).Add(Token);
@@ -4596,7 +4596,7 @@ begin
       end;
 {$ENDIF}
 
-      if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
+      if (Info.KeyCount > 0) or (Info.CurrentIdentTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
         or (Info.FlowTokenCount > 0) or (Info.CustomIdentTokenCount > 0) then
       begin
 {$IFNDEF USE_CODEEDITOR_SERVICE}
@@ -6090,8 +6090,8 @@ procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TCnBlockMatchInfo);
 var
   I: Integer;
 begin
-  for I := 0 to Info.CurTokenCount - 1 do
-    EditorMarkLineDirty(Info.CurTokens[I].EditLine);
+  for I := 0 to Info.CurrentIdentTokenCount - 1 do
+    EditorMarkLineDirty(Info.CurrentIdentTokens[I].EditLine);
 end;
 
 {$IFNDEF BDS}
@@ -6844,7 +6844,7 @@ begin
 
   // 画高亮当前标识符。先假设 Text 内最多只有一个标识符
   if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier])
-    and (Info.CurrentTokenCount > 0) then
+    and (Info.CurrentIdentTokenCount > 0) then
   begin
     L := Context.LogicalLineNum;
     if HSC = -1 then
@@ -6896,7 +6896,7 @@ begin
             C.Pen.Color := FCurrentTokenBorderColor;
 
             C.Rectangle(R);
-            C.Pen.Colr := OldColor;
+            C.Pen.Color := OldColor;
           end;
         end;
 
