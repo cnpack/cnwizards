@@ -28,6 +28,7 @@ unit CnSourceHighlight;
 *           LiuXiao
 *           Shenloqi
 * 备    注：BDS 下 UTF8 的问题有三个地方需要标明：
+*
 *                              D7 或以下、  D2009 以下的BDS、 D2009：
 *           LineText 属性：    AnsiString、 UTF8、            UncodeString
 *           EditView.CusorPos：Ansi 字节、  UTF8 的字节 Col、 转成 Ansi 的字符 Col
@@ -128,8 +129,8 @@ const
   csDefFlowControlBg = $FFCCCC;
   csDefaultHighlightBackgroundColor = $0066FFFF;
 
-  csDefaultCustomIdentifierBackground = $00E3EBEE;
-  csDefaultCustomIdentifierForeground = clNavy;
+  csDefaultCustomIdentBackground = $00E3EBEE;
+  csDefaultCustomIdentForeground = clNavy;
 
   CN_LINE_STYLE_SMALL_DOT_STEP = 2;
 
@@ -233,7 +234,7 @@ type
     FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数
     FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens 的引用
     FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens 的引用
-    FCustomIdentifierTokenList: TCnList;   // 容纳解析出来的自定义高亮标识符的引用
+    FCustomIdentTokenList: TCnList;   // 容纳解析出来的自定义高亮标识符的引用
 
     // *LineList 容纳快速访问结果
     FKeyLineList: TCnFastObjectList;      // 容纳按行方式存储的快速访问的关键字内容
@@ -241,7 +242,7 @@ type
     FFlowLineList: TCnFastObjectList;     // 容纳按行方式存储的快速访问的流程控制符内容
     FSeparateLineList: TCnList;           // 容纳行方式存储的快速访问的分界空行信息
     FCompDirectiveLineList: TCnFastObjectList;       // 容纳行方式存储的快速访问的编译指令内容
-    FCustomIdentifierLineList: TCnFastObjectList;    // 容纳按行方式存储的自定义高亮标识符的内容
+    FCustomIdentLineList: TCnFastObjectList;    // 容纳按行方式存储的自定义高亮标识符的内容
 
     FLineInfo: TCnBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCnCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
@@ -257,27 +258,32 @@ type
 
     function GetKeyCount: Integer;
     function GetKeyTokens(Index: Integer): TCnGeneralPasToken;
-    function GetCurTokens(Index: Integer): TCnGeneralPasToken;
+
     function GetLineCount: Integer;
-    function GetIdLineCount: Integer;
     function GetLines(LineNum: Integer): TCnList;
-    function GetCurTokenCount: Integer;
-    function GetIdLines(LineNum: Integer): TCnList;
+
+    function GetCurrentIdentTokenCount: Integer;
+    function GetCurrentIdentTokens(Index: Integer): TCnGeneralPasToken;
+    function GetCurrentIdentLineCount: Integer;
+    function GetCurrentIdentLines(LineNum: Integer): TCnList;
+
     function GetFlowTokenCount: Integer;
     function GetFlowTokens(Index: Integer): TCnGeneralPasToken;
     function GetFlowLineCount: Integer;
     function GetFlowLines(LineNum: Integer): TCnList;
+
     function GetCompDirectiveTokenCount: Integer;
     function GetCompDirectiveTokens(Index: Integer): TCnGeneralPasToken;
     function GetCompDirectiveLineCount: Integer;
     function GetCompDirectiveLines(LineNum: Integer): TCnList;
-    function GetCustomIdentifierTokenCount: Integer;
-    function GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
-    function GetCustomIdentifierLineCount: Integer;
-    function GetCustomIdentifierLines(LineNum: Integer): TCnList;
+
+    function GetCustomIdentTokenCount: Integer;
+    function GetCustomIdentTokens(Index: Integer): TCnGeneralPasToken;
+    function GetCustomIdentLineCount: Integer;
+    function GetCustomIdentLines(LineNum: Integer): TCnList;
   protected
     function CheckIsFlowToken(AToken: TCnGeneralPasToken; IsCpp: Boolean): Boolean;
-    function CheckIsCustomIdentifier(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
+    function CheckIsCustomIdent(AToken: TCnGeneralPasToken; IsCpp: Boolean; out Bold: Boolean): Boolean;
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -288,7 +294,7 @@ type
     procedure UpdateFlowTokenList;     // 找出流程控制标识符
     procedure UpdateCurTokenList;      // 找出和光标下相同的标识符
     procedure UpdateCompDirectiveList; // 找出编译指令
-    procedure UpdateCustomIdentifierList;   // 找出自定义标识符
+    procedure UpdateCustomIdentList;   // 找出自定义标识符
 {$ENDIF}
 
     procedure CheckLineMatch(ViewCursorPosLine: Integer;
@@ -300,22 +306,22 @@ type
     procedure ConvertIdLineList;        // 将解析出的标识符转换成按行方式快速访问的
     procedure ConvertFlowLineList;      // 将解析出的流程控制标识符转换成按行方式快速访问的
     procedure ConvertCompDirectiveLineList; // 将解析出的编译指令转换成按行方式快速访问的
-    procedure ConvertCustomIdentifierLineList;   // 将解析出的自定义标识符转换成按行方式快速访问的
+    procedure ConvertCustomIdentLineList;   // 将解析出的自定义标识符转换成按行方式快速访问的
 
     procedure Clear;
     procedure AddToKeyList(AToken: TCnGeneralPasToken);
     procedure AddToCurrList(AToken: TCnGeneralPasToken);
     procedure AddToFlowList(AToken: TCnGeneralPasToken);
     procedure AddToCompDirectiveList(AToken: TCnGeneralPasToken);
-    procedure AddToCustomIdentifierList(AToken: TCnGeneralPasToken);
+    procedure AddToCustomIdentList(AToken: TCnGeneralPasToken);
 
     property KeyTokens[Index: Integer]: TCnGeneralPasToken read GetKeyTokens;
     {* 高亮关键字列表}
     property KeyCount: Integer read GetKeyCount;
     {* 高亮关键字列表数目}
-    property CurTokens[Index: Integer]: TCnGeneralPasToken read GetCurTokens;
+    property CurTokens[Index: Integer]: TCnGeneralPasToken read GetCurrentIdentTokens;
     {* 和当前标识符相同的标识符列表}
-    property CurTokenCount: Integer read GetCurTokenCount;
+    property CurTokenCount: Integer read GetCurrentIdentTokenCount;
     {* 和当前标识符相同的标识符列表数目}
     property FlowTokens[Index: Integer]: TCnGeneralPasToken read GetFlowTokens;
     {* 流程控制的标识符列表}
@@ -325,27 +331,27 @@ type
     {* 编译指令的标识符列表}
     property CompDirectiveTokenCount: Integer read GetCompDirectiveTokenCount;
     {* 编译指令的标识符列表数目}
-    property CustomIdentifierTokens[Index: Integer]: TCnGeneralPasToken read GetCustomIdentifierTokens;
+    property CustomIdentTokens[Index: Integer]: TCnGeneralPasToken read GetCustomIdentTokens;
     {* 自定义标识符的列表}
-    property CustomIdentifierTokenCount: Integer read GetCustomIdentifierTokenCount;
+    property CustomIdentTokenCount: Integer read GetCustomIdentTokenCount;
     {* 自定义标识符的列表数目}
 
     property LineCount: Integer read GetLineCount;
-    property IdLineCount: Integer read GetIdLineCount;
+    property CurrentIdentLineCount: Integer read GetCurrentIdentLineCount;
     property FlowLineCount: Integer read GetFlowLineCount;
     property CompDirectiveLineCount: Integer read GetCompDirectiveLineCount;
-    property CustomIdentifierLineCount: Integer read GetCustomIdentifierLineCount;
+    property CustomIdentLineCount: Integer read GetCustomIdentLineCount;
 
     property Lines[LineNum: Integer]: TCnList read GetLines;
     {* 每行一个 CnList，后者容纳 Token}
-    property IdLines[LineNum: Integer]: TCnList read GetIdLines;
-    {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CurToken}
+    property CurrentIdentLines[LineNum: Integer]: TCnList read GetCurrentIdentLines;
+    {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CurrentToken}
     property FlowLines[LineNum: Integer]: TCnList read GetFlowLines;
     {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 FlowToken}
     property CompDirectiveLines[LineNum: Integer]: TCnList read GetCompDirectiveLines;
     {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CompDirectiveToken}
-    property CustomIdentifierLines[LineNum: Integer]: TCnList read GetCustomIdentifierLines;
-    {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CustomIdentifier}
+    property CustomIdentLines[LineNum: Integer]: TCnList read GetCustomIdentLines;
+    {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CustomIdent}
 
     property Control: TControl read FControl;
     property Modified: Boolean read FModified write FModified;
@@ -569,10 +575,10 @@ type
     FFlowStatementForeground: TColor;
     FHighlightCompDirective: Boolean;
     FCompDirectiveBackground: TColor;
-    FHighlightCustomIdentifier: Boolean;
-    FCustomIdentifierBackground: TColor;
-    FCustomIdentifierForeground: TColor;
-    FCustomIdentifiers: TStringList;
+    FHighlightCustomIdent: Boolean;
+    FCustomIdentBackground: TColor;
+    FCustomIdentForeground: TColor;
+    FCustomIdents: TStringList;
 {$IFDEF IDE_STRING_ANSI_UTF8}
     FCustomWideIdentfiers: TCnWideStringList;
 {$ENDIF}
@@ -670,8 +676,8 @@ type
     procedure SetCompDirectiveBackground(const Value: TColor);
     procedure SetHighlightCompDirective(const Value: Boolean);
     procedure SetBlockMatchLineNamespace(const Value: Boolean);
-    procedure SetCustomIdentifierBackground(const Value: TColor);
-    procedure SetCustomIdentifierForeground(const Value: TColor);
+    procedure SetCustomIdentBackground(const Value: TColor);
+    procedure SetCustomIdentForeground(const Value: TColor);
   protected
 {$IFNDEF STAND_ALONE}
     procedure GutterChangeRepaint(Sender: TObject);
@@ -792,13 +798,13 @@ type
     property CompDirectiveBackground: TColor read FCompDirectiveBackground write SetCompDirectiveBackground;
     {* 高亮当前条件编译指令的背景色}
 
-    property HighlightCustomIdentifier: Boolean read FHighlightCustomIdentifier write FHighlightCustomIdentifier;
+    property HighlightCustomIdent: Boolean read FHighlightCustomIdent write FHighlightCustomIdent;
     {* 是否高亮自定义内容}
-    property CustomIdentifierBackground: TColor read FCustomIdentifierBackground write SetCustomIdentifierBackground;
+    property CustomIdentBackground: TColor read FCustomIdentBackground write SetCustomIdentBackground;
     {* 高亮自定义内容的背景色}
-    property CustomIdentifierForeground: TColor read FCustomIdentifierForeground write SetCustomIdentifierForeground;
+    property CustomIdentForeground: TColor read FCustomIdentForeground write SetCustomIdentForeground;
     {* 高亮自定义内容的前景色}
-    property CustomIdentifiers: TStringList read FCustomIdentifiers;
+    property CustomIdents: TStringList read FCustomIdents;
     {* 需要高亮的自定义标识符列表}
 
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
@@ -930,10 +936,10 @@ const
   csFlowStatementForeground = 'FlowStatementForeground';
   csHighlightCompDirective = 'HighlightCompDirective';
   csCompDirectiveBackground = 'CompDirectiveBackground';
-  csHighlightCustomIdentifier = 'HighlightCustomIdentifier';
-  csCustomIdentifierBackground = 'CustomIdentifierBackground';
-  csCustomIdentifierForeground = 'CustomIdentifierForeground';
-  csCustomIdentifiers = 'CustomIdentifiers';
+  csHighlightCustomIdent = 'HighlightCustomIdentifier';
+  csCustomIdentBackground = 'CustomIdentifierBackground';
+  csCustomIdentForeground = 'CustomIdentifierForeground';
+  csCustomIdents = 'CustomIdentifiers';
 
 var
   FHighlight: TCnSourceHighlight = nil;
@@ -1617,7 +1623,7 @@ begin
       UpdateCurTokenList;
       UpdateFlowTokenList;
       UpdateCompDirectiveList;
-      UpdateCustomIdentifierList;
+      UpdateCustomIdentList;
 
       ConvertLineList;
       if LineInfo <> nil then
@@ -1706,7 +1712,7 @@ begin
     UpdateCurTokenList;
     UpdateFlowTokenList;
     UpdateCompDirectiveList;
-    UpdateCustomIdentifierList;
+    UpdateCustomIdentList;
 
     FCurrentBlockSearched := False;
 
@@ -2598,14 +2604,14 @@ begin
   FCurTokenListEditCol.Clear;
   FFlowTokenList.Clear;
   FCompDirectiveTokenList.Clear;
-  FCustomIdentifierTokenList.Clear;
+  FCustomIdentTokenList.Clear;
 
   FKeyLineList.Clear;
   FIdLineList.Clear;
   FFlowLineList.Clear;
   FSeparateLineList.Clear;
   FCompDirectiveLineList.Clear;
-  FCustomIdentifierLineList.Clear;
+  FCustomIdentLineList.Clear;
 
   if LineInfo <> nil then
     LineInfo.Clear;
@@ -2646,14 +2652,14 @@ begin
   FCurTokenListEditCol := TCnList.Create;
   FFlowTokenList := TCnList.Create;
   FCompDirectiveTokenList := TCnList.Create;
-  FCustomIdentifierTokenList := TCnList.Create;
+  FCustomIdentTokenList := TCnList.Create;
 
   FKeyLineList := TCnFastObjectList.Create;
   FIdLineList := TCnFastObjectList.Create;
   FFlowLineList := TCnFastObjectList.Create;
   FSeparateLineList := TCnList.Create;
   FCompDirectiveLineList := TCnFastObjectList.Create;
-  FCustomIdentifierLineList := TCnFastObjectList.Create;
+  FCustomIdentLineList := TCnFastObjectList.Create;
 
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
@@ -2681,10 +2687,10 @@ begin
   FIdLineList.Free;
   FFlowLineList.Free;
   FCompDirectiveLineList.Free;
-  FCustomIdentifierLineList.Free;
+  FCustomIdentLineList.Free;
   FSeparateLineList.Free;
 
-  FCustomIdentifierTokenList.Free;
+  FCustomIdentTokenList.Free;
   FCompDirectiveTokenList.Free;
   FFlowTokenList.Free;
   FCurTokenListEditLine.Free;
@@ -2727,12 +2733,12 @@ begin
   Result := TCnGeneralPasToken(FKeyTokenList[Index]);
 end;
 
-function TCnBlockMatchInfo.GetCurTokens(Index: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetCurrentIdentTokens(Index: Integer): TCnGeneralPasToken;
 begin
   Result := TCnGeneralPasToken(FCurTokenList[Index]);
 end;
 
-function TCnBlockMatchInfo.GetCurTokenCount: Integer;
+function TCnBlockMatchInfo.GetCurrentIdentTokenCount: Integer;
 begin
   Result := FCurTokenList.Count;
 end;
@@ -2762,7 +2768,7 @@ begin
   Result := FKeyLineList.Count;
 end;
 
-function TCnBlockMatchInfo.GetIdLineCount: Integer;
+function TCnBlockMatchInfo.GetCurrentIdentLineCount: Integer;
 begin
   Result := FIdLineList.Count;
 end;
@@ -2782,7 +2788,7 @@ begin
   Result := TCnList(FKeyLineList[LineNum]);
 end;
 
-function TCnBlockMatchInfo.GetIdLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetCurrentIdentLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FIdLineList[LineNum]);
 end;
@@ -2894,53 +2900,53 @@ begin
   end;
 end;
 
-procedure TCnBlockMatchInfo.AddToCustomIdentifierList(AToken: TCnGeneralPasToken);
+procedure TCnBlockMatchInfo.AddToCustomIdentList(AToken: TCnGeneralPasToken);
 begin
-  FCustomIdentifierTokenList.Add(AToken);
+  FCustomIdentTokenList.Add(AToken);
 end;
 
-procedure TCnBlockMatchInfo.ConvertCustomIdentifierLineList;
+procedure TCnBlockMatchInfo.ConvertCustomIdentLineList;
 var
   I: Integer;
   Token: TCnGeneralPasToken;
   MaxLine: Integer;
 begin
   MaxLine := 0;
-  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
-    if CustomIdentifierTokens[I].EditLine > MaxLine then
-      MaxLine := CustomIdentifierTokens[I].EditLine;
-  FCustomIdentifierLineList.Count := MaxLine + 1;
+  for I := 0 to FCustomIdentTokenList.Count - 1 do
+    if CustomIdentTokens[I].EditLine > MaxLine then
+      MaxLine := CustomIdentTokens[I].EditLine;
+  FCustomIdentLineList.Count := MaxLine + 1;
 
-  if FHighlight.HighlightCustomIdentifier then
+  if FHighlight.HighlightCustomIdent then
   begin
-    for I := 0 to FCustomIdentifierTokenList.Count - 1 do
+    for I := 0 to FCustomIdentTokenList.Count - 1 do
     begin
-      Token := CustomIdentifierTokens[I];
-      if FCustomIdentifierLineList[Token.EditLine] = nil then
-        FCustomIdentifierLineList[Token.EditLine] := TCnList.Create;
-      TCnList(FCustomIdentifierLineList[Token.EditLine]).Add(Token);
+      Token := CustomIdentTokens[I];
+      if FCustomIdentLineList[Token.EditLine] = nil then
+        FCustomIdentLineList[Token.EditLine] := TCnList.Create;
+      TCnList(FCustomIdentLineList[Token.EditLine]).Add(Token);
     end;
   end;
 end;
 
-function TCnBlockMatchInfo.GetCustomIdentifierTokenCount: Integer;
+function TCnBlockMatchInfo.GetCustomIdentTokenCount: Integer;
 begin
-  Result := FCustomIdentifierTokenList.Count;
+  Result := FCustomIdentTokenList.Count;
 end;
 
-function TCnBlockMatchInfo.GetCustomIdentifierLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetCustomIdentLines(LineNum: Integer): TCnList;
 begin
-  Result := TCnList(FCustomIdentifierLineList[LineNum]);
+  Result := TCnList(FCustomIdentLineList[LineNum]);
 end;
 
-function TCnBlockMatchInfo.GetCustomIdentifierTokens(Index: Integer): TCnGeneralPasToken;
+function TCnBlockMatchInfo.GetCustomIdentTokens(Index: Integer): TCnGeneralPasToken;
 begin
-  Result := TCnGeneralPasToken(FCustomIdentifierTokenList[Index]);
+  Result := TCnGeneralPasToken(FCustomIdentTokenList[Index]);
 end;
 
 {$IFNDEF STAND_ALONE}
 
-procedure TCnBlockMatchInfo.UpdateCustomIdentifierList;
+procedure TCnBlockMatchInfo.UpdateCustomIdentList;
 var
   EditView: IOTAEditView;
   Bold: Boolean;
@@ -2963,7 +2969,7 @@ begin
   if EditView = nil then
     Exit;
 
-  FCustomIdentifierTokenList.Clear;
+  FCustomIdentTokenList.Clear;
   if not FIsCppSource then
   begin
     if Assigned(PasParser) then
@@ -2975,9 +2981,9 @@ begin
       for I := 0 to PasParser.Count - 1 do
       begin
         Bold := False;
-        if CheckIsCustomIdentifier(PasParser.Tokens[I], FIsCppSource, Bold) then
+        if CheckIsCustomIdent(PasParser.Tokens[I], FIsCppSource, Bold) then
         begin
-          FCustomIdentifierTokenList.Add(PasParser.Tokens[I]);
+          FCustomIdentTokenList.Add(PasParser.Tokens[I]);
           if Bold then
             PasParser.Tokens[I].Tag := 1  // 如果设置要求加粗，用 Tag 存储加粗标志
           else
@@ -2986,8 +2992,8 @@ begin
       end;
     end;
 
-    FCustomIdentifierLineList.Clear;
-    ConvertCustomIdentifierLineList;
+    FCustomIdentLineList.Clear;
+    ConvertCustomIdentLineList;
   end
   else // 做 C/C++ 中的当前解析，将所需高亮的自定义标识符解析出来
   begin
@@ -2996,9 +3002,9 @@ begin
 
     for I := 0 to CppParser.Count - 1 do
     begin
-      if CheckIsCustomIdentifier(CppParser.Tokens[I], FIsCppSource, Bold) then
+      if CheckIsCustomIdent(CppParser.Tokens[I], FIsCppSource, Bold) then
       begin
-        FCustomIdentifierTokenList.Add(CppParser.Tokens[I]);
+        FCustomIdentTokenList.Add(CppParser.Tokens[I]);
         if Bold then
           CppParser.Tokens[I].Tag := 1
         else
@@ -3006,26 +3012,26 @@ begin
       end;
     end;
 
-    FCustomIdentifierLineList.Clear;
-    ConvertCustomIdentifierLineList;
+    FCustomIdentLineList.Clear;
+    ConvertCustomIdentLineList;
   end;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogFmt('FCustomIdentifierTokenList.Count: %d', [FCustomIdentifierTokenList.Count]);
+  CnDebugger.LogFmt('FCustomIdentTokenList.Count: %d', [FCustomIdentTokenList.Count]);
 {$ENDIF}
 
-  for I := 0 to FCustomIdentifierTokenList.Count - 1 do
-    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentifierTokenList[I]).EditLine);
+  for I := 0 to FCustomIdentTokenList.Count - 1 do
+    FHighLight.EditorMarkLineDirty(TCnGeneralPasToken(FCustomIdentTokenList[I]).EditLine);
 end;
 
 {$ENDIF}
 
-function TCnBlockMatchInfo.GetCustomIdentifierLineCount: Integer;
+function TCnBlockMatchInfo.GetCustomIdentLineCount: Integer;
 begin
-  Result := FCustomIdentifierLineList.Count;
+  Result := FCustomIdentLineList.Count;
 end;
 
-function TCnBlockMatchInfo.CheckIsCustomIdentifier(AToken: TCnGeneralPasToken;
+function TCnBlockMatchInfo.CheckIsCustomIdent(AToken: TCnGeneralPasToken;
   IsCpp: Boolean; out Bold: Boolean): Boolean;
 var
   I: Integer;
@@ -3062,11 +3068,11 @@ begin
 {$ELSE}
   if IsCpp then // 区分大小写
   begin
-    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    for I := 0 to FHighlight.FCustomIdents.Count - 1 do
     begin
-      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomIdentifiers[I])[1]), True) then
+      if EqualIdeToken(AToken.Token, @((FHighlight.FCustomIdents[I])[1]), True) then
       begin
-        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
+        Bold := FHighlight.FCustomIdents.Objects[I] <> nil;
         Result := True;
         Exit;
       end;
@@ -3074,11 +3080,11 @@ begin
   end
   else // 不区分大小写
   begin
-    for I := 0 to FHighlight.FCustomIdentifiers.Count - 1 do
+    for I := 0 to FHighlight.FCustomIdents.Count - 1 do
     begin
-      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomIdentifiers[I])[1])) then
+      if EqualIdeToken(AToken.Token,@((FHighlight.FCustomIdents[I])[1])) then
       begin
-        Bold := FHighlight.FCustomIdentifiers.Objects[I] <> nil;
+        Bold := FHighlight.FCustomIdents.Objects[I] <> nil;
         Result := True;
         Exit;
       end;
@@ -3151,10 +3157,10 @@ begin
   FFlowStatementBackground := csDefFlowControlBg;
   FFlowStatementForeground := clBlack;
 
-  FHighlightCustomIdentifier := True; // 默认画自定义标识符
-  FCustomIdentifierBackground := csDefaultCustomIdentifierBackground;
-  FCustomIdentifierForeground := csDefaultCustomIdentifierForeground;
-  FCustomIdentifiers := TStringList.Create;
+  FHighlightCustomIdent := True; // 默认画自定义标识符
+  FCustomIdentBackground := csDefaultCustomIdentBackground;
+  FCustomIdentForeground := csDefaultCustomIdentForeground;
+  FCustomIdents := TStringList.Create;
 {$IFDEF IDE_STRING_ANSI_UTF8}
   FCustomWideIdentfiers := TCnWideStringList.Create;
 {$ENDIF}
@@ -3238,7 +3244,7 @@ begin
 {$ENDIF}
   FCompDirectiveHighlight.Free;
   FDirtyList.Free;
-  FCustomIdentifiers.Free;
+  FCustomIdents.Free;
 {$IFDEF IDE_STRING_ANSI_UTF8}
   FCustomWideIdentfiers.Free;
 {$ENDIF}
@@ -4591,7 +4597,7 @@ begin
 {$ENDIF}
 
       if (Info.KeyCount > 0) or (Info.CurTokenCount > 0) or (Info.CompDirectiveTokenCount > 0)
-        or (Info.FlowTokenCount > 0) or (Info.CustomIdentifierTokenCount > 0) then
+        or (Info.FlowTokenCount > 0) or (Info.CustomIdentTokenCount > 0) then
       begin
 {$IFNDEF USE_CODEEDITOR_SERVICE}
         // 高版本下使用新 API 绘制关键字高亮及匹配高亮
@@ -4731,9 +4737,10 @@ begin
         end;
 {$ENDIF}
 
-        // 如果有需要高亮绘制的标识符内容
+{$IFNDEF USE_CODEEDITOR_SERVICE}
+        // 如果有需要高亮绘制的当前标识符内容
         if FCurrentTokenHighlight and not FCurrentTokenInvalid and
-          (LogicLineNum < Info.IdLineCount) and (Info.IdLines[LogicLineNum] <> nil) then
+          (LogicLineNum < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[LogicLineNum] <> nil) then
         begin
           with EditCanvas do
           begin
@@ -4747,9 +4754,9 @@ begin
               Font.Style := Font.Style + [fsUnderline];
           end;
 
-          for I := 0 to Info.IdLines[LogicLineNum].Count - 1 do
+          for I := 0 to Info.CurrentIdentLines[LogicLineNum].Count - 1 do
           begin
-            Token := TCnGeneralPasToken(Info.IdLines[LogicLineNum][I]);
+            Token := TCnGeneralPasToken(Info.CurrentIdentLines[LogicLineNum][I]);
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
@@ -4857,6 +4864,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
 {$IFNDEF USE_CODEEDITOR_SERVICE}
         // 如果有需要高亮绘制的流程控制标识符的内容
@@ -4964,7 +4972,9 @@ begin
             end;
           end;
         end;
+{$ENDIF}
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
         // 如果有需要高亮的条件编译指令
         if FHighlightCompDirective and (LogicLineNum < Info.CompDirectiveLineCount) and
           (Info.CompDirectiveLines[LogicLineNum] <> nil) and
@@ -5073,13 +5083,14 @@ begin
         end;
 {$ENDIF}
 
+{$IFNDEF USE_CODEEDITOR_SERVICE}
         // 如果有需要高亮绘制的自定义标识符的内容
-        if FHighlightCustomIdentifier and (LogicLineNum < Info.CustomIdentifierLineCount) and
-          (Info.CustomIdentifierLines[LogicLineNum] <> nil) then
+        if FHighlightCustomIdent and (LogicLineNum < Info.CustomIdentLineCount) and
+          (Info.CustomIdentLines[LogicLineNum] <> nil) then
         begin
-          for I := 0 to Info.CustomIdentifierLines[LogicLineNum].Count - 1 do
+          for I := 0 to Info.CustomIdentLines[LogicLineNum].Count - 1 do
           begin
-            Token := TCnGeneralPasToken(Info.CustomIdentifierLines[LogicLineNum][I]);
+            Token := TCnGeneralPasToken(Info.CustomIdentLines[LogicLineNum][I]);
             TokenLen := Length(Token.Token);
 
             EditPos := OTAEditPos(GetTokenAnsiEditCol(Token), LineNum);
@@ -5113,8 +5124,8 @@ begin
               with EditCanvas do
               begin
                 R1 := Rect(R.Left - 1, R.Top, R.Right + 1, R.Bottom - 1);
-                if FCustomIdentifierBackground <> clNone then
-                  Brush.Color := FCustomIdentifierBackground
+                if FCustomIdentBackground <> clNone then
+                  Brush.Color := FCustomIdentBackground
                 else
                   Brush.Color := EditControlWrapper.BackgroundColor; // 透明意味着使用编辑器原来的背景色
 
@@ -5143,7 +5154,7 @@ begin
                   if FKeywordHighlight.Underline then
                     Font.Style := Font.Style + [fsUnderline];
                 end;
-                Font.Color := FCustomIdentifierForeground;
+                Font.Color := FCustomIdentForeground;
 {$IFDEF BDS}
                 // BDS 下需要挨个绘制字符，因为 BDS 自身采用的是加粗的字符间距绘制
                 EditPosColBaseForAttribute := CalcTokenEditColForAttribute(Token);
@@ -5179,6 +5190,7 @@ begin
             end;
           end;
         end;
+{$ENDIF}
       end;
 
       if CanvasSaved then
@@ -5706,7 +5718,7 @@ begin
 {$ENDIF}
     if FStructureHighlight or FBlockMatchHighlight or FCurrentTokenHighlight
       or FHilightSeparateLine or FHighlightFlowStatement or FHighlightCompDirective
-      or FHighlightCustomIdentifier then // 里头顺便做背景匹配高亮
+      or FHighlightCustomIdent then // 里头顺便做背景匹配高亮
       PaintBlockMatchKeyword(Editor, LineNum, LogicLineNum, AElided);
 {$IFNDEF USE_CODEEDITOR_SERVICE}
     if FBlockMatchDrawLine then
@@ -5783,10 +5795,10 @@ begin
     FHighlightCompDirective := ReadBool('', csHighlightCompDirective, True);
     FCompDirectiveBackground := ReadColor('', csCompDirectiveBackground, csDefaultHighlightBackgroundColor);
 
-    FHighlightCustomIdentifier := ReadBool('', csHighlightCustomIdentifier, True);
-    FCustomIdentifierBackground := ReadColor('', csCustomIdentifierBackground, csDefaultCustomIdentifierBackground);
-    FCustomIdentifierForeground := ReadColor('', csCustomIdentifierForeground, csDefaultCustomIdentifierForeground);
-    ReadStringsBoolean('', csCustomIdentifiers, FCustomIdentifiers);
+    FHighlightCustomIdent := ReadBool('', csHighlightCustomIdent, True);
+    FCustomIdentBackground := ReadColor('', csCustomIdentBackground, csDefaultCustomIdentBackground);
+    FCustomIdentForeground := ReadColor('', csCustomIdentForeground, csDefaultCustomIdentForeground);
+    ReadStringsBoolean('', csCustomIdents, FCustomIdents);
 {$IFDEF IDE_STRING_ANSI_UTF8}
     SyncCustomWide;
 {$ENDIF}
@@ -5853,10 +5865,10 @@ begin
     WriteBool('', csHighlightCompDirective, FHighlightCompDirective);
     WriteColor('', csCompDirectiveBackground, FCompDirectiveBackground);
 
-    WriteBool('', csHighlightCustomIdentifier, FHighlightCustomIdentifier);
-    WriteColor('', csCustomIdentifierBackground, FCustomIdentifierBackground);
-    WriteColor('', csCustomIdentifierForeground, FCustomIdentifierForeground);
-    WriteStringsBoolean('', csCustomIdentifiers, FCustomIdentifiers);
+    WriteBool('', csHighlightCustomIdent, FHighlightCustomIdent);
+    WriteColor('', csCustomIdentBackground, FCustomIdentBackground);
+    WriteColor('', csCustomIdentForeground, FCustomIdentForeground);
+    WriteStringsBoolean('', csCustomIdents, FCustomIdents);
 
     WriteInteger('', csBlockHighlightRange, Ord(FBlockHighlightRange));
     WriteInteger('', csBlockMatchDelay, FBlockMatchDelay);
@@ -6206,10 +6218,10 @@ var
   S: WideString;
 begin
   FCustomWideIdentfiers.Clear;
-  for I := 0 to FCustomIdentifiers.Count - 1 do
+  for I := 0 to FCustomIdents.Count - 1 do
   begin
-    S := WideString(FCustomIdentifiers[I]);
-    FCustomWideIdentfiers.AddObject(S, FCustomIdentifiers.Objects[I]);
+    S := WideString(FCustomIdents[I]);
+    FCustomWideIdentfiers.AddObject(S, FCustomIdents.Objects[I]);
   end;
 end;
 
@@ -6588,7 +6600,7 @@ begin
     Exit;
 
   if not FStructureHighlight and not FBlockMatchHighlight and not FCurrentTokenHighlight
-    and not FHighlightFlowStatement and not FHighlightCompDirective and not FHighlightCustomIdentifier then
+    and not FHighlightFlowStatement and not FHighlightCompDirective and not FHighlightCustomIdent then
     Exit;
 
   Idx := IndexOfBlockMatch(Context.EditControl);
@@ -6829,6 +6841,164 @@ begin
       end;
     end;
   end;
+
+  // 画高亮当前标识符。先假设 Text 内最多只有一个标识符
+  if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier])
+    and (Info.CurrentTokenCount > 0) then
+  begin
+    L := Context.LogicalLineNum;
+    if HSC = -1 then
+      HSC := GetHeaderSpaceCount(Text);
+    // 部分当前标识符可能和前面的内容遗留下来的空格一起单独画
+
+    if (L < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[L] <> nil) then
+    begin
+      Token := nil;
+      for I := 0 to Info.CurrentIdentLines[L].Count - 1 do
+      begin
+        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.CurrentIdentLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+
+        if Utf8Col = ColNum + HSC then
+        begin
+          Token := TCnGeneralPasToken(Info.CurrentIdentLines[L][I]);
+          Break;
+        end;
+      end;
+
+      if Token <> nil then  // 该位置是我们解析出来的当前标识符的位置
+      begin
+        C := Context.Canvas;
+        if (FCurrentTokenBackground <> clNone) or (FCurrentTokenBorderColor <> clNone) then
+        begin
+          R := Rect;
+          if HSC > 0 then
+            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+
+          // 画背景
+          if FCurrentTokenBackground <> clNone then
+          begin
+            OldColor := C.Brush.Color;
+            C.Brush.Color := FCurrentTokenBackground;
+            C.Brush.Style := bsSolid;
+
+            C.FillRect(R);
+            C.Brush.Color := OldColor;
+          end;
+
+          // 画边框
+          if (FCurrentTokenBorderColor <> clNone) and
+            (FCurrentTokenBorderColor <> FCurrentTokenBackground) then
+          begin
+            OldColor := C.Pen.Color;
+            C.Pen.Color := FCurrentTokenBorderColor;
+
+            C.Rectangle(R);
+            C.Pen.Colr := OldColor;
+          end;
+        end;
+
+        // 画字
+        OldColor := C.Font.Color;
+        if SyntaxCode = atIdentifier then
+        begin
+          C.Font.Style := [];
+          C.Font.Color := FIdentifierHighlight.ColorFg;
+          if FIdentifierHighlight.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FIdentifierHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FIdentifierHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+        end;
+
+        C.Brush.Style := bsClear;
+        if FCurrentTokenBackground <> clNone then // 有背景色则使用固定前景色，好看点
+          C.Font.Color := FCurrentTokenForeground;
+        C.TextOut(Rect.Left, Rect.Top, Text);
+        C.Font.Color := OldColor;
+      end;
+    end;
+  end;
+
+  // 画自定义标识符
+  if FHighlightCustomIdent and (SyntaxCode in [atIdentifier])
+    and (Info.CustomIdentTokenCount > 0) then
+  begin
+    L := Context.LogicalLineNum;
+    if HSC = -1 then
+      HSC := GetHeaderSpaceCount(Text);
+    // 部分当前标识符可能和前面的内容遗留下来的空格一起单独画
+
+    if (L < Info.CustomIdentLineCount) and (Info.CustomIdentLines[L] <> nil) then
+    begin
+      Token := nil;
+      for I := 0 to Info.CustomIdentLines[L].Count - 1 do
+      begin
+        // 将 EditCol 转为 Utf8 的 Col，汉字有偏差不能直接比较
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+          TCnGeneralPasToken(Info.CustomIdentLines[L][I]).EditCol, @IDEWideCharIsWideLength);
+
+        if Utf8Col = ColNum + HSC then
+        begin
+          Token := TCnGeneralPasToken(Info.CustomIdentLines[L][I]);
+          Break;
+        end;
+      end;
+
+      if Token <> nil then  // 该位置是我们解析出来的自定义标识符的位置
+      begin
+        C := Context.Canvas;
+
+        // 画背景框
+        if FCustomIdentBackground <> clNone then
+        begin
+          OldColor := C.Brush.Color;
+          C.Brush.Color := FCustomIdentBackground;
+          C.Brush.Style := bsSolid;
+
+          R := Rect;
+          if HSC > 0 then
+            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+          C.FillRect(R);
+          C.Brush.Color := OldColor;
+        end;
+
+        OldColor := C.Font.Color;
+        if SyntaxCode = atIdentifier then
+        begin
+          C.Font.Style := [];
+          C.Font.Color := FIdentifierHighlight.ColorFg;
+          if FIdentifierHighlight.Bold or (Token.Tag <> 0) then // 自定义的标识符如果用 Tag 传递了设置加粗则加粗
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FIdentifierHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FIdentifierHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+        end
+        else if SyntaxCode = atReservedWord then
+        begin
+          C.Font.Style := [];
+          C.Font.Color := FKeywordHighlight.ColorFg;
+          if FKeywordHighlight.Bold then
+            C.Font.Style := C.Font.Style + [fsBold];
+          if FKeywordHighlight.Italic then
+            C.Font.Style := C.Font.Style + [fsItalic];
+          if FKeywordHighlight.Underline then
+            C.Font.Style := C.Font.Style + [fsUnderline];
+        end;
+
+        C.Brush.Style := bsClear;
+        if FCustomIdentBackground <> clNone then // 有背景色则使用固定前景色，好看点
+          C.Font.Color := FCustomIdentForeground;
+        C.TextOut(Rect.Left, Rect.Top, Text);
+        C.Font.Color := OldColor;
+      end;
+    end;
+  end;
 end;
 
 {$ENDIF}
@@ -6904,14 +7074,14 @@ begin
   GlobalIgnoreNamespace := not Value;
 end;
 
-procedure TCnSourceHighlight.SetCustomIdentifierBackground(const Value: TColor);
+procedure TCnSourceHighlight.SetCustomIdentBackground(const Value: TColor);
 begin
-  FCustomIdentifierBackground := Value;
+  FCustomIdentBackground := Value;
 end;
 
-procedure TCnSourceHighlight.SetCustomIdentifierForeground(const Value: TColor);
+procedure TCnSourceHighlight.SetCustomIdentForeground(const Value: TColor);
 begin
-  FCustomIdentifierForeground := Value;
+  FCustomIdentForeground := Value;
 end;
 
 function TCnSourceHighlight.CanSolidCurrentLineBlock: Boolean;

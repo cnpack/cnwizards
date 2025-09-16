@@ -184,7 +184,7 @@ begin
     shpFlowControl.Brush.Color := Wizard.FlowStatementBackground;
     chkCompDirective.Checked := Wizard.HighlightCompDirective;
     shpCompDirective.Brush.Color := Wizard.CompDirectiveBackground;
-    chkCustomIdent.Checked := Wizard.HighlightCustomIdentifier;
+    chkCustomIdent.Checked := Wizard.HighlightCustomIdent;
 
     rgMatchRange.ItemIndex := Integer(Wizard.BlockHighlightRange);
     rgMatchDelay.ItemIndex := Integer(Wizard.BlockHighlightStyle);
@@ -229,7 +229,7 @@ begin
       Wizard.FlowStatementBackground := shpFlowControl.Brush.Color;
       Wizard.HighlightCompDirective := chkCompDirective.Checked;
       Wizard.CompDirectiveBackground := shpCompDirective.Brush.Color;
-      Wizard.HighlightCustomIdentifier := chkCustomIdent.Checked;
+      Wizard.HighlightCustomIdent := chkCustomIdent.Checked;
 
       Wizard.BlockHighlightRange := TBlockHighlightRange(rgMatchRange.ItemIndex);
       Wizard.BlockHighlightStyle := TBlockHighlightStyle(rgMatchDelay.ItemIndex);
@@ -479,31 +479,31 @@ procedure TCnSourceHighlightForm.btnCustomIdentSettingClick(
 begin
   with TCnHighlightCustomIdentForm.Create(Self) do
   begin
-    shpCustomFg.Brush.Color := AWizard.CustomIdentifierForeground;
+    shpCustomFg.Brush.Color := AWizard.CustomIdentForeground;
 
-    if AWizard.CustomIdentifierBackground = clNone then
+    if AWizard.CustomIdentBackground = clNone then
     begin
       shpCustomBg.Brush.Color := clWhite;
       chkBkTransparent.Checked := True;
     end
     else
     begin
-      shpCustomBg.Brush.Color := AWizard.CustomIdentifierBackground;
+      shpCustomBg.Brush.Color := AWizard.CustomIdentBackground;
       chkBkTransparent.Checked := False;
     end;
 
-    LoadFromStringList(AWizard.CustomIdentifiers);
+    LoadFromStringList(AWizard.CustomIdents);
 
     if ShowModal = mrOK then
     begin
-      AWizard.CustomIdentifierForeground := shpCustomFg.Brush.Color;
+      AWizard.CustomIdentForeground := shpCustomFg.Brush.Color;
 
       if chkBkTransparent.Checked then
-        AWizard.CustomIdentifierBackground := clNone
+        AWizard.CustomIdentBackground := clNone
       else
-        AWizard.CustomIdentifierBackground := shpCustomBg.Brush.Color;
+        AWizard.CustomIdentBackground := shpCustomBg.Brush.Color;
 
-      SaveToStringList(AWizard.CustomIdentifiers);
+      SaveToStringList(AWizard.CustomIdents);
 {$IFDEF IDE_STRING_ANSI_UTF8}
       AWizard.SyncCustomWide;
 {$ENDIF}
