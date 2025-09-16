@@ -3482,6 +3482,10 @@
   {$DEFINE OTA_CODEEDITOR_SERVICE}      // 11.3 加入了 ToolsAPI.Editor 接口，但编译时无法和 11.0/1/2 区分，只能加到 12 里
 {$ENDIF}
 
+{$IFDEF DELPHI120_ATHENS}
+  {$DEFINE CODEEDITOR_PAINTTEXT_BUG}    // Athens 12 的 PaintText 通知里，Text 有乱码的 Bug，13 修复
+{$ENDIF}
+
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
   {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 removed OldCreateOrder
   {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 supports HDPI using TVirtualImageList, etc.
