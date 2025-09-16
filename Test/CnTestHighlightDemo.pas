@@ -10,6 +10,11 @@ if h = '¡ø' then
   Break;
 if h = '¡÷' then
   Exit;
+   if  (Info.CustomIdentLines[L] <> nil) then
+     Info.CustomIdentLines[L] := nil;
+
+  True or True or False;
+
 begin  ¡÷  ¡ø   end;
   var ³Ô·¹: string := 'Test';
   ³Ô·¹ := '';
