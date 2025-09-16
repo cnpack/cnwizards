@@ -6321,13 +6321,13 @@ begin
           begin
             Editor := EditControlWrapper.Editors[Idx];
             if (Context.LogicalLineNum = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
+              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), Context.LineState.Text,
               TCnIdeTokenString(BracketInfo.TokenStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
 
             if (Context.LogicalLineNum = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), {$IFDEF BDS}FRawLineText, {$ENDIF}
+              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), Context.LineState.Text,
               TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
