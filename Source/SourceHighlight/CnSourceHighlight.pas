@@ -123,7 +123,7 @@ interface
 
 // RAW_WIDECHAR_IDENT_SUPPORT 是指高亮当前及自定义标识符时因需要支持汉字
 // 因而低版本下、和高版本为了躲过 D12 的 Bug，都得使用 PaintLine 的 Hook
-// D13 开始才正常，因而可以定义 NO_EDITOR_PAINTLINE_HOOK，彻底去除 PaintLine 的 Hook。
+// D13 开始才正常，因而可以定义 NO_EDITOR_PAINTLINE_HOOK，彻底不使用旧的 PaintLine 通知。
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
