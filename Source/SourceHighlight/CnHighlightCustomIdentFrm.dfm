@@ -7,6 +7,7 @@ inherited CnHighlightCustomIdentForm: TCnHighlightCustomIdentForm
   ClientWidth = 418
   Font.Name = 'MS Sans Serif'
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object btnOK: TButton

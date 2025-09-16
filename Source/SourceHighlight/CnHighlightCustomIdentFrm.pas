@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, StdCtrls, ExtCtrls, ActnList, ToolWin,
+  ComCtrls, StdCtrls, ExtCtrls, ActnList, ToolWin, CnWizOptions,
   CnConsts, CnWizConsts, CnWizUtils, CnLangMgr, CnWizMultiLang, CnWizShareImages;
 
 type
@@ -71,6 +71,7 @@ type
     procedure actAddExecute(Sender: TObject);
     procedure lvIdentsDblClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   protected
@@ -194,6 +195,11 @@ end;
 procedure TCnHighlightCustomIdentForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnHighlightCustomIdentForm.FormCreate(Sender: TObject);
+begin
+  WizOptions.ResetToolbarWithLargeIcons(tlb1);
 end;
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
