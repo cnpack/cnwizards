@@ -6844,8 +6844,8 @@ begin
   end;
 
   // 画高亮当前标识符。注意需要查找到标识符，并且前后是有效分隔符才对
-  if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier])
-    and (Info.CurrentIdentTokenCount > 0) then
+  if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier, atSymbol])
+    and (Info.CurrentIdentTokenCount > 0) then // 小括号开头的 Text 可能是 Symbol
   begin
     L := Context.LogicalLineNum;
     if (L < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[L] <> nil) then
@@ -6902,7 +6902,7 @@ begin
 
               // 在计算出来的框里画字
               OldColor := C.Font.Color;
-              if SyntaxCode = atIdentifier then
+              if SyntaxCode in [atIdentifier, atSymbol] then
               begin
                 C.Font.Style := [];
                 C.Font.Color := FIdentifierHighlight.ColorFg;
@@ -6927,7 +6927,7 @@ begin
   end;
 
   // 画自定义标识符
-  if FHighlightCustomIdent and (SyntaxCode in [atIdentifier])
+  if FHighlightCustomIdent and (SyntaxCode in [atIdentifier, atSymbol, atReservedWord])
     and (Info.CustomIdentTokenCount > 0) then
   begin
     L := Context.LogicalLineNum;
@@ -6967,7 +6967,7 @@ begin
             end;
 
             OldColor := C.Font.Color;
-            if SyntaxCode = atIdentifier then
+            if SyntaxCode in [atIdentifier, atSymbol] then
             begin
               C.Font.Style := [];
               C.Font.Color := FIdentifierHighlight.ColorFg;
