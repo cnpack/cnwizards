@@ -114,6 +114,8 @@ interface
 {$IFDEF USE_CODEEDITOR_SERVICE}
   {$IFDEF CODEEDITOR_PAINTTEXT_BUG}
   {$DEFINE RAW_WIDECHAR_IDENT_SUPPORT}
+  {$ELSE}
+  {$DEFINE NO_EDITOR_PAINTLINE_HOOK}
   {$ENDIF}
 {$ELSE}
   {$DEFINE RAW_WIDECHAR_IDENT_SUPPORT}
@@ -121,7 +123,7 @@ interface
 
 // RAW_WIDECHAR_IDENT_SUPPORT 是指高亮当前及自定义标识符时因需要支持汉字
 // 因而低版本下、和高版本为了躲过 D12 的 Bug，都得使用 PaintLine 的 Hook
-// D13 开始才正常。
+// D13 开始才正常，因而可以定义 NO_EDITOR_PAINTLINE_HOOK，彻底去除 PaintLine 的 Hook。
 
 uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms,
@@ -3223,7 +3225,9 @@ begin
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 {$IFNDEF STAND_ALONE}
+  {$IFNDEF NO_EDITOR_PAINTLINE_HOOK}
   EditControlWrapper.AddAfterPaintLineNotifier(PaintLine);
+  {$ENDIF}
   {$IFDEF USE_CODEEDITOR_SERVICE}
   EditControlWrapper.AddEditor2PaintLineNotifier(Editor2PaintLine);
   EditControlWrapper.AddEditor2PaintTextNotifier(Editor2PaintText);
@@ -3292,7 +3296,9 @@ begin
   EditControlWrapper.RemoveEditor2PaintTextNotifier(Editor2PaintText);
   EditControlWrapper.RemoveEditor2PaintLineNotifier(Editor2PaintLine);
   {$ENDIF}
+  {$IFNDEF NO_EDITOR_PAINTLINE_HOOK}
   EditControlWrapper.RemoveAfterPaintLineNotifier(PaintLine);
+  {$ENDIF}
 {$ENDIF}
   FHighlight := nil;
   inherited;
@@ -6929,8 +6935,15 @@ begin
             begin
               OldColor := C.Pen.Color;
               C.Pen.Color := FCurrentTokenBorderColor;
+              C.Brush.Style := bsClear;
 
-              C.Rectangle(R);
+              // C.Rectangle(R); // 这句在 Delphi 13 下竟然会产生 FillRect 的效果，会覆盖上面的 FillRect？
+              C.MoveTo(R.Left, R.Top);
+              C.LineTo(R.Right, R.Top);
+              C.LineTo(R.Right, R.Bottom - 1);
+              C.LineTo(R.Left, R.Bottom - 1);
+              C.LineTo(R.Left, R.Top);
+
               C.Pen.Color := OldColor;
             end;
 
