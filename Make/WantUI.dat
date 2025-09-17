@@ -1,4 +1,4 @@
-unstable=true
+nightly=true
 debug=true
 preview=true
 release=true
