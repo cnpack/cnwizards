@@ -95,7 +95,7 @@ See http://www.suigeneris.org/want/ for details.
 
 
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
-  <property name="release.type"   value="_Unstable" if="unstable" />
+  <property name="release.type"   value="_Nightly"  if="nightly" />
   <property name="release.type"   value="_Debug"    if="debug" />
   <property name="release.type"   value="_Preview"  if="preview" />
   <property name="release.type"   value="_RC1"      if="rc1" />
@@ -105,7 +105,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.type"   value="_RC5"      if="rc5" />
   <property name="release.type"   value=""          if="release" />
 
-  <property name="release.labels"   value="Unstable"   if="unstable" />
+  <property name="release.labels"   value="Nightly"    if="nightly" />
   <property name="release.labels"   value="Debug"      if="debug" />
   <property name="release.labels"   value="Preview"    if="preview" />
   <property name="release.labels"   value="RC"         if="rc1" />
@@ -116,7 +116,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.labels"   value="Release"    if="release" />
   <property name="release.labels"   value="Release"    unless="release.labels" />
 
-  <property name="ftpdir"  value="/download.cnpack.org/unstable"  if="unstable" />
+  <property name="ftpdir"  value="/download.cnpack.org/nightly"   if="nightly" />
   <property name="ftpdir"  value="/download.cnpack.org/debug"     if="debug" />
   <property name="ftpdir"  value="/download.cnpack.org/preview"   if="preview" />
   <property name="ftpdir"  value="/download.cnpack.org/rc"        if="rc1" />
@@ -127,7 +127,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="ftpdir"  value="/upgrade.cnpack.org/cnwizards"  if="release" />
 
   <property name="dcc_arg" value="-vn" if="debug" />
-  <property name="dcc_arg" value="-vn" if="unstable" />
+  <property name="dcc_arg" value="-vn" if="nightly" />
   <property name="dcc_arg" value="-vn" if="td32" />
   <property name="dcc_arg" value=""    unless="dcc_arg" />
 
@@ -139,16 +139,16 @@ See http://www.suigeneris.org/want/ for details.
   <property name="define.add"       value="AUTO_BUILD${define._debug}${define._master}"/>
 
   <!-- 定义是否需要包括帮助文件的条件 -->
-  <property name="install_arg"  value="/DMINI_HELP" if="unstable"/>
-  <property name="install_arg"  value=""          unless="unstable"/>
+  <property name="install_arg"  value="/DMINI_HELP" if="nightly"/>
+  <property name="install_arg"  value=""          unless="nightly"/>
   <property name="install_arg"  value="/DNO_HELP" if="debug"/>
   <property name="install_arg"  value=""          if="helpfile"/>
 
   <property name="install_dbg"  value="/DDEBUG"   if="debug"/>
   <property name="install_dbg"  value=""          unless="debug"/>
 
-  <property name="release.type" value="_Unstable" unless="ftpdir" />
-  <property name="ftpdir"       value="/download.cnpack.org/unstable" unless="ftpdir" />
+  <property name="release.type" value="_Nightly" unless="ftpdir" />
+  <property name="ftpdir"       value="/download.cnpack.org/nightly" unless="ftpdir" />
 
   <!-- 从 release.ini 中读取项目属性 -->
   <property name="ini"                  value="${basedir}/Make/release.ini" />
@@ -250,12 +250,12 @@ Usage: want [target-name] [-Dname=value]
     publish    - Publish a new version (Master only. Need Manually Upload).
 
   where name=value may:
-    unstable=true - Make unstable version (default).
+    nightly=true - Make nightly version (default).
     debug=true    - Make debug version.
     preview=true  - Make preview version.
     release=true  - Make release version.
 
-    helpfile=true - Include help files (default when not unstable)." />
+    helpfile=true - Include help files (default when not nightly)." />
   </target>
 
   <!-- 准备构建 -->
