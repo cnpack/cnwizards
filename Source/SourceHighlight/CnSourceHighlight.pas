@@ -6865,7 +6865,7 @@ begin
         C.Brush.Style := bsClear;
         if FFlowStatementBackground <> clNone then // 有背景色则使用固定前景色，好看点
           C.Font.Color := FFlowStatementForeground;
-        C.TextOut(Rect.Left, Rect.Top, Text);
+        C.TextOut(R.Left, R.Top, Token.Token);     // 只画 Exit 等本身，不画完整的 Text 避免后面的括号等的颜色受影响
         C.Font.Color := OldColor;
       end;
     end;
