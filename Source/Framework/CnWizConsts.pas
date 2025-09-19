@@ -668,10 +668,10 @@ var
   SCnDfm6To5InvalidFormat: string = 'Convertion Failure! ' + #13#10#13#10 + 'Filename: %s';
 
   // CnBookmarkWizard
-  SCnBookmarkWizardMenuCaption: string = '&BookMark Browser...';
-  SCnBookmarkWizardMenuHint: string = 'Browsing BookMarks of All Opening Files';
-  SCnBookmarkWizardName: string = 'BookMark Browser';
-  SCnBookmarkWizardComment: string = 'Browsing BookMarks of All Opening Files';
+  SCnBookmarkWizardMenuCaption: string = '&Bookmark Browser...';
+  SCnBookmarkWizardMenuHint: string = 'Browsing Bookmarks of All Opening Files';
+  SCnBookmarkWizardName: string = 'Bookmark Browser';
+  SCnBookmarkWizardComment: string = 'Browsing Bookmarks of All Opening Files';
   SCnBookmarkAllUnit: string = '<All Units>';
   SCnBookmarkCurrentUnit: string = '<Current Unit>';
   SCnBookmarkFileCount: string = 'Units Count: %d';
