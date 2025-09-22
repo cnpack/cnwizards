@@ -437,6 +437,10 @@ uses
 const
   MY_VK_DOT_KEY = 190;
 
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+  CN_PINYIN_DELTA = 12;
+{$ENDIF}
+
   // BCB 下出错框的地址
   SCppKibitzManagerCCError = '@Cppcodcmplt@TCppKibitzManager@CCError$qqrp20System@TResStringRec';
 
@@ -2582,7 +2586,7 @@ begin
           if CanDel then
             FItems.Delete(I)
           else
-            TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
+            TCnSymbolItem(FItems.Objects[I]).Tag := Idx + CN_PINYIN_DELTA;
         end;
       end;
     end
@@ -2690,7 +2694,7 @@ begin
                 and FuzzyMatchStrWithScore(Symbol, TCnSymbolItem(FSymbols.Objects[I]).PinYin, Idx, nil)) then
               begin
                 TCnSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes.Clear;
-                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx + CN_PINYIN_DELTA;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end;
 {$ENDIF}

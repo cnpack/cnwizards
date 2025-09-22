@@ -109,10 +109,10 @@ type
     function GetScopeRate: Integer;
     function GetText: string;
     procedure SetScopeRate(const Value: Integer);
+    procedure SetName(const Value: string);
     function GetAllowMultiLine: Boolean;
     function GetDescription: string;
     function PipesCursorPosition(var S: string): Integer;
-    procedure SetName(const Value: string);
     {* 处理输入文本中的 | 号，返回第一个单独 | 号的偏移量，无则返回 -1。并将 S 中的连续 || 替换成单独 |}
   protected
     procedure CalcHashCode; virtual;
