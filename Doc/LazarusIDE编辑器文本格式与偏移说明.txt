@@ -20,7 +20,7 @@ Lazarus µÄ IDE ½Ó¿ÚÎÄµµ½ÏÎªÈ±·¦£¬Í¨¹ýÐ´²¿·Ö²âÊÔ²å¼þµ¥Ôª£¬×Ü½áÁË±à¼­Æ÷½á¹¹¡¢ÎÄ±¾¼
 
 Èç¹û´úÂëÀïÐ´ËÀ¸ø string ÀàÐÍµÄ±äÁ¿¸³Öµºº×Ö£¬Ôòºº×Ö±àÂë»áËæ×ÅÔ´ÂëÎÄ¼þµÄ±àÂë¶ø±ä£¬µ±Ô´ÂëÎÄ¼þ±àÂëÊÇ Utf8 Ê±£¬Õâ×Ö·û´®Ò²ÊÇ Utf8 ¸ñÊ½¡£ÕâµãÒ²ºÍ¸ß°æ±¾µÄ Delphi ²»Í¬£¬¸ß°æ±¾µÄ Delphi ÀïµÄ×Ö·û´®ÄÚÈÝÊÇ²»ËæÔ´ÎÄ¼þ±àÂë±ä»¯¶ø±ä»¯µÄ¡£
 
-Èç¹û°ÑÒ»¸öÄÚÈÝÊÇ Ansi ±àÂëµÄ string ×ª»»³É UnicodeString£¬Ö±½ÓÓÃ UnicodeString ½øÐÐÇ¿ÖÆÀàÐÍ×ª»»ÊÇÂÒÂëµÄ£¬±ØÐëÏÈ½«Æä×ª»»Îª Utf8 ¸ñÊ½²ÅÐÐ¡£Ò²¾ÍÊÇËµ UnicodeString Ç¿ÖÆ×ª»»µÄÀàÐÍ±ØÐëÊÇ Utf8 ÄÚÈÝµÄ string£¬ÄÚÈÝ²ÅÄÜÊÇºÏ·¨µÄ Utf16¡£
+Èç¹û°ÑÒ»¸öÄÚÈÝÊÇ Ansi ±àÂëµÄ string ×ª»»³É UnicodeString£¬Ö±½ÓÓÃ UnicodeString ½øÐÐÇ¿ÖÆÀàÐÍ×ª»»ÊÇÂÒÂëµÄ£¬±ØÐëÏÈ½«Æä×ª»»Îª Utf8 ¸ñÊ½²ÅÐÐ¡£Ò²¾ÍÊÇËµ½øÐÐ UnicodeString Ç¿ÖÆ×ª»»Ê±£¬±»×ª»»µÄÀàÐÍ±ØÐëÊÇ Utf8 ÄÚÈÝµÄ string£¬ÕâÑù×ª»»ºóµÄÄÚÈÝ²ÅÄÜÊÇºÏ·¨µÄ Utf16¡£
 
 ======================================================================
 ¶þ¡¢±à¼­Æ÷´°ÌåÓë¿Ø¼þ½á¹¹

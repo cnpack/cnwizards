@@ -420,6 +420,7 @@ procedure TCnVerEnhanceWizard.Config;
 begin
   // Ω¯––≈‰÷√°£
   with TCnVerEnhanceForm.Create(nil) do
+  begin
     try
       chkLastCompiled.Checked := FLastCompiled;
       chkIncBuild.Checked := FIncBuild;
@@ -438,6 +439,7 @@ begin
     finally
       Free;
     end;
+  end;
 end;
 
 constructor TCnVerEnhanceWizard.Create;

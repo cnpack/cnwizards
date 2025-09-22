@@ -90,6 +90,9 @@ type
     FDescIsUtf8: Boolean;
     FKind: TCnSymbolKind;
     FName: string;
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+    FPinYin: string;
+{$ENDIF}
     FScope: Integer;
     FScopeHit: Integer;
     FScopeAdjust: Integer;
@@ -109,6 +112,7 @@ type
     function GetAllowMultiLine: Boolean;
     function GetDescription: string;
     function PipesCursorPosition(var S: string): Integer;
+    procedure SetName(const Value: string);
     {* 处理输入文本中的 | 号，返回第一个单独 | 号的偏移量，无则返回 -1。并将 S 中的连续 || 替换成单独 |}
   protected
     procedure CalcHashCode; virtual;
@@ -137,14 +141,18 @@ type
     property Scope: Integer read FScope write FScope;
     {* 符号的优先级，0..MaxInt，越小显示越靠前 }
     property MatchFirstOnly: Boolean read FMatchFirstOnly write FMatchFirstOnly;
-    {* 是否要求从头开始匹配 }
+    {* 是否要求从头开始匹配，用于注释及编译指令这种开头字符敏感的场合 }
     property AllowMultiLine: Boolean read GetAllowMultiLine;
     {* 允许多行文本 }
     property FuzzyMatchIndexes: TList read FFuzzyMatchIndexes;
     {* 模糊匹配时用来存储匹配下标的列表 }
   published
-    property Name: string read FName write FName;
+    property Name: string read FName write SetName;
     {* 符号的名称，即用户键入的字符串 }
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+    property PinYin: string read FPinYin write FPinYin;
+    {* 符号名称如果是汉字，存储拼音首字母的大写字符串 }
+{$ENDIF}
     property Kind: TCnSymbolKind read FKind write FKind;
     {* 符号的类型 }
     property Description: string read GetDescription write FDescription;
@@ -764,6 +772,18 @@ begin
   inherited;
 end;
 
+procedure TCnSymbolItem.SetName(const Value: string);
+begin
+  FName := Value;
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+{$IFDEF UNICODE}
+  FPinYin := GetHzPyW(Value);
+{$ELSE}
+  FPinYin := GetHzPy(Value);
+{$ENDIF}
+{$ENDIF}
+end;
+
 function TCnSymbolItem.PipesCursorPosition(var S: string): Integer;
 const
   RPC = #0;
@@ -899,6 +919,7 @@ begin
     Reader := TOmniXMLReaderHack.Create(pfNodes);
     try
       for I := 0 to Root.ChildNodes.Length - 1 do
+      begin
         if SameText(Root.ChildNodes.Item[I].NodeName, csXmlItem) then
         begin
           Item := TCnSymbolItem.Create;
@@ -917,6 +938,7 @@ begin
             Item.Free;
           end;
         end;
+      end;
     finally
       Reader.Free;
     end;

@@ -2454,7 +2454,7 @@ begin
 
           S := Item.Name;
 {$IFDEF DEBUG}
-//        CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S, GetEnumName(TypeInfo(TSymbolKind), Ord(Item.Kind))]);
+//        CnDebugger.LogFmt('Input Helper Check Name %s, %s', [S + Item.PinYin, GetEnumName(TypeInfo(TCnSymbolKind), Ord(Item.Kind))]);
 {$ENDIF}
                                       // 额外处理，如果用户迅速输入 uses，那么应该在 uses 处允许出现关键字类型
           if ((Item.Kind in Kinds) or ((Item.Kind = skKeyword) and (FPosInfo.LastNoSpace = tkUses)))
@@ -2501,6 +2501,7 @@ function TCnInputHelper.UpdateCurrList(ForcePopup: Boolean): Boolean;
 var
   I, Idx: Integer;
   Symbol: string;
+  CanDel: Boolean;
 begin
 {$IFDEF ADJUST_CODEPARAMWINDOW}
   AdjustCodeParamWindowPos;
@@ -2526,8 +2527,21 @@ begin
         for I := FItems.Count - 1 downto 0 do
         begin
           Idx := Pos(Symbol, UpperCase(FItems[I]));
-          if Idx <> 1 then
-            FItems.Delete(I)
+          CanDel := Idx <> 1;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+          // 不单纯匹配，还得不匹配拼音开头
+          if CanDel and (FItems.Objects[I] <> nil) and (TCnSymbolItem(FItems.Objects[I]).PinYin <> '')then
+          begin
+            Idx := Pos(Symbol, UpperCase(TCnSymbolItem(FItems.Objects[I]).PinYin));
+            CanDel := Idx <> 1;
+          end;
+{$ENDIF}
+
+          if CanDel then
+          begin
+            FItems.Delete(I);
+          end
           else
             TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
         end;
@@ -2537,7 +2551,17 @@ begin
         for I := FItems.Count - 1 downto 0 do
         begin
           Idx := Pos(Symbol, UpperCase(FItems[I]));
-          if Idx <= 0 then
+          CanDel := Idx <= 0;
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+          // 不单纯匹配，还得内部不匹配拼音
+          if CanDel and (FItems.Objects[I] <> nil) and (TCnSymbolItem(FItems.Objects[I]).PinYin <> '')then
+          begin
+            Idx := Pos(Symbol, UpperCase(TCnSymbolItem(FItems.Objects[I]).PinYin));
+            CanDel := Idx <= 0;
+          end;
+{$ENDIF}
+          if CanDel then
             FItems.Delete(I)
           else
             TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
@@ -2547,8 +2571,15 @@ begin
       begin
         for I := FItems.Count - 1 downto 0 do
         begin
-          if not FuzzyMatchStrWithScore(Symbol, FItems[I], Idx,
-            TCnSymbolItem(FItems.Objects[I]).FuzzyMatchIndexes) then
+          CanDel := not FuzzyMatchStrWithScore(Symbol, FItems[I], Idx,
+            TCnSymbolItem(FItems.Objects[I]).FuzzyMatchIndexes);
+
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+          // 不单纯匹配，还得内部不模糊匹配拼音
+          if CanDel and (FItems.Objects[I] <> nil) and (TCnSymbolItem(FItems.Objects[I]).PinYin <> '')then
+            CanDel := not FuzzyMatchStrWithScore(Symbol, TCnSymbolItem(FItems.Objects[I]).PinYin, Idx, nil);
+{$ENDIF}
+          if CanDel then
             FItems.Delete(I)
           else
             TCnSymbolItem(FItems.Objects[I]).Tag := Idx;
@@ -2576,7 +2607,23 @@ begin
               begin
                 TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+              else
+              begin
+                // 拼音匹配的
+                if (Symbol <> '') and (FSymbols.Objects[I] <> nil) and (TCnSymbolItem(FSymbols.Objects[I]).PinYin <> '') then
+                  Idx := Pos(Symbol, UpperCase(TCnSymbolItem(FSymbols.Objects[I]).PinYin))
+                else
+                  Idx := 1;
+
+                if Idx = 1 then
+                begin
+                  TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                  FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+                end;
               end;
+{$ENDIF}
             end;
           end;
         mmAnywhere:
@@ -2594,7 +2641,23 @@ begin
               begin
                 TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+              else
+              begin
+                // 拼音匹配的
+                if (Symbol <> '') and (FSymbols.Objects[I] <> nil) and (TCnSymbolItem(FSymbols.Objects[I]).PinYin <> '') then
+                  Idx := Pos(Symbol, UpperCase(TCnSymbolItem(FSymbols.Objects[I]).PinYin))
+                else
+                  Idx := 1;
+
+                if Idx > 0 then
+                begin
+                  TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                  FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+                end;
               end;
+{$ENDIF}
             end;
           end;
         mmFuzzy:
@@ -2620,7 +2683,17 @@ begin
               begin
                 TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
+              end
+{$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
+              // 有拼音就也模糊匹配，但不带 Indexes 了
+              else if ((FSymbols.Objects[I] <> nil) and (TCnSymbolItem(FSymbols.Objects[I]).PinYin <> '')
+                and FuzzyMatchStrWithScore(Symbol, TCnSymbolItem(FSymbols.Objects[I]).PinYin, Idx, nil)) then
+              begin
+                TCnSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes.Clear;
+                TCnSymbolItem(FSymbols.Objects[I]).Tag := Idx;
+                FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end;
+{$ENDIF}
             end;
           end;
       end;
