@@ -65,14 +65,14 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
 {$IFNDEF STAND_ALONE}
-  CnWizUtils, CnDesignEditor, CnWizScaler,
+  CnDesignEditor, CnWizScaler,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
 {$ELSE}
   CnWizLangID, 
 {$ENDIF}
   CnConsts, CnWizClasses, CnLangUtils, CnWizTranslate, CnWizManager, CnWizOptions,
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
-  CnFormScaler, CnWizIni, CnLangCollection,
+  CnWizUtils, CnWizIdeUtils, CnFormScaler, CnWizIni, CnLangCollection,
   StdCtrls, ComCtrls, IniFiles;
 
 type
@@ -459,7 +459,7 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   if Menu <> nil then
   begin
     if Menu.Images = dmCnSharedImages.Images then

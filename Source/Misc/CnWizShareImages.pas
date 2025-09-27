@@ -45,7 +45,7 @@ interface
 
 uses
   SysUtils, Windows, Classes, Graphics, Forms, ImgList, Buttons, Controls,
-  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+  {$IFDEF DELPHI_OTA} {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF} {$ENDIF}
   {$IFDEF SUPPORT_GDIPLUS} WinApi.GDIPOBJ, WinApi.GDIPAPI, {$ENDIF}
   CnWizOptions, CnWizUtils, CnWizIdeUtils, CnGraphUtils;
 
@@ -66,7 +66,8 @@ type
     procedure DataModuleCreate(Sender: TObject);
   private
     FIdxUnknown: Integer;
-{$IFDEF IDE_SUPPORT_HDPI}
+
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     FIdxUnknownLargeInIDE: Integer;
     FImageCollection: TImageCollection;       // 普通尺寸与大尺寸的 Images 对应的 Collection
     FVirtualImages: TVirtualImageList;        // 对应普通尺寸的 Images
@@ -118,6 +119,7 @@ type
     function CalcMixedImageIndex(ImageIndex: Integer): Integer;
 
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
     property VirtualImages: TVirtualImageList read FVirtualImages;
     property LargeVirtualImages: TVirtualImageList read FLargeVirtualImages;
     {* D110A 或以上，因为 IDE 中没有，故普通工具栏用这个，普通尺寸和大尺寸}
@@ -130,6 +132,7 @@ type
 
     property IDELargeVirtualImages: TVirtualImageList read FIDELargeVirtualImages;
     {* 大尺寸下的 D110A 或以上，编辑器工具栏等需要 IDE 的用这个}
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
   end;
@@ -240,7 +243,7 @@ procedure TdmCnSharedImages.DataModuleCreate(Sender: TObject);
 {$IFNDEF STAND_ALONE}
 var
   ImgLst: TCustomImageList;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   Ico: TIcon;
 {$ELSE}
   Bmp: TBitmap;
@@ -252,7 +255,7 @@ begin
   FIdxUnknown := 66;
   ImgLst := GetIDEImageList;
 
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   Ico := TIcon.Create;
   try
     Images.GetIcon(IdxUnknown, Ico);
@@ -275,7 +278,7 @@ begin
   end;
 {$ENDIF}
 
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   FVirtualImages := TVirtualImageList.Create(Self);
   FVirtualImages.Name := 'CnVirtualImages';
   FImageCollection := TImageCollection.Create(Self);
@@ -308,7 +311,7 @@ begin
   if WizOptions.UseLargeIcon then
   begin
     // 为大图标版做好准备
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     FIDELargeVirtualImages := TVirtualImageList.Create(Self);
     FIDELargeVirtualImages.Name := 'CnIDELargeVirtualImages';
     FIDELargeVirtualImages.ImageCollection := GetIDEImagecollection;
@@ -358,6 +361,7 @@ begin
   if IDEs <> nil then
   begin
     Cnt := IDEs.Count;
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
     if WizOptions.UseLargeIcon then
     begin
@@ -379,6 +383,7 @@ begin
 {$ENDIF}
     end;
 {$ENDIF}
+{$ENDIF}
 
     FIDEOffset := Cnt;
     FCopied := True;
@@ -393,7 +398,7 @@ begin
   if FCopied and (ImageIndex >= 0) then
   begin
     Result := ImageIndex + FIDEOffset;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     if WizOptions.UseLargeIcon then
       Result := ImageIndex + FLargeIDEOffset;
 {$ENDIF}
@@ -408,7 +413,7 @@ begin
   begin
     if WizOptions.UseLargeIcon and not ForceSmall and FLargeCopied then
     begin
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
       Result := FIDELargeVirtualImages;
 {$ELSE}
       Result := IDELargeImages;
@@ -465,7 +470,7 @@ begin
     Exit;
 
   // 真正把 IDE 的 ImageList 复制一个超大型的供大尺寸下使用
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   FIDELargeVirtualImages.Clear;
   CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
 {$IFDEF DEBUG}
@@ -500,7 +505,7 @@ end;
 function TdmCnSharedImages.GetIdxUnknownInIDE: Integer;
 begin
   Result := FIdxUnknownInIDE;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   if WizOptions.UseLargeIcon then
     Result := FIdxUnknownLargeInIDE;
 {$ENDIF}

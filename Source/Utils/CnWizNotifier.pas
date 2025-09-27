@@ -2081,50 +2081,62 @@ end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowCreate(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowCreate: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowCreate: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowDestroy(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowDestroy: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowDestroy: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowActivate(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowActivate: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowActivate: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowFocused(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowFocused: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowFocused: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowShow(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowShow: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowShow: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorWindowHide(Sender: TObject);
 begin
+{$IFDEF DEBUG}
   if Sender <> nil then
     CnDebugger.TraceMsg('SourceEditorWindowHide: ' + Sender.ClassName)
   else
     CnDebugger.TraceMsg('SourceEditorWindowHide: ');
+{$ENDIF}
 end;
 
 procedure TCnWizNotifierServices.SourceEditorCreate(Sender: TObject);

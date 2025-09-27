@@ -548,7 +548,13 @@ begin
 {$IFDEF DEBUG}
   {$IFDEF IDE_SUPPORT_HDPI}
     if Application.MainForm <> nil then
+    begin
+{$IFDEF FPC}
+      CnDebugger.LogInteger(Screen.PixelsPerInch, 'Application Screen PPI: ');
+{$ELSE}
       CnDebugger.LogInteger(Application.MainForm.CurrentPPI, 'Application MainForm PPI: ');
+{$ENDIF}
+    end;
   {$ENDIF}
 {$ENDIF}
 
