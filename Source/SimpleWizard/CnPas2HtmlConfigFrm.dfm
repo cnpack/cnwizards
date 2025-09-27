@@ -275,7 +275,6 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
           BevelOuter = bvLowered
           Caption = 'CnPack'
           Color = clWhite
-          Locked = True
           TabOrder = 4
           OnDblClick = PanelDispDblClick
         end
