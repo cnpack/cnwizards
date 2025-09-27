@@ -14,15 +14,11 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
-        <CustomOptions Value="-dDEBUG
--dSUPPORT_EVALUATE
--dENABLE_UIINTERACT
--dCAPTURE_STACK"/>
+        <CustomOptions Value="-dSUPPORT_EVALUATE
+-dENABLE_UIINTERACT"/>
         <OtherDefines Count="4">
-          <Define0 Value="DEBUG"/>
           <Define1 Value="SUPPORT_EVALUATE"/>
           <Define2 Value="ENABLE_UIINTERACT"/>
-          <Define3 Value="CAPTURE_STACK"/>
         </OtherDefines>
       </Other>
     </CompilerOptions>
