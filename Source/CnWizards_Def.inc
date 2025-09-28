@@ -49,13 +49,20 @@
 {$ENDIF}
 
 {$IFDEF DELPHI}
-  // 非独立的 Delphi 编译，表示有 OTA 接口
+  // 非独立的 Delphi 编译，表示有 OTA 接口（注意独立与否在下面判断）
   {$DEFINE DELPHI_OTA}
 {$ENDIF}
 
 {$IFDEF BCB5OR6}
-  // 非独立的 BCB5/6 编译，也表示有 OTA 接口
+  // 非独立的 BCB5/6 编译，也表示有 OTA 接口（注意独立与否在下面判断）
   {$DEFINE DELPHI_OTA}
+{$ENDIF}
+
+{$IFDEF FPC}
+  // 非独立的 FPC 编译，表示有 Lazarus 接口（注意独立与否在下面判断）
+  {$DEFINE LAZARUS}
+  // Lazarus 下也支持 HDPI，包括独立程序
+  {$DEFINE IDE_SUPPORT_HDPI}
 {$ENDIF}
 
 {$IFDEF STAND_ALONE}
@@ -64,13 +71,6 @@
   {$UNDEF DELPHI_OTA}
   // 独立的表示没有 LAZARUS 接口
   {$UNDEF LAZARUS}
-{$ENDIF}
-
-{$IFDEF FPC}
-  // 非独立的 FPC 编译，表示有 Lazarus 接口
-  {$DEFINE LAZARUS}
-  // Lazarus 下也支持 HDPI，包括独立程序
-  {$DEFINE IDE_SUPPORT_HDPI}
 {$ENDIF}
 
 {$IFDEF IDE_SUPPORT_HDPI}
