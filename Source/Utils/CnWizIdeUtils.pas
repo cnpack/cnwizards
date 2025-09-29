@@ -4123,6 +4123,8 @@ end;
 
 {$ENDIF}
 
+{$IFDEF IDE_SUPPORT_HDPI}
+
 function GetControlCurrentPPI(AControl: TControl): Integer;
 {$IFDEF FPC}
 var
@@ -4144,6 +4146,8 @@ begin
   Result := AControl.CurrentPPI;
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
 begin
