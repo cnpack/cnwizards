@@ -53,7 +53,7 @@ uses
   Forms, Menus, Clipbrd, ActnList, StdCtrls, ComCtrls, Imm, Math, TypInfo,
   CnPasCodeParser, CnCommon, CnConsts, CnWizUtils, CnWizConsts, CnWizOptions,
   CnWizIdeUtils, CnEditControlWrapper, CnWizNotifier, CnWizMethodHook, CnNative,
-  CnWizCompilerConst,
+  CnWizCompilerConst, CnSrcEditorNav,
   {$IFDEF IDE_WIDECONTROL}
   CnWidePasParser, CnWideCppParser,
   {$ENDIF}
@@ -77,6 +77,7 @@ type
   private
     FActive: Boolean;
     FOnEnhConfig: TNotifyEvent;
+    FNavMgrRef: TCnSrcEditorNavMgr; // 供拦截 Alt 左右键配合用
     FAutoMatchEntered: Boolean;
     FAutoMatchType: TCnAutoMatchType;
     FRepaintView: TCnNativeUInt; // 供传递重画参数用
@@ -147,6 +148,8 @@ type
 {$ENDIF}
     procedure EditControlKeyDown(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
+    procedure EditControlSysKeyDown(Key, ScanCode: Word; Shift: TShiftState;
+      var Handled: Boolean);
     procedure EditControlKeyUp(Key, ScanCode: Word; Shift: TShiftState;
       var Handled: Boolean);
     procedure ExecuteInsertCharOnIdle(Sender: TObject);
@@ -199,7 +202,7 @@ implementation
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnIDEStrings,
+  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnIDEStrings, CnSrcEditorEnhance, CnWizManager,
   CnSourceHighlight, mPasLex, mwBCBTokenList, CnIdentRenameFrm, CnWideStrings;
 
 { TCnSrcEditorKey }
@@ -458,6 +461,8 @@ end;
 {$ENDIF}
 
 constructor TCnSrcEditorKey.Create;
+var
+  Wizard: TCnSrcEditorEnhance;
 begin
   inherited;
   FActive := True;
@@ -512,6 +517,7 @@ begin
   end;
 
   EditControlWrapper.AddKeyDownNotifier(EditControlKeyDown);
+  EditControlWrapper.AddSysKeyDownNotifier(EditControlSysKeyDown);
   EditControlWrapper.AddKeyUpNotifier(EditControlKeyUp);
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
 
@@ -528,6 +534,7 @@ begin
 
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveKeyUpNotifier(EditControlKeyUp);
+  EditControlWrapper.RemoveSysKeyDownNotifier(EditControlSysKeyDown);
   EditControlWrapper.RemoveKeyDownNotifier(EditControlKeyDown);
 
 {$IFDEF IDE_HAS_EDITOR_SEARCHPANEL}
@@ -3417,6 +3424,29 @@ begin
   Handled := True;
 end;
 
+procedure TCnSrcEditorKey.EditControlSysKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+var
+  Nav: TCnSrcEditorNav;
+begin
+  if Active and (FNavMgrRef <> nil) and FNavMgrRef.Active and (CnOtaGetTopMostEditView <> nil)
+    and ((Key = VK_LEFT) or (Key = VK_RIGHT)) then
+  begin
+    Nav := FNavMgrRef.GetMainNavigatorOrFromEditControl(GetCurrentEditControl);
+    if Nav <> nil then
+    begin
+      Nav.AllowAlt := True;
+      if Key = VK_LEFT then
+        Nav.BackAction.Execute
+      else
+        Nav.ForwardAction.Execute;
+      Nav.AllowAlt := False;
+
+      Handled := True;
+    end;
+  end;
+end;
+
 procedure TCnSrcEditorKey.EditControlKeyDown(Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
@@ -3518,7 +3548,14 @@ const
   csAutoEnterEnd = 'AutoEnterEnd';
 
 procedure TCnSrcEditorKey.LoadSettings(Ini: TCustomIniFile);
+var
+  Wizard: TCnSrcEditorEnhance;
 begin
+  // 不能在 Create 的时候找，TCnSrcEditorEnhance 刚创建还没赋值
+  Wizard := TCnSrcEditorEnhance(CnWizardMgr.WizardByClass(TCnSrcEditorEnhance));
+  if Wizard <> nil then
+    FNavMgrRef := Wizard.NavMgr;
+
   FSmartCopy := Ini.ReadBool(csEditorKey, csSmartCopy, True);
   FSmartPaste := Ini.ReadBool(csEditorKey, csSmartPaste, False); // 粘贴时自动对齐默认不启用
   FPasteReplace := Ini.ReadBool(csEditorKey, csPasteReplace, False);

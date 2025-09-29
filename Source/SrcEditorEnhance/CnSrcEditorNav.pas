@@ -85,6 +85,7 @@ type
     FForwardAction: TAction;
     FBackList: TStringList;    // 用 Objects 属性存行号，64 位和 32 位下均可 Integer 转换
     FForwardList: TStringList;
+    FAllowAlt: Boolean;
     function ActionEnabled(AAction: TBasicAction): Boolean;
     function MenuEnabled(AMenu: Menus.TPopupMenu): Boolean;
     procedure DoMenuPopup(AMenu: Menus.TPopupMenu; AList: TStringList; AOnItem, AOnIDE:
@@ -125,6 +126,9 @@ type
 
     property BackAction: TAction read FBackAction;
     property ForwardAction: TAction read FForwardAction;
+
+    property AllowAlt: Boolean read FAllowAlt write FAllowAlt;
+    {* 由外界控制的，是否允许 Alt 按下时跑}
   end;
 
 { TCnSrcEditorNavMgr }
@@ -162,6 +166,8 @@ type
     procedure FixButtonArrowInComplete(Sender: TObject);
 {$ENDIF}
     procedure UpdateControls;
+    function GetMainNavigatorOrFromEditControl(EditControl: TControl): TCnSrcEditorNav;
+    // 查找 EditControl 对应的 Nav，或者主 Nav
 
     procedure LoadSettings(Ini: TCustomIniFile);
     procedure SaveSettings(Ini: TCustomIniFile);
@@ -369,8 +375,15 @@ begin
 end;
 
 procedure TCnSrcEditorNav.BackActionExecute(Sender: TObject);
+var
+  State: TShiftState;
 begin
-  if not FPause and (GetShiftState * [ssShift, ssAlt, ssCtrl] = []) and
+  if FAllowAlt then
+    State := [ssShift, ssCtrl]
+  else
+    State := [ssShift, ssAlt, ssCtrl];
+
+  if not FPause and (GetShiftState * State = []) and
     (FBackList.Count > 0) then
     GotoSourceLine(FBackList.Count - 1, FBackList, FForwardList)
   else
@@ -378,8 +391,15 @@ begin
 end;
 
 procedure TCnSrcEditorNav.ForwardActionExecute(Sender: TObject);
+var
+  State: TShiftState;
 begin
-  if not FPause and (GetShiftState * [ssShift, ssAlt, ssCtrl] = []) and
+  if FAllowAlt then
+    State := [ssShift, ssCtrl]
+  else
+    State := [ssShift, ssAlt, ssCtrl];
+
+  if not FPause and (GetShiftState * State = []) and
     (FForwardList.Count > 0) then
     GotoSourceLine(FForwardList.Count - 1, FForwardList, FBackList)
   else
@@ -1132,6 +1152,23 @@ var
 begin
   for I := 0 to FList.Count - 1 do
     TCnSrcEditorNav(FList[I]).UpdateControls;
+end;
+
+function TCnSrcEditorNavMgr.GetMainNavigatorOrFromEditControl(EditControl: TControl): TCnSrcEditorNav;
+var
+  I: Integer;
+  Nav: TCnSrcEditorNav;
+begin
+  for I := 0 to FList.Count - 1 do
+  begin
+    Nav := TCnSrcEditorNav(FList[I]);
+    if (Nav <> nil) and ((Nav.FEditControl = EditControl) or (Nav.FEditControl = nil)) then
+    begin
+      Result := Nav;
+      Exit;
+    end;
+  end;
+  Result := nil;
 end;
 
 //------------------------------------------------------------------------------

@@ -536,7 +536,7 @@ type
     {* 删除编辑器按键按下通知}
 
     procedure AddSysKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
-    {* 增加编辑器系统按键按下通知}
+    {* 增加编辑器系统按键按下通知，注意 Shift 里不会再有 ssAlt，而对应 VK_MENU}
     procedure RemoveSysKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
     {* 删除编辑器系统按键按下通知}
 
