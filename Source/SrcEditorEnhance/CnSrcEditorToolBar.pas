@@ -445,7 +445,7 @@ begin
   Top := -1;
   Align := alTop;
   Images := GetIDEImageList;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   InitSizeIfLargeIcon(Self, TImageList(dmCnSharedImages.IDELargeVirtualImages));
 {$ELSE}
   InitSizeIfLargeIcon(Self, dmCnSharedImages.IDELargeImages);
@@ -1330,7 +1330,7 @@ begin
   AutoSize := True;
   Align := alTop;
   Images := GetIDEImageList;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   InitSizeIfLargeIcon(Self, TImageList(dmCnSharedImages.IDELargeVirtualImages));
 {$ELSE}
   InitSizeIfLargeIcon(Self, dmCnSharedImages.IDELargeImages);

@@ -568,6 +568,13 @@ begin
       FOldBackMenu := BackButton.DropdownMenu;
       BackButton.Action := FBackAction;
       BackButton.DropdownMenu := FBackMenu;
+
+      // 快捷键也抢过来
+      if FOldBackShortCut <> 0 then
+      begin
+        (FOldBackAction as TCustomAction).ShortCut := 0;
+        FBackAction.ShortCut := FOldBackShortCut;
+      end;
     end;
 
     ForwardButton := TToolButton(Owner.FindComponent(SForwardToolButtonName));
@@ -590,6 +597,13 @@ begin
 
       ForwardButton.Action := FForwardAction;
       ForwardButton.DropdownMenu := FForwardMenu;
+
+      // 快捷键也抢过来
+      if FOldForwardShortCut <> 0 then
+      begin
+        (FOldForwardAction as TCustomAction).ShortCut := 0;
+        FForwardAction.ShortCut := FOldForwardShortCut;
+      end;
     end;
 
 {$IFDEF BDS}
@@ -635,6 +649,13 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
           BackButton.ImageIndex := FBackAction.ImageIndex;
 {$ENDIF}
+
+          // 快捷键也抢过来
+          if FOldBackShortCut <> 0 then
+          begin
+            (FBackAction as TCustomAction).ShortCut := 0;
+            FBackAction.ShortCut := FOldBackShortCut;
+          end;
         end;
 
         if Assigned(ForwardButton) and (ForwardButton.Action <> FForwardAction) then
@@ -659,6 +680,13 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
           ForwardButton.ImageIndex := FForwardAction.ImageIndex;
 {$ENDIF}
+
+          // 快捷键也抢过来
+          if FOldForwardShortCut <> 0 then
+          begin
+            (FOldForwardAction as TCustomAction).ShortCut := 0;
+            FForwardAction.ShortCut := FOldForwardShortCut;
+          end;
         end;
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('TCnSrcEditorNav.Install. Buttons Hooked.');
@@ -686,6 +714,13 @@ begin
       TToolBar(BackButton.Parent).Images := FOldImageList;
       BackButton.Action := FOldBackAction;
       BackButton.DropdownMenu := FOldBackMenu;
+
+      // 恢复快捷键
+      if FOldBackShortCut <> 0 then
+      begin
+        (FOldBackAction as TCustomAction).ShortCut := FOldBackShortCut;
+        FBackAction.ShortCut := 0;
+      end;
     end;
 
     ForwardButton := TToolButton(Owner.FindComponent(SForwardToolButtonName));
@@ -693,6 +728,13 @@ begin
     begin
       ForwardButton.Action := FOldForwardAction;
       ForwardButton.DropdownMenu := FOldForwardMenu;
+
+      // 恢复快捷键
+      if FOldForwardShortCut <> 0 then
+      begin
+        (FOldForwardAction as TCustomAction).ShortCut := FOldForwardShortCut;
+        FForwardAction.ShortCut := 0;
+      end;
     end;
 
 {$IFDEF BDS}
@@ -717,12 +759,26 @@ begin
 
             BackButton.Action := FindActionByNameFromActionManager(ActionMgr, SBackCommandActionName);
             BackButton.DropdownMenu := FOldBackMenu;
+
+            // 恢复快捷键
+            if (FOldBackShortCut <> 0) and (BackButton.Action <> nil) then
+            begin
+              (BackButton.Action as TCustomAction).ShortCut := FOldBackShortCut;
+              FBackAction.ShortCut := 0;
+            end;
           end;
 
           if Assigned(ForwardButton) and (ForwardButton.Action = FForwardAction) then
           begin
             ForwardButton.Action := FindActionByNameFromActionManager(ActionMgr, SForwardCommandActionName);
             ForwardButton.DropdownMenu := FOldForwardMenu;
+
+            // 恢复快捷键
+            if (FOldForwardShortCut <> 0) and (ForwardButton.Action <> nil) then
+            begin
+              (ForwardButton.Action as TCustomAction).ShortCut := FOldForwardShortCut;
+              FForwardAction.ShortCut := 0;
+            end;
           end;
         end;
       end;

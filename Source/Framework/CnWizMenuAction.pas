@@ -49,8 +49,7 @@ interface
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
   {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
-  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF} {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
 type
@@ -509,14 +508,14 @@ begin
       AWizAction.FIcon.Height]);
 {$ENDIF}
 
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
+  {$IFDEF IDE_SUPPORT_HDPI}
     AWizAction.ImageIndex := AddGraphicToVirtualImageList(AWizAction.FIcon, Svcs40.ImageList as TVirtualImageList);
-{$ELSE}
-  {$IFDEF DELPHI_OTA}
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
   {$ELSE}
-    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, Svcs40.ImageList, False);
   {$ENDIF}
+{$ELSE}
+    AWizAction.ImageIndex := AddIconToImageList(AWizAction.FIcon, GetIDEImageList, False);
 {$ENDIF}
   end
   else

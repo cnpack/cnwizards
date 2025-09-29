@@ -1112,7 +1112,7 @@ begin
     DockSite := False;
     ShowHint := True;
     Transparent := False;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     Images := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
     InitSizeIfLargeIcon(Obj.InternalToolBar2, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
 {$ELSE}
@@ -1145,7 +1145,7 @@ begin
   end;
 
   Obj.JumpsMenu := TPopupMenu.Create(Obj.InternalToolBar2);
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   Obj.JumpsMenu.Images := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
 {$ELSE}
   Obj.JumpsMenu.Images := dmCnSharedImages.ilProcToolBar;
@@ -1191,7 +1191,7 @@ begin
     ShowHint := True;
     Transparent := False;
     Images := GetIDEImageList;
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     InitSizeIfLargeIcon(Obj.InternalToolBar1, TImageList(dmCnSharedImages.IDELargeVirtualImages));
 {$ELSE}
     InitSizeIfLargeIcon(Obj.InternalToolBar1, dmCnSharedImages.IDELargeImages);
@@ -1546,7 +1546,7 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   InitSizeIfLargeIcon(ToolBar, TImageList(dmCnSharedImages.LargeProcToolbarVirtualImages));
 {$ELSE}
   InitSizeIfLargeIcon(ToolBar, dmCnSharedImages.ilProcToolbarLarge);
@@ -1945,9 +1945,14 @@ begin
 
     if Idx >= 0 then
     begin
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
       Img := TImageList(dmCnSharedImages.ProcToolbarVirtualImages);
       Img.Draw(Canvas, PaddingRect.Left, PaddingRect.Top + 2, Idx);
+{$ELSE}
+      Img := dmCnSharedImages.ilProcToolBar;
+      Img.Draw(Canvas, PaddingRect.Left, PaddingRect.Top + 1, Idx);
+{$ENDIF}
 {$ELSE}
       Img := dmCnSharedImages.ilProcToolBar;
       Img.Draw(Canvas, PaddingRect.Left, PaddingRect.Top + 1, Idx);

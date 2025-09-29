@@ -76,7 +76,7 @@ uses
   Forms, SysUtils, Messages, Windows, Classes, Controls, ExtCtrls, ComCtrls,
   IniFiles, StdCtrls, Menus, ToolWin, ActnList, ImgList,
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+  {$IFDEF DELPHI_IDE_WITH_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   CnWizIdeDock, CnShellCtrls, CnWizClasses, CnConsts, CnWizConsts, CnPopupMenu;
 
 //==============================================================================

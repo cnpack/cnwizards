@@ -149,7 +149,7 @@ constructor TCnMatchButtonFrame.Create(AOwner: TComponent);
 begin
   inherited;
 {$IFNDEF STAND_ALONE}
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
   if WizOptions.UseLargeIcon then
     pmMatchMode.Images := dmCnSharedImages.LargeVirtualImages
   else

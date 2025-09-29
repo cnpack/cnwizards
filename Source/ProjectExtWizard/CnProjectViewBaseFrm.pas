@@ -52,9 +52,9 @@ uses
 {$ENDIF COMPILER6_UP}
   ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
 {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
-  CnWizUtils, CnWizIdeUtils, CnWizNotifier, CnIDEVersion, {$ENDIF}
-  CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni, CnWizMultiLang,
-  CnWizShareImages, CnIniStrUtils, AsRegExpr, CnStrings;
+  CnWizNotifier, CnIDEVersion, {$ENDIF}
+  CnWizUtils, CnWizIdeUtils, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnIni,
+  CnWizMultiLang, CnWizShareImages, CnIniStrUtils, AsRegExpr, CnStrings;
 
 type
 

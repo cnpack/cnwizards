@@ -62,12 +62,13 @@ uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
   {$IFDEF LAZARUS} PackageIntf, ComponentReg, IDEOptionsIntf, {$ENDIF}
-  {$IFDEF DELPHI_OTA} ToolsAPI, CnWizEditFiler, {$IFDEF COMPILER6_UP}
+  {$IFDEF DELPHI_OTA} ToolsAPI, CnWizEditFiler, {$IFDEF IDE_SUPPORT_HDPI}
+  Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
+ {$IFDEF COMPILER6_UP}
   DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF FPC} LCLType, {$ELSE} Tabs, {$ENDIF}
   {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF}
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
@@ -769,12 +770,14 @@ procedure IdeScaleToolbarComboFontSize(Combo: TControl);
 {* 统一根据当前 HDPI 与缩放设置等设置 Toolbar 中的 Combobox 的字号}
 
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 
 function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
   AControl: TControl = nil; IgnoreWizLargeOption: Boolean = False): TVirtualImageList;
 {* 统一根据当前 HDPI 与缩放设置等，从原始 TImageList 创建一个 TVirtualImageList，无需释放
   IgnoreWizLargeOption 表示不处理专家包设置中的使用大图标}
 
+{$ENDIF}
 {$ENDIF}
 
 {$IFNDEF LAZARUS}
@@ -816,6 +819,14 @@ uses
   Registry, CnGraphUtils {$IFNDEF LAZARUS}, CnWizNotifier {$ENDIF};
 
 const
+{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF FPC}
+  CN_DEF_SCREEN_DPI = 96;
+{$ELSE}
+  CN_DEF_SCREEN_DPI = Windows.USER_DEFAULT_SCREEN_DPI;
+{$ENDIF}
+{$ENDIF}
+
   SSyncButtonName = 'SyncButton';
   SCodeTemplateListBoxName = 'CodeTemplateListBox';
 {$IFDEF IDE_SWITCH_BUG}
@@ -4112,6 +4123,32 @@ end;
 
 {$ENDIF}
 
+{$IFDEF IDE_SUPPORT_HDPI}
+
+function GetControlCurrentPPI(AControl: TControl): Integer;
+{$IFDEF FPC}
+var
+  P: TPoint;
+  M: TMonitor;
+{$ENDIF}
+begin
+{$IFDEF FPC}
+  Result := Screen.PixelsPerInch;
+  try
+    P := AControl.ClientToScreen(Point(0, 0));
+    M := Screen.MonitorFromPoint(P);
+    if M <> nil then
+      Result := M.PixelsPerInch;
+  except
+    ;
+  end;
+{$ELSE}
+  Result := AControl.CurrentPPI;
+{$ENDIF}
+end;
+
+{$ENDIF}
+
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl): Integer;
 begin
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -4122,7 +4159,7 @@ begin
     Result := APixels
   else
   begin
-    Result := MulDiv(APixels, AControl.CurrentPPI, Windows.USER_DEFAULT_SCREEN_DPI);
+    Result := MulDiv(APixels, GetControlCurrentPPI(AControl), CN_DEF_SCREEN_DPI);
   end;
 {$ELSE}
   Result := APixels; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
@@ -4139,7 +4176,7 @@ begin
     Result := APixels
   else
   begin
-    Result := MulDiv(APixels, Windows.USER_DEFAULT_SCREEN_DPI, AControl.CurrentPPI);
+    Result := MulDiv(APixels, CN_DEF_SCREEN_DPI, GetControlCurrentPPI(AControl));
   end;
 {$ELSE}
   Result := APixels; // IDE 不支持 HDPI 时原封不动地返回
@@ -4156,7 +4193,7 @@ begin
     Result := 1.0
   else
   begin
-    Result := AControl.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
+    Result := GetControlCurrentPPI(AControl) / CN_DEF_SCREEN_DPI;
   end;
 {$ELSE}
   Result := 1.0; // IDE 不支持 HDPI 时原封不动地返回，交给 OS 处理
@@ -4168,10 +4205,11 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
   if AControl <> nil then
   begin
-  if not TControlHack(AControl).ParentFont and
-    (sfFont in TControlHack(AControl).DefaultScalingFlags) then
+  if not TControlHack(AControl).ParentFont
+    {$IFNDEF FPC} and (sfFont in TControlHack(AControl).DefaultScalingFlags) {$ENDIF}
+    then
     TControlHack(AControl).Font.Height := MulDiv(TControlHack(AControl).Font.Height,
-      Windows.USER_DEFAULT_SCREEN_DPI, AControl.CurrentPPI);
+      CN_DEF_SCREEN_DPI, GetControlCurrentPPI(AControl));
   end;
 {$ENDIF}
 end;
@@ -4184,6 +4222,7 @@ begin
 end;
 
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 
 function IdeGetVirtualImageListFromOrigin(Origin: TCustomImageList;
   AControl: TControl; IgnoreWizLargeOption: Boolean): TVirtualImageList;
@@ -4235,6 +4274,7 @@ begin
   Result := AVL;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 {$IFNDEF LAZARUS}

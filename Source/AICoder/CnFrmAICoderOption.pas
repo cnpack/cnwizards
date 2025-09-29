@@ -213,7 +213,7 @@ begin
   begin
     Item := TCnAIExtraItem(FExtraOptions[I]);
     Lbl := TLabel.Create(Self);
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     Lbl.Left := Trunc(FHoriLabelStart / IdeGetScaledFactor);
     Lbl.Top := Trunc((FVerticalLabelStart + I * FVerticalDistance) / IdeGetScaledFactor);
 {$ELSE}
@@ -227,7 +227,7 @@ begin
     Lbl.Parent := Self;
 
     Edt := TEdit.Create(Self);
-{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_IDE_WITH_HDPI}
     Edt.Left := Trunc(FHoriEditStart / IdeGetScaledFactor);;
     Edt.Top := Trunc((FVerticalEditStart + I * FVerticalDistance) / IdeGetScaledFactor);;
     Edt.Width := Trunc(edtURL.Width / IdeGetScaledFactor);;

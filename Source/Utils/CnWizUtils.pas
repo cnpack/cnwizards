@@ -66,12 +66,11 @@ uses
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf,
   SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, ProjectGroupIntf, {$ENDIF} {$ENDIF}
-  {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI,
+  {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI, {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
+  Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
-  {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
-  Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
   mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
@@ -223,8 +222,8 @@ function AddIconToImageList(AIcon: TIcon; ImageList: TCustomImageList;
   Stretch: Boolean = True): Integer;
 {* 增加图标到 ImageList 中，可使用平滑处理}
 
-{$IFNDEF LAZARUS}
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
   DstVirtual: TVirtualImageList; const ANamePrefix: string = '';
@@ -239,6 +238,7 @@ procedure CopyVirtualImageList(SrcVirtual, DstVirtual: TVirtualImageList;
   如不共用，则内部先复制 ImageCollection 内容。后面复制 ImageList 引用内容再内部绘图}
 
 {$ENDIF}
+{$ENDIF}
 
 function CreateDisabledBitmap(Glyph: TBitmap): TBitmap;
 {* 创建一个 Disabled 的位图，返回对象需要调用方释放}
@@ -246,8 +246,6 @@ procedure AdjustButtonGlyph(Glyph: TBitmap);
 {* Delphi 的按钮在 Disabled 状态时，显示的图像很难看，该函数通过在该位图的基础上
    创建一个新的灰度位图来解决这一问题。调整完成后 Glyph 宽度变为高度的两倍，需要
    设置 Button.NumGlyphs := 2 }
-
-{$ENDIF}
 
 function SameFileName(const S1, S2: string): Boolean;
 {* 文件名相同}
@@ -266,8 +264,10 @@ function GetCaptionOrgStr(const Caption: string): string;
 function GetIDEImageList: TCustomImageList;
 {* 取得 IDE 主 ImageList}
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 function GetIDEImagecollection: TCustomImageCollection;
 {* 取得 IDE 主 ImageList 且是 VirtualImageList 时对应的 ImageCollection}
+{$ENDIF}
 {$ENDIF}
 procedure SaveIDEImageListToPath(ImgList: TCustomImageList; const Path: string);
 {* 保存 IDE ImageList 中的图像到指定目录下}
@@ -1933,8 +1933,8 @@ begin
     Result := -1;
 end;
 
-{$IFNDEF LAZARUS}
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 
 procedure CopyImageListToVirtual(SrcImageList: TCustomImageList;
   DstVirtual: TVirtualImageList; const ANamePrefix: string; Disabled: Boolean);
@@ -2054,6 +2054,7 @@ begin
   DstVirtual.Images := SrcVirtual.Images;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 // 创建一个 Disabled 的位图，返回对象需要调用方释放
@@ -2184,8 +2185,6 @@ begin
     end;
   end;
 end;
-
-{$ENDIF}
 
 // 文件名相同
 function SameFileName(const S1, S2: string): Boolean;
@@ -2322,6 +2321,7 @@ begin
 end;
 
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 
 // 取得 IDE 主 ImageList 且是 VirtualImageList 时对应的 ImageCollection
 function GetIDEImagecollection: TCustomImageCollection;
@@ -2335,6 +2335,7 @@ begin
     Result := nil;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 // 保存 IDE ImageList 中的图像到指定目录下}
@@ -3230,6 +3231,7 @@ end;
 
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
 {$IFNDEF CNWIZARDS_MINIMUM}
 var
   I: Integer;
@@ -3237,9 +3239,12 @@ var
   HdpiFactor: Single;
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 begin
+  Result := GetListViewWidthString(AListView, DivFactor);
 {$IFDEF IDE_SUPPORT_HDPI}
-  {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFDEF DELPHI_OTA}
+{$IFNDEF CNWIZARDS_MINIMUM}
   if CnIsGEDelphi11Dot3 then
   begin
     Lines := TStringList.Create;
@@ -3260,11 +3265,8 @@ begin
   end
   else
     Result := GetListViewWidthString(AListView, DivFactor);
-  {$ELSE}
-    Result := GetListViewWidthString(AListView, DivFactor);
-  {$ENDIF}
-{$ELSE}
-  Result := GetListViewWidthString(AListView, DivFactor);
+{$ENDIF}
+{$ENDIF}
 {$ENDIF}
 end;
 
