@@ -75,6 +75,8 @@ type
     FOldForwardAction: TBasicAction;
     FOldBackShortCut: TShortCut;
     FOldForwardShortCut: TShortCut;
+    FOldBackImageIndex: Integer;
+    FOldForwardImageIndex: Integer;
     FOldImageList: TCustomImageList;
     FLastUpdateTick: Cardinal;
     FBackMenu: TPopupMenu;
@@ -566,6 +568,7 @@ begin
       end;
 
       FOldBackMenu := BackButton.DropdownMenu;
+      FOldBackImageIndex := BackButton.ImageIndex;
       BackButton.Action := FBackAction;
       BackButton.DropdownMenu := FBackMenu;
 
@@ -595,6 +598,7 @@ begin
 {$ENDIF}
       end;
 
+      FOldForwardImageIndex := ForwardButton.ImageIndex;
       ForwardButton.Action := FForwardAction;
       ForwardButton.DropdownMenu := FForwardMenu;
 
@@ -644,6 +648,7 @@ begin
 {$ENDIF}
           end;
 
+          FOldBackImageIndex := BackButton.ImageIndex;
           BackButton.Action := FBackAction;
           BackButton.DropdownMenu := FBackMenu;
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -675,6 +680,7 @@ begin
 {$ENDIF}
           end;
 
+          FOldForwardImageIndex := ForwardButton.ImageIndex;
           ForwardButton.Action := FForwardAction;
           ForwardButton.DropdownMenu := FForwardMenu;
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -714,6 +720,8 @@ begin
       TToolBar(BackButton.Parent).Images := FOldImageList;
       BackButton.Action := FOldBackAction;
       BackButton.DropdownMenu := FOldBackMenu;
+      if BackButton.ImageIndex = -1 then
+        BackButton.ImageIndex := FOldBackImageIndex;
 
       // »Ö¸´¿ì½Ý¼ü
       if FOldBackShortCut <> 0 then
@@ -728,6 +736,8 @@ begin
     begin
       ForwardButton.Action := FOldForwardAction;
       ForwardButton.DropdownMenu := FOldForwardMenu;
+      if ForwardButton.ImageIndex = -1 then
+        ForwardButton.ImageIndex := FOldForwardImageIndex;
 
       // »Ö¸´¿ì½Ý¼ü
       if FOldForwardShortCut <> 0 then
@@ -759,6 +769,8 @@ begin
 
             BackButton.Action := FindActionByNameFromActionManager(ActionMgr, SBackCommandActionName);
             BackButton.DropdownMenu := FOldBackMenu;
+            if BackButton.ImageIndex = -1 then
+              BackButton.ImageIndex := FOldBackImageIndex;
 
             // »Ö¸´¿ì½Ý¼ü
             if (FOldBackShortCut <> 0) and (BackButton.Action <> nil) then
@@ -772,6 +784,8 @@ begin
           begin
             ForwardButton.Action := FindActionByNameFromActionManager(ActionMgr, SForwardCommandActionName);
             ForwardButton.DropdownMenu := FOldForwardMenu;
+            if ForwardButton.ImageIndex = -1 then
+              ForwardButton.ImageIndex := FOldForwardImageIndex;
 
             // »Ö¸´¿ì½Ý¼ü
             if (FOldForwardShortCut <> 0) and (ForwardButton.Action <> nil) then
