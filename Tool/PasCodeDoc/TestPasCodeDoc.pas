@@ -117,57 +117,97 @@ const
     '<tr><td width=90 valign=top><p class="text"><b>单元说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
     '<tr><td height=4><p class="text">　</p></td></tr></table>' + #13#10;
 
-  HTML_CONST_FMT = // 常量说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>常量</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_CONST_FMT = // 常量说明，已适配 Crypto
+    '<div class="api-card"><div class="api-header">' + #13#10 +
+    '<div class="api-name-container">' + #13#10 +
+    '<div class="api-type-label">常量：</div>' + #13#10 + 
+    '<div class="api-name">%s</div></div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 + 
+    '<div class="api-declaration-label">声明：</div>' + #13#10 + 
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 + 
+    '<div class="api-description">%s</div></div></div>' + #13#10;
 
-  HTML_TYPE_FMT =  // 类型说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>类型</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_TYPE_FMT =  // 类型说明，已适配 Crypto
+    '<div class="api-card"><div class="api-header">' + #13#10 +
+    '<div class="api-name-container">' + #13#10 +
+    '<div class="api-type-label">类型：</div>' + #13#10 +
+    '<div class="api-name">%s</div></div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 + 
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 + 
+    '<div class="api-description">%s</div></div></div>' + #13#10;
 
-  HTML_PROCEDURE_FMT = // 过程说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>函数</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_PROCEDURE_FMT = // 过程说明，已适配 Crypto
+    '<div class="api-card"><div class="api-header">' + #13#10 +
+    '<div class="api-name-container">' + #13#10 +
+    '<div class="api-type-label">函数：</div>' + #13#10 +
+    '<div class="api-name">%s</div></div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 +
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 +
+    '<div class="api-description">%s</div></div></div>' + #13#10;
 
-  HTML_VAR_FMT =   // 变量说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>变量</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td height=4><p class="text">　</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_VAR_FMT =   // 变量说明，已适配 Crypto
+    '<div class="api-card"><div class="api-header">' + #13#10 +
+    '<div class="api-name-container">' + #13#10 +
+    '<div class="api-type-label">变量：</div>' + #13#10 +
+    '<div class="api-name">%s</div></div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 +
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 +
+    '<div class="api-description">%s</div></div></div>' + #13#10;
 
-  HTML_PROP_FMT =   // 属性说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>属性</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_PROP_FMT =   // 属性说明，已适配 Crypto
+    '<div class="api-card method-card">' + #13#10 +
+    '<div class="api-header method-header">' + #13#10 +
+    '<div class="api-type-label">属性：</div>' + #13#10 +
+    '<div class="api-name">%s</div>' + #13#10 +
+    '<div class="api-visibility">%s</div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 +
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 +
+    '<div class="api-description">%s</div></div></div>' + #13#10;
 
-  HTML_METHOD_FMT = // 方法说明
-    '<table width="100%%" border="0" cellpadding="0">' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><span class="uc"><b>方法</b>：</span></p></td><td valign=top style="word-wrap:break-word"><p class="text"><span class="uc">%s</span></p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>声明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>可见</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '<tr><td width=54 valign=top><p class="text"><b>说明</b>：</p></td><td valign=top><p class="text">%s</p></td></tr>' + #13#10 +
-    '</table>' + #13#10;
+  HTML_METHOD_FMT = // 方法说明，已适配 Crypto
+    '<div class="api-card method-card">' + #13#10 +
+    '<div class="api-header method-header">' + #13#10 +
+    '<div class="api-type-label">方法：</div>' + #13#10 +
+    '<div class="api-name">%s</div>' + #13#10 +
+    '<div class="api-visibility">%s</div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 +
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 +
+    '<div class="api-description">%s</div></div></div>' + #13#10;
+
+function TrimLastSpacesLineEnd(const Str: string): string;
+var
+  Len: Integer;
+begin
+  Result := Str;
+  Len := Length(Result);
+
+  // 从字符串末尾向前扫描，删除所有连续的空格、#13和#10
+  while Len > 0 do
+  begin
+    case Result[Len] of
+      ' ', #13, #10:
+        begin
+          // 如果是空格、回车或换行符，删除它
+          SetLength(Result, Len - 1);
+          Dec(Len);
+        end;
+    else
+      // 遇到非空格/回车/换行符，停止删除
+      Break;
+    end;
+  end;
+end;
 
 procedure TFormPasDoc.btnExtractFromFileClick(Sender: TObject);
 var
@@ -549,6 +589,8 @@ begin
   finally
     SL.Free;
   end;
+
+  Result := TrimLastSpacesLineEnd(Result);
 
   Result := StringReplace(Result, #13#10#13#10, '<p>', [rfReplaceAll]);
   Result := StringReplace(Result, #13#10, '<br>', [rfReplaceAll]);
@@ -1076,6 +1118,39 @@ var
   Tail: TStringList;
   S: string;
   Item, Sub: TCnDocBaseItem;
+
+  function TrimLFBR(const Str: string): string;
+  var
+    Len: Integer;
+  begin
+    Result := Str;
+    Len := Length(Result);
+  
+    // 从字符串末尾向前扫描，删除所有连续的 #13#10 和 <br>
+    while Len > 0 do
+    begin
+      // 检查是否以 #13#10 结尾
+      if (Len >= 2) and (Result[Len-1] = #13) and (Result[Len] = #10) then
+      begin
+        SetLength(Result, Len - 2);
+        Dec(Len, 2);
+      end
+      // 检查是否以 <br> 结尾（不区分大小写）
+      else if (Len >= 4) and 
+              ((CompareText(Copy(Result, Len-3, 4), '<br>') = 0) or
+               (CompareText(Copy(Result, Len-3, 4), '<BR>') = 0)) then
+      begin
+        SetLength(Result, Len - 4);
+        Dec(Len, 4);
+      end
+      else
+      begin
+        // 遇到其他字符，停止删除
+        Break;
+      end;
+    end;
+  end;
+
 begin
   // 重新排版
   ListPos := -1;
@@ -1088,7 +1163,7 @@ begin
     if Pos(UNIT_DESC_TAG, HtmlStrings[I]) > 0 then
       HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_DESC_TAG, Doc.DeclareType, [rfReplaceAll]);
     if Pos(UNIT_COMMENT_TAG, HtmlStrings[I]) > 0 then
-      HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_COMMENT_TAG, Doc.Comment, [rfReplaceAll]);
+      HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_COMMENT_TAG, TrimLFBR(Doc.Comment), [rfReplaceAll]);
 
     if Pos(UNIT_DECL_LIST_TAG, HtmlStrings[I]) > 0 then
       ListPos := I;
@@ -1111,7 +1186,6 @@ begin
   begin
     // 写每个声明
     Item := Doc.Items[I];
-    HtmlStrings.Add('<hr>');
     case Item.DocType of
       dtType: // 类型内部还有其他内容
         begin
@@ -1126,14 +1200,12 @@ begin
               case Sub.DocType of
                 dtProperty:
                   begin
-                    HtmlStrings.Add('<hr>');
-                    S := Format(HTML_PROP_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    S := Format(HTML_PROP_FMT, [Sub.DeclareName, Sub.GetScopeStr, PasCodeToHtml(Sub.DeclareType), TrimComment(Sub.Comment)]);
                     HtmlStrings.Add(S);
                   end;
                 dtProcedure:
                   begin
-                    HtmlStrings.Add('<hr>');
-                    S := Format(HTML_METHOD_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    S := Format(HTML_METHOD_FMT, [Sub.DeclareName, Sub.GetScopeStr, PasCodeToHtml(Sub.DeclareType), TrimComment(Sub.Comment)]);
                     HtmlStrings.Add(S);
                   end;
               end;
