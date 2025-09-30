@@ -552,6 +552,19 @@ var
     end;
   end;
 
+  function AddTermForSingleLine(const Line: string): string;
+  begin
+    Result := Line;
+    if Length(Line) = 0 then
+      Exit;
+
+    if (Pos(#13, Line) > 0) or (Pos(#10, Line) > 0) then
+      Exit;
+
+    if Ord(Line[Length(Line)]) > 128 then
+      Result := Line + '¡£';
+  end;
+
 begin
   Result := Comment;
   if Result = '' then
@@ -591,6 +604,7 @@ begin
   end;
 
   Result := TrimLastSpacesLineEnd(Result);
+  Result := AddTermForSingleLine(Result);
 
   Result := StringReplace(Result, #13#10#13#10, '<p>', [rfReplaceAll]);
   Result := StringReplace(Result, #13#10, '<br>', [rfReplaceAll]);
