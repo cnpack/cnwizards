@@ -925,6 +925,7 @@ const
   SCRIPT_FILE = FILE_PREFIX + 'script.js';
   WELCOME_FILE = FILE_PREFIX + 'welcome.html';
   UNIT_FILE = FILE_PREFIX + 'template.html';
+  IMG_FILE = 'cnpack_64.png';
 
   UNIT_LIST_TAG = '<!--#UNIT_LIST#-->';
   UNIT_NAME_TAG = '<!--#UNIT_NAME#-->';
@@ -1043,6 +1044,9 @@ begin
     S := STYLE_FILE;
     Delete(S, 1, Length(FILE_PREFIX));
     SL.SaveToFile(MakePath(OutputDir) + S);
+
+    // 复制图像文件
+    CopyFile(PChar(MakePath(TemplateDir) + IMG_FILE), PChar(MakePath(OutputDir) + IMG_FILE), False);
 
     // 根据 Template 文件生成每个单元的帮助文件
     for I := 0 to FAllFile.Count - 1 do

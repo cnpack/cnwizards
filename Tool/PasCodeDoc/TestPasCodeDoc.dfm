@@ -1,9 +1,10 @@
 object FormPasDoc: TFormPasDoc
   Left = 198
   Top = 137
-  Width = 994
-  Height = 604
+  BorderStyle = bsDialog
   Caption = 'Pascal Document'
+  ClientHeight = 572
+  ClientWidth = 986
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,7 +21,7 @@ object FormPasDoc: TFormPasDoc
     Top = 8
     Width = 961
     Height = 553
-    ActivePage = tsGenerate
+    ActivePage = tsParse
     TabOrder = 0
     object tsParse: TTabSheet
       Caption = 'Parse'
