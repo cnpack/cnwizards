@@ -10,16 +10,29 @@ uses
 
 type
   TFormPasDoc = class(TForm)
-    btnExtractFromFile: TButton;
-    mmoResult: TMemo;
     dlgOpen1: TOpenDialog;
-    btnCombineInterface: TButton;
     dlgSave1: TSaveDialog;
-    tvPas: TTreeView;
-    btnConvertDirectory: TButton;
+    pgcMain: TPageControl;
+    tsParse: TTabSheet;
+    tsGenerate: TTabSheet;
+    btnExtractFromFile: TButton;
     btnCheckParamList: TButton;
     btnGenParamList: TButton;
     chkModFile: TCheckBox;
+    tvPas: TTreeView;
+    btnCombineInterface: TButton;
+    mmoResult: TMemo;
+    btnConvertDirectory: TButton;
+    lblTemplateDir: TLabel;
+    lblSourceDir: TLabel;
+    lblDestDir: TLabel;
+    edtTemplateDir: TEdit;
+    edtSourceDir: TEdit;
+    edtOutputDir: TEdit;
+    btnTemplateBrowse: TButton;
+    btnSourceBrowse: TButton;
+    btnOutputBrowse: TButton;
+    btnCryptoGen: TButton;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -28,6 +41,10 @@ type
     procedure btnConvertDirectoryClick(Sender: TObject);
     procedure btnCheckParamListClick(Sender: TObject);
     procedure btnGenParamListClick(Sender: TObject);
+    procedure btnTemplateBrowseClick(Sender: TObject);
+    procedure btnSourceBrowseClick(Sender: TObject);
+    procedure btnOutputBrowseClick(Sender: TObject);
+    procedure btnCryptoGenClick(Sender: TObject);
   private
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
@@ -50,6 +67,10 @@ type
 
 
     class procedure DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
+
+    // For Crypto
+    procedure GenCryptoDoc(const TemplateDir, SourceDir, OutputDir: string);
+    class procedure DumpCryptoDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
   end;
 
 var
@@ -894,6 +915,254 @@ begin
 
     FCommOffset := 0;
     CnScanFileProcDecls(dlgOpen1.FileName, OnProcedureGenerate);
+  end;
+end;
+
+const
+  FILE_PREFIX = 'cncrypto_';
+  INDEX_FILE = FILE_PREFIX + 'index.html';
+  STYLE_FILE = FILE_PREFIX + 'style.css';
+  SCRIPT_FILE = FILE_PREFIX + 'script.js';
+  WELCOME_FILE = FILE_PREFIX + 'welcome.html';
+  UNIT_FILE = FILE_PREFIX + 'template.html';
+
+  UNIT_LIST_TAG = '<!--#UNIT_LIST#-->';
+  UNIT_NAME_TAG = '<!--#UNIT_NAME#-->';
+  UNIT_DESC_TAG = '<!--#UNIT_DESC#-->';
+  UNIT_COMMENT_TAG = '<!--#UNIT_COMMENT#-->';
+  UNIT_DECL_LIST_TAG = '<!--#UNIT_DECL_LIST#-->';
+
+procedure TFormPasDoc.btnTemplateBrowseClick(Sender: TObject);
+var
+  S: string;
+begin
+  if SelectDirectory('Select Template Directory', '', S) then
+    edtTemplateDir.Text := S;
+end;
+
+procedure TFormPasDoc.btnSourceBrowseClick(Sender: TObject);
+var
+  S: string;
+begin
+  if SelectDirectory('Select Source Directory', '', S) then
+    edtSourceDir.Text := S;
+end;
+
+procedure TFormPasDoc.btnOutputBrowseClick(Sender: TObject);
+var
+  S: string;
+begin
+  if SelectDirectory('Select Output Directory', '', S) then
+    edtOutputDir.Text := S;
+end;
+
+procedure TFormPasDoc.btnCryptoGenClick(Sender: TObject);
+begin
+{$IFDEF UNICODE}
+  ShowMessage('Please use Non Unicode Delphi to Generate.');
+  Exit;
+{$ENDIF}
+
+  if not DirectoryExists(edtTemplateDir.Text) then
+  begin
+    ShowMessage('NO Template Directory');
+    Exit;
+  end;
+  if not DirectoryExists(edtSourceDir.Text) then
+  begin
+    ShowMessage('NO Source Directory');
+    Exit;
+  end;
+  if edtOutputDir.Text = '' then
+  begin
+    ShowMessage('NO Output Directory');
+    Exit;
+  end;
+
+  GenCryptoDoc(edtTemplateDir.Text, edtSourceDir.Text, edtOutputDir.Text);
+end;
+
+procedure TFormPasDoc.GenCryptoDoc(const TemplateDir, SourceDir,
+  OutputDir: string);
+var
+  I, J: Integer;
+  S: string;
+  SL: TStringList;
+begin
+  FAllFile.Clear;
+  Screen.Cursor := crHourGlass;
+  SL := TStringList.Create;
+
+  try
+    FindFile(SourceDir, '*.pas', FileCallBack);
+    FAllFile.Sort;
+
+    // Script 文件里塞上文件列表
+    SL.LoadFromFile(MakePath(TemplateDir) + SCRIPT_FILE);
+    J := -1;
+    for I := 0 to SL.Count - 1 do
+    begin
+      if SL[I] = UNIT_LIST_TAG then
+      begin
+        J := I;
+        Break;
+      end;
+    end;
+
+    if J > 0 then
+    begin
+      SL.Delete(J);
+      for I := FAllFile.Count - 1 downto 0 do
+      begin
+        if I = FAllFile.Count - 1 then
+          S := '  ''' + ChangeFileExt(ExtractFileName(FAllFile[I]), '') + ''''
+        else
+          S := '  ''' + ChangeFileExt(ExtractFileName(FAllFile[I]), '') + ''',';
+        SL.Insert(J, S);
+      end;
+
+      S := SCRIPT_FILE;
+      Delete(S, 1, Length(FILE_PREFIX));
+      SL.SaveToFile(MakePath(OutputDir) + S);
+    end;
+
+    // index 文件照样复制
+    SL.LoadFromFile(MakePath(TemplateDir) + INDEX_FILE);
+    S := INDEX_FILE;
+    Delete(S, 1, Length(FILE_PREFIX));
+    SL.SaveToFile(MakePath(OutputDir) + S);
+
+    // welcome 文件照样复制
+    SL.LoadFromFile(MakePath(TemplateDir) + WELCOME_FILE);
+    S := WELCOME_FILE;
+    Delete(S, 1, Length(FILE_PREFIX));
+    SL.SaveToFile(MakePath(OutputDir) + S);
+
+    // style 文件照样复制
+    SL.LoadFromFile(MakePath(TemplateDir) + STYLE_FILE);
+    S := STYLE_FILE;
+    Delete(S, 1, Length(FILE_PREFIX));
+    SL.SaveToFile(MakePath(OutputDir) + S);
+
+    // 根据 Template 文件生成每个单元的帮助文件
+    for I := 0 to FAllFile.Count - 1 do
+    begin
+      FreeAndNil(FDoc);
+      try
+        FDoc := CnCreateUnitDocFromFileName(FAllFile[I]);
+      except
+        on E: Exception do
+          ShowMessage(FAllFile[I] + ' ' + E.Message);
+      end;
+
+      SL.LoadFromFile(MakePath(TemplateDir) + UNIT_FILE);
+      DumpCryptoDocToHtml(FDoc, SL);
+      S := ChangeFileExt(ExtractFileName(FAllFile[I]), '.html');
+      SL.SaveToFile(MakePath(OutputDir) + S);
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+class procedure TFormPasDoc.DumpCryptoDocToHtml(Doc: TCnDocUnit;
+  HtmlStrings: TStringList);
+var
+  I, J, ListPos: Integer;
+  Tail: TStringList;
+  S: string;
+  Item, Sub: TCnDocBaseItem;
+begin
+  // 重新排版
+  ListPos := -1;
+  Tail := nil;
+
+  for I := 0 to HtmlStrings.Count - 1 do
+  begin
+    if Pos(UNIT_NAME_TAG, HtmlStrings[I]) > 0 then
+      HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_NAME_TAG, Doc.DeclareName, [rfReplaceAll]);
+    if Pos(UNIT_DESC_TAG, HtmlStrings[I]) > 0 then
+      HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_DESC_TAG, Doc.DeclareType, [rfReplaceAll]);
+    if Pos(UNIT_COMMENT_TAG, HtmlStrings[I]) > 0 then
+      HtmlStrings[I] := StringReplace(HtmlStrings[I], UNIT_COMMENT_TAG, Doc.Comment, [rfReplaceAll]);
+
+    if Pos(UNIT_DECL_LIST_TAG, HtmlStrings[I]) > 0 then
+      ListPos := I;
+  end;
+
+  if ListPos > 0 then
+  begin
+    Tail := TStringList.Create;
+    Tail.Assign(HtmlStrings);
+    for I := 0 to ListPos do
+      Tail.Delete(0);
+
+    J := HtmlStrings.Count - 1;
+    for I := ListPos to J do
+      HtmlStrings.Delete(ListPos);
+  end;
+
+  // HtmlStrings 和 Tail 是声明区前后，在 HtmlStrings 里加东西
+  for I := 0 to Doc.Count - 1 do
+  begin
+    // 写每个声明
+    Item := Doc.Items[I];
+    HtmlStrings.Add('<hr>');
+    case Item.DocType of
+      dtType: // 类型内部还有其他内容
+        begin
+          S := Format(HTML_TYPE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          HtmlStrings.Add(S);
+          if Item.Count > 0 then
+          begin
+            HtmlStrings.Add('<blockquote>');
+            for J := 0 to Item.Count - 1 do
+            begin
+              Sub := Item.Items[J];
+              case Sub.DocType of
+                dtProperty:
+                  begin
+                    HtmlStrings.Add('<hr>');
+                    S := Format(HTML_PROP_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    HtmlStrings.Add(S);
+                  end;
+                dtProcedure:
+                  begin
+                    HtmlStrings.Add('<hr>');
+                    S := Format(HTML_METHOD_FMT, [Sub.DeclareName, PasCodeToHtml(Sub.DeclareType), Sub.GetScopeStr, TrimComment(Sub.Comment)]);
+                    HtmlStrings.Add(S);
+                  end;
+              end;
+            end;
+            HtmlStrings.Add('</blockquote>');
+          end;
+        end;
+      dtConst:
+        begin
+          S := Format(HTML_CONST_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          HtmlStrings.Add(S);
+        end;
+      dtProcedure:
+        begin
+          S := Format(HTML_PROCEDURE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          HtmlStrings.Add(S);
+        end;
+      dtVar:
+        begin
+          S := Format(HTML_VAR_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          HtmlStrings.Add(S);
+        end;
+    else
+      ;
+    end;
+  end;
+
+  // 再拼一块
+  if Tail <> nil then
+  begin
+    for I := 0 to Tail.Count - 1 do
+      HtmlStrings.Add(Tail[I]);
+    Tail.Free;
   end;
 end;
 
