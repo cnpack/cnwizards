@@ -7159,6 +7159,20 @@ procedure TCnSourceHighlight.DebugComand(Cmds, Results: TStrings);
 var
   I, Idx: Integer;
   Info: TCnBlockMatchInfo;
+
+  function GetTokenEditLineCol(List: TCnList): string;
+  var
+    J: Integer;
+    Token: TCnGeneralPasToken;
+  begin
+    Result := '';
+    for J := 0 to List.Count - 1 do
+    begin
+      Token := TCnGeneralPasToken(List[J]);
+      Result := Result + Format('[-%d |%d]', [Token.EditLine, Token.EditCol]);
+    end;
+  end;
+
 begin
   Results.Add('Block Match Info Count ' + IntToStr(FBlockMatchList.Count));
   Idx := IndexOfBlockMatch(GetCurrentEditControl);
@@ -7178,7 +7192,10 @@ begin
     for I := 0 to Info.KeyLineCount - 1 do
     begin
       if Info.KeyLines[I] <> nil then
-        Results.Add(Format('#%d: (%d) %s', [I, Info.KeyLines[I].Count, Info.KeyLines[I].ToString]));
+      begin
+        Results.Add(Format('#%d: (%d) %s - %s', [I, Info.KeyLines[I].Count,
+          Info.KeyLines[I].ToString, GetTokenEditLineCol(Info.KeyLines[I])]));
+      end;
     end;
   end
   else
