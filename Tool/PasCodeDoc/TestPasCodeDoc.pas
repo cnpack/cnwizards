@@ -1229,6 +1229,11 @@ begin
         end;
       dtConst:
         begin
+          if Length(Item.DeclareType) > 256 then // 太长的常量声明，只取等号之前的
+          begin
+            if Pos('=', Item.DeclareType) > 1 then
+              Item.DeclareType := Copy(Item.DeclareType, 1, Pos('=', Item.DeclareType) - 1);
+          end;
           S := Format(HTML_CONST_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
           HtmlStrings.Add(S);
         end;
