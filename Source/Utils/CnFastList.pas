@@ -96,6 +96,8 @@ type
     function QueuePop: Pointer;
     function QueuePeek: Pointer;
 
+    function ToString: string; {$IFDEF OBJECT_HAS_TOSTRING} override; {$ENDIF}
+
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount write SetCount;
     property Items[Index: Integer]: Pointer read Get write Put; default;
@@ -334,6 +336,23 @@ end;
 procedure TCnBaseList.StackPush(Item: Pointer);
 begin
   Add(Item);
+end;
+
+function TCnBaseList.ToString: string;
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 0 to Count - 1 do
+  begin
+{$IFDEF CPU64BITS}
+    Result := Result + IntToStr(NativeInt(FList^[I]));
+{$ELSE}
+    Result := Result + IntToStr(Integer(FList^[I]));
+{$ENDIF}
+    if I < Count - 1 then
+      Result := Result + ', ';
+  end;
 end;
 
 procedure TCnBaseList.Insert(Index: Integer; Item: Pointer);
