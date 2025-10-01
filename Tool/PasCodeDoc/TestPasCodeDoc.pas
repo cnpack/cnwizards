@@ -33,6 +33,7 @@ type
     btnSourceBrowse: TButton;
     btnOutputBrowse: TButton;
     btnCryptoGen: TButton;
+    btnCryptoGenAFile: TButton;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -45,6 +46,7 @@ type
     procedure btnSourceBrowseClick(Sender: TObject);
     procedure btnOutputBrowseClick(Sender: TObject);
     procedure btnCryptoGenClick(Sender: TObject);
+    procedure btnCryptoGenAFileClick(Sender: TObject);
   private
     FDoc: TCnDocUnit;
     FAllFile: TStringList;
@@ -69,7 +71,7 @@ type
     class procedure DumpDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
 
     // For Crypto
-    procedure GenCryptoDoc(const TemplateDir, SourceDir, OutputDir: string);
+    procedure GenCryptoDoc(const TemplateDir, SourceDir, OutputDir: string; SourceIsFile: Boolean = False);
     class procedure DumpCryptoDocToHtml(Doc: TCnDocUnit; HtmlStrings: TStringList);
   end;
 
@@ -1040,7 +1042,7 @@ begin
 end;
 
 procedure TFormPasDoc.GenCryptoDoc(const TemplateDir, SourceDir,
-  OutputDir: string);
+  OutputDir: string; SourceIsFile: Boolean);
 var
   I, J: Integer;
   S: string;
@@ -1051,8 +1053,13 @@ begin
   SL := TStringList.Create;
 
   try
-    FindFile(SourceDir, '*.pas', FileCallBack);
-    FAllFile.Sort;
+    if SourceIsFile then
+      FAllFile.Add(SourceDir)
+    else
+    begin
+      FindFile(SourceDir, '*.pas', FileCallBack);
+      FAllFile.Sort;
+    end;
 
     // Script 文件里塞上文件列表
     SL.LoadFromFile(MakePath(TemplateDir) + SCRIPT_FILE);
@@ -1259,6 +1266,12 @@ begin
       HtmlStrings.Add(Tail[I]);
     Tail.Free;
   end;
+end;
+
+procedure TFormPasDoc.btnCryptoGenAFileClick(Sender: TObject);
+begin
+  if dlgOpen1.Execute then
+    GenCryptoDoc(edtTemplateDir.Text, dlgOpen1.FileName, edtOutputDir.Text, True);
 end;
 
 end.

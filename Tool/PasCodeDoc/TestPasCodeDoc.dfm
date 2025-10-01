@@ -120,7 +120,7 @@ object FormPasDoc: TFormPasDoc
       object btnConvertDirectory: TButton
         Left = 16
         Top = 120
-        Width = 305
+        Width = 97
         Height = 25
         Caption = 'Convert Directory'
         TabOrder = 0
@@ -186,6 +186,15 @@ object FormPasDoc: TFormPasDoc
         Caption = 'Crypto Generate'
         TabOrder = 7
         OnClick = btnCryptoGenClick
+      end
+      object btnCryptoGenAFile: TButton
+        Left = 152
+        Top = 120
+        Width = 169
+        Height = 25
+        Caption = 'Crypto Generate One File'
+        TabOrder = 8
+        OnClick = btnCryptoGenAFileClick
       end
     end
   end
