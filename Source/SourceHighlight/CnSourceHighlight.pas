@@ -6387,9 +6387,9 @@ begin
               and (Pair.EndToken.EditLine > Pair.StartToken.EditLine) then
             begin
               // 处理前面还有 token 的情形，找 Start/End Token 所在行的第一个 Token
-              if Info.Lines[L].Count > 0 then
+              if Info.KeyLines[L].Count > 0 then
               begin
-                LineFirstToken := TCnGeneralPasToken(Info.Lines[L][0]);
+                LineFirstToken := TCnGeneralPasToken(Info.KeyLines[L][0]);
                 if LineFirstToken <> Pair.StartToken then
                 begin
                   if Pair.Left > LineFirstToken.EditCol then
@@ -6399,11 +6399,11 @@ begin
                 end;
               end;
 
-              if Pair.EndToken.EditLine < Info.LineCount then
+              if Pair.EndToken.EditLine < Info.KeyLineCount then
               begin
-                if Info.Lines[Pair.EndToken.EditLine].Count > 0 then
+                if Info.KeyLines[Pair.EndToken.EditLine].Count > 0 then
                 begin
-                  LineFirstToken := TCnGeneralPasToken(Info.Lines[Pair.EndToken.EditLine][0]);
+                  LineFirstToken := TCnGeneralPasToken(Info.KeyLines[Pair.EndToken.EditLine][0]);
 
                   if LineFirstToken <> Pair.EndToken then
                   begin
@@ -6659,20 +6659,20 @@ begin
       end;
     end;
 
-    if (L < Info.LineCount) and (Info.Lines[L] <> nil) then
+    if (L < Info.KeyLineCount) and (Info.KeyLines[L] <> nil) then
     begin
       Token := nil;
-      for I := 0 to Info.Lines[L].Count - 1 do
+      for I := 0 to Info.KeyLines[L].Count - 1 do
       begin
         // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
         Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
-          TCnGeneralPasToken(Info.Lines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
+          TCnGeneralPasToken(Info.KeyLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum then
         begin
-          Token := TCnGeneralPasToken(Info.Lines[L][I]);
+          Token := TCnGeneralPasToken(Info.KeyLines[L][I]);
           Break;
         end;
       end;
@@ -7160,18 +7160,29 @@ var
   I, Idx: Integer;
   Info: TCnBlockMatchInfo;
 begin
+  Results.Add('Block Match Info Count ' + IntToStr(FBlockMatchList.Count));
   Idx := IndexOfBlockMatch(GetCurrentEditControl);
+  Info := nil;
   if Idx > 0 then
+    Info := TCnBlockMatchInfo(FBlockMatchList[Idx])
+  else if FBlockMatchList.Count > 0 then
   begin
-    Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+    Results.Add('No Block MatchInfo for Current EditControl. Use First One.');
+    Info := TCnBlockMatchInfo(FBlockMatchList[0]);
+  end;
+
+  if Info <> nil then
+  begin
     Results.Add('BlockMatch Key Lines Count ' + IntToStr(Info.KeyLineCount));
 
     for I := 0 to Info.KeyLineCount - 1 do
     begin
       if Info.KeyLines[I] <> nil then
-        Results.Add(Format('#%d: %d', [I, Info.KeyLines[I].Count]));
+        Results.Add(Format('#%d: (%d) %s', [I, Info.KeyLines[I].Count, Info.KeyLines[I].ToString]));
     end;
-  end;
+  end
+  else
+    Results.Add('No Block MatchInfo');
 end;
 
 { TCnBlockLinePair }
