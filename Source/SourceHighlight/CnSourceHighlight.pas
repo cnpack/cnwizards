@@ -275,8 +275,8 @@ type
     function GetKeyCount: Integer;
     function GetKeyTokens(Index: Integer): TCnGeneralPasToken;
 
-    function GetLineCount: Integer;
-    function GetLines(LineNum: Integer): TCnList;
+    function GetKeyLineCount: Integer;
+    function GetKeyLines(LineNum: Integer): TCnList;
 
     function GetCurrentIdentTokenCount: Integer;
     function GetCurrentIdentTokens(Index: Integer): TCnGeneralPasToken;
@@ -352,13 +352,13 @@ type
     property CustomIdentTokenCount: Integer read GetCustomIdentTokenCount;
     {* 自定义标识符的列表数目}
 
-    property LineCount: Integer read GetLineCount;
+    property KeyLineCount: Integer read GetKeyLineCount;
     property CurrentIdentLineCount: Integer read GetCurrentIdentLineCount;
     property FlowLineCount: Integer read GetFlowLineCount;
     property CompDirectiveLineCount: Integer read GetCompDirectiveLineCount;
     property CustomIdentLineCount: Integer read GetCustomIdentLineCount;
 
-    property Lines[LineNum: Integer]: TCnList read GetLines;
+    property KeyLines[LineNum: Integer]: TCnList read GetKeyLines;
     {* 每行一个 CnList，后者容纳 Token}
     property CurrentIdentLines[LineNum: Integer]: TCnList read GetCurrentIdentLines;
     {* 也是按 Lines 的方式来，每行一个 CnList，后者容纳 CurrentToken}
@@ -708,6 +708,8 @@ type
 
     constructor Create; override;
     destructor Destroy; override;
+
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
     procedure SyncCustomWide; // 2005/2006/2007 下使用宽字符串进行对比
@@ -2779,7 +2781,7 @@ begin
   Result := TCnGeneralPasToken(FCompDirectiveTokenList[Index]);
 end;
 
-function TCnBlockMatchInfo.GetLineCount: Integer;
+function TCnBlockMatchInfo.GetKeyLineCount: Integer;
 begin
   Result := FKeyLineList.Count;
 end;
@@ -2799,7 +2801,7 @@ begin
   Result := FCompDirectiveLineList.Count;
 end;
 
-function TCnBlockMatchInfo.GetLines(LineNum: Integer): TCnList;
+function TCnBlockMatchInfo.GetKeyLines(LineNum: Integer): TCnList;
 begin
   Result := TCnList(FKeyLineList[LineNum]);
 end;
@@ -4676,7 +4678,7 @@ begin
 {$IFNDEF USE_CODEEDITOR_SERVICE}
         // 高版本下使用新 API 绘制关键字高亮及匹配高亮
         // BlockMatch 里有多个 TCnGeneralPasToken
-        if (LogicLineNum < Info.LineCount) and (Info.Lines[LogicLineNum] <> nil) then
+        if (LogicLineNum < Info.KeyLineCount) and (Info.KeyLines[LogicLineNum] <> nil) then
         begin
           with EditCanvas do
           begin
@@ -4689,9 +4691,9 @@ begin
               Font.Style := Font.Style + [fsUnderline];
           end;
 
-          for I := 0 to Info.Lines[LogicLineNum].Count - 1 do
+          for I := 0 to Info.KeyLines[LogicLineNum].Count - 1 do
           begin
-            Token := TCnGeneralPasToken(Info.Lines[LogicLineNum][I]);
+            Token := TCnGeneralPasToken(Info.KeyLines[LogicLineNum][I]);
 
             Layer := Token.ItemLayer - 1;
             if FStructureHighlight then
@@ -5317,9 +5319,9 @@ begin
                 and (Pair.EndToken.EditLine > Pair.StartToken.EditLine) then
               begin
                 // 处理前面还有 token 的情形，找 Start/End Token 所在行的第一个 Token
-                if Info.Lines[LogicLineNum].Count > 0 then
+                if Info.KeyLines[LogicLineNum].Count > 0 then
                 begin
-                  LineFirstToken := TCnGeneralPasToken(Info.Lines[LogicLineNum][0]);
+                  LineFirstToken := TCnGeneralPasToken(Info.KeyLines[LogicLineNum][0]);
                   if LineFirstToken <> Pair.StartToken then
                   begin
                     if Pair.Left > LineFirstToken.EditCol then
@@ -5329,11 +5331,11 @@ begin
                   end;
                 end;
 
-                if Pair.EndToken.EditLine < Info.LineCount then
+                if Pair.EndToken.EditLine < Info.KeyLineCount then
                 begin
-                  if Info.Lines[Pair.EndToken.EditLine].Count > 0 then
+                  if Info.KeyLines[Pair.EndToken.EditLine].Count > 0 then
                   begin
-                    LineFirstToken := TCnGeneralPasToken(Info.Lines[Pair.EndToken.EditLine][0]);
+                    LineFirstToken := TCnGeneralPasToken(Info.KeyLines[Pair.EndToken.EditLine][0]);
 
                     if LineFirstToken <> Pair.EndToken then
                     begin
@@ -7151,6 +7153,25 @@ function TCnSourceHighlight.GetSearchContent: string;
 begin
   Result := inherited GetSearchContent + '括号,匹配,标识符,关键字,划线,画线,空行,分隔,结构,编译指令,行号,'
     + 'bracket,match,identifier,keyword,line,draw,structure,blank,compiler,directive,';
+end;
+
+procedure TCnSourceHighlight.DebugComand(Cmds, Results: TStrings);
+var
+  I, Idx: Integer;
+  Info: TCnBlockMatchInfo;
+begin
+  Idx := IndexOfBlockMatch(GetCurrentEditControl);
+  if Idx > 0 then
+  begin
+    Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+    Results.Add('BlockMatch Key Lines Count ' + IntToStr(Info.KeyLineCount));
+
+    for I := 0 to Info.KeyLineCount - 1 do
+    begin
+      if Info.KeyLines[I] <> nil then
+        Results.Add(Format('#%d: %d', [I, Info.KeyLines[I].Count]));
+    end;
+  end;
 end;
 
 { TCnBlockLinePair }
