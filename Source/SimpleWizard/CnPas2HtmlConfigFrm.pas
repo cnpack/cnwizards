@@ -25,6 +25,8 @@ unit CnPas2HtmlConfigFrm;
 * 单元名称：代码到 HTML 转换输出专家配置单元
 * 单元作者：CnPack 开发组 master@cnpack.org
 * 备    注：CnPas2Html 专家配置单元
+*           不知咋回事，第二个 Tab 的GroupBox 的 Anchor 里不能有 akBottom
+*           否则 FPC 下其里面的 Panel 的 Top 会产生偏差。
 * 开发平台：PWin98SE + Delphi 6
 * 兼容测试：暂无（PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6）
 * 本 地 化：该窗体中的字符串均符合本地化处理方式

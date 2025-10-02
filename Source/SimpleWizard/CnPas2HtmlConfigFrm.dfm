@@ -183,7 +183,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
         Top = 8
         Width = 289
         Height = 221
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Fo&nt Settings'
         TabOrder = 0
         object Label5: TLabel
