@@ -64,7 +64,7 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
-  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf,
+  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf, ComponentEditors,
   SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, ProjectGroupIntf, {$ENDIF} {$ENDIF}
   {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI, {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
@@ -115,6 +115,7 @@ type
   TCnIDEProjectResourceInterface = Pointer;
   TCnIDEDesigner = Pointer;
   TCnDesignerSelectionList = Pointer;
+  TCnIDEFormEditor = Pointer;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
@@ -127,6 +128,7 @@ type
   TCnIDEProjectResourceInterface = TObject;
   TCnIDEDesigner = TIDesigner;
   TCnDesignerSelectionList = TPersistentSelectionList;
+  TCnIDEFormEditor = TComponentEditorDesigner;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
   TCnIDEEditorInterface = IOTAEditor;
@@ -138,6 +140,7 @@ type
   TCnIDEProjectResourceInterface = IOTAProjectResource;
   TCnIDEDesigner = IDesigner;
   TCnDesignerSelectionList = IDesignerSelections;
+  TCnIDEFormEditor = IOTAFormEditor;
   {$ENDIF}
 {$ENDIF}
 
@@ -570,6 +573,10 @@ function CnOtaGetProject: TCnIDEProjectInterface;
 {* 取第一个工程}
 function CnOtaGetUnitName(Editor: TCnSourceEditorInterface): string;
 {* 返回单元名称}
+function CnOtaGetRootComponentFromEditor(Editor: TCnIDEFormEditor): TComponent;
+{* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例。它应该是其上的设计期及运行期组件的 Owner}
+function CnOtaGetCurrentFormEditor: TCnIDEFormEditor;
+{* 取当前窗体编辑器}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -588,8 +595,6 @@ function CnOtaGetFileEditorForModule(Module: IOTAModule; Index: Integer): IOTAEd
 {* 取模块编辑器}
 function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
 {* 取窗体编辑器}
-function CnOtaGetCurrentFormEditor: IOTAFormEditor;
-{* 取当前窗体编辑器}
 function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor = nil): TWinControl;
 {* 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
 function CnOtaGetCurrentDesignContainer: TWinControl;
@@ -618,8 +623,6 @@ function CnOtaGetModuleCountFromProject(Project: IOTAProject): Integer;
 {* 取当前工程中模块数，无工程返回 -1}
 function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer): IOTAModuleInfo;
 {* 取当前工程中的第 Index 个模块信息，从 0 开始}
-function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
-{* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例。它应该是其上的设计期及运行期组件的 Owner}
 function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
 function CnOtaGetCurrentEditWindow: TCustomForm;
@@ -929,8 +932,9 @@ function ConvertEditorTextToTextW(const Text: AnsiString): string;
 {$ENDIF}
 
 function CnOtaGetCurrentSourceFile: string;
-{* 取当前编辑的源文件。编辑器活动时返回在编辑的源文件，
-  在设计窗体活动时，会返回 dfm 或类似文件，不是源码文件}
+{* 取当前编辑的源文件。Delphi 中，编辑器活动时返回在编辑的源文件，
+  在设计窗体活动时，会返回 dfm 或类似文件，不是源码文件。这里的“活动”大概是指哪个 ZOrder 靠前。
+  Lazarus 中没有这个活动的概念，所以返回的总是当前编辑器所编辑的源文件。}
 
 function CnOtaGetCurrentSourceFileName: string;
 {* 取当前编辑的 Pascal 或 Cpp 源文件，判断限制较多。
@@ -1256,25 +1260,6 @@ procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 // 窗体操作相关函数
 //==============================================================================
 
-function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
-  ExcludeForm: Boolean = True): Boolean;
-{* 取得当前设计的窗体及选择的组件列表，返回成功标志
- |<PRE>
-   var AForm: TCustomForm    - 正在设计的窗体
-   Selections: TList         - 当前选择的组件列表，如果传入 nil 则不返回
-   ExcludeForm: Boolean      - 不包含 Form 本身
-   Result: Boolean           - 如果成功返回为 True
- |</PRE>}
-
-function CnOtaGetCurrFormSelectionsCount: Integer;
-{* 取当前设计的窗体上选择控件的数量}
-
-function CnOtaIsCurrFormSelectionsEmpty: Boolean;
-{* 判断当前设计的窗体上是否选择有控件}
-
-procedure CnOtaNotifyFormDesignerModified(FormEditor: IOTAFormEditor = nil);
-{* 通知窗体设计器内容已变更}
-
 function CnOtaSelectedComponentIsRoot(FormEditor: IOTAFormEditor = nil): Boolean;
 {* 判断当前选择的控件是否为设计窗体本身}
 
@@ -1321,6 +1306,25 @@ procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: T
 {* 从 ObjectList 中替换一部分 EditView 中的书签}
 
 {$ENDIF}
+
+function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
+  ExcludeForm: Boolean = True): Boolean;
+{* 取得当前设计的窗体及选择的组件列表，返回成功标志
+ |<PRE>
+   var AForm: TCustomForm    - 正在设计的窗体
+   Selections: TList         - 当前选择的组件列表，如果传入 nil 则不返回
+   ExcludeForm: Boolean      - 不包含 Form 本身
+   Result: Boolean           - 如果成功返回为 True
+ |</PRE>}
+
+ function CnOtaGetCurrFormSelectionsCount: Integer;
+ {* 取当前设计的窗体上选择控件的数量}
+
+ function CnOtaIsCurrFormSelectionsEmpty: Boolean;
+ {* 判断当前设计的窗体上是否选择有控件}
+
+ procedure CnOtaNotifyFormDesignerModified(FormEditor: TCnIDEFormEditor = nil);
+{* 通知窗体设计器内容已变更}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 procedure TranslateFormFromLangFile(AForm: TCustomForm; const ALangDir, ALangFile: string;
@@ -4414,6 +4418,63 @@ begin
 {$ENDIF}
 end;
 
+// 返回窗体编辑器设计窗体组件
+function CnOtaGetRootComponentFromEditor(Editor: TCnIDEFormEditor): TComponent;
+{$IFDEF DELPHI_OTA}
+var
+  Component: IOTAComponent;
+  NTAComponent: INTAComponent;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  if Assigned(Editor) and IsVCLFormEditor(Editor) then
+  begin
+    try
+      Component := Editor.GetRootComponent;
+    except
+      // 打开某些文件时会出错（Delphi5）
+      Result := nil;
+      Exit;
+    end;
+
+    if Assigned(Component) and QuerySvcs(Component, INTAComponent,
+      NTAComponent) then
+    begin
+      Result := NTAComponent.GetComponent;
+      Exit;
+    end;
+  end;
+  Result := nil;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  Result := Editor.Form;
+{$ENDIF}
+end;
+
+// 取当前窗体编辑器
+function CnOtaGetCurrentFormEditor: TCnIDEFormEditor;
+{$IFDEF DELPHI_OTA}
+var
+  Module: IOTAModule;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  Module := CnOtaGetCurrentModule;
+  if Assigned(Module) then
+  begin
+    Result := CnOtaGetFormEditorFromModule(Module);
+    Exit;
+  end;
+  Result := nil;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
+    Result := LazarusIDE.GetDesignerForProjectEditor(SourceEditorManagerIntf.ActiveEditor, true) as TCnIDEFormEditor;
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -4540,20 +4601,6 @@ begin
         Exit;
       end;
     end;
-  end;
-  Result := nil;
-end;
-
-// 取当前窗体编辑器
-function CnOtaGetCurrentFormEditor: IOTAFormEditor;
-var
-  Module: IOTAModule;
-begin
-  Module := CnOtaGetCurrentModule;
-  if Assigned(Module) then
-  begin
-    Result := CnOtaGetFormEditorFromModule(Module);
-    Exit;
   end;
   Result := nil;
 end;
@@ -4861,32 +4908,6 @@ begin
     Result := Project.GetModule(Index)
   else
     Result := nil;
-end;
-
-// 返回窗体编辑器设计窗体组件
-function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
-var
-  Component: IOTAComponent;
-  NTAComponent: INTAComponent;
-begin
-  if Assigned(Editor) and IsVCLFormEditor(Editor) then
-  begin
-    try
-      Component := Editor.GetRootComponent;
-    except
-      // 打开某些文件时会出错（Delphi5）
-      Result := nil;
-      Exit;
-    end;
-
-    if Assigned(Component) and QuerySvcs(Component, INTAComponent,
-      NTAComponent) then
-    begin
-      Result := NTAComponent.GetComponent;
-      Exit;
-    end;
-  end;
-  Result := nil;
 end;
 
 // 返回窗体设计器的格点也就是 Grid 的横竖步进像素数
@@ -9703,83 +9724,6 @@ end;
 // 窗体操作相关函数
 //==============================================================================
 
-// 取得当前设计的窗体及选择的组件列表，返回成功标志
-function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
-  ExcludeForm: Boolean): Boolean;
-var
-  I: Integer;
-  AObj: TPersistent;
-  FormDesigner: IDesigner;
-  AList: IDesignerSelections;
-begin
-  Result := False;
-  try
-    FormDesigner := CnOtaGetFormDesigner;
-    if FormDesigner = nil then Exit;
-  {$IFDEF COMPILER6_UP}
-    if FormDesigner.Root is TCustomForm then
-      AForm := TCustomForm(FormDesigner.Root);
-  {$ELSE}
-    AForm := FormDesigner.Form;
-  {$ENDIF}
-
-    if Selections <> nil then
-    begin
-      Selections.Clear;
-      AList := CreateSelectionList;
-      FormDesigner.GetSelections(AList);
-      for I := 0 to AList.Count - 1 do
-      begin
-      {$IFDEF COMPILER6_UP}
-        AObj := TPersistent(AList[I]);
-      {$ELSE}
-        AObj := TryExtractPersistent(AList[I]);
-      {$ENDIF}
-        if AObj <> nil then // perhaps is nil when disabling packages in the IDE
-          Selections.Add(AObj);
-      end;
-      
-      if ExcludeForm and (Selections.Count = 1) and (Selections[0] = AForm) then
-        Selections.Clear;
-    end;
-    Result := True;
-  except
-    ;
-  end;
-end;
-
-// 取当前设计的窗体上选择控件的数量
-function CnOtaGetCurrFormSelectionsCount: Integer;
-var
-  AForm: TCustomForm;
-  AList: TList;
-begin
-  Result := 0;
-  AList := TList.Create;
-  try
-    if not CnOtaGetCurrDesignedForm(AForm, AList) then Exit;
-    Result := AList.Count;
-  finally
-    AList.Free;
-  end;
-end;
-
-// 判断当前设计的窗体上是否选择有控件
-function CnOtaIsCurrFormSelectionsEmpty: Boolean;
-begin
-  Result := CnOtaGetCurrFormSelectionsCount <= 0;
-end;
-
-// 通知窗体设计器内容已变更
-procedure CnOtaNotifyFormDesignerModified(FormEditor: IOTAFormEditor);
-var
-  FormDesigner: IDesigner;
-begin
-  FormDesigner := CnOtaGetFormDesigner(FormEditor);
-  if FormDesigner = nil then Exit;
-  FormDesigner.Modified;
-end;
-
 // 判断当前选择的控件是否为设计窗体本身
 function CnOtaSelectedComponentIsRoot(FormEditor: IOTAFormEditor): Boolean;
 var
@@ -10146,6 +10090,112 @@ begin
 end;
 
 {$ENDIF}
+
+// 取得当前设计的窗体及选择的组件列表，返回成功标志
+function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
+  ExcludeForm: Boolean): Boolean;
+var
+  I: Integer;
+  AObj: TPersistent;
+  FormDesigner: TCnIDEDesigner;
+{$IFNDEF STAND_ALONE}
+  AList: TCnDesignerSelectionList;
+{$ENDIF}
+begin
+  Result := False;
+  try
+    FormDesigner := CnOtaGetFormDesigner;
+    if FormDesigner = nil then Exit;
+{$IFDEF LAZARUS}
+    if GlobalDesignHook.LookupRoot is TCustomForm then
+      AForm := TCustomForm(GlobalDesignHook.LookupRoot);
+{$ENDIF}
+
+{$IFDEF DELHI_OTA}
+  {$IFDEF COMPILER6_UP}
+    if FormDesigner.Root is TCustomForm then
+      AForm := TCustomForm(FormDesigner.Root);
+  {$ELSE}
+    AForm := FormDesigner.Form;
+  {$ENDIF}
+{$ENDIF}
+
+{$IFNDEF STAND_ALONE}
+    if Selections <> nil then
+    begin
+      Selections.Clear;
+{$IFDEF LAZARUS}
+      AList := TCnDesignerSelectionList.Create;
+      GlobalDesignHook.GetSelection(AList);
+{$ENDIF}
+{$IFDEF DELHI_OTA}
+      AList := CreateSelectionList;
+      FormDesigner.GetSelections(AList);
+{$ENDIF}
+
+      for I := 0 to AList.Count - 1 do
+      begin
+{$IFDEF LAZARUS}
+        AObj := TPersistent(AList[I]);
+{$endif}
+{$IFDEF DELHI_OTA}
+      {$IFDEF COMPILER6_UP}
+        AObj := TPersistent(AList[I]);
+      {$ELSE}
+        AObj := TryExtractPersistent(AList[I]);
+      {$ENDIF}
+{$ENDIF}
+        if AObj <> nil then // perhaps is nil when disabling packages in the IDE
+          Selections.Add(AObj);
+      end;
+
+      if ExcludeForm and (Selections.Count = 1) and (Selections[0] = AForm) then
+        Selections.Clear;
+    end;
+    Result := True;
+{$ENDIF}
+  except
+    ;
+  end;
+end;
+
+// 取当前设计的窗体上选择控件的数量
+function CnOtaGetCurrFormSelectionsCount: Integer;
+var
+  AForm: TCustomForm;
+  AList: TList;
+begin
+  Result := 0;
+  AList := TList.Create;
+  try
+    if not CnOtaGetCurrDesignedForm(AForm, AList) then Exit;
+    Result := AList.Count;
+  finally
+    AList.Free;
+  end;
+end;
+
+// 判断当前设计的窗体上是否选择有控件
+function CnOtaIsCurrFormSelectionsEmpty: Boolean;
+begin
+  Result := CnOtaGetCurrFormSelectionsCount <= 0;
+end;
+
+// 通知窗体设计器内容已变更
+procedure CnOtaNotifyFormDesignerModified(FormEditor: TCnIDEFormEditor);
+var
+  FormDesigner: TCnIDEDesigner;
+begin
+  FormDesigner := CnOtaGetFormDesigner({$IFDEF DELPHI_OTA} FormEditor {$ENDIF});
+  if FormDesigner = nil then Exit;
+
+{$IFDEF DELPHI_OTA}
+  FormDesigner.Modified;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  GlobalDesignHook.Modified(FormEditor);
+{$ENDIF}
+end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 

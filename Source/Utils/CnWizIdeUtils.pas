@@ -427,6 +427,15 @@ function GetProjectDcuPath(AProject: TCnIDEProjectInterface): string;
 function GetCurrentTopEditorPage(AControl: TWinControl): TCnSrcEditorPage;
 {* 取当前编辑窗口顶层页面类型，传入编辑器父控件 }
 
+function IsDesignControl(AControl: TControl): Boolean;
+{* 判断一 Control 是否是设计期 WinControl}
+
+function IsDesignWinControl(AControl: TWinControl): Boolean;
+{* 判断一 WinControl 是否是设计期 WinControl}
+
+function IsXTabControl(AControl: TComponent): Boolean;
+{* 判断指定控件是否编辑器窗口的 TabControl 控件 }
+
 {$IFDEF DELPHI_OTA}
 
 procedure CloseExpandableEvalViewForm;
@@ -474,15 +483,6 @@ function GetIDERegistryFont(const RegItem: string; AFont: TFont;
    RegItem 可以是 '', 'Assembler', 'Comment', 'Preprocessor',
     'Identifier', 'Reserved word', 'Number', 'Whitespace', 'String', 'Symbol'
     等注册表里头已经定义了的键值}
-
-function IsDesignControl(AControl: TControl): Boolean;
-{* 判断一 Control 是否是设计期 WinControl}
-
-function IsDesignWinControl(AControl: TWinControl): Boolean;
-{* 判断一 WinControl 是否是设计期 WinControl}
-
-function IsXTabControl(AControl: TComponent): Boolean;
-{* 判断指定控件是否编辑器窗口的 TabControl 控件 }
 
 function GetCPUViewFromEditorForm(AForm: TCustomForm): TControl;
 {* 返回编辑器窗口的 CPU 查看器控件 }
@@ -2203,6 +2203,33 @@ begin
   end;
 end;
 
+// 判断一 Control 是否是设计期 Control
+function IsDesignControl(AControl: TControl): Boolean;
+begin
+  Result := (AControl <> nil) and (AControl is TControl) and
+    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
+    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
+    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
+    (csDesigning in AControl.Owner.ComponentState);
+end;
+
+// 判断一 WinControl 是否是设计期 Control
+function IsDesignWinControl(AControl: TWinControl): Boolean;
+begin
+  Result := (AControl <> nil) and (AControl is TWinControl) and
+    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
+    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
+    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
+    (csDesigning in AControl.Owner.ComponentState);
+end;
+
+// 判断指定控件是否编辑器窗口的 TabControl 控件
+function IsXTabControl(AControl: TComponent): Boolean;
+begin
+  Result := (AControl <> nil) and AControl.ClassNameIs(SCnXTabControlClassName)
+    and SameText(AControl.Name, SCnXTabControlName);
+end;
+
 {$IFDEF DELPHI_OTA}
 
 procedure CloseExpandableEvalViewForm;
@@ -2605,33 +2632,6 @@ begin
       Reg.Free;
     end;
   end;
-end;
-
-// 判断一 Control 是否是设计期 Control
-function IsDesignControl(AControl: TControl): Boolean;
-begin
-  Result := (AControl <> nil) and (AControl is TControl) and
-    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
-    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
-    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
-    (csDesigning in AControl.Owner.ComponentState);
-end;
-
-// 判断一 WinControl 是否是设计期 Control
-function IsDesignWinControl(AControl: TWinControl): Boolean;
-begin
-  Result := (AControl <> nil) and (AControl is TWinControl) and
-    (csDesigning in AControl.ComponentState) and (AControl.Parent <> nil) and
-    not (AControl is TCustomForm) and not (AControl is TCustomFrame) and
-    ((AControl.Owner is TCustomForm) or (AControl.Owner is TCustomFrame)) and
-    (csDesigning in AControl.Owner.ComponentState);
-end;
-
-// 判断指定控件是否编辑器窗口的 TabControl 控件
-function IsXTabControl(AControl: TComponent): Boolean;
-begin
-  Result := (AControl <> nil) and AControl.ClassNameIs(SCnXTabControlClassName)
-    and SameText(AControl.Name, SCnXTabControlName);
 end;
 
 // 返回编辑器窗口的 CPU 查看器控件

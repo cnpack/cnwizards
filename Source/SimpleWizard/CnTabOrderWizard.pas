@@ -53,9 +53,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, ToolsAPI,
-  Contnrs, CnWizMethodHook, {$IFDEF TABORDER_FMX} CnFmxTabOrderUtils, {$ENDIF}
-  {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
+  StdCtrls, ExtCtrls, Buttons, ComCtrls, IniFiles, Registry, Menus, Contnrs,
+  CnWizMethodHook, {$IFDEF TABORDER_FMX} CnFmxTabOrderUtils, {$ENDIF}
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors,
+  {$ELSE} DsgnIntf, {$ENDIF} {$ENDIF}
+  {$IFDEF LAZARUS} ProjectIntf, LazIDEIntf, ComponentEditors, SrcEditorIntf, LCLProc, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnCommon,
   CnWizShortCut, CnWizNotifier, CnWizMultiLang;
 
@@ -167,20 +169,23 @@ type
     FIdSetCurrForm: Integer;
     FIdSetOpenedForm: Integer;
     FIdSetProject: Integer;
+{$IFDEF DELPHI_OTA}
     FIdSetProjectGroup: Integer;
+{$ENDIF}
     FIdDispTabOrder: Integer;
     FIdAutoReset: Integer;
     FIdConfig: Integer;
 
-    function DoSetFormEditor(Editor: IOTAFormEditor): Boolean;
-    function DoSetProject(Project: IOTAProject): Integer;
+    function DoSetFormEditor(Editor: TCnIDEFormEditor): Boolean;
+    function DoSetProject(Project: TCnIDEProjectInterface): Integer;
 
     procedure OnSetCurrControl;
     procedure OnSetCurrForm;
     procedure OnSetOpenedForm;
     procedure OnSetProject;
+{$IFDEF DELPHI_OTA}
     procedure OnSetProjectGroup;
-
+{$ENDIF}
     procedure OnDispTabOrder;
     procedure OnAutoReset;
     procedure OnConfig;
@@ -204,9 +209,11 @@ type
     procedure SetActive(Value: Boolean); override;
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
     function OnGetMsg(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
+{$IFDEF DELPHI_OTA}
     procedure FormNotify(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
+{$ENDIF}
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -427,7 +434,9 @@ begin
   CnWizNotifierServices.AddCallWndProcRetNotifier(OnCallWndProcRet,
     [WM_PAINT, WM_WINDOWPOSCHANGED]);
   CnWizNotifierServices.AddGetMsgNotifier(OnGetMsg, [WM_PAINT]);
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddFormEditorNotifier(FormNotify);
+{$ENDIF}
 
 {$IFDEF TABORDER_FMX}
   // Hook FMX TControl AfterPaint;
@@ -448,7 +457,10 @@ destructor TCnTabOrderWizard.Destroy;
 begin
   CnWizNotifierServices.RemoveCallWndProcRetNotifier(OnCallWndProcRet);
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsg);
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.RemoveFormEditorNotifier(FormNotify);
+{$ENDIF}
+
 {$IFDEF TABORDER_FMX}
   FreeNotificationFMXPaintHook;
 {$ENDIF}
@@ -888,8 +900,10 @@ begin
     OnSetOpenedForm
   else if Index = FIdSetProject then
     OnSetProject
+{$IFDEF DELPHI_OTA}
   else if Index = FIdSetProjectGroup then
     OnSetProjectGroup
+{$ENDIF}
   else if Index = FIdDispTabOrder then
     OnDispTabOrder
   else if Index = FIdAutoReset then
@@ -954,7 +968,7 @@ begin
 end;
 
 // 设置窗体编辑器
-function TCnTabOrderWizard.DoSetFormEditor(Editor: IOTAFormEditor): Boolean;
+function TCnTabOrderWizard.DoSetFormEditor(Editor: TCnIDEFormEditor): Boolean;
 var
   Root: TComponent;
   AForm: TWinControl;
@@ -979,14 +993,20 @@ begin
 end;
 
 // 设置一个工程
-function TCnTabOrderWizard.DoSetProject(Project: IOTAProject): Integer;
+function TCnTabOrderWizard.DoSetProject(Project: TCnIDEProjectInterface): Integer;
 var
   I: Integer;
+{$IFDEF DELPHI_OTA}
   ModuleInfo: IOTAModuleInfo;
   Module: IOTAModule;
   FormEditor: IOTAFormEditor;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  F: TLazProjectFile;
+{$ENDIF}
 begin
   Result := 0;
+{$IFDEF DELPHI_OTA}
   for I := 0 to Project.GetModuleCount - 1 do
   begin
     ModuleInfo := Project.GetModule(I);
@@ -1003,9 +1023,24 @@ begin
 
     FormEditor := CnOtaGetFormEditorFromModule(Module);
     if Assigned(FormEditor) then
+    begin
       if DoSetFormEditor(FormEditor) then
         Inc(Result);
+    end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  for I := 0 to Project.FileCount - 1 do
+  begin
+    if Project.Files[I].IsPartOfProject then
+    begin
+      F := Project.FindFile(Project.Files[I].Filename, []);
+      if F <> nil then
+        DoSetFormEditor(TComponentEditorDesigner(LazarusIDE.GetDesignerWithProjectFile(F, True)));
+    end;
+  end;
+{$ENDIF}
 end;
 
 // 设置当前窗体 Tab Order 执行方法
@@ -1018,23 +1053,44 @@ end;
 // 设置打开的窗体执行方法
 procedure TCnTabOrderWizard.OnSetOpenedForm;
 var
-  I: Integer;
-  FormEditor: IOTAFormEditor;
+  I, Count: Integer;
+  FormEditor: TCnIDEFormEditor;
+{$IFDEF DELPHI_OTA}
   ModuleServices: IOTAModuleServices;
-  Count: Integer;
+{$ENDIF}
 begin
   if not Active then Exit;
+  Count := 0;
+
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
 
-  Count := 0;
   for I := 0 to ModuleServices.GetModuleCount - 1 do
   begin
     FormEditor := CnOtaGetFormEditorFromModule(ModuleServices.GetModule(I));
     if Assigned(FormEditor) then
+    begin
       if DoSetFormEditor(FormEditor) then
         Inc(Count);
+    end;
   end;
-  
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.SourceEditorCount > 0) then
+  begin
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      FormEditor := LazarusIDE.GetDesignerForProjectEditor(SourceEditorManagerIntf.SourceEditors[I], True) as TCnIDEFormEditor;
+      if FormEditor <> nil then
+      begin
+        if DoSetFormEditor(FormEditor) then
+          Inc(Count);
+      end;
+    end;
+  end;
+{$ENDIF}
+
   if Count > 0 then
     InfoDlg(Format(SCnTabOrderSucc, [Count]))
   else
@@ -1055,6 +1111,8 @@ begin
     InfoDlg(SCnTabOrderFail);
 end;
 
+{$IFDEF DELPHI_OTA}
+
 // 设置当前工程组执行方法
 procedure TCnTabOrderWizard.OnSetProjectGroup;
 var
@@ -1067,14 +1125,18 @@ begin
   Count := 0;
   ProjectGroup := CnOtaGetProjectGroup;
   if Assigned(ProjectGroup) then
+  begin
     for I := 0 to ProjectGroup.ProjectCount - 1 do
       Inc(Count, DoSetProject(ProjectGroup.Projects[I]));
+  end;
 
   if Count > 0 then
     InfoDlg(Format(SCnTabOrderSucc, [Count]))
   else
     InfoDlg(SCnTabOrderFail);
 end;
+
+{$ENDIF}
 
 //------------------------------------------------------------------------------
 // 设计期窗体 Tab Order 绘制
@@ -1154,6 +1216,8 @@ begin
   end;
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnTabOrderWizard.FormNotify(FormEditor: IOTAFormEditor;
   NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
   Component: TComponent; const OldName, NewName: string);
@@ -1185,6 +1249,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TCnTabOrderWizard.InitCanvas;
 begin
   FCanvas.Font.Color := clBlack;
@@ -1198,13 +1264,16 @@ end;
 procedure TCnTabOrderWizard.UpdateDraw;
 var
   I, J: Integer;
-  FormEditor: IOTAFormEditor;
-  ModuleServices: IOTAModuleServices;
   Root: TComponent;
+  FormEditor: TCnIDEFormEditor;
+{$IFDEF DELPHI_OTA}
+  ModuleServices: IOTAModuleServices;
+{$ENDIF}
 begin
   if not Active then
     Exit;
 
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleServices);
   for I := 0 to ModuleServices.GetModuleCount - 1 do
   begin
@@ -1228,6 +1297,32 @@ begin
       end;
     end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.SourceEditorCount > 0) then
+  begin
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      FormEditor := LazarusIDE.GetDesignerForProjectEditor(SourceEditorManagerIntf.SourceEditors[I], True) as TCnIDEFormEditor;
+      if FormEditor <> nil then
+      begin
+        Root := CnOtaGetRootComponentFromEditor(FormEditor);
+        if Root <> nil then
+        begin
+          if Root is TWinControl then
+          begin
+            for J := 0 to Root.ComponentCount - 1 do
+            begin
+              if Root.Components[J] is TWinControl then
+                TWinControl(Root.Components[J]).Invalidate;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+{$ENDIF}
 end;
 
 // 重绘指定窗口控件 Tab Order
@@ -1381,7 +1476,7 @@ end;
 procedure TCnTabOrderWizard.SubActionUpdate(Index: Integer);
 var
   AEnabled: Boolean;
-  Project: IOTAProject;
+  Project: TCnIDEProjectInterface;
 begin
   // 当前有工程打开
   Project := CnOtaGetCurrentProject;
@@ -1399,9 +1494,11 @@ begin
 
   SubActions[FIdSetProject].Visible := Active;
   SubActions[FIdSetProject].Enabled := AEnabled;
-  
+
+{$IFDEF DELPHI_OTA}
   SubActions[FIdSetProjectGroup].Visible := Active;
   SubActions[FIdSetProjectGroup].Enabled := AEnabled;
+{$ENDIF}
 
   SubActions[FIdDispTabOrder].Visible := Active;
   SubActions[FIdDispTabOrder].Enabled := Action.Enabled;
@@ -1463,8 +1560,10 @@ begin
     SCnTabOrderSetOpenedFormCaption, 0, SCnTabOrderSetOpenedFormHint);
   FIdSetProject := RegisterASubAction(SCnTabOrderSetProject,
     SCnTabOrderSetProjectCaption, 0, SCnTabOrderSetProjectHint);
+{$IFDEF DELPHI_OTA}
   FIdSetProjectGroup := RegisterASubAction(SCnTabOrderSetProjectGroup,
     SCnTabOrderSetProjectGroupCaption, 0, SCnTabOrderSetProjectGroupHint);
+{$ENDIF}
 
   AddSepMenu;
 
