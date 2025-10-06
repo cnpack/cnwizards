@@ -22,7 +22,7 @@ uses
   CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
   CnStatResultFrm, CnStatWizard, CnEditorCodeComment, CnPas2HtmlConfigFrm, 
   CnPas2HtmlWizard, CnPasConvertTypeFrm, CnCodeFormatRules, 
-  CnCodeFormatterWizard, CnFormatterIntf, LazarusPackageIntf;
+  CnCodeFormatterWizard, CnFormatterIntf, CnTabOrderWizard, LazarusPackageIntf;
 
 implementation
 

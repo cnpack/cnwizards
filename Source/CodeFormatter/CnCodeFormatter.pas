@@ -2112,14 +2112,22 @@ begin
 
   if Scanner.Token = tokKeywordElse then
   begin
-    if ElseAfterThen then // 如果 then 后紧跟 else，则 then 和 else 间空一行。
-      EnsureOneEmptyLine
+    if (FLastNonBlankToken = tokKeywordEnd) and (CnPascalCodeForRule.ElseAfterEndStyle = eaeSameLine) then
+    begin
+      // end else 同行
+      Match(tokKeywordElse, 0);
+    end
     else
-      EnsureWriteln;
-    // 如果保留换行，则 then 后的语句因为无分号，可能会因为原始语句的 else 换行了从而多生成一个回车
-    // 此处不能直接 Writeln，得保证有且只有一个回车
+    begin
+      if ElseAfterThen then // 如果 then 后紧跟 else，则 then 和 else 间空一行。
+        EnsureOneEmptyLine
+      else
+        EnsureWriteln;
+      // 如果保留换行，则 then 后的语句因为无分号，可能会因为原始语句的 else 换行了从而多生成一个回车
+      // 此处不能直接 Writeln，得保证有且只有一个回车
 
-    Match(tokKeywordElse, PreSpaceCount);
+      Match(tokKeywordElse, PreSpaceCount);
+    end;
 
     if Scanner.Token = tokKeywordIf then // 处理 else if
     begin
@@ -2514,14 +2522,21 @@ begin
             end;
 
             // Else 是属于 try except end 块的，这里做了个小处理，
-            // 无 on 时和 except 对齐，有 on 时和缩进的 on 对齐
+            // 换行时，无 on 时和 except 对齐，有 on 时和缩进的 on 对齐
             if Scanner.Token = tokKeywordElse then
             begin
-              Writeln;
-              if HasOn then
-                Match(tokKeywordElse, Tab(PreSpaceCount), 1)
+              if (FLastNonBlankToken = tokKeywordEnd) and (CnPascalCodeForRule.ElseAfterEndStyle = eaeSameLine) then
+              begin
+                Match(tokKeywordElse, 0);
+              end
               else
-                Match(tokKeywordElse, PreSpaceCount, 1);
+              begin
+                Writeln;
+                if HasOn then
+                  Match(tokKeywordElse, Tab(PreSpaceCount), 1)
+                else
+                  Match(tokKeywordElse, PreSpaceCount, 1);
+              end;
 
               Writeln;
               if HasOn then

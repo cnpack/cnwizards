@@ -16,9 +16,9 @@
       <Other>
         <CustomOptions Value="-dSUPPORT_EVALUATE
 -dENABLE_UIINTERACT"/>
-        <OtherDefines Count="4">
-          <Define1 Value="SUPPORT_EVALUATE"/>
-          <Define2 Value="ENABLE_UIINTERACT"/>
+        <OtherDefines Count="2">
+          <Define0 Value="SUPPORT_EVALUATE"/>
+          <Define1 Value="ENABLE_UIINTERACT"/>
         </OtherDefines>
       </Other>
     </CompilerOptions>
@@ -255,6 +255,10 @@
       <Item>
         <Filename Value="CodeFormatter\CnFormatterIntf.pas"/>
         <UnitName Value="CnFormatterIntf"/>
+      </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnTabOrderWizard.pas"/>
+        <UnitName Value="CnTabOrderWizard"/>
       </Item>
     </Files>
     <RequiredPkgs>

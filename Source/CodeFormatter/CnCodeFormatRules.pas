@@ -47,6 +47,8 @@ type
 
   TCnBeginStyle = (bsNextLine, bsSameLine);
 
+  TCnElseAfterEndStyle = (eaeNextLine, eaeSameLine);
+
   TCnCodeWrapMode = (cwmNone, cwmSimple, cwmAdvanced);
   {* 代码换行的设置，不自动换行、简单的超过就换行，高级的超过多了才从少的地方换行}
 
@@ -58,9 +60,10 @@ type
     ContinueAfterError: Boolean;
     CodeStyle: TCnCodeStyles;
 
-    CompDirectiveMode: TCnCompDirectiveMode;  // 此项不开放
+    CompDirectiveMode: TCnCompDirectiveMode;
     KeywordStyle: TCnKeywordStyle;
     BeginStyle: TCnBeginStyle;
+    ElseAfterEndStyle: TCnElseAfterEndStyle;
     CodeWrapMode: TCnCodeWrapMode;
     TypeIDStyle: TCnTypeIDStyle;    // 此项无法处理标识符内的分词，意义不大，暂不对外开放
     TabSpaceCount: Byte;
@@ -86,6 +89,7 @@ const
     CompDirectiveMode: cdmAsComment;
     KeywordStyle: ksLowerCaseKeyword;
     BeginStyle: bsNextLine;
+    ElseAfterEndStyle: eaeNextLine;
     CodeWrapMode: cwmNone;
     TypeIDStyle: tisNoChange;
     TabSpaceCount: 2;

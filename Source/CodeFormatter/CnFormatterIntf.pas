@@ -66,6 +66,13 @@ const
   {* begin 在本行}
   CN_RULE_BEGIN_STYLE_DEFAULT         = CN_RULE_BEGIN_STYLE_NEXTLINE;
 
+  // Ene 后的 Else 块开始模式
+  CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE = 1;
+  {* else 在下一行}
+  CN_RULE_ELSEAFTEREND_STYLE_SAMELINE = 2;
+  {* else 在本行}
+  CN_RULE_ELSEAFTEREND_STYLE_DEFAULT  = CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
+
   // 代码换行模式
   CN_RULE_CODE_WRAP_MODE_NONE         = 1;
   {* 超宽不自动换行}
