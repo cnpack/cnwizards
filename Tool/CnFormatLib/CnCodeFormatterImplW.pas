@@ -67,9 +67,9 @@ type
     destructor Destroy; override;
 
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
-      BeginStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD; SpaceBeforeOperator: DWORD;
-      SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD; SpaceTabAsm: DWORD;
-      LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
+      BeginStyle: DWORD; ElseAfterEndStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD;
+      SpaceBeforeOperator: DWORD; SpaceAfterOperator: DWORD; SpaceBeforeAsm: DWORD;
+      SpaceTabAsm: DWORD; LineWrapWidth: DWORD; NewLineWrapWidth: DWORD; UsesSingleLine: LongBool;
       UseIgnoreArea: LongBool; UsesLineWrapWidth: DWORD; KeepUserLineBreak: LongBool);
     procedure SetPreIdentifierNames(Names: PLPSTR);
     procedure SetInputLineMarks(Marks: PDWORD);
@@ -343,9 +343,9 @@ begin
 end;
 
 procedure TCnCodeFormatProvider.SetPascalFormatRule(DirectiveMode, KeywordStyle,
-  BeginStyle, WrapMode, TabSpace, SpaceBeforeOperator, SpaceAfterOperator, SpaceBeforeAsm,
-  SpaceTabAsm, LineWrapWidth, NewLineWrapWidth: DWORD; UsesSingleLine, UseIgnoreArea: LongBool;
-  UsesLineWrapWidth: DWORD; KeepUserLineBreak: LongBool);
+  BeginStyle, ElseAfterEndStyle, WrapMode, TabSpace, SpaceBeforeOperator, SpaceAfterOperator,
+  SpaceBeforeAsm, SpaceTabAsm, LineWrapWidth, NewLineWrapWidth: DWORD;
+  UsesSingleLine, UseIgnoreArea: LongBool; UsesLineWrapWidth: DWORD; KeepUserLineBreak: LongBool);
 begin
   case DirectiveMode of
     CN_RULE_DIRECTIVE_MODE_ASCOMMENT:
@@ -370,6 +370,13 @@ begin
       CnPascalCodeForRule.BeginStyle := bsNextLine;
     CN_RULE_BEGIN_STYLE_SAMELINE:
       CnPascalCodeForRule.BeginStyle := bsSameLine;
+  end;
+
+  case ElseAfterEndStyle of
+    CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE:
+      CnPascalCodeForRule.ElseAfterEndStyle := eaeNextLine;
+    CN_RULE_ELSEAFTEREND_STYLE_SAMELINE:
+      CnPascalCodeForRule.ElseAfterEndStyle := eaeSameLine;
   end;
 
   case WrapMode of

@@ -72,6 +72,7 @@ type
     FSpaceTabASMKeyword: Byte;
     FWrapWidth: Integer;
     FBeginStyle: TCnBeginStyle;
+    FElseAfterEndStyle: TCnElseAfterEndStyle;
     FKeywordStyle: TCnKeywordStyle;
     FWrapMode: TCnCodeWrapMode;
     FWrapNewLineWidth: Integer;
@@ -138,6 +139,7 @@ type
     property DirectiveMode: TCnCompDirectiveMode read FDirectiveMode write FDirectiveMode;
     property KeywordStyle: TCnKeywordStyle read FKeywordStyle write FKeywordStyle;
     property BeginStyle: TCnBeginStyle read FBeginStyle write FBeginStyle;
+    property ElseAfterEndStyle: TCnElseAfterEndStyle read FElseAfterEndStyle write FElseAfterEndStyle;
     property WrapMode: TCnCodeWrapMode read FWrapMode write FWrapMode;
     property TabSpaceCount: Byte read FTabSpaceCount write FTabSpaceCount;
     property SpaceBeforeOperator: Byte read FSpaceBeforeOperator write
@@ -187,6 +189,8 @@ type
     cbbDirectiveMode: TComboBox;
     lblDirectiveMode: TLabel;
     chkKeepUserLineBreak: TCheckBox;
+    lblElseAfterEnd: TLabel;
+    cbbElseAfterEndStyle: TComboBox;
     procedure chkAutoWrapClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnShortCutClick(Sender: TObject);
@@ -244,6 +248,7 @@ const
   csWrapNewLineWidth = 'WrapNewLineWidth';
   csWrapMode = 'WrapMode';
   csBeginStyle = 'BeginStyle';
+  csElseAfterEndStyle = 'ElseAfterEndStyle';
   csKeywordStyle = 'KeywordStyle';
   csDirectiveMode = 'DirectiveMode';
   csKeepUserLineBreak = 'KeepUserLineBreak';
@@ -363,6 +368,7 @@ begin
 
     cbbKeywordStyle.ItemIndex := Ord(FKeywordStyle);
     cbbBeginStyle.ItemIndex := Ord(FBeginStyle);
+    cbbElseAfterEndStyle.ItemIndex := Ord(FElseAfterEndStyle);
     seTab.Value := FTabSpaceCount;
     chkAutoWrap.Checked := (FWrapMode <> cwmNone);
     seWrapLine.Value := FWrapWidth;
@@ -387,6 +393,7 @@ begin
     begin
       FKeywordStyle := TCnKeywordStyle(cbbKeywordStyle.ItemIndex);
       FBeginStyle := TCnBeginStyle(cbbBeginStyle.ItemIndex);
+      FElseAfterEndStyle := TCnElseAfterEndStyle(cbbElseAfterEndStyle.ItemIndex);
       FTabSpaceCount := seTab.Value;
       FWrapWidth := seWrapLine.Value;
       FWrapNewLineWidth := seNewLine.Value;
@@ -576,6 +583,8 @@ begin
     Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
   FBeginStyle := TCnBeginStyle(Ini.ReadInteger('', csBeginStyle,
     Ord(CnPascalCodeForVCLRule.BeginStyle)));
+  FElseAfterEndStyle := TCnElseAfterEndStyle(Ini.ReadInteger('', csElseAfterEndStyle,
+    Ord(CnPascalCodeForVCLRule.ElseAfterEndStyle)));
   FKeywordStyle := TCnKeywordStyle(Ini.ReadInteger('', csKeywordStyle,
     Ord(CnPascalCodeForVCLRule.KeywordStyle)));
   FDirectiveMode := TCnCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode,
@@ -693,6 +702,7 @@ var
   ADirectiveMode: DWORD;
   AKeywordStyle: DWORD;
   ABeginStyle: DWORD;
+  AElseAfterEndStyle: DWORD;
   ATabSpace: DWORD;
   ASpaceBeforeOperator: DWORD;
   ASpaceAfterOperator: DWORD;
@@ -744,6 +754,14 @@ begin
       ABeginStyle := CN_RULE_BEGIN_STYLE_SAMELINE;
   end;
 
+  AElseAfterEndStyle := CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
+  case FElseAfterEndStyle of
+    eaeNextLine:
+      ABeginStyle := CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
+    eaeSameLine:
+      ABeginStyle := CN_RULE_ELSEAFTEREND_STYLE_SAMELINE;
+  end;
+
   ATabSpace := FTabSpaceCount;
   ASpaceBeforeOperator := FSpaceBeforeOperator;
   ASpaceAfterOperator := FSpaceAfterOperator;
@@ -770,8 +788,8 @@ begin
   AUseIgnoreArea := LongBool(FUseIgnoreArea);
   AKeepUserLineBreak := LongBool(FKeepUserLineBreak);
 
-  Intf.SetPascalFormatRule(ADirectiveMode, AKeywordStyle, ABeginStyle, AWrapMode,
-    ATabSpace, ASpaceBeforeOperator, ASpaceAfterOperator, ASpaceBeforeAsm,
+  Intf.SetPascalFormatRule(ADirectiveMode, AKeywordStyle, ABeginStyle, AElseAfterEndStyle,
+    AWrapMode, ATabSpace, ASpaceBeforeOperator, ASpaceAfterOperator, ASpaceBeforeAsm,
     ASpaceTabAsm, ALineWrapWidth, ANewLineWrapWidth, AUsesSingleLine, AUseIgnoreArea,
     AUsesLineWrapWidth, AKeepUserLineBreak);
   Result := True;
@@ -790,6 +808,7 @@ begin
   Ini.WriteInteger('', csWrapNewLineWidth, FWrapNewLineWidth);
   Ini.WriteInteger('', csWrapMode, Ord(FWrapMode));
   Ini.WriteInteger('', csBeginStyle, Ord(FBeginStyle));
+  Ini.WriteInteger('', csElseAfterEndStyle, Ord(FElseAfterEndStyle));
   Ini.WriteInteger('', csKeywordStyle, Ord(FKeywordStyle));
   Ini.WriteInteger('', csDirectiveMode, Ord(FDirectiveMode));
   Ini.WriteBool('', csKeepUserLineBreak, FKeepUserLineBreak);
