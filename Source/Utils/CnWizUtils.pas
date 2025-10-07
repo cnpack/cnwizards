@@ -425,7 +425,7 @@ function CurrentSourceIsC: Boolean;
 function CurrentSourceIsDelphiOrCSource: Boolean;
 {* 当前编辑的源文件（非窗体）是 Delphi 或 C/C++ 源文件，即使设计器里取到 dfm 也判断对应源文件}
 function CurrentIsForm: Boolean;
-{* 当前编辑的文件是窗体文件}
+{* 当前编辑的文件是窗体文件。在 Lazarus 中返回最靠前端的设计器是否是窗体设计器}
 
 function ExtractUpperFileExt(const FileName: string): string;
 {* 取大写文件扩展名}
@@ -576,7 +576,7 @@ function CnOtaGetUnitName(Editor: TCnSourceEditorInterface): string;
 function CnOtaGetRootComponentFromEditor(Editor: TCnIDEFormEditor): TComponent;
 {* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例。它应该是其上的设计期及运行期组件的 Owner}
 function CnOtaGetCurrentFormEditor: TCnIDEFormEditor;
-{* 取当前窗体编辑器}
+{* 取当前窗体编辑器，也即在编辑的源文件对应的设计器}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -3324,7 +3324,13 @@ end;
 // 当前编辑的文件是窗体文件
 function CurrentIsForm: Boolean;
 begin
+{$IFDEF DELPHI_OTA}
   Result := IsForm(CnOtaGetCurrentSourceFile);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // GlobalDesignHook.LookupRoot 会返回设计器中最靠前端的那个容器
+  Result := (GlobalDesignHook.LookupRoot <> nil) and (GlobalDesignHook.LookupRoot is TCustomForm);
+{$ENDIF}
 end;
 
 function ExtractUpperFileExt(const FileName: string): string;

@@ -57,7 +57,8 @@ uses
   CnWizMethodHook, {$IFDEF TABORDER_FMX} CnFmxTabOrderUtils, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors,
   {$ELSE} DsgnIntf, {$ENDIF} {$ENDIF}
-  {$IFDEF LAZARUS} ProjectIntf, LazIDEIntf, ComponentEditors, SrcEditorIntf, LCLProc, {$ENDIF}
+  {$IFDEF LAZARUS} ProjectIntf, LazIDEIntf, ComponentEditors, SrcEditorIntf,
+  LCLProc, PropEdits, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnCommon,
   CnWizShortCut, CnWizNotifier, CnWizMultiLang;
 
@@ -967,17 +968,26 @@ begin
   end;
 end;
 
-// 设置窗体编辑器
+// 设置窗体编辑器，注意 Lazarus 下建议传 nil，让内部找最前端的设计器
 function TCnTabOrderWizard.DoSetFormEditor(Editor: TCnIDEFormEditor): Boolean;
 var
   Root: TComponent;
   AForm: TWinControl;
 begin
   Result := False;
+{$IFDEF DELPHI_OTA}
   if Editor = nil then
     Exit;
-
   Root := CnOtaGetRootComponentFromEditor(Editor);
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if Editor = nil then
+    Root := TComponent(GlobalDesignHook.LookupRoot)
+  else
+    Root := nil;
+{$ENDIF}
+
   if Root = nil then
     Exit;
 {$IFDEF TABORDER_FMX}
@@ -1047,7 +1057,12 @@ end;
 procedure TCnTabOrderWizard.OnSetCurrForm;
 begin
   if not Active then Exit;
+{$IFDEF DELPHI_OTA}
   DoSetFormEditor(CnOtaGetCurrentFormEditor);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  DoSetFormEditor(nil);
+{$ENDIF}
 end;
 
 // 设置打开的窗体执行方法
