@@ -57,8 +57,8 @@ uses
   CnWizMethodHook, {$IFDEF TABORDER_FMX} CnFmxTabOrderUtils, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors,
   {$ELSE} DsgnIntf, {$ENDIF} {$ENDIF}
-  {$IFDEF LAZARUS} ProjectIntf, LazIDEIntf, ComponentEditors, SrcEditorIntf,
-  LCLProc, PropEdits, {$ENDIF}
+  {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} ProjectIntf, LazIDEIntf, ComponentEditors,
+  SrcEditorIntf, PropEdits, {$ENDIF} {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnCommon,
   CnWizShortCut, CnWizNotifier, CnWizMultiLang;
 

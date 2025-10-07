@@ -92,6 +92,31 @@ object FormFramework: TFormFramework
     TabOrder = 7
     OnClick = Button4Click
   end
+  object RadioGroup1: TRadioGroup
+    Left = 27
+    Height = 128
+    Top = 223
+    Width = 230
+    AutoFill = True
+    Caption = 'RadioGroup1'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 110
+    ClientWidth = 226
+    ItemIndex = 0
+    Items.Strings = (
+      'Radio 1'
+      'Radio 2'
+      'Radio 3'
+    )
+    ParentBackground = False
+    TabOrder = 8
+  end
   object actlstStub: TActionList
     Images = ilStub
     Left = 608

@@ -11,14 +11,15 @@ uses
 {$ENDIF}
   Forms, CnMessageBoxWizard, CnProcListWizard, CnCommentCropper,
   CnBookmarkConfigFrm, CnBookmarkWizard, CnPas2HtmlConfigFrm, CnPas2HtmlWizard,
-  CnPasConvertTypeFrm, CnAICoderChatFrm, CnAICoderConfig, CnAICoderEngine,
-  CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption, CnAICoderWizard,
-  CnProjectViewBaseFrm, CnCodingToolsetWizard, CnEditorOpenFile,
-  CnEditorOpenFileFrm, CnAsciiChart, CnEditorCodeComment, CnEditorCodeDelBlank,
-  CnEditorCodeIndent, CnWizConfigFrm, CnWizMenuSortFrm,
+  CnPasConvertTypeFrm, CnTabOrderWizard, CnAICoderChatFrm, CnAICoderConfig,
+  CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient, CnFrmAICoderOption,
+  CnAICoderWizard, CnProjectViewBaseFrm, CnCodingToolsetWizard,
+  CnEditorOpenFile, CnEditorOpenFileFrm, CnAsciiChart, CnEditorCodeComment,
+  CnEditorCodeDelBlank, CnEditorCodeIndent, CnWizConfigFrm, CnWizMenuSortFrm,
   CnWizSubActionShortCutFrm, CnWizLangID, CnWizMultiLang, CnWizMultiLangFrame,
   CnWizTranslate, CnSrcTemplate, CnSrcTemplateEditFrm, CnStatFrm,
   CnStatResultFrm, CnStatWizard, CnCodeFormatterWizard, CnFormatterIntf,
+  CnExplore, CnExploreDirectory, CnExploreFilter, CnExploreFilterEditor,
   StandAloneUnit, TestFormUnit {FormFramework};
 
 {$R *.res}

@@ -10,7 +10,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMenuAction, CnWizShortCut, CnWizConsts, CnWizCompilerConst, CnWizOptions,
   CnWizClasses, CnWizNotifier, CnEditControlWrapper, ImgList, Menus, CnWizIdeUtils,
-  ActnList, StdCtrls, Spin, ComCtrls, CnSpin, CnHotKey;
+  ActnList, StdCtrls, Spin, ComCtrls, ExtCtrls, CnSpin, CnHotKey;
 
 type
 
@@ -31,6 +31,7 @@ type
     mmStub: TMainMenu;
     File1: TMenuItem;
     Edit1: TMenuItem;
+    RadioGroup1: TRadioGroup;
     Search1: TMenuItem;
     SpinEdit1: TSpinEdit;
     View1: TMenuItem;
