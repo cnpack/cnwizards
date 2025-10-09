@@ -1309,9 +1309,8 @@ end;
 procedure TCnMainViewer.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
-  TerminateThread;
-  actClose.Execute;
   DestroyThread;
+  actClose.Execute;
 end;
 
 procedure TCnMainViewer.CnUDPDataReceived(Sender: TComponent;
@@ -1502,7 +1501,7 @@ begin
     try
       FThread.WaitFor;
     except
-      ;
+      DebugDebuggerLog('MainViewer FThread WaitFor Exception');
     end;
     // FThread := nil;
   end;
@@ -1513,7 +1512,7 @@ begin
     try
       FDbgThread.WaitFor;
     except
-      ;
+      DebugDebuggerLog('MainViewer FDbgThread WaitFor Exception');
     end;
     // FDbgThread := nil;
   end;
@@ -1543,9 +1542,15 @@ end;
 procedure TCnMainViewer.ThreadTerminated(Sender: TObject);
 begin
   if Sender = FThread then
-    FThread := nil
+  begin
+    FThread := nil;
+    DebugDebuggerLog('MainViewer OnThreadTerminated FThread Set to nil');
+  end
   else if Sender = FDbgThread then
+  begin
     FDbgThread := nil;
+    DebugDebuggerLog('MainViewer OnThreadTerminated FDbgThread Set to nil');
+  end;
 end;
 
 procedure TCnMainViewer.FormShow(Sender: TObject);
