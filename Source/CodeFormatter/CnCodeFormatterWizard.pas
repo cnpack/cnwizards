@@ -757,9 +757,9 @@ begin
   AElseAfterEndStyle := CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
   case FElseAfterEndStyle of
     eaeNextLine:
-      ABeginStyle := CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
+      AElseAfterEndStyle := CN_RULE_ELSEAFTEREND_STYLE_NEXTLINE;
     eaeSameLine:
-      ABeginStyle := CN_RULE_ELSEAFTEREND_STYLE_SAMELINE;
+      AElseAfterEndStyle := CN_RULE_ELSEAFTEREND_STYLE_SAMELINE;
   end;
 
   ATabSpace := FTabSpaceCount;

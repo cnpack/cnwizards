@@ -259,6 +259,10 @@ begin
   CnPascalCodeForRule.UseIgnoreArea := UseIgnoreArea;
   CnPascalCodeForRule.UsesLineWrapWidth := UsesLineWrapWidth;
   CnPascalCodeForRule.KeepUserLineBreak := KeepUserLineBreak;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg(PascalCodeRuleToString(CnPascalCodeForRule));
+{$ENDIF}
 end;
 
 function TCnCodeFormatProvider.RetrievePascalLastError(out SourceLine, SourceCol,

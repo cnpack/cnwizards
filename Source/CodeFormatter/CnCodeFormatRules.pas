@@ -38,6 +38,9 @@ interface
 
 {$I CnPack.inc}
 
+uses
+  SysUtils, TypInfo;
+
 type
   TCnCodeStyle = (fsNone);
 
@@ -106,10 +109,50 @@ const
     KeepUserLineBreak: False;
   );
 
+function PascalCodeRuleToString(var Rule: TCnPascalCodeFormatRule): string;
+
 var
   CnPascalCodeForRule: TCnPascalCodeFormatRule;
 
 implementation
+
+function PascalCodeRuleToString(var Rule: TCnPascalCodeFormatRule): string;
+const
+  sLineBreak = #13#10;
+var
+  S: string;
+
+  function MyBooleanToStr(Value: Boolean): string;
+  begin
+    if Value then
+      Result := 'True'
+    else
+      Result := 'False';
+  end;
+begin
+  S := 'TCnPascalCodeFormatRule:' + sLineBreak;
+  S := S + '  ContinueAfterError: ' + MyBooleanToStr(Rule.ContinueAfterError) + sLineBreak;
+  S := S + '  CodeStyle: ' + '[Set of TCnCodeStyle]' + sLineBreak;  // Set 类型暂时简化处理
+  S := S + '  CompDirectiveMode: ' + GetEnumName(TypeInfo(TCnCompDirectiveMode), Ord(Rule.CompDirectiveMode)) + sLineBreak;
+  S := S + '  KeywordStyle: ' + GetEnumName(TypeInfo(TCnKeywordStyle), Ord(Rule.KeywordStyle)) + sLineBreak;
+  S := S + '  BeginStyle: ' + GetEnumName(TypeInfo(TCnBeginStyle), Ord(Rule.BeginStyle)) + sLineBreak;
+  S := S + '  ElseAfterEndStyle: ' + GetEnumName(TypeInfo(TCnElseAfterEndStyle), Ord(Rule.ElseAfterEndStyle)) + sLineBreak;
+  S := S + '  CodeWrapMode: ' + GetEnumName(TypeInfo(TCnCodeWrapMode), Ord(Rule.CodeWrapMode)) + sLineBreak;
+  S := S + '  TypeIDStyle: ' + GetEnumName(TypeInfo(TCnTypeIDStyle), Ord(Rule.TypeIDStyle)) + sLineBreak;
+  S := S + '  TabSpaceCount: ' + IntToStr(Rule.TabSpaceCount) + sLineBreak;
+  S := S + '  SpaceBeforeOperator: ' + IntToStr(Rule.SpaceBeforeOperator) + sLineBreak;
+  S := S + '  SpaceAfterOperator: ' + IntToStr(Rule.SpaceAfterOperator) + sLineBreak;
+  S := S + '  SpaceBeforeASM: ' + IntToStr(Rule.SpaceBeforeASM) + sLineBreak;
+  S := S + '  SpaceTabASMKeyword: ' + IntToStr(Rule.SpaceTabASMKeyword) + sLineBreak;
+  S := S + '  WrapWidth: ' + IntToStr(Rule.WrapWidth) + sLineBreak;
+  S := S + '  WrapNewLineWidth: ' + IntToStr(Rule.WrapNewLineWidth) + sLineBreak;
+  S := S + '  UsesUnitSingleLine: ' + MyBooleanToStr(Rule.UsesUnitSingleLine) + sLineBreak;
+  S := S + '  SingleStatementToBlock: ' + MyBooleanToStr(Rule.SingleStatementToBlock) + sLineBreak;
+  S := S + '  UseIgnoreArea: ' + MyBooleanToStr(Rule.UseIgnoreArea) + sLineBreak;
+  S := S + '  UsesLineWrapWidth: ' + IntToStr(Rule.UsesLineWrapWidth) + sLineBreak;
+  S := S + '  KeepUserLineBreak: ' + MyBooleanToStr(Rule.KeepUserLineBreak);
+  Result := S;
+end;
 
 initialization
   // Default Setting
