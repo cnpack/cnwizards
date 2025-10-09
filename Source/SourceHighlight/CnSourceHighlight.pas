@@ -665,7 +665,6 @@ type
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
     // 用新的绘制接口
-    function GetPaintLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
     procedure Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
       const BeforeEvent: Boolean; var AllowDefaultPainting: Boolean;
       const Context: INTACodeEditorPaintContext);
@@ -6270,9 +6269,16 @@ end;
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
-function TCnSourceHighlight.GetPaintLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
+function GetPaintLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
 begin
-  Result := Context.EditorLineNum; // D13 下本该是 Logic 的，但屏幕折叠后部有偏差，不得不改用
+  // D13 下本该是 LogicLineNum 的，但屏幕折叠后部有偏差，不得不改用
+  Result := Context.EditorLineNum;
+end;
+
+function GetPaintLineTextFromContext(const Context: INTACodeEditorPaintContext): string;
+begin
+  // D13 下本该是 Context.LineState.Text 的，但屏幕折叠后部有偏差，不得不改用
+  Result := EditControlWrapper.GetTextAtLine(Context.EditControl, Context.EditorLineNum);
 end;
 
 procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
@@ -6332,13 +6338,13 @@ begin
           begin
             Editor := EditControlWrapper.Editors[Idx];
             if (GetPaintLineNumFromContext(Context) = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), Context.LineState.Text,
+              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
 
             if (GetPaintLineNumFromContext(Context) = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), Context.LineState.Text,
+              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
@@ -6573,7 +6579,7 @@ begin
       Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
       if FHilightSeparateLine and (L < Info.FSeparateLineList.Count)
         and (Integer(Info.FSeparateLineList[L]) = CN_LINE_SEPARATE_FLAG)
-        and (Context.LineState <> nil) and (Trim(Context.LineState.Text) = '') then
+        and (Context.LineState <> nil) and (Trim(GetPaintLineTextFromContext(Context)) = '') then
       begin
         // 用默认的背景色填充再划线并阻止默认绘制，均会影响到 Gutter 区
         C := Context.Canvas;
@@ -6673,7 +6679,7 @@ begin
         // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
-        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.KeyLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum then
@@ -6758,7 +6764,7 @@ begin
       begin
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
-        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.CompDirectiveLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum + HSC then
@@ -6818,7 +6824,7 @@ begin
       begin
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
-        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.FlowLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         if Utf8Col = ColNum + HSC then
@@ -6900,7 +6906,7 @@ begin
 
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
-        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.CurrentIdentLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         // ColNum 是此次要画的文本所在列头，这个文本可能命中 CurrentIdentLines[L] 里的一个或多个
@@ -6909,7 +6915,6 @@ begin
         Token := nil;
         if (ColNum <= Utf8Col) and (Utf8Col <= ColNum + Utf8Len) then
         begin
-
           Token := TCnGeneralPasToken(Info.CurrentIdentLines[L][I]);
 
           // 这个 Token 符合条件要画，但如何确定其在 Text 中的位置？
@@ -6997,7 +7002,7 @@ begin
       begin
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
-        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(Context.LineState.Text),
+        Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.CustomIdentLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
         Token := nil;
