@@ -6269,10 +6269,16 @@ end;
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
 
-function GetPaintLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
+function GetPaintLogicalLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
 begin
   // D13 下本该是 LogicLineNum 的，但屏幕折叠后部有偏差，不得不改用
   Result := Context.EditorLineNum;
+end;
+
+function GetPaintPhysicalLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
+begin
+  // D13 下本该是 EditorLineNum 的，但屏幕折叠后部有偏差，不得不手工修改偏差
+  Result := Context.EditorLineNum - (Context.LogicalLineNum - Context.EditorLineNum);
 end;
 
 function GetPaintLineTextFromContext(const Context: INTACodeEditorPaintContext): string;
@@ -6321,7 +6327,7 @@ var
 begin
   // 画括号和配对线
   if (FMatchedBracket or FBlockMatchDrawLine) and not BeforeEvent and (Stage = plsEndPaint)
-    and (GetPaintLineNumFromContext(Context) >= 0) then
+    and (GetPaintLogicalLineNumFromContext(Context) >= 0) then
   begin
     // 括号
     Editor := nil;
@@ -6337,14 +6343,14 @@ begin
           if Idx >= 0 then
           begin
             Editor := EditControlWrapper.Editors[Idx];
-            if (GetPaintLineNumFromContext(Context) = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenPos.Col, Context.EditorLineNum), GetPaintLineTextFromContext(Context),
+            if (GetPaintLogicalLineNumFromContext(Context) = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
+              OTAEditPos(BracketInfo.TokenPos.Col, GetPaintPhysicalLineNumFromContext(Context)), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
 
-            if (GetPaintLineNumFromContext(Context) = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
-              OTAEditPos(BracketInfo.TokenMatchPos.Col, Context.EditorLineNum), GetPaintLineTextFromContext(Context),
+            if (GetPaintLogicalLineNumFromContext(Context) = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
+              OTAEditPos(BracketInfo.TokenMatchPos.Col, GetPaintPhysicalLineNumFromContext(Context)), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
@@ -6372,7 +6378,7 @@ begin
 
       if (Editor <> nil) and (LineInfo <> nil) and (LineInfo.Count > 0) then
       begin
-        L := GetPaintLineNumFromContext(Context);
+        L := GetPaintLogicalLineNumFromContext(Context);
         if (L < LineInfo.LineCount) and (LineInfo.Lines[L] <> nil) then
         begin
           C := Context.Canvas;
@@ -6428,7 +6434,7 @@ begin
               end;
             end;
 
-            EditPos1 := OTAEditPos(Pair.Left, Context.EditorLineNum); // 用实际行去计算座标
+            EditPos1 := OTAEditPos(Pair.Left, GetPaintPhysicalLineNumFromContext(Context)); // 用实际行去计算座标
             // 得到 R1，是 Left 需要绘制的位置
             if not EditorGetEditPoint(EditPos1, R1) then
               Continue;
@@ -6437,7 +6443,7 @@ begin
             if L = Pair.Top then
             begin
               // 画配对头，横向从 Left 到 StartLeft
-              EditPos2 := OTAEditPos(Pair.StartLeft, Context.EditorLineNum);
+              EditPos2 := OTAEditPos(Pair.StartLeft, GetPaintPhysicalLineNumFromContext(Context));
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
 
@@ -6471,7 +6477,7 @@ begin
             else if L = Pair.Bottom then
             begin
               // 画配对尾，横向从 Left 到 EndLeft
-              EditPos2 := OTAEditPos(Pair.EndLeft, Context.EditorLineNum);
+              EditPos2 := OTAEditPos(Pair.EndLeft, GetPaintPhysicalLineNumFromContext(Context));
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
 
@@ -6527,7 +6533,7 @@ begin
                 begin
                   if L = Pair.MiddleToken[J].EditLine then
                   begin
-                    EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, Context.EditorLineNum);
+                    EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, GetPaintPhysicalLineNumFromContext(Context));
                     if not EditorGetEditPoint(EditPos2, R2) then
                       Continue;
 
@@ -6568,12 +6574,12 @@ begin
   end;
 
   if FHilightSeparateLine and BeforeEvent and (Stage = plsBackground)
-    and (GetPaintLineNumFromContext(Context) >= 0)then
+    and (GetPaintLogicalLineNumFromContext(Context) >= 0)then
   begin
     Idx := IndexOfBlockMatch(Context.EditControl);
     if Idx >= 0 then
     begin
-      L := GetPaintLineNumFromContext(Context);
+      L := GetPaintLogicalLineNumFromContext(Context);
 
       // 找到该 EditControl 对应的 BlockMatch 列表
       Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
@@ -6635,7 +6641,7 @@ var
   end;
 
 begin
-  if BeforeEvent or Hilight or (Length(Text) = 0) or (GetPaintLineNumFromContext(Context) < 0) then // 只绘制事后无选择区的
+  if BeforeEvent or Hilight or (Length(Text) = 0) or (GetPaintLogicalLineNumFromContext(Context) < 0) then // 只绘制事后无选择区的
     Exit;
 
   if not FStructureHighlight and not FBlockMatchHighlight and not FCurrentTokenHighlight
@@ -6653,7 +6659,7 @@ begin
   if (FStructureHighlight or FBlockMatchHighlight) and (SyntaxCode = atReservedWord)
     and (Info.KeyCount > 0) then
   begin
-    L := GetPaintLineNumFromContext(Context);
+    L := GetPaintLogicalLineNumFromContext(Context);
     KeyPair := nil;
     if FBlockMatchHighlight then
     begin
@@ -6739,7 +6745,7 @@ begin
   if FHighlightCompDirective and (SyntaxCode in [atPreproc, atComment]) and
     (FCompDirectiveBackground <> clNone) and (Info.CompDirectiveTokenCount > 0) then
   begin
-    L := GetPaintLineNumFromContext(Context);
+    L := GetPaintLogicalLineNumFromContext(Context);
     CompDirectivePair := nil;
     Idx := IndexOfCompDirectiveLine(Context.EditControl);
     if Idx >= 0 then
@@ -6811,7 +6817,7 @@ begin
   if FHighlightFlowStatement and (SyntaxCode in [atReservedWord, atIdentifier])
     and (Info.FlowTokenCount > 0) then
   begin
-    L := GetPaintLineNumFromContext(Context);
+    L := GetPaintLogicalLineNumFromContext(Context);
     if HSC = -1 then
       HSC := GetHeaderSpaceCount(Text);
     // 部分流程控制标识符可能和前面的内容遗留下来的空格一起单独画
@@ -6892,7 +6898,7 @@ begin
   if FCurrentTokenHighlight and (SyntaxCode in [atIdentifier, atSymbol])
     and (Info.CurrentIdentTokenCount > 0) then // 小括号开头的 Text 可能是 Symbol
   begin
-    L := GetPaintLineNumFromContext(Context);
+    L := GetPaintLogicalLineNumFromContext(Context);
     if (L < Info.CurrentIdentLineCount) and (Info.CurrentIdentLines[L] <> nil) then
     begin
       C := Context.Canvas;
@@ -6992,7 +6998,7 @@ begin
   if FHighlightCustomIdent and (SyntaxCode in [atIdentifier, atSymbol, atReservedWord])
     and (Info.CustomIdentTokenCount > 0) then
   begin
-    L := GetPaintLineNumFromContext(Context);
+    L := GetPaintLogicalLineNumFromContext(Context);
     if (L < Info.CustomIdentLineCount) and (Info.CustomIdentLines[L] <> nil) then
     begin
       C := Context.Canvas;
