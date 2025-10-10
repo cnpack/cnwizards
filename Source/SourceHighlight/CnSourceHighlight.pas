@@ -6271,20 +6271,34 @@ end;
 
 function GetPaintLogicalLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
 begin
-  // D13 下本该是 LogicLineNum 的，但屏幕折叠后部有偏差，不得不改用
+  // D13 下本该是 LogicLineNum 的，但屏幕折叠后部有偏差，不得不改用 EditorLineNum
+  // 待我们给 Embarcadero 提的 RSS-4306 解决后再换回来
   Result := Context.EditorLineNum;
 end;
 
 function GetPaintPhysicalLineNumFromContext(const Context: INTACodeEditorPaintContext): Integer;
 begin
   // D13 下本该是 EditorLineNum 的，但屏幕折叠后部有偏差，不得不手工修改偏差
-  Result := Context.EditorLineNum - (Context.LogicalLineNum - Context.EditorLineNum);
+  // 但有两个或两个以上折叠时仍不对，只能凑合着用
+  // 待我们给 Embarcadero 提的 RSS-4306 解决后再换回来
+  if Context.LogicalLineNum < 0 then
+    Result := Context.EditorLineNum
+  else
+    Result := Context.EditorLineNum - (Context.LogicalLineNum - Context.EditorLineNum);
 end;
 
 function GetPaintLineTextFromContext(const Context: INTACodeEditorPaintContext): string;
 begin
   // D13 下本该是 Context.LineState.Text 的，但屏幕折叠后部有偏差，不得不改用
   Result := EditControlWrapper.GetTextAtLine(Context.EditControl, Context.EditorLineNum);
+end;
+
+procedure AdjustRectTopBottom(const SourceRect: TRect; var DestRect: TRect);
+begin
+  // 有两处或两处以上折叠时上面的物理行号有偏差，导致计算 Top 错误，须如此弥补
+  // 待我们给 Embarcadero 提的 RSS-4306 解决后再看情况判断
+  DestRect.Top := SourceRect.Top;
+  DestRect.Bottom := SourceRect.Bottom;
 end;
 
 procedure TCnSourceHighlight.Editor2PaintLine(const Rect: TRect; const Stage: TPaintLineStage;
@@ -6311,7 +6325,7 @@ var
   begin
     with Editor, Editor.EditView do
     begin
-      if InBound(APos.Line, TopRow, BottomRow) and
+      if {InBound(APos.Line, TopRow, BottomRow) and} // D13 的 Bug 导致折叠会超，待 4306 修复后再说
         InBound(APos.Col, LeftColumn, RightColumn) then
       begin
         ARect := Bounds(GutterWidth + (APos.Col - LeftColumn) * CharSize.cx,
@@ -6346,14 +6360,22 @@ begin
             if (GetPaintLogicalLineNumFromContext(Context) = BracketInfo.TokenPos.Line) and EditorGetTextRect(Editor,
               OTAEditPos(BracketInfo.TokenPos.Col, GetPaintPhysicalLineNumFromContext(Context)), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenStr), R) then
+            begin
+              AdjustRectTopBottom(Rect, R);
+
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
+            end;
 
             if (GetPaintLogicalLineNumFromContext(Context) = BracketInfo.TokenMatchPos.Line) and EditorGetTextRect(Editor,
               OTAEditPos(BracketInfo.TokenMatchPos.Col, GetPaintPhysicalLineNumFromContext(Context)), GetPaintLineTextFromContext(Context),
               TCnIdeTokenString(BracketInfo.TokenMatchStr), R) then
+            begin
+              AdjustRectTopBottom(Rect, R);
+
               EditorPaintText(Context.EditControl, R, BracketInfo.TokenMatchStr, BracketColor,
                 BracketColorBk, BracketColorBd, BracketBold, False, False);
+            end;
           end;
         end;
       end;
@@ -6379,13 +6401,13 @@ begin
       if (Editor <> nil) and (LineInfo <> nil) and (LineInfo.Count > 0) then
       begin
         L := GetPaintLogicalLineNumFromContext(Context);
+
         if (L < LineInfo.LineCount) and (LineInfo.Lines[L] <> nil) then
         begin
           C := Context.Canvas;
           SavePenColor := C.Pen.Color;
           SavePenWidth := C.Pen.Width;
           SavePenStyle := C.Pen.Style;
-
           C.Pen.Width := FBlockMatchLineWidth; // 线宽
 
           // 开始循环画当前行所涉及到的每个 Pair 在当前行里的线条
@@ -6439,6 +6461,8 @@ begin
             if not EditorGetEditPoint(EditPos1, R1) then
               Continue;
 
+            AdjustRectTopBottom(Rect, R1);
+
             // 画配对头尾
             if L = Pair.Top then
             begin
@@ -6446,6 +6470,8 @@ begin
               EditPos2 := OTAEditPos(Pair.StartLeft, GetPaintPhysicalLineNumFromContext(Context));
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
+
+              AdjustRectTopBottom(Rect, R2);
 
               if FBlockMatchLineEnd and (Pair.Top <> Pair.Bottom) then // 在文字头上画方框
               begin
@@ -6480,6 +6506,8 @@ begin
               EditPos2 := OTAEditPos(Pair.EndLeft, GetPaintPhysicalLineNumFromContext(Context));
               if not EditorGetEditPoint(EditPos2, R2) then
                 Continue;
+
+              AdjustRectTopBottom(Rect, R2);
 
               if FBlockMatchLineEnd  and (Pair.Top <> Pair.Bottom) then // 在文字头上画方框
               begin
@@ -6536,6 +6564,8 @@ begin
                     EditPos2 := OTAEditPos(Pair.MiddleToken[J].EditCol, GetPaintPhysicalLineNumFromContext(Context));
                     if not EditorGetEditPoint(EditPos2, R2) then
                       Continue;
+
+                    AdjustRectTopBottom(Rect, R2);
 
                     // 画中央的横线
                     if FBlockMatchLineHoriDot then
