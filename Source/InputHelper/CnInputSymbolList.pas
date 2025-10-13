@@ -196,7 +196,7 @@ type
     procedure Reset; virtual;
     class function GetListName: string; virtual;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; virtual;
+      TCodePosInfo; Data: Integer = 0): Boolean; virtual;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); virtual;
     function Add(AItem: TCnSymbolItem): Integer; overload; virtual;
@@ -237,7 +237,7 @@ type
     procedure Save; override;
     procedure Reset; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
     function CanCustomize: Boolean; override;
     procedure RestoreDefault; override;
   end;
@@ -254,7 +254,7 @@ type
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
 //==============================================================================
@@ -297,7 +297,7 @@ type
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); override;
   end;
@@ -314,7 +314,7 @@ type
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; PosInfo:
       TCodePosInfo); override;
   end;
@@ -333,7 +333,7 @@ type
     procedure Save; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; PosInfo:
       TCodePosInfo); override;
   end;
@@ -374,7 +374,7 @@ type
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure DoInternalLoad(IncludePath: Boolean = True);
     procedure ExportToStringList(Names, Paths: TStringList);
     // 将不包括扩展名的文件名以及带完整路径的文件名输出至外部列表
@@ -390,7 +390,7 @@ type
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
 //==============================================================================
@@ -409,7 +409,7 @@ type
   public
     procedure Load; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
 //==============================================================================
@@ -431,7 +431,7 @@ type
   public
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
 {$ENDIF}
@@ -1052,7 +1052,7 @@ begin
 end;
 
 function TCnSymbolList.Reload(Editor: IOTAEditBuffer; const InputText: string;
-  PosInfo: TCodePosInfo): Boolean;
+  PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := Count > 0;
 end;
@@ -1137,7 +1137,7 @@ begin
 end;
 
 function TCnFileSymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkComment]) // ParsePasCodePosInfo(W) 判断位置不准的问题修复了，不用 Field
@@ -1179,7 +1179,7 @@ begin
 end;
 
 function TCnPreDefSymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := inherited Reload(Editor, InputText, PosInfo);
   if not Result and PosInfo.IsPascal then
@@ -1280,7 +1280,7 @@ begin
 end;
 
 function TCnCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
     Result := PosInfo.PosKind in (csNormalPosKinds + [pkCompDirect, pkIntfUses, pkImplUses, pkField])
@@ -1345,7 +1345,7 @@ begin
 end;
 
 function TCnXMLCommentSymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := PosInfo.PosKind in (csNormalPosKinds + [pkComment]);
 end;
@@ -1381,7 +1381,7 @@ begin
 end;
 
 function TCnJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++
 end;
@@ -1667,7 +1667,7 @@ begin
 end;
 
 function TCnUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
-  PosInfo: TCodePosInfo): Boolean;
+  PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := False;
   try
@@ -1717,7 +1717,7 @@ begin
 end;
 
 function TCnUnitUsesList.Reload(Editor: IOTAEditBuffer; const InputText: string;
-  PosInfo: TCodePosInfo): Boolean;
+  PosInfo: TCodePosInfo; Data: Integer): Boolean;
 const
   csMaxProcessLines = 30000;
 var
@@ -1888,7 +1888,7 @@ begin
 end;
 
 function TCnCodeTemplateList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
     Result := PosInfo.PosKind in csNormalPosKinds // ParsePasCodePosInfo(W) 判断位置不准的问题修复了，不用 Field
@@ -2072,7 +2072,7 @@ begin
 end;
 
 function TCnIDEModernCodeTemplateList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 var
   I, Idx: Integer;
   CT: IOTACodeTemplate;

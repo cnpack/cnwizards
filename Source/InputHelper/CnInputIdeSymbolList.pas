@@ -115,13 +115,13 @@ type
   {$ENDIF}
   {$IFDEF SUPPORT_IOTACodeInsightManager}
     function Reload_CodeInsightManager(Editor: IOTAEditBuffer;
-      const InputText: string; PosInfo: TCodePosInfo): Boolean;
+      const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0): Boolean;
   {$ENDIF SUPPORT_IOTACodeInsightManager}
   {$IFDEF SUPPORT_KibitzCompile}
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
     procedure OnIdleExecute(Sender: TObject);
     function Reload_KibitzCompile(Editor: IOTAEditBuffer;
-      const InputText: string; PosInfo: TCodePosInfo): Boolean;
+      const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0: Boolean;
   {$ENDIF SUPPORT_KibitzCompile}
   public
     constructor Create; override;
@@ -129,17 +129,20 @@ type
 
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
 
-    // 以下俩函数在 LSP 模式下会做防重处理，注意 Add(Item: TSymbolItem) 未做
+    // 该函数在 LSP 模式下会做防重处理，注意 Add(Item: TSymbolItem) 未做
     function Add(const AName: string; AKind: TCnSymbolKind; AScope: Integer; const
       ADescription: string = ''; const AText: string = ''; AAutoIndent: Boolean =
       True; AMatchFirstOnly: Boolean = False; AAlwaysDisp: Boolean = False;
       ADescIsUtf8: Boolean = False): Integer; overload; override;
+    {* 添加一 IDE 符号}
+
     procedure Clear; override;
+    {* 清空}
 
     procedure Cancel; override;
-    // 供外界按需通知中止异步等待
+    {* 供外界按需通知中止异步等待}
   end;
 
 const
@@ -509,13 +512,14 @@ end;
 
 // Invoke delphi code completion, load symbol list
 function TIDESymbolList.Reload_CodeInsightManager(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 var
   CodeInsightServices: IOTACodeInsightServices;
   CodeInsightManager: IOTACodeInsightManager;
   EditView: IOTAEditView;
   Element, LineFlag: Integer;
   Index: Integer;
+  CurPos: TOTAEditPos;
 
   function SymbolFlagsToKind(Flags: TOTAViewerSymbolFlags; const Description: string):
     TCnSymbolKind;
@@ -743,9 +747,17 @@ begin
   if not Assigned(EditView) then
     Exit;
 
+  if Data > 0 then // 由外界指定行而不使用光标所在行
+  begin
+    CurPos.Line := Data;
+    CurPos.Col := 1;
+  end
+  else
+    CurPos := EditView.CursorPos;
+
   // debug or comment will exit
   EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
-    EditView.CursorPos, False, Element, LineFlag);
+    CurPos, False, Element, LineFlag);
   if (LineFlag = lfCurrentEIP) or (Element = atComment) then
     Exit;
 
@@ -1124,7 +1136,7 @@ begin
 end;
 
 function TIDESymbolList.Reload_KibitzCompile(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 const
   csMaxSymbolCount = 32768;
 var
@@ -1309,7 +1321,7 @@ begin
 end;
 
 function TIDESymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
 {$IFDEF SUPPORT_IDESYMBOLLIST}
 
