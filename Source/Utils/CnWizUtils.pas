@@ -1037,6 +1037,14 @@ procedure CnGeneralCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
+procedure CnGeneralParsePasCodePosInfo(EditBuffer: TCnEditBufferInterface;
+  Line, Col: Integer; var PosInfo: TCodePosInfo);
+{* 封装的解析包含 Pascal 源文件的 EditBuffer 中指定光标所在代码的位置信息}
+
+procedure CnGeneralParseCppCodePosInfo(EditBuffer: TCnEditBufferInterface;
+  Line, Col: Integer; var PosInfo: TCodePosInfo);
+{* 封装的解析包含 C/C++ 源文件 EditView 中指定光标所在代码的位置信息}
+
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaGetCurrentCharPosFromCursorPosForParser(out CharPos: TOTACharPos): Boolean;
@@ -8320,6 +8328,76 @@ begin
   Parser.ParseString(PAnsiChar(Stream.Memory), Stream.Size);
 {$ENDIF}
 {$ENDIF}
+end;
+
+procedure CnGeneralParsePasCodePosInfo(EditBuffer: TCnEditBufferInterface;
+  Line, Col: Integer; var PosInfo: TCodePosInfo);
+var
+  Stream: TMemoryStream;
+{$IFNDEF UNICODE}
+  CurrPos: Integer;
+  EditPos: TOTAEditPos;
+{$ENDIF}
+begin
+  Stream := TMemoryStream.Create;
+  try
+    CnGeneralSaveEditorToStream(EditBuffer, Stream); // Ansi/Utf16/Utf16
+
+{$IFDEF LAZARUS}
+    ParsePasCodePosInfoW(PChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+{$ELSE}
+{$IFDEF UNICODE}
+    ParsePasCodePosInfoW(PChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    ParsePasCodePosInfoW(PWideChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+  {$ELSE}
+    EditPos.Line := Line;
+    EditPos.Col := Col;
+    CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
+
+    ParsePasCodePosInfo(PChar(Stream.Memory), CurrPos, PosInfo); // Ansi
+  {$ENDIF}
+{$ENDIF}
+{$ENDIF}
+  finally
+    Stream.Free;
+  end;
+end;
+
+procedure CnGeneralParseCppCodePosInfo(EditBuffer: TCnEditBufferInterface;
+  Line, Col: Integer; var PosInfo: TCodePosInfo);
+var
+  Stream: TMemoryStream;
+{$IFNDEF UNICODE}
+  CurrPos: Integer;
+  EditPos: TOTAEditPos;
+{$ENDIF}
+begin
+  Stream := TMemoryStream.Create;
+  try
+    CnGeneralSaveEditorToStream(EditBuffer, Stream); // Ansi/Utf16/Utf16
+
+{$IFDEF LAZARUS}
+    ParseCppCodePosInfoW(PChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+{$ELSE}
+{$IFDEF UNICODE}
+    ParseCppCodePosInfoW(PChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    ParseCppCodePosInfoW(PWideChar(Stream.Memory), Line, Col, PosInfo); // Utf16
+  {$ELSE}
+    EditPos.Line := Line;
+    EditPos.Col := Col;
+    CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
+
+    ParseCppCodePosInfo(PChar(Stream.Memory), CurrPos, PosInfo); // Ansi
+  {$ENDIF}
+{$ENDIF}
+{$ENDIF}
+  finally
+    Stream.Free;
+  end;
 end;
 
 {$IFNDEF CNWIZARDS_MINIMUM}
