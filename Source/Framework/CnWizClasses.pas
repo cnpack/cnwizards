@@ -793,9 +793,30 @@ end;
 
 // 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用
 procedure TCnBaseWizard.DebugComand(Cmds: TStrings; Results: TStrings);
+var
+  I: Integer;
+  Names: TStrings;
 begin
   if Results <> nil then
-    Results.Add(ClassName + ' Debug Command Not Implemented.');
+  begin
+    // 加入 published 的属性名和属性值
+    Names := TStringList.Create;
+    try
+      GetAllPropNames(Self, Names);
+      if Names.Count = 0 then
+      begin
+        Results.Add(ClassName + ' NO Publshed Properties.')
+      end
+      else
+      begin
+        Results.Add(ClassName);
+        for I := 0 to Names.Count - 1 do
+          Results.Add(Names[I] + ': ' + GetPropValueIncludeSub(Self, Names[I]));
+      end;
+    finally
+      Names.Free;
+    end;
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1274,10 +1295,11 @@ var
   I: Integer;
   Act: TCnWizAction;
 begin
+  inherited DebugComand(Cmds, Results);
   for I := 0 to SubActionCount - 1 do
   begin
     Act := SubActions[I];
-    Results.Add(IntToStr(I) + '. ' + Act.Command + ': ' + Act.Caption);
+    Results.Add('#' + IntToStr(I) + '. ' + Act.Command + ': ' + Act.Caption);
   end;
 end;
 

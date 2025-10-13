@@ -136,6 +136,8 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); override;
     procedure AcquireSubActions; override;
 
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
+
     property DirectiveMode: TCnCompDirectiveMode read FDirectiveMode write FDirectiveMode;
     property KeywordStyle: TCnKeywordStyle read FKeywordStyle write FKeywordStyle;
     property BeginStyle: TCnBeginStyle read FBeginStyle write FBeginStyle;
@@ -1564,6 +1566,27 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+procedure TCnCodeFormatterWizard.DebugComand(Cmds, Results: TStrings);
+begin
+  inherited;
+  Results.Add('DirectiveMode: ' + IntToStr(Ord(FDirectiveMode)));
+  Results.Add('KeywordStyle: ' + IntToStr(Ord(FKeywordStyle)));
+  Results.Add('BeginStyle: ' + IntToStr(Ord(FBeginStyle)));
+  Results.Add('ElseAfterEndStyle: ' + IntToStr(Ord(FElseAfterEndStyle)));
+  Results.Add('WrapMode: ' + IntToStr(Ord(FWrapMode)));
+  Results.Add('TabSpaceCount: ' + IntToStr(FTabSpaceCount));
+  Results.Add('SpaceBeforeOperator: ' + IntToStr(FSpaceBeforeOperator));
+  Results.Add('SpaceAfterOperator: ' + IntToStr(FSpaceAfterOperator));
+  Results.Add('SpaceBeforeASM: ' + IntToStr(FSpaceBeforeASM));
+  Results.Add('SpaceTabASMKeyword: ' + IntToStr(FSpaceTabASMKeyword));
+  Results.Add('WrapWidth: ' + IntToStr(FWrapWidth));
+  Results.Add('WrapNewLineWidth: ' + IntToStr(FWrapNewLineWidth));
+  Results.Add('UsesUnitSingleLine: ' + BoolToStr(FUsesUnitSingleLine));
+  Results.Add('UseIgnoreArea: ' + BoolToStr(FUseIgnoreArea));
+  Results.Add('KeepUserLineBreak: ' + BoolToStr(FKeepUserLineBreak));
+  Results.Add('UseIDESymbols: ' + BoolToStr(FUseIDESymbols));
+end;
 
 initialization
 {$IFNDEF BCB5OR6}  // 目前只支持 Delphi/Lazarus。
