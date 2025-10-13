@@ -7222,7 +7222,12 @@ var
 
 begin
   Results.Add('Block Match Info Count ' + IntToStr(FBlockMatchList.Count));
+{$IFDEF STAND_ALONE}
+  Idx := -1;
+{$ELSE}
   Idx := IndexOfBlockMatch(GetCurrentEditControl);
+{$ENDIF}
+
   Info := nil;
   if Idx > 0 then
     Info := TCnBlockMatchInfo(FBlockMatchList[Idx])

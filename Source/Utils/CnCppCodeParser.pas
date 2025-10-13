@@ -150,9 +150,9 @@ type
     property Source: AnsiString read FSource;
   end;
 
-function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
-{* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
+procedure ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
+  var PosInfo: TCodePosInfo; FullSource: Boolean = True; SourceIsUtf8: Boolean = False);
+{* 分析 C/C++ 代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
   CurrPos 应当是文件的线性位置（Ansi/Utf8/Utf8）
   但如果 Unicode 环境下取到的线性位置当有宽字符时有偏差的话此函数便不适用，
   需要使用 ParseCppCodePosInfoW
@@ -747,9 +747,9 @@ begin
   FUseAsC := True;
 end;
 
-// 分析源代码中当前位置的信息
-function ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
+// 分析 C/C++ 代码中当前位置的信息
+procedure ParseCppCodePosInfo(const Source: AnsiString; CurrPos: Integer;
+  var PosInfo: TCodePosInfo; FullSource: Boolean; SourceIsUtf8: Boolean);
 var
   CanExit: Boolean;
   CParser: TBCBTokenList;
@@ -759,11 +759,11 @@ var
   var
     OldPosition: Integer;
   begin
-    Result.LineNumber := CParser.RunLineNumber - 1;
-    Result.LinePos := CParser.LineStartOffset;
-    Result.TokenPos := CParser.RunPosition;
-    Result.Token := AnsiString(CParser.RunToken);
-    Result.CTokenID := CParser.RunID;
+    PosInfo.LineNumber := CParser.RunLineNumber - 1;
+    PosInfo.LinePos := CParser.LineStartOffset;
+    PosInfo.TokenPos := CParser.RunPosition;
+    PosInfo.Token := AnsiString(CParser.RunToken);
+    PosInfo.CTokenID := CParser.RunID;
 
     OldPosition := CParser.RunPosition;
     CParser.Next;
@@ -777,7 +777,7 @@ begin
   if CurrPos <= 0 then
     CurrPos := MaxInt;
   CParser := nil;
-  Result.IsPascal := False;
+  PosInfo.IsPascal := False;
 
   // BDS 下 CurrPos 与 Text 都必须转成 Ansi 才能比较
   try
@@ -798,8 +798,8 @@ begin
 
     if FullSource then
     begin
-      Result.AreaKind := akHead; // 未使用
-      Result.PosKind := pkField; // 常规空白区，以 pkField 为准
+      PosInfo.AreaKind := akHead; // 未使用
+      PosInfo.PosKind := pkField; // 常规空白区，以 pkField 为准
     end
     else
     begin
@@ -812,17 +812,17 @@ begin
       case CParser.RunID of
         ctkansicomment, ctkslashescomment:
           begin
-            Result.PosKind := pkComment;
+            PosInfo.PosKind := pkComment;
           end;
         ctkstring:
           begin
-            Result.PosKind := pkString;
+            PosInfo.PosKind := pkString;
           end;
         ctkcrlf:
           begin
             // 行注释与#编译指令，以回车结尾
-            if (Result.PosKind = pkCompDirect) or (Result.CTokenID = ctkslashescomment) then
-              Result.PosKind := pkField;
+            if (PosInfo.PosKind = pkCompDirect) or (PosInfo.CTokenID = ctkslashescomment) then
+              PosInfo.PosKind := pkField;
           end;
 //        ctksemicolon, ctkbraceopen, ctkbraceclose, ctkbracepair,
 //        ctkint, ctkfloat, ctkdouble, ctkchar,
@@ -834,31 +834,31 @@ begin
 //          end;
         ctkselectelement:
           begin
-            Result.PosKind := pkFieldDot; // -> 视作 . 处理
+            PosInfo.PosKind := pkFieldDot; // -> 视作 . 处理
           end;
         ctkpoint:
           begin
-            if Result.CTokenID = ctkidentifier then
-              Result.PosKind := pkFieldDot; // 上一个标识符后的点才算
+            if PosInfo.CTokenID = ctkidentifier then
+              PosInfo.PosKind := pkFieldDot; // 上一个标识符后的点才算
           end;
         ctkdirdefine, ctkdirelif, ctkdirelse, ctkdirendif, ctkdirerror, ctkdirif,
         ctkdirifdef, ctkdirifndef, ctkdirinclude, ctkdirline, ctkdirnull,
         ctkdirpragma, ctkdirundef:
           begin
-            Result.PosKind := pkCompDirect;
+            PosInfo.PosKind := pkCompDirect;
           end;
         ctkUnknown:
           begin
             // # 后的编译指令未完成时
             if (Length(CParser.RunToken) >= 1 ) and (CParser.RunToken[1] = '#') then
             begin
-              Result.PosKind := pkCompDirect;
+              PosInfo.PosKind := pkCompDirect;
             end
             else
-              Result.PosKind := pkField;
+              PosInfo.PosKind := pkField;
           end;
       else
-        Result.PosKind := pkField;
+        PosInfo.PosKind := pkField;
       end;
 
       DoNext;

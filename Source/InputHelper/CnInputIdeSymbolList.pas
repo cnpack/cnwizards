@@ -121,7 +121,7 @@ type
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
     procedure OnIdleExecute(Sender: TObject);
     function Reload_KibitzCompile(Editor: IOTAEditBuffer;
-      const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0: Boolean;
+      const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0): Boolean;
   {$ENDIF SUPPORT_KibitzCompile}
   public
     constructor Create; override;

@@ -524,7 +524,7 @@ var
   PosInfo: TCodePosInfo;
 begin
   mmoParsePas.Lines.Clear;
-  PosInfo := ParsePasCodePosInfo(mmoPas.Lines.Text, GetMemoCursorLinearPos(mmoPas));
+  ParsePasCodePosInfo(mmoPas.Lines.Text, GetMemoCursorLinearPos(mmoPas), PosInfo);
   ShowMessage(PosInfo.Token);
 
   with PosInfo do

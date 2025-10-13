@@ -1039,7 +1039,7 @@ begin
         EditPos.Col := Token.EditCol;
         CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
 
-        Info := ParsePasCodePosInfo(PChar(FEditStream.Memory), CurrPos); // Ansi
+        ParsePasCodePosInfo(PChar(FEditStream.Memory), CurrPos, Info); // Ansi
   {$ENDIF}
 {$ENDIF}
         Token.Tag := Ord(Info.PosKind);
@@ -1150,7 +1150,7 @@ begin
       EditPos.Col := Token.EditCol;
       CurrPos := CnOtaGetLinePosFromEditPos(EditPos);
 
-      Info := ParseCppCodePosInfo(PChar(FEditStream.Memory), CurrPos);
+      ParseCppCodePosInfo(PChar(FEditStream.Memory), CurrPos, Info);
 {$ENDIF}
       Token.Tag := Ord(Info.PosKind);
     end

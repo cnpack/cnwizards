@@ -354,7 +354,7 @@ begin
       EditView.CursorPos.Col, PosInfo, EditControlWrapper.GetTabWidth, True);
 {$ELSE}
     CnOtaSaveCurrentEditorToStream(Stream, False, False);
-    PosInfo := ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, True, True);
+    ParsePasCodePosInfo(PAnsiChar(Stream.Memory), CurrPos, PosInfo, True, True);
 {$ENDIF}
 
     lstInfo.Items.Add(SEP);

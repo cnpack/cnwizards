@@ -325,8 +325,8 @@ const
   // 常规代码区域
   csNormalPosKinds = csAllPosKinds - csNonCodePosKinds - csFieldPosKinds;
 
-function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
+procedure ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
+  var PosInfo: TCodePosInfo; FullSource: Boolean = True; SourceIsUtf8: Boolean = False);
 {* 分析源代码中当前位置的信息，如果 SourceIsUtf8 为 True，内部会转为 Ansi
   CurrPos 应当是文件的线性位置（Ansi/Utf8/Utf8）
   但如果 Unicode 环境下取到的线性位置当有宽字符时有偏差的话此函数便不适用，
@@ -1594,8 +1594,8 @@ end;
 // Pascal 源码位置信息分析
 //==============================================================================
 
-function ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
-  FullSource: Boolean = True; SourceIsUtf8: Boolean = False): TCodePosInfo;
+procedure ParsePasCodePosInfo(const Source: AnsiString; CurrPos: Integer;
+  var PosInfo: TCodePosInfo; FullSource: Boolean; SourceIsUtf8: Boolean);
 var
   IsProgram: Boolean;
   InClass: Boolean;
@@ -1610,14 +1610,14 @@ var
 
   procedure DoNext(NoJunk: Boolean = False);
   begin
-    Result.LastIdentPos := Lex.LastIdentPos;
-    Result.LastNoSpace := Lex.LastNoSpace;
-    Result.LastNoSpacePos := Lex.LastNoSpacePos;
-    Result.LineNumber := Lex.LineNumber;
-    Result.LinePos := Lex.LinePos;
-    Result.TokenPos := Lex.TokenPos;
-    Result.Token := Lex.Token;
-    Result.TokenID := Lex.TokenID;
+    PosInfo.LastIdentPos := Lex.LastIdentPos;
+    PosInfo.LastNoSpace := Lex.LastNoSpace;
+    PosInfo.LastNoSpacePos := Lex.LastNoSpacePos;
+    PosInfo.LineNumber := Lex.LineNumber;
+    PosInfo.LinePos := Lex.LinePos;
+    PosInfo.TokenPos := Lex.TokenPos;
+    PosInfo.Token := Lex.Token;
+    PosInfo.TokenID := Lex.TokenID;
     if NoJunk then
     begin
       // 不能直接调用 Lex.NextNoJunk，会错误地越过注释而忽略了光标判断
@@ -1626,20 +1626,20 @@ var
         if (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment]) and (Lex.TokenPos < CurrPos) then
         begin
           // 重复上面的
-          Result.LastIdentPos := Lex.LastIdentPos;
-          Result.LastNoSpace := Lex.LastNoSpace;
-          Result.LastNoSpacePos := Lex.LastNoSpacePos;
-          Result.LineNumber := Lex.LineNumber;
-          Result.LinePos := Lex.LinePos;
-          Result.TokenPos := Lex.TokenPos;
-          Result.Token := Lex.Token;
-          Result.TokenID := Lex.TokenID;
+          PosInfo.LastIdentPos := Lex.LastIdentPos;
+          PosInfo.LastNoSpace := Lex.LastNoSpace;
+          PosInfo.LastNoSpacePos := Lex.LastNoSpacePos;
+          PosInfo.LineNumber := Lex.LineNumber;
+          PosInfo.LinePos := Lex.LinePos;
+          PosInfo.TokenPos := Lex.TokenPos;
+          PosInfo.Token := Lex.Token;
+          PosInfo.TokenID := Lex.TokenID;
 
           // 设置注释区域
-          if Result.PosKind <> pkComment then
+          if PosInfo.PosKind <> pkComment then
           begin
-            SavePos := Result.PosKind;
-            Result.PosKind := pkComment;
+            SavePos := PosInfo.PosKind;
+            PosInfo.PosKind := pkComment;
           end;
         end;
       until not (Lex.TokenID in [tkSlashesComment, tkAnsiComment, tkBorComment, tkCRLF, tkCRLFCo, tkSpace]);
@@ -1653,7 +1653,7 @@ begin
     CurrPos := MaxInt;
   Lex := nil;
   ProcStack := nil;
-  Result.IsPascal := True;
+  PosInfo.IsPascal := True;
 
   // BDS 下 CurrPos 与 Text 都必须转成 Ansi 才能比较
   try
@@ -1675,13 +1675,13 @@ begin
 
     if FullSource then
     begin
-      Result.AreaKind := akHead;
-      Result.PosKind := pkUnknown;
+      PosInfo.AreaKind := akHead;
+      PosInfo.PosKind := pkUnknown;
     end
     else
     begin
-      Result.AreaKind := akImplementation;
-      Result.PosKind := pkUnknown;
+      PosInfo.AreaKind := akImplementation;
+      PosInfo.PosKind := pkUnknown;
     end;
     SavePos := pkUnknown;
     IsProgram := False;
@@ -1709,28 +1709,28 @@ begin
         tkUnit:
           begin
             IsProgram := False;
-            Result.AreaKind := akUnit;
-            Result.PosKind := pkFlat;
+            PosInfo.AreaKind := akUnit;
+            PosInfo.PosKind := pkFlat;
           end;
         tkProgram, tkLibrary:
           begin
             IsProgram := True;
-            Result.AreaKind := akProgram;
-            Result.PosKind := pkFlat;
+            PosInfo.AreaKind := akProgram;
+            PosInfo.PosKind := pkFlat;
           end;
         tkInterface:
           begin
-            if (Result.AreaKind in [akUnit, akProgram]) and not IsProgram then
+            if (PosInfo.AreaKind in [akUnit, akProgram]) and not IsProgram then
             begin
-              Result.AreaKind := akInterface;
-              Result.PosKind := pkFlat;
+              PosInfo.AreaKind := akInterface;
+              PosInfo.PosKind := pkFlat;
             end
             else if Lex.IsInterface then  // 和 class/record 判断类似
             begin
-              Result.PosKind := pkInterface;
+              PosInfo.PosKind := pkInterface;
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                Result.PosKind := pkTypeDecl
+                PosInfo.PosKind := pkTypeDecl
               else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
               begin
                 while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
@@ -1740,64 +1740,64 @@ begin
                 begin
                   DoNext(True);
                   if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                    Result.PosKind := pkTypeDecl;
+                    PosInfo.PosKind := pkTypeDecl;
                 end;
               end;
-              if Result.PosKind = pkInterface then
+              if PosInfo.PosKind = pkInterface then
                 InClass := True;
             end;
           end;
         tkUses:
           begin
-            if Result.AreaKind in [akProgram, akInterface] then
+            if PosInfo.AreaKind in [akProgram, akInterface] then
             begin
-              Result.AreaKind := akIntfUses;
-              Result.PosKind := pkIntfUses;
+              PosInfo.AreaKind := akIntfUses;
+              PosInfo.PosKind := pkIntfUses;
             end
-            else if Result.AreaKind = akImplementation then
+            else if PosInfo.AreaKind = akImplementation then
             begin
-              Result.AreaKind := akImplUses;
-              Result.PosKind := pkIntfUses;
+              PosInfo.AreaKind := akImplUses;
+              PosInfo.PosKind := pkIntfUses;
             end;
-            if Result.AreaKind in [akIntfUses, akImplUses] then
+            if PosInfo.AreaKind in [akIntfUses, akImplUses] then
             begin
               while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in [tkNull, tkSemiColon]) do
               begin
                 if IsProgram and (Lex.TokenID = tkString) then
                 begin
-                  if Result.PosKind <> pkString then
+                  if PosInfo.PosKind <> pkString then
                   begin
-                    SavePos := Result.PosKind;
-                    Result.PosKind := pkString;
+                    SavePos := PosInfo.PosKind;
+                    PosInfo.PosKind := pkString;
                   end;
                 end;
                 DoNext;
               end;
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
               begin
-                if Result.AreaKind = akIntfUses then
-                  Result.AreaKind := akInterface
+                if PosInfo.AreaKind = akIntfUses then
+                  PosInfo.AreaKind := akInterface
                 else
-                  Result.AreaKind := akImplementation;
-                Result.PosKind := pkFlat;
+                  PosInfo.AreaKind := akImplementation;
+                PosInfo.PosKind := pkFlat;
               end;
             end;
           end;
         tkImplementation:
           if not IsProgram then
           begin
-            Result.AreaKind := akImplementation;
-            Result.PosKind := pkFlat;
+            PosInfo.AreaKind := akImplementation;
+            PosInfo.PosKind := pkFlat;
           end;
         tkInitialization:
           begin
-            Result.AreaKind := akInitialization;
-            Result.PosKind := pkFlat;
+            PosInfo.AreaKind := akInitialization;
+            PosInfo.PosKind := pkFlat;
           end;
         tkFinalization:
           begin
-            Result.AreaKind := akFinalization;
-            Result.PosKind := pkFlat;
+            PosInfo.AreaKind := akFinalization;
+            PosInfo.PosKind := pkFlat;
           end;
 // 以下代码会造成 F[''].All; 这种语句分号后位置错误地变成 pkString，因此注释掉，副作用未知
 //        tkSquareClose:
@@ -1811,8 +1811,8 @@ begin
         tkPoint:
           if Lex.LastNoSpace = tkEnd then
           begin
-            Result.AreaKind := akEnd;
-            Result.PosKind := pkUnknown;
+            PosInfo.AreaKind := akEnd;
+            PosInfo.PosKind := pkUnknown;
           end
           else if Lex.LastNoSpaceCRLF in [tkIdentifier, tkPointerSymbol, {$IFDEF DelphiXE3_UP} tkString, {$ENDIF} // Delphi XE3 Supports function invoke on string
             tkSquareClose, tkRoundClose] then
@@ -1821,26 +1821,26 @@ begin
             // 如 GetObject()
             //      .Hide()
             //      .Show() 这种
-            if not (Result.PosKind in [pkFieldDot, pkField]) then
-              SavePos := Result.PosKind;
-            Result.PosKind := pkFieldDot;
+            if not (PosInfo.PosKind in [pkFieldDot, pkField]) then
+              SavePos := PosInfo.PosKind;
+            PosInfo.PosKind := pkFieldDot;
           end;
         tkAnsiComment, tkBorComment, tkSlashesComment:
           begin
-            if Result.PosKind <> pkComment then
+            if PosInfo.PosKind <> pkComment then
             begin
-              SavePos := Result.PosKind;
-              Result.PosKind := pkComment;
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkComment;
             end;
           end;
         tkClass:
           begin
             if Lex.IsClass then
             begin
-              Result.PosKind := pkClass;
+              PosInfo.PosKind := pkClass;
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                Result.PosKind := pkTypeDecl
+                PosInfo.PosKind := pkTypeDecl
               else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
               begin
                 while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
@@ -1850,7 +1850,7 @@ begin
                 begin
                   DoNext(True);
                   if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                    Result.PosKind := pkTypeDecl
+                    PosInfo.PosKind := pkTypeDecl
                   else
                   begin
                     InClass := True;
@@ -1872,7 +1872,7 @@ begin
                 tkPrivate, tkProtected, tkPublic, tkPublished, tkHelper, tkClass,
                 tkVar, tkConst, tkType, tkProperty]) then
               begin
-                Result.PosKind := pkClass;
+                PosInfo.PosKind := pkClass;
                 InClass := True;
                 Continue;
               end
@@ -1884,50 +1884,50 @@ begin
             end;
           end;
         tkType:
-          Result.PosKind := pkType;
+          PosInfo.PosKind := pkType;
         tkConst:
           if not InClass then
-            Result.PosKind := pkConst;
+            PosInfo.PosKind := pkConst;
         tkResourceString:
-          Result.PosKind := pkResourceString;
+          PosInfo.PosKind := pkResourceString;
         tkVar:
           if not InClass then
-            Result.PosKind := pkVar;
+            PosInfo.PosKind := pkVar;
         tkCompDirect:
           begin
-            if Result.PosKind <> pkCompDirect then
+            if PosInfo.PosKind <> pkCompDirect then
             begin
-              SavePos := Result.PosKind;
-              Result.PosKind := pkCompDirect;
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkCompDirect;
             end;
           end;
         tkString, tkMultiLineString:
           begin
-            if Result.PosKind <> pkString then
+            if PosInfo.PosKind <> pkString then
             begin
-              SavePos := Result.PosKind;
-              Result.PosKind := pkString;
+              SavePos := PosInfo.PosKind;
+              PosInfo.PosKind := pkString;
             end;
           end;
         tkIdentifier, tkMessage, tkRead, tkWrite, tkDefault, tkIndex:
-          if (Lex.LastNoSpace = tkPoint) and (Result.PosKind = pkFieldDot) then
+          if (Lex.LastNoSpace = tkPoint) and (PosInfo.PosKind = pkFieldDot) then
           begin
-            Result.PosKind := pkField;
+            PosInfo.PosKind := pkField;
           end;
         tkProcedure, tkFunction, tkConstructor, tkDestructor:
           begin
-            if not InClass and (Result.AreaKind in [akProgram, akImplementation]) then
+            if not InClass and (PosInfo.AreaKind in [akProgram, akImplementation]) then
             begin
               ProcIndent := 0;
               if Lex.TokenID = tkProcedure then
-                Result.PosKind := pkProcedure
+                PosInfo.PosKind := pkProcedure
               else if Lex.TokenID = tkFunction then
-                Result.PosKind := pkFunction
+                PosInfo.PosKind := pkFunction
               else if Lex.TokenID = tkConstructor then
-                Result.PosKind := pkConstructor
+                PosInfo.PosKind := pkConstructor
               else
-                Result.PosKind := pkDestructor;
-              ProcStack.Push(Pointer(Result.PosKind));
+                PosInfo.PosKind := pkDestructor;
+              ProcStack.Push(Pointer(PosInfo.PosKind));
               IsAfterProcBegin := False;
             end;
             // todo: 处理单独声明的函数
@@ -1938,18 +1938,18 @@ begin
             begin
               Inc(ProcIndent);
               if ProcStack.Count = 0 then // 表示是 program 或 library 里的主 begin
-                Result.PosKind := pkProcedure
+                PosInfo.PosKind := pkProcedure
               else
-                Result.PosKind := TCodePosKind(ProcStack.Peek);
+                PosInfo.PosKind := TCodePosKind(ProcStack.Peek);
               IsAfterProcBegin := True;
             end;
 
             if MyTokenID = tkRecord then
             begin
-              Result.PosKind := pkClass; // Record 也复用 class 标记，后续的判断类似于 class
+              PosInfo.PosKind := pkClass; // Record 也复用 class 标记，后续的判断类似于 class
               DoNext(True);
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                Result.PosKind := pkTypeDecl
+                PosInfo.PosKind := pkTypeDecl
               else if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkRoundOpen) then
               begin
                 while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in
@@ -1959,7 +1959,7 @@ begin
                 begin
                   DoNext(True);
                   if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
-                    Result.PosKind := pkTypeDecl
+                    PosInfo.PosKind := pkTypeDecl
                   else
                   begin
                     InClass := True;
@@ -1978,7 +1978,7 @@ begin
           begin
             if InClass then
             begin
-              Result.PosKind := pkType;
+              PosInfo.PosKind := pkType;
               InClass := False;
             end
             else if ProcStack.Count > 0 then
@@ -1987,58 +1987,58 @@ begin
               if ProcIndent <= 0 then
               begin
                 ProcStack.Pop;
-                Result.PosKind := pkFlat;
+                PosInfo.PosKind := pkFlat;
                 IsAfterProcBegin := False;
               end;
             end;
           end;
         tkColon:
           begin
-            if Result.PosKind = pkVar then  // 判断是否就地 var Str: string 这种类型声明
-              Result.PosKind := pkVarType
-            else if Result.PosKind = pkConst then
-              Result.PosKind := pkConstTypeValue;
+            if PosInfo.PosKind = pkVar then  // 判断是否就地 var Str: string 这种类型声明
+              PosInfo.PosKind := pkVarType
+            else if PosInfo.PosKind = pkConst then
+              PosInfo.PosKind := pkConstTypeValue;
           end;
         tkEqual:
           begin
-            if Result.PosKind = pkConst then
-              Result.PosKind := pkConstTypeValue
-            else if Result.PosKind = pkType then
-              Result.PosKind := pkTypeDecl
-            else if Result.PosKind = pkField then // 等号结束 Field
-              Result.PosKind := SavePos;
+            if PosInfo.PosKind = pkConst then
+              PosInfo.PosKind := pkConstTypeValue
+            else if PosInfo.PosKind = pkType then
+              PosInfo.PosKind := pkTypeDecl
+            else if PosInfo.PosKind = pkField then // 等号结束 Field
+              PosInfo.PosKind := SavePos;
           end;
         tkAssign:
           begin
-            if Result.PosKind = pkVar then  // 判断是否就地 var K := 1 这种推断声明
-              Result.PosKind := pkVarType;
+            if PosInfo.PosKind = pkVar then  // 判断是否就地 var K := 1 这种推断声明
+              PosInfo.PosKind := pkVarType;
 
             // Field 等内容如果碰到赋值，也要结束掉
-            if Result.PosKind in [pkCompDirect, pkComment, pkField] then
-              Result.PosKind := SavePos;
+            if PosInfo.PosKind in [pkCompDirect, pkComment, pkField] then
+              PosInfo.PosKind := SavePos;
           end;
         tkSemiColon:
           begin
-            if Result.PosKind in [pkString, pkCompDirect, pkComment] then // 先还原
-              Result.PosKind := SavePos;
+            if PosInfo.PosKind in [pkString, pkCompDirect, pkComment] then // 先还原
+              PosInfo.PosKind := SavePos;
 
-            if Result.PosKind = pkVarType then
+            if PosInfo.PosKind = pkVarType then
             begin
               // 判断是否是 procedure 对应的 begin 后，是则恢复成 pkProcedure 等
               if IsAfterProcBegin and (ProcStack.Count > 0) then
-                Result.PosKind := TCodePosKind(ProcStack.Peek)
+                PosInfo.PosKind := TCodePosKind(ProcStack.Peek)
               else
-                Result.PosKind := pkVar;
+                PosInfo.PosKind := pkVar;
             end
-            else if Result.PosKind = pkConstTypeValue then
-              Result.PosKind := pkConst
-            else if Result.PosKind = pkTypeDecl then
-              Result.PosKind := pkType;
+            else if PosInfo.PosKind = pkConstTypeValue then
+              PosInfo.PosKind := pkConst
+            else if PosInfo.PosKind = pkTypeDecl then
+              PosInfo.PosKind := pkType;
           end;
       else
-        if Result.PosKind in [pkCompDirect, pkComment, pkString, pkField,
+        if PosInfo.PosKind in [pkCompDirect, pkComment, pkString, pkField,
           pkFieldDot] then
-          Result.PosKind := SavePos;
+          PosInfo.PosKind := SavePos;
       end;
 
       DoNext;

@@ -86,7 +86,7 @@ begin
     begin
       Token := Parser.Tokens[I];
 
-      Info := ParsePasCodePosInfo(mmoPas.Lines.Text, Token.TokenPos);
+      ParsePasCodePosInfo(mmoPas.Lines.Text, Token.TokenPos, Info);
       Token.Tag := Ord(Info.PosKind);
 
       mmoParsePas.Lines.Add(Format('#%3.3d. Line: %2.2d, Col %2.2d, Pos %4.4d. PosKind: %-18s, Token: %-14s',
