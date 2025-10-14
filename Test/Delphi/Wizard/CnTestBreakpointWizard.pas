@@ -49,12 +49,17 @@ type
 // 测试 CnWizDebuggerNotifier 的获取断点的菜单专家
 //==============================================================================
 
-{ TCnTestBreakpointMenuWizard }
+{ TCnTestBreakpointWizard }
 
-  TCnTestBreakpointMenuWizard = class(TCnMenuWizard)
+  TCnTestBreakpointWizard = class(TCnSubMenuWizard)
   private
+    FIdGetBPFromCnService: Integer;
+    FIdGetBPFromToolsAPI: Integer;
+    procedure GetBPFromCnServiceExecute;
+    procedure GetBPFromToolsAPIExecute;
   protected
     function GetHasConfig: Boolean; override;
+    procedure SubActionExecute(Index: Integer); override;
   public
     function GetState: TWizardState; override;
     procedure Config; override;
@@ -64,7 +69,8 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
+
+    procedure AcquireSubActions; override;
   end;
 
 implementation
@@ -76,14 +82,20 @@ uses
 // 测试 CnWizDebuggerNotifier 中的获取断点的菜单专家
 //==============================================================================
 
-{ TCnTestBreakpointMenuWizard }
+{ TCnTestBreakpointWizard }
 
-procedure TCnTestBreakpointMenuWizard.Config;
+procedure TCnTestBreakpointWizard.AcquireSubActions;
+begin
+  FIdGetBPFromCnService := RegisterASubAction('CnGetBPFromCnService', 'Get BP From Wizard Service');
+  FIdGetBPFromToolsAPI := RegisterASubAction('CnGetBPFromToolsAPI', 'Get BP From ToolsAPI');
+end;
+
+procedure TCnTestBreakpointWizard.Config;
 begin
   ShowMessage('No option for this test case.');
 end;
 
-procedure TCnTestBreakpointMenuWizard.Execute;
+procedure TCnTestBreakpointWizard.GetBPFromCnServiceExecute;
 var
   List: TList;
   I: Integer;
@@ -112,32 +124,56 @@ begin
   end;
 end;
 
-function TCnTestBreakpointMenuWizard.GetCaption: string;
+procedure TCnTestBreakpointWizard.GetBPFromToolsAPIExecute;
+var
+  DebugSvcs: IOTADebuggerServices;
+  B: IOTASourceBreakpoint;
+  S: string;
+  I: Integer;
 begin
-  Result := 'Get Current Breakpoints';
+  if Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+  begin
+    I := DebugSvcs.GetSourceBkptCount;
+    if I = 0 then
+      ShowMessage('No Breakpoints from Tools API.')
+    else
+    begin
+      for I := 0 to DebugSvcs.GetSourceBkptCount - 1 do
+      begin
+        B := DebugSvcs.GetSourceBkpt(I);
+        S := S + Format('#%d. Line %d - %s%s', [I, B.LineNumber, B.FileName, #13#10]);
+      end;
+      ShowMessage(S);
+    end;
+  end;
 end;
 
-function TCnTestBreakpointMenuWizard.GetDefShortCut: TShortCut;
+function TCnTestBreakpointWizard.GetCaption: string;
+begin
+  Result := 'Test Breakpoints';
+end;
+
+function TCnTestBreakpointWizard.GetDefShortCut: TShortCut;
 begin
   Result := 0;
 end;
 
-function TCnTestBreakpointMenuWizard.GetHasConfig: Boolean;
+function TCnTestBreakpointWizard.GetHasConfig: Boolean;
 begin
   Result := True;
 end;
 
-function TCnTestBreakpointMenuWizard.GetHint: string;
+function TCnTestBreakpointWizard.GetHint: string;
 begin
   Result := 'Test hint';
 end;
 
-function TCnTestBreakpointMenuWizard.GetState: TWizardState;
+function TCnTestBreakpointWizard.GetState: TWizardState;
 begin
   Result := [wsEnabled];
 end;
 
-class procedure TCnTestBreakpointMenuWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
+class procedure TCnTestBreakpointWizard.GetWizardInfo(var Name, Author, Email, Comment: string);
 begin
   Name := 'Test Breakpoints Menu Wizard';
   Author := 'Liu Xiao';
@@ -145,18 +181,26 @@ begin
   Comment := 'Test for Get Breakpoints';
 end;
 
-procedure TCnTestBreakpointMenuWizard.LoadSettings(Ini: TCustomIniFile);
+procedure TCnTestBreakpointWizard.LoadSettings(Ini: TCustomIniFile);
 begin
 
 end;
 
-procedure TCnTestBreakpointMenuWizard.SaveSettings(Ini: TCustomIniFile);
+procedure TCnTestBreakpointWizard.SaveSettings(Ini: TCustomIniFile);
 begin
 
+end;
+
+procedure TCnTestBreakpointWizard.SubActionExecute(Index: Integer);
+begin
+  if Index = FIdGetBPFromCnService then
+    GetBPFromCnServiceExecute
+  else if Index = FIdGetBPFromToolsAPI then
+    GetBPFromToolsAPIExecute;
 end;
 
 initialization
-  RegisterCnWizard(TCnTestBreakpointMenuWizard); // 注册此测试专家
+  RegisterCnWizard(TCnTestBreakpointWizard); // 注册此测试专家
 
 end.
 
