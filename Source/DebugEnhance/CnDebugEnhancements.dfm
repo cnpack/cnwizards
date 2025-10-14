@@ -222,6 +222,15 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
             'E or Above)'
           TabOrder = 2
         end
+        object chkAutoBreakpoint: TCheckBox
+          Left = 16
+          Top = 96
+          Width = 415
+          Height = 17
+          Anchors = [akLeft, akTop, akRight]
+          Caption = 'Auto Load/Save Breakpoints'
+          TabOrder = 3
+        end
       end
     end
   end

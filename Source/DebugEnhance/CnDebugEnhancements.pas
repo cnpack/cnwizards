@@ -61,6 +61,7 @@ type
     FIdConfig: Integer;
     FAutoClose: Boolean;
     FAutoReset: Boolean;
+    FAutoBreakpoint: Boolean;
     FResetAction: TAction;
     FHooks: TCnActionListHook;
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -97,12 +98,19 @@ type
     procedure DisableHooks;
     procedure SetAutoReset(const Value: Boolean);
     procedure NewExecute(Sender: TObject);
+    function FindSection(Ini: TCustomIniFile; const FileName: string;
+      var Section: string): Boolean;
   protected
     procedure SetActive(Value: Boolean); override;
     function GetHasConfig: Boolean; override;
 
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
+    procedure SourceEditorNotifier(SourceEditor: TCnSourceEditorInterface;
+      NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
+
+    procedure LoadBreakpoints(SourceEditor: TCnSourceEditorInterface);
+    procedure SaveBreakpoints(SourceEditor: TCnSourceEditorInterface);
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -139,6 +147,8 @@ type
     {* 编译前是否自动杀掉在运行的目标进程，需是独立运行的 Exe}
     property AutoReset: Boolean read FAutoReset write SetAutoReset;
     {* 编译前是否自动关闭在调试的目标进程，需是非独立运行的 Exe}
+    property AutoBreakpoint: Boolean read FAutoBreakpoint write FAutoBreakpoint;
+    {* 是否自动加载保存源文件中的断点}
   end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -242,6 +252,7 @@ type
     chkWideViewer: TCheckBox;
     chkMemoryStreamViewer: TCheckBox;
     chkEnhanceFloat: TCheckBox;
+    chkAutoBreakpoint: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -279,7 +290,12 @@ uses
 const
   csAutoClose = 'AutoClose';
   csAutoReset = 'AutoReset';
+  csAutoBreakpoint = 'AutoBreakpoint';
   csEnableFloat = 'EnableFloat';
+
+  csBreakpoint = 'Breakpoint';
+  csFileName = 'FileName';
+  csItem = 'Item';
 
   SCnRunResetActionName = 'RunResetCommand';
   SCnCompileActionNames: array[0..4] of string = ('ProjectCompileCommand',
@@ -505,6 +521,7 @@ begin
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
+    chkAutoBreakpoint.Checked := AutoBreakpoint;
 
     if ShowModal = mrOK then
     begin
@@ -528,6 +545,7 @@ begin
 {$ENDIF}
       AutoClose := chkAutoClose.Checked;
       AutoReset := chkAutoReset.Checked;
+      AutoBreakpoint := chkAutoBreakpoint.Checked;
       DoSaveSettings;
     end;
     Free;
@@ -549,6 +567,7 @@ begin
   FHooks := TCnActionListHook.Create(nil);
   FResetAction := TAction(GetIDEActionFromName(SCnRunResetActionName));
   CnWizNotifierServices.AddBeforeCompileNotifier(BeforeCompile);
+  CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotifier);
 end;
 
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
@@ -561,6 +580,7 @@ begin
 
   Results.Add(Format('AutoClose %d', [Ord(FAutoClose)]));
   Results.Add(Format('AutoReset %d', [Ord(FAutoReset)]));
+  Results.Add(Format('AutoBreakpoint %d', [Ord(FAutoBreakpoint)]));
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
   Results.Add(Format('DataSet Viewer Registered: %d', [Ord(FDataSetRegistered)]));
@@ -580,6 +600,7 @@ var
   ID: IOTADebuggerServices;
 {$ENDIF}
 begin
+  CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotifier);
   CnWizNotifierServices.RemoveBeforeCompileNotifier(BeforeCompile);
   FHooks.Free;
 
@@ -647,6 +668,7 @@ begin
 {$ENDIF}
   FAutoClose := Ini.ReadBool('', csAutoClose, False);
   FAutoReset := Ini.ReadBool('', csAutoReset, False);
+  FAutoBreakpoint := Ini.ReadBool('', csAutoBreakpoint, True);
 end;
 
 procedure TCnDebugEnhanceWizard.ResetSettings(Ini: TCustomIniFile);
@@ -669,6 +691,7 @@ begin
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
+  Ini.WriteBool('', csAutoBreakpoint, FAutoBreakpoint);
 end;
 
 procedure TCnDebugEnhanceWizard.SetActive(Value: Boolean);
@@ -1052,6 +1075,21 @@ begin
   end;
 end;
 
+procedure TCnDebugEnhanceForm.FormCreate(Sender: TObject);
+begin
+  WizOptions.ResetToolbarWithLargeIcons(tlbHint);
+end;
+
+function TCnDebugEnhanceForm.GetHelpTopic: string;
+begin
+  Result := 'CnDebugEnhanceWizard';
+end;
+
+procedure TCnDebugEnhanceForm.btnHelpClick(Sender: TObject);
+begin
+  ShowFormHelp;
+end;
+
 procedure TCnDebugEnhanceWizard.AcquireSubActions;
 begin
   FIdEvalObj := RegisterASubAction('EvalAsObj',
@@ -1259,14 +1297,176 @@ begin
   end;
 end;
 
-function TCnDebugEnhanceForm.GetHelpTopic: string;
+procedure TCnDebugEnhanceWizard.SourceEditorNotifier(SourceEditor: TCnSourceEditorInterface;
+  NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
 begin
-  Result := 'CnDebugEnhanceWizard';
+  if not Active then
+    Exit;
+
+  if FAutoBreakpoint then
+  begin
+    if NotifyType = setOpened then
+    begin
+      // 从设置里找 SourceEditor 文件对应的断点信息并设置进该编辑器
+      LoadBreakpoints(SourceEditor);
+    end
+    else if NotifyType in [setEditViewRemove, setClosing] then
+    begin
+      // 将 SourceEditor 里的断点保存起来
+      SaveBreakpoints(SourceEditor);
+    end;
+  end;
 end;
 
-procedure TCnDebugEnhanceForm.btnHelpClick(Sender: TObject);
+procedure TCnDebugEnhanceWizard.LoadBreakpoints(
+  SourceEditor: TCnSourceEditorInterface);
+var
+  I, J, L: Integer;
+  Ini: TCustomIniFile;
+  S, Section: string;
+  DebugSvcs: IOTADebuggerServices;
+  B: IOTABreakpoint;
 begin
-  ShowFormHelp;
+  if Active and FileExists(SourceEditor.FileName) and
+    Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+  begin
+    Ini := CreateIniFile;
+    try
+      if FindSection(Ini, SourceEditor.FileName, Section) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('Load Breakpoint from Section %s to File %s', [Section, SourceEditor.FileName]);
+{$ENDIF}
+      end;
+
+      for I := 0 to 19 do // 假设一个文件最多存 20 个断点
+      begin
+        S := Ini.ReadString(Section, csBreakpoint + IntToStr(I), '');
+
+        // 从 S 中解出断点内容并新建在本文件内
+        if S <> '' then
+        begin
+          J := Pos(',', S);
+          if J > 1 then
+          begin
+            L := StrToIntDef(Copy(S, 1, J - 1), 0);
+            if L > 0 then
+            begin
+              B := DebugSvcs.NewSourceBreakpoint(SourceEditor.FileName, L, DebugSvcs.CurrentProcess);
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('Restore Breakpoint at Line %d', [L]);
+{$ENDIF}
+              try
+                if B <> nil then
+                begin
+                  Delete(S, 1, J);
+                  if S = '0' then
+                    B.Enabled := False;
+                end;
+              except
+                ;
+              end;
+            end;
+          end;
+        end;
+      end;
+    finally
+      Ini.Free;
+    end;
+  end;
+end;
+
+procedure TCnDebugEnhanceWizard.SaveBreakpoints(
+  SourceEditor: TCnSourceEditorInterface);
+var
+  I, J: Integer;
+  Ini: TCustomIniFile;
+  Section: string;
+  FileNameSaved: Boolean;
+  DebugSvcs: IOTADebuggerServices;
+  B: IOTASourceBreakpoint;
+
+  function BreakpointToStr(BP: IOTASourceBreakpoint): string;
+  begin
+    if BP.Enabled then
+      Result := Format('%d,1',[BP.LineNumber])
+    else
+      Result := Format('%d,1',[BP.LineNumber]);
+  end;
+
+begin
+  if Active and FileExists(SourceEditor.FileName) and
+    Supports(BorlandIDEServices, IOTADebuggerServices, DebugSvcs) then
+  begin
+    Ini := CreateIniFile;
+    try
+      if FindSection(Ini, SourceEditor.FileName, Section) then
+        Ini.EraseSection(Section); // 如果已经存在则先删除
+
+      FileNameSaved := False;
+      J := 0;
+      for I := 0 to DebugSvcs.GetSourceBkptCount - 1 do
+      begin
+        B := DebugSvcs.GetSourceBkpt(I);
+        if B.FileName <> SourceEditor.FileName then
+          Continue;
+
+        if not FileNameSaved then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Save Breakpoint to Section %s from File %s ', [Section, SourceEditor.FileName]);
+{$ENDIF}
+          Ini.WriteString(Section, csFileName, SourceEditor.FileName);
+          FileNameSaved := True;
+        end;
+
+        Ini.WriteString(Section, csBreakpoint + IntToStr(J), BreakpointToStr(B));
+        Inc(J);
+      end;
+    finally
+      Ini.Free;
+    end;
+  end;
+end;
+
+function TCnDebugEnhanceWizard.FindSection(Ini: TCustomIniFile;
+  const FileName: string; var Section: string): Boolean;
+var
+  Sections: TStrings;
+  I: Integer;
+begin
+  Result := False;
+  Sections := TStringList.Create;
+  try
+    Ini.ReadSections(Sections);
+    for I := 0 to Sections.Count - 1 do
+    begin
+      if Pos(csItem, Sections[I]) > 0 then
+      begin
+        if SameFileName(Ini.ReadString(Sections[I], csFileName, ''), FileName) then
+        begin
+          Section := Sections[I];
+          Result := True;
+          Break;
+        end;
+      end;
+    end;
+
+    if not Result then
+    begin
+      I := 0;
+      while True do
+      begin
+        Section := csItem + IntToStr(I);
+        if Ini.SectionExists(Section) then
+          Inc(I)
+        else
+          Break;
+      end;
+    end;
+  finally
+    Sections.Free;
+  end;
 end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
@@ -1500,11 +1700,6 @@ begin
 end;
 
 {$ENDIF}
-
-procedure TCnDebugEnhanceForm.FormCreate(Sender: TObject);
-begin
-  WizOptions.ResetToolbarWithLargeIcons(tlbHint);
-end;
 
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}

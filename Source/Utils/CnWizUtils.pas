@@ -10220,9 +10220,10 @@ begin
 
       for I := 0 to AList.Count - 1 do
       begin
+        AObj := nil;
 {$IFDEF LAZARUS}
         AObj := TPersistent(AList[I]);
-{$endif}
+{$ENDIF}
 {$IFDEF DELHI_OTA}
       {$IFDEF COMPILER6_UP}
         AObj := TPersistent(AList[I]);

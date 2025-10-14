@@ -381,8 +381,10 @@ var
   I: Integer;
 begin
   for I := FProcesses.Count - 1 downto 0 do
+  begin
     if FProcesses[I] <> nil then
       TCnOTAProcess(FProcesses[I]).Free;
+  end;
 
   FProcesses.Free;
   FBreakpoints.Free;

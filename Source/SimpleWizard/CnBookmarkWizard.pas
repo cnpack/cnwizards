@@ -375,7 +375,7 @@ begin
       if FindSection(Ini, SourceEditor.FileName, Section) then
       begin
       {$IFDEF DEBUG}
-        CnDebugger.LogMsg('Load bookmark: ' + SourceEditor.FileName);
+        CnDebugger.LogMsg('Load Bookmark: ' + SourceEditor.FileName);
         CnDebugger.LogMsg('Section: ' + Section);
       {$ENDIF}
         View := SourceEditor.EditViews[0];
@@ -464,7 +464,7 @@ begin
       if FindSection(Ini, SourceEditor.FileName, Section) then
         Ini.EraseSection(Section); // 如果已经存在则先删除
       FileNameSaved := False;
-      for I := 0 to 9 do
+      for I := 0 to 9 do  // 最多只记文件里的十个书签
       begin
         APos := View.BookmarkPos[I];
         if (APos.CharIndex <> 0) or (APos.Line <> 0) then
@@ -472,7 +472,7 @@ begin
           if not FileNameSaved then
           begin
           {$IFDEF DEBUG}
-            CnDebugger.LogMsg('Save bookmark: ' + SourceEditor.FileName);
+            CnDebugger.LogMsg('Save Bookmark: ' + SourceEditor.FileName);
             CnDebugger.LogMsg('Section: ' + Section);
           {$ENDIF}
             Ini.WriteString(Section, csFileName, SourceEditor.FileName);
