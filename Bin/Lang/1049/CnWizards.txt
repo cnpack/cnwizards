@@ -2765,6 +2765,7 @@ TCnDebugEnhanceForm.btnCancel.Caption=Отмена
 TCnDebugEnhanceForm.btnHelp.Caption=Справка
 TCnDebugEnhanceForm.btnOK.Caption=&OK
 TCnDebugEnhanceForm.Caption=Настройки улучшения отладки
+TCnDebugEnhanceForm.chkAutoBreakpoint.Caption=Автоматическая загрузка/сохранение точек останова
 TCnDebugEnhanceForm.chkAutoClose.Caption=Автоматически закрыть выполняемый цель перед компиляцией или сборкой
 TCnDebugEnhanceForm.chkAutoReset.Caption=Автоматически сбросить цель отладки перед компиляцией или сборкой
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Включить просмотр TBytes/RawByteString (Delphi XE ~ 10.4)

@@ -2765,6 +2765,7 @@ TCnDebugEnhanceForm.btnCancel.Caption=&Abbruch
 TCnDebugEnhanceForm.btnHelp.Caption=&Hilfe
 TCnDebugEnhanceForm.btnOK.Caption=&OK
 TCnDebugEnhanceForm.Caption=Debug-Erweiterungseinstellungen
+TCnDebugEnhanceForm.chkAutoBreakpoint.Caption=Automatisches Laden/Speichern von Haltepunkten
 TCnDebugEnhanceForm.chkAutoClose.Caption=Automatisch schließen ausgeführtes Ziel vor dem Kompilieren oder Erstellen
 TCnDebugEnhanceForm.chkAutoReset.Caption=Automatisch zurücksetzen des Debug-Ziels vor dem Kompilieren oder Erstellen
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Aktivieren TBytes/RawByteString-Viewer (Delphi XE ~ 10.4)

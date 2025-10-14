@@ -2765,6 +2765,7 @@ TCnDebugEnhanceForm.btnCancel.Caption=取消(&C)
 TCnDebugEnhanceForm.btnHelp.Caption=帮助(&H)
 TCnDebugEnhanceForm.btnOK.Caption=确定(&O)
 TCnDebugEnhanceForm.Caption=调试增强设置
+TCnDebugEnhanceForm.chkAutoBreakpoint.Caption=自动保存和恢复断点
 TCnDebugEnhanceForm.chkAutoClose.Caption=在编译或构建前自动关闭正在运行的目标程序
 TCnDebugEnhanceForm.chkAutoReset.Caption=在编译或构建前自动重置被调试的目标程序
 TCnDebugEnhanceForm.chkBytesViewer.Caption=启用 TBytes/RawByteString 查看器（仅适用于 Delphi XE ～ 10.4）

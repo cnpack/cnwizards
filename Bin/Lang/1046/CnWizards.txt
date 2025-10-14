@@ -2765,6 +2765,7 @@ TCnDebugEnhanceForm.btnCancel.Caption=&Cancelar
 TCnDebugEnhanceForm.btnHelp.Caption=&Ajuda
 TCnDebugEnhanceForm.btnOK.Caption=&OK
 TCnDebugEnhanceForm.Caption=Configuración de Mejoras de Depuración
+TCnDebugEnhanceForm.chkAutoBreakpoint.Caption=Carregar/Salvar pontos de interrupção automaticamente
 TCnDebugEnhanceForm.chkAutoClose.Caption=Cerrar Automáticamente el Destino en Ejecución Antes de Compilar o Construir
 TCnDebugEnhanceForm.chkAutoReset.Caption=Restablecer Automáticamente el Objetivo de Depuración Antes de Compilar o Construir
 TCnDebugEnhanceForm.chkBytesViewer.Caption=Habilitar Visor de TBytes/RawByteString (Delphi XE ~ 10.4)
