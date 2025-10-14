@@ -671,8 +671,8 @@ begin
         begin
           if (Parser.TokenID = tkPoint) and (PrevToken = tkEnd) then
           begin
-            // 找到结尾的 end. 了，拿到行号，0 开始的变成 1 开始的要加一，然后空白回溯要减一
-            I := Parser.LineNumber;
+            // 找到结尾的 end. 了，拿到行号，0 开始的变成 1 开始的要加一，然后空白回溯要减
+            I := Parser.LineNumber - 2;
             Break;
           end;
 

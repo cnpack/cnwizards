@@ -603,9 +603,7 @@ var
         FAsyncResultGot := False;
         FAsyncManagerObj := AsyncManager as TObject;
         FAsyncIsPascal := PosInfo.IsPascal;
-    {$IFDEF DEBUG}
-        CnDebugger.LogFmt('To Async Invoke %s.', [FAsyncManagerObj.ClassName]);
-    {$ENDIF}
+
         FKeepUnique := True;
         FAnsycCancel := False;
         FAsyncWaiting := True;
@@ -619,6 +617,9 @@ var
         else
           CurPos := EditView.CursorPos;
 
+    {$IFDEF DEBUG}
+        CnDebugger.LogFmt('To Async Invoke %s at Line %d Col %d.', [FAsyncManagerObj.ClassName, CurPos.Line, CurPos.Col]);
+    {$ENDIF}
         AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
           CurPos.Col - 1, AsyncCodeCompletionCallBack);
 
