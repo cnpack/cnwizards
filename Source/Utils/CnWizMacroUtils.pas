@@ -295,7 +295,7 @@ begin
       CnGeneralSaveEditorToStream(nil, Stream); // Ansi/Utf16/Utf16
       CurrLinear := CnGeneralGetCurrLinearPos;
 
-      Parser := TCnGeneralWidePasLex.Create;;
+      Parser := TCnGeneralWidePasLex.Create;
       Parser.Origin := Stream.Memory;
 
       LastProcLinear := 0;

@@ -1039,11 +1039,13 @@ procedure CnGeneralCppParserParseString(Parser: TCnGeneralCppStructParser;
 
 procedure CnGeneralParsePasCodePosInfo(EditBuffer: TCnEditBufferInterface;
   Line, Col: Integer; var PosInfo: TCodePosInfo);
-{* 封装的解析包含 Pascal 源文件的 EditBuffer 中指定光标所在代码的位置信息}
+{* 封装的解析包含 Pascal 源文件的 EditBuffer 中指定光标所在代码的位置信息
+   Line/Col 对应 View 的 CursorPos，均为 1 开始}
 
 procedure CnGeneralParseCppCodePosInfo(EditBuffer: TCnEditBufferInterface;
   Line, Col: Integer; var PosInfo: TCodePosInfo);
-{* 封装的解析包含 C/C++ 源文件 EditView 中指定光标所在代码的位置信息}
+{* 封装的解析包含 C/C++ 源文件 EditView 中指定光标所在代码的位置信息
+   Line/Col 对应 View 的 CursorPos，均为 1 开始}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
@@ -1211,7 +1213,7 @@ procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Intege
 
 {$ENDIF}
 
-function CnOtaGetEditPos(EditView: IOTAEditView): TOTAEditPos;
+function CnOtaGetEditPos(EditView: IOTAEditView = nil): TOTAEditPos;
 {* 返回当前光标位置，如果 EditView 为空使用当前值。 }
 
 procedure CnOtaGotoEditPos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil;
@@ -8288,7 +8290,6 @@ begin
 {$ENDIF}
 {$ENDIF}
 end;
-
 
 // 封装的解析器解析 Cpp 代码的过程
 procedure CnGeneralCppParserParseSource(Parser: TCnGeneralCppStructParser;

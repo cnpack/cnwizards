@@ -606,7 +606,11 @@ var
   IDESymbols, UnitNames: TCnSymbolList;
   Buffer: IOTAEditBuffer;
   PosInfo: TCodePosInfo;
+  CurPos: TOTAEditPos;
   I: Integer;
+  Parser: TCnGeneralWidePasLex; // Ansi/Utf16/Utf16
+  Stream: TMemoryStream;
+  PrevToken: TTokenKind;
 
   procedure AddNameWithoutDuplicate(const AName: AnsiString);
   var
@@ -643,9 +647,57 @@ begin
   IDESymbols := FSymbolListMgr.ListByClass(TIDESymbolList);
   if IDESymbols <> nil then
   begin
-    PosInfo.PosKind := pkProcedure;
-    PosInfo.AreaKind := akImplementation;
-    IDESymbols.Reload(Buffer, '', PosInfo);
+    CurPos := CnOtaGetEditPos;
+    CnGeneralParsePasCodePosInfo(Buffer, CurPos.Line, CurPos.Col, PosInfo);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Get PosInfo AreaKind %d for Cursor %d:%d', [Ord(PosInfo.AreaKind), CurPos.Line, CurPos.Col]);
+{$ENDIF}
+
+    if PosInfo.AreaKind in [akUnknown, akEnd] then
+    begin
+      // 光标位置太差会影响符号表获取，找 end. 之前的空行，赋值行号给 I
+      Stream := nil;
+      Parser := nil;
+      I := 0;
+
+      try
+        Stream := TMemoryStream.Create;
+        Parser := TCnGeneralWidePasLex.Create;
+        CnGeneralSaveEditorToStream(nil, Stream); // Ansi/Utf16/Utf16
+
+        Parser.Origin := Stream.Memory;
+        PrevToken := Parser.TokenID;
+        while Parser.TokenID <> tkNull do
+        begin
+          if (Parser.TokenID = tkPoint) and (PrevToken = tkEnd) then
+          begin
+            // 找到结尾的 end. 了，拿到行号，0 开始的变成 1 开始的要加一，然后空白回溯要减一
+            I := Parser.LineNumber;
+            Break;
+          end;
+
+          PrevToken := Parser.TokenID;
+          Parser.Next;
+        end;
+
+      finally
+        Stream.Free;
+        Parser.Free;
+      end;
+
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('PosInfo AreaKind Bad. Change to Line %d', [I]);
+{$ENDIF}
+      PosInfo.PosKind := pkProcedure;
+      PosInfo.AreaKind := akImplementation;
+      IDESymbols.Reload(Buffer, '', PosInfo, I);
+    end
+    else
+    begin
+      PosInfo.PosKind := pkProcedure;
+      PosInfo.AreaKind := akImplementation;
+      IDESymbols.Reload(Buffer, '', PosInfo);
+    end;
 
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnCodeFormatterWizard IDE Symbols Got Count: ' +

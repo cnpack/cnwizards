@@ -53,16 +53,16 @@ uses
 
 {$IFDEF SUPPORT_IDESYMBOLLIST}
 {$IFDEF COMPILER7_UP}
-  {$DEFINE SUPPORT_IOTACodeInsightManager}  // D7 及以上支持 IOTACodeInsightManager
+  {$DEFINE SUPPORT_IOTACODEINSIGHTMANAGER}  // D7 及以上支持 IOTACodeInsightManager
 {$ENDIF}
 
 {$IFNDEF COMPILER8_UP}
-  {$DEFINE SUPPORT_KibitzCompile}           // D567 支持 KibitzCompile
+  {$DEFINE SUPPORT_KIBITZCOMPILE}           // D567 支持 KibitzCompile
 {$ENDIF}
 
-{$IFDEF SUPPORT_IOTACodeInsightManager}
-  {$IFDEF SUPPORT_KibitzCompile}
-    {$DEFINE SUPPORT_MULTI_IDESymbolList}   // D7 俩都支持
+{$IFDEF SUPPORT_IOTACODEINSIGHTMANAGER}
+  {$IFDEF SUPPORT_KIBITZCOMPILE}
+    {$DEFINE SUPPORT_MULTI_IDESYMBOLLIST}   // D7 俩都支持
   {$ENDIF}
 {$ENDIF}
 
@@ -77,7 +77,7 @@ uses
 {$IFDEF BDS4_UP}
   // BDS 2006 在执行 IOTACodeInsightServices.SetQueryContext(nil, nil)
   // 后再调用自动完成会导致 IDE 异常
-  {$DEFINE IDE_SetQueryContext_Bug}
+  {$DEFINE IDE_SETQUERYCONTEXT_BUG}
 {$ENDIF}
 
 {$IFDEF DELPHI2007_UP}
@@ -113,16 +113,16 @@ type
      procedure AsyncCodeCompletionCallBack(Sender: TObject; AId: Integer;
        AError: Boolean; const AMessage: string);
   {$ENDIF}
-  {$IFDEF SUPPORT_IOTACodeInsightManager}
+  {$IFDEF SUPPORT_IOTACODEINSIGHTMANAGER}
     function Reload_CodeInsightManager(Editor: IOTAEditBuffer;
       const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0): Boolean;
-  {$ENDIF SUPPORT_IOTACodeInsightManager}
-  {$IFDEF SUPPORT_KibitzCompile}
+  {$ENDIF SUPPORT_IOTACODEINSIGHTMANAGER}
+  {$IFDEF SUPPORT_KIBITZCOMPILE}
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
     procedure OnIdleExecute(Sender: TObject);
     function Reload_KibitzCompile(Editor: IOTAEditBuffer;
       const InputText: string; PosInfo: TCodePosInfo; Data: Integer = 0): Boolean;
-  {$ENDIF SUPPORT_KibitzCompile}
+  {$ENDIF SUPPORT_KIBITZCOMPILE}
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -130,6 +130,7 @@ type
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
+    {* Data 可当作 1 开始的行号用来自定义触发的光标位置}
 
     // 该函数在 LSP 模式下会做防重处理，注意 Add(Item: TSymbolItem) 未做
     function Add(const AName: string; AKind: TCnSymbolKind; AScope: Integer; const
@@ -152,7 +153,7 @@ const
   SupportMultiIDESymbolList = False;
 {$ENDIF}
 
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   SupportKibitzCompile = True;
 {$ELSE}
   SupportKibitzCompile = False;
@@ -263,7 +264,7 @@ var
 
 { TIDESymbolList }
 
-{$IFDEF SUPPORT_IOTACodeInsightManager}
+{$IFDEF SUPPORT_IOTACODEINSIGHTMANAGER}
 
 const
   ComtypesLockName = '@Comtypes@Lock$qqsv';
@@ -610,8 +611,16 @@ var
         FAsyncWaiting := True;
         // 标记开始异步等待
 
-        AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, EditView.CursorPos.Line,
-          EditView.CursorPos.Col - 1, AsyncCodeCompletionCallBack);
+        if Data > 0 then // 由外界指定弹出光标位置
+        begin
+          CurPos.Line := Data;
+          CurPos.Col := 1;
+        end
+        else
+          CurPos := EditView.CursorPos;
+
+        AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
+          CurPos.Col - 1, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
         try
@@ -755,10 +764,12 @@ begin
   else
     CurPos := EditView.CursorPos;
 
-  // debug or comment will exit
+  // 调试期的当前行，及注释，不获取
   EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
     CurPos, False, Element, LineFlag);
-  if (LineFlag = lfCurrentEIP) or (Element = atComment) then
+
+  // 外界指定行时不判断是否调试当前行
+  if ((Data = 0) and (LineFlag = lfCurrentEIP)) or (Element = atComment) then
     Exit;
 
   Clear;
@@ -770,7 +781,7 @@ begin
       + IntToStr(CodeInsightServices.CodeInsightManagerCount));
 {$ENDIF}
 
-{$IFDEF IDE_SetQueryContext_Bug}
+{$IFDEF IDE_SETQUERYCONTEXT_BUG}
     for Index := 0 to CodeInsightServices.CodeInsightManagerCount - 1 do
     begin
       CodeInsightManager := CodeInsightServices.CodeInsightManager[Index];
@@ -821,9 +832,9 @@ begin
   Result := Count > 0;
 end;
 
-{$ENDIF SUPPORT_IOTACodeInsightManager}
+{$ENDIF SUPPORT_IOTACODEINSIGHTMANAGER}
 
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
 
 {******************************************************************************}
 { Code Note:                                                                   }
@@ -1276,15 +1287,15 @@ begin
   end;
 end;
 
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF SUPPORT_KIBITZCOMPILE}
 
 function KibitzCompileThreadRunning: Boolean;
 begin
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   Result := KibitzThread <> nil;
 {$ELSE}
   Result := False;
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF SUPPORT_KIBITZCOMPILE}
 end;
 
 constructor TIDESymbolList.Create;
@@ -1294,20 +1305,20 @@ begin
   FHashList := TCnStrToStrHashMap.Create(HashSize);
 {$ENDIF}
 
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   KibitzEnabled := KibitzInitialize;
   InitializeCriticalSection(HookCS);
   InvokeKibitzCompileInThread;
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF SUPPORT_KIBITZCOMPILE}
 end;
 
 destructor TIDESymbolList.Destroy;
 begin
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
   KibitzFinalize;
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF SUPPORT_KIBITZCOMPILE}
 
 {$IFDEF IDE_SUPPORT_LSP}
   FHashList.Free;
@@ -1324,27 +1335,23 @@ function TIDESymbolList.Reload(Editor: IOTAEditBuffer;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
 {$IFDEF SUPPORT_IDESYMBOLLIST}
-
-{$IFDEF SUPPORT_MULTI_IDESymbolList}
+{$IFDEF SUPPORT_MULTI_IDESYMBOLLIST}
   if UseCodeInsightMgr then
     Result := Reload_CodeInsightManager(Editor, InputText, PosInfo)
   else
     Result := Reload_KibitzCompile(Editor, InputText, PosInfo);
 {$ELSE}
-
-{$IFDEF SUPPORT_IOTACodeInsightManager}
+  {$IFDEF SUPPORT_IOTACODEINSIGHTMANAGER}
   Result := Reload_CodeInsightManager(Editor, InputText, PosInfo);
-{$ENDIF SUPPORT_IOTACodeInsightManager}
+  {$ENDIF SUPPORT_IOTACODEINSIGHTMANAGER}
 
-{$IFDEF SUPPORT_KibitzCompile}
+  {$IFDEF SUPPORT_KIBITZCOMPILE}
   Result := Reload_KibitzCompile(Editor, InputText, PosInfo);
-{$ENDIF SUPPORT_KibitzCompile}
-
-{$ENDIF SUPPORT_MULTI_IDESymbolList}
-
+  {$ENDIF SUPPORT_KIBITZCOMPILE}
+{$ENDIF}
 {$ELSE}
   Result := False;
-{$ENDIF SUPPORT_IDESYMBOLLIST}
+{$ENDIF}
 end;
 
 function TIDESymbolList.Add(const AName: string; AKind: TCnSymbolKind;
