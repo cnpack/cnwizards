@@ -46,12 +46,12 @@ uses
   CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier;
 
 {$IFDEF BCB5}
-  {$DEFINE SUPPORT_IDESymbolList}
-  {$DEFINE SUPPORT_KibitzCompile}
+  {$DEFINE SUPPORT_IDESYMBOLLIST}
+  {$DEFINE SUPPORT_KIBITZCOMPILE}
 {$ELSE}
   {$IFDEF BCB6}
-  {$DEFINE SUPPORT_IDESymbolList}
-  {$DEFINE SUPPORT_KibitzCompile}
+  {$DEFINE SUPPORT_IDESYMBOLLIST}
+  {$DEFINE SUPPORT_KIBITZCOMPILE}
   {$ENDIF}
 {$ENDIF}
 
@@ -65,18 +65,18 @@ type
 
   TCnBcbIDESymbolList = class(TCnSymbolList)
   private
-  {$IFDEF SUPPORT_KibitzCompile}
+  {$IFDEF SUPPORT_KIBITZCOMPILE}
     procedure OnFileNotify(NotifyCode: TOTAFileNotification; const FileName: string);
     procedure OnIdleExecute(Sender: TObject);
     function Reload_KibitzCompile(Editor: IOTAEditBuffer;
       const InputText: string; PosInfo: TCodePosInfo): Boolean;
-  {$ENDIF SUPPORT_KibitzCompile}
+  {$ENDIF}
   public
     constructor Create; override;
     destructor Destroy; override;
     class function GetListName: string; override;
     function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
-      TCodePosInfo): Boolean; override;
+      TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
 const
@@ -94,7 +94,7 @@ var
   UseKibitzCompileThread: Boolean = False;
   {* 是否使用后台线程预处理符号 }
 
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
 
 procedure CnIDEEnableKibitzing(AParam: Integer); stdcall;
 
@@ -133,7 +133,7 @@ begin
   Result := mrOk;
 end;
 
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
 
 {******************************************************************************}
 { Code Note:                                                                   }
@@ -635,35 +635,35 @@ begin
   Result := Count > 0;
 end;
 
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF}
 
 function KibitzCompileThreadRunning: Boolean;
 begin
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   Result := KibitzThread <> nil;
 {$ELSE}
   Result := False;
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF}
 end;
 
 constructor TCnBcbIDESymbolList.Create;
 begin
   inherited;
   FBcbIdeSymbolList := Self;
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   KibitzEnabled := KibitzInitialize;
 //  InitializeCriticalSection(HookCS);
   InvokeKibitzCompileInThread;
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF}
 end;
 
 destructor TCnBcbIDESymbolList.Destroy;
 begin
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
   KibitzFinalize;
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF}
   FBcbIdeSymbolList := nil;
   inherited;
 end;
@@ -674,19 +674,19 @@ begin
 end;
 
 function TCnBcbIDESymbolList.Reload(Editor: IOTAEditBuffer;
-  const InputText: string; PosInfo: TCodePosInfo): Boolean;
+  const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
-{$IFDEF SUPPORT_IDESymbolList}
-{$IFDEF SUPPORT_KibitzCompile}
+{$IFDEF SUPPORT_IDESYMBOLLIST}
+{$IFDEF SUPPORT_KIBITZCOMPILE}
   Result := Reload_KibitzCompile(Editor, InputText, PosInfo);
-{$ENDIF SUPPORT_KibitzCompile}
+{$ENDIF}
 {$ELSE}
   Result := False;
-{$ENDIF SUPPORT_IDESymbolList}
+{$ENDIF}
 end;
 
 initialization
-{$IFDEF SUPPORT_IDESymbolList}
+{$IFDEF SUPPORT_IDESYMBOLLIST}
 {$IFDEF BCB5OR6}
   RegisterSymbolList(TCnBcbIDESymbolList); // BCB5、6下注册
 {$ENDIF}
