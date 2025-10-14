@@ -1037,6 +1037,8 @@ procedure CnGeneralCppParserParseString(Parser: TCnGeneralCppStructParser;
   Stream: TMemoryStream);
 {* 封装的解析器解析 C/C++ 代码中的字符串的过程，不包括对当前光标的处理}
 
+{$IFNDEF STAND_ALONE}
+
 procedure CnGeneralParsePasCodePosInfo(EditBuffer: TCnEditBufferInterface;
   Line, Col: Integer; var PosInfo: TCodePosInfo);
 {* 封装的解析包含 Pascal 源文件的 EditBuffer 中指定光标所在代码的位置信息
@@ -1046,6 +1048,8 @@ procedure CnGeneralParseCppCodePosInfo(EditBuffer: TCnEditBufferInterface;
   Line, Col: Integer; var PosInfo: TCodePosInfo);
 {* 封装的解析包含 C/C++ 源文件 EditView 中指定光标所在代码的位置信息
    Line/Col 对应 View 的 CursorPos，均为 1 开始}
+
+{$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
@@ -8331,6 +8335,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF STAND_ALONE}
+
 procedure CnGeneralParsePasCodePosInfo(EditBuffer: TCnEditBufferInterface;
   Line, Col: Integer; var PosInfo: TCodePosInfo);
 var
@@ -8400,6 +8406,8 @@ begin
     Stream.Free;
   end;
 end;
+
+{$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
 
