@@ -257,7 +257,7 @@ type
     procedure FormatSimpleExpression(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatTerm(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
     procedure FormatFactor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
-    procedure FormatDesignator(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; FromAt: Boolean = False);
+    procedure FormatDesignator(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; FromAt: Boolean = False; AfterLB: Boolean = False);
     procedure FormatDesignatorList(PreSpaceCount: Byte = 0);
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
@@ -278,11 +278,11 @@ type
     procedure FormatTypeParamIdent(PreSpaceCount: Byte = 0);
 
     // Anonymouse function support moving
-    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False);
-    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False);
+    procedure FormatProcedureDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False; IgnoreHeadSpace: Boolean = False);
+    procedure FormatFunctionDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False; IgnoreHeadSpace: Boolean = False);
     {* 用 AllowEqual 区分 ProcType 和 ProcDecl 可否带等于号的情形}
-    procedure FormatFunctionHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
-    procedure FormatProcedureHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True);
+    procedure FormatFunctionHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True; IgnoreHeadSpace: Boolean = False);
+    procedure FormatProcedureHeading(PreSpaceCount: Byte = 0; AllowEqual: Boolean = True; IgnoreHeadSpace: Boolean = False);
     procedure FormatMethodName(PreSpaceCount: Byte = 0);
     procedure FormatFormalParameters(PreSpaceCount: Byte = 0);
     procedure FormatFormalParm(PreSpaceCount: Byte = 0);
@@ -1101,7 +1101,7 @@ end;
   注：虽然有 Designator -> '(' Designator ')' 的情况，但已经包含在 QualId 的处理中了。
 }
 procedure TCnBasePascalFormatter.FormatDesignator(PreSpaceCount: Byte;
-  IndentForAnonymous: Byte; FromAt: Boolean);
+  IndentForAnonymous: Byte; FromAt: Boolean; AfterLB: Boolean);
 var
   IsB, IsGeneric: Boolean;
   GenericBookmark: TScannerBookmark;
@@ -1113,7 +1113,8 @@ begin
     if CnPascalCodeForRule.KeepUserLineBreak then
       FCodeGen.TrimLastEmptyLine;  // 保留换行时，前面的内容可能多输出了空格，要删除
 
-    EnsureWriteln; // 保留换行时，匿名函数前面可能有回车，不能直接 Writeln 以避免出现俩回车
+    if not AfterLB then // 单个左括号后的匿名函数不换行
+      EnsureWriteln;    // 保留换行时，匿名函数前面可能有回车，不能直接 Writeln 以避免出现俩回车
 
     // 匿名函数内部改为不保留换行
     FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
@@ -1121,9 +1122,9 @@ begin
     try
       // Anonymous function/procedure. 匿名函数的缩进使用 IndentForAnonymous 参数
       if Scanner.Token = tokKeywordProcedure then
-        FormatProcedureDecl(Tab(IndentForAnonymous), True)
+        FormatProcedureDecl(Tab(IndentForAnonymous), True, AfterLB) // 左括号后紧跟的起始 Designater 无需缩进
       else
-        FormatFunctionDecl(Tab(IndentForAnonymous), True);
+        FormatFunctionDecl(Tab(IndentForAnonymous), True, AfterLB);
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
     end;
@@ -1616,7 +1617,8 @@ begin
   if Scanner.Token = tokLB then
   begin
     Match(tokLB, PreSpaceCount);
-    FormatDesignator;
+    FormatDesignator(0, 0, True, True);
+    // 可以无需 @ 而直接 procedure 上匿名函数，故此此处强行传 True 并告知在左括号后
 
     if Scanner.Token = tokKeywordAs then
     begin
@@ -3528,7 +3530,7 @@ end;
 { FunctionHeading -> FUNCTION Ident [FormalParameters] ':' (SimpleType | STRING) }
 { FunctionHeading -> OPERATOR Ident [FormalParameters] [':' (SimpleType | STRING)] }
 procedure TCnBasePascalFormatter.FormatFunctionHeading(PreSpaceCount: Byte;
-  AllowEqual: Boolean);
+  AllowEqual: Boolean; IgnoreHeadSpace: Boolean);
 var
   IsOperator, IsClass: Boolean;
 begin
@@ -3542,7 +3544,12 @@ begin
     if IsClass then
       Match(Scanner.Token)
     else
-      Match(Scanner.Token, PreSpaceCount); // 没有 class，这个要缩进
+    begin
+      if IgnoreHeadSpace then
+        Match(Scanner.Token)
+      else
+        Match(Scanner.Token, PreSpaceCount); // 没有 class，这个要缩进
+    end;
   end;
 
   FormatPossibleAmpersand(CnPascalCodeForRule.SpaceBeforeOperator);
@@ -4020,7 +4027,7 @@ end;
 
 { ProcedureHeading -> [CLASS] PROCEDURE Ident [FormalParameters] }
 procedure TCnBasePascalFormatter.FormatProcedureHeading(PreSpaceCount: Byte;
-  AllowEqual: Boolean);
+  AllowEqual: Boolean; IgnoreHeadSpace: Boolean);
 begin
   if Scanner.Token = tokKeywordClass then
   begin
@@ -4028,7 +4035,12 @@ begin
     Match(Scanner.Token);
   end
   else
-    Match(Scanner.Token, PreSpaceCount);
+  begin
+    if IgnoreHeadSpace then
+      Match(Scanner.Token)
+    else
+      Match(Scanner.Token, PreSpaceCount);
+  end;
 
   FormatPossibleAmpersand;
 
@@ -5160,7 +5172,7 @@ end;
 }
 
 procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte;
-  IsAnonymous: Boolean);
+  IsAnonymous: Boolean; IgnoreHeadSpace: Boolean);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -5172,7 +5184,7 @@ begin
   FIdentBackupListRef := IdentBackupList;
 
   try
-    FormatFunctionHeading(PreSpaceCount);
+    FormatFunctionHeading(PreSpaceCount, True, IgnoreHeadSpace);
 
     if Scanner.Token = tokSemicolon then // 可能有省略分号的情况
       Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
@@ -5245,7 +5257,7 @@ end;
                    Block ';'
 }
 procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte;
-  IsAnonymous: Boolean);
+  IsAnonymous: Boolean; IgnoreHeadSpace: Boolean);
 var
   IsExternal: Boolean;
   IsForward: Boolean;
@@ -5257,7 +5269,7 @@ begin
   FIdentBackupListRef := IdentBackupList;
 
   try
-    FormatProcedureHeading(PreSpaceCount);
+    FormatProcedureHeading(PreSpaceCount, True, IgnoreHeadSpace);
 
     if Scanner.Token = tokSemicolon then // 可能有省略分号的情况
       Match(tokSemicolon, 0, 0, True); // 不让分号后写空格，免得影响 Directive 的空格
