@@ -3512,6 +3512,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHI101_BERLIN_UP}
+  {$DEFINE TSTRINGS_HAS_OPTIONS}        // 101B TStrings 有 Options 属性控制 Text 末尾的回车换行要不要去掉等
   {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}   // 101B Re-opens "Embedded Designer" Option and Gives a New Container.
 {$ENDIF}
 
