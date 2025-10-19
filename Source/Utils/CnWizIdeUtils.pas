@@ -1076,9 +1076,10 @@ begin
     if not DoGetEditorSrcInfo(Mode, View, StartPos, EndPos, NewRow, NewCol,
       BlockStartLine, BlockEndLine) then
       Exit;
+
 {$IFDEF TSTRINGS_HAS_OPTIONS}
     T := Lines.TrailingLineBreak;
-    Lines.TrailingLineBreak := False; // 要保留末尾的回车换行免得下一行被拎上来
+    Lines.TrailingLineBreak := True; // 要保留末尾的回车换行免得下一行被拎上来
 {$ENDIF}
     Text := StringReplace(Lines.Text, #0, ' ', [rfReplaceAll]);
 {$IFDEF TSTRINGS_HAS_OPTIONS}
