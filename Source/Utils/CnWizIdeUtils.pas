@@ -1060,6 +1060,7 @@ const
 var
   View: IOTAEditView;
   Text: string;
+  S: AnsiString;
   BlockStartLine, BlockEndLine: Integer;
   StartPos, EndPos: Integer;
   Writer: IOTAEditWriter;
@@ -1088,10 +1089,14 @@ begin
     try
       Writer.CopyTo(StartPos);
   {$IFDEF UNICODE}
-      Writer.Insert(PAnsiChar(ConvertTextToEditorTextW(Text)));
+      S := ConvertTextToEditorTextW(Text);
   {$ELSE}
-      Writer.Insert(PAnsiChar(ConvertTextToEditorText(Text)));
+      S := ConvertTextToEditorText(Text);
   {$ENDIF}
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('Insert %d AnsiChars to %d -> %d', [Length(S), StartPos, EndPos]);
+{$ENDIF}
+      Writer.Insert(PAnsiChar(S));
       Writer.DeleteTo(EndPos);
     finally
       Writer := nil;
