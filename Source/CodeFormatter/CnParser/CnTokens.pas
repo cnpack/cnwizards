@@ -106,6 +106,7 @@ type
     tokKeywordAt,
     tokKeywordAutomated,
     tokKeywordBegin,
+    tokKeywordBitpacked,
     tokKeywordCase,
     tokKeywordClass,
     tokKeywordConst,
@@ -294,7 +295,7 @@ const
   RestrictedTypeTokens = [tokKeywordObject, tokKeywordClass, tokKeywordInterface,
     tokKeywordDispinterface];
 
-  StructTypeTokens = [tokKeywordPacked, tokKeywordArray, tokKeywordSet,
+  StructTypeTokens = [tokKeywordPacked, tokKeywordBitpacked, tokKeywordArray, tokKeywordSet,
     tokKeywordFile, tokKeywordRecord];
 
   ClassMethodTokens = [tokKeywordClass, tokKeywordProcedure, tokKeywordFunction,
@@ -436,6 +437,7 @@ const
     (Value: Integer(tokKeywordAt);             Name: 'At'),
     (Value: Integer(tokKeywordAutomated);      Name: 'Automated'),
     (Value: Integer(tokKeywordBegin);          Name: 'Begin'),
+    (Value: Integer(tokKeywordBitpacked);      Name: 'Bitpacked'),
     (Value: Integer(tokKeywordCase);           Name: 'Case'),
     (Value: Integer(tokKeywordClass);          Name: 'Class'),
     (Value: Integer(tokKeywordConst);          Name: 'Const'),

@@ -4479,7 +4479,7 @@ end;
 { StrucType -> [PACKED] (ArrayType | SetType | FileType | RecType) }
 procedure TCnBasePascalFormatter.FormatStructType(PreSpaceCount: Byte);
 begin
-  if Scanner.Token = tokkeywordPacked then
+  if Scanner.Token in [tokkeywordPacked, tokKeywordBitpacked] then
     Match(Scanner.Token);
 
   case Scanner.Token of
