@@ -109,6 +109,7 @@ type
     tokKeywordCase,
     tokKeywordClass,
     tokKeywordConst,
+    tokKeywordConstref,    // FPC
     tokKeywordConstructor,
     tokKeywordContains,
     tokKeywordDestructor,
@@ -438,6 +439,7 @@ const
     (Value: Integer(tokKeywordCase);           Name: 'Case'),
     (Value: Integer(tokKeywordClass);          Name: 'Class'),
     (Value: Integer(tokKeywordConst);          Name: 'Const'),
+    (Value: Integer(tokKeywordConstref);       Name: 'Constref'),
     (Value: Integer(tokKeywordConstructor);    Name: 'Constructor'),
     (Value: Integer(tokKeywordContains);       Name: 'Contains'),
     (Value: Integer(tokKeywordDestructor);     Name: 'Destructor'),

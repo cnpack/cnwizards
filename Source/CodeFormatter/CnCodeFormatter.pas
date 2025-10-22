@@ -3501,7 +3501,7 @@ begin
   if Scanner.Token = tokSLB then
     FormatSingleAttribute(0, 1);
 
-  if (Scanner.Token in [tokKeywordVar, tokKeywordConst, tokKeywordOut]) and
+  if (Scanner.Token in [tokKeywordVar, tokKeywordConst, tokKeywordConstref, tokKeywordOut]) and
      not (Scanner.ForwardToken in [tokColon, tokComma])
   then
   begin
@@ -3892,7 +3892,7 @@ procedure TCnBasePascalFormatter.FormatParameter(PreSpaceCount: Byte);
 var
   OldStoreIdent, GreatEqual: Boolean;
 begin
-  if Scanner.Token = tokKeywordConst then
+  if Scanner.Token in [tokKeywordConst, tokKeywordConstref] then
     Match(Scanner.Token);
 
   if Scanner.Token = tokAmpersand then
