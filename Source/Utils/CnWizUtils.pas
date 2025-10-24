@@ -1292,7 +1292,7 @@ procedure CnOtaCopyCurrFormSelectionsName;
 procedure CnOtaGetCurrFormSelectionsClassName(List: TStrings);
 {* 取得当前选择的控件的类名列表}
 
-procedure CnOtaCopyCurrFormSelectionsClassName;
+procedure CnOtaCopyCurrFormSelectionsClassName(IgnoreDuplicated: Boolean = False);
 {* 复制当前选择的控件的类名列表到剪贴板}
 
 function CnOtaIDESupportsTheming: Boolean;
@@ -9923,12 +9923,18 @@ begin
 end;
 
 // 复制当前选择的控件的类名列表到剪贴板
-procedure CnOtaCopyCurrFormSelectionsClassName;
+procedure CnOtaCopyCurrFormSelectionsClassName(IgnoreDuplicated: Boolean);
 var
-  List: TStrings;
+  List: TStringList;
 begin
   List := TStringList.Create;
   try
+    if IgnoreDuplicated then
+    begin
+      List.Sorted := True;
+      List.Duplicates := dupIgnore; // 类名去重
+    end;
+
     CnOtaGetCurrFormSelectionsClassName(List);
     if List.Count = 1 then
       Clipboard.AsText := List[0]  // 只有一行时去掉换行符

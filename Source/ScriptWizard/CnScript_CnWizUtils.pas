@@ -573,7 +573,7 @@ begin
   CL.AddDelphiFunction('Procedure CnOtaGetCurrFormSelectionsName( List : TStrings)');
   CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsName');
   CL.AddDelphiFunction('Procedure CnOtaGetCurrFormSelectionsClassName( List : TStrings)');
-  CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsClassName');
+  CL.AddDelphiFunction('Procedure CnOtaCopyCurrFormSelectionsClassName( IgnoreDuplicated : Boolean)');
   CL.AddDelphiFunction('Function CnOtaIDESupportsTheming : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetIDEThemingEnabled : Boolean');
   CL.AddDelphiFunction('Function CnOtaGetActiveThemeName : string');

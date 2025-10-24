@@ -930,6 +930,12 @@ procedure CnOtaGetCurrFormSelectionsName(List: TStrings);
 procedure CnOtaCopyCurrFormSelectionsName;
 {* 复制当前选择的控件的名称列表到剪贴板}
 
+procedure CnOtaGetCurrFormSelectionsClassName(List: TStrings);
+{* 取得当前选择的控件的类名列表}
+
+procedure CnOtaCopyCurrFormSelectionsClassName(IgnoreDuplicated : Boolean);
+{* 复制当前选择的控件的类名列表到剪贴板}
+
 function CnOtaIDESupportsTheming: Boolean;
 {* 获得 IDE 是否支持主题切换}
 
@@ -1934,7 +1940,7 @@ procedure CnOtaGetCurrFormSelectionsClassName(List: TStrings);
 begin
 end;
 
-procedure CnOtaCopyCurrFormSelectionsClassName;
+procedure CnOtaCopyCurrFormSelectionsClassName(IgnoreDuplicated : Boolean);
 begin
 end;
 
