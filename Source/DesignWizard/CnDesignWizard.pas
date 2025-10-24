@@ -954,7 +954,7 @@ begin
           if AlignSizeStyle = asCopyCompName then
             CnOtaCopyCurrFormSelectionsName
           else
-            CnOtaCopyCurrFormSelectionsClassName;
+            CnOtaCopyCurrFormSelectionsClassName(True);
 
           GetKeyboardState(KeyState);
           if (KeyState[VK_SHIFT] and $80) = 0 then // °´ Shift ²»Ìø
