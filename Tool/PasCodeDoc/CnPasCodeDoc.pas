@@ -167,8 +167,12 @@ type
 
   TCnProcedureDocItem = class(TCnDocBaseItem)
   {* 描述一代码帮助文档中的函数过程对象}
+  private
+    FIsFunction: Boolean;
   public
     constructor Create; override;
+    property IsFunction: Boolean read FIsFunction write FIsFunction;
+    {* True 为函数，False 为过程}
   end;
 
   TCnTypeDocItem = class(TCnDocBaseItem)
@@ -449,6 +453,7 @@ begin
     raise ECnPasCodeDocException.Create(SCnErrorNoProcedureFunctionIdentExists);
 
   Item := TCnProcedureDocItem.Create;
+  Item.IsFunction := ParentLeaf.NodeType = cntFunction;
   Item.DeclareName := Leaf.Text; // 独立过程名
   Item.Scope := AScope;
   Item.DeclareType := ParentLeaf.GetPascalCode; // 获取完整过程声明，无 Directives

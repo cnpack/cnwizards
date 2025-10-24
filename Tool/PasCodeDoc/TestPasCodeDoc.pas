@@ -83,6 +83,10 @@ implementation
 {$R *.DFM}
 
 const
+  HTML_FUNCTION = '函数';
+
+  HTML_PROCEDURE = '过程';
+
   HTML_HEAD_FMT = // 头，指定 UTF 8；俩 %s 是单元名
     '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">' + #13#10 +
     '<html>' + #13#10 +
@@ -144,7 +148,7 @@ const
   HTML_PROCEDURE_FMT = // 过程说明，已适配 Crypto
     '<div class="api-card"><div class="api-header">' + #13#10 +
     '<div class="api-name-container">' + #13#10 +
-    '<div class="api-type-label">函数：</div>' + #13#10 +
+    '<div class="api-type-label">%s：</div>' + #13#10 +
     '<div class="api-name">%s</div></div></div>' + #13#10 +
     '<div class="api-body">' + #13#10 +
     '<div class="api-declaration-label">声明：</div>' + #13#10 +
@@ -480,7 +484,10 @@ begin
         end;
       dtProcedure:
         begin
-          S := Format(HTML_PROCEDURE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          if (Item is TCnProcedureDocItem) and TCnProcedureDocItem(Item).IsFunction then
+            S := Format(HTML_PROCEDURE_FMT, [HTML_FUNCTION, Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)])
+          else
+            S := Format(HTML_PROCEDURE_FMT, [HTML_PROCEDURE, Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
           HtmlStrings.Add(S);
         end;
       dtVar:
@@ -1246,7 +1253,10 @@ begin
         end;
       dtProcedure:
         begin
-          S := Format(HTML_PROCEDURE_FMT, [Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
+          if (Item is TCnProcedureDocItem) and TCnProcedureDocItem(Item).IsFunction then
+            S := Format(HTML_PROCEDURE_FMT, [HTML_FUNCTION, Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)])
+          else
+            S := Format(HTML_PROCEDURE_FMT, [HTML_PROCEDURE, Item.DeclareName, PasCodeToHtml(Item.DeclareType), TrimComment(Item.Comment)]);
           HtmlStrings.Add(S);
         end;
       dtVar:
