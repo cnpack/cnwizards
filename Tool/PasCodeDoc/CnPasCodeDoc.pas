@@ -768,6 +768,11 @@ begin
             begin
               // 返回 nil 表示是 class of xxxx 这种，似乎也不用做啥
             end;
+          end
+          else // 等于 0 表示是 Txxx = class; 这种前向声明，要跳过
+          begin
+            Inc(K);
+            Continue;
           end;
         end;
 
