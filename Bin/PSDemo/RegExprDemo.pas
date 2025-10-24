@@ -11,7 +11,7 @@ program RegExprDemo;
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  RegExpr;
+  AsRegExpr;
 
 procedure CheckPhoneNumber(S: string);
 begin

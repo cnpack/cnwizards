@@ -37,7 +37,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$DEFINE UniCode}
+{$DEFINE UNICODE}
 
 uses
   Windows, SysUtils, Classes, AsRegExpr, uPSComponent, uPSRuntime, uPSCompiler;
@@ -51,18 +51,18 @@ type
   end;
 
 { compile-time registration functions }
-procedure SIRegister_RegExpr(CL: TPSPascalCompiler);
+procedure SIRegister_AsRegExpr(CL: TPSPascalCompiler);
 
 { run-time registration functions }
-procedure RIRegister_RegExpr_Routines(S: TPSExec);
+procedure RIRegister_AsRegExpr_Routines(S: TPSExec);
 
 implementation
 
 (* === compile-time registration functions === *)
 (*----------------------------------------------------------------------------*)
-procedure SIRegister_RegExpr(CL: TPSPascalCompiler);
+procedure SIRegister_AsRegExpr(CL: TPSPascalCompiler);
 begin
-{$IFDEF UniCode}
+{$IFDEF UNICODE}
   CL.AddTypeS('RegExprString', 'WideString');
 {$ELSE}
   CL.AddTypeS('RegExprString', 'AnsiString');
@@ -76,7 +76,7 @@ end;
 
 (* === run-time registration functions === *)
 (*----------------------------------------------------------------------------*)
-procedure RIRegister_RegExpr_Routines(S: TPSExec);
+procedure RIRegister_AsRegExpr_Routines(S: TPSExec);
 begin
   S.RegisterDelphiFunction(@ExecRegExpr, 'ExecRegExpr', cdRegister);
   S.RegisterDelphiFunction(@SplitRegExpr, 'SplitRegExpr', cdRegister);
@@ -91,12 +91,12 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure TPSImport_AsRegExpr.CompileImport1(CompExec: TPSScript);
 begin
-  SIRegister_RegExpr(CompExec.Comp);
+  SIRegister_AsRegExpr(CompExec.Comp);
 end;
 (*----------------------------------------------------------------------------*)
 procedure TPSImport_AsRegExpr.ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter);
 begin
-  RIRegister_RegExpr_Routines(CompExec.Exec); // comment it if no routines
+  RIRegister_AsRegExpr_Routines(CompExec.Exec); // comment it if no routines
 end;
 (*----------------------------------------------------------------------------*)
 
