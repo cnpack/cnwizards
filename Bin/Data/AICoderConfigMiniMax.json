@@ -1,0 +1,12 @@
+﻿{
+    "EngineName": "MiniMax",
+    "URL": "https://api.minimaxi.com/anthropic",
+    "ApiKey": "",
+    "Model": "MiniMax-M2",
+    "Temperature": 1,
+    "Stream": false,
+    "ModelList": "MiniMax-M2",
+    "WebAddress": "https://platform.minimaxi.com/user-center/basic-information/interface-key",
+    "MaxTokens": 4096,
+    "AnthropicVersion": "2023-06-01"
+}

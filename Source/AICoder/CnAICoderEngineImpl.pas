@@ -48,7 +48,7 @@ uses
 
 type
   TCnOpenAIAIEngine = class(TCnAIBaseEngine)
-  {* OpenAI 引擎}
+  {* OpenAI 引擎，OpenAI 规则，常被别家当作兼容规范}
   public
     class function EngineName: string; override;
   end;
@@ -60,7 +60,7 @@ type
   end;
 
   TCnClaudeAIEngine = class(TCnAIBaseEngine)
-  {* Claude 引擎}
+  {* Claude 引擎，Anthropic 规则，常被别家当作兼容规范}
   protected
     class function GetModelListURL(const OrigURL: string): string; override;
 
@@ -134,6 +134,12 @@ type
   {* 腾讯混元 AI 引擎}
   protected
     class function GetModelListURL(const OrigURL: string): string; override;
+  public
+    class function EngineName: string; override;
+  end;
+
+  TCnMiniMaxAIEngine = class(TCnClaudeAIEngine)
+  {* MiniMax 引擎。现阶段号称兼容 OpenAI 及 Anthropic，这里使用后者}
   public
     class function EngineName: string; override;
   end;
@@ -764,6 +770,13 @@ begin
   Result := ''; // 腾讯混元似乎也不支持模型列表获取操作
 end;
 
+{ TCnMiniMaxAIEngine }
+
+class function TCnMiniMaxAIEngine.EngineName: string;
+begin
+  Result := 'MiniMax';
+end;
+
 initialization
   RegisterAIEngine(TCnDeepSeekAIEngine);
   RegisterAIEngine(TCnOpenAIAIEngine);
@@ -774,6 +787,7 @@ initialization
   RegisterAIEngine(TCnVolceAIEngine);
   RegisterAIEngine(TCnHunYuanAIEngine);
   RegisterAIEngine(TCnMoonshotAIEngine);
+  RegisterAIEngine(TCnMiniMaxAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
   RegisterAIEngine(TCnOllamaAIEngine);
