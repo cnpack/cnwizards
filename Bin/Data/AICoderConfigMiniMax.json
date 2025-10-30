@@ -1,6 +1,6 @@
 ﻿{
     "EngineName": "MiniMax",
-    "URL": "https://api.minimaxi.com/anthropic",
+    "URL": "https://api.minimaxi.com/anthropic/v1/messages",
     "ApiKey": "",
     "Model": "MiniMax-M2",
     "Temperature": 1,

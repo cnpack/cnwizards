@@ -193,6 +193,7 @@ begin
   btnReferSelection.Down := CnAIEngineOptionManager.ReferSelection;
 
   WizOptions.ResetToolbarWithLargeIcons(tlbAICoder);
+  WizOptions.ResetToolbarWithLargeIcons(tlbSend);
 
   cbbActiveEngine.Items.Clear;
   for I := 0 to CnAIEngineManager.EngineCount - 1 do
