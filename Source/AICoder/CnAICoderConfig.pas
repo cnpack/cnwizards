@@ -142,6 +142,25 @@ type
     {* Claude 的版本}
   end;
 
+  { TCnMiniMaxAIEngineOption }
+
+  TCnMiniMaxAIEngineOption = class(TCnAIEngineOption)
+  {* 给 MiniMax 专用的兼容 Anthropic 的设置项，多了一个选项}
+  private
+    FMaxTokens: Integer;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+
+    // 注意本类较基类在 published 区域增加了 1 个属性，因而以下仨函数需重载返回这俩
+    function GetExtraOptionCount: Integer; override;
+    function GetExtraOptionName(Index: Integer): string; override;
+    function GetExtraOptionType(Index: Integer): TTypeKind; override;
+  published
+    property MaxTokens: Integer read FMaxTokens write FMaxTokens;
+    {* 最大 Token 数，其余默认}
+  end;
+
   TCnAIEngineOptionManager = class(TPersistent)
   {* AI 引擎配置管理类，持有并管理多个 TCnAIEngineOption 对象，数量顺序和 EngineManager 一致}
   private
@@ -761,6 +780,43 @@ begin
   case Index of
     0: Result := tkInteger;
     1: Result := tkString;
+  else
+    Result := tkUnknown;
+  end;
+end;
+
+{ TCnMiniMaxAIEngineOption }
+
+constructor TCnMiniMaxAIEngineOption.Create;
+begin
+  inherited;
+  Temperature := 1.0;
+  MaxTokens := 4096;
+end;
+
+destructor TCnMiniMaxAIEngineOption.Destroy;
+begin
+  inherited Destroy;
+end;
+
+function TCnMiniMaxAIEngineOption.GetExtraOptionCount: Integer;
+begin
+  Result := 1;
+end;
+
+function TCnMiniMaxAIEngineOption.GetExtraOptionName(Index: Integer): string;
+begin
+  case Index of
+    0: Result := 'MaxTokens';
+  else
+    Result := '';
+  end;
+end;
+
+function TCnMiniMaxAIEngineOption.GetExtraOptionType(Index: Integer): TTypeKind;
+begin
+  case Index of
+    0: Result := tkInteger;
   else
     Result := tkUnknown;
   end;

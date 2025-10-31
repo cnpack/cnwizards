@@ -42,8 +42,8 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);..\..\..\Source"/>
-      <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\MultiLang;..\..\..\Source\AICoder;..\..\..\Source\Misc;..\..\..\Source\DesignEditor;..\..\..\Source\Config;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\NonVisual"/>
+      <IncludeFiles Value="$(ProjOutDir);..\..\..\..\Source"/>
+      <OtherUnitFiles Value="..\..\..\..\Source\Framework;..\..\..\..\Source\Utils;..\..\..\..\Source\MultiLang;..\..\..\..\Source\AICoder;..\..\..\..\Source\Misc;..\..\..\..\Source\DesignEditor;..\..\..\..\Source\Config;..\..\..\..\Source\ThirdParty;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\Common;..\..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\..\cnvcl\Source\NonVisual"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

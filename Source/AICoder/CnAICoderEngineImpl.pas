@@ -59,6 +59,8 @@ type
     class function EngineName: string; override;
   end;
 
+  { TCnClaudeAIEngine }
+
   TCnClaudeAIEngine = class(TCnAIBaseEngine)
   {* Claude 引擎，Anthropic 规则，常被别家当作兼容规范}
   protected
@@ -70,6 +72,9 @@ type
     // Claude 的 HTTP 接口的 JSON 格式和其他几个有所不同
     function ConstructRequest(RequestType: TCnAIRequestType; const Code: string;
       History: TStrings = nil): TBytes; override;
+
+    // 请求体里也要加额外参数
+    procedure PreProcessAnthropicReqRoot(Option: TCnAIEngineOption; ReqRoot: TCnJSONObject); virtual;
 
     // Claude 的信息返回格式也不同
     function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
@@ -138,10 +143,24 @@ type
     class function EngineName: string; override;
   end;
 
+  { TCnMiniMaxAIEngine }
+
   TCnMiniMaxAIEngine = class(TCnClaudeAIEngine)
   {* MiniMax 引擎。现阶段号称兼容 OpenAI 及 Anthropic，这里使用后者}
+  protected
+    // 请求体里也要加额外参数
+    procedure PreProcessAnthropicReqRoot(Option: TCnAIEngineOption; ReqRoot: TCnJSONObject); override;
   public
+    // MiniMax 的身份验证头信息不需要 AnthropicVersion
+    procedure PrepareRequestHeader(const APIKey: string; Headers: TStringList); override;
+
+    // MiniMax 的信息返回格式也不同
+    function ParseResponse(SendId: Integer; StreamMode, Partly: Boolean; var Success: Boolean;
+      var ErrorCode: Cardinal; var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
+      const Response: TBytes): string; override;
+
     class function EngineName: string; override;
+    class function OptionClass: TCnAIEngineOptionClass; override;
   end;
 
   TCnOllamaAIEngine = class(TCnAIBaseEngine)
@@ -305,7 +324,8 @@ begin
     ReqRoot.AddPair('model', Option.Model);
     ReqRoot.AddPair('stream', Option.Stream);
     ReqRoot.AddPair('temperature', Option.Temperature);
-    ReqRoot.AddPair('max_tokens', (Option as TCnClaudeAIEngineOption).MaxTokens);
+
+    PreProcessAnthropicReqRoot(Option, ReqRoot);
 
     ReqRoot.AddPair('system', Option.SystemMessage); // Claude 额外放 System 消息
     Arr := ReqRoot.AddArray('messages');
@@ -345,6 +365,13 @@ begin
   finally
     ReqRoot.Free;
   end;
+end;
+
+procedure TCnClaudeAIEngine.PreProcessAnthropicReqRoot(
+  Option: TCnAIEngineOption; ReqRoot: TCnJSONObject);
+begin
+  if Option is TCnClaudeAIEngineOption then
+    ReqRoot.AddPair('max_tokens', (Option as TCnClaudeAIEngineOption).MaxTokens);
 end;
 
 class function TCnClaudeAIEngine.EngineName: string;
@@ -516,12 +543,14 @@ begin
     Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
 end;
 
-procedure TCnClaudeAIEngine.PrepareRequestHeader(const ApiKey: string; Headers: TStringList);
+procedure TCnClaudeAIEngine.PrepareRequestHeader(const APIKey: string;
+  Headers: TStringList);
 begin
   inherited;
   DeleteAuthorizationHeader(Headers); // 删除原有的认证头，换新头
   Headers.Add('x-api-key: ' + ApiKey);
-  Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
+  if Option is TCnClaudeAIEngineOption then
+    Headers.Add('anthropic-version: ' + (Option as TCnClaudeAIEngineOption).AnthropicVersion);
 end;
 
 { TCnGeminiAIEngine }
@@ -772,9 +801,188 @@ end;
 
 { TCnMiniMaxAIEngine }
 
+procedure TCnMiniMaxAIEngine.PreProcessAnthropicReqRoot(
+  Option: TCnAIEngineOption; ReqRoot: TCnJSONObject);
+begin
+  if Option is TCnMiniMaxAIEngineOption then
+    ReqRoot.AddPair('max_tokens', (Option as TCnMiniMaxAIEngineOption).MaxTokens);
+end;
+
+procedure TCnMiniMaxAIEngine.PrepareRequestHeader(const APIKey: string;
+  Headers: TStringList);
+begin
+  inherited;
+  DeleteAuthorizationHeader(Headers); // 删除原有的认证头，换新头
+  Headers.Add('x-api-key: ' + ApiKey);
+end;
+
+function TCnMiniMaxAIEngine.ParseResponse(SendId: Integer; StreamMode,
+  Partly: Boolean; var Success: Boolean; var ErrorCode: Cardinal;
+  var IsStreamEnd: Boolean; RequestType: TCnAIRequestType;
+  const Response: TBytes): string;
+var
+  RespRoot, Msg: TCnJSONObject;
+  Arr: TCnJSONArray;
+  S, Prev: AnsiString;
+  PrevS: string;
+  P: PAnsiChar;
+  HasPartly: Boolean;
+  JsonObjs: TObjectList;
+  I, Step: Integer;
+begin
+// 流格式，省略了复杂的：
+// event: message_start
+// data: {"type":"message_start","message":{"id":"02","type":"message","role":"assistant","content":[],"model":"name2","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":59,"output_tokens":0},"service_tier":"standard"}}
+// event: ping
+// data: {"type":"ping"}
+// event: content_block_delta
+// data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"通过，在"}}
+
+
+  Result := '';
+  // 根据 SendId 找本次会话中留存的数据
+  Prev := '';
+  if FPrevRespRemainMap.Find(IntToStr(SendId), PrevS) then
+  begin
+    Prev := AnsiString(PrevS);
+    S := Prev + BytesToAnsi(Response) // 把剩余内容拼上现有内容再次进行解析
+  end
+  else
+    S := BytesToAnsi(Response);
+
+  JsonObjs := TObjectList.Create(True);
+  Step := CnNewLineDelimitedJSONParse(PAnsiChar(S), JsonObjs, True);
+  P := PAnsiChar(PAnsiChar(S) + Step);
+
+  if (P <> #0) and (Step < Length(S)) then
+  begin
+    // 步进没处理完（长度没满足），且不是结束符，说明有剩余内容
+    Prev := Copy(S, Step + 1, MaxInt);
+  end
+  else // 说明没剩余内容
+    Prev := '';
+
+  // 有无剩余都存起来
+  FPrevRespRemainMap.Add(IntToStr(SendId), Prev);
+
+  RespRoot := nil;
+  if JsonObjs.Count > 0 then
+    RespRoot := TCnJSONObject(JsonObjs[0]);
+
+  if RespRoot = nil then
+  begin
+    // 一类原始错误
+    Result := string(S);
+  end
+  else
+  begin
+    try
+      // 正常回应
+      HasPartly := False;
+      if Partly then
+      begin
+        // 流式模式下，可能有多个 Obj，并且以 type 来区分
+        for I := 0 to JsonObjs.Count - 1 do
+        begin
+          // 找 data 中的 delta 中的 text，不判断 type
+          RespRoot := TCnJSONObject(JsonObjs[I]);
+          if (RespRoot['data'] <> nil) and (RespRoot['data'] is TCnJSONObject) then
+            RespRoot := TCnJSONObject(RespRoot['data']);
+
+          if (RespRoot['delta'] <> nil) and (RespRoot['delta'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(RespRoot['delta']);
+            if (Msg['text'] <> nil) and (Msg['text'] is TCnJSONString) then
+            begin
+              // 每一块回应拼起来
+              Result := Result + Msg['text'].AsString;
+              HasPartly := True;
+            end
+            else if (Msg['thinking'] <> nil) and (Msg['thinking'] is TCnJSONString) then
+            begin
+              // 每一块思考的回应拼起来
+              Result := Result + Msg['thinking'].AsString;
+              HasPartly := True;
+            end;
+          end;
+          if (RespRoot['content_block'] <> nil) and (RespRoot['content_block'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(RespRoot['content_block']);
+            if (Msg['text'] <> nil) and (Msg['text'] is TCnJSONString) then
+            begin
+              // 每一块回应拼起来
+              Result := Result + Msg['text'].AsString;
+              HasPartly := True;
+            end;
+          end;
+
+          // 也找结束标记 type
+          if (RespRoot['type'] <> nil) and (RespRoot['type'] is TCnJSONString) then
+          begin
+            if RespRoot['type'].AsString = 'message_stop' then
+            begin
+              IsStreamEnd := True;
+              Exit;
+            end;
+          end;
+        end;
+      end
+      else // 完整模式下
+      begin
+        // 正常回应
+        if (RespRoot['content'] <> nil) and (RespRoot['content'] is TCnJSONArray) then
+        begin
+          Arr := TCnJSONArray(RespRoot['content']);
+          if (Arr.Count > 0) and (Arr[0]['text'] <> nil) and (Arr[0]['text'] is TCnJSONString) then
+            Result := Arr[0]['text'].AsString;
+        end;
+
+        if not HasPartly and (Result = '') then
+        begin
+          // 只要没有正常回应，就说明出错了，但 Claude 的文档里没有说明，只能照着其他 AI 引擎写
+          Success := False;
+
+          // 一类业务错误，比如 Key 无效等
+          if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONObject) then
+          begin
+            Msg := TCnJSONObject(RespRoot['error']);
+            Result := Msg['message'].AsString;
+          end;
+
+          // 一类网络错误，比如 URL 错了等
+          if (RespRoot['error'] <> nil) and (RespRoot['error'] is TCnJSONString) then
+            Result := RespRoot['error'].AsString;
+          if (RespRoot['message'] <> nil) and (RespRoot['message'] is TCnJSONString) then
+          begin
+            if Result = '' then
+              Result := RespRoot['message'].AsString
+            else
+              Result := Result + ', ' + RespRoot['message'].AsString;
+          end;
+        end;
+      end;
+
+      // 兜底，所有解析都无效就直接用整个 JSON 作为返回信息
+      if not HasPartly and (Result = '') then
+        Result := string(S);
+    finally
+      JsonObjs.Free;
+    end;
+  end;
+
+  // 处理一下回车换行
+  if Pos(CRLF, Result) <= 0 then
+    Result := StringReplace(Result, LF, CRLF, [rfReplaceAll]);
+end;
+
 class function TCnMiniMaxAIEngine.EngineName: string;
 begin
   Result := 'MiniMax';
+end;
+
+class function TCnMiniMaxAIEngine.OptionClass: TCnAIEngineOptionClass;
+begin
+  Result := TCnMiniMaxAIEngineOption;
 end;
 
 initialization

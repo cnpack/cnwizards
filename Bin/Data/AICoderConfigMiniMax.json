@@ -7,6 +7,5 @@
     "Stream": false,
     "ModelList": "MiniMax-M2",
     "WebAddress": "https://platform.minimaxi.com/user-center/basic-information/interface-key",
-    "MaxTokens": 4096,
-    "AnthropicVersion": "2023-06-01"
+    "MaxTokens": 4096
 }
