@@ -1309,6 +1309,14 @@ begin
         FormatExpression(0, PreSpaceCount);
       end;
     end;
+
+    // 如果表达式前面是匿名函数则要处理调用的情形，但不确定有啥副作用
+    while Scanner.Token = tokLB do
+    begin
+      Match(tokLB);
+      FormatExprList;
+      Match(tokRB);
+    end;
   finally
     RestoreElementType;
   end;
@@ -3752,9 +3760,7 @@ begin
     Exit;
 
   if Scanner.Token = tokLB then
-  begin
-    FormatObjHeritage // ObjHeritage -> '(' QualId ')'
-  end;
+    FormatObjHeritage; // ObjHeritage -> '(' QualId ')'
 
   Writeln;
 
