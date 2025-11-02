@@ -838,7 +838,6 @@ begin
 // event: content_block_delta
 // data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"通过，在"}}
 
-
   Result := '';
   // 根据 SendId 找本次会话中留存的数据
   Prev := '';

@@ -6639,7 +6639,7 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, Idx, Layer, Utf8Col, Utf8Len, TL, HSC: Integer;
+  I, L, K, Idx, Layer, Utf8Col, Utf8Len, TL, HSC: Integer;
   Utf8Text: RawByteString;
   Utf16Text: string;
   ColorFg, ColorBk: TColor;
@@ -6762,7 +6762,14 @@ begin
             C.FillRect(Rect);
           end;
           C.Brush.Style := bsClear;
-          C.TextOut(Rect.Left, Rect.Top, Text);
+
+          if Context.EditorState.CharWidth > 0 then
+          begin
+            for K := 0 to Length(Text) - 1 do
+              C.TextOut(Rect.Left + K * Context.EditorState.CharWidth, Rect.Top, string(Text[K + 1]));
+          end
+          else
+            C.TextOut(Rect.Left, Rect.Top, Text);
           C.Font.Color := OldColor;
         end;
       end;
@@ -6837,7 +6844,13 @@ begin
           C.Font.Style := C.Font.Style + [fsUnderline];
 
         C.Brush.Style := bsClear;
-        C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
+        if Context.EditorState.CharWidth > 0 then
+        begin
+          for K := 0 to Length(Text) - 1 do
+            C.TextOut(Rect.Left + K * Context.EditorState.CharWidth, Rect.Top, string(Text[K + 1]));
+        end
+        else
+          C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
         C.Font.Color := OldColor;
       end;
     end;
@@ -6915,7 +6928,14 @@ begin
         C.Brush.Style := bsClear;
         if FFlowStatementBackground <> clNone then // 有背景色则使用固定前景色，好看点
           C.Font.Color := FFlowStatementForeground;
-        C.TextOut(R.Left, R.Top, Token.Token);     // 只画 Exit 等本身，不画完整的 Text 避免后面的括号等的颜色受影响
+
+        if Context.EditorState.CharWidth > 0 then
+        begin
+          for K := 0 to Length(Token.Token) - 1 do
+            C.TextOut(R.Left + K * Context.EditorState.CharWidth, R.Top, string(Token.Token[K]));
+        end
+        else
+          C.TextOut(R.Left, R.Top, Token.Token);     // 只画 Exit 等本身，不画完整的 Text 避免后面的括号等的颜色受影响
         C.Font.Color := OldColor;
       end;
     end;
@@ -7016,7 +7036,14 @@ begin
             C.Brush.Style := bsClear;
             if FCurrentTokenBackground <> clNone then // 有背景色则使用固定前景色，好看点
               C.Font.Color := FCurrentTokenForeground;
-            C.TextOut(R.Left, R.Top, Token.Token);
+
+            if Context.EditorState.CharWidth > 0 then
+            begin
+              for K := 0 to Length(Token.Token) - 1 do
+                C.TextOut(R.Left + K * Context.EditorState.CharWidth, R.Top, string(Token.Token[K]));
+            end
+            else
+              C.TextOut(R.Left, R.Top, Token.Token);
             C.Font.Color := OldColor;
           end;
         end;
@@ -7099,7 +7126,14 @@ begin
           C.Brush.Style := bsClear;
           if FCustomIdentBackground <> clNone then // 有背景色则使用固定前景色，好看点
             C.Font.Color := FCustomIdentForeground;
-          C.TextOut(R.Left, R.Top, Token.Token);
+
+          if Context.EditorState.CharWidth > 0 then
+          begin
+            for K := 0 to Length(Token.Token) - 1 do
+              C.TextOut(R.Left + K * Context.EditorState.CharWidth, R.Top, string(Token.Token[K]));
+          end
+          else
+            C.TextOut(R.Left, R.Top, Token.Token);
           C.Font.Color := OldColor;
         end;
       end;
