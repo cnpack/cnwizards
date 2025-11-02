@@ -148,6 +148,8 @@ type
   TCnMiniMaxAIEngine = class(TCnClaudeAIEngine)
   {* MiniMax 引擎。现阶段号称兼容 OpenAI 及 Anthropic，这里使用后者}
   protected
+    class function GetModelListURL(const OrigURL: string): string; override;
+
     // 请求体里也要加额外参数
     procedure PreProcessAnthropicReqRoot(Option: TCnAIEngineOption; ReqRoot: TCnJSONObject); override;
   public
@@ -800,6 +802,11 @@ begin
 end;
 
 { TCnMiniMaxAIEngine }
+
+class function TCnMiniMaxAIEngine.GetModelListURL(const OrigURL: string): string;
+begin
+  Result := '';
+end;
 
 procedure TCnMiniMaxAIEngine.PreProcessAnthropicReqRoot(
   Option: TCnAIEngineOption; ReqRoot: TCnJSONObject);
