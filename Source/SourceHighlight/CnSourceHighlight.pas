@@ -6773,9 +6773,12 @@ begin
 
           if Context.EditorState.CharWidth > 0 then
           begin
+            L := Rect.Left;
             for K := 0 to Length(Text) - 1 do
-              C.TextOut(Rect.Left + K * Context.EditorState.CharWidth
-                * GetWidthFactor(Text[K + 1]), Rect.Top, string(Text[K + 1]));
+            begin
+              C.TextOut(L, Rect.Top, string(Text[K + 1]));
+              Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
+            end;
           end
           else
             C.TextOut(Rect.Left, Rect.Top, Text);
@@ -6855,9 +6858,12 @@ begin
         C.Brush.Style := bsClear;
         if Context.EditorState.CharWidth > 0 then
         begin
+          L := Rect.Left;
           for K := 0 to Length(Text) - 1 do
-            C.TextOut(Rect.Left + K * Context.EditorState.CharWidth
-              * GetWidthFactor(Text[K + 1]), Rect.Top, string(Text[K + 1]));
+          begin
+            C.TextOut(L, Rect.Top, string(Text[K + 1]));
+            Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
+          end;
         end
         else
           C.TextOut(Rect.Left, Rect.Top, Text); // 画文字
@@ -6941,9 +6947,12 @@ begin
 
         if Context.EditorState.CharWidth > 0 then
         begin
+          L := R.Left;
           for K := 0 to Length(Token.Token) - 1 do
-            C.TextOut(R.Left + K * Context.EditorState.CharWidth
-              * GetWidthFactor(Token.Token[K]), R.Top, string(Token.Token[K]));
+          begin
+            C.TextOut(L, R.Top, string(Token.Token[K]));
+            Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+          end;
         end
         else
           C.TextOut(R.Left, R.Top, Token.Token);     // 只画 Exit 等本身，不画完整的 Text 避免后面的括号等的颜色受影响
@@ -7050,9 +7059,12 @@ begin
 
             if Context.EditorState.CharWidth > 0 then
             begin
+              L := R.Left;
               for K := 0 to Length(Token.Token) - 1 do
-                C.TextOut(R.Left + K * Context.EditorState.CharWidth
-                  * GetWidthFactor(Token.Token[K]), R.Top, string(Token.Token[K]));
+              begin
+                C.TextOut(L, R.Top, string(Token.Token[K]));
+                Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+              end;
             end
             else
               C.TextOut(R.Left, R.Top, Token.Token);
@@ -7141,9 +7153,12 @@ begin
 
           if Context.EditorState.CharWidth > 0 then
           begin
+            L := R.Left;
             for K := 0 to Length(Token.Token) - 1 do
-              C.TextOut(R.Left + K * Context.EditorState.CharWidth
-                * GetWidthFactor(Token.Token[K]), R.Top, string(Token.Token[K]));
+            begin
+              C.TextOut(L, R.Top, string(Token.Token[K]));
+              Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+            end;
           end
           else
             C.TextOut(R.Left, R.Top, Token.Token);
