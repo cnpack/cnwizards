@@ -6639,7 +6639,7 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, K, Idx, Layer, Utf8Col, Utf8Len, TL, HSC: Integer;
+  I, L, K, Idx, Layer, Utf8Col, Utf8Len, TL, HSC, CW: Integer;
   Utf8Text: RawByteString;
   Utf16Text: string;
   ColorFg, ColorBk: TColor;
@@ -6692,6 +6692,7 @@ begin
 
   // 找到该 EditControl 对应的 BlockMatch 列表
   Info := TCnBlockMatchInfo(FBlockMatchList[Idx]);
+  HSC := -1;
 
   // 画关键字嵌套以及光标下关键字匹配高亮
   if (FStructureHighlight or FBlockMatchHighlight) and (SyntaxCode = atReservedWord)
@@ -6718,15 +6719,19 @@ begin
     if (L < Info.KeyLineCount) and (Info.KeyLines[L] <> nil) then
     begin
       Token := nil;
+      if HSC = -1 then
+        HSC := GetHeaderSpaceCount(Text);
+
       for I := 0 to Info.KeyLines[L].Count - 1 do
       begin
-        // 注意关键字都是前后去除空格独立绘制的，因此比较 Col 有效
+        // 注意关键字只有设置粗体时才是前后去除空格独立绘制的，这时候比较 Col 有效
+        // 但未设置粗体时，就会和前后的同格式内容一起绘制，因而不能全简单比较 Col
         // 因为汉字有偏差不能直接比较，所以要将 EditCol 转为 Utf8 的 Col，
         // 也就是把 EditCol 之前的部分（所以减一）求 Utf8 长度后，加上列的起始值 1
         Utf8Col := 1 + CalcUtf8LengthFromWideStringAnsiDisplayOffset(PWideChar(GetPaintLineTextFromContext(Context)),
           TCnGeneralPasToken(Info.KeyLines[L][I]).EditCol - 1, @IDEWideCharIsWideLength);
 
-        if Utf8Col = ColNum then
+        if Utf8Col = ColNum + HSC then
         begin
           Token := TCnGeneralPasToken(Info.KeyLines[L][I]);
           Break;
@@ -6788,8 +6793,6 @@ begin
     end;
   end;
 
-  HSC := -1;
-
   // 条件编译指令高亮
   if FHighlightCompDirective and (SyntaxCode in [atPreproc, atComment]) and
     (FCompDirectiveBackground <> clNone) and (Info.CompDirectiveTokenCount > 0) then
@@ -6813,7 +6816,8 @@ begin
       and (CompDirectivePair <> nil) then
     begin
       Token := nil;
-      HSC := GetHeaderSpaceCount(Text);
+      if HSC = -1 then
+        HSC := GetHeaderSpaceCount(Text);
 
       for I := 0 to Info.CompDirectiveLines[L].Count - 1 do
       begin
@@ -7000,15 +7004,15 @@ begin
           begin
             Utf8Text := Copy(UTF8Encode(Text), 1, TL);  // 拿到 Utf8 子串
             Utf16Text := UTF8Decode(Utf8Text);
-            HSC := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
+            CW := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
           end
           else
-            HSC := 0;
+            CW := 0;
 
           if (FCurrentTokenBackground <> clNone) or (FCurrentTokenBorderColor <> clNone) then
           begin
             R := Rect;
-            R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+            R.Left := R.Left + CW * Context.EditorState.CharWidth;
             R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
 
             // 画背景
@@ -7103,13 +7107,13 @@ begin
           begin
             Utf8Text := Copy(UTF8Encode(Text), 1, TL);  // 拿到 Utf8 子串
             Utf16Text := UTF8Decode(Utf8Text);
-            HSC := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
+            CW := CalcAnsiDisplayLengthFromWideString(PChar(Utf16Text));
           end
           else
-            HSC := 0;
+            CW := 0;
 
           R := Rect;
-          R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+          R.Left := R.Left + CW * Context.EditorState.CharWidth;
           R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
 
           // 画背景框
