@@ -547,7 +547,7 @@ var
         Result := FloatToStr(Reader.ReadCurrency);
       vaDate:
         Result := FloatToStr(Reader.ReadDate);
-      vaWString, vaUTF8String:
+      vaWString {$IFDEF COMPILER6_UP}, vaUTF8String {$ENDIF}:
         begin
           W := Reader.ReadWideString;
           Result := ConvertWideStringToDfmString(W);
