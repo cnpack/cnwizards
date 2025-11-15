@@ -511,12 +511,159 @@ begin
     Leaf.Text := Leaf.ElementClass;
 end;
 
-procedure ParseBinaryObjectToLeaf(Reader: TReader; Leaf: TCnDfmLeaf);
+procedure ParseBinaryObjectToLeaf(Reader: TReader; Tree: TCnDfmTree; Leaf: TCnDfmLeaf);
+var
+  Child: TCnDfmLeaf;
+  PropName: string;
+  PropValue: string;
+  BinStream: TObject;
+  Buffer: array of Byte;
+
+  function ParseBinaryPropertyValue(Reader: TReader): string;
+  var
+    ValueType: TValueType;
+    I, Size: Integer;
+    W: WideString;
+    S: string;
+    Stream: TMemoryStream;
+  begin
+    Result := '';
+    ValueType := Reader.NextValue;
+
+    case ValueType of
+      vaInt8, vaInt16, vaInt32:
+        Result := IntToStr(Reader.ReadInteger);
+      vaInt64:
+        {$IFDEF COMPILER6_UP}
+        Result := IntToStr(Reader.ReadInt64);
+        {$ELSE}
+        Result := IntToStr(Integer(Reader.ReadInt64));
+        {$ENDIF}
+      vaExtended:
+        Result := FloatToStr(Reader.ReadFloat);
+      vaSingle:
+        Result := FloatToStr(Reader.ReadSingle);
+      vaCurrency:
+        Result := FloatToStr(Reader.ReadCurrency);
+      vaDate:
+        Result := FloatToStr(Reader.ReadDate);
+      vaWString, vaUTF8String:
+        begin
+          W := Reader.ReadWideString;
+          Result := ConvertWideStringToDfmString(W);
+        end;
+      vaString, vaLString:
+        begin
+          S := Reader.ReadString;
+          Result := '''' + StringReplace(S, '''', '''''', [rfReplaceAll]) + '''';
+        end;
+      vaIdent, vaFalse, vaTrue, vaNil, vaNull:
+        Result := Reader.ReadIdent;
+      vaBinary:
+        begin
+          Size := Reader.ReadInteger;
+          Stream := TMemoryStream.Create;
+          try
+            if Size > 0 then
+            begin
+              SetLength(Buffer, Size);
+              Reader.Read(Buffer[0], Size);
+              Stream.Write(Buffer[0], Size);
+              Stream.Position := 0;
+            end;
+            Result := '{' + ConvertStreamToHexDfmString(Stream) + '}';
+            BinStream := Stream; // Pass binary stream object
+          except
+            Stream.Free;
+            raise;
+          end;
+        end;
+      vaSet:
+        begin
+          Result := '[';
+          Reader.ReadValue; // Skip Value Type
+          while True do
+          begin
+            S := Reader.ReadStr;
+            if S = '' then Break;
+            if Result <> '[' then
+              Result := Result + ', ';
+            Result := Result + S;
+          end;
+          Result := Result + ']';
+        end;
+      vaCollection:
+        begin
+          Result := '<';
+          Reader.ReadValue; // Skip Value Type
+          while not Reader.EndOfList do
+          begin
+            Result := Result + 'item' + #13#10;
+            // Read order modifier if present
+            if Reader.NextValue in [vaInt8, vaInt16, vaInt32] then
+            begin
+              Reader.ReadInteger; // Skip order modifier for now
+            end;
+
+            // Read item properties
+            while not Reader.EndOfList do
+            begin
+              PropName := Reader.ReadStr;
+              PropValue := ParseBinaryPropertyValue(Reader);
+              Result := Result + '  ' + PropName + ' = ' + PropValue + #13#10;
+            end;
+            Reader.ReadListEnd;
+            Result := Result + 'end' + #13#10;
+          end;
+          Reader.ReadListEnd;
+          Result := Result + '>';
+        end;
+      vaList:
+        begin
+          Result := '(' + #13#10;
+          Reader.ReadValue;
+          while not Reader.EndOfList do
+          begin
+            S := ParseBinaryPropertyValue(Reader);
+            Result := Result + '  ' + S + #13#10;
+          end;
+          Reader.ReadListEnd;
+          Result := Result + ')';
+        end;
+    else
+      raise EReadError.CreateResFmt(@SInvalidPropertyType, [Ord(ValueType)]);
+    end;
+  end;
+
 begin
   ParseBinaryHeader(Reader, Leaf);
-  // TODO: Parse Binary Properties and Children to Leaves.
-//  while not Reader.EndOfList do
-//    ParseBinaryPropertyToLeaf(True);
+
+  // Parse properties
+  BinStream := nil;
+  while not Reader.EndOfList do
+  begin
+    PropName := Reader.ReadStr;
+    PropValue := ParseBinaryPropertyValue(Reader);
+
+    if BinStream <> nil then
+    begin
+      Leaf.Properties.AddObject(PropName + ' = ' + PropValue, BinStream);
+      BinStream := nil;
+    end
+    else
+    begin
+      Leaf.Properties.Add(PropName + ' = ' + PropValue);
+    end;
+  end;
+  Reader.ReadListEnd; // End of properties list
+
+  // Parse child objects
+  while not Reader.EndOfList do
+  begin
+    Child := Tree.AddChild(Leaf) as TCnDfmLeaf;
+    ParseBinaryObjectToLeaf(Reader, Tree, Child);
+  end;
+  Reader.ReadListEnd; // End of children list
 end;
 
 // 简单解析 Text 格式的 Dfm 拿到 Info
@@ -957,7 +1104,7 @@ begin
     try
       Reader.ReadSignature;
       StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
-      ParseBinaryObjectToLeaf(Reader, StartLeaf);
+      ParseBinaryObjectToLeaf(Reader, Tree, StartLeaf);
       Result := True;
     finally
       {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := SaveSeparator;
