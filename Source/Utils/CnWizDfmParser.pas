@@ -594,27 +594,30 @@ var
         end;
       vaCollection:
         begin
+          Reader.ReadValue; // 读取 vaCollection 值类型
           Result := '<';
-          Reader.ReadValue; // Skip Value Type
-          while not Reader.EndOfList do
-          begin
+
+          repeat
+            Reader.ReadListBegin;
             Result := Result + 'item' + #13#10;
-            // Read order modifier if present
+
+            // 读取可选的顺序修饰符
             if Reader.NextValue in [vaInt8, vaInt16, vaInt32] then
             begin
-              Reader.ReadInteger; // Skip order modifier for now
+              Reader.ReadInteger; // 跳过顺序修饰符
             end;
 
-            // Read item properties
-            while not Reader.EndOfList do
-            begin
+            // 处理单个集合项内的属性
+            repeat
               PropName := Reader.ReadStr;
               PropValue := ParseBinaryPropertyValue(Reader);
               Result := Result + '  ' + PropName + ' = ' + PropValue + #13#10;
-            end;
-            Reader.ReadListEnd;
+            until Reader.EndOfList;
+
             Result := Result + 'end' + #13#10;
-          end;
+            Reader.ReadListEnd;
+          until Reader.EndOfList;
+
           Reader.ReadListEnd;
           Result := Result + '>';
         end;
@@ -631,7 +634,7 @@ var
           Result := Result + ')';
         end;
     else
-      raise EReadError.CreateResFmt(@SInvalidPropertyType, [Ord(ValueType)]);
+      raise EReadError.CreateResFmt(@SInvalidPropertyType, [IntToStr(Ord(ValueType))]);
     end;
   end;
 
