@@ -191,6 +191,18 @@ const
     '<div class="api-description-label">说明：</div>' + #13#10 +
     '<div class="api-description">%s</div></div></div>' + #13#10;
 
+  HTML_FIELD_FMT =   // Field 说明，已适配 Crypto
+    '<div class="api-card method-card">' + #13#10 +
+    '<div class="api-header method-header">' + #13#10 +
+    '<div class="api-type-label">成员：</div>' + #13#10 +
+    '<div class="api-name">%s</div>' + #13#10 +
+    '<div class="api-visibility">%s</div></div>' + #13#10 +
+    '<div class="api-body">' + #13#10 +
+    '<div class="api-declaration-label">声明：</div>' + #13#10 +
+    '<div class="api-declaration">%s</div>' + #13#10 +
+    '<div class="api-description-label">说明：</div>' + #13#10 +
+    '<div class="api-description">%s</div></div></div>' + #13#10;
+
 function TrimLastSpacesLineEnd(const Str: string): string;
 var
   Len: Integer;
@@ -303,7 +315,6 @@ begin
           Html.Free;
         end;
       end;
-
 
       // 生成容器文件
     finally
@@ -1085,6 +1096,9 @@ begin
       SL.Delete(J);
       for I := FAllFile.Count - 1 downto 0 do
       begin
+        if Pos('CnCryptoExport', FAllFile[I]) > 0 then // 忽略这个文件
+          Continue;
+
         if I = FAllFile.Count - 1 then
           S := '  ''' + ChangeFileExt(ExtractFileName(FAllFile[I]), '') + ''''
         else
@@ -1121,6 +1135,9 @@ begin
     // 根据 Template 文件生成每个单元的帮助文件
     for I := 0 to FAllFile.Count - 1 do
     begin
+      if Pos('CnCryptoExport', FAllFile[I]) > 0 then // 忽略这个文件
+        Continue;
+
       FreeAndNil(FDoc);
       try
         FDoc := CnCreateUnitDocFromFileName(FAllFile[I]);
@@ -1234,6 +1251,11 @@ begin
                 dtProcedure:
                   begin
                     S := Format(HTML_METHOD_FMT, [Sub.DeclareName, Sub.GetScopeStr, PasCodeToHtml(Sub.DeclareType), TrimComment(Sub.Comment)]);
+                    HtmlStrings.Add(S);
+                  end;
+                dtField:
+                  begin
+                    S := Format(HTML_FIELD_FMT, [Sub.DeclareName, Sub.GetScopeStr, PasCodeToHtml(Sub.DeclareType), TrimComment(Sub.Comment)]);
                     HtmlStrings.Add(S);
                   end;
               end;
