@@ -100,8 +100,8 @@ function CnConvertBmpToPng(BmpFile, PngFile: PAnsiChar): LongBool;
 var
   Png: TPngImage;
   Bmp: TBitmap;
-  i, j: Integer;
-  p, p1, p2: PByteArray;
+  I, J: Integer;
+  P, P1, P2: PByteArray;
 begin
   Result := False;
   if not FileExists(string(BmpFile)) then
@@ -115,17 +115,17 @@ begin
     if Bmp.PixelFormat = pf32bit then
     begin
       Png := TPngImage.CreateBlank(COLOR_RGBALPHA, 8, Bmp.Width, Bmp.Height);
-      for i := 0 to Bmp.Height - 1 do
+      for I := 0 to Bmp.Height - 1 do
       begin
-        p := Bmp.ScanLine[i];
-        p1 := Png.Scanline[i];
-        p2 := Png.AlphaScanline[i];
-        for j := 0 to Bmp.Width - 1 do
+        P := Bmp.ScanLine[I];
+        P1 := Png.Scanline[I];
+        P2 := Png.AlphaScanline[I];
+        for J := 0 to Bmp.Width - 1 do
         begin
-          p1[j * 3] := p[j * 4];
-          p1[j * 3 + 1] := p[j * 4 + 1];
-          p1[j * 3 + 2] := p[j * 4 + 2];
-          p2[j] := p[j * 4 + 3];
+          P1[J * 3] := P[J * 4];
+          P1[J * 3 + 1] := P[J * 4 + 1];
+          P1[J * 3 + 2] := P[J * 4 + 2];
+          P2[J] := P[J * 4 + 3];
         end;
       end;
     end
