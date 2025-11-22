@@ -48,7 +48,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnPrefixList, CnWizIdeUtils, CnCommon, CnWizUtils,
-  CnWizConsts, CnWizOptions, CnWizMultiLang, CnPrefixWizard, ExtCtrls;
+  CnWizConsts, CnWizOptions, CnWizMultiLang, CnPrefixWizard, ExtCtrls,
+  Buttons;
 
 type
 
@@ -83,6 +84,10 @@ type
     chkF2Rename: TCheckBox;
     bvl1: TBevel;
     chkUseAncestor: TCheckBox;
+    bvl2: TBevel;
+    btnInvert: TSpeedButton;
+    btnDeselAll: TSpeedButton;
+    btnSelAll: TSpeedButton;
     procedure ListViewClick(Sender: TObject);
     procedure btnModifyClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -98,6 +103,9 @@ type
     procedure ListViewChange(Sender: TObject; Item: TListItem;
       Change: TItemChange);
     procedure FormCreate(Sender: TObject);
+    procedure btnSelAllClick(Sender: TObject);
+    procedure btnDeselAllClick(Sender: TObject);
+    procedure btnInvertClick(Sender: TObject);
   private
     FList: TCnPrefixList;
     FSortIndex: Integer;
@@ -372,6 +380,30 @@ end;
 procedure TCnPrefixConfigForm.FormCreate(Sender: TObject);
 begin
   EnlargeListViewColumns(ListView);
+end;
+
+procedure TCnPrefixConfigForm.btnSelAllClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to ListView.Items.Count - 1 do
+    ListView.Items[I].Checked := True;
+end;
+
+procedure TCnPrefixConfigForm.btnDeselAllClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to ListView.Items.Count - 1 do
+    ListView.Items[I].Checked := False;
+end;
+
+procedure TCnPrefixConfigForm.btnInvertClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  for I := 0 to ListView.Items.Count - 1 do
+    ListView.Items[I].Checked := not ListView.Items[I].Checked;
 end;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}
