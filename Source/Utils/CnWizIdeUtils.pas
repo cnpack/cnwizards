@@ -68,7 +68,7 @@ uses
   DesignIntf, DesignEditors, ComponentDesigner, Variants,
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF FPC} LCLType, {$ELSE} Tabs, {$ENDIF}
-  {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF OTA_PALETTE_API} PaletteAPI, {$ENDIF} {$ENDIF}
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF}
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,

@@ -737,6 +737,9 @@ begin
     Pos := 0;
     if FBuf = nil then
       GetMem(FBuf, BufSize + 1);
+
+{$IFDEF DELPHI_OTA}
+
     if FEditRead = nil then
       raise Exception.Create(SNoEditReader);
 
@@ -770,6 +773,7 @@ begin
     Stream.Size := (Length(Text) + 1) * SizeOf(Char);
     Stream.Position := 0;
     Stream.Write(PChar(Text)^, (Length(Text) + 1) * SizeOf(Char));
+{$ENDIF}
   end;
 end;
 
@@ -932,6 +936,7 @@ begin
   end
   else
   begin
+{$IFDEF DELPHI_OTA}
     if FEditWrite = nil then
       raise Exception.Create(SNoEditWriter);
 
@@ -946,6 +951,7 @@ begin
     // Utf8 尾部有 #0，用 FEditWrite.Insert 一次性写入，正好有 PAnsiChar 且 #0 结尾
     if Length(Utf8Text) > 0 then
       FEditWrite.Insert(PAnsiChar(Utf8Text));
+{$ENDIF}
   end;
 end;
 

@@ -3090,10 +3090,12 @@ end;
 
 // 用各种法子判断当前 IDE/BDS 是否是 Delphi，是则返回 True，C++Builder 则返回 False
 function IsDelphiRuntime: Boolean;
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER9_UP}
 var
   Project: IOTAProject;
   Personality: string;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF LAZARUS}
@@ -3108,6 +3110,7 @@ begin
   Exit;
 {$ELSE} // 是 BDS 2005/2006 或以上则需要动态判断
   Result := CurrentSourceIsDelphi;
+{$IFDEF DELPHI_OTA}
   Project := CnOtaGetCurrentProject;
   if Project <> nil then
   begin
@@ -3119,17 +3122,21 @@ begin
   end;
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
 end;
 
 // 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False
 function IsCSharpRuntime: Boolean;
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER9_UP}
 var
   Project: IOTAProject;
   Personality: string;
 {$ENDIF}
+{$ENDIF}
 begin
   Result := False;
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER9_UP}
   Project := CnOtaGetCurrentProject;
   if Project <> nil then
@@ -3138,6 +3145,7 @@ begin
     if Personality = sCSharpPersonality then
       Result := True;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -3310,8 +3318,8 @@ end;
 function CurrentIsSource: Boolean;
 begin
 {$IFDEF BDS}
-  Result := (CurrentIsDelphiSource or CurrentIsCSource) and
-    (CnOtaGetEditPosition <> nil);
+  Result := (CurrentIsDelphiSource or CurrentIsCSource) {$IFDEF DELPHI_OTA} and
+    (CnOtaGetEditPosition <> nil) {$ENDIF};
 {$ELSE}
   Result := CurrentIsDelphiSource or CurrentIsCSource;
 {$ENDIF}
@@ -10606,8 +10614,10 @@ finalization
 {$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
+{$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
   VirtualEditControlBitmap.Free;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 

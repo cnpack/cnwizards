@@ -513,11 +513,14 @@ end;
 
 // BDS 下注册插件产品信息
 procedure TCnWizardMgr.RegisterPluginInfo;
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
 var
   AboutSvcs: IOTAAboutBoxServices;
 {$ENDIF}
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
   if Assigned(SplashScreenServices) then
   begin
@@ -529,6 +532,7 @@ begin
     AboutSvcs.AddPluginInfo(SCnWizardCaption, SCnWizardDesc, FAboutBmp.Handle,
       False, SCnWizardLicense);
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
