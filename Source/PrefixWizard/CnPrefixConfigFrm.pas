@@ -386,24 +386,39 @@ procedure TCnPrefixConfigForm.btnSelAllClick(Sender: TObject);
 var
   I: Integer;
 begin
-  for I := 0 to ListView.Items.Count - 1 do
-    ListView.Items[I].Checked := True;
+  ListView.Items.BeginUpdate;
+  try
+    for I := 0 to ListView.Items.Count - 1 do
+      ListView.Items[I].Checked := True;
+  finally
+    ListView.Items.EndUpdate;
+  end;
 end;
 
 procedure TCnPrefixConfigForm.btnDeselAllClick(Sender: TObject);
 var
   I: Integer;
 begin
-  for I := 0 to ListView.Items.Count - 1 do
-    ListView.Items[I].Checked := False;
+  ListView.Items.BeginUpdate;
+  try
+    for I := 0 to ListView.Items.Count - 1 do
+      ListView.Items[I].Checked := False;
+  finally
+    ListView.Items.EndUpdate;
+  end;
 end;
 
 procedure TCnPrefixConfigForm.btnInvertClick(Sender: TObject);
 var
   I: Integer;
 begin
-  for I := 0 to ListView.Items.Count - 1 do
-    ListView.Items[I].Checked := not ListView.Items[I].Checked;
+  ListView.Items.BeginUpdate;
+  try
+    for I := 0 to ListView.Items.Count - 1 do
+      ListView.Items[I].Checked := not ListView.Items[I].Checked;
+  finally
+    ListView.Items.EndUpdate;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNPREFIXWIZARD}

@@ -24,7 +24,7 @@ unit CnImageProviderIconFinder;
 * 软件名称：开发包属性、组件编辑器库
 * 单元名称：www.IconFinder.com 服务支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：
+* 备    注：该服务已迁移至 api.freepik.com
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
@@ -49,7 +49,7 @@ uses
   CnCommon, CnWizXmlUtils;
 
 type
-  TCnImageProviderIconFinder = class(TCnBaseImageProvider)
+  TCnImageProviderFreePik = class(TCnBaseImageProvider)
   protected
     function DoSearchImage(Req: TCnImageReqInfo): Boolean; override;
   public
@@ -62,29 +62,32 @@ type
   
 implementation
 
-{ TCnImageProvider_IconFinder }
+uses
+  CnJSON;
 
-constructor TCnImageProviderIconFinder.Create;
+{ TCnImageProviderFreePik }
+
+constructor TCnImageProviderFreePik.Create;
 begin
   inherited;
   FItemsPerPage := 20;
   FFeatures := [pfOpenInBrowser, pfSearchIconset];
 end;
 
-destructor TCnImageProviderIconFinder.Destroy;
+destructor TCnImageProviderFreePik.Destroy;
 begin
 
   inherited;
 end;
 
-class procedure TCnImageProviderIconFinder.GetProviderInfo(var DispName,
+class procedure TCnImageProviderFreePik.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
-  DispName := 'IconFinder.com';
-  HomeUrl := 'http://www.iconfinder.com';
+  DispName := 'FreePik.com';
+  HomeUrl := 'http://www.freepik.com';
 end;
 
-function TCnImageProviderIconFinder.DoSearchImage(Req: TCnImageReqInfo): Boolean;
+function TCnImageProviderFreePik.DoSearchImage(Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
   Lic: Integer;
@@ -92,60 +95,77 @@ var
   Root, Node, Icon: IXMLNode;
   I, J, Size: Integer;
   Item: TCnImageRespItem;
+  Obj: TCnJSONObject;
+  Http: TCnHTTP;
+  ErrCode: DWORD;
 begin
   Result := False;
   if Req.CommercialLicenses then
     Lic := 1
   else
     Lic := 0;
-  Url := Format('http://www.iconfinder.com/xml/search/?q=%s&c=%d&p=%d&l=%d&min=%d&max=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
-    [Req.Keyword, FItemsPerPage, Req.Page, Lic, Req.MinSize, Req.MaxSize]);
-  Text := string(CnInet_GetString(Url));
-  Xml := CreateXMLDoc;
-  if Xml.LoadXML(Text) then
-  begin
-    Root := FindNode(Xml, 'results');
-    if Root <> nil then
-    begin
-      for I := 0 to Root.ChildNodes.Length - 1 do
-      begin
-        Node := Root.ChildNodes.Item[I];
-        if SameText(Node.NodeName, 'opensearch:totalResults') then
-        begin
-          FTotalCount := XMLStrToIntDef(Node.Text, 0);
-          FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
-        end
-        else if SameText(Node.NodeName, 'iconmatches') then
-        begin
-          Result := True;
-          for J := 0 to Node.ChildNodes.Length - 1 do
-          begin
-            Icon := Node.ChildNodes.Item[J];
-            if SameText(Icon.NodeName, 'icon') then
-            begin
-              Size := GetNodeTextInt(Icon, 'size', 0);
-              if (Size >= Req.MinSize) and (Size <= Req.MaxSize) then
-              begin
-                Item := Items.Add;
-                Item.Size := Size;
-                Item.Id := GetNodeTextStr(Icon, 'id', '');
-                Item.Url := GetNodeTextStr(Icon, 'image', '');
-                Item.Ext := _CnExtractFileExt(Item.Url);
-              end;
-            end;
-          end;
-        end;
-      end;
-    end;
+
+  Url := Format('http://www.iconfinder.com/xml/search/?term=%s&page=%d&per_page=%d&lthumbnail_size=%d',
+    [Req.Keyword, Req.Page, FItemsPerPage, Req.MinSize]);
+
+  Http := TCnHTTP.Create;
+  try
+    Http.HttpRequestHeaders.Add('x-freepik-api-key: FPSXcc4ff90d504ed4a27af599370239655e');
+    Text := string(Http.GetString(Url, TStringList(nil), @ErrCode));
+  finally
+    Http.Free;
   end;
+
+  Obj := CnJSONParse(Text);
+
+  Obj.Free;
+
+//  Text := string(CnInet_GetString(Url));
+//  Xml := CreateXMLDoc;
+//  if Xml.LoadXML(Text) then
+//  begin
+//    Root := FindNode(Xml, 'results');
+//    if Root <> nil then
+//    begin
+//      for I := 0 to Root.ChildNodes.Length - 1 do
+//      begin
+//        Node := Root.ChildNodes.Item[I];
+//        if SameText(Node.NodeName, 'opensearch:totalResults') then
+//        begin
+//          FTotalCount := XMLStrToIntDef(Node.Text, 0);
+//          FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
+//        end
+//        else if SameText(Node.NodeName, 'iconmatches') then
+//        begin
+//          Result := True;
+//          for J := 0 to Node.ChildNodes.Length - 1 do
+//          begin
+//            Icon := Node.ChildNodes.Item[J];
+//            if SameText(Icon.NodeName, 'icon') then
+//            begin
+//              Size := GetNodeTextInt(Icon, 'size', 0);
+//              if (Size >= Req.MinSize) and (Size <= Req.MaxSize) then
+//              begin
+//                Item := Items.Add;
+//                Item.Size := Size;
+//                Item.Id := GetNodeTextStr(Icon, 'id', '');
+//                Item.Url := GetNodeTextStr(Icon, 'image', '');
+//                Item.Ext := _CnExtractFileExt(Item.Url);
+//              end;
+//            end;
+//          end;
+//        end;
+//      end;
+//    end;
+//  end;
 end;
 
-procedure TCnImageProviderIconFinder.OpenInBrowser(Item: TCnImageRespItem);
+procedure TCnImageProviderFreePik.OpenInBrowser(Item: TCnImageRespItem);
 begin
   OpenUrl(Format('http://www.iconfinder.com/icondetails/%s/%d/', [Item.Id, Item.Size]));
 end;
 
-function TCnImageProviderIconFinder.SearchIconset(Item: TCnImageRespItem;
+function TCnImageProviderFreePik.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
@@ -174,6 +194,6 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProviderIconFinder);
+  ImageProviderMgr.RegisterProvider(TCnImageProviderFreePik);
 
 end.
