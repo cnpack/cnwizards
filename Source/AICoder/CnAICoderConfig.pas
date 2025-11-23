@@ -67,9 +67,6 @@ type
     function GetContinueCodingPrompt: string;
   protected
     function GetCurrentLangName: string;
-    // SM4-GCM 加十六进制加解密
-    function EncryptKey(const Key: string): string;
-    function DecryptKey(const Text: string): string;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -276,11 +273,6 @@ implementation
 
 uses
   CnSM4, CnAEAD, CnStrings {$IFNDEF TEST_APP}, CnWizUtils {$ENDIF};
-
-const
-  SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
-  SM4_IV: TCnSM4Iv   = ($18, $40, $19, $21, $19, $31, $19, $37, $19, $45, $19, $49, $19, $53, $19, $78);
-  SM4_AD: AnsiString = 'CnPack';
 
 var
   FAIEngineOptionManager: TCnAIEngineOptionManager = nil;
@@ -523,51 +515,6 @@ begin
 {$ENDIF}
 end;
 
-function TCnAIEngineOption.EncryptKey(const Key: string): string;
-var
-  K, Iv, AD: TBytes;
-begin
-  if Key = '' then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  SetLength(K, SizeOf(SM4_KEY));
-  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
-
-  SetLength(Iv, SizeOf(SM4_IV));
-  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
-
-  SetLength(AD, Length(SM4_AD));
-  Move(SM4_AD[1], AD[0], Length(AD));
-
-  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
-end;
-
-function TCnAIEngineOption.DecryptKey(const Text: string): string;
-var
-  K, Iv, AD, Res: TBytes;
-begin
-  if Text = '' then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  SetLength(K, SizeOf(SM4_KEY));
-  Move(SM4_KEY[0], K[0], SizeOf(SM4_KEY));
-
-  SetLength(Iv, SizeOf(SM4_IV));
-  Move(SM4_IV[0], Iv[0], SizeOf(SM4_Iv));
-
-  SetLength(AD, Length(SM4_AD));
-  Move(SM4_AD[1], AD[0], Length(AD));
-
-  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
-  Result := BytesToString(Res);
-end;
-
 function TCnAIEngineOption.GetExplainCodePrompt: string;
 begin
   Result := Format(SCnAICoderWizardUserMessageExplainFmt, [UIStringToNativeString(GetCurrentLangName)]);
@@ -611,7 +558,7 @@ begin
     Root.Free;
   end;
 
-  ApiKey := DecryptKey(ApiKey);
+  ApiKey := CnWizDecryptKey(ApiKey);
 end;
 
 function TCnAIEngineOption.SaveToJSON: AnsiString;
@@ -624,7 +571,7 @@ begin
     PlainKey := ApiKey;
     try
       // 原地加密 APIKey
-      ApiKey := EncryptKey(ApiKey);
+      ApiKey := CnWizEncryptKey(ApiKey);
       TCnJSONWriter.Write(Self, Root);
     finally
       // 内存中再还原

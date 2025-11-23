@@ -72,7 +72,7 @@ uses
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
-  mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo,
+  mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo, CnSM4, CnAEAD,
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
@@ -1416,6 +1416,12 @@ function CnWizInputMultiLineBox(const ACaption, APrompt, ADefault: string): stri
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
+function CnWizEncryptKey(const Key: string): string;
+{* 封装的加密方法}
+
+function CnWizDecryptKey(const Text: string): string;
+{* 封装的解密方法}
+
 var
   CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
 
@@ -1447,6 +1453,10 @@ uses
 const
   MAX_LINE_LENGTH = 2048;
   CNWIZARDDEFAULT_ICO = 'CnWizardDefault';
+
+  CN_SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
+  CN_SM4_IV: TCnSM4Iv   = ($18, $40, $19, $21, $19, $31, $19, $37, $19, $45, $19, $49, $19, $53, $19, $78);
+  CN_SM4_AD: AnsiString = 'CnPack';
 
 type
   TControlAccess = class(TControl);
@@ -1488,6 +1498,51 @@ begin
   AClass := GetClass(ClassName);
   if Assigned(AClass) then
     CnNoIconList.Add(AClass.ClassName);
+end;
+
+function CnWizEncryptKey(const Key: string): string;
+var
+  K, Iv, AD: TBytes;
+begin
+  if Key = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(CN_SM4_KEY));
+  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
+
+  SetLength(Iv, SizeOf(CN_SM4_IV));
+  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
+
+  SetLength(AD, Length(CN_SM4_AD));
+  Move(CN_SM4_AD[1], AD[0], Length(AD));
+
+  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
+end;
+
+function CnWizDecryptKey(const Text: string): string;
+var
+  K, Iv, AD, Res: TBytes;
+begin
+  if Text = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(CN_SM4_KEY));
+  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
+
+  SetLength(Iv, SizeOf(CN_SM4_IV));
+  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
+
+  SetLength(AD, Length(CN_SM4_AD));
+  Move(CN_SM4_AD[1], AD[0], Length(AD));
+
+  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
+  Result := BytesToString(Res);
 end;
 
 //==============================================================================
