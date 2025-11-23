@@ -63,7 +63,11 @@ type
 implementation
 
 uses
-  CnJSON;
+  CnJSON, CnWizUtils;
+
+const
+  API_KEY = '871ADC4931BD5990FD344F00B26B1698CE35F5B550C5A377A775389C6F46576' +
+    'DF4942120F13D27C8873282FB90F6735324FF369E';
 
 { TCnImageProviderFreePik }
 
@@ -109,7 +113,7 @@ begin
 
   Http := TCnHTTP.Create;
   try
-    Http.HttpRequestHeaders.Add('x-freepik-api-key: FPSXcc4ff90d504ed4a27af599370239655e');
+    Http.HttpRequestHeaders.Add('x-freepik-api-key: ' + CnWizDecryptKey(API_KEY));
     Text := string(Http.GetString(Url, TStringList(nil), @ErrCode));
   finally
     Http.Free;
