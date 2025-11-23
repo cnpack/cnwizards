@@ -91,11 +91,10 @@ function TCnImageProviderFreePik.DoSearchImage(Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
   Lic: Integer;
-  Xml: IXMLDocument;
-  Root, Node, Icon: IXMLNode;
-  I, J, Size: Integer;
+  I, J: Integer;
   Item: TCnImageRespItem;
-  Obj: TCnJSONObject;
+  Obj, MO: TCnJSONObject;
+  Arr, Thumb: TCnJSONArray;
   Http: TCnHTTP;
   ErrCode: DWORD;
 begin
@@ -105,8 +104,8 @@ begin
   else
     Lic := 0;
 
-  Url := Format('http://www.iconfinder.com/xml/search/?term=%s&page=%d&per_page=%d&lthumbnail_size=%d',
-    [Req.Keyword, Req.Page, FItemsPerPage, Req.MinSize]);
+  Url := Format('https://api.freepik.com/v1/icons?term=%s&page=%d&per_page=%d&thumbnail_size=%d',
+    [Req.Keyword, Req.Page + 1, FItemsPerPage, Req.MinSize]);
 
   Http := TCnHTTP.Create;
   try
@@ -117,80 +116,51 @@ begin
   end;
 
   Obj := CnJSONParse(Text);
+  try
+    if (Obj['data'] <> nil) and (Obj['data'] is TCnJSONArray) then
+    begin
+      Arr := Obj['data'] as TCnJSONArray;
+      for I := 0 to Arr.Count - 1 do
+      begin
+        if (Arr[I]['id'] <> nil) and (Arr[I]['id'] is TCnJSONNumber) and
+          (Arr[I]['thumbnails'] <> nil) and (Arr[I]['thumbnails'] is TCnJSONArray) and
+          ((Arr[I]['thumbnails'] as TCnJSONArray).Count > 0) then
+        begin
+          Thumb := Arr[I]['thumbnails'] as TCnJSONArray;
+          Item := Items.Add;
+          Item.Id := Arr[I]['id'].AsString;
+          Item.Size := Thumb[0]['width'].AsInteger;
+          Item.Url := Thumb[0]['url'].AsString;
+          Item.Ext := _CnExtractFileExt(Item.Url);
+          Result := True;
+        end;
+      end;
+    end;
 
-  Obj.Free;
-
-//  Text := string(CnInet_GetString(Url));
-//  Xml := CreateXMLDoc;
-//  if Xml.LoadXML(Text) then
-//  begin
-//    Root := FindNode(Xml, 'results');
-//    if Root <> nil then
-//    begin
-//      for I := 0 to Root.ChildNodes.Length - 1 do
-//      begin
-//        Node := Root.ChildNodes.Item[I];
-//        if SameText(Node.NodeName, 'opensearch:totalResults') then
-//        begin
-//          FTotalCount := XMLStrToIntDef(Node.Text, 0);
-//          FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
-//        end
-//        else if SameText(Node.NodeName, 'iconmatches') then
-//        begin
-//          Result := True;
-//          for J := 0 to Node.ChildNodes.Length - 1 do
-//          begin
-//            Icon := Node.ChildNodes.Item[J];
-//            if SameText(Icon.NodeName, 'icon') then
-//            begin
-//              Size := GetNodeTextInt(Icon, 'size', 0);
-//              if (Size >= Req.MinSize) and (Size <= Req.MaxSize) then
-//              begin
-//                Item := Items.Add;
-//                Item.Size := Size;
-//                Item.Id := GetNodeTextStr(Icon, 'id', '');
-//                Item.Url := GetNodeTextStr(Icon, 'image', '');
-//                Item.Ext := _CnExtractFileExt(Item.Url);
-//              end;
-//            end;
-//          end;
-//        end;
-//      end;
-//    end;
-//  end;
+    if (Obj['meta'] <> nil) and (Obj['meta'] is TCnJSONObject) then
+    begin
+      MO := Obj['meta'] as TCnJSONObject;
+      if (MO['pagination'] <> nil) and (MO['pagination'] is TCnJSONObject) then
+      begin
+        MO := MO['pagination'] as TCnJSONObject;
+        FTotalCount := MO['total'].AsInteger;
+        FPageCount := (FTotalCount + FItemsPerPage - 1) div FItemsPerPage;
+      end;
+    end;
+  finally
+    Obj.Free;
+  end;
 end;
 
 procedure TCnImageProviderFreePik.OpenInBrowser(Item: TCnImageRespItem);
 begin
-  OpenUrl(Format('http://www.iconfinder.com/icondetails/%s/%d/', [Item.Id, Item.Size]));
+  OpenUrl(Item.Url);
 end;
 
 function TCnImageProviderFreePik.SearchIconset(Item: TCnImageRespItem;
   var Req: TCnImageReqInfo): Boolean;
-var
-  Url, Text: string;
-  Xml: IXMLDocument;
-  Root, Node: IXMLNode;
 begin
-  Result := False;
-  Url := Format('http://www.iconfinder.com/xml/icondetails/?id=%s&size=%d&api_key=7cb3bc9947285bc4b3a2f2d8bd20a3dd',
-    [Item.Id, Item.Size]);
-  Text := string(CnInet_GetString(Url));
-  Xml := CreateXMLDoc;
-  if Xml.LoadXML(Text) then
-  begin
-    Root := FindNode(Xml, 'icon');
-    if Root <> nil then
-    begin
-      Node := FindNode(Root, 'iconsetid');
-      if Node <> nil then
-      begin
-        Req.Keyword := 'iconset:' + Node.Text;
-        Req.Page := 0;
-        Result := True;
-      end;
-    end;
-  end;
+  Result := False; // 不支持图标集搜索
 end;
 
 initialization
