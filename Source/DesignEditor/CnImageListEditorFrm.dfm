@@ -441,6 +441,7 @@ inherited CnImageListEditorForm: TCnImageListEditorForm
         Width = 249
         Height = 17
         Caption = 'Include only icons with commercial licenses'
+        Visible = False
         TabOrder = 4
       end
     end

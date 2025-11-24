@@ -94,8 +94,7 @@ end;
 function TCnImageProviderFreePik.DoSearchImage(Req: TCnImageReqInfo): Boolean;
 var
   Url, Text: string;
-  Lic: Integer;
-  I, J: Integer;
+  I: Integer;
   Item: TCnImageRespItem;
   Obj, MO: TCnJSONObject;
   Arr, Thumb: TCnJSONArray;
@@ -103,11 +102,6 @@ var
   ErrCode: DWORD;
 begin
   Result := False;
-  if Req.CommercialLicenses then
-    Lic := 1
-  else
-    Lic := 0;
-
   Url := Format('https://api.freepik.com/v1/icons?term=%s&page=%d&per_page=%d&thumbnail_size=%d',
     [Req.Keyword, Req.Page + 1, FItemsPerPage, Req.MinSize]);
 
