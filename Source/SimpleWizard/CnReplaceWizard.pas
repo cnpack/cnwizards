@@ -49,73 +49,6 @@ uses
 
 type
 
-{ TCnReplaceWizardForm }
-
-  TCnReplaceStyle = (rsUnit, rsProjectGroups, rsProject, rsOpenUnits, rsDir);
-
-  TCnReplaceWizardForm = class(TCnTranslateForm)
-    tbOptions: TGroupBox;
-    gbText: TGroupBox;
-    Label1: TLabel;
-    cbbSrc: TComboBox;
-    Label2: TLabel;
-    cbbDst: TComboBox;
-    rgReplaceStyle: TRadioGroup;
-    gbDir: TGroupBox;
-    cbCaseSensitive: TCheckBox;
-    cbWholeWord: TCheckBox;
-    btnReplace: TButton;
-    btnClose: TButton;
-    btnHelp: TButton;
-    Label3: TLabel;
-    btnSelectDir: TButton;
-    cbbDir: TComboBox;
-    Label4: TLabel;
-    cbbMask: TComboBox;
-    cbSubDirs: TCheckBox;
-    cbRegEx: TCheckBox;
-    cbANSICompatible: TCheckBox;
-    rbNormal: TRadioButton;
-    rbRegExpr: TRadioButton;
-    chkUseSub: TCheckBox;
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure btnReplaceClick(Sender: TObject);
-    procedure btnSelectDirClick(Sender: TObject);
-    procedure rgReplaceStyleClick(Sender: TObject);
-    procedure cbbDirDropDown(Sender: TObject);
-    procedure btnHelpClick(Sender: TObject);
-    procedure rbNormalClick(Sender: TObject);
-  private
-    FIni: TCustomIniFile;
-    FSearcher: TCnSearcher;
-    
-    function GetDestText: string;
-    function GetDir: string;
-    function GetFileMask: string;
-    function GetIncludeSubDirs: Boolean;
-    function GetReplaceStyle: TCnReplaceStyle;
-    function GetSearchOption: TSearchOptions;
-    function GetSourceText: string;
-    procedure LoadSettings;
-    procedure SaveSettings;
-    function GetANSICompatible: Boolean;
-  protected
-    function GetHelpTopic: string; override;
-  public
-    constructor CreateEx(AOwner: TComponent; AIni: TCustomIniFile;
-      ASearcher: TCnSearcher);
-
-    property SearchOption: TSearchOptions read GetSearchOption;
-    property ReplaceStyle: TCnReplaceStyle read GetReplaceStyle;
-    property SourceText: string read GetSourceText;
-    property DestText: string read GetDestText;
-    property Dir: string read GetDir;
-    property FileMask: string read GetFileMask;
-    property IncludeSubDirs: Boolean read GetIncludeSubDirs;
-    property ANSICompatible: Boolean read GetANSICompatible;
-  end;
-
 //==============================================================================
 // 批量文件替换专家
 //==============================================================================
@@ -162,6 +95,79 @@ type
     procedure Execute; override;
   end;
 
+{ TCnReplaceWizardForm }
+
+  TCnReplaceStyle = (rsUnit, rsProjectGroups, rsProject, rsOpenUnits, rsDir);
+
+  TCnReplaceWizardForm = class(TCnTranslateForm)
+    tbOptions: TGroupBox;
+    gbText: TGroupBox;
+    Label1: TLabel;
+    cbbSrc: TComboBox;
+    Label2: TLabel;
+    cbbDst: TComboBox;
+    rgReplaceStyle: TRadioGroup;
+    gbDir: TGroupBox;
+    cbCaseSensitive: TCheckBox;
+    cbWholeWord: TCheckBox;
+    btnReplace: TButton;
+    btnClose: TButton;
+    btnHelp: TButton;
+    Label3: TLabel;
+    btnSelectDir: TButton;
+    cbbDir: TComboBox;
+    Label4: TLabel;
+    cbbMask: TComboBox;
+    cbSubDirs: TCheckBox;
+    cbRegEx: TCheckBox;
+    cbANSICompatible: TCheckBox;
+    rbNormal: TRadioButton;
+    rbRegExpr: TRadioButton;
+    chkUseSub: TCheckBox;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnReplaceClick(Sender: TObject);
+    procedure btnSelectDirClick(Sender: TObject);
+    procedure rgReplaceStyleClick(Sender: TObject);
+    procedure cbbDirDropDown(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+    procedure rbNormalClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnCloseClick(Sender: TObject);
+  private
+    FIni: TCustomIniFile;
+    FSearcher: TCnSearcher;
+    
+    function GetDestText: string;
+    function GetDir: string;
+    function GetFileMask: string;
+    function GetIncludeSubDirs: Boolean;
+    function GetReplaceStyle: TCnReplaceStyle;
+    function GetSearchOption: TSearchOptions;
+    function GetSourceText: string;
+    procedure LoadSettings;
+    procedure SaveSettings;
+    function GetANSICompatible: Boolean;
+  protected
+    FWizard: TCnReplaceWizard;
+    function GetHelpTopic: string; override;
+  public
+    constructor CreateEx(AOwner: TComponent; AWizard: TCnReplaceWizard;
+      AIni: TCustomIniFile; ASearcher: TCnSearcher);
+
+    property SearchOption: TSearchOptions read GetSearchOption;
+    property ReplaceStyle: TCnReplaceStyle read GetReplaceStyle;
+    property SourceText: string read GetSourceText;
+    property DestText: string read GetDestText;
+    property Dir: string read GetDir;
+    property FileMask: string read GetFileMask;
+    property IncludeSubDirs: Boolean read GetIncludeSubDirs;
+    property ANSICompatible: Boolean read GetANSICompatible;
+  end;
+
+var
+  CnReplaceWizardForm: TCnReplaceWizardForm = nil;
+
 {$ENDIF CNWIZARDS_CNREPLACEWIZARD}
 
 implementation
@@ -177,10 +183,11 @@ uses
 
 { TCnReplaceWizardForm }
 
-constructor TCnReplaceWizardForm.CreateEx(AOwner: TComponent;
+constructor TCnReplaceWizardForm.CreateEx(AOwner: TComponent; AWizard: TCnReplaceWizard;
   AIni: TCustomIniFile; ASearcher: TCnSearcher);
 begin
   Create(AOwner);
+  FWizard := AWizard;
   FIni := AIni;
   FSearcher := ASearcher;
 end;
@@ -191,7 +198,7 @@ var
   Idx: Integer;
 begin
   LoadSettings;
-  Sel := CnOtaGetCurrentSelection;      // 取当前选择的文本
+  Sel := CnOtaGetCurrentSelection;         // 取当前选择的文本
   if (Pos(#10, Sel) > 0) or (Pos(#13, Sel) > 0) then
     Sel := Copy(Sel, 1, Min(Pos(#13, Sel), Pos(#10, Sel)) - 1);
 
@@ -204,8 +211,8 @@ end;
 
 procedure TCnReplaceWizardForm.FormDestroy(Sender: TObject);
 begin
-  if ModalResult = mrOk then
-    SaveSettings;
+  SaveSettings;
+  CnReplaceWizardForm := nil;
 end;
 
 procedure TCnReplaceWizardForm.btnReplaceClick(Sender: TObject);
@@ -246,7 +253,47 @@ begin
     end;
   end;
 
-  ModalResult := mrOk;
+  Screen.Cursor := crHourGlass;
+  try
+    FWizard.FUseRegExpr := rbRegExpr.Checked;
+    FWizard.FUseSub := chkUseSub.Checked;
+    if FWizard.FUseRegExpr then
+      FWizard.FRegExpr.Expression := SourceText;
+    FWizard.FDestText := DestText;
+    FWizard.FFoundCount := 0;
+    FWizard.FCurrCount := 0;
+    FWizard.FFileCount := 0;
+    FWizard.FAbort := False;
+
+    case ReplaceStyle of
+      rsProjectGroups:
+        begin
+          FWizard.ReplaceProjectGroup(CnOtaGetProjectGroup);
+        end;
+      rsProject:
+        begin
+          FWizard.ReplaceProject(CnOtaGetCurrentProject);
+        end;
+      rsOpenUnits:
+        begin
+          FWizard.ReplaceOpenUnits;
+        end;
+      rsDir:
+        begin
+          FWizard.ReplaceDir(Dir, FileMask, IncludeSubDirs);
+        end;
+    else
+      FWizard.ReplaceFile(CnOtaGetFileNameOfCurrentModule(True)); // rsUnit
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  FWizard.FInStream.Size := 0;
+  FWizard.FOutStream.Size := 0;
+
+  if not FWizard.FAbort then
+    InfoDlg(Format(SCnReplaceResult, [FWizard.FFileCount, FWizard.FFoundCount]));
 end;
 
 const
@@ -448,6 +495,8 @@ destructor TCnReplaceWizard.Destroy;
 begin
   FInStream.Free;
   FOutStream.Free;
+  FreeAndNil(FSearcher);
+  FreeAndNil(FRegExpr);
   inherited;
 end;
 
@@ -455,62 +504,18 @@ procedure TCnReplaceWizard.Execute;
 var
   FileName: string;
 begin
-  FSearcher := nil;
-  FRegExpr := nil;
+  FreeAndNil(FSearcher);
+  FreeAndNil(FRegExpr);
 
-  try
-    FSearcher := TCnSearcher.Create;
-    FRegExpr := TRegExpr.Create;
-    FSearcher.OnFound := OnFound;
-    with TCnReplaceWizardForm.CreateEx(nil, CreateIniFile, FSearcher) do
-    try
-      if ShowModal = mrOk then
-      begin
-        FUseRegExpr := rbRegExpr.Checked;
-        FUseSub := chkUseSub.Checked;
-        if FUseRegExpr then
-          FRegExpr.Expression := SourceText;
-        FDestText := DestText;
-        FFoundCount := 0;
-        FCurrCount := 0;
-        FFileCount := 0;
-        FAbort := False;
-        case ReplaceStyle of
-          rsProjectGroups:
-            begin
-              ReplaceProjectGroup(CnOtaGetProjectGroup);
-            end;
-          rsProject:
-            begin
-              ReplaceProject(CnOtaGetCurrentProject);
-            end;
-          rsOpenUnits:
-            begin
-              ReplaceOpenUnits;
-            end;
-          rsDir:
-            begin
-              ReplaceDir(Dir, FileMask, IncludeSubDirs);
-            end;
-        else                            // rsUnit
-          begin
-            FileName := CnOtaGetFileNameOfCurrentModule(True);
-            ReplaceFile(FileName);
-          end;
-        end;
-        
-        if not FAbort then
-          InfoDlg(Format(SCnReplaceResult, [FFileCount, FFoundCount]));
-      end;
-    finally
-      Free;
-      FInStream.Size := 0;
-      FOutStream.Size := 0;
-    end;
-  finally
-    FreeAndNil(FSearcher);
-    FreeAndNil(FRegExpr);
-  end;
+  FSearcher := TCnSearcher.Create;
+  FRegExpr := TRegExpr.Create;
+  FSearcher.OnFound := OnFound;
+
+  if CnReplaceWizardForm = nil then
+     CnReplaceWizardForm := TCnReplaceWizardForm.CreateEx(Application, Self, CreateIniFile, FSearcher);
+
+  CnReplaceWizardForm.Show;
+  CnReplaceWizardForm.BringToFront;
 end;
 
 procedure TCnReplaceWizard.QueryContinue(const Msg: string);
@@ -823,6 +828,17 @@ begin
   Author := SCnPack_Zjy;
   Email := SCnPack_ZjyEmail;
   Comment := SCnReplaceWizardComment;
+end;
+
+procedure TCnReplaceWizardForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  Action := caFree;
+end;
+
+procedure TCnReplaceWizardForm.btnCloseClick(Sender: TObject);
+begin
+  Close;
 end;
 
 initialization
