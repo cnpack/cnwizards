@@ -24,8 +24,9 @@ unit CnImageProviderFindIcons;
 * 软件名称：开发包属性、组件编辑器库
 * 单元名称：www.FindIcons.com 服务支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：该网站没有提供API接口，通过网页分析可以拿到图标。但由于网站做了流量
+* 备    注：该网站没有提供 API 接口，通过网页分析可以拿到图标。但由于网站做了流量
 *           限制，查询时可能不稳定。
+*           补充：后来该网站倒闭，重定向到 www.freeimages.com/ 也挂了
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
@@ -34,9 +35,9 @@ unit CnImageProviderFindIcons;
 ================================================================================
 |</PRE>}
 
-{$I CnWizards.inc}
-
 interface
+
+{$I CnWizards.inc}
 
 uses
   Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
@@ -56,7 +57,7 @@ type
 
 implementation
 
-{ TCnImageProvider_FindIcons }
+{ TCnImageProviderFindIcons }
 
 constructor TCnImageProviderFindIcons.Create;
 begin
@@ -163,6 +164,7 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProviderFindIcons);
+  // 该网站挂了
+  // ImageProviderMgr.RegisterProvider(TCnImageProviderFindIcons);
 
 end.
