@@ -121,7 +121,7 @@ begin
 
   Obj := CnJSONParse(Text);
   try
-    if (Obj['data'] <> nil) and (Obj['data'] is TCnJSONArray) then
+    if (Obj <> nil) and (Obj['data'] <> nil) and (Obj['data'] is TCnJSONArray) then
     begin
       Arr := Obj['data'] as TCnJSONArray;
       for I := 0 to Arr.Count - 1 do

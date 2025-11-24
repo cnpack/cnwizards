@@ -57,7 +57,7 @@ type
     property FileName: string read FFileName;
   end;
 
-  TCnDownThread = class(TCnTaskThread)
+  TCnWizDownThread = class(TCnTaskThread)
   private
    FHttp: TCnHTTP;
   protected
@@ -66,7 +66,7 @@ type
     destructor Destroy; override;
   end;
 
-  TCnDownMgr = class(TCnThreadTaskMgr)
+  TCnWizDownMgr = class(TCnThreadTaskMgr)
   protected
     function GetThreadClass: TCnTaskThreadClass; override;
   public
@@ -75,27 +75,32 @@ type
     // 增加一个下载
     function NewDownload(AUrl, AFileName, AUserAgent, AReferer: string; Data: Pointer): TCnDownTask;
   end;
-  
+
 implementation
 
-{ TCnDownMgr }
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
 
-constructor TCnDownMgr.Create;
+{ TCnWizDownMgr }
+
+constructor TCnWizDownMgr.Create;
 begin
   inherited Create;
 end;
 
-destructor TCnDownMgr.Destroy;
+destructor TCnWizDownMgr.Destroy;
 begin
   inherited;
 end;
 
-function TCnDownMgr.GetThreadClass: TCnTaskThreadClass;
+function TCnWizDownMgr.GetThreadClass: TCnTaskThreadClass;
 begin
-  Result := TCnDownThread;
+  Result := TCnWizDownThread;
 end;
 
-function TCnDownMgr.NewDownload(AUrl, AFileName, AUserAgent, AReferer: string;
+function TCnWizDownMgr.NewDownload(AUrl, AFileName, AUserAgent, AReferer: string;
   Data: Pointer): TCnDownTask;
 begin
   if AUrl <> '' then
@@ -113,34 +118,44 @@ begin
     Result := nil;
 end;
 
-{ TCnDownThread }
+{ TCnWizDownThread }
 
-destructor TCnDownThread.Destroy;
+destructor TCnWizDownThread.Destroy;
 begin
   if FHttp <> nil then
     FHttp.Free;
   inherited;
 end;
 
-procedure TCnDownThread.DoExecute;
+procedure TCnWizDownThread.DoExecute;
 var
-  i: Integer;
+  I: Integer;
   ATask: TCnDownTask;
+  ErrCode: DWORD;
 begin
   ATask := TCnDownTask(FTask);
   FHttp := TCnHTTP.Create;
   try
-    for i := 0 to csRetryCount - 1 do
+    for I := 0 to csRetryCount - 1 do
     begin
       if ATask.UserAgent <> '' then
         FHttp.UserAgent := ATask.UserAgent;
       if ATask.Referer <> '' then
         FHttp.HttpRequestHeaders.Add('Referer: ' + ATask.Referer);
-      FHttp.GetFile(ATask.Url, ATask.FileName);
+      FHttp.GetFile(ATask.Url, ATask.FileName, TStringList(nil), @ErrCode);
       if GetFileSize(ATask.FileName) > 0 then
       begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('DownMgr Download OK for Try Count #%d for %s => %s', [I, ATask.Url, ATask.FileName]);
+{$ENDIF}
         ATask.FStatus := tsFinished;
         Break;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('DownMgr Download Failed %d for Try Count #%d for %s', [ErrCode, I, ATask.Url]);
+{$ENDIF}
       end;
     end;
   finally

@@ -140,6 +140,11 @@ function ImageProviderMgr: TCnImageProviderMgr;
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  CnDebug;
+{$ENDIF}
+
 var
   FImageProviderMgr: TCnImageProviderMgr;
 
@@ -357,7 +362,7 @@ var
   Task: TCnDownTask;
   Item: TCnImageRespItem;
   BmpName, TmpName: string;
-  DownMgr: TCnDownMgr;
+  DownMgr: TCnWizDownMgr;
   DownList: TList;
 
   procedure LoadCache(AItem: TCnImageRespItem);
@@ -384,7 +389,7 @@ begin
   DownMgr := nil;
   DownList := nil;
   try
-    DownMgr := TCnDownMgr.Create;
+    DownMgr := TCnWizDownMgr.Create;
     DownList := TList.Create;
     DoProgress(0);
     FPageCount := 0;
@@ -428,8 +433,13 @@ begin
         if FileExists(Items[I].FCacheName) then
           LoadCache(Items[I])
         else
+        begin
           DownList.Add(DownMgr.NewDownload(Items[I].Url, Items[I].FFileName,
             Items[I].FUserAgent, Items[I].FReferer, Items[I]));
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Provider %s To Download #%d: %s', [ClassName, I, Items[I].Url]);
+{$ENDIF}
+        end;
       end;
 
       Prog := 5;
@@ -445,10 +455,16 @@ begin
             TmpName := Item.FFileName;
             if Task.Status = tsFailure then
             begin
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('ImagePrivoder %s Download #%d Fail %s', [ClassName, I, Item.Url]);
+{$ENDIF}
               Item.Free;
             end
             else if Task.Status = tsFinished then
             begin
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('ImagePrivoder %s Download #%d OK %s', [ClassName, I, Item.FFileName]);
+{$ENDIF}
               if SameText(Item.Ext, '.png') then
               begin
                 BmpName := Item.FFileName + '.bmp';
@@ -456,6 +472,12 @@ begin
                 begin
                   Item.Bitmap.LoadFromFile(BmpName);
                   CopyFile(PChar(Item.FFileName), PChar(Item.FCacheName), False);
+                end
+                else
+                begin
+{$IFDEF DEBUG}
+                  CnDebugger.LogFmt('ImagePrivoder %s Convert Png to Bmp Error %s', [ClassName, Item.FFileName]);
+{$ENDIF}
                 end;
                 DeleteFile(BmpName);
               end
