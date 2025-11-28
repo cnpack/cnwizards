@@ -402,6 +402,13 @@ object CnMainViewer: TCnMainViewer
         Caption = '&Language'
       end
     end
+    object mniWindow: TMenuItem
+      Caption = '&Window'
+      OnClick = mniWindowClick
+      object mniNone: TMenuItem
+        Caption = '<None>'
+      end
+    end
     object N3: TMenuItem
       Caption = '&Help'
       object H1: TMenuItem

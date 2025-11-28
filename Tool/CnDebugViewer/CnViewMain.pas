@@ -204,6 +204,8 @@ type
     N15: TMenuItem;
     AddToBlackList1: TMenuItem;
     AddtoWhiteList1: TMenuItem;
+    mniWindow: TMenuItem;
+    mniNone: TMenuItem;
     procedure actNewExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure actExitExecute(Sender: TObject);
@@ -258,6 +260,7 @@ type
     procedure actSwtAddToWhiteExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure pnlChildContainerDblClick(Sender: TObject);
+    procedure mniWindowClick(Sender: TObject);
   private
     FUpdatingSwitch: Boolean;
     FClickingSwitch: Boolean;
@@ -278,6 +281,7 @@ type
     procedure LanguageClick(Sender: TObject);
     procedure LanguageChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
+    procedure WindowMenuItemClick(Sender: TObject);
     procedure SwitchTabHint(Sender: TObject; Index: Integer; var HintStr: string);
     procedure OnUpdateStore(var Msg: TMessage); message WM_USER_UPDATE_STORE;
     procedure OnNewChildForm(var Msg: TMessage); message WM_USER_NEW_FORM;
@@ -1568,6 +1572,65 @@ end;
 procedure TCnMainViewer.pnlChildContainerDblClick(Sender: TObject);
 begin
   actOpen.Execute;
+end;
+
+procedure TCnMainViewer.mniWindowClick(Sender: TObject);
+var
+  I: Integer;
+  Item: TMenuItem;
+begin
+  // 全删会出弹不出来的问题，要保留一个
+  for I := mniWindow.Count - 1 downto 1 do
+    mniWindow.Delete(0);
+
+  if tsSwitch.Tabs.Count > 0 then
+  begin
+
+  for I := 0 to tsSwitch.Tabs.Count - 1 do
+  begin
+    if (tsSwitch.Tabs.Objects[I] <> nil) and (tsSwitch.Tabs.Objects[I] is TForm) then
+    begin
+      if I = 0 then
+        Item := mniWindow.Items[0]
+      else
+        Item := TMenuItem.Create(Self);
+      Item.Caption := tsSwitch.Tabs[I];
+{$IFDEF WIN64}
+      Item.Tag := NativeInt(tsSwitch.Tabs.Objects[I]);
+{$ELSE}
+      Item.Tag := Integer(tsSwitch.Tabs.Objects[I]);
+{$ENDIF}
+      Item.Checked := TForm(tsSwitch.Tabs.Objects[I]).Visible;
+      Item.OnClick := WindowMenuItemClick;
+
+      if I > 0 then
+        mniWindow.Add(Item);
+    end;
+  end;
+  end
+  else
+  begin
+    mniWindow.Items[0].Caption := SCnMenuItemCaption;
+    mniWindow.Items[0].Tag := 0;
+    minWindow.Items[0].Checked := False;
+    mniWindow.Items[0].Enabled := False;
+  end;
+end;
+
+procedure TCnMainViewer.WindowMenuItemClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  if Sender is TMenuItem then
+  begin
+    if (TMenuItem(Sender).Tag <> 0) and (TObject(TMenuItem(Sender).Tag) is TForm) then
+    begin
+      ShowAndHideOtherChildren(TForm(TMenuItem(Sender).Tag));
+      I := tsSwitch.Tabs.IndexOfObject(TObject(TMenuItem(Sender).Tag));
+      if I >= 0 then
+        tsSwitch.TabIndex := I;
+    end;
+  end;
 end;
 
 end.

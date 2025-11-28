@@ -200,6 +200,7 @@ var
 // ==== Start of 'Constant' String for Translation
 
   SCnNoneProcName: string = '[Unknown]';
+  SCnNoneMenuItemCaption: string = '<None>';
   SCnHintMsgTree: string = 'Debugging Information Display';
 
   SCnCPUSpeedFmt: string = 'CPU Speed: %f MHz';
@@ -681,6 +682,7 @@ end;
 procedure TranslateStrings;
 begin
   TranslateStr(SCnNoneProcName, 'SCnNoneProcName');
+  TranslateStr(SCnNoneMenuItemCaption, 'SCnNoneMenuItemCaption');
   TranslateStr(SCnHintMsgTree, 'SCnHintMsgTree');
 
   TranslateStr(SCnCPUSpeedFmt, 'SCnCPUSpeedFmt');
