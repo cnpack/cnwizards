@@ -1610,7 +1610,7 @@ begin
   end
   else
   begin
-    mniWindow.Items[0].Caption := SCnMenuItemCaption;
+    mniWindow.Items[0].Caption := SCnNoneMenuItemCaption;
     mniWindow.Items[0].Tag := 0;
     minWindow.Items[0].Checked := False;
     mniWindow.Items[0].Enabled := False;
