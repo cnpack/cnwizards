@@ -7360,7 +7360,7 @@ var
 
 begin
   Results.Add(Format('Block Match List %s Info Count %d',
-    [ObjectToString(FBlockMatchList), FBlockMatchList.Count]));
+    [CnObjectToString(FBlockMatchList), FBlockMatchList.Count]));
 {$IFDEF STAND_ALONE}
   Idx := -1;
 {$ELSE}
@@ -7376,7 +7376,7 @@ begin
     Info := TCnBlockMatchInfo(FBlockMatchList[0]);
   end;
 
-  Results.Add('BlockMatch Info ' + ObjectToString(Info));
+  Results.Add('BlockMatch Info ' + CnObjectToString(Info));
   if Info <> nil then
   begin
     Results.Add('BlockMatch Key Lines Count ' + IntToStr(Info.KeyLineCount));
