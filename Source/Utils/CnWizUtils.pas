@@ -10267,13 +10267,15 @@ begin
   Result := False;
   try
     FormDesigner := CnOtaGetFormDesigner;
-    if FormDesigner = nil then Exit;
+    if FormDesigner = nil then
+      Exit;
+
 {$IFDEF LAZARUS}
     if GlobalDesignHook.LookupRoot is TCustomForm then
       AForm := TCustomForm(GlobalDesignHook.LookupRoot);
 {$ENDIF}
 
-{$IFDEF DELHI_OTA}
+{$IFDEF DELPHI_OTA}
   {$IFDEF COMPILER6_UP}
     if FormDesigner.Root is TCustomForm then
       AForm := TCustomForm(FormDesigner.Root);
@@ -10290,7 +10292,7 @@ begin
       AList := TCnDesignerSelectionList.Create;
       GlobalDesignHook.GetSelection(AList);
 {$ENDIF}
-{$IFDEF DELHI_OTA}
+{$IFDEF DELPHI_OTA}
       AList := CreateSelectionList;
       FormDesigner.GetSelections(AList);
 {$ENDIF}
@@ -10301,7 +10303,7 @@ begin
 {$IFDEF LAZARUS}
         AObj := TPersistent(AList[I]);
 {$ENDIF}
-{$IFDEF DELHI_OTA}
+{$IFDEF DELPHI_OTA}
       {$IFDEF COMPILER6_UP}
         AObj := TPersistent(AList[I]);
       {$ELSE}
