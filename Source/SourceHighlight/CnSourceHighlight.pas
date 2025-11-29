@@ -864,7 +864,7 @@ implementation
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF}
+  CnNative, {$IFDEF DEBUG} CnDebug, {$ENDIF}
   {$IFNDEF STAND_ALONE} CnWizMethodHook, CnSourceHighlightFrm, CnEventBus, {$ENDIF}
   CnWizCompilerConst {$IFDEF USE_CODEEDITOR_SERVICE} , CnStrings {$ENDIF};
 
@@ -2898,13 +2898,16 @@ begin
   begin
     MaxLine := 0;
     for I := 0 to FCurTokenList.Count - 1 do
+    begin
       if CurrentIdentTokens[I].EditLine > MaxLine then
         MaxLine := CurrentIdentTokens[I].EditLine;
+    end;
     FIdLineList.Count := MaxLine + 1;
 
     for I := 0 to FCurTokenList.Count - 1 do
     begin
       Token := CurrentIdentTokens[I];
+
       if FIdLineList[Token.EditLine] = nil then
         FIdLineList[Token.EditLine] := CreateLineList;
       TCnList(FIdLineList[Token.EditLine]).Add(Token);
@@ -2920,8 +2923,10 @@ var
 begin
   MaxLine := 0;
   for I := 0 to FFlowTokenList.Count - 1 do
+  begin
     if FlowTokens[I].EditLine > MaxLine then
       MaxLine := FlowTokens[I].EditLine;
+  end;
   FFlowLineList.Count := MaxLine + 1;
 
   if FHighlight.HighlightFlowStatement then
@@ -2944,8 +2949,10 @@ var
 begin
   MaxLine := 0;
   for I := 0 to FCompDirectiveTokenList.Count - 1 do
+  begin
     if CompDirectiveTokens[I].EditLine > MaxLine then
       MaxLine := CompDirectiveTokens[I].EditLine;
+  end;
   FCompDirectiveLineList.Count := MaxLine + 1;
 
   if FHighlight.HighlightCompDirective then
@@ -6704,7 +6711,7 @@ procedure TCnSourceHighlight.Editor2PaintText(const Rect: TRect; const ColNum: S
   const SyntaxCode: TOTASyntaxCode; const Hilight, BeforeEvent: Boolean;
   var AllowDefaultPainting: Boolean; const Context: INTACodeEditorPaintContext);
 var
-  I, L, K, Idx, Layer, Utf8Col, Utf8Len, TL, HSC, CW: Integer;
+  I, L, K, Idx, Layer, Utf8Col, Utf8Len, TL, HSC, CW, LE: Integer;
   Utf8Text: RawByteString;
   Utf16Text: string;
   ColorFg, ColorBk: TColor;
@@ -6843,11 +6850,11 @@ begin
 
           if Context.EditorState.CharWidth > 0 then
           begin
-            L := Rect.Left;
+            LE := Rect.Left;
             for K := 0 to Length(Text) - 1 do
             begin
-              C.TextOut(L, Rect.Top, string(Text[K + 1]));
-              Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
+              C.TextOut(LE, Rect.Top, string(Text[K + 1]));
+              Inc(LE, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
             end;
           end
           else
@@ -6927,11 +6934,11 @@ begin
         C.Brush.Style := bsClear;
         if Context.EditorState.CharWidth > 0 then
         begin
-          L := Rect.Left;
+          LE := Rect.Left;
           for K := 0 to Length(Text) - 1 do
           begin
-            C.TextOut(L, Rect.Top, string(Text[K + 1]));
-            Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
+            C.TextOut(LE, Rect.Top, string(Text[K + 1]));
+            Inc(LE, Context.EditorState.CharWidth * GetWidthFactor(Text[K + 1]));
           end;
         end
         else
@@ -7016,11 +7023,11 @@ begin
 
         if Context.EditorState.CharWidth > 0 then
         begin
-          L := R.Left;
+          LE := R.Left;
           for K := 0 to Length(Token.Token) - 1 do
           begin
-            C.TextOut(L, R.Top, string(Token.Token[K]));
-            Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+            C.TextOut(LE, R.Top, string(Token.Token[K]));
+            Inc(LE, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
           end;
         end
         else
@@ -7128,11 +7135,11 @@ begin
 
             if Context.EditorState.CharWidth > 0 then
             begin
-              L := R.Left;
+              LE := R.Left;
               for K := 0 to Length(Token.Token) - 1 do
               begin
-                C.TextOut(L, R.Top, string(Token.Token[K]));
-                Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+                C.TextOut(LE, R.Top, string(Token.Token[K]));
+                Inc(LE, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
               end;
             end
             else
@@ -7222,11 +7229,11 @@ begin
 
           if Context.EditorState.CharWidth > 0 then
           begin
-            L := R.Left;
+            LE := R.Left;
             for K := 0 to Length(Token.Token) - 1 do
             begin
-              C.TextOut(L, R.Top, string(Token.Token[K]));
-              Inc(L, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
+              C.TextOut(LE, R.Top, string(Token.Token[K]));
+              Inc(LE, Context.EditorState.CharWidth * GetWidthFactor(Token.Token[K]));
             end;
           end
           else
@@ -7347,12 +7354,13 @@ var
     for J := 0 to List.Count - 1 do
     begin
       Token := TCnGeneralPasToken(List[J]);
-      Result := Result + Format('[-%d |%d]', [Token.EditLine, Token.EditCol]);
+      Result := Result + Format('[%d|%d]', [Token.EditLine, Token.EditCol]);
     end;
   end;
 
 begin
-  Results.Add('Block Match Info Count ' + IntToStr(FBlockMatchList.Count));
+  Results.Add(Format('Block Match List %s Info Count %d',
+    [ObjectToString(FBlockMatchList), FBlockMatchList.Count]));
 {$IFDEF STAND_ALONE}
   Idx := -1;
 {$ELSE}
@@ -7368,6 +7376,7 @@ begin
     Info := TCnBlockMatchInfo(FBlockMatchList[0]);
   end;
 
+  Results.Add('BlockMatch Info ' + ObjectToString(Info));
   if Info <> nil then
   begin
     Results.Add('BlockMatch Key Lines Count ' + IntToStr(Info.KeyLineCount));
@@ -7378,6 +7387,17 @@ begin
       begin
         Results.Add(Format('#%d: (%d) %s - %s', [I, Info.KeyLines[I].Count,
           Info.KeyLines[I].ToString, GetTokenEditLineCol(Info.KeyLines[I])]));
+      end;
+    end;
+
+    Results.Add('BlockMatch Current Ident Lines Count ' + IntToStr(Info.CurrentIdentLineCount));
+
+    for I := 0 to Info.CurrentIdentLineCount - 1 do
+    begin
+      if Info.CurrentIdentLines[I] <> nil then
+      begin
+        Results.Add(Format('#%d: (%d) %s - %s', [I, Info.CurrentIdentLines[I].Count,
+          Info.CurrentIdentLines[I].ToString, GetTokenEditLineCol(Info.CurrentIdentLines[I])]));
       end;
     end;
   end
