@@ -246,19 +246,21 @@ type
     // *TokenList 容纳初步解析结果
     FKeyTokenList: TCnList;           // 容纳解析出来的关键字 Tokens 的引用
     FCurTokenList: TCnList;           // 容纳解析出来的与光标当前词相同的 Tokens 的引用
-    FCurTokenListEditLine: TCnList;   // 容纳解析出来的光标当前词相同的词的行数
-    FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数
     FFlowTokenList: TCnList;          // 容纳解析出来的流程控制标识符的 Tokens 的引用
     FCompDirectiveTokenList: TCnList; // 容纳解析出来的编译指令 Tokens 的引用
     FCustomIdentTokenList: TCnList;   // 容纳解析出来的自定义高亮标识符的引用
 
-    // *LineList 容纳快速访问结果
-    FKeyLineList: TCnFastObjectList;      // 容纳按行方式存储的快速访问的关键字内容
-    FIdLineList: TCnFastObjectList;       // 容纳按行方式存储的快速访问的标识符内容
-    FFlowLineList: TCnFastObjectList;     // 容纳按行方式存储的快速访问的流程控制符内容
-    FSeparateLineList: TCnList;           // 容纳行方式存储的快速访问的分界空行信息
-    FCompDirectiveLineList: TCnFastObjectList;       // 容纳行方式存储的快速访问的编译指令内容
-    FCustomIdentLineList: TCnFastObjectList;    // 容纳按行方式存储的自定义高亮标识符的内容
+    FCurTokenListEditLine: TCnList;   // 容纳解析出来的光标当前词相同的词的行数，并非内容引用
+    FCurTokenListEditCol: TCnList;    // 容纳解析出来的光标当前词相同的词的列数，并非内容引用
+
+    // *LineList 容纳快速访问结果，内容为了提速是引用，由 ListPool 管理
+    FKeyLineList: TCnList;            // 容纳按行方式存储的快速访问的关键字内容
+    FIdLineList: TCnList;             // 容纳按行方式存储的快速访问的标识符内容
+    FFlowLineList: TCnList;           // 容纳按行方式存储的快速访问的流程控制符内容
+    FCompDirectiveLineList: TCnList;  // 容纳行方式存储的快速访问的编译指令内容
+    FCustomIdentLineList: TCnList;    // 容纳按行方式存储的自定义高亮标识符的内容
+
+    FSeparateLineList: TCnList;       // 容纳行方式存储的快速访问的分界空行信息，并非内容引用
 
     FLineInfo: TCnBlockLineInfo;              // 容纳解析出来的 Tokens 配对信息
     FCompDirectiveInfo: TCnCompDirectiveInfo; // 容纳解析出来的编译指令配对信息
@@ -325,6 +327,8 @@ type
     procedure ConvertCustomIdentLineList;   // 将解析出的自定义标识符转换成按行方式快速访问的
 
     procedure Clear;
+    procedure RecycleList(List: TCnList);
+
     procedure AddToKeyList(AToken: TCnGeneralPasToken);
     procedure AddToCurrList(AToken: TCnGeneralPasToken);
     procedure AddToFlowList(AToken: TCnGeneralPasToken);
@@ -460,7 +464,7 @@ type
     function GetPairs(Index: Integer): TCnBlockLinePair;
     function GetLineCount: Integer;
     function GetLines(LineNum: Integer): TCnList;
-    procedure ConvertLineList; // 转换成按行快速访问的
+    procedure ConvertBlockLineList;      // 转换成按行快速访问的
   public
     constructor Create(AControl: TControl);
     destructor Destroy; override;
@@ -984,6 +988,36 @@ var
 {$ENDIF}
 
   PairPool: TCnList = nil;
+  ListPool: TCnList = nil;
+
+// 用池方式来管理每一行的 TCnList 以提高性能
+function CreateLineList: TCnList;
+begin
+  if ListPool.Count > 0 then
+  begin
+    Result := TCnList(ListPool.Last);
+    ListPool.Delete(ListPool.Count - 1);
+  end
+  else
+    Result := TCnList.Create;
+end;
+
+procedure FreeLineList(List: TCnList);
+begin
+  if List <> nil then
+  begin
+    List.Clear;
+    ListPool.Add(List);
+  end;
+end;
+
+procedure ClearListPool;
+var
+  I: Integer;
+begin
+  for I := 0 to ListPool.Count - 1 do
+    TObject(ListPool[I]).Free;
+end;
 
 // 用池方式来管理 TCnBlockLinePair 以提高性能
 function CreateLinePair: TCnBlockLinePair;
@@ -1487,8 +1521,7 @@ end;
 {$IFNDEF STAND_ALONE}
 
 // 分析检查本 EditControl 中的结构高亮信息
-function TCnBlockMatchInfo.CheckBlockMatch(
-  BlockHighlightRange: TBlockHighlightRange): Boolean;
+function TCnBlockMatchInfo.CheckBlockMatch(BlockHighlightRange: TBlockHighlightRange): Boolean;
 var
   EditView: IOTAEditView;
   Stream: TMemoryStream;
@@ -1540,11 +1573,15 @@ begin
 
   // 不能调用 Clear 来简单清除所有内容，必须保留 FCurTokenList，避免重画时不能刷新
   FKeyTokenList.Clear;
-  FKeyLineList.Clear;
-  FIdLineList.Clear;
-  FFlowLineList.Clear;
+
+  RecycleList(FKeyLineList);
+  RecycleList(FIdLineList);
+  RecycleList(FFlowLineList);
+  RecycleList(FCompDirectiveLineList);
+  RecycleList(FCustomIdentLineList);
+
   FSeparateLineList.Clear;
-  FCompDirectiveLineList.Clear;
+
   if LineInfo <> nil then
     LineInfo.Clear;
   if CompDirectiveInfo <> nil then
@@ -1648,14 +1685,14 @@ begin
       begin
         CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, GlobalIgnoreClass, GlobalIgnoreNamespace);
 {$IFDEF DEBUG}
-        CnDebugger.LogInteger(LineInfo.Count, 'HighLight Cpp LinePairs Count.');
+        CnDebugger.LogInteger(LineInfo.Count, 'Highlight Cpp LinePairs Count.');
 {$ENDIF}
       end;
       if CompDirectiveInfo <> nil then
       begin
         CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
 {$IFDEF DEBUG}
-        CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Cpp CompDirectivePairs Count.');
+        CnDebugger.LogInteger(CompDirectiveInfo.Count, 'Highlight Cpp CompDirectivePairs Count.');
 {$ENDIF}
       end;
     end;
@@ -1918,7 +1955,7 @@ begin
       end;
     end;
 
-    FFlowLineList.Clear;
+    RecycleList(FFlowLineList);
     ConvertFlowLineList;
   end
   else // 做 C/C++ 中的当前解析，将控制流程的标识符解析出来
@@ -1961,7 +1998,7 @@ begin
       end;
     end;
 
-    FFlowLineList.Clear;
+    RecycleList(FFlowLineList);
     ConvertFlowLineList;
   end;
 
@@ -2072,7 +2109,7 @@ begin
       end;
     end;
 
-    FIdLineList.Clear;
+    RecycleList(FIdLineList);
     ConvertIdLineList;
   end
   else // 做 C/C++ 中的当前解析，将相同的标识符解析出来
@@ -2130,7 +2167,7 @@ begin
       end;
     end;
 
-    FIdLineList.Clear;
+    RecycleList(FIdLineList);
     ConvertIdLineList;
   end;
 
@@ -2210,7 +2247,7 @@ begin
     end;
   end;
 
-  FCompDirectiveLineList.Clear;
+  RecycleList(FCompDirectiveLineList);
   ConvertCompDirectiveLineList;
 
 {$IFDEF DEBUG}
@@ -2278,7 +2315,8 @@ begin
             end;
           end;
         end;
-        LineInfo.ConvertLineList;
+
+        LineInfo.ConvertBlockLineList;
         LineInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
       finally
         for I := 0 to FStack.Count - 1 do
@@ -2446,7 +2484,7 @@ begin
           end;
         end;
 
-        LineInfo.ConvertLineList;
+        LineInfo.ConvertBlockLineList;
         LineInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
       finally
         for I := 0 to FIfThenStack.Count - 1 do
@@ -2532,7 +2570,8 @@ begin
           end;
         end;
       end;
-      CompDirectiveInfo.ConvertLineList;
+
+      CompDirectiveInfo.ConvertBlockLineList;
       CompDirectiveInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
@@ -2600,7 +2639,8 @@ begin
           end;
         end;
       end;
-      CompDirectiveInfo.ConvertLineList;
+
+      CompDirectiveInfo.ConvertBlockLineList;
       CompDirectiveInfo.FindCurrentPair(ViewCursorPosLine, ViewCursorPosCol, FIsCppSource);
     finally
       for I := 0 to FStack.Count - 1 do
@@ -2624,12 +2664,13 @@ begin
   FCompDirectiveTokenList.Clear;
   FCustomIdentTokenList.Clear;
 
-  FKeyLineList.Clear;
-  FIdLineList.Clear;
-  FFlowLineList.Clear;
+  RecycleList(FKeyLineList);
+  RecycleList(FIdLineList);
+  RecycleList(FFlowLineList);
+  RecycleList(FCompDirectiveLineList);
+  RecycleList(FCustomIdentLineList);
+
   FSeparateLineList.Clear;
-  FCompDirectiveLineList.Clear;
-  FCustomIdentLineList.Clear;
 
   if LineInfo <> nil then
     LineInfo.Clear;
@@ -2672,12 +2713,13 @@ begin
   FCompDirectiveTokenList := TCnList.Create;
   FCustomIdentTokenList := TCnList.Create;
 
-  FKeyLineList := TCnFastObjectList.Create;
-  FIdLineList := TCnFastObjectList.Create;
-  FFlowLineList := TCnFastObjectList.Create;
+  FKeyLineList := TCnList.Create;
+  FIdLineList := TCnList.Create;
+  FFlowLineList := TCnList.Create;
+  FCompDirectiveLineList := TCnList.Create;
+  FCustomIdentLineList := TCnList.Create;
+
   FSeparateLineList := TCnList.Create;
-  FCompDirectiveLineList := TCnFastObjectList.Create;
-  FCustomIdentLineList := TCnFastObjectList.Create;
 
   FStack := TStack.Create;
   FIfThenStack := TStack.Create;
@@ -2839,7 +2881,7 @@ begin
   begin
     Token := KeyTokens[I];
     if FKeyLineList[Token.EditLine] = nil then
-      FKeyLineList[Token.EditLine] := TCnList.Create;
+      FKeyLineList[Token.EditLine] := CreateLineList;
     TCnList(FKeyLineList[Token.EditLine]).Add(Token);
   end;
 
@@ -2864,7 +2906,7 @@ begin
     begin
       Token := CurrentIdentTokens[I];
       if FIdLineList[Token.EditLine] = nil then
-        FIdLineList[Token.EditLine] := TCnList.Create;
+        FIdLineList[Token.EditLine] := CreateLineList;
       TCnList(FIdLineList[Token.EditLine]).Add(Token);
     end;
   end;
@@ -2888,7 +2930,7 @@ begin
     begin
       Token := FlowTokens[I];
       if FFlowLineList[Token.EditLine] = nil then
-        FFlowLineList[Token.EditLine] := TCnList.Create;
+        FFlowLineList[Token.EditLine] := CreateLineList;
       TCnList(FFlowLineList[Token.EditLine]).Add(Token);
     end;
   end;
@@ -2912,15 +2954,10 @@ begin
     begin
       Token := CompDirectiveTokens[I];
       if FCompDirectiveLineList[Token.EditLine] = nil then
-        FCompDirectiveLineList[Token.EditLine] := TCnList.Create;
+        FCompDirectiveLineList[Token.EditLine] := CreateLineList;
       TCnList(FCompDirectiveLineList[Token.EditLine]).Add(Token);
     end;
   end;
-end;
-
-procedure TCnBlockMatchInfo.AddToCustomIdentList(AToken: TCnGeneralPasToken);
-begin
-  FCustomIdentTokenList.Add(AToken);
 end;
 
 procedure TCnBlockMatchInfo.ConvertCustomIdentLineList;
@@ -2941,10 +2978,15 @@ begin
     begin
       Token := CustomIdentTokens[I];
       if FCustomIdentLineList[Token.EditLine] = nil then
-        FCustomIdentLineList[Token.EditLine] := TCnList.Create;
+        FCustomIdentLineList[Token.EditLine] := CreateLineList;
       TCnList(FCustomIdentLineList[Token.EditLine]).Add(Token);
     end;
   end;
+end;
+
+procedure TCnBlockMatchInfo.AddToCustomIdentList(AToken: TCnGeneralPasToken);
+begin
+  FCustomIdentTokenList.Add(AToken);
 end;
 
 function TCnBlockMatchInfo.GetCustomIdentTokenCount: Integer;
@@ -3010,7 +3052,7 @@ begin
       end;
     end;
 
-    FCustomIdentLineList.Clear;
+    RecycleList(FCustomIdentLineList);
     ConvertCustomIdentLineList;
   end
   else // 做 C/C++ 中的当前解析，将所需高亮的自定义标识符解析出来
@@ -3030,7 +3072,7 @@ begin
       end;
     end;
 
-    FCustomIdentLineList.Clear;
+    RecycleList(FCustomIdentLineList);
     ConvertCustomIdentLineList;
   end;
 
@@ -3109,6 +3151,15 @@ begin
     end;
   end;
 {$ENDIF}
+end;
+
+procedure TCnBlockMatchInfo.RecycleList(List: TCnList);
+var
+  I: Integer;
+begin
+  for I := List.Count - 1 downto 0 do
+    FreeLineList(TCnList(List[I]));
+  List.Clear;
 end;
 
 { TCnSourceHighlight }
@@ -4133,10 +4184,20 @@ begin
     with TCnBlockMatchInfo(FBlockMatchList[Index]) do
     begin
       FKeyTokenList.Clear;
-      FKeyLineList.Clear;
-      FIdLineList.Clear;
+      FCurTokenList.Clear;
+      FCurTokenListEditLine.Clear;
+      FCurTokenListEditCol.Clear;
+      FFlowTokenList.Clear;
+      FCompDirectiveTokenList.Clear;
+      FCustomIdentTokenList.Clear;
+
+      RecycleList(FKeyLineList);
+      RecycleList(FIdLineList);
+      RecycleList(FFlowLineList);
+      RecycleList(FCompDirectiveLineList);
+      RecycleList(FCustomIdentLineList);
+
       FSeparateLineList.Clear;
-      FFlowLineList.Clear;
       if LineInfo <> nil then
         LineInfo.Clear;
     end;
@@ -4144,10 +4205,12 @@ begin
 
   Index := IndexOfBlockLine(Editor.EditControl);
   if Index >= 0 then
+  begin
     with TCnBlockLineInfo(FBlockLineList[Index]) do
     begin
       Clear;
     end;
+  end;
 
   Index := IndexOfCompDirectiveLine(Editor.EditControl);
   if Index >= 0 then
@@ -4265,12 +4328,14 @@ begin
 
       // 展开以及变动的情况，或者局部高亮时位置改动的情况，重新解析
       Info.FKeyTokenList.Clear;
-      Info.FKeyLineList.Clear;
-      Info.FIdLineList.Clear;
-      Info.FSeparateLineList.Clear;
-      Info.FFlowLineList.Clear;
-      Info.FCompDirectiveLineList.Clear;
 
+      Info.RecycleList(Info.FKeyLineList);
+      Info.RecycleList(Info.FIdLineList);
+      Info.RecycleList(Info.FFlowLineList);
+      Info.RecycleList(Info.FCompDirectiveLineList);
+      Info.RecycleList(Info.FCustomIdentLineList);
+
+      Info.FSeparateLineList.Clear;
       if Info.LineInfo <> nil then
         Info.LineInfo.Clear;
       if Info.CompDirectiveInfo <> nil then
@@ -7592,7 +7657,7 @@ begin
   Result := TCnBlockLinePair(FPairList[Index]);
 end;
 
-procedure TCnBlockLineInfo.ConvertLineList;
+procedure TCnBlockLineInfo.ConvertBlockLineList;
 var
   I, J: Integer;
   Pair: TCnBlockLinePair;
@@ -7781,8 +7846,11 @@ initialization
   RegisterCnWizard(TCnSourceHighlight);
 {$ENDIF}
   PairPool := TCnList.Create;
+  ListPool := TCnList.Create;
 
 finalization
+  ClearListPool;
+  FreeAndNil(ListPool);
   ClearPairPool;
   FreeAndNil(PairPool);
 
