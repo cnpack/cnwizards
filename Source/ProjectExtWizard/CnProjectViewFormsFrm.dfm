@@ -1,12 +1,20 @@
 inherited CnProjectViewFormsForm: TCnProjectViewFormsForm
   Top = 200
   Caption = 'Form List of Project Group'
+  ClientHeight = 478
+  ClientWidth = 711
   PixelsPerInch = 96
   TextHeight = 13
+  inherited pnlHeader: TPanel
+    Width = 711
+  end
   inherited StatusBar: TStatusBar
+    Top = 459
+    Width = 711
     OnDrawPanel = StatusBarDrawPanel
   end
   inherited ToolBar: TToolBar
+    Width = 711
     object tbnSep2: TToolButton
       Left = 378
       Top = 0
@@ -33,26 +41,29 @@ inherited CnProjectViewFormsForm: TCnProjectViewFormsForm
     end
   end
   inherited pnlMain: TPanel
+    Width = 711
+    Height = 393
     inherited lvList: TListView
+      Width = 711
+      Height = 393
       Columns = <
         item
           Caption = 'Form'
-          Width = 140
+          Width = 160
         end
         item
           Caption = 'Caption'
-          Width = 130
+          Width = 150
         end
         item
           Caption = 'Type'
-          Width = 90
+          Width = 110
         end
         item
           Caption = 'Project'
-          Width = 100
+          Width = 120
         end
         item
-          Alignment = taRightJustify
           Caption = 'Size(Byte)'
           Width = 80
         end

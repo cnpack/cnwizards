@@ -1,17 +1,32 @@
 inherited CnProjectViewUnitsForm: TCnProjectViewUnitsForm
-  Top = 250
+  Left = 288
+  Top = 219
   Caption = 'Unit List of Project Group'
+  ClientHeight = 471
+  ClientWidth = 705
   PixelsPerInch = 96
   TextHeight = 13
+  inherited pnlHeader: TPanel
+    Width = 705
+  end
   inherited StatusBar: TStatusBar
+    Top = 452
+    Width = 705
     OnDrawPanel = StatusBarDrawPanel
   end
+  inherited ToolBar: TToolBar
+    Width = 705
+  end
   inherited pnlMain: TPanel
+    Width = 705
+    Height = 386
     inherited lvList: TListView
+      Width = 705
+      Height = 386
       Columns = <
         item
           Caption = 'Unit'
-          Width = 210
+          Width = 225
         end
         item
           Caption = 'Type'
@@ -19,16 +34,15 @@ inherited CnProjectViewUnitsForm: TCnProjectViewUnitsForm
         end
         item
           Caption = 'Project'
-          Width = 140
+          Width = 145
         end
         item
-          Alignment = taRightJustify
           Caption = 'Size(Byte)'
           Width = 80
         end
         item
           Caption = 'File State'
-          Width = 72
+          Width = 125
         end>
       OwnerData = True
       OnData = lvListData

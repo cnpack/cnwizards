@@ -87,10 +87,12 @@ type
     FFileName: string;
     FProject: string;
     FUnitType: TCnUnitType;
+    FLastModified: string;
   public
     property FileName: string read FFileName write FFileName;
     property Project: string read FProject write FProject;
     property Size: Integer read FSize write FSize;
+    property LastModified: string read FLastModified write FLastModified;
     property UnitType: TCnUnitType read FUnitType write FUnitType;
     property IsOpened: Boolean read FIsOpened write FIsOpened;
     property ImageIndex: Integer read FImageIndex write FImageIndex;
@@ -287,6 +289,11 @@ begin
         Reader := TCnEditFiler.Create(AInfo.FileName);
         AInfo.Size := Reader.FileSize;
       end;
+
+      if FileExists(AInfo.FileName) then
+        AInfo.LastModified := FormatDateTime('yyyy-MM-dd hh:mm:ss', GetFileDateTime(AInfo.FileName))
+      else
+        AInfo.LastModified := '';
     except
       AInfo.Size := 0;
     end;
@@ -556,8 +563,8 @@ begin
       Add(SUnitTypes[Info.UnitType]);
       Add(Info.Project);
       Add(IntToStrSp(Info.Size));
-      if Info.Size > 0 then
-        Add('')
+      if (Info.Size > 0) or FileExists(Info.FileName) then
+        Add(Info.LastModified)
       else
         Add(SCnProjExtNotSaved);
     end;
