@@ -212,12 +212,12 @@
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
       -IIdeEnhancement -IPrefixWizard -ISourceStat -IDesignEditor -IDesignWizard -ISourceDiff 
       -ICodingToolset -IUtils -IFramework -I$(BCB)\include -I$(BCB)\include\vcl 
-      -I$(BCB)\source\toolsapi -Ithirdparty 
-      -Ithirdparty\ddetours -Ithirdparty\jcl -Ithirdparty\fastcode 
-      -Ithirdparty\pascalscript -I..\dcu -I..\..\cnvcl\source\common -I..\..\cnvcl\source\crypto 
-      -I..\..\cnvcl\source\nonvisual -I..\..\cnvcl\source\graphic 
-      -I..\..\cnvcl\source\netcomm -I..\..\cnvcl\source\multilang 
-      -I..\..\cnvcl\source\objrep -src_suffix cpp -boa"/>
+      -I$(BCB)\source\toolsapi -IThirdParty 
+      -IThirdParty\DDetours 
+      -IThirdParty\PascalScript -I..\Dcu -I..\..\cnvcl\Source\Common -I..\..\cnvcl\Source\Crypto 
+      -I..\..\cnvcl\Source\NonVisual -I..\..\cnvcl\Source\Graphic 
+      -I..\..\cnvcl\Source\NetComm -I..\..\cnvcl\Source\Multilang 
+      -I..\..\cnvcl\Source\ObjRep -src_suffix cpp -boa"/>
     <CFLAG1 value="-WD -O2 -Vx -Ve -X- -a8 -b- -k- -vi -tWD -tWM -c"/>
     <PFLAGS value="-N2..\Dcu -N0..\Dcu -$Y- -$W -$O- -$L- -$D- -$A8 -LUvcl;designide -v 
       -JPHNE -M"/>
