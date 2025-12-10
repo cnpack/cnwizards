@@ -117,6 +117,20 @@ object FormPasDoc: TFormPasDoc
         Height = 13
         Caption = 'HTML Output Directory:'
       end
+      object lbl1: TLabel
+        Left = 656
+        Top = 56
+        Width = 112
+        Height = 13
+        Caption = 'Crypto Source Directory'
+      end
+      object lbl2: TLabel
+        Left = 656
+        Top = 88
+        Width = 100
+        Height = 13
+        Caption = 'Crypto Help Directory'
+      end
       object btnConvertDirectory: TButton
         Left = 16
         Top = 120

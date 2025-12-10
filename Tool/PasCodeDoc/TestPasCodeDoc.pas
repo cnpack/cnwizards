@@ -34,6 +34,8 @@ type
     btnOutputBrowse: TButton;
     btnCryptoGen: TButton;
     btnCryptoGenAFile: TButton;
+    lbl1: TLabel;
+    lbl2: TLabel;
     procedure btnExtractFromFileClick(Sender: TObject);
     procedure btnCombineInterfaceClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -1001,7 +1003,7 @@ const
   SCRIPT_FILE = FILE_PREFIX + 'script.js';
   WELCOME_FILE = FILE_PREFIX + 'welcome.html';
   UNIT_FILE = FILE_PREFIX + 'template.html';
-  IMG_FILE = 'cnpack_64.png';
+  IMG_FILE = 'cncrypto_64.png';
 
   UNIT_LIST_TAG = '<!--#UNIT_LIST#-->';
   UNIT_NAME_TAG = '<!--#UNIT_NAME#-->';
@@ -1065,6 +1067,35 @@ var
   I, J: Integer;
   S: string;
   SL: TStringList;
+
+  function CanIgnoreFile(const F: string): Boolean;
+  begin
+    Result := True;
+    if Pos('CnCryptoExport', F) > 0 then // 忽略这批文件
+      Exit;
+    if Pos('CnConsts', F) > 0 then
+      Exit;
+    if Pos('CnStrings', F) > 0 then
+      Exit;
+    if Pos('CnWideStrings', F) > 0 then
+      Exit;
+    if Pos('CnTree', F) > 0 then
+      Exit;
+    if Pos('CnContainers', F) > 0 then
+      Exit;
+    if Pos('CnFileUtils', F) > 0 then
+      Exit;
+    if Pos('CnMath', F) > 0 then
+      Exit;
+    if Pos('CnHashMap', F) > 0 then
+      Exit;
+    if Pos('CnFloat', F) > 0 then
+      Exit;
+    if Pos('CnZip', F) > 0 then
+      Exit;
+    Result := False;
+  end;
+
 begin
   FAllFile.Clear;
   Screen.Cursor := crHourGlass;
@@ -1096,7 +1127,7 @@ begin
       SL.Delete(J);
       for I := FAllFile.Count - 1 downto 0 do
       begin
-        if Pos('CnCryptoExport', FAllFile[I]) > 0 then // 忽略这个文件
+        if CanIgnoreFile(FAllFile[I]) then
           Continue;
 
         if I = FAllFile.Count - 1 then
@@ -1135,7 +1166,7 @@ begin
     // 根据 Template 文件生成每个单元的帮助文件
     for I := 0 to FAllFile.Count - 1 do
     begin
-      if Pos('CnCryptoExport', FAllFile[I]) > 0 then // 忽略这个文件
+      if CanIgnoreFile(FAllFile[I]) then
         Continue;
 
       FreeAndNil(FDoc);
