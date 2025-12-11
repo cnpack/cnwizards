@@ -155,7 +155,7 @@ object FormPasDoc: TFormPasDoc
         Width = 385
         Height = 21
         TabOrder = 2
-        Text = '..\..\..\cnvcl\Source\Crypto'
+        Text = 'C:\CnPack\build\crypto\Source'
       end
       object edtOutputDir: TEdit
         Left = 152
@@ -163,7 +163,7 @@ object FormPasDoc: TFormPasDoc
         Width = 385
         Height = 21
         TabOrder = 3
-        Text = '.'
+        Text = 'C:\CnPack\build\crypto\Help'
       end
       object btnTemplateBrowse: TButton
         Left = 552
