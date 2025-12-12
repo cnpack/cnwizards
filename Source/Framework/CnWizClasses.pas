@@ -184,7 +184,8 @@ type
     procedure SaveSettings(Ini: TCustomIniFile); virtual;
     {* 保存专家设置方法，子类重载此方法将专家参数保存到 INI 对象中 }
     procedure ResetSettings(Ini: TCustomIniFile); virtual;
-    {* 重置专家设置方法，子类如有 INI 对象之外的保存动作，需要重载此方法 }
+    {* 重置专家设置方法，子类如有 INI 对象之外的保存动作，需要重载此方法。
+       典型的情况是调用 WizOptions.CleanUserFile 清除指定的数据存储文件。 }
 
     class function GetIDStr: string;
     {* 返回专家唯一标识符，供管理器使用 }
@@ -195,7 +196,7 @@ type
     procedure DoSaveSettings;
     {* 保存专家设置 }
     procedure DoResetSettings;
-    {* 重置专家设置}
+    {* 重置专家设置 }
 
     property Active: Boolean read FActive write SetActive;
     {* 活跃属性，表明专家当前是否可用 }
@@ -903,18 +904,19 @@ var
 begin
   Ini := CreateIniFile;
   List := TStringList.Create;
+
   try
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
     CnDebugger.LogMsg('Reset Settings: ' + ClassName);
-  {$ENDIF}
+{$ENDIF}
 
     if Ini is TCnRegistryIniFile then
     begin
       with (Ini as TCnRegistryIniFile).RegIniFile do
       begin
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
         CnDebugger.LogMsg('Remove Registry Entry: ' + FileName);
-  {$ENDIF}
+{$ENDIF}
 
         Reg := TRegistry.Create;
         try
@@ -966,7 +968,7 @@ end;
 
 procedure TCnBaseWizard.ResetSettings(Ini: TCustomIniFile);
 begin
-// 基类啥也不干
+  // 基类啥也不干
 end;
 
 procedure TCnBaseWizard.Loaded;

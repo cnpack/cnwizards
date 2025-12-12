@@ -1398,7 +1398,9 @@ end;
 
 procedure TCnSrcEditorBlockTools.ResetSettings(Ini: TCustomIniFile);
 begin
-
+  FCodeWrap.ResetSettings;
+  FGroupReplace.ResetSettings;
+  FWebSearch.ResetSettings;
 end;
 
 //------------------------------------------------------------------------------

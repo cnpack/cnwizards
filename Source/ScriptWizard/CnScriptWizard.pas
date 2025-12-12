@@ -250,6 +250,7 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -1201,6 +1202,11 @@ begin
 
   // 保存完毕后再把内部的加进来
   MergeCollectionsTo(FInternalScripts, FScripts);
+end;
+
+procedure TCnScriptWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+  WizOptions.CleanUserFile(SCnScriptFileName);
 end;
 
 procedure TCnScriptWizard.SetActive(Value: Boolean);

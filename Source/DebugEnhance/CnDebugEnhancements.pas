@@ -907,15 +907,6 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnDebuggerValueReplaceManager.ResetSettings;
-var
-  F: string;
-begin
-  F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, False);
-  if FileExists(F) then
-    DeleteFile(F);
-end;
-
 procedure TCnDebuggerValueReplaceManager.SaveSettings;
 var
   F: string;
@@ -923,6 +914,11 @@ begin
   F := WizOptions.GetUserFileName(SCnDebugReplacerDataName, False);
   FReplaceItems.SaveToFile(F);
   WizOptions.CheckUserFile(SCnDebugReplacerDataName);
+end;
+
+procedure TCnDebuggerValueReplaceManager.ResetSettings;
+begin
+  WizOptions.CleanUserFile(SCnDebugReplacerDataName);
 end;
 
 {$ENDIF}

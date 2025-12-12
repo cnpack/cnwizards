@@ -1103,7 +1103,6 @@ end;
 // 自定义符号列表
 //==============================================================================
 
-
 { TCnFileSymbolList }
 
 function TCnFileSymbolList.CanCustomize: Boolean;

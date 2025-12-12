@@ -255,17 +255,19 @@ end;
 procedure TCnCorPropWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
-
   SavePropertyRules(WizOptions.GetUserFileName(SCnCorPropDataName, False));
+
   // 检查用户文件，如果与默认文件相同则删除，以支持默认文件升级
   WizOptions.CheckUserFile(SCnCorPropDataName);
 
   with TCnIniFile.Create(Ini) do
+  begin
     try
       // 另外的设置保存到注册表中
     finally
       Free;
     end;
+  end;
 end;
 
 procedure TCnCorPropWizard.ResetSettings(Ini: TCustomIniFile);

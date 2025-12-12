@@ -137,6 +137,7 @@ type
     procedure Config; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
+    procedure ResetSettings(Ini: TCustomIniFile); override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     function GetCaption: string; override;
     function GetHint: string; override;
@@ -308,6 +309,11 @@ end;
 procedure TCnAICoderWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   CnAIEngineManager.SaveToWizOptions;
+end;
+
+procedure TCnAICoderWizard.ResetSettings(Ini: TCustomIniFile);
+begin
+  CnAIEngineManager.ResetWizOptions;
 end;
 
 procedure TCnAICoderWizard.SubActionExecute(Index: Integer);

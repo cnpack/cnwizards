@@ -204,9 +204,11 @@ type
     {* 根据选项对象查找对应引擎}
 
     procedure LoadFromWizOptions;
-    {* 专家包的加载总入口，动态加载所有配置，内部会分辨不同目录}
+    {* 专家包中运行时的加载总入口，动态加载所有配置，内部会分辨不同目录}
     procedure SaveToWizOptions;
-    {* 专家包的保存总入口，动态保存所有配置到用户目录}
+    {* 专家包中运行时的保存总入口，动态保存所有配置到用户目录}
+    procedure ResetWizOptions;
+    {* 该专家的重置入口}
 
     property CurrentEngineName: string read GetCurrentEngineName write SetCurrentEngineName;
     {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎。
@@ -484,6 +486,21 @@ begin
     S := WizOptions.GetUserFileName(F, False);
     CnAIEngineOptionManager.SaveOptionToFile(Engines[I].EngineName, S);
     WizOptions.CheckUserFile(F);
+  end;
+end;
+
+procedure TCnAIEngineManager.ResetWizOptions;
+var
+  I: Integer;
+  F: string;
+begin
+  WizOptions.CleanUserFile(Format(SCnAICoderEngineOptionFileFmt, ['']));
+  WizOptions.CleanUserFile(SCnAICoderFavoritesFile);
+
+  for I := 0 to EngineCount - 1 do
+  begin
+    F := Format(SCnAICoderEngineOptionFileFmt, [Engines[I].EngineID]);
+    WizOptions.CleanUserFile(F);
   end;
 end;
 

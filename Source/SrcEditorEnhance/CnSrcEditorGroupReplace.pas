@@ -143,6 +143,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    procedure ResetSettings;
     function Config: Boolean;
     procedure Execute(Item: TCnGroupReplacement);
     procedure InitMenuItems(AMenu: TMenuItem);
@@ -258,6 +260,11 @@ begin
   FShortCuts.Free;
   FItems.Free;
   inherited;
+end;
+
+procedure TCnSrcEditorGroupReplaceTool.ResetSettings;
+begin
+  WizOptions.CleanUserFile(SCnGroupReplaceFile);
 end;
 
 procedure TCnSrcEditorGroupReplaceTool.Execute(Item: TCnGroupReplacement);

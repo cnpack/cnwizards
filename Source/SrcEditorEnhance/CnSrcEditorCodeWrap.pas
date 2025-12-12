@@ -172,6 +172,8 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
+    procedure ResetSettings;
     function Config: Boolean;
     procedure Execute(Item: TCnCodeWrapItem);
     procedure InitMenuItems(AMenu: TMenuItem);
@@ -323,6 +325,11 @@ begin
   inherited;
 end;
 
+procedure TCnSrcEditorCodeWrapTool.ResetSettings;
+begin
+  WizOptions.CleanUserFile(SCnCodeWrapFile);
+end;
+
 procedure TCnSrcEditorCodeWrapTool.Execute(Item: TCnCodeWrapItem);
 var
   EditView: IOTAEditView;
@@ -457,6 +464,7 @@ var
       CnOtaInsertSingleLine(ALineNo + I, Line, EditView);
     end;
   end;
+
 begin
   EditView := CnOtaGetTopMostEditView;
   if Assigned(EditView) and EditView.Block.IsValid and
