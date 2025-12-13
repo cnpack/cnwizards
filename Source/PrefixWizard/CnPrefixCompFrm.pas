@@ -112,20 +112,21 @@ var
   Frm: TCnPrefixCompForm;
 begin
   Frm := TCnPrefixCompForm.Create(nil);
-  with Frm, IniFile do
+  with Frm do
   try
     FList := List;
-    Width := ReadInteger(csSection, csWidth, Width);
-    Height := ReadInteger(csSection, csHeight, Height);
+    Width := IniFile.ReadInteger(csSection, csWidth, Width);
+    Height := IniFile.ReadInteger(csSection, csHeight, Height);
     CenterForm(Frm);
-    SetListViewWidthString(ListView, ReadString(csSection, csListViewWidth, ''),
+
+    SetListViewWidthString(ListView, IniFile.ReadString(csSection, csListViewWidth, ''),
       GetFactorFromSizeEnlarge(Enlarge));
     UpdateTrigger := UpdateListToListView;
     Result := ShowModal = mrOk;
 
-    WriteInteger(csSection, csWidth, Width);
-    WriteInteger(csSection, csHeight, Height);
-    WriteString(csSection, csListViewWidth,
+    IniFile.WriteInteger(csSection, csWidth, Width);
+    IniFile.WriteInteger(csSection, csHeight, Height);
+    IniFile.WriteString(csSection, csListViewWidth,
       GetListViewWidthString(ListView, GetFactorFromSizeEnlarge(Enlarge)));
   finally
     Frm.Free;
@@ -252,6 +253,7 @@ begin
     Compare := CompareText(Item1.Caption, Item2.Caption)
   else
     Compare := CompareText(Item1.SubItems[FSortIndex - 1], Item2.SubItems[FSortIndex - 1]);
+
   if FSortDown then
     Compare := -Compare;
 end;
@@ -283,6 +285,7 @@ begin
   begin
     btnModifyClick(nil);
     if (edtNewName.Text = '') or IsValidIdent(edtNewName.Text) then
+    begin
       if ListView.Selected.Index < ListView.Items.Count - 1 then
       begin
         ListView.Selected := ListView.Items[ListView.Selected.Index + 1];
@@ -290,6 +293,7 @@ begin
       end
       else
         btnOK.SetFocus;
+    end;
     Key := #0;
   end
   else if not CharInSet(Key, Chars + EditChars) and not IsValidIdent('A' + Key) then
