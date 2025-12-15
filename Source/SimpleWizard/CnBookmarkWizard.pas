@@ -547,7 +547,9 @@ begin
       SaveBookmark(SourceEditor);
   end;
 
-  FSourceFileChanged := False; // 当前源文件发生改变时也通知
+  // FSourceFileChanged := False;
+  // 当前源文件发生改变时也通知，但不要在此处置为 False，否则连续来通知时来不及处理，
+  // FSourceFileChanged 可能最终会保持 False，导致漏处理
   if NotifyType in [setOpened, setClosing, setEditViewRemove, setEditViewActivated] then
   begin
     S := CnOtaGetCurrentSourceFile;
@@ -880,8 +882,13 @@ var
     end;
     Result := True;
   end;
+
 begin
   Result := False;
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogMsg('TCnBookmarkForm.UpdateBookmarkList');
+{$ENDIF}
 
 {$IFDEF DELPHI_OTA}
   if not QuerySvcs(BorlandIDEServices, IOTAModuleServices, ModuleSvcs) then
@@ -943,52 +950,52 @@ begin
   if (SourceEditorManagerIntf = nil) or (SourceEditorManagerIntf.SourceEditorCount <= 0) then
     Exit;
 
-NewList := TObjectList.Create;
-try
+  NewList := TObjectList.Create;
   try
-    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
-    begin
-      EditorObj := nil;
-      for K := 0 to 9 do
+    try
+      for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
       begin
-        X := 0;
-        Y := 0;
-        if SourceEditorManagerIntf.SourceEditors[I].GetBookMark(K, X, Y) then
+        EditorObj := nil;
+        for K := 0 to 9 do
         begin
-          if (X <> 0) or (Y <> 0) then
+          X := 0;
+          Y := 0;
+          if SourceEditorManagerIntf.SourceEditors[I].GetBookMark(K, X, Y) then
           begin
-            if EditorObj = nil then
+            if (X <> 0) or (Y <> 0) then
             begin
-              EditorObj := TCnBookmarkEditorObj.Create;
-              EditorObj.FileName := SourceEditorManagerIntf.SourceEditors[I].FileName;
-              NewList.Add(EditorObj);
-            end;
+              if EditorObj = nil then
+              begin
+                EditorObj := TCnBookmarkEditorObj.Create;
+                EditorObj.FileName := SourceEditorManagerIntf.SourceEditors[I].FileName;
+                NewList.Add(EditorObj);
+              end;
 
-            BkObj := TCnBookmarkObj.Create(EditorObj);
-            BkObj.BookmarkID := K;
-            BkObj.CharPos.CharIndex := X;
-            BkObj.CharPos.Line := Y;
-            BkObj.Line := CnOtaGetLineText(Y, TCnEditBufferInterface(SourceEditorManagerIntf.SourceEditors[I]));
-            EditorObj.FList.Add(BkObj);
+              BkObj := TCnBookmarkObj.Create(EditorObj);
+              BkObj.BookmarkID := K;
+              BkObj.CharPos.CharIndex := X;
+              BkObj.CharPos.Line := Y;
+              BkObj.Line := CnOtaGetLineText(Y, TCnEditBufferInterface(SourceEditorManagerIntf.SourceEditors[I]));
+              EditorObj.FList.Add(BkObj);
+            end;
           end;
         end;
       end;
-    end;
-    SortList(NewList);
+      SortList(NewList);
 
-    Result := not SameEditorList(FList, NewList);
-    if Result then
-    begin
-      FList.Clear;
-      while NewList.Count > 0 do
-        FList.Add(NewList.Extract(NewList.First));
+      Result := not SameEditorList(FList, NewList);
+      if Result then
+      begin
+        FList.Clear;
+        while NewList.Count > 0 do
+          FList.Add(NewList.Extract(NewList.First));
+      end;
+    except
+      ;
     end;
-  except
-    ;
+  finally
+    NewList.Free;
   end;
-finally
-  NewList.Free;
-end;
 {$ENDIF}
 end;
 
@@ -999,6 +1006,10 @@ var
 begin
   if FUpdateCount > 0 then
     Exit;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnBookmarkForm.UpdateComboBox');
+{$ENDIF}
 
   Inc(FUpdateCount);
   try
@@ -1059,8 +1070,13 @@ begin
   if FUpdateCount > 0 then
     Exit;
 
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnBookmarkForm.UpdateListView');
+{$ENDIF}
+
   Inc(FUpdateCount);
   ListView.Items.BeginUpdate;
+
   try
     // 外面已经记录了当前选中的书签的文件名与行号
 
@@ -1196,6 +1212,9 @@ begin
   // 单纯切文件，没有书签更新时也需要更新
   if FWizard.FSourceFileChanged then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnBookmarkForm SourceFile Changed. Update ListView and StatusBar.');
+{$ENDIF}
     FWizard.FSourceFileChanged := False;
     UpdateListView;
     UpdateStatusBar;
