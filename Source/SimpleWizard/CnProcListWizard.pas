@@ -2000,10 +2000,6 @@ end;
 { TCnProcListForm }
 
 procedure TCnProcListForm.FormCreate(Sender: TObject);
-{$IFNDEF STAND_ALONE}
-var
-  EditorCanvas: TCanvas;
-{$ENDIF}
 begin
   inherited;
   NeedInitProjectControls := False;
@@ -2021,19 +2017,9 @@ begin
   FObjectList.Duplicates := dupIgnore;
 
 {$IFNDEF STAND_ALONE}
-{$IFDEF DELPHI_OTA}
-  EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
-{$ELSE}
-  EditorCanvas := EditControlWrapper.GetEditControlCanvas(GetCurrentEditControl);
-{$ENDIF}
-
-  if EditorCanvas <> nil then
-  begin
-    if EditorCanvas.Font.Name <> mmoContent.Font.Name then
-      mmoContent.Font.Name := EditorCanvas.Font.Name;
-    mmoContent.Font.Size := EditorCanvas.Font.Size;
-    mmoContent.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
-  end;
+  mmoContent.Font.Name := EditControlWrapper.EditorBaseFont.Name;
+  mmoContent.Font.Size := EditControlWrapper.EditorBaseFont.Size;
+  mmoContent.Font.Style := [];
 {$ENDIF}
 
 {$IFDEF COMPILER6_UP}

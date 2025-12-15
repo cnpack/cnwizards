@@ -738,10 +738,6 @@ end;
 { TCnBookmarkForm }
 
 constructor TCnBookmarkForm.Create(AOwner: TComponent);
-{$IFNDEF STAND_ALONE}
-var
-  EditorCanvas: TCanvas;
-{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnBookmarkForm.Create');
@@ -758,19 +754,9 @@ begin
   SetListViewWidthString(ListView, FWizard.FWidthString, GetFactorFromSizeEnlarge(Enlarge));
 
 {$IFNDEF STAND_ALONE}
-{$IFDEF DELPHI_OTA}
-  EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
-{$ELSE}
-  EditorCanvas := EditControlWrapper.GetEditControlCanvas(GetCurrentEditControl);
-{$ENDIF}
-
-  if EditorCanvas <> nil then
-  begin
-    if EditorCanvas.Font.Name <> mmoPreview.Font.Name then
-      mmoPreview.Font.Name := EditorCanvas.Font.Name;
-    mmoPreview.Font.Size := EditorCanvas.Font.Size;
-    mmoPreview.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
-  end;
+  mmoPreview.Font.Name := EditControlWrapper.EditorBaseFont.Name;
+  mmoPreview.Font.Size := EditControlWrapper.EditorBaseFont.Size;
+  mmoPreview.Font.Style := [];
 {$ENDIF}
 end;
 
