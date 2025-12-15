@@ -193,7 +193,7 @@ inherited CnBookmarkForm: TCnBookmarkForm
       HideSelection = False
       ParentFont = False
       ReadOnly = True
-      ScrollBars = ssBoth
+      ScrollBars = ssVertical
       TabOrder = 1
       WordWrap = False
     end

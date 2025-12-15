@@ -208,7 +208,7 @@ uses
   CnDebug,
 {$ENDIF}
   CnIni, CnWizConsts, CnConsts, CnCommon, CnWizOptions, CnWizIdeUtils,
-  CnBookmarkConfigFrm, CnWizShareImages, CnWizManager;
+  CnBookmarkConfigFrm, CnWizShareImages, CnWizManager, CnEditControlWrapper;
 
 {$R *.DFM}
 
@@ -736,6 +736,10 @@ end;
 { TCnBookmarkForm }
 
 constructor TCnBookmarkForm.Create(AOwner: TComponent);
+{$IFNDEF STAND_ALONE}
+var
+  EditorCanvas: TCanvas;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnBookmarkForm.Create');
@@ -745,10 +749,27 @@ begin
   FWizard := TCnBookmarkWizard(CnWizardMgr.WizardByClass(TCnBookmarkWizard));
   Icon := FWizard.Icon;
   ShowHint := WizOptions.ShowHint;
+
   mmoPreview.Height := FWizard.FRichEditHeight;
   if FWizard.FListFont.Name <> '' then
     ListView.Font := FWizard.FListFont;
   SetListViewWidthString(ListView, FWizard.FWidthString, GetFactorFromSizeEnlarge(Enlarge));
+
+{$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
+  EditorCanvas := EditControlWrapper.GetEditControlCanvas(CnOtaGetCurrentEditControl);
+{$ELSE}
+  EditorCanvas := EditControlWrapper.GetEditControlCanvas(GetCurrentEditControl);
+{$ENDIF}
+
+  if EditorCanvas <> nil then
+  begin
+    if EditorCanvas.Font.Name <> mmoPreview.Font.Name then
+      mmoPreview.Font.Name := EditorCanvas.Font.Name;
+    mmoPreview.Font.Size := EditorCanvas.Font.Size;
+    mmoPreview.Font.Style := EditorCanvas.Font.Style - [fsUnderline, fsStrikeOut, fsItalic];
+  end;
+{$ENDIF}
 end;
 
 destructor TCnBookmarkForm.Destroy;
@@ -1122,6 +1143,11 @@ begin
           FWizard.FDispLines);
         Line2 := CnOtaGetLineText(CharPos.Line, Buffer, 1);
         Line3 := CnOtaGetLineText(CharPos.Line + 1, Buffer, FWizard.FDispLines);
+
+        // CnOtaGetLineText 可能会多出尾部的 #13，导致下面选择偏差，此处不得不修补去掉
+        Line1 := TrimLineBreak(Line1);
+        Line2 := TrimLineBreak(Line2);
+        Line3 := TrimLineBreak(Line3);
 
         mmoPreview.Lines.Add(Line1);
         FromLine := mmoPreview.Lines.Count;
