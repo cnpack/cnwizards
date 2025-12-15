@@ -28,7 +28,9 @@ unit CnWizUpgradeFrm;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2003.08.10 V1.1
+* 修改记录：2025.12.15 V1.2
+*               增加额外的展示文字及链接的功能
+*           2003.08.10 V1.1
 *               只有点击“关闭”按钮时，才处理“以后不再提示”检查框
 *           2003.04.28 V1.1
 *               修正开启 IDE 后马上关闭可能导致 IDE 死掉的问题
@@ -61,6 +63,8 @@ type
     FURL: string;
     FBetaVersion: Boolean;
     FWideComment: WideString;
+    FPopupText: string;
+    FPopupLink: string;
   public
     procedure Assign(Source: TPersistent); override;
   published
@@ -72,6 +76,9 @@ type
     property Comment: string read FComment write FComment;
     property WideComment: WideString read FWideComment write FWideComment;
     property URL: string read FURL write FURL;
+
+    property PopupText: string read FPopupText write FPopupText;
+    property PopupLink: string read FPopupLink write FPopupLink;
   end;
 
 { TCnWizUpgradeCollection }
@@ -135,11 +142,12 @@ type
     FMemo: TMemo;
     FPanel: TPanel;
     FLabelContent: TCnWideLabel;
+    FPopupLink: string;
     function NeedManuallyUnicode: Boolean;
   protected
     function GetHelpTopic: string; override;
   public
-
+    procedure OnLinkClick(Sender: TObject);
   end;
 
 procedure CheckUpgrade(AUserCheck: Boolean);
@@ -203,6 +211,9 @@ begin
     FURL := TCnWizUpgradeItem(Source).FURL;
     FBetaVersion := TCnWizUpgradeItem(Source).FBetaVersion;
     FWideComment := TCnWizUpgradeItem(Source).FWideComment;
+
+    FPopupText := TCnWizUpgradeItem(Source).FPopupText;
+    FPopupLink := TCnWizUpgradeItem(Source).FPopupLink;
   end
   else
     inherited;
@@ -357,7 +368,9 @@ begin
     try
       FindLinks(Content, Strings);
       if Strings.Count <= csMaxLinks then // 正常的转向信息不应该有过多的链接
+      begin
         for I := 0 to Strings.Count - 1 do
+        begin
           if GetUpgrade(Strings[I], Level + 1) then
           begin
             Result := True;
@@ -365,6 +378,8 @@ begin
           end
           else if FHTTP.Aborted or Terminated then
             Exit;
+        end;
+      end;
     finally
       Strings.Free;
     end;
@@ -410,6 +425,15 @@ begin
             NewFeature := Ini.ReadBool(Strings[I], csNewFeature, False);
             BigBugFixed := Ini.ReadBool(Strings[I], csBigBugFixed, False);
             Comment := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradeCommentName, ''));
+
+            // 读各自语言的弹窗内容。如无对应语言的，则读通用的弹窗内容
+            PopupText := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradePopupTextName, ''));
+            if PopupText = '' then
+              PopupText := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradePopupText, ''));
+
+            PopupLink := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradePopupLinkName, ''));
+            if PopupLink = '' then
+              PopupLink := StrToLines(Ini.ReadString(Strings[I], SCnWizUpgradePopupLink, ''));
 {$IFNDEF UNICODE}
             Idx := Pos(ADateStr, WideCon);
             if Idx > 0 then
@@ -488,14 +512,17 @@ var
 begin
   // 避免因网络问题导致连接失败时出错
   if FUpgradeCollection.Count = 0 then Exit;
+
   // 检查升级内容
   if (FUpgradeCollection[0].Date > WizOptions.BuildDate) or
     (GetBuildNo(FUpgradeCollection[0].Version) > GetBuildNo(SCnWizardVersion)) then
   begin
     // 删除旧版本记录
     for I := FUpgradeCollection.Count - 1 downto 1 do
+    begin
       if GetBuildNo(FUpgradeCollection[I].Version) <= GetBuildNo(SCnWizardVersion) then
         FUpgradeCollection.Delete(I);
+    end;
 
     if not FUserCheck then
     begin
@@ -506,15 +533,21 @@ begin
 
       // 删除最新的测试版本记录
       if WizOptions.UpgradeReleaseOnly then
+      begin
         while FUpgradeCollection.Count > 0 do
+        begin
           if FUpgradeCollection.Items[0].BetaVersion then
             FUpgradeCollection.Delete(0)
           else
             Break;
+        end;
+      end;
 
       // 删除最新与用户定义内容不符的记录
       if WizOptions.UpgradeStyle = usUserDefine then
+      begin
         while FUpgradeCollection.Count > 0 do
+        begin
           if (ucNewFeature in WizOptions.UpgradeContent) and
             (FUpgradeCollection.Items[0].FNewFeature) or
             (ucBigBugFixed in WizOptions.UpgradeContent) and
@@ -522,6 +555,8 @@ begin
             Break
           else
             FUpgradeCollection.Delete(0);
+        end;
+      end;
 
       // 上次提示后没有新的更新
       if (FUpgradeCollection.Count <= 0) or (Trunc(FUpgradeCollection.Items[0].Date)
@@ -605,6 +640,7 @@ var
   I: Integer;
   S: string;
   W, T: WideString;
+  LinkItem: TCnWizUpgradeItem;
 
   function AddLineCRLF(const Src: Widestring; const Subfix: WideString): WideString;
   begin
@@ -655,6 +691,25 @@ begin
     end;
   end;
   cbNoHint.Checked := WizOptions.ReadBool(SCnUpgradeSection, csNoHint, True);
+
+  // 如果更新内容中有弹窗及链接，就在界面上复用 Label 展示并允许点击
+  for I := 0 to FCollection.Count - 1 do
+  begin
+    if (FCollection.Items[I].PopupText <> '') and (FCollection.Items[I].PopupLink <> '') then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Upgrade Got PopupText and PopupLink.');
+{$ENDIF}
+      LinkItem := FCollection.Items[I];
+      FPopupLink := LinkItem.PopupLink;
+      lbl1.Caption := LinkItem.PopupText;
+      lbl1.Font.Color := clBlue;
+      lbl1.Cursor := crHandPoint;
+      lbl1.OnClick := OnLinkClick;
+
+      Break;
+    end;
+  end;
 end;
 
 procedure TCnWizUpgradeForm.FormClose(Sender: TObject;
@@ -706,6 +761,12 @@ begin
     or (WizOptions.CurrentLangID = 1028)) then
     Result := True;
 {$ENDIF}
+end;
+
+procedure TCnWizUpgradeForm.OnLinkClick(Sender: TObject);
+begin
+  if FPopupLink <> '' then
+    OpenUrl(FPopupLink);
 end;
 
 initialization

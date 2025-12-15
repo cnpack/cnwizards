@@ -204,6 +204,8 @@ begin
   TranslateStr(SCnWizNoUpgrade, 'SCnWizNoUpgrade');
   TranslateStr(SCnWizUpgradeFail, 'SCnWizUpgradeFail');
   TranslateStr(SCnWizUpgradeCommentName, 'SCnWizUpgradeCommentName');
+  TranslateStr(SCnWizUpgradePopupTextName, 'SCnWizUpgradePopupTextName');
+  TranslateStr(SCnWizUpgradePopupLinkName, 'SCnWizUpgradePopupLinkName');
 
   // CheckIDEVersion
   TranslateStr(SCnIDENOTLatest, 'SCnIDENOTLatest');

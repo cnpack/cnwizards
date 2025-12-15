@@ -194,6 +194,8 @@ resourcestring
   SCnWizDefUpgradeURL = 'https://upgrade.cnpack.org/cnwizards/upgrade.php';
   SCnWizDefNightlyBuildUrl = 'https://upgrade.cnpack.org/cnwizards/latest/';
   SCnWizUpgradeVersion = 'Ver %s Build %s';
+  SCnWizUpgradePopupText = 'PopupText';
+  SCnWizUpgradePopupLink = 'PopupLink';
 
   // CnMessageBoxWizard
   SCnMsgBoxDataName = 'MsgBoxPrj.ini';
@@ -565,6 +567,8 @@ var
     'Do You Want to Browse Our Nightly-Buid Download Page?';
   SCnWizUpgradeFail: string = 'Connection Failure. Please Retry Later, or Visit our Website to Get the Update.';
   SCnWizUpgradeCommentName: string = 'Comment_ENU';
+  SCnWizUpgradePopupTextName: string = 'PopupText_ENU';
+  SCnWizUpgradePopupLinkName: string = 'PopupLink_ENU';
 
   // CheckIDEVersion
   SCnIDENOTLatest: string =
