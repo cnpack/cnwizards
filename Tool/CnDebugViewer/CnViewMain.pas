@@ -40,7 +40,7 @@ uses
   ExtCtrls, Menus, ComCtrls, ActnList, ImgList, ToolWin, Clipbrd, Registry, 
   Tabs, VirtualTrees, CnMdiView, CnLangMgr, CnWizLangID, CnTabSet,
   CnLangStorage, CnHashLangStorage, CnClasses, CnMsgClasses, CnTrayIcon,
-  CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32
+  CnWizCfgUtils, CnUDP, CnDebugIntf, CnCRC32 {$IFDEF CAPTURE_STACK}, CnPE, CnRTL {$ENDIF}
   {$IFDEF WIN64}, System.ImageList, System.Actions {$ENDIF};
 
 const
@@ -292,6 +292,10 @@ type
   protected
     procedure DoCreate; override;
     procedure ThreadTerminated(Sender: TObject);
+{$IFDEF CAPTURE_STACK}
+    class procedure ExceptionRecorder(ExceptObj: Exception; ExceptAddr: Pointer;
+      IsOSException: Boolean; StackList: TCnStackInfoList);
+{$ENDIF}
   public
     procedure LaunchThread;
     procedure PauseThread;
@@ -1632,5 +1636,125 @@ begin
     end;
   end;
 end;
+
+{$IFDEF CAPTURE_STACK}
+
+const
+{$IFDEF CPUX64}
+  SCnLocationInfoFmt = '(%16.16x) [%-14s | $%16.16x] ';
+{$ELSE}
+  SCnLocationInfoFmt = '(%8.8x) [%-14s | $%8.8x] ';
+{$ENDIF}
+
+type
+{$IFDEF CPUX64}
+  TCnNativeInt = NativeInt;
+{$ELSE}
+  TCnNativeInt = Integer;
+{$ENDIF}
+
+{$IFDEF CAPTURE_STACK}
+var
+  FInProcessCriticalSection: TRTLCriticalSection;
+  FInProcessModuleList: TCnInProcessModuleList = nil;
+{$ENDIF}
+
+{$IFDEF CAPTURE_STACK}
+threadvar
+  FIsInExcption: Boolean;
+{$ENDIF}
+
+function GetLocationInfoStr(const Address: Pointer): string;
+var
+  Info: TCnModuleDebugInfo;
+  MN, UN, PN: string;
+  LN, OL, OP: Integer;
+begin
+  Result := '';
+  if FInProcessModuleList = nil then
+  begin
+    EnterCriticalSection(FInProcessCriticalSection);
+    try
+      if FInProcessModuleList = nil then
+        FInProcessModuleList := CreateInProcessAllModulesList;
+    finally
+      LeaveCriticalSection(FInProcessCriticalSection);
+    end;
+  end;
+
+  Info := FInProcessModuleList.CreateDebugInfoFromAddress(Address);
+  if Info = nil then
+    Exit;
+
+  // (地址) [模块名| 基址]
+  Result := Format(SCnLocationInfoFmt, [TCnNativeInt(Address),
+    ExtractFileName(Info.ModuleFile), Info.ModuleHandle]);
+
+  if Info.GetDebugInfoFromAddr(Address, MN, UN, PN, LN, OL, OP) then
+  begin
+    if PN <> '' then
+    begin
+      Result := Result + PN;
+      if OP > 0 then
+        Result := Result + Format(' + $%x', [OP]);
+    end;
+
+    if UN <> '' then
+    begin
+      Result := Result + ' ("' + UN + '"';
+      if LN > 0 then
+        Result := Result + Format(' #%d', [LN]);
+      if OL > 0 then
+        Result := Result + Format(' + $%x', [OL]);
+      Result := Result + ')';
+    end;
+  end;
+end;
+
+class procedure TCnMainViewer.ExceptionRecorder(ExceptObj: Exception; ExceptAddr: Pointer;
+  IsOSException: Boolean; StackList: TCnStackInfoList);
+var
+  I: Integer;
+  SL: TStrings;
+begin
+  SL := TStrings.Create;
+  try
+    if IsOSException then
+      SL.Add('OS Exception: ' + ExceptObj.ClassName + ': ' + ExceptObj.Message)
+    else
+      SL.Add(ExceptObj.ClassName + ': ' + ExceptObj.Message);
+
+    if FIsInExcption then
+    begin
+      SL.Add('!!! Exception Reraised in CnDebugViewer Handler !!!');
+      MessageBox(0, PChar(SL.Text), '', MB_OK);
+      Exit;
+    end;
+
+    FIsInExcption := True;
+    try
+      SL.Add('Exception call stack:');
+      for I := 0 to StackList.Count - 1 do
+        SL.Add(GetLocationInfoStr(StackList.Items[I].CallerAddr));
+
+      MessageBox(0, PChar(SL.Text), '', MB_OK);
+    finally
+      FIsInExcption := False;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+
+initialization
+  InitializeCriticalSection(FInProcessCriticalSection);
+  CnSetAdditionalExceptionRecorder(TCnMainViewer.ExceptionRecorder);
+  CnHookException;
+
+finalization
+  CnUnHookException;
+  DeleteCriticalSection(FInProcessCriticalSection);
+
+{$ENDIF}
 
 end.
