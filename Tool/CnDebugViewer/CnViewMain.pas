@@ -416,6 +416,10 @@ begin
   Caption := Caption + ' Debug ';
 {$ENDIF}
 
+{$IFDEF CAPTURE_STACK}
+   Caption := Caption + ' Stack ';
+{$ENDIF}
+
   if not IsLocalMode then
     Caption := Caption + '- (Global)' // 显示为全局模式
   else
