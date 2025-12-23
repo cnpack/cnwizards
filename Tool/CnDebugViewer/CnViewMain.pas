@@ -1741,7 +1741,8 @@ begin
       for I := 0 to StackList.Count - 1 do
         SL.Add(GetLocationInfoStr(StackList.Items[I].CallerAddr));
 
-      MessageBox(0, PChar(SL.Text), '', MB_OK);
+      DebugDebuggerLog(SL.Text);
+      // MessageBox(0, PChar(SL.Text), '', MB_OK);
     finally
       FIsInExcption := False;
     end;

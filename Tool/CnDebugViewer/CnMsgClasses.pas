@@ -36,6 +36,10 @@ unit CnMsgClasses;
 
 interface
 
+{$IFDEF CAPTURE_STACK}
+  {$DEFINE DEBUGDEBUGGER}
+{$ENDIF}
+
 uses
   SysUtils, Classes, Windows, Messages, Forms, Contnrs, CnHashMap, CnDebugIntf;
 
@@ -111,15 +115,6 @@ type
     property AvePeriod: Int64 read FAvePeriod write FAvePeriod;
     property PassCount: Integer read FPassCount write FPassCount;
   end;
-
-//  TCnWatchItem = class(TPersistent)
-//  private
-//    FVarName: string;
-//    FValue: string;
-//  published
-//    property VarName: string read FVarName write FVarName;
-//    property Value: string read FValue write FValue;
-//  end;
 
   TCnStoreChangeType = (ctAdd, ctModify, ctDelete, ctProcess, ctTimeChanged);
   TCnMsgStoreChangeNotify = procedure (Sender: TObject;
@@ -1095,15 +1090,16 @@ begin
     end;
   end;
 
-  try
-    F.Seek(0, soEnd);
-    T := DateTimeToStr(Now) + ': ' + S;
-    B := TEncoding.Default.GetBytes(T);
-    F.Write(B, Length(B));
-    F.Write(CRLF[1], 2);
-  finally
-    // F.Free;
-  end;
+  F.Seek(0, soEnd);
+  T := DateTimeToStr(Now) + ': ' + S;
+{$IFDEF UNICODE}
+  B := TEncoding.Default.GetBytes(T);
+{$ELSE}
+  SetLength(B, Length(T);
+  Move(T[1], B[0], Length(B));
+{$ENDIF}
+  F.Write(B, Length(B));
+  F.Write(CRLF[1], 2);
 {$ENDIF}
 end;
 
