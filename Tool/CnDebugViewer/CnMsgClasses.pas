@@ -295,7 +295,7 @@ procedure DebugDebuggerLog(const S: string);
 implementation
 
 uses
-  CnViewCore;
+  CnViewCore, CnNative;
 
 type
 {$IFDEF SUPPORT_32_AND_64}
@@ -1095,7 +1095,7 @@ begin
 {$IFDEF UNICODE}
   B := TEncoding.Default.GetBytes(T);
 {$ELSE}
-  SetLength(B, Length(T);
+  SetLength(B, Length(T));
   Move(T[1], B[0], Length(B));
 {$ENDIF}
   F.Write(B, Length(B));
