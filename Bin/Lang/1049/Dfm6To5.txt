@@ -33,4 +33,4 @@ SCnSucc=Успешно конвертировано
 SCnOpenFail=Ошибка при открытии
 SCnSaveFail=Ошибка при сохранении
 SCnInvalidFormat=Неверный формат файла
-SCnAbout=DFM-конвертер<BR><BR>Утилита позволяет конвертировать формы Delphi 6/7 или<BR>C++Builder 6 или выше, в формы формата  Delphi 5 или C++ Builder 5.<BR>Также поддерживаются преобразования текстового и двоичного форматов.<BR><BR>Автор: Zhou JingYu (zjy@cnpack.org)<BR>Мультиязычность: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C)2001-2025 CnPack Team
+SCnAbout=DFM-конвертер<BR><BR>Утилита позволяет конвертировать формы Delphi 6/7 или<BR>C++Builder 6 или выше, в формы формата  Delphi 5 или C++ Builder 5.<BR>Также поддерживаются преобразования текстового и двоичного форматов.<BR><BR>Автор: Zhou JingYu (zjy@cnpack.org)<BR>Мультиязычность: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C)2001-2026 CnPack Team

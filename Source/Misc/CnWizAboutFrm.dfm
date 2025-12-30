@@ -35,7 +35,7 @@ inherited CnWizAboutForm: TCnWizAboutForm
     Top = 68
     Width = 289
     Height = 13
-    Caption = 'Copyright: 2001-2025 CnPack Team'
+    Caption = 'Copyright: 2001-2026 CnPack Team'
   end
   object lblWeb: TLabel
     Left = 96

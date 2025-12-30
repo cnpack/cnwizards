@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2025 CnPack 开发组                       }
+{                   (C)Copyright 2001-2026 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -68,7 +68,7 @@ const
   SCnWizardDesc = 'CnPack IDE Wizards for Delphi/C++Builder/BDS/RAD Studio' + #13#10 +
                   '' + #13#10 +
                   'Version: ' + SCnWizardFullVersion + #13#10 +
-                  'Copyright: 2001-2025 CnPack Team' + #13#10 +
+                  'Copyright: 2001-2026 CnPack Team' + #13#10 +
                   '' + #13#10 +
                   'This is a freeware, you can use it freely without any fee. ' +
                   'You can copy or distribute it in any form, without any fee. ' +

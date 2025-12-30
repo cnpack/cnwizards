@@ -43,4 +43,4 @@ SCnConfirmDeleteFmt=Удалить %s из %s ?
 SCnChangedRefreshFmt=%s Информация о мастерах изменилась, сбросить или обновить?
 SCnWizardChangedFmt=Для сл. IDE инфомация о мастерах была изменена. Сохранить?<BR><BR>
 SCnConfirmExit=Выйти?
-SCnManageWizAbout=CnPack - внешнее управление мастерами<BR><BR>Автор: LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2025 CnPack Team
+SCnManageWizAbout=CnPack - внешнее управление мастерами<BR><BR>Автор: LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2026 CnPack Team

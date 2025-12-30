@@ -43,4 +43,4 @@ SCnConfirmDeleteFmt=Certeza de cancelar o registro %s em %s ?
 SCnChangedRefreshFmt=%s As informações de registro do assistente foram alteradas, descartar e recarregar?
 SCnWizardChangedFmt=Abaixo IDE(s) As informações de registro do assistente foram alteradas. Salvar?<BR><BR>
 SCnConfirmExit=Certeza de Sair?
-SCnManageWizAbout=Gerenciamento de assistente externo do CnPack IDE<BR><BR>Autor LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2025 Equipe CnPack
+SCnManageWizAbout=Gerenciamento de assistente externo do CnPack IDE<BR><BR>Autor LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2026 Equipe CnPack

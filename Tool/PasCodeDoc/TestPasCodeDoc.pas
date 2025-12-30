@@ -112,7 +112,7 @@ const
       '</table>' + #13#10;
 
   HTML_TAIL_FMT = // 尾，纯字符串
-    '<p class="text" align="center"><a href="https://www.cnpack.org">(C)版权所有 2001-2025 CnPack 开发组</a></p>' + #13#10 +
+    '<p class="text" align="center"><a href="https://www.cnpack.org">(C)版权所有 2001-2026 CnPack 开发组</a></p>' + #13#10 +
     '</body>' + #13#10 +
     '</html>';
 

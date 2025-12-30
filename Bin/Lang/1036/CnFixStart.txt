@@ -22,4 +22,4 @@ SCnNoKeyMappingProblemFound=AUCUN problème de mappage trouvé. Tout va bien.
 SCnKeyMappingProblemFound=Problème de mappage possible détecté.
 SCnKeyMappingProblemFixed=Problème de mappage des touches résolu. Veuillez essayer de démarrer Delphi.
 SCnKeyMappingNoProblemNeedFix=AUCUN problème ne doit être résolu.
-SCnFixToolAbout=Outil de correction de démarrage des assistants CnPack IDE 1.0<BR><BR>Cet outil est utilisé pour essayer de résoudre le problème de démarrage de Delphi lors de l'installation de CnPack.<BR><BR>Auteur : Liu Xiao (liuxiao@cnpack.org) <BR>Copyright (C) 2001-2025 Equipe CnPack
+SCnFixToolAbout=Outil de correction de démarrage des assistants CnPack IDE 1.0<BR><BR>Cet outil est utilisé pour essayer de résoudre le problème de démarrage de Delphi lors de l'installation de CnPack.<BR><BR>Auteur : Liu Xiao (liuxiao@cnpack.org) <BR>Copyright (C) 2001-2026 Equipe CnPack

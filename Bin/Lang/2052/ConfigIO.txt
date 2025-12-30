@@ -25,4 +25,4 @@ SCnIdeRunning1=在执行恢复默认操作前，请先关闭您的 Delphi / C++B
 SCnRestoreError=无法导入指定的注册表文件！也许您需要以管理员身份运行本程序。
 SCnConfigIOCmdHelp=本工具支持命令行参数的不显示主窗口的导入导出方式<BR><BR>命令行参数说明：<BR><BR>         命令行参数中第一个不以 / 或 - 开头的是文件名参数<BR>         -i 或 /i     导入设置<BR>         -o 或 /o     导出设置<BR>         -r 或 /r     恢复默认设置<BR>         -n 或 /n 或 -NoMsg 或 /NoMsg 不弹出成功的提示信息<BR>         -? 或 /? 或 -h 或 /h  命令行参数帮助<BR><BR>如：<BR>         CnConfigIO -i C:\a.cnw -n<BR>         CnConfigIO -o C:\a.cnw -n<BR>         CnConfigIO -r
 SCnConfigIOAboutCaption=关于
-SCnConfigIOAbout=CnPack IDE 专家包设置导入导出工具<BR><BR>该工具提供 CnPack IDE 专家包设置的导入导出功能，<BR>用于保留设置备份，或者将设置迁移到其他环境中。<BR><BR>软件作者 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2025 CnPack 开发组
+SCnConfigIOAbout=CnPack IDE 专家包设置导入导出工具<BR><BR>该工具提供 CnPack IDE 专家包设置的导入导出功能，<BR>用于保留设置备份，或者将设置迁移到其他环境中。<BR><BR>软件作者 刘啸 liuxiao@cnpack.org<BR>版权所有 (C) 2001-2026 CnPack 开发组

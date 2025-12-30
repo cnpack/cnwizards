@@ -1,7 +1,7 @@
 {******************************************************************************}
 {                       CnPack For Delphi/C++Builder                           }
 {                     中国人自己的开放源码第三方开发包                         }
-{                   (C)Copyright 2001-2025 CnPack 开发组                       }
+{                   (C)Copyright 2001-2026 CnPack 开发组                       }
 {                   ------------------------------------                       }
 {                                                                              }
 {            本开发包是开源的自由软件，您可以遵照 CnPack 的发布协议来修        }
@@ -133,7 +133,7 @@ var
   SCnWizardGenerateOK: string = 'cnwizards\Source\CnWizards.inc 写入成功。';
   SCnCustBuildAbout: string = 'CnPack IDE 专家包自定义构建工具' + #13#10#13#10 +
     '软件作者 CnPack 开发组 (master@cnpack.org)' + #13#10 +
-    '版权所有 (C) 2001-2025 CnPack 开发组';
+    '版权所有 (C) 2001-2026 CnPack 开发组';
 
   SCnCustBuildHelp: string =
     'CnPack IDE 专家包支持自定义构建。它的各个专家是否参与编译都统一由源码中的' + #13#10 +

@@ -33,4 +33,4 @@ SCnSucc=Converter com sucesso.
 SCnOpenFail=Falha ao abrir.
 SCnSaveFail=Falha ao salvar.
 SCnInvalidFormat=Formato de arquivo inválido.
-SCnAbout=Ferramenta de conversão de arquivo DFM<BR><BR>Esta ferramenta pode ser usada para converter formulários gerados pelo Delphi 6/7<BR>ou C++Builder 6 ou superior para o formato do Delphi 5 ou C++ Builder 5 Format.<BR>Também são suportadas conversões de formato texto e binário.<BR><BR>Autor: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: Liu Xiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2025 CnPack Team
+SCnAbout=Ferramenta de conversão de arquivo DFM<BR><BR>Esta ferramenta pode ser usada para converter formulários gerados pelo Delphi 6/7<BR>ou C++Builder 6 ou superior para o formato do Delphi 5 ou C++ Builder 5 Format.<BR>Também são suportadas conversões de formato texto e binário.<BR><BR>Autor: Zhou JingYu (zjy@cnpack.org)<BR>Multilang: Liu Xiao (liuxiao@cnpack.org)<BR>CopyRight (C)2001-2026 CnPack Team

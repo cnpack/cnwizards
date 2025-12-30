@@ -43,4 +43,4 @@ SCnConfirmDeleteFmt=Sure to UnRegister %s in %s ?
 SCnChangedRefreshFmt=%s Wizard Registration Information Changed, Discard and Reload?
 SCnWizardChangedFmt=Below IDE(s) Wizard Registration Information Changed. Save?<BR><BR>
 SCnConfirmExit=Sure to Exit?
-SCnManageWizAbout=CnPack IDE External Wizard Management<BR><BR>Author LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2025 CnPack Team
+SCnManageWizAbout=CnPack IDE External Wizard Management<BR><BR>Author LiuXiao liuxiao@cnpack.org<BR>Copyright (C) 2001-2026 CnPack Team

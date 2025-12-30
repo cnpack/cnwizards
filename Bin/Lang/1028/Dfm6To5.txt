@@ -33,4 +33,4 @@ SCnSucc=轉換成功
 SCnOpenFail=打開失敗
 SCnSaveFail=保存失敗
 SCnInvalidFormat=無效的格式
-SCnAbout=DFM 窗體文件轉換工具<BR><BR>用於將由 Delphi 6/7 及 C++Builder 6 及以上版本保存的 DFM 窗體<BR>轉換成 Delphi 5 及 C++Builder 5 支持的窗體文件。<BR>並支持文本格式和二進制格式的窗體的互相轉換。<BR><BR>軟件作者 周勁羽 (zjy@cnpack.org)<BR>多語支持 劉嘯 (liuxiao@cnpack.org)<BR>版權所有 (C)2001-2025 CnPack 開發組
+SCnAbout=DFM 窗體文件轉換工具<BR><BR>用於將由 Delphi 6/7 及 C++Builder 6 及以上版本保存的 DFM 窗體<BR>轉換成 Delphi 5 及 C++Builder 5 支持的窗體文件。<BR>並支持文本格式和二進制格式的窗體的互相轉換。<BR><BR>軟件作者 周勁羽 (zjy@cnpack.org)<BR>多語支持 劉嘯 (liuxiao@cnpack.org)<BR>版權所有 (C)2001-2026 CnPack 開發組

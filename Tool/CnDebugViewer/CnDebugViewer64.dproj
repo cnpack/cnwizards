@@ -79,7 +79,7 @@
         <VerInfo_MinorVer>9</VerInfo_MinorVer>
         <VerInfo_Release>3</VerInfo_Release>
         <VerInfo_Locale>2057</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=CnPack Team;FileDescription=CnWizards Debug Viewer;FileVersion=1.0.0.0;InternalName=CnDebugViewer;LegalCopyright=(C)Copyright 2001-2025 CnPack Team;LegalTrademarks=CnPack;OriginalFilename=CnDebugViewer.EXE;ProductName=CnWizards;ProductVersion=1.0.0.0;Comments=https://www.cnpack.org</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=CnPack Team;FileDescription=CnWizards Debug Viewer;FileVersion=1.0.0.0;InternalName=CnDebugViewer;LegalCopyright=(C)Copyright 2001-2026 CnPack Team;LegalTrademarks=CnPack;OriginalFilename=CnDebugViewer.EXE;ProductName=CnWizards;ProductVersion=1.0.0.0;Comments=https://www.cnpack.org</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>

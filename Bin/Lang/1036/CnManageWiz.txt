@@ -43,4 +43,4 @@ SCnConfirmDeleteFmt=Êtes-vous sûr de désinscrire %s dans %s ?
 SCnChangedRefreshFmt=%s des Informations d'enregistrement de l'assistant modifiées, supprimées et rechargées?
 SCnWizardChangedFmt=Les informations d'enregistrement de l'assistant IDE (s) ci-dessous ont été modifiées. Enregistrer?<BR><BR>
 SCnConfirmExit=Êtes-vous sûr de quitter?
-SCnManageWizAbout=Gestion de l'assistant externe CnPack IDE<BR><BR>Auteur LiuXiao liuxiao@cnpack.org <BR>droits d'auteur (C) 2001-2025 équipe CnPack
+SCnManageWizAbout=Gestion de l'assistant externe CnPack IDE<BR><BR>Auteur LiuXiao liuxiao@cnpack.org <BR>droits d'auteur (C) 2001-2026 équipe CnPack

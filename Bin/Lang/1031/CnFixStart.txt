@@ -21,5 +21,5 @@ SCnNoKeyMappingProblemFound=Kein Tastenkombinationsproblem gefunden. Alles ist i
 SCnKeyMappingProblemFound=Mögliches Tastenkombinationsproblem gefunden.
 SCnKeyMappingProblemFixed=Tastenkombinationsproblem behoben. Bitte versuchen Sie, Delphi zu starten.
 SCnKeyMappingNoProblemNeedFix=Kein Tastenkombinationsproblem muss behoben werden.
-SCnFixToolAbout=CnPack IDE Wizards Startbehebungstool 1.0<BR><BR>Dieses Tool wird verwendet, um Probleme beim Starten von Delphi nach der Installation von CnPack zu beheben.<BR><BR>Autor: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2025 CnPack Team
+SCnFixToolAbout=CnPack IDE Wizards Startbehebungstool 1.0<BR><BR>Dieses Tool wird verwendet, um Probleme beim Starten von Delphi nach der Installation von CnPack zu beheben.<BR><BR>Autor: Liu Xiao (liuxiao@cnpack.org)<BR>Copyright (C) 2001-2026 CnPack Team
 

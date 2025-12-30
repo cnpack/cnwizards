@@ -83,4 +83,4 @@ SCnIDERunning=IDE wird ausgeführt, Bitte schließen Sie die IDE und starten Sie
 SCnCleaned=IDE Historie wurde erfolgreich gelöscht!
 SCnHelpOpenError=Hilfe Datei Öffnen Fehler!
 SCnAboutCaption=Über
-SCnIDEAbout=IDE Backup/Restore Konfigurations--Werkzeug<BR><BR>Autor:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyrights 2001-2025 CnPack Team
+SCnIDEAbout=IDE Backup/Restore Konfigurations--Werkzeug<BR><BR>Autor:<BR>ccrun (info@ccrun.com)<BR>LiuXiao (liuxiao@cnpack.org)<BR><BR>Copyrights 2001-2026 CnPack Team

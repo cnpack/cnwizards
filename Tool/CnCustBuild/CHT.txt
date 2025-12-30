@@ -29,5 +29,5 @@ SCnWizardDisabled=未參與編譯
 SCnWizardExitAsk=是否退出本工具？
 SCnWizardGenerate=是否確定將編譯控制信息寫入 cnwizards\Source\CnWizards.inc ?
 SCnWizardGenerateOK=cnwizards\Source\CnWizards.inc 寫入成功。
-SCnCustBuildAbout=CnPack IDE 專家包自定義構建工具<BR><BR>軟件作者 劉嘯 (LiuXiao)  (master@cnpack.org)<BR>版權所有 (C) 2001-2025 CnPack 開發組
+SCnCustBuildAbout=CnPack IDE 專家包自定義構建工具<BR><BR>軟件作者 劉嘯 (LiuXiao)  (master@cnpack.org)<BR>版權所有 (C) 2001-2026 CnPack 開發組
 SCnCustBuildHelp=CnPack IDE 專家包支持自定義構建。它的各個專家是否參與編譯都統一由源碼中的<BR>cnwizards\Source\CnWizards.inc 文件控制。<BR><BR>本工具能夠以可視化的方式供用戶選擇需要編譯的專家並將選擇寫入 CnWizards.inc<BR>文件，從而達到選擇性地編譯某些專家的目的。<BR><BR>本工具的使用方法：下載 cnpack 和 cnwizards 源碼後，編譯運行<BR>cnwizards\Tools\CnCustBuild 目錄下的 CnCustBuild.dpr 工程<BR>選擇專家後寫入 CnWizards.inc 即可。<BR><BR>注意：部分專家在特定版本的 IDE 下無效，因而此處的選擇不會對它們造成影響。<BR><BR>另外，如果需要在高版本 Delphi 中整體禁用 CnPack IDE 專家包的 FMX 相關功能，則需要在工程選項中加入 DISABLE_FMX 編譯條件，而不是在本工具中調整。<BR><BR>寫入成功後，可打開 cnwizards\Source 目錄下的工程文件重新編譯 CnWizards。
