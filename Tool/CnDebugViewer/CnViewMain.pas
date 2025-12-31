@@ -1749,6 +1749,10 @@ var
   I: Integer;
   SL: TStrings;
 begin
+  // 忽略掉 DebugDebuggerLog 中抛出的文件异常
+  if (ExceptObj <> nil) and (ExceptObj.ClassName = 'EFCreateError') then
+    Exit;
+
   SL := TStringList.Create;
   try
     if IsOSException then
