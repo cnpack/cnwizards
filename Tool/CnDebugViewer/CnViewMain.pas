@@ -1721,7 +1721,7 @@ var
   I: Integer;
   SL: TStrings;
 begin
-  SL := TStrings.Create;
+  SL := TStringList.Create;
   try
     if IsOSException then
       SL.Add('OS Exception: ' + ExceptObj.ClassName + ': ' + ExceptObj.Message)
