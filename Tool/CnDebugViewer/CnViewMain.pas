@@ -496,8 +496,10 @@ begin
   end
   else // 默认位置及大小
   begin
-    Left := 0; Width := Screen.Width;
-    Top := 0; Height := Screen.Height - 25;
+    Left := 0;
+    Width := Screen.Width;
+    Top := 0;
+    Height := Screen.Height - 25;
   end;
 
   // 处理启动时最小化选项
@@ -545,6 +547,7 @@ begin
     SaveOptions(GetCWUserPath + SCnOptionFileName)
   else
     SaveOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
+
   CnLangManager.RemoveChangeNotifier(LanguageChanged);
 
   // 注销热键
@@ -1321,6 +1324,31 @@ end;
 procedure TCnMainViewer.FormClose(Sender: TObject;
   var Action: TCloseAction);
 begin
+  // 重复保存一次选项，避免异常导致 Destroy 事件中跳过了保存
+  with CnViewerOptions do
+  begin
+    if SaveFormPosition then
+    begin
+      WinState := Ord(Self.WindowState);
+      case WinState of
+        0:
+          begin
+            Top := Self.Top;
+            Left := Self.Left;
+            Height := Self.Height;
+            Width := Self.Width;
+          end;
+        1: ;
+        2: ;
+      end;
+    end;
+  end;
+
+  if GetCWUseCustomUserDir then
+    SaveOptions(GetCWUserPath + SCnOptionFileName)
+  else
+    SaveOptions(_CnExtractFilePath(Application.ExeName) + SCnOptionFileName);
+
   DestroyThread;
   actClose.Execute;
 end;
