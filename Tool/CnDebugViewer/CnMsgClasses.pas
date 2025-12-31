@@ -1079,7 +1079,13 @@ begin
   begin
     FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
     if not FileExists(FN) then
-      F := TFileStream.Create(FN, fmCreate or fmShareDenyWrite)
+    begin
+      try
+        F := TFileStream.Create(FN, fmCreate or fmShareDenyWrite);
+      except
+        Exit; // 如果创建失败则放弃
+      end;
+    end
     else
     begin
       try

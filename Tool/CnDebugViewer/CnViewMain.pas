@@ -1759,7 +1759,8 @@ begin
     if FIsInExcption then
     begin
       SL.Add('!!! Exception Reraised in CnDebugViewer Handler !!!');
-      MessageBox(0, PChar(SL.Text), '', MB_OK);
+      DebugDebuggerLog(SL.Text);
+      // MessageBox(0, PChar(SL.Text), '', MB_OK);
       Exit;
     end;
 

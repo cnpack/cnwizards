@@ -1,10 +1,9 @@
 object AppBuillder: TAppBuillder
   Left = 369
   Top = 259
-  BorderStyle = bsDialog
+  Width = 538
+  Height = 503
   Caption = 'Build Launcher for CnPack IDE Wizards'
-  ClientHeight = 476
-  ClientWidth = 530
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,6 +13,9 @@ object AppBuillder: TAppBuillder
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
+  DesignSize = (
+    530
+    476)
   PixelsPerInch = 96
   TextHeight = 13
   object lbl1: TLabel
@@ -36,6 +38,7 @@ object AppBuillder: TAppBuillder
     Top = 136
     Width = 497
     Height = 17
+    Anchors = [akLeft, akTop, akRight]
     Shape = bsTopLine
   end
   object btnRunWant: TButton
@@ -43,6 +46,7 @@ object AppBuillder: TAppBuillder
     Top = 16
     Width = 161
     Height = 25
+    Anchors = [akTop, akRight]
     Caption = 'Run Want To Build'
     TabOrder = 0
     OnClick = btnRunWantClick
@@ -69,6 +73,7 @@ object AppBuillder: TAppBuillder
     Top = 16
     Width = 145
     Height = 105
+    Anchors = [akLeft, akTop, akRight]
     Caption = 'Build Type'
     ItemIndex = 0
     Items.Strings = (
@@ -84,6 +89,7 @@ object AppBuillder: TAppBuillder
     Top = 96
     Width = 161
     Height = 25
+    Anchors = [akTop, akRight]
     Caption = 'Show Cmd Window'
     TabOrder = 3
     OnClick = btnShowCmdClick
@@ -93,6 +99,7 @@ object AppBuillder: TAppBuillder
     Top = 176
     Width = 497
     Height = 281
+    Anchors = [akLeft, akTop, akRight, akBottom]
     Columns = <
       item
         Caption = 'Target'
