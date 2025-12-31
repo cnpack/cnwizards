@@ -1098,7 +1098,7 @@ begin
   SetLength(B, Length(T));
   Move(T[1], B[0], Length(B));
 {$ENDIF}
-  F.Write(B, Length(B));
+  F.Write(B[0], Length(B));
   F.Write(CRLF[1], 2);
 {$ENDIF}
 end;
