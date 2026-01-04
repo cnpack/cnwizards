@@ -1500,51 +1500,6 @@ begin
     CnNoIconList.Add(AClass.ClassName);
 end;
 
-function CnWizEncryptKey(const Key: string): string;
-var
-  K, Iv, AD: TBytes;
-begin
-  if Key = '' then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  SetLength(K, SizeOf(CN_SM4_KEY));
-  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
-
-  SetLength(Iv, SizeOf(CN_SM4_IV));
-  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
-
-  SetLength(AD, Length(CN_SM4_AD));
-  Move(CN_SM4_AD[1], AD[0], Length(AD));
-
-  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
-end;
-
-function CnWizDecryptKey(const Text: string): string;
-var
-  K, Iv, AD, Res: TBytes;
-begin
-  if Text = '' then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  SetLength(K, SizeOf(CN_SM4_KEY));
-  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
-
-  SetLength(Iv, SizeOf(CN_SM4_IV));
-  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
-
-  SetLength(AD, Length(CN_SM4_AD));
-  Move(CN_SM4_AD[1], AD[0], Length(AD));
-
-  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
-  Result := BytesToString(Res);
-end;
-
 //==============================================================================
 // 公共信息函数
 //==============================================================================
@@ -1665,6 +1620,51 @@ end;
 {$ENDIF}
 
 {$ENDIF}
+
+function CnWizEncryptKey(const Key: string): string;
+var
+  K, Iv, AD: TBytes;
+begin
+  if Key = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(CN_SM4_KEY));
+  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
+
+  SetLength(Iv, SizeOf(CN_SM4_IV));
+  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
+
+  SetLength(AD, Length(CN_SM4_AD));
+  Move(CN_SM4_AD[1], AD[0], Length(AD));
+
+  Result := SM4GCMEncryptToHex(K, Iv, AD, AnsiToBytes(Key));
+end;
+
+function CnWizDecryptKey(const Text: string): string;
+var
+  K, Iv, AD, Res: TBytes;
+begin
+  if Text = '' then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  SetLength(K, SizeOf(CN_SM4_KEY));
+  Move(CN_SM4_KEY[0], K[0], SizeOf(CN_SM4_KEY));
+
+  SetLength(Iv, SizeOf(CN_SM4_IV));
+  Move(CN_SM4_IV[0], Iv[0], SizeOf(CN_SM4_IV));
+
+  SetLength(AD, Length(CN_SM4_AD));
+  Move(CN_SM4_AD[1], AD[0], Length(AD));
+
+  Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
+  Result := BytesToString(Res);
+end;
 
 var
   FResInited: Boolean;
