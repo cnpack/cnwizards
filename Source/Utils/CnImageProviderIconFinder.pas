@@ -40,13 +40,7 @@ interface
 {$DEFINE USE_MSXML}
 
 uses
-  Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils,
-{$IFDEF CN_USE_MSXML}
-  ActiveX, ComObj, msxml,
-{$ELSE}
-  OmniXML, OmniXMLUtils,
-{$ENDIF}
-  CnCommon, CnWizXmlUtils;
+  Windows, SysUtils, Classes, Graphics, CnImageProviderMgr, CnInetUtils, CnCommon;
 
 type
   TCnImageProviderFreePik = class(TCnBaseImageProvider)

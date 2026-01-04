@@ -38,39 +38,48 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes,
-{$IFDEF CN_USE_MSXML}
-  ActiveX, ComObj, msxml
-{$ELSE}
-  OmniXML, OmniXMLUtils
-{$ENDIF};
+  Windows, SysUtils, Classes {$IFDEF CN_USE_MSXML},
+  ActiveX, ComObj, msxml {$ENDIF};
 
 {$IFDEF CN_USE_MSXML}
+
 type
   IXMLNode = IXMLDOMNode;
+
   IXMLDocument = IXMLDOMDocument;
 
-function XMLStrToInt(nodeValue: WideString; var value: integer): boolean;
-function XMLStrToIntDef(nodeValue: WideString; defaultValue: integer): integer;
+function XMLStrToInt(nodeValue: WideString; var value: Integer): Boolean;
+
+function XMLStrToIntDef(nodeValue: WideString; defaultValue: Integer): Integer;
+
 function GetNodeAttr(parentNode: IXMLNode; attrName: string;
-  var value: WideString): boolean;
+  var value: WideString): Boolean;
+
 function GetNodeAttrStr(parentNode: IXMLNode; attrName: string;
   defaultValue: WideString): WideString;
+
 function GetTextChild(node: IXMLNode): IXMLNode;
+
 function GetNodeText(parentNode: IXMLNode; nodeTag: string;
-  var nodeText: WideString): boolean;
+  var nodeText: WideString): Boolean;
+
 function GetNodeTextInt(parentNode: IXMLNode; nodeTag: string;
-  defaultValue: integer): integer;
+  defaultValue: Integer): Integer;
+
 function GetNodeTextStr(parentNode: IXMLNode; nodeTag: string;
   defaultValue: WideString): WideString;
+
 function FindNode(parentNode: IXMLNode; matchesName: string): IXMLNode;
+
 function CreateXMLDoc: IXMLDOMDocument;
+
 {$ENDIF}
 
 implementation
 
 {$IFDEF CN_USE_MSXML}
-function XMLStrToInt(nodeValue: WideString; var value: integer): boolean;
+
+function XMLStrToInt(nodeValue: WideString; var value: Integer): Boolean;
 begin
   try
     value := StrToInt(nodeValue);
@@ -81,21 +90,22 @@ begin
   end;
 end;
 
-function XMLStrToIntDef(nodeValue: WideString; defaultValue: integer): integer;
+function XMLStrToIntDef(nodeValue: WideString; defaultValue: Integer): Integer;
 begin
   if not XMLStrToInt(nodeValue,Result) then
     Result := defaultValue;
 end;
 
 function GetNodeAttr(parentNode: IXMLNode; attrName: string;
-  var value: WideString): boolean;
+  var value: WideString): Boolean;
 var
   attrNode: IXMLNode;
 begin
   attrNode := parentNode.Attributes.GetNamedItem(attrName);
-  if not assigned(attrNode) then
+  if not Assigned(attrNode) then
     Result := False
-  else begin
+  else
+  begin
     value := attrNode.NodeValue;
     Result := True;
   end;
@@ -112,25 +122,28 @@ end;
 
 function GetTextChild(node: IXMLNode): IXMLNode;
 var
-  iText: integer;
+  iText: Integer;
 begin
   Result := nil;
   for iText := 0 to node.ChildNodes.Length-1 do
-    if node.ChildNodes.Item[iText].NodeType = NODE_TEXT then begin
+  begin
+    if node.ChildNodes.Item[iText].NodeType = NODE_TEXT then
+    begin
       Result := node.ChildNodes.Item[iText];
-      Break; //for
+      Break;
     end;
+  end;
 end;
 
 function GetNodeText(parentNode: IXMLNode; nodeTag: string;
-  var nodeText: WideString): boolean;
+  var nodeText: WideString): Boolean;
 var
   myNode: IXMLNode;
 begin
   nodeText := '';
   Result := False;
   myNode := parentNode.SelectSingleNode(nodeTag);
-  if assigned(myNode) then
+  if Assigned(myNode) then
   begin
     nodeText := myNode.text;
     Result := True;
@@ -138,7 +151,7 @@ begin
 end;
 
 function GetNodeTextInt(parentNode: IXMLNode; nodeTag: string;
-  defaultValue: integer): integer;
+  defaultValue: Integer): Integer;
 var
   nodeText: WideString;
 begin
@@ -159,14 +172,16 @@ end;
 
 function FindNode(parentNode: IXMLNode; matchesName: string): IXMLNode;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to parentNode.childNodes.length - 1 do
-    if SameText(parentNode.childNodes.item[i].nodeName, matchesName) then
+  for I := 0 to parentNode.childNodes.length - 1 do
+  begin
+    if SameText(parentNode.childNodes.item[I].nodeName, matchesName) then
     begin
-      Result := parentNode.childNodes.item[i];
+      Result := parentNode.childNodes.item[I];
       Exit;
     end;
+  end;
   Result := nil;
 end;
 
@@ -180,5 +195,4 @@ begin
 end;
 
 {$ENDIF}
-
 end.
