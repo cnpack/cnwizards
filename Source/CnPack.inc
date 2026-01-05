@@ -3590,6 +3590,15 @@
   // A Bug Can't get Correct Env Option Values for Current Platform.
 {$ENDIF}
 
+{$IFDEF SUPPORT_CROSS_PLATFORM}
+{$IFDEF ANDROID}
+  {$DEFINE MOBILE_PLATFORM}
+{$ENDIF}
+{$IFDEF IOS}
+  {$DEFINE MOBILE_PLATFORM}
+{$ENDIF}
+{$ENDIF}
+
 {$IFDEF DELPHIXE_UP}
   {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property
   {$DEFINE FONT_HAS_QUALITY}                   // XE TFont has Quality for AntiAliasing
