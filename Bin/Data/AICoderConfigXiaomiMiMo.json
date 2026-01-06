@@ -1,0 +1,10 @@
+﻿{
+    "EngineName": "小米MiMo",
+    "URL": "https://api.xiaomimimo.com/v1/chat/completions",
+    "ApiKey": "",
+    "Model": "mimo-v2-flash",
+    "ModelList": "mimo-v2-flash",
+    "Temperature": 0.3,
+    "Stream": true,
+    "WebAddress": "https://platform.xiaomimimo.com/#/console/api-keys"
+}

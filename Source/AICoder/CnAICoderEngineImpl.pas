@@ -53,14 +53,6 @@ type
     class function EngineName: string; override;
   end;
 
-  TCnMistralAIAIEngine = class(TCnAIBaseEngine)
-  {* MistralAI 引擎}
-  public
-    class function EngineName: string; override;
-  end;
-
-  { TCnClaudeAIEngine }
-
   TCnClaudeAIEngine = class(TCnAIBaseEngine)
   {* Claude 引擎，Anthropic 规则，常被别家当作兼容规范}
   protected
@@ -83,6 +75,12 @@ type
   public
     class function EngineName: string; override;
     class function OptionClass: TCnAIEngineOptionClass; override;
+  end;
+
+  TCnMistralAIAIEngine = class(TCnAIBaseEngine)
+  {* MistralAI 引擎}
+  public
+    class function EngineName: string; override;
   end;
 
   TCnGeminiAIEngine = class(TCnAIBaseEngine)
@@ -143,8 +141,6 @@ type
     class function EngineName: string; override;
   end;
 
-  { TCnMiniMaxAIEngine }
-
   TCnMiniMaxAIEngine = class(TCnClaudeAIEngine)
   {* MiniMax 引擎。现阶段号称兼容 OpenAI 及 Anthropic，这里使用后者}
   protected
@@ -163,6 +159,14 @@ type
 
     class function EngineName: string; override;
     class function OptionClass: TCnAIEngineOptionClass; override;
+  end;
+
+  TCnXiaomiMiMoAIEngine = class(TCnAIBaseEngine)
+  {* 小米 MiMo AI 引擎}
+  protected
+    class function GetModelListURL(const OrigURL: string): string; override;
+  public
+    class function EngineName: string; override;
   end;
 
   TCnOllamaAIEngine = class(TCnAIBaseEngine)
@@ -991,6 +995,19 @@ begin
   Result := TCnMiniMaxAIEngineOption;
 end;
 
+{ TCnXiaomiMiMoAIEngine }
+
+class function TCnXiaomiMiMoAIEngine.EngineName: string;
+begin
+  Result := '小米MiMo'
+end;
+
+class function TCnXiaomiMiMoAIEngine.GetModelListURL(
+  const OrigURL: string): string;
+begin
+  Result := ''; // 小米MiMo 暂不支持获取模型列表
+end;
+
 initialization
   RegisterAIEngine(TCnDeepSeekAIEngine);
   RegisterAIEngine(TCnOpenAIAIEngine);
@@ -1004,6 +1021,7 @@ initialization
   RegisterAIEngine(TCnMiniMaxAIEngine);
   RegisterAIEngine(TCnChatGLMAIEngine);
   RegisterAIEngine(TCnBaiChuanAIEngine);
+  RegisterAIEngine(TCnXiaomiMiMoAIEngine);
   RegisterAIEngine(TCnOllamaAIEngine);
 
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
