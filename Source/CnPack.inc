@@ -3449,6 +3449,7 @@
   {$DEFINE DOTNET}
 {$ENDIF}
 
+// Delphi 5 只定义 WIN32，没像高版本 Delphi 那样定义 MSWINDOWS，这里补上
 {$IFDEF WIN32}
   {$DEFINE MSWINDOWS}
 {$ENDIF}
