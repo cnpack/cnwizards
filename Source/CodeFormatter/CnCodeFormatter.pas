@@ -263,7 +263,7 @@ type
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
     procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
     procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True; NeedGeneric: Boolean = False);
-    procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
+    procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; IgnoreEqual: Boolean = False);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
     procedure FormatSetConstructor(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0);
 
@@ -1022,7 +1022,8 @@ begin
 end;
 
 { ConstExpr -> <constant-expression> }
-procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount, IndentForAnonymous: Byte);
+procedure TCnBasePascalFormatter.FormatConstExpr(PreSpaceCount, IndentForAnonymous: Byte;
+  IgnoreEqual: Boolean);
 begin
   SpecifyElementType(pfetConstExpr);
   try
@@ -1035,6 +1036,10 @@ begin
     finally
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);
     end;
+
+    // 如果外界声明忽略等号，则跳出
+    if IgnoreEqual and (Scanner.Token = tokEqual) then
+      Exit;
 
     while Scanner.Token in RelOpTokens + [tokHat, tokSLB, tokDot, tokKeywordNot] do
     begin
@@ -1803,7 +1808,7 @@ begin
     begin
       // Match(tokGreatOrEqu, 0, 1); // 拆开 > 与 =
       WriteToken(tokGreat, 0, 1, False, False, False, '>');
-      WriteToken(tokEQUAL, 0, 1, False, False, False, '=');
+      WriteToken(tokEqual, 0, 1, False, False, False, '=');
       Scanner.NextToken;
 
       Result := True;
@@ -3162,7 +3167,7 @@ begin
       FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
     end;
 
-    if Scanner.Token = tokEQUAL then
+    if Scanner.Token = tokEqual then
     begin
       Match(Scanner.Token, 1, 1);
       FormatTypedConstant;
@@ -3345,9 +3350,9 @@ begin
 //    Match(tokAndSign);              // Moved to FormatIdent
     
   FormatIdent(PreSpaceCount);
-  if Scanner.Token = tokEQUAL then
+  if Scanner.Token = tokEqual then
   begin
-    Match(tokEQUAL, 1, 1);
+    Match(tokEqual, 1, 1);
     FormatConstExpr;
   end;
 end;
@@ -3574,9 +3579,9 @@ begin
   if Scanner.Token = tokSemicolon then // 处理 Forward 的函数的真正声明可省略参数的情形
     Exit;
 
-  if AllowEqual and (Scanner.Token = tokEQUAL) then  // procedure Intf.Ident = Ident
+  if AllowEqual and (Scanner.Token = tokEqual) then  // procedure Intf.Ident = Ident
   begin
-    Match(tokEQUAL, 1, 1);
+    Match(tokEqual, 1, 1);
     FormatIdent;
     Exit;
   end;
@@ -3957,12 +3962,12 @@ begin
       else
         GreatEqual := FormatSimpleType;
 
-      if Scanner.Token = tokEQUAL then
+      if Scanner.Token = tokEqual then
       begin
         //if not CanHaveDefaultValue then
         //  Error('Can not have default value');
 
-        Match(tokEQUAL, 1, 1);
+        Match(tokEqual, 1, 1);
         FormatConstExpr;
       end
       else if GreatEqual then
@@ -4063,9 +4068,9 @@ begin
   if Scanner.Token = tokLB then
     FormatFormalParameters;
 
-  if AllowEqual and (Scanner.Token = tokEQUAL) then  // procedure Intf.Ident = Ident
+  if AllowEqual and (Scanner.Token = tokEqual) then  // procedure Intf.Ident = Ident
   begin
-    Match(tokEQUAL, 1, 1);
+    Match(tokEqual, 1, 1);
     FormatIdent;
   end;
 end;
@@ -4599,9 +4604,9 @@ begin
       begin
         FormatConstExpr;
         Match(tokRange);
-        FormatConstExpr;
+        FormatConstExpr(0, 0, True); // .. 的上限表达式，不要算进 = 号去
       end
-      else if AToken = tokLess then // 加入对<>泛型的支持
+      else if AToken = tokLess then  // 加入对 <> 泛型的支持
       begin
         FormatIdent;
         Result := FormatTypeParams(0, True);
@@ -4809,7 +4814,7 @@ begin
     GreatEqual := FormatTypeParams(0, True);
 
   if not GreatEqual then
-    MatchOperator(tokEQUAL);
+    MatchOperator(tokEqual);
 
   if Scanner.Token = tokKeywordType then // 处理 TInt = type Integer; 的情形
     Match(tokKeywordType);
@@ -4961,7 +4966,7 @@ begin
 
   try
     case Scanner.Token of
-      tokEQUAL:
+      tokEqual:
         begin
           // 常量表达式从等号起就允许保持内部换行
           FLineBreakKeepStack.Push(Pointer(FNeedKeepLineBreak));
@@ -4986,7 +4991,7 @@ begin
           try
             FCurrentTab := PreSpaceCount;
             if not GreatEqual then // 可能内部碰到泛型已经输出了等号，这里就不输出了
-              Match(tokEQUAL, 1, 1); // 等号前后空一格
+              Match(tokEqual, 1, 1); // 等号前后空一格
 
             FormatTypedConstant; // 等号后空一格
           finally
@@ -5497,7 +5502,7 @@ begin
     GreatEqual := FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
   end;
 
-  if GreatEqual or (Scanner.Token = tokEQUAL) then // 如果已经输出了 >= 拆分而成的 > 和 =
+  if GreatEqual or (Scanner.Token = tokEqual) then // 如果已经输出了 >= 拆分而成的 > 和 =
   begin
     FCurrentTab := PreSpaceCount;
     OldKeepOneBlankLine := Scanner.KeepOneBlankLine;
@@ -6174,7 +6179,7 @@ begin
   FormatIdent(PreSpaceCount);
 
   case Scanner.Token of
-    tokEQUAL:
+    tokEqual:
       begin
         Match(Scanner.Token, 1); // 等号前空一格
         FCurrentTab := PreSpaceCount; // 记录当前缩进供常量表达式内部保留换行处理
@@ -6186,7 +6191,7 @@ begin
         Match(Scanner.Token);
 
         FormatType;
-        Match(tokEQUAL, 1, 1); // 等号前后空一格
+        Match(tokEqual, 1, 1); // 等号前后空一格
 
         FormatTypedConstant; // 等号后空一格
       end;

@@ -77,7 +77,7 @@ type
     tokGreatOrEqu,
     tokLessOrEqu,
     tokNotEqual,
-    tokEQUAL,
+    tokEqual,
     
     // Sign
     tokDot,
@@ -360,8 +360,9 @@ const
   CanBeNewIdentifierTokens = [tokInteger, tokFloat]; // 新语法允许 1.toString 这种
 
   // 这批关键字后可跟表达式，所以后面需要空格
-  NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor, tokKeywordThen, tokKeywordElse,
-    tokKeywordWith, tokKeywordCase, tokKeywordTo, tokKeywordDownto, tokKeywordUntil];
+  NeedSpaceAfterKeywordTokens = [tokKeywordIf, tokKeywordWhile, tokKeywordFor,
+    tokKeywordThen, tokKeywordElse, tokKeywordWith, tokKeywordCase, tokKeywordTo,
+    tokKeywordDownto, tokKeywordUntil, tokKeywordOf];
 
   NonEffectiveTokens = [tokBlank, tokCRLF, tokLineComment, tokBlockComment, tokCompDirective];
 
@@ -408,7 +409,7 @@ const
     (Value: Integer(tokGreatOrEqu);     Name: '>='),
     (Value: Integer(tokLessOrEqu);      Name: '<='),
     (Value: Integer(tokNotEqual);       Name: '<>'),
-    (Value: Integer(tokEQUAL);          Name: '='),
+    (Value: Integer(tokEqual);          Name: '='),
     
     // Sign
     (Value: Integer(tokDot);            Name: '.'),
