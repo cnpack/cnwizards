@@ -5479,6 +5479,7 @@ procedure TCnBasePascalFormatter.FormatVarDecl(PreSpaceCount: Byte);
 var
   OldStoreIdent: Boolean;
   OldKeepOneBlankLine: Boolean;
+  GreatEqual: Boolean;
 begin
   OldStoreIdent := FStoreIdent;
   try
@@ -5489,19 +5490,21 @@ begin
     FStoreIdent := OldStoreIdent;
   end;
 
+  GreatEqual := False;
   if Scanner.Token = tokColon then // 放宽语法限制
   begin
     Match(tokColon);
-    FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
+    GreatEqual := FormatType(PreSpaceCount); // 长 Type 可能换行，必须传入
   end;
 
-  if Scanner.Token = tokEQUAL then
+  if GreatEqual or (Scanner.Token = tokEQUAL) then // 如果已经输出了 >= 拆分而成的 > 和 =
   begin
     FCurrentTab := PreSpaceCount;
     OldKeepOneBlankLine := Scanner.KeepOneBlankLine;
     Scanner.KeepOneBlankLine := True;  // var 的赋值语句也要求保持换行
     try
-      Match(Scanner.Token, 1, 1);
+      if not GreatEqual then           // 已经输出了 > = 则无需多输出等号
+        Match(Scanner.Token, 1, 1);
       FormatTypedConstant;
     finally
       Scanner.KeepOneBlankLine := OldKeepOneBlankLine;
