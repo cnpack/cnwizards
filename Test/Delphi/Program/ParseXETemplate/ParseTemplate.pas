@@ -16,9 +16,9 @@ type
     btnParse: TButton;
     procedure btnParseClick(Sender: TObject);
   private
-    { Private declarations }
+
   public
-    { Public declarations }
+
   end;
 
 var
@@ -29,7 +29,7 @@ implementation
 {$R *.dfm}
 
 uses
-  OmniXML, OmniXMLUtils;
+  CnXML;
 
 const
   XeCodeTemplateTag_codetemplate = 'codetemplate';
@@ -45,10 +45,10 @@ procedure TfrmParse.btnParseClick(Sender: TObject);
 var
   Dir, FileName: string;
   Sch: TSearchRec;
-  Doc: IXMLDocument;
-  Root: IXmlElement;
-  TemplateNode: IXMLElement;
-  CodeNode: IXMLElement;
+  Doc: TCnXMLDocument;
+  Root: TCnXMLElement;
+  TemplateNode: TCnXMLElement;
+  CodeNode: TCnXMLElement;
   I, C, CDataEndPos: Integer;
   Text: string;
   Name: string;
@@ -70,59 +70,72 @@ begin
       begin
         try
           FileName := Dir + Sch.Name;
-          // Load this XML and read Name/Descripttion/Text
+          // Load this XML and read Name/Description/Text
           Inc(C);
-          Doc := CreateXMLDoc();
-          Doc.Load(FileName);
-          Root := Doc.DocumentElement;
-          if not Assigned(Root) or not
-            SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
-            Continue;
 
-          TemplateNode := nil;
-          for I := 0 to Root.ChildNodes.Length - 1 do
-          begin
-            if SameText(Root.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_template) then
-            begin
-              TemplateNode := Root.ChildNodes.Item[I] as IXMLElement;
-              Break;
-            end;
-          end;
+          Doc := TCnXMLDocument.Create;
+          try
+            Doc.LoadFromFile(FileName);
+            Root := Doc.DocumentElement;
 
-          if TemplateNode <> nil then
-          begin
-            Name := TemplateNode.GetAttribute(XeCodeTemplateAttrib_name);
-            Desc := ''; Text := '';
-            for I := 0 to TemplateNode.ChildNodes.Length - 1 do
+            if not Assigned(Root) or not
+              SameText(Root.NodeName, XeCodeTemplateTag_codetemplate) then
+              Continue;
+
+            TemplateNode := nil;
+            for I := 0 to Root.ChildCount - 1 do
             begin
-              if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_description) then
+              if SameText(Root.Children[I].NodeName, XeCodeTemplateTag_template) then
               begin
-                // Read Description
-                Desc := TemplateNode.ChildNodes.Item[I].Text;
-              end
-              else if SameText(TemplateNode.ChildNodes.Item[I].NodeName, XeCodeTemplateTag_code) then
-              begin
-                // Language is Delphi? read the CDATA part
-                CodeNode := TemplateNode.ChildNodes.Item[I] as IXMLElement;
-                if CodeNode.GetAttribute(XeCodeTemplateAttrib_language) = 'Delphi' then
+                if Root.Children[I] is TCnXMLElement then
                 begin
-                  Text := CodeNode.Text;
-                  if Pos(XeCodeTemplate_cdata, Text) = 1 then
-                    Text := Copy(Text, Length(XeCodeTemplate_cdata), MaxInt);
-                  CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
-                  if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
-                    Text := Copy(Text, 1, CDataEndPos - 1);
+                  TemplateNode := TCnXMLElement(Root.Children[I]);
+                  Break;
                 end;
               end;
             end;
 
-            if (Name <> '') and (Text <> '') then
+            if TemplateNode <> nil then
             begin
-              mmoTemplates.Lines.Add(Name);
-              mmoTemplates.Lines.Add(Desc);
-              mmoTemplates.Lines.Add(Text);
-              mmoTemplates.Lines.Add('');
+              Name := TemplateNode.GetAttribute(XeCodeTemplateAttrib_name);
+              Desc := ''; Text := '';
+
+              for I := 0 to TemplateNode.ChildCount - 1 do
+              begin
+                if SameText(TemplateNode.Children[I].NodeName, XeCodeTemplateTag_description) then
+                begin
+                  // Read Description
+                  Desc := TemplateNode.Children[I].Text;
+                end
+                else if SameText(TemplateNode.Children[I].NodeName, XeCodeTemplateTag_code) then
+                begin
+                  // Language is Delphi? read the CDATA part
+                  if TemplateNode.Children[I] is TCnXMLElement then
+                  begin
+                    CodeNode := TCnXMLElement(TemplateNode.Children[I]);
+                    if CodeNode.GetAttribute(XeCodeTemplateAttrib_language) = 'Delphi' then
+                    begin
+                      Text := CodeNode.Text;
+                      if Pos(XeCodeTemplate_cdata, Text) = 1 then
+                        Text := Copy(Text, Length(XeCodeTemplate_cdata) + 1, MaxInt);
+                      CDataEndPos := Length(Text) - Length(XeCodeTemplate_cdataend) + 1;
+                      if Pos(XeCodeTemplate_cdataend, Text) = CDataEndPos then
+                        Text := Copy(Text, 1, CDataEndPos - 1);
+                    end;
+                  end;
+                end;
+              end;
+
+              if (Name <> '') and (Text <> '') then
+              begin
+                mmoTemplates.Lines.Add(Name);
+                mmoTemplates.Lines.Add(Desc);
+                mmoTemplates.Lines.Add(Text);
+                mmoTemplates.Lines.Add('');
+              end;
             end;
+          finally
+            Doc.Free;
           end;
         except
           ;
