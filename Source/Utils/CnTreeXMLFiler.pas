@@ -39,29 +39,24 @@ interface
 
 uses
   Classes, SysUtils, Controls, TypInfo, {$IFDEF COMPILER6_UP}Variants,{$ENDIF}
-  CnCommon, CnTree, OmniXMLPersistent, OmniXML,
-{$IFDEF USE_MSXML}
-  OmniXML_MSXML,
-{$ENDIF}
-  OmniXMLUtils;
+  CnCommon, CnTree, CnXML;
 
 type
   TCnTreeXMLFiler = class(TInterfacedObject, ICnTreeFiler)
   private
-    FXMLDoc: IXMLDocument;
-    FRoot: IXMLElement;
-    FPropsFormat: TPropsFormat;
+    FXMLDoc: TCnXMLDocument;
+    FRoot: TCnXMLElement;
 
-    function FindElement(const Root: IXMLElement; const TagName: string): IXMLElement;
-    procedure ReadProperties(Instance: TPersistent; Element: IXMLElement);
-    procedure ReadProperty(Instance: TPersistent; PropInfo: Pointer; Element: IXMLElement);
-    function InternalReadText(Root: IXMLElement; Name: string; var Value: WideString): Boolean;
-    procedure Read(Instance: TPersistent; Root: IXMLElement);
+    function FindElement(const Root: TCnXMLElement; const TagName: string): TCnXMLElement;
+    procedure ReadProperties(Instance: TPersistent; Element: TCnXMLElement);
+    procedure ReadProperty(Instance: TPersistent; PropInfo: Pointer; Element: TCnXMLElement);
+    function InternalReadText(Root: TCnXMLElement; Name: string; var Value: WideString): Boolean;
+    procedure Read(Instance: TPersistent; Root: TCnXMLElement);
 
-    procedure WriteProperties(Instance: TPersistent; Element: IXMLElement);
-    procedure WriteProperty(Instance: TPersistent; PropInfo: PPropInfo; Element: IXMLElement);
-    procedure InternalWriteText(Root: IXMLElement; Name, Value: string);
-    procedure Write(Instance: TPersistent; Root: IXMLElement);
+    procedure WriteProperties(Instance: TPersistent; Element: TCnXMLElement);
+    procedure WriteProperty(Instance: TPersistent; PropInfo: PPropInfo; Element: TCnXMLElement);
+    procedure InternalWriteText(Root: TCnXMLElement; Name, Value: string);
+    procedure Write(Instance: TPersistent; Root: TCnXMLElement);
   public
     constructor Create;
     destructor Destroy; override;
@@ -74,48 +69,21 @@ implementation
 
 const
   CNLEAF_NODENAME = 'CnLeaf';
-  PROP_FORMAT = 'PropFormat';
 
-var
-  PropFormatValues: array[TPropsFormat] of string = ('auto', 'attr', 'node');
-
-procedure CreateDocument(var XMLDoc: IXMLDocument; var Root: IXMLElement; RootNodeName: string);
+procedure CreateDocument(var XMLDoc: TCnXMLDocument; var Root: TCnXMLElement; RootNodeName: string);
 begin
-  XMLDoc := CreateXMLDoc;
+  XMLDoc := TCnXMLDocument.Create;
   Root := XMLDoc.CreateElement(RootNodeName);
   XMLDoc.DocumentElement := Root;
 end;
 
-procedure Load(var XMLDoc: IXMLDocument; var XMLRoot: IXMLElement; var PropsFormat: TPropsFormat);
-var
-  I: TPropsFormat;
-  PropFormatValue: string;
+procedure LoadDocument(const FileName: string; var XMLDoc: TCnXMLDocument; var XMLRoot: TCnXMLElement);
 begin
-  // set root element
-  XMLRoot := XMLDoc.documentElement;
-  PropsFormat := pfNodes;
+  XMLDoc := TCnXMLDocument.Create;
+  XMLDoc.PreserveWhiteSpace := True;
+  XMLDoc.LoadFromFile(FileName);
 
-  if XMLRoot = nil then
-    Exit;
-
-  PropFormatValue := XMLRoot.GetAttribute(PROP_FORMAT);
-
-  for I := Low(TPropsFormat) to High(TPropsFormat) do begin
-    if SameText(PropFormatValue, PropFormatValues[I]) then begin
-      PropsFormat := I;
-      Break;
-    end;
-  end;
-end;
-
-procedure LoadDocument(const FileName: string; var XMLDoc: IXMLDocument; var XMLRoot: IXMLElement; var PropsFormat: TPropsFormat);
-begin
-  XMLDoc := CreateXMLDoc;
-
-  XMLDoc.preserveWhiteSpace := True;
-  XMLDoc.Load(FileName);
-
-  Load(XMLDoc, XMLRoot, PropsFormat);
+  XMLRoot := XMLDoc.DocumentElement;
 end;
 
 { TCnTreeXMLFiler }
@@ -127,13 +95,13 @@ end;
 
 destructor TCnTreeXMLFiler.Destroy;
 begin
-  FXMLDoc := nil;
+  FreeAndNil(FXMLDoc);
   FRoot := nil;
   inherited;
 end;
 
-function TCnTreeXMLFiler.FindElement(const Root: IXMLElement;
-  const TagName: string): IXMLElement;
+function TCnTreeXMLFiler.FindElement(const Root: TCnXMLElement;
+  const TagName: string): TCnXMLElement;
 var
   I: Integer;
 begin
@@ -141,46 +109,31 @@ begin
   if Root = nil then
     Exit;
   I := 0;
-  while (Result = nil) and (I < Root.ChildNodes.Length) do
+  while (Result = nil) and (I < Root.ChildCount) do
   begin
-    if (Root.ChildNodes.Item[I].NodeType = ELEMENT_NODE)
-      and (CompareText(Root.ChildNodes.Item[I].NodeName, TagName) = 0) then
-      Result := Root.ChildNodes.Item[I] as IXMLElement
+    if (Root.Children[I].NodeType = xntElement)
+      and (CompareText(Root.Children[I].NodeName, TagName) = 0) then
+      Result := Root.Children[I] as TCnXMLElement
     else
       Inc(I);
   end;
 end;
 
-function TCnTreeXMLFiler.InternalReadText(Root: IXMLElement; Name: string;
+function TCnTreeXMLFiler.InternalReadText(Root: TCnXMLElement; Name: string;
   var Value: WideString): Boolean;
 var
-  PropNode: IXMLElement;
-  AttrNode: IXMLNode;
+  PropNode: TCnXMLElement;
 begin
-  case FPropsFormat of
-    pfAttributes:
-      begin
-        AttrNode := Root.Attributes.GetNamedItem(Name);
-        Result := AttrNode <> nil;
-        if Result then
-          Value := AttrNode.NodeValue;
-      end;
-    pfNodes:
-      begin
-        PropNode := FindElement(Root, Name);
-        Result := PropNode <> nil;
-        if Result then
-          Value := PropNode.Text;
-      end;
-    else
-      Result := False;
-  end;
+  PropNode := FindElement(Root, Name);
+  Result := PropNode <> nil;
+  if Result then
+    Value := PropNode.Text;
 end;
 
-procedure TCnTreeXMLFiler.InternalWriteText(Root: IXMLElement; Name,
+procedure TCnTreeXMLFiler.InternalWriteText(Root: TCnXMLElement; Name,
   Value: string);
 var
-  PropNode: IXMLElement;
+  PropNode: TCnXMLElement;
 begin
   PropNode := FXMLDoc.CreateElement(Name);
   PropNode.Text := Value;
@@ -190,20 +143,20 @@ end;
 procedure TCnTreeXMLFiler.LoadFromFile(Instance: TPersistent;
   const FileName: string);
 begin
-  FXMLDoc := nil;
+  FreeAndNil(FXMLDoc);
   FRoot := nil;
 
   if Instance is TCnTree then
   begin
-    LoadDocument(FileName, FXMLDoc, FRoot, FPropsFormat);
+    LoadDocument(FileName, FXMLDoc, FRoot);
     Read(Instance, FRoot);
 
-    FXMLDoc := nil;
+    FreeAndNil(FXMLDoc);
     FRoot := nil;
   end;
 end;
 
-procedure TCnTreeXMLFiler.Read(Instance: TPersistent; Root: IXMLElement);
+procedure TCnTreeXMLFiler.Read(Instance: TPersistent; Root: TCnXMLElement);
 var
   I: Integer;
   ALeaf: TCnLeaf;
@@ -229,14 +182,14 @@ begin
 
     // 递归读下属子节点
     ATree := (Instance as TCnLeaf).Tree;
-    for I := 0 to Root.ChildNodes.Length - 1 do
+    for I := 0 to Root.ChildCount - 1 do
     begin
-      if Root.ChildNodes.Item[I].NodeType = ELEMENT_NODE then
+      if Root.Children[I].NodeType = xntElement then
       begin
-        if Root.ChildNodes.Item[I].NodeName = CNLEAF_NODENAME then
+        if Root.Children[I].NodeName = CNLEAF_NODENAME then
         begin
           ALeaf := ATree.AddChild(Instance as TCnLeaf);
-          Read(ALeaf, Root.ChildNodes.Item[I] as IXMLElement);
+          Read(ALeaf, Root.Children[I] as TCnXMLElement);
         end;
       end;
     end;
@@ -244,7 +197,7 @@ begin
 end;
 
 procedure TCnTreeXMLFiler.ReadProperties(Instance: TPersistent;
-  Element: IXMLElement);
+  Element: TCnXMLElement);
 var
   I: Integer;
   PropCount: Integer;
@@ -269,7 +222,7 @@ begin
 end;
 
 procedure TCnTreeXMLFiler.ReadProperty(Instance: TPersistent;
-  PropInfo: Pointer; Element: IXMLElement);
+  PropInfo: Pointer; Element: TCnXMLElement);
 var
   PropType: PTypeInfo;
 
@@ -279,7 +232,7 @@ var
     Text: WideString;
   begin
     if InternalReadText(Element, PropInfoName(PropInfo), Text) then
-      Value := XMLStrToRealDef(Text, 0)
+      Value := CnXMLStrToRealDef(Text, 0)
     else
       Value := 0;
     SetFloatProp(Instance, PropInfo, Value)
@@ -291,13 +244,13 @@ var
     Text: WideString;
   begin
     if InternalReadText(Element, PropInfoName(PropInfo), Text) then begin
-      if XMLStrToDateTime(Text, Value) then
+      if CnXMLStrToDateTime(Text, Value) then
         SetFloatProp(Instance, PropInfo, Value)
       else
-        raise EOmniXMLPersistent.CreateFmt('Error in datetime property %s', [PropInfoName(PropInfo)]);
+        raise ECnXMLException.CreateFmt('Error in datetime property %s', [PropInfoName(PropInfo)]);
     end
     else
-      raise EOmniXMLPersistent.CreateFmt('Missing datetime property %s', [PropInfoName(PropInfo)]);
+      raise ECnXMLException.CreateFmt('Missing datetime property %s', [PropInfoName(PropInfo)]);
   end;
 
   procedure ReadStrProp;
@@ -319,29 +272,29 @@ var
     if InternalReadText(Element, PropInfoName(PropInfo), Value) then begin
       case PropType^.Kind of
         tkInteger:
-          if XMLStrToInt(Value, IntValue) then
-            SetOrdProp(Instance, PropInfo, XMLStrToIntDef(Value, 0))
+          if CnXMLStrToInt(Value, IntValue) then
+            SetOrdProp(Instance, PropInfo, CnXMLStrToIntDef(Value, 0))
           else
-            raise EOmniXMLPersistent.CreateFmt('Invalid integer value (%s).', [Value]);
+            raise ECnXMLException.CreateFmt('Invalid integer value (%s).', [Value]);
         tkChar: SetOrdProp(Instance, PropInfo, Ord(Value[1]));
         tkSet: SetSetProp(Instance, PropInfo, Value);
         tkEnumeration:
           begin
             if PropType = System.TypeInfo(Boolean) then begin
-              if XMLStrToBool(Value, BoolValue) then
+              if CnXMLStrToBool(Value, BoolValue) then
                 SetOrdProp(Instance, PropInfo, Ord(BoolValue))
               else
-                raise EOmniXMLPersistent.CreateFmt('Invalid boolean value (%s).', [Value]);
+                raise ECnXMLException.CreateFmt('Invalid boolean value (%s).', [Value]);
             end
             else if PropType^.Kind = tkInteger then begin
-              if XMLStrToInt(Value, IntValue) then
+              if CnXMLStrToInt(Value, IntValue) then
                 SetOrdProp(Instance, PropInfo, IntValue)
               else
-                raise EOmniXMLPersistent.CreateFmt('Invalid enum value (%s).', [Value]);
+                raise ECnXMLException.CreateFmt('Invalid enum value (%s).', [Value]);
             end
             // 2003-05-27 (mr): added tkEnumeration processing
             else if PropType^.Kind = tkEnumeration then
-              if XMLStrToInt(Value, IntValue) then
+              if CnXMLStrToInt(Value, IntValue) then
                 SetOrdProp(Instance, PropInfo, IntValue)
               else
                 SetEnumProp(Instance, PropInfo, Value);
@@ -358,10 +311,10 @@ var
     IntValue: Int64;
   begin
     if InternalReadText(Element, PropInfoName(PropInfo), Value) then begin
-      if XMLStrToInt64(Value, IntValue) then
+      if CnXMLStrToInt64(Value, IntValue) then
         SetInt64Prop(Instance, PropInfo, IntValue)
       else
-        raise EOmniXMLPersistent.CreateFmt('Invalid int64 value (%s).', [Value]);
+        raise ECnXMLException.CreateFmt('Invalid int64 value (%s).', [Value]);
     end
     else
       SetFloatProp(Instance, PropInfo, 0)
@@ -388,26 +341,25 @@ end;
 procedure TCnTreeXMLFiler.SaveToFile(Instance: TPersistent;
   const FileName: string);
 begin
-  FXMLDoc := nil;
+  FreeAndNil(FXMLDoc);
   FRoot := nil;
 
   if Instance is TCnTree then
   begin
     CreateDocument(FXMLDoc, FRoot, 'data');
-    FXMLDoc.DocumentElement.SetAttribute(PROP_FORMAT, PropFormatValues[pfNodes]);
 
     Write(Instance, FRoot);
-    FXMLDoc.Save(FileName, ofIndent);
+    FXMLDoc.SaveToFile(FileName, True);
 
-    FXMLDoc := nil;
+    FreeAndNil(FXMLDoc);
     FRoot := nil;
   end;
 end;
 
-procedure TCnTreeXMLFiler.Write(Instance: TPersistent; Root: IXMLElement);
+procedure TCnTreeXMLFiler.Write(Instance: TPersistent; Root: TCnXMLElement);
 var
   I: Integer;
-  Element, ChildElement: IXMLElement;
+  Element, ChildElement: TCnXMLElement;
 begin
   if Instance is TCnTree then
   begin
@@ -437,7 +389,7 @@ begin
 end;
 
 procedure TCnTreeXMLFiler.WriteProperties(Instance: TPersistent;
-  Element: IXMLElement);
+  Element: TCnXMLElement);
 var
   I: Integer;
   PropCount: Integer;
@@ -468,7 +420,7 @@ begin
 end;
 
 procedure TCnTreeXMLFiler.WriteProperty(Instance: TPersistent;
-  PropInfo: PPropInfo; Element: IXMLElement);
+  PropInfo: PPropInfo; Element: TCnXMLElement);
 var
   PropType: PTypeInfo;
 
@@ -488,15 +440,15 @@ var
     Value := GetOrdProp(Instance, PropInfo);
     if Value <> PropInfo^.Default then begin
       case PropType^.Kind of
-        tkInteger: InternalWriteText(Element, PropInfoName(PropInfo), XMLIntToStr(Value));
+        tkInteger: InternalWriteText(Element, PropInfoName(PropInfo), CnXMLIntToStr(Value));
         tkChar: InternalWriteText(Element, PropInfoName(PropInfo), Chr(Value));
         tkSet: InternalWriteText(Element, PropInfoName(PropInfo), GetSetProp(Instance, PropInfo, True));
         tkEnumeration:
           begin
             if PropType = System.TypeInfo(Boolean) then
-              InternalWriteText(Element, PropInfoName(PropInfo), XMLBoolToStr(Boolean(Value)))
+              InternalWriteText(Element, PropInfoName(PropInfo), CnXMLBoolToStr(Boolean(Value)))
             else if PropType^.Kind = tkInteger then
-              InternalWriteText(Element, PropInfoName(PropInfo), XMLIntToStr(Value))
+              InternalWriteText(Element, PropInfoName(PropInfo), CnXMLIntToStr(Value))
             // 2003-05-27 (mr): added tkEnumeration processing
             else if PropType^.Kind = tkEnumeration then
               InternalWriteText(Element, PropInfoName(PropInfo), GetEnumName(PropType, Value));
@@ -511,7 +463,7 @@ var
   begin
     Value := GetFloatProp(Instance, PropInfo);
     if Value <> 0 then
-      InternalWriteText(Element, PropInfoName(PropInfo), XMLRealToStr(Value));
+      InternalWriteText(Element, PropInfoName(PropInfo), CnXMLRealToStr(Value));
   end;
 
   procedure WriteDateTimeProp;
@@ -520,7 +472,7 @@ var
   begin
     Value := VarAsType(GetFloatProp(Instance, PropInfo), varDate);
     if Value <> 0 then
-      InternalWriteText(Element, PropInfoName(PropInfo), XMLDateTimeToStrEx(Value));
+      InternalWriteText(Element, PropInfoName(PropInfo), CnXMLDateTimeToStrEx(Value));
   end;
 
   procedure WriteInt64Prop;
@@ -529,7 +481,7 @@ var
   begin
     Value := GetInt64Prop(Instance, PropInfo);
     if Value <> 0 then
-      InternalWriteText(Element, PropInfoName(PropInfo), XMLInt64ToStr(Value));
+      InternalWriteText(Element, PropInfoName(PropInfo), CnXMLInt64ToStr(Value));
   end;
 
 begin

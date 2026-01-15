@@ -57,8 +57,8 @@ uses
   Forms, Graphics, Contnrs, TypInfo,
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnCommon, CnWizConsts, CnWizOptions,
-  CnWizUtils, CnWizIdeUtils, CnPasCodeParser, OmniXML, OmniXMLPersistent,
-  OmniXMLUtils, CnWizMacroUtils, CnWizIni;
+  CnWizUtils, CnWizIdeUtils, CnPasCodeParser, CnXML,
+  CnWizMacroUtils, CnWizIni;
 
 const
   CN_CODE_TEMPLATE_INDEX_INVALID = -1;
@@ -536,10 +536,6 @@ const
   csCommentScope = MaxInt div 100 * 15;
   csDefScope = MaxInt div 100 * csDefScopeRate;
 
-type
-  TOmniXMLReaderHack = class(TOmniXMLReader);
-  TOmniXMLWriterHack = class(TOmniXMLWriter);
-
 // 返回符号类型的名称
 function GetSymbolKindName(Kind: TCnSymbolKind): string;
 begin
@@ -867,33 +863,60 @@ const
 
 function SaveListToXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 var
-  Doc: IXMLDocument;
-  Root: IXMLElement;
-  Node: IXMLElement;
-  Writer: TOmniXMLWriterHack;
-  I: Integer;
+  Doc: TCnXMLDocument;
+  Root: TCnXMLElement;
+  Node: TCnXMLElement;
+  Writer: TCnXMLWriter;
+  TempDoc: TCnXMLDocument;
+  I, J: Integer;
+  SrcNode: TCnXMLNode;
 begin
   Result := False;
   if FileName <> '' then
   try
-    Doc := CreateXMLDoc;
-    Root := Doc.CreateElement(csXmlRoot);
-    Doc.DocumentElement := Root;
-
-    List.Sort;
-    Writer := TOmniXMLWriterHack.Create(Doc);
+    Doc := CnXMLCreateDocument;
     try
+      Root := Doc.CreateElement(csXmlRoot);
+      Doc.DocumentElement := Root;
+
+      List.Sort;
       for I := 0 to List.Count - 1 do
       begin
-        Node := Doc.CreateElement(csXmlItem);
-        Writer.Write(List.Items[I], Node, False);
-        Root.AppendChild(Node);
+        // 为每个 Item 创建独立的 Writer 和临时文档
+        Writer := TCnXMLWriter.Create(nil);
+        try
+          Writer.WriteObjectToXML(List.Items[I]);
+
+          // 获取 Writer 生成的 XML 结构
+          TempDoc := Writer.Document;
+          if Assigned(TempDoc) and Assigned(TempDoc.DocumentElement) and
+             (TempDoc.DocumentElement.ChildCount > 0) then
+          begin
+            // 创建 Item 节点
+            Node := Doc.CreateElement(csXmlItem);
+
+            // 复制类节点的所有子节点到 Item 节点
+            SrcNode := TempDoc.DocumentElement.Children[0];
+            if SrcNode is TCnXMLElement then
+            begin
+              for J := 0 to TCnXMLElement(SrcNode).ChildCount - 1 do
+              begin
+                Node.AppendChild(TCnXMLElement(SrcNode).Children[J].CloneNode(True));
+              end;
+            end;
+
+            Root.AppendChild(Node);
+          end;
+        finally
+          Writer.Free;
+        end;
       end;
+
+      Doc.SaveToFile(FileName, True);
+      Result := True;
     finally
-      Writer.Free;
+      Doc.Free;
     end;
-    Doc.Save(FileName, ofIndent);
-    Result := True;
   except
     ;
   end;
@@ -901,30 +924,64 @@ end;
 
 function LoadListFromXMLFile(List: TCnSymbolList; const FileName: string): Boolean;
 var
-  Doc: IXMLDocument;
-  Root: IXMLElement;
+  Doc: TCnXMLDocument;
+  Root: TCnXMLElement;
   Item: TCnSymbolItem;
-  I, Idx: Integer;
-  Reader: TOmniXMLReaderHack;
+  I, J, Idx: Integer;
+  Reader: TCnXMLReader;
+  TempDoc: TCnXMLDocument;
+  TempRoot: TCnXMLElement;
+  ClassNode: TCnXMLElement;
+  ItemNode: TCnXMLNode;
 begin
   Result := False;
   if FileExists(FileName) then
   try
-    Doc := CreateXMLDoc;
-    Doc.Load(FileName);
-    Root := Doc.DocumentElement;
-    if not Assigned(Root) or not SameText(Root.NodeName, csXmlRoot) then
-      Exit;
-
-    Reader := TOmniXMLReaderHack.Create(pfNodes);
+    Doc := CnXMLCreateDocument;
     try
-      for I := 0 to Root.ChildNodes.Length - 1 do
+      Doc.LoadFromFile(FileName);
+      Root := Doc.DocumentElement;
+      if not Assigned(Root) or not SameText(Root.TagName, csXmlRoot) then
+        Exit;
+
+      for I := 0 to Root.ChildCount - 1 do
       begin
-        if SameText(Root.ChildNodes.Item[I].NodeName, csXmlItem) then
+        ItemNode := Root.Children[I];
+        if (ItemNode is TCnXMLElement) and
+           SameText(TCnXMLElement(ItemNode).TagName, csXmlItem) then
         begin
           Item := TCnSymbolItem.Create;
           try
-            Reader.Read(Item, Root.ChildNodes.Item[I] as IXmlElement);
+            // 为每个 Item 创建独立的 Reader 和临时文档
+            Reader := TCnXMLReader.Create(nil);
+            try
+              // 创建临时文档结构：Root -> TCnSymbolItem -> properties
+              TempDoc := CnXMLCreateDocument;
+              try
+                TempRoot := TempDoc.CreateElement('Root');
+                TempDoc.DocumentElement := TempRoot;
+
+                // 创建类名节点
+                ClassNode := TempDoc.CreateElement('TCnSymbolItem');
+
+                // 复制 Item 节点的所有子节点到类名节点
+                for J := 0 to TCnXMLElement(ItemNode).ChildCount - 1 do
+                begin
+                  ClassNode.AppendChild(TCnXMLElement(ItemNode).Children[J].CloneNode(True));
+                end;
+
+                TempRoot.AppendChild(ClassNode);
+
+                // 使用 Reader 读取
+                Reader.XMLString := TempDoc.SaveToString(True);
+                Reader.ReadObjectFromXML(Item);
+              finally
+                TempDoc.Free;
+              end;
+            finally
+              Reader.Free;
+            end;
+
             Item.MatchFirstOnly := Item.Kind in [skCompDirect, skComment];
             Idx := List.IndexOf(Item.Name, Item.Kind);
             if Idx < 0 then
@@ -939,10 +996,10 @@ begin
           end;
         end;
       end;
+      Result := True;
     finally
-      Reader.Free;
+      Doc.Free;
     end;
-    Result := List.Count > 0;
   except
     ;
   end;
