@@ -39,7 +39,7 @@ interface
 
 uses
   SysUtils, Classes, Windows, Forms, Graphics, TLHelp32, PsAPI,
-  OmniXML, OmniXMLPersistent, CnLangMgr, CnIniStrUtils, CnDebugIntf;
+  CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
 
 const
   CnMapSize = 1024 * 1204;
@@ -630,15 +630,33 @@ begin
 end;
 
 procedure LoadOptions(const FileName: string);
+var
+  Reader: TCnXMLReader;
 begin
   if FileExists(FileName) then
-    TOmniXMLReader.LoadFromFile(CnViewerOptions, FileName);
+  begin
+    Reader := TCnXMLReader.Create(nil);
+    try
+      Reader.LoadFromFile(FileName);
+      Reader.ReadObjectFromXML(CnViewerOptions);
+    finally
+      Reader.Free;
+    end;
+  end;
 end;
 
 procedure SaveOptions(const FileName: string);
+var
+  Writer: TCnXMLWriter;
 begin
   ForceDirectories(ExtractFileDir(FileName));
-  TOmniXMLWriter.SaveToFile(CnViewerOptions, FileName, pfAuto, ofIndent);
+  Writer := TCnXMLWriter.Create(nil);
+  try
+    Writer.WriteObjectToXML(CnViewerOptions);
+    Writer.SaveToFile(FileName);
+  finally
+    Writer.Free;
+  end;
 end;
 
 procedure UpdateFilterToMap;
