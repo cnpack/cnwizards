@@ -47,7 +47,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, StdCtrls, ComCtrls, Menus, ToolsApi, CnSpin, CnClasses,
   CnWizConsts, CnCommon, CnWizOptions, CnWizUtils, CnWizMacroText, CnWizMacroFrm,
-  CnWizShortCut, OmniXML, OmniXMLPersistent;
+  CnWizShortCut, CnXML;
 
 type
   TCnCodeWrapItem = class(TCnAssignableCollectionItem)
@@ -228,6 +228,7 @@ end;
 function TCnCodeWrapCollection.LoadFromFile(const FileName: string;
   Append: Boolean): Boolean;
 var
+  Reader: TCnXMLReader;
   Col: TCnCodeWrapCollection;
   I: Integer;
 begin
@@ -239,14 +240,20 @@ begin
     if not Append then
       Clear;
 
-    Col := TCnCodeWrapCollection.Create;
+    Reader := TCnXMLReader.Create(nil);
     try
-      TOmniXMLReader.LoadFromFile(Col, FileName);
-      for I := 0 to Col.Count - 1 do
-        Add.Assign(Col.Items[I]);
-      Result := True;
+      Reader.LoadFromFile(FileName);
+      Col := TCnCodeWrapCollection.Create;
+      try
+        Reader.ReadObjectFromXML(Col);
+        for I := 0 to Col.Count - 1 do
+          Add.Assign(Col.Items[I]);
+        Result := True;
+      finally
+        Col.Free;
+      end;
     finally
-      Col.Free;
+      Reader.Free;
     end;
   except
     ;
@@ -254,11 +261,19 @@ begin
 end;
 
 function TCnCodeWrapCollection.SaveToFile(const FileName: string): Boolean;
+var
+  Writer: TCnXMLWriter;
 begin
   Result := False;
   try
-    TOmniXMLWriter.SaveToFile(Self, FileName, pfAuto, ofIndent);
-    Result := True;
+    Writer := TCnXMLWriter.Create(nil);
+    try
+      Writer.WriteObjectToXML(Self);
+      Writer.SaveToFile(FileName);
+      Result := True;
+    finally
+      Writer.Free;
+    end;
   except
     ;
   end;

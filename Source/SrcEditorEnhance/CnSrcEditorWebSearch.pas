@@ -40,7 +40,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, StdCtrls, ComCtrls, Menus, ToolsAPI,
-  CnClasses, OmniXML, OmniXMLPersistent, CnCommon, CnWizUtils, CnWizConsts,
+  CnClasses, CnXML, CnCommon, CnWizUtils, CnWizConsts,
   CnWizShortCut, CnWizOptions, CnInetUtils;
 
 type
@@ -196,6 +196,7 @@ end;
 function TCnWebSearchCollection.LoadFromFile(const FileName: string; Append:
   Boolean): Boolean;
 var
+  Reader: TCnXMLReader;
   Col: TCnWebSearchCollection;
   I: Integer;
 begin
@@ -207,14 +208,20 @@ begin
     if not Append then
       Clear;
       
-    Col := TCnWebSearchCollection.Create;
+    Reader := TCnXMLReader.Create(nil);
     try
-      TOmniXMLReader.LoadFromFile(Col, FileName);
-      for I := 0 to Col.Count - 1 do
-        Add.Assign(Col.Items[I]);
-      Result := True;
+      Reader.LoadFromFile(FileName);
+      Col := TCnWebSearchCollection.Create;
+      try
+        Reader.ReadObjectFromXML(Col);
+        for I := 0 to Col.Count - 1 do
+          Add.Assign(Col.Items[I]);
+        Result := True;
+      finally
+        Col.Free;
+      end;
     finally
-      Col.Free;
+      Reader.Free;
     end;
   except
     ;
@@ -222,11 +229,19 @@ begin
 end;
 
 function TCnWebSearchCollection.SaveToFile(const FileName: string): Boolean;
+var
+  Writer: TCnXMLWriter;
 begin
   Result := False;
   try
-    TOmniXMLWriter.SaveToFile(Self, FileName, pfAuto, ofIndent);
-    Result := True;
+    Writer := TCnXMLWriter.Create(nil);
+    try
+      Writer.WriteObjectToXML(Self);
+      Writer.SaveToFile(FileName);
+      Result := True;
+    finally
+      Writer.Free;
+    end;
   except
     ;
   end;   

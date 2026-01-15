@@ -44,8 +44,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, StdCtrls, ComCtrls, Menus, ToolsApi, CnSpin, CnClasses,
-  CnWizConsts, CnCommon, CnWizOptions, CnWizUtils, CnWizShortCut, OmniXML,
-  OmniXMLPersistent, CnGroupReplace;
+  CnWizConsts, CnCommon, CnWizOptions, CnWizUtils, CnWizShortCut, CnXML,
+  CnGroupReplace;
 
 type
   TCnXMLGroupReplacements = class(TCnGroupReplacements)
@@ -168,7 +168,8 @@ const
 function TCnXMLGroupReplacements.LoadFromFile(const FileName: string;
   Append: Boolean): Boolean;
 var
-  Col: TCnXMLGroupReplacements;
+  Reader: TCnXMLReader;
+  Col: TCnGroupReplacements;
   I: Integer;
 begin
   Result := False;
@@ -179,14 +180,20 @@ begin
     if not Append then
       Clear;
       
-    Col := TCnXMLGroupReplacements.Create;
+    Reader := TCnXMLReader.Create(nil);
     try
-      TOmniXMLReader.LoadFromFile(Col, FileName);
-      for I := 0 to Col.Count - 1 do
-        Add.Assign(Col.Items[I]);
-      Result := True;
+      Reader.LoadFromFile(FileName);
+      Col := TCnGroupReplacements.Create;
+      try
+        Reader.ReadObjectFromXML(Col);
+        for I := 0 to Col.Count - 1 do
+          Add.Assign(Col.Items[I]);
+        Result := True;
+      finally
+        Col.Free;
+      end;
     finally
-      Col.Free;
+      Reader.Free;
     end;
   except
     ;
@@ -194,11 +201,29 @@ begin
 end;
 
 function TCnXMLGroupReplacements.SaveToFile(const FileName: string): Boolean;
+var
+  Writer: TCnXMLWriter;
+  Col: TCnGroupReplacements;
+  I: Integer;
 begin
   Result := False;
   try
-    TOmniXMLWriter.SaveToFile(Self, FileName, pfAuto, ofIndent);
-    Result := True;
+    Writer := TCnXMLWriter.Create(nil);
+    try
+      Col := TCnGroupReplacements.Create;
+      try
+        for I := 0 to Count - 1 do
+          Col.Add.Assign(Items[I]);
+
+        Writer.WriteObjectToXML(Col);
+      finally
+        Col.Free;
+      end;
+      Writer.SaveToFile(FileName);
+      Result := True;
+    finally
+      Writer.Free;
+    end;
   except
     ;
   end;
