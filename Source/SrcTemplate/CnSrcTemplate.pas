@@ -44,7 +44,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
-  OmniXML, OmniXMLPersistent, CnWizMultiLang, CnWizMacroUtils, CnWizClasses,
+  CnXML, CnWizMultiLang, CnWizMacroUtils, CnWizClasses,
   CnConsts, CnWizConsts, CnWizUtils, CnWizManager {$IFDEF FPC} , LCLProc {$ENDIF}
   {$IFDEF BDS}, CnEditControlWrapper {$ENDIF};
 
@@ -284,30 +284,47 @@ end;
 function TCnTemplateCollection.LoadFromFile(const FileName: string): Boolean;
 var
   I: Integer;
+  Reader: TCnXMLReader;
 begin
   Result := False;
   try
     if not FileExists(FileName) then
       Exit;
 
-    TOmniXMLReader.LoadFromFile(Self, FileName);
-    // 弥补 XML 读入字符串的时候 #13#10 变成 #10 的问题。LiuXiao
-    for I := 0 to Count - 1 do
-    begin
-      Items[I].Content := StringReplace(Items[I].Content, #10, #13#10, [rfReplaceAll]);
-      Items[I].Content := StringReplace(Items[I].Content, #13#13, #13, [rfReplaceAll]);
+    Reader := TCnXMLReader.Create(nil);
+    try
+      Reader.LoadFromFile(FileName);
+      Reader.ReadObjectFromXML(Self, 'TCnEditorCollection'); // 得指定个名字，历史原因
+
+      // 弥补 XML 读入字符串的时候 #13#10 变成 #10 的问题。LiuXiao
+      for I := 0 to Count - 1 do
+      begin
+        Items[I].Content := StringReplace(Items[I].Content, #10, #13#10, [rfReplaceAll]);
+        Items[I].Content := StringReplace(Items[I].Content, #13#13, #13, [rfReplaceAll]);
+      end;
+      Result := True;
+    finally
+      Reader.Free;
     end;
-    Result := True;
   except
     Result := False;
   end;
 end;
 
 function TCnTemplateCollection.SaveToFile(const FileName: string): Boolean;
+var
+  Writer: TCnXMLWriter;
 begin
   try
-    TOmniXMLWriter.SaveToFile(Self, FileName, pfAuto, ofIndent);
-    Result := True;
+    Writer := TCnXMLWriter.Create(nil);
+    try
+      Writer.UseDataNode := False;
+      Writer.WriteObjectToXML(Self, 'TCnEditorCollection');
+      Writer.SaveToFile(FileName);
+      Result := True;
+    finally
+      Writer.Free;
+    end;
   except
     Result := False;
   end;

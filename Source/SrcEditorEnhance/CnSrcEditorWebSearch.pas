@@ -236,6 +236,7 @@ begin
   try
     Writer := TCnXMLWriter.Create(nil);
     try
+      Writer.UseDataNode := False;
       Writer.WriteObjectToXML(Self);
       Writer.SaveToFile(FileName);
       Result := True;

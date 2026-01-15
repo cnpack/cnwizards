@@ -210,6 +210,7 @@ begin
   try
     Writer := TCnXMLWriter.Create(nil);
     try
+      Writer.UseDataNode := False;
       Col := TCnGroupReplacements.Create;
       try
         for I := 0 to Count - 1 do
