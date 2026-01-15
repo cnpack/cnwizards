@@ -39,7 +39,7 @@ interface
 
 uses
   Windows, Classes, Registry, IniFiles, ShellApi, SysUtils, FileCtrl,
-  CnCompressor, CnBHConst, CnCommon, tlhelp32, OmniXML;
+  CnCompressor, CnBHConst, CnCommon, tlhelp32, CnXML;
 
 type
   // AppBuilder 备份/恢复选项
@@ -402,15 +402,15 @@ var
   RepsPath, strIconFile, sExt: string;
   strSec, strUnit, strTempType, strTempName: string;
   SFO: SHFILEOPSTRUCT;
-  XMLDoc: IXMLDocument;
-  Root, Items: IXMLElement;
+  XMLDoc: TCnXMLDocument;
+  Root, Items: TCnXMLElement;
 begin
   // 存放对象库文件的临时目录
   RepsPath := _CnExtractFilePath(DroFile) + 'Reps\';
   if not DirectoryExists(RepsPath) then
     ForceDirectories(RepsPath);
 
-  // 将系统目录ObjRepos中所有文件拷贝到临时目录
+  // 将系统目录 ObjRepos 中所有文件拷贝到临时目录
   OutputLog(SCnBackuping + FAppName + ' ' + SCnObjRepUnit + SCnPleaseWait);
   ZeroMemory(@SFO, SizeOf(SFO));
   SFO.wFunc := FO_COPY;
@@ -424,134 +424,140 @@ begin
   if Ord(FAbiType) >= Ord(atBDS2005) then
   begin
     // 以 XML 格式处理 BorlandStudioRepository.xml
-    XMLDoc := CreateXMLDoc;
-    XMLDoc.preserveWhiteSpace := True;
-    XMLDoc.Load(DroFile);
+    XMLDoc := TCnXMLDocument.Create;
+    try
+      XMLDoc.PreserveWhitespace := True;
+      XMLDoc.LoadFromFile(DroFile);
 
-    Root := XMLDoc.documentElement;
-    Items := nil;
-    for I := 0 to Root.ChildNodes.Length - 1 do
-    begin
-      if Root.ChildNodes.Item[I].NodeName = 'Items' then
+      Root := XMLDoc.DocumentElement;
+      Items := nil;
+      for I := 0 to Root.ChildCount - 1 do
       begin
-        Items := Root.ChildNodes.Item[I] as IXMLElement;
-        Break;
-      end;
-    end;
-
-    if Items <> nil then
-    begin
-      for I := 0 to Items.ChildNodes.Length - 1 do
-      begin
-        if Items.ChildNodes.Item[I].NodeName = 'Item' then
+        if Root.Children[I].NodeName = 'Items' then
         begin
-          // 是某 Item
-          strSec := (Items.ChildNodes.Item[I] as IXMLElement).GetAttribute('IDString');
-          strIconFile := (Items.ChildNodes.Item[I] as IXMLElement).GetAttribute('Icon');
-          strUnit := Copy(strSec, LastDelimiter('\', strSec) + 1, Length(strSec));
-
-          for J := 0 to (Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Length - 1 do
-          begin
-            if (Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Item[J].NodeName = 'Type' then
-            begin
-              strTempType := ((Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Item[J] as IXMLElement).GetAttribute('Value');
-              Break;
-            end;
-          end;
-
-          if UpperCase(strTempType) = 'PROJECTTEMPLATE' then
-          begin
-            // strSec 采用的是相对路径，不能再 Pos(FRootDir + 'Objrepos', strSec) 比了。
-            if not DirectoryExists(FRootDir + 'Objrepos\' + strSec)
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.pas')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.dfm')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.xfm')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cpp')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.h')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cs') then
-            begin
-              // 不是在 ObjRepos 里头，复制
-              ZeroMemory(@SFO, SizeOf(SFO));
-              SFO.wFunc := FO_COPY;
-              SFO.pFrom := PChar(Copy(strSec, 1, LastDelimiter('\', strSec)) + '*.*' + #0 + #0);
-              SFO.pTo := PChar(RepsPath + strUnit + #0 + #0);
-              SFO.fFlags := FOF_NOCONFIRMATION or FOF_SILENT or FOF_NOCONFIRMMKDIR;
-              SHFileOperation(SFO);
-            end;
-
-            // strIconFile 采用的是绝对路径，可以如此比较
-            if (Pos(UpperCase(FRootDir + 'Objrepos'), UpperCase(strIconFile)) < 1) and FileExists(strIconFile) then
-            begin
-              CopyFile(PChar(strIconFile), PChar(RepsPath
-               + strUnit + '\' + strUnit + '.ico'), False);
-              (Items.ChildNodes.Item[I] as IXMLElement).SetAttribute('Icon',
-               '$(MYROOTDIR)\Objrepos\' + strUnit + '\' + strUnit + '.ico');
-            end;
-            (Items.ChildNodes.Item[I] as IXMLElement).SetAttribute('IDString', '$(MYROOTDIR)\Objrepos\' + strUnit);
-          end
-          else // FormTemplate
-          begin
-            // 不在系统缺省目录下的对象库文件
-            // strSec 采用的是相对路径，不能再 Pos(FRootDir + 'Objrepos', strSec) 比了。
-            if not DirectoryExists(FRootDir + 'Objrepos\' + strSec)
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.pas')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.dfm')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.xfm')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cpp')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.h')
-              and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cs') then
-            begin
-              // .cpp 文件
-              CopyFile(PChar(strSec + '.cpp'), PChar(RepsPath + strUnit + '.cpp'), False);
-              // .h 文件
-              CopyFile(PChar(strSec + '.h'), PChar(RepsPath + strUnit + '.h'), False);
-              // .dfm/.xfm 文件
-              sExt := '';
-              for J := 0 to (Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Length - 1 do
-                if (Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Item[J].NodeName = 'Designer' then
-                begin
-                  sExt := ((Items.ChildNodes.Item[I] as IXMLElement).ChildNodes.Item[J] as IXMLElement).GetAttribute('Value');
-                  Break;
-                end;
-
-              if UpperCase(sExt) = 'ANY' then
-              begin
-                CopyFile(PChar(strSec + '.dfm'), PChar(RepsPath + strUnit + '.dfm'), False);
-                CopyFile(PChar(strSec + '.xfm'), PChar(RepsPath + strUnit + '.xfm'), False);
-              end
-              else
-                CopyFile(PChar(strSec + '.' + sExt), PChar(RepsPath + strUnit + '.' + sExt), False);
-              // .pas 文件
-              CopyFile(PChar(strSec + '.pas'),
-                  PChar(RepsPath + strUnit + '.pas'), False);
-              // .ico 文件
-              if FileExists(strIconFile) then
-              begin
-                CopyFile(PChar(strIconFile), PChar(RepsPath
-                    + strUnit + '.ico'), False);
-                (Items.ChildNodes.Item[I] as IXMLElement).SetAttribute('Icon',
-                  '$(MYROOTDIR)\Objrepos\' + strUnit + '.ico');
-              end;
-
-              (Items.ChildNodes.Item[I] as IXMLElement).SetAttribute('IDString', '$(MYROOTDIR)\Objrepos\' + strUnit);
-            end;
-          end;
-          OutputLog(SCnAnalyzing + SCnObjRepUnit + ': ' + strTempName, 1);
+          Items := Root.Children[I] as TCnXMLElement;
+          Break;
         end;
       end;
-      XMLDoc.Save(DroFile);
+
+      if Items <> nil then
+      begin
+        for I := 0 to Items.ChildCount - 1 do
+        begin
+          if Items.Children[I].NodeName = 'Item' then
+          begin
+            // 是某 Item
+            strSec := (Items.Children[I] as TCnXMLElement).GetAttribute('IDString');
+            strIconFile := (Items.Children[I] as TCnXMLElement).GetAttribute('Icon');
+            strUnit := Copy(strSec, LastDelimiter('\', strSec) + 1, Length(strSec));
+
+            for J := 0 to (Items.Children[I] as TCnXMLElement).ChildCount - 1 do
+            begin
+              if (Items.Children[I] as TCnXMLElement).Children[J].NodeName = 'Type' then
+              begin
+                strTempType := ((Items.Children[I] as TCnXMLElement).Children[J] as TCnXMLElement).GetAttribute('Value');
+              Break;
+              end;
+            end;
+
+            if UpperCase(strTempType) = 'PROJECTTEMPLATE' then
+            begin
+              // strSec 采用的是相对路径，不能再 Pos(FRootDir + 'Objrepos', strSec) 比了。
+              if not DirectoryExists(FRootDir + 'Objrepos\' + strSec)
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.pas')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.dfm')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.xfm')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cpp')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.h')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cs') then
+              begin
+                // 不是在 ObjRepos 里头，复制
+                ZeroMemory(@SFO, SizeOf(SFO));
+                SFO.wFunc := FO_COPY;
+                SFO.pFrom := PChar(Copy(strSec, 1, LastDelimiter('\', strSec)) + '*.*' + #0 + #0);
+                SFO.pTo := PChar(RepsPath + strUnit + #0 + #0);
+                SFO.fFlags := FOF_NOCONFIRMATION or FOF_SILENT or FOF_NOCONFIRMMKDIR;
+                SHFileOperation(SFO);
+              end;
+
+              // strIconFile 采用的是绝对路径，可以如此比较
+              if (Pos(UpperCase(FRootDir + 'Objrepos'), UpperCase(strIconFile)) < 1) and FileExists(strIconFile) then
+              begin
+                CopyFile(PChar(strIconFile), PChar(RepsPath
+                 + strUnit + '\' + strUnit + '.ico'), False);
+                (Items.Children[I] as TCnXMLElement).SetAttribute('Icon',
+                 '$(MYROOTDIR)\Objrepos\' + strUnit + '\' + strUnit + '.ico');
+              end;
+              (Items.Children[I] as TCnXMLElement).SetAttribute('IDString', '$(MYROOTDIR)\Objrepos\' + strUnit);
+            end
+            else // FormTemplate
+            begin
+              // 不在系统缺省目录下的对象库文件
+              // strSec 采用的是相对路径，不能再 Pos(FRootDir + 'Objrepos', strSec) 比了。
+              if not DirectoryExists(FRootDir + 'Objrepos\' + strSec)
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.pas')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.dfm')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.xfm')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cpp')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.h')
+                and not FileExists(FRootDir + 'Objrepos\' + strSec + '.cs') then
+              begin
+                // .cpp 文件
+                CopyFile(PChar(strSec + '.cpp'), PChar(RepsPath + strUnit + '.cpp'), False);
+                // .h 文件
+                CopyFile(PChar(strSec + '.h'), PChar(RepsPath + strUnit + '.h'), False);
+                // .dfm/.xfm 文件
+                sExt := '';
+                for J := 0 to (Items.Children[I] as TCnXMLElement).ChildCount - 1 do
+                begin
+                  if (Items.Children[I] as TCnXMLElement).Children[J].NodeName = 'Designer' then
+                  begin
+                    sExt := ((Items.Children[I] as TCnXMLElement).Children[J] as TCnXMLElement).GetAttribute('Value');
+                    Break;
+                  end;
+                end;
+
+                if UpperCase(sExt) = 'ANY' then
+                begin
+                  CopyFile(PChar(strSec + '.dfm'), PChar(RepsPath + strUnit + '.dfm'), False);
+                  CopyFile(PChar(strSec + '.xfm'), PChar(RepsPath + strUnit + '.xfm'), False);
+                end
+                else
+                  CopyFile(PChar(strSec + '.' + sExt), PChar(RepsPath + strUnit + '.' + sExt), False);
+                // .pas 文件
+                CopyFile(PChar(strSec + '.pas'),
+                    PChar(RepsPath + strUnit + '.pas'), False);
+                // .ico 文件
+                if FileExists(strIconFile) then
+                begin
+                  CopyFile(PChar(strIconFile), PChar(RepsPath
+                      + strUnit + '.ico'), False);
+                  (Items.Children[I] as TCnXMLElement).SetAttribute('Icon',
+                    '$(MYROOTDIR)\Objrepos\' + strUnit + '.ico');
+                end;
+
+                (Items.Children[I] as TCnXMLElement).SetAttribute('IDString', '$(MYROOTDIR)\Objrepos\' + strUnit);
+              end;
+            end;
+            OutputLog(SCnAnalyzing + SCnObjRepUnit + ': ' + strTempName, 1);
+          end;
+        end;
+        XMLDoc.SaveToFile(DroFile, True);
+      end;
+    finally
+      XMLDoc.Free;
     end;
   end
   else
   begin
     // 以下是对 D567/BCB56 的处理
     SecList := TStringList.Create;
-    // 先将Dro文件中的[]替换掉，否则会影响TIniFile类
+    // 先将 Dro 文件中的 [] 替换掉，否则会影响 TIniFile 类
     SecList.LoadFromFile(DroFile);
     SecList.Text := StringReplaceNonAnsi(SecList.Text, '[]', '[$(MYBLANK)]', [rfReplaceAll]);
     SecList.SaveToFile(DroFile);
 
-    // 替换完毕，以Ini格式处理
+    // 替换完毕，以 Ini 格式处理
     Ini := TIniFile.Create(DroFile);
     SecList := TStringList.Create;
     Ini.ReadSections(SecList);
@@ -645,7 +651,7 @@ begin
           end; // end of Pos(UpperCase(FRootDir + 'Objrepos')...
           OutputLog(SCnAnalyzing + SCnObjRepUnit + ': ' + strTempName, 1);
         end; // end of if UpperCase(strType) = 'PROJECTTEMPLATE'
-      end; // end of for
+      end;
     finally
       FreeAndNil(Ini);
       FreeAndNil(SecList);
