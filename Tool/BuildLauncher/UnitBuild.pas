@@ -37,7 +37,7 @@ implementation
 {$R *.dfm}
 
 uses
-  OmniXML, CnCommon;
+  CnXML, CnCommon;
 
 const
   SXProject = 'project';
@@ -67,49 +67,59 @@ end;
 
 procedure TAppBuillder.LoadXML(const FileName: string);
 var
-  XMLDoc: IXMLDocument;
-  Root: IXMLElement;
-  Item: IXMLNode;
+  XMLDoc: TCnXMLDocument;
+  Root: TCnXMLElement;
+  Item: TCnXMLNode;
   Def, Name, Disc: string;
   I: Integer;
 begin
   lvTargets.Items.Clear;
 
-  XMLDoc := CreateXMLDoc;
-  if XMLDoc.Load(FileName) and Assigned(XMLDoc.DocumentElement) and
-    SameText(XMLDoc.DocumentElement.NodeName, SXProject) then
-  begin
-    Root := XMLDoc.DocumentElement;
-    if Assigned(Root.Attributes.GetNamedItem(SXDefault)) then
-      Def := Root.Attributes.GetNamedItem(SXDefault).NodeValue
-    else
-      Def := '';
-    for I := 0 to Root.ChildNodes.Length - 1 do
-    begin
-      Item := Root.ChildNodes.Item[I];
-      if SameText(Item.NodeName, SXTarget) then
-      begin
-        Name := Item.Attributes.GetNamedItem(SXName).NodeValue;
+  XMLDoc := TCnXMLDocument.Create;
+  try
+    XMLDoc.LoadFromFile(FileName);
 
-        if (Name <> '') and (Name[1] <> '-') then
+    if Assigned(XMLDoc.DocumentElement) and
+       SameText(XMLDoc.DocumentElement.NodeName, SXProject) then
+    begin
+      Root := XMLDoc.DocumentElement;
+
+      // Get default attribute
+      Def := Root.GetAttribute(SXDefault);
+
+      // Iterate child nodes
+      for I := 0 to Root.ChildCount - 1 do
+      begin
+        Item := Root.Children[I];
+        if SameText(Item.NodeName, SXTarget) then
         begin
-          if Assigned(Item.Attributes.GetNamedItem(SXDescription)) then
-            Disc := Item.Attributes.GetNamedItem(SXDescription).NodeValue
-          else
-            Disc := '';
-          with lvTargets.Items.Add do
+          // Get name attribute
+          if Item is TCnXMLElement then
           begin
-            Caption := Name;
-            SubItems.Add(Disc);
-            if CompareStr(Def, Name) = 0 then
+            Name := TCnXMLElement(Item).GetAttribute(SXName);
+
+            if (Name <> '') and (Name[1] <> '-') then
             begin
-              lvTargets.Selected := lvTargets.Items[Index];
-              lvTargets.ItemFocused := lvTargets.Selected;
+              // Get description attribute
+              Disc := TCnXMLElement(Item).GetAttribute(SXDescription);
+
+              with lvTargets.Items.Add do
+              begin
+                Caption := Name;
+                SubItems.Add(Disc);
+                if CompareStr(Def, Name) = 0 then
+                begin
+                  lvTargets.Selected := lvTargets.Items[Index];
+                  lvTargets.ItemFocused := lvTargets.Selected;
+                end;
+              end;
             end;
           end;
-        end;            
+        end;
       end;
     end;
+  finally
+    XMLDoc.Free;
   end;
 end;
 
