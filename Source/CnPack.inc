@@ -44,6 +44,14 @@
   {$DEFINE TBYTES_DEFINED}
   {$DEFINE NO_OLDCREATEORDER}
 
+  {$IFDEF DARWIN}
+    {$DEFINE FPC_MACOS}                        // FPC 在 MACOS 下的编译条件
+  {$ENDIF}
+
+  {$IFDEF MSWINDOWS}
+    {$DEFINE FPC_WINDOWS}                      // FPC 在 Windows 下的编译条件
+  {$ENDIF}
+
   // 以下是 CPU 定义从 FPC 映射到 Delphi
   {$IFDEF CPU386}     // Intel 32 CPU
     {$DEFINE CPU32BITS}
