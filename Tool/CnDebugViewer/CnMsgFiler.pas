@@ -44,8 +44,7 @@ uses
 {$IFDEF COMPILER6_UP}
   Variants,
 {$ENDIF}
-  CnMsgClasses, CnJSON,
-  CnXML;
+  CnMsgClasses, CnJSON, CnXML;
 
 type
   TCnMsgXMLFiler = class(TInterfacedObject, ICnMsgFiler)
@@ -85,6 +84,13 @@ type
   end;
 
 implementation
+
+resourcestring
+  SCnErrorErrorInDatetimePropertyFmt = 'Error in Datetime Property %s';
+  SCnErrorInvalidIntegerValueFmt = 'Invalid Integer Value (%s).';
+  SCnErrorInvalidBooleanValueFmt = 'Invalid Boolean Value (%s).';
+  SCnErrorInvalidEnumValueFmt = 'Invalid Enum Value (%s).';
+  SCnErrorInvalidInt64ValueFmt = 'Invalid Int64 Value (%s).';
 
 const
   CNMSG_NODENAME = 'CnMsgs';
@@ -276,7 +282,7 @@ var
       if CnXMLStrToDateTime(Text, Value) then
         SetFloatProp(Instance, PropInfo, Value)
       else
-        raise ECnXMLPersistent.CreateFmt('Error in datetime property %s', [PPropInfo(PropInfo)^.Name]);
+        raise ECnXMLException.CreateFmt(SCnErrorErrorInDatetimePropertyFmt, [PPropInfo(PropInfo)^.Name]);
     end
     else
       SetFloatProp(Instance, PropInfo, 0);
@@ -306,7 +312,7 @@ var
           if CnXMLStrToInt(Value, IntValue) then
             SetOrdProp(Instance, PropInfo, CnXMLStrToIntDef(Value, 0))
           else
-            raise ECnXMLPersistent.CreateFmt('Invalid integer value (%s).', [Value]);
+            raise ECnXMLException.CreateFmt(SCnErrorInvalidIntegerValueFmt, [Value]);
         tkChar: SetOrdProp(Instance, PropInfo, Ord(Value[1]));
         tkSet: SetSetProp(Instance, PropInfo, Value);
         tkEnumeration:
@@ -315,13 +321,13 @@ var
               if CnXMLStrToBool(Value, BoolValue) then
                 SetOrdProp(Instance, PropInfo, Ord(BoolValue))
               else
-                raise ECnXMLPersistent.CreateFmt('Invalid boolean value (%s).', [Value]);
+                raise ECnXMLException.CreateFmt(SCnErrorInvalidBooleanValueFmt, [Value]);
             end
             else if PropType^.Kind = tkInteger then begin
               if CnXMLStrToInt(Value, IntValue) then
                 SetOrdProp(Instance, PropInfo, IntValue)
               else
-                raise ECnXMLPersistent.CreateFmt('Invalid enum value (%s).', [Value]);
+                raise ECnXMLException.CreateFmt(SCnErrorInvalidEnumValueFmt, [Value]);
             end
             // 2003-05-27 (mr): added tkEnumeration processing
             else if PropType^.Kind = tkEnumeration then
@@ -348,7 +354,7 @@ var
       if CnXMLStrToInt64(Value, IntValue) then
         SetInt64Prop(Instance, PropInfo, IntValue)
       else
-        raise ECnXMLPersistent.CreateFmt('Invalid int64 value (%s).', [Value]);
+        raise ECnXMLException.CreateFmt(SCnErrorInvalidInt64ValueFmt, [Value]);
     end
     else
       SetFloatProp(Instance, PropInfo, 0)
