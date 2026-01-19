@@ -1003,7 +1003,7 @@ begin
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
   // 脚本菜单
   SW := CnWizardMgr.WizardByClassName('TCnScriptWizard') as TCnScriptWizard;
-  if SW <> nil then
+  if (SW <> nil) and SW.Active then
   begin
     FScriptMenu := AddMenuItem(Items, SCnScriptWizardMenuCaption, nil);
     for I := 0 to SW.Scripts.Count - 1 do
@@ -1026,7 +1026,7 @@ begin
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
   // AI 辅助编程菜单
   AW := CnWizardMgr.WizardByClassName('TCnAICoderWizard') as TCnAICoderWizard;
-  if AW <> nil then
+  if (AW <> nil) and AW.Active then
   begin
     FAICoderMenu := AddMenuItem(Items, SCnAICoderWizardMenuCaption, nil);
     AddMenuItemWithAction(FAICoderMenu, 'actCnAICoderWizardExplainCode', btAICoderExplainCode);
