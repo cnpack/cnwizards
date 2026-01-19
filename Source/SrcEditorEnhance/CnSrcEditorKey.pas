@@ -3428,21 +3428,26 @@ procedure TCnSrcEditorKey.EditControlSysKeyDown(Key, ScanCode: Word;
   Shift: TShiftState; var Handled: Boolean);
 var
   Nav: TCnSrcEditorNav;
+  B: Boolean;
 begin
   if Active and (FNavMgrRef <> nil) and FNavMgrRef.Active and (CnOtaGetTopMostEditView <> nil)
-    and ((Key = VK_LEFT) or (Key = VK_RIGHT)) then
+    and (Shift = []) and ((Key = VK_LEFT) or (Key = VK_RIGHT)) then // Alt won't in Shift
   begin
     Nav := FNavMgrRef.GetMainNavigatorOrFromEditControl(GetCurrentEditControl);
     if Nav <> nil then
     begin
       Nav.AllowAlt := True;
-      if Key = VK_LEFT then
-        Nav.BackAction.Execute
-      else
-        Nav.ForwardAction.Execute;
-      Nav.AllowAlt := False;
+      try
+        if Key = VK_LEFT then
+          B := Nav.BackAction.Execute
+        else
+          B := Nav.ForwardAction.Execute;
+      finally
+        Nav.AllowAlt := False;
+      end;
 
-      Handled := True;
+      if B then
+        Handled := True;
     end;
   end;
 end;
