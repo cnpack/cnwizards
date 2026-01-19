@@ -421,12 +421,12 @@ begin
   end;
   if (Trim(CnAIEngineManager.CurrentEngine.Option.URL) = '') then
   begin
-    ErrorDlg(Format(SCnAICoderWizardErrorURLFmt, [CnAIEngineManager.CurrentEngine.EngineName]));
+    ErrorDlg(Format(SCnAICoderWizardErrorURLFmt, [CnAIEngineManager.CurrentEngine.EngineDisplayName]));
     Exit;
   end;
   if CnAIEngineManager.CurrentEngine.NeedApiKey and (Trim(CnAIEngineManager.CurrentEngine.Option.ApiKey) = '') then
   begin
-    ErrorDlg(Format(SCnAICoderWizardErrorAPIKeyFmt, [CnAIEngineManager.CurrentEngine.EngineName]));
+    ErrorDlg(Format(SCnAICoderWizardErrorAPIKeyFmt, [CnAIEngineManager.CurrentEngine.EngineDisplayName]));
     Exit;
   end;
 
@@ -437,6 +437,7 @@ procedure TCnAICoderConfigForm.LoadFromOptions;
 var
   I, J, C: Integer;
   SL: TStringList;
+  S: string;
   Eng: TCnAIBaseEngine;
 begin
   chkProxy.Checked := CnAIEngineOptionManager.UseProxy;
@@ -444,7 +445,7 @@ begin
 
   cbbActiveEngine.Items.Clear;
   for I := 0 to CnAIEngineManager.EngineCount - 1 do
-    cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineName);
+    cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineDisplayName);
 
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
 
@@ -465,11 +466,15 @@ begin
 
       // 给每个 Options 创建一个 Tab
       FTabsheets[I] := TTabSheet.Create(pgcAI);
+      S := CnAIEngineOptionManager.Options[I].EngineName;
+      if (Eng.EngineDisplayName <> '') and (S <> '') and
+        (S <> Eng.EngineDisplayName) then
+        S := Eng.EngineDisplayName;
+
       if I < 10 then
-        FTabsheets[I].Caption := Format('&%d. ', [I]) + CnAIEngineOptionManager.Options[I].EngineName
+        FTabsheets[I].Caption := Format('&%d. ', [I]) + S
       else
-        FTabsheets[I].Caption := Format('&%s. ', [Chr(Ord('A') + I - 10)])
-        + CnAIEngineOptionManager.Options[I].EngineName;
+        FTabsheets[I].Caption := Format('&%s. ', [Chr(Ord('A') + I - 10)]) + S;
       FTabsheets[I].PageControl := pgcAI;
 
       // 给每个 Tab 里塞一个 Frame

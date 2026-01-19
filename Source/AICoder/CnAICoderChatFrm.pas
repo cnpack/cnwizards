@@ -197,7 +197,7 @@ begin
 
   cbbActiveEngine.Items.Clear;
   for I := 0 to CnAIEngineManager.EngineCount - 1 do
-    cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineName);
+    cbbActiveEngine.Items.Add(CnAIEngineManager.Engines[I].EngineDisplayName);
 
   cbbActiveEngine.ItemIndex := CnAIEngineManager.CurrentIndex;
   BuildFavoriteMenu;
@@ -255,13 +255,13 @@ begin
 
       // 发出的消息
       Msg := FChatBox.Items.AddMessage;
-      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
+      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineDisplayName);
       Msg.Text := mmoSelf.Lines.Text;
       Msg.FromType := cmtMe;
 
       // 回来的消息
       Msg := FChatBox.Items.AddMessage;
-      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineName);
+      Msg.From := UIStringToNativeString(CnAIEngineManager.CurrentEngineDisplayName);
       Msg.FromType := cmtYou;
       Msg.Text := '...';
 
@@ -312,7 +312,7 @@ begin
   if I > 0 then
     Delete(S, I, MaxInt);
 
-  Caption := S + SEP + CnAIEngineManager.CurrentEngineName;
+  Caption := S + SEP + CnAIEngineManager.CurrentEngineDisplayName;
 end;
 
 procedure TCnAICoderChatForm.OnEditorChange(Editor: TCnEditorObject;
@@ -412,10 +412,19 @@ begin
 end;
 
 procedure TCnAICoderChatForm.cbbActiveEngineChange(Sender: TObject);
+var
+  I: Integer;
 begin
-  CnAIEngineOptionManager.ActiveEngine := cbbActiveEngine.Text;
-  CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
-  UpdateCaption;
+  for I := 0 to CnAIEngineManager.EngineCount - 1 do
+  begin
+    if cbbActiveEngine.Text = CnAIEngineManager.Engines[I].EngineDisplayName then // 要用 DisplayName 比较
+    begin
+      CnAIEngineOptionManager.ActiveEngine := CnAIEngineManager.Engines[I].EngineName;
+      CnAIEngineManager.CurrentEngineName := CnAIEngineOptionManager.ActiveEngine;
+      UpdateCaption;
+      Exit;
+    end;
+  end;
 end;
 
 class function TCnAICoderChatForm.ExtractCode(Item: TCnChatMessage): string;

@@ -138,6 +138,8 @@ type
   public
     class function EngineName: string; virtual;
     {* 子类必须有个名字}
+    class function EngineDisplayName: string; virtual;
+    {* 子类用来显示的名字，默认内部使用 EngineName}
     class function EngineID: string;
     {* 引擎的 ID，供存储保存用，根据类名运算而来}
     class function OptionClass: TCnAIEngineOptionClass; virtual;
@@ -185,6 +187,7 @@ type
     procedure SetCurrentIndex(const Value: Integer);
     function GetCurrentEngineName: string;
     procedure SetCurrentEngineName(const Value: string);
+    function GetCurrentEngineDisplayName: string;
   protected
     procedure ProcessRequest(Sender: TCnThreadPool;
       DataObj: TCnTaskDataObject; Thread: TCnPoolingThread);
@@ -213,6 +216,8 @@ type
     property CurrentEngineName: string read GetCurrentEngineName write SetCurrentEngineName;
     {* 获得及设置当前引擎名称，前者从当前引擎中取，后者会切换引擎。
        注意在 FPC 下，该字符串编码是 Utf8}
+    property CurrentEngineDisplayName: string read GetCurrentEngineDisplayName;
+    {* 获得当前引擎的显示名称}
     property CurrentIndex: Integer read FCurrentIndex write SetCurrentIndex;
     {* 当前活动引擎的索引号，供外界切换设置}
     property CurrentEngine: TCnAIBaseEngine read GetCurrentEngine;
@@ -338,6 +343,11 @@ end;
 function TCnAIEngineManager.GetCurrentEngineName: string;
 begin
   Result := CurrentEngine.EngineName;
+end;
+
+function TCnAIEngineManager.GetCurrentEngineDisplayName: string;
+begin
+  Result := CurrentEngine.EngineDisplayName;
 end;
 
 function TCnAIEngineManager.GetEnginCount: Integer;
@@ -1049,6 +1059,11 @@ end;
 class function TCnAIBaseEngine.EngineName: string;
 begin
   Result := '<NoName>';
+end;
+
+class function TCnAIBaseEngine.EngineDisplayName: string;
+begin
+  Result := EngineName;
 end;
 
 function TCnAIBaseEngine.GetRequestURL(DataObj: TCnAINetRequestDataObject): string;

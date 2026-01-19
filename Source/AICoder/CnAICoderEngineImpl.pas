@@ -101,6 +101,7 @@ type
   {* 月之暗面 AI 引擎}
   public
     class function EngineName: string; override;
+    class function EngineDisplayName: string; override;
   end;
 
   TCnChatGLMAIEngine = class(TCnAIBaseEngine)
@@ -222,6 +223,11 @@ begin
 end;
 
 { TCnMoonshotAIEngine }
+
+class function TCnMoonshotAIEngine.EngineDisplayName: string;
+begin
+  Result := 'Kimi'; // Kimi 这个词知名度更高一点
+end;
 
 class function TCnMoonshotAIEngine.EngineName: string;
 begin
