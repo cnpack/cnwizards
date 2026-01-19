@@ -155,11 +155,7 @@ begin
   PropNode := FindElement(Root, Name);
   Result := PropNode <> nil;
   if Result then
-  begin
     Value := PropNode.Text;
-    // 把 OmniXML 读入的 #10 换行转化成 #13#10 以修正载入后不换行的问题
-    Value := StringReplace(Value, #10, #13#10, [rfReplaceAll]);
-  end;
 end;
 
 procedure TCnMsgXMLFiler.InternalWriteText(Root: TCnXMLElement; Name,
@@ -239,7 +235,8 @@ var
   PropInfo: PPropInfo;
 begin
   PropCount := GetTypeData(Instance.ClassInfo)^.PropCount;
-  if PropCount > 0 then begin
+  if PropCount > 0 then
+  begin
     GetMem(PropList, PropCount * SizeOf(Pointer));
     try
       GetPropInfos(Instance.ClassInfo, PropList);
@@ -286,7 +283,6 @@ var
     end
     else
       SetFloatProp(Instance, PropInfo, 0);
-      // raise EOmniXMLPersistent.CreateFmt('Missing datetime property %s', [PPropInfo(PropInfo)^.Name]);
   end;
 
   procedure ReadStrProp;
@@ -317,13 +313,15 @@ var
         tkSet: SetSetProp(Instance, PropInfo, Value);
         tkEnumeration:
           begin
-            if PropType = System.TypeInfo(Boolean) then begin
+            if PropType = System.TypeInfo(Boolean) then
+            begin
               if CnXMLStrToBool(Value, BoolValue) then
                 SetOrdProp(Instance, PropInfo, Ord(BoolValue))
               else
                 raise ECnXMLException.CreateFmt(SCnErrorInvalidBooleanValueFmt, [Value]);
             end
-            else if PropType^.Kind = tkInteger then begin
+            else if PropType^.Kind = tkInteger then
+            begin
               if CnXMLStrToInt(Value, IntValue) then
                 SetOrdProp(Instance, PropInfo, IntValue)
               else
@@ -478,7 +476,8 @@ var
     Value: Longint;
   begin
     Value := GetOrdProp(Instance, PropInfo);
-    if Value <> PPropInfo(PropInfo)^.Default then begin
+    if Value <> PPropInfo(PropInfo)^.Default then
+    begin
       case PropType^.Kind of
         tkInteger: InternalWriteText(Element, PPropInfo(PropInfo)^.Name, CnXMLIntToStr(Value));
         tkChar: InternalWriteText(Element, PPropInfo(PropInfo)^.Name, Chr(Value));
