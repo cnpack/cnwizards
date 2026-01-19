@@ -424,7 +424,7 @@ resourcestring
 
   // Source Highlight Event used to show Identifiers Positions
   EVENT_HIGHLIGHT_IDENT_POSITION = 'HighlightIdentPosition';
-  // CnWizards Setting Changed Event used to Update float buttons
+  // CnWizards Setting Changed Event used to Update Float Buttons
   EVENT_CNWIZARDS_SETTING_CHANGED = 'CnWizardsSettingChanged';
   // Input Helper ShortCut Changed Event used to Avoid Conflict Popup
   EVENT_INPUTHELPER_POPUP_SHORTCUT_CHANGED = 'InputHeperPopupShortcutChanged';
