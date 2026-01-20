@@ -272,7 +272,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  CnSM4, CnAEAD, CnStrings {$IFNDEF TEST_APP}, CnWizUtils {$ENDIF};
+  CnSM4, CnAEAD, CnStrings, CnWizUtils;
 
 var
   FAIEngineOptionManager: TCnAIEngineOptionManager = nil;
