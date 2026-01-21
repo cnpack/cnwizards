@@ -293,8 +293,21 @@ begin
 
     Reader := TCnXMLReader.Create(nil);
     try
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnTemplateCollection.LoadFromFile ' + FileName);
+{$ENDIF}
       Reader.LoadFromFile(FileName);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnTemplateCollection.ReadObjectFromXML 1st');
+{$ENDIF}
       Reader.ReadObjectFromXML(Self, 'TCnEditorCollection'); // 得指定个名字，历史原因
+      if Count = 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnTemplateCollection.ReadObjectFromXML 2nd');
+{$ENDIF}
+        Reader.ReadObjectFromXML(Self);
+      end;
 
       // 弥补 XML 读入字符串的时候 #13#10 变成 #10 的问题。LiuXiao
       for I := 0 to Count - 1 do
