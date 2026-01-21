@@ -42,7 +42,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ImgList, Menus, StdCtrls, ExtCtrls, ComCtrls, FileCtrl, ToolWin, IniFiles,
-  CnCheckTreeView, OmniXML, CnIni, CnCommon, CnConsts, CnWizConsts,
+  CnCheckTreeView, CnXML, CnIni, CnCommon, CnConsts, CnWizConsts,
   CnWizMultiLang, CnWizOptions, CnTree, CnTreeXMLFiler, CnPopupMenu;
 
 const
@@ -582,7 +582,7 @@ end;
 procedure TCnProjectDirBuilderForm.LoadTreeFromFile;
 var
   Filer: ICnTreeFiler;
-  XMLDoc: IXMLDocument;
+  XMLDoc: TCnXMLDocument;
   Leaf: TCnDirLeaf;
   Path: string;
 begin
@@ -596,15 +596,17 @@ begin
 
     if FileExists(FUserFilePath) then
       LoadFromFile(Filer, FUserFilePath)
-    else
-    if FileExists(FDataFilePath) then
+    else if FileExists(FDataFilePath) then
       LoadFromFile(Filer, FDataFilePath)
     else
     begin
-      XMLDoc := CreateXMLDoc;
-      XMLDoc.Save(FDataFilePath);
-      XMLDoc := nil;
-      LoadFromFile(Filer, FDataFilePath)
+      XMLDoc := TCnXMLDocument.Create;
+      try
+        XMLDoc.SaveToFile(FDataFilePath, True);
+      finally
+        XMLDoc.Free;
+      end;
+      LoadFromFile(Filer, FDataFilePath);
     end;
   end;
 
