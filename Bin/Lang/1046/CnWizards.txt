@@ -3638,7 +3638,7 @@ SCnDebugErrorProcessNotAccessible=Proceso NO Accessible
 SCnDebugErrorValueNotAccessible=Valor NO Accessible
 SCnDebugErrorOutOfScope=Fuera de Alcance
 SCnDebugAddReplacerCaption=Ingresar un Sustituto
-SCnDebugAddReplacerHint=Nombre de Clase=Expresión con %s
+SCnDebugAddReplacerHint=Nombre de Clase=Expresión con (%s)
 SCnDebugRemoveReplacerHint=¿Seguro de Borrar la Pista Seleccionada?
 SCnDebugErrorReplacerFormat=Formato de Pista de Sustituto Inválido
 SCnDebugErrorExprNotAClass=%s Error o NO %s

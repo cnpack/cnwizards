@@ -1392,7 +1392,7 @@ var
   SCnDebugErrorValueNotAccessible: string = 'Value NOT Accessible';
   SCnDebugErrorOutOfScope: string = 'Out of Scope';
   SCnDebugAddReplacerCaption: string = 'Enter a Replacer';
-  SCnDebugAddReplacerHint: string = 'ClassName=Expression with %s';
+  SCnDebugAddReplacerHint: string = 'ClassName=Expression with (%s)';
   SCnDebugRemoveReplacerHint: string = 'Sure to Delete Selected Hint?';
   SCnDebugErrorReplacerFormat: string = 'Invalid Replacer Hint Format';
   SCnDebugErrorExprNotAClass: string = '%s Error or NOT %s';

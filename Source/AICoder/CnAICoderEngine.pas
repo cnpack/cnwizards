@@ -46,6 +46,17 @@ uses
   CnHashMap, CnConsts;
 
 type
+  TCnAITool = class
+  private
+    FName: string;
+    FDescription: string;
+    FParameters: string; // JSON Schema string
+  public
+    property Name: string read FName write FName;
+    property Description: string read FDescription write FDescription;
+    property Parameters: string read FParameters write FParameters;
+  end;
+
   TCnAIAnswerObject = class(TPersistent)
   {* 封装的 AI 应答结果}
   private
@@ -81,6 +92,7 @@ type
     FPoolRef: TCnThreadPool; // 从 Manager 处拿来持有的线程池对象引用
     FOption: TCnAIEngineOption;
     FAnswerQueue: TCnObjectQueue;
+    FTools: TObjectList;
     FProcessingDataObj: TCnAINetRequestDataObject;
     FProcessingThread: TCnPoolingThread;
     procedure CheckOptionPool;
@@ -168,6 +180,7 @@ type
     {* 进一步封装的设置界面由用户调用的获取模型列表的过程，内部组装调整后调用 AskAIEngine，也算第一步
        加一 AlterOption 参数的目的是为了允许临时指定参数，不用本 Engine 默认参数以适合灵活场合}
 
+    property Tools: TObjectList read FTools;
     property Option: TCnAIEngineOption read FOption;
     {* 引擎配置，根据名字从配置管理器中取来的引用}
   end;
@@ -619,10 +632,12 @@ end;
 function TCnAIBaseEngine.ConstructRequest(RequestType: TCnAIRequestType;
   const Code: string; History: TStrings): TBytes;
 var
-  ReqRoot, Msg: TCnJSONObject;
+  ReqRoot, Msg, FuncObj, ParamRoot: TCnJSONObject;
   Arr: TCnJSONArray;
   S: AnsiString;
   I: Integer;
+  ParamObjs, TempObjs: TObjectList;
+  IsJsonMsg: Boolean;
 begin
   ReqRoot := TCnJSONObject.Create;
   try
@@ -636,6 +651,40 @@ begin
       ReqRoot.AddPair('model', FOption.Model);
       ReqRoot.AddPair('temperature', FOption.Temperature);
       ReqRoot.AddPair('stream', FOption.Stream);
+
+      if (FTools <> nil) and (FTools.Count > 0) then
+      begin
+        Arr := ReqRoot.AddArray('tools');
+        for I := 0 to FTools.Count - 1 do
+        begin
+          Msg := TCnJSONObject.Create;
+          Msg.AddPair('type', 'function');
+
+          FuncObj := TCnJSONObject.Create;
+          FuncObj.AddPair('name', TCnAITool(FTools[I]).Name);
+          FuncObj.AddPair('description', TCnAITool(FTools[I]).Description);
+
+          if TCnAITool(FTools[I]).Parameters <> '' then
+          begin
+             ParamObjs := TObjectList.Create(True);
+             try
+               CnJSONParse(PAnsiChar(AnsiString(TCnAITool(FTools[I]).Parameters)), ParamObjs);
+               if ParamObjs.Count > 0 then
+               begin
+                 ParamRoot := TCnJSONObject(ParamObjs[0]);
+                 ParamObjs.Extract(ParamRoot);
+                 FuncObj.AddPair('parameters', ParamRoot);
+               end;
+             finally
+               ParamObjs.Free;
+             end;
+          end;
+
+          Msg.AddPair('function', FuncObj);
+          Arr.AddValue(Msg);
+        end;
+      end;
+
       Arr := ReqRoot.AddArray('messages');
 
       Msg := TCnJSONObject.Create;
@@ -650,9 +699,31 @@ begin
         begin
           if Trim(History[I]) <> '' then
           begin
-            Msg := TCnJSONObject.Create;
-            Msg.AddPair('role', 'user');
-            Msg.AddPair('content', History[I]);
+            IsJsonMsg := False;
+            if (Length(History[I]) > 2) and (History[I][1] = '{') then
+            begin
+               TempObjs := TObjectList.Create(True);
+               try
+                 if CnJSONParse(PAnsiChar(AnsiString(History[I])), TempObjs) > 0 then
+                 begin
+                   if (TempObjs.Count > 0) and (TCnJSONObject(TempObjs[0])['role'] <> nil) then
+                   begin
+                      Msg := TCnJSONObject(TempObjs[0]);
+                      TempObjs.Extract(Msg);
+                      IsJsonMsg := True;
+                   end;
+                 end;
+               except
+               end;
+               TempObjs.Free;
+            end;
+
+            if not IsJsonMsg then
+            begin
+              Msg := TCnJSONObject.Create;
+              Msg.AddPair('role', 'user');
+              Msg.AddPair('content', History[I]);
+            end;
             Arr.AddValue(Msg);
           end;
         end;
@@ -764,7 +835,9 @@ begin
             begin
               // 每一块回应拼起来
               Msg := TCnJSONObject(Arr[0]['delta']);
-              if (Msg['content'] <> nil) and (Msg['content'].AsString <> '') then
+              if Msg['tool_calls'] <> nil then
+                Result := Msg.ToJSON
+              else if (Msg['content'] <> nil) and (Msg['content'].AsString <> '') then
                 Result := Result + Msg['content'].AsString
               else if Msg['reasoning_content'] <> nil then // 也可能是内容空，先来推理数据
                 Result := Result + Msg['reasoning_content'].AsString;
@@ -790,7 +863,9 @@ begin
           begin
             // 整块回应
             Msg := TCnJSONObject(Arr[0]['message']);
-            if (Msg['content'] <> nil) and (Msg['content'].AsString <> '') then
+            if Msg['tool_calls'] <> nil then
+              Result := Msg.ToJSON
+            else if (Msg['content'] <> nil) and (Msg['content'] is TCnJSONString) then
               Result := Msg['content'].AsString
             else if Msg['reasoning_content'] <> nil then // 也可能是先来推理数据
               Result := Result + Msg['reasoning_content'].AsString;
@@ -873,6 +948,7 @@ begin
   FPoolRef := ANetPool;
 
   FAnswerQueue := TCnObjectQueue.Create(True);
+  FTools := TObjectList.Create(True);
   FPrevRespRemainMap := TCnStrToStrHashMap.Create;
   InitOption;
 end;
@@ -884,6 +960,7 @@ begin
 
   FPrevRespRemainMap.Free;
   FAnswerQueue.Free;
+  FTools.Free;
   inherited;
 end;
 

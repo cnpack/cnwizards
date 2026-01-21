@@ -93,14 +93,14 @@ object FormAITest: TFormAITest
       Caption = 'AI Engine Test'
       ImageIndex = 2
       object lblAIName: TLabel
-        Left = 144
+        Left = 136
         Top = 20
         Width = 44
         Height = 13
         Caption = 'AI Name:'
       end
       object lblProxy: TLabel
-        Left = 504
+        Left = 464
         Top = 20
         Width = 29
         Height = 13
@@ -123,7 +123,7 @@ object FormAITest: TFormAITest
         OnClick = btnLoadAIConfigClick
       end
       object cbbAIEngines: TComboBox
-        Left = 200
+        Left = 184
         Top = 16
         Width = 145
         Height = 21
@@ -133,7 +133,7 @@ object FormAITest: TFormAITest
         OnChange = cbbAIEnginesChange
       end
       object btnSaveAIConfig: TButton
-        Left = 376
+        Left = 344
         Top = 16
         Width = 105
         Height = 25
@@ -142,7 +142,7 @@ object FormAITest: TFormAITest
         OnClick = btnSaveAIConfigClick
       end
       object btnExplainCode: TButton
-        Left = 680
+        Left = 632
         Top = 16
         Width = 73
         Height = 25
@@ -161,7 +161,7 @@ object FormAITest: TFormAITest
         TabOrder = 4
       end
       object edtProxy: TEdit
-        Left = 544
+        Left = 504
         Top = 16
         Width = 121
         Height = 21
@@ -177,7 +177,7 @@ object FormAITest: TFormAITest
         TabOrder = 6
       end
       object btnReviewCode: TButton
-        Left = 768
+        Left = 712
         Top = 16
         Width = 73
         Height = 25
@@ -185,17 +185,26 @@ object FormAITest: TFormAITest
         TabOrder = 7
         OnClick = btnReviewCodeClick
       end
+      object btnFuncCall: TButton
+        Left = 872
+        Top = 16
+        Width = 73
+        Height = 25
+        Caption = 'Function Call'
+        TabOrder = 10
+        OnClick = btnFuncCallClick
+      end
       object chkMarkDown: TCheckBox
-        Left = 944
+        Left = 952
         Top = 20
-        Width = 81
+        Width = 73
         Height = 17
         Caption = 'MarkDown'
         TabOrder = 8
         OnClick = chkMarkDownClick
       end
       object btnModelList: TButton
-        Left = 856
+        Left = 792
         Top = 16
         Width = 73
         Height = 25
@@ -208,7 +217,7 @@ object FormAITest: TFormAITest
         Top = 56
         Width = 545
         Height = 21
-        TabOrder = 10
+        TabOrder = 11
         OnKeyPress = edtChatMessageKeyPress
       end
     end

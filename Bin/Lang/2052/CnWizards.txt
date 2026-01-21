@@ -3638,7 +3638,7 @@ SCnDebugErrorProcessNotAccessible=无法访问被调试进程
 SCnDebugErrorValueNotAccessible=无法获取值
 SCnDebugErrorOutOfScope=不在范围内
 SCnDebugAddReplacerCaption=输入替换表达式
-SCnDebugAddReplacerHint=类型名=包含%s的表达式
+SCnDebugAddReplacerHint=类型名=包含(%s)的表达式
 SCnDebugRemoveReplacerHint=确定删除选中的替换表达式？
 SCnDebugErrorReplacerFormat=错误的替换表达式
 SCnDebugErrorExprNotAClass=%s 错误！可能不是 %s

@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ComCtrls, CnThreadPool, CnInetUtils, CnNative, CnContainers, CnJSON,
   CnAICoderConfig, CnAICoderEngine, CnWideStrings, FileCtrl, CnChatBox, CnRichEdit,
-  CnMarkDown, ExtCtrls, Menus, Clipbrd;
+  CnMarkDown, ExtCtrls, Menus, Clipbrd, Contnrs;
 
 type
   TFormAITest = class(TForm)
@@ -40,6 +40,7 @@ type
     btnAddMyLongMsg: TButton;
     pnlAIChat: TPanel;
     btnReviewCode: TButton;
+    btnFuncCall: TButton;
     pmChat: TPopupMenu;
     Copy1: TMenuItem;
     pmAIChat: TPopupMenu;
@@ -68,6 +69,7 @@ type
     procedure btnAddYouLongMsgClick(Sender: TObject);
     procedure btnAddMyLongMsgClick(Sender: TObject);
     procedure btnReviewCodeClick(Sender: TObject);
+    procedure btnFuncCallClick(Sender: TObject);
     procedure chkMarkDownClick(Sender: TObject);
     procedure CopyAll1Click(Sender: TObject);
     procedure pmChatPopup(Sender: TObject);
@@ -103,6 +105,8 @@ type
     procedure AIOnExplainCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnReviewCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnFuncCallAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnRawAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
       SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
@@ -870,6 +874,106 @@ begin
     else
       TCnChatMessage(Tag).Text := Format('%d %s', [ErrorCode, Answer]);
   end;
+end;
+
+procedure TFormAITest.btnFuncCallClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+  Tool: TCnAITool;
+begin
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+  Msg.Waiting := True;
+
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
+
+  // Register Tools
+  CnAIEngineManager.CurrentEngine.Tools.Clear;
+
+  Tool := TCnAITool.Create;
+  Tool.Name := 'read_file';
+  Tool.Description := 'Read the content of a file.';
+  Tool.Parameters := '{"type": "object", "properties": {"path": {"type": "string", "description": "The absolute path to the file"}}, "required": ["path"]}';
+  CnAIEngineManager.CurrentEngine.Tools.Add(Tool);
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode('Please read the file ' + ParamStr(0) + ' and tell me its size.',
+    nil, Msg, artRaw, AIOnFuncCallAnswer);
+end;
+
+procedure TFormAITest.AIOnFuncCallAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+var
+  Json: TCnJSONObject;
+  Arr: TCnJSONArray;
+  ToolCall: TCnJSONObject;
+  Args: string;
+  FuncArgs: TCnJSONObject;
+  JsonObjs: TObjectList;
+begin
+  if (Tag = nil) or not (Tag is TCnChatMessage) then Exit;
+
+  if not Success then
+  begin
+    TCnChatMessage(Tag).Text := Format('Error: %d %s', [ErrorCode, Answer]);
+    TCnChatMessage(Tag).Waiting := False;
+    Exit;
+  end;
+
+  // Check if Answer is JSON with tool_calls
+  if (Length(Answer) > 0) and (Answer[1] = '{') then
+  begin
+    JsonObjs := TObjectList.Create(True);
+    try
+      if CnJSONParse(PAnsiChar(AnsiString(Answer)), JsonObjs) > 0 then
+      begin
+        if JsonObjs.Count > 0 then
+        begin
+          Json := TCnJSONObject(JsonObjs[0]);
+          if (Json['tool_calls'] <> nil) and (Json['tool_calls'] is TCnJSONArray) then
+          begin
+             Arr := TCnJSONArray(Json['tool_calls']);
+             if Arr.Count > 0 then
+             begin
+               ToolCall := TCnJSONObject(Arr[0]);
+               // Execute Tool
+               if (ToolCall['function'] <> nil) then
+               begin
+                  FuncArgs := TCnJSONObject(ToolCall['function']);
+                  Args := FuncArgs['arguments'].AsString;
+                  TCnChatMessage(Tag).Text := 'Tool Call: ' + FuncArgs['name'].AsString + ' Args: ' + Args;
+                  TCnChatMessage(Tag).Waiting := False;
+                  Exit;
+               end;
+             end;
+          end;
+        end;
+      end;
+    finally
+      JsonObjs.Free;
+    end;
+  end;
+
+  // Normal text
+  if Partly then
+  begin
+    if TCnChatMessage(Tag).Text = '...' then
+      TCnChatMessage(Tag).Text := Answer
+    else
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer;
+  end
+  else
+    TCnChatMessage(Tag).Text := Answer;
+
+  if IsStreamEnd or not Partly then
+    TCnChatMessage(Tag).Waiting := False;
 end;
 
 end.

@@ -1020,7 +1020,7 @@ var
   Idx: Integer;
   Item: TListItem;
 begin
-  S := 'TSample=%s.ToString';
+  S := 'TSample=(%s).ToString';
   if CnWizInputQuery(SCnDebugAddReplacerCaption, SCnDebugAddReplacerHint, S) then
   begin
     Idx := Pos('=', S);

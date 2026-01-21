@@ -3638,7 +3638,7 @@ SCnDebugErrorProcessNotAccessible=Процесс недоступен
 SCnDebugErrorValueNotAccessible=Значение недоступно
 SCnDebugErrorOutOfScope=Вне области
 SCnDebugAddReplacerCaption=Ввести заменитель
-SCnDebugAddReplacerHint=ClassName=Выражение с %s
+SCnDebugAddReplacerHint=ClassName=Выражение с (%s)
 SCnDebugRemoveReplacerHint=Удалить выбранную подсказку?
 SCnDebugErrorReplacerFormat=Неверный формат подсказки замены
 SCnDebugErrorExprNotAClass=%s Ошибка или НЕ %s

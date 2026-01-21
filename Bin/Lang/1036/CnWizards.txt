@@ -3639,7 +3639,7 @@ SCnDebugErrorProcessNotAccessible=Processus inaccessible
 SCnDebugErrorValueNotAccessible=Valeur inaccessible
 SCnDebugErrorOutOfScope=Hors de portée
 SCnDebugAddReplacerCaption=Entrer un remplaçant
-SCnDebugAddReplacerHint=Nom de la classe=Expression avec %s
+SCnDebugAddReplacerHint=Nom de la classe=Expression avec (%s)
 SCnDebugRemoveReplacerHint=Êtes-vous sûr de vouloir supprimer l'astuce sélectionnée ?
 SCnDebugErrorReplacerFormat=Format d'astuce de remplaçant invalide
 SCnDebugErrorExprNotAClass=Erreur de %s ou PAS %s

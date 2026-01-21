@@ -3638,7 +3638,7 @@ SCnDebugErrorProcessNotAccessible=Process NOT Accessible
 SCnDebugErrorValueNotAccessible=Value NOT Accessible
 SCnDebugErrorOutOfScope=Out of Scope
 SCnDebugAddReplacerCaption=Enter a Replacer
-SCnDebugAddReplacerHint=ClassName=Expression with %s
+SCnDebugAddReplacerHint=ClassName=Expression with (%s)
 SCnDebugRemoveReplacerHint=Sure to Delete Selected Hint?
 SCnDebugErrorReplacerFormat=Invalid Replacer Hint Format
 SCnDebugErrorExprNotAClass=%s Error or NOT %s
