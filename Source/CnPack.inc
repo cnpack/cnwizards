@@ -46,6 +46,7 @@
 
   {$IFDEF DARWIN}
     {$DEFINE FPC_MACOS}                        // FPC 在 MACOS 下的编译条件
+    {$DEFINE MACOS}                            // 补一个 MACOS，和 Delphi 保持一致
   {$ENDIF}
 
   {$IFDEF MSWINDOWS}
@@ -3736,23 +3737,21 @@
 {$ENDIF}
 
 {$IFDEF COMPILER6_UP}
-  {$DEFINE SUPPORT_DEPRECATED}
-{$ENDIF}
-
-{$IFDEF COMPILER6_UP}
-  {$DEFINE SUPPORT_ENUMVALUES}
-  {$DEFINE SUPPORT_VARIANTS}
-  {$DEFINE SUPPORT_IFDIRECTIVE}
+  {$DEFINE SUPPORT_DEPRECATED}            // Delphi 6 开始支持 deprecated 关键字
+  {$DEFINE SUPPORT_ENUMVALUES}            // Delphi 6 开始支持枚举类型声明时自定义值
+  {$DEFINE SUPPORT_VARIANTS}              // Delphi 6 开始有 Variants 单元
+  {$DEFINE SUPPORT_IFDIRECTIVE}           // Delphi 6 开始支持 {$IF 编译指令
+  {$DEFINE TMONITOR_HAS_WORKAREA}         // Delphi 6 的 TMonitor 才有 Workarea
 {$ENDIF}
 
 {$IFDEF DELPHI5_UP}
   {$IFNDEF BDS2005_UP}
-    {$DEFINE PROJECT_FILENAME_DPR}       // Delphi 5/6/7 的工程文件的扩展名是 .dpr
+    {$DEFINE PROJECT_FILENAME_DPR}        // Delphi 5/6/7 的工程文件的扩展名是 .dpr
   {$ENDIF}
 {$ENDIF}
 
 {$IFDEF COMPILER5}
-  {$DEFINE TSTREAM_LONGINT}              // D6 及以上的 TStream 的 Size 和 Position 是 Int64
+  {$DEFINE TSTREAM_LONGINT}               // D6 及以上的 TStream 的 Size 和 Position 是 Int64
 {$ENDIF}
 
 {$IFDEF BCB5}
@@ -3859,8 +3858,6 @@
 {$IFDEF BCB}
   {$OBJEXPORTALL ON}
 {$ENDIF}
-
-{$DEFINE CN_USE_MSXML}
 
 {$ENDIF FPC}
 
