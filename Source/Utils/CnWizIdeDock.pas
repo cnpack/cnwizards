@@ -547,6 +547,7 @@ begin
   if FNeedRestore and (Parent = nil) then
   begin
     RestorePosition;
+    MakeFormFullyDesktopVisible(Self);
     FNeedRestore := False;
   end;
   inherited;
