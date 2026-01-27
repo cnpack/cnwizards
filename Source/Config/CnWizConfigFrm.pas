@@ -1217,7 +1217,7 @@ begin
       Holder := TCnShortCutHolder.Create(N, St, Idx);
       List.Add(Holder);
     end;
-    ShowShortCutConfigForHolders(List, SCnWizConfigName);
+    ShowShortCutConfigForHolders(List, SCnWizConfigComment);
   finally
     for I := 0 to List.Count - 1 do
       TObject(List[I]).Free;

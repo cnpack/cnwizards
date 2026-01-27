@@ -775,7 +775,6 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Anchors = [akLeft, akBottom]
     Caption = 'A&ll Shortcuts'
     TabOrder = 5
-    Visible = False
     OnClick = btnAllShortcutClick
   end
   object dlgSaveActionList: TSaveDialog

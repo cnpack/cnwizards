@@ -223,6 +223,7 @@ begin
   ListView.Items.Clear;
   SetLength(FShortCuts, Wizard.SubActionCount);
   for I := 0 to Wizard.SubActionCount - 1 do
+  begin
     with ListView.Items.Add do
     begin
       Caption := StripHotkey(Wizard.SubActions[I].Caption);
@@ -230,6 +231,7 @@ begin
       Data := Wizard.SubActions[I];
       ShortCuts[I] := Wizard.SubActions[I].ShortCut;
     end;
+  end;
 end;
 
 procedure TCnWizSubActionShortCutForm.SetShortCutsToWizard;
@@ -318,6 +320,8 @@ procedure TCnWizSubActionShortCutForm.FormCloseQuery(Sender: TObject;
   var CanClose: Boolean);
 var
   I: Integer;
+  Act: TCustomAction;
+  Hld: TCnShortCutHolder;
 begin
   CanClose := True;
   if (ModalResult <> mrOK) or (Length(FShortCuts) = 0) then
@@ -325,9 +329,17 @@ begin
 
   for I := Low(FShortCuts) to High(FShortCuts) do
   begin
+    if FHolders <> nil then
+    begin
+      Hld := TCnShortCutHolder(ListView.Items[I].Data);
+      if Hld <> nil then
+        Act := Hld.WizShortCut.Action;              // Holder 模式下，Data 下是 Holder，找其 Action
+    end
+    else
+      Act := TCustomAction(ListView.Items[I].Data); // 非 Holder 模式下，Data 里是 Action
+
     // 对于每一个快捷键，都要判断是否没重复，或者有重复但用户选择了忽略，才能关闭
-    if CheckQueryShortCutDuplicated(FShortCuts[I],
-      TCustomAction(ListView.Items[I].Data)) = sdDuplicatedStop then
+    if CheckQueryShortCutDuplicated(FShortCuts[I], Act) = sdDuplicatedStop then
     begin
       CanClose := False;
       Exit;
