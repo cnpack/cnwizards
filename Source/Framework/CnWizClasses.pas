@@ -1261,11 +1261,12 @@ begin
 {$ENDIF}
 
   // 用于关联到工具栏上按钮的 Action，图标应和主 Action 图标一样，为避免重复创建
-  FPopupAction := WizActionMgr.AddAction(GetIDStr + '1', GetCaption, 0, OnPopup,
+  FPopupAction := WizActionMgr.AddAction(GetIDStr + '_Popup', GetCaption, 0, OnPopup,
     '', GetHint);
   // 先传空的图标名，再复制 ImageIndex 值，能省下所有 SubMenuWizard 中的每一个 Icon
   FPopupAction.ImageIndex := Action.ImageIndex;
   FPopupAction.OnUpdate := OnActionUpdate;
+  FPopupAction.Tag := 1; // 设置一个标记，供外界了解它是 Popup 的 Action
 end;
 
 // 类析构器

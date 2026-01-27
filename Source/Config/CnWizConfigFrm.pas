@@ -143,6 +143,7 @@ type
     chkEnlarge: TCheckBox;
     cbbEnlarge: TComboBox;
     chkDisableIcons: TCheckBox;
+    btnAllShortcut: TButton;
     procedure lbWizardsDrawItem(Control: TWinControl; Index: Integer;
       Rect: TRect; State: TOwnerDrawState);
     procedure FormCreate(Sender: TObject);
@@ -176,6 +177,7 @@ type
     procedure btnRestoreSettingClick(Sender: TObject);
     procedure lbWizardsKeyPress(Sender: TObject; var Key: Char);
     procedure lbDesignEditorsKeyPress(Sender: TObject; var Key: Char);
+    procedure btnAllShortcutClick(Sender: TObject);
   private
     FWizardsActiveChanged: Boolean;
     FShortCuts: array of TShortCut;    // 所有专家的快捷键
@@ -200,7 +202,8 @@ implementation
 
 uses
   CnWizManager, CnCommon, CnWizConsts, CnWizShortCut, CnWizOptions, CnEventBus,
-  CnWizCommentFrm, CnWizUtils, CnWizUpgradeFrm, CnWizIdeUtils, CnWizMenuSortFrm;
+  CnWizCommentFrm, CnWizUtils, CnWizUpgradeFrm, CnWizIdeUtils, CnWizMenuSortFrm,
+  CnWizSubActionShortCutFrm {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
   csSelectedColor = $FFB0B0;
@@ -1171,6 +1174,55 @@ procedure TCnWizConfigForm.lbDesignEditorsKeyPress(Sender: TObject;
 begin
   if Key = ' ' then
     TogglePropertyEditorActive;
+end;
+
+procedure TCnWizConfigForm.btnAllShortcutClick(Sender: TObject);
+var
+  I, Idx: Integer;
+  List: TList;
+  Holder: TCnShortCutHolder;
+  St: TCnWizShortCut;
+  N: string;
+begin
+  List := TList.Create;
+  try
+    for I := 0 to WizShortCutMgr.Count - 1 do
+    begin
+      St := WizShortCutMgr.ShortCuts[I];
+      if (St.Action <> nil) and (St.Action.ActionList = nil) then // 过滤掉子菜单专家的 Action
+        Continue;
+
+      if (St.Action <> nil) and (St.Action.Tag = 1) then // 1 是搁工具栏上的多余 Action，也无需设置
+        Continue;
+
+{$IFDEF DEBUG}
+      N := '';
+      if St.Action <> nil then
+        N := St.Action.Caption;
+      CnDebugger.LogFmt('Name %s, MenuName: %s, Action Caption %s',
+        [St.Name, St.MenuName, N]);
+{$ENDIF}
+
+      Idx := -1;
+      if St.Action <> nil then
+      begin
+        N := St.Action.Caption;
+        Idx := St.Action.ImageIndex;
+      end;
+      if (N = '') and (St.MenuName <> '') then
+        N := St.MenuName;
+      if N = '' then
+        N := St.Name;
+
+      Holder := TCnShortCutHolder.Create(N, St, Idx);
+      List.Add(Holder);
+    end;
+    ShowShortCutConfigForHolders(List, SCnWizConfigName);
+  finally
+    for I := 0 to List.Count - 1 do
+      TObject(List[I]).Free;
+    List.Free;
+  end;
 end;
 
 end.

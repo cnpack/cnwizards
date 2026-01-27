@@ -1,12 +1,12 @@
 inherited CnWizConfigForm: TCnWizConfigForm
   Left = 351
   Top = 66
-  ClientWidth = 521
-  ClientHeight = 523
+  Width = 529
+  Height = 555
   BorderIcons = [biSystemMenu]
   Caption = 'CnPack IDE Wizards Settings'
-  Constraints.MinHeight = 562
-  Constraints.MinWidth = 537
+  Constraints.MinHeight = 555
+  Constraints.MinWidth = 529
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
@@ -598,7 +598,9 @@ inherited CnWizConfigForm: TCnWizConfigForm
           Top = 122
           Width = 457
           Height = 17
-          Caption = 'Diable All Icons to Reduce GDI Resource Occupation (Need Restart).'
+          Caption = 
+            'Diable All Icons to Reduce GDI Resource Occupation (Need Restart' +
+            ').'
           TabOrder = 6
         end
       end
@@ -764,6 +766,17 @@ inherited CnWizConfigForm: TCnWizConfigForm
     Caption = '&Advanced'
     TabOrder = 4
     OnClick = btnSortClick
+  end
+  object btnAllShortcut: TButton
+    Left = 96
+    Top = 492
+    Width = 75
+    Height = 21
+    Anchors = [akLeft, akBottom]
+    Caption = 'A&ll Shortcuts'
+    TabOrder = 5
+    Visible = False
+    OnClick = btnAllShortcutClick
   end
   object dlgSaveActionList: TSaveDialog
     DefaultExt = 'txt'
