@@ -82,6 +82,7 @@ TCnWizConfigForm.Label5.!Font=,,B,,,
 TCnWizConfigForm.Label5.Caption=設置：
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.Label7.Caption=類型：
+TCnWizConfigForm.btnAllShortcut.Caption=所有快捷鍵(&L)
 TCnWizConfigForm.btnCancel.Caption=取消(&C)
 TCnWizConfigForm.btnCheckUpgrade.Caption=立即檢測最新的版本(&U)
 TCnWizConfigForm.btnConfig.Caption=設置(&S)

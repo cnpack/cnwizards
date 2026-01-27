@@ -82,6 +82,7 @@ TCnWizConfigForm.Label5.!Font=,,B,,,
 TCnWizConfigForm.Label5.Caption=Настройки:
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.Label7.Caption=Тип:
+TCnWizConfigForm.btnAllShortcut.Caption=Все комбинации клавиш
 TCnWizConfigForm.btnCancel.Caption=Отмена
 TCnWizConfigForm.btnCheckUpgrade.Caption=Проверить обновление сейчас
 TCnWizConfigForm.btnConfig.Caption=Настройки

@@ -1203,6 +1203,7 @@ begin
         [St.Name, St.MenuName, N]);
 {$ENDIF}
 
+      N := '';
       Idx := -1;
       if St.Action <> nil then
       begin

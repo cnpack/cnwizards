@@ -82,6 +82,7 @@ TCnWizConfigForm.Label5.!Font=,,B,,,
 TCnWizConfigForm.Label5.Caption=Definições:
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.Label7.Caption=Tipo:
+TCnWizConfigForm.btnAllShortcut.Caption=Todos os Ata&lhos
 TCnWizConfigForm.btnCancel.Caption=&Cancelar
 TCnWizConfigForm.btnCheckUpgrade.Caption=Verificar Novos &Atualizar Agora
 TCnWizConfigForm.btnConfig.Caption=&Configurações

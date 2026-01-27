@@ -82,6 +82,7 @@ TCnWizConfigForm.Label5.!Font=,,B,,,
 TCnWizConfigForm.Label5.Caption=Settings:
 TCnWizConfigForm.Label7.!Font=,,B,,,
 TCnWizConfigForm.Label7.Caption=Type:
+TCnWizConfigForm.btnAllShortcut.Caption=A&ll Shortcuts
 TCnWizConfigForm.btnCancel.Caption=&Cancel
 TCnWizConfigForm.btnCheckUpgrade.Caption=Check for New &Upgrade Now
 TCnWizConfigForm.btnConfig.Caption=&Settings
