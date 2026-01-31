@@ -49,7 +49,7 @@ type
   end;
 
 { compile-time registration functions }
-procedure SIRegister_TCnMapFileChannel(CL: TPSPascalCompiler);
+procedure SIRegister_TCnWinMapFileChannel(CL: TPSPascalCompiler);
 procedure SIRegister_TCnDebugChannel(CL: TPSPascalCompiler);
 procedure SIRegister_TCnDebugger(CL: TPSPascalCompiler);
 procedure SIRegister_TCnDebugFilter(CL: TPSPascalCompiler);
@@ -57,7 +57,7 @@ procedure SIRegister_CnDebug(CL: TPSPascalCompiler);
 
 { run-time registration functions }
 procedure RIRegister_CnDebug_Routines(S: TPSExec);
-procedure RIRegister_TCnMapFileChannel(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TCnWinMapFileChannel(CL: TPSRuntimeClassImporter);
 procedure RIRegister_TCnDebugChannel(CL: TPSRuntimeClassImporter);
 procedure RIRegister_TCnDebugger(CL: TPSRuntimeClassImporter);
 procedure RIRegister_TCnDebugFilter(CL: TPSRuntimeClassImporter);
@@ -67,10 +67,10 @@ implementation
 
 (* === compile-time registration functions === *)
 
-procedure SIRegister_TCnMapFileChannel(CL: TPSPascalCompiler);
+procedure SIRegister_TCnWinMapFileChannel(CL: TPSPascalCompiler);
 begin
   //with RegClassS(CL,'TCnDebugChannel', 'TCnMapFileChannel') do
-  with CL.AddClass(CL.FindClass('TCnDebugChannel'), TCnMapFileChannel) do
+  with CL.AddClass(CL.FindClass('TCnDebugChannel'), TCnWinMapFileChannel) do
   begin
   end;
 end;
@@ -252,7 +252,7 @@ begin
   SIRegister_TCnDebugger(CL);
   SIRegister_TCnDebugChannel(CL);
   //CL.AddTypeS('TCnDebugChannelClass', 'class of TCnDebugChannel');
-  SIRegister_TCnMapFileChannel(CL);
+  SIRegister_TCnWinMapFileChannel(CL);
   CL.AddDelphiFunction('Function CnDebugger : TCnDebugger');
 end;
 
@@ -438,9 +438,9 @@ begin
   S.RegisterDelphiFunction(@CnDebugger, 'CnDebugger', cdRegister);
 end;
 
-procedure RIRegister_TCnMapFileChannel(CL: TPSRuntimeClassImporter);
+procedure RIRegister_TCnWinMapFileChannel(CL: TPSRuntimeClassImporter);
 begin
-  with CL.Add(TCnMapFileChannel) do
+  with CL.Add(TCnWinMapFileChannel) do
   begin
   end;
 end;
@@ -584,7 +584,7 @@ begin
     RegisterPropertyHelper(@TCnDebuggerExceptTracking_R, @TCnDebuggerExceptTracking_W, 'ExceptTracking');
     RegisterPropertyHelper(@TCnDebuggerAutoStart_R, @TCnDebuggerAutoStart_W, 'AutoStart');
     RegisterPropertyHelper(@TCnDebuggerDumpToFile_R, @TCnDebuggerDumpToFile_W, 'DumpToFile');
-    RegisterPropertyHelper(@TCnDebuggerDumpFileName_R, @TCnDebuggerDumpFileName_W, 'DumpFileName');   
+    RegisterPropertyHelper(@TCnDebuggerDumpFileName_R, @TCnDebuggerDumpFileName_W, 'DumpFileName');
     RegisterPropertyHelper(@TCnDebuggerMessageCount_R, nil, 'MessageCount');
     RegisterPropertyHelper(@TCnDebuggerPostedMessageCount_R, nil, 'PostedMessageCount');
     RegisterPropertyHelper(@TCnDebuggerDiscardedMessageCount_R, nil, 'DiscardedMessageCount');
@@ -610,7 +610,7 @@ begin
   CL.Add(TCnDebugChannel);
   RIRegister_TCnDebugger(CL);
   RIRegister_TCnDebugChannel(CL);
-  RIRegister_TCnMapFileChannel(CL);
+  RIRegister_TCnWinMapFileChannel(CL);
 end;
 
 { TPSImport_CnDebug }
