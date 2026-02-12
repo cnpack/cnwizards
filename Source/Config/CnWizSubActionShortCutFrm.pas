@@ -327,6 +327,7 @@ begin
   if (ModalResult <> mrOK) or (Length(FShortCuts) = 0) then
     Exit;
 
+  Act := nil;
   for I := Low(FShortCuts) to High(FShortCuts) do
   begin
     if FHolders <> nil then

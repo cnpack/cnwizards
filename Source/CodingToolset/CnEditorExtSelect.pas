@@ -1360,6 +1360,15 @@ begin
           CnOtaSelectCurrentToken;
           Exit;
         end;
+      end
+      else if CnOtaGeneralGetCurrPosNumber(FCurrTokenStr, CurrIndex) then
+      begin
+        if FCurrTokenStr <> '' then
+        begin
+          // 光标下有数字，选中
+          CnOtaSelectCurrentNumber;
+          Exit;
+        end;
       end;
     end;
 
