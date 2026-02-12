@@ -79,6 +79,7 @@ begin
     RegisterMethod('Constructor Create');
     RegisterMethod('Procedure UpdateAllItems');
     RegisterMethod('Procedure EditMessageSource');
+    RegisterMethod('Procedure AddTitleMessage( const Msg : string)');
     RegisterProperty('MessageViewForm', 'TCustomForm', iptr);
     RegisterProperty('TreeView', 'TXTreeView', iptr);
 {$IFNDEF BDS}
@@ -223,6 +224,7 @@ begin
 end;
 
 {$IFNDEF BDS}
+
 procedure TCnMessageViewWrapperCurrentMessage_R(Self: TCnMessageViewWrapper; var T: string);
 begin
   T := Self.CurrentMessage;
@@ -242,6 +244,7 @@ procedure TCnMessageViewWrapperSelectedIndex_R(Self: TCnMessageViewWrapper; var 
 begin
   T := Self.SelectedIndex;
 end;
+
 {$ENDIF}
 
 procedure TCnMessageViewWrapperTreeView_R(Self: TCnMessageViewWrapper; var T: TXTreeView);
@@ -336,6 +339,7 @@ begin
     RegisterConstructor(@TCnMessageViewWrapper.Create, 'Create');
     RegisterMethod(@TCnMessageViewWrapper.UpdateAllItems, 'UpdateAllItems');
     RegisterMethod(@TCnMessageViewWrapper.EditMessageSource, 'EditMessageSource');
+    RegisterMethod(@TCnMessageViewWrapper.AddTitleMessage, 'AddTitleMessage');
     RegisterPropertyHelper(@TCnMessageViewWrapperMessageViewForm_R, nil, 'MessageViewForm');
     RegisterPropertyHelper(@TCnMessageViewWrapperTreeView_R, nil, 'TreeView');
 {$IFNDEF BDS}

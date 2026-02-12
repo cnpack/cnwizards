@@ -313,6 +313,9 @@ type
     procedure EditMessageSource;
     {* 双击信息窗口}
 
+    procedure AddTitleMessage(const Msg: string);
+    {* 输出一个简单字符串信息}
+
     property MessageViewForm: TCustomForm read FMessageViewForm;
     {* 信息窗口}
     property TreeView: TXTreeView read FTreeView;
@@ -1071,6 +1074,10 @@ begin
 end;
 
 procedure TCnMessageViewWrapper.EditMessageSource;
+begin
+end;
+
+procedure TCnMessageViewWrapper.AddTitleMessage(const Msg: string);
 begin
 end;
 

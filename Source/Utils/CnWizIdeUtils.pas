@@ -684,6 +684,9 @@ type
     procedure EditMessageSource;
     {* 双击信息窗口}
 
+    procedure AddTitleMessage(const Msg: string);
+    {* 输出一个简单字符串信息}
+
     property MessageViewForm: TCustomForm read FMessageViewForm;
     {* 信息窗口}
     property TreeView: TXTreeView read FTreeView;
@@ -3952,6 +3955,14 @@ begin
     FMessageViewForm.SetFocus;
     FEditMenuItem.OnClick(FEditMenuItem);
   end;
+end;
+
+procedure TCnMessageViewWrapper.AddTitleMessage(const Msg: string);
+var
+  Sv: IOTAMessageServices;
+begin
+  if Supports(BorlandIDEServices, IOTAMessageServices, Sv) then
+    Sv.AddTitleMessage(Msg);
 end;
 
 {$IFNDEF BDS}

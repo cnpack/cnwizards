@@ -17,8 +17,6 @@ var
   I, J: Integer;
   MsgView: TCustomForm;
   Tree: TTreeView;
-//Node: TTreeNode;
-
 begin
   Tree := nil;
   MsgView := nil;
@@ -41,14 +39,13 @@ begin
 
   if MsgView <> nil then
     MsgView.Show;
-    
+
   if Tree <> nil then
   begin
     Tree.HideSelection := False;
     Tree.Items.Clear;
     CnDebugger.LogObject(Tree);
-    // Node := Tree.Items.Add(nil, 'Test Pascal Script by CnWizards.');
   end;
+
+  CnMessageViewWrapper.AddTitleMessage('Test Message from Pascal Script by CnWizards.');
 end.
- 
- 
