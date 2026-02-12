@@ -6469,7 +6469,8 @@ begin
     CurrIndex := 0;
 
     // 查找起始字符
-    while (I > 0) and IsValidNumberChar(WideText[I], False) do
+    while (I > 0) and (Ord(WideText[I]) < 127) and
+      IsValidNumberChar(AnsiChar(WideText[I]), False) do
     begin
       Dec(I);
       Inc(CurrIndex);
@@ -6478,7 +6479,8 @@ begin
 
     // 查找结束字符
     I := 1;
-    while (I <= Length(WideText)) and IsValidNumberChar(WideText[I], False) do
+    while (I <= Length(WideText)) and (Ord(WideText[I]) < 127) and
+      IsValidNumberChar(AnsiChar(WideText[I]), False) do
       Inc(I);
     Delete(WideText, I, MaxInt);
     Number := WideText;
