@@ -40,7 +40,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Controls, TypInfo,
+  Classes, SysUtils, {$IFDEF MSWINDOWS} Controls, {$ENDIF} TypInfo,
 {$IFDEF COMPILER6_UP}
   Variants,
 {$ENDIF}
@@ -367,7 +367,8 @@ begin
       tkInteger, tkChar, tkEnumeration, tkSet: ReadOrdProp;
       tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: ReadStrProp;
       tkFloat:
-        if (PropType = System.TypeInfo(TDateTime)) or (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) then
+        if (PropType = System.TypeInfo(TDateTime))
+          {$IFDEF MSWINDOWS} or (PropType = System.TypeInfo(TTime)) or (PropType = System.TypeInfo(TDate)) {$ENDIF} then
           ReadDateTimeProp
         else
           ReadFloatProp;

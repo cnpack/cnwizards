@@ -748,6 +748,7 @@ function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
 
 function CnOtaGetCurrLineInfo(var LineNo, CharIndex, LineLen: Integer): Boolean;
 {* 返回 SourceEditor 当前行信息}
+
 function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
@@ -755,7 +756,12 @@ function CnOtaGetCurrPosToken(var Token: string; var CurrIndex: Integer;
 {* 取当前光标下的标识符及光标在标识符中的索引号，速度较快，允许 Unicode 标识符
   Token 以 2009 为界返回 Ansi 或 Utf16，但对于 2005 ~ 2007，有 Utf8 转 Ansi 的可能丢字符的情形}
 
+function CnOtaGetCurrPosNumber(var Number: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
+{* 取当前光标下的数字及光标在数字中的索引号，速度较快，Number 以 2009 为界返回 Ansi 或 Utf16}
+
 {$IFDEF IDE_STRING_ANSI_UTF8}
+
 function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil;
@@ -763,9 +769,16 @@ function CnOtaGetCurrPosTokenUtf8(var Token: WideString; var CurrIndex: Integer;
 {* 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
   输出用 WideString，避免 Utf8 转 Ansi 的丢字符情形。
   CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移}
+
+function CnOtaGetCurrPosNumberUtf8(var Number: WideString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
+{* 取当前光标下的数字及光标在数字中的索引号，用于 2005 ~ 2007，
+  输出用 WideString。CurrIndex 0 开始。}
+
 {$ENDIF}
 
 {$IFDEF UNICODE}
+
 function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TCharSet = [];
   CharSet: TCharSet = []; EditView: IOTAEditView = nil; SupportUnicodeIdent: Boolean = False;
@@ -774,12 +787,24 @@ function CnOtaGetCurrPosTokenW(var Token: string; var CurrIndex: Integer;
   可用于 2009 或以上。CurrIndex 0 开始，根据 IndexUsingWide 参数返回 Ansi 或 Wide 偏移
   PreciseMode 为 True 时使用 Canvas.TextWidth 来衡量宽字符的实际宽度，准确但略慢
    为 False 时直接判断字符是否大于 $1100 来决定其是一字符宽还是二字符宽，碰上部分古怪 Unicode 字符会产生偏差}
+
+function CnOtaGetCurrPosNumberW(var Number: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
+{* 取当前光标下的数字及光标在数字中的索引号的 Unicode 版本，可用于 2009 或以上。
+  CurrIndex 0 开始。}
+
 {$ENDIF}
 
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
 {* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
+  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
+  CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移}
+
+function CnOtaGeneralGetCurrPosNumber(var Number: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
+{* 封装的获取当前光标下的数字以及索引号的函数。
   Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
   CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移}
 
@@ -802,6 +827,8 @@ procedure CnOtaGetCurrentBreakpoints(Results: TList);
 function CnOtaSelectCurrentToken(FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []): Boolean;
 {* 选中当前光标下的标识符，如果光标下没有标识符则返回 False}
+function CnOtaSelectCurrentNumber: Boolean;
+{* 选中当前光标下的数字，如果光标下没有数字则返回 False}
 
 {$ENDIF}
 
@@ -6265,6 +6292,63 @@ begin
     Token := '';
 end;
 
+function CnOtaGetCurrPosNumber(var Number: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; EditView: IOTAEditView): Boolean;
+var
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  AnsiText: AnsiString;
+  I: Integer;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Utf8Text: AnsiString;
+{$ENDIF}
+begin
+  Number := '';
+  CurrIndex := 0;
+  Result := False;
+
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+  if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
+    (LineText <> '') then
+  begin
+    if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
+      Exit;
+
+    AnsiText := ConvertNtaEditorStringToAnsi(LineText);
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    // 注意上面拿到的 CharIndex 在 D2005~2007 下是 Utf8 的，需要转换成 Ansi 的
+    // TODO: 直接 Utf8 转 Ansi，暂不考虑代码页未设置导致丢字符的问题
+    Utf8Text := Copy(LineText, 1, CharIndex);
+    CharIndex := Length(CnUtf8ToAnsi(Utf8Text));
+{$ENDIF}
+
+    I := CharIndex;
+    CurrIndex := 0;
+    // 查找起始字符
+    while (I > 0) and IsValidNumberChar(Char(AnsiText[I])) do
+    begin
+      Dec(I);
+      Inc(CurrIndex);
+    end;
+    Delete(AnsiText, 1, I);
+
+    // 查找结束字符
+    I := 1;
+    while (I <= Length(AnsiText)) and IsValidNumberChar(Char(AnsiText[I])) do
+      Inc(I);
+    Delete(AnsiText, I, MaxInt);
+    Number := string(AnsiText);
+  end;
+
+  if Number <> '' then
+    Result := IsValidNumber(Number);
+
+  if not Result then
+    Number := '';
+end;
+
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
 // 取当前光标下的标识符及光标在标识符中的索引号，允许 Unicode 标识符，用于 2005 ~ 2007，
@@ -6349,6 +6433,62 @@ begin
 
   if not Result then
     Token := '';
+end;
+
+// 取当前光标下的数字及光标在数字中的索引号，用于 2005 ~ 2007，输出用 WideString。CurrIndex 0 开始。
+function CnOtaGetCurrPosNumberUtf8(var Number: WideString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; EditView: IOTAEditView): Boolean;
+var
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  Utf8Text: AnsiString;
+  WideText: WideString;
+  I: Integer;
+begin
+  Number := '';
+  CurrIndex := 0;
+  Result := False;
+
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+
+  if (EditView <> nil) and CnNtaGetCurrLineText(LineText, LineNo, CharIndex) and
+    (LineText <> '') then
+  begin
+    if CheckCursorOutOfLineEnd and CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
+      Exit;
+
+    // CharIndex 是 Utf8 位置，LineText 这里也是 Utf8，不能把 Utf8 转 Ansi，怕丢字符
+    // 因此需要把 LineText 转 WideString，CharIndex 对应转 WideString 的 Index
+    Utf8Text := Copy(LineText, 1, CharIndex);
+    CharIndex := Length(Utf8Decode(Utf8Text));
+    WideText := Utf8Decode(LineText);
+
+    I := CharIndex;
+    CurrIndex := 0;
+
+    // 查找起始字符
+    while (I > 0) and IsValidNumberChar(WideText[I], False) do
+    begin
+      Dec(I);
+      Inc(CurrIndex);
+    end;
+    Delete(WideText, 1, I);
+
+    // 查找结束字符
+    I := 1;
+    while (I <= Length(WideText)) and IsValidNumberChar(WideText[I], False) do
+      Inc(I);
+    Delete(WideText, I, MaxInt);
+    Number := WideText;
+  end;
+
+  if Number <> '' then
+    Result := IsValidNumber(Number);
+
+  if not Result then
+    Number := '';
 end;
 
 {$ENDIF}
@@ -6460,6 +6600,86 @@ begin
     Token := '';
 end;
 
+// 取当前光标下的数字及光标在数字中的索引号的 Unicode 版本，可用于 2009 或以上，CurrIndex 0 开始。}
+function CnOtaGetCurrPosNumberW(var Number: string; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
+var
+  LineNo: Integer;
+  CharIndex: Integer;
+  LineText: string;
+  AnsiText: AnsiString;
+  I: Integer;
+
+  function StrHasUnicodeChar(const S: string): Boolean;
+  var
+    I: Integer;
+  begin
+    Result := False;
+    if Length(S) = 0 then
+      Exit;
+    for I := 0 to Length(S) - 1 do
+    begin
+      if Ord(S[I]) > 127 then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+
+begin
+  Number := '';
+  CurrIndex := 0;
+  Result := False;
+
+  if not Assigned(EditView) then
+    EditView := CnOtaGetTopMostEditView;
+
+  if (EditView <> nil) and CnNtaGetCurrLineTextW(LineText, LineNo, CharIndex)
+    and (LineText <> '') then
+  begin
+    if CheckCursorOutOfLineEnd then
+    begin
+      if StrHasUnicodeChar(LineText) then
+      begin
+        // CnOtaIsEditPosOutOfLine 的判断在当前行文字有宽字节字符时可能不准
+        // 改用直接判断，两者都是 UTF16，可直接判断。
+        if CharIndex > Length(LineText) then
+          Exit;
+      end
+      else
+      begin
+        if CnOtaIsEditPosOutOfLine(EditView.CursorPos) then
+          Exit;
+      end;
+    end;
+
+    // CharIndex 是 Utf16 位置，可以直接计算
+    I := CharIndex;
+    CurrIndex := 0;
+    // 查找起始字符
+    while (I > 0) and IsValidNumberChar(LineText[I], False) do
+    begin
+      Dec(I);
+      Inc(CurrIndex);
+    end;
+    Delete(LineText, 1, I);
+
+    // 查找结束字符
+    I := 1;
+    while (I <= Length(LineText)) and IsValidNumberChar(LineText[I], False) do
+      Inc(I);
+    Delete(LineText, I, MaxInt);
+    Number := LineText;
+  end;
+
+  if Number <> '' then
+    Result := IsValidNumber(Number);
+
+  if not Result then
+    Number := '';
+end;
+
 {$ENDIF}
 
 // 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
@@ -6484,6 +6704,21 @@ begin
   {$ELSE}
   Result := CnOtaGetCurrPosToken(Token, CurrIndex, CheckCursorOutOfLineEnd,
     FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+  {$ENDIF}
+{$ENDIF}
+end;
+
+function CnOtaGeneralGetCurrPosNumber(var Number: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; EditView: IOTAEditView): Boolean;
+begin
+{$IFDEF UNICODE}
+  Result := CnOtaGetCurrPosNumberW(Number, CurrIndex, CheckCursorOutOfLineEnd,
+    EditView);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnOtaGetCurrPosNumberUtf8(Number, CurrIndex, CheckCursorOutOfLineEnd, EditView);
+  {$ELSE}
+  Result := CnOtaGetCurrPosNumber(Number, CurrIndex, CheckCursorOutOfLineEnd, EditView);
   {$ENDIF}
 {$ENDIF}
 end;
@@ -6683,6 +6918,56 @@ begin
 {$ELSE}
     // D567 下标识符无双字节字符，直接计算 Token 长度
     MoveToRightCount := Length(Token);
+{$ENDIF}
+
+    // 往前移动 CurrIndex，开始选中并朝后移动 MoveToRightCount，再结束选择
+    // MoveRelative: 0  Ansi/Utf8/Utf8
+
+    EditPos.MoveRelative(0, -CurrIndex);
+
+    Block.Reset;
+    Block.Style := btNonInclusive;
+    Block.BeginBlock;
+
+    EditPos.MoveRelative(0, MoveToRightCount);
+
+    Block.EndBlock;
+    Result := True;
+  end;
+end;
+
+function CnOtaSelectCurrentNumber(): Boolean;
+var
+  View: IOTAEditView;
+  Number: TCnIdeTokenString; // Ansi/Wide/Wide
+  CurrIndex: Integer;        // Ansi/Wide/Wide
+  EditPos: IOTAEditPosition;
+  Block: IOTAEditBlock;
+  MoveToRightCount: Integer;    // 从光标处移至右端所需的 Col，不用移到左
+begin
+  Result := False;
+  if CnOtaGeneralGetCurrPosNumber(Number, CurrIndex, True) then
+  begin
+    View := CnOtaGetTopMostEditView;
+    if View = nil then
+      Exit;
+
+    Block := View.Block;
+    if Block = nil then
+      Exit;
+
+    EditPos := CnOtaGetEditPosition;
+    if not Assigned(EditPos) then
+      Exit;
+
+{$IFDEF BDS}
+    // CurrIndex 是 0 开始的 Ansi/Wide/Wide，用来移动光标时需要转成 0 开始的 Ansi/Utf8/Utf8
+    CurrIndex := CalcUtf8LengthFromWideString(PWideChar(Copy(Number, 1, CurrIndex)));
+    // MoveToRightCount 用来移动光标到标识符尾，是 0 开始的 Ansi/Utf8/Utf8
+    MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Number));
+{$ELSE}
+    // D567 下标识符无双字节字符，直接计算 Token 长度
+    MoveToRightCount := Length(Number);
 {$ENDIF}
 
     // 往前移动 CurrIndex，开始选中并朝后移动 MoveToRightCount，再结束选择

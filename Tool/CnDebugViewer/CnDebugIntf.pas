@@ -38,7 +38,7 @@ unit CnDebugIntf;
 interface
 
 uses
-  SysUtils, Classes, Windows;
+  SysUtils, Classes;
 
 const
   CnDefLevel = 3;

@@ -1414,7 +1414,7 @@ var
   Text: string;
   LineNo: Integer;
   CharIdx: Integer;
-  i, Idx: Integer;
+  I, Idx: Integer;
   NeedIndent: Boolean;
 begin
   Result := False;
@@ -1435,11 +1435,11 @@ begin
             if FAutoIndent then
             begin
               Idx := 0;
-              for i := Length(Text) downto 1 do
+              for I := Length(Text) downto 1 do
               begin
-                if not IsValidIdentChar(Text[i]) then
+                if not IsValidIdentChar(Text[I]) then
                 begin
-                  Idx := i;
+                  Idx := I;
                   Break;
                 end;
               end;

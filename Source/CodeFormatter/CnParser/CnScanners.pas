@@ -1448,7 +1448,7 @@ begin
           Result := tokInteger;
         end;
 
-        if (P^ = '.') and ((P+1)^ <> '.') then
+        if (P^ = '.') and ((P + 1)^ <> '.') then
         begin
           OldP := P;
           Inc(P);
@@ -1480,14 +1480,6 @@ begin
               Inc(P);
             Result := tokFloat;
           end;
-
-//          if (P^ in ['c', 'C', 'd', 'D', 's', 'S']) then
-//          begin
-//            Result := tokFloat;
-//            FFloatType := P^;
-//            Inc(P);
-//          end
-//          else
 
           FFloatType := #0; // 去除对浮点数后一个字母的处理，貌似 Delphi 不支持
         end;

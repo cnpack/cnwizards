@@ -41,13 +41,15 @@ interface
 {$ENDIF}
 
 uses
-  SysUtils, Classes, Windows, Messages, Forms, Contnrs, CnHashMap, CnDebugIntf;
+  SysUtils, Classes, {$IFDEF MSWINDOWS} Messages, {$ENDIF} Contnrs, CnHashMap, CnDebugIntf;
 
 const
+{$IFDEF MSWINDOWS}
   WM_USER_UPDATE_STORE = WM_USER + $C;
   WM_USER_NEW_FORM     = WM_USER + $D;
   WM_USER_SET_CAPTION  = WM_USER + $E;
   WM_USER_SHOW_CHILD   = WM_USER + $F;
+{$ENDIF}
 
 type
 
@@ -60,9 +62,9 @@ type
 
   TCnMsgItem = class(TPersistent)
   private
-    FThreadId: DWORD;
-    FProcessId: DWORD;
-    FMsgTickCount: DWORD;
+    FThreadId: Cardinal;
+    FProcessId: Cardinal;
+    FMsgTickCount: Cardinal;
     FMsgCPUPeriod: Int64;
     FMsgCPInterval: Int64;
     FIndent: Integer;
@@ -82,8 +84,8 @@ type
   published
     property Level: Integer read FLevel write FLevel;
     property Indent: Integer read FIndent write FIndent;
-    property ProcessId: DWORD read FProcessId write FProcessId;
-    property ThreadId: DWORD read FThreadId write FThreadId;
+    property ProcessId: Cardinal read FProcessId write FProcessId;
+    property ThreadId: Cardinal read FThreadId write FThreadId;
     property MsgCPInterval: Int64 read FMsgCPInterval write FMsgCPInterval;
     property Msg: string read FMsg write FMsg;
     property Tag: string read FTag write FTag;
@@ -91,7 +93,7 @@ type
 
     property TimeStampType: TCnTimeStampType read FTimeStampType write FTimeStampType;
     property MsgDateTime: TDateTime read FMsgDateTime write FMsgDateTime;
-    property MsgTickCount: DWORD read FMsgTickCount write FMsgTickCount;
+    property MsgTickCount: Cardinal read FMsgTickCount write FMsgTickCount;
     property MsgCPUPeriod: Int64 read FMsgCPUPeriod write FMsgCPUPeriod;
 
     property Bookmarked: Boolean read FBookmarked write FBookmarked;
@@ -128,7 +130,7 @@ type
   TCnMsgStore = class(TPersistent)
   {* 属于一个进程的消息集合}
   private
-    FProcessID: DWORD;
+    FProcessID: Cardinal;
     FProcName: string;
 
     FOwner: TObject;
@@ -144,7 +146,7 @@ type
 
     function GetMsgs(Index: Integer): TCnMsgItem;
     function GetTimes(Index: Integer): TCnTimeItem;
-    procedure SetProcessID(const Value: DWORD);
+    procedure SetProcessID(const Value: Cardinal);
     procedure SetProcName(const Value: string);
     function GetMsgCount: Integer;
     function GetTimeCount: Integer;
@@ -173,7 +175,7 @@ type
     procedure LoadFromFile(Filer: ICnMsgFiler; const FileName: string);
     procedure SaveToFile(Filer: ICnMsgFiler; const FileName: string);
 
-    property ProcessID: DWORD read FProcessID write SetProcessID;
+    property ProcessID: Cardinal read FProcessID write SetProcessID;
     property ProcName: string read FProcName write SetProcName;
     property Form: TObject read FForm write FForm;
     property Owner: TObject read FOwner write FOwner;
@@ -204,8 +206,8 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
-    function AddStore(AProcessID: DWORD; const AProcName: string): TCnMsgStore;
-    function IndexOf(AProcessID: DWORD): TCnMsgStore;
+    function AddStore(AProcessID: Cardinal; const AProcName: string): TCnMsgStore;
+    function IndexOf(AProcessID: Cardinal): TCnMsgStore;
     function IndexOfStore(AStore: TCnMsgStore): Integer;
     procedure RemoveStore(AStore: TCnMsgStore);
     function FindByProcName(AProcName: string): TCnMsgStore;
@@ -231,8 +233,8 @@ type
 
   TCnDisplayFilter = class(TObject)
   private
-    FThreadId: DWORD;
-    FProcessId: DWORD;
+    FThreadId: Cardinal;
+    FProcessId: Cardinal;
     FIndent: Integer;
     FLevel: Integer;
     FTag: string;
@@ -243,9 +245,9 @@ type
     procedure SetIndent(const Value: Integer);
     procedure SetLevel(const Value: Integer);
     procedure SetMsgTypes(const Value: TCnMsgTypes);
-    procedure SetProcessId(const Value: DWORD);
+    procedure SetProcessId(const Value: Cardinal);
     procedure SetTag(const Value: string);
-    procedure SetThreadId(const Value: DWORD);
+    procedure SetThreadId(const Value: Cardinal);
   protected
     procedure UpdateFiltered;
   public
@@ -255,8 +257,8 @@ type
 
     property Level: Integer read FLevel write SetLevel;
     property Indent: Integer read FIndent write SetIndent;
-    property ProcessId: DWORD read FProcessId write SetProcessId;
-    property ThreadId: DWORD read FThreadId write SetThreadId;
+    property ProcessId: Cardinal read FProcessId write SetProcessId;
+    property ThreadId: Cardinal read FThreadId write SetThreadId;
     property Tag: string read FTag write SetTag;
     property MsgTypes: TCnMsgTypes read FMsgTypes write SetMsgTypes;
 
@@ -272,10 +274,10 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function IndexOfThreadID(AID: DWORD): Integer;
+    function IndexOfThreadID(AID: Cardinal): Integer;
     function IndexOfTag(const ATag: string): Integer;
 
-    function CheckAndAddThreadID(AID: DWORD): Boolean;
+    function CheckAndAddThreadID(AID: Cardinal): Boolean;
     function CheckAndAddTag(const ATag: string): Boolean;
 
     property ThreadIDs: TList read FThreadIDs;
@@ -296,13 +298,6 @@ implementation
 
 uses
   CnViewCore, CnNative;
-
-type
-{$IFDEF SUPPORT_32_AND_64}
-  TCnNativeInt     = NativeInt;
-{$ELSE}
-  TCnNativeInt     = Integer;
-{$ENDIF}
 
 var
   FCnMsgManager: TCnMsgManager = nil;
@@ -475,7 +470,7 @@ begin
     end;
 
     FillChar(ATag, SizeOf(ATag), 0);
-    CopyMemory(@ATag, @(ADesc^.Annex.Tag), CnMaxTagLength);
+    Move(ADesc^.Annex.Tag, ATag, CnMaxTagLength);
 {$IFDEF UNICODE}
     AItem.Tag := string(ATag);
 {$ELSE}
@@ -483,8 +478,8 @@ begin
 {$ENDIF}
 
     FillChar(AMsg, SizeOf(AMsg), 0);
-    Size := ADesc^.Length - SizeOf(ADesc^.Annex) - SizeOf(DWord);
-    CopyMemory(@AMsg, @(ADesc^.Msg), Size);
+    Size := ADesc^.Length - SizeOf(ADesc^.Annex) - SizeOf(Cardinal);
+    Move(ADesc^.Msg, AMsg, Size);
     if AItem.MsgType = cmtMemoryDump then
     begin
       AItem.Msg := HexDumpMemory(@AMsg, Size);
@@ -492,7 +487,7 @@ begin
       if Size > 0 then
       begin
         AItem.MemDumpAddr := GetMemory(Size);
-        CopyMemory(AItem.MemDumpAddr, @AMsg, Size);
+        Move(AMsg, AItem.MemDumpAddr^, Size);
       end;
     end
     else
@@ -714,7 +709,7 @@ begin
     end;
 end;
 
-procedure TCnMsgStore.SetProcessID(const Value: DWORD);
+procedure TCnMsgStore.SetProcessID(const Value: Cardinal);
 begin
   if FProcessID <> Value then
   begin
@@ -786,7 +781,7 @@ end;
 
 { TCnMsgManager }
 
-function TCnMsgManager.AddStore(AProcessID: DWORD;
+function TCnMsgManager.AddStore(AProcessID: Cardinal;
   const AProcName: string): TCnMsgStore;
 var
   AStore: TCnMsgStore;
@@ -881,7 +876,7 @@ begin
   Result := FWatches.Size;
 end;
 
-function TCnMsgManager.IndexOf(AProcessID: DWORD): TCnMsgStore;
+function TCnMsgManager.IndexOf(AProcessID: Cardinal): TCnMsgStore;
 var
   I: Integer;
 begin
@@ -974,7 +969,7 @@ begin
   UpdateFiltered;
 end;
 
-procedure TCnDisplayFilter.SetProcessId(const Value: DWORD);
+procedure TCnDisplayFilter.SetProcessId(const Value: Cardinal);
 begin
   FProcessId := Value;
   UpdateFiltered;
@@ -986,7 +981,7 @@ begin
   UpdateFiltered;
 end;
 
-procedure TCnDisplayFilter.SetThreadId(const Value: DWORD);
+procedure TCnDisplayFilter.SetThreadId(const Value: Cardinal);
 begin
   FThreadId := Value;
   UpdateFiltered;
@@ -1010,7 +1005,7 @@ begin
   end;
 end;
 
-function TCnFilterConditions.CheckAndAddThreadID(AID: DWORD): Boolean;
+function TCnFilterConditions.CheckAndAddThreadID(AID: Cardinal): Boolean;
 begin
   Result := False;
   if IndexOfThreadID(AID) < 0 then
@@ -1041,7 +1036,7 @@ begin
   Result := FTags.IndexOf(ATag);
 end;
 
-function TCnFilterConditions.IndexOfThreadID(AID: DWORD): Integer;
+function TCnFilterConditions.IndexOfThreadID(AID: Cardinal): Integer;
 begin
   Result := FThreadIDs.IndexOf(Pointer(AID));
 end;

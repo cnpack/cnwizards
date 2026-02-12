@@ -172,6 +172,7 @@ type
   end;
 
 var
+{$IFDEF MSWINDOWS}
   HMap:   THandle = 0;
   HMutex: THandle = 0;
   HEvent: THandle = 0;
@@ -179,16 +180,19 @@ var
   HViewerMutex: THandle = 0;
   PHeader: PCnMapHeader;
   PBase: Pointer;
+{$ENDIF}
 
   SysDebugReady: Boolean = False;
   SysDebugExists: Boolean = False;
 
+{$IFDEF MSWINDOWS}
   SysDbgSa: TSecurityAttributes;
   SysDbgSd: TSecurityDescriptor;
   HSysBufferReady: THandle = 0;
   HSysDataReady: THandle = 0;
   HSysBuffer: THandle = 0;
   PSysDbgBase: Pointer;
+{$ENDIF}
 
   CSMsgStore: TRTLCriticalSection;
 
@@ -683,18 +687,29 @@ end;
 
 procedure ErrorDlg(const AText: string);
 begin
+{$IFDEF MSWINDOWS}
   MessageBox(Application.Handle, PChar(AText), PChar(SCnErrorCaption),
     MB_OK or MB_ICONERROR);
+{$ELSE}
+  ShowMessage(AText);
+{$ENDIF}
 end;
 
 function QueryDlg(Mess: string; DefaultNo: Boolean; Caption: string): Boolean;
+{$IFDEF MSWINDOWS}
 const
   Defaults: array[Boolean] of DWORD = (0, MB_DEFBUTTON2);
+{$ENDIF}
 begin
   if Caption = '' then
     Caption := SCnInfoCaption;
+{$IFDEF MSWINDOWS}
   Result := Application.MessageBox(PChar(Mess), PChar(Caption),
     MB_YESNO + MB_ICONQUESTION + Defaults[DefaultNo]) = IDYES;
+{$ELSE}
+  // Simplified for FMX/Mac
+  Result := MessageDlg(Mess, TMsgDlgType.mtConfirmation, [TMsgDlgBtn.mbYes, TMsgDlgBtn.mbNo], 0) = mrYes;
+{$ENDIF}
 end;
 
 procedure TranslateStrings;
