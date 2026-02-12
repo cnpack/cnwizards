@@ -27,11 +27,11 @@ uses
   CnCodeFormatterImplW in 'CnCodeFormatterImplW.pas',
   CnCodeFormatter in '..\..\Source\CodeFormatter\CnCodeFormatter.pas',
   CnCodeFormatRules in '..\..\Source\CodeFormatter\CnCodeFormatRules.pas',
-  CnCodeGenerators in '..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas',
-  CnParseConsts in '..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas',
-  CnPascalGrammar in '..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas',
-  CnScanners in '..\..\Source\CodeFormatter\CnParser\CnScanners.pas',
-  CnTokens in '..\..\Source\CodeFormatter\CnParser\CnTokens.pas';
+  CnCodeGenerators in '..\..\Source\CodeFormatter\Parser\CnCodeGenerators.pas',
+  CnParseConsts in '..\..\Source\CodeFormatter\Parser\CnParseConsts.pas',
+  CnPascalGrammar in '..\..\Source\CodeFormatter\Parser\CnPascalGrammar.pas',
+  CnScanners in '..\..\Source\CodeFormatter\Parser\CnScanners.pas',
+  CnTokens in '..\..\Source\CodeFormatter\Parser\CnTokens.pas';
 
 {$R *.RES}
 

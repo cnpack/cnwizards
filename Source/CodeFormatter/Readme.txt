@@ -4,7 +4,7 @@ CnCodeFormater Readme
   Last Update:2003-12-16
 
 Directories
-\CnParser	Object Pascal 语法解析器
+\Parser	Object Pascal 语法解析器
 \DCU		测试工程DCU输出目录
 \Test		测试工程
 

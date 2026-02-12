@@ -41,11 +41,11 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnScanners.pas"/>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\Parser\CnScanners.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnTokens.pas"/>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\Parser\CnTokens.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -53,11 +53,11 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas"/>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\Parser\CnParseConsts.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas"/>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\Parser\CnCodeGenerators.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -65,7 +65,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="..\..\..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas"/>
+        <Filename Value="..\..\..\..\Source\CodeFormatter\Parser\CnPascalGrammar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -78,9 +78,9 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <SearchPaths>
-      <IncludeFiles Value="..\..\..\..\Source;..\..\..\..\Source\CodeFormatter;..\..\..\..\Source\CodeFormatter\CnParser;$(ProjOutDir)"/>
+      <IncludeFiles Value="..\..\..\..\Source;..\..\..\..\Source\CodeFormatter;..\..\..\..\Source\CodeFormatter\Parser;$(ProjOutDir)"/>
       <Libraries Value="..\..\..\..\Source"/>
-      <OtherUnitFiles Value="..\..\..\..\Source;..\..\..\..\Source\CodeFormatter;..\..\..\..\Source\CodeFormatter\CnParser;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\Common"/>
+      <OtherUnitFiles Value="..\..\..\..\Source;..\..\..\..\Source\CodeFormatter;..\..\..\..\Source\CodeFormatter\Parser;..\..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\..\cnvcl\Source\Common"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       <ObjectPath Value="..\..\..\..\Source"/>
     </SearchPaths>

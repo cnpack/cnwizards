@@ -54,11 +54,11 @@
 			<DCCReference Include="CnCodeFormatterImplW.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatter.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatRules.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnScanners.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnParser\CnTokens.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnCodeGenerators.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnParseConsts.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnPascalGrammar.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnScanners.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnTokens.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

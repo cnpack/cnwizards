@@ -32,13 +32,13 @@ uses
   Forms,
   CnCodeFormatterTest in 'CnCodeFormatterTest.pas' {MainForm},
   CnFormatterIntf in '..\..\..\..\Source\CodeFormatter\CnFormatterIntf.pas',
-  CnScanners in '..\..\..\..\Source\CodeFormatter\CnParser\CnScanners.pas',
-  CnTokens in '..\..\..\..\Source\CodeFormatter\CnParser\CnTokens.pas',
+  CnScanners in '..\..\..\..\Source\CodeFormatter\Parser\CnScanners.pas',
+  CnTokens in '..\..\..\..\Source\CodeFormatter\Parser\CnTokens.pas',
   CnCodeFormatter in '..\..\..\..\Source\CodeFormatter\CnCodeFormatter.pas',
-  CnParseConsts in '..\..\..\..\Source\CodeFormatter\CnParser\CnParseConsts.pas',
-  CnCodeGenerators in '..\..\..\..\Source\CodeFormatter\CnParser\CnCodeGenerators.pas',
+  CnParseConsts in '..\..\..\..\Source\CodeFormatter\Parser\CnParseConsts.pas',
+  CnCodeGenerators in '..\..\..\..\Source\CodeFormatter\Parser\CnCodeGenerators.pas',
   CnCodeFormatRules in '..\..\..\..\Source\CodeFormatter\CnCodeFormatRules.pas',
-  CnPascalGrammar in '..\..\..\..\Source\CodeFormatter\CnParser\CnPascalGrammar.pas',
+  CnPascalGrammar in '..\..\..\..\Source\CodeFormatter\Parser\CnPascalGrammar.pas',
   CnCompDirectiveTree in '..\..\..\..\Source\CodeFormatter\CnCompDirectiveTree.pas';
 
 {$R *.res}
