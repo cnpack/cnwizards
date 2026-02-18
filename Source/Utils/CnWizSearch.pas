@@ -113,6 +113,15 @@ function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer): Boo
 {* 修复一个文件中的 CRLF，也即将 LF 全转变为 CRLF，返回转换是否成功，
   注意如果返回的 CorrectCount 是 0，将不实施保存动作，但返回值仍是成功}
 
+function CheckFileZeroWidthChar(const FileName: string; out ZWCCount: Integer): Boolean;
+{* 检查一个文件中有多少 Unicode 中的零宽字符，返回检测是否成功。
+  注意 D567 下因源文件不支持 Unicode 因而直接返回 False}
+
+function CorrectFileZeroWidthChar(const FileName: string; out CorrectCount: Integer): Boolean;
+{* 删除一个文件中的零宽字符，返回转换是否成功。
+  注意如果返回的 CorrectCount 是 0，将不实施保存动作，但返回值仍是成功
+  D567 下因源文件不支持 Unicode 因而直接返回 False}
+
 implementation
 
 const
@@ -136,7 +145,7 @@ const
   SearchLineSize = 1024;
   DefaultBufferSize = 2048;
 
-{ Generic routines }
+  ZERO_WIDTH_CHARS: array[0..6] of WideChar = (#$200A, #$200B, #$200C, #$200D, #$200E, #$200F, #$FEFF);
 
 {$IFDEF UNICODE}
 
@@ -804,6 +813,140 @@ begin
     DestStream.Free;
     SourceStream.Free;
   end;
+end;
+
+function IsWideCharZeroWidth(const WC: WideChar): Boolean;
+var
+  I: Integer;
+begin
+  Result := True;
+  for I := Low(ZERO_WIDTH_CHARS) to High(ZERO_WIDTH_CHARS) do
+  begin
+    if WC = ZERO_WIDTH_CHARS[I] then
+      Exit;
+  end;
+  Result := False;
+end;
+
+function CheckFileZeroWidthChar(const FileName: string; out ZWCCount: Integer): Boolean;
+{$IFDEF BDS}
+var
+  Stream: TMemoryStream;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Text: WideString;
+{$ENDIF}
+  P: PWideChar;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF BDS}
+
+  Stream := nil;
+  try
+    try
+      Stream := TMemoryStream.Create;
+      EditFilerSaveFileToStream(FileName, Stream); // 读出原始格式，Ansi/Utf8/Utf16
+
+      if Stream.Size = 0 then
+        Exit;
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+      Text := UTF8Decode(PAnsiChar(Stream.Memory));
+      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+      Stream.Position := 0;
+      Stream.Write(PWideChar(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+      Stream.Position := 0;
+{$ENDIF}
+
+      ZWCCount := 0;
+      P := PWideChar(Stream.Memory);
+
+      while P^ <> #0 do
+      begin
+        if IsWideCharZeroWidth(P^) then
+          Inc(ZWCCount);
+        Inc(P);
+      end;
+      Result := True;
+    except
+      ;
+    end;
+  finally
+    Stream.Free;
+  end;
+{$ENDIF}
+end;
+
+function CorrectFileZeroWidthChar(const FileName: string; out CorrectCount: Integer): Boolean;
+{$IFDEF BDS}
+var
+  SourceStream, DestStream: TMemoryStream;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  Text: AnsiString;
+{$ENDIF}
+  P: PWideChar;
+  CZ: WideChar;
+{$ENDIF}
+begin
+  Result := False;
+
+{$IFDEF BDS}
+  SourceStream := nil;
+  DestStream := nil;
+
+  try
+    try
+      SourceStream := TMemoryStream.Create;
+      EditFilerSaveFileToStream(FileName, SourceStream); // 读出 Ansi/Utf8/Utf16
+
+      if SourceStream.Size = 0 then
+        Exit;
+
+{$IFDEF IDE_STRING_ANSI_UTF8}
+      Text := UTF8Decode(PAnsiChar(Stream.Memory));
+      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+      Stream.Position := 0;
+      Stream.Write(PWideChar(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+      Stream.Position := 0;
+{$ENDIF}
+
+      DestStream := TMemoryStream.Create;
+      CorrectCount := 0;
+
+      CZ := #0;
+      P := PWideChar(SourceStream.Memory);
+      while P^ <> #0 do
+      begin
+        if IsWideCharZeroWidth(P^) then
+          Inc(CorrectCount)
+        else
+          DestStream.Write(P^, SizeOf(WideChar));
+        Inc(P);
+      end;
+
+      DestStream.Write(CZ, SizeOf(WideChar));
+
+      if CorrectCount > 0 then  // 需要 Ansi/Utf8/Utf16
+      begin
+{$IFDEF IDE_STRING_ANSI_UTF8}
+        Text := UTF8Encode(PWideChar(DestStream.Memory));
+        DestStream.Size := (Length(Text) + 1) * SizeOf(AnsiChar);
+        DestStream.Position := 0;
+        DestStream.Write(PAnsiChar(Text)^, (Length(Text) + 1) * SizeOf(AnsiChar));
+        DestStream.Position := 0;
+{$ENDIF}
+        EditFilerLoadFileFromStream(FileName, DestStream); // 写原始格式 Ansi/Utf8/Utf16
+      end;
+
+      Result := True;
+    except
+      ;
+    end;
+  finally
+    DestStream.Free;
+    SourceStream.Free;
+  end;
+{$ENDIF}
 end;
 
 end.

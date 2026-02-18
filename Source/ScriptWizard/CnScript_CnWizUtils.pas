@@ -591,6 +591,8 @@ begin
   // CnWizSearch
   CL.AddDelphiFunction('Function CheckFileCRLF(const FileName: string; out CRLFCount, LFCount: Integer) : Boolean');
   CL.AddDelphiFunction('Function CorrectFileCRLF(const FileName: string; out CorrectCount: Integer) : Boolean');
+  CL.AddDelphiFunction('Function CheckFileZeroWidthChar(const FileName: string; out ZWCCount: Integer) : Boolean');
+  CL.AddDelphiFunction('Function CorrectFileZeroWidthChar(const FileName: string; out CorrectCount: Integer) : Boolean');
 end;
 
 (* === run-time registration functions === *)
@@ -867,6 +869,8 @@ begin
   // CnWizSearch
   S.RegisterDelphiFunction(@CheckFileCRLF, 'CheckFileCRLF', cdRegister);
   S.RegisterDelphiFunction(@CorrectFileCRLF, 'CorrectFileCRLF', cdRegister);
+  S.RegisterDelphiFunction(@CheckFileZeroWidthChar, 'CheckFileZeroWidthChar', cdRegister);
+  S.RegisterDelphiFunction(@CorrectFileZeroWidthChar, 'CorrectFileZeroWidthChar', cdRegister);
 end;
 
 { TPSImport_CnWizUtils }
