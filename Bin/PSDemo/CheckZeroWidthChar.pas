@@ -8,7 +8,7 @@
 {                                                                              }
 {******************************************************************************}
 
-program CheckCRLF;
+program CheckZeroWidthChar;
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
@@ -18,23 +18,24 @@ uses
   CnWizShortCut, CnWizOptions;
 
 var
-  CRC, LFC: Integer;
+  C: Integer;
   S: string;
 begin
   S := CnOtaGetCurrentSourceFile;
-  if CheckFileCRLF(S, CRC, LFC) then
+  if CheckFileZeroWidthChar(S, C) then
   begin
-    if LFC = 0 then
-      InfoDlg('Current File: ' + #13#10 + S + #13#10 + 'has ' + IntToStr(CRC) + ' CRLF(s). '
-        + 'NO Single LF.' + #13#10#13#10 + 'Seems OK.')
+    if C = 0 then
+      InfoDlg('Current File: ' + #13#10 + S + #13#10 + 'has NO Zero-Width Chars. Seems OK.')
     else
     begin
-      if QueryDlg('Current File: ' + #13#10 + S + #13#10 + 'has ' + IntToStr(CRC) + ' CRLF(s). '
-        + IntToStr(LFC) + ' Single LF(s).' + #13#10#13#10 + 'Correct it?', False) then
+      if QueryDlg('Current File: ' + #13#10 + S + #13#10 + 'has ' + IntToStr(C) + ' Zero-Width Char(s). '
+        + #13#10#13#10 + 'Correct it?', False) then
       begin
-        if CorrectFileCRLF(S, LFC) then
-          InfoDlg('Correct LF(s) ' + IntToStr(LFC));
+        if CorrectFileZeroWidthChar(S, C) then
+          InfoDlg('Remove Zero-Width Char(s) ' + IntToStr(C));
       end;
     end;
-  end;
+  end
+  else
+    InfoDlg('Checking NOT Supported');
 end.

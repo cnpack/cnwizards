@@ -7,6 +7,13 @@
     <RelFileName>..\PSDemo\CheckCRLF.pas</RelFileName>
   </o>
   <o>
+    <Name>Check Zero-Width Characters</Name>
+    <Confirm>0</Confirm>
+    <Mode>[smEditorFlatButton]</Mode>
+    <ShortCut>32819</ShortCut>
+    <RelFileName>..\PSDemo\CheckZeroWidthChar.pas</RelFileName>
+  </o>
+  <o>
     <Name>Generate Code from Variable Declaration</Name>
     <Confirm>0</Confirm>
     <Mode>[smEditorFlatButton]</Mode>
