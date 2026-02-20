@@ -101,8 +101,10 @@ type
   end;
   PCnMsgDesc = ^TCnMsgDesc;
 
+{$IFDEF MSWINDOWS}
   {$NODEFINE TCnMapFilter}
   {$NODEFINE PCnMapFilter}
+{$ENDIF}
   TCnMapFilter = packed record
   {* 用内存映射文件传送数据时的内存区头中的过滤器格式}
     NeedRefresh: Cardinal;                         // 非 0 时需要更新

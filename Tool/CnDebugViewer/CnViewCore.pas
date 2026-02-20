@@ -37,9 +37,15 @@ unit CnViewCore;
 
 interface
 
+{$IFDEF MSWINDOWS}
 uses
   SysUtils, Classes, Windows, Forms, Graphics, TLHelp32, PsAPI,
   CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
+{$ELSE}
+uses
+  SysUtils, Classes, FMX.Forms, FMX.Graphics, FMX.Types, SyncObjs, FMX.Dialogs,
+  UITypes, CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
+{$ENDIF}
 
 const
   CnMapSize = 1024 * 1204;
@@ -192,9 +198,11 @@ var
   HSysDataReady: THandle = 0;
   HSysBuffer: THandle = 0;
   PSysDbgBase: Pointer;
-{$ENDIF}
 
   CSMsgStore: TRTLCriticalSection;
+{$ENDIF}
+
+  CSMsgStore: TCriticalSection = nil;
 
   CPUClock: Extended; // 计算而得的 CPU 主频，以 MHZ 为单位
   CnViewerOptions: TCnViewerOptions = nil;
@@ -372,7 +380,7 @@ procedure SetAnotherViewer;
 
 procedure PostStartEvent;
 
-function GetProcNameFromProcessID(ProcessID: DWORD): string;
+function GetProcNameFromProcessID(ProcessID: Cardinal): string;
 
 procedure LoadOptions(const FileName: string);
 
@@ -392,6 +400,8 @@ implementation
 uses
   CnMsgClasses;
 
+{$IFDEF MSWINDOWS}
+
 // 该 RDTSC 指令在 32 位和 64 位下都有效，且行为一致：高 32 位存入 EDX，低 32 位存入 EAX
 // 64 位系统中 Int64 直接通过 RAX 返回因此会丢高 32 位，需要补处理代码
 function GetCPUPeriod: Int64; assembler;
@@ -404,8 +414,19 @@ asm
 {$ENDIF}
 end;
 
+{$ELSE}
+
+// MAC 下不支持 ASM
+function GetCPUPeriod: Int64;
+begin
+  Result := 0;
+end;
+
+{$ENDIF}
+
 function InitializeCore: TCnCoreInitResults;
 begin
+{$IFDEF MSWINDOWS}
   HEvent := CreateEvent(nil, False, False, PChar(SCnDebugQueueEventName));
   if HEvent = 0 then
   begin
@@ -453,10 +474,15 @@ begin
     InitSysDebug;
 
   Result := ciOK;
+{$ELSE}
+  CSMsgStore := TCriticalSection.Create;
+  Result := ciOK;
+{$ENDIF}
 end;
 
 procedure InitSysDebug;
 begin
+{$IFDEF MSWINDOWS}
   if not InitializeSecurityDescriptor(@SysDbgSd, SECURITY_DESCRIPTOR_REVISION) then
     Exit;
 
@@ -489,10 +515,12 @@ begin
     if PSysDbgBase <> nil then
       SysDebugReady := True;
   end;
+{$ENDIF}
 end;
 
 procedure FinalizeCore;
 begin
+{$IFDEF MSWINDOWS}
   if HViewerMutex <> 0 then
   begin
     CloseHandle(HViewerMutex);
@@ -549,7 +577,12 @@ begin
     CloseHandle(HSysBufferReady);
     HSysBufferReady := 0;
   end;
+{$ELSE}
+  CSMsgStore.Free;
+{$ENDIF}
 end;
+
+{$IFDEF MSWINDOWS}
 
 procedure CalcCPUSpeed;
 var
@@ -564,36 +597,58 @@ begin
   CPUClock := 2e-6 * (B - A);{MHz}
 end;
 
+{$ELSE}
+
+procedure CalcCPUSpeed;
+begin
+  CPUClock := 10000;
+end;
+
+{$ENDIF}
+
 function CheckRunning: Boolean;
 begin
+{$IFDEF MSWINDOWS}
   HViewerMutex := CreateMutex(nil, False, PChar(SCnViewerMutexName));
   Result := ERROR_ALREADY_EXISTS = GetLastError;
   if Result and FindCmdLineSwitch('A', ['-'], True) then
     PostStartEvent;
+{$ELSE}
+  Result := False; // Not implemented for non-Windows yet
+{$ENDIF}
 end;
 
 procedure SetAnotherViewer;
+{$IFDEF MSWINDOWS}
 var
   HViewer: HWND;
+{$ENDIF}
 begin
+{$IFDEF MSWINDOWS}
   HViewer := FindWindow('TCnMainViewer', nil);
   if HViewer <> 0 then
     SetForegroundWindow(HViewer);
+{$ENDIF}
 end;
 
 procedure PostStartEvent;
+{$IFDEF MSWINDOWS}
 var
   HStartEvent: THandle;
+{$ENDIF}
 begin
+{$IFDEF MSWINDOWS}
   HStartEvent := OpenEvent(EVENT_MODIFY_STATE, False, PChar(SCnDebugStartEventName));
   if HStartEvent <> 0 then
   begin
     SetEvent(HStartEvent);
     CloseHandle(HStartEvent);
   end;
+{$ENDIF}
 end;
 
 function GetProcNameFromProcessID(ProcessID: DWORD): string;
+{$IFDEF MSWINDOWS}
 var
   HSnap, Hp: THandle;
   Pe: TProcessEntry32;
@@ -601,7 +656,9 @@ var
   HM: HModule;
   N: DWORD;
   ModName: array[0..MAX_PATH - 1] of Char;
+{$ENDIF}
 begin
+{$IFDEF MSWINDOWS}
   Result := '';
   Hp := OpenProcess(PROCESS_QUERY_INFORMATION or PROCESS_VM_READ, False, ProcessID);
   if Hp <> 0 then
@@ -631,6 +688,9 @@ begin
     Next := Process32Next(HSnap, Pe);
   end;
   CloseHandle(HSnap);
+{$ELSE}
+  Result := 'Process ' + IntToStr(ProcessID);
+{$ENDIF}
 end;
 
 procedure LoadOptions(const FileName: string);
@@ -664,9 +724,12 @@ begin
 end;
 
 procedure UpdateFilterToMap;
+{$IFDEF MSWINDOWS}
 var
   Len: Integer;
+{$ENDIF}
 begin
+{$IFDEF MSWINDOWS}
   if (HMap <> 0) and (PHeader <> nil) then
   begin
     if CnViewerOptions.EnableFilter then
@@ -683,6 +746,7 @@ begin
     PHeader^.Filter.MsgTypes := CnViewerOptions.FilterTypes;
     PHeader^.Filter.NeedRefresh := 1;
   end;
+{$ENDIF}
 end;
 
 procedure ErrorDlg(const AText: string);
@@ -797,8 +861,13 @@ begin
   FSaveFormPosition := True;
   FTop := 0;
   FLeft := 0;
+{$IFDEF MSWINDOWS}
   FHeight := Screen.Height - 25;
   FWidth := Screen.Width;
+{$ELSE}
+  FHeight := Trunc(Screen.Height - 25);
+  FWidth := Trunc(Screen.Width);
+{$ENDIF}
   FWinState := 0;
   FEnableUDPMsg := False;
   FUDPPort := 9099;

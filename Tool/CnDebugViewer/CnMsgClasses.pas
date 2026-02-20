@@ -41,7 +41,8 @@ interface
 {$ENDIF}
 
 uses
-  SysUtils, Classes, {$IFDEF MSWINDOWS} Messages, {$ENDIF} Contnrs, CnHashMap, CnDebugIntf;
+  SysUtils, Classes, Contnrs, CnHashMap, CnDebugIntf
+  {$IFDEF MSWINDOWS}, Windows, Messages, Forms{$ENDIF};
 
 const
 {$IFDEF MSWINDOWS}
@@ -50,8 +51,16 @@ const
   WM_USER_SET_CAPTION  = WM_USER + $E;
   WM_USER_SHOW_CHILD   = WM_USER + $F;
 {$ENDIF}
+  // Cross-platform event constants or simple integer IDs if needed
+  EVT_UPDATE_STORE = 1;
+  EVT_NEW_FORM     = 2;
+  EVT_SET_CAPTION  = 3;
+  EVT_SHOW_CHILD   = 4;
 
 type
+{$IFNDEF MSWINDOWS}
+  DWORD = Cardinal;
+{$ENDIF}
 
   ICnMsgFiler = interface(IUnknown)
   {* 用来流化的接口 }
@@ -297,7 +306,14 @@ procedure DebugDebuggerLog(const S: string);
 implementation
 
 uses
-  CnViewCore, CnNative;
+  CnViewCore{$IFNDEF MSWINDOWS}, CnNative{$ENDIF};
+
+type
+{$IFDEF SUPPORT_32_AND_64}
+  TCnNativeInt     = NativeInt;
+{$ELSE}
+  TCnNativeInt     = Integer;
+{$ENDIF}
 
 var
   FCnMsgManager: TCnMsgManager = nil;
@@ -1072,7 +1088,11 @@ begin
 
   if F = nil then
   begin
+{$IFDEF MSWINDOWS}
     FN := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + DEBUG_FILE;
+{$ELSE}
+    FN := ExtractFilePath(ParamStr(0)) + PathDelim + DEBUG_FILE;
+{$ENDIF}
     if not FileExists(FN) then
     begin
       try
