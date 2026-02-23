@@ -85,7 +85,8 @@ type
 
   TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
     const FileName: string) of object;
-  {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名}
+  {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名
+     注意 Delphi 5 下的 TOTAFileNotification 中没有当前工程改变通知}
 
   TCnWizFormEditorNotifyType = (fetOpened, fetClosing, fetModified,
     fetActivated, fetSaving, fetComponentCreating, fetComponentCreated,
@@ -138,6 +139,11 @@ type
     {* 增加一个编译后通知事件}
     procedure RemoveAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
     {* 删除一个编译后通知事件}
+
+    procedure AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+    {* 增加一个当前工程改变通知}
+    procedure RemoveActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+    {* 删除一个当前工程改变通知}
 
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     {* 增加一个窗体编辑器通知事件}
@@ -413,6 +419,7 @@ type
     FBreakpointAddedNotifiers: TList;
     FBreakpointDeletedNotifiers: TList;
     FFileNotifiers: TList;
+    FActiveProjectChangedNotifiers: TList;
     FSourceEditorNotifiers: TList;
     FSourceEditorIntfs: TList;
     FFormEditorNotifiers: TList;
@@ -440,6 +447,9 @@ type
 {$ENDIF}
 
 {$IFDEF DELPHI_OTA}
+  {$IFDEF COMPILER5}
+    FProjectFile: string;
+  {$ENDIF}
     FIdeNotifierIndex: Integer;
     FDebuggerNotifierIndex: Integer;
     FCnWizIdeNotifier: TCnWizIdeNotifier;
@@ -481,6 +491,8 @@ type
     procedure RemoveBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
     procedure AddAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
     procedure RemoveAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
+    procedure AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+    procedure RemoveActiveProjectChangedNotifier(Notifier: TNotifyEvent);
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
@@ -1054,6 +1066,7 @@ begin
   FBreakpointDeletedNotifiers := TList.Create;
 
   FFileNotifiers := TList.Create;
+  FActiveProjectChangedNotifiers := TList.Create;
 {$IFDEF FPC}
   FEvents := TApplicationProperties.Create(nil);
   FEvents.OnIdle := DoApplicationIdle;
@@ -1233,6 +1246,7 @@ begin
   CnWizClearAndFreeList(FBreakpointAddedNotifiers);
   CnWizClearAndFreeList(FBreakpointDeletedNotifiers);
   CnWizClearAndFreeList(FFileNotifiers);
+  CnWizClearAndFreeList(FActiveProjectChangedNotifiers);
   CnWizClearAndFreeList(FSourceEditorNotifiers);
   CnWizClearAndFreeList(FFormEditorNotifiers);
   CnWizClearAndFreeList(FActiveFormNotifiers);
@@ -1367,6 +1381,9 @@ procedure TCnWizNotifierServices.FileNotification(
   NotifyCode: TOTAFileNotification; const FileName: string);
 var
   I: Integer;
+{$IFDEF COMPILER5}
+  S: string;
+{$ENDIF}
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('FileNotification: %s (%s)',
@@ -1389,6 +1406,42 @@ begin
     end;
   end;
 
+{$IFDEF COMPILER5}
+  // Delphi 5 下没有工程改变通知，在文件打开后关闭前比较检测
+  if NotifyCode in [ofnFileOpened, ofnFileClosing] then
+  begin
+    S := CnOtaGetCurrentProjectFileName;
+    if FProjectFile <> S then
+    begin
+      FProjectFile := S;
+      if FActiveProjectChangedNotifiers <> nil then
+      begin
+        for I := FActiveProjectChangedNotifiers.Count - 1 downto 0 do
+        try
+          with PCnWizNotifierRecord(FActiveProjectChangedNotifiers[I])^ do
+            TNotifyEvent(Notifier)(Self);
+        except
+          DoHandleException('TCnWizNotifierServices.ActiveProjectChangedNotification[' + IntToStr(I) + ']');
+        end;
+      end;
+    end;
+  end;
+{$ELSE}
+  if NotifyCode = ofnActiveProjectChanged then
+  begin
+    if FActiveProjectChangedNotifiers <> nil then
+    begin
+      for I := FActiveProjectChangedNotifiers.Count - 1 downto 0 do
+      try
+        with PCnWizNotifierRecord(FActiveProjectChangedNotifiers[I])^ do
+          TNotifyEvent(Notifier)(Self);
+      except
+        DoHandleException('TCnWizNotifierServices.ActiveProjectChangedNotification[' + IntToStr(I) + ']');
+      end;
+    end;
+  end;
+{$ENDIF}
+
   if NotifyCode = ofnPackageUninstalled then
   begin
     if (Application = nil) or (Application.FindComponent('AppBuilder') = nil) then
@@ -1405,6 +1458,15 @@ begin
   end;
 end;
 
+procedure TCnWizNotifierServices.AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+begin
+  CnWizAddNotifier(FActiveProjectChangedNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+begin
+  CnWizRemoveNotifier(FActiveProjectChangedNotifiers, TMethod(Notifier));
+end;
 //------------------------------------------------------------------------------
 // 编译通知
 //------------------------------------------------------------------------------
