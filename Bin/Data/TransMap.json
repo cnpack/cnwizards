@@ -1,0 +1,301 @@
+﻿{
+  "Languages": {
+    "MenuCaption": ["Language", "语言"],
+    "ItemCaption": [["English", "Chinese(Simplified)"], ["英语", "中文(简体)"]]
+  },
+  "MainMenu": {
+    "MainPath": "AppBuilder.MainMenu1",
+    "DirectAccess": [{
+        "MenuPath": "ComponentMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Component", "组件"], ["Configure Palette", "配置调色板"], ["Create Component Template", "创建组件模板"], ["Import ActiveX Control", "导入 ActiveX 控件"], ["Import Component", "导入组件"], ["Import WSDL", "导入 WSDL"], ["Install Component", "安装组件"], ["Install Packages", "安装包"], ["New Component", "新建组件"]]
+      }, {
+        "MenuPath": "DatabaseMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Database", "数据库"], ["Explore", "浏览"], ["Form Wizard", "窗体向导"], ["SQL Monitor", "SQL 监视器"]]
+      }, {
+        "MenuPath": "EditMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Add to Interface", "添加到接口"], ["Align", "对齐"], ["Align To Grid", "对齐到网格"], ["All", "全部"], ["Bring to Front", "置于顶层"], ["Compare", "比较"], ["Compare to Delphi Version", "与 Delphi 版本比较"], ["Compare to File", "与文件比较"], ["Compare to Last Save", "与最后保存的比较"], ["Compare to Opened File", "与已打开的文件比较"], ["Copy", "复制"], ["Creation Order", "创建顺序"], ["Cut", "剪切"], ["Delete", "删除"], ["Edit", "编辑"], ["Flip Children", "翻转子控件"], ["Format Document", "格式化文档"], ["Hide Non-Visual Components", "隐藏非可视组件"], ["Hide/Show Non-Visual Components", "隐藏/显示非可视组件"], ["History Compare", "历史比较"], ["Launch Beyond Compare", "启动 Beyond Compare"], ["Lock Controls", "锁定控件"], ["MultiPaste", "多重粘贴"], ["Paste", "粘贴"], ["Redo", "重做"], ["Scale", "缩放"], ["Select All", "全选"], ["Select Left File For Compare", "选择左侧文件进行比较"], ["Selected", "选定"], ["Send to Back", "置于底层"], ["Show Non-Visual Components", "显示非可视组件"], ["Size", "大小"], ["Tab Order", "Tab 键顺序"], ["Undo", "撤销"]]
+      }, {
+        "MenuPath": "FileMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Close", "关闭"], ["Close All", "全部关闭"], ["Close all and terminate process", "全部关闭并终止进程"], ["Customize", "自定义"], ["Exit", "退出"], ["File", "文件"], ["New", "新建"], ["Open", "打开"], ["Open Favorite", "打开收藏夹"], ["Open From Version Control", "从版本控制打开"], ["Open Project", "打开项目"], ["Open Recent", "打开最近"], ["Other", "其他"], ["Print", "打印"], ["Properties", "属性"], ["Reopen", "重新打开"], ["Save", "保存"], ["Save All", "全部保存"], ["Save As", "另存为"], ["Save Project As", "项目另存为"], ["Use Unit", "使用单元"]]
+      }, {
+        "MenuPath": "HelpMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["||Help", "||帮助"], ["About", "关于"], ["About||", "关于||"], ["Borland Developer Network", "Borland 开发者网络"], ["Borland Home Page", "Borland 主页"], ["Customize", "自定义"], ["Delphi Developer Support", "Delphi 开发者支持"], ["Delphi Help", "Delphi 帮助"], ["Delphi Home Page", "Delphi 主页"], ["Delphi Tools", "Delphi 工具"], ["Embarcadero Blogs", "Embarcadero 博客"], ["Embarcadero Community Site", "Embarcadero 社区站点"], ["Embarcadero Developer Support Page", "Embarcadero 开发者支持页面"], ["Embarcadero Home Page", "Embarcadero 主页"], ["Examples and Samples", "示例和样本"], ["Help Wizards", "帮助向导"], ["License Manager", "许可证管理器"], ["macOS Developer Library", "macOS 开发者库"], ["Mobile Help Wizard", "移动帮助向导"], ["RAD AI Companion", "RAD AI 伴侣"], ["RAD Studio Docwiki", "RAD Studio 维基"], ["Welcome Configuration", "欢迎配置"], ["Windows Platform SDK Library", "Windows 平台 SDK 库"], ["Windows SDK", "Windows SDK"]]
+      }, {
+        "MenuPath": "mnuRefactoring",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Change Parameters", "更改参数"], ["Change Params", "更改参数"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find Unit", "查找单元"], ["Inline Variable", "内联变量"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Move", "移动"], ["No Refactorings Available", "无可用的重构"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Refactor", "重构"], ["Rename", "重命名"], ["Safe Delete", "安全删除"]]
+      }, {
+        "MenuPath": "ProjectBuildItem",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Build", "构建"]]
+      }, {
+        "MenuPath": "ProjectCompileItem",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Compile", "编译"]]
+      }, {
+        "MenuPath": "ProjectDeployItem",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Deploy", "部署"]]
+      }, {
+        "MenuPath": "ProjectInformationItem",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Information for", "信息"]]
+      }, {
+        "MenuPath": "ProjectMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Add", "添加"], ["Add Existing Project", "添加现有项目"], ["Add New Project", "添加新项目"], ["Add to Project", "添加到项目"], ["Add to Repository", "添加到资源库"], ["Build All Projects", "构建所有项目"], ["Clean", "清理"], ["Clear Unit Cache", "清除单元缓存"], ["Compile All Projects", "编译所有项目"], ["Default Options", "默认选项"], ["Dependencies", "依赖项"], ["Deployment", "部署"], ["Format Project Sources", "格式化项目源代码"], ["Import Type Library", "导入类型库"], ["Languages", "语言"], ["Method Toxicity Metrics", "函数矩阵"], ["Modeling Support", "模块支持"], ["Options", "选项"], ["Project", "项目"], ["Project Configurations", "项目配置"], ["Project Page Options", "项目页面选项"], ["QA Audits", "检测设计质量"], ["QA Metrics", "检测代码质量"], ["Remove", "移除"], ["Remove From Project", "从项目移除"], ["Resources and Images", "资源和图像"], ["Set Active  (<||>)", "设为活动  (<||>)"], ["Set Active||", "设为活动"], ["Stop Building", "停止构建"], ["Update Localized Projects", "更新本地化项目"], ["Update Resource DLLs", "更新资源 DLL"], ["View source", "查看源代码"], ["Web Deploy", "Web 部署"], ["Web Deployment Options", "Web 部署选项"]]
+      }, {
+        "MenuPath": "ProjectSyntaxItem",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Syntax Check", "语法检查"]]
+      }, {
+        "MenuPath": "RunMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["ActiveX Server", "ActiveX 服务器"], ["Add Breakpoint", "添加断点"], ["Add Watch", "添加监视"], ["Address Breakpoint", "地址断点"], ["Attach to Process", "附加到进程"], ["Data Breakpoint", "数据断点"], ["Detach From Program", "与程序分离"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Install COM+ Objects", "安装 COM+ 对象"], ["Load Process", "加载进程"], ["Module Load Breakpoint", "模块加载断点"], ["Parameters", "参数"], ["Program Pause", "程序暂停"], ["Program Reset", "程序重置"], ["Register", "注册"], ["Register ActiveX Server", "注册 ActiveX 服务器"], ["Register for Current User", "为当前用户注册"], ["Run", "运行"], ["Run to Cursor", "运行到光标处"], ["Run Until Return", "运行直到返回"], ["Run Without Debugging", "无调试运行"], ["Show Execution Point", "显示执行点"], ["Source Breakpoint", "源代码断点"], ["Step Over", "逐过程"], ["Trace Into", "逐语句"], ["Trace to Next Source Line", "跟踪到下一源代码行"], ["Unregister", "注销"], ["Unregister ActiveX Server", "注销 ActiveX 服务器"]]
+      }, {
+        "MenuPath": "SearchMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Browse Symbol", "浏览符号"], ["Find", "查找"], ["Find Class", "查找类"], ["Find Error", "查找错误"], ["Find in Files", "在文件中查找"], ["Find Local References", "查找本地引用"], ["Find Original Symbol", "查找原始符号"], ["Find References", "查找引用"], ["Find Symbols", "查找符号"], ["Find Unit-File", "查找单元文件"], ["Go to Address", "转到地址"], ["Go to Definition", "转到定义"], ["Go to Implementation", "转到实现"], ["Go to Line Number", "转到行号"], ["IDE Insight", "IDE 洞察"], ["Incremental Search", "增量搜索"], ["Replace", "替换"], ["Search", "搜索"], ["Search Again", "再次搜索"]]
+      }, {
+        "MenuPath": "ToolsMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Borland Resource Builder", "Borland 资源生成器"], ["Build Tools", "构建工具"], ["Configure Tools", "配置工具"], ["DDevExtensions options", "DDevExtensions 选项"], ["Debugger Options", "调试器选项"], ["Dependency Walker", "依赖关系查看器"], ["DLL Export Viewer", "DLL 导出查看器"], ["Editor Options", "编辑器选项"], ["Environment Options", "环境选项"], ["IDE Config Backup/Restore Tool", "IDE 配置备份/还原工具"], ["Image Editor", "图像编辑器"], ["Microsoft Spy++", "Microsoft Spy++"], ["Options", "选项"], ["Package Collection Editor", "包集合编辑器"], ["Pattern Organizer", "模式组织器"], ["Rave Designer", "Rave 设计器"], ["Reload LSP Server", "重新加载 LSP 服务器"], ["Repository", "资源库"], ["Source Formatter", "源代码格式化器"], ["Template Libraries", "模板库"], ["Tools", "工具"], ["Translation Editor", "翻译编辑器"], ["Translation Manager", "翻译管理器"], ["Translation Repository", "翻译资源库"], ["Translation Tools Options", "翻译工具选项"], ["Web App Debugger", "Web 应用程序调试器"], ["Win Sight 32", "Win Sight 32"], ["XML Mapper", "XML 映射器"]]
+      }, {
+        "MenuPath": "ViewsMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Active", "活动"], ["Additional Message Info", "附加消息信息"], ["Align", "对齐"], ["Alignment Palette", "对齐调色板"], ["All", "全部"], ["Always on top", "始终置顶"], ["Animation", "动画"], ["Audits Results", "审计结果"], ["AutoHide", "自动隐藏"], ["Back", "后退"], ["Bookmark||", "书签||"], ["Bottom", "底部"], ["Breakpoints", "断点"], ["Broadcast to devices", "广播到设备"], ["Browser", "浏览器"], ["C++ Refactoring", "C++ 重构"], ["Call Stack", "调用堆栈"], ["Class Explorer", "类资源管理器"], ["Clear Bookmarks", "清除书签"], ["Code Explorer", "代码浏览器"], ["Complete Class at Cursor", "在光标处补全类"], ["Complete Code", "代码补全"], ["Component", "组件"], ["Component List", "组件列表"], ["Component Toolbar", "组件工具栏"], ["Configuration Manager", "配置管理器"], ["CPU Windows", "CPU 窗口"], ["Custom", "自定义"], ["Customize", "自定义"], ["Data Explorer", "数据浏览器"], ["Debug", "调试"], ["Debug Windows", "调试窗口"], ["Delete", "删除"], ["Desktops", "桌面"], ["Disassembly", "反汇编"], ["Doc Comments", "文档注释"], ["Dock area", "停靠区域"], ["Docking", "停靠"], ["Editor", "编辑器"], ["Entire CPU", "完整 CPU"], ["Event Log", "事件日志"], ["Events", "事件"], ["Find", "查找"], ["Find Declaration", "查找声明"], ["Find Declaration Symbol", "查找声明符号"], ["Find Local References", "查找本地引用"], ["Find Reference Results", "查找引用结果"], ["Find References", "查找引用"], ["Float", "浮动"], ["Fold", "折叠"], ["Format Source", "格式化源代码"], ["Forms", "窗体"], ["Forward", "前进"], ["FPU", "浮点运算单元"], ["Goto Bookmarks", "转到书签"], ["Help Insight", "帮助洞察"], ["History", "历史记录"], ["HTML Design", "HTML 设计"], ["HTML Format", "HTML 格式"], ["HTML Table", "HTML 表格"], ["Left", "左侧"], ["LiveBindings Designer", "实时绑定设计器"], ["Local Variables", "局部变量"], ["Memory||", "内存||"], ["Messages", "消息"], ["Methods", "方法"], ["Metrics Results", "度量结果"], ["Model View", "模型视图"], ["Modules", "模块"], ["Multi-Device Preview", "多设备预览"], ["Namespace", "命名空间"], ["Nearest", "最近"], ["Nested Methods", "嵌套方法"], ["New Edit Window", "新建编辑窗口"], ["Next Window", "下一个窗口"], ["Object Inspector", "对象检查器"], ["Object TreeView", "对象树视图"], ["Palette", "组件"], ["Parameter Hint", "参数提示"], ["Platform Device Selection", "平台设备选择"], ["Position", "位置"], ["Project Manager", "项目管理器"], ["Projects", "项目"], ["Refactorings", "重构"], ["Regions", "区域"], ["Registered Type Libraries", "已注册类型库"], ["Registers", "寄存器"], ["Right", "右侧"], ["Save Desktop", "保存桌面"], ["Select View", "选择视图"], ["Set Debug Desktop", "设置调试桌面"], ["Set Default Desktop", "设置默认桌面"], ["Set Startup Desktop", "设置启动桌面"], ["Spacing", "间距"], ["Stack", "堆栈"], ["Standard", "标准"], ["Structure", "结构"], ["Surround", "环绕代码"], ["Sync Prototypes", "同步原型"], ["Templates", "模板"], ["Threads", "线程"], ["To-Do List", "待办列表"], ["Toggle Bookmarks", "切换书签"], ["Toggle Comment", "切换注释"], ["Toggle Form/Unit", "切换窗体/单元"], ["Tool Windows", "工具窗口"], ["Toolbars", "工具栏"], ["Top", "顶部"], ["Translation Manager", "翻译管理器"], ["Type Library", "类型库"], ["Types", "类型"], ["Unfold", "展开"], ["Units", "单元"], ["View", "视图"], ["View as Form", "以窗体查看"], ["Watches", "监视"], ["Welcome Page", "欢迎页"], ["Window List", "窗口列表"]]
+      }, {
+        "MenuPath": "WindowsMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Tabs", "窗口"]]
+      }
+    ],
+    "EventHandler": [{
+        "MenuPath": "InternationalMenu",
+        "ForceEnglish": "True",
+        "ItemCaption": [["Add", "添加"], ["Remove", "移除"], ["Set Active  (<||>)", "设为活动  (<||>)"], ["Update Resource DLLs", "更新资源 DLL"]]
+      }, {
+        "MenuPath": "ViewDesktopsMenu",
+        "ForceEnglish": "True",
+        "ItemCaption": [["<None>", "<无>"], ["Debug Layout", "调试布局"], ["Default Layout", "默认布局"], ["Delete", "删除"], ["Save Desktop", "保存桌面"], ["Set Debug Desktop", "设置调试桌面"], ["Startup Layout", "启动布局"]]
+      }, {
+        "MenuPath": "ViewToolbarsItem",
+        "ForceEnglish": "True",
+        "ItemCaption": [["Active", "活动"], ["Align", "对齐"], ["Always on top", "始终置顶"], ["Animation", "动画"], ["AutoHide", "自动隐藏"], ["Bottom", "底部"], ["Browser", "浏览器"], ["Component", "组件"], ["Custom", "自定义"], ["Customize", "自定义"], ["Debug", "调试"], ["Dock area", "停靠区域"], ["Docking", "停靠"], ["Float", "浮动"], ["HTML Design", "HTML 设计"], ["HTML Format", "HTML 格式"], ["HTML Table", "HTML 表格"], ["Left", "左侧"], ["Platform Device Selection", "平台设备选择"], ["Position", "位置"], ["Right", "右侧"], ["Spacing", "间距"], ["Standard", "标准"], ["Top", "顶部"], ["View", "视图"]]
+      }, {
+        "MenuPath": "WindowsMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["(no windows)", "(无窗口)"], ["Next Tab", "下一个窗口"], ["Previous Tab", "上一个窗口"]]
+      }
+    ]
+  },
+  "PopupMenus": {
+    "DirectAccess": [{
+        "MenuPath": "BPWindow.BPWindow.BPLocalMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Add", "添加"], ["Close", "关闭"], ["Delete All", "全部删除"], ["Disable All", "全部禁用"], ["Disable Group", "禁用组"], ["Dockable", "可停靠"], ["Enable All", "全部启用"], ["Enable Group", "启用组"], ["LocalMenu", "本地菜单"], ["Source Breakpoint", "源代码断点"], ["Stay on Top", "保持置顶"], ["Toolbar", "工具栏"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "CallStackWindow.CallStackWindow.CallStackMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Close", "关闭"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源文件"], ["Local Menu", "本地菜单"], ["Select All", "全选"], ["Show Fully Qualified Names", "显示完全限定名称"], ["Stay on Top", "保持置顶"], ["Toggle Breakpoint", "切换断点"], ["View Locals", "查看局部变量"], ["View Source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "DebugLogView.DebugLogView.LogPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Add Comment", "添加注释"], ["Clear Events", "清除事件"], ["Close", "关闭"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Local Menu", "本地菜单"], ["Properties", "属性"], ["Save Events to File", "保存事件到文件"], ["Select All", "全选"], ["Stay on Top", "保持置顶"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "DockSite0.DockSite0.TabPosPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
+      }, {
+        "MenuPath": "DockSite1.DockSite1.TabPosPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
+      }, {
+        "MenuPath": "DockSite2.DockSite2.TabPosPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
+      }, {
+        "MenuPath": "DockSite3.DockSite3.TabPosPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
+      }, {
+        "MenuPath": "DockSite4.DockSite4.TabPosPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_0.StatusBarPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Status Bar Options", "状态栏选项"]]
+      }, {
+        "MenuPath": "EditWindow_0.FileHistoryFrame.HistoryPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Copy", "复制"], ["Follow move", "跟随移动"], ["Next difference", "下一个差异"], ["Previous difference", "上一个差异"], ["Refresh", "刷新"], ["Revert", "恢复"], ["Select All", "全选"]]
+      }, {
+        "MenuPath": "FindReferencesForm.FindReferencesForm.PopupMenu1",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Dockable", "可停靠"], ["Remove", "移除"], ["Remove All", "全部移除"], ["Stay on Top", "保持置顶"]]
+      }, {
+        "MenuPath": "frmDesignPreview.frmDesignPreview.FormPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Dockable", "可停靠"], ["Stay on Top", "保持置顶"]]
+      }, {
+        "MenuPath": "LocalVarsWindow.LocalVarsWindow.LocalsPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["AltInspect", "Alt检查"], ["Close", "关闭"], ["Copy Name", "复制名称"], ["Copy Value", "复制值"], ["Dockable", "可停靠"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Local Menu", "本地菜单"], ["Stay on Top", "保持置顶"], ["Visualizers", "可视化工具"], ["Watch", "监视"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "MessageViewForm.MessageViewForm.MsgViewPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Clear All Messages", "清除所有消息"], ["Clear Messages", "清除消息"], ["Close Tab", "关闭窗口"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源代码"], ["Local Menu", "本地菜单"], ["Next Message Tab", "下一个消息窗口"], ["Previous Message Tab", "上一个消息窗口"], ["Save All Messages", "保存所有消息"], ["Save Messages", "保存消息"], ["Select All", "全选"], ["View Editor", "查看编辑器"], ["View source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "ProjectManagerForm.ProjectManagerForm.MiscMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Auto Collapse", "自动折叠"], ["Auto Sort", "自动排序"], ["Auto Track", "自动跟踪"], ["Code Insight Activity", "代码洞察活动"], ["Collapse", "折叠"], ["Default Sort Order", "默认排序顺序"], ["Directory (Flat)", "目录(平铺)"], ["Directory (Nested)", "目录(嵌套)"], ["Dockable", "可停靠"], ["Expand", "展开"], ["List", "列表"], ["Modified Date", "修改日期"], ["Name", "名称"], ["Off", "关闭"], ["On", "开启"], ["Path", "路径"], ["Show Path", "显示路径"], ["Show Project Output", "显示项目输出"], ["Sort Projects By", "项目排序方式"], ["Sorting", "排序"], ["Status Bar", "状态栏"], ["Stay on Top", "保持置顶"], ["Type", "类型"], ["Views", "视图"]]
+      }, {
+        "MenuPath": "PropertyInspector.PropertyInspector.LocalPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["All", "全部"], ["Arrange", "排列"], ["by Category", "按类别"], ["by Name", "按名称"], ["Collapse", "折叠"], ["Description Panel", "描述面板"], ["Dockable", "可停靠"], ["Expand", "展开"], ["Filter Box", "筛选框"], ["Help", "帮助"], ["Instance List", "实例列表"], ["Local Menu", "本地菜单"], ["Next Page", "下一页"], ["Next page alt", "下一页备用"], ["None", "无"], ["Previous Page", "上一页"], ["Previous page alt", "上一页备用"], ["Properties", "属性"], ["Quick Action Panel", "快速操作面板"], ["Revert to inherited", "恢复为继承"], ["Show", "显示"], ["Status Bar", "状态栏"], ["Stay on Top", "保持置顶"], ["Toggle", "切换"], ["View", "视图"]]
+      }, {
+        "MenuPath": "RefactoringForm.RefactoringForm.PopupMenu1",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Apply Refactoring", "应用重构"], ["Dockable", "可停靠"], ["Remove", "移除"], ["Remove All", "全部移除"], ["Stay on Top", "保持置顶"], ["Undo/Redo", "撤销/重做"]]
+      }, {
+        "MenuPath": "StructureViewForm.StructureViewForm.NodePopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Dockable", "可停靠"], ["Stay on Top", "保持置顶"]]
+      }, {
+        "MenuPath": "TemplateView.TemplateView.FormPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Edit", "编辑"], ["Execute", "执行"], ["Filter", "筛选"], ["New", "新建"], ["Remove", "移除"], ["Toolbar", "工具栏"]]
+      }, {
+        "MenuPath": "TemplateView.TemplateView.ToolbarPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Text Labels", "文本标签"]]
+      }, {
+        "MenuPath": "ThreadStatus.ThreadStatus.ItemPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Close", "关闭"], ["Detach Process", "分离进程"], ["Dockable", "可停靠"], ["Freeze", "冻结"], ["Freeze All Other Threads", "冻结所有其他线程"], ["Go to Source", "转到源代码"], ["Local Menu", "本地菜单"], ["Make Current", "设为当前"], ["Name Thread", "命名线程"], ["Pause Process", "暂停进程"], ["Process Properties", "进程属性"], ["Stay on Top", "保持置顶"], ["Terminate Process", "终止进程"], ["Thaw", "解冻"], ["Thaw All Threads", "解冻所有线程"], ["View Source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "ToDoListWindow.ToDoListWindow.GridPopup",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Action Item", "操作项"], ["Add", "添加"], ["Categories", "类别"], ["Category", "类别"], ["Copy As", "复制为"], ["Delete", "删除"], ["Dockable", "可停靠"], ["Edit", "编辑"], ["Filter", "筛选"], ["HTML Table", "HTML 表格"], ["Item Types", "项目类型"], ["Local Menu", "本地菜单"], ["Module", "模块"], ["Open", "打开"], ["Owner", "所有者"], ["Owners", "所有者"], ["Priority", "优先级"], ["Show Completed Items", "显示已完成项目"], ["Show ToolTips when Clipped", "剪辑时显示工具提示"], ["Sort", "排序"], ["Status", "状态"], ["Stay on Top", "保持置顶"], ["Table Properties", "表格属性"], ["Text", "文本"], ["Type", "类型"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "WatchWindow.WatchWindow.WatchMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Add Group", "添加组"], ["Add Watch", "添加监视"], ["AddWatch", "添加监视"], ["Break When Changed", "值更改时中断"], ["Close", "关闭"], ["Copy Watch Name", "复制监视名称"], ["Copy Watch Value", "复制监视值"], ["Delete All Watches", "删除所有监视"], ["Delete Group", "删除组"], ["Delete Watch", "删除监视"], ["DeleteWatch", "删除监视"], ["Disable All Watches", "禁用所有监视"], ["Disable Watch", "禁用监视"], ["Dockable", "可停靠"], ["Edit Watch", "编辑监视"], ["EditWatch", "编辑监视"], ["Enable All Watches", "启用所有监视"], ["Enable Watch", "启用监视"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Local Menu", "本地菜单"], ["Move Watch to Group", "将监视移动到组"], ["New Watch", "新建监视"], ["Next Watch Group", "下一个监视组"], ["Previous Watch Group", "上一个监视组"], ["Show Column Headers", "显示列标题"], ["Stay on Top", "保持置顶"], ["Visualizers", "可视化工具"], ["Zoom Window", "缩放窗口"]]
+      }
+    ],
+    "EventHandler": [{
+        "MenuPath": "AppBuilder.AppBuilder.ToolbarsPopup",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Active", "活动"], ["Align", "对齐"], ["Always on top", "始终置顶"], ["Animation", "动画"], ["AutoHide", "自动隐藏"], ["Bottom", "底部"], ["Browser", "浏览器"], ["Component", "组件"], ["Custom", "自定义"], ["Customize", "自定义"], ["Debug", "调试"], ["Dock area", "停靠区域"], ["Docking", "停靠"], ["Float", "浮动"], ["HTML Design", "HTML 设计"], ["HTML Format", "HTML 格式"], ["HTML Table", "HTML 表格"], ["Left", "左侧"], ["Platform Device Selection", "平台设备选择"], ["Position", "位置"], ["Right", "右侧"], ["Spacing", "间距"], ["Standard", "标准"], ["Top", "顶部"], ["View", "视图"]]
+      }, {
+        "MenuPath": "DataExplorerDockForm.ExplorerTreeFrame.PopupMenu1",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Add New Connection", "添加新连接"], ["Close", "关闭"], ["Delete", "删除"], ["Modify", "修改"], ["New Table", "新建表格"], ["Refresh", "刷新"], ["Rename", "重命名"], ["SQL Window", "SQL 窗口"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_0.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Add Comment", "添加注释"], ["Add to Repository", "添加到资源库"], ["Add To-Do Item", "添加待办事项"], ["Add Unit Test", "添加单元测试"], ["Add Watch at Cursor", "在光标处添加监视"], ["AI Chat", "AI 聊天"], ["All", "全部"], ["Bookmark 0", "书签 0"], ["Bookmark 1", "书签 1"], ["Bookmark 2", "书签 2"], ["Bookmark 3", "书签 3"], ["Bookmark 4", "书签 4"], ["Bookmark 5", "书签 5"], ["Bookmark 6", "书签 6"], ["Bookmark 7", "书签 7"], ["Bookmark 8", "书签 8"], ["Bookmark 9", "书签 9"], ["Browse Symbol at Cursor", "浏览光标处符号"], ["Change Params", "更改参数"], ["Clear Bookmarks", "清除书签"], ["Close Page", "关闭页面"], ["Complete Class at Cursor", "在光标处补全类"], ["Complete the Code", "补全代码"], ["Config", "配置"], ["Convert to Assembly", "转换为汇编"], ["Convert to C++", "转换为 C++"], ["Convert to Delphi", "转换为 Delphi"], ["Copy", "复制"], ["Cut", "剪切"], ["Debug", "调试"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Display results in the Chat window", "在聊天窗口中显示结果"], ["Display results in the editor", "在编辑器中显示结果"], ["Doc Comments", "文档注释"], ["Editor Options", "编辑器选项"], ["Evaluate/Modify", "计算/修改"], ["Explain the Code", "解释代码"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find", "查找"], ["Find Bugs", "查找缺陷"], ["Find Declaration", "查找声明"], ["Find declaration of constant||", "查找常量声明||"], ["Find declaration of constructor||", "查找构造函数声明||"], ["Find declaration of field||", "查找字段声明||"], ["Find declaration of method||", "查找方法声明||"], ["Find declaration of property||", "查找属性声明||"], ["Find declaration of type||", "查找类型声明||"], ["Find declaration of unit||", "查找单元声明||"], ["Find Declaration Symbol", "查找声明符号"], ["Find Header(AI)", "查找头文件(AI)"], ["Find Local References", "查找本地引用"], ["Find Local References to constant||", "查找常量的局部引用||"], ["Find Local References to constructor||", "查找构造函数的局部引用||"], ["Find Local References to field||", "查找字段的局部引用||"], ["Find Local References to method||", "查找方法的局部引用||"], ["Find Local References to property||", "查找属性的局部引用||"], ["Find Local References to type||", "查找类型的局部引用||"], ["Find Local References to unit||", "查找单元的局部引用||"], ["Find References", "查找引用"], ["Find References to constant||", "查找常量的引用||"], ["Find References to constructor||", "查找构造函数的引用||"], ["Find References to field||", "查找字段的引用||"], ["Find References to method||", "查找方法的引用||"], ["Find References to property||", "查找属性的引用||"], ["Find References to type||", "查找类型的引用||"], ["Find References to unit||", "查找单元的引用||"], ["Find Symbols", "查找符号"], ["Find Unit", "查找单元"], ["Find Unit(AI)", "查找单元(AI)"], ["Fold", "折叠"], ["Format Source", "格式化源代码"], ["Go to Address", "转到地址"], ["Goto Bookmarks", "转到书签"], ["Inline Variable", "内联变量"], ["Inspect", "检查"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Methods", "方法"], ["Move", "移动"], ["Namespace", "命名空间"], ["Nearest", "最近"], ["Nested Methods", "嵌套方法"], ["Next Buffer View", "下一个缓冲区视图"], ["Next Modification", "下一个修改"], ["Next Unsaved Modification", "下一个未保存的修改"], ["Open File at Cursor", "在光标处打开文件"], ["Open Source/Header File", "打开源文件/头文件"], ["Optimize Code", "优化代码"], ["Paste", "粘贴"], ["Prev Buffer View", "上一个缓冲区视图"], ["Previous Modification", "上一个修改"], ["Previous Unsaved Modification", "上一个未保存的修改"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Read Only", "只读"], ["Refactor", "重构"], ["Regions", "区域"], ["Rename", "重命名"], ["Run to Cursor", "运行到光标处"], ["Safe Delete", "安全删除"], ["Search For Usages", "搜索使用情况"], ["Set Next Statement", "设置下一条语句"], ["Smart CodeInsight", "智能代码洞察"], ["Surround", "环绕代码"], ["Surround Windows", "环绕 Windows"], ["Sync Prototypes", "同步原型"], ["Toggle Bookmarks", "切换书签"], ["Toggle Breakpoint", "切换断点"], ["Toggle Comment", "切换注释"], ["Topic Search", "主题搜索"], ["Types", "类型"], ["Unfold", "展开"], ["Version Control", "版本控制"], ["View as Form", "以窗体查看"], ["View CPU", "查看 CPU"], ["View Messages", "查看消息"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_0.ModuleMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Add Comment", "添加注释"], ["Add Unit Test", "添加单元测试"], ["AI Chat", "AI 聊天"], ["All Other Pages", "所有其他页面"], ["All to the Left", "全部移至左侧"], ["All to the Right", "全部移至右侧"], ["Bottom", "底部"], ["Close", "关闭"], ["Close All Pages Opened While Debugging", "关闭调试时打开的所有页面"], ["Close Page", "关闭页面"], ["Complete the Code", "补全代码"], ["Config", "配置"], ["Convert to Assembly", "转换为汇编"], ["Convert to C++", "转换为 C++"], ["Convert to Delphi", "转换为 Delphi"], ["Copy File Path", "复制文件路径"], ["Display results in the Chat window", "在聊天窗口中显示结果"], ["Display results in the editor", "在编辑器中显示结果"], ["Explain the Code", "解释代码"], ["File Name Only", "仅文件名"], ["Find Bugs", "查找缺陷"], ["Find Header(AI)", "查找头文件(AI)"], ["Find Unit(AI)", "查找单元(AI)"], ["Focus Mode", "专注模式"], ["Folder Only", "仅文件夹"], ["Full Path", "完整路径"], ["Left", "左侧"], ["Move", "移动"], ["New Edit Window", "新建编辑窗口"], ["Open Source/Header File", "打开源文件/头文件"], ["Opened While Debugging", "调试时打开的"], ["Optimize Code", "优化代码"], ["Pages", "页面"], ["Read Only", "只读"], ["Right", "右侧"], ["Show in Explorer", "在资源管理器中显示"], ["Smart CodeInsight", "智能代码洞察"], ["Split", "拆分"], ["Tab Options", "窗口选项"], ["Top", "顶部"], ["UnDock Edit Window", "取消编辑窗口停靠"], ["View as Form", "以窗体查看"], ["View Messages", "查看消息"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_1.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Close All Other Pages", "关闭所有其他页面"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_10.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["View Explorer", "查看资源管理器"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_11.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Properties", "属性"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_12.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Open \"||\" in Windows Explorer", "在 Windows 资源管理器中打开 \"||\""]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_2.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Shell Context Menu", "外壳上下文菜单"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_3.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Copy Full Path/FileName", "复制完整路径/文件名"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_4.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["New Edit Window", "新建编辑窗口"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_5.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Add to Interface...", "添加到接口..."]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_6.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Add To-Do Item...", "添加待办事项..."]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_7.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Select All", "全选"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_8.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["CnPack Editor Menu", "CnPack 编辑器菜单"]]
+      }, {
+        "MenuPath": "EditWindow_0.EditWindow_9.EditorLocalMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Message View", "消息视图"]]
+      }, {
+        "MenuPath": "ProjectManagerForm.ProjectManagerForm.FormPopupMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Activate", "激活"], ["Add", "添加"], ["Add Existing Project", "添加现有项目"], ["Add New", "添加新建"], ["Add New Project", "添加新项目"], ["Add Platform", "添加平台"], ["Add Reference", "添加引用"], ["Add to Version Control", "添加到版本控制"], ["Apply Option Set", "应用选项集"], ["Auto Sort", "自动排序"], ["Build", "构建"], ["Build All From Here", "从此处开始构建所有"], ["Build Later", "较晚构建"], ["Build Sooner", "较早构建"], ["Clean", "清理"], ["Clean All From Here", "从此处开始清理所有"], ["Compare", "比较"], ["Compare to Delphi Version", "与 Delphi 版本比较"], ["Compare to File", "与文件比较"], ["Compare to Last Save", "与最后保存的比较"], ["Compare to Opened File", "与已打开的文件比较"], ["Compile", "编译"], ["Compile All From Here", "从此处开始编译所有"], ["Copy File Path", "复制文件路径"], ["Customize", "自定义"], ["Delete", "删除"], ["Dependencies", "依赖项"], ["Edit", "编辑"], ["Edit Connection", "编辑连接"], ["Edit SDK", "编辑 SDK"], ["Enable Skia", "启用 Skia"], ["File Name Only", "仅文件名"], ["Folder Only", "仅文件夹"], ["Format Project Sources", "格式化项目源代码"], ["From Here", "从此处开始"], ["Full Path", "完整路径"], ["History Compare", "历史比较"], ["Install", "安装"], ["Launch Beyond Compare", "启动 Beyond Compare"], ["Local Menu", "本地菜单"], ["Make", "生成"], ["Modeling Support", "模块支持"], ["Modified Date", "修改日期"], ["Name", "名称"], ["New Configuration", "新建配置"], ["New Edit Window", "新建编辑窗口"], ["New Option Set", "新建选项集"], ["Open", "打开"], ["Open in", "在中打开"], ["Options", "选项"], ["Other", "其他"], ["Path", "路径"], ["Properties", "属性"], ["Remove File", "移除文件"], ["Remove From Project", "从项目移除"], ["Remove Project", "移除项目"], ["Rename", "重命名"], ["Revert to Default Connection", "恢复为默认连接"], ["Revert to Default SDK", "恢复为默认 SDK"], ["Run", "运行"], ["Run Without Debugging", "无调试运行"], ["Save", "保存"], ["Save As", "另存为"], ["Save Project Group", "保存项目组"], ["Save Project Group As", "项目组另存为"], ["Select Left File For Compare", "选择左侧文件进行比较"], ["Show in Explorer", "在资源管理器中显示"], ["Sort By", "排序依据"], ["TDump||", "转储||"], ["Type", "类型"], ["Uninstall", "卸载"], ["View Source", "查看源代码"]]
+      }, {
+        "MenuPath": "ProjectManagerForm.ProjectManagerForm.ToolbarPopupMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Text Labels", "文本标签"], ["Tool Windows", "工具窗口"]]
+      }, {
+        "MenuPath": "StructureViewForm.StructureViewForm.NodePopupMenu",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["<Add New ImageList>", "<添加新图像列表>"], ["<Add New||", "<添加新||"], ["Action List", "操作列表"], ["Action List Editor", "操作列表编辑器"], ["Add Component", "添加组件"], ["Add Control", "添加控件"], ["Add to Repository", "添加到资源库"], ["Align", "对齐"], ["Align To Grid", "对齐到网格"], ["All", "全部"], ["Bind Visually", "可视化绑定"], ["Bring to Front", "置于顶层"], ["Button", "按钮"], ["Checked", "已选中"], ["Clear Text", "清除文本"], ["Control", "控件"], ["Copy", "复制"], ["Creation Order", "创建顺序"], ["Cut", "剪切"], ["Delete", "删除"], ["Dialog", "对话框"], ["Edit", "编辑"], ["Flip Children", "翻转子控件"], ["Form State", "窗体状态"], ["Frame Controller", "框架控制器"], ["GroupBar", "分组栏"], ["Hide Non-Visual Components", "隐藏非可视组件"], ["Image Collection", "图像集合"], ["Image List", "图像列表"], ["ImageList Editor", "图像列表编辑器"], ["Items Editor", "节点编辑器"], ["Label", "标签"], ["Left Justify", "左对齐"], ["Main Form", "主窗体"], ["Main Form (w/ GroupBar)", "主窗体(带分组栏)"], ["Main Form (w/ Splitter)", "主窗体(带分隔条)"], ["Main Menu", "主菜单"], ["Menu Controller", "菜单控制器"], ["Menu Designer", "菜单设计器"], ["Panel", "面板"], ["Paste", "粘贴"], ["Popup Menu", "弹出菜单"], ["Position", "位置"], ["Properties", "属性"], ["Property Store", "属性存储"], ["Quick Button Configuration", "快速按钮配置"], ["Quick Edit", "快速编辑"], ["Quick Edit Icon", "快速编辑图标"], ["Quick Edit Picture", "快速编辑图像"], ["Quick Edit||", "快速编辑||"], ["Quick Select DisabledImages", "快速选择禁用图像"], ["Quick Select Images", "快速选择图像"], ["Quick Select StateImages", "快速选择状态图像"], ["Quick Select||", "快速选择||"], ["Quick||Configuration", "快速||设计"], ["Quick-Design Form", "快速设计窗体"], ["RegIniFile", "注册表INI文件"], ["Revert to Inherited", "恢复为继承"], ["Right Justify", "右对齐"], ["Scale", "缩放"], ["Select All", "全选"], ["Selected", "选定"], ["Send to Back", "置于底层"], ["Show Non-Visual Components", "显示非可视组件"], ["Size", "大小"], ["SizePanel", "大小面板"], ["Splitter", "分隔条"], ["StatusBar", "状态栏"], ["Tab Order", "Tab 键顺序"], ["Tabbed Dialog", "选项卡式对话框"], ["Test Dialog", "测试对话框"], ["Text DFM", "文本 DFM"], ["ToolBar", "工具栏"], ["Undo", "撤销"], ["View as Text", "以文本查看"], ["Virtual Image List", "虚拟图像列表"], ["Word Wrap", "自动换行"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Add New Category", "添加新类别"], ["Auto Collapse Categories", "自动折叠类别"], ["Collapse All", "全部折叠"], ["Dockable", "可停靠"], ["Expand All", "全部展开"], ["Local Menu", "本地菜单"], ["Lock Reordering", "锁定重排序"], ["Properties", "属性"], ["Reset Palette", "重置组件"], ["Show All Buttons", "显示所有按钮"], ["Stay on Top", "保持置顶"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette.actnRemoveCategory1",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Delete||Category", "删除||类别"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette.DeleteButton1",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Delete||Button", "删除||按钮"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette.HideButton1",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Hide||Button", "隐藏||按钮"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette.mnuRenameCategory",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Rename||Category", "重命名||类别"]]
+      }, {
+        "MenuPath": "ToolForm.ToolForm.popPalette.mnuShowButton",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["Unhide||Button", "取消隐藏||按钮"]]
+      }
+    ],
+    "WindowProc": [{
+        "MenuPath": "Application.TFormContainerForm.TPopupActionBar",
+        "ForceEnglish": "TRUE",
+        "ItemCaption": [["<Add New ImageList>", "<添加新图像列表>"], ["<Add New||", "<添加新||"], ["Action List", "操作列表"], ["Action List Editor", "操作列表编辑器"], ["Add Component", "添加组件"], ["Add Control", "添加控件"], ["Add to Repository", "添加到资源库"], ["Align", "对齐"], ["Align To Grid", "对齐到网格"], ["All", "全部"], ["Bind Visually", "可视化绑定"], ["Bring to Front", "置于顶层"], ["Button", "按钮"], ["Checked", "已选中"], ["Clear Text", "清除文本"], ["Control", "控件"], ["Copy", "复制"], ["Creation Order", "创建顺序"], ["Cut", "剪切"], ["Delete", "删除"], ["Dialog", "对话框"], ["Edit", "编辑"], ["Edit", "编辑框"], ["Flip Children", "翻转子控件"], ["Hide Non-Visual Components", "隐藏非可视组件"], ["Image List", "图像列表"], ["ImageList Editor", "图像列表编辑器"], ["Items Editor", "节点编辑器"], ["Label", "标签"], ["Left Justify", "左对齐"], ["Main Form", "主窗体"], ["Main Form (w/ Splitter)", "主窗体 (带分隔条)"], ["Main Menu", "主菜单"], ["Menu Designer", "菜单设计器"], ["Panel", "面板"], ["Paste", "粘贴"], ["Popup Menu", "弹出菜单"], ["Position", "位置"], ["Quick Button Configuration", "快速按钮配置"], ["Quick Edit", "快速编辑"], ["Quick Edit Icon", "快速编辑图标"], ["Quick Edit Picture", "快速编辑图像"], ["Quick Edit||", "快速编辑||"], ["Quick Select DisabledImages", "快速选择禁用图像"], ["Quick Select Images", "快速选择图像"], ["Quick Select StateImages", "快速选择状态图像"], ["Quick Select||", "快速选择||"], ["Quick-Design Form", "快速设计窗体"], ["Revert to Inherited", "恢复为继承"], ["Right Justify", "右对齐"], ["Scale", "缩放"], ["Select All", "全选"], ["Selected", "选定"], ["Send to Back", "置于底层"], ["Show Non-Visual Components", "显示非可视组件"], ["Size", "大小"], ["StatusBar", "状态栏"], ["Tab Order", "Tab 键顺序"], ["Tabbed Dialog", "选项卡式对话框"], ["Test Dialog", "测试对话框"], ["Text DFM", "文本 DFM"], ["ToolBar", "工具栏"], ["Undo", "撤销"], ["View as Text", "以文本查看"], ["Word Wrap", "自动换行"]]
+      }
+    ]
+  }
+}

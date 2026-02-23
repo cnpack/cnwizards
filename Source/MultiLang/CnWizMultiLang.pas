@@ -65,7 +65,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
 {$IFNDEF STAND_ALONE}
-  CnDesignEditor, CnWizScaler,
+  CnDesignEditor, CnWizScaler, CnIDETranslator,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
 {$ELSE}
   CnWizLangID, 
@@ -81,16 +81,21 @@ type
 
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
+    FTranslateIndex: Integer;
     FIndexes: array of Integer;
+    FTranslator: TCnMenuTranslator;
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
     procedure WizLanguageChanged(Sender: TObject);
+    procedure UpdateTranslator(Sender: TObject);
   public
     constructor Create; override;
     destructor Destroy; override;
     procedure AcquireSubActions; override;
     procedure RefreshSubActions; override;
+
+    procedure Loaded; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     class function IsInternalWizard: Boolean; override;
     function GetCaption: string; override;
@@ -188,14 +193,17 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizShareImages {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizShareImages, CnWizNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   TControlHack = class(TControl);
 
 const
   csLanguage = 'Language';
+  csUITrans = 'UITrans';
+
   csEnglishID = 1033;
+  csChineseID = 2052;
 
   csFixPPI = 96;
   csFixPerInch = 72;
@@ -258,7 +266,7 @@ begin
   end;
 
   // 将 2052 调整至首位
-  Idx := FStorage.Languages.Find(2052);
+  Idx := FStorage.Languages.Find(csChineseID);
   if Idx > 0 then
   begin
     Item := FStorage.Languages.Add;
@@ -317,6 +325,8 @@ begin
     AcquireSubActions
   else
     Active := False;
+
+  FTranslator := TCnMenuTranslator.Create;
 end;
 
 procedure TCnWizMultiLang.AcquireSubActions;
@@ -324,23 +334,29 @@ var
   I: Integer;
   S: string;
 begin
+  FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化所有菜单');
+  AddSepMenu;
+
   if FStorage.LanguageCount > 0 then
-    SetLength(FIndexes, FStorage.LanguageCount);
-  for I := 0 to FStorage.LanguageCount - 1 do
   begin
-    S := CnLanguages.NameFromLocaleID[FStorage.Languages[I].LanguageID];
-    if Pos('中国', S) <= 0 then
-      S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
-    FIndexes[I] := RegisterASubAction(csLanguage + InttoStr(I) + FStorage.
-      Languages[I].Abbreviation, FStorage.Languages[I].LanguageName + ' - ' +
-      S, 0, FStorage.Languages[I].LanguageName);
+    SetLength(FIndexes, FStorage.LanguageCount);
+    for I := 0 to FStorage.LanguageCount - 1 do
+    begin
+      S := CnLanguages.NameFromLocaleID[FStorage.Languages[I].LanguageID];
+      if Pos('中国', S) <= 0 then
+        S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
+
+      FIndexes[I] := RegisterASubAction(csLanguage + InttoStr(I) + FStorage.
+        Languages[I].Abbreviation, FStorage.Languages[I].LanguageName + ' - ' +
+        S, 0, FStorage.Languages[I].LanguageName);
+    end;
   end;
 end;
 
 destructor TCnWizMultiLang.Destroy;
 begin
-  if FStorage <> nil then
-    FreeAndNil(FStorage);
+  FreeAndNil(FTranslator);
+  FreeAndNil(FStorage);
   inherited;
 end;
 
@@ -381,23 +397,36 @@ begin
     CnDesignEditorMgr.LanguageChanged(Sender);
 {$ENDIF}
   end;
+  CnWizNotifierServices.ExecuteOnApplicationIdle(UpdateTranslator);
 end;
 
 procedure TCnWizMultiLang.RefreshSubActions;
 begin
-// 什么也不做，也不 inherited, 以阻止子 Action 被刷新。
+  // 什么也不做，也不 inherited, 以阻止子 Action 被刷新。
 end;
 
 procedure TCnWizMultiLang.SubActionExecute(Index: Integer);
 var
   I: Integer;
 begin
-  for I := Low(FIndexes) to High(FIndexes) do
+  if Index = FTranslateIndex then
   begin
-    if FIndexes[I] = Index then
+    if WizOptions.CurrentLangID = csChineseID then
     begin
-      CnLanguageManager.CurrentLanguageIndex := I;
-      WizOptions.CurrentLangID := FStorage.Languages[I].LanguageID;
+      SubActions[Index].Checked := not SubActions[Index].Checked;
+      FTranslator.Active := SubActions[Index].Checked;
+      WizOptions.TranslateUI := FTranslator.Active;
+    end;
+  end
+  else
+  begin
+    for I := Low(FIndexes) to High(FIndexes) do
+    begin
+      if FIndexes[I] = Index then
+      begin
+        CnLanguageManager.CurrentLanguageIndex := I;
+        WizOptions.CurrentLangID := FStorage.Languages[I].LanguageID;
+      end;
     end;
   end;
 end;
@@ -406,11 +435,35 @@ procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
 var
   I: Integer;
 begin
-  for I := Low(FIndexes) to High(FIndexes) do
+  if Index = FTranslateIndex then
   begin
-    SubActions[I].Checked := WizOptions.CurrentLangID =
-      FStorage.Languages[I].LanguageID;
+    SubActions[Index].Visible := WizOptions.CurrentLangID = csChineseID;
+    if SubActions[Index].Visible then
+      SubActions[Index].Checked := FTranslator.Active;
+  end
+  else
+  begin
+    for I := Low(FIndexes) to High(FIndexes) do
+    begin
+      if Index = FIndexes[I] then
+        SubActions[Index].Checked := WizOptions.CurrentLangID =
+          FStorage.Languages[I].LanguageID;
+    end;
   end;
+end;
+
+procedure TCnWizMultiLang.UpdateTranslator(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnWizMultiLang.UpdateTranslator. TranslateUI %d, CurrentLangID %d',
+    [Ord(WizOptions.TranslateUI), WizOptions.CurrentLangID]);
+{$ENDIF}
+  FTranslator.Active := WizOptions.TranslateUI and (WizOptions.CurrentLangID = csChineseID);
+end;
+
+procedure TCnWizMultiLang.Loaded;
+begin
+  UpdateTranslator(Self);
 end;
 
 { TCnTranslateForm }
