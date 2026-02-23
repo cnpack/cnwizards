@@ -1609,6 +1609,12 @@ begin
       DoHandleException('WizManager ' + Wizards[I].ClassName + '.Loaded');
     end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+    // 这俩内部专家需要调用
+    FWizMultiLang.Loaded;
+    FWizAbout.Loaded;
+{$ENDIF}
+
 {$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
     // 装载组件编辑器设置

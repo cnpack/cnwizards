@@ -130,7 +130,7 @@ end;
 constructor TCnWizAbout.Create;
 begin
   inherited;
-  // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
+  // 因为本 Wizard 不会被 Loaded 调用，故需要手工 AcquireSubActions;
   AcquireSubActions;
 
 {$IFDEF DELPHI_OTA}

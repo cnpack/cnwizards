@@ -108,6 +108,7 @@ type
     FUpgradeLastDate: TDateTime;
     FBuildDate: TDateTime;
     FCurrentLangID: Cardinal;
+    FTranslateUI: Boolean;
     FShowTipOfDay: Boolean;
     FUseToolsMenu: Boolean;
     FFixThreadLocale: Boolean;
@@ -211,6 +212,8 @@ type
     // 专家使用的语言
     property CurrentLangID: Cardinal read FCurrentLangID write SetCurrentLangID;
     {* 当前语言 ID}
+    property TranslateUI: Boolean read FTranslateUI write FTranslateUI;
+    {* 是否翻译界面主要是菜单}
 
     // 专家使用的目录名
     property LangPath: string read FLangPath;
@@ -339,6 +342,7 @@ end;
 
 const
   csLangID = 'CurrentLangID';
+  csTranslateUI = 'TranslateUI';
   csShowHint = 'ShowHint';
   csShowWizComment = 'ShowWizComment';
   csShowTipOfDay = 'ShowTipOfDay';
@@ -503,6 +507,7 @@ begin
   with CreateRegIniFile do
   try
     FCurrentLangID := ReadInteger(SCnOptionSection, csLangID, GetSystemDefaultLCID);
+    FTranslateUI := ReadBool(SCnOptionSection, csTranslateUI, False);
     FShowHint := ReadBool(SCnOptionSection, csShowHint, True);
     FShowWizComment := ReadBool(SCnOptionSection, csShowWizComment, True);
     FShowTipOfDay := ReadBool(SCnOptionSection, csShowTipOfDay, True);
@@ -580,6 +585,7 @@ begin
   with CreateRegIniFile do
   try
     WriteInteger(SCnOptionSection, csLangID, FCurrentLangID);
+    WriteBool(SCnOptionSection, csTranslateUI, FTranslateUI);
     WriteBool(SCnOptionSection, csShowHint, FShowHint);
     WriteBool(SCnOptionSection, csShowWizComment, FShowWizComment);
     WriteBool(SCnOptionSection, csShowTipOfDay, FShowTipOfDay);
