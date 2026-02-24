@@ -81,9 +81,11 @@ type
 
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
-    FTranslateIndex: Integer;
     FIndexes: array of Integer;
+{$IFNDEF STAND_ALONE}
+    FTranslateIndex: Integer;
     FTranslator: TCnMenuTranslator;
+{$ENDIF}
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
@@ -326,7 +328,9 @@ begin
   else
     Active := False;
 
+{$IFNDEF STAND_ALONE}
   FTranslator := TCnMenuTranslator.Create;
+{$ENDIF}
 end;
 
 procedure TCnWizMultiLang.AcquireSubActions;
@@ -334,8 +338,10 @@ var
   I: Integer;
   S: string;
 begin
+{$IFNDEF STAND_ALONE}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化所有菜单');
   AddSepMenu;
+{$ENDIF}
 
   if FStorage.LanguageCount > 0 then
   begin
@@ -355,7 +361,9 @@ end;
 
 destructor TCnWizMultiLang.Destroy;
 begin
+{$IFNDEF STAND_ALONE}
   FreeAndNil(FTranslator);
+{$ENDIF}
   FreeAndNil(FStorage);
   inherited;
 end;
@@ -409,13 +417,15 @@ procedure TCnWizMultiLang.SubActionExecute(Index: Integer);
 var
   I: Integer;
 begin
-  if Index = FTranslateIndex then
+  if {$IFDEF STAND_ALONE} False {$ELSE} Index = FTranslateIndex {$ENDIF} then
   begin
     if WizOptions.CurrentLangID = csChineseID then
     begin
       SubActions[Index].Checked := not SubActions[Index].Checked;
+{$IFNDEF STAND_ALONE}
       FTranslator.Active := SubActions[Index].Checked;
       WizOptions.TranslateUI := FTranslator.Active;
+{$ENDIF}
     end;
   end
   else
@@ -435,11 +445,13 @@ procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
 var
   I: Integer;
 begin
-  if Index = FTranslateIndex then
+  if {$IFDEF STAND_ALONE} False {$ELSE} Index = FTranslateIndex {$ENDIF} then
   begin
     SubActions[Index].Visible := WizOptions.CurrentLangID = csChineseID;
+{$IFNDEF STAND_ALONE}
     if SubActions[Index].Visible then
       SubActions[Index].Checked := FTranslator.Active;
+{$ENDIF}
   end
   else
   begin
@@ -458,12 +470,16 @@ begin
   CnDebugger.LogFmt('TCnWizMultiLang.UpdateTranslator. TranslateUI %d, CurrentLangID %d',
     [Ord(WizOptions.TranslateUI), WizOptions.CurrentLangID]);
 {$ENDIF}
+{$IFNDEF STAND_ALONE}
   FTranslator.Active := WizOptions.TranslateUI and (WizOptions.CurrentLangID = csChineseID);
+{$ENDIF}
 end;
 
 procedure TCnWizMultiLang.Loaded;
 begin
+{$IFNDEF STAND_ALONE}
   UpdateTranslator(Self);
+{$ENDIF}
 end;
 
 { TCnTranslateForm }
