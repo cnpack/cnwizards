@@ -596,9 +596,11 @@ function CnOtaGetFileEditorForModule(Module: IOTAModule; Index: Integer): IOTAEd
 function CnOtaGetFormEditorFromModule(const Module: IOTAModule): IOTAFormEditor;
 {* 取窗体编辑器}
 function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor = nil): TWinControl;
-{* 取得窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
+{* 取得窗体编辑器的容器控件如 Form1 实例或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口。
+  另外当是嵌入式设计器时会返回 Form1 的容器 TFormContainerForm}
 function CnOtaGetCurrentDesignContainer: TWinControl;
-{* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口}
+{* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口。
+  另外当是嵌入式设计器时会返回 Form1 的容器 TFormContainerForm}
 function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean; overload;
 {* 取得当前窗体编辑器的已选择的组件的实例}
 function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean; overload;
@@ -4731,7 +4733,11 @@ begin
   begin
     Result := Root as TWinControl;
     while Assigned(Result) and Assigned(Result.Parent) do
+    begin
       Result := Result.Parent;
+      if Result.ClassNameIs('TFormContainerForm') then // 指定类名的容器
+        Exit;
+    end;
   end
   else if (Root is TDataModule) and (Root.Owner <> nil) and (Root.Owner is TWinControl) then
   begin
