@@ -4,6 +4,7 @@ USEFORMNS("Misc\CnWizUpgradeFrm.pas", Cnwizupgradefrm, CnWizUpgradeForm);
 USEFORMNS("Misc\CnWizShareImages.pas", Cnwizshareimages, dmCnSharedImages); /* TDataModule: File Type */
 USEFORMNS("MultiLang\CnWizMultiLang.pas", Cnwizmultilang, CnTranslateForm);
 USEFORMNS("MultiLang\CnWizMultiLangFrame.pas", Cnwizmultilangframe, CnTranslateFrame); /* TFrame: File Type */
+USEUNIT("MultiLang\CnIDETranslator.pas");
 USEFORMNS("Config\CnWizConfigFrm.pas", Cnwizconfigfrm, CnWizConfigForm);
 USEFORMNS("Config\CnWizSubActionShortCutFrm.pas", Cnwizsubactionshortcutfrm, CnWizSubActionShortCutForm);
 USEFORMNS("Config\CnWizMenuSortFrm.pas", Cnwizmenusortfrm, CnMenuSortFrm);

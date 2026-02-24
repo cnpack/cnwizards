@@ -44,6 +44,7 @@ uses
   CnIDEVersion in 'Misc\CnIDEVersion.pas',
   CnWizMultiLang in 'MultiLang\CnWizMultiLang.pas' {CnTranslateForm},
   CnWizMultiLangFrame in 'MultiLang\CnWizMultiLangFrame.pas' {CnTranslateFrame: TFrame},
+  CnIDETranslator in 'MultiLang\CnIDETranslator.pas',
   CnWizTranslate in 'MultiLang\CnWizTranslate.pas',
   CnWizUtils in 'Utils\CnWizUtils.pas',
   CnWizNotifier in 'Utils\CnWizNotifier.pas',

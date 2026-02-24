@@ -11,7 +11,7 @@
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
       ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
-      ..\Dcu\CnWizMultiLang.obj .\Dcu\CnWizMultiLangFrame.obj 
+      ..\Dcu\CnWizMultiLang.obj .\Dcu\CnWizMultiLangFrame.obj ..\Dcu\CnIDETranslator.obj 
       ..\Dcu\CnWizConfigFrm.obj ..\Dcu\CnWizSubActionShortCutFrm.obj 
       ..\Dcu\CnWizMenuSortFrm.obj ..\Dcu\CnWizUtils.obj 
       ..\Dcu\CnFastCodeWizard.obj ..\Dcu\CnDesignWizard.obj 
@@ -253,6 +253,7 @@
       <FILE FILENAME="Misc\CnIDEVersion.pas" FORMNAME="" UNITNAME="CnIDEVersion" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="MultiLang\CnWizMultiLang.pas" FORMNAME="CnTranslateForm" UNITNAME="Cnwizmultilang" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="MultiLang\CnWizMultiLangFrame.pas" FORMNAME="CnTranslateFrame" UNITNAME="Cnwizmultilangframe" CONTAINERID="PascalCompiler" DESIGNCLASS="TFrame" LOCALCOMMAND=""/>
+      <FILE FILENAME="MultiLang\CnIDETranslator.pas" FORMNAME="" UNITNAME="CnIDETranslator" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizConfigFrm.pas" FORMNAME="CnWizConfigForm" UNITNAME="Cnwizconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizSubActionShortCutFrm.pas" FORMNAME="CnWizSubActionShortCutForm" UNITNAME="Cnwizsubactionshortcutfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Config\CnWizMenuSortFrm.pas" FORMNAME="CnMenuSortFrm" UNITNAME="Cnwizmenusortfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>

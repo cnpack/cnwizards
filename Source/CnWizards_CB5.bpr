@@ -11,7 +11,7 @@
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
       ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
-      ..\Dcu\CnWizMultiLangFrame.obj ..\Dcu\CnWizConfigFrm.obj 
+      ..\Dcu\CnWizMultiLangFrame.obj ..\Dcu\CnIDETranslator.obj ..\Dcu\CnWizConfigFrm.obj 
       ..\Dcu\CnWizSubActionShortCutFrm.obj ..\Dcu\CnWizMenuSortFrm.obj 
       ..\Dcu\CnWizUtils.obj ..\Dcu\CnDesignWizard.obj 
       ..\Dcu\CnCodingToolsetWizard.obj ..\Dcu\CnListCompFrm.obj 

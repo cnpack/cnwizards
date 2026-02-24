@@ -134,6 +134,7 @@
             <Form>CnTranslateFrame</Form>
             <DesignClass>TFrame</DesignClass>
         </DCCReference>
+        <DCCReference Include="MultiLang\CnIDETranslator.pas"/>
         <DCCReference Include="MultiLang\CnWizTranslate.pas"/>
         <DCCReference Include="Utils\CnWizUtils.pas"/>
         <DCCReference Include="Utils\CnWizNotifier.pas"/>
