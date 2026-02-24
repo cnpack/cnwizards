@@ -55,6 +55,8 @@ var
   I: Integer;
   Arg: string;
   AlgFound: Boolean;
+  OutputToFile: Boolean;
+  OutputFile: TextFile;
   CurrentPattern: string;
   SearchRec: TSearchRec;
   Res: Integer;
@@ -77,6 +79,9 @@ begin
   Writeln('  -SHA3_256   Calculate SHA3_256');
   Writeln('  -SHA3_384   Calculate SHA3_384');
   Writeln('  -SHA3_512   Calculate SHA3_512');
+  Writeln;
+  Writeln('Options (Output):');
+  Writeln('  -F          Output to Digest.txt');
   Writeln;
   Writeln('Examples:');
   Writeln('  CnHash file.txt');
@@ -101,26 +106,34 @@ begin
   end;
 end;
 
+procedure Log(const Msg: string);
+begin
+  if OutputToFile then
+    Writeln(OutputFile, Msg)
+  else
+    Writeln(Msg);
+end;
+
 procedure ProcessFile(const FileName: string);
 var
   Alg: TCnHashType;
   HashStr: string;
 begin
-  Writeln(FileName);
+  Log(FileName);
   for Alg := Low(TCnHashType) to High(TCnHashType) do
   begin
     if Alg in SelectedAlgs then
     begin
       try
         HashStr := GetHashStr(Alg, FileName);
-        Writeln(Format('%-9.9s: %s', [AlgNames[Alg], UpperCase(HashStr)]));
+        Log(Format('%-9.9s: %s', [AlgNames[Alg], UpperCase(HashStr)]));
       except
         on E: Exception do
-          Writeln(AlgNames[Alg] + ': Error - ' + E.Message);
+          Log(AlgNames[Alg] + ': Error - ' + E.Message);
       end;
     end;
   end;
-  Writeln;
+  Log('');
 end;
 
 begin
@@ -133,6 +146,7 @@ begin
   SelectedAlgs := [];
   FilePatterns := TStringList.Create;
   AlgFound := False;
+  OutputToFile := False;
 
   try
     for I := 1 to ParamCount do
@@ -154,6 +168,7 @@ begin
         else if Arg = 'SHA3_256' then begin Include(SelectedAlgs, htSHA3_256); AlgFound := True; end
         else if Arg = 'SHA3_384' then begin Include(SelectedAlgs, htSHA3_384); AlgFound := True; end
         else if Arg = 'SHA3_512' then begin Include(SelectedAlgs, htSHA3_512); AlgFound := True; end
+        else if Arg = 'F' then OutputToFile := True
         else
           Writeln('Unknown option: ' + ParamStr(I));
       end
@@ -179,34 +194,45 @@ begin
       Exit;
     end;
 
-    for I := 0 to FilePatterns.Count - 1 do
+    if OutputToFile then
     begin
-      CurrentPattern := FilePatterns[I];
-      Path := ExtractFilePath(CurrentPattern);
-      
-      Res := FindFirst(CurrentPattern, faAnyFile - faDirectory, SearchRec);
-      if Res = 0 then
+      AssignFile(OutputFile, 'Digest.txt');
+      Rewrite(OutputFile);
+    end;
+
+    try
+      for I := 0 to FilePatterns.Count - 1 do
       begin
-        try
-          repeat
-            if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
-            begin
-               if Path = '' then
-                 ProcessFile(SearchRec.Name)
-               else
-                 ProcessFile(Path + SearchRec.Name);
-            end;
-            Res := FindNext(SearchRec);
-          until Res <> 0;
-        finally
-          FindClose(SearchRec);
+        CurrentPattern := FilePatterns[I];
+        Path := ExtractFilePath(CurrentPattern);
+
+        Res := FindFirst(CurrentPattern, faAnyFile - faDirectory, SearchRec);
+        if Res = 0 then
+        begin
+          try
+            repeat
+              if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+              begin
+                 if Path = '' then
+                   ProcessFile(SearchRec.Name)
+                 else
+                   ProcessFile(Path + SearchRec.Name);
+              end;
+              Res := FindNext(SearchRec);
+            until Res <> 0;
+          finally
+            FindClose(SearchRec);
+          end;
+        end
+        else
+        begin
+           // If exact file not found or pattern matches nothing
+           Writeln('File not found: ' + CurrentPattern);
         end;
-      end
-      else
-      begin
-         // If exact file not found or pattern matches nothing
-         Writeln('File not found: ' + CurrentPattern);
       end;
+    finally
+      if OutputToFile then
+        CloseFile(OutputFile);
     end;
 
   finally
