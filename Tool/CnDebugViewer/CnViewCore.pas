@@ -200,9 +200,9 @@ var
   PSysDbgBase: Pointer;
 
   CSMsgStore: TRTLCriticalSection;
-{$ENDIF}
-
+{$ELSE}
   CSMsgStore: TCriticalSection = nil;
+{$ENDIF}
 
   CPUClock: Extended; // 计算而得的 CPU 主频，以 MHZ 为单位
   CnViewerOptions: TCnViewerOptions = nil;
