@@ -91,7 +91,7 @@ See http://www.suigeneris.org/want/ for details.
 
   <property name="cnwizards_list" value="-cnwizloader,-cnwizloader64,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-d120a64,-d130f,-d130f64,-cb5,-cb6" />
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnhash,cnfixstart" />
-  <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,makeinst" />
+  <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,calchash,makeinst" />
 
 
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
@@ -244,6 +244,7 @@ Usage: want [target-name] [-Dname=value]
     help_cht   - Compile Traditional Chinese CHM help (BIG5).
     help_enu   - Compile English CHM help.
     makehelp   - Compile all chm help files.
+    calchash   = Calculate Hash Values.
     makeinst   - Build CnWizards Installer.
     all        - All above tasks except gitpull.
     allgit     - All above tasks.
@@ -1759,7 +1760,7 @@ Usage: want [target-name] [-Dname=value]
     <property name="Ver.FileDescription"  value="CnHash Tool" />
     <property name="Ver.InternalName"     value="CnHash" />
     <property name="Ver.OriginalFilename" value="CnHash.EXE" />
-    <dcc basedir="${tools}/CnHash" source="CnHash.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnHash" source="CnHash.dpr" versions="7" usecfg="true" />
   </target>
 
   <target name="cnfixstart" depends="-prepare" description="Compile CnWizards Fix Starting-Up Tool." >
@@ -1816,6 +1817,18 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
+  <!-- 计算校验和 -->
+  <target name="calchash" depends="-prepare" description="Calculate Hash Values." >
+    <exec basedir="${bin}" defaultfilters="true"
+          executable="${bin}\CnHash.exe" >
+      <arg value="-F" />
+      <arg value="-SM3" />
+      <arg value="-SHA256" />
+      <arg value="*.exe" />
+      <arg value="*.dll" />
+    </exec>
+  </target>
+
   <!-- 制作安装程序 -->
   <target name="makeinst" depends="-prepare" description="Build CnWizards Installer." >
     <exec basedir="${install.src}" defaultfilters="true"
@@ -1828,15 +1841,6 @@ Usage: want [target-name] [-Dname=value]
     </exec>
   </target>
 
-  <!--
-  <target name="zip" >
-    <delete file="${zipfile}" />
-    <zip zipfile="${zipfile}" >
-      <include name="${root}/**" />
-    </zip>
-  </target>
-  -->
-
   <!-- 完整构建 -->
   <target name="all" depends="-prepare,clean,${all_list}" description="All above tasks except gitpull." >
   </target>
@@ -1844,39 +1848,6 @@ Usage: want [target-name] [-Dname=value]
   <!-- 带 git 更新的完整构建 -->
   <target name="allgit" depends="-prepare,clean,gitpull,${all_list}" description="All above tasks." >
   </target>
-
-  <!-- FTP 上传服务器
-  <target name="upload_ftp" depends="-prepare" if="ismaster" description="Upload Installer to FTP Server (Master only)." >
-    <ftp server="www.cnpack.org" userid="?{${master.ini}:Master:ftpuser}" password="?{${master.ini}:Master:ftppass}" >
-      <cd dir="${ftpdir}" />
-      <put basedir="${install.output}" src="${Installer.Name}" />
-    </ftp>
-  </target>
-  -->
-
-  <!-- 上传到 Google Code 服务器
-  <target name="upload_google" depends="-prepare" if="ismaster" description="Upload Installer to Google Code Server (Master only)." >
-    <exec basedir="${basedir}" errorlevel="1" defaultfilters="true"
-          executable="${exe.python}" >
-      <arg value="Make/googlecode_upload.py" />
-      <arg value="-s" />
-      <arg value='"${Installer.Name}"' />
-      <arg value="-p" />
-      <arg value="cnpack" />
-      <arg value="-u" />
-      <arg value="?{${master.ini}:GoogleCode:user}" />
-      <arg value="-w" />
-      <arg value="?{${master.ini}:GoogleCode:password}" />
-      <arg value="-l" />
-      <arg value='"${release.labels}"' />
-      <arg value="Install/Output/${Installer.Name}" />
-    </exec>
-  </target>
-  -->
-
-  <!--
-  <target name="upload" depends="-prepare" if="ismaster" description="Upload Installer to FTP and Google Code Servers (Master only)." />
-  -->
 
   <!-- 更新 build 号及提交文件 -->
   <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >

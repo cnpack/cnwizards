@@ -675,6 +675,7 @@ InitOk:
   File "..\..\Bin\CnZipUtils64.dll"
 
   File "..\..\License.*.txt"
+  File "..\..\Digest.txt"
 
   SetOutPath $INSTDIR\Data
   File "..\..\Bin\Data\*.*"
