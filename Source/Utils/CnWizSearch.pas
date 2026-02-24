@@ -903,11 +903,11 @@ begin
         Exit;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
-      Text := UTF8Decode(PAnsiChar(Stream.Memory));
-      Stream.Size := (Length(Text) + 1) * SizeOf(WideChar);
-      Stream.Position := 0;
-      Stream.Write(PWideChar(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
-      Stream.Position := 0;
+      Text := UTF8Decode(PAnsiChar(SourceStream.Memory));
+      SourceStream.Size := (Length(Text) + 1) * SizeOf(WideChar);
+      SourceStream.Position := 0;
+      SourceStream.Write(PWideChar(Text)^, (Length(Text) + 1) * SizeOf(WideChar));
+      SourceStream.Position := 0;
 {$ENDIF}
 
       DestStream := TMemoryStream.Create;
