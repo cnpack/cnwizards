@@ -90,7 +90,7 @@ See http://www.suigeneris.org/want/ for details.
   <property name="release.pro"    value="" />
 
   <property name="cnwizards_list" value="-cnwizloader,-cnwizloader64,-d5,-d6,-d7,-d2005,-d2006,-d2007,-d2009,-d2010,-dxe,-dxe21,-dxe2,-dxe3,-dxe4,-dxe5,-dxe6,-dxe7,-dxe8,-dxe81,-d10s,-d101b,-d102t,-d103r1,-d103r,-d104s1,-d104s,-d110a,-d120a1,-d120a2,-d120a,-d120a64,-d130f,-d130f64,-cb5,-cb6" />
-  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnfixstart" />
+  <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnhash,cnfixstart" />
   <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,makeinst" />
 
 
@@ -237,6 +237,7 @@ Usage: want [target-name] [-Dname=value]
     cnselectlang  - Compile CnSelectLang.
     cnsmr         - Compile Relation Analyzer.
     cnwizsetup - Compile CnWizards Setup.
+    cnhash     - Compile CnHash Tool.
     cnfixstart - Compile CnWizards Fix Starting-Up Tool
     tools      - Compile Tools (CnDfm6To5, CnWizSetup, etc.).
     help_chs   - Compile Simplified Chinese CHM help (GB18030/GB2312).
@@ -1752,6 +1753,13 @@ Usage: want [target-name] [-Dname=value]
     <move tofile="${tools}/CnWizSetup/Setup.res" >
        <include name="${tools}/CnWizSetup/Setup.res.old" />
     </move>
+  </target>
+
+  <target name="cnhash" depends="-prepare" description="Compile CnHash Tool." >
+    <property name="Ver.FileDescription"  value="CnHash Tool" />
+    <property name="Ver.InternalName"     value="CnHash" />
+    <property name="Ver.OriginalFilename" value="CnHash.EXE" />
+    <dcc basedir="${tools}/CnHash" source="CnHash.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
   </target>
 
   <target name="cnfixstart" depends="-prepare" description="Compile CnWizards Fix Starting-Up Tool." >
