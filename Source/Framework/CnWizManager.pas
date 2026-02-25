@@ -1805,6 +1805,17 @@ begin
       end;
     end;
 
+    // 多语也允许调试
+    if not Matched then
+    begin
+      ID := LowerCase(FWizMultiLang.GetIDStr);
+      if Pos(LocalCmd, ID) > 0 then
+      begin
+        Matched := True;
+        Wizard := FWizMultiLang;
+      end;
+    end;
+
     if Matched and (Wizard <> nil) then
     begin
       Cmds.Delete(0);

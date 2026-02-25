@@ -102,6 +102,8 @@ type
     class function IsInternalWizard: Boolean; override;
     function GetCaption: string; override;
     function GetHint: string; override;
+
+    procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
   end;
 
   { TCnTranslateForm }
@@ -479,6 +481,14 @@ procedure TCnWizMultiLang.Loaded;
 begin
 {$IFNDEF STAND_ALONE}
   UpdateTranslator(Self);
+{$ENDIF}
+end;
+
+procedure TCnWizMultiLang.DebugComand(Cmds, Results: TStrings);
+begin
+  inherited DebugComand(Cmds, Results);
+{$IFNDEF STAND_ALONE}
+  FTranslator.DebugCommand(Cmds, Results);
 {$ENDIF}
 end;
 

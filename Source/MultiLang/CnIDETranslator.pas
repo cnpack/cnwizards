@@ -107,6 +107,8 @@ type
     function FindScreenFormByName(const AFormName: string): TForm;
     function GetActiveProjectInfo: TCnActiveProjectInfo;
 
+    function IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
+
 {$IFDEF BDS}
     function GetPaletteButtonInfo: TCnPaletteButtonInfo;
 {$ENDIF}
@@ -134,13 +136,12 @@ type
     {* 解除挂接主菜单}
 
     // 弹出菜单处理过程
-    procedure TranslatePopupMenu(const AMenuCategory, AMechanism, AMenuPath,
-      IsFromEnglish: string);
+    procedure TranslatePopupMenu(const AMenuCategory, AMechanism, AMenuPath: string);
     {* 翻译一个弹出菜单，可弹出时动态调用，也可直接调用}
     procedure TranslatePopupMenuPaletteItems;
     {* 翻译控件板的弹出菜单}
-    procedure TranslateStaticPopupMenus;
-    {* 翻译其他静态弹出菜单}
+    procedure TranslateStaticPopupMenus(OnlyCurrent: Boolean = False);
+    {* 翻译其他静态弹出菜单，OnlyCurrent 为 True 表示只翻译最靠前窗体的}
     procedure HookPopupMenus;
     {* 挂接弹出菜单在弹出后进行翻译}
 
@@ -153,14 +154,19 @@ type
     procedure LoadTranslationMap(const AMapFile: string);
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
+    procedure CheckHookApplicationPopupMenus;
 
     procedure DelayActivate(Sender: TObject);
     procedure SetActive(const Value: Boolean);
 
     procedure ActiveProjectChanged(Sender: TObject);
+    procedure ActiveFormChanged(Sender: TObject);
+    // procedure AfterMessage(hwnd: HWND; Control: TWinControl; Msg: TMessage);
   public
     constructor Create;
     destructor Destroy; override;
+
+    procedure DebugCommand(Cmds: TStrings; Results: TStrings);
 
     property Active: Boolean read FActive write SetActive;
     {* 是否启用英译中功能}
@@ -932,7 +938,7 @@ begin
   end;
 end;
 
-{ 主菜单处理过程->卸载动态子菜单集合 }
+// 主菜单处理过程-，卸载动态子菜单集合
 procedure TCnMenuTranslator.UnHookMainMenuDynamicItems;
 var
   I: Integer;
@@ -950,9 +956,9 @@ begin
   FAttachedMenuItems.Clear;
 end;
 
-{ 弹出菜单处理过程->重写单个弹出菜单 }
-procedure TCnMenuTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism, AMenuPath,
-  IsFromEnglish: string);
+// 弹出菜单处理过程，重写单个弹出菜单
+procedure TCnMenuTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism,
+  AMenuPath: string);
 var
   I: Integer;
   Form: TForm;
@@ -963,10 +969,10 @@ begin
   Names := TStringList.Create;
   try
     ExtractStrings(['.'], [' '], PChar(AMenuPath), Names);
-
     Form := FindScreenFormByName(Names[0]);
     if not Assigned(Form) then
       Exit;
+
     PopupMenu := FindPopupMenuByName(Form, Names[1], Names[2]);
     if not Assigned(PopupMenu) then
       Exit;
@@ -976,18 +982,16 @@ begin
       Captions := GetTranslationItemCaptions(AMenuCategory, AMechanism, AMenuPath);
       if Length(Captions) = 0 then
         Exit;
-  
+
       for I := 0 to PopupMenu.Items.Count - 1 do
-      begin
         TranslateMenuItem(PopupMenu.Items[I], Captions);
-      end;
     end;
   finally
     Names.Free;
   end;
 end;
 
-{ 弹出菜单处理过程->重写控件区指定弹出菜单 }
+// 弹出菜单处理过程，重写控件区指定弹出菜单
 procedure TCnMenuTranslator.TranslatePopupMenuPaletteItems;
 var
   I: Integer;
@@ -1104,31 +1108,47 @@ begin
 end;
 
 // 重写弹出菜单集合
-procedure TCnMenuTranslator.TranslateStaticPopupMenus;
+procedure TCnMenuTranslator.TranslateStaticPopupMenus(OnlyCurrent: Boolean);
 var
   I: Integer;
   MenuPaths: TCn2DStringArray;
+  F: TCustomForm;
+  S: string;
 begin
   MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS);
-  for I := 0 to Length(MenuPaths) - 1 do
+  if OnlyCurrent then
   begin
-    if SameText(MenuPaths[I, 1], 'False') then
+    F := Screen.ActiveCustomForm;
+    if (F <> nil) and (F.Name <> '') then
     begin
-      TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
-        MenuPaths[I, 0], MenuPaths[I, 1]);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnMenuTranslator.TranslateStaticPopupMenus for ' + F.Name);
+{$ENDIF}
+      S := F.Name + '.';
+      for I := 0 to Length(MenuPaths) - 1 do
+      begin
+        if Pos(S, MenuPaths[I, 0]) = 1 then
+          TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+           MenuPaths[I, 0]);
+      end;
     end;
+  end
+  else
+  begin
+    for I := 0 to Length(MenuPaths) - 1 do
+      TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+        MenuPaths[I, 0]);
   end;
 end;
 
 // 挂钩弹出菜单集合
 procedure TCnMenuTranslator.HookPopupMenus;
 var
-  I, J: Integer;
+  I: Integer;
   MenuPaths: TCn2DStringArray;
   Names: TStringList;
   Form: TForm;
   PopupMenu: TPopupMenu;
-  MenuHooked: Boolean;
   Hook: TCnMenuHook;
 begin
   UnHookPopupMenus;
@@ -1151,17 +1171,7 @@ begin
       if not Assigned(PopupMenu) then
         Continue;
 
-      MenuHooked := False;
-      for J := 0 to FAttachedPopupMenuHooks.Count - 1 do
-      begin
-        if TCnMenuHook(FAttachedPopupMenuHooks[J]).IsHooked(PopupMenu) then
-        begin
-          MenuHooked := True;
-          Break;
-        end;
-      end;
-
-      if not MenuHooked then
+      if not IsPopupMenuHooked(PopupMenu) then
       begin
         Hook := TCnMenuHook.Create(nil);
         Hook.Text := MenuPaths[I, 0];
@@ -1186,6 +1196,9 @@ begin
     Hook := TCnMenuHook(FAttachedPopupMenuHooks[I]);
     if Hook.IsHooked(Menu) then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('AfterPopupMenuOnPopup for a Hooked PopupMenu with Count ' + IntToStr(Menu.Items.Count));
+{$ENDIF}
       if SameText(Menu.Name, 'popPalette') then
       begin
         TranslatePopupMenuPaletteItems;
@@ -1193,7 +1206,7 @@ begin
       else
       begin
         TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_EVENTHANDLER,
-          Hook.Text, 'True');
+          Hook.Text);
       end;
       Exit;
     end;
@@ -1306,10 +1319,14 @@ begin
   LoadTranslationMap(TranslationMapPath);
 
   CnWizNotifierServices.AddActiveProjectChangedNotifier(ActiveProjectChanged);
+  CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+  // CnWizNotifierServices.AddCallWndProcRetNotifier(AfterMessage, [WM_RBUTTONDOWN, WM_NCRBUTTONDOWN {, WM_PARENTNOTIFY}]);
 end;
 
 destructor TCnMenuTranslator.Destroy;
 begin
+  // CnWizNotifierServices.RemoveCallWndProcRetNotifier(AfterMessage);
+  CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.RemoveActiveProjectChangedNotifier(ActiveProjectChanged);
   FOld2Array.Free;
   FNew2Array.Free;
@@ -1327,6 +1344,8 @@ begin
 
   TranslateStaticMainMenu;
   TranslateMainMenuProjectItems;
+  TranslateStaticPopupMenus;
+  TranslatePopupMenuPaletteItems;
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
@@ -1374,6 +1393,88 @@ begin
   CnDebugger.LogMsg('TCnMenuTranslator.ActiveProjectChanged');
 {$ENDIF}
   TranslateMainMenuProjectItems;
+end;
+
+function TCnMenuTranslator.IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 0 to FAttachedPopupMenuHooks.Count - 1 do
+  begin
+    if TCnMenuHook(FAttachedPopupMenuHooks[I]).IsHooked(Menu) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TCnMenuTranslator.CheckHookApplicationPopupMenus;
+var
+  I: Integer;
+  C: TComponent;
+  Menu: TPopupMenu;
+  Hook: TCnMenuHook;
+begin
+  for I := 0 to Application.ComponentCount - 1 do
+  begin
+    if Application.Components[I].ClassNameIs('TPopupMenu') or
+      Application.Components[I].ClassNameIs('TPopupActionBar') then
+    begin
+      C := Application.Components[I];
+      if C is TPopupMenu then
+      begin
+        Menu := TPopupMenu(C);
+        if not IsPopupMenuHooked(Menu) then
+        begin
+          Hook := TCnMenuHook.Create(nil);
+          if Menu.ClassNameIs('TPopupMenu') then
+            Hook.Text := 'Application.TFormContainerForm.TPopupMenu'
+          else
+            Hook.Text := 'Application.TFormContainerForm.TPopupActionBar';
+
+          Hook.HookMenu(Menu);
+          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          FAttachedPopupMenuHooks.Add(Hook);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CheckHookApplicationPopupMenus. Hook ' + Hook.Text);
+{$ENDIF}
+        end;
+      end;
+    end;
+  end;
+end;
+
+//procedure TCnMenuTranslator.AfterMessage(hwnd: HWND; Control: TWinControl;
+//  Msg: TMessage);
+//begin
+//{$IFDEF DEBUG}
+//  if Control <> nil then
+//    CnDebugger.LogFmt('TCnMenuTranslator.AfterMessage Get %x for %s|%s', [Msg.Msg, Control.Name, Control.ClassName]);
+//{$ENDIF}
+//end;
+
+procedure TCnMenuTranslator.DebugCommand(Cmds, Results: TStrings);
+var
+  I: Integer;
+  S: string;
+  Hook: TCnMenuHook;
+begin
+  Results.Add(Format('CnMenuTranslator PopupMenu Hooks %d', [FAttachedPopupMenuHooks.Count]));
+  for I := 0 to FAttachedPopupMenuHooks.Count - 1 do
+  begin
+    Hook := TCnMenuHook(FAttachedPopupMenuHooks[I]);
+    if Hook.HookedMenuCount = 1 then
+      Results.Add(Format('  %s: %s|%s', [Hook.Text, Hook.HookedMenu[0].Name, Hook.HookedMenu[0].ClassName]))
+    else
+      Results.Add(Format('  Error Get %d Menus', [Hook.HookedMenuCount]));
+  end;
+end;
+
+procedure TCnMenuTranslator.ActiveFormChanged(Sender: TObject);
+begin
+  TranslateStaticPopupMenus(True);
 end;
 
 end.

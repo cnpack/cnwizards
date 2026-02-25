@@ -64,7 +64,7 @@
       }, {
         "MenuPath": "ToolsMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Borland Resource Builder", "Borland 资源生成器"], ["Build Tools", "构建工具"], ["Configure Tools", "配置工具"], ["DDevExtensions options", "DDevExtensions 选项"], ["Debugger Options", "调试器选项"], ["Dependency Walker", "依赖关系查看器"], ["DLL Export Viewer", "DLL 导出查看器"], ["Editor Options", "编辑器选项"], ["Environment Options", "环境选项"], ["IDE Config Backup/Restore Tool", "IDE 配置备份/还原工具"], ["Image Editor", "图像编辑器"], ["Microsoft Spy++", "Microsoft Spy++"], ["Options", "选项"], ["Package Collection Editor", "包集合编辑器"], ["Pattern Organizer", "模式组织器"], ["Rave Designer", "Rave 设计器"], ["Reload LSP Server", "重新加载 LSP 服务器"], ["Repository", "资源库"], ["Source Formatter", "源代码格式化器"], ["Template Libraries", "模板库"], ["Tools", "工具"], ["Translation Editor", "翻译编辑器"], ["Translation Manager", "翻译管理器"], ["Translation Repository", "翻译资源库"], ["Translation Tools Options", "翻译工具选项"], ["Web App Debugger", "Web 应用程序调试器"], ["Win Sight 32", "Win Sight 32"], ["XML Mapper", "XML 映射器"]]
+        "ItemCaption": [["Build Tools", "构建工具"], ["Configure Tools", "配置工具"], ["DDevExtensions options", "DDevExtensions 选项"], ["Debugger Options", "调试器选项"], ["Editor Options", "编辑器选项"], ["Environment Options", "环境选项"], ["Options", "选项"], ["Pattern Organizer", "模式组织器"], ["Reload LSP Server", "重新加载 LSP 服务器"], ["Repository", "资源库"], ["Source Formatter", "源代码格式化器"], ["Template Libraries", "模板库"], ["Tools", "工具"], ["Translation Editor", "翻译编辑器"], ["Translation Manager", "翻译管理器"], ["Translation Repository", "翻译资源库"], ["Translation Tools Options", "翻译工具选项"], ["Web App Debugger", "Web 应用程序调试器"]]
       }, {
         "MenuPath": "ViewsMenu",
         "ForceEnglish": "False",
@@ -72,7 +72,7 @@
       }, {
         "MenuPath": "WindowsMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Tabs", "窗口"]]
+        "ItemCaption": [["Tabs", "标签"], ["Window", "窗口"]]
       }
     ],
     "EventHandler": [{
@@ -90,7 +90,7 @@
       }, {
         "MenuPath": "WindowsMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["(no windows)", "(无窗口)"], ["Next Tab", "下一个窗口"], ["Previous Tab", "上一个窗口"]]
+        "ItemCaption": [["(no windows)", "(无窗口)"], ["Next Tab", "下一个标签"], ["Next Window", "下一个窗口"], ["Previous Tab", "上一个标签"], ["Previous Window", "上一个窗口"]]
       }
     ]
   },
@@ -200,63 +200,15 @@
       }, {
         "MenuPath": "EditWindow_0.EditWindow_0.EditorLocalMenu",
         "ForceEnglish": "TRUE",
-        "ItemCaption": [["Add Comment", "添加注释"], ["Add to Repository", "添加到资源库"], ["Add To-Do Item", "添加待办事项"], ["Add Unit Test", "添加单元测试"], ["Add Watch at Cursor", "在光标处添加监视"], ["AI Chat", "AI 聊天"], ["All", "全部"], ["Bookmark 0", "书签 0"], ["Bookmark 1", "书签 1"], ["Bookmark 2", "书签 2"], ["Bookmark 3", "书签 3"], ["Bookmark 4", "书签 4"], ["Bookmark 5", "书签 5"], ["Bookmark 6", "书签 6"], ["Bookmark 7", "书签 7"], ["Bookmark 8", "书签 8"], ["Bookmark 9", "书签 9"], ["Browse Symbol at Cursor", "浏览光标处符号"], ["Change Params", "更改参数"], ["Clear Bookmarks", "清除书签"], ["Close Page", "关闭页面"], ["Complete Class at Cursor", "在光标处补全类"], ["Complete the Code", "补全代码"], ["Config", "配置"], ["Convert to Assembly", "转换为汇编"], ["Convert to C++", "转换为 C++"], ["Convert to Delphi", "转换为 Delphi"], ["Copy", "复制"], ["Cut", "剪切"], ["Debug", "调试"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Display results in the Chat window", "在聊天窗口中显示结果"], ["Display results in the editor", "在编辑器中显示结果"], ["Doc Comments", "文档注释"], ["Editor Options", "编辑器选项"], ["Evaluate/Modify", "计算/修改"], ["Explain the Code", "解释代码"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find", "查找"], ["Find Bugs", "查找缺陷"], ["Find Declaration", "查找声明"], ["Find declaration of constant||", "查找常量声明||"], ["Find declaration of constructor||", "查找构造函数声明||"], ["Find declaration of field||", "查找字段声明||"], ["Find declaration of method||", "查找方法声明||"], ["Find declaration of property||", "查找属性声明||"], ["Find declaration of type||", "查找类型声明||"], ["Find declaration of unit||", "查找单元声明||"], ["Find Declaration Symbol", "查找声明符号"], ["Find Header(AI)", "查找头文件(AI)"], ["Find Local References", "查找本地引用"], ["Find Local References to constant||", "查找常量的局部引用||"], ["Find Local References to constructor||", "查找构造函数的局部引用||"], ["Find Local References to field||", "查找字段的局部引用||"], ["Find Local References to method||", "查找方法的局部引用||"], ["Find Local References to property||", "查找属性的局部引用||"], ["Find Local References to type||", "查找类型的局部引用||"], ["Find Local References to unit||", "查找单元的局部引用||"], ["Find References", "查找引用"], ["Find References to constant||", "查找常量的引用||"], ["Find References to constructor||", "查找构造函数的引用||"], ["Find References to field||", "查找字段的引用||"], ["Find References to method||", "查找方法的引用||"], ["Find References to property||", "查找属性的引用||"], ["Find References to type||", "查找类型的引用||"], ["Find References to unit||", "查找单元的引用||"], ["Find Symbols", "查找符号"], ["Find Unit", "查找单元"], ["Find Unit(AI)", "查找单元(AI)"], ["Fold", "折叠"], ["Format Source", "格式化源代码"], ["Go to Address", "转到地址"], ["Goto Bookmarks", "转到书签"], ["Inline Variable", "内联变量"], ["Inspect", "检查"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Methods", "方法"], ["Move", "移动"], ["Namespace", "命名空间"], ["Nearest", "最近"], ["Nested Methods", "嵌套方法"], ["Next Buffer View", "下一个缓冲区视图"], ["Next Modification", "下一个修改"], ["Next Unsaved Modification", "下一个未保存的修改"], ["Open File at Cursor", "在光标处打开文件"], ["Open Source/Header File", "打开源文件/头文件"], ["Optimize Code", "优化代码"], ["Paste", "粘贴"], ["Prev Buffer View", "上一个缓冲区视图"], ["Previous Modification", "上一个修改"], ["Previous Unsaved Modification", "上一个未保存的修改"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Read Only", "只读"], ["Refactor", "重构"], ["Regions", "区域"], ["Rename", "重命名"], ["Run to Cursor", "运行到光标处"], ["Safe Delete", "安全删除"], ["Search For Usages", "搜索使用情况"], ["Set Next Statement", "设置下一条语句"], ["Smart CodeInsight", "智能代码洞察"], ["Surround", "环绕代码"], ["Surround Windows", "环绕 Windows"], ["Sync Prototypes", "同步原型"], ["Toggle Bookmarks", "切换书签"], ["Toggle Breakpoint", "切换断点"], ["Toggle Comment", "切换注释"], ["Topic Search", "主题搜索"], ["Types", "类型"], ["Unfold", "展开"], ["Version Control", "版本控制"], ["View as Form", "以窗体查看"], ["View CPU", "查看 CPU"], ["View Messages", "查看消息"]]
+        "ItemCaption": [["Add Comment", "添加注释"], ["Add to Interface...", "添加到接口..."], ["Add to Repository", "添加到资源库"], ["Add To-Do Item", "添加待办事项"], ["Add To-Do Item...", "添加待办事项..."], ["Add Unit Test", "添加单元测试"], ["Add Watch at Cursor", "在光标处添加监视"], ["AI Chat", "AI 聊天"], ["All", "全部"], ["Bookmark 0", "书签 0"], ["Bookmark 1", "书签 1"], ["Bookmark 2", "书签 2"], ["Bookmark 3", "书签 3"], ["Bookmark 4", "书签 4"], ["Bookmark 5", "书签 5"], ["Bookmark 6", "书签 6"], ["Bookmark 7", "书签 7"], ["Bookmark 8", "书签 8"], ["Bookmark 9", "书签 9"], ["Browse Symbol at Cursor", "浏览光标处符号"], ["Change Params", "更改参数"], ["Clear Bookmarks", "清除书签"], ["Close All Other Pages", "关闭所有其他页面"], ["Close Page", "关闭页面"], ["CnPack Editor Menu", "CnPack 编辑器菜单"], ["Complete Class at Cursor", "在光标处补全类"], ["Complete the Code", "补全代码"], ["Config", "配置"], ["Convert to Assembly", "转换为汇编"], ["Convert to C++", "转换为 C++"], ["Convert to Delphi", "转换为 Delphi"], ["Copy", "复制"], ["Copy Full Path/FileName", "复制完整路径/文件名"], ["Cut", "剪切"], ["Debug", "调试"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Display results in the Chat window", "在聊天窗口中显示结果"], ["Display results in the editor", "在编辑器中显示结果"], ["Doc Comments", "文档注释"], ["Editor Options", "编辑器选项"], ["Evaluate/Modify", "计算/修改"], ["Explain the Code", "解释代码"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find", "查找"], ["Find Bugs", "查找缺陷"], ["Find Declaration", "查找声明"], ["Find declaration of constant||", "查找常量声明||"], ["Find declaration of constructor||", "查找构造函数声明||"], ["Find declaration of field||", "查找字段声明||"], ["Find declaration of method||", "查找方法声明||"], ["Find declaration of property||", "查找属性声明||"], ["Find declaration of type||", "查找类型声明||"], ["Find declaration of unit||", "查找单元声明||"], ["Find Declaration Symbol", "查找声明符号"], ["Find Header(AI)", "查找头文件(AI)"], ["Find Local References", "查找本地引用"], ["Find Local References to constant||", "查找常量的局部引用||"], ["Find Local References to constructor||", "查找构造函数的局部引用||"], ["Find Local References to field||", "查找字段的局部引用||"], ["Find Local References to method||", "查找方法的局部引用||"], ["Find Local References to property||", "查找属性的局部引用||"], ["Find Local References to type||", "查找类型的局部引用||"], ["Find Local References to unit||", "查找单元的局部引用||"], ["Find References", "查找引用"], ["Find References to constant||", "查找常量的引用||"], ["Find References to constructor||", "查找构造函数的引用||"], ["Find References to field||", "查找字段的引用||"], ["Find References to method||", "查找方法的引用||"], ["Find References to property||", "查找属性的引用||"], ["Find References to type||", "查找类型的引用||"], ["Find References to unit||", "查找单元的引用||"], ["Find Symbols", "查找符号"], ["Find Unit", "查找单元"], ["Find Unit(AI)", "查找单元(AI)"], ["Fold", "折叠"], ["Format Source", "格式化源代码"], ["Go to Address", "转到地址"], ["Goto Bookmarks", "转到书签"], ["Inline Variable", "内联变量"], ["Inspect", "检查"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Message View", "消息视图"], ["Methods", "方法"], ["Move", "移动"], ["Namespace", "命名空间"], ["Nearest", "最近"], ["Nested Methods", "嵌套方法"], ["New Edit Window", "新建编辑窗口"], ["Next Buffer View", "下一个缓冲区视图"], ["Next Modification", "下一个修改"], ["Next Unsaved Modification", "下一个未保存的修改"], ["Open \"||\" in Windows Explorer", "在 Windows 资源管理器中打开 \"||\""], ["Open File at Cursor", "在光标处打开文件"], ["Open Source/Header File", "打开源文件/头文件"], ["Optimize Code", "优化代码"], ["Paste", "粘贴"], ["Prev Buffer View", "上一个缓冲区视图"], ["Previous Modification", "上一个修改"], ["Previous Unsaved Modification", "上一个未保存的修改"], ["Properties", "属性"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Read Only", "只读"], ["Refactor", "重构"], ["Regions", "区域"], ["Rename", "重命名"], ["Run to Cursor", "运行到光标处"], ["Safe Delete", "安全删除"], ["Search For Usages", "搜索使用情况"], ["Select All", "全选"], ["Set Next Statement", "设置下一条语句"], ["Shell Context Menu", "外壳上下文菜单"], ["Smart CodeInsight", "智能代码洞察"], ["Surround", "环绕代码"], ["Surround Windows", "环绕 Windows"], ["Sync Prototypes", "同步原型"], ["Toggle Bookmarks", "切换书签"], ["Toggle Breakpoint", "切换断点"], ["Toggle Comment", "切换注释"], ["Topic Search", "主题搜索"], ["Types", "类型"], ["Unfold", "展开"], ["Version Control", "版本控制"], ["View as Form", "以窗体查看"], ["View CPU", "查看 CPU"], ["View Explorer", "查看资源管理器"], ["View Messages", "查看消息"]]
       }, {
         "MenuPath": "EditWindow_0.EditWindow_0.ModuleMenu",
         "ForceEnglish": "TRUE",
         "ItemCaption": [["Add Comment", "添加注释"], ["Add Unit Test", "添加单元测试"], ["AI Chat", "AI 聊天"], ["All Other Pages", "所有其他页面"], ["All to the Left", "全部移至左侧"], ["All to the Right", "全部移至右侧"], ["Bottom", "底部"], ["Close", "关闭"], ["Close All Pages Opened While Debugging", "关闭调试时打开的所有页面"], ["Close Page", "关闭页面"], ["Complete the Code", "补全代码"], ["Config", "配置"], ["Convert to Assembly", "转换为汇编"], ["Convert to C++", "转换为 C++"], ["Convert to Delphi", "转换为 Delphi"], ["Copy File Path", "复制文件路径"], ["Display results in the Chat window", "在聊天窗口中显示结果"], ["Display results in the editor", "在编辑器中显示结果"], ["Explain the Code", "解释代码"], ["File Name Only", "仅文件名"], ["Find Bugs", "查找缺陷"], ["Find Header(AI)", "查找头文件(AI)"], ["Find Unit(AI)", "查找单元(AI)"], ["Focus Mode", "专注模式"], ["Folder Only", "仅文件夹"], ["Full Path", "完整路径"], ["Left", "左侧"], ["Move", "移动"], ["New Edit Window", "新建编辑窗口"], ["Open Source/Header File", "打开源文件/头文件"], ["Opened While Debugging", "调试时打开的"], ["Optimize Code", "优化代码"], ["Pages", "页面"], ["Read Only", "只读"], ["Right", "右侧"], ["Show in Explorer", "在资源管理器中显示"], ["Smart CodeInsight", "智能代码洞察"], ["Split", "拆分"], ["Tab Options", "窗口选项"], ["Top", "顶部"], ["UnDock Edit Window", "取消编辑窗口停靠"], ["View as Form", "以窗体查看"], ["View Messages", "查看消息"]]
       }, {
-        "MenuPath": "EditWindow_0.EditWindow_1.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Close All Other Pages", "关闭所有其他页面"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_10.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["View Explorer", "查看资源管理器"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_11.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Properties", "属性"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_12.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Open \"||\" in Windows Explorer", "在 Windows 资源管理器中打开 \"||\""]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_2.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Shell Context Menu", "外壳上下文菜单"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_3.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Copy Full Path/FileName", "复制完整路径/文件名"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_4.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["New Edit Window", "新建编辑窗口"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_5.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Add to Interface...", "添加到接口..."]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_6.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Add To-Do Item...", "添加待办事项..."]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_7.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Select All", "全选"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_8.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["CnPack Editor Menu", "CnPack 编辑器菜单"]]
-      }, {
-        "MenuPath": "EditWindow_0.EditWindow_9.EditorLocalMenu",
-        "ForceEnglish": "TRUE",
-        "ItemCaption": [["Message View", "消息视图"]]
-      }, {
         "MenuPath": "ProjectManagerForm.ProjectManagerForm.FormPopupMenu",
         "ForceEnglish": "TRUE",
-        "ItemCaption": [["Activate", "激活"], ["Add", "添加"], ["Add Existing Project", "添加现有项目"], ["Add New", "添加新建"], ["Add New Project", "添加新项目"], ["Add Platform", "添加平台"], ["Add Reference", "添加引用"], ["Add to Version Control", "添加到版本控制"], ["Apply Option Set", "应用选项集"], ["Auto Sort", "自动排序"], ["Build", "构建"], ["Build All From Here", "从此处开始构建所有"], ["Build Later", "较晚构建"], ["Build Sooner", "较早构建"], ["Clean", "清理"], ["Clean All From Here", "从此处开始清理所有"], ["Compare", "比较"], ["Compare to Delphi Version", "与 Delphi 版本比较"], ["Compare to File", "与文件比较"], ["Compare to Last Save", "与最后保存的比较"], ["Compare to Opened File", "与已打开的文件比较"], ["Compile", "编译"], ["Compile All From Here", "从此处开始编译所有"], ["Copy File Path", "复制文件路径"], ["Customize", "自定义"], ["Delete", "删除"], ["Dependencies", "依赖项"], ["Edit", "编辑"], ["Edit Connection", "编辑连接"], ["Edit SDK", "编辑 SDK"], ["Enable Skia", "启用 Skia"], ["File Name Only", "仅文件名"], ["Folder Only", "仅文件夹"], ["Format Project Sources", "格式化项目源代码"], ["From Here", "从此处开始"], ["Full Path", "完整路径"], ["History Compare", "历史比较"], ["Install", "安装"], ["Launch Beyond Compare", "启动 Beyond Compare"], ["Local Menu", "本地菜单"], ["Make", "生成"], ["Modeling Support", "模块支持"], ["Modified Date", "修改日期"], ["Name", "名称"], ["New Configuration", "新建配置"], ["New Edit Window", "新建编辑窗口"], ["New Option Set", "新建选项集"], ["Open", "打开"], ["Open in", "在中打开"], ["Options", "选项"], ["Other", "其他"], ["Path", "路径"], ["Properties", "属性"], ["Remove File", "移除文件"], ["Remove From Project", "从项目移除"], ["Remove Project", "移除项目"], ["Rename", "重命名"], ["Revert to Default Connection", "恢复为默认连接"], ["Revert to Default SDK", "恢复为默认 SDK"], ["Run", "运行"], ["Run Without Debugging", "无调试运行"], ["Save", "保存"], ["Save As", "另存为"], ["Save Project Group", "保存项目组"], ["Save Project Group As", "项目组另存为"], ["Select Left File For Compare", "选择左侧文件进行比较"], ["Show in Explorer", "在资源管理器中显示"], ["Sort By", "排序依据"], ["TDump||", "转储||"], ["Type", "类型"], ["Uninstall", "卸载"], ["View Source", "查看源代码"]]
+        "ItemCaption": [["Activate", "激活"], ["Add", "添加"], ["Add Existing Project", "添加现有项目"], ["Add New", "添加新建"], ["Add New Project", "添加新项目"], ["Add Platform", "添加平台"], ["Add Reference", "添加引用"], ["Add to Version Control", "添加到版本控制"], ["Apply Option Set", "应用选项集"], ["Auto Collapse", "自动折叠"], ["Auto Sort", "自动排序"], ["Auto Track", "自动跟踪"], ["Build", "构建"], ["Build All From Here", "从此处开始构建所有"], ["Build Later", "较晚构建"], ["Build Sooner", "较早构建"], ["Clean", "清理"], ["Clean All From Here", "从此处开始清理所有"], ["Compare", "比较"], ["Compare to Delphi Version", "与 Delphi 版本比较"], ["Compare to File", "与文件比较"], ["Compare to Last Save", "与最后保存的比较"], ["Compare to Opened File", "与已打开的文件比较"], ["Compile", "编译"], ["Compile All From Here", "从此处开始编译所有"], ["Copy File Path", "复制文件路径"], ["Customize", "自定义"], ["Delete", "删除"], ["Dependencies", "依赖项"], ["Directory (Flat)", "目录(平铺)"], ["Directory (Nested)", "目录(嵌套)"], ["Dockable", "可停靠"], ["Edit", "编辑"], ["Edit Connection", "编辑连接"], ["Edit SDK", "编辑 SDK"], ["Enable Skia", "启用 Skia"], ["File Name Only", "仅文件名"], ["Folder Only", "仅文件夹"], ["Format Project Sources", "格式化项目源代码"], ["From Here", "从此处开始"], ["Full Path", "完整路径"], ["History Compare", "历史比较"], ["Install", "安装"], ["Launch Beyond Compare", "启动 Beyond Compare"], ["List", "列表"], ["Local Menu", "本地菜单"], ["Make", "生成"], ["Modeling Support", "模块支持"], ["Modified Date", "修改日期"], ["Name", "名称"], ["New Configuration", "新建配置"], ["New Edit Window", "新建编辑窗口"], ["New Option Set", "新建选项集"], ["Open", "打开"], ["Open in", "在中打开"], ["Options", "选项"], ["Other", "其他"], ["Path", "路径"], ["Properties", "属性"], ["Remove File", "移除文件"], ["Remove From Project", "从项目移除"], ["Remove Project", "移除项目"], ["Rename", "重命名"], ["Revert to Default Connection", "恢复为默认连接"], ["Revert to Default SDK", "恢复为默认 SDK"], ["Run", "运行"], ["Run Without Debugging", "无调试运行"], ["Save", "保存"], ["Save As", "另存为"], ["Save Project Group", "保存项目组"], ["Save Project Group As", "项目组另存为"], ["Select Left File For Compare", "选择左侧文件进行比较"], ["Show in Explorer", "在资源管理器中显示"], ["Show Path", "显示路径"], ["Show Project Output", "显示项目输出"], ["Sort By", "排序依据"], ["Status Bar", "状态栏"], ["Stay on Top", "保持置顶"], ["TDump||", "转储||"], ["Toolbar", "工具栏"], ["Type", "类型"], ["Uninstall", "卸载"], ["View Source", "查看源代码"], ["Views", "视图"]]
       }, {
         "MenuPath": "ProjectManagerForm.ProjectManagerForm.ToolbarPopupMenu",
         "ForceEnglish": "TRUE",
