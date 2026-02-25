@@ -28,7 +28,9 @@ unit CnWizNotifier;
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2025.04.09
+* 修改记录：2026.02.25
+*               重构三种拦截消息机制，做到分发更精准
+*           2025.04.09
 *               GetMsgHook 允许拦截消息
 *           2018.03.20
 *               增加 IDE 主题切换通知机制
@@ -257,8 +259,44 @@ uses
 
 const
   csIdleMinInterval = 50;
+  MSG_DISPATCHER_SIZE = $FFFF;
 
 type
+  TCnWndProcMessageDispatcher = class
+  {* 用于 CallWndProc 和 CallWndProcRet 的消息分发器，只支持 $FFFF 以下的消息，不考虑返回值}
+  private
+    FMessageArray: array[0..MSG_DISPATCHER_SIZE] of TList;
+  protected
+    procedure AddClientInternal(Msg: Cardinal; Notifier: TMethod);
+    procedure RemoveClientInternal(Notifier: TMethod);
+
+    function InternalDispatchCall(Method: TMethod; Handle: HWND;
+      Control: TWinControl; Msg: TMessage): Boolean; virtual;
+    {* 分发消息拦截，固定返回 False}
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    procedure AddClientMsg(Msg: Cardinal; Notifier: TCnWizMsgHookNotifier);
+    procedure AddClientMsgs(Msgs: array of Cardinal; Notifier: TCnWizMsgHookNotifier);
+
+    procedure RemoveClient(Notifier: TCnWizMsgHookNotifier);
+
+    function DispatchCall(Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
+  end;
+
+  TCnGetMessageDispatcher = class(TCnWndProcMessageDispatcher)
+  {* 用于 GetMsg 的消息分发器，只支持 $FFFF 以下的消息，返回 True 时跳过后面的处理}
+  protected
+    function InternalDispatchCall(Method: TMethod; Handle: HWND;
+      Control: TWinControl; Msg: TMessage): Boolean; override;
+    {* 分发消息拦截，有一客户端返回 True 则中止并返回 True}
+  public
+    procedure AddClientMsg(Msg: Cardinal; Notifier: TCnWizGetMsgHookNotifier); reintroduce;
+    procedure AddClientMsgs(Msgs: array of Cardinal; Notifier: TCnWizGetMsgHookNotifier); reintroduce;
+
+    procedure RemoveClient(Notifier: TCnWizGetMsgHookNotifier); reintroduce;
+  end;
 
 {$IFDEF DELPHI_OTA}
 
@@ -429,12 +467,11 @@ type
     FApplicationIdleNotifiers: TList;
     FApplicationMessageNotifiers: TList;
     FAppEventNotifiers: TList;
-    FCallWndProcNotifiers: TList;
-    FCallWndProcMsgList: TList;
-    FCallWndProcRetNotifiers: TList;
-    FCallWndProcRetMsgList: TList;
-    FGetMsgNotifiers: TList;
-    FGetMsgMsgList: TList;
+
+    FCallWndProcDispatcher: TCnWndProcMessageDispatcher;
+    FCallWndProcRetDispatcher: TCnWndProcMessageDispatcher;
+    FGetMsgDispatcher: TCnGetMessageDispatcher;
+
     FBeforeThemeChangeNotifiers: TList;
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
@@ -476,7 +513,6 @@ type
 {$IFDEF DELPHI_OTA}
     FCurrentCompilingProject: IOTAProject;
 {$ENDIF}
-    procedure AddNotifierEx(List, MsgList: TList; Notifier: TMethod; MsgIDs: array of Cardinal);
     procedure CheckActiveControl;
 {$IFDEF DELPHI_OTA}
     procedure CheckDesignerSelection;
@@ -1094,12 +1130,11 @@ begin
   FApplicationIdleNotifiers := TList.Create;
   FApplicationMessageNotifiers := TList.Create;
   FAppEventNotifiers := TList.Create;
-  FCallWndProcNotifiers := TList.Create;
-  FCallWndProcMsgList := TList.Create;
-  FCallWndProcRetNotifiers := TList.Create;
-  FCallWndProcRetMsgList := TList.Create;
-  FGetMsgNotifiers := TList.Create;
-  FGetMsgMsgList := TList.Create;
+
+  FCallWndProcDispatcher := TCnWndProcMessageDispatcher.Create;
+  FCallWndProcRetDispatcher := TCnWndProcMessageDispatcher.Create;
+  FGetMsgDispatcher := TCnGetMessageDispatcher.Create;
+
   FBeforeThemeChangeNotifiers := TList.Create;
   FAfterThemeChangeNotifiers := TList.Create;
   FIdleMethods := TList.Create;
@@ -1254,12 +1289,11 @@ begin
   CnWizClearAndFreeList(FApplicationIdleNotifiers);
   CnWizClearAndFreeList(FApplicationMessageNotifiers);
   CnWizClearAndFreeList(FAppEventNotifiers);
-  CnWizClearAndFreeList(FCallWndProcNotifiers);
-  FreeAndNil(FCallWndProcMsgList);
-  CnWizClearAndFreeList(FCallWndProcRetNotifiers);
-  FreeAndNil(FCallWndProcRetMsgList);
-  CnWizClearAndFreeList(FGetMsgNotifiers);
-  FreeAndNil(FGetMsgMsgList);
+
+  FCallWndProcDispatcher.Free;
+  FCallWndProcRetDispatcher.Free;
+  FGetMsgDispatcher.Free;
+
   CnWizClearAndFreeList(FBeforeThemeChangeNotifiers);
   CnWizClearAndFreeList(FAfterThemeChangeNotifiers);
   CnWizClearAndFreeList(FIdleMethods);
@@ -1311,19 +1345,6 @@ end;
 //------------------------------------------------------------------------------
 // 列表操作
 //------------------------------------------------------------------------------
-
-procedure TCnWizNotifierServices.AddNotifierEx(List, MsgList: TList;
-  Notifier: TMethod; MsgIDs: array of Cardinal);
-var
-  I: Integer;
-begin
-  CnWizAddNotifier(List, Notifier);
-  for I := Low(MsgIDs) to High(MsgIDs) do
-  begin
-    if MsgList.IndexOf(Pointer(MsgIDs[I])) < 0 then
-      MsgList.Add(Pointer(MsgIDs[I]));
-  end;
-end;
 
 procedure TCnWizNotifierServices.AddSourceEditorNotifier(
   Notifier: TCnWizSourceEditorNotifier);
@@ -2463,53 +2484,72 @@ end;
 procedure TCnWizNotifierServices.AddCallWndProcNotifier(
   Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifierEx(FCallWndProcNotifiers, FCallWndProcMsgList, TMethod(Notifier), MsgIDs);
+  FCallWndProcDispatcher.AddClientMsgs(MsgIDs, Notifier);
 end;
 
 procedure TCnWizNotifierServices.RemoveCallWndProcNotifier(
   Notifier: TCnWizMsgHookNotifier);
 begin
-  CnWizRemoveNotifier(FCallWndProcNotifiers, TMethod(Notifier));
+  FCallWndProcDispatcher.RemoveClient(Notifier);
 end;
 
 procedure TCnWizNotifierServices.DoCallWndProc(Handle: HWND; Msg: TMessage);
+var
+  Control: TWinControl;
 begin
-  DoMsgHook(FCallWndProcNotifiers, FCallWndProcMsgList, Handle, Msg);
+  if not IdeClosing then
+  begin
+    Control := FindControl(Handle);
+    FCallWndProcDispatcher.DispatchCall(Handle, Control, Msg);
+  end;
 end;
 
 procedure TCnWizNotifierServices.AddCallWndProcRetNotifier(
   Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifierEx(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, TMethod(Notifier), MsgIDs);
+  FCallWndProcRetDispatcher.AddClientMsgs(MsgIDs, Notifier);
 end;
 
 procedure TCnWizNotifierServices.RemoveCallWndProcRetNotifier(
   Notifier: TCnWizMsgHookNotifier);
 begin
-  CnWizRemoveNotifier(FCallWndProcRetNotifiers, TMethod(Notifier));
+  FCallWndProcRetDispatcher.RemoveClient(Notifier);
 end;
 
 procedure TCnWizNotifierServices.DoCallWndProcRet(Handle: HWND;
   Msg: TMessage);
+var
+  Control: TWinControl;
 begin
-  DoMsgHook(FCallWndProcRetNotifiers, FCallWndProcRetMsgList, Handle, Msg);
+  if not IdeClosing then
+  begin
+    Control := FindControl(Handle);
+    FCallWndProcRetDispatcher.DispatchCall(Handle, Control, Msg);
+  end;
 end;
 
 procedure TCnWizNotifierServices.AddGetMsgNotifier(
   Notifier: TCnWizGetMsgHookNotifier; MsgIDs: array of Cardinal);
 begin
-  AddNotifierEx(FGetMsgNotifiers, FGetMsgMsgList, TMethod(Notifier), MsgIDs);
+  FGetMsgDispatcher.AddClientMsgs(MsgIDs, Notifier);
 end;
 
 procedure TCnWizNotifierServices.RemoveGetMsgNotifier(
   Notifier: TCnWizGetMsgHookNotifier);
 begin
-  CnWizRemoveNotifier(FGetMsgNotifiers, TMethod(Notifier));
+  FGetMsgDispatcher.RemoveClient(Notifier);
 end;
 
 function TCnWizNotifierServices.DoGetMsg(Handle: HWND; Msg: TMessage): Boolean;
+var
+  Control: TWinControl;
 begin
-  Result := DoGetMsgHook(FGetMsgNotifiers, FGetMsgMsgList, Handle, Msg);
+  Result := False;
+  if not IdeClosing then
+  begin
+    Control := FindControl(Handle);
+    Result := FGetMsgDispatcher.DispatchCall(Handle, Control, Msg);
+  end;
 end;
 
 procedure TCnWizNotifierServices.AddAfterThemeChangeNotifier(
@@ -2707,6 +2747,154 @@ begin
       DoHandleException('TCnWizNotifierServices.DoBeforeThemeChange[' + IntToStr(I) + ']');
     end;
   end;
+end;
+
+{ TCnWndProcMessageDispatcher }
+
+constructor TCnWndProcMessageDispatcher.Create;
+begin
+  inherited;
+
+end;
+
+destructor TCnWndProcMessageDispatcher.Destroy;
+var
+  I: Integer;
+begin
+  for I := Low(FMessageArray) to High(FMessageArray) do
+  begin
+    if FMessageArray[I] <> nil then
+      FreeAndNil(FMessageArray[I]);
+  end;
+  inherited;
+end;
+
+procedure TCnWndProcMessageDispatcher.AddClientInternal(Msg: Cardinal; Notifier: TMethod);
+begin
+  if Msg > MSG_DISPATCHER_SIZE then
+    raise Exception.Create('Message > $FFFF NOT Support!');
+
+  if FMessageArray[Msg] = nil then
+    FMessageArray[Msg] := TList.Create;
+
+  FMessageArray[Msg].Add(Pointer(Notifier.Code));
+  FMessageArray[Msg].Add(Pointer(Notifier.Data));
+end;
+
+procedure TCnWndProcMessageDispatcher.AddClientMsgs(Msgs: array of Cardinal; Notifier: TCnWizMsgHookNotifier);
+var
+  I: Integer;
+begin
+  for I := Low(Msgs) to High(Msgs) do
+    AddClientMsg(Msgs[I], Notifier);
+end;
+
+procedure TCnWndProcMessageDispatcher.AddClientMsg(Msg: Cardinal; Notifier: TCnWizMsgHookNotifier);
+begin
+  AddClientInternal(Msg, TMethod(Notifier));
+end;
+
+procedure TCnWndProcMessageDispatcher.RemoveClientInternal(Notifier: TMethod);
+var
+  I, J, C: Integer;
+begin
+  for I := Low(FMessageArray) to High(FMessageArray) do
+  begin
+    if FMessageArray[I] <> nil then
+    begin
+      C := FMessageArray[I].Count;
+      if C = 0 then
+        Continue;
+
+      if (C and 1) <> 0 then
+        raise Exception.Create('Error Dispatch Method Count!');
+
+      C := C shr 1;
+      for J := C - 1 downto 0 do
+      begin
+        if (FMessageArray[I][2 * J + 1] = Notifier.Data) and (FMessageArray[I][2 * J] = Notifier.Code) then
+        begin
+          FMessageArray[I].Delete(2 * J + 1);
+          FMessageArray[I].Delete(2 * J);
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnWndProcMessageDispatcher.RemoveClient(Notifier: TCnWizMsgHookNotifier);
+begin
+  RemoveClientInternal(TMethod(Notifier));
+end;
+
+function TCnWndProcMessageDispatcher.InternalDispatchCall(Method: TMethod;
+  Handle: HWND; Control: TWinControl; Msg: TMessage): Boolean;
+begin
+  TCnWizMsgHookNotifier(Method)(Handle, Control, Msg);
+  Result := False;
+end;
+
+function TCnWndProcMessageDispatcher.DispatchCall(Handle: HWND; Control: TWinControl;
+  Msg: TMessage): Boolean;
+var
+  I, C: Integer;
+  M: TMethod;
+  L: TList;
+begin
+  Result := False;
+  if Msg.Msg > MSG_DISPATCHER_SIZE then
+    Exit;
+
+  L := FMessageArray[Msg.Msg];
+  if L = nil then
+    Exit;
+
+  C := L.Count;
+  if C = 0 then
+    Exit;
+
+  if (C and 1) <> 0 then
+    raise Exception.Create('Error Dispatch Method Count!');
+
+  C := C shr 1;
+  for I := 0 to C - 1 do
+  begin
+    M.Data := L[2 * I + 1];
+    M.Code := L[2 * I];
+
+    if InternalDispatchCall(M, Handle, Control, Msg) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+{ TCnGetMessageDispatcher }
+
+function TCnGetMessageDispatcher.InternalDispatchCall(Method: TMethod; Handle: HWND;
+  Control: TWinControl; Msg: TMessage): Boolean;
+begin
+  Result := TCnWizGetMsgHookNotifier(Method)(Handle, Control, Msg);
+end;
+
+procedure TCnGetMessageDispatcher.AddClientMsg(Msg: Cardinal; Notifier: TCnWizGetMsgHookNotifier);
+begin
+  AddClientInternal(Msg, TMethod(Notifier));
+end;
+
+procedure TCnGetMessageDispatcher.AddClientMsgs(Msgs: array of Cardinal;
+  Notifier: TCnWizGetMsgHookNotifier);
+var
+  I: Integer;
+begin
+  for I := Low(Msgs) to High(Msgs) do
+    AddClientMsg(Msgs[I], Notifier);
+end;
+
+procedure TCnGetMessageDispatcher.RemoveClient(Notifier: TCnWizGetMsgHookNotifier);
+begin
+  RemoveClientInternal(TMethod(Notifier));
 end;
 
 {$IFDEF DELPHI_OTA}
