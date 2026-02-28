@@ -599,7 +599,7 @@ function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor = nil): TW
 {* 取得窗体编辑器的容器控件如 Form1 实例或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口。
   另外当是嵌入式设计器时会返回 Form1 的容器 TFormContainerForm}
 function CnOtaGetCurrentDesignContainer: TWinControl;
-{* 取得当前窗体编辑器的容器控件或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口。
+{* 取得当前窗体编辑器的容器控件如 Form1 或 DataModule 的容器，注意 DataModule 容器不一定是顶层窗口。
   另外当是嵌入式设计器时会返回 Form1 的容器 TFormContainerForm}
 function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean; overload;
 {* 取得当前窗体编辑器的已选择的组件的实例}
