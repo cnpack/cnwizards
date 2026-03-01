@@ -6844,7 +6844,12 @@ begin
           begin
             C.Brush.Color := ColorBk;
             C.Brush.Style := bsSolid;
-            C.FillRect(Rect);
+
+            R := Rect;
+            if HSC > 0 then
+              R.Left := R.Left + HSC * Context.EditorState.CharWidth;
+            R.Right := R.Left + Context.EditorState.CharWidth * CalcAnsiDisplayLengthFromWideString(Token.Token);
+            C.FillRect(R);
           end;
           C.Brush.Style := bsClear;
 
