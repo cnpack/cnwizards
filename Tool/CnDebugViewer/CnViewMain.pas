@@ -303,6 +303,7 @@ type
     procedure DestroyThread;
 
     procedure UpdateFormInSwitch(AForm: TCustomForm; Switch: TCnFormSwitch);
+    procedure UpdateSearchHistoryToChildren;
     property UpdatingSwitch: Boolean read FUpdatingSwitch;
     property ClickingSwitch: Boolean read FClickingSwitch;
     property CurrentChild: TCnMsgChild read GetCurrentChild;
@@ -1666,6 +1667,17 @@ begin
       if I >= 0 then
         tsSwitch.TabIndex := I;
     end;
+  end;
+end;
+
+procedure TCnMainViewer.UpdateSearchHistoryToChildren;
+var
+  I: Integer;
+begin
+  for I := 0 to pnlChildContainer.ControlCount - 1 do
+  begin
+    if pnlChildContainer.Controls[I] is TCnMsgChild then
+      TCnMsgChild(pnlChildContainer.Controls[I]).cbbSearch.Items.Assign(SearchHistoryItems);
   end;
 end;
 

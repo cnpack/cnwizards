@@ -208,7 +208,8 @@ var
 
 implementation
 
-uses CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgFiler;
+uses
+  CnCommon, CnViewMain, CnViewCore, CnDebugIntf, CnMsgFiler;
 
 {$R *.DFM}
 
@@ -770,12 +771,9 @@ begin
     if cbbSearch.Text <> '' then
     begin
       btnSearch.Click;
-      if (cbbSearch.Items.IndexOf(cbbSearch.Text) < 0) then
-      begin
-        if (cbbSearch.Items.Count >= CnViewerOptions.SearchDownCount) then
-          cbbSearch.Items.Delete(cbbSearch.Items.Count - 1);
-        cbbSearch.Items.Insert(0, cbbSearch.Text);
-      end;
+      AddSearchHistoryItems(cbbSearch.Text);
+
+      CnMainViewer.UpdateSearchHistoryToChildren;
     end;
     Key := #0;
   end;

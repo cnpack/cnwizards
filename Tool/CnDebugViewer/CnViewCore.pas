@@ -209,6 +209,8 @@ var
 
   IsLocalMode: Boolean = False;
 
+  SearchHistoryItems: TStringList = nil;
+
 // ==== Start of 'Constant' String for Translation
 
   SCnNoneProcName: string = '[Unknown]';
@@ -392,6 +394,8 @@ procedure ErrorDlg(const AText: string);
 
 function QueryDlg(Mess: string; DefaultNo: Boolean = False;
   Caption: string = ''): Boolean;
+
+procedure AddSearchHistoryItems(const Text: string);
 
 procedure TranslateStrings;
 
@@ -776,6 +780,16 @@ begin
 {$ENDIF}
 end;
 
+procedure AddSearchHistoryItems(const Text: string);
+begin
+  if SearchHistoryItems.IndexOf(Text) < 0 then
+  begin
+    if (SearchHistoryItems.Count >= CnViewerOptions.SearchDownCount) then
+      SearchHistoryItems.Delete(SearchHistoryItems.Count - 1);
+    SearchHistoryItems.Insert(0, Text);
+  end;
+end;
+
 procedure TranslateStrings;
 begin
   TranslateStr(SCnNoneProcName, 'SCnNoneProcName');
@@ -951,6 +965,7 @@ initialization
 
 finalization
   DebugDebuggerLog('CnViewCore Before finalization');
+  SearchHistoryItems.Free;
   FreeAndNil(CnViewerOptions);
   DebugDebuggerLog('CnViewCore In finalization');
   FinalizeCore;
