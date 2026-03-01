@@ -72,7 +72,8 @@ type
   end;
 
   // 自定义 CodeInsightManager 实现
-  TCnCustomCodeInsightManager = class(TInterfacedObject, IOTACodeInsightManager)
+  TCnCustomCodeInsightManager = class(TInterfacedObject,
+    IOTACodeInsightManager, IOTAAsyncCodeInsightManager)
   private
     FEnabled: Boolean;
     FName: string;
@@ -80,7 +81,7 @@ type
     function GetCount: Integer;
   public
     constructor Create;
-    
+
     // IOTACodeInsightManager 接口实现
     function GetEnabled: Boolean;
     procedure SetEnabled(Value: Boolean);
@@ -107,6 +108,22 @@ type
     function GetHintText(HintLine, HintCol: Integer): string;
     procedure Done(Accepted: Boolean; out DisplayParams: Boolean);
     function GetOptionSetName: string;
+
+    // IOTAAsyncCodeInsightManager 接口实现
+    procedure AsyncAllowCodeInsight(var AAllow: Boolean; const AKey: Char);
+    function AsyncCanInvoke(AInsightType: TOTACodeInsightType): Boolean;
+    function AsyncEnabled: Boolean;
+    function AsyncInvokeCodeCompletion(AHowInvoked: TOTAInvokeType; var AStr: string; ALine, ACharIndex: Integer;
+      ACallback: TOTACodeCompleteCallBack): Integer;
+    function AsyncInvokeParameterCodeInsight(HowInvoked: TOTAInvokeType; const AFileName: string;
+      ALine, ACharIndex: Integer; ACallback: TOTAParametersCallBack): Integer;
+    function AsyncGetHintText(HintLine, HintCol: Integer; ACallBack: TOTAHintTextCallBack): Integer;
+    function AsyncGotoDefinition(const AFileName: string; ALine, ACharIndex: Integer;
+      ACallBack: TOTAGotoDefinitionCallBack): Integer;
+    procedure AsyncParameterCodeInsightParamIndex(const AFileName: string; ALine,
+      ACharIndex: Integer; ACallBack: TOTAParamIndexCallBack);
+    procedure AsyncOperationCanceled(AId: Integer);
+    function ShowCalculating: Boolean;
     
     property Enabled: Boolean read GetEnabled write SetEnabled;
     property Name: string read GetName;
@@ -126,6 +143,63 @@ uses
 
 procedure TCnCustomCodeInsightManager.AllowCodeInsight(var Allow: Boolean;
   const Key: Char);
+begin
+
+end;
+
+procedure TCnCustomCodeInsightManager.AsyncAllowCodeInsight(var AAllow: Boolean;
+  const AKey: Char);
+begin
+  AAllow := True;
+end;
+
+function TCnCustomCodeInsightManager.AsyncCanInvoke(
+  AInsightType: TOTACodeInsightType): Boolean;
+begin
+
+end;
+
+function TCnCustomCodeInsightManager.AsyncEnabled: Boolean;
+begin
+  Result := True;
+end;
+
+function TCnCustomCodeInsightManager.AsyncGetHintText(HintLine,
+  HintCol: Integer; ACallBack: TOTAHintTextCallBack): Integer;
+begin
+
+end;
+
+function TCnCustomCodeInsightManager.AsyncGotoDefinition(
+  const AFileName: string; ALine, ACharIndex: Integer;
+  ACallBack: TOTAGotoDefinitionCallBack): Integer;
+begin
+
+end;
+
+function TCnCustomCodeInsightManager.AsyncInvokeCodeCompletion(
+  AHowInvoked: TOTAInvokeType; var AStr: string; ALine, ACharIndex: Integer;
+  ACallback: TOTACodeCompleteCallBack): Integer;
+begin
+  // 待会回调 ACallback
+  ACallback(Self, 0, False, 'Test Message');
+end;
+
+function TCnCustomCodeInsightManager.AsyncInvokeParameterCodeInsight(
+  HowInvoked: TOTAInvokeType; const AFileName: string; ALine,
+  ACharIndex: Integer; ACallback: TOTAParametersCallBack): Integer;
+begin
+
+end;
+
+procedure TCnCustomCodeInsightManager.AsyncOperationCanceled(AId: Integer);
+begin
+
+end;
+
+procedure TCnCustomCodeInsightManager.AsyncParameterCodeInsightParamIndex(
+  const AFileName: string; ALine, ACharIndex: Integer;
+  ACallBack: TOTAParamIndexCallBack);
 begin
 
 end;
@@ -272,6 +346,11 @@ end;
 procedure TCnCustomCodeInsightManager.SetEnabled(Value: Boolean);
 begin
   FEnabled := Value;
+end;
+
+function TCnCustomCodeInsightManager.ShowCalculating: Boolean;
+begin
+
 end;
 
 //==============================================================================
