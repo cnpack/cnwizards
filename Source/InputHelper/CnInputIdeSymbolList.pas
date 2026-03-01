@@ -88,6 +88,10 @@ uses
   {$UNDEF SYMBOL_LOCKHOOK}
 {$ENDIF}
 
+{$IFDEF  DELPHI110_ALEXANDRIA_UP}
+  {$DEFINE USE_OTA_CODEINSIGTMANAGER_COUNT}
+{$ENDIF}
+
 const
   CN_IDESYMBOL_ASYNC_TIMEOUT = 3000;
   {* 异步符号列表的超时时间，单位毫秒}
@@ -359,6 +363,10 @@ var
   SName, SDesc, S3: string;
   PasEntry: PCnDelphiLspCodeCompEntry;
   CppEntry: PCnBcbLspCodeCompEntry;
+{$IFDEF USE_OTA_CODEINSIGTMANAGER_COUNT}
+  TmpMgr: IOTACodeInsightManager;
+  List: IOTACodeInsightSymbolList;
+{$ENDIF}
 
   function ExtractStr(CppPtr: PAnsiChar; Len: Integer): string;
   const
@@ -406,7 +414,8 @@ var
 
 begin
   try
-    if not Assigned(FAsyncManagerObj) then
+    if not Assigned(FAsyncManagerObj) or not // 只处理 LSP 异步回调，其他不处理
+      InheritsFromClassNamePattern(FAsyncManagerObj, 'KibitzManager') then
       Exit;
 
     if FAnsycCancel then
@@ -421,12 +430,30 @@ begin
     begin
       if Assigned(DelphiLspGetCount) and Assigned(DelphiLspGetCodeCompEntry) then
       begin
-        // Delphi 下 FAsyncManagerObj 似乎是个 TLSPKibitzManager 实例，有俩方法获得个数与元素
-        C := DelphiLspGetCount(FAsyncManagerObj);
+{$IFDEF USE_OTA_CODEINSIGTMANAGER_COUNT}
+        // 暂时只在 110 或以上改用此方法
+        if Supports(FAsyncManagerObj, IOTACodeInsightManager, TmpMgr) then
+        begin
+          C := 0;
+          TmpMgr.GetSymbolList(List);
+          if List <> nil then
+          begin
+            C := List.Count;
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('Callback DelphiLspGetCount %s Returns Count %d',
-          [FAsyncManagerObj.ClassName, C]);
+            CnDebugger.LogFmt('Callback CodeInsightManager Returns SymbolList Count %d', [C]);
 {$ENDIF}
+          end;
+        end
+        else
+{$ENDIF}
+        begin
+          // Delphi 下 FAsyncManagerObj 似乎是个 TLSPKibitzManager 实例，有俩方法获得个数与元素
+          C := DelphiLspGetCount(FAsyncManagerObj);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('Callback DelphiLspGetCount %s Returns Count %d',
+            [FAsyncManagerObj.ClassName, C]);
+{$ENDIF}
+        end;
 
         if C <= 0 then
           Exit;
