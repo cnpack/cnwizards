@@ -866,6 +866,7 @@ begin
   TranslateStr(SCnFlatToolBarRestoreDefault, 'SCnFlatToolBarRestoreDefault');
   TranslateStr(SCnFloatPropBarFilterCaption, 'SCnFloatPropBarFilterCaption');
   TranslateStr(SCnFloatPropBarRenameCaption, 'SCnFloatPropBarRenameCaption');
+  TranslateStr(SCnFloatPropBarRenameHint, 'SCnFloatPropBarRenameHint');
   TranslateStr(SCnEmbeddedDesignerNotSupport, 'SCnEmbeddedDesignerNotSupport');
 
   // CnDesignWizard
@@ -946,6 +947,8 @@ begin
   TranslateStr(SCnSizeToGridHint, 'SCnSizeToGridHint');
   TranslateStr(SCnLockControlsCaption, 'SCnLockControlsCaption');
   TranslateStr(SCnLockControlsHint, 'SCnLockControlsHint');
+  TranslateStr(SCnRememberLockCaption, 'SCnRememberLockCaption');
+  TranslateStr(SCnRememberLockHint, 'SCnRememberLockHint');
   TranslateStr(SCnSelectRootCaption, 'SCnSelectRootCaption');
   TranslateStr(SCnSelectRootHint, 'SCnSelectRootHint');
   TranslateStr(SCnCopyCompNameCaption, 'SCnCopyCompNameCaption');

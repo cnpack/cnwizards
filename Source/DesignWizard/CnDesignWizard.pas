@@ -31,7 +31,9 @@ unit CnDesignWizard;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin2000 + Delphi 5
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2025.07.03 by LiuXiao
+* 修改记录：2026.03.01 by LiuXiao
+*               增加记住锁定状态的菜单项
+*           2025.07.03 by LiuXiao
 *               不可视组件增加对 FMX 的支持，使用 DesignInfo 结合界面切换实现
 *           2021.08.11 by LiuXiao
 *               增加组件比较的入口
@@ -94,7 +96,7 @@ type
     asMakeMinHeight, asMakeMaxHeight, asMakeSameHeight, asMakeSameSize,
     asParentHCenter, asParentVCenter, asBringToFront, asSendToBack,
     asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
-    asSizeToGrid, asLockControls, asSelectRoot, asCopyCompName, asCopyCompClass,
+    asSizeToGrid, asLockControls, asRememberLock, asSelectRoot, asCopyCompName, asCopyCompClass,
     asHideComponent, asNonArrange, asListComp, asCompareProp, asCompToCode,
     asChangeCompClass, asCompRename, asShowFlatForm);
 
@@ -117,6 +119,9 @@ type
     FPropertyCompare: TCnPropertyCompareManager;
     FUpdateControlList: TList;
     FUpdateCompList: TList;
+    FLockStatus: Boolean;
+    FRememberLock: Boolean;
+    FNeedClickLockWhenDesign: Boolean;
 
 {$IFDEF IDE_ACTION_UPDATE_DELAY}
     FIDEMenuBar: TCustomActionMenuBar;
@@ -161,6 +166,8 @@ type
     procedure FormEditorNotifier(FormEditor: IOTAFormEditor;
       NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
       Component: TComponent; const OldName, NewName: string);
+    procedure ApplicationIdle(Sender: TObject);
+    procedure InitLockMenuStatus(Sender: TObject);
 
     function GetComponentGeneralPos(Component: TComponent): TPoint;
     {* 封装的获取组件左上角位置的函数，支持可视组件与不可视组件}
@@ -204,6 +211,7 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
 
+    property RememberLock: Boolean read FRememberLock write FRememberLock;
 {$IFNDEF IDE_HAS_HIDE_NONVISUAL}
     property HideNonVisual: Boolean read FHideNonVisual;
 {$ENDIF}
@@ -298,6 +306,8 @@ const
   csNonAutoMove = 'NonArrangeAutoMove';
   csSortByClassName = 'SortByClassName';
   csSizeSpace = 'NonArrangeSizeSpace';
+  csLockStatus = 'LockStatus';
+  csRememberLock = 'RememberLock';
   csNonVisualSize = 28;
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
   csNonVisualCaptionSize = 18;  // D110 下不可视组件的文字高度有变化且不固定
@@ -317,12 +327,12 @@ const
   // Action 生效需要选择的最小控件数（部分包括组件数），-1 表示无需判断
   csAlignNeedControls: array[TCnAlignSizeStyle] of Integer = (2, 2, 2, 2, 2, 2,
     3, 2, 2, 2, 2, 3, 2, 2, 2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 0,
-    {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1,
+    {$IFDEF IDE_HAS_GUIDE_LINE} 0, {$ENDIF} 1, 1, -1, -1, -1, -1, -1,
     0, 0, 0, 0, 0, 0, 1, -1);
 
   csAlignNeedSepMenu: set of TCnAlignSizeStyle =
     [asAlignVCenter, asSpaceRemoveV, asMakeSameSize, asParentVCenter,
-    asSendToBack, asLockControls, asChangeCompClass];
+    asSendToBack, asRememberLock, asChangeCompClass];
 
   csAlignSupportsNonVisual: set of TCnAlignSizeStyle =
     [asAlignLeft, asAlignRight, asAlignTop, asAlignBottom,
@@ -337,7 +347,7 @@ const
     'CnMakeMaxHeight', 'CnMakeSameHeight', 'CnMakeSameSize', 'CnParentHCenter',
     'CnParentVCenter', 'CnBringToFront', 'CnSendToBack', 'CnSnapToGrid',
     {$IFDEF IDE_HAS_GUIDE_LINE} 'CnUseGuidelines', {$ENDIF}
-    'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnSelectRoot',
+    'CnAlignToGrid', 'CnSizeToGrid', 'CnLockControls', 'CnRememberLock', 'CnSelectRoot',
     'CnCopyCompName', 'CnCopyCompClass', 'CnHideComponent', 'CnNonArrange',
     'CnListComp', 'CnCompareProp', 'CnCompToCode', 'CnChangeCompClass',
     'CnCompRename', 'CnShowFlatForm');
@@ -354,8 +364,8 @@ const
     @SCnBringToFrontCaption, @SCnSendToBackCaption, @SCnSnapToGridCaption,
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesCaption, {$ENDIF}
     @SCnAlignToGridCaption, @SCnSizeToGridCaption, @SCnLockControlsCaption,
-    @SCnSelectRootCaption, @SCnCopyCompNameCaption, @SCnCopyCompClassCaption,
-    @SCnHideComponentCaption, @SCnNonArrangeCaption,
+    @SCnRememberLockCaption, @SCnSelectRootCaption, @SCnCopyCompNameCaption,
+    @SCnCopyCompClassCaption, @SCnHideComponentCaption, @SCnNonArrangeCaption,
     @SCnListCompCaption, @SCnComparePropertyCaption, @SCnCompToCodeCaption,
     @SCnChangeCompClassCaption, @SCnFloatPropBarRenameCaption, @SCnShowFlatFormCaption);
 
@@ -371,10 +381,10 @@ const
     @SCnBringToFrontHint, @SCnSendToBackHint, @SCnSnapToGridHint,
     {$IFDEF IDE_HAS_GUIDE_LINE} @SCnUseGuidelinesHint, {$ENDIF}
     @SCnAlignToGridHint, @SCnSizeToGridHint, @SCnLockControlsHint,
-    @SCnSelectRootHint, @SCnCopyCompNameHint, @SCnCopyCompClassHint,
-    @SCnHideComponentHint, @SCnNonArrangeHint, @SCnListCompHint,
-    @SCnComparePropertyHint, @SCnCompToCodeHint, @SCnChangeCompClassHint,
-    @SCnFloatPropBarRenameCaption, @SCnShowFlatFormHint); // 缺 Hint 的用 Caption 代替
+    @SCnRememberLockHint, @SCnSelectRootHint, @SCnCopyCompNameHint,
+    @SCnCopyCompClassHint, @SCnHideComponentHint, @SCnNonArrangeHint,
+    @SCnListCompHint, @SCnComparePropertyHint, @SCnCompToCodeHint,
+    @SCnChangeCompClassHint, @SCnFloatPropBarRenameHint, @SCnShowFlatFormHint);
 
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
@@ -484,10 +494,12 @@ begin
 {$ENDIF}
 {$ENDIF}
   CnWizNotifierServices.AddFormEditorNotifier(FormEditorNotifier);
+  CnWizNotifierServices.AddApplicationIdleNotifier(ApplicationIdle);
 end;
 
 destructor TCnDesignWizard.Destroy;
 begin
+  CnWizNotifierServices.RemoveApplicationIdleNotifier(ApplicationIdle);
   CnWizNotifierServices.RemoveFormEditorNotifier(FormEditorNotifier);
 {$IFDEF CNWIZARDS_CNSCRIPTWIZARD}
 {$IFDEF SUPPORT_PASCAL_SCRIPT}
@@ -940,8 +952,14 @@ begin
           if Assigned(FIDELockControlsMenu) then
           begin
             FIDELockControlsMenu.Click;
+            FLockStatus := FIDELockControlsMenu.Checked;
             CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
           end;
+          IsModified := False;
+        end;
+      asRememberLock:
+        begin
+          FRememberLock := not FRememberLock;
           IsModified := False;
         end;
       asSelectRoot:
@@ -1130,6 +1148,13 @@ begin
   if Active and (NotifyType = fetActivated) and (FIDEHideNonvisualsMenu = nil) then
     UpdateNonVisualComponent(FormEditor);
 
+  if Active and FNeedClickLockWhenDesign and (NotifyType = fetOpened)
+    and (FIDELockControlsMenu <> nil) then
+  begin
+    CnWizNotifierServices.ExecuteOnApplicationIdle(InitLockMenuStatus);
+    Exit;
+  end;
+
   if Active and (NotifyType = fetOpened) and (FIDELockControlsMenu <> nil) and
     FIDELockControlsMenu.Enabled and FIDELockControlsMenu.Checked then
   begin
@@ -1137,6 +1162,25 @@ begin
     CnDebugger.LogMsg('Form Editor Opened and Controls Locked. Do Re-Lock.');
 {$ENDIF}
     CnWizNotifierServices.ExecuteOnApplicationIdle(LockMenuExecuteReLock);
+  end;
+end;
+
+procedure TCnDesignWizard.ApplicationIdle(Sender: TObject);
+begin
+  if FRememberLock and (FIDELockControlsMenu <> nil) then
+    FLockStatus := FIDELockControlsMenu.Checked;
+end;
+
+procedure TCnDesignWizard.InitLockMenuStatus(Sender: TObject);
+begin
+  if FNeedClickLockWhenDesign and (FIDELockControlsMenu <> nil) then
+  begin
+    FIDELockControlsMenu.Click;
+    CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnDesignWizard.FormEditorNotifier Idle Init LockStatus when Form');
+{$ENDIF}
+    FNeedClickLockWhenDesign := False;
   end;
 end;
 
@@ -1761,11 +1805,13 @@ begin
   if not Active then Exit;
 
   for Style := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
+  begin
     if Indexes[Style] = Index then
     begin
       DoAlignSize(Style);
       Break;
     end;
+  end;
 end;
 
 // Action 状态更新
@@ -1833,7 +1879,7 @@ begin
   {$IFDEF IDE_HAS_GUIDE_LINE}
   else if Index = Indexes[asUseGuidelines] then
     Actn.Checked := CnOtaGetEnvironmentOptions.GetOptionValue(SOptionUseGuidelines)
-  {$ENDIF}   
+  {$ENDIF}
   else if Index = Indexes[asSelectRoot] then
     Actn.Enabled := not CnOtaSelectedComponentIsRoot
   else if Index = Indexes[asLockControls] then
@@ -1846,6 +1892,8 @@ begin
     else
       Actn.Enabled := False;
   end
+  else if Index = Indexes[asRememberLock] then
+    Actn.Checked := FRememberLock
   else if Index = Indexes[asHideComponent] then
   begin
     Actn.Enabled := True;
@@ -1893,6 +1941,9 @@ begin
   FSortByClassName := Ini.ReadBool('', csSortByClassName, True);
   FSizeSpace := Ini.ReadInteger('', csSizeSpace, csDefSizeSpace);
 
+  FLockStatus := Ini.ReadBool('', csLockStatus, False);
+  FRememberLock := Ini.ReadBool('', csRememberLock, False);
+
   FPropertyCompare.LoadSettings(Ini);
 end;
 
@@ -1908,6 +1959,9 @@ begin
   Ini.WriteInteger('', csPerColCount, FPerColCount);
   Ini.WriteBool('', csSortByClassName, FSortByClassName);
   Ini.WriteInteger('', csSizeSpace, FSizeSpace);
+
+  Ini.WriteBool('', csLockStatus, FLockStatus);
+  Ini.WriteBool('', csRememberLock, FRememberLock);
 
   FPropertyCompare.SaveSettings(Ini);
 end;
@@ -1993,7 +2047,36 @@ end;
 procedure TCnDesignWizard.CheckMenuItemReady(Sender: TObject);
 begin
   if FIDELockControlsMenu = nil then
+  begin
     FIDELockControlsMenu := TMenuItem(Application.MainForm.FindComponent(SIDELockControlsMenuName));
+    if (FIDELockControlsMenu <> nil) and FRememberLock then
+    begin
+      // 第一次找到该原始菜单项时，根据设置，判断是否初始化改变锁定状态
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnDesignWizard.CheckMenuItemReady and Restore Remember. Get IDELockControlsMenu Checked %d and Our LockStatus %d',
+        [Ord(FIDELockControlsMenu.Checked), Ord(FLockStatus)]);
+{$ENDIF}
+      if FIDELockControlsMenu.Checked <> FLockStatus then
+      begin
+        // 注意有可能没有设计器导致该菜单条目 Click 不生效
+        if CnOtaGetCurrentDesignContainer <> nil then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnDesignWizard.CheckMenuItemReady Has Designer. Click.');
+{$ENDIF}
+          FIDELockControlsMenu.Click;
+          CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
+        end
+        else
+        begin
+          FNeedClickLockWhenDesign := True;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnDesignWizard.CheckMenuItemReady NO Designer. Delay to Design to Click.');
+{$ENDIF}
+        end;
+      end;
+    end;
+  end;
 
   // Maybe nil under XE8 or below.
   if FIDEHideNonvisualsMenu = nil then
@@ -2011,6 +2094,7 @@ begin
     if Assigned(FIDEMenuBar.OnPopup) then
     begin
       FIDEMenuBar.OnPopup(FIDEMenuBar, FEditMenuActionControl);
+      FLockStatus := FIDELockControlsMenu.Checked;
 {$IFDEF DEBUG}
       CnDebugger.LogBoolean(FIDELockControlsMenu.Checked,
         'TCnDesignWizard RequestLockControlsMenuUpdate Call MenuBar.OnPopup. IDELockControlsMenu.Checked');

@@ -1213,6 +1213,7 @@ var
   SCnFlatToolBarRestoreDefault: string = 'Sure to Delete Your Toolbars and Restore to Default?';
   SCnFloatPropBarFilterCaption: string = 'Only Show Frequent Properties';
   SCnFloatPropBarRenameCaption: string = 'Rename Component';
+  SCnFloatPropBarRenameHint: string = 'Rename Component';
   SCnEmbeddedDesignerNotSupport: string = 'Sorry. VCL Embedded Designer NOT Supported.';
 
   // CnDesignWizard
@@ -1292,6 +1293,8 @@ var
   SCnSizeToGridHint: string = 'Size to grid';
   SCnLockControlsCaption: string = 'Lock Controls';
   SCnLockControlsHint: string = 'Lock Controls';
+  SCnRememberLockCaption: string = 'Remember Lock Status';
+  SCnRememberLockHint: string = 'Remember Lock Status';
   SCnSelectRootCaption: string = 'Select Form';
   SCnSelectRootHint: string = 'Select Current Form in Current Designer';
   SCnCopyCompNameCaption: string = 'Copy Component''s Name';
