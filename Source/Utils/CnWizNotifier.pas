@@ -59,8 +59,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
+  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ENDIF}
   {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
-  {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF} CnWizUtils, CnClasses
+  {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
+  CnWizUtils, CnClasses, CnWizMethodHook, CnWizCompilerConst
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
   
 type
@@ -82,6 +84,9 @@ type
   TCnWizSourceEditorNotifier = procedure (SourceEditor: TCnSourceEditorInterface;
     NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF}) of object;
   {* SourceEditor 通知事件，SourceEditor 为源码编辑器接口，NotifyType 为类型}
+
+  TCnWizPopupMenuBuildNotifier = procedure (Sender: TObject; PopupMenu: TPopupMenu) of object;
+  {* 设计器右键菜单准备好的事件，仅 Delphi 5 下有效}
 
 {$IFDEF DELPHI_OTA}
 
@@ -205,6 +210,15 @@ type
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     {* 删除一个应用程序事件通知事件}
 
+{$IFDEF COMPILER5}
+
+    procedure AddDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+    {* 增加一个设计器右键菜单准备好的事件，仅 Delphi 5 下有效}
+    procedure RemoveDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+    {* 删除一个设计器右键菜单准备好的事件}
+
+{$ENDIF}
+
     procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     {* 增加一个 CallWndProc HOOK 通知事件}
     procedure RemoveCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
@@ -261,7 +275,16 @@ const
   csIdleMinInterval = 50;
   MSG_DISPATCHER_SIZE = $FFFF;
 
+{$IFDEF COMPILER5}
+  SDesignerBuildLocalMenu = '@Libmain@TWindowDesigner@BuildLocalMenu$qqrp16Menus@TPopupMenu53System@%Set$t25Dsgnintf@TLocalMenuFilter$iuc$0$iuc$2%';
+{$ENDIF}
+
 type
+{$IFDEF COMPILER5}
+  TDesignerBuildLocalMenuProc = function (ASelf: Pointer; PopupMenu: TPopupMenu;
+    LocalMenuFilter: TLocalMenuFilters): TObject;
+{$ENDIF}
+
   TCnWndProcMessageDispatcher = class
   {* 用于 CallWndProc 和 CallWndProcRet 的消息分发器，只支持 $FFFF 以下的消息，不考虑返回值}
   private
@@ -467,7 +490,9 @@ type
     FApplicationIdleNotifiers: TList;
     FApplicationMessageNotifiers: TList;
     FAppEventNotifiers: TList;
-
+{$IFDEF COMPILER5}
+    FDesignerMenuBuildNotifiers: TList;
+{$ENDIF}
     FCallWndProcDispatcher: TCnWndProcMessageDispatcher;
     FCallWndProcRetDispatcher: TCnWndProcMessageDispatcher;
     FGetMsgDispatcher: TCnGetMessageDispatcher;
@@ -510,6 +535,9 @@ type
     FCompNotifyList: TComponentList;
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
+{$IFDEF COMPILER5}
+    FLocalMenuHook: TCnMethodHook;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
     FCurrentCompilingProject: IOTAProject;
 {$ENDIF}
@@ -555,6 +583,12 @@ type
 
     procedure AddAppEventNotifier(Notifier: TCnWizAppEventNotifier);
     procedure RemoveAppEventNotifier(Notifier: TCnWizAppEventNotifier);
+
+{$IFDEF COMPILER5}
+    procedure AddDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+    procedure RemoveDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+{$ENDIF}
+
     procedure AddCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
     procedure RemoveCallWndProcNotifier(Notifier: TCnWizMsgHookNotifier);
     procedure AddCallWndProcRetNotifier(Notifier: TCnWizMsgHookNotifier; MsgIDs: array of Cardinal);
@@ -653,9 +687,13 @@ var
   FIsReleased: Boolean = False;
   FCnWizNotifierServices: TCnWizNotifierServices = nil;
 
-{$IFNDEF DELPHI_OTA}
-  IdeClosing: Boolean = False; // 独立运行时无此变量，冒充一个
+{$IFDEF COMPILER5}
+  DesignerBuildLocalMenu: TDesignerBuildLocalMenuProc = nil;
+{$ENDIF}
 
+{$IFNDEF DELPHI_OTA}
+
+  IdeClosing: Boolean = False; // 独立运行时无此变量，冒充一个
 
 // 独立运行时无此方法，也冒充一个，处理一些执行方法中的异常
 procedure DoHandleException(const ErrorMsg: string; E: Exception = nil);
@@ -668,6 +706,47 @@ begin
     CnDebugger.LogMsgWithType('Error ' + ErrorMsg + ' : ' + E.Message, cmtError);
     CnDebugger.LogStackFromAddress(ExceptAddr, 'Call Stack');
   end;
+{$ENDIF}
+end;
+
+{$ENDIF}
+
+{$IFDEF COMPILER5}
+
+function MyDesignerBuildLocalMenu(ASelf: Pointer; PopupMenu: TPopupMenu;
+  LocalMenuFilter: TLocalMenuFilters): TObject;
+var
+  I: Integer;
+begin
+  if FCnWizNotifierServices.FLocalMenuHook.UseDDteours then
+    Result := TDesignerBuildLocalMenuProc(FCnWizNotifierServices.FLocalMenuHook.Trampoline)(ASelf, PopupMenu, LocalMenuFilter)
+  else
+  begin
+    FCnWizNotifierServices.FLocalMenuHook.UnhookMethod;
+    try
+      Result := DesignerBuildLocalMenu(ASelf, PopupMenu, LocalMenuFilter);
+    finally
+      FCnWizNotifierServices.FLocalMenuHook.HookMethod;
+    end;
+  end;
+
+  if (Result <> nil) and (Result is TPopupMenu) then
+  begin
+    for I := FCnWizNotifierServices.FDesignerMenuBuildNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FCnWizNotifierServices.FDesignerMenuBuildNotifiers[I])^ do
+        TCnWizPopupMenuBuildNotifier(Notifier)(FCnWizNotifierServices, TPopupMenu(Result));
+    except
+      DoHandleException('TCnWizNotifierServices.DoDesignerBuildLocalMenu[' + IntToStr(I) + ']');
+    end;
+  end;
+
+{$IFDEF DEBUG}
+  if (Result <> nil) and (Result is TPopupMenu) then
+    CnDebugger.LogFmt('CnWizNotifierServices After DesignerBuildLocalMenu %s|%s Count %d',
+      [Result.ClassName, TComponent(Result).Name, TPopupMenu(Result).Items.Count])
+  else
+    CnDebugger.LogMsg('CnWizNotifierServices After DesignerBuildLocalMenu Get nil');
 {$ENDIF}
 end;
 
@@ -1076,6 +1155,9 @@ constructor TCnWizNotifierServices.Create;
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
+{$IFDEF COMPILER5}
+  CorIdeModule: THandle;
+{$ENDIF}
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
   {$IFDEF DELPHI102_TOKYO}
@@ -1130,6 +1212,9 @@ begin
   FApplicationIdleNotifiers := TList.Create;
   FApplicationMessageNotifiers := TList.Create;
   FAppEventNotifiers := TList.Create;
+{$IFDEF COMPILER5}
+  FDesignerMenuBuildNotifiers := TList.Create;
+{$ENDIF}
 
   FCallWndProcDispatcher := TCnWndProcMessageDispatcher.Create;
   FCallWndProcRetDispatcher := TCnWndProcMessageDispatcher.Create;
@@ -1190,6 +1275,19 @@ begin
   GetMsgHook := SetWindowsHookEx(WH_GETMESSAGE, GetMsgProc, 0, GetCurrentThreadId);
   FLastControl := nil;
   FLastForm := nil;
+
+{$IFDEF COMPILER5}
+  CorIdeModule := GetModuleHandle(CorIdeLibName);
+  CnWizAssert(CorIdeModule <> 0, 'GetModuleHandle CorIdeModule');
+
+  DesignerBuildLocalMenu := GetBplMethodAddress(GetProcAddress(CorIdeModule, SDesignerBuildLocalMenu));
+  CnWizAssert(CorIdeModule <> 0, 'CorIdeModule GetProcAddress DesignerBuildLocalMenu');
+  FLocalMenuHook := TCnMethodHook.Create(@DesignerBuildLocalMenu, @MyDesignerBuildLocalMenu);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnWizNotifierServices Hook DesignerBuildLocalMenu');
+{$ENDIF}
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizNotifierServices.Create succeed');
 {$ENDIF}
@@ -1215,6 +1313,10 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizNotifierServices.Destroy');
 {$ENDIF}
+{$IFDEF COMPILER5}
+  FLocalMenuHook.Free;
+{$ENDIF}
+
   UnhookWindowsHookEx(CallWndProcHook);
   CallWndProcHook := 0;
   UnhookWindowsHookEx(CallWndProcRetHook);
@@ -1289,6 +1391,9 @@ begin
   CnWizClearAndFreeList(FApplicationIdleNotifiers);
   CnWizClearAndFreeList(FApplicationMessageNotifiers);
   CnWizClearAndFreeList(FAppEventNotifiers);
+{$IFDEF COMPILER5}
+  CnWizClearAndFreeList(FDesignerMenuBuildNotifiers);
+{$ENDIF}
 
   FCallWndProcDispatcher.Free;
   FCallWndProcRetDispatcher.Free;
@@ -2065,6 +2170,20 @@ procedure TCnWizNotifierServices.RemoveAppEventNotifier(
 begin
   CnWizRemoveNotifier(FAppEventNotifiers, TMethod(Notifier));
 end;
+
+{$IFDEF COMPILER5}
+
+procedure TCnWizNotifierServices.AddDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+begin
+  CnWizAddNotifier(FDesignerMenuBuildNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.RemoveDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
+begin
+  CnWizRemoveNotifier(FDesignerMenuBuildNotifiers, TMethod(Notifier));
+end;
+
+{$ENDIF}
 
 procedure TCnWizNotifierServices.DoIdleNotifiers;
 var
