@@ -782,6 +782,9 @@ end;
 
 procedure AddSearchHistoryItems(const Text: string);
 begin
+  if SearchHistoryItems = nil then
+    SearchHistoryItems := TStringList.Create;
+
   if SearchHistoryItems.IndexOf(Text) < 0 then
   begin
     if (SearchHistoryItems.Count >= CnViewerOptions.SearchDownCount) then
