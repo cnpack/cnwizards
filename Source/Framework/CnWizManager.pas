@@ -119,7 +119,9 @@ type
     procedure CalcProductVersion;
     procedure DoLaterLoad(Sender: TObject);
     procedure DoFreeLaterLoadTimer(Sender: TObject);
-
+{$IFDEF COMPILER5}
+    procedure DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
+{$ENDIF}
     procedure CreateIDEMenu;
     procedure InstallIDEMenu;
     procedure FreeMenu;
@@ -497,6 +499,10 @@ begin
   // 文件通知
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
+{$IFDEF COMPILER5}
+  CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
+{$ENDIF}
+
   // IDE 启动完成后调用 Loaded
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('InternalCreate IdleLoaded');
@@ -685,6 +691,10 @@ begin
   CnDebugger.LogEnter('TCnWizardMgr.Destroy');
 {$ENDIF}
 
+{$IFDEF COMPILER5}
+  CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
+{$ENDIF}
+
   // 防止多个 IDE 实例同时释放时保存设置冲突
   hMutex := CreateMutex(nil, False, csCnWizFreeMutex);
 {$IFDEF DEBUG}
@@ -776,6 +786,61 @@ begin
   CnDebugger.LogLeave('TCnWizardMgr.Destroy');
 {$ENDIF}
 end;
+
+{$IFDEF COMPILER5}
+
+procedure TCnWizardMgr.DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
+var
+  Sep, Item: TMenuItem;
+  I, Idx: Integer;
+  Executor: TCnContextMenuExecutor;
+begin
+  if CnDesignExecutorList.Count <= 0 then
+    Exit;
+
+  Sep := nil;
+  for I := 0 to PopupMenu.Items.Count - 1 do
+  begin
+    if PopupMenu.Items[I].Caption = '-' then
+    begin
+      Sep := PopupMenu.Items[I];
+      Break;
+    end;
+  end;
+
+  if Sep = nil then
+    Idx := 0
+  else
+    Idx := Sep.MenuIndex + 1;
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('WizManager DesignerMenuBuild Check %d Executors to Insert at Index %d',
+      [CnDesignExecutorList.Count, Idx]);
+{$ENDIF}
+
+  for I := 0 to CnDesignExecutorList.Count - 1 do
+  begin
+    Executor := TCnContextMenuExecutor(CnDesignExecutorList[I]);
+    if ((Executor.Wizard = nil) or Executor.Wizard.Active) then
+    begin
+      Item := TMenuItem.Create(PopupMenu);
+
+      Item.Caption := Executor.GetCaption;
+      Item.Hint := Executor.GetHint;
+      Executor.Prepare;
+      Item.Visible := Executor.GetActive;
+      Item.Enabled := Executor.GetEnabled;
+      Item.OnClick := Executor.OnExecute;
+
+      PopupMenu.Items.Insert(Idx, Item);
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('WizManager DesignerMenuBuild Insert ' + Item.Caption);
+{$ENDIF}
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 //------------------------------------------------------------------------------
 // 专家设置相关方法
