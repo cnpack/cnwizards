@@ -59,7 +59,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ELSE} ActnPopup, {$ENDIF}
+  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ELSE} {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF} {$ENDIF}
   {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
   CnWizUtils, CnClasses, CnWizMethodHook, CnWizCompilerConst
@@ -273,8 +273,6 @@ const
 
 {$IFDEF COMPILER5}
   SDesignerBuildLocalMenu = '@Libmain@TWindowDesigner@BuildLocalMenu$qqrp16Menus@TPopupMenu53System@%Set$t25Dsgnintf@TLocalMenuFilter$iuc$0$iuc$2%';
-{$ELSE}
-  SPopupActionBarPopup = '@Vcl@Actnpopup@TPopupActionBar@Popup$qqrii';
 {$ENDIF}
 
 type
@@ -1309,7 +1307,11 @@ begin
   CnDebugger.LogMsg('TCnWizNotifierServices Hook DesignerBuildLocalMenu');
 {$ENDIF}
 {$ELSE}
+  {$IFDEF COMPILER6}
+  PopupActionBarPopup := GetBplMethodAddress(@TPopupMenu.Popup);
+  {$ELSE}
   PopupActionBarPopup := GetBplMethodAddress(@TPopupActionBar.Popup);
+  {$ENDIF}
   FLocalMenuHook := TCnMethodHook.Create(@PopupActionBarPopup, @MyPopupActionBarPopup);
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizNotifierServices Hook PopupActionBarPopup');

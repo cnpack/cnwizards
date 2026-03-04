@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, ShellAPI, ExtCtrls, ComCtrls;
+  Dialogs, StdCtrls, ShellAPI, ExtCtrls, ComCtrls, Buttons, Clipbrd;
 
 type
   TAppBuillder = class(TForm)
@@ -16,12 +16,15 @@ type
     lvTargets: TListView;
     lblCmdPreview: TLabel;
     bvl1: TBevel;
+    btnCopyCmd: TSpeedButton;
     procedure btnRunWantClick(Sender: TObject);
     procedure btnShowCmdClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure cbbTargetChange(Sender: TObject);
     procedure rgDefClick(Sender: TObject);
     procedure lvTargetsDblClick(Sender: TObject);
+    procedure lvTargetsClick(Sender: TObject);
+    procedure btnCopyCmdClick(Sender: TObject);
   private
     procedure LoadXML(const FileName: string);
     procedure UpdateCmdPreview;
@@ -174,12 +177,40 @@ begin
 end;
 
 procedure TAppBuillder.lvTargetsDblClick(Sender: TObject);
+var
+  Cmd, Param: string;
+begin
+  if lvTargets.Selected <> nil then
+  begin
+    cbbTarget.Text := lvTargets.Selected.Caption;
+    UpdateCmdPreview;
+
+    PrepareCmd(Cmd, Param);
+    ShellExecute(0, 'open', PChar(Cmd), PChar(Param),
+      PChar(ExtractFilePath(Application.ExeName)), SW_SHOWNORMAL);
+  end;
+end;
+
+procedure TAppBuillder.lvTargetsClick(Sender: TObject);
 begin
   if lvTargets.Selected <> nil then
   begin
     cbbTarget.Text := lvTargets.Selected.Caption;
     UpdateCmdPreview;
   end;
+end;
+
+procedure TAppBuillder.btnCopyCmdClick(Sender: TObject);
+var
+  S: string;
+  I: Integer;
+begin
+  S := lblCmdPreview.Caption;
+  I := Pos('want.exe ', S);
+  if I > 1 then
+    Delete(S, 1, I - 1);
+
+  Clipboard.AsText := S;
 end;
 
 end.
