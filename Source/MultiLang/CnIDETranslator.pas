@@ -95,7 +95,6 @@ type
     FMainMenu: TMainMenu;
     FMainMenuPath: string;
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
-    FAttachedDesignHooks: TObjectList;    // ControlHooks
     FAttachedMenuItems: TObjectList;
 
     { 插件公用函数 }
@@ -110,8 +109,6 @@ type
     function GetActiveProjectInfo: TCnActiveProjectInfo;
 
     function IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
-    function IsControlHooked(Control: TControl): Boolean;
-
 {$IFDEF BDS}
     function GetPaletteButtonInfo: TCnPaletteButtonInfo;
 {$ENDIF}
@@ -157,8 +154,6 @@ type
     procedure LoadTranslationMap(const AMapFile: string);
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
-    procedure CheckHookApplicationPopupMenus(Sender: TObject);
-    procedure HookPopupMenuCreate;
 
     procedure DelayActivate(Sender: TObject);
     procedure SetActive(const Value: Boolean);
@@ -166,13 +161,6 @@ type
     procedure ActiveProjectChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
     procedure DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
-    procedure AfterCallWndMessage(hwnd: HWND; Control: TWinControl; Msg: TMessage);
-    procedure AfterCallWndRetMessage(hwnd: HWND; Control: TWinControl; Msg: TMessage);
-
-    procedure BeforeControlMessage(Sender: TObject; Control: TControl;
-      var Msg: TMessage; var Handled: Boolean);
-    procedure AfterControlMessage(Sender: TObject; Control: TControl;
-      var Msg: TMessage; var Handled: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -202,58 +190,6 @@ const
   RT_MECHANISM_DIRECTACCESS: string = 'DirectAccess';
   RT_MECHANISM_EVENTHANDLER: string = 'EventHandler';
   RT_MECHANISM_WINDOWPROC: string = 'WindowProc';
-
-//type
-//  TMyHookPopupMenu = class(TComponent)
-//  public
-//    class function MyCreate(AOwner: TComponent; IsClassCreate: Boolean);
-//  end;
-
-type
-  TCnComponentCreateProc = function (SelfClass: Pointer; IsClassCreate: Boolean; AOwner: TComponent): TObject;
-
-var
-  FPopupMenuCreateHook: TCnMethodHook = nil;
-
-function MyHookPopupMenuCreate(SelfClass: Pointer; IsClassCreate: Boolean; AOwner: TComponent): TObject;
-begin
-  Result := nil;
-  if FPopupMenuCreateHook <> nil then
-  begin
-    FPopupMenuCreateHook.UnhookMethod;
-    try
-      if IsClassCreate then
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('MyHookPopupMenuCreate Actually Create');
-{$ENDIF}
-{$IFDEF COMPILER7_UP}
-        Result := TPopupActionBar.Create(AOwner);
-{$ELSE}
-        Result := TPopupMenu.Create(AOwner);
-{$ENDIF}
-      end
-      else
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('MyHookPopupMenuCreate Only Call Create');
-{$ENDIF}
-{$IFDEF COMPILER7_UP}
-        TPopupActionBar(SelfClass).Create(AOwner);
-{$ELSE}
-        TPopupMenu(SelfClass).Create(AOwner);
-{$ENDIF}
-        Result := TObject(SelfClass);
-      end;
-    finally
-      FPopupMenuCreateHook.HookMethod;
-    end;
-  end;
-
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('MyHookPopupMenuCreate Create %s', [CnDebugger.ObjectAddressToString(Result)]);
-{$ENDIF}
-end;
 
 {$IFDEF DEBUG}
 
@@ -1376,7 +1312,6 @@ begin
   inherited Create;
   // 初始化参数对象
   FAttachedPopupMenuHooks := TObjectList.Create(True);
-  FAttachedDesignHooks := TObjectList.Create(True);
   FAttachedMenuItems := TObjectList.Create(True);
 
   // 加载翻译内容
@@ -1385,31 +1320,19 @@ begin
 
   CnWizNotifierServices.AddActiveProjectChangedNotifier(ActiveProjectChanged);
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
-
-{$IFDEF COMPILER5}
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
-{$ENDIF}
-
-  // CnWizNotifierServices.AddCallWndProcNotifier(AfterCallWndMessage, [WM_RBUTTONDOWN, WM_NCRBUTTONDOWN, WM_PARENTNOTIFY]);
-  // CnWizNotifierServices.AddCallWndProcRetNotifier(AfterCallWndRetMessage, [WM_RBUTTONDOWN, WM_NCRBUTTONDOWN, WM_PARENTNOTIFY]);
 end;
 
 destructor TCnMenuTranslator.Destroy;
 begin
-  //CnWizNotifierServices.RemoveCallWndProcRetNotifier(AfterCallWndRetMessage);
-  //CnWizNotifierServices.RemoveCallWndProcNotifier(AfterCallWndMessage);
-
-{$IFDEF COMPILER5}
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
-{$ENDIF}
-
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.RemoveActiveProjectChangedNotifier(ActiveProjectChanged);
+
   FOld2Array.Free;
   FNew2Array.Free;
   FreeAndNil(FTranslationMap);
   FreeAndNil(FAttachedPopupMenuHooks);
-  FreeAndNil(FAttachedDesignHooks);
   FreeAndNil(FAttachedMenuItems);
   inherited;
 end;
@@ -1488,82 +1411,6 @@ begin
   end;
 end;
 
-function TCnMenuTranslator.IsControlHooked(Control: TControl): Boolean;
-var
-  I: Integer;
-begin
-  Result := False;
-  for I := 0 to FAttachedDesignHooks.Count - 1 do
-  begin
-    if TCnControlHook(FAttachedDesignHooks[I]).IsHooked(Control) then
-    begin
-      Result := True;
-      Exit;
-    end;
-  end;
-end;
-
-procedure TCnMenuTranslator.CheckHookApplicationPopupMenus(Sender: TObject);
-var
-  I: Integer;
-  C: TComponent;
-  Menu: TPopupMenu;
-  Hook: TCnMenuHook;
-begin
-  for I := 0 to Application.ComponentCount - 1 do
-  begin
-    if Application.Components[I].ClassNameIs('TPopupMenu') or
-      Application.Components[I].ClassNameIs('TPopupActionBar') then
-    begin
-      C := Application.Components[I];
-      if C is TPopupMenu then
-      begin
-        Menu := TPopupMenu(C);
-        if not IsPopupMenuHooked(Menu) then
-        begin
-          Hook := TCnMenuHook.Create(nil);
-          if Menu.ClassNameIs('TPopupMenu') then
-            Hook.Text := 'Application.TFormContainerForm.TPopupMenu'
-          else
-            Hook.Text := 'Application.TFormContainerForm.TPopupActionBar';
-
-          Hook.HookMenu(Menu);
-          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
-          FAttachedPopupMenuHooks.Add(Hook);
-{$IFDEF DEBUG}
-          CnDebugger.LogFmt('CheckHookApplicationPopupMenus. %s Hook %s',
-            [CnDebugger.ObjectAddressToString(Menu), Hook.Text]);
-{$ENDIF}
-        end;
-      end;
-    end;
-  end;
-end;
-
-procedure TCnMenuTranslator.AfterCallWndMessage(hwnd: HWND; Control: TWinControl;
-  Msg: TMessage);
-begin
-{$IFDEF DEBUG}
-  if Control <> nil then
-    CnDebugger.LogFmt('TCnMenuTranslator.AfterCallWndMessage Get $%4.4x for %s|%s', [Msg.Msg, Control.Name, Control.ClassName]);
-
-  if Msg.Msg = WM_PARENTNOTIFY then
-    CnDebugger.LogFmt('TCnMenuTranslator.AfterCallWndMessage Get WM_PARENTNOTIFY for $%4.4x', [Msg.WParam]);
-{$ENDIF}
-end;
-
-procedure TCnMenuTranslator.AfterCallWndRetMessage(hwnd: HWND; Control: TWinControl;
-  Msg: TMessage);
-begin
-{$IFDEF DEBUG}
-  if Control <> nil then
-    CnDebugger.LogFmt('TCnMenuTranslator.AfterCallWndRetMessage Get $%4.4x for %s|%s', [Msg.Msg, Control.Name, Control.ClassName]);
-
-  if Msg.Msg = WM_PARENTNOTIFY then
-    CnDebugger.LogFmt('TCnMenuTranslator.AfterCallWndRetMessage Get WM_PARENTNOTIFY for $%4.4x', [Msg.WParam]);
-{$ENDIF}
-end;
-
 procedure TCnMenuTranslator.DebugCommand(Cmds, Results: TStrings);
 var
   I: Integer;
@@ -1582,55 +1429,8 @@ begin
 end;
 
 procedure TCnMenuTranslator.ActiveFormChanged(Sender: TObject);
-var
-  I: Integer;
-  ACtrl: TWinControl;
-  Hook: TCnControlHook;
 begin
   TranslateStaticPopupMenus(True);
-
-  ACtrl := CnOtaGetCurrentDesignContainer;
-  if ACtrl = nil then
-    Exit;
-
-  if (ACtrl.Name = 'DataModuleForm') and ACtrl.ClassNameIs('TDataModuleForm') then
-  begin
-    // 非设计器的 DataModuleForm，找其 Controls 里的 TComponentContainer
-    for I := 0 to ACtrl.ControlCount - 1 do
-    begin
-      if (ACtrl.Controls[I] is TWinControl) and
-        ACtrl.Controls[I].ClassNameIs('TComponentContainer') then
-      begin
-        ACtrl := TWinControl(ACtrl.Controls[I]);
-        Break;
-      end;
-    end;
-  end
-  else if ACtrl.ClassNameIs('TFormContainerForm') then
-  begin
-    // 嵌入式的，找里面的设计期窗体
-    for I := 0 to ACtrl.ControlCount - 1 do
-    begin
-      if (ACtrl is TWinControl) and (csDesigning in ACtrl.Controls[I].ComponentState) then
-      begin
-        ACtrl := TWinControl(ACtrl.Controls[I]);
-        Break;
-      end;
-    end;
-  end;
-
-  if not IsControlHooked(ACtrl) then
-  begin
-    Hook := TCnControlHook.Create(nil);
-    Hook.BeforeMessage := BeforeControlMessage;
-    Hook.AfterMessage := AfterControlMessage;
-    Hook.Hook(ACtrl);
-    FAttachedDesignHooks.Add(Hook);
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnMenuTranslator.ActiveFormChanged. Hook Designer Menu Container '
-      + ACtrl.Name + ' | ' + ACtrl.ClassName);
-{$ENDIF}
-  end;
 end;
 
 procedure TCnMenuTranslator.DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
@@ -1649,63 +1449,6 @@ begin
       TranslateMenuItem(PopupMenu.Items[I], Captions);
   end;
 end;
-
-procedure TCnMenuTranslator.BeforeControlMessage(Sender: TObject;
-  Control: TControl; var Msg: TMessage; var Handled: Boolean);
-begin
-  if (Msg.Msg = WM_RBUTTONDOWN) or (Msg.Msg = WM_NCRBUTTONDOWN) then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnMenuTranslator.BeforeControlMessage Get $%4.4x for %s | %s', [Msg.Msg, Control.Name, Control.ClassName]);
-{$ENDIF}
-    // 要确保浮动式/嵌入式 Form 设计器里、或浮动式/嵌入式 DataModule 设计器里，点右键会到这里准备弹出右键菜单
-    // FMX 未知
-
-    // HookPopupMenuCreate;
-
-    // 找 Application 里的 PopupMenu 并 Hook 之？
-    // CnWizNotifierServices.ExecuteOnApplicationIdle(CheckHookApplicationPopupMenus);
-  end;
-end;
-
-procedure TCnMenuTranslator.AfterControlMessage(Sender: TObject;
-  Control: TControl; var Msg: TMessage; var Handled: Boolean);
-begin
-  if (Msg.Msg = WM_RBUTTONDOWN) or (Msg.Msg = WM_NCRBUTTONDOWN) then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnMenuTranslator.AfterControlMessage Get $%4.4x for %s | %s', [Msg.Msg, Control.Name, Control.ClassName]);
-{$ENDIF}
-    // 要确保浮动式/嵌入式 Form 设计器里、或浮动式/嵌入式 DataModule 设计器里，点右键会到这里准备弹出右键菜单
-    // FMX 未知
-
-    // HookPopupMenuCreate;
-
-    // 找 Application 里的 PopupMenu 并 Hook 之？
-    // CnWizNotifierServices.ExecuteOnApplicationIdle(CheckHookApplicationPopupMenus);
-  end;
-end;
-
-procedure TCnMenuTranslator.HookPopupMenuCreate;
-begin
-  if FPopupMenuCreateHook = nil then
-  begin
-{$IFDEF COMPILER7_UP}
-    FPopupMenuCreateHook := TCnMethodHook.Create(GetBplMethodAddress(@TPopupActionBar.Create), @MyHookPopupMenuCreate);
-{$ELSE}
-    FPopupMenuCreateHook := TCnMethodHook.Create(GetBplMethodAddress(@TPopupMenu.Create), @MyHookPopupMenuCreate);
-{$ENDIF}
-
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnMenuTranslator.HookPopupMenuCreate');
-{$ENDIF}
-  end;
-end;
-
-initialization
-
-finalization
-  FPopupMenuCreateHook.Free;
 
 end.
 
