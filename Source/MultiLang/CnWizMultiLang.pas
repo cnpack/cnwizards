@@ -446,10 +446,25 @@ end;
 procedure TCnWizMultiLang.SubActionUpdate(Index: Integer);
 var
   I: Integer;
+  Sep: TMenuItem;
 begin
   if {$IFDEF STAND_ALONE} False {$ELSE} Index = FTranslateIndex {$ENDIF} then
   begin
     SubActions[Index].Visible := WizOptions.CurrentLangID = csChineseID;
+
+    Sep := nil;
+    for I := 0 to Menu.Count - 1 do
+    begin
+      if Menu.Items[I].Caption = '-' then
+      begin
+        Sep := Menu.Items[I];
+        Break;
+      end;
+    end;
+
+    if Sep <> nil then
+      Sep.Visible := WizOptions.CurrentLangID = csChineseID;
+
 {$IFNDEF STAND_ALONE}
     if SubActions[Index].Visible then
       SubActions[Index].Checked := FTranslator.Active;
