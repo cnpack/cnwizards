@@ -820,7 +820,6 @@ begin
       Field := Ctx.GetType(Item.ClassInfo).GetField('FMenu');
       if Field = nil then
         Exit;
-cndebugger.logmsg('IdleCheckMenuItem 5 ' + Field.FieldType.Name);
 
       // ≈–∂œ «∑Ò TPopupMenu
       Popup := nil;
@@ -830,11 +829,9 @@ cndebugger.logmsg('IdleCheckMenuItem 5 ' + Field.FieldType.Name);
         if Value.IsObject and (Value.AsObject is TPopupMenu) then
           Popup := Value.AsObject as TPopupMenu;
       end;
-cndebugger.logmsg('IdleCheckMenuItem 6');
 
       if Popup = nil then
         Exit;
-cndebugger.logmsg('IdleCheckMenuItem 7');
 
       FCnWizNotifierServices.DoDesignerMenuBuild(Popup);
     finally
