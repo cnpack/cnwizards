@@ -58,9 +58,9 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ELSE} DesignIntf, DesignEditors, DesignMenus,
-  {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF} {$ENDIF}
+  Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs, Menus,
+  {$IFNDEF STAND_ALONE} {$IFDEF COMPILER5} DsgnIntf, {$ELSE} DesignIntf, DesignEditors, DesignMenus,
+  {$ENDIF} {$ENDIF} {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF SUPPORT_FMX} System.Rtti, {$ENDIF}
   {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
