@@ -264,8 +264,10 @@ function CnWizIndexOfNotifier(List: TList; Notifier: TMethod): Integer;
 
 implementation
 
+{$IFDEF DEBUG}
 uses
   CnDebug, TypInfo;
+{$ENDIF}
 
 const
   csIdleMinInterval = 50;
@@ -3253,8 +3255,8 @@ begin
   // IMenuItem，其 FItem 是 TDesignerMenuItem，其 Parent 是 TMenuItem，其 FMenu 是 TPopupMenu。
   AItem.Visible := False;
 
-  // IMenuItem 对应到 TMenuItemWrapper
-  Obj := CnDebugger.ObjectFromInterface(AItem);
+  // IMenuItem 对应到 TMenuItemWrapper，FMX 支持这样直接 as
+  Obj := AItem as TObject;
   if Obj = nil then
     Exit;
 
