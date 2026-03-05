@@ -590,6 +590,7 @@ const
 {$ENDIF}
 
 {$IFDEF COMPILER5}
+  VclLibName = 'vcl50.bpl';
   CorIdeLibName = 'coride50.bpl';
   DesignIdeLibName = 'dsnide50.bpl';
   {$IFDEF BCB}
@@ -603,6 +604,7 @@ const
 
 {$IFDEF COMPILER6}
   {$IFDEF MSWINDOWS}
+  VclLibName = 'vcl60.bpl';
   CorIdeLibName = 'coreide60.bpl';
   DesignIdeLibName = 'designide60.bpl';
   VclDesignerLibName = 'vcldesigner60.bpl';
@@ -618,6 +620,7 @@ const
 
 {$IFDEF COMPILER7}
   {$IFDEF MSWINDOWS}
+  VclLibName = 'vcl70.bpl';
   CorIdeLibName = 'coreide70.bpl';
   DesignIdeLibName = 'designide70.bpl';
   VclDesignerLibName = 'vcldesigner70.bpl';
@@ -632,6 +635,7 @@ const
 {$ENDIF COMPILER7}
 
 {$IFDEF COMPILER8}
+  VclLibName = 'vcl71.bpl';
   CorIdeLibName = 'coreide71.bpl';
   DesignIdeLibName = 'designide71.bpl';
   VclDesignerLibName = 'vcldesigner71.bpl';
@@ -641,6 +645,7 @@ const
 {$ENDIF COMPILER8}
 
 {$IFDEF COMPILER9}
+  VclLibName = 'vcl90.bpl';
   CorIdeLibName = 'coreide90.bpl';
   DesignIdeLibName = 'designide90.bpl';
   VclDesignerLibName = 'vcldesigner90.bpl';
@@ -650,6 +655,7 @@ const
 {$ENDIF COMPILER9}
 
 {$IFDEF COMPILER10}
+  VclLibName = 'vcl100.bpl';
   CorIdeLibName = 'coreide100.bpl';
   DesignIdeLibName = 'designide100.bpl';
   VclDesignerLibName = 'vcldesigner100.bpl';
@@ -659,6 +665,7 @@ const
 {$ENDIF COMPILER10}
 
 {$IFDEF COMPILER11}     // 2007 Still use 100, NOT 110 !
+  VclLibName = 'vcl100.bpl';
   CorIdeLibName = 'coreide100.bpl';
   DesignIdeLibName = 'designide100.bpl';
   VclDesignerLibName = 'vcldesigner100.bpl';
@@ -668,6 +675,7 @@ const
 {$ENDIF COMPILER11}
 
 {$IFDEF COMPILER12}
+  VclLibName = 'vcl120.bpl';
   CorIdeLibName = 'coreide120.bpl';
   DesignIdeLibName = 'designide120.bpl';
   VclDesignerLibName = 'vcldesigner120.bpl';
@@ -677,6 +685,7 @@ const
 {$ENDIF COMPILER12}
 
 {$IFDEF COMPILER14}
+  VclLibName = 'vcl140.bpl';
   CorIdeLibName = 'coreide140.bpl';
   DesignIdeLibName = 'designide140.bpl';
   VclDesignerLibName = 'vcldesigner140.bpl';
@@ -686,6 +695,7 @@ const
 {$ENDIF COMPILER14}
 
 {$IFDEF COMPILER15}
+  VclLibName = 'vcl150.bpl';
   CorIdeLibName = 'coreide150.bpl';
   DesignIdeLibName = 'designide150.bpl';
   VclDesignerLibName = 'vcldesigner150.bpl';
@@ -695,6 +705,7 @@ const
 {$ENDIF COMPILER15}
 
 {$IFDEF COMPILER16}
+  VclLibName = 'vcl160.bpl';
   CorIdeLibName = 'coreide160.bpl';
   DesignIdeLibName = 'designide160.bpl';
   VclDesignerLibName = 'vcldesigner160.bpl';
@@ -704,6 +715,7 @@ const
 {$ENDIF COMPILER16}
 
 {$IFDEF COMPILER17}
+  VclLibName = 'vcl170.bpl';
   CorIdeLibName = 'coreide170.bpl';
   DesignIdeLibName = 'designide170.bpl';
   VclDesignerLibName = 'vcldesigner170.bpl';
@@ -713,6 +725,7 @@ const
 {$ENDIF COMPILER17}
 
 {$IFDEF COMPILER18}
+  VclLibName = 'vcl180.bpl';
   CorIdeLibName = 'coreide180.bpl';
   DesignIdeLibName = 'designide180.bpl';
   VclDesignerLibName = 'vcldesigner180.bpl';
@@ -722,6 +735,7 @@ const
 {$ENDIF COMPILER18}
 
 {$IFDEF COMPILER19}
+  VclLibName = 'vcl190.bpl';
   CorIdeLibName = 'coreide190.bpl';
   DesignIdeLibName = 'designide190.bpl';
   VclDesignerLibName = 'vcldesigner190.bpl';
@@ -731,6 +745,7 @@ const
 {$ENDIF COMPILER19}
 
 {$IFDEF COMPILER20}
+  VclLibName = 'vcl200.bpl';
   CorIdeLibName = 'coreide200.bpl';
   DesignIdeLibName = 'designide200.bpl';
   VclDesignerLibName = 'vcldesigner200.bpl';
@@ -740,6 +755,7 @@ const
 {$ENDIF COMPILER20}
 
 {$IFDEF COMPILER21}
+  VclLibName = 'vcl210.bpl';
   CorIdeLibName = 'coreide210.bpl';
   DesignIdeLibName = 'designide210.bpl';
   VclDesignerLibName = 'vcldesigner210.bpl';
@@ -749,6 +765,7 @@ const
 {$ENDIF COMPILER21}
 
 {$IFDEF COMPILER22}
+  VclLibName = 'vcl220.bpl';
   CorIdeLibName = 'coreide220.bpl';
   DesignIdeLibName = 'designide220.bpl';
   VclDesignerLibName = 'vcldesigner220.bpl';
@@ -758,6 +775,7 @@ const
 {$ENDIF COMPILER22}
 
 {$IFDEF COMPILER23}
+  VclLibName = 'vcl230.bpl';
   CorIdeLibName = 'coreide230.bpl';
   DesignIdeLibName = 'designide230.bpl';
   VclDesignerLibName = 'vcldesigner230.bpl';
@@ -767,6 +785,7 @@ const
 {$ENDIF COMPILER23}
 
 {$IFDEF COMPILER24}
+  VclLibName = 'vcl240.bpl';
   CorIdeLibName = 'coreide240.bpl';
   DesignIdeLibName = 'designide240.bpl';
   VclDesignerLibName = 'vcldesigner240.bpl';
@@ -776,6 +795,7 @@ const
 {$ENDIF COMPILER24}
 
 {$IFDEF COMPILER25}
+  VclLibName = 'vcl250.bpl';
   CorIdeLibName = 'coreide250.bpl';
   DesignIdeLibName = 'designide250.bpl';
   VclDesignerLibName = 'vcldesigner250.bpl';
@@ -785,6 +805,7 @@ const
 {$ENDIF COMPILER25}
 
 {$IFDEF COMPILER26}
+  VclLibName = 'vcl260.bpl';
   CorIdeLibName = 'coreide260.bpl';
   DesignIdeLibName = 'designide260.bpl';
   VclDesignerLibName = 'vcldesigner260.bpl';
@@ -794,6 +815,7 @@ const
 {$ENDIF COMPILER26}
 
 {$IFDEF COMPILER27}
+  VclLibName = 'vcl270.bpl';
   CorIdeLibName = 'coreide270.bpl';
   DesignIdeLibName = 'designide270.bpl';
   VclDesignerLibName = 'vcldesigner270.bpl';
@@ -806,6 +828,7 @@ const
 {$ENDIF COMPILER27}
 
 {$IFDEF COMPILER28}
+  VclLibName = 'vcl280.bpl';
   CorIdeLibName = 'coreide280.bpl';
   DesignIdeLibName = 'designide280.bpl';
   VclDesignerLibName = 'vcldesigner280.bpl';
@@ -818,6 +841,7 @@ const
 {$ENDIF COMPILER28}
 
 {$IFDEF COMPILER29}
+  VclLibName = 'vcl290.bpl';
   CorIdeLibName = 'coreide290.bpl';
   DesignIdeLibName = 'designide290.bpl';
   VclDesignerLibName = 'vcldesigner290.bpl';
@@ -830,6 +854,7 @@ const
 {$ENDIF COMPILER29}
 
 {$IFDEF COMPILER37}
+  VclLibName = 'vcl370.bpl';
   CorIdeLibName = 'coreide370.bpl';
   DesignIdeLibName = 'designide370.bpl';
   VclDesignerLibName = 'vcldesigner370.bpl';
