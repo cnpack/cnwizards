@@ -59,7 +59,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs,
-  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ELSE} {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF} {$ENDIF}
+  Menus, {$IFDEF COMPILER5} DsgnIntf, {$ELSE} DesignIntf, DesignEditors, DesignMenus,
+  {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF} {$ENDIF}
+  {$IFDEF SUPPORT_FMX} System.Rtti, {$ENDIF}
   {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
   CnWizUtils, CnClasses, CnWizMethodHook, CnWizCompilerConst
@@ -262,10 +264,8 @@ function CnWizIndexOfNotifier(List: TList; Notifier: TMethod): Integer;
 
 implementation
 
-{$IFDEF DEBUG}
 uses
   CnDebug, TypInfo;
-{$ENDIF}
 
 const
   csIdleMinInterval = 50;
@@ -281,6 +281,26 @@ type
     LocalMenuFilter: TLocalMenuFilters): TObject;
 {$ELSE}
   TPopupActionBarPopupProc = procedure (ASelf: TObject; X, Y: Integer);
+{$ENDIF}
+
+{$IFDEF SUPPORT_FMX}
+  TMenuItemInsertProc = procedure (ASelf: TObject; Index: Integer; Item: TMenuItem);
+{$ENDIF}
+
+{$IFDEF SUPPORT_FMX}
+
+  TCnHookDesignMenuEditor = class(TBaseSelectionEditor, ISelectionEditor)
+  {* 设计器右键菜单挂接器}
+  private
+
+  public
+    procedure ExecuteVerb(Index: Integer; const List: IDesignerSelections);
+    function GetVerb(Index: Integer): string;
+    function GetVerbCount: Integer;
+    procedure PrepareItem(Index: Integer; const AItem: IMenuItem);
+    procedure RequiresUnits(Proc: TGetStrProc);
+  end;
+
 {$ENDIF}
 
   TCnWndProcMessageDispatcher = class
@@ -533,6 +553,10 @@ type
     FLastIdleTick: Cardinal;
     FIdleExecuting: Boolean;
     FLocalMenuHook: TCnMethodHook;
+{$IFDEF SUPPORT_FMX}
+    FDesignMenuItem: TMenuItem;
+    FMenuItemAddHook: TCnMethodHook;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
     FCurrentCompilingProject: IOTAProject;
 {$ENDIF}
@@ -669,6 +693,7 @@ type
 
     procedure DoActiveControlChange;
     procedure DoIdleExecute;
+    procedure DoDesignerMenuBuild(Popup: TPopupMenu);
   public
     constructor Create;
     destructor Destroy; override;
@@ -682,6 +707,10 @@ var
   DesignerBuildLocalMenu: TDesignerBuildLocalMenuProc = nil;
 {$ELSE}
   PopupActionBarPopup: TPopupActionBarPopupProc = nil;
+{$ENDIF}
+
+{$IFDEF SUPPORT_FMX}
+  MenuItemInsert: TMenuItemInsertProc = nil;
 {$ENDIF}
 
 {$IFNDEF DELPHI_OTA}
@@ -724,15 +753,7 @@ begin
   end;
 
   if (Result <> nil) and (Result is TPopupMenu) then
-  begin
-    for I := FCnWizNotifierServices.FDesignerMenuBuildNotifiers.Count - 1 downto 0 do
-    try
-      with PCnWizNotifierRecord(FCnWizNotifierServices.FDesignerMenuBuildNotifiers[I])^ do
-        TCnWizPopupMenuBuildNotifier(Notifier)(FCnWizNotifierServices, TPopupMenu(Result));
-    except
-      DoHandleException('TCnWizNotifierServices.DoDesignerBuildLocalMenu[' + IntToStr(I) + ']');
-    end;
-  end;
+    FCnWizNotifierServices.DoDesignerMenuBuild(TPopupMenu(Result));
 
 {$IFDEF DEBUG}
   if (Result <> nil) and (Result is TPopupMenu) then
@@ -751,15 +772,7 @@ var
 begin
   // 设计器菜单的 Owner 为 Application，不过也可能有其他菜单也是，导致多余通知
   if (ASelf <> nil) and (ASelf is TPopupMenu) and (TPopupMenu(ASelf).Owner = Application) then
-  begin
-    for I := FCnWizNotifierServices.FDesignerMenuBuildNotifiers.Count - 1 downto 0 do
-    try
-      with PCnWizNotifierRecord(FCnWizNotifierServices.FDesignerMenuBuildNotifiers[I])^ do
-        TCnWizPopupMenuBuildNotifier(Notifier)(FCnWizNotifierServices, TPopupMenu(ASelf));
-    except
-      DoHandleException('TCnWizNotifierServices.DoDesignerBuildLocalMenu[' + IntToStr(I) + ']');
-    end;
-  end;
+    FCnWizNotifierServices.DoDesignerMenuBuild(TPopupMenu(ASelf));
 
   if FCnWizNotifierServices.FLocalMenuHook.UseDDteours then
     TPopupActionBarPopupProc(FCnWizNotifierServices.FLocalMenuHook.Trampoline)(ASelf, X, Y)
@@ -772,6 +785,64 @@ begin
       FCnWizNotifierServices.FLocalMenuHook.HookMethod;
     end;
   end;
+end;
+
+{$ENDIF}
+
+{$IFDEF SUPPORT_FMX}
+
+procedure MyMenuItemInsert(ASelf: TObject; Index: Integer; Item: TMenuItem);
+var
+  Ctx: TRttiContext;
+  Field: TRttiField;
+  Value: TValue;
+  Popup: TPopupMenu;
+begin
+  if FCnWizNotifierServices.FMenuItemAddHook.UseDDteours then
+    TMenuItemInsertProc(FCnWizNotifierServices.FMenuItemAddHook.Trampoline)(ASelf, Index, Item)
+  else
+  begin
+    FCnWizNotifierServices.FMenuItemAddHook.UnhookMethod;
+    try
+      MenuItemInsert(ASelf, Index, Item);
+    finally
+      FCnWizNotifierServices.FMenuItemAddHook.HookMethod;
+    end;
+  end;
+
+  if (Item = FCnWizNotifierServices.FDesignMenuItem) and
+    (FCnWizNotifierServices.FDesignMenuItem.Parent <> nil) then
+  begin
+    Item := FCnWizNotifierServices.FDesignMenuItem.Parent;
+    Ctx := TRttiContext.Create;
+    try
+      // Item 是 PopupMenu 的根 Item 了，拿其 FMenu 字段
+      Field := Ctx.GetType(Item.ClassInfo).GetField('FMenu');
+      if Field = nil then
+        Exit;
+cndebugger.logmsg('IdleCheckMenuItem 5 ' + Field.FieldType.Name);
+
+      // 判断是否 TPopupMenu
+      Popup := nil;
+      if Field.FieldType.Name = 'TMenu' then
+      begin
+        Value := Field.GetValue(Item);
+        if Value.IsObject and (Value.AsObject is TPopupMenu) then
+          Popup := Value.AsObject as TPopupMenu;
+      end;
+cndebugger.logmsg('IdleCheckMenuItem 6');
+
+      if Popup = nil then
+        Exit;
+cndebugger.logmsg('IdleCheckMenuItem 7');
+
+      FCnWizNotifierServices.DoDesignerMenuBuild(Popup);
+    finally
+      Ctx.Free;
+    end;
+  end;
+
+  FCnWizNotifierServices.FDesignMenuItem := nil;
 end;
 
 {$ENDIF}
@@ -1318,6 +1389,13 @@ begin
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF SUPPORT_FMX}
+  MenuItemInsert := GetBplMethodAddress(@TMenuItem.Insert);
+  FMenuItemAddHook := TCnMethodHook.Create(@MenuItemInsert, @MyMenuItemInsert);
+
+  RegisterSelectionEditor(TComponent, TCnHookDesignMenuEditor);
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnWizNotifierServices.Create succeed');
 {$ENDIF}
@@ -1342,6 +1420,9 @@ var
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnWizNotifierServices.Destroy');
+{$ENDIF}
+{$IFDEF SUPPORT_FMX}
+  FMenuItemAddHook.Free;
 {$ENDIF}
   FLocalMenuHook.Free;
   UnhookWindowsHookEx(CallWndProcHook);
@@ -2204,6 +2285,22 @@ end;
 procedure TCnWizNotifierServices.RemoveDesignerMenuBuildNotifier(Notifier: TCnWizPopupMenuBuildNotifier);
 begin
   CnWizRemoveNotifier(FDesignerMenuBuildNotifiers, TMethod(Notifier));
+end;
+
+procedure TCnWizNotifierServices.DoDesignerMenuBuild(Popup: TPopupMenu);
+var
+  I: Integer;
+begin
+  if Popup = nil then
+    Exit;
+
+  for I := FDesignerMenuBuildNotifiers.Count - 1 downto 0 do
+  try
+    with PCnWizNotifierRecord(FDesignerMenuBuildNotifiers[I])^ do
+      TCnWizPopupMenuBuildNotifier(Notifier)(Self, Popup);
+  except
+    DoHandleException('TCnWizNotifierServices.DoDesignerMenuBuild[' + IntToStr(I) + ']');
+  end;
 end;
 
 procedure TCnWizNotifierServices.DoIdleNotifiers;
@@ -3126,6 +3223,81 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF SUPPORT_FMX}
+
+{ TCnHookDesignMenuEditor }
+
+procedure TCnHookDesignMenuEditor.ExecuteVerb(Index: Integer; const List: IDesignerSelections);
+begin
+
+end;
+
+function TCnHookDesignMenuEditor.GetVerb(Index: Integer): string;
+begin
+  Result := 'CnPack Hidden Hook';
+end;
+
+function TCnHookDesignMenuEditor.GetVerbCount: Integer;
+begin
+  Result := 1;
+end;
+
+procedure TCnHookDesignMenuEditor.PrepareItem(Index: Integer; const AItem: IMenuItem);
+var
+  Obj: TObject;
+  Ctx: TRttiContext;
+  Field: TRttiField;
+  Value: TValue;
+  Item: TMenuItem;
+  Popup: TPopupMenu;
+begin
+  // IMenuItem，其 FItem 是 TDesignerMenuItem，其 Parent 是 TMenuItem，其 FMenu 是 TPopupMenu。
+  AItem.Visible := False;
+
+  // IMenuItem 对应到 TMenuItemWrapper
+  Obj := CnDebugger.ObjectFromInterface(AItem);
+  if Obj = nil then
+    Exit;
+
+  Ctx := TRttiContext.Create;
+  try
+    // TMenuItemWrapper 的 FItem 字段是 TDesignerMenuItem
+    Field := Ctx.GetType(Obj.ClassInfo).GetField('FItem');
+    if Field = nil then
+      Exit;
+
+    Item := nil;
+    if Field.FieldType.Name = 'TMenuItem' then
+    begin
+      Value := Field.GetValue(Obj);
+      if Value.IsObject and (Value.AsObject is TMenuItem) then
+        Item := Value.AsObject as TMenuItem;
+    end;
+
+    if Item = nil then
+      Exit;
+
+    // Item 的 Parent，现在是 nil
+    if Item.Parent = nil then
+    begin
+      FCnWizNotifierServices.FDesignMenuItem := Item;
+{$IFDEF DEBUG}
+
+{$ENDIF}
+      Exit;
+    end;
+  finally
+    Ctx.Free;
+  end;
+end;
+
+procedure TCnHookDesignMenuEditor.RequiresUnits(Proc: TGetStrProc);
+begin
+
+end;
+
 {$ENDIF}
 
 initialization
