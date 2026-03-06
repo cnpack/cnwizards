@@ -186,7 +186,7 @@
     <PACKAGES value="vcl50.bpi vclx50.bpi vcldb50.bpi vcldbx50.bpi vclbde50.bpi dsnide50.bpi 
       vclmid50.bpi"/>
     <PATHCPP value=".;"/>
-    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;DesignWizard;CodingToolset;SimpleWizard;SrcTemplate;SourceDiff;DesignEditor;SourceStat;PrefixWizard;IdeEnhancement;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;DebugEnhance;SourceHighlight;InputHelper;CodeFormatter;AICoder"/>
+    <PATHPAS value=".;Framework;Misc;MultiLang;Config;Utils;DesignWizard;CodingToolset;Command;SimpleWizard;SrcTemplate;SourceDiff;DesignEditor;SourceStat;PrefixWizard;IdeEnhancement;ScriptWizard;CorProperty;ProjectExtWizard;RepositoryWiz;ExplorerWizard;ReopenWizard;SrcEditorEnhance;DebugEnhance;SourceHighlight;InputHelper;CodeFormatter;AICoder"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
@@ -195,8 +195,8 @@
     <USERDEFINES value="ENABLE_UIINTERACT;SUPPORT_EVALUATE;${define.add}"/>
     <SYSDEFINES value="NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="CnWizards_CB5.bpf"/>
-    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
-    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <INCLUDEPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;SrcEditorEnhance;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;Command;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\include;$(BCB)\include\vcl;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
+    <LIBPATH value="AICoder;CodeFormatter;ScriptWizard;SrcTemplate;SrcEditorEnhance;ReopenWizard;SimpleWizard;Config;MultiLang;Misc;ExplorerWizard;RepositoryWiz;ProjectExtWizard;CorProperty;IdeEnhancement;PrefixWizard;SourceStat;DesignEditor;DesignWizard;DebugEnhance;SourceDiff;CodingToolset;Command;SourceHighlight;InputHelper;Utils;Framework;$(BCB)\lib;$(BCB)\lib\obj;$(BCB)\source\toolsapi;thirdparty;thirdparty\ddetours;thirdparty\pascalscript;..\dcu;..\..\cnvcl\source\common;..\..\cnvcl\source\crypto;..\..\cnvcl\source\nonvisual;..\..\cnvcl\source\graphic;..\..\cnvcl\source\netcomm;..\..\cnvcl\source\multilang;..\..\cnvcl\source\objrep"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
@@ -204,7 +204,7 @@
       -ISimpleWizard -IConfig -IMultiLang -IMisc -ISrcEditorEnhance 
       -IExplorerWizard -IRepositoryWiz -IProjectExtWizard -ICorProperty 
       -IIdeEnhancement -IPrefixWizard -ISourceStat -IDesignEditor 
-      -IDesignWizard -IDebugEnhance -ISourceDiff -ICodingToolset 
+      -IDesignWizard -IDebugEnhance -ISourceDiff -ICodingToolset -ICommand 
       -ISourceHighlight -IInputHelper -IUtils -IFramework -I$(BCB)\include 
       -I$(BCB)\include\vcl -I$(BCB)\source\toolsapi -IThirdParty 
       -IThirdParty\DDetours -IThirdparty\PascalScript -I..\Dcu 
