@@ -1,0 +1,151 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                    中国人自己的开放源码第三方开发包
+                  (C)Copyright 2001-2026 CnPack 开发组
+**********************************************************************
+
+                    如何将Delphi的界面菜单翻译为中文
+                            Revision 1.0.0.0
+                       =========================
+                        作者：刘啸 2026.03.05
+
+
+近日2ccc论坛上的网友robinttt放出了苦心孤诣费数月时间打造的Delphi IDE菜单内容翻译插件并开源，主要针对Delphi 13等高版本。经其授权后及多次共同探讨，我们初步将其移植到能够支持较低版本Delphi的CnPack IDE专家包中，并持续完善中。
+
+翻译菜单，可能咋一想不算太难，作为能加载到IDE进程内部的插件，我们应该可以通过Open ToolsAPI接口或通过原生访问的方式拿到菜单控件，然后遍历其Items，根据它们的名字，翻译上面的文字。——这思路是最容易想到的，但真正在实施的时候，便发现至少有两个大坑。
+
+第一个坑，很多菜单项压根没名字，没法根据名字来翻译其文字。能标识某菜单项的，只有它自身的文本。robinttt独创的方法是，在配置文件中配置菜单项的原始英文（有可变之处则配置类似于正则表达式的规则），运行期查询菜单项的文字是否匹配原始英文，匹配的话才进行中文翻译。
+
+第二个坑，很多菜单是动态创建的，平时找不着，我们要找到一个合适的时刻去访问它、遍历它、翻译它，这个过程困难重重。
+
+首先是Delphi主窗体的主菜单。
+
+主菜单是TMainMenu，在整个Delphi中有且只有这一个实例，并且Delphi一启动它就被创建了，照理是翻译难度最低的。但我们很快发现，它有不少菜单项也是动态创建的，如果只在Delphi启动时遍历翻译一次主菜单TMainMenu，则肯定会漏掉不少东西。
+
+所以针对主菜单TMainMenu，我们除了启动时遍历翻译它一次外，还需要在启动时遍历其十余个第一级菜单，针对有可能动态调整菜单项的，挂接其OnPopup事件（幸好这批第一级菜单项都有Name可供配置、使用），这样才能准确翻译到每一级。
+
+其次更复杂的是各类弹出菜单，它们根据创建类型分三种，内容是则分动态及是否动态两种，综合起来有二乘三等于六种。
+
+对于单个弹出菜单内容的翻译，我们封装了一套完整的方法，既可以直接遍历其已有菜单项进行静态内容的翻译，也可以利用CnPack组件包中成熟的TCnMenuHook组件挂接其OnPopup事件，在事件执后、真正弹出前进行动态内容的翻译。
+
+最关键是，根据创建类型，我们应该在哪三个时机去触发翻译。
+
+第一种创建类型也是在Delphi一启动就被创建的，这种也好办，找到它的实例，直接实施上面封装的翻译方法即可，比如对象查看器窗口的右键菜单等。
+
+第二种创建类型是从属于子窗口的弹出菜单，比如断点窗口、堆栈窗口等，这些窗口内部持有弹出菜单组件并可供弹出，但窗口却一开始并没创建，这种时候光在Delphi启动时去寻找挂接弹出菜单组件是找不着的。
+
+对于这类动态创建的窗口，我们挂接了Screen的ActiveFormChanged事件，每次当有窗体切换至前台时，我们对前台窗口进行检查、搜索其内部弹出菜单组件，再进行挂接、翻译。
+
+甚至编辑器右键菜单也是这样。
+
+第三种则是最最最麻烦的：设计器右键菜单。
+
+我们的专家包从Delphi 5支持到Delphi 13，设计器有浮动的、嵌入的，设计内容有TForm、TDataModule、FMX的Form，设计器的弹出菜单有Delphi 5/6的原生TPopupMenu，也有Delphi 7及以上的TPopupActionBar、甚至还有FMX中封装的FMX Menu，后者我们在VCL体系中完全访问不到。
+
+这就给我们带来了巨大的挑战。
+
+所幸经过春节假期后半个月左右与robinttt一起的奋战研究，终于将上面全部问题基本解决。不同版本、不同体系，各自封装了好几种机制，统一成了一套服务。
+
+为什么设计器右键菜单不能用前面两种挂接翻译机制？原因很奇妙，也不知道Borland为何如此设计：
+
+只有当设计器上鼠标右键按下时，该弹出菜单才被创建、且Owner被设置为Application，再在极短的时间里初始化了其各个菜单项条目，这才施施然弹出，弹出前留给我们翻译的时机十分渺茫。
+
+而只要该菜单一消失，内部大概立马就释放掉了，下回重新创建，哪怕我们事后诸葛亮翻译了消失的实例，也白翻。
+
+robinttt的思路是挂接设计器窗体TFormContainerForm的WndProc消息处理，拦截其WM_RBUTTONDOWN等消息。在高版本Delphi的嵌入式VCL设计器中这个办法有作用，但对低版本无效、对DataModule无效、对FMX窗体无效。
+
+我们经过努力，最终适配了原生、非原生菜单，浮动、嵌入式设计器，VCL/FMX窗体、DataModule，统一封装了一个DesignerMenuBuild通知服务，任何专家，只要朝这个服务注册一个Notifier通知器，Delphi的设计器右键菜单在创建完毕、准备弹出前，就会调用该通知，允许专家在此时机对该弹出菜单控件实例进行操作，可以遍历翻译其文字（这正是我们做的）、甚至可以增加或删除菜单项（当然，现在还没人这么做）。
+
+至此，我们的菜单翻译覆盖面，终于基本完成。
+
+DesignerMenuBuild通知器是怎样实现的？所适配的方面，要分开说明：
+
+Delphi 5下，其内部的coreide50.bpl中有个输出函数
+
+@Libmain@TWindowDesigner@BuildLocalMenu$qqrp16Menus@TPopupMenu53System@%Set$t25Dsgnintf@TLocalMenuFilter$iuc$0$iuc$2%
+
+这个函数被我们幸运地找着了，它会在设计器右键菜单创建后、弹出前被调用，用来动态组装内部的Items，我们只要用CnPack组件包中强大的CnMethodHook组件挂接拦截它，就能达到实现通知的目的。
+
+Delphi 6以上，设计器机制貌似有大改，这个函数不幸没了。于是经过逆向发掘，我们挂接了TPopupMeu.Popup方法，在该方法里检查PopupMenu实例的Owner是否是Application，是，则近似认为它是设计器的右键弹出菜单组件，可以实现通知。
+
+这个Application判断也有一定道理，因为其他静态创建的弹出菜单组件，一般放在什么窗体上，Owner就是该窗体，只有这种十分动态的才设为Application。
+
+当然，如果未来有其他Owner是Application的TPopopMenu菜单弹出，则我们的服务可能会误通知。
+
+但目前先这样，好歹我们的通知器里，翻译会检查原始文字，如来了陌生菜单项，则不会翻译，应该也不会起到其他副作用。
+
+Delphi 7以上，设计器又不用TPopupMenu了，换成了TPopupActionBar，经过逆向，我们挂接了TPopupActionBar的Popup方法，机制同上，也实现了相应的通知。
+
+幸运的是，这两种通知，在DataModule中也有效，在高版本VCL的嵌入式设计器窗体中也有效。
+
+于是，就只剩下FMX窗体了。
+
+FMX窗体的设计器菜单让我们有山穷水尽束手无策走投无路以头抢地之感。
+
+首先它既不是VCL的TPopupMenu，也不是TPopupActionBar，因为上面两个Popup函数下断点时完全进不来。
+
+猜想可能是FMX自己的Menu，但找FMX自己的TMenuItem等方法下断点，也同样进不来。
+
+乃至相关的TPopupMenuWrapper、TMenuItemWrapper，尽管名字上知道它可能和设计器右键菜单有关，可仍进不来。
+
+后来还是在看Tools API各接口时捞到一点点灵感：
+
+DesignEditors里有个函数：
+
+  procedure RegisterSelectionEditor(AClass: TClass; AEditor: TSelectionEditorClass);
+
+它允许我们朝特定的AClass注册一个组件编辑器右键菜单项，只需在AEditor里实现一个ISelectionEditor接口实例，就能替AClass的右键菜单增加项目：
+
+  ISelectionEditor = interface
+    ['{B91F7A78-BB2C-45D9-957A-8A45A2D30435}']
+    procedure ExecuteVerb(Index: Integer; const List: IDesignerSelections);
+    function GetVerb(Index: Integer): string;
+    function GetVerbCount: Integer;
+    procedure PrepareItem(Index: Integer; const AItem: IMenuItem);
+    procedure RequiresUnits(Proc: TGetStrProc);
+  end;
+
+看到没有，这个IMenuItem，就是突破口！
+
+  procedure PrepareItem(Index: Integer; const AItem: IMenuItem);
+
+原来，这个待我们实现的ISelectionEditor的机制是，首先我们在GetVerbCount里返回1，表示我们要替设计器右键菜单增加一项。
+
+接着Delphi会调用我们的GetVerb，让我们返回这项的菜单文字，这里我们随便返回一个。
+
+接着Delphi会调用PrepareItem，将代表该菜单项的一个IMenuItem接口实例传给我们，让我们根据实际情况决定其Checked、Enabled、Visible等属性。
+
+我们就拿它做突破口了！
+
+在我们的猜想中，IMenuItem接口的实现对象哪怕不是TMenuItem子类，也一定是一个和设计器弹出菜单TMenuItem有关的对象。于是我们把它as回一个TObject，发现它是一个TMenuItemWrapper类的对象。
+
+然后我们用CnDebugger的对象查看功能查看该对象，发现它有个FItem 字段，类型是TMenuItem，这个应该就是我们要找的原生菜单项对象。
+
+照理如果我们拿到一个一级TMenuItem，那么其Parent就应该是整个TPopupMenu的根Item，而该根Item的FMenu字段，就应该是这个TPopupMenu实例！
+
+照着这个思路，我们兴冲冲地摸过去，发现这个TMenuItem的Parent和Owner都是nil，得，线索咔嚓就断了。
+
+又发挥猜谜的手段，我觉得Delphi在处理上面增加菜单项的机制应该类似于：
+
+  ANewItem := TMenuItem.Create;
+  AMenuItemWrapper.FItem = ANewItem;
+  PrepareItem(AMenuItemWrapper as IMenuItem);
+  PopupMenu.Items.Add(ANewItem);
+
+也就是说，一个全新的TMenuItem被创建后，并不是先添加到PopupMenu弹出菜单中，而是先以一个悬挂着的空状态，调用我们的PrepareItem，所以我们查找该Item时，完全找不着对应的菜单控件，因为它是后期被Add上去的。
+
+既然都查到这一步了，那么下一步自然而然想到挂接TMenuItem.Insert方法！
+
+我们先在PrepareItem方法里记录下这个新鲜热辣的TMenuItem，然后在挂接TMenuItem.Insert方法里检查Insert之后的是否是这个新鲜热辣的TMenuItem，如果是，那么说明这个TMenuItem已经被插入弹出菜单对象了，可以畅通无阻地拿到其Parent的FMenu了！
+
+最终，在挂接的TMenuItem.Insert方法里，我们完成了FMX右键弹出菜单的通知，也完成了相应的翻译。
+
+只是我们知道，该TPopupMenu实例，在FMX设计器上并不是最终真正弹出的实例，FMX设计器应该又将其封装了一层，复制其所有内容，以FMX的Layout或类似方式模仿了弹出菜单，但这已经不重要了。
+
+因为我们只要操纵好了该PopupMenu实例，就能控制最终FMX设计器上的弹出菜单。
+
+综合路径：
+
+PrepareItem函数中接口参数IMenuItem，转换成TMenuItemWrapper类，其FItem字段是TMenuItem对象，后者其Parent（应当，并在TMenuItem.Insert中）是TMenuItem，再后者其FMenu才是供弹出的TPopupMenu。
+
+目前我们网站上的最新的每日构建版1318已集成了所有翻译功能，当然，因为菜单条目太多，Delphi的版本也太多，中间一定会有错漏之处，欢迎广大Delphier在试用过程中指正。
