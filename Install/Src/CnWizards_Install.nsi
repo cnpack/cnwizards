@@ -1099,6 +1099,8 @@ Section "$(OTHERTOOLS)" SecTools
   File "..\..\Bin\CnDebugViewer.exe"
   File "..\..\Bin\CnDebugViewer64.exe"
 
+  File "..\..\Bin\CnHash.exe"
+
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SASCIICHART).lnk" "$INSTDIR\AsciiChart.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SDFMCONVERTOR).lnk" "$INSTDIR\CnDfm6To5.exe"
   CreateShortCut "$SMPROGRAMS\${APPNAMEDIR}\$(SIDEBRTOOL).lnk" "$INSTDIR\CnIdeBRTool.exe"
