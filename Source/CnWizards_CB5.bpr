@@ -6,12 +6,14 @@
     <PROJECT value="..\Bin\CnWizards_CB5.dll"/>
     <OBJFILES value="..\Dcu\CnWizDllEntry.obj ..\Dcu\CnWizClasses.obj 
       ..\Dcu\CnWizCompilerConst.obj ..\Dcu\CnWizManager.obj 
-      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj ..\Dcu\CnWizOptions.obj 
-      ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
+      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj 
+      ..\Dcu\CnWizOptions.obj ..\Dcu\CnWizShortCut.obj 
+      ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
-      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj ..\Dcu\CnWizMultiLang.obj 
-      ..\Dcu\CnWizMultiLangFrame.obj ..\Dcu\CnIDETranslator.obj ..\Dcu\CnWizConfigFrm.obj 
+      ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
+      ..\Dcu\CnWizMultiLang.obj ..\Dcu\CnWizMultiLangFrame.obj 
+      ..\Dcu\CnIDETranslator.obj ..\Dcu\CnWizConfigFrm.obj 
       ..\Dcu\CnWizSubActionShortCutFrm.obj ..\Dcu\CnWizMenuSortFrm.obj 
       ..\Dcu\CnWizUtils.obj ..\Dcu\CnDesignWizard.obj 
       ..\Dcu\CnCodingToolsetWizard.obj ..\Dcu\CnListCompFrm.obj 
@@ -21,7 +23,8 @@
       ..\Dcu\CnWizDfm6To5.obj ..\Dcu\CnDfm6To5Wizard.obj 
       ..\Dcu\CnBookmarkWizard.obj ..\Dcu\CnWizNotifier.obj 
       ..\Dcu\CnWizControlHook.obj ..\Dcu\CnBookmarkConfigFrm.obj 
-      ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnSrcTemplate.obj 
+      ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnWizCmdMsg.obj 
+      ..\Dcu\CnWizCmdNotify.obj ..\Dcu\CnWizCmdSend.obj ..\Dcu\CnSrcTemplate.obj 
       ..\Dcu\CnSrcTemplateEditFrm.obj ..\Dcu\CnEditorOpenFile.obj 
       ..\Dcu\CnEditorOpenFileFrm.obj ..\Dcu\CnEditorCodeSwap.obj 
       ..\Dcu\CnWizEditFiler.obj ..\Dcu\CnMsdnWizard.obj 

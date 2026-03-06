@@ -6,8 +6,9 @@
     <PROJECT value="..\Bin\CnWizards_CB6.dll"/>
     <OBJFILES value="..\Dcu\CnWizards_CB6.obj ..\Dcu\CnWizDllEntry.obj ..\Dcu\CnWizClasses.obj 
       ..\Dcu\CnWizCompilerConst.obj ..\Dcu\CnWizManager.obj 
-      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj ..\Dcu\CnWizOptions.obj 
-      ..\Dcu\CnWizShortCut.obj ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
+      ..\Dcu\CnWizConsts.obj ..\Dcu\CnWizMenuAction.obj 
+      ..\Dcu\CnWizOptions.obj ..\Dcu\CnWizShortCut.obj 
+      ..\Dcu\CnWizSplash.obj ..\Dcu\CnWizAboutFrm.obj 
       ..\Dcu\CnWizCommentFrm.obj ..\Dcu\CnWizUpgradeFrm.obj 
       ..\Dcu\CnWizFeedbackFrm.obj ..\Dcu\CnWizShareImages.obj 
       ..\Dcu\CnWizAbout.obj ..\Dcu\CnIDEVersion.obj 
@@ -21,7 +22,8 @@
       ..\Dcu\CnComponentSelector.obj ..\Dcu\CnTabOrderWizard.obj 
       ..\Dcu\CnBookmarkWizard.obj ..\Dcu\CnWizNotifier.obj 
       ..\Dcu\CnWizControlHook.obj ..\Dcu\CnBookmarkConfigFrm.obj 
-      ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnSrcTemplate.obj 
+      ..\Dcu\CnWizIdeUtils.obj ..\Dcu\CnWizCmdMsg.obj 
+      ..\Dcu\CnWizCmdNotify.obj ..\Dcu\CnWizCmdSend.obj ..\Dcu\CnSrcTemplate.obj 
       ..\Dcu\CnSrcTemplateEditFrm.obj ..\Dcu\CnEditorOpenFile.obj 
       ..\Dcu\CnEditorOpenFileFrm.obj ..\Dcu\CnEditorCodeSwap.obj 
       ..\Dcu\CnWizEditFiler.obj ..\Dcu\CnMsdnWizard.obj 
@@ -273,6 +275,9 @@
       <FILE FILENAME="Utils\CnWizControlHook.pas" FORMNAME="" UNITNAME="CnWizControlHook" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SimpleWizard\CnBookmarkConfigFrm.pas" FORMNAME="CnBookmarkConfigForm" UNITNAME="Cnbookmarkconfigfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnWizIdeUtils.pas" FORMNAME="" UNITNAME="CnWizIdeUtils" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Command\CnWizCmdMsg.pas" FORMNAME="" UNITNAME="CnWizCmdMsg" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Command\CnWizCmdNotify.pas" FORMNAME="" UNITNAME="CnWizCmdNotify" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Command\CnWizCmdSend.pas" FORMNAME="" UNITNAME="CnWizCmdSend" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcTemplate\CnSrcTemplate.pas" FORMNAME="CnSrcTemplateForm" UNITNAME="Cnsrctemplate" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="SrcTemplate\CnSrcTemplateEditFrm.pas" FORMNAME="CnSrcTemplateEditForm" UNITNAME="Cnsrctemplateeditfrm" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodingToolset\CnEditorOpenFile.pas" FORMNAME="" UNITNAME="CnEditorOpenFile" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
