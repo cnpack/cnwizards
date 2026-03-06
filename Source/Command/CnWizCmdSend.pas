@@ -46,7 +46,8 @@ uses
 function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
   const DestID: AnsiString = ''; const SourceID: AnsiString = '';
   const Params: TStrings = nil): Boolean;
-{* 根据传入的参数发送命令
+{* 根据传入的参数发送命令。
+
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = []; 目的 IDE 版本要求
               const DestID: AnsiString = '';     目的 ID
@@ -65,7 +66,8 @@ function CnWizSendCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
 
 function CnWizSendCommandFromScript(Command: Cardinal; DestIDESet: TCnCompilers;
   const DestID: AnsiString; const Params: TStrings): Boolean;
-{* 供脚本专家调用的、简易的发送命令的函数
+{* 供脚本专家调用的、简易的发送命令的函数。
+
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = []; 目的 IDE 版本要求
               const DestID: AnsiString = '';     目的 ID
@@ -74,12 +76,13 @@ function CnWizSendCommandFromScript(Command: Cardinal; DestIDESet: TCnCompilers;
 
    返回值:    Boolean，是否发送成功
 
-   备注：     由于脚本无法注册自己的接收 ID，因此发送时也无需标注源 ID，
+   备注：     由于脚本无法注册自己的接收 ID，因此发送时也无需标注源 ID。
 }
 
 function CnWizReplyCommand(Command: Cardinal; DestIDESet: TCnCompilers = [];
   const SourceID: AnsiString = ''; const Params: TStrings = nil): Boolean;
-{* 在收到命令的处理过程中回复命令，无需再次指明目的端
+{* 在收到命令的处理过程中回复命令，无需再次指明目的端。
+
    参数:      Command: Cardinal;             命令号
               DestIDESet: TCnCompilers = [];     目的 IDE 版本要求
               const SourceID: AnsiString = '';   发送者的源 ID
@@ -156,7 +159,8 @@ begin
   StrCopy(Cmd^.SourceID, PAnsiChar(SourceID));
 
   Cmd^.DataLength := DataLength;
-  CopyMemory(@(Cmd^.Data[0]), @S[1], DataLength);
+  if DataLength > 0 then
+    CopyMemory(@(Cmd^.Data[0]), @S[1], DataLength);
 
   try
     Cnt := 0;

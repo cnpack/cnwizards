@@ -52,7 +52,7 @@ const
 
   //========= 以下是全局命令 ID 定义，一般用于框架，可在开发过程中扩展 =========
 
-  CN_WIZ_CMD_BEGIN           = $CCB;
+  CN_WIZ_CMD_BEGIN           = $CCB;         // 3275
   {* 命令字起始号，一般保留而不使用}
 
   CN_WIZ_CMD_TEST            = $CCB + $1;
@@ -75,7 +75,7 @@ const
 
   //========= 以下是自定义命令 ID，一般用于具体专家，可在开发过程中扩展 ========
 
-  CN_WIZ_CMD_USER_BEGIN      = $CCB + $100;
+  CN_WIZ_CMD_USER_BEGIN      = $CCB + $100;  // 3531
   {* 自定义命令字起始号，一般保留而不使用}
 
   CN_WIZ_CMD_USER_TEST       = $CCB + $101;
@@ -83,6 +83,9 @@ const
 
   CN_WIZ_CMD_RELOAD_SCRIPT   = $CCB + $102;
   {* 通知脚本专家重新载入脚本的命令号}
+
+  CN_WIZ_CMD_GEN_MULTILANG   = $CCB + $103;
+  {* 通知多语插件测试语言条目生成功能}
 
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 

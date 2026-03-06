@@ -84,7 +84,8 @@ uses
   {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} IDECommands, {$ENDIF} {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Registry, ComCtrls, Forms, CnHashMap, CnWizShortCut, CnWizMenuAction,
-  {$IFNDEF FPC} CnPopupMenu, {$ENDIF} CnIni, CnWizIni, CnWizConsts;
+  {$IFNDEF FPC} CnPopupMenu, {$ENDIF} CnIni, CnWizIni, CnWizConsts,
+  CnWizCmdNotify, CnWizCompilerConst;
 
 type
   ECnWizardException = class(Exception);
@@ -111,6 +112,7 @@ type
     FActive: Boolean;
     FWizardIndex: Integer;
     FDefaultsMap: TCnStrToVariantHashMap;
+    FCmdNotifierRegistered: Boolean;
   protected
     procedure SetActive(Value: Boolean); virtual;
     {* Active 属性写方法，子类重载该方法处理 Active 属性变更事件
@@ -121,6 +123,10 @@ type
     {* Icon 属性读方法，子类重载该方法返回返回专家图标，用户专家通常不需自己处理 }
     function GetBigIcon: TIcon; virtual; abstract;
     {* 大尺寸 Icon 属性读方法，子类重载该方法返回返回专家图标，用户专家通常不需自己处理 }
+
+    procedure OnReceiveCmd(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings); virtual;
+    {* 收到特定命令时的回调，子类可重载做响应。需要 ActivateCmdReceiver 后才有用}
 
     // IOTAWizard methods
     function GetIDString: string;
@@ -197,6 +203,9 @@ type
     {* 保存专家设置 }
     procedure DoResetSettings;
     {* 重置专家设置 }
+
+    procedure ActivateCmdReceiver;
+    {* 启用命令接收器，也就是以自身 ID 向命令中心注册接收器}
 
     property Active: Boolean read FActive write SetActive;
     {* 活跃属性，表明专家当前是否可用 }
@@ -739,6 +748,8 @@ end;
 // 类析构器
 destructor TCnBaseWizard.Destroy;
 begin
+  if FCmdNotifierRegistered then
+    CnWizCmdNotifier.RemoveCmdNotifier(OnReceiveCmd);
   FDefaultsMap.Free;
   inherited Destroy;
 end;
@@ -937,6 +948,22 @@ begin
   end;
 end;
 
+procedure TCnBaseWizard.ActivateCmdReceiver;
+begin
+  if not FCmdNotifierRegistered then
+  begin
+    CnWizCmdNotifier.AddCmdNotifier(OnReceiveCmd, GetIDStr);
+    FCmdNotifierRegistered := True;
+  end;
+end;
+
+procedure TCnBaseWizard.OnReceiveCmd(const Command: Cardinal;
+  const SourceID: PAnsiChar; const DestID: PAnsiChar;
+  const IDESets: TCnCompilers; const Params: TStrings);
+begin
+  // 基类啥都不干
+end;
+
 procedure TCnBaseWizard.Config;
 begin
   // 基类啥也不干
@@ -944,7 +971,7 @@ end;
 
 procedure TCnBaseWizard.LanguageChanged(Sender: TObject);
 begin
-  // 基类啥也不干
+  // 基类啥全不干
 end;
 
 procedure TCnBaseWizard.LoadSettings(Ini: TCustomIniFile);

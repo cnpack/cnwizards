@@ -50,7 +50,6 @@ type
 
   ICnWizCmdNotifier = interface
     ['{E14E47D9-2D3A-4F5B-A036-400CB43C30E3}']
-
     procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; const MyID: AnsiString = '';
       AllowCommand: Cardinal = 0; AllowIDESet: TCnCompilers = []);
     {* 增加一通知器，可声明通知的附件条件，包括自身 ID，只接受的命令号，只接受的 IDE 版本}
@@ -180,10 +179,10 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogFmt('WizCmdNotifier: Got Broadcast Message. Send to %d Clients.', [FClients.Count]);
 {$ENDIF}
-        for I := 0 to FClients.Count - 1 do
+        for I := FClients.Count - 1 downto 0 do
         begin
           Message.Result := Integer(Notify(TCnWizCmdObj(FClients[I]),
-            FCurrentCmd, TWmCopyData(Message).From)); // 通知出去后Notify才返回 True
+            FCurrentCmd, TWmCopyData(Message).From)); // 通知出去后 Notify 才返回 True
         end;
         FCurrentCmd := nil;
       end;
