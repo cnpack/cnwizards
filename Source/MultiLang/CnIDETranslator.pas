@@ -112,7 +112,8 @@ type
 {$IFDEF BDS}
     function GetPaletteButtonInfo: TCnPaletteButtonInfo;
 {$ENDIF}
-    function GetTranslationMenuPaths(const AMenuCategory, AMechanism: string): TCn2DStringArray;
+    function GetTranslationMenuPaths(const AMenuCategory, AMechanism: string;
+      const APrefix: string = ''): TCn2DStringArray;
     function GetTranslationItemCaptions(const AMenuCategory, AMechanism,
       AMenuPath: string): TCn2DStringArray;
     function ReturnTranslateCaption(const AItemCaption: string; const ACaptions:
@@ -502,8 +503,8 @@ end;
 {$ENDIF}
 
 // 根据菜单类型查找菜单路径
-function TCnMenuTranslator.GetTranslationMenuPaths(const AMenuCategory, AMechanism:
-  string): TCn2DStringArray;
+function TCnMenuTranslator.GetTranslationMenuPaths(const AMenuCategory,
+  AMechanism: string; const APrefix: string): TCn2DStringArray;
 var
   I, Count: Integer;
   JsonValue: TCnJSONValue;
@@ -537,15 +538,59 @@ begin
 
   SetLength(Result, Count, 2);
   Count := 0;
-  for I := 0 to JsonArray.Count - 1 do
-  begin
-    if not (JsonArray[I] is TCnJSONObject) then
-      Continue;
 
-    JsonObject := TCnJSONObject(JsonArray[I]);
-    Result[Count, 0] := JsonObject['MenuPath'].AsString;
-    Result[Count, 1] := JsonObject['ForceEnglish'].AsString;
-    Inc(Count);
+  if APrefix = '' then
+  begin
+    for I := 0 to JsonArray.Count - 1 do
+    begin
+      if not (JsonArray[I] is TCnJSONObject) then
+        Continue;
+
+      JsonObject := TCnJSONObject(JsonArray[I]);
+      if (APrefix <> '') and (Pos(APrefix, JsonObject['MenuPath'].AsString) <> 1) then
+        Continue;
+
+      Result[Count, 0] := JsonObject['MenuPath'].AsString;
+      Result[Count, 1] := JsonObject['ForceEnglish'].AsString;
+      Inc(Count);
+    end;
+  end
+  else
+  begin
+    // 统计匹配数量
+    for I := 0 to JsonArray.Count - 1 do
+    begin
+      if not (JsonArray[I] is TCnJSONObject) then
+        Continue;
+
+      JsonObject := TCnJSONObject(JsonArray[I]);
+      if Pos(APrefix, JsonObject['MenuPath'].AsString) <> 1 then
+        Continue;
+
+      Inc(Count);
+    end;
+
+    SetLength(Result, Count, 2);
+
+    // 有匹配的，才真正赋值
+    if Count > 0 then
+    begin
+      Count := 0;
+
+      for I := 0 to JsonArray.Count - 1 do
+      begin
+        if not (JsonArray[I] is TCnJSONObject) then
+          Continue;
+
+        JsonObject := TCnJSONObject(JsonArray[I]);
+        if Pos(APrefix, JsonObject['MenuPath'].AsString) <> 1 then
+          Continue;
+
+        Result[Count, 0] := JsonObject['MenuPath'].AsString;
+        Result[Count, 1] := JsonObject['ForceEnglish'].AsString;
+        Inc(Count);
+      end;
+    end;
   end;
 end;
 
@@ -1115,16 +1160,17 @@ var
   F: TCustomForm;
   S: string;
 begin
-  MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS);
   if OnlyCurrent then
   begin
     F := Screen.ActiveCustomForm;
     if (F <> nil) and (F.Name <> '') then
     begin
-{$IFDEF DEBUG}
-      CnDebugger.LogMsg('TCnMenuTranslator.TranslateStaticPopupMenus for ' + F.Name);
-{$ENDIF}
       S := F.Name + '.';
+      MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS, S);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenus for %s Get %d', [F.Name, Length(MenuPaths)]);
+{$ENDIF}
+
       for I := 0 to Length(MenuPaths) - 1 do
       begin
         if Pos(S, MenuPaths[I, 0]) = 1 then
@@ -1135,6 +1181,7 @@ begin
   end
   else
   begin
+    MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS);
     for I := 0 to Length(MenuPaths) - 1 do
       TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
         MenuPaths[I, 0]);

@@ -782,7 +782,11 @@ begin
   begin
     FCnWizNotifierServices.FLocalMenuHook.UnhookMethod;
     try
-      PopupActionBarPopup(ASelf, X, Y);
+      try
+        PopupActionBarPopup(ASelf, X, Y);
+      except
+        ;
+      end;
     finally
       FCnWizNotifierServices.FLocalMenuHook.HookMethod;
     end;
@@ -806,7 +810,11 @@ begin
   begin
     FCnWizNotifierServices.FMenuItemAddHook.UnhookMethod;
     try
-      MenuItemInsert(ASelf, Index, Item);
+      try
+        MenuItemInsert(ASelf, Index, Item);
+      except
+        ;
+      end;
     finally
       FCnWizNotifierServices.FMenuItemAddHook.HookMethod;
     end;
