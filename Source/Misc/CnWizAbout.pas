@@ -54,7 +54,7 @@ uses
   Windows, Messages, SysUtils, Classes, IniFiles, Menus, Forms, Controls,
   {$IFDEF FPC} LCLProc, {$ENDIF}
   CnConsts, CnWizClasses, CnWizManager, CnWizConsts, CnWizUtils, CnCommon,
-  CnWizOptions, CnWizIdeUtils;
+  CnWizOptions, CnWizIdeUtils, CnWizCompilerConst;
 
 type
 
@@ -96,6 +96,9 @@ type
   protected
     procedure ConfigIO;
     procedure SubActionExecute(Index: Integer); override;
+
+    procedure OnReceiveCmd(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings); override;
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -111,7 +114,7 @@ type
 implementation
 
 uses
-  CnWizAboutFrm, CnWizFeedbackFrm, CnWizUpgradeFrm, CnWizTipOfDayFrm
+  CnWizAboutFrm, CnWizFeedbackFrm, CnWizUpgradeFrm, CnWizTipOfDayFrm, CnWizCmdMsg
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 { TCnWizAbout }
@@ -138,6 +141,8 @@ begin
   FEvaluationExecutor := TCnEvaluationExecutor.Create;
   FEvaluationExecutor.OnExecute := EvalExecute;
   RegisterDesignMenuExecutor(FEvaluationExecutor);
+
+  ActivateCmdReceiver; // 按需才开启
 {$ENDIF}
 {$ENDIF}
 end;
@@ -246,6 +251,16 @@ begin
 {$ENDIF}
   else if Index = FIdAbout then
     ShowCnWizAboutForm;
+end;
+
+procedure TCnWizAbout.OnReceiveCmd(const Command: Cardinal; const SourceID,
+  DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
+begin
+  if Command = CN_WIZ_CMD_DBG_EVALFORM then
+  begin
+    if Screen.ActiveCustomForm <> nil then
+      CnDebugger.EvaluateObject(Screen.ActiveCustomForm);
+  end;
 end;
 
 {$IFDEF DEBUG}

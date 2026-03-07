@@ -52,40 +52,46 @@ const
 
   //========= 以下是全局命令 ID 定义，一般用于框架，可在开发过程中扩展 =========
 
-  CN_WIZ_CMD_BEGIN           = $CCB;         // 3275
+  CN_WIZ_CMD_BEGIN               = $CCB;         // 3275
   {* 命令字起始号，一般保留而不使用}
 
-  CN_WIZ_CMD_TEST            = $CCB + $1;
+  CN_WIZ_CMD_TEST                = $CCB + $1;
   {* 测试命令号，一般不做正式用途}
 
-  CN_WIZ_CMD_ECHO            = $CCB + $2;
+  CN_WIZ_CMD_ECHO                = $CCB + $2;
   {* 呼叫的命令号，用于通讯测试}
 
-  CN_WIZ_CMD_ECHO_REPLY      = $CCB + $3;
+  CN_WIZ_CMD_ECHO_REPLY          = $CCB + $3;
   {* 回应的命令号，收到呼叫时应返回}
 
-  CN_WIZ_CMD_SAVE_SETTINGS   = $CCB + $4;
+  CN_WIZ_CMD_SAVE_SETTINGS       = $CCB + $4;
   {* 保存设置命令号，收到时专家应保存设置}
 
-  CN_WIZ_CMD_RELOAD_SETTINGS = $CCB + $5;
+  CN_WIZ_CMD_RELOAD_SETTINGS     = $CCB + $5;
   {* 重载设置命令号，收到时专家应重新载入设置}
 
-  CN_WIZ_CMD_DEBUG_LOG       = $CCB + $6;
+  CN_WIZ_CMD_DEBUG_LOG           = $CCB + $6;
   {* 调试输出命令号，收到时应调用 CnDebugger 发送一调试字符串}
 
   //========= 以下是自定义命令 ID，一般用于具体专家，可在开发过程中扩展 ========
 
-  CN_WIZ_CMD_USER_BEGIN      = $CCB + $100;  // 3531
+  CN_WIZ_CMD_USER_BEGIN          = $CCB + $100;  // 3531
   {* 自定义命令字起始号，一般保留而不使用}
 
-  CN_WIZ_CMD_USER_TEST       = $CCB + $101;
+  CN_WIZ_CMD_USER_TEST           = $CCB + $101;
   {* 自定义测试命令号，一般不做正式用途}
 
-  CN_WIZ_CMD_RELOAD_SCRIPT   = $CCB + $102;
+  CN_WIZ_CMD_RELOAD_SCRIPT       = $CCB + $102;
   {* 通知脚本专家重新载入脚本的命令号}
 
-  CN_WIZ_CMD_GEN_MULTILANG   = $CCB + $103;
-  {* 通知多语插件测试语言条目生成功能}
+  CN_WIZ_CMD_GEN_MULTILANG       = $CCB + $103;
+  {* 通知多语插件测试当前窗体的语言条目生成功能}
+
+  CN_WIZ_CMD_GEN_MULTILANG_ALL   = $CCB + $104;
+  {* 通知多语插件测试所有窗体的语言条目生成功能}
+
+  CN_WIZ_CMD_DBG_EVALFORM        = $CCB + $105;
+  {* 通知内部调试功能，查看当前活动窗体}
 
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
