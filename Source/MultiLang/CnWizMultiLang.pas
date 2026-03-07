@@ -81,6 +81,8 @@ type
 
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
+    FTranFormsList: TComponentList;
+    FActiveFormChangedReg: Boolean;
     FIndexes: array of Integer;
 {$IFNDEF STAND_ALONE}
     FTranslateIndex: Integer;
@@ -95,6 +97,7 @@ type
     procedure ExtractorAllowItem(AObject: TObject; const PropName: string; var Allow: Boolean);
     procedure OnReceiveCmd(const Command: Cardinal; const SourceID: PAnsiChar;
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings); override;
+    procedure ActiveFormChanged(Sender: TObject);
   public
     constructor Create; override;
     destructor Destroy; override;
@@ -338,6 +341,7 @@ begin
 {$IFDEF DEBUG}
   ActivateCmdReceiver; // 按需才开启
 {$ENDIF}
+  FTranFormsList := TComponentList.Create(False);
 
 {$IFNDEF STAND_ALONE}
   FTranslator := TCnMenuTranslator.Create;
@@ -372,6 +376,10 @@ end;
 
 destructor TCnWizMultiLang.Destroy;
 begin
+  FTranFormsList.Free;
+
+  if FActiveFormChangedReg then
+    CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
 {$IFNDEF STAND_ALONE}
   FreeAndNil(FTranslator);
 {$ENDIF}
@@ -409,6 +417,8 @@ begin
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
   begin
+    FTranFormsList.Clear;
+
     CnTranslateConsts(Sender);
     CnWizardMgr.RefreshLanguage;
     CnWizardMgr.ChangeWizardLanguage;
@@ -599,6 +609,17 @@ begin
         CnLanguageManager.TranslateForm(Screen.CustomForms[I]);
     end;
   end
+  else if Command = CN_WIZ_CMD_ACTIVECHANGE_TRAN then
+  begin
+    if not FActiveFormChangedReg then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_ACTIVECHANGE_TRAN. Register ActiveFormChanged.');
+{$ENDIF}
+      CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+      FActiveFormChangedReg := True;
+    end;
+  end
   else if Command = CN_WIZ_CMD_LOAD_MULTILANG_CLIP then
   begin
     if CnLanguageManager.LanguageStorage <> nil then
@@ -656,13 +677,21 @@ begin
     AObject.ClassNameIs('TIDEStyleMenuButton') or
     AObject.ClassNameIs('TPopupActionBar') or
     AObject.ClassNameIs('TComponentToolbarFrame') or
+    AObject.ClassNameIs('TInspListBox') or
+    AObject.ClassNameIs('TStatusBar') or
     AObject.InheritsFrom(TMenuItem) or AObject.InheritsFrom(TMainMenu) or
     AObject.InheritsFrom(TPopupMenu) then
     Allow := False
-  else if (AObject.ClassNameIs('TPropCheckBox') or (AObject.ClassNameIs('TPropRadioGroup'))) and
+  else if ( AObject.ClassNameIs('TPropCheckBox') or AObject.ClassNameIs('TPropRadioGroup')
+    or AObject.ClassNameIs('TPropComboBox') or AObject.ClassNameIs('THistoryPropComboBox') )
+    and
     ((PropName = 'ValueChecked') or (PropName = 'ValueUnchecked') or (PropName = 'PropField')) then
     Allow := False
+  else if AObject.ClassNameIs('THistoryPropComboBox') and (PropName = 'HistoryList') then
+    Allow := False
   else if (AObject is TAction) and (PropName = 'Category') then
+    Allow := False
+  else if (AObject is TEdit) and (PropName = 'Text') then
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
     Allow := False;
@@ -670,6 +699,33 @@ begin
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('CnWizMultiLang On ExtractorAllowItem %s.%s', [AObject.ClassName, PropName]);
 {$ENDIF}
+end;
+
+procedure TCnWizMultiLang.ActiveFormChanged(Sender: TObject);
+var
+  F: TCustomForm;
+begin
+  if (WizOptions.CurrentLangID = csChineseID) and (Screen.ActiveCustomForm <> nil) then
+  begin
+    F := Screen.ActiveCustomForm;
+    if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
+    begin
+      if FTranFormsList.IndexOf(F) < 0 then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate ' + F.ClassName);
+{$ENDIF}
+        CnLanguageManager.TranslateForm(F);
+        FTranFormsList.Add(F);
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. ' + F.ClassName + ' Already Translated. Do Nothing.');
+{$ENDIF}
+      end;
+    end;
+  end;
 end;
 
 { TCnTranslateForm }

@@ -84,14 +84,14 @@ const
   CN_WIZ_CMD_RELOAD_SCRIPT       = $CCB + $102;  // 3533
   {* 通知脚本专家重新载入脚本的命令号}
 
-  CN_WIZ_CMD_GEN_MULTILANG       = $CCB + $103;  // 3534
+  CN_WIZ_CMD_DBG_EVALFORM        = $CCB + $103;  // 3534
+  {* 通知内部调试功能，查看当前活动窗体}
+
+  CN_WIZ_CMD_GEN_MULTILANG       = $CCB + $104;  // 3535
   {* 通知多语插件生成当前窗体的语言条目}
 
-  CN_WIZ_CMD_GEN_MULTILANG_ALL   = $CCB + $104;  // 3535
+  CN_WIZ_CMD_GEN_MULTILANG_ALL   = $CCB + $105;  // 3536
   {* 通知多语插件生成所有窗体的语言条目}
-
-  CN_WIZ_CMD_DBG_EVALFORM        = $CCB + $105;  // 3536
-  {* 通知内部调试功能，查看当前活动窗体}
 
   CN_WIZ_CMD_TRANS_MULTILANG     = $CCB + $106;  // 3537
   {* 通知多语插件翻译当前活动窗体}
@@ -99,7 +99,10 @@ const
   CN_WIZ_CMD_TRANS_MULTILANG_ALL = $CCB + $107;  // 3538
   {* 通知多语插件翻译所有窗体}
 
-  CN_WIZ_CMD_LOAD_MULTILANG_CLIP = $CCB + $108;  // 3539
+  CN_WIZ_CMD_ACTIVECHANGE_TRAN   = $CCB + $108;  // 3539
+  {* 通知多语插件在切换窗体时翻译}
+
+  CN_WIZ_CMD_LOAD_MULTILANG_CLIP = $CCB + $109;  // 3540
   {* 通知多语插件从剪贴板加载语言条目}
 
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
