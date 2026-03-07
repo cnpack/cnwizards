@@ -4650,7 +4650,7 @@ begin
         CnEditorToolBarService.SetVisible(FEditorToolBarType, True)
       else
       begin
-        FEditorToolBarType := ClassName;
+        FEditorToolBarType := GetIDStr + '_ToolBar';
         CnEditorToolBarService.RegisterToolBarType(FEditorToolBarType,
           CreateProcToolBar, InitProcToolBar, RemoveProcToolBar);
         if FToolBarTimer = nil then
