@@ -522,7 +522,8 @@ procedure TCnWizMultiLang.OnReceiveCmd(const Command: Cardinal;
 var
   E: TCnLangStringExtractor;
   SL: TStringList;
-  I: Integer;
+  C, I, EP: Integer;
+  S: string;
 begin
   if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3534
   begin
@@ -575,6 +576,56 @@ begin
       E.Free;
       SL.Free;
     end;
+  end
+  else if Command = CN_WIZ_CMD_TRANS_MULTILANG then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_TRANS_MULTILANG');
+{$ENDIF}
+
+    if Screen.ActiveCustomForm <> nil then
+      CnLanguageManager.TranslateForm(Screen.ActiveCustomForm);
+  end
+  else if Command = CN_WIZ_CMD_TRANS_MULTILANG_ALL then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_TRANS_MULTILANG_ALL');
+{$ENDIF}
+
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      // 忽略我们专家包的窗体
+      if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
+        CnLanguageManager.TranslateForm(Screen.CustomForms[I]);
+    end;
+  end
+  else if Command = CN_WIZ_CMD_LOAD_MULTILANG_CLIP then
+  begin
+    if CnLanguageManager.LanguageStorage <> nil then
+    begin
+      SL := TStringList.Create;
+      try
+        SL.Text := Clipboard.AsText;
+        C := 0;
+
+        for I := 0 to SL.Count - 1 do
+        begin
+          S := SL[I];
+          EP := Pos(DefEqual, S);
+          if EP > 0 then
+          begin
+            CnLanguageManager.LanguageStorage.AddString(Copy(S, 1, EP - 1),
+              Copy(S, EP + 1, Length(S) - EP));
+            Inc(C);
+          end;
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_LOAD_MULTILANG_CLIP. Get Lang Items ' + IntToStr(C));
+{$ENDIF}
+      finally
+        SL.Free;
+      end;
+    end;
   end;
 end;
 
@@ -609,7 +660,7 @@ begin
     AObject.InheritsFrom(TPopupMenu) then
     Allow := False
   else if (AObject.ClassNameIs('TPropCheckBox') or (AObject.ClassNameIs('TPropRadioGroup'))) and
-    ((PropName = 'ValueChecked') or (PropName = 'ValueChecked')) then
+    ((PropName = 'ValueChecked') or (PropName = 'ValueUnchecked') or (PropName = 'PropField')) then
     Allow := False
   else if (AObject is TAction) and (PropName = 'Category') then
     Allow := False
