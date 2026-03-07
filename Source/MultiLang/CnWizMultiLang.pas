@@ -72,8 +72,8 @@ uses
 {$ENDIF}
   CnConsts, CnWizClasses, CnLangUtils, CnWizTranslate, CnWizManager, CnWizOptions,
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
-  CnWizUtils, CnWizIdeUtils, CnFormScaler, CnWizIni, CnLangCollection,
-  StdCtrls, ComCtrls, IniFiles;
+  CnWizUtils, CnWizIdeUtils, CnFormScaler, CnWizIni, CnLangCollection, CnWizCompilerConst,
+  StdCtrls, ComCtrls, IniFiles, Clipbrd;
 
 type
 
@@ -91,9 +91,14 @@ type
     procedure SubActionUpdate(Index: Integer); override;
     procedure WizLanguageChanged(Sender: TObject);
     procedure UpdateTranslator(Sender: TObject);
+
+    procedure ExtractorAllowItem(AObject: TObject; const PropName: string; var Allow: Boolean);
+    procedure OnReceiveCmd(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings); override;
   public
     constructor Create; override;
     destructor Destroy; override;
+
     procedure AcquireSubActions; override;
     procedure RefreshSubActions; override;
 
@@ -197,7 +202,7 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizShareImages, CnWizNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizShareImages, CnWizCmdMsg, CnWizNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   TControlHack = class(TControl);
@@ -329,6 +334,10 @@ begin
     AcquireSubActions
   else
     Active := False;
+
+{$IFDEF DEBUG}
+  ActivateCmdReceiver; // 按需才开启
+{$ENDIF}
 
 {$IFNDEF STAND_ALONE}
   FTranslator := TCnMenuTranslator.Create;
@@ -504,6 +513,111 @@ begin
   inherited DebugComand(Cmds, Results);
 {$IFNDEF STAND_ALONE}
   FTranslator.DebugCommand(Cmds, Results);
+{$ENDIF}
+end;
+
+procedure TCnWizMultiLang.OnReceiveCmd(const Command: Cardinal;
+  const SourceID, DestID: PAnsiChar; const IDESets: TCnCompilers;
+  const Params: TStrings);
+var
+  E: TCnLangStringExtractor;
+  SL: TStringList;
+  I: Integer;
+begin
+  if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3534
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_MULTILANG');
+{$ENDIF}
+
+    SL := nil;
+    E := nil;
+
+    try
+      SL := TStringList.Create;
+      E := TCnLangStringExtractor.Create;
+      E.SkipEmptyComponentName := False;
+
+      if Screen.ActiveForm <> nil then
+      begin
+        E.OnAllowItem := ExtractorAllowItem;
+        E.GetFormStrings(Screen.ActiveForm, SL, True);
+        Clipboard.AsText := SL.Text;
+      end;
+    finally
+      E.Free;
+      SL.Free;
+    end;
+  end
+  else if Command = CN_WIZ_CMD_GEN_MULTILANG_ALL then //3535
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_MULTILANG_ALL');
+{$ENDIF}
+
+    SL := nil;
+    E := nil;
+
+    try
+      SL := TStringList.Create;
+      E := TCnLangStringExtractor.Create;
+      E.SkipEmptyComponentName := False;
+      E.OnAllowItem := ExtractorAllowItem;
+
+      for I := 0 to Screen.CustomFormCount - 1 do
+      begin
+        // 忽略我们专家包的窗体
+        if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
+          E.GetFormStrings(Screen.CustomForms[I], SL, True);
+      end;
+      Clipboard.AsText := SL.Text;
+    finally
+      E.Free;
+      SL.Free;
+    end;
+  end;
+end;
+
+procedure TCnWizMultiLang.ExtractorAllowItem(AObject: TObject;
+  const PropName: string; var Allow: Boolean);
+begin
+{$IFDEF DEBUG}
+//  if AObject is TComponent then
+//    CnDebugger.LogFmt('CnWizMultiLang Check Name %s(%s).%s', [AObject.ClassName, TComponent(AObject).Name, PropName])
+//  else
+//    CnDebugger.LogFmt('CnWizMultiLang Check Class %s.%s', [AObject.ClassName, PropName]);
+{$ENDIF}
+{
+  不需要获取的：
+    TPropCheckBox/TPropRadioGroup 的 ValueChecked 和 ValueUChecked
+    ...
+    TmxCaptionBarButtons 的所有内容
+    TPopupMenu/TMainMenu/TMenuItem/TActionMainMenuBar/TIDEStyleMenuButton/TPopupActionBar，已由 MenuTranslator 翻译
+    TCnWizAction/TCnWizMenuAction，（暂时不判断 actCn 开头）
+    TAction 的 Category
+}
+  if AObject.ClassNameIs('TmxCaptionBarButtons') or
+    AObject.ClassNameIs('TmxCaptionButtons') or
+    AObject.ClassNameIs('TmxCaptionButton') or
+    AObject.ClassNameIs('TCnWizAction') or
+    AObject.ClassNameIs('TCnWizMenuAction') or
+    AObject.ClassNameIs('TActionMainMenuBar') or
+    AObject.ClassNameIs('TIDEStyleMenuButton') or
+    AObject.ClassNameIs('TPopupActionBar') or
+    AObject.ClassNameIs('TComponentToolbarFrame') or
+    AObject.InheritsFrom(TMenuItem) or AObject.InheritsFrom(TMainMenu) or
+    AObject.InheritsFrom(TPopupMenu) then
+    Allow := False
+  else if (AObject.ClassNameIs('TPropCheckBox') or (AObject.ClassNameIs('TPropRadioGroup'))) and
+    ((PropName = 'ValueChecked') or (PropName = 'ValueChecked')) then
+    Allow := False
+  else if (AObject is TAction) and (PropName = 'Category') then
+    Allow := False
+  else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
+    Allow := False;
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('CnWizMultiLang On ExtractorAllowItem %s.%s', [AObject.ClassName, PropName]);
 {$ENDIF}
 end;
 
