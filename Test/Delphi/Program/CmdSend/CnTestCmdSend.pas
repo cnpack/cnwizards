@@ -21,10 +21,12 @@ type
     lblParam: TLabel;
     edtDest: TEdit;
     lblDest: TLabel;
+    lstMsg: TListBox;
     procedure btnSimpleSendClick(Sender: TObject);
     procedure btnRegRecvClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure lstMsgClick(Sender: TObject);
   private
     FCheckBoxList: TList;
     procedure CreateCompilerCheckBoxes;
@@ -150,6 +152,19 @@ end;
 procedure TCnCmdSendForm.FormDestroy(Sender: TObject);
 begin
   FCheckBoxList.Free;
+end;
+
+procedure TCnCmdSendForm.lstMsgClick(Sender: TObject);
+var
+  S: string;
+begin
+  if lstMsg.ItemIndex >= 0 then
+  begin
+    S := lstMsg.Items[lstMsg.ItemIndex];
+    if Pos(' ', S) > 0 then
+      Delete(S, Pos(' ', S), MaxInt);
+    edtCommand.Text := S;
+  end;
 end;
 
 end.

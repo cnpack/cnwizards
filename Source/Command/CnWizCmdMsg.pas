@@ -94,7 +94,7 @@ const
   {* 通知内部调试功能，查看当前活动窗体}
 
   CN_WIZ_CMD_TRANS_MULTILANG     = $CCB + $106;  // 3537
-  {* 通知多语插件翻译当前窗体}
+  {* 通知多语插件翻译当前活动窗体}
 
   CN_WIZ_CMD_TRANS_MULTILANG_ALL = $CCB + $107;  // 3538
   {* 通知多语插件翻译所有窗体}
