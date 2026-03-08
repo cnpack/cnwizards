@@ -105,6 +105,9 @@ const
   CN_WIZ_CMD_LOAD_MULTILANG_CLIP = $CCB + $109;  // 3540
   {* 通知多语插件从剪贴板加载语言条目}
 
+  CN_WIZ_CMD_TRANS_MULTILANG_PRE = $CCB + $10A;  // 3541
+  {* 通知多语插件根据参数语言条目进行翻译}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type

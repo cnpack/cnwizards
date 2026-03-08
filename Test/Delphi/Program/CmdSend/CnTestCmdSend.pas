@@ -10,7 +10,6 @@ type
   TCnCmdSendForm = class(TForm)
     btnSimpleSend: TButton;
     btnRegRecv: TButton;
-    bvl1: TBevel;
     pnlDisp: TPanel;
     pnl2: TPanel;
     mmo1: TMemo;

@@ -1461,7 +1461,6 @@ end;
 procedure TCnMenuTranslator.DebugCommand(Cmds, Results: TStrings);
 var
   I: Integer;
-  S: string;
   Hook: TCnMenuHook;
 begin
   Results.Add(Format('CnMenuTranslator PopupMenu Hooks %d', [FAttachedPopupMenuHooks.Count]));

@@ -4,7 +4,7 @@ object CnCmdSendForm: TCnCmdSendForm
   BorderStyle = bsDialog
   Caption = '测试 Command 的发送'
   ClientHeight = 574
-  ClientWidth = 658
+  ClientWidth = 619
   Color = clBtnFace
   Font.Charset = GB2312_CHARSET
   Font.Color = clWindowText
@@ -17,14 +17,6 @@ object CnCmdSendForm: TCnCmdSendForm
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 12
-  object bvl1: TBevel
-    Left = 22
-    Top = 367
-    Width = 227
-    Height = 15
-    Anchors = [akLeft, akBottom]
-    Shape = bsTopLine
-  end
   object lblCommand: TLabel
     Left = 22
     Top = 22
@@ -33,7 +25,7 @@ object CnCmdSendForm: TCnCmdSendForm
     Caption = '命令数值：'
   end
   object lblCompilers: TLabel
-    Left = 262
+    Left = 318
     Top = 22
     Width = 216
     Height = 12
@@ -41,22 +33,22 @@ object CnCmdSendForm: TCnCmdSendForm
   end
   object lblParam: TLabel
     Left = 22
-    Top = 182
+    Top = 254
     Width = 48
     Height = 12
     Caption = '参数值：'
   end
   object lblDest: TLabel
     Left = 22
-    Top = 262
+    Top = 406
     Width = 132
     Height = 12
     Caption = '目标名（空表示广播）：'
   end
   object btnSimpleSend: TButton
     Left = 22
-    Top = 326
-    Width = 227
+    Top = 462
+    Width = 280
     Height = 23
     Anchors = [akLeft, akBottom]
     Caption = '简单发送广播测试命令'
@@ -64,9 +56,9 @@ object CnCmdSendForm: TCnCmdSendForm
     OnClick = btnSimpleSendClick
   end
   object btnRegRecv: TButton
-    Left = 22
-    Top = 385
-    Width = 227
+    Left = 320
+    Top = 462
+    Width = 280
     Height = 23
     Anchors = [akLeft, akBottom]
     Caption = '注册通知以便接收回应'
@@ -75,8 +67,8 @@ object CnCmdSendForm: TCnCmdSendForm
   end
   object pnlDisp: TPanel
     Left = 22
-    Top = 420
-    Width = 616
+    Top = 500
+    Width = 280
     Height = 52
     Anchors = [akLeft, akRight, akBottom]
     BevelInner = bvRaised
@@ -85,11 +77,11 @@ object CnCmdSendForm: TCnCmdSendForm
     TabOrder = 2
   end
   object pnl2: TPanel
-    Left = 22
-    Top = 493
-    Width = 616
+    Left = 320
+    Top = 500
+    Width = 280
     Height = 53
-    Anchors = [akLeft, akRight, akBottom]
+    Anchors = [akLeft, akBottom]
     BevelInner = bvRaised
     BevelOuter = bvLowered
     Caption = '未收到内容'
@@ -97,46 +89,49 @@ object CnCmdSendForm: TCnCmdSendForm
   end
   object mmo1: TMemo
     Left = 22
-    Top = 207
-    Width = 227
-    Height = 42
+    Top = 272
+    Width = 280
+    Height = 121
     Lines.Strings = (
       'param1=value1'
       'param2=value2')
+    ScrollBars = ssBoth
     TabOrder = 4
+    WantReturns = False
+    WordWrap = False
   end
   object edtCommand: TEdit
     Left = 22
     Top = 44
-    Width = 227
+    Width = 280
     Height = 20
     TabOrder = 5
     Text = '0'
   end
   object scbCompilers: TScrollBox
-    Left = 264
+    Left = 320
     Top = 44
-    Width = 374
-    Height = 362
+    Width = 281
+    Height = 405
     VertScrollBar.Tracking = True
-    Anchors = [akLeft, akTop, akRight, akBottom]
+    Anchors = [akLeft, akTop, akBottom]
     Color = clWindow
     ParentColor = False
     TabOrder = 6
   end
   object edtDest: TEdit
     Left = 22
-    Top = 284
-    Width = 227
+    Top = 428
+    Width = 280
     Height = 20
     TabOrder = 7
     Text = '0'
   end
   object lstMsg: TListBox
-    Left = 24
+    Left = 22
     Top = 80
-    Width = 225
-    Height = 89
+    Width = 280
+    Height = 161
     ItemHeight = 12
     Items.Strings = (
       '3534 查看当前活动窗体'
@@ -145,7 +140,8 @@ object CnCmdSendForm: TCnCmdSendForm
       '3537 翻译当前活动窗体'
       '3538 翻译所有窗体'
       '3539 通知多语插件在切换窗体时翻译'
-      '3540 从剪贴板加载语言条目')
+      '3540 从剪贴板加载语言条目'
+      '3541 通知多语插件根据参数语言条目进行翻译')
     TabOrder = 8
     OnClick = lstMsgClick
   end

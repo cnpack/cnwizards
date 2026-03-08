@@ -534,6 +534,25 @@ var
   SL: TStringList;
   C, I, EP: Integer;
   S: string;
+
+  function StringsContainsHead(const Head: string; Strings: TStrings): Boolean;
+  var
+    J: Integer;
+  begin
+    Result := False;
+    if Head <> '' then
+    begin
+      for J := 0 to Strings.Count - 1 do
+      begin
+        if Pos(Head, Strings[J]) = 1 then
+        begin
+          Result := True;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
 begin
   if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3534
   begin
@@ -647,11 +666,30 @@ begin
         SL.Free;
       end;
     end;
+  end
+  else if Command = CN_WIZ_CMD_TRANS_MULTILANG_PRE then
+  begin
+    if (Params <> nil) and (Params.Count > 0) then
+    begin
+      for I := 0 to Screen.CustomFormCount - 1 do
+      begin
+        if StringsContainsHead(Screen.CustomForms[I].ClassName, Params) then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_TRANS_MULTILANG_PRE to Translate '
+            + Screen.CustomForms[I].Name);
+{$ENDIF}
+          CnLanguageManager.TranslateForm(Screen.CustomForms[I], Params);
+        end;
+      end;
+    end;
   end;
 end;
 
 procedure TCnWizMultiLang.ExtractorAllowItem(AObject: TObject;
   const PropName: string; var Allow: Boolean);
+var
+  N: string;
 begin
 {$IFDEF DEBUG}
 //  if AObject is TComponent then
@@ -667,6 +705,7 @@ begin
     TPopupMenu/TMainMenu/TMenuItem/TActionMainMenuBar/TIDEStyleMenuButton/TPopupActionBar，已由 MenuTranslator 翻译
     TCnWizAction/TCnWizMenuAction，（暂时不判断 actCn 开头）
     TAction 的 Category
+    ...
 }
   if AObject.ClassNameIs('TmxCaptionBarButtons') or
     AObject.ClassNameIs('TmxCaptionButtons') or
@@ -694,7 +733,14 @@ begin
   else if (AObject is TEdit) and (PropName = 'Text') then
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
+    Allow := False
+  else if AObject is TComponent then // 组件进这里判断
+  begin
+    N := TComponent(AObject).Name;
+    if (N = 'CnSrcEditorNav') or (N = 'CnSrcEditorToolBar') or (N = 'CnSrcEditorDesignToolBar') or
+      ((Pos('Cn', N) = 1) and (Pos('_ToolBar', N) > 1)) then
     Allow := False;
+  end;
 
 {$IFDEF DEBUG}
 //  CnDebugger.LogFmt('CnWizMultiLang On ExtractorAllowItem %s.%s', [AObject.ClassName, PropName]);
