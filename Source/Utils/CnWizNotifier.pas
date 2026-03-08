@@ -1257,7 +1257,9 @@ constructor TCnWizNotifierServices.Create;
 var
   IServices: IOTAServices;
   IDebuggerService: IOTADebuggerServices;
+{$IFDEF COMPILER5}
   IdeModule: THandle;
+{$ENDIF}
 {$IFDEF IDE_SUPPORT_THEMING}
 {$IFNDEF CNWIZARDS_MINIMUM}
   {$IFDEF DELPHI102_TOKYO}

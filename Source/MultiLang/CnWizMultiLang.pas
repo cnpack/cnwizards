@@ -64,6 +64,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
+  StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, CheckLst,
 {$IFNDEF STAND_ALONE}
   CnDesignEditor, CnWizScaler, CnIDETranslator,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
@@ -72,8 +73,7 @@ uses
 {$ENDIF}
   CnConsts, CnWizClasses, CnLangUtils, CnWizTranslate, CnWizManager, CnWizOptions,
   CnWizConsts, CnCommon, CnLangMgr, CnHashLangStorage, CnLangStorage, CnWizHelp,
-  CnWizUtils, CnWizIdeUtils, CnFormScaler, CnWizIni, CnLangCollection, CnWizCompilerConst,
-  StdCtrls, ComCtrls, IniFiles, Clipbrd;
+  CnWizUtils, CnWizIdeUtils, CnFormScaler, CnWizIni, CnLangCollection, CnWizCompilerConst;
 
 type
 
@@ -692,6 +692,7 @@ procedure TCnWizMultiLang.ExtractorAllowItem(AObject: TObject;
   const PropName: string; var Allow: Boolean);
 var
   N: string;
+  O: TComponent;
 begin
 {$IFDEF DEBUG}
 //  if AObject is TComponent then
@@ -701,12 +702,11 @@ begin
 {$ENDIF}
 {
   不需要获取的：
-    TPropCheckBox/TPropRadioGroup 的 ValueChecked 和 ValueUChecked
-    ...
-    TmxCaptionBarButtons 的所有内容
+    Delphi 内部封装的 TPropCheckBox/TPropRadioGroup 的 PropField/ValueChecked、ValueUChecked 等属性
+    我们的标题栏绘制按钮 TmxCaptionBarButtons 的所有相关组件
     TPopupMenu/TMainMenu/TMenuItem/TActionMainMenuBar/TIDEStyleMenuButton/TPopupActionBar，已由 MenuTranslator 翻译
     TCnWizAction/TCnWizMenuAction，（暂时不判断 actCn 开头）
-    TAction 的 Category
+    TAction 的 Category 等
     ...
 }
   if AObject.ClassNameIs('TmxCaptionBarButtons') or
@@ -720,28 +720,51 @@ begin
     AObject.ClassNameIs('TComponentToolbarFrame') or
     AObject.ClassNameIs('TInspListBox') or
     AObject.ClassNameIs('TStatusBar') or
+    AObject.ClassNameIs('TCustomEditControl') or
+    AObject.ClassNameIs('TEditControl') or
+    AObject.ClassNameIs('TGalleryList') or
+    AObject.ClassNameIs('TExplorerCheckListBox') or
     AObject.InheritsFrom(TMenuItem) or AObject.InheritsFrom(TMainMenu) or
     AObject.InheritsFrom(TPopupMenu) then
     Allow := False
-  else if ( AObject.ClassNameIs('TPropCheckBox') or AObject.ClassNameIs('TPropRadioGroup')
-    or AObject.ClassNameIs('TPropComboBox') or AObject.ClassNameIs('THistoryPropComboBox') )
+  else if ( AObject.ClassNameIs('TPropCheckBox') or AObject.ClassNameIs('TPropRadioGroup') )
     and
     ((PropName = 'ValueChecked') or (PropName = 'ValueUnchecked') or (PropName = 'PropField')) then
     Allow := False
-  else if AObject.ClassNameIs('THistoryPropComboBox') and (PropName = 'HistoryList') then
+  else if AObject.ClassNameIs('TPropComboBox') and ( (PropName = 'Text') or (PropName = 'Items') or (PropName = 'PropField') ) then
+    Allow := False
+  else if AObject.ClassNameIs('THistoryPropComboBox') and
+    ((PropName = 'HistoryList') or (PropName = 'Text') or (PropName = 'PropField') or (PropName = 'Items')) then
     Allow := False
   else if (AObject is TAction) and (PropName = 'Category') then
     Allow := False
-  else if (AObject is TEdit) and (PropName = 'Text') then
+  else if ((AObject is TCustomEdit) or AObject.ClassNameIs('TMaskEdit')) and (PropName = 'Text') then
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
+    Allow := False
+  else if PropName = 'DefaultExt' then
     Allow := False
   else if AObject is TComponent then // 组件进这里判断
   begin
     N := TComponent(AObject).Name;
-    if (N = 'CnSrcEditorNav') or (N = 'CnSrcEditorToolBar') or (N = 'CnSrcEditorDesignToolBar') or
+    O := TComponent(AObject).Owner;
+    if (AObject is TComboBox) and ((N = 'SpeedSetting') or (N = 'LangID') or (N = 'cbRecordAlign') or (N = 'ColorSchemeComboBox')) then
+      Allow := False
+    else if (AObject is TPanel) and ( (N = 'FontSample') or (N = 'GridFontsSample') ) then
+      Allow := False
+    else if (AObject is TListBox) and
+      ((N = 'ElementList') or (N = 'lbEvents') or (N = 'ExceptListBox') or (N = 'ItemList') or (N = 'PageListBox')
+      or (N = 'WarningsList') or (N = 'DesignPackageList') ) then
+      Allow := False
+    else if (N = 'PageListBox') or (N = 'LabelPackageFile') then
+      Allow := False
+    else if (AObject is TCheckListBox) and (N = 'ExceptListBox') then
+      Allow := False
+    else if (AObject is TTabControl) and (N = 'TabControl') and (O <> nil) and O.ClassNameIs('TGalleryBrowseDlg') then
+      Allow := False
+    else if (N = 'CnSrcEditorNav') or (N = 'CnSrcEditorToolBar') or (N = 'CnSrcEditorDesignToolBar') or
       ((Pos('Cn', N) = 1) and (Pos('_ToolBar', N) > 1)) then
-    Allow := False;
+      Allow := False;
   end;
 
 {$IFDEF DEBUG}
