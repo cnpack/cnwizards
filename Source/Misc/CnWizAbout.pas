@@ -258,8 +258,10 @@ procedure TCnWizAbout.OnReceiveCmd(const Command: Cardinal; const SourceID,
 begin
   if Command = CN_WIZ_CMD_DBG_EVALFORM then
   begin
+{$IFDEF DEBUG}
     if Screen.ActiveCustomForm <> nil then
       CnDebugger.EvaluateObject(Screen.ActiveCustomForm);
+{$ENDIF}
   end;
 end;
 
