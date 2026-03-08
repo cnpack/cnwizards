@@ -51,7 +51,7 @@ object CnCmdSendForm: TCnCmdSendForm
     Width = 280
     Height = 23
     Anchors = [akLeft, akBottom]
-    Caption = '¼òµ¥·¢ËÍ¹ã²¥²âÊÔÃüÁî'
+    Caption = '·¢ËÍÃüÁî£¡£¡£¡'
     TabOrder = 0
     OnClick = btnSimpleSendClick
   end

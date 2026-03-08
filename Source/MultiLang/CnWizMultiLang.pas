@@ -567,6 +567,7 @@ begin
       SL := TStringList.Create;
       E := TCnLangStringExtractor.Create;
       E.SkipEmptyComponentName := False;
+      E.IgnoreRootFont := True;
 
       if Screen.ActiveForm <> nil then
       begin
@@ -592,6 +593,7 @@ begin
       SL := TStringList.Create;
       E := TCnLangStringExtractor.Create;
       E.SkipEmptyComponentName := False;
+      E.IgnoreRootFont := True;
       E.OnAllowItem := ExtractorAllowItem;
 
       for I := 0 to Screen.CustomFormCount - 1 do
@@ -613,7 +615,7 @@ begin
 {$ENDIF}
 
     if Screen.ActiveCustomForm <> nil then
-      CnLanguageManager.TranslateForm(Screen.ActiveCustomForm);
+      CnLanguageManager.TranslateForm(Screen.ActiveCustomForm, True);
   end
   else if Command = CN_WIZ_CMD_TRANS_MULTILANG_ALL then
   begin
@@ -625,7 +627,7 @@ begin
     begin
       // 忽略我们专家包的窗体
       if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
-        CnLanguageManager.TranslateForm(Screen.CustomForms[I]);
+        CnLanguageManager.TranslateForm(Screen.CustomForms[I], True);
     end;
   end
   else if Command = CN_WIZ_CMD_ACTIVECHANGE_TRAN then
@@ -679,7 +681,7 @@ begin
           CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_TRANS_MULTILANG_PRE to Translate '
             + Screen.CustomForms[I].Name);
 {$ENDIF}
-          CnLanguageManager.TranslateForm(Screen.CustomForms[I], Params);
+          CnLanguageManager.TranslateForm(Screen.CustomForms[I], True, Params);
         end;
       end;
     end;
@@ -761,7 +763,7 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate ' + F.ClassName);
 {$ENDIF}
-        CnLanguageManager.TranslateForm(F);
+        CnLanguageManager.TranslateForm(F, True);
         FTranFormsList.Add(F);
       end
       else
