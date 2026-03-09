@@ -772,7 +772,10 @@ begin
       try
         FHashMap.StartEnum;
         while FHashMap.GetNext(Key, Value) do
-          WL.Add(Key + DefEqual + Value);
+        begin
+          if (Value <> '...') and (Value <> '-') and (Value <> '') then
+            WL.Add(Key + DefEqual + Value);
+        end;
         WL.Sort;
 
         if Params.Count > 0 then
@@ -858,7 +861,7 @@ begin
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
     Allow := False
-  else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') then
+  else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') or (PropName = 'PropField') then
     Allow := False
   else if AObject is TComponent then // 组件进这里判断
   begin
@@ -871,7 +874,7 @@ begin
     N := TComponent(AObject).Name;
     O := TComponent(AObject).Owner;
     if (AObject is TComboBox) and ((N = 'SpeedSetting') or (N = 'LangID') or (N = 'cbRecordAlign') or (N = 'ColorSchemeComboBox')
-      or (N = 'PageNames') or (N = 'ClassList') or (N = 'PackageName') ) then
+      or (N = 'PageNames') or (N = 'ClassList') or (N = 'PackageName') or (N = 'cmbxSourceFileType') or (N = 'cmbxSyntaxHighlighter') ) then
       Allow := False
     else if (AObject is TPanel) and ( (N = 'FontSample') or (N = 'GridFontsSample') ) then
       Allow := False
