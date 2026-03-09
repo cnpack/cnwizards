@@ -64,7 +64,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
-  StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, CheckLst,
+  StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, CheckLst, CnHashMap,
 {$IFNDEF STAND_ALONE}
   CnDesignEditor, CnWizScaler, CnIDETranslator,
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
@@ -82,6 +82,12 @@ type
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
     FTranFormsList: TComponentList;
+    FLangCapture: Boolean;
+{$IFDEF UNICODE}
+    FHashMap: TCnStrToStrHashMap;
+{$ELSE}
+    FHashMap: TCnWideStrToWideStrHashMap;
+{$ENDIF}
     FActiveFormChangedReg: Boolean;
     FIndexes: array of Integer;
 {$IFNDEF STAND_ALONE}
@@ -205,7 +211,8 @@ implementation
 {$R *.DFM}
 
 uses
-  CnWizShareImages, CnWizCmdMsg, CnWizNotifier {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnWizShareImages, CnWizCmdMsg, CnWizNotifier, CnWideStrings
+  {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 type
   TControlHack = class(TControl);
@@ -225,6 +232,8 @@ const
   csLangDir = 'Lang\';
   csHelpDir = 'Help\';
 {$ENDIF}
+
+  csGenFile = 'C:\Temp\DelphiLang.txt';
 
 var
   FStorage: TCnHashLangFileStorage;
@@ -377,9 +386,13 @@ end;
 destructor TCnWizMultiLang.Destroy;
 begin
   FTranFormsList.Free;
+  FHashMap.Free;
 
   if FActiveFormChangedReg then
+  begin
     CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
+    FActiveFormChangedReg := False;
+  end;
 {$IFNDEF STAND_ALONE}
   FreeAndNil(FTranslator);
 {$ENDIF}
@@ -532,8 +545,10 @@ procedure TCnWizMultiLang.OnReceiveCmd(const Command: Cardinal;
 var
   E: TCnLangStringExtractor;
   SL: TStringList;
+  WL: TCnWideStringList;
   C, I, EP: Integer;
   S: string;
+  Key, Value: TCnLangString;
 
   function StringsContainsHead(const Head: string; Strings: TStrings): Boolean;
   var
@@ -569,10 +584,10 @@ begin
       E.SkipEmptyComponentName := False;
       E.IgnoreRootFont := True;
 
-      if Screen.ActiveForm <> nil then
+      if Screen.ActiveCustomForm <> nil then
       begin
         E.OnAllowItem := ExtractorAllowItem;
-        E.GetFormStrings(Screen.ActiveForm, SL, True);
+        E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
         Clipboard.AsText := SL.Text;
       end;
     finally
@@ -594,6 +609,7 @@ begin
       E := TCnLangStringExtractor.Create;
       E.SkipEmptyComponentName := False;
       E.IgnoreRootFont := True;
+      E.FilterOptions := E.FilterOptions - [tfFont];
       E.OnAllowItem := ExtractorAllowItem;
 
       for I := 0 to Screen.CustomFormCount - 1 do
@@ -685,6 +701,101 @@ begin
         end;
       end;
     end;
+  end
+  else if Command = CN_WIZ_CMD_MULTILANG_START_GEN then
+  begin
+    FreeAndNil(FHashMap);
+    // 如果有文件参数，则载入，加载入 HashMap
+    if Params.Count > 0 then
+    begin
+      S := Params[0];
+      if Pos('FileName=', S) = 1 then
+        Delete(S, 1, Length(S))
+      else
+        S := csGenFile;
+    end
+    else
+      S := csGenFile;
+
+{$IFDEF UNICODE}
+    FHashMap := TCnStrToStrHashMap.Create;
+{$ELSE}
+    FHashMap := TCnWideStrToWideStrHashMap.Create;
+{$ENDIF}
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnWizMultiLang Get Cmd CN_WIZ_CMD_MULTILANG_START_GEN. Load from %s', [S]);
+{$ENDIF}
+    if FileExists(S) then
+    begin
+      WL := TCnWideStringList.Create;
+      try
+        WL.LoadFromFile(S);
+        for I := 0 to WL.Count - 1 do
+        begin
+          S := WL[I];
+          EP := Pos(DefEqual, S);
+          if EP > 0 then
+            FHashMap.Add(Copy(S, 1, EP - 1), Copy(S, EP + 1,
+              Length(S) - EP))
+          else
+            FHashMap.Add(S, '');
+        end;
+      finally
+        WL.Free;
+      end;
+    end;
+    FLangCapture := True;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnWizMultiLang Load %d Items.', [FHashMap.Size]);
+{$ENDIF}
+
+    if not FActiveFormChangedReg then
+    begin
+      CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
+      FActiveFormChangedReg := True;
+    end;
+  end
+  else if Command = CN_WIZ_CMD_MULTILANG_END_GEN then
+  begin
+    if FActiveFormChangedReg then
+    begin
+      CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
+      FActiveFormChangedReg := False;
+    end;
+
+    FLangCapture := False;
+
+    if (FHashMap <> nil) and (FHashMap.Size > 0) then
+    begin
+      WL := TCnWideStringList.Create;
+      try
+        FHashMap.StartEnum;
+        while FHashMap.GetNext(Key, Value) do
+          WL.Add(Key + DefEqual + Value);
+        WL.Sort;
+
+        if Params.Count > 0 then
+        begin
+          S := Params[0];
+          if Pos('FileName=', S) = 1 then
+            Delete(S, 1, Length(S))
+          else
+            S := csGenFile;
+        end
+        else
+          S := csGenFile;
+
+        WL.SaveToFile(S);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnWizMultiLang Get Cmd CN_WIZ_CMD_MULTILANG_START_GEN. Save Items %d to %s',
+          [WL.Count, S]);
+{$ENDIF}
+        FreeAndNil(FHashMap);
+      finally
+        WL.Free;
+      end;
+    end;
   end;
 end;
 
@@ -736,31 +847,49 @@ begin
   else if AObject.ClassNameIs('THistoryPropComboBox') and
     ((PropName = 'HistoryList') or (PropName = 'Text') or (PropName = 'PropField') or (PropName = 'Items')) then
     Allow := False
-  else if (AObject is TAction) and (PropName = 'Category') then
-    Allow := False
+  else if AObject is TAction then
+  begin
+    if PropName = 'Category' then
+      Allow := False                 // 先把所有 Action 的 Caption 都忽略，假设已经在菜单项上翻译掉了
+    else if (TAction(AObject).Owner <> nil) and (PropName = 'Caption') then // (TAction(AObject).Owner.ClassNameIs('TAppBuilder')) then
+      Allow := False;
+  end
   else if ((AObject is TCustomEdit) or AObject.ClassNameIs('TMaskEdit')) and (PropName = 'Text') then
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
     Allow := False
-  else if PropName = 'DefaultExt' then
+  else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') then
     Allow := False
   else if AObject is TComponent then // 组件进这里判断
   begin
+    if csDesigning in TComponent(AObject).ComponentState then
+    begin
+      Allow := False;
+      Exit;
+    end;
+
     N := TComponent(AObject).Name;
     O := TComponent(AObject).Owner;
-    if (AObject is TComboBox) and ((N = 'SpeedSetting') or (N = 'LangID') or (N = 'cbRecordAlign') or (N = 'ColorSchemeComboBox')) then
+    if (AObject is TComboBox) and ((N = 'SpeedSetting') or (N = 'LangID') or (N = 'cbRecordAlign') or (N = 'ColorSchemeComboBox')
+      or (N = 'PageNames') or (N = 'ClassList') or (N = 'PackageName') ) then
       Allow := False
     else if (AObject is TPanel) and ( (N = 'FontSample') or (N = 'GridFontsSample') ) then
       Allow := False
     else if (AObject is TListBox) and
-      ((N = 'ElementList') or (N = 'lbEvents') or (N = 'ExceptListBox') or (N = 'ItemList') or (N = 'PageListBox')
-      or (N = 'WarningsList') or (N = 'DesignPackageList') ) then
+      ((N = 'ElementList') or (N = 'lbEvents') or (N = 'ExceptListBox') or (N = 'ExceptionList') or (N = 'ItemList') or (N = 'PageListBox')
+      or (N = 'WarningsList') or (N = 'DesignPackageList') or (N = 'WindowListBox') or (N = 'ControlList') or (N = 'ComponentsListBox')
+      or (N = 'ComponentList') or (N = 'CategoryList') or (N = 'lstbxColors') ) then
       Allow := False
-    else if (N = 'PageListBox') or (N = 'LabelPackageFile') then
+    else if (N = 'PageListBox') or (N = 'LabelPackageFile') or (N = 'TreeView1') or (N = 'ZoomPicker') or (N = 'TreeView') then
       Allow := False
-    else if (AObject is TCheckListBox) and (N = 'ExceptListBox') then
+    else if (AObject is TCheckListBox) and ( (N = 'ExceptListBox') or (N = 'DesignPackageList') or (N = 'WarningsList') or (N = 'ToolbarList') ) then
       Allow := False
     else if (AObject is TTabControl) and (N = 'TabControl') and (O <> nil) and O.ClassNameIs('TGalleryBrowseDlg') then
+      Allow := False
+    else if (AObject is TLabel) and
+     ( (N = 'CodeSizeLabel') or (N = 'CompiledLabel') or (N = 'CompilerGroup') or (N = 'DataSizeLabel') or (N = 'FileSizeLabel')
+      or (N = 'StackSizeLabel') or (N = 'PhysMem') or (N = 'LRegKey') or (N = 'RegisterNumber') or (N = 'PatentInfo') or (N = 'OS')
+      or (N = 'Copyright')) then
       Allow := False
     else if (N = 'CnSrcEditorNav') or (N = 'CnSrcEditorToolBar') or (N = 'CnSrcEditorDesignToolBar') or
       ((Pos('Cn', N) = 1) and (Pos('_ToolBar', N) > 1)) then
@@ -774,9 +903,49 @@ end;
 
 procedure TCnWizMultiLang.ActiveFormChanged(Sender: TObject);
 var
+  I, EP: Integer;
   F: TCustomForm;
+  E: TCnLangStringExtractor;
+  SL: TStringList;
+  S: string;
 begin
-  if (WizOptions.CurrentLangID = csChineseID) and (Screen.ActiveCustomForm <> nil) then
+  if FLangCapture then
+  begin
+    if (Screen.ActiveCustomForm <> nil) and (FHashMap <> nil) then
+    begin
+      E := TCnLangStringExtractor.Create;
+      E.SkipEmptyComponentName := False;
+      E.IgnoreRootFont := True;
+      E.FilterOptions := E.FilterOptions - [tfFont];
+      E.OnAllowItem := ExtractorAllowItem;
+
+      SL := TStringList.Create;
+      try
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnWizMultiLang.ActiveFormChanged. To Capture %s.',
+          [Screen.ActiveCustomForm.ClassName]);
+{$ENDIF}
+        E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
+        for I := 0 to SL.Count - 1 do
+        begin
+          S := SL[I];
+          EP := Pos(DefEqual, S);
+          if EP > 0 then
+            FHashMap.Add(Copy(S, 1, EP - 1), Copy(S, EP + 1,
+              Length(S) - EP))
+          else
+            FHashMap.Add(S, '');
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnWizMultiLang.ActiveFormChanged %s. Capture %d. Total %d',
+          [Screen.ActiveCustomForm.ClassName, SL.Count, FHashMap.Size]);
+{$ENDIF}
+      finally
+        SL.Free;
+      end;
+    end;
+  end
+  else if (WizOptions.CurrentLangID = csChineseID) and (Screen.ActiveCustomForm <> nil) then
   begin
     F := Screen.ActiveCustomForm;
     if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
