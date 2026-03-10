@@ -81,7 +81,6 @@ type
 
   TCnWizMultiLang = class(TCnSubMenuWizard)
   private
-    FTranFormsList: TComponentList;
     FLangCapture: Boolean;
 {$IFDEF UNICODE}
     FHashMap: TCnStrToStrHashMap;
@@ -92,11 +91,17 @@ type
     FIndexes: array of Integer;
 {$IFNDEF STAND_ALONE}
     FTranslateIndex: Integer;
-    FTranslator: TCnMenuTranslator;
+    FTranslator: TCnMenuFormTranslator;
 {$ENDIF}
+    function GetAdditionalLangMainFileName: string;
+    function GetAdditionalLangExtraFileName: string;
+    procedure LoadAdditionalLangFile;
+    procedure SetExtractorNoNameMode(E: TCnLangStringExtractor; F: TCustomForm);
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
+
+    procedure StorageLanguageChanged(Sender: TObject; ALanguageIndex: Integer);
     procedure WizLanguageChanged(Sender: TObject);
     procedure UpdateTranslator(Sender: TObject);
 
@@ -196,6 +201,9 @@ type
     procedure Translate; virtual;
     {* 进行全窗体翻译}
   end;
+
+var
+  AddtionalLanguageFileLoad: Boolean = False;
 
 function CnWizLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
@@ -338,6 +346,11 @@ constructor TCnWizMultiLang.Create;
 begin
   if CnLanguageManager <> nil then
     CnLanguageManager.OnLanguageChanged := WizLanguageChanged;
+  if FStorage <> nil then
+  begin
+    FStorage.OnLanguageChanged := StorageLanguageChanged;
+    LoadAdditionalLangFile;
+  end;
 
   inherited;
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
@@ -350,10 +363,9 @@ begin
 {$IFDEF DEBUG}
   ActivateCmdReceiver; // 按需才开启
 {$ENDIF}
-  FTranFormsList := TComponentList.Create(False);
 
 {$IFNDEF STAND_ALONE}
-  FTranslator := TCnMenuTranslator.Create;
+  FTranslator := TCnMenuFormTranslator.Create;
 {$ENDIF}
 end;
 
@@ -385,7 +397,6 @@ end;
 
 destructor TCnWizMultiLang.Destroy;
 begin
-  FTranFormsList.Free;
   FHashMap.Free;
 
   if FActiveFormChangedReg then
@@ -430,8 +441,6 @@ begin
   if (CnLanguageManager <> nil) and (CnLanguageManager.LanguageStorage <> nil)
     and (CnLanguageManager.LanguageStorage.LanguageCount > 0) then
   begin
-    FTranFormsList.Clear;
-
     CnTranslateConsts(Sender);
     CnWizardMgr.RefreshLanguage;
     CnWizardMgr.ChangeWizardLanguage;
@@ -583,11 +592,14 @@ begin
       E := TCnLangStringExtractor.Create;
       E.SkipEmptyComponentName := False;
       E.IgnoreRootFont := True;
+      E.OnAllowItem := ExtractorAllowItem;
 
       if Screen.ActiveCustomForm <> nil then
       begin
-        E.OnAllowItem := ExtractorAllowItem;
+        SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
+
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
+        SL.Sort;
         Clipboard.AsText := SL.Text;
       end;
     finally
@@ -616,8 +628,12 @@ begin
       begin
         // 忽略我们专家包的窗体
         if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
+        begin
+          SetExtractorNoNameMode(E, Screen.CustomForms[I]);
           E.GetFormStrings(Screen.CustomForms[I], SL, True);
+        end;
       end;
+      SL.Sort;
       Clipboard.AsText := SL.Text;
     finally
       E.Free;
@@ -809,10 +825,10 @@ var
   O: TComponent;
 begin
 {$IFDEF DEBUG}
-//  if AObject is TComponent then
-//    CnDebugger.LogFmt('CnWizMultiLang Check Name %s(%s).%s', [AObject.ClassName, TComponent(AObject).Name, PropName])
-//  else
-//    CnDebugger.LogFmt('CnWizMultiLang Check Class %s.%s', [AObject.ClassName, PropName]);
+  if AObject is TComponent then
+    CnDebugger.LogFmt('CnWizMultiLang Check Name %s(%s).%s', [AObject.ClassName, TComponent(AObject).Name, PropName])
+  else
+    CnDebugger.LogFmt('CnWizMultiLang Check Class %s.%s', [AObject.ClassName, PropName]);
 {$ENDIF}
 {
   不需要获取的：
@@ -853,9 +869,9 @@ begin
   else if AObject is TAction then
   begin
     if PropName = 'Category' then
-      Allow := False                 // 先把所有 Action 的 Caption 都忽略，假设已经在菜单项上翻译掉了
-    else if (TAction(AObject).Owner <> nil) and (PropName = 'Caption') then // (TAction(AObject).Owner.ClassNameIs('TAppBuilder')) then
-      Allow := False;
+      Allow := False                 
+    else if (TAction(AObject).Owner <> nil) and (PropName = 'Caption') and (TAction(AObject).Owner.ClassNameIs('TAppBuilder')) then
+      Allow := False;    // 也不能把所有 Action 的 Caption 都忽略，有一部分没有在菜单项上翻译掉了
   end
   else if ((AObject is TCustomEdit) or AObject.ClassNameIs('TMaskEdit')) and (PropName = 'Text') then
     Allow := False
@@ -881,7 +897,7 @@ begin
     else if (AObject is TListBox) and
       ((N = 'ElementList') or (N = 'lbEvents') or (N = 'ExceptListBox') or (N = 'ExceptionList') or (N = 'ItemList') or (N = 'PageListBox')
       or (N = 'WarningsList') or (N = 'DesignPackageList') or (N = 'WindowListBox') or (N = 'ControlList') or (N = 'ComponentsListBox')
-      or (N = 'ComponentList') or (N = 'CategoryList') or (N = 'lstbxColors') ) then
+      or (N = 'ComponentList') or (N = 'CategoryList') or (N = 'lstbxColors') or (N = 'Emulations') or (N = 'Enhancements') or (N = 'CreationList') ) then
       Allow := False
     else if (N = 'PageListBox') or (N = 'LabelPackageFile') or (N = 'TreeView1') or (N = 'ZoomPicker') or (N = 'TreeView') then
       Allow := False
@@ -928,6 +944,7 @@ begin
         CnDebugger.LogFmt('CnWizMultiLang.ActiveFormChanged. To Capture %s.',
           [Screen.ActiveCustomForm.ClassName]);
 {$ENDIF}
+        SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
         for I := 0 to SL.Count - 1 do
         begin
@@ -947,27 +964,78 @@ begin
         SL.Free;
       end;
     end;
-  end
-  else if (WizOptions.CurrentLangID = csChineseID) and (Screen.ActiveCustomForm <> nil) then
-  begin
-    F := Screen.ActiveCustomForm;
-    if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
-    begin
-      if FTranFormsList.IndexOf(F) < 0 then
-      begin
+  end;
+end;
+
+procedure TCnWizMultiLang.StorageLanguageChanged(Sender: TObject; ALanguageIndex: Integer);
+begin
+  // 存储加载事件，按需加载额外的翻译条目
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate ' + F.ClassName);
+  CnDebugger.LogMsg('CnWizMultiLang.StorageLanguageChanged');
 {$ENDIF}
-        CnLanguageManager.TranslateForm(F, True);
-        FTranFormsList.Add(F);
-      end
-      else
+  LoadAdditionalLangFile;
+end;
+
+procedure TCnWizMultiLang.LoadAdditionalLangFile;
+var
+  S: string;
+begin
+  AddtionalLanguageFileLoad := False;
+  if FStorage.CurrentLanguage <> nil then
+  begin
+    if FStorage.CurrentLanguage.LanguageID = csChineseID then
+    begin
+      // 大版本语言文件
+      S := MakePath(MakePath(FStorage.LanguagePath) + FStorage.CurrentLanguage.LanguageDirName) + GetAdditionalLangMainFileName;
+      if FileExists(S) then
       begin
+        FStorage.AddExtraItemsFromFile(S);
+        AddtionalLanguageFileLoad := True;
 {$IFDEF DEBUG}
-        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. ' + F.ClassName + ' Already Translated. Do Nothing.');
+        CnDebugger.LogMsg('CnWizMultiLang.LoadAdditionalLangFile from ' + S);
 {$ENDIF}
       end;
+
+      // 自身版本独特的语言文件
+      if GetAdditionalLangExtraFileName <> '' then
+      begin
+        S := MakePath(MakePath(FStorage.LanguagePath) + FStorage.CurrentLanguage.LanguageDirName) + GetAdditionalLangExtraFileName;
+        if FileExists(S) then
+        begin
+          FStorage.AddExtraItemsFromFile(S);
+          AddtionalLanguageFileLoad := True;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnWizMultiLang.LoadAdditionalLangFile for Self from ' + S);
+{$ENDIF}
+        end;
+      end;
     end;
+  end;
+end;
+
+function TCnWizMultiLang.GetAdditionalLangMainFileName: string;
+begin
+{$IFDEF BDS}
+  Result := '<none>.txt';
+{$ELSE}
+  Result := 'Delphi7.txt';
+{$ENDIF}
+end;
+
+function TCnWizMultiLang.GetAdditionalLangExtraFileName: string;
+begin
+  Result := CompilerShortName + '.txt';
+end;
+
+procedure TCnWizMultiLang.SetExtractorNoNameMode(E: TCnLangStringExtractor;
+  F: TCustomForm);
+begin
+  if (F <> nil) and (E <> nil) then
+  begin
+    if F.ClassNameIs('TProjectOptionsDialog') then
+      E.NoNameProcessType := cnptAtClassName
+    else
+      E.NoNameProcessType := cnptIndex;
   end;
 end;
 

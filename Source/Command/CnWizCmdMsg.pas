@@ -108,6 +108,12 @@ const
   CN_WIZ_CMD_TRANS_MULTILANG_PRE = $CCB + $10A;  // 3541
   {* 通知多语插件根据参数语言条目进行翻译}
 
+  CN_WIZ_CMD_MULTILANG_START_GEN = $CCB + $10B;  // 3542
+  {* 通知多语插件初始化生成条目功能并准备捕获生成，参数 FileName 表示加载旧有文本}
+
+  CN_WIZ_CMD_MULTILANG_END_GEN   = $CCB + $10C;  // 3543
+  {* 通知多语插件停止生成条目功能并保存文件}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type

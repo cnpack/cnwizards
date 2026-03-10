@@ -86,10 +86,12 @@ type
     ButtonCaption: string;
   end;
 
-  TCnMenuTranslator = class
-  {* 菜单翻译器}
+  TCnMenuFormTranslator = class
+  {* 菜单及窗体翻译器}
   private
     FActive: Boolean;
+    FTransQueue: TComponentList;
+    FTranFormsList: TComponentList;
     FOld2Array, FNew2Array: TStringList;
     FTranslationMap: TCnJSONObject;
     FMainMenu: TMainMenu;
@@ -155,13 +157,16 @@ type
     procedure LoadTranslationMap(const AMapFile: string);
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
+    procedure TranslateAllForms;
 
     procedure DelayActivate(Sender: TObject);
     procedure SetActive(const Value: Boolean);
 
+    procedure LangaugeChanged(Sender: TObject);
     procedure ActiveProjectChanged(Sender: TObject);
     procedure ActiveFormChanged(Sender: TObject);
     procedure DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
+    procedure TranslateQueue(Sender: TObject);
   public
     constructor Create;
     destructor Destroy; override;
@@ -175,11 +180,15 @@ type
 implementation
 
 uses
-  CnCommon, CnMenuHook, CnControlHook, CnWizNotifier, CnStrings, CnWizOptions
+  CnCommon, CnMenuHook, CnControlHook, CnWizNotifier, CnStrings, CnWizOptions,
+  CnWizMultiLang, CnLangMgr
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
-  csTransMapFile = 'TransMap.json';
+  csEnglishID = 1033;
+  csChineseID = 2052;
+
+  csMenuTransFile = 'TransMap.json';
   INDEX_ENU = 0;
   INDEX_CHS = 1;
 
@@ -230,7 +239,7 @@ end;
 {$ENDIF}
 
 // 根据名称遍历查找组件
-function TCnMenuTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
+function TCnMenuFormTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
   const AName: string): TComponent;
 var
   I: Integer;
@@ -260,7 +269,7 @@ begin
 end;
 
 // 根据名称遍历查找控件
-function TCnMenuTranslator.FindControlByNameDeep(const ARootControl: TControl;
+function TCnMenuFormTranslator.FindControlByNameDeep(const ARootControl: TControl;
   const AName: string): TControl;
 var
   I: Integer;
@@ -295,7 +304,7 @@ begin
 end;
 
 // 根据类名遍历查找组件
-function TCnMenuTranslator.FindComponentByClassDeep(const ARootComp: TComponent;
+function TCnMenuFormTranslator.FindComponentByClassDeep(const ARootComp: TComponent;
   const AClassName: string): TComponent;
 var
   I: Integer;
@@ -325,7 +334,7 @@ begin
 end;
 
 // 根据类名遍历查找控件
-function TCnMenuTranslator.FindControlByClassDeep(const ARootControl: TControl;
+function TCnMenuFormTranslator.FindControlByClassDeep(const ARootControl: TControl;
   const AClassName: string): TControl;
 var
   I: Integer;
@@ -359,7 +368,7 @@ begin
 end;
 
 // 根据名称查找顶层窗体
-function TCnMenuTranslator.FindScreenFormByName(const AFormName: string): TForm;
+function TCnMenuFormTranslator.FindScreenFormByName(const AFormName: string): TForm;
 var
   I: Integer;
   Form: TForm;
@@ -377,7 +386,7 @@ begin
 end;
 
 // 根据名称遍历查找菜单的子菜单
-function TCnMenuTranslator.FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem;
+function TCnMenuFormTranslator.FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem;
   const AName: string): TMenuItem;
 var
   I: Integer;
@@ -401,7 +410,7 @@ begin
 end;
 
 // 根据名称遍历查找主菜单的子菜单
-function TCnMenuTranslator.FindMainMenuItemByNameDeep(const AMainMenu: TMainMenu;
+function TCnMenuFormTranslator.FindMainMenuItemByNameDeep(const AMainMenu: TMainMenu;
   const AName: string): TMenuItem;
 var
   I: Integer;
@@ -419,7 +428,7 @@ begin
 end;
 
 // 根据名称查找弹出菜单
-function TCnMenuTranslator.FindPopupMenuByName(const AForm: TForm; const AOwnerName,
+function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TForm; const AOwnerName,
   AMenuName: string): TPopupMenu;
 var
   I: Integer;
@@ -447,7 +456,7 @@ begin
 end;
 
 // 获取活动项目的文件名称
-function TCnMenuTranslator.GetActiveProjectInfo: TCnActiveProjectInfo;
+function TCnMenuFormTranslator.GetActiveProjectInfo: TCnActiveProjectInfo;
 var
   Project: IOTAProject;
 begin
@@ -467,7 +476,7 @@ end;
 {$IFDEF BDS}
 
 // 获取控件区光标所在位置的按钮信息
-function TCnMenuTranslator.GetPaletteButtonInfo: TCnPaletteButtonInfo;
+function TCnMenuFormTranslator.GetPaletteButtonInfo: TCnPaletteButtonInfo;
 var
   Form: TForm;
   Control: TControl;
@@ -503,7 +512,7 @@ end;
 {$ENDIF}
 
 // 根据菜单类型查找菜单路径
-function TCnMenuTranslator.GetTranslationMenuPaths(const AMenuCategory,
+function TCnMenuFormTranslator.GetTranslationMenuPaths(const AMenuCategory,
   AMechanism: string; const APrefix: string): TCn2DStringArray;
 var
   I, Count: Integer;
@@ -595,7 +604,7 @@ begin
 end;
 
 // 根据菜单路径获取标题集合
-function TCnMenuTranslator.GetTranslationItemCaptions(const AMenuCategory, AMechanism,
+function TCnMenuFormTranslator.GetTranslationItemCaptions(const AMenuCategory, AMechanism,
   AMenuPath: string): TCn2DStringArray;
 var
   I, Count: Integer;
@@ -683,7 +692,7 @@ begin
 end;
 
 // 返回翻译后的菜单标题
-function TCnMenuTranslator.ReturnTranslateCaption(const AItemCaption: string;
+function TCnMenuFormTranslator.ReturnTranslateCaption(const AItemCaption: string;
   const ACaptions: TCn2DStringArray): string;
 var
   I, Position: Integer;
@@ -800,7 +809,7 @@ begin
 end;
 
 // 递归重写各级子菜单
-procedure TCnMenuTranslator.TranslateMenuItem(const AMenuItem: TMenuItem; const ACaptions:
+procedure TCnMenuFormTranslator.TranslateMenuItem(const AMenuItem: TMenuItem; const ACaptions:
   TCn2DStringArray);
 var
   I: Integer;
@@ -818,7 +827,7 @@ begin
 end;
 
 // 主菜单重写单个子菜单
-procedure TCnMenuTranslator.TranslateMainMenuDynamicItem(const AMenuCategory,
+procedure TCnMenuFormTranslator.TranslateMainMenuDynamicItem(const AMenuCategory,
   AMechanism, AMenuPath: string);
 var
   MenuItem: TMenuItem;
@@ -836,7 +845,7 @@ begin
 end;
 
 // 重写主菜单的静态子菜单集合
-procedure TCnMenuTranslator.TranslateStaticMainMenu;
+procedure TCnMenuFormTranslator.TranslateStaticMainMenu;
 var
   I: Integer;
   Captions: TCn2DStringArray;
@@ -857,7 +866,7 @@ begin
 end;
 
 // 专门重写项目菜单下指定子菜单
-procedure TCnMenuTranslator.TranslateMainMenuProjectItems;
+procedure TCnMenuFormTranslator.TranslateMainMenuProjectItems;
 var
   ActiveProjectInfo: TCnActiveProjectInfo;
   MenuItem: TMenuItem;
@@ -915,7 +924,7 @@ begin
 end;
 
 // 事件挂钩动态子菜单
-procedure TCnMenuTranslator.HookMainMenuDynamicItems;
+procedure TCnMenuFormTranslator.HookMainMenuDynamicItems;
 var
   I, J: Integer;
   MenuPaths: TCn2DStringArray;
@@ -959,7 +968,7 @@ begin
 end;
 
 // 动态子菜单挂钩事件
-procedure TCnMenuTranslator.HookedMenuItemOnClick(Sender: TObject);
+procedure TCnMenuFormTranslator.HookedMenuItemOnClick(Sender: TObject);
 var
   I: Integer;
   MenuItem: TMenuItem;
@@ -984,7 +993,7 @@ begin
 end;
 
 // 主菜单处理过程-，卸载动态子菜单集合
-procedure TCnMenuTranslator.UnHookMainMenuDynamicItems;
+procedure TCnMenuFormTranslator.UnHookMainMenuDynamicItems;
 var
   I: Integer;
   ItemInfo: TCnAttachedMenuItem;
@@ -1002,7 +1011,7 @@ begin
 end;
 
 // 弹出菜单处理过程，重写单个弹出菜单
-procedure TCnMenuTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism,
+procedure TCnMenuFormTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism,
   AMenuPath: string);
 var
   I: Integer;
@@ -1037,7 +1046,7 @@ begin
 end;
 
 // 弹出菜单处理过程，重写控件区指定弹出菜单
-procedure TCnMenuTranslator.TranslatePopupMenuPaletteItems;
+procedure TCnMenuFormTranslator.TranslatePopupMenuPaletteItems;
 var
   I: Integer;
   MenuPath: string;
@@ -1153,7 +1162,7 @@ begin
 end;
 
 // 重写弹出菜单集合
-procedure TCnMenuTranslator.TranslateStaticPopupMenus(OnlyCurrent: Boolean);
+procedure TCnMenuFormTranslator.TranslateStaticPopupMenus(OnlyCurrent: Boolean);
 var
   I: Integer;
   MenuPaths: TCn2DStringArray;
@@ -1189,7 +1198,7 @@ begin
 end;
 
 // 挂钩弹出菜单集合
-procedure TCnMenuTranslator.HookPopupMenus;
+procedure TCnMenuFormTranslator.HookPopupMenus;
 var
   I: Integer;
   MenuPaths: TCn2DStringArray;
@@ -1233,7 +1242,7 @@ begin
 end;
 
 // 动态弹出菜单挂钩事件
-procedure TCnMenuTranslator.AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
+procedure TCnMenuFormTranslator.AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
 var
   I: Integer;
   Hook: TCnMenuHook;
@@ -1261,7 +1270,7 @@ begin
 end;
 
 // 卸载弹出菜单集合
-procedure TCnMenuTranslator.UnHookPopupMenus;
+procedure TCnMenuFormTranslator.UnHookPopupMenus;
 var
   I: Integer;
   Info: TCnAttachedPopupMenu;
@@ -1280,7 +1289,7 @@ begin
 end;
 
 // 加载翻译数据
-procedure TCnMenuTranslator.LoadTranslationMap(const AMapFile: string);
+procedure TCnMenuFormTranslator.LoadTranslationMap(const AMapFile: string);
 var
   StringList: TCnAnsiStringList;
   S: AnsiString;
@@ -1300,7 +1309,7 @@ begin
 end;
 
 // 加载语言数据并初始化主菜单
-procedure TCnMenuTranslator.LoadMenuItemLanguages;
+procedure TCnMenuFormTranslator.LoadMenuItemLanguages;
 var
   MainArray: TStringList;
   Form: TForm;
@@ -1339,7 +1348,7 @@ begin
 end;
 
 // 刷新所有菜单
-procedure TCnMenuTranslator.UpdateWholeMenus;
+procedure TCnMenuFormTranslator.UpdateWholeMenus;
 var
   NTAServices: INTAServices;
 begin
@@ -1352,39 +1361,50 @@ begin
   end;
 end;
 
-constructor TCnMenuTranslator.Create;
+constructor TCnMenuFormTranslator.Create;
 var
   TranslationMapPath: string;
 begin
   inherited Create;
+
+  FTransQueue := TComponentList.Create(False);
+  FTranFormsList := TComponentList.Create(False);
+
   // 初始化参数对象
   FAttachedPopupMenuHooks := TObjectList.Create(True);
   FAttachedMenuItems := TObjectList.Create(True);
 
   // 加载翻译内容
-  TranslationMapPath := WizOptions.GetDataFileName(csTransMapFile);
+  TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
   LoadTranslationMap(TranslationMapPath);
+
+  CnLanguageManager.AddChangeNotifier(LangaugeChanged);
 
   CnWizNotifierServices.AddActiveProjectChangedNotifier(ActiveProjectChanged);
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
 end;
 
-destructor TCnMenuTranslator.Destroy;
+destructor TCnMenuFormTranslator.Destroy;
 begin
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.RemoveActiveProjectChangedNotifier(ActiveProjectChanged);
+
+  CnLanguageManager.RemoveChangeNotifier(LangaugeChanged);
 
   FOld2Array.Free;
   FNew2Array.Free;
   FreeAndNil(FTranslationMap);
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
+
+  FreeAndNil(FTranFormsList);
+  FreeAndNil(FTransQueue);
   inherited;
 end;
 
-procedure TCnMenuTranslator.DelayActivate(Sender: TObject);
+procedure TCnMenuFormTranslator.DelayActivate(Sender: TObject);
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnMenuTranslator.DelayActivate');
@@ -1403,7 +1423,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnMenuTranslator.SetActive(const Value: Boolean);
+procedure TCnMenuFormTranslator.SetActive(const Value: Boolean);
 begin
   if Value <> FActive then
   begin
@@ -1412,6 +1432,8 @@ begin
     begin
       // 加载语言菜单
       LoadMenuItemLanguages;
+
+      TranslateAllForms;
 
       // 延时挂载菜单和窗体容器
       CnWizNotifierServices.ExecuteOnApplicationIdle(DelayActivate);
@@ -1435,7 +1457,7 @@ begin
   end;
 end;
 
-procedure TCnMenuTranslator.ActiveProjectChanged(Sender: TObject);
+procedure TCnMenuFormTranslator.ActiveProjectChanged(Sender: TObject);
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnMenuTranslator.ActiveProjectChanged');
@@ -1443,7 +1465,7 @@ begin
   TranslateMainMenuProjectItems;
 end;
 
-function TCnMenuTranslator.IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
+function TCnMenuFormTranslator.IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
 var
   I: Integer;
 begin
@@ -1458,7 +1480,7 @@ begin
   end;
 end;
 
-procedure TCnMenuTranslator.DebugCommand(Cmds, Results: TStrings);
+procedure TCnMenuFormTranslator.DebugCommand(Cmds, Results: TStrings);
 var
   I: Integer;
   Hook: TCnMenuHook;
@@ -1474,12 +1496,70 @@ begin
   end;
 end;
 
-procedure TCnMenuTranslator.ActiveFormChanged(Sender: TObject);
+procedure TCnMenuFormTranslator.TranslateQueue(Sender: TObject);
+var
+  F: TCustomForm;
 begin
-  TranslateStaticPopupMenus(True);
+  while FTransQueue.Count > 0 do
+  begin
+    F := TCustomForm(FTransQueue[0]);
+    CnLanguageManager.TranslateForm(F, True);
+    if F.Visible then
+      F.Update;
+
+    FTransQueue.Delete(0);
+    FTranFormsList.Add(F);
+  end;
 end;
 
-procedure TCnMenuTranslator.DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
+procedure TCnMenuFormTranslator.ActiveFormChanged(Sender: TObject);
+var
+  F: TCustomForm;
+begin
+  TranslateStaticPopupMenus(True);
+
+  if FActive and AddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
+    and (Screen.ActiveCustomForm <> nil) then
+  begin
+    F := Screen.ActiveCustomForm;
+    if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
+    begin
+      if FTranFormsList.IndexOf(F) < 0 then
+      begin
+        if False {F.ClassNameIs('TProjectOptionsDialog')} then
+        begin
+          // 特殊窗体要等其延迟初始化完毕后再翻译，先留这么个口子
+          FTransQueue.Add(F);
+          CnWizNotifierServices.ExecuteOnApplicationIdle(TranslateQueue);
+        end
+        else
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate ' + F.ClassName);
+{$ENDIF}
+          CnLanguageManager.TranslateForm(F, True);
+          if F.Visible then
+            F.Update;
+          FTranFormsList.Add(F);
+        end;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. ' + F.ClassName + ' Already Translated. Do Nothing.');
+{$ENDIF}
+      end;
+    end;
+  end;
+end;
+
+procedure TCnMenuFormTranslator.LangaugeChanged(Sender: TObject);
+begin
+  FTranFormsList.Clear;
+  TranslateAllForms;
+end;
+
+procedure TCnMenuFormTranslator.DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
 var
   I: Integer;
   Captions: TCn2DStringArray;
@@ -1493,6 +1573,39 @@ begin
 
     for I := 0 to PopupMenu.Items.Count - 1 do
       TranslateMenuItem(PopupMenu.Items[I], Captions);
+  end;
+end;
+
+procedure TCnMenuFormTranslator.TranslateAllForms;
+var
+  I: Integer;
+  F: TCustomForm;
+begin
+  if FActive and AddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+  begin
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      F := Screen.ActiveCustomForm;
+      if Pos('TCn', F.ClassName) <> 1 then
+      begin
+        if FTranFormsList.IndexOf(F) < 0 then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate ' + F.ClassName);
+{$ENDIF}
+          CnLanguageManager.TranslateForm(F, True);
+          if F.Visible then
+            F.Update;
+          FTranFormsList.Add(F);
+        end
+        else
+        begin
+  {$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang LangaugeChanged. ' + F.ClassName + ' Already Translated. Do Nothing.');
+  {$ENDIF}
+        end;
+      end;
+    end;
   end;
 end;
 
