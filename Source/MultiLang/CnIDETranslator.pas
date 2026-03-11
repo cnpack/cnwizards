@@ -100,8 +100,11 @@ type
     FAttachedMenuItems: TObjectList;
 
     { 插件公用函数 }
-    function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent;
-    function FindControlByNameDeep(const ARootControl: TControl; const AName: string): TControl;
+    function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
+    function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string; ComponentResult: TObjectList): Boolean; overload;
+    function FindControlByNameDeep(const ARootControl: TControl; const AName: string): TControl; overload;
+    function FindControlByNameDeep(const ARootControl: TControl; const AName: string; ControlResult: TObjectList): Boolean; overload;
+    function FindFormsInControlDeep(const ARootControl: TControl; FormList: TObjectList): Boolean;
     function FindComponentByClassDeep(const ARootComp: TComponent; const AClassName: string): TComponent;
     function FindControlByClassDeep(const ARootControl: TControl; const AClassName: string): TControl;
     function FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem; const AName: string): TMenuItem;
@@ -419,6 +422,204 @@ begin
       end;
     end;
   end;
+end;
+
+// 根据名称查找多个子组件（支持通配符）
+function TCnMenuFormTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
+  const AName: string; ComponentResult: TObjectList): Boolean;
+var
+  I, PosWildcard: Integer;
+  Component: TComponent;
+  Prefix: string;
+
+  procedure SearchComponents(AComp: TComponent);
+  var
+    J: Integer;
+    SubComp: TComponent;
+  begin
+    if not Assigned(AComp) then
+      Exit;
+
+    for J := 0 to AComp.ComponentCount - 1 do
+    begin
+      SubComp := AComp.Components[J];
+      if PosWildcard > 1 then
+      begin
+        // 有通配符，使用首匹配
+        if Pos(Prefix, SubComp.Name) = 1 then
+        begin
+          ComponentResult.Add(SubComp);
+          Result := True;
+        end;
+      end
+      else
+      begin
+        // 没通配符，精确匹配
+        if SameText(SubComp.Name, AName) then
+        begin
+          ComponentResult.Add(SubComp);
+          Result := True;
+        end;
+      end;
+      // 递归查找子组件
+      SearchComponents(SubComp);
+    end;
+  end;
+
+begin
+  Result := False;
+  if not Assigned(ARootComp) then
+    Exit;
+
+  PosWildcard := Pos('*', AName);
+  if PosWildcard > 1 then
+    Prefix := Copy(AName, 1, PosWildcard - 1)
+  else
+    Prefix := '';
+
+  // 先检查根组件自身
+  if PosWildcard > 1 then
+  begin
+    if Pos(Prefix, ARootComp.Name) = 1 then
+    begin
+      ComponentResult.Add(ARootComp);
+      Result := True;
+    end;
+  end
+  else
+  begin
+    if SameText(ARootComp.Name, AName) then
+    begin
+      ComponentResult.Add(ARootComp);
+      Result := True;
+    end;
+  end;
+
+  // 递归查找所有子组件
+  SearchComponents(ARootComp);
+end;
+
+// 根据名称查找多个子控件（支持通配符）
+function TCnMenuFormTranslator.FindControlByNameDeep(const ARootControl: TControl;
+  const AName: string; ControlResult: TObjectList): Boolean;
+var
+  I, PosWildcard: Integer;
+  Control: TControl;
+  WinControl: TWinControl;
+  Prefix: string;
+
+  procedure SearchControls(AControl: TControl);
+  var
+    J: Integer;
+    SubControl: TControl;
+    SubWinControl: TWinControl;
+  begin
+    if not Assigned(AControl) then
+      Exit;
+
+    if not (AControl is TWinControl) then
+      Exit;
+
+    SubWinControl := TWinControl(AControl);
+    for J := 0 to SubWinControl.ControlCount - 1 do
+    begin
+      SubControl := SubWinControl.Controls[J];
+      if PosWildcard > 1 then
+      begin
+        // 有通配符，使用首匹配
+        if Pos(Prefix, SubControl.Name) = 1 then
+        begin
+          ControlResult.Add(SubControl);
+          Result := True;
+        end;
+      end
+      else
+      begin
+        // 没通配符，精确匹配
+        if SameText(SubControl.Name, AName) then
+        begin
+          ControlResult.Add(SubControl);
+          Result := True;
+        end;
+      end;
+      // 递归查找子控件
+      SearchControls(SubControl);
+    end;
+  end;
+
+begin
+  Result := False;
+  if not Assigned(ARootControl) then
+    Exit;
+
+  PosWildcard := Pos('*', AName);
+  if PosWildcard > 1 then
+    Prefix := Copy(AName, 1, PosWildcard - 1)
+  else
+    Prefix := '';
+
+  // 先检查根控件自身
+  if PosWildcard > 1 then
+  begin
+    if Pos(Prefix, ARootControl.Name) = 1 then
+    begin
+      ControlResult.Add(ARootControl);
+      Result := True;
+    end;
+  end
+  else
+  begin
+    if SameText(ARootControl.Name, AName) then
+    begin
+      ControlResult.Add(ARootControl);
+      Result := True;
+    end;
+  end;
+
+  // 递归查找所有子控件
+  SearchControls(ARootControl);
+end;
+
+// 递归查找控件树中的所有窗体
+function TCnMenuFormTranslator.FindFormsInControlDeep(const ARootControl: TControl;
+  FormList: TObjectList): Boolean;
+var
+  I: Integer;
+  WinControl: TWinControl;
+
+  procedure SearchForms(AControl: TControl);
+  var
+    J: Integer;
+    SubControl: TControl;
+    SubWinControl: TWinControl;
+  begin
+    if not Assigned(AControl) then
+      Exit;
+
+    // 检查当前控件是否是 TForm 或其子类
+    if AControl is TForm then
+      FormList.Add(AControl);
+
+    // 如果是 TWinControl，递归搜索其子控件
+    if AControl is TWinControl then
+    begin
+      SubWinControl := TWinControl(AControl);
+      for J := 0 to SubWinControl.ControlCount - 1 do
+      begin
+        SubControl := SubWinControl.Controls[J];
+        SearchForms(SubControl);
+      end;
+    end;
+  end;
+
+begin
+  Result := False;
+  if not Assigned(ARootControl) then
+    Exit;
+
+  // 不检查根控件自身，直接递归搜索所有子控件
+  SearchForms(ARootControl);
+  Result := FormList.Count > 0;
 end;
 
 // 根据名称遍历查找菜单的子菜单
@@ -1209,10 +1410,11 @@ end;
 // 重写弹出菜单集合
 procedure TCnMenuFormTranslator.TranslateStaticPopupMenus(OnlyCurrent: Boolean);
 var
-  I: Integer;
+  I, J: Integer;
   MenuPaths: TCn2DStringArray;
   F: TCustomForm;
   S: string;
+  FS: TObjectList;
 begin
   if OnlyCurrent then
   begin
@@ -1230,6 +1432,38 @@ begin
         if Pos(S, MenuPaths[I, 0]) = 1 then
           TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
            MenuPaths[I, 0]);
+      end;
+
+      // 找 F 的深层 Controls 里有 TForm 的也进行类似翻译，以处理新的停靠过来的情形，但为了性能，暂时不处理 TAppBuilder
+      if F.ClassNameIs('TAppBuilder') then
+        Exit;
+
+      FS := TObjectList.Create(False);
+      try
+        if FindFormsInControlDeep(F, FS) then
+        begin
+          for I := 0 to FS.Count - 1 do
+          begin
+            F := TForm(FS[I]);
+            if (F <> nil) and (F.Name <> '') then
+            begin
+              S := F.Name + '.';
+              MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS, S);
+{$IFDEF DEBUG}
+              CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenus for Dock %s Get %d', [F.Name, Length(MenuPaths)]);
+{$ENDIF}
+
+              for J := 0 to Length(MenuPaths) - 1 do
+              begin
+                if Pos(S, MenuPaths[J, 0]) = 1 then
+                  TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+                   MenuPaths[J, 0]);
+              end;
+            end;
+          end;
+        end;
+      finally
+        FS.Free;
       end;
     end;
   end
@@ -1659,9 +1893,9 @@ begin
         end
         else
         begin
-  {$IFDEF DEBUG}
+{$IFDEF DEBUG}
           CnDebugger.LogMsg('CnMultiLang LangaugeChanged. ' + F.ClassName + ' Already Translated. Do Nothing.');
-  {$ENDIF}
+{$ENDIF}
         end;
       end;
     end;
