@@ -20,7 +20,7 @@
       }, {
         "MenuPath": "FileMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Add Unit", "添加单元"], ["Close", "关闭"], ["Close All", "全部关闭"], ["Close all and terminate process", "全部关闭并终止进程"], ["Configure Unit Expert", "配置单元专家"], ["Customize", "自定义"], ["Exit", "退出"], ["File", "文件"], ["Find Project", "查找项目"], ["New||", "新建||"], ["Open", "打开"], ["Open Favorite", "打开收藏夹"], ["Open From Version Control", "从版本控制打开"], ["Open Project", "打开项目"], ["Open Recent", "打开最近"], ["Other", "其他"], ["Print", "打印"], ["Properties", "属性"], ["Rename Unit", "重命名单元"], ["Reopen", "重新打开"], ["Save", "保存"], ["Save All", "全部保存"], ["Save As", "另存为"], ["Save Project As", "项目另存为"], ["Unit Expert", "单元专家"], ["Use Unit", "使用单元"]]
+        "ItemCaption": [["Add Unit", "添加单元"], ["Close", "关闭"], ["Close All", "全部关闭"], ["Close all and terminate process", "全部关闭并终止进程"], ["Configure Unit Expert", "配置单元专家"], ["Customize", "自定义"], ["Exit", "退出"], ["File", "文件"], ["Find Project", "查找项目"], ["New||", "新建||"], ["Open", "打开"], ["Open Favorite", "打开收藏夹"], ["Open From Version Control", "从版本控制打开"], ["Open Project", "打开项目"], ["Open Recent", "打开最近"], ["Other", "其他"], ["Print", "打印"], ["Properties", "属性"], ["Rename Unit", "重命名单元"], ["Reopen", "重新打开"], ["Save", "保存"], ["Save All", "全部保存"], ["Save As", "另存为"], ["Save Project As", "项目另存为"], ["Unit Expert", "单元专家"], ["Use Unit", "引用单元"]]
       }, {
         "MenuPath": "HelpMenu",
         "ForceEnglish": "False",
@@ -155,6 +155,18 @@
         "MenuPath": "MessageViewForm.MessageViewForm.MsgViewPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Clear All Messages", "清除所有消息"], ["Clear Messages", "清除消息"], ["Close Tab", "关闭窗口"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源代码"], ["Local Menu", "本地菜单"], ["Next Message Tab", "下一个消息窗口"], ["Previous Message Tab", "上一个消息窗口"], ["Save All Messages", "保存所有消息"], ["Save Messages", "保存消息"], ["Select All", "全选"], ["View Editor", "查看编辑器"], ["View source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "ModulesView.ModulesView.EPPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Go to Entry Point", "跳至入口"]]
+      }, {
+        "MenuPath": "ModulesView.ModulesView.ModViewPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Add Module", "添加模块"], ["Break On Load", "加载时中断"], ["Dockable", "可停靠"], ["Reload Symbol Table", "重新加载符号表"]]
+      }, {
+        "MenuPath": "ModulesView.ModulesView.SourcePopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Edit Source", "编辑源码"], ["View Source", "查看源码"]]
       }, {
         "MenuPath": "ProjectManagerForm.ProjectManagerForm.MiscMenu",
         "ForceEnglish": "FALSE",
