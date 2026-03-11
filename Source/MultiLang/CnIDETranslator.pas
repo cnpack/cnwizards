@@ -110,6 +110,7 @@ type
     function FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem; const AName: string): TMenuItem;
     function FindMainMenuItemByNameDeep(const AMainMenu: TMainMenu; const AName: string): TMenuItem;
     function FindPopupMenuByName(const AForm: TForm; const AOwnerName, AMenuName: string): TPopupMenu;
+    {* AOwnerName 支持通配符 *}
 
     function FindScreenFormByName(const AFormName: string): TForm; overload;
     function FindScreenFormByName(const AFormName: string; FormResult: TObjectList): Boolean; overload;
@@ -151,7 +152,9 @@ type
     procedure TranslateStaticPopupMenus(OnlyCurrent: Boolean = False);
     {* 翻译其他静态弹出菜单，OnlyCurrent 为 True 表示只翻译最靠前窗体的}
     procedure HookPopupMenus;
-    {* 挂接弹出菜单在弹出后进行翻译}
+    {* 挂接所有现有的弹出菜单以在弹出后进行翻译}
+    procedure HookPopupMenuOnCurrentEditWindow;
+    {* 挂接当前活动编辑器窗口上的菜单控件}
 
     procedure AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
     {* 用来挂接的新弹出事件处理器}
@@ -243,6 +246,25 @@ end;
 
 {$ENDIF}
 
+function StrEqualOrMatchStartWithStar(const APattern, AStr: string): Boolean;
+var
+  J: Integer;
+  Prefix: string;
+begin
+  Result := True;
+  if AStr = APattern then
+    Exit;
+
+  J := Pos('*', APattern);
+  if J > 1 then
+  begin
+    Prefix := Copy(APattern, 1, J - 1);
+    Result := Pos(Prefix, AStr) = 1;
+  end
+  else
+    Result := False;
+end;
+
 // 根据名称遍历查找组件
 function TCnMenuFormTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
   const AName: string): TComponent;
@@ -253,7 +275,8 @@ begin
   Result := nil;
   if not Assigned(ARootComp) then
     Exit;
-  if SameText(ARootComp.Name, AName) then
+
+  if StrEqualOrMatchStartWithStar(AName, ARootComp.Name) then
   begin
     Result := ARootComp;
     Exit;
@@ -262,11 +285,12 @@ begin
   for I := 0 to ARootComp.ComponentCount - 1 do
   begin
     Component := ARootComp.Components[I];
-    if SameText(Component.Name, AName) then
+    if StrEqualOrMatchStartWithStar(AName, Component.Name) then
     begin
       Result := Component;
       Exit;
     end;
+
     Result := FindComponentByNameDeep(Component, AName);
     if Result <> nil then
       Exit;
@@ -284,7 +308,8 @@ begin
   Result := nil;
   if not Assigned(ARootControl) then
     Exit;
-  if SameText(ARootControl.Name, AName) then
+
+  if StrEqualOrMatchStartWithStar(AName, ARootControl.Name) then
   begin
     Result := ARootControl;
     Exit;
@@ -297,11 +322,12 @@ begin
   for I := 0 to WinControl.ControlCount - 1 do
   begin
     Control := WinControl.Controls[I];
-    if SameText(Control.Name, AName) then
+    if StrEqualOrMatchStartWithStar(AName, Control.Name) then
     begin
       Result := Control;
       Exit;
     end;
+
     Result := FindControlByNameDeep(Control, AName);
     if Result <> nil then
       Exit;
@@ -380,12 +406,13 @@ begin
   for I := 0 to Screen.FormCount - 1 do
   begin
     Form := Screen.Forms[I];
-    if SameText(Form.Name, AFormName) then
+    if (Form.Name <> '') and SameText(Form.Name, AFormName) then
     begin
       Result := Form;
       Exit;
     end;
   end;
+  Result := nil;
 end;
 
 // 根据名称查找顶层窗体
@@ -664,7 +691,7 @@ begin
   end;
 end;
 
-// 根据名称查找弹出菜单
+// 根据名称查找弹出菜单，需要 AOwnerName 支持通配符
 function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TForm; const AOwnerName,
   AMenuName: string): TPopupMenu;
 var
@@ -1316,6 +1343,7 @@ begin
     Form := FindScreenFormByName(Names[0]);
     if not Assigned(Form) then
       Exit;
+
     PopupMenu := FindPopupMenuByName(Form, Names[1], Names[2]);
     if not Assigned(PopupMenu) then
       Exit;
@@ -1436,7 +1464,9 @@ begin
            MenuPaths[I, 0]);
       end;
 
-      // 找 F 的深层 Controls 里有 TForm 的也进行类似翻译，以处理新的停靠过来的情形，但为了性能，暂时不处理 TAppBuilder
+{$IFNDEF BDS}
+      // 找 F 的深层 Controls 里有 TForm 的也进行类似翻译，以处理新的编辑器里停靠过来的情形，
+      // 但为了性能，暂时不处理 TAppBuilder，且只低版本浮动有效
       if F.ClassNameIs('TAppBuilder') then
         Exit;
 
@@ -1467,6 +1497,7 @@ begin
       finally
         FS.Free;
       end;
+{$ENDIF}
     end;
   end
   else
@@ -1475,6 +1506,56 @@ begin
     for I := 0 to Length(MenuPaths) - 1 do
       TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
         MenuPaths[I, 0]);
+  end;
+end;
+
+// 挂接当前活动编辑器窗口上的菜单控件
+procedure TCnMenuFormTranslator.HookPopupMenuOnCurrentEditWindow;
+const
+  EDITWINDOW_PREFIX = 'EditWindow_';
+var
+  I: Integer;
+  F: TForm;
+  MenuPaths: TCn2DStringArray;
+  Names: TStringList;
+  PopupMenu: TPopupMenu;
+  Hook: TCnMenuHook;
+begin
+  F := Screen.ActiveForm;
+  if (F = nil) or (Pos(EDITWINDOW_PREFIX, F.Name) <> 1) then
+    Exit;
+
+  MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_EVENTHANDLER);
+  Names := TStringList.Create;
+  try
+    for I := 0 to Length(MenuPaths) - 1 do
+    begin
+      if Pos(EDITWINDOW_PREFIX, MenuPaths[I, 0]) <> 1 then
+        Continue;
+
+      Names.Clear;
+      ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
+      if Names.Count <> 3 then
+        Continue;
+
+      if StrEqualOrMatchStartWithStar(Names[0], F.Name) then
+      begin
+        PopupMenu := FindPopupMenuByName(F, Names[1], Names[2]);
+        if not Assigned(PopupMenu) then
+          Continue;
+
+        if not IsPopupMenuHooked(PopupMenu) then
+        begin
+          Hook := TCnMenuHook.Create(nil);
+          Hook.Text := MenuPaths[I, 0];
+          Hook.HookMenu(PopupMenu);
+          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          FAttachedPopupMenuHooks.Add(Hook);
+        end;
+      end;
+    end;
+  finally
+    Names.Free;
   end;
 end;
 
@@ -1812,6 +1893,7 @@ var
   F: TCustomForm;
 begin
   TranslateStaticPopupMenus(True);
+  HookPopupMenuOnCurrentEditWindow;
 
   if FActive and AddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
     and (Screen.ActiveCustomForm <> nil) then
