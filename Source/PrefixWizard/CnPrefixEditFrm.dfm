@@ -179,6 +179,7 @@ inherited CnPrefixEditForm: TCnPrefixEditForm
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
+      OnKeyDown = edtNameKeyDown
       OnKeyPress = edtNameKeyPress
     end
     object cbNeverDisp: TCheckBox

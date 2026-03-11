@@ -76,6 +76,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure edtNameKeyPress(Sender: TObject; var Key: Char);
     procedure btnClassNameClick(Sender: TObject);
+    procedure edtNameKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
   private
     FPrefix: string;
     FRootName: string;
@@ -233,6 +235,16 @@ const
 begin
   if not CharInSet(Key, Chars) and not IsValidIdent('A' + Key) then
     Key := #0;
+end;
+
+procedure TCnPrefixEditForm.edtNameKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (ssCtrl in Shift) and (Key = Ord('A')) then
+  begin
+    edtName.SelectAll;
+    Key := 0;
+  end;
 end;
 
 procedure TCnPrefixEditForm.btnClassNameClick(Sender: TObject);

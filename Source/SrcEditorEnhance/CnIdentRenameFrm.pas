@@ -90,6 +90,7 @@ procedure TCnIdentRenameForm.edtRenameKeyDown(Sender: TObject;
   var Key: Word; Shift: TShiftState);
 var
   NextRadioButton: TRadioButton;
+  S: string;
 begin
   NextRadioButton := nil;
   if (Key = VK_UP) and (Shift = []) then
@@ -135,13 +136,32 @@ begin
   end
   else if (Key = VK_UP) and (Shift = [ssAlt]) then
   begin
-    // Change Case to Upper
+    // 全变大写
     edtRename.Text := UpperCase(edtRename.Text);
   end
   else if (Key = VK_DOWN) and (Shift = [ssAlt]) then
   begin
-    // Change Case to Lower
+    // 全变小写
     edtRename.Text := LowerCase(edtRename.Text);
+  end
+  else if ((Key = VK_DOWN) or (Key = VK_UP)) and
+    ((Shift = [ssAlt, ssShift]) or (Shift = [ssAlt, ssCtrl])) then
+  begin
+    // 首字符是字母时才全改成小写但首字母大写
+    S := LowerCase(edtRename.Text);
+    if Length(S) > 0 then
+    begin
+      if S[1] in ['a'..'z'] then
+      begin
+        S[1] := Chr(Ord(S[1]) - 32);
+        edtRename.Text := S;
+      end;
+    end;
+  end
+  else if (Key = Ord('A')) and (Shift = [ssCtrl]) then
+  begin
+    edtRename.SelectAll;
+    Key := 0;
   end;
 
   if NextRadioButton <> nil then
