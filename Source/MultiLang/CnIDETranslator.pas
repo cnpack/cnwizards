@@ -196,7 +196,7 @@ const
   csEnglishID = 1033;
   csChineseID = 2052;
 
-  csMenuTransFile = 'TransMap.json';
+  csMenuTransFile = 'TransMenu.json';
   INDEX_ENU = 0;
   INDEX_CHS = 1;
 
