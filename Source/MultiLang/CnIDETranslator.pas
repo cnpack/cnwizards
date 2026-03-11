@@ -1222,6 +1222,7 @@ begin
     begin
       if Assigned(ItemInfo.OriginalOnClick) then
         ItemInfo.OriginalOnClick(Sender);
+
       TranslateMainMenuDynamicItem(RT_CATEGORY_MAINMENU, RT_MECHANISM_EVENTHANDLER,
         ItemInfo.MenuPath);
       Exit;
@@ -1318,6 +1319,7 @@ begin
     PopupMenu := FindPopupMenuByName(Form, Names[1], Names[2]);
     if not Assigned(PopupMenu) then
       Exit;
+
     Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
       RT_MECHANISM_EVENTHANDLER, MenuPath);
     if Length(Captions) > 0 then
