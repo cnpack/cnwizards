@@ -107,7 +107,9 @@ type
     function FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem; const AName: string): TMenuItem;
     function FindMainMenuItemByNameDeep(const AMainMenu: TMainMenu; const AName: string): TMenuItem;
     function FindPopupMenuByName(const AForm: TForm; const AOwnerName, AMenuName: string): TPopupMenu;
-    function FindScreenFormByName(const AFormName: string): TForm;
+
+    function FindScreenFormByName(const AFormName: string): TForm; overload;
+    function FindScreenFormByName(const AFormName: string; FormResult: TObjectList): Boolean; overload;
     function GetActiveProjectInfo: TCnActiveProjectInfo;
 
     function IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
@@ -367,13 +369,11 @@ begin
   end;
 end;
 
-// 根据名称查找顶层窗体
 function TCnMenuFormTranslator.FindScreenFormByName(const AFormName: string): TForm;
 var
   I: Integer;
   Form: TForm;
 begin
-  Result := nil;
   for I := 0 to Screen.FormCount - 1 do
   begin
     Form := Screen.Forms[I];
@@ -381,6 +381,42 @@ begin
     begin
       Result := Form;
       Exit;
+    end;
+  end;
+end;
+
+// 根据名称查找顶层窗体
+function TCnMenuFormTranslator.FindScreenFormByName(const AFormName: string; FormResult: TObjectList): Boolean;
+var
+  I: Integer;
+  Form: TForm;
+  Prefix: string;
+begin
+  Result := False;
+  I := Pos('*', AFormName);
+  if I > 1 then
+  begin
+    Prefix := Copy(AFormName, 1, I - 1); // 有通配符，截取通配符前面的
+    for I := 0 to Screen.FormCount - 1 do
+    begin
+      Form := Screen.Forms[I];
+      if Pos(Prefix, Form.Name) = 1 then // 从头匹配
+      begin
+        FormResult.Add(Form);
+        Result := True;
+      end;
+    end;
+  end
+  else // 没通配符，直接找
+  begin
+    for I := 0 to Screen.FormCount - 1 do
+    begin
+      Form := Screen.Forms[I];
+      if SameText(Form.Name, AFormName) then
+      begin
+        FormResult.Add(Form);
+        Result := True;
+      end;
     end;
   end;
 end;
@@ -1014,21 +1050,22 @@ end;
 procedure TCnMenuFormTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism,
   AMenuPath: string);
 var
-  I: Integer;
+  I, J: Integer;
   Form: TForm;
+  FS: TObjectList;
   PopupMenu: TPopupMenu;
   Names: TStringList;
   Captions: TCn2DStringArray;
 begin
-  Names := TStringList.Create;
-  try
-    ExtractStrings(['.'], [' '], PChar(AMenuPath), Names);
-    Form := FindScreenFormByName(Names[0]);
-    if not Assigned(Form) then
-      Exit;
+  Names := nil;
+  FS := nil;
 
-    PopupMenu := FindPopupMenuByName(Form, Names[1], Names[2]);
-    if not Assigned(PopupMenu) then
+  try
+    Names := TStringList.Create;
+    FS := TObjectList.Create(False);
+
+    ExtractStrings(['.'], [' '], PChar(AMenuPath), Names);
+    if not FindScreenFormByName(Names[0], FS) then
       Exit;
 
     if Names.Count = 3 then
@@ -1037,10 +1074,18 @@ begin
       if Length(Captions) = 0 then
         Exit;
 
-      for I := 0 to PopupMenu.Items.Count - 1 do
-        TranslateMenuItem(PopupMenu.Items[I], Captions);
+      for I := 0 to FS.Count - 1 do
+      begin
+        PopupMenu := FindPopupMenuByName(TForm(FS[I]), Names[1], Names[2]);
+        if not Assigned(PopupMenu) then
+          Continue;
+
+        for J := 0 to PopupMenu.Items.Count - 1 do
+          TranslateMenuItem(PopupMenu.Items[J], Captions);
+      end;
     end;
   finally
+    FS.Free;
     Names.Free;
   end;
 end;
@@ -1200,9 +1245,10 @@ end;
 // 挂钩弹出菜单集合
 procedure TCnMenuFormTranslator.HookPopupMenus;
 var
-  I: Integer;
+  I, J: Integer;
   MenuPaths: TCn2DStringArray;
   Names: TStringList;
+  FS: TObjectList;
   Form: TForm;
   PopupMenu: TPopupMenu;
   Hook: TCnMenuHook;
@@ -1213,31 +1259,43 @@ begin
   CnDebugger.LogFmt('TCnMenuTranslator.HookPopupMenus %d', [Length(MenuPaths)]);
 {$ENDIF}
 
-  for I := 0 to Length(MenuPaths) - 1 do
-  begin
+  Names := nil;
+  FS := nil;
+
+  try
     Names := TStringList.Create;
-    try
+    FS := TObjectList.Create(False);
+
+    for I := 0 to Length(MenuPaths) - 1 do
+    begin
+      Names.Clear;
       ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
       if Names.Count <> 3 then
         Continue;
-      Form := FindScreenFormByName(Names[0]);
-      if not Assigned(Form) then
-        Continue;
-      PopupMenu := FindPopupMenuByName(Form, Names[1], Names[2]);
-      if not Assigned(PopupMenu) then
+
+      FS.Clear;
+      if not FindScreenFormByName(Names[0], FS) then
         Continue;
 
-      if not IsPopupMenuHooked(PopupMenu) then
+      for J := 0 to FS.Count - 1 do
       begin
-        Hook := TCnMenuHook.Create(nil);
-        Hook.Text := MenuPaths[I, 0];
-        Hook.HookMenu(PopupMenu);
-        Hook.OnAfterPopup := AfterPopupMenuOnPopup;
-        FAttachedPopupMenuHooks.Add(Hook);
+        PopupMenu := FindPopupMenuByName(TForm(FS[J]), Names[1], Names[2]);
+        if not Assigned(PopupMenu) then
+          Continue;
+
+        if not IsPopupMenuHooked(PopupMenu) then
+        begin
+          Hook := TCnMenuHook.Create(nil);
+          Hook.Text := MenuPaths[I, 0];
+          Hook.HookMenu(PopupMenu);
+          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          FAttachedPopupMenuHooks.Add(Hook);
+        end;
       end;
-    finally
-      Names.Free;
     end;
+  finally
+    FS.Free;
+    Names.Free;
   end;
 end;
 
@@ -1327,6 +1385,7 @@ begin
 
   JsonObject := TCnJSONObject(JsonValue);
   FMainMenuPath := JsonObject['MainPath'].AsString;
+
   MainArray := TStringList.Create;
   try
     ExtractStrings(['.'], [' '], PChar(FMainMenuPath), MainArray);
@@ -1335,6 +1394,7 @@ begin
     Form := FindScreenFormByName(MainArray[0]);
     if not Assigned(Form) then
       Exit;
+
     Component := Form.FindComponent(MainArray[1]);
     if not Assigned(Component) or not (Component is TMainMenu) then
       Exit;
@@ -1417,7 +1477,6 @@ begin
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
-//  HookFormDesigner;
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMenuTranslator.DelayActivate');
 {$ENDIF}

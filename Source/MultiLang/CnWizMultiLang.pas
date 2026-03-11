@@ -825,10 +825,10 @@ var
   O: TComponent;
 begin
 {$IFDEF DEBUG}
-  if AObject is TComponent then
-    CnDebugger.LogFmt('CnWizMultiLang Check Name %s(%s).%s', [AObject.ClassName, TComponent(AObject).Name, PropName])
-  else
-    CnDebugger.LogFmt('CnWizMultiLang Check Class %s.%s', [AObject.ClassName, PropName]);
+//  if AObject is TComponent then
+//    CnDebugger.LogFmt('CnWizMultiLang Check Name %s(%s).%s', [AObject.ClassName, TComponent(AObject).Name, PropName])
+//  else
+//    CnDebugger.LogFmt('CnWizMultiLang Check Class %s.%s', [AObject.ClassName, PropName]);
 {$ENDIF}
 {
   不需要获取的：
