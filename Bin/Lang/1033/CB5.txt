@@ -460,3 +460,5 @@ TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.ModVerGroup.Caption= Mo
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.PreRelease.Caption=Pre-r&elease 
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.PrivateBuild.Caption=&Private build
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.SpecialBuild.Caption=&Special build
+TRunParamsDlg.GroupBox1.Caption= Host &Application
+TRunParamsDlg.GroupBox2.Caption= &Parameters

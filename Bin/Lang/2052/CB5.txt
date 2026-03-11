@@ -460,3 +460,5 @@ TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.ModVerGroup.Caption=模
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.PreRelease.Caption=预发行版(&E)
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.PrivateBuild.Caption=私有版本(&P)
 TProjectOptionsDialog.PropSheetControl.@TVersionInfoPage.SpecialBuild.Caption=特殊版本(&S)
+TRunParamsDlg.GroupBox1.Caption= 宿主应用程序(&A)
+TRunParamsDlg.GroupBox2.Caption= 参数(&P)
