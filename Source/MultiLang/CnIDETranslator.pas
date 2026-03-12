@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, // Vcl.CategoryButtons,
-  Controls, Forms, Menus, CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
+  Controls, Forms, Menus, CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF BDS} CategoryButtons, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
@@ -90,6 +90,9 @@ type
   {* 菜单及窗体翻译器}
   private
     FActive: Boolean;
+    FStorageRef: TCnHashLangFileStorage;
+    FAddtionalLanguageFileLoad: Boolean;
+    FAlreadyChinese: Boolean;
     FTransQueue: TComponentList;
     FTranFormsList: TComponentList;
     FOld2Array, FNew2Array: TStringList;
@@ -162,10 +165,22 @@ type
     {* 解除挂接所有弹出菜单}
 
     // 插件处理过程
-    procedure LoadTranslationMap(const AMapFile: string);
+    procedure LoadTranslationMenus(const AMenuLangFile: string);
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
-    procedure TranslateAllForms;
+    procedure TranslateAllExistingForms;
+    {* 翻译现有 IDE 的窗体。以下几种情况下会被调用：
+      中文状态下汉化功能启用或禁用时（SetActive 中调用），内部检查 FActive 以决定翻成中文还是英文，
+      切换语言到中文时且汉化功能启用时调用（LanguageChanged 中调用，内部翻成中文）
+      切换语言到非中文语言时（LanguageChanged 中调用，内部翻译成英文}
+
+  protected
+    function GetAdditionalLangMainFileName: string;
+    function GetAdditionalLangExtraFileName: string;
+    function GetAdditionalLangID: Cardinal;
+    // 只有当前语言为中文，且启用了汉化功能的情况下，额外语言文件才要加载中文的，其他情况都是加载英文的
+
+    procedure LoadAdditionalLangFile(ALangID: Cardinal);
 
     procedure DelayActivate(Sender: TObject);
     procedure SetActive(const Value: Boolean);
@@ -176,7 +191,7 @@ type
     procedure DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
     procedure TranslateQueue(Sender: TObject);
   public
-    constructor Create;
+    constructor Create(AStorage: TCnHashLangFileStorage);
     destructor Destroy; override;
 
     procedure DebugCommand(Cmds: TStrings; Results: TStrings);
@@ -189,7 +204,7 @@ implementation
 
 uses
   CnCommon, CnMenuHook, CnControlHook, CnWizNotifier, CnStrings, CnWizOptions,
-  CnWizMultiLang, CnLangMgr
+  CnWizMultiLang, CnLangMgr, CnWizCompilerConst
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
@@ -1664,15 +1679,15 @@ begin
 end;
 
 // 加载翻译数据
-procedure TCnMenuFormTranslator.LoadTranslationMap(const AMapFile: string);
+procedure TCnMenuFormTranslator.LoadTranslationMenus(const AMenuLangFile: string);
 var
   StringList: TCnAnsiStringList;
   S: AnsiString;
 begin
   StringList := TCnAnsiStringList.Create;
-  if FileExists(AMapFile) then
+  if FileExists(AMenuLangFile) then
   begin
-    StringList.LoadFromFile(AMapFile);
+    StringList.LoadFromFile(AMenuLangFile);
     S := StringList.Text;
     if Length(S) > 3 then
       if (S[1] = #$EF) and (S[2] = #$BB) and (S[3] = #$BF) then
@@ -1738,11 +1753,15 @@ begin
   end;
 end;
 
-constructor TCnMenuFormTranslator.Create;
+constructor TCnMenuFormTranslator.Create(AStorage: TCnHashLangFileStorage);
 var
   TranslationMapPath: string;
 begin
   inherited Create;
+
+  FStorageRef := AStorage;
+  if FStorageRef <> nil then
+    LoadAdditionalLangFile(GetAdditionalLangID);
 
   FTransQueue := TComponentList.Create(False);
   FTranFormsList := TComponentList.Create(False);
@@ -1753,7 +1772,7 @@ begin
 
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
-  LoadTranslationMap(TranslationMapPath);
+  LoadTranslationMenus(TranslationMapPath);
 
   CnLanguageManager.AddChangeNotifier(LangaugeChanged);
 
@@ -1779,6 +1798,62 @@ begin
   FreeAndNil(FTranFormsList);
   FreeAndNil(FTransQueue);
   inherited;
+end;
+
+function TCnMenuFormTranslator.GetAdditionalLangMainFileName: string;
+begin
+{$IFDEF BDS}
+  Result := '<none>.txt';
+{$ELSE}
+  Result := 'Delphi7.txt';
+{$ENDIF}
+end;
+
+function TCnMenuFormTranslator.GetAdditionalLangExtraFileName: string;
+begin
+  Result := CompilerShortName + '.txt';
+end;
+
+procedure TCnMenuFormTranslator.LoadAdditionalLangFile(ALangID: Cardinal);
+var
+  S, D: string;
+begin
+  FAddtionalLanguageFileLoad := False;
+  if ALangID = 0 then
+    D := FStorageRef.CurrentLanguage.LanguageDirName
+  else
+    D := IntToStr(ALangID);
+
+  // 注意加载的额外语言文件，和专家包的当前语言不一定相同
+  if FStorageRef.CurrentLanguage <> nil then
+  begin
+    // 大版本语言文件
+    S := MakePath(MakePath(FStorageRef.LanguagePath) + D) + GetAdditionalLangMainFileName;
+    if FileExists(S) then
+    begin
+      FStorageRef.AddExtraItemsFromFile(S);
+      FAddtionalLanguageFileLoad := True;
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('CnMenuFormTranslator.LoadAdditionalLangFile from ' + S);
+{$ENDIF}
+    end
+    else
+      Exit; // 没大版本语言文件则不加载小版本补充文件
+
+    // 自身版本独特的语言文件
+    if GetAdditionalLangExtraFileName <> '' then
+    begin
+      S := MakePath(MakePath(FStorageRef.LanguagePath) + D) + GetAdditionalLangExtraFileName;
+      if FileExists(S) then
+      begin
+        FStorageRef.AddExtraItemsFromFile(S);
+        FAddtionalLanguageFileLoad := True;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMenuFormTranslator.LoadAdditionalLangFile for Self from ' + S);
+{$ENDIF}
+      end;
+    end;
+  end;
 end;
 
 procedure TCnMenuFormTranslator.DelayActivate(Sender: TObject);
@@ -1809,7 +1884,9 @@ begin
       // 加载语言菜单
       LoadMenuItemLanguages;
 
-      TranslateAllForms;
+      // 根据需要加载中文或英文翻译当前已存在的所有窗体
+      LoadAdditionalLangFile(GetAdditionalLangID);
+      TranslateAllExistingForms;
 
       // 延时挂载菜单和窗体容器
       CnWizNotifierServices.ExecuteOnApplicationIdle(DelayActivate);
@@ -1824,6 +1901,10 @@ begin
         TranslateStaticPopupMenus;
         TranslatePopupMenuPaletteItems;
         UpdateWholeMenus;
+
+        // 根据需要将当前已存在的窗体翻译回英语
+        LoadAdditionalLangFile(GetAdditionalLangID);
+        TranslateAllExistingForms;
       end;
 
       // 卸载事件挂钩
@@ -1895,7 +1976,7 @@ begin
   TranslateStaticPopupMenus(True);
   HookPopupMenuOnCurrentEditWindow;
 
-  if FActive and AddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
+  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
     and (Screen.ActiveCustomForm <> nil) then
   begin
     F := Screen.ActiveCustomForm;
@@ -1932,8 +2013,8 @@ end;
 
 procedure TCnMenuFormTranslator.LangaugeChanged(Sender: TObject);
 begin
-  FTranFormsList.Clear;
-  TranslateAllForms;
+  LoadAdditionalLangFile(GetAdditionalLangID);
+  TranslateAllExistingForms;
 end;
 
 procedure TCnMenuFormTranslator.DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
@@ -1953,24 +2034,35 @@ begin
   end;
 end;
 
-procedure TCnMenuFormTranslator.TranslateAllForms;
+procedure TCnMenuFormTranslator.TranslateAllExistingForms;
 var
   I: Integer;
   F: TCustomForm;
 begin
-  if FActive and AddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+  FTranFormsList.Clear;
+
+  // 当前要翻译为中文、且当前语言是中文，且加载了 IDE 的中文语言文件，则翻译所有已经存在的窗体为中文
+  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Current Translate to Chinese UI.');
+{$ENDIF}
     for I := 0 to Screen.CustomFormCount - 1 do
     begin
-      F := Screen.ActiveCustomForm;
+      F := Screen.CustomForms[I];
       if Pos('TCn', F.ClassName) <> 1 then
       begin
         if FTranFormsList.IndexOf(F) < 0 then
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate ' + F.ClassName);
+          CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate to Chinese ' + F.ClassName);
 {$ENDIF}
-          CnLanguageManager.TranslateForm(F, True);
+          try
+            CnLanguageManager.TranslateForm(F, True);
+          except
+            ;
+          end;
+
           if F.Visible then
             F.Update;
           FTranFormsList.Add(F);
@@ -1983,7 +2075,45 @@ begin
         end;
       end;
     end;
+    FAlreadyChinese := True;
+  end
+  else if FAlreadyChinese then // 其他情况，只要曾经中文了，就翻译回英文一次
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Current Already Chinese UI. Translate back to English.');
+{$ENDIF}
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      F := Screen.CustomForms[I];
+      if Pos('TCn', F.ClassName) <> 1 then
+      begin
+        if FTranFormsList.IndexOf(F) < 0 then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate to English ' + F.ClassName);
+{$ENDIF}
+          try
+            CnLanguageManager.TranslateForm(F, True);
+          except
+            ;
+          end;
+
+          if F.Visible then
+            F.Update;
+          FTranFormsList.Add(F);
+        end;
+      end;
+    end;
+    FAlreadyChinese := False;
   end;
+end;
+
+function TCnMenuFormTranslator.GetAdditionalLangID: Cardinal;
+begin
+  if FActive and (WizOptions.CurrentLangID = csChineseID) then
+    Result := csChineseID
+  else
+    Result := csEnglishID;
 end;
 
 end.

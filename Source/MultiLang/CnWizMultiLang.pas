@@ -93,15 +93,11 @@ type
     FTranslateIndex: Integer;
     FTranslator: TCnMenuFormTranslator;
 {$ENDIF}
-    function GetAdditionalLangMainFileName: string;
-    function GetAdditionalLangExtraFileName: string;
-    procedure LoadAdditionalLangFile;
     procedure SetExtractorNoNameMode(E: TCnLangStringExtractor; F: TCustomForm);
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
 
-    procedure StorageLanguageChanged(Sender: TObject; ALanguageIndex: Integer);
     procedure WizLanguageChanged(Sender: TObject);
     procedure UpdateTranslator(Sender: TObject);
 
@@ -201,9 +197,6 @@ type
     procedure Translate; virtual;
     {* 进行全窗体翻译}
   end;
-
-var
-  AddtionalLanguageFileLoad: Boolean = False;
 
 function CnWizLangMgr: TCnCustomLangManager;
 {* CnLanguageManager 的简略封装，保证返回的管理器能进行翻译 }
@@ -346,11 +339,6 @@ constructor TCnWizMultiLang.Create;
 begin
   if CnLanguageManager <> nil then
     CnLanguageManager.OnLanguageChanged := WizLanguageChanged;
-  if FStorage <> nil then
-  begin
-    FStorage.OnLanguageChanged := StorageLanguageChanged;
-    LoadAdditionalLangFile;
-  end;
 
   inherited;
   // 因为本 Wizard 不会被 Loaded调用，故需要手工 AcquireSubActions;
@@ -365,7 +353,7 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-  FTranslator := TCnMenuFormTranslator.Create;
+  FTranslator := TCnMenuFormTranslator.Create(FStorage);
 {$ENDIF}
 end;
 
@@ -881,7 +869,8 @@ begin
     Allow := False
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
     Allow := False
-  else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') or (PropName = 'PropField') then
+  else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') or (PropName = 'PropField')
+    or (PropName = 'EditMask') or (PropName = 'StyleName') then
     Allow := False
   else if AObject is TComponent then // 组件进这里判断
   begin
@@ -971,72 +960,13 @@ begin
   end;
 end;
 
-procedure TCnWizMultiLang.StorageLanguageChanged(Sender: TObject; ALanguageIndex: Integer);
-begin
-  // 存储加载事件，按需加载额外的翻译条目
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg('CnWizMultiLang.StorageLanguageChanged');
-{$ENDIF}
-  LoadAdditionalLangFile;
-end;
-
-procedure TCnWizMultiLang.LoadAdditionalLangFile;
-var
-  S: string;
-begin
-  AddtionalLanguageFileLoad := False;
-  if FStorage.CurrentLanguage <> nil then
-  begin
-    if FStorage.CurrentLanguage.LanguageID = csChineseID then
-    begin
-      // 大版本语言文件
-      S := MakePath(MakePath(FStorage.LanguagePath) + FStorage.CurrentLanguage.LanguageDirName) + GetAdditionalLangMainFileName;
-      if FileExists(S) then
-      begin
-        FStorage.AddExtraItemsFromFile(S);
-        AddtionalLanguageFileLoad := True;
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('CnWizMultiLang.LoadAdditionalLangFile from ' + S);
-{$ENDIF}
-      end;
-
-      // 自身版本独特的语言文件
-      if GetAdditionalLangExtraFileName <> '' then
-      begin
-        S := MakePath(MakePath(FStorage.LanguagePath) + FStorage.CurrentLanguage.LanguageDirName) + GetAdditionalLangExtraFileName;
-        if FileExists(S) then
-        begin
-          FStorage.AddExtraItemsFromFile(S);
-          AddtionalLanguageFileLoad := True;
-{$IFDEF DEBUG}
-          CnDebugger.LogMsg('CnWizMultiLang.LoadAdditionalLangFile for Self from ' + S);
-{$ENDIF}
-        end;
-      end;
-    end;
-  end;
-end;
-
-function TCnWizMultiLang.GetAdditionalLangMainFileName: string;
-begin
-{$IFDEF BDS}
-  Result := '<none>.txt';
-{$ELSE}
-  Result := 'Delphi7.txt';
-{$ENDIF}
-end;
-
-function TCnWizMultiLang.GetAdditionalLangExtraFileName: string;
-begin
-  Result := CompilerShortName + '.txt';
-end;
-
 procedure TCnWizMultiLang.SetExtractorNoNameMode(E: TCnLangStringExtractor;
   F: TCustomForm);
 begin
   if (F <> nil) and (E <> nil) then
   begin
-    if F.ClassNameIs('TProjectOptionsDialog') then
+    if F.ClassNameIs('TProjectOptionsDialog') or F.ClassNameIs('TDefaultEnvironmentDialog')
+      or F.ClassNameIs('TDelphiProjectOptionsDialog') or F.ClassNameIs('TCppProjOptsDlg') then
       E.NoNameProcessType := cnptAtClassName
     else
       E.NoNameProcessType := cnptIndex;
