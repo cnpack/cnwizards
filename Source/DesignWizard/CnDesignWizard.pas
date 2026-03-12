@@ -1175,6 +1175,13 @@ procedure TCnDesignWizard.InitLockMenuStatus(Sender: TObject);
 begin
   if FNeedClickLockWhenDesign and (FIDELockControlsMenu <> nil) then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnDesignWizard.FormEditorNotifier Idle Init. LockControlsMenu.Enabled '
+      + IntToStr(Ord(FIDELockControlsMenu.Enabled)));
+{$ENDIF}
+    if not FIDELockControlsMenu.Enabled then
+      RequestLockControlsMenuUpdate(nil);
+
     FIDELockControlsMenu.Click;
     CnWizNotifierServices.ExecuteOnApplicationIdle(RequestLockControlsMenuUpdate);
 {$IFDEF DEBUG}
