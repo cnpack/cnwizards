@@ -803,7 +803,7 @@ begin
     Result := T in OpTokens + [tokSemicolon, tokRB, tokSRB,
       tokKeywordDo, tokKeywordOf, tokKeywordThen];  // 或者下一个是双目运算符或分号或右括号几个其他语句结束关键字
     if not Result then
-      Result := (T = tokDot) and (FPrevEffectiveToken = tokRB); // 级联的调用 ().test 这种
+      Result := (T = tokDot) and (FPrevEffectiveToken in [tokString, tokSymbol, tokRB]); // 级联的调用 a.test 或 ().test 这种
 
     // 可能还有其他判断
   end;

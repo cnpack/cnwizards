@@ -33,6 +33,8 @@ unit CnCodeFormatter;
 *
 *           保留换行时如果某些语句内部因为注释会多出空行来，八成是 IsInStatement
 *           或 IsInOpStatement 对注释前的符号判断是否在语句内有误导致没删除回车换行
+*           另外两成是 OnlyFirst 时第一个分支后缺乏分号（从而认为语句在第二个分支里也一直没结束一直保留换行）
+*           导致第一个分支后出现空行，且第二个分支反复出现空行哪怕有分号。暂无办法。
 *
 *           如果语句间不因注释等，单纯多出现了空行，跟到 DoBlankLinesWhenSkip 多输出了空行
 *           则八成是外部应设 KeepOneBlankLine 为 False，而被嵌套的给盖掉了
@@ -6657,7 +6659,7 @@ begin
   if LineBreak and (FCodeGen.LockedCount <= 0) then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('On Scaner Line Break, to Write a CRLF.');
+    CnDebugger.LogMsg('On Scaner Line Break, will Write a CRLF.');
 {$ENDIF}
     FCodeGen.Writeln;
     // 在原有缩进上前进 Tab 后回车
