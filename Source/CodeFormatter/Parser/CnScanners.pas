@@ -714,7 +714,8 @@ end;
 
 procedure TAbstractScanner.DoLineBreak;
 begin
-  if Assigned(FOnLineBreak) then
+  // 如果在 OnlyFirst 处理分支里，则要保留整个格式，无需触发回车换行动作
+  if not FInDirectiveNestSearch and Assigned(FOnLineBreak) then
     FOnLineBreak(Self);
 end;
 
@@ -1845,8 +1846,8 @@ begin
               if DirectiveNest = 0 then
               begin
                 FInDirectiveNestSearch := False;
-                // 已经顺利找到了，再往后按原有的跳过注释的规矩找下一个Token
-                // 避免下一个又是IFDEF时出问题。
+                // 已经顺利找到了，再往后按原有的跳过注释的规矩找下一个 Token
+                // 避免下一个又是 IFDEF 时出问题。
                 FPreviousIsComment := True;
                 Result := NextToken;
                 FPreviousIsComment := False;
