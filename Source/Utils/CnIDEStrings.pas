@@ -70,7 +70,8 @@ type
 {$ENDIF}
   PCnIdeTokenInt = ^TCnIdeTokenInt;
 
-  // Ansi/Utf16/Utf16/Utf16(Lazarus)，配合 CnGeneralSaveEditorToStream 系列使用，对应 Ansi/Utf16/Utf16/Utf16(Lazarus)
+  // Ansi/Utf16/Utf16/Utf16(Lazarus)
+  // 配合 CnGeneralSaveEditorToStream 与 TCnIdeStringList 等系列使用
 {$IFDEF LAZARUS}
   TCnGeneralPasToken = TCnWidePasToken;
   TCnGeneralCppToken = TCnWideCppToken;

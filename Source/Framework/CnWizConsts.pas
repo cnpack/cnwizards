@@ -1516,11 +1516,11 @@ var
   SCnCommentCropperWizardName: string = 'Comment Cropper';
   SCnCommentCropperWizardMenuCaption: string = 'Tidy Comments';
   SCnCommentCropperWizardMenuHint: string = 'Tidy Comments in Source Code';
-  SCnCommentCropperWizardComment: string = 'Crop Comments in Source Code';
+  SCnCommentCropperWizardComment: string = 'Tidy Comments in Source Code';
   SCnCommentCropperCountFmt: string = '%d File(s) Processed.';
-  SCnCommentCropperCropMenuCaption: string = 'Crop Comments...';
+  SCnCommentCropperCropMenuCaption: string = '&Crop Comments...';
   SCnCommentCropperCropMenuHint: string = 'Crop Comments in Source Code';
-  SCnCommentCropperAlignMenuCaption: string = 'Align Comment Blocks...';
+  SCnCommentCropperAlignMenuCaption: string = '&Align Comment Blocks...';
   SCnCommentCropperAlignMenuHint: string = 'Align Comment Blocks in Source Code';
 
   // CnFavoriteWizard

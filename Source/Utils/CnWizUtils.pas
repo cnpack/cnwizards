@@ -516,7 +516,7 @@ function FindControlByClassName(AParent: TWinControl; const AClassName: string;
 function QuerySvcs(const Instance: IUnknown; const Intf: TGUID; out Inst): Boolean;
 {* 查询输入的服务接口并返回一个指定接口实例，如果失败，返回 False}
 function CnOtaGetCurrentSelection: string;
-{* 取当前选择的文本}
+{* 取当前选择的文本，格式大概是 Ansi/Ansi/Utf16/Utf8}
 function CnOtaGetTopMostEditView: TCnEditViewSourceInterface; overload;
 {* 取当前最前端的 IOTAEditView 接口或 Lazarus 的活动编辑器}
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -1118,6 +1118,19 @@ function CnGeneralFilerSaveFileToStream(const FileName: string; Stream: TMemoryS
 {* 封装的一通用方法，使用 Filer 将指定文件内容保存至流中，BDS 以上均使用 WideChar，
   D567 使用 AnsiChar，均不带 UTF8，也就是 Ansi/Utf16/Utf16，末尾均有结束字符 #0。
   不区分磁盘文件还是内存，供 Ansi 与 Wide 版的语法分析用}
+
+procedure CnGeneralStringsLoadFromStream(Strings: TCnIdeStringList; Stream: TMemoryStream);
+{* 封装的一通用方法，将 General 系列取到的 Stream 格式的 Ansi/Utf16/Utf16/Utf16 内容写入对应格式的 StringList}
+
+procedure CnGeneralStringsSaveToStream(Strings: TCnIdeStringList; Stream: TMemoryStream);
+{* 封装的一通用方法，将 Ansi/Utf16/Utf16/Utf16 格式的 StringList 的内容写入 Stream 中供 General 系列使用}
+
+function CnGeneralGetSelectionOfView(View: TCnEditViewSourceInterface = nil): TCnIdeTokenString;
+{* 封装的一通用方法，获取选择区字符串，返回格式 Ansi/Utf16/Utf16/Utf16}
+
+procedure CnGeneralSetSelectionOfView(const Str: TCnIdeTokenString;
+  View: TCnEditViewSourceInterface = nil);
+{* 封装的一通用方法，设置选择区字符串，要求字符串格式 Ansi/Utf16/Utf16/Utf16}
 
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
@@ -3801,6 +3814,7 @@ begin
     Result := EditBlock.Text;
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
+  // 注意 BDS 2005/2006/2007 下 Block.Text 是 Utf8 格式
   Result := CnUtf8ToAnsi2(Result);
 {$ENDIF}
 {$ENDIF}
@@ -9083,6 +9097,152 @@ begin
   end;
 {$ENDIF}
   Result := Stream.Size > 0;
+end;
+
+// 封装的一通用方法，将 General 系列取到的 Stream 格式的 Ansi/Utf16/Utf16/Utf16 内容写入对应格式的 StringList
+procedure CnGeneralStringsLoadFromStream(Strings: TCnIdeStringList; Stream: TMemoryStream);
+var
+  BomStream: TMemoryStream;
+
+  procedure MakeBomStream;
+  var
+    C: Byte;
+  begin
+    // 写入要插入的两个字节
+    C := $FF;
+    BomStream.Write(C, SizeOf(Byte));
+    C := $FE;
+    BomStream.Write(C, SizeOf(Byte));
+
+    // 将原流的所有数据复制到临时流（从当前位置之后追加）
+    Stream.Position := 0;
+    BomStream.CopyFrom(Stream, Stream.Size);
+    BomStream.Position := 0;
+  end;
+
+begin
+  BomStream := nil;
+  try
+{$IFDEF UNICODE}
+    Strings.LoadFromStream(Stream, TEncoding.Unicode);
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+    BomStream := TMemoryStream.Create;
+    MakeBomStream;
+    Strings.LoadFromStream(BomStream);   // TCnWideStringList 加载 WideString
+  {$ELSE}
+    {$IFDEF FPC}
+    BomStream := TMemoryStream.Create;
+    MakeBomStream;
+    Strings.LoadFromStream(BomStream);   // TCnWideStringList 加载 WideString
+    {$ELSE}
+    Strings.LoadFromStream(Stream);      // D567 的 Ansi
+    {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
+  finally
+    BomStream.Free;
+  end;
+end;
+
+// 封装的一通用方法，将 Ansi/Utf16/Utf16/Utf16 格式的 StringList 的内容写入 Stream 中供 General 系列使用
+procedure CnGeneralStringsSaveToStream(Strings: TCnIdeStringList; Stream: TMemoryStream);
+
+  procedure RemoveUtf16Bom;
+  var
+    P: PByteArray;
+    NewSize: Int64;
+  begin
+    if Stream.Size < 2 then
+      Exit;
+
+    P := PByteArray(Stream.Memory);
+    if (P[0] = $FF) and (P[1] = $FE) then
+    begin
+      NewSize := Stream.Size - 2;
+      if NewSize > 0 then
+        Move(P[2], P[0], NewSize);
+
+      Stream.Size := NewSize;
+    end;
+  end;
+
+begin
+{$IFDEF UNICODE}
+  // Unicode 下尽量先声明不写 BOM，不支持而写了，再删
+  {$IFDEF TSTRINGS_HAS_WRITEBOM}
+  Strings.WriteBOM := False;
+  {$ENDIF}
+  Strings.SaveToStream(Stream, TEncoding.Unicode);
+  {$IFNDEF TSTRINGS_HAS_WRITEBOM}
+  RemoveUtf16Bom;
+  {$ENDIF}
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Strings.WriteBOM := False;
+  Strings.SaveToStream(Stream, wlfUnicode);
+  {$ELSE}
+    {$IFDEF FPC}
+    Strings.WriteBOM := False;
+    Strings.SaveToStream(Stream, wlfUnicode);
+    {$ELSE}
+    Strings.SaveToStream(Stream);
+    {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
+end;
+
+// 封装的一通用方法，获取选择区字符串，返回格式 Ansi/Utf16/Utf16/Utf16
+function CnGeneralGetSelectionOfView(View: TCnEditViewSourceInterface): TCnIdeTokenString;
+var
+  S: string;
+begin
+  Result := '';
+
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  if (View.Block <> nil) and View.Block.IsValid then
+  begin
+    S := View.Block.Text; // Ansi/Utf8/Utf16
+{$IFDEF IDE_STRING_ANSI_UTF8}
+    Result := CnUtf8DecodeToWideString(S); // Utf8 转 Utf16
+{$ELSE}
+    Result := S;
+{$ENDIF}
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.Selection <> '' then // Utf8 转 Utf16
+    Result := CnUtf8DecodeToWideString(View.Selection);
+{$ENDIF}
+end;
+
+// 封装的一通用方法，设置选择区字符串，要求字符串格式 Ansi/Utf16/Utf16/Utf16
+procedure CnGeneralSetSelectionOfView(const Str: TCnIdeTokenString;
+  View: TCnEditViewSourceInterface);
+begin
+  if View = nil then
+    View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  CnOtaReplaceCurrentSelectionUtf8(CnUtf8EncodeWideString(Str), True); // Utf16 转 Utf8
+{$ELSE}
+  CnOtaReplaceCurrentSelection(Str, True);  // Ansi/Utf16
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // TODO: NOT Implemented
+  raise Exception.Create('NOT Implemented');
+  // View.Selection := CnUtf8EncodeWideString(Str);    // Utf16 转 Utf8
+{$ENDIF}
 end;
 
 // 取得当前编辑器源代码

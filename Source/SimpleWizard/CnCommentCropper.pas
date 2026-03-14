@@ -53,7 +53,7 @@ uses
   StdCtrls, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} FileCtrl,
   {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   CnConsts, CnWizClasses, CnWizConsts, CnWizUtils, CnCommon, CnWideStrings,
-  CnWizIdeUtils, CnIni, IniFiles, CnWizEditFiler, CnSourceCropper, CnWizMultiLang;
+  CnIDEStrings, CnWizIdeUtils, CnIni, IniFiles, CnWizEditFiler, CnSourceCropper, CnWizMultiLang;
 
 type
   TCropStyle = (csCropSelected, csCropCurrent, csCropOpened, csCropProject,
@@ -90,6 +90,9 @@ type
     cbbMask: TComboBox;
     chkSubDirs: TCheckBox;
     chkMergeBlank: TCheckBox;
+    GroupBox2: TGroupBox;
+    rbAlignToPrev: TRadioButton;
+    rbAlignToNext: TRadioButton;
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure chkReserveClick(Sender: TObject);
@@ -120,6 +123,8 @@ type
     function GetFileMask: string;
     procedure SetDir(const Value: string);
     procedure SetFileMask(const Value: string);
+    function GetAlignStyle: TCnCommentAlignStyle;
+    procedure SetAlignStyle(const Value: TCnCommentAlignStyle);
   protected
     function GetHelpTopic: string; override;
   public
@@ -164,12 +169,16 @@ type
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
-    procedure OnFindFile(const FileName: string; const Info: TSearchRec;
+    procedure OnCropFindFile(const FileName: string; const Info: TSearchRec;
+      var Abort: Boolean);
+    procedure OnAlignFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
 
     procedure DoCropComments;
     procedure CropAUnit(const FileName: string; IsCurrent: Boolean = False);
+    procedure AlignAUnit(const FileName: string; IsCurrent: Boolean = False);
     procedure CropStream(InStream, OutStream: TStream; IsDelphi: Boolean = True);
+    procedure AlignStream(InStream, OutStream: TMemoryStream; IsDelphi: Boolean = True);
     procedure MergeBlankStream(Stream: TStream);
   public
     constructor Create; override;
@@ -194,7 +203,17 @@ type
     procedure CropAProjectGroup(ProjectGroup: IOTAProjectGroup);
 {$ENDIF}
     procedure CropInDirectories;
-    procedure AlignCommentBlocks;
+    procedure DoAlignCommentBlocks;
+
+    procedure AlignComments;
+    procedure AlignSelection;
+    procedure AlignCurrentUnit;
+    procedure AlignOpenedUnits;
+    procedure AlignAProject(Project: TCnIDEProjectInterface);
+{$IFDEF DELPHI_OTA}
+    procedure AlignAProjectGroup(ProjectGroup: IOTAProjectGroup);
+{$ENDIF}
+    procedure AlignInDirectories;
 
     property CropStyle: TCropStyle read FCropStyle write FCropStyle;
     property CropOption: TCnCropOption read FCropOption write FCropOption;
@@ -255,7 +274,7 @@ begin
   if Index = FIdCropComments then
     DoCropComments
   else if Index = FIdAlignBlocks then
-    AlignCommentBlocks;
+    DoAlignCommentBlocks;
 end;
 
 procedure TCnCommentCropperWizard.SubActionUpdate(Index: Integer);
@@ -553,10 +572,42 @@ begin
   end;
 end;
 
-procedure TCnCommentCropperWizard.AlignCommentBlocks;
+procedure TCnCommentCropperWizard.DoAlignCommentBlocks;
 begin
-  // TODO: Align comment blocks - not implemented yet
-  InfoDlg('Align Comment Blocks: Not implemented yet.');
+  with TCnCommentCropForm.Create(nil) do
+  begin
+    // 切换到对齐注释模式：显示 GroupBox2，隐藏 GroupBox1
+    GroupBox1.Visible := False;
+    GroupBox2.Visible := True;
+
+    AlignStyle := FAlignStyle;
+    Dir := FDir;
+    FileMask := FFileMask;
+    if FDirsHistory.Text <> '' then
+      cbbDir.Items.Text := FDirsHistory.Text;
+    if FFileMasksHistory.Text <> '' then
+      cbbMask.Items.Text := FFileMasksHistory.Text;
+
+    try
+      ShowModal;
+      if ModalResult = mrOK then
+      begin
+        FAlignStyle := AlignStyle;
+        FCropStyle := CropStyle;
+        FDir := Dir;
+        FFileMask := FileMask;
+        FDirsHistory.Text := cbbDir.Items.Text;
+        FFileMasksHistory.Text := cbbMask.Items.Text;
+
+        // 执行对齐注释块操作
+        AlignComments;
+
+        DoSaveSettings;
+      end;
+    finally
+      Free;
+    end;
+  end;
 end;
 
 function TCnCommentCropperWizard.GetCaption: string;
@@ -852,7 +903,7 @@ begin
     FInternalMasks := SCnDefSourceMask
   else
     FInternalMasks := FileMask;
-  FindFile(Dir, '*.*', OnFindFile, nil, IncludeSubDirs);
+  FindFile(Dir, '*.*', OnCropFindFile, nil, IncludeSubDirs);
 end;
 
 function TCnCommentCropForm.GetIncludeSubDirs: Boolean;
@@ -885,11 +936,384 @@ begin
   cbbMask.Text := Trim(Value);
 end;
 
-procedure TCnCommentCropperWizard.OnFindFile(const FileName: string;
+function TCnCommentCropForm.GetAlignStyle: TCnCommentAlignStyle;
+begin
+  if rbAlignToNext.Checked then
+    Result := casNextLine
+  else
+    Result := casPrevLine;
+end;
+
+procedure TCnCommentCropForm.SetAlignStyle(const Value: TCnCommentAlignStyle);
+begin
+  rbAlignToPrev.Checked := Value = casPrevLine;
+  rbAlignToNext.Checked := Value = casNextLine;
+end;
+
+procedure TCnCommentCropperWizard.OnCropFindFile(const FileName: string;
   const Info: TSearchRec; var Abort: Boolean);
 begin
   if FileMatchesExts(FileName, FInternalMasks) then
     CropAUnit(FileName);
+end;
+
+procedure TCnCommentCropperWizard.AlignAUnit(const FileName: string;
+  IsCurrent: Boolean);
+var
+  InStream, OutStream: TMemoryStream;
+begin
+  InStream := nil;
+  OutStream := nil;
+  try
+    InStream := TMemoryStream.Create;
+    OutStream := TMemoryStream.Create;
+
+    try
+      CnGeneralFilerSaveFileToStream(FileName, InStream);
+    except
+      Application.HandleException(Self);
+      Exit;
+    end;
+
+    AlignStream(InStream, OutStream, IsDelphiSourceModule(FileName));
+
+    CnGeneralFilerLoadFileFromStream(FileName, OutStream);
+    Inc(FCropCount);
+  finally
+    InStream.Free;
+    OutStream.Free;
+  end;
+end;
+
+procedure TCnCommentCropperWizard.AlignStream(InStream, OutStream: TMemoryStream;
+  IsDelphi: Boolean);
+
+  // 判断一行（原始内容，未 Trim）是否是整行注释
+  function IsFullLineComment(const S: string): Boolean;
+  var
+    T: string;
+  begin
+    Result := False;
+    T := Trim(S);
+    if T = '' then
+      Exit;
+    // // 开头
+    if Copy(T, 1, 2) = '//' then
+    begin
+      Result := True;
+      Exit;
+    end;
+    // { } 块注释（排除 {$ 开头的编译指令）
+    if (T[1] = '{') and (T[Length(T)] = '}') and (Copy(T, 1, 2) <> '{$') then
+    begin
+      Result := True;
+      Exit;
+    end;
+    // (* *) 块注释
+    if (Copy(T, 1, 2) = '(*') and (Copy(T, Length(T) - 1, 2) = '*)') then
+    begin
+      Result := True;
+      Exit;
+    end;
+    // /* */ 块注释（C 风格）
+    if (Copy(T, 1, 2) = '/*') and (Copy(T, Length(T) - 1, 2) = '*/') then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+
+  // 获取一行行首空格数
+  function GetLeadingSpaces(const S: string): Integer;
+  begin
+    Result := 0;
+    while (Result < Length(S)) and (S[Result + 1] = ' ') do
+      Inc(Result);
+  end;
+
+  // 将一行的行首空格数调整为 ASpaces
+  function SetLeadingSpaces(const S: string; ASpaces: Integer): string;
+  var
+    T: string;
+    I: Integer;
+  begin
+    T := TrimLeft(S);
+    Result := '';
+    for I := 1 to ASpaces do
+      Result := Result + ' ';
+    Result := Result + T;
+  end;
+
+var
+  Lines: TCnIdeStringList;
+  I, J: Integer;
+  BlockStart, BlockEnd: Integer;
+  RefLine: string;
+  RefSpaces: Integer;
+  PrevIsBlank, NextIsBlank: Boolean;
+  PrevIsComment, NextIsComment: Boolean;
+  C: TCnIdeTokenChar;
+begin
+  Lines := TCnIdeStringList.Create;
+  try
+    InStream.Position := 0;
+    CnGeneralStringsLoadFromStream(Lines, InStream);
+
+    I := 0;
+    while I < Lines.Count do
+    begin
+      // 找到整行注释块的起始行
+      if IsFullLineComment(Lines[I]) then
+      begin
+        BlockStart := I;
+        BlockEnd := I;
+        // 向后扩展，找到连续整行注释块的末尾
+        while (BlockEnd + 1 < Lines.Count) and IsFullLineComment(Lines[BlockEnd + 1]) do
+          Inc(BlockEnd);
+
+        // 判断块前一行状态
+        if BlockStart > 0 then
+        begin
+          PrevIsBlank := Trim(Lines[BlockStart - 1]) = '';
+          PrevIsComment := IsFullLineComment(Lines[BlockStart - 1]);
+        end
+        else
+        begin
+          PrevIsBlank := True;   // 没有前一行，视作空行
+          PrevIsComment := False;
+        end;
+
+        // 判断块后一行状态
+        if BlockEnd + 1 < Lines.Count then
+        begin
+          NextIsBlank := Trim(Lines[BlockEnd + 1]) = '';
+          NextIsComment := IsFullLineComment(Lines[BlockEnd + 1]);
+        end
+        else
+        begin
+          NextIsBlank := True;   // 没有后一行，视作空行
+          NextIsComment := False;
+        end;
+
+        RefSpaces := -1;
+
+        if (not PrevIsBlank) and (not PrevIsComment) and NextIsBlank then
+        begin
+          // 前一行有内容且非注释，后一行是空行（或无后一行）→ 对齐前一行
+          RefLine := Lines[BlockStart - 1];
+          RefSpaces := GetLeadingSpaces(RefLine);
+        end
+        else if (not NextIsBlank) and (not NextIsComment) and PrevIsBlank then
+        begin
+          // 后一行有内容且非注释，前一行是空行（或无前一行）→ 对齐后一行
+          RefLine := Lines[BlockEnd + 1];
+          RefSpaces := GetLeadingSpaces(RefLine);
+        end
+        else if (not PrevIsBlank) and (not PrevIsComment) and
+                (not NextIsBlank) and (not NextIsComment) then
+        begin
+          // 前后都有内容且非注释 → 根据 FAlignStyle 决定
+          if FAlignStyle = casPrevLine then
+          begin
+            RefLine := Lines[BlockStart - 1];
+            RefSpaces := GetLeadingSpaces(RefLine);
+          end
+          else
+          begin
+            RefLine := Lines[BlockEnd + 1];
+            RefSpaces := GetLeadingSpaces(RefLine);
+          end;
+        end;
+
+        // 应用对齐
+        if RefSpaces >= 0 then
+        begin
+          for J := BlockStart to BlockEnd do
+            Lines[J] := SetLeadingSpaces(Lines[J], RefSpaces);
+        end;
+
+        I := BlockEnd + 1;
+      end
+      else
+        Inc(I);
+    end;
+
+    OutStream.Size := 0;
+    CnGeneralStringsSaveToStream(Lines, OutStream);
+
+    C := #0;
+    OutStream.Write(C, SizeOf(TCnIdeTokenChar)); // 写结束符
+  finally
+    Lines.Free;
+  end;
+end;
+
+procedure TCnCommentCropperWizard.AlignComments;
+begin
+  FCropCount := 0;
+  Screen.Cursor := crHourGlass;
+  try
+    case FCropStyle of
+      csCropSelected:       AlignSelection;
+      csCropCurrent:        AlignCurrentUnit;
+      csCropOpened:         AlignOpenedUnits;
+      csCropProject:        AlignAProject(CnOtaGetCurrentProject);
+{$IFDEF DELPHI_OTA}
+      csCropProjectGroup:   AlignAProjectGroup(CnOtaGetProjectGroup);
+{$ENDIF}
+      csDirectory:          AlignInDirectories;
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+
+  if FCropCount > 0 then
+    InfoDlg(Format(SCnCommentCropperCountFmt, [FCropCount]));
+end;
+
+procedure TCnCommentCropperWizard.AlignSelection;
+var
+  InStream, OutStream: TMemoryStream;
+  View: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
+  Block: IOTAEditBlock;
+{$ENDIF}
+  Text: TCnIdeTokenString;
+begin
+  View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  Block := View.Block;
+  if (Block = nil) or (Block.Size <= 0) then
+    Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.Selection = '' then
+    Exit;
+{$ENDIF}
+
+  InStream := nil;
+  OutStream := nil;
+
+  try
+    InStream := TMemoryStream.Create;
+    OutStream := TMemoryStream.Create;
+
+    Text := CnGeneralGetSelectionOfView(View);
+    InStream.Write(Text[1], Length(Text) * SizeOf(TCnIdeTokenChar));
+
+    AlignStream(InStream, OutStream, IsDelphiSourceModule(CnOtaGetCurrentSourceFile));
+
+    Text := TCnIdeTokenString(PCnIdeTokenChar(OutStream.Memory));
+    CnGeneralSetSelectionOfView(Text);
+  finally
+    InStream.Free;
+    OutStream.Free;
+  end;
+end;
+
+procedure TCnCommentCropperWizard.AlignCurrentUnit;
+begin
+  if IsSourceModule(CnOtaGetCurrentSourceFile) then
+    AlignAUnit(CnOtaGetCurrentSourceFile, True);
+end;
+
+procedure TCnCommentCropperWizard.AlignOpenedUnits;
+var
+  I: Integer;
+{$IFDEF DELPHI_OTA}
+  iModuleServices: IOTAModuleServices;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
+  for I := 0 to iModuleServices.GetModuleCount - 1 do
+  begin
+    if IsSourceModule(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I))) then
+      AlignAUnit(CnOtaGetFileNameOfModule(iModuleServices.GetModule(I)));
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.SourceEditorCount > 0) then
+  begin
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      if IsSourceModule(SourceEditorManagerIntf.SourceEditors[I].FileName) then
+        AlignAUnit(SourceEditorManagerIntf.SourceEditors[I].FileName);
+    end;
+  end;
+{$ENDIF}
+end;
+
+procedure TCnCommentCropperWizard.AlignAProject(Project: TCnIDEProjectInterface);
+var
+  I: Integer;
+begin
+  if Project <> nil then
+  begin
+{$IFDEF DELPHI_OTA}
+    if IsSourceModule(Project.FileName) then
+      AlignAUnit(Project.FileName);
+{$IFDEF BDS}
+    if not IsDpr(Project.FileName) then
+      AlignAUnit(_CnChangeFileExt(Project.FileName, '.dpr'));
+{$ENDIF}
+
+    for I := 0 to Project.GetModuleCount - 1 do
+    begin
+      if IsSourceModule(Project.GetModule(I).FileName) then
+        AlignAUnit(Project.GetModule(I).FileName);
+      if IsC(Project.GetModule(I).FileName) or IsCpp(Project.GetModule(I).FileName) then
+      begin
+        if FileExists(_CnChangeFileExt(Project.GetModule(I).FileName, '.h')) or
+          CnOtaIsFileOpen(_CnChangeFileExt(Project.GetModule(I).FileName, '.h')) then
+          AlignAUnit(_CnChangeFileExt(Project.GetModule(I).FileName, '.h'));
+      end;
+    end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    for I := 0 to Project.FileCount - 1 do
+    begin
+      if Project.Files[I].IsPartOfProject and IsSourceModule(Project.Files[I].Filename) then
+        AlignAUnit(Project.Files[I].Filename);
+    end;
+{$ENDIF}
+  end;
+end;
+
+{$IFDEF DELPHI_OTA}
+
+procedure TCnCommentCropperWizard.AlignAProjectGroup(ProjectGroup: IOTAProjectGroup);
+var
+  I: Integer;
+begin
+  if ProjectGroup <> nil then
+  begin
+    for I := 0 to ProjectGroup.ProjectCount - 1 do
+      AlignAProject(ProjectGroup.Projects[I]);
+  end;
+end;
+
+{$ENDIF}
+
+procedure TCnCommentCropperWizard.AlignInDirectories;
+begin
+  if FileMask = '' then
+    FInternalMasks := SCnDefSourceMask
+  else
+    FInternalMasks := FileMask;
+  FindFile(Dir, '*.*', OnAlignFindFile, nil, IncludeSubDirs);
+end;
+
+procedure TCnCommentCropperWizard.OnAlignFindFile(const FileName: string;
+  const Info: TSearchRec; var Abort: Boolean);
+begin
+  if FileMatchesExts(FileName, FInternalMasks) then
+    AlignAUnit(FileName);
 end;
 
 procedure TCnCommentCropperWizard.MergeBlankStream(Stream: TStream);

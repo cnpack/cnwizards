@@ -40,7 +40,7 @@ inherited CnCommentCropForm: TCnCommentCropForm
     end
     object rbOpenedUnits: TRadioButton
       Left = 8
-      Top = 85
+      Top = 84
       Width = 200
       Height = 17
       Caption = 'All Opened Units(&3).'
@@ -50,7 +50,7 @@ inherited CnCommentCropForm: TCnCommentCropForm
     end
     object rbCurrProject: TRadioButton
       Left = 8
-      Top = 115
+      Top = 114
       Width = 200
       Height = 17
       Caption = 'All Units in Current Project(&4).'
@@ -60,7 +60,7 @@ inherited CnCommentCropForm: TCnCommentCropForm
     end
     object rbProjectGroup: TRadioButton
       Left = 8
-      Top = 146
+      Top = 144
       Width = 200
       Height = 17
       Caption = 'All Units in Current ProjectGroup(&5).'
@@ -70,7 +70,7 @@ inherited CnCommentCropForm: TCnCommentCropForm
     end
     object rbDirectory: TRadioButton
       Left = 8
-      Top = 176
+      Top = 174
       Width = 200
       Height = 17
       Caption = 'In Directories(&6).'
@@ -162,6 +162,33 @@ inherited CnCommentCropForm: TCnCommentCropForm
       State = cbChecked
       TabOrder = 7
       OnClick = chkReserveClick
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 8
+    Top = 8
+    Width = 305
+    Height = 209
+    Caption = '&Align Settings'
+    TabOrder = 6
+    Visible = False
+    object rbAlignToPrev: TRadioButton
+      Left = 8
+      Top = 24
+      Width = 289
+      Height = 17
+      Caption = 'Align to &Previous Line when Adjacent to Both.'
+      Checked = True
+      TabOrder = 0
+      TabStop = True
+    end
+    object rbAlignToNext: TRadioButton
+      Left = 8
+      Top = 54
+      Width = 289
+      Height = 17
+      Caption = 'Align to &Next Line when Adjacent to Both.'
+      TabOrder = 1
     end
   end
   object btnOK: TButton
