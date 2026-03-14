@@ -280,8 +280,8 @@ resourcestring
   SCnFilesSnapshotReopen = 'CnFilesSnapshotReopen';
 
   // CnCommentCropperWizard
-  SCnCommentCropperCropComments = 'CnCommentCropperCropComments';
-  SCnCommentCropperAlignCommentBlocks = 'CnCommentCropperAlignCommentBlocks';
+  SCnCommentCropperCropComments = 'CnCommentCropComments';
+  SCnCommentCropperAlignCommentBlocks = 'CnCommentAlignCommentBlocks';
 
   // CnDebugEnhanceWizard
   SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
