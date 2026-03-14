@@ -1513,7 +1513,7 @@ var
   SCnFilesSnapshotManageFrmLblSnapshotsCaptionAdd: string = 'Save File List as a Snapshot:';
 
   // CnCommentCroperWizard
-  SCnCommentCropperWizardName: string = 'Comment Cropper';
+  SCnCommentCropperWizardName: string = 'Comment Tidy';
   SCnCommentCropperWizardMenuCaption: string = 'Tidy Comments';
   SCnCommentCropperWizardMenuHint: string = 'Tidy Comments in Source Code';
   SCnCommentCropperWizardComment: string = 'Tidy Comments in Source Code';

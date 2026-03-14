@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<title>删除注释专家</title>
+<title>注释整理专家</title>
 <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
 <link rel="stylesheet" href="../css/style.css" type="text/css">
 </head>
@@ -9,7 +9,7 @@
 <body>
 <table width="100%" border="0" cellpadding="4">
   <tr>
-    <td class="head" height="16">删除注释专家</td>
+    <td class="head" height="16">注释整理专家</td>
   </tr>
   <tr>
     <td bgcolor="#FF9900" height="6"></td>
@@ -18,14 +18,17 @@
     <td height=6></td>
   </tr>
 </table>
-<p class="title">删除注释专家</p>
-<p class="text" align="left"> 该专家用于删除单元文件中的注释。运行该专家弹出的对话框如图所示：</p>
-<p align="center"> <img src="commcropper.png"></p>
+<p class="title">注释整理专家</p>
+<p class="text" align="left">该专家提供两个子菜单项，用于整理 Pascal/C/C++ 源文件中的注释：<b>删除注释</b>和<b>对齐注释块</b>。</p>
+
+<p class="title">删除注释</p>
+<p class="text" align="left">该功能用于删除单元文件中的注释。运行后弹出的对话框如图所示：</p>
+<p align="center"><img src="commcropper.png"></p>
 <p class="text"><b>处理内容选择</b></p>
 <p class="text">该部分可供用户选择要处理的对象：</p>
 <ul>
   <li>
-    <p class="text"><b>当前编辑的选择区</b>：删除当前编辑区中的选中部分的注释。</p>
+    <p class="text"><b>当前编辑的选择区</b>：删除当前编辑区中选中部分的注释。</p>
   </li>
   <li>
     <p class="text"><b>当前编辑的单元</b>：删除当前编辑单元中的注释。</p>
@@ -55,7 +58,7 @@
     <p class="text"><b>只删除注释中的扩展 ASCII 字符</b>：处理注释时，只删除注释中的扩展 ASCII 字符，也就是删除全角字符，注释块本身不被删除。一般用于代码移植到英文平台时的处理。</p>
   </li>
   <li>
-    <p class="text"><b>处理 Delphi 编辑指令</b>：此选项只在 Delphi 中有效。选中此选项后，编译指令也被当作注释来进行处理，一般不推荐这种选择，因为可能会影响到代码编译。</p>
+    <p class="text"><b>处理 Delphi 编译指令</b>：此选项只在 Delphi 中有效。选中此选项后，编译指令也被当作注释来进行处理，一般不推荐这种选择，因为可能会影响到代码编译。</p>
   </li>
   <li>
     <p class="text"><b>处理 Todo List</b>：选中此选项后，代码中的 Todo List 也被当作注释处理的对象来进行处理。</p>
@@ -67,15 +70,38 @@
     <p class="text"><b>保留以内容中以下字串开头的块注释</b>：选中此选项后，代码中的块注释（Delphi 中的{ } 和 BCB 中的 /* */ ）内容的开头部分出现编辑框中的字符串之一时，该注释不会被进行处理。不同的字符串以半角逗号进行分隔。举例说明：如果保留编辑框输入的内容是“*,(*,*),#”，则 Delphi 中，不会被处理的注释包括{*...}、{(*...}、{*)...} 和 {#...} 四种形式（不支持 (*...*) 形式的注释保留）。该项是为了方便用户自定义保留需要的注释。</p>
   </li>
   <li>
-    <p class="text"><b>处理完毕后合并相邻空行</b>：大块注释处理完毕后，源码中往往会留下大堆空白，选中此选项可将源码中的连续空行合并为一行以减少空行数。</p>
+    <p class="text"><b>处理完毕后合并相邻空行</b>：大块注释处理完毕后，源码中往往会留下大量空行，选中此选项可将源码中的连续空行合并为一行以减少空行数。</p>
   </li>
 </ul>
+
+<p class="title">对齐注释块</p>
+<p class="text" align="left">该功能用于将源码中独立成行的注释块，对齐到相邻代码行的缩进位置。运行后弹出的对话框如图所示：</p>
+<p align="center"><img src="commentalign.png"></p>
+<p class="text">处理范围选项（当前选择区、当前单元、所有打开的单元等）及指定目录设置与上述"删除注释"功能相同，此处不再重复。</p>
+<p class="text"><b>对齐选项</b></p>
+<p class="text">整行注释是指去除首尾空格后，内容完全是注释的行（<code>//...</code>、<code>{...}</code>、<code>(*...*)</code> 或 <code>/*...*/</code>）。连续的整行注释行构成一个注释块。对齐规则如下：</p>
+<ul>
+  <li>
+    <p class="text">若注释块紧邻前一行为非注释代码行，后一行为空行（或文件末尾），则将注释块对齐到前一行的缩进。</p>
+  </li>
+  <li>
+    <p class="text">若注释块紧邻后一行为非注释代码行，前一行为空行（或文件开头），则将注释块对齐到后一行的缩进。</p>
+  </li>
+  <li>
+    <p class="text">若注释块前后均紧邻非注释代码行（两侧均无空行），则由以下选项决定对齐方式：</p>
+    <ul>
+      <li><p class="text"><b>行注释上下均相邻时对齐上一行</b>：将注释块对齐到前一行的缩进。</p></li>
+      <li><p class="text"><b>行注释上下均相邻时对齐下一行</b>：将注释块对齐到后一行的缩进。</p></li>
+    </ul>
+  </li>
+</ul>
+
 <p class="title" align="left">&nbsp;
-<p class="title" align="left">相关主题 
-<p class="text" align="left"> <a href="wizards.htm">IDE 专家基本操作</a> 
-  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 专家设置</a> 
-  <p class="text" align="left"> <a href="../cnpack/index.htm">关于 IDE 专家包</a> 
-  <p class="text" align="left">　 
+<p class="title" align="left">相关主题
+<p class="text" align="left"> <a href="wizards.htm">IDE 专家基本操作</a>
+  <p class="text" align="left"> <a href="../options/wizconfig.htm">IDE 专家设置</a>
+  <p class="text" align="left"> <a href="../cnpack/index.htm">关于 IDE 专家包</a>
+  <p class="text" align="left">　
   <hr>
   <p class="text" align="center"><a href="https://www.cnpack.org">(C)版权所有 2001-2026 CnPack 开发组</a></p>
 </body>
