@@ -204,7 +204,7 @@ implementation
 
 uses
   CnCommon, CnMenuHook, CnControlHook, CnWizNotifier, CnStrings, CnWizOptions,
-  CnWizMultiLang, CnLangMgr, CnWizCompilerConst
+  CnWizMultiLang, CnLangMgr, CnWizCompilerConst, CnWideStrings, CnLangCollection
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
@@ -223,6 +223,9 @@ const
   RT_MECHANISM_DIRECTACCESS: string = 'DirectAccess';
   RT_MECHANISM_EVENTHANDLER: string = 'EventHandler';
   RT_MECHANISM_WINDOWPROC: string = 'WindowProc';
+
+type
+  TCnHackHashLangStorage = class(TCnCustomHashLangStorage);
 
 {$IFDEF DEBUG}
 
@@ -278,6 +281,41 @@ begin
   end
   else
     Result := False;
+end;
+
+procedure ChangeLangPrefix(AMap: TCnLangHashMap; const OldPrefix, NewPrefix: string);
+var
+  Key, Value: TCnLangString;
+  OldKeys: TCnWideStringList;
+  OldValues: TCnWideStringList;
+  I: Integer;
+  NewKey: string;
+begin
+  OldKeys := TCnWideStringList.Create;
+  OldValues := TCnWideStringList.Create;
+  try
+    AMap.StartEnum;
+    while AMap.GetNext(Key, Value) do
+    begin
+      if Pos(OldPrefix, Key) = 1 then
+      begin
+        OldKeys.Add(Key);
+        OldValues.Add(Value);
+      end;
+    end;
+
+    for I := 0 to OldKeys.Count - 1 do
+      AMap.Delete(OldKeys[I]);
+
+    for I := 0 to OldKeys.Count - 1 do
+    begin
+      NewKey := NewPrefix + Copy(OldKeys[I], Length(OldPrefix) + 1, MaxInt);
+      AMap.Add(NewKey, OldValues[I]);
+    end;
+  finally
+    OldKeys.Free;
+    OldValues.Free;
+  end;
 end;
 
 // 根据名称遍历查找组件
@@ -1802,8 +1840,11 @@ end;
 
 function TCnMenuFormTranslator.GetAdditionalLangMainFileName: string;
 begin
+  Result := '<None.txt>';
 {$IFDEF BDS}
-  Result := '<none>.txt';
+  {$IFNDEF UNICODE}
+  Result := 'RADStudio2007.txt';
+  {$ENDIF}
 {$ELSE}
   Result := 'Delphi7.txt';
 {$ENDIF}
@@ -1852,6 +1893,14 @@ begin
         CnDebugger.LogMsg('CnMenuFormTranslator.LoadAdditionalLangFile for Self from ' + S);
 {$ENDIF}
       end;
+    end;
+
+    // 不同版本的 Delphi，可在此针对当前语言的条目进行进一步处理：
+    if Compiler in [cnDelphi2005, cnDelphi2006] then
+    begin
+      // 将语言条目中的 TDelphiProjectOptionsDialog 替换为低版本中的 TProjectOptionsDialog
+      ChangeLangPrefix(TCnHackHashLangStorage(FStorageRef).HashMap,
+        'TDelphiProjectOptionsDialog.', 'TProjectOptionsDialog.');
     end;
   end;
 end;

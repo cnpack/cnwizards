@@ -569,6 +569,12 @@ var
     end;
   end;
 
+  function CanDeleteItem(const Str: string): Boolean;
+  begin
+    Result := StrEndWith(Str, '=...') or StrEndWith(Str, '=-') or StrEndWith(Str, '=>')
+      or StrEndWith(Str, '=>>') or StrEndWith(Str, '=<') or StrEndWith(Str, '=<<') or StrEndWith(Str, '=');
+  end;
+
 begin
   if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3534
   begin
@@ -584,6 +590,7 @@ begin
       E := TCnLangStringExtractor.Create;
       E.SkipEmptyComponentName := False;
       E.IgnoreRootFont := True;
+      E.FilterOptions := E.FilterOptions - [tfFont];
       E.OnAllowItem := ExtractorAllowItem;
 
       if Screen.ActiveCustomForm <> nil then
@@ -591,6 +598,11 @@ begin
         SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
 
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
+        for I := SL.Count - 1 downto 0 do
+        begin
+          if CanDeleteItem(SL[I]) then
+            SL.Delete(I);
+        end;
         SL.Sort;
         Clipboard.AsText := SL.Text;
       end;
@@ -624,6 +636,12 @@ begin
           SetExtractorNoNameMode(E, Screen.CustomForms[I]);
           E.GetFormStrings(Screen.CustomForms[I], SL, True);
         end;
+      end;
+
+      for I := SL.Count - 1 downto 0 do
+      begin
+        if CanDeleteItem(SL[I]) then
+          SL.Delete(I);
       end;
       SL.Sort;
       Clipboard.AsText := SL.Text;
@@ -781,7 +799,8 @@ begin
         FHashMap.StartEnum;
         while FHashMap.GetNext(Key, Value) do
         begin
-          if (Value <> '...') and (Value <> '-') and (Value <> '') then
+          if (Value <> '...') and (Value <> '-') and (Value <> '')
+            and (Value <> '>') and (Value <> '>>') and (Value <> '<') and (Value <> '<<') then
             WL.Add(Key + DefEqual + Value);
         end;
         WL.Sort;
@@ -870,7 +889,8 @@ begin
   else if AObject.ClassNameIs('TPropertySheetItem') and (PropName = 'PropertySheetClassName') then
     Allow := False
   else if (PropName = 'DefaultExt') or (PropName = 'PrioritySchedule') or (PropName = 'ActionBars') or (PropName = 'PropField')
-    or (PropName = 'EditMask') or (PropName = 'StyleName') then
+    or (PropName = 'EditMask') or (PropName = 'StyleName') or (PropName = 'ImageName') or (PropName = 'HotImageName')
+    or (PropName = 'Area') then  // 单纯的属性名判断
     Allow := False
   else if AObject is TComponent then // 组件进这里判断
   begin
@@ -892,7 +912,9 @@ begin
       or (N = 'WarningsList') or (N = 'DesignPackageList') or (N = 'WindowListBox') or (N = 'ControlList') or (N = 'ComponentsListBox')
       or (N = 'ComponentList') or (N = 'CategoryList') or (N = 'lstbxColors') or (N = 'Emulations') or (N = 'Enhancements') or (N = 'CreationList') ) then
       Allow := False
-    else if (N = 'PageListBox') or (N = 'LabelPackageFile') or (N = 'TreeView1') or (N = 'ZoomPicker') or (N = 'TreeView') then
+    else if (N = 'PageListBox') or (N = 'LabelPackageFile') or (N = 'TreeView1') or (N = 'ZoomPicker') or (N = 'TreeView')
+      or (N = 'FilterImageList') or (N = 'AutoCreateForms') or (N = 'cbMainForm') or (N = 'tbsetPreviews') or (N = 'ElementList')
+      or (N = 'cbSpeedSettings') then // 单纯的组件名判断
       Allow := False
     else if (AObject is TCheckListBox) and ( (N = 'ExceptListBox') or (N = 'DesignPackageList') or (N = 'WarningsList') or (N = 'ToolbarList') ) then
       Allow := False
@@ -965,7 +987,7 @@ procedure TCnWizMultiLang.SetExtractorNoNameMode(E: TCnLangStringExtractor;
 begin
   if (F <> nil) and (E <> nil) then
   begin
-    if F.ClassNameIs('TProjectOptionsDialog') or F.ClassNameIs('TDefaultEnvironmentDialog')
+    if F.ClassNameIs('TProjectOptionsDialog') {$IFDEF UNCODE} or F.ClassNameIs('TDefaultEnvironmentDialog') {$ENDIF}
       or F.ClassNameIs('TDelphiProjectOptionsDialog') or F.ClassNameIs('TCppProjOptsDlg') then
       E.NoNameProcessType := cnptAtClassName
     else
