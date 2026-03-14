@@ -97,7 +97,7 @@
 		<param name="Local" value="wizards\toolset\toolsetcodecomment.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Comment Cropper">
+		<param name="Name" value="Comment Tidy">
 		<param name="Local" value="wizards\commcropwizard.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">

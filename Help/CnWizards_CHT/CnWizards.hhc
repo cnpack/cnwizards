@@ -113,7 +113,7 @@
 			<param name="Local" value="wizards/corprop.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="刪除註釋專家">
+			<param name="Name" value="註釋整理專家">
 			<param name="Local" value="wizards/commcropwizard.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
