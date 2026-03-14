@@ -1175,6 +1175,10 @@ begin
   TranslateStr(SCnCommentCropperWizardMenuHint, 'SCnCommentCropperWizardMenuHint');
   TranslateStr(SCnCommentCropperWizardComment, 'SCnCommentCropperWizardComment');
   TranslateStr(SCnCommentCropperCountFmt, 'SCnCommentCropperCountFmt');
+  TranslateStr(SCnCommentCropperCropMenuCaption, 'SCnCommentCropperCropMenuCaption');
+  TranslateStr(SCnCommentCropperCropMenuHint, 'SCnCommentCropperCropMenuHint');
+  TranslateStr(SCnCommentCropperAlignMenuCaption, 'SCnCommentCropperAlignMenuCaption');
+  TranslateStr(SCnCommentCropperAlignMenuHint, 'SCnCommentCropperAlignMenuHint');
 
   // CnFavoriteWizard
   TranslateStr(SCnFavWizName, 'SCnFavWizName');

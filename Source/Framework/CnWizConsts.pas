@@ -279,6 +279,10 @@ resourcestring
   SCnFilesSnapshotsItem = 'CnFilesSnapshotsItem';
   SCnFilesSnapshotReopen = 'CnFilesSnapshotReopen';
 
+  // CnCommentCropperWizard
+  SCnCommentCropperCropComments = 'CnCommentCropperCropComments';
+  SCnCommentCropperAlignCommentBlocks = 'CnCommentCropperAlignCommentBlocks';
+
   // CnDebugEnhanceWizard
   SCnDebugVisualizerIdentifier = 'CnPackIDEWizardsDebugVisualizer';
   SCnDataSetVisualizerIdentifier = 'CnPackIDEWizardsDataSetVisualizer';
@@ -1416,7 +1420,7 @@ var
   SCnCorrectPropertyErrNoResult: string = 'No Property Found.';
   SCnCorrectPropertyErrNoModuleFound: string = 'Component NOT Exists, Perhaps Deleted or the Form has Closed.';
   SCnCorrectPropertyErrClassFmt: string = 'Can NOT Find the Class %s ,Continue?';
-  SCnCorrectPropertyErrClassCreate: string = 'Can NOT Create the Class %s to Verify the Property, Continue?¡H';
+  SCnCorrectPropertyErrClassCreate: string = 'Can NOT Create the Class %s to Verify the Property, Continue?';
   SCnCorrectPropertyErrPropFmt: string = 'In %s, There''s No %s Property, Maybe only Exist in Decend Classes, Continue?';
   SCnCorrPropSetPropValueErrorFmt: string = 'Error Occurred when Processing the %s Property, Please Check Rules.' + #13#10#13#10;
 
@@ -1510,10 +1514,14 @@ var
 
   // CnCommentCroperWizard
   SCnCommentCropperWizardName: string = 'Comment Cropper';
-  SCnCommentCropperWizardMenuCaption: string = 'Comments Cropper...';
-  SCnCommentCropperWizardMenuHint: string = 'Crop Comments in Source Code';
+  SCnCommentCropperWizardMenuCaption: string = 'Tidy Comments';
+  SCnCommentCropperWizardMenuHint: string = 'Tidy Comments in Source Code';
   SCnCommentCropperWizardComment: string = 'Crop Comments in Source Code';
   SCnCommentCropperCountFmt: string = '%d File(s) Processed.';
+  SCnCommentCropperCropMenuCaption: string = 'Crop Comments...';
+  SCnCommentCropperCropMenuHint: string = 'Crop Comments in Source Code';
+  SCnCommentCropperAlignMenuCaption: string = 'Align Comment Blocks...';
+  SCnCommentCropperAlignMenuHint: string = 'Align Comment Blocks in Source Code';
 
   // CnFavoriteWizard
   SCnFavWizName: string = 'Favorites Wizard';

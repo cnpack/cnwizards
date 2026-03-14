@@ -22,7 +22,7 @@ unit CnCommentCropper;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack IDE 专家包
-* 单元名称：删除注释专家与窗体单元
+* 单元名称：整理注释专家与窗体单元
 * 单元作者：CnPack 开发组 master@cnpack.org
 *           dejoy
 * 备    注：删除注释专家与窗体单元
@@ -58,6 +58,8 @@ uses
 type
   TCropStyle = (csCropSelected, csCropCurrent, csCropOpened, csCropProject,
     csCropProjectGroup, csDirectory);
+
+  TCnCommentAlignStyle = (casPrevLine, casNextLine);
 
 type
   TCnCommentCropForm = class(TCnTranslateForm)
@@ -132,12 +134,16 @@ type
     property IncludeSubDirs: Boolean read GetIncludeSubDirs write SetIncludeSubDirs;
     property Reserve: Boolean read GetReserve write SetReserve;
     property ReserveStr: string read GetReserveStr write SetReserveStr;
+
+    property AlignStyle: TCnCommentAlignStyle read GetAlignStyle write SetAlignStyle;
   end;
 
 { TCnCommentCroperWizard }
 
-  TCnCommentCropperWizard = class(TCnMenuWizard)
+  TCnCommentCropperWizard = class(TCnSubMenuWizard)
   private
+    FIdCropComments: Integer;
+    FIdAlignBlocks: Integer;
     FCropTodoList: Boolean;
     FCropDirective: Boolean;
     FCropProjectSrc: Boolean;
@@ -153,17 +159,22 @@ type
     FDir: string;
     FDirsHistory: TStrings;
     FFileMasksHistory: TStrings;
+    FAlignStyle: TCnCommentAlignStyle;
   protected
     function GetHasConfig: Boolean; override;
+    procedure SubActionExecute(Index: Integer); override;
+    procedure SubActionUpdate(Index: Integer); override;
     procedure OnFindFile(const FileName: string; const Info: TSearchRec;
       var Abort: Boolean);
 
+    procedure DoCropComments;
     procedure CropAUnit(const FileName: string; IsCurrent: Boolean = False);
     procedure CropStream(InStream, OutStream: TStream; IsDelphi: Boolean = True);
     procedure MergeBlankStream(Stream: TStream);
   public
     constructor Create; override;
     destructor Destroy; override;
+    procedure AcquireSubActions; override;
     procedure Config; override;
     function GetState: TWizardState; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
@@ -171,7 +182,6 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-    procedure Execute; override;
     procedure LoadSettings(Ini: TCustomIniFile); override;
     procedure SaveSettings(Ini: TCustomIniFile); override;
 
@@ -184,6 +194,7 @@ type
     procedure CropAProjectGroup(ProjectGroup: IOTAProjectGroup);
 {$ENDIF}
     procedure CropInDirectories;
+    procedure AlignCommentBlocks;
 
     property CropStyle: TCropStyle read FCropStyle write FCropStyle;
     property CropOption: TCnCropOption read FCropOption write FCropOption;
@@ -197,6 +208,7 @@ type
     property Reserve: Boolean read FReserve write FReserve;
     property ReserveStr: string read FReserveStr write FReserveStr;
     property CropCount: Integer read FCropCount write FCropCount;
+    property AlignStyle: TCnCommentAlignStyle read FAlignStyle write FAlignStyle;
   end;
 
 {$ENDIF CNWIZARDS_CNCOMMENTCROPPERWIZARD}
@@ -226,8 +238,30 @@ const
   csReserve = 'Reserve';
   csReserveStr = 'ReserveStr';
   csDefReserveStr = '%,*,(*,*),#,%File';
+  csAlignStyle = 'AlignStyle';
 
 { TCnCommentCroperWizard }
+
+procedure TCnCommentCropperWizard.AcquireSubActions;
+begin
+  FIdCropComments := RegisterASubAction(SCnCommentCropperCropComments,
+    SCnCommentCropperCropMenuCaption, 0, SCnCommentCropperCropMenuHint);
+  FIdAlignBlocks := RegisterASubAction(SCnCommentCropperAlignCommentBlocks,
+    SCnCommentCropperAlignMenuCaption, 0, SCnCommentCropperAlignMenuHint);
+end;
+
+procedure TCnCommentCropperWizard.SubActionExecute(Index: Integer);
+begin
+  if Index = FIdCropComments then
+    DoCropComments
+  else if Index = FIdAlignBlocks then
+    AlignCommentBlocks;
+end;
+
+procedure TCnCommentCropperWizard.SubActionUpdate(Index: Integer);
+begin
+  SubActions[Index].Enabled := GetState = [wsEnabled];
+end;
 
 procedure TCnCommentCropperWizard.Config;
 begin
@@ -474,7 +508,7 @@ begin
   FFileMasksHistory.Free;
 end;
 
-procedure TCnCommentCropperWizard.Execute;
+procedure TCnCommentCropperWizard.DoCropComments;
 begin
   with TCnCommentCropForm.Create(nil) do
   begin
@@ -517,6 +551,12 @@ begin
       Free;
     end;
   end;
+end;
+
+procedure TCnCommentCropperWizard.AlignCommentBlocks;
+begin
+  // TODO: Align comment blocks - not implemented yet
+  InfoDlg('Align Comment Blocks: Not implemented yet.');
 end;
 
 function TCnCommentCropperWizard.GetCaption: string;
@@ -568,6 +608,7 @@ begin
     CropOption := TCnCropOption(ReadInteger('', csCropOption, 0));
     ReadStrings('', csDirsHistory, FDirsHistory);
     ReadStrings('', csFileMasksHistory, FFileMasksHistory);
+    AlignStyle := TCnCommentAlignStyle(ReadInteger('', csAlignStyle, 0));
     Free;
   end;
 end;
@@ -588,6 +629,7 @@ begin
       WriteStrings('', csDirsHistory, FDirsHistory);
     if FFileMasksHistory.Text <> '' then
       WriteStrings('', csFileMasksHistory, FFileMasksHistory);
+    WriteInteger('', csAlignStyle, Ord(FAlignStyle));
   finally
     Free;
   end;
