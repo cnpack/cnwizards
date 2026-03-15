@@ -154,7 +154,7 @@
       }, {
         "MenuPath": "GalleryBrowseDlg.GalleryBrowseDlg.GalBrowPopup",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Arrange by Author", "按作者分类"], ["Arrange by Date", "按日期分类"], ["Arrange by Description", "按描述分类"], ["Arrange by Name", "按名称分类"], ["Next Page", "下一页"], ["Previous Page", "上一页"], ["Properties", "属性"], ["View Details", "查看详细信息"], ["View Large Icons", "查看大图标"], ["View List", "查看列表"], ["View Small Icons", "查看小图标"]]
+        "ItemCaption": [["Arrange by Author", "按作者分类"], ["Arrange by Date", "按日期分类"], ["Arrange by Description", "按描述分类"], ["Arrange by Name", "按名称分类"], ["Next Page", "下一页"], ["Object Repository", "对象库"], ["Previous Page", "上一页"], ["Properties", "属性"], ["Template Libraries", "模板库"], ["View Details", "查看详细信息"], ["View Large Icons", "查看大图标"], ["View List", "查看列表"], ["View Small Icons", "查看小图标"]]
       }, {
         "MenuPath": "LocalVarsWindow.LocalVarsWindow.LocalsPopupMenu",
         "ForceEnglish": "FALSE",
