@@ -283,6 +283,7 @@ begin
     Result := False;
 end;
 
+// 如果 NewPrefix 为空则代表删除 OldPrefix 开头的所有条目
 procedure ChangeLangPrefix(AMap: TCnLangHashMap; const OldPrefix, NewPrefix: string);
 var
   Key, Value: TCnLangString;
@@ -307,10 +308,13 @@ begin
     for I := 0 to OldKeys.Count - 1 do
       AMap.Delete(OldKeys[I]);
 
-    for I := 0 to OldKeys.Count - 1 do
+    if NewPrefix <> '' then
     begin
-      NewKey := NewPrefix + Copy(OldKeys[I], Length(OldPrefix) + 1, MaxInt);
-      AMap.Add(NewKey, OldValues[I]);
+      for I := 0 to OldKeys.Count - 1 do
+      begin
+        NewKey := NewPrefix + Copy(OldKeys[I], Length(OldPrefix) + 1, MaxInt);
+        AMap.Add(NewKey, OldValues[I]);
+      end;
     end;
   finally
     OldKeys.Free;
@@ -1881,6 +1885,14 @@ begin
     else
       Exit; // 没大版本语言文件则不加载小版本补充文件
 
+    // 不同版本的 Delphi，可在此针对当前语言的条目进行进一步处理：
+    if Compiler in [cnDelphi2005, cnDelphi2006] then
+    begin
+      // 将语言条目中的 TDelphiProjectOptionsDialog 替换为低版本中的 TProjectOptionsDialog
+      ChangeLangPrefix(TCnHackHashLangStorage(FStorageRef).HashMap,
+        'TDelphiProjectOptionsDialog.', 'TProjectOptionsDialog.');
+    end;
+
     // 自身版本独特的语言文件
     if GetAdditionalLangExtraFileName <> '' then
     begin
@@ -1893,14 +1905,6 @@ begin
         CnDebugger.LogMsg('CnMenuFormTranslator.LoadAdditionalLangFile for Self from ' + S);
 {$ENDIF}
       end;
-    end;
-
-    // 不同版本的 Delphi，可在此针对当前语言的条目进行进一步处理：
-    if Compiler in [cnDelphi2005, cnDelphi2006] then
-    begin
-      // 将语言条目中的 TDelphiProjectOptionsDialog 替换为低版本中的 TProjectOptionsDialog
-      ChangeLangPrefix(TCnHackHashLangStorage(FStorageRef).HashMap,
-        'TDelphiProjectOptionsDialog.', 'TProjectOptionsDialog.');
     end;
   end;
 end;
