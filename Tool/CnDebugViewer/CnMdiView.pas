@@ -232,6 +232,9 @@ begin
   FTimeTree := TVirtualStringTree.Create(Self);
   FFilter := TCnDisplayFilter.Create;
 
+  if (SearchHistoryItems <> nil) and (SearchHistoryItems.Count > 0) then
+    cbbSearch.Items.Assign(SearchHistoryItems);
+
   InitControls;
 end;
 

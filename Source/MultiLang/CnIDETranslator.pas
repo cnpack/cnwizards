@@ -1889,10 +1889,16 @@ begin
     S := MakePath(MakePath(FStorageRef.LanguagePath) + D) + GetAdditionalLangMainFileName;
     if FileExists(S) then
     begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnMenuFormTranslator Before LoadAdditionalLangFile. %d',
+        [TCnHackHashLangStorage(FStorageRef).HashMap.Size]);
+{$ENDIF}
+
       FStorageRef.AddExtraItemsFromFile(S);
       FAddtionalLanguageFileLoad := True;
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('CnMenuFormTranslator.LoadAdditionalLangFile from ' + S);
+      CnDebugger.LogFmt('CnMenuFormTranslator.LoadAdditionalLangFile %d from %s',
+        [TCnHackHashLangStorage(FStorageRef).HashMap.Size, S]);
 {$ENDIF}
     end
     else
