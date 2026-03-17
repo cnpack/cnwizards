@@ -102,7 +102,7 @@
       }, {
         "MenuPath": "BPWindow.BPWindow.BPLocalMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Add", "添加"], ["Close", "关闭"], ["Delete All", "全部删除"], ["Disable All", "全部禁用"], ["Disable Group", "禁用组"], ["Dockable", "可停靠"], ["Enable All", "全部启用"], ["Enable Group", "启用组"], ["LocalMenu", "本地菜单"], ["Source Breakpoint", "源代码断点"], ["Stay on Top", "保持置顶"], ["Toolbar", "工具栏"], ["Zoom Window", "缩放窗口"]]
+        "ItemCaption": [["Add", "添加"], ["Address Breakpoint", "地址断点"], ["Close", "关闭"], ["Data Breakpoint", "数据断点"], ["Delete All", "全部删除"], ["Disable All", "全部禁用"], ["Disable Group", "禁用组"], ["Dockable", "可停靠"], ["Enable All", "全部启用"], ["Enable Group", "启用组"], ["LocalMenu", "本地菜单"], ["Source Breakpoint", "源代码断点"], ["Stay on Top", "保持置顶"], ["Toolbar", "工具栏"], ["Zoom Window", "缩放窗口"]]
       }, {
         "MenuPath": "CallStackWindow.CallStackWindow.CallStackMenu",
         "ForceEnglish": "FALSE",
