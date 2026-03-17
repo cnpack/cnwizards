@@ -601,7 +601,8 @@ var
     ValidChars: TSysCharSet;
     Name: string;
  {$IFDEF IDE_SUPPORT_LSP}
-    Filter: string;
+    Filter, LineText: string;
+    Utf8Col: Integer;
     Tick: Cardinal;
     AsyncManager: IOTAAsyncCodeInsightManager;
  {$ENDIF}
@@ -644,11 +645,18 @@ var
         else
           CurPos := EditView.CursorPos;
 
-    {$IFDEF DEBUG}
-        CnDebugger.LogFmt('To Async Invoke %s at Line %d Col %d.', [FAsyncManagerObj.ClassName, CurPos.Line, CurPos.Col]);
-    {$ENDIF}
+        // 注意：似乎 LSP 模式下，该 AsyncInvoke 接口的 Column 参数要求是 UTF8 的列
+        // 以往非 LSP 模式的同步接口传 Ansi 的 CursorPos 都是可用的。
+        // 偏偏此处要额外做一次 Ansi 到 UTF8 的转换
+        LineText := EditControlWrapper.GetTextAtLine(GetCurrentEditControl, CurPos.Line);
+        Utf8Col := CalcUtf8LengthFromWideStringAnsiOffset(PWideChar(LineText), CurPos.Col);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('To Async Invoke %s at Line %d Utf8Col %d.',
+          [FAsyncManagerObj.ClassName, CurPos.Line, Utf8Col]);
+{$ENDIF}
+
         AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
-          CurPos.Col - 1, AsyncCodeCompletionCallBack);
+          Utf8Col - 1, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
         try
