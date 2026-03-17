@@ -310,6 +310,11 @@ begin
       end;
     end;
 
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('MenuForm Translator ChangeLangPrefix %d from %s to %s',
+      [OldKeys.Count, OldPrefix, NewPrefix]);
+{$ENDIF}
+
     for I := 0 to OldKeys.Count - 1 do
       AMap.Delete(OldKeys[I]);
 
