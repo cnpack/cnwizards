@@ -270,6 +270,7 @@ begin
   CnLanguageManager.AutoTranslate := False;
   CnLanguageManager.TranslateTreeNode := True;
   CnLanguageManager.UseDefaultFont := True;
+
   FStorage := TCnHashLangFileStorage.Create(nil);
   FStorage.FileName := SCnWizLangFile;
   FStorage.StorageMode := smByDirectory;
@@ -363,7 +364,7 @@ var
   S: string;
 begin
 {$IFNDEF STAND_ALONE}
-  {$IFDEF BDS}
+  {$IFDEF UNICODE}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化所有菜单');
   {$ELSE}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化界面');

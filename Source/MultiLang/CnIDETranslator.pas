@@ -93,6 +93,7 @@ type
     FStorageRef: TCnHashLangFileStorage;
     FAddtionalLanguageFileLoad: Boolean;
     FAlreadyChinese: Boolean;
+    FLangTransFlag: Boolean;
     FTransQueue: TComponentList;
     FTranFormsList: TComponentList;
     FOld2Array, FNew2Array: TStringList;
@@ -190,6 +191,10 @@ type
     procedure ActiveFormChanged(Sender: TObject);
     procedure DesignerMenuBuild(Sender: TObject; PopupMenu: TPopupMenu);
     procedure TranslateQueue(Sender: TObject);
+
+    procedure MultiLangTranslateObject(AObject: TObject; var Translate: Boolean);
+    procedure MultiLangTranslateObjectProperty(AObject: TObject;
+      const PropName: string; var Translate: Boolean);
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
     destructor Destroy; override;
@@ -1816,6 +1821,9 @@ begin
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
   LoadTranslationMenus(TranslationMapPath);
 
+  // 设置事件通知，注意通知非独占但事件独占了
+  CnLanguageManager.OnTranslateObject := MultiLangTranslateObject;
+  CnLanguageManager.OnTranslateObjectProperty := MultiLangTranslateObjectProperty;
   CnLanguageManager.AddChangeNotifier(LangaugeChanged);
 
   CnWizNotifierServices.AddActiveProjectChangedNotifier(ActiveProjectChanged);
@@ -2035,7 +2043,7 @@ begin
     F := Screen.ActiveCustomForm;
     if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
     begin
-      if FTranFormsList.IndexOf(F) < 0 then
+      if not (csDesigning in F.ComponentState) and (FTranFormsList.IndexOf(F) < 0) then
       begin
         if False {F.ClassNameIs('TProjectOptionsDialog')} then
         begin
@@ -2046,11 +2054,14 @@ begin
         else
         begin
 {$IFDEF DEBUG}
-          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate ' + F.ClassName);
+          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
 {$ENDIF}
           CnLanguageManager.TranslateForm(F, True);
           if F.Visible then
             F.Update;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
+{$ENDIF}
           FTranFormsList.Add(F);
         end;
       end
@@ -2093,6 +2104,7 @@ var
   F: TCustomForm;
 begin
   FTranFormsList.Clear;
+  FLangTransFlag := False;
 
   // 当前要翻译为中文、且当前语言是中文，且加载了 IDE 的中文语言文件，则翻译所有已经存在的窗体为中文
   if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
@@ -2103,7 +2115,7 @@ begin
     for I := 0 to Screen.CustomFormCount - 1 do
     begin
       F := Screen.CustomForms[I];
-      if Pos('TCn', F.ClassName) <> 1 then
+      if (Pos('TCn', F.ClassName) <> 1) and (F.ClassName <> 'TTabDockHostForm') then
       begin
         if FTranFormsList.IndexOf(F) < 0 then
         begin
@@ -2167,6 +2179,23 @@ begin
     Result := csChineseID
   else
     Result := csEnglishID;
+end;
+
+procedure TCnMenuFormTranslator.MultiLangTranslateObject(AObject: TObject;
+  var Translate: Boolean);
+begin
+  if FActive and (Compiler in [cnDelphi2007]) and (AObject.ClassName = 'TWatchWindow') then
+    FLangTransFlag := True;
+end;
+
+procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
+  AObject: TObject; const PropName: string; var Translate: Boolean);
+begin
+  if FActive and FLangTransFlag and (Compiler in [cnDelphi2007]) and AObject.ClassNameIs('TTabList') then
+  begin
+    Translate := False;
+    FLangTransFlag := False;
+  end;
 end;
 
 end.
