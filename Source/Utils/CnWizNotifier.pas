@@ -278,6 +278,7 @@ const
 {$ENDIF}
 
 type
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER5}
   TDesignerBuildLocalMenuProc = function (ASelf: Pointer; PopupMenu: TPopupMenu;
     LocalMenuFilter: TLocalMenuFilters): TObject;
@@ -303,6 +304,7 @@ type
     procedure RequiresUnits(Proc: TGetStrProc);
   end;
 
+{$ENDIF}
 {$ENDIF}
 
   TCnWndProcMessageDispatcher = class
@@ -705,6 +707,7 @@ var
   FIsReleased: Boolean = False;
   FCnWizNotifierServices: TCnWizNotifierServices = nil;
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER5}
   DesignerBuildLocalMenu: TDesignerBuildLocalMenuProc = nil;
 {$ELSE}
@@ -713,6 +716,7 @@ var
 
 {$IFDEF SUPPORT_FMX}
   MenuItemInsert: TMenuItemInsertProc = nil;
+{$ENDIF}
 {$ENDIF}
 
 {$IFNDEF DELPHI_OTA}
@@ -735,6 +739,7 @@ end;
 
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER5}
 
 function MyDesignerBuildLocalMenu(ASelf: Pointer; PopupMenu: TPopupMenu;
@@ -852,6 +857,7 @@ begin
   FCnWizNotifierServices.FDesignMenuItem := nil;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 function CnWizNotifierServices: ICnWizNotifierServices;
@@ -1376,6 +1382,7 @@ begin
   FLastControl := nil;
   FLastForm := nil;
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF COMPILER5}
   IdeModule := GetModuleHandle(CorIdeLibName);
   CnWizAssert(IdeModule <> 0, 'GetModuleHandle CorIdeModule');
@@ -1403,6 +1410,7 @@ begin
   FMenuItemAddHook := TCnMethodHook.Create(@MenuItemInsert, @MyMenuItemInsert);
 
   RegisterSelectionEditor(TComponent, TCnHookDesignMenuEditor);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
