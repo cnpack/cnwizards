@@ -211,6 +211,8 @@ var
   S: string;
   Len: Integer;
 begin
+  if FLock <> 0 then Exit;
+
   if FCode.Count > 0 then
   begin
     S := FCode[FCode.Count - 1];
@@ -234,6 +236,8 @@ end;
 
 procedure TCnCodeGenerator.BackSpaceEmptyLines;
 begin
+  if FLock <> 0 then Exit;
+
   while IsLastLineSpaces do
   begin
     if FCode.Count > 0 then
@@ -248,6 +252,8 @@ var
   S: string;
   I, Len: Integer;
 begin
+  if FLock <> 0 then Exit;
+
   if FCode.Count > 0 then
   begin
     S := FCode[FCode.Count - 1];
@@ -289,6 +295,8 @@ var
   S: string;
   I, Len: Integer;
 begin
+  if FLock <> 0 then Exit;
+
   if FCode.Count > 0 then
   begin
     S := FCode[FCode.Count - 1];
