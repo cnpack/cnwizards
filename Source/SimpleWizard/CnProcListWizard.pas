@@ -4351,6 +4351,7 @@ function TCnProcListForm.SortItemCompare(ASortIndex: Integer;
   const AMatchStr, S1, S2: string; Obj1, Obj2: TObject; SortDown: Boolean): Integer;
 var
   Info1, Info2: TCnElementInfo;
+  P1, P2: string;
 begin
   Info1 := TCnElementInfo(Obj1);
   Info2 := TCnElementInfo(Obj2);
@@ -4358,7 +4359,14 @@ begin
   case ASortIndex of
   0:
     begin
-      Result := CompareTextWithPos(AMatchStr, Info1.Text, Info2.Text, SortDown);
+      P1 := GetMethodName(Info1.Text);
+      P2 := GetMethodName(Info2.Text);
+      // 只拿函数名排序
+      Result := CompareTextWithPos(AMatchStr, P1, P2, SortDown);
+
+      // 如果函数名相同，说明匹配情况相同，则额外拿前缀长度排一下序
+      if (Result = 0) and SameText(P1, P2) then
+        Result := CnPosEx(AMatchStr, Info1.Text, False, False) - CnPosEx(AMatchStr, Info2.Text, False, False);
     end;
   1:
     begin
