@@ -647,7 +647,7 @@ var
 
         // 注意：似乎 LSP 模式下，该 AsyncInvoke 接口的 Column 参数要求是 UTF8 的列
         // 以往非 LSP 模式的同步接口传 Ansi 的 CursorPos 都是可用的。
-        // 偏偏此处要额外做一次 Ansi 到 UTF8 的转换
+        // 偏偏此处要额外做一次 Ansi 到 UTF8 的转换，且 Col 是 1 开始
         LineText := EditControlWrapper.GetTextAtLine(GetCurrentEditControl, CurPos.Line);
         Utf8Col := CalcUtf8LengthFromWideStringAnsiOffset(PWideChar(LineText), CurPos.Col);
 {$IFDEF DEBUG}
@@ -656,7 +656,7 @@ var
 {$ENDIF}
 
         AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
-          Utf8Col - 1, AsyncCodeCompletionCallBack);
+          Utf8Col, AsyncCodeCompletionCallBack);
 
         Tick := GetTickCount;
         try
