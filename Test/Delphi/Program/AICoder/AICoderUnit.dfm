@@ -152,9 +152,9 @@ object FormAITest: TFormAITest
       end
       object mmoAI: TMemo
         Left = 16
-        Top = 56
+        Top = 80
         Width = 393
-        Height = 503
+        Height = 479
         Anchors = [akLeft, akTop, akBottom]
         ReadOnly = True
         ScrollBars = ssVertical
@@ -193,6 +193,42 @@ object FormAITest: TFormAITest
         Caption = 'Function Call'
         TabOrder = 10
         OnClick = btnFuncCallClick
+      end
+      object btnInlineComplete: TButton
+        Left = 16
+        Top = 48
+        Width = 105
+        Height = 25
+        Caption = 'Inline Complete'
+        TabOrder = 12
+        OnClick = btnInlineCompleteClick
+      end
+      object btnRefactorCode: TButton
+        Left = 128
+        Top = 48
+        Width = 90
+        Height = 25
+        Caption = 'Refactor Code'
+        TabOrder = 13
+        OnClick = btnRefactorCodeClick
+      end
+      object btnFixCode: TButton
+        Left = 224
+        Top = 48
+        Width = 90
+        Height = 25
+        Caption = 'Fix Code'
+        TabOrder = 14
+        OnClick = btnFixCodeClick
+      end
+      object btnExtractContext: TButton
+        Left = 320
+        Top = 48
+        Width = 90
+        Height = 25
+        Caption = 'Extract Context'
+        TabOrder = 15
+        OnClick = btnExtractContextClick
       end
       object chkMarkDown: TCheckBox
         Left = 952

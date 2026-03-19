@@ -137,7 +137,11 @@ type
     procedure InternalCreate;
     procedure InstallPropEditors;
     procedure InstallCompEditors;
+{$IFNDEF STAND_ALONE}
+{$IFNDEF CNWIZARDS_MINIMUM}
     procedure SetTipShowing;
+{$ENDIF}
+{$ENDIF}
     procedure ShowTipofDay(Sender: TObject);
     procedure CheckIDEVersion;
 {$IFNDEF CNWIZARDS_MINIMUM}
@@ -1591,6 +1595,9 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF STAND_ALONE}
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 启动每日一帖的延时
 procedure TCnWizardMgr.SetTipShowing;
 begin
@@ -1598,6 +1605,9 @@ begin
   FTipTimer.Interval := 8000;
   FTipTimer.OnTimer := ShowTipofDay;
 end;
+
+{$ENDIF}
+{$ENDIF}
 
 // 显示每日一帖
 procedure TCnWizardMgr.ShowTipofDay(Sender: TObject);

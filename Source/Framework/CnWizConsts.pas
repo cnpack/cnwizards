@@ -1883,6 +1883,14 @@ var
   SCnAICoderWizardErrorURLFmt: string = 'URL Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorAPIKeyFmt: string = 'API Key Error or Empty for AI Engine %s.';
   SCnAICoderWizardErrorNoCode: string = 'No Code Found between ``` and ```';
+  SCnAICoderWizardUserMessageRefactorFmt: string = 'Please refactor and optimize the following %s code. ' +
+    'Keep the functionality unchanged. Return only the refactored code in a code block.';
+  SCnAICoderWizardUserMessageFixFmt: string = 'Please find and fix all bugs in the following %s code. ' +
+    'Return only the fixed code in a code block.';
+  SCnAICoderWizardUserMessageInlineCompleteFmt: string = 'You are a code completion assistant. ' +
+    'The code before the cursor is provided followed by <CURSOR> and then the code after the cursor. ' +
+    'Please output ONLY the code to insert at the <CURSOR> position. ' +
+    'Do not repeat the prefix or suffix code.';
 
   // CnMatchButtonFrame
   SCnMatchButtonFrameMenuStartCaption: string = 'Match From &Start';

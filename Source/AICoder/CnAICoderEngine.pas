@@ -248,6 +248,12 @@ procedure RegisterAIEngine(AIEngineClass: TCnAIBaseEngineClass);
 function CnAIEngineManager: TCnAIEngineManager;
 {* 返回一全局 AI 引擎管理对象}
 
+function ExtractContextWindow(const FullText: string;
+  CursorLine: Integer; PrefixLines: Integer; SuffixLines: Integer): string;
+{* Extracts a context window around CursorLine from FullText.
+   Returns prefix lines + '<CURSOR>' + suffix lines.
+   CursorLine is 1-based. Lines are clamped to actual content. }
+
 {$ENDIF CNWIZARDS_CNAICODERWIZARD}
 
 implementation
@@ -280,6 +286,67 @@ begin
   if FAIEngineManager = nil then
     FAIEngineManager := TCnAIEngineManager.Create;
   Result := FAIEngineManager;
+end;
+
+function ExtractContextWindow(const FullText: string;
+  CursorLine: Integer; PrefixLines: Integer; SuffixLines: Integer): string;
+var
+  Lines: TStringList;
+  PrefixStart, PrefixEnd, SuffixStart, SuffixEnd: Integer;
+  I: Integer;
+  Prefix, Suffix: string;
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.Text := FullText;
+
+    // Convert CursorLine to 0-based index, clamp to valid range
+    if CursorLine < 1 then
+      CursorLine := 1;
+    if CursorLine > Lines.Count then
+      CursorLine := Lines.Count;
+
+    // Prefix: lines before cursor (0-based indices)
+    PrefixEnd := CursorLine - 1;       // exclusive upper bound (0-based)
+    PrefixStart := PrefixEnd - PrefixLines;
+    if PrefixStart < 0 then
+      PrefixStart := 0;
+
+    // Suffix: lines from cursor onward
+    SuffixStart := CursorLine - 1;     // inclusive (0-based)
+    SuffixEnd := SuffixStart + SuffixLines;
+    if SuffixEnd > Lines.Count then
+      SuffixEnd := Lines.Count;
+
+    Prefix := '';
+    for I := PrefixStart to PrefixEnd - 1 do
+    begin
+      if Prefix = '' then
+        Prefix := Lines[I]
+      else
+        Prefix := Prefix + #13#10 + Lines[I];
+    end;
+
+    Suffix := '';
+    for I := SuffixStart to SuffixEnd - 1 do
+    begin
+      if Suffix = '' then
+        Suffix := Lines[I]
+      else
+        Suffix := Suffix + #13#10 + Lines[I];
+    end;
+
+    if (Prefix = '') and (Suffix = '') then
+      Result := '<CURSOR>'
+    else if Prefix = '' then
+      Result := '<CURSOR>' + #13#10 + Suffix
+    else if Suffix = '' then
+      Result := Prefix + #13#10 + '<CURSOR>'
+    else
+      Result := Prefix + #13#10 + '<CURSOR>' + #13#10 + Suffix;
+  finally
+    Lines.Free;
+  end;
 end;
 
 { TCnAIEngineManager }
@@ -739,6 +806,12 @@ begin
         Msg.AddPair('content', FOption.GenTestCasePrompt + #13#10 + Code)
       else if RequestType = artContinueCoding then
         Msg.AddPair('content', FOption.ContinueCodingPrompt + #13#10 + Code)
+      else if RequestType = artRefactorCode then
+        Msg.AddPair('content', FOption.RefactorCodePrompt + #13#10 + Code)
+      else if RequestType = artFixCode then
+        Msg.AddPair('content', FOption.FixCodePrompt + #13#10 + Code)
+      else if RequestType = artInlineComplete then
+        Msg.AddPair('content', FOption.InlineCompletePrompt + #13#10 + Code)
       else if RequestType = artRaw then
         Msg.AddPair('content', Code);
 

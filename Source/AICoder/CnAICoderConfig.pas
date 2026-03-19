@@ -65,6 +65,9 @@ type
     function GetGenTestCasePrompt: string;
     function GetReferSelectionPrompt: string;
     function GetContinueCodingPrompt: string;
+    function GetRefactorCodePrompt: string;
+    function GetFixCodePrompt: string;
+    function GetInlineCompletePrompt: string;
   protected
     function GetCurrentLangName: string;
   public
@@ -96,6 +99,12 @@ type
     {* 生成测试用例的提示文字}
     property ContinueCodingPrompt: string read GetContinueCodingPrompt;
     {* 续写代码提示文字}
+    property RefactorCodePrompt: string read GetRefactorCodePrompt;
+    {* Prompt for refactoring code }
+    property FixCodePrompt: string read GetFixCodePrompt;
+    {* Prompt for fixing code }
+    property InlineCompletePrompt: string read GetInlineCompletePrompt;
+    {* Prompt for inline completion }
   published
     property EngineName: string read FEngineName write FEngineName;
     {* AI 引擎名称}
@@ -174,7 +183,8 @@ type
     FMaxFavCount: Integer;
     FFavorites: TStringList; // 注意确保内部存储不包括回车换行
     FContCodeKey1: Boolean;
-    FContCodeKey2: Boolean; 
+    FContCodeKey2: Boolean;
+    FInlineCompleteKey: Boolean;
     function GetOptionCount: Integer;
     function GetOption(Index: Integer): TCnAIEngineOption;
   public
@@ -260,6 +270,8 @@ type
     {* 是否快捷键 Alt+Enter 在当前编辑器续写代码}
     property ContCodeKey2: Boolean read FContCodeKey2 write FContCodeKey2;
     {* 是否快捷键 Ctrl+Alt+Enter 在聊天窗口续写代码}
+    property InlineCompleteKey: Boolean read FInlineCompleteKey write FInlineCompleteKey;
+    {* Enable/disable inline completion shortcut key; default True }
   end;
 
 function CnAIEngineOptionManager: TCnAIEngineOptionManager;
@@ -323,6 +335,7 @@ begin
   FFavorites := TStringList.Create;
   FContCodeKey1 := True;
   FContCodeKey2 := True;
+  FInlineCompleteKey := True;
 end;
 
 function TCnAIEngineOptionManager.CreateOptionFromFile(const EngineName,
@@ -687,6 +700,23 @@ end;
 function TCnAIEngineOption.GetContinueCodingPrompt: string;
 begin
   Result := Format(SCnAICoderWizardUserMessageContinueCodingFmt, [SCnAICoderWizardFlagContinueCoding]);
+end;
+
+function TCnAIEngineOption.GetRefactorCodePrompt: string;
+begin
+  Result := Format(SCnAICoderWizardUserMessageRefactorFmt,
+    [UIStringToNativeString(GetCurrentLangName)]);
+end;
+
+function TCnAIEngineOption.GetFixCodePrompt: string;
+begin
+  Result := Format(SCnAICoderWizardUserMessageFixFmt,
+    [UIStringToNativeString(GetCurrentLangName)]);
+end;
+
+function TCnAIEngineOption.GetInlineCompletePrompt: string;
+begin
+  Result := SCnAICoderWizardUserMessageInlineCompleteFmt;
 end;
 
 { TCnClaudeAIEngineOption }

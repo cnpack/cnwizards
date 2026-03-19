@@ -54,6 +54,10 @@ type
     dlgFont1: TFontDialog;
     lblMe: TLabel;
     edtChatMessage: TEdit;
+    btnInlineComplete: TButton;
+    btnRefactorCode: TButton;
+    btnFixCode: TButton;
+    btnExtractContext: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btnAddHttpsClick(Sender: TObject);
@@ -81,6 +85,10 @@ type
     procedure btnModelListClick(Sender: TObject);
     procedure btnChatFontClick(Sender: TObject);
     procedure edtChatMessageKeyPress(Sender: TObject; var Key: Char);
+    procedure btnInlineCompleteClick(Sender: TObject);
+    procedure btnRefactorCodeClick(Sender: TObject);
+    procedure btnFixCodeClick(Sender: TObject);
+    procedure btnExtractContextClick(Sender: TObject);
   private
     FNetPool: TCnThreadPool;
     FResQueue: TCnObjectQueue;
@@ -111,6 +119,12 @@ type
     procedure AIOnRawAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
       SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
     procedure AIOnModelListAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnInlineCompleteAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnRefactorCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
+      const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+    procedure AIOnFixCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean; SendId: Integer;
       const Answer: string; ErrorCode: Cardinal; Tag: TObject);
   protected
     procedure ShowData;
@@ -974,6 +988,172 @@ begin
 
   if IsStreamEnd or not Partly then
     TCnChatMessage(Tag).Waiting := False;
+end;
+
+procedure TFormAITest.btnRefactorCodeClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+begin
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+  Msg.Waiting := True;
+
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoAI.Lines.Text,
+    nil, Msg, artRefactorCode, AIOnRefactorCodeAnswer);
+end;
+
+procedure TFormAITest.AIOnRefactorCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Refactor Code OK for Request %d: %s', [SendId, Answer]))
+  else
+    mmoAI.Lines.Add(Format('Refactor Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]));
+
+  if (Tag = nil) or not (Tag is TCnChatMessage) then
+    Exit;
+
+  TCnChatMessage(Tag).Waiting := False;
+  if Success then
+  begin
+    if Partly then
+    begin
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer;
+      if IsStreamEnd then
+        mmoAI.Lines.Add('End Stream Comes.');
+    end
+    else
+      TCnChatMessage(Tag).Text := Answer;
+  end
+  else
+    TCnChatMessage(Tag).Text := Format('Refactor Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]);
+end;
+
+procedure TFormAITest.btnFixCodeClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+begin
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+  Msg.Waiting := True;
+
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode(mmoAI.Lines.Text,
+    nil, Msg, artFixCode, AIOnFixCodeAnswer);
+end;
+
+procedure TFormAITest.AIOnFixCodeAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Fix Code OK for Request %d: %s', [SendId, Answer]))
+  else
+    mmoAI.Lines.Add(Format('Fix Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]));
+
+  if (Tag = nil) or not (Tag is TCnChatMessage) then
+    Exit;
+
+  TCnChatMessage(Tag).Waiting := False;
+  if Success then
+  begin
+    if Partly then
+    begin
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer;
+      if IsStreamEnd then
+        mmoAI.Lines.Add('End Stream Comes.');
+    end
+    else
+      TCnChatMessage(Tag).Text := Answer;
+  end
+  else
+    TCnChatMessage(Tag).Text := Format('Fix Code Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]);
+end;
+
+procedure TFormAITest.btnInlineCompleteClick(Sender: TObject);
+var
+  Msg: TCnChatMessage;
+  Context: string;
+begin
+  Context := ExtractContextWindow(mmoAI.Lines.Text, 5, 100, 50);
+
+  Msg := FAIChatBox.Items.AddMessage;
+  Msg.From := 'AI';
+  Msg.FromType := cmtYou;
+  Msg.Text := '...';
+  Msg.Waiting := True;
+
+  if Trim(edtProxy.Text) <> '' then
+  begin
+    CnAIEngineOptionManager.UseProxy := True;
+    CnAIEngineOptionManager.ProxyServer := Trim(edtProxy.Text);
+  end
+  else
+    CnAIEngineOptionManager.UseProxy := False;
+
+  CnAIEngineManager.CurrentEngine.AskAIEngineForCode(Context,
+    nil, Msg, artInlineComplete, AIOnInlineCompleteAnswer);
+end;
+
+procedure TFormAITest.AIOnInlineCompleteAnswer(StreamMode, Partly, Success, IsStreamEnd: Boolean;
+  SendId: Integer; const Answer: string; ErrorCode: Cardinal; Tag: TObject);
+begin
+  if Success then
+    mmoAI.Lines.Add(Format('Inline Complete OK for Request %d: %s', [SendId, Answer]))
+  else
+    mmoAI.Lines.Add(Format('Inline Complete Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]));
+
+  if (Tag = nil) or not (Tag is TCnChatMessage) then
+    Exit;
+
+  TCnChatMessage(Tag).Waiting := False;
+  if Success then
+  begin
+    if Partly then
+    begin
+      TCnChatMessage(Tag).Text := TCnChatMessage(Tag).Text + Answer;
+      if IsStreamEnd then
+        mmoAI.Lines.Add('End Stream Comes.');
+    end
+    else
+      TCnChatMessage(Tag).Text := Answer;
+  end
+  else
+    TCnChatMessage(Tag).Text := Format('Inline Complete Fail for Request %d: Error Code: %d. Error Msg: %s',
+      [SendId, ErrorCode, Answer]);
+end;
+
+procedure TFormAITest.btnExtractContextClick(Sender: TObject);
+var
+  Context: string;
+begin
+  Context := ExtractContextWindow(mmoAI.Lines.Text, 5, 100, 50);
+  mmoAI.Lines.Clear;
+  mmoAI.Lines.Add('--- Extract Context Result ---');
+  mmoAI.Lines.Add(Context);
 end;
 
 end.

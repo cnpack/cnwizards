@@ -44,7 +44,7 @@ uses
 
 type
   TCnAIRequestType = (artRaw, artModelList, artExplainCode, artReviewCode, artGenTestCase,
-    artContinueCoding);
+    artContinueCoding, artInlineComplete, artRefactorCode, artFixCode);
   {* «Î«Û¿‡–Õ}
 
   TCnAINetRequestDataObject = class;
