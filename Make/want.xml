@@ -93,7 +93,6 @@ See http://www.suigeneris.org/want/ for details.
   <property name="tools_list"     value="cnconfigio,cndebugviewer,cndebugviewer64,cndfm6to5,cnascii,cnidebr,cnmanagewiz,cnselectlang,cnsmr,cnwizsetup,cnhash,cnfixstart" />
   <property name="all_list"       value="cnwizards,resdll,resdll64,cnwizhelperdll,cnwizhelperdll64,cnziputilsdll,cnziputilsdll64,cnpnglib,cnpnglib64,cnformatlib,cnformatlibw,cnformatlibw64,cnvcltofmx,cnvcltofmx64,tools,makehelp,calchash,makeinst" />
 
-
   <!-- 根据发布类型设置相关属性，发布类型由命令行传入，如 want -Dpreview=true -->
   <property name="release.type"   value="_Nightly"  if="nightly" />
   <property name="release.type"   value="_Debug"    if="debug" />
