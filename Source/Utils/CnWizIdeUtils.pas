@@ -326,10 +326,10 @@ function IdeGetFormSelection(Selections: TList; Designer: IDesigner = nil;
   ExcludeForm: Boolean = True): Boolean;
 {* 取得当前设计窗体上已选择的组件 }
 
-{$ENDIF}
-
 function IdeGetIsEmbeddedDesigner: Boolean;
 {* 取得当前是否是嵌入式设计窗体模式}
+
+{$ENDIF}
 
 var
   IdeIsEmbeddedDesigner: Boolean = False;
@@ -1387,8 +1387,6 @@ begin
   end;
 end;
 
-{$ENDIF}
-
 // 取得当前是否是嵌入式设计窗体模式
 function IdeGetIsEmbeddedDesigner: Boolean;
 {$IFDEF BDS}
@@ -1409,6 +1407,8 @@ begin
   Result := False;  // D7 以下或 Lazarus 不支持嵌入
 {$ENDIF}
 end;
+
+{$ENDIF}
 
 //==============================================================================
 // 修改自 GExperts Src 1.12 的 IDE 相关函数

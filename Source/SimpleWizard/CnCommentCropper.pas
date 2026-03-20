@@ -206,7 +206,7 @@ type
     procedure DoAlignCommentBlocks;
 
     procedure AlignComments;
-    procedure AlignSelection;
+    procedure AlignSelected;
     procedure AlignCurrentUnit;
     procedure AlignOpenedUnits;
     procedure AlignAProject(Project: TCnIDEProjectInterface);
@@ -1154,7 +1154,7 @@ begin
   Screen.Cursor := crHourGlass;
   try
     case FCropStyle of
-      csCropSelected:       AlignSelection;
+      csCropSelected:       AlignSelected;
       csCropCurrent:        AlignCurrentUnit;
       csCropOpened:         AlignOpenedUnits;
       csCropProject:        AlignAProject(CnOtaGetCurrentProject);
@@ -1171,7 +1171,7 @@ begin
     InfoDlg(Format(SCnCommentCropperCountFmt, [FCropCount]));
 end;
 
-procedure TCnCommentCropperWizard.AlignSelection;
+procedure TCnCommentCropperWizard.AlignSelected;
 var
   InStream, OutStream: TMemoryStream;
   View: TCnEditViewSourceInterface;

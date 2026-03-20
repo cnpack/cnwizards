@@ -225,15 +225,19 @@ begin
     with DbgFrm do
     begin
 {$IFDEF LAZARUS}
-      Width := 550;
-      Height := 400;
+      Width := 700;
+      Height := 500;
 {$ELSE}
-      Width := IdeGetScaledPixelsFromOrigin(550);
-      Height := IdeGetScaledPixelsFromOrigin(400);
+      Width := IdeGetScaledPixelsFromOrigin(700);
+      Height := IdeGetScaledPixelsFromOrigin(500);
 {$ENDIF}
       Position := poScreenCenter;
       BorderStyle := bsSizeToolWin;
+{$IFDEF LAZARUS}
       Caption := 'CnPack IDE Wizard Debug Command Window';
+{$ELSE}
+      Caption := 'CnPack IDE Wizard Debug Command - ' + WizOptions.DllName;
+{$ENDIF}
       BorderIcons := [biSystemMenu];
     end;
 
