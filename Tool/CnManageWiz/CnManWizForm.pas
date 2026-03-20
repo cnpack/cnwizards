@@ -197,10 +197,6 @@ implementation
 
 {$R *.DFM}
 
-{$IFDEF COMPILER7_UP}
-{$R WindowsXP.res}
-{$ENDIF}
-
 const
   csLangPath = 'Lang\';
 

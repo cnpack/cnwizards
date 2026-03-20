@@ -1561,7 +1561,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnConfigIO/CnConfigIO.rc" />
     <brcc file="${tools}/CnConfigIO/CnConfigIO.rc" output="${tools}/CnConfigIO/CnConfigIO.res" />
-    <dcc basedir="${tools}/CnConfigIO" source="CnConfigIO.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnConfigIO" source="CnConfigIO.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnConfigIO">
        <include name="CnConfigIO.res" />
        <include name="CnConfigIO.rc" />
@@ -1581,7 +1581,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnDebugViewer/CnDebugViewer.rc" />
     <brcc file="${tools}/CnDebugViewer/CnDebugViewer.rc" output="${tools}/CnDebugViewer/CnDebugViewer.res" />
-    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" >
+    <dcc basedir="${tools}/CnDebugViewer" source="CnDebugViewer.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" >
     	<define name="${define.add}" />
     </dcc>
     <delete dir="${tools}/CnDebugViewer">
@@ -1645,7 +1645,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnAsciiChart/AsciiChart.rc" />
     <brcc file="${tools}/CnAsciiChart/AsciiChart.rc" output="${tools}/CnAsciiChart/AsciiChart.res" />
-    <dcc basedir="${tools}/CnAsciiChart" source="AsciiChart.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnAsciiChart" source="AsciiChart.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnAsciiChart">
        <include name="AsciiChart.res" />
        <include name="AsciiChart.rc" />
@@ -1665,7 +1665,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" />
     <brcc file="${tools}/CnIdeBRTool/CnIdeBRTool.rc" output="${tools}/CnIdeBRTool/CnIdeBRTool.res" />
-    <dcc basedir="${tools}/CnIdeBRTool" source="CnIdeBRTool.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnIdeBRTool" source="CnIdeBRTool.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnIdeBRTool">
        <include name="CnIdeBRTool.res" />
        <include name="CnIdeBRTool.rc" />
@@ -1685,7 +1685,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnManageWiz/CnManageWiz.rc" />
     <brcc file="${tools}/CnManageWiz/CnManageWiz.rc" output="${tools}/CnManageWiz/CnManageWiz.res" />
-    <dcc basedir="${tools}/CnManageWiz" source="CnManageWiz.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnManageWiz" source="CnManageWiz.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnManageWiz">
        <include name="CnManageWiz.res" />
        <include name="CnManageWiz.rc" />
@@ -1705,7 +1705,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSelectLang/CnSelectLang.rc" />
     <brcc file="${tools}/CnSelectLang/CnSelectLang.rc" output="${tools}/CnSelectLang/CnSelectLang.res" />
-    <dcc basedir="${tools}/CnSelectLang" source="CnSelectLang.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnSelectLang" source="CnSelectLang.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnSelectLang">
        <include name="CnSelectLang.res" />
        <include name="CnSelectLang.rc" />
@@ -1725,7 +1725,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnSMR/CnSMR.rc" />
     <brcc file="${tools}/CnSMR/CnSMR.rc" output="${tools}/CnSMR/CnSMR.res" />
-    <dcc basedir="${tools}/CnSMR" source="CnSMR.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnSMR" source="CnSMR.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnSMR">
        <include name="CnSMR.res" />
        <include name="CnSMR.rc" />
@@ -1745,7 +1745,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnWizSetup/Setup.rc" />
     <brcc file="${tools}/CnWizSetup/Setup.rc" output="${tools}/CnWizSetup/Setup.res" />
-    <dcc basedir="${tools}/CnWizSetup" source="Setup.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnWizSetup" source="Setup.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnWizSetup">
        <include name="Setup.res" />
        <include name="Setup.rc" />
@@ -1772,7 +1772,7 @@ Usage: want [target-name] [-Dname=value]
     </copy>
     <echo input="${tools}/CnTools.template.rc" file="${tools}/CnFixStart/CnFixStart.rc" />
     <brcc file="${tools}/CnFixStart/CnFixStart.rc" output="${tools}/CnFixStart/CnFixStart.res" />
-    <dcc basedir="${tools}/CnFixStart" source="CnFixStart.dpr" versions="7" usecfg="true" arguments="${dcc_arg}" />
+    <dcc basedir="${tools}/CnFixStart" source="CnFixStart.dpr" exename="${exe.D2007}" usecfg="true" arguments="${dcc_arg}" />
     <delete dir="${tools}/CnFixStart">
        <include name="CnFixStart.res" />
        <include name="CnFixStart.rc" />

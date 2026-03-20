@@ -20,8 +20,8 @@
 
 program CnDebugViewer;
 
-{$IFNDEF VER150}
-  {$MESSAGE ERROR 'CnDebugViewer Compiled Only by Delphi 7.'}
+{$IFNDEF VER185}
+  {$MESSAGE ERROR 'CnDebugViewer Compiled Only by Delphi 2007.'}
 {$ENDIF}
 
 uses

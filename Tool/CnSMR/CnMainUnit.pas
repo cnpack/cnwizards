@@ -149,10 +149,6 @@ uses
 
 {$R *.dfm}
 
-{$IFDEF COMPILER7_UP}
-{$R WindowsXP.res}
-{$ENDIF}
-
 function AppPath: string;
 begin
   Result := _CnExtractFilePath(ParamStr(0));

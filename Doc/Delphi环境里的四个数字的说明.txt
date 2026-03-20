@@ -5,9 +5,9 @@
 **********************************************************************
 
                      Delphi 环境里的四个数字的说明
-                           Revision 1.0.0.0
+                           Revision 1.0.0.1
                        =========================
-                         作者：刘啸 2025.03.14
+                         作者：刘啸 2026.03.20
 
 
 Delphi 环境的数字很复杂且混乱。长期和 Delphi 打交道，从 Delphi 5 到较新的 RAD Studio 12.3，我们被它的一堆大版本相关的数字所困扰。
@@ -46,7 +46,7 @@ Borland\Delphi6              60          VER140      6     C++Builder 6类似
 Borland\Delphi7              70          VER150      7
 Borland\BDS\3.0              90          VER170      2005
 Borland\BDS\4.0              100         VER180      2006
-CodeGear\RAD Studio\5.0      100         VER190      2007  注意2007和2006安装后文件的数字相同
+CodeGear\RAD Studio\5.0      100         VER185      2007  注意2007和2006安装后文件的数字相同，且VER不是190
 CodeGear\RAD Studio\6.0      120         VER200      2009
 Embarcadero\RAD Studio\7.0   140         VER210      2010
 Embarcadero\RAD Studio\8.0   150         VER220      XE
