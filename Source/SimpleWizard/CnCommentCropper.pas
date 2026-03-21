@@ -1188,6 +1188,16 @@ begin
   Block := View.Block;
   if (Block = nil) or (Block.Size <= 0) then
     Exit;
+
+  if (Block.StartingColumn <> 1) or (Block.EndingColumn <> 1) then
+  begin
+    CnOtaMoveAndSelectByRowCol(Block.StartingRow, 1, Block.EndingRow + 1, 1);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('AlignSelected Comment. Extend Block to %d:%d~%d:%d',
+      [Block.StartingRow, Block.StartingColumn, Block.EndingRow, Block.EndingColumn]);
+{$ENDIF}
+  end;
+
 {$ENDIF}
 {$IFDEF LAZARUS}
   if View.Selection = '' then
