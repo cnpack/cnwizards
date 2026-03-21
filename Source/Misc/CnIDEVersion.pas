@@ -76,6 +76,9 @@ function IsDelphi11GEDot3: Boolean;
 function IsDelphi12Dot3GEHotFix: Boolean;
 {* 返回是否 Delphi 12.3 的 HotFix 或更高的子版本，用于某些古怪判断}
 
+function IsGEDelphi13Dot1: Boolean;
+{* 返回是否 Delphi 13.1 或更高的子版本，用于某些古怪判断}
+
 var
   CnIdeVersionDetected: Boolean = False;
   CnIdeVersionIsLatest: Boolean = False;
@@ -476,7 +479,7 @@ var
 begin
   ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide370.bpl');
   Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
-  LatestUpdate := '13.0';
+  LatestUpdate := 'Update 1 (13.1)';
 end;
 
 function IsDelphi11GEDot3: Boolean;
@@ -524,6 +527,23 @@ begin
 {$ELSE}
   Result := False;
 {$ENDIF};
+end;
+
+function IsGEDelphi13Dot1: Boolean;
+{$IFDEF DELPHI130_FLORENCE_UP}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 37; Minor: 0; Release: 59082; Build: 6021); // 13.1
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI130_FLORENCE_UP}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide370.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
 end;
 
 function IsIdeVersionLatest(out LatestUpdate: string): Boolean;
