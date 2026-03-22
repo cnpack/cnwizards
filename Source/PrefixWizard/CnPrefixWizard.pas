@@ -414,9 +414,9 @@ begin
   if GetIDEActionFromShortCut(ShortCut(VK_F2, [])) = nil then
   begin
     // 如果当前 IDE 中无 F2 快捷键的其它 Action，则注册此快捷键来更改
-    FRenameAction := WizActionMgr.AddAction('CnPrefixRename',
-      'Rename Select Component', ShortCut(VK_F2, []), OnRenameShortCutExec,
-      'CnPrefixRename', 'Rename Select Component');
+    FRenameAction := WizActionMgr.AddAction(SCnPrefixActionName,
+      SCnPrefixRenameComponent, ShortCut(VK_F2, []), OnRenameShortCutExec,
+      SCnPrefixActionName, SCnPrefixRenameComponent);
     FRenameAction.Visible := False;
   end
   else

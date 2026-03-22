@@ -161,6 +161,7 @@ type
     procedure SetShowColor(const Value: Boolean);
     procedure CreateShortCuts;   // 创建快捷键对象，可重复调用
     procedure DestroyShortCuts;  // 销毁快捷键对象，可重复调用
+    procedure UpdateShortCutMenuNames;
   protected
     function CanShowButton: Boolean;
     function CanShowDisableStructuralHighlight: Boolean;
@@ -251,6 +252,7 @@ begin
     FBlockDelLinesShortCut := WizShortCutMgr.Add('CnEditBlockDeleteLines',
       ShortCut(Word('D'), [ssCtrl, ssShift]), OnEditBlockDelLines);
 {$ENDIF}
+  UpdateShortCutMenuNames;
 end;
 
 procedure TCnSrcEditorBlockTools.DestroyShortCuts;
@@ -1377,6 +1379,7 @@ end;
 
 procedure TCnSrcEditorBlockTools.LanguageChanged(Sender: TObject);
 begin
+  UpdateShortCutMenuNames;
   UpdateMenu(FPopupMenu.Items);
   UpdateFlatButtons;
   FWebSearch.LanguageChanged(Sender);
@@ -1443,6 +1446,34 @@ begin
     ReInitShortCuts;
     UpdateMenu(FPopupMenu.Items);
   end;
+end;
+
+procedure TCnSrcEditorBlockTools.UpdateShortCutMenuNames;
+begin
+  if FDupShortCut <> nil then
+    FDupShortCut.MenuName := SCnSrcBlockDuplicate;
+  if FLowerCaseShortCut <> nil then
+    FLowerCaseShortCut.MenuName := SCnSrcBlockLowerCase;
+  if FUpperCaseShortCut <> nil then
+    FUpperCaseShortCut.MenuName := SCnSrcBlockUpperCase;
+  if FToggleCaseShortCut <> nil then
+    FToggleCaseShortCut.MenuName := SCnSrcBlockToggleCase;
+{$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
+  if FAddToCollectorShortCut <> nil then
+    FAddToCollectorShortCut.MenuName := SCnSrcBlockAddToCollector;
+{$ENDIF}
+{$IFDEF CNWIZARDS_CNSOURCEDIFFWIZARD}
+  if FCompareToClipboardShortCut <> nil then
+    FCompareToClipboardShortCut.MenuName := SCnSrcBlockCompareToClipboard;
+{$ENDIF}
+{$IFDEF BDS}
+  if FBlockMoveUpShortCut <> nil then
+    FBlockMoveUpShortCut.MenuName := SCnSrcBlockMoveUp;
+  if FBlockMoveDownShortCut <> nil then
+    FBlockMoveDownShortCut.MenuName := SCnSrcBlockMoveDown;
+  if FBlockDelLinesShortCut <> nil then
+    FBlockDelLinesShortCut.MenuName := SCnSrcBlockDeleteLines;
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorBlockTools.DoShortCutConfig;

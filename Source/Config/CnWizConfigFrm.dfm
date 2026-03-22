@@ -770,7 +770,7 @@ inherited CnWizConfigForm: TCnWizConfigForm
   object btnAllShortcut: TButton
     Left = 96
     Top = 492
-    Width = 75
+    Width = 83
     Height = 21
     Anchors = [akLeft, akBottom]
     Caption = 'A&ll Shortcuts'

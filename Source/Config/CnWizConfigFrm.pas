@@ -1196,7 +1196,7 @@ begin
         Continue;
 
 {$IFDEF DEBUG}
-      N := '';
+      N := '<No Action>';
       if St.Action <> nil then
         N := St.Action.Caption;
       CnDebugger.LogFmt('Name %s, MenuName: %s, Action Caption %s',

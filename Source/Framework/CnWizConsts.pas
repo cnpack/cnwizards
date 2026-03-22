@@ -250,6 +250,7 @@ resourcestring
   SCnPas2HtmlWizardConfig = 'CnPas2HtmlWizardConfig';
 
   // CnPrefixWizard
+  SCnPrefixActionName = 'CnPrefixRename';
   SCnPrefixDataName = 'Prefix.ini';
 
   // CnProjectExtWizard
@@ -1092,6 +1093,7 @@ var
   SCnPrefixDupName: string = 'A Component with the Same Name Found, Please Reenter the Name.';
   SCnPrefixNoComp: string = 'No Components Found in Selections.';
   SCnPrefixAskToProcess: string = 'Sure to Process the Names of Component(s)?';
+  SCnPrefixRenameComponent: string = 'Rename Select Component';
 
   // CnWizAbout
   SCnWizAboutCaption: string = '&About...';

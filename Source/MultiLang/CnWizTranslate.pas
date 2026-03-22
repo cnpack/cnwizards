@@ -739,6 +739,7 @@ begin
   TranslateStr(SCnPrefixDupName, 'SCnPrefixDupName');
   TranslateStr(SCnPrefixNoComp, 'SCnPrefixNoComp');
   TranslateStr(SCnPrefixAskToProcess, 'SCnPrefixAskToProcess');
+  TranslateStr(SCnPrefixRenameComponent, 'SCnPrefixRenameComponent');
 end;
 
 // 拆成两个，以躲过 2009/2010 下局部变量过多的问题
