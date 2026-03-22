@@ -3360,6 +3360,7 @@ SCnPrefixNameError=Bitte geben sie ein effektives Präfix als Komponenten Namen 
 SCnPrefixDupName=eine Komponente mit gleichem Namen wurde gefunden, bitte neuen Namen festlegen.
 SCnPrefixNoComp=keine Komponenten in Auswahl gefunden.
 SCnPrefixAskToProcess=Sind sie Sicher dass die Namen der Komponenten verarbeitet werden sollen?
+SCnPrefixRenameComponent=Umbenennen ausgewählte Komponente
 SCnWizAboutCaption=&über...
 SCnWizAboutName=Über und Hilfe
 SCnWizAboutComment=Über und Hilfe

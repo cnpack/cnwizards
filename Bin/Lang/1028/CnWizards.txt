@@ -3361,6 +3361,7 @@ SCnPrefixNameError=請輸入有效的識別字作為元件名！
 SCnPrefixDupName=表單中已經有一個同名的元件了，請重新輸入元件名！
 SCnPrefixNoComp=在您選擇的範圍中沒有需要改名的元件！
 SCnPrefixAskToProcess=您確實要對這些元件的名稱進行處理嗎？
+SCnPrefixRenameComponent=選中組件改名
 SCnWizAboutCaption=說明(&A)
 SCnWizAboutName=專家關於及幫助
 SCnWizAboutComment=專家關於及幫助

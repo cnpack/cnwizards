@@ -3361,6 +3361,7 @@ SCnPrefixNameError=请输入有效的标识符作为组件名！
 SCnPrefixDupName=窗体中已经有一个同名的组件了，请重新输入组件名！
 SCnPrefixNoComp=在您选择的范围中没有需要改名的组件！
 SCnPrefixAskToProcess=您确实要对这些组件的名称进行处理吗？
+SCnPrefixRenameComponent=选中组件改名
 SCnWizAboutCaption=帮助(&A)
 SCnWizAboutName=专家关于及帮助
 SCnWizAboutComment=专家关于及帮助

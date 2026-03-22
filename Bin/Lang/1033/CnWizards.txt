@@ -3361,6 +3361,7 @@ SCnPrefixNameError=Please Enter A Effective Prefix as the Component Name.
 SCnPrefixDupName=A Component with the Same Name Found, Please Reenter the Name.
 SCnPrefixNoComp=No Components Found in Selections.
 SCnPrefixAskToProcess=Sure to Process the Names of Component(s)?
+SCnPrefixRenameComponent=Rename Select Component
 SCnWizAboutCaption=&About...
 SCnWizAboutName=About and Help
 SCnWizAboutComment=About and Help

@@ -3362,6 +3362,7 @@ SCnPrefixNameError=Veuillez entrer un préfixe efficace comme nom de composant.
 SCnPrefixDupName=Un composant portant le même nom a été trouvé, veuillez ressaisir le nom.
 SCnPrefixNoComp=Aucun composant trouvé dans les sélections.
 SCnPrefixAskToProcess=Êtes-vous sûr de traiter les noms des composants?
+SCnPrefixRenameComponent=Renommer le composant sélectionné
 SCnWizAboutCaption=&A Propos
 SCnWizAboutName=Á propos et aide
 SCnWizAboutComment=Á propos et aide

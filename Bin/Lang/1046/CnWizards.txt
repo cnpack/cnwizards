@@ -3361,6 +3361,7 @@ SCnPrefixNameError=Por favor, insira um prefixo efetivo como o nome do component
 SCnPrefixDupName=Um Componente com o Mesmo Nome Encontrado, Por Favor Redigite o Nome.
 SCnPrefixNoComp=Nenhum componente encontrado nas seleções.
 SCnPrefixAskToProcess=Certeza de processar os nomes dos componentes?
+SCnPrefixRenameComponent=Renomear Componente Selecionado
 SCnWizAboutCaption=&Sobre...
 SCnWizAboutName=Sobre e Ajuda
 SCnWizAboutComment=Sobre e Ajuda
