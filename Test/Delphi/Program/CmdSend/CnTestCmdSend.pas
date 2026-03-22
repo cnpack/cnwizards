@@ -145,7 +145,7 @@ begin
   FCheckBoxList := TList.Create;
   CreateCompilerCheckBoxes;
   edtCommand.Text := IntToStr(CN_WIZ_CMD_TEST);
-  edtDest.Text := SCnCmdTestRecvID;
+  // edtDest.Text := SCnCmdTestRecvID;
 end;
 
 procedure TCnCmdSendForm.FormDestroy(Sender: TObject);

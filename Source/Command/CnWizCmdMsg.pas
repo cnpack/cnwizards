@@ -114,6 +114,12 @@ const
   CN_WIZ_CMD_MULTILANG_END_GEN   = $CCB + $10C;  // 3543
   {* 通知多语插件停止生成条目功能并保存文件}
 
+  CN_WIZ_CMD_INSP_DUMP_HOOK      = $CCB + $10D;  // 3544
+  {* 通知多语插件将拦截到的 TextRect 的参数字符串放到剪贴板}
+
+  CN_WIZ_CMD_INSP_RESTART_HOOK   = $CCB + $10E;  // 3545
+  {* 通知多语插件清空拦截到的 TextRect 的字符串并继续拦截}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type

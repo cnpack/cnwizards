@@ -25,7 +25,7 @@ object CnCmdSendForm: TCnCmdSendForm
     Caption = '命令数值：'
   end
   object lblCompilers: TLabel
-    Left = 318
+    Left = 366
     Top = 22
     Width = 216
     Height = 12
@@ -90,7 +90,7 @@ object CnCmdSendForm: TCnCmdSendForm
   object mmo1: TMemo
     Left = 22
     Top = 272
-    Width = 280
+    Width = 331
     Height = 121
     Lines.Strings = (
       'param1=value1'
@@ -103,15 +103,15 @@ object CnCmdSendForm: TCnCmdSendForm
   object edtCommand: TEdit
     Left = 22
     Top = 44
-    Width = 280
+    Width = 331
     Height = 20
     TabOrder = 5
     Text = '0'
   end
   object scbCompilers: TScrollBox
-    Left = 320
+    Left = 368
     Top = 44
-    Width = 281
+    Width = 233
     Height = 405
     VertScrollBar.Tracking = True
     Anchors = [akLeft, akTop, akBottom]
@@ -122,7 +122,7 @@ object CnCmdSendForm: TCnCmdSendForm
   object edtDest: TEdit
     Left = 22
     Top = 428
-    Width = 280
+    Width = 331
     Height = 20
     TabOrder = 7
     Text = '0'
@@ -130,7 +130,7 @@ object CnCmdSendForm: TCnCmdSendForm
   object lstMsg: TListBox
     Left = 22
     Top = 80
-    Width = 280
+    Width = 331
     Height = 161
     ItemHeight = 12
     Items.Strings = (
@@ -141,7 +141,13 @@ object CnCmdSendForm: TCnCmdSendForm
       '3538 翻译所有窗体'
       '3539 通知多语插件在切换窗体时翻译'
       '3540 从剪贴板加载语言条目'
-      '3541 通知多语插件根据参数语言条目进行翻译')
+      '3541 通知多语插件根据参数语言条目进行翻译'
+      
+        '3542 通知多语插件初始化生成条目功能并准备捕获生成，参数 FileName' +
+        ' 表示加载旧有文本'
+      '3543 通知多语插件停止生成条目功能并保存文件'
+      '3544 通知多语插件将拦截到的 TextRect 的参数字符串放到剪贴板'
+      '3545 通知多语插件清空拦截到的 TextRect 的字符串并继续拦截')
     TabOrder = 8
     OnClick = lstMsgClick
   end

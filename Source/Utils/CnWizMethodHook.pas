@@ -24,7 +24,7 @@ unit CnWizMethodHook;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：对象方法挂接单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：该单元用来挂接 IDE 内部类的方法
+* 备    注：该单元用来挂接 IDE 内部类的方法，并可使用 DETOURS 库作为实际执行库。
 *           32 位下统一使用相对跳转也即 E9 加 32 位偏移，一般没啥问题。
 *           64 位下如果也用 E9 加 32 位偏移，那么 DLL 在内存空间中太远就会跳不过去
 *           64 位下有 25FF 加 RIP 偏移处的 8 字节作为绝对跳转地址的模式（BPL 就如此），
@@ -35,6 +35,113 @@ unit CnWizMethodHook;
 *              mov dword [rsp+4], address.high32
 *              ret
 *           好处是能覆盖所有空间不用担心太远，坏处是 14 个字节，远超 32 位下的 5 个。
+*
+*  注   意：使用本单元进行 Hook 时经常会碰到 overload 问题，也就是说，当多个函数或方法
+*           使用 overload 关键字时，直接使用 @函数名 或 @对象.方法名会引发编译歧义，
+*           因为编译器无法确定要取哪个 overload 版本的地址，即使没编译错误也有概率跑错。
+*           解决方案是通过“函数指针变量赋值”或“类型强制转换”来消除歧义。
+*
+*  ------------------------------------------------------------------------
+*  一、独立函数（全局函数/过程）
+*  ------------------------------------------------------------------------
+*
+*  1. 函数指针变量赋值法（推荐）
+*     - 声明一个与目标 overload 参数完全匹配的函数类型。
+*     - 将该类型的变量赋值为函数名，编译器根据变量类型自动选择正确的版本。
+*     - 该变量即为所需函数的地址。
+*
+*  2. 直接强制转换（仅适用于无类型指针）
+*     - 使用 @ 操作符结合强制类型转换，但需要先通过函数指针变量中转。
+*
+*  示例：
+*  type
+*    TIntFunc = function (x: Integer): Integer;
+*    TStrFunc = function (s: string): Integer;
+*
+*  // overload 函数
+*  function MyFunc(x: Integer): Integer; overload;
+*  begin
+*    Result := x * 2;
+*  end;
+*
+*  function MyFunc(s: string): Integer; overload;
+*  begin
+*    Result := Length(s);
+*  end;
+*
+*  procedure GetGlobalFuncAddress;
+*  var
+*    F1: TIntFunc;
+*    F2: TStrFunc;
+*    P: Pointer;
+*  begin
+*    // 通过函数指针变量赋值，变量即包含地址
+*    F1 := MyFunc;            // 取参数为 Integer 的版本
+*    F2 := MyFunc;            // 取参数为 string 的版本
+*
+*    // 直接使用 F1、F2 作为函数指针
+*    ShowMessage(IntToStr(F1(5)));     // 10
+*    ShowMessage(IntToStr(F2('abc'))); // 3
+*
+*    // 若需要无类型指针（如赋值给 TMethod 或 API 回调），可将变量转换为 Pointer
+*    P := Pointer(F1);        // 获取 Integer 版本的入口地址
+*  end;
+*
+*  ------------------------------------------------------------------------
+*  二、类方法（对象方法）
+*  ------------------------------------------------------------------------
+*
+*  类方法的 overload 同样需要通过方法指针变量来消除歧义，
+*  但需注意“对象方法”的指针类型需使用 of object。
+*
+*  1. 方法指针变量赋值
+*     - 声明匹配的方法类型（需包含 of object）。
+*     - 将对象的方法名赋值给该变量。
+*
+*  2. 获取地址时，方法指针变量本身就是一个记录（TMethod），其中 Code 字段即函数入口地址。
+*
+*  示例：
+*  type
+*    TMyClass = class
+*      function MyFunc(x: Integer): Integer; overload;
+*      function MyFunc(s: string): Integer; overload;
+*    end;
+*
+*  // 定义方法指针类型
+*  TIntMethod = function (x: Integer): Integer of object;
+*  TStrMethod = function (s: string): Integer of object;
+*
+*  procedure GetMethodAddress;
+*  var
+*    Obj: TMyClass;
+*    M1: TIntMethod;
+*    M2: TStrMethod;
+*    P: Pointer;
+*  begin
+*    Obj := TMyClass.Create;
+*    try
+*      // 通过方法指针变量赋值，自动匹配，注意不能 @TMyClass.MyFunc
+*      M1 := Obj.MyFunc;          // 取参数为 Integer 的版本
+*      M2 := Obj.MyFunc;          // 取参数为 string 的版本
+*
+*      // 直接调用
+*      ShowMessage(IntToStr(M1(5)));      // 假设实现为 x*2 -> 10
+*      ShowMessage(IntToStr(M2('abc')));  // 假设实现为 Length(s) -> 3
+*
+*      // 获取入口地址（无类型指针）
+*      P := TMethod(M1).Code;     // 或 P := Pointer(TMethod(M1).Code);
+*      // 注意：方法指针包含 Code（函数入口）和 Data（对象实例）
+*    finally
+*      Obj.Free;
+*    end;
+*  end;
+*
+*  ------------------------------------------------------------------------
+*  总结
+*  ------------------------------------------------------------------------
+*  - 对于独立函数：使用匹配的函数指针变量赋值，变量即所需地址。
+*  - 对于类方法：使用匹配的方法指针变量赋值，通过 TMethod 记录获取 Code 字段。
+*  - 这两种方式均能明确告知编译器所需的 overload 版本，避免歧义。
 *
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：
