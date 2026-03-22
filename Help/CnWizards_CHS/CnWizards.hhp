@@ -56,12 +56,14 @@ licenses\license.htm
 licenses\mpl-1.1.txt
 licenses\ro_ps_lic.txt
 options\cmdline.htm
+options\cnlang.html
 options\create.png
 options\menuorder.png
 options\otherconfig.png
 options\otherconfig.htm
 options\propconfig.png
 options\propconfig.htm
+options\uilang.html
 options\upgrade.png
 options\upgrade.htm
 options\wizconfig.png

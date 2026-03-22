@@ -485,6 +485,19 @@
 			</OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Multi-Language Settings">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="CnWizards Multi-Language Settings">
+			<param name="Local" value="options/cnlang.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE UI Localization">
+			<param name="Local" value="options/uilang.html">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="CnDebugger Tool">
 		</OBJECT>
 	<UL>

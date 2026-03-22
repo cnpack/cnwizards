@@ -61,6 +61,10 @@
 		<param name="Local" value="licenses\gelicense.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="IDE 界面汉化">
+		<param name="Local" value="options\uilang.html">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="IDE 配置备份恢复工具">
 		<param name="Local" value="wizards\cnidebrtool.htm">
 		</OBJECT>
@@ -459,6 +463,10 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="增大字体工具">
 		<param name="Local" value="wizards\toolset\toolsetfontinc.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="专家包多语言">
+		<param name="Local" value="options\cnlang.html">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="组件前缀专家">

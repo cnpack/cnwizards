@@ -485,6 +485,19 @@
 			</OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="多語言設置">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="專家包多語言">
+			<param name="Local" value="options/cnlang.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="IDE 界面漢化">
+			<param name="Local" value="options/uilang.html">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="CnDebugger 調試工具">
 		</OBJECT>
 	<UL>

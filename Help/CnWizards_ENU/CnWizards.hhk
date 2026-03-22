@@ -65,6 +65,10 @@
 		<param name="Local" value="options\upgrade.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CnWizards Multi-Language Settings">
+		<param name="Local" value="options\cnlang.html">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Coding Toolset Settings">
 		<param name="Local" value="wizards\toolset\wizeditors.htm">
 		</OBJECT>
@@ -231,6 +235,10 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="IDE Wizards Settings">
 		<param name="Local" value="options\wizconfig.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="IDE UI Localization">
+		<param name="Local" value="options\uilang.html">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="ImageList Component Editor">

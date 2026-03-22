@@ -61,6 +61,10 @@
 		<param name="Name" value="GExperts 使用許可協議">
 		<param name="Local" value="licenses\gelicense.htm">
 		</OBJECT>
+  <LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="IDE 界面漢化">
+		<param name="Local" value="options\uilang.html">
+		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="IDE 配置備份恢復工具">
 		<param name="Local" value="wizards\cnidebrtool.htm">
@@ -460,6 +464,10 @@
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="增大字體工具">
 		<param name="Local" value="wizards\toolset\toolsetfontinc.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="專家包多語言">
+		<param name="Local" value="options\cnlang.html">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="組件前綴專家">
