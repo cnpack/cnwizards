@@ -112,6 +112,14 @@
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Dockable", "可停靠"], ["New", "新建"], ["Properties", "属性"], ["Rename", "重命名"], ["View Editor", "查看编辑器"]]
       }, {
+        "MenuPath": "ConfigMgrDlg.ConfigMgrDlg.FormPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Delete Configuration", "删除配置"], ["Dockable", "可停靠"], ["New Configuration", "新建配置"], ["New Option Set", "新建选项集"], ["Remove Option Set", "删除选项集"], ["Stay on Top", "保持置顶"], ["Toolbar", "工具栏"]]
+      }, {
+        "MenuPath": "ConfigMgrDlg.ConfigMgrDlg.ToolbarPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Text Labels", "文本标签"]]
+      }, {
         "MenuPath": "DebugLogView.DebugLogView.LogPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Add Comment", "添加注释"], ["Clear Events", "清除事件"], ["Close", "关闭"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Local Menu", "本地菜单"], ["Properties", "属性"], ["Save Events to File", "保存事件到文件"], ["Select All", "全选"], ["Stay on Top", "保持置顶"], ["Zoom Window", "缩放窗口"]]
