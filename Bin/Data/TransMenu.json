@@ -168,6 +168,10 @@
         "ForceEnglish": "FALSE",
         "ItemCaption": [["AltInspect", "Alt检查"], ["Close", "关闭"], ["Copy Name", "复制名称"], ["Copy Value", "复制值"], ["Dockable", "可停靠"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Local Menu", "本地菜单"], ["Stay on Top", "保持置顶"], ["Visualizers", "可视化工具"], ["Watch", "监视"], ["Zoom Window", "缩放窗口"]]
       }, {
+        "MenuPath": "MessageView.MessageView.MsgViewPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Clear All Messages", "清除所有消息"], ["Clear Messages", "清除消息"], ["Close Tab", "关闭窗口"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源代码"], ["Local Menu", "本地菜单"], ["Next Message Tab", "下一个消息窗口"], ["Previous Message Tab", "上一个消息窗口"], ["Save All Messages", "保存所有消息"], ["Save Messages", "保存消息"], ["Select All", "全选"], ["View Editor", "查看编辑器"], ["View source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+      }, {
         "MenuPath": "MessageViewForm.MessageViewForm.MsgViewPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Clear All Messages", "清除所有消息"], ["Clear Messages", "清除消息"], ["Close Tab", "关闭窗口"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源代码"], ["Local Menu", "本地菜单"], ["Next Message Tab", "下一个消息窗口"], ["Previous Message Tab", "上一个消息窗口"], ["Save All Messages", "保存所有消息"], ["Save Messages", "保存消息"], ["Select All", "全选"], ["View Editor", "查看编辑器"], ["View source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
