@@ -2195,14 +2195,20 @@ end;
 procedure TCnMenuFormTranslator.MultiLangTranslateObject(AObject: TObject;
   var Translate: Boolean);
 begin
-  if FActive and (Compiler in [cnDelphi2007]) and (AObject.ClassName = 'TWatchWindow') then
+  if FActive and (
+    ((Compiler in [cnDelphi2007]) and (AObject.ClassName = 'TWatchWindow')) or
+    ((Compiler in [cnDelphi7]) and (AObject.ClassName = 'TMessageViewForm'))
+    ) then
     FLangTransFlag := True;
+
+  // 原本已创建但隐藏，基于某事件（如编译运行）出现的特定窗体，里头有 TTabSet 的，
+  // 其 Tabs: TTabList 属性不能去访问，更别说翻译了，容易出错，因而在此过滤掉。
 end;
 
 procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
   AObject: TObject; const PropName: string; var Translate: Boolean);
 begin
-  if FActive and FLangTransFlag and (Compiler in [cnDelphi2007]) and AObject.ClassNameIs('TTabList') then
+  if FActive and FLangTransFlag and (Compiler in [cnDelphi7, cnDelphi2007]) and AObject.ClassNameIs('TTabList') then
   begin
     Translate := False;
     FLangTransFlag := False;
