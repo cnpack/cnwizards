@@ -447,7 +447,6 @@ TEditWindow.Label1.Caption=&Description
 TEditWindow.Label2.Caption=&Name
 TEditWindow.LookupMode.Hint=Lookup connector
 TEditWindow.MasterMode.Hint=Master/Detail connector
-TEditWindow.MessageGroups.Tabs.Text=Build
 TEditWindow.NewDiagram.Hint=New diagram
 TEditWindow.OpenFileDlg.Filter=C++ files (*.CPP;*.C;*.HPP;*.H)|*.cpp;*.c;*.hpp;*.h|Pascal files (*.PAS)|*.pas|Project file (*.MAK)|*.mak|Any file (*.*)|*.*
 TEditWindow.OpenFileDlg.Title=Read File as Block

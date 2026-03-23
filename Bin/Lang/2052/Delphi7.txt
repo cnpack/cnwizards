@@ -447,7 +447,6 @@ TEditWindow.Label1.Caption=描述(&D)
 TEditWindow.Label2.Caption=名称(&N)
 TEditWindow.LookupMode.Hint=查找连接器
 TEditWindow.MasterMode.Hint=主/从连接器
-TEditWindow.MessageGroups.Tabs.Text=生成
 TEditWindow.NewDiagram.Hint=新建图表
 TEditWindow.OpenFileDlg.Filter=C++ 文件 (*.CPP;*.C;*.HPP;*.H)|*.cpp;*.c;*.hpp;*.h|Pascal 文件 (*.PAS)|*.pas|项目文件 (*.MAK)|*.mak|所有文件 (*.*)|*.*
 TEditWindow.OpenFileDlg.Title=将文件作为块读取
