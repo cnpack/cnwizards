@@ -1136,7 +1136,7 @@ begin
       FNeedKeepLineBreak := Boolean(FLineBreakKeepStack.Pop);   // 恢复不保留换行的选项
     end;
   end
-  else  if Scanner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
+  else if Scanner.Token = tokAtSign then // 如果是 @ Designator 的形式则再次递归
   begin
     Match(tokAtSign, PreSpaceCount);
     FormatDesignator(0, IndentForAnonymous, True);

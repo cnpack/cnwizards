@@ -234,6 +234,7 @@ type
     cntExpression,
     cntSimpleExpression,
     cntDesignator,
+    cntDesignatorAt,
     cntQualId,
     cntTerm,
     cntFactor,
@@ -858,6 +859,16 @@ procedure TCnPasAstGenerator.BuildDesignator;
 begin
   MatchCreateLeafAndPush(tkNone, cntDesignator);
   // Pop 之前，内部添加的节点均为抽象的 Expression 节点之子
+
+  if FLex.TokenID = tkAddressOp then
+  begin
+    MatchCreateLeafAndPush(tkAddressOp, cntDesignatorAt);
+    try
+      BuildDesignator;
+    finally
+      PopLeaf;
+    end;
+  end;
 
   try
     BuildQualId;
