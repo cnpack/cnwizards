@@ -270,6 +270,7 @@ begin
   CnLanguageManager.AutoTranslate := False;
   CnLanguageManager.TranslateTreeNode := True;
   CnLanguageManager.UseDefaultFont := True;
+  CnLanguageManager.UseClassWhenNoCompName := True;
 
   FStorage := TCnHashLangFileStorage.Create(nil);
   FStorage.FileName := SCnWizLangFile;
