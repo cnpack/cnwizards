@@ -92,9 +92,6 @@ object CnCmdSendForm: TCnCmdSendForm
     Top = 272
     Width = 331
     Height = 121
-    Lines.Strings = (
-      'param1=value1'
-      'param2=value2')
     ScrollBars = ssBoth
     TabOrder = 4
     WantReturns = False
@@ -125,7 +122,6 @@ object CnCmdSendForm: TCnCmdSendForm
     Width = 331
     Height = 20
     TabOrder = 7
-    Text = '0'
   end
   object lstMsg: TListBox
     Left = 22
@@ -147,7 +143,8 @@ object CnCmdSendForm: TCnCmdSendForm
         ' 表示加载旧有文本'
       '3543 通知多语插件停止生成条目功能并保存文件'
       '3544 通知多语插件将拦截到的 TextRect 的参数字符串放到剪贴板'
-      '3545 通知多语插件清空拦截到的 TextRect 的字符串并继续拦截')
+      '3545 通知多语插件清空拦截到的 TextRect 的字符串并继续拦截'
+      '3546 通知多语插件将当前语言存储条目放至剪贴板，参数为前缀过滤')
     TabOrder = 8
     OnClick = lstMsgClick
   end

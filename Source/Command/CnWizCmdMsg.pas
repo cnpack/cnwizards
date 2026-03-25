@@ -120,6 +120,9 @@ const
   CN_WIZ_CMD_INSP_RESTART_HOOK   = $CCB + $10E;  // 3545
   {* 通知多语插件清空拦截到的 TextRect 的字符串并继续拦截}
 
+  CN_WIZ_CMD_DUMP_LANGSTORAGE    = $CCB + $10F;  // 3546
+  {* 通知多语插件将当前语言存储条目放至剪贴板，参数为前缀过滤}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type
