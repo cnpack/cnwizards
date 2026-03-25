@@ -1927,15 +1927,19 @@ begin
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
 
+{$IFDEF UNICODE}
 {$IFDEF DEBUG}
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
+{$ENDIF}
 {$ENDIF}
 end;
 
 destructor TCnMenuFormTranslator.Destroy;
 begin
+{$IFDEF UNICODE}
 {$IFDEF DEBUG}
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
+{$ENDIF}
 {$ENDIF}
 
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
@@ -2057,7 +2061,22 @@ begin
           ChangeDefEnvPrefix(I, I - 3);
         for I := 34 to 42 do
           ChangeDefEnvPrefix(I, I - 4);
-      end;
+      end
+      else if Compiler = cnDelphiXE5 then
+      begin
+        ChangeDefEnvPrefix(19, 18);
+        ChangeDefEnvPrefix(20, -1);
+        ChangeDefEnvPrefix(21, 19);
+        ChangeDefEnvPrefix(22, 20);
+        ChangeDefEnvPrefix(23, 75);
+        ChangeDefEnvPrefix(24, 16);
+        ChangeDefEnvPrefix(-1, 22);
+        for I := 25 to 31 do
+          ChangeDefEnvPrefix(I, I - 2);
+        ChangeDefEnvPrefix(32, 21);
+        for I := 34 to 42 do
+          ChangeDefEnvPrefix(I, I + 42);
+      end
     end;
 
     // 自身版本独特的语言文件
