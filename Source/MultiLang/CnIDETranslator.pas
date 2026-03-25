@@ -2050,6 +2050,13 @@ begin
 
         for I := 34 to 42 do
           ChangeDefEnvPrefix(I, I - 3);
+      end
+      else if Compiler = cnDelphiXE6 then
+      begin
+        for I := 19 to 32 do
+          ChangeDefEnvPrefix(I, I - 3);
+        for I := 34 to 42 do
+          ChangeDefEnvPrefix(I, I - 4);
       end;
     end;
 
