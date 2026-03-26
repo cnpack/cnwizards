@@ -2077,6 +2077,17 @@ begin
         for I := 34 to 42 do
           ChangeDefEnvPrefix(I, I + 42);
       end
+      else if Compiler = cnDelphiXE4 then
+      begin
+        for I := 19 to 22 do
+          ChangeDefEnvPrefix(I, I - 3);
+        for I := 25 to 31 do
+          ChangeDefEnvPrefix(I, I - 3);
+        for I := 34 to 36 do
+          ChangeDefEnvPrefix(I, I - 4);
+        for I := 37 to 42 do
+          ChangeDefEnvPrefix(I, I - 3);
+      end;
     end;
 
     // 自身版本独特的语言文件
