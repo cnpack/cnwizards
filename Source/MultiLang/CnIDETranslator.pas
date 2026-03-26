@@ -2087,6 +2087,24 @@ begin
           ChangeDefEnvPrefix(I, I - 4);
         for I := 37 to 42 do
           ChangeDefEnvPrefix(I, I - 3);
+      end
+      else if Compiler = cnDelphiXE2 then
+      begin
+        ChangeDefEnvPrefix(19, 15);
+        ChangeDefEnvPrefix(21, 16);
+        ChangeDefEnvPrefix(22, 17);
+
+        ChangeDefEnvPrefix(24, -1);
+        ChangeDefEnvPrefix(25, -2);
+        for I := 27 to 31 do            // 影响 21 到 25，所以要备份俩
+          ChangeDefEnvPrefix(I, I - 6);
+        ChangeDefEnvPrefix(35, 28);
+        for I := 36 to 42 do
+          ChangeDefEnvPrefix(I, I - 7);
+        ChangeDefEnvPrefix(20, 27);
+        ChangeDefEnvPrefix(-1, 26);     // 还原俩
+        ChangeDefEnvPrefix(26, 19);
+        ChangeDefEnvPrefix(-2, 18);
       end;
     end;
 
