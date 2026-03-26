@@ -264,6 +264,7 @@ type
     procedure FormatQualID(PreSpaceCount: Byte = 0);
     procedure FormatTypeID(PreSpaceCount: Byte = 0);
     procedure FormatIdent(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True);
+    procedure FormatIdentWithBracket(PreSpaceCount: Byte = 0);
     procedure FormatIdentList(PreSpaceCount: Byte = 0; const CanHaveUnitQual: Boolean = True; NeedGeneric: Boolean = False);
     procedure FormatConstExpr(PreSpaceCount: Byte = 0; IndentForAnonymous: Byte = 0; IgnoreEqual: Boolean = False);
     procedure FormatConstExprInType(PreSpaceCount: Byte = 0);
@@ -1562,6 +1563,59 @@ begin
   end;
 end;
 
+procedure TCnBasePascalFormatter.FormatIdentWithBracket(PreSpaceCount: Byte);
+var
+  I, BracketCount, LessCount: Integer;
+  IsGeneric: Boolean;
+  GenericBookmark: TScannerBookmark;
+begin
+  BracketCount := 0;
+  while Scanner.Token = tokLB do
+  begin
+    Match(tokLB);
+    Inc(BracketCount);
+  end;
+
+  FormatIdent(PreSpaceCount, True);
+
+  // 这儿应该加入泛型判断
+  IsGeneric := False;
+  if Scanner.Token = tokLess then
+  begin
+    // 判断泛型，如果不是，恢复书签往下走；如果是，就恢复书签处理泛型
+    Scanner.SaveBookmark(GenericBookmark);
+    CodeGen.LockOutput;
+
+    // 往后找，一直找到非类型的关键字或者分号或者文件尾。
+    // 如果出现小于号和大于号一直不配对，则认为不是泛型。
+    // TODO: 判断还是不太严密，待继续验证。
+    Scanner.NextToken;
+    LessCount := 1;
+    while not (Scanner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
+    begin
+      if Scanner.Token = tokLess then
+        Inc(LessCount)
+      else if Scanner.Token = tokGreat then
+        Dec(LessCount);
+
+      if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
+        Break;
+
+      Scanner.NextToken;
+    end;
+    IsGeneric := (LessCount = 0);
+
+    Scanner.LoadBookmark(GenericBookmark);
+    CodeGen.UnLockOutput;
+  end;
+
+  if IsGeneric then
+    FormatTypeParams;
+
+  for I := 1 to BracketCount do
+    Match(tokRB);
+end;
+
 {
   New Grammer:
   QualID -> '(' Designator [AS TypeId]')'
@@ -1574,60 +1628,6 @@ end;
   QualId -> [UnitId '.'] Ident
 }
 procedure TCnBasePascalFormatter.FormatQualID(PreSpaceCount: Byte);
-
-  procedure FormatIdentWithBracket(PreSpaceCount: Byte);
-  var
-    I, BracketCount, LessCount: Integer;
-    IsGeneric: Boolean;
-    GenericBookmark: TScannerBookmark;
-  begin
-    BracketCount := 0;
-    while Scanner.Token = tokLB do
-    begin
-      Match(tokLB);
-      Inc(BracketCount);
-    end;
-
-    FormatIdent(PreSpaceCount, True);
-
-    // 这儿应该加入泛型判断
-    IsGeneric := False;
-    if Scanner.Token = tokLess then
-    begin
-      // 判断泛型，如果不是，恢复书签往下走；如果是，就恢复书签处理泛型
-      Scanner.SaveBookmark(GenericBookmark);
-      CodeGen.LockOutput;
-
-      // 往后找，一直找到非类型的关键字或者分号或者文件尾。
-      // 如果出现小于号和大于号一直不配对，则认为不是泛型。
-      // TODO: 判断还是不太严密，待继续验证。
-      Scanner.NextToken;
-      LessCount := 1;
-      while not (Scanner.Token in KeywordTokens + [tokSemicolon, tokEOF] - CanBeTypeKeywordTokens) do
-      begin
-        if Scanner.Token = tokLess then
-          Inc(LessCount)
-        else if Scanner.Token = tokGreat then
-          Dec(LessCount);
-
-        if LessCount = 0 then // Test<TObject><1 的情况，需要为 0 配对时就提前跳出
-          Break;
-
-        Scanner.NextToken;
-      end;
-      IsGeneric := (LessCount = 0);
-      
-      Scanner.LoadBookmark(GenericBookmark);
-      CodeGen.UnLockOutput;
-    end;
-
-    if IsGeneric then
-      FormatTypeParams;
-
-    for I := 1 to BracketCount do
-      Match(tokRB);
-  end;
-
 begin
   if Scanner.Token = tokLB then
   begin
@@ -3075,7 +3075,7 @@ begin
   if Scanner.Token = tokKeywordOF then  // like TFoo = class of TBar;
   begin
     Match(tokKeywordOF);
-    FormatIdent;
+    FormatIdentWithBracket;
     Exit;
   end
   else if (Scanner.Token = tokSymbol) and (Scanner.ForwardToken = tokKeywordFor)
@@ -3084,7 +3084,7 @@ begin
     // class helper for Ident
     Match(Scanner.Token);
     Match(tokKeywordFor);
-    FormatIdent(0);
+    FormatIdentWithBracket;
   end;
 
   if Scanner.Token in [tokKeywordSealed, tokDirectiveABSTRACT] then // TFoo = class sealed
@@ -4354,7 +4354,7 @@ begin
   begin
     Match(Scanner.Token);
     Match(tokKeywordFor);
-    FormatIdent(0);
+    FormatIdentWithBracket;
   end;
   Writeln;
 
