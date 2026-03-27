@@ -578,7 +578,7 @@ var
   end;
 
 begin
-  if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3534
+  if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3535
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_MULTILANG');
@@ -595,9 +595,18 @@ begin
       E.FilterOptions := E.FilterOptions - [tfFont];
       E.OnAllowItem := ExtractorAllowItem;
 
+      S := '';
+      if (Params <> nil) and (Params.Count > 0) then
+        S := Params[0];
+
       if Screen.ActiveCustomForm <> nil then
       begin
-        SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
+        if S = 'class' then
+          E.NoNameProcessType := cnptAtClassName
+        else if S = 'index' then
+          E.NoNameProcessType := cnptIndex
+        else
+          SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
 
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
         for I := SL.Count - 1 downto 0 do

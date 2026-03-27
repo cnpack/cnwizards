@@ -43,8 +43,9 @@ interface
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
-  Controls, Forms, Menus, Clipbrd, CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook,
-  CnHashLangStorage, CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst,
+  Controls, Forms, Menus, Clipbrd, ComCtrls,
+  CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
+  CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF UNICODE} CnControlHook, {$ENDIF}
   {$IFDEF BDS} CategoryButtons, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
@@ -105,8 +106,8 @@ type
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
     FAttachedMenuItems: TObjectList;
 {$IFDEF UNICODE}
-    FInspListBoxHook: TCnControlHook;
-    FInspTextDrawHook: TCnMethodHook;
+    FControlHook: TCnControlHook;
+    FTextDrawHook: TCnMethodHook;
 {$ENDIF}
     { 插件公用函数 }
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
@@ -201,13 +202,15 @@ type
     procedure MultiLangTranslateObjectProperty(AObject: TObject;
       const PropName: string; var Translate: Boolean);
 {$IFDEF UNICODE}
-    procedure ClearInspListBoxHooks;
-    procedure HookInspListBoxInControl(ARootControl: TControl);
-    procedure InstallInspTextDrawHook;
-    procedure UninstallInspTextDrawHook;
-    procedure InspListBoxBeforeMessage(Sender: TObject; Control: TControl;
+    procedure ClearTextDrawHooks;
+    procedure HookMessagesInControl(ARootControl: TControl);
+    procedure InstallTextDrawHook;
+    procedure UninstallTextDrawHook;
+    procedure TranslateTreeViewCatalog(AComponent: TComponent);
+
+    procedure ControlBeforeMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
-    procedure InspListBoxAfterMessage(Sender: TObject; Control: TControl;
+    procedure ControlAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 
 {$IFDEF DEBUG}
@@ -249,6 +252,9 @@ const
   RT_MECHANISM_EVENTHANDLER: string = 'EventHandler';
   RT_MECHANISM_WINDOWPROC: string = 'WindowProc';
 
+  SCN_INSP_LIST_BOX = 'TInspListBox';
+  SCN_TREE_NAME = 'trvwPageNodes';
+
 type
   TCnHackHashLangStorage = class(TCnCustomHashLangStorage);
 
@@ -261,6 +267,7 @@ type
 
 var
   FUITranslator: TCnMenuFormTranslator = nil;
+
   FOldCanvasTextRect: TCanvasTextRectProc = nil;
 {$IFDEF DEBUG}
   FHookedStringHashMap: TCnLangHashMap = nil;
@@ -275,14 +282,14 @@ var
   S: string;
 begin
 {$IFDEF DEBUG}
-//  if FInspListBoxDrawPainting and (Text <> '') then
+//  if FInspListBoxlDrawPainting and (Text <> '') then
 //    CnDebugger.LogFmt('CnIDETranslator InspListBox Canvas.TextRect Left %d, Top %d: %s',
 //      [Rect.Left, Rect.Top, Text]);
 {$ENDIF}
 
 {$IFDEF DEBUG}
    // Left < 100 的字符串，都记下来
-   if Rect.Left < 100 then
+   if FInspListBoxDrawPainting and (Rect.Left < 100) then
    begin
      if FHookedStringHashMap = nil then
        FHookedStringHashMap := TCnLangHashMap.Create;
@@ -300,18 +307,18 @@ begin
   else
     S := Text;
 
-  if FUITranslator.FInspTextDrawHook.UseDDteours then
+  if FUITranslator.FTextDrawHook.UseDDteours then
   begin
-    OldProc := TCanvasTextRectProc(FUITranslator.FInspTextDrawHook.Trampoline);
+    OldProc := TCanvasTextRectProc(FUITranslator.FTextDrawHook.Trampoline);
     OldProc(ASelf, Rect, X, Y, S);
   end
   else
   begin
-    FUITranslator.FInspTextDrawHook.UnhookMethod;
+    FUITranslator.FTextDrawHook.UnhookMethod;
     try
       ASelf.TextRect(Rect, X, Y, S);
     finally
-      FUITranslator.FInspTextDrawHook.HookMethod;
+      FUITranslator.FTextDrawHook.HookMethod;
     end;
   end;
 end;
@@ -1908,11 +1915,11 @@ begin
   FAttachedPopupMenuHooks := TObjectList.Create(True);
   FAttachedMenuItems := TObjectList.Create(True);
 {$IFDEF UNICODE}
-  FInspListBoxHook := TCnControlHook.Create(nil);
-  FInspListBoxHook.BeforeMessage := InspListBoxBeforeMessage;
-  FInspListBoxHook.AfterMessage := InspListBoxAfterMessage;
+  FControlHook := TCnControlHook.Create(nil);
+  FControlHook.BeforeMessage := ControlBeforeMessage;
+  FControlHook.AfterMessage := ControlAfterMessage;
   FUITranslator := Self;
-  InstallInspTextDrawHook;
+  InstallTextDrawHook;
 {$ENDIF}
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
@@ -1954,9 +1961,9 @@ begin
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
 {$IFDEF UNICODE}
-  UninstallInspTextDrawHook;
-  ClearInspListBoxHooks;
-  FreeAndNil(FInspListBoxHook);
+  UninstallTextDrawHook;
+  ClearTextDrawHooks;
+  FreeAndNil(FControlHook);
   FUITranslator := nil;
 {$ENDIF}
 
@@ -2156,7 +2163,7 @@ begin
       LoadAdditionalLangFile(GetAdditionalLangID);
       TranslateAllExistingForms;
 {$IFDEF UNICODE}
-      InstallInspTextDrawHook;
+      InstallTextDrawHook;
 {$ENDIF}
 
       // 延迟加载
@@ -2182,8 +2189,8 @@ begin
       UnHookPopupMenus;
       UnHookMainMenuDynamicItems;
 {$IFDEF UNICODE}
-      ClearInspListBoxHooks;
-      UninstallInspTextDrawHook;
+      ClearTextDrawHooks;
+      UninstallTextDrawHook;
 {$ENDIF}
     end;
   end;
@@ -2252,11 +2259,18 @@ begin
   HookPopupMenuOnCurrentEditWindow;
 
 {$IFDEF UNICODE}
-  ClearInspListBoxHooks;
+  ClearTextDrawHooks;
   if FActive and (Screen.ActiveCustomForm <> nil) and
     (Screen.ActiveCustomForm.ClassNameIs('TDelphiProjectOptionsDialog')
-    or (Screen.ActiveCustomForm.ClassNameIs('TCppProjectOptionsDialog'))) then
-    HookInspListBoxInControl(Screen.ActiveCustomForm);
+    or Screen.ActiveCustomForm.ClassNameIs('TCppProjectOptionsDialog')
+    or Screen.ActiveCustomForm.ClassNameIs('TCppProjOptsDlg')
+    or Screen.ActiveCustomForm.ClassNameIs('TDefaultEnvironmentDialog')) then
+  begin
+    HookMessagesInControl(Screen.ActiveCustomForm);
+    // 手动翻译工程选项、环境选项等部分对话框左侧的树目录节点
+    if FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+      TranslateTreeViewCatalog(Screen.ActiveCustomForm);
+  end;
 {$ENDIF}
 
   if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
@@ -2299,40 +2313,40 @@ end;
 
 {$IFDEF UNICODE}
 
-procedure TCnMenuFormTranslator.InstallInspTextDrawHook;
+procedure TCnMenuFormTranslator.InstallTextDrawHook;
 var
   M: TCanvasTextRectMethod;
   C: TCanvas;
 begin
-  if FInspTextDrawHook = nil then
+  if FTextDrawHook = nil then
   begin
     C := TCanvas.Create;
     M := C.TextRect;
     FOldCanvasTextRect := GetBplMethodAddress(TMethod(M).Code);
     C.Free;
-    FInspTextDrawHook := TCnMethodHook.Create(@FOldCanvasTextRect, @MyHookedCanvasTextRect);
+    FTextDrawHook := TCnMethodHook.Create(@FOldCanvasTextRect, @MyHookedCanvasTextRect);
   end;
 end;
 
-procedure TCnMenuFormTranslator.UninstallInspTextDrawHook;
+procedure TCnMenuFormTranslator.UninstallTextDrawHook;
 begin
-  FreeAndNil(FInspTextDrawHook);
+  FreeAndNil(FTextDrawHook);
   FOldCanvasTextRect := nil;
 end;
 
-procedure TCnMenuFormTranslator.ClearInspListBoxHooks;
+procedure TCnMenuFormTranslator.ClearTextDrawHooks;
 var
   I: Integer;
 begin
-  if FInspListBoxHook = nil then
+  if FControlHook = nil then
     Exit;
 
-  for I := FInspListBoxHook.Items.Count - 1 downto 0 do
+  for I := FControlHook.Items.Count - 1 downto 0 do
   begin
-    if FInspListBoxHook.Items[I].Control <> nil then
-      FInspListBoxHook.UnHook(FInspListBoxHook.Items[I].Control)
+    if FControlHook.Items[I].Control <> nil then
+      FControlHook.UnHook(FControlHook.Items[I].Control)
     else
-      FInspListBoxHook.Items[I].Free;
+      FControlHook.Items[I].Free;
   end;
 end;
 
@@ -2405,26 +2419,34 @@ begin
         SL.Free;
       end;
     end;
+  end
+  else if Command = CN_WIZ_CMD_TRAN_TREEVIEW then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_TRAN_TREEVIEW in %s',
+      [Screen.ActiveCustomForm.ClassName]);
+{$ENDIF}
+    TranslateTreeViewCatalog(Screen.ActiveCustomForm);
   end;
 end;
 
 {$ENDIF}
 
-procedure TCnMenuFormTranslator.HookInspListBoxInControl(ARootControl: TControl);
+procedure TCnMenuFormTranslator.HookMessagesInControl(ARootControl: TControl);
 var
   I: Integer;
   C: TControl;
   W: TWinControl;
   OwnerName: string;
 begin
-  if (ARootControl = nil) or (FInspListBoxHook = nil) then
+  if (ARootControl = nil) or (FControlHook = nil) then
     Exit;
 
-  if SameText(ARootControl.ClassName, 'TInspListBox') then
+  if ARootControl.ClassNameIs(SCN_INSP_LIST_BOX) then
   begin
-    if not FInspListBoxHook.IsHooked(ARootControl) then
+    if not FControlHook.IsHooked(ARootControl) then
     begin
-      FInspListBoxHook.Hook(ARootControl);
+      FControlHook.Hook(ARootControl);
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
         OwnerName := ARootControl.Owner.Name
@@ -2442,12 +2464,43 @@ begin
     for I := 0 to W.ControlCount - 1 do
     begin
       C := W.Controls[I];
-      HookInspListBoxInControl(C);
+      HookMessagesInControl(C);
     end;
   end;
 end;
 
-procedure TCnMenuFormTranslator.InspListBoxBeforeMessage(Sender: TObject;
+procedure TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent);
+var
+  I: Integer;
+  AChild: TComponent;
+  ATreeView: TTreeView;
+  S: string;
+begin
+  if AComponent = nil then
+    Exit;
+
+  if (AComponent is TTreeView) and (AComponent.Name = 'trvwPageNodes') then
+  begin
+    ATreeView := TTreeView(AComponent);
+    if ATreeView.Items.Count > 0 then
+    begin
+      for I := 0 to ATreeView.Items.Count - 1 do
+      begin
+        S := CnLanguageManager.Translate(ATreeView.Items[I].Text);
+        if S <> '' then
+          ATreeView.Items[I].Text := S;
+      end;
+    end;
+  end;
+
+  for I := 0 to AComponent.ComponentCount - 1 do
+  begin
+    AChild := AComponent.Components[I];
+    TranslateTreeViewCatalog(AChild);
+  end;
+end;
+
+procedure TCnMenuFormTranslator.ControlBeforeMessage(Sender: TObject;
   Control: TControl; var Msg: TMessage; var Handled: Boolean);
 var
   OwnerName: string;
@@ -2455,18 +2508,19 @@ begin
   if Msg.Msg = WM_PAINT then
   begin
     FInspListBoxDrawPainting := True;
+
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
       OwnerName := Control.Owner.Name
     else
       OwnerName := '<nil>';
-    CnDebugger.LogFmt('CnIDETranslator InspListBox Before WM_PAINT: %s.%s',
+    CnDebugger.LogFmt('CnIDETranslator Control Before WM_PAINT: %s.%s',
       [OwnerName, Control.Name]);
 {$ENDIF}
   end;
 end;
 
-procedure TCnMenuFormTranslator.InspListBoxAfterMessage(Sender: TObject;
+procedure TCnMenuFormTranslator.ControlAfterMessage(Sender: TObject;
   Control: TControl; var Msg: TMessage; var Handled: Boolean);
 var
   OwnerName: string;
@@ -2474,12 +2528,13 @@ begin
   if Msg.Msg = WM_PAINT then
   begin
     FInspListBoxDrawPainting := False;
+
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
       OwnerName := Control.Owner.Name
     else
       OwnerName := '<nil>';
-    CnDebugger.LogFmt('CnIDETranslator InspListBox After WM_PAINT: %s.%s',
+    CnDebugger.LogFmt('CnIDETranslator Control After WM_PAINT: %s.%s',
       [OwnerName, Control.Name]);
 {$ENDIF}
   end;
