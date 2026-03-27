@@ -213,10 +213,8 @@ type
     procedure ControlAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 
-{$IFDEF DEBUG}
     procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
-{$ENDIF}
 {$ENDIF}
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
@@ -1609,7 +1607,8 @@ begin
   if OnlyCurrent then
   begin
     F := Screen.ActiveCustomForm;
-    if (F <> nil) and (F.Name <> '') then
+    if (F <> nil) and (F.Name <> '') and // 不找专家包的窗体
+      (Pos('TCn', F.ClassName) <> 1) and (Pos('Cn', F.Name) <> 1) then
     begin
       S := F.Name + '.';
       MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS, S);
@@ -1935,18 +1934,14 @@ begin
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
 
 {$IFDEF UNICODE}
-{$IFDEF DEBUG}
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
-{$ENDIF}
 {$ENDIF}
 end;
 
 destructor TCnMenuFormTranslator.Destroy;
 begin
 {$IFDEF UNICODE}
-{$IFDEF DEBUG}
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
-{$ENDIF}
 {$ENDIF}
 
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
@@ -1994,18 +1989,9 @@ begin
 end;
 
 procedure TCnMenuFormTranslator.LoadAdditionalLangFile(ALangID: Cardinal);
-const
-  DEF_ENV_FMT = 'TDefaultEnvironmentDialog.PropertySheetControl1.[%d].';
 var
   I: Integer;
   S, D: string;
-
-  procedure ChangeDefEnvPrefix(Source, Dest: Integer);
-  begin
-    ChangeLangPrefix(TCnHackHashLangStorage(FStorageRef).HashMap,
-      Format(DEF_ENV_FMT, [Source]), Format(DEF_ENV_FMT, [Dest]));
-  end;
-
 begin
   FAddtionalLanguageFileLoad := False;
   if ALangID = 0 then
@@ -2041,78 +2027,6 @@ begin
       // 将语言条目中的 TDelphiProjectOptionsDialog 替换为低版本中的 TProjectOptionsDialog
       ChangeLangPrefix(TCnHackHashLangStorage(FStorageRef).HashMap,
         'TDelphiProjectOptionsDialog.', 'TProjectOptionsDialog.');
-    end;
-
-    if Compiler in [cnDelphi2009..cnDelphiXE7] then
-    begin
-      if Compiler = cnDelphiXE7 then
-      begin
-        // 工程树架构有差异改动
-        for I := 18 to 22 do
-          ChangeDefEnvPrefix(I, I - 1);
-
-        ChangeDefEnvPrefix(24, -1); // 连接管理器放临时位置
-
-        for I := 25 to 31 do
-          ChangeDefEnvPrefix(I, I - 3);
-
-        ChangeDefEnvPrefix(-1, 29); // 临时位置恢复连接管理器
-        ChangeDefEnvPrefix(32, 30); // SDK 管理器
-
-        for I := 34 to 42 do
-          ChangeDefEnvPrefix(I, I - 3);
-      end
-      else if Compiler = cnDelphiXE6 then
-      begin
-        for I := 19 to 32 do
-          ChangeDefEnvPrefix(I, I - 3);
-        for I := 34 to 42 do
-          ChangeDefEnvPrefix(I, I - 4);
-      end
-      else if Compiler = cnDelphiXE5 then
-      begin
-        ChangeDefEnvPrefix(19, 18);
-        ChangeDefEnvPrefix(20, -1);
-        ChangeDefEnvPrefix(21, 19);
-        ChangeDefEnvPrefix(22, 20);
-        ChangeDefEnvPrefix(23, 75);
-        ChangeDefEnvPrefix(24, 16);
-        ChangeDefEnvPrefix(-1, 22);
-        for I := 25 to 31 do
-          ChangeDefEnvPrefix(I, I - 2);
-        ChangeDefEnvPrefix(32, 21);
-        for I := 34 to 42 do
-          ChangeDefEnvPrefix(I, I + 42);
-      end
-      else if Compiler = cnDelphiXE4 then
-      begin
-        for I := 19 to 22 do
-          ChangeDefEnvPrefix(I, I - 3);
-        for I := 25 to 31 do
-          ChangeDefEnvPrefix(I, I - 3);
-        for I := 34 to 36 do
-          ChangeDefEnvPrefix(I, I - 4);
-        for I := 37 to 42 do
-          ChangeDefEnvPrefix(I, I - 3);
-      end
-      else if Compiler = cnDelphiXE2 then
-      begin
-        ChangeDefEnvPrefix(19, 15);
-        ChangeDefEnvPrefix(21, 16);
-        ChangeDefEnvPrefix(22, 17);
-
-        ChangeDefEnvPrefix(24, -1);
-        ChangeDefEnvPrefix(25, -2);
-        for I := 27 to 31 do            // 影响 21 到 25，所以要备份俩
-          ChangeDefEnvPrefix(I, I - 6);
-        ChangeDefEnvPrefix(35, 28);
-        for I := 36 to 42 do
-          ChangeDefEnvPrefix(I, I - 7);
-        ChangeDefEnvPrefix(20, 27);
-        ChangeDefEnvPrefix(-1, 26);     // 还原俩
-        ChangeDefEnvPrefix(26, 19);
-        ChangeDefEnvPrefix(-2, 18);
-      end;
     end;
 
     // 自身版本独特的语言文件
@@ -2242,6 +2156,10 @@ begin
   while FTransQueue.Count > 0 do
   begin
     F := TCustomForm(FTransQueue[0]);
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('Delayed To TranslateQueue ' + F.ClassName);
+{$ENDIF}
+
     CnLanguageManager.TranslateForm(F, True);
     if F.Visible then
       F.Update;
@@ -2281,25 +2199,24 @@ begin
     begin
       if not (csDesigning in F.ComponentState) and (FTranFormsList.IndexOf(F) < 0) then
       begin
-        if False {F.ClassNameIs('TProjectOptionsDialog')} then
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
+{$ENDIF}
+        CnLanguageManager.TranslateForm(F, True);
+        if F.Visible then
+          F.Update;
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
+{$ENDIF}
+
+        if (Compiler >= cnDelphi2009) and F.ClassNameIs('TDefaultEnvironmentDialog') then
         begin
-          // 特殊窗体要等其延迟初始化完毕后再翻译，先留这么个口子
+          // 特殊窗体要等其延迟初始化完毕后再翻译一次
           FTransQueue.Add(F);
           CnWizNotifierServices.ExecuteOnApplicationIdle(TranslateQueue);
         end
         else
-        begin
-{$IFDEF DEBUG}
-          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
-{$ENDIF}
-          CnLanguageManager.TranslateForm(F, True);
-          if F.Visible then
-            F.Update;
-{$IFDEF DEBUG}
-          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
-{$ENDIF}
           FTranFormsList.Add(F);
-        end;
       end
       else
       begin
@@ -2350,8 +2267,6 @@ begin
   end;
 end;
 
-{$IFDEF DEBUG}
-
 procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
   const SourceID, DestID: PAnsiChar; const IDESets: TCnCompilers;
   const Params: TStrings);
@@ -2361,6 +2276,7 @@ var
 begin
   if Command = CN_WIZ_CMD_INSP_DUMP_HOOK then
   begin
+{$IFDEF DEBUG}
     if FHookedStringHashMap <> nil then
     begin
       SL := TStringList.Create;
@@ -2369,27 +2285,27 @@ begin
         while FHookedStringHashMap.GetNext(Key, Value) do
           SL.Add(Key + '=' + Key);
 
-{$IFDEF DEBUG}
       CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_DUMP_HOOK. Dump %d',
         [FHookedStringHashMap.Size]);
-{$ENDIF}
+
         SL.Sort;
         Clipboard.AsText := SL.Text;
       finally
         SL.Free;
       end;
     end;
+{$ENDIF}
   end
   else if Command = CN_WIZ_CMD_INSP_RESTART_HOOK then
   begin
+{$IFDEF DEBUG}
     if FHookedStringHashMap <> nil then
     begin
       FHookedStringHashMap.Clear;
-{$IFDEF DEBUG}
       CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_RESTART_HOOK. Clear to %d',
         [FHookedStringHashMap.Size]);
-{$ENDIF}
     end;
+{$ENDIF}
   end
   else if Command = CN_WIZ_CMD_DUMP_LANGSTORAGE then
   begin
@@ -2429,8 +2345,6 @@ begin
     TranslateTreeViewCatalog(Screen.ActiveCustomForm);
   end;
 end;
-
-{$ENDIF}
 
 procedure TCnMenuFormTranslator.HookMessagesInControl(ARootControl: TControl);
 var
