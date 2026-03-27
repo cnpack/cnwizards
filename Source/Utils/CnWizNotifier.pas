@@ -3253,7 +3253,7 @@ end;
 
 function TCnHookDesignMenuEditor.GetVerb(Index: Integer): string;
 begin
-  Result := 'CnPack Hidden Hook';
+  Result := '-';
 end;
 
 function TCnHookDesignMenuEditor.GetVerbCount: Integer;
