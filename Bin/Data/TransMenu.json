@@ -20,7 +20,7 @@
       }, {
         "MenuPath": "FileMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Add Unit", "添加单元"], ["Close", "关闭"], ["Close All", "全部关闭"], ["Close all and terminate process", "全部关闭并终止进程"], ["Configure Unit Expert", "配置单元专家"], ["Customize", "自定义"], ["Exit", "退出"], ["File", "文件"], ["Find Project", "查找项目"], ["Include Unit Hdr", "引用头文件"], ["New||", "新建||"], ["Open", "打开"], ["Open Favorite", "打开收藏夹"], ["Open From Version Control", "从版本控制打开"], ["Open Project", "打开项目"], ["Open Recent", "打开最近"], ["Other", "其他"], ["Print", "打印"], ["Properties", "属性"], ["Rename Unit", "重命名单元"], ["Reopen", "重新打开"], ["Save", "保存"], ["Save All", "全部保存"], ["Save As", "另存为"], ["Save Project As", "项目另存为"], ["Unit Expert", "单元专家"], ["Use Unit", "引用单元"]]
+        "ItemCaption": [["Add Unit", "添加单元"], ["Close", "关闭"], ["Close All", "全部关闭"], ["Close all and terminate process", "全部关闭并终止进程"], ["Configure Unit Expert", "配置单元专家"], ["Customize", "自定义"], ["Exit", "退出"], ["File", "文件"], ["Find Project", "查找工程"], ["Include Unit Hdr", "引用头文件"], ["New||", "新建||"], ["Open", "打开"], ["Open Favorite", "打开收藏夹"], ["Open From Version Control", "从版本控制打开"], ["Open Project", "打开工程"], ["Open Recent", "打开最近"], ["Other", "其他"], ["Print", "打印"], ["Properties", "属性"], ["Rename Unit", "重命名单元"], ["Reopen", "重新打开"], ["Save", "保存"], ["Save All", "全部保存"], ["Save As", "另存为"], ["Save Project As", "工程另存为"], ["Unit Expert", "单元专家"], ["Use Unit", "引用单元"]]
       }, {
         "MenuPath": "HelpMenu",
         "ForceEnglish": "False",
@@ -28,7 +28,7 @@
       }, {
         "MenuPath": "mnuRefactoring",
         "ForceEnglish": "False",
-        "ItemCaption": [["Change Parameters", "更改参数"], ["Change Params", "更改参数"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find Unit", "查找单元"], ["Find Unit", "查找单元"], ["Inline Variable", "内联变量"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Move", "移动"], ["No Refactorings Available", "无可用的重构"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Refactor", "重构"], ["Rename", "重命名"], ["Safe Delete", "安全删除"]]
+        "ItemCaption": [["Change Parameters", "更改参数"], ["Change Params", "更改参数"], ["Declare Field", "声明字段"], ["Declare Variable", "声明变量"], ["Extract Interface", "提取接口"], ["Extract Method", "提取方法"], ["Extract Resource String", "提取资源字符串"], ["Extract Superclass", "提取超类"], ["Find Unit", "查找单元"], ["Inline Variable", "内联变量"], ["Introduce Field", "引入字段"], ["Introduce Variable", "引入变量"], ["Move", "移动"], ["No Refactorings Available", "无可用的重构"], ["Pull Members Up", "上拉成员"], ["Push Members Down", "下推成员"], ["Refactor", "重构"], ["Rename", "重命名"], ["Safe Delete", "安全删除"]]
       }, {
         "MenuPath": "ProjectBuildItem",
         "ForceEnglish": "False",
@@ -48,7 +48,7 @@
       }, {
         "MenuPath": "ProjectMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Add", "添加"], ["Add Existing Project", "添加现有项目"], ["Add New Project", "添加新项目"], ["Add to Project", "添加到项目"], ["Add to Repository", "添加到资源库"], ["Build All Projects", "构建所有项目"], ["Clean", "清理"], ["Clear Unit Cache", "清除单元缓存"], ["Compile All Projects", "编译所有项目"], ["Compile Unit", "编译单元"], ["Configuration Manager", "配置管理器"], ["Default Options", "默认选项"], ["Dependencies", "依赖项"], ["Deploy to the Cloud", "部署到云端"], ["Deployment", "部署"], ["Edit Option Source", "编辑选项源码"], ["Export Makefile", "输出Makefile"], ["Format Project Sources", "格式化项目源代码"], ["Import Type Library", "导入类型库"], ["Languages", "语言"], ["Method Toxicity Metrics", "函数矩阵"], ["Modeling Support", "模块支持"], ["Options", "选项"], ["Project", "项目"], ["Project Configurations", "项目配置"], ["Project Page Options", "项目页面选项"], ["QA Audits", "检测设计质量"], ["QA Metrics", "检测代码质量"], ["Remove", "移除"], ["Remove From Project", "从项目移除"], ["Resources", "资源"], ["Resources and Images", "资源和图像"], ["Set Active  (<||>)", "设为活动  (<||>)"], ["Set Active||", "设为活动"], ["Stop Building", "停止构建"], ["Together Support", "协同支持"], ["Update Localized Projects", "更新本地化项目"], ["Update Resource DLLs", "更新资源 DLL"], ["View source", "查看源代码"], ["Web Deploy", "Web 部署"], ["Web Deployment Options", "Web 部署选项"]]
+        "ItemCaption": [["Add", "添加"], ["Add Existing Project", "添加现有工程"], ["Add New Project", "添加新工程"], ["Add to Project", "添加到工程"], ["Add to Repository", "添加到资源库"], ["Build All Projects", "构建所有工程"], ["Clean", "清理"], ["Clear Unit Cache", "清除单元缓存"], ["Compile All Projects", "编译所有工程"], ["Compile Unit", "编译单元"], ["Configuration Manager", "配置管理器"], ["Default Options", "默认选项"], ["Dependencies", "依赖项"], ["Deploy to the Cloud", "部署到云端"], ["Deployment", "部署"], ["Edit Option Source", "编辑选项源码"], ["Export Makefile", "输出Makefile"], ["Format Project Sources", "格式化工程源代码"], ["Import Type Library", "导入类型库"], ["Languages", "语言"], ["Method Toxicity Metrics", "方法副作用指标"], ["Modeling Support", "模块支持"], ["Options", "选项"], ["Project", "工程"], ["Project Configurations", "工程配置"], ["Project Page Options", "工程页面选项"], ["QA Audits", "检测设计质量"], ["QA Metrics", "检测代码质量"], ["Remove", "移除"], ["Remove From Project", "从工程移除"], ["Resources", "资源"], ["Resources and Images", "资源和图像"], ["Set Active  (<||>)", "设为活动  (<||>)"], ["Set Active||", "设为活动"], ["Stop Building", "停止构建"], ["Together Support", "协同支持"], ["Update Localized Projects", "更新本地化工程"], ["Update Resource DLLs", "更新资源 DLL"], ["View source", "查看源代码"], ["Web Deploy", "Web 部署"], ["Web Deployment Options", "Web 部署选项"]]
       }, {
         "MenuPath": "ProjectSyntaxItem",
         "ForceEnglish": "False",
@@ -194,7 +194,7 @@
       }, {
         "MenuPath": "ProjectManagerForm.ProjectManagerForm.SortMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Auto Sort", "自动排序"], ["Default Sort Order", "默认排序顺序"], ["Modified Date", "修改日期"], ["Name", "名称"], ["Off", "关闭"], ["On", "开启"], ["Path", "路径"], ["Sort Projects By", "项目排序方式"], ["Type", "类型"]]
+        "ItemCaption": [["Auto Sort", "自动排序"], ["Default Sort Order", "默认排序顺序"], ["Modified Date", "修改日期"], ["Name", "名称"], ["Off", "关闭"], ["On", "开启"], ["Path", "路径"], ["Sort Projects By", "工程排序方式"], ["Type", "类型"]]
       }, {
         "MenuPath": "ProjectManagerForm.ProjectManagerForm.viewsPopupMenu",
         "ForceEnglish": "FALSE",
@@ -230,7 +230,7 @@
       }, {
         "MenuPath": "ToDoListWindow.ToDoListWindow.GridPopup",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Action Item", "操作项"], ["Add", "添加"], ["Categories", "类别"], ["Category", "类别"], ["Copy As", "复制为"], ["Delete", "删除"], ["Dockable", "可停靠"], ["Edit", "编辑"], ["Filter", "筛选"], ["HTML Table", "HTML 表格"], ["Item Types", "项目类型"], ["Local Menu", "本地菜单"], ["Module", "模块"], ["Open", "打开"], ["Owner", "所有者"], ["Owners", "所有者"], ["Priority", "优先级"], ["Show Completed Items", "显示已完成项目"], ["Show ToolTips when Clipped", "剪辑时显示工具提示"], ["Sort", "排序"], ["Status", "状态"], ["Stay on Top", "保持置顶"], ["Table Properties", "表格属性"], ["Text", "文本"], ["Type", "类型"], ["Zoom Window", "缩放窗口"]]
+      "ItemCaption": [["Action Item", "操作项"], ["Add", "添加"], ["Categories", "类别"], ["Category", "类别"], ["Copy As", "复制为"], ["Delete", "删除"], ["Dockable", "可停靠"], ["Edit", "编辑"], ["Filter", "筛选"], ["HTML Table", "HTML 表格"], ["Item Types", "工程类型"], ["Local Menu", "本地菜单"], ["Module", "模块"], ["Open", "打开"], ["Owner", "所有者"], ["Owners", "所有者"], ["Priority", "优先级"], ["Show Completed Items", "显示已完成项目"], ["Show ToolTips when Clipped", "剪辑时显示工具提示"], ["Sort", "排序"], ["Status", "状态"], ["Stay on Top", "保持置顶"], ["Table Properties", "表格属性"], ["Text", "文本"], ["Type", "类型"], ["Zoom Window", "缩放窗口"]]
       }, {
         "MenuPath": "WatchWindow.WatchWindow.WatchMenu",
         "ForceEnglish": "FALSE",
