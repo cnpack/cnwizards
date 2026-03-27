@@ -1972,8 +1972,8 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  {$IFNDEF DELPHI10_SEATTLE_UP}
-  Result := 'RADStudioXE8.txt';  // XE8 µ½ 2009
+  {$IFNDEF DELPHI102_TOKYO_UP}
+  Result := 'RADStudioXE8.txt';  // 10.2/10.1/XE8 µ½ 2009
   {$ENDIF}
   {$ELSE}
   Result := 'RADStudio2007.txt'; // 2005 µ½ 2007
