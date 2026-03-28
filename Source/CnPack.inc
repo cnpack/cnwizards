@@ -3486,9 +3486,9 @@
 {$ENDIF}
 
 {$IFDEF DELPHI120_ATHENS_UP}
-  {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 TList use NativeInt for Index and Count instead of Integer
-  {$DEFINE IDE_HAS_TABMENU_COPY_PATH}   // Athens 12 editor tab menu has item to copy path or filename
-  {$DEFINE IDE_HAS_DBCLICK_HIGHLIGHT}   // Athens 12 editor double click selection highlight
+  {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 的 TList 的 Index 和 Count 从 Integer 改成 NativeInt
+  {$DEFINE IDE_HAS_TABMENU_COPY_PATH}   // Athens 12 的编辑器的 Tab 右键菜单有 copy path or filename 项
+  {$DEFINE IDE_HAS_DBCLICK_HIGHLIGHT}   // Athens 12 的编辑器双击可同屏高亮选择区
   {$DEFINE OTA_CODEEDITOR_SERVICE}      // 11.3 加入了 ToolsAPI.Editor 接口，但编译时无法和 11.0/1/2 区分，只能加到 12 里
 {$ENDIF}
 
@@ -3497,12 +3497,12 @@
 {$ENDIF}
 
 {$IFDEF DELPHI110_ALEXANDRIA_UP}
-  {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 removed OldCreateOrder
-  {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 supports HDPI using TVirtualImageList, etc.
-  {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 supports auto open VCL source readonly
-  {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 has Memory Visualizer for Debug
-  {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 TStrings.SetTextStr Ignore #0 Terminated Char
-  {$DEFINE MEMORYSTREAM_CAPACITY_NATIVEINT}  // Alexandria 11 TMemoryStream Capacity is NativeInt instead of Longint
+  {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 删除了 OldCreateOrder 属性
+  {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 的 IDE 开始支持 HDPI，用 TVirtualImageList 等相关组件
+  {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 中有并自动开启 VCL 源码只读保护功能
+  {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 的调试器中有 Memory Visualizer
+  {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 的 TStrings.SetTextStr 会忽略 #0 结束符
+  {$DEFINE MEMORYSTREAM_CAPACITY_NATIVEINT}  // Alexandria 11 的 TMemoryStream 的 Capacity 从 Longint 改成了 NativeInt
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
@@ -3514,6 +3514,7 @@
 
 {$IFDEF DELPHI103_RIO_UP}
   {$DEFINE SUPPORT_MACOS64}             // Rio 10.3.2 或以上支持 64 位 MacOS
+  {$DEFINE IDE_CATALOG_VIRTUALTREE}     // Rio 10.3 的设置等对话框左侧目录树从 TreeView 改成了 VirtualStringTree
 {$ENDIF}
 
 {$IFDEF DELPHI102_TOKYO_UP}
@@ -3527,13 +3528,13 @@
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
-  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S has own Structual Highlight
-  {$DEFINE IDE_HAS_HIDE_NONVISUAL}      // 10S has "Hide NonVisual" Feature.
+  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S 开始有高亮划线 "Structual Highlight" 的功能
+  {$DEFINE IDE_HAS_HIDE_NONVISUAL}      // 10S 开始有隐藏不可视组件 "Hide NonVisual" 的功能
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
   {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 及以上的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 Longint 改为 Integer
-  {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S and above integrate Castalia.
+  {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S 及以上集成了 Castalia.
 {$ENDIF}
 
 {$IFDEF DELPHIXE7_UP}
@@ -3549,7 +3550,7 @@
 {$IFDEF DELPHIXE5_UP}
   {$DEFINE SUPPORT_MOBILE}              // XE5 及以上开始支持移动开发
   {$DEFINE FMX_HAS_GRAPHICS}            // XE5 及以上 FMX 才有 Graphics 单元
-  {$DEFINE IDE_HAS_INSIGHT}             // XE5 has IDE Insight Bar
+  {$DEFINE IDE_HAS_INSIGHT}             // XE5 及以上有 IDE Insight Bar
 {$ENDIF}
 
 {$IFDEF DELPHIXE5}
@@ -3561,7 +3562,7 @@
     {$DEFINE SUPPORT_FMX_FRAME}         // XE4 及以上的 FMX 支持 FMX Frame
   {$ENDIF}
 {$ELSE}
-  {$DEFINE MEMO_CARETPOS_BUG}           // Memo CaretPos Get Negative Error Value for Large File under XE3 or below
+  {$DEFINE MEMO_CARETPOS_BUG}           // XE3 及以下的 Memo CaretPos 在碰到大文件时会出现负值
 {$ENDIF}
 
 {$IFDEF DELPHIXE4}
@@ -3569,8 +3570,8 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE3_UP}
-  {$DEFINE SUPPORT_ATOMIC}              // XE3 has Atomic Routines
-  {$DEFINE TCONTROL_HAS_STYLEELEMENTS}  // XE3 TControl has StyleElements Property
+  {$DEFINE SUPPORT_ATOMIC}              // XE3 有 Atomic 相关函数
+  {$DEFINE TCONTROL_HAS_STYLEELEMENTS}  // XE3 的 TControl 开始有 StyleElements 属性
   {$DEFINE NEW_SETTING_DELIMITER}       // FormatSettings 和 TStringHelper.LastDelimiter 带来了不兼容问题
   {$DEFINE IDE_NP_FMX_DESIGN_BUG}       // XE3 FMX Designer Cut/Copy/Paste cause AV Bug for -np switch
 {$ENDIF}
@@ -3590,11 +3591,11 @@
   {$DEFINE SUPPORT_THEME}                      // XE2 及以上支持 StyleService 的主题
   {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 及以上的单元名开始带点
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
-  {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 ZLib Supports WindowBits
-  {$DEFINE SUPPORT_GDIPLUS}                    // XE2 Supports GDI+
-  {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 Defined Int64Array
-  {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 System.UITypes Has TAlphaColors
-  {$DEFINE LIST_NEW_POINTER}                   // XE2 List has a New Pointer
+  {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 及以上的 ZLib 支持 WindowBits
+  {$DEFINE SUPPORT_GDIPLUS}                    // XE2 及以上支持 GDI+
+  {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 及以上定义了 Int64Array
+  {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 的 System.UITypes 里定义了 TAlphaColors
+  {$DEFINE LIST_NEW_POINTER}                   // XE2 的 List 有个新 Pointer
   {$DEFINE VERSIONINFO_PER_CONFIGURATION}      // Every Configuruation can have a Version Info
   {$DEFINE OTA_ENVOPTIONS_PLATFORM_BUG}
   // A Bug Can't get Correct Env Option Values for Current Platform.
@@ -3610,23 +3611,23 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
-  {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE TStrings has WriteBOM property
-  {$DEFINE FONT_HAS_QUALITY}                   // XE TFont has Quality for AntiAliasing
-  {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE ToolsAPI has Debugger Visualizer Interfaces
-  {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE has TStrings Visualizer for Debug
+  {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE 的 TStrings 开始有 WriteBOM 属性
+  {$DEFINE FONT_HAS_QUALITY}                   // XE 的 TFont 开始有 Quality 属性，包括 AntiAliasing
+  {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE 的 ToolsAPI 开始有 Debugger Visualizer 相关接口
+  {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE 的调试器中有 TStrings Visualizer
 {$ENDIF}
 
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}        // 支持从接口实例寻找其实现对象实例
-  {$DEFINE SUPPORT_ENHANCED_RTTI}              // New enhanced RTTI
-  {$DEFINE SUPPORT_EXTERNAL_DELAYED}           // External functions can be declared as 'delayed'
-  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}          // 2010 and above Supports class constructor and destructor
+  {$DEFINE SUPPORT_ENHANCED_RTTI}              // 新的增强型 RTTI
+  {$DEFINE SUPPORT_EXTERNAL_DELAYED}           // 外部函数支持 delayed 声明
+  {$DEFINE SUPPORT_CLASS_CONSTRUCTOR}          // 2010 开始支持 class 的 constructor 和 destructor
   {$DEFINE SUPPORT_CLASS_DESTRUCTOR}
   {$DEFINE IMAGELIST_BEGINENDUPDATE}           // 2010 及以上的 ImageList 有公开的 BeginUpdate 和 EndUpdate 方法
   {$DEFINE OTA_DEBUG_HAS_EVENTS}               // 2010 及以上的 DebuggerService 有 ProcessDebugEvents
-  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}      // IDE has a new style Component Palette
-  {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}         // Editor has a Search Panel
-  {$DEFINE IDE_HAS_DATETIME_HINT}              // TDate/TTime/TDateTime shows Normally in Debug Hint
+  {$DEFINE IDE_HAS_NEW_COMPONENT_PALETTE}      // 2010 开始有个新样式的组件面板
+  {$DEFINE IDE_HAS_EDITOR_SEARCHPANEL}         // 2010 编辑器有个 Search Panel
+  {$DEFINE IDE_HAS_DATETIME_HINT}              // 2010 调试时的 TDate/TTime/TDateTime 类型能正常显示（以前是浮点数）
 {$ENDIF}
 
 {$IFDEF BDS2010}
