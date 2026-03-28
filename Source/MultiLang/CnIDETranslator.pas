@@ -108,6 +108,9 @@ type
 {$IFDEF UNICODE}
     FControlHook: TCnControlHook;
     FTextDrawHook: TCnMethodHook;
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+    FVirtualTreeHooks: TObjectList;
+{$ENDIF}
 {$ENDIF}
     { 插件公用函数 }
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
@@ -181,6 +184,9 @@ type
       切换语言到中文时且汉化功能启用时调用（LanguageChanged 中调用，内部翻成中文）
       切换语言到非中文语言时（LanguageChanged 中调用，内部翻译成英文}
 
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+    procedure ClearUnusedVirtualTreeHooks;
+{$ENDIF}
   protected
     function GetAdditionalLangMainFileName: string;
     function GetAdditionalLangExtraFileName: string;
@@ -206,7 +212,7 @@ type
     procedure HookMessagesInControl(ARootControl: TControl);
     procedure InstallTextDrawHook;
     procedure UninstallTextDrawHook;
-    procedure TranslateTreeViewCatalog(AComponent: TComponent);
+    function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
 
     procedure ControlBeforeMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
@@ -230,6 +236,7 @@ implementation
 
 uses
   CnCommon, CnMenuHook, CnWizNotifier, CnStrings, CnWizOptions,
+  {$IFDEF IDE_CATALOG_VIRTUALTREE} CnVSTreeOp, {$ENDIF}
   CnWizMultiLang, CnLangMgr, CnWideStrings, CnLangCollection
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
@@ -1919,6 +1926,10 @@ begin
   FControlHook.AfterMessage := ControlAfterMessage;
   FUITranslator := Self;
   InstallTextDrawHook;
+
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+  FVirtualTreeHooks := TObjectList.Create(True);
+{$ENDIF}
 {$ENDIF}
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
@@ -1956,6 +1967,9 @@ begin
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
 {$IFDEF UNICODE}
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+  FVirtualTreeHooks.Free;
+{$ENDIF}
   UninstallTextDrawHook;
   ClearTextDrawHooks;
   FreeAndNil(FControlHook);
@@ -1972,7 +1986,7 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  {$IFNDEF DELPHI103_RIO_UP}
+  {$IFNDEF DELPHI104_SYDNEY_UP}
   Result := 'RADStudioXE8.txt';  // 10.2/10.1/10/XE8 到 2009
   {$ENDIF}
   {$ELSE}
@@ -2383,13 +2397,37 @@ begin
   end;
 end;
 
-procedure TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent);
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+
+procedure TCnMenuFormTranslator.ClearUnusedVirtualTreeHooks;
+var
+  I: Integer;
+  Hook: TCnVSTOnGetTextHook;
+begin
+  for I := FVirtualTreeHooks.Count - 1 downto 0 do
+  begin
+    Hook := TCnVSTOnGetTextHook(FVirtualTreeHooks[I]);
+    if (Hook <> nil) and not Hook.Hooked then
+      FVirtualTreeHooks.Remove(Hook);
+  end;
+end;
+
+{$ENDIF}
+
+function TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
 var
   I: Integer;
   AChild: TComponent;
   ATreeView: TTreeView;
   S: string;
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+  T: string;
+  Op: TCnVSTreeOperator;
+  Hook: TCnVSTOnGetTextHook;
+  Node: Pointer;
+{$ENDIF}
 begin
+  Result := False;
   if AComponent = nil then
     Exit;
 
@@ -2405,12 +2443,60 @@ begin
           ATreeView.Items[I].Text := S;
       end;
     end;
+    Result := True;
+    Exit;
   end;
+
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+
+  ClearUnusedVirtualTreeHooks;
+  if AComponent.ClassNameIs('TVirtualStringTree') and (AComponent.Name = 'VirtualStringTree1') then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TranslateTreeViewCatalog Get VirtualStringTree Node Count ' + IntToStr(CnVSTGetTotalNodeCount(AComponent)));
+{$ENDIF}
+
+    Op := TCnVSTreeOperator.Create(AComponent);
+    Hook := TCnVSTOnGetTextHook.Create(AComponent);
+    try
+      if not Hook.Install then
+        Exit;
+
+      Node := Op.GetFirstNode;
+      I := 0;
+      while Node <> nil do
+      begin
+        Inc(I);
+        S := Op.GetNodeText(Node, -1);
+
+        if S <> '' then
+        begin
+          T := CnLanguageManager.Translate(S);
+          if T <> '' then
+            Hook.SetOverrideText(Node, -1, T);
+        end;
+        Node := Op.GetNextNode(Node);
+      end;
+      Hook.RefreshTree;
+      FVirtualTreeHooks.Add(Hook);
+    finally
+      Op.Free;
+    end;
+
+    Result := True;
+    Exit;
+  end;
+
+{$ENDIF}
 
   for I := 0 to AComponent.ComponentCount - 1 do
   begin
     AChild := AComponent.Components[I];
-    TranslateTreeViewCatalog(AChild);
+    if TranslateTreeViewCatalog(AChild) then
+    begin
+      Result := True;
+      Exit;
+    end;
   end;
 end;
 
