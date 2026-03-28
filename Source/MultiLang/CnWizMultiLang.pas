@@ -365,7 +365,7 @@ var
   S: string;
 begin
 {$IFNDEF STAND_ALONE}
-  {$IFDEF DELPHI103_RIO_UP}
+  {$IFDEF DELPHI104_SYDNEY_UP}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化所有菜单');
   {$ELSE}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化界面');
