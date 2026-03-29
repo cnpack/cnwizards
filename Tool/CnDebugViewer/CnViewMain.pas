@@ -623,10 +623,13 @@ var
   Idx: Integer;
 begin
   Idx := tsSwitch.TabIndex;
-  if tsSwitch.Tabs.Objects[tsSwitch.TabIndex] <> nil then
+  if (Idx >= 0) and (Idx < tsSwitch.Tabs.Count) then
   begin
-    TCustomForm(tsSwitch.Tabs.Objects[tsSwitch.TabIndex]).Close;
-    ChooseAChildToDisplay(Idx);
+    if tsSwitch.Tabs.Objects[Idx] <> nil then
+    begin
+      TCustomForm(tsSwitch.Tabs.Objects[Idx]).Close;
+      ChooseAChildToDisplay(Idx);
+	end;
   end;
 end;
 
@@ -1307,12 +1310,18 @@ end;
 procedure TCnMainViewer.tsSwitchDblClick(Sender: TObject);
 var
   P: TPoint;
+  Idx: Integer;
 begin
   P := tsSwitch.ScreenToClient(Mouse.CursorPos);
-  if tsSwitch.ItemAtPos(P) >= 0 then
+  Idx := tsSwitch.ItemAtPos(P);
+  if (Idx >= 0) and (Idx < tsSwitch.Tabs.Count) then
   begin
-    actSwtClose.Execute;
-    PostMessage(Handle, WM_TAB_MAKE_VISIBLE, 0, 0);
+    if tsSwitch.Tabs.Objects[Idx] <> nil then
+    begin
+      TCustomForm(tsSwitch.Tabs.Objects[Idx]).Close;
+      ChooseAChildToDisplay(Idx);
+      PostMessage(Handle, WM_TAB_MAKE_VISIBLE, 0, 0);
+    end;
   end;
 end;
 
@@ -1472,11 +1481,20 @@ procedure TCnMainViewer.ChooseAChildToDisplay(OldTabIndex: Integer);
 var
   I: Integer;
 begin
-  // 关闭窗口后更新 FActiveChild 与 Tab。注意此时 Tabs.Count 已经减少
-  // 拿当前 Tab 的前一个作为显示内容，如果当前 Tab 是首个（0），则用 0
-  if OldTabIndex > 0 then
-    Dec(OldTabIndex)
-  else if (OldTabIndex < 0) or (tsSwitch.Tabs.Count = 0) then
+  if tsSwitch.Tabs.Count = 0 then
+  begin
+    FActiveChild := nil;
+    Exit;
+  end;
+
+  if OldTabIndex < 0 then
+    OldTabIndex := 0
+  else if OldTabIndex >= tsSwitch.Tabs.Count then
+    OldTabIndex := tsSwitch.Tabs.Count - 1
+  else if OldTabIndex > 0 then
+    Dec(OldTabIndex);
+
+  if tsSwitch.Tabs.Objects[OldTabIndex] = nil then
   begin
     FActiveChild := nil;
     Exit;
