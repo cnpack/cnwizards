@@ -24,7 +24,8 @@ unit CnWizConfigFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：专家设置窗体单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：
+* 备    注：由于该窗体特殊性，dfm 中须使用 ClientWidth 和 ClientHeight 而不能用
+*           Width 和 Height，否则会出现下边缘多出一大块的莫名其妙现象。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式

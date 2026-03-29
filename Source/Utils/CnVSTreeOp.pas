@@ -434,11 +434,6 @@ begin
   AText := '';
   Key := MakeKey(Node, Column);
   Result := FTextMap.Find(Key, AText);
-
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnVSTOnGetTextHook.FindOverride HIT Node=%p Column=%d Text="%s"',
-    [Node, Column, AText]);
-{$ENDIF}
 end;
 
 procedure TCnVSTOnGetTextHook.CallOriginalOnGetText(Sender: TObject; Node: Pointer; Column: Integer;
@@ -448,12 +443,7 @@ var
   E: TCnVSTOnGetTextEvent;
 begin
   if FHook = nil then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnVSTOnGetTextHook.CallOriginalOnGetText FHook=nil');
-{$ENDIF}
     Exit;
-  end;
 
   M.Data := FHook.TrampolineData;
   M.Code := FHook.Trampoline;
