@@ -1185,6 +1185,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPan
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPanel3.ControlCollection.Item5.Control.PriorityGridPanel.ControlCollection.Item2.Control.lbNormal.Caption=正常
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPanel3.ControlCollection.Item5.Control.PriorityGridPanel.ControlCollection.Item3.Control.lbHighest.Caption=高
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDefafultProject.Caption=默认工程(&R)：
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDefaultProject.Caption=默认工程(&R)：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDockHint.Caption=拖动时按住 Control 键可阻止窗口停靠
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbReposDir.Caption=共享存储库(&H)：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.Running.Caption= 运行中 
@@ -3744,6 +3745,7 @@ Appearance=外观
 Application=应用程序
 AutoRecover=自动恢复
 Build Events=构建事件
+Build Log=构建日志
 Build Order=构建顺序
 Building=构建
 C++ (Shared Options)=C++ 共享选项

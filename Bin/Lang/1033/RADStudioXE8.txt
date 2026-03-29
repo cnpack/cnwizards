@@ -1185,6 +1185,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPan
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPanel3.ControlCollection.Item5.Control.PriorityGridPanel.ControlCollection.Item2.Control.lbNormal.Caption=Normal
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.GridPanel3.ControlCollection.Item5.Control.PriorityGridPanel.ControlCollection.Item3.Control.lbHighest.Caption=High
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDefafultProject.Caption=Default p&roject:
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDefaultProject.Caption=Default p&roject
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbDockHint.Caption=Pressing the Control key while dragging will prevent window docking
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.lbReposDir.Caption=S&hared repository:
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEnvironmentOptionsPage.Running.Caption= Running 
@@ -3744,6 +3745,7 @@ Appearance=Appearance
 Application=Application
 AutoRecover=AutoRecover
 Build Events=Build Events
+Build Log=Build Log
 Build Order=Build Order
 Building=Building
 C++ (Shared Options)=C++ (Shared Options)
