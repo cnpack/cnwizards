@@ -1986,14 +1986,14 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  {$IFNDEF DELPHI120_ATHENS_UP}
-  Result := 'RADStudioXE8.txt';  // 2009 到 10.3
+  {$IFNDEF DELPHI104_SYDNEY_UP}
+  Result := 'RADStudio.txt';     // 2009 到 10.3
   {$ENDIF}
   {$ELSE}
   Result := 'BDS.txt';           // 2005 到 2007
   {$ENDIF}
 {$ELSE}
-  Result := 'Delphi7.txt';       // D 5 6 7 和 CB 5 6
+  Result := 'Delphi.txt';        // D 5 6 7 和 CB 5 6
 {$ENDIF}
 end;
 
