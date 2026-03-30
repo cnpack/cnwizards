@@ -133,7 +133,6 @@ TCppEnvironmentDialog.PropertySheetControl1.[2].ToolLabel.Caption=&Components:
 TCppEnvironmentDialog.PropertySheetControl1.[2].ToolListHeader.Sections.Item0.Text=Name
 TCppEnvironmentDialog.PropertySheetControl1.[2].ToolListHeader.Sections.Item1.Text=Package
 TCppEnvironmentDialog.PropertySheetControl1.[2].ToolListHeader.Sections.Item2.Text=Page
-TCppEnvironmentDialog.PropertySheetControl1.[2].ToolListPanel.Caption=ToolListPanel
 TCppEnvironmentDialog.PropertySheetControl1.[3].Caption=C++Builder Direct
 TCppEnvironmentDialog.PropertySheetControl1.[3].cbAutoPoll.Caption=&Automatically poll network
 TCppEnvironmentDialog.PropertySheetControl1.[3].cbAutoShowOnRefresh.Caption=Automatically &show C++Builder Direct on refresh

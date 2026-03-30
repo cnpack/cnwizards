@@ -207,12 +207,14 @@ type
     procedure MultiLangTranslateObject(AObject: TObject; var Translate: Boolean);
     procedure MultiLangTranslateObjectProperty(AObject: TObject;
       const PropName: string; var Translate: Boolean);
+{$IFDEF BDS}
+    function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
+{$ENDIF}
 {$IFDEF UNICODE}
     procedure ClearTextDrawHooks;
     procedure HookMessagesInControl(ARootControl: TControl);
     procedure InstallTextDrawHook;
     procedure UninstallTextDrawHook;
-    function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
 
     procedure ControlBeforeMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
@@ -2192,13 +2194,19 @@ begin
 
 {$IFDEF UNICODE}
   ClearTextDrawHooks;
+{$ENDIF}
+
+{$IFDEF BDS}
   if FActive and (Screen.ActiveCustomForm <> nil) and
     (Screen.ActiveCustomForm.ClassNameIs('TDelphiProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjOptsDlg')
+    or Screen.ActiveCustomForm.ClassNameIs('TProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TDefaultEnvironmentDialog')) then
   begin
+{$IFDEF UNICODE}
     HookMessagesInControl(Screen.ActiveCustomForm);
+{$ENDIF}
     // 手动翻译工程选项、环境选项等部分对话框左侧的树目录节点
     if FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
       TranslateTreeViewCatalog(Screen.ActiveCustomForm);
@@ -2241,6 +2249,96 @@ begin
     end;
   end;
 end;
+
+{$IFDEF BDS}
+
+function TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
+var
+  I: Integer;
+  AChild: TComponent;
+  ATreeView: TTreeView;
+  S: string;
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+  T: string;
+  Op: TCnVSTreeOperator;
+  Hook: TCnVSTOnGetTextHook;
+  Node: Pointer;
+{$ENDIF}
+begin
+  Result := False;
+  if AComponent = nil then
+    Exit;
+
+  if (AComponent is TTreeView) and (AComponent.Name = 'trvwPageNodes') then
+  begin
+    ATreeView := TTreeView(AComponent);
+    if ATreeView.Items.Count > 0 then
+    begin
+      for I := 0 to ATreeView.Items.Count - 1 do
+      begin
+        S := CnLanguageManager.Translate(ATreeView.Items[I].Text);
+        if S <> '' then
+          ATreeView.Items[I].Text := S;
+      end;
+    end;
+    Result := True;
+    Exit;
+  end;
+
+{$IFDEF IDE_CATALOG_VIRTUALTREE}
+
+  ClearUnusedVirtualTreeHooks;
+  if AComponent.ClassNameIs('TVirtualStringTree') and (AComponent.Name = 'VirtualStringTree1') then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TranslateTreeViewCatalog Get VirtualStringTree Node Count ' + IntToStr(CnVSTGetTotalNodeCount(AComponent)));
+{$ENDIF}
+
+    Op := TCnVSTreeOperator.Create(AComponent);
+    Hook := TCnVSTOnGetTextHook.Create(AComponent);
+    try
+      if not Hook.Install then
+        Exit;
+
+      Node := Op.GetFirstNode;
+      I := 0;
+      while Node <> nil do
+      begin
+        Inc(I);
+        S := Op.GetNodeText(Node, -1);
+
+        if S <> '' then
+        begin
+          T := CnLanguageManager.Translate(S);
+          if T <> '' then
+            Hook.SetOverrideText(Node, -1, T);
+        end;
+        Node := Op.GetNextNode(Node);
+      end;
+      Hook.RefreshTree;
+      FVirtualTreeHooks.Add(Hook);
+    finally
+      Op.Free;
+    end;
+
+    Result := True;
+    Exit;
+  end;
+
+{$ENDIF}
+
+  for I := 0 to AComponent.ComponentCount - 1 do
+  begin
+    AChild := AComponent.Components[I];
+    if TranslateTreeViewCatalog(AChild) then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 {$IFDEF UNICODE}
 
@@ -2413,92 +2511,6 @@ begin
 end;
 
 {$ENDIF}
-
-function TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
-var
-  I: Integer;
-  AChild: TComponent;
-  ATreeView: TTreeView;
-  S: string;
-{$IFDEF IDE_CATALOG_VIRTUALTREE}
-  T: string;
-  Op: TCnVSTreeOperator;
-  Hook: TCnVSTOnGetTextHook;
-  Node: Pointer;
-{$ENDIF}
-begin
-  Result := False;
-  if AComponent = nil then
-    Exit;
-
-  if (AComponent is TTreeView) and (AComponent.Name = 'trvwPageNodes') then
-  begin
-    ATreeView := TTreeView(AComponent);
-    if ATreeView.Items.Count > 0 then
-    begin
-      for I := 0 to ATreeView.Items.Count - 1 do
-      begin
-        S := CnLanguageManager.Translate(ATreeView.Items[I].Text);
-        if S <> '' then
-          ATreeView.Items[I].Text := S;
-      end;
-    end;
-    Result := True;
-    Exit;
-  end;
-
-{$IFDEF IDE_CATALOG_VIRTUALTREE}
-
-  ClearUnusedVirtualTreeHooks;
-  if AComponent.ClassNameIs('TVirtualStringTree') and (AComponent.Name = 'VirtualStringTree1') then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TranslateTreeViewCatalog Get VirtualStringTree Node Count ' + IntToStr(CnVSTGetTotalNodeCount(AComponent)));
-{$ENDIF}
-
-    Op := TCnVSTreeOperator.Create(AComponent);
-    Hook := TCnVSTOnGetTextHook.Create(AComponent);
-    try
-      if not Hook.Install then
-        Exit;
-
-      Node := Op.GetFirstNode;
-      I := 0;
-      while Node <> nil do
-      begin
-        Inc(I);
-        S := Op.GetNodeText(Node, -1);
-
-        if S <> '' then
-        begin
-          T := CnLanguageManager.Translate(S);
-          if T <> '' then
-            Hook.SetOverrideText(Node, -1, T);
-        end;
-        Node := Op.GetNextNode(Node);
-      end;
-      Hook.RefreshTree;
-      FVirtualTreeHooks.Add(Hook);
-    finally
-      Op.Free;
-    end;
-
-    Result := True;
-    Exit;
-  end;
-
-{$ENDIF}
-
-  for I := 0 to AComponent.ComponentCount - 1 do
-  begin
-    AChild := AComponent.Components[I];
-    if TranslateTreeViewCatalog(AChild) then
-    begin
-      Result := True;
-      Exit;
-    end;
-  end;
-end;
 
 procedure TCnMenuFormTranslator.ControlBeforeMessage(Sender: TObject;
   Control: TControl; var Msg: TMessage; var Handled: Boolean);
