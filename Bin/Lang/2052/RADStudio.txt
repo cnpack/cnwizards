@@ -1,5 +1,7 @@
 ﻿TAboutBox.AcknowledgementsButton.Caption=致谢(&A)...
+TAboutBox.InstalledProductsGroupBox.Caption=已安装的产品(&I)
 TAboutBox.InstalledProductsLabel.Caption=已安装的产品(&I)：
+TAboutBox.InstalledUpdatesGroupBox.Caption=已安装的更新
 TAboutBox.InstalledUpdatesLabel.Caption=已安装的更新：
 TAboutBox.LicensedToLabel.Caption=本产品授权给：
 TAboutBox.LicenseLabel.Caption=产品许可证状态：
@@ -7,6 +9,8 @@ TAboutBox.MemoryAvailableLabel.Caption=Windows 可用内存：
 TAboutBox.OKButton.Caption=确定(&O)
 TAboutBox.ProductInfoLabel.Caption=产品信息(&P)：
 TAboutBox.VersionInfoButton.Caption=版本信息(&V)...
+TAboutBox.vtvInstalledProducts.AccessibleName=已安装的产品
+TAboutBox.vtvInstalledUpdatesList.AccessibleName=已安装的更新
 TAddAdrBP.AdvancedButton.Caption=高级(&A) >>
 TAddAdrBP.CancelButton.Caption=取消(&C)
 TAddAdrBP.Caption=添加地址断点

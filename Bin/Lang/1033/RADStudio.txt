@@ -1,5 +1,7 @@
 ﻿TAboutBox.AcknowledgementsButton.Caption=&Acknowledgements...
+TAboutBox.InstalledProductsGroupBox.Caption=&Installed Products
 TAboutBox.InstalledProductsLabel.Caption=&Installed Products:
+TAboutBox.InstalledUpdatesGroupBox.Caption=Installed Updates
 TAboutBox.InstalledUpdatesLabel.Caption=Installed Updates:
 TAboutBox.LicensedToLabel.Caption=This product is licensed to:
 TAboutBox.LicenseLabel.Caption=Product License Status:
@@ -7,6 +9,8 @@ TAboutBox.MemoryAvailableLabel.Caption=Memory Available to Windows:
 TAboutBox.OKButton.Caption=OK
 TAboutBox.ProductInfoLabel.Caption=&Product Information:
 TAboutBox.VersionInfoButton.Caption=&Version Info...
+TAboutBox.vtvInstalledProducts.AccessibleName=Installed Products
+TAboutBox.vtvInstalledUpdatesList.AccessibleName=Installed Updates
 TAddAdrBP.AdvancedButton.Caption=&Advanced >>
 TAddAdrBP.CancelButton.Caption=Cancel
 TAddAdrBP.Caption=Add Address Breakpoint
