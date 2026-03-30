@@ -1,1 +1,0 @@
-﻿TAboutBox.Caption=关于 Borland™ Delphi®

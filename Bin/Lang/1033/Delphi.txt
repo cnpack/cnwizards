@@ -1,8 +1,5 @@
-﻿TAboutBoxHiColor.BorlandWebLabel.Caption=http://www.borland.com
-TAboutBoxHiColor.Caption=About Delphi
-TAboutBoxHiColor.Company.Caption=Borland Software Corporation
+﻿TAboutBoxHiColor.Company.Caption=Borland Software Corporation
 TAboutBoxHiColor.Confidential.Caption=Confidentia
-TAboutBoxHiColor.JediLabel.Caption=http://www.delphi-jedi.org
 TAboutBoxHiColor.Label3.Caption=Memory Available to Windows:
 TAboutBoxHiColor.OKButton.Caption=OK
 TAddAdrBP.AdvancedButton.Caption=&Advanced >>

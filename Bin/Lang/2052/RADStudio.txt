@@ -3,7 +3,6 @@ TAboutBox.InstalledProductsLabel.Caption=已安装的产品(&I)：
 TAboutBox.InstalledUpdatesLabel.Caption=已安装的更新：
 TAboutBox.LicensedToLabel.Caption=本产品授权给：
 TAboutBox.LicenseLabel.Caption=产品许可证状态：
-TAboutBox.LinkLabel.Caption=www.embarcadero.com
 TAboutBox.MemoryAvailableLabel.Caption=Windows 可用内存：
 TAboutBox.OKButton.Caption=确定(&O)
 TAboutBox.ProductInfoLabel.Caption=产品信息(&P)：

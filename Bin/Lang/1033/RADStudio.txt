@@ -3,7 +3,6 @@ TAboutBox.InstalledProductsLabel.Caption=&Installed Products:
 TAboutBox.InstalledUpdatesLabel.Caption=Installed Updates:
 TAboutBox.LicensedToLabel.Caption=This product is licensed to:
 TAboutBox.LicenseLabel.Caption=Product License Status:
-TAboutBox.LinkLabel.Caption=www.embarcadero.com
 TAboutBox.MemoryAvailableLabel.Caption=Memory Available to Windows:
 TAboutBox.OKButton.Caption=OK
 TAboutBox.ProductInfoLabel.Caption=&Product Information:
