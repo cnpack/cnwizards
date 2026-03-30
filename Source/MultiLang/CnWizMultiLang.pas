@@ -271,6 +271,7 @@ begin
   CnLanguageManager.TranslateTreeNode := True;
   CnLanguageManager.UseDefaultFont := True;
   CnLanguageManager.UseClassWhenNoCompName := True;
+  CnLanguageManager.UseClassExtra := True;
 
   FStorage := TCnHashLangFileStorage.Create(nil);
   FStorage.FileName := SCnWizLangFile;
@@ -365,7 +366,7 @@ var
   S: string;
 begin
 {$IFNDEF STAND_ALONE}
-  {$IFDEF DELPHI104_SYDNEY_UP}
+  {$IFDEF DELPHI120_ATHENS_UP}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化所有菜单');
   {$ELSE}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', '汉化界面');

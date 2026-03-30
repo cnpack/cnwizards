@@ -1,0 +1,12 @@
+TDefaultEnvironmentDialog.PropertySheetControl1.@TAutoRecoverOptionsPg.EnabledCheck.Caption=定期保存备份文件以进行自动恢复
+TDefaultEnvironmentDialog.PropertySheetControl1.@TAutoRecoverOptionsPg.Label1.Caption=保存间隔（分钟）
+TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.Label1.Caption=处理者
+TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerOptionsPage.cbUseDesignerGuidelines.Caption=使用设计器参考线(&D)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerOptionsPage.cbVirtualScreenPosition.Caption=显示窗体定位器(&F)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorColor.DefaultBack.Caption=使用默认值
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorColor.DefaultFore.Caption=使用默认值
+TDefaultEnvironmentDialog.PropertySheetControl1.@THTMLDesignerOptions.PropCheckBox1.Caption=使用 Windows 主题渲染 HTML 控件(&R)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.lbGridSizeX.Caption=&X
+TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.lbGridSizeY.Caption=&Y
+TDefaultEnvironmentDialog.PropertySheetControl1.@TOTAAddinPropSheet.frmGitTestsOptions.GroupBox1.Caption=授权
+TDefaultEnvironmentDialog.PropertySheetControl1.@TThemeLoaderOptionsPage.rbCustom.Caption=自定义 VCL 样式

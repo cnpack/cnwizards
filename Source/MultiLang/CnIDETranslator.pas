@@ -98,7 +98,7 @@ type
     FAlreadyChinese: Boolean;
     FLangTransFlag: Boolean;
     FTransQueue: TComponentList;
-    FTranFormsList: TComponentList;
+    FTranedCompList: TComponentList;
     FOld2Array, FNew2Array: TStringList;
     FTranslationMap: TCnJSONObject;
     FMainMenu: TMainMenu;
@@ -113,7 +113,7 @@ type
 {$ENDIF}
 {$ENDIF}
 {$IFDEF IDE_OPTION_DYNCREATE}
-    FPropertySheetHook: TCnControlHook;
+    FPropertySheetControlHook: TCnControlHook;
 {$ENDIF}
     { 插件公用函数 }
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
@@ -228,6 +228,7 @@ type
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 {$ENDIF}
 {$IFDEF IDE_OPTION_DYNCREATE}
+    procedure IdleTranslatePage(Sender: TObject);
     procedure PropertySheetAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
@@ -246,7 +247,7 @@ implementation
 uses
   CnCommon, CnMenuHook, CnWizNotifier, CnStrings, CnWizOptions,
   {$IFDEF IDE_CATALOG_VIRTUALTREE} CnVSTreeOp, {$ENDIF}
-  CnWizMultiLang, CnLangMgr, CnWideStrings, CnLangCollection
+  CnWizMultiLang, CnLangMgr, CnWideStrings, CnLangCollection, CnLangStorage
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
@@ -1924,7 +1925,7 @@ begin
     LoadAdditionalLangFile(GetAdditionalLangID);
 
   FTransQueue := TComponentList.Create(False);
-  FTranFormsList := TComponentList.Create(False);
+  FTranedCompList := TComponentList.Create(False);
 
   // 初始化参数对象
   FAttachedPopupMenuHooks := TObjectList.Create(True);
@@ -1942,8 +1943,8 @@ begin
 {$ENDIF}
 
 {$IFDEF IDE_OPTION_DYNCREATE}
-  FPropertySheetHook := TCnControlHook.Create(nil);
-  FPropertySheetHook.AfterMessage := PropertySheetAfterMessage;
+  FPropertySheetControlHook := TCnControlHook.Create(nil);
+  FPropertySheetControlHook.AfterMessage := PropertySheetAfterMessage;
 {$ENDIF}
 
   // 加载翻译内容
@@ -1982,7 +1983,7 @@ begin
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
 {$IFDEF IDE_OPTION_DYNCREATE}
-  FreeAndiNil(FPropertySheetHook);
+  FreeAndNil(FPropertySheetControlHook);
 {$ENDIF}
 
 {$IFDEF UNICODE}
@@ -1995,7 +1996,7 @@ begin
   FUITranslator := nil;
 {$ENDIF}
 
-  FreeAndNil(FTranFormsList);
+  FreeAndNil(FTranedCompList);
   FreeAndNil(FTransQueue);
   inherited;
 end;
@@ -2005,7 +2006,7 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  {$IFNDEF DELPHI104_SYDNEY_UP}
+  {$IFNDEF DELPHI120_ATHENS_UP}
   Result := 'RADStudio.txt';     // 2009 到 10.3
   {$ENDIF}
   {$ELSE}
@@ -2198,7 +2199,7 @@ begin
       F.Update;
 
     FTransQueue.Delete(0);
-    FTranFormsList.Add(F);
+    FTranedCompList.Add(F);
   end;
 end;
 
@@ -2236,7 +2237,7 @@ begin
     F := Screen.ActiveCustomForm;
     if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
     begin
-      if not (csDesigning in F.ComponentState) and (FTranFormsList.IndexOf(F) < 0) then
+      if not (csDesigning in F.ComponentState) and (FTranedCompList.IndexOf(F) < 0) then
       begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
@@ -2255,7 +2256,7 @@ begin
           CnWizNotifierServices.ExecuteOnApplicationIdle(TranslateQueue);
         end
         else
-          FTranFormsList.Add(F);
+          FTranedCompList.Add(F);
       end
       else
       begin
@@ -2598,6 +2599,15 @@ end;
 
 {$IFDEF IDE_OPTION_DYNCREATE}
 
+procedure TCnMenuFormTranslator.IdleTranslatePage(Sender: TObject);
+begin
+  while FTransQueue.Count > 0 do
+  begin
+    CnLanguageManager.TranslateComponent(FTransQueue[0]);
+    FTransQueue.Delete(0);
+  end;
+end;
+
 procedure TCnMenuFormTranslator.PropertySheetAfterMessage(Sender: TObject; Control: TControl;
   var Msg: TMessage; var Handled: Boolean);
 var
@@ -2612,7 +2622,10 @@ begin
       CnDebugger.LogFmt('CnMenuFormTranslator Get Control %s:%s inserted to Propsheet.',
         [C.ClassName, C.Name]);
 {$ENDIF}
-      // 翻译该 Control
+      // 延迟翻译该 Control，避免其内部组件还没创建完毕，复用 FTransQueue 应该没啥问题
+      FTransQueue.Add(C);
+      CnWizNotifierServices.ExecuteOnApplicationIdle(IdleTranslatePage);
+      // CnLanguageManager.TranslateComponent(C);
     end;
   end;
 end;
@@ -2647,7 +2660,7 @@ var
   I: Integer;
   F: TCustomForm;
 begin
-  FTranFormsList.Clear;
+  FTranedCompList.Clear;
   FLangTransFlag := False;
 
   // 当前要翻译为中文、且当前语言是中文，且加载了 IDE 的中文语言文件，则翻译所有已经存在的窗体为中文
@@ -2661,7 +2674,7 @@ begin
       F := Screen.CustomForms[I];
       if (Pos('TCn', F.ClassName) <> 1) and (F.ClassName <> 'TTabDockHostForm') then
       begin
-        if FTranFormsList.IndexOf(F) < 0 then
+        if FTranedCompList.IndexOf(F) < 0 then
         begin
 {$IFDEF DEBUG}
           CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate to Chinese ' + F.ClassName);
@@ -2674,7 +2687,7 @@ begin
 
           if F.Visible then
             F.Update;
-          FTranFormsList.Add(F);
+          FTranedCompList.Add(F);
         end
         else
         begin
@@ -2696,7 +2709,7 @@ begin
       F := Screen.CustomForms[I];
       if Pos('TCn', F.ClassName) <> 1 then
       begin
-        if FTranFormsList.IndexOf(F) < 0 then
+        if FTranedCompList.IndexOf(F) < 0 then
         begin
 {$IFDEF DEBUG}
           CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Translate to English ' + F.ClassName);
@@ -2709,7 +2722,7 @@ begin
 
           if F.Visible then
             F.Update;
-          FTranFormsList.Add(F);
+          FTranedCompList.Add(F);
         end;
       end;
     end;
