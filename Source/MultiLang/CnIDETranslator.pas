@@ -106,11 +106,14 @@ type
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
     FAttachedMenuItems: TObjectList;
 {$IFDEF UNICODE}
-    FControlHook: TCnControlHook;
+    FInspListBoxControlHook: TCnControlHook;
     FTextDrawHook: TCnMethodHook;
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
     FVirtualTreeHooks: TObjectList;
 {$ENDIF}
+{$ENDIF}
+{$IFDEF IDE_OPTION_DYNCREATE}
+    FPropertySheetHook: TCnControlHook;
 {$ENDIF}
     { 插件公用函数 }
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
@@ -216,13 +219,17 @@ type
     procedure InstallTextDrawHook;
     procedure UninstallTextDrawHook;
 
-    procedure ControlBeforeMessage(Sender: TObject; Control: TControl;
+    procedure InspListBoxControlBeforeMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
-    procedure ControlAfterMessage(Sender: TObject; Control: TControl;
+    procedure InspListBoxControlAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 
     procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
+{$ENDIF}
+{$IFDEF IDE_OPTION_DYNCREATE}
+    procedure PropertySheetAfterMessage(Sender: TObject; Control: TControl;
+      var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
@@ -1923,16 +1930,22 @@ begin
   FAttachedPopupMenuHooks := TObjectList.Create(True);
   FAttachedMenuItems := TObjectList.Create(True);
 {$IFDEF UNICODE}
-  FControlHook := TCnControlHook.Create(nil);
-  FControlHook.BeforeMessage := ControlBeforeMessage;
-  FControlHook.AfterMessage := ControlAfterMessage;
+  FInspListBoxControlHook := TCnControlHook.Create(nil);
+  FInspListBoxControlHook.BeforeMessage := InspListBoxControlBeforeMessage;
+  FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
   FUITranslator := Self;
-  InstallTextDrawHook;
+  // InstallTextDrawHook; 延迟 Hook
 
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
   FVirtualTreeHooks := TObjectList.Create(True);
 {$ENDIF}
 {$ENDIF}
+
+{$IFDEF IDE_OPTION_DYNCREATE}
+  FPropertySheetHook := TCnControlHook.Create(nil);
+  FPropertySheetHook.AfterMessage := PropertySheetAfterMessage;
+{$ENDIF}
+
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
   LoadTranslationMenus(TranslationMapPath);
@@ -1968,13 +1981,17 @@ begin
   FreeAndNil(FTranslationMap);
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
+{$IFDEF IDE_OPTION_DYNCREATE}
+  FreeAndiNil(FPropertySheetHook);
+{$ENDIF}
+
 {$IFDEF UNICODE}
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
   FVirtualTreeHooks.Free;
 {$ENDIF}
   UninstallTextDrawHook;
   ClearTextDrawHooks;
-  FreeAndNil(FControlHook);
+  FreeAndNil(FInspListBoxControlHook);
   FUITranslator := nil;
 {$ENDIF}
 
@@ -2367,15 +2384,15 @@ procedure TCnMenuFormTranslator.ClearTextDrawHooks;
 var
   I: Integer;
 begin
-  if FControlHook = nil then
+  if FInspListBoxControlHook = nil then
     Exit;
 
-  for I := FControlHook.Items.Count - 1 downto 0 do
+  for I := FInspListBoxControlHook.Items.Count - 1 downto 0 do
   begin
-    if FControlHook.Items[I].Control <> nil then
-      FControlHook.UnHook(FControlHook.Items[I].Control)
+    if FInspListBoxControlHook.Items[I].Control <> nil then
+      FInspListBoxControlHook.UnHook(FInspListBoxControlHook.Items[I].Control)
     else
-      FControlHook.Items[I].Free;
+      FInspListBoxControlHook.Items[I].Free;
   end;
 end;
 
@@ -2465,14 +2482,16 @@ var
   W: TWinControl;
   OwnerName: string;
 begin
-  if (ARootControl = nil) or (FControlHook = nil) then
+  if (ARootControl = nil) or (FInspListBoxControlHook = nil)
+    {$IFDEF IDE_OPTION_DYNCREATE} or (FpropertySheetControlHook = nil) {$ENDIF}
+    then
     Exit;
 
   if ARootControl.ClassNameIs(SCN_INSP_LIST_BOX) then
   begin
-    if not FControlHook.IsHooked(ARootControl) then
+    if not FInspListBoxControlHook.IsHooked(ARootControl) then
     begin
-      FControlHook.Hook(ARootControl);
+      FInspListBoxControlHook.Hook(ARootControl);
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
         OwnerName := ARootControl.Owner.Name
@@ -2482,7 +2501,30 @@ begin
         [OwnerName, ARootControl.Name]);
 {$ENDIF}
     end;
+    Exit;
   end;
+
+{$IFDEF IDE_OPTION_DYNCREATE}
+
+  if ARootControl.Name = 'PropertySheetControl1' then
+  begin
+    if not FpropertySheetControlHook.IsHooked(ARootControl) then
+    begin
+      FpropertySheetControlHook.Hook(ARootControl);
+
+{$IFDEF DEBUG}
+      if ARootControl.Owner <> nil then
+        OwnerName := ARootControl.Owner.Name
+      else
+        OwnerName := '<nil>';
+      CnDebugger.LogFmt('CnIDETranslator Hook PropertySheet: %s.%s',
+        [OwnerName, ARootControl.Name]);
+{$ENDIF}
+    end;
+    Exit;
+  end;
+
+{$ENDIF}
 
   if ARootControl is TWinControl then
   begin
@@ -2512,7 +2554,7 @@ end;
 
 {$ENDIF}
 
-procedure TCnMenuFormTranslator.ControlBeforeMessage(Sender: TObject;
+procedure TCnMenuFormTranslator.InspListBoxControlBeforeMessage(Sender: TObject;
   Control: TControl; var Msg: TMessage; var Handled: Boolean);
 var
   OwnerName: string;
@@ -2532,7 +2574,7 @@ begin
   end;
 end;
 
-procedure TCnMenuFormTranslator.ControlAfterMessage(Sender: TObject;
+procedure TCnMenuFormTranslator.InspListBoxControlAfterMessage(Sender: TObject;
   Control: TControl; var Msg: TMessage; var Handled: Boolean);
 var
   OwnerName: string;
@@ -2549,6 +2591,29 @@ begin
     CnDebugger.LogFmt('CnIDETranslator Control After WM_PAINT: %s.%s',
       [OwnerName, Control.Name]);
 {$ENDIF}
+  end;
+end;
+
+{$ENDIF}
+
+{$IFDEF IDE_OPTION_DYNCREATE}
+
+procedure TCnMenuFormTranslator.PropertySheetAfterMessage(Sender: TObject; Control: TControl;
+  var Msg: TMessage; var Handled: Boolean);
+var
+  C: TControl;
+begin
+  if Msg.Msg = CM_CONTROLCHANGE then
+  begin
+    if TCMControlChange(Msg).Inserting and (TCMControlChange(Msg).Control <> nil) then
+    begin
+      C := TCMControlChange(Msg).Control;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnMenuFormTranslator Get Control %s:%s inserted to Propsheet.',
+        [C.ClassName, C.Name]);
+{$ENDIF}
+      // 翻译该 Control
+    end;
   end;
 end;
 
