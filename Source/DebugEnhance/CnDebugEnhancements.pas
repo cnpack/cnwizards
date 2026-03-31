@@ -639,6 +639,7 @@ end;
 procedure TCnDebugEnhanceWizard.DebugComand(Cmds, Results: TStrings);
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 var
+  I: Integer;
   Mgr: TCnDebuggerValueReplaceManager;
 {$ENDIF}
 begin
@@ -656,7 +657,18 @@ begin
 
   Mgr := FReplaceManager as TCnDebuggerValueReplaceManager;
   Results.Add('Replace Item Count: ' + IntToStr(Mgr.FReplaceItems.Count));
-  Results.AddStrings(Mgr.FReplaceItems);
+  for I := 0 to Mgr.FReplaceItems.Count - 1 do
+    Results.Add('  ' + Mgr.FReplaceItems[I]);
+
+  Results.Add('Single Value Replacer Count: ' + IntToStr(Mgr.FSingleReplacers.Count));
+  for I := 0 to Mgr.FSingleReplacers.Count - 1 do
+    Results.Add(Format('  Single %s For %s', [Mgr.FSingleReplacers[I].ClassName,
+      TCnDebuggerSingleValueReplacer(Mgr.FSingleReplacers[I]).GetEvalType]));
+
+  Results.Add('Multi Value Replacer Count: ' + IntToStr(Mgr.FMultiReplacers.Count));
+  for I := 0 to Mgr.FMultiReplacers.Count - 1 do
+    Results.Add(Format('  Multi %s For Count %d', [Mgr.FMultiReplacers[I].ClassName,
+      TCnDebuggerMultiValueReplacer(Mgr.FMultiReplacers[I]).GetEvalTypeCount]));
 {$ENDIF}
 end;
 

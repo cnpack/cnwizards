@@ -2778,6 +2778,7 @@ TCnDebugEnhanceForm.chkAutoReset.Caption=在編譯或構建前自動重置被調
 TCnDebugEnhanceForm.chkBytesViewer.Caption=啟用 TBytes/RawByteString 查看器（僅適用於 Delphi XE ～ 10.4）
 TCnDebugEnhanceForm.chkDataSetViewer.Caption=啟用 TDataSet 查看器（僅適用於 Delphi XE 及以上）
 TCnDebugEnhanceForm.chkEnhanceFloat.Caption=為浮點數增加顯示符號、指數與有效數字
+TCnDebugEnhanceForm.chkEnhanceInteger.Caption=為整數增加顯示十六進位值的提示（僅適用於 Delphi XE 及以上）
 TCnDebugEnhanceForm.chkMemoryStreamViewer.Caption=啟用 TMemoryStream 查看器（僅適用於 Delphi XE ～ 10.4）
 TCnDebugEnhanceForm.chkStringsViewer.Caption=啟用 TStrings 查看器
 TCnDebugEnhanceForm.chkWideViewer.Caption=啟用 WideString/UnicodeString 查看器（僅適用於 Delphi XE 及以上）
