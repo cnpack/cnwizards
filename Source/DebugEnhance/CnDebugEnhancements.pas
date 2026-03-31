@@ -411,7 +411,9 @@ type
     function GetEvalTypeByIndex(Index: Integer): string; override;
   public
     function GetNewExpression(const Expression, TypeName,
-      OldEvalResult: string): string;
+      OldEvalResult: string): string; override;
+    function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
+      NewEvalResult: string): string; override;
   end;
 
 {$ENDIF}
@@ -900,6 +902,10 @@ begin
       Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, S)
     else
       Result := EvalResult + ': ' + S;
+  end
+  else if Replacer <> nil then // NewExpr 空但有 Replacer 还是调
+  begin
+    Result := Replacer.GetFinalResult(Expression, TypeName, EvalResult, '');
   end;
 end;
 
@@ -1080,21 +1086,26 @@ end;
 
 function TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex(Index: Integer): string;
 var
-  I, K: Integer;
+  I: Integer;
   Replacer: TCnDebuggerMultiValueReplacer;
 begin
   Result := '';
-  K := 0;
   for I := 0 to Count - 1 do
   begin
     Replacer := TCnDebuggerMultiValueReplacer(Items[I]);
     if Index - Replacer.GetEvalTypeCount < 0 then
     begin
       Result := Replacer.GetEvalTypeByIndex(Index);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex #%d: %s', [Index, Result]);
+{$ENDIF}
       Exit;
     end;
     Index := Index - Replacer.GetEvalTypeCount;
   end;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex #%d: NOT FOUND', [Index]);
+{$ENDIF}
 end;
 
 {$ENDIF}
@@ -1869,11 +1880,18 @@ end;
 
 function TCnDebuggerIntegerValueReplacer.GetNewExpression(const Expression, TypeName,
   OldEvalResult: string): string;
+begin
+  Result := '';
+end;
+
+function TCnDebuggerIntegerValueReplacer.GetFinalResult(const OldExpression,
+  TypeName, OldEvalResult, NewEvalResult: string): string;
 var
   Neg: Boolean;
   S: string;
   U: UInt64;
 begin
+  Result := OldEvalResult;
   Neg := False;
   if (Length(OldEvalResult) > 0) and (OldEvalResult[1] = '-') then
   begin
@@ -1883,13 +1901,29 @@ begin
   else
     S := OldEvalResult;
 
+  S := Trim(S);
+  if (Length(S) > 0) and (S[Length(S)] = ')') then
+  begin
+    while (Length(S) > 0) and (S[Length(S)] <> ' ') do
+      Delete(S, Length(S), 1);
+    S := Trim(S);
+  end;
+
   if TryStrToUInt64(S, U) then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('IntegerValueReplacer GetFinalResult. OldEvalResult %s, Neg %d, U %d, Hex %s',
+      [OldEvalResult, Ord(Neg), U, UInt64ToHex(U)]);
+{$ENDIF}
     if Neg then
-      Result := '-$' + UInt64ToHex(U)
+      Result := OldEvalResult + ' ($' + UInt64ToHex(U) + ')'
     else
-      Result := '$' + UInt64ToHex(U);
-  end;
+      Result := OldEvalResult + ' ($' + UInt64ToHex(U) + ')';
+  end
+{$IFDEF DEBUG}
+  else
+    CnDebugger.LogFmt('IntegerValueReplacer GetFinalResult. TryStrToUInt64 Failed for %s', [S]);
+{$ENDIF}
 end;
 
 {$ENDIF}
