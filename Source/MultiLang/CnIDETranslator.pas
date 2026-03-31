@@ -297,7 +297,7 @@ var
   S: string;
 begin
 {$IFDEF DEBUG}
-//  if FInspListBoxlDrawPainting and (Text <> '') then
+//  if FInspListBoxDrawPainting and (Text <> '') then
 //    CnDebugger.LogFmt('CnIDETranslator InspListBox Canvas.TextRect Left %d, Top %d: %s',
 //      [Rect.Left, Rect.Top, Text]);
 {$ENDIF}
@@ -313,7 +313,7 @@ begin
    end;
 {$ENDIF}
 
-  if Rect.Left < 120 then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
+  if FInspListBoxDrawPainting and (Rect.Left < 120) then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
   begin
     S := CnLanguageManager.Translate(Text);
     if S = '' then
@@ -2006,11 +2006,9 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  {$IFNDEF DELPHI130_FLORENCE_UP}
   Result := 'RADStudio.txt';     // 2009 到 12
   {$ELSE}
   Result := 'BDS.txt';           // 2005 到 2007
-  {$ENDIF}
   {$ENDIF}
 {$ELSE}
   Result := 'Delphi.txt';        // D 5 6 7 和 CB 5 6
@@ -2522,7 +2520,7 @@ begin
         [OwnerName, ARootControl.Name]);
 {$ENDIF}
     end;
-    Exit;
+    // 注意不能 Exit; 其子 Control 可能还有 InspListBox
   end;
 
 {$ENDIF}
@@ -2569,7 +2567,7 @@ begin
       OwnerName := Control.Owner.Name
     else
       OwnerName := '<nil>';
-    CnDebugger.LogFmt('CnIDETranslator Control Before WM_PAINT: %s.%s',
+    CnDebugger.LogFmt('CnIDETranslator InspListBox Control Before WM_PAINT: %s.%s',
       [OwnerName, Control.Name]);
 {$ENDIF}
   end;
@@ -2589,7 +2587,7 @@ begin
       OwnerName := Control.Owner.Name
     else
       OwnerName := '<nil>';
-    CnDebugger.LogFmt('CnIDETranslator Control After WM_PAINT: %s.%s',
+    CnDebugger.LogFmt('CnIDETranslator InspListBox Control After WM_PAINT: %s.%s',
       [OwnerName, Control.Name]);
 {$ENDIF}
   end;
