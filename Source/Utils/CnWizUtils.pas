@@ -388,6 +388,9 @@ procedure GetColorList(List: TStrings);
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
 {* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
 
+procedure SetListViewWidthString2(AListView: TListView; const Text: string; MulFactor: Single = 1.0);
+{* 从字符串转换并设置 ListView 子项宽度，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
+
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
 //==============================================================================
@@ -3393,8 +3396,54 @@ begin
 {$ENDIF}
 end;
 
+procedure SetListViewWidthString2(AListView: TListView; const Text: string; MulFactor: Single);
+{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
+{$IFNDEF CNWIZARDS_MINIMUM}
+var
+  I: Integer;
+  Lines: TStringList;
+  HdpiFactor: Single;
 {$ENDIF}
+{$ENDIF}
+{$ENDIF}
+begin
+{$IFDEF IDE_SUPPORT_HDPI}
+{$IFDEF DELPHI_OTA}
+{$IFNDEF CNWIZARDS_MINIMUM}
+  if CnIsGEDelphi11Dot3 then
+  begin
+    Lines := TStringList.Create;
+    HdpiFactor := AListView.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
+    try
+      Lines.CommaText := Text;
+      if SingleEqual(MulFactor, 1.0) then
+      begin
+        for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
+          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor);
+      end
+      else
+      begin
+        for I := 0 to AListView.Columns.Count - 1 do
+        begin
+          if I < Lines.Count then
+            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor * MulFactor)
+          else
+            AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+        end;
+      end;
+    finally
+      Lines.Free;
+    end;
+    Exit;
+  end;
+{$ENDIF}
+{$ENDIF}
+{$ENDIF}
+  SetListViewWidthString(AListView, Text, MulFactor);
+end;
 
+{$ENDIF}
 //==============================================================================
 // 文件名判断处理函数 (来自 GExperts Src 1.12)
 //==============================================================================

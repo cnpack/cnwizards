@@ -430,7 +430,12 @@ begin
   SelectOpenedItem;
 {$IFNDEF STAND_ALONE}
   {$IFDEF BDS}
-  SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+  {$IFDEF DELPHI_OTA}
+  if CnIsGEDelphi11Dot3 then
+    SetListViewWidthString2(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge))
+  else
+  {$ENDIF}
+    SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
   {$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(FirstUpdate);
 {$ENDIF}
@@ -764,7 +769,14 @@ begin
     CnDebugger.LogFmt('TCnProjectViewBaseForm.LoadSettings Read ListView Widths %s', [FListViewWidthStr]);
 {$ENDIF}
     if FListViewWidthStr <> '' then
-      SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+    begin
+{$IFDEF DELPHI_OTA}
+      if CnIsGEDelphi11Dot3 then
+        SetListViewWidthString2(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge))
+      else
+{$ENDIF}
+        SetListViewWidthString(lvList, FListViewWidthStr, GetFactorFromSizeEnlarge(Enlarge));
+    end;
 {$ENDIF}
   finally
     Free;
