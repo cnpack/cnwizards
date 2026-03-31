@@ -224,11 +224,20 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
         end
         object chkAutoBreakpoint: TCheckBox
           Left = 16
-          Top = 96
+          Top = 120
           Width = 415
           Height = 17
           Anchors = [akLeft, akTop, akRight]
           Caption = 'Auto Load/Save Breakpoints'
+          TabOrder = 4
+        end
+        object chkEnhanceInteger: TCheckBox
+          Left = 16
+          Top = 96
+          Width = 415
+          Height = 17
+          Anchors = [akLeft, akTop, akRight]
+          Caption = 'Enhance Integer Hint to Show Hex Value (Delphi XE or Above)'
           TabOrder = 3
         end
       end

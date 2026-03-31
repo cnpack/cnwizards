@@ -83,12 +83,14 @@ type
     FMemoryStreamRegistered: Boolean;
     FEnableMemoryStream: Boolean;
     FEnableFloat: Boolean;
+    FEnableInteger: Boolean;
     procedure SetEnableDataSet(const Value: Boolean);
     procedure SetEnableStrings(const Value: Boolean);
     procedure SetEnableBytes(const Value: Boolean);
     procedure SetEnableWide(const Value: Boolean);
     procedure SetEnableMemoryStream(const Value: Boolean);
     procedure SetEnableFloat(const Value: Boolean);
+    procedure SetEnableInteger(const Value: Boolean);
     procedure CheckViewersRegistration;
 {$ENDIF}
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
@@ -140,6 +142,8 @@ type
     {* 是否启用 MemoryStream Viewer}
     property EnableFloat: Boolean read FEnableFloat write SetEnableFloat;
     {* 是否扩展 Float 浮点数的显示}
+    property EnableInteger: Boolean read FEnableInteger write SetEnableInteger;
+    {* 是否扩展整型的显示，增加十六进制}
  {$ENDIF}
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
@@ -154,7 +158,6 @@ type
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
   TCnDebuggerBaseValueReplacer = class(TObject)
-  {* 封装的 ValueReplacer 单类型替换型基类，简化了一些内部操作}
   private
     FActive: Boolean;
   protected
@@ -162,33 +165,60 @@ type
     {* 供子类重载控制是否使能}
     procedure SetActive(const Value: Boolean); virtual;
     {* 供子类重载控制是否使能}
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
 
-    function GetEvalType: string; virtual; abstract;
-    {* 返回支持的类型名，带 T 前缀}
     function GetNewExpression(const Expression, TypeName,
       OldEvalResult: string): string; virtual; abstract;
     {* 重新求值前调用，让子类给出新表达式供重新求值}
     function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
       NewEvalResult: string): string; virtual;
     {* 重新求值成功后调用，给子类一个调整显示的机会。默认实现是“旧: 新”}
-  public
-    constructor Create; virtual;
-    destructor Destroy; override;
 
     property Active: Boolean read GetActive write SetActive;
     {* 是否启用}
   end;
 
-  TCnDebuggerBaseValueReplacerClass = class of TCnDebuggerBaseValueReplacer;
+  TCnDebuggerSingleValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  {* 封装的 ValueReplacer 单类型替换型基类，简化了一些内部操作}
+  protected
+    function GetEvalType: string; virtual; abstract;
+    {* 返回支持的类型名，带 T 前缀}
+  end;
+
+  TCnDebuggerSingleValueReplacerClass = class of TCnDebuggerSingleValueReplacer;
+  {* 单类型调试值替换类}
+
+  TCnDebuggerMultiValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  protected
+    function GetEvalTypeCount: Integer; virtual; abstract;
+    {* 返回支持的类型名数量}
+    function GetEvalTypeByIndex(Index: Integer): string; virtual; abstract;
+    {* 根据索引返回支持的类型名，带 T 前缀。索引从 0 到 GetEvalTypeCount - 1}
+  end;
+
+  TCnDebuggerMultiValueReplacerClass = class of TCnDebuggerMultiValueReplacer;
+  {* 多类型调试值替换类}
+
+  TCnDebuggerMultiReplacerManager = class(TObjectList)
+  {* 对一批多类型调试值替换类的管理类，容纳替换类们的实例，封装了数量与名称等}
+  public
+    function GetEvalTypeCount: Integer;
+    {* 汇总所有实例的 TypeCount 总数}
+    function GetEvalTypeByIndex(Index: Integer): string;
+    {* 根据索引遍历内部返回支持的类型名，带 T 前缀。索引从 0 到 GetEvalTypeCount - 1}
+  end;
 
   TCnDebuggerValueReplaceManager = class(TInterfacedObject,
     {$IFDEF FULL_IOTADEBUGGERVISUALIZER_250} IOTADebuggerVisualizer250, {$ENDIF}
     IOTADebuggerVisualizerValueReplacer)
-  {* 所有单类型调试值替换类的管理类，自身聚合成单个类注册至 Delphi}
+  {* 所有单类型及多类型调试值替换类的管理类，自身聚合成单个类注册至 Delphi}
   private
     FWizard: TCnDebugEnhanceWizard;
     FReplaceItems: TStringList;
-    FReplacers: TObjectList;
+    FSingleReplacers: TObjectList;
+    FMultiReplacers: TCnDebuggerMultiReplacerManager;
     FMap: TCnStrToPtrHashMap;
     FEvaluator: TCnRemoteProcessEvaluator;
   protected
@@ -253,6 +283,7 @@ type
     chkMemoryStreamViewer: TCheckBox;
     chkEnhanceFloat: TCheckBox;
     chkAutoBreakpoint: TCheckBox;
+    chkEnhanceInteger: TCheckBox;
     procedure actRemoveHintExecute(Sender: TObject);
     procedure actlstDebugUpdate(Action: TBasicAction;
       var Handled: Boolean);
@@ -271,8 +302,11 @@ type
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
-{* 供外界的 TCnDebuggerBaseValueReplacer 子类注册，实现针对特定类型的调试期显示内容的值的替换}
+procedure RegisterCnDebuggerSingleValueReplacer(ReplacerClass: TCnDebuggerSingleValueReplacerClass);
+{* 供外界的 TCnDebuggerSingleValueReplacer 子类注册，实现针对单个特定类型的调试期显示内容的值的替换}
+
+procedure RegisterCnDebuggerMultiValueReplacer(ReplacerClass: TCnDebuggerMultiValueReplacerClass);
+{* 供外界的 TCnDebuggerBaseValueReplacer 子类注册，实现针对多个特定类型的调试期显示内容的值的替换}
 
 {$ENDIF}
 
@@ -292,6 +326,7 @@ const
   csAutoReset = 'AutoReset';
   csAutoBreakpoint = 'AutoBreakpoint';
   csEnableFloat = 'EnableFloat';
+  csEnableInteger = 'EnableInteger';
 
   csBreakpoint = 'Breakpoint';
   csFileName = 'FileName';
@@ -302,24 +337,37 @@ const
     'ProjectBuildCommand', 'ProjectSyntaxCommand', 'ProjectCompileAllCommand',
     'ProjectBuildAllCommand'
   );
+
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
+
   csEnableDataSet = 'EnableDataSet';
   csEnableStrings = 'EnableStrings';
   csEnableBytes = 'EnableBytes';
   csEnableWide = 'EnableWide';
   csEnableMemoryStream = 'EnableMemoryStream';
 
-var
-  FDebuggerValueReplacerClass: TList = nil;
+  SCnIntegerTypes: array[0..10] of string = ('Byte', 'SmallInt', 'ShortInt', 'Word',
+    'Integer', 'Cardinal', 'DWORD', 'LongInt', 'LongWord', 'Int64', 'UInt64');
+  {* 几种常见的整型}
 
-procedure RegisterCnDebuggerValueReplacer(ReplacerClass: TCnDebuggerBaseValueReplacerClass);
+var
+  FDebuggerSingleValueReplacerClass: TList = nil;
+  FDebuggerMultiValueReplacerClass: TList = nil;
+
+procedure RegisterCnDebuggerSingleValueReplacer(ReplacerClass: TCnDebuggerSingleValueReplacerClass);
 begin
-  if FDebuggerValueReplacerClass.IndexOf(ReplacerClass) < 0 then
-    FDebuggerValueReplacerClass.Add(ReplacerClass);
+  if FDebuggerSingleValueReplacerClass.IndexOf(ReplacerClass) < 0 then
+    FDebuggerSingleValueReplacerClass.Add(ReplacerClass);
+end;
+
+procedure RegisterCnDebuggerMultiValueReplacer(ReplacerClass: TCnDebuggerMultiValueReplacerClass);
+begin
+  if FDebuggerMultiValueReplacerClass.IndexOf(ReplacerClass) < 0 then
+    FDebuggerMultiValueReplacerClass.Add(ReplacerClass);
 end;
 
 type
-  TCnDebuggerFloatSingleValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  TCnDebuggerFloatSingleValueReplacer = class(TCnDebuggerSingleValueReplacer)
   {* 单精度浮点数调试显示扩展}
   protected
     function GetActive: Boolean; override;
@@ -330,7 +378,7 @@ type
       NewEvalResult: string): string; override;
   end;
 
-  TCnDebuggerFloatDoubleValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  TCnDebuggerFloatDoubleValueReplacer = class(TCnDebuggerSingleValueReplacer)
   {* 双精度浮点数调试显示扩展}
   protected
     function GetActive: Boolean; override;
@@ -341,7 +389,7 @@ type
       NewEvalResult: string): string; override;
   end;
 
-  TCnDebuggerFloatExtendedValueReplacer = class(TCnDebuggerBaseValueReplacer)
+  TCnDebuggerFloatExtendedValueReplacer = class(TCnDebuggerSingleValueReplacer)
   {* 扩展精度浮点数调试显示扩展}
   private
     FExtSize: Integer;
@@ -353,6 +401,17 @@ type
       OldEvalResult: string): string; override;
     function GetFinalResult(const OldExpression, TypeName, OldEvalResult,
       NewEvalResult: string): string; override;
+  end;
+
+  TCnDebuggerIntegerValueReplacer = class(TCnDebuggerMultiValueReplacer)
+  {* 各种整型增加十六进制显示的调试显示扩展}
+  protected
+    function GetActive: Boolean; override;
+    function GetEvalTypeCount: Integer; override;
+    function GetEvalTypeByIndex(Index: Integer): string; override;
+  public
+    function GetNewExpression(const Expression, TypeName,
+      OldEvalResult: string): string;
   end;
 
 {$ENDIF}
@@ -394,7 +453,11 @@ end;
 procedure TCnDebugEnhanceWizard.SetEnableFloat(const Value: Boolean);
 begin
   FEnableFloat := Value;
-  // 由 Float 子类来判断使能
+end;
+
+procedure TCnDebugEnhanceWizard.SetEnableInteger(const Value: Boolean);
+begin
+  FEnableInteger := Value;
 end;
 
 procedure TCnDebugEnhanceWizard.CheckViewersRegistration;
@@ -508,6 +571,7 @@ begin
     chkBytesViewer.Checked := FEnableBytes;
   {$ENDIF}
     chkEnhanceFloat.Checked := FEnableFloat;
+    chkEnhanceInteger.Checked := FEnableInteger;
 {$ELSE}
     lblEnhanceHint.Enabled := False;
     lvReplacers.Enabled := False;
@@ -518,6 +582,7 @@ begin
     chkWideViewer.Enabled := False;
     chkMemoryStreamViewer.Enabled := False;
     chkEnhanceFloat.Enabled := False;
+    chkEnhanceInteger.Enabled := False;
 {$ENDIF}
     chkAutoClose.Checked := AutoClose;
     chkAutoReset.Checked := AutoReset;
@@ -532,6 +597,7 @@ begin
       EnableWide := chkWideViewer.Checked;
       EnableMemoryStream := chkMemoryStreamViewer.Checked;
       EnableFloat := chkEnhanceFloat.Checked;
+      EnableInteger := chkEnhanceInteger.Checked;
 
       SaveReplacersToStrings((FReplaceManager as TCnDebuggerValueReplaceManager).ReplaceItems);
       if Active and FReplaceRegistered then // 重新注册以让新条目生效
@@ -665,6 +731,7 @@ begin
 {$ENDIF}
   FEnableWide := Ini.ReadBool('', csEnableWide, True);
   FEnableFloat := Ini.ReadBool('', csEnableFloat, False);
+  FEnableInteger := Ini.ReadBool('', csEnableInteger, False);
 {$ENDIF}
   FAutoClose := Ini.ReadBool('', csAutoClose, False);
   FAutoReset := Ini.ReadBool('', csAutoReset, False);
@@ -688,6 +755,7 @@ begin
   Ini.WriteBool('', csEnableWide, FEnableWide);
   Ini.WriteBool('', csEnableMemoryStream, FEnableMemoryStream);
   Ini.WriteBool('', csEnableFloat, FEnableFloat);
+  Ini.WriteBool('', csEnableInteger, FEnableInteger);
 {$ENDIF}
   Ini.WriteBool('', csAutoClose, FAutoClose);
   Ini.WriteBool('', csAutoReset, FAutoReset);
@@ -744,7 +812,8 @@ begin
 {$ENDIF}
   FWizard := AWizard;
   FReplaceItems := TStringList.Create;
-  FReplacers := TObjectList.Create(True);
+  FSingleReplacers := TObjectList.Create(True);
+  FMultiReplacers := TCnDebuggerMultiReplacerManager.Create(True);
   FEvaluator := TCnRemoteProcessEvaluator.Create;
   CreateVisualizers;
 end;
@@ -754,7 +823,8 @@ begin
   FEvaluator.Free;
   FMap.Free;
   FReplaceItems.Free;
-  FReplacers.Free;
+  FSingleReplacers.Free;
+  FMultiReplacers.Free;
   inherited;
 end;
 
@@ -826,8 +896,13 @@ procedure TCnDebuggerValueReplaceManager.GetSupportedType(Index: Integer;
 begin
   if Index < FReplaceItems.Count then
     TypeName := FReplaceItems.Names[Index]
-  else if Index < FReplaceItems.Count + FReplacers.Count then
-    TypeName := (FReplacers[Index - FReplaceItems.Count] as TCnDebuggerBaseValueReplacer).GetEvalType;
+  else if Index < FReplaceItems.Count + FSingleReplacers.Count then
+    TypeName := (FSingleReplacers[Index - FReplaceItems.Count] as TCnDebuggerSingleValueReplacer).GetEvalType
+  else if Index < FReplaceItems.Count + FSingleReplacers.Count + FMultiReplacers.GetEvalTypeCount then
+  begin
+    Index := Index - FReplaceItems.Count - FSingleReplacers.Count;
+    TypeName := FMultiReplacers.GetEvalTypeByIndex(Index);
+  end;
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnDebuggerValueReplaceManager.GetSupportedType #%d: %s', [Index, TypeName]);
@@ -849,7 +924,7 @@ end;
 
 function TCnDebuggerValueReplaceManager.GetSupportedTypeCount: Integer;
 begin
-  Result := FReplaceItems.Count + FReplacers.Count;
+  Result := FReplaceItems.Count + FSingleReplacers.Count + FMultiReplacers.GetEvalTypeCount;
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnDebuggerValueReplaceManager.GetSupportedTypeCount %d', [Result]);
 {$ENDIF}
@@ -872,24 +947,45 @@ end;
 
 procedure TCnDebuggerValueReplaceManager.CreateVisualizers;
 var
-  I: Integer;
-  Clz: TCnDebuggerBaseValueReplacerClass;
-  Obj: TCnDebuggerBaseValueReplacer;
+  I, J: Integer;
+  Clz1: TCnDebuggerSingleValueReplacerClass;
+  Obj1: TCnDebuggerSingleValueReplacer;
+  Clz2: TCnDebuggerMultiValueReplacerClass;
+  Obj2: TCnDebuggerMultiValueReplacer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnDebuggerValueReplaceManager CreateVisualizers');
 {$ENDIF}
-  for I := 0 to FDebuggerValueReplacerClass.Count - 1 do
+  for I := 0 to FDebuggerSingleValueReplacerClass.Count - 1 do
   begin
-    Clz := TCnDebuggerBaseValueReplacerClass(FDebuggerValueReplacerClass[I]);
-    Obj := TCnDebuggerBaseValueReplacer(Clz.NewInstance);
-    Obj.Create;
-    FReplacers.Add(Obj);
+    Clz1 := TCnDebuggerSingleValueReplacerClass(FDebuggerSingleValueReplacerClass[I]);
+    Obj1 := TCnDebuggerSingleValueReplacer(Clz1.NewInstance);
+    Obj1.Create;
+    FSingleReplacers.Add(Obj1);
   end;
 
   FMap := TCnStrToPtrHashMap.Create;
-  for I := 0 to FReplacers.Count - 1 do
-    FMap.Add((FReplacers[I] as TCnDebuggerBaseValueReplacer).GetEvalType, FReplacers[I]);
+  for I := 0 to FSingleReplacers.Count - 1 do
+  begin
+    Obj1 := FSingleReplacers[I] as TCnDebuggerSingleValueReplacer;
+    FMap.Add(Obj1.GetEvalType, Obj1);
+  end;
+
+  for I := 0 to FDebuggerMultiValueReplacerClass.Count - 1 do
+  begin
+    Clz2 := TCnDebuggerMultiValueReplacerClass(FDebuggerMultiValueReplacerClass[I]);
+    Obj2 := TCnDebuggerMultiValueReplacer(Clz2.NewInstance);
+    Obj2.Create;
+    FMultiReplacers.Add(Obj2);
+  end;
+
+  for I := 0 to FMultiReplacers.Count - 1 do
+  begin
+    Obj2 := FMultiReplacers[I] as TCnDebuggerMultiValueReplacer;
+    for J := 0 to Obj2.GetEvalTypeCount - 1 do
+      FMap.Add(Obj2.GetEvalTypeByIndex(J), Obj2);
+  end;
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnDebuggerValueReplaceManager CreateVisualizers Complete');
 {$ENDIF}
@@ -944,15 +1040,49 @@ begin
   Result := FActive;
 end;
 
+procedure TCnDebuggerBaseValueReplacer.SetActive(const Value: Boolean);
+begin
+  FActive := Value;
+end;
+
 function TCnDebuggerBaseValueReplacer.GetFinalResult(const OldExpression,
   TypeName, OldEvalResult, NewEvalResult: string): string;
 begin
   Result := OldEvalResult + ': ' + NewEvalResult;
 end;
 
-procedure TCnDebuggerBaseValueReplacer.SetActive(const Value: Boolean);
+{ TCnDebuggerMultiReplacerManager }
+
+function TCnDebuggerMultiReplacerManager.GetEvalTypeCount: Integer;
+var
+  I: Integer;
+  Replacer: TCnDebuggerMultiValueReplacer;
 begin
-  FActive := Value;
+  Result := 0;
+  for I := 0 to Count - 1 do
+  begin
+    Replacer := TCnDebuggerMultiValueReplacer(Items[I]);
+    Result := Result + Replacer.GetEvalTypeCount;
+  end;
+end;
+
+function TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex(Index: Integer): string;
+var
+  I, K: Integer;
+  Replacer: TCnDebuggerMultiValueReplacer;
+begin
+  Result := '';
+  K := 0;
+  for I := 0 to Count - 1 do
+  begin
+    Replacer := TCnDebuggerMultiValueReplacer(Items[I]);
+    if Index - Replacer.GetEvalTypeCount < 0 then
+    begin
+      Result := Replacer.GetEvalTypeByIndex(Index);
+      Exit;
+    end;
+    Index := Index - Replacer.GetEvalTypeCount;
+  end;
 end;
 
 {$ENDIF}
@@ -1695,14 +1825,71 @@ begin
 {$ENDIF}
 end;
 
+function GetDebugEnhanceIntegerEnable: Boolean;
+var
+  W: TCnBaseWizard;
+begin
+  Result := False;
+  W := CnWizardMgr.WizardByClass(TCnDebugEnhanceWizard);
+  if (W <> nil) and (W is TCnDebugEnhanceWizard) then
+    Result := TCnDebugEnhanceWizard(W).Active and TCnDebugEnhanceWizard(W).EnableInteger;
+end;
+
+{ TCnDebuggerIntegerValueReplacer }
+
+function TCnDebuggerIntegerValueReplacer.GetActive: Boolean;
+begin
+  Result := GetDebugEnhanceIntegerEnable;
+end;
+
+function TCnDebuggerIntegerValueReplacer.GetEvalTypeCount: Integer;
+begin
+  Result := Length(SCnIntegerTypes);
+end;
+
+function TCnDebuggerIntegerValueReplacer.GetEvalTypeByIndex(Index: Integer): string;
+begin
+  if (Index >= Low(SCnIntegerTypes)) and (Index <= High(SCnIntegerTypes)) then
+    Result := SCnIntegerTypes[Index]
+  else
+    Result := '';
+end;
+
+function TCnDebuggerIntegerValueReplacer.GetNewExpression(const Expression, TypeName,
+  OldEvalResult: string): string;
+var
+  Neg: Boolean;
+  S: string;
+  U: UInt64;
+begin
+  Neg := False;
+  if (Length(OldEvalResult) > 0) and (OldEvalResult[1] = '-') then
+  begin
+    Neg := True;
+    S := Copy(OldEvalResult, 2, MaxInt);
+  end
+  else
+    S := OldEvalResult;
+
+  if TryStrToUInt64(S, U) then
+  begin
+    if Neg then
+      Result := '-$' + UInt64ToHex(U)
+    else
+      Result := '$' + UInt64ToHex(U);
+  end;
+end;
+
 {$ENDIF}
 
 initialization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  FDebuggerValueReplacerClass := TList.Create;
-  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatSingleValueReplacer);
-  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatDoubleValueReplacer);
-  RegisterCnDebuggerValueReplacer(TCnDebuggerFloatExtendedValueReplacer);
+  FDebuggerSingleValueReplacerClass := TList.Create;
+  FDebuggerMultiValueReplacerClass := TList.Create;
+  RegisterCnDebuggerSingleValueReplacer(TCnDebuggerFloatSingleValueReplacer);
+  RegisterCnDebuggerSingleValueReplacer(TCnDebuggerFloatDoubleValueReplacer);
+  RegisterCnDebuggerSingleValueReplacer(TCnDebuggerFloatExtendedValueReplacer);
+  RegisterCnDebuggerMultiValueReplacer(TCnDebuggerIntegerValueReplacer);
 {$ENDIF}
 
 {$IFDEF DELPHI}
@@ -1711,7 +1898,8 @@ initialization
 
 finalization
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
-  FDebuggerValueReplacerClass.Free;
+  FDebuggerMultiValueReplacerClass.Free;
+  FDebuggerSingleValueReplacerClass.Free;
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNDEBUGENHANCEWIZARD}
