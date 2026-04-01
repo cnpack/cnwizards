@@ -1620,13 +1620,6 @@ end;
 
 {$IFDEF IDE_HAS_DEBUGGERVISUALIZER}
 
-function HexTrimZero(N: TUInt64): string;
-begin
-  Result := UInt64ToHex(N);
-  while (Length(Result) > 0) and (Result[1] = '0') do
-    Delete(Result, 1, 1);
-end;
-
 function GetDebugEnhanceFloatEnable: Boolean;
 var
   W: TCnBaseWizard;
@@ -1685,9 +1678,9 @@ begin
 
     ExtractFloatSingle(F, Sign, E, M);
     if Sign then
-      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + UInt64ToHex(M, True)
     else
-      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + UInt64ToHex(M, True);
   end;
 end;
 
@@ -1752,9 +1745,9 @@ begin
 
     ExtractFloatDouble(F, Sign, E, M);
     if Sign then
-      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+      Result := OldEvalResult + ' | ' + '-^' + IntToStr(E) + ': ' + UInt64ToHex(M, True)
     else
-      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+      Result := OldEvalResult + ' | ' + '+^' + IntToStr(E) + ': ' + UInt64ToHex(M, True);
   end;
 end;
 
@@ -1830,9 +1823,9 @@ begin
 
       ExtractFloatExtended(@Buf[0], FExtSize, Sign, E, M);
       if Sign then
-        Result := S + ' | ' + '-^' + IntToStr(E) + ': ' + HexTrimZero(M)
+        Result := S + ' | ' + '-^' + IntToStr(E) + ': ' + UInt64ToHex(M, True)
       else
-        Result := S + ' | ' + '+^' + IntToStr(E) + ': ' + HexTrimZero(M);
+        Result := S + ' | ' + '+^' + IntToStr(E) + ': ' + UInt64ToHex(M, True);
     end;
   end;
 end;
@@ -1913,12 +1906,12 @@ begin
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('IntegerValueReplacer GetFinalResult. OldEvalResult %s, Neg %d, U %d, Hex %s',
-      [OldEvalResult, Ord(Neg), U, UInt64ToHex(U)]);
+      [OldEvalResult, Ord(Neg), U, UInt64ToHex(U, True)]);
 {$ENDIF}
     if Neg then
-      Result := OldEvalResult + ' ($' + UInt64ToHex(U) + ')'
+      Result := OldEvalResult + ' (-$' + UInt64ToHex(U, True) + ')'
     else
-      Result := OldEvalResult + ' ($' + UInt64ToHex(U) + ')';
+      Result := OldEvalResult + ' ($' + UInt64ToHex(U, True) + ')';
   end
 {$IFDEF DEBUG}
   else
