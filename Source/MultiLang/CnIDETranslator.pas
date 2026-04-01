@@ -2801,7 +2801,7 @@ end;
 procedure TCnMenuFormTranslator.MultiLangTranslateObject(AObject: TObject;
   var Translate: Boolean);
 begin
-  if FActive and (
+  if ( // 注意此处不能加 FActive 判断，否则从中翻英时会进不来从而导致该属性被破坏出错
     ((Compiler >= cnDelphi2007) and (AObject.ClassName = 'TWatchWindow')) or
     ((Compiler in [cnDelphi7]) and (AObject.ClassName = 'TMessageViewForm'))
     ) then
@@ -2814,7 +2814,8 @@ end;
 procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
   AObject: TObject; const PropName: string; var Translate: Boolean);
 begin
-  if FActive and FLangTransFlag and ((Compiler = cnDelphi7) or (Compiler >= cnDelphi2007))
+  // 注意此处不能加 FActive 判断，否则从中翻英时会进不来从而导致该属性被破坏出错
+  if FLangTransFlag and ((Compiler = cnDelphi7) or (Compiler >= cnDelphi2007))
     and AObject.ClassNameIs('TTabList') then
   begin
     Translate := False;
