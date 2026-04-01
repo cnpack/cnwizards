@@ -216,9 +216,10 @@ type
       const PropName: string; var Translate: Boolean);
 {$IFDEF BDS}
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
+    {* 手动翻译树节点，包括 TTreeView 和 TVirtualStringList 两种情况}
 {$ENDIF}
 {$IFDEF UNICODE}
-    procedure ClearTextDrawHooks;
+    procedure ClearTextDrawMessageHooks;
     procedure HookMessagesInControl(ARootControl: TControl);
     procedure InstallTextDrawHook;
     procedure UninstallTextDrawHook;
@@ -227,6 +228,7 @@ type
       var Msg: TMessage; var Handled: Boolean);
     procedure InspListBoxControlAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
+    procedure InspListBoxUnHook(Sender: TObject; Control: TControl);
 
     procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
@@ -1981,6 +1983,7 @@ begin
   FInspListBoxControlHook := TCnControlHook.Create(nil);
   FInspListBoxControlHook.BeforeMessage := InspListBoxControlBeforeMessage;
   FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
+  FInspListBoxControlHook.OnUnhooked := InspListBoxUnHook;
 
   // 注意此处同样不用调用 InstallTextDrawHook，要延迟 Hook
 
@@ -2045,7 +2048,7 @@ begin
   FVirtualTreeHooks.Free;
 {$ENDIF}
   UninstallTextDrawHook;
-  ClearTextDrawHooks;
+  ClearTextDrawMessageHooks;
   FreeAndNil(FInspListBoxControlHook);
   FUITranslator := nil;
 {$ENDIF}
@@ -2193,7 +2196,7 @@ begin
       UnHookPopupMenus;
       UnHookMainMenuDynamicItems;
 {$IFDEF UNICODE}
-      ClearTextDrawHooks;
+      ClearTextDrawMessageHooks;
       UninstallTextDrawHook;
 {$ENDIF}
     end;
@@ -2267,7 +2270,7 @@ begin
   HookPopupMenuOnCurrentEditWindow;
 
 {$IFDEF UNICODE}
-  ClearTextDrawHooks;
+  ClearTextDrawMessageHooks;
 {$ENDIF}
 
 {$IFDEF BDS}
@@ -2441,7 +2444,7 @@ begin
   FOldCanvasTextRect := nil;
 end;
 
-procedure TCnMenuFormTranslator.ClearTextDrawHooks;
+procedure TCnMenuFormTranslator.ClearTextDrawMessageHooks;
 var
   I: Integer;
 begin
@@ -2454,7 +2457,9 @@ begin
       FInspListBoxControlHook.UnHook(FInspListBoxControlHook.Items[I].Control)
     else
       FInspListBoxControlHook.Items[I].Free;
+      // CollectionItem 的 Destroy 会从 Collection 里 Remove 自己
   end;
+  FInspListBoxDrawPainting := False;
 end;
 
 procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
@@ -2553,6 +2558,7 @@ begin
     if not FInspListBoxControlHook.IsHooked(ARootControl) then
     begin
       FInspListBoxControlHook.Hook(ARootControl);
+      FInspListBoxDrawPainting := False;
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
         OwnerName := ARootControl.Owner.Name
@@ -2642,7 +2648,12 @@ var
 begin
   if Msg.Msg = WM_PAINT then
   begin
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+    // Delphi 11 后的 InspListBox 有多余的缓冲绘制，WM_PAINT 处理完后还在绘制
+    // 不得不延迟取消标志，副作用则是可能会多余覆盖绘制本窗体上其他组件的字符串
+    // 在 UnHook 时才重置。好在该组件用处仅限制于设置对话框，没这种情况。
     FInspListBoxDrawPainting := False;
+{$ENDIF}
 
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
@@ -2653,6 +2664,12 @@ begin
       [OwnerName, Control.Name]);
 {$ENDIF}
   end;
+end;
+
+procedure TCnMenuFormTranslator.InspListBoxUnHook(Sender: TObject; Control: TControl);
+begin
+  // 只要有取消挂接事件就重置绘制标志
+  FInspListBoxDrawPainting := False;
 end;
 
 {$ENDIF}
