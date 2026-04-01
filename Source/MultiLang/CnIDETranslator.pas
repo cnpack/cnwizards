@@ -45,7 +45,7 @@ interface
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
-  Controls, Forms, Menus, Clipbrd, ComCtrls, ActnMenus,
+  Controls, Forms, Menus, Clipbrd, ComCtrls, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
   CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
   CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
@@ -118,6 +118,7 @@ type
 {$IFDEF IDE_OPTION_DYNCREATE}
     FPropertySheetControlHook: TCnControlHook;
 {$ENDIF}
+    function CanTranslateToChinese: Boolean;
     { 插件公用函数 }
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string): TComponent; overload;
     function FindComponentByNameDeep(const ARootComp: TComponent; const AName: string; ComponentResult: TObjectList): Boolean; overload;
@@ -235,7 +236,9 @@ type
     procedure PropertySheetAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
+{$IFDEF COMPILER7_UP}
     procedure CheckActionMainMenuBarPersistentHotKeys;
+{$ENDIF}
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
     destructor Destroy; override;
@@ -292,9 +295,11 @@ threadvar
 
 var
   FUITranslator: TCnMenuFormTranslator = nil;
+{$IFDEF UNICODE}
   FOldCanvasTextRect: TCanvasTextRectProc = nil;
 {$IFDEF DEBUG}
   FHookedStringHashMap: TCnLangHashMap = nil;
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF UNICODE}
@@ -2139,7 +2144,9 @@ begin
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
+{$IFDEF COMPILER7_UP}
   CheckActionMainMenuBarPersistentHotKeys;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMenuTranslator.DelayActivate');
@@ -2275,13 +2282,12 @@ begin
     HookMessagesInControl(Screen.ActiveCustomForm);
 {$ENDIF}
     // 手动翻译工程选项、环境选项等部分对话框左侧的树目录节点
-    if FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+    if CanTranslateToChinese then
       TranslateTreeViewCatalog(Screen.ActiveCustomForm);
   end;
 {$ENDIF}
 
-  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID)
-    and (Screen.ActiveCustomForm <> nil) then
+  if CanTranslateToChinese and (Screen.ActiveCustomForm <> nil) then
   begin
     F := Screen.ActiveCustomForm;
     if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
@@ -2316,8 +2322,10 @@ begin
     end;
   end;
 
-  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+{$IFDEF COMPILER7_UP}
+  if CanTranslateToChinese then
     CheckActionMainMenuBarPersistentHotKeys;
+{$ENDIF}
 end;
 
 {$IFDEF BDS}
@@ -2814,6 +2822,8 @@ begin
   end;
 end;
 
+{$IFDEF COMPILER7_UP}
+
 procedure TCnMenuFormTranslator.CheckActionMainMenuBarPersistentHotKeys;
 var
   Bar: TComponent;
@@ -2821,6 +2831,13 @@ begin
   Bar := GetIDEMainMenuBar;
   if (Bar <> nil) and (Bar is TActionMainMenuBar) then
     TActionMainMenuBar(Bar).PersistentHotKeys := True;
+end;
+
+{$ENDIF}
+
+function TCnMenuFormTranslator.CanTranslateToChinese: Boolean;
+begin
+  Result := FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID);
 end;
 
 initialization
