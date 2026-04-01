@@ -24,11 +24,13 @@ unit CnIDETranslator;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：Delphi 菜单翻译
 * 单元作者：Robinttt
-* 备    注：
+* 备    注： 
 * 开发平台：PWin7 + Delphi 5
 * 兼容测试：Windows + Delphi 所有版本
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2026.02.24 V1.2
+* 修改记录：2026.04.01 V1.3
+*               加入大量界面翻译机制，待不断完善中
+*           2026.02.24 V1.2
 *               移植入专家包。重构插件，主菜单（直接写）、弹出菜单（事件挂钩）、活动窗体菜单（子类化窗口）
 *           2025.12.21 V1.1
 *               添加编辑区弹出菜单翻译支持，直接写菜单项标题和对应动作的标题
@@ -105,6 +107,7 @@ type
     FMainMenuPath: string;
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
     FAttachedMenuItems: TObjectList;
+    FLoadResStringHook: TCnMethodHook;
 {$IFDEF UNICODE}
     FInspListBoxControlHook: TCnControlHook;
     FTextDrawHook: TCnMethodHook;
@@ -274,23 +277,27 @@ const
 type
   TCnHackHashLangStorage = class(TCnCustomHashLangStorage);
 
+  TLoadResStringFunc = function(ResStringRec: PResStringRec): string;
+
 {$IFDEF UNICODE}
 
-type
   TCanvasTextRectMethod = procedure (Rect: TRect; X, Y: Integer; const Text: string) of object;
 
   TCanvasTextRectProc = procedure (ASelf: TCanvas; Rect: TRect; X, Y: Integer; const Text: string);
 
+threadvar
+  FInspListBoxDrawPainting: Boolean;
+
+{$ENDIF}
+
 var
   FUITranslator: TCnMenuFormTranslator = nil;
-
   FOldCanvasTextRect: TCanvasTextRectProc = nil;
 {$IFDEF DEBUG}
   FHookedStringHashMap: TCnLangHashMap = nil;
 {$ENDIF}
 
-threadvar
-  FInspListBoxDrawPainting: Boolean;
+{$IFDEF UNICODE}
 
 procedure MyHookedCanvasTextRect(ASelf: TCanvas; Rect: TRect; X, Y: Integer; const Text: string);
 var
@@ -340,6 +347,38 @@ begin
 end;
 
 {$ENDIF}
+
+// LoadResString Hook 函数：输出字符串内容，预留翻译替换机制，原封不动返回
+function MyHookedLoadResString(ResStringRec: PResStringRec): string;
+var
+  S: string;
+begin
+  // 先调用原始函数获取字符串
+  if FUITranslator.FLoadResStringHook.UseDDteours then
+  begin
+    S := TLoadResStringFunc(FUITranslator.FLoadResStringHook.Trampoline)(ResStringRec);
+  end
+  else
+  begin
+    FUITranslator.FLoadResStringHook.UnhookMethod;
+    try
+      S := System.LoadResString(ResStringRec);
+    finally
+      FUITranslator.FLoadResStringHook.HookMethod;
+    end;
+  end;
+
+{$IFDEF DEBUG}
+  // 输出字符串内容，便于收集需要翻译的资源字符串
+  if (S <> '') and (Pos('Cn', S) <> 1) then
+    CnDebugger.LogFmt('CnIDETranslator LoadResString: %s', [S]);
+{$ENDIF}
+
+  // 预留翻译替换机制：此处可根据 S 查表替换为翻译后的字符串
+  // 例如：Result := CnLanguageManager.Translate(S);
+  // 目前原封不动返回
+  Result := S;
+end;
 
 {$IFDEF DEBUG}
 
@@ -1920,6 +1959,7 @@ var
   TranslationMapPath: string;
 begin
   inherited Create;
+  FUITranslator := Self;
 
   FStorageRef := AStorage;
   if FStorageRef <> nil then
@@ -1932,11 +1972,12 @@ begin
   FAttachedPopupMenuHooks := TObjectList.Create(True);
   FAttachedMenuItems := TObjectList.Create(True);
 {$IFDEF UNICODE}
+  // 准备好 Hook 工具对象，但此时不实际进行 Hook
   FInspListBoxControlHook := TCnControlHook.Create(nil);
   FInspListBoxControlHook.BeforeMessage := InspListBoxControlBeforeMessage;
   FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
-  FUITranslator := Self;
-  // InstallTextDrawHook; 延迟 Hook
+
+  // 注意此处同样不用调用 InstallTextDrawHook，要延迟 Hook
 
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
   FVirtualTreeHooks := TObjectList.Create(True);
@@ -1947,6 +1988,10 @@ begin
   FPropertySheetControlHook := TCnControlHook.Create(nil);
   FPropertySheetControlHook.AfterMessage := PropertySheetAfterMessage;
 {$ENDIF}
+
+  // 安装 LoadResString Hook，用于拦截资源字符串加载，预留翻译替换机制
+  // FLoadResStringHook := TCnMethodHook.Create(GetBplMethodAddress(@System.LoadResString),
+  //  @MyHookedLoadResString);
 
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
@@ -1986,6 +2031,9 @@ begin
 {$IFDEF IDE_OPTION_DYNCREATE}
   FreeAndNil(FPropertySheetControlHook);
 {$ENDIF}
+
+  // 卸载 LoadResString Hook
+  FreeAndNil(FLoadResStringHook);
 
 {$IFDEF UNICODE}
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
