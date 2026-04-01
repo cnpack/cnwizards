@@ -337,13 +337,17 @@ var
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
 
 //==============================================================================
-// 修改自 GExperts Src 1.12 的 IDE 相关函数
+// 部分修改自 GExperts Src 1.12 的 IDE 相关函数
 //==============================================================================
 
 function GetIDEMainForm: TCustomForm;
 {* 返回 IDE 主窗体（TAppBuilder 或 TMainIDEBar）}
 
 {$IFDEF DELPHI_OTA}
+
+function GetIDEMainMenuBar: TComponent;
+{* 返回 IDE 主窗体的 MainMenuBar，注意不是 MainMenu，
+  其类型可能是 TDockToolBar 或 TActionMainMenuBar}
 
 function GetIDEEdition: string;
 {* 返回 IDE 版本}
@@ -1434,6 +1438,18 @@ begin
 end;
 
 {$IFDEF DELPHI_OTA}
+
+// 返回 IDE 主窗体的 MainMenuBar，注意不是 MainMenu
+function GetIDEMainMenuBar: TComponent;
+var
+  M: TCustomForm;
+begin
+  M := GetIDEMainForm;
+  if M <> nil then
+    Result := M.FindComponent('MenuBar')
+  else
+    Result := nil;
+end;
 
 // 取 IDE 版本
 function GetIDEEdition: string;

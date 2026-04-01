@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
-  Controls, Forms, Menus, Clipbrd, ComCtrls,
+  Controls, Forms, Menus, Clipbrd, ComCtrls, ActnMenus,
   CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
   CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
@@ -232,6 +232,7 @@ type
     procedure PropertySheetAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
+    procedure CheckActionMainMenuBarPersistentHotKeys;
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
     destructor Destroy; override;
@@ -2090,6 +2091,8 @@ begin
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
+  CheckActionMainMenuBarPersistentHotKeys;
+
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnMenuTranslator.DelayActivate');
 {$ENDIF}
@@ -2213,7 +2216,7 @@ begin
 {$ENDIF}
 
 {$IFDEF BDS}
-  if FActive and (Screen.ActiveCustomForm <> nil) and
+  if FActive and (Screen.ActiveCustomForm <> nil) and (WizOptions.CurrentLangID = csChineseID) and
     (Screen.ActiveCustomForm.ClassNameIs('TDelphiProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjOptsDlg')
@@ -2264,6 +2267,9 @@ begin
       end;
     end;
   end;
+
+  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+    CheckActionMainMenuBarPersistentHotKeys;
 end;
 
 {$IFDEF BDS}
@@ -2758,6 +2764,15 @@ begin
     Translate := False;
     FLangTransFlag := False;
   end;
+end;
+
+procedure TCnMenuFormTranslator.CheckActionMainMenuBarPersistentHotKeys;
+var
+  Bar: TComponent;
+begin
+  Bar := GetIDEMainMenuBar;
+  if (Bar <> nil) and (Bar is TActionMainMenuBar) then
+    TActionMainMenuBar(Bar).PersistentHotKeys := True;
 end;
 
 initialization
