@@ -426,14 +426,12 @@ begin
   Key := MakeKey(Node, Column);
   Result := FTextMap.Find(Key, AText);
 
-{$IFDEF DELPHI104_SYDNEY}
-  // Delphi 104 ÌØÊâ£¬¶µ¸öµ×
+  // ¶µ¸öµ×
   if not Result then
   begin
     Key := MakeKey(Node, -1);
     Result := FTextMap.Find(Key, AText);
   end;
-{$ENDIF}
 end;
 
 procedure TCnVSTOnGetTextHook.CallOriginalOnGetText(Sender: TObject; Node: Pointer; Column: Integer;
