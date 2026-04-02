@@ -240,11 +240,13 @@ var
   I: Integer;
 begin
   for I := 0 to FCount - 1 do
+  begin
     if FList^[I] = Item then
     begin
       Result := I;
       Exit;
     end;
+  end;
   Result := -1;
 end;
 

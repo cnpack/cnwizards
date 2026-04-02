@@ -51,6 +51,10 @@ type
     TextType: Integer; var CellText: WideString) of object;
   {* TVirtualStringTree 自己的 OnGetText 事件}
 
+  TCnVSTTranslateTextEvent = procedure(Sender: TObject; const AText: string;
+    var ATranslated: string) of object;
+  {* 实时翻译回调，用于解决懒加载场景下预遍历时节点为空的问题}
+
   TCnVSTOnGetTextHook = class
   {* 封装的对 TVirtualStringTree 的 OnGetText 的处理工具类}
   private
@@ -58,6 +62,7 @@ type
     FHook: TCnEventHook;
     FFreeNotify: TCnFreeNotificationWrapper;
     FTextMap: TCnStrToStrHashMap;
+    FOnTranslateText: TCnVSTTranslateTextEvent;
     function MakeKey(Node: Pointer; Column: Integer): string;
     function FindOverride(Node: Pointer; Column: Integer; out AText: string): Boolean;
     procedure CallOriginalOnGetText(Sender: TObject; Node: Pointer; Column: Integer;
@@ -78,7 +83,11 @@ type
     procedure ClearOverrideTexts;
     procedure RefreshTree;
 
+    property OnTranslateText: TCnVSTTranslateTextEvent read FOnTranslateText write FOnTranslateText;
+    {* 设置实时翻译回调，有此回调时 DoOnGetText 会对原始文本实时翻译，无需预遍历}
+
     property Tree: TComponent read FTree;
+    function TextMapSize: Integer;
   end;
 
   TCnVSTreeOperator = class
@@ -156,14 +165,6 @@ begin
         FTotalCountProperty := FindProperty('RootNodeCount');
     end;
   end;
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg(Format(
-    'TCnVSTreeOperator.Create Tree=%s RTTI=%s GetFirst=%s GetNext=%s GetText=%s SetText=%s TotalProp=%s',
-    [BoolToStr(FTree <> nil, True), BoolToStr(FRttiType <> nil, True),
-     BoolToStr(FGetFirstMethod <> nil, True), BoolToStr(FGetNextMethod <> nil, True),
-     BoolToStr(FGetTextMethod <> nil, True), BoolToStr(FSetTextMethod <> nil, True),
-     BoolToStr(FTotalCountProperty <> nil, True)]));
-{$ENDIF}
 {$ENDIF}
 end;
 
@@ -342,10 +343,6 @@ begin
 
   M := GetMethodProp(ATree, PropInfo);
   Result := Assigned(M.Code) and Assigned(M.Data);
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg(Format('CnVSTHasOnGetTextHandler Result=%d Code=%p Data=%p',
-    [Ord(Result), M.Code, M.Data]));
-{$ENDIF}
 end;
 
 function CnVSTProbeOnGetTextSource(ATree: TComponent; AColumn: Integer;
@@ -391,10 +388,6 @@ begin
   end;
 
   Result := BeforeText <> AfterText;
-{$IFDEF DEBUG}
-  CnDebugger.LogMsg(Format('CnVSTProbeOnGetTextSource Before="%s" After="%s" Result=%d',
-    [BeforeText, AfterText, Ord(Result)]));
-{$ENDIF}
 end;
 
 constructor TCnVSTOnGetTextHook.Create(ATree: TComponent);
@@ -406,9 +399,6 @@ begin
   FFreeNotify := TCnFreeNotificationWrapper.Create(nil);
   FFreeNotify.OnFreeNotification := TreeFreeNotification;
   FFreeNotify.FreeNotification(ATree);
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnVSTOnGetTextHook.Create Tree=%p', [Pointer(FTree)]);
-{$ENDIF}
 end;
 
 destructor TCnVSTOnGetTextHook.Destroy;
@@ -432,8 +422,18 @@ var
   Key: string;
 begin
   AText := '';
+  // 先精确匹配 Node:Column，找不到再尝试通配键 Node:-1
   Key := MakeKey(Node, Column);
   Result := FTextMap.Find(Key, AText);
+
+{$IFDEF DELPHI104_SYDNEY}
+  // Delphi 104 特殊，兜个底
+  if not Result then
+  begin
+    Key := MakeKey(Node, -1);
+    Result := FTextMap.Find(Key, AText);
+  end;
+{$ENDIF}
 end;
 
 procedure TCnVSTOnGetTextHook.CallOriginalOnGetText(Sender: TObject; Node: Pointer; Column: Integer;
@@ -458,10 +458,28 @@ procedure TCnVSTOnGetTextHook.DoOnGetText(Sender: TObject; Node: Pointer; Column
   TextType: Integer; var CellText: WideString);
 var
   OverrideText: string;
+  Translated: string;
 begin
   CallOriginalOnGetText(Sender, Node, Column, TextType, CellText);
+
+  // 先查预存的覆盖文本（由 SetOverrideText 存入）
   if FindOverride(Node, Column, OverrideText) then
-    CellText := OverrideText;
+    CellText := OverrideText
+  else if (CellText <> '') and Assigned(FOnTranslateText) then
+  begin
+    // 没有预存覆盖文本时，通过回调实时翻译原始文本
+    // 这解决了 D10.4 懒加载导致预遍历时节点为空的问题
+    Translated := '';
+    FOnTranslateText(Self, string(CellText), Translated);
+    if Translated <> '' then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnVSTOnGetTextHook.DoOnGetText RealTime Translate: "%s" -> "%s"',
+        [string(CellText), Translated]);
+{$ENDIF}
+      CellText := Translated;
+    end;
+  end;
 end;
 
 function TCnVSTOnGetTextHook.Install: Boolean;
@@ -495,9 +513,6 @@ end;
 
 procedure TCnVSTOnGetTextHook.Uninstall;
 begin
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('TCnVSTOnGetTextHook.Uninstall Hook=%p', [Pointer(FHook)]);
-{$ENDIF}
   FreeAndNil(FHook);
 end;
 
@@ -509,7 +524,6 @@ end;
 procedure TCnVSTOnGetTextHook.SetOverrideText(Node: Pointer; Column: Integer; const AText: string);
 var
   Key: string;
-  Idx: Integer;
 begin
   if not Hooked then
     Install;
@@ -547,12 +561,13 @@ begin
   begin
     TControl(FTree).Invalidate;
     TControl(FTree).Update;
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnVSTOnGetTextHook.RefreshTree Invalidate + Update called');
-{$ENDIF}
   end;
 end;
 
+function TCnVSTOnGetTextHook.TextMapSize: Integer;
+begin
+  Result := FTextMap.Size;
+end;
 {$IFDEF SUPPORT_ENHANCED_RTTI}
 
 function TCnVSTreeOperator.FindMethod(const AName: string; AParamCount: Integer): TRttiMethod;

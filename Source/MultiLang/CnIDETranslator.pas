@@ -199,6 +199,7 @@ type
 
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
     procedure ClearUnusedVirtualTreeHooks;
+    procedure VSTTranslateText(Sender: TObject; const AText: string; var ATranslated: string);
 {$ENDIF}
   protected
     function GetAdditionalLangMainFileName: string;
@@ -2357,10 +2358,7 @@ var
   ATreeView: TTreeView;
   S: string;
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
-  T: string;
-  Op: TCnVSTreeOperator;
   Hook: TCnVSTOnGetTextHook;
-  Node: Pointer;
 {$ENDIF}
 begin
   Result := False;
@@ -2388,35 +2386,23 @@ begin
   ClearUnusedVirtualTreeHooks;
   if AComponent.ClassNameIs('TVirtualStringTree') and (AComponent.Name = 'VirtualStringTree1') then
   begin
-{$IFDEF DEBUG}
-    CnDebugger.LogMsg('TranslateTreeViewCatalog Get VirtualStringTree Node Count ' + IntToStr(CnVSTGetTotalNodeCount(AComponent)));
-{$ENDIF}
-
-    Op := TCnVSTreeOperator.Create(AComponent);
     Hook := TCnVSTOnGetTextHook.Create(AComponent);
     try
+      Hook.OnTranslateText := VSTTranslateText;
       if not Hook.Install then
-        Exit;
-
-      Node := Op.GetFirstNode;
-      I := 0;
-      while Node <> nil do
       begin
-        Inc(I);
-        S := Op.GetNodeText(Node, -1);
-
-        if S <> '' then
-        begin
-          T := CnLanguageManager.Translate(S);
-          if T <> '' then
-            Hook.SetOverrideText(Node, -1, T);
-        end;
-        Node := Op.GetNextNode(Node);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('TranslateTreeViewCatalog Hook.Install Failed, Exit.');
+{$ENDIF}
+        Hook.Free;
+        Exit;
       end;
+
       Hook.RefreshTree;
       FVirtualTreeHooks.Add(Hook);
-    finally
-      Op.Free;
+    except
+      Hook.Free;
+      raise;
     end;
 
     Result := True;
@@ -2636,6 +2622,12 @@ begin
     if (Hook <> nil) and not Hook.Hooked then
       FVirtualTreeHooks.Remove(Hook);
   end;
+end;
+
+procedure TCnMenuFormTranslator.VSTTranslateText(Sender: TObject; const AText: string;
+  var ATranslated: string);
+begin
+  ATranslated := CnLanguageManager.Translate(AText);
 end;
 
 {$ENDIF}
