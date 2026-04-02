@@ -43,6 +43,10 @@ interface
 
 {$I CnWizards.inc}
 
+{$IFDEF DELPHI110_ALEXANDRIA_UP}
+  {$DEFINE IDE_INSP_LISTBOX_MIXPAINT} // Delphi 110 以上该组件乱画
+{$ENDIF}
+
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
   Controls, Forms, Menus, Clipbrd, ComCtrls, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
@@ -109,6 +113,7 @@ type
     FAttachedMenuItems: TObjectList;
     FLoadResStringHook: TCnMethodHook;
 {$IFDEF UNICODE}
+    FDrawingInspListBoxes: TObjectList;   // 记录当前有需要绘制的 InspListBox 实例
     FInspListBoxControlHook: TCnControlHook;
     FTextDrawHook: TCnMethodHook;
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
@@ -310,11 +315,13 @@ procedure MyHookedCanvasTextRect(ASelf: TCanvas; Rect: TRect; X, Y: Integer; con
 var
   OldProc: TCanvasTextRectProc;
   S: string;
+  CanTranslate: Boolean;
 begin
 {$IFDEF DEBUG}
-//  if FInspListBoxDrawPainting and (Text <> '') then
-//    CnDebugger.LogFmt('CnIDETranslator InspListBox Canvas.TextRect Left %d, Top %d: %s',
-//      [Rect.Left, Rect.Top, Text]);
+  if Text <> '' then
+    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting %d, Count %d. Canvas.TextRect Left %d, Top %d: %s',
+      [Ord(FInspListBoxDrawPainting), FUITranslator.FDrawingInspListBoxes.Count,
+      Rect.Left, Rect.Top, Text]);
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -328,7 +335,13 @@ begin
    end;
 {$ENDIF}
 
-  if FInspListBoxDrawPainting and (Rect.Left < 120) then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
+{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
+   CanTranslate := FUITranslator.FDrawingInspListBoxes.Count > 0;
+{$ELSE}
+   CanTranslate := FInspListBoxDrawPainting;
+{$ENDIF}
+
+  if CanTranslate and (Rect.Left < 120) then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
   begin
     S := CnLanguageManager.Translate(Text);
     if S = '' then
@@ -1984,6 +1997,7 @@ begin
   FInspListBoxControlHook.BeforeMessage := InspListBoxControlBeforeMessage;
   FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
   FInspListBoxControlHook.OnUnhooked := InspListBoxUnHook;
+  FDrawingInspListBoxes := TObjectList.Create(False); // 只存引用
 
   // 注意此处同样不用调用 InstallTextDrawHook，要延迟 Hook
 
@@ -2459,6 +2473,7 @@ begin
       FInspListBoxControlHook.Items[I].Free;
       // CollectionItem 的 Destroy 会从 Collection 里 Remove 自己
   end;
+  FDrawingInspListBoxes.Clear;
   FInspListBoxDrawPainting := False;
 end;
 
@@ -2558,6 +2573,7 @@ begin
     if not FInspListBoxControlHook.IsHooked(ARootControl) then
     begin
       FInspListBoxControlHook.Hook(ARootControl);
+      FDrawingInspListBoxes.Add(ARootControl);
       FInspListBoxDrawPainting := False;
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
@@ -2648,7 +2664,7 @@ var
 begin
   if Msg.Msg = WM_PAINT then
   begin
-{$IFDEF DELPHI110_ALEXANDRIA_UP}
+{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
     // Delphi 11 后的 InspListBox 有多余的缓冲绘制，WM_PAINT 处理完后还在绘制
     // 不得不延迟取消标志，副作用则是可能会多余覆盖绘制本窗体上其他组件的字符串
     // 在 UnHook 时才重置。好在该组件用处仅限制于设置对话框，没这种情况。
@@ -2670,6 +2686,7 @@ procedure TCnMenuFormTranslator.InspListBoxUnHook(Sender: TObject; Control: TCon
 begin
   // 只要有取消挂接事件就重置绘制标志
   FInspListBoxDrawPainting := False;
+  FDrawingInspListBoxes.Remove(Control);
 end;
 
 {$ENDIF}
