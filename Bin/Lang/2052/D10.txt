@@ -1,2 +1,0 @@
-TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.lbGridSizeX.Caption=&X
-TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.lbGridSizeY.Caption=&Y
