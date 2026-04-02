@@ -318,10 +318,10 @@ var
   CanTranslate: Boolean;
 begin
 {$IFDEF DEBUG}
-  if Text <> '' then
-    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting %d, Count %d. Canvas.TextRect Left %d, Top %d: %s',
-      [Ord(FInspListBoxDrawPainting), FUITranslator.FDrawingInspListBoxes.Count,
-      Rect.Left, Rect.Top, Text]);
+//  if Text <> '' then
+//    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting %d, Count %d. Canvas.TextRect Left %d, Top %d: %s',
+//      [Ord(FInspListBoxDrawPainting), FUITranslator.FDrawingInspListBoxes.Count,
+//      Rect.Left, Rect.Top, Text]);
 {$ENDIF}
 
 {$IFDEF DEBUG}

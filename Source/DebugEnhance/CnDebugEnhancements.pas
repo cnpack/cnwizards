@@ -1097,7 +1097,7 @@ begin
     begin
       Result := Replacer.GetEvalTypeByIndex(Index);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex #%d: %s', [Index, Result]);
+      // CnDebugger.LogFmt('TCnDebuggerMultiReplacerManager.GetEvalTypeByIndex #%d: %s', [Index, Result]);
 {$ENDIF}
       Exit;
     end;
