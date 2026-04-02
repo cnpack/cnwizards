@@ -43,8 +43,8 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF DELPHI110_ALEXANDRIA_UP}
-  {$DEFINE IDE_INSP_LISTBOX_MIXPAINT} // Delphi 110 以上该组件乱画
+{$IFDEF DELPHI104_SYDNEY_UP}
+  {$DEFINE IDE_INSP_LISTBOX_MIXPAINT} // Delphi 104 以上该组件乱画
 {$ENDIF}
 
 uses
