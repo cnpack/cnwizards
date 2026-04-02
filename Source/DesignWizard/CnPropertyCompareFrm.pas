@@ -104,6 +104,8 @@ type
 
     procedure RegisterMenu;
     procedure UnRegisterMenu;
+
+    procedure DebuggerCompareObjects(ALeft: TObject; ARight: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -327,7 +329,7 @@ implementation
 {$R *.DFM}
 
 uses
-  {$IFDEF DEBUG} CnDebug, {$ENDIF} CnPropertyCompConfigFrm, CnWizOptions, CnGraphUtils
+  CnDebug, CnPropertyCompConfigFrm, CnWizOptions, CnGraphUtils
   {$IFNDEF STAND_ALONE}, CnListCompFrm {$ENDIF};
 
 const
@@ -475,6 +477,8 @@ begin
   FIgnoreProperties := TStringList.Create;
   // ÑÓ³Ù´´½¨ FGridFont
   RegisterMenu;
+
+  CnDebugger.OnCompareObjects := DebuggerCompareObjects;
 end;
 
 destructor TCnPropertyCompareManager.Destroy;
@@ -483,6 +487,12 @@ begin
   FIgnoreProperties.Free;
   FSelection.Free;
   inherited;
+end;
+
+procedure TCnPropertyCompareManager.DebuggerCompareObjects(ALeft: TObject; ARight: TObject);
+begin
+  if (ALeft <> nil) and (ARight <> nil) then
+    CompareTwoObjects(ALeft, ARight);
 end;
 
 function TCnPropertyCompareManager.GetSelectionCount: Integer;
