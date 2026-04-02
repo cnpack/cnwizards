@@ -43,10 +43,6 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFDEF DELPHI104_SYDNEY_UP}
-  {$DEFINE IDE_INSP_LISTBOX_MIXPAINT} // Delphi 104 以上该组件乱画
-{$ENDIF}
-
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
   Controls, Forms, Menus, Clipbrd, ComCtrls, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
@@ -297,9 +293,6 @@ type
 
   TCanvasTextRectProc = procedure (ASelf: TCanvas; Rect: TRect; X, Y: Integer; const Text: string);
 
-threadvar
-  FInspListBoxDrawPainting: Boolean;
-
 {$ENDIF}
 
 var
@@ -317,33 +310,25 @@ procedure MyHookedCanvasTextRect(ASelf: TCanvas; Rect: TRect; X, Y: Integer; con
 var
   OldProc: TCanvasTextRectProc;
   S: string;
-  CanTranslate: Boolean;
 begin
 {$IFDEF DEBUG}
-//  if Text <> '' then
-//    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting %d, Count %d. Canvas.TextRect Left %d, Top %d: %s',
-//      [Ord(FInspListBoxDrawPainting), FUITranslator.FDrawingInspListBoxes.Count,
-//      Rect.Left, Rect.Top, Text]);
+  if Text <> '' then
+    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting Count %d. Canvas.TextRect Left %d, Top %d: %s',
+      [FUITranslator.FDrawingInspListBoxes.Count, Rect.Left, Rect.Top, Text]);
 {$ENDIF}
 
 {$IFDEF DEBUG}
-   // Left < 100 的字符串，都记下来
-   if FInspListBoxDrawPainting and (Rect.Left < 100) then
-   begin
-     if FHookedStringHashMap = nil then
-       FHookedStringHashMap := TCnLangHashMap.Create;
-
-     FHookedStringHashMap.Add(Text, '');
-   end;
+//   Left < 100 的字符串，都记下来
+//   if (FUITranslator.FDrawingInspListBoxes.Count > 0) and (Rect.Left < 100) then
+//   begin
+//     if FHookedStringHashMap = nil then
+//       FHookedStringHashMap := TCnLangHashMap.Create;
+//
+//     FHookedStringHashMap.Add(Text, '');
+//   end;
 {$ENDIF}
 
-{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
-   CanTranslate := FUITranslator.FDrawingInspListBoxes.Count > 0;
-{$ELSE}
-   CanTranslate := FInspListBoxDrawPainting;
-{$ENDIF}
-
-  if CanTranslate and (Rect.Left < 120) then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
+  if (FUITranslator.FDrawingInspListBoxes.Count > 0) and (Rect.Left < 120) then  // 靠左绘制的才翻译，免得右边的值串区域也翻译了
   begin
     S := CnLanguageManager.Translate(Text);
     if S = '' then
@@ -1999,8 +1984,10 @@ begin
   FInspListBoxControlHook.BeforeMessage := InspListBoxControlBeforeMessage;
   FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
   FInspListBoxControlHook.OnUnhooked := InspListBoxUnHook;
+
   FDrawingInspListBoxes := TObjectList.Create(False); // 只存引用
   FPendingRemoveInspListBoxes := TObjectList.Create(False);
+
   // 注意此处同样不用调用 InstallTextDrawHook，要延迟 Hook
 
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
@@ -2066,10 +2053,12 @@ begin
   UninstallTextDrawHook;
   ClearTextDrawMessageHooks;
   FreeAndNil(FInspListBoxControlHook);
+
   FreeAndNil(FDrawingInspListBoxes);
   FreeAndNil(FPendingRemoveInspListBoxes);
-  FUITranslator := nil;
 {$ENDIF}
+
+  FUITranslator := nil;
 
   FreeAndNil(FTranedCompList);
   FreeAndNil(FTransQueue);
@@ -2462,9 +2451,9 @@ begin
       FInspListBoxControlHook.Items[I].Free;
       // CollectionItem 的 Destroy 会从 Collection 里 Remove 自己
   end;
+
   FDrawingInspListBoxes.Clear;
   FPendingRemoveInspListBoxes.Clear;
-  FInspListBoxDrawPainting := False;
 end;
 
 procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
@@ -2563,7 +2552,6 @@ begin
     if not FInspListBoxControlHook.IsHooked(ARootControl) then
     begin
       FInspListBoxControlHook.Hook(ARootControl);
-      FInspListBoxDrawPainting := False;
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
         OwnerName := ARootControl.Owner.Name
@@ -2639,9 +2627,6 @@ var
 begin
   if Msg.Msg = WM_PAINT then
   begin
-    FInspListBoxDrawPainting := True;
-
-{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
     // 延迟移除：把上一轮 After 放入待移除列表的控件真正移除
     while FPendingRemoveInspListBoxes.Count > 0 do
     begin
@@ -2650,8 +2635,7 @@ begin
     end;
     // 把当前控件加入正在绘制集合
     if FDrawingInspListBoxes.IndexOf(Control) < 0 then
-    FDrawingInspListBoxes.Add(Control);
-{$ENDIF}
+      FDrawingInspListBoxes.Add(Control);
 
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
@@ -2671,16 +2655,12 @@ var
 begin
   if Msg.Msg = WM_PAINT then
   begin
-{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
-    // Delphi 11 后的 InspListBox 有多余的缓冲绘制，WM_PAINT 处理完后还在绘制
+    // InspListBox 有多余的缓冲绘制，WM_PAINT 处理完后还在绘制
     // 不得不延迟取消标志，副作用则是可能会多余覆盖绘制本窗体上其他组件的字符串
-    // 做法：WM_PAINT 结束后不立刻移除，放入待移除列表，
+    // 具体做法：WM_PAINT 结束后不立刻移除，放入待移除列表，
     // 等下一个 WM_PAINT 的 Before 到来时才真正移除，覆盖 WM_PAINT 后的补绘
     if FPendingRemoveInspListBoxes.IndexOf(Control) < 0 then
       FPendingRemoveInspListBoxes.Add(Control);
-{$ELSE}
-    FInspListBoxDrawPainting := False;
-{$ENDIF}
 
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
@@ -2696,7 +2676,6 @@ end;
 procedure TCnMenuFormTranslator.InspListBoxUnHook(Sender: TObject; Control: TControl);
 begin
   // 只要有取消挂接事件就从两个列表里移除，防止残留
-  FInspListBoxDrawPainting := False;
   FDrawingInspListBoxes.Remove(Control);
   FPendingRemoveInspListBoxes.Remove(Control);
 end;
