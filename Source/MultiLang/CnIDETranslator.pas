@@ -113,7 +113,8 @@ type
     FAttachedMenuItems: TObjectList;
     FLoadResStringHook: TCnMethodHook;
 {$IFDEF UNICODE}
-    FDrawingInspListBoxes: TObjectList;   // 记录当前有需要绘制的 InspListBox 实例
+    FDrawingInspListBoxes: TObjectList;        // 当前正在 WM_PAINT 处理中的 InspListBox
+    FPendingRemoveInspListBoxes: TObjectList;  // WM_PAINT After 后待移除（延迟移除，覆盖补绘）
     FInspListBoxControlHook: TCnControlHook;
     FTextDrawHook: TCnMethodHook;
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
@@ -1998,7 +1999,7 @@ begin
   FInspListBoxControlHook.AfterMessage := InspListBoxControlAfterMessage;
   FInspListBoxControlHook.OnUnhooked := InspListBoxUnHook;
   FDrawingInspListBoxes := TObjectList.Create(False); // 只存引用
-
+  FPendingRemoveInspListBoxes := TObjectList.Create(False);
   // 注意此处同样不用调用 InstallTextDrawHook，要延迟 Hook
 
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
@@ -2064,6 +2065,8 @@ begin
   UninstallTextDrawHook;
   ClearTextDrawMessageHooks;
   FreeAndNil(FInspListBoxControlHook);
+  FreeAndNil(FDrawingInspListBoxes);
+  FreeAndNil(FPendingRemoveInspListBoxes);
   FUITranslator := nil;
 {$ENDIF}
 
@@ -2474,6 +2477,7 @@ begin
       // CollectionItem 的 Destroy 会从 Collection 里 Remove 自己
   end;
   FDrawingInspListBoxes.Clear;
+  FPendingRemoveInspListBoxes.Clear;
   FInspListBoxDrawPainting := False;
 end;
 
@@ -2573,7 +2577,6 @@ begin
     if not FInspListBoxControlHook.IsHooked(ARootControl) then
     begin
       FInspListBoxControlHook.Hook(ARootControl);
-      FDrawingInspListBoxes.Add(ARootControl);
       FInspListBoxDrawPainting := False;
 {$IFDEF DEBUG}
       if ARootControl.Owner <> nil then
@@ -2646,6 +2649,18 @@ begin
   begin
     FInspListBoxDrawPainting := True;
 
+{$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
+    // 延迟移除：把上一轮 After 放入待移除列表的控件真正移除
+    while FPendingRemoveInspListBoxes.Count > 0 do
+    begin
+      FDrawingInspListBoxes.Remove(FPendingRemoveInspListBoxes[0]);
+      FPendingRemoveInspListBoxes.Delete(0);
+    end;
+    // 把当前控件加入正在绘制集合
+    if FDrawingInspListBoxes.IndexOf(Control) < 0 then
+    FDrawingInspListBoxes.Add(Control);
+{$ENDIF}
+
 {$IFDEF DEBUG}
     if Control.Owner <> nil then
       OwnerName := Control.Owner.Name
@@ -2667,7 +2682,11 @@ begin
 {$IFDEF IDE_INSP_LISTBOX_MIXPAINT}
     // Delphi 11 后的 InspListBox 有多余的缓冲绘制，WM_PAINT 处理完后还在绘制
     // 不得不延迟取消标志，副作用则是可能会多余覆盖绘制本窗体上其他组件的字符串
-    // 在 UnHook 时才重置。好在该组件用处仅限制于设置对话框，没这种情况。
+    // 做法：WM_PAINT 结束后不立刻移除，放入待移除列表，
+    // 等下一个 WM_PAINT 的 Before 到来时才真正移除，覆盖 WM_PAINT 后的补绘
+    if FPendingRemoveInspListBoxes.IndexOf(Control) < 0 then
+      FPendingRemoveInspListBoxes.Add(Control);
+{$ELSE}
     FInspListBoxDrawPainting := False;
 {$ENDIF}
 
@@ -2684,9 +2703,10 @@ end;
 
 procedure TCnMenuFormTranslator.InspListBoxUnHook(Sender: TObject; Control: TControl);
 begin
-  // 只要有取消挂接事件就重置绘制标志
+  // 只要有取消挂接事件就从两个列表里移除，防止残留
   FInspListBoxDrawPainting := False;
   FDrawingInspListBoxes.Remove(Control);
+  FPendingRemoveInspListBoxes.Remove(Control);
 end;
 
 {$ENDIF}
