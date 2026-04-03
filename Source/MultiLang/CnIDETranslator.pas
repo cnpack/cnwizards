@@ -231,6 +231,10 @@ type
     procedure MultiLangTranslateObject(AObject: TObject; var Translate: Boolean);
     procedure MultiLangTranslateObjectProperty(AObject: TObject;
       const PropName: string; var Translate: Boolean);
+
+    procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
+
 {$IFDEF BDS}
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
     {* 手动翻译树节点，包括 TTreeView 和 TVirtualStringList 两种情况}
@@ -246,9 +250,6 @@ type
     procedure InspListBoxControlAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
     procedure InspListBoxUnHook(Sender: TObject; Control: TControl);
-
-    procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
-      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 {$ENDIF}
 {$IFDEF IDE_OPTION_DYNCREATE}
     procedure IdleTranslatePage(Sender: TObject);
@@ -1527,7 +1528,6 @@ procedure TCnMenuFormTranslator.TranslatePopupMenu(const AMenuCategory, AMechani
   AMenuPath: string);
 var
   I, J: Integer;
-  Form: TForm;
   FS: TObjectList;
   PopupMenu: TPopupMenu;
   Names: TStringList;
@@ -1864,7 +1864,6 @@ var
   MenuPaths: TCn2DStringArray;
   Names: TStringList;
   FS: TObjectList;
-  Form: TForm;
   PopupMenu: TPopupMenu;
   Hook: TCnMenuHook;
 begin
@@ -2094,16 +2093,12 @@ begin
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
 
-{$IFDEF UNICODE}
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
-{$ENDIF}
 end;
 
 destructor TCnMenuFormTranslator.Destroy;
 begin
-{$IFDEF UNICODE}
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
-{$ENDIF}
 
 {$IFDEF BDS}
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
@@ -2521,6 +2516,167 @@ end;
 
 {$ENDIF}
 
+// 递归遍历菜单项，将 Caption 去掉 & 和 ... 后逐行加入列表
+procedure DumpPopupMenuItems(AItem: TMenuItem; AList: TStrings);
+var
+  I: Integer;
+  Cap: string;
+begin
+  for I := 0 to AItem.Count - 1 do
+  begin
+    Cap := AItem.Items[I].Caption;
+    if Cap = '-' then
+      Continue;
+
+    Cap := StringReplace(Cap, '&', '', [rfReplaceAll]);
+    Cap := StringReplace(Cap, '...', '', [rfReplaceAll]);
+    Cap := Trim(Cap);
+
+    if Cap <> '' then
+      AList.Add(Cap);
+    if AItem.Items[I].Count > 0 then
+      DumpPopupMenuItems(AItem.Items[I], AList);
+  end;
+end;
+
+// 遍历窗体的所有 Components，找到每个 PopupMenu 并输出标题行和菜单项
+procedure DumpFormPopupMenus(AForm: TCustomForm; AList: TStrings);
+var
+  I: Integer;
+  Comp: TComponent;
+  PM: TPopupMenu;
+  OwnerName, PopupCtrlName: string;
+begin
+  for I := 0 to AForm.ComponentCount - 1 do
+  begin
+    Comp := AForm.Components[I];
+    if Comp is TPopupMenu then
+    begin
+      PM := TPopupMenu(Comp);
+      if (PM.Owner <> nil) and (PM.Owner is TComponent) then
+        OwnerName := TComponent(PM.Owner).Name
+      else
+        OwnerName := '';
+      if (PM.PopupComponent <> nil) and (PM.PopupComponent is TComponent) then
+        PopupCtrlName := TComponent(PM.PopupComponent).Name
+      else
+        PopupCtrlName := '';
+
+      // 标题行：Owner名.弹出控件名.菜单名
+      AList.Add(OwnerName + '.' + PopupCtrlName + '.' + PM.Name);
+      // 递归输出所有菜单项
+      DumpPopupMenuItems(PM.Items, AList);
+    end;
+  end;
+end;
+
+procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
+  const SourceID, DestID: PAnsiChar; const IDESets: TCnCompilers;
+  const Params: TStrings);
+var
+  SL: TStringList;
+  Key, Value, Prefix: string;
+begin
+  if Command = CN_WIZ_CMD_INSP_DUMP_HOOK then
+  begin
+{$IFDEF UNICODE}
+{$IFDEF DEBUG}
+    if FHookedStringHashMap <> nil then
+    begin
+      SL := TStringList.Create;
+      try
+        FHookedStringHashMap.StartEnum;
+        while FHookedStringHashMap.GetNext(Key, Value) do
+          SL.Add(Key + '=' + Key);
+
+      CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_DUMP_HOOK. Dump %d',
+        [FHookedStringHashMap.Size]);
+
+        SL.Sort;
+        Clipboard.AsText := SL.Text;
+      finally
+        SL.Free;
+      end;
+    end;
+{$ENDIF}
+{$ENDIF}
+  end
+  else if Command = CN_WIZ_CMD_INSP_RESTART_HOOK then
+  begin
+{$IFDEF UNICODE}
+{$IFDEF DEBUG}
+    if FHookedStringHashMap <> nil then
+    begin
+      FHookedStringHashMap.Clear;
+      CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_RESTART_HOOK. Clear to %d',
+        [FHookedStringHashMap.Size]);
+    end;
+{$ENDIF}
+{$ENDIF}
+  end
+  else if Command = CN_WIZ_CMD_DUMP_LANGSTORAGE then
+  begin
+{$IFDEF UNICODE}
+    if FStorageRef <> nil then
+    begin
+      SL := TStringList.Create;
+      if Params.Count > 0 then
+        Prefix := Trim(Params[0])
+      else
+        Prefix := '';
+
+      try
+        TCnHackHashLangStorage(FStorageRef).HashMap.StartEnum;
+        while TCnHackHashLangStorage(FStorageRef).HashMap.GetNext(Key, Value) do
+        begin
+          if (Prefix = '') or (Pos(Prefix, Key) = 1)  then
+            SL.Add(Key + '=' + Value);
+        end;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_DUMP_LANGSTORAGE. Dump %d',
+          [SL.Count]);
+{$ENDIF}
+        SL.Sort;
+        if SL.Count > 0 then
+          Clipboard.AsText := SL.Text;
+      finally
+        SL.Free;
+      end;
+    end;
+{$ENDIF}
+  end
+  else if Command = CN_WIZ_CMD_TRAN_TREEVIEW then
+  begin
+{$IFDEF UNICODE}
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_TRAN_TREEVIEW in %s',
+      [Screen.ActiveCustomForm.ClassName]);
+{$ENDIF}
+    TranslateTreeViewCatalog(Screen.ActiveCustomForm);
+{$ENDIF}
+  end
+  else if Command = CN_WIZ_CMD_DUMP_POPUPMENU then
+  begin
+    // 针对当前活动窗体，递归寻找所有 PopupMenu，输出其 Owner.PopupComponent.Name 及菜单项 Caption
+    if Screen.ActiveCustomForm <> nil then
+    begin
+      SL := TStringList.Create;
+      try
+        DumpFormPopupMenus(Screen.ActiveCustomForm, SL);
+
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_DUMP_POPUPMENU. Dump %d Lines',
+          [SL.Count]);
+{$ENDIF}
+        if SL.Count > 0 then
+          Clipboard.AsText := SL.Text;
+      finally
+        SL.Free;
+      end;
+    end;
+  end;
+end;
+
 {$IFDEF UNICODE}
 
 procedure TCnMenuFormTranslator.InstallTextDrawHook;
@@ -2562,90 +2718,6 @@ begin
 
   FDrawingInspListBoxes.Clear;
   FPendingRemoveInspListBoxes.Clear;
-end;
-
-procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
-  const SourceID, DestID: PAnsiChar; const IDESets: TCnCompilers;
-  const Params: TStrings);
-var
-  SL: TStringList;
-  Key, Value, Prefix: string;
-begin
-  if Command = CN_WIZ_CMD_INSP_DUMP_HOOK then
-  begin
-{$IFDEF DEBUG}
-    if FHookedStringHashMap <> nil then
-    begin
-      SL := TStringList.Create;
-      try
-        FHookedStringHashMap.StartEnum;
-        while FHookedStringHashMap.GetNext(Key, Value) do
-          SL.Add(Key + '=' + Key);
-
-      CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_DUMP_HOOK. Dump %d',
-        [FHookedStringHashMap.Size]);
-
-        SL.Sort;
-        Clipboard.AsText := SL.Text;
-      finally
-        SL.Free;
-      end;
-    end;
-{$ENDIF}
-  end
-  else if Command = CN_WIZ_CMD_INSP_RESTART_HOOK then
-  begin
-{$IFDEF DEBUG}
-    if FHookedStringHashMap <> nil then
-    begin
-      FHookedStringHashMap.Clear;
-      CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_INSP_RESTART_HOOK. Clear to %d',
-        [FHookedStringHashMap.Size]);
-    end;
-{$ENDIF}
-  end
-  else if Command = CN_WIZ_CMD_DUMP_LANGSTORAGE then
-  begin
-    if FStorageRef <> nil then
-    begin
-      SL := TStringList.Create;
-      if Params.Count > 0 then
-        Prefix := Trim(Params[0])
-      else
-        Prefix := '';
-
-      try
-        TCnHackHashLangStorage(FStorageRef).HashMap.StartEnum;
-        while TCnHackHashLangStorage(FStorageRef).HashMap.GetNext(Key, Value) do
-        begin
-          if (Prefix = '') or (Pos(Prefix, Key) = 1)  then
-            SL.Add(Key + '=' + Value);
-        end;
-{$IFDEF DEBUG}
-        CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_DUMP_LANGSTORAGE. Dump %d',
-          [SL.Count]);
-{$ENDIF}
-        SL.Sort;
-        if SL.Count > 0 then
-          Clipboard.AsText := SL.Text;
-      finally
-        SL.Free;
-      end;
-    end;
-  end
-  else if Command = CN_WIZ_CMD_TRAN_TREEVIEW then
-  begin
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_TRAN_TREEVIEW in %s',
-      [Screen.ActiveCustomForm.ClassName]);
-{$ENDIF}
-    TranslateTreeViewCatalog(Screen.ActiveCustomForm);
-  end
-  else if Command = CN_WIZ_CMD_DUMP_POPUPMENU then
-  begin
-    // TODO: Recursive Dump PopupMenu Items.
-    
-  end;
 end;
 
 procedure TCnMenuFormTranslator.HookMessagesInControl(ARootControl: TControl);

@@ -56,7 +56,7 @@
       }, {
         "MenuPath": "RunMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["ActiveX Server", "ActiveX 服务器"], ["Add Breakpoint", "添加断点"], ["Add Watch", "添加监视"], ["Address Breakpoint", "地址断点"], ["Attach to Process", "附加到进程"], ["Data Breakpoint", "数据断点"], ["Detach From Program", "与程序分离"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Install COM+ Objects", "安装 COM+ 对象"], ["Load Process", "加载进程"], ["Module Load Breakpoint", "模块加载断点"], ["Parameters", "参数"], ["Program Pause", "程序暂停"], ["Program Reset", "程序重置"], ["Register", "注册"], ["Register ActiveX Server", "注册 ActiveX 服务器"], ["Register for Current User", "为当前用户注册"], ["Run", "运行"], ["Run to Cursor", "运行到光标处"], ["Run Until Return", "运行直到返回"], ["Run Without Debugging", "无调试运行"], ["Show Execution Point", "显示执行点"], ["Source Breakpoint", "源代码断点"], ["Step Over", "逐过程"], ["Trace Into", "逐语句"], ["Trace to Next Source Line", "跟踪到下一源代码行"], ["Unregister", "注销"], ["Unregister ActiveX Server", "注销 ActiveX 服务器"]]
+        "ItemCaption": [["ActiveX Server", "ActiveX 服务器"], ["Add Breakpoint", "添加断点"], ["Add Watch", "添加监视"], ["Address Breakpoint", "地址断点"], ["Attach to Process", "附加到进程"], ["Data Breakpoint", "数据断点"], ["Detach From Program", "与程序分离"], ["Evaluate/Modify", "计算/修改"], ["Inspect", "检查"], ["Install COM+ Objects", "安装 COM+ 对象"], ["Load Process", "加载进程"], ["Module Load Breakpoint", "模块加载断点"], ["Parameters", "参数"], ["Program Pause", "程序暂停"], ["Program Reset", "程序重置"], ["Register", "注册"], ["Register ActiveX Server", "注册 ActiveX 服务器"], ["Register for Current User", "为当前用户注册"], ["Run", "运行"], ["Run to Cursor", "运行到光标处"], ["Run Until Return", "运行直到返回"], ["Run Without Debugging", "无调试运行"], ["Show Execution Point", "显示执行点"], ["Source Breakpoint", "源代码断点"], ["Step Over", "逐过程步过"], ["Trace Into", "逐语句步入"], ["Trace to Next Source Line", "跟踪到下一源代码行"], ["Unregister", "注销"], ["Unregister ActiveX Server", "注销 ActiveX 服务器"]]
       }, {
         "MenuPath": "SearchMenu",
         "ForceEnglish": "False",
@@ -131,6 +131,30 @@
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Add Comment", "添加注释"], ["Clear Events", "清除事件"], ["Close", "关闭"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Local Menu", "本地菜单"], ["Properties", "属性"], ["Save Events to File", "保存事件到文件"], ["Select All", "全选"], ["Stay on Top", "保持置顶"], ["Zoom Window", "缩放窗口"]]
       }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.CPUPaneMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Breakpoint Properties", "断点属性"], ["Caller", "转至调用者"], ["Change Thread", "更换线程"], ["Enabled", "启用"], ["Follow", "跟随移动"], ["Goto Address", "转至地址"], ["Goto Current EIP", "转至当前 EIP"], ["Mixed", "源码汇编混合显示"], ["New EIP", "将此处设为 EIP"], ["Previous", "转至前一处"], ["Run to Current", "运行至此处"], ["Search", "查找"], ["Toggle Breakpoint", "切换断点"], ["View FPU", "查看 FPU"], ["View Source", "查看源代码"]]
+      }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.DumpPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Bytes", "单字节"], ["Change", "修改内存值"], ["Change Thread", "更换线程"], ["Display As", "显示模式"], ["Doubles", "双精度浮点"], ["DWords", "四字节"], ["Extendeds", "扩展精度浮点"], ["Follow", "跟随"], ["Goto Address", "转至地址"], ["MultiByte", "多字节"], ["Near Code", "至代码"], ["Next", "下一处"], ["Offset to Data", "至数据"], ["Previous", "前一处"], ["QWords", "八字节"], ["Search", "查找"], ["Singles", "单精度浮点"], ["Unicode", "Unicode 字符"], ["View FPU", "查看 FPU"], ["Words", "双字节"]]
+      }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.FlagsPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Change Thread", "更换线程"], ["Toggle Flag", "翻转标志位"], ["View FPU", "查看 FPU"]]
+      }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.MainPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Close Window", "关闭窗口"], ["Down Pane", "下方面板"], ["Left Pane", "左方面板"], ["Local Menu", "本地菜单"], ["Right Pane", "右方面板"], ["Run To Here", "运行至此处"], ["Set Breakpoint", "设置断点"], ["Step Into", "逐语句步入"], ["Step Over", "逐过程步过"], ["Up Pane", "上方面板"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.RegisterPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Change Register", "修改寄存器值"], ["Change Thread", "更换线程"], ["Decrement Register", "寄存器值减一"], ["Dockable", "可停靠"], ["Increment Register", "寄存器值加一"], ["View FPU", "查看 FPU"], ["Zero Register", "寄存器清零"]]
+      }, {
+        "MenuPath": "DisassemblyView.DisassemblyView.StackPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Bytes", "单字节"], ["Change", "修改内存值"], ["Change Thread", "更换线程"], ["Display As", "显示模式"], ["DWords", "四字节"], ["Follow", "跟随"], ["Goto Address", "转至地址"], ["Near Code", "至代码"], ["Offset to Data", "至数据"], ["Offset to Stack", "栈偏移"], ["Previous", "前一处"], ["QWords", "八字节"], ["Singles", "单精度浮点"], ["Top of Stack", "栈顶"], ["View FPU", "查看 FPU"], ["Words", "双字节"]]
+      }, {
         "MenuPath": "DockSite0.DockSite0.TabPosPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Bottom", "底部"], ["Hide", "隐藏"], ["Left", "左侧"], ["Right", "右侧"], ["Top", "顶部"]]
@@ -162,6 +186,26 @@
         "MenuPath": "FindReferencesForm.FindReferencesForm.PopupMenu1",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Dockable", "可停靠"], ["Remove", "移除"], ["Remove All", "全部移除"], ["Stay on Top", "保持置顶"]]
+      }, {
+        "MenuPath": "FPUWindow.FPUWindow.ControlFlagsPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Dockable", "可停靠"], ["Stay on Top", "保持置顶"], ["Toggle Flag", "翻转标志位"]]
+      }, {
+        "MenuPath": "FPUWindow.FPUWindow.MainPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Close", "关闭"], ["Close Window", "关闭窗口"], ["Down Pane", "下方面板"], ["FPUWindow", "浮点运算单元"], ["Left Pane", "左方面板"], ["Local Menu", "本地菜单"], ["Right Pane", "右方面板"], ["Step Into", "逐语句步入"], ["Step Over", "逐过程步过"], ["Up Pane", "上方面板"], ["Zoom Window", "缩放窗口"]]
+      }, {
+        "MenuPath": "FPUWindow.FPUWindow.RegisterPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Binary", "二进制"], ["Bytes", "单字节"], ["Change", "修改"], ["Display As", "显示模式"], ["Dockable", "可停靠"], ["DWords", "四字节"], ["Empty", "置空"], ["Extendeds", "扩展精度浮点"], ["Floating Point Registers", "浮点寄存器"], ["Hexadecimal", "十六进制"], ["MMX Registers", "MMX 寄存器"], ["QWords", "八字节"], ["Radix", "基数"], ["Show", "显示"], ["Signed Decimal", "有符号十进制"], ["Stay on Top", "保持置顶"], ["Unsigned Decimal", "无符号十进制"], ["Words", "双字节"], ["Zero", "置零"]]
+      }, {
+        "MenuPath": "FPUWindow.FPUWindow.StatusFlagsPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Dockable", "可停靠"], ["Stay on Top", "保持置顶"], ["Toggle Flag", "翻转标志位"]]
+      }, {
+        "MenuPath": "FPUWindow.FPUWindow.XMMRegisterPopupMenu",
+        "ForceEnglish": "False",
+        "ItemCaption": [["Bytes", "单字节"], ["Change", "修改"], ["Display As", "显示模式"], ["Dockable", "可停靠"], ["Doubles", "双精度浮点"], ["DQWords", "十六字节"], ["DWords", "四字节"], ["QWords", "八字节"], ["Singles", "单精度浮点"], ["Stay on Top", "保持置顶"], ["Words", "双字节"], ["Zero", "置零"]]
       }, {
         "MenuPath": "frmDesignPreview.frmDesignPreview.FormPopupMenu",
         "ForceEnglish": "FALSE",
