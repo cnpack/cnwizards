@@ -45,9 +45,9 @@ interface
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
-  Controls, Forms, Menus, Clipbrd, ComCtrls, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
+  Controls, Forms, Menus, Clipbrd, ComCtrls, Tabs, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
   CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
-  CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst,
+  CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst, CnWizNotifier,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF UNICODE} CnControlHook, {$ENDIF}
   {$IFDEF BDS} CategoryButtons, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
@@ -141,6 +141,8 @@ type
     function IsPopupMenuHooked(Menu: TPopupMenu): Boolean;
 {$IFDEF BDS}
     function GetPaletteButtonInfo: TCnPaletteButtonInfo;
+    procedure SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
+      NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
 {$ENDIF}
     function GetTranslationMenuPaths(const AMenuCategory, AMechanism: string;
       const APrefix: string = ''): TCn2DStringArray;
@@ -158,6 +160,10 @@ type
     {* 翻译主菜单中的静态条目}
     procedure TranslateMainMenuProjectItems;
     {* 翻译主菜单中工程相关的动态条目，注意需在当前工程切换时通知调用}
+
+    procedure TranslateEditorTab;
+    {* 单独翻译编辑器 Tab}
+
     procedure HookMainMenuDynamicItems;
     {* 部分主菜单的主菜单项内容是动态生成的，需要通过 Hook 这几个 Item 的 OnClick 来处理}
 
@@ -257,7 +263,7 @@ type
 implementation
 
 uses
-  CnCommon, CnMenuHook, CnWizNotifier, CnStrings, CnWizOptions,
+  CnCommon, CnMenuHook, CnStrings, CnWizOptions,
   {$IFDEF IDE_CATALOG_VIRTUALTREE} CnVSTreeOp, {$ENDIF}
   CnWizMultiLang, CnLangMgr, CnWideStrings, CnLangCollection, CnLangStorage
   {$IFDEF DEBUG}, CnDebug {$ENDIF};
@@ -271,13 +277,14 @@ const
   INDEX_CHS = 1;
 
   // 翻译的菜单类型
-  RT_CATEGORY_MAINMENU: string = 'MainMenu';
-  RT_CATEGORY_POPUPMENUS: string = 'PopupMenus';
+  SCN_CATEGORY_MAINMENU: string = 'MainMenu';
+  SCN_CATEGORY_POPUPMENUS: string = 'PopupMenus';
+  SCN_CATEGORY_SCREENFORMS: string = 'ScreenForms';
 
   // 翻译的翻译机制
-  RT_MECHANISM_DIRECTACCESS: string = 'DirectAccess';
-  RT_MECHANISM_EVENTHANDLER: string = 'EventHandler';
-  RT_MECHANISM_WINDOWPROC: string = 'WindowProc';
+  SCN_MECHANISM_DIRECTACCESS: string = 'DirectAccess';
+  SCN_MECHANISM_EVENTHANDLER: string = 'EventHandler';
+  SCN_MECHANISM_WINDOWPROC: string = 'WindowProc';
 
   SCN_INSP_LIST_BOX = 'TInspListBox';
   SCN_TREE_NAME = 'trvwPageNodes';
@@ -995,6 +1002,13 @@ begin
   end;
 end;
 
+procedure TCnMenuFormTranslator.SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
+  NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
+begin
+  if NotifyType = setEditViewActivated then
+    TranslateEditorTab;
+end;
+
 {$ENDIF}
 
 // 根据菜单类型查找菜单路径
@@ -1341,8 +1355,8 @@ begin
 
   for I := 0 to FMainMenu.Items.Count - 1 do
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, FMainMenu.Items[I].Name);
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, FMainMenu.Items[I].Name);
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('TranslateStaticMainMenu %s Get Captions %d', [FMainMenu.Items[I].Name, Length(Captions)]);
 {$ENDIF}
@@ -1366,8 +1380,8 @@ begin
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, 'ProjectBuildItem');
   if Assigned(MenuItem) then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, 'ProjectBuildItem');
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, 'ProjectBuildItem');
     if Length(Captions) > 0 then
       MenuItem.Caption := Captions[0, 1] + ' ' + ActiveProjectInfo.FileNameNoExt;
   end;
@@ -1375,8 +1389,8 @@ begin
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, 'ProjectCompileItem');
   if Assigned(MenuItem) then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, 'ProjectCompileItem');
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, 'ProjectCompileItem');
     if Length(Captions) > 0 then
       MenuItem.Caption := Captions[0, 1] + ' ' + ActiveProjectInfo.FileNameNoExt;
   end;
@@ -1384,8 +1398,8 @@ begin
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, 'ProjectDeployItem');
   if Assigned(MenuItem) then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, 'ProjectDeployItem');
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, 'ProjectDeployItem');
     if Length(Captions) > 0 then
       MenuItem.Caption := Captions[0, 1] + ' ' + ActiveProjectInfo.FileName;
   end;
@@ -1393,8 +1407,8 @@ begin
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, 'ProjectInformationItem');
   if Assigned(MenuItem) then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, 'ProjectInformationItem');
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, 'ProjectInformationItem');
     if Length(Captions) > 0 then
       MenuItem.Caption := Captions[0, 1] + ' ' + ActiveProjectInfo.FileNameNoExt;
   end;
@@ -1402,8 +1416,8 @@ begin
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, 'ProjectSyntaxItem');
   if Assigned(MenuItem) then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_MAINMENU,
-      RT_MECHANISM_DIRECTACCESS, 'ProjectSyntaxItem');
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
+      SCN_MECHANISM_DIRECTACCESS, 'ProjectSyntaxItem');
     if Length(Captions) > 0 then
       MenuItem.Caption := Captions[0, 1] + ' ' + ActiveProjectInfo.FileNameNoExt;
   end;
@@ -1420,7 +1434,7 @@ var
 begin
   UnHookMainMenuDynamicItems;
 
-  MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_MAINMENU, RT_MECHANISM_EVENTHANDLER);
+  MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_MAINMENU, SCN_MECHANISM_EVENTHANDLER);
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnMenuTranslator.HookMainMenuItems %d', [Length(MenuPaths)]);
 {$ENDIF}
@@ -1472,7 +1486,7 @@ begin
       if Assigned(ItemInfo.OriginalOnClick) then
         ItemInfo.OriginalOnClick(Sender);
 
-      TranslateMainMenuDynamicItem(RT_CATEGORY_MAINMENU, RT_MECHANISM_EVENTHANDLER,
+      TranslateMainMenuDynamicItem(SCN_CATEGORY_MAINMENU, SCN_MECHANISM_EVENTHANDLER,
         ItemInfo.MenuPath);
       Exit;
     end;
@@ -1570,8 +1584,8 @@ begin
     if not Assigned(PopupMenu) then
       Exit;
 
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-      RT_MECHANISM_EVENTHANDLER, MenuPath);
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+      SCN_MECHANISM_EVENTHANDLER, MenuPath);
     if Length(Captions) > 0 then
     begin
       for I := 0 to PopupMenu.Items.Count - 1 do
@@ -1592,8 +1606,8 @@ begin
       begin
         TempCaption := '&Delete "' + PaletteButtonInfo.CateGoryCaption + '" Category...';
       end;
-      Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-        RT_MECHANISM_EVENTHANDLER, MenuPath + '.actnRemoveCategory1');
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+        SCN_MECHANISM_EVENTHANDLER, MenuPath + '.actnRemoveCategory1');
       MenuItem.Caption := ReturnTranslateCaption(TempCaption, Captions);
     end;
 
@@ -1608,8 +1622,8 @@ begin
       begin
         TempCaption := 'Re&name "' + PaletteButtonInfo.CateGoryCaption + '" Category';
       end;
-      Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-        RT_MECHANISM_EVENTHANDLER, MenuPath + '.mnuRenameCategory');
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+        SCN_MECHANISM_EVENTHANDLER, MenuPath + '.mnuRenameCategory');
       MenuItem.Caption := ReturnTranslateCaption(TempCaption, Captions);
     end;
 
@@ -1624,8 +1638,8 @@ begin
       begin
         TempCaption := 'De&lete "' + PaletteButtonInfo.ButtonCaption + '" Button';
       end;
-      Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-        RT_MECHANISM_EVENTHANDLER, MenuPath + '.DeleteButton1');
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+        SCN_MECHANISM_EVENTHANDLER, MenuPath + '.DeleteButton1');
       MenuItem.Caption := ReturnTranslateCaption(TempCaption, Captions);
     end;
 
@@ -1640,8 +1654,8 @@ begin
       begin
         TempCaption := '&Hide "' + PaletteButtonInfo.ButtonCaption + '" Button';
       end;
-      Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-        RT_MECHANISM_EVENTHANDLER, MenuPath + '.HideButton1');
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+        SCN_MECHANISM_EVENTHANDLER, MenuPath + '.HideButton1');
       MenuItem.Caption := ReturnTranslateCaption(TempCaption, Captions);
     end;
 
@@ -1649,8 +1663,8 @@ begin
     if Assigned(MenuItem) then
     begin
       TempCaption := 'Unhide &Button';
-      Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS,
-        RT_MECHANISM_EVENTHANDLER, MenuPath + '.mnuShowButton');
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS,
+        SCN_MECHANISM_EVENTHANDLER, MenuPath + '.mnuShowButton');
       MenuItem.Caption := ReturnTranslateCaption(TempCaption, Captions);
     end;
 {$ENDIF}
@@ -1675,7 +1689,7 @@ begin
       (Pos('TCn', F.ClassName) <> 1) and (Pos('Cn', F.Name) <> 1) then
     begin
       S := F.Name + '.';
-      MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS, S);
+      MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS, S);
 {$IFDEF DEBUG}
       CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenus for %s Get %d', [F.Name, Length(MenuPaths)]);
 {$ENDIF}
@@ -1683,7 +1697,7 @@ begin
       for I := 0 to Length(MenuPaths) - 1 do
       begin
         if Pos(S, MenuPaths[I, 0]) = 1 then
-          TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+          TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
            MenuPaths[I, 0]);
       end;
 
@@ -1703,7 +1717,7 @@ begin
             if (F <> nil) and (F.Name <> '') then
             begin
               S := F.Name + '.';
-              MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS, S);
+              MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS, S);
 {$IFDEF DEBUG}
               CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenus for Dock %s Get %d', [F.Name, Length(MenuPaths)]);
 {$ENDIF}
@@ -1711,7 +1725,7 @@ begin
               for J := 0 to Length(MenuPaths) - 1 do
               begin
                 if Pos(S, MenuPaths[J, 0]) = 1 then
-                  TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+                  TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
                    MenuPaths[J, 0]);
               end;
             end;
@@ -1725,10 +1739,60 @@ begin
   end
   else
   begin
-    MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS);
+    MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS);
     for I := 0 to Length(MenuPaths) - 1 do
-      TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_DIRECTACCESS,
+      TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
         MenuPaths[I, 0]);
+  end;
+end;
+
+procedure TCnMenuFormTranslator.TranslateEditorTab;
+var
+  I, J: Integer;
+  FS: TObjectList;
+  Form: TForm;
+  Control: TControl;
+  TabSet: TTabSet;
+  Captions: TCn2DStringArray;
+begin
+  FS := TObjectList.Create(False);
+  try
+    if not FindScreenFormByName('EditWindow_*', FS) then
+      Exit;
+
+    for I := 0 to FS.Count - 1 do
+    begin
+      Form := TForm(FS[I]);
+
+      Control := FindControlByNameDeep(Form, 'ViewBar');
+      if Assigned(Control) then
+      begin
+        Captions := GetTranslationItemCaptions(SCN_CATEGORY_SCREENFORMS,
+          SCN_MECHANISM_DIRECTACCESS, 'EditWindow_*.ViewBar');
+        if Length(Captions) > 0 then
+        begin
+          TabSet := TTabSet(Control);
+          for J := 0 to TabSet.Tabs.Count - 1 do
+            TabSet.Tabs[J] := ReturnTranslateCaption(TabSet.Tabs[J], Captions);
+        end;
+      end;
+
+      // 重写编辑区历史窗口内的选项卡
+      Control := FindControlByNameDeep(Form, 'TabSet1');
+      if Assigned(Control) then
+      begin
+        Captions := GetTranslationItemCaptions(SCN_CATEGORY_SCREENFORMS,
+          SCN_MECHANISM_DIRECTACCESS, 'EditWindow_*.TabSet1');
+        if Length(Captions) > 0 then
+        begin
+          TabSet := TTabSet(Control);
+          for J := 0 to TabSet.Tabs.Count - 1 do
+            TabSet.Tabs[J] := ReturnTranslateCaption(TabSet.Tabs[J], Captions);
+        end;
+      end;
+    end;
+  finally
+    FS.Free;
   end;
 end;
 
@@ -1748,7 +1812,7 @@ begin
   if (F = nil) or (Pos(EDITWINDOW_PREFIX, F.Name) <> 1) then
     Exit;
 
-  MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_EVENTHANDLER);
+  MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER);
   Names := TStringList.Create;
   try
     for I := 0 to Length(MenuPaths) - 1 do
@@ -1794,7 +1858,7 @@ var
   Hook: TCnMenuHook;
 begin
   UnHookPopupMenus;
-  MenuPaths := GetTranslationMenuPaths(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_EVENTHANDLER);
+  MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER);
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TCnMenuTranslator.HookPopupMenus %d', [Length(MenuPaths)]);
 {$ENDIF}
@@ -1859,7 +1923,7 @@ begin
       end
       else
       begin
-        TranslatePopupMenu(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_EVENTHANDLER,
+        TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER,
           Hook.Text);
       end;
       Exit;
@@ -1919,7 +1983,7 @@ begin
     Exit;
 
   // 查找主菜单
-  JsonValue := FTranslationMap[RT_CATEGORY_MAINMENU];
+  JsonValue := FTranslationMap[SCN_CATEGORY_MAINMENU];
   if not (JsonValue is TCnJSONObject) then
     Exit;
 
@@ -2017,6 +2081,10 @@ begin
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
 
+{$IFDEF BDS}
+  CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
+{$ENDIF}
+
 {$IFDEF UNICODE}
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
 {$ENDIF}
@@ -2026,6 +2094,10 @@ destructor TCnMenuFormTranslator.Destroy;
 begin
 {$IFDEF UNICODE}
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
+{$ENDIF}
+
+{$IFDEF BDS}
+  CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
 
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
@@ -2154,6 +2226,8 @@ begin
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
+  TranslateEditorTab;
+
 {$IFDEF COMPILER7_UP}
   CheckActionMainMenuBarPersistentHotKeys;
 {$ENDIF}
@@ -2187,12 +2261,14 @@ begin
     begin
       if not Application.Terminated then
       begin
-        // 非 IDE 关闭情况下，恢复英文菜单
+        // 非 IDE 关闭情况下，恢复英文菜单等
         TranslateStaticMainMenu;
         TranslateMainMenuProjectItems;
         TranslateStaticPopupMenus;
         TranslatePopupMenuPaletteItems;
         UpdateWholeMenus;
+
+        TranslateEditorTab;
 
         // 根据需要将当前已存在的窗体翻译回英语
         LoadAdditionalLangFile(GetAdditionalLangID);
@@ -2730,7 +2806,7 @@ var
 begin
   if FActive then
   begin
-    Captions := GetTranslationItemCaptions(RT_CATEGORY_POPUPMENUS, RT_MECHANISM_WINDOWPROC,
+    Captions := GetTranslationItemCaptions(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_WINDOWPROC,
       'Application.TFormContainerForm.TPopupActionBar');
     if Length(Captions) = 0 then
       Exit;
@@ -2749,7 +2825,7 @@ begin
   FLangTransFlag := False;
 
   // 当前要翻译为中文、且当前语言是中文，且加载了 IDE 的中文语言文件，则翻译所有已经存在的窗体为中文
-  if FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID) then
+  if CanTranslateToChinese then
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnMultiLang LangaugeChanged. Current Translate to Chinese UI.');
@@ -2782,6 +2858,8 @@ begin
         end;
       end;
     end;
+
+    TranslateEditorTab;
     FAlreadyChinese := True;
   end
   else if FAlreadyChinese then // 其他情况，只要曾经中文了，就翻译回英文一次
@@ -2811,6 +2889,8 @@ begin
         end;
       end;
     end;
+
+    TranslateEditorTab;
     FAlreadyChinese := False;
   end;
 end;

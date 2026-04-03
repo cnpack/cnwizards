@@ -94,6 +94,13 @@
       }
     ]
   },
+  "ScreenForms": {
+    "DirectAccess": [{
+      "MenuPath": "EditWindow_*.ViewBar",
+      "ForceEnglish": "True",
+      "ItemCaption": [["Code", "代码"], ["Design", "设计"], ["Diagram", "图表"], ["History", "历史"]]
+    }]
+  },
   "PopupMenus": {
     "DirectAccess": [{
         "MenuPath": "AppBuilder.AppBuilder.PaletteMenu",
