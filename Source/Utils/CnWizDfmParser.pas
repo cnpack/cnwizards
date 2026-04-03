@@ -1386,6 +1386,7 @@ begin
     if Root.Count = 1 then
       SaveLeafToStrings(Root.Items[0], List, 0);
   end;
+  Result := True;
 end;
 
 { TCnDfmLeaf }
