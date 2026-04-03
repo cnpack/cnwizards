@@ -830,10 +830,11 @@ var
 
 begin
   try
-    Parser := TParser.Create(Stream);
+    Parser := nil;
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
-    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+      Parser := TParser.Create(Stream);
       PropCount := 0;
       ParseObject;
       Result := True;
@@ -1077,11 +1078,12 @@ var
   Parser: TParser;
   StartLeaf: TCnDfmLeaf;
 begin
-  Parser := TParser.Create(Stream);
   try
+    Parser := nil;
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
-    {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
     try
+      {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+      Parser := TParser.Create(Stream);
       StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
       ParseTextObjectToLeaf(Parser, Tree, StartLeaf as TCnDfmLeaf);
       Result := True;
