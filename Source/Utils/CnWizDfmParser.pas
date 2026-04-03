@@ -1077,7 +1077,7 @@ var
   Parser: TParser;
   StartLeaf: TCnDfmLeaf;
 begin
-  Parser := TParser.Create(Stream);
+  Parser := TParser.Create(Stream, TFormatSettings.Invariant);
   try
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
