@@ -417,7 +417,7 @@ begin
           Stream := TMemoryStream.Create;
           Parser.HexToBinary(Stream);
           Stream.Position := 0;
-          Result := ConvertStreamToHexDfmString(Stream) + '}';
+          Result := '{' + ConvertStreamToHexDfmString(Stream) + '}';
 
           BinStream := Stream; // 将存有二进制数据的流对象传出
         end;
