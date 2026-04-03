@@ -28,7 +28,9 @@ unit CnIDETranslator;
 * 开发平台：PWin7 + Delphi 5
 * 兼容测试：Windows + Delphi 所有版本
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2026.04.01 V1.3
+* 修改记录：2026.04.03 V1.4
+*               加入资源字符串 Hook 的机制，仅少数版本启用，待测试
+*           2026.04.01 V1.3
 *               加入大量界面翻译机制，待不断完善中
 *           2026.02.24 V1.2
 *               移植入专家包。重构插件，主菜单（直接写）、弹出菜单（事件挂钩）、活动窗体菜单（子类化窗口）
@@ -42,6 +44,10 @@ unit CnIDETranslator;
 interface
 
 {$I CnWizards.inc}
+
+{$IFNDEF BDS}
+//  {$DEFINE ENABLE_RESSTRING_HOOK} // 不完善，暂时屏蔽
+{$ENDIF}
 
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
@@ -107,7 +113,9 @@ type
     FMainMenuPath: string;
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
     FAttachedMenuItems: TObjectList;
+{$IFDEF ENABLE_RESSTRING_HOOK}
     FLoadResStringHook: TCnMethodHook;
+{$ENDIF}
 {$IFDEF UNICODE}
     FDrawingInspListBoxes: TObjectList;        // 当前正在 WM_PAINT 处理中的 InspListBox
     FPendingRemoveInspListBoxes: TObjectList;  // WM_PAINT After 后待移除（延迟移除，覆盖补绘）
@@ -362,6 +370,8 @@ end;
 
 {$ENDIF}
 
+{$IFDEF ENABLE_RESSTRING_HOOK}
+
 // LoadResString Hook 函数：输出字符串内容，预留翻译替换机制，原封不动返回
 function MyHookedLoadResString(ResStringRec: PResStringRec): string;
 var
@@ -383,16 +393,17 @@ begin
   end;
 
 {$IFDEF DEBUG}
-  // 输出字符串内容，便于收集需要翻译的资源字符串
-  if (S <> '') and (Pos('Cn', S) <> 1) then
-    CnDebugger.LogFmt('CnIDETranslator LoadResString: %s', [S]);
+// 输出字符串内容，便于收集需要翻译的资源字符串
+//  if (S <> '') and (Pos('Cn', S) <> 1) then
+//    CnDebugger.LogFmt('CnIDETranslator LoadResString: %s', [S]);
 {$ENDIF}
 
-  // 预留翻译替换机制：此处可根据 S 查表替换为翻译后的字符串
-  // 例如：Result := CnLanguageManager.Translate(S);
-  // 目前原封不动返回
-  Result := S;
+  Result := CnLanguageManager.Translate(S);
+  if Result = '' then
+    Result := S;
 end;
+
+{$ENDIF}
 
 {$IFDEF DEBUG}
 
@@ -2064,9 +2075,7 @@ begin
   FPropertySheetControlHook.AfterMessage := PropertySheetAfterMessage;
 {$ENDIF}
 
-  // 安装 LoadResString Hook，用于拦截资源字符串加载，预留翻译替换机制
-  // FLoadResStringHook := TCnMethodHook.Create(GetBplMethodAddress(@System.LoadResString),
-  //  @MyHookedLoadResString);
+  // 注意同样不用安装 LoadResString Hook，要延迟
 
   // 加载翻译内容
   TranslationMapPath := WizOptions.GetDataFileName(csMenuTransFile);
@@ -2115,8 +2124,10 @@ begin
   FreeAndNil(FPropertySheetControlHook);
 {$ENDIF}
 
+{$IFDEF ENABLE_RESSTRING_HOOK}
   // 卸载 LoadResString Hook
   FreeAndNil(FLoadResStringHook);
+{$ENDIF}
 
 {$IFDEF UNICODE}
 {$IFDEF IDE_CATALOG_VIRTUALTREE}
@@ -2261,6 +2272,12 @@ begin
       // 根据需要加载中文或英文翻译当前已存在的所有窗体
       LoadAdditionalLangFile(GetAdditionalLangID);
       TranslateAllExistingForms;
+
+{$IFDEF ENABLE_RESSTRING_HOOK}
+      FLoadResStringHook := TCnMethodHook.Create(GetBplMethodAddress(@System.LoadResString),
+        @MyHookedLoadResString);
+{$ENDIF}
+
 {$IFDEF UNICODE}
       InstallTextDrawHook;
 {$ENDIF}
@@ -2292,6 +2309,10 @@ begin
 {$IFDEF UNICODE}
       ClearTextDrawMessageHooks;
       UninstallTextDrawHook;
+{$ENDIF}
+
+{$IFDEF ENABLE_RESSTRING_HOOK}
+      FreeAndNil(FLoadResStringHook);
 {$ENDIF}
     end;
   end;
