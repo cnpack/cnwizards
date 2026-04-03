@@ -2170,7 +2170,18 @@ begin
   // 注意加载的额外语言文件，和专家包的当前语言不一定相同
   if FStorageRef.CurrentLanguage <> nil then
   begin
-    // 大版本语言文件
+    // 先加载全部字符串内容文件，不区分版本
+    S := MakePath(MakePath(FStorageRef.LanguagePath) + D) + 'Resource.txt';
+    if FileExists(S) then
+    begin
+      FStorageRef.AddExtraItemsFromFile(S);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnMenuFormTranslator Load Resoure String File to %d',
+        [TCnHackHashLangStorage(FStorageRef).HashMap.Size]);
+{$ENDIF}
+    end;
+
+    // 大版本语言界面文件
     S := MakePath(MakePath(FStorageRef.LanguagePath) + D) + GetAdditionalLangMainFileName;
     if FileExists(S) then
     begin
