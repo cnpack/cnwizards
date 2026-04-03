@@ -2640,6 +2640,11 @@ begin
       [Screen.ActiveCustomForm.ClassName]);
 {$ENDIF}
     TranslateTreeViewCatalog(Screen.ActiveCustomForm);
+  end
+  else if Command = CN_WIZ_CMD_DUMP_POPUPMENU then
+  begin
+    // TODO: Recursive Dump PopupMenu Items.
+    
   end;
 end;
 

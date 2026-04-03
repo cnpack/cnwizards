@@ -145,7 +145,8 @@ object CnCmdSendForm: TCnCmdSendForm
       '3544 将拦截到的 TextRect 的参数字符串放到剪贴板'
       '3545 清空拦截到的 TextRect 的字符串并继续拦截'
       '3546 将当前语言存储条目放至剪贴板，参数为前缀过滤'
-      '3547 翻译当前活动窗体的目录树组件')
+      '3547 翻译当前活动窗体的目录树组件'
+      '3548 生成当前窗体的弹出菜单条目')
     TabOrder = 8
     OnClick = lstMsgClick
   end

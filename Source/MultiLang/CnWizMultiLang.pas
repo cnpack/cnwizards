@@ -276,6 +276,7 @@ begin
   FStorage := TCnHashLangFileStorage.Create(nil);
   FStorage.FileName := SCnWizLangFile;
   FStorage.StorageMode := smByDirectory;
+  FStorage.ListLength := 64 * 1024;  // 一开始大一点准备加载较多条目
 
   try
 {$IFNDEF STAND_ALONE}

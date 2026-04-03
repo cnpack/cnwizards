@@ -126,6 +126,9 @@ const
   CN_WIZ_CMD_TRAN_TREEVIEW       = $CCB + $110;  // 3547
   {* 通知多语插件翻译当前活动窗体的目录树组件}
 
+  CN_WIZ_CMD_DUMP_POPUPMENU      = $CCB + $111;  // 3548
+  {* 通知 Dump 当前活动窗体的 PopupMenu 条目}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type
