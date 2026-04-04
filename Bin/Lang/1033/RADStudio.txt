@@ -3360,6 +3360,7 @@ THTMLDesignerCommands.WebBrowserUnorderedList1.Hint=Unordered list
 THTMLDesignerCommands.WebBrowserZeroBorder1.Caption=Show Borders
 THTMLDesignerCommands.WebBrowserZeroBorder1.Hint=Show borders
 TIDEFirstUseForm.IDEThemeGeneralFrame1.cbASEditor.Caption=Autosave files and layout
+TIDEFirstUseForm.IDEThemeGeneralFrame1.checkboxClassicComp.Caption=Show the 'classic' component toolbar
 TIDEFirstUseForm.IDEThemeGeneralFrame1.DefaultProjectBtn.Caption=Browse...
 TIDEFirstUseForm.IDEThemeGeneralFrame1.labelConfSourceControl.Caption=Configure source control
 TIDEFirstUseForm.IDEThemeGeneralFrame1.labelDefafultProject.Caption=Default project folder:

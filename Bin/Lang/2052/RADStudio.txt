@@ -3360,6 +3360,7 @@ THTMLDesignerCommands.WebBrowserUnorderedList1.Hint=无序列表
 THTMLDesignerCommands.WebBrowserZeroBorder1.Caption=显示边框
 THTMLDesignerCommands.WebBrowserZeroBorder1.Hint=显示边框
 TIDEFirstUseForm.IDEThemeGeneralFrame1.cbASEditor.Caption=自动保存文件和布局
+TIDEFirstUseForm.IDEThemeGeneralFrame1.checkboxClassicComp.Caption=显示传统的组件面板
 TIDEFirstUseForm.IDEThemeGeneralFrame1.DefaultProjectBtn.Caption=浏览...
 TIDEFirstUseForm.IDEThemeGeneralFrame1.labelConfSourceControl.Caption=配置源代码控制
 TIDEFirstUseForm.IDEThemeGeneralFrame1.labelDefafultProject.Caption=默认项目文件夹：

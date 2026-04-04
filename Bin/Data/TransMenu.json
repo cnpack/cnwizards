@@ -263,6 +263,10 @@
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Dockable", "可停靠"], ["Stay on Top", "保持置顶"]]
       }, {
+        "MenuPath": "StructureViewForm.StructureViewForm.pmSearch",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Case sensitive", "区分大小写"], ["Properties", "属性"], ["Regular expressions", "正则表达式"], ["Whole Words Only", "全字匹配"]]
+      }, {
         "MenuPath": "TemplateView.TemplateView.FormPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Edit", "编辑"], ["Execute", "执行"], ["Filter", "筛选"], ["New", "新建"], ["Remove", "移除"], ["Toolbar", "工具栏"]]
@@ -289,6 +293,10 @@
       }
     ],
     "EventHandler": [{
+        "MenuPath": "AppBuilder.AppBuilder.IDEThemePopup",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Editor", "编辑器"], ["Editor Display Options", "编辑器显示设置"], ["IDE Style Options", "IDE 样式设置"], ["Match Window Theme", "匹配系统主题"], ["Set Desktop", "设为桌面"]]
+      }, {
         "MenuPath": "AppBuilder.AppBuilder.ToolbarsPopup",
         "ForceEnglish": "TRUE",
         "ItemCaption": [["Active", "活动"], ["Align", "对齐"], ["Always on top", "始终置顶"], ["Animation", "动画"], ["AutoHide", "自动隐藏"], ["Bottom", "底部"], ["Browser", "浏览器"], ["Component", "组件"], ["Component Palette", "组件面板"], ["ComponentSelector", "组件选择器"], ["Custom", "自定义"], ["Customize", "自定义"], ["Debug", "调试"], ["Desktop", "桌面"], ["Desktops", "桌面"], ["Dock area", "停靠区域"], ["Docking", "停靠"], ["Embarcadero Community", "Embarcadero 社区"], ["Float", "浮动"], ["HTML Design", "HTML 设计"], ["HTML Format", "HTML 格式"], ["HTML Table", "HTML 表格"], ["IDE Insight", "IDE 洞察"], ["Internet", "互联网"], ["Left", "左侧"], ["MSDN Help", "MSDN 帮助"], ["Personality", "开发环境配置"], ["Platform Device Selection", "平台设备选择"], ["Position", "位置"], ["Repository", "资源库"], ["Right", "右侧"], ["Show Hints", "显示提示"], ["Spacing", "间距"], ["Standard", "标准"], ["Tabs", "标签"], ["Top", "顶部"], ["View", "视图"]]
