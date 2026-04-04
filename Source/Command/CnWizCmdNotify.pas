@@ -41,7 +41,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  SysUtils, Classes, Windows, Messages, Forms, CnWizCompilerConst, CnWizCmdMsg;
+  SysUtils, Classes, {$IFDEF FPC} LCLType, LMessages, {$ENDIF} Windows, Messages,
+  Forms, CnWizCompilerConst, CnWizCmdMsg;
 
 type
   TCnWizCmdNotifyEvent = procedure (const Command: Cardinal; const SourceID: PAnsiChar;
@@ -122,8 +123,13 @@ function CnWizCmdNotifier: ICnWizCmdNotifier;
 
 implementation
 
+{$IFDEF DEBUG}
 uses
-  Consts {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnDebug;
+{$ENDIF}
+
+resourcestring
+  SCnErrorCreateWindowClass = 'Error Creating Window Class';
 
 var
   FCnWizCmdNotifier: ICnWizCmdNotifier = nil;
@@ -206,7 +212,7 @@ begin
   begin
     CnWizCmdClass.hInstance := HInstance;
     if Windows.RegisterClass(CnWizCmdClass) = 0 then
-      raise EOutOfResources.Create(SWindowClass);
+      raise EOutOfResources.Create(SCnErrorCreateWindowClass);
   end;
 
   FHandle := CreateWindow(CnWizCmdClass.lpszClassName, PChar(SCN_WIZ_CMD_WINDOW_NAME),

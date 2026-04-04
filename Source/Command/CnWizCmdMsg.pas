@@ -151,6 +151,17 @@ type
     {* 命令的其他数据，可扩展}
   end;
 
+{$IFDEF FPC}
+
+  TWMCopyData = record
+    Msg: Cardinal;
+    MsgFiller: TDWordFiller;
+    From: HWND;
+    CopyDataStruct: PCopyDataStruct;
+    Result: LRESULT;
+  end;
+
+{$ENDIF}
 implementation
 
 end.

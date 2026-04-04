@@ -22,7 +22,8 @@ uses
   CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
   CnStatResultFrm, CnStatWizard, CnEditorCodeComment, CnPas2HtmlConfigFrm, 
   CnPas2HtmlWizard, CnPasConvertTypeFrm, CnCodeFormatRules, 
-  CnCodeFormatterWizard, CnFormatterIntf, CnTabOrderWizard, LazarusPackageIntf;
+  CnCodeFormatterWizard, CnFormatterIntf, CnTabOrderWizard, CnWizCmdMsg, 
+  CnWizCmdNotify, CnWizCmdSend, LazarusPackageIntf;
 
 implementation
 

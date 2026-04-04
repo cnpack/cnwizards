@@ -59,8 +59,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, ExtCtrls, Contnrs, Menus,
-  {$IFNDEF STAND_ALONE} {$IFDEF COMPILER5} DsgnIntf, {$ELSE} DesignIntf, DesignEditors, DesignMenus,
-  {$ENDIF} {$ENDIF} {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFNDEF FPC}
+  {$IFDEF COMPILER5} DsgnIntf, {$ELSE} DesignIntf, DesignEditors, DesignMenus,{$ENDIF}
+  {$ENDIF} {$ENDIF}
+  {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF SUPPORT_FMX} System.Rtti, {$ENDIF}
   {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}

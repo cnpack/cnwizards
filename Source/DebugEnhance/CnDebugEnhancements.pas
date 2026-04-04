@@ -346,8 +346,9 @@ const
   csEnableWide = 'EnableWide';
   csEnableMemoryStream = 'EnableMemoryStream';
 
-  SCnIntegerTypes: array[0..10] of string = ('Byte', 'SmallInt', 'ShortInt', 'Word',
-    'Integer', 'Cardinal', 'DWORD', 'LongInt', 'LongWord', 'Int64', 'UInt64');
+  SCnIntegerTypes: array[0..12] of string = ('Byte', 'SmallInt', 'ShortInt', 'Word',
+    'Integer', 'Cardinal', 'DWORD', 'LongInt', 'LongWord', 'Int64', 'UInt64',
+    'NativeInt', 'NativeUInt');
   {* 几种常见的整型}
 
 var

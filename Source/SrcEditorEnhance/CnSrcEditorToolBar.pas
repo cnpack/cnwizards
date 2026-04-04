@@ -674,7 +674,8 @@ end;
 
 function TCnSrcEditorToolBarMgr.CanShowDesignToolBar: Boolean;
 begin
-  Result := Active and ShowDesignToolBar and IdeGetIsEmbeddedDesigner;
+  Result := Active and ShowDesignToolBar
+    {$IFDEF DELPHI_OTA} and IdeGetIsEmbeddedDesigner {$ENDIF};
 end;
 
 procedure TCnSrcEditorToolBarMgr.DoInstallToolBars(EditWindow: TCustomForm;

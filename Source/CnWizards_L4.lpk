@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -259,6 +259,18 @@
       <Item>
         <Filename Value="SimpleWizard\CnTabOrderWizard.pas"/>
         <UnitName Value="CnTabOrderWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdMsg.pas"/>
+        <UnitName Value="CnWizCmdMsg"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdNotify.pas"/>
+        <UnitName Value="CnWizCmdNotify"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdSend.pas"/>
+        <UnitName Value="CnWizCmdSend"/>
       </Item>
     </Files>
     <RequiredPkgs>

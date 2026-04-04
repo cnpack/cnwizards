@@ -66,7 +66,7 @@ uses
   Windows, Messages, SysUtils, Classes, Forms, ActnList, Controls, Menus, Contnrs,
   StdCtrls, ExtCtrls, ComCtrls, IniFiles, Clipbrd, CheckLst, CnHashMap,
 {$IFNDEF STAND_ALONE}
-  CnDesignEditor, CnWizScaler, CnIDETranslator,
+  CnDesignEditor, CnWizScaler, {$IFNDEF FPC} CnIDETranslator, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} ToolsAPI, CnIDEMirrorIntf, {$ENDIF}
 {$ELSE}
   CnWizLangID, 
@@ -91,7 +91,9 @@ type
     FIndexes: array of Integer;
 {$IFNDEF STAND_ALONE}
     FTranslateIndex: Integer;
+{$IFNDEF FPC}
     FTranslator: TCnMenuFormTranslator;
+{$ENDIF}
 {$ENDIF}
     procedure SetExtractorNoNameMode(E: TCnLangStringExtractor; F: TCustomForm);
   protected
@@ -357,7 +359,10 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
+  FTranslateIndex := -1;
+{$IFNDEF FPC}
   FTranslator := TCnMenuFormTranslator.Create(FStorage);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -367,8 +372,10 @@ var
   S: string;
 begin
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
   FTranslateIndex := RegisterASubAction('CnTranslateMenu', 'ºº»¯½çÃæ');
   AddSepMenu;
+{$ENDIF}
 {$ENDIF}
 
   if FStorage.LanguageCount > 0 then
@@ -397,7 +404,9 @@ begin
     FActiveFormChangedReg := False;
   end;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
   FreeAndNil(FTranslator);
+{$ENDIF}
 {$ENDIF}
   FreeAndNil(FStorage);
   inherited;
@@ -458,8 +467,10 @@ begin
     begin
       SubActions[Index].Checked := not SubActions[Index].Checked;
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
       FTranslator.Active := SubActions[Index].Checked;
       WizOptions.TranslateUI := FTranslator.Active;
+{$ENDIF}
 {$ENDIF}
     end;
   end
@@ -499,8 +510,10 @@ begin
       Sep.Visible := WizOptions.CurrentLangID = csChineseID;
 
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
     if SubActions[Index].Visible then
       SubActions[Index].Checked := FTranslator.Active;
+{$ENDIF}
 {$ENDIF}
   end
   else
@@ -521,14 +534,18 @@ begin
     [Ord(WizOptions.TranslateUI), WizOptions.CurrentLangID]);
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
   FTranslator.Active := WizOptions.TranslateUI and (WizOptions.CurrentLangID = csChineseID);
+{$ENDIF}
 {$ENDIF}
 end;
 
 procedure TCnWizMultiLang.Loaded;
 begin
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
   UpdateTranslator(Self);
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -536,7 +553,9 @@ procedure TCnWizMultiLang.DebugComand(Cmds, Results: TStrings);
 begin
   inherited DebugComand(Cmds, Results);
 {$IFNDEF STAND_ALONE}
+{$IFNDEF FPC}
   FTranslator.DebugCommand(Cmds, Results);
+{$ENDIF}
 {$ENDIF}
 end;
 
