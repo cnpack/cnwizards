@@ -2040,7 +2040,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbNoBack
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbRenameNew.Caption=转换并重命名新工程(&R)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.Caption=对象检查器
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbBoldNonDefault.Caption=非默认值使用粗体(&O)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbIntegralHeight.Caption=整行高度（未停靠时）(&I)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbIntegralHeight.Caption=整数倍行高（未停靠时）(&I)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbReferenceExpandable.Caption=内联展开(&X)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbReferenceOnEventsPage.Caption=在事件页上显示(&P)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbRenderBackgroundGrid.Caption=渲染背景网格(&G)

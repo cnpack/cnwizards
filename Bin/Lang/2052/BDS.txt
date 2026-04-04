@@ -771,7 +771,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TPasTypeLibOptions.rgSafeCallFu
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPasTypeLibOptions.rgSafeCallFunctionMapping.Items.Text=所有虚表接口(&A)<BR>仅双接口(&O)<BR>不映射(&D)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.Caption=对象查看器
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbBoldNonDefault.Caption=非默认值粗体(&O)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbIntegralHeight.Caption=整型高度（未停靠时）(&N)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbIntegralHeight.Caption=整数倍行高（未停靠时）(&N)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbReferenceExpandable.Caption=内联展开(&X)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbReferenceOnEventsPage.Caption=在事件页显示(&P)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TPropInspOptionsPage.cbRenderBackgroundGrid.Caption=渲染背景网格(&G)
