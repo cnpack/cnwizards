@@ -1165,12 +1165,12 @@ TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbLocalSymbols.C
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOpenParameters.Caption=开放参数(&P)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOptimization.Caption=优化(&Z)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOverflowCheck.Caption=溢出检查(&O)
-TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用 Pentium 安全版 FDIV 指令(&M)
+TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用奔腾安全版 FDIV 指令(&M)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbRangeCheck.Caption=范围检查(&R)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbStackFrames.Caption=栈帧(&K)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbSymbolInfo.Caption=引用信息(&F)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbTypedPointers.Caption=类型化 @ 运算符(&T)
-TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbVarStrCheck.Caption=严格 var-strings(&V)
+TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbVarStrCheck.Caption=严格 var 字符串(&V)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.GroupBox1.Caption=代码生成
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.GroupBox2.Caption=运行时错误
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.GroupBox3.Caption=语法选项
