@@ -104,6 +104,7 @@ type
     FStorageRef: TCnHashLangFileStorage;
     FAddtionalLanguageFileLoad: Boolean;
     FAlreadyChinese: Boolean;
+    FOldFont: TFont;
     FLangTransFlag: Boolean;
     FTransQueue: TComponentList;
     FTranedCompList: TComponentList;
@@ -2140,6 +2141,7 @@ begin
 {$ENDIF}
 
   FUITranslator := nil;
+  FOldFont.Free;
 
   FreeAndNil(FTranedCompList);
   FreeAndNil(FTransQueue);
@@ -2269,6 +2271,14 @@ begin
 
       // 根据需要加载中文或英文翻译当前已存在的所有窗体
       LoadAdditionalLangFile(GetAdditionalLangID);
+
+      // 第一次翻译前，记录主窗体旧字体备用
+      if WizOptions.UseChineseFont and (FOldFont = nil) then
+      begin
+        FOldFont := TFont.Create;
+        if GetIDEMainForm <> nil then
+          FOldFont := GetIDEMainForm.Font;
+      end;
       TranslateAllExistingForms;
 
 {$IFDEF ENABLE_RESSTRING_HOOK}
@@ -2367,6 +2377,9 @@ begin
 {$ENDIF}
 
     CnLanguageManager.TranslateForm(F, True);
+    if CanTranslateToChinese and WizOptions.UseChineseFont and (fsModal in F.FormState) then
+      F.Font := WizOptions.ChineseFont;
+
     if F.Visible then
       F.Update;
 
@@ -2414,6 +2427,10 @@ begin
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
 {$ENDIF}
         CnLanguageManager.TranslateForm(F, True);
+
+        // 只改 Modal 窗体的字体
+        if WizOptions.UseChineseFont and (fsModal in F.FormState) then
+          F.Font := WizOptions.ChineseFont;
         if F.Visible then
           F.Update;
 {$IFDEF DEBUG}
@@ -2969,6 +2986,10 @@ begin
           except
             ;
           end;
+
+          // 只改 Modal 窗口
+          if WizOptions.UseChineseFont and (fsModal in F.FormState) then
+            F.Font := WizOptions.ChineseFont;
 
           if F.Visible then
             F.Update;

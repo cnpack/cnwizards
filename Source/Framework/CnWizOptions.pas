@@ -121,6 +121,8 @@ type
     FDisableIcons: Boolean;
     FTempForceDisableIco: Boolean;
     FUseSearchCombo: Boolean;
+    FUseChineseFont: Boolean;
+    FChineseFont: TFont;
     procedure SetCurrentLangID(const Value: Cardinal);
     function GetUpgradeCheckDate: TDateTime;
     procedure SetUpgradeCheckDate(const Value: TDateTime);
@@ -136,6 +138,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
+
     procedure LoadSettings;
     procedure SaveSettings(Manual: Boolean = False);
     // Manual 为 True 时表示从界面保存而不是结束时自动保存
@@ -299,6 +302,11 @@ type
 
     property UseSearchCombo: Boolean read FUseSearchCombo write FUseSearchCombo;
     {* 部分使用 ComboBox 进行下拉选择的场合，是否改用 CnSearchCombo}
+
+    property UseChineseFont: Boolean read FUseChineseFont write FUseChineseFont;
+    {* 是否汉化时模态对话框使用指定汉字字体}
+    property ChineseFont: TFont read FChineseFont write FChineseFont;
+    {* 汉化时给模态对话框使用的窗体基本字体}
   end;
 
 var
@@ -319,7 +327,7 @@ uses
   {$IFNDEF CNWIZARDS_MINIMUM} CnWizShareImages, {$ENDIF}
 {$ENDIF}
 {$ENDIF}
-  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnRegIni, CnNative;
+  CnWizConsts, CnCommon,  CnConsts, CnWizCompilerConst, CnRegIni, CnIniStrUtils, CnNative;
 
 function GetFactorFromSizeEnlarge(Enlarge: TCnWizSizeEnlarge): Single;
 begin
@@ -379,6 +387,9 @@ const
   csCustomUserDir = 'CustomUserDir';
   csUseSearchCombo = 'UseSearchCombo';
 
+  csUseChineseFont = 'UseChineseFont';
+  csChineseFont = 'ChineseFont';
+
 {$IFNDEF COMPILER6_UP}
 const
   SHFolderDll = 'SHFolder.dll';
@@ -394,12 +405,14 @@ function SHGetFolderPath(hwnd: HWND; csidl: Integer; hToken: THandle;
 constructor TCnWizOptions.Create;
 begin
   inherited;
+  FChineseFont := TFont.Create;
   LoadSettings;
 end;
 
 destructor TCnWizOptions.Destroy;
 begin
   SaveSettings;
+  FChineseFont.Free;
   inherited;
 end;
 
@@ -540,6 +553,15 @@ begin
         FCustomUserDir := DefDir;
     end;
     FUseSearchCombo := ReadBool(SCnOptionSection, csUseSearchCombo, True);
+    FUseChineseFont := ReadBool(SCnOptionSection, csUseChineseFont, False);
+    StringToFont(ReadString(SCnOptionSection, csChineseFont, ''), FChineseFont);
+
+{   测试用
+    FUseChineseFont := True;
+    FChineseFont.Name := '宋体';
+    FChineseFont.Size := 9;
+    FChineseFont.Charset := GB2312_CHARSET;
+}
 
     FUpgradeReleaseOnly := ReadBool(SCnUpgradeSection, csUpgradeReleaseOnly, True);
     FUpgradeContent := [];
@@ -607,6 +629,12 @@ begin
       WriteString(SCnOptionSection, csCustomUserDir, FCustomUserDir);
 
     WriteBool(SCnOptionSection, csUseSearchCombo, FUseSearchCombo);
+    WriteBool(SCnOptionSection, csUseChineseFont, FUseChineseFont);
+    if FUseChineseFont then
+      WriteString(SCnOptionSection, csChineseFont, FontToString(FChineseFont))
+    else
+      WriteString(SCnOptionSection, csChineseFont, '');
+
     WriteBool(SCnUpgradeSection, csUpgradeReleaseOnly, FUpgradeReleaseOnly);
     WriteBool(SCnUpgradeSection, csNewFeature, ucNewFeature in FUpgradeContent);
     WriteBool(SCnUpgradeSection, csBigBugFixed, ucBigBugFixed in FUpgradeContent);

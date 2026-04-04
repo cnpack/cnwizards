@@ -359,7 +359,6 @@ begin
 {$ENDIF}
 
 {$IFNDEF STAND_ALONE}
-  FTranslateIndex := -1;
 {$IFNDEF FPC}
   FTranslator := TCnMenuFormTranslator.Create(FStorage);
 {$ENDIF}
