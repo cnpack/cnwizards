@@ -637,12 +637,22 @@ begin
       E.FilterOptions := E.FilterOptions - [tfFont];
       E.OnAllowItem := ExtractorAllowItem;
 
+      S := '';
+      if (Params <> nil) and (Params.Count > 0) then
+        S := Params[0];
+
       for I := 0 to Screen.CustomFormCount - 1 do
       begin
         // 忽略我们专家包的窗体
         if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
         begin
-          SetExtractorNoNameMode(E, Screen.CustomForms[I]);
+          if S = 'class' then
+            E.NoNameProcessType := cnptAtClassName
+          else if S = 'index' then
+            E.NoNameProcessType := cnptIndex
+          else
+            SetExtractorNoNameMode(E, Screen.CustomForms[I]);
+
           E.GetFormStrings(Screen.CustomForms[I], SL, True);
         end;
       end;
