@@ -56,7 +56,7 @@ uses
   CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst, CnWizNotifier,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF UNICODE} CnControlHook, {$ENDIF}
-  {$IFDEF BDS} CategoryButtons, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
+  {$IFDEF BDS} CategoryButtons, CnEditControlWrapper, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf, {$ENDIF} ToolsAPI;
 
@@ -201,7 +201,7 @@ type
     procedure LoadTranslationMenus(const AMenuLangFile: string);
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
-    procedure TranslateAllExistingForms;
+    procedure TranslateAllExistingForms(const ClassNamePattern: string = '');
     {* 翻译现有 IDE 的窗体。以下几种情况下会被调用：
       中文状态下汉化功能启用或禁用时（SetActive 中调用），内部检查 FActive 以决定翻成中文还是英文，
       切换语言到中文时且汉化功能启用时调用（LanguageChanged 中调用，内部翻成中文）
@@ -236,6 +236,7 @@ type
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 
 {$IFDEF BDS}
+    procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
     {* 手动翻译树节点，包括 TTreeView 和 TVirtualStringList 两种情况}
 {$ENDIF}
@@ -328,9 +329,9 @@ var
   S: string;
 begin
 {$IFDEF DEBUG}
-  if Text <> '' then
-    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting Count %d. Canvas.TextRect Left %d, Top %d: %s',
-      [FUITranslator.FDrawingInspListBoxes.Count, Rect.Left, Rect.Top, Text]);
+//  if Text <> '' then
+//    CnDebugger.LogFmt('CnIDETranslator InspListBox Painting Count %d. Canvas.TextRect Left %d, Top %d: %s',
+//      [FUITranslator.FDrawingInspListBoxes.Count, Rect.Left, Rect.Top, Text]);
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -2091,6 +2092,7 @@ begin
 
 {$IFDEF BDS}
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
+  EditControlWrapper.AddEditorChangeNotifier(EditorChange);
 {$ENDIF}
 
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
@@ -2101,6 +2103,7 @@ begin
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
 
 {$IFDEF BDS}
+  EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
 
@@ -2442,6 +2445,17 @@ begin
 end;
 
 {$IFDEF BDS}
+
+procedure TCnMenuFormTranslator.EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
+begin
+  if ctTopEditorChanged in ChangeType then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed.');
+{$ENDIF}
+    // TODO: 翻 CPU 等 SubView？
+  end;
+end;
 
 function TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
 var
@@ -2925,7 +2939,7 @@ begin
   end;
 end;
 
-procedure TCnMenuFormTranslator.TranslateAllExistingForms;
+procedure TCnMenuFormTranslator.TranslateAllExistingForms(const ClassNamePattern: string);
 var
   I: Integer;
   F: TCustomForm;
@@ -2942,7 +2956,8 @@ begin
     for I := 0 to Screen.CustomFormCount - 1 do
     begin
       F := Screen.CustomForms[I];
-      if (Pos('TCn', F.ClassName) <> 1) and (F.ClassName <> 'TTabDockHostForm') then
+      if (Pos('TCn', F.ClassName) <> 1) and (F.ClassName <> 'TTabDockHostForm')
+        and ((ClassNamePattern = '') or (Pos(ClassNamePattern, F.ClassName) > 0)) then // 有匹配条件时就得匹配类名
       begin
         if FTranedCompList.IndexOf(F) < 0 then
         begin

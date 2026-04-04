@@ -295,7 +295,7 @@
     "EventHandler": [{
         "MenuPath": "AppBuilder.AppBuilder.IDEThemePopup",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Editor", "编辑器"], ["Editor Display Options", "编辑器显示设置"], ["IDE Style Options", "IDE 样式设置"], ["Match Window Theme", "匹配系统主题"], ["Set Desktop", "设为桌面"]]
+        "ItemCaption": [["Editor", "编辑器"], ["Editor Display Options", "编辑器显示设置"], ["IDE Style Options", "IDE 样式设置"], ["Match Windows Theme", "匹配系统主题"], ["Set Desktop", "设为桌面"]]
       }, {
         "MenuPath": "AppBuilder.AppBuilder.ToolbarsPopup",
         "ForceEnglish": "TRUE",
