@@ -106,7 +106,7 @@ type
     ctHScroll,                // 编辑器横向滚动
     ctBlock,                  // 块变更，也就是选择范围或状态有变化
     ctModified,               // 编辑内容修改
-    ctTopEditorChanged,       // 当前显示的上层编辑器变更
+    ctTopEditorChanged,       // 当前显示的上层编辑器变更，注意该通知收到时，在切换 CPU 等场合，CnOtaGetCurrentEditWindow 可能会拿到 nil，需要 Idle 后执行
 {$IFDEF BDS}
     ctLineDigit,              // 编辑器总行数位数变化，如 99 到 100
 {$ENDIF}

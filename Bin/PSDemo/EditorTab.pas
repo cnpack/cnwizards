@@ -19,7 +19,7 @@ var
   TabControlClassName: string;
   Tabs: TStrings;
 begin
-  EditWindow := CnOtaGetCurrentEditWindow;
+  EditWindow := CnOtaGetCurrentEditWindow(True);
   if EditWindow = nil then
   begin
     ErrorDlg('NO Editor Window Found');

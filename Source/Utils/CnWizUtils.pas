@@ -630,10 +630,12 @@ function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer):
 {* 取当前工程中的第 Index 个模块信息，从 0 开始}
 function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
-function CnOtaGetCurrentEditWindow: TCustomForm;
-{* 以 OTA 的方式取当前的 EditWindow}
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean = False): TCustomForm;
+{* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历 Screen 的 Form 们，但在有多个 EditWindow 的情况下}
 function CnOtaGetCurrentEditControl: TWinControl;
 {* 以 OTA 的方式取当前的 EditControl 控件}
+function CnOtaGetCurrentEditWindowSubViewControl: TControl;
+{* 以 OTA 的方式取当前的 EditWindow 下的当前 SubView，如编辑器、设计器、CPU 等}
 function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
@@ -5110,8 +5112,9 @@ begin
 end;
 
 // 以 OTA 的方式取当前的 EditWindow
-function CnOtaGetCurrentEditWindow: TCustomForm;
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
 var
+  I: Integer;
   EditView: IOTAEditView;
   EditWindow: INTAEditWindow;
 begin
@@ -5123,6 +5126,18 @@ begin
     begin
       Result := EditWindow.Form;
       Exit;
+    end;
+  end;
+
+  if CheckScreen then
+  begin
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      if IsIdeEditorForm(Screen.CustomForms[I]) then
+      begin
+        Result := Screen.CustomForms[I];
+        Exit;
+      end;
     end;
   end;
   Result := nil;
@@ -5156,6 +5171,36 @@ begin
   end;
   Result := nil;
 {$ENDIF}
+end;
+
+// 以 OTA 的方式取当前的 EditWindow 下的当前 SubView，如编辑器、设计器、CPU 等
+function CnOtaGetCurrentEditWindowSubViewControl: TControl;
+var
+  I: Integer;
+  F: TCustomForm;
+  C: TComponent;
+  L: TControl;
+begin
+  Result := nil;
+  F := CnOtaGetCurrentEditWindow(True);
+
+  // TEditWindow 的 Components 里有个 CodePanel:TPanel，也有个 EditorPanel: TPanel，
+  // 前者 Controls 下面有后者，后者下面才是各个 SubView
+  if F <> nil then
+  begin
+    C := F.FindComponent('EditorPanel');
+    if (C <> nil) and (C is TPanel) then
+    begin
+      for I := TPanel(C).ControlCount - 1 downto 0 do
+      begin
+        if Pos('Cn', TPanel(C).Controls[I].Name) <> 1 then
+        begin
+          Result := TPanel(C).Controls[I];
+          Exit;
+        end;
+      end;
+    end;
+  end;
 end;
 
 //设定项目配置值

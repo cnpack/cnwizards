@@ -592,7 +592,7 @@ function CnOtaGetEditor(const FileName: string): IOTAEditor;
 {* 根据文件名返回编辑器接口}
 function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
 {* 返回窗体编辑器设计窗体组件}
-function CnOtaGetCurrentEditWindow: TCustomForm;
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
 {* 取当前的 EditWindow}
 function CnOtaGetCurrentEditControl: TWinControl;
 {* 取当前的 EditControl 控件}
@@ -1467,7 +1467,7 @@ function CnOtaGetRootComponentFromEditor(Editor: IOTAFormEditor): TComponent;
 begin
 end;
 
-function CnOtaGetCurrentEditWindow: TCustomForm;
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
 begin
 end;
 

@@ -107,7 +107,9 @@ const
 {$ENDIF}
 
   SCnDesignControlClassName = 'TEditorFormDesigner';
+  SCnDesignControlName = 'EditFormDesigner';
   SCnWelcomePageClassName = 'TWelcomePageFrame';
+  SCnWelcomePageName = 'WelcomePage';
   SCnDisassemblyViewClassName = 'TDisassemblyView';
   SCnDisassemblyViewName = 'CPU';
   SCnEditorStatusBarName = 'StatusBar';

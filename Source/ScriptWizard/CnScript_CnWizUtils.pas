@@ -452,7 +452,7 @@ begin
   CL.AddDelphiFunction('Function CnOtaGetModuleFromProjectByIndex( Project : IOTAProject; Index : Integer): IOTAModuleInfo');
   CL.AddDelphiFunction('Function CnOtaGetEditor( const FileName : string) : IOTAEditor');
   CL.AddDelphiFunction('Function CnOtaGetRootComponentFromEditor( Editor : IOTAFormEditor) : TComponent');
-  CL.AddDelphiFunction('Function CnOtaGetCurrentEditWindow : TCustomForm');
+  CL.AddDelphiFunction('Function CnOtaGetCurrentEditWindow(CheckScreen: Boolean) : TCustomForm');
   CL.AddDelphiFunction('Function CnOtaGetCurrentEditControl : TWinControl');
   CL.AddDelphiFunction('Function CnOtaGetUnitName( Editor : IOTASourceEditor) : string');
   CL.AddDelphiFunction('Function CnOtaGetProjectGroup : IOTAProjectGroup');
