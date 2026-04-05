@@ -182,12 +182,16 @@ type
     {* 解除挂接主菜单}
 
     // 弹出菜单处理过程
-    procedure TranslatePopupMenu(const AMenuCategory, AMechanism, AMenuPath: string);
-    {* 翻译一个弹出菜单，可弹出时动态调用，也可直接调用}
+    procedure TranslatePopupMenu(const AMenuCategory, AMechanism, AMenuPath: string;
+      Container: TComponent = nil);
+    {* 翻译一个弹出菜单，可弹出时动态调用，也可直接调用，
+       默认从匹配 AMenuPath 的 Screen 里找 Form 们的菜单，如 Container 不为 nil 则从 Container 里找菜单}
     procedure TranslatePopupMenuPaletteItems;
     {* 翻译控件板的弹出菜单}
     procedure TranslateStaticPopupMenus(OnlyCurrent: Boolean = False);
     {* 翻译其他静态弹出菜单，OnlyCurrent 为 True 表示只翻译最靠前窗体的}
+    procedure TranslateStaticPopupMenusForContainer(Container: TComponent);
+    {* 翻译指定容器的其他静态弹出菜单，MenuPath 采用 Container 的名字}
     procedure HookPopupMenus;
     {* 挂接所有现有的弹出菜单以在弹出后进行翻译}
     procedure HookPopupMenuOnCurrentEditWindow;
@@ -237,6 +241,7 @@ type
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 
 {$IFDEF BDS}
+    procedure CheckSubViewPopupMenus(Sender: TObject);
     procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
     {* 手动翻译树节点，包括 TTreeView 和 TVirtualStringList 两种情况}
@@ -408,56 +413,19 @@ end;
 
 {$ENDIF}
 
-{$IFDEF DEBUG}
-
-procedure Dump2DStringArray(const Arr: TCn2DStringArray);
-var
-  I, J: Integer;
-  RowCount, ColCount: Integer;
-  Line: string;
-begin
-  RowCount := Length(Arr);
-  if RowCount = 0 then
-  begin
-    CnDebugger.LogMsg('2D String Array is empty (no rows).');
-    Exit;
-  end;
-
-  for I := 0 to RowCount - 1 do
-  begin
-    ColCount := Length(Arr[I]);
-    if ColCount = 0 then
-    begin
-      CnDebugger.LogFmt('Row %d: empty', [I]);
-      Continue;
-    end;
-
-    Line := Format('Row %d: ', [I]);
-    for J := 0 to ColCount - 1 do
-    begin
-      if J > 0 then
-        Line := Line + ', ';
-      Line := Line + Format('[%d,%d]="%s"', [I, J, Arr[I, J]]);
-    end;
-    CnDebugger.LogMsg(Line);
-  end;
-end;
-
-{$ENDIF}
-
 function StrEqualOrMatchStartWithStar(const APattern, AStr: string): Boolean;
 var
-  J: Integer;
+  I: Integer;
   Prefix: string;
 begin
   Result := True;
   if AStr = APattern then
     Exit;
 
-  J := Pos('*', APattern);
-  if J > 1 then
+  I := Pos('*', APattern);
+  if I > 1 then
   begin
-    Prefix := Copy(APattern, 1, J - 1);
+    Prefix := Copy(APattern, 1, I - 1);
     Result := Pos(Prefix, AStr) = 1;
   end
   else
@@ -1525,9 +1493,9 @@ begin
   FAttachedMenuItems.Clear;
 end;
 
-// 弹出菜单处理过程，重写单个弹出菜单
+// 弹出菜单处理过程，从 Screen 里找 Form 们的菜单并重写单个弹出菜单
 procedure TCnMenuFormTranslator.TranslatePopupMenu(const AMenuCategory, AMechanism,
-  AMenuPath: string);
+  AMenuPath: string; Container: TComponent);
 var
   I, J: Integer;
   FS: TObjectList;
@@ -1543,8 +1511,13 @@ begin
     FS := TObjectList.Create(False);
 
     ExtractStrings(['.'], [' '], PChar(AMenuPath), Names);
-    if not FindScreenFormByName(Names[0], FS) then
-      Exit;
+    if Container = nil then
+    begin
+      if not FindScreenFormByName(Names[0], FS) then
+        Exit;
+    end
+    else
+      FS.Add(Container);
 
     if Names.Count = 3 then
     begin
@@ -1739,7 +1712,7 @@ begin
               begin
                 if Pos(S, MenuPaths[J, 0]) = 1 then
                   TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
-                   MenuPaths[J, 0]);
+                    MenuPaths[J, 0]);
               end;
             end;
           end;
@@ -1756,6 +1729,30 @@ begin
     for I := 0 to Length(MenuPaths) - 1 do
       TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
         MenuPaths[I, 0]);
+  end;
+end;
+
+// 翻译指定容器的其他静态弹出菜单，MenuPath 采用 Container 的名字
+procedure TCnMenuFormTranslator.TranslateStaticPopupMenusForContainer(Container: TComponent);
+var
+  I: Integer;
+  S: string;
+  MenuPaths: TCn2DStringArray;
+begin
+  if (Container <> nil) and (Container.Name <> '') then
+  begin
+    S := Container.Name + '.';
+    MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS, S);
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenusForContainer %s Get %d', [Container.Name, Length(MenuPaths)]);
+{$ENDIF}
+
+    for I := 0 to Length(MenuPaths) - 1 do
+    begin
+      if Pos(S, MenuPaths[I, 0]) = 1 then
+        TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
+         MenuPaths[I, 0], Container);
+    end;
   end;
 end;
 
@@ -2470,7 +2467,23 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed.');
 {$ENDIF}
-    // TODO: 翻 CPU 等 SubView？
+    CnWizNotifierServices.ExecuteOnApplicationIdle(CheckSubViewPopupMenus);
+  end;
+end;
+
+procedure TCnMenuFormTranslator.CheckSubViewPopupMenus(Sender: TObject);
+var
+  C: TControl;
+begin
+  // 检查当前是否切到了 CPU
+  C := CnOtaGetCurrentEditWindowSubViewControl;
+  if (C <> nil) and C.ClassNameIs(SCnDisassemblyViewClassName) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to CPU.');
+{$ENDIF}
+    // 翻 CPU 中的右键菜单
+    TranslateStaticPopupMenusForContainer(C);
   end;
 end;
 
@@ -3063,12 +3076,29 @@ end;
 
 procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
   AObject: TObject; const PropName: string; var Translate: Boolean);
+var
+  I: Integer;
+  S: string;
+  SL: TStrings;
 begin
   // 注意此处不能加 FActive 判断，否则从中翻英时会进不来从而导致该属性被破坏出错
   if FLangTransFlag and ((Compiler = cnDelphi7) or (Compiler >= cnDelphi2007))
     and AObject.ClassNameIs('TTabList') then
   begin
     Translate := False;
+
+    // 只能挨个翻，不能 Text 整体赋值，否则会破坏其 Objects 导致出错
+    if CanTranslateToChinese and (AObject is TStrings) then
+    begin
+      SL := TStrings(AObject);
+      for I := 0 to SL.Count - 1 do
+      begin
+        S := CnLanguageManager.TranslateString(SL[I]);
+        if S <> '' then
+          SL[I] := S;
+      end;
+    end;
+
     FLangTransFlag := False;
   end;
 end;
