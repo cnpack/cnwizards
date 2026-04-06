@@ -1379,7 +1379,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbIntegrat
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbPromptToRebuild.Caption=&Prompt to rebuild projects modified while debugging
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbRearrangeMenu.Caption=Rearrange &editor local menu on run
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbTD32Commands.Caption=Map &TD32 keystrokes on run
-TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.clbAutoCloseViews.Items.Text=Files implicitly opened while debugging<BR>Modules view<BR>CPU view
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbAutoClose.Caption= &Auto close views after debugging 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbDebuggers.Caption= &Registered debuggers 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbDebugging.Caption= General 

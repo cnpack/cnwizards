@@ -1379,7 +1379,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbIntegrat
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbPromptToRebuild.Caption=在调试时提示重新构建已修改的工程(&P)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbRearrangeMenu.Caption=运行时重新排列编辑器本地菜单(&E)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.cbTD32Commands.Caption=运行时映射 TD32 快捷键(&T)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.clbAutoCloseViews.Items.Text=调试时隐式打开的文件<BR>模块视图<BR>CPU 视图
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbAutoClose.Caption= 调试后自动关闭视图(&A) 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbDebuggers.Caption= 已注册的调试器(&R) 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerOptionsPage.gbDebugging.Caption= 常规 
