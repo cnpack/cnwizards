@@ -354,7 +354,6 @@ TDebuggerLogOptDialog.PropertySheetControl1.[0].cbClearOnStartup.Caption=&Clear 
 TDebuggerLogOptDialog.PropertySheetControl1.[0].cbIncludeProcessInfo.Caption=&Display process info with event
 TDebuggerLogOptDialog.PropertySheetControl1.[0].cbUnlimited.Caption=&Unlimited length
 TDebuggerLogOptDialog.PropertySheetControl1.[0].chkbxUseLogColors.Caption=Use &event log colors
-TDebuggerLogOptDialog.PropertySheetControl1.[0].clbMessageTypes.Items.Text=Breakpoint Messages<BR>Process Messages<BR>Thread Messages<BR>Module Messages<BR>Output Messages<BR>Application Domain Messages<BR>Managed Debug Assistant Messages<BR>Windows Messages
 TDebuggerLogOptDialog.PropertySheetControl1.[0].GeneralGroupBox.Caption= General 
 TDebuggerLogOptDialog.PropertySheetControl1.[0].lblBackground.Caption=&Background:
 TDebuggerLogOptDialog.PropertySheetControl1.[0].lblForeground.Caption=&Foreground:
@@ -502,7 +501,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbClear
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbIncludeProcessInfo.Caption=&Display process info with event
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbUnlimited.Caption=&Unlimited length
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.chkbxUseLogColors.Caption=Use &event log colors
-TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.clbMessageTypes.Items.Text=Breakpoint Messages<BR>Process Messages<BR>Thread Messages<BR>Module Messages<BR>Output Messages<BR>Application Domain Messages<BR>Managed Debug Assistant Messages<BR>Windows Messages
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.GeneralGroupBox.Caption= General 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.lblBackground.Caption=&Background:
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.lblForeground.Caption=&Foreground:

@@ -354,7 +354,6 @@ TDebuggerLogOptDialog.PropertySheetControl1.[0].cbClearOnStartup.Caption=运行�
 TDebuggerLogOptDialog.PropertySheetControl1.[0].cbIncludeProcessInfo.Caption=在事件中显示进程信息(&D)
 TDebuggerLogOptDialog.PropertySheetControl1.[0].cbUnlimited.Caption=无长度限制(&U)
 TDebuggerLogOptDialog.PropertySheetControl1.[0].chkbxUseLogColors.Caption=使用事件日志颜色(&E)
-TDebuggerLogOptDialog.PropertySheetControl1.[0].clbMessageTypes.Items.Text=断点消息<BR>进程消息<BR>线程消息<BR>模块消息<BR>输出消息<BR>应用程序域消息<BR>托管调试助手消息<BR>Windows 消息
 TDebuggerLogOptDialog.PropertySheetControl1.[0].GeneralGroupBox.Caption= 常规
 TDebuggerLogOptDialog.PropertySheetControl1.[0].lblBackground.Caption=背景(&B)：
 TDebuggerLogOptDialog.PropertySheetControl1.[0].lblForeground.Caption=前景(&F)：
@@ -502,7 +501,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbClear
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbIncludeProcessInfo.Caption=显示事件附带进程信息(&D)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.cbUnlimited.Caption=无限长度(&U)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.chkbxUseLogColors.Caption=使用事件日志颜色(&E)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.clbMessageTypes.Items.Text=断点消息<BR>进程消息<BR>线程消息<BR>模块消息<BR>输出消息<BR>应用程序域消息<BR>托管调试助手消息<BR>Windows 消息
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.GeneralGroupBox.Caption=常规
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.lblBackground.Caption=背景(&B)：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerLogOptionsPage.lblForeground.Caption=前景(&F)：
