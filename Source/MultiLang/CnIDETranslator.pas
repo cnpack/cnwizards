@@ -107,13 +107,14 @@ type
     FOldFont: TFont;
     FLangTransFlag: Boolean;
     FTransQueue: TComponentList;
-    FTranedCompList: TComponentList;
+    FTranedCompList: TComponentList;      // 记录已经翻译过的窗体、容器等，避免重复
     FOld2Array, FNew2Array: TStringList;
     FTranslationMap: TCnJSONObject;
     FMainMenu: TMainMenu;
     FMainMenuPath: string;
     FAttachedPopupMenuHooks: TObjectList; // MenuHooks
     FAttachedMenuItems: TObjectList;
+    // 注意不能记录已经静态翻译过的 PopupMenu 来避免重复，因为 IDE 自身会老改
 {$IFDEF ENABLE_RESSTRING_HOOK}
     FLoadResStringHook: TCnMethodHook;
 {$ENDIF}
@@ -171,7 +172,9 @@ type
     {* 翻译主菜单中工程相关的动态条目，注意需在当前工程切换时通知调用}
 
     procedure TranslateEditorTab;
-    {* 单独翻译编辑器 Tab}
+    {* 单独翻译编辑器 Tab，内部不能控制防重}
+    procedure TranslateEditorSubViews;
+    {* 单独翻译编辑器的 SubView 们，目前只翻译 CPU}
 
     procedure HookMainMenuDynamicItems;
     {* 部分主菜单的主菜单项内容是动态生成的，需要通过 Hook 这几个 Item 的 OnClick 来处理}
@@ -1806,6 +1809,31 @@ begin
   end;
 end;
 
+procedure TCnMenuFormTranslator.TranslateEditorSubViews;
+var
+  I: Integer;
+  C: TWinControl;
+begin
+  C := CnOtaGetCurrentEditWindowSubViewContainer;
+  if C = nil then
+    Exit;
+
+  for I := 0 to C.ControlCount - 1 do
+  begin
+    // TODO: 翻各种现存的 SubView 的 Frame，记得判断是否已翻译，并去掉下面的 Exit
+
+    if C.Controls[I].ClassNameIs(SCnDisassemblyViewClassName) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnMenuFormTranslator TranslateEditorSubViews: CPU PopupMenu');
+{$ENDIF}
+      // 翻 CPU 中的右键菜单
+      TranslateStaticPopupMenusForContainer(C.Controls[I]);
+      Exit;
+    end;
+  end;
+end;
+
 // 挂接当前活动编辑器窗口上的菜单控件
 procedure TCnMenuFormTranslator.HookPopupMenuOnCurrentEditWindow;
 const
@@ -2237,7 +2265,6 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogEnter('TCnMenuTranslator.DelayActivate');
 {$ENDIF}
-
   TranslateStaticMainMenu;
   TranslateMainMenuProjectItems;
   TranslateStaticPopupMenus;
@@ -2246,6 +2273,7 @@ begin
   HookPopupMenus;
 
   TranslateEditorTab;
+  TranslateEditorSubViews;
 
 {$IFDEF COMPILER7_UP}
   CheckActionMainMenuBarPersistentHotKeys;
@@ -2301,11 +2329,12 @@ begin
         TranslatePopupMenuPaletteItems;
         UpdateWholeMenus;
 
-        TranslateEditorTab;
-
         // 根据需要将当前已存在的窗体翻译回英语
         LoadAdditionalLangFile(GetAdditionalLangID);
         TranslateAllExistingForms;
+
+        TranslateEditorTab;
+        TranslateEditorSubViews;
       end;
 
       // 卸载事件挂钩
@@ -2939,7 +2968,6 @@ begin
       // 延迟翻译该 Control，避免其内部组件还没创建完毕，复用 FTransQueue 应该没啥问题
       FTransQueue.Add(C);
       CnWizNotifierServices.ExecuteOnApplicationIdle(IdleTranslatePage);
-      // CnLanguageManager.TranslateComponent(C);
     end;
   end;
 end;

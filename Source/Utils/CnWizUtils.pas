@@ -631,9 +631,11 @@ function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer):
 function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
 function CnOtaGetCurrentEditWindow(CheckScreen: Boolean = False): TCustomForm;
-{* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历 Screen 的 Form 们，但在有多个 EditWindow 的情况下}
+{* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历 Screen 的 Form 们，但在有多个 EditWindow 的情况下可能不是最前端那个}
 function CnOtaGetCurrentEditControl: TWinControl;
 {* 以 OTA 的方式取当前的 EditControl 控件}
+function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
+{* 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器}
 function CnOtaGetCurrentEditWindowSubViewControl: TControl;
 {* 以 OTA 的方式取当前的 EditWindow 下的当前 SubView，如编辑器、设计器、CPU 等}
 function CnOtaGetProjectCountFromGroup: Integer;
@@ -5171,6 +5173,30 @@ begin
   end;
   Result := nil;
 {$ENDIF}
+end;
+
+// 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器
+function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
+var
+  I: Integer;
+  F: TCustomForm;
+  C: TComponent;
+  L: TControl;
+begin
+  Result := nil;
+  F := CnOtaGetCurrentEditWindow(True);
+
+  // TEditWindow 的 Components 里有个 CodePanel:TPanel，也有个 EditorPanel: TPanel，
+  // 前者 Controls 下面有后者，后者下面才是各个 SubView
+  if F <> nil then
+  begin
+    C := F.FindComponent('EditorPanel');
+    if (C <> nil) and (C is TPanel) then
+    begin
+      Result := TWinControl(C);
+      Exit;
+    end;
+  end;
 end;
 
 // 以 OTA 的方式取当前的 EditWindow 下的当前 SubView，如编辑器、设计器、CPU 等
