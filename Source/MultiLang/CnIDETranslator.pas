@@ -3115,17 +3115,18 @@ begin
   begin
     Translate := False;
 
-    // 只能挨个翻，不能 Text 整体赋值，否则会破坏其 Objects 导致出错
-    if CanTranslateToChinese and (AObject is TStrings) then
-    begin
-      SL := TStrings(AObject);
-      for I := 0 to SL.Count - 1 do
-      begin
-        S := CnLanguageManager.TranslateString(SL[I]);
-        if S <> '' then
-          SL[I] := S;
-      end;
-    end;
+// 只能挨个翻，而且只能根据值翻，不能 Text 整体赋值，否则会破坏其 Objects 导致出错
+// 但这样翻似乎也会出错，先屏蔽
+//    if CanTranslateToChinese and (AObject is TStrings) then
+//    begin
+//      SL := TStrings(AObject);
+//      for I := 0 to SL.Count - 1 do
+//      begin
+//        S := CnLanguageManager.TranslateString(SL[I]);
+//        if S <> '' then
+//          SL[I] := S;
+//      end;
+//    end;
 
     FLangTransFlag := False;
   end;
