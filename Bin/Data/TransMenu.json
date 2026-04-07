@@ -117,7 +117,7 @@
       }, {
         "MenuPath": "CodeExplorer.CodeExplorer.LocalMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Dockable", "可停靠"], ["New", "新建"], ["Properties", "属性"], ["Rename", "重命名"], ["View Editor", "查看编辑器"]]
+        "ItemCaption": [["Class Hierarchy", "类继承关系"], ["Collapse", "折叠"], ["Collapse all", "全部折叠"], ["Dockable", "可停靠"], ["Expand", "展开"], ["Expand all", "全部展开"], ["Go to Declaration", "转至声明"], ["Go to Implementation", "转至实现"], ["Hew Method", "新建方法"], ["Mew Field", "新建字段"], ["Mew Property", "新建属性"], ["New", "新建"], ["Node", "节点"], ["Properties", "属性"], ["Rename", "重命名"], ["View Editor", "查看编辑器"], ["View Mode", "查看模式"]]
       }, {
         "MenuPath": "ConfigMgrDlg.ConfigMgrDlg.FormPopupMenu",
         "ForceEnglish": "FALSE",
