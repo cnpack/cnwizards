@@ -52,7 +52,7 @@ interface
 uses
   Windows, Messages, Classes, Contnrs, SysUtils, ActnList, Graphics, // Vcl.CategoryButtons,
   Controls, Forms, Menus, Clipbrd, ComCtrls, Tabs, {$IFDEF COMPILER7_UP} ActnMenus, {$ENDIF}
-  CnJSON, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
+  CnJSON, CnHashMap, CnWizUtils, CnWizIdeUtils, CnWizMethodHook, CnHashLangStorage,
   CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst, CnWizNotifier,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF UNICODE} CnControlHook, {$ENDIF}
@@ -63,6 +63,23 @@ uses
 type
   TCn1DStringArray = array of string;
   TCn2DStringArray = array of array of string;
+
+  TCnMenuCaptionPrefixSuffix = record
+  {* 含 || 的前缀/后缀替换规则，预解析后存储 }
+    OldPrefix: string;
+    OldSuffix: string;
+    NewPrefix: string;
+    NewSuffix: string;
+  end;
+
+  TCnMenuCaptionEntry = class
+  {* 单个 MenuPath 的翻译缓存：精确匹配用 HashMap，|| 规则单独列表 }
+  public
+    ExactMap: TCnStrToStrHashMap;       // LowerCase(英文) -> 译文
+    PrefixSuffixRules: array of TCnMenuCaptionPrefixSuffix;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
   TCnAttachedPopupMenu = class
   {* 事件挂钩的弹出菜单项集合 }
@@ -111,6 +128,7 @@ type
     FTranedCompList: TComponentList;      // 记录已经翻译过的窗体、容器等，避免重复
     FOld2Array, FNew2Array: TStringList;
     FTranslationMap: TCnJSONObject;
+    FMenuCaptionIndex: TStringList;   // Sorted，key=Category|Mechanism|MenuPath，Object=TCnMenuCaptionEntry
     FMainMenu: TMainMenu;
     FMainMenuPath: string;
     FAttachedPopupMenuHooks: TObjectList; // 容纳 TCnMenuHookWrapper
@@ -161,8 +179,13 @@ type
       AMenuPath: string): TCn2DStringArray;
     function ReturnTranslateCaption(const AItemCaption: string; const ACaptions:
       TCn2DStringArray): string;
+    function ReturnTranslateCaptionFromCache(const AItemCaption: string;
+      Entry: TCnMenuCaptionEntry): string;
+    {* 直接从缓存 Entry 查找译文，比 ReturnTranslateCaption 更高效 }
 
     procedure TranslateMenuItem(const AMenuItem: TMenuItem; const ACaptions: TCn2DStringArray);
+    procedure TranslateMenuItemFromCache(const AMenuItem: TMenuItem; Entry: TCnMenuCaptionEntry);
+    {* 直接从缓存 Entry 翻译菜单项，避免构造临时二维数组 }
 
     // 主菜单处理过程
     procedure TranslateMainMenuDynamicItem(const AMenuCategory, AMechanism, AMenuPath: string);
@@ -210,6 +233,8 @@ type
 
     // 插件处理过程
     procedure LoadTranslationMenus(const AMenuLangFile: string);
+    procedure BuildCaptionCache;
+    {* 将 FTranslationMap 中所有 ItemCaption 预处理为 HashMap 缓存，加速运行时查找 }
     procedure LoadMenuItemLanguages;
     procedure UpdateWholeMenus;
     procedure TranslateAllExistingForms(const ClassNamePattern: string = '');
@@ -346,6 +371,20 @@ var
   FHookedStringHashMap: TCnLangHashMap = nil;
 {$ENDIF}
 {$ENDIF}
+
+{ TCnMenuCaptionEntry }
+
+constructor TCnMenuCaptionEntry.Create;
+begin
+  inherited;
+  ExactMap := TCnStrToStrHashMap.Create(64);
+end;
+
+destructor TCnMenuCaptionEntry.Destroy;
+begin
+  ExactMap.Free;
+  inherited;
+end;
 
 {$IFDEF UNICODE}
 
@@ -1106,7 +1145,70 @@ var
   JsonObject: TCnJSONObject;
   JsonArray, ItemArray: TCnJSONArray;
   IsFromEnglish: Boolean;
+  CacheKey: string;
+  CacheIdx: Integer;
+  Entry: TCnMenuCaptionEntry;
+  ENU, CHS: string;
+  RuleIdx: Integer;
 begin
+  SetLength(Result, 0, 0);
+
+  // Try cache first: O(log N) binary search + O(1) HashMap lookup
+  if Assigned(FMenuCaptionIndex) then
+  begin
+    CacheKey := LowerCase(AMenuCategory + '|' + AMechanism + '|' + AMenuPath);
+    CacheIdx := FMenuCaptionIndex.IndexOf(CacheKey);
+    if CacheIdx >= 0 then
+    begin
+      Entry := TCnMenuCaptionEntry(FMenuCaptionIndex.Objects[CacheIdx]);
+      Count := Entry.ExactMap.Size + Length(Entry.PrefixSuffixRules);
+      if Count = 0 then
+        Exit;
+
+      SetLength(Result, Count, 2);
+      Count := 0;
+
+      Entry.ExactMap.StartEnum;
+      if FActive then
+      begin
+        while Entry.ExactMap.GetNext(ENU, CHS) do
+        begin
+          Result[Count, 0] := ENU;
+          Result[Count, 1] := CHS;
+          Inc(Count);
+        end;
+        for RuleIdx := 0 to Length(Entry.PrefixSuffixRules) - 1 do
+        begin
+          Result[Count, 0] := Entry.PrefixSuffixRules[RuleIdx].OldPrefix + '||'
+            + Entry.PrefixSuffixRules[RuleIdx].OldSuffix;
+          Result[Count, 1] := Entry.PrefixSuffixRules[RuleIdx].NewPrefix + '||'
+            + Entry.PrefixSuffixRules[RuleIdx].NewSuffix;
+          Inc(Count);
+        end;
+      end
+      else
+      begin
+        while Entry.ExactMap.GetNext(ENU, CHS) do
+        begin
+          Result[Count, 0] := CHS;
+          Result[Count, 1] := ENU;
+          Inc(Count);
+        end;
+        for RuleIdx := 0 to Length(Entry.PrefixSuffixRules) - 1 do
+        begin
+          Result[Count, 0] := Entry.PrefixSuffixRules[RuleIdx].NewPrefix + '||'
+            + Entry.PrefixSuffixRules[RuleIdx].NewSuffix;
+          Result[Count, 1] := Entry.PrefixSuffixRules[RuleIdx].OldPrefix + '||'
+            + Entry.PrefixSuffixRules[RuleIdx].OldSuffix;
+          Inc(Count);
+        end;
+      end;
+      SetLength(Result, Count, 2);
+      Exit;
+    end;
+  end;
+
+  // Fallback to JSON scan when cache is not available
   if not Assigned(FTranslationMap) then
     Exit;
 
@@ -1297,7 +1399,134 @@ begin
   end;
 end;
 
-// 递归重写各级子菜单
+// Translate a menu item recursively using the pre-built cache entry (fast path)
+// Fast caption translation using pre-built cache entry.
+// For the active (ENU->CHS) path: O(1) HashMap lookup.
+// For the inactive (CHS->ENU) path: falls back to ReturnTranslateCaption.
+function TCnMenuFormTranslator.ReturnTranslateCaptionFromCache(const AItemCaption: string;
+  Entry: TCnMenuCaptionEntry): string;
+var
+  Position, RuleIdx: Integer;
+  ReducedCaption, NewCaption, AccessKey, Ellipsis, LowReduced: string;
+  Rule: TCnMenuCaptionPrefixSuffix;
+
+  function RestoreAccessKeyAndEllipsis: string;
+  begin
+    if AccessKey <> '' then
+      NewCaption := NewCaption + '(&' + AccessKey + ')';
+    if Ellipsis <> '' then
+      NewCaption := NewCaption + Ellipsis;
+    Result := NewCaption;
+  end;
+
+begin
+  Result := AItemCaption;
+  if not Assigned(Entry) then
+    Exit;
+
+  // Inactive path is rare (language switch back to English); use original slow path
+  if not FActive then
+  begin
+    Result := ReturnTranslateCaption(AItemCaption,
+      GetTranslationItemCaptions('', '', ''));
+    // GetTranslationItemCaptions with empty keys returns empty array,
+    // so ReturnTranslateCaption returns AItemCaption unchanged.
+    // The caller (TranslateMenuItemFromCache) should not be called when FActive=False.
+    Exit;
+  end;
+
+  ReducedCaption := AItemCaption;
+  AccessKey := '';
+  Ellipsis := '';
+  Position := Pos('(&', ReducedCaption);
+  if Position > 0 then
+  begin
+    AccessKey := UpperCase(Copy(ReducedCaption, Position + 2, 1));
+    Delete(ReducedCaption, Position, 4);
+  end
+  else
+  begin
+    Position := Pos('&', ReducedCaption);
+    if Position > 0 then
+    begin
+      AccessKey := UpperCase(Copy(ReducedCaption, Position + 1, 1));
+      Delete(ReducedCaption, Position, 1);
+    end;
+  end;
+
+  Position := Pos('...', ReducedCaption);
+  if Position > 0 then
+  begin
+    Ellipsis := '...';
+    Delete(ReducedCaption, Position, 3);
+  end;
+
+  // O(1) exact match: ExactMap stores LowerCase(ENU) -> CHS
+  LowReduced := LowerCase(ReducedCaption);
+  if Entry.ExactMap.Find(LowReduced, NewCaption) then
+  begin
+    Result := RestoreAccessKeyAndEllipsis;
+    Exit;
+  end;
+
+  // Check prefix/suffix rules
+  for RuleIdx := 0 to Length(Entry.PrefixSuffixRules) - 1 do
+  begin
+    Rule := Entry.PrefixSuffixRules[RuleIdx];
+    if (Rule.OldPrefix <> '') and (Rule.OldSuffix = '') then
+    begin
+      if SameText(Rule.OldPrefix, Copy(ReducedCaption, 1, Length(Rule.OldPrefix))) then
+      begin
+        NewCaption := Rule.NewPrefix + StrRight(ReducedCaption,
+          Length(ReducedCaption) - Length(Rule.OldPrefix));
+        Result := RestoreAccessKeyAndEllipsis;
+        Exit;
+      end;
+    end
+    else if (Rule.OldPrefix = '') and (Rule.OldSuffix <> '') then
+    begin
+      if SameText(Rule.OldSuffix, StrRight(ReducedCaption, Length(Rule.OldSuffix))) then
+      begin
+        NewCaption := Copy(ReducedCaption, 1, Length(ReducedCaption) - Length(Rule.OldSuffix))
+          + Rule.NewSuffix;
+        Result := RestoreAccessKeyAndEllipsis;
+        Exit;
+      end;
+    end
+    else if (Rule.OldPrefix <> '') and (Rule.OldSuffix <> '') then
+    begin
+      if SameText(Rule.OldPrefix, Copy(ReducedCaption, 1, Length(Rule.OldPrefix)))
+        and SameText(Rule.OldSuffix, StrRight(ReducedCaption, Length(Rule.OldSuffix))) then
+      begin
+        NewCaption := Rule.NewPrefix + StrRight(ReducedCaption,
+          Length(ReducedCaption) - Length(Rule.OldPrefix));
+        NewCaption := Copy(NewCaption, 1, Length(NewCaption) - Length(Rule.OldSuffix))
+          + Rule.NewSuffix;
+        Result := RestoreAccessKeyAndEllipsis;
+        Exit;
+      end;
+    end;
+  end;
+end;
+
+procedure TCnMenuFormTranslator.TranslateMenuItemFromCache(const AMenuItem: TMenuItem;
+  Entry: TCnMenuCaptionEntry);
+var
+  I: Integer;
+begin
+  if not Assigned(AMenuItem) or not Assigned(Entry) then
+    Exit;
+  if (AMenuItem.Caption = '-') or (AMenuItem.Caption = '') then
+    Exit;
+
+  AMenuItem.Caption := ReturnTranslateCaptionFromCache(AMenuItem.Caption, Entry);
+
+  for I := 0 to AMenuItem.Count - 1 do
+    TranslateMenuItemFromCache(AMenuItem.Items[I], Entry);
+end;
+
+
+// Translate a menu item recursively using the 2D array (compatibility path)
 procedure TCnMenuFormTranslator.TranslateMenuItem(const AMenuItem: TMenuItem; const ACaptions:
   TCn2DStringArray);
 var
@@ -1321,11 +1550,33 @@ procedure TCnMenuFormTranslator.TranslateMainMenuDynamicItem(const AMenuCategory
 var
   MenuItem: TMenuItem;
   Captions: TCn2DStringArray;
+  CacheKey: string;
+  CacheIdx: Integer;
+  Entry: TCnMenuCaptionEntry;
 begin
   if not Assigned(FMainMenu) then
     Exit;
 
   MenuItem := FindMainMenuItemByNameDeep(FMainMenu, AMenuPath);
+  if not Assigned(MenuItem) then
+    Exit;
+
+  // Fast path: use pre-built cache entry when active (ENU->CHS)
+  if FActive and Assigned(FMenuCaptionIndex) then
+  begin
+    CacheKey := LowerCase(AMenuCategory + '|' + AMechanism + '|' + AMenuPath);
+    CacheIdx := FMenuCaptionIndex.IndexOf(CacheKey);
+    if CacheIdx >= 0 then
+    begin
+      Entry := TCnMenuCaptionEntry(FMenuCaptionIndex.Objects[CacheIdx]);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('TranslateDynamicMainMenu %s (cache hit)', [AMenuPath]);
+{$ENDIF}
+      TranslateMenuItemFromCache(MenuItem, Entry);
+      Exit;
+    end;
+  end;
+
   Captions := GetTranslationItemCaptions(AMenuCategory, AMechanism, AMenuPath);
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('TranslateDynamicMainMenu %s Get Captions %d', [AMenuPath, Length(Captions)]);
@@ -1338,12 +1589,32 @@ procedure TCnMenuFormTranslator.TranslateStaticMainMenu;
 var
   I: Integer;
   Captions: TCn2DStringArray;
+  CacheKey: string;
+  CacheIdx: Integer;
+  Entry: TCnMenuCaptionEntry;
 begin
   if not Assigned(FMainMenu) then
     Exit;
 
   for I := 0 to FMainMenu.Items.Count - 1 do
   begin
+    // Fast path: use pre-built cache entry when active (ENU->CHS)
+    if FActive and Assigned(FMenuCaptionIndex) then
+    begin
+      CacheKey := LowerCase(SCN_CATEGORY_MAINMENU + '|' + SCN_MECHANISM_DIRECTACCESS
+        + '|' + FMainMenu.Items[I].Name);
+      CacheIdx := FMenuCaptionIndex.IndexOf(CacheKey);
+      if CacheIdx >= 0 then
+      begin
+        Entry := TCnMenuCaptionEntry(FMenuCaptionIndex.Objects[CacheIdx]);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('TranslateStaticMainMenu %s (cache hit)', [FMainMenu.Items[I].Name]);
+{$ENDIF}
+        TranslateMenuItemFromCache(FMainMenu.Items[I], Entry);
+        Continue;
+      end;
+    end;
+
     Captions := GetTranslationItemCaptions(SCN_CATEGORY_MAINMENU,
       SCN_MECHANISM_DIRECTACCESS, FMainMenu.Items[I].Name);
 {$IFDEF DEBUG}
@@ -1509,6 +1780,9 @@ var
   PopupMenu: TPopupMenu;
   Names: TStringList;
   Captions: TCn2DStringArray;
+  CacheKey: string;
+  CacheIdx: Integer;
+  Entry: TCnMenuCaptionEntry;
 begin
   Names := nil;
   FS := nil;
@@ -1528,6 +1802,26 @@ begin
 
     if Names.Count = 3 then
     begin
+      // Fast path: use pre-built cache entry when active (ENU->CHS)
+      if FActive and Assigned(FMenuCaptionIndex) then
+      begin
+        CacheKey := LowerCase(AMenuCategory + '|' + AMechanism + '|' + AMenuPath);
+        CacheIdx := FMenuCaptionIndex.IndexOf(CacheKey);
+        if CacheIdx >= 0 then
+        begin
+          Entry := TCnMenuCaptionEntry(FMenuCaptionIndex.Objects[CacheIdx]);
+          for I := 0 to FS.Count - 1 do
+          begin
+            PopupMenu := FindPopupMenuByName(TForm(FS[I]), Names[1], Names[2]);
+            if not Assigned(PopupMenu) then
+              Continue;
+            for J := 0 to PopupMenu.Items.Count - 1 do
+              TranslateMenuItemFromCache(PopupMenu.Items[J], Entry);
+          end;
+          Exit;
+        end;
+      end;
+
       Captions := GetTranslationItemCaptions(AMenuCategory, AMechanism, AMenuPath);
       if Length(Captions) = 0 then
         Exit;
@@ -2058,9 +2352,137 @@ begin
     FTranslationMap := CnJSONParse(S);
   end;
   FreeAndNil(StringList);
+  BuildCaptionCache;
 end;
 
-// 加载语言数据并初始化主菜单
+// 将 FTranslationMap 中所有 ItemCaption 预处理为 HashMap 缓存
+procedure TCnMenuFormTranslator.BuildCaptionCache;
+var
+  CatIdx, MechIdx, PathIdx, CapIdx: Integer;
+  CatNames: array[0..2] of string;
+  MechNames: array[0..2] of string;
+  CatValue, MechValue, PathValue, CapValue: TCnJSONValue;
+  CatObj, PathObj: TCnJSONObject;
+  MechArray, CapArray, ItemArray: TCnJSONArray;
+  CacheKey: string;
+  Entry: TCnMenuCaptionEntry;
+  ENU, CHS: string;
+  RuleIdx: Integer;
+  OldParts, NewParts: TStringList;
+  Rule: TCnMenuCaptionPrefixSuffix;
+  SepPos: Integer;
+begin
+  // 清理旧缓存
+  if FMenuCaptionIndex <> nil then
+  begin
+    for CatIdx := 0 to FMenuCaptionIndex.Count - 1 do
+      FMenuCaptionIndex.Objects[CatIdx].Free;
+    FMenuCaptionIndex.Clear;
+  end
+  else
+  begin
+    FMenuCaptionIndex := TStringList.Create;
+    FMenuCaptionIndex.Sorted := True;
+    FMenuCaptionIndex.Duplicates := dupIgnore;
+  end;
+
+  if not Assigned(FTranslationMap) then
+    Exit;
+
+  CatNames[0] := SCN_CATEGORY_MAINMENU;
+  CatNames[1] := SCN_CATEGORY_POPUPMENUS;
+  CatNames[2] := SCN_CATEGORY_SCREENFORMS;
+  MechNames[0] := SCN_MECHANISM_DIRECTACCESS;
+  MechNames[1] := SCN_MECHANISM_EVENTHANDLER;
+  MechNames[2] := SCN_MECHANISM_WINDOWPROC;
+
+  OldParts := TStringList.Create;
+  NewParts := TStringList.Create;
+  try
+    for CatIdx := 0 to 2 do
+    begin
+      CatValue := FTranslationMap[CatNames[CatIdx]];
+      if not (CatValue is TCnJSONObject) then
+        Continue;
+      CatObj := TCnJSONObject(CatValue);
+
+      for MechIdx := 0 to 2 do
+      begin
+        MechValue := CatObj[MechNames[MechIdx]];
+        if not (MechValue is TCnJSONArray) then
+          Continue;
+        MechArray := TCnJSONArray(MechValue);
+
+        for PathIdx := 0 to MechArray.Count - 1 do
+        begin
+          if not (MechArray[PathIdx] is TCnJSONObject) then
+            Continue;
+          PathObj := TCnJSONObject(MechArray[PathIdx]);
+
+          PathValue := PathObj['MenuPath'];
+          if not Assigned(PathValue) then
+            Continue;
+
+          // 构造缓存 key：Category|Mechanism|MenuPath（全小写）
+          CacheKey := LowerCase(CatNames[CatIdx] + '|' + MechNames[MechIdx] + '|'
+            + PathValue.AsString);
+
+          Entry := TCnMenuCaptionEntry.Create;
+
+          CapValue := PathObj['ItemCaption'];
+          if CapValue is TCnJSONArray then
+          begin
+            CapArray := TCnJSONArray(CapValue);
+            RuleIdx := 0;
+            for CapIdx := 0 to CapArray.Count - 1 do
+            begin
+              if not (CapArray[CapIdx] is TCnJSONArray) then
+                Continue;
+              ItemArray := TCnJSONArray(CapArray[CapIdx]);
+              if ItemArray.Count < 2 then
+                Continue;
+
+              ENU := ItemArray[INDEX_ENU].AsString;
+              CHS := ItemArray[INDEX_CHS].AsString;
+
+              SepPos := Pos('||', ENU);
+              if SepPos > 0 then
+              begin
+                // 预解析 || 规则
+                OldParts.Clear;
+                NewParts.Clear;
+                CnSplitString('||', ENU, OldParts);
+                CnSplitString('||', CHS, NewParts);
+                if (OldParts.Count >= 2) and (NewParts.Count >= 2) then
+                begin
+                  Rule.OldPrefix := OldParts[0];
+                  Rule.OldSuffix := OldParts[1];
+                  Rule.NewPrefix := NewParts[0];
+                  Rule.NewSuffix := NewParts[1];
+                  SetLength(Entry.PrefixSuffixRules, RuleIdx + 1);
+                  Entry.PrefixSuffixRules[RuleIdx] := Rule;
+                  Inc(RuleIdx);
+                end;
+              end
+              else
+              begin
+                // 精确匹配：key 存小写，查找时也转小写
+                Entry.ExactMap.Add(LowerCase(ENU), CHS);
+              end;
+            end;
+          end;
+
+          FMenuCaptionIndex.AddObject(CacheKey, Entry);
+        end;
+      end;
+    end;
+  finally
+    OldParts.Free;
+    NewParts.Free;
+  end;
+end;
+
+// ???????????????????????
 procedure TCnMenuFormTranslator.LoadMenuItemLanguages;
 var
   MainArray: TStringList;
@@ -2195,6 +2617,16 @@ begin
   FOld2Array.Free;
   FNew2Array.Free;
   FreeAndNil(FTranslationMap);
+  // 释放缓存索引（每个 Object 是 TCnMenuCaptionEntry，需要逐个释放）
+  if FMenuCaptionIndex <> nil then
+  begin
+    while FMenuCaptionIndex.Count > 0 do
+    begin
+      FMenuCaptionIndex.Objects[0].Free;
+      FMenuCaptionIndex.Delete(0);
+    end;
+    FreeAndNil(FMenuCaptionIndex);
+  end;
   FreeAndNil(FAttachedPopupMenuHooks);
   FreeAndNil(FAttachedMenuItems);
 {$IFDEF IDE_OPTION_DYNCREATE}
@@ -2231,7 +2663,7 @@ begin
   Result := '<None.txt>';
 {$IFDEF BDS}
   {$IFDEF UNICODE}
-  Result := 'RADStudio.txt';     // 2009 到 12
+  Result := 'RADStudio.txt';     // 2009 到 13
   {$ELSE}
   Result := 'BDS.txt';           // 2005 到 2007
   {$ENDIF}
@@ -3162,10 +3594,6 @@ end;
 
 procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
   AObject: TObject; const PropName: string; var Translate: Boolean);
-var
-  I: Integer;
-  S: string;
-  SL: TStrings;
 begin
   // 注意此处不能加 FActive 判断，否则从中翻英时会进不来从而导致该属性被破坏出错
   if FLangTransFlag and ((Compiler = cnDelphi7) or (Compiler >= cnDelphi2007))
