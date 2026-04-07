@@ -746,8 +746,6 @@ end;
 
 function MyDesignerBuildLocalMenu(ASelf: Pointer; PopupMenu: TPopupMenu;
   LocalMenuFilter: TLocalMenuFilters): TObject;
-var
-  I: Integer;
 begin
   if FCnWizNotifierServices.FLocalMenuHook.UseDDteours then
     Result := TDesignerBuildLocalMenuProc(FCnWizNotifierServices.FLocalMenuHook.Trampoline)(ASelf, PopupMenu, LocalMenuFilter)

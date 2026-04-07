@@ -61,6 +61,7 @@ uses
   DsgnIntf, {$ENDIF} ToolsAPI;
 
 type
+  TCn1DStringArray = array of string;
   TCn2DStringArray = array of array of string;
 
   TCnAttachedPopupMenu = class
@@ -155,7 +156,7 @@ type
       NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
 {$ENDIF}
     function GetTranslationMenuPaths(const AMenuCategory, AMechanism: string;
-      const APrefix: string = ''): TCn2DStringArray;
+      const APrefix: string = ''): TCn1DStringArray;
     function GetTranslationItemCaptions(const AMenuCategory, AMechanism,
       AMenuPath: string): TCn2DStringArray;
     function ReturnTranslateCaption(const AItemCaption: string; const ACaptions:
@@ -685,8 +686,7 @@ end;
 function TCnMenuFormTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
   const AName: string; ComponentResult: TObjectList): Boolean;
 var
-  I, PosWildcard: Integer;
-  Component: TComponent;
+  PosWildcard: Integer;
   Prefix: string;
 
   procedure SearchComponents(AComp: TComponent);
@@ -760,9 +760,7 @@ end;
 function TCnMenuFormTranslator.FindControlByNameDeep(const ARootControl: TControl;
   const AName: string; ControlResult: TObjectList): Boolean;
 var
-  I, PosWildcard: Integer;
-  Control: TControl;
-  WinControl: TWinControl;
+  PosWildcard: Integer;
   Prefix: string;
 
   procedure SearchControls(AControl: TControl);
@@ -840,9 +838,6 @@ end;
 // 递归查找控件树中的所有窗体
 function TCnMenuFormTranslator.FindFormsInControlDeep(const ARootControl: TControl;
   FormList: TObjectList): Boolean;
-var
-  I: Integer;
-  WinControl: TWinControl;
 
   procedure SearchForms(AControl: TControl);
   var
@@ -1014,14 +1009,14 @@ end;
 
 // 根据菜单类型查找菜单路径
 function TCnMenuFormTranslator.GetTranslationMenuPaths(const AMenuCategory,
-  AMechanism: string; const APrefix: string): TCn2DStringArray;
+  AMechanism: string; const APrefix: string): TCn1DStringArray;
 var
   I, Count: Integer;
   JsonValue: TCnJSONValue;
   JsonArray: TCnJSONArray;
   JsonObject: TCnJSONObject;
 begin
-  SetLength(Result, 0, 0);
+  SetLength(Result, 0);
   if not Assigned(FTranslationMap) then
     Exit;
 
@@ -1046,7 +1041,7 @@ begin
   if Count = 0 then
     Exit;
 
-  SetLength(Result, Count, 2);
+  SetLength(Result, Count);
   Count := 0;
 
   if APrefix = '' then
@@ -1060,8 +1055,7 @@ begin
       if (APrefix <> '') and (Pos(APrefix, JsonObject['MenuPath'].AsString) <> 1) then
         Continue;
 
-      Result[Count, 0] := JsonObject['MenuPath'].AsString;
-      Result[Count, 1] := JsonObject['ForceEnglish'].AsString;
+      Result[Count] := JsonObject['MenuPath'].AsString;
       Inc(Count);
     end;
   end
@@ -1080,7 +1074,7 @@ begin
       Inc(Count);
     end;
 
-    SetLength(Result, Count, 2);
+    SetLength(Result, Count);
 
     // 有匹配的，才真正赋值
     if Count > 0 then
@@ -1096,8 +1090,7 @@ begin
         if Pos(APrefix, JsonObject['MenuPath'].AsString) <> 1 then
           Continue;
 
-        Result[Count, 0] := JsonObject['MenuPath'].AsString;
-        Result[Count, 1] := JsonObject['ForceEnglish'].AsString;
+        Result[Count] := JsonObject['MenuPath'].AsString;
         Inc(Count);
       end;
     end;
@@ -1133,12 +1126,7 @@ begin
   begin
     JsonObject := TCnJSONObject(JsonArray[I]);
     if SameText(JsonObject['MenuPath'].AsString, AMenuPath) then
-    begin
-      if SameText(JsonObject['ForceEnglish'].AsString, 'True') then
-        IsFromEnglish := True;
       Break;
-    end;
-    // 如果某菜单项本身会被 IDE 动态强行设为英文，则翻译时就应取先英后中的内容
   end;
 
   if not Assigned(JsonObject) then
@@ -1428,7 +1416,7 @@ end;
 procedure TCnMenuFormTranslator.HookMainMenuDynamicItems;
 var
   I, J: Integer;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
   MenuItem: TMenuItem;
   ItemHooked: Boolean;
   ItemInfo: TCnAttachedMenuItem;
@@ -1442,7 +1430,7 @@ begin
 
   for I := 0 to Length(MenuPaths) - 1 do
   begin
-    MenuItem := FindMainMenuItemByNameDeep(FMainMenu, MenuPaths[I, 0]);
+    MenuItem := FindMainMenuItemByNameDeep(FMainMenu, MenuPaths[I]);
     if not Assigned(MenuItem) then
       Continue;
 
@@ -1460,7 +1448,7 @@ begin
     begin
       ItemInfo := TCnAttachedMenuItem.Create;
       ItemInfo.MenuItem := MenuItem;
-      ItemInfo.MenuPath := MenuPaths[I, 0];
+      ItemInfo.MenuPath := MenuPaths[I];
       ItemInfo.OriginalOnClick := MenuItem.OnClick;
       MenuItem.OnClick := HookedMenuItemOnClick;
       FAttachedMenuItems.Add(ItemInfo);
@@ -1682,7 +1670,7 @@ end;
 procedure TCnMenuFormTranslator.TranslateStaticPopupMenus(OnlyCurrent: Boolean);
 var
   I, J: Integer;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
   F: TCustomForm;
   S: string;
   FS: TObjectList;
@@ -1701,9 +1689,9 @@ begin
 
       for I := 0 to Length(MenuPaths) - 1 do
       begin
-        if Pos(S, MenuPaths[I, 0]) = 1 then
+        if Pos(S, MenuPaths[I]) = 1 then
           TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
-           MenuPaths[I, 0]);
+           MenuPaths[I]);
       end;
 
 {$IFNDEF BDS}
@@ -1729,9 +1717,9 @@ begin
 
               for J := 0 to Length(MenuPaths) - 1 do
               begin
-                if Pos(S, MenuPaths[J, 0]) = 1 then
+                if Pos(S, MenuPaths[J]) = 1 then
                   TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
-                    MenuPaths[J, 0]);
+                    MenuPaths[J]);
               end;
             end;
           end;
@@ -1747,7 +1735,7 @@ begin
     MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS);
     for I := 0 to Length(MenuPaths) - 1 do
       TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
-        MenuPaths[I, 0]);
+        MenuPaths[I]);
   end;
 end;
 
@@ -1756,7 +1744,7 @@ procedure TCnMenuFormTranslator.TranslateStaticPopupMenusForContainer(Container:
 var
   I: Integer;
   S: string;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
 begin
   if (Container <> nil) and (Container.Name <> '') then
   begin
@@ -1768,9 +1756,9 @@ begin
 
     for I := 0 to Length(MenuPaths) - 1 do
     begin
-      if Pos(S, MenuPaths[I, 0]) = 1 then
+      if Pos(S, MenuPaths[I]) = 1 then
         TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS,
-         MenuPaths[I, 0], Container);
+         MenuPaths[I], Container);
     end;
   end;
 end;
@@ -1857,7 +1845,7 @@ const
 var
   I: Integer;
   F: TForm;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
   Names: TStringList;
   PopupMenu: TPopupMenu;
   Hook: TCnMenuHookWrapper;
@@ -1871,11 +1859,11 @@ begin
   try
     for I := 0 to Length(MenuPaths) - 1 do
     begin
-      if Pos(EDITWINDOW_PREFIX, MenuPaths[I, 0]) <> 1 then
+      if Pos(EDITWINDOW_PREFIX, MenuPaths[I]) <> 1 then
         Continue;
 
       Names.Clear;
-      ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
+      ExtractStrings(['.'], [' '], PChar(MenuPaths[I]), Names);
       if Names.Count <> 3 then
         Continue;
 
@@ -1888,7 +1876,7 @@ begin
         if not IsPopupMenuHooked(PopupMenu) then
         begin
           Hook := TCnMenuHookWrapper.Create;
-          Hook.Text := MenuPaths[I, 0];
+          Hook.Text := MenuPaths[I];
           Hook.Hook.HookMenu(PopupMenu);
           Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
@@ -1903,7 +1891,7 @@ end;
 procedure TCnMenuFormTranslator.HookPopupMenuOnSubView(SubView: TComponent);
 var
   I: Integer;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
   Names: TStringList;
   PopupMenu: TPopupMenu;
   Hook: TCnMenuHookWrapper;
@@ -1916,11 +1904,11 @@ begin
   try
     for I := 0 to Length(MenuPaths) - 1 do
     begin
-      if Pos(SubView.Name, MenuPaths[I, 0]) <> 1 then
+      if Pos(SubView.Name, MenuPaths[I]) <> 1 then
         Continue;
 
       Names.Clear;
-      ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
+      ExtractStrings(['.'], [' '], PChar(MenuPaths[I]), Names);
       if Names.Count <> 3 then
         Continue;
 
@@ -1933,7 +1921,7 @@ begin
         if not IsPopupMenuHooked(PopupMenu) then
         begin
           Hook := TCnMenuHookWrapper.Create;
-          Hook.Text := MenuPaths[I, 0];
+          Hook.Text := MenuPaths[I];
           Hook.Container := SubView;
           Hook.Hook.HookMenu(PopupMenu);
           Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
@@ -1953,7 +1941,7 @@ end;
 procedure TCnMenuFormTranslator.HookPopupMenus;
 var
   I, J: Integer;
-  MenuPaths: TCn2DStringArray;
+  MenuPaths: TCn1DStringArray;
   Names: TStringList;
   FS: TObjectList;
   PopupMenu: TPopupMenu;
@@ -1975,7 +1963,7 @@ begin
     for I := 0 to Length(MenuPaths) - 1 do
     begin
       Names.Clear;
-      ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
+      ExtractStrings(['.'], [' '], PChar(MenuPaths[I]), Names);
       if Names.Count <> 3 then
         Continue;
 
@@ -1992,7 +1980,7 @@ begin
         if not IsPopupMenuHooked(PopupMenu) then
         begin
           Hook := TCnMenuHookWrapper.Create;
-          Hook.Text := MenuPaths[I, 0];
+          Hook.Text := MenuPaths[I];
           Hook.Hook.HookMenu(PopupMenu);
           Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
