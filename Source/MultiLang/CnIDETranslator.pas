@@ -112,7 +112,7 @@ type
     FTranslationMap: TCnJSONObject;
     FMainMenu: TMainMenu;
     FMainMenuPath: string;
-    FAttachedPopupMenuHooks: TObjectList; // MenuHooks
+    FAttachedPopupMenuHooks: TObjectList; // 容纳 TCnMenuHookWrapper
     FAttachedMenuItems: TObjectList;
     // 注意不能记录已经静态翻译过的 PopupMenu 来避免重复，因为 IDE 自身会老改
 {$IFDEF ENABLE_RESSTRING_HOOK}
@@ -141,7 +141,7 @@ type
     function FindControlByClassDeep(const ARootControl: TControl; const AClassName: string): TControl;
     function FindMenuItemByNameDeep(const ARootMenuItem: TMenuItem; const AName: string): TMenuItem;
     function FindMainMenuItemByNameDeep(const AMainMenu: TMainMenu; const AName: string): TMenuItem;
-    function FindPopupMenuByName(const AForm: TForm; const AOwnerName, AMenuName: string): TPopupMenu;
+    function FindPopupMenuByName(const AForm: TComponent; const AOwnerName, AMenuName: string): TPopupMenu;
     {* AOwnerName 支持通配符 *}
 
     function FindScreenFormByName(const AFormName: string): TForm; overload;
@@ -198,7 +198,9 @@ type
     procedure HookPopupMenus;
     {* 挂接所有现有的弹出菜单以在弹出后进行翻译}
     procedure HookPopupMenuOnCurrentEditWindow;
-    {* 挂接当前活动编辑器窗口上的菜单控件}
+    {* 挂接当前活动编辑器窗口上的弹出菜单控件}
+    procedure HookPopupMenuOnSubView(SubView: TComponent);
+    {* 挂接当前活动 SubView 中的弹出菜单控件}
 
     procedure AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
     {* 用来挂接的新弹出事件处理器}
@@ -309,6 +311,20 @@ const
   SCN_TREE_NAME = 'trvwPageNodes';
 
 type
+  TCnMenuHookWrapper = class
+  private
+    FContainer: TComponent;
+    FHook: TCnMenuHook;
+    FText: string;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property Hook: TCnMenuHook read FHook;
+    property Text: string read FText write FText;
+    property Container: TComponent read FContainer write FContainer;
+  end;
+
   TCnHackHashLangStorage = class(TCnCustomHashLangStorage);
 
   TLoadResStringFunc = function(ResStringRec: PResStringRec): string;
@@ -906,8 +922,8 @@ begin
 end;
 
 // 根据名称查找弹出菜单，需要 AOwnerName 支持通配符
-function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TForm; const AOwnerName,
-  AMenuName: string): TPopupMenu;
+function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TComponent;
+  const AOwnerName, AMenuName: string): TPopupMenu;
 var
   I: Integer;
   MenuOwner, Component: TComponent;
@@ -917,8 +933,8 @@ begin
     Exit;
 
   MenuOwner := FindComponentByNameDeep(AForm, AOwnerName);
-  if not Assigned(MenuOwner) then
-    MenuOwner := FindControlByNameDeep(AForm, AOwnerName);
+  if not Assigned(MenuOwner) and (AForm is TControl) then
+    MenuOwner := FindControlByNameDeep(TControl(AForm), AOwnerName);
   if not Assigned(MenuOwner) then
     Exit;
 
@@ -1530,7 +1546,7 @@ begin
 
       for I := 0 to FS.Count - 1 do
       begin
-        PopupMenu := FindPopupMenuByName(TForm(FS[I]), Names[1], Names[2]);
+        PopupMenu := FindPopupMenuByName(TComponent(FS[I]), Names[1], Names[2]);
         if not Assigned(PopupMenu) then
           Continue;
 
@@ -1844,7 +1860,7 @@ var
   MenuPaths: TCn2DStringArray;
   Names: TStringList;
   PopupMenu: TPopupMenu;
-  Hook: TCnMenuHook;
+  Hook: TCnMenuHookWrapper;
 begin
   F := Screen.ActiveForm;
   if (F = nil) or (Pos(EDITWINDOW_PREFIX, F.Name) <> 1) then
@@ -1871,11 +1887,60 @@ begin
 
         if not IsPopupMenuHooked(PopupMenu) then
         begin
-          Hook := TCnMenuHook.Create(nil);
+          Hook := TCnMenuHookWrapper.Create;
           Hook.Text := MenuPaths[I, 0];
-          Hook.HookMenu(PopupMenu);
-          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          Hook.Hook.HookMenu(PopupMenu);
+          Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
+        end;
+      end;
+    end;
+  finally
+    Names.Free;
+  end;
+end;
+
+procedure TCnMenuFormTranslator.HookPopupMenuOnSubView(SubView: TComponent);
+var
+  I: Integer;
+  MenuPaths: TCn2DStringArray;
+  Names: TStringList;
+  PopupMenu: TPopupMenu;
+  Hook: TCnMenuHookWrapper;
+begin
+  if (SubView = nil) or (SubView.Name = '') then
+    Exit;
+
+  MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER, SubView.Name);
+  Names := TStringList.Create;
+  try
+    for I := 0 to Length(MenuPaths) - 1 do
+    begin
+      if Pos(SubView.Name, MenuPaths[I, 0]) <> 1 then
+        Continue;
+
+      Names.Clear;
+      ExtractStrings(['.'], [' '], PChar(MenuPaths[I, 0]), Names);
+      if Names.Count <> 3 then
+        Continue;
+
+      if StrEqualOrMatchStartWithStar(Names[0], SubView.Name) then
+      begin
+        PopupMenu := FindPopupMenuByName(SubView, Names[1], Names[2]);
+        if not Assigned(PopupMenu) then
+          Continue;
+
+        if not IsPopupMenuHooked(PopupMenu) then
+        begin
+          Hook := TCnMenuHookWrapper.Create;
+          Hook.Text := MenuPaths[I, 0];
+          Hook.Container := SubView;
+          Hook.Hook.HookMenu(PopupMenu);
+          Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          FAttachedPopupMenuHooks.Add(Hook);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnMenuFormTranslator.HookPopupMenuOnSubView. Hooked Popup ' + PopupMenu.Name);
+{$ENDIF}
         end;
       end;
     end;
@@ -1892,7 +1957,7 @@ var
   Names: TStringList;
   FS: TObjectList;
   PopupMenu: TPopupMenu;
-  Hook: TCnMenuHook;
+  Hook: TCnMenuHookWrapper;
 begin
   UnHookPopupMenus;
   MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER);
@@ -1926,10 +1991,10 @@ begin
 
         if not IsPopupMenuHooked(PopupMenu) then
         begin
-          Hook := TCnMenuHook.Create(nil);
+          Hook := TCnMenuHookWrapper.Create;
           Hook.Text := MenuPaths[I, 0];
-          Hook.HookMenu(PopupMenu);
-          Hook.OnAfterPopup := AfterPopupMenuOnPopup;
+          Hook.Hook.HookMenu(PopupMenu);
+          Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
         end;
       end;
@@ -1944,12 +2009,12 @@ end;
 procedure TCnMenuFormTranslator.AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
 var
   I: Integer;
-  Hook: TCnMenuHook;
+  Hook: TCnMenuHookWrapper;
 begin
   for I := 0 to FAttachedPopupMenuHooks.Count - 1 do
   begin
-    Hook := TCnMenuHook(FAttachedPopupMenuHooks[I]);
-    if Hook.IsHooked(Menu) then
+    Hook := TCnMenuHookWrapper(FAttachedPopupMenuHooks[I]);
+    if Hook.Hook.IsHooked(Menu) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('AfterPopupMenuOnPopup for a Hooked PopupMenu with Count ' + IntToStr(Menu.Items.Count));
@@ -1961,7 +2026,7 @@ begin
       else
       begin
         TranslatePopupMenu(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_EVENTHANDLER,
-          Hook.Text);
+          Hook.Text, Hook.Container);
       end;
       Exit;
     end;
@@ -2367,7 +2432,7 @@ begin
   Result := False;
   for I := 0 to FAttachedPopupMenuHooks.Count - 1 do
   begin
-    if TCnMenuHook(FAttachedPopupMenuHooks[I]).IsHooked(Menu) then
+    if TCnMenuHookWrapper(FAttachedPopupMenuHooks[I]).Hook.IsHooked(Menu) then
     begin
       Result := True;
       Exit;
@@ -2378,16 +2443,17 @@ end;
 procedure TCnMenuFormTranslator.DebugCommand(Cmds, Results: TStrings);
 var
   I: Integer;
-  Hook: TCnMenuHook;
+  Hook: TCnMenuHookWrapper;
 begin
   Results.Add(Format('CnMenuTranslator PopupMenu Hooks %d', [FAttachedPopupMenuHooks.Count]));
   for I := 0 to FAttachedPopupMenuHooks.Count - 1 do
   begin
-    Hook := TCnMenuHook(FAttachedPopupMenuHooks[I]);
-    if Hook.HookedMenuCount = 1 then
-      Results.Add(Format('  %s: %s|%s', [Hook.Text, Hook.HookedMenu[0].Name, Hook.HookedMenu[0].ClassName]))
+    Hook := TCnMenuHookWrapper(FAttachedPopupMenuHooks[I]);
+    if Hook.Hook.HookedMenuCount = 1 then
+      Results.Add(Format('  %s: %s|%s', [Hook.Text, Hook.Hook.HookedMenu[0].Name,
+        Hook.Hook.HookedMenu[0].ClassName]))
     else
-      Results.Add(Format('  Error Get %d Menus', [Hook.HookedMenuCount]));
+      Results.Add(Format('  Error Get %d Menus', [Hook.Hook.HookedMenuCount]));
   end;
 end;
 
@@ -2504,7 +2570,7 @@ procedure TCnMenuFormTranslator.CheckSubViewPopupMenus(Sender: TObject);
 var
   C: TControl;
 begin
-  // 检查当前是否切到了 CPU
+  // 检查当前是否切到了 CPU 或其他能翻的 SubView
   C := CnOtaGetCurrentEditWindowSubViewControl;
   if (C <> nil) and
     (C.ClassNameIs(SCnDisassemblyViewClassName) or C.ClassNameIs(SCnModuleViewClassName)) then
@@ -2512,8 +2578,11 @@ begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to ' + C.Name);
 {$ENDIF}
-    // 翻 CPU 或其他 SubView 中的右键菜单
+    // 静态翻该 SubView 中的右键菜单
     TranslateStaticPopupMenusForContainer(C);
+
+    // 挂接该 SubView 中的右键菜单准备动态翻
+    HookPopupMenuOnSubView(C);
   end;
 end;
 
@@ -3149,6 +3218,19 @@ end;
 function TCnMenuFormTranslator.CanTranslateToChinese: Boolean;
 begin
   Result := FActive and FAddtionalLanguageFileLoad and (WizOptions.CurrentLangID = csChineseID);
+end;
+
+{ TCnMenuHookWrapper }
+
+constructor TCnMenuHookWrapper.Create;
+begin
+  FHook := TCnMenuHook.Create(nil);
+end;
+
+destructor TCnMenuHookWrapper.Destroy;
+begin
+  FHook.Free;
+  inherited;
 end;
 
 initialization
