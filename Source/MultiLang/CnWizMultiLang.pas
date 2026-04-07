@@ -263,6 +263,63 @@ begin
 {$ENDIF}
 end;
 
+
+procedure ExtractPopupMenuStrings(Res: TStringList; AForm: TComponent);
+
+  procedure ProcessMenuItem(AMenuItem: TMenuItem);
+  var
+    I: Integer;
+    S: string;
+  begin
+    if (AMenuItem = nil) or (AMenuItem.Caption = '-') then
+      Exit;
+
+    S := StringReplace(AMenuItem.Caption, '&', '', [rfReplaceAll]);
+
+    // È¥µôÄ©Î²µÄ ...
+    if S <> '' then
+    begin
+      if S[Length(S)] = '.' then
+        SetLength(S, Length(S) - 3);
+    end;
+    Res.Add(S);
+
+    for I := 0 to AMenuItem.Count - 1 do
+      ProcessMenuItem(AMenuItem.Items[I]);
+  end;
+
+  procedure ScanComponents(AParent: TComponent);
+  var
+    I, J: Integer;
+    Comp: TComponent;
+    Menu: TPopupMenu;
+  begin
+    if AParent = nil then
+      Exit;
+
+    for I := 0 to AParent.ComponentCount - 1 do
+    begin
+      Comp := AParent.Components[I];
+      if Comp is TPopupMenu then
+      begin
+        Menu := TPopupMenu(Comp);
+        Res.Add(AForm.Name + '.' + Menu.Owner.Name + '.' + Menu.Name);
+        for J := 0 to Menu.Items.Count - 1 do
+          ProcessMenuItem(Menu.Items[J]);
+      end;
+
+      if Comp.ComponentCount > 0 then
+        ScanComponents(Comp);
+    end;
+  end;
+
+begin
+  if not Assigned(Res) or not Assigned(AForm) then
+     Exit;
+
+  ScanComponents(AForm);
+end;
+
 procedure InitLangManager;
 var
   LangID: Cardinal;
@@ -906,6 +963,21 @@ begin
       CnLanguageManager.TranslateFrame(TCustomFrame(SV));
     end;
   end
+  else if Command = CN_WIZ_CMD_GEN_MENU then
+  begin
+    SL := TStringList.Create;
+    try
+      ExtractPopupMenuStrings(SL, Screen.ActiveCustomForm);
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_MENU. Extract %d',
+          [SL.Count]);
+{$ENDIF}
+      if SL.Count > 0 then
+        Clipboard.AsText := SL.Text;
+    finally
+      SL.Free;
+    end;
+  end;
 end;
 
 procedure TCnWizMultiLang.ExtractorAllowItem(AObject: TObject;
