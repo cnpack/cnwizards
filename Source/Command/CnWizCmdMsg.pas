@@ -129,6 +129,15 @@ const
   CN_WIZ_CMD_DUMP_POPUPMENU      = $CCB + $111;  // 3548
   {* 通知 Dump 当前活动窗体的 PopupMenu 条目}
 
+  CN_WIZ_CMD_DBG_EVALSUBVIEW     = $CCB + $112;  // 3549
+  {* 查看当前编辑器窗口中的当前 SubView}
+
+  CN_WIZ_CMD_GEN_SUBVIEW         = $CCB + $113;  // 3550
+  {* 通知多语插件生成当前 SubView 的语言条目}
+
+  CN_WIZ_CMD_TRANS_SUBVIEW       = $CCB + $114;  // 3551
+  {* 通知多语插件翻译当前 SubView}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type
