@@ -1384,7 +1384,10 @@ begin
     List.Clear;
     // Root ±æ…Ì≤ª¥Ê
     if Root.Count = 1 then
+    begin
       SaveLeafToStrings(Root.Items[0], List, 0);
+      Result := True;
+    end;
   end;
 end;
 
