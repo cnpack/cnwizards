@@ -129,11 +129,11 @@
       }, {
         "MenuPath": "CPU.DisViewFrame.CPUPaneMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Always", "始终"], ["Auto", "自动"], ["Breakpoint Properties", "断点属性"], ["Caller", "调用方"], ["Copy", "复制"], ["Enabled", "已启用"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Go to Current EIP", "转到当前 EIP"], ["Go to Current RIP", "转到当前 RIP"], ["Mixed IL Code", "混合 IL 代码"], ["Mixed Source", "混合源代码"], ["Never", "从不"], ["New EIP", "新 EIP"], ["New RIP", "新 RIP"], ["Previous", "上一个"], ["Run to Current", "运行到当前"], ["Run To Here", "运行到此处"], ["Search", "搜索"], ["Show Addresses", "显示地址"], ["Show Opcodes", "显示操作码"], ["Toggle Breakpoint", "切换断点"], ["View FPU", "查看浮点运算单元"], ["View Source", "查看源代码"]]
+        "ItemCaption": [["Always", "始终"], ["Auto", "自动"], ["Breakpoint Properties", "断点属性"], ["Caller", "调用方"], ["Copy", "复制"], ["Enabled", "已启用"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Go to Current EIP", "转到当前 EIP"], ["Go to Current RIP", "转到当前 RIP"], ["Goto Address", "转到地址"], ["Goto Current EIP", "转到当前 EIP"], ["Goto Current RIP", "转到当前 RIP"], ["Mixed IL Code", "混合 IL 代码"], ["Mixed Source", "混合源代码"], ["Never", "从不"], ["New EIP", "新 EIP"], ["New RIP", "新 RIP"], ["Previous", "上一个"], ["Run to Current", "运行到当前"], ["Run To Here", "运行到此处"], ["Search", "搜索"], ["Show Addresses", "显示地址"], ["Show Opcodes", "显示操作码"], ["Toggle Breakpoint", "切换断点"], ["View FPU", "查看浮点运算单元"], ["View Source", "查看源代码"]]
       }, {
         "MenuPath": "CPU.DumpViewFrame.DumpPopupMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Change", "更改"], ["Copy", "复制"], ["Display As", "显示模式"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Near Code", "至代码"], ["Next", "下一个"], ["Offset to Data", "至数据"], ["Previous", "上一个"], ["Search", "搜索"], ["View FPU", "查看浮点运算单元"]]
+        "ItemCaption": [["Change", "更改"], ["Copy", "复制"], ["Display As", "显示模式"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Goto Address", "转到地址"], ["Near Code", "至代码"], ["Next", "下一个"], ["Offset to Data", "至数据"], ["Previous", "上一个"], ["Search", "搜索"], ["View FPU", "查看浮点运算单元"]]
       }, {
         "MenuPath": "CPU.RegsFlagsViewFrame.FlagsPopupMenu",
         "ForceEnglish": "False",
@@ -145,7 +145,7 @@
       }, {
         "MenuPath": "CPU.StackViewFrame.DumpPopupMenu",
         "ForceEnglish": "False",
-        "ItemCaption": [["Change", "更改"], ["Copy", "复制"], ["Display As", "显示模式"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Near Code", "至代码"], ["Offset to Data", "至数据"], ["Offset to Stack", "至堆栈"], ["Previous", "上一个"], ["Top of Stack", "栈顶"], ["View FPU", "查看浮点运算单元"]]
+        "ItemCaption": [["Change", "更改"], ["Copy", "复制"], ["Display As", "显示模式"], ["Follow", "跟随"], ["Go to Address", "转到地址"], ["Goto Address", "转到地址"], ["Near Code", "至代码"], ["Offset to Data", "至数据"], ["Offset to Stack", "至堆栈"], ["Previous", "上一个"], ["Top of Stack", "栈顶"], ["View FPU", "查看浮点运算单元"]]
       }, {
         "MenuPath": "DebugLogView.DebugLogView.LogPopupMenu",
         "ForceEnglish": "FALSE",
@@ -249,7 +249,7 @@
       }, {
         "MenuPath": "Modules.Modules.EntryPointPopupMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Go to Entry Point", "跳至入口"]]
+        "ItemCaption": [["Go to Entry Point", "跳至入口"], ["Goto Entry Point", "跳至入口"]]
       }, {
         "MenuPath": "Modules.Modules.MainPopupMenu",
         "ForceEnglish": "FALSE",
@@ -265,7 +265,7 @@
       }, {
         "MenuPath": "ModulesView.ModulesView.EPPopupMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Go to Entry Point", "跳至入口"]]
+        "ItemCaption": [["Go to Entry Point", "跳至入口"], ["Goto Entry Point", "跳至入口"]]
       }, {
         "MenuPath": "ModulesView.ModulesView.ModViewPopupMenu",
         "ForceEnglish": "FALSE",
@@ -317,7 +317,7 @@
       }, {
         "MenuPath": "ThreadStatus.ThreadStatus.ItemPopupMenu",
         "ForceEnglish": "FALSE",
-        "ItemCaption": [["Close", "关闭"], ["Detach Process", "分离进程"], ["Dockable", "可停靠"], ["Freeze", "冻结"], ["Freeze All Other Threads", "冻结所有其他线程"], ["Go to Source", "转到源代码"], ["Local Menu", "本地菜单"], ["Make Current", "设为当前"], ["Name Thread", "命名线程"], ["Pause Process", "暂停进程"], ["Process Properties", "进程属性"], ["Stay on Top", "保持置顶"], ["Terminate Process", "终止进程"], ["Thaw", "解冻"], ["Thaw All Threads", "解冻所有线程"], ["View Source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
+        "ItemCaption": [["Close", "关闭"], ["Detach Process", "分离进程"], ["Dockable", "可停靠"], ["Freeze", "冻结"], ["Freeze All Other Threads", "冻结所有其他线程"], ["Go to Source", "转到源代码"], ["Goto Source", "转到源代码"], ["Local Menu", "本地菜单"], ["Make Current", "设为当前"], ["Name Thread", "命名线程"], ["Pause Process", "暂停进程"], ["Process Properties", "进程属性"], ["Stay on Top", "保持置顶"], ["Terminate Process", "终止进程"], ["Thaw", "解冻"], ["Thaw All Threads", "解冻所有线程"], ["View Source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
       }, {
         "MenuPath": "ToDoListWindow.ToDoListWindow.GridPopup",
         "ForceEnglish": "FALSE",
