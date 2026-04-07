@@ -926,6 +926,7 @@ begin
   end
   else if Command = CN_WIZ_CMD_GEN_SUBVIEW then
   begin
+{$IFDEF DELPHI_OTA}
     SV := CnOtaGetCurrentEditWindowSubViewControl;
     if (SV <> nil) and (SV is TFrame) then
     begin
@@ -950,9 +951,11 @@ begin
         E.Free;
       end;
     end;
+{$ENDIF}
   end
   else if Command = CN_WIZ_CMD_TRANS_SUBVIEW then
   begin
+{$IFDEF DELPHI_OTA}
     SV := CnOtaGetCurrentEditWindowSubViewControl;
     if (SV <> nil) and (SV is TCustomFrame) then
     begin
@@ -962,6 +965,7 @@ begin
 {$ENDIF}
       CnLanguageManager.TranslateFrame(TCustomFrame(SV));
     end;
+{$ENDIF}
   end
   else if Command = CN_WIZ_CMD_GEN_MENU then
   begin
