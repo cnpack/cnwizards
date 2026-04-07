@@ -76,6 +76,7 @@ type
   {* 单个 MenuPath 的翻译缓存：精确匹配用 HashMap，|| 规则单独列表 }
   public
     ExactMap: TCnStrToStrHashMap;       // LowerCase(英文) -> 译文
+    OriginalENUMap: TCnStrToStrHashMap; // LowerCase(英文) -> 原始大小写英文（用于切回英文时还原）
     PrefixSuffixRules: array of TCnMenuCaptionPrefixSuffix;
     constructor Create;
     destructor Destroy; override;
@@ -378,11 +379,13 @@ constructor TCnMenuCaptionEntry.Create;
 begin
   inherited;
   ExactMap := TCnStrToStrHashMap.Create(64);
+  OriginalENUMap := TCnStrToStrHashMap.Create(64);
 end;
 
 destructor TCnMenuCaptionEntry.Destroy;
 begin
   ExactMap.Free;
+  OriginalENUMap.Free;
   inherited;
 end;
 
@@ -1190,7 +1193,9 @@ begin
       begin
         while Entry.ExactMap.GetNext(ENU, CHS) do
         begin
+          // ENU 此时是小写 key，需要从 OriginalENUMap 取回原始大小写
           Result[Count, 0] := CHS;
+          if not Entry.OriginalENUMap.Find(ENU, Result[Count, 1]) then
           Result[Count, 1] := ENU;
           Inc(Count);
         end;
@@ -2468,6 +2473,7 @@ begin
               begin
                 // 精确匹配：key 存小写，查找时也转小写
                 Entry.ExactMap.Add(LowerCase(ENU), CHS);
+                Entry.OriginalENUMap.Add(LowerCase(ENU), ENU); // 保存原始大小写，用于切回英文时还原
               end;
             end;
           end;
