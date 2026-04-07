@@ -2506,12 +2506,13 @@ var
 begin
   // 检查当前是否切到了 CPU
   C := CnOtaGetCurrentEditWindowSubViewControl;
-  if (C <> nil) and C.ClassNameIs(SCnDisassemblyViewClassName) then
+  if (C <> nil) and
+    (C.ClassNameIs(SCnDisassemblyViewClassName) or C.ClassNameIs(SCnModuleViewClassName)) then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to CPU.');
+    CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to ' + C.Name);
 {$ENDIF}
-    // 翻 CPU 中的右键菜单
+    // 翻 CPU 或其他 SubView 中的右键菜单
     TranslateStaticPopupMenusForContainer(C);
   end;
 end;

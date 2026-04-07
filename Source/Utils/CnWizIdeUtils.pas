@@ -112,6 +112,8 @@ const
   SCnWelcomePageName = 'WelcomePage';
   SCnDisassemblyViewClassName = 'TDisassemblyView';
   SCnDisassemblyViewName = 'CPU';
+  SCnModuleViewClassName = 'TModulesView';
+  SCnModuleViewName = 'Modules';
   SCnEditorStatusBarName = 'StatusBar';
 
 {$IFDEF BDS}
