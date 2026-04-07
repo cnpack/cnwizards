@@ -148,8 +148,8 @@ object CnCmdSendForm: TCnCmdSendForm
       '3547 翻译当前活动窗体的目录树组件'
       '3548 生成当前窗体的弹出菜单条目'
       '3549 查看当前编辑器窗口中的当前 SubView'
-      '3550 通知多语插件生成当前 SubView 的语言条目'
-      '3551 通知多语插件翻译当前 SubView')
+      '3550 生成当前 SubView 的语言条目'
+      '3551 翻译当前 SubView')
     TabOrder = 8
     OnClick = lstMsgClick
   end

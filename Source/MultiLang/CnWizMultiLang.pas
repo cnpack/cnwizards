@@ -95,7 +95,7 @@ type
     FTranslator: TCnMenuFormTranslator;
 {$ENDIF}
 {$ENDIF}
-    procedure SetExtractorNoNameMode(E: TCnLangStringExtractor; F: TCustomForm);
+    procedure SetExtractorNoNameMode(E: TCnLangStringExtractor; F: TComponent);
   protected
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
@@ -568,6 +568,7 @@ var
   C, I, EP: Integer;
   S: string;
   Key, Value: TCnLangString;
+  SV: TControl;
 
   function StringsContainsHead(const Head: string; Strings: TStrings): Boolean;
   var
@@ -593,6 +594,38 @@ var
       or StrEndWith(Str, '=>>') or StrEndWith(Str, '=<') or StrEndWith(Str, '=<<') or StrEndWith(Str, '=');
   end;
 
+  function CreateExtrator: TCnLangStringExtractor;
+  begin
+    Result := TCnLangStringExtractor.Create;
+    Result.SkipEmptyComponentName := False;
+    Result.IgnoreRootFont := True;
+    Result.FilterOptions := Result.FilterOptions - [tfFont];
+    Result.OnAllowItem := ExtractorAllowItem;
+  end;
+
+  procedure SetExtractorMode(E: TCnLangStringExtractor;
+    const Param: string; AComp: TComponent);
+  begin
+    if Param = 'class' then
+      E.NoNameProcessType := cnptAtClassName
+    else if Param = 'index' then
+      E.NoNameProcessType := cnptIndex
+    else
+      SetExtractorNoNameMode(E, AComp);
+  end;
+
+  procedure TrimSortTranslationItems(List: TStringList);
+  var
+    J: Integer;
+  begin
+    for J := List.Count - 1 downto 0 do
+    begin
+      if CanDeleteItem(List[I]) then
+        List.Delete(I);
+    end;
+    List.Sort;
+  end;
+
 begin
   if Command = CN_WIZ_CMD_GEN_MULTILANG then // 3535
   begin
@@ -605,11 +638,7 @@ begin
 
     try
       SL := TStringList.Create;
-      E := TCnLangStringExtractor.Create;
-      E.SkipEmptyComponentName := False;
-      E.IgnoreRootFont := True;
-      E.FilterOptions := E.FilterOptions - [tfFont];
-      E.OnAllowItem := ExtractorAllowItem;
+      E := CreateExtrator;
 
       S := '';
       if (Params <> nil) and (Params.Count > 0) then
@@ -617,20 +646,9 @@ begin
 
       if Screen.ActiveCustomForm <> nil then
       begin
-        if S = 'class' then
-          E.NoNameProcessType := cnptAtClassName
-        else if S = 'index' then
-          E.NoNameProcessType := cnptIndex
-        else
-          SetExtractorNoNameMode(E, Screen.ActiveCustomForm);
-
+        SetExtractorMode(E, S, Screen.ActiveCustomForm);
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
-        for I := SL.Count - 1 downto 0 do
-        begin
-          if CanDeleteItem(SL[I]) then
-            SL.Delete(I);
-        end;
-        SL.Sort;
+        TrimSortTranslationItems(SL);
         Clipboard.AsText := SL.Text;
       end;
     finally
@@ -649,11 +667,7 @@ begin
 
     try
       SL := TStringList.Create;
-      E := TCnLangStringExtractor.Create;
-      E.SkipEmptyComponentName := False;
-      E.IgnoreRootFont := True;
-      E.FilterOptions := E.FilterOptions - [tfFont];
-      E.OnAllowItem := ExtractorAllowItem;
+      E := CreateExtrator;
 
       S := '';
       if (Params <> nil) and (Params.Count > 0) then
@@ -664,23 +678,12 @@ begin
         // 忽略我们专家包的窗体
         if Pos('TCn', Screen.CustomForms[I].ClassName) <> 1 then
         begin
-          if S = 'class' then
-            E.NoNameProcessType := cnptAtClassName
-          else if S = 'index' then
-            E.NoNameProcessType := cnptIndex
-          else
-            SetExtractorNoNameMode(E, Screen.CustomForms[I]);
-
+          SetExtractorMode(E, S, Screen.CustomForms[I]);
           E.GetFormStrings(Screen.CustomForms[I], SL, True);
         end;
       end;
 
-      for I := SL.Count - 1 downto 0 do
-      begin
-        if CanDeleteItem(SL[I]) then
-          SL.Delete(I);
-      end;
-      SL.Sort;
+      TrimSortTranslationItems(SL);
       Clipboard.AsText := SL.Text;
     finally
       E.Free;
@@ -863,7 +866,46 @@ begin
         WL.Free;
       end;
     end;
-  end;
+  end
+  else if Command = CN_WIZ_CMD_GEN_SUBVIEW then
+  begin
+    SV := CnOtaGetCurrentEditWindowSubViewControl;
+    if (SV <> nil) and (SV is TFrame) then
+    begin
+      SL := nil;
+      E := nil;
+
+      try
+        SL := TStringList.Create;
+        E := CreateExtrator;
+        SetExtractorMode(E, S, SV);
+
+        E.ForceFrameToForm := True;
+        E.GetFormStrings(SV, SL, True);
+        TrimSortTranslationItems(SL);
+        Clipboard.AsText := SL.Text;
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_SUBVIEW. Get Items %d',
+          [SL.Count]);
+{$ENDIF}
+      finally
+        SL.Free;
+        E.Free;
+      end;
+    end;
+  end
+  else if Command = CN_WIZ_CMD_TRANS_SUBVIEW then
+  begin
+    SV := CnOtaGetCurrentEditWindowSubViewControl;
+    if (SV <> nil) and (SV is TCustomFrame) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CnWizMultiLang Get Cmd CN_WIZ_CMD_TRANS_SUBVIEW. Trnaslate %s',
+          [SV.ClassName]);
+{$ENDIF}
+      CnLanguageManager.TranslateFrame(TCustomFrame(SV));
+    end;
+  end
 end;
 
 procedure TCnWizMultiLang.ExtractorAllowItem(AObject: TObject;
@@ -975,7 +1017,6 @@ end;
 procedure TCnWizMultiLang.ActiveFormChanged(Sender: TObject);
 var
   I, EP: Integer;
-  F: TCustomForm;
   E: TCnLangStringExtractor;
   SL: TStringList;
   S: string;
@@ -1020,7 +1061,7 @@ begin
 end;
 
 procedure TCnWizMultiLang.SetExtractorNoNameMode(E: TCnLangStringExtractor;
-  F: TCustomForm);
+  F: TComponent);
 begin
   if (F <> nil) and (E <> nil) then
   begin
