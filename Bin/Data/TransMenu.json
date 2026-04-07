@@ -247,6 +247,22 @@
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Clear All Messages", "清除所有消息"], ["Clear Messages", "清除消息"], ["Close Tab", "关闭窗口"], ["Copy", "复制"], ["Dockable", "可停靠"], ["Edit Source", "编辑源代码"], ["Local Menu", "本地菜单"], ["Next Message Tab", "下一个消息窗口"], ["Previous Message Tab", "上一个消息窗口"], ["Save All Messages", "保存所有消息"], ["Save Messages", "保存消息"], ["Select All", "全选"], ["View Editor", "查看编辑器"], ["View source", "查看源代码"], ["Zoom Window", "缩放窗口"]]
       }, {
+        "MenuPath": "Modules.Modules.EntryPointPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Go to Entry Point", "跳至入口"]]
+      }, {
+        "MenuPath": "Modules.Modules.MainPopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Close Window", "关闭窗口"], ["Down Pane", "下方面板"], ["Left Pane", "左方面板"], ["Local Menu", "本地菜单"], ["Right Pane", "右方面板"], ["Up Pane", "上方面板"]]
+      }, {
+        "MenuPath": "Modules.Modules.ScopePopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Browse Class", "浏览类"], ["Edit Source", "编辑源码"]]
+      }, {
+        "MenuPath": "Modules.Modules.SourcePopupMenu",
+        "ForceEnglish": "FALSE",
+        "ItemCaption": [["Add Module", "添加模块"], ["Break On Load", "加载时中断"], ["Reload Symbol Table", "重新加载符号表"]]
+      }, {
         "MenuPath": "ModulesView.ModulesView.EPPopupMenu",
         "ForceEnglish": "FALSE",
         "ItemCaption": [["Go to Entry Point", "跳至入口"]]
