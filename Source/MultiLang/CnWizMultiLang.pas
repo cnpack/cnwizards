@@ -677,8 +677,8 @@ var
   begin
     for J := List.Count - 1 downto 0 do
     begin
-      if CanDeleteItem(List[I]) then
-        List.Delete(I);
+      if CanDeleteItem(List[J]) then
+        List.Delete(J);
     end;
     List.Sort;
   end;
