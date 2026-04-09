@@ -830,9 +830,9 @@ var
 
 begin
   try
-    Parser := TParser.Create(Stream);
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    Parser := TParser.Create(Stream);
     try
       PropCount := 0;
       ParseObject;
@@ -989,9 +989,9 @@ var
 
 begin
   try
-    Reader := TReader.Create(Stream, 4096);
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    Reader := TReader.Create(Stream, 4096);
     try
       PropCount := 0;
       Reader.ReadSignature;
@@ -1077,10 +1077,10 @@ var
   Parser: TParser;
   StartLeaf: TCnDfmLeaf;
 begin
-  Parser := TParser.Create(Stream);
   try
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    Parser := TParser.Create(Stream);
     try
       StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
       ParseTextObjectToLeaf(Parser, Tree, StartLeaf as TCnDfmLeaf);
@@ -1101,9 +1101,9 @@ var
   StartLeaf: TCnDfmLeaf;
 begin
   try
-    Reader := TReader.Create(Stream, 4096);
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
+    Reader := TReader.Create(Stream, 4096);
     try
       Reader.ReadSignature;
       StartLeaf := Tree.AddChild(Tree.Root) as TCnDfmLeaf;
@@ -1137,7 +1137,6 @@ begin
     Tree.DfmFormat := dfText;
     SaveSeparator := {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator;
     {$IFDEF DELPHIXE3_UP}FormatSettings.{$ENDIF}DecimalSeparator := '.';
-
     Parser := TParser.Create(Stream);
     try
       while Parser.Token <> #0 do
