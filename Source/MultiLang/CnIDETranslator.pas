@@ -135,6 +135,9 @@ type
     FAttachedPopupMenuHooks: TObjectList; // 容纳 TCnMenuHookWrapper
     FAttachedMenuItems: TObjectList;
     // 注意不能记录已经静态翻译过的 PopupMenu 来避免重复，因为 IDE 自身会老改
+{$IFDEF COMPILER7_UP}
+    FIDEMainMenuBar: TActionMainMenuBar;
+{$ENDIF}
 {$IFDEF ENABLE_RESSTRING_HOOK}
     FLoadResStringHook: TCnMethodHook;
 {$ENDIF}
@@ -224,9 +227,10 @@ type
     {* 挂接所有现有的弹出菜单以在弹出后进行翻译}
     procedure HookPopupMenuOnCurrentEditWindow;
     {* 挂接当前活动编辑器窗口上的弹出菜单控件}
+{$IFDEF BDS}
     procedure HookPopupMenuOnSubView(SubView: TComponent);
     {* 挂接当前活动 SubView 中的弹出菜单控件}
-
+{$ENDIF}
     procedure AfterPopupMenuOnPopup(Sender: TObject; Menu: TPopupMenu);
     {* 用来挂接的新弹出事件处理器}
     procedure UnHookPopupMenus;
@@ -296,7 +300,9 @@ type
       var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
 {$IFDEF COMPILER7_UP}
+    procedure OnApplicationIdle(Sender: TObject);
     procedure CheckActionMainMenuBarPersistentHotKeys;
+    {* 汉化状态下，一空闲就改 PersistentHotKeys 为 True}
 {$ENDIF}
   public
     constructor Create(AStorage: TCnHashLangFileStorage);
@@ -2187,6 +2193,8 @@ begin
   end;
 end;
 
+{$IFDEF BDS}
+
 procedure TCnMenuFormTranslator.HookPopupMenuOnSubView(SubView: TComponent);
 var
   I: Integer;
@@ -2235,6 +2243,8 @@ begin
     Names.Free;
   end;
 end;
+
+{$ENDIF}
 
 // 挂钩弹出菜单集合
 procedure TCnMenuFormTranslator.HookPopupMenus;
@@ -2597,6 +2607,9 @@ begin
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
 
+{$IFDEF COMPILER7_UP}
+   CnWizNotifierServices.AddApplicationIdleNotifier(OnApplicationIdle);
+{$ENDIF}
 {$IFDEF BDS}
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
   EditControlWrapper.AddEditorChangeNotifier(EditorChange);
@@ -2612,6 +2625,10 @@ begin
 {$IFDEF BDS}
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
+{$ENDIF}
+
+{$IFDEF COMPILER7_UP}
+   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnApplicationIdle);
 {$ENDIF}
 
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
@@ -3626,13 +3643,25 @@ end;
 
 {$IFDEF COMPILER7_UP}
 
+procedure TCnMenuFormTranslator.OnApplicationIdle(Sender: TObject);
+begin
+  if CanTranslateToChinese then
+    CheckActionMainMenuBarPersistentHotKeys;
+end;
+
 procedure TCnMenuFormTranslator.CheckActionMainMenuBarPersistentHotKeys;
 var
   Bar: TComponent;
 begin
-  Bar := GetIDEMainMenuBar;
-  if (Bar <> nil) and (Bar is TActionMainMenuBar) then
-    TActionMainMenuBar(Bar).PersistentHotKeys := True;
+  if FIDEMainMenuBar = nil then
+  begin
+    Bar := GetIDEMainMenuBar;
+    if (Bar <> nil) and (Bar is TActionMainMenuBar) then
+      FIDEMainMenuBar := TActionMainMenuBar(Bar);
+  end;
+
+  if (FIDEMainMenuBar <> nil) and not FIDEMainMenuBar.PersistentHotKeys then
+    FIDEMainMenuBar.PersistentHotKeys := True;
 end;
 
 {$ENDIF}
