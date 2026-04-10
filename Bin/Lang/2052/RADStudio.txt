@@ -1639,7 +1639,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSearchOptions.Label1.Cap
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSearchOptions.PropCheckBox1.Caption=在搜索结果窗口中启用颜色高亮。
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.actnDeleteFileType.Caption=删除(&D)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.actnNewFileType.Caption=新建(&N)...
-TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.Caption=源选项
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.Caption=源代码选项
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.eoAutoIndentMode.Caption=自动缩进模式(&A)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.eoBackspaceUnindents.Caption=退格取消缩进(&U)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorSourceOptionsPg.eoCursorInTabs.Caption=光标穿过制表符(&C)
