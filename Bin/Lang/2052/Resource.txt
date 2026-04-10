@@ -3158,7 +3158,7 @@ PCH Filename ('Classic' Borland compiler)=PCH 文件名(旧版 Borland 编译器
 PCH Filename=PCH 文件名
 PCH usage (Clang compilers)=PCH 使用 (Clang 编译器)
 PCH usage=PCH 用法
-Pentium-safe FDIV=使用奔腾安全版 FDIV 指令
+Pentium-safe FDIV=奔腾安全 FDIV 指令
 Per Monitor v2=每显示器v2
 Per Monitor=每显示器
 Percent=百分比
@@ -3853,7 +3853,7 @@ The component palette has been updated as a result of rebuilding installed packa
 The created action, must inherit from %s=创建的操作必须继承自%s
 The created instance of class %s is wrong=创建的类%s实例错误
 The current framework is not registered or cannot be identified=当前框架未注册或无法识别
-The default editor source option cannot be deleted=无法删除默认编辑器源选项
+The default editor source option cannot be deleted=无法删除默认的编辑器源代码选项
 The Description cannot have a | in it.=描述中不能包含|。
 The device does not support peripheral mode=设备不支持外设模式
 The display name for my file.=我的文件的显示名称。

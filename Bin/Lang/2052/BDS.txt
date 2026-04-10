@@ -1002,7 +1002,7 @@ TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbLoc
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbOpenParameters.Caption=开放参数(&P)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbOptimization.Caption=优化(&Z)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbOverflowCheck.Caption=溢出检查(&O)
-TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用奔腾安全版 FDIV 指令(&M)
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用奔腾安全 FDIV 指令(&M)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbRangeCheck.Caption=范围检查(&R)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbStackFrames.Caption=栈帧(&K)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbSymbolInfo.Caption=引用信息(&F)

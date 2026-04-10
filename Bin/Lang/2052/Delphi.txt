@@ -1286,7 +1286,7 @@ TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbLocalSymbols.C
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOpenParameters.Caption=开放参数(&P)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOptimization.Caption=优化(&Z)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbOverflowCheck.Caption=溢出检查(&O)
-TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用奔腾安全版 FDIV 指令(&M)
+TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbPentiumSafe.Caption=使用奔腾安全 FDIV 指令(&M)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbRangeCheck.Caption=范围检查(&R)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbStackFrames.Caption=栈帧(&K)
 TProjectOptionsDialog.PropSheetControl.@TPasCompilerOptionsPage.cbSymbolInfo.Caption=引用信息(&F)
