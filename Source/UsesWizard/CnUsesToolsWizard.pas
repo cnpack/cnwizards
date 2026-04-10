@@ -1984,6 +1984,15 @@ var
     CnDebugger.LogFmt('UsesTools Project uses ProcessFile %s', [FileName]);
 {$ENDIF}
 
+    // 如果文件名等于引用名说明可能是同一个文件
+    if LowerCase(AUnit) = LowerCase(_CnChangeFileExt(_CnExtractFileName(FileName), '')) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('UsesTools Project uses ProcessFile Maybe Self. Skip.');
+{$ENDIF}
+      Exit;
+    end;
+
     try
       Stream := TMemoryStream.Create;
       CnGeneralFilerSaveFileToStream(FileName, Stream); // Stream 得到 Ansi/*/Utf16
@@ -2026,8 +2035,13 @@ var
         Dest.Write(Ins[1], Length(Ins) * SizeOf(TCnIdeTokenChar));
         Dest.CopyFrom(Stream, Stream.Size - (LinearPos + 1) * SizeOf(TCnIdeTokenChar));
 
-        CnGeneralFilerLoadFileFromStream(FileName, Dest);
-        Result := True;
+        try
+          CnGeneralFilerLoadFileFromStream(FileName, Dest); // 保存文件失败出异常则返回 False
+          Result := True;
+        except
+          Application.HandleException(Self);
+          Result := False;
+        end;
       end;
     finally
       Dest.Free;
