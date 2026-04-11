@@ -56,7 +56,7 @@ uses
   CnWizCmdNotify, CnWizCmdMsg, CnWizCompilerConst, CnWizNotifier,
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF UNICODE} CnControlHook, {$ENDIF}
-  {$IFDEF BDS} CategoryButtons, CnEditControlWrapper, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
+  CnEditControlWrapper, {$IFDEF BDS} CategoryButtons, {$ENDIF} // 2005 及以上才有新组件板的 CategoryButtons
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf, {$ENDIF} ToolsAPI;
 
@@ -276,9 +276,9 @@ type
     procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 
-{$IFDEF BDS}
     procedure CheckSubViewPopupMenus(Sender: TObject);
     procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
+{$IFDEF BDS}
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
     {* 手动翻译树节点，包括 TTreeView 和 TVirtualStringList 两种情况}
 {$ENDIF}
@@ -500,6 +500,25 @@ begin
     Result := False;
 end;
 
+// 判断名字或@类名是否与对应组件匹配
+function MatchNamedOrClassPattern(const APattern: string; const AComponent: TComponent): Boolean;
+var
+  ClassNamePattern: string;
+begin
+  Result := False;
+  if not Assigned(AComponent) then
+    Exit;
+
+  if (APattern <> '') and (APattern[1] = '@') then
+  begin
+    ClassNamePattern := Copy(APattern, 2, MaxInt);
+    Result := (ClassNamePattern <> '') and (AComponent.Name = '') and
+      SameText(AComponent.ClassName, ClassNamePattern);
+  end
+  else
+    Result := StrEqualOrMatchStartWithStar(APattern, AComponent.Name);
+end;
+
 // 如果 NewPrefix 为空则代表删除 OldPrefix 开头的所有条目
 procedure ChangeLangPrefix(AMap: TCnLangHashMap; const OldPrefix, NewPrefix: string);
 var
@@ -555,7 +574,7 @@ begin
   if not Assigned(ARootComp) then
     Exit;
 
-  if StrEqualOrMatchStartWithStar(AName, ARootComp.Name) then
+  if MatchNamedOrClassPattern(AName, ARootComp) then
   begin
     Result := ARootComp;
     Exit;
@@ -564,7 +583,7 @@ begin
   for I := 0 to ARootComp.ComponentCount - 1 do
   begin
     Component := ARootComp.Components[I];
-    if StrEqualOrMatchStartWithStar(AName, Component.Name) then
+    if MatchNamedOrClassPattern(AName, Component) then
     begin
       Result := Component;
       Exit;
@@ -588,7 +607,7 @@ begin
   if not Assigned(ARootControl) then
     Exit;
 
-  if StrEqualOrMatchStartWithStar(AName, ARootControl.Name) then
+  if MatchNamedOrClassPattern(AName, ARootControl) then
   begin
     Result := ARootControl;
     Exit;
@@ -601,7 +620,7 @@ begin
   for I := 0 to WinControl.ControlCount - 1 do
   begin
     Control := WinControl.Controls[I];
-    if StrEqualOrMatchStartWithStar(AName, Control.Name) then
+    if MatchNamedOrClassPattern(AName, Control) then
     begin
       Result := Control;
       Exit;
@@ -730,12 +749,9 @@ begin
   end;
 end;
 
-// 根据名称查找多个子组件（支持通配符）
+// 根据名称查找多个子组件（支持@类名及 * 通配符）
 function TCnMenuFormTranslator.FindComponentByNameDeep(const ARootComp: TComponent;
   const AName: string; ComponentResult: TObjectList): Boolean;
-var
-  PosWildcard: Integer;
-  Prefix: string;
 
   procedure SearchComponents(AComp: TComponent);
   var
@@ -748,23 +764,10 @@ var
     for J := 0 to AComp.ComponentCount - 1 do
     begin
       SubComp := AComp.Components[J];
-      if PosWildcard > 1 then
+      if MatchNamedOrClassPattern(AName, SubComp) then
       begin
-        // 有通配符，使用首匹配
-        if Pos(Prefix, SubComp.Name) = 1 then
-        begin
-          ComponentResult.Add(SubComp);
-          Result := True;
-        end;
-      end
-      else
-      begin
-        // 没通配符，精确匹配
-        if SameText(SubComp.Name, AName) then
-        begin
-          ComponentResult.Add(SubComp);
-          Result := True;
-        end;
+        ComponentResult.Add(SubComp);
+        Result := True;
       end;
       // 递归查找子组件
       SearchComponents(SubComp);
@@ -776,28 +779,12 @@ begin
   if not Assigned(ARootComp) then
     Exit;
 
-  PosWildcard := Pos('*', AName);
-  if PosWildcard > 1 then
-    Prefix := Copy(AName, 1, PosWildcard - 1)
-  else
-    Prefix := '';
 
   // 先检查根组件自身
-  if PosWildcard > 1 then
+  if MatchNamedOrClassPattern(AName, ARootComp) then
   begin
-    if Pos(Prefix, ARootComp.Name) = 1 then
-    begin
-      ComponentResult.Add(ARootComp);
-      Result := True;
-    end;
-  end
-  else
-  begin
-    if SameText(ARootComp.Name, AName) then
-    begin
-      ComponentResult.Add(ARootComp);
-      Result := True;
-    end;
+    ComponentResult.Add(ARootComp);
+    Result := True;
   end;
 
   // 递归查找所有子组件
@@ -807,9 +794,6 @@ end;
 // 根据名称查找多个子控件（支持通配符）
 function TCnMenuFormTranslator.FindControlByNameDeep(const ARootControl: TControl;
   const AName: string; ControlResult: TObjectList): Boolean;
-var
-  PosWildcard: Integer;
-  Prefix: string;
 
   procedure SearchControls(AControl: TControl);
   var
@@ -827,23 +811,10 @@ var
     for J := 0 to SubWinControl.ControlCount - 1 do
     begin
       SubControl := SubWinControl.Controls[J];
-      if PosWildcard > 1 then
+      if MatchNamedOrClassPattern(AName, SubControl) then
       begin
-        // 有通配符，使用首匹配
-        if Pos(Prefix, SubControl.Name) = 1 then
-        begin
-          ControlResult.Add(SubControl);
-          Result := True;
-        end;
-      end
-      else
-      begin
-        // 没通配符，精确匹配
-        if SameText(SubControl.Name, AName) then
-        begin
-          ControlResult.Add(SubControl);
-          Result := True;
-        end;
+        ControlResult.Add(SubControl);
+        Result := True;
       end;
       // 递归查找子控件
       SearchControls(SubControl);
@@ -855,28 +826,10 @@ begin
   if not Assigned(ARootControl) then
     Exit;
 
-  PosWildcard := Pos('*', AName);
-  if PosWildcard > 1 then
-    Prefix := Copy(AName, 1, PosWildcard - 1)
-  else
-    Prefix := '';
-
-  // 先检查根控件自身
-  if PosWildcard > 1 then
+  if MatchNamedOrClassPattern(AName, ARootControl) then
   begin
-    if Pos(Prefix, ARootControl.Name) = 1 then
-    begin
-      ControlResult.Add(ARootControl);
-      Result := True;
-    end;
-  end
-  else
-  begin
-    if SameText(ARootControl.Name, AName) then
-    begin
-      ControlResult.Add(ARootControl);
-      Result := True;
-    end;
+    ControlResult.Add(ARootControl);
+    Result := True;
   end;
 
   // 递归查找所有子控件
@@ -964,7 +917,7 @@ begin
   end;
 end;
 
-// 根据名称查找弹出菜单，需要 AOwnerName 支持通配符
+// 根据名称查找弹出菜单，需要 AOwnerName 支持通配符及@类名
 function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TComponent;
   const AOwnerName, AMenuName: string): TPopupMenu;
 var
@@ -975,6 +928,7 @@ begin
   if not Assigned(AForm) then
     Exit;
 
+  // 这里找 MenuOwner 支持 @类名，避免 Owner 没名字的情况下找不着
   MenuOwner := FindComponentByNameDeep(AForm, AOwnerName);
   if not Assigned(MenuOwner) and (AForm is TControl) then
     MenuOwner := FindControlByNameDeep(TControl(AForm), AOwnerName);
@@ -984,10 +938,20 @@ begin
   for I := 0 to MenuOwner.ComponentCount - 1 do
   begin
     Component := MenuOwner.Components[I];
-    if (Component is TPopupMenu) and SameText(Component.Name, AMenuName) then
+
+    // 名字匹配，或者没名字但 @类名匹配
+    if Component is TPopupMenu then
     begin
-      Result := TPopupMenu(Component);
-      Exit;
+      if SameText(Component.Name, AMenuName) then
+      begin
+        Result := TPopupMenu(Component);
+        Exit;
+      end
+      else if (Component.Name = '') and (AMenuName = '@' + Component.ClassName) then
+      begin
+        Result := TPopupMenu(Component);
+        Exit;
+      end;
     end;
   end;
 end;
@@ -2618,8 +2582,8 @@ begin
 {$ENDIF}
 {$IFDEF BDS}
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
-  EditControlWrapper.AddEditorChangeNotifier(EditorChange);
 {$ENDIF}
+  EditControlWrapper.AddEditorChangeNotifier(EditorChange);
 
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
 end;
@@ -2628,8 +2592,8 @@ destructor TCnMenuFormTranslator.Destroy;
 begin
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
 
-{$IFDEF BDS}
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChange);
+{$IFDEF BDS}
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
 
@@ -3002,8 +2966,6 @@ begin
 {$ENDIF}
 end;
 
-{$IFDEF BDS}
-
 procedure TCnMenuFormTranslator.EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
 begin
   if ctTopEditorChanged in ChangeType then
@@ -3022,7 +2984,8 @@ begin
   // 检查当前是否切到了 CPU 或其他能翻的 SubView
   C := CnOtaGetCurrentEditWindowSubViewControl;
   if (C <> nil) and
-    (C.ClassNameIs(SCnDisassemblyViewClassName) or C.ClassNameIs(SCnModuleViewClassName)) then
+    (C.ClassNameIs(SCnDisassemblyViewClassName) or C.ClassNameIs(SCnModuleViewClassName)
+    or C.ClassNameIs(SCnDiagramViewFrameClassName)) then
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to ' + C.Name);
@@ -3030,10 +2993,14 @@ begin
     // 静态翻该 SubView 中的右键菜单
     TranslateStaticPopupMenusForContainer(C);
 
-    // 挂接该 SubView 中的右键菜单准备动态翻
+{$IFDEF BDS}
+    // 挂接该 SubView 中的右键菜单准备动态翻，目前只有 BDS 下有
     HookPopupMenuOnSubView(C);
+{$ENDIF}
   end;
 end;
+
+{$IFDEF BDS}
 
 function TCnMenuFormTranslator.TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
 var

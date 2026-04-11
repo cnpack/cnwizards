@@ -165,6 +165,11 @@
       "ItemCaption": [["Case sensitive", "区分大小写"], ["Properties", "属性"], ["Regular expressions", "正则表达式"], ["Whole Words Only", "全字匹配"]]
     },
     {
+      "MenuPath": "DiagramViewFrame.@TModelControl.@TPopupMenu",
+      "ForceEnglish": "FALSE",
+      "ItemCaption": [["Copy", "复制"], ["Cut", "剪切"], ["Delete", "删除"], ["Paste", "粘贴"], ["Select All", "全选"], ["Undo", "撤销"]]
+    },
+    {
       "MenuPath": "DisassemblyView.DisassemblyView.CPUPaneMenu",
       "ForceEnglish": "FALSE",
       "ItemCaption": [["Breakpoint Properties", "断点属性"], ["Caller", "转至调用者"], ["Change Thread", "更换线程"], ["Enabled", "启用"], ["Follow", "跟随移动"], ["Goto Address", "转至地址"], ["Goto Current EIP", "转至当前 EIP"], ["Goto Current RIP", "转至当前 RIP"], ["Mixed", "源码汇编混合显示"], ["New EIP", "将此处设为 EIP"], ["New RIP", "将此处设为 RIP"], ["Previous", "转至前一处"], ["Run to Current", "运行至此处"], ["Search", "查找"], ["Toggle Breakpoint", "切换断点"], ["View FPU", "查看 FPU"], ["View Source", "查看源代码"]]
