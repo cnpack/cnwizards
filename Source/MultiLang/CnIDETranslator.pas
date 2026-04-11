@@ -45,7 +45,7 @@ interface
 
 {$I CnWizards.inc}
 
-{$IFNDEF BDS}
+{$IFNDEF UNICODE}
 //  {$DEFINE ENABLE_RESSTRING_HOOK} // 不完善，暂时屏蔽
 {$ENDIF}
 
@@ -2185,6 +2185,9 @@ begin
           Hook.Hook.HookMenu(PopupMenu);
           Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnMenuFormTranslator.HookPopupMenuOnEditWindow. Hooked Popup ' + PopupMenu.Name);
+{$ENDIF}
         end;
       end;
     end;
@@ -2293,6 +2296,9 @@ begin
           Hook.Hook.HookMenu(PopupMenu);
           Hook.Hook.OnAfterPopup := AfterPopupMenuOnPopup;
           FAttachedPopupMenuHooks.Add(Hook);
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('TCnMenuFormTranslator.HookPopups. Hooked Popup ' + PopupMenu.Name);
+{$ENDIF}
         end;
       end;
     end;
@@ -3618,6 +3624,18 @@ end;
 procedure TCnMenuFormTranslator.MultiLangTranslateObjectProperty(
   AObject: TObject; const PropName: string; var Translate: Boolean);
 begin
+  // 构建事件对话框里的时机相关的 ComBoBox 不能翻译，哪怕没条目也不知怎么会丢 ItemIndex
+  if (Compiler in [cnDelphi2009, cnDelphi2010, cnDelphiXE]) and
+    (PropName = 'Items') and (AObject is TComponent) and
+    AObject.ClassNameIs('TComboBox') and
+    (TComponent(AObject).Name = 'ModeCombobox') and
+    (TComponent(AObject).Owner <> nil) and
+    TComponent(TComponent(AObject).Owner).ClassNameIs('TBuildEventEditor') then
+  begin
+    Translate := False;
+    Exit;
+  end;
+
   // 注意此处不能加 FActive 判断，否则从中翻英时会进不来从而导致该属性被破坏出错
   if FLangTransFlag and ((Compiler = cnDelphi7) or (Compiler >= cnDelphi2007))
     and AObject.ClassNameIs('TTabList') then
