@@ -141,6 +141,9 @@ const
   CN_WIZ_CMD_GEN_MENU            = $CCB + $115;  // 3552
   {* 通知多语插件生成当前窗体的菜单字符串}
 
+  CN_WIZ_CMD_TRANS_CURSHEET      = $CCB + $116;  // 3553
+  {* 通知多语插件翻译当前环境设置对话框里 PropSheetControl 的当前 Page}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type

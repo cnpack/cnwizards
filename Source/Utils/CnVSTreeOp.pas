@@ -472,8 +472,8 @@ begin
     if Translated <> '' then
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('CnVSTOnGetTextHook.DoOnGetText RealTime Translate: "%s" -> "%s"',
-        [string(CellText), Translated]);
+//    CnDebugger.LogFmt('CnVSTOnGetTextHook.DoOnGetText RealTime Translate: "%s" -> "%s"',
+//      [string(CellText), Translated]);
 {$ENDIF}
       CellText := Translated;
     end;

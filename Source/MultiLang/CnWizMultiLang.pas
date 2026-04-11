@@ -1141,7 +1141,7 @@ procedure TCnWizMultiLang.SetExtractorNoNameMode(E: TCnLangStringExtractor;
 begin
   if (F <> nil) and (E <> nil) then
   begin
-    if F.ClassNameIs('TProjectOptionsDialog') {$IFDEF UNCODE} or F.ClassNameIs('TDefaultEnvironmentDialog') {$ENDIF}
+    if F.ClassNameIs('TProjectOptionsDialog') {$IFDEF UNCODE} or F.ClassNameIs(SCnEnvOptionDlgClassName) {$ENDIF}
       or F.ClassNameIs('TDelphiProjectOptionsDialog') or F.ClassNameIs('TCppProjOptsDlg') then
       E.NoNameProcessType := cnptAtClassName
     else

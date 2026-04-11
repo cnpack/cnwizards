@@ -118,6 +118,11 @@ const
   SCnDiagramViewFrameName = 'DiagramViewFrame';
   SCnEditorStatusBarName = 'StatusBar';
 
+  SCnEnvOptionDlgClassName = 'TDefaultEnvironmentDialog';
+  SCnEnvOptionDlgName = 'DefaultEnvironmentDialog';
+  SCnEnvOptionDlgPropSheetControlClassName = 'TPropertySheetControl';
+  SCnEnvOptionDlgPropSheetControlName = 'PropertySheetControl1';
+
 {$IFDEF BDS}
   {$IFDEF BDS4_UP} // BDS 2006 RAD Studio 2007 的标签页类名
   SCnXTabControlClassName = 'TIDEGradientTabSet';   // TWinControl 子类
@@ -143,7 +148,7 @@ const
 
   // 编辑器设置对话框
 {$IFDEF BDS}
-  SCnEditorOptionDlgClassName = 'TDefaultEnvironmentDialog';
+  SCnEditorOptionDlgClassName = 'TDefaultEnvironmentDialog'; // 同时也是工具设置总对话框
   SCnEditorOptionDlgName = 'DefaultEnvironmentDialog';
 {$ELSE} {$IFDEF BCB}
   SCnEditorOptionDlgClassName = 'TCppEditorPropertyDialog';

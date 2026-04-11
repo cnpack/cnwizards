@@ -2924,7 +2924,7 @@ begin
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjectOptionsDialog')
     or Screen.ActiveCustomForm.ClassNameIs('TCppProjOptsDlg')
     or Screen.ActiveCustomForm.ClassNameIs('TProjectOptionsDialog')
-    or Screen.ActiveCustomForm.ClassNameIs('TDefaultEnvironmentDialog')) then
+    or Screen.ActiveCustomForm.ClassNameIs(SCnEnvOptionDlgClassName)) then
   begin
 {$IFDEF UNICODE}
     HookMessagesInControl(Screen.ActiveCustomForm);
@@ -2956,7 +2956,7 @@ begin
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
 {$ENDIF}
 
-        if (Compiler >= cnDelphi2009) and F.ClassNameIs('TDefaultEnvironmentDialog') then
+        if (Compiler >= cnDelphi2009) and F.ClassNameIs(SCnEnvOptionDlgClassName) then
         begin
           // 特殊窗体要等其延迟初始化完毕后再翻译一次
           FTransQueue.Add(F);
@@ -3154,6 +3154,7 @@ procedure TCnMenuFormTranslator.CommandNotify(const Command: Cardinal;
 var
   SL: TStringList;
   Key, Value, Prefix: string;
+  C: TComponent;
 begin
   if Command = CN_WIZ_CMD_INSP_DUMP_HOOK then
   begin
@@ -3252,6 +3253,30 @@ begin
         SL.Free;
       end;
     end;
+  end
+  else if Command = CN_WIZ_CMD_TRANS_CURSHEET then
+  begin
+    if (Screen.ActiveCustomForm <> nil) and (Screen.ActiveCustomForm.ClassNameIs(SCnEnvOptionDlgClassName)) then
+    begin
+      C := Screen.ActiveCustomForm.FindComponent(SCnEnvOptionDlgPropSheetControlName);
+{$IFDEF DEBUG}
+      if C <> nil then
+        CnDebugger.LogFmt('CnIDETranslator Get Command CN_WIZ_CMD_TRANS_CURSHEET. Get %s', [C.ClassName])
+      else
+        CnDebugger.LogMsg('CnIDETranslator Get Command CN_WIZ_CMD_TRANS_CURSHEET. Not Found.');
+{$ENDIF}
+      if (C <> nil) and (C is TPageControl) then
+      begin
+        C := TPageControl(C).ActivePage;
+        if C <> nil then
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('CnIDETranslator Translate Current Sheet %s', [C.ClassName]);
+{$ENDIF}
+          CnLanguageManager.TranslateComponent(C);
+        end;
+      end;
+    end;
   end;
 end;
 
@@ -3329,7 +3354,7 @@ begin
 
 {$IFDEF IDE_OPTION_DYNCREATE}
 
-  if ARootControl.Name = 'PropertySheetControl1' then
+  if ARootControl.Name = SCnEnvOptionDlgPropSheetControlName then
   begin
     if not FpropertySheetControlHook.IsHooked(ARootControl) then
     begin
