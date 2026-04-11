@@ -713,7 +713,7 @@ begin
   Result := nil;
 end;
 
-// 根据名称查找顶层窗体
+// 根据名称查找顶层窗体，如果名称是 Application 则加入 Application
 function TCnMenuFormTranslator.FindScreenFormByName(const AFormName: string; FormResult: TObjectList): Boolean;
 var
   I: Integer;
@@ -721,6 +721,12 @@ var
   Prefix: string;
 begin
   Result := False;
+  if AFormName = 'Application' then
+  begin
+    FormResult.Add(Application);
+    Exit;                       // 不考虑叫 Application 的窗体
+  end;
+
   I := Pos('*', AFormName);
   if I > 1 then
   begin
@@ -917,7 +923,7 @@ begin
   end;
 end;
 
-// 根据名称查找弹出菜单，需要 AOwnerName 支持通配符及@类名
+// 根据名称在指定组件里查找弹出菜单，需要 AOwnerName 支持通配符及@类名
 function TCnMenuFormTranslator.FindPopupMenuByName(const AForm: TComponent;
   const AOwnerName, AMenuName: string): TPopupMenu;
 var
@@ -2008,19 +2014,27 @@ begin
   end;
 end;
 
-// 翻译指定容器的其他静态弹出菜单，MenuPath 采用 Container 的名字
+// 翻译指定容器的其他静态弹出菜单，MenuPath 采用 Container 的名字，也支持 Application
 procedure TCnMenuFormTranslator.TranslateStaticPopupMenusForContainer(Container: TComponent);
 var
   I: Integer;
   S: string;
   MenuPaths: TCn1DStringArray;
 begin
-  if (Container <> nil) and (Container.Name <> '') then
+  S := '';
+  if Container <> nil then
   begin
-    S := Container.Name + '.';
+    if Container = Application then
+      S := 'Application.'
+    else if Container.Name <> '' then
+      S := Container.Name + '.';
+  end;
+
+  if S <> '' then
+  begin
     MenuPaths := GetTranslationMenuPaths(SCN_CATEGORY_POPUPMENUS, SCN_MECHANISM_DIRECTACCESS, S);
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenusForContainer %s Get %d', [Container.Name, Length(MenuPaths)]);
+    CnDebugger.LogFmt('TCnMenuTranslator.TranslateStaticPopupMenusForContainer %s Get %d', [S, Length(MenuPaths)]);
 {$ENDIF}
 
     for I := 0 to Length(MenuPaths) - 1 do
@@ -2249,7 +2263,7 @@ begin
 
       for J := 0 to FS.Count - 1 do
       begin
-        PopupMenu := FindPopupMenuByName(TForm(FS[J]), Names[1], Names[2]);
+        PopupMenu := FindPopupMenuByName(TComponent(FS[J]), Names[1], Names[2]);
         if not Assigned(PopupMenu) then
           Continue;
 
@@ -2996,6 +3010,11 @@ begin
 {$IFDEF BDS}
     // 挂接该 SubView 中的右键菜单准备动态翻，目前只有 BDS 下有
     HookPopupMenuOnSubView(C);
+{$ELSE}
+    // 特殊情况，D7 的图表菜单的 Owner 是 Application。
+    // 本该如此处理，但后来发现该 TPopupActionBar 在右键点击时才创建，于是没用了，代码先留着
+    if C.ClassNameIs(SCnDiagramViewFrameClassName) then
+      TranslateStaticPopupMenusForContainer(Application);
 {$ENDIF}
   end;
 end;
