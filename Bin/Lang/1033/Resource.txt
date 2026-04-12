@@ -2645,6 +2645,7 @@ Make All From Here=Make All From Here
 Make=Make
 Making:=Making:
 Manager=Manager
+Manifest=Manifest
 Manifest file (*.manifest)|*.manifest|Any file (*.*)|*.*=Manifest file (*.manifest)|*.manifest|Any file (*.*)|*.*
 Manual construction of TDeviceInfo is not supported=Manual construction of TDeviceInfo is not supported
 Map file type=Map file type

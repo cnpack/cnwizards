@@ -2645,6 +2645,7 @@ Make All From Here=从此处全部生成
 Make=生成
 Making:=正在生成：
 Manager=管理器
+Manifest=清单
 Manifest file (*.manifest)|*.manifest|Any file (*.*)|*.*=清单文件 (*.manifest)|*.manifest|任何文件 (*.*)|*.*
 Manual construction of TDeviceInfo is not supported=不支持手动构造 TDeviceInfo
 Map file type=Map 文件类型

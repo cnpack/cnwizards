@@ -1527,7 +1527,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpCaret.ControlC
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpDisplay.ControlCollection.Item0.Control.eoFullZoom.Caption=缩放到全屏(&Z)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpDisplay.ControlCollection.Item1.Control.eoShowNavbar.Caption=显示导航工具栏
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpFont.ControlCollection.Item0.Control.lbFontName.Caption=编辑器字体(&F)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpFont.ControlCollection.Item1.Control.lbFontSize.Caption==大小(&S)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpFont.ControlCollection.Item1.Control.lbFontSize.Caption=大小(&S)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpFont.ControlCollection.Item4.Control.lbLineHeight.Caption=行高(&L)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpMargins.ControlCollection.Item0.Control.eoLineOnMargin.Caption=显示右边距(&V)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TEditorDisplay.gpMargins.ControlCollection.Item1.Control.lbRightMargin.Caption=右边距(&M)
