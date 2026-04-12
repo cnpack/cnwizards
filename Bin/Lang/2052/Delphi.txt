@@ -1341,7 +1341,7 @@ TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label1.C
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label10.Caption=单元别名(&A)：
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label15.Caption=调试源路径(&D)：
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label16.Caption=单元输出目录(&U)：
-TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label2.Caption=DC&P 输出目录(&P)：
+TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label2.Caption=DCP 输出目录(&P)：
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label3.Caption=输出目录：
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label4.Caption=搜索路径(&S)：
 TProjectOptionsDialog.PropSheetControl.@TPkgDirectoriesConditionalsPage.Label8.Caption=条件定义(&C)：

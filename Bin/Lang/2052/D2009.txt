@@ -105,7 +105,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.pcbD
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.pcbSnapToGrid.Caption=对齐网格(&P)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.AutomaticallyQuoteStrings.Caption=自动引用字符串(&Q)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.AutoSaveFiles.Caption=自动保存文件(&O)
-TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbExternalEditor.Caption= 外部编辑器 
+TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbExternalEditor.Caption= 外部编辑器(&E)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.HideEmptyItems.Caption=隐藏空项目(&I)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.UseNewlyTranslated.Caption=使用"新建翻译"状态(&U)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITERepositoryOptionPage.DuplicateActionGroup.Caption= 重复操作 

@@ -1388,7 +1388,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.GridP
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.GridPanel1.ControlCollection.Item1.Control.rgResumeOptions.Caption= 恢复时 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.GridPanel1.ControlCollection.Item1.Control.rgResumeOptions.Items.Text=运行已处理的(&R)<BR>运行未处理的(&U)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.Label1.Caption=异常(&E)：
-TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.Label2.Caption=恢复时(&R)：
+TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.Label2.Caption=恢复时：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.RemoveExButton.Caption=移除(&M)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.rgHandledBy.Items.Text=调试器(&D)<BR>用户程序(&P)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDebuggerExceptionOptions.rgResumeOptions.Items.Text=运行已处理的(&R)<BR>运行未处理的(&U)
@@ -1776,7 +1776,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TITEColorOptionPage.ElementLabe
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEColorOptionPage.SampleGroupBox.Caption=示例
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFontOptionPage.Caption=翻译工具选项。字体
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFontOptionPage.FontButton.Caption=字体(&F)...
-TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFontOptionPage.GridFontsGroup.Caption= 网格字体 
+TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFontOptionPage.GridFontsGroup.Caption= 网格字体(&G) 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFontOptionPage.GridFontsSampleLabel.Caption=示例：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.Caption=翻译工具选项。窗体设计器
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.gbFormDesigner.Caption= 窗体设计器 
@@ -1788,7 +1788,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TITEFormDesignerOptionPage.lbGr
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.AutoCompileProject.Caption=自动编译工程(&C)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.AutoQueryRepository.Caption=自动查询存储库(&A)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.Caption=翻译工具选项
-TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbExternalEditor.Caption= 外部编辑器 
+TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbExternalEditor.Caption= 外部编辑器(&E)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbMisc.Caption= 杂项 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.gbTM.Caption= 外部翻译管理器 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TITEMainOptionPage.GridPanel1.ControlCollection.Item0.Control.AutoSaveFiles.Caption=自动保存文件(&O)
@@ -2351,8 +2351,8 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOp
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.bAddOverride.Caption=添加系统覆盖(&O)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.DeleteAction.Caption=删除(&D)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.EditAction.Caption=编辑(&E)...
-TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.GridPanel1.ControlCollection.Item0.Control.GroupBox1.Caption= 系统变量 
-TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.GridPanel1.ControlCollection.Item1.Control.GroupBox2.Caption= 用户覆盖 
+TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.GridPanel1.ControlCollection.Item0.Control.GroupBox1.Caption= 系统变量(&S)
+TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.GridPanel1.ControlCollection.Item1.Control.GroupBox2.Caption= 用户覆盖(&U)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.NewAction.Caption=新建(&N)...
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.SystemVariablesListView.Columns.Item0.Caption=变量
 TDefaultEnvironmentDialog.PropertySheetControl1.@TVariableOptionsPage.VariableOptionsFrame.SystemVariablesListView.Columns.Item1.Caption=值

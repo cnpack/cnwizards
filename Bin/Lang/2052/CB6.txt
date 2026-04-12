@@ -275,10 +275,10 @@ TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbInstru
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbInstruction486.Caption=i&486
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbInstructionPentium.Caption=&Pentium
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbInstructionPentiumPro.Caption=Pentium P&ro
-TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangANSI.Caption=ANSI(&I)
-TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangBorland.Caption=Borland(&L)
-TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangKnR.Caption=K&R(&K)
-TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangUNIX.Caption=Unix V(&X)
+TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangANSI.Caption=ANS&I
+TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangBorland.Caption=Bor&land
+TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangKnR.Caption=&K && R
+TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbLangUNIX.Caption=Uni&x V
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbRegisterAuto.Caption=自动(&A)
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbRegisterKeyword.Caption=寄存器关键字(&Y)
 TProjectOptionsDialog.PropSheetControl.@TCppAdvancedCompilerOptionsPage.rbRegisterNone.Caption=无(&N)
