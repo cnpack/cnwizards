@@ -1432,6 +1432,7 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TDelphiOptions.Label1.Caption=D
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDelphiOptions.Label2.Caption=Please select an option on the left.
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.Caption=High DPI
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.cbScaleGridSize.Caption=Scale grid size / snap tolerance to design PPI *
+TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.chbSave96.Caption=Save in 96 DPI
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.lbCustomPPI.Caption=Custom Design PPI
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.lbDesignerDPIMode.Caption=VCL Designer High DPI mode *
 TDefaultEnvironmentDialog.PropertySheetControl1.@TDesignerHighDPIPage.lbNotSupportedByFireMonkey.Caption=(*) Feature not supported by FireMonkey
