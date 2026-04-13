@@ -1747,6 +1747,8 @@ var
   SCnUsesToolsProjImplUseMenuHint: string = 'Uses One Unit in Implementation in Project Files';
   SCnUsesToolsProjImplPrompt: string = 'Enter Unit Name to be Used in All Project Units:';
   SCnUsesToolsProjImplCountFmt: string = '%d Inserted.';
+  SCnUsesToolsProjImplCountErrFmt: string = '%d Inserted. %d Failed.' + #13#10#13#10 + 'Do you want to view log?';
+  SCnUsesToolsProjImplFailedFiles: string = 'Failed Files:';
   SCnUsesToolsProjImplErrorUnit: string = 'Invalid Unit Name!';
   SCnUsesToolsProjImplErrorSource: string = 'NO Project or Source Files!';
 

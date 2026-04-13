@@ -1400,10 +1400,13 @@ begin
   TranslateStr(SCnUsesUnitAnalyzeWaiting, 'SCnUsesUnitAnalyzeWaiting');
   TranslateStr(SCnUsesUnitFromIdentErrorFmt, 'SCnUsesUnitFromIdentErrorFmt');
 
+  // CnProjImplUse
   TranslateStr(SCnUsesToolsProjImplUseMenuCaption, 'SCnUsesToolsProjImplUseMenuCaption');
   TranslateStr(SCnUsesToolsProjImplUseMenuHint, 'SCnUsesToolsProjImplUseMenuHint');
   TranslateStr(SCnUsesToolsProjImplPrompt, 'SCnUsesToolsProjImplPrompt');
   TranslateStr(SCnUsesToolsProjImplCountFmt, 'SCnUsesToolsProjImplCountFmt');
+  TranslateStr(SCnUsesToolsProjImplCountErrFmt, 'SCnUsesToolsProjImplCountErrFmt');
+  TranslateStr(SCnUsesToolsProjImplFailedFiles, 'SCnUsesToolsProjImplFailedFiles');
   TranslateStr(SCnUsesToolsProjImplErrorUnit, 'SCnUsesToolsProjImplErrorUnit');
   TranslateStr(SCnUsesToolsProjImplErrorSource, 'SCnUsesToolsProjImplErrorSource');
 

@@ -1962,9 +1962,9 @@ procedure TCnUsesToolsWizard.ProjImplExecute;
 const
   DEF_UNIT = 'CnDebug';
 var
-  I, C: Integer;
+  I, C, L: Integer;
   U: string;
-  F: TStringList;
+  F, Logs: TStringList;
 
   function ProcessFile(const FileName: string; const AUnit: string): Boolean;
   var
@@ -2055,6 +2055,7 @@ begin
   if FProjImplUnit = '' then
     FProjImplUnit := DEF_UNIT;
 
+  Logs := nil;
   U := FProjImplUnit;
   if CnWizInputQuery(SCnInformation, SCnUsesToolsProjImplPrompt, U) then
   begin
@@ -2075,14 +2076,36 @@ begin
       end;
 
       C := 0;
+      L := 0;
       for I := 0 to F.Count - 1 do
       begin
         if ProcessFile(F[I], FProjImplUnit) then
-          Inc(C);
+          Inc(C)
+        else
+        begin
+          if Logs = nil then
+          begin
+            Logs := TStringList.Create;
+            Logs.Add(SCnUsesToolsProjImplFailedFiles);
+          end;
+          Logs.Add(F[I]);
+          Inc(L);
+        end;
       end;
 
-      InfoDlg(Format(SCnUsesToolsProjImplCountFmt, [C]));
+      if L = 0 then
+        InfoDlg(Format(SCnUsesToolsProjImplCountFmt, [C]))
+      else
+      begin
+        if QueryDlg(Format(SCnUsesToolsProjImplCountErrFmt, [C, L])) then
+        begin
+          U := GetWindowsTempPath + 'CnUsesResult.txt';
+          Logs.SaveToFile(U);
+          RunFile(U);
+        end;
+      end;
     finally
+      Logs.Free;
       F.Free;
     end;
   end;
