@@ -2073,7 +2073,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TPasTypeLibOptions.rgSafeCallFu
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.Caption=工程升级
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.cbDontShowAgain.Caption=应用设置而不提示(&A) 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.GroupBox1.Caption=升级工程时要执行的操作
-TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.Label1.Caption=给备份工程名称加上后缀(&X)：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.leBackupSuffix.SubLabel.Caption=备份工程名称的后缀(&X)：
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbBackupOld.Caption=转换并创建旧工程的备份(&B)
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbNoBackup.Caption=就地转换（无备份）(&C)

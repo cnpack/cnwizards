@@ -2073,7 +2073,6 @@ TDefaultEnvironmentDialog.PropertySheetControl1.@TPasTypeLibOptions.rgSafeCallFu
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.Caption=Project Upgrading
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.cbDontShowAgain.Caption=&Apply settings without prompting 
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.GroupBox1.Caption=Action to take when upgrading projects
-TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.Label1.Caption=Suffi&x for backup project name:
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.leBackupSuffix.SubLabel.Caption=Suffi&x for backup project name:
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbBackupOld.Caption=Convert and create a &backup of the old project
 TDefaultEnvironmentDialog.PropertySheetControl1.@TProjectUpgradeEnvPage.rbNoBackup.Caption=&Convert in place (no backup)
