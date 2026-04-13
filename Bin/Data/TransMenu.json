@@ -162,7 +162,7 @@
     {
       "MenuPath": "DebugLogView.DebugLogView.pmSearch",
       "ForceEnglish": "FALSE",
-      "ItemCaption": [["Case sensitive", "区分大小写"], ["Properties", "属性"], ["Regular expressions", "正则表达式"], ["Whole Words Only", "全字匹配"]]
+      "ItemCaption": [["Case sensitive", "区分大小写"], ["Event Log Options", "事件日志选项"], ["Properties", "属性"], ["Regular expressions", "正则表达式"], ["Whole Words Only", "全字匹配"]]
     },
     {
       "MenuPath": "DiagramViewFrame.@TModelControl.@TPopupMenu",
@@ -307,7 +307,7 @@
     {
       "MenuPath": "ModulesView.ModulesView.SourcePopupMenu",
       "ForceEnglish": "FALSE",
-      "ItemCaption": [["Edit Source", "编辑源码"], ["View Source", "查看源码"]]
+      "ItemCaption": [["Edit Source", "编辑源代码"], ["View Source", "查看源代码"]]
     },
     {
       "MenuPath": "ObjectTreeView.ObjectTreeView.LocalPopupMenu",
@@ -315,9 +315,19 @@
       "ItemCaption": [["Dockable", "可停靠"], ["Help", "帮助"], ["Hide", "隐藏"], ["Local Menu", "本地菜单"], ["Stay on Top", "保持置顶"]]
     },
     {
+      "MenuPath": "PackageEditorForm.PackageEditorForm.ToolbarPopupMenu",
+      "ForceEnglish": "FALSE",
+      "ItemCaption": [["Text Labels", "文本标签"]]
+    },
+    {
       "MenuPath": "ProjectManagerForm.ProjectManagerForm.MiscMenu",
       "ForceEnglish": "FALSE",
       "ItemCaption": [["Auto Collapse", "自动折叠"], ["Auto Sort", "自动排序"], ["Auto Track", "自动跟踪"], ["Code Insight Activity", "代码洞察活动"], ["Collapse", "折叠"], ["Default Sort Order", "默认排序顺序"], ["Directory (Flat)", "目录(平铺)"], ["Directory (Nested)", "目录(嵌套)"], ["Dockable", "可停靠"], ["Expand", "展开"], ["List", "列表"], ["Modified Date", "修改日期"], ["Name", "名称"], ["Off", "关闭"], ["On", "开启"], ["Path", "路径"], ["Show Path", "显示路径"], ["Show Project Output", "显示工程输出"], ["Sort Projects By", "工程排序方式"], ["Sorting", "排序"], ["Status Bar", "状态栏"], ["Stay on Top", "保持置顶"], ["Type", "类型"], ["Views", "视图"]]
+    },
+    {
+      "MenuPath": "ProjectManagerForm.ProjectManagerForm.pmSearch",
+      "ForceEnglish": "FALSE",
+      "ItemCaption": [["Case sensitive", "区分大小写"], ["Regular expressions", "正则表达式"], ["Whole Words Only", "全字匹配"]]
     },
     {
       "MenuPath": "ProjectManagerForm.ProjectManagerForm.SortMenu",
@@ -447,12 +457,17 @@
     {
       "MenuPath": "Modules.Modules.ScopePopupMenu",
       "ForceEnglish": "FALSE",
-      "ItemCaption": [["Browse Class", "浏览类"], ["Edit Source", "编辑源码"]]
+      "ItemCaption": [["Browse Class", "浏览类"], ["Edit Source", "编辑源代码"]]
     },
     {
       "MenuPath": "Modules.Modules.SourcePopupMenu",
       "ForceEnglish": "FALSE",
-      "ItemCaption": [["Edit Source", "编辑源码"], ["View Source", "查看源码"]]
+      "ItemCaption": [["Edit Source", "编辑源代码"], ["View Source", "查看源代码"]]
+    },
+    {
+      "MenuPath": "PackageEditorForm.PackageEditorForm.PopupMenu1",
+      "ForceEnglish": "FALSE",
+      "ItemCaption": [["Add", "添加"], ["Add Item", "添加"], ["Add to Project Group", "添加至工程组"], ["Build", "构建"], ["Build Package", "构建包"], ["Compile", "编译"], ["Dockable", "可停靠"], ["Install", "安装"], ["Open", "打开"], ["Options", "选项"], ["Remove File", "移除文件"], ["Remove From Project", "从工程移除"], ["Remove Item", "移除文件"], ["Save", "保存"], ["Save As", "另存为"], ["Status Bar", "状态栏"], ["Toolbar", "工具栏"], ["View Item", "查看"], ["View Source", "查看源文件"]]
     },
     {
       "MenuPath": "ProjectManagerForm.ProjectManagerForm.FormPopupMenu",
