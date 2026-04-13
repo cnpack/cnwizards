@@ -3237,6 +3237,7 @@ TGalleryBrowseDlg.RInherit.Caption=&Inherit
 TGalleryBrowseDlg.RInherit.Hint=Make an Inherited Form from Object
 TGalleryBrowseDlg.RReference.Caption=&Use
 TGalleryBrowseDlg.RReference.Hint=Add Object to Project
+TGalleryBrowseDlg.TemplateButton.Caption=Template Libraries
 TGalTemplateLibsDlg.Add.Caption=&Add..
 TGalTemplateLibsDlg.CancelBtn.Caption=Cancel
 TGalTemplateLibsDlg.Caption=Template Libraries

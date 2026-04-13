@@ -3237,6 +3237,7 @@ TGalleryBrowseDlg.RInherit.Caption=继承(&I)
 TGalleryBrowseDlg.RInherit.Hint=从对象创建继承窗体
 TGalleryBrowseDlg.RReference.Caption=使用(&U)
 TGalleryBrowseDlg.RReference.Hint=将对象添加到工程
+TGalleryBrowseDlg.TemplateButton.Caption=模板库
 TGalTemplateLibsDlg.Add.Caption=添加(&A)..
 TGalTemplateLibsDlg.CancelBtn.Caption=取消(&C)
 TGalTemplateLibsDlg.Caption=模板库
