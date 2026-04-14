@@ -116,6 +116,7 @@ const
   SCnModuleViewName = 'Modules';
   SCnDiagramViewFrameClassName = 'TDiagramViewFrame';
   SCnDiagramViewFrameName = 'DiagramViewFrame';
+  SCnFileHistoryFrameClassName = 'TFileHistoryFrame';
   SCnEditorStatusBarName = 'StatusBar';
 
   SCnEnvOptionDlgClassName = 'TDefaultEnvironmentDialog';
