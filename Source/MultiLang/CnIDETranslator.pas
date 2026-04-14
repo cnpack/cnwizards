@@ -2971,6 +2971,14 @@ end;
 procedure TCnMenuFormTranslator.ActiveFormChanged(Sender: TObject);
 var
   F: TCustomForm;
+{$IFDEF IDE_HAS_GETIT}
+  I, J: Integer;
+  C: TComponent;
+  Cat: TCategoryButtons;
+  Category: TButtonCategory;
+  Button: TButtonItem;
+  S: string;
+{$ENDIF}
 begin
   TranslateStaticPopupMenus(True);
   HookPopupMenus(True);
@@ -3007,16 +3015,6 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
 {$ENDIF}
-        CnLanguageManager.TranslateForm(F, True);
-
-        // 只改 Modal 窗体的字体
-        if WizOptions.UseChineseFont and (fsModal in F.FormState) then
-          F.Font := WizOptions.ChineseFont;
-        if F.Visible then
-          F.Update;
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
-{$ENDIF}
 
         if (Compiler >= cnDelphi2009) and F.ClassNameIs(SCnEnvOptionDlgClassName) then
         begin
@@ -3025,7 +3023,46 @@ begin
           CnWizNotifierServices.ExecuteOnApplicationIdle(TranslateQueue);
         end
         else
+        begin
+          CnLanguageManager.TranslateForm(F, True);
+
+          // 只改 Modal 窗体的字体
+          if WizOptions.UseChineseFont and (fsModal in F.FormState) then
+            F.Font := WizOptions.ChineseFont;
+          if F.Visible then
+            F.Update;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. Translate OK ' + F.ClassName);
+{$ENDIF}
           FTranedCompList.Add(F);
+        end;
+
+{$IFDEF IDE_HAS_GETIT}
+        // 针对 TGetItPage 窗体，遍历翻译其叫 CategoryPane 的 TCategoryButtons
+        if F.ClassNameIs('TGetItPage') then
+        begin
+          C := F.FindComponent('CategoryPane');
+          if (C <> nil) and (C is TCategoryButtons) then
+          begin
+            Cat := TCategoryButtons(C);
+            for I := 0 to Cat.Categories.Count - 1 do
+            begin
+              Category := Cat.Categories[I];
+              S := CnLanguageManager.Translate(Category.Caption);
+              if S <> '' then
+                Category.Caption := S;
+
+              for J := 0 to Category.Items.Count - 1 do
+              begin
+                Button := Category.Items[J];
+                S := CnLanguageManager.Translate(Button.Caption);
+                if S <> '' then
+                  Button.Caption := S;
+              end;
+            end;
+          end;
+        end;
+{$ENDIF}
       end
       else
       begin
@@ -3748,20 +3785,6 @@ begin
     and AObject.ClassNameIs('TTabList') then
   begin
     Translate := False;
-
-// 只能挨个翻，而且只能根据值翻，不能 Text 整体赋值，否则会破坏其 Objects 导致出错
-// 但这样翻似乎也会出错，先屏蔽
-//    if CanTranslateToChinese and (AObject is TStrings) then
-//    begin
-//      SL := TStrings(AObject);
-//      for I := 0 to SL.Count - 1 do
-//      begin
-//        S := CnLanguageManager.TranslateString(SL[I]);
-//        if S <> '' then
-//          SL[I] := S;
-//      end;
-//    end;
-
     FLangTransFlag := False;
   end;
 end;
