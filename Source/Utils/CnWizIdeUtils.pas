@@ -117,6 +117,8 @@ const
   SCnDiagramViewFrameClassName = 'TDiagramViewFrame';
   SCnDiagramViewFrameName = 'DiagramViewFrame';
   SCnFileHistoryFrameClassName = 'TFileHistoryFrame';
+  SCnWelcomePageFrameClassName = 'TWelcomePageFrame';
+  SCnTranslationEditorFrameClassName = 'TTranslationEditorFrame';
   SCnEditorStatusBarName = 'StatusBar';
 
   SCnEnvOptionDlgClassName = 'TDefaultEnvironmentDialog';

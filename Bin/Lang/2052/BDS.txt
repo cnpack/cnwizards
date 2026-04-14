@@ -1013,7 +1013,7 @@ TDelphiProjectOptionsDialog.PropertySheetControl1.@TPackageInstall.RuntimePackag
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.Caption=编译器
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbAssertions.Caption=断言(&E)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbAssignConst.Caption=可赋值类型常量(&B)
-TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbDebugDCU.Caption=使用调试 DCU(&U)
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbDebugDCU.Caption=使用调试 DC&U
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbDebugInfo.Caption=调试信息(&D)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbDefinitionsOnly.Caption=仅定义(&Y)
 TDelphiProjectOptionsDialog.PropertySheetControl1.@TPasCompilerOptionsPage.cbExtSyntax.Caption=扩展语法(&X)
@@ -1962,7 +1962,7 @@ TUsagesView.Caption=查找使用位置
 TVariableEntry.bCancel.Caption=取消
 TVariableEntry.bHelp.Caption=帮助
 TVariableEntry.bOK.Caption=确定
-TVariableEntry.Caption=新建用户变量
+TVariableEntry.Caption=新建或修改变量
 TVariableEntry.Label1.Caption=变量名称(&N)：
 TVariableEntry.Label2.Caption=变量值(&V)：
 TViewDialog.CancelButton.Caption=取消
