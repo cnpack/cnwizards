@@ -203,9 +203,15 @@ begin
         if SortDown then
           Result := -Result;
       end;
-    3, 4:
+    3:
       begin
         Result := CompareValue(Info1.Size, Info2.Size);
+        if SortDown then
+          Result := -Result;
+      end;
+    4:
+      begin
+        Result := CompareStr(Info1.LastModified, Info2.LastModified);
         if SortDown then
           Result := -Result;
       end;
