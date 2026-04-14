@@ -2085,8 +2085,11 @@ end;
 
 procedure TCnMenuFormTranslator.TranslateStaticEditorSubViews;
 var
-  I: Integer;
+  I, J: Integer;
   C: TWinControl;
+  T: TControl;
+  TabSet: TTabSet;
+  Captions: TCn2DStringArray;
 begin
   C := CnOtaGetCurrentEditWindowSubViewContainer;
   if C = nil then
@@ -2103,7 +2106,6 @@ begin
 {$ENDIF}
       // 翻 CPU 中的右键菜单，界面没啥东西因而不用翻
       TranslateStaticPopupMenusForContainer(C.Controls[I]);
-      Exit;
     end
     else if C.Controls[I].ClassNameIs(SCnFileHistoryFrameClassName) and (C.Controls[I] is TFrame) then
     begin
@@ -2111,6 +2113,20 @@ begin
       CnDebugger.LogMsg('TCnMenuFormTranslator TranslateStaticEditorSubViews: History Frame');
 {$ENDIF}
       CnLanguageManager.TranslateFrame(TFrame(C.Controls[I]));
+
+      // 针对历史 Frame 翻译其 Tab
+      T := FindControlByNameDeep(C.Controls[I], 'TabSet1');
+      if Assigned(T) then
+      begin
+        Captions := GetTranslationItemCaptions(SCN_CATEGORY_SCREENFORMS,
+          SCN_MECHANISM_DIRECTACCESS, 'EditWindow_*.FileHistoryFrame.TabSet1');
+        if Length(Captions) > 0 then
+        begin
+          TabSet := TTabSet(T);
+          for J := 0 to TabSet.Tabs.Count - 1 do
+            TabSet.Tabs[J] := ReturnTranslateCaption(TabSet.Tabs[J], Captions);
+        end;
+      end;
     end;
   end;
 end;
