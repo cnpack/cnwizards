@@ -3507,35 +3507,36 @@
 {$ENDIF}
 
 {$IFDEF DELPHI104_SYDNEY_UP}
-  {$DEFINE IDE_SUPPORT_LSP}             // Sydney 10.4 或以上支持 LSP 语言服务器
-  {$DEFINE IDE_HAS_ERRORINSIGHT}        // Sydney 10.4.2 或以上支持编辑器侧栏的 ErrorInsight
-  {$DEFINE IDE_EDITOR_CUSTOM_COLUMN}    // Sydney 10.4 或以上编辑器左侧 Gutter 支持自定义，但没接口操纵，约等于无用
-  {$DEFINE IDE_SWITCH_BUG}              // Sydney 10.4.2 存在打开文件时莫名其妙切换到后台的 Bug
+  {$DEFINE IDE_SUPPORT_LSP}             // Sydney 10.4 及以上支持 LSP 语言服务器
+  {$DEFINE IDE_HAS_ERRORINSIGHT}        // Sydney 10.4.2 及以上支持编辑器侧栏的 ErrorInsight
+  {$DEFINE IDE_EDITOR_CUSTOM_COLUMN}    // Sydney 10.4 及以上编辑器左侧 Gutter 支持自定义，但没接口操纵，约等于无用
+  {$DEFINE IDE_SWITCH_BUG}              // Sydney 10.4.2 及以上存在打开文件时莫名其妙切换到后台的 Bug
 {$ENDIF}
 
 {$IFDEF DELPHI103_RIO_UP}
-  {$DEFINE SUPPORT_MACOS64}             // Rio 10.3.2 或以上支持 64 位 MacOS
-  {$DEFINE IDE_CATALOG_VIRTUALTREE}     // Rio 10.3 的设置等对话框左侧目录树从 TreeView 改成了 VirtualStringTree
+  {$DEFINE SUPPORT_MACOS64}             // Rio 10.3.2 及以上支持 64 位 MacOS
+  {$DEFINE IDE_CATALOG_VIRTUALTREE}     // Rio 10.3 及以上的设置等对话框左侧目录树从 TreeView 改成了 VirtualStringTree
 {$ENDIF}
 
 {$IFDEF DELPHI102_TOKYO_UP}
-  {$DEFINE SUPPORT_LINUX64}             // Tokyo 10.2 或以上支持 Linux 64 位 Server
-  {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 或以上支持 IDE 主题切换
+  {$DEFINE SUPPORT_LINUX64}             // Tokyo 10.2 及以上支持 Linux 64 位 Server
+  {$DEFINE IDE_SUPPORT_THEMING}         // Tokyo 10.2.2 及以上支持 IDE 主题切换
 {$ENDIF}
 
 {$IFDEF DELPHI101_BERLIN_UP}
-  {$DEFINE TSTRINGS_HAS_OPTIONS}        // 101B TStrings 有 Options 属性控制 Text 末尾的回车换行要不要去掉等
-  {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}   // 101B Re-opens "Embedded Designer" Option and Gives a New Container.
+  {$DEFINE TSTRINGS_HAS_OPTIONS}        // 101B 及以上的 TStrings 有 Options 属性控制 Text 末尾的回车换行要不要去掉等
+  {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}   // 101B 及以上重新开启了 "Embedded Designer" 选项并设了个新 Container.
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
-  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S 开始有高亮划线 "Structual Highlight" 的功能
-  {$DEFINE IDE_HAS_HIDE_NONVISUAL}      // 10S 开始有隐藏不可视组件 "Hide NonVisual" 的功能
+  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S 及以上有高亮划线 "Structual Highlight" 的功能
+  {$DEFINE IDE_HAS_HIDE_NONVISUAL}      // 10S 及以上有隐藏不可视组件 "Hide NonVisual" 的功能
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
   {$DEFINE INIFILE_READWRITE_INTEGER}   // XE8 及以上的 IniFile 的 ReadInteger 和 WriteInteger 参数开始由 Longint 改为 Integer
   {$DEFINE IDE_INTEGRATE_CASTALIA}      // XE8/10S 及以上集成了 Castalia.
+  {$DEFINE IDE_HAS_GETIT}               // XE8 及以上有 GetIt 包管理器
 {$ENDIF}
 
 {$IFDEF DELPHIXE7_UP}
