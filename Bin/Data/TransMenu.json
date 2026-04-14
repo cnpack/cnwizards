@@ -113,6 +113,11 @@
   },
   "ScreenForms": {
     "DirectAccess": [{
+      "MenuPath": "EditWindow_*.FileHistoryFrame.TabSet1",
+      "ForceEnglish": "True",
+      "ItemCaption": [["Contents", "内容"], ["Diff", "差异"], ["Differences", "差异"], ["Info", "信息"], ["Information", "信息"]]
+    },
+    {
       "MenuPath": "EditWindow_*.ViewBar",
       "ForceEnglish": "True",
       "ItemCaption": [["Code", "代码"], ["Design", "设计"], ["Diagram", "图表"], ["History", "历史"]]
