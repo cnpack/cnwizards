@@ -199,9 +199,9 @@ type
     procedure TranslateMainMenuProjectItems;
     {* 翻译主菜单中工程相关的动态条目，注意需在当前工程切换时通知调用}
 
-    procedure TranslateEditorTab;
+    procedure TranslateStaticEditorTab;
     {* 单独翻译编辑器 Tab，内部不能控制防重}
-    procedure TranslateEditorSubViews;
+    procedure TranslateStaticEditorSubViews;
     {* 单独翻译编辑器的 SubView 们，目前只翻译 CPU}
 
     procedure HookMainMenuDynamicItems;
@@ -277,6 +277,7 @@ type
       const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
 
     procedure CheckSubViewPopupMenus(Sender: TObject);
+    procedure CheckSubViewTranslation(Sender: TObject);
     procedure EditorChange(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
 {$IFDEF BDS}
     function TranslateTreeViewCatalog(AComponent: TComponent): Boolean;
@@ -1020,7 +1021,7 @@ procedure TCnMenuFormTranslator.SourceEditorNotify(SourceEditor: TCnSourceEditor
   NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView {$ENDIF});
 begin
   if NotifyType = setEditViewActivated then
-    TranslateEditorTab;
+    TranslateStaticEditorTab;
 end;
 
 {$ENDIF}
@@ -2046,7 +2047,7 @@ begin
   end;
 end;
 
-procedure TCnMenuFormTranslator.TranslateEditorTab;
+procedure TCnMenuFormTranslator.TranslateStaticEditorTab;
 var
   I, J: Integer;
   FS: TObjectList;
@@ -2076,27 +2077,13 @@ begin
             TabSet.Tabs[J] := ReturnTranslateCaption(TabSet.Tabs[J], Captions);
         end;
       end;
-
-      // 重写编辑区历史窗口内的选项卡
-      Control := FindControlByNameDeep(Form, 'TabSet1');
-      if Assigned(Control) then
-      begin
-        Captions := GetTranslationItemCaptions(SCN_CATEGORY_SCREENFORMS,
-          SCN_MECHANISM_DIRECTACCESS, 'EditWindow_*.TabSet1');
-        if Length(Captions) > 0 then
-        begin
-          TabSet := TTabSet(Control);
-          for J := 0 to TabSet.Tabs.Count - 1 do
-            TabSet.Tabs[J] := ReturnTranslateCaption(TabSet.Tabs[J], Captions);
-        end;
-      end;
     end;
   finally
     FS.Free;
   end;
 end;
 
-procedure TCnMenuFormTranslator.TranslateEditorSubViews;
+procedure TCnMenuFormTranslator.TranslateStaticEditorSubViews;
 var
   I: Integer;
   C: TWinControl;
@@ -2107,16 +2094,23 @@ begin
 
   for I := 0 to C.ControlCount - 1 do
   begin
-    // TODO: 翻各种现存的 SubView 的 Frame，记得判断是否已翻译，并去掉下面的 Exit
+    // TODO: 翻各种现存的、非动态创建的 SubView 的 Frame，记得判断是否已翻译，并去掉下面的 Exit
 
     if C.Controls[I].ClassNameIs(SCnDisassemblyViewClassName) then
     begin
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('TCnMenuFormTranslator TranslateEditorSubViews: CPU PopupMenu');
 {$ENDIF}
-      // 翻 CPU 中的右键菜单
+      // 翻 CPU 中的右键菜单，界面没啥东西因而不用翻
       TranslateStaticPopupMenusForContainer(C.Controls[I]);
       Exit;
+    end
+    else if C.Controls[I].ClassNameIs(SCnFileHistoryFrameClassName) and (C.Controls[I] is TFrame) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('TCnMenuFormTranslator TranslateStaticEditorSubViews: History Frame');
+{$ENDIF}
+      CnLanguageManager.TranslateFrame(TFrame(C.Controls[I]));
     end;
   end;
 end;
@@ -2815,8 +2809,8 @@ begin
   HookMainMenuDynamicItems;
   HookPopupMenus;
 
-  TranslateEditorTab;
-  TranslateEditorSubViews;
+  TranslateStaticEditorTab;
+  TranslateStaticEditorSubViews;
 
 {$IFDEF COMPILER7_UP}
   CheckActionMainMenuBarPersistentHotKeys;
@@ -2876,8 +2870,8 @@ begin
         LoadAdditionalLangFile(GetAdditionalLangID);
         TranslateAllExistingForms;
 
-        TranslateEditorTab;
-        TranslateEditorSubViews;
+        TranslateStaticEditorTab;
+        TranslateStaticEditorSubViews;
       end;
 
       // 卸载事件挂钩
@@ -3040,6 +3034,7 @@ begin
     CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed.');
 {$ENDIF}
     CnWizNotifierServices.ExecuteOnApplicationIdle(CheckSubViewPopupMenus);
+    CnWizNotifierServices.ExecuteOnApplicationIdle(CheckSubViewTranslation);
   end;
 end;
 
@@ -3054,7 +3049,7 @@ begin
     or C.ClassNameIs(SCnDiagramViewFrameClassName)) then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('TCnMenuFormTranslator TopEditor Changed. Switch to ' + C.Name);
+    CnDebugger.LogMsg('TCnMenuFormTranslator CheckSubViewPopupMenus. Switch to ' + C.Name);
 {$ENDIF}
     // 静态翻该 SubView 中的右键菜单
     TranslateStaticPopupMenusForContainer(C);
@@ -3068,6 +3063,39 @@ begin
     if C.ClassNameIs(SCnDiagramViewFrameClassName) then
       TranslateStaticPopupMenusForContainer(Application);
 {$ENDIF}
+  end;
+end;
+
+procedure TCnMenuFormTranslator.CheckSubViewTranslation(Sender: TObject);
+var
+  I: Integer;
+  C: TControl;
+  Captions: TCn2DStringArray;
+  TabSet: TTabSet;
+begin
+  // 检查当前是否切到了 CPU 或其他能翻的 SubView
+  C := CnOtaGetCurrentEditWindowSubViewControl;
+  if (C <> nil) and (C is TFrame) and C.ClassNameIs(SCnFileHistoryFrameClassName) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('TCnMenuFormTranslator CheckSubViewTranslation. Switch to ' + C.Name);
+{$ENDIF}
+    // 翻该 SubView
+    CnLanguageManager.TranslateFrame(TFrame(C));
+
+    // 针对历史 Frame 翻译其 Tab
+    C := FindControlByNameDeep(C, 'TabSet1');
+    if Assigned(C) then
+    begin
+      Captions := GetTranslationItemCaptions(SCN_CATEGORY_SCREENFORMS,
+        SCN_MECHANISM_DIRECTACCESS, 'EditWindow_*.FileHistoryFrame.TabSet1');
+      if Length(Captions) > 0 then
+      begin
+        TabSet := TTabSet(C);
+        for I := 0 to TabSet.Tabs.Count - 1 do
+          TabSet.Tabs[I] := ReturnTranslateCaption(TabSet.Tabs[I], Captions);
+      end;
+    end;
   end;
 end;
 
@@ -3627,7 +3655,7 @@ begin
       end;
     end;
 
-    TranslateEditorTab;
+    TranslateStaticEditorTab;
     FAlreadyChinese := True;
   end
   else if FAlreadyChinese then // 其他情况，只要曾经中文了，就翻译回英文一次
@@ -3658,7 +3686,7 @@ begin
       end;
     end;
 
-    TranslateEditorTab;
+    TranslateStaticEditorTab;
     FAlreadyChinese := False;
   end;
 end;
