@@ -705,15 +705,25 @@ begin
       begin
         SetExtractorMode(E, S, Screen.ActiveCustomForm);
         E.GetFormStrings(Screen.ActiveCustomForm, SL, True);
+{$IFDEF DEBUG}
+        CnDebugger.LogFmt('CnWizMultiLang Get %d Items from %s',
+          [SL.Count, Screen.ActiveCustomForm.ClassName]);
+{$ENDIF}
         TrimSortTranslationItems(SL);
         Clipboard.AsText := SL.Text;
+      end
+      else
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('CnWizMultiLang NO Screen.ActiveCustomForm');
+{$ENDIF}
       end;
     finally
       E.Free;
       SL.Free;
     end;
   end
-  else if Command = CN_WIZ_CMD_GEN_MULTILANG_ALL then //3535
+  else if Command = CN_WIZ_CMD_GEN_MULTILANG_ALL then // 3536
   begin
 {$IFDEF DEBUG}
     CnDebugger.LogMsg('CnWizMultiLang Get Cmd CN_WIZ_CMD_GEN_MULTILANG_ALL');
