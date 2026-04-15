@@ -72,7 +72,7 @@ Delphi/C++Builder/Developer Studio/RAD Studio 的设计器层级布局十分复杂，
        └─ TFmxEditorFormDesignerWrapper.TVclFmxHostPanel （内部以未知方式包含 FMX 设计窗体实例）
 
 ---------------
-2.3 DataModule：
+2.3 Data Module：
 ---------------
 
     UndockedDesignerForm: TUndockedDesignerForm
