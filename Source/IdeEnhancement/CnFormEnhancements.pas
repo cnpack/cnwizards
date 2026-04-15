@@ -96,7 +96,7 @@ type
     FOldY: Integer;
     FOffsetX: Integer;
     FOffsetY: Integer;
-    FSnapForm: TCustomForm;
+    FSnapForm: TWinControl;
     FSnapPos: TSnapPos;
     FPosMenu: TMenuItem;
     FDragMenu: TMenuItem;
@@ -113,7 +113,7 @@ type
     procedure SetOffsetX(const Value: Integer);
     procedure SetOffsetY(const Value: Integer);
     procedure SetSnapPos(const Value: TSnapPos);
-    procedure SetSnapForm(const Value: TCustomForm);
+    procedure SetSnapForm(const Value: TWinControl);
     procedure SetAllowShow(const Value: Boolean);
   protected
     PaintBox: TPaintBox;
@@ -147,7 +147,7 @@ type
     property SnapPos: TSnapPos read FSnapPos write SetSnapPos;
     property OffsetX: Integer read FOffsetX write SetOffsetX;
     property OffsetY: Integer read FOffsetY write SetOffsetY;
-    property SnapForm: TCustomForm read FSnapForm write SetSnapForm;
+    property SnapForm: TWinControl read FSnapForm write SetSnapForm;
     property Visible: Boolean read GetVisible write SetVisible;
   end;
 
@@ -787,7 +787,7 @@ begin
   end;
 end;
 
-procedure TCnFloatSnapPanel.SetSnapForm(const Value: TCustomForm);
+procedure TCnFloatSnapPanel.SetSnapForm(const Value: TWinControl);
 begin
   if FSnapForm <> Value then
   begin
@@ -2253,7 +2253,7 @@ procedure TCnFormEnhanceWizard.UpdateFlatPanelsPosition;
 var
   Container: TWinControl;
   I: Integer;
-  SnapForm: TCustomForm;
+  SnapForm: TWinControl;
   SnapGot: Boolean;
 begin
   if FUpdating then
@@ -2290,22 +2290,27 @@ begin
       not IsIconic(Container.Handle) then
     begin
       SnapGot := True;
-      SnapForm := TCustomForm(Container);
+      SnapForm := TWinControl(Container);
+      // DataModule 的情况下可能通过上面的循环拿到了 UndockedDesignerForm，是浮动设计器所需要的
+
 {$IFDEF IDE_NEW_EMBEDDED_DESIGNER}
       // 10.1/10.2/10.3 的浮动设计器，需要拿 TFormContainerForm 的 Parent 的 Parent
       SnapGot := False;
       if SnapForm.ClassNameIs(SCnFormContainerFormClassName) then
       begin
-        SnapForm := TCustomForm(SnapForm.Parent); // 强行转换也没事
+        SnapForm := SnapForm.Parent;
         if (SnapForm <> nil) and SnapForm.ClassNameIs(SCnDesignControlClassName) then
         begin
-          SnapForm := TCustomForm(SnapForm.Parent);
+          SnapForm := SnapForm.Parent;
           if (SnapForm <> nil) and SnapForm.ClassNameIs(SCnUndockedDesignerFormClassName) then
           begin
             SnapGot := True;
           end;
         end;
-      end;
+      end
+      else if SnapForm.ClassNameIs(SCnUndockedDesignerFormClassName) then
+        SnapGot := True;
+
       if not SnapGot then
         SnapForm := nil;
 {$ENDIF}
@@ -2364,8 +2369,6 @@ procedure TCnFormEnhanceWizard.OnCallWndProcRet(Handle: HWND; Control: TWinContr
 begin
   if not Active or FIsEmbeddedDesigner or FUpdating then
     Exit;
-
-if (Msg.Msg = WM_WINDOWPOSCHANGED) and (Control <> nil) then cndebugger.LogMsg('WM_WINDOWPOSCHANGED' + Control.ClassName);
 
   if (Msg.Msg = WM_ACTIVATE) or (Msg.Msg = WM_NCACTIVATE) then
   begin
