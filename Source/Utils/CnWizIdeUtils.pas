@@ -106,8 +106,11 @@ const
   SCnEditControlName = 'Editor';
 {$ENDIF}
 
+  SCnUndockedDesignerFormClassName = 'TUndockedDesignerForm';
+  SCnUndockedDesignerFormName = 'UndockedDesignerForm';
   SCnDesignControlClassName = 'TEditorFormDesigner';
   SCnDesignControlName = 'EditFormDesigner';
+  SCnFormContainerFormClassName = 'TFormContainerForm';
   SCnWelcomePageClassName = 'TWelcomePageFrame';
   SCnWelcomePageName = 'WelcomePage';
   SCnDisassemblyViewClassName = 'TDisassemblyView';

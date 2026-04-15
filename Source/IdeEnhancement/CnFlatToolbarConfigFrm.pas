@@ -20,7 +20,7 @@
 
 {******************************************************************************}
 { Unit Note:                                                                   }
-{    This file is derived from GExperts 1.2                                    }
+{    This file is partly derived from GExperts 1.2                             }
 {                                                                              }
 { Original author:                                                             }
 {    GExperts, Inc  http://www.gexperts.org/                                   }
@@ -33,7 +33,7 @@ unit CnFlatToolbarConfigFrm;
 * 软件名称：CnPack IDE 专家包
 * 单元名称：浮动工具条定制窗体单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
-* 备    注：该单元移植自 GExperts 1.2a Src
+* 备    注：该单元部分移植自 GExperts 1.2a Src
 *           其原始内容受 GExperts License 的保护
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
@@ -218,6 +218,7 @@ begin
     lbCategories.Items.Delete(NoneIndex);
     lbCategories.Items.Add(SNoButtonCategory);
   end;
+
   lbCategories.Items.Add(SAllButtonsCategory);
   lbCategories.ItemIndex := 0;
   lbCategoriesClick(lbCategories);
@@ -252,7 +253,6 @@ end;
 constructor TCnFlatToolbarConfigForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
   FToolbarActionNames := TStringList.Create;
   FActionList := GetIDEActionList;
 end;
@@ -260,7 +260,6 @@ end;
 destructor TCnFlatToolbarConfigForm.Destroy;
 begin
   FreeAndNil(FToolbarActionNames);
-
   inherited Destroy;
 end;
 
@@ -354,6 +353,7 @@ begin
     begin
       if FActionList.Actions[I].Name = '' then
         Continue;
+
       if (FActionList.Actions[I] is TCustomAction) then // 不加入隐藏的 Action
         if not TCustomAction(FActionList.Actions[I]).Visible then
           Continue;
@@ -389,6 +389,7 @@ begin
   Index := lbToolbar.ItemIndex;
   if Index = 0 then
     Exit;
+
   lbToolbar.Items.Exchange(Index, Index - 1);
 end;
 
@@ -399,6 +400,7 @@ begin
   Index := lbToolbar.ItemIndex;
   if Index = lbToolbar.Items.Count - 1 then
     Exit;
+
   lbToolbar.Items.Exchange(Index, Index + 1);
 end;
 
@@ -411,6 +413,7 @@ begin
   for I := 0 to lbToolbar.Items.Count - 1 do
   begin
     Action := TContainedAction(lbToolbar.Items.Objects[I]);
+
     if Action <> nil then
       FToolbarActionNames.Add(Action.Name)
     else
@@ -448,14 +451,14 @@ var
     begin
       OldColor := LbCanvas.Brush.Color;
       LbCanvas.Brush.Color := clBtnface;
+
       try
         BtnRect := Classes.Rect(Rect.Left, Rect.Top + 1,
-                                Rect.Left + 20, Rect.Top + 20);
+          Rect.Left + 20, Rect.Top + 20);
         LbCanvas.FillRect(BtnRect);
+
         Action.ActionList.Images.Draw(LbCanvas,
-                                      Rect.Left + 2,
-                                      Rect.Top + 2,
-                                      Action.ImageIndex);
+          Rect.Left + 2, Rect.Top + 2, Action.ImageIndex);
         Frame3D(LbCanvas, BtnRect, clBtnHighlight, clBtnShadow, 1);
       finally
         LbCanvas.Brush.Color := OldColor;
@@ -476,6 +479,7 @@ begin
 
   if not lbAvailable.Enabled then
     LbCanvas.Font.Color := clGrayText;
+
   if ListBox.Items[Index] = csSeparatorCaption then
     LbCanvas.TextOut(Rect.Left + IdeGetScaledPixelsFromOrigin(csListItemIconWidth, ListBox), Rect.Top + FTextOffSet, SSeparator)
   else
@@ -499,6 +503,7 @@ var
   Idx: Integer;
 begin
   Accept := ((Source = lbAvailable) or (Source = Sender));
+
   // Autoscroll the listbox to make dragging easier
   if Y < 15 then
     lbToolbar.Perform(WM_VSCROLL, SB_LINEUP, 0)
@@ -517,6 +522,7 @@ begin
   Idx := lbToolbar.ItemAtPos(Point(X, Y), False);
   if Idx = lbToolbar.Items.Count then
     Dec(Idx);
+
   if Sender <> Source then
   begin
     if (Idx < 0) or (Idx = lbToolbar.Items.Count - 1) then

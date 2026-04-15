@@ -132,6 +132,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+
     procedure Show; virtual;
     procedure Hide; virtual;
     procedure UpdatePosition; virtual;
@@ -2253,6 +2254,7 @@ var
   Container: TWinControl;
   I: Integer;
   SnapForm: TCustomForm;
+  SnapGot: Boolean;
 begin
   if FUpdating then
     Exit;
@@ -2287,7 +2289,30 @@ begin
       IsWindowVisible(Container.Handle) and
       not IsIconic(Container.Handle) then
     begin
+      SnapGot := True;
       SnapForm := TCustomForm(Container);
+{$IFDEF IDE_NEW_EMBEDDED_DESIGNER}
+      // 10.1/10.2/10.3 的浮动设计器，需要拿 TFormContainerForm 的 Parent 的 Parent
+      SnapGot := False;
+      if SnapForm.ClassNameIs(SCnFormContainerFormClassName) then
+      begin
+        SnapForm := TCustomForm(SnapForm.Parent); // 强行转换也没事
+        if (SnapForm <> nil) and SnapForm.ClassNameIs(SCnDesignControlClassName) then
+        begin
+          SnapForm := TCustomForm(SnapForm.Parent);
+          if (SnapForm <> nil) and SnapForm.ClassNameIs(SCnUndockedDesignerFormClassName) then
+          begin
+            SnapGot := True;
+          end;
+        end;
+      end;
+      if not SnapGot then
+        SnapForm := nil;
+{$ENDIF}
+{$IFDEF DEBUG}
+      if SnapGot then
+        CnDebugger.LogMsg('TCnFormEnhanceWizard.UpdateFlatPanelsPosition Get SnapForm ' + SnapForm.ClassName);
+{$ENDIF}
     end
     else
       SnapForm := nil;
@@ -2340,6 +2365,8 @@ begin
   if not Active or FIsEmbeddedDesigner or FUpdating then
     Exit;
 
+if (Msg.Msg = WM_WINDOWPOSCHANGED) and (Control <> nil) then cndebugger.LogMsg('WM_WINDOWPOSCHANGED' + Control.ClassName);
+
   if (Msg.Msg = WM_ACTIVATE) or (Msg.Msg = WM_NCACTIVATE) then
   begin
     UpdateFlatPanelsPosition;
@@ -2349,7 +2376,8 @@ begin
 {$IFNDEF IDE_NEW_EMBEDDED_DESIGNER} // 101B has a TUndockedDesignerForm Container without csDesigning
     (csDesigning in Control.ComponentState) and
 {$ENDIF}
-    (Control.Parent = nil) and (Control = CnOtaGetCurrentDesignContainer) then
+    (Control.Parent = nil) and ((Control = CnOtaGetCurrentDesignContainer)
+      {$IFDEF IDE_NEW_EMBEDDED_DESIGNER} or (Control.ClassNameIs(SCnUndockedDesignerFormClassName)) {$ENDIF} ) then
   begin
     if Msg.Msg = WM_WINDOWPOSCHANGED then
       UpdateFlatPanelsPosition

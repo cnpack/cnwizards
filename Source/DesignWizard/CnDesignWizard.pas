@@ -98,7 +98,7 @@ type
     asSnapToGrid, {$IFDEF IDE_HAS_GUIDE_LINE} asUseGuidelines, {$ENDIF} asAlignToGrid,
     asSizeToGrid, asLockControls, asRememberLock, asSelectRoot, asCopyCompName, asCopyCompClass,
     asHideComponent, asNonArrange, asListComp, asCompareProp, asCompToCode,
-    asChangeCompClass, asCompRename, asShowFlatForm);
+    asChangeCompClass, asCompRename, asFlatFormConfig);
 
   TNonArrangeStyle = (asRow, asCol);
 
@@ -159,7 +159,7 @@ type
     procedure ScriptExecute(Sender: TObject);
 {$ENDIF}
 {$ENDIF}
-    procedure ShowFlatForm;
+    procedure ShowFlatFormConfig;
     procedure NonVisualArrange;
     procedure ArrangeNonVisualComponents;
     procedure LockMenuExecuteReLock(Sender: TObject);
@@ -315,7 +315,7 @@ const
   csNonVisualCaptionSize = 14;
 {$ENDIF}
   csNonVisualCaptionV = 30;
-  csNonVisualMiddleGap = 4; 
+  csNonVisualMiddleGap = 4;
 
   csSpaceIncStep = 1;
 
@@ -946,7 +946,7 @@ begin
             DoHandleException('UseGuidelines Error.');
           end;
         end;
-      {$ENDIF}        
+      {$ENDIF}
       asLockControls:
         begin
           if Assigned(FIDELockControlsMenu) then
@@ -985,7 +985,7 @@ begin
                 EditAction.ToggleFormUnit;
             end;
           end;
-          
+
           IsModified := False;
         end;
       asHideComponent:
@@ -1046,16 +1046,16 @@ begin
               ErrorDlg(SCnPrefixWizardNotExist);
           end;
         end;
-      asShowFlatForm:
+      asFlatFormConfig:
         begin
-          ShowFlatForm;
+          ShowFlatFormConfig;
           IsModified := False;
         end;
     end;
 
     for I := 0 to ControlList.Count - 1 do
       InvalidateControl(ControlList[I]);
-    
+
     if IsModified then
     begin
       FormEditor := CnOtaGetFormEditorFromModule(CnOtaGetCurrentModule);
@@ -1764,7 +1764,7 @@ end;
 // 显示浮动工具面板
 //------------------------------------------------------------------------------
 
-procedure TCnDesignWizard.ShowFlatForm;
+procedure TCnDesignWizard.ShowFlatFormConfig;
 var
   Wizard: TCnIDEEnhanceWizard;
 begin
@@ -1792,6 +1792,7 @@ var
     else
       Result := 0;
   end;
+
 begin
   for Style := Low(TCnAlignSizeStyle) to High(TCnAlignSizeStyle) do
   begin
@@ -1907,7 +1908,7 @@ begin
     if Assigned(FIDEHideNonvisualsMenu) then
     begin
       Actn.Checked := (Length(FIDEHideNonvisualsMenu.Caption) > 1) and (FIDEHideNonvisualsMenu.Caption[1] = 'S');
-      // 此菜单项无 Checked 状态，判断文字是 Show 还是 Hide。 
+      // 此菜单项无 Checked 状态，判断文字是 Show 还是 Hide。
     end
     else
       Actn.Checked := FHideNonVisual;
@@ -1917,7 +1918,7 @@ begin
   begin
     Actn.Enabled := not CnOtaIsCurrFormSelectionsEmpty;
   end
-  else if Index = Indexes[asShowFlatForm] then
+  else if Index = Indexes[asFlatFormConfig] then
   begin
     Actn.Enabled := (CnWizardMgr.WizardByClassName('TCnFormEnhanceWizard') <> nil)
       and not IdeIsEmbeddedDesigner;
