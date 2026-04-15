@@ -336,8 +336,57 @@ begin
 end;
 
 procedure TFormMain.btnInsertLineClick(Sender: TObject);
+var
+  InputLine: string;
+  EqPos: Integer;
+  KeyPart: string;
+  LeftLine: string;
+  LeftInsertPos: Integer;
+  RightInsertPos: Integer;
+  I: Integer;
 begin
-  // TODO:
+  InputLine := Trim(edtInsert.Text);
+  if InputLine = '' then
+  begin
+    ShowMessage('请输入待插入内容。');
+    Exit;
+  end;
+
+  EqPos := Pos('=', InputLine);
+  if EqPos = 0 then
+  begin
+    ShowMessage('输入内容必须包含等号。');
+    Exit;
+  end;
+
+  KeyPart := Copy(InputLine, 1, EqPos - 1);
+  LeftLine := KeyPart + '=' + KeyPart;
+  LeftInsertPos := MemoLeft.Lines.Count;
+  for I := 0 to MemoLeft.Lines.Count - 1 do
+  begin
+    if CompareStr(LeftLine, MemoLeft.Lines[I]) < 0 then
+    begin
+      LeftInsertPos := I;
+      Break;
+    end;
+  end;
+  MemoLeft.Lines.Insert(LeftInsertPos, LeftLine);
+
+  RightInsertPos := MemoRight.Lines.Count;
+  for I := 0 to MemoRight.Lines.Count - 1 do
+  begin
+    if CompareStr(InputLine, MemoRight.Lines[I]) < 0 then
+    begin
+      RightInsertPos := I;
+      Break;
+    end;
+  end;
+  MemoRight.Lines.Insert(RightInsertPos, InputLine);
+
+  ShowMessage('左侧插入到第 ' + IntToStr(LeftInsertPos + 1) + ' 行，右侧插入到第 ' +
+    IntToStr(RightInsertPos + 1) + ' 行。');
+
+  edtInsert.Clear;
 end;
 
 procedure TFormMain.BtnCompareEqualClick(Sender: TObject);
