@@ -211,6 +211,7 @@ object FormMain: TFormMain
     Height = 25
     Caption = #20004#36793#25554#20837
     TabOrder = 17
+    OnClick = btnInsertLineClick
   end
   object btnSaveLeft: TButton
     Left = 472

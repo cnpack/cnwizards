@@ -46,6 +46,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure BtnTabCopyClick(Sender: TObject);
     procedure btnSaveLeftClick(Sender: TObject);
+    procedure btnInsertLineClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -332,6 +333,11 @@ begin
   end;
 
   ShowMessage('插入完成！');
+end;
+
+procedure TFormMain.btnInsertLineClick(Sender: TObject);
+begin
+  // TODO:
 end;
 
 procedure TFormMain.BtnCompareEqualClick(Sender: TObject);
