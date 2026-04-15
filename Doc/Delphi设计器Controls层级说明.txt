@@ -5,9 +5,9 @@
 **********************************************************************
 
                     Delphi 设计器 Controls 层级说明
-                           Revision 1.0.0.0
+                           Revision 1.0.0.1
                        =========================
-                         作者：刘啸 2026.04.15
+                         作者：刘啸 2026.04.16
 
 Delphi/C++Builder/Developer Studio/RAD Studio 的设计器层级布局十分复杂，
 我们在多年的开发过程中，将逆向查来的层级关系以文档形式记录如下，包括不
@@ -32,20 +32,20 @@ Delphi/C++Builder/Developer Studio/RAD Studio 的设计器层级布局十分复杂，
 
     Form1: TForm1 （VCL 窗体实例）
 
-------------------------------------------
-1.2 Data Module（Delphi 5、C++Builder 5）：
-------------------------------------------
+--------------------------------------------
+1.2 Data Module（Delphi 6/7、C++Builder 6）：
+--------------------------------------------
 
     DataModuleForm: TDataModuleForm（其 Components 里包含 TDataModule 实例）
     └─ <Noname>: TComponentContainer
 
---------------------------------------------
-1.3 Data Module（Delphi 6/7、C++Builder 6）：
---------------------------------------------
+------------------------------------------
+1.3 Data Module（Delphi 5、C++Builder 5）：
+------------------------------------------
 
     DataModuleDesigner: TDataModuleDesigner （其 Components 里包含 TDataModule 实例）
     └─ ParentageEditorFrame1: TParentageEditorFrame
-        └─<Noname>: TParentageTreeView     // 树结构里编辑不可视组件
+        └─<Noname>: TParentageTreeView     // 在该树结构里编辑不可视组件
 
 ======================================================
 二、Delphi 10.1/10.2/10.3 下的浮动设计器 Controls 层级
