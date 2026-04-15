@@ -1,0 +1,144 @@
+**********************************************************************
+                     CnPack For Delphi/C++Builder
+                     中国人自己的免费第三方开发包
+                 (C)Copyright 2001-2026 CnPack 开发组
+**********************************************************************
+
+                    Delphi 设计器 Controls 层级说明
+                           Revision 1.0.0.0
+                       =========================
+                         作者：刘啸 2026.04.15
+
+Delphi/C++Builder/Developer Studio/RAD Studio 的设计器层级布局十分复杂，
+我们在多年的开发过程中，将逆向查来的层级关系以文档形式记录如下，包括不
+同版本、是否停靠时的 VCL 窗体、FMX 窗体及 Data Module 等。
+
+注意，布局浮动是指 Delphi 5/6/7、C++Builder 5/6 下的各窗体独立模式。
+也指 Delphi 2005 及以上各窗体的手动修改的独立模式（尽管默认是 Dock 的）。
+
+设计器浮动则是环境设置中的 Embedded Designer 选项控制。
+
+该选项从 Delphi 2005 到 XE2 有效，但 XE3 到 10 关闭了该选项，只允许嵌入式，
+10.1 到 10.3 重新开启，但浮动的层级模式变了，而且大概太复杂，10.4 起又
+重新关闭，只允许嵌入式了。
+
+==============================================================
+一、Delphi 6、C++Builder 6 ～ XE2 下的浮动设计器 Controls 层级
+==============================================================
+
+-------------
+1.1 VCL 窗体：
+-------------
+
+    Form1: TForm1 （VCL 窗体实例）
+
+------------------------------------------
+1.2 Data Module（Delphi 5、C++Builder 5）：
+------------------------------------------
+
+    DataModuleForm: TDataModuleForm（其 Components 里包含 TDataModule 实例）
+    └─ <Noname>: TComponentContainer
+
+--------------------------------------------
+1.3 Data Module（Delphi 6/7、C++Builder 6）：
+--------------------------------------------
+
+    DataModuleDesigner: TDataModuleDesigner （其 Components 里包含 TDataModule 实例）
+    └─ ParentageEditorFrame1: TParentageEditorFrame
+        └─<Noname>: TParentageTreeView     // 树结构里编辑不可视组件
+
+======================================================
+二、Delphi 10.1/10.2/10.3 下的浮动设计器 Controls 层级
+======================================================
+
+-------------
+2.1 VCL 窗体：
+-------------
+
+    UndockedDesignerForm: TUndockedDesignerForm
+    └─ EditorFormDesigner: TEditorFormDesigner
+       └─ <Noname>: TFormContainerForm
+          ├─ <Noname>: TControlSizer
+          ├─ <Noname>: TVirtualDisplay
+          │  └─ <Noname>: TFormShape
+          └─ Form1: TForm1 （VCL 窗体实例）
+
+-------------
+2.2 FMX 窗体：
+-------------
+
+    UndockedDesignerForm: TUndockedDesignerForm
+    └─ EditorFormDesigner: TEditorFormDesigner
+       └─ TFmxEditorFormDesignerWrapper.TVclFmxHostPanel （内部以未知方式包含 FMX 设计窗体实例）
+
+---------------
+2.3 DataModule：
+---------------
+
+    UndockedDesignerForm: TUndockedDesignerForm
+    └─ EditorFormDesigner: TEditorFormDesigner
+       └─ <Noname>: TFormContainerForm
+          ├─ <Noname>: TControlSizer
+          ├─ <Noname>: TVirtualDisplay
+          └─ DataModuleForm: TDataModuleForm（其 Components 里包含 TDataModule 实例）
+             └─ <Noname>: TComponentContainer
+
+==================================================
+三、Delphi 2005 及以上的嵌入式设计器 Controls 层级
+==================================================
+
+-------------
+3.1 VCL 窗体：
+-------------
+
+    AppBuilder: TAppBuilder
+    └─ DockBottomPanel: TEditorDockPanel
+       └─ EditWindow_0: TEditWindow                                     // 如布局浮动，则此处独立
+          └─ PanelContainsMiddleStuff: TPanel
+             └─ Panel1: TPanel
+                └─ ModuleEditorsContainer: TPanel
+                   └─ pnlBottomCode: TPanel
+                      └─ CodePanel: TPanel
+                         └─ EditorPanel: TPanel;
+                            └─ EditorFormDesigner: TEditorFormDesigner  // 如设计器浮动，则此处挂到独立的 UndockedDesignerForm: TUndockedDesignerForm 下
+                               └─ <Noname>: TFormContainerForm
+                                  ├─ <Noname>: TControlSizer
+                                  ├─ <Noname>: TVirtualDisplay
+                                  │  └─ <Noname>: TFormShape
+                                  └─ Form1: TForm1 （VCL 窗体实例）
+
+-------------
+3.2 FMX 窗体：
+-------------
+
+    AppBuilder: TAppBuilder
+    └─ DockBottomPanel: TEditorDockPanel
+       └─ EditWindow_0: TEditWindow                                     // 如布局浮动，则此处独立
+          └─ PanelContainsMiddleStuff: TPanel
+             └─ Panel1: TPanel
+                └─ ModuleEditorsContainer: TPanel
+                   └─ pnlBottomCode: TPanel
+                      └─ CodePanel: TPanel
+                         └─ EditorPanel: TPanel;
+                            └─ EditorFormDesigner: TEditorFormDesigner  // 如设计器浮动，则此处挂到独立的 UndockedDesignerForm: TUndockedDesignerForm 下
+                               └─ TFmxEditorFormDesignerWrapper.TVclFmxHostPanel （内部以未知方式包含 FMX 设计窗体实例）
+
+----------------
+3.3 Data Module：
+----------------
+
+    AppBuilder: TAppBuilder
+    └─ DockBottomPanel: TEditorDockPanel
+       └─ EditWindow_0: TEditWindow                                     // 如布局浮动，则此处独立
+          └─ PanelContainsMiddleStuff: TPanel
+             └─ Panel1: TPanel
+                └─ ModuleEditorsContainer: TPanel
+                   └─ pnlBottomCode: TPanel
+                      └─ CodePanel: TPanel
+                         └─ EditorPanel: TPanel;
+                            └─ EditorFormDesigner: TEditorFormDesigner  // 如设计器浮动，则此处挂到独立的 UndockedDesignerForm: TUndockedDesignerForm 下
+                               └─ <Noname>: TFormContainerForm
+                                  ├─ <Noname>: TControlSizer
+                                  ├─ <Noname>: TVirtualDisplay
+                                  └─ DataModuleForm: TDataModuleForm（其 Components 里包含 TDataModule 实例）
+                                     └─ <Noname>: TComponentContainer
