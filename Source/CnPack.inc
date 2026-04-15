@@ -3525,7 +3525,9 @@
 
 {$IFDEF DELPHI101_BERLIN_UP}
   {$DEFINE TSTRINGS_HAS_OPTIONS}        // 101B 及以上的 TStrings 有 Options 属性控制 Text 末尾的回车换行要不要去掉等
-  {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}   // 101B 及以上重新开启了 "Embedded Designer" 选项并设了个新 Container.
+  {$IFNDEF DELPHI104_SYDNEY_UP}
+  {$DEFINE IDE_NEW_EMBEDDED_DESIGNER}   // 101B 到 103R 之间短暂重新开启了 "Embedded Designer" 选项并设了个新 Container.
+  {$ENDIF}
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
