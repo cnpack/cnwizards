@@ -3010,7 +3010,8 @@ begin
     F := Screen.ActiveCustomForm;
     if {not F.ClassNameIs('TAppBuilder') and} (Pos('TCn', F.ClassName) <> 1) then
     begin
-      if not (csDesigning in F.ComponentState) and (FTranedCompList.IndexOf(F) < 0) then
+      if (not (csDesigning in F.ComponentState) or F.ClassNameIs('TDataModuleDesigner')) // D5 的数据模块设计器也要翻译
+        and (FTranedCompList.IndexOf(F) < 0) then
       begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('CnMultiLang ActiveFormChanged. To Translate ' + F.ClassName);
