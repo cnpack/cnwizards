@@ -2039,7 +2039,7 @@ var
           CnGeneralFilerLoadFileFromStream(FileName, Dest); // 保存文件失败出异常则返回 False
           Result := True;
         except
-          Application.HandleException(Self);
+          // Application.HandleException(Self); // 不弹出错误免得太打扰用户，毕竟调用者最后有统计
           Result := False;
         end;
       end;
