@@ -661,7 +661,7 @@ $HPPEMIT ignored=$HPPEMIT 已忽略
 &Visible When Expanded=展开时可见(&V)
 &Visible=可见(&V)
 &Web Components Editor...=Web组件编辑器(&W)...
-&Whole words=全字匹配(&W)
+&Whole words=整词匹配(&W)
 &Yes=是(&Y)
 &nbsp;&nbsp;<span class="Tip">Link to WS-Inspection document of Services <a href="%s">here</a></span>=&nbsp;&nbsp;<span class="Tip">连接到WS-检查文档的服务<a href="%s">这里</a></span>
 ' and inserting into method list.='并插入到方法列表中.
