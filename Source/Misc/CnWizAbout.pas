@@ -265,11 +265,13 @@ begin
   end
   else if Command = CN_WIZ_CMD_DBG_EVALSUBVIEW then
   begin
+{$IFNDEF STAND_ALONE}
 {$IFDEF DEBUG}
     if CnOtaGetCurrentEditWindowSubViewControl <> nil then
       CnDebugger.EvaluateObject(CnOtaGetCurrentEditWindowSubViewControl)
     else
       CnDebugger.LogMsgError('No SubView Found.');
+{$ENDIF}
 {$ENDIF}
   end;
 end;
