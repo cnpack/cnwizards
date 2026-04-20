@@ -169,7 +169,7 @@
 		<param name="Local" value="options\otherconfig.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Evaluation Align Tool">
+		<param name="Name" value="Evaluation Declaration Align Tool">
 		<param name="Local" value="wizards\toolset\toolsetevalalign.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">

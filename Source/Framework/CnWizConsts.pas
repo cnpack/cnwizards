@@ -703,9 +703,9 @@ var
   SCnEditorCodeSwapMenuHint: string = 'Swap the Contents of the Evaluation Sign in Both Sides';
 
   // CnEditorEvalAlign
-  SCnEditorEvalAlignMenuCaption: string = 'Eval &Align';
-  SCnEditorEvalAlignName: string = 'Eval Align Tool';
-  SCnEditorEvalAlignMenuHint: string = 'Align the Evaluation Signs in Lines';
+  SCnEditorEvalAlignMenuCaption: string = 'Eval/Declaration &Align';
+  SCnEditorEvalAlignName: string = 'Eval Declaration Align Tool';
+  SCnEditorEvalAlignMenuHint: string = 'Align the Evaluation or Declaration Signs in Lines';
 
   // CnEditorCodeToString
   SCnEditorCodeToStringMenuCaption: string = 'Convert to &String';

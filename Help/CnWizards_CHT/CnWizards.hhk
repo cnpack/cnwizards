@@ -226,7 +226,7 @@
 		<param name="Local" value="propeditor\propstring.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="賦值對齊工具">
+		<param name="Name" value="賦值聲明對齊工具">
 		<param name="Local" value="wizards\toolset\toolsetevalalign.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">

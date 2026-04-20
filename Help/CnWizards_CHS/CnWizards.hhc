@@ -218,7 +218,7 @@
 				<param name="Local" value="wizards\toolset\toolsetcodeswap.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">
-				<param name="Name" value="赋值对齐工具">
+				<param name="Name" value="赋值声明对齐工具">
 				<param name="Local" value="wizards\toolset\toolsetevalalign.htm">
 				</OBJECT>
 			<LI> <OBJECT type="text/sitemap">

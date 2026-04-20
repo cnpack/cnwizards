@@ -257,7 +257,7 @@ function TCnEditorEvalAlign.ProcessText(const Text: string): string;
 var
   Lines: TStringList;
 
-  function ProcessEqualLines(const Equ: string): Boolean;
+  function ProcessEqualLines(const Equ: string; const Decl: string): Boolean;
   var
     I, P, EP: Integer;
     L, R: string;
@@ -267,6 +267,9 @@ var
     for I := 0 to Lines.Count - 1 do
     begin
       P := Pos(Equ, Lines[I]);
+      if (P <= 0) and (Decl <> '') then // 声明的冒号也可用于对齐
+        P := Pos(Decl, Lines[I]);
+
       if P > EP then
       begin
         EP := P;
@@ -276,7 +279,7 @@ var
     end;
 
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('TCnEditorEvalAlign.ProcessEqualLines. Got Eval %s Point at %d', [Equ, EP]);
+    CnDebugger.LogFmt('TCnEditorEvalAlign.ProcessEqualLines. Got Eval/Decl %s/%s Point at %d', [Equ, Decl, EP]);
 {$ENDIF}
 
     // EP 是赋值号们应该对齐的位置，减 1 后也是左边字符串应该有的长度
@@ -292,6 +295,17 @@ var
           R := Copy(Lines[I], P, MaxInt);
           if EP - 1 - Length(L) > 0 then
             Lines[I] := L + Spc(EP - 1 - Length(L)) + R;
+        end
+        else if Decl <> '' then
+        begin
+          P := Pos(Decl, Lines[I]);
+          if P > 0 then // 有声明冒号的，去补
+          begin
+            L := Copy(Lines[I], 1, P - 1);
+            R := Copy(Lines[I], P, MaxInt);
+            if EP - 1 - Length(L) > 0 then
+              Lines[I] := L + Spc(EP - 1 - Length(L)) + R;
+          end;
         end;
       end;
     end;
@@ -305,11 +319,11 @@ begin
     if IsDelphiSourceModule(CnOtaGetCurrentSourceFile) or
       IsInc(CnOtaGetCurrentSourceFile) then
     begin
-      if not ProcessEqualLines(':=') then // 变量赋值号
-        ProcessEqualLines('=');            // 常量赋值号
+      if not ProcessEqualLines(':=', ':') then  // 变量赋值号，声明冒号
+        ProcessEqualLines('=', ':');            // 常量赋值号，声明冒号
     end
     else
-      ProcessEqualLines('=');              // 赋值号
+      ProcessEqualLines('=', '');               // 赋值号
 
     Result := Lines.Text;
   finally
