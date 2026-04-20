@@ -52,7 +52,7 @@ interface
 {$IFDEF CNWIZARDS_CNUSESTOOLS}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, FileCtrl,
   StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
   CnWizOptions, CnHashMap, mPasLex, {$IFDEF UNICODE} CnPasWideLex, {$ENDIF}
@@ -82,8 +82,15 @@ type
     chkIgnoreCompRef: TCheckBox;
     chkProcessDependencies: TCheckBox;
     chkSaveAndClose: TCheckBox;
+    grpDir: TGroupBox;
+    lblDir: TLabel;
+    btnSelectDir: TButton;
+    cbbDir: TComboBox;
+    chkSubDirs: TCheckBox;
+    chkOnlyDirectory: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
     procedure rbCurrUnitClick(Sender: TObject);
+    procedure btnSelectDirClick(Sender: TObject);
   private
 
   protected
@@ -102,6 +109,10 @@ type
     FIdInitTree: Integer;
     FIdFromIdent: Integer;
     FIdProjImplUse: Integer;
+    FOnlyInDir: Boolean;
+    FOnlyDirName: string;
+    FOnlyDirs: TStringList;
+    FOnlyDirSub: Boolean;
     FIgnoreInit: Boolean;
     FIgnoreReg: Boolean;
     FIgnoreNoSrc: Boolean;
@@ -162,8 +173,6 @@ type
     function GetCaption: string; override;
     function GetHint: string; override;
     function GetDefShortCut: TShortCut; override;
-
-    procedure Execute; override;
     procedure AcquireSubActions; override;
 
     function IsValidUnitName(const AUnitName: string): Boolean;
@@ -180,13 +189,19 @@ uses
   CnDebug,
 {$ENDIF}
   CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm, CnNative,
-  CnWideStrings, CnProgressFrm, CnIDEStrings, CnPasCodeParser, CnWidePasParser;
+  CnIni, CnStrings, CnWideStrings, CnProgressFrm, CnIDEStrings, CnPasCodeParser,
+  CnWidePasParser;
 
 {$R *.DFM}
 
 const
   csCleanList = 'UsesClean.dat';
   csIgnoreList = 'UsesIgnore.dat';
+
+  csOnlyInDir = 'OnlyInDir';
+  csOnlyDirName = 'OnlyDirName';
+  csOnlyDirs = 'OnlyDirs';
+  csOnlyDirSub = 'OnlyDirSub';
 
   csIgnoreInit = 'IgnoreInit';
   csIgnoreReg = 'IgnoreReg';
@@ -205,6 +220,8 @@ const
 constructor TCnUsesToolsWizard.Create;
 begin
   inherited;
+  FOnlyInDir := False;
+  FOnlyDirs := TStringList.Create;
   FIgnoreInit := True;
   FIgnoreReg := True;
   FIgnoreNoSrc := False;
@@ -227,18 +244,18 @@ begin
   FUnitsMap.Free;
   FUnitIdents.Free;
   FUnitNames.Free;
+  FOnlyDirs.Free;
   inherited;
-end;
-
-procedure TCnUsesToolsWizard.Execute;
-begin
-
 end;
 
 procedure TCnUsesToolsWizard.CleanExecute;
 var
   Kind: TCnUsesCleanKind;
   List: TObjectList;
+  Proj: TCnProjectUsesInfo;
+  U: TCnEmptyUsesInfo;
+  I, J: Integer;
+  D: string;
 begin
   if CnOtaGetProjectGroup <> nil then
   begin
@@ -257,7 +274,7 @@ begin
     CnDebugger.LogMsg('UsesCleaner Compile OK. Start to Process Files.');
 {$ENDIF}
 
-    // 进行分析
+    // 进行分析，
     List := TObjectList.Create;
     try
       if ProcessUnits(Kind, List) then
@@ -272,6 +289,46 @@ begin
 {$IFDEF DEBUG}
         CnDebugger.LogMsg('UsesCleaner CheckUnits OK. To Show Results.');
 {$ENDIF}
+
+        if FOnlyInDir and (FOnlyDirName <> '') and DirectoryExists(FOnlyDirName)
+          and (Kind in [ukCurrProject, ukProjectGroup]) then
+        begin
+          // 去掉不在所需目录中的单元
+          for I := 0 to List.Count - 1 do
+          begin
+            Proj := TCnProjectUsesInfo(List[I]);
+            for J := Proj.Units.Count - 1 downto 0 do
+            begin
+              U := TCnEmptyUsesInfo(Proj.Units[J]);
+              D := MakePath(_CnExtractFileDir(U.SourceFileName));
+              if not FOnlyDirSub then
+              begin
+                // 直属目录，文件所在目录必须等于我们的目录
+                if SameText(D, MakePath(FOnlyDirName)) then
+                begin
+{$IFDEF DEBUG}
+                  CnDebugger.LogMsg('UsesCleaner Check in Directory and Ignore ' + U.SourceFileName);
+{$ENDIF}
+                  Proj.Units.Delete(J);
+                end;
+              end
+              else
+              begin
+                // 间接目录，我们的目录得在文件所在目录头部，也包括直接的情形
+                if CnPosEx(MakePath(FOnlyDirName), D, False, False) = 1 then
+                begin
+                  Proj.Units.Delete(J);
+{$IFDEF DEBUG}
+                  CnDebugger.LogMsg('UsesCleaner Check in (Sub)Directory and Ignore ' + U.SourceFileName);
+{$ENDIF}
+                end;
+              end;
+            end;
+          end;
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('UsesCleaner Limit to Directory ' + FOnlyDirName);
+{$ENDIF}
+        end;
 
         if ShowUsesCleanResultForm(List) then
         begin
@@ -301,6 +358,11 @@ begin
   // 显示处理窗口
   with TCnUsesCleanerForm.Create(nil) do
   try
+    chkOnlyDirectory.Checked := FOnlyInDir;
+    chkSubDirs.Checked := FOnlyDirSub;
+    cbbDir.Items.Assign(FOnlyDirs);
+    cbbDir.Text := FOnlyDirName;
+
     chkIgnoreInit.Checked := FIgnoreInit;
     chkIgnoreReg.Checked := FIgnoreReg;
     chkIgnoreNoSrc.Checked := FIgnoreNoSrc;
@@ -320,6 +382,21 @@ begin
 
     if ShowModal = mrOK then
     begin
+      if chkOnlyDirectory.Checked and (cbbDir.Text <> '') then
+      begin
+        if cbbDir.Items.IndexOf(cbbDir.Text) < 0 then
+        begin
+          while cbbDir.Items.Count > 7 do
+            cbbDir.Items.Delete(0);
+          cbbDir.Items.Add(cbbDir.Text);
+        end;
+      end;
+
+      FOnlyInDir := chkOnlyDirectory.Checked;
+      FOnlyDirSub := chkSubDirs.Checked;
+      FOnlyDirs.Assign(cbbDir.Items);
+      FOnlyDirName := cbbDir.Text;
+
       FIgnoreInit := chkIgnoreInit.Checked;
       FIgnoreReg := chkIgnoreReg.Checked;
       FIgnoreNoSrc := chkIgnoreNoSrc.Checked;
@@ -913,7 +990,9 @@ begin
     // 取得所有引用到的单元
     UnitList.Sorted := True;
     for I := 0 to List.Count - 1 do
+    begin
       for J := 0 to TCnProjectUsesInfo(List[I]).Units.Count - 1 do
+      begin
         with TCnEmptyUsesInfo(TCnProjectUsesInfo(List[I]).Units[J]) do
         begin
           for K := 0 to IntfCount - 1 do
@@ -923,6 +1002,8 @@ begin
             if UnitList.IndexOf(ImplItems[K].Name) < 0 then
               UnitList.AddObject(ImplItems[K].Name, TObject(Pointer(Project)));
         end;
+      end;
+    end;
 
     // 分析单元类型
     for U := 0 to UnitList.Count - 1 do
@@ -981,7 +1062,6 @@ begin
         end;
       end;
     end;
-
   finally
     UnitList.Free;
   end;
@@ -997,6 +1077,7 @@ begin
         begin
           CompRef.Clear;
           GetCompRefUnits(CnOtaGetModule(SourceFileName), Project, CompRef);
+
           if CompRef.Count > 0 then
           begin
             for K := 0 to IntfCount - 1 do
@@ -1453,6 +1534,14 @@ end;
 procedure TCnUsesToolsWizard.LoadSettings(Ini: TCustomIniFile);
 begin
   inherited;
+  FOnlyInDir := Ini.ReadBool('', csOnlyInDir, False);
+  FOnlyDirName := Ini.ReadString('', csOnlyDirName, '');
+  with TCnIniFile.Create(Ini) do
+  begin
+    ReadStrings('', csOnlyDirs, FOnlyDirs);
+    Free;
+  end;
+  FOnlyDirSub := Ini.ReadBool('', csOnlyDirSub, False);
   FIgnoreInit := Ini.ReadBool('', csIgnoreInit, FIgnoreInit);
   FIgnoreReg := Ini.ReadBool('', csIgnoreReg, FIgnoreReg);
   FIgnoreNoSrc := Ini.ReadBool('', csIgnoreNoSrc, FIgnoreNoSrc);
@@ -1467,6 +1556,14 @@ end;
 procedure TCnUsesToolsWizard.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
+  Ini.WriteBool('', csOnlyInDir, FOnlyInDir);
+  Ini.WriteString('', csOnlyDirName, FOnlyDirName);
+  with TCnIniFile.Create(Ini) do
+  begin
+    WriteStrings('', csOnlyDirs, FOnlyDirs);
+    Free;
+  end;
+  Ini.WriteBool('', csOnlyDirSub, FOnlyDirSub);
   Ini.WriteBool('', csIgnoreInit, FIgnoreInit);
   Ini.WriteBool('', csIgnoreReg, FIgnoreReg);
   Ini.WriteBool('', csIgnoreNoSrc, FIgnoreNoSrc);
@@ -2124,8 +2221,17 @@ begin
 end;
 
 procedure TCnUsesCleanerForm.rbCurrUnitClick(Sender: TObject);
+var
+  B: Boolean;
 begin
   chkProcessDependencies.Enabled := not rbCurrUnit.Checked;
+  chkOnlyDirectory.Enabled := rbProjectGroup.Checked or rbCurrProject.Checked;
+
+  B := chkOnlyDirectory.Enabled and chkOnlyDirectory.Checked;
+  lblDir.Enabled := B;
+  cbbDir.Enabled := B;
+  btnSelectDir.Enabled := B;
+  chkSubDirs.Enabled := B;
 end;
 
 function TCnUsesToolsWizard.IsValidUnitName(const AUnitName: string): Boolean;
@@ -2154,6 +2260,15 @@ begin
   end;
 {$ENDIF}
   Result := True;
+end;
+
+procedure TCnUsesCleanerForm.btnSelectDirClick(Sender: TObject);
+var
+  NewDir: string;
+begin
+  NewDir := cbbDir.Text;
+  if GetDirectory(SCnReplaceSelectDirCaption, NewDir) then
+    cbbDir.Text := NewDir;
 end;
 
 initialization

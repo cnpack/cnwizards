@@ -49,7 +49,7 @@ type
   TCnProjectUsesInfo = class
   public
     Project: IOTAProject;
-    Units: TObjectList;
+    Units: TObjectList;  // ÈÝÄÉ TCnEmptyUsesInfo
     constructor Create;
     destructor Destroy; override;
   end;
@@ -188,7 +188,9 @@ begin
         _CnExtractFileName(ProjectInfo.Project.FileName), ProjectInfo);
       ProjNode.ImageIndex := IdxProject;
       ProjNode.SelectedIndex := IdxProject;
+
       for J := 0 to ProjectInfo.Units.Count - 1 do
+      begin
         with TCnEmptyUsesInfo(ProjectInfo.Units[J]) do
         begin
           UnitNode := chktvResult.Items.AddChildObject(ProjNode,
@@ -226,6 +228,7 @@ begin
             end;
           end;
         end;
+      end;
     end;
 
     chktvResult.FullExpand;

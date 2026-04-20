@@ -3,20 +3,20 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
   Top = 131
   BorderStyle = bsDialog
   Caption = 'Uses Units Cleaner'
-  ClientHeight = 406
-  ClientWidth = 392
+  ClientHeight = 541
+  ClientWidth = 457
   PixelsPerInch = 96
   TextHeight = 13
   object grpKind: TGroupBox
     Left = 8
     Top = 8
-    Width = 377
-    Height = 120
+    Width = 440
+    Height = 129
     Caption = '&Select Content to Process'
     TabOrder = 0
     object rbCurrUnit: TRadioButton
       Left = 8
-      Top = 18
+      Top = 20
       Width = 281
       Height = 17
       Caption = 'Current Unit(&1).'
@@ -27,7 +27,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object rbCurrProject: TRadioButton
       Left = 8
-      Top = 54
+      Top = 60
       Width = 281
       Height = 17
       Caption = 'All Units in Current Project(&3).'
@@ -37,7 +37,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object rbProjectGroup: TRadioButton
       Left = 8
-      Top = 72
+      Top = 80
       Width = 281
       Height = 17
       Caption = 'All Units in Current ProjectGroup(&4).'
@@ -47,7 +47,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object rbOpenedUnits: TRadioButton
       Left = 8
-      Top = 36
+      Top = 40
       Width = 281
       Height = 17
       Caption = 'Opened Units in Current ProjectGroup(&2).'
@@ -57,7 +57,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object chkProcessDependencies: TCheckBox
       Left = 24
-      Top = 94
+      Top = 100
       Width = 340
       Height = 17
       Caption = 'Include Indirecty Used Units.'
@@ -66,39 +66,43 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
   end
   object btnOK: TButton
-    Left = 150
-    Top = 378
+    Left = 215
+    Top = 513
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Process'
     Default = True
     ModalResult = 1
     TabOrder = 2
   end
   object btnCancel: TButton
-    Left = 230
-    Top = 378
+    Left = 295
+    Top = 513
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
     TabOrder = 3
   end
   object btnHelp: TButton
-    Left = 310
-    Top = 378
+    Left = 375
+    Top = 513
     Width = 75
     Height = 21
+    Anchors = [akRight, akBottom]
     Caption = '&Help'
     TabOrder = 4
     OnClick = btnHelpClick
   end
   object grpSettings: TGroupBox
     Left = 8
-    Top = 132
-    Width = 377
-    Height = 239
+    Top = 252
+    Width = 441
+    Height = 253
+    Anchors = [akLeft, akBottom]
     Caption = 'Clean &Settings'
     TabOrder = 1
     object lblIgnore: TLabel
@@ -109,7 +113,7 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
       Caption = 'Clean Units Directly:'
     end
     object lbl1: TLabel
-      Left = 192
+      Left = 224
       Top = 126
       Width = 89
       Height = 13
@@ -117,61 +121,122 @@ inherited CnUsesCleanerForm: TCnUsesCleanerForm
     end
     object chkIgnoreInit: TCheckBox
       Left = 8
-      Top = 16
-      Width = 361
+      Top = 20
+      Width = 425
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Skip Used Units including Initialization Part.'
       TabOrder = 0
     end
     object chkIgnoreReg: TCheckBox
       Left = 8
-      Top = 38
-      Width = 361
+      Top = 40
+      Width = 425
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Skip Used Units including Register Procedure.'
       TabOrder = 1
     end
     object mmoClean: TMemo
       Left = 8
-      Top = 144
-      Width = 177
-      Height = 89
+      Top = 146
+      Width = 210
+      Height = 97
       ScrollBars = ssBoth
       TabOrder = 5
       WordWrap = False
     end
     object mmoIgnore: TMemo
-      Left = 192
-      Top = 144
-      Width = 177
-      Height = 89
+      Left = 224
+      Top = 146
+      Width = 210
+      Height = 97
       ScrollBars = ssBoth
       TabOrder = 6
       WordWrap = False
     end
     object chkIgnoreNoSrc: TCheckBox
       Left = 8
-      Top = 82
-      Width = 361
+      Top = 80
+      Width = 425
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Skip Used Units without Source.'
       TabOrder = 3
     end
     object chkIgnoreCompRef: TCheckBox
       Left = 8
       Top = 60
-      Width = 361
+      Width = 425
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Skip Used Units Referred by Component Indirectly.'
       TabOrder = 2
     end
     object chkSaveAndClose: TCheckBox
       Left = 8
-      Top = 104
-      Width = 361
+      Top = 100
+      Width = 425
       Height = 17
+      Anchors = [akLeft, akTop, akRight]
       Caption = 'Auto Save/Close Unopened Files(For Huge Project but Can'#39't Undo).'
       TabOrder = 4
+    end
+  end
+  object grpDir: TGroupBox
+    Left = 8
+    Top = 144
+    Width = 440
+    Height = 100
+    Caption = 'Units &Directory'
+    TabOrder = 5
+    object lblDir: TLabel
+      Left = 8
+      Top = 44
+      Width = 48
+      Height = 13
+      Caption = 'Di&rectory:'
+      FocusControl = cbbDir
+    end
+    object btnSelectDir: TButton
+      Left = 400
+      Top = 42
+      Width = 21
+      Height = 21
+      Caption = '...'
+      TabOrder = 2
+      OnClick = btnSelectDirClick
+    end
+    object cbbDir: TComboBox
+      Left = 88
+      Top = 42
+      Width = 305
+      Height = 21
+      ItemHeight = 13
+      TabOrder = 1
+    end
+    object chkSubDirs: TCheckBox
+      Left = 88
+      Top = 70
+      Width = 105
+      Height = 17
+      Caption = '&Include Sub-folders'
+      Checked = True
+      State = cbChecked
+      TabOrder = 3
+    end
+    object chkOnlyDirectory: TCheckBox
+      Left = 8
+      Top = 20
+      Width = 425
+      Height = 17
+      Anchors = [akLeft, akTop, akRight]
+      Caption = 
+        'Only Clean Units in this Directory when Processing Project or Pr' +
+        'ojectGroup.'
+      Enabled = False
+      TabOrder = 0
+      OnClick = rbCurrUnitClick
     end
   end
 end
