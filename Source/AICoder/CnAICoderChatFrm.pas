@@ -489,7 +489,6 @@ end;
 
 procedure TCnAICoderChatForm.btnReferSelectionClick(Sender: TObject);
 begin
-  btnReferSelection.Down := not btnReferSelection.Down;
   CnAIEngineOptionManager.ReferSelection := btnReferSelection.Down;
 end;
 

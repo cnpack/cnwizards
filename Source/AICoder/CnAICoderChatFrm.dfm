@@ -18,7 +18,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   TextHeight = 13
   object spl1: TSplitter
     Left = 0
-    Top = 562
+    Top = 567
     Width = 541
     Height = 3
     Cursor = crVSplit
@@ -28,7 +28,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
     Left = 0
     Top = 30
     Width = 541
-    Height = 532
+    Height = 537
     Align = alClient
     BevelInner = bvLowered
     BevelOuter = bvNone
@@ -69,6 +69,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
       Top = 0
       Hint = 'Attach Selected Code in Editor when Asking'
       ImageIndex = 88
+      Style = tbsCheck
       OnClick = btnReferSelectionClick
     end
     object btn3: TToolButton
@@ -116,7 +117,7 @@ object CnAICoderChatForm: TCnAICoderChatForm
   end
   object pnlTop: TPanel
     Left = 0
-    Top = 565
+    Top = 570
     Width = 541
     Height = 107
     Align = alBottom
