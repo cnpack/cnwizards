@@ -57,10 +57,13 @@ type
     lblFormat: TLabel;
     cbbFormat: TComboBox;
     chkDateAsVersion: TCheckBox;
+    chkBuildCarry: TCheckBox;
+    cbbBuildCarryType: TComboBox;
+    lblRadix: TLabel;
     procedure btnHelpClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure chkLastCompiledClick(Sender: TObject);
-    procedure chkIncBuildClick(Sender: TObject);
+    procedure UpdateControl(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
 
   protected
@@ -102,15 +105,19 @@ begin
 {$ENDIF}
 end;
 
-procedure TCnVerEnhanceForm.chkLastCompiledClick(Sender: TObject);
+procedure TCnVerEnhanceForm.UpdateControl(Sender: TObject);
 begin
   lblFormat.Enabled := chkLastCompiled.Checked;
   cbbFormat.Enabled := chkLastCompiled.Checked;
+  chkDateAsVersion.Enabled := chkIncBuild.Checked;
+  lblRadix.Enabled := chkBuildCarry.Checked;
+  cbbBuildCarryType.Enabled := chkBuildCarry.Checked;
+  chkDateAsVersion.Enabled := not chkBuildCarry.Checked;
 end;
 
-procedure TCnVerEnhanceForm.chkIncBuildClick(Sender: TObject);
+procedure TCnVerEnhanceForm.FormShow(Sender: TObject);
 begin
-  chkDateAsVersion.Enabled := chkIncBuild.Checked;
+  UpdateControl(nil);
 end;
 
 {$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}

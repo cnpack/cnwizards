@@ -56,6 +56,8 @@ uses
   CnConsts, CnWizClasses;
 
 type
+  TCnBuildCarryType = (bctNone, bct10, bct100, bct1000, bct10000);
+  {* Build 号进位类型，不进，满十、百、千、万进}
 
 //==============================================================================
 // 版本信息扩展专家
@@ -70,10 +72,14 @@ type
     FIncBuild: Boolean;
     FBeforeBuildNo: Integer;
     FAfterBuildNo: Integer;
+    FBeforeRelease: Integer;
+    FAfterRelease: Integer;
     FIncludeVer: Boolean;
     FCompileNotifierAdded: Boolean;
     FDateTimeFormat: string;
     FDateAsVersion: Boolean;
+    FBuildCarryType: TCnBuildCarryType;
+    FThisTimeCarry: Boolean;
     function GetCompileNotifyEnabled: Boolean;
     procedure SetIncBuild(const Value: Boolean);
     procedure SetLastCompiled(const Value: Boolean);
@@ -106,6 +112,8 @@ type
     property DateTimeFormat: string read FDateTimeFormat write FDateTimeFormat;
     property DateAsVersion: Boolean read FDateAsVersion write FDateAsVersion;
     property IncBuild: Boolean read FIncBuild write SetIncBuild;
+    property BuildCarryType: TCnBuildCarryType read FBuildCarryType write FBuildCarryType;
+    {* Build 号朝 Release 进位的类型，包括不进及满十、百、千、万进}
   end;
 
 {$ENDIF CNWIZARDS_CNVERENHANCEWIZARD}
@@ -134,6 +142,7 @@ const
   csDateTimeFormat = 'DateTimeFormat';
   csDateAsVersion = 'DateAsVersion';
   csIncBuild = 'IncBuild';
+  csBuildCarryType = 'BuildCarryType';
 
   csDefaultDateTimeFormat = 'yyyy/mm/dd hh:nn:ss';
 
@@ -228,30 +237,53 @@ begin
     Exit;
 
   FAfterBuildNo := Options.GetOptionValue('Build');
+  FAfterRelease := Options.GetOptionValue('Release');
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg(Format('VerEnhance After Build No %d. Compile Succ %d.',
-    [FAfterBuildNo, Integer(Succeeded)]));
+  CnDebugger.LogMsg(Format('VerEnhance After Release %d Build No %d. Compile Succ %d.',
+    [FAfterRelease, FAfterBuildNo, Integer(Succeeded)]));
 {$ENDIF}
 
   if not Assigned(FCurrentProject) then
     Exit;
 
-  if not Succeeded and FIncBuild and (FAfterBuildNo > FBeforeBuildNo) then
+  if not Succeeded and FIncBuild then
   begin
-    // 编译失败，版本号改回去
+    // 编译失败
+    if not FThisTimeCarry and (FAfterBuildNo > FBeforeBuildNo) then
+    begin
+      // 没进位，且版本号大，则改回去
 {$IFDEF COMPILER6_UP} // 只 D6 及以上改回版本号，D5 由于 Bug 而无效
-    if CanSetValueWithoutBug(FCurrentProject) then
-      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
-    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
+      if CanSetValueWithoutBug(FCurrentProject) then
+        CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
-    UpdateConfigurationFileVersionAndTime(FIncBuild, False);
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
+      UpdateConfigurationFileVersionAndTime(FIncBuild, False);
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg(Format('VerEnhance Compiling Fail. Set Back Build No %d.', [FBeforeBuildNo]));
+      CnDebugger.LogFmt('VerEnhance Compiling Fail. Set Back Build No %d.', [FBeforeBuildNo]);
 {$ENDIF}
+    end
+    else if FThisTimeCarry and (FAfterBuildNo = 0) then
+    begin
+      // 有进位，且新版本号 0，两个都改回去
+{$IFDEF COMPILER6_UP} // 只 D6 及以上改回版本号，D5 由于 Bug 而无效
+      if CanSetValueWithoutBug(FCurrentProject) then
+      begin
+        CnOtaSetProjectOptionValue(Options, 'Release', Format('%d', [FBeforeRelease]));
+        CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo]));
+      end;
+  {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(FBeforeRelease));
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
+      UpdateConfigurationFileVersionAndTime(FIncBuild, False);
+  {$ENDIF}
+{$ENDIF}
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('VerEnhance Compiling Fail. Set Back Release %d Build No %d.', [FBeforeRelease, FBeforeBuildNo]);
+{$ENDIF}
+    end;
   end;
 
   if not FIncBuild and FLastCompiled then
@@ -271,6 +303,7 @@ end;
 procedure TCnVerEnhanceWizard.BeforeCompile(const Project: IOTAProject;
   IsCodeInsight: Boolean; var Cancel: Boolean);
 var
+  NewRelease, NewBuildNo: Integer;
 {$IFDEF COMPILER6_UP}
   I: Integer;
   ModuleFileEditor: IOTAEditor;
@@ -283,6 +316,23 @@ var
 {$IFDEF COMPILER6_UP}
   Y, M, D: Word;
 {$ENDIF}
+
+  // 传入加一后的 L，计算并返回是否进位
+  function CheckCarry(CarryType: TCnBuildCarryType; var H, L: Integer): Boolean;
+  begin
+    if ((CarryType = bct10) and (L >= 10)) or
+      ((CarryType = bct100) and (L >= 100)) or
+      ((CarryType = bct1000) and (L >= 1000)) or
+      ((CarryType = bct10000) and (L >= 10000)) then
+    begin
+      L := 0;
+      Inc(H);
+      Result := True;
+    end
+    else
+      Result := False;
+  end;
+
 begin
   if IsCodeInsight then
     Exit;
@@ -317,15 +367,21 @@ begin
     FBeforeBuildNo := 0; // 如果值非法，则改成 0
   end;
 
+  try
+    FBeforeRelease := Options.GetOptionValue('Release');
+  except
+    FBeforeRelease := 0; // 如果值非法，则改成 0
+  end;
+
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
   {$IFNDEF PROJECT_VERSION_NUMBER_BUG}
   // 2009/2010/XE has a bug that below got a wrong value.
   FBeforeBuildNo := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild), 0);
+  FBeforeRelease := StrToIntDef(CnOtaGetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease), 0);
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('VerEnhance BeforeCompile BeforeBuildNo: '
-    + IntToStr(FBeforeBuildNo));
+  CnDebugger.LogFmt('VerEnhance BeforeCompile BeforeRelease %d BeforeBuildNo %d', [FBeforeRelease, FBeforeBuildNo]);
 {$ENDIF}
 
   //先增加文件版本信息, 修改 OptionValue 的值就可以了
@@ -333,32 +389,58 @@ begin
   //（这是 D5/BCB5/BCB6 的一个Bug)，但在 D6 下又能修改成功
   if FIncBuild then
   begin
+    NewRelease := FBeforeRelease;
+    NewBuildNo := FBeforeBuildNo + 1;
+    FThisTimeCarry := False;
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     if CanSetValueWithoutBug(FCurrentProject) then
     begin
-      CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FBeforeBuildNo + 1]));
+      if FBuildCarryType = bctNone then
+      begin
+        CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [NewBuildNo]));
+        if FDateAsVersion then
+        begin
+          DecodeDate(Now, Y, M, D);
+          CnOtaSetProjectOptionValue(Options, 'MajorVersion', IntToStr(Y));
+          CnOtaSetProjectOptionValue(Options, 'MinorVersion', IntToStr(M));
+          CnOtaSetProjectOptionValue(Options, 'Release', IntToStr(D));
+        end;
+      end
+      else
+      begin
+        // 处理是否进位，并忽略 FDateAsVersion
+        FThisTimeCarry := CheckCarry(FBuildCarryType, NewRelease, NewBuildNo);
+        if FThisTimeCarry then
+          CnOtaSetProjectOptionValue(Options, 'Release', Format('%d', [NewRelease]));
+
+        CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [NewBuildNo]));
+      end;
+    end;
+{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+    if FBuildCarryType = bctNone then
+    begin
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(NewBuildNo));
       if FDateAsVersion then
       begin
         DecodeDate(Now, Y, M, D);
-        CnOtaSetProjectOptionValue(Options, 'MajorVersion', IntToStr(Y));
-        CnOtaSetProjectOptionValue(Options, 'MinorVersion', IntToStr(M));
-        CnOtaSetProjectOptionValue(Options, 'Release', IntToStr(D));
+        CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMajorVer, IntToStr(Y));
+        CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMinorVer, IntToStr(M));
+        CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(D));
       end;
-    end;
-    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
-{$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
-    CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo + 1));
-    if FDateAsVersion then
+    end
+    else
     begin
-      DecodeDate(Now, Y, M, D);
-      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMajorVer, IntToStr(Y));
-      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csMinorVer, IntToStr(M));
-      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(D));
+      // 处理是否进位，并忽略 FDateAsVersion
+      FThisTimeCarry := CheckCarry(FBuildCarryType, NewRelease, NewBuildNo);
+      if FThisTimeCarry then
+        CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(NewRelease));
+
+      CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(NewBuildNo));
     end;
 {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('VerEnhance Set New Build No %d.', [FBeforeBuildNo + 1]);
+    CnDebugger.LogFmt('VerEnhance Set New Release %d Build No %d.', [NewRelease, NewBuildNo]);
 {$ENDIF}
   end;
 
@@ -426,6 +508,12 @@ begin
       chkIncBuild.Checked := FIncBuild;
       chkDateAsVersion.Checked := FDateAsVersion;
       cbbFormat.Text := FDateTimeFormat;
+      chkBuildCarry.Checked := FBuildCarryType <> bctNone;
+
+      if chkBuildCarry.Checked then
+        cbbBuildCarryType.ItemIndex := Ord(FBuildCarryType) - 1
+      else
+        cbbBuildCarryType.ItemIndex := 1;
 
       if ShowModal = mrOK then
       begin
@@ -433,6 +521,11 @@ begin
         IncBuild := chkIncBuild.Checked;
         DateAsVersion := chkDateAsVersion.Checked;
         DateTimeFormat := Trim(cbbFormat.Text);
+
+        if chkBuildCarry.Checked then
+          FBuildCarryType := TCnBuildCarryType(cbbBuildCarryType.ItemIndex + 1)
+        else
+          FBuildCarryType := bctNone;
         
         DoSaveSettings;
       end;
@@ -519,6 +612,7 @@ begin
   FIncBuild := Ini.ReadBool('', csIncBuild, False);
   FDateTimeFormat := Ini.ReadString('', csDateTimeFormat, csDefaultDateTimeFormat);
   FDateAsVersion := Ini.ReadBool('', csDateAsVersion, False);
+  FBuildCarryType := TCnBuildCarryType(Ini.ReadInteger('', csBuildCarryType, Ord(FBuildCarryType)));
   UpdateCompileNotify; // 改为有需要才进行通知器的增加
 end;
 
@@ -528,6 +622,7 @@ begin
   Ini.WriteBool('', csIncBuild, FIncBuild);
   Ini.WriteString('', csDateTimeFormat, FDateTimeFormat);
   Ini.WriteBool('', csDateAsVersion, FDateAsVersion);
+  Ini.WriteInteger('', csBuildCarryType, Ord(FBuildCarryType));
 end;
 
 function TCnVerEnhanceWizard.GetCompileNotifyEnabled: Boolean;
