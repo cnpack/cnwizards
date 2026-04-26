@@ -313,6 +313,7 @@ const
   SCN_DBG_CMD_DUMP = 'dump';
   SCN_DBG_CMD_OPTION = 'option';
   SCN_DBG_CMD_STATE = 'state';
+  SCN_DBG_CMD_NOTIF = 'notif';
 
 var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
@@ -1922,11 +1923,16 @@ begin
         WizOptions.DumpToStrings(Results);
         Results.Add('');
       end
-      else if  LowerCase(Cmds[0]) = SCN_DBG_CMD_STATE then
+      else if LowerCase(Cmds[0]) = SCN_DBG_CMD_STATE then
       begin
         // 打印内部状态
         Results.Add('Loaded Icons: ' + IntToStr(CnLoadedIconCount));
         Results.Add('');
+      end
+      else if LowerCase(Cmds[0]) = SCN_DBG_CMD_NOTIF then
+      begin
+        // 打印 NotifierService 的内部状态
+        CnWizNotifierServices.DebugComand(Cmds, Results);
       end
       else  // No Wizard can process this debug command, do other stuff
         Results.Add('Unknown Debug Command ' + Cmd);

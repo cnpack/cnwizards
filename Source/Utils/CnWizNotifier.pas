@@ -25,6 +25,9 @@ unit CnWizNotifier;
 * 单元名称：IDE 通知服务单元
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元提供了 IDE 通知事件服务。
+*           注意私有类里的几个 *Intf 列表，其内部搁的通知器会 AddNotifier 进 IDE
+*           内部，无需手动释放，会在 IDE 的 Editor/Module 等释放时自动释放掉，
+*           但我们得保证在其析构函数里从 Intf 里删除（之前再次 RemoveNotifier 似乎也没关系）
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -247,6 +250,9 @@ type
     {* 将一个方法在应用程序空闲时执行}
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
     {* 将一个已经设置为空闲时执行的方法在它执行前通知停止执行，如已执行则此调用无效}
+
+    procedure DebugComand(Cmds: TStrings; Results: TStrings);
+    {* 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用}
   end;
 
 function CnWizNotifierServices: ICnWizNotifierServices;
@@ -397,6 +403,33 @@ type
   end;
 
 //==============================================================================
+// 模块通知器类（私有类）
+//==============================================================================
+
+{ TCnModuleNotifier }
+
+  TCnModuleNotifier = class(TModuleNotifierObject, IOTANotifier, IOTAModuleNotifier)
+  private
+    FNotifierServices: TCnWizNotifierServices;
+    NotifierIndex: Integer;
+    FileName: string;
+    Module: IOTAModule;
+  protected
+    // IOTANotifier
+    procedure AfterSave;
+    procedure BeforeSave;
+    procedure Destroyed;
+    procedure Modified;
+
+    // IOTAModuleNotifier
+    function CheckOverwrite: Boolean;
+    procedure ModuleRenamed(const NewName: string);
+  public
+    constructor Create(ANotifierServices: TCnWizNotifierServices);
+    destructor Destroy; override;
+  end;
+
+//==============================================================================
 // FormEditor 通知器类（私有类）
 //==============================================================================
 
@@ -506,9 +539,10 @@ type
     FFileNotifiers: TList;
     FActiveProjectChangedNotifiers: TList;
     FSourceEditorNotifiers: TList;
-    FSourceEditorIntfs: TList;
+    FSourceEditorIntfs: TList;              // 存储 Add 到 SourceEditor 的 Notifier
+    FModuleIntfs: TList;                    // 存储 Add 到 Module 的 Notifier
     FFormEditorNotifiers: TList;
-    FFormEditorIntfs: TList;
+    FFormEditorIntfs: TList;                // 存储 Add 到 FormEditor 的 Notifier
     FActiveFormNotifiers: TList;
     FActiveControlNotifiers: TList;
     FApplicationIdleNotifiers: TList;
@@ -700,6 +734,8 @@ type
     procedure DoActiveControlChange;
     procedure DoIdleExecute;
     procedure DoDesignerMenuBuild(Popup: TPopupMenu);
+
+    procedure DebugComand(Cmds: TStrings; Results: TStrings);
   public
     constructor Create;
     destructor Destroy; override;
@@ -1078,6 +1114,76 @@ begin
 end;
 
 //==============================================================================
+// 模块通知器类（私有类）
+//==============================================================================
+
+{ TCnModuleNotifier }
+
+constructor TCnModuleNotifier.Create(ANotifierServices: TCnWizNotifierServices);
+begin
+  Assert(Assigned(ANotifierServices));
+  inherited Create;
+  FNotifierServices := ANotifierServices;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnModuleNotifier.Create succeed');
+{$ENDIF}
+end;
+
+destructor TCnModuleNotifier.Destroy;
+var
+  Idx: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogEnter('TCnModuleNotifier.Destroy');
+{$ENDIF}
+  NoRefCount(Module) := nil;
+  with FNotifierServices.FModuleIntfs do
+  begin
+    Idx := IndexOf(Self);
+  {$IFDEF DEBUG}
+    CnDebugger.LogInteger(Idx, 'IndexOf TCnModuleNotifier');
+  {$ENDIF}
+    if Idx >= 0 then
+      Delete(Idx);
+  end;
+  inherited;
+{$IFDEF DEBUG}
+  CnDebugger.LogLeave('TCnModuleNotifier.Destroy');
+{$ENDIF}
+end;
+
+procedure TCnModuleNotifier.AfterSave;
+begin
+
+end;
+
+procedure TCnModuleNotifier.BeforeSave;
+begin
+
+end;
+
+procedure TCnModuleNotifier.Destroyed;
+begin
+
+end;
+
+procedure TCnModuleNotifier.Modified;
+begin
+
+end;
+
+function TCnModuleNotifier.CheckOverwrite: Boolean;
+begin
+
+end;
+
+procedure TCnModuleNotifier.ModuleRenamed(const NewName: string);
+begin
+
+end;
+
+//==============================================================================
 // FormEditor 通知器类（私有类）
 //==============================================================================
 
@@ -1313,6 +1419,7 @@ begin
 {$ENDIF}
   FSourceEditorNotifiers := TList.Create;
   FSourceEditorIntfs := TList.Create;
+  FModuleIntfs := TList.Create;
   FFormEditorNotifiers := TList.Create;
   FFormEditorIntfs := TList.Create;
   FActiveFormNotifiers := TList.Create;
@@ -1536,14 +1643,32 @@ begin
     begin
       if Assigned(FormEditor) then
       begin
-        {$IFDEF DEBUG}
-          CnDebugger.LogMsg('Form: ' + FormEditor.FileName);
-        {$ENDIF}
-          FormEditor.RemoveNotifier(NotifierIndex);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('FormEditor: ' + FormEditor.FileName);
+{$ENDIF}
+        FormEditor.RemoveNotifier(NotifierIndex);
       end;
     end;
   end;
   FreeAndNil(FFormEditorIntfs);
+
+{$IFDEF DEBUG}
+  CnDebugger.LogInteger(FModuleIntfs.Count, 'Remove ModuleNotifiers');
+{$ENDIF}
+  for I := FModuleIntfs.Count - 1 downto 0 do
+  begin
+    with TCnModuleNotifier(FModuleIntfs[I]) do
+    begin
+      if Assigned(Module) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('Module: ' + Module.FileName);
+{$ENDIF}
+        Module.RemoveNotifier(NotifierIndex);
+      end;
+    end;
+  end;
+  FreeAndNil(FModuleIntfs);
 
 {$IFDEF DEBUG}
   CnDebugger.LogInteger(FSourceEditorIntfs.Count, 'Remove SourceEditorNotifiers');
@@ -1554,10 +1679,10 @@ begin
     begin
       if Assigned(SourceEditor) then
       begin
-        {$IFDEF DEBUG}
-          CnDebugger.LogMsg('Source: ' + SourceEditor.FileName);
-        {$ENDIF}
-          SourceEditor.RemoveNotifier(NotifierIndex);
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('SourceEditor: ' + SourceEditor.FileName);
+{$ENDIF}
+        SourceEditor.RemoveNotifier(NotifierIndex);
       end;
     end;
   end;
@@ -1568,6 +1693,54 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('TCnWizNotifierServices.Destroy');
 {$ENDIF}
+end;
+
+// 打印内部信息
+procedure TCnWizNotifierServices.DebugComand(Cmds: TStrings; Results: TStrings);
+var
+  I: Integer;
+  NS: TCnSourceEditorNotifier;
+  NF: TCnFormEditorNotifier;
+  NM: TCnModuleNotifier;
+begin
+  Results.Add('Client Notifiers:');
+  Results.Add('  BeforeCompile: ' + IntToStr(FBeforeCompileNotifiers.Count));
+  Results.Add('  AfterCompile: ' + IntToStr(FAfterCompileNotifiers.Count));
+  Results.Add('  ProcessCreated: ' + IntToStr(FProcessCreatedNotifiers.Count));
+  Results.Add('  ProcessDestroyed: ' + IntToStr(FProcessDestroyedNotifiers.Count));
+  Results.Add('  BreakpointAdded: ' + IntToStr(FBreakpointAddedNotifiers.Count));
+  Results.Add('  BreakpointDeleted: ' + IntToStr(FBreakpointDeletedNotifiers.Count));
+  Results.Add('  File: ' + IntToStr(FFileNotifiers.Count));
+  Results.Add('  ActiveProjectChanged: ' + IntToStr(FActiveProjectChangedNotifiers.Count));
+  Results.Add('  SourceEditor: ' + IntToStr(FSourceEditorNotifiers.Count));
+  Results.Add('  FormEditor: ' + IntToStr(FFormEditorNotifiers.Count));
+  Results.Add('  ActiveForm: ' + IntToStr(FActiveFormNotifiers.Count));
+  Results.Add('  ActiveControl: ' + IntToStr(FActiveControlNotifiers.Count));
+  Results.Add('  ApplicationIdle: ' + IntToStr(FApplicationIdleNotifiers.Count));
+  Results.Add('  ApplicationMessage: ' + IntToStr(FApplicationMessageNotifiers.Count));
+  Results.Add('  AppEvent: ' + IntToStr(FAppEventNotifiers.Count));
+  Results.Add('  DesignerMenuBuild: ' + IntToStr(FDesignerMenuBuildNotifiers.Count));
+  Results.Add('  BeforeThemeChange: ' + IntToStr(FBeforeThemeChangeNotifiers.Count));
+  Results.Add('  AfterThemeChange: ' + IntToStr(FAfterThemeChangeNotifiers.Count));
+
+  Results.Add('IDE SourceEditor Notifiers:');
+  for I := 0 to FSourceEditorIntfs.Count - 1 do
+  begin
+    NS := TCnSourceEditorNotifier(FSourceEditorIntfs[I]);
+    Results.Add(Format('  %d: %s', [NS.NotifierIndex, NS.SourceEditor.FileName]));
+  end;
+  Results.Add('IDE FormEditor Notifiers:');
+  for I := 0 to FFormEditorIntfs.Count - 1 do
+  begin
+    NF := TCnFormEditorNotifier(FFormEditorIntfs[I]);
+    Results.Add(Format('  %d: %s', [NF.NotifierIndex, NF.FormEditor.FileName]));
+  end;
+  Results.Add('IDE Module Notifiers:');
+  for I := 0 to FModuleIntfs.Count - 1 do
+  begin
+    NM := TCnModuleNotifier(FModuleIntfs[I]);
+    Results.Add(Format('  %d: %s', [NM.NotifierIndex, NM.Module.FileName]));
+  end;
 end;
 
 //------------------------------------------------------------------------------
@@ -1630,6 +1803,11 @@ procedure TCnWizNotifierServices.FileNotification(
   NotifyCode: TOTAFileNotification; const FileName: string);
 var
   I: Integer;
+  ModuleServices: IOTAModuleServices;
+  Module: IOTAModule;
+  Project: IOTAProject;
+  Notifier: TCnModuleNotifier;
+  M: Boolean;
 {$IFDEF COMPILER5}
   S: string;
 {$ENDIF}
@@ -1652,6 +1830,46 @@ begin
         TCnWizFileNotifier(Notifier)(NotifyCode, FileName);
     except
       DoHandleException('TCnWizNotifierServices.FileNotification[' + IntToStr(I) + ']');
+    end;
+  end;
+
+  if (NotifyCode = ofnFileOpened) and
+    (IsProject(FileName) or IsBdsProject(FileName) or IsDProject(FileName)) then
+  begin
+    // 找对应文件的 Module，如果是 IOTAProject，则增加该文件的 Notifier
+    if Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) then
+    begin
+      Module := ModuleServices.FindModule(FileName);
+      if Supports(Module, IOTAProject, Project) then
+      begin
+{$IFDEF DEBUG}
+        CnDebugger.LogMsg('FileNotification Get Project Module ' + FileName);
+{$ENDIF}
+        // 打开则先判断有无通知器，如无则根据文件名增加
+        M := False;
+        for I := 0 to FModuleIntfs.Count - 1 do
+        begin
+          Notifier := TCnModuleNotifier(FModuleIntfs[I]);
+          if Notifier.FileName = FileName then
+          begin
+            M := True;
+            Break;
+          end;
+        end;
+
+        if not M then
+        begin
+          Notifier := TCnModuleNotifier.Create(Self);
+          NoRefCount(Notifier.Module) := NoRefCount(Module);
+          Notifier.FileName := FileName;
+          Notifier.NotifierIndex := Module.AddNotifier(Notifier as IOTAModuleNotifier);
+          FModuleIntfs.Add(Notifier);
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('FileNotification Add a Notifier at %d for Module %s',
+            [Notifier.NotifierIndex, FileName]);
+{$ENDIF}
+        end;
+      end;
     end;
   end;
 
@@ -1815,7 +2033,7 @@ begin
   // D5 下如果为包文件注册通知器，在释放时可能会出异常
   if IsPackage(SourceEditor.FileName) then
     Exit;
-{$ENDIF COMPILER5}
+{$ENDIF}
 
   if SourceEditor.GetEditViewCount > 0 then
   begin
@@ -1885,6 +2103,7 @@ begin
         {$ENDIF}
           SourceEditorNotify(SourceEditor, setClosing);
           for J := 0 to FSourceEditorIntfs.Count - 1 do
+          begin
             if TCnSourceEditorNotifier(FSourceEditorIntfs[J]).SourceEditor =
               SourceEditor then
             begin
@@ -1894,6 +2113,7 @@ begin
               TCnSourceEditorNotifier(FSourceEditorIntfs[J]).ClosingNotified := True;
               Break;
             end;
+          end;
         end;
       end;
     end;
