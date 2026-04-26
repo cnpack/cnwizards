@@ -2315,8 +2315,8 @@ begin
         SnapForm := nil;
 {$ENDIF}
 {$IFDEF DEBUG}
-      if SnapGot then
-        CnDebugger.LogMsg('TCnFormEnhanceWizard.UpdateFlatPanelsPosition Get SnapForm ' + SnapForm.ClassName);
+//    if SnapGot then
+//      CnDebugger.LogMsg('TCnFormEnhanceWizard.UpdateFlatPanelsPosition Get SnapForm ' + SnapForm.ClassName);
 {$ENDIF}
     end
     else

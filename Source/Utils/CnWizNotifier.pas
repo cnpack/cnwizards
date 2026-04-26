@@ -26,8 +26,12 @@ unit CnWizNotifier;
 * 单元作者：周劲羽 (zjy@cnpack.org)
 * 备    注：该单元提供了 IDE 通知事件服务。
 *           注意私有类里的几个 *Intf 列表，其内部搁的通知器会 AddNotifier 进 IDE
-*           内部，无需手动释放，会在 IDE 的 Editor/Module 等释放时自动释放掉，
-*           但我们得保证在其析构函数里从 Intf 里删除（之前再次 RemoveNotifier 似乎也没关系）
+*           内部，无需主动释放，会在 IDE 的 Editor/Module 等释放时触发 Destroyed
+*           从而我们自身需要调用 RemoveNotifier 从 IDE 里删除，接下来在因为接口
+*           机制而自动释放时，我们得保证在其析构函数里从 Intf 里删除。
+*
+*           问题：给 Project 的 Module 增加通知器，会导致无法另存工程？这啥 Bug？
+*
 * 开发平台：PWin2000Pro + Delphi 5.0
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
@@ -408,11 +412,10 @@ type
 
 { TCnModuleNotifier }
 
-  TCnModuleNotifier = class(TModuleNotifierObject, IOTANotifier, IOTAModuleNotifier)
+  TCnModuleNotifier = class(TNotifierObject, IOTANotifier, IOTAModuleNotifier)
   private
     FNotifierServices: TCnWizNotifierServices;
     NotifierIndex: Integer;
-    FileName: string;
     Module: IOTAModule;
   protected
     // IOTANotifier
@@ -685,6 +688,7 @@ type
     procedure CheckCompNotifyObj;
     procedure FormEditorFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
+    procedure ModuleRenamed(const OldName, NewName: string);
 {$ENDIF}
 
 {$IFDEF LAZARUS}
@@ -1165,7 +1169,11 @@ end;
 
 procedure TCnModuleNotifier.Destroyed;
 begin
-
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('TCnModuleNotifier.Destroyed: ' + Module.FileName);
+{$ENDIF}
+  Module.RemoveNotifier(NotifierIndex);
+  NoRefCount(Module) := nil;
 end;
 
 procedure TCnModuleNotifier.Modified;
@@ -1807,7 +1815,6 @@ var
   Module: IOTAModule;
   Project: IOTAProject;
   Notifier: TCnModuleNotifier;
-  M: Boolean;
 {$IFDEF COMPILER5}
   S: string;
 {$ENDIF}
@@ -1833,45 +1840,30 @@ begin
     end;
   end;
 
-  if (NotifyCode = ofnFileOpened) and
-    (IsProject(FileName) or IsBdsProject(FileName) or IsDProject(FileName)) then
-  begin
-    // 找对应文件的 Module，如果是 IOTAProject，则增加该文件的 Notifier
-    if Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) then
-    begin
-      Module := ModuleServices.FindModule(FileName);
-      if Supports(Module, IOTAProject, Project) then
-      begin
-{$IFDEF DEBUG}
-        CnDebugger.LogMsg('FileNotification Get Project Module ' + FileName);
-{$ENDIF}
-        // 打开则先判断有无通知器，如无则根据文件名增加
-        M := False;
-        for I := 0 to FModuleIntfs.Count - 1 do
-        begin
-          Notifier := TCnModuleNotifier(FModuleIntfs[I]);
-          if Notifier.FileName = FileName then
-          begin
-            M := True;
-            Break;
-          end;
-        end;
-
-        if not M then
-        begin
-          Notifier := TCnModuleNotifier.Create(Self);
-          NoRefCount(Notifier.Module) := NoRefCount(Module);
-          Notifier.FileName := FileName;
-          Notifier.NotifierIndex := Module.AddNotifier(Notifier as IOTAModuleNotifier);
-          FModuleIntfs.Add(Notifier);
-{$IFDEF DEBUG}
-          CnDebugger.LogFmt('FileNotification Add a Notifier at %d for Module %s',
-            [Notifier.NotifierIndex, FileName]);
-{$ENDIF}
-        end;
-      end;
-    end;
-  end;
+//  if (NotifyCode = ofnFileOpened) and
+//    (IsProject(FileName) or IsBdsProject(FileName) or IsDProject(FileName)) then
+//  begin
+//    // 找对应文件的 Module，如果是 IOTAProject，则增加该文件的 Notifier
+//    if Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) then
+//    begin
+//      Module := ModuleServices.FindModule(FileName);
+//      if Supports(Module, IOTAProject, Project) then
+//      begin
+//{$IFDEF DEBUG}
+//        CnDebugger.LogMsg('FileNotification Get Project Module ' + FileName);
+//{$ENDIF}
+//        // 打开时添加通知器
+//        Notifier := TCnModuleNotifier.Create(Self);
+//        NoRefCount(Notifier.Module) := NoRefCount(Module);
+//        Notifier.NotifierIndex := Module.AddNotifier(Notifier as IOTAModuleNotifier);
+//        FModuleIntfs.Add(Notifier);
+//{$IFDEF DEBUG}
+//        CnDebugger.LogFmt('FileNotification Add a Notifier at %d for Module %s',
+//          [Notifier.NotifierIndex, FileName]);
+//{$ENDIF}
+//      end;
+//    end;
+//  end;
 
 {$IFDEF COMPILER5}
   // Delphi 5 下没有工程改变通知，在文件打开后关闭前比较检测
@@ -2357,6 +2349,23 @@ begin
             end;
           end;
         end;
+    end;
+  end;
+end;
+
+procedure TCnWizNotifierServices.ModuleRenamed(const OldName, NewName: string);
+var
+  I: Integer;
+begin
+  // 用 Project Module 的 Rename 事件额外包装工程改变通知
+  if FActiveProjectChangedNotifiers <> nil then
+  begin
+    for I := FActiveProjectChangedNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FActiveProjectChangedNotifiers[I])^ do
+        TNotifyEvent(Notifier)(Self);
+    except
+      DoHandleException('TCnWizNotifierServices.ActiveProjectChanged by ModuleRename [' + IntToStr(I) + ']');
     end;
   end;
 end;

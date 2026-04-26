@@ -4790,12 +4790,16 @@ function CnOtaGetDesignContainerFromEditor(FormEditor: IOTAFormEditor): TWinCont
 var
   Root: TComponent;
 begin
+  Result := nil;
   if FormEditor = nil then
     FormEditor := CnOtaGetCurrentFormEditor;
+  if FormEditor = nil then
+    Exit;
 
   { 支持为 Root 非 TWinControl 的设计对象取其 Container }
-  Result := nil;
   Root := CnOtaGetRootComponentFromEditor(FormEditor);
+  if Root = nil then
+    Exit;
 
   // Root 也可能是 FMX 的 Form，如何拿其 Win 下的 Container？
   if Root is TWinControl then
