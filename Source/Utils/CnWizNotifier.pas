@@ -1705,12 +1705,15 @@ end;
 
 // 打印内部信息
 procedure TCnWizNotifierServices.DebugComand(Cmds: TStrings; Results: TStrings);
+{$IFDEF DELPHI_OTA}
 var
   I: Integer;
   NS: TCnSourceEditorNotifier;
   NF: TCnFormEditorNotifier;
   NM: TCnModuleNotifier;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   Results.Add('Client Notifiers:');
   Results.Add('  BeforeCompile: ' + IntToStr(FBeforeCompileNotifiers.Count));
   Results.Add('  AfterCompile: ' + IntToStr(FAfterCompileNotifiers.Count));
@@ -1749,6 +1752,7 @@ begin
     NM := TCnModuleNotifier(FModuleIntfs[I]);
     Results.Add(Format('  %d: %s', [NM.NotifierIndex, NM.Module.FileName]));
   end;
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
