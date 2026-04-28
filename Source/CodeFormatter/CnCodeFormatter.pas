@@ -4060,7 +4060,7 @@ begin
   { !! Fixed. e.g. "const proc: procedure = nil;" }
   if Scanner.Token in [tokSymbol] + ComplexTokens + DirectiveTokens
     + KeywordTokens - [tokKeywordBegin, tokKeywordVar, tokKeywordConst, tokKeywordType,
-    tokKeywordProcedure, tokKeywordFunction] then
+    tokKeywordLabel, tokKeywordProcedure, tokKeywordFunction] then
   begin // 函数名允许出现关键字，但匿名函数无参而碰见 begin/var/const/type 以及嵌套 function/procedure 等除外
     // 处理 of
     if (Scanner.Token <> tokKeywordOf) or (Scanner.ForwardToken = tokLB) then
