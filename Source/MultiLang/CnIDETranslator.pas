@@ -132,6 +132,7 @@ type
     FMenuCaptionIndex: TStringList;   // Sorted，key=Category|Mechanism|MenuPath，Object=TCnMenuCaptionEntry
     FMainMenu: TMainMenu;
     FMainMenuPath: string;
+    FCurProjectName: string;
     FAttachedPopupMenuHooks: TObjectList; // 容纳 TCnMenuHookWrapper
     FAttachedMenuItems: TObjectList;
     // 注意不能记录已经静态翻译过的 PopupMenu 来避免重复，因为 IDE 自身会老改
@@ -300,8 +301,9 @@ type
     procedure PropertySheetAfterMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
 {$ENDIF}
-{$IFDEF COMPILER7_UP}
+
     procedure OnApplicationIdle(Sender: TObject);
+{$IFDEF COMPILER7_UP}
     procedure CheckActionMainMenuBarPersistentHotKeys;
     {* 汉化状态下，一空闲就改 PersistentHotKeys 为 True}
 {$ENDIF}
@@ -2651,10 +2653,8 @@ begin
   CnWizNotifierServices.AddActiveProjectChangedNotifier(ActiveProjectChanged);
   CnWizNotifierServices.AddActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.AddDesignerMenuBuildNotifier(DesignerMenuBuild);
+  CnWizNotifierServices.AddApplicationIdleNotifier(OnApplicationIdle);
 
-{$IFDEF COMPILER7_UP}
-   CnWizNotifierServices.AddApplicationIdleNotifier(OnApplicationIdle);
-{$ENDIF}
 {$IFDEF BDS}
   CnWizNotifierServices.AddSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
@@ -2672,10 +2672,7 @@ begin
   CnWizNotifierServices.RemoveSourceEditorNotifier(SourceEditorNotify);
 {$ENDIF}
 
-{$IFDEF COMPILER7_UP}
-   CnWizNotifierServices.RemoveApplicationIdleNotifier(OnApplicationIdle);
-{$ENDIF}
-
+  CnWizNotifierServices.RemoveApplicationIdleNotifier(OnApplicationIdle);
   CnWizNotifierServices.RemoveDesignerMenuBuildNotifier(DesignerMenuBuild);
   CnWizNotifierServices.RemoveActiveFormNotifier(ActiveFormChanged);
   CnWizNotifierServices.RemoveActiveProjectChangedNotifier(ActiveProjectChanged);
@@ -3790,13 +3787,24 @@ begin
   end;
 end;
 
-{$IFDEF COMPILER7_UP}
-
 procedure TCnMenuFormTranslator.OnApplicationIdle(Sender: TObject);
+var
+  S: string;
 begin
+{$IFDEF COMPILER7_UP}
   if CanTranslateToChinese then
     CheckActionMainMenuBarPersistentHotKeys;
+{$ENDIF}
+  // 获取当前工程名和旧的比对，如果不同就更新，用来弥补工程另存时无通知的问题
+  S := CnOtaGetCurrentProjectName;
+  if S <> FCurProjectName then
+  begin
+    FCurProjectName := S;
+    ActiveProjectChanged(Sender);
+  end;
 end;
+
+{$IFDEF COMPILER7_UP}
 
 procedure TCnMenuFormTranslator.CheckActionMainMenuBarPersistentHotKeys;
 var
