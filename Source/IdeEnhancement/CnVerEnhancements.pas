@@ -126,7 +126,7 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnVerEnhanceFrm, VersionInfo;
+  CnVerEnhanceFrm, CnResFile;
 
 const
   csDateKeyName = 'LastCompiledTime';
@@ -309,7 +309,7 @@ var
   ModuleFileEditor: IOTAEditor;
   ProjectResource: IOTAProjectResource;
   ResourceEntry: IOTAResourceEntry;
-  VI: TVersionInfo;
+  VI: TCnVersionInfo;
   Stream: TMemoryStream;
 {$ENDIF}
   Options: IOTAProjectOptions;
@@ -479,7 +479,7 @@ begin
       ResourceEntry := ProjectResource.FindEntry(RT_VERSION, PChar(1));
       if Assigned(ResourceEntry) then
       begin
-        VI := TVersionInfo.Create(PChar(ResourceEntry.GetData));
+        VI := TCCnVersionInfo.Create(PChar(ResourceEntry.GetData));
         try
           Stream := TMemoryStream.Create;
           try
