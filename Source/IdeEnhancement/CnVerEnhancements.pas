@@ -220,6 +220,11 @@ procedure TCnVerEnhanceWizard.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
 var
   Options: IOTAProjectOptions;
+{$IFDEF VERSIONINFO_PER_CONFIGURATION}
+  ResFileName: string;
+  ResFile: TCnResFile;
+  M1, M2, M3, M4, M5, M6: Integer;
+{$ENDIF}
 begin
   if IsCodeInsight or not Active then
     Exit;
@@ -259,6 +264,28 @@ begin
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
       CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
       UpdateConfigurationFileVersionAndTime(FIncBuild, False);
+
+  {$IFDEF VERSIONINFO_PER_CONFIGURATION}
+      // XE2 以上的编译（非 Build）不会把版本号写入 res，得手工写
+      ResFileName := ChangeFileExt(FCurrentProject.FileName, '.res');
+      if FileExists(ResFileName) then
+      begin
+        ResFile := TCnResFile.Create(ResFileName);
+        try
+          // 操作 res 文件写回 FBeforeBuildNo
+          if ResFile.GetVersionInfo(M1, M2, M3, M4, M5, M6) then
+          begin
+            ResFile.SetVersionInfo(M1, M2, M3, FBeforeBuildNo, M5, M6);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Update Res File Back to %d', [FBeforeBuildNo]);
+{$ENDIF}
+          end;
+        finally
+          ResFile.Free;
+        end;
+      end;
+  {$ENDIF}
+
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -278,6 +305,27 @@ begin
       CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(FBeforeRelease));
       CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(FBeforeBuildNo));
       UpdateConfigurationFileVersionAndTime(FIncBuild, False);
+
+  {$IFDEF VERSIONINFO_PER_CONFIGURATION}
+      // XE2 以上的编译（非 Build）不会把版本号写入 res，得手工写
+      ResFileName := ChangeFileExt(FCurrentProject.FileName, '.res');
+      if FileExists(ResFileName) then
+      begin
+        ResFile := TCnResFile.Create(ResFileName);
+        try
+          // 操作 res 文件写回 FBeforeRelease、FBeforeBuildNo
+          if ResFile.GetVersionInfo(M1, M2, M3, M4, M5, M6) then
+          begin
+            ResFile.SetVersionInfo(M1, M2, FBeforeRelease, FBeforeBuildNo, M5, M6);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Update Res File Back to %d.%d', [FBeforeRelease, FBeforeBuildNo]);
+{$ENDIF}
+          end;
+        finally
+          ResFile.Free;
+        end;
+      end;
+  {$ENDIF}
   {$ENDIF}
 {$ENDIF}
 {$IFDEF DEBUG}
@@ -292,7 +340,7 @@ begin
 {$IFDEF COMPILER6_UP} // 只 D6 及以上增加版本号，D5 由于 Bug 而无效
     if CanSetValueWithoutBug(FCurrentProject) then
       CnOtaSetProjectOptionValue(Options, 'Build', Format('%d', [FAfterBuildNo]));
-    // TODO: 以上一句在 2009 或以上可能导致 dpk 源文件被破坏，原因未知，只能禁用
+
   {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
     UpdateConfigurationFileVersionAndTime(FIncBuild, FLastCompiled);
   {$ENDIF}
@@ -311,6 +359,11 @@ var
   ResourceEntry: IOTAResourceEntry;
   VI: TCnVersionInfo;
   Stream: TMemoryStream;
+{$IFDEF VERSIONINFO_PER_CONFIGURATION}
+  ResFileName: string;
+  ResFile: TCnResFile;
+  M1, M2, M3, M4, M5, M6: Integer;
+{$ENDIF}
 {$ENDIF}
   Options: IOTAProjectOptions;
 {$IFDEF COMPILER6_UP}
@@ -420,6 +473,28 @@ begin
     if FBuildCarryType = bctNone then
     begin
       CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(NewBuildNo));
+
+  {$IFDEF VERSIONINFO_PER_CONFIGURATION}
+      // XE2 以上的编译（非 Build）不会把版本号写入 res，得手工写
+      ResFileName := ChangeFileExt(FCurrentProject.FileName, '.res');
+      if FileExists(ResFileName) then
+      begin
+        ResFile := TCnResFile.Create(ResFileName);
+        try
+          // 操作 res 文件写 NewBuildNo
+          if ResFile.GetVersionInfo(M1, M2, M3, M4, M5, M6) then
+          begin
+            ResFile.SetVersionInfo(M1, M2, M3, NewBuildNo, M5, M6);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Update Res File to %d', [NewBuildNo]);
+{$ENDIF}
+          end;
+        finally
+          ResFile.Free;
+        end;
+      end;
+  {$ENDIF}
+
       if FDateAsVersion then
       begin
         DecodeDate(Now, Y, M, D);
@@ -436,6 +511,30 @@ begin
         CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csRelease, IntToStr(NewRelease));
 
       CnOtaSetProjectCurrentBuildConfigurationValue(FCurrentProject, csBuild, IntToStr(NewBuildNo));
+
+  {$IFDEF VERSIONINFO_PER_CONFIGURATION}
+      // XE2 以上的编译（非 Build）不会把版本号写入 res，得手工写
+      ResFileName := ChangeFileExt(FCurrentProject.FileName, '.res');
+      if FileExists(ResFileName) then
+      begin
+        ResFile := TCnResFile.Create(ResFileName);
+        try
+          if ResFile.GetVersionInfo(M1, M2, M3, M4, M5, M6) then
+          begin
+            // 操作 res 文件根据进位状况写 NewRelease、NewBuildNo
+            if FThisTimeCarry then
+              ResFile.SetVersionInfo(M1, M2, NewRelease, NewBuildNo, M5, M6)
+            else
+              ResFile.SetVersionInfo(M1, M2, M3, NewBuildNo, M5, M6);
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Update Res File to %d.%d', [NewRelease, NewBuildNo]);
+{$ENDIF}
+          end;
+        finally
+          ResFile.Free;
+        end;
+      end;
+  {$ENDIF}
     end;
 {$ENDIF}
 {$ENDIF}
@@ -479,7 +578,7 @@ begin
       ResourceEntry := ProjectResource.FindEntry(RT_VERSION, PChar(1));
       if Assigned(ResourceEntry) then
       begin
-        VI := TCCnVersionInfo.Create(PChar(ResourceEntry.GetData));
+        VI := TCnVersionInfo.Create(PChar(ResourceEntry.GetData));
         try
           Stream := TMemoryStream.Create;
           try

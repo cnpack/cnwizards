@@ -48,23 +48,17 @@ type
     FFileName: string;
     FVersionInfoStart: Int64;
     FVersionDataSize: DWORD;
-    FStreamOwned: Boolean;
-    FCurMajor, FCurMinor, FCurRelease, FCurBuild: Integer;
-    FCurLangID, FCurCodePage: Integer;
     function ReadResourceEntry(var HeaderSize: Integer;
       var DataSize: DWORD; var ResType: Integer): Boolean;
   public
-    constructor Create(const AFileName: string; AOwnedStream: Boolean = False);
+    constructor Create(const AFileName: string);
     destructor Destroy; override;
+
     function HasVersionInfo: Boolean;
     function GetVersionInfo(var Major, Minor, Release, Build: Integer;
       var LangID, CodePage: Integer): Boolean;
     function SetVersionInfo(Major, Minor, Release, Build: Integer;
       LangID, CodePage: Integer): Boolean;
-    function IncrementBuildNo(IncValue: Integer = 1): Boolean;
-    function RestoreOriginal: Boolean;
-
-    property Stream: TFileStream read FStream;
   end;
 
   TCnVersionInfo = class
@@ -152,38 +146,31 @@ end;
 
 { TCnResFile }
 
-constructor TCnResFile.Create(const AFileName: string; AOwnedStream: Boolean = False);
+constructor TCnResFile.Create(const AFileName: string);
 begin
   inherited Create;
   FFileName := AFileName;
   FVersionInfoStart := Int64(-1);
   FVersionDataSize := 0;
-  FStreamOwned := AOwnedStream;
-  FStream := nil;
 
-  if not AOwnedStream then
+  if FileExists(AFileName) then
   begin
-    if FileExists(AFileName) then
-    begin
-      try
-        FStream := TFileStream.Create(AFileName, fmOpenReadWrite or fmShareDenyWrite);
-      except
-        FStream := nil;
-      end;
+    try
+      FStream := TFileStream.Create(AFileName, fmOpenReadWrite or fmShareDenyWrite);
+    except
+      FStream := nil;
     end;
   end;
 end;
 
 destructor TCnResFile.Destroy;
 begin
-  if FStreamOwned then
-    FStream := nil
-  else
-    FStream.Free;
+  FStream.Free;
   inherited;
 end;
 
-function TCnResFile.ReadResourceEntry(var HeaderSize: Integer; var DataSize: DWORD; var ResType: Integer): Boolean;
+function TCnResFile.ReadResourceEntry(var HeaderSize: Integer;
+  var DataSize: DWORD; var ResType: Integer): Boolean;
 var
   Header: TCnResResourceHeader;
 begin
@@ -212,7 +199,8 @@ begin
   Result := GetVersionInfo(Major, Minor, Release, Build, LangID, CodePage);
 end;
 
-function TCnResFile.GetVersionInfo(var Major, Minor, Release, Build: Integer; var LangID, CodePage: Integer): Boolean;
+function TCnResFile.GetVersionInfo(var Major, Minor, Release, Build: Integer;
+  var LangID, CodePage: Integer): Boolean;
 var
   HeaderSize: Integer;
   DataSize: DWORD;
@@ -228,12 +216,6 @@ begin
   LangID := $0409;
   CodePage := 1252;
   FVersionInfoStart := Int64(-1);
-  FCurMajor := 0;
-  FCurMinor := 0;
-  FCurRelease := 0;
-  FCurBuild := 0;
-  FCurLangID := $0409;
-  FCurCodePage := 1252;
 
   if FStream = nil then
     Exit;
@@ -263,10 +245,7 @@ begin
               Minor := LoWord(FixedInfo.dwFileVersionMS);
               Release := HiWord(FixedInfo.dwFileVersionLS);
               Build := LoWord(FixedInfo.dwFileVersionLS);
-              FCurMajor := Major;
-              FCurMinor := Minor;
-              FCurRelease := Release;
-              FCurBuild := Build;
+
               Result := True;
               Exit;
             end;
@@ -284,7 +263,8 @@ begin
   end;
 end;
 
-function TCnResFile.SetVersionInfo(Major, Minor, Release, Build: Integer; LangID, CodePage: Integer): Boolean;
+function TCnResFile.SetVersionInfo(Major, Minor, Release, Build: Integer;
+  LangID, CodePage: Integer): Boolean;
 var
   HeaderSize: Integer;
   DataSize: DWORD;
@@ -338,28 +318,6 @@ begin
   except
     Result := False;
   end;
-end;
-
-function TCnResFile.IncrementBuildNo(IncValue: Integer = 1): Boolean;
-var
-  Major, Minor, Release, Build: Integer;
-  LangID, CodePage: Integer;
-begin
-  Result := False;
-  if FStream = nil then
-    Exit;
-
-  if GetVersionInfo(Major, Minor, Release, Build, LangID, CodePage) then
-  begin
-    Inc(Build, IncValue);
-    Result := SetVersionInfo(Major, Minor, Release, Build, LangID, CodePage);
-  end;
-end;
-
-function TCnResFile.RestoreOriginal: Boolean;
-begin
-  Result := SetVersionInfo(FCurMajor, FCurMinor, FCurRelease, FCurBuild,
-    FCurLangID, FCurCodePage);
 end;
 
 function CnReadProjectResVersion(const ResFileName: string; var Major, Minor, Release, Build: Integer): Boolean;
