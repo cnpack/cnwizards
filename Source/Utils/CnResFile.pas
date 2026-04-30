@@ -29,6 +29,9 @@ unit CnResFile;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
 * 修改记录：2026.04.30 V1.1
+*               修正 ReadResourceEntry 未正确解析 RES 文件 Type 字段编码的 Bug
+*               RES 文件中 Type/Name 使用 0xFFFF 前缀标识序号型 ID，
+*               旧代码将原始 DWORD 直接与 RT_VERSION(16) 比较，永远不匹配
 *               修正版本号读写时未跳过 VS_VERSIONINFO 头部的 Bug
 *           2026.04.29 V1.0
 *               创建单元
@@ -113,18 +116,6 @@ type
     constructor Create(const AValue: string; ALangID, ACodePage: Integer);
   end;
 
-  TCnResResourceHeader = packed record
-    DataSize: DWORD;
-    HeaderSize: DWORD;
-    ResType: DWORD;
-    Name: DWORD;
-    DataVersion: DWORD;
-    MemoryFlags: Word;
-    LanguageId: Word;
-    Version: DWORD;
-    Characteristics: DWORD;
-  end;
-
   TCnVSFixedFileInfo = packed record
     dwSignature: DWORD;
     dwStrucVersion: DWORD;
@@ -155,6 +146,7 @@ begin
   FFileName := AFileName;
   FVersionInfoStart := Int64(-1);
   FVersionDataSize := 0;
+  FFixedFilePos := Int64(-1);
 
   if FileExists(AFileName) then
   begin
@@ -175,20 +167,50 @@ end;
 function TCnResFile.ReadResourceEntry(var HeaderSize: Integer;
   var DataSize: DWORD; var ResType: Integer): Boolean;
 var
-  Header: TCnResResourceHeader;
+  W: Word;
+  HeaderSizeDW: DWORD;
 begin
   Result := False;
   if FStream = nil then
     Exit;
 
   try
-    if FStream.Read(Header, SizeOf(Header)) = SizeOf(Header) then
+    // 读取 DataSize
+    if FStream.Read(DataSize, SizeOf(DWORD)) <> SizeOf(DWORD) then
+      Exit;
+    // 读取 HeaderSize
+    if FStream.Read(HeaderSizeDW, SizeOf(DWORD)) <> SizeOf(DWORD) then
+      Exit;
+    HeaderSize := HeaderSizeDW;
+
+    // 空条目表示 RES 文件结束
+    if (DataSize = 0) and (HeaderSize = 0) then
+      Exit;
+
+    // 读取 Type 字段
+    // RES 文件格式: 如果第一个 WORD 是 $FFFF，则下一个 WORD 是序号型 ID
+    // 否则是 null 结尾的 Unicode 字符串
+    ResType := -1;
+    if FStream.Read(W, SizeOf(Word)) <> SizeOf(Word) then
+      Exit;
+    if W = $FFFF then
     begin
-      HeaderSize := Header.HeaderSize;
-      DataSize := Header.DataSize;
-      ResType := Header.ResType;
-      Result := True;
+      // 序号型 Type，读取序号值
+      if FStream.Read(W, SizeOf(Word)) <> SizeOf(Word) then
+        Exit;
+      ResType := W;
+    end
+    else
+    begin
+      // 字符串型 Type，跳过剩余的 null 结尾 Unicode 字符串
+      while W <> 0 do
+      begin
+        if FStream.Read(W, SizeOf(Word)) <> SizeOf(Word) then
+          Exit;
+      end;
     end;
+
+    Result := True;
   except
     Result := False;
   end;
