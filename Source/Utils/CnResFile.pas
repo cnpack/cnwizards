@@ -28,7 +28,9 @@ unit CnResFile;
 * 开发平台：Win7 + Delphi XE2
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串均符合本地化处理方式
-* 修改记录：2026.04.29 V1.0
+* 修改记录：2026.04.30 V1.1
+*               修正版本号读写时未跳过 VS_VERSIONINFO 头部的 Bug
+*           2026.04.29 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -48,6 +50,7 @@ type
     FFileName: string;
     FVersionInfoStart: Int64;
     FVersionDataSize: DWORD;
+    FFixedFilePos: Int64;
     function ReadResourceEntry(var HeaderSize: Integer;
       var DataSize: DWORD; var ResType: Integer): Boolean;
   public
@@ -207,6 +210,9 @@ var
   ResType: Integer;
   DataStart: Int64;
   FixedInfo: TCnVSFixedFileInfo;
+  wLength, wValueLength, wType: Word;
+  KeyBuf: array[0..15] of WideChar; // "VS_VERSION_INFO" + #0 = 15+1 chars
+  FixedFilePos: Int64;
 begin
   Result := False;
   Major := 0;
@@ -216,6 +222,8 @@ begin
   LangID := $0409;
   CodePage := 1252;
   FVersionInfoStart := Int64(-1);
+  FVersionDataSize := 0;
+  FFixedFilePos := Int64(-1);
 
   if FStream = nil then
     Exit;
@@ -234,20 +242,67 @@ begin
         FVersionInfoStart := DataStart;
         FVersionDataSize := DataSize;
 
-        // Read VS_FIXEDFILEINFO
-        if DataSize >= SizeOf(TCnVSFixedFileInfo) then
-        begin
-          if FStream.Read(FixedInfo, SizeOf(FixedInfo)) = SizeOf(FixedInfo) then
-          begin
-            if FixedInfo.dwSignature = VS_FFI_SIGNATURE then
-            begin
-              Major := HiWord(FixedInfo.dwFileVersionMS);
-              Minor := LoWord(FixedInfo.dwFileVersionMS);
-              Release := HiWord(FixedInfo.dwFileVersionLS);
-              Build := LoWord(FixedInfo.dwFileVersionLS);
+        // 版本信息资源的数据结构是 VS_VERSIONINFO:
+        //   wLength (WORD), wValueLength (WORD), wType (WORD),
+        //   szKey ("VS_VERSION_INFO\0" = 32 bytes),
+        //   Padding (对齐到 DWORD),
+        //   Value (VS_FIXEDFILEINFO)
+        // 需要先跳过头部，才能读到 VS_FIXEDFILEINFO
 
-              Result := True;
-              Exit;
+        // 定位到数据区起始: DataStart + HeaderSize
+        FStream.Position := DataStart + HeaderSize;
+
+        if DataSize >= 6 then
+        begin
+          // 读取 VS_VERSIONINFO 头部
+          if FStream.Read(wLength, SizeOf(Word)) <> SizeOf(Word) then
+          begin
+            FStream.Position := DataStart + HeaderSize + DataSize;
+            AlignStream(FStream);
+            Continue;
+          end;
+          if FStream.Read(wValueLength, SizeOf(Word)) <> SizeOf(Word) then
+          begin
+            FStream.Position := DataStart + HeaderSize + DataSize;
+            AlignStream(FStream);
+            Continue;
+          end;
+          if FStream.Read(wType, SizeOf(Word)) <> SizeOf(Word) then
+          begin
+            FStream.Position := DataStart + HeaderSize + DataSize;
+            AlignStream(FStream);
+            Continue;
+          end;
+
+          // 读取 szKey，应该是 "VS_VERSION_INFO"
+          if FStream.Read(KeyBuf, SizeOf(KeyBuf)) <> SizeOf(KeyBuf) then
+          begin
+            FStream.Position := DataStart + HeaderSize + DataSize;
+            AlignStream(FStream);
+            Continue;
+          end;
+
+          // 对齐到 DWORD
+          AlignStream(FStream);
+
+          // 现在流位置应在 VS_FIXEDFILEINFO 处
+          FixedFilePos := FStream.Position;
+
+          if wValueLength >= SizeOf(TCnVSFixedFileInfo) then
+          begin
+            if FStream.Read(FixedInfo, SizeOf(FixedInfo)) = SizeOf(FixedInfo) then
+            begin
+              if FixedInfo.dwSignature = VS_FFI_SIGNATURE then
+              begin
+                FFixedFilePos := FixedFilePos;
+                Major := HiWord(FixedInfo.dwFileVersionMS);
+                Minor := LoWord(FixedInfo.dwFileVersionMS);
+                Release := HiWord(FixedInfo.dwFileVersionLS);
+                Build := LoWord(FixedInfo.dwFileVersionLS);
+
+                Result := True;
+                Exit;
+              end;
             end;
           end;
         end;
@@ -260,17 +315,13 @@ begin
   except
     Result := False;
     FVersionInfoStart := Int64(-1);
+    FFixedFilePos := Int64(-1);
   end;
 end;
 
 function TCnResFile.SetVersionInfo(Major, Minor, Release, Build: Integer;
   LangID, CodePage: Integer): Boolean;
 var
-  HeaderSize: Integer;
-  DataSize: DWORD;
-  ResType: Integer;
-  DataStart: Int64;
-  Header: TCnResResourceHeader;
   FixedInfo: TCnVSFixedFileInfo;
 begin
   Result := False;
@@ -284,17 +335,12 @@ begin
       Exit;
   end;
 
+  if FFixedFilePos < 0 then
+    Exit;
+
   try
-    FStream.Position := FVersionInfoStart;
-    
-    // Re-read header to verify
-    if FStream.Read(Header, SizeOf(Header)) <> SizeOf(Header) then
-      Exit;
-
-    if Header.ResType <> RT_VERSION_INT then
-      Exit;
-
-    DataStart := FStream.Position;
+    // 定位到 VS_FIXEDFILEINFO 所在位置
+    FStream.Position := FFixedFilePos;
 
     // Read and update fixed info
     if FStream.Read(FixedInfo, SizeOf(FixedInfo)) = SizeOf(FixedInfo) then
@@ -308,7 +354,7 @@ begin
         FixedInfo.dwProductVersionLS := MakeLong(Word(Build), Word(Release));
 
         // Write back
-        FStream.Position := DataStart;
+        FStream.Position := FFixedFilePos;
         FStream.WriteBuffer(FixedInfo, SizeOf(FixedInfo));
 
         Result := True;
