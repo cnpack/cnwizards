@@ -335,10 +335,11 @@ object CnDTMainForm: TCnDTMainForm
           Height = 21
           ItemHeight = 13
           TabOrder = 7
-          Text = '.pas;.dpr;.dpk;.inc'
+          Text = '.pas;.dpr;.dpk;.lpr;.inc'
           Items.Strings = (
-            '.pas;.dpr;.dpk;.inc'
+            '.pas;.dpr;.dpk;.lpr;.inc'
             '.cpp;.c;.hpp;.h;.cxx;.cc;.hxx;.hh;.asm'
+            '.dfm;.xfm;.lfm;.fmx'
             '.txt;.ini')
         end
       end
