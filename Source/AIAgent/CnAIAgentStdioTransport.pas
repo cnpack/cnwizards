@@ -27,7 +27,7 @@ interface
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 uses
-  SysUtils, Classes, CnJSON, CnAIAgentTypes
+  SysUtils, Classes, CnNative, CnJSON, CnAIAgentTypes
   {$IFDEF MSWINDOWS}
   , CnStdio
   {$ENDIF}
