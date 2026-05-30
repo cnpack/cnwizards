@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  SysUtils, Classes,
+  SysUtils, Classes, CnJSON,
   CnAIAgentTypes, CnAIAgentJsonRpc, CnAIAgentStdioTransport, CnAIAgentClient,
   CnAIAgentTools, CnAIAgentSession,
   AIAgentTestConsts, AIAgentTestReplay, AIAgentTestToolMocks,
@@ -40,6 +40,140 @@ var
   Mode: string;
   I: Integer;
   R: TScenarioResult;
+
+procedure RunToolTests;
+var
+  LocalTM: TCnAIAgentToolManager;
+  LocalMD: TMockData;
+  Args, ResultObj: TCnJSONObject;
+  ArgsArr: TCnJSONArray;
+  TR: TCnAIAgentToolExecuteResult;
+  SL: TStringList;
+  TestDir, TestFile: string;
+begin
+  TestDir := GetTempDir + 'AIAgentToolTest_' + IntToStr(GetProcessID);
+  TestFile := TestDir + '/testwrite.pas';
+  ForceDirectories(TestDir);
+
+  LocalTM := TCnAIAgentToolManager.Create;
+  LocalMD := CreateDefaultMockData;
+  try
+    LocalTM.RegisterAllDefaultTools;
+    RegisterMockTools(LocalTM, LocalMD);
+    Writeln('Registered ', LocalTM.ToolCount, ' tools');
+
+    // ---- Test 1: fs/write_text_file ----
+    Writeln;
+    Writeln('--- Test 1: fs/write_text_file ---');
+    Args := TCnJSONObject.Create;
+    ResultObj := TCnJSONObject.Create;
+    try
+      Args.AddPair('path', TestFile);
+      Args.AddPair('content', 'program Hello;'#10'begin'#10'  Writeln(''Hello'');'#10'end.');
+      TR := LocalTM.ExecuteTool('fs/write_text_file', Args, LocalMD);
+      if TR.Success then
+      begin
+        if FileExists(TestFile) then
+        begin
+          SL := TStringList.Create;
+          try
+            SL.LoadFromFile(TestFile);
+            Writeln('  PASS: File created, content="', Trim(SL.Text), '"');
+          finally
+            SL.Free;
+          end;
+        end
+        else
+          Writeln('  FAIL: tool returned success but file not found');
+      end
+      else
+        Writeln('  FAIL: ', TR.ErrorMessage);
+    finally
+      Args.Free;
+      ResultObj.Free;
+    end;
+
+    // ---- Test 2: fs/read_text_file ----
+    Writeln;
+    Writeln('--- Test 2: fs/read_text_file ---');
+    Args := TCnJSONObject.Create;
+    try
+      Args.AddPair('path', TestFile);
+      TR := LocalTM.ExecuteTool('fs/read_text_file', Args, LocalMD);
+      if TR.Success then
+        Writeln('  PASS: read back content="', TR.ResultData.ValueByName['content'].AsString, '"')
+      else
+        Writeln('  FAIL: ', TR.ErrorMessage);
+    finally
+      Args.Free;
+    end;
+
+    // ---- Test 3: run/execute_command (fpc --version) ----
+    Writeln;
+    Writeln('--- Test 3: run/execute_command (fpc --version) ---');
+    Args := TCnJSONObject.Create;
+    ResultObj := TCnJSONObject.Create;
+    try
+      Args.AddPair('command', 'fpc');
+      ArgsArr := TCnJSONArray.Create;
+      ArgsArr.AddValue('--version');
+      Args.AddPair('args', ArgsArr);
+      Args.AddPair('cwd', TestDir);
+      Args.AddPair('timeout', 15000);
+      TR := LocalTM.ExecuteTool('run/execute_command', Args, LocalMD);
+      if TR.Success then
+      begin
+        Writeln('  PASS: exitCode=', TR.ResultData.ValueByName['exitCode'].AsString);
+        Writeln('  stdout: ', Trim(TR.ResultData.ValueByName['stdout'].AsString));
+        Writeln('  stderr: ', Trim(TR.ResultData.ValueByName['stderr'].AsString));
+      end
+      else
+        Writeln('  FAIL: ', TR.ErrorMessage);
+    finally
+      Args.Free;
+      ResultObj.Free;
+    end;
+
+    // ---- Test 4: run/execute_command (fpc compile testwrite.pas) ----
+    Writeln;
+    Writeln('--- Test 4: run/execute_command (fpc compile) ---');
+    Args := TCnJSONObject.Create;
+    ResultObj := TCnJSONObject.Create;
+    try
+      Args.AddPair('command', 'fpc');
+      ArgsArr := TCnJSONArray.Create;
+      ArgsArr.AddValue(TestFile);
+      ArgsArr.AddValue('-o' + TestDir + '/testwrite');
+      Args.AddPair('args', ArgsArr);
+      Args.AddPair('cwd', TestDir);
+      Args.AddPair('timeout', 30000);
+      TR := LocalTM.ExecuteTool('run/execute_command', Args, LocalMD);
+      if TR.Success then
+      begin
+        Writeln('  exitCode=', TR.ResultData.ValueByName['exitCode'].AsString);
+        Writeln('  stdout: ', Trim(TR.ResultData.ValueByName['stdout'].AsString));
+        Writeln('  stderr: ', Trim(TR.ResultData.ValueByName['stderr'].AsString));
+        if TR.ResultData.ValueByName['exitCode'].AsInteger = 0 then
+        begin
+          Writeln('  PASS: compilation succeeded');
+          if FileExists(TestDir + '/testwrite') or FileExists(TestDir + '/testwrite.exe') then
+            Writeln('  PASS: binary exists');
+        end
+        else
+          Writeln('  FAIL: compilation failed');
+      end
+      else
+        Writeln('  FAIL: ', TR.ErrorMessage);
+    finally
+      Args.Free;
+      ResultObj.Free;
+    end;
+
+  finally
+    LocalTM.Free;
+    LocalMD.Free;
+  end;
+end;
 
 procedure TEventHandler.Log(Sender: TObject; const Text: string);
 begin
@@ -139,6 +273,10 @@ begin
     else if ParamStr(I) = '--run-all' then
     begin
       Mode := 'runall';
+    end
+    else if ParamStr(I) = '--tooltest' then
+    begin
+      Mode := 'tooltest';
     end;
     Inc(I);
   end;
@@ -193,6 +331,10 @@ begin
           for I := 0 to R.FailDetails.Count - 1 do
             Writeln('  ', R.FailDetails[I]);
         end;
+      end
+      else if Mode = 'tooltest' then
+      begin
+        RunToolTests;
       end;
     finally
       Engine.Free;

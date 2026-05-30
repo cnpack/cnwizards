@@ -75,10 +75,12 @@ const
 type
   TCnACPConnectionState = (acsIdle, acsStarting, acsRunning, acsClosed, acsError);
 
-function ACPBuildClientCapabilities(FSReadText, FSWriteText, Terminal: Boolean): TCnJSONObject;
+function ACPBuildClientCapabilities(FSReadText, FSWriteText, Terminal: Boolean;
+  ToolDescriptions: TCnJSONArray = nil): TCnJSONObject;
 function ACPBuildClientInfo(const Name, Title, Version: string): TCnJSONObject;
 function ACPBuildInitializeParams(const Name, Title, Version: string;
-  FSReadText, FSWriteText, Terminal: Boolean): TCnJSONObject;
+  FSReadText, FSWriteText, Terminal: Boolean;
+  ToolDescriptions: TCnJSONArray = nil): TCnJSONObject;
 
 function ACPBuildTextContent(const Text: string): TCnJSONObject;
 function ACPBuildPromptTextArray(const Text: string): TCnJSONArray;
@@ -90,7 +92,7 @@ implementation
 {$IFDEF CNWIZARDS_CNAICODERWIZARD}
 
 function ACPBuildClientCapabilities(FSReadText, FSWriteText,
-  Terminal: Boolean): TCnJSONObject;
+  Terminal: Boolean; ToolDescriptions: TCnJSONArray): TCnJSONObject;
 var
   FSObj: TCnJSONObject;
 begin
@@ -100,6 +102,8 @@ begin
   FSObj.AddPair('writeTextFile', FSWriteText);
   Result.AddPair('fs', FSObj);
   Result.AddPair('terminal', Terminal);
+  if ToolDescriptions <> nil then
+    Result.AddPair('tools', ToolDescriptions);
 end;
 
 function ACPBuildClientInfo(const Name, Title, Version: string): TCnJSONObject;
@@ -111,12 +115,13 @@ begin
 end;
 
 function ACPBuildInitializeParams(const Name, Title, Version: string;
-  FSReadText, FSWriteText, Terminal: Boolean): TCnJSONObject;
+  FSReadText, FSWriteText, Terminal: Boolean;
+  ToolDescriptions: TCnJSONArray): TCnJSONObject;
 begin
   Result := TCnJSONObject.Create;
   Result.AddPair('protocolVersion', CN_ACP_PROTOCOL_VERSION);
   Result.AddPair('clientCapabilities',
-    ACPBuildClientCapabilities(FSReadText, FSWriteText, Terminal));
+    ACPBuildClientCapabilities(FSReadText, FSWriteText, Terminal, ToolDescriptions));
   Result.AddPair('clientInfo', ACPBuildClientInfo(Name, Title, Version));
 end;
 

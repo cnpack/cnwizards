@@ -29,7 +29,7 @@ uses
 
 type
   TCnAIAgentToolCategory = (tkFileLevel, tkSearchLevel, tkEditorLevel,
-    tkDesignerLevel, tkProjectLevel);
+    tkDesignerLevel, tkProjectLevel, tkRunLevel);
 
   TCnAIAgentToolExecuteResult = record
     Success: Boolean;
@@ -68,6 +68,7 @@ type
     function GetToolDescriptions: TCnJSONArray;
     function ToolCount: Integer;
     function NeedConfirm(const Name: string): Boolean;
+    procedure GetAllToolNames(Names: TStrings);
     procedure RegisterAllDefaultTools;
     property Tools[Index: Integer]: TCnAIAgentTool read GetTool;
   end;
@@ -84,6 +85,7 @@ begin
     tkEditorLevel:   Result := 'editor';
     tkDesignerLevel: Result := 'designer';
     tkProjectLevel:  Result := 'project';
+    tkRunLevel:      Result := 'run';
   else
     Result := 'unknown';
   end;
@@ -218,6 +220,15 @@ begin
     Result := False;
 end;
 
+procedure TCnAIAgentToolManager.GetAllToolNames(Names: TStrings);
+var
+  I: Integer;
+begin
+  Names.Clear;
+  for I := 0 to FTools.Count - 1 do
+    Names.Add(TCnAIAgentTool(FTools.Objects[I]).Name);
+end;
+
 function DefaultToolStub(Session: TObject; const Args: TCnJSONObject;
   var ResultObj: TCnJSONObject): TCnAIAgentToolExecuteResult;
 begin
@@ -270,6 +281,8 @@ begin
   Add('ide/set_active_project', 'Set active project', tkProjectLevel, False);
   Add('ide/compile', 'Compile current project', tkProjectLevel, True);
   Add('ide/get_errors', 'Get compile errors', tkProjectLevel, False);
+  Add('run/execute_command', 'Execute shell command, captures stdout/stderr/exitCode',
+    tkRunLevel, False);
 end;
 
 end.

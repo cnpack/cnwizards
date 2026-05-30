@@ -65,6 +65,25 @@ function RunAllScenarios(Client: TCnACPClient): TScenarioResult;
 
 implementation
 
+type
+  TPromptWaiter = class
+    Done: Boolean;
+    Success: Boolean;
+    StopReason: string;
+    ErrorMsg: string;
+    procedure OnPromptResult(Sender: TObject; const SessionId, StopReason: string;
+      Success: Boolean; const ErrorMessage: string);
+  end;
+
+procedure TPromptWaiter.OnPromptResult(Sender: TObject; const SessionId,
+  StopReason: string; Success: Boolean; const ErrorMessage: string);
+begin
+  Done := True;
+  Self.Success := Success;
+  Self.StopReason := StopReason;
+  ErrorMsg := ErrorMessage;
+end;
+
 function ParseScript(const FileName: string): TScriptLineArray;
 var
   SL: TStringList;
@@ -364,6 +383,9 @@ var
   SessionId: string;
   TestDir: string;
   Tick: Int64;
+  Waiter: TPromptWaiter;
+  OldPromptResult: TCnACPClientPromptResultEvent;
+  TestFile: string;
 begin
   ResultTotal.TotalSteps := 0;
   ResultTotal.PassedSteps := 0;
@@ -414,6 +436,63 @@ begin
     Client.CloseSession(SessionId);
     Sleep(2000);
     Check(5, 'Session ID cleared after close', Client.CurrentSessionId = '', ResultTotal);
+  end;
+
+  Log('');
+
+  // ===== Scenario 3: Tool Call via Prompt =====
+  Log('--- Scenario 3: Tool Call (File Write via Prompt) ---');
+
+  // Create a new session for this scenario
+  SessionId := '';
+  Client.NewSession(TestDir);
+  WaitForSessionCreated(Client, 10000);
+  SessionId := Client.CurrentSessionId;
+  Check(6, 'Session created for tool prompt test', SessionId <> '', ResultTotal);
+
+  if SessionId <> '' then
+  begin
+    Waiter := TPromptWaiter.Create;
+    try
+      OldPromptResult := Client.OnPromptResult;
+      Client.OnPromptResult := Waiter.OnPromptResult;
+
+      TestFile := '/tmp/aia_test_scenario3.txt';
+      DeleteFile(TestFile);
+      Log('  Sending prompt to write file: ' + TestFile);
+      Client.PromptText(SessionId, 'Use the write tool to create a file at ' +
+        TestFile + ' with content "Hello from AIAgent Scenario 3"');
+
+      // Wait for file to appear (tool_call should complete quickly)
+      Tick := GetTickCount64;
+      while (not FileExists(TestFile)) and (GetTickCount64 - Tick < 15000) do
+        Sleep(200);
+
+      Check(7, 'File created by tool call (waited ' +
+        IntToStr(Integer(GetTickCount64 - Tick)) + 'ms): ' + TestFile,
+        FileExists(TestFile), ResultTotal);
+
+      // Check if prompt completed (informational only, not a hard test)
+      if not Waiter.Done then
+      begin
+        while (not Waiter.Done) and (GetTickCount64 - Tick < 5000) do
+          Sleep(100);
+        if Waiter.Done then
+          Log('  Prompt completed OK, stopReason=' + Waiter.StopReason)
+        else
+          Log('  (info) Prompt not yet completed after tool result sent');
+      end;
+
+      Client.OnPromptResult := OldPromptResult;
+
+      Log('  Closing session...');
+      Client.CloseSession(SessionId);
+      Sleep(2000);
+      Check(8, 'Session closed after tool test',
+        Client.CurrentSessionId = '', ResultTotal);
+    finally
+      Waiter.Free;
+    end;
   end;
 
   Log('');

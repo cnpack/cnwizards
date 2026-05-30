@@ -7,6 +7,7 @@ interface
 uses
   {$IFDEF MSWINDOWS} Windows, {$ENDIF} SysUtils, Classes, Contnrs,
   {$IFNDEF FPC} FileCtrl, {$ENDIF}
+  {$IFDEF FPC} Process, {$ENDIF}
   CnJSON, CnAIAgentTools;
 
 type
@@ -145,6 +146,7 @@ function MockWriteTextFile(Session: TObject; const Args: TCnJSONObject;
   var ResultObj: TCnJSONObject): TCnAIAgentToolExecuteResult;
 var
   Path, Content: string;
+  SL: TStringList;
 begin
   Result.Success := False;
   Result.ErrorMessage := '';
@@ -158,6 +160,13 @@ begin
   end;
   try
     ForceDirectories(ExtractFileDir(Path));
+    SL := TStringList.Create;
+    try
+      SL.Text := Content;
+      SL.SaveToFile(Path);
+    finally
+      SL.Free;
+    end;
     ResultObj.AddPair('path', Path);
     ResultObj.AddPair('size', Length(Content));
     Result.Success := True;
@@ -545,6 +554,126 @@ begin
   Result.ResultData := ResultObj;
 end;
 
+{$IFDEF FPC}
+function ExecuteCommand(const AExecutable, WorkDir: string;
+  AParams: TStrings; var OutText, ErrText: string; MaxWaitMs: Integer): Integer;
+var
+  P: TProcess;
+  Tick: Int64;
+  SL: TStringList;
+  I: Integer;
+begin
+  Result := -1;
+  OutText := '';
+  ErrText := '';
+  try
+    P := TProcess.Create(nil);
+    try
+      P.Executable := AExecutable;
+      if AParams <> nil then
+        for I := 0 to AParams.Count - 1 do
+          P.Parameters.Add(AParams[I]);
+      P.CurrentDirectory := WorkDir;
+      P.Options := [poUsePipes];
+      P.Execute;
+
+      Tick := GetTickCount64;
+      while P.Running do
+      begin
+        if (MaxWaitMs > 0) and (GetTickCount64 - Tick > MaxWaitMs) then
+        begin
+          P.Terminate(1);
+          OutText := '';
+          ErrText := '(timed out)';
+          Result := -1;
+          Exit;
+        end;
+        Sleep(50);
+      end;
+
+      SL := TStringList.Create;
+      try
+        SL.LoadFromStream(P.Output);
+        OutText := SL.Text;
+      finally
+        SL.Free;
+      end;
+
+      SL := TStringList.Create;
+      try
+        SL.LoadFromStream(P.Stderr);
+        ErrText := SL.Text;
+      finally
+        SL.Free;
+      end;
+
+      Result := P.ExitCode;
+    finally
+      P.Free;
+    end;
+  except
+    on E: Exception do
+      ErrText := 'ExecuteCommand exception: ' + E.Message;
+  end;
+end;
+{$ENDIF}
+
+function MockRunCommand(Session: TObject; const Args: TCnJSONObject;
+  var ResultObj: TCnJSONObject): TCnAIAgentToolExecuteResult;
+var
+  Cmd, Cwd, FullCmd, OutText, ErrText: string;
+  ArgsArr: TCnJSONArray;
+  Params: TStringList;
+  I, Timeout, ProcExitCode: Integer;
+begin
+  Result.Success := False;
+  Result.ErrorMessage := '';
+  Result.ResultData := nil;
+
+  Cmd := JsonValStr(Args.ValueByName['command']);
+  if Cmd = '' then
+  begin
+    Result.ErrorMessage := 'Missing command';
+    Exit;
+  end;
+
+  Cwd := JsonValStr(Args.ValueByName['cwd']);
+  if Cwd = '' then
+    Cwd := GetCurrentDir;
+
+  Timeout := JsonValInt(Args.ValueByName['timeout'], 60000);
+
+  FullCmd := Cmd;
+  Params := TStringList.Create;
+  try
+    ArgsArr := TCnJSONArray(Args.ValueByName['args']);
+    if ArgsArr <> nil then
+      for I := 0 to ArgsArr.Count - 1 do
+      begin
+        Params.Add(ArgsArr[I].AsString);
+        FullCmd := FullCmd + ' ' + ArgsArr[I].AsString;
+      end;
+
+    {$IFDEF FPC}
+    ProcExitCode := ExecuteCommand(Cmd, Cwd, Params, OutText, ErrText, Timeout);
+    {$ELSE}
+    ProcExitCode := -1;
+    OutText := '(run/execute_command requires FPC)';
+    ErrText := '';
+    {$ENDIF}
+  finally
+    Params.Free;
+  end;
+
+  ResultObj.AddPair('stdout', OutText);
+  ResultObj.AddPair('stderr', ErrText);
+  ResultObj.AddPair('exitCode', ProcExitCode);
+  ResultObj.AddPair('command', FullCmd);
+  ResultObj.AddPair('cwd', Cwd);
+  Result.Success := True;
+  Result.ResultData := ResultObj;
+end;
+
 procedure RegisterMockTools(Manager: TCnAIAgentToolManager; MockData: TMockData);
 
   procedure SetMock(const Name: string; Fn: TCnAIAgentToolExecuteEvent);
@@ -584,6 +713,7 @@ begin
   SetMock('ide/set_active_project', MockSetActiveProject);
   SetMock('ide/compile', MockCompile);
   SetMock('ide/get_errors', MockGetErrors);
+  SetMock('run/execute_command', MockRunCommand);
 end;
 
 end.

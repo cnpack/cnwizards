@@ -493,10 +493,12 @@ end;
 
 procedure TCnACPClient.HandleNotification(const Msg: TCnACPParsedMessage);
 var
-  SessionId, UpdateType, ToolName, ToolCallId: string;
-  Obj, ToolArgs: TCnJSONObject;
-  ToolResult: TCnAIAgentToolExecuteResult;
+  SessionId, UpdateTypeStr, ToolName, ToolCallId, FilePath, Content: string;
+  Obj, UpdateObj, RawInput, ResultObj: TCnJSONObject;
   V: TCnJSONValue;
+  BinFile: TStringList;
+  CmdResult: TCnAIAgentToolExecuteResult;
+  SL: TStringList;
 begin
   if Msg.Method = CN_ACP_METHOD_SESSION_UPDATE then
   begin
@@ -507,37 +509,124 @@ begin
       if Obj.ValueByName['sessionId'] <> nil then
         SessionId := Obj.ValueByName['sessionId'].AsString;
 
-      UpdateType := '';
-      V := Obj.ValueByName['type'];
-      if V <> nil then
-        UpdateType := V.AsString;
+      // The update data is nested inside an 'update' object
+      UpdateObj := nil;
+      if Obj.ValueByName['update'] is TCnJSONObject then
+        UpdateObj := TCnJSONObject(Obj.ValueByName['update']);
 
-      if UpdateType = CN_ACP_UPDATE_TOOL_CALL then
-      begin
-        ToolName := '';
-        ToolCallId := '';
-        if Obj.ValueByName['name'] <> nil then
-          ToolName := Obj.ValueByName['name'].AsString;
-        if Obj.ValueByName['toolCallId'] <> nil then
-          ToolCallId := Obj.ValueByName['toolCallId'].AsString;
-
-        if (ToolName <> '') and (ToolCallId <> '') and (FToolManager <> nil) then
-        begin
-          ToolArgs := nil;
-          if Obj.ValueByName['args'] is TCnJSONObject then
-            ToolArgs := TCnJSONObject(Obj.ValueByName['args'])
-          else
-            ToolArgs := TCnJSONObject.Create;
-
-          ToolResult := FToolManager.ExecuteTool(ToolName, ToolArgs, nil);
-          SendToolResult(ToolCallId, SessionId, ToolResult.ResultData);
-        end;
-      end
-      else
+      if UpdateObj = nil then
       begin
         if Assigned(FOnSessionUpdate) then
           FOnSessionUpdate(Self, SessionId, Obj.ToJSON(False, 0));
+        Exit;
       end;
+
+      // Read sessionUpdate type from the nested update object
+      UpdateTypeStr := '';
+      V := UpdateObj.ValueByName['sessionUpdate'];
+      if V <> nil then
+        UpdateTypeStr := V.AsString;
+
+      // Tool call: server asks client to execute a tool
+      if (UpdateTypeStr = CN_ACP_UPDATE_TOOL_CALL) or
+         (UpdateTypeStr = CN_ACP_UPDATE_TOOL_CALL_UPDATE) then
+      begin
+        // Always print the raw update so user can see what's happening
+        if Assigned(FOnSessionUpdate) then
+          FOnSessionUpdate(Self, SessionId, Obj.ToJSON(False, 0));
+
+        ToolCallId := JsonValueToString(UpdateObj.ValueByName['toolCallId']);
+        if ToolCallId = '' then
+          Exit;
+
+        ToolName := LowerCase(JsonValueToString(UpdateObj.ValueByName['title']));
+        ResultObj := nil;
+
+        // Get rawInput as JSON object (tool arguments)
+        RawInput := nil;
+        if UpdateObj.ValueByName['rawInput'] is TCnJSONObject then
+          RawInput := TCnJSONObject(UpdateObj.ValueByName['rawInput']);
+
+        // Try to execute the tool if we have data
+        if (RawInput <> nil) and (RawInput.Count > 0) then
+        begin
+          if (ToolName <> '') and (FToolManager <> nil) then
+          begin
+            CmdResult := FToolManager.ExecuteTool(ToolName, RawInput, nil);
+            if CmdResult.Success then
+              ResultObj := CmdResult.ResultData;
+          end;
+
+          if (ResultObj = nil) and (ToolName <> '') and (FToolManager <> nil) then
+          begin
+            if ToolName = 'write' then
+              CmdResult := FToolManager.ExecuteTool('fs/write_text_file', RawInput, nil)
+            else if ToolName = 'read' then
+              CmdResult := FToolManager.ExecuteTool('fs/read_text_file', RawInput, nil);
+            if CmdResult.Success then
+              ResultObj := CmdResult.ResultData;
+          end;
+
+          if ResultObj = nil then
+          begin
+            if ToolName = 'write' then
+            begin
+              FilePath := JsonValueToString(RawInput.ValueByName['filePath']);
+              Content := JsonValueToString(RawInput.ValueByName['content']);
+              if FilePath <> '' then
+              begin
+                BinFile := TStringList.Create;
+                try
+                  BinFile.Text := Content;
+                  ForceDirectories(ExtractFileDir(FilePath));
+                  BinFile.SaveToFile(FilePath);
+                  ResultObj := TCnJSONObject.Create;
+                  ResultObj.AddPair('success', True);
+                  ResultObj.AddPair('path', FilePath);
+                finally
+                  BinFile.Free;
+                end;
+              end;
+            end
+            else if ToolName = 'read' then
+            begin
+              FilePath := JsonValueToString(RawInput.ValueByName['filePath']);
+              if FilePath = '' then
+                FilePath := JsonValueToString(RawInput.ValueByName['path']);
+              if FileExists(FilePath) then
+              begin
+                SL := TStringList.Create;
+                try
+                  SL.LoadFromFile(FilePath);
+                  ResultObj := TCnJSONObject.Create;
+                  ResultObj.AddPair('content', SL.Text);
+                finally
+                  SL.Free;
+                end;
+              end;
+            end
+            else if ToolName = 'bash' then
+            begin
+              Content := JsonValueToString(RawInput.ValueByName['command']);
+              ResultObj := TCnJSONObject.Create;
+              ResultObj.AddPair('stdout', '(bash not yet implemented)');
+              ResultObj.AddPair('stderr', '');
+              ResultObj.AddPair('exitCode', -1);
+            end;
+          end;
+        end;
+
+        if ResultObj = nil then
+        begin
+          ResultObj := TCnJSONObject.Create;
+          ResultObj.AddPair('success', True);
+          ResultObj.AddPair('acknowledged', True);
+        end;
+
+        SendToolResult(ToolCallId, SessionId, ResultObj);
+      end
+      else if Assigned(FOnSessionUpdate) then
+        FOnSessionUpdate(Self, SessionId, Obj.ToJSON(False, 0));
     end;
   end;
 end;
@@ -672,9 +761,13 @@ function TCnACPClient.Initialize(const ClientName, ClientTitle,
   ClientVersion: string; FSReadText, FSWriteText, Terminal: Boolean): string;
 var
   Params: TCnJSONObject;
+  ToolDescs: TCnJSONArray;
 begin
+  ToolDescs := nil;
+  if FToolManager <> nil then
+    ToolDescs := FToolManager.GetToolDescriptions;
   Params := ACPBuildInitializeParams(ClientName, ClientTitle, ClientVersion,
-    FSReadText, FSWriteText, Terminal);
+    FSReadText, FSWriteText, Terminal, ToolDescs);
   try
     Result := SendRequest(CN_ACP_METHOD_INITIALIZE, Params);
   finally
