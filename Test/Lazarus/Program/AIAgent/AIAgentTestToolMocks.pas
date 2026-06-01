@@ -6,7 +6,7 @@ interface
 
 uses
   {$IFDEF MSWINDOWS} Windows, {$ENDIF} SysUtils, Classes, Contnrs,
-  {$IFNDEF FPC} FileCtrl, {$ENDIF}
+  {$IFNDEF FPC} FileCtrl, CnStdio, {$ENDIF}
   {$IFDEF FPC} Process, {$ENDIF}
   CnJSON, CnAIAgentTools;
 
@@ -113,6 +113,8 @@ function MockReadTextFile(Session: TObject; const Args: TCnJSONObject;
 var
   Path: string;
   SL: TStringList;
+  Line, Limit, I, StartIdx, LinesOut: Integer;
+  OutText: string;
 begin
   Result.Success := False;
   Result.ErrorMessage := '';
@@ -123,14 +125,35 @@ begin
     Result.ErrorMessage := 'Missing path';
     Exit;
   end;
+  Line := JsonValInt(Args.ValueByName['line'], 0);
+  Limit := JsonValInt(Args.ValueByName['limit'], 0);
   SL := TStringList.Create;
   try
     if FileExists(Path) then
     begin
       SL.LoadFromFile(Path);
-      ResultObj.AddPair('content', SL.Text);
+      if (Line > 0) or (Limit > 0) then
+      begin
+        StartIdx := Line - 1;
+        if StartIdx < 0 then StartIdx := 0;
+        OutText := '';
+        LinesOut := 0;
+        for I := StartIdx to SL.Count - 1 do
+        begin
+          if (Limit > 0) and (LinesOut >= Limit) then Break;
+          if LinesOut > 0 then OutText := OutText + #13#10;
+          OutText := OutText + SL[I];
+          Inc(LinesOut);
+        end;
+        ResultObj.AddPair('content', OutText);
+        ResultObj.AddPair('lineCount', LinesOut);
+      end
+      else
+      begin
+        ResultObj.AddPair('content', SL.Text);
+        ResultObj.AddPair('lineCount', SL.Count);
+      end;
       ResultObj.AddPair('path', Path);
-      ResultObj.AddPair('lineCount', SL.Count);
       Result.Success := True;
     end
     else
@@ -616,6 +639,53 @@ begin
       ErrText := 'ExecuteCommand exception: ' + E.Message;
   end;
 end;
+{$ELSE}
+function ExecuteCommand(const AExecutable, WorkDir: string;
+  AParams: TStrings; var OutText, ErrText: string; MaxWaitMs: Integer): Integer;
+var
+  Proc: TCnStdioProcess;
+  CmdLine: string;
+  I: Integer;
+begin
+  Result := -1;
+  OutText := '';
+  ErrText := '';
+  Proc := TCnStdioProcess.Create;
+  try
+    Proc.ApplicationName := AExecutable;
+    CmdLine := AExecutable;
+    if AParams <> nil then
+      for I := 0 to AParams.Count - 1 do
+        CmdLine := CmdLine + ' ' + AParams[I];
+    Proc.CommandLine := CmdLine;
+    Proc.WorkingDirectory := WorkDir;
+    Proc.CreateNoWindow := True;
+
+    if not Proc.Start then
+    begin
+      ErrText := 'ExecuteCommand: failed to start ' + AExecutable;
+      Exit;
+    end;
+
+    if MaxWaitMs <= 0 then
+      Proc.WaitFor($FFFFFFFF)
+    else if not Proc.WaitFor(MaxWaitMs) then
+    begin
+      Proc.Terminate;
+      OutText := '';
+      ErrText := '(timed out)';
+      Result := -1;
+      Exit;
+    end;
+
+    OutText := Proc.StdOutText;
+    ErrText := Proc.StdErrText;
+    if Proc.ExitCodeReady then
+      Result := Integer(Proc.ExitCode);
+  finally
+    Proc.Free;
+  end;
+end;
 {$ENDIF}
 
 function MockRunCommand(Session: TObject; const Args: TCnJSONObject;
@@ -647,20 +717,42 @@ begin
   Params := TStringList.Create;
   try
     ArgsArr := TCnJSONArray(Args.ValueByName['args']);
-    if ArgsArr <> nil then
+    if (ArgsArr <> nil) and (ArgsArr.Count > 0) then
+    begin
       for I := 0 to ArgsArr.Count - 1 do
       begin
         Params.Add(ArgsArr[I].AsString);
         FullCmd := FullCmd + ' ' + ArgsArr[I].AsString;
       end;
+    end
+    else
+    begin
+      FullCmd := Cmd;
+      I := 1;
+      while (I <= Length(Cmd)) and (Cmd[I] = ' ') do Inc(I);
+      if I <= Length(Cmd) then
+      begin
+        while (I <= Length(Cmd)) and (Cmd[I] <> ' ') do Inc(I);
+        Cmd := Copy(Cmd, 1, I - 1);
+        while (I <= Length(FullCmd)) and (FullCmd[I] = ' ') do Inc(I);
+        if I <= Length(FullCmd) then
+        begin
+          FullCmd := Copy(FullCmd, I, MaxInt);
+          while FullCmd <> '' do
+          begin
+            while (Length(FullCmd) > 0) and (FullCmd[1] = ' ') do
+              Delete(FullCmd, 1, 1);
+            if FullCmd = '' then Break;
+            I := 1;
+            while (I <= Length(FullCmd)) and (FullCmd[I] <> ' ') do Inc(I);
+            Params.Add(Copy(FullCmd, 1, I - 1));
+            Delete(FullCmd, 1, I - 1);
+          end;
+        end;
+      end;
+    end;
 
-    {$IFDEF FPC}
     ProcExitCode := ExecuteCommand(Cmd, Cwd, Params, OutText, ErrText, Timeout);
-    {$ELSE}
-    ProcExitCode := -1;
-    OutText := '(run/execute_command requires FPC)';
-    ErrText := '';
-    {$ENDIF}
   finally
     Params.Free;
   end;

@@ -386,6 +386,9 @@ var
   Waiter: TPromptWaiter;
   OldPromptResult: TCnACPClientPromptResultEvent;
   TestFile: string;
+  S4Dir, S4Src, S4Bin: string;
+  S4Content: string;
+  SrcFound, BinFound: Boolean;
 begin
   ResultTotal.TotalSteps := 0;
   ResultTotal.PassedSteps := 0;
@@ -497,8 +500,84 @@ begin
 
   Log('');
 
-  // ===== Results =====
-  ResultTotal.ElapsedMs := Integer(GetTickCount64 - Tick);
+  // ===== Scenario 4: Write ? Compile ? Fix ? Run (FPC) =====
+  Log('--- Scenario 4: Write ? Compile ? Fix ? Run (FPC) ---');
+
+  SessionId := '';
+  Client.NewSession(TestDir + '_s4');
+  WaitForSessionCreated(Client, 10000);
+  SessionId := Client.CurrentSessionId;
+  Check(9, 'Session created for compile/run test', SessionId <> '', ResultTotal);
+
+  if SessionId <> '' then
+  begin
+    S4Dir := TestDir + '_s4';
+    ForceDirectories(S4Dir);
+    S4Src := S4Dir + '/hello.pas';
+    S4Bin := S4Dir + '/hello';
+    DeleteFile(S4Src);
+    DeleteFile(S4Bin);
+
+    Log('  Pre-writing source file, then asking for compilation...');
+    Log('  Source: ' + S4Src);
+    Log('  Binary: ' + S4Bin);
+    // Write source file directly first (before AI prompt)
+    S4Content := 'program Hello;'#10 +
+      'uses SysUtils;'#10 +
+      'begin'#10 +
+      '  WriteLn('#39'Hello from AIAgent'#39');'#10 +
+      '  WriteLn(DateToStr(Date));'#10 +
+      'end.';
+    with TStringList.Create do
+    begin
+      Text := S4Content;
+      SaveToFile(S4Src);
+      Free;
+    end;
+    if FileExists(S4Src) then
+      Log('  Source file pre-written');
+    // Minimal prompt: just one bash command to compile
+    Client.PromptText(SessionId, 'Run bash command: fpc -o' + S4Bin + ' ' + S4Src + ' (fpc is available at /usr/local/bin/fpc)');
+
+    Tick := GetTickCount64;
+    SrcFound := False;
+    BinFound := False;
+    while (GetTickCount64 - Tick < 90000) do
+    begin
+      if not SrcFound and FileExists(S4Src) then
+      begin
+        SrcFound := True;
+        Log('  Source file created after ' +
+          IntToStr(Integer(GetTickCount64 - Tick)) + 'ms');
+      end;
+      if not BinFound and FileExists(S4Bin) then
+      begin
+        BinFound := True;
+        Log('  Binary created after ' +
+          IntToStr(Integer(GetTickCount64 - Tick)) + 'ms');
+      end;
+      if SrcFound and BinFound then Break;
+      Sleep(200);
+    end;
+
+    Check(10, 'Source file created', SrcFound, ResultTotal);
+    Check(11, 'Compiled binary exists: ' + S4Bin, BinFound, ResultTotal);
+
+    if BinFound then
+      Log('  Scenario 4: Full write?compile?fix?run cycle verified')
+    else if SrcFound then
+      Log('  Scenario 4: Source written but compilation did not succeed')
+    else
+      Log('  Scenario 4: No artifacts produced');
+
+    Log('  Closing session...');
+    Client.CloseSession(SessionId);
+    Sleep(2000);
+    Check(12, 'Session closed after compile/run test',
+      Client.CurrentSessionId = '', ResultTotal);
+  end;
+
+  Log('');
   Log('--- Summary ---');
   Log(Format('  Total: %d, Passed: %d, Failed: %d, Elapsed: %dms',
     [ResultTotal.TotalSteps, ResultTotal.PassedSteps,

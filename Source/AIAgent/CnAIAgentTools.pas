@@ -253,8 +253,37 @@ procedure TCnAIAgentToolManager.RegisterAllDefaultTools;
     RegisterTool(T);
   end;
 
+  procedure AddReadSchema;
+  var
+    T: TCnAIAgentTool;
+    Props, P: TCnJSONObject;
+    Required: TCnJSONArray;
+  begin
+    T := FindTool('fs/read_text_file');
+    if T = nil then Exit;
+    T.InputSchema.AddPair('type', 'object');
+    Props := TCnJSONObject.Create;
+    P := TCnJSONObject.Create;
+    P.AddPair('type', 'string');
+    P.AddPair('description', 'Absolute path to the file');
+    Props.AddPair('path', P);
+    P := TCnJSONObject.Create;
+    P.AddPair('type', 'integer');
+    P.AddPair('description', 'Line number to start reading from (1-based)');
+    Props.AddPair('line', P);
+    P := TCnJSONObject.Create;
+    P.AddPair('type', 'integer');
+    P.AddPair('description', 'Maximum number of lines to read');
+    Props.AddPair('limit', P);
+    T.InputSchema.AddPair('properties', Props);
+    Required := TCnJSONArray.Create;
+    Required.AddValue('path');
+    T.InputSchema.AddPair('required', Required);
+  end;
+
 begin
   Add('fs/read_text_file', 'Read text file from filesystem', tkFileLevel, False);
+  AddReadSchema;
   Add('fs/get_file_info', 'Get file metadata', tkFileLevel, False);
   Add('fs/list_directory', 'List directory contents', tkFileLevel, False);
   Add('fs/glob', 'Glob file pattern matching', tkFileLevel, False);
