@@ -24,7 +24,7 @@ unit CnImageProviderIconFinder;
 * 软件名称：开发包属性、组件编辑器库
 * 单元名称：www.IconFinder.com 服务支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：该服务已迁移至 api.freepik.com
+* 备    注：该服务已迁移至 api.freepik.com，后又改为 api.magnific.com
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
@@ -81,8 +81,8 @@ end;
 class procedure TCnImageProviderFreePik.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
-  DispName := 'FreePik.com';
-  HomeUrl := 'http://www.freepik.com';
+  DispName := 'Magnific.com';
+  HomeUrl := 'http://www.magnific.com';
 end;
 
 function TCnImageProviderFreePik.DoSearchImage(Req: TCnImageReqInfo): Boolean;
@@ -96,7 +96,7 @@ var
   ErrCode: DWORD;
 begin
   Result := False;
-  Url := Format('https://api.freepik.com/v1/icons?term=%s&page=%d&per_page=%d&thumbnail_size=%d',
+  Url := Format('https://api.magnific.com/v1/icons?term=%s&page=%d&per_page=%d&thumbnail_size=%d',
     [Req.Keyword, Req.Page + 1, FItemsPerPage, Req.MinSize]);
 
   Http := TCnHTTP.Create;
