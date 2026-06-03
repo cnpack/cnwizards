@@ -3475,6 +3475,7 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF SUPPORT_FMX}
 
 { TCnHookDesignMenuEditor }
@@ -3548,6 +3549,7 @@ begin
 
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 initialization
