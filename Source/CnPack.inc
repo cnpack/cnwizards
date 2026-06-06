@@ -3582,7 +3582,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE3}
-  {$DEFINE FMX_PIXELFORMATS}            // XE3 FMX 有独立的 PixelFormats 单元，XE 6 才没
+  {$DEFINE FMX_PIXELFORMATS}            // XE3 FMX 有独立的 PixelFormats 单元，XE6 才没
 {$ENDIF}
 
 {$IFDEF DELPHIXE2_UP}
@@ -3597,7 +3597,9 @@
   {$DEFINE SUPPORT_UNITNAME_DOT}               // XE2 及以上的单元名开始带点
   {$DEFINE SUPPORT_ENHANCED_INDEXEDPROPERTY}   // XE2 New RTTI Supports IndexedProperty
   {$DEFINE SUPPORT_ZLIB_WINDOWBITS}            // XE2 及以上的 ZLib 支持 WindowBits
-  {$DEFINE SUPPORT_GDIPLUS}                    // XE2 及以上支持 GDI+
+  {$IFDEF MSWINDOWS}
+    {$DEFINE SUPPORT_GDIPLUS}                  // XE2 及以上在 Windows 上支持 GDI+
+  {$ENDIF}
   {$DEFINE SUPPORT_INT64ARRAY}                 // XE2 及以上定义了 Int64Array
   {$DEFINE SUPPORT_ALPHACOLOR}                 // XE2 的 System.UITypes 里定义了 TAlphaColors
   {$DEFINE LIST_NEW_POINTER}                   // XE2 的 List 有个新 Pointer
