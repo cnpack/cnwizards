@@ -201,6 +201,7 @@ USEFORMNS("DesignEditor\CnImageListEditorFrm.pas", Cnimagelisteditorfrm, CnImage
 USEUNIT("Utils\CnImageProviderIconFinder.pas");
 USEUNIT("Utils\CnImageProviderMgr.pas");
 USEUNIT("Utils\CnImageProviderFindIcons.pas");
+USEUNIT("Utils\CnImageProviderIcons8.pas");
 USEUNIT("Utils\CnImageProviderLocalCache.pas");
 USEUNIT("CodeFormatter\CnFormatterIntf.pas");
 USEFORMNS("CodeFormatter\CnCodeFormatterWizard.pas", Cncodeformatterwizard, CnCodeFormatterForm);

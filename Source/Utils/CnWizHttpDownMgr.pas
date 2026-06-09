@@ -33,9 +33,9 @@ unit CnWizHttpDownMgr;
 ================================================================================
 |</PRE>}
 
-{$I CnWizards.inc}
-
 interface
+
+{$I CnWizards.inc}
 
 uses
   Windows, SysUtils, Classes, CnThreadTaskMgr, CnCommon, CnInetUtils;

@@ -235,6 +235,7 @@ uses
   CnImageProviderMgr in 'Utils\CnImageProviderMgr.pas',
   CnImageProviderIconFinder in 'Utils\CnImageProviderIconFinder.pas',
   CnImageProviderFindIcons in 'Utils\CnImageProviderFindIcons.pas',
+  CnImageProviderIcons8 in 'Utils\CnImageProviderIcons8.pas',
   CnImageProviderLocalCache in 'Utils\CnImageProviderLocalCache.pas',
   CnFormatterIntf in 'CodeFormatter\CnFormatterIntf.pas',
   CnCodeFormatterWizard in 'CodeFormatter\CnCodeFormatterWizard.pas' {CnCodeFormatterForm},

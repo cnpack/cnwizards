@@ -90,18 +90,19 @@
       ..\Dcu\CnSrcEditorReplaceInBlock.obj ..\Dcu\CnEditorSortLines.obj 
       ..\Dcu\CnEditorToggleUses.obj ..\Dcu\CnEditorJumpMessage.obj 
       ..\Dcu\CnEditorFontZoom.obj ..\Dcu\CnEditorDuplicateUnit.obj 
-      ..\Dcu\CnEditorExtractString.obj ..\Dcu\CnEditorExtSelect.obj ..\Dcu\CnSrcEditorKey.obj 
-      ..\Dcu\CnIdentRenameFrm.obj ..\Dcu\CnIdeEnhanceMenu.obj 
-      ..\Dcu\CnIdeBRWizard.obj ..\Dcu\CnSourceHighlightFrm.obj 
-      ..\Dcu\CnHighlightLineFrm.obj ..\Dcu\CnHighlightSeparateLineFrm.obj 
-      ..\Dcu\CnHighlightCustomIdentFrm.obj ..\Dcu\CnSourceHighlight.obj 
-      ..\Dcu\CnSrcEditorWebSearch.obj ..\Dcu\CnPropEditorCustomizeFrm.obj 
-      ..\Dcu\CnInputSymbolList.obj ..\Dcu\CnInputHelper.obj 
-      ..\Dcu\CnInputHelperEditFrm.obj ..\Dcu\CnInputHelperFrm.obj 
-      ..\Dcu\CnInputIdeSymbolList.obj ..\Dcu\CnInputBcbIdeSymbolList.obj 
-      ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
-      ..\Dcu\CnImageProviderIconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
-      ..\Dcu\CnImageProviderFindIcons.obj ..\Dcu\CnImageProviderLocalCache.obj 
+      ..\Dcu\CnEditorExtractString.obj ..\Dcu\CnEditorExtSelect.obj 
+      ..\Dcu\CnSrcEditorKey.obj  ..\Dcu\CnIdentRenameFrm.obj 
+      ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnIdeBRWizard.obj 
+      ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
+      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnHighlightCustomIdentFrm.obj 
+      ..\Dcu\CnSourceHighlight.obj ..\Dcu\CnSrcEditorWebSearch.obj 
+      ..\Dcu\CnPropEditorCustomizeFrm.obj ..\Dcu\CnInputSymbolList.obj 
+      ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
+      ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
+      ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnImageListEditor.obj 
+      ..\Dcu\CnImageListEditorFrm.obj ..\Dcu\CnImageProviderIconFinder.obj 
+      ..\Dcu\CnImageProviderMgr.obj ..\Dcu\CnImageProviderFindIcons.obj 
+      ..\Dcu\CnImageProviderIcons8.obj ..\Dcu\CnImageProviderLocalCache.obj 
       ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
       ..\Dcu\CnAICoderWizard.obj ..\Dcu\CnAICoderConfig.obj 
       ..\Dcu\CnAICoderNetClient.obj ..\Dcu\CnAICoderEngine.obj 

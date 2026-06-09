@@ -34,9 +34,9 @@ unit CnImageProviderIconFinder;
 ================================================================================
 |</PRE>}
 
-{$I CnWizards.inc}
-
 interface
+
+{$I CnWizards.inc}
 
 {$DEFINE USE_MSXML}
 

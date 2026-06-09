@@ -661,6 +661,7 @@
         <DCCReference Include="Utils\CnImageProviderMgr.pas"/>
         <DCCReference Include="Utils\CnImageProviderIconFinder.pas"/>
         <DCCReference Include="Utils\CnImageProviderFindIcons.pas"/>
+        <DCCReference Include="Utils\CnImageProviderIcons8.pas"/>
         <DCCReference Include="Utils\CnImageProviderLocalCache.pas"/>
         <DCCReference Include="CodeFormatter\CnFormatterIntf.pas"/>
         <DCCReference Include="CodeFormatter\CnCodeFormatterWizard.pas">

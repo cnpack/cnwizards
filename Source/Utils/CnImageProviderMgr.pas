@@ -33,9 +33,9 @@ unit CnImageProviderMgr;
 ================================================================================
 |</PRE>}
 
-{$I CnWizards.inc}
-
 interface
+
+{$I CnWizards.inc}
 
 uses
   Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms, CnCommon,

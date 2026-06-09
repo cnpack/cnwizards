@@ -91,16 +91,17 @@
       ..\Dcu\CnSrcEditorKey.obj ..\Dcu\CnIdentRenameFrm.obj 
       ..\Dcu\CnIdeEnhanceMenu.obj ..\Dcu\CnSourceHighlight.obj 
       ..\Dcu\CnSourceHighlightFrm.obj ..\Dcu\CnHighlightLineFrm.obj 
-      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnHighlightCustomIdentFrm.obj ..\Dcu\CnInputSymbolList.obj 
-      ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
-      ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
-      ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnSrcEditorWebSearch.obj 
-      ..\Dcu\CnIdeBRWizard.obj ..\Dcu\CnPropEditorCustomizeFrm.obj 
-      ..\Dcu\CnScriptClasses.obj ..\Dcu\CnScriptRegister.obj 
-      ..\Dcu\CnScriptFrm.obj ..\Dcu\CnScriptWizard.obj 
-      ..\Dcu\CnImageListEditor.obj ..\Dcu\CnImageListEditorFrm.obj 
-      ..\Dcu\CnImageProviderIconFinder.obj ..\Dcu\CnImageProviderMgr.obj 
-      ..\Dcu\CnImageProviderFindIcons.obj ..\Dcu\CnImageProviderLocalCache.obj 
+      ..\Dcu\CnHighlightSeparateLineFrm.obj ..\Dcu\CnHighlightCustomIdentFrm.obj 
+      ..\Dcu\CnInputSymbolList.obj  ..\Dcu\CnInputHelper.obj 
+      ..\Dcu\CnInputHelperEditFrm.obj  ..\Dcu\CnInputHelperFrm.obj 
+      ..\Dcu\CnInputIdeSymbolList.obj ..\Dcu\CnInputBcbIdeSymbolList.obj 
+      ..\Dcu\CnSrcEditorWebSearch.obj ..\Dcu\CnIdeBRWizard.obj 
+      ..\Dcu\CnPropEditorCustomizeFrm.obj  ..\Dcu\CnScriptClasses.obj 
+      ..\Dcu\CnScriptRegister.obj ..\Dcu\CnScriptFrm.obj 
+      ..\Dcu\CnScriptWizard.obj ..\Dcu\CnImageListEditor.obj 
+      ..\Dcu\CnImageListEditorFrm.obj ..\Dcu\CnImageProviderIconFinder.obj 
+      ..\Dcu\CnImageProviderMgr.obj  ..\Dcu\CnImageProviderFindIcons.obj 
+      ..\Dcu\CnImageProviderIcons8.obj ..\Dcu\CnImageProviderLocalCache.obj 
       ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
       ..\Dcu\CnAICoderWizard.obj ..\Dcu\CnAICoderConfig.obj 
       ..\Dcu\CnAICoderNetClient.obj ..\Dcu\CnAICoderEngine.obj 
@@ -437,6 +438,7 @@
       <FILE FILENAME="Utils\CnImageProviderIconFinder.pas" FORMNAME="" UNITNAME="CnImageProviderIconFinder.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProviderMgr.pas" FORMNAME="" UNITNAME="CnImageProviderMgr.pas" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProviderFindIcons.pas" FORMNAME="" UNITNAME="CnImageProviderFindIcons" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="Utils\CnImageProviderIcons8.pas" FORMNAME="" UNITNAME="CnImageProviderIcons8" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="Utils\CnImageProviderLocalCache.pas" FORMNAME="" UNITNAME="CnImageProviderLocalCache" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnFormatterIntf.pas" FORMNAME="" UNITNAME="CnFormatterIntf" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="CodeFormatter\CnCodeFormatterWizard.pas" FORMNAME="CnCodeFormatterForm" UNITNAME="CnCodeFormatterWizard" CONTAINERID="PascalCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
