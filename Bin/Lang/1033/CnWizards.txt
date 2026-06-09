@@ -3825,6 +3825,7 @@ SCnImageListSearchFailed=Search Image Failed!
 SCnImageListInvalidFile=The File is NOT a Valid Image File: 
 SCnImageListSepBmp=Image Dimensions for %s are Greater than Imagelist Dimensions. Split it into %d Separated Bitmaps?
 SCnImageListNoPngLib=CnPngLib.dll NOT Found! Please Reinstall CnWizards.
+SCnImageListNoPngLib64=CnPngLib64.dll NOT Found! Please Reinstall CnWizards.
 SCnImageListExportFailed=Export Images Failed!
 SCnImageListXPStyleNotSupport=The ImageList Uses XP Style images, but Your IDE doesn''t Support XPManifest! Do You Want to Convert Images to Normal Style?
 SCnImageListSearchIconsetFailed=Search Icon Set Failed!

@@ -16,10 +16,9 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-    { Private declarations }
     FIni: TCustomIniFile;
   public
-    { Public declarations }
+
   end;
 
 var

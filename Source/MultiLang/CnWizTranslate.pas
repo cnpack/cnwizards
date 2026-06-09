@@ -170,6 +170,7 @@ begin
   TranslateStr(SCnImageListInvalidFile, 'SCnImageListInvalidFile');
   TranslateStr(SCnImageListSepBmp, 'SCnImageListSepBmp');
   TranslateStr(SCnImageListNoPngLib, 'SCnImageListNoPngLib');
+  TranslateStr(SCnImageListNoPngLib64, 'SCnImageListNoPngLib64');
   TranslateStr(SCnImageListExportFailed, 'SCnImageListExportFailed');
   TranslateStr(SCnImageListXPStyleNotSupport, 'SCnImageListXPStyleNotSupport');
   TranslateStr(SCnImageListSearchIconsetFailed, 'SCnImageListSearchIconsetFailed');

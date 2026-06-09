@@ -433,7 +433,13 @@ begin
   UpdateSelected;
 
   if not CnPngLibLoaded then
+  begin
+{$IFDEF WIN64}
+    WarningDlg(SCnImageListNoPngLib64);
+{$ELSE}
     WarningDlg(SCnImageListNoPngLib);
+{$ENDIF}
+  end;
 end;
 
 procedure TCnImageListEditorForm.AddSize(W, H: Integer);

@@ -3825,6 +3825,7 @@ SCnImageListSearchFailed=Ошибка при поиске изображений
 SCnImageListInvalidFile=Файл не является изображением: 
 SCnImageListSepBmp=Размеры "%s" больше размеров ImageList''а. Разбить изображение на %d части(ь,ей)?
 SCnImageListNoPngLib=CnPngLib.dll не найдена! Пожалуйста, переустановите CnPack IDE-Мастер.
+SCnImageListNoPngLib64=CnPngLib64.dll не найдена! Пожалуйста, переустановите CnPack IDE-Мастер.
 SCnImageListExportFailed=Ошибка при эскпорте изображений!
 SCnImageListXPStyleNotSupport=Изображения в ImageList''е используют стиле XP, но Ваша IDE не поддерживает XPManifest! Преобразовать изображения к стандартному стилю?
 SCnImageListSearchIconsetFailed=Ошибка при поиске набора изображений!

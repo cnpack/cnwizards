@@ -3825,6 +3825,7 @@ SCnImageListSearchFailed=Suche des Image fehlgeschlagen!
 SCnImageListInvalidFile=Die Datei ist keine gültige Image-Datei: 
 SCnImageListSepBmp=Image Dimension für %s ist größer als Dimension der Imagelist. Sollen %d separate Bitmaps angelegt werden?
 SCnImageListNoPngLib=CnPngLib.dll nicht gefunden! Bitte installieren Sie CnWizards neu.
+SCnImageListNoPngLib64=CnPngLib64.dll nicht gefunden! Bitte installieren Sie CnWizards neu.
 SCnImageListExportFailed=Export der Bilder fehlgeschlagen!
 SCnImageListXPStyleNotSupport=Die ImageList benutzt XP Style images, aber Ihre unterstützt kein! Wollen Sie die Bilder in "normal" Style konvertieren?
 SCnImageListSearchIconsetFailed=Suche nach icon set fehlgeschlagen!
