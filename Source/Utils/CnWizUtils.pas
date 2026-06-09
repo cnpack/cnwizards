@@ -3421,17 +3421,18 @@ begin
     HdpiFactor := AListView.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
     try
       Lines.CommaText := Text;
+      // 注意这里最终经过测试，末尾无需再乘 HdpiFactor，因为系统会误乘
       if SingleEqual(MulFactor, 1.0) then
       begin
         for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
-          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor);
+          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)));
       end
       else
       begin
         for I := 0 to AListView.Columns.Count - 1 do
         begin
           if I < Lines.Count then
-            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor * MulFactor)
+            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * MulFactor)
           else
             AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
         end;
