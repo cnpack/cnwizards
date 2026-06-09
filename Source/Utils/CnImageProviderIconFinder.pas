@@ -24,7 +24,8 @@ unit CnImageProviderIconFinder;
 * 软件名称：开发包属性、组件编辑器库
 * 单元名称：www.IconFinder.com 服务支持单元
 * 单元作者：周劲羽 zjy@cnpack.org
-* 备    注：该服务已迁移至 api.freepik.com，后又改为 api.magnific.com
+* 备    注：该服务已迁移至 api.freepik.com，后又改为 api.magnific.com，后又收费，
+*           没法用了！
 * 开发平台：Win7 + Delphi 7
 * 兼容测试：
 * 本 地 化：该单元和窗体中的字符串已经本地化处理方式
@@ -156,6 +157,7 @@ begin
 end;
 
 initialization
-  ImageProviderMgr.RegisterProvider(TCnImageProviderFreePik);
+  // 换域名后收费，没法用了
+  // ImageProviderMgr.RegisterProvider(TCnImageProviderFreePik);
 
 end.

@@ -4,6 +4,7 @@ uses
   Forms,
   Unit1 in 'Unit1.pas' {ImgListEdtTestForm},
   CnImageProviderIconFinder in '..\..\..\..\Source\Utils\CnImageProviderIconFinder.pas',
+  CnImageProviderIcons8 in '..\..\..\..\Source\Utils\CnImageProviderIcons8.pas',
   CnImageProviderMgr in '..\..\..\..\Source\Utils\CnImageProviderMgr.pas',
   CnPngUtilsIntf in '..\..\..\..\Source\Utils\CnPngUtilsIntf.pas',
   CnWizMultiLang in '..\..\..\..\Source\MultiLang\CnWizMultiLang.pas' {CnTranslateForm},

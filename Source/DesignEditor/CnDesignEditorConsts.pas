@@ -104,7 +104,7 @@ var
   // TCnImageListEditor
   SCnImageListChangeSize: string = 'Do You Want to Change the Image Dimensions?';
   SCnImageListChangeXPStyle: string = 'Do You Want to Change the Image Style?';
-  SCnImageListSearchFailed: string = 'Search image failed!';
+  SCnImageListSearchFailed: string = 'Search Image Failed!';
   SCnImageListInvalidFile: string = 'The File is NOT a Valid Image File: ';
   SCnImageListSepBmp: string = 'Image Dimensions for %s are Greater than Imagelist Dimensions. Split it into %d Separated Bitmaps?';
   SCnImageListNoPngLib: string = 'CnPngLib.dll NOT Found! Please Reinstall CnWizards.';
