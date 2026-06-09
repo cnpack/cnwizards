@@ -144,6 +144,9 @@ const
   CN_WIZ_CMD_TRANS_CURSHEET      = $CCB + $116;  // 3553
   {* 通知多语插件翻译当前环境设置对话框里 PropSheetControl 的当前 Page}
 
+  CN_WIZ_CMD_LVCOLUMN_WIDTH      = $CCB + $117;  // 3554
+  {* Dump 出当前窗体的 ListView 的列宽}
+
   //================= 以上是命令 ID 定义，可在开发过程中扩展 ===================
 
 type

@@ -77,7 +77,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
   ToolsAPI, IniFiles, ShellAPI, Menus, FileCtrl, {$IFDEF BDS} Variants, {$ENDIF}
-  {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
+  ComCtrls, {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
@@ -141,6 +141,9 @@ type
     procedure SubActionExecute(Index: Integer); override;
     procedure SubActionUpdate(Index: Integer); override;
     procedure SetActive(Value: Boolean); override;
+
+    procedure CommandNotify(const Command: Cardinal; const SourceID: PAnsiChar;
+      const DestID: PAnsiChar; const IDESets: TCnCompilers; const Params: TStrings);
   public
     procedure UpdateActionHook(HookUnitsList, HookFormsList, HookUseUnit: Boolean);
     procedure UpdateMethodHook(HookUseUnit: Boolean);
@@ -177,7 +180,8 @@ uses
   CnDebug,
 {$ENDIF}
   {$IFDEF SUPPORT_FMX} CnVclToFmxIntf, {$ENDIF}
-  CnWizIdeUtils, CnWizOptions, CnWizMenuAction, CnProjectUseUnitsFrm;
+  CnWizIdeUtils, CnWizOptions, CnWizMenuAction, CnWizCmdNotify,
+  CnWizCmdMsg, CnProjectUseUnitsFrm;
 
 const
 {$IFDEF WIN64}
@@ -218,6 +222,8 @@ begin
     end;
   end;
 
+  CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
+
   // Lazy to Let UI Create them to Optimize Starting-Up Speed.
   // FPasUnitNameList := TUnitNameList.Create(True, False, False);
   // FCppUnitNameList := TUnitNameList.Create(True, True, False);
@@ -225,11 +231,55 @@ end;
 
 destructor TCnProjectExtWizard.Destroy;
 begin
+  CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
+
   FPasUnitNameList.Free;
   FCppUnitNameList.Free;
   FMethodHook.Free;
 
   inherited;
+end;
+
+procedure TCnProjectExtWizard.CommandNotify(const Command: Cardinal;
+  const SourceID, DestID: PAnsiChar; const IDESets: TCnCompilers;
+  const Params: TStrings);
+var
+  I: Integer;
+  S: string;
+  F: TCustomForm;
+  Lv: TListView;
+begin
+  if Command = CN_WIZ_CMD_LVCOLUMN_WIDTH then
+  begin
+{$IFDEF DEBUG}
+    F := Screen.ActiveCustomForm;
+    if F = nil then
+      Exit;
+
+    Lv := nil;
+    for I := 0 to F.ComponentCount - 1 do
+    begin
+      if F.Components[I] is TListView then
+      begin
+        Lv := TListView(F.Components[I]);
+        Break;
+      end;
+    end;
+
+    if Lv = nil then
+      Exit;
+
+{$IFDEF IDE_SUPPORT_HDPI}
+    S := FloatToStr(Lv.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI);
+{$ELSE}
+    S := '';
+{$ENDIF}
+    for I := 0 to Lv.Columns.Count - 1 do
+      S := S + ' ' + IntToStr(Lv.Columns[I].Width);
+
+    CnDebugger.LogMsg('CN_WIZ_CMD_LVCOLUMN_WIDTH: ' + S);
+{$ENDIF}
+  end;
 end;
 
 procedure TCnProjectExtWizard.Loaded;

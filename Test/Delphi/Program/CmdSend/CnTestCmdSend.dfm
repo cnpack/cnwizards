@@ -151,7 +151,8 @@ object CnCmdSendForm: TCnCmdSendForm
       '3550 生成当前 SubView 的语言条目'
       '3551 翻译当前 SubView'
       '3552 生成当前窗体的菜单字符串'
-      '3553 翻译环境设置对话框里的当前 Page')
+      '3553 翻译环境设置对话框里的当前 Page'
+      '3554 Dump 出当前窗体的 ListView 的列宽')
     TabOrder = 8
     OnClick = lstMsgClick
   end
