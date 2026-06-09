@@ -126,8 +126,9 @@ begin
   IconMap := TStringList.Create;
   RegExpr := TRegExpr.Create;
   try
+{$IFDEF COMPILER7_UP}
     IconMap.NameValueSeparator := '=';
-
+{$ENDIF}
     MatchIcons('icons8\.com/icon/([A-Za-z0-9]+)/([A-Za-z0-9\-_]+)', 1, 2);
     MatchIcons('icons8\\.com\\u002Ficon\\u002F([A-Za-z0-9]+)\\u002F([A-Za-z0-9\-_]+)', 1, 2);
     MatchIcons('img\.icons8\.com/\?size=\d+&id=([A-Za-z0-9]+)&format=png', 1, 0);
@@ -145,7 +146,7 @@ begin
     for I := 0 to IconMap.Count - 1 do
     begin
       Id := IconMap.Names[I];
-      Slug := IconMap.ValueFromIndex[I];
+      Slug := IconMap.Values[Id];
 
       Item := Items.Add;
       Item.Ext := '.png';
