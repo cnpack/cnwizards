@@ -158,6 +158,8 @@ begin
 {$ENDIF}
       end;
     end;
+    if ATask.FStatus <> tsFinished then
+      ATask.FStatus := tsFailure;
   finally
     FreeAndNil(FHttp);
   end;

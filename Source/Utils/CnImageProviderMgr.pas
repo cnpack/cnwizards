@@ -478,6 +478,7 @@ begin
 {$IFDEF DEBUG}
                   CnDebugger.LogFmt('ImagePrivoder %s Convert Png to Bmp Error %s', [ClassName, Item.FFileName]);
 {$ENDIF}
+                  Item.Free;
                 end;
                 DeleteFile(BmpName);
               end
