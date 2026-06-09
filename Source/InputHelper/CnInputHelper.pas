@@ -2673,6 +2673,7 @@ begin
               if Symbol = '' then
               begin
                 TCnSymbolItem(FSymbols.Objects[I]).Tag := 1;
+                TCnSymbolItem(FSymbols.Objects[I]).FuzzyMatchIndexes.Clear; // 可能有上一次匹配的索引影响绘制，清除
                 FItems.AddObject(FSymbols[I], FSymbols.Objects[I]);
               end
               else if TCnSymbolItem(FSymbols.Objects[I]).MatchFirstOnly then
