@@ -37,9 +37,6 @@ unit CnDesignEditorConsts;
 
 interface
 
-uses
-  Windows;
-
 {$I CnWizards.inc}
 
 const

@@ -41,6 +41,8 @@ unit HtmlHlp;
 
 interface
 
+{$I CnWizards.inc}
+
 (*$HPPEMIT ''*)
 (*$HPPEMIT '#include "htmlhelp.h"'*)
 (*$HPPEMIT ''*)
@@ -54,8 +56,6 @@ interface
 
 uses
   Windows;
-
-{$I CnWizards.inc}
 
 {.$DEFINE _WIN64}
 {.$DEFINE HTMLHELP11}
