@@ -608,6 +608,7 @@ begin
 
     TmpFile := FileName + '.~tmp';
     try
+      List.WriteBOM := List.HasBOM;
       List.SaveToFile(TmpFile, Fmt);
     except
       Result := scrSaveError;
@@ -656,6 +657,7 @@ begin
 
     TmpFile := FileName + '.~tmp';
     try
+      List.WriteBOM := List.HasBOM;
       List.SaveToFile(TmpFile, Fmt);
     except
       Result := scrSaveError;
