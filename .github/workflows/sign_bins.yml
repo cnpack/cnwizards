@@ -34,7 +34,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '3a9625c5-a4a0-46c9-8e46-2f1414ee63b0'
-          project-slug: 'CnPack IDE Wizards [OSS]'
+          project-slug: 'cnwizards'
           signing-policy-slug: 'test-signing'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
