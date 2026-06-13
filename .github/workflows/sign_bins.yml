@@ -1,0 +1,49 @@
+name: Sign File with SignPath
+
+on:
+  workflow_dispatch:            # 允许手动触发
+  # 也可以添加 push: 或 schedule: 触发器
+
+jobs:
+  sign-bin-zip:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read             # 允许读取 artifact 信息
+      contents: read
+
+    steps:
+      - name: 下载待签名文件
+        run: |
+          mkdir -p unsigned_artifact
+          curl -L "https://download.cnpack.org/Bin.zip" --output "./unsigned_artifact/Bin.zip"
+          echo "文件下载完成"
+          ls -la ./unsigned_artifact/
+
+      - name: 上传文件为 GitHub Artifact
+        uses: actions/upload-artifact@v4
+        id: upload-unsigned
+        with:
+          name: unsigned-bin-zip
+          path: ./unsigned_artifact/
+          if-no-files-found: error
+          # 保持原始 zip 文件不变，不压缩成嵌套 zip
+          archive: false
+
+      - name: 提交签名请求到 SignPath
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          wait-for-completion: true
+          # 可选：设置等待超时（秒），默认 3600
+          wait-for-completion-timeout-seconds: 1800
+          # 签名后文件保存目录
+          output-artifact-directory: ./signed_artifact
+
+      - name: 显示签名结果
+        run: |
+          echo "✅ 签名完成，签名文件位于："
+          ls -la ./signed_artifact/
