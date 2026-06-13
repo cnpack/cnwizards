@@ -20,7 +20,7 @@ jobs:
           ls -la ./unsigned_artifact/
 
       - name: 上传文件为 GitHub Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         id: upload-unsigned
         with:
           name: unsigned-bin-zip
@@ -33,13 +33,11 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v2
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
-          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
-          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          organization-id: '3a9625c5-a4a0-46c9-8e46-2f1414ee63b0'
+          project-slug: 'CnPack IDE Wizards [OSS]'
+          signing-policy-slug: 'test-signing'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
-          # 可选：设置等待超时（秒），默认 3600
-          wait-for-completion-timeout-seconds: 1800
           # 签名后文件保存目录
           output-artifact-directory: ./signed_artifact
 
