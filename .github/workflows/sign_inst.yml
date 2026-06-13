@@ -1,4 +1,4 @@
-name: Sign Files with SignPath
+name: Sign Installer with SignPath
 
 on:
   workflow_dispatch:            # 允许手动触发
@@ -15,7 +15,7 @@ jobs:
       - name: 下载待签名文件
         run: |
           mkdir -p unsigned_artifact
-          curl -L "https://download.cnpack.org/Bin.zip" --output "./unsigned_artifact/Bin.zip"
+          curl -L "https://download.cnpack.org/Installer.exe" --output "./unsigned_artifact/Installer.exe"
           echo "文件下载完成"
           ls -la ./unsigned_artifact/
 
@@ -36,7 +36,7 @@ jobs:
           organization-id: '3a9625c5-a4a0-46c9-8e46-2f1414ee63b0'
           project-slug: 'cnwizards'
           signing-policy-slug: 'test-signing'
-          artifact-configuration-slug: 'sign_multi_pes'
+          artifact-configuration-slug: 'sign_single_installer'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
           # 签名后文件保存目录
