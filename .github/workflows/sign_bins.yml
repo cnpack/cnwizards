@@ -12,7 +12,7 @@ jobs:
       contents: read
 
     steps:
-      - name: 下载待签名文件
+      - name: 下载待签名的 ZIP 文件，包含 61 个 exe/dll
         run: |
           mkdir -p unsigned_artifact
           curl -L "https://download.cnpack.org/Bin.zip" --output "./unsigned_artifact/Bin.zip"

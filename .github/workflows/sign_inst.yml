@@ -12,7 +12,7 @@ jobs:
       contents: read
 
     steps:
-      - name: 下载待签名文件
+      - name: 下载待签名的安装包文件，一个单一 exe
         run: |
           mkdir -p unsigned_artifact
           curl -L "https://download.cnpack.org/Installer.exe" --output "./unsigned_artifact/Installer.exe"
