@@ -5,7 +5,7 @@ on:
   # 也可以添加 push: 或 schedule: 触发器
 
 jobs:
-  sign-bin-zip:
+  sign-bin-inst:
     runs-on: ubuntu-latest
     permissions:
       actions: read             # 允许读取 artifact 信息
