@@ -125,6 +125,26 @@ type
 
   TTokenKinds = set of TTokenKind;
 
+const
+  PascalKeywords: TTokenKinds = [tkAbsolute, tkAbstract, tkAnd, tkArray, tkAs,
+    tkAsm, tkAssembler, tkAt, tkAutomated, tkBegin, tkCase, tkCdecl, tkClass,
+    tkConst, tkConstructor, tkContains, tkDefault, tkDeprecated, tkDestructor,
+    tkDispid, tkDispinterface, tkDiv, tkDo, tkDownto, tkDynamic, tkElse, tkEnd,
+    tkExcept, tkExport, tkExports, tkExternal, tkFar, tkFile, tkFinal,
+    tkFinalization, tkFinally, tkFor, tkForward, tkFunction, tkGoto, tkHelper,
+    tkIf, tkImplementation, tkImplements, tkIn, tkIndex, tkInherited,
+    tkInitialization, tkInline, tkInterface, tkIs, tkKeyString, tkLabel,
+    tkLibrary, tkMessage, tkMod, tkName, tkNear, tkNil, tkNodefault, tkNoReturn,
+    tkNot, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload,
+    tkOverride, tkPackage, tkPacked, tkPascal, tkPlatform, tkPrivate,
+    tkProcedure, tkProgram, tkProperty, tkProtected, tkPublic, tkPublished,
+    tkRaise, tkRead, tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat,
+    tkRequires, tkResident, tkResourcestring, tkSafecall, tkSealed, tkSet, tkShl,
+    tkShr, tkStatic, tkStdcall, tkStored, tkStrict, tkStringresource, tkThen,
+    tkThreadvar, tkTo, tkTry, tkType, tkUnit, tkUntil, tkUses, tkVar, tkVirtual,
+    tkWhile, tkWith, tkWrite, tkWriteonly, tkXor];
+
+type
   TCommentState=(csAnsi, csBor, csNo);
 
 {$IFDEF BCB5}
