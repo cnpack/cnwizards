@@ -649,14 +649,26 @@ var
         // 以往非 LSP 模式的同步接口传 Ansi 的 CursorPos 都是可用的。
         // 偏偏此处要额外做一次 Ansi 到 UTF8 的转换，且 Col 是 1 开始
         LineText := EditControlWrapper.GetTextAtLine(GetCurrentEditControl, CurPos.Line);
-        Utf8Col := CalcUtf8LengthFromWideStringAnsiOffset(PWideChar(LineText), CurPos.Col);
+        if CnIsValidAscii then
+        begin
+          Utf8Col := CalcUtf8LengthFromWideStringAnsiOffset(PWideChar(LineText), CurPos.Col);
 {$IFDEF DEBUG}
-        CnDebugger.LogFmt('To Async Invoke %s at Line %d Utf8Col %d.',
-          [FAsyncManagerObj.ClassName, CurPos.Line, Utf8Col]);
+          CnDebugger.LogFmt('To Async Invoke %s at Line %d Utf8Col %d.',
+            [FAsyncManagerObj.ClassName, CurPos.Line, Utf8Col]);
 {$ENDIF}
 
-        AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
-          Utf8Col, AsyncCodeCompletionCallBack);
+          AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
+            Utf8Col, AsyncCodeCompletionCallBack);
+        end
+        else // 但直接改似乎又会触发 D13 的点号后已有内容时删除再输入时弹出内容错乱的 Bug，所以做一次纯 ASCII 判断，是则走老流程
+        begin
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('To Async Invoke %s at Line %d Col %d.',
+            [FAsyncManagerObj.ClassName, CurPos.Line, CurPos.Col - 1]);
+{$ENDIF}
+          AsyncManager.AsyncInvokeCodeCompletion(itAuto, Filter, CurPos.Line,
+            CurPos.Col - 1, AsyncCodeCompletionCallBack);
+        end;
 
         Tick := GetTickCount;
         try
