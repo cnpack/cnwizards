@@ -649,7 +649,7 @@ var
         // 以往非 LSP 模式的同步接口传 Ansi 的 CursorPos 都是可用的。
         // 偏偏此处要额外做一次 Ansi 到 UTF8 的转换，且 Col 是 1 开始
         LineText := EditControlWrapper.GetTextAtLine(GetCurrentEditControl, CurPos.Line);
-        if CnIsValidAscii then
+        if not CnIsValidAscii(LineText) then
         begin
           Utf8Col := CalcUtf8LengthFromWideStringAnsiOffset(PWideChar(LineText), CurPos.Col);
 {$IFDEF DEBUG}
