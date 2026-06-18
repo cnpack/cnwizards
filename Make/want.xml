@@ -203,16 +203,16 @@ See http://www.suigeneris.org/want/ for details.
     <echo message="CnWizards Build Tool - WANT
 Usage: want [target-name] [-Dname=value]
   where target-name may:
-    help       - This help text.
-    cleanbin   - Clean output files.
-    cleanobj   - Clean temp files.
-    clean      - Clean output and temp files.
-    gitpull    - Update all files.
+    help       - This Help Text.
+    cleanbin   - Clean Output Files.
+    cleanobj   - Clean Temp Files.
+    clean      - Clean Output and Temp Files.
+    gitpull    - Update All Files from git.
     cnwizloader    - Compile CnWizards Loader DLL.
     cnwizloader64  - Compile CnWizards 64-Bit Loader DLL.
     d5         - Compile CnWizards for Delphi 5.
                  (d6, d7, d2005, d2006, d2007, d2009, d2010, dxe, dxe21, dxe2, dxe3, dxe4, dxe5, dxe6, dxe7, dxe8, dxe81, d10s, d101b, d102t, d103r1, d103r, d104s1, d104s, d110a, d120a1, d120a2, d120a, d120a64, d130f, d130f64, cb5, cb6 also)
-    cnwizards  - Compile all CnWizards DLLs (D5, D6, etc.).
+    cnwizards  - Compile all CnWizards DLLs (* D5, D6, etc.).
     resdll     - Compile CnWizards Resource DLL.
     resdll64   - Compile CnWizards 64-Bit Resource DLL.
     cnwizhelperdll - Compile CnWizards Helper DLL.
@@ -238,17 +238,17 @@ Usage: want [target-name] [-Dname=value]
     cnwizsetup - Compile CnWizards Setup.
     cnhash     - Compile CnHash Tool.
     cnfixstart - Compile CnWizards Fix Starting-Up Tool
-    tools      - Compile Tools (CnDfm6To5, CnWizSetup, etc.).
-    help_chs   - Compile Simplified Chinese CHM help (GB18030/GB2312).
-    help_cht   - Compile Traditional Chinese CHM help (BIG5).
-    help_enu   - Compile English CHM help.
-    makehelp   - Compile all chm help files.
+    tools      - Compile Tools (* CnDfm6To5, CnWizSetup, etc.).
+    help_chs   - Compile Simplified Chinese CHM Help (GB18030/GB2312).
+    help_cht   - Compile Traditional Chinese CHM Help (BIG5).
+    help_enu   - Compile English CHM Help.
+    makehelp   - Compile all CHM Help Files.
     calchash   = Calculate Hash Values.
     makeinst   - Build CnWizards Installer.
-    all        - All above tasks except gitpull.
-    allgit     - All above tasks.
-    incbuild   - Increase build and commit (Master only).
-    publish    - Publish a new version (Master only. Need Manually Upload).
+    all        - All above Tasks except gitpull.
+    allgit     - All above Tasks.
+    incbuild   - Increase Build and Commit (Master only).
+    publish    - Publish a New Version (Master only. Need Manually Upload).
 
   where name=value may:
     nightly=true - Make nightly version (default).
@@ -333,7 +333,7 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 编译 CnWizards DLLs -->
-  <target name="cnwizards" depends="-cw_prepare,${cnwizards_list},-cw_final" description="Compile all CnWizards DLLs (D5, D6, etc.)." />
+  <target name="cnwizards" depends="-cw_prepare,${cnwizards_list},-cw_final" description="Compile all CnWizards DLLs (* D5, D6, etc.)." />
   <target name="cnwizloader" depends="-cnwizloader,-cw_final" description="Compile CnWizards Loader." />
   <target name="cnwizloader64" depends="-cnwizloader64,-cw_final" description="Compile CnWizards 64-Bit Loader." />
   <target name="d5" depends="-d5,-cw_final" description="Compile CnWizards for Delphi 5." />
@@ -1543,7 +1543,7 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 编译附加工具 -->
-  <target name="tools" depends="-prepare,${tools_list}" description="Compile Tools (CnDfm6To5, CnWizSetup, etc.)." >
+  <target name="tools" depends="-prepare,${tools_list}" description="Compile Tools (* CnDfm6To5, CnWizSetup, etc.)." >
     <delete dir="${dcu}" >
        <exclude name="?svn" />
        <include name="*.*" />
@@ -1783,10 +1783,10 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 编译帮助文件 -->
-  <target name="makehelp" depends="-prepare,help_chs,help_cht,help_enu" description="Compile all chm help files." >
+  <target name="makehelp" depends="-prepare,help_chs,help_cht,help_enu" description="Compile all CHM Help Files." >
   </target>
 
-  <target name="help_chs" depends="-prepare" description="Compile Simplified Chinese CHM help (GB18030/GB2312)." >
+  <target name="help_chs" depends="-prepare" description="Compile Simplified Chinese CHM Help (GB18030/GB2312)." >
     <exec basedir="${help}/CnWizards_CHS" errorlevel="1" defaultfilters="true"
           executable="${ProgramFiles}\HTML Help Workshop\hhc">
       <arg value="CnWizards.hhp" />
@@ -1796,7 +1796,7 @@ Usage: want [target-name] [-Dname=value]
     </delete>
   </target>
 
-  <target name="help_cht" depends="-prepare" description="Compile Traditional Chinese CHM help (BIG5)." >
+  <target name="help_cht" depends="-prepare" description="Compile Traditional Chinese CHM Help (BIG5)." >
     <exec basedir="${help}/CnWizards_CHT" errorlevel="1" defaultfilters="true"
           executable="${ProgramFiles}\HTML Help Workshop\hhc">
       <arg value="CnWizards.hhp" />
@@ -1851,16 +1851,20 @@ Usage: want [target-name] [-Dname=value]
     </exec>
   </target>
 
+  <!-- 重新计算二进制文件的杂凑值并打包制作安装程序 -->
+  <target name="repack" depends="-prepare,calchash,makeinst" description="Repack to CnWizards Installer." >
+  </target>
+
   <!-- 完整构建 -->
-  <target name="all" depends="-prepare,clean,${all_list}" description="All above tasks except gitpull." >
+  <target name="all" depends="-prepare,clean,${all_list}" description="All above Tasks except gitpull." >
   </target>
 
   <!-- 带 git 更新的完整构建 -->
-  <target name="allgit" depends="-prepare,clean,gitpull,${all_list}" description="All above tasks." >
+  <target name="allgit" depends="-prepare,clean,gitpull,${all_list}" description="All above Tasks." >
   </target>
 
   <!-- 更新 build 号及提交文件 -->
-  <target name="incbuild" depends="-prepare" if="ismaster" description="Increase build and commit (Master only)." >
+  <target name="incbuild" depends="-prepare" if="ismaster" description="Increase Build and Commit (Master Only)." >
     <ini file="${ini}" >
       <write section="Version" key="Major" value="${Ver.Major}" />
       <write section="Version" key="Minor" value="${Ver.Minor}" />
@@ -1887,6 +1891,6 @@ Usage: want [target-name] [-Dname=value]
   </target>
 
   <!-- 完整构建并发布 -->
-  <target name="publish" depends="allgit,incbuild" description="Publish a new version (Master only)." >
+  <target name="publish" depends="allgit,incbuild" description="Publish a New Version (Master Only)." >
   </target>
 </project>
