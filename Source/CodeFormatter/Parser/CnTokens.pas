@@ -334,7 +334,7 @@ const
   IdentTokens = SymbolTokens + ConstTokens + ComplexTokens;
 
   // UpperFirstTypeTokens = [tokInteger, tokFloat, tokChar];
-  ClassMemberSymbolTokens = ClassMemberTokens + ComplexTokens + DirectiveTokens;
+  ClassMemberSymbolTokens = ClassMemberTokens + ComplexTokens + DirectiveTokens + [tokAmpersand];
   LeftBracket = [tokLB, tokSLB];
   RightBracket = [tokRB, tokSRB];
 
