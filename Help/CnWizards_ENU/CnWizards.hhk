@@ -277,8 +277,16 @@
 		<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Jump to Next Bookmark Tool">
+		<param name="Local" value="wizards\toolset\toolsetjumpnextbookmark.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Next Identifier Tool">
 		<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="Jump to Previous Bookmark Tool">
+		<param name="Local" value="wizards\toolset\toolsetjumpprevbookmark.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Jump to Previous Identifier Tool">

@@ -168,6 +168,8 @@ wizards\toolset\toolsetjumpimpl.htm
 wizards\toolset\toolsetjumpkeyword.htm
 wizards\toolset\toolsetjumpprevident.htm
 wizards\toolset\toolsetjumpnextident.htm
+wizards\toolset\toolsetjumpprevbookmark.htm
+wizards\toolset\toolsetjumpnextbookmark.htm
 wizards\toolset\toolsetjumpideinsight.htm
 wizards\toolset\toolsetfontinc.htm
 wizards\toolset\toolsetfontdec.htm

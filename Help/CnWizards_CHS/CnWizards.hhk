@@ -369,12 +369,20 @@
 		<param name="Local" value="wizards\toolset\toolsetjumpnextident.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="跳至后一书签工具">
+		<param name="Local" value="wizards\toolset\toolsetjumpnextbookmark.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至匹配关键字工具">
 		<param name="Local" value="wizards\toolset\toolsetjumpkeyword.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至前一标识符工具">
 		<param name="Local" value="wizards\toolset\toolsetjumpprevident.htm">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="跳至前一书签工具">
+		<param name="Local" value="wizards\toolset\toolsetjumpprevbookmark.htm">
 		</OBJECT>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="跳至上一信息行工具">
