@@ -1,3 +1,8 @@
+---
+name: update-cnwizards-lang
+description: 更新 CnWizards 多语言文件，向七个语言目录的 CnWizards.txt 中添加新的本地化字符串条目，以及在 CnWizConsts.pas 和 CnWizTranslate.pas 中新增可翻译的字符串变量。当需要向 CnWizards 添加新的多语言字符串、新增可翻译变量、或更新语言文件时使用。
+---
+
 # CnWizards 多语言文件更新
 
 > **如何使用本文件**

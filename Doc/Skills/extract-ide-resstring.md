@@ -1,4 +1,9 @@
-﻿# 从 BPL 文件提取资源字符串并翻译
+﻿---
+name: extract-ide-resstring
+description: 从 Win32 BPL 文件中提取 resourcestring 资源字符串，生成英文原文文件和中文翻译文件，用于 CnWizards IDE 翻译器的翻译替换机制。当需要从 Delphi/C++Builder BPL 文件中提取资源字符串、生成翻译文件、或更新 IDE 翻译器的资源字符串映射时使用。
+---
+
+# 从 BPL 文件提取资源字符串并翻译
 
 > **如何使用本文件**
 > 本文件是面向 AI 编程助手的操作指南，描述了从 Win32 BPL 文件中提取 resourcestring
