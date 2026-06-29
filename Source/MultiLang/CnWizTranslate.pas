@@ -470,6 +470,16 @@ begin
   TranslateStr(SCnEditorJumpNextIdentMenuHint, 'SCnEditorJumpNextIdentMenuHint');
   TranslateStr(SCnEditorJumpNextIdentName, 'SCnEditorJumpNextIdentName');
 
+  // CnEditorJumpPrevBookmark
+  TranslateStr(SCnEditorJumpPrevBookmarkMenuCaption, 'SCnEditorJumpPrevBookmarkMenuCaption');
+  TranslateStr(SCnEditorJumpPrevBookmarkMenuHint, 'SCnEditorJumpPrevBookmarkMenuHint');
+  TranslateStr(SCnEditorJumpPrevBookmarkName, 'SCnEditorJumpPrevBookmarkName');
+
+  // CnEditorJumpNextBookmark
+  TranslateStr(SCnEditorJumpNextBookmarkMenuCaption, 'SCnEditorJumpNextBookmarkMenuCaption');
+  TranslateStr(SCnEditorJumpNextBookmarkMenuHint, 'SCnEditorJumpNextBookmarkMenuHint');
+  TranslateStr(SCnEditorJumpNextBookmarkName, 'SCnEditorJumpNextBookmarkName');
+
   // CnEditorJumpIDEInsight
   TranslateStr(SCnEditorJumpIDEInsightMenuCaption, 'SCnEditorJumpIDEInsightMenuCaption');
   TranslateStr(SCnEditorJumpIDEInsightMenuHint, 'SCnEditorJumpIDEInsightMenuHint');

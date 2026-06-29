@@ -28,7 +28,9 @@ unit CnEditorJumpMessage;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2014.12.25
+* 修改记录：2026.06.29
+*               加入跳至书签的功能
+*           2014.12.25
 *               加入跳至匹配的条件编译指令的功能
 *           2012.02.25
 *               加入跳至前一个/后一个相同标识符的功能
@@ -111,6 +113,38 @@ type
   end;
 
   TCnEditorJumpImpl = class(TCnBaseCodingToolset)
+  private
+
+  public
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
+    function GetDefShortCut: TShortCut; override;
+    procedure Execute; override;
+  end;
+
+  TCnEditorJumpPrevBookmark = class(TCnBaseCodingToolset)
+  private
+
+  public
+    constructor Create(AOwner: TCnCodingToolsetWizard); override;
+    destructor Destroy; override;
+    procedure LoadSettings(Ini: TCustomIniFile); override;
+    procedure SaveSettings(Ini: TCustomIniFile); override;
+    function GetCaption: string; override;
+    function GetHint: string; override;
+    procedure GetToolsetInfo(var Name, Author, Email: string); override;
+    function GetState: TWizardState; override;
+    function GetDefShortCut: TShortCut; override;
+    procedure Execute; override;
+  end;
+
+  TCnEditorJumpNextBookmark = class(TCnBaseCodingToolset)
   private
 
   public
@@ -514,6 +548,243 @@ begin
 end;
 
 procedure TCnEditorJumpImpl.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+// 在当前编辑文件的书签间跳动。Next 为 True 时往行号大的方向找下一个书签，
+// 为 False 时往行号小的方向找前一个书签。找不到时回绕到另一端继续找。
+procedure JumpBookmarkNearby(Next: Boolean);
+var
+  EditControl: TControl;
+  EditView: IOTAEditView;
+  CharPos: TOTACharPos;
+  EditPos: TOTAEditPos;
+  CurLine, I: Integer;
+  Bookmarks: array[0..9] of TOTAEditPos;
+  BookmarkCount: Integer;
+  Found: Boolean;
+  BestLine, BestIdx: Integer;
+begin
+  EditControl := CnOtaGetCurrentEditControl;
+  if EditControl = nil then
+    Exit;
+  try
+    EditView := EditControlWrapper.GetEditView(EditControl);
+  except
+    Exit;
+  end;
+
+  if EditView = nil then
+    Exit;
+
+  CurLine := EditView.CursorPos.Line;
+  BookmarkCount := 0;
+
+  // 收集 0 到 9 所有已设置的书签位置
+  for I := 0 to 9 do
+  begin
+    CharPos := EditView.BookmarkPos[I];
+    if (CharPos.CharIndex <> 0) or (CharPos.Line <> 0) then
+    begin
+      EditView.ConvertPos(False, EditPos, CharPos);
+      Bookmarks[BookmarkCount] := EditPos;
+      Inc(BookmarkCount);
+    end;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Get %d Bookmarks for Current EditView.', [BookmarkCount]);
+{$ENDIF}
+
+  // 当前编辑文件无书签则什么都不做
+  if BookmarkCount = 0 then
+    Exit;
+
+  Found := False;
+  BestIdx := -1;
+
+  if Next then
+  begin
+    // 从当前光标处往行数大的方向找最近的书签
+    BestLine := MaxInt;
+    for I := 0 to BookmarkCount - 1 do
+    begin
+      if (Bookmarks[I].Line > CurLine) and (Bookmarks[I].Line < BestLine) then
+      begin
+        BestLine := Bookmarks[I].Line;
+        BestIdx := I;
+        Found := True;
+      end;
+    end;
+
+    // 行数大的方向上没书签了，回绕到最开头再往后找最近一个书签
+    if not Found then
+    begin
+      BestLine := MaxInt;
+      for I := 0 to BookmarkCount - 1 do
+      begin
+        if Bookmarks[I].Line < BestLine then
+        begin
+          BestLine := Bookmarks[I].Line;
+          BestIdx := I;
+          Found := True;
+        end;
+      end;
+    end;
+  end
+  else
+  begin
+    // 从当前光标处往行数小的方向找最近的书签
+    BestLine := 0;
+    for I := 0 to BookmarkCount - 1 do
+    begin
+      if (Bookmarks[I].Line < CurLine) and (Bookmarks[I].Line > BestLine) then
+      begin
+        BestLine := Bookmarks[I].Line;
+        BestIdx := I;
+        Found := True;
+      end;
+    end;
+
+    // 行数小的方向上没书签了，回绕到末尾再往前找最近一个书签
+    if not Found then
+    begin
+      BestLine := 0;
+      for I := 0 to BookmarkCount - 1 do
+      begin
+        if Bookmarks[I].Line > BestLine then
+        begin
+          BestLine := Bookmarks[I].Line;
+          BestIdx := I;
+          Found := True;
+        end;
+      end;
+    end;
+  end;
+
+  if Found then
+    CnOtaGotoEditPosAndRepaint(EditView, Bookmarks[BestIdx].Line, Bookmarks[BestIdx].Col);
+end;
+
+{ TCnEditorJumpPrevBookmark }
+
+constructor TCnEditorJumpPrevBookmark.Create(AOwner: TCnCodingToolsetWizard);
+begin
+  inherited;
+
+end;
+
+destructor TCnEditorJumpPrevBookmark.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnEditorJumpPrevBookmark.Execute;
+begin
+  JumpBookmarkNearby(False);
+end;
+
+function TCnEditorJumpPrevBookmark.GetCaption: string;
+begin
+  Result := SCnEditorJumpPrevBookmarkMenuCaption;
+end;
+
+function TCnEditorJumpPrevBookmark.GetDefShortCut: TShortCut;
+begin
+  Result := 0;
+end;
+
+procedure TCnEditorJumpPrevBookmark.GetToolsetInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorJumpPrevBookmarkName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorJumpPrevBookmark.GetHint: string;
+begin
+  Result := SCnEditorJumpPrevBookmarkMenuHint;
+end;
+
+function TCnEditorJumpPrevBookmark.GetState: TWizardState;
+begin
+  Result := inherited GetState;
+  if not CurrentIsSource then
+    Result := [];
+end;
+
+procedure TCnEditorJumpPrevBookmark.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpPrevBookmark.SaveSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+{ TCnEditorJumpNextBookmark }
+
+constructor TCnEditorJumpNextBookmark.Create(AOwner: TCnCodingToolsetWizard);
+begin
+  inherited;
+
+end;
+
+destructor TCnEditorJumpNextBookmark.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TCnEditorJumpNextBookmark.Execute;
+begin
+  JumpBookmarkNearby(True);
+end;
+
+function TCnEditorJumpNextBookmark.GetCaption: string;
+begin
+  Result := SCnEditorJumpNextBookmarkMenuCaption;
+end;
+
+function TCnEditorJumpNextBookmark.GetDefShortCut: TShortCut;
+begin
+  Result := 0;
+end;
+
+procedure TCnEditorJumpNextBookmark.GetToolsetInfo(var Name, Author,
+  Email: string);
+begin
+  Name := SCnEditorJumpNextBookmarkName;
+  Author := SCnPack_LiuXiao;
+  Email := SCnPack_LiuXiaoEmail;
+end;
+
+function TCnEditorJumpNextBookmark.GetHint: string;
+begin
+  Result := SCnEditorJumpNextBookmarkMenuHint;
+end;
+
+function TCnEditorJumpNextBookmark.GetState: TWizardState;
+begin
+  Result := inherited GetState;
+  if not CurrentIsSource then
+    Result := [];
+end;
+
+procedure TCnEditorJumpNextBookmark.LoadSettings(Ini: TCustomIniFile);
+begin
+  inherited;
+
+end;
+
+procedure TCnEditorJumpNextBookmark.SaveSettings(Ini: TCustomIniFile);
 begin
   inherited;
 
@@ -1409,6 +1680,8 @@ initialization
 
   RegisterCnCodingToolset(TCnEditorJumpIntf);
   RegisterCnCodingToolset(TCnEditorJumpImpl);
+  RegisterCnCodingToolset(TCnEditorJumpPrevBookmark);
+  RegisterCnCodingToolset(TCnEditorJumpNextBookmark);
 
 {$IFDEF CNWIZARDS_CNSOURCEHIGHLIGHT}
   RegisterCnCodingToolset(TCnEditorJumpMatchedKeyword);

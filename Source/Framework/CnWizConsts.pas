@@ -839,6 +839,16 @@ var
   SCnEditorJumpNextIdentMenuHint: string = 'Jump to Next Identifier under Cursor';
   SCnEditorJumpNextIdentName: string = 'Jump to Next Identifier Tool';
 
+  // CnEditorJumpPrevBookmark
+  SCnEditorJumpPrevBookmarkMenuCaption: string = 'Jump to Previous Bookmark';
+  SCnEditorJumpPrevBookmarkMenuHint: string = 'Jump to Previous Bookmark in Current Editor';
+  SCnEditorJumpPrevBookmarkName: string = 'Jump to Previous Bookmark Tool';
+
+  // CnEditorJumpNextBookmark
+  SCnEditorJumpNextBookmarkMenuCaption: string = 'Jump to Next Bookmark';
+  SCnEditorJumpNextBookmarkMenuHint: string = 'Jump to Next Bookmark in Current Editor';
+  SCnEditorJumpNextBookmarkName: string = 'Jump to Next Bookmark Tool';
+
   // CnEditorJumpIDEInsight
   SCnEditorJumpIDEInsightMenuCaption: string = 'Search in IDE Insight';
   SCnEditorJumpIDEInsightMenuHint: string = 'Search Text under Cursor in IDE Insight';
