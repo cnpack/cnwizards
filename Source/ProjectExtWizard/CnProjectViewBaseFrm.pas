@@ -794,18 +794,96 @@ var
 
   function CheckWidthValid: Boolean;
   var
-    I: Integer;
+    I, M: Integer;
+
   begin
     Result := False;
+    M := 0;
     for I := 0 to lvList.Columns.Count - 1 do
     begin
-      if lvList.Columns[I].Width > Screen.Width then // 如果列宽超过了屏幕宽度，说明出问题了
+      if lvList.Columns[I].Width < 20 then           // 记下小列数
+        Inc(M);
+      if lvList.Columns[I].Width > Screen.Width then // 如果某列宽超过了屏幕宽度，说明出问题了
         Exit;
     end;
+    if M >= lvList.Columns.Count then      // 如果所有列都很小，也说明出问题了
+      Exit;
+
     Result := True;
   end;
 
 {$ENDIF}
+
+  // 检查两个列宽字符串是否等比例变化了，非法等各种情况均认为等比例变化了，调用者会剔除
+  function IsWidthsProportional(const W1, W2: string): Boolean;
+  var
+    SL1, SL2: TStringList;
+    I: Integer;
+    V1, V2: Double;
+    BaseRatio, CurrentRatio: Double;
+    First: Boolean;
+  begin
+    Result := True; // 默认返回 True
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('TCnProjectViewBaseForm IsWidthsProportional %s - %s', [W1, W2]);
+{$ENDIF}
+
+    SL1 := TStringList.Create;
+    SL2 := TStringList.Create;
+    try
+      ExtractStrings([','], [], PChar(W1), SL1);
+      ExtractStrings([','], [], PChar(W2), SL2);
+
+      // 数量不等，返回 True
+      if SL1.Count <> SL2.Count then
+        Exit;
+
+      // 如果两边都为空（无任何数字项），视为等比例（返回 True）
+      if SL1.Count = 0 then
+        Exit;
+
+      First := True;
+      for I := 0 to SL1.Count - 1 do
+      begin
+        try
+          V1 := StrToFloat(SL1[I]);
+          V2 := StrToFloat(SL2[I]);
+        except
+          // 任一转换失败（非数字、空串等）返回 True
+          Exit;
+        end;
+
+        // 除数为零时也返回 True
+        if V2 = 0 then
+          Exit;
+
+        CurrentRatio := V1 / V2;
+
+        if First then
+        begin
+          BaseRatio := CurrentRatio;
+          First := False;
+        end
+        else
+        begin
+          if Abs(CurrentRatio - BaseRatio) > 0.001 then
+          begin
+            Result := False;
+{$IFDEF DEBUG}
+            CnDebugger.LogMsg('TCnProjectViewBaseForm IsWidthsProportional? No.');
+{$ENDIF}
+            Exit;
+          end;
+        end;
+      end;
+
+      // 所有比例一致，Result 保持 True
+    finally
+      SL1.Free;
+      SL2.Free;
+    end;
+  end;
+
 begin
   with TCnIniFile.Create(Ini) do
   try
@@ -841,8 +919,9 @@ begin
       CnDebugger.LogFmt('TCnProjectViewBaseForm.SaveSettings To Write ListView Width2 %s', [S]);
 {$ENDIF}
       if {$IFNDEF DELPHI120_ATHENS_UP} FColumnWidthManuallyChanged and {$ENDIF}
-        (S <> FListViewWidthOldStr) then // 有宽度 Bug 存在的情况下，只手工更改过且变化了才保存
+        (S <> FListViewWidthOldStr) and not IsWidthsProportional(S, FListViewWidthOldStr) then
         WriteString(aSection, csListViewWidth, S);
+        // 有宽度 Bug 存在的情况下，只手工更改过且非等比例变化了才保存
     end
     else
     begin
@@ -852,7 +931,7 @@ begin
 {$ENDIF}
       if CheckWidthValid then
       begin
-        if S <> FListViewWidthOldStr then // 只变化了，且宽度合适，才保存
+        if (S <> FListViewWidthOldStr) and not IsWidthsProportional(S, FListViewWidthOldStr) then // 只非等比例变化了，且宽度合适，才保存
           WriteString(aSection, csListViewWidth, S);
       end
       else // 宽度不合适，清空设置恢复原始宽度
