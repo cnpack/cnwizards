@@ -350,9 +350,13 @@ procedure RemoveListViewSubImages(ListView: TListView); overload;
 procedure RemoveListViewSubImages(ListItem: TListItem); overload;
 {* 更新 ListItem，去除子项的 SubItemImages}
 function GetListViewWidthString(AListView: TListView; DivFactor: Single = 1.0): string;
-{* 转换 ListView 子项宽度为字符串，允许设缩小倍数}
+{* 转换 ListView 子项宽度为字符串，允许设手动缩小倍数。
+  注意代码中直接拿的 Columns 宽度，该值在 D11.3 之前未乘过 HDPI 放大系数，11.3 及之后乘过，行为不一致。}
 procedure SetListViewWidthString(AListView: TListView; const Text: string; MulFactor: Single = 1.0);
-{* 转换字符串为 ListView 子项宽度，允许设放大倍数}
+{* 转换字符串为 ListView 子项宽度，允许设手动放大倍数。
+  注意代码中直接设置 Columns 宽度，该值在从 D11.3 到 D13.0 版（或者说 13.0 及之前所有版本），
+  需要的是未 HDPI 转换后的原始值，VCL 内部会按需乘以 HDPI 系数以符合正常视觉效果。
+  但在 D13.1 开始，该值竟然需要已经乘过 HDPI 系数的了，它内部不乘了！行为不一致。}
 function ListViewSelectedItemsCanUp(AListView: TListView): Boolean;
 {* ListView 当前选择项是否允许上移}
 function ListViewSelectedItemsCanDown(AListView: TListView): Boolean;
@@ -386,10 +390,13 @@ procedure GetColorList(List: TStrings);
 {* 取 Color 标识符列表 }
 
 function GetListViewWidthString2(AListView: TListView; DivFactor: Single = 1.0): string;
-{* 转换 ListView 子项宽度为字符串，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
+{* 转换 ListView 子项宽度为字符串，允许设手工缩小倍数。
+  内部会处理 D11.3 及以上版本带来的已经乘过 HDPI 放大倍数的 Bug 机制（我们补除），均确保拿到原始宽度。}
 
 procedure SetListViewWidthString2(AListView: TListView; const Text: string; MulFactor: Single = 1.0);
-{* 从字符串转换并设置 ListView 子项宽度，允许设缩小倍数，内部会处理 D11.3 及以上版本带来的宽度误乘以 HDPI 放大倍数的 Bug}
+{* 从字符串转换并设置 ListView 子项宽度，值要求是未乘 HDPI 的原始宽度，允许设手工缩小倍数。
+  内部会处理 D13.1 及以上版本宽度需要乘过 HDPI 放大倍数的不兼容问题（我们补乘），
+  均确保从原始宽度准确设置 HDPI 放大宽度。}
 
 //==============================================================================
 // 运行期判断 IDE/BDS 是 Delphi 还是 C++Builder 还是别的
@@ -3415,26 +3422,50 @@ begin
 {$IFDEF IDE_SUPPORT_HDPI}
 {$IFDEF DELPHI_OTA}
 {$IFNDEF CNWIZARDS_MINIMUM}
-  if CnIsGEDelphi11Dot3 then
+  if CnIsGEDelphi11Dot3 then // 11.3 到 13.0 有此 HDPI 机制更改
   begin
     Lines := TStringList.Create;
     HdpiFactor := AListView.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI;
     try
       Lines.CommaText := Text;
-      // 注意这里最终经过测试，末尾无需再乘 HdpiFactor，因为系统会误乘
-      if SingleEqual(MulFactor, 1.0) then
+      if CnIsGEDelphi13Dot1 then
       begin
-        for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
-          AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)));
+        // 注意这里最终经过测试，13.1 起，我们设置的宽度值得额外乘以 HdpiFactor，因为系统要求，自己不会额外乘
+        // 默认值中的 Width 是已经乘过 HDPI 的，我们要先除，确保参与运算的都是原始值
+        if SingleEqual(MulFactor, 1.0) then
+        begin
+          for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
+            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor);
+        end
+        else
+        begin
+          for I := 0 to AListView.Columns.Count - 1 do
+          begin
+            if I < Lines.Count then
+              AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * HdpiFactor * MulFactor)
+            else
+              AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+          end;
+        end;
       end
       else
       begin
-        for I := 0 to AListView.Columns.Count - 1 do
+        // 注意这里最终经过测试，11.3 到 13.0 中无需处理 HdpiFactor，给原始值即可，因为系统会自动乘
+        // 但默认值中的 Width 仍然是已经乘过 HDPI 的，我们要先除，确保参与运算的都是原始值
+        if SingleEqual(MulFactor, 1.0) then
         begin
-          if I < Lines.Count then
-            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * MulFactor)
-          else
-            AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+          for I := 0 to Min(AListView.Columns.Count - 1, Lines.Count - 1) do
+            AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)));
+        end
+        else
+        begin
+          for I := 0 to AListView.Columns.Count - 1 do
+          begin
+            if I < Lines.Count then
+              AListView.Columns[I].Width := Round(StrToIntDef(Lines[I], Round(AListView.Columns[I].Width / HdpiFactor)) * MulFactor)
+            else
+              AListView.Columns[I].Width := Round(AListView.Columns[I].Width * MulFactor);
+          end;
         end;
       end;
     finally

@@ -89,6 +89,7 @@ var
   CnIsDelphi11GEDot3: Boolean = False; // 是否 D11 下的 .3，不包括 D12
   CnIsGEDelphi11Dot3: Boolean = False; // 是否大于等于 D11.3，包括 D12
   CnIsDelphi12Dot3GEHotFix: Boolean = False;
+  CnIsGEDelphi13Dot1: Boolean = False; // 是否大于等于 D13.1
 
 implementation
 
@@ -676,6 +677,7 @@ begin
   CnIsGEDelphi11Dot3 := IsGEDelphi11Dot3;
 
   CnIsDelphi12Dot3GEHotFix := IsDelphi12Dot3GEHotFix;
+  CnIsGEDelphi13Dot1 := IsGEDelphi13Dot1;
 end;
 
 function GetIdeExeVersion: string;
