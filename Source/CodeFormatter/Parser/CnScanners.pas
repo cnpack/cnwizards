@@ -71,6 +71,12 @@ type
     OldSourceColPtrBookmark: PChar;
     PrevTokenBookmark: TPascalToken;
     PrevEffectiveeTokenBookmark: TPascalToken;
+    BlankLinesBookmark: Integer;
+    BlankLinesAfterCommentBookmark: Integer;
+    FirstCommentInBlockBookmark: Boolean;
+    PreviousIsCommentBookmark: Boolean;
+    BackwardTokenBookmark: TPascalToken;
+    JustWroteBlockCommentBookmark: Boolean;
   end;
 
   TGetBooleanEvent = function(Sender: TObject): Boolean of object;
@@ -601,6 +607,12 @@ begin
       FBlankLinesAfter := BlankLinesAfterBookmark;
       FPrevBlankLines := PrevBlankLinesBookmark;
       FInIgnoreArea := InIgnoreAreaBookmark;
+      FBlankLines := BlankLinesBookmark;
+      FBlankLinesAfterComment := BlankLinesAfterCommentBookmark;
+      FFirstCommentInBlock := FirstCommentInBlockBookmark;
+      FPreviousIsComment := PreviousIsCommentBookmark;
+      FBackwardToken := BackwardTokenBookmark;
+      FJustWroteBlockComment := JustWroteBlockCommentBookmark;
     end
     else
       Error(CN_ERRCODE_PASCAL_INVALID_BOOKMARK);
@@ -625,6 +637,12 @@ begin
     BlankLinesAfterBookmark := FBlankLinesAfter;
     PrevBlankLinesBookmark := FPrevBlankLines;
     InIgnoreAreaBookmark := FInIgnoreArea;
+    BlankLinesBookmark := FBlankLines;
+    BlankLinesAfterCommentBookmark := FBlankLinesAfterComment;
+    FirstCommentInBlockBookmark := FFirstCommentInBlock;
+    PreviousIsCommentBookmark := FPreviousIsComment;
+    BackwardTokenBookmark := FBackwardToken;
+    JustWroteBlockCommentBookmark := FJustWroteBlockComment;
   end;
 end;
 
