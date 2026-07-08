@@ -1012,7 +1012,7 @@ end;
 procedure TCnProjectBackupForm.actZipExecute(Sender: TObject);
 var
   I: Integer;
-  CompressorCommand, ListFileName, ExecCommand, VerStr: string;
+  CompressorCommand, ListFileName, ExecCommand, VerStr, Dir: string;
   List: TStrings;
   Comment: AnsiString;
   SrcList, ArcList: TStrings;
@@ -1110,6 +1110,19 @@ begin
 
         SaveFileName := LinkPath(_CnExtractFilePath(FCurrentName), SaveFileName);
 
+        // 解出 SaveFileName 的所在路径，如不存在则创建
+        Dir := ExtractFileDir(SaveFileName);
+        if Length(Dir) > 2 then
+        begin
+          if not DirectoryExists(Dir) then
+          begin
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Save Directory Not Exists. Create %s', [Dir]);
+{$ENDIF}
+            ForceDirectories(Dir);
+          end;
+        end;
+
         if FileExists(SaveFileName) and not Confirmed then
           if not QueryDlg(SCnOverwriteQuery) then
             Exit;
@@ -1121,8 +1134,10 @@ begin
           List := TStringList.Create;
           try
             for I := 0 to lvFileView.Items.Count - 1 do
+            begin
               if lvFileView.Items[I].Data <> nil then
                 List.Add(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName);
+            end;
 
             List.SaveToFile(ListFileName);
           finally
@@ -1164,8 +1179,10 @@ begin
               if FRemovePath then
               begin
                 for I := 0 to lvFileView.Items.Count - 1 do
+                begin
                   if lvFileView.Items[I].Data <> nil then
                     CnWizZipAddFile(_CnPChar(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName), nil);
+                end;
               end
               else
               begin
@@ -1174,8 +1191,10 @@ begin
                 ArcList := TStringList.Create;
                 try
                   for I := 0 to lvFileView.Items.Count - 1 do
+                  begin
                     if lvFileView.Items[I].Data <> nil then
                       SrcList.Add(TCnBackupFileInfo(lvFileView.Items[I].Data).FullFileName);
+                  end;
 
                   // 删除掉公共目录头后，添加进去
                   if CombineCommonPath(SrcList, ArcList) then
