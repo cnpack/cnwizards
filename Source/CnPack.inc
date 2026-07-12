@@ -59,7 +59,7 @@
     {$DEFINE CPUX86}
     {$asmMode intel}
   {$ENDIF}
-  {$IFDEF CPUi386}
+  {$IFDEF CPUI386}
     {$DEFINE CPU32BITS}
     {$DEFINE CPUX86}
     {$asmMode intel}
@@ -3805,18 +3805,6 @@
   {$DEFINE SUPPORT_INTERFACE}
 {$ENDIF}
 
-{$IFDEF CPU386}
-  {$DEFINE CPUX86ORX64}  // 定义一个 CPUX86ORX64 以方便 Intel 32 位 与 64 位使用
-{$ENDIF}
-
-{$IFDEF CPUX86}
-  {$DEFINE CPUX86ORX64}
-{$ENDIF}
-
-{$IFDEF CPUX64}
-  {$DEFINE CPUX86ORX64}
-{$ENDIF}
-
 {$IFDEF WIN64}
   {$DEFINE EXTENDED_SIZE_8}      // Win64 下 Extended 类型长度 8 字节
 {$ENDIF}
@@ -3885,4 +3873,18 @@
 {$ENDIF}
 
 {$ENDIF FPC}
+
+// 以下是编译器无关的封装定义
+
+{$IFDEF CPU386}
+  {$DEFINE CPUX86ORX64}  // 定义一个 CPUX86ORX64 以方便 Intel 32 位 与 64 位使用
+{$ENDIF}
+
+{$IFDEF CPUX86}
+  {$DEFINE CPUX86ORX64}
+{$ENDIF}
+
+{$IFDEF CPUX64}
+  {$DEFINE CPUX86ORX64}
+{$ENDIF}
 
