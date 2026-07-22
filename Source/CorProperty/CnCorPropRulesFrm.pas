@@ -240,7 +240,20 @@ begin
       PropText := cbbProperty.Text;
     end;
 
-    AClass := GetClass(CompText);
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+    AClass := FindClassInAllRttiType(CompText);
+{$IFDEF DEBUG}
+    if AClass <> nil then
+      CnDebugger.LogMsg(CompText + ' Found in All Rtti Type.')
+    else
+      CnDebugger.LogMsg(CompText + ' NOT Found in All Rtti Type.');
+{$ENDIF}
+{$ELSE}
+    AClass := nil;
+{$ENDIF}
+    if AClass = nil then
+      AClass := GetClass(CompText);
+
     if AClass = nil then
     begin
       CanClose := QueryDlg(Format(SCnCorrectPropertyErrClassFmt,
