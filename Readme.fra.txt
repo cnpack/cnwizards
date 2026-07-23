@@ -16,7 +16,7 @@
 
     CnWizards est le produit principal de CnPack. Le nom complet en anglais est
 «Assistants CnPack IDE». C'est un ensemble d'outils plug-in gratuit utilisé dans Delphi /
-C ++ Builder / BDS pour améliorer l'efficacité du développement.
+C++ Builder / BDS / RAD Studio pour améliorer l'efficacité du développement.
 
     CnWizards est conçu pour aider les programmeurs qui utilisent Delphi 5 6 7,
 C ++ Builder 5 6 et BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2,

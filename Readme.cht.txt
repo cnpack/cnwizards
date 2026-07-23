@@ -16,8 +16,8 @@
 
     CnWizards 是 CnPack 項目組的主力產品之一，中文全稱是 CnPack IDE 專
 家包，英文全稱是 CnPack IDE Wizards，簡稱 CnWizards。CnWizards 是一組
-集成在 Delphi/C++Builder/BDS 的 IDE 中，用於增強 IDE 功能、提高 IDE 的
-可用性及開發效率的免費、開放源碼工具。
+集成在 Delphi/C++Builder/BDS/RAD Studio 的 IDE 中，用於增強 IDE 功能、
+提高 IDE 的可用性及開發效率的免費、開放源碼工具。
 
     CnWizards 產品主要面對使用 Delphi 5 6 7、C++Builder 5 6 以及 BDS
 2005 2006、RAD Studio 2007 2009 2010、XE、XE2、XE3、XE4、XE5、XE6、XE7
