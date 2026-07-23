@@ -1219,7 +1219,21 @@ begin
       Holder := TCnShortCutHolder.Create(N, St, Idx);
       List.Add(Holder);
     end;
-    ShowShortCutConfigForHolders(List, SCnWizConfigComment);
+
+    if ShowShortCutConfigForHolders(List, SCnWizConfigComment) then
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('Config All ShortCuts OK. Reload Wizards ShortCuts.');
+{$ENDIF}
+      // 更新界面上各专家的快捷键显示，因为上面可能更改了
+      for I := 0 to CnWizardMgr.WizardCount - 1 do
+      begin
+        if CnWizardMgr[I] is TCnActionWizard then
+          FShortCuts[I] := TCnActionWizard(CnWizardMgr[I]).Action.ShortCut;
+      end;
+      lbWizards.Invalidate;
+      lbWizardsClick(lbWizards);
+    end;
   finally
     for I := 0 to List.Count - 1 do
       TObject(List[I]).Free;
