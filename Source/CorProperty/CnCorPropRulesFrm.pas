@@ -98,7 +98,8 @@ implementation
 {$IFDEF CNWIZARDS_CNCORPROPWIZARD}
 
 uses
-  CnCorPropCfgFrm, CnCorPropFrm, CnWizIdeUtils, CnWizOptions;
+  CnCorPropCfgFrm, CnCorPropFrm, CnWizIdeUtils, CnWizOptions
+  {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 {$R *.DFM}
 
@@ -339,16 +340,38 @@ begin
     if WizOptions.UseSearchCombo then
     begin
       FcbbProperty.Items.Clear;
-
-      AClass := FindClass(FcbbComponent.Text);
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+      AClass := FindClassInAllRttiType(FcbbComponent.Text);
+{$IFDEF DEBUG}
+      if AClass <> nil then
+        CnDebugger.LogMsg(FcbbComponent.Text + ' Found in All Rtti Type.')
+      else
+        CnDebugger.LogMsg(FcbbComponent.Text + ' NOT Found in All Rtti Type.');
+{$ENDIF}
+{$ELSE}
+      AClass := nil;
+{$ENDIF}
+      if AClass = nil then
+        AClass := GetClass(FcbbComponent.Text);
       if AClass <> nil then
         GetAllPropNamesFromClass(AClass, FcbbProperty.Items); // 如果能找到类，把属性列表找出来
     end
     else
     begin
       cbbProperty.Items.Clear;
-
-      AClass := FindClass(cbbComponent.Text);
+{$IFDEF SUPPORT_ENHANCED_RTTI}
+      AClass := FindClassInAllRttiType(FcbbComponent.Text);
+{$IFDEF DEBUG}
+      if AClass <> nil then
+        CnDebugger.LogMsg(FcbbComponent.Text + ' Found in All Rtti Type.')
+      else
+        CnDebugger.LogMsg(FcbbComponent.Text + ' NOT Found in All Rtti Type.');
+{$ENDIF}
+{$ELSE}
+      AClass := nil;
+{$ENDIF}
+      if AClass = nil then
+        AClass := GetClass(cbbComponent.Text);
       if AClass <> nil then
         GetAllPropNamesFromClass(AClass, cbbProperty.Items); // 如果能找到类，把属性列表找出来
     end;
