@@ -61,10 +61,10 @@ CnPack 是由互联网上一群中国程序员开发的开放源码的自由软件项目，当前主要
 2009 年 CnPack 开发组成为了 Embarcadero 的技术合作伙伴。
 CnPack 开发团队目前规模有 260 余人，并且还在不断发展壮大中。
 
-CnPack 网站：https://www.cnpack.org
-CnPack 论坛：https://bbs.cnpack.org
-每日构建版： https://www.cnpack.org/downbuilds.php
-管理员信箱： master@cnpack.org
+  * CnPack 网站：https://www.cnpack.org
+  * CnPack 论坛：https://bbs.cnpack.org
+  * 每日构建版： https://www.cnpack.org/downbuilds.php
+  * 管理员信箱： master@cnpack.org
 
 ----
 
@@ -128,11 +128,11 @@ Builder Fans on Internet. Our products include CnPack IDE Wizards,
 CnPack Component Package and CnCrypto Library. etc.
 CnPack becomes Embarcadero Technology Partner in 2009.
 
- * CnPack Website: https://www.cnpack.org
- * CnPack BBS:     https://bbs.cnpack.org
- * Email:          master@cnpack.org
+  * CnPack Website: https://www.cnpack.org
+  * CnPack BBS:     https://bbs.cnpack.org
+  * Email:          master@cnpack.org
 
 # 5. Related Links
 
- * https://www.embarcadero.com/
- * https://learndelphi.org/
+  * https://www.embarcadero.com/
+  * https://learndelphi.org/
