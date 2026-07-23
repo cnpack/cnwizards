@@ -11045,6 +11045,7 @@ begin
   ASearchCombo.Width := ACombo.Width;
   ASearchCombo.Height := ACombo.Height;
   ASearchCombo.DropDownList.Width := ASearchCombo.Width;
+  ASearchCombo.Font := ACombo.Font;
   ASearchCombo.OnSelect := ACombo.OnChange;
 
   ASearchCombo.Visible := True;
