@@ -4,10 +4,7 @@
  
 # 一、什么是 CnWizards？
 
-CnWizards 是 CnPack 项目组的主力产品之一，中文全称是 CnPack IDE 专家包，
-英文全称是 CnPack IDE Wizards，简称 CnWizards。CnWizards 是一组集成在
-Delphi/C++Builder/BDS 的 IDE 中，用于增强 IDE 功能、提高 IDE 的可用性及
-开发效率的免费、开放源码工具。
+CnWizards 是 CnPack 项目组的主力产品之一，中文全称是 CnPack IDE 专家包，英文全称是 CnPack IDE Wizards，简称 CnWizards。CnWizards 是一组集成在 Delphi/C++Builder/BDS/RAD Studio 的 IDE 中，用于增强 IDE 功能、提高 IDE 的可用性及开发效率的免费、开放源码工具。
 
 2010 年 9 月，CnWizards 已进入 Embarcadero Delphi XE Partner DVD。
 
@@ -15,9 +12,7 @@ Delphi/C++Builder/BDS 的 IDE 中，用于增强 IDE 功能、提高 IDE 的可用性及
 
 CnWizards 产品主要面对使用 Delphi、C++Builder、BDS、RAD Studio 的开发者。
 
-CnWizards 目前的发布版本包括简体中文、繁体中文、英、德、俄、法、葡萄牙七种语言。
-CnWizards 目前包括以下几种语言的发布版本：简体中文、繁体中文、英语、
-俄语、德语、法语、葡萄牙语。
+CnWizards 目前包括以下几种语言的发布版本：简体中文、繁体中文、英语、俄语、德语、法语、葡萄牙语。
 
 # 三、CnWizards 主要有哪些功能？
 
@@ -50,15 +45,14 @@ CnWizards 在 Delphi / C++Builder / BDS 的 IDE 中提供了十多个可独立设置的
   * IDE 外部专家管理工具
   * 源码模块关系分析工具
 
-CnWizards 以与开源协议兼容的 CnPack 协议发布，因而是开源、免费的。
-任何个人或商业团体可以免费使用 CnWizards，无需支付任何费用。
+CnWizards 以与开源协议兼容的 CnPack 协议发布，因而是开源、免费的。任何个人或商业团体可以免费使用 CnWizards，无需支付任何费用。
 
 # 四、关于 CnPack 开发组
 
-CnPack 是由互联网上一群中国程序员开发的开放源码的自由软件项目，当前主要
-的工作成果包括 CnWizards 专家包、CnPack 组件包以及 CnPack 密码算法库等。
+CnPack 是由互联网上一群中国程序员开发的开放源码的自由软件项目，当前主要的工作成果包括 CnWizards 专家包、CnPack 组件包以及 CnPack 密码算法库等。
 
 2009 年 CnPack 开发组成为了 Embarcadero 的技术合作伙伴。
+
 CnPack 开发团队目前规模有 260 余人，并且还在不断发展壮大中。
 
   * CnPack 网站：https://www.cnpack.org
