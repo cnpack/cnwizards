@@ -128,7 +128,7 @@ type
     procedure SetPropDefList(const Value: TObjectList);
     // 将修正属性的结果添加到 ListView 中，返回是否修改
     function CorrectProp(FileName: string; AComp: IOTAComponent): Boolean;
-    function ValidateProp(APropDef: TCnPropDef; AValue: Variant;
+    function ValidateProp(APropDef: TCnPropDef; ActualValue: Variant;
       PropInfo: PPropInfo): Boolean;
     procedure AddCorrItem(AItem: TCnCorrectItem);
     procedure SetCorrectItemList(const Value: TObjectList); // 添加修正项目
@@ -262,7 +262,7 @@ begin
       AValue := '';
 
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('CorrectProp. AValue: ' + VarToStr(AValue));
+    CnDebugger.LogMsg('CorrectProp. ActualValue: ' + VarToStr(AValue));
 {$ENDIF}
 
     if not ValidateProp(APropDef, AValue, PropInfo) then
@@ -289,7 +289,7 @@ end;
 
 // 检查属性是否满足条件
 function TCnCorPropForm.ValidateProp(APropDef: TCnPropDef;
-  AValue: Variant; PropInfo: PPropInfo): Boolean;
+  ActualValue: Variant; PropInfo: PPropInfo): Boolean;
 var
   I1, I2: integer;
   F1, F2: double;
@@ -298,26 +298,47 @@ var
   IdToInt: TIdentToInt;
 begin
   Result := False;
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('To ValidateProp %s, TypeKind %d Rule Value: %s',
+    [APropDef.PropName, Integer(PropInfo^.PropType^.Kind), APropDef.Value]);
+{$ENDIF}
   I1 := 0; I2 := 0; F1 := 0.0; F2 := 0.0;
   try
     // TODO: 用 VarType 检查 AValue 类型，如果是 TObject 等类型就退出
     if IsInt(APropDef.Value) then
     begin
       I1 := StrToInt(APropDef.Value);
-      I2 := AValue;
+      try
+        I2 := ActualValue;
+      except
+        // 如果规则的比较值是 $00112233 这种颜色值，会进该分支，
+        // 但组件实际属性值如果是 clBtnFace 这种，
+        // 上面的 VarToInt('clBtnFace') 就会出错，需要再度处理
+        if PropInfo^.PropType^.Kind = tkInteger then
+        begin
+          IdToInt := FindIdentToInt(PPropInfo(PropInfo)^.PropType^);
+          if not Assigned(IdToInt) then Exit;
+          if not IdToInt(ActualValue, I2) then Exit;
+{$IFDEF DEBUG}
+          CnDebugger.LogFmt('ValidateProp Compared Value Int but Actual Value %s, Convert Ident To %d',
+            [VarToStr(ActualValue), I2]);
+{$ENDIF}
+        end;
+      end;
+
       ValueType := vtInt;
     end
     else if IsFloat(APropDef.Value) then
     begin
       F1 := StrToFloat(APropDef.Value);
-      F2 := AValue;
+      F2 := ActualValue;
       ValueType := vtFloat;
     end
     else if PropInfo^.PropType^.Kind = tkInteger then
     begin
       IdToInt := FindIdentToInt(PPropInfo(PropInfo)^.PropType^);
       if Assigned(IdToInt) and ((APropDef.Value = '') or (IdToInt(APropDef.Value, I1)))
-        and IdToInt(AValue, I2) then
+        and IdToInt(ActualValue, I2) then
       begin
         ValueType := vtInt;
         if APropDef.Value = '' then
@@ -326,14 +347,14 @@ begin
       else
       begin
         S1 := APropDef.Value;
-        S2 := AValue;
+        S2 := ActualValue;
         ValueType := vtOther;
       end;
     end
     else
     begin
       S1 := APropDef.Value;
-      S2 := AValue;
+      S2 := ActualValue;
       if PropInfo^.PropType^.Kind = tkClass then
         ValueType := vtObject
       else
