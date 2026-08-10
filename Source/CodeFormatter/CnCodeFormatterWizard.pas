@@ -986,7 +986,9 @@ begin
       Formatter.SetPreIdentifierNames(PLPSTR(FPreNamesArray));
       SetLength(FPreNamesArray, 0);
       FPreNamesList.Clear;
-    end;
+    end
+    else
+      Formatter.SetPreIdentifierNames(nil); // 无内容时要清除
 {$ENDIF}
     HasSel := (View.Block <> nil) and View.Block.IsValid;
 {$ENDIF}
