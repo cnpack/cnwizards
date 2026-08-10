@@ -3,8 +3,8 @@ object FrmConfigIO: TFrmConfigIO
   Top = 191
   BorderStyle = bsDialog
   Caption = 'CnPack IDE Wizards Config Import & Export Tool'
-  ClientHeight = 243
-  ClientWidth = 392
+  ClientHeight = 272
+  ClientWidth = 430
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,7 +21,7 @@ object FrmConfigIO: TFrmConfigIO
   object Label1: TLabel
     Left = 88
     Top = 8
-    Width = 297
+    Width = 321
     Height = 65
     AutoSize = False
     Caption = 
@@ -34,8 +34,9 @@ object FrmConfigIO: TFrmConfigIO
   object Bevel1: TBevel
     Left = 8
     Top = 80
-    Width = 377
+    Width = 406
     Height = 10
+    Anchors = [akLeft, akTop, akRight]
     Shape = bsBottomLine
   end
   object Image1: TImage
@@ -440,6 +441,14 @@ object FrmConfigIO: TFrmConfigIO
     Height = 13
     Caption = 'You Can...'
   end
+  object bvl1: TBevel
+    Left = 7
+    Top = 208
+    Width = 406
+    Height = 10
+    Anchors = [akLeft, akTop, akRight]
+    Shape = bsBottomLine
+  end
   object RadioButtonOut: TRadioButton
     Left = 88
     Top = 128
@@ -459,11 +468,11 @@ object FrmConfigIO: TFrmConfigIO
     TabOrder = 1
   end
   object btnClose: TButton
-    Left = 301
-    Top = 208
+    Left = 339
+    Top = 237
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akRight, akBottom]
     Cancel = True
     Caption = '&Close'
     TabOrder = 4
@@ -471,20 +480,20 @@ object FrmConfigIO: TFrmConfigIO
   end
   object btnHelp: TButton
     Left = 13
-    Top = 208
+    Top = 237
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akLeft, akBottom]
     Caption = '&About'
     TabOrder = 5
     OnClick = btnHelpClick
   end
   object btnOK: TButton
-    Left = 211
-    Top = 208
+    Left = 249
+    Top = 237
     Width = 75
     Height = 21
-    Anchors = [akTop, akRight]
+    Anchors = [akRight, akBottom]
     Caption = '&Next'
     Default = True
     ModalResult = 1

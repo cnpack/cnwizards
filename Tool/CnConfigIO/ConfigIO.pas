@@ -97,6 +97,7 @@ type
     RadioButtonRestore: TRadioButton;
     CnHashLangFileStorage: TCnHashLangFileStorage;
     CnLangManager: TCnLangManager;
+    bvl1: TBevel;
     procedure btnCloseClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
