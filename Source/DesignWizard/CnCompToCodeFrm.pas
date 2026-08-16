@@ -267,7 +267,7 @@ begin
   FOwnFormName := FOwnForm.Name;
 
 {$IFDEF DEBUG}
-  CnDebugger.LogMsg('Got All Selected Components in ' + FOwnFormName);
+  CnDebugger.LogFmt('Got All Selected Components %d in %s', [FComps.Count, FOwnFormName]);
 {$ENDIF}
   // 去除 Parent 重复的部分
   if FComps.Count > 1 then
@@ -754,7 +754,34 @@ begin
                 NeedRefreshPropNames := True;
                 FCurIsForm := False;
                 ParseCompText(AChildComp, CompStrs);
-               end;
+              end;
+            end
+            else if CnFmxIsInheritedFromForm(AComp) then
+            begin
+              AChildComp := nil;
+{$IFDEF DEBUG}
+              CnDebugger.LogInteger(CnFmxGetChildrenCount(AComp), 'FMX Form Children Count');
+{$ENDIF}
+              for I := 0 to CnFmxGetChildrenCount(AComp) - 1 do
+              begin
+                TmpComp := CnFmxGetChildByIndex(AComp, I);
+                if (TmpComp <> nil) and (TmpComp.Name = AChild) then
+                begin
+                  AChildComp := TmpComp;
+{$IFDEF DEBUG}
+                  CnDebugger.LogInteger(I, 'FMX Form Children Index as AChild');
+{$ENDIF}
+                  Break;
+                end;
+              end;
+
+              if AChildComp <> nil then // 如果实际存在 FMX 的 Child 组件，则递归处理 Child 组件
+              begin
+                // 有子组件，FPropNames 会被更新成子组件的属性列表，因此设个标志
+                NeedRefreshPropNames := True;
+                FCurIsForm := False;
+                ParseCompText(AChildComp, CompStrs);
+              end;
             end;
 {$ENDIF}
           end;
@@ -1027,8 +1054,8 @@ begin
 {$ENDIF}
             if FIsPas then
             begin
-              // Set 属性赋值在DXE后语法规则变了，枚举常量必须加入类名了，
-              // 但它为了兼容又定义了许多和以前一样的const，导致无法判断[]中的
+              // Set 属性赋值在 DXE 后语法规则变了，枚举常量必须加入类名了，
+              // 但它为了兼容又定义了许多和以前一样的 const，导致无法判断[]中的
               // 量究竟是枚举常量还是正常的const。不好办，只能先硬补几个。
 {$IFDEF SUPPORT_FMX}
               // 先只处理 FMX 中的一些特定名字。
