@@ -97,6 +97,9 @@ type
     FCreates: TStrings;
     FIsPas: Boolean;
     FHasProps: Boolean;
+{$IFDEF SUPPORT_FMX}
+    FIsFMX: Boolean;
+{$ENDIF}
     FCurIsForm: Boolean;
     FSelIsForm: Boolean;
     FFirstComp: Boolean;
@@ -115,6 +118,9 @@ type
     procedure UpdateStatusBar;
     procedure GetPropNames(AComp: TObject; PropNames: TStrings);
     function PropIsType(PName: string; AType: TTypeKind; PropNames: TStrings): Boolean;
+{$IFDEF SUPPORT_FMX}
+    function GetPropTypeKind(PName: string; PropNames: TStrings): TTypeKind;
+{$ENDIF}
   protected
     function GetHelpTopic: string; override;
     procedure DoLanguageChanged(Sender: TObject); override;
@@ -265,6 +271,11 @@ begin
   FOwnFormClass := TObject(FormEditor.GetRootComponent.GetComponentHandle).ClassName;
   FOwnForm := TComponent(FormEditor.GetRootComponent.GetComponentHandle);
   FOwnFormName := FOwnForm.Name;
+
+  // 如果当前是 FMX Form 就先记下来
+{$IFDEF SUPPORT_FMX}
+  FIsFMX := (FOwnForm <> nil) and CnFmxIsInheritedFromForm(FOwnForm);
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('Got All Selected Components %d in %s', [FComps.Count, FOwnFormName]);
@@ -1054,12 +1065,11 @@ begin
 {$ENDIF}
             if FIsPas then
             begin
-              // Set 属性赋值在 DXE 后语法规则变了，枚举常量必须加入类名了，
-              // 但它为了兼容又定义了许多和以前一样的 const，导致无法判断[]中的
-              // 量究竟是枚举常量还是正常的const。不好办，只能先硬补几个。
 {$IFDEF SUPPORT_FMX}
-              // 先只处理 FMX 中的一些特定名字。
-              PValue := CnFmxFixSetValue(FPropNames.Values[PName], PValue);
+              // FMX ScopedEnums: add Type Prefix to Enum/Set Property Values
+              if FIsFMX then
+                PValue := CnFmxFixScopedEnumValue(FPropNames.Values[PName],
+                  GetPropTypeKind(PName, FPropNames), PValue);
 {$ENDIF}
               mmoImpl.Lines.Add(Spc(FIndentWidth) + AName + '.' + PName + ' := ' + PValue + ';')
             end
@@ -1207,6 +1217,24 @@ begin
       Result := Integer(PropNames.Objects[I]) = Integer(AType);
   end;
 end;
+
+{$IFDEF SUPPORT_FMX}
+
+function TCnCompToCodeForm.GetPropTypeKind(PName: string;
+  PropNames: TStrings): TTypeKind;
+var
+  I: Integer;
+begin
+  Result := tkUnknown;
+  if PropNames <> nil then
+  begin
+    I := PropNames.IndexOfName(PName);
+    if I >= 0 then
+      Result := TTypeKind(PropNames.Objects[I]);
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnCompToCodeForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
