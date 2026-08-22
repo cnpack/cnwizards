@@ -37,6 +37,7 @@
   {$DEFINE SUPPORT_ENCODING}                   // Unicode 字符串支持 Encoding 转换
   {$DEFINE SUPPORT_INLINE}                     // 支持 inline
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}        // 支持从接口实例寻找其实现对象实例
+  {$DEFINE SUPPORT_DEPRECATED}                 // 支持 deprecated 关键字
   {$DEFINE NEW_SETTING_DELIMITER}              // 也有 TStringHelper.LastDelimiter 带来的不兼容
 
   {$DEFINE OBJECT_HAS_TOSTRING}                // TObject.ToString
