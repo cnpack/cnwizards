@@ -18,7 +18,7 @@
 {                                                                              }
 {******************************************************************************}
 
-unit CnScanners;
+unit CnPasScanner;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
@@ -36,8 +36,8 @@ unit CnScanners;
 *           另外，Unicode 编译器中，才支持 Unicode 标识符和全角空格
 *
 * 开发平台：Win2003 + Delphi 5.0
-* 兼容测试：not test yet
-* 本 地 化：not test hell
+* 兼容测试：无
+* 本 地 化：无
 * 修改记录：2007-10-13 V1.0
 *               完善一些功能
 *           2004-1-14 V0.5
@@ -53,7 +53,7 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, CnFormatterIntf, CnNative,
-  CnParseConsts, CnTokens, CnCodeGenerators, CnCodeFormatRules;
+  CnParseConsts, CnPasToken, CnPasCodeGenerator, CnCodeFormatRules;
 
 type
   TScannerBookmark = packed record

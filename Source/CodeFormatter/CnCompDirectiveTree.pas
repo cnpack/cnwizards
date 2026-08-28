@@ -82,7 +82,7 @@ interface
 
 uses
   SysUtils, Classes, Windows,
-  CnTree, CnScanners, CnCodeFormatRules, CnTokens;
+  CnTree, CnPasScanner, CnCodeFormatRules, CnPasToken;
 
 type
   TCnSliceNode = class(TCnLeaf)
