@@ -3619,6 +3619,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHIXE_UP}
+  {$DEFINE SUPPORT_GLOBAL_FORMAT_SETTINGS}     // XE 开始有全局 FormatSettings 记录
   {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE 的 TStrings 开始有 WriteBOM 属性
   {$DEFINE FONT_HAS_QUALITY}                   // XE 的 TFont 开始有 Quality 属性，包括 AntiAliasing
   {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE 的 ToolsAPI 开始有 Debugger Visualizer 相关接口
@@ -3738,7 +3739,7 @@
 {$ENDIF}
 
 {$IFDEF DELPHI7_UP}
-  {$DEFINE SUPPORT_FORMAT_SETTINGS}       // Delphi 7 开始支持 FormatSettings
+  {$DEFINE SUPPORT_FORMAT_SETTINGS}       // Delphi 7 开始支持 FormatSettings 记录
   {$DEFINE OTA_CODEINSIGHT_MANAGER}       // Delphi 7 才有 IOTACodeInsightManager 接口
   {$DEFINE IDE_MENUBAR_VERTICAL_POSITION_BUG}
   // Delphi 7 及以上的 MenuBar 的竖直方向上的弹出位置计算错误，容易超出上界
