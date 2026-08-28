@@ -3357,7 +3357,10 @@ begin
             BuildExceptionHandler;
 
           if FLex.TokenID = tkElse then
+          begin
+            MatchCreateLeafAndStep(FLex.TokenID);
             BuildStatementList;
+          end;
 
           if FLex.TokenID = tkSemiColon then
             MarkReturnFlag(MatchCreateLeafAndStep(tkSemiColon));
