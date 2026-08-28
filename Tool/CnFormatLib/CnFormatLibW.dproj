@@ -52,13 +52,13 @@
 			</DelphiCompile>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnFormatterIntf.pas"/>
 			<DCCReference Include="CnCodeFormatterImplW.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatter.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CnPasCodeFormatter.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatRules.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnPasCodeGenerator.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnParseConsts.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnPascalGrammar.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnPasScanner.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\Parser\CnPasToken.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasCodeGenerator.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnParseConsts.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPascalGrammar.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasScanner.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasToken.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

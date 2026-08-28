@@ -22,12 +22,12 @@ unit CnCodeFormatterImpl;
 {* |<PRE>
 ================================================================================
 * 软件名称：CnPack 代码格式化专家
-* 单元名称：代码格式化对外接口
+* 单元名称：代码格式化对外接口的实现类
 * 单元作者：CnPack开发组
-* 备    注：该单元实现代码格式化的对外接口，Ansi 版供 D5~7 使用
+* 备    注：该单元实现代码格式化的对外接口的实现类，Ansi 版供 D5~7 使用
 * 开发平台：WinXP + Delphi 5.0
-* 兼容测试：not test yet
-* 本 地 化：not test hell
+* 兼容测试：无
+* 本 地 化：无
 * 修改记录：2015.02.11 V1.0
 *               创建单元。
 ================================================================================
@@ -48,7 +48,7 @@ exports
 implementation
 
 uses
-  CnCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
+  CnPasCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)

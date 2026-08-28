@@ -28,8 +28,8 @@ unit CnCodeFormatterImplW;
 *           以及 2009 以上（Utf16版）使用。由 D2009 编译
 *           另有 64 位 Unicode 版供 64 位专家包及 IDE 使用
 * 开发平台：WinXP + Delphi 2009
-* 兼容测试：
-* 本 地 化：
+* 兼容测试：无
+* 本 地 化：无
 * 修改记录：2025.02.16 V1.1
 *               修正 64 位的支持
 *           2015.04.04 V1.0
@@ -52,7 +52,7 @@ exports
 implementation
 
 uses
-  CnCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
+  CnPasCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCodeFormatProvider = class(TInterfacedObject, ICnPascalFormatterIntf)

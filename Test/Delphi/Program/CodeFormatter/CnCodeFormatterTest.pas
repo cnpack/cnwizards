@@ -130,8 +130,8 @@ var
 implementation
 
 uses
-  CnCodeFormatter, CnCodeFormatRules, CnScanners, CnTokens, CnCompDirectiveTree,
-  CnDebug;
+  CnPasCodeFormatter, CnCodeFormatRules, CnPasScanner, CnPasToken,
+  CnCompDirectiveTree, CnDebug;
 
 {$R *.DFM}
 
