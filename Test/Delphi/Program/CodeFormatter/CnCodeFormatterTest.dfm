@@ -22,7 +22,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 1028
     Height = 697
-    ActivePage = tsCppFormatter
+    ActivePage = tsSingleTest
     Align = alClient
     TabOrder = 0
     object tsSingleTest: TTabSheet
@@ -323,7 +323,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object UpDown1: TUpDown
-          Left = 681
+          Left = 513
           Top = 0
           Width = 15
           Height = 20
@@ -720,7 +720,7 @@ object MainForm: TMainForm
           Layout = tlCenter
         end
         object udCpp: TUpDown
-          Left = 419
+          Left = 475
           Top = 0
           Width = 15
           Height = 20

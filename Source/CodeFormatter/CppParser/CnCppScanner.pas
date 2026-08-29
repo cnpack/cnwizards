@@ -23,6 +23,7 @@ type
     function ReadQuoted(Quote: Char; Kind: TCnCppTokenKind): TCnCppToken;
     function ReadPrefixedQuoted(const Prefix: string; Quote: Char;
       Kind: TCnCppTokenKind): TCnCppToken;
+    function ReadRawString(PrefixLength: Integer): TCnCppToken;
     function ReadOperator: TCnCppToken;
   public
     constructor Create(Stream: TStream); virtual;
@@ -135,6 +136,33 @@ begin
   Result := MakeToken(Kind, S, L, C);
 end;
 
+function TCnCppScanner.ReadRawString(PrefixLength: Integer): TCnCppToken;
+var
+  S, L, C, I: Integer;
+  Delimiter, EndMarker: string;
+begin
+  S := FIndex; L := FLine; C := FColumn;
+  for I := 1 to PrefixLength do Take;
+  if Peek = '"' then Take;
+
+  Delimiter := '';
+  while (Peek <> #0) and (Peek <> '(') and not (Peek in [#13, #10]) do
+    Delimiter := Delimiter + Take;
+  if Peek = '(' then Take;
+
+  EndMarker := ')' + Delimiter + '"';
+  while Peek <> #0 do
+  begin
+    if Copy(FSource, FIndex, Length(EndMarker)) = EndMarker then
+    begin
+      for I := 1 to Length(EndMarker) do Take;
+      Break;
+    end;
+    Take;
+  end;
+  Result := MakeToken(ctkString, S, L, C);
+end;
+
 function TCnCppScanner.ReadOperator: TCnCppToken;
 var
   S, L, C, Best: Integer;
@@ -181,14 +209,14 @@ begin
   end;
   if FAtLineStart and (Ch = '#') then
   begin
-    while (Peek <> #0) and (Peek <> #10) do Take;
+    while (Peek <> #0) and not (Peek in [#13, #10]) do Take;
     Result := MakeToken(ctkPreprocessor, S, L, C);
     Exit;
   end;
   if (Ch = '/') and (Peek(1) = '/') then
   begin
     Take; Take;
-    while (Peek <> #0) and (Peek <> #10) do Take;
+    while (Peek <> #0) and not (Peek in [#13, #10]) do Take;
     Result := MakeToken(ctkLineComment, S, L, C);
     Exit;
   end;
@@ -205,7 +233,21 @@ begin
   end;
   if Ch = '"' then begin Result := ReadQuoted('"', ctkString); Exit end;
   if Ch = '''' then begin Result := ReadQuoted('''', ctkChar); Exit end;
-  if ((Ch = 'R') or (Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and
+  if (Ch = 'R') and (Peek(1) = '"') then
+  begin
+    Result := ReadRawString(1); Exit
+  end;
+  if (Ch = 'u') and (Peek(1) = '8') and (Peek(2) = 'R') and
+    (Peek(3) = '"') then
+  begin
+    Result := ReadRawString(3); Exit
+  end;
+  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and (Peek(1) = 'R') and
+    (Peek(2) = '"') then
+  begin
+    Result := ReadRawString(2); Exit
+  end;
+  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and
     ((Peek(1) = '"') or ((Ch = 'u') and (Peek(1) = '8') and (Peek(2) = '"'))) then
   begin
     if (Ch = 'u') and (Peek(1) = '8') then

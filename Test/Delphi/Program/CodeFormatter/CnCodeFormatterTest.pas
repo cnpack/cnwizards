@@ -559,9 +559,13 @@ procedure TMainForm.btnFormatCppClick(Sender: TObject);
 var
   Rule: TCnCppCodeFormatRule;
   Source: string;
+  MemStr: TMemoryStream;
+  Formatter: TCnCppCodeFormatter;
+  StartOffset, EndOffset: Integer;
 begin
   Rule := CnCppCodeForRule;
   Rule.TabSpaceCount := udCpp.Position;
+  Rule.BraceStyle := cbsNextLine;
   Rule.KeepUserLineBreak := chkCppKeepUserBreakLine.Checked;
 
   if chkCppAutoWrap.Checked then
@@ -573,10 +577,48 @@ begin
     Rule.WrapWidth := 0;
 
   Source := mmoCpp.Lines.Text;
-  if chkCppLF.Checked then
-    Source := StringReplace(Source, #13#10, #10, [rfReplaceAll]);
+  if mmoCpp.SelLength <= 0 then
+  begin
+    if chkCppLF.Checked then
+      Source := StringReplace(Source, #13#10, #10, [rfReplaceAll]);
+    mmoResultCpp.Lines.Text := CnFormatCppText(Source, Rule);
+  end
+  else
+  begin
+    // 选择区偏移基于 Memo 的原始 CRLF 文本，不能在此处转换为单 LF。
+    StartOffset := mmoCpp.SelStart;
+    EndOffset := StartOffset + mmoCpp.SelLength;
 
-  mmoResultCpp.Lines.Text := CnFormatCppText(Source, Rule);
+    MemStr := TMemoryStream.Create;
+    Formatter := nil;
+    try
+      if Source <> '' then
+        MemStr.Write(Source[1], Length(Source) * SizeOf(Char));
+      MemStr.Position := 0;
+
+      Formatter := TCnCppCodeFormatter.Create(MemStr, Rule, StartOffset,
+        EndOffset);
+      Formatter.SliceMode := True;
+
+      ShowMessage(IntToStr(StartOffset) + ':' + IntToStr(EndOffset));
+      CnDebugger.LogRawString(Copy(Source, Formatter.MatchedInStart + 1,
+        Formatter.MatchedInEnd - Formatter.MatchedInStart));
+
+      Formatter.FormatCode;
+      if Formatter.HasSliceResult then
+      begin
+        CnDebugger.LogFmt('C++ Slice Callback: (%d, %d) - (%d, %d)',
+          [Formatter.MatchedOutStartRow, Formatter.MatchedOutStartCol,
+          Formatter.MatchedOutEndRow, Formatter.MatchedOutEndCol]);
+        mmoResultCpp.Lines.Text := Formatter.CopyMatchedSliceResult;
+      end
+      else
+        mmoResultCpp.Clear;
+    finally
+      Formatter.Free;
+      MemStr.Free;
+    end;
+  end;
 end;
 
 end.
