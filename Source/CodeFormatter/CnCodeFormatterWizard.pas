@@ -58,7 +58,7 @@ type
     FIdOptions: Integer;
     FIdFormatCurrent: Integer;
     FLibHandle: THandle;
-    FGetProvider: TCnGetFormatterProvider;
+    FGetPasProvider: TCnGetPasFormatterProvider;
 
     // Pascal Format Settings
     FDirectiveMode: TCnCompDirectiveMode;
@@ -71,9 +71,9 @@ type
     FTabSpaceCount: Byte;
     FSpaceTabASMKeyword: Byte;
     FWrapWidth: Integer;
-    FBeginStyle: TCnBeginStyle;
-    FElseAfterEndStyle: TCnElseAfterEndStyle;
-    FKeywordStyle: TCnKeywordStyle;
+    FBeginStyle: TCnPasBeginStyle;
+    FElseAfterEndStyle: TCnPasElseAfterEndStyle;
+    FKeywordStyle: TCnPasKeywordStyle;
     FWrapMode: TCnCodeWrapMode;
     FWrapNewLineWidth: Integer;
     FUseIDESymbols: Boolean;
@@ -139,9 +139,9 @@ type
     procedure DebugComand(Cmds: TStrings; Results: TStrings); override;
 
     property DirectiveMode: TCnCompDirectiveMode read FDirectiveMode write FDirectiveMode;
-    property KeywordStyle: TCnKeywordStyle read FKeywordStyle write FKeywordStyle;
-    property BeginStyle: TCnBeginStyle read FBeginStyle write FBeginStyle;
-    property ElseAfterEndStyle: TCnElseAfterEndStyle read FElseAfterEndStyle write FElseAfterEndStyle;
+    property KeywordStyle: TCnPasKeywordStyle read FKeywordStyle write FKeywordStyle;
+    property BeginStyle: TCnPasBeginStyle read FBeginStyle write FBeginStyle;
+    property ElseAfterEndStyle: TCnPasElseAfterEndStyle read FElseAfterEndStyle write FElseAfterEndStyle;
     property WrapMode: TCnCodeWrapMode read FWrapMode write FWrapMode;
     property TabSpaceCount: Byte read FTabSpaceCount write FTabSpaceCount;
     property SpaceBeforeOperator: Byte read FSpaceBeforeOperator write
@@ -393,9 +393,9 @@ begin
 
     if ShowModal = mrOK then
     begin
-      FKeywordStyle := TCnKeywordStyle(cbbKeywordStyle.ItemIndex);
-      FBeginStyle := TCnBeginStyle(cbbBeginStyle.ItemIndex);
-      FElseAfterEndStyle := TCnElseAfterEndStyle(cbbElseAfterEndStyle.ItemIndex);
+      FKeywordStyle := TCnPasKeywordStyle(cbbKeywordStyle.ItemIndex);
+      FBeginStyle := TCnPasBeginStyle(cbbBeginStyle.ItemIndex);
+      FElseAfterEndStyle := TCnPasElseAfterEndStyle(cbbElseAfterEndStyle.ItemIndex);
       FTabSpaceCount := seTab.Value;
       FWrapWidth := seWrapLine.Value;
       FWrapNewLineWidth := seNewLine.Value;
@@ -437,7 +437,7 @@ begin
 
   FLibHandle := LoadLibrary(PChar(MakePath(WizOptions.DllPath) + DLLName));
   if FLibHandle <> 0 then
-    FGetProvider := TCnGetFormatterProvider(GetProcAddress(FLibHandle,
+    FGetPasProvider := TCnGetPasFormatterProvider(GetProcAddress(FLibHandle,
       'GetCodeFormatterProvider'));
 end;
 
@@ -583,11 +583,11 @@ begin
     CnPascalCodeForVCLRule.WrapNewLineWidth);
   FWrapMode := TCnCodeWrapMode(Ini.ReadInteger('', csWrapMode,
     Ord(CnPascalCodeForVCLRule.CodeWrapMode)));
-  FBeginStyle := TCnBeginStyle(Ini.ReadInteger('', csBeginStyle,
+  FBeginStyle := TCnPasBeginStyle(Ini.ReadInteger('', csBeginStyle,
     Ord(CnPascalCodeForVCLRule.BeginStyle)));
-  FElseAfterEndStyle := TCnElseAfterEndStyle(Ini.ReadInteger('', csElseAfterEndStyle,
+  FElseAfterEndStyle := TCnPasElseAfterEndStyle(Ini.ReadInteger('', csElseAfterEndStyle,
     Ord(CnPascalCodeForVCLRule.ElseAfterEndStyle)));
-  FKeywordStyle := TCnKeywordStyle(Ini.ReadInteger('', csKeywordStyle,
+  FKeywordStyle := TCnPasKeywordStyle(Ini.ReadInteger('', csKeywordStyle,
     Ord(CnPascalCodeForVCLRule.KeywordStyle)));
   FDirectiveMode := TCnCompDirectiveMode(Ini.ReadInteger('', csDirectiveMode,
     Ord(CnPascalCodeForVCLRule.CompDirectiveMode)));
@@ -771,9 +771,9 @@ var
   AKeepUserLineBreak: LongBool;
 begin
   Result := False;
-  if FGetProvider = nil then
+  if FGetPasProvider = nil then
     Exit;
-  Intf := FGetProvider();
+  Intf := FGetPasProvider();
 
   if Intf = nil then
     Exit;
@@ -961,7 +961,7 @@ begin
   begin
     PutPascalFormatRules;
 
-    Formatter := FGetProvider();
+    Formatter := FGetPasProvider();
     if Formatter = nil then
       Exit;
     View := CnOtaGetTopMostEditView;

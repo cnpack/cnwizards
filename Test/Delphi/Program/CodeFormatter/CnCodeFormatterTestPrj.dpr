@@ -27,7 +27,7 @@ uses
   CnPasScanner in '..\..\..\..\Source\CodeFormatter\PasParser\CnPasScanner.pas',
   CnPasToken in '..\..\..\..\Source\CodeFormatter\PasParser\CnPasToken.pas',
   CnPasCodeFormatter in '..\..\..\..\Source\CodeFormatter\CnPasCodeFormatter.pas',
-  CnParseConsts in '..\..\..\..\Source\CodeFormatter\PasParser\CnParseConsts.pas',
+  CnParseConsts in '..\..\..\..\Source\CodeFormatter\CnParseConsts.pas',
   CnPasCodeGenerator in '..\..\..\..\Source\CodeFormatter\PasParser\CnPasCodeGenerator.pas',
   CnCodeFormatRules in '..\..\..\..\Source\CodeFormatter\CnCodeFormatRules.pas',
   CnPascalGrammar in '..\..\..\..\Source\CodeFormatter\PasParser\CnPascalGrammar.pas',

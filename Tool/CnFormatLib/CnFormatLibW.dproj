@@ -59,7 +59,7 @@
 			<DCCReference Include="..\..\Source\CodeFormatter\CnPasCodeFormatter.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatRules.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasCodeGenerator.pas"/>
-			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnParseConsts.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CnParseConsts.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPascalGrammar.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasScanner.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\PasParser\CnPasToken.pas"/>

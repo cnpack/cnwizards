@@ -52,7 +52,7 @@ implementation
 
 uses
   CnCppCodeFormatter,
-  CnPasCodeFormatter, CnParseoCnsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
+  CnPasCodeFormatter, CnParseConsts, CnCodeFormatRules {$IFDEF DEBUG} , CnDebug {$ENDIF} ;
 
 type
   TCnCppFormatterProvider = class(TInterfacedObject, ICnCppFormatterIntf)
