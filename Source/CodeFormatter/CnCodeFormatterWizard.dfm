@@ -52,16 +52,16 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         object lblSpaceBefore: TLabel
           Left = 16
           Top = 136
-          Width = 115
+          Width = 148
           Height = 13
-          Caption = 'Space Before Operator:'
+          Caption = 'Space Before Binary Operator:'
         end
         object lblSpaceAfter: TLabel
           Left = 16
           Top = 164
-          Width = 108
+          Width = 141
           Height = 13
-          Caption = 'Space After Operator:'
+          Caption = 'Space After Binary Operator:'
         end
         object lblNewLine: TLabel
           Left = 232
