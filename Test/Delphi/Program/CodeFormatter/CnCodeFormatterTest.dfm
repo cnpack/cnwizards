@@ -21,24 +21,24 @@ object MainForm: TMainForm
     Left = 0
     Top = 0
     Width = 1028
-    Height = 702
-    ActivePage = tsSingleTest
+    Height = 697
+    ActivePage = tsCppFormatter
     Align = alClient
     TabOrder = 0
     object tsSingleTest: TTabSheet
-      Caption = '代码格式化测试'
+      Caption = 'Pascal代码格式化测试'
       object Splitter1: TSplitter
         Left = 505
         Top = 29
         Width = 3
-        Height = 646
+        Height = 641
         Cursor = crHSplit
       end
       object Panel1: TPanel
         Left = 0
         Top = 29
         Width = 505
-        Height = 646
+        Height = 641
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -57,7 +57,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 505
-          Height = 634
+          Height = 629
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -146,7 +146,7 @@ object MainForm: TMainForm
         Left = 508
         Top = 29
         Width = 512
-        Height = 646
+        Height = 641
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -163,7 +163,7 @@ object MainForm: TMainForm
         end
         object spl1: TSplitter
           Left = 0
-          Top = 463
+          Top = 458
           Width = 512
           Height = 3
           Cursor = crVSplit
@@ -173,7 +173,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 512
-          Height = 451
+          Height = 446
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -188,7 +188,7 @@ object MainForm: TMainForm
         end
         object tvCompDirective: TTreeView
           Left = 0
-          Top = 466
+          Top = 461
           Width = 512
           Height = 180
           Align = alBottom
@@ -495,20 +495,20 @@ object MainForm: TMainForm
       end
     end
     object tsScanerTest: TTabSheet
-      Caption = '词法分析器测试'
+      Caption = 'Pascal词法分析器测试'
       ImageIndex = 1
       object Splitter2: TSplitter
         Left = 393
         Top = 29
         Width = 3
-        Height = 646
+        Height = 641
         Cursor = crHSplit
       end
       object Panel4: TPanel
         Left = 0
         Top = 29
         Width = 393
-        Height = 646
+        Height = 641
         Align = alLeft
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -516,7 +516,7 @@ object MainForm: TMainForm
         object Label5: TLabel
           Left = 0
           Top = 0
-          Width = 393
+          Width = 36
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -527,7 +527,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 393
-          Height = 634
+          Height = 629
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
@@ -540,7 +540,7 @@ object MainForm: TMainForm
         Left = 396
         Top = 29
         Width = 624
-        Height = 646
+        Height = 641
         Align = alClient
         BevelOuter = bvNone
         Caption = 'Panel1'
@@ -548,7 +548,7 @@ object MainForm: TMainForm
         object Label6: TLabel
           Left = 0
           Top = 0
-          Width = 624
+          Width = 36
           Height = 12
           Align = alTop
           Alignment = taCenter
@@ -559,7 +559,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 12
           Width = 624
-          Height = 634
+          Height = 629
           Align = alClient
           ScrollBars = ssBoth
           TabOrder = 0
@@ -605,9 +605,261 @@ object MainForm: TMainForm
         end
       end
     end
+    object tsCppFormatter: TTabSheet
+      Caption = 'C/C++代码格式化测试'
+      ImageIndex = 3
+      object spl2: TSplitter
+        Left = 505
+        Top = 29
+        Width = 3
+        Height = 641
+        Cursor = crHSplit
+      end
+      object tlb1: TToolBar
+        Left = 0
+        Top = 0
+        Width = 1020
+        Height = 29
+        BorderWidth = 1
+        ButtonHeight = 20
+        ButtonWidth = 55
+        Caption = 'ToolBar1'
+        EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+        Flat = True
+        ShowCaptions = True
+        TabOrder = 0
+        object btnCppLoadFile: TToolButton
+          Left = 0
+          Top = 0
+          Caption = '打开文件'
+          ImageIndex = 1
+          OnClick = btnCppLoadFileClick
+        end
+        object btn3: TToolButton
+          Left = 55
+          Top = 0
+          Width = 8
+          Caption = 'ToolButton3'
+          ImageIndex = 1
+          Style = tbsSeparator
+        end
+        object chkCppAutoWrap: TCheckBox
+          Left = 63
+          Top = 0
+          Width = 70
+          Height = 20
+          Caption = '自动换行'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+        end
+        object chkCppLF: TCheckBox
+          Left = 133
+          Top = 0
+          Width = 70
+          Height = 20
+          Caption = '换行#$A'
+          TabOrder = 1
+        end
+        object chkCppKeepUserBreakLine: TCheckBox
+          Left = 203
+          Top = 0
+          Width = 70
+          Height = 20
+          Caption = '保留换行'
+          Checked = True
+          State = cbChecked
+          TabOrder = 4
+        end
+        object btnFormatCpp: TToolButton
+          Left = 273
+          Top = 0
+          Caption = '格式化！'
+          ImageIndex = 0
+          OnClick = btnFormatCppClick
+        end
+        object lbl: TLabel
+          Left = 328
+          Top = 0
+          Width = 6
+          Height = 20
+        end
+        object lbl2: TLabel
+          Left = 334
+          Top = 0
+          Width = 60
+          Height = 20
+          Alignment = taRightJustify
+          Caption = '缩进空格数'
+          Layout = tlCenter
+        end
+        object edtCppIndent: TEdit
+          Left = 394
+          Top = 0
+          Width = 25
+          Height = 20
+          TabOrder = 2
+          Text = '2'
+        end
+        object btnSep11: TToolButton
+          Left = 419
+          Top = 0
+          Width = 8
+          Caption = 'btnSep1'
+          ImageIndex = 1
+          Style = tbsSeparator
+        end
+        object lbl3: TLabel
+          Left = 427
+          Top = 0
+          Width = 48
+          Height = 20
+          Alignment = taRightJustify
+          AutoSize = False
+          Caption = '关键字'
+          Layout = tlCenter
+        end
+        object udCpp: TUpDown
+          Left = 419
+          Top = 0
+          Width = 15
+          Height = 20
+          Associate = edtCppIndent
+          Min = 0
+          Position = 2
+          TabOrder = 3
+          Wrap = False
+        end
+        object btnSep21: TToolButton
+          Left = 490
+          Top = 0
+          Width = 8
+          Caption = 'btnSep2'
+          ImageIndex = 2
+          Style = tbsSeparator
+        end
+        object btn11: TToolButton
+          Left = 498
+          Top = 0
+          Width = 8
+          Caption = 'btn1'
+          ImageIndex = 3
+          Style = tbsSeparator
+        end
+        object btnCppSave: TToolButton
+          Left = 506
+          Top = 0
+          Caption = '保存结果'
+          ImageIndex = 2
+          OnClick = ToolButton1Click
+        end
+      end
+      object pnl1: TPanel
+        Left = 0
+        Top = 29
+        Width = 505
+        Height = 641
+        Align = alLeft
+        BevelOuter = bvNone
+        Caption = 'Panel1'
+        TabOrder = 1
+        object lbl4: TLabel
+          Left = 0
+          Top = 0
+          Width = 505
+          Height = 12
+          Align = alTop
+          Alignment = taCenter
+          Caption = '无标题'
+          Layout = tlCenter
+        end
+        object mmoCpp: TMemo
+          Left = 0
+          Top = 12
+          Width = 505
+          Height = 629
+          Align = alClient
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'Courier New'
+          Font.Style = []
+          Lines.Strings = (
+            '#include <stdio.h>'
+            '// Test'
+            'void main()'
+            '{'
+            '/* comment */'
+            '  printf("Hello\n");'
+            '}')
+          ParentFont = False
+          ScrollBars = ssBoth
+          TabOrder = 0
+          WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
+        end
+      end
+      object pnl2: TPanel
+        Left = 508
+        Top = 29
+        Width = 512
+        Height = 641
+        Align = alClient
+        BevelOuter = bvNone
+        Caption = 'Panel1'
+        TabOrder = 2
+        object lbl5: TLabel
+          Left = 0
+          Top = 0
+          Width = 512
+          Height = 12
+          Align = alTop
+          Alignment = taCenter
+          Caption = '格式化结果'
+          Layout = tlCenter
+        end
+        object spl11: TSplitter
+          Left = 0
+          Top = 458
+          Width = 512
+          Height = 3
+          Cursor = crVSplit
+          Align = alBottom
+        end
+        object mmoResultCpp: TMemo
+          Left = 0
+          Top = 12
+          Width = 512
+          Height = 446
+          Align = alClient
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -13
+          Font.Name = 'Courier New'
+          Font.Style = []
+          ParentFont = False
+          ScrollBars = ssBoth
+          TabOrder = 0
+          WordWrap = False
+          OnKeyDown = SrcMemoKeyDown
+        end
+        object tvCompDirective1: TTreeView
+          Left = 0
+          Top = 461
+          Width = 512
+          Height = 180
+          Align = alBottom
+          Indent = 19
+          TabOrder = 1
+          OnCustomDrawItem = tvCompDirectiveCustomDrawItem
+        end
+      end
+    end
   end
   object OpenDialog: TOpenDialog
-    Filter = 'Pascal Source|*.pas|All Files|*.*'
+    Filter = 
+      'Pascal Source|*.pas|C/C++ Source|*.c;*.cpp;*.h;*.hpp;*.cc;*.hh|A' +
+      'll Files|*.*'
     Top = 21
   end
   object SaveDialog1: TSaveDialog

@@ -31,7 +31,13 @@ uses
   CnPasCodeGenerator in '..\..\..\..\Source\CodeFormatter\PasParser\CnPasCodeGenerator.pas',
   CnCodeFormatRules in '..\..\..\..\Source\CodeFormatter\CnCodeFormatRules.pas',
   CnPascalGrammar in '..\..\..\..\Source\CodeFormatter\PasParser\CnPascalGrammar.pas',
-  CnCompDirectiveTree in '..\..\..\..\Source\CodeFormatter\CnCompDirectiveTree.pas';
+  CnCompDirectiveTree in '..\..\..\..\Source\CodeFormatter\CnCompDirectiveTree.pas',
+  CnCppCodeFormatRules in '..\..\..\..\Source\CodeFormatter\CnCppCodeFormatRules.pas',
+  CnCppCodeFormatter in '..\..\..\..\Source\CodeFormatter\CnCppCodeFormatter.pas',
+  CnCppFormatterIntf in '..\..\..\..\Source\CodeFormatter\CnCppFormatterIntf.pas',
+  CnCppCodeGenerator in '..\..\..\..\Source\CodeFormatter\CppParser\CnCppCodeGenerator.pas',
+  CnCppScanner in '..\..\..\..\Source\CodeFormatter\CppParser\CnCppScanner.pas',
+  CnCppToken in '..\..\..\..\Source\CodeFormatter\CppParser\CnCppToken.pas';
 
 {$R *.RES}
 

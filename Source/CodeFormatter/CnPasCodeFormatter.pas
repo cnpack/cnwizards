@@ -183,7 +183,7 @@ type
     {* 根据上一次是否输出了批量空行来决定本次输出单个回车还是双回车的空行，某些场合用来取代 WriteLine}
     procedure WriteLineFeedByPrevCondition;
     {* 根据上一次是否输出了批量空行来决定本次输出不换行还是单个回车，某些场合用来取代 Writeln}
-    function FormatString(const KeywordStr: string; KeywordStyle: TCnKeywordStyle): string;
+    function FormatString(const KeywordStr: string; KeywordStyle: TCnPasKeywordStyle): string;
     {* 返回指定关键字风格的字符串}
     function UpperFirst(const KeywordStr: string): string;
     {* 返回首字母大写的字符串}
@@ -635,7 +635,7 @@ begin
 end;
 
 function TCnAbstractCodeFormatter.FormatString(const KeywordStr: string;
-  KeywordStyle: TCnKeywordStyle): string;
+  KeywordStyle: TCnPasKeywordStyle): string;
 begin
   case KeywordStyle of
     ksPascalKeyword:    Result := UpperFirst(KeywordStr);
@@ -2733,7 +2733,7 @@ var
   OldLastToken: TPascalToken;
   LabelLen, InstrucLen: Integer;
   ALabel: string;
-  OldKeywordStyle: TCnKeywordStyle;
+  OldKeywordStyle: TCnPasKeywordStyle;
 begin
   Match(tokKeywordAsm, PreSpaceCount);
   Writeln;
