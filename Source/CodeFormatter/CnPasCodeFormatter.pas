@@ -60,7 +60,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, Windows, Dialogs, Contnrs, CnHashMap,
+  Classes, SysUtils, Windows, Contnrs, CnHashMap,
   CnPasToken, CnPasScanner, CnPasCodeGenerator, CnCodeFormatRules, CnFormatterIntf;
 
 const

@@ -142,6 +142,10 @@ const
 
   CN_ERRCODE_END                      = 22;
 
+  CN_ERRCODE_CPP_OK                  = 0;
+  CN_ERRCODE_CPP_FORMAT              = 1;
+  CN_ERRCODE_CPP_NOT_SUPPORT         = 2;
+
 type
   ICnPascalFormatterIntf = interface
     ['{0CC0F874-227A-4516-9D17-6331EA86CBCA}']
@@ -210,7 +214,33 @@ type
        CurrentToken 内容应复制出来使用，无须释放}
   end;
 
-  TCnGetFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
+  TCnGetPasFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
+
+const
+  CN_CPP_BRACE_SAMELINE = 0;
+  CN_CPP_BRACE_NEXTLINE = 1;
+
+type
+  ICnCppFormatterIntf = interface
+    ['{C6B53E5D-6A95-4C4A-9E2B-9A0B8E1D6F20}']
+    procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
+      WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
+      SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
+      KeepUserLineBreak, UseIgnoreArea, FormatAsm: LongBool);
+    function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    function FormatOneCppUnitW(Input: PWideChar; Len: DWORD): PWideChar;
+    function FormatCppBlock(Input: PAnsiChar; Len, StartOffset,
+      EndOffset: DWORD): PAnsiChar;
+    function FormatCppBlockUtf8(Input: PAnsiChar; Len, StartOffset,
+      EndOffset: DWORD): PAnsiChar;
+    function FormatCppBlockW(Input: PWideChar; Len, StartOffset,
+      EndOffset: DWORD): PWideChar;
+    function RetrieveCppLastError(out SourceLine: Integer; out SourceCol: Integer;
+      out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
+  end;
+
+  TCnGetCppFormatterProvider = function: ICnCppFormatterIntf; stdcall;
   {* DLL 中输出的函数类型}
 
 implementation

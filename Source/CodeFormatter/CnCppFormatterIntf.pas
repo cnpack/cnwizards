@@ -20,8 +20,10 @@ type
 
   ICnCppFormatterIntf = interface
     ['{C6B53E5D-6A95-4C4A-9E2B-9A0B8E1D6F20}']
-    procedure SetCppFormatRule(TabSpace, WrapWidth, BraceStyle,
-      SpaceBeforeBinaryOperator, SpaceAfterBinaryOperator: DWORD;
+    procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
+      WrapNewLineWidth, BraceStyle,
+      SpaceBeforeBinaryOperator, SpaceAfterBinaryOperator,
+      SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
       KeepUserLineBreak, UseIgnoreArea, FormatAsm: LongBool);
     function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;

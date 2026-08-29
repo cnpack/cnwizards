@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, CnCppToken, CnCppScanner, CnCppCodeGenerator,
-  CnCodeFormatRules;
+  CnCodeFormatRules, CnParseConsts, CnFormatterIntf;
 
 const
   CN_CPP_MATCHED_INVALID = -1;
@@ -20,6 +20,9 @@ type
     FTokens: TList;
     FIgnore: Boolean;
     FAsmDepth: Integer;
+    FAsmLineStart: Boolean;
+    FAsmAfterKeyword: Boolean;
+    FAsmKeywordLength: Integer;
     FParenDepth: Integer;
     FBracketDepth: Integer;
     FTemplateDepth: Integer;
@@ -46,7 +49,6 @@ type
     function IsWordLike(Token: TCnCppToken): Boolean;
     function IsUnary(Token: TCnCppToken): Boolean;
     function IsTemplateOpen(TokenIndex: Integer): Boolean;
-    function CurrentColumn: Integer;
     procedure WriteText(const S: string);
     procedure EnsureLine;
     procedure EnsureSpace;
@@ -54,6 +56,8 @@ type
     procedure WriteComment(Token: TCnCppToken);
     procedure WriteOperator(Token: TCnCppToken);
     procedure WriteBrace(Token: TCnCppToken; IsOpen: Boolean);
+    procedure FormatAsmToken(Token: TCnCppToken);
+    procedure TryAutoWrap;
     function IsDeclarationBrace(TokenIndex: Integer): Boolean;
     function IsTypeDeclarationBrace(TokenIndex: Integer): Boolean;
     procedure PushBrace(IsDeclaration, IsTypeDeclaration: Boolean);
@@ -62,6 +66,8 @@ type
     procedure FormatTokens;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank,
       IsWriteln: Boolean; PrefixSpaces: Integer);
+  protected
+    function CurrentColumn: Integer;
   public
     constructor Create(Stream: TStream; const Rule: TCnCppCodeFormatRule;
       AMatchedInStart: Integer = CN_CPP_MATCHED_INVALID;
@@ -86,6 +92,18 @@ type
 function CnFormatCppText(const Source: string; const Rule: TCnCppCodeFormatRule): string;
 
 implementation
+
+procedure SetCppError(Code: Integer; Token: TCnCppToken);
+begin
+  CppErrorRec.ErrorCode := Code;
+  if Token <> nil then
+  begin
+    CppErrorRec.SourceLine := Token.Line;
+    CppErrorRec.SourceCol := Token.Column;
+    CppErrorRec.SourcePos := Token.Position;
+    CppErrorRec.CurrentToken := Token.Text;
+  end;
+end;
 
 constructor TCnCppCodeFormatter.Create(Stream: TStream;
   const Rule: TCnCppCodeFormatRule; AMatchedInStart, AMatchedInEnd: Integer);
@@ -476,6 +494,83 @@ begin
   end;
 end;
 
+procedure TCnCppCodeFormatter.FormatAsmToken(Token: TCnCppToken);
+var
+  PrefixSpaces, OperandSpaces: Integer;
+begin
+  if Token.Kind = ctkNewLine then
+  begin
+    if not FAtLineStart then WriteNewLine;
+    FAsmLineStart := True;
+    FAsmAfterKeyword := False;
+    Exit;
+  end;
+
+  if FAsmLineStart then
+  begin
+    PrefixSpaces := FRule.SpaceBeforeASM -
+      FCodeGen.Indent * FCodeGen.TabWidth;
+    if PrefixSpaces < 0 then PrefixSpaces := 0;
+    if PrefixSpaces > 0 then FCodeGen.Space(PrefixSpaces);
+    WriteText(Token.Text);
+    FAsmKeywordLength := Length(Token.Text);
+    FAsmAfterKeyword := Token.Text <> '@';
+    FAsmLineStart := False;
+    Exit;
+  end;
+
+  if FAsmAfterKeyword then
+  begin
+    OperandSpaces := FRule.SpaceTabASMKeyword - FAsmKeywordLength;
+    if OperandSpaces < 1 then OperandSpaces := 1;
+    FCodeGen.Space(OperandSpaces);
+    WriteText(Token.Text);
+    FAsmAfterKeyword := False;
+  end
+  else if Token.Text = ';' then
+  begin
+    FCodeGen.TrimLine;
+    WriteText(';');
+    WriteNewLine;
+    FAsmLineStart := True;
+  end
+  else
+  begin
+    if (Token.Text = ',') or (Token.Text = ';') or (Token.Text = ')') or
+      (Token.Text = ']') or (Token.Text = ':') then
+      FCodeGen.TrimLine
+    else
+      EnsureSpace;
+    WriteText(Token.Text);
+  end;
+end;
+
+procedure TCnCppCodeFormatter.TryAutoWrap;
+var
+  WrapWidth, NewLineWidth: Integer;
+begin
+  if (FRule.CodeWrapMode = cwmNone) or FRule.KeepUserLineBreak or FIgnore or
+    (FRule.WrapWidth <= 0) or (FParenDepth <= 0) then
+    Exit;
+
+  WrapWidth := FRule.WrapWidth;
+  NewLineWidth := FRule.WrapNewLineWidth;
+  if NewLineWidth <= 0 then NewLineWidth := WrapWidth;
+
+  if (FRule.CodeWrapMode = cwmSimple) or
+    ((FRule.CodeWrapMode = cwmAdvanced) and (WrapWidth >= NewLineWidth)) then
+  begin
+    if FCodeGen.CurrentLineLength > WrapWidth then
+      WriteNewLine;
+  end
+  else if FCodeGen.CurrentLineLength > NewLineWidth then
+  begin
+    if not FCodeGen.BreakLineAtLastSpace(WrapWidth,
+      FCodeGen.Indent * FCodeGen.TabWidth) then
+      WriteNewLine;
+  end;
+end;
+
 procedure TCnCppCodeFormatter.FormatTokens;
 var
   I: Integer;
@@ -498,6 +593,11 @@ begin
     FlushPendingBlankLine(T);
     if (T.Kind = ctkNewLine) then
     begin
+      if (FAsmDepth > 0) and FRule.FormatAsm then
+      begin
+        FormatAsmToken(T);
+        Continue;
+      end;
       if (FIgnore or FRule.KeepUserLineBreak) and not FAtLineStart then WriteNewLine;
       Continue;
     end;
@@ -510,7 +610,14 @@ begin
       IsDeclBrace := IsDeclarationBrace(I);
       IsTypeBrace := IsTypeDeclarationBrace(I);
       PushBrace(IsDeclBrace, IsTypeBrace);
-      WriteBrace(T, True); FPrev := T; Continue
+      WriteBrace(T, True);
+      if FAsmDepth > 0 then
+      begin
+        FAsmLineStart := True;
+        FAsmAfterKeyword := False;
+        FAsmKeywordLength := 0;
+      end;
+      FPrev := T; Continue
     end;
     if T.Text = '}' then begin
       ClosedDeclBrace := PopBrace;
@@ -527,6 +634,11 @@ begin
         (AfterClose <> nil) and (AfterClose.Kind = ctkIdentifier)) then
         FBlankLinePending := True;
       FPrev := T; Continue
+    end;
+    if (FAsmDepth > 0) and FRule.FormatAsm then begin
+      FormatAsmToken(T);
+      FPrev := T;
+      Continue;
     end;
     if (FAsmDepth > 0) and not FRule.FormatAsm then begin
       EnsureSpace; WriteText(T.Text); if T.Text = ';' then WriteNewLine; Continue
@@ -573,7 +685,7 @@ begin
       ((T.Kind = ctkIdentifier) and (FPrev <> nil) and (FPrev.Text = '*'));
     if NeedSpace then EnsureSpace;
     WriteText(T.Text);
-    if (Rule.WrapWidth > 0) and (FCodeGen.CurrentLineLength > Rule.WrapWidth) and (FParenDepth > 0) then WriteNewLine;
+    TryAutoWrap;
     FPrev := T;
   end;
   if not FAtLineStart then WriteNewLine;
@@ -584,11 +696,14 @@ var
   T: TCnCppToken;
   I: Integer;
 begin
+  ClearCppError;
   FCodeGen.Reset;
   for I := 0 to FTokens.Count - 1 do TObject(FTokens[I]).Free;
   FTokens.Clear;
   FPrev := nil; FCurrentToken := nil; FIgnore := False;
-  FAsmDepth := 0; FParenDepth := 0; FBracketDepth := 0; FTemplateDepth := 0;
+  FAsmDepth := 0; FAsmLineStart := False; FAsmAfterKeyword := False;
+  FAsmKeywordLength := 0;
+  FParenDepth := 0; FBracketDepth := 0; FTemplateDepth := 0;
   FPrevTemplateClose := False;
   FBraceDepth := 0;
   FAtLineStart := True;
@@ -603,7 +718,15 @@ begin
   repeat
     T := FScanner.NextToken; FTokens.Add(T);
   until T.Kind = ctkEOF;
-  FormatTokens;
+  try
+    FormatTokens;
+  except
+    on E: Exception do
+    begin
+      SetCppError(CnFormatterIntf.CN_ERRCODE_CPP_FORMAT, FCurrentToken);
+      raise;
+    end;
+  end;
 end;
 
 procedure TCnCppCodeFormatter.SaveToStream(Stream: TStream);
@@ -650,8 +773,20 @@ begin
     if Source <> '' then InStream.Write(Source[1], Length(Source) * SizeOf(Char));
     InStream.Position := 0;
     F := TCnCppCodeFormatter.Create(InStream, Rule);
-    try F.FormatCode; Result := F.ResultText finally F.Free end;
+    try
+      try
+        F.FormatCode;
+        Result := F.ResultText;
+      except
+        Result := '';
+      end;
+    finally
+      F.Free;
+    end;
   finally InStream.Free end;
 end;
+
+initialization
+  ClearCppError;
 
 end.

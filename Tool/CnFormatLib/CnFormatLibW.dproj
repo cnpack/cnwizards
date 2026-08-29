@@ -51,6 +51,10 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnFormatterIntf.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CnCppCodeFormatter.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CppParser\CnCppToken.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CppParser\CnCppScanner.pas"/>
+			<DCCReference Include="..\..\Source\CodeFormatter\CppParser\CnCppCodeGenerator.pas"/>
 			<DCCReference Include="CnCodeFormatterImplW.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnPasCodeFormatter.pas"/>
 			<DCCReference Include="..\..\Source\CodeFormatter\CnCodeFormatRules.pas"/>

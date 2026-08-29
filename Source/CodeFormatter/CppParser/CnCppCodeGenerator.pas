@@ -34,6 +34,7 @@ type
     procedure Write(const S: string);
     procedure Space(Count: Integer);
     procedure NewLine;
+    function BreakLineAtLastSpace(MaxColumn, PrefixSpaces: Integer): Boolean;
     procedure TrimLine;
     procedure IncIndent;
     procedure DecIndent;
@@ -135,6 +136,39 @@ begin
   FLines.Add(FCurrent);
   FCurrent := '';
   EndWrite(False, True);
+end;
+
+function TCnCppCodeGenerator.BreakLineAtLastSpace(MaxColumn,
+  PrefixSpaces: Integer): Boolean;
+var
+  I, SplitAt: Integer;
+  LeftPart, RightPart: string;
+begin
+  Result := False;
+  SplitAt := 0;
+  I := Length(FCurrent);
+  if I > MaxColumn then I := MaxColumn;
+  while I > 0 do
+  begin
+    if (FCurrent[I] = ' ') and
+      ((I = Length(FCurrent)) or not (FCurrent[I + 1] in [',', ';', ')', ']'])) then
+    begin
+      SplitAt := I;
+      Break;
+    end;
+    Dec(I);
+  end;
+  if SplitAt <= PrefixSpaces then Exit;
+  LeftPart := TrimRight(Copy(FCurrent, 1, SplitAt - 1));
+  RightPart := TrimLeft(Copy(FCurrent, SplitAt + 1, MaxInt));
+  while (RightPart <> '') and (RightPart[1] in [',', ';', ')', ']']) do
+  begin
+    LeftPart := LeftPart + RightPart[1];
+    Delete(RightPart, 1, 1);
+  end;
+  FLines.Add(LeftPart);
+  FCurrent := StringOfChar(' ', PrefixSpaces) + RightPart;
+  Result := True;
 end;
 
 procedure TCnCppCodeGenerator.TrimLine;

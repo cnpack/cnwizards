@@ -42,10 +42,6 @@ uses
   SysUtils, TypInfo;
 
 type
-  TCnCodeStyle = (fsNone);
-
-  TCnCodeStyles = set of TCnCodeStyle;
-
   TCnPasKeywordStyle = (ksLowerCaseKeyword, ksUpperCaseKeyword, ksPascalKeyword, ksNoChange);
 
   TCnPasBeginStyle = (bsNextLine, bsSameLine);
@@ -63,19 +59,21 @@ type
 
   TCnCppCodeFormatRule = record
     TabSpaceCount: Byte;
+    CodeWrapMode: TCnCodeWrapMode;
     WrapWidth: Integer;
+    WrapNewLineWidth: Integer;
     KeepUserLineBreak: Boolean;
     BraceStyle: TCnCppBraceStyle;
     SpaceBeforeBinaryOperator: Byte;
     SpaceAfterBinaryOperator: Byte;
+    SpaceBeforeASM: Byte;
+    SpaceTabASMKeyword: Byte;
     UseIgnoreArea: Boolean;
     FormatAsm: Boolean;
   end;
 
   TCnPascalCodeFormatRule = record
     ContinueAfterError: Boolean;
-    CodeStyle: TCnCodeStyles;
-
     CompDirectiveMode: TCnCompDirectiveMode;
     KeywordStyle: TCnPasKeywordStyle;
     BeginStyle: TCnPasBeginStyle;
@@ -100,11 +98,15 @@ const
   CnCppCodeForVCLRule: TCnCppCodeFormatRule =
   (
     TabSpaceCount: 2;
+    CodeWrapMode: cwmSimple;
     WrapWidth: 100;
+    WrapNewLineWidth: 120;
     KeepUserLineBreak: False;
     BraceStyle: cbsSameLine;
     SpaceBeforeBinaryOperator: 1;
     SpaceAfterBinaryOperator: 1;
+    SpaceBeforeASM: 8;
+    SpaceTabASMKeyword: 8;
     UseIgnoreArea: True;
     FormatAsm: False;
   );
@@ -112,8 +114,6 @@ const
   CnPascalCodeForVCLRule: TCnPascalCodeFormatRule =
   (
     ContinueAfterError: False;
-    CodeStyle: [];
-
     CompDirectiveMode: cdmAsComment;
     KeywordStyle: ksLowerCaseKeyword;
     BeginStyle: bsNextLine;
@@ -197,11 +197,15 @@ var
 begin
   S := 'TCnCppCodeFormatRule:' + sLineBreak;
   S := S + '  TabSpaceCount: ' + IntToStr(Rule.TabSpaceCount) + sLineBreak;
+  S := S + '  CodeWrapMode: ' + GetEnumName(TypeInfo(TCnCodeWrapMode), Ord(Rule.CodeWrapMode)) + sLineBreak;
   S := S + '  WrapWidth: ' + IntToStr(Rule.WrapWidth) + sLineBreak;
+  S := S + '  WrapNewLineWidth: ' + IntToStr(Rule.WrapNewLineWidth) + sLineBreak;
   S := S + '  KeepUserLineBreak: ' + MyBooleanToStr(Rule.KeepUserLineBreak) + sLineBreak;
   S := S + '  BraceStyle: ' + GetEnumName(TypeInfo(TCnCppBraceStyle), Ord(Rule.BraceStyle)) + sLineBreak;
   S := S + '  SpaceBeforeBinaryOperator: ' + IntToStr(Rule.SpaceBeforeBinaryOperator) + sLineBreak;
   S := S + '  SpaceAfterBinaryOperator: ' + IntToStr(Rule.SpaceAfterBinaryOperator) + sLineBreak;
+  S := S + '  SpaceBeforeASM: ' + IntToStr(Rule.SpaceBeforeASM) + sLineBreak;
+  S := S + '  SpaceTabASMKeyword: ' + IntToStr(Rule.SpaceTabASMKeyword) + sLineBreak;
   S := S + '  UseIgnoreArea: ' + MyBooleanToStr(Rule.UseIgnoreArea) + sLineBreak;
   S := S + '  FormatAsm: ' + MyBooleanToStr(Rule.FormatAsm);
   Result := S;

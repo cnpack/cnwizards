@@ -42,6 +42,10 @@ uses
   CnFormatterIntf;
 
 const
+  CN_ERRCODE_CPP_OK = 0;
+  CN_ERRCODE_CPP_FORMAT = 1;
+  CN_ERRCODE_CPP_NOT_SUPPORT = 2;
+
   SIdentifierExpected: PAnsiChar = 'Identifier expected';
   SStringExpected: PAnsiChar = 'String expected';
   SNumberExpected: PAnsiChar = 'Number expected';
@@ -80,6 +84,14 @@ type
     CurrentToken: string;
   end;
 
+  TCnCppErrorRec = packed record
+    ErrorCode: Integer;
+    SourceLine: Integer;
+    SourceCol: Integer;
+    SourcePos: Integer;
+    CurrentToken: string;
+  end;
+
 var
   ErrorStrings: array[CN_ERRCODE_START..CN_ERRCODE_END] of PPAnsiChar =
     (
@@ -101,7 +113,17 @@ var
     CurrentToken: '';
   );
 
+  CppErrorRec: TCnCppErrorRec = (
+    ErrorCode: 0;
+    SourceLine: 0;
+    SourceCol: 0;
+    SourcePos: 0;
+    CurrentToken: '';
+  );
+
 procedure ClearPascalError;
+
+procedure ClearCppError;
 
 function RetrieveFormatErrorString(const Ident: Integer): PAnsiChar;
 
@@ -113,6 +135,18 @@ begin
   begin
     ErrorCode := 0;
     ErrorMessage := '';
+    SourceLine := 0;
+    SourceCol := 0;
+    SourcePos := 0;
+    CurrentToken := '';
+  end;
+end;
+
+procedure ClearCppError;
+begin
+  with CppErrorRec do
+  begin
+    ErrorCode := CN_ERRCODE_CPP_OK;
     SourceLine := 0;
     SourceCol := 0;
     SourcePos := 0;
