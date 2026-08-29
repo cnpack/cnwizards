@@ -226,7 +226,7 @@ type
     procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
       WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
       SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
-      KeepUserLineBreak, UseIgnoreArea, FormatAsm: LongBool);
+      KeepUserLineBreak, UseIgnoreArea: LongBool);
     function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitW(Input: PWideChar; Len: DWORD): PWideChar;

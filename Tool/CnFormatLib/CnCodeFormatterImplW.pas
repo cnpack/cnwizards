@@ -73,7 +73,7 @@ type
     procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
       WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
       SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
-      KeepUserLineBreak, UseIgnoreArea, FormatAsm: LongBool);
+      KeepUserLineBreak, UseIgnoreArea: LongBool);
     function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitW(Input: PWideChar; Len: DWORD): PWideChar;
@@ -708,7 +708,7 @@ end;
 procedure TCnCppFormatterProvider.SetCppFormatRule(TabSpace, CodeWrapMode,
   WrapWidth, WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
   SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
-  KeepUserLineBreak, UseIgnoreArea, FormatAsm: LongBool);
+  KeepUserLineBreak, UseIgnoreArea: LongBool);
 begin
   CnCppCodeForRule.TabSpaceCount := TabSpace;
   CnCppCodeForRule.CodeWrapMode := TCnCodeWrapMode(CodeWrapMode);
@@ -721,7 +721,6 @@ begin
   CnCppCodeForRule.SpaceTabASMKeyword := SpaceTabASMKeyword;
   CnCppCodeForRule.KeepUserLineBreak := KeepUserLineBreak;
   CnCppCodeForRule.UseIgnoreArea := UseIgnoreArea;
-  CnCppCodeForRule.FormatAsm := FormatAsm;
 end;
 
 function TCnCppFormatterProvider.FormatOneCppUnit(Input: PAnsiChar;
