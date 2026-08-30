@@ -943,19 +943,19 @@ begin
   // 如出现换行，换行处 SourceCol 被置 1、OldCol 被赋值为换行处，末了仍然是 NewSourceCol += P - OldCol;
 
   case P^ of
-    'A'..'Z', 'a'..'z', '_' {$IFDEF UNICODE}, #$0100..#$FFFF {$ENDIF}:
+    'A'..'Z', 'a'..'z', '_' {$IFDEF UNICODE}, #$0080..#$FFFF {$ENDIF}:
       begin
         Inc(P);
         if FIdentContainsDot then // 如果外部要求标识符包括点号如单元名等
         begin
           while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.'])
-            {$IFDEF UNICODE} or ((P^ >= #$0100) and (P^ <> '　')) {$ENDIF} do
+            {$IFDEF UNICODE} or ((P^ >= #$0080) and (P^ <> '　')) {$ENDIF} do
             Inc(P);
         end
         else  // 注意 Unicode 环境下，Unicode 标识符不包括全角空格，全角空格做半角空格用
         begin
           while (P^ in ['A'..'Z', 'a'..'z', '0'..'9', '_'])
-            {$IFDEF UNICODE} or ((P^ >= #$0100) and (P^ <> '　')) {$ENDIF} do
+            {$IFDEF UNICODE} or ((P^ >= #$0080) and (P^ <> '　')) {$ENDIF} do
             Inc(P);
         end;
         Result := tokSymbol;

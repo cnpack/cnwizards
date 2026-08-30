@@ -97,7 +97,7 @@ type
 const
   CnCppCodeForVCLRule: TCnCppCodeFormatRule =
   (
-    TabSpaceCount: 2;
+    TabSpaceCount: 4;
     CodeWrapMode: cwmSimple;
     WrapWidth: 100;
     WrapNewLineWidth: 120;
