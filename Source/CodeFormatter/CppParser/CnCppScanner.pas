@@ -51,8 +51,8 @@ type
     FSourcePos: Integer;
     FCurrentToken: string;
   public
-    constructor Create(AErrorKind: TCnCppScanErrorKind; ASourceLine,
-      ASourceCol, ASourcePos: Integer; const ACurrentToken: string);
+    constructor Create(AErrorKind: TCnCppScanErrorKind; ASourceLine, ASourceCol,
+      ASourcePos: Integer; const ACurrentToken: string);
     property ErrorKind: TCnCppScanErrorKind read FErrorKind;
     property SourceLine: Integer read FSourceLine;
     property SourceCol: Integer read FSourceCol;
@@ -73,8 +73,8 @@ type
     function IsIdentStart(C: Char): Boolean;
     function IsIdentChar(C: Char): Boolean;
     function ReadQuoted(Quote: Char; Kind: TCnCppTokenKind): TCnCppToken;
-    function ReadPrefixedQuoted(const Prefix: string; Quote: Char;
-      Kind: TCnCppTokenKind): TCnCppToken;
+    function ReadPrefixedQuoted(const Prefix: string; Quote: Char; Kind:
+      TCnCppTokenKind): TCnCppToken;
     function ReadRawString(PrefixLength: Integer): TCnCppToken;
     function ReadOperator: TCnCppToken;
   public
@@ -88,7 +88,7 @@ implementation
 constructor ECnCppScannerError.Create(AErrorKind: TCnCppScanErrorKind;
   ASourceLine, ASourceCol, ASourcePos: Integer; const ACurrentToken: string);
 begin
-  inherited Create('Unclosed C/C++ lexical element');
+  inherited Create('Unclosed C/C++ Lexical Element');
   FErrorKind := AErrorKind;
   FSourceLine := ASourceLine;
   FSourceCol := ASourceCol;
@@ -111,6 +111,7 @@ begin
       Stream.Read(FSource[1], N * SizeOf(Char));
     end;
   end;
+
   FIndex := 1;
   FLine := 1;
   FColumn := 1;
@@ -122,14 +123,18 @@ var
   P: Integer;
 begin
   P := FIndex + Offset;
-  if (P < 1) or (P > Length(FSource)) then Result := #0
-  else Result := FSource[P];
+  if (P < 1) or (P > Length(FSource)) then
+    Result := #0
+  else
+    Result := FSource[P];
 end;
 
 function TCnCppScanner.Take: Char;
 begin
   Result := Peek;
-  if Result = #0 then Exit;
+  if Result = #0 then
+    Exit;
+
   Inc(FIndex);
   if Result = #10 then
   begin
@@ -140,15 +145,16 @@ begin
   else
   begin
     Inc(FColumn);
-    if not (Result in [#13, ' ', #9]) then FAtLineStart := False;
+    if not (Result in [#13, ' ', #9]) then
+      FAtLineStart := False;
   end;
 end;
 
-function TCnCppScanner.MakeToken(Kind: TCnCppTokenKind; Start, Line,
-  Col: Integer): TCnCppToken;
+function TCnCppScanner.MakeToken(Kind: TCnCppTokenKind; Start, Line, Col:
+  Integer): TCnCppToken;
 begin
-  Result := TCnCppToken.Create(Kind, Copy(FSource, Start, FIndex - Start),
-    Line, Col, Start - 1);
+  Result := TCnCppToken.Create(Kind, Copy(FSource, Start, FIndex - Start), Line,
+    Col, Start - 1);
 end;
 
 function TCnCppScanner.IsIdentStart(C: Char): Boolean;
@@ -166,8 +172,12 @@ var
   S, L, C: Integer;
   Closed: Boolean;
 begin
-  S := FIndex; L := FLine; C := FColumn;
-  Take; Closed := False;
+  S := FIndex;
+  L := FLine;
+  C := FColumn;
+  Take;
+  Closed := False;
+
   while Peek <> #0 do
   begin
     if Peek = Quote then
@@ -176,14 +186,16 @@ begin
       Closed := True;
       Break;
     end;
-    if Peek in [#13, #10] then Break;
+    if Peek in [#13, #10] then
+      Break;
     if Peek = '\' then
     begin
       Take;
       if Peek = #13 then
       begin
         Take;
-        if Peek = #10 then Take;
+        if Peek = #10 then
+          Take;
       end
       else if Peek <> #0 then
         Take;
@@ -191,6 +203,7 @@ begin
     else
       Take;
   end;
+
   if not Closed then
     raise ECnCppScannerError.Create(csekUnclosedString, L, C, S - 1, Quote);
   Result := MakeToken(Kind, S, L, C);
@@ -202,9 +215,15 @@ var
   S, L, C, I: Integer;
   Closed: Boolean;
 begin
-  S := FIndex; L := FLine; C := FColumn; Closed := False;
-  for I := 1 to Length(Prefix) do Take;
-  if Peek = Quote then Take;
+  S := FIndex;
+  L := FLine;
+  C := FColumn;
+  Closed := False;
+  for I := 1 to Length(Prefix) do
+    Take;
+  if Peek = Quote then
+    Take;
+
   while Peek <> #0 do
   begin
     if Peek = Quote then
@@ -213,14 +232,16 @@ begin
       Closed := True;
       Break;
     end;
-    if Peek in [#13, #10] then Break;
+    if Peek in [#13, #10] then
+      Break;
     if Peek = '\' then
     begin
       Take;
       if Peek = #13 then
       begin
         Take;
-        if Peek = #10 then Take;
+        if Peek = #10 then
+          Take;
       end
       else if Peek <> #0 then
         Take;
@@ -228,6 +249,7 @@ begin
     else
       Take;
   end;
+
   if not Closed then
     raise ECnCppScannerError.Create(csekUnclosedString, L, C, S - 1, Prefix + Quote);
   Result := MakeToken(Kind, S, L, C);
@@ -239,9 +261,14 @@ var
   Delimiter, EndMarker: string;
   Closed: Boolean;
 begin
-  S := FIndex; L := FLine; C := FColumn; Closed := False;
-  for I := 1 to PrefixLength do Take;
-  if Peek = '"' then Take;
+  S := FIndex;
+  L := FLine;
+  C := FColumn;
+  Closed := False;
+  for I := 1 to PrefixLength do
+    Take;
+  if Peek = '"' then
+    Take;
 
   Delimiter := '';
   while (Peek <> #0) and (Peek <> '(') and not (Peek in [#13, #10]) do
@@ -254,16 +281,18 @@ begin
     begin
       if Copy(FSource, FIndex, Length(EndMarker)) = EndMarker then
       begin
-        for I := 1 to Length(EndMarker) do Take;
+        for I := 1 to Length(EndMarker) do
+          Take;
         Closed := True;
         Break;
       end;
       Take;
     end;
   end;
+
   if not Closed then
-    raise ECnCppScannerError.Create(csekUnclosedRawString, L, C, S - 1,
-      Copy(FSource, S, PrefixLength + 1));
+    raise ECnCppScannerError.Create(csekUnclosedRawString, L, C, S - 1, Copy(FSource,
+      S, PrefixLength + 1));
   Result := MakeToken(ctkString, S, L, C);
 end;
 
@@ -272,25 +301,38 @@ var
   S, L, C, Best: Integer;
   Candidate: string;
 begin
-  S := FIndex; L := FLine; C := FColumn; Best := 0;
+  S := FIndex;
+  L := FLine;
+  C := FColumn;
+  Best := 0;
   Candidate := Copy(FSource, FIndex, 3);
-  if (Candidate = '>>=') or (Candidate = '<<=') or (Candidate = '->*') then Best := 3;
+  if (Candidate = '>>=') or (Candidate = '<<=') or (Candidate = '->*') then
+    Best := 3;
+
   if Best = 0 then
   begin
     Candidate := Copy(FSource, FIndex, 2);
-    if (Candidate = '++') or (Candidate = '--') or (Candidate = '==') or
-      (Candidate = '!=') or (Candidate = '<=') or (Candidate = '>=') or
-      (Candidate = '&&') or (Candidate = '||') or (Candidate = '+=') or
-      (Candidate = '-=') or (Candidate = '*=') or (Candidate = '/=') or
-      (Candidate = '%=') or (Candidate = '&=') or (Candidate = '|=') or
-      (Candidate = '^=') or (Candidate = '<<') or (Candidate = '>>') or
-      (Candidate = '->') or (Candidate = '::') or (Candidate = '.*') or
-      (Candidate = '##') then Best := 2;
+    if (Candidate = '++') or (Candidate = '--') or (Candidate = '==') or (Candidate
+      = '!=') or (Candidate = '<=') or (Candidate = '>=') or (Candidate = '&&')
+      or (Candidate = '||') or (Candidate = '+=') or (Candidate = '-=') or (Candidate
+      = '*=') or (Candidate = '/=') or (Candidate = '%=') or (Candidate = '&=')
+      or (Candidate = '|=') or (Candidate = '^=') or (Candidate = '<<') or (Candidate
+      = '>>') or (Candidate = '->') or (Candidate = '::') or (Candidate = '.*')
+      or (Candidate = '##') then
+      Best := 2;
   end;
-  if Best = 0 then Best := 1;
-  while Best > 0 do begin Take; Dec(Best) end;
+
+  if Best = 0 then
+    Best := 1;
+  while Best > 0 do
+  begin
+    Take;
+    Dec(Best)
+  end;
+
   Result := MakeToken(ctkOperator, S, L, C);
-  if not CnCppIsBinaryOperator(Result.Text) then Result.Kind := ctkSymbol;
+  if not CnCppIsBinaryOperator(Result.Text) then
+    Result.Kind := ctkSymbol;
 end;
 
 function TCnCppScanner.NextToken: TCnCppToken;
@@ -298,40 +340,53 @@ var
   S, L, C: Integer;
   Ch: Char;
 begin
-  while Peek in [' ', #9, #13] do Take;
+  while Peek in [' ', #9, #13] do
+    Take;
+
   if Peek = #0 then
   begin
     Result := TCnCppToken.Create(ctkEOF, '', FLine, FColumn, FIndex - 1);
     Exit;
   end;
-  S := FIndex; L := FLine; C := FColumn; Ch := Peek;
+
+  S := FIndex;
+  L := FLine;
+  C := FColumn;
+  Ch := Peek;
   if Ch = #10 then
   begin
     Take;
     Result := MakeToken(ctkNewLine, S, L, C);
     Exit;
   end;
+
   if FAtLineStart and (Ch = '#') then
   begin
-    while (Peek <> #0) and not (Peek in [#13, #10]) do Take;
+    while (Peek <> #0) and not (Peek in [#13, #10]) do
+      Take;
     Result := MakeToken(ctkPreprocessor, S, L, C);
     Exit;
   end;
   if (Ch = '/') and (Peek(1) = '/') then
   begin
-    Take; Take;
-    while (Peek <> #0) and not (Peek in [#13, #10]) do Take;
+    Take;
+    Take;
+    while (Peek <> #0) and not (Peek in [#13, #10]) do
+      Take;
     Result := MakeToken(ctkLineComment, S, L, C);
     Exit;
   end;
+
   if (Ch = '/') and (Peek(1) = '*') then
   begin
-    Take; Take;
+    Take;
+    Take;
     while Peek <> #0 do
     begin
       if (Peek = '*') and (Peek(1) = '/') then
       begin
-        Take; Take;
+        Take;
+        Take;
         Result := MakeToken(ctkBlockComment, S, L, C);
         Exit;
       end;
@@ -339,24 +394,33 @@ begin
     end;
     raise ECnCppScannerError.Create(csekUnclosedBlockComment, L, C, S - 1, '/*');
   end;
-  if Ch = '"' then begin Result := ReadQuoted('"', ctkString); Exit end;
-  if Ch = '''' then begin Result := ReadQuoted('''', ctkChar); Exit end;
+  if Ch = '"' then
+  begin
+    Result := ReadQuoted('"', ctkString);
+    Exit
+  end;
+  if Ch = '''' then
+  begin
+    Result := ReadQuoted('''', ctkChar);
+    Exit
+  end;
   if (Ch = 'R') and (Peek(1) = '"') then
   begin
-    Result := ReadRawString(1); Exit
+    Result := ReadRawString(1);
+    Exit
   end;
-  if (Ch = 'u') and (Peek(1) = '8') and (Peek(2) = 'R') and
-    (Peek(3) = '"') then
+  if (Ch = 'u') and (Peek(1) = '8') and (Peek(2) = 'R') and (Peek(3) = '"') then
   begin
-    Result := ReadRawString(3); Exit
+    Result := ReadRawString(3);
+    Exit
   end;
-  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and (Peek(1) = 'R') and
-    (Peek(2) = '"') then
+  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and (Peek(1) = 'R') and (Peek(2) = '"') then
   begin
-    Result := ReadRawString(2); Exit
+    Result := ReadRawString(2);
+    Exit
   end;
-  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and
-    ((Peek(1) = '"') or ((Ch = 'u') and (Peek(1) = '8') and (Peek(2) = '"'))) then
+  if ((Ch = 'u') or (Ch = 'U') or (Ch = 'L')) and ((Peek(1) = '"') or ((Ch = 'u')
+    and (Peek(1) = '8') and (Peek(2) = '"'))) then
   begin
     if (Ch = 'u') and (Peek(1) = '8') then
       Result := ReadPrefixedQuoted('u8', '"', ctkString)
@@ -367,14 +431,16 @@ begin
   if IsIdentStart(Ch) then
   begin
     Take;
-    while IsIdentChar(Peek) do Take;
+    while IsIdentChar(Peek) do
+      Take;
     Result := MakeToken(ctkIdentifier, S, L, C);
     Exit;
   end;
   if Ch in ['0'..'9'] then
   begin
     Take;
-    while Peek in ['A'..'Z', 'a'..'z', '0'..'9', '.', '_'] do Take;
+    while Peek in ['A'..'Z', 'a'..'z', '0'..'9', '.', '_'] do
+      Take;
     Result := MakeToken(ctkNumber, S, L, C);
     Exit;
   end;
@@ -382,3 +448,4 @@ begin
 end;
 
 end.
+

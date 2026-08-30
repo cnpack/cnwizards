@@ -40,8 +40,8 @@ uses
   Classes, SysUtils;
 
 type
-  TCnCppAfterWriteEvent = procedure(Sender: TObject; IsWriteBlank,
-    IsWriteln: Boolean; PrefixSpaces: Integer) of object;
+  TCnCppAfterWriteEvent = procedure(Sender: TObject; IsWriteBlank, IsWriteln:
+    Boolean; PrefixSpaces: Integer) of object;
 
   TCnCppCodeGenerator = class
   private
@@ -73,8 +73,7 @@ type
     procedure SaveToStrings(Strings: TStrings);
     function Text: string;
     function CurrentLineLength: Integer;
-    function CopyPartOut(StartRow, StartColumn, EndRow,
-      EndColumn: Integer): string;
+    function CopyPartOut(StartRow, StartColumn, EndRow, EndColumn: Integer): string;
     property Indent: Integer read FIndent write FIndent;
     property TabWidth: Integer read FTabWidth write FTabWidth;
     property PrevRow: Integer read FPrevRow;
@@ -102,13 +101,19 @@ end;
 
 procedure TCnCppCodeGenerator.Reset;
 begin
-  FLines.Clear; FCurrent := ''; FIndent := 0;
-  FPrevRow := 0; FPrevColumn := 0; FCurrRow := 0; FCurrColumn := 0;
+  FLines.Clear;
+  FCurrent := '';
+  FIndent := 0;
+  FPrevRow := 0;
+  FPrevColumn := 0;
+  FCurrRow := 0;
+  FCurrColumn := 0;
 end;
 
 procedure TCnCppCodeGenerator.EnsureIndent;
 begin
-  if FCurrent = '' then FCurrent := StringOfChar(' ', FIndent * FTabWidth);
+  if FCurrent = '' then
+    FCurrent := StringOfChar(' ', FIndent * FTabWidth);
 end;
 
 procedure TCnCppCodeGenerator.BeginWrite(PrefixSpaces: Integer);
@@ -149,13 +154,17 @@ begin
       Inc(I);
     end;
   end;
-  if S = '' then BeginWrite;
+
+  if S = '' then
+    BeginWrite;
   EndWrite(False, False);
 end;
 
 procedure TCnCppCodeGenerator.Space(Count: Integer);
 begin
-  if Count <= 0 then Exit;
+  if Count <= 0 then
+    Exit;
+
   EnsureIndent;
   BeginWrite(0);
   FCurrent := FCurrent + StringOfChar(' ', Count);
@@ -170,8 +179,8 @@ begin
   EndWrite(False, True);
 end;
 
-function TCnCppCodeGenerator.BreakLineAtLastSpace(MaxColumn,
-  PrefixSpaces: Integer): Boolean;
+function TCnCppCodeGenerator.BreakLineAtLastSpace(MaxColumn, PrefixSpaces:
+  Integer): Boolean;
 var
   I, SplitAt: Integer;
   LeftPart, RightPart: string;
@@ -179,18 +188,22 @@ begin
   Result := False;
   SplitAt := 0;
   I := Length(FCurrent);
-  if I > MaxColumn then I := MaxColumn;
+
+  if I > MaxColumn then
+    I := MaxColumn;
   while I > 0 do
   begin
-    if (FCurrent[I] = ' ') and
-      ((I = Length(FCurrent)) or not (FCurrent[I + 1] in [',', ';', ')', ']'])) then
+    if (FCurrent[I] = ' ') and ((I = Length(FCurrent)) or not (FCurrent[I + 1]
+      in [',', ';', ')', ']'])) then
     begin
       SplitAt := I;
       Break;
     end;
     Dec(I);
   end;
-  if SplitAt <= PrefixSpaces then Exit;
+  if SplitAt <= PrefixSpaces then
+    Exit;
+
   LeftPart := TrimRight(Copy(FCurrent, 1, SplitAt - 1));
   RightPart := TrimLeft(Copy(FCurrent, SplitAt + 1, MaxInt));
   while (RightPart <> '') and (RightPart[1] in [',', ';', ')', ']']) do
@@ -198,6 +211,7 @@ begin
     LeftPart := LeftPart + RightPart[1];
     Delete(RightPart, 1, 1);
   end;
+
   FLines.Add(LeftPart);
   FCurrent := StringOfChar(' ', PrefixSpaces) + RightPart;
   Result := True;
@@ -215,7 +229,8 @@ end;
 
 procedure TCnCppCodeGenerator.DecIndent;
 begin
-  if FIndent > 0 then Dec(FIndent);
+  if FIndent > 0 then
+    Dec(FIndent);
 end;
 
 procedure TCnCppCodeGenerator.SaveToStrings(Strings: TStrings);
@@ -230,12 +245,15 @@ begin
   Result := '';
   for I := 0 to FLines.Count - 1 do
   begin
-    if I > 0 then Result := Result + #13#10;
+    if I > 0 then
+      Result := Result + #13#10;
     Result := Result + FLines[I];
   end;
+
   if FCurrent <> '' then
   begin
-    if FLines.Count > 0 then Result := Result + #13#10;
+    if FLines.Count > 0 then
+      Result := Result + #13#10;
     Result := Result + FCurrent;
   end;
 end;
@@ -262,7 +280,8 @@ var
   S: string;
 begin
   Result := '';
-  if (StartRow < 0) or (EndRow < StartRow) then Exit;
+  if (StartRow < 0) or (EndRow < StartRow) then
+    Exit;
 
   if StartRow = EndRow then
   begin
@@ -280,3 +299,4 @@ begin
 end;
 
 end.
+

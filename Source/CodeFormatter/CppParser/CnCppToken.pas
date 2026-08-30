@@ -37,9 +37,9 @@ interface
 {$I CnPack.inc}
 
 type
-  TCnCppTokenKind = (ctkUnknown, ctkEOF, ctkIdentifier, ctkNumber,
-    ctkString, ctkChar, ctkLineComment, ctkBlockComment, ctkPreprocessor,
-    ctkNewLine, ctkSymbol, ctkOperator);
+  TCnCppTokenKind = (ctkUnknown, ctkEOF, ctkIdentifier, ctkNumber, ctkString,
+    ctkChar, ctkLineComment, ctkBlockComment, ctkPreprocessor, ctkNewLine,
+    ctkSymbol, ctkOperator);
 
   TCnCppToken = class
   private
@@ -50,8 +50,8 @@ type
     FPosition: Integer;
     FHadLineBreak: Boolean;
   public
-    constructor Create(AKind: TCnCppTokenKind; const AText: string;
-      ALine, AColumn, APosition: Integer);
+    constructor Create(AKind: TCnCppTokenKind; const AText: string; ALine,
+      AColumn, APosition: Integer);
     property Kind: TCnCppTokenKind read FKind write FKind;
     property Text: string read FText;
     property Line: Integer read FLine;
@@ -87,13 +87,12 @@ end;
 
 function CnCppIsBinaryOperator(const S: string): Boolean;
 begin
-  Result := (S = '=') or (S = '+') or (S = '-') or (S = '*') or (S = '/') or
-    (S = '%') or (S = '==') or (S = '!=') or (S = '<') or (S = '>') or
-    (S = '<=') or (S = '>=') or (S = '&&') or (S = '||') or (S = '&') or
-    (S = '|') or (S = '^') or (S = '<<') or (S = '>>') or (S = '+=') or
-    (S = '-=') or (S = '*=') or (S = '/=') or (S = '%=') or (S = '&=') or
-    (S = '|=') or (S = '^=') or (S = '<<=') or (S = '>>=') or
-    (S = '->*') or (S = '.*');
+  Result := (S = '=') or (S = '+') or (S = '-') or (S = '*') or (S = '/') or (S
+    = '%') or (S = '==') or (S = '!=') or (S = '<') or (S = '>') or (S = '<=')
+    or (S = '>=') or (S = '&&') or (S = '||') or (S = '&') or (S = '|') or (S =
+    '^') or (S = '<<') or (S = '>>') or (S = '+=') or (S = '-=') or (S = '*=')
+    or (S = '/=') or (S = '%=') or (S = '&=') or (S = '|=') or (S = '^=') or (S
+    = '<<=') or (S = '>>=') or (S = '->*') or (S = '.*');
 end;
 
 function CnCppIsUnaryOperator(const S: string): Boolean;
@@ -102,3 +101,4 @@ begin
 end;
 
 end.
+
