@@ -445,7 +445,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         Top = 334
         Width = 281
         Height = 17
-        Caption = 'Do NOT Format Contents between {(*} and {*)}'
+        Caption = 'Do NOT Format Contents between // clang-format off and // clang-format on'
         TabOrder = 2
       end
     end

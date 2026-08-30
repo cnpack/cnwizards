@@ -51,6 +51,7 @@ type
     FRule: TCnCppCodeFormatRule;
     FTokens: TList;
     FIgnore: Boolean;
+    FIgnoreRawPos: Integer;
     FAsmDepth: Integer;
     FAsmLineStart: Boolean;
     FAsmAfterKeyword: Boolean;
@@ -80,8 +81,12 @@ type
     function TokenAt(Index: Integer): TCnCppToken;
     function IsWordLike(Token: TCnCppToken): Boolean;
     function IsUnary(Token: TCnCppToken): Boolean;
+    function IsPointerOperator(Token: TCnCppToken): Boolean;
+    function IsAddressOperator(Token: TCnCppToken): Boolean;
+    function IsTernaryColon(TokenIndex: Integer): Boolean;
     function IsTemplateOpen(TokenIndex: Integer): Boolean;
     procedure WriteText(const S: string);
+    procedure WriteIgnoredSource(StartPos, EndPos: Integer);
     procedure EnsureLine;
     procedure EnsureSpace;
     procedure WriteNewLine;
@@ -214,6 +219,261 @@ begin
     (Token.Text = '++') or (Token.Text = '--') or
     (((Token.Text = '+') or (Token.Text = '-')) and ((FPrev = nil) or
       (FPrev.Kind in [ctkOperator, ctkSymbol]))));
+end;
+
+function TCnCppCodeFormatter.IsPointerOperator(Token: TCnCppToken): Boolean;
+var
+  I, J, RunStart, RunEnd, WordCount: Integer;
+  Prev, Next, AfterNext, T: TCnCppToken;
+  HasDeclarationKeyword, AtStatementStart: Boolean;
+
+  function IsDeclarationKeyword(const S: string): Boolean;
+  begin
+    { These are grammar keywords, not a list of user-defined type names. }
+    Result := SameText(S, 'const') or SameText(S, 'volatile') or
+      SameText(S, 'static') or SameText(S, 'extern') or SameText(S, 'register') or
+      SameText(S, 'mutable') or SameText(S, 'constexpr') or SameText(S, 'inline') or
+      SameText(S, 'virtual') or SameText(S, 'friend') or SameText(S, 'typedef') or
+      SameText(S, 'using') or SameText(S, 'typename') or SameText(S, 'class') or
+      SameText(S, 'struct') or SameText(S, 'union') or SameText(S, 'enum');
+  end;
+
+  function IsExpressionBoundary(const S: string): Boolean;
+  begin
+    Result := (S = ';') or (S = '{') or (S = '}') or (S = '=') or
+      (S = '(') or (S = ')') or (S = '[') or
+      (S = '+') or (S = '-') or (S = '/') or (S = '%') or (S = '&') or
+      (S = '|') or (S = '!') or (S = '?') or (S = ':') or
+      SameText(S, 'return') or SameText(S, 'if') or SameText(S, 'for') or
+      SameText(S, 'while') or SameText(S, 'case');
+  end;
+
+begin
+  Result := False;
+  if (Token = nil) or (Token.Text <> '*') then
+    Exit;
+
+  I := FTokens.IndexOf(Token);
+  Prev := TokenAt(I - 1);
+  Next := TokenAt(I + 1);
+  AfterNext := TokenAt(I + 2);
+
+  { A cast/declarator star is followed by a closing delimiter, a declarator
+    separator, or an assignment. }
+  if (Next <> nil) and ((Next.Text = ')') or (Next.Text = ']') or
+    (Next.Text = ';') or (Next.Text = ',') or (Next.Text = '=')) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  { Prefix operators, dereference and overloaded operator* are not binary
+    multiplication. }
+  if (Prev = nil) or (Prev.Text = '(') or (Prev.Text = '[') or
+    (Prev.Text = ',') or (Prev.Text = ':') or (Prev.Text = '=') or
+    (Prev.Text = '{') or (Prev.Text = '}') or (Prev.Text = ';') or
+    SameText(Prev.Text, 'return') or SameText(Prev.Text, 'operator') then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  { A multi-level pointer declarator has an adjacent run of stars.  Inspect
+    the whole run and apply the declaration-shaped test to its final name. }
+  if ((Prev <> nil) and (Prev.Text = '*')) or
+    ((Next <> nil) and (Next.Text = '*')) then
+  begin
+    RunStart := I;
+    while (TokenAt(RunStart - 1) <> nil) and
+      (TokenAt(RunStart - 1).Text = '*') do
+      Dec(RunStart);
+    RunEnd := I + 1;
+    while (TokenAt(RunEnd) <> nil) and (TokenAt(RunEnd).Text = '*') do
+      Inc(RunEnd);
+    T := TokenAt(RunEnd);
+    AfterNext := TokenAt(RunEnd + 1);
+    if (T <> nil) and (T.Kind = ctkIdentifier) and (AfterNext <> nil) and
+      ((AfterNext.Text = ';') or (AfterNext.Text = ',') or
+       (AfterNext.Text = '=') or (AfterNext.Text = ')') or
+       (AfterNext.Text = ']') or (AfterNext.Text = '(') or
+       (AfterNext.Text = '[')) then
+    begin
+      { A type/name immediately before the pointer run is the same
+        declaration-shaped context used by the single-star heuristic. }
+      if (TokenAt(RunStart - 1) <> nil) and
+        IsWordLike(TokenAt(RunStart - 1)) then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end;
+  end;
+
+  WordCount := 0;
+  HasDeclarationKeyword := False;
+  AtStatementStart := True;
+  J := I - 1;
+  while J >= 0 do
+  begin
+    T := TokenAt(J);
+    if T = nil then
+      Break;
+    if IsExpressionBoundary(T.Text) then
+    begin
+      AtStatementStart := (T.Text = ';') or (T.Text = '{') or (T.Text = '}');
+      Break;
+    end;
+    if (T.Kind = ctkIdentifier) then
+    begin
+      Inc(WordCount);
+      if IsDeclarationKeyword(T.Text) then
+        HasDeclarationKeyword := True;
+    end;
+    if (T.Text = '>') or (T.Text = ']') or (T.Text = '::') then
+      HasDeclarationKeyword := True;
+    Dec(J);
+  end;
+
+  { Multiple adjacent declarator words (for example "const T" or
+    "unsigned char16_t") identify a declaration without naming T. }
+  if HasDeclarationKeyword or (WordCount >= 2) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  { For a single user-defined type, lexical C++ is inherently ambiguous
+    ("T *p" and "a *b" have the same token grammar). Only treat it as a
+    declarator when it starts a statement and the following token shape is
+    declarator-like; expressions following an assignment/operator were
+    already excluded by the boundary scan above. }
+  if (WordCount = 1) and AtStatementStart and (Next <> nil) and
+    (Next.Kind = ctkIdentifier) and (AfterNext <> nil) and
+    ((AfterNext.Text = ';') or (AfterNext.Text = '=') or
+     (AfterNext.Text = ',') or (AfterNext.Text = '(') or
+     (AfterNext.Text = '[')) then
+    Result := True;
+end;
+
+function TCnCppCodeFormatter.IsAddressOperator(Token: TCnCppToken): Boolean;
+var
+  I, J, WordCount: Integer;
+  Prev, Next, AfterNext, T: TCnCppToken;
+  HasDeclarationKeyword, AtStatementStart: Boolean;
+
+  function IsDeclarationKeyword(const S: string): Boolean;
+  begin
+    Result := SameText(S, 'const') or SameText(S, 'volatile') or
+      SameText(S, 'static') or SameText(S, 'extern') or SameText(S, 'register') or
+      SameText(S, 'mutable') or SameText(S, 'constexpr') or SameText(S, 'inline') or
+      SameText(S, 'virtual') or SameText(S, 'friend') or SameText(S, 'typedef') or
+      SameText(S, 'using') or SameText(S, 'typename') or SameText(S, 'class') or
+      SameText(S, 'struct') or SameText(S, 'union') or SameText(S, 'enum') or
+      SameText(S, 'auto');
+  end;
+
+  function IsExpressionBoundary(const S: string): Boolean;
+  begin
+    Result := (S = ';') or (S = '{') or (S = '}') or (S = '=') or
+      (S = '(') or (S = ')') or (S = '[') or
+      (S = '+') or (S = '-') or (S = '/') or (S = '%') or
+      (S = '|') or (S = '!') or (S = '?') or (S = ':') or
+      SameText(S, 'return') or SameText(S, 'if') or SameText(S, 'for') or
+      SameText(S, 'while') or SameText(S, 'case');
+  end;
+
+begin
+  Result := False;
+  if (Token = nil) or (Token.Text <> '&') then
+    Exit;
+
+  I := FTokens.IndexOf(Token);
+  Prev := TokenAt(I - 1);
+  Next := TokenAt(I + 1);
+  AfterNext := TokenAt(I + 2);
+
+  { Prefix address-of, including expressions such as "= &value" and
+    "return &value". }
+  if (Prev = nil) or (Prev.Text = '(') or (Prev.Text = '[') or
+    (Prev.Text = ',') or (Prev.Text = ':') or (Prev.Text = '=') or
+    SameText(Prev.Text, 'return') then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  { A reference declarator has declaration-specifier context before '&'.
+    This deliberately does not rely on a list of user-defined type names. }
+  WordCount := 0;
+  HasDeclarationKeyword := False;
+  AtStatementStart := True;
+  J := I - 1;
+  while J >= 0 do
+  begin
+    T := TokenAt(J);
+    if T = nil then
+      Break;
+    if IsExpressionBoundary(T.Text) then
+    begin
+      AtStatementStart := (T.Text = ';') or (T.Text = '{') or (T.Text = '}');
+      Break;
+    end;
+    if T.Kind = ctkIdentifier then
+    begin
+      Inc(WordCount);
+      if IsDeclarationKeyword(T.Text) then
+        HasDeclarationKeyword := True;
+    end;
+    if (T.Text = '>') or (T.Text = ']') or (T.Text = '::') then
+      HasDeclarationKeyword := True;
+    Dec(J);
+  end;
+
+  Result := HasDeclarationKeyword or (WordCount >= 2);
+  { A single user-defined type followed by a reference name and an
+    initializer is unambiguously a declaration; avoid treating a plain
+    expression such as "a & b;" as a reference declarator. }
+  if not Result and (WordCount = 1) and AtStatementStart and
+    (Next <> nil) and (Next.Kind = ctkIdentifier) and (AfterNext <> nil) and
+    (AfterNext.Text = '=') then
+    Result := True;
+end;
+
+function TCnCppCodeFormatter.IsTernaryColon(TokenIndex: Integer): Boolean;
+var
+  J, Depth: Integer;
+  T: TCnCppToken;
+begin
+  Result := False;
+  Depth := 0;
+  J := TokenIndex - 1;
+  while J >= 0 do
+  begin
+    T := TokenAt(J);
+    if T = nil then
+      Break;
+    if (T.Text = ')') or (T.Text = ']') then
+      Inc(Depth)
+    else if (T.Text = '(') or (T.Text = '[') then
+    begin
+      if Depth > 0 then
+        Dec(Depth)
+      else
+        Break;
+    end
+    else if Depth = 0 then
+    begin
+      if T.Text = '?' then
+      begin
+        Result := True;
+        Exit;
+      end;
+      if (T.Text = ';') or (T.Text = '{') or (T.Text = '}') or
+        (T.Text = '=') or (T.Text = ',') then
+        Break;
+    end;
+    Dec(J);
+  end;
 end;
 
 function TCnCppCodeFormatter.IsTemplateOpen(TokenIndex: Integer): Boolean;
@@ -436,6 +696,25 @@ begin
     FAtLineStart := False;
 end;
 
+procedure TCnCppCodeFormatter.WriteIgnoredSource(StartPos, EndPos: Integer);
+var
+  S: string;
+  SavedToken: TCnCppToken;
+begin
+  if StartPos < 1 then StartPos := 1;
+  if EndPos < StartPos then Exit;
+  S := Copy(FScanner.Source, StartPos, EndPos - StartPos + 1);
+  if S = '' then Exit;
+
+  { Raw ignored text must not affect matched-slice coordinates. }
+  SavedToken := FCurrentToken;
+  FCurrentToken := nil;
+  FCodeGen.Write(S);
+  FCurrentToken := SavedToken;
+
+  FAtLineStart := S[Length(S)] in [#10, #13];
+end;
+
 procedure TCnCppCodeFormatter.EnsureLine;
 begin
   if not FAtLineStart then WriteNewLine;
@@ -460,18 +739,39 @@ var
 begin
   if Token.Kind = ctkLineComment then
   begin
-    if Pos('clang-format off', LowerCase(Token.Text)) > 0 then FIgnore := FRule.UseIgnoreArea;
+    if Pos('clang-format off', LowerCase(Token.Text)) > 0 then
+    begin
+      FIgnore := FRule.UseIgnoreArea;
+      if FIgnore then
+        FIgnoreRawPos := Token.Position + Length(Token.Text) + 1;
+    end;
     if Pos('clang-format on', LowerCase(Token.Text)) > 0 then FIgnore := False;
-    EnsureSpace; WriteText(TrimRight(Token.Text)); WriteNewLine;
+    EnsureSpace;
+    if FIgnore then
+      WriteText(Token.Text)
+    else
+    begin
+      WriteText(TrimRight(Token.Text));
+      WriteNewLine;
+    end;
   end
   else
   begin
     S := Token.Text;
     WasLineStart := FAtLineStart;
-    if Pos('clang-format off', LowerCase(S)) > 0 then FIgnore := FRule.UseIgnoreArea;
+    if Pos('clang-format off', LowerCase(S)) > 0 then
+    begin
+      FIgnore := FRule.UseIgnoreArea;
+      if FIgnore then
+        FIgnoreRawPos := Token.Position + Length(Token.Text) + 1;
+    end;
     if Pos('clang-format on', LowerCase(S)) > 0 then FIgnore := False;
     EnsureSpace; WriteText(S);
-    if (Pos(#10, S) > 0) or WasLineStart then WriteNewLine else EnsureSpace;
+    if not (FIgnore and (Pos('clang-format off', LowerCase(S)) > 0)) then
+    begin
+      if (Pos(#10, S) > 0) or WasLineStart then WriteNewLine
+      else EnsureSpace;
+    end;
   end;
 end;
 
@@ -480,13 +780,27 @@ var
   S: string;
 begin
   S := Token.Text;
-  if IsUnary(Token) then
+  if IsPointerOperator(Token) or IsAddressOperator(Token) then
+  begin
+    if (FPrev <> nil) and IsWordLike(FPrev) and
+      not SameText(FPrev.Text, 'operator') then
+      EnsureSpace;
+    WriteText(S);
+  end
+  else if IsUnary(Token) then
   begin
     if (S = '++') or (S = '--') then
       WriteText(S)
     else if (S = '+') or (S = '-') then
       WriteText(S)
     else begin EnsureSpace; WriteText(S) end;
+  end
+  else if S = '?' then
+  begin
+    if not FAtLineStart then
+      FCodeGen.Space(1);
+    WriteText(S);
+    FCodeGen.Space(1);
   end
   else if CnCppIsBinaryOperator(S) then
   begin
@@ -613,7 +927,7 @@ var
   IsTypeBrace: Boolean;
   ClosedDeclBrace: Boolean;
   PrevTemplateClose: Boolean;
-  J: Integer;
+  J, RawEndPos: Integer;
 begin
   for I := 0 to FTokens.Count - 1 do
   begin
@@ -621,11 +935,48 @@ begin
     FCurrentToken := T;
     PrevTemplateClose := FPrevTemplateClose;
     FPrevTemplateClose := False;
-    if T.Kind = ctkEOF then Break;
+    if T.Kind = ctkEOF then
+    begin
+      if FIgnore and (FIgnoreRawPos > 0) then
+      begin
+        WriteIgnoredSource(FIgnoreRawPos, Length(FScanner.Source));
+        FIgnore := False;
+        FIgnoreRawPos := 0;
+      end;
+      Break;
+    end;
+
+    { While ignoring, defer every token and copy the complete source range
+      when the matching marker is found.  This preserves all original
+      whitespace and line breaks instead of rebuilding them token by token. }
+    if FIgnore then
+    begin
+      if (T.Kind in [ctkLineComment, ctkBlockComment]) and
+        (Pos('clang-format on', LowerCase(T.Text)) > 0) then
+      begin
+        RawEndPos := T.Position + Length(T.Text);
+        if N <> nil then
+        begin
+          if N.Kind = ctkNewLine then
+            RawEndPos := N.Position + Length(N.Text)
+          else
+            { Preserve the source gap after an inline closing marker. }
+            RawEndPos := N.Position;
+        end;
+        WriteIgnoredSource(FIgnoreRawPos, RawEndPos);
+        FIgnore := False;
+        FIgnoreRawPos := 0;
+        FBlankLinePending := False;
+        FPrev := nil;
+      end;
+      if FIgnore then Continue;
+      Continue;
+    end;
+
     FlushPendingBlankLine(T);
     if (T.Kind = ctkNewLine) then
     begin
-      if (FAsmDepth > 0) and FRule.FormatAsm then
+      if FAsmDepth > 0 then
       begin
         FormatAsmToken(T);
         Continue;
@@ -633,9 +984,17 @@ begin
       if (FIgnore or FRule.KeepUserLineBreak) and not FAtLineStart then WriteNewLine;
       Continue;
     end;
-    if T.Kind = ctkPreprocessor then begin EnsureLine; WriteText(T.Text); WriteNewLine; Continue end;
+    if T.Kind = ctkPreprocessor then
+    begin
+      EnsureLine;
+      WriteText(T.Text);
+      WriteNewLine;
+      { Keep include/directive groups together; the pending blank line is
+        emitted only when the next non-punctuation declaration begins. }
+      FBlankLinePending := True;
+      Continue;
+    end;
     if T.Kind in [ctkLineComment, ctkBlockComment] then begin WriteComment(T); Continue end;
-    if FIgnore then begin EnsureSpace; WriteText(T.Text); Continue end;
     if (T.Kind = ctkIdentifier) and SameText(T.Text, 'asm') then FAsmDepth := -1;
     if T.Text = '{' then begin
       if FAsmDepth = -1 then FAsmDepth := FBraceDepth + 1;
@@ -667,13 +1026,10 @@ begin
         FBlankLinePending := True;
       FPrev := T; Continue
     end;
-    if (FAsmDepth > 0) and FRule.FormatAsm then begin
+    if FAsmDepth > 0 then begin
       FormatAsmToken(T);
       FPrev := T;
       Continue;
-    end;
-    if (FAsmDepth > 0) and not FRule.FormatAsm then begin
-      EnsureSpace; WriteText(T.Text); if T.Text = ';' then WriteNewLine; Continue
     end;
     if T.Text = '(' then begin
       if (FPrev <> nil) and ((FPrev.Text = 'if') or (FPrev.Text = 'for') or
@@ -686,7 +1042,24 @@ begin
     if T.Text = ']' then begin FCodeGen.TrimLine; WriteText(']'); if FBracketDepth > 0 then Dec(FBracketDepth); FPrev := T; Continue end;
     if T.Text = ';' then begin FCodeGen.TrimLine; WriteText(';'); if FParenDepth = 0 then WriteNewLine else EnsureSpace; FPrev := T; Continue end;
     if T.Text = ',' then begin FCodeGen.TrimLine; WriteText(','); EnsureSpace; FPrev := T; Continue end;
-    if T.Text = ':' then begin FCodeGen.TrimLine; WriteText(':'); if (N <> nil) and (N.Text <> ':') then EnsureSpace; FPrev := T; Continue end;
+    if T.Text = ':' then
+    begin
+      if IsTernaryColon(I) then
+      begin
+        FCodeGen.TrimLine;
+        EnsureSpace;
+        WriteText(':');
+        EnsureSpace;
+      end
+      else
+      begin
+        FCodeGen.TrimLine;
+        WriteText(':');
+        if (N <> nil) and (N.Text <> ':') then
+          EnsureSpace;
+      end;
+      FPrev := T; Continue
+    end;
     if (T.Text = '<') and IsTemplateOpen(I) then
     begin
       FCodeGen.TrimLine;
@@ -710,11 +1083,17 @@ begin
     begin
       FCodeGen.TrimLine; WriteText(T.Text); FPrev := T; Continue
     end;
+    if T.Text = '?' then
+    begin
+      EnsureSpace;
+      WriteText('?');
+      EnsureSpace;
+      FPrev := T; Continue
+    end;
     if T.Kind = ctkOperator then begin WriteOperator(T); FPrev := T; Continue end;
     NeedSpace := IsWordLike(FPrev) or ((FPrev <> nil) and ((FPrev.Text = ')') or
       (FPrev.Text = ']') or (FPrev.Text = '}'))) or
-      (PrevTemplateClose and IsWordLike(T)) or
-      ((T.Kind = ctkIdentifier) and (FPrev <> nil) and (FPrev.Text = '*'));
+      (PrevTemplateClose and IsWordLike(T));
     if NeedSpace then EnsureSpace;
     WriteText(T.Text);
     TryAutoWrap;
@@ -732,7 +1111,7 @@ begin
   FCodeGen.Reset;
   for I := 0 to FTokens.Count - 1 do TObject(FTokens[I]).Free;
   FTokens.Clear;
-  FPrev := nil; FCurrentToken := nil; FIgnore := False;
+  FPrev := nil; FCurrentToken := nil; FIgnore := False; FIgnoreRawPos := 0;
   FAsmDepth := 0; FAsmLineStart := False; FAsmAfterKeyword := False;
   FAsmKeywordLength := 0;
   FParenDepth := 0; FBracketDepth := 0; FTemplateDepth := 0;
