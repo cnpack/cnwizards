@@ -74,6 +74,8 @@ type
       WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
       SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
       KeepUserLineBreak, UseIgnoreArea: LongBool);
+    procedure SetInputLineMarks(Marks: PDWORD);
+    function RetrieveOutputLinkMarks: PDWORD;
     function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
     function FormatOneCppUnitW(Input: PWideChar; Len: DWORD): PWideChar;
@@ -133,6 +135,8 @@ var
 
   FInputLineMarks: PDWORD = nil;
   FOutputLineMarks: PDWORD = nil;
+  FCppInputLineMarks: PDWORD = nil;
+  FCppOutputLineMarks: PDWORD = nil;
 
 function GetCodeFormatterProvider: ICnPascalFormatterIntf; stdcall;
 begin
@@ -173,6 +177,24 @@ begin
   begin
     FreeMemory(FOutputLineMarks);
     FOutputLineMarks := nil;
+  end;
+end;
+
+procedure ClearCppInputLineMarks;
+begin
+  if FCppInputLineMarks <> nil then
+  begin
+    FreeMemory(FCppInputLineMarks);
+    FCppInputLineMarks := nil;
+  end;
+end;
+
+procedure ClearCppOutputLineMarks;
+begin
+  if FCppOutputLineMarks <> nil then
+  begin
+    FreeMemory(FCppOutputLineMarks);
+    FCppOutputLineMarks := nil;
   end;
 end;
 
@@ -639,6 +661,29 @@ begin
   end;
 end;
 
+procedure TCnCppFormatterProvider.SetInputLineMarks(Marks: PDWORD);
+var
+  Len: Integer;
+  M: PDWORD;
+begin
+  ClearCppInputLineMarks;
+  if (Marks = nil) or (Marks^ = 0) then Exit;
+  M := Marks;
+  Len := 0;
+  while M^ <> 0 do
+  begin
+    Inc(Len);
+    Inc(M);
+  end;
+  FCppInputLineMarks := PDWORD(GetMemory((Len + 1) * SizeOf(DWORD)));
+  CopyMemory(FCppInputLineMarks, Marks, (Len + 1) * SizeOf(DWORD));
+end;
+
+function TCnCppFormatterProvider.RetrieveOutputLinkMarks: PDWORD;
+begin
+  Result := FCppOutputLineMarks;
+end;
+
 destructor TCnCppFormatterProvider.Destroy;
 begin
   ClearResults;
@@ -676,8 +721,32 @@ begin
 end;
 
 function TCnCppFormatterProvider.FormatNative(const S: string): string;
+var
+  InStream: TMemoryStream;
+  Formatter: TCnCppCodeFormatter;
 begin
-  Result := CnFormatCppText(S, CnCppCodeForRule);
+  Result := '';
+  InStream := TMemoryStream.Create;
+  try
+    if S <> '' then InStream.Write(S[1], Length(S) * SizeOf(Char));
+    InStream.Position := 0;
+    Formatter := TCnCppCodeFormatter.Create(InStream, CnCppCodeForRule);
+    try
+      Formatter.SpecifyLineMarks(FCppInputLineMarks);
+      try
+        Formatter.FormatCode;
+        Result := Formatter.ResultText;
+      except
+        Result := '';
+      end;
+      ClearCppOutputLineMarks;
+      Formatter.SaveOutputLineMarks(FCppOutputLineMarks);
+    finally
+      Formatter.Free;
+    end;
+  finally
+    InStream.Free;
+  end;
 end;
 
 function TCnCppFormatterProvider.FormatSlice(const S: string; StartOffset,
@@ -695,8 +764,11 @@ begin
       StartOffset, EndOffset);
     try
       Formatter.SliceMode := True;
+      Formatter.SpecifyLineMarks(FCppInputLineMarks);
       Formatter.FormatCode;
       Result := Formatter.CopyMatchedSliceResult;
+      ClearCppOutputLineMarks;
+      Formatter.SaveOutputLineMarks(FCppOutputLineMarks);
     finally
       Formatter.Free;
     end;
@@ -727,6 +799,7 @@ function TCnCppFormatterProvider.FormatOneCppUnit(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
 begin
   ClearResults;
+  ClearCppOutputLineMarks;
   ClearCppError;
   CppErrorRec.ErrorCode := CN_ERRCODE_CPP_NOT_SUPPORT;
   Result := nil;
@@ -736,7 +809,9 @@ function TCnCppFormatterProvider.FormatOneCppUnitUtf8(Input: PAnsiChar;
   Len: DWORD): PAnsiChar;
 var A: AnsiString; U, R: WideString;
 begin
-  ClearResults; Result := nil;
+  ClearResults;
+  ClearCppOutputLineMarks;
+  Result := nil;
   if (Input = nil) or (Len = 0) then Exit;
   SetString(A, Input, Len);
   U := UTF8Decode(A);
@@ -749,7 +824,9 @@ function TCnCppFormatterProvider.FormatOneCppUnitW(Input: PWideChar;
   Len: DWORD): PWideChar;
 var S, R: WideString;
 begin
-  ClearResults; Result := nil;
+  ClearResults;
+  ClearCppOutputLineMarks;
+  Result := nil;
   if (Input = nil) or (Len = 0) then Exit;
   SetString(S, Input, Len);
   R := WideString(FormatNative(string(S)));
@@ -761,6 +838,7 @@ function TCnCppFormatterProvider.FormatCppBlock(Input: PAnsiChar; Len,
   StartOffset, EndOffset: DWORD): PAnsiChar;
 begin
   ClearResults;
+  ClearCppOutputLineMarks;
   ClearCppError;
   CppErrorRec.ErrorCode := CN_ERRCODE_CPP_NOT_SUPPORT;
   Result := nil;
@@ -770,7 +848,9 @@ function TCnCppFormatterProvider.FormatCppBlockUtf8(Input: PAnsiChar; Len,
   StartOffset, EndOffset: DWORD): PAnsiChar;
 var A: AnsiString; U, R: WideString; NativeStart, NativeEnd: Integer;
 begin
-  ClearResults; Result := nil;
+  ClearResults;
+  ClearCppOutputLineMarks;
+  Result := nil;
   if (Input = nil) or (StartOffset >= Len) then Exit;
   if EndOffset > Len then EndOffset := Len;
   if EndOffset <= StartOffset then Exit;
@@ -787,7 +867,9 @@ function TCnCppFormatterProvider.FormatCppBlockW(Input: PWideChar; Len,
   StartOffset, EndOffset: DWORD): PWideChar;
 var S, R: WideString;
 begin
-  ClearResults; Result := nil;
+  ClearResults;
+  ClearCppOutputLineMarks;
+  Result := nil;
   if (Input = nil) or (StartOffset >= Len) then Exit;
   if EndOffset > Len then EndOffset := Len;
   if EndOffset <= StartOffset then Exit;
@@ -806,5 +888,7 @@ finalization
   FPreNameList.Free;
   ClearInputLineMarks;
   ClearOutputLineMarks;
+  ClearCppInputLineMarks;
+  ClearCppOutputLineMarks;
 
 end.

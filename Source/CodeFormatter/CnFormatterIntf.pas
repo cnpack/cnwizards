@@ -143,11 +143,15 @@ const
   CN_ERRCODE_END                      = 22;
 
   CN_ERRCODE_CPP_OK                  = 0;
+  {* C/C++ 格式化成功。}
   CN_ERRCODE_CPP_FORMAT              = 1;
+  {* C/C++ 格式化过程中发生错误。}
   CN_ERRCODE_CPP_NOT_SUPPORT         = 2;
+  {* C/C++ 格式化功能或请求暂不支持。}
 
 type
   ICnPascalFormatterIntf = interface
+  {* Pascal 代码格式化接口，供 IDE 专家和外部调用者使用。}
     ['{0CC0F874-227A-4516-9D17-6331EA86CBCA}']
     procedure SetPascalFormatRule(DirectiveMode: DWORD; KeywordStyle: DWORD;
       BeginStyle: DWORD; ElseAfterEndStyle: DWORD; WrapMode: DWORD; TabSpace: DWORD;
@@ -215,33 +219,77 @@ type
   end;
 
   TCnGetPasFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
+  {* DLL 导出的 Pascal 格式化器接口获取函数类型。}
 
 const
   CN_CPP_BRACE_SAMELINE = 0;
+  {* 左大括号与声明或语句保持在同一行。}
   CN_CPP_BRACE_NEXTLINE = 1;
+  {* 左大括号另起一行。}
 
 type
   ICnCppFormatterIntf = interface
+  {* C/C++ 代码格式化接口，供 IDE 专家和外部调用者使用。}
     ['{C6B53E5D-6A95-4C4A-9E2B-9A0B8E1D6F20}']
     procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
       WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
       SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
       KeepUserLineBreak, UseIgnoreArea: LongBool);
+    {* 设置格式化选项，包括缩进、换行宽度、大括号位置、二元运算符空格、
+       汇编代码空格、保留换行和忽略区域等 C/C++ 格式化规则。}
+
+    procedure SetInputLineMarks(Marks: PDWORD);
+    {* 设置源文件中的行标记，供格式化后恢复光标、断点、书签等位置。
+       以 DWORD 数组传递源代码行号，0 结尾；传 nil 表示清除行标记。}
+
     function FormatOneCppUnit(Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    {* 格式化一整个 C/C++ 文件内容，代码以 AnsiString 格式传入。
+       返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
     function FormatOneCppUnitUtf8(Input: PAnsiChar; Len: DWORD): PAnsiChar;
+    {* 格式化一整个 C/C++ 文件内容，代码以 UTF8String 格式传入。
+       返回结果存储的 UTF8String 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
     function FormatOneCppUnitW(Input: PWideChar; Len: DWORD): PWideChar;
+    {* 格式化一整个 C/C++ 文件内容，代码以 UnicodeString 格式传入，Len 为字符长度。
+       返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
     function FormatCppBlock(Input: PAnsiChar; Len, StartOffset,
       EndOffset: DWORD): PAnsiChar;
+    {* 格式化一代码块，所属整个 C/C++ 文件内容以 AnsiString 格式传入。
+       StartOffset 与 EndOffset 是代码块在整个文件中的字节偏移量，通常直接
+       对应 IDE 中的选择区。返回结果存储的 AnsiString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
     function FormatCppBlockUtf8(Input: PAnsiChar; Len, StartOffset,
       EndOffset: DWORD): PAnsiChar;
+    {* 格式化一代码块，整个 C/C++ 文件内容以 UTF8String 格式传入。
+       StartOffset 与 EndOffset 是代码块在整个文件中的 UTF-8 字节偏移量，通常直接
+       对应 IDE 中的选择区。返回结果存储的 UTF8String 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
     function FormatCppBlockW(Input: PWideChar; Len, StartOffset,
       EndOffset: DWORD): PWideChar;
+    {* 格式化一代码块，整个 C/C++ 文件内容以 UnicodeString 格式传入，Len 为字符长度。
+       StartOffset 与 EndOffset 是代码块在整个文件中的 Unicode 字符偏移量，不能直接
+       从 IDE 选择区取得。返回结果存储的 UnicodeString 字符内容的指针，用完后无须释放。
+       如果返回 nil，说明出错，需要用 RetrieveCppLastError 获得错误码。}
+
+    function RetrieveOutputLinkMarks: PDWORD;
+    {* 获取格式化结果中的目标行标记，供格式化完成后恢复光标、断点、书签等位置。
+       以 DWORD 数组指针传递，0 结尾；调用者不得释放此数组内存。}
+
     function RetrieveCppLastError(out SourceLine: Integer; out SourceCol: Integer;
       out SourcePos: Integer; out CurrentToken: PAnsiChar): Integer;
+    {* 获取错误码以及出错时的代码行数、列数、整体块偏移和解析出错时的当前 Token。
+       CurrentToken 内容应复制出来使用，用完后无须释放。}
   end;
 
   TCnGetCppFormatterProvider = function: ICnCppFormatterIntf; stdcall;
-  {* DLL 中输出的函数类型}
+  {* DLL 导出的 C/C++ 格式化器接口获取函数类型。}
 
 implementation
 

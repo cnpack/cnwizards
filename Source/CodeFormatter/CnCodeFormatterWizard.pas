@@ -899,6 +899,10 @@ var
   StartRec, EndRec: TOTACharPos;
 {$IFDEF DELPHI_OTA}
   Block: IOTAEditBlock;
+  EP: TOTAEditPos;
+  BpBmLineMarks: array of Cardinal;
+  OutLineMarks: PDWORD;
+  I, Idx: Integer;
 {$ENDIF}
 
 begin
@@ -931,6 +935,11 @@ begin
   Src := CnOtaGetCurrentEditorSource(True);
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  CnWizGetBreakpointsByFile(CnOtaGetCurrentSourceFileName, FBreakpoints);
+  SaveBookMarksToObjectList(View, FBookmarks);
 {$ENDIF}
 
   Screen.Cursor := crHourGlass;
@@ -980,6 +989,19 @@ begin
     end
     else
     begin
+{$IFDEF DELPHI_OTA}
+      EP := View.CursorPos;
+      SetLength(BpBmLineMarks, 1 + FBreakpoints.Count + FBookmarks.Count + 1);
+      BpBmLineMarks[0] := EP.Line;
+      Idx := 1;
+      for I := 0 to FBreakpoints.Count - 1 do
+        BpBmLineMarks[I + Idx] := DWORD(TCnBreakpointDescriptor(FBreakpoints[I]).LineNumber);
+      Inc(Idx, FBreakpoints.Count);
+      for I := 0 to FBookmarks.Count - 1 do
+        BpBmLineMarks[I + Idx] := DWORD(TCnBookmarkObject(FBookmarks[I]).Line);
+      BpBmLineMarks[Length(BpBmLineMarks) - 1] := 0;
+      Formatter.SetInputLineMarks(@(BpBmLineMarks[0]));
+{$ENDIF}
 {$IFDEF LAZARUS}
       Res := Formatter.FormatOneCppUnitUtf8(PAnsiChar(Src), Length(Src));
 {$ENDIF}
@@ -1012,6 +1034,27 @@ begin
       CnOtaSetCurrentEditorSource(string(Res));
   {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+      OutLineMarks := Formatter.RetrieveOutputLinkMarks;
+      if OutLineMarks <> nil then
+      begin
+        EP.Line := OutLineMarks^;
+        View.SetCursorPos(EP);
+        Inc(OutLineMarks);
+        if FBreakpoints.Count > 0 then
+        begin
+          RestoreBreakpoints(OutLineMarks, FBreakpoints.Count);
+          Inc(OutLineMarks, FBreakpoints.Count);
+        end;
+        if FBookmarks.Count > 0 then
+        begin
+          RestoreBookmarks(View, OutLineMarks);
+          Inc(OutLineMarks, FBookmarks.Count);
+        end;
+        View.MoveViewToCursor;
+        View.Paint;
+      end;
 {$ENDIF}
     end;
   finally

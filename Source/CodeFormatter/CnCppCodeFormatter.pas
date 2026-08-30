@@ -37,7 +37,7 @@ interface
 {$I CnPack.inc}
 
 uses
-  Classes, SysUtils, CnCppToken, CnCppScanner, CnCppCodeGenerator,
+  Classes, SysUtils, Windows, CnCppToken, CnCppScanner, CnCppCodeGenerator,
   CnCodeFormatRules, CnParseConsts, CnFormatterIntf;
 
 const
@@ -52,6 +52,8 @@ type
     FTokens: TList;
     FIgnore: Boolean;
     FIgnoreRawPos: Integer;
+    FInputLineMarks: TList;
+    FOutputLineMarks: TList;
     FAsmDepth: Integer;
     FAsmLineStart: Boolean;
     FAsmAfterKeyword: Boolean;
@@ -111,6 +113,8 @@ type
       AMatchedInEnd: Integer = CN_CPP_MATCHED_INVALID);
     destructor Destroy; override;
     procedure FormatCode;
+    procedure SpecifyLineMarks(Marks: PDWORD);
+    procedure SaveOutputLineMarks(var Marks: PDWORD);
     procedure SaveToStream(Stream: TStream);
     procedure SaveToStrings(Strings: TStrings);
     function ResultText: string;
@@ -158,14 +162,25 @@ begin
   FCodeGen.TabWidth := Rule.TabSpaceCount;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
   FTokens := TList.Create;
+  FInputLineMarks := nil;
+  FOutputLineMarks := nil;
   FAtLineStart := True;
 end;
 
 procedure TCnCppCodeFormatter.CodeGenAfterWrite(Sender: TObject;
   IsWriteBlank, IsWriteln: Boolean; PrefixSpaces: Integer);
 var
-  StartPos, EndPos: Integer;
+  StartPos, EndPos, I: Integer;
 begin
+  if not IsWriteBlank and not IsWriteln and (FInputLineMarks <> nil) and
+    (FCurrentToken <> nil) then
+  begin
+    for I := 0 to FInputLineMarks.Count - 1 do
+      if (FCurrentToken.Line >= Integer(FInputLineMarks[I])) and
+        (Integer(FOutputLineMarks[I]) = 0) then
+        FOutputLineMarks[I] := Pointer(TCnCppCodeGenerator(Sender).CurrRow + 1);
+  end;
+
   if not FSliceMode or (FCurrentToken = nil) or
     (FMatchedInStart = CN_CPP_MATCHED_INVALID) or
     (FMatchedInEnd = CN_CPP_MATCHED_INVALID) then Exit;
@@ -199,7 +214,45 @@ begin
   FTokens.Free;
   FCodeGen.Free;
   FScanner.Free;
+  FOutputLineMarks.Free;
+  FInputLineMarks.Free;
   inherited Destroy;
+end;
+
+procedure TCnCppCodeFormatter.SpecifyLineMarks(Marks: PDWORD);
+var
+  M: PDWORD;
+begin
+  FreeAndNil(FInputLineMarks);
+  FreeAndNil(FOutputLineMarks);
+  if (Marks = nil) or (Marks^ = 0) then Exit;
+
+  FInputLineMarks := TList.Create;
+  FOutputLineMarks := TList.Create;
+  M := Marks;
+  while M^ <> 0 do
+  begin
+    FInputLineMarks.Add(Pointer(M^));
+    FOutputLineMarks.Add(nil);
+    Inc(M);
+  end;
+end;
+
+procedure TCnCppCodeFormatter.SaveOutputLineMarks(var Marks: PDWORD);
+var
+  I: Integer;
+  M: PDWORD;
+begin
+  if (FOutputLineMarks = nil) or (FOutputLineMarks.Count = 0) or
+    (Marks <> nil) then Exit;
+  Marks := GetMemory((FOutputLineMarks.Count + 1) * SizeOf(DWORD));
+  M := Marks;
+  for I := 0 to FOutputLineMarks.Count - 1 do
+  begin
+    M^ := DWORD(FOutputLineMarks[I]);
+    Inc(M);
+  end;
+  M^ := 0;
 end;
 
 function TCnCppCodeFormatter.TokenAt(Index: Integer): TCnCppToken;
@@ -700,11 +753,31 @@ procedure TCnCppCodeFormatter.WriteIgnoredSource(StartPos, EndPos: Integer);
 var
   S: string;
   SavedToken: TCnCppToken;
+  I, SourceStartLine, SourceEndLine, OutputStartLine: Integer;
 begin
   if StartPos < 1 then StartPos := 1;
   if EndPos < StartPos then Exit;
   S := Copy(FScanner.Source, StartPos, EndPos - StartPos + 1);
   if S = '' then Exit;
+
+  { Assign line marks in an ignored range by preserving its source/output
+    line offset.  Raw output has no current token for the normal callback. }
+  if FInputLineMarks <> nil then
+  begin
+    SourceStartLine := 1;
+    for I := 1 to StartPos - 1 do
+      if FScanner.Source[I] = #10 then Inc(SourceStartLine);
+    SourceEndLine := SourceStartLine;
+    for I := StartPos to EndPos do
+      if FScanner.Source[I] = #10 then Inc(SourceEndLine);
+    OutputStartLine := FCodeGen.CurrRow + 1;
+    for I := 0 to FInputLineMarks.Count - 1 do
+      if (Integer(FOutputLineMarks[I]) = 0) and
+        (Integer(FInputLineMarks[I]) >= SourceStartLine) and
+        (Integer(FInputLineMarks[I]) <= SourceEndLine) then
+        FOutputLineMarks[I] := Pointer(OutputStartLine +
+          Integer(FInputLineMarks[I]) - SourceStartLine);
+  end;
 
   { Raw ignored text must not affect matched-slice coordinates. }
   SavedToken := FCurrentToken;
