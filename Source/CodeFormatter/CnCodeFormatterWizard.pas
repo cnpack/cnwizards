@@ -133,7 +133,7 @@ type
     function PutCppFormatRules: Boolean;
     procedure FormatCpp;
     function GetCppErrorStr(Err: Integer): string;
-    function GetErrorStr(Err: Integer): string;
+    function GetPasErrorStr(Err: Integer): string;
   protected
     function GetHasConfig: Boolean; override;
     procedure SubActionExecute(Index: Integer); override;
@@ -603,7 +603,7 @@ begin
   end;
 end;
 
-function TCnCodeFormatterWizard.GetErrorStr(Err: Integer): string;
+function TCnCodeFormatterWizard.GetPasErrorStr(Err: Integer): string;
 begin
   case Err of
     CN_ERRCODE_PASCAL_IDENT_EXP:
@@ -1574,7 +1574,7 @@ begin
 
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
             ConvertToVisibleCol(ErrLine, SourceCol),
-            GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+            GetPasErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
 {$ENDIF}
 {$IFDEF LAZARUS}
           P := View.CursorTextXY;
@@ -1583,7 +1583,7 @@ begin
           View.CursorTextXY := P;
 
           ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
-            GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+            GetPasErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
 {$ENDIF}
         end;
       finally
@@ -1799,7 +1799,7 @@ begin
               CnOtaGotoEditPos(ErrPos);
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine,
                 ConvertToVisibleCol(ErrLine, SourceCol),
-                GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+                GetPasErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
 {$ENDIF}
 
 {$IFDEF LAZARUS}
@@ -1809,7 +1809,7 @@ begin
               View.CursorTextXY := P;
 
               ErrorDlg(Format(SCnCodeFormatterErrPascalFmt, [SourceLine, SourceCol,
-                GetErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
+                GetPasErrorStr(ErrCode), CurrentToken]) + SCnCodeFormatterErrMaybeComment);
 {$ENDIF}
             end;
           end;

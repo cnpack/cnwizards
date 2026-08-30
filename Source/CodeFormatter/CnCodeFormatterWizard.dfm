@@ -305,9 +305,16 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
         object lblCppBraceStyle: TLabel
           Left = 16
           Top = 108
-          Width = 64
+          Width = 58
           Height = 13
           Caption = 'Brace Style:'
+        end
+        object lblCppNewLine: TLabel
+          Left = 232
+          Top = 142
+          Width = 68
+          Height = 13
+          Caption = 'when Exceed:'
         end
         object chkCppAutoWrap: TCheckBox
           Left = 16
@@ -317,13 +324,6 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           Caption = 'Auto Wrap Line at:'
           TabOrder = 4
           OnClick = chkCppAutoWrapClick
-        end
-        object lblCppNewLine: TLabel
-          Left = 232
-          Top = 142
-          Width = 68
-          Height = 13
-          Caption = 'when Exceed:'
         end
         object chkCppKeepUserLineBreak: TCheckBox
           Left = 16
@@ -443,9 +443,11 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
       object chkCppIgnoreArea: TCheckBox
         Left = 8
         Top = 334
-        Width = 281
+        Width = 409
         Height = 17
-        Caption = 'Do NOT Format Contents between // clang-format off and // clang-format on'
+        Caption = 
+          'Do NOT Format Contents between // clang-format off and // clang-' +
+          'format on'
         TabOrder = 2
       end
     end
