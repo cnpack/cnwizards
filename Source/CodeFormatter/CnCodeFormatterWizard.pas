@@ -132,6 +132,7 @@ type
     function PutPascalFormatRules: Boolean;
     function PutCppFormatRules: Boolean;
     procedure FormatCpp;
+    function GetCppErrorStr(Err: Integer): string;
     function GetErrorStr(Err: Integer): string;
   protected
     function GetHasConfig: Boolean; override;
@@ -574,6 +575,34 @@ begin
   Result := 0;
 end;
 
+function TCnCodeFormatterWizard.GetCppErrorStr(Err: Integer): string;
+begin
+  case Err of
+    CN_ERRCODE_CPP_FORMAT:
+      Result := SCnCodeFormatterErrCppFormat;
+    CN_ERRCODE_CPP_NOT_SUPPORT:
+      Result := SCnCodeFormatterErrCppNotSupport;
+    CN_ERRCODE_CPP_UNCLOSED_STRING:
+      Result := SCnCodeFormatterErrCppUnclosedString;
+    CN_ERRCODE_CPP_UNCLOSED_COMMENT:
+      Result := SCnCodeFormatterErrCppUnclosedComment;
+    CN_ERRCODE_CPP_UNCLOSED_RAW_STRING:
+      Result := SCnCodeFormatterErrCppUnclosedRawString;
+    CN_ERRCODE_CPP_PAREN_MISMATCH:
+      Result := SCnCodeFormatterErrCppParenMismatch;
+    CN_ERRCODE_CPP_BRACKET_MISMATCH:
+      Result := SCnCodeFormatterErrCppBracketMismatch;
+    CN_ERRCODE_CPP_BRACE_MISMATCH:
+      Result := SCnCodeFormatterErrCppBraceMismatch;
+    CN_ERRCODE_CPP_TEMPLATE_MISMATCH:
+      Result := SCnCodeFormatterErrCppTemplateMismatch;
+    CN_ERRCODE_CPP_ASM_MISMATCH:
+      Result := SCnCodeFormatterErrCppAsmMismatch;
+  else
+    Result := SCnCodeFormatterErrUnknown;
+  end;
+end;
+
 function TCnCodeFormatterWizard.GetErrorStr(Err: Integer): string;
 begin
   case Err of
@@ -904,6 +933,21 @@ var
   OutLineMarks: PDWORD;
   I, Idx: Integer;
 {$ENDIF}
+  ErrCode, SourceLine, SourceCol, SourcePos: Integer;
+  CurrentToken: PAnsiChar;
+
+  procedure ShowCppFormatError;
+  begin
+    CurrentToken := nil;
+    ErrCode := Formatter.RetrieveCppLastError(SourceLine, SourceCol,
+      SourcePos, CurrentToken);
+{$IFDEF DELPHI_OTA}
+    if SourceLine > 0 then
+      CnOtaGotoEditPos(OTAEditPos(SourceCol, SourceLine));
+{$ENDIF}
+    ErrorDlg(Format(SCnCodeFormatterErrCppFmt, [SourceLine, SourceCol,
+      GetCppErrorStr(ErrCode), CurrentToken]));
+  end;
 
 begin
   if not PutCppFormatRules then
@@ -975,7 +1019,10 @@ begin
 {$ENDIF}
 
       if Res = nil then
+      begin
+        ShowCppFormatError;
         Exit;
+      end;
 {$IFDEF DELPHI_OTA}
   {$IFDEF IDE_STRING_ANSI_UTF8}
       CnOtaReplaceCurrentSelectionUtf8(Res, True, True, True);
@@ -1018,7 +1065,10 @@ begin
 {$ENDIF}
 
       if Res = nil then
+      begin
+        ShowCppFormatError;
         Exit;
+      end;
       if TrimRight(Src) = TrimRight(string(Res)) then
         Exit;
 {$IFDEF LAZARUS}
@@ -1989,9 +2039,7 @@ begin
 end;
 
 initialization
-{$IFNDEF BCB5OR6}  // 目前只支持 Delphi/Lazarus。
   RegisterCnWizard(TCnCodeFormatterWizard);
-{$ENDIF}
 
 {$ENDIF CNWIZARDS_CNCODEFORMATTERWIZARD}
 end.

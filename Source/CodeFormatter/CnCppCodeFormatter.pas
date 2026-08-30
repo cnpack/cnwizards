@@ -44,6 +44,8 @@ const
   CN_CPP_MATCHED_INVALID = -1;
 
 type
+  ECnCppFormatError = class(Exception);
+
   TCnCppCodeFormatter = class
   private
     FScanner: TCnCppScanner;
@@ -63,6 +65,12 @@ type
     FTemplateDepth: Integer;
     FPrevTemplateClose: Boolean;
     FBraceDepth: Integer;
+    FParenOpenTokens: TList;
+    FBracketOpenTokens: TList;
+    FTemplateOpenTokens: TList;
+    FBraceOpenTokens: TList;
+    FStructureOpenTokens: TList;
+    FAsmOpenToken: TCnCppToken;
     FBraceDeclStack: array of Boolean;
     FBraceTypeStack: array of Boolean;
     FBraceStackCount: Integer;
@@ -102,6 +110,8 @@ type
     procedure PushBrace(IsDeclaration, IsTypeDeclaration: Boolean);
     function PopBrace: Boolean;
     procedure FlushPendingBlankLine(Token: TCnCppToken);
+    procedure RaiseMismatch(Code: Integer; Token: TCnCppToken);
+    procedure CheckUnclosedStructures;
     procedure FormatTokens;
     procedure CodeGenAfterWrite(Sender: TObject; IsWriteBlank,
       IsWriteln: Boolean; PrefixSpaces: Integer);
@@ -146,6 +156,15 @@ begin
   end;
 end;
 
+procedure SetCppScanError(Code: Integer; Error: ECnCppScannerError);
+begin
+  CppErrorRec.ErrorCode := Code;
+  CppErrorRec.SourceLine := Error.SourceLine;
+  CppErrorRec.SourceCol := Error.SourceCol;
+  CppErrorRec.SourcePos := Error.SourcePos;
+  CppErrorRec.CurrentToken := Error.CurrentToken;
+end;
+
 constructor TCnCppCodeFormatter.Create(Stream: TStream;
   const Rule: TCnCppCodeFormatRule; AMatchedInStart, AMatchedInEnd: Integer);
 begin
@@ -162,6 +181,11 @@ begin
   FCodeGen.TabWidth := Rule.TabSpaceCount;
   FCodeGen.OnAfterWrite := CodeGenAfterWrite;
   FTokens := TList.Create;
+  FParenOpenTokens := TList.Create;
+  FBracketOpenTokens := TList.Create;
+  FTemplateOpenTokens := TList.Create;
+  FBraceOpenTokens := TList.Create;
+  FStructureOpenTokens := TList.Create;
   FInputLineMarks := nil;
   FOutputLineMarks := nil;
   FAtLineStart := True;
@@ -212,6 +236,11 @@ var
 begin
   for I := 0 to FTokens.Count - 1 do TObject(FTokens[I]).Free;
   FTokens.Free;
+  FParenOpenTokens.Free;
+  FBracketOpenTokens.Free;
+  FTemplateOpenTokens.Free;
+  FBraceOpenTokens.Free;
+  FStructureOpenTokens.Free;
   FCodeGen.Free;
   FScanner.Free;
   FOutputLineMarks.Free;
@@ -534,8 +563,10 @@ var
   Prev, BeforePrev, T: TCnCppToken;
   J, Depth: Integer;
   Name: string;
+  StrongCandidate: Boolean;
 begin
   Result := False;
+  StrongCandidate := False;
   Prev := TokenAt(TokenIndex - 1);
   if Prev = nil then Exit;
 
@@ -543,13 +574,19 @@ begin
     another template's closing angle.  The common type names below also cover
     unqualified STL declarations such as vector<int>. }
   if (Prev.Text = '>') or (FTemplateDepth > 0) then
-    Result := True
+  begin
+    Result := True;
+    StrongCandidate := True;
+  end
   else if Prev.Kind = ctkIdentifier then
   begin
     Name := Prev.Text;
     if SameText(Name, 'operator') then Exit;
     if SameText(Name, 'template') then
+    begin
       Result := True;
+      StrongCandidate := True;
+    end;
     BeforePrev := TokenAt(TokenIndex - 2);
     if not Result then
       Result := (BeforePrev <> nil) and (BeforePrev.Text = '::');
@@ -567,6 +604,15 @@ begin
         (Name = 'decltype') or (Name = 'static_cast') or
         (Name = 'dynamic_cast') or (Name = 'reinterpret_cast') or
         (Name = 'const_cast');
+    if Result and ((BeforePrev = nil) or (BeforePrev.Text <> '::')) then
+      StrongCandidate := True;
+    { A qualified known template such as std::vector is also strong. }
+    if Result and ((Name = 'vector') or (Name = 'map') or (Name = 'set') or
+      (Name = 'list') or (Name = 'deque') or (Name = 'array') or
+      (Name = 'tuple') or (Name = 'pair') or (Name = 'optional') or
+      (Name = 'variant') or (Name = 'unique_ptr') or (Name = 'shared_ptr') or
+      (Name = 'weak_ptr')) then
+      StrongCandidate := True;
   end;
   if not Result then Exit;
 
@@ -577,8 +623,8 @@ begin
   while True do
   begin
     T := TokenAt(J);
-    if T = nil then begin Result := False; Exit end;
-    if T.Kind = ctkEOF then begin Result := False; Exit end;
+    if T = nil then begin Result := StrongCandidate; Exit end;
+    if T.Kind = ctkEOF then begin Result := StrongCandidate; Exit end;
     if T.Text = '<' then Inc(Depth)
     else if T.Text = '>' then Dec(Depth)
     else if T.Text = '>>' then Dec(Depth, 2);
@@ -586,7 +632,7 @@ begin
     if (Depth = 1) and ((T.Text = ';') or (T.Text = '{') or
       (T.Text = '}') or (T.Text = ':')) then
     begin
-      Result := False;
+      Result := StrongCandidate;
       Exit;
     end;
     Inc(J);
@@ -990,6 +1036,35 @@ begin
   end;
 end;
 
+procedure TCnCppCodeFormatter.RaiseMismatch(Code: Integer;
+  Token: TCnCppToken);
+begin
+  SetCppError(Code, Token);
+  raise ECnCppFormatError.Create('Mismatched C/C++ structure');
+end;
+
+procedure TCnCppCodeFormatter.CheckUnclosedStructures;
+begin
+  { ASM is checked before the general brace stack so an unterminated ASM
+    block receives the more specific error code. }
+  if (FAsmDepth > 0) and (FAsmOpenToken <> nil) then
+    RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_ASM_MISMATCH, FAsmOpenToken);
+  if FStructureOpenTokens.Count > 0 then
+    with TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]) do
+      if Text = '(' then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_PAREN_MISMATCH,
+          TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]))
+      else if Text = '[' then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_BRACKET_MISMATCH,
+          TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]))
+      else if Text = '{' then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_BRACE_MISMATCH,
+          TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]))
+      else
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_TEMPLATE_MISMATCH,
+          TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]));
+end;
+
 procedure TCnCppCodeFormatter.FormatTokens;
 var
   I: Integer;
@@ -1016,6 +1091,7 @@ begin
         FIgnore := False;
         FIgnoreRawPos := 0;
       end;
+      CheckUnclosedStructures;
       Break;
     end;
 
@@ -1068,8 +1144,19 @@ begin
       Continue;
     end;
     if T.Kind in [ctkLineComment, ctkBlockComment] then begin WriteComment(T); Continue end;
-    if (T.Kind = ctkIdentifier) and SameText(T.Text, 'asm') then FAsmDepth := -1;
+    if (T.Kind = ctkIdentifier) and SameText(T.Text, 'asm') then
+    begin
+      J := I + 1;
+      while (TokenAt(J) <> nil) and (TokenAt(J).Kind = ctkNewLine) do Inc(J);
+      if (TokenAt(J) <> nil) and (TokenAt(J).Text = '{') then
+      begin
+        FAsmDepth := -1;
+        FAsmOpenToken := T;
+      end;
+    end;
     if T.Text = '{' then begin
+      FBraceOpenTokens.Add(T);
+      FStructureOpenTokens.Add(T);
       if FAsmDepth = -1 then FAsmDepth := FBraceDepth + 1;
       IsDeclBrace := IsDeclarationBrace(I);
       IsTypeBrace := IsTypeDeclarationBrace(I);
@@ -1084,9 +1171,19 @@ begin
       FPrev := T; Continue
     end;
     if T.Text = '}' then begin
+      if (FBraceOpenTokens.Count = 0) or
+        (FStructureOpenTokens.Count = 0) or
+        (TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]).Text <> '{') then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_BRACE_MISMATCH, T);
+      FBraceOpenTokens.Delete(FBraceOpenTokens.Count - 1);
+      FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
       ClosedDeclBrace := PopBrace;
       WriteBrace(T, False);
-      if (FAsmDepth > 0) and (FBraceDepth < FAsmDepth) then FAsmDepth := 0;
+      if (FAsmDepth > 0) and (FBraceDepth < FAsmDepth) then
+      begin
+        FAsmDepth := 0;
+        FAsmOpenToken := nil;
+      end;
       J := I + 1;
       AfterClose := TokenAt(J);
       while (AfterClose <> nil) and (AfterClose.Kind = ctkNewLine) do
@@ -1108,11 +1205,33 @@ begin
       if (FPrev <> nil) and ((FPrev.Text = 'if') or (FPrev.Text = 'for') or
         (FPrev.Text = 'while') or (FPrev.Text = 'switch') or
         (FPrev.Text = 'catch')) then EnsureSpace;
-      WriteText('('); Inc(FParenDepth); FPrev := T; Continue
+      WriteText('('); Inc(FParenDepth); FParenOpenTokens.Add(T);
+      FStructureOpenTokens.Add(T);
+      FPrev := T; Continue
     end;
-    if T.Text = ')' then begin FCodeGen.TrimLine; WriteText(')'); if FParenDepth > 0 then Dec(FParenDepth); FPrev := T; Continue end;
-    if T.Text = '[' then begin WriteText('['); Inc(FBracketDepth); FPrev := T; Continue end;
-    if T.Text = ']' then begin FCodeGen.TrimLine; WriteText(']'); if FBracketDepth > 0 then Dec(FBracketDepth); FPrev := T; Continue end;
+    if T.Text = ')' then begin
+      if (FParenOpenTokens.Count = 0) or
+        (FStructureOpenTokens.Count = 0) or
+        (TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]).Text <> '(') then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_PAREN_MISMATCH, T);
+      FParenOpenTokens.Delete(FParenOpenTokens.Count - 1);
+      FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
+      FCodeGen.TrimLine; WriteText(')'); Dec(FParenDepth); FPrev := T; Continue
+    end;
+    if T.Text = '[' then begin
+      WriteText('['); Inc(FBracketDepth); FBracketOpenTokens.Add(T);
+      FStructureOpenTokens.Add(T);
+      FPrev := T; Continue
+    end;
+    if T.Text = ']' then begin
+      if (FBracketOpenTokens.Count = 0) or
+        (FStructureOpenTokens.Count = 0) or
+        (TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]).Text <> '[') then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_BRACKET_MISMATCH, T);
+      FBracketOpenTokens.Delete(FBracketOpenTokens.Count - 1);
+      FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
+      FCodeGen.TrimLine; WriteText(']'); Dec(FBracketDepth); FPrev := T; Continue
+    end;
     if T.Text = ';' then begin FCodeGen.TrimLine; WriteText(';'); if FParenDepth = 0 then WriteNewLine else EnsureSpace; FPrev := T; Continue end;
     if T.Text = ',' then begin FCodeGen.TrimLine; WriteText(','); EnsureSpace; FPrev := T; Continue end;
     if T.Text = ':' then
@@ -1138,16 +1257,31 @@ begin
       FCodeGen.TrimLine;
       WriteText('<');
       Inc(FTemplateDepth);
+      FTemplateOpenTokens.Add(T);
+      FStructureOpenTokens.Add(T);
       FPrev := T;
       Continue;
     end;
     if (FTemplateDepth > 0) and ((T.Text = '>') or (T.Text = '>>')) then
     begin
+      if (FTemplateOpenTokens.Count = 0) or
+        (FStructureOpenTokens.Count = 0) or
+        (TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 1]).Text <> '<') or
+        ((T.Text = '>>') and ((FTemplateOpenTokens.Count < 2) or
+          (FStructureOpenTokens.Count < 2) or
+          (TCnCppToken(FStructureOpenTokens[FStructureOpenTokens.Count - 2]).Text <> '<'))) then
+        RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_TEMPLATE_MISMATCH, T);
       FCodeGen.TrimLine;
       WriteText(T.Text);
-      if T.Text = '>>' then Dec(FTemplateDepth, 2)
-      else Dec(FTemplateDepth);
-      if FTemplateDepth < 0 then FTemplateDepth := 0;
+      FTemplateOpenTokens.Delete(FTemplateOpenTokens.Count - 1);
+      FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
+      Dec(FTemplateDepth);
+      if T.Text = '>>' then
+      begin
+        FTemplateOpenTokens.Delete(FTemplateOpenTokens.Count - 1);
+        FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
+        Dec(FTemplateDepth);
+      end;
       FPrevTemplateClose := True;
       FPrev := T;
       Continue;
@@ -1190,6 +1324,12 @@ begin
   FParenDepth := 0; FBracketDepth := 0; FTemplateDepth := 0;
   FPrevTemplateClose := False;
   FBraceDepth := 0;
+  FParenOpenTokens.Clear;
+  FBracketOpenTokens.Clear;
+  FTemplateOpenTokens.Clear;
+  FBraceOpenTokens.Clear;
+  FStructureOpenTokens.Clear;
+  FAsmOpenToken := nil;
   FAtLineStart := True;
   FBraceStackCount := 0; SetLength(FBraceDeclStack, 0); SetLength(FBraceTypeStack, 0);
   FLastClosedBraceIsType := False;
@@ -1199,12 +1339,27 @@ begin
   FMatchedOutStartCol := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndRow := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndCol := CN_CPP_MATCHED_INVALID;
-  repeat
-    T := FScanner.NextToken; FTokens.Add(T);
-  until T.Kind = ctkEOF;
   try
+    repeat
+      T := FScanner.NextToken;
+      FTokens.Add(T);
+    until T.Kind = ctkEOF;
     FormatTokens;
   except
+    on E: ECnCppFormatError do
+      raise;
+    on E: ECnCppScannerError do
+    begin
+      case E.ErrorKind of
+        csekUnclosedString:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_STRING, E);
+        csekUnclosedBlockComment:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_COMMENT, E);
+        csekUnclosedRawString:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_RAW_STRING, E);
+      end;
+      raise;
+    end;
     on E: Exception do
     begin
       SetCppError(CnFormatterIntf.CN_ERRCODE_CPP_FORMAT, FCurrentToken);

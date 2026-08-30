@@ -1491,6 +1491,17 @@ begin
   TranslateStr(SCnCodeFormatterWizardErrLineWidth, 'SCnCodeFormatterWizardErrLineWidth');
   TranslateStr(SCnCodeFormatterWizardErrSelection, 'SCnCodeFormatterWizardErrSelection');
   TranslateStr(SCnCodeFormatterErrUnknown, 'SCnCodeFormatterErrUnknown');
+  TranslateStr(SCnCodeFormatterErrCppFmt, 'SCnCodeFormatterErrCppFmt');
+  TranslateStr(SCnCodeFormatterErrCppFormat, 'SCnCodeFormatterErrCppFormat');
+  TranslateStr(SCnCodeFormatterErrCppNotSupport, 'SCnCodeFormatterErrCppNotSupport');
+  TranslateStr(SCnCodeFormatterErrCppUnclosedString, 'SCnCodeFormatterErrCppUnclosedString');
+  TranslateStr(SCnCodeFormatterErrCppUnclosedComment, 'SCnCodeFormatterErrCppUnclosedComment');
+  TranslateStr(SCnCodeFormatterErrCppUnclosedRawString, 'SCnCodeFormatterErrCppUnclosedRawString');
+  TranslateStr(SCnCodeFormatterErrCppParenMismatch, 'SCnCodeFormatterErrCppParenMismatch');
+  TranslateStr(SCnCodeFormatterErrCppBracketMismatch, 'SCnCodeFormatterErrCppBracketMismatch');
+  TranslateStr(SCnCodeFormatterErrCppBraceMismatch, 'SCnCodeFormatterErrCppBraceMismatch');
+  TranslateStr(SCnCodeFormatterErrCppTemplateMismatch, 'SCnCodeFormatterErrCppTemplateMismatch');
+  TranslateStr(SCnCodeFormatterErrCppAsmMismatch, 'SCnCodeFormatterErrCppAsmMismatch');
   TranslateStr(SCnCodeFormatterErrPascalFmt, 'SCnCodeFormatterErrPascalFmt');
   TranslateStr(SCnCodeFormatterErrMaybeComment, 'SCnCodeFormatterErrMaybeComment');
   TranslateStr(SCnCodeFormatterErrPascalIdentExp, 'SCnCodeFormatterErrPascalIdentExp');

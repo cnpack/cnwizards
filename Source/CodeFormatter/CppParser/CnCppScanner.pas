@@ -40,6 +40,26 @@ uses
   Classes, SysUtils, CnCppToken;
 
 type
+  TCnCppScanErrorKind = (csekUnclosedString, csekUnclosedBlockComment,
+    csekUnclosedRawString);
+
+  ECnCppScannerError = class(Exception)
+  private
+    FErrorKind: TCnCppScanErrorKind;
+    FSourceLine: Integer;
+    FSourceCol: Integer;
+    FSourcePos: Integer;
+    FCurrentToken: string;
+  public
+    constructor Create(AErrorKind: TCnCppScanErrorKind; ASourceLine,
+      ASourceCol, ASourcePos: Integer; const ACurrentToken: string);
+    property ErrorKind: TCnCppScanErrorKind read FErrorKind;
+    property SourceLine: Integer read FSourceLine;
+    property SourceCol: Integer read FSourceCol;
+    property SourcePos: Integer read FSourcePos;
+    property CurrentToken: string read FCurrentToken;
+  end;
+
   TCnCppScanner = class
   private
     FSource: string;
@@ -64,6 +84,17 @@ type
   end;
 
 implementation
+
+constructor ECnCppScannerError.Create(AErrorKind: TCnCppScanErrorKind;
+  ASourceLine, ASourceCol, ASourcePos: Integer; const ACurrentToken: string);
+begin
+  inherited Create('Unclosed C/C++ lexical element');
+  FErrorKind := AErrorKind;
+  FSourceLine := ASourceLine;
+  FSourceCol := ASourceCol;
+  FSourcePos := ASourcePos;
+  FCurrentToken := ACurrentToken;
+end;
 
 constructor TCnCppScanner.Create(Stream: TStream);
 var
@@ -133,17 +164,35 @@ end;
 function TCnCppScanner.ReadQuoted(Quote: Char; Kind: TCnCppTokenKind): TCnCppToken;
 var
   S, L, C: Integer;
-  Escaped: Boolean;
+  Closed: Boolean;
 begin
   S := FIndex; L := FLine; C := FColumn;
-  Take; Escaped := False;
+  Take; Closed := False;
   while Peek <> #0 do
   begin
-    if (Peek = #10) and not Escaped then Break;
-    if (Peek = Quote) and not Escaped then begin Take; Break end;
-    if Peek = '\' then Escaped := not Escaped else Escaped := False;
-    Take;
+    if Peek = Quote then
+    begin
+      Take;
+      Closed := True;
+      Break;
+    end;
+    if Peek in [#13, #10] then Break;
+    if Peek = '\' then
+    begin
+      Take;
+      if Peek = #13 then
+      begin
+        Take;
+        if Peek = #10 then Take;
+      end
+      else if Peek <> #0 then
+        Take;
+    end
+    else
+      Take;
   end;
+  if not Closed then
+    raise ECnCppScannerError.Create(csekUnclosedString, L, C, S - 1, Quote);
   Result := MakeToken(Kind, S, L, C);
 end;
 
@@ -151,20 +200,36 @@ function TCnCppScanner.ReadPrefixedQuoted(const Prefix: string; Quote: Char;
   Kind: TCnCppTokenKind): TCnCppToken;
 var
   S, L, C, I: Integer;
+  Closed: Boolean;
 begin
-  S := FIndex; L := FLine; C := FColumn;
+  S := FIndex; L := FLine; C := FColumn; Closed := False;
   for I := 1 to Length(Prefix) do Take;
-  while (Peek <> #0) and (Peek <> Quote) do Take;
-  if Peek = Quote then
+  if Peek = Quote then Take;
+  while Peek <> #0 do
   begin
-    Take;
-    while Peek <> #0 do
+    if Peek = Quote then
     begin
-      if Peek = Quote then begin Take; Break end;
-      if Peek = '\\' then begin Take; if Peek <> #0 then Take end
-      else Take;
+      Take;
+      Closed := True;
+      Break;
     end;
+    if Peek in [#13, #10] then Break;
+    if Peek = '\' then
+    begin
+      Take;
+      if Peek = #13 then
+      begin
+        Take;
+        if Peek = #10 then Take;
+      end
+      else if Peek <> #0 then
+        Take;
+    end
+    else
+      Take;
   end;
+  if not Closed then
+    raise ECnCppScannerError.Create(csekUnclosedString, L, C, S - 1, Prefix + Quote);
   Result := MakeToken(Kind, S, L, C);
 end;
 
@@ -172,26 +237,33 @@ function TCnCppScanner.ReadRawString(PrefixLength: Integer): TCnCppToken;
 var
   S, L, C, I: Integer;
   Delimiter, EndMarker: string;
+  Closed: Boolean;
 begin
-  S := FIndex; L := FLine; C := FColumn;
+  S := FIndex; L := FLine; C := FColumn; Closed := False;
   for I := 1 to PrefixLength do Take;
   if Peek = '"' then Take;
 
   Delimiter := '';
   while (Peek <> #0) and (Peek <> '(') and not (Peek in [#13, #10]) do
     Delimiter := Delimiter + Take;
-  if Peek = '(' then Take;
-
-  EndMarker := ')' + Delimiter + '"';
-  while Peek <> #0 do
+  if Peek = '(' then
   begin
-    if Copy(FSource, FIndex, Length(EndMarker)) = EndMarker then
-    begin
-      for I := 1 to Length(EndMarker) do Take;
-      Break;
-    end;
     Take;
+    EndMarker := ')' + Delimiter + '"';
+    while Peek <> #0 do
+    begin
+      if Copy(FSource, FIndex, Length(EndMarker)) = EndMarker then
+      begin
+        for I := 1 to Length(EndMarker) do Take;
+        Closed := True;
+        Break;
+      end;
+      Take;
+    end;
   end;
+  if not Closed then
+    raise ECnCppScannerError.Create(csekUnclosedRawString, L, C, S - 1,
+      Copy(FSource, S, PrefixLength + 1));
   Result := MakeToken(ctkString, S, L, C);
 end;
 
@@ -257,11 +329,15 @@ begin
     Take; Take;
     while Peek <> #0 do
     begin
-      if (Peek = '*') and (Peek(1) = '/') then begin Take; Take; Break end;
+      if (Peek = '*') and (Peek(1) = '/') then
+      begin
+        Take; Take;
+        Result := MakeToken(ctkBlockComment, S, L, C);
+        Exit;
+      end;
       Take;
     end;
-    Result := MakeToken(ctkBlockComment, S, L, C);
-    Exit;
+    raise ECnCppScannerError.Create(csekUnclosedBlockComment, L, C, S - 1, '/*');
   end;
   if Ch = '"' then begin Result := ReadQuoted('"', ctkString); Exit end;
   if Ch = '''' then begin Result := ReadQuoted('''', ctkChar); Exit end;

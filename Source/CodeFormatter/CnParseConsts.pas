@@ -42,10 +42,6 @@ uses
   CnFormatterIntf;
 
 const
-  CN_ERRCODE_CPP_OK = 0;
-  CN_ERRCODE_CPP_FORMAT = 1;
-  CN_ERRCODE_CPP_NOT_SUPPORT = 2;
-
   SIdentifierExpected: PAnsiChar = 'Identifier expected';
   SStringExpected: PAnsiChar = 'String expected';
   SNumberExpected: PAnsiChar = 'Number expected';
@@ -146,7 +142,7 @@ procedure ClearCppError;
 begin
   with CppErrorRec do
   begin
-    ErrorCode := CN_ERRCODE_CPP_OK;
+    ErrorCode := CnFormatterIntf.CN_ERRCODE_CPP_OK;
     SourceLine := 0;
     SourceCol := 0;
     SourcePos := 0;

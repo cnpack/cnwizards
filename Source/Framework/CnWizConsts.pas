@@ -1834,6 +1834,17 @@ var
   SCnCodeFormatterWizardErrSelection: string = 'Can NOT Process Current Selection for Error Position.';
 
   SCnCodeFormatterErrUnknown: string = 'Unknown Error.';
+  SCnCodeFormatterErrCppFmt: string = 'C/C++ Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';
+  SCnCodeFormatterErrCppFormat: string = 'C/C++ Formatting Error.';
+  SCnCodeFormatterErrCppNotSupport: string = 'C/C++ Formatting Is Not Supported.';
+  SCnCodeFormatterErrCppUnclosedString: string = 'String or Character Literal Is Not Closed.';
+  SCnCodeFormatterErrCppUnclosedComment: string = 'Block Comment Is Not Closed.';
+  SCnCodeFormatterErrCppUnclosedRawString: string = 'Raw String Literal Is Not Closed.';
+  SCnCodeFormatterErrCppParenMismatch: string = 'Parentheses Do Not Match.';
+  SCnCodeFormatterErrCppBracketMismatch: string = 'Square Brackets Do Not Match.';
+  SCnCodeFormatterErrCppBraceMismatch: string = 'Braces Do Not Match.';
+  SCnCodeFormatterErrCppTemplateMismatch: string = 'Template Angle Brackets Do Not Match.';
+  SCnCodeFormatterErrCppAsmMismatch: string = 'ASM Block Does Not Match.';
   SCnCodeFormatterErrPascalFmt: string = 'Format Error(%d, %d): %s' + #13#10#13#10 + 'Current: ''%s''';
   SCnCodeFormatterErrMaybeComment: string = #13#10#13#10 + 'If Error Caused by Compiler Directive {$...},' + #13#10 + 'Maybe You Can Change Format Option for it and Try Again.';
   SCnCodeFormatterErrPascalIdentExp: string = 'Identifier Expected.';

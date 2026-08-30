@@ -148,6 +148,22 @@ const
   {* C/C++ 格式化过程中发生错误。}
   CN_ERRCODE_CPP_NOT_SUPPORT         = 2;
   {* C/C++ 格式化功能或请求暂不支持。}
+  CN_ERRCODE_CPP_UNCLOSED_STRING     = 3;
+  {* C/C++ 字符串或字符常量未闭合。}
+  CN_ERRCODE_CPP_UNCLOSED_COMMENT    = 4;
+  {* C/C++ 块注释未闭合。}
+  CN_ERRCODE_CPP_UNCLOSED_RAW_STRING = 5;
+  {* C/C++ 原始字符串未闭合。}
+  CN_ERRCODE_CPP_PAREN_MISMATCH      = 6;
+  {* C/C++ 圆括号不匹配。}
+  CN_ERRCODE_CPP_BRACKET_MISMATCH    = 7;
+  {* C/C++ 方括号不匹配。}
+  CN_ERRCODE_CPP_BRACE_MISMATCH      = 8;
+  {* C/C++ 大括号不匹配。}
+  CN_ERRCODE_CPP_TEMPLATE_MISMATCH   = 9;
+  {* C/C++ 模板尖括号不匹配。}
+  CN_ERRCODE_CPP_ASM_MISMATCH        = 10;
+  {* C/C++ ASM 块不匹配。}
 
 type
   ICnPascalFormatterIntf = interface
