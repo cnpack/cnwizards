@@ -372,8 +372,8 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           ItemHeight = 13
           TabOrder = 3
           Items.Strings = (
-            'This Line'
-            'Next Line')
+            'Next Line'
+            'This Line')
         end
         object seCppWrapLine: TCnSpinEdit
           Left = 144

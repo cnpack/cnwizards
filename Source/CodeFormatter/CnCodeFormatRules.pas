@@ -55,7 +55,7 @@ type
 
   TCnCompDirectiveMode = (cdmAsComment, cdmOnlyFirst, cdmNone); // None 表示扔给外面处理
 
-  TCnCppBraceStyle = (cbsSameLine, cbsNextLine);
+  TCnCppBraceStyle = (cbsNextLine, cbsSameLine);
 
   TCnCppCodeFormatRule = record
     TabSpaceCount: Byte;

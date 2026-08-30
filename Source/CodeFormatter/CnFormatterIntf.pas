@@ -112,6 +112,11 @@ const
   CN_START_PROC                       = 5;
   CN_START_STATEMENT                  = 6;
 
+  CN_CPP_BRACE_NEXTLINE = 0;
+  {* 左大括号另起一行。}
+  CN_CPP_BRACE_SAMELINE = 1;
+  {* 左大括号与声明或语句保持在同一行。}
+
   // 错误码
   CN_ERRCODE_OK                       = 0;
   CN_ERRCODE_START                    = 1;
@@ -237,13 +242,6 @@ type
   TCnGetPasFormatterProvider = function: ICnPascalFormatterIntf; stdcall;
   {* DLL 导出的 Pascal 格式化器接口获取函数类型。}
 
-const
-  CN_CPP_BRACE_SAMELINE = 0;
-  {* 左大括号与声明或语句保持在同一行。}
-  CN_CPP_BRACE_NEXTLINE = 1;
-  {* 左大括号另起一行。}
-
-type
   ICnCppFormatterIntf = interface
   {* C/C++ 代码格式化接口，供 IDE 专家和外部调用者使用。}
     ['{C6B53E5D-6A95-4C4A-9E2B-9A0B8E1D6F20}']
