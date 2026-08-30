@@ -57,6 +57,8 @@ type
 
   TCnCppBraceStyle = (cbsNextLine, cbsSameLine);
 
+  TCnCppElseStyle = (cesNextLine, cesSameLine); // else 与右大括号同行或下一行
+
   TCnCppCodeFormatRule = record
     TabSpaceCount: Byte;
     CodeWrapMode: TCnCodeWrapMode;
@@ -64,6 +66,7 @@ type
     WrapNewLineWidth: Integer;
     KeepUserLineBreak: Boolean;
     BraceStyle: TCnCppBraceStyle;
+    ElseStyle: TCnCppElseStyle;
     SpaceBeforeBinaryOperator: Byte;
     SpaceAfterBinaryOperator: Byte;
     SpaceBeforeASM: Byte;
@@ -102,7 +105,8 @@ const
     WrapWidth: 100;
     WrapNewLineWidth: 120;
     KeepUserLineBreak: False;
-    BraceStyle: cbsSameLine;
+    BraceStyle: cbsNextLine;
+    ElseStyle: cesNextLine;
     SpaceBeforeBinaryOperator: 1;
     SpaceAfterBinaryOperator: 1;
     SpaceBeforeASM: 8;
@@ -202,6 +206,7 @@ begin
   S := S + '  WrapNewLineWidth: ' + IntToStr(Rule.WrapNewLineWidth) + sLineBreak;
   S := S + '  KeepUserLineBreak: ' + MyBooleanToStr(Rule.KeepUserLineBreak) + sLineBreak;
   S := S + '  BraceStyle: ' + GetEnumName(TypeInfo(TCnCppBraceStyle), Ord(Rule.BraceStyle)) + sLineBreak;
+  S := S + '  ElseStyle: ' + GetEnumName(TypeInfo(TCnCppElseStyle), Ord(Rule.ElseStyle)) + sLineBreak;
   S := S + '  SpaceBeforeBinaryOperator: ' + IntToStr(Rule.SpaceBeforeBinaryOperator) + sLineBreak;
   S := S + '  SpaceAfterBinaryOperator: ' + IntToStr(Rule.SpaceAfterBinaryOperator) + sLineBreak;
   S := S + '  SpaceBeforeASM: ' + IntToStr(Rule.SpaceBeforeASM) + sLineBreak;

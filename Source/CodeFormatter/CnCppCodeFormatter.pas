@@ -77,6 +77,7 @@ type
     FLastClosedBraceIsType: Boolean;
     FBlankLinePending: Boolean;
     FAtLineStart: Boolean;
+    FSuppressNextNewLine: Boolean;
     FPrev: TCnCppToken;
     FCurrentToken: TCnCppToken;
     FSliceMode: Boolean;
@@ -1010,7 +1011,9 @@ end;
 
 procedure TCnCppCodeFormatter.WriteBrace(Token: TCnCppToken; IsOpen: Boolean);
 var
-  NextToken: TCnCppToken;
+  NextToken, ImmediateNextToken: TCnCppToken;
+  NextIndex: Integer;
+  HadNewLine: Boolean;
 begin
   if IsOpen then
   begin
@@ -1030,15 +1033,30 @@ begin
     EnsureLine;
     WriteText('}');
 
-    NextToken := TokenAt(FTokens.IndexOf(Token) + 1);
-    if (NextToken = nil) or not ((NextToken.Text = ';') or (NextToken.Text = ',')
-      or (NextToken.Text = ')') or (NextToken.Text = ']') or (NextToken.Text =
-      'else') or (NextToken.Text = 'catch') or (NextToken.Text = 'while')) then
-      WriteNewLine
-    else if not ((NextToken.Text = ';') or (NextToken.Text = ',') or (NextToken.Text
-      = ')') or (NextToken.Text = ']') or (NextToken.Text = 'else') or (NextToken.Text
-      = 'catch') or (NextToken.Text = 'while')) then
-      EnsureSpace;
+    NextIndex := FTokens.IndexOf(Token) + 1;
+    ImmediateNextToken := TokenAt(NextIndex);
+    NextToken := ImmediateNextToken;
+    HadNewLine := False;
+    while (NextToken <> nil) and (NextToken.Kind = ctkNewLine) do
+    begin
+      HadNewLine := True;
+      Inc(NextIndex);
+      NextToken := TokenAt(NextIndex);
+    end;
+
+    if (NextToken <> nil) and (NextToken.Text = 'else') then
+    begin
+      if FRule.ElseStyle = cesNextLine then
+        WriteNewLine
+      else if HadNewLine then
+        { 同行模式下忽略右大括号与 else 之间原有的所有换行。 }
+        FSuppressNextNewLine := True;
+    end
+    else if (ImmediateNextToken = nil) or not ((ImmediateNextToken.Text = ';')
+      or (ImmediateNextToken.Text = ',') or (ImmediateNextToken.Text = ')') or
+      (ImmediateNextToken.Text = ']') or (ImmediateNextToken.Text = 'else') or
+      (ImmediateNextToken.Text = 'catch') or (ImmediateNextToken.Text = 'while')) then
+      WriteNewLine;
   end;
 end;
 
@@ -1213,9 +1231,14 @@ begin
       Continue;
     end;
 
+    if T.Kind <> ctkNewLine then
+      FSuppressNextNewLine := False;
+
     FlushPendingBlankLine(T);
     if (T.Kind = ctkNewLine) then
     begin
+      if FSuppressNextNewLine then
+        Continue;
       if FAsmDepth > 0 then
       begin
         FormatAsmToken(T);
@@ -1523,6 +1546,7 @@ begin
   FBracketDepth := 0;
   FTemplateDepth := 0;
   FPrevTemplateClose := False;
+  FSuppressNextNewLine := False;
   FBraceDepth := 0;
   FParenOpenTokens.Clear;
   FBracketOpenTokens.Clear;

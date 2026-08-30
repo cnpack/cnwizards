@@ -66,7 +66,7 @@ type
   public
     destructor Destroy; override;
     procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
-      WrapNewLineWidth, BraceStyle,
+      WrapNewLineWidth, BraceStyle, ElseStyle,
       SpaceBeforeBinaryOperator, SpaceAfterBinaryOperator,
       SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
       KeepUserLineBreak, UseIgnoreArea: LongBool);
@@ -603,7 +603,7 @@ begin
 end;
 
 procedure TCnCppFormatterProvider.SetCppFormatRule(TabSpace, CodeWrapMode,
-  WrapWidth, WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
+  WrapWidth, WrapNewLineWidth, BraceStyle, ElseStyle, SpaceBeforeBinaryOperator,
   SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
   KeepUserLineBreak, UseIgnoreArea: LongBool);
 begin
@@ -612,6 +612,7 @@ begin
   CnCppCodeForRule.WrapWidth := WrapWidth;
   CnCppCodeForRule.WrapNewLineWidth := WrapNewLineWidth;
   CnCppCodeForRule.BraceStyle := TCnCppBraceStyle(BraceStyle);
+  CnCppCodeForRule.ElseStyle := TCnCppElseStyle(ElseStyle);
   CnCppCodeForRule.SpaceBeforeBinaryOperator := SpaceBeforeBinaryOperator;
   CnCppCodeForRule.SpaceAfterBinaryOperator := SpaceAfterBinaryOperator;
   CnCppCodeForRule.SpaceBeforeASM := SpaceBeforeASM;

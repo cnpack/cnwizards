@@ -246,10 +246,10 @@ type
   {* C/C++ 代码格式化接口，供 IDE 专家和外部调用者使用。}
     ['{C6B53E5D-6A95-4C4A-9E2B-9A0B8E1D6F20}']
     procedure SetCppFormatRule(TabSpace, CodeWrapMode, WrapWidth,
-      WrapNewLineWidth, BraceStyle, SpaceBeforeBinaryOperator,
+      WrapNewLineWidth, BraceStyle, ElseStyle, SpaceBeforeBinaryOperator,
       SpaceAfterBinaryOperator, SpaceBeforeASM, SpaceTabASMKeyword: DWORD;
       KeepUserLineBreak, UseIgnoreArea: LongBool);
-    {* 设置格式化选项，包括缩进、换行宽度、大括号位置、二元运算符空格、
+    {* 设置格式化选项，包括缩进、换行宽度、大括号和 else 位置、二元运算符空格、
        汇编代码空格、保留换行和忽略区域等 C/C++ 格式化规则。}
 
     procedure SetInputLineMarks(Marks: PDWORD);

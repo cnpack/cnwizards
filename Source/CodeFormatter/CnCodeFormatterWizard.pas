@@ -86,6 +86,7 @@ type
     FCppWrapNewLineWidth: Integer;
     FCppKeepUserLineBreak: Boolean;
     FCppBraceStyle: TCnCppBraceStyle;
+    FCppElseStyle: TCnCppElseStyle;
     FCppSpaceBeforeBinaryOperator: Byte;
     FCppSpaceAfterBinaryOperator: Byte;
     FCppSpaceBeforeASM: Byte;
@@ -179,6 +180,7 @@ type
     property CppWrapNewLineWidth: Integer read FCppWrapNewLineWidth write FCppWrapNewLineWidth;
     property CppKeepUserLineBreak: Boolean read FCppKeepUserLineBreak write FCppKeepUserLineBreak;
     property CppBraceStyle: TCnCppBraceStyle read FCppBraceStyle write FCppBraceStyle;
+    property CppElseStyle: TCnCppElseStyle read FCppElseStyle write FCppElseStyle;
     property CppSpaceBeforeBinaryOperator: Byte read FCppSpaceBeforeBinaryOperator write FCppSpaceBeforeBinaryOperator;
     property CppSpaceAfterBinaryOperator: Byte read FCppSpaceAfterBinaryOperator write FCppSpaceAfterBinaryOperator;
     property CppSpaceBeforeASM: Byte read FCppSpaceBeforeASM write FCppSpaceBeforeASM;
@@ -231,6 +233,8 @@ type
     seCppSpaceAfter: TCnSpinEdit;
     lblCppBraceStyle: TLabel;
     cbbCppBraceStyle: TComboBox;
+    lblCppElseStyle: TLabel;
+    cbbCppElseStyle: TComboBox;
     chkCppAutoWrap: TCheckBox;
     seCppWrapLine: TCnSpinEdit;
     lblCppNewLine: TLabel;
@@ -313,6 +317,7 @@ const
   csCppWrapNewLineWidth = 'CppWrapNewLineWidth';
   csCppWrapMode = 'CppWrapMode';
   csCppBraceStyle = 'CppBraceStyle';
+  csCppElseStyle = 'CppElseStyle';
   csCppSpaceBeforeASM = 'CppSpaceBeforeASM';
   csCppSpaceTabASMKeyword = 'CppSpaceTabASMKeyword';
   csCppKeepUserLineBreak = 'CppKeepUserLineBreak';
@@ -462,6 +467,7 @@ begin
     seCppSpaceBefore.Value := FCppSpaceBeforeBinaryOperator;
     seCppSpaceAfter.Value := FCppSpaceAfterBinaryOperator;
     cbbCppBraceStyle.ItemIndex := Ord(FCppBraceStyle);
+    cbbCppElseStyle.ItemIndex := Ord(FCppElseStyle);
     chkCppAutoWrap.Checked := (FCppCodeWrapMode <> cwmNone);
     seCppWrapLine.Value := FCppWrapWidth;
     seCppNewLine.Value := FCppWrapNewLineWidth;
@@ -499,6 +505,7 @@ begin
       FCppSpaceBeforeBinaryOperator := seCppSpaceBefore.Value;
       FCppSpaceAfterBinaryOperator := seCppSpaceAfter.Value;
       FCppBraceStyle := TCnCppBraceStyle(cbbCppBraceStyle.ItemIndex);
+      FCppElseStyle := TCnCppElseStyle(cbbCppElseStyle.ItemIndex);
       FCppWrapWidth := seCppWrapLine.Value;
       FCppWrapNewLineWidth := seCppNewLine.Value;
       if chkCppAutoWrap.Checked then
@@ -736,6 +743,8 @@ begin
     Ord(CnCppCodeForVCLRule.CodeWrapMode)));
   FCppBraceStyle := TCnCppBraceStyle(Ini.ReadInteger('', csCppBraceStyle,
     Ord(CnCppCodeForVCLRule.BraceStyle)));
+  FCppElseStyle := TCnCppElseStyle(Ini.ReadInteger('', csCppElseStyle,
+    Ord(CnCppCodeForVCLRule.ElseStyle)));
   FCppSpaceBeforeASM := Ini.ReadInteger('', csCppSpaceBeforeASM,
     CnCppCodeForVCLRule.SpaceBeforeASM);
   FCppSpaceTabASMKeyword := Ini.ReadInteger('', csCppSpaceTabASMKeyword,
@@ -910,7 +919,7 @@ begin
     Exit;
 
   Intf.SetCppFormatRule(FCppTabSpaceCount, Ord(FCppCodeWrapMode),
-    FCppWrapWidth, FCppWrapNewLineWidth, Ord(FCppBraceStyle),
+    FCppWrapWidth, FCppWrapNewLineWidth, Ord(FCppBraceStyle), Ord(FCppElseStyle),
     FCppSpaceBeforeBinaryOperator, FCppSpaceAfterBinaryOperator,
     FCppSpaceBeforeASM, FCppSpaceTabASMKeyword,
     LongBool(FCppKeepUserLineBreak), LongBool(FCppUseIgnoreArea));
@@ -1241,6 +1250,7 @@ begin
   Ini.WriteInteger('', csCppWrapNewLineWidth, FCppWrapNewLineWidth);
   Ini.WriteInteger('', csCppWrapMode, Ord(FCppCodeWrapMode));
   Ini.WriteInteger('', csCppBraceStyle, Ord(FCppBraceStyle));
+  Ini.WriteInteger('', csCppElseStyle, Ord(FCppElseStyle));
   Ini.WriteInteger('', csCppSpaceBeforeASM, FCppSpaceBeforeASM);
   Ini.WriteInteger('', csCppSpaceTabASMKeyword, FCppSpaceTabASMKeyword);
   Ini.WriteBool('', csCppKeepUserLineBreak, FCppKeepUserLineBreak);
