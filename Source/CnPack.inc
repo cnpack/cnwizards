@@ -3663,18 +3663,21 @@
   {$DEFINE SUPPORT_OTA_PROJECT_CONFIGURATION}
 
   {$DEFINE IDE_MAINFORM_EAT_MOUSEWHEEL}
-  // MainForm of 2009 or Above will eat Message in MouseWheelHandler
+  // 2009 或以上版本的 IDE 主窗体会在 MouseWheelHandler 里吃掉消息
   {$DEFINE IDE_CODEINSIGHT_AUTOINVOKE}
-  // IDE Code Insight has Auto Invoke Option
+  // IDE Code Insight 有自动弹出的选项
   {$DEFINE EDITVIEW_CONVERTPOS_BUG}
-  // 2009 or Above IEditView.ConvertPos Incorrect when Meeting Unicode Chars
+  // 2009 或以上版本的 IEditView.ConvertPos 在碰到 Unicode 字符时计算不准确
 
-  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE has a Project Version Number Bug
+  {$IFNDEF DELPHIXE2_UP}  // 2009/2010/XE 的工程版本号有 Bug
     {$DEFINE PROJECT_VERSION_NUMBER_BUG}
   {$ENDIF}
+  {$IFNDEF DELPHIXE4_UP}  // 2009 ~ XE3 在 const 太长时会编译出错
+    {$DEFINE LOCAL_CONST_TOOMANY_BUG}
+  {$ENDIF}
   {$DEFINE OTA_DPKOPTION_SETVALUE_CORRUPT_BUG}
-  // A OpenTools API Bug IOTAProjectOptions.SetOptionValue under 2009 or above:
-  // Set an Option Value to DPK Project Options maybe cause DPK Source Corrupt
+  // 2009 或以上版本的 OpenTools API 的 IOTAProjectOptions.SetOptionValue 有 Bug
+  // 调用该接口设置 DPK 的工程选项时，可能会导致 DPK 源码损坏或乱码
 {$ELSE}
   {$DEFINE ZLIB_STREAM_NOSIZE}           // 2007 及以下的 Zlib 的解压缩流不支持 Size 操作
 {$ENDIF}
