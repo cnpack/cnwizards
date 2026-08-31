@@ -3626,6 +3626,10 @@
   {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE 的调试器中有 TStrings Visualizer
 {$ENDIF}
 
+{$IFDEF DELPHIXE}
+  {$DEFINE DYNARRAY_PARAM_NO_DEFVALUE_BUG}     // XE 的 TBytes 等类型在函数参数中不能带默认值，高低版本都行
+{$ENDIF}
+
 {$IFDEF BDS2010_UP}
   {$DEFINE SUPPORT_INTERFACE_AS_OBJECT}        // 支持从接口实例寻找其实现对象实例
   {$DEFINE SUPPORT_ENHANCED_RTTI}              // 新的增强型 RTTI
