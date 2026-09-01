@@ -19,8 +19,8 @@
   </tr>
 </table>
 <p class="title">Code Formatter Wizard</p>
-<p class="text" align="left">This Wizard is used to Format Code in IDE. Now only Supports Pascal.</p>
-<p class="text" align="left">With the Default short Ctrl+W, You can Format Current Pascal Source File or Selection in Editor. If Formatting Section, Section will be Extended to Whole Lines before Formatting.</p>
+<p class="text" align="left">This Wizard is used to format code in the IDE. It supports Pascal and C/C++.</p>
+<p class="text" align="left">With the default shortcut Ctrl+W, you can format the current Pascal unit or C/C++ source file, or a selection in the editor. If a selection is formatted, it is extended to whole lines before formatting.</p>
 <p class="text" align="left"></p>
 <p class="title">&nbsp;</p>
 <p class="title">Settings</p>
@@ -65,6 +65,29 @@
 <li>
 <p class="text"><b>Do NOT Format Content between {(*} and {*)}</b>: If Checked, Contents between {(*} and {*)} won't be Formatted and will Keep its Original Format.</p></li>
 <li>
+	<p class="text"><b>C/C++ Formatting Settings</b></p></li>
+<p class="text" align="center">&nbsp;<img src="formatterconfigcpp.png"></p>
+	<ul>
+  <li>
+<p class="text"><b>Brace Style</b>: Specifies whether an opening brace is placed on the current line or on the next line.</p></li>
+  <li>
+<p class="text"><b>Else Style</b>: Specifies whether <b>else</b> stays on the same line as the preceding closing brace or moves to the next line. Combined with Brace Style, this can produce either <b>} else {</b> or separate lines for the closing brace, <b>else</b>, and opening brace.</p></li>
+  <li>
+<p class="text"><b>Tab Indent</b>: Specifies the number of spaces used for C/C++ indentation. The default is 4.</p></li>
+  <li>
+<p class="text"><b>Space Before Binary Operator</b>: Specifies the number of spaces before binary operators. The default is 1.</p></li>
+  <li>
+<p class="text"><b>Space After Binary Operator</b>: Specifies the number of spaces after binary operators. The default is 1.</p></li>
+  <li>
+<p class="text"><b>Auto Wrap</b>: The formatter supports three modes: no automatic wrapping, simple wrapping, and advanced wrapping. When enabled, code is wrapped after exceeding the configured line width. The larger "Exceeding Width" is used by advanced wrapping, while the smaller line width is used to find a suitable break point.</p></li>
+  <li>
+<p class="text"><b>Keep User Line Break in Statement</b>: Preserves line breaks originally present inside a statement and skips automatic wrapping.</p></li>
+  <li>
+<p class="text"><b>ASM Settings</b>: Specifies the line-head indentation and the tab width between an inline ASM keyword and its operands.</p></li>
+  <li>
+<p class="text"><b>Do NOT Format Contents between // clang-format off and // clang-format on</b>: When checked, C/C++ contents between these markers are copied in their original format.</p></li>
+</ul>
+<li>
 <p class="text"><b>Shortcut</b>: Change Shortcut for Menu Items Here.</li>
 	<li>
     <p class="text"><b>OK</b>: Confirm modification.</p>
@@ -87,7 +110,7 @@
 <li>
 <p class="text"><b>Settings Limited</b>: Now This Wizard only Provides A Few Settings. We'll Provide More Later.</p></li>
 	<li>
-<p class="text"><b>C/C++ Code</b>: Not Supported yet.</p></li>
+<p class="text"><b>C/C++ Code</b>: Common C/C++ syntax and RAD Studio/C++Builder extensions are supported. Lines beginning with # are kept as original preprocessor lines.</p></li>
 </ul>
 <p class="title" align="left">&nbsp;
 <p class="title">Links</p>

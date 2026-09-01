@@ -19,17 +19,17 @@
   </tr>
 </table>
 <p class="title">代码格式化专家</p>
-<p class="text" align="left"> 该专家用于格式化代码，目前只支持 Pascal。</p>
-<p class="text" align="left">代码格式化功能可格式化当前编辑器内的 Pascal 单元源码或选择区的内容，默认热键 Ctrl+W。如果有选择区，格式化之前会将选择区扩展至整行模式再进行格式化。</p>
+<p class="text" align="left">该专家用于格式化代码，支持 Pascal 和 C/C++。</p>
+<p class="text" align="left">代码格式化功能可格式化当前编辑器内的 Pascal 单元或 C/C++ 源码，也可以格式化选择区的内容，默认热键 Ctrl+W。如果有选择区，格式化之前会将选择区扩展至整行模式再进行格式化。</p>
 <p class="text" align="left"></p>
 <p class="title">　</p>
 <p class="title">参数设置</p>
-<p class="text" align="left">代码格式化专家的设置界面如图：</p>
+<p class="text" align="left">代码格式化专家的 Pascal 代码设置界面如图：</p>
 <p class="text" align="center">　<img src="formatterconfig.png"></p>
 <p class="text" align="left"> 
 <ul>
 	<li>
-<p class="text"><b>普通设置</b></p></li>
+<p class="text"><b>Pascal 格式化设置</b></p></li>
 	<ul>
   <li>
 <p class="text"><b>关键字大小写</b>：设置格式化时关键字的大小写处理规则，有大写、小写、首字母大写、不改变原有大小写四种选择，默认为小写。</p></li>
@@ -65,6 +65,30 @@
 <li>
 <p class="text"><b>不格式化 {(*} 与 {*)} 之间的内容</b>：勾选此选项可控制对代码中的部分区域不予格式化。</p></li>
 <li>
+<p class="text"><b>C/C++ 格式化设置</b></p></li>
+<p class="text" align="center">　<img src="formatterconfigcpp.png"></p>
+	<ul>
+  <li>
+<p class="text"><b>大括号样式</b>：指定左大括号置于控制语句或声明的当前行，还是另起一行。</p></li>
+  <li>
+<p class="text"><b>else 位置</b>：指定 <b>else</b> 与前一个语句的右大括号同行，还是置于下一行。与“大括号样式”组合后，可以得到 <b>} else {</b> 或右大括号、<b>else</b>、左大括号分别换行的效果。</p></li>
+  <li>
+<p class="text"><b>缩进空格数</b>：指定 C/C++ 代码的缩进空格数，默认为 4。</p></li>
+  <li>
+<p class="text"><b>二元运算符前的空格数</b>：指定二元运算符前的空格数，默认为 1。</p></li>
+  <li>
+<p class="text"><b>二元运算符后的空格数</b>：指定二元运算符后的空格数，默认为 1。</p></li>
+  <li>
+<p class="text"><b>自动换行</b>：格式化规则支持不自动换行、简单自动换行和高级自动换行三种模式。启用后，代码超过设置的换行宽度时自动换行；“超过时”宽度用于高级换行模式，较小的换行宽度用于寻找合适的断行位置。</p></li>
+  <li>
+<p class="text"><b>保留语句中的换行</b>：保留单个语句内部原有的换行，并跳过自动换行处理。</p></li>
+  <li>
+<p class="text"><b>ASM 设置</b>：设置 C/C++ 内嵌 ASM 的行首缩进空格数，以及 ASM 关键字与操作数之间的制表宽度。</p></li>
+  <li>
+<p class="text"><b>不格式化 clang-format off 与 clang-format on 之间的内容</b>：勾选后，两个标记之间的 C/C++ 内容严格保持原始格式。</p></li>
+</ul>
+<li>
+
 <p class="text"><b>快捷键</b>：可在此设置格式化功能以及设置等的快捷键。</p></li>
 	<li>
     <p class="text"><b>确定</b>：保存选项并关闭设置对话框。</p>
@@ -87,7 +111,7 @@
 <li>
 <p class="text"><b>选项较少</b>：目前代码格式化专家未提供太多的控制选项，以后会逐步丰富。</p></li>
 	<li>
-<p class="text"><b>C/C++代码</b>：尚不支持。</p></li>
+<p class="text"><b>C/C++代码</b>：支持常见 C/C++ 语法以及 RAD Studio/C++Builder 扩展语法；以 # 开头的预处理指令按原行输出。</p></li>
 </ul>
 <p class="title" align="left">　<p class="title" align="left">相关主题<p class="text" align="left">
 <a href="wizards.htm">IDE 专家基本操作</a><p class="text" align="left">
