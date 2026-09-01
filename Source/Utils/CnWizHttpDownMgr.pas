@@ -136,6 +136,7 @@ begin
   ATask := TCnDownTask(FTask);
   FHttp := TCnHTTP.Create;
   try
+    FHttp.EncodeUrlPath := False;
     for I := 0 to csRetryCount - 1 do
     begin
       if ATask.UserAgent <> '' then

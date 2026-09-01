@@ -13,7 +13,8 @@ uses
   CnWizHttpDownMgr in '..\..\..\..\Source\Utils\CnWizHttpDownMgr.pas',
   CnDesignEditorConsts in '..\..\..\..\Source\DesignEditor\CnDesignEditorConsts.pas',
   CnImageProviderFindIcons in '..\..\..\..\Source\Utils\CnImageProviderFindIcons.pas',
-  CnImageProviderLocalCache in '..\..\..\..\Source\Utils\CnImageProviderLocalCache.pas';
+  CnImageProviderLocalCache in '..\..\..\..\Source\Utils\CnImageProviderLocalCache.pas',
+  CnImageProviderIconify in '..\..\..\..\Source\Utils\CnImageProviderIconify.pas';
 
 {$R *.res}
 

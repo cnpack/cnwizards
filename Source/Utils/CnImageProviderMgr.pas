@@ -40,7 +40,7 @@ interface
 uses
   Windows, SysUtils, Classes, Graphics, CnWizHttpDownMgr, Forms, CnCommon,
   {$IFNDEF TEST_APP}CnWizOptions,{$ENDIF} AsRegExpr, ActiveX,
-  CnMD5, CnThreadTaskMgr, CnPngUtilsIntf, CnDesignEditorConsts;
+  CnMD5, CnThreadTaskMgr, CnPngUtilsIntf, CnDesignEditorConsts, CnSVG;
 
 type
   TCnImageReqInfo = record
@@ -140,10 +140,8 @@ function ImageProviderMgr: TCnImageProviderMgr;
 
 implementation
 
-{$IFDEF DEBUG}
 uses
-  CnDebug;
-{$ENDIF}
+  CnImageProviderIconify {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 var
   FImageProviderMgr: TCnImageProviderMgr;
@@ -362,12 +360,28 @@ var
   Task: TCnDownTask;
   Item: TCnImageRespItem;
   BmpName, TmpName: string;
+  SvgBmp: TBitmap;
   DownMgr: TCnWizDownMgr;
   DownList: TList;
 
   procedure LoadCache(AItem: TCnImageRespItem);
+  var
+    SvgBmp: TBitmap;
   begin
-    if SameText(AItem.Ext, '.png') then
+    if SameText(AItem.Ext, '.svg') then
+    begin
+      try
+        SvgBmp := CnSVGRenderToBitmap(AItem.FCacheName, AItem.Size, AItem.Size);
+        try
+          AItem.Bitmap.Assign(SvgBmp);
+        finally
+          SvgBmp.Free;
+        end;
+      except
+        AItem.Free;
+      end;
+    end
+    else if SameText(AItem.Ext, '.png') then
     begin
       BmpName := AItem.FCacheName + '.bmp';
       if CnConvertPngToBmp(AItem.FCacheName, BmpName) then
@@ -486,6 +500,24 @@ begin
               begin
                 CopyFile(PChar(Item.FFileName), PChar(Item.FCacheName), False);
                 Item.Bitmap.LoadFromFile(Item.FFileName);
+              end
+              else if SameText(Item.Ext, '.svg') then
+              begin
+                try
+                  SvgBmp := CnSVGRenderToBitmap(Item.FFileName, Item.Size, Item.Size);
+                  try
+                    Item.Bitmap.Assign(SvgBmp);
+                  finally
+                    SvgBmp.Free;
+                  end;
+                  CopyFile(PChar(Item.FFileName), PChar(Item.FCacheName), False);
+                except
+{$IFDEF DEBUG}
+                  CnDebugger.LogFmt('ImagePrivoder %s Render SVG Error %s',
+                    [ClassName, Item.FFileName]);
+{$ENDIF}
+                  Item.Free;
+                end;
               end
               else
               begin
