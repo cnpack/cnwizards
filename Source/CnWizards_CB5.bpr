@@ -100,9 +100,8 @@
       ..\Dcu\CnInputHelper.obj ..\Dcu\CnInputHelperEditFrm.obj 
       ..\Dcu\CnInputHelperFrm.obj ..\Dcu\CnInputIdeSymbolList.obj 
       ..\Dcu\CnInputBcbIdeSymbolList.obj ..\Dcu\CnImageListEditor.obj 
-      ..\Dcu\CnImageListEditorFrm.obj ..\Dcu\CnImageProviderIconFinder.obj 
-      ..\Dcu\CnImageProviderMgr.obj ..\Dcu\CnImageProviderFindIcons.obj 
-      ..\Dcu\CnImageProviderIcons8.obj ..\Dcu\CnImageProviderLocalCache.obj 
+      ..\Dcu\CnImageListEditorFrm.obj 
+      ..\Dcu\CnImageProviderMgr.obj ..\Dcu\CnImageProviderLocalCache.obj 
       ..\Dcu\CnFormatterIntf.obj ..\Dcu\CnCodeFormatterWizard.obj 
       ..\Dcu\CnAICoderWizard.obj ..\Dcu\CnAICoderConfig.obj 
       ..\Dcu\CnAICoderNetClient.obj ..\Dcu\CnAICoderEngine.obj 
