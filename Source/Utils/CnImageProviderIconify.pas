@@ -112,7 +112,7 @@ end;
 class procedure TCnImageProviderIconify.GetProviderInfo(var DispName,
   HomeUrl: string);
 begin
-  DispName := 'Iconify (free SVG)';
+  DispName := 'Iconify';
   HomeUrl := 'https://iconify.design';
 end;
 
