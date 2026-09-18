@@ -797,7 +797,13 @@ begin
           KeySvcs.PushKeyboard(SCnKeyBindingName);
         {$ENDIF}
         except
+{$IFDEF DEBUG}
+          on E: Exception do
+            CnDebugger.LogMsgError('AddKeyboardBinding Failed: ' +
+              E.ClassName + ': ' + E.Message);
+{$ELSE}
           ;
+{$ENDIF}
         end;
       end
       else
