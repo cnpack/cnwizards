@@ -11462,6 +11462,7 @@ NativeNode cannot be null=本地节点不能为空
 NauticalMiles=海里
 Navigation Pane=导航窗格
 Navigation Toolbar Keybindings=导航工具栏键绑定
+Navigator=导航器
 Navy=深蓝
 Ne&twork...=网络(&T)...
 Ne&ver=从不(&V)

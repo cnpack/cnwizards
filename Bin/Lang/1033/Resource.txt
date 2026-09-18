@@ -11462,6 +11462,7 @@ NativeNode cannot be null=NativeNode cannot be null
 NauticalMiles=NauticalMiles
 Navigation Pane=Navigation Pane
 Navigation Toolbar Keybindings=Navigation Toolbar Keybindings
+Navigator=Navigator
 Navy=Navy
 Ne&twork...=Ne&twork...
 Ne&ver=Ne&ver
