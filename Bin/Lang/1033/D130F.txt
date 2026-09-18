@@ -1,0 +1,4 @@
+TCppProjOptsDlg.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item3.Text=Version
+TCppProjOptsDlg.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item4.Text=Description
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item3.Text=Version
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item4.Text=Description

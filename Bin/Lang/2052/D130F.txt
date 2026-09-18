@@ -1,0 +1,4 @@
+TCppProjOptsDlg.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item3.Text=版本
+TCppProjOptsDlg.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item4.Text=描述
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item3.Text=版本
+TDelphiProjectOptionsDialog.PropertySheetControl1.@TGetItDependencies.vstPackages.Header.Columns.Item4.Text=描述
