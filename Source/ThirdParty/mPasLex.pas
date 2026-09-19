@@ -95,7 +95,7 @@ type
     tkInherited, tkInitialization, tkInline, tkInteger, tkInterface, tkIs,
     tkKeyString, tkLabel, tkLibrary, tkLower, tkLowerEqual, tkMessage, tkMinus,
     tkMod, tkMultiLineString, tkName, tkNear, tkNil, tkNodefault, tkNone, tkNoReturn,
-    tkNot, tkNotEqual, tkNull, tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr,
+    tkNoStackFrame, tkNot, tkNotEqual, tkNull, tkNumber, tkObject, tkOf, tkOn, tkOperator, tkOr,
     tkOut, tkOverload, tkOverride, tkPackage, tkPacked, tkPascal, tkPlatform,
     tkPlus, tkPoint, tkPointerSymbol, tkPrivate, tkProcedure, tkProgram,
     tkProperty, tkProtected, tkPublic, tkPublished, tkRaise, tkRead, tkReadonly,
@@ -135,7 +135,7 @@ const
     tkIf, tkImplementation, tkImplements, tkIn, tkIndex, tkInherited,
     tkInitialization, tkInline, tkInterface, tkIs, tkKeyString, tkLabel,
     tkLibrary, tkMessage, tkMod, tkName, tkNear, tkNil, tkNodefault, tkNoReturn,
-    tkNot, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload,
+    tkNoStackFrame, tkNot, tkObject, tkOf, tkOn, tkOperator, tkOr, tkOut, tkOverload,
     tkOverride, tkPackage, tkPacked, tkPascal, tkPlatform, tkPrivate,
     tkProcedure, tkProgram, tkProperty, tkProtected, tkPublic, tkPublished,
     tkRaise, tkRead, tkReadonly, tkRecord, tkRegister, tkReintroduce, tkRepeat,
@@ -943,6 +943,8 @@ function TmwPasLex.Func126: TTokenKind;
 begin
   if KeyComp('Implements') then
     Result:=tkImplements
+  else if KeyComp('Nostackframe') then
+    Result:=tkNoStackFrame
   else
   Result:=tkIdentifier;
 end;

@@ -1332,6 +1332,8 @@ function TCnPasWideLex.Func126: TTokenKind;
 begin
   if KeyComp('Implements') then
     Result := tkImplements
+  else if KeyComp('Nostackframe') then
+    Result:=tkNoStackFrame
   else
     Result := tkIdentifier;
 end;
