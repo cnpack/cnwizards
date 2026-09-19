@@ -589,7 +589,7 @@ const
      + ProcedureTokens;  // ²»Ö§³Ö class var/threadvar
 
   DirectiveTokens = [tkVirtual, tkOverride, tkAbstract, tkReintroduce, tkStdcall,
-    tkCdecl, tkInline, tkName, tkIndex, tkLibrary, tkDefault, tkNoDefault,
+    tkCdecl, tkInline, tkName, tkIndex, tkLibrary, tkDefault, tkNoDefault, tkNoStackFrame,
     tkRead, tkReadonly, tkWrite, tkWriteonly, tkStored, tkImplements, tkOverload,
     tkPascal, tkRegister, tkExternal, tkAssembler, tkDynamic, tkAutomated,
     tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall,
@@ -738,7 +738,7 @@ begin
     tkVirtual, tkOverride, tkAbstract, tkReintroduce, tkStdcall, tkCdecl, tkInline, tkName,
     tkOverload, tkPascal, tkRegister, tkExternal, tkAssembler, tkDynamic, tkAutomated,
     tkDispid, tkExport, tkFar, tkForward, tkNear, tkMessage, tkResident, tkSafecall,
-    tkPlatform, tkDeprecated:
+    tkPlatform, tkDeprecated, tkNoStackFrame:
       Result := cntDirective;
   else
     raise ECnPascalAstException.Create(SCnErrorNoMatchNodeType + ' '
