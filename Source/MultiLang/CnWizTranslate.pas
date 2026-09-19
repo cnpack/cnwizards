@@ -228,6 +228,8 @@ begin
   // CnWizConfigForm
   TranslateStr(SCnWizConfigCaption, 'SCnWizConfigCaption');
   TranslateStr(SCnWizConfigHint, 'SCnWizConfigHint');
+  TranslateStr(SCnWizConfigName, 'SCnWizConfigName');
+  TranslateStr(SCnWizConfigComment, 'SCnWizConfigComment');
   TranslateStr(SCnProjectWizardName, 'SCnProjectWizardName');
   TranslateStr(SCnFormWizardName, 'SCnFormWizardName');
   TranslateStr(SCnUnitWizardName, 'SCnUnitWizardName');

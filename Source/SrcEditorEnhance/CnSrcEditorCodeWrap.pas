@@ -604,7 +604,8 @@ begin
 //    2007.12.13 Commented by LiuXiao | 2008.11.11 UnCommented Back
 
       if (Items[I].Caption <> '-') and (Items[I].ShortCut <> 0) then
-        FShortCuts.Add(WizShortCutMgr.Add('', Items[I].ShortCut, OnShortCut, '', I));
+        FShortCuts.Add(WizShortCutMgr.Add(Items[I].ClassName + IntToStr(I),
+          Items[I].ShortCut, OnShortCut, Items[I].Caption, I));
     end;
 
     AddSepMenuItem(AMenu);
