@@ -3652,6 +3652,7 @@
   {$DEFINE UNICODE_STRING}                       // 等同于 UNICODE
   {$DEFINE SUPPORT_ATTRIBUTE}                    // 2009 及以上支持 Attribute
   {$DEFINE SUPPORT_GENERIC}                      // 2009 及以上支持泛型
+  {$DEFINE SUPPORT_ANONYMOUS_METHOD}             // 2009 及以上支持匿名方法
   {$DEFINE SUPPORT_ANSISTRING_CODEPAGE}          // 2009 及以上的 AnsiString 的声明支持指定代码页
   {$DEFINE SUPPORT_ENCODING}                     // 2009 及以上支持 TEncoding
   {$DEFINE SUPPORT_PUINT64}                      // 2009 及以上的声明了 UInt64 的指针
