@@ -86,6 +86,15 @@ type
     Notifier: TMethod;
   end;
 
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+
+  PCnWizProcRecord = ^TCnWizProcRecord;
+  TCnWizProcRecord = record
+    Proc: TCnNotifyProc;
+  end;
+
+{$ENDIF}
+
   NoRefCount = Pointer; // 使用指针类型来强制为接口变量赋值，不增加引用计数
 
   TCnWizSourceEditorNotifyType = (setOpened, setClosing, setModified,
@@ -255,6 +264,13 @@ type
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
     {* 将一个已经设置为空闲时执行的方法在它执行前通知停止执行，如已执行则此调用无效}
 
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+    procedure ExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+    {* 将一个匿名方法在应用程序空闲时执行}
+    procedure StopExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+    {* 将一个已经设置为空闲时执行的匿名方法在它执行前通知停止执行，如已执行则此调用无效}
+{$ENDIF}
+
     procedure DebugComand(Cmds: TStrings; Results: TStrings);
     {* 处理 Debug 输出命令并将结果放置入 Results 中，供内部调试用}
   end;
@@ -273,6 +289,22 @@ procedure CnWizRemoveNotifier(List: TList; Notifier: TMethod);
 
 function CnWizIndexOfNotifier(List: TList; Notifier: TMethod): Integer;
 {* 查找通知器公用函数}
+
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+
+procedure CnWizClearAndFreeProcList(var List: TList);
+{* 全部释放匿名方法通知器的公用函数}
+
+procedure CnWizAddProc(List: TList; Notifier: TCnNotifyProc);
+{* 增加匿名方法通知器公用函数}
+
+procedure CnWizRemoveProc(List: TList; Notifier: TCnNotifyProc);
+{* 删除匿名方法通知器公用函数}
+
+function CnWizIndexOfProc(List: TList; Notifier: TCnNotifyProc): Integer;
+{* 查找匿名方法通知器公用函数}
+
+{$ENDIF}
 
 implementation
 
@@ -560,6 +592,9 @@ type
     FBeforeThemeChangeNotifiers: TList;
     FAfterThemeChangeNotifiers: TList;
     FIdleMethods: TList;
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+    FIdleProcs: TList;
+{$ENDIF}
 {$IFDEF FPC}
     FEvents: TApplicationProperties;
     FOldScreenActiveFormChange: TNotifyEvent;
@@ -659,7 +694,10 @@ type
     procedure RemoveAfterThemeChangeNotifier(Notifier: TNotifyEvent);
     procedure ExecuteOnApplicationIdle(Method: TNotifyEvent);
     procedure StopExecuteOnApplicationIdle(Method: TNotifyEvent);
-
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+    procedure ExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+    procedure StopExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+{$ENDIF}
     procedure SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
       NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF});
 {$IFDEF DELPHI_OTA}
@@ -974,6 +1012,67 @@ begin
     end;
   end;
 end;
+
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+
+procedure CnWizClearAndFreeProcList(var List: TList);
+var
+  Rec: PCnWizProcRecord;
+begin
+  while List.Count > 0 do
+  begin
+    Rec := List[0];
+    Dispose(Rec);
+    List.Delete(0);
+  end;
+  FreeAndNil(List);
+end;
+
+procedure CnWizAddProc(List: TList; Notifier: TCnNotifyProc);
+var
+  Rec: PCnWizProcRecord;
+begin
+  if List = nil then
+    Exit;
+
+  if CnWizIndexOfProc(List, Notifier) < 0 then
+  begin
+    New(Rec);
+    Rec^.Proc := Notifier;
+    List.Add(Rec);
+  end;
+end;
+
+procedure CnWizRemoveProc(List: TList; Notifier: TCnNotifyProc);
+var
+  Rec: PCnWizProcRecord;
+  Idx: Integer;
+begin
+  Idx := CnWizIndexOfProc(List, Notifier);
+  if Idx >= 0 then
+  begin
+    Rec := List[Idx];
+    Dispose(Rec);
+    List.Delete(Idx);
+  end;
+end;
+
+function CnWizIndexOfProc(List: TList; Notifier: TCnNotifyProc): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to List.Count - 1 do
+  begin
+    if CompareMem(List[I], @Notifier, SizeOf(TCnNotifyProc)) then
+    begin
+      Result := I;
+      Exit;
+    end;
+  end;
+end;
+
+{$ENDIF}
 
 {$IFDEF DELPHI_OTA}
 
@@ -1444,6 +1543,9 @@ begin
   FBeforeThemeChangeNotifiers := TList.Create;
   FAfterThemeChangeNotifiers := TList.Create;
   FIdleMethods := TList.Create;
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+  FIdleProcs := TList.Create;
+{$ENDIF}
   FDesignerSelection := TList.Create;
   FLastDesignerSelection := TList.Create;
   FCompNotifyList := TComponentList.Create(True);
@@ -1640,6 +1742,9 @@ begin
   CnWizClearAndFreeList(FBeforeThemeChangeNotifiers);
   CnWizClearAndFreeList(FAfterThemeChangeNotifiers);
   CnWizClearAndFreeList(FIdleMethods);
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+  CnWizClearAndFreeProcList(FIdleProcs);
+{$ENDIF}
 
 {$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
@@ -2891,10 +2996,28 @@ begin
   CnWizRemoveNotifier(FIdleMethods, TMethod(Method));
 end;
 
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+
+procedure TCnWizNotifierServices.ExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+begin
+  CnWizAddProc(FIdleProcs, Proc);
+end;
+
+procedure TCnWizNotifierServices.StopExecProcOnApplicationIdle(Proc: TCnNotifyProc);
+begin
+  CnWizRemoveProc(FIdleProcs, Proc);
+end;
+
+{$ENDIF}
+
 procedure TCnWizNotifierServices.DoIdleExecute;
 var
   Rec: PCnWizNotifierRecord;
   Event: TNotifyEvent;
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+  ProcRec: PCnWizProcRecord;
+  AProc: TCnNotifyProc;
+{$ENDIF}
 begin
   while FIdleMethods.Count > 0 do
   begin
@@ -2907,6 +3030,19 @@ begin
       DoHandleException('TCnWizNotifierServices.DoIdleExecute');
     end;
   end;
+{$IFDEF SUPPORT_ANONYMOUS_METHOD}
+  while FIdleProcs.Count > 0 do
+  begin
+    ProcRec := FIdleProcs.Extract(FIdleProcs.Last);
+    AProc := ProcRec^.Proc;
+    Dispose(ProcRec);
+    try
+      AProc(Application);
+    except
+      DoHandleException('TCnWizNotifierServices.DoIdleExecute Anonymous Method');
+    end;
+  end;
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
