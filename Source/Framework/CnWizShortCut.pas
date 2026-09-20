@@ -761,6 +761,7 @@ end;
 
 function CanInstallKeyBinding: Boolean;
 begin
+{$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
   if IsGEDelphi13Dot2 then
   begin
@@ -768,7 +769,8 @@ begin
     Exit;
   end;
 {$ENDIF}
-  Result := not _IS64BIT {$IFNDEF CNWIZARDS_MINIMUM} or IsDelphi12Dot3GEHotFix {$ENDIF}
+{$ENDIF}
+  Result := not _IS64BIT {$IFDEF DELPHI_OTA} {$IFNDEF CNWIZARDS_MINIMUM} or IsDelphi12Dot3GEHotFix {$ENDIF} {$ENDIF}
 end;
 
 // °²×°¼üÅÌ°ó¶¨

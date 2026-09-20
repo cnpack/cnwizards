@@ -1,15 +1,15 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{1C6A547D-B315-484B-B7DB-08723731B6D1}</ProjectGuid>
-        <MainSource>CnWizards_D130F64.dpr</MainSource>
+        <MainSource>CnWizards_D130F1.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
-        <TargetedPlatforms>3</TargetedPlatforms>
+        <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Library</AppType>
-        <FrameworkType>VCL</FrameworkType>
+        <FrameworkType>None</FrameworkType>
         <ProjectVersion>20.3</ProjectVersion>
-        <Platform Condition="'$(Platform)'==''">Win64</Platform>
-        <ProjectName Condition="'$(ProjectName)'==''">CnWizards_D130F64</ProjectName>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <ProjectName Condition="'$(ProjectName)'==''">CnWizards_D130F1</ProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -35,12 +35,6 @@
         <Cfg_1>true</Cfg_1>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_1)'=='true') or '$(Cfg_1_Win64)'!=''">
-        <Cfg_1_Win64>true</Cfg_1_Win64>
-        <CfgParent>Cfg_1</CfgParent>
-        <Cfg_1>true</Cfg_1>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
         <Cfg_2>true</Cfg_2>
         <CfgParent>Base</CfgParent>
@@ -52,14 +46,8 @@
         <Cfg_2>true</Cfg_2>
         <Base>true</Base>
     </PropertyGroup>
-    <PropertyGroup Condition="('$(Platform)'=='Win64' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win64)'!=''">
-        <Cfg_2_Win64>true</Cfg_2_Win64>
-        <CfgParent>Cfg_2</CfgParent>
-        <Cfg_2>true</Cfg_2>
-        <Base>true</Base>
-    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>CnWizards_D130F64</SanitizedProjectName>
+        <SanitizedProjectName>CnWizards_D130F1</SanitizedProjectName>
         <DCC_K>false</DCC_K>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_N>false</DCC_N>
@@ -68,7 +56,7 @@
         <DCC_S>false</DCC_S>
         <GenDll>true</GenDll>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=;CFBundleName=;CFBundleDisplayName=;CFBundleIdentifier=;CFBundleVersion=;CFBundlePackageType=;CFBundleSignature=;CFBundleAllowMixedLocalizations=;CFBundleExecutable=</VerInfo_Keys>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Vcl;Vcl.Imaging;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>2052</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -83,13 +71,6 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <UsePackages>true</UsePackages>
-        <Manifest_File>(None)</Manifest_File>
-        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-        <DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32_110;ThirdParty\DDetours;ThirdParty\PascalScript_x64;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;IdeEnhancement;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-        <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
-        <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -102,21 +83,13 @@
         <VerInfo_Keys>CompanyName=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName);FileDescription=$(MSBuildProjectName);ProductName=$(MSBuildProjectName)</VerInfo_Keys>
         <UsePackages>true</UsePackages>
         <DCC_UsePackage>rtl;vcl;vclx;fmx;designide;$(DCC_UsePackage)</DCC_UsePackage>
-        <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32_110;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;IdeEnhancement;C:\Program Files (x86)\Embarcadero\Studio\23.0\source\ToolsAPI;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32_110;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;IdeEnhancement;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
         <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
-        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
-        <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
-        <DCC_Define>DEBUG;I64;ENABLE_UIINTERACT;ENABLE_FMX;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;CAPTURE_STACK;$(DCC_Define)</DCC_Define>
+        <DCC_Define>DEBUG;I64;ENABLE_UIINTERACT;ENABLE_FMX;SUPPORT_EVALUATE;OTA_HAS_AISERVICE;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
@@ -128,11 +101,6 @@
         <DCC_UnitSearchPath>..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;ThirdParty;ThirdParty\DCU32_110;ThirdParty\DDetours;ThirdParty\PascalScript_2009;ThirdParty\FastCode;Utils;CodeFormatter;ScriptWizard;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_DcuOutput>..\Dcu</DCC_DcuOutput>
         <DCC_ExeOutput>..\Bin</DCC_ExeOutput>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -632,7 +600,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">CnWizards_D130F64.dpr</Source>
+                    <Source Name="MainSource">CnWizards_D130F1.dpr</Source>
                 </Source>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
@@ -669,11 +637,16 @@
                     <VersionInfoKeys Name="CFBundleAllowMixedLocalizations"/>
                     <VersionInfoKeys Name="CFBundleExecutable"/>
                 </VersionInfoKeys>
-                <Excluded_Packages/>
+                <Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k290.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp290.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
                 <Platform value="Win32">True</Platform>
-                <Platform value="Win64">True</Platform>
+                <Platform value="Win64">False</Platform>
             </Platforms>
             <Deployment Version="5">
                 <DeployFile LocalName="$(BDS)\Redist\iossim32\libcgunwind.1.0.dylib" Class="DependencyModule"/>
@@ -695,19 +668,7 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx64\libcgsqlite3.dylib" Class="DependencyModule"/>
-                <DeployFile LocalName="..\Bin\CnWizards_D130F64.dll" Configuration="Release" Class="ProjectOutput"/>
-                <DeployFile LocalName="..\Bin\CnWizards_D130F64.dll" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win64">
-                        <RemoteName>CnWizards_D130F64.dll</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="\CnWizards_D130F64.dll" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win64">
-                        <RemoteName>CnWizards_D130F64.dll</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
+                <DeployFile LocalName="..\Bin\CnWizards_D120A.dll" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="OSX32">
                         <Operation>1</Operation>

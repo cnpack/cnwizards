@@ -626,6 +626,14 @@ FileLoop:
   FileOpen $0 "$INSTDIR\CnWizards_D130F64.dll" a
   IfErrors FileInUse
   FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D130F1.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D130F1.dll" a
+  IfErrors FileInUse
+  FileClose $0
+  IfFileExists "$INSTDIR\CnWizards_D130F641.dll" 0 +4
+  FileOpen $0 "$INSTDIR\CnWizards_D130F641.dll" a
+  IfErrors FileInUse
+  FileClose $0
 !endif
 !endif
 
@@ -1032,6 +1040,8 @@ Section "RAD Studio 13 Florence" SecD130F
   SetOutPath $INSTDIR
   File "..\..\Bin\CnWizards_D130F.dll"
   File "..\..\Bin\CnWizards_D130F64.dll"
+  File "..\..\Bin\CnWizards_D130F1.dll"
+  File "..\..\Bin\CnWizards_D130F641.dll"
   ; 写入专家注册键值
   DeleteRegValue HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_D130F"
   WriteRegStr HKCU "Software\Embarcadero\BDS\37.0\Experts" "CnWizards_Loader" "$INSTDIR\CnWizLoader.dll"

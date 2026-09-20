@@ -138,6 +138,7 @@ const
   SYDNEY_10_4_1_RELEASE = 38860;
   ATHENS_12_2_RELEASE = 53571;
   ATHENS_12_2_PATCH1_RELEASE = 53982;
+  FLORENCE_13_2_RELEASE = 60952;
 var
   FullPath: array[0..MAX_PATH - 1] of AnsiChar;
   Dir, Exe: string;
@@ -241,11 +242,24 @@ begin
       end;
     37:
       begin
+        if V.Release < FLORENCE_13_2_RELEASE then
+        begin
+          // 13.1 或 13.0 采用另两个 DLL
 {$IFDEF WIN64}
-        Result := Dir + 'CnWizards_D130F64.DLL'; // 64 位 IDE 用这个
+          Result := Dir + 'CnWizards_D130F641.DLL'; // 64 位 IDE 用这个
 {$ELSE}
-        Result := Dir + 'CnWizards_D130F.DLL';   // 13.0
+          Result := Dir + 'CnWizards_D130F1.DLL';   // 32 位 IDE 用这个
 {$ENDIF}
+        end
+        else
+        begin
+          // 13.2 用这两个
+{$IFDEF WIN64}
+          Result := Dir + 'CnWizards_D130F64.DLL'; // 64 位 IDE 用这个
+{$ELSE}
+          Result := Dir + 'CnWizards_D130F.DLL';   // 32 位 IDE 用这个
+{$ENDIF}
+        end;
       end;
   end;
 end;

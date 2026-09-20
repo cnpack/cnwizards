@@ -1,7 +1,7 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{1C6A547D-B315-484B-B7DB-08723731B6D1}</ProjectGuid>
-        <MainSource>CnWizards_D130F64.dpr</MainSource>
+        <MainSource>CnWizards_D130F641.dpr</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Release</Config>
         <TargetedPlatforms>3</TargetedPlatforms>
@@ -9,7 +9,7 @@
         <FrameworkType>VCL</FrameworkType>
         <ProjectVersion>20.3</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win64</Platform>
-        <ProjectName Condition="'$(ProjectName)'==''">CnWizards_D130F64</ProjectName>
+        <ProjectName Condition="'$(ProjectName)'==''">CnWizards_D130F641</ProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -59,7 +59,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <SanitizedProjectName>CnWizards_D130F64</SanitizedProjectName>
+        <SanitizedProjectName>CnWizards_D130F641</SanitizedProjectName>
         <DCC_K>false</DCC_K>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_N>false</DCC_N>
@@ -632,7 +632,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">CnWizards_D130F64.dpr</Source>
+                    <Source Name="MainSource">CnWizards_D130F641.dpr</Source>
                 </Source>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">False</VersionInfo>
@@ -695,16 +695,16 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx64\libcgsqlite3.dylib" Class="DependencyModule"/>
-                <DeployFile LocalName="..\Bin\CnWizards_D130F64.dll" Configuration="Release" Class="ProjectOutput"/>
-                <DeployFile LocalName="..\Bin\CnWizards_D130F64.dll" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\Bin\CnWizards_D130F641.dll" Configuration="Release" Class="ProjectOutput"/>
+                <DeployFile LocalName="..\Bin\CnWizards_D130F641.dll" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win64">
-                        <RemoteName>CnWizards_D130F64.dll</RemoteName>
+                        <RemoteName>CnWizards_D130F641.dll</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="\CnWizards_D130F64.dll" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="\CnWizards_D130F641.dll" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win64">
-                        <RemoteName>CnWizards_D130F64.dll</RemoteName>
+                        <RemoteName>CnWizards_D130F641.dll</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
