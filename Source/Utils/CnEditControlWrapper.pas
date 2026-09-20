@@ -1133,7 +1133,13 @@ begin
     IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
   begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
-    FEditControlWrapper.CheckNewEditor(TControl(Self));
+    // D13.* 有 Bug，此时调 CheckNewEditor 的话，
+    // 内部直接拿到的 View 是 nil，不得不延迟拿
+    CnWizNotifierServices.ExecProcOnApplicationIdle(
+      procedure(Sender: TObject)
+      begin
+        FEditControlWrapper.CheckNewEditor(TControl(Self));
+      end);
 {$ELSE}
     View := GetOTAEditView(EditView);
     FEditControlWrapper.CheckNewEditor(TControl(Self), View);
@@ -1618,6 +1624,10 @@ begin
     if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
     begin
       View := CES.GetViewForEditor(TWinControl(EditControl));
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('CodeEditorServices Got View %p for EditControl %p',
+        [Pointer(View), Pointer(EditControl)]);
+{$ENDIF}
       AddEditor(EditControl, View);
     end;
 {$ELSE}
@@ -1761,6 +1771,7 @@ begin
   Idx := Context.TopRow;
   Editor.FLastTop := Idx;
   Editor.FLastBottomElided := GetLineIsElided(Editor.EditControl, LineCount);
+
   for I := Context.TopRow to Context.BottomRow do
   begin
     FCmpLines.Add(Pointer(Idx));
@@ -1794,7 +1805,7 @@ begin
     for I := 0 to FCmpLines.Count - 1 do
       Editor.FLines[I] := FCmpLines[I];
   {$IFDEF DEBUG}
-    CnDebugger.LogMsg('Lines Changed');
+    CnDebugger.LogMsg('Lines Changed. Count ' + IntToStr(Editor.FLines.Count));
   {$ENDIF}
   end;
 
@@ -1953,6 +1964,9 @@ begin
 
   for I := 0 to EditorCount - 1 do
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('EditControlWrapper.OnIdle to CheckEditorChanges #%d EditorObj %p.', [I, Pointer(Editors[I])]);
+{$ENDIF}
     ChangeType := CheckEditorChanges(Editors[I]) + OptionType;
     if ChangeType <> [] then
     begin
