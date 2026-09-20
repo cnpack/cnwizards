@@ -79,6 +79,9 @@ function IsDelphi12Dot3GEHotFix: Boolean;
 function IsGEDelphi13Dot1: Boolean;
 {* 返回是否 Delphi 13.1 或更高的子版本，用于某些古怪判断}
 
+function IsGEDelphi13Dot2: Boolean;
+{* 返回是否 Delphi 13.1 或更高的子版本，用于某些古怪判断}
+
 var
   CnIdeVersionDetected: Boolean = False;
   CnIdeVersionIsLatest: Boolean = False;
@@ -535,6 +538,23 @@ function IsGEDelphi13Dot1: Boolean;
 const
   CoreIdeLatest: TVersionNumber =
     (Major: 37; Minor: 0; Release: 59082; Build: 6021); // 13.1
+var
+  ReadFileVersion: TVersionNumber;
+{$ENDIF}
+begin
+{$IFDEF DELPHI130_FLORENCE_UP}
+  ReadFileVersion := GetFileVersionNumber(GetIdeRootDirectory + 'Bin\coreide370.bpl');
+  Result := CompareVersionNumber(ReadFileVersion, CoreIdeLatest) >= 0;
+{$ELSE}
+  Result := False;
+{$ENDIF}
+end;
+
+function IsGEDelphi13Dot2: Boolean;
+{$IFDEF DELPHI130_FLORENCE_UP}
+const
+  CoreIdeLatest: TVersionNumber =
+    (Major: 37; Minor: 0; Release: 60952; Build: 8797); // 13.2
 var
   ReadFileVersion: TVersionNumber;
 {$ENDIF}

@@ -759,6 +759,18 @@ begin
 {$ENDIF}
 end;
 
+function CanInstallKeyBinding: Boolean;
+begin
+{$IFNDEF CNWIZARDS_MINIMUM}
+  if IsGEDelphi13Dot2 then
+  begin
+    Result := True;
+    Exit;
+  end;
+{$ENDIF}
+  Result := not _IS64BIT {$IFNDEF CNWIZARDS_MINIMUM} or IsDelphi12Dot3GEHotFix {$ENDIF}
+end;
+
 // 安装键盘绑定
 procedure TCnWizShortCutMgr.InstallKeyBinding;
 var
@@ -787,7 +799,7 @@ begin
     try
       // 12.3 非 HotFix 版的 64 位下注册会出异常，必须先屏蔽
       // 之后还要加上 13 及更高版本的判断
-      if not _IS64BIT {$IFNDEF CNWIZARDS_MINIMUM} or IsDelphi12Dot3GEHotFix {$ENDIF} then
+      if CanInstallKeyBinding then
       begin
         try
           FKeyBindingIndex := KeySvcs.AddKeyboardBinding(TCnKeyBinding.Create(Self));
