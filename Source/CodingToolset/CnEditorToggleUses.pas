@@ -88,13 +88,15 @@ implementation
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
-  CnEditControlWrapper {$IFDEF DEBUG}, CnDebug {$ENDIF};
+  CnEditControlWrapper, CnIDEVersion {$IFDEF DEBUG}, CnDebug {$ENDIF};
 
 const
-  CnToggleUsesBookmarkID = 18;
   CnToggleUsesTimeInterval = 2; // Seconds
 
   csSkipImplementUses = 'SkipImplementUses';
+
+var
+  CnToggleUsesBookmarkID: Integer = 18;
 
 { TCnEditorToggleUses }
 
@@ -119,6 +121,9 @@ constructor TCnEditorToggleUses.Create(AOwner: TCnCodingToolsetWizard);
 begin
   inherited;
   EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
+
+  if CnIsGEDelphi13Dot1 then
+    CnToggleUsesBookmarkID := 257; // 有 Navigator 后要大一点
 end;
 
 destructor TCnEditorToggleUses.Destroy;
@@ -427,7 +432,7 @@ begin
 
   if View.Buffer.EditPosition.Column = 1 then // 行首则回到原列
     View.Buffer.EditPosition.MoveRelative(0, FColumn - 1);
-
+  View.BookmarkToggle(CnToggleUsesBookmarkID);
   View.MoveViewToCursor;
   View.Paint;
 end;

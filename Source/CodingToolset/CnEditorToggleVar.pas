@@ -91,11 +91,9 @@ implementation
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
 uses
-  CnEditControlWrapper;
+  CnEditControlWrapper, CnIDEVersion;
 
 const
-  CnToggleVarBookmarkID = 19;
-
   csAddVar = 'AddVar';
   csAddNewLine = 'AddNewLine';
   csEscBack = 'EscBack';
@@ -116,6 +114,9 @@ type
     property VarEnd: Integer read FVarEnd write FVarEnd;
     property VarDeclareEnd: Integer read FVarDeclareEnd write FVarDeclareEnd;
   end;
+
+var
+  CnToggleVarBookmarkID: Integer = 19;
 
 { TCnEditorToggleVar }
 
@@ -144,6 +145,9 @@ begin
   FAddNewLine := True;
   FEscBack := True;
   FDelBlankVar := True;
+
+  if CnIsGEDelphi13Dot1 then
+    CnToggleVarBookmarkID := 258; // 有 Navigator 后要大一点
 end;
 
 destructor TCnEditorToggleVar.Destroy;
@@ -483,6 +487,7 @@ begin
   View.BookmarkGoto(CnToggleVarBookmarkID);
   if View.Buffer.EditPosition.Column = 1 then // 行首则回到原列
     View.Buffer.EditPosition.MoveRelative(0, FColumn - 1);
+  View.BookmarkToggle(CnToggleVarBookmarkID);
 
   View.MoveViewToCursor;
   View.Paint;
