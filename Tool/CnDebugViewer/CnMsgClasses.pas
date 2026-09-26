@@ -78,6 +78,7 @@ type
     FMsgCPInterval: Int64;
     FIndent: Integer;
     FLevel: Integer;
+    FEncoding: Integer;
     FTag: string;
     FMsg: string;
     FMsgType: TCnMsgType;
@@ -93,6 +94,7 @@ type
   published
     property Level: Integer read FLevel write FLevel;
     property Indent: Integer read FIndent write FIndent;
+    property Encoding: Integer read FEncoding write FEncoding;
     property ProcessId: Cardinal read FProcessId write FProcessId;
     property ThreadId: Cardinal read FThreadId write FThreadId;
     property MsgCPInterval: Int64 read FMsgCPInterval write FMsgCPInterval;
@@ -464,6 +466,7 @@ begin
     AItem.MsgCPInterval := ADesc^.Annex.MsgCPInterval;
     AItem.Indent := ADesc^.Annex.Indent;
     AItem.Level := ADesc^.Annex.Level;
+    AItem.Encoding := ADesc^.Annex.Encoding;
 
     if (LongInt(ADesc^.Annex.MsgType) >= Ord(Low(TCnMsgType))) and
       (LongInt(ADesc^.Annex.MsgType) <= Ord(High(TCnMsgType))) then
@@ -511,7 +514,10 @@ begin
 {$IFDEF UNICODE}
       AItem.Msg := string(AMsg);
 {$ELSE}
-      AItem.Msg := AMsg;
+      if AItem.Encoding = Ord(meUtf8) then
+        AItem.Msg := UTF8Decode(AMsg)
+      else
+        AItem.Msg := AMsg;
 {$ENDIF}
     end;
   end;

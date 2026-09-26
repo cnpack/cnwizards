@@ -74,11 +74,15 @@ type
   // 时间戳格式类型
   TCnTimeStampType = (ttNone, ttDateTime, ttTickCount, ttCPUPeriod);
 
+  // 如果内容是字符串，则指示其编码
+  TCnMsgEncoding = (meDefault, meUtf8, meUtf16);
+
   {$NODEFINE TCnMsgAnnex}
   TCnMsgAnnex = packed record
   {* 放入数据区的每条信息的头描述结构 }
     Level:     Integer;                            // 自定义 Level 数，供用户过滤用
-    Indent:    Integer;                            // 缩进数目，由 Enter 和 Leave 控制
+    Indent:    SmallInt;                           // 二字节缩进数目，由 Enter 和 Leave 控制
+    Encoding:  SmallInt;                           // 二字节字符串编码
     ProcessId: Cardinal;                           // 调用者的进程 ID
     ThreadId:  Cardinal;                           // 调用者的线程 ID
     Tag: array[0..CnMaxTagLength - 1] of AnsiChar; // 自定义 Tag 值，供用户过滤用

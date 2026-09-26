@@ -300,7 +300,7 @@ var
     '</tr>';
   SCnDebugViewerAboutCaption: string = 'About';
   SCnDebugViewerAbout: string =
-    'CnDebugViewer 2.2' + #13#10#13#10 +
+    'CnDebugViewer 2.3' + #13#10#13#10 +
     'This Tool is Used to Show the Debugging Output Information from CnDebug.' + #13#10#13#10 +
     'Author: Liu Xiao (master@cnpack.org)' + #13#10 +
     'Copyright (C) 2001-2026 CnPack Team';

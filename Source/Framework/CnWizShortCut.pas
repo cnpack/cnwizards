@@ -761,7 +761,7 @@ end;
 
 function CanInstallKeyBinding: Boolean;
 begin
-{$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
 {$IFNDEF CNWIZARDS_MINIMUM}
   if IsGEDelphi13Dot2 then
   begin

@@ -265,7 +265,7 @@ begin
   end
   else if Command = CN_WIZ_CMD_DBG_EVALSUBVIEW then
   begin
-{$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
 {$IFDEF DEBUG}
     if CnOtaGetCurrentEditWindowSubViewControl <> nil then
       CnDebugger.EvaluateObject(CnOtaGetCurrentEditWindowSubViewControl)
