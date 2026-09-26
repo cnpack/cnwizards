@@ -357,6 +357,7 @@ var
   CurPos, BlockIndent, CurrIndent, PrevIndent: Integer;
   CurX, CurY: Integer;
   StartPos: Integer;
+  HasBlock: Boolean;
 
   function ProcessMacros: Boolean;
   begin
@@ -483,62 +484,76 @@ var
 
 begin
   EditView := CnOtaGetTopMostEditView;
-  if Assigned(EditView) and EditView.Block.IsValid and
-    (EditView.Block.Style <> btColumn) then
+  if EditView = nil then
+    Exit;
+
+  HasBlock := EditView.Block.IsValid and (EditView.Block.Style <> btColumn);
+
+  if not ProcessMacros then
+    Exit;
+
+  if not Item.LineBlockMode then
   begin
-    if not ProcessMacros then
-      Exit;
-
-    if not Item.LineBlockMode then
-    begin
+    if HasBlock then
       StartPos := CnOtaEditPosToLinePos(OTAEditPos(EditView.Block.StartingColumn,
-        EditView.Block.StartingRow), EditView);
+        EditView.Block.StartingRow), EditView)
+    else
+      StartPos := CnOtaEditPosToLinePos(EditView.CursorPos);
 
+    if HasBlock then
+    begin
 {$IFDEF UNICODE}
       BlockText := EditView.Block.Text; // Unicode 环境下无需转换
 {$ELSE}
       BlockText := ConvertEditorTextToText(EditView.Block.Text);
 {$ENDIF}
+    end
+    else
+      BlockText := '';
 
-      CurPos := AnsiPos('|', HeadText);
-      HeadText := StringReplace(HeadText, '|', '', [rfReplaceAll]);
-      if CurPos = 0 then
-      begin
-        CurPos := AnsiPos('|', TailText);
-        if CurPos > 0 then
-          CurPos := Length(HeadText) + Length(BlockText) + CurPos;
-      end;
-      TailText := StringReplace(TailText, '|', '', [rfReplaceAll]);
+    CurPos := AnsiPos('|', HeadText);
+    HeadText := StringReplace(HeadText, '|', '', [rfReplaceAll]);
+    if CurPos = 0 then
+    begin
+      CurPos := AnsiPos('|', TailText);
+      if CurPos > 0 then
+        CurPos := Length(HeadText) + Length(BlockText) + CurPos;
+    end;
+    TailText := StringReplace(TailText, '|', '', [rfReplaceAll]);
 
+    if HasBlock then
       EditView.Block.Delete;
 
 {$IFDEF UNICODE}
-      CnOtaInsertTextIntoEditorAtPosW(HeadText + BlockText + TailText, StartPos,
-        EditView.Buffer);
+    CnOtaInsertTextIntoEditorAtPosW(HeadText + BlockText + TailText, StartPos,
+      EditView.Buffer);
 {$ELSE}
-      CnOtaInsertTextIntoEditorAtPos(HeadText + BlockText + TailText, StartPos,
-        EditView.Buffer);
+    CnOtaInsertTextIntoEditorAtPos(HeadText + BlockText + TailText, StartPos,
+      EditView.Buffer);
 {$ENDIF}
 
-      if CurPos > 0 then
-        EditView.CursorPos := CnOtaLinePosToEditPos(StartPos + CurPos - 1, EditView);
-    end
-    else
-    begin
-      NeedAlignStart := Item.HeadAutoIndent and Item.TailAutoIndent and
-        ((IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName)) and ((LowerCase(Item.HeadText) = 'begin') or (LowerCase(Item.HeadText) = 'try'))
-         or (IsCppSourceModule(EditView.Buffer.FileName) and (LowerCase(Item.HeadText) = '{')));
-      // begin 和 try 开头的块，以及 C 中的大括号，需要和上一行开头对齐
+    if CurPos > 0 then
+      EditView.CursorPos := CnOtaLinePosToEditPos(StartPos + CurPos - 1, EditView);
+  end
+  else
+  begin
+    NeedAlignStart := Item.HeadAutoIndent and Item.TailAutoIndent and
+      ((IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName))
+      and ((LowerCase(Item.HeadText) = 'begin') or (LowerCase(Item.HeadText) = 'try'))
+      or (IsCppSourceModule(EditView.Buffer.FileName) and (LowerCase(Item.HeadText) = '{')));
+    // begin 和 try 开头的块，以及 C 中的大括号，需要和上一行开头对齐
 
-     // 计算块首尾行
+    // 计算缩进量
+    CurrIndent := GetIndentPos(EditView);
+    BlockIndent := CnOtaGetBlockIndent;
+
+    if HasBlock then
+    begin
+      // 计算块首尾行
       StartLine := EditView.Block.StartingRow;
       EndLine := EditView.Block.EndingRow;
       if EditView.Block.EndingColumn > 1 then
         Inc(EndLine);
-
-      // 计算缩进量
-      CurrIndent := GetIndentPos(EditView);
-      BlockIndent := CnOtaGetBlockIndent;
 
       // 先把块和上一行先对齐
       if NeedAlignStart then
@@ -549,41 +564,47 @@ begin
       end
       else if Item.IndentLevel <> 0 then // 缩进当前块
         EditView.Block.Indent(BlockIndent * Item.IndentLevel);
-
-      Relocate := False;
-      CurX := 0;
-      CurY := 0;
-      Lines := TStringList.Create;
-      try
-        if HeadText <> '' then
-        begin
-          Lines.Text := HeadText;
-          if Item.HeadAutoIndent then
-            OutputLines(StartLine, CurrIndent + Item.HeadIndentLevel * BlockIndent)
-          else
-            OutputLines(StartLine, 0);
-          Inc(EndLine, Lines.Count);
-        end;
-
-        if TailText <> '' then
-        begin
-          Lines.Text := TailText;
-          if Item.TailAutoIndent then
-            OutputLines(EndLine, CurrIndent + Item.TailIndentLevel * BlockIndent)
-          else
-            OutputLines(EndLine, 0);
-        end;
-      finally
-        Lines.Free;
-      end;
-
-      if Relocate then
-        EditView.CursorPos := OTAEditPos(CurX, CurY);
+    end
+    else
+    begin
+      // 在当前光标插入
+      StartLine := EditView.CursorPos.Line;
+      EndLine := EditView.CursorPos.Line + 1;
     end;
 
-    Application.ProcessMessages;
-    EditView.Paint;
+    Relocate := False;
+    CurX := 0;
+    CurY := 0;
+    Lines := TStringList.Create;
+    try
+      if HeadText <> '' then
+      begin
+        Lines.Text := HeadText;
+        if Item.HeadAutoIndent then
+          OutputLines(StartLine, CurrIndent + Item.HeadIndentLevel * BlockIndent)
+        else
+          OutputLines(StartLine, 0);
+        Inc(EndLine, Lines.Count);
+      end;
+
+      if TailText <> '' then
+      begin
+        Lines.Text := TailText;
+        if Item.TailAutoIndent then
+          OutputLines(EndLine, CurrIndent + Item.TailIndentLevel * BlockIndent)
+        else
+          OutputLines(EndLine, 0);
+      end;
+    finally
+      Lines.Free;
+    end;
+
+    if Relocate then
+      EditView.CursorPos := OTAEditPos(CurX, CurY);
   end;
+
+  Application.ProcessMessages;
+  EditView.Paint;
 end;
 
 procedure TCnSrcEditorCodeWrapTool.InitMenuItems(AMenu: TMenuItem);
