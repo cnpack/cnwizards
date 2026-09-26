@@ -628,6 +628,11 @@ begin
 {$IFDEF CASTALIA_KEYMAPPING_CONFLICT_BUG}
   CheckKeyMappingEnhModulesSequence;
 {$ENDIF}
+
+{$IFDEF LAZARUS}
+  if WizOptions.DllPath = '' then
+    ErrorDlg('No CnPack IDE Wizards Data Found!' + #13#10 + 'Please Install CnPack IDE Wizards First.');
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}

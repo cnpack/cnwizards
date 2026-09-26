@@ -228,7 +228,7 @@ type
     property TemplatePath: string read FTemplatePath;
     {* 只读的系统模板文件存放目录，居于数据目录之下 }
     property UserPath: string read FUserPath;
-    {* 用户数据目录，存放所有保存用户数据和配置的文件存放，反安装时可选择不删除该目录}
+    {* 用户数据目录，存放所有保存用户数据和配置的文件存放，卸载时可选择不删除该目录}
     property HelpPath: string read FHelpPath;
     {* 帮助文件目录，存放专家包帮助文件}
 

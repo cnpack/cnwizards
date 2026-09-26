@@ -833,7 +833,7 @@ begin
   end;
 end;
 
-// 反安装键盘绑定
+// 卸载键盘绑定
 procedure TCnWizShortCutMgr.RemoveKeyBinding;
 {$IFDEF DELPHI_OTA}
 var
