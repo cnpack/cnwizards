@@ -511,14 +511,16 @@ begin
     end
     else
     begin
-{$IFDEF UNICODE}
-      AItem.Msg := string(AMsg);
-{$ELSE}
       if AItem.Encoding = Ord(meUtf8) then
         AItem.Msg := UTF8Decode(AMsg)
       else
+      begin
+{$IFDEF UNICODE}
+        AItem.Msg := string(AMsg);
+{$ELSE}
         AItem.Msg := AMsg;
 {$ENDIF}
+      end;
     end;
   end;
 end;
