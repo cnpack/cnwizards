@@ -539,8 +539,11 @@ begin
       SubActions[Index].Checked := not SubActions[Index].Checked;
 {$IFNDEF STAND_ALONE}
 {$IFNDEF FPC}
-      FTranslator.Active := SubActions[Index].Checked;
-      WizOptions.TranslateUI := FTranslator.Active;
+      if FTranslator <> nil then
+      begin
+        FTranslator.Active := SubActions[Index].Checked;
+        WizOptions.TranslateUI := FTranslator.Active;
+      end;
 {$ENDIF}
 {$ENDIF}
     end;
@@ -584,7 +587,12 @@ begin
 {$IFNDEF STAND_ALONE}
 {$IFNDEF FPC}
     if SubActions[Index].Visible then
-      SubActions[Index].Checked := FTranslator.Active;
+    begin
+      if FTranslator = nil then
+        SubActions[Index].Checked := False
+      else
+        SubActions[Index].Checked := FTranslator.Active;
+    end;
 {$ENDIF}
 {$ENDIF}
   end
@@ -607,7 +615,8 @@ begin
 {$ENDIF}
 {$IFNDEF STAND_ALONE}
 {$IFNDEF FPC}
-  FTranslator.Active := WizOptions.TranslateUI and (WizOptions.CurrentLangID = csChineseID);
+  if FTranslator <> nil then
+    FTranslator.Active := WizOptions.TranslateUI and (WizOptions.CurrentLangID = csChineseID);
 {$ENDIF}
 {$ENDIF}
 end;
@@ -626,7 +635,8 @@ begin
   inherited DebugComand(Cmds, Results);
 {$IFNDEF STAND_ALONE}
 {$IFNDEF FPC}
-  FTranslator.DebugCommand(Cmds, Results);
+  if FTranslator <> nil then
+    FTranslator.DebugCommand(Cmds, Results);
 {$ENDIF}
 {$ENDIF}
 end;

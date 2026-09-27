@@ -124,10 +124,19 @@ end;
 // 加载器 DLL 卸载函数，执行专家包 DLL 的卸载过程并卸载专家包 DLL
 procedure LoaderTerminate;
 begin
+  OutputDebugString(PChar('CnWizLoadUtil LoaderTerminate Enter'));
+
   if Assigned(LoaderTerminateProc) then
+  begin
+    OutputDebugString(PChar('CnWizLoadUtil Call LoaderTerminateProc'));
     LoaderTerminateProc();
+    OutputDebugString(PChar('CnWizLoadUtil LoaderTerminateProc Called'));
+  end;
   FreeLibrary(DllInst);
+  OutputDebugString(PChar('CnWizLoadUtil FreeLibrary Called'));
   DllInst := 0;
+
+  OutputDebugString(PChar('CnWizLoadUtil LoaderTerminate Leave'));
 end;
 
 function GetWizardDll: string;
@@ -263,5 +272,11 @@ begin
       end;
   end;
 end;
+
+initialization
+  OutputDebugString(PChar('CnWizLoadUtil initialization'));
+
+finalization
+  OutputDebugString(PChar('CnWizLoadUtil finalization'));
 
 end.
