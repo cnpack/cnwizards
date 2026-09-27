@@ -1084,9 +1084,14 @@ procedure TCnMainViewer.OnUpdateStore(var Msg: TMessage);
 var
   I: Integer;
 begin
+  // 读取线程只记录待通知状态，此处统一在主线程取走并刷新界面。
+  // Updating 为 True 时用 EndUpdate（同时会 Flush），否则直接 Flush，
+  // 覆盖主线程 EndUpdate 与读取线程 BeginUpdate 交错后留下的待刷新范围
   for I := 0 to CnMsgManager.Count - 1 do
     if CnMsgManager.Store[I].Updating then
-      CnMsgManager.Store[I].EndUpdate;
+      CnMsgManager.Store[I].EndUpdate
+    else
+      CnMsgManager.Store[I].FlushPendingNotify;
 end;
 
 procedure TCnMainViewer.OnNewChildForm(var Msg: TMessage);

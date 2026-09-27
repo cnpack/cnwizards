@@ -57,6 +57,11 @@ const
   EVT_SET_CAPTION  = 3;
   EVT_SHOW_CHILD   = 4;
 
+var
+  // 保护各 TCnMsgStore 的待通知状态（FChanged/FAddStart/FAddEnd 等），
+  // 读取线程写入、主线程取走刷新时必须互斥，避免通知范围被交错覆盖导致消息丢失
+  CSStoreChange: TRTLCriticalSection;
+
 type
 {$IFNDEF MSWINDOWS}
   DWORD = Cardinal;
@@ -154,6 +159,8 @@ type
     FAddStart: Integer;
     FAddEnd: Integer;
     FTimeChangeIndex: Integer;
+    FProcessChanged: Boolean;
+    FTimeChangedPending: Boolean;
 
     function GetMsgs(Index: Integer): TCnMsgItem;
     function GetTimes(Index: Integer): TCnTimeItem;
@@ -182,6 +189,8 @@ type
 
     procedure BeginUpdate;
     procedure EndUpdate;
+    {* 取走待通知的状态并在锁外触发 OnChange，只应在主线程调用 *}
+    procedure FlushPendingNotify;
 
     procedure LoadFromFile(Filer: ICnMsgFiler; const FileName: string);
     procedure SaveToFile(Filer: ICnMsgFiler; const FileName: string);
@@ -319,6 +328,16 @@ type
 
 var
   FCnMsgManager: TCnMsgManager = nil;
+
+procedure LockStoreChange;
+begin
+  EnterCriticalSection(CSStoreChange);
+end;
+
+procedure UnlockStoreChange;
+begin
+  LeaveCriticalSection(CSStoreChange);
+end;
 
 function CnMsgManager: TCnMsgManager;
 begin
@@ -575,21 +594,34 @@ begin
     AssignMsgDescToMsgItem(ADesc, AMsgItem);
     FMsgs.Add(AMsgItem);
 
-    FChanged := True;
-    // FAddStart 是最近一次需要更新的开始号, FAddEnd 是结束号
-    if FAddStart < 0 then
-      FAddStart := FMsgs.Count - 1;
-    FAddEnd := FMsgs.Count - 1;
+    // 记录待刷新范围，须与主线程的 FlushPendingNotify 互斥，
+    // 否则主线程取走范围后复位 FAddStart/FAddEnd 会覆盖掉此处刚写入的范围，导致消息丢失
+    LockStoreChange;
+    try
+      FChanged := True;
+      // FAddStart 是最近一次需要更新的开始号, FAddEnd 是结束号
+      if FAddStart < 0 then
+        FAddStart := FMsgs.Count - 1;
+      FAddEnd := FMsgs.Count - 1;
+    finally
+      UnlockStoreChange;
+    end;
     DoMsgAdded;
 
     if AMsgItem.MsgType = cmtTimeMarkStop then
     begin
       // 根据 Tag 值查旧的或新建 TimeItem，并更新内容
-      ATimeItem := IndexOfTime(AMsgItem.Tag, FTimeChangeIndex);
-      if ATimeItem = nil then
-      begin
-        ATimeItem := AddTimeItem(AMsgItem.Tag);
-        FTimeChangeIndex := FTimes.Count - 1;
+      LockStoreChange;
+      try
+        ATimeItem := IndexOfTime(AMsgItem.Tag, FTimeChangeIndex);
+        if ATimeItem = nil then
+        begin
+          ATimeItem := AddTimeItem(AMsgItem.Tag);
+          FTimeChangeIndex := FTimes.Count - 1;
+        end;
+        FTimeChangedPending := True;
+      finally
+        UnlockStoreChange;
       end;
 
       ATimeItem.PassCount := ATimeItem.PassCount + 1;
@@ -629,35 +661,59 @@ end;
 
 procedure TCnMsgStore.DoChanged(Operation: TCnStoreChangeType);
 begin
-  if FChanged and ((not FUpdating) or (Operation in [ctProcess, ctTimeChanged])) then
-  begin
-    // Updating 为 True 的状态下，需要保留 FChanged 的 True，等 EndUpdate 时再触
-    if not FUpdating then
-      FChanged := False;
-
-    if Assigned(FOnChange) then
-    begin
-      case Operation of
-        ctAdd:
-          begin
-            FOnChange(Self, ctAdd, FAddStart, FAddEnd);
-            FAddStart := -1;
-            FAddEnd := -1;
-          end;
-        ctProcess:
-          begin
-            FOnChange(Self, ctProcess, -1, -1);
-          end;
-        ctTimeChanged:
-          begin
-            FOnChange(Self, ctTimeChanged, FTimeChangeIndex, FTimeChangeIndex);
-          end;
-        // 其余暂未实现
-      else
-        ;
-      end;
+  // 只记录待通知状态，不再直接触发 OnChange：
+  // OnChange 会更新界面，而本方法可能在读取线程中被调用，
+  // 实际通知统一由主线程调用 FlushPendingNotify 完成
+  LockStoreChange;
+  try
+    case Operation of
+      ctAdd:        FChanged := True;
+      ctProcess:    FProcessChanged := True;
+      ctTimeChanged: FTimeChangedPending := True;
+    else
+      ; // 其余暂未实现
     end;
+  finally
+    UnlockStoreChange;
   end;
+end;
+
+procedure TCnMsgStore.FlushPendingNotify;
+var
+  ProcessChanged, TimeChanged: Boolean;
+  AddStart, AddEnd, TimeIndex: Integer;
+begin
+  // 无观察者时不取走待通知状态，保持累积，
+  // 等 OnChange 挂上后（子窗体创建完成）再一次性补显
+  if not Assigned(FOnChange) then
+    Exit;
+
+  // 在锁内取走全部待通知状态，在锁外触发 OnChange（回调中会更新界面）
+  LockStoreChange;
+  try
+    ProcessChanged := FProcessChanged;
+    TimeChanged := FTimeChangedPending;
+    TimeIndex := FTimeChangeIndex;
+    AddStart := FAddStart;
+    AddEnd := FAddEnd;
+
+    FProcessChanged := False;
+    FTimeChangedPending := False;
+    FChanged := False;
+    FAddStart := -1;
+    FAddEnd := -1;
+  finally
+    UnlockStoreChange;
+  end;
+
+  if ProcessChanged then
+    FOnChange(Self, ctProcess, -1, -1);
+
+  if (AddStart >= 0) and (AddEnd >= 0) then
+    FOnChange(Self, ctAdd, AddStart, AddEnd);
+
+  if TimeChanged then
+    FOnChange(Self, ctTimeChanged, TimeIndex, TimeIndex);
 end;
 
 procedure TCnMsgStore.ClearMsgs;
@@ -693,6 +749,8 @@ end;
 procedure TCnMsgStore.EndUpdate;
 begin
   Updating := False;
+  // 结束批量后统一触发挂起的通知（在主线程中调用）
+  FlushPendingNotify;
 end;
 
 function TCnMsgStore.GetMsgCount: Integer;
@@ -738,7 +796,6 @@ begin
   if FProcessID <> Value then
   begin
     FProcessID := Value;
-    FChanged := True;
     DoChanged(ctProcess);
   end;
 end;
@@ -748,7 +805,6 @@ begin
   if FProcName <> Value then
   begin
     FProcName := Value;
-    FChanged := True;
     DoChanged(ctProcess);
   end;
 end;
@@ -756,11 +812,7 @@ end;
 procedure TCnMsgStore.SetUpdating(const Value: Boolean);
 begin
   if FUpdating <> Value then
-  begin
     FUpdating := Value;
-    if not FUpdating then
-      DoChanged(ctAdd);
-  end;
 end;
 
 procedure TCnMsgStore.DoMsgAdded;
@@ -1133,6 +1185,7 @@ begin
 end;
 
 initialization
+  InitializeCriticalSection(CSStoreChange);
 
 finalization
   DebugDebuggerLog('CnMsgClasses Before finalization');
@@ -1142,5 +1195,6 @@ finalization
   Exiting := True;
   FreeAndNil(F);
 {$ENDIF}
+  DeleteCriticalSection(CSStoreChange);
 
 end.
