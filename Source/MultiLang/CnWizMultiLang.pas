@@ -443,7 +443,20 @@ begin
       S := CnLanguages.NameFromLocaleID[FStorage.Languages[I].LanguageID];
       if Pos('中国', S) <= 0 then
         S := StringReplace(S, '台湾', '中国台湾', [rfReplaceAll]);
-
+      if Pos('中國', S) <= 0 then
+      begin
+        S := StringReplace(S, '台灣', '中國台灣', [rfReplaceAll]);
+        S := StringReplace(S, '臺灣', '中國臺灣', [rfReplaceAll]);
+      end;
+ {$IFDEF LAZARUS}
+     if Pos(#$E4#$B8#$AD#$E5#$9B#$BD, S) <= 0 then
+       S := StringReplace(S, #$E5#$8F#$B0#$E6#$B9, #$E4#$B8#$AD#$E5#$9B#$BD#$E5#$8F#$B0#$E6#$B9, [rfReplaceAll]);
+     if Pos(#$E4#$B8#$AD#$E5#$9C#$8B, S) <= 0 then
+     begin
+       S := StringReplace(S, #$E5#$8F#$B0#$E7#$81#$A3, #$E4#$B8#$AD#$E5#$9C#$8B#$E5#$8F#$B0#$E7#$81#$A3, [rfReplaceAll]);
+       S := StringReplace(S, #$E8#$87#$BA#$E7#$81#$A3, #$E4#$B8#$AD#$E5#$9C#$8B#$E8#$87#$BA#$E7#$81#$A3, [rfReplaceAll]);
+     end;
+ {$ENDIF}
       FIndexes[I] := RegisterASubAction(csLanguage + IntToStr(I) + FStorage.
         Languages[I].Abbreviation, FStorage.Languages[I].LanguageName + ' - ' +
         S, 0, FStorage.Languages[I].LanguageName);
