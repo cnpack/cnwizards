@@ -400,6 +400,7 @@ end;
 
 constructor TCnWizMultiLang.Create;
 begin
+  FTranslateIndex := -1; // 防御性初始化，FPC 下不会注册 CnTranslateMenu 来设置它
   if CnLanguageManager <> nil then
     CnLanguageManager.OnLanguageChanged := WizLanguageChanged;
 
@@ -517,7 +518,8 @@ procedure TCnWizMultiLang.SubActionExecute(Index: Integer);
 var
   I: Integer;
 begin
-  if {$IFDEF STAND_ALONE} False {$ELSE} Index = FTranslateIndex {$ENDIF} then
+  // FTranslateIndex 仅在非 FPC 非独立应用时被赋为汉化子项索引，其余情况构造时置为 -1
+  if Index = FTranslateIndex then
   begin
     if WizOptions.CurrentLangID = csChineseID then
     begin
@@ -548,7 +550,8 @@ var
   I: Integer;
   Sep: TMenuItem;
 begin
-  if {$IFDEF STAND_ALONE} False {$ELSE} Index = FTranslateIndex {$ENDIF} then
+  // FTranslateIndex 仅在非 FPC 非独立应用时被赋为汉化子项索引，其余情况构造时置为 -1
+  if Index = FTranslateIndex then
   begin
     SubActions[Index].Visible := WizOptions.CurrentLangID = csChineseID;
 
