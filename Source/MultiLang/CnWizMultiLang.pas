@@ -89,8 +89,8 @@ type
 {$ENDIF}
     FActiveFormChangedReg: Boolean;
     FIndexes: array of Integer;
-{$IFNDEF STAND_ALONE}
     FTranslateIndex: Integer;
+{$IFNDEF STAND_ALONE}
 {$IFNDEF FPC}
     FTranslator: TCnMenuFormTranslator;
 {$ENDIF}
