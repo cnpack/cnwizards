@@ -43,9 +43,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, Menus,
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
   CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnIDEStrings,
-  CnWizConsts, CnSelectionCodeTool, CnIni, mPasLex;
+  CnWizConsts, CnWizClasses, CnSelectionCodeTool, CnIni, mPasLex;
 
 type
 
@@ -138,14 +138,16 @@ const
   SCnCInclude = '#include';
   SCnCppComment = '//--';
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   MemStream: TMemoryStream;
   Use1Line, Use2Line, CurLine, IntfLine, ImplLine: Integer;
   Uses1, Uses2, InImplement, CursorInImplement: Boolean;
   S: string;
   CSources: TStringList;
   I, InsertPos, CommentPos, CommentCount: Integer;
-
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
 begin
   View := CnOtaGetTopMostEditView;
   if View = nil then
@@ -170,8 +172,13 @@ begin
     try
       CnGeneralSaveEditorToStream(nil, MemStream); // Ansi/Utf16/Utf16
       FParser.Origin := MemStream.Memory;
-
+{$IFDEF DELPHI_OTA}
       CurLine := CnOtaGetCurrCharPos.Line;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      if not CnOtaGetCurSourcePos(I, CurLine) then
+        Exit;
+{$ENDIF}
 
       Use1Line := 0;
       Use2Line := 0;
@@ -253,26 +260,54 @@ begin
           if FUsesPosition = upNone then
           begin
             // 用书签记录位置，注意，连按跳到 interface 时不记。
+{$IFDEF DELPHI_OTA}
             View.BookmarkRecord(CnToggleUsesBookmarkID);
             FColumn := View.Buffer.EditPosition.Column;
 {$IFDEF DEBUG}
             CnDebugger.LogFmt('Toggle Uses Use1. Record Bookmark at %d/%d',
               [View.Buffer.EditPosition.Row, FColumn]);
 {$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+            View.SetBookMark(CnToggleUsesBookmarkID, View.CursorTextXY.X, View.CursorTextXY.Y);
+            FColumn := View.CursorTextXY.X;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Toggle Uses Use1. Record Bookmark at %d/%d',
+              [View.CursorTextXY.X, FColumn]);
+{$ENDIF}
+{$ENDIF}
           end;  
 
           if Uses1 then
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.GotoLine(Use1Line);
             View.Buffer.EditPosition.MoveEOL;
             View.Buffer.EditPosition.MoveRelative(0, -1);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            P.X := View.CursorTextXY.X;
+            P.Y := Use1Line;
+            View.CursorTextXY := P;
+            CnOtaMovePosInCurSource(ipLineEnd, 0, -1);
+{$ENDIF}
           end
           else
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.GotoLine(IntfLine);
             View.Buffer.EditPosition.MoveEOL;
             View.Buffer.EditPosition.InsertText(#$D#$A#$D#$A'uses'#$D#$A'  ;');
             View.Buffer.EditPosition.MoveRelative(0, -1);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            P.X := View.CursorTextXY.X;
+            P.Y := IntfLine;
+            View.CursorTextXY := P;
+            CnOtaMovePosInCurSource(ipLineEnd, 0, 0);
+            CnOtaInsertTextIntoEditor(#$D#$A#$D#$A'uses'#$D#$A'  ;');
+            CnOtaMovePosInCurSource(ipLineEnd, 0, -1);
+{$ENDIF}
             FUsesAdded := False;
           end;  
           FUsesPosition := upInterface;
@@ -281,25 +316,52 @@ begin
         else if FUsesPosition = upNone then
         begin
           // 用书签记录位置
+{$IFDEF DELPHI_OTA}
           View.BookmarkRecord(CnToggleUsesBookmarkID);
           FColumn := View.Buffer.EditPosition.Column;
 {$IFDEF DEBUG}
           CnDebugger.LogFmt('Toggle Uses Use2. Record Bookmark at %d/%d',
             [View.Buffer.EditPosition.Row, FColumn]);
 {$ENDIF}
-
+{$ENDIF}
+{$IFDEF LAZARUS}
+            View.SetBookMark(CnToggleUsesBookmarkID, View.CursorTextXY.X, View.CursorTextXY.Y);
+            FColumn := View.CursorTextXY.X;
+{$IFDEF DEBUG}
+            CnDebugger.LogFmt('Toggle Uses Use2. Record Bookmark at %d/%d',
+              [View.CursorTextXY.X, FColumn]);
+{$ENDIF}
+{$ENDIF}
           if Uses2 then
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.GotoLine(Use2Line);
             View.Buffer.EditPosition.MoveEOL;
             View.Buffer.EditPosition.MoveRelative(0, -1);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            P.X := View.CursorTextXY.X;
+            P.Y := Use2Line;
+            View.CursorTextXY := P;
+            CnOtaMovePosInCurSource(ipLineEnd, 0, -1);
+{$ENDIF}
           end
           else
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.GotoLine(ImplLine);
             View.Buffer.EditPosition.MoveEOL;
             View.Buffer.EditPosition.InsertText(#$D#$A#$D#$A'uses'#$D#$A'  ;');
             View.Buffer.EditPosition.MoveRelative(0, -1);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            P.X := View.CursorTextXY.X;
+            P.Y := ImplLine;
+            View.CursorTextXY := P;
+            CnOtaMovePosInCurSource(ipLineEnd, 0, 0);
+            CnOtaInsertTextIntoEditor(#$D#$A#$D#$A'uses'#$D#$A'  ;');
+            CnOtaMovePosInCurSource(ipLineEnd, 0, -1);
+{$ENDIF}
             FUsesAdded := False;
           end;
 
@@ -308,7 +370,8 @@ begin
       end
       else if IsCpp(S) or IsC(S) or IsH(S) or IsHpp(S) then // 解析 C
       begin
-        // 处理 C 的 Include 部分
+{$IFNDEF LAZARUS}
+        // 处理 C 的 Include 部分，注意Lazarus中不处理 C/C++ 文件
         CSources := TStringList.Create;
         try
           CSources.LoadFromStream(MemStream);
@@ -368,12 +431,17 @@ begin
         finally
           CSources.Free;
         end;
+{$ENDIF}
       end
       else
         Exit;
-
+{$IFDEF DELPHI_OTA}
       View.MoveViewToCursor;
       View.Paint;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      CnLazMoveViewToCursor(View);
+{$ENDIF}
       FJumpTime := GetTickCount;
     finally
       MemStream.Free;
@@ -419,22 +487,33 @@ end;
 
 procedure TCnEditorToggleUses.CursorReturnBack;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
+{$IFDEF LAZARUS}
+  X, Y: Integer;
+{$ENDIF}
 begin
   View := CnOtaGetTopMostEditView;
   if View = nil then
     Exit;
-
+{$IFDEF DELPHI_OTA}
   View.BookmarkGoto(CnToggleUsesBookmarkID);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.GetBookMark(CnToggleUsesBookmarkID, X, Y) then
+    CnOtaSetCurSourcePos(X, Y);
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Toggle Uses CursorReturnBack.');
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
   if View.Buffer.EditPosition.Column = 1 then // 行首则回到原列
     View.Buffer.EditPosition.MoveRelative(0, FColumn - 1);
   View.BookmarkToggle(CnToggleUsesBookmarkID);
   View.MoveViewToCursor;
   View.Paint;
+{$ENDIF}
 end;
 
 initialization

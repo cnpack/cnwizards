@@ -41,8 +41,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, Menus,
-  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard,
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus,
+  CnWizUtils, CnConsts, CnCommon, CnCodingToolsetWizard, CnWizClasses,
   CnWizConsts, CnSelectionCodeTool, CnIni, mPasLex;
 
 type
@@ -159,7 +159,7 @@ end;
 
 procedure TCnEditorToggleVar.Execute;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   MemStream: TMemoryStream;
   CurLine: Integer;
   InParenthesis, IdentifierNeeded: Boolean;
@@ -168,6 +168,9 @@ var
   LineText: string;
   LineNo, CharIndex: Integer;
   I, ProcLineOffSet, PrevLineOffSet: Integer;
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
 
   procedure SkipProcedureDeclaration;
   begin
@@ -312,7 +315,13 @@ begin
       FParser.Origin := MemStream.Memory;
 
       // 查找当前所在的 Proc 的局部变量区域并定位
+{$IFDEF DELPHI_OTA}
       CurLine := CnOtaGetCurrCharPos.Line;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      if not CnOtaGetCurSourcePos(I, CurLine) then
+        Exit;
+{$ENDIF}
       while not (FParser.TokenId in [tkNull, tkImplementation, tkProgram, tkLibrary]) do
         FParser.Next;
 
@@ -384,35 +393,70 @@ begin
       end;
 
       // 如果找到的 var 区比当前光标还后面，说明出错了
+{$IFDEF DELPHI_OTA}
       if AProcInfo.VarDeclareEnd > View.Buffer.EditPosition.Row then
         Exit;
 
       View.BookmarkRecord(CnToggleVarBookmarkID);
       FColumn := View.Buffer.EditPosition.Column;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      if AProcInfo.VarDeclareEnd > View.CursorTextXY.Y then
+        Exit;
+
+      View.SetBookMark(CnToggleVarBookmarkID, View.CursorTextXY.X, View.CursorTextXY.Y);
+      FColumn := View.CursorTextXY.X;
+{$ENDIF}
+
       FIsVar := True;
 
       if AProcInfo.HasVar then
       begin
+{$IFDEF DELPHI_OTA}
         View.Buffer.EditPosition.GotoLine(AProcInfo.VarDeclareEnd);
         View.Buffer.EditPosition.MoveEOL;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        P.X := View.CursorTextXY.X;
+        P.Y := AProcInfo.VarDeclareEnd;
+        View.CursorTextXY := P;
+        CnOtaMovePosInCurSource(ipLineEnd, 0, -1);
+{$ENDIF}
+
         if CnOtaGetCurrLineText(LineText, LineNo, CharIndex, View) then
         begin
           if FAddNewLine and (Trim(LineText) <> '') then // 增加新行
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.InsertText(#$D#$A);
             if View.Buffer.EditPosition.Column = 1 then
               View.Buffer.EditPosition.MoveRelative(0, PrevLineOffSet);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            CnOtaInsertTextIntoEditor(#$D#$A);
+            if View.CursorTextXY.X = 1 then
+              CnOtaMovePosInCurSource(ipCur, 0, PrevLineOffset);
+{$ENDIF}
             FLineAdded := True;
           end
-          else // 本行空行
-          if AProcInfo.VarDeclareEnd - AProcInfo.VarStart = 1 then // 上行是 var，缩进
+          else if AProcInfo.VarDeclareEnd - AProcInfo.VarStart = 1 then // 本行空行且上行是 var，缩进
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.MoveReal(View.Buffer.EditPosition.Row, 1);
             View.Buffer.EditPosition.MoveRelative(0, PrevLineOffSet + CnOtaGetBlockIndent);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            CnOtaMovePosInCurSource(ipLineHead, 0, PrevLineOffSet + 2); // 缩进还没拿到
+{$ENDIF}
           end
           else // 空行，上行是正常声明，不用额外缩进
           begin
+{$IFDEF DELPHI_OTA}
             View.Buffer.EditPosition.MoveRelative(0, PrevLineOffSet);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            CnOtaMovePosInCurSource(ipCur, 0, PrevLineOffset);
+{$ENDIF}
           end;
         end;
       end
@@ -420,6 +464,7 @@ begin
       begin
         if FAddVar then
         begin
+{$IFDEF DELPHI_OTA}
           View.Buffer.EditPosition.GotoLine(AProcInfo.VarDeclareEnd);
           View.Buffer.EditPosition.MoveEOL;
           View.Buffer.EditPosition.InsertText(#$D#$A);
@@ -430,11 +475,28 @@ begin
           View.Buffer.EditPosition.MoveRelative(0, CnOtaGetBlockIndent);
           // 此处不需要加 LineOffSet 因为已经缩进了
           FVarAdded := True;
+{$ENDIF}
+{$IFDEF LAZARUS}
+          P.X := View.CursorTextXY.X;
+          P.Y := AProcInfo.VarDeclareEnd;
+          View.CursorTextXY := P;
+          CnOtaMovePosInCurSource(ipLineEnd, 0, 0);
+          CnOtaInsertTextIntoEditor(#$D#$A);
+          FLineAdded := True;
+          CnOtaMovePosInCurSource(ipLineHead, 0, ProcLineOffSet);
+          CnOtaInsertTextIntoEditor('var'#$D#$A);
+          CnOtaMovePosInCurSource(ipLineHead, 0, 2); // 缩进还没拿到
+{$ENDIF}
         end;
       end;
 
+{$IFDEF DELPHI_OTA}
       View.MoveViewToCursor;
       View.Paint;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      CnLazMoveViewToCursor(View);
+{$ENDIF}
     finally
       MemStream.Free;
       AProcInfo.Free;
@@ -465,9 +527,12 @@ end;
 
 procedure TCnEditorToggleVar.CursorReturnBack;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   Text: string;
   LineNo, CharIndex: Integer;
+{$IFDEF LAZARUS}
+  X, Y: Integer;
+{$ENDIF}
 begin
   View := CnOtaGetTopMostEditView;
   if View = nil then
@@ -479,11 +544,18 @@ begin
     if FLineAdded and (Trim(Text) = '') then // 空行
     begin
       // 行首退格删除当前行
+{$IFDEF DELPHI_OTA}
       View.Buffer.EditPosition.MoveBOL;
       View.Buffer.EditPosition.BackspaceDelete(1);
+{$ENDIF}
+{$IFDEF LAZARUS}
+      CnOtaMovePosInCurSource(ipLineHead, 0, 0);
+
+{$ENDIF}
     end;
   end;
 
+{$IFDEF DELPHI_OTA}
   View.BookmarkGoto(CnToggleVarBookmarkID);
   if View.Buffer.EditPosition.Column = 1 then // 行首则回到原列
     View.Buffer.EditPosition.MoveRelative(0, FColumn - 1);
@@ -491,6 +563,16 @@ begin
 
   View.MoveViewToCursor;
   View.Paint;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if View.GetBookMark(CnToggleVarBookmarkID, X, Y) then
+    CnOtaSetCurSourcePos(X, Y);
+  if View.CursorTextXY.Y = 1 then
+    CnOtaMovePosInCurSource(ipLineHead, 0, FColumn - 1);
+
+  CnLazMoveViewToCursor(View);
+{$ENDIF}
+
   FIsVar := False;
   FVarAdded := False;
   FLineAdded := False;

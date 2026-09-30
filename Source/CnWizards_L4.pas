@@ -9,21 +9,22 @@ interface
 
 uses
   CnLazPkgEntry, CnWizConsts, CnWizCompilerConst, CnWizOptions, CnWizShortCut, 
-  CnWizMenuAction, CnWizClasses, CnPasCodeParser, CnPasWideLex, 
-  CnWidePasParser, mPasLex, CnWizManager, CnWizIdeUtils, CnWizUtils, 
-  CnWizAbout, CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, CnWizIdeDock, 
-  CnAICoderEngine, CnAICoderEngineImpl, CnAICoderNetClient, CnAICoderConfig, 
-  CnAICoderChatFrm, CnAICoderWizard, CnCodingToolsetWizard, 
-  CnProjectViewBaseFrm, CnEditorOpenFile, CnEditorOpenFileFrm, CnFloatWindow, 
-  CnSourceCropper, CnPascalAST, CnLineParser, CnWizEditFiler, 
-  CnProcListWizard, CnSrcEditorToolBar, CnFlatToolbarConfigFrm, 
-  CnComponentSelector, CnAsciiChart, CnSelectionCodeTool, CnEditorInsertColor, 
-  CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
-  CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
-  CnStatResultFrm, CnStatWizard, CnEditorCodeComment, CnPas2HtmlConfigFrm, 
-  CnPas2HtmlWizard, CnPasConvertTypeFrm, CnCodeFormatRules, 
-  CnCodeFormatterWizard, CnFormatterIntf, CnTabOrderWizard, CnWizCmdMsg, 
-  CnWizCmdNotify, CnWizCmdSend, LazarusPackageIntf;
+  CnWizMenuAction, CnWizClasses, CnWizManager, mPasLex, CnPasCodeParser, 
+  CnPasWideLex, CnWidePasParser, CnWizIdeUtils, CnWizUtils, CnWizIdeDock, 
+  CnFloatWindow, CnSourceCropper, CnPascalAST, CnLineParser, CnWizEditFiler, 
+  CnWizCmdMsg, CnWizCmdNotify, CnWizCmdSend, CnWizMultiLang, CnWizAbout, 
+  CnWizAboutFrm, CnMessageBoxWizard, CnWizConfigFrm, CnAICoderEngine, 
+  CnAICoderEngineImpl, CnAICoderNetClient, CnAICoderConfig, CnAICoderChatFrm, 
+  CnAICoderWizard, CnCodingToolsetWizard, CnProjectViewBaseFrm, 
+  CnEditorOpenFile, CnEditorOpenFileFrm, CnProcListWizard, CnSrcEditorToolBar, 
+  CnFlatToolbarConfigFrm, CnComponentSelector, CnAsciiChart, 
+  CnSelectionCodeTool, CnEditorInsertColor, CnEditorCodeSwap, 
+  CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, CnCommentCropper, 
+  CnBookmarkWizard, CnWizNotifier, CnStatFrm, CnStatResultFrm, CnStatWizard, 
+  CnEditorCodeComment, CnPas2HtmlConfigFrm, CnPas2HtmlWizard, 
+  CnPasConvertTypeFrm, CnCodeFormatRules, CnCodeFormatterWizard, 
+  CnFormatterIntf, CnTabOrderWizard, CnEditorToggleUses, CnEditorToggleVar, 
+  LazarusPackageIntf;
 
 implementation
 

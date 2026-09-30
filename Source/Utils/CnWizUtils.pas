@@ -588,6 +588,15 @@ function CnOtaGetRootComponentFromEditor(Editor: TCnIDEFormEditor): TComponent;
 function CnOtaGetCurrentFormEditor: TCnIDEFormEditor;
 {* 取当前窗体编辑器，也即在编辑的源文件对应的设计器}
 
+function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; View: TCnEditViewSourceInterface = nil): Boolean;
+{* 取当前行源代码}
+
+procedure CnOtaEditBackspace(Many: Integer);
+{* 在编辑器中退格}
+procedure CnOtaEditDelete(Many: Integer);
+{* 在编辑器中删除}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -729,18 +738,10 @@ function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectio
   KeepSelecting: Boolean = False; LineMode: Boolean = False): Boolean;
 {* 用文本替换选中的文本，参数是 Utf8 的 Ansi 字符串，可在 D2005~2007 下使用，不丢字符}
 
-procedure CnOtaEditBackspace(Many: Integer);
-{* 在编辑器中退格}
-procedure CnOtaEditDelete(Many: Integer);
-{* 在编辑器中删除}
-
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
-function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
-{* 取当前行源代码}
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; ActualPosWhenEmpty: Boolean = False): Boolean;
 {* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
@@ -1038,10 +1039,10 @@ function CnOtaSetCurSourceCol(Col: Integer): Boolean;
 function CnOtaSetCurSourceRow(Row: Integer): Boolean;
 {* 设定当前编辑的源文件中光标的位置，返回成功标志}
 
-function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer): Boolean;
+function CnOtaMovePosInCurSource(APos: TInsertPos; OffsetRow, OffsetCol: Integer): Boolean;
 {* 在当前编辑的源文件中移动光标，返回成功标志
  |<PRE>
-   Pos: TInsertPos        - 光标位置
+   APos: TInsertPos       - 光标位置类型
    Offset: Integer        - 偏移量
  |</PRE>}
 
@@ -1428,6 +1429,9 @@ procedure CnEnlargeButtonGlyphForHDPI(const Button: TControl);
 
 {$IFDEF LAZARUS}
 
+procedure CnLazMoveViewToCursor(Editor: TSourceEditorInterface);
+{* Lazarus 下将编辑器的光标处变为可见。}
+
 procedure CnLazSourceEditorCenterLine(Editor: TSourceEditorInterface; LineNo: Integer);
 {* Lazarus 下将光标跳至编辑器指定行的行首并将其垂直居中定位。}
 
@@ -1435,6 +1439,17 @@ function CnLazSaveEditorToStream(Editor: TSourceEditorInterface; Stream: TMemory
   FromCurrPos: Boolean = False; CheckUtf8: Boolean = False): Boolean;
 {* Lazarus 下保存编辑器文本到流中，不支持 Ansi 模式。
   CheckUtf8 为 True 时为 Utf8 格式带 #0，否则为 Utf16 格式带宽 #0}
+
+function CnLazEditBackspaceDelete(Editor: TSourceEditorInterface;
+  Many: Integer): Boolean;
+{* Lazarus 下实现光标朝左退格，类似于 EditPosition.BackspaceDelete
+  删除光标前 Many 个字符（字符数口径，跨行时换行符算一个字符）。
+  删除范围若不足 Many（到文件头为止），删到能删的为止；返回是否实际删除了内容。}
+
+function CnLazEditDelete(Editor: TSourceEditorInterface; Many: Integer): Boolean;
+{* Lazarus 下实现光标朝右删除，类似于 EditPosition.Delete
+  删除光标后 Many 个字符（字符数口径，跨行时换行符算一个字符）。
+  删除范围若不足 Many（到文件尾为止），删到能删的为止；返回是否实际删除了内容。}
 
 {$ENDIF}
 
@@ -4683,7 +4698,117 @@ begin
 
 {$IFDEF LAZARUS}
   if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
-    Result := LazarusIDE.GetDesignerForProjectEditor(SourceEditorManagerIntf.ActiveEditor, true) as TCnIDEFormEditor;
+    Result := LazarusIDE.GetDesignerForProjectEditor(SourceEditorManagerIntf.ActiveEditor, True) as TCnIDEFormEditor;
+{$ENDIF}
+end;
+
+// 取当前行源代码
+function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; View: TCnEditViewSourceInterface): Boolean;
+var
+  L1, L2: Integer;
+{$IFDEF DELPHI_OTA}
+  Reader: IOTAEditReader;
+  EditBuffer: IOTAEditBuffer;
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+  OutStr: AnsiString;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
+begin
+  Result := False;
+  if not Assigned(View) then
+    View := CnOtaGetTopMostEditView;
+  if not Assigned(View) then Exit;
+
+{$IFDEF DELPHI_OTA}
+  EditPos := View.CursorPos;
+  View.ConvertPos(True, EditPos, CharPos);
+  LineNo := CharPos.Line;
+  CharIndex := CharPos.CharIndex;
+
+  EditBuffer := View.Buffer;
+  L1 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo), EditBuffer.TopView);
+  if (LineNo >= View.Buffer.GetLinesInBuffer) then
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(High(SmallInt), LineNo + 1), EditBuffer.TopView)
+  else
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView) - 2;
+  SetLength(OutStr, L2 - L1);
+  Reader := EditBuffer.CreateReader;
+  try
+    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
+  finally
+    Reader := nil;
+  end;
+  {$IFDEF UNICODE}
+  Text := TrimRight(ConvertEditorTextToTextW(OutStr));
+  {$ELSE}
+  Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
+  {$ENDIF}
+  Result := True;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  P := View.CursorTextXY;
+  LineNo := P.Y;                 // 行号，1 开始
+  CharIndex := P.X - 1;          // 行内位置，0 开始，与 Delphi 版语义一致
+  if (LineNo >= 1) and (LineNo <= View.Lines.Count) then
+  begin
+    Text := TrimRight(View.Lines[LineNo - 1]);   // UTF-8，已去行尾空白
+    Result := True;
+  end;
+{$ENDIF}
+end;
+
+// 在编辑器中退格
+procedure CnOtaEditBackspace(Many: Integer);
+var
+{$IFDEF DELPHI_OTA}
+  EditPosition: IOTAEditPosition;
+{$ENDIF}
+  EditView: TCnEditViewSourceInterface;
+begin
+{$IFDEF DELPHI_OTA}
+  EditPosition := CnOtaGetEditPosition;
+  if Assigned(EditPosition) then
+  begin
+    EditPosition.BackspaceDelete(Many);
+    EditView := CnOtaGetTopMostEditView;
+    if Assigned(EditView) then
+      EditView.Paint;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  EditView := CnOtaGetTopMostEditView;
+  if EditView <> nil then
+    CnLazEditBackspaceDelete(EditView, Many);
+{$ENDIF}
+end;
+
+// 在编辑器中删除
+procedure CnOtaEditDelete(Many: Integer);
+var
+{$IFDEF DELPHI_OTA}
+  EditPosition: IOTAEditPosition;
+{$ENDIF}
+  EditView: TCnEditViewSourceInterface;
+begin
+{$IFDEF DELPHI_OTA}
+  EditPosition := CnOtaGetEditPosition;
+  if Assigned(EditPosition) then
+  begin
+    EditPosition.Delete(Many);
+    EditView := CnOtaGetTopMostEditView;
+    if Assigned(EditView) then
+      EditView.Paint;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  EditView := CnOtaGetTopMostEditView;
+  if EditView <> nil then
+    CnLazEditDelete(EditView, Many);
 {$ENDIF}
 end;
 
@@ -5841,6 +5966,7 @@ begin
 end;
 
 {$IFDEF SUPPORT_OTA_PROJECT_CONFIGURATION}
+
 // * 取当前工程配置选项，2009 后才有效
 function CnOtaGetActiveProjectOptionsConfigurations
   (Project: IOTAProject = nil): IOTAProjectOptionsConfigurations;
@@ -5854,6 +5980,7 @@ begin
 
   Result := nil;
 end;
+
 {$ENDIF}
 
 // 取环境设置中新建窗体的文件类型
@@ -6109,38 +6236,6 @@ begin
   Result := True;
 end;
 
-// 在编辑器中退格
-procedure CnOtaEditBackspace(Many: Integer);
-var
-  EditPosition: IOTAEditPosition;
-  EditView: IOTAEditView;
-begin
-  EditPosition := CnOtaGetEditPosition;
-  if Assigned(EditPosition) then
-  begin
-    EditPosition.BackspaceDelete(Many);
-    EditView := CnOtaGetTopMostEditView;
-    if Assigned(EditView) then
-      EditView.Paint;
-  end;
-end;
-
-// 在编辑器中删除
-procedure CnOtaEditDelete(Many: Integer);
-var
-  EditPosition: IOTAEditPosition;
-  EditView: IOTAEditView;
-begin
-  EditPosition := CnOtaGetEditPosition;
-  if Assigned(EditPosition) then
-  begin
-    EditPosition.Delete(Many);
-    EditView := CnOtaGetTopMostEditView;
-    if Assigned(EditView) then
-      EditView.Paint;
-  end;
-end;
-
 {$IFNDEF CNWIZARDS_MINIMUM}
 
 // 获取当前光标所在的类名或声明
@@ -6172,48 +6267,6 @@ begin
   EditView.ConvertPos(True, EditPos, CharPos);
   Result := string(Parser.FindCurrentDeclaration(CharPos.Line, CharPos.CharIndex, Vis));
   Parser.Free;
-end;
-
-// 取当前行源代码
-function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; View: IOTAEditView = nil): Boolean;
-var
-  L1, L2: Integer;
-  Reader: IOTAEditReader;
-  EditBuffer: IOTAEditBuffer;
-  EditPos: TOTAEditPos;
-  CharPos: TOTACharPos;
-  OutStr: AnsiString;
-begin
-  Result := False;
-  if not Assigned(View) then
-    View := CnOtaGetTopMostEditView;
-  if not Assigned(View) then Exit;
-
-  EditPos := View.CursorPos;
-  View.ConvertPos(True, EditPos, CharPos);
-  LineNo := CharPos.Line;
-  CharIndex := CharPos.CharIndex;
-
-  EditBuffer := View.Buffer;
-  L1 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo), EditBuffer.TopView);
-  if (LineNo >= View.Buffer.GetLinesInBuffer) then
-    L2 := CnOtaEditPosToLinePos(OTAEditPos(High(SmallInt), LineNo + 1), EditBuffer.TopView)
-  else
-    L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView) - 2;
-  SetLength(OutStr, L2 - L1);
-  Reader := EditBuffer.CreateReader;
-  try
-    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
-  finally
-    Reader := nil;
-  end;
-  {$IFDEF UNICODE}
-  Text := TrimRight(ConvertEditorTextToTextW(OutStr));
-  {$ELSE}
-  Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
-  {$ENDIF}
-  Result := True;
 end;
 
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
@@ -8602,7 +8655,7 @@ begin
 end;
 
 // 在当前源文件中移动光标
-function CnOtaMovePosInCurSource(Pos: TInsertPos; OffsetRow, OffsetCol: Integer): Boolean;
+function CnOtaMovePosInCurSource(APos: TInsertPos; OffsetRow, OffsetCol: Integer): Boolean;
 {$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
@@ -8624,7 +8677,7 @@ begin
   if Assigned(Editor) then
   begin
     P := Editor.CursorTextXY;
-    case Pos of
+    case APos of
       ipFileHead:
         begin
           P.X := 1;
@@ -8663,7 +8716,7 @@ begin
   try
     iEditPosition := CnOtaGetEditPosition;
     if iEditPosition = nil then Exit;
-    case Pos of
+    case APos of
       ipFileHead: if not iEditPosition.Move(1, 1) then Exit;
       ipFileEnd: if not iEditPosition.MoveEOF then Exit;
       ipLineHead: if not iEditPosition.MoveBOL then Exit;
@@ -11126,6 +11179,18 @@ end;
 
 {$IFDEF LAZARUS}
 
+procedure CnLazMoveViewToCursor(Editor: TSourceEditorInterface);
+var
+  P: TPoint;
+begin
+  if Editor = nil then Exit;
+  P := Editor.CursorTextXY;
+  if P.Y < Editor.TopLine then
+    Editor.TopLine := P.Y                                  // 光标在可视区上方
+  else if P.Y >= Editor.TopLine + Editor.LinesInWindow then
+    Editor.TopLine := P.Y - Editor.LinesInWindow + 1;      // 光标在可视区下方
+end;
+
 procedure CnLazSourceEditorCenterLine(Editor: TSourceEditorInterface; LineNo: Integer);
 var
   P: TPoint;
@@ -11183,6 +11248,98 @@ begin
         Result := True;
       end;
     end;
+  end;
+end;
+
+function CnLazEditBackspaceDelete(Editor: TSourceEditorInterface;
+  Many: Integer): Boolean;
+var
+  FromP, CurP: TPoint;
+begin
+  Result := False;
+  if (Editor = nil) or (Many <= 0) then
+    Exit;
+
+  CurP := Editor.CursorTextXY;
+  FromP := CurP;
+
+  while Many > 0 do
+  begin
+    if FromP.X > 1 then
+    begin
+      if FromP.X - 1 >= Many then
+      begin
+        FromP.X := FromP.X - Many; // 整段回退在本行内
+        Many := 0;
+      end
+      else
+      begin
+        Dec(Many, FromP.X - 1); // 先退到本行行首
+        FromP.X := 1;
+      end;
+    end
+    else
+    begin
+      if FromP.Y <= 1 then
+        Break; // 已到文件头，能删多少删多少
+      // 跨行：换行符本身算一个被删除的字符
+      Dec(FromP.Y);
+      FromP.X := GetCharLengthFromUtf8(PAnsiChar(Editor.Lines[FromP.Y - 1])) + 1;
+      Dec(Many);
+    end;
+  end;
+
+  if (FromP.Y < CurP.Y) or (FromP.X < CurP.X) then
+  begin
+    Editor.ReplaceText(FromP, CurP, ''); // 删除区间，光标停在删除起点
+    Result := True;
+  end;
+end;
+
+// 删除光标后 Many 个字符（字符数口径，跨行时换行符算一个字符）。
+// 删除范围若不足 Many（到文件尾为止），删到能删的为止；返回是否实际删除了内容。
+function CnLazEditDelete(Editor: TSourceEditorInterface; Many: Integer): Boolean;
+var
+  CurP, ToP: TPoint;
+  LineChars: Integer;
+begin
+  Result := False;
+  if (Editor = nil) or (Many <= 0) then
+    Exit;
+  if Editor.Lines.Count = 0 then
+    Exit;
+
+  CurP := Editor.CursorTextXY;
+  ToP := CurP;
+
+  while Many > 0 do
+  begin
+    // 当前行字符数（UTF-8 码点口径，与 SynEdit 列语义一致）
+    LineChars := GetCharLengthFromUtf8(PAnsiChar(Editor.Lines[ToP.Y - 1]));
+
+    if ToP.X + Many <= LineChars + 1 then
+    begin
+      // 整段前移在本行内（含恰好删到行尾后一列的情况）
+      Inc(ToP.X, Many);
+      Many := 0;
+    end
+    else
+    begin
+      // 删掉本行光标后的剩余字符
+      Dec(Many, LineChars - ToP.X + 1);
+      if ToP.Y >= Editor.Lines.Count then
+        Break; // 已是最后一行，删到行尾为止
+      // 跨行：换行符本身算一个被删除的字符
+      Inc(ToP.Y);
+      ToP.X := 1;
+      Dec(Many);
+    end;
+  end;
+
+  if (ToP.Y > CurP.Y) or (ToP.X > CurP.X) then
+  begin
+    Editor.ReplaceText(CurP, ToP, ''); // 删除区间，光标停在删除起点
+    Result := True;
   end;
 end;
 

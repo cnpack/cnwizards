@@ -15,10 +15,14 @@
       </SearchPaths>
       <Other>
         <CustomOptions Value="-dSUPPORT_EVALUATE
--dENABLE_UIINTERACT"/>
-        <OtherDefines Count="2">
+-dENABLE_UIINTERACT
+-dDEBUG
+-dCAPTURE_STACK"/>
+        <OtherDefines Count="4">
           <Define0 Value="SUPPORT_EVALUATE"/>
           <Define1 Value="ENABLE_UIINTERACT"/>
+          <Define2 Value="DEBUG"/>
+          <Define3 Value="CAPTURE_STACK"/>
         </OtherDefines>
       </Other>
     </CompilerOptions>
@@ -53,6 +57,14 @@
         <UnitName Value="CnWizClasses"/>
       </Item>
       <Item>
+        <Filename Value="Framework\CnWizManager.pas"/>
+        <UnitName Value="CnWizManager"/>
+      </Item>
+      <Item>
+        <Filename Value="ThirdParty\mPasLex.pas"/>
+        <UnitName Value="mPasLex"/>
+      </Item>
+      <Item>
         <Filename Value="Utils\CnPasCodeParser.pas"/>
         <UnitName Value="CnPasCodeParser"/>
       </Item>
@@ -65,20 +77,52 @@
         <UnitName Value="CnWidePasParser"/>
       </Item>
       <Item>
-        <Filename Value="ThirdParty\mPasLex.pas"/>
-        <UnitName Value="mPasLex"/>
-      </Item>
-      <Item>
-        <Filename Value="Framework\CnWizManager.pas"/>
-        <UnitName Value="CnWizManager"/>
-      </Item>
-      <Item>
         <Filename Value="Utils\CnWizIdeUtils.pas"/>
         <UnitName Value="CnWizIdeUtils"/>
       </Item>
       <Item>
         <Filename Value="Utils\CnWizUtils.pas"/>
         <UnitName Value="CnWizUtils"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizIdeDock.pas"/>
+        <UnitName Value="CnWizIdeDock"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnFloatWindow.pas"/>
+        <UnitName Value="CnFloatWindow"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnSourceCropper.pas"/>
+        <UnitName Value="CnSourceCropper"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnPascalAST.pas"/>
+        <UnitName Value="CnPascalAST"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnLineParser.pas"/>
+        <UnitName Value="CnLineParser"/>
+      </Item>
+      <Item>
+        <Filename Value="Utils\CnWizEditFiler.pas"/>
+        <UnitName Value="CnWizEditFiler"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdMsg.pas"/>
+        <UnitName Value="CnWizCmdMsg"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdNotify.pas"/>
+        <UnitName Value="CnWizCmdNotify"/>
+      </Item>
+      <Item>
+        <Filename Value="Command\CnWizCmdSend.pas"/>
+        <UnitName Value="CnWizCmdSend"/>
+      </Item>
+      <Item>
+        <Filename Value="MultiLang\CnWizMultiLang.pas"/>
+        <UnitName Value="CnWizMultiLang"/>
       </Item>
       <Item>
         <Filename Value="Misc\CnWizAbout.pas"/>
@@ -95,10 +139,6 @@
       <Item>
         <Filename Value="Config\CnWizConfigFrm.pas"/>
         <UnitName Value="CnWizConfigFrm"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnWizIdeDock.pas"/>
-        <UnitName Value="CnWizIdeDock"/>
       </Item>
       <Item>
         <Filename Value="AICoder\CnAICoderEngine.pas"/>
@@ -139,26 +179,6 @@
       <Item>
         <Filename Value="CodingToolset\CnEditorOpenFileFrm.pas"/>
         <UnitName Value="CnEditorOpenFileFrm"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnFloatWindow.pas"/>
-        <UnitName Value="CnFloatWindow"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnSourceCropper.pas"/>
-        <UnitName Value="CnSourceCropper"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnPascalAST.pas"/>
-        <UnitName Value="CnPascalAST"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnLineParser.pas"/>
-        <UnitName Value="CnLineParser"/>
-      </Item>
-      <Item>
-        <Filename Value="Utils\CnWizEditFiler.pas"/>
-        <UnitName Value="CnWizEditFiler"/>
       </Item>
       <Item>
         <Filename Value="SimpleWizard\CnProcListWizard.pas"/>
@@ -261,16 +281,12 @@
         <UnitName Value="CnTabOrderWizard"/>
       </Item>
       <Item>
-        <Filename Value="Command\CnWizCmdMsg.pas"/>
-        <UnitName Value="CnWizCmdMsg"/>
+        <Filename Value="CodingToolset\CnEditorToggleUses.pas"/>
+        <UnitName Value="CnEditorToggleUses"/>
       </Item>
       <Item>
-        <Filename Value="Command\CnWizCmdNotify.pas"/>
-        <UnitName Value="CnWizCmdNotify"/>
-      </Item>
-      <Item>
-        <Filename Value="Command\CnWizCmdSend.pas"/>
-        <UnitName Value="CnWizCmdSend"/>
+        <Filename Value="CodingToolset\CnEditorToggleVar.pas"/>
+        <UnitName Value="CnEditorToggleVar"/>
       </Item>
     </Files>
     <RequiredPkgs>
