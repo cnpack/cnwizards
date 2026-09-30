@@ -59,7 +59,7 @@ uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, {$ENDIF} {$ELSE}
-  {$IFDEF DELPHI_OTA} ToolsAPI,  CnRestoreSystemMenu, CnWizIdeHooks,
+  {$IFDEF DELPHI_OTA} ToolsAPI, CnRestoreSystemMenu, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
   CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
@@ -709,7 +709,7 @@ begin
   hMutex := CreateMutex(nil, False, csCnWizFreeMutex);
 {$IFDEF DEBUG}
   if GetLastError = ERROR_ALREADY_EXISTS then
-    CnDebugger.LogMsg('Waiting for another instance');
+    CnDebugger.LogMsg('Waiting for Another Instance');
 {$ENDIF}
   WaitForSingleObject(hMutex, csMaxWaitFreeTick);
 
@@ -2200,8 +2200,14 @@ initialization
 {$ENDIF}
 
 finalization
+{$IFDEF DEBUG}
+  CnDebugger.LogEnter('CnWizManager: finalization.');
+{$ENDIF}
   FreeAndNil(CnDesignExecutorList);
   FreeAndNil(CnEditorExecutorList);
+{$IFDEF DEBUG}
+  CnDebugger.LogLeave('CnWizManager: finalization.');
+{$ENDIF}
 
 end.
 

@@ -1965,7 +1965,7 @@ begin
   for I := 0 to EditorCount - 1 do
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('EditControlWrapper.OnIdle to CheckEditorChanges #%d EditorObj %p.', [I, Pointer(Editors[I])]);
+//  CnDebugger.LogFmt('EditControlWrapper.OnIdle to CheckEditorChanges #%d EditorObj %p.', [I, Pointer(Editors[I])]);
 {$ENDIF}
     ChangeType := CheckEditorChanges(Editors[I]) + OptionType;
     if ChangeType <> [] then

@@ -1884,13 +1884,13 @@ initialization
 
 finalization
 {$IFDEF DEBUG}
-  CnDebugger.LogEnter('CnBaseWizard finalization.');
+  CnDebugger.LogEnter('CnWizClasses finalization.');
 {$ENDIF}
 
   FreeAndNil(CnWizardClassList);
 
 {$IFDEF DEBUG}
-  CnDebugger.LogLeave('CnBaseWizard finalization.');
+  CnDebugger.LogLeave('CnWizClasses finalization.');
 {$ENDIF}
 
 end.

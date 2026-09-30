@@ -132,9 +132,14 @@ begin
     LoaderTerminateProc();
     OutputDebugString(PChar('CnWizLoadUtil LoaderTerminateProc Called'));
   end;
-  FreeLibrary(DllInst);
-  OutputDebugString(PChar('CnWizLoadUtil FreeLibrary Called'));
-  DllInst := 0;
+
+  if DllInst <> 0 then
+  begin
+    OutputDebugString(PChar('CnWizLoadUtil Call FreeLibrary'));
+    FreeLibrary(DllInst);
+    OutputDebugString(PChar('CnWizLoadUtil FreeLibrary Called'));
+    DllInst := 0;
+  end;
 
   OutputDebugString(PChar('CnWizLoadUtil LoaderTerminate Leave'));
 end;
