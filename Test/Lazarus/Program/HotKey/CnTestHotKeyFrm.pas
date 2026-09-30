@@ -17,7 +17,10 @@ type
   private
     hkTest: THotKey;
     memoLog: TMemo;
+    FLastSC: TShortCut;
+	function HotKeyToText(SC: TShortCut): string;
     function VirtualKeyToText(VKey: Word): string;
+    procedure HotKeyChange(Sender: TObject);
     procedure HotKeyExit(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
@@ -46,7 +49,9 @@ begin
   hkTest.Parent := Self;
   hkTest.SetBounds(20, 20, 250, 24);
   hkTest.TabOrder := 0;
+  hkTest.OnChange := HotKeyChange;
   hkTest.OnExit := HotKeyExit;
+  FLastSC := 0;
 
   // 动态创建用于打印结果的 Memo
   memoLog := TMemo.Create(Self);
@@ -138,26 +143,48 @@ begin
   end;
 end;
 
-procedure TFormHotKeyTest.HotKeyExit(Sender: TObject);
+function TFormHotKeyTest.HotKeyToText(SC: TShortCut): string;
 var
-  SC: TShortCut;
   Key: Word;
   Shift: TShiftState;
-  S: string;
 begin
-  SC := hkTest.HotKey;
   if SC = 0 then
-    memoLog.Lines.Add('HotKey Exit: (None)')
+    Result := '(None)'
   else
   begin
     // 同 CnHotKey.pas：用 ShortCutToKey 拆开后自行拼接修饰键与键名文本
     ShortCutToKey(SC, Key, Shift);
-    S := '';
-    if ssCtrl in Shift then S := S + 'Ctrl+';
-    if ssAlt in Shift then S := S + 'Alt+';
-    if ssShift in Shift then S := S + 'Shift+';
-    S := S + VirtualKeyToText(Key);
-    memoLog.Lines.Add('HotKey Exit: ' + S);
+    Result := '';
+    if ssCtrl in Shift then Result := Result + 'Ctrl+';
+    if ssAlt in Shift then Result := Result + 'Alt+';
+    if ssShift in Shift then Result := Result + 'Shift+';
+    Result := Result + VirtualKeyToText(Key);
+  end;
+end;
+
+procedure TFormHotKeyTest.HotKeyChange(Sender: TObject);
+var
+  SC: TShortCut;
+begin
+  // 确认热键（含方向键等所有按键）时立即打印
+  SC := hkTest.HotKey;
+  if SC <> FLastSC then
+  begin
+    FLastSC := SC;
+    memoLog.Lines.Add('HotKey Change: ' + HotKeyToText(SC));
+  end;
+end;
+
+procedure TFormHotKeyTest.HotKeyExit(Sender: TObject);
+var
+  SC: TShortCut;
+begin
+  // 失焦时仅在值有变化时补充打印
+  SC := hkTest.HotKey;
+  if SC <> FLastSC then
+  begin
+    FLastSC := SC;
+    memoLog.Lines.Add('HotKey Exit: ' + HotKeyToText(SC));
   end;
 end;
 
