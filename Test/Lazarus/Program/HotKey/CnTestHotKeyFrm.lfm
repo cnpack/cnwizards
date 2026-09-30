@@ -1,0 +1,14 @@
+object FormHotKeyTest: TFormHotKeyTest
+  Left = 300
+  Height = 380
+  Top = 200
+  Width = 420
+  BorderStyle = bsSingle
+  Caption = 'CnHotKey Test'
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Position = poScreenCenter
+  LCLVersion = '4.0.0.4'
+end

@@ -41,7 +41,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Windows, Menus;
+  Windows, Messages, Menus;
 
 type
   THKModifier = (hkShift, hkCtrl, hkAlt, hkExt);
@@ -76,6 +76,7 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
+    procedure WndProc(var Message: TMessage); override;
     property VirtKey: Word read FVirtKey;
   published
     property HotKey: TShortCut read GetHotKey write SetHotKey;
@@ -156,7 +157,12 @@ begin
   if Cancel then
     SetHotKey(FOriginalHotKey)
   else
+  begin
     UpdateDisplay;
+    // 确认热键后通知值已改变，供外部即时打印或保存
+    if Assigned(FOnChange) then
+      FOnChange(Self);
+  end;
 end;
 
 function THotKey.GetHotKey: TShortCut;
@@ -236,9 +242,14 @@ function THotKey.ShortCutToText(ShortCut: TShortCut): string;
 var
   Key: Word;
   Shift: TShiftState;
+  S: string;
 begin
   Menus.ShortCutToKey(ShortCut, Key, Shift);
-  Result := GetModifiersText(Shift) + '+' + VirtualKeyToString(Key);
+  S := GetModifiersText(Shift);
+  if S = '' then
+    Result := VirtualKeyToString(Key)
+  else
+    Result := S + '+' + VirtualKeyToString(Key);
 end;
 
 function THotKey.VirtualKeyToString(VKey: Word): string;
@@ -275,10 +286,10 @@ begin
     VK_END:        Result := 'End';
     VK_PRIOR:      Result := 'PgUp';
     VK_NEXT:       Result := 'PgDn';
-    VK_UP:         Result := '↑';
-    VK_DOWN:       Result := '↓';
-    VK_LEFT:       Result := '←';
-    VK_RIGHT:      Result := '→';
+    VK_UP:         Result := 'Up';
+    VK_DOWN:       Result := 'Down';
+    VK_LEFT:       Result := 'Left';
+    VK_RIGHT:      Result := 'Right';
     VK_RETURN:     Result := 'Enter';
     VK_ESCAPE:     Result := 'Esc';
     VK_BACK:       Result := 'Back';
@@ -311,6 +322,13 @@ begin
     VK_OEM_PERIOD: Result := '.';
     VK_OEM_MINUS:  Result := '-';
     VK_OEM_PLUS:   Result := '+';
+    VK_OEM_1:      Result := ';';
+    VK_OEM_2:      Result := '/';
+    VK_OEM_3:      Result := '`';
+    VK_OEM_4:      Result := '[';
+    VK_OEM_5:      Result := '\';
+    VK_OEM_6:      Result := ']';
+    VK_OEM_7:      Result := '''';
 
     0:             Result := '';
 
@@ -329,7 +347,12 @@ procedure THotKey.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   inherited KeyDown(Key, Shift);
 
-  if not FCapturing then Exit;
+  // 未在捕获状态时重新进入捕获（保留当前热键值），使后续按键仍可继续录入
+  if not FCapturing then
+  begin
+    FCapturing := True;
+    FOriginalHotKey := GetHotKey;
+  end;
 
   // 处理特殊键
   case Key of
@@ -375,6 +398,8 @@ begin
   if Key in [VK_SHIFT, VK_CONTROL, VK_MENU] then
   begin
     FModifiers := ShiftStateToModifiers(Shift);
+    if FModifiers = [] then
+      FVirtKey := 0; // 修饰键全部松开，清除未确认的键值，全清空显示
     UpdateDisplay; // 实时更新修饰键显示
   end;
 
@@ -386,6 +411,22 @@ begin
   inherited;
   if not FCapturing and Focused then
     StartCapture;
+end;
+
+procedure THotKey.WndProc(var Message: TMessage);
+var
+  Key: Word;
+begin
+  // 在消息层拦截按键，防止原生编辑框先行处理（如方向键移动光标），
+  // 确保方向键等所有按键都能作为热键捕获
+  if Message.Msg = WM_KEYDOWN then
+  begin
+    Key := TWMKey(Message).CharCode;
+    KeyDown(Key, KeyDataToShiftState(TWMKey(Message).KeyData));
+    if Key = 0 then // 已消费，直接吞掉消息
+      Exit;
+  end;
+  inherited WndProc(Message);
 end;
 
 {$ENDIF FPC}
