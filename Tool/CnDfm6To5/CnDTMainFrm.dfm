@@ -323,7 +323,9 @@ object CnDTMainForm: TCnDTMainForm
           TabOrder = 6
           Items.Strings = (
             'To UTF-8'
+            'To UTF-8 (No BOM)'
             'To UTF-16'
+            'To UTF-16 (No BOM)'
             'To ANSI'
             'To CRLF (Windows)'
             'To LF (Unix/Mac)')

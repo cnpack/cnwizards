@@ -45,7 +45,7 @@ uses
   CnHashLangStorage, CnLangMgr, CnClasses, CnWideCtrls, ExtCtrls;
 
 type
-  TCnSrcConvType = (sctUtf8, sctUtf16, sctAnsi, sctCRLF, sctLF);
+  TCnSrcConvType = (sctUtf8, sctUtf8NoBom, sctUtf16, sctUtf16NoBom, sctAnsi, sctCRLF, sctLF);
 
   TCnSrcConvertResult = (scrSucc, scrOpenError, scrSaveError, scrInvalidFormat);
 
@@ -127,8 +127,8 @@ type
 
     function InternalConvertSource(const FileName: string;
       ConvType: TCnSrcConvType): TCnSrcConvertResult;
-    function InternalToUtf8(const FileName: string): TCnSrcConvertResult;
-    function InternalToUtf16(const FileName: string): TCnSrcConvertResult;
+    function InternalToUtf8(const FileName: string; WithBom: Boolean = True): TCnSrcConvertResult;
+    function InternalToUtf16(const FileName: string; WithBom: Boolean = True): TCnSrcConvertResult;
     function InternalToAnsi(const FileName: string): TCnSrcConvertResult;
     function InternalToCRLF(const FileName: string): TCnSrcConvertResult;
     function InternalToLF(const FileName: string): TCnSrcConvertResult;
@@ -526,8 +526,12 @@ begin
   case ConvType of
     sctUtf8:
       Result := InternalToUtf8(FileName);
+    sctUtf8NoBom:
+      Result := InternalToUtf8(FileName, False);
     sctUtf16:
       Result := InternalToUtf16(FileName);
+    sctUtf16NoBom:
+      Result := InternalToUtf16(FileName, False);
     sctAnsi:
       Result := InternalToAnsi(FileName);
     sctCRLF:
@@ -682,7 +686,8 @@ begin
   Result := scrSucc;
 end;
 
-function TCnDTMainForm.InternalToUtf16(const FileName: string): TCnSrcConvertResult;
+function TCnDTMainForm.InternalToUtf16(const FileName: string;
+  WithBom: Boolean): TCnSrcConvertResult;
 var
   List: TCnWideStringList;
   TmpFile: string;
@@ -702,7 +707,7 @@ begin
 
     TmpFile := FileName + '.~tmp';
     try
-      List.WriteBOM := True;
+      List.WriteBOM := WithBom;
       List.SaveToFile(TmpFile, wlfUnicode);
     except
       Result := scrSaveError;
@@ -727,7 +732,8 @@ begin
   Result := scrSucc;
 end;
 
-function TCnDTMainForm.InternalToUtf8(const FileName: string): TCnSrcConvertResult;
+function TCnDTMainForm.InternalToUtf8(const FileName: string;
+  WithBom: Boolean): TCnSrcConvertResult;
 var
   List: TCnWideStringList;
   TmpFile: string;
@@ -747,7 +753,7 @@ begin
 
     TmpFile := FileName + '.~tmp';
     try
-      List.WriteBOM := True;
+      List.WriteBOM := WithBom;
       List.SaveToFile(TmpFile, wlfUtf8);
     except
       Result := scrSaveError;
