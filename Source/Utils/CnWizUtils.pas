@@ -65,7 +65,8 @@ uses
   Windows, Messages, Classes, Graphics, Controls, SysUtils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, ComObj, IniFiles, FileCtrl, Buttons,
   {$IFDEF FPC} LCLProc, {$IFDEF LAZARUS} LazIDEIntf, ProjectIntf, ComponentEditors,
-  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, ProjectGroupIntf, {$ENDIF} {$ENDIF}
+  SrcEditorIntf, FormEditingIntf, PropEdits, CompOptsIntf, ProjectGroupIntf,
+  IDEOptionsIntf, IDEOptEditorIntf, {$ENDIF} {$ENDIF}
   {$IFDEF DELPHI_OTA} ExptIntf, ToolsAPI, {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList,
   Vcl.BaseImageCollection, Vcl.ImageCollection, {$ENDIF}
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, ComponentDesigner, Variants, Types,
@@ -596,6 +597,9 @@ procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
 {* 在编辑器中删除}
+
+function CnOtaGetBlockIndent: Integer;
+{* 获得当前编辑器块缩进宽度 }
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -1287,9 +1291,6 @@ procedure CnOtaGotoEditPos(EditPos: TOTAEditPos; EditView: IOTAEditView = nil;
 function CnOtaGetCharPosFromPos(Position: LongInt; EditView: IOTAEditView): TOTACharPos;
 {* 转换一个线性位置到 TOTACharPos，因为在 D5/D6 下 IOTAEditView.PosToCharPos
    可能不能正常工作}
-
-function CnOtaGetBlockIndent: Integer;
-{* 获得当前编辑器块缩进宽度 }
 
 procedure CnOtaClosePage(EditView: IOTAEditView);
 {* 关闭模块视图}
@@ -4809,6 +4810,66 @@ begin
   EditView := CnOtaGetTopMostEditView;
   if EditView <> nil then
     CnLazEditDelete(EditView, Many);
+{$ENDIF}
+end;
+
+// 获得当前编辑器块缩进宽度
+function CnOtaGetBlockIndent: Integer;
+var
+  V: Integer;
+{$IFDEF DELPHI_OTA}
+  EditOptions: IOTAEditOptions;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Editor: TSourceEditorInterface;
+
+  function ReadBlockIndentFromObject(Obj: TObject): Integer;
+  begin
+    // BlockIndent 属性若非 published，RTTI 读不到，返回 0 由外层回退
+    Result := StrToIntDef(GetPropValue(Obj, 'BlockIndent'), 0);
+  end;
+
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  EditOptions := CnOtaGetEditOptions;
+  if Assigned(EditOptions) then
+    Result := EditOptions.GetBlockIndent
+  else
+    Result := 2;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  Result := 0;
+
+  // 1、IDE 编辑器设置（不依赖编辑器控件实例）
+  try
+    if IDEEditorOptions <> nil then
+      Result := ReadBlockIndentFromObject(IDEEditorOptions);
+  except
+    Result := 0;
+  end;
+
+  // 2、回退：当前活动编辑器的 SynEdit 控件
+  if Result <= 0 then
+  begin
+    Editor := nil;
+    if SourceEditorManagerIntf <> nil then
+      Editor := SourceEditorManagerIntf.ActiveEditor;
+    if Editor <> nil then
+    begin
+      try
+        if Editor.EditorControl <> nil then
+          Result := ReadBlockIndentFromObject(Editor.EditorControl);
+      except
+        Result := 0;
+      end;
+    end;
+  end;
+
+  // 3、兜底默认值
+  if Result <= 0 then
+    Result := 2;
 {$ENDIF}
 end;
 
@@ -10285,18 +10346,6 @@ begin
   finally
     EditWriter := nil;
   end;          
-end;
-
-// 获得当前编辑器块缩进宽度 
-function CnOtaGetBlockIndent: Integer;
-var
-  EditOptions: IOTAEditOptions;
-begin
-  EditOptions := CnOtaGetEditOptions;
-  if Assigned(EditOptions) then
-    Result := EditOptions.GetBlockIndent
-  else
-    Result := 2;
 end;
 
 // 关闭模块视图

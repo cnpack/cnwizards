@@ -67,10 +67,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
-{$IFDEF COMPILER6_UP}
-  StrUtils,
-{$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
+  {$IFDEF COMPILER6_UP} StrUtils, {$ENDIF}
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Graphics, ImgList, ActnList, CnStrings, CnCommon, CnConsts, CnWizConsts,
   CnWizOptions, CnWizUtils, CnIni, CnWizIdeUtils, CnWizMultiLang,
   CnProjectViewBaseFrm, CnWizEditFiler;
@@ -259,11 +258,18 @@ begin
 end;
 
 function TCnProjectViewUnitsForm.DoSelectOpenedItem: string;
+{$IFDEF DELPHI_OTA}
 var
   CurrentModule: IOTAModule;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   CurrentModule := CnOtaGetCurrentModule;
   Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := ChangeFileExt(ExtractFileName(CnOtaGetCurrentSourceFileName), '');
+{$ENDIF}
 end;
 
 function TCnProjectViewUnitsForm.GetSelectedFileName: string;
@@ -341,13 +347,17 @@ var
   var
     I: Integer;
   begin
+{$IFDEF DELPHI_OTA}
     BeginBatchOpenClose;
+{$ENDIF}
     try
       for I := 0 to Pred(lvList.Items.Count) do
         if lvList.Items.Item[I].Selected then
           OpenItem(TCnUnitInfo(lvList.Items.Item[I].Data).FileName);
     finally
+{$IFDEF DELPHI_OTA}
       EndBatchOpenClose;
+{$ENDIF}
     end;
   end;
 

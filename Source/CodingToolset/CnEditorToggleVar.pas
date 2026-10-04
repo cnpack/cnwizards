@@ -550,7 +550,7 @@ begin
 {$ENDIF}
 {$IFDEF LAZARUS}
       CnOtaMovePosInCurSource(ipLineHead, 0, 0);
-
+      CnOtaEditBackspace(1);
 {$ENDIF}
     end;
   end;
