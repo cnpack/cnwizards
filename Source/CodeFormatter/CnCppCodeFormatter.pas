@@ -1119,7 +1119,7 @@ var
   WrapWidth, NewLineWidth: Integer;
 begin
   if (FRule.CodeWrapMode = cwmNone) or FRule.KeepUserLineBreak or FIgnore or (FRule.WrapWidth
-    <= 0) or (FParenDepth <= 0) then
+    <= 0) or ((FParenDepth <= 0) and (FBraceDepth <= 0)) then
     Exit;
 
   WrapWidth := FRule.WrapWidth;

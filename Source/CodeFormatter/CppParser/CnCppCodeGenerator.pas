@@ -59,6 +59,7 @@ type
     procedure BeginWrite(PrefixSpaces: Integer = 0);
     procedure EndWrite(IsWriteBlank, IsWriteln: Boolean);
     function LineAt(Index: Integer): string;
+    function IsInsideStringOrCharLiteral(const S: string; Position: Integer): Boolean;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -179,6 +180,146 @@ begin
   EndWrite(False, True);
 end;
 
+{ Returns True if the character at Position (1-based) in S is inside a string
+  or char literal, including prefixed forms L"..." u"..." U"..." u8"...".
+  The scan starts at position 1 and walks forward to determine context. }
+function TCnCppCodeGenerator.IsInsideStringOrCharLiteral(const S: string;
+  Position: Integer): Boolean;
+var
+  I: Integer;
+  InString: Boolean;
+  InChar: Boolean;
+  QuoteChar: Char;
+  IsPrefix: Boolean;
+begin
+  Result := False;
+  InString := False;
+  InChar := False;
+  QuoteChar := #0;
+  I := 1;
+  while I <= Position do
+  begin
+    if InString then
+    begin
+      if S[I] = '\' then
+      begin
+        { 转义序列：跳过紧随的下一个字符 }
+        if I = Position then
+        begin
+          { \ 本身在字符串内 }
+          Result := True;
+          Exit;
+        end;
+        Inc(I);
+        { 被跳过的转义字符也在字符串内 }
+        if I = Position then
+        begin
+          Result := True;
+          Exit;
+        end;
+      end
+      else if S[I] = QuoteChar then
+      begin
+        InString := False;
+        { 关闭引号本身不算"在内部" }
+        if I = Position then
+        begin
+          Result := False;
+          Exit;
+        end;
+      end
+      else if I = Position then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end
+    else if InChar then
+    begin
+      if S[I] = '\' then
+      begin
+        if I = Position then
+        begin
+          Result := True;
+          Exit;
+        end;
+        Inc(I);
+        if I = Position then
+        begin
+          Result := True;
+          Exit;
+        end;
+      end
+      else if S[I] = QuoteChar then
+      begin
+        InChar := False;
+        if I = Position then
+        begin
+          Result := False;
+          Exit;
+        end;
+      end
+      else if I = Position then
+      begin
+        Result := True;
+        Exit;
+      end;
+    end
+    else
+    begin
+      { Check for string prefix characters: L u U u8 }
+      IsPrefix := False;
+      if (S[I] = 'L') or (S[I] = 'u') or (S[I] = 'U') then
+      begin
+        if (I + 1 <= Length(S)) and (S[I + 1] = '"') then
+          IsPrefix := True
+        else if (S[I] = 'u') and (I + 2 <= Length(S)) and (S[I + 1] = '8')
+          and (S[I + 2] = '"') then
+          IsPrefix := True;
+      end;
+
+      if IsPrefix then
+      begin
+        { Skip over the prefix characters to reach the opening " }
+        while (I <= Length(S)) and (S[I] <> '"') do
+          Inc(I);
+        { Now I points at the opening "; consume it }
+        if (I <= Length(S)) and (S[I] = '"') then
+        begin
+          if I = Position then
+          begin
+            Result := False;
+            Exit;
+          end;
+          InString := True;
+          QuoteChar := '"';
+        end;
+      end
+      else if S[I] = '"' then
+      begin
+        if I = Position then
+        begin
+          Result := False;
+          Exit;
+        end;
+        InString := True;
+        QuoteChar := '"';
+      end
+      else if S[I] = '''' then
+      begin
+        if I = Position then
+        begin
+          Result := False;
+          Exit;
+        end;
+        InChar := True;
+        QuoteChar := '''';
+      end;
+    end;
+    Inc(I);
+  end;
+end;
+
 function TCnCppCodeGenerator.BreakLineAtLastSpace(MaxColumn, PrefixSpaces:
   Integer): Boolean;
 var
@@ -194,7 +335,7 @@ begin
   while I > 0 do
   begin
     if (FCurrent[I] = ' ') and ((I = Length(FCurrent)) or not (FCurrent[I + 1]
-      in [',', ';', ')', ']'])) then
+      in [',', ';', ')', ']'])) and not IsInsideStringOrCharLiteral(FCurrent, I) then
     begin
       SplitAt := I;
       Break;
