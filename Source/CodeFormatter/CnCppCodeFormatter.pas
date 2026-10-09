@@ -1119,7 +1119,7 @@ var
   WrapWidth, NewLineWidth: Integer;
 begin
   if (FRule.CodeWrapMode = cwmNone) or FRule.KeepUserLineBreak or FIgnore or (FRule.WrapWidth
-    <= 0) or ((FParenDepth <= 0) and (FBraceDepth <= 0)) then
+    <= 0) then
     Exit;
 
   WrapWidth := FRule.WrapWidth;
@@ -1353,8 +1353,16 @@ begin
         RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_PAREN_MISMATCH, T);
       FParenOpenTokens.Delete(FParenOpenTokens.Count - 1);
       FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
-      FCodeGen.TrimLine;
-      WriteText(')');
+      if FAtLineStart then
+      begin
+        FCodeGen.AppendToLastLine(')');
+        FAtLineStart := False;
+      end
+      else
+      begin
+        FCodeGen.TrimLine;
+        WriteText(')');
+      end;
       Dec(FParenDepth);
       FPrev := T;
       Continue
@@ -1377,8 +1385,16 @@ begin
         RaiseMismatch(CnFormatterIntf.CN_ERRCODE_CPP_BRACKET_MISMATCH, T);
       FBracketOpenTokens.Delete(FBracketOpenTokens.Count - 1);
       FStructureOpenTokens.Delete(FStructureOpenTokens.Count - 1);
-      FCodeGen.TrimLine;
-      WriteText(']');
+      if FAtLineStart then
+      begin
+        FCodeGen.AppendToLastLine(']');
+        FAtLineStart := False;
+      end
+      else
+      begin
+        FCodeGen.TrimLine;
+        WriteText(']');
+      end;
       Dec(FBracketDepth);
       FPrev := T;
       Continue
@@ -1398,9 +1414,19 @@ begin
 
     if T.Text = ',' then
     begin
-      FCodeGen.TrimLine;
-      WriteText(',');
-      EnsureSpace;
+      if FAtLineStart then
+      begin
+        FCodeGen.AppendToLastLine(',');
+        FAtLineStart := False;
+      end
+      else
+      begin
+        FCodeGen.TrimLine;
+        WriteText(',');
+      end;
+      TryAutoWrap;
+      if not FAtLineStart then
+        EnsureSpace;
       FPrev := T;
       Continue
     end;

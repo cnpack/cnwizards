@@ -68,6 +68,7 @@ type
     procedure Space(Count: Integer);
     procedure NewLine;
     function BreakLineAtLastSpace(MaxColumn, PrefixSpaces: Integer): Boolean;
+    procedure AppendToLastLine(const S: string);
     procedure TrimLine;
     procedure IncIndent;
     procedure DecIndent;
@@ -356,6 +357,20 @@ begin
   FLines.Add(LeftPart);
   FCurrent := StringOfChar(' ', PrefixSpaces) + RightPart;
   Result := True;
+end;
+
+procedure TCnCppCodeGenerator.AppendToLastLine(const S: string);
+begin
+  { If FCurrent is empty (or only indent spaces) and there is a previous line,
+    pop that line back into FCurrent so the caller can append S without
+    leaving a dangling new line. This prevents ,  )  ] from becoming the
+    first character on a continuation line. }
+  if (FLines.Count > 0) and (Trim(FCurrent) = '') then
+  begin
+    FCurrent := FLines[FLines.Count - 1];
+    FLines.Delete(FLines.Count - 1);
+  end;
+  FCurrent := FCurrent + S;
 end;
 
 procedure TCnCppCodeGenerator.TrimLine;
