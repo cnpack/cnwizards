@@ -63,7 +63,7 @@ begin
 
           // ÒÔ¶ººÅÅü¿ª S
           Names.Clear;
-          ExtractStrings([','], [' '], S, Names);
+          CnExtractStrings([','], [' '], S, Names);
           for J := 0 to Names.Count - 1 do
           begin
             if Trim(Names[J]) <> '' then
