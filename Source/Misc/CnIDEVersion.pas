@@ -81,7 +81,7 @@ function IsGEDelphi13Dot1: Boolean;
 {* 返回是否 Delphi 13.1 或更高的子版本，用于某些古怪判断}
 
 function IsGEDelphi13Dot2: Boolean;
-{* 返回是否 Delphi 13.1 或更高的子版本，用于某些古怪判断}
+{* 返回是否 Delphi 13.2 或更高的子版本，用于某些古怪判断}
 
 var
   CnIdeVersionDetected: Boolean = False;
@@ -94,6 +94,7 @@ var
   CnIsGEDelphi11Dot3: Boolean = False; // 是否大于等于 D11.3，包括 D12
   CnIsDelphi12Dot3GEHotFix: Boolean = False;
   CnIsGEDelphi13Dot1: Boolean = False; // 是否大于等于 D13.1
+  CnIsGEDelphi13Dot2: Boolean = False; // 是否大于等于 D13.2
 
 implementation
 
@@ -699,6 +700,7 @@ begin
 
   CnIsDelphi12Dot3GEHotFix := IsDelphi12Dot3GEHotFix;
   CnIsGEDelphi13Dot1 := IsGEDelphi13Dot1;
+  CnIsGEDelphi13Dot2 := IsGEDelphi13Dot2;
 end;
 
 function GetIdeExeVersion: string;
