@@ -717,10 +717,14 @@ function SetPropValueIncludeSub(Instance: TObject; const PropName: string;
 //==============================================================================
 
 function IsParentFont(AControl: TControl): Boolean;
-{* 判断某 Control 的 ParentFont 属性是否为 True，如无 Parent 则返回 False }
+{* 判断某 Control 的 ParentFont 属性是否为 True，如无 Parent 则返回 False}
 
 function GetParentFont(AControl: TComponent): TFont;
-{* 取某 Control 的 Parent 的 Font 属性，如果没有返回 nil }
+{* 取某 Control 的 Parent 的 Font 属性，如果没有则返回 nil}
+
+function CnExtractStrings(Separators, WhiteSpace: TSysCharSet; const Content: string;
+  Strings: TStrings): Integer;
+{* 字符串按字符劈分函数，不走 PChar 参数以避免与脚本引擎不兼容}
 
 implementation
 
@@ -1538,6 +1542,11 @@ begin
 end;
 
 function GetParentFont(AControl: TComponent): TFont;
+begin
+end;
+
+function CnExtractStrings(Separators, WhiteSpace: TSysCharSet; const Content: string;
+  Strings: TStrings): Integer;
 begin
 end;
 

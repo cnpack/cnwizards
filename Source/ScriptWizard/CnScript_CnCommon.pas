@@ -39,7 +39,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, SysUtils, Classes, CnCommon, CnVclFmxMixed,
+  Windows, SysUtils, Classes, CnCommon, CnVclFmxMixed, CnStrings,
   uPSComponent, uPSRuntime, uPSCompiler;
 
 type
@@ -270,6 +270,9 @@ begin
   CL.AddDelphiFunction('Function SetPropValueIncludeSub( Instance : TObject; const PropName : string; const Value : Variant) : Boolean');
   CL.AddDelphiFunction('Function IsParentFont( AControl : TControl) : Boolean');
   CL.AddDelphiFunction('Function GetParentFont( AControl : TComponent) : TFont');
+
+  // 注册其他函数
+  CL.AddDelphiFunction('Function CnExtractStrings( Separators, WhiteSpace : TSysCharSet; const Content : string; Strings : TStrings) : Integer');
 end;
 
 (* === run-time registration functions === *)
@@ -524,6 +527,9 @@ begin
   S.RegisterDelphiFunction(@SetPropValueIncludeSub, 'SetPropValueIncludeSub', cdRegister);
   S.RegisterDelphiFunction(@IsParentFont, 'IsParentFont', cdRegister);
   S.RegisterDelphiFunction(@GetParentFont, 'GetParentFont', cdRegister);
+
+  // 注册其他函数
+  S.RegisterDelphiFunction(@CnExtractStrings, 'CnExtractStrings', cdRegister);
 end;
 
 { TPSImport_CnCommon }
