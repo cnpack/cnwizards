@@ -39,7 +39,10 @@ begin
       for I := 0 to Lines.Count - 1 do
       begin
         S := Trim(Lines[I])
-        Idx := Pos(':', S);
+        Idx := AnsiPos(':', S);
+        // 注意脚本专家有个奇怪的 Bug，Pos 函数在 Unicode 下是 AnsiString 版。
+        // AnsiPos 才是 string 版，才能在 Unicode 下和非 Unicode 下都配合下面的 string 版跑
+
         if Idx > 1 then
         begin
           AType := Trim(Copy(S, Idx + 1, MaxInt));
