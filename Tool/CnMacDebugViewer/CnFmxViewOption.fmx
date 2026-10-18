@@ -1,0 +1,140 @@
+object CnFmxViewOptionFrm: TCnFmxViewOptionFrm
+  Left = 0
+  Top = 0
+  Caption = 'Options'
+  ClientHeight = 360
+  ClientWidth = 460
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object LayoutButtons: TLayout
+    Align = Bottom
+    Size.Width = 460.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    object btnOK: TButton
+      Align = Right
+      Margins.Right = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'OK'
+      ModalResult = 1
+    end
+    object btnCancel: TButton
+      Align = Right
+      Margins.Right = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Text = 'Cancel'
+      ModalResult = 2
+    end
+  end
+  object LayoutBody: TLayout
+    Align = Client
+    Size.Width = 460.000000000000000000
+    Size.Height = 316.000000000000000000
+    Size.PlatformDefault = False
+    Padding.Left = 8.000000000000000000
+    Padding.Right = 8.000000000000000000
+    Padding.Top = 8.000000000000000000
+    Padding.Bottom = 8.000000000000000000
+    object chkSaveFormPosition: TCheckBox
+      Align = Top
+      Size.Width = 444.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Save Form Position'
+    end
+    object chkLocalSession: TCheckBox
+      Align = Top
+      Size.Width = 444.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Local Session Only'
+    end
+    object chkUDPMsg: TCheckBox
+      Align = Top
+      Size.Width = 444.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Enable UDP Message'
+    end
+    object LayoutUDP: TLayout
+      Align = Top
+      Size.Width = 444.000000000000000000
+      Size.Height = 30.000000000000000000
+      Size.PlatformDefault = False
+      object lblPort: TLabel
+        Align = Left
+        Size.Width = 50.000000000000000000
+        Size.Height = 30.000000000000000000
+        Size.PlatformDefault = False
+        Text = 'Port:'
+        TextSettings.VertAlign = Center
+      end
+      object seUDPPort: TNumberBox
+        Align = Left
+        Margins.Right = 8.000000000000000000
+        Size.Width = 90.000000000000000000
+        Size.Height = 26.000000000000000000
+        Size.PlatformDefault = False
+        Min = 0.000000000000000000
+        Max = 65535.000000000000000000
+        Value = 9099.000000000000000000
+      end
+    end
+    object LayoutLists: TLayout
+      Align = Client
+      Size.Width = 444.000000000000000000
+      Size.Height = 186.000000000000000000
+      Size.PlatformDefault = False
+      object LayoutList1: TLayout
+        Align = Left
+        Margins.Right = 8.000000000000000000
+        Size.Width = 218.000000000000000000
+        Size.Height = 186.000000000000000000
+        Size.PlatformDefault = False
+        object rbWhiteList: TRadioButton
+          Align = Top
+          Size.Width = 218.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'White List'
+        end
+        object mmoWhiteList: TMemo
+          Align = Client
+          Size.Width = 218.000000000000000000
+          Size.Height = 162.000000000000000000
+          Size.PlatformDefault = False
+        end
+      end
+      object LayoutList2: TLayout
+        Align = Client
+        Size.Width = 218.000000000000000000
+        Size.Height = 186.000000000000000000
+        Size.PlatformDefault = False
+        object rbBlackList: TRadioButton
+          Align = Top
+          Size.Width = 218.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          Text = 'Black List'
+        end
+        object mmoBlackList: TMemo
+          Align = Client
+          Size.Width = 218.000000000000000000
+          Size.Height = 162.000000000000000000
+          Size.PlatformDefault = False
+        end
+      end
+    end
+  end
+end

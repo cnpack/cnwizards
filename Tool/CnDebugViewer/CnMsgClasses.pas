@@ -43,7 +43,7 @@ interface
 
 uses
   SysUtils, Classes, Contnrs, CnHashMap, CnDebugIntf
-  {$IFDEF MSWINDOWS}, Windows, Messages, Forms{$ENDIF};
+  {$IFDEF MSWINDOWS}, Windows, Messages, Forms {$ELSE}, SyncObjs{$ENDIF};
 
 const
 {$IFDEF MSWINDOWS}
@@ -61,7 +61,11 @@ const
 var
   // 保护各 TCnMsgStore 的待通知状态（FChanged/FAddStart/FAddEnd 等），
   // 读取线程写入、主线程取走刷新时必须互斥，避免通知范围被交错覆盖导致消息丢失
-  CSStoreChange: TRTLCriticalSection;
+{$IFDEF MSWINDOWS}
+  CSStoreChange: TRTLCriticalSection;       // Windows 原生临界区
+{$ELSE}
+  CSStoreChange: SyncObjs.TCriticalSection; // 跨平台临界区，POSIX 下为 pthread 互斥锁
+{$ENDIF}
 
 type
 {$IFNDEF MSWINDOWS}
@@ -332,12 +336,20 @@ var
 
 procedure LockStoreChange;
 begin
+{$IFDEF MSWINDOWS}
   EnterCriticalSection(CSStoreChange);
+{$ELSE}
+  CSStoreChange.Enter;
+{$ENDIF}
 end;
 
 procedure UnlockStoreChange;
 begin
+{$IFDEF MSWINDOWS}
   LeaveCriticalSection(CSStoreChange);
+{$ELSE}
+  CSStoreChange.Leave;
+{$ENDIF}
 end;
 
 function CnMsgManager: TCnMsgManager;
@@ -1186,7 +1198,11 @@ begin
 end;
 
 initialization
+{$IFDEF MSWINDOWS}
   InitializeCriticalSection(CSStoreChange);
+{$ELSE}
+  CSStoreChange := SyncObjs.TCriticalSection.Create;
+{$ENDIF}
 
 finalization
   DebugDebuggerLog('CnMsgClasses Before finalization');
@@ -1196,6 +1212,10 @@ finalization
   Exiting := True;
   FreeAndNil(F);
 {$ENDIF}
+{$IFDEF MSWINDOWS}
   DeleteCriticalSection(CSStoreChange);
+{$ELSE}
+  CSStoreChange.Free;
+{$ENDIF}
 
 end.

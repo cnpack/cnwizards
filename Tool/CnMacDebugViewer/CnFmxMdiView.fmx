@@ -1,0 +1,167 @@
+object CnFmxMdiView: TCnFmxMdiView
+  Size.Width = 640.000000000000000000
+  Size.Height = 480.000000000000000000
+  Size.PlatformDefault = False
+  object LayoutFilter: TLayout
+    Align = Top
+    Size.Width = 640.000000000000000000
+    Size.Height = 30.000000000000000000
+    Size.PlatformDefault = False
+    object cbbLevel: TComboBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 70.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+    end
+    object cbbType: TComboBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+    end
+    object cbbThread: TComboBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 110.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+    end
+    object cbbTag: TComboBox
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 90.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+    end
+    object edtSearch: TEdit
+      Align = Left
+      Margins.Left = 8.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 150.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      KillFocusByReturn = True
+    end
+    object btnSearch: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Margins.Bottom = 3.000000000000000000
+      Size.Width = 60.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Find'
+    end
+  end
+  object LayoutBottom: TLayout
+    Align = Bottom
+    Size.Width = 640.000000000000000000
+    Size.Height = 230.000000000000000000
+    Size.PlatformDefault = False
+    object LayoutTime: TLayout
+      Align = Top
+      Size.Width = 640.000000000000000000
+      Size.Height = 140.000000000000000000
+      Size.PlatformDefault = False
+      object GridTime: TGrid
+        Align = Client
+        CanFocus = True
+        ClipChildren = True
+        Size.Width = 640.000000000000000000
+        Size.Height = 140.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        object ColumnTimeIndex: TIntegerColumn
+          Header = '#'
+          Size.Width = 32.000000000000000000
+        end
+        object ColumnTimeCnt: TStringColumn
+          Header = 'Cnt'
+          Size.Width = 50.000000000000000000
+        end
+        object ColumnTimeSum: TStringColumn
+          Header = 'Time(us)'
+          Size.Width = 70.000000000000000000
+        end
+        object ColumnTimeAve: TStringColumn
+          Header = 'Ave(us)'
+          Size.Width = 70.000000000000000000
+        end
+        object ColumnTimeMax: TStringColumn
+          Header = 'Max(us)'
+          Size.Width = 70.000000000000000000
+        end
+        object ColumnTimeMin: TStringColumn
+          Header = 'Min(us)'
+          Size.Width = 70.000000000000000000
+        end
+        object ColumnTimeTag: TStringColumn
+          Header = 'Tag'
+          Size.Width = 60.000000000000000000
+        end
+      end
+    end
+    object mmoDetail: TMemo
+      Align = Client
+      CanFocus = True
+      Size.Width = 640.000000000000000000
+      Size.Height = 90.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      ReadOnly = True
+    end
+  end
+  object GridMsg: TGrid
+    Align = Client
+    CanFocus = True
+    ClipChildren = True
+    Size.Width = 640.000000000000000000
+    Size.Height = 220.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object ColumnIndex: TIntegerColumn
+      Header = '#'
+      Size.Width = 36.000000000000000000
+    end
+    object ColumnMsg: TStringColumn
+      Header = 'Information'
+      Size.Width = 230.000000000000000000
+    end
+    object ColumnType: TStringColumn
+      Header = 'Type'
+      Size.Width = 55.000000000000000000
+    end
+    object ColumnLevel: TIntegerColumn
+      Header = 'Level'
+      Size.Width = 41.000000000000000000
+    end
+    object ColumnThread: TStringColumn
+      Header = 'Thread'
+      Size.Width = 77.000000000000000000
+    end
+    object ColumnTag: TStringColumn
+      Header = 'Tag'
+      Size.Width = 60.000000000000000000
+    end
+    object ColumnTime: TStringColumn
+      Header = 'TimeStamp'
+      Size.Width = 84.000000000000000000
+    end
+  end
+end

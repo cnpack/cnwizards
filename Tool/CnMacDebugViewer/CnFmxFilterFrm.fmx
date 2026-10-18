@@ -1,0 +1,97 @@
+object CnFmxFilterFrm: TCnFmxFilterFrm
+  Left = 0
+  Top = 0
+  Caption = 'Filter'
+  ClientHeight = 380
+  ClientWidth = 420
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object chkEnable: TCheckBox
+    Align = Top
+    Size.Width = 420.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    Padding.Left = 8.000000000000000000
+    Text = 'Enable Filter'
+  end
+  object LayoutButtons: TLayout
+    Align = Bottom
+    Size.Width = 420.000000000000000000
+    Size.Height = 44.000000000000000000
+    Size.PlatformDefault = False
+    object btnOK: TButton
+      Align = Right
+      Margins.Right = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Text = 'OK'
+      ModalResult = 1
+    end
+    object btnCancel: TButton
+      Align = Right
+      Margins.Right = 8.000000000000000000
+      Margins.Top = 8.000000000000000000
+      Size.Width = 80.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Text = 'Cancel'
+      ModalResult = 2
+    end
+  end
+  object LayoutBody: TLayout
+    Align = Client
+    Size.Width = 420.000000000000000000
+    Size.Height = 336.000000000000000000
+    Size.PlatformDefault = False
+    Padding.Left = 8.000000000000000000
+    Padding.Right = 8.000000000000000000
+    Padding.Top = 8.000000000000000000
+    Padding.Bottom = 8.000000000000000000
+    object lblLevel: TLabel
+      Align = Top
+      Size.Width = 404.000000000000000000
+      Size.Height = 20.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Level'
+    end
+    object cbbLevel: TComboBox
+      Align = Top
+      Size.Width = 404.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object lblTag: TLabel
+      Align = Top
+      Size.Width = 404.000000000000000000
+      Size.Height = 20.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Tag'
+    end
+    object edtTag: TEdit
+      Align = Top
+      Size.Width = 404.000000000000000000
+      Size.Height = 28.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object lblTypes: TLabel
+      Align = Top
+      Size.Width = 404.000000000000000000
+      Size.Height = 20.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Message Types'
+    end
+    object FlowTypes: TFlowLayout
+      Align = Client
+      Size.Width = 404.000000000000000000
+      Size.Height = 170.000000000000000000
+      Size.PlatformDefault = False
+    end
+  end
+end

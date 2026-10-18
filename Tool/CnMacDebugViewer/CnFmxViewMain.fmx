@@ -1,0 +1,294 @@
+object CnFmxMainViewer: TCnFmxMainViewer
+  Left = 0
+  Top = 0
+  Caption = 'CnMacDebugViewer'
+  ClientHeight = 600
+  ClientWidth = 800
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  OnClose = FormClose
+  DesignerMasterStyle = 0
+  object MenuBar1: TMenuBar
+    Size.Width = 800.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    object mniFile: TMenuItem
+      Text = 'File'
+      object mniFileNew: TMenuItem
+        Text = 'New Window'
+        OnClick = FileNewClick
+      end
+      object mniFileOpen: TMenuItem
+        Text = 'Open...'
+        OnClick = FileOpenClick
+      end
+      object mniFileClose: TMenuItem
+        Text = 'Close Window'
+        OnClick = FileCloseClick
+      end
+      object mniFileSave: TMenuItem
+        Text = 'Save...'
+        OnClick = FileSaveClick
+      end
+      object mniFileExport: TMenuItem
+        Text = 'Export...'
+        OnClick = ExportClick
+      end
+      object mniFileSep1: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object mniFileExit: TMenuItem
+        Text = 'Exit'
+        OnClick = FileExitClick
+      end
+    end
+    object mniEdit: TMenuItem
+      Text = 'Edit'
+      object mniEditClear: TMenuItem
+        Text = 'Clear Display'
+        OnClick = EditClearClick
+      end
+      object mniEditClearTime: TMenuItem
+        Text = 'Clear Time'
+        OnClick = EditClearTimeClick
+      end
+      object mniEditCopy: TMenuItem
+        Text = 'Copy'
+        OnClick = EditCopyClick
+      end
+      object mniEditSep1: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object mniEditBmToggle: TMenuItem
+        Text = 'Toggle Bookmark'
+        OnClick = BmToggleClick
+      end
+      object mniEditBmPrev: TMenuItem
+        Text = 'Previous Bookmark'
+        OnClick = BmPrevClick
+      end
+      object mniEditBmNext: TMenuItem
+        Text = 'Next Bookmark'
+        OnClick = BmNextClick
+      end
+      object mniEditBmClear: TMenuItem
+        Text = 'Clear Bookmarks'
+        OnClick = BmClearClick
+      end
+      object mniEditSep2: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object mniEditFind: TMenuItem
+        Text = 'Find...'
+        OnClick = ViewFindClick
+      end
+      object mniEditFindNext: TMenuItem
+        Text = 'Find Next'
+        OnClick = ViewFindNextClick
+      end
+    end
+    object mniView: TMenuItem
+      Text = 'View'
+      object mniViewTime: TMenuItem
+        Text = 'Time'
+        IsChecked = True
+        OnClick = ViewTimeClick
+      end
+      object mniViewDetail: TMenuItem
+        Text = 'Details'
+        IsChecked = True
+        OnClick = ViewDetailClick
+      end
+      object mniViewSep1: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object mniViewFirst: TMenuItem
+        Text = 'First'
+        OnClick = ViewFirstClick
+      end
+      object mniViewPrev: TMenuItem
+        Text = 'Previous'
+        OnClick = ViewPrevClick
+      end
+      object mniViewNext: TMenuItem
+        Text = 'Next'
+        OnClick = ViewNextClick
+      end
+      object mniViewLast: TMenuItem
+        Text = 'Last'
+        OnClick = ViewLastClick
+      end
+    end
+    object mniControl: TMenuItem
+      Text = 'Control'
+      object mniCtrlStart: TMenuItem
+        Text = 'Start'
+        OnClick = ActStartClick
+      end
+      object mniCtrlPause: TMenuItem
+        AutoCheck = True
+        IsChecked = False
+        Text = 'Pause'
+        OnClick = ActPauseClick
+      end
+      object mniCtrlStop: TMenuItem
+        Text = 'Stop'
+        OnClick = ActStopClick
+      end
+    end
+    object mniOption: TMenuItem
+      Text = 'Option'
+      object mniOptionOptions: TMenuItem
+        Text = 'General Options...'
+        OnClick = OptionsOptionsClick
+      end
+      object mniOptionFilter: TMenuItem
+        Text = 'Filter Options...'
+        OnClick = OptionsFilterClick
+      end
+      object mniOptionSep1: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object mniOptionLanguage: TMenuItem
+        Enabled = False
+        Text = 'Language'
+      end
+    end
+    object mniWindow: TMenuItem
+      Text = 'Window'
+      object mniWinNone: TMenuItem
+        Locked = True
+        Enabled = False
+        Text = '<None>'
+      end
+    end
+    object mniHelp: TMenuItem
+      Text = 'Help'
+      object mniHelpAbout: TMenuItem
+        Text = 'About...'
+        OnClick = AboutClick
+      end
+    end
+  end
+  object ToolBar1: TToolBar
+    Size.Width = 800.000000000000000000
+    Size.Height = 40.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    object sbNew: TSpeedButton
+      Align = Left
+      Size.Width = 56.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'New'
+      OnClick = FileNewClick
+    end
+    object sbOpen: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Open'
+      OnClick = FileOpenClick
+    end
+    object sbSave: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Save'
+      OnClick = FileSaveClick
+    end
+    object sbSep1: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 8.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object sbCopy: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Copy'
+      OnClick = EditCopyClick
+    end
+    object sbClear: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 56.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Clear'
+      OnClick = EditClearClick
+    end
+    object sbSep2: TLayout
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 8.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object sbBookmark: TSpeedButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Size.Width = 68.000000000000000000
+      Size.Height = 36.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Bookmark'
+      OnClick = BmToggleClick
+    end
+  end
+  object LayoutStatus: TLayout
+    Align = Bottom
+    Size.Width = 800.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    Padding.Left = 6.000000000000000000
+    Padding.Right = 6.000000000000000000
+    object lblStatusLeft: TLabel
+      Align = Client
+      Size.Width = 700.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = ''
+    end
+    object lblStatusRight: TLabel
+      Align = Right
+      Size.Width = 120.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      Text = ''
+      TextSettings.HorzAlign = Trailing
+    end
+  end
+  object TabControl1: TTabControl
+    Align = Client
+    Size.Width = 800.000000000000000000
+    Size.Height = 536.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    TabPosition = Top
+    OnChange = TabControlChange
+  end
+  object dlgOpen: TOpenDialog
+    Filter = 'CnDebug Files (*.xml;*.json;*.cjs)|*.xml;*.json;*.cjs|All Files (*.*)|*.*'
+  end
+  object dlgSave: TSaveDialog
+    Filter = 'XML Files (*.xml)|*.xml|JSON Files (*.json)|*.json'
+  end
+  object dlgSaveExport: TSaveDialog
+    Filter = 'Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|HTML Files (*.htm;*.html)|*.htm;*.html'
+  end
+end
