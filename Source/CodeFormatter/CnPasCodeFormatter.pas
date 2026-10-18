@@ -4721,6 +4721,9 @@ begin
             // 括号后有常量后有冒号表示是 recordfield
             TypedConstantType := tcRecord;
           end
+          else if Scanner.ForwardToken = tokKeywordIf then
+            // ( if ... ) 是新语法的 If 表达式，不可能是数组或记录常量，直接按常量表达式处理
+            TypedConstantType := tcConst
           else // 匹配一下 ( ConstExpr ) 然后看后续是否是;结束，来判断是否是数组
           begin
             try
@@ -4777,7 +4780,7 @@ begin
         end;
       end;
   else // 不是括号开头，说明是简单的常量，直接处理
-    if Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat] then // 有可能初始化的值以这些开头
+    if Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokKeywordIf] then // 有可能初始化的值以这些开头
       FormatConstExpr(PreSpaceCount, IndentForAnonymous)
     else if Scanner.Token <> tokRB then
       Error(CN_ERRCODE_PASCAL_NO_TYPEDCONSTANT);
@@ -5555,7 +5558,9 @@ begin
     begin
       Match(Scanner.Token, 1, 1);
       // var F := not A 这种，走不了 TypedConstant，得走 ConstExpr
-      if Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB] then
+      // 而 var F := (if ... ) 这种带括号的 If 表达式也走不了 TypedConstant，得走 ConstExpr
+      if (Scanner.Token in ConstTokens + [tokAtSign, tokPlus, tokMinus, tokHat, tokSLB, tokLB])
+        and not ((Scanner.Token = tokLB) and (Scanner.ForwardToken = tokKeywordIf)) then
         FormatTypedConstant(0, IndentForAnonymous)
       else
         FormatConstExpr(0, IndentForAnonymous);
