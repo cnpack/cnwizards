@@ -117,6 +117,7 @@ type
     FWinMenuItems: array[0..15] of TMenuItem; // 上限与 CnMaxTabCount 一致
     procedure StopThreads;
     procedure CreateWindowMenuPool;
+    procedure RestoreWindowPlacement;
     procedure UpdateStoreNotify(Sender: TObject);
     procedure NewStoreNotify(AStore: TCnMsgStore);
     procedure UdpMsgNotify(Sender: TObject; const FromIP: string;
@@ -152,6 +153,7 @@ begin
   if CnViewerOptions = nil then
     CnViewerOptions := TCnViewerOptions.Create;
   LoadOptions(OptionsFileName);
+  RestoreWindowPlacement;
   CreateWindowMenuPool;
   UpdateMenuAndStatus;
 end;
@@ -160,8 +162,55 @@ procedure TCnFmxMainViewer.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   StopThreads;
   if CnViewerOptions <> nil then
+  begin
+    // 记录窗口位置与状态（对照 Win 版 FormDestroy）
+    if CnViewerOptions.SaveFormPosition then
+    begin
+      CnViewerOptions.WinState := Ord(WindowState);
+      if WindowState = TWindowState.wsNormal then
+      begin
+        CnViewerOptions.Top := Round(Top);
+        CnViewerOptions.Left := Round(Left);
+        CnViewerOptions.Height := Round(Height);
+        CnViewerOptions.Width := Round(Width);
+      end;
+    end;
     SaveOptions(OptionsFileName);
+  end;
   Action := TCloseAction.caFree;
+end;
+
+procedure TCnFmxMainViewer.RestoreWindowPlacement;
+begin
+  // 对照 Win 版 FormCreate 的窗口还原逻辑（含单显示器防越界）
+  if CnViewerOptions = nil then
+    Exit;
+
+  if not CnViewerOptions.SaveFormPosition then
+    Exit;
+
+  case CnViewerOptions.WinState of
+    0:
+      begin
+        Position := TFormPosition.Designed;
+        Top := CnViewerOptions.Top;
+        Left := CnViewerOptions.Left;
+        Height := CnViewerOptions.Height;
+        Width := CnViewerOptions.Width;
+
+        // 超出桌面范围时归零，防止窗口找不到（FMX 无 MonitorCount，用桌面总尺寸判断）
+        if Top > Screen.DesktopHeight - 40 then
+          Top := 0;
+        if Left > Screen.DesktopWidth then
+          Left := 0;
+        if Top + Height < 0 then
+          Top := 0;
+        if Left + Width < 0 then
+          Left := 0;
+      end;
+    1: WindowState := TWindowState.wsMinimized;
+    2: WindowState := TWindowState.wsMaximized; // 上次最大化，启动即最大化
+  end;
 end;
 
 function TCnFmxMainViewer.OptionsFileName: string;

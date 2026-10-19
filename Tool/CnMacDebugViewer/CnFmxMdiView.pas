@@ -27,8 +27,9 @@ type
     cbbTag: TComboBox;
     edtSearch: TEdit;
     btnSearch: TSpeedButton;
-    LayoutBottom: TLayout;
-    LayoutTime: TLayout;
+    LayoutMain: TLayout;
+    splV: TSplitter;      // 消息列表 | 计时窗口 左右分割
+    splH: TSplitter;      // 上方两窗口 / 详情窗口 上下分割
     GridTime: TGrid;
     ColumnTimeIndex: TIntegerColumn;
     ColumnTimeCnt: TStringColumn;
@@ -866,16 +867,12 @@ end;
 
 procedure TCnFmxMdiView.UpdateBottomLayoutHeight;
 begin
-  // 底部区域 = 计时面板 + 详情面板，按可见状态调整总高
-  LayoutTime.Visible := FTimeVisible;
-  if FTimeVisible and FDetailVisible then
-    LayoutBottom.Height := CnDetailHeight          // 140 + 90
-  else if FTimeVisible then
-    LayoutBottom.Height := 140
-  else if FDetailVisible then
-    LayoutBottom.Height := 90
-  else
-    LayoutBottom.Height := 0;
+  // 布局已改为 TSplitter 可拖动：消息列表(Client) | 计时(Right) 并排，
+  // 详情(Bottom) 横跨底部。此处只切可见性，宽度/高度由分割线拖动决定
+  GridTime.Visible := FTimeVisible;
+  splV.Visible := FTimeVisible;
+  mmoDetail.Visible := FDetailVisible;
+  splH.Visible := FDetailVisible;
 end;
 
 procedure TCnFmxMdiView.SetTimePanelVisible(const Value: Boolean);
