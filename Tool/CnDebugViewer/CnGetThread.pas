@@ -551,7 +551,13 @@ begin
   DebugDebuggerLog('TGetDebugThread Start');
 
   PostStartEvent; // Windows-only 实现，POSIX 下为空操作
-  QueueSize := CnMapSize - CnHeadSize;
+  if PHeader = nil then
+  begin
+    DoStatus('[线程] 共享内存头指针为空，读取线程退出');
+    Exit;
+  end;
+  // 队列大小从共享头读取（MapSize 已扣除保护字节），与客户端的 FQueueSize 算法一致
+  QueueSize := PHeader^.MapSize - PHeader^.DataOffset;
   QueueAlreadyEmpty := False;
   FirstData := False;
   LastBeat := TThread.GetTickCount64;
@@ -623,6 +629,22 @@ begin
       Continue;
     end;
 
+    // Front 合法性预检：越界的 Front 会使后续 Desc^.Length 读取与 Move 越出映射
+    if (Front < 0) or (Front >= QueueSize) then
+    begin
+      DoStatus(Format('[线程] 非法队列位置 Front=%d（QueueSize=%d），队列复位',
+        [Front, QueueSize]));
+      PHeader^.QueueFront := 0;
+      PHeader^.QueueTail := 0;
+      if Terminated then
+      begin
+        CheckExit;
+        Exit;
+      end;
+      ReleaseSemMutex;
+      Continue;
+    end;
+
     Desc := PCnMsgDesc(NativeInt(PHeader) + PHeader^.DataOffset + Front);
 
     if not Paused then
@@ -644,37 +666,64 @@ begin
         Continue;
       end;
 
-      if Front + Len < QueueSize then
-        Move(Desc^, ADesc, Len)
-      else
+      // Len 合法性检查：坏数据/越界的 Length 会令 Move 踩栈或后续流程崩溃
+      if (Len < SizeOf(TCnMsgAnnex) + SizeOf(Cardinal)) or
+         (Len > SizeOf(TCnMsgDesc)) then
       begin
-        RestLen := QueueSize - Front;
-        Move(Desc^, ADesc, RestLen);
-        Move(Pointer(PHeader^.DataOffset + NativeInt(PHeader))^,
-          Pointer(NativeInt(@ADesc) + RestLen)^, Len - RestLen);
-      end;
-
-      CSMsgStore.Enter;
-      try
-        AddADescToStore(ADesc);
-        Inc(FCount);
-      finally
-        CSMsgStore.Leave;
-      end;
-
-      // 收到数据的状态回报：首批 + 每 3 秒心跳
-      if not FirstData then
-      begin
-        FirstData := True;
-        DoStatus(Format('[线程] 收到首批数据，累计 %d 条', [FCount]));
-      end
-      else
-      begin
-        BeatNow := TThread.GetTickCount64;
-        if BeatNow - LastBeat >= 3000 then
+        DoStatus(Format('[线程] 非法消息长度 Len=%d（Front=%d），队列复位', [Len, Front]));
+        PHeader^.QueueFront := 0;
+        PHeader^.QueueTail := 0;
+        if Terminated then
         begin
-          LastBeat := BeatNow;
-          DoStatus(Format('[线程] 已读取 %d 条消息', [FCount]));
+          CheckExit;
+          Exit;
+        end;
+        ReleaseSemMutex;
+        Continue;
+      end;
+
+      try
+        if Front + Len < QueueSize then
+          Move(Desc^, ADesc, Len)
+        else
+        begin
+          RestLen := QueueSize - Front;
+          Move(Desc^, ADesc, RestLen);
+          Move(Pointer(PHeader^.DataOffset + NativeInt(PHeader))^,
+            Pointer(NativeInt(@ADesc) + RestLen)^, Len - RestLen);
+        end;
+
+        CSMsgStore.Enter;
+        try
+          AddADescToStore(ADesc);
+          Inc(FCount);
+        finally
+          CSMsgStore.Leave;
+        end;
+
+        // 收到数据的状态回报：首批 + 每 3 秒心跳
+        if not FirstData then
+        begin
+          FirstData := True;
+          DoStatus(Format('[线程] 收到首批数据，累计 %d 条', [FCount]));
+        end
+        else
+        begin
+          BeatNow := TThread.GetTickCount64;
+          if BeatNow - LastBeat >= 3000 then
+          begin
+            LastBeat := BeatNow;
+            DoStatus(Format('[线程] 已读取 %d 条消息', [FCount]));
+          end;
+        end;
+      except
+        on E: Exception do
+        begin
+          // 单条消息处理失败只复位队列并回报，不杀死读取线程
+          DoStatus(Format('[线程] 处理消息异常: %s: %s（Len=%d Front=%d），队列复位',
+            [E.ClassName, E.Message, Len, Front]));
+          PHeader^.QueueFront := 0;
+          PHeader^.QueueTail := 0;
         end;
       end;
     end; // 暂停时会读指针然后加指针，不取出内容

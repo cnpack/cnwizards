@@ -408,7 +408,7 @@ var
     end;
 
     SetLength(Result, ((Size div 16) + 1 ) * ( 3 * 16 + 2 + 16 + 2 ));
-    FillChar(Result[1], Length(Result), 0);
+    FillChar(Result[1], Length(Result) * SizeOf(Char), 0);
 
     DestP := 0;
     PrevLineStart := 0;
@@ -487,6 +487,12 @@ var
         Inc(DestP);
       end;
     end;
+{$IFDEF POSIX}
+    // 截断到实际写入长度：预分配长度按"最后一行也满 16 字节"计算，
+    // Size 非 16 倍数时 DestP 之后是未初始化内存，垃圾 WideChar 会传给
+    // 各平台的文本绘制器（macOS CoreText 对无效 UTF-16 尤其危险）
+    SetLength(Result, DestP);
+{$ENDIF}
   end;
 
 begin
@@ -605,12 +611,12 @@ begin
   begin
     AMsgItem := TCnMsgItem.Create;
     AssignMsgDescToMsgItem(ADesc, AMsgItem);
-    FMsgs.Add(AMsgItem);
 
     // 记录待刷新范围，须与主线程的 FlushPendingNotify 互斥，
     // 否则主线程取走范围后复位 FAddStart/FAddEnd 会覆盖掉此处刚写入的范围，导致消息丢失
     LockStoreChange;
     try
+      FMsgs.Add(AMsgItem);
       FChanged := True;
       // FAddStart 是最近一次需要更新的开始号, FAddEnd 是结束号
       if FAddStart < 0 then
@@ -731,12 +737,23 @@ end;
 
 procedure TCnMsgStore.ClearMsgs;
 begin
-  FMsgs.Clear;
+  // 主线程清空时读取线程可能正在 AddMsgDesc 写 FMsgs，须互斥
+  LockStoreChange;
+  try
+    FMsgs.Clear;
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 procedure TCnMsgStore.ClearTimes;
 begin
-  FTimes.Clear;
+  LockStoreChange;
+  try
+    FTimes.Clear;
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 constructor TCnMsgStore.Create(AOwner: TObject; AOwnsObjects: Boolean);
@@ -768,26 +785,47 @@ end;
 
 function TCnMsgStore.GetMsgCount: Integer;
 begin
-  Result := FMsgs.Count;
+  // 读取线程可能正在 FMsgs.Add（TList 扩容 Realloc），计数读取须与写入互斥
+  LockStoreChange;
+  try
+    Result := FMsgs.Count;
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 function TCnMsgStore.GetMsgs(Index: Integer): TCnMsgItem;
 begin
   Result := nil;
-  if (Index >= 0) and (Index < FMsgs.Count) then
-    Result := TCnMsgItem(FMsgs[Index]);
+  LockStoreChange;
+  try
+    if (Index >= 0) and (Index < FMsgs.Count) then
+      Result := TCnMsgItem(FMsgs[Index]);
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 function TCnMsgStore.GetTimeCount: Integer;
 begin
-  Result := FTimes.Count;
+  LockStoreChange;
+  try
+    Result := FTimes.Count;
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 function TCnMsgStore.GetTimes(Index: Integer): TCnTimeItem;
 begin
   Result := nil;
-  if (Index >= 0) and (Index < FTimes.Count) then
-    Result := TCnTimeItem(FTimes[Index]);
+  LockStoreChange;
+  try
+    if (Index >= 0) and (Index < FTimes.Count) then
+      Result := TCnTimeItem(FTimes[Index]);
+  finally
+    UnlockStoreChange;
+  end;
 end;
 
 function TCnMsgStore.IndexOfTime(const ATag: string; var Index: Integer): TCnTimeItem;

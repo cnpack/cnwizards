@@ -44,7 +44,7 @@ uses
   CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
 
 const
-  CnMapSize = 1024 * 1204;
+  CnMapSize = 1024 * 1024 * 2;
   CnHeadSize = 64;
   CnProtectSize = 4;
 
@@ -552,7 +552,10 @@ begin
       begin
         FShmSize := CnMapSize;
         PHeader := PBase;
-        PHeader^.MapSize := CnMapSize;
+        // Windows 版靠映射 CnMapSize + CnProtectSize 给客户端回绕时的越界写留保护字节；
+        // Mac 版不改客户端，改为把 MapSize 缩小 CnProtectSize：客户端按头计算
+        // FQueueSize 后，环形区尾部与 shm 对象边界自然保留 4 字节，效果等同
+        PHeader^.MapSize := CnMapSize - CnProtectSize;
         PHeader^.DataOffset := CnHeadSize;
         PHeader^.QueueFront := 0;
         PHeader^.QueueTail := 0;
@@ -560,7 +563,7 @@ begin
         Move(PAnsiChar(AnsiString(CnDebugMagicName))^, PHeader^,
           Length(CnDebugMagicName) + 1);
         if Assigned(SCoreStatus) then
-          SCoreStatus(Format('[shm] 映射成功 fd=%d 大小=%d', [FShmFd, CnMapSize]));
+          SCoreStatus(Format('[shm] 映射成功 fd=%d 大小=%d', [FShmFd, CnMapSize + CnProtectSize]));
       end
       else
       begin
