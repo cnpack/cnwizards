@@ -238,7 +238,10 @@ begin
   if TabControl1.TabCount >= CnMaxTabCount then
     Exit;
 
-  Store := FMsgManager.AddStore(0, '');
+  // 原版 actNew 只建空子窗口不建 Store；AddStore 拒绝空名（返回 nil），
+  // 故用占位名创建空 Store，等价原版空窗口（不会自动接收消息）
+  Store := FMsgManager.AddStore(0,
+    Format('New Window %d', [TabControl1.TabCount + 1]));
   CreateTabForStore(Store);
 end;
 
