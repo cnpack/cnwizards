@@ -41,7 +41,8 @@ unit CnGetThread;
 interface
 
 uses
-  Classes, SysUtils, Windows, Forms, Contnrs,
+  Classes, SysUtils, Contnrs,
+  {$IFDEF MSWINDOWS} Windows, Forms, {$ELSE} FMX.Forms, {$ENDIF}
   CnViewCore, CnDebugIntf, CnMsgClasses;
 
 type
@@ -58,12 +59,18 @@ type
     function FilterProcessId(ProcId: Integer): Boolean;
   end;
 
+  TCnNewStoreEvent = procedure(AStore: TCnMsgStore) of object;
+
   TGetDebugThread = class(TThread)
   {* 读取 CnDebugger 内容的线程}
   private
     FCount: Cardinal;
     FPaused: Boolean;
     FFilter: TProcessFilter;
+    FOnUpdateStore: TNotifyEvent;
+    FOnNewStore: TCnNewStoreEvent;
+    procedure DoUpdateStore;   // POSIX 下 Synchronize 内调用，触发 OnUpdateStore
+    procedure DoNewStore(AStore: TCnMsgStore); // POSIX 下 Synchronize 内调用，触发 OnNewStore
   protected
     procedure AddADescToStore(var ADesc: TCnMsgDesc);
     procedure Execute; override;
@@ -71,18 +78,31 @@ type
     constructor Create(CreateSuspended: Boolean);
     destructor Destroy; override;
     property Paused: Boolean read FPaused write FPaused;
+    // Windows 下仍走 PostMessage(WM_USER_UPDATE_STORE / WM_USER_NEW_FORM)，
+    // POSIX 下 Main 窗体通过这两个事件接收线程通知
+    property OnUpdateStore: TNotifyEvent read FOnUpdateStore write FOnUpdateStore;
+    property OnNewStore: TCnNewStoreEvent read FOnNewStore write FOnNewStore;
   end;
 
+{$IFDEF MSWINDOWS}
   TDbgGetDebugThread = class(TGetDebugThread)
   {* 读取 OutputDebugString 内容的线程}
   protected
     procedure Execute; override;
   end;
+{$ENDIF}
 
 implementation
 
+{$IFDEF MSWINDOWS}
 uses
   CnMdiView;
+{$ENDIF}
+
+{$IFDEF POSIX}
+uses
+  Posix.Base, Posix.Semaphore;
+{$ENDIF}
 
 const
   MAX_WAIT_COUNT = 10;
@@ -218,6 +238,7 @@ begin
     AStore := CnMsgManager.IndexOf(0);
     if AStore = nil then
     begin
+{$IFDEF MSWINDOWS}
       if Application.MainForm <> nil then
       begin
         if not (csDestroying in Application.MainForm.ComponentState) then
@@ -232,6 +253,19 @@ begin
 {$ENDIF}
         end;
       end;
+{$ELSE}
+      if (Application.MainForm <> nil) and
+         not (csDestroying in Application.MainForm.ComponentState) then
+      begin
+        AStore := CnMsgManager.AddStore(0, SCnNoneProcName);
+        AStore.ProcessID := ADesc.Annex.ProcessId;
+        AStore.ProcName := GetProcNameFromProcessID(AStore.ProcessID);
+        Synchronize(procedure
+          begin
+            DoNewStore(AStore);
+          end);
+      end;
+{$ENDIF}
     end;
 
     if not StoreInited and (AStore <> nil) then
@@ -262,6 +296,19 @@ begin
   inherited;
 end;
 
+procedure TGetDebugThread.DoUpdateStore;
+begin
+  if Assigned(FOnUpdateStore) then
+    FOnUpdateStore(Self);
+end;
+
+procedure TGetDebugThread.DoNewStore(AStore: TCnMsgStore);
+begin
+  if Assigned(FOnNewStore) then
+    FOnNewStore(AStore);
+end;
+
+{$IFDEF MSWINDOWS}
 procedure TGetDebugThread.Execute;
 var
   Len, RestLen, QueueSize: Integer;
@@ -416,9 +463,169 @@ begin
     Exit;
   end;
 end;
+{$ENDIF}
+
+{$IFDEF POSIX}
+procedure TGetDebugThread.Execute;
+var
+  Len, RestLen, QueueSize: Integer;
+  Desc: PCnMsgDesc;
+  ADesc: TCnMsgDesc;
+  Front, Tail: Integer;
+  QueueAlreadyEmpty: Boolean;
+
+  procedure TakeMutex;
+  var
+    Count: Integer;
+  begin
+    if FSemMutex <> nil then
+    begin
+      Count := 0;
+      while (sem_trywait(Psem_t(FSemMutex)^) <> 0) and (Count < MAX_WAIT_COUNT * 10) do
+      begin
+        Sleep(10);
+        Inc(Count);
+      end;
+    end;
+  end;
+
+  procedure ReleaseSemMutex;
+  begin
+    if FSemMutex <> nil then
+      sem_post(Psem_t(FSemMutex)^);
+  end;
+
+  procedure CheckExit;
+  begin
+    if FSemMutex <> nil then
+      sem_post(Psem_t(FSemMutex)^);
+  end;
+
+begin
+  DebugDebuggerLog('TGetDebugThread Start');
+
+  PostStartEvent; // Windows-only 实现，POSIX 下为空操作
+  QueueSize := CnMapSize - CnHeadSize;
+  QueueAlreadyEmpty := False;
+
+  while not Terminated do
+  begin
+    // 等待客户端写完数据的队列事件信号量（轮询 sem_trywait，带超时）
+    if FSemQueue = nil then
+    begin
+      Sleep(CnWaitEventTime);
+      Continue;
+    end;
+
+    if sem_trywait(Psem_t(FSemQueue)^) <> 0 then
+    begin
+      Sleep(CnWaitEventTime div 4);
+      Continue;
+    end;
+
+    if not QueueAlreadyEmpty and (PHeader <> nil) and
+       (PHeader^.QueueFront = PHeader^.QueueTail) then
+    begin
+      // 队列刚空，可开始更新界面
+      QueueAlreadyEmpty := True;
+      if Assigned(FOnUpdateStore) then
+        Synchronize(DoUpdateStore);
+      Sleep(0);
+      Continue;
+    end
+    else
+      QueueAlreadyEmpty := False;
+
+    if PHeader = nil then
+    begin
+      Sleep(CnWaitEventTime);
+      Continue;
+    end;
+
+    TakeMutex;
+    Front := PHeader^.QueueFront;
+    Tail := PHeader^.QueueTail;
+    if Front = Tail then
+    begin
+      if Terminated then
+      begin
+        CheckExit;
+        DebugDebuggerLog('Front = Tail and Terminated');
+        Exit;
+      end;
+      ReleaseSemMutex;
+      Continue;
+    end;
+
+    Desc := PCnMsgDesc(NativeInt(PHeader) + PHeader^.DataOffset + Front);
+
+    if not Paused then
+    begin
+      FillChar(ADesc, SizeOf(ADesc), 0);
+      Len := Desc^.Length;
+
+      if Len = 0 then // 避免发送端出错导致死循环
+      begin
+        PHeader^.QueueFront := 0;
+        PHeader^.QueueTail := 0;
+        if Terminated then
+        begin
+          CheckExit;
+          DebugDebuggerLog('NOT Pause and Len = 0 and Terminated');
+          Exit;
+        end;
+        ReleaseSemMutex;
+        Continue;
+      end;
+
+      if Front + Len < QueueSize then
+        Move(Desc^, ADesc, Len)
+      else
+      begin
+        RestLen := QueueSize - Front;
+        Move(Desc^, ADesc, RestLen);
+        Move(Pointer(PHeader^.DataOffset + NativeInt(PHeader))^,
+          Pointer(NativeInt(@ADesc) + RestLen)^, Len - RestLen);
+      end;
+
+      CSMsgStore.Enter;
+      try
+        AddADescToStore(ADesc);
+        Inc(FCount);
+      finally
+        CSMsgStore.Leave;
+      end;
+    end; // 暂停时会读指针然后加指针，不取出内容
+
+    Inc(PHeader^.QueueFront, Desc^.Length);
+    if PHeader^.QueueFront >= QueueSize then
+      PHeader^.QueueFront := PHeader^.QueueFront mod QueueSize;
+
+    if Terminated then
+    begin
+      CheckExit;
+      DebugDebuggerLog('Check and Terminated');
+      Exit;
+    end;
+
+    ReleaseSemMutex;
+    // 通知客户端已消费（对应 Windows 的 SetEvent(HFlush)）
+    if FSemFlush <> nil then
+      sem_post(Psem_t(FSemFlush)^);
+  end;
+
+  if Terminated then
+  begin
+    CheckExit;
+    DebugDebuggerLog('Loop out and Terminated');
+    Exit;
+  end;
+end;
+{$ENDIF}
 
 { TDbgGetDebugThread }
 
+{$IFDEF MSWINDOWS}
 procedure TDbgGetDebugThread.Execute;
 var
   Res: DWORD;
@@ -494,5 +701,6 @@ begin
       PostMessage(Application.MainForm.Handle, WM_USER_UPDATE_STORE, 0, 0);
   end;
 end;
+{$ENDIF}
 
 end.

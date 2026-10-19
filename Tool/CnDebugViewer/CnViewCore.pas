@@ -187,6 +187,15 @@ var
   HViewerMutex: THandle = 0;
   PHeader: PCnMapHeader;
   PBase: Pointer;
+{$ELSE}
+  // POSIX 下 Viewer 负责创建共享内存与命名信号量（对应 Windows 的 CreateEvent/CreateMutex/CreateFileMapping）
+  FShmFd: Integer = 0;        // shm_open 返回的文件描述符
+  FShmSize: Integer = 0;      // mmap 的实际大小
+  PHeader: PCnMapHeader;      // 映射首地址
+  PBase: Pointer;             // 与 Windows 保持一致，指向映射首地址
+  FSemQueue: Pointer = nil;   // 队列事件信号量 sem_t*，客户端写完数据后 sem_post
+  FSemMutex: Pointer = nil;   // 队列互斥信号量 sem_t*
+  FSemFlush: Pointer = nil;   // 刷新信号量 sem_t*，Viewer 消费后 sem_post
 {$ENDIF}
 
   SysDebugReady: Boolean = False;
@@ -403,7 +412,19 @@ procedure TranslateStrings;
 implementation
 
 uses
-  CnMsgClasses;
+  CnMsgClasses
+{$IFDEF POSIX}
+  , Posix.Base, Posix.Fcntl, Posix.SysMman, Posix.SysStat, Posix.Semaphore,
+  Posix.Unistd
+{$ENDIF};
+
+{$IFDEF POSIX}
+const
+  libc = '/usr/lib/libc.dylib';
+
+// D11 的 Posix.SysMman 未声明 shm_open（macOS 专属 API），此处按 libc 直声明
+function shm_open(const APath: PAnsiChar; AOFlag: Integer; AMode: Cardinal): Integer; cdecl; external libc name 'shm_open';
+{$ENDIF}
 
 {$IFDEF MSWINDOWS}
 
@@ -425,6 +446,28 @@ end;
 function GetCPUPeriod: Int64;
 begin
   Result := 0;
+end;
+
+{$ENDIF}
+
+{$IFDEF POSIX}
+
+// 'Local\CnDebugMap' → '/Local_CnDebugMap'，与客户端 TCnPosixMapFileChannel 的命名规则一致
+function PosixKernelName(const AName: string): string;
+begin
+  Result := '/' + StringReplace(AName, '\', '_', [rfReplaceAll]);
+end;
+
+// 创建/打开命名信号量，返回 sem_t*，失败返回 nil
+function CreateNamedSem(const AName: string; AValue: Integer): Pointer;
+var
+  Sem: Psem_t;
+begin
+  Sem := sem_open(PAnsiChar(AnsiString(AName)), O_CREAT, $1FF {0777}, AValue);
+  if Sem = SEM_FAILED then
+    Result := nil
+  else
+    Result := Sem;
 end;
 
 {$ENDIF}
@@ -481,6 +524,41 @@ begin
   Result := ciOK;
 {$ELSE}
   CSMsgStore := TCriticalSection.Create;
+
+  // POSIX: 创建共享内存并初始化头部。客户端的 TCnPosixMapFileChannel 只打开不创建，
+  // 因此这里承担 Windows 版 CreateFileMapping + MapViewOfFile + 初始化的全部职责。
+  FShmFd := shm_open(PAnsiChar(AnsiString(PosixKernelName(SCnDebugMapName))),
+    O_CREAT or O_RDWR, $1FF);
+  if FShmFd > 0 then
+  begin
+    if ftruncate(FShmFd, CnMapSize) = 0 then
+    begin
+      PBase := mmap(nil, CnMapSize, PROT_READ or PROT_WRITE, MAP_SHARED, FShmFd, 0);
+      if (PBase <> nil) and (PBase <> MAP_FAILED) then
+      begin
+        FShmSize := CnMapSize;
+        PHeader := PBase;
+        PHeader^.MapSize := CnMapSize;
+        PHeader^.DataOffset := CnHeadSize;
+        PHeader^.QueueFront := 0;
+        PHeader^.QueueTail := 0;
+        PHeader^.MapEnabled := CnDebugMapEnabled;
+        Move(PAnsiChar(AnsiString(CnDebugMagicName))^, PHeader^,
+          Length(CnDebugMagicName) + 1);
+      end
+      else
+      begin
+        PBase := nil;
+        PHeader := nil;
+      end;
+    end;
+  end;
+
+  // 创建三个命名信号量：互斥初值 1，队列事件与刷新信号量初值 0
+  FSemMutex := CreateNamedSem(PosixKernelName(SCnDebugQueueMutexName), 1);
+  FSemQueue := CreateNamedSem(PosixKernelName(SCnDebugQueueEventName), 0);
+  FSemFlush := CreateNamedSem(PosixKernelName(SCnDebugFlushEventName), 0);
+
   Result := ciOK;
 {$ENDIF}
 end;
@@ -583,6 +661,34 @@ begin
     HSysBufferReady := 0;
   end;
 {$ELSE}
+  // POSIX: 先禁用共享内存，让正在运行的客户端停止输出，再释放资源
+  if PHeader <> nil then
+  begin
+    PHeader^.MapEnabled := 0;
+    munmap(PHeader, FShmSize);
+    PHeader := nil;
+    PBase := nil;
+  end;
+  if FShmFd > 0 then
+  begin
+    __close(FShmFd);
+    FShmFd := 0;
+  end;
+  if FSemFlush <> nil then
+  begin
+    sem_close(Psem_t(FSemFlush)^);
+    FSemFlush := nil;
+  end;
+  if FSemQueue <> nil then
+  begin
+    sem_close(Psem_t(FSemQueue)^);
+    FSemQueue := nil;
+  end;
+  if FSemMutex <> nil then
+  begin
+    sem_close(Psem_t(FSemMutex)^);
+    FSemMutex := nil;
+  end;
   CSMsgStore.Free;
 {$ENDIF}
 end;
@@ -733,6 +839,11 @@ procedure UpdateFilterToMap;
 var
   Len: Integer;
 {$ENDIF}
+{$IFDEF POSIX}
+var
+  Len: Integer;
+  S: AnsiString;
+{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
   if (HMap <> 0) and (PHeader <> nil) then
@@ -747,6 +858,26 @@ begin
     Len := Length(CnViewerOptions.FFilterTag);
     if Len > CnMaxTagLength then Len := CnMaxTagLength;
     CopyMemory(@(PHeader^.Filter.Tag), PChar(CnViewerOptions.FilterTag), Len);
+
+    PHeader^.Filter.MsgTypes := CnViewerOptions.FilterTypes;
+    PHeader^.Filter.NeedRefresh := 1;
+  end;
+{$ENDIF}
+{$IFDEF POSIX}
+  if (PHeader <> nil) and (PHeader^.MapEnabled = CnDebugMapEnabled) then
+  begin
+    if CnViewerOptions.EnableFilter then
+      PHeader^.Filter.Enabled := 1
+    else
+      PHeader^.Filter.Enabled := 0;
+    PHeader^.Filter.Level := CnViewerOptions.FFilterLevel;
+
+    // 客户端按 AnsiString 读取 Tag，这里以 AnsiString 写入
+    FillChar(PHeader^.Filter.Tag, CnMaxTagLength, 0);
+    S := AnsiString(CnViewerOptions.FFilterTag);
+    Len := Length(S);
+    if Len > CnMaxTagLength then Len := CnMaxTagLength;
+    Move(PAnsiChar(S)^, PHeader^.Filter.Tag, Len);
 
     PHeader^.Filter.MsgTypes := CnViewerOptions.FilterTypes;
     PHeader^.Filter.NeedRefresh := 1;
