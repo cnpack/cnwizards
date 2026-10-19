@@ -14,25 +14,31 @@ object CnFmxMainViewer: TCnFmxMainViewer
     Size.Width = 800.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    TabOrder = 0
     object mniFile: TMenuItem
       Text = 'File'
       object mniFileNew: TMenuItem
+        Locked = True
         Text = 'New Window'
         OnClick = FileNewClick
       end
       object mniFileOpen: TMenuItem
+        Locked = True
         Text = 'Open...'
         OnClick = FileOpenClick
       end
       object mniFileClose: TMenuItem
+        Locked = True
         Text = 'Close Window'
         OnClick = FileCloseClick
       end
       object mniFileSave: TMenuItem
+        Locked = True
         Text = 'Save...'
         OnClick = FileSaveClick
       end
       object mniFileExport: TMenuItem
+        Locked = True
         Text = 'Export...'
         OnClick = ExportClick
       end
@@ -41,6 +47,7 @@ object CnFmxMainViewer: TCnFmxMainViewer
         Text = '-'
       end
       object mniFileExit: TMenuItem
+        Locked = True
         Text = 'Exit'
         OnClick = FileExitClick
       end
@@ -48,14 +55,17 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object mniEdit: TMenuItem
       Text = 'Edit'
       object mniEditClear: TMenuItem
+        Locked = True
         Text = 'Clear Display'
         OnClick = EditClearClick
       end
       object mniEditClearTime: TMenuItem
+        Locked = True
         Text = 'Clear Time'
         OnClick = EditClearTimeClick
       end
       object mniEditCopy: TMenuItem
+        Locked = True
         Text = 'Copy'
         OnClick = EditCopyClick
       end
@@ -64,18 +74,22 @@ object CnFmxMainViewer: TCnFmxMainViewer
         Text = '-'
       end
       object mniEditBmToggle: TMenuItem
+        Locked = True
         Text = 'Toggle Bookmark'
         OnClick = BmToggleClick
       end
       object mniEditBmPrev: TMenuItem
+        Locked = True
         Text = 'Previous Bookmark'
         OnClick = BmPrevClick
       end
       object mniEditBmNext: TMenuItem
+        Locked = True
         Text = 'Next Bookmark'
         OnClick = BmNextClick
       end
       object mniEditBmClear: TMenuItem
+        Locked = True
         Text = 'Clear Bookmarks'
         OnClick = BmClearClick
       end
@@ -84,10 +98,12 @@ object CnFmxMainViewer: TCnFmxMainViewer
         Text = '-'
       end
       object mniEditFind: TMenuItem
+        Locked = True
         Text = 'Find...'
         OnClick = ViewFindClick
       end
       object mniEditFindNext: TMenuItem
+        Locked = True
         Text = 'Find Next'
         OnClick = ViewFindNextClick
       end
@@ -95,13 +111,15 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object mniView: TMenuItem
       Text = 'View'
       object mniViewTime: TMenuItem
-        Text = 'Time'
+        Locked = True
         IsChecked = True
+        Text = 'Time'
         OnClick = ViewTimeClick
       end
       object mniViewDetail: TMenuItem
-        Text = 'Details'
+        Locked = True
         IsChecked = True
+        Text = 'Details'
         OnClick = ViewDetailClick
       end
       object mniViewSep1: TMenuItem
@@ -109,18 +127,22 @@ object CnFmxMainViewer: TCnFmxMainViewer
         Text = '-'
       end
       object mniViewFirst: TMenuItem
+        Locked = True
         Text = 'First'
         OnClick = ViewFirstClick
       end
       object mniViewPrev: TMenuItem
+        Locked = True
         Text = 'Previous'
         OnClick = ViewPrevClick
       end
       object mniViewNext: TMenuItem
+        Locked = True
         Text = 'Next'
         OnClick = ViewNextClick
       end
       object mniViewLast: TMenuItem
+        Locked = True
         Text = 'Last'
         OnClick = ViewLastClick
       end
@@ -128,16 +150,18 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object mniControl: TMenuItem
       Text = 'Control'
       object mniCtrlStart: TMenuItem
+        Locked = True
         Text = 'Start'
         OnClick = ActStartClick
       end
       object mniCtrlPause: TMenuItem
+        Locked = True
         AutoCheck = True
-        IsChecked = False
         Text = 'Pause'
         OnClick = ActPauseClick
       end
       object mniCtrlStop: TMenuItem
+        Locked = True
         Text = 'Stop'
         OnClick = ActStopClick
       end
@@ -145,10 +169,12 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object mniOption: TMenuItem
       Text = 'Option'
       object mniOptionOptions: TMenuItem
+        Locked = True
         Text = 'General Options...'
         OnClick = OptionsOptionsClick
       end
       object mniOptionFilter: TMenuItem
+        Locked = True
         Text = 'Filter Options...'
         OnClick = OptionsFilterClick
       end
@@ -158,34 +184,37 @@ object CnFmxMainViewer: TCnFmxMainViewer
       end
       object mniOptionLanguage: TMenuItem
         Enabled = False
+        Locked = True
         Text = 'Language'
       end
     end
     object mniWindow: TMenuItem
       Text = 'Window'
       object mniWinNone: TMenuItem
-        Locked = True
         Enabled = False
+        Locked = True
         Text = '<None>'
       end
     end
     object mniHelp: TMenuItem
       Text = 'Help'
       object mniHelpAbout: TMenuItem
+        Locked = True
         Text = 'About...'
         OnClick = AboutClick
       end
     end
   end
   object ToolBar1: TToolBar
+    Position.Y = 22.000000000000000000
     Size.Width = 800.000000000000000000
-    Size.Height = 40.000000000000000000
+    Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
     object sbNew: TSpeedButton
       Align = Left
       Size.Width = 56.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'New'
       OnClick = FileNewClick
@@ -193,8 +222,9 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object sbOpen: TSpeedButton
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 60.000000000000000000
       Size.Width = 56.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'Open'
       OnClick = FileOpenClick
@@ -202,8 +232,9 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object sbSave: TSpeedButton
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 120.000000000000000000
       Size.Width = 56.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'Save'
       OnClick = FileSaveClick
@@ -211,15 +242,17 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object sbSep1: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 180.000000000000000000
       Size.Width = 8.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
     end
     object sbCopy: TSpeedButton
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 192.000000000000000000
       Size.Width = 56.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'Copy'
       OnClick = EditCopyClick
@@ -227,8 +260,9 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object sbClear: TSpeedButton
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 252.000000000000000000
       Size.Width = 56.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'Clear'
       OnClick = EditClearClick
@@ -236,15 +270,17 @@ object CnFmxMainViewer: TCnFmxMainViewer
     object sbSep2: TLayout
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 312.000000000000000000
       Size.Width = 8.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
     end
     object sbBookmark: TSpeedButton
       Align = Left
       Margins.Left = 4.000000000000000000
+      Position.X = 324.000000000000000000
       Size.Width = 68.000000000000000000
-      Size.Height = 36.000000000000000000
+      Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
       Text = 'Bookmark'
       OnClick = BmToggleClick
@@ -252,43 +288,61 @@ object CnFmxMainViewer: TCnFmxMainViewer
   end
   object LayoutStatus: TLayout
     Align = Bottom
+    Padding.Left = 6.000000000000000000
+    Padding.Right = 6.000000000000000000
+    Position.Y = 576.000000000000000000
     Size.Width = 800.000000000000000000
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
-    Padding.Left = 6.000000000000000000
-    Padding.Right = 6.000000000000000000
+    TabOrder = 3
     object lblStatusLeft: TLabel
-      Align = Client
-      Size.Width = 700.000000000000000000
+      Align = Left
+      Position.X = 6.000000000000000000
+      Size.Width = 200.000000000000000000
       Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
-      Text = ''
+    end
+    object lblDebugStatus: TLabel
+      Align = Client
+      Size.Width = 468.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
     end
     object lblStatusRight: TLabel
       Align = Right
+      Position.X = 674.000000000000000000
       Size.Width = 120.000000000000000000
       Size.Height = 24.000000000000000000
       Size.PlatformDefault = False
-      Text = ''
       TextSettings.HorzAlign = Trailing
     end
   end
   object TabControl1: TTabControl
     Align = Client
     Size.Width = 800.000000000000000000
-    Size.Height = 536.000000000000000000
+    Size.Height = 530.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     TabPosition = Top
     OnChange = TabControlChange
   end
   object dlgOpen: TOpenDialog
-    Filter = 'CnDebug Files (*.xml;*.json;*.cjs)|*.xml;*.json;*.cjs|All Files (*.*)|*.*'
+    Filter = 
+      'CnDebug Files (*.xml;*.json;*.cjs)|*.xml;*.json;*.cjs|All Files ' +
+      '(*.*)|*.*'
+    Left = 40
+    Top = 56
   end
   object dlgSave: TSaveDialog
     Filter = 'XML Files (*.xml)|*.xml|JSON Files (*.json)|*.json'
+    Left = 96
+    Top = 56
   end
   object dlgSaveExport: TSaveDialog
-    Filter = 'Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|HTML Files (*.htm;*.html)|*.htm;*.html'
+    Filter = 
+      'Text Files (*.txt)|*.txt|CSV Files (*.csv)|*.csv|HTML Files (*.h' +
+      'tm;*.html)|*.htm;*.html'
+    Left = 152
+    Top = 56
   end
 end

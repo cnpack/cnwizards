@@ -38,15 +38,10 @@ unit CnViewCore;
 
 interface
 
-{$IFDEF MSWINDOWS}
 uses
-  SysUtils, Classes, Windows, Forms, Graphics, TLHelp32, PsAPI,
+  SysUtils, Classes, {$IFDEF MSWINDOWS} Windows, Forms, Graphics, TLHelp32, PsAPI, {$ELSE}
+  FMX.Forms, FMX.Graphics, FMX.Types, SyncObjs, FMX.Dialogs, UITypes, {$ENDIF}
   CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
-{$ELSE}
-uses
-  SysUtils, Classes, FMX.Forms, FMX.Graphics, FMX.Types, SyncObjs, FMX.Dialogs,
-  UITypes, CnXML, CnLangMgr, CnIniStrUtils, CnDebugIntf;
-{$ENDIF}
 
 const
   CnMapSize = 1024 * 1204;
@@ -179,6 +174,10 @@ type
   end;
 
 var
+  // 核心初始化状态回报：主窗体赋值后 InitializeCore 逐步回报 shm/信号量创建结果
+  SCoreStatus: procedure(const AText: string) of object = nil;
+  // POSIX 下共享内存与三个信号量是否全部就绪（Start 时提示用）
+  SCoreShmOk: Boolean = False;
 {$IFDEF MSWINDOWS}
   HMap:   THandle = 0;
   HMutex: THandle = 0;
@@ -415,7 +414,7 @@ uses
   CnMsgClasses
 {$IFDEF POSIX}
   , Posix.Base, Posix.Fcntl, Posix.SysMman, Posix.SysStat, Posix.Semaphore,
-  Posix.Unistd
+  Posix.Errno, Posix.Unistd
 {$ENDIF};
 
 {$IFDEF POSIX}
@@ -424,6 +423,8 @@ const
 
 // D11 的 Posix.SysMman 未声明 shm_open（macOS 专属 API），此处按 libc 直声明
 function shm_open(const APath: PAnsiChar; AOFlag: Integer; AMode: Cardinal): Integer; cdecl; external libc name 'shm_open';
+function shm_unlink(const APath: PAnsiChar): Integer; cdecl; external libc name 'shm_unlink';
+function libc_close(AFd: Integer): Integer; cdecl; external libc name 'close';
 {$ENDIF}
 
 {$IFDEF MSWINDOWS}
@@ -473,6 +474,13 @@ end;
 {$ENDIF}
 
 function InitializeCore: TCnCoreInitResults;
+{$IFDEF POSIX}
+var
+  FailDetail: string; // 各步失败原因汇总，随最终失败消息一并显示
+  SR: TSearchRec;
+  Found: string;
+  ReopenFd: Integer;
+{$ENDIF}
 begin
 {$IFDEF MSWINDOWS}
   HEvent := CreateEvent(nil, False, False, PChar(SCnDebugQueueEventName));
@@ -527,6 +535,12 @@ begin
 
   // POSIX: 创建共享内存并初始化头部。客户端的 TCnPosixMapFileChannel 只打开不创建，
   // 因此这里承担 Windows 版 CreateFileMapping + MapViewOfFile + 初始化的全部职责。
+  // FailDetail 汇总各步失败原因，最终随失败消息一并上报（状态栏只显示最后一行）
+  FailDetail := '';
+  if Assigned(SCoreStatus) then
+    SCoreStatus('[shm] 正在打开 ' + PosixKernelName(SCnDebugMapName) + ' ...');
+  shm_unlink(PAnsiChar(AnsiString(PosixKernelName(SCnDebugMapName))));
+  // 清理上次残留，确保全新创建；若客户端先于本程序启动，需重启客户端重连
   FShmFd := shm_open(PAnsiChar(AnsiString(PosixKernelName(SCnDebugMapName))),
     O_CREAT or O_RDWR, $1FF);
   if FShmFd > 0 then
@@ -545,19 +559,69 @@ begin
         PHeader^.MapEnabled := CnDebugMapEnabled;
         Move(PAnsiChar(AnsiString(CnDebugMagicName))^, PHeader^,
           Length(CnDebugMagicName) + 1);
+        if Assigned(SCoreStatus) then
+          SCoreStatus(Format('[shm] 映射成功 fd=%d 大小=%d', [FShmFd, CnMapSize]));
       end
       else
       begin
         PBase := nil;
         PHeader := nil;
+        FailDetail := Format('mmap 失败 errno=%d', [errno]);
+        if Assigned(SCoreStatus) then
+          SCoreStatus('[shm] ' + FailDetail);
       end;
+    end
+    else
+    begin
+      FailDetail := Format('ftruncate 失败 errno=%d', [errno]);
+      if Assigned(SCoreStatus) then
+        SCoreStatus('[shm] ' + FailDetail);
     end;
+  end
+  else
+  begin
+    FailDetail := Format('shm_open 失败 errno=%d', [errno]);
+    if Assigned(SCoreStatus) then
+      SCoreStatus('[shm] ' + FailDetail);
   end;
 
   // 创建三个命名信号量：互斥初值 1，队列事件与刷新信号量初值 0
   FSemMutex := CreateNamedSem(PosixKernelName(SCnDebugQueueMutexName), 1);
   FSemQueue := CreateNamedSem(PosixKernelName(SCnDebugQueueEventName), 0);
   FSemFlush := CreateNamedSem(PosixKernelName(SCnDebugFlushEventName), 0);
+  if Assigned(SCoreStatus) then
+    SCoreStatus(Format('[shm] 信号量 Mutex=%s Queue=%s Flush=%s',
+      [BoolToStr(FSemMutex <> nil, True), BoolToStr(FSemQueue <> nil, True),
+       BoolToStr(FSemFlush <> nil, True)]));
+  if FSemMutex = nil then
+    FailDetail := FailDetail + ' Mutex信号量创建失败';
+  if FSemQueue = nil then
+    FailDetail := FailDetail + ' Queue信号量创建失败';
+  if FSemFlush = nil then
+    FailDetail := FailDetail + ' Flush信号量创建失败';
+
+  SCoreShmOk := (PBase <> nil) and (FSemMutex <> nil) and
+    (FSemQueue <> nil) and (FSemFlush <> nil);
+  if Assigned(SCoreStatus) then
+  begin
+    if SCoreShmOk then
+    begin
+      // 决定性验证：不带 O_CREAT 按名重开，完全模拟客户端的打开行为，
+      // 确认对象名字已注册进系统命名空间（macOS 的 POSIX shm 不落盘、ls 看不见）
+      ReopenFd := shm_open(PAnsiChar(AnsiString(PosixKernelName(SCnDebugMapName))),
+        O_RDWR, 0);
+      if ReopenFd >= 0 then
+      begin
+        libc_close(ReopenFd);
+        SCoreStatus('[shm] 通道就绪，按名重开验证通过，等待客户端连接');
+      end
+      else
+        SCoreStatus(Format('[shm] 创建成功但按名重开失败 errno=%d —— 对象未注册进命名空间！',
+          [errno]));
+    end
+    else
+      SCoreStatus('[shm] 通道初始化失败: ' + Trim(FailDetail));
+  end;
 
   Result := ciOK;
 {$ENDIF}

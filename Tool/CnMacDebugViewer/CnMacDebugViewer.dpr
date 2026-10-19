@@ -9,11 +9,9 @@ uses
   CnMsgFiler in '../CnDebugViewer/CnMsgFiler.pas',
   CnViewCore in '../CnDebugViewer/CnViewCore.pas',
   CnGetThread in '../CnDebugViewer/CnGetThread.pas',
-  CnCRC32 in '../../../cnvcl/Source/Crypto/CnCRC32.pas',
   CnFmxFilterFrm in 'CnFmxFilterFrm.pas' {CnFmxFilterFrm},
   CnFmxViewOption in 'CnFmxViewOption.pas' {CnFmxViewOptionFrm},
-  CnFmxMdiView in 'CnFmxMdiView.pas' {CnFmxMdiView: TFrame},
-  CnFmxUdpThread in 'CnFmxUdpThread.pas';
+  CnFmxMdiView in 'CnFmxMdiView.pas' {CnFmxMdiView: TFrame};
 
 {$R *.res}
 

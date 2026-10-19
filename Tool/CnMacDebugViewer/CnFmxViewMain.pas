@@ -1,4 +1,4 @@
-unit CnFmxViewMain;
+﻿unit CnFmxViewMain;
 { CnMacDebugViewer 主窗体：模仿 CnDebugViewer 的 CnViewMain（VCL/MDI 版），
   以 FMX TabControl 管理多个 TCnFmxMdiView 子视图。
   去除了 OutputDebugString 捕获、托盘图标、全局热键等 Mac 上无意义的功能，
@@ -12,7 +12,7 @@ uses
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Menus,
   FMX.Layouts, FMX.ListBox, FMX.TabControl, FMX.StdCtrls, FMX.Platform,
   CnMsgClasses, CnDebugIntf, CnMsgFiler, CnFmxMdiView, CnViewCore,
-  CnGetThread, CnFmxFilterFrm, CnFmxViewOption, CnFmxUdpThread, CnCRC32;
+  CnGetThread, CnFmxFilterFrm, CnFmxViewOption, FMX.Controls.Presentation;
 
 type
   TCnRunState = (crsStopped, crsRunning, crsPaused);
@@ -74,6 +74,7 @@ type
     LayoutStatus: TLayout;
     lblStatusLeft: TLabel;
     lblStatusRight: TLabel;
+    lblDebugStatus: TLabel; // 状态诊断信息（shm/线程/UDP 链路）
     dlgOpen: TOpenDialog;
     dlgSave: TSaveDialog;
     dlgSaveExport: TSaveDialog;
@@ -110,18 +111,16 @@ type
   private
     FMsgManager: TCnMsgManager;
     FGetThread: TGetDebugThread;    // shm 共享内存读取线程
-    FUdpThread: TCnUdpGetThread;    // UDP 接收线程
     FRunState: TCnRunState;
     // Window 菜单项池：运行时只切换 Visible，绝不 Free 原生菜单栏中注册过的菜单项
     // （macOS Cocoa 菜单层持有 TMenuItem 指针，Free 会造成悬空指针 → EInvalidCast）
     FWinMenuItems: array[0..15] of TMenuItem; // 上限与 CnMaxTabCount 一致
     procedure StopThreads;
+    procedure ShowDebugStatus(const S: string); // SCoreStatus/线程 OnStatus 的统一出口
     procedure CreateWindowMenuPool;
     procedure RestoreWindowPlacement;
     procedure UpdateStoreNotify(Sender: TObject);
     procedure NewStoreNotify(AStore: TCnMsgStore);
-    procedure UdpMsgNotify(Sender: TObject; const FromIP: string;
-      Port: Integer; Buffer: Pointer; Len: Integer);
     function CurrentView: TCnFmxMdiView;
     function OptionsFileName: string;
     procedure CreateTabForStore(Store: TCnMsgStore);
@@ -149,10 +148,21 @@ const
 procedure TCnFmxMainViewer.FormCreate(Sender: TObject);
 begin
   FMsgManager := CnMsgManager;
-  InitializeCore; // 全局临界区、CPUClock 等核心初始化
+  SCoreStatus := ShowDebugStatus; // 必须在 InitializeCore 之前接好
   if CnViewerOptions = nil then
     CnViewerOptions := TCnViewerOptions.Create;
-  LoadOptions(OptionsFileName);
+  LoadOptions(OptionsFileName); // 先读选项，Local/Global 模式判定依赖 LocalSession
+  // 与 Windows 版 CnDebugViewer.dpr 一致的 Global/Local 模式判定：
+  // 客户端 CnDebug 若工作在 Local 模式，共享内存与信号量名字均为 Local\CnDebugMap 等，
+  // 两端模式不一致将各建各的内核对象、永远无法互通（此前 Mac 版从未切换过前缀，此为根因）
+  if FindCmdLineSwitch('global', ['-', '/'], True) then
+    IsLocalMode := False
+  else if CnViewerOptions.LocalSession or FindCmdLineSwitch('local', ['-', '/'], True) then
+  begin
+    ReInitLocalConsts;
+    IsLocalMode := True;
+  end;
+  InitializeCore; // 全局临界区、共享内存、CPUClock 等核心初始化
   RestoreWindowPlacement;
   CreateWindowMenuPool;
   UpdateMenuAndStatus;
@@ -643,21 +653,25 @@ begin
   end;
 end;
 
+procedure TCnFmxMainViewer.ShowDebugStatus(const S: string);
+begin
+  lblDebugStatus.Text := S;
+end;
+
 procedure TCnFmxMainViewer.ActStartClick(Sender: TObject);
 begin
   if FRunState = crsStopped then
   begin
+    if not SCoreShmOk then
+      ShowDebugStatus('[警告] 共享内存通道未就绪，可能无法收到数据');
     if FGetThread = nil then
     begin
-      FGetThread := TGetDebugThread.Create(False);
+      ShowDebugStatus('[控制] 正在启动共享内存读取线程...');
+      FGetThread := TGetDebugThread.Create(True);
       FGetThread.OnUpdateStore := UpdateStoreNotify;
       FGetThread.OnNewStore := NewStoreNotify;
-    end;
-    if (FUdpThread = nil) and (CnViewerOptions <> nil) and
-       CnViewerOptions.EnableUDPMsg then
-    begin
-      FUdpThread := TCnUdpGetThread.Create(CnViewerOptions.UDPPort);
-      FUdpThread.OnUdpMsg := UdpMsgNotify;
+      FGetThread.OnStatus := ShowDebugStatus;
+      FGetThread.Start;
     end;
     FRunState := crsRunning;
     UpdateMenuAndStatus;
@@ -699,11 +713,6 @@ begin
     FGetThread.Paused := False;
     FreeAndNil(FGetThread); // TThread.Destroy 内部 WaitFor
   end;
-  if FUdpThread <> nil then
-  begin
-    FUdpThread.Stop;
-    FreeAndNil(FUdpThread);
-  end;
 end;
 
 procedure TCnFmxMainViewer.UpdateStoreNotify(Sender: TObject);
@@ -719,43 +728,6 @@ end;
 procedure TCnFmxMainViewer.NewStoreNotify(AStore: TCnMsgStore);
 begin
   CreateTabForStore(AStore);
-end;
-
-procedure TCnFmxMainViewer.UdpMsgNotify(Sender: TObject; const FromIP: string;
-  Port: Integer; Buffer: Pointer; Len: Integer);
-var
-  ProcName: string;
-  ProcId: Cardinal;
-  AStore: TCnMsgStore;
-  ADesc: TCnMsgDesc;
-begin
-  if (FRunState = crsPaused) or (CnViewerOptions = nil) or
-     not CnViewerOptions.EnableUDPMsg then
-    Exit;
-
-  // 与原版 CnUDPDataReceived 一致：以 IP:Port 作为进程名
-  ProcName := Format('%s:%d', [FromIP, Port]);
-  ProcId := StrCRC32(0, ProcName);
-
-  AStore := FMsgManager.FindByProcName(ProcName);
-  if AStore = nil then
-  begin
-    AStore := FMsgManager.AddStore(ProcId, ProcName);
-    CreateTabForStore(AStore);
-  end;
-
-  FillChar(ADesc, SizeOf(ADesc), 0);
-  if Len > CnMaxMsgLength then
-    Len := CnMaxMsgLength;
-  Move(Buffer^, ADesc.Msg, Len);
-
-  ADesc.Annex.Level := CnDefLevel;
-  ADesc.Annex.MsgType := Ord(cmtUDPMsg);
-  ADesc.Annex.TimeStampType := Ord(ttDateTime);
-  ADesc.Annex.MsgDateTime := Date + Time;
-  ADesc.Length := Len + SizeOf(TCnMsgAnnex) + SizeOf(Integer) + 1;
-
-  AStore.AddMsgDesc(@ADesc);
 end;
 
 procedure TCnFmxMainViewer.CreateWindowMenuPool;

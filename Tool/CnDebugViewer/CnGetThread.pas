@@ -40,6 +40,8 @@ unit CnGetThread;
 
 interface
 
+{$I CnPack.inc}
+
 uses
   Classes, SysUtils, Contnrs,
   {$IFDEF MSWINDOWS} Windows, Forms, {$ELSE} FMX.Forms, {$ENDIF}
@@ -67,10 +69,16 @@ type
     FCount: Cardinal;
     FPaused: Boolean;
     FFilter: TProcessFilter;
+{$IFDEF POSIX}
     FOnUpdateStore: TNotifyEvent;
     FOnNewStore: TCnNewStoreEvent;
+    FOnStatus: TGetStrProc; // 状态回报（诊断用），线程内经 Synchronize 调用
+{$ENDIF}
+{$IFDEF POSIX}
     procedure DoUpdateStore;   // POSIX 下 Synchronize 内调用，触发 OnUpdateStore
     procedure DoNewStore(AStore: TCnMsgStore); // POSIX 下 Synchronize 内调用，触发 OnNewStore
+    procedure DoStatus(const S: string); // POSIX 下 Synchronize 内调用，触发 OnStatus
+{$ENDIF}
   protected
     procedure AddADescToStore(var ADesc: TCnMsgDesc);
     procedure Execute; override;
@@ -78,10 +86,12 @@ type
     constructor Create(CreateSuspended: Boolean);
     destructor Destroy; override;
     property Paused: Boolean read FPaused write FPaused;
-    // Windows 下仍走 PostMessage(WM_USER_UPDATE_STORE / WM_USER_NEW_FORM)，
-    // POSIX 下 Main 窗体通过这两个事件接收线程通知
+{$IFDEF POSIX}
+    // POSIX 下 Main 窗体通过事件接收线程通知（Windows 走 PostMessage(WM_USER_*)）
     property OnUpdateStore: TNotifyEvent read FOnUpdateStore write FOnUpdateStore;
     property OnNewStore: TCnNewStoreEvent read FOnNewStore write FOnNewStore;
+    property OnStatus: TGetStrProc read FOnStatus write FOnStatus;
+{$ENDIF}
   end;
 
 {$IFDEF MSWINDOWS}
@@ -296,6 +306,7 @@ begin
   inherited;
 end;
 
+{$IFDEF POSIX}
 procedure TGetDebugThread.DoUpdateStore;
 begin
   if Assigned(FOnUpdateStore) then
@@ -307,6 +318,13 @@ begin
   if Assigned(FOnNewStore) then
     FOnNewStore(AStore);
 end;
+
+procedure TGetDebugThread.DoStatus(const S: string);
+begin
+  if Assigned(FOnStatus) then
+    Synchronize(procedure begin FOnStatus(S); end);
+end;
+{$ENDIF}
 
 {$IFDEF MSWINDOWS}
 procedure TGetDebugThread.Execute;
@@ -473,6 +491,11 @@ var
   ADesc: TCnMsgDesc;
   Front, Tail: Integer;
   QueueAlreadyEmpty: Boolean;
+  FirstData: Boolean;   // 已报告收到首批消息
+  LastBeat: Int64;      // 上次状态心跳时间
+  BeatNow: Int64;
+  MagicOk: Boolean;
+  SemWarned: Boolean;   // 队列信号量缺失只警告一次
 
   procedure TakeMutex;
   var
@@ -501,12 +524,39 @@ var
       sem_post(Psem_t(FSemMutex)^);
   end;
 
+  // 空闲时约 3 秒一次的状态心跳，便于诊断"为何收不到数据"
+  procedure IdleBeat;
+  begin
+    BeatNow := TThread.GetTickCount64;
+    if BeatNow - LastBeat < 3000 then
+      Exit;
+    LastBeat := BeatNow;
+    if PHeader = nil then
+      DoStatus('[线程] 共享内存头指针为空')
+    else
+    begin
+      MagicOk := CompareMem(PHeader, PAnsiChar(AnsiString(CnDebugMagicName)),
+        Length(CnDebugMagicName));
+      if not MagicOk then
+        DoStatus('[shm] 头部校验异常: Magic 不匹配')
+      else if PHeader^.MapEnabled <> CnDebugMapEnabled then
+        DoStatus('[shm] 头部校验异常: MapEnabled=0（客户端可能已被关闭）')
+      else
+        DoStatus(Format('[shm] 连接正常，等待数据 Front=%d Tail=%d',
+          [PHeader^.QueueFront, PHeader^.QueueTail]));
+    end;
+  end;
+
 begin
   DebugDebuggerLog('TGetDebugThread Start');
 
   PostStartEvent; // Windows-only 实现，POSIX 下为空操作
   QueueSize := CnMapSize - CnHeadSize;
   QueueAlreadyEmpty := False;
+  FirstData := False;
+  LastBeat := TThread.GetTickCount64;
+  SemWarned := False;
+  DoStatus('[线程] 读取线程已启动，轮询共享内存...');
 
   while not Terminated do
   begin
@@ -514,12 +564,28 @@ begin
     if FSemQueue = nil then
     begin
       Sleep(CnWaitEventTime);
+      if not SemWarned then
+      begin
+        SemWarned := True;
+        DoStatus('[线程] 队列事件信号量未创建，无法接收数据');
+      end;
       Continue;
     end;
 
     if sem_trywait(Psem_t(FSemQueue)^) <> 0 then
     begin
       Sleep(CnWaitEventTime div 4);
+      IdleBeat;
+      // 与 Windows 版带超时的 WaitForSingleObject 等价：等待超时且队列已空时
+      // 触发一次界面刷新。客户端一次性写入只投递一次队列信号量时，线程读完全部
+      // 数据后不会再有投递，若不在此处补刷，批量变更将永远滞留在 FAddStart/FAddEnd
+      if not QueueAlreadyEmpty and (PHeader <> nil) and
+         (PHeader^.QueueFront = PHeader^.QueueTail) then
+      begin
+        QueueAlreadyEmpty := True;
+        if Assigned(FOnUpdateStore) then
+          Synchronize(DoUpdateStore);
+      end;
       Continue;
     end;
 
@@ -594,6 +660,22 @@ begin
         Inc(FCount);
       finally
         CSMsgStore.Leave;
+      end;
+
+      // 收到数据的状态回报：首批 + 每 3 秒心跳
+      if not FirstData then
+      begin
+        FirstData := True;
+        DoStatus(Format('[线程] 收到首批数据，累计 %d 条', [FCount]));
+      end
+      else
+      begin
+        BeatNow := TThread.GetTickCount64;
+        if BeatNow - LastBeat >= 3000 then
+        begin
+          LastBeat := BeatNow;
+          DoStatus(Format('[线程] 已读取 %d 条消息', [FCount]));
+        end;
       end;
     end; // 暂停时会读指针然后加指针，不取出内容
 
