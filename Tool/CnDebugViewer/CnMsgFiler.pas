@@ -108,7 +108,7 @@ procedure LoadDocument(const FileName: string; var XMLDoc: TCnXMLDocument; var X
 begin
   XMLDoc := TCnXMLDocument.Create;
 
-  XMLDoc.PreserveWhitespace := True;
+  // XMLDoc.PreserveWhitespace := True;
   XMLDoc.LoadFromFile(FileName);
 
   // Set root element
