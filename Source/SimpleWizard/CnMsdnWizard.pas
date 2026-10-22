@@ -27,7 +27,15 @@ unit CnMsdnWizard;
 * 单元作者：Filer Lu（原作者）flier_lu@sina.com
 *           周劲羽（移植）zjy@cnpack.org
 *           张伟（Alan）（升级）BeyondStudio@163.com
-* 备    注：
+* 备    注：注意：D13 及以后的工具栏及其子控件都会被 IDE 用 TWriter 序列化（用户拖动 ControlBar 里
+*           的工具栏分组后，IDE 的 TAppBuilder.ControlBar1EndBandMove -> ToolbarModified
+*           -> UpdateStableSnapshot -> WriteToolbarStream 会写一份工具栏快照），因此这些
+*           对象上不能保留任何非空的事件属性（tkMethod 属性）。
+*           否则 TWriter.WriteProperties -> IsDefaultPropertyValue -> IsDefaultMethodProp
+*           -> FindMethodName 会去解析事件方法的宿主对象，此处对非 TComponent 的宿主
+*           （如本单元的 TCnMsdnWizard）会访问无效内存，表现为松开鼠标后弹出异常。
+*           所以：1) 事件改由子类覆盖虚方法实现（见 TCnMsdnToolButton/TCnMsdnKeywordCombo）；
+*                 2) 不再从标准工具栏复制 OnGetSiteInfo/OnStartDock 等事件。
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -69,6 +77,33 @@ type
   TCnMsdnWizard = class;
 
   TQueryMode = (qmDefault, qmCustom, qmWeb);
+
+{$IFDEF IDE_CONTROLBAR_DRAG_SAVE}
+  { MSDN 工具栏上的按钮和搜索框。它们不用 OnClick/OnKeyPress 事件属性，而是在
+    子类里覆盖虚方法，原因见单元备注。 }
+  TCnMsdnToolButton = class(TToolButton)
+  private
+    FClickHandler: TNotifyEvent;
+  protected
+    procedure Click; override;
+  public
+    property ClickHandler: TNotifyEvent read FClickHandler write FClickHandler;
+  end;
+
+  TCnMsdnKeywordCombo = class(TCnToolBarComboBox)
+  private
+    FKeyPressHandler: TKeyPressEvent;
+  protected
+    procedure KeyPress(var Key: Char); override;
+  public
+    property KeyPressHandler: TKeyPressEvent read FKeyPressHandler
+      write FKeyPressHandler;
+  end;
+{$ELSE}
+  // 低版本 Delphi 保持原样，直接使用标准控件
+  TCnMsdnToolButton = TToolButton;
+  TCnMsdnKeywordCombo = TCnToolBarComboBox;
+{$ENDIF}
 
   TCnMsdnInfo = class(TObject)
   private
@@ -136,8 +171,8 @@ type
     FBarControl: TControlBar;
     FBarMsdn: TToolBar;
     FActViewMsdn: TAction;
-    FCboKeywords: TComboBox;
-    FBtnOpenMsdn: TToolButton;
+    FCboKeywords: TCnMsdnKeywordCombo;
+    FBtnOpenMsdn: TCnMsdnToolButton;
 
     FMaxHistory: Integer;
     FQueryMode: TQueryMode;
@@ -239,6 +274,32 @@ var
 {$IFDEF RUN_ON_SAME_THREAD}
 threadvar
   g_dwCookie: DWORD;
+{$ENDIF}
+
+//==============================================================================
+// 工具栏上的控件
+//==============================================================================
+
+{$IFDEF IDE_CONTROLBAR_DRAG_SAVE}
+
+procedure TCnMsdnToolButton.Click;
+begin
+  { 不调用 inherited：未给 OnClick 属性赋值时 TControl.Click 会去执行 Action，
+    而这里的行为必须与原先“同时设置 Action 和 OnClick”时一致，即只执行 OnClick }
+  if Assigned(FClickHandler) then
+    FClickHandler(Self)
+  else
+    inherited Click;
+end;
+
+procedure TCnMsdnKeywordCombo.KeyPress(var Key: Char);
+begin
+  if Assigned(FKeyPressHandler) then
+    FKeyPressHandler(Self, Key);
+  // 保留 VCL 的默认处理（TControl.KeyPress 在未挂 OnKeyPress 时本来什么也不做）
+  inherited KeyPress(Key);
+end;
+
 {$ENDIF}
 
 //==============================================================================
@@ -376,11 +437,14 @@ begin
     PopupMenu := BarStdTool.PopupMenu;
     ShowHint := BarStdTool.ShowHint;
     ShowCaptions := BarStdTool.ShowCaptions;
+{$IFNDEF IDE_CONTROLBAR_DRAG_SAVE}
+    // 不要复制 BarStdTool.OnGetSiteInfo/OnStartDock/OnStartDrag/OnEndDock/OnEndDrag
     OnGetSiteInfo := BarStdTool.OnGetSiteInfo;
     OnStartDock := BarStdTool.OnStartDock;
     OnStartDrag := BarStdTool.OnStartDrag;
     OnEndDock := BarStdTool.OnEndDock;
     OnEndDrag := BarStdTool.OnEndDrag;
+{$ENDIF}
 
     BarDskTool := (BorlandIDEServices as INTAServices).ToolBar[sDesktopToolBar];
     if Assigned(BarDskTool) then
@@ -408,13 +472,17 @@ begin
     FActViewMsdn := nil;
 
   { Combox - FCboKeywords }
-  FCboKeywords := TCnToolBarComboBox.Create(FBarMsdn);
+  FCboKeywords := TCnMsdnKeywordCombo.Create(FBarMsdn);
   with FCboKeywords do
   begin
     Visible := True;
     Hint := SCnMsdnSelectKeywordHint;
     Style := csDropDown;
+  {$IFDEF IDE_CONTROLBAR_DRAG_SAVE}
+    KeyPressHandler := OnComboBoxKeyPress;
+  {$ELSE}
     OnKeyPress := OnComboBoxKeyPress;
+  {$ENDIF}
     Width := csKeywordComboBoxWidth;
 
     FBarMsdn.InsertControl(FCboKeywords);
@@ -424,12 +492,16 @@ begin
   end;
 
   { ToolButton - FBtnOpenMsdn }
-  FBtnOpenMsdn := TToolButton.Create(FBarMsdn);
+  FBtnOpenMsdn := TCnMsdnToolButton.Create(FBarMsdn);
   with FBtnOpenMsdn do
   begin
     Visible := True;
     Action := Self.Action;
+  {$IFDEF IDE_CONTROLBAR_DRAG_SAVE}
+    ClickHandler := OnMsdnBtnClick;
+  {$ELSE}
     OnClick := OnMsdnBtnClick;
+  {$ENDIF}
 
     FBarMsdn.InsertControl(FBtnOpenMsdn);
 
