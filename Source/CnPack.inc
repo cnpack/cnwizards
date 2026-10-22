@@ -3495,6 +3495,10 @@
   {$DEFINE SUPPORT_CPLUSPLUS}
 {$ENDIF}
 
+{$IFDEF DELPHI130_FLORENCE_UP}
+  {$DEFINE IDE_CONTROLBAR_DRAG_SAVE}    // Florence 13 拖动工具栏分组后 IDE 会写工具栏快照
+{$ENDIF}
+
 {$IFDEF DELPHI120_ATHENS_UP}
   {$DEFINE LIST_INDEX_NATIVEINT}        // Athens 12 的 TList 的 Index 和 Count 从 Integer 改成 NativeInt
   {$DEFINE IDE_HAS_TABMENU_COPY_PATH}   // Athens 12 的编辑器的 Tab 右键菜单有 copy path or filename 项
