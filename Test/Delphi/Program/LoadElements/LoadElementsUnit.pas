@@ -182,7 +182,7 @@ begin
         if IsIntf and (ElementInfo.OwnerClass <> '') then
           TempStr := ElementInfo.OwnerClass + '.' + TempStr;
 
-        // Remove the paramater list
+        // Remove the parameter list
         I := Pos('(', TempStr);
         if I > 0 then
           TempStr := Copy(TempStr, 1, I - 1);

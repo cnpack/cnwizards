@@ -1946,7 +1946,7 @@ type
     ['{B7523AB7-EB81-11D2-AC7B-00C04FB173DC}']
     { Returns the number of child messages the current message has }
     function GetChildCount: Integer;
-    { Returns the child message referred to by the Index paramater }
+    { Returns the child message referred to by the Index parameter }
     function GetChild(Index: Integer): IOTACustomMessage50;
 
     property ChildCount: Integer read GetChildCount;

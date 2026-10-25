@@ -18,23 +18,23 @@
     <td height=6></td>
   </tr>
 </table>
-<p class="text">Welcome to use the log debugging tool "CnDebug/CnDebugViewer", which is developed by CnPack team. CnDebugViewer is an EXE tool running in Windows / x86 platform. It can be used to recieve, display and save/load the debug information output by CnDebug.pas. And it also can recieve Debug information from OutputDebugString API.</p>
+<p class="text">Welcome to use the log debugging tool "CnDebug/CnDebugViewer", which is developed by CnPack team. CnDebugViewer is an EXE tool running in Windows / x86 platform. It can be used to receive, display and save/load the debug information output by CnDebug.pas. And it also can receive Debug information from OutputDebugString API.</p>
 
 <p class="text">&nbsp;</p>
 <p class="title" align="left">CnDebugViewer Introduction</p>
 
-<p class="text" align="left">CnDebugViewer can recieve the debug and timming information output from CnDebug.pas. Debug information is displayed in a tree in the main window. They can be filtered to display, and also can be saved to XML or JSON file and re-loaded. The snapshot of CnDebugViewer's main window is as below:</p>
+<p class="text" align="left">CnDebugViewer can receive the debug and timing information output from CnDebug.pas. Debug information is displayed in a tree in the main window. They can be filtered to display, and also can be saved to XML or JSON file and re-loaded. The snapshot of CnDebugViewer's main window is as below:</p>
 <p class="text" align="center"><img src="cndebugviewer.png"></p>
 <p class="text" align="left">&nbsp;</p>
-<p class="text" align="left">When CnDebugViewer starting up, a share memory map will be created and initilized to a queue for debug information retrieving. And a thread will be launched to read the information output from CnDebug. Information will also be put to different windows by the sender's process id. The switching tab over statusbar shows the sender's exe file name and the process id. Clicking the tab, you can switch to corresponding sender.</p>
-<p class="text" align="left">Debug information are displayed in the treeview in the middle of the window. Timing result is in right. The bottom panel shows the detailed information of selected item. Toolbar buttons has the same functions as the menu items. please reference below:</p>
+<p class="text" align="left">When CnDebugViewer starting up, a shared memory map will be created and initialized to a queue for debug information retrieving. And a thread will be launched to read the information output from CnDebug. Information will also be put to different windows by the sender's process id. The switching tab over statusbar shows the sender's exe file name and the process id. Clicking the tab, you can switch to corresponding sender.</p>
+<p class="text" align="left">Debug information is displayed in the treeview in the middle of the window. Timing result is in right. The bottom panel shows the detailed information of selected item. Toolbar buttons have the same functions as the menu items. please refer below:</p>
 <p class="text" align="left">&nbsp;</p>
 <p class="title" align="left">Menu: File</p>
 <ul>
   <li><p class="text"><b>New Window</b>: Create a new, empty window. If a process output some debug information through CnDebug, it will be captured by this new, empty window if the read thread of CnDebugViewer is running.</li>
   <li><p class="text"><b>Open</b>: Open and load a XML or JSON file or a CnDebug Dump file (*.cdd). It should be saved by CnDebugViewer before.</li>
   <li><p class="text"><b>Close Window</b>: Close current window. No hint to save the message.</li>
-  <li><p class="text"><b>Save</b>: Save the debug messages in current window to XML or JSON file, inlucding debug information, bookmarks and timing results.</li>
+  <li><p class="text"><b>Save</b>: Save the debug messages in current window to XML or JSON file, including debug information, bookmarks and timing results.</li>
   <li><p class="text"><b>Save MemDump</b>: Save the binary MemDump message in current window to file if selected Message item type is MemDump.</li>
   <li><p class="text"><b>Export</b>: Export the debug messages in current window to other file format, including TXT, CSV or HTM etc.</li>  	
   <li><p class="text"><b>Exit</b>: Exit CnDebugViewer.</li>
@@ -46,7 +46,7 @@
   <li><p class="text"><b>Clear Time</b>: Clear the timing result display</li>
   <li><p class="text"><b>Copy</b>: Copy the detailed information of selected item to clipboard.</li>
   <li><p class="text"><b>Toggle Bookmark</b>: Toggle the bookmark status of selected item in debug information tree.</li>
-  <li><p class="text"><b>Jump to Bookmakr</b>: When any bookmark exists, this meunitem will show the bookmarks as its submenu item. Click to jump to the corresponding bookmark.</li>
+  <li><p class="text"><b>Jump to Bookmark</b>: When any bookmark exists, this meunitem will show the bookmarks as its submenu item. Click to jump to the corresponding bookmark.</li>
   <li><p class="text"><b>Previous Bookmark</b>: Jump to previous bookmark. If no previous bookmark, keep unmoved.</li>
   <li><p class="text"><b>Next Bookmark</b>: Jump to next bookmark. If no next bookmark, keep unmoved, too.</li>
   <li><p class="text"><b>Clear Bookmarks</b>: Delete all bookmarks in current window.</li>
@@ -90,7 +90,7 @@
     <li><p class="text"><b>Minimize to Tray Icon</b>: If show tray icon, this item is used to set whether to minimize CnDebugViewer to system tray without displaying a button in task bar.</li>
     <li><p class="text"><b>Close to Tray Icon</b>: If show tray icon and checked, CnDebug will minimize to system tray without displaying a button in task bar when Close button in main window clicked, otherwise exit normally.</li>
   <li><p class="text"><b>Save Window State/Position</b>: If checked, CnDebugViewer will save the window state and position when exiting, and restore it when next running.</li>
-    <li><p class="text"><b>Font</b>: Change display font of messsage, details and timing area.</li>
+    <li><p class="text"><b>Font</b>: Change display font of message, details and timing area.</li>
     <li><p class="text"><b>Capture "OutputDebugString" API</b>: Whether capture the output of debug API <b>OutputDebugString</b>. Default is not. To make this change into effect, a restarting of CnDebugViewer needed.</li>
     <li><p class="text"><b>Use Local Session Mode</b>: If checked, CnDebugViewer will use "Local" objects to get the debug message instead of "Global". It depends on CnDebug.pas use Local mode or Global mode. Changes to this option will take effects after restarting CnDebugViewer.</li>
     <li><p class="text"><b>Show All Processes Except in Black List</b>: A Process Filter Option. If checked, CnDebugViewer will show messages from all processes except those in the black list. If black list is empty, show all processes.</li>

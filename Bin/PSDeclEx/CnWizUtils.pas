@@ -720,7 +720,7 @@ function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer; View: IOTAEd
 {* 用 Block Extend 的方式选中多行，光标停留在 End 行所标识的地方，返回是否成功}
 function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
-{* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
+{* 直接用起止行列为参数选中代码块，均以一开始，返回是否成功
    如果起行列大于止行列，内部会互换}
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空 }
