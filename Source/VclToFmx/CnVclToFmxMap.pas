@@ -72,7 +72,7 @@ function CnConvertTreeFromVclToFmx(SourceTree, DestTree: TCnDfmTree; OutEventInt
         OutUnits 只输出 FMX 所需，外部需和原始的 uses 内容拼接
         OutEventIntf 只输出 TForm 内定义的事件声明，外部需和单元内容拼接
         OutSinglePropMap 用于输出简单的一对一的属性名变动映射，供外部替换处理源文件
-  TODO: OutEvenetImpl 可不输出，由外界检查后拼接 private 及之后的原始文件内容，同时替换掉 $R *.dfm 为 xfm}
+  TODO: OutEventImpl 可不输出，由外界检查后拼接 private 及之后的原始文件内容，同时替换掉 $R *.dfm 为 xfm}
 
 function CnConvertPropertiesFromVclToFmx(const InComponentClass, InContainerClass, InComponentName: string;
   var OutComponentClass: string; InProperties, OutProperties, OutEventsIntf,

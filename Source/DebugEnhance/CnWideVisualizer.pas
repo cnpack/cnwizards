@@ -206,7 +206,7 @@ procedure TCnDebuggerWideVisualizer.GetSupportedType(Index: Integer;
   var TypeName: string; var AllDescendants, IsGeneric: Boolean);
 begin
   GetSupportedType(Index, TypeName, AllDescendants);
-{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFDEF IDE_HAS_MEMORY_VISUALIZER}
   IsGeneric := False; // 在 IDE 有系统的 Memory Viewer 的情况下，此处返回 True 会让其他 TArray<TObject> 也出现放大镜从而出错
 {$ELSE}
   IsGeneric := Index in [5, 6];

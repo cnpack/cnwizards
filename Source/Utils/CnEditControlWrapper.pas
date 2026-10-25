@@ -3867,7 +3867,7 @@ var
     Sl := TStringList.Create();
     try
       Sl.Delimiter := ' ';
-      // The tab-string might separeted by ';', too
+      // The tab-string might separated by ';', too
       if Pos(';', TabWidthStr) > 0 then
       begin
         // if so, use it

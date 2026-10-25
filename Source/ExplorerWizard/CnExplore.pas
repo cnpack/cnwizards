@@ -24,7 +24,7 @@ unit CnExplore;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：文件管理器专家单元
-* 单元作者：Hhha（Hhha） Hhha@eyou.con
+* 单元作者：Hhha（Hhha） Hhha@eyou.com
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试
@@ -197,14 +197,14 @@ type
     function GetBoolean(const Index: Integer): Boolean;
     procedure SetBoolean(const Index: Integer; const Value: Boolean);
 
-    procedure ChangeListViewStyle(Index: Integer); // 改变 ListView 的 ViewStype
-    function GetListViewStyle(): Integer; // 得到 ListView 的 ViewStype
+    procedure ChangeListViewStyle(Index: Integer); // 改变 ListView 的 ViewStyle
+    function GetListViewStyle(): Integer; // 得到 ListView 的 ViewStyle
     function ChangeMenu(AValue: string; AStrList: TStringList): Boolean;
     procedure PopupMenu(Sender: TObject; PopMenu: TPopupMenu);
     procedure SetFilter(AValue, AKey: string);  // 设置文件过滤
     procedure LoadFileFilterState;              // 加载 FileFilter 菜单
     procedure LoadFolderState;                  // 加载 Folder 过滤菜单
-    procedure ChangeShlstSet;  //改变 Shlsh 的 ObjectTypes 设置
+    procedure ChangeShlstSet;  // 改变 Shlsh 的 ObjectTypes 设置
   protected
     function GetHelpTopic: string; override;
   public

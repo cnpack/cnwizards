@@ -337,7 +337,7 @@ begin
     FLargeProcToolbarVirtualImages.Width := IdeGetScaledPixelsFromOrigin(csLargeImageListWidth);
     FLargeProcToolbarVirtualImages.Height := IdeGetScaledPixelsFromOrigin(csLargeImageListHeight);
 
-    // 大尺寸模式下，不重新创建 ImageColleciton，复用原始的，只是放大后加入 VirtualImageList
+    // 大尺寸模式下，不重新创建 ImageCollection，复用原始的，只是放大后加入 VirtualImageList
     FLargeVirtualImages.Add('', -1, -1, False);
     FDisabledLargeVirtualImages.Add('', -1, -1, False);
     FLargeProcToolbarVirtualImages.Add('', -1, -1, False);

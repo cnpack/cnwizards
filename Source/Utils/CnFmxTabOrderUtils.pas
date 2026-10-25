@@ -171,7 +171,7 @@ begin
 {$ENDIF}
   SaveState := Canvas.SaveState;
   try
-    // Calc Rect and Draw Rectagle and Text.
+    // Calc Rect and Draw Rectangle and Text.
     Canvas.BeginScene;
 
     Canvas.Font.Family := TabOrderWizard.DispFont.Name;

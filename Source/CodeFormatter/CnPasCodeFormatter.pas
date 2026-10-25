@@ -281,7 +281,7 @@ type
     procedure FormatTypeParamIdentList(PreSpaceCount: Byte = 0);
     procedure FormatTypeParamIdent(PreSpaceCount: Byte = 0);
 
-    // Anonymouse function support moving
+    // Anonymous function support moving
     procedure FormatProcedureDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False; IgnoreHeadSpace: Boolean = False);
     procedure FormatFunctionDecl(PreSpaceCount: Byte = 0; IsAnonymous: Boolean = False; IgnoreHeadSpace: Boolean = False);
     {* 用 AllowEqual 区分 ProcType 和 ProcDecl 可否带等于号的情形}
@@ -301,7 +301,7 @@ type
 
     procedure FormatProgramInnerBlock(PreSpaceCount: Byte = 0; IsInternal: Boolean = False;
       IsLib: Boolean = False);
-    // Program 中的主 begin end 之前的声明不同于嵌套 fucntion 这种声明，因此此处独立
+    // Program 中的主 begin end 之前的声明不同于嵌套 function 这种声明，因此此处独立
 
     procedure FormatDeclSection(PreSpaceCount: Byte; IndentProcs: Boolean = True;
       IsInternal: Boolean = False);
@@ -1252,7 +1252,7 @@ begin
         end;
       tokHat: // ^ 这里支持多个指针连续指
         begin
-          { DONE: deal with pointer derefrence }
+          { DONE: deal with pointer dereference }
           Match(tokHat);
         end;
       tokPlus, tokMinus: // 这里的加减号是啥目的？照理应该算 Term 之间的二元运算符才对
@@ -1487,7 +1487,7 @@ begin
         FormatSetConstructor(PreSpaceCount, IndentForAnonymous);
       end;
   else
-    { Doesn't do anything to implemenation rule: '' Designator }
+    { Doesn't do anything to implementation rule: '' Designator }
   end;
 end;
 
@@ -3724,7 +3724,7 @@ var
 begin
   // Writeln;
 
-  // Class Method List maybe hava Class Visibility Token
+  // Class Method List maybe have Class Visibility Token
   FormatClassVisibility(PreSpaceCount);
   FormatMethodHeading(PreSpaceCount);
   Match(tokSemicolon);
@@ -4245,7 +4245,7 @@ begin
         begin
           Match(Scanner.Token);
           ProcessBlank;
-          FormatConstExpr; // Constrant is an Expression
+          FormatConstExpr; // Constant is an Expression
         end;
 
         tokComplexImplements:
@@ -6017,7 +6017,7 @@ end;
 { ClassMember -> ClassField | ClassMethod | ClassProperty }
 procedure TCnBasePascalFormatter.FormatClassMember(PreSpaceCount: Byte);
 begin
-  // no need loop here, we have one loop outter
+  // no need loop here, we have one loop outer
   if Scanner.Token in ClassMemberSymbolTokens then // 部分关键字此处可以当做 Symbol
   begin
     case Scanner.Token of

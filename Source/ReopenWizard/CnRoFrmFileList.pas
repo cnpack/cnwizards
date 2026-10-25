@@ -163,7 +163,7 @@ end;
 
 procedure TCnRecentFilesFrame.CloseForm(AFileName: string);
 begin
-  // TODO: check favorate file is project's file then close form.
+  // TODO: check favorite file is project's file then close form.
   if (IsProject(AFileName) or IsDpk(AFileName)
     or IsBdsProject(AFileName) or IsDProject(AFileName) or 
     IsCbProject(AFileName) or IsBpg(AFileName)) then

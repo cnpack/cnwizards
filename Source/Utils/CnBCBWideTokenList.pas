@@ -1399,7 +1399,7 @@ begin
             StepRun;
           end;
         end
-        else // Other strage chars.
+        else // Other strange chars.
         begin
           StepRun;
         end;

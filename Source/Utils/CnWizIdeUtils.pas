@@ -351,7 +351,7 @@ function IdeGetIsEmbeddedDesigner: Boolean;
 
 var
   IdeIsEmbeddedDesigner: Boolean = False;
-  {* 标记当前是否是嵌入式设计窗体模式，initiliazation 时被初始化，请勿手工修改其值。
+  {* 标记当前是否是嵌入式设计窗体模式，initialization 时被初始化，请勿手工修改其值。
      使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数}
 
 //==============================================================================
@@ -815,12 +815,12 @@ function SearchUsesInsertPosInPasFile(const FileName: string; IsIntf: Boolean;
   out HasUses: Boolean; out LinearPos: Integer): Boolean;
 {* 使用 Filer 封装指定 Pascal 源文件中搜索 uses 待插入的线性位置，不区分文件或磁盘
   偏移均以 Ansi/Utf16/Utf16 为准。IsIntf 指明搜索的是 interface 处的 uses
-  还是 implemetation 的，返回是否成功。成功时返回线性位置，以及该处是否已有 uses}
+  还是 implementation 的，返回是否成功。成功时返回线性位置，以及该处是否已有 uses}
 
 function SearchUsesInsertPosInCurrentPas(IsIntf: Boolean; out HasUses: Boolean;
   out CharPos: TOTACharPos): Boolean;
 {* 在当前编辑的 Pascal 源文件中搜索 uses 待插入的编辑器位置，IsIntf 指明搜索的是 interface 处的 uses
-  还是 implemetation 的，返回是否成功，成功时返回编辑器位置，以及该处是否已有 uses}
+  还是 implementation 的，返回是否成功，成功时返回编辑器位置，以及该处是否已有 uses}
 
 function SearchUsesInsertPosInCurrentCpp(out CharPos: TOTACharPos;
   SourceEditor: IOTASourceEditor = nil): Boolean;

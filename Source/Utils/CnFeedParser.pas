@@ -151,7 +151,7 @@ begin
   end;
   {We use ABS because EncodeTime will only accept positve values}
   Result := EncodeTime(Abs(iBias) div 60, Abs(iBias) mod 60, 0, 0);
-  {The GetTimeZone function returns values oriented towards convertin
+  {The GetTimeZone function returns values oriented towards converting
    a GMT time into a local time.  We wish to do the do the opposit by returning
    the difference between the local time and GMT.  So I just make a positive
    value negative and leave a negative value as positive}

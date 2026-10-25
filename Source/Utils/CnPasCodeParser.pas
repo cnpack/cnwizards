@@ -430,7 +430,7 @@ type
     property ElseIfElse[Index: Integer]: TCnPasToken read GetElseIfElse;
     {* 返回该 if 块的 else if 的 else 的 Token，索引从 0 到 ElseIfCount - 1}
     property ElseIfIf[Index: Integer]: TCnPasToken read GetElseIfIf;
-    {* 返回该 if 块的 else if 的  的 Token，索引从 0 到 ElseIfCount - 1}
+    {* 返回该 if 块的 else if 的 Token，索引从 0 到 ElseIfCount - 1}
     property LastElseIfElse: TCnPasToken read GetLastElseIfElse;
     {* 返回该 if 块的最后一个 else if 的 else}
     property LastElseIfIf: TCnPasToken read GetLastElseIfIf;

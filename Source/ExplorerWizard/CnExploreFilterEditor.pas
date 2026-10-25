@@ -24,7 +24,7 @@ unit CnExploreFilterEditor;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：文件管理器专家单元
-* 单元作者：Hhha（Hhha） Hhha@eyou.con
+* 单元作者：Hhha（Hhha） Hhha@eyou.com
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 7
 * 兼容测试：未测试

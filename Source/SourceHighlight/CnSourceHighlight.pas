@@ -30,10 +30,10 @@ unit CnSourceHighlight;
 *           Shenloqi
 * 备    注：BDS 下 UTF8 的问题有三个地方需要标明：
 *
-*                              D7 或以下、  D2009 以下的 BDS、 D2009 及以上：
-*           LineText 属性：    AnsiString、 UTF8、             UncodeString
-*           EditView.CusorPos：Ansi 字节、  UTF8 的字节 Col、  转成 Ansi 的字符 Col
-*           GetAttributeAtPos：Ansi 字节、  UTF8 的字节 Col、  UTF8 的字节 Col
+*                               D7 或以下、  D2009 以下的 BDS、 D2009 及以上：
+*           LineText 属性：     AnsiString、 UTF8、             UnicodeString
+*           EditView.CursorPos：Ansi 字节、  UTF8 的字节 Col、  转成 Ansi 的字符 Col
+*           GetAttributeAtPos： Ansi 字节、  UTF8 的字节 Col、  UTF8 的字节 Col
 *               因此 D2009 下处理时，需要额外将获得的 UnicodeString 的 LineText
 *               转成 UTF8 来适应相关的 CursorPos 和 GetAttributeAtPos
 *
@@ -1932,7 +1932,7 @@ begin
         FCurMethodCloseToken := PasParser.MethodCloseToken;
       end;
 
-      // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
+      // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标处于当前过程内的问题
       for I := 0 to PasParser.Count - 1 do
         ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
 
@@ -2089,7 +2089,7 @@ begin
           EndIndex := FCurMethodCloseToken.ItemIndex;
         end;
 
-        // 必须搜索当前所有标识符，避免只高亮光标出于当前过程内的问题
+        // 必须搜索当前所有标识符，避免只高亮光标处于当前过程内的问题
         for I := StartIndex to EndIndex do
         begin
           AToken := PasParser.Tokens[I];

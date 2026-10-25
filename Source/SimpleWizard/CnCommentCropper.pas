@@ -144,7 +144,7 @@ type
     property AlignStyle: TCnCommentAlignStyle read GetAlignStyle write SetAlignStyle;
   end;
 
-{ TCnCommentCroperWizard }
+{ TCnCommentCropperWizard }
 
   TCnCommentCropperWizard = class(TCnSubMenuWizard)
   private
@@ -260,7 +260,7 @@ const
   csDefReserveStr = '%,*,(*,*),#,%File';
   csAlignStyle = 'AlignStyle';
 
-{ TCnCommentCroperWizard }
+{ TCnCommentCropperWizard }
 
 procedure TCnCommentCropperWizard.AcquireSubActions;
 begin

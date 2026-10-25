@@ -74,7 +74,7 @@ type
     constructor Create(AText: string);
     destructor Destroy; override;
     function OutputText(var CursorPos: Integer): string;
-    {* 内部执行完后，CrusorPos 应该返回光标应该被设置的位置，相对于整个文本。无处理则为 0}
+    {* 内部执行完后，CursorPos 应该返回光标应该被设置的位置，相对于整个文本。无处理则为 0}
     property Macros: TStringList read FMacros;
     property Text: string read FText write SetText;
   end;

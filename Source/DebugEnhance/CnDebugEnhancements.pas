@@ -27,7 +27,7 @@ unit CnDebugEnhancements;
 * 单元作者：CnPack 开发组 (master@cnpack.org)
 * 备    注：IDE_HAS_DEBUGGERVISUALIZER 是 XE 或以上有，表示能增强 Hint 以及查看器
 *           FULL_IOTADEBUGGERVISUALIZER_250 是 10.3 或以上支持泛型的增强查看器
-*           IDE_HAS_MEMORY_VISUALIZAER 是 110 或以上有，表示有特定的 TBytes 查看器
+*           IDE_HAS_MEMORY_VISUALIZER 是 110 或以上有，表示有特定的 TBytes 查看器
 * 开发平台：PWin7Pro + Delphi 10.3
 * 兼容测试：暂无
 * 本 地 化：该单元中的字符串支持本地化处理方式
@@ -489,7 +489,7 @@ begin
         FStringsRegistered := True;
       end;
     end;
-{$IFNDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFNDEF IDE_HAS_MEMORY_VISUALIZER}
     if FEnableBytes then
     begin
       if not FBytesRegistered then
@@ -528,7 +528,7 @@ begin
       ID.UnregisterDebugVisualizer(FStringsViewer);
       FStringsRegistered := False;
     end;
-{$IFNDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFNDEF IDE_HAS_MEMORY_VISUALIZER}
     if FBytesRegistered then
     begin
       ID.UnregisterDebugVisualizer(FBytesViewer);
@@ -566,7 +566,7 @@ begin
     chkBytesViewer.Checked := FEnableBytes;
     chkWideViewer.Checked := FEnableWide;
     chkMemoryStreamViewer.Checked := FEnableMemoryStream;
-  {$IFDEF IDE_HAS_MEMORY_VISUALIZAER}  // 高版本 IDE 自带，先不替换，禁用
+  {$IFDEF IDE_HAS_MEMORY_VISUALIZER}  // 高版本 IDE 自带，先不替换，禁用
     chkBytesViewer.Checked := False;
     chkBytesViewer.Enabled := False;
     chkMemoryStreamViewer.Checked := False;
@@ -738,7 +738,7 @@ begin
   (FReplaceManager as TCnDebuggerValueReplaceManager).LoadSettings;
   FEnableDataSet := Ini.ReadBool('', csEnableDataSet, True);
   FEnableStrings := Ini.ReadBool('', csEnableStrings, False); // IDE 自带了，也没法替换
-{$IFDEF IDE_HAS_MEMORY_VISUALIZAER}
+{$IFDEF IDE_HAS_MEMORY_VISUALIZER}
   FEnableBytes := Ini.ReadBool('', csEnableBytes, False);     // 高版本 IDE 自带
   FEnableMemoryStream := Ini.ReadBool('', csEnableMemoryStream, False);
 {$ELSE}

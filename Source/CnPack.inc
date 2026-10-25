@@ -3514,7 +3514,7 @@
   {$DEFINE NO_OLDCREATEORDER}           // Alexandria 11 删除了 OldCreateOrder 属性
   {$DEFINE IDE_SUPPORT_HDPI}            // Alexandria 11 的 IDE 开始支持 HDPI，用 TVirtualImageList 等相关组件
   {$DEFINE IDE_HAS_AUTO_READONLY}       // Alexandria 11 中有并自动开启 VCL 源码只读保护功能
-  {$DEFINE IDE_HAS_MEMORY_VISUALIZAER}  // Alexandria 11 的调试器中有 Memory Visualizer
+  {$DEFINE IDE_HAS_MEMORY_VISUALIZER}   // Alexandria 11 的调试器中有 Memory Visualizer
   {$DEFINE IDE_OPTION_DYNCREATE}        // Alexandria 11 的环境设置对话框内页开始动态创建
   {$DEFINE TSTRINGS_SETTEXTSTR_CANNULL} // Alexandria 11 的 TStrings.SetTextStr 会忽略 #0 结束符
   {$DEFINE MEMORYSTREAM_CAPACITY_NATIVEINT}  // Alexandria 11 的 TMemoryStream 的 Capacity 从 Longint 改成了 NativeInt
@@ -3628,7 +3628,7 @@
   {$DEFINE TSTRINGS_HAS_WRITEBOM}              // XE 的 TStrings 开始有 WriteBOM 属性
   {$DEFINE FONT_HAS_QUALITY}                   // XE 的 TFont 开始有 Quality 属性，包括 AntiAliasing
   {$DEFINE IDE_HAS_DEBUGGERVISUALIZER}         // XE 的 ToolsAPI 开始有 Debugger Visualizer 相关接口
-  {$DEFINE IDE_HAS_STRINGS_VISUALIZAER}        // XE 的调试器中有 TStrings Visualizer
+  {$DEFINE IDE_HAS_STRINGS_VISUALIZER}         // XE 的调试器中有 TStrings Visualizer
 {$ENDIF}
 
 {$IFDEF DELPHIXE}

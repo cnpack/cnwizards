@@ -2777,13 +2777,13 @@ begin
 
         if StartCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.CopyTo(Length(UTF8Encode(Copy(Parser.Source, 1, StartCurToken.TokenPos))));
         end;
 
         if EndCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.DeleteTo(Length(UTF8Encode(Copy(Parser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;
@@ -3049,13 +3049,13 @@ begin
 
         if StartCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.CopyTo(Length(UTF8Encode(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
         end;
 
         if EndCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.DeleteTo(Length(UTF8Encode(Copy(CParser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;
@@ -3178,13 +3178,13 @@ begin
 
         if StartCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.CopyTo(Length(UTF8Encode(Copy(CParser.Source, 1, StartCurToken.TokenPos))));
         end;
 
         if EndCurToken <> nil then
         begin
-          // 要处理的是 UTF8 的长度，而 Paser 算出的 TokenPos 是 Unicode 的因此需要转换
+          // 要处理的是 UTF8 的长度，而 Parser 算出的 TokenPos 是 Unicode 的因此需要转换
           EditWriter.DeleteTo(Length(UTF8Encode(Copy(CParser.Source, 1,
             EndCurToken.TokenPos + Length(EndCurToken.Token)))));
         end;

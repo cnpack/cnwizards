@@ -30,7 +30,7 @@ unit CnSrcEditorCodeWrap;
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
 * 修改记录：2024.09.24
-*               加入对 Pascal 或 C/++ 的设置及显示过滤
+*               加入对 Pascal 或 C/C++ 的设置及显示过滤
 *           2013.09.01
 *               修正 Unicode 环境下可能乱码的问题
 *           2005.06.14

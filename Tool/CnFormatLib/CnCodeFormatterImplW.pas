@@ -552,7 +552,7 @@ begin
     end;
 
     // GetTextStr 会导致在输出 Strings 最后一行是回车换行时又多出个回车换行，移除\
-    // 4 作为判断使用，和 Uincode 以及 Win64 无关
+    // 4 作为判断使用，和 Unicode 以及 Win64 无关
     if OutStream.Size >= 4 * SizeOf(Char) then
     begin
       ResPtr := PWideChar(TCnNativeInt(OutStream.Memory) + OutStream.Size - 4 * SizeOf(Char));

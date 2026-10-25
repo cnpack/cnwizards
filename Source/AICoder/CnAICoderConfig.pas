@@ -81,7 +81,7 @@ type
     function GetExtraOptionType(Index: Integer): TTypeKind; virtual;
 
     procedure AssignToEmpty(Dest: TCnAIEngineOption);
-    {* 源属性非空且目标属性空时赋值，用于新增加的设置理，与旧版本属性合并}
+    {* 源属性非空且目标属性空时赋值，用于新增加的设置里，与旧版本属性合并}
 
     procedure LoadFromJSON(const JSON: AnsiString);
     {* 从 UTF8 格式的 JSON 字符串中加载一个选项实例的设置到自身}

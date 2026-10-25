@@ -54,7 +54,7 @@ type
     ['{E14E47D9-2D3A-4F5B-A036-400CB43C30E3}']
     procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; const MyID: AnsiString = '';
       AllowCommand: Cardinal = 0; AllowIDESet: TCnCompilers = []);
-    {* 增加一通知器，可声明通知的附件条件，包括自身 ID，只接受的命令号，只接受的 IDE 版本}
+    {* 增加一通知器，可声明通知的附加条件，包括自身 ID，只接受的命令号，只接受的 IDE 版本}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
 
@@ -107,7 +107,7 @@ type
     // ICnWizCmdNotifier
     procedure AddCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent; const MyID: AnsiString = '';
       AllowCommand: Cardinal = 0; AllowIDESet: TCnCompilers = []);
-    {* 增加一通知器，可声明通知的附件条件}
+    {* 增加一通知器，可声明通知的附加条件}
     procedure RemoveCmdNotifier(CmdNotifier: TCnWizCmdNotifyEvent);
     {* 移除一通知器}
     function GetCurrentSourceId: AnsiString;

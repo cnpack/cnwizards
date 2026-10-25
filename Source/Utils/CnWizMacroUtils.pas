@@ -570,7 +570,7 @@ var
           tkConstructor, tkDestructor]) do
           Parser.NextNoJunk;
 
-        // 处理 class proceduer classfunc 类型的过程定义
+        // 处理 class procedure classfunc 类型的过程定义
         if Parser.TokenID = tkClass then
         begin
           ClassPos := Parser.TokenPos; // 先记录 class 保留字的开始位置

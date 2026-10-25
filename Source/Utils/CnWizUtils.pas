@@ -630,9 +630,9 @@ function CnOtaGetSelectedComponentFromCurrentForm(List: TList): Boolean; overloa
 function CnOtaGetSelectedControlFromCurrentForm(List: TList): Boolean; overload;
 {* 取得当前窗体编辑器的已选择的控件的实例}
 function CnOtaGetSelectedComponentFromCurrentForm(List: TInterfaceList): Boolean; overload;
-{* 取得当前窗体编辑器的已选择的组件的 IComponenet 接口}
+{* 取得当前窗体编辑器的已选择的组件的 IComponent 接口}
 function CnOtaGetSelectedControlFromCurrentForm(List: TInterfaceList): Boolean; overload;
-{* 取得当前窗体编辑器的已选择的控件的 IComponenet 接口}
+{* 取得当前窗体编辑器的已选择的控件的 IComponent 接口}
 function CnOtaShowFormForModule(const Module: IOTAModule): Boolean;
 {* 显示指定模块的窗体 (来自 GExperts Src 1.2)}
 procedure CnOtaShowDesignerForm;
@@ -868,7 +868,7 @@ function CnOtaMoveAndSelectLines(StartLineNum, EndLineNum: Integer; View: IOTAEd
 {* 用 Block Extend 的方式选中多行，光标停留在 End 行所标识的地方，返回是否成功}
 function CnOtaMoveAndSelectByRowCol(const OneBasedStartRow, OneBasedStartCol,
   OneBasedEndRow, OneBasedEndCol: Integer; View: IOTAEditView = nil): Boolean;
-{* 直接用起止行列为参数选中代码快，均以一开始，返回是否成功
+{* 直接用起止行列为参数选中代码块，均以一开始，返回是否成功
    如果起行列大于止行列，内部会互换}
 function CnOtaCloseFileByAction(const FileName: string): Boolean;
 {* 用 ActionService 来关闭文件}
@@ -1117,7 +1117,7 @@ function CnOtaSaveCurrentEditorToStream(Stream: TMemoryStream; FromCurrPos:
 
 procedure CnOtaGotoPosition(Position: Longint; EditView: TCnEditViewSourceInterface = nil;
   Middle: Boolean = True);
-{* 移动光标到指定位置，如果 EditView 为空使用当前值。Position 是线性位置，一般都是 Ansi 或 Utf文字8
+{* 移动光标到指定位置，如果 EditView 为空使用当前值。Position 是线性位置，一般都是 Ansi 或 Utf8
   Middle 为 True 时表示垂直方向上滚动至居中，False 表示仅滚动到最近可见，如本来可见就不滚动}
 
 procedure CnOtaInsertTextIntoEditorAtPos(const Text: string; Position: Longint;
@@ -1367,7 +1367,7 @@ function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 {* 判断一控件窗口是否是非可视化控件}
 
 function FileExists(const Filename: string): Boolean;
-{* Tests for file existance, a lot faster than the RTL implementation }
+{* Tests for file existence, a lot faster than the RTL implementation }
 
 procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
 {* 将一 EditView 中的书签信息保存至一 ObjectList 中}
@@ -5119,7 +5119,7 @@ begin
   Result := List.Count > 0;
 end;
 
-// 取得当前窗体编辑器的已选择的组件的 IComponenet 接口
+// 取得当前窗体编辑器的已选择的组件的 IComponent 接口
 function CnOtaGetSelectedComponentFromCurrentForm(List: TInterfaceList): Boolean;
 var
   FormEditor: IOTAFormEditor;
@@ -5150,7 +5150,7 @@ begin
   Result := List.Count > 0;
 end;
 
-// 取得当前窗体编辑器的已选择的控件的 IComponenet 接口
+// 取得当前窗体编辑器的已选择的控件的 IComponent 接口
 function CnOtaGetSelectedControlFromCurrentForm(List: TInterfaceList): Boolean;
 var
   FormEditor: IOTAFormEditor;
@@ -10793,7 +10793,7 @@ begin
   Result := string(AClassName) = NonvisualClassNamePattern;
 end;
 
-// Tests for file existance, a lot faster than the RTL implementation
+// Tests for file existence, a lot faster than the RTL implementation
 function FileExists(const Filename: string): Boolean;
 var
   a: Cardinal;

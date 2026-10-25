@@ -184,15 +184,15 @@ type
     function FindCurrentDeclaration(LineNumber, WideCharIndex: Integer;
       out Visibility: TTokenKind): CnWideString;
     {* 查找指定光标位置所在的声明，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
-       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
-       Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
+       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConvertPos 后得到的是
+       Utf8 的 CharPos 偏移，2009 或以上 ConvertPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
        再转成 WideChar 的偏移。
        Visibility 参数返回为光标所在是 private/protected/public/published 等}
     function FindCurrentBlock(LineNumber, WideCharIndex: Integer): TTokenKind;
     {* 查找指定光标位置所在的块，LineNumber 1 开始，WideCharIndex 0 开始，类似于 CharPos，
-       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConverPos 后得到的是
-       Utf8 的 CharPos 偏移，2009 或以上 ConverPos 得到混乱的 Ansi 偏移，都不能直接用。
+       但要求是 WideChar 偏移。D2005~2007 下，CursorPos.Col 经 ConvertPos 后得到的是
+       Utf8 的 CharPos 偏移，2009 或以上 ConvertPos 得到混乱的 Ansi 偏移，都不能直接用。
        前者需要转成 WideChar 偏移，后者只能把 CursorPos.Col - 1 当作 Ansi 的 CharIndex，
        再转成 WideChar 的偏移。
        返回值为当前块上部最近的是 private/protected/public/published 还是 none}
@@ -339,7 +339,7 @@ type
     property ElseIfElse[Index: Integer]: TCnWidePasToken read GetElseIfElse;
     {* 返回该 if 块的 else if 的 else 的 Token，索引从 0 到 ElseIfCount - 1}
     property ElseIfIf[Index: Integer]: TCnWidePasToken read GetElseIfIf;
-    {* 返回该 if 块的 else if 的  的 Token，索引从 0 到 ElseIfCount - 1}
+    {* 返回该 if 块的 else if 的 Token，索引从 0 到 ElseIfCount - 1}
     property LastElseIfElse: TCnWidePasToken read GetLastElseIfElse;
     {* 返回该 if 块的最后一个 else if 的 else}
     property LastElseIfIf: TCnWidePasToken read GetLastElseIfIf;

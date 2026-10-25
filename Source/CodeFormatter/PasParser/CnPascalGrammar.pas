@@ -30,7 +30,7 @@ unit CnPascalGrammar;
 * 兼容测试：not test yet
 * 本 地 化：not test hell
 * 修改记录：2003-12-16 V0.3
-*               建立，来自Delphi Help - Object Pascal Gramer，
+*               建立，来自Delphi Help - Object Pascal Grammar，
 *               原始文件有一些错误，一直在陆续修改中。
 *               本语法目前与 CnCodeFormater 有部分不同步，仅供参考
 *           2007-10-11

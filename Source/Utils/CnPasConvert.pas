@@ -128,7 +128,7 @@ uses
 
 {$IFDEF DEBUG}
   {$DEFINE CNPASCONVERT_DEBUG}
-{this conditional directive should be disalbed in release version}
+{this conditional directive should be disabled in release version}
 {$ENDIF}
 
 const
@@ -210,7 +210,7 @@ type
     FPreFixList, FPostFixList: array[ttAssembler..ttUnknown] of string;
     Prefix, Postfix: string;
 
-    {debug varible}
+    {debug variable}
     {$IFDEF CNPASCONVERT_DEBUG}
     nDebugCount: Integer;
     {$ENDIF}
@@ -458,7 +458,7 @@ begin
     WideStringToUTF8Stream(S, TmpOutStream);
     // 先转 UTF8
 
-   { 接着处理 tmpoutStream，变换成 HTML 剪贴板形式写入 OutStream}
+   { 接着处理 tmpOutStream，变换成 HTML 剪贴板形式写入 OutStream}
     HeadLen := Length(SCnHtmlClipHead);
     outStream.Write(AnsiString(SCnHtmlClipHead), HeadLen);
     BodyPos := Pos(AnsiString('<span '), PAnsiChar(TmpOutStream.Memory));
@@ -909,7 +909,7 @@ var
 begin
   inherited;
 
-  {ok, i initial all the private varible here}
+  {ok, i initial all the private variable here}
   FDiffer := False;
   FAssembler := False;
 
@@ -1008,7 +1008,7 @@ begin
   {$ENDIF}
 
   {v0.97: Now we set the token string here now, maybe some slow, but this is a bug should be corrected.
-     i will consider to enchance its performance in furture   :)}
+     i will consider to enhance its performance in furture   :)}
   TakeTokenStr;
 end;
 
@@ -1471,7 +1471,7 @@ end;
 
 function TCnSourceConversion.IsKeyWord(AToken: string): Boolean;
 { Use ??? to find string}
-{ Maybe use hash code is more effcient.}
+{ Maybe use hash code is more efficient.}
 var
   First, Last, I, Compare: Integer;
   Token: string;

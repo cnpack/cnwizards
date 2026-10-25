@@ -24,7 +24,7 @@ unit CnProjectDelTempFrm;
 ================================================================================
 * 软件名称：CnPack IDE 专家包
 * 单元名称：删除工程临时文件窗体单元
-* 单元作者：Hhha（Hhha） Hhha@eyou.con
+* 单元作者：Hhha（Hhha） Hhha@eyou.com
 *           周劲羽 (zjy@cnpack.org)
 * 备    注：
 * 开发平台：PWin2000Pro + Delphi 7
