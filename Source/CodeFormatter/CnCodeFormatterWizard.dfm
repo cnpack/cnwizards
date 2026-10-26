@@ -151,7 +151,7 @@ inherited CnCodeFormatterForm: TCnCodeFormatterForm
           TabOrder = 5
           Value = 1
         end
-        object chkUsesSinglieLine: TCheckBox
+        object chkUsesSingleLine: TCheckBox
           Left = 16
           Top = 220
           Width = 377

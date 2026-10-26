@@ -205,7 +205,7 @@ type
     seSpaceBefore: TCnSpinEdit;
     lblSpaceAfter: TLabel;
     seSpaceAfter: TCnSpinEdit;
-    chkUsesSinglieLine: TCheckBox;
+    chkUsesSingleLine: TCheckBox;
     grpAsm: TGroupBox;
     chkIgnoreArea: TCheckBox;
     seASMHeadIndent: TCnSpinEdit;
