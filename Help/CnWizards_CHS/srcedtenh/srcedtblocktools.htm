@@ -19,14 +19,14 @@
   </tr>
 </table>
 <p class="title">选择块浮动按钮</p>
-<p class="text">该工具提供了一组与选择文本相关功能的快捷操作方式。当用户在代码编辑器中选择了一段文本时，会自动在编辑器左边显示一个浮动按钮，点击该按键下拉出相关的操作菜单。</p>
+<p class="text">该工具提供了一组与选择文本相关功能的快捷操作方式。当用户在代码编辑器中选择了一段文本时，会自动在编辑器左边显示一个浮动按钮，点击该按钮下拉出相关的操作菜单。</p>
 <p class="text">使用界面如下图所示：</p>
 <p class="text" align="center">
 <img src="srcedtblocktools.png"></p>
 <p class="text"><b>编辑菜单</b></p>
 <ul>
 	<li>
-	<p class="text"><b>复制到剪帖板</b>：复制当前选择块。</p></li>
+	<p class="text"><b>复制到剪贴板</b>：复制当前选择块。</p></li>
 	<li>
 	<p class="text"><b>追加复制到剪贴板</b>：复制当前选择块并追加到剪贴板。</p></li>
 	<li>
@@ -38,7 +38,7 @@
 	<li>
 	<p class="text"><b>删除</b>：删除选择块。</p></li>
 	<li>
-	<p class="text"><b>复制 HTML 到剪帖板</b>：将当前选择块内容以语法高亮的 HTML 格式复制到剪贴板，见 
+	<p class="text"><b>复制 HTML 到剪贴板</b>：将当前选择块内容以语法高亮的 HTML 格式复制到剪贴板，见 
 	<a href="../wizards/pas2htmlwizards.htm">带格式代码输出工具</a>。</p></li>
 	<li>
 	<p class="text"><b>保存到文件</b>：将当前选择块内容保存到文件中。</p></li>
@@ -77,13 +77,13 @@
 <ul>
 	<li>
 	<p class="text"><b>注释代码块</b>：使用 // 注释当前选择块。见 
-	<a href="../wizards/editors/editorcodecomment.htm">代码注释工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetcodecomment.htm">代码块注释工具</a>。</p></li>
 	<li>
 	<p class="text"><b>取消代码块注释</b>：取消使用 // 的注释块。见 
-	<a href="../wizards/editors/editorcodeuncomment.htm">取消代码注释工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetcodeuncomment.htm">代码块取消注释工具</a>。</p></li>
 	<li>
 	<p class="text"><b>反转代码块注释</b>：反转选择块的代码注释。见 
-	<a href="../wizards/editors/editorcodetogglecomment.htm">反转代码注释工具</a>。</p>
+	<a href="../wizards/toolset/toolsetcodetogglecomment.htm">代码块注释反转工具</a>。</p>
 	</li>
 </ul>
 <p align="center">
@@ -128,10 +128,10 @@
 	<p class="text"><b>代码块</b>：
 	如果选择了“行块处理模式”，则在执行代码嵌入时将选择区域首尾扩展到整行进行处理。在行块模式下，可以设置块缩进级数来对代码块进行缩进。</li>
 	<li>
-	<p class="text"><b>头部</b>：插入到选择块前面的代码。如果是行块模块，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
+	<p class="text"><b>头部</b>：插入到选择块前面的代码。如果是行块模式，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
 	&quot;|&quot; </span>可以定位光标。</li>
 	<li>
-	<p class="text"><b>尾部</b>：插入到选择块后面的代码。如果是行块模块，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
+	<p class="text"><b>尾部</b>：插入到选择块后面的代码。如果是行块模式，可以选择自动缩进和缩进级数。使用<span lang="en-us"> 
 	&quot;|&quot; </span>可以定位光标。</li>
 	<li>
 	<p class="text"><b>Pascal</b>：设置当前条目针对 Pascal 源文件有效。</li>
@@ -257,25 +257,25 @@
 <ul>
 	<li>
 	<p class="text"><b>赋值交换</b>：将当前选择的源代码中的赋值代码左右交换，即将 A := B 的代码变换为 B := A。见 
-	<a href="../wizards/editors/editorcodeswap.htm">赋值交换工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetcodeswap.htm">赋值交换工具</a>。</p></li>
 	<li>
 	<p class="text"><b>转换为字符串</b>：将当前选择的源代码转换成多行字符串常量，这样可以省去输入引号和换行字符的麻烦。见 
-	<a href="../wizards/editors/editorcodetostring.htm">转换为字符串工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetcodetostring.htm">代码转字符串工具</a>。</p></li>
 </ul>
 <ul>
 	<li>
 	<p class="text"><b>插入颜色</b>：打开颜色对话框并用选择的颜色值替换当前选择的文本。见 
-	<a href="../wizards/editors/editorinsertcolor.htm">插入颜色工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetinsertcolor.htm">插入颜色工具</a>。</p></li>
 	<li>
 	<p class="text"><b>插入日期时间</b>：打开插入日期对话框并用日期时间值替换当前选择的文本。见 
-	<a href="../wizards/editors/editorinserttime.htm">插入日期时间工具</a>。</p></li>
+	<a href="../wizards/toolset/toolsetinserttime.htm">插入日期时间工具</a>。</p></li>
 	<li>
-	<p class="text"><b>转换为字符串</b>：将当前选择的代码行按字母排序。见 
-	<a href="../wizards/editors/editorsortlines.htm">选择行排序工具</a>。</p></li>
+	<p class="text"><b>选择行排序</b>：将当前选择的代码行按字母排序。见 
+	<a href="../wizards/toolset/toolsetsortlines.htm">选择行排序工具</a>。</p></li>
 	<li>
 	<p class="text"><b>向上移动一行</b>：将选择区的内容向上移动一行，如未选择，则移动当前行。</p></li>
 	<li>
-	<p class="text"><b>向上移动一行</b>：将选择区的内容向下移动一行，如未选择，则移动当前行。</p></li>
+	<p class="text"><b>向下移动一行</b>：将选择区的内容向下移动一行，如未选择，则移动当前行。</p></li>
 	<li>
 	<p class="text"><b>删除当前行</b>：删除选择区所在的行，如未选择，则删除当前行。</p></li>
 </ul>
