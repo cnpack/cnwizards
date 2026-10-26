@@ -1072,7 +1072,7 @@ begin
 {$ENDIF}
 
 {$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
-  FHideStructMenu := DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructualHighlight, btDisableHighlight);
+  FHideStructMenu := DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructuralHighlight, btDisableHighlight);
 {$ENDIF}
 
   AddSepMenuItem(FMiscMenu);

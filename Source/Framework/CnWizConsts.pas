@@ -1200,7 +1200,7 @@ var
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
   SCnSrcBlockDeleteLines: string = 'Delete &Lines';
-  SCnSrcBlockDisableStructualHighlight: string = 'Disable IDE &Structural Highlight';
+  SCnSrcBlockDisableStructuralHighlight: string = 'Disable IDE &Structural Highlight';
   SCnSrcBlockErrorNoContent: string = 'No Content to Compare';
 
   // CnSrcEditorKey
