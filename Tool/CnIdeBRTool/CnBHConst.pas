@@ -142,7 +142,7 @@ var
   SCnQuitAskCaption: string = 'Information';
   SCnErrorCaption: string = 'Error';
   SCnIDERunning: string = 'IDE is Running, Please Exit IDE and Run Me again!';
-  SCnCleaned: string = 'IDE History Cleanned Successfully!';
+  SCnCleaned: string = 'IDE History Cleaned Successfully!';
   SCnHelpOpenError: string = 'Help File Open Error!';
 
   SCnAboutCaption: string = 'About';

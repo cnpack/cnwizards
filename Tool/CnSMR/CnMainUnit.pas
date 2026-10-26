@@ -72,17 +72,13 @@ type
     procedure FormCreate(Sender: TObject);
     procedure actHelpExecute(Sender: TObject);
   private
-    { Private declarations }
-
     function GetTabSheet(P: TObject): TTabSheet;
-
     procedure NewForm(FormClass: TFormClass);
     procedure SortTabs;
   protected
     procedure DoCreate; override;
     procedure TranslateStrings;
   public
-    { Public declarations }
     procedure GetMessageResults(const Message: TMessage; var Results: TMessageList);
   end;
 
@@ -108,12 +104,12 @@ var
     'LiuXiao (LiuXiao)  (master@cnpack.org)' + #13#10#13#10 +
     'Copyright (C) 2001-2026 CnPack Team';
 
-  SCnAnalyzedResultsSaved: string = 'Analyzed Results Saved Successed to File %s.';
+  SCnAnalyzedResultsSaved: string = 'Analyzed Results Saved Successfully to File %s.';
   SCnDuplicatedNameFound: string = 'Can NOT Save analyzed result: Duplicated File Names Found:'#13#10#13#10'%s';
   SCnSomeAnalyzedFailed: string = 'All Files Analyzed, but Some Files Analyzed Failed:'#13#10;
 
   SCnClickHintARFFmt: string = 'Please Click "%s" to Open an Analyzed Result File.';
-  SCnClickHintSMRFmt: string = 'Please Click "%s" to Open an Source Module Relation File.';
+  SCnClickHintSMRFmt: string = 'Please Click "%s" to Open a Source Module Relation File.';
   SCnBrowseHintARFFmt: string = 'Browsing Analyzed Results of "%s"';
   SCnBrowseHintSMRFmt: string = 'Browsing Source Module Relation of "%s"';
   
@@ -121,7 +117,7 @@ var
   SCnNoMatchedResultAll: string = 'No Matched Directories/files.';
   SCnNoMatchedResultDir: string = 'No Matched Directories.';
   SCnNoMatchedResultFile: string = 'No Matched Files.';
-  SCnSuccessedSaveToFile: string = 'Successed Save to File %s.';
+  SCnSuccessedSaveToFile: string = 'Succeeded Save to File %s.';
   SCnNameDuplicatedFiles: string = 'Name Duplicated Files';
 
 function AppPath: string;

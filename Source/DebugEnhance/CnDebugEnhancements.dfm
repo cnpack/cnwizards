@@ -68,11 +68,11 @@ object CnDebugEnhanceForm: TCnDebugEnhanceForm
       object lblHint: TLabel
         Left = 222
         Top = 332
-        Width = 229
+        Width = 227
         Height = 13
         Anchors = [akRight, akBottom]
         BiDiMode = bdLeftToRight
-        Caption = 'Note: Only Availiable under Delphi XE or Above.'
+        Caption = 'Note: Only Available under Delphi XE or Above.'
         ParentBiDiMode = False
       end
       object lvReplacers: TListView

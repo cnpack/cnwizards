@@ -242,7 +242,7 @@ inherited CnPas2HtmlConfigForm: TCnPas2HtmlConfigForm
             'Identifier'
             'Reserved Word'
             'Number'
-            'Whitepace'
+            'Whitespace'
             'String'
             'Symbol')
         end

@@ -493,9 +493,9 @@ var
     '  or press Save button to save the content and send to %s as attachment.' + #13#10#13#10 +
     '  Our Wizards would not automatically send information which may be about your privacy. All contents need you to send manually.';
   SCnTypeExample: string =
-    '  CnPack team won''t to take any commercial develop tasks. All members are busy. ' +
+    '  CnPack team won''t take any commercial develop tasks. All members are busy. ' +
     'Freeware developing is our interesting and pursuit, so we won''t do any customize components, ' +
-    'wizards or projects. Further more, wizards existing in free Tools, e.g. GExperts, are also excluded.' + #13#10#13#10 +
+    'wizards or projects. Furthermore, wizards existing in free Tools, e.g. GExperts, are also excluded.' + #13#10#13#10 +
     '  Please pay attention to it.';
   SCnBugDescriptionExample: string =
     '  I add some Toolbutton to IDE toolbar. After restarting, the buttons added become empty.';
@@ -635,7 +635,7 @@ var
   SCnMsgBoxProjectDefaultName: string = 'Template';
   SCnMsgBoxProjectExists: string = 'Template Name already Exists, Overwrite?';
   SCnMsgBoxDeleteProject: string = 'Sure to Delete the Template?';
-  SCnMsgBoxCannotDelLastProject: string = 'Auto Saved Template can MOT be Deleted!';
+  SCnMsgBoxCannotDelLastProject: string = 'Auto Saved Template can NOT be Deleted!';
 
   // CnComponentSelector
   SCnCompSelectorMenuCaption: string = 'Component &Selector...';
@@ -675,7 +675,7 @@ var
   SCnDfm6To5WizardComment: string = 'Open Forms and Units Created by High Version IDEs.';
   SCnDfm6To5OpenError: string = 'File Opening Failure! ' + #13#10#13#10 + 'Filename: %s';
   SCnDfm6To5SaveError: string = 'Writing File Failure, please check the read-only attributes. ' + #13#10#13#10 + 'Filename: %s';
-  SCnDfm6To5InvalidFormat: string = 'Convertion Failure! ' + #13#10#13#10 + 'Filename: %s';
+  SCnDfm6To5InvalidFormat: string = 'Conversion Failure! ' + #13#10#13#10 + 'Filename: %s';
 
   // CnBookmarkWizard
   SCnBookmarkWizardMenuCaption: string = '&Bookmark Browser...';
@@ -692,7 +692,7 @@ var
   SCnCodingToolsetWizardName: string = 'Coding Toolset';
   SCnCodingToolsetWizardComment: string = 'Code Editor Toolset.';
   SCnCodingToolsetWizardConfigCaption: string = '&Options...';
-  SCnCodingToolsetWizardConfigHint: string = 'Configurate the Coding Toolset';
+  SCnCodingToolsetWizardConfigHint: string = 'Config the Coding Toolset';
 
   // CnSelectionCodeTool
   SCnEditorCodeToolSelIsEmpty: string = 'Please Select the Code Block to Process.';
@@ -988,7 +988,7 @@ var
   SCnDispCaption: string = 'Converting %s';
   SCnPas2HtmlErrorNOTSupport: string = 'Only Pascal/C/C++ File Supported.';
   SCnPas2HtmlErrorConvertProject: string = 'Converting Project Error.';
-  SCnPas2HtmlErrorConvert: string = 'Convertion Error in File %s';
+  SCnPas2HtmlErrorConvert: string = 'Conversion Error in File %s';
   SCnPas2HtmlDefEncode: string = 'iso-8859-1';
 
   // CnWizEditFiler
@@ -1200,7 +1200,7 @@ var
   SCnSrcBlockMoveUp: string = 'Move &Up';
   SCnSrcBlockMoveDown: string = 'Move &Down';
   SCnSrcBlockDeleteLines: string = 'Delete &Lines';
-  SCnSrcBlockDisableStructualHighlight: string = 'Disable IDE &Structual Highlight';
+  SCnSrcBlockDisableStructualHighlight: string = 'Disable IDE &Structural Highlight';
   SCnSrcBlockErrorNoContent: string = 'No Content to Compare';
 
   // CnSrcEditorKey

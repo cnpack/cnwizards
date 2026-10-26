@@ -63,17 +63,16 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    { Private declarations }
     procedure CMGetFormIndex(var Message: TMessage); message CM_GETFORMINDEX;
   public
-    { Public declarations }
+
   end;
 
 implementation
 
 {$R *.dfm}
 
-{ TfAbout }
+{ TCnAboutForm }
 
 procedure TCnAboutForm.CMGetFormIndex(var Message: TMessage);
 begin
