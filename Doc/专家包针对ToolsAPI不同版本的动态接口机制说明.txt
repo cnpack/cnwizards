@@ -181,7 +181,7 @@ https://www.cnpack.org/showdetail.php?id=959&lang=zh-cn
 
 注意，这些环境中，是没有INTACodeEditorServices接口的声明与实现的的。而且，各Update包也不提供任何编译条件供我们区分。
 
-如果我们用Delphi 11 Update 3的编译环境，引用INTACodeEditorServices接口来写代码，虽然编译能通过，但这个DLL在Dephi 11 Update 2、Update 1、没Update下，就会冒出引用的运行函数不存在的问题，导致IDE无法启动。到时候投诉又多了。
+如果我们用Delphi 11 Update 3的编译环境，引用INTACodeEditorServices接口来写代码，虽然编译能通过，但这个DLL在Delphi 11 Update 2、Update 1、没Update下，就会冒出引用的运行函数不存在的问题，导致IDE无法启动。到时候投诉又多了。
 
 如果分开编译DLL，那又只有Delphi 11 Update 3的用户能看到此问题修复，低Update包的修不了，也让人头大。
 

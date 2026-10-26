@@ -66,7 +66,7 @@ Delphi 5下，其内部的coreide50.bpl中有个输出函数
 
 这个函数被我们幸运地找着了，它会在设计器右键菜单创建后、弹出前被调用，用来动态组装内部的Items，我们只要用CnPack组件包中强大的CnMethodHook组件挂接拦截它，就能达到实现通知的目的。
 
-Delphi 6以上，设计器机制貌似有大改，这个函数不幸没了。于是经过逆向发掘，我们挂接了TPopupMeu.Popup方法，在该方法里检查PopupMenu实例的Owner是否是Application，是，则近似认为它是设计器的右键弹出菜单组件，可以实现通知。
+Delphi 6以上，设计器机制貌似有大改，这个函数不幸没了。于是经过逆向发掘，我们挂接了TPopupMenu.Popup方法，在该方法里检查PopupMenu实例的Owner是否是Application，是，则近似认为它是设计器的右键弹出菜单组件，可以实现通知。
 
 这个Application判断也有一定道理，因为其他静态创建的弹出菜单组件，一般放在什么窗体上，Owner就是该窗体，只有这种十分动态的才设为Application。
 
