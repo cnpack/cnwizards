@@ -1071,7 +1071,7 @@ begin
   DoAddMenuItem(FMiscMenu, SCnSrcBlockDeleteLines, btBlockDelLines, GetShortCut(FBlockDelLinesShortCut));
 {$ENDIF}
 
-{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+{$IFDEF IDE_HAS_OWN_STRUCTURAL_HIGHLIGHT}
   FHideStructMenu := DoAddMenuItem(FMiscMenu, SCnSrcBlockDisableStructuralHighlight, btDisableHighlight);
 {$ENDIF}
 
@@ -1533,7 +1533,7 @@ end;
 function TCnSrcEditorBlockTools.CanShowDisableStructuralHighlight: Boolean;
 begin
   Result := False;
-{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+{$IFDEF IDE_HAS_OWN_STRUCTURAL_HIGHLIGHT}
   // IDE 该选项打开才允许显示
   if not CnOtaGetEnvironmentOptionValue('EnabledProp') then
     Exit;
@@ -1544,7 +1544,7 @@ end;
 
 procedure TCnSrcEditorBlockTools.DoDisableHighlight;
 begin
-{$IFDEF IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}
+{$IFDEF IDE_HAS_OWN_STRUCTURAL_HIGHLIGHT}
   CnOtaSetEnvironmentOptionValue('EnabledProp', False);
   EditControlWrapper.RepaintEditControls;
 {$ENDIF}

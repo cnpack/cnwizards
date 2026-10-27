@@ -3545,8 +3545,8 @@
 {$ENDIF}
 
 {$IFDEF DELPHI10_SEATTLE_UP}
-  {$DEFINE IDE_HAS_OWN_STRUCTUAL_HIGHLIGHT}  // 10S 及以上有高亮划线 "Structual Highlight" 的功能
-  {$DEFINE IDE_HAS_HIDE_NONVISUAL}      // 10S 及以上有隐藏不可视组件 "Hide NonVisual" 的功能
+  {$DEFINE IDE_HAS_OWN_STRUCTURAL_HIGHLIGHT} // 10S 及以上有高亮划线 "Structural Highlight" 的功能
+  {$DEFINE IDE_HAS_HIDE_NONVISUAL}           // 10S 及以上有隐藏不可视组件 "Hide NonVisual" 的功能
 {$ENDIF}
 
 {$IFDEF DELPHIXE8_UP}
