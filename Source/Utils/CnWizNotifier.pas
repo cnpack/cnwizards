@@ -853,8 +853,6 @@ end;
 {$ELSE}
 
 procedure MyPopupActionBarPopup(ASelf: TObject; X, Y: Integer);
-var
-  I: Integer;
 begin
   // 设计器菜单的 Owner 为 Application，不过也可能有其他菜单也是，导致多余通知
   if (ASelf <> nil) and (ASelf is TPopupMenu) and (TPopupMenu(ASelf).Owner = Application) then
@@ -1921,8 +1919,6 @@ procedure TCnWizNotifierServices.FileNotification(
   NotifyCode: TOTAFileNotification; const FileName: string);
 var
   I: Integer;
-  ModuleServices: IOTAModuleServices;
-  Module: IOTAModule;
   Project: IOTAProject;
   Notifier: TCnModuleNotifier;
 {$IFDEF COMPILER5}
@@ -1949,31 +1945,6 @@ begin
       DoHandleException('TCnWizNotifierServices.FileNotification[' + IntToStr(I) + ']');
     end;
   end;
-
-//  if (NotifyCode = ofnFileOpened) and
-//    (IsProject(FileName) or IsBdsProject(FileName) or IsDProject(FileName)) then
-//  begin
-//    // 找对应文件的 Module，如果是 IOTAProject，则增加该文件的 Notifier
-//    if Supports(BorlandIDEServices, IOTAModuleServices, ModuleServices) then
-//    begin
-//      Module := ModuleServices.FindModule(FileName);
-//      if Supports(Module, IOTAProject, Project) then
-//      begin
-//{$IFDEF DEBUG}
-//        CnDebugger.LogMsg('FileNotification Get Project Module ' + FileName);
-//{$ENDIF}
-//        // 打开时添加通知器
-//        Notifier := TCnModuleNotifier.Create(Self);
-//        NoRefCount(Notifier.Module) := NoRefCount(Module);
-//        Notifier.NotifierIndex := Module.AddNotifier(Notifier as IOTAModuleNotifier);
-//        FModuleIntfs.Add(Notifier);
-//{$IFDEF DEBUG}
-//        CnDebugger.LogFmt('FileNotification Add a Notifier at %d for Module %s',
-//          [Notifier.NotifierIndex, FileName]);
-//{$ENDIF}
-//      end;
-//    end;
-//  end;
 
 {$IFDEF COMPILER5}
   // Delphi 5 下没有工程改变通知，在文件打开后关闭前比较检测

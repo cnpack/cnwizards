@@ -450,7 +450,7 @@ begin
     seNewLine.Value := FWrapNewLineWidth;
     seSpaceBefore.Value := FSpaceBeforeOperator;
     seSpaceAfter.Value := FSpaceAfterOperator;
-    chkUsesSinglieLine.Checked := FUsesUnitSingleLine;
+    chkUsesSingleLine.Checked := FUsesUnitSingleLine;
     cbbDirectiveMode.ItemIndex := Ord(FDirectiveMode);
 
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
@@ -492,7 +492,7 @@ begin
 
       FSpaceBeforeOperator := seSpaceBefore.Value;
       FSpaceAfterOperator := seSpaceAfter.Value;
-      FUsesUnitSingleLine := chkUsesSinglieLine.Checked;
+      FUsesUnitSingleLine := chkUsesSingleLine.Checked;
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
       FUseIDESymbols := chkUseIDESymbols.Checked;
 {$ENDIF}

@@ -60,11 +60,11 @@ uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, {$ENDIF} {$ELSE}
-  {$IFDEF DELPHI_OTA} ToolsAPI, CnRestoreSystemMenu, CnWizIdeHooks,
+  {$IFDEF DELPHI_OTA} ToolsAPI, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
   CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnLangMgr {$ENDIF};
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnRestoreSystemMenu, CnLangMgr {$ENDIF};
 
 const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时

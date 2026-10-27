@@ -74,7 +74,8 @@ uses
   {$ELSE} DsgnIntf, LibIntf,{$ENDIF} {$ENDIF}
   {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF} {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF IDE_SUPPORT_THEMING} CnIDEMirrorIntf, {$ENDIF}
-  mPasLex, mwBCBTokenList, AsRegExpr, CnNative, CnSearchCombo, CnSM4, CnAEAD,
+  mPasLex, mwBCBTokenList, AsRegExpr, CnNative,
+  {$IFNDEF CNWIZARDS_MINIMUM} CnSearchCombo, CnSM4, CnAEAD, {$ENDIF}
   Clipbrd, TypInfo, ComCtrls, StdCtrls, Imm, Contnrs, CnIDEStrings,
   CnPasWideLex, CnBCBWideTokenList, CnStrings, CnWizCompilerConst, CnWizConsts,
   CnCommon, CnConsts, CnWideStrings, CnWizClasses, CnWizIni,
@@ -1417,8 +1418,12 @@ function SameEditPos(Pos1, Pos2: TOTAEditPos): Boolean;
 function SameCharPos(Pos1, Pos2: TOTACharPos): Boolean;
 {* 判断两个字符位置是否相等 }
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
 {* 将一个 Combo 复制为 CnSearchCombo，供调用者替换掉}
+
+{$ENDIF}
 
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
   APattern: string; IsMatchStart: Boolean = False): Boolean;
@@ -1489,11 +1494,15 @@ function CnWizInputMultiLineBox(const ACaption, APrompt, ADefault: string): stri
 procedure CnWizAssert(Expr: Boolean; const Msg: string = '');
 {* 封装 Assert 判断}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnWizEncryptKey(const Key: string): string;
 {* 封装的加密方法}
 
 function CnWizDecryptKey(const Text: string): string;
 {* 封装的解密方法}
+
+{$ENDIF}
 
 var
   CnLoadedIconCount: Integer = 0; // 暗中记录加载的 Icon 数量
@@ -1515,11 +1524,10 @@ uses
 {$IFDEF SUPPORT_FMX}
   CnFmxUtils,
 {$ENDIF}
-  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizHelp,
-  CnLangMgr, CnLangStorage, CnHashLangStorage, CnWizEditFiler
+  Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizEditFiler
   {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} {$ELSE}, CnWizScaler
-  {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage,
+  CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
   {$ENDIF} {$ENDIF} {$ENDIF}
   ;
 
@@ -1527,9 +1535,11 @@ const
   MAX_LINE_LENGTH = 2048;
   CNWIZARDDEFAULT_ICO = 'CnWizardDefault';
 
+{$IFNDEF CNWIZARDS_MINIMUM}
   CN_SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
   CN_SM4_IV: TCnSM4Iv   = ($18, $40, $19, $21, $19, $31, $19, $37, $19, $45, $19, $49, $19, $53, $19, $78);
   CN_SM4_AD: AnsiString = 'CnPack';
+{$ENDIF}
 
 type
   TControlAccess = class(TControl);
@@ -1694,6 +1704,8 @@ end;
 
 {$ENDIF}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnWizEncryptKey(const Key: string): string;
 var
   K, Iv, AD: TBytes;
@@ -1738,6 +1750,8 @@ begin
   Res := SM4GCMDecryptFromHex(K, Iv, AD, Text);
   Result := BytesToString(Res);
 end;
+
+{$ENDIF}
 
 var
   FResInited: Boolean;
@@ -5403,10 +5417,8 @@ end;
 // 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器
 function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
 var
-  I: Integer;
   F: TCustomForm;
   C: TComponent;
-  L: TControl;
 begin
   Result := nil;
   F := CnOtaGetCurrentEditWindow(True);
@@ -5430,7 +5442,6 @@ var
   I: Integer;
   F: TCustomForm;
   C: TComponent;
-  L: TControl;
 begin
   Result := nil;
   F := CnOtaGetCurrentEditWindow(True);
@@ -11137,6 +11148,8 @@ begin
   Result := (Pos1.CharIndex = Pos2.CharIndex) and (Pos1.Line = Pos2.Line);
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 procedure CloneSearchCombo(var ASearchCombo: TCnSearchComboBox; ACombo: TComboBox);
 begin
   ASearchCombo := TCnSearchComboBox.Create(ACombo.Owner);
@@ -11154,6 +11167,8 @@ begin
   ASearchCombo.Visible := True;
   ACombo.Visible := False;
 end;
+
+{$ENDIF}
 
 // 判断正则表达式匹配
 function RegExpContainsText(ARegExpr: TRegExpr; const AText: string;
