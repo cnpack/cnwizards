@@ -4,7 +4,7 @@
                  (C)Copyright 2001-2026 CnPack Team
 **********************************************************************
 
-Follow features depend on third part components:
+Follow features depend on third-party components:
 
 Script Wizard
 =============

@@ -78,7 +78,7 @@ CnWizards enters Embarcadero Delphi XE Partner DVD in Sep. 2010.
 
 CnWizards is designed to face the programmers who use Delphi/C++Builder/BDS/RAD Studio.
 
-The offical version of CnWizards includes follow languages: Simplified Chinese,
+The official version of CnWizards includes follow languages: Simplified Chinese,
 Traditional Chinese, English, Russian, German, French and Portuguese.
 
 # 3. What can CnWizards do?

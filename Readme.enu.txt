@@ -18,12 +18,12 @@
 'CnPack IDE Wizards'. It's a free plug-in tool set used in Delphi/
 C++Builder/BDS/RAD Studio to improve development efficiency.
 
-    CnWizards is designed to aide programmers who use Delphi 5 6 7,
+    CnWizards is designed to aid programmers who use Delphi 5 6 7,
 C++Builder 5 6 and BDS 2005 2006, RAD Studio 2007 2009 2010, XE, XE2,
 XE3, XE4, XE5, XE6, XE7, XE8, 10 Seattle, 10.1 Berlin, 10.2 Tokyo,
 10.3 Rio, 10.4 Sydney, 11 Alexandria, 12 Athens, 13 Florence.
 
-    The offical version of CnWizards includes follow languages: 
+    The official version of CnWizards includes follow languages: 
 Simplified Chinese, Traditional Chinese, English, Russian, German,
 French and Portuguese.
 
@@ -86,7 +86,7 @@ file.
 ======================================================================
 
     First you need to download cnpack source code and decompress it into
-the same directory where cnwizards source lays in. Then open the project
+the same directory where cnwizards source lies in. Then open the project
 file in "Source" directory to compile. The "Tools" directory contains the 
 source codes of other tools of CnWizards.
 
