@@ -64,7 +64,7 @@ uses
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
   CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnRestoreSystemMenu, CnLangMgr {$ENDIF};
+  {$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF LAZARUS}, CnRestoreSystemMenu {$ENDIF}, CnLangMgr {$ENDIF};
 
 const
   BootShortCutKey = VK_LSHIFT; // 快捷键为 左 Shift，用户可以在启动 Delphi 时

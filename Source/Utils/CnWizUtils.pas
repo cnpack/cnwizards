@@ -881,8 +881,12 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
   View: TCnEditViewSourceInterface = nil): Boolean;
 {* 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区}
+
+{$IFNDEF CNWIZARDS_MINIMUM}
 function CnOtaGetCurrentProcedure: string;
 {* 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域}
+{$ENDIF}
+
 function CnOtaCurrBlockEmpty: Boolean;
 {* 返回当前选择的块是否为空}
 function CnOtaOpenFile(const FileName: string): Boolean;
@@ -1525,9 +1529,10 @@ uses
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizEditFiler
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} {$ELSE}, CnWizScaler
-  {$IFNDEF CNWIZARDS_MINIMUM}, CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage,
-  CnWizMultiLang, CnWizDebuggerNotifier, CnEditControlWrapper, CnIDEVersion
+  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}
+  , CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage,
+  CnWizMultiLang, CnEditControlWrapper, CnIDEVersion
+  {$IFDEF LAZARUS} {$ELSE}, CnWizScaler, CnWizDebuggerNotifier
   {$ENDIF} {$ENDIF} {$ENDIF}
   ;
 
@@ -7603,6 +7608,8 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 获取当前光标所在的过程或函数名，必须是实现区域，不包括声明区域
 function CnOtaGetCurrentProcedure: string;
 var
@@ -7686,6 +7693,8 @@ begin
     Stream.Free;
   end;
 end;
+
+{$ENDIF}
 
 // 返回当前选择的块是否为空
 function CnOtaCurrBlockEmpty: Boolean;

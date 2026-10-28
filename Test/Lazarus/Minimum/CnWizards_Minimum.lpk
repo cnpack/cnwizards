@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\..\Source"/>
         <Libraries Value="..\..\..\Source\Framework;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\MultiLang;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\Source\Utils"/>
-        <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\ObjRep;..\..\..\..\cnvcl\Source\MultiLang"/>
+        <OtherUnitFiles Value="..\..\..\Source\Framework;..\..\..\Source\Utils;..\..\..\Source\Command;..\..\..\Source\ThirdParty;..\..\..\..\cnvcl\Source\Common;..\..\..\..\cnvcl\Source\Crypto;..\..\..\..\cnvcl\Source\Graphic;..\..\..\..\cnvcl\Source\NonVisual;..\..\..\..\cnvcl\Source\NetComm;..\..\..\..\cnvcl\Source\ObjRep;..\..\..\..\cnvcl\Source\MultiLang"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
