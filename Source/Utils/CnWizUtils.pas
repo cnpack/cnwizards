@@ -11453,9 +11453,11 @@ end;
 procedure FormCallBack(Sender: TObject);
 begin
 {$IFNDEF STAND_ALONE}
+{$IFNDEF CNWIZARDS_MINIMUM}
 {$IFNDEF LAZARUS}
   if Sender is TForm then
     ScaleForm(Sender as TForm, IdeGetScaledFactor);
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 end;
