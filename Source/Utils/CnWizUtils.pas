@@ -119,6 +119,7 @@ type
   TCnIDEDesigner = Pointer;
   TCnDesignerSelectionList = Pointer;
   TCnIDEFormEditor = Pointer;
+  TCnIDEInterfaceList = TList;
 {$ELSE}
   {$IFDEF LAZARUS}
   TCnEditViewSourceInterface = TSourceEditorInterface;
@@ -132,6 +133,7 @@ type
   TCnIDEDesigner = TIDesigner;
   TCnDesignerSelectionList = TPersistentSelectionList;
   TCnIDEFormEditor = TComponentEditorDesigner;
+  TCnIDEInterfaceList = TList;
   {$ELSE}
   TCnEditViewSourceInterface = IOTAEditView;
   TCnIDEEditorInterface = IOTAEditor;
@@ -144,6 +146,7 @@ type
   TCnIDEDesigner = IDesigner;
   TCnDesignerSelectionList = IDesignerSelections;
   TCnIDEFormEditor = IOTAFormEditor;
+  TCnIDEInterfaceList = TInterfaceList;
   {$ENDIF}
 {$ENDIF}
 
@@ -578,6 +581,8 @@ function CnOtaGetProjectGroup: TCnIDEProjectGroupInterface;
 {* 取当前工程组}
 function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
+function CnOtaGetProjectGroupProjectCount: Integer;
+{* 封装的取当前工程组的工程数量}
 function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
 {* 取工程的源码文件 dpr/dpk}
 function CnOtaGetProjectResource(Project: TCnIDEProjectInterface): TCnIDEProjectResourceInterface;
@@ -695,7 +700,7 @@ function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出目录}
 function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出完整路径}
-procedure CnOtaGetProjectList(const List: TInterfaceList);
+procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 {* 取得所有工程列表}
 function CnOtaGetCurrentFormName: string;
 {* 取当前窗体名称}
@@ -4563,6 +4568,25 @@ begin
 {$ENDIF}
 end;
 
+// 封装的取当前工程组的工程数量
+function CnOtaGetProjectGroupProjectCount: Integer;
+var
+  ProjectGroup: TCnIDEProjectGroupInterface;
+begin
+  ProjectGroup := CnOtaGetProjectGroup;
+  if ProjectGroup = nil then
+    Result := 0
+  else
+  begin
+{$IFDEF DELPHI_OTA}
+    Result := ProjectGroup.ProjectCount;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    Result := ProjectGroup.TargetCount;
+{$ENDIF}
+  end;
+end;
+
 // 取工程的源码文件 dpr/dpk
 function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
 {$IFNDEF PROJECT_FILENAME_DPR}
@@ -5855,7 +5879,7 @@ begin
 end;
 
 // 取得所有工程列表
-procedure CnOtaGetProjectList(const List: TInterfaceList);
+procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 var
   IModuleServices: IOTAModuleServices;
   IModule: IOTAModule;

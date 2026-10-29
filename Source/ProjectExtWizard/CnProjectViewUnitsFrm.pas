@@ -406,9 +406,9 @@ var
   UnitInfo: TCnUnitInfo;
   I, J: Integer;
   UnitFileName: string;
-  IProject: IOTAProject;
+  IProject: TCnIDEProjectInterface;
   IModuleInfo: IOTAModuleInfo;
-  ProjectInterfaceList: TInterfaceList;
+  ProjectInterfaceList: TCnIDEInterfaceList;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
 {$ENDIF}
@@ -487,7 +487,7 @@ begin
             Project := _CnExtractFileName(IProject.FileName);
             
           {$IFDEF SUPPORT_MODULETYPE}
-            // todo: Check ModuleInfo.ModuleType
+            // TODO: Check ModuleInfo.ModuleType
           {$ELSE}
             if AnsiPos('DataModule', IModuleInfo.DesignClass) > 0 then
               UnitType := utDataModule
