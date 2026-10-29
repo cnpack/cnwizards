@@ -1534,9 +1534,8 @@ uses
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizEditFiler
-  {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}
-  , CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage,
-  CnWizMultiLang, CnEditControlWrapper, CnIDEVersion
+  {$IFNDEF CNWIZARDS_MINIMUM}, CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage{$IFNDEF STAND_ALONE}
+  , CnWizMultiLang, CnEditControlWrapper, CnIDEVersion
   {$IFDEF LAZARUS} {$ELSE}, CnWizScaler, CnWizDebuggerNotifier
   {$ENDIF} {$ENDIF} {$ENDIF}
   ;
