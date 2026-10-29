@@ -41,7 +41,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnCommon, CnWideStrings,
-  SrcEditorIntf, LazIDEIntf, ProjectGroupIntf, ProjectGroup;
+  SrcEditorIntf, LazIDEIntf, ProjectGroupIntf;
 
 type
 
