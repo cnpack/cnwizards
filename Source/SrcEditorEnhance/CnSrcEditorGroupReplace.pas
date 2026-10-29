@@ -340,7 +340,7 @@ begin
       AddMenuItem(AMenu, Items[I].Caption, OnMenuItemClick, nil,
         Items[I].ShortCut, '', I);
 
-//      不能加WizShortCutMgr的处理，免得热键弹出右键菜单后出未知错误。2007.12.13 by LiuXiao
+//      不能加 WizShortCutMgr 的处理，免得热键弹出右键菜单后出未知错误。2007.12.13 by LiuXiao
 //      if (Items[i].Caption <> '-') and (Items[i].ShortCut <> 0) then
 //        FShortCuts.Add(WizShortCutMgr.Add('', Items[i].ShortCut, OnShortCut, '', i));
     end;

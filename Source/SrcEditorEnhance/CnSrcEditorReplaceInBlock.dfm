@@ -7,6 +7,8 @@ inherited CnSrcEditorReplaceInBlockForm: TCnSrcEditorReplaceInBlockForm
   ClientHeight = 173
   ClientWidth = 423
   Font.Charset = ANSI_CHARSET
+  OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object lblReplace: TLabel

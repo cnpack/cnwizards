@@ -56,6 +56,8 @@ type
     chkInverse: TCheckBox;
     chkSaveToItem: TCheckBox;
     procedure btnHelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
 
   public
@@ -70,6 +72,10 @@ implementation
 
 {$R *.DFM}
 
+var
+  HisSrc: string = '';
+  HisDst: string = '';
+
 { TCnSrcEditorReplaceInBlockForm }
 
 function TCnSrcEditorReplaceInBlockForm.GetHelpTopic: string;
@@ -80,6 +86,22 @@ end;
 procedure TCnSrcEditorReplaceInBlockForm.btnHelpClick(Sender: TObject);
 begin
   ShowFormHelp;
+end;
+
+procedure TCnSrcEditorReplaceInBlockForm.FormCreate(Sender: TObject);
+begin
+  edtFrom.Text := HisSrc;
+  edtTo.Text := HisDst;
+end;
+
+procedure TCnSrcEditorReplaceInBlockForm.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  if ModalResult = mrOk then
+  begin
+    HisSrc := edtFrom.Text;
+    HisDst := edtTo.Text;
+  end;
 end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
