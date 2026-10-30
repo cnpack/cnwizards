@@ -43,7 +43,8 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Graphics, Forms, Controls, StdCtrls,
-  Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl, ToolsAPI,
+  Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnCommon, CnWizConsts, CnWizMultiLang, CnWizIdeUtils, CnPopupMenu;
 
 type
@@ -266,6 +267,7 @@ var
       Strings.Add(Path);
   end;
   
+{$IFDEF DELPHI_OTA}
   procedure AddProjectDir(Project: IOTAProject; const OptionName: string);
   var
     Directory: string;
@@ -319,17 +321,21 @@ var
       AddProjectDir(Project, 'PkgDcpDir');
     end;
   end;
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 var
   I: Integer;
   Project: IOTAProject;
   ProjectGroup: IOTAProjectGroup;
   ProjectInterfaceList: TInterfaceList;
+{$ENDIF}
 begin
   chklstDirs.Clear;
   Strings := chklstDirs.Items;
   Strings.BeginUpdate;
   try
+{$IFDEF DELPHI_OTA}
     case cbbSelectType.ItemIndex of
       0, 1:
         begin
@@ -363,6 +369,13 @@ begin
           end;
         end;
     end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // TODO: Lazarus 下待完整移植：枚举工程目录与输出目录，
+    // 目前先降级为仅列出当前工程所在目录。
+    AddPathToStrings(_CnExtractFileDir(CnOtaGetCurrentProjectFileName));
+{$ENDIF}
   finally
     Strings.EndUpdate;
   end;
@@ -455,13 +468,13 @@ end;
 
 procedure TCnProjectDelTempForm.btnPrioClick(Sender: TObject);
 begin
-  nb.ActivePage := 'DelCondition';
+  {$IFDEF FPC} nb.PageIndex := nb.Pages.IndexOf('DelCondition'); {$ELSE} nb.ActivePage := 'DelCondition'; {$ENDIF}
   CheckButton;
 end;
 
 procedure TCnProjectDelTempForm.btnNextClick(Sender: TObject);
 begin
-  nb.ActivePage := 'DelList';
+  {$IFDEF FPC} nb.PageIndex := nb.Pages.IndexOf('DelList'); {$ELSE} nb.ActivePage := 'DelList'; {$ENDIF}
   CheckButton;
   GetDelFile;
 end;

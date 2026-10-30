@@ -39,7 +39,7 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, SysUtils, Controls, TypInfo, {$IFDEF COMPILER6_UP}Variants,{$ENDIF}
+  Classes, SysUtils, Controls, TypInfo, {$IFNDEF COMPILER5} Variants, {$ENDIF}
   CnCommon, CnTree, CnXML;
 
 type
@@ -325,7 +325,11 @@ begin
   if (PPropInfo(PropInfo)^.SetProc <> nil)
     and (PPropInfo(PropInfo)^.GetProc <> nil) then
   begin
+{$IFDEF FPC}
+    PropType := PPropInfo(PropInfo)^.PropType; // FPC 的 TPropInfo.PropType 少一层间接
+{$ELSE}
     PropType := PPropInfo(PropInfo)^.PropType^;
+{$ENDIF}
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: ReadOrdProp;
       tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: ReadStrProp;
@@ -489,7 +493,11 @@ begin
   if (PropInfo^.SetProc <> nil) and
     (PropInfo^.GetProc <> nil) then
   begin
+{$IFDEF FPC}
+    PropType := PropInfo^.PropType; // FPC 的 TPropInfo.PropType 少一层间接
+{$ELSE}
     PropType := PropInfo^.PropType^;
+{$ENDIF}
     case PropType^.Kind of
       tkInteger, tkChar, tkEnumeration, tkSet: WriteOrdProp;
       tkString, tkLString, tkWString{$IFDEF UNICODE}, tkUString{$ENDIF}: WriteStrProp;

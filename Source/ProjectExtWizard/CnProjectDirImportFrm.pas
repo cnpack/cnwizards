@@ -112,7 +112,11 @@ procedure TCnImportDirForm.btnSelectDirClick(Sender: TObject);
 var
   NewDir: string;
 begin
+{$IFDEF DELPHI_OTA}
   NewDir := ReplaceToActualPath(edtDir.Text);
+{$ELSE}
+  NewDir := edtDir.Text; // Lazarus 下暂无环境宏替换
+{$ENDIF}
   if GetDirectory(SCnSelectDir, NewDir) then
     edtDir.Text := NewDir;
 end;

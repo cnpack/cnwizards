@@ -100,7 +100,11 @@ type
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
     FLazShortCut: TIDEShortCut; // 结构，无需释放
-    FLazCommand: TIDECommand;   // 注册的对象，如何释放？
+    FLazCommand: TIDECommand;   // 注册到 IDE 键位系统的命令对象
+    procedure LazSyncCommand;
+    {* 创建或同步对应的 TIDECommand，使快捷键进入 IDE 键位系统}
+    procedure LazCommandExecute(Sender: TObject);
+    {* TIDECommand 的 OnExecute 分发，转调 KeyProc}
 {$ENDIF}
 {$ENDIF}
     procedure SetKeyProc(const Value: TNotifyEvent);
@@ -228,6 +232,29 @@ uses
 const
   csInvalidIndex = -1;
 
+{$IFDEF LAZARUS}
+const
+  // Lazarus 下 TIDECommand 注册所用分类名
+  SCnLazShortCutCategory = 'CnPackShortCut';
+  SCnLazShortCutCategoryDesc = 'CnPack IDE Wizards Shortcuts';
+
+var
+  FLazShortCutCategory: TIDECommandCategory = nil;
+  FLazCommandNames: TStringList = nil; // 已注册的命令名，防止重名
+
+// 取（必要时创建）CnPack 快捷键命令分类
+function LazShortCutCategory: TIDECommandCategory;
+begin
+  if FLazShortCutCategory = nil then
+  begin
+    FLazShortCutCategory := RegisterIDECommandCategory(nil,
+      SCnLazShortCutCategory, SCnLazShortCutCategoryDesc);
+    FLazCommandNames := TStringList.Create;
+  end;
+  Result := FLazShortCutCategory;
+end;
+{$ENDIF}
+
 {$IFDEF DELPHI_OTA}
 
 type
@@ -287,9 +314,10 @@ begin
 
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-  // Lazarus 下先行同步快捷键保存，暂时不塞给 IDE
+  // Lazarus 下同步快捷键保存，并注册/更新 TIDECommand 进入 IDE 键位系统
   ShortCutToKey(FShortCut, Key, Shift);
   FLazShortCut := IDEShortCut(Key, Shift);
+  LazSyncCommand;
 {$ELSE}
   if FOwner <> nil then
     FOwner.UpdateBinding;
@@ -301,6 +329,13 @@ end;
 constructor TCnWizShortCut.Create(AOwner: TCnWizShortCutMgr;
   const AName: string; AShortCut: TShortCut; AKeyProc: TNotifyEvent;
   const AMenuName: string; ATag: Integer);
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+var
+  Key: Word;
+  Shift: TShiftState;
+{$ENDIF}
+{$ENDIF}
 begin
   inherited Create;
   FOwner := AOwner;
@@ -310,11 +345,110 @@ begin
   FKeyProc := AKeyProc;
   FMenuName := AMenuName;
   FTag := ATag;
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  // 初始快捷键若有效，注册对应的 IDE 命令
+  if FShortCut <> 0 then
+  begin
+    ShortCutToKey(FShortCut, Key, Shift);
+    FLazShortCut := IDEShortCut(Key, Shift);
+    LazSyncCommand;
+  end;
+{$ENDIF}
+{$ENDIF}
 end;
+
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+
+// 创建或同步对应的 TIDECommand
+procedure TCnWizShortCut.LazSyncCommand;
+var
+  CmdName: string;
+
+  function MakeCommandName(const AName: string; AIndex: Integer): string;
+  var
+    J: Integer;
+  begin
+    Result := '';
+    for J := 1 to Length(AName) do
+    begin
+      if CharInSet(AName[J], ['A'..'Z', 'a'..'z', '0'..'9', '_']) then
+        Result := Result + AName[J]
+      else
+        Result := Result + '_';
+    end;
+    if Result = '' then
+      Result := IntToStr(AIndex);
+    Result := 'CnWizSC_' + Result;
+  end;
+
+begin
+  if FLazCommand = nil then
+  begin
+    if (FShortCut = 0) or (LazShortCutCategory = nil) then
+      Exit;
+    // 命令名要求 IDE 内唯一，统一加前缀；Name 为空时用索引号
+    if FName <> '' then
+      CmdName := MakeCommandName(FName, 0)
+    else if FOwner <> nil then
+      CmdName := MakeCommandName(FName, FOwner.IndexOfShortCut(Self))
+    else
+      CmdName := MakeCommandName(FName, 0);
+    if FLazCommandNames.IndexOf(CmdName) >= 0 then
+      CmdName := CmdName + '_' + IntToStr(GetTickCount);
+    FLazCommand := RegisterIDECommand(LazShortCutCategory, CmdName, FName,
+      LazCommandExecute);
+    FLazCommandNames.Add(CmdName);
+  end;
+
+  if FLazCommand <> nil then
+  begin
+    FLazCommand.ShortcutA := FLazShortCut;
+    FLazCommand.Enabled := FShortCut <> 0;
+  end;
+end;
+
+// TIDECommand 的 OnExecute 分发
+procedure TCnWizShortCut.LazCommandExecute(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('TCnWizShortCut.LazCommandExecute: %s', [Name]);
+{$ENDIF}
+  if Assigned(FKeyProc) then
+    FKeyProc(Self);
+end;
+
+{$ENDIF}
+{$ENDIF}
 
 // 类析构器
 destructor TCnWizShortCut.Destroy;
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+var
+  I: Integer;
+{$ENDIF}
+{$ENDIF}
 begin
+{$IFNDEF STAND_ALONE}
+{$IFDEF LAZARUS}
+  // 命令对象由 IDE 分类持有无法释放，这里将其失效
+  if FLazCommand <> nil then
+  begin
+    if FLazCommandNames <> nil then
+    begin
+      I := FLazCommandNames.IndexOf(FLazCommand.Name);
+      if I >= 0 then
+        FLazCommandNames.Delete(I);
+    end;
+    FLazCommand.OnExecute := nil;
+    FLazCommand.ClearShortcutA;
+    FLazCommand.Enabled := False;
+    FLazCommand := nil;
+  end;
+{$ENDIF}
+{$ENDIF}
   FOwner := nil;
   FKeyProc := nil;
   inherited;
@@ -796,6 +930,11 @@ begin
 
   if not IsEmpty then
   begin
+{$IFDEF LAZARUS}
+    // Lazarus 下逐个创建/同步 TIDECommand，使快捷键进入 IDE 键位系统
+    for I := 0 to Count - 1 do
+      ShortCuts[I].LazSyncCommand;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
     QuerySvcs(BorlandIDEServices, IOTAKeyboardServices, KeySvcs);
     SaveMainMenuShortCuts;
@@ -920,6 +1059,11 @@ procedure FreeWizShortCutMgr;
 begin
   if FWizShortCutMgr <> nil then
     FreeAndNil(FWizShortCutMgr);
+{$IFDEF LAZARUS}
+  // TIDECommand/Category 由 IDE 持有，这里仅清理本地登记与引用
+  FreeAndNil(FLazCommandNames);
+  FLazShortCutCategory := nil;
+{$ENDIF}
 end;
 
 end.

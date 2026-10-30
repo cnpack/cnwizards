@@ -45,7 +45,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
 {$IFDEF COMPILER6_UP} StrUtils, {$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Graphics, ImgList, ActnList,
 {$IFDEF SUPPORT_FMX} CnFmxUtils, {$ENDIF}
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,

@@ -55,7 +55,8 @@ interface
 uses
   Windows, SysUtils, Messages, Classes, Graphics, Forms, Controls, StdCtrls,
   Buttons, ExtCtrls, CheckLst, IniFiles, Menus, ActnList, FileCtrl, CnCommon,
-  CnWizConsts, CnWizMultiLang, ComCtrls, ToolWin, ToolsAPI, ShellAPI, CommCtrl,
+  CnWizConsts, CnWizMultiLang, ComCtrls, ToolWin,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} ShellAPI, CommCtrl,
   Contnrs, Dialogs, CnLangTranslator, CnLangMgr, CnLangStorage, CnHashLangStorage;
 
 type
@@ -258,6 +259,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} CnDebug, {$ENDIF} {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
+  {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
   CnWizOptions, CnWizUtils, CnWizHelperIntf,
   CnWizShareImages, CnProjectBackupSaveFrm, CnWizNotifier;
 
@@ -776,16 +778,17 @@ end;
 procedure TCnProjectBackupForm.CreateProjectList;
 var
   ProjectInfo: TCnBackupProjectInfo;
-
   FileName: string;
-  IProjectGroup: IOTAProjectGroup;
+  ProjectInterfaceList: TCnIDEInterfaceList;
+  IProjectGroup: TCnIDEProjectGroupInterface;
+  I, J: Integer;
+{$IFDEF DELPHI_OTA}
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
   IEditor: IOTAEditor;
-  I, J: Integer;
-  ProjectInterfaceList: TInterfaceList;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
+{$ENDIF}
 {$ENDIF}
 begin
 {$IFDEF DEBUG}
@@ -793,17 +796,18 @@ begin
 {$ENDIF}
 
   IProjectGroup := CnOtaGetProjectGroup;
-  if IProjectGroup = nil then
-    Exit;
+  if IProjectGroup <> nil then
+  begin
+    FileName := CnOtaGetProjectGroupFileName;
+    if FileExists(FileName) then
+      FProjectList.SetFileInfo(FileName);
+  end;
 
-  FileName := CnOtaGetProjectGroupFileName;
-  if FileExists(FileName) then
-    FProjectList.SetFileInfo(FileName);
-
-  ProjectInterfaceList := TInterfaceList.Create;
+  ProjectInterfaceList := TCnIDEInterfaceList.Create;
   try
     CnOtaGetProjectList(ProjectInterfaceList);
 
+{$IFDEF DELPHI_OTA}
     for I := 0 to ProjectInterfaceList.Count - 1 do
     begin
       IProject := IOTAProject(ProjectInterfaceList[I]);
@@ -840,6 +844,10 @@ begin
           ProjectInfo.AddFiles(IModuleInfo.FileName, '', IModuleInfo.FormName);
       end;
     end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      // TODO: 从 ProjectInterfaceList 中加文件
+{$ENDIF}
   finally
     ProjectInterfaceList.Free;
   end;
@@ -923,8 +931,8 @@ end;
 
 procedure TCnProjectBackupForm.UpdateBackupFileView(ProjectName: string);
 var
-  IProjectGroup: IOTAProjectGroup;
-  IProject: IOTAProject;
+  IProjectGroup: TCnIDEProjectGroupInterface;
+  IProject: TCnIDEProjectInterface;
   I: Integer;
 begin
   lvFileView.Items.BeginUpdate;
@@ -934,7 +942,7 @@ begin
     if ProjectName = SCnProjExtProjectAll then // 备份全部的工程项
     begin
       IProjectGroup := CnOtaGetProjectGroup;
-      if (IProjectGroup <> nil) and (IProjectGroup.ProjectCount > 1) then
+      if (IProjectGroup <> nil) and (CnOtaGetProjectCountFromGroup > 1) then
         FCurrentName := CnOtaGetProjectGroupFileName
       else
         FCurrentName := CnOtaGetCurrentProjectFileName;
@@ -950,9 +958,13 @@ begin
         IProject := CnOtaGetCurrentProject;
         if IProject = nil then
           Exit;
-
-        ProjectName := _CnExtractFileName(IProject.FileName);
+{$IFDEF DELPHI_OTA}
         FCurrentName := IProject.FileName;
+{$ENDIF}
+{$IFDEF LAZARUS}
+        FCurrentName := IProject.MainFile.Filename;
+{$ENDIF}
+        ProjectName := _CnExtractFileName(FCurrentName);
       end;
 
       for I := 0 to FProjectList.Count - 1 do
@@ -1426,10 +1438,13 @@ procedure TCnProjectBackupForm.actAddOpenedExecute(Sender: TObject);
 var
   I, J, Cnt: Integer;
   SName: string;
+{$IFDEF DELPHI_OTA}
   MS: IOTAModuleServices;
   MO: IOTAModule;
+{$ENDIF}
   FileInfo: TCnBackupFileInfo;
 begin
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, MS);
   Cnt := 0;
 
@@ -1475,6 +1490,10 @@ begin
         FileInfo.Free;
     end;
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // TODO: 添加 Lazarus 中所有打开的文件
+{$ENDIF}
   // Cnt 个文件
   InfoDlg(Format(SCnProjExtBackupAddFile, [Cnt]));
 end;

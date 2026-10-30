@@ -77,12 +77,16 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
+  {$IFDEF LAZARUS} LCLProc, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles, ShellAPI, Menus, FileCtrl,
   {$IFDEF BDS} Variants, {$ENDIF} ComCtrls, {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
   CnProjectViewFormsFrm, CnProjectListUsedFrm, CnProjectDelTempFrm, CnIni,
   CnWizCompilerConst, CnProjectBackupFrm, CnProjectDirBuilderFrm, CnWizMethodHook,
-  CnProjectFramesFrm, CnInputSymbolList;
+  CnProjectFramesFrm
+  {$IFNDEF LAZARUS} // CnInputSymbolList 属于 InputHelper 目录，Lazarus 侧暂未引入且本单元未使用
+  , CnInputSymbolList
+  {$ENDIF};
                                            
 type
 
@@ -123,8 +127,10 @@ type
     FCorIdeModule: HModule;
     FMethodHook: TCnMethodHook;
     FOldViewDialogExecute: Pointer;
+{$IFNDEF LAZARUS} // 类型来自 CnInputSymbolList，Lazarus 侧暂未引入；列表本就未创建
     FPasUnitNameList: TCnUnitNameList;
     FCppUnitNameList: TCnUnitNameList;
+{$ENDIF}
   {$IFNDEF BDS}
     procedure RunSeparately;
   {$ENDIF}
@@ -182,7 +188,10 @@ uses
 {$ENDIF}
   {$IFDEF SUPPORT_FMX} CnVclToFmxIntf, {$ENDIF}
   CnWizIdeUtils, CnWizOptions, CnWizMenuAction, CnWizCmdNotify,
-  CnWizCmdMsg, CnProjectUseUnitsFrm;
+  CnWizCmdMsg
+  {$IFNDEF LAZARUS} // UseUnits 链依赖 InputHelper 的 CnInputSymbolList，且 SUPPORT_USE_UNIT 从未启用
+  , CnProjectUseUnitsFrm
+  {$ENDIF};
 
 const
 {$IFDEF WIN64}
@@ -208,6 +217,7 @@ const
 constructor TCnProjectExtWizard.Create;
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
   FCorIdeModule := GetModuleHandle(CorIdeLibName);
   if FCorIdeModule <> 0 then
   begin
@@ -222,6 +232,7 @@ begin
       end;
     end;
   end;
+{$ENDIF}
 
   CnWizCmdNotifier.AddCmdNotifier(CommandNotify);
 
@@ -234,8 +245,10 @@ destructor TCnProjectExtWizard.Destroy;
 begin
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
 
+{$IFNDEF LAZARUS}
   FPasUnitNameList.Free;
   FCppUnitNameList.Free;
+{$ENDIF}
   FMethodHook.Free;
 
   inherited;
@@ -270,10 +283,11 @@ begin
     if Lv = nil then
       Exit;
 
+    S := '';
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
     S := FloatToStr(Lv.CurrentPPI / Windows.USER_DEFAULT_SCREEN_DPI);
-{$ELSE}
-    S := '';
+{$ENDIF}
 {$ENDIF}
     for I := 0 to Lv.Columns.Count - 1 do
       S := S + ' ' + IntToStr(Lv.Columns[I].Width);
@@ -312,7 +326,7 @@ end;
 
 procedure TCnProjectExtWizard.ExploreExe;
 var
-  Project: IOTAProject;
+  Project: TCnIDEProjectInterface;
   Dir, ProjectFileName, OutName: string;
 begin
   Project := CnOtaGetCurrentProject;
@@ -324,7 +338,13 @@ begin
     ExploreFile(OutName)
   else
   begin
+{$IFDEF DELPHI_OTA}
     ProjectFileName := Project.GetFileName;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    ProjectFileName := Project.MainFile.Filename;
+{$ENDIF}
+
     if ProjectFileName <> '' then
     begin
       Dir := CnOtaGetProjectOutputDirectory(Project);
@@ -350,14 +370,20 @@ end;
 
 procedure TCnProjectExtWizard.ExploreProject;
 var
-  Project: IOTAProject;
+  Project: TCnIDEProjectInterface;
   ProjectFileName: string;
 begin
   Project := CnOtaGetCurrentProject;
   if not Assigned(Project) then
     Exit;
 
+{$IFDEF DELPHI_OTA}
   ProjectFileName := Project.GetFileName;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  ProjectFileName := Project.MainFile.Filename;
+{$ENDIF}
+
   if ProjectFileName <> '' then
   begin
     if FileExists(ProjectFileName) then
@@ -367,6 +393,7 @@ begin
   end;
 end;
 
+{$IFNDEF LAZARUS}
 {$IFNDEF BDS}
 
 procedure TCnProjectExtWizard.RunSeparately;
@@ -424,6 +451,7 @@ begin
       PChar(_CnExtractFileDir(ExeName)), SW_SHOWNORMAL);
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 //------------------------------------------------------------------------------
@@ -543,6 +571,7 @@ begin
 {$IFDEF SUPPORT_USE_UNIT}
   else if Index = IdUseUnits then
   begin
+{$IFDEF DELPHI_OTA}
     Ini := CreateIniFile;
     try
       if CurrentSourceIsC then
@@ -558,6 +587,7 @@ begin
     finally
       Ini.Free;
     end;
+{$ENDIF}
   end
 {$ENDIF}
   else if Index = IdListUsed then
@@ -707,11 +737,17 @@ begin
   SetVisible([IdViewUnits, IdViewForms], Active);
   SetEnabled([IdViewUnits, IdViewForms], AEnabled);
 
+{$IFDEF DELPHI_OTA}
   SubActions[IdExploreUnit].Enabled := CnOtaGetCurrentModule <> nil;
   SubActions[IdListUsed].Enabled := CnOtaGetCurrentModule <> nil;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  SubActions[IdExploreUnit].Enabled := CnOtaGetCurrentSourceEditor <> nil;
+  SubActions[IdListUsed].Enabled := CnOtaGetCurrentSourceEditor <> nil;
+{$ENDIF}
 
   SubActions[IdDelTemp].Enabled := AEnabled;
-  
   SubActions[IdDirBuilder].Enabled := True;
 end;
 

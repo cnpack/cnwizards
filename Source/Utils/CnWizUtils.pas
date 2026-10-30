@@ -581,8 +581,6 @@ function CnOtaGetProjectGroup: TCnIDEProjectGroupInterface;
 {* 取当前工程组}
 function CnOtaGetProjectGroupFileName: string;
 {* 取当前工程组文件名}
-function CnOtaGetProjectGroupProjectCount: Integer;
-{* 封装的取当前工程组的工程数量}
 function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
 {* 取工程的源码文件 dpr/dpk}
 function CnOtaGetProjectResource(Project: TCnIDEProjectInterface): TCnIDEProjectResourceInterface;
@@ -607,6 +605,12 @@ procedure CnOtaEditDelete(Many: Integer);
 
 function CnOtaGetBlockIndent: Integer;
 {* 获得当前编辑器块缩进宽度 }
+
+procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
+{* 取得所有工程列表。Delphi 中是 IOTAProject 接口实例，Lazarus 中则不同}
+
+function CnOtaGetProjectCountFromGroup: Integer;
+{* 取当前工程组中工程数，无工程组返回 -1}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -665,8 +669,6 @@ function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
 {* 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器}
 function CnOtaGetCurrentEditWindowSubViewControl: TControl;
 {* 以 OTA 的方式取当前的 EditWindow 下的当前 SubView，如编辑器、设计器、CPU 等}
-function CnOtaGetProjectCountFromGroup: Integer;
-{* 取当前工程组中工程数，无工程组返回 -1}
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
 {* 取当前工程组中的第 Index 个工程，从 0 开始}
 function CnOtaGetProjectGroupSourceFiles(Sources: TStrings;
@@ -700,8 +702,6 @@ function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出目录}
 function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
 {* 获得项目的二进制文件输出完整路径}
-procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
-{* 取得所有工程列表}
 function CnOtaGetCurrentFormName: string;
 {* 取当前窗体名称}
 function CnOtaGetCurrentFormFileName: string;
@@ -2624,6 +2624,11 @@ var
 begin
 {$IFDEF STAND_ALONE}
   Result := CnStubRefActionList;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus 的 IDE 未提供全局 ActionList（命令体系为 TIDECommand），
+  // 此处只能返回 nil，调用方需自行判空
+  Result := nil;
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, INTAServices40, Svcs40);
@@ -4567,25 +4572,6 @@ begin
 {$ENDIF}
 end;
 
-// 封装的取当前工程组的工程数量
-function CnOtaGetProjectGroupProjectCount: Integer;
-var
-  ProjectGroup: TCnIDEProjectGroupInterface;
-begin
-  ProjectGroup := CnOtaGetProjectGroup;
-  if ProjectGroup = nil then
-    Result := 0
-  else
-  begin
-{$IFDEF DELPHI_OTA}
-    Result := ProjectGroup.ProjectCount;
-{$ENDIF}
-{$IFDEF LAZARUS}
-    Result := ProjectGroup.TargetCount;
-{$ENDIF}
-  end;
-end;
-
 // 取工程的源码文件 dpr/dpk
 function CnOtaGetProjectSourceFileName(Project: TCnIDEProjectInterface): string;
 {$IFNDEF PROJECT_FILENAME_DPR}
@@ -4914,6 +4900,71 @@ begin
   if Result <= 0 then
     Result := 2;
 {$ENDIF}
+end;
+
+// 取得所有工程列表
+procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
+var
+{$IFDEF DELPHI_OTA}
+  IModuleServices: IOTAModuleServices;
+  IModule: IOTAModule;
+  IProject: IOTAProject;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  ProjectGroup: TCnIDEProjectGroupInterface;
+  Target: TPGCompileTarget;
+{$ENDIF}
+  I: Integer;
+begin
+  if not Assigned(List) then
+    Exit;
+
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
+  if IModuleServices <> nil then
+  begin
+    for I := 0 to IModuleServices.ModuleCount - 1 do
+    begin
+      IModule := IModuleServices.Modules[I];
+      if Supports(IModule, IOTAProject, IProject) then
+        List.Add(IProject);
+    end;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // 如果没 ProjectGroup，则返回当前活动工程
+  ProjectGroup := CnOtaGetProjectGroup;
+  if ProjectGroup = nil then
+  begin
+    if CnOtaGetCurrentProject <> nil then
+      List.Add(Pointer(CnOtaGetCurrentProject));
+  end
+  else
+  begin
+    // 如果有 ProjectGroup 则遍历其 Target 返回符合的类型
+    for I := 0 to ProjectGroup.TargetCount - 1 do
+    begin
+      Target := ProjectGroup.Targets[I];
+      if (Target.TargetType in [ttProject, ttPackage]) then
+        List.Add(Pointer(Target));
+    end;
+  end;
+{$ENDIF}
+end;
+
+// 取当前工程组中工程数，无工程组返回 -1
+function CnOtaGetProjectCountFromGroup: Integer;
+begin
+  Result := -1;
+  if CnOtaGetProjectGroup <> nil then
+  begin
+{$IFDEF DELPHI_OTA}
+    Result := CnOtaGetProjectGroup.GetProjectCount;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    Result := CnOtaGetProjectGroup.TargetCount;
+{$ENDIF}
+  end;
 end;
 
 {$IFNDEF LAZARUS}
@@ -5712,14 +5763,6 @@ begin
   end;
 end;
 
-// 取当前工程组中工程数，无工程组返回 -1
-function CnOtaGetProjectCountFromGroup: Integer;
-begin
-  Result := -1;
-  if CnOtaGetProjectGroup <> nil then
-    Result := CnOtaGetProjectGroup.GetProjectCount;
-end;
-
 // 取当前工程组中的第 Index 个工程，从 0 开始
 function CnOtaGetProjectFromGroupByIndex(Index: Integer): IOTAProject;
 begin
@@ -5875,29 +5918,6 @@ begin
 {$ENDIF}
   Result := MakePath(Dir) + IntermediaDir + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), OutExt);
 {$ENDIF}
-end;
-
-// 取得所有工程列表
-procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
-var
-  IModuleServices: IOTAModuleServices;
-  IModule: IOTAModule;
-  IProject: IOTAProject;
-  I: Integer;
-begin
-  if not Assigned(List) then
-    Exit;
-
-  QuerySvcs(BorlandIDEServices, IOTAModuleServices, IModuleServices);
-  if IModuleServices <> nil then
-  begin
-    for I := 0 to IModuleServices.ModuleCount - 1 do
-    begin
-      IModule := IModuleServices.Modules[I];
-      if Supports(IModule, IOTAProject, IProject) then
-        List.Add(IProject);
-    end;
-  end;
 end;
 
 // 取当前窗体名称

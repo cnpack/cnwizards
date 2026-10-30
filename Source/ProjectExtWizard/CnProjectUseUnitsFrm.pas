@@ -47,7 +47,8 @@ uses
 {$IFDEF COMPILER6_UP}
   StrUtils,
 {$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Graphics,  ActnList, ImgList, CnCommon, CnConsts, CnWizConsts, CnWizOptions,
   CnWizUtils, CnIni, CnWizIdeUtils, CnWizMultiLang, CnProjectViewBaseFrm,
   CnProjectViewUnitsFrm, CnWizEditFiler, CnProjectExtWizard, CnWizClasses,
@@ -203,11 +204,18 @@ begin
 end;
 
 function TCnProjectUseUnitsForm.DoSelectOpenedItem: string;
+{$IFDEF DELPHI_OTA}
 var
   CurrentModule: IOTAModule;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   CurrentModule := CnOtaGetCurrentModule;
   Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := ChangeFileExt(ExtractFileName(CnOtaGetCurrentSourceFileName), '');
+{$ENDIF}
 end;
 
 function TCnProjectUseUnitsForm.GetSelectedFileName: string;
@@ -230,7 +238,9 @@ begin
 end;
 
 procedure TCnProjectUseUnitsForm.OpenSelect;
+
 var
+{$IFDEF DELPHI_OTA}
   CharPos: TOTACharPos;
   Info: TCnUseUnitInfo;
   IsIntfOrH: Boolean;
@@ -239,13 +249,16 @@ var
   SrcEditor: IOTASourceEditor;
   HasUses: Boolean;
   LinearPos: LongInt;
-  Sl: TStrings;
   F: string;
+{$ENDIF}
+  Sl: TStrings;
   J: Integer;
+
 begin
   if lvList.SelCount > 0 then
   begin
     ModalResult := mrOk;
+{$IFDEF DELPHI_OTA}
     Sl := TStringList.Create;
     for J := 0 to lvList.Items.Count - 1 do
       if lvList.Items[J].Selected then
@@ -319,6 +332,20 @@ begin
       LinearPos := EditView.CharPosToPos(CharPos);
       CnOtaInsertTextIntoEditorAtPos(JoinUsesOrInclude(FIsCppMode, HasUses, False, Sl), LinearPos);
     end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // TODO: Lazarus 下待完整移植：定位 uses 区并插入所选单元，
+    // 目前先降级为仅收集所选单元后关闭对话框，不执行插入。
+    Sl := TStringList.Create;
+    try
+      for J := 0 to lvList.Items.Count - 1 do
+        if lvList.Items[J].Selected then
+          Sl.Add(lvList.Items[J].Caption);
+    finally
+      Sl.Free;
+    end;
+{$ENDIF}
   end;
 end;
 

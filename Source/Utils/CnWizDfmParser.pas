@@ -42,11 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, CnCommon, CnTree,
-{$IFDEF COMPILER6_UP}
-  Variants, RTLConsts,
-{$ELSE}
-  Consts,
-{$ENDIF}
+  {$IFDEF COMPILER5} Consts, {$ELSE} Variants, RTLConsts, {$ENDIF}
   TypInfo;
 
 type
@@ -505,9 +501,14 @@ var
   Flags: TFilerFlags;
   Position: Integer;
 begin
+{$IFDEF FPC}
+  Leaf.ElementClass := Reader.ReadString;
+  Leaf.Text := Reader.ReadString;
+{$ELSE}
   Reader.ReadPrefix(Flags, Position);
   Leaf.ElementClass := Reader.ReadStr;
   Leaf.Text := Reader.ReadStr;
+{$ENDIF}
   if Leaf.Text = '' then
     Leaf.Text := Leaf.ElementClass;
 end;
@@ -585,7 +586,11 @@ var
           Reader.ReadValue; // Skip Value Type
           while True do
           begin
+{$IFDEF FPC}
+            S := Reader.ReadString;
+{$ELSE}
             S := Reader.ReadStr;
+{$ENDIF}
             if S = '' then Break;
             if Result <> '[' then
               Result := Result + ', ';
@@ -610,7 +615,11 @@ var
 
             // 处理单个集合项内的属性
             repeat
+{$IFDEF FPC}
+              PropName := Reader.ReadString;
+{$ELSE}
               PropName := Reader.ReadStr;
+{$ENDIF}
               PropValue := ParseBinaryPropertyValue(Reader);
               Result := Result + '  ' + PropName + ' = ' + PropValue + #13#10;
             until Reader.EndOfList;
@@ -646,7 +655,11 @@ begin
   BinStream := nil;
   while not Reader.EndOfList do
   begin
+{$IFDEF FPC}
+    PropName := Reader.ReadString;
+{$ELSE}
     PropName := Reader.ReadStr;
+{$ENDIF}
     PropValue := ParseBinaryPropertyValue(Reader);
 
     if BinStream <> nil then
@@ -736,7 +749,7 @@ var
         '(':
           begin
             Parser.NextToken;
-            while Parser.Token <> ')' do ParseValue;
+            while Parser.Token <> ')' do ParseValue();
           end;
         '{':
           Parser.HexToBinary(Stream);
@@ -860,9 +873,14 @@ var
     Flags: TFilerFlags;
     Position: Integer;
   begin
+{$IFDEF FPC}
+    Info.FormClass := Reader.ReadString;
+    Info.Name := Reader.ReadString;
+{$ELSE}
     Reader.ReadPrefix(Flags, Position);
     Info.FormClass := Reader.ReadStr;
     Info.Name := Reader.ReadStr;
+{$ENDIF}
     if Info.Name = '' then
       Info.Name := Info.FormClass;
   end;
@@ -899,7 +917,7 @@ var
         begin
           Reader.ReadValue;
           while not Reader.EndOfList do
-            ParseValue;
+            ParseValue();
           Reader.ReadListEnd;
         end;
       vaInt8, vaInt16, vaInt32:
@@ -925,7 +943,11 @@ var
           Reader.ReadValue;
           while True do
           begin
+{$IFDEF FPC}
+            S := Reader.ReadString;
+{$ELSE}
             S := Reader.ReadStr;
+{$ENDIF}
             if S = '' then Break;
           end;
         end;
@@ -936,7 +958,7 @@ var
           begin
             if Reader.NextValue in [vaInt8, vaInt16, vaInt32] then
             begin
-              ParseValue;
+              ParseValue();
             end;
             Reader.CheckValue(vaList);
             while not Reader.EndOfList do ParseProperty(False);
@@ -960,7 +982,11 @@ var
   var
     PropValue: Variant;
   begin
+{$IFDEF FPC}
+    PropName := Reader.ReadString;
+{$ELSE}
     PropName := Reader.ReadStr;
+{$ENDIF}
     PropValue := ParseValue;
 
     if IsForm then

@@ -212,7 +212,7 @@ end;
 function CnWizZipSaveAndClose: Boolean; stdcall;
 begin
   if CnWizHelperZipValid then
-    Result := FCnWizZipSaveAndClose
+    Result := FCnWizZipSaveAndClose()
   else
     Result := False;
 end;

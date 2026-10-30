@@ -72,7 +72,8 @@ uses
   {$ENDIF} {$ENDIF}
   {$IFDEF COMPILER7_UP} ActnPopup, {$ENDIF}
   {$IFDEF SUPPORT_FMX} System.Rtti, {$ENDIF}
-  {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  {$IFNDEF FPC} AppEvnts, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, LazIDEIntf,
+  ProjectIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} Consts, ToolsAPI, {$ENDIF}
   CnWizUtils, CnClasses, CnWizMethodHook, CnWizCompilerConst
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM}, CnIDEVersion, CnIDEMirrorIntf {$ENDIF} {$ENDIF};
@@ -110,11 +111,30 @@ type
   {* 设计器右键菜单准备好的事件，仅 Delphi 5 下有效}
 
 {$IFDEF DELPHI_OTA}
+  TCnOTAFileNotification = TOTAFileNotification;
+  {* 直接沿用 ToolsAPI 的文件通知枚举}
+{$ELSE}
+  TCnOTAFileNotification = (ofnFileOpened, ofnFileClosed, ofnDefaultDesktopLoad,
+    ofnDefaultDesktopSave, ofnProjectDesktopLoad, ofnProjectDesktopSave,
+    ofnActiveProjectChanged);
+  {* 与 ToolsAPI 的 TOTAFileNotification 对应的文件通知枚举，Lazarus 下自行定义}
+{$ENDIF}
 
-  TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
+  TCnWizFileNotifier = procedure (NotifyCode: TCnOTAFileNotification;
     const FileName: string) of object;
   {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名
      注意 Delphi 5 下的 TOTAFileNotification 中没有当前工程改变通知}
+
+  TCnWizBeforeCompileNotifier = procedure (const Project: TCnIDEProjectInterface;
+    IsCodeInsight: Boolean; var Cancel: Boolean) of object;
+  {* 编译前通知事件，Project 为 TCnIDEProjectInterface（Delphi 下即 IOTAProject，
+     Lazarus 下即 TLazProject），IsCodeInsight 恒为 False}
+
+  TCnWizAfterCompileNotifier = procedure (Succeeded: Boolean; IsCodeInsight:
+    Boolean) of object;
+  {* 编译后通知事件，IsCodeInsight 恒为 False}
+
+{$IFDEF DELPHI_OTA}
 
   TCnWizFormEditorNotifyType = (fetOpened, fetClosing, fetModified,
     fetActivated, fetSaving, fetComponentCreating, fetComponentCreated,
@@ -123,12 +143,6 @@ type
   TCnWizFormEditorNotifier = procedure (FormEditor: IOTAFormEditor;
     NotifyType: TCnWizFormEditorNotifyType; ComponentHandle: TOTAHandle;
     Component: TComponent; const OldName, NewName: string) of object;
-
-  TCnWizBeforeCompileNotifier = procedure (const Project: IOTAProject;
-    IsCodeInsight: Boolean; var Cancel: Boolean) of object;
-
-  TCnWizAfterCompileNotifier = procedure (Succeeded: Boolean; IsCodeInsight:
-    Boolean) of object;
 
   TCnWizProcessNotifier = procedure (Process: IOTAProcess) of object;
 
@@ -151,27 +165,27 @@ type
   {* IDE 通知服务接口}
     ['{18C4DD6A-802A-48D7-AC93-A2487411CA79}']
 
-{$IFDEF DELPHI_OTA}
-
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
-    {* 增加一个文件通知事件}
+    {* 增加一个文件通知事件，Lazarus 下由源码编辑器与工程事件近似映射}
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
     {* 删除一个文件通知事件}
-    
+
     procedure AddBeforeCompileNotifier(Notifier:TCnWizBeforeCompileNotifier);
-    {* 增加一个编译前通知事件}
+    {* 增加一个编译前通知事件，Lazarus 下映射自工程构建事件}
     procedure RemoveBeforeCompileNotifier(Notifier:TCnWizBeforeCompileNotifier);
     {* 删除一个编译前通知事件}
 
     procedure AddAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
-    {* 增加一个编译后通知事件}
+    {* 增加一个编译后通知事件，Lazarus 下映射自工程构建完成事件}
     procedure RemoveAfterCompileNotifier(Notifier:TCnWizAfterCompileNotifier);
     {* 删除一个编译后通知事件}
 
     procedure AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
-    {* 增加一个当前工程改变通知}
+    {* 增加一个当前工程改变通知，Lazarus 下映射自工程打开/关闭事件}
     procedure RemoveActiveProjectChangedNotifier(Notifier: TNotifyEvent);
     {* 删除一个当前工程改变通知}
+
+{$IFDEF DELPHI_OTA}
 
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     {* 增加一个窗体编辑器通知事件}
@@ -403,7 +417,7 @@ type
     FNotifierServices: TCnWizNotifierServices;
   protected
     // IOTAIdeNotifier
-    procedure FileNotification(NotifyCode: TOTAFileNotification;
+    procedure FileNotification(NotifyCode: TCnOTAFileNotification;
       const FileName: string; var Cancel: Boolean);
     procedure BeforeCompile(const Project: IOTAProject; var Cancel: Boolean); overload;
     procedure AfterCompile(Succeeded: Boolean); overload;
@@ -646,7 +660,6 @@ type
     procedure DoIdleNotifiers;
   protected
     // ICnWizNotifierServices
-{$IFDEF DELPHI_OTA}
     procedure AddFileNotifier(Notifier: TCnWizFileNotifier);
     procedure RemoveFileNotifier(Notifier: TCnWizFileNotifier);
     procedure AddBeforeCompileNotifier(Notifier: TCnWizBeforeCompileNotifier);
@@ -655,6 +668,7 @@ type
     procedure RemoveAfterCompileNotifier(Notifier: TCnWizAfterCompileNotifier);
     procedure AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
     procedure RemoveActiveProjectChangedNotifier(Notifier: TNotifyEvent);
+{$IFDEF DELPHI_OTA}
     procedure AddFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure RemoveFormEditorNotifier(Notifier: TCnWizFormEditorNotifier);
     procedure AddProcessCreatedNotifier(Notifier: TCnWizProcessNotifier);
@@ -702,7 +716,7 @@ type
     procedure SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
       NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF});
 {$IFDEF DELPHI_OTA}
-    procedure FileNotification(NotifyCode: TOTAFileNotification;
+    procedure FileNotification(NotifyCode: TCnOTAFileNotification;
       const FileName: string);
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
       var Cancel: Boolean);
@@ -752,6 +766,21 @@ type
     procedure SourceEditorMoved(Sender: TObject);
     procedure SourceEditorCloned(Sender: TObject);
     procedure SourceEditorReConfigured(Sender: TObject);
+
+    // LazarusIDE 事件映射
+    procedure DoFileNotification(NotifyCode: TCnOTAFileNotification;
+      const FileName: string);
+    {* 触发文件通知}
+    procedure DoActiveProjectChanged;
+    {* 触发当前工程改变通知}
+    function LazProjectBuilding(Sender: TObject): TModalResult;
+    {* 映射 LazarusIDE 工程构建开始事件到 BeforeCompile 通知}
+    procedure LazProjectBuildingFinished(Sender: TObject; BuildSuccessful: Boolean);
+    {* 映射 LazarusIDE 工程构建完成事件到 AfterCompile 通知}
+    function LazProjectOpened(Sender: TObject; AProject: TLazProject): TModalResult;
+    {* 映射 LazarusIDE 工程打开事件到 ActiveProjectChanged 通知}
+    function LazProjectClose(Sender: TObject; AProject: TLazProject): TModalResult;
+    {* 映射 LazarusIDE 工程关闭事件到 ActiveProjectChanged 通知}
 {$ENDIF}
     procedure AppEventNotify(EventType: TCnWizAppEventType; Data: Pointer = nil);
 
@@ -1555,6 +1584,15 @@ begin
   FOldScreenActiveControlChange := Screen.OnActiveControlChange;
   Screen.OnActiveControlChange := ScreenActiveControlChange;
 
+  // 注册 LazarusIDE 工程级事件，映射到文件/编译/工程通知
+  if LazarusIDE <> nil then
+  begin
+    LazarusIDE.AddHandlerOnProjectBuilding(LazProjectBuilding);
+    LazarusIDE.AddHandlerOnProjectBuildingFinished(LazProjectBuildingFinished);
+    LazarusIDE.AddHandlerOnProjectOpened(LazProjectOpened);
+    LazarusIDE.AddHandlerOnProjectClose(LazProjectClose);
+  end;
+
   if SourceEditorManagerIntf <> nil then
   begin
     SourceEditorManagerIntf.RegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
@@ -1684,6 +1722,15 @@ begin
     SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowActivate, SourceEditorWindowActivate);
     SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowDestroy, SourceEditorWindowDestroy);
     SourceEditorManagerIntf.UnRegisterChangeEvent(semWindowCreate, SourceEditorWindowCreate);
+  end;
+
+  // 注销 LazarusIDE 工程级事件
+  if LazarusIDE <> nil then
+  begin
+    LazarusIDE.RemoveHandlerOnProjectBuilding(LazProjectBuilding);
+    LazarusIDE.RemoveHandlerOnProjectBuildingFinished(LazProjectBuildingFinished);
+    LazarusIDE.RemoveHandlerOnProjectOpened(LazProjectOpened);
+    LazarusIDE.RemoveHandlerOnProjectClose(LazProjectClose);
   end;
 
   Screen.OnActiveFormChange := FOldScreenActiveFormChange;
@@ -1897,8 +1944,6 @@ begin
   end;
 end;
 
-{$IFDEF DELPHI_OTA}
-
 //------------------------------------------------------------------------------
 // IDE 文件通知
 //------------------------------------------------------------------------------
@@ -1915,8 +1960,10 @@ begin
   CnWizRemoveNotifier(FFileNotifiers, TMethod(Notifier));
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnWizNotifierServices.FileNotification(
-  NotifyCode: TOTAFileNotification; const FileName: string);
+  NotifyCode: TCnOTAFileNotification; const FileName: string);
 var
   I: Integer;
   Project: IOTAProject;
@@ -1998,6 +2045,36 @@ begin
   end;
 end;
 
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+procedure TCnWizNotifierServices.DoFileNotification(
+  NotifyCode: TCnOTAFileNotification; const FileName: string);
+var
+  I: Integer;
+begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('Laz FileNotification: %s (%s)',
+    [GetEnumName(TypeInfo(TCnOTAFileNotification), Ord(NotifyCode)), FileName]);
+{$ENDIF}
+
+  // 注意：Lazarus 下源码编辑器的打开/关闭已由 SourceEditorManagerIntf 的
+  // 事件单独映射，这里只分发给文件通知列表
+  if FFileNotifiers <> nil then
+  begin
+    for I := FFileNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FFileNotifiers[I])^ do
+        TCnWizFileNotifier(Notifier)(NotifyCode, FileName);
+    except
+      DoHandleException('TCnWizNotifierServices.LazFileNotification[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 procedure TCnWizNotifierServices.AddActiveProjectChangedNotifier(Notifier: TNotifyEvent);
 begin
   CnWizAddNotifier(FActiveProjectChangedNotifiers, TMethod(Notifier));
@@ -2007,6 +2084,7 @@ procedure TCnWizNotifierServices.RemoveActiveProjectChangedNotifier(Notifier: TN
 begin
   CnWizRemoveNotifier(FActiveProjectChangedNotifiers, TMethod(Notifier));
 end;
+
 //------------------------------------------------------------------------------
 // 编译通知
 //------------------------------------------------------------------------------
@@ -2034,6 +2112,8 @@ procedure TCnWizNotifierServices.RemoveBeforeCompileNotifier(
 begin
   CnWizRemoveNotifier(FBeforeCompileNotifiers, TMethod(Notifier));
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnWizNotifierServices.AfterCompile(Succeeded,
   IsCodeInsight: Boolean);
@@ -2192,6 +2272,85 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+// 触发当前工程改变通知
+procedure TCnWizNotifierServices.DoActiveProjectChanged;
+var
+  I: Integer;
+begin
+  if FActiveProjectChangedNotifiers <> nil then
+  begin
+    for I := FActiveProjectChangedNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FActiveProjectChangedNotifiers[I])^ do
+        TNotifyEvent(Notifier)(Self);
+    except
+      DoHandleException('TCnWizNotifierServices.LazActiveProjectChanged[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+// 映射工程构建开始到 BeforeCompile 通知
+function TCnWizNotifierServices.LazProjectBuilding(Sender: TObject): TModalResult;
+var
+  I: Integer;
+  Cancel: Boolean;
+begin
+  Result := mrOk;
+  if FBeforeCompileNotifiers <> nil then
+  begin
+    Cancel := False;
+    for I := FBeforeCompileNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FBeforeCompileNotifiers[I])^ do
+        TCnWizBeforeCompileNotifier(Notifier)(LazarusIDE.ActiveProject, False, Cancel);
+    except
+      DoHandleException('TCnWizNotifierServices.LazProjectBuilding[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+// 映射工程构建完成到 AfterCompile 通知
+procedure TCnWizNotifierServices.LazProjectBuildingFinished(Sender: TObject;
+  BuildSuccessful: Boolean);
+var
+  I: Integer;
+begin
+  if FAfterCompileNotifiers <> nil then
+  begin
+    for I := FAfterCompileNotifiers.Count - 1 downto 0 do
+    try
+      with PCnWizNotifierRecord(FAfterCompileNotifiers[I])^ do
+        TCnWizAfterCompileNotifier(Notifier)(BuildSuccessful, False);
+    except
+      DoHandleException('TCnWizNotifierServices.LazProjectBuildingFinished[' + IntToStr(I) + ']');
+    end;
+  end;
+end;
+
+// 映射工程打开到 ActiveProjectChanged 通知
+function TCnWizNotifierServices.LazProjectOpened(Sender: TObject;
+  AProject: TLazProject): TModalResult;
+begin
+  Result := mrOk;
+  DoActiveProjectChanged;
+end;
+
+// 映射工程关闭到 ActiveProjectChanged 通知
+function TCnWizNotifierServices.LazProjectClose(Sender: TObject;
+  AProject: TLazProject): TModalResult;
+begin
+  Result := mrOk;
+  DoActiveProjectChanged;
+end;
+
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 
 //------------------------------------------------------------------------------
 // FormEditor 通知
@@ -2364,13 +2523,15 @@ begin
       begin
         Exists := False;
         for K := 0 to FFormEditorIntfs.Count - 1 do
+        begin
           if TCnFormEditorNotifier(FFormEditorIntfs[K]).FormEditor =
             FormEditor then
           begin
             Exists := True;
             Break;
           end;
-          
+        end;
+
         if not Exists then
         begin
         {$IFDEF DEBUG}
@@ -2795,9 +2956,12 @@ begin
     CnDebugger.LogMsg('SourceEditorCreate: ');
 {$ENDIF}
 
-  // 映射成 setOpened
+  // 映射成 setOpened，同时触发文件打开通知
   if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+  begin
     SourceEditorNotify(TSourceEditorInterface(Sender), setOpened);
+    DoFileNotification(ofnFileOpened, TSourceEditorInterface(Sender).FileName);
+  end;
 end;
 
 procedure TCnWizNotifierServices.SourceEditorDestroy(Sender: TObject);
@@ -2809,9 +2973,12 @@ begin
     CnDebugger.TraceMsg('SourceEditorDestroy: ');
 {$ENDIF}
 
-  // 映射成 setClosing
+  // 映射成 setClosing，同时触发文件关闭通知
   if (Sender <> nil) and (Sender is TSourceEditorInterface) then
+  begin
     SourceEditorNotify(TSourceEditorInterface(Sender), setClosing);
+    DoFileNotification(ofnFileClosed, TSourceEditorInterface(Sender).FileName);
+  end;
 end;
 
 procedure TCnWizNotifierServices.SourceEditorOptsChanged(Sender: TObject);

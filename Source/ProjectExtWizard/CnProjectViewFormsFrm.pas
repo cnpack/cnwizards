@@ -66,7 +66,8 @@ uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, Contnrs,
   {$IFDEF COMPILER6_UP} StrUtils, {$ENDIF}
   {$IFDEF SUPPORT_FMX} CnFmxUtils, {$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Graphics, CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizUtils, CnIni,
   CnWizMultiLang, CnProjectViewBaseFrm, CnWizDfmParser, ImgList, ActnList,
   CnWizIdeUtils, CnStrings;
@@ -253,9 +254,10 @@ var
   FormInfo: TCnFormInfo;
   I, J: Integer;
   FormFileName: string;
+  ProjectInterfaceList: TCnIDEInterfaceList;
+{$IFDEF DELPHI_OTA}
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
-  ProjectInterfaceList: TInterfaceList;
   Exists: Boolean;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
@@ -316,12 +318,14 @@ var
       ;
     end;
   end;
+{$ENDIF}
 begin
-  ProjectInterfaceList := TInterfaceList.Create;
+  ProjectInterfaceList := TCnIDEInterfaceList.Create;
   try
     CnOtaGetProjectList(ProjectInterfaceList);
 
     try
+{$IFDEF DELPHI_OTA}
       for I := 0 to ProjectInterfaceList.Count - 1 do
       begin
         IProject := IOTAProject(ProjectInterfaceList[I]);
@@ -405,6 +409,10 @@ begin
 
         ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
       end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      // TODO: 从 ProjectInterfaceList 中拿东西
+{$ENDIF}
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);
     end;
@@ -415,7 +423,13 @@ end;
 
 function TCnProjectViewFormsForm.DoSelectOpenedItem: string;
 begin
+{$IFDEF DELPHI_OTA}
   Result := Trim(CnOtaGetCurrentFormName);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // TODO: Lazarus 下暂无获取当前设计器窗体名的接口，降级为空
+  Result := '';
+{$ENDIF}
 end;
 
 function TCnProjectViewFormsForm.GetSelectedFileName: string;
@@ -446,10 +460,15 @@ begin
     else if DfmInfo.Format = dfBinary then
       ImageIndex := 69
     else
+{$IFDEF DELPHI_OTA}
       case CnOtaGetNewFormTypeOption of
         ftText: ImageIndex := 68;
         ftBinary: ImageIndex := 69;
       end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      ImageIndex := 68;
+{$ENDIF}
   end;
 end;
 
@@ -466,7 +485,12 @@ var
 {$ENDIF}
     if FormName <> '' then
     begin
+{$IFDEF DELPHI_OTA}
       CnOtaOpenUnSaveForm(FormName);
+{$ENDIF}
+{$IFDEF LAZARUS}
+      // TODO: Lazarus 下暂无打开未保存窗体的接口
+{$ENDIF}
       Exit;
     end;
 
@@ -501,7 +525,9 @@ var
     I: Integer;
     FormInfo: TCnFormInfo;
   begin
+{$IFDEF DELPHI_OTA}
     BeginBatchOpenClose;
+{$ENDIF}
     try
       for I := 0 to lvList.Items.Count - 1 do
         if lvList.Items.Item[I].Selected then
@@ -513,7 +539,9 @@ var
             OpenItem(FormInfo.FileName);
         end;
     finally
+{$IFDEF DELPHI_OTA}
       EndBatchOpenClose;
+{$ENDIF}
     end;
   end;
 

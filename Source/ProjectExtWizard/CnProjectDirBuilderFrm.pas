@@ -711,13 +711,13 @@ begin
   if (not FTempletSaved) and (TreeView.Items.Count > 0) then
     case Application.MessageBox(PChar(SCnProjExtConfirmSaveTemplet),
       PChar(SCnInformation), MB_ICONQUESTION + MB_YESNOCANCEL) of
-      ID_YES:
+      {$IFDEF FPC} mrYes {$ELSE} ID_YES {$ENDIF}:
         if not SaveTempletToTree(cbbDirList.Text) then
         begin
           Action := caNone;
           Exit;
         end;
-      ID_CANCEL:
+      {$IFDEF FPC} mrCancel {$ELSE} ID_CANCEL {$ENDIF}:
         begin
           Action := caNone;
           Exit;
@@ -759,10 +759,10 @@ begin
   if (not FTempletSaved) and (TreeView.Items.Count > 0) then
     case Application.MessageBox(PChar(SCnProjExtConfirmSaveTemplet),
       PChar(SCnInformation), MB_ICONQUESTION + MB_YESNOCANCEL) of
-      ID_YES:
+      {$IFDEF FPC} mrYes {$ELSE} ID_YES {$ENDIF}:
         if not SaveTempletToTree(cbbDirList.Text) then
           Exit;
-      ID_CANCEL: Exit;
+      {$IFDEF FPC} mrCancel {$ELSE} ID_CANCEL {$ENDIF}: Exit;
     end;
 
   ClearTreeViewAndMemo;
@@ -823,10 +823,10 @@ begin
   if (not FTempletSaved) and (TreeView.Items.Count > 0) then
     case Application.MessageBox(PChar(SCnProjExtConfirmSaveTemplet),
       PChar(SCnInformation), MB_ICONQUESTION + MB_YESNOCANCEL) of
-      ID_YES:
+      {$IFDEF FPC} mrYes {$ELSE} ID_YES {$ENDIF}:
         if not SaveTempletToTree(FOldTemplet) then
           Exit;
-      ID_CANCEL: Exit;
+      {$IFDEF FPC} mrCancel {$ELSE} ID_CANCEL {$ENDIF}: Exit;
     end;
 
   FOldTemplet := cbbDirList.Text;

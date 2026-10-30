@@ -59,7 +59,8 @@ interface
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
   Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
-  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, {$ENDIF} {$ELSE}
+  {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, NewItemIntf,
+  ProjectIntf, {$ENDIF} {$ELSE}
   {$IFDEF DELPHI_OTA} ToolsAPI, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
@@ -320,6 +321,111 @@ var
   CnDesignExecutorList: TObjectList = nil; // 设计器右键菜单执行对象列表
 
   CnEditorExecutorList: TObjectList = nil; // 编辑器右键菜单执行对象列表
+
+{$IFDEF LAZARUS}
+
+{ Lazarus 下 Repository 专家的 File>New 注册管道：
+  将 TCnRepositoryWizard 适配为 TProjectFileDescriptor + TNewItemProjectFile，
+  注册到 Lazarus 的 NewIDEItems 中。具体专家通过重载
+  TCnRepositoryWizard.GetLazNewFileSource 提供生成内容。}
+
+type
+  TCnLazRepositoryFileDescriptor = class(TProjectFileDescriptor)
+  {* 将 CnPack Repository 专家适配为 Lazarus File>New 的文件描述符}
+  private
+    FWizard: TCnRepositoryWizard;
+  public
+    constructor Create(AWizard: TCnRepositoryWizard); reintroduce;
+    function GetLocalizedName: string; override;
+    function GetLocalizedDescription: string; override;
+    function CreateSource(const aFilename, aSourceName,
+      aResourceName: string): string; override;
+  end;
+
+  TCnLazRepositoryItem = class(TNewItemProjectFile)
+  {* 持有 Descriptor 与专家引用的 New 对话框条目}
+  public
+    Wizard: TCnRepositoryWizard;
+  end;
+
+var
+  FLazRepositoryItems: TObjectList = nil; // TCnLazRepositoryItem 列表，OwnsObjects
+
+constructor TCnLazRepositoryFileDescriptor.Create(AWizard: TCnRepositoryWizard);
+var
+  WizardName, Author, Email, Comment: string;
+begin
+  inherited Create;
+  FWizard := AWizard;
+  TCnRepositoryWizardClass(FWizard.ClassType).GetWizardInfo(WizardName, Author, Email, Comment);
+  Name := 'CnWizNew' + FWizard.ClassName; // 描述符名要求唯一
+  DefaultFileExt := '.pas';
+  DefaultSourceName := 'Unit1';
+  IsPascalUnit := True;
+  AddToProject := True;
+  VisibleInNewDialog := True;
+end;
+
+function TCnLazRepositoryFileDescriptor.GetLocalizedName: string;
+var
+  WizardName, Author, Email, Comment: string;
+begin
+  // GetName 为 protected，改用 GetWizardInfo 的 Name
+  TCnRepositoryWizardClass(FWizard.ClassType).GetWizardInfo(WizardName, Author, Email, Comment);
+  Result := WizardName;
+end;
+
+function TCnLazRepositoryFileDescriptor.GetLocalizedDescription: string;
+var
+  WizardName, Author, Email, Comment: string;
+begin
+  TCnRepositoryWizardClass(FWizard.ClassType).GetWizardInfo(WizardName, Author, Email, Comment);
+  Result := Comment;
+end;
+
+function TCnLazRepositoryFileDescriptor.CreateSource(const aFilename,
+  aSourceName, aResourceName: string): string;
+begin
+  // 内容由具体专家的重载方法提供，基类默认返回空串（得到空单元文件）
+  Result := FWizard.GetLazNewFileSource(aSourceName);
+end;
+
+// 将一个 Repository 专家注册到 Lazarus 的 File>New 对话框
+procedure RegisterRepositoryWizardToLaz(Wizard: TCnRepositoryWizard);
+var
+  Descriptor: TCnLazRepositoryFileDescriptor;
+  Item: TCnLazRepositoryItem;
+begin
+  if NewIDEItems = nil then
+    Exit;
+  if FLazRepositoryItems = nil then
+    FLazRepositoryItems := TObjectList.Create(True);
+
+  Descriptor := TCnLazRepositoryFileDescriptor.Create(Wizard);
+  Item := TCnLazRepositoryItem.Create(Descriptor.Name);
+  Item.Descriptor := Descriptor;
+  Item.Wizard := Wizard;
+  RegisterNewDialogItem(SCnWizardsPage, Item);
+  FLazRepositoryItems.Add(Item);
+end;
+
+// 注销全部 Repository 专家的 File>New 条目
+procedure UnregisterRepositoryWizardsFromLaz;
+var
+  I: Integer;
+  Item: TCnLazRepositoryItem;
+begin
+  if FLazRepositoryItems = nil then
+    Exit;
+  for I := FLazRepositoryItems.Count - 1 downto 0 do
+  begin
+    Item := TCnLazRepositoryItem(FLazRepositoryItems[I]);
+    UnregisterNewDialogItem(Item);
+  end;
+  FreeAndNil(FLazRepositoryItems);
+end;
+
+{$ENDIF LAZARUS}
 
 // 封装的返回 TCnWizardMgr 主专家实例的函数，主要给脚本专家使用
 function GetCnWizardMgr: TCnWizardMgr;
@@ -725,6 +831,11 @@ begin
     CnWizNotifierServices.RemoveFileNotifier(OnFileNotify);
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // 注销 File>New 中的 Repository 专家条目（须在专家实例释放前）
+    UnregisterRepositoryWizardsFromLaz;
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -1222,7 +1333,7 @@ begin
         FRepositoryWizards.Add(RepositoryWizard);
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
-        // TODO: 注册 Lazarus 下的 Repository 专家
+        RegisterRepositoryWizardToLaz(RepositoryWizard);
 {$ELSE}
         RepositoryWizard.WizardIndex := WizardSvcs.AddWizard(RepositoryWizard);
 {$ENDIF}

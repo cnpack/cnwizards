@@ -407,17 +407,20 @@ var
   I, J: Integer;
   UnitFileName: string;
   IProject: TCnIDEProjectInterface;
-  IModuleInfo: IOTAModuleInfo;
   ProjectInterfaceList: TCnIDEInterfaceList;
+{$IFDEF DELPHI_OTA}
+  IModuleInfo: IOTAModuleInfo;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
 {$ENDIF}
+{$ENDIF}
 begin
-  ProjectInterfaceList := TInterfaceList.Create;
+  ProjectInterfaceList := TCnIDEInterfaceList.Create;
   try
     CnOtaGetProjectList(ProjectInterfaceList);
 
     try
+{$IFDEF DELPHI_OTA}
       for I := 0 to ProjectInterfaceList.Count - 1 do
       begin
         IProject := IOTAProject(ProjectInterfaceList[I]);
@@ -518,6 +521,10 @@ begin
         end;
         ProjectList.Add(ProjectInfo);  // ProjectList 中只包含工程信息
       end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      // TODO: 从 ProjectInterfaceList 中拿东西
+{$ENDIF}
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);
     end;

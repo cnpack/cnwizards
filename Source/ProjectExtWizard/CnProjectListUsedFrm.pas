@@ -47,7 +47,11 @@ uses
 {$IFDEF COMPILER6_UP}
   StrUtils,
 {$ENDIF}
-  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles, ToolsAPI,
+{$IFDEF FPC}
+  StrUtils, // FPC 下未定义 COMPILER6_UP，但本单元用到了 AnsiStartsText
+{$ENDIF}
+  ComCtrls, StdCtrls, ExtCtrls, Math, ToolWin, Clipbrd, IniFiles,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   Graphics, ImgList, ActnList,
   CnPasCodeParser,  CnWizIdeUtils, CnEditorOpenFile, CnWizUtils, CnIni,
   CnCommon, CnConsts, CnWizConsts, CnWizOptions, CnWizMultiLang,
@@ -303,11 +307,18 @@ begin
 end;
 
 function TCnProjectListUsedForm.DoSelectOpenedItem: string;
+{$IFDEF DELPHI_OTA}
 var
   CurrentModule: IOTAModule;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   CurrentModule := CnOtaGetCurrentModule;
   Result := _CnChangeFileExt(_CnExtractFileName(CurrentModule.FileName), '');
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := ChangeFileExt(ExtractFileName(CnOtaGetCurrentSourceFileName), '');
+{$ENDIF}
 end;
 
 function TCnProjectListUsedForm.GetSelectedFileName: string;

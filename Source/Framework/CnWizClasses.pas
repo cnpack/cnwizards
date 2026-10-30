@@ -444,7 +444,15 @@ type
 {$ELSE}
     function GetGlyph: HICON;
 {$ENDIF}
+{$IFDEF LAZARUS}
+    function GetLazNewFileSource(const AFileName: string): string; virtual;
+    {* Lazarus 下 File>New 对话框创建文件时由框架回调，返回要生成的源码内容；
+       返回空串表示该专家的文件内容生成尚未移植，将得到一个空的单元文件。
+       具体专家在完成 Lazarus 移植后重载此方法。}
+{$ENDIF}
   end;
+
+  TCnRepositoryWizardClass = class of TCnRepositoryWizard;
 
 //==============================================================================
 // 单元模板向导基类
@@ -1779,6 +1787,14 @@ function TCnRepositoryWizard.GetPage: string;
 begin
   Result := SCnWizardsPage;
 end;
+
+{$IFDEF LAZARUS}
+// 返回 File>New 时要生成的源码内容，默认为空表示尚未移植
+function TCnRepositoryWizard.GetLazNewFileSource(const AFileName: string): string;
+begin
+  Result := '';
+end;
+{$ENDIF}
 
 //==============================================================================
 // 设计器右键菜单执行条目的基类
