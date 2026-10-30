@@ -612,6 +612,12 @@ procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 
+function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string;
+{* 获得项目的二进制文件输出目录，Lazarus 下通过 LazCompilerOptions.CreateTargetFilename 实现}
+
+function CnOtaGetProjectOutputTarget(Project: TCnIDEProjectInterface): string;
+{* 获得项目的二进制文件输出完整路径，Lazarus 下通过 LazCompilerOptions.CreateTargetFilename 实现}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -698,10 +704,6 @@ procedure CnOtaGetPlatformsFromBuildConfiguration(BuildConfig: IOTABuildConfigur
 {* 获取 BuildConfiguration 的 Platforms 至 TStrings 中，以避免低版本与脚本不支持泛型的问题}
 {$ENDIF}
 
-function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
-{* 获得项目的二进制文件输出目录}
-function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
-{* 获得项目的二进制文件输出完整路径}
 function CnOtaGetCurrentFormName: string;
 {* 取当前窗体名称}
 function CnOtaGetCurrentFormFileName: string;
@@ -5805,121 +5807,6 @@ begin
   end;
 end;
 
-// 获得项目的二进制文件输出目录
-function CnOtaGetProjectOutputDirectory(Project: IOTAProject): string;
-var
-  Options: IOTAProjectOptions;
-  ProjectDir: string;
-{$IFNDEF DELPHIXE_UP}
-  Dir: Variant;
-  OutputDir: string;
-{$ENDIF}
-begin
-  Result := '';
-  if Project = nil then
-    Project := CnOtaGetCurrentProject;
-  if Project = nil then
-    Exit;
-
-  ProjectDir := _CnExtractFileDir(Project.FileName);
-  Options := Project.ProjectOptions;
-
-{$IFDEF DELPHIXE_UP}  // XE 以上直接走 TargetName，要验证是否和当前 Configuration 的目录一致
-  if Options <> nil then
-    Result := _CnExtractFilePath(Options.TargetName)
-  else
-    Result := ProjectDir;
-{$ELSE}
-  if Options <> nil then
-  begin
-    Dir := Options.GetOptionValue('OutputDir');
-    OutputDir := VarToStr(Dir);
-
-    if OutputDir <> '' then // $(Config)/$(Platform) 的形式，需要替换
-      Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir));
-  end;
-
-  if Result = '' then
-    Result := ProjectDir;
-{$ENDIF}
-end;
-
-// 获得项目的二进制文件输出完整路径
-function CnOtaGetProjectOutputTarget(Project: IOTAProject): string;
-var
-  Dir, ProjectFileName: string;
-{$IFNDEF DELPHIXE_UP}
-  OutExt, IntermediaDir: string;
-  Val: Variant;
-{$ENDIF}
-begin
-  Result := '';
-  if Project = nil then
-    Exit;
-
-  ProjectFileName := Project.GetFileName;
-  if ProjectFileName = '' then
-    Exit;
-
-  Dir := CnOtaGetProjectOutputDirectory(Project);
-  if Dir = '' then
-    Exit;
-
-{$IFDEF DELPHIXE_UP}
-  if CnOtaGetActiveProjectOptions <> nil then
-    Result := CnOtaGetActiveProjectOptions.TargetName;
-{$ELSE}
-  { TODO : 自定义的输出扩展名暂不支持 }
-  try
-    if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
-      OutExt := '.bpl';
-  except
-    ;
-  end;
-
-  try
-    if (OutExt = '') and CnOtaGetActiveProjectOption('GenStaticLibrary', Val) and Val then
-      OutExt := '.lib';
-  except
-    ;
-  end;
-
-  try
-    if (OutExt = '') and CnOtaGetActiveProjectOption('GenDll', Val) and Val then
-      OutExt := '.dll';
-  except
-    ;
-  end;
-
-  if OutExt = '' then
-    OutExt := '.exe';
-
-{$IFDEF IDE_CONF_MANAGER}
-  if not IsDelphiRuntime then
-  begin
-{$IFDEF BDS2009_UP}
-    if CnOtaGetActiveProjectOptionsConfigurations <> nil then
-    begin
-      if CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration <> nil then
-      begin
-        IntermediaDir := MakePath(CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration.GetName);
-      end;
-    end;
-{$ELSE}
-    // TODO: BCB2007 下无 OTA 接口得到 Configuration，得想别的法子
-    try
-      if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
-        IntermediaDir := MakePath(VarToStr(Val));
-    except
-      ;
-    end;
-{$ENDIF}
-  end;
-{$ENDIF}
-  Result := MakePath(Dir) + IntermediaDir + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), OutExt);
-{$ENDIF}
-end;
-
 // 取当前窗体名称
 function CnOtaGetCurrentFormName: string;
 var
@@ -7594,6 +7481,152 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+// 获得项目的二进制文件输出目录
+function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string;
+var
+{$IFDEF LAZARUS}
+  Target: string;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  Options: IOTAProjectOptions;
+  ProjectDir: string;
+{$IFNDEF DELPHIXE_UP}
+  Dir: Variant;
+  OutputDir: string;
+{$ENDIF}
+{$ENDIF}
+begin
+  Result := '';
+  if Project = nil then
+    Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+{$IFDEF LAZARUS}
+  // CreateTargetFilename 会替换宏并将相对路径按工程目录展开为绝对路径，
+  // 未设置 TargetFilename 时默认输出到 UnitOutputDirectory（如 lib/$(TargetCPU)-$(TargetOS)）
+  if Project.LazCompilerOptions <> nil then
+  begin
+    Target := Project.LazCompilerOptions.CreateTargetFilename;
+    if Target <> '' then
+      Result := _CnExtractFilePath(Target);
+  end;
+
+  if (Result = '') and (Project.MainFile <> nil) then
+    Result := _CnExtractFilePath(Project.MainFile.Filename);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  ProjectDir := _CnExtractFileDir(Project.FileName);
+  Options := Project.ProjectOptions;
+
+{$IFDEF DELPHIXE_UP}  // XE 以上直接走 TargetName，要验证是否和当前 Configuration 的目录一致
+  if Options <> nil then
+    Result := _CnExtractFilePath(Options.TargetName)
+  else
+    Result := ProjectDir;
+{$ELSE}
+  if Options <> nil then
+  begin
+    Dir := Options.GetOptionValue('OutputDir');
+    OutputDir := VarToStr(Dir);
+
+    if OutputDir <> '' then // $(Config)/$(Platform) 的形式，需要替换
+      Result := LinkPath(ProjectDir, ReplaceToActualPath(OutputDir));
+  end;
+
+  if Result = '' then
+    Result := ProjectDir;
+{$ENDIF}
+{$ENDIF}
+end;
+
+// 获得项目的二进制文件输出完整路径
+function CnOtaGetProjectOutputTarget(Project: TCnIDEProjectInterface): string;
+{$IFDEF DELPHI_OTA}
+var
+  Dir, ProjectFileName: string;
+{$IFNDEF DELPHIXE_UP}
+  OutExt, IntermediaDir: string;
+  Val: Variant;
+{$ENDIF}
+{$ENDIF}
+begin
+  Result := '';
+
+{$IFDEF LAZARUS}
+  if Project = nil then
+    Exit;
+  // CreateTargetFilename 返回带扩展名的可执行文件完整路径
+  if Project.LazCompilerOptions <> nil then
+    Result := Project.LazCompilerOptions.CreateTargetFilename;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  ProjectFileName := Project.GetFileName;
+  if ProjectFileName = '' then
+    Exit;
+
+  Dir := CnOtaGetProjectOutputDirectory(Project);
+  if Dir = '' then
+    Exit;
+
+{$IFDEF DELPHIXE_UP}
+  if CnOtaGetActiveProjectOptions <> nil then
+    Result := CnOtaGetActiveProjectOptions.TargetName;
+{$ELSE}
+  { TODO : 自定义的输出扩展名暂不支持 }
+  try
+    if CnOtaGetActiveProjectOption('GenPackage', Val) and Val then
+      OutExt := '.bpl';
+  except
+    ;
+  end;
+
+  try
+    if (OutExt = '') and CnOtaGetActiveProjectOption('GenStaticLibrary', Val) and Val then
+      OutExt := '.lib';
+  except
+    ;
+  end;
+
+  try
+    if (OutExt = '') and CnOtaGetActiveProjectOption('GenDll', Val) and Val then
+      OutExt := '.dll';
+  except
+    ;
+  end;
+
+  if OutExt = '' then
+    OutExt := '.exe';
+
+{$IFDEF IDE_CONF_MANAGER}
+  if not IsDelphiRuntime then
+  begin
+{$IFDEF BDS2009_UP}
+    if CnOtaGetActiveProjectOptionsConfigurations <> nil then
+    begin
+      if CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration <> nil then
+      begin
+        IntermediaDir := MakePath(CnOtaGetActiveProjectOptionsConfigurations.GetActiveConfiguration.GetName);
+      end;
+    end;
+{$ELSE}
+    // TODO: BCB2007 下无 OTA 接口得到 Configuration，得想别的法子
+    try
+      if CnOtaGetActiveProjectOption('UnitOutputDir', Val) then
+        IntermediaDir := MakePath(VarToStr(Val));
+    except
+      ;
+    end;
+{$ENDIF}
+  end;
+{$ENDIF}
+  Result := MakePath(Dir) + IntermediaDir + _CnChangeFileExt(_CnExtractFileName(ProjectFileName), OutExt);
+{$ENDIF}
+{$ENDIF}
+end;
 
 // 返回当前选择的块扩展成行模式后的起始位置，不实际扩展选择区
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;

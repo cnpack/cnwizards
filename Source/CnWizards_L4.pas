@@ -24,7 +24,7 @@ uses
   CnEditorCodeComment, CnPas2HtmlConfigFrm, CnPas2HtmlWizard, 
   CnPasConvertTypeFrm, CnCodeFormatRules, CnCodeFormatterWizard, 
   CnFormatterIntf, CnTabOrderWizard, CnEditorToggleUses, CnEditorToggleVar, 
-  LazarusPackageIntf;
+  CnProjectExtWizard, LazarusPackageIntf;
 
 implementation
 

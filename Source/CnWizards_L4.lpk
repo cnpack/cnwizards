@@ -288,10 +288,17 @@
         <Filename Value="CodingToolset\CnEditorToggleVar.pas"/>
         <UnitName Value="CnEditorToggleVar"/>
       </Item>
+      <Item>
+        <Filename Value="ProjectExtWizard\CnProjectExtWizard.pas"/>
+        <UnitName Value="CnProjectExtWizard"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
         <PackageName Value="IDEIntf"/>
+      </Item>
+      <Item>
+        <PackageName Value="BuildIntf"/>
       </Item>
       <Item>
         <PackageName Value="LCLBase"/>

@@ -131,9 +131,11 @@ type
     FPasUnitNameList: TCnUnitNameList;
     FCppUnitNameList: TCnUnitNameList;
 {$ENDIF}
+{$IFNDEF LAZARUS}
   {$IFNDEF BDS}
     procedure RunSeparately;
   {$ENDIF}
+{$ENDIF}
     procedure ExploreProject;
     procedure ExploreUnit;
     procedure ExploreExe;
@@ -460,12 +462,14 @@ end;
 
 procedure TCnProjectExtWizard.AcquireSubActions;
 begin
+{$IFNDEF LAZARUS}
 {$IFNDEF BDS}
   IdRunSeparately := RegisterASubAction(SCnProjExtRunSeparately,
     SCnProjExtRunSeparatelyCaption, ShortCut(VK_F9, [ssShift]),
     SCnProjExtRunSeparatelyHint, SCnProjExtRunSeparately);
 
   AddSepMenu;
+{$ENDIF}
 {$ENDIF}
 
   IdExploreUnit := RegisterASubAction(SCnProjExtExploreUnit,
@@ -537,10 +541,12 @@ begin
   if not Active then
     Exit;
 
+{$IFNDEF LAZARUS}
 {$IFNDEF BDS}
   if Index = IdRunSeparately then
     RunSeparately
   else
+{$ENDIF}
 {$ENDIF}
   if Index = IdExploreUnit then
     ExploreUnit

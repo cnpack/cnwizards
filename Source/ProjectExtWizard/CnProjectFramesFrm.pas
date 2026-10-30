@@ -236,9 +236,10 @@ var
   FormInfo: TCnFormInfo;
   I, J: Integer;
   FormFileName: string;
+  ProjectInterfaceList: TCnIDEInterfaceList;
+{$IFDEF DELPHI_OTA}
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
-  ProjectInterfaceList: TInterfaceList;
   Exists: Boolean;
 {$IFDEF BDS}
   ProjectGroup: IOTAProjectGroup;
@@ -295,12 +296,15 @@ var
       ;
     end;
   end;
+{$ENDIF}
+
 begin
-  ProjectInterfaceList := TInterfaceList.Create;
+  ProjectInterfaceList := TCnIDEInterfaceList.Create;
   try
     CnOtaGetProjectList(ProjectInterfaceList);
 
     try
+{$IFDEF DELPHI_OTA}
       for I := 0 to ProjectInterfaceList.Count - 1 do
       begin
         IProject := IOTAProject(ProjectInterfaceList[I]);
@@ -398,6 +402,10 @@ begin
 
         ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
       end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    // TODO: Lazarus 下从 ProjectInterfaceList 中取
+{$ENDIF}
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);
     end;
