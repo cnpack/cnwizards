@@ -45,7 +45,7 @@ interface
 {$IFDEF CNWIZARDS_CNFILESSNAPSHOTWIZARD}
 
 uses
-  SysUtils, Classes, ToolsAPI, Menus, ExtCtrls,
+  SysUtils, Classes, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Menus, ExtCtrls,
   CnWizNotifier, CnWizUtils, CnRoFilesList, CnRoInterfaces, CnRoClasses;
 
 type
@@ -150,7 +150,13 @@ begin
     ofnFileClosing: GetReopen.LogClosingFile(FileName);
     ofnProjectDesktopSave:
       begin
+{$IFDEF DELPHI_OTA}
         GetReopen.LogClosingFile(CnOtaGetCurrentProject.FileName);
+{$ENDIF}
+{$IFDEF LAZARUS}
+        // TLazProject 无 FileName 属性，取工程信息文件名
+        GetReopen.LogClosingFile(CnOtaGetCurrentProjectFileName);
+{$ENDIF}
         GetReopen.LogClosingFile(CnOtaGetProjectGroup.FileName);
         GetRoOptions.SaveFiles;
       end;

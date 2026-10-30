@@ -58,13 +58,13 @@ interface
 
 uses
   Windows, Messages, Classes, Graphics, Controls, Sysutils, Menus, ActnList,
-  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry,  Contnrs,
+  Forms, ImgList, ExtCtrls, IniFiles, Dialogs, Registry, Contnrs,
   {$IFDEF LAZARUS} LCLProc, {$IFNDEF STAND_ALONE} IDECommands, NewItemIntf,
   ProjectIntf, {$ENDIF} {$ELSE}
   {$IFDEF DELPHI_OTA} ToolsAPI, CnWizIdeHooks,
   {$IFDEF COMPILER6_UP} DesignIntf, DesignEditors, DesignMenus,{$ELSE}
   DsgnIntf,{$ENDIF} {$ENDIF} {$ENDIF}
-  CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils
+  CnWizClasses, CnWizConsts, CnWizMenuAction, CnWizUtils, CnWizIdeUtils, CnWizNotifier
   {$IFNDEF CNWIZARDS_MINIMUM} {$IFNDEF LAZARUS}, CnRestoreSystemMenu {$ENDIF}, CnLangMgr {$ENDIF};
 
 const
@@ -305,7 +305,7 @@ uses
   CnIDEVersion,
   {$ENDIF}{$ENDIF}
 {$ENDIF}
-  CnWizNotifier, CnWizCompilerConst;
+  CnWizCompilerConst;
 
 const
   csCnWizFreeMutex = 'CnWizFreeMutex';

@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;AIAgent;FavoriteWizard;ExplorerWizard;ReopenWizard;SourceDiff;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -291,6 +291,114 @@
       <Item>
         <Filename Value="ProjectExtWizard\CnProjectExtWizard.pas"/>
         <UnitName Value="CnProjectExtWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizShareImages.pas"/>
+        <UnitName Value="CnWizShareImages"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizBoot.pas"/>
+        <UnitName Value="CnWizBoot"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizCommentFrm.pas"/>
+        <UnitName Value="CnWizCommentFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizTipOfDayFrm.pas"/>
+        <UnitName Value="CnWizTipOfDayFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizUpgradeFrm.pas"/>
+        <UnitName Value="CnWizUpgradeFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="Misc\CnWizFeedbackFrm.pas"/>
+        <UnitName Value="CnWizFeedbackFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentTypes.pas"/>
+        <UnitName Value="CnAIAgentTypes"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentJsonRpc.pas"/>
+        <UnitName Value="CnAIAgentJsonRpc"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentStdioTransport.pas"/>
+        <UnitName Value="CnAIAgentStdioTransport"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentSession.pas"/>
+        <UnitName Value="CnAIAgentSession"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentTools.pas"/>
+        <UnitName Value="CnAIAgentTools"/>
+      </Item>
+      <Item>
+        <Filename Value="AIAgent\CnAIAgentClient.pas"/>
+        <UnitName Value="CnAIAgentClient"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceDiff\CnSourceDiffWizard.pas"/>
+        <UnitName Value="CnSourceDiffWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceDiff\CnSourceDiffFrm.pas"/>
+        <UnitName Value="CnSourceDiffFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="SourceDiff\CnDiffEditorFrm.pas"/>
+        <UnitName Value="CnDiffEditorFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="ExplorerWizard\CnExplore.pas"/>
+        <UnitName Value="CnExplore"/>
+      </Item>
+      <Item>
+        <Filename Value="ExplorerWizard\CnExploreDirectory.pas"/>
+        <UnitName Value="CnExploreDirectory"/>
+      </Item>
+      <Item>
+        <Filename Value="ExplorerWizard\CnExploreFilter.pas"/>
+        <UnitName Value="CnExploreFilter"/>
+      </Item>
+      <Item>
+        <Filename Value="ExplorerWizard\CnExploreFilterEditor.pas"/>
+        <UnitName Value="CnExploreFilterEditor"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoWizard.pas"/>
+        <UnitName Value="CnRoWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoInterfaces.pas"/>
+        <UnitName Value="CnRoInterfaces"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoClasses.pas"/>
+        <UnitName Value="CnRoClasses"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoFilesList.pas"/>
+        <UnitName Value="CnRoFilesList"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoFrmFileList.pas"/>
+        <UnitName Value="CnRoFrmFileList"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnRoOptions.pas"/>
+        <UnitName Value="CnRoOptions"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnFilesSnapshot.pas"/>
+        <UnitName Value="CnFilesSnapshot"/>
+      </Item>
+      <Item>
+        <Filename Value="ReopenWizard\CnFilesSnapshotManageFrm.pas"/>
+        <UnitName Value="CnFilesSnapshotManageFrm"/>
       </Item>
     </Files>
     <RequiredPkgs>

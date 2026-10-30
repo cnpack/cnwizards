@@ -117,7 +117,7 @@ implementation
 {$R *.DFM}
 
 uses
-  ToolsAPI, CnCommon, CnRoWizard, CnLangMgr, CnWizOptions;
+  CnCommon, CnRoWizard, CnLangMgr, CnWizOptions;
 
 {***************************** TCnFilesListForm *******************************}
 

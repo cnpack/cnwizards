@@ -42,7 +42,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ToolsAPI, IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnConsts,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  IniFiles, CnWizClasses, CnWizUtils, CnWizConsts, CnConsts,
   CnSourceDiffFrm;
 
 type

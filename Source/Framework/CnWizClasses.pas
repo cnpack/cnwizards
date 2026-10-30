@@ -92,11 +92,9 @@ type
   ECnWizardException = class(Exception);
 
 {$IFNDEF DELPHI_OTA}
+
   TWizardState = set of (wsEnabled, wsChecked);
 
-  TOTAFileNotification = (ofnFileOpening, ofnFileOpened, ofnFileClosing,
-    ofnDefaultDesktopLoad, ofnDefaultDesktopSave, ofnProjectDesktopLoad,
-    ofnProjectDesktopSave, ofnPackageInstalled, ofnPackageUninstalled);
 {$ENDIF}
 
 //==============================================================================

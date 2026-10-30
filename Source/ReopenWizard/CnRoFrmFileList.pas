@@ -100,7 +100,8 @@ implementation
 {$R *.DFM}
 
 uses
-  ToolsAPI, CnWizShareImages, CnCommon, CnWizUtils;
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} {$IFDEF LAZARUS} LazIDEIntf, {$ENDIF}
+  CnWizShareImages, CnCommon, CnWizUtils;
 
 {*************************** TCnRecentFilesFrame ******************************}
 
@@ -291,10 +292,18 @@ begin
     S := Selected.SubItems[0] + Selected.Caption;
     if FileExists(S) then
     begin
+{$IFDEF DELPHI_OTA}
       if IsProject(S) then
         (BorlandIDEServices as IOTAActionServices).OpenProject(S, True)
       else
         (BorlandIDEServices as IOTAActionServices).OpenFile(S);
+{$ENDIF}
+{$IFDEF LAZARUS}
+      if IsProject(S) then
+        LazarusIDE.DoOpenProjectFile(S, [])
+      else
+        CnOtaOpenFile(S);
+{$ENDIF}
     end;
   end;
   CloseForm(S);
@@ -316,7 +325,12 @@ begin
           S := Items[I].SubItems[0] + Items[I].Caption;
           if FileExists(S) then
           begin
+{$IFDEF DELPHI_OTA}
             (BorlandIDEServices as IOTAActionServices).OpenFile(S);
+{$ENDIF}
+{$IFDEF LAZARUS}
+            CnOtaOpenFile(S);
+{$ENDIF}
           end;
         end;
       end;

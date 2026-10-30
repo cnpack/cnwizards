@@ -5,7 +5,8 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ShellAPI;
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, ShellAPI
+  {$IFDEF FPC}, LCLType, LMessages {$ENDIF};
 
 type
 
@@ -93,7 +94,9 @@ type
     property FocusLength: Integer read GetFocusLength;
   published
     property Align;
+    {$IFNDEF FPC} // LCL Œﬁ Ctl3D  Ù–‘
     property Ctl3D;
+    {$ENDIF}
     property Color;
     property Font;
     property OnDblClick;
@@ -267,7 +270,7 @@ begin
   with Params do
   begin
     Style := Style or WS_VSCROLL or WS_HSCROLL or WS_TABSTOP;
-    if NewStyleControls and Ctl3D then
+    if NewStyleControls {$IFNDEF FPC} and Ctl3D {$ENDIF} then
       ExStyle := ExStyle or WS_EX_CLIENTEDGE
     else
       Style := Style or WS_BORDER;
@@ -279,7 +282,7 @@ procedure TDiffControl.WMSetFont(var message: TMessage);
 var
   dc: HDC;
   oldFont: HFont;
-  tm: TTextMetric;
+  tm: Windows.TTextMetric;
 begin
   inherited;
   Canvas.Font := Font;
@@ -300,7 +303,7 @@ end;
 
 procedure TDiffControl.UpdateScrollbars;
 var
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
 begin
   if not handleallocated then Exit;
   si.cbSize := SizeOf(TScrollInfo);
@@ -406,7 +409,7 @@ end;
 
 procedure TDiffControl.WMVScroll(var message: TWMScroll);
 var
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
   oldVertDelta, VisibleLines: Integer;
   goingDown: Boolean;
 begin
@@ -446,7 +449,7 @@ end;
 
 procedure TDiffControl.WMHScroll(var message: TWMScroll);
 var
-  si: TScrollInfo;
+  si: Windows.TScrollInfo;
   oldHorzDelta: Integer;
 begin
   si.cbSize := SizeOf(TScrollInfo);

@@ -50,8 +50,10 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, DiffUnit, ExtCtrls, DiffControl, Menus, ComCtrls, ShellAPI, Clipbrd,
   IniFiles, CnDiffEditorFrm, CnCRC32, CnWizUtils, Buttons, ToolWin, CnIni,
-  ActnList, ImgList, CnWizConsts, ToolsAPI, CnWizEditFiler, CnCommon,
-  CnConsts, CnWizMultiLang, CnPopupMenu;
+  ActnList, ImgList, CnWizConsts, CnWizEditFiler, CnCommon,
+  CnConsts, CnWizMultiLang, CnPopupMenu
+  {$IFDEF LAZARUS}, SrcEditorIntf {$ENDIF}
+  {$IFDEF DELPHI_OTA}, ToolsAPI {$ENDIF};
 
 type
 
@@ -1434,8 +1436,10 @@ end;
 
 function TCnSourceDiffForm.GetFileKinds(
   const FileName: string): TCnDiffFileKinds;
+{$IFDEF DELPHI_OTA}
 var
   FModIntf: IOTAModule;
+{$ENDIF}
 begin
   Result := [];
   // 源文件存在
@@ -1447,12 +1451,18 @@ begin
     Include(Result, fkBackupFile);
 
   // 文件在 IDE 中打开
+{$IFDEF DELPHI_OTA}
   FModIntf := CnOtaGetModule(FileName);
   if FModIntf <> nil then
   begin
     if CnOtaGetSourceEditorFromModule(FModIntf, FileName) <> nil then
       Include(Result, fkEditorBuff);
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if CnOtaIsFileOpen(FileName) then
+    Include(Result, fkEditorBuff);
+{$ENDIF}
 end;
 
 procedure TCnSourceDiffForm.SetFileKind1(const Value: TCnDiffFileKind);
@@ -1544,7 +1554,9 @@ const
 procedure TCnSourceDiffForm.UpdateHistoryMenu(Menu: TPopupMenu;
   History: TStrings; OnClick: TNotifyEvent; IsEmpty: Boolean);
 var
+{$IFDEF DELPHI_OTA}
   iModuleServices: IOTAModuleServices;
+{$ENDIF}
   I: Integer;
   FileName: string;
 
@@ -1560,8 +1572,6 @@ var
   end;
 
 begin
-  QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
-
   Menu.Items.Clear;
   UnitList.Clear;
 
@@ -1570,6 +1580,8 @@ begin
     CreateItem(SCnSourceDiffUpdateFile, csUpdateIndex, OnClick);
   CreateItem('-', -1, nil);
 
+{$IFDEF DELPHI_OTA}
+  QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
   for I := 0 to iModuleServices.GetModuleCount - 1 do
   begin
     FileName := CnOtaGetFileNameOfModule(iModuleServices.GetModule(I));
@@ -1578,6 +1590,18 @@ begin
     UnitList.Add(FileName);
     CreateItem(FileName, csUnitIndex + I, OnClick);
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if SourceEditorManagerIntf <> nil then
+  begin
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      FileName := SourceEditorManagerIntf.SourceEditors[I].FileName;
+      UnitList.Add(FileName);
+      CreateItem(FileName, csUnitIndex + I, OnClick);
+    end;
+  end;
+{$ENDIF}
 
   CreateItem('-', -1, nil);
 

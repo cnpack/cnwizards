@@ -189,7 +189,9 @@ var
   I: Integer;
   Category: string;
 begin
-  Assert(Assigned(ActionList));
+  // Lazarus 下 GetIDEActionList 返回 nil，此处直接返回空分类
+  if ActionList = nil then
+    Exit;
   Assert(Assigned(Categories));
   Categories.Clear;
 
@@ -210,7 +212,7 @@ var
   NoneIndex: Integer;
 begin
   GetCategories(FActionList, lbCategories.Items);
-  Assert(lbCategories.Items.Count > 0);
+  // Lazarus 下 FActionList 为 nil，分类列表可能为空，Assert 移除
   lbCategories.Sorted := True;
   NoneIndex := lbCategories.Items.IndexOf(SNoButtonCategory);
   lbCategories.Sorted := False;
@@ -350,21 +352,24 @@ begin
       Exit;
 
     Category := lbCategories.Items[lbCategories.ItemIndex];
-    for I := 0 to FActionList.ActionCount - 1 do
+    if FActionList <> nil then
     begin
-      if FActionList.Actions[I].Name = '' then
-        Continue;
-
-      if (FActionList.Actions[I] is TCustomAction) then // 不加入隐藏的 Action
-        if not TCustomAction(FActionList.Actions[I]).Visible then
+      for I := 0 to FActionList.ActionCount - 1 do
+      begin
+        if FActionList.Actions[I].Name = '' then
           Continue;
 
-      if Category = SAllButtonsCategory then
-        AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
-      else if SameText(Category, FActionList.Actions[I].Category) then
-        AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
-      else if (Category = SNoButtonCategory) and (Trim(FActionList.Actions[I].Category) = '') then
-        AddActionToListbox(FActionList.Actions[I], lbAvailable, False);
+        if (FActionList.Actions[I] is TCustomAction) then // 不加入隐藏的 Action
+          if not TCustomAction(FActionList.Actions[I]).Visible then
+            Continue;
+
+        if Category = SAllButtonsCategory then
+          AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
+        else if SameText(Category, FActionList.Actions[I].Category) then
+          AddActionToListbox(FActionList.Actions[I], lbAvailable, False)
+        else if (Category = SNoButtonCategory) and (Trim(FActionList.Actions[I].Category) = '') then
+          AddActionToListbox(FActionList.Actions[I], lbAvailable, False);
+      end;
     end;
     lbAvailable.Sorted := True;
   finally

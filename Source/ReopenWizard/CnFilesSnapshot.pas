@@ -50,7 +50,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
-  ToolsAPI, IniFiles, ShellAPI, Menus, CnCommon, CnWizClasses, CnWizUtils,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} {$IFDEF LAZARUS} SrcEditorIntf, {$ENDIF}
+  IniFiles, ShellAPI, Menus, CnCommon, CnWizClasses, CnWizUtils,
   CnConsts, CnWizConsts, CnFilesSnapshotManageFrm, CnWizOptions, CnWizIdeUtils,
   CnRoWizard;
 
@@ -111,14 +112,14 @@ uses
   CnDebug;
 {$ENDIF}
 
-// todo: 这部分代码应该提取到相应单元或新建单元中，如果其它地方也需要
+// TODO: 这部分代码应该提取到相应单元或新建单元中，如果其它地方也需要
 type
   TCnSourceFileType = (sftGroup, sftProject, sftHeader, sftUnit, sftForm, sftOthers);
 
 function GetSourceFileType(const AFileName: string): TCnSourceFileType;
 begin
   Result := sftOthers;
-  // todo: 对于用户定义的不同语言源文件扩展名，应该允许分类，以避免此处的硬编码
+  // TODO: 对于用户定义的不同语言源文件扩展名，应该允许分类，以避免此处的硬编码
   if FileMatchesExts(AFileName, '.bpg;.bdsgroup;.groupproj') then
     Result := sftGroup
   else if FileMatchesExts(AFileName, '.dpr;.dpk;.bdsproj;.dproj;.cbproj;.bpr;.bpk') then
@@ -152,10 +153,11 @@ end;
 
 destructor TCnFilesSnapshotWizard.Destroy;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i := 0 to FFilesSnapshots.Count - 1 do
-    FFilesSnapshots.Objects[i].Free;
+  for I := 0 to FFilesSnapshots.Count - 1 do
+    FFilesSnapshots.Objects[I].Free;
+
   FFilesSnapshots.Free;
   FReOpener.Free;
   inherited;
@@ -163,21 +165,21 @@ end;
 
 procedure TCnFilesSnapshotWizard.AcquireSubActions;
 var
-  i: Integer;
+  I: Integer;
 begin
   // 若没有快照，则不必创建快照菜单项和分隔符
   if FFilesSnapshots.Count > 0 then
   begin
     // 创建快照菜单项
-    i := 0;
+    I := 0;
     IdFilesSnapshotsFirst := RegisterASubAction(SCnFilesSnapshotsItem +
-      IntToStr(i), FFilesSnapshots[i], 0, FFilesSnapshots[i],
-      SCnFilesSnapshotsItem + IntToStr(i));
+      IntToStr(I), FFilesSnapshots[I], 0, FFilesSnapshots[I],
+      SCnFilesSnapshotsItem + IntToStr(I));
     IdFilesSnapshotsLast := IdFilesSnapshotsFirst; // 避免下面被跳过而没赋值，LiuXiao
-    for i := 1 to FFilesSnapshots.Count - 1 do
+    for I := 1 to FFilesSnapshots.Count - 1 do
       IdFilesSnapshotsLast := RegisterASubAction(SCnFilesSnapshotsItem +
-        IntToStr(i), FFilesSnapshots[i], 0, FFilesSnapshots[i],
-        SCnFilesSnapshotsItem + IntToStr(i));
+        IntToStr(I), FFilesSnapshots[I], 0, FFilesSnapshots[I],
+        SCnFilesSnapshotsItem + IntToStr(I));
 
     AddSepMenu;
   end
@@ -272,42 +274,53 @@ procedure TCnFilesSnapshotWizard.FilesSnapshotAdd;
   // 获取已经打开的文件名列表
   function DoSnapshotFiles(Files: TStrings): Boolean;
   var
-    i: Integer;
+    I: Integer;
+{$IFDEF DELPHI_OTA}
     iModuleServices: IOTAModuleServices;
+{$ENDIF}
   begin
     Files.Clear;
+{$IFDEF DELPHI_OTA}
     QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
 
     // 反序获取，因为遍历获得的文件顺序和打开时是相反的
-    for i := iModuleServices.ModuleCount - 1 downto 0 do
-      Files.Add(iModuleServices.Modules[i].FileName);
-
+    for I := iModuleServices.ModuleCount - 1 downto 0 do
+      Files.Add(iModuleServices.Modules[I].FileName);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    if SourceEditorManagerIntf <> nil then
+    begin
+      // 反序获取，因为遍历获得的文件顺序和打开时是相反的
+      for I := SourceEditorManagerIntf.SourceEditorCount - 1 downto 0 do
+        Files.Add(SourceEditorManagerIntf.SourceEditors[I].FileName);
+    end;
+{$ENDIF}
     Result := Files.Count > 0;
   end;
 
   // 打开一个工程文件会关闭已经打开的单元文件，所以应该优先打开工程文件
   function FixupFileOrders(Files: TStrings): TStrings;
   var
-    i, Base: Integer;
+    I, Base: Integer;
   begin
     Result := Files;
 
-    for i := 0 to Files.Count - 1 do
-      Files.Objects[i] := TObject(GetSourceFileType(Files[i]));
+    for I := 0 to Files.Count - 1 do
+      Files.Objects[I] := TObject(GetSourceFileType(Files[I]));
 
     Base := 0;
     // 优先打开工程组文件
-    for i := 0 to Files.Count - 1 do
-      if TCnSourceFileType(Files.Objects[i]) = sftGroup then
+    for I := 0 to Files.Count - 1 do
+      if TCnSourceFileType(Files.Objects[I]) = sftGroup then
       begin
-        Files.Move(i, Base);
+        Files.Move(I, Base);
         Inc(Base);
       end;
     // 其次是工程文件
-    for i := 0 to Files.Count - 1 do
-      if TCnSourceFileType(Files.Objects[i]) = sftProject then
+    for I := 0 to Files.Count - 1 do
+      if TCnSourceFileType(Files.Objects[I]) = sftProject then
       begin
-        Files.Move(i, Base);
+        Files.Move(I, Base);
         Inc(Base);
       end;
   end;
@@ -392,27 +405,39 @@ begin
 end;
 
 function TCnFilesSnapshotWizard.IsAnyFileOpen: Boolean;
+{$IFDEF DELPHI_OTA}
 var
   iModuleServices: IOTAModuleServices;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
   Result := (iModuleServices <> nil) and (iModuleServices.ModuleCount > 0);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := (SourceEditorManagerIntf <> nil)
+    and (SourceEditorManagerIntf.SourceEditorCount > 0);
+{$ENDIF}
 end;
 
 procedure TCnFilesSnapshotWizard.FilesRestore(Index: Integer);
 
   function DoRestoreFiles(Files: TStrings): Boolean;
   var
-    i: Integer;
+    I: Integer;
   begin
     Result := False;
+{$IFDEF DELPHI_OTA}
     BeginBatchOpenClose;
+{$ENDIF}
     try
-      for i := 0 to Files.Count - 1 do
-        if FileExists(Files[i]) then
-          Result := CnOtaOpenFile(Files[i]) or Result;
+      for I := 0 to Files.Count - 1 do
+        if FileExists(Files[I]) then
+          Result := CnOtaOpenFile(Files[I]) or Result;
     finally
+{$IFDEF DELPHI_OTA}
       EndBatchOpenClose;
+{$ENDIF}
     end;
   end;
 
@@ -425,32 +450,32 @@ end;
 
 procedure TCnFilesSnapshotWizard.InternalLoadSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
   Files: TStringList;
 begin
-  for i := 0 to FFilesSnapshots.Count - 1 do
-    FFilesSnapshots.Objects[i].Free;
+  for I := 0 to FFilesSnapshots.Count - 1 do
+    FFilesSnapshots.Objects[I].Free;
   FFilesSnapshots.Clear;
 
   Ini.ReadSection(FSnapSection, FFilesSnapshots);
-  for i := 0 to FFilesSnapshots.Count - 1 do
+  for I := 0 to FFilesSnapshots.Count - 1 do
   begin
     Files := TStringList.Create;
-    Files.CommaText := Ini.ReadString(FSnapSection, FFilesSnapshots[i], '');
-    FFilesSnapshots.Objects[i] := Files;
+    Files.CommaText := Ini.ReadString(FSnapSection, FFilesSnapshots[I], '');
+    FFilesSnapshots.Objects[I] := Files;
   end;
 end;
 
 procedure TCnFilesSnapshotWizard.InternalSaveSettings(Ini: TCustomIniFile);
 var
-  i: Integer;
+  I: Integer;
 begin
   if Ini.SectionExists(FSnapSection) then
     Ini.EraseSection(FSnapSection);
 
-  for i := 0 to FFilesSnapshots.Count - 1 do
-    Ini.WriteString(FSnapSection, FFilesSnapshots[i],
-      TStringList(FFilesSnapshots.Objects[i]).CommaText);
+  for I := 0 to FFilesSnapshots.Count - 1 do
+    Ini.WriteString(FSnapSection, FFilesSnapshots[I],
+      TStringList(FFilesSnapshots.Objects[I]).CommaText);
 end;
 
 procedure TCnFilesSnapshotWizard.LoadSettings(Ini: TCustomIniFile);

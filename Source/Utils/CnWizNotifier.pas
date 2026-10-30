@@ -110,17 +110,16 @@ type
   TCnWizPopupMenuBuildNotifier = procedure (Sender: TObject; PopupMenu: TPopupMenu) of object;
   {* 设计器右键菜单准备好的事件，仅 Delphi 5 下有效}
 
-{$IFDEF DELPHI_OTA}
-  TCnOTAFileNotification = TOTAFileNotification;
-  {* 直接沿用 ToolsAPI 的文件通知枚举}
-{$ELSE}
-  TCnOTAFileNotification = (ofnFileOpened, ofnFileClosed, ofnDefaultDesktopLoad,
+{$IFNDEF DELPHI_OTA}
+
+  TOTAFileNotification = (ofnFileOpened, ofnFileClosing, ofnDefaultDesktopLoad,
     ofnDefaultDesktopSave, ofnProjectDesktopLoad, ofnProjectDesktopSave,
-    ofnActiveProjectChanged);
+    ofnActiveProjectChanged, ofnPackageInstalled, ofnPackageUninstalled);
   {* 与 ToolsAPI 的 TOTAFileNotification 对应的文件通知枚举，Lazarus 下自行定义}
+
 {$ENDIF}
 
-  TCnWizFileNotifier = procedure (NotifyCode: TCnOTAFileNotification;
+  TCnWizFileNotifier = procedure (NotifyCode: TOTAFileNotification;
     const FileName: string) of object;
   {* IDE 文件通知事件，NotifyCode 为通知类型，FileName 为文件名
      注意 Delphi 5 下的 TOTAFileNotification 中没有当前工程改变通知}
@@ -417,7 +416,7 @@ type
     FNotifierServices: TCnWizNotifierServices;
   protected
     // IOTAIdeNotifier
-    procedure FileNotification(NotifyCode: TCnOTAFileNotification;
+    procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string; var Cancel: Boolean);
     procedure BeforeCompile(const Project: IOTAProject; var Cancel: Boolean); overload;
     procedure AfterCompile(Succeeded: Boolean); overload;
@@ -716,7 +715,7 @@ type
     procedure SourceEditorNotify(SourceEditor: TCnSourceEditorInterface;
       NotifyType: TCnWizSourceEditorNotifyType {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF});
 {$IFDEF DELPHI_OTA}
-    procedure FileNotification(NotifyCode: TCnOTAFileNotification;
+    procedure FileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
     procedure BeforeCompile(const Project: IOTAProject; IsCodeInsight: Boolean;
       var Cancel: Boolean);
@@ -768,7 +767,7 @@ type
     procedure SourceEditorReConfigured(Sender: TObject);
 
     // LazarusIDE 事件映射
-    procedure DoFileNotification(NotifyCode: TCnOTAFileNotification;
+    procedure DoFileNotification(NotifyCode: TOTAFileNotification;
       const FileName: string);
     {* 触发文件通知}
     procedure DoActiveProjectChanged;
@@ -1963,7 +1962,7 @@ end;
 {$IFDEF DELPHI_OTA}
 
 procedure TCnWizNotifierServices.FileNotification(
-  NotifyCode: TCnOTAFileNotification; const FileName: string);
+  NotifyCode: TOTAFileNotification; const FileName: string);
 var
   I: Integer;
   Project: IOTAProject;
@@ -2050,13 +2049,13 @@ end;
 {$IFDEF LAZARUS}
 
 procedure TCnWizNotifierServices.DoFileNotification(
-  NotifyCode: TCnOTAFileNotification; const FileName: string);
+  NotifyCode: TOTAFileNotification; const FileName: string);
 var
   I: Integer;
 begin
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('Laz FileNotification: %s (%s)',
-    [GetEnumName(TypeInfo(TCnOTAFileNotification), Ord(NotifyCode)), FileName]);
+    [GetEnumName(TypeInfo(TOTAFileNotification), Ord(NotifyCode)), FileName]);
 {$ENDIF}
 
   // 注意：Lazarus 下源码编辑器的打开/关闭已由 SourceEditorManagerIntf 的
@@ -2977,7 +2976,7 @@ begin
   if (Sender <> nil) and (Sender is TSourceEditorInterface) then
   begin
     SourceEditorNotify(TSourceEditorInterface(Sender), setClosing);
-    DoFileNotification(ofnFileClosed, TSourceEditorInterface(Sender).FileName);
+    DoFileNotification(ofnFileClosing, TSourceEditorInterface(Sender).FileName);
   end;
 end;
 

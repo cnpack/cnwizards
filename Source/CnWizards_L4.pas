@@ -24,7 +24,14 @@ uses
   CnEditorCodeComment, CnPas2HtmlConfigFrm, CnPas2HtmlWizard, 
   CnPasConvertTypeFrm, CnCodeFormatRules, CnCodeFormatterWizard, 
   CnFormatterIntf, CnTabOrderWizard, CnEditorToggleUses, CnEditorToggleVar, 
-  CnProjectExtWizard, LazarusPackageIntf;
+  CnProjectExtWizard, CnWizShareImages, CnWizBoot, CnWizCommentFrm, CnWizTipOfDayFrm, 
+  CnWizUpgradeFrm, CnWizFeedbackFrm, CnAIAgentTypes, CnAIAgentJsonRpc, 
+  CnAIAgentStdioTransport, CnAIAgentSession, CnAIAgentTools, CnAIAgentClient, 
+
+  CnSourceDiffWizard, CnSourceDiffFrm, CnDiffEditorFrm, CnExplore, 
+  CnExploreDirectory, CnExploreFilter, CnExploreFilterEditor, CnRoWizard, 
+  CnRoInterfaces, CnRoClasses, CnRoFilesList, CnRoFrmFileList, CnRoOptions, 
+  CnFilesSnapshot, CnFilesSnapshotManageFrm, LazarusPackageIntf;
 
 implementation
 
