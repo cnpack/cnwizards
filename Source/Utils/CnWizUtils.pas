@@ -7484,6 +7484,7 @@ end;
 
 // 获得项目的二进制文件输出目录
 function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF LAZARUS}
   Target: string;
@@ -7494,6 +7495,7 @@ var
 {$IFNDEF DELPHIXE_UP}
   Dir: Variant;
   OutputDir: string;
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 begin
