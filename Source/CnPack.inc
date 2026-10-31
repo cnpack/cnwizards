@@ -103,6 +103,12 @@
     {$ENDIF}
   {$ENDIF}
 
+  {$IFDEF MSWINDOWS}
+    {$IFDEF CPU64BITS}
+      {$DEFINE WIN64}                          // Windows 下的 64 位 FPC 加上该定义
+    {$ENDIF}
+  {$ENDIF}
+
   {$mode Delphi}       // Delphi Compatibility, not DelphiUnicode。注意源码中勿重复声明
 
   // 关闭 Range Check 和 Overflow Check
