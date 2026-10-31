@@ -225,7 +225,7 @@ uses
   CnDebug,
 {$ENDIF}
   IniFiles, Registry,
-  {$IFNDEF LAZARUS} {$IFNDEF STAND_ALONE} CnWizUtils,
+  {$IFNDEF STAND_ALONE} CnWizUtils, {$IFNDEF LAZARUS}
   {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF} {$ENDIF}
   CnWizOptions, CnWizCompilerConst;
 
@@ -433,6 +433,15 @@ var
 begin
 {$IFNDEF STAND_ALONE}
 {$IFDEF LAZARUS}
+  if IdeClosing then
+  begin
+    // IDE 关闭阶段命令对象可能已随 IDE 命令表释放，不触碰，放弃引用即可
+    FLazCommand := nil;
+    FOwner := nil;
+    FKeyProc := nil;
+    inherited;
+    Exit;
+  end;
   // 命令对象由 IDE 分类持有无法释放，这里将其失效
   if FLazCommand <> nil then
   begin
@@ -1010,6 +1019,10 @@ begin
 {$IFDEF DELPHI_OTA}
   if IdeClosing then
     Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if IdeClosing then
+    Exit; // IDE 关闭阶段命令对象可能已随 IDE 命令表释放，不再重挂接
 {$ENDIF}
 
 {$IFDEF DEBUG}

@@ -635,7 +635,12 @@ end;
 
 destructor TCnIniContainer.Destroy;
 begin
-  SaveAll;
+  try
+    SaveAll;
+  except
+    // IDE 关闭阶段保存可能因环境失效而失败（定时器已周期性保存过），
+    // 析构函数不向外传播异常
+  end;
   FreeAndNil(FIniFile);
   DestroyRoFilesList;
   inherited;
