@@ -343,9 +343,12 @@ type
   end;
 
   TCnLazRepositoryItem = class(TNewItemProjectFile)
-  {* 持有 Descriptor 与专家引用的 New 对话框条目}
+  {* 持有 Descriptor 与专家引用的 New 对话框条目。
+     模板条目由 IDE 的分类持有并在其析构时释放，本类析构时负责释放
+     自有的 Descriptor（注册时已持有 1 个永久引用）}
   public
     Wizard: TCnRepositoryWizard;
+    destructor Destroy; override;
   end;
 
 var
@@ -359,11 +362,24 @@ begin
   FWizard := AWizard;
   TCnRepositoryWizardClass(FWizard.ClassType).GetWizardInfo(WizardName, Author, Email, Comment);
   Name := 'CnWizNew' + FWizard.ClassName; // 描述符名要求唯一
+  DefaultFilename := 'unit.pas';
   DefaultFileExt := '.pas';
   DefaultSourceName := 'Unit1';
   IsPascalUnit := True;
   AddToProject := True;
   VisibleInNewDialog := True;
+end;
+
+destructor TCnLazRepositoryItem.Destroy;
+var
+  Desc: TProjectFileDescriptor;
+begin
+  // 分类持有条目但不持有 Descriptor；我们注册时持有 1 个永久引用，
+  // New 对话框的 Reference/Release 是成对的临时引用，这里直接释放
+  Desc := Descriptor;
+  Descriptor := nil;
+  FreeAndNil(Desc);
+  inherited Destroy;
 end;
 
 function TCnLazRepositoryFileDescriptor.GetLocalizedName: string;
@@ -398,10 +414,17 @@ var
 begin
   if NewIDEItems = nil then
     Exit;
+  // 条目由 IDE 的分类持有并随其析构释放，这里只保存引用
   if FLazRepositoryItems = nil then
-    FLazRepositoryItems := TObjectList.Create(True);
+    FLazRepositoryItems := TObjectList.Create(False);
+
+  // IDE 的 RegisterItem 不会自动创建分类，必须先注册 CnPack 根分类，
+  // 否则 FindCategoryByPath 会抛 Unknown category 异常导致 IDE 启动失败
+  if NewIDEItems.FindByName(SCnWizardsPage) = nil then
+    RegisterNewItemCategory(TNewIDEItemCategory.Create(SCnWizardsPage));
 
   Descriptor := TCnLazRepositoryFileDescriptor.Create(Wizard);
+  Descriptor.Reference; // 持有 1 个永久引用，避免 New 对话框 Release 后计数归零被释放
   Item := TCnLazRepositoryItem.Create(Descriptor.Name);
   Item.Descriptor := Descriptor;
   Item.Wizard := Wizard;
@@ -411,17 +434,10 @@ end;
 
 // 注销全部 Repository 专家的 File>New 条目
 procedure UnregisterRepositoryWizardsFromLaz;
-var
-  I: Integer;
-  Item: TCnLazRepositoryItem;
 begin
-  if FLazRepositoryItems = nil then
-    Exit;
-  for I := FLazRepositoryItems.Count - 1 downto 0 do
-  begin
-    Item := TCnLazRepositoryItem(FLazRepositoryItems[I]);
-    UnregisterNewDialogItem(Item);
-  end;
+  // 注意：IDE 的 TNewLazIDEItemCategories.UnregisterItem 目前是 TODO 直接
+  // 抛异常，不能调用 UnregisterNewDialogItem；本包只在 IDE 关闭时卸载，
+  // 分类与条目随 NewIDEItems 一起释放，这里仅释放本地引用即可
   FreeAndNil(FLazRepositoryItems);
 end;
 

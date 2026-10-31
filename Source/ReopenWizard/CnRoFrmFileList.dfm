@@ -185,7 +185,6 @@ object CnRecentFilesFrame: TCnRecentFilesFrame
       000000000000}
   end
   object pmList: TPopupMenu
-    AutoHotkeys = maManual
     AutoLineReduction = maManual
     Images = dmCnSharedImages.Images
     Left = 96

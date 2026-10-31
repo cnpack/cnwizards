@@ -264,6 +264,15 @@ var
 begin
   WizOptions.ResetToolbarWithLargeIcons(tlb1);
 
+{$IFDEF DELPHI}
+  frBPG.pmList.AutoHotkeys := maManual;
+  frDPR.pmList.AutoHotkeys := maManual;
+  frPAS.pmList.AutoHotkeys := maManual;
+  frDPK.pmList.AutoHotkeys := maManual;
+  frOTH.pmList.AutoHotkeys := maManual;
+  frFAV.pmList.AutoHotkeys := maManual;
+{$ENDIF}
+
   ReadFiles(frBPG, SProjectGroup);
   ReadFiles(frDPR, SProject);
   ReadFiles(frPAS, SUnt);

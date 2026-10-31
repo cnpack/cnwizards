@@ -103,8 +103,6 @@ uses
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} {$IFDEF LAZARUS} LazIDEIntf, {$ENDIF}
   CnWizShareImages, CnCommon, CnWizUtils;
 
-{*************************** TCnRecentFilesFrame ******************************}
-
 procedure TCnRecentFilesFrame.actCopyFolderExecute(Sender: TObject);
 var
   I: Integer;
