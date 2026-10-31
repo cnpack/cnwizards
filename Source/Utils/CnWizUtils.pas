@@ -376,10 +376,9 @@ function IsDelphiRuntime: Boolean;
 function IsCSharpRuntime: Boolean;
 {* 用各种法子判断当前 IDE 是否是 C#，是则返回 True，其他则返回 False。Lazarus 也返回 False}
 
-{$IFNDEF LAZARUS}
-
 function ScreenHasModalForm: Boolean;
 {* 存在模式窗口}
+{$IFNDEF LAZARUS}
 procedure SetFormNoTitle(Form: TForm);
 {* 去掉窗体的标题}
 procedure SendKey(vk: Word);
@@ -3326,8 +3325,6 @@ begin
 {$ENDIF}
 end;
 
-{$IFNDEF LAZARUS}
-
 // 存在模式窗口
 function ScreenHasModalForm: Boolean;
 var
@@ -3343,6 +3340,8 @@ begin
   end;
   Result := False;
 end;
+
+{$IFNDEF LAZARUS}
 
 // 去掉窗体的标题
 procedure SetFormNoTitle(Form: TForm);
@@ -7865,7 +7864,8 @@ begin
     Result := False;
 {$ENDIF}
 {$IFDEF LAZARUS}
-  Result := (View.SelStart = View.SelEnd);
+  if Assigned(View) and (View.SelStart <> View.SelEnd) then
+    Result := False;
 {$ENDIF}
 {$ENDIF}
 end;

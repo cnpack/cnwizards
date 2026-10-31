@@ -205,6 +205,34 @@
         <UnitName Value="CnSelectionCodeTool"/>
       </Item>
       <Item>
+        <Filename Value="CodingToolset\CnEditorSortLines.pas"/>
+        <UnitName Value="CnEditorSortLines"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorFontZoom.pas"/>
+        <UnitName Value="CnEditorFontZoom"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorInsertTime.pas"/>
+        <UnitName Value="CnEditorInsertTime"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorCodeIndent.pas"/>
+        <UnitName Value="CnEditorCodeIndent"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorCodeDelBlank.pas"/>
+        <UnitName Value="CnEditorCodeDelBlank"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorZoomFullScreen.pas"/>
+        <UnitName Value="CnEditorZoomFullScreen"/>
+      </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorDuplicateUnit.pas"/>
+        <UnitName Value="CnEditorDuplicateUnit"/>
+      </Item>
+      <Item>
         <Filename Value="CodingToolset\CnEditorInsertColor.pas"/>
         <UnitName Value="CnEditorInsertColor"/>
       </Item>
@@ -436,6 +464,9 @@
     <RequiredPkgs>
       <Item>
         <PackageName Value="IDEIntf"/>
+      </Item>
+      <Item>
+        <PackageName Value="SynEdit"/>
       </Item>
       <Item>
         <PackageName Value="BuildIntf"/>

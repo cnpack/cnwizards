@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, ToolsAPI, CnWizClasses, CnWizUtils, CnConsts, CnCommon,
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizClasses, CnWizUtils, CnConsts, CnCommon,
   Menus, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool;
 
 type
@@ -83,6 +83,11 @@ implementation
 
 {$IFDEF CNWIZARDS_CNCODINGTOOLSETWIZARD}
 
+{$IFDEF LAZARUS}
+uses
+  SynEdit, SrcEditorIntf;
+{$ENDIF}
+
 { TCnEditorFontInc }
 
 constructor TCnEditorFontInc.Create(AOwner: TCnCodingToolsetWizard);
@@ -111,11 +116,27 @@ end;
 
 procedure TCnEditorFontInc.Execute;
 var
+{$IFDEF LAZARUS}
+  View: TCnEditViewSourceInterface;
+  SynEdit: TSynEdit;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Option: IOTAEditOptions;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  View := CnOtaGetTopMostEditView;
+  if (View <> nil) and (View.EditorControl is TSynEdit) then
+  begin
+    SynEdit := View.EditorControl as TSynEdit;
+    SynEdit.Font.Size := Round(SynEdit.Font.Size * 1.1);
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Option := CnOtaGetEditOptions;
   if Assigned(Option) then
     Option.FontSize := Round(Option.FontSize * 1.1);
+{$ENDIF}
 end;
 
 { TCnEditorFontDec }
@@ -146,11 +167,27 @@ end;
 
 procedure TCnEditorFontDec.Execute;
 var
+{$IFDEF LAZARUS}
+  View: TCnEditViewSourceInterface;
+  SynEdit: TSynEdit;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Option: IOTAEditOptions;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  View := CnOtaGetTopMostEditView;
+  if (View <> nil) and (View.EditorControl is TSynEdit) then
+  begin
+    SynEdit := View.EditorControl as TSynEdit;
+    SynEdit.Font.Size := Round(SynEdit.Font.Size / 1.1);
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Option := CnOtaGetEditOptions;
   if Assigned(Option) then
     Option.FontSize := Round(Option.FontSize / 1.1);
+{$ENDIF}
 end;
 
 initialization

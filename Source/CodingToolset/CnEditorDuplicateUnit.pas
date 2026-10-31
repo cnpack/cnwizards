@@ -42,9 +42,10 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Menus,
-  StdCtrls, IniFiles, ToolsAPI, {$IFDEF COMPILER6_UP}
-  DesignIntf, {$ELSE} DsgnIntf, {$ENDIF}
-  CnConsts, CnWizUtils, CnCodingToolsetWizard, CnWizConsts, CnCommon, CnWizOptions;
+  StdCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF COMPILER6_UP}
+  DesignIntf, {$ELSE} DsgnIntf, {$ENDIF} {$ENDIF} CnConsts, CnWizUtils,
+  CnCodingToolsetWizard, CnWizConsts, CnCommon, CnWizOptions
+  {$IFDEF LAZARUS}, CnWizClasses {$ENDIF};
 
 type
 
@@ -139,6 +140,126 @@ type
 //==============================================================================
 
 { TCnEditorDuplicateUnit }
+
+{$IFDEF LAZARUS}
+
+procedure TCnEditorDuplicateUnit.Execute;
+var
+  CurrFile, ImplFile, FormFile, Ext: string;
+  NewImplFile, NewFormFile: string;
+  OldUnitName, NewUnitName: string;
+  OldFormName, NewFormName: string;
+  S: string;
+  I: Integer;
+
+  function FileToStr(const AFile: string): string;
+  var
+    FS: TFileStream;
+  begin
+    Result := '';
+    FS := TFileStream.Create(AFile, fmOpenRead or fmShareDenyWrite);
+    try
+      SetLength(Result, FS.Size);
+      if FS.Size > 0 then
+        FS.ReadBuffer(Result[1], FS.Size);
+    finally
+      FS.Free;
+    end;
+  end;
+
+  procedure StrToFile(const AFile: string; const Content: string);
+  var
+    FS: TFileStream;
+  begin
+    FS := TFileStream.Create(AFile, fmCreate);
+    try
+      if Content <> '' then
+        FS.WriteBuffer(Content[1], Length(Content));
+    finally
+      FS.Free;
+    end;
+  end;
+
+begin
+  // Lazarus 下不走 New 对话框，直接复制当前单元文件（含窗体文件）并改名后打开
+  CurrFile := CnOtaGetCurrentSourceFile;
+  if (CurrFile = '') or not FileExists(CurrFile) then
+    Exit;
+
+  ImplFile := CurrFile;
+  Ext := ExtractFileExt(ImplFile);
+  FormFile := '';
+  S := ChangeFileExt(ImplFile, '.lfm');
+  if FileExists(S) then
+    FormFile := S
+  else
+  begin
+    S := ChangeFileExt(ImplFile, '.dfm');
+    if FileExists(S) then
+      FormFile := S;
+  end;
+
+  OldUnitName := ChangeFileExt(ExtractFileName(ImplFile), '');
+
+  // 生成一个不冲突的新单元名，形如 Unit1 -> Unit11
+  I := 1;
+  repeat
+    NewUnitName := OldUnitName + IntToStr(I);
+    NewImplFile := ExtractFilePath(ImplFile) + NewUnitName + Ext;
+    Inc(I);
+  until (NewImplFile <> ImplFile) and not FileExists(NewImplFile);
+
+  // 从窗体文件第一行 object Form1: TForm1 取出窗体名
+  OldFormName := '';
+  NewFormName := '';
+  if FormFile <> '' then
+  begin
+    S := FileToStr(FormFile);
+    I := Pos('object ', S);
+    if I > 0 then
+    begin
+      S := Copy(S, I + Length('object '), MaxInt);
+      I := Pos(':', S);
+      if I > 0 then
+      begin
+        OldFormName := Trim(Copy(S, 1, I - 1));
+        NewFormName := OldFormName + '1';
+      end;
+    end;
+    if OldFormName = '' then
+      FormFile := '';
+  end;
+
+  NewFormFile := '';
+  if FormFile <> '' then
+    NewFormFile := ChangeFileExt(NewImplFile, ExtractFileExt(FormFile));
+
+  // 内容替换：窗体名与单元名整体替换（含 T 前缀类名，子串替换天然覆盖）
+  S := FileToStr(ImplFile);
+  if OldFormName <> '' then
+    S := StringReplace(S, OldFormName, NewFormName, [rfIgnoreCase, rfReplaceAll]);
+  S := StringReplace(S, OldUnitName, NewUnitName, [rfIgnoreCase, rfReplaceAll]);
+  StrToFile(NewImplFile, S);
+
+  if (FormFile <> '') and (NewFormFile <> '') then
+  begin
+    S := FileToStr(FormFile);
+    if OldFormName <> '' then
+      S := StringReplace(S, OldFormName, NewFormName, [rfIgnoreCase, rfReplaceAll]);
+    S := StringReplace(S, OldUnitName, NewUnitName, [rfIgnoreCase, rfReplaceAll]);
+    StrToFile(NewFormFile, S);
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('DuplicateUnit Lazarus: %s -> %s, Form %s -> %s',
+    [ImplFile, NewImplFile, OldFormName, NewFormName]);
+{$ENDIF}
+
+  CnOtaOpenFile(NewImplFile);
+end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnEditorDuplicateUnit.Execute;
 var
@@ -290,6 +411,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function TCnEditorDuplicateUnit.GetCaption: string;
 begin
   Result := SCnEditorDuplicateUnitMenuCaption;
@@ -321,8 +444,13 @@ end;
 function TCnEditorDuplicateUnit.GetState: TWizardState;
 begin
   Result := inherited GetState;
+{$IFDEF LAZARUS}
+  if (wsEnabled in Result) and (CnOtaGetCurrentSourceFile = '') then
+    Result := [];
+{$ELSE}
   if (wsEnabled in Result) and (CnOtaGetCurrentModule = nil) then
     Result := [];
+{$ENDIF}
 end;
 
 { TCnDuplicateCreator }

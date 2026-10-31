@@ -48,8 +48,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, CnWizIdeUtils, CnConsts, CnCommon,
-  CnWizConsts, CnCodingToolsetWizard, CnWizUtils, CnWizMultiLang;
+  StdCtrls, ExtCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  CnWizIdeUtils, CnConsts, CnCommon, CnWizConsts, CnCodingToolsetWizard,
+  CnWizUtils, CnWizMultiLang {$IFDEF LAZARUS}, CnWizClasses {$ENDIF};
 
 type
   TCnEditorZoomFullScreenForm = class(TCnTranslateForm)
@@ -82,6 +83,9 @@ type
     FLastAutoHideMainForm: Boolean;
     FRestoreNormal: Boolean;
     FStayedTop: Boolean;
+{$IFDEF LAZARUS}
+    FFullScreenLaz: Boolean;    // Lazarus 下无 IOTAEnvironmentOptions，用本地字段保存状态
+{$ENDIF}
     procedure AdjustEditorForm(FullScreen: Boolean);
     procedure SetAutoHideMainForm(const Value: Boolean);
     procedure UpdateAutoHide;
@@ -222,23 +226,37 @@ begin
 end;
 
 function TCnEditorZoomFullScreen.GetFullScreen: Boolean;
+{$IFDEF DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Assigned(Options) then
     Result := Options.GetOptionValue(csZoomFullScreen)
   else
     Result := False;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Result := FFullScreenLaz;
+{$ENDIF}
 end;
 
 procedure TCnEditorZoomFullScreen.SetFullScreen(const Value: Boolean);
+{$IFDEF DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Assigned(Options) then
     Options.SetOptionValue(csZoomFullScreen, Value);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  FFullScreenLaz := Value;
+{$ENDIF}
 end;
 
 function TCnEditorZoomFullScreen.GetCaption: string;
