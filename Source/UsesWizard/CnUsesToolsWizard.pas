@@ -2142,7 +2142,8 @@ begin
         for T := 0 to Info.ExportedNames.Count - 1 do
         begin
           V := Info.ExportedNames[T];
-          if (V = '') or IsInt(V) then
+          // 过滤空串、纯数字与 $ 开头的编译器内部符号（如 $vmtdef$xxx）
+          if (V = '') or (V[1] = '$') or IsInt(V) then
             Continue;
 
           // 去重：同一标识符只保留首个命中的单元（与 Delphi 行为一致）

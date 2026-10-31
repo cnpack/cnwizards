@@ -1391,6 +1391,10 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg(ClassName + ' to RefreshSubActions.');
 {$ENDIF}
+{$IFDEF LAZARUS}
+  if IdeClosing then
+    Exit; // IDE 关闭阶段不再重建子 Action，避免触碰已失效的菜单链
+{$ENDIF}
   if FActive then
   begin
     AcquireSubActions;
@@ -1464,6 +1468,15 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg(ClassName + ' to ClearSubActions.');
 {$ENDIF}
+{$IFDEF LAZARUS}
+  if IdeClosing then
+  begin
+    // IDE 关闭阶段根菜单链已随 IDE 释放，触碰 LCL 菜单会访问悬挂指针；
+    // 仅清空引用列表，Action 与菜单项随进程退出由系统回收
+    FList.Clear;
+    Exit;
+  end;
+{$ENDIF}
   while FList.Count > 0 do
   begin
     WizAction := SubActions[0];
@@ -1513,6 +1526,10 @@ end;
 // 释放菜单项
 procedure TCnSubMenuWizard.FreeSubMenus;
 begin
+{$IFDEF LAZARUS}
+  if IdeClosing then
+    Exit; // IDE 关闭阶段菜单链已失效，跳过触碰
+{$ENDIF}
   Menu.Clear;
 end;
 

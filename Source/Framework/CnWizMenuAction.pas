@@ -361,7 +361,11 @@ end;
 // 类析构器
 destructor TCnWizMenuAction.Destroy;
 begin
-  if Assigned(FMenu) then
+{$IFDEF LAZARUS}
+  if IdeClosing then
+    FMenu := nil // IDE 关闭阶段菜单链已失效，不触碰菜单项，放弃引用即可
+  else
+{$ENDIF}
     FreeAndNil(FMenu);
   inherited Destroy;
 end;

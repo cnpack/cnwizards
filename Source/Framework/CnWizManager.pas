@@ -819,6 +819,13 @@ destructor TCnWizardMgr.Destroy;
 var
   hMutex: THandle;
 begin
+{$IFDEF LAZARUS}
+  // Lazarus 下本析构经由单元 finalization 触发，此时 IDE 主窗体与主菜单
+  // 已释放，菜单项的祖先链失效，任何触碰 LCL 菜单的操作都会访问悬挂
+  // 指针（TMenuItem.IsInMenuBar AV）。置此标记后，各销毁路径将跳过菜单操作
+  IdeClosing := True;
+{$ENDIF}
+
 {$IFDEF DEBUG}
   CnDebugger.LogSeparator;
   CnDebugger.LogEnter('TCnWizardMgr.Destroy');
@@ -1252,6 +1259,14 @@ end;
 // 释放菜单项
 procedure TCnWizardMgr.FreeMenu;
 begin
+{$IFDEF LAZARUS}
+  if IdeClosing then
+  begin
+    // IDE 关闭阶段本菜单的祖先链已随 IDE 释放，不触碰，放弃引用即可
+    FMenu := nil;
+    Exit;
+  end;
+{$ENDIF}
   if Menu <> nil then
   begin
     while Menu.Count > 0 do
@@ -1651,7 +1666,12 @@ begin
   WizActionMgr.DeleteAction(TCnWizAction(FConfigAction));
   FWizMultiLang.Free;
   FWizAbout.Free;
-  FSepMenu.Free;
+{$IFDEF LAZARUS}
+  if IdeClosing then
+    FSepMenu := nil // IDE 关闭阶段菜单链已失效，不触碰菜单项，放弃引用即可
+  else
+{$ENDIF}
+    FSepMenu.Free;
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('Free Misc Menu Succeed');
 {$ENDIF}
