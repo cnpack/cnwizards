@@ -174,7 +174,7 @@ const
 {$ELSE}
   csDcuExt = '.dcu';
 {$ENDIF}
-  SCnUsesInitTreeCompileHint = 'Lazarus 下请先构建工程以生成 PPU 文件，再生成初始化依赖树。';
+  SCnUsesInitTreeCompileHint = 'Please build the project to generate PPU files first under Lazarus, then create the initialization tree.';
   csExploreCmdLine = 'EXPLORER.EXE /e, /select, "%s"';
 
   csSearchTypeStrings: array[Low(TCnModuleSearchType)..High(TCnModuleSearchType)] of PString =

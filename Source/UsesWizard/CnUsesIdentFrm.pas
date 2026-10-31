@@ -213,7 +213,7 @@ begin
       if Sl.Text <> '' then
       begin
         Clipbrd.Clipboard.AsText := LazJoinUses(Sl);
-        InfoDlg('单元名已复制到剪贴板，请手动加入 uses 子句。');
+        InfoDlg('Unit names have been copied to the clipboard, please add them to the uses clause manually.');
       end;
     finally
       Sl.Free;

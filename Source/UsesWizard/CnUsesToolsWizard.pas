@@ -271,7 +271,7 @@ var
 begin
 {$IFDEF LAZARUS}
   // TODO: Lazarus 下的清理执行依赖可写编辑器拼接接口，待编辑器深水区移植后启用
-  InfoDlg('Uses Clean 功能在 Lazarus 下暂未启用，请使用初始化依赖树与标识符查询单元功能。');
+  InfoDlg('Uses Clean is not enabled under Lazarus yet. Please use Init Tree and Uses Identifier features instead.');
   Exit;
 {$ENDIF}
 {$IFNDEF LAZARUS}

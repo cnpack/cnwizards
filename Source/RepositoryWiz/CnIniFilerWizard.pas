@@ -426,7 +426,7 @@ begin
   if Assigned(ModuleCreator) then
   begin
     FreeAndNil(ModuleCreator);
-    InfoDlg('请通过 文件 > 新建工程/文件 > CnPack 分类 使用本向导。');
+    InfoDlg('Please use this wizard via File > New Project/File > CnPack category.');
   end;
 {$ENDIF}
 end;
