@@ -58,22 +58,24 @@ uses
   Windows, SysUtils, Classes, IniFiles, CnRoInterfaces, CnWizIni;
 
 const
-  SProjectGroup = 'bpg';
   SFavorite = 'fav';
   SOther = 'oth';
 {$IFDEF DELPHI}
   SCnRecentFile = 'RecentFiles.ini';
+  SProjectGroup = 'bpg';
   SProject = 'dpr';
   SPackge = 'dpk';
   SUnt = 'pas';
 {$ELSE}
   {$IFDEF LAZARUS}
   SCnRecentFile = 'RecentFiles_Laz.ini';
+  SProjectGroup = 'lpg';
   SProject = 'lpr';
   SPackge = 'lpk';
   SUnt = 'pas';
   {$ELSE}
   SCnRecentFile = 'RecentFiles_BCB.ini';
+  SProjectGroup = 'bpg';
   SProject = 'bpr';
   SPackge = 'bpk';
   SUnt = 'cpp';

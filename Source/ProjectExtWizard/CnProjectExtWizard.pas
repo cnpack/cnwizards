@@ -356,6 +356,9 @@ begin
 
 {$IFDEF LAZARUS}
   // Lazarus：挂接 IDE 的查看单元/窗体命令（菜单 + 工具栏 + 快捷键）
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('ProjExt Loaded: Begin LazInstallHooks.');
+{$ENDIF}
   LazInstallHooks;
 {$ENDIF}
 end;
@@ -931,6 +934,10 @@ procedure TCnProjectExtWizard.LazInstallHooks;
 var
   Section: TIDEMenuSection;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazInstallHooks Enter. Roots=%p IDECmdList=%p',
+    [Pointer(IDEMenuRoots), Pointer(IDECommandList)]);
+{$ENDIF}
   if FHooksInstalled then
     Exit;
 
@@ -945,6 +952,19 @@ begin
     FUnitsMenuCmd := FindMenuCmd(Section, 'itmProjectViewUnits');
     FFormsMenuCmd := FindMenuCmd(Section, 'itmProjectViewForms');
   end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazInstallHooks Found: Section=%p ' +
+    'UnitsCmd=%p FormsCmd=%p UnitsMenu=%p FormsMenu=%p',
+    [Pointer(Section), Pointer(FUnitsIDECommand), Pointer(FFormsIDECommand),
+     Pointer(FUnitsMenuCmd), Pointer(FFormsMenuCmd)]);
+  if FUnitsIDECommand <> nil then
+    CnDebugger.LogMsg('ProjExt LazInstallHooks: UnitsIDECommand Name=' +
+      FUnitsIDECommand.Name);
+  if FFormsIDECommand <> nil then
+    CnDebugger.LogMsg('ProjExt LazInstallHooks: FormsIDECommand Name=' +
+      FFormsIDECommand.Name);
+{$ENDIF}
 
   // 3. 保存原值并替换。菜单 OnClick 与命令 OnExecute 都指向同一执行体，
   //    执行体内部再按挂接开关决定显示 CnPack 列表还是回退原行为
@@ -980,6 +1000,8 @@ begin
     or (FFormsMenuCmd <> nil) or (FFormsIDECommand <> nil);
 
 {$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazInstallHooks Done. Installed=%s',
+    [BoolToStr(FHooksInstalled, True)]);
   if not FHooksInstalled then
     CnDebugger.LogMsgError('ProjExt: Laz Hook Install Failed. No Entry Found.');
 {$ENDIF}
@@ -988,6 +1010,10 @@ end;
 // 还原全部挂接
 procedure TCnProjectExtWizard.LazUninstallHooks;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazUninstallHooks Enter. Installed=%s IdeClosing=%s',
+    [BoolToStr(FHooksInstalled, True), BoolToStr(IdeClosing, True)]);
+{$ENDIF}
   if not FHooksInstalled then
     Exit;
 
@@ -1032,47 +1058,110 @@ end;
 // 挂接后的"查看单元"执行体
 procedure TCnProjectExtWizard.LazViewUnitsExec(Sender: TObject);
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazViewUnitsExec Enter. Sender=%s Active=%s Hooked=%s ' +
+    'OldClick=%p OldExec=%p',
+    [DbgSName(Sender), BoolToStr(Active, True), BoolToStr(UnitsListHookBtnChecked, True),
+     Pointer(TMethod(FOldViewUnitsMenuClick).Code),
+     Pointer(TMethod(FOldUnitsCmdExecute).Code)]);
+{$ENDIF}
   if Active and UnitsListHookBtnChecked then
-    SubActionExecute(IdViewUnits)   // CnPack 列表对话框内部自行打开选中文件
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazViewUnitsExec: Show CnPack Units List.');
+{$ENDIF}
+    SubActionExecute(IdViewUnits);   // CnPack 列表对话框内部自行打开选中文件
+  end
   else if Assigned(FOldViewUnitsMenuClick) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazViewUnitsExec: Fallback to Old MenuClick.');
+{$ENDIF}
     FOldViewUnitsMenuClick(Sender)  // 原生"查看单元"对话框
+  end
   else if Assigned(FOldUnitsCmdExecute) then
     FOldUnitsCmdExecute(Sender)
   else if Assigned(FOldUnitsCmdExecuteProc) then
     FOldUnitsCmdExecuteProc(Sender);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('ProjExt LazViewUnitsExec Exit.');
+{$ENDIF}
 end;
 
 // 挂接后的"查看窗体"执行体
 procedure TCnProjectExtWizard.LazViewFormsExec(Sender: TObject);
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazViewFormsExec Enter. Sender=%s Active=%s Hooked=%s ' +
+    'OldClick=%p OldExec=%p',
+    [DbgSName(Sender), BoolToStr(Active, True), BoolToStr(FormsListHookBtnChecked, True),
+     Pointer(TMethod(FOldViewFormsMenuClick).Code),
+     Pointer(TMethod(FOldFormsCmdExecute).Code)]);
+{$ENDIF}
   if Active and FormsListHookBtnChecked then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazViewFormsExec: Show CnPack Forms List.');
+{$ENDIF}
     SubActionExecute(IdViewForms)
+  end
   else if Assigned(FOldViewFormsMenuClick) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazViewFormsExec: Fallback to Old MenuClick.');
+{$ENDIF}
     FOldViewFormsMenuClick(Sender)
+  end
   else if Assigned(FOldFormsCmdExecute) then
     FOldFormsCmdExecute(Sender)
   else if Assigned(FOldFormsCmdExecuteProc) then
     FOldFormsCmdExecuteProc(Sender);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('ProjExt LazViewFormsExec Exit.');
+{$ENDIF}
 end;
 
 // 中央分发包装器：只拦截两个命令字，其余透传给 IDE 原处理器
 function TCnProjectExtWizard.LazExecuteIDECommand(Sender: TObject;
   Command: word): Boolean;
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('ProjExt LazExecuteIDECommand Enter. Command=%d Sender=%s',
+    [Command, DbgSName(Sender)]);
+{$ENDIF}
   if Command = ecViewProjectUnits then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazExecuteIDECommand: Intercept ViewUnits.');
+{$ENDIF}
     LazViewUnitsExec(Sender);
     Result := True;
   end
   else if Command = ecViewProjectForms then
   begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('ProjExt LazExecuteIDECommand: Intercept ViewForms.');
+{$ENDIF}
     LazViewFormsExec(Sender);
     Result := True;
   end
   else if Assigned(FOldExecuteIDECommand) then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ProjExt LazExecuteIDECommand: Forward Command=%d', [Command]);
+{$ENDIF}
     Result := FOldExecuteIDECommand(Sender, Command)
+  end
   else
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('ProjExt LazExecuteIDECommand: No Old Handler, Command=%d Ignored.', [Command]);
+{$ENDIF}
     Result := False;
+  end;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('ProjExt LazExecuteIDECommand Exit.');
+{$ENDIF}
 end;
 
 {$ENDIF}

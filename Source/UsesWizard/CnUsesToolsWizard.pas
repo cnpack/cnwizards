@@ -219,7 +219,10 @@ const
   csProcessDependencies = 'ProcessDependencies';
   csUseBuildAction = 'UseBuildAction';
   csSaveAndClose = 'SaveAndClose';
+
+{$IFDEF DELPHI_OTA}
   csDcuExt = '.dcu';
+{$ENDIF}
 
   csProjectBuildCommand = 'ProjectBuildCommand';
   csProjectBuildAllCommand = 'ProjectBuildAllCommand';
@@ -1726,7 +1729,14 @@ end;
 procedure TCnUsesToolsWizard.SubActionUpdate(Index: Integer);
 begin
   if (Index = FIdCleaner) or (Index = FIdInitTree) then
-    SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil
+  begin
+{$IFDEF DELPHI_OTA}
+    SubActions[Index].Enabled := CnOtaGetProjectGroup <> nil;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    SubActions[Index].Enabled := CnOtaGetCurrentProject <> nil;
+{$ENDIF}
+  end
   else if Index = FIdProjImplUse then
     SubActions[Index].Enabled := CnOtaGetCurrentProject <> nil
 end;

@@ -623,7 +623,6 @@ begin
 
 {$IFNDEF STAND_ALONE}
 {$IFNDEF CNWIZARDS_MINIMUM}
-{$IFNDEF LAZARUS}
   // 文件通知
   CnWizNotifierServices.AddFileNotifier(OnFileNotify);
 
@@ -636,7 +635,6 @@ begin
   CnDebugger.LogMsg('InternalCreate IdleLoaded');
 {$ENDIF}
   CnWizNotifierServices.ExecuteOnApplicationIdle(OnIdleLoaded);
-{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 

@@ -790,6 +790,12 @@ begin
       imgIcon.Width, imgIcon.Height, 0, 0, DI_NORMAL);
 
     lblToolName.Caption := AName;
+{$IFDEF LAZARUS}
+    // Lazarus 下 Label 的 tlCenter 垂直居中与多行文字的实际绘制存在偏差，
+    // 改为顶部对齐图标：两行文字高度与 32px 图标相当，视觉上即居中
+    lblToolName.Layout := tlTop;
+    lblToolName.Top := imgIcon.Top;
+{$ENDIF}
     lblToolAuthor.Caption := CnAuthorEmailToStr(AAuthor, AEmail);
 
     if FWizard.CodingTools[Idx].FAction <> nil then
