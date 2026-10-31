@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  ComCtrls, StdCtrls, ToolWin, ExtCtrls, ActnList, ToolsAPI,
+  ComCtrls, StdCtrls, ToolWin, ExtCtrls, ActnList, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   CnTree, CnCommon, CnWizMultiLang, CnWizConsts, CnWizUtils, CnWizIdeUtils,
   Menus;
 
@@ -137,7 +137,7 @@ type
     FFileNames: TStringList;
     FLibPaths: TStringList;
     FDcuPath: string;
-    FProjectList: TInterfaceList;
+    FProjectList: TCnIDEInterfaceList;
     FOldSearchStr: string;
     FInitOrders: TStringList;
     procedure InitProjectList;
@@ -145,7 +145,7 @@ type
     procedure OnDepthFirst(Sender: TObject);
     procedure TreeSaveANode(ALeaf: TCnLeaf; ATreeNode: TTreeNode; var Valid: Boolean);
     procedure SearchAUnit(const AFullDcuName, AFullSourceName: string; ProcessedFiles: TStrings;
-      UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: IOTAProject);
+      UnitLeaf: TCnLeaf; Tree: TCnTree; AProject: TCnIDEProjectInterface);
     {* 递归调用，分析并查找对应 dcu 或源码的 Uses 列表并加入到树中的 UnitLeaf 的子节点中}
     procedure UpdateTreeView;
     procedure UpdateInfo(Leaf: TCnLeaf);
@@ -165,10 +165,16 @@ implementation
 {$R *.DFM}
 
 uses
+  {$IFDEF LAZARUS} ProjectIntf, CnWizEditFiler, CnPasCodeParser, {$ENDIF}
   CnWizShareImages, CnDCU32, CnWizOptions;
 
 const
+{$IFDEF FPC} // Lazarus uses .ppu as compiled artifact
+  csDcuExt = '.ppu';
+{$ELSE}
   csDcuExt = '.dcu';
+{$ENDIF}
+  SCnUsesInitTreeCompileHint = 'Lazarus 下请先构建工程以生成 PPU 文件，再生成初始化依赖树。';
   csExploreCmdLine = 'EXPLORER.EXE /e, /select, "%s"';
 
   csSearchTypeStrings: array[Low(TCnModuleSearchType)..High(TCnModuleSearchType)] of PString =
@@ -201,9 +207,69 @@ begin
     Result := _CnChangeFileExt(ADcuPath + _CnExtractFileName(ASourceFileName), csDcuExt);
 end;
 
+{$IFDEF LAZARUS}
+
+// Lazarus 下的源码 uses 解析：读文件后用 CnPasCodeParser 解析
+procedure LazParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
+var
+  Stream: TMemoryStream;
+begin
+  UsesList.Clear;
+  Stream := TMemoryStream.Create;
+  try
+    EditFilerSaveFileToStream(FileName, Stream, True);
+    Stream.Position := 0;
+    ParseUnitUses(PAnsiChar(Stream.Memory), UsesList);
+  finally
+    Stream.Free;
+  end;
+end;
+
+// Lazarus 下按模块名查源文件的简化版：
+// 依次在工程目录、当前递归单元所在目录与 LibraryPath 中找 .pas/.pp/.inc
+function LazGetFileNameSearchTypeFromModuleName(const AName: string;
+  var SearchType: TCnModuleSearchType; AProject: TCnIDEProjectInterface): string;
+var
+  I: Integer;
+  Paths: TStringList;
+  BaseDir: string;
+begin
+  Result := '';
+  SearchType := mstInProject;
+
+  // 工程目录
+  if (AProject <> nil) and (AProject.ProjectInfoFile <> '') then
+  begin
+    BaseDir := MakePath(ExtractFileDir(AProject.ProjectInfoFile));
+    if FileExists(BaseDir + AName + '.pas') then
+    begin
+      Result := BaseDir + AName + '.pas';
+      Exit;
+    end;
+  end;
+
+  // LibraryPath 各目录（视为搜索目录）
+  Paths := TStringList.Create;
+  try
+    GetLibraryPath(Paths, False);
+    for I := 0 to Paths.Count - 1 do
+    begin
+      if FileExists(MakePath(Paths[I]) + AName + '.pas') then
+      begin
+        Result := MakePath(Paths[I]) + AName + '.pas';
+        SearchType := mstProjectSearch;
+        Exit;
+      end;
+    end;
+  finally
+    Paths.Free;
+  end;
+end;
+{$ENDIF}
+
 procedure TCnUsesInitTreeForm.actGenerateUsesTreeExecute(Sender: TObject);
 var
-  Proj, P: IOTAProject;
+  Proj, P: TCnIDEProjectInterface;
   I: Integer;
   ProjDcu: string;
 begin
@@ -211,16 +277,27 @@ begin
   if cbbProject.ItemIndex <= 0 then // 当前工程
   begin
     Proj := CnOtaGetCurrentProject;
+{$IFDEF DELPHI_OTA}
     if (Proj = nil) or not IsDelphiProject(Proj) then
       Exit;
+{$ENDIF}
   end
   else
   begin
     // 特定名称的工程
     for I := 0 to FProjectList.Count - 1 do
     begin
-      P := FProjectList[I] as IOTAProject;
-      if cbbProject.Items[cbbProject.ItemIndex] = _CnExtractFileName(P.FileName) then
+{$IFDEF DELPHI_OTA}
+      P := FProjectList[I] as TCnIDEProjectInterface;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      if not (TObject(FProjectList[I]) is TLazProject) then
+        Continue;
+      P := TCnIDEProjectInterface(FProjectList[I]);
+{$ENDIF}
+      if cbbProject.Items[cbbProject.ItemIndex] = _CnExtractFileName(
+{$IFDEF DELPHI_OTA} P.FileName {$ENDIF}
+{$IFDEF LAZARUS} P.ProjectInfoFile {$ENDIF}) then
       begin
         Proj := P;
         Break;
@@ -228,7 +305,10 @@ begin
     end;
   end;
 
-  if (Proj = nil) or not IsDelphiProject(Proj) then
+  if Proj = nil then
+    Exit;
+{$IFDEF DELPHI_OTA}
+  if not IsDelphiProject(Proj) then
     Exit;
 
   // 编译工程
@@ -238,6 +318,11 @@ begin
     ErrorDlg(SCnUsesCleanerCompileFail);
     Exit;
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus 下不代为编译，要求工程已构建出 PPU，否则树为空
+  InfoDlg(SCnUsesInitTreeCompileHint);
+{$ENDIF}
 
   FTree.Clear;
   FFileNames.Clear;
@@ -273,7 +358,7 @@ begin
   FFileNames := TStringList.Create;
   FLibPaths := TStringList.Create;
   FTree := TCnTree.Create(TCnUsesLeaf);
-  FProjectList := TInterfaceList.Create;
+  FProjectList := TCnIDEInterfaceList.Create;
   tlbUses.ShowHint := WizOptions.ShowHint;
 
   FTree.OnSaveANode := TreeSaveANode;
@@ -301,10 +386,16 @@ end;
 
 procedure TCnUsesInitTreeForm.InitProjectList;
 var
+{$IFDEF DELPHI_OTA}
   I: Integer;
   Proj: IOTAProject;
 {$IFDEF BDS}
   PG: IOTAProjectGroup;
+{$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+  I: Integer;
+  Proj: TCnIDEProjectInterface;
 {$ENDIF}
 begin
   CnOtaGetProjectList(FProjectList);
@@ -313,9 +404,22 @@ begin
   if FProjectList.Count <= 0 then
     Exit;
 
+{$IFDEF LAZARUS}
+  // Lazarus 下从工程列表取 TLazProject，填当前工程文件名
   for I := 0 to FProjectList.Count - 1 do
   begin
-    Proj := IOTAProject(FProjectList[I]);
+    if not (TObject(FProjectList[I]) is TLazProject) then
+      Continue;
+    Proj := TCnIDEProjectInterface(FProjectList[I]);
+    if Proj.ProjectInfoFile = '' then
+      Continue;
+    cbbProject.Items.Add(_CnExtractFileName(Proj.ProjectInfoFile));
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  for I := 0 to FProjectList.Count - 1 do
+  begin
+    Proj := TCnIDEProjectInterface(FProjectList[I]);
     if Proj.FileName = '' then
       Continue;
 
@@ -330,6 +434,7 @@ begin
 
     cbbProject.Items.Add(_CnExtractFileName(Proj.FileName));
   end;
+{$ENDIF}
 
   if cbbProject.Items.Count > 0 then
   begin
@@ -340,7 +445,7 @@ end;
 
 procedure TCnUsesInitTreeForm.SearchAUnit(const AFullDcuName,
   AFullSourceName: string; ProcessedFiles: TStrings; UnitLeaf: TCnLeaf;
-  Tree: TCnTree; AProject: IOTAProject);
+  Tree: TCnTree; AProject: TCnIDEProjectInterface);
 var
   St: TCnModuleSearchType;
   ASourceFileName, ADcuFileName: string;
@@ -373,7 +478,11 @@ begin
     else // 否则解析源码
     begin
       statUses.SimpleText := AFullSourceName;
+{$IFDEF LAZARUS}
+      LazParseUnitUsesFromFileName(AFullSourceName, UsesList);
+{$ELSE}
       ParseUnitUsesFromFileName(AFullSourceName, UsesList);
+{$ENDIF}
     end;
     Application.ProcessMessages;
 
@@ -381,7 +490,11 @@ begin
     for I := 0 to UsesList.Count - 1 do
     begin
       // 找到源文件
+{$IFDEF LAZARUS}
+      ASourceFileName := LazGetFileNameSearchTypeFromModuleName(UsesList[I], St, AProject);
+{$ELSE}
       ASourceFileName := GetFileNameSearchTypeFromModuleName(UsesList[I], St, AProject);
+{$ENDIF}
       if (ASourceFileName = '') or (ProcessedFiles.IndexOf(ASourceFileName) >= 0) then
         Continue;
 

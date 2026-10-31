@@ -54,9 +54,9 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, FileCtrl,
-  StdCtrls, ToolsAPI, IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
+  StdCtrls, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles, Contnrs, CnWizMultiLang, CnWizClasses, CnWizConsts,
   CnCommon, CnConsts, CnWizUtils, CnDCU32, CnWizIdeUtils, CnWizEditFiler,
-  CnWizOptions, CnHashMap, mPasLex, {$IFDEF UNICODE} CnPasWideLex, {$ENDIF}
+  CnWizOptions, CnHashMap, mPasLex, {$IFDEF UNICODE} CnPasWideLex, {$ENDIF} {$IFDEF LAZARUS} CnPasWideLex, {$ENDIF}
   Math, TypInfo, AsRegExpr, ActnList {$IFDEF DELPHIXE3_UP}, System.Actions {$ENDIF};
 
 type
@@ -133,21 +133,27 @@ type
 {$ENDIF}
     FProjImplUnit: string;
     function MatchInListWithExpr(List: TStrings; const Str: string): Boolean;
+{$IFDEF DELPHI_OTA}
     function GetProjectFromModule(AModule: IOTAModule): IOTAProject;
+{$ENDIF}
     function ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
     function CompileUnits(AKind: TCnUsesCleanKind): Boolean;
     function ProcessUnits(AKind: TCnUsesCleanKind; List: TObjectList): Boolean;
     {* 编译后的总体的单元解析查找处理函数，处理 dcu 与源码，结果为 TCnProjectUsesInfo 实例，放 List 里}
     procedure ParseUnitKind(const FileName: string; var Kinds: TCnUsesKinds);
     {* 解析各 unit 源码获取其有无 init、有无 Register 函数等信息}
+{$IFDEF DELPHI_OTA}
     procedure GetCompRefUnits(AModule: IOTAModule; AProject: IOTAProject; Units:
       TStrings);
+{$ENDIF}
     procedure CheckUnits(List: TObjectList);
     {* 总体的单元分析清理函数，List 来自 ProcessUnits，存储了所有工程的所有引用信息}
+{$IFDEF DELPHI_OTA}
     function DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl: TStrings): Boolean;
     {* 做单个源码文件的实际清理工作}
     procedure CleanUnitUses(List: TObjectList);
     {* 根据用户的选择，开始做源码的实际清理工作}
+{$ENDIF}
 
     procedure UsesEnumCallback(const AUnitFullName: string; Exists: Boolean;
       FileType: TCnUsesFileType; ModuleSearchType: TCnModuleSearchType);
@@ -189,9 +195,11 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, DCURecs, CnUsesIdentFrm, CnNative,
+  {$IFDEF LAZARUS} LazIDEIntf, CnPPUInfo, {$ENDIF}
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, CnUsesIdentFrm, CnNative,
   CnIni, CnStrings, CnWideStrings, CnProgressFrm, CnIDEStrings, CnPasCodeParser,
-  CnWidePasParser;
+  CnWidePasParser
+  {$IFDEF DELPHI_OTA}, DCURecs {$ENDIF};
 
 {$R *.DFM}
 
@@ -258,6 +266,12 @@ var
   I, J: Integer;
   D: string;
 begin
+{$IFDEF LAZARUS}
+  // TODO: Lazarus 下的清理执行依赖可写编辑器拼接接口，待编辑器深水区移植后启用
+  InfoDlg('Uses Clean 功能在 Lazarus 下暂未启用，请使用初始化依赖树与标识符查询单元功能。');
+  Exit;
+{$ENDIF}
+{$IFNDEF LAZARUS}
   if CnOtaGetProjectGroup <> nil then
   begin
     // 显示选择对话框
@@ -347,13 +361,16 @@ begin
       end;
     finally
       List.Free;
-    end;   
+    end;
   end;
+{$ENDIF}
 end;
 
 function TCnUsesToolsWizard.ShowKindForm(var AKind: TCnUsesCleanKind): Boolean;
+{$IFDEF DELPHI_OTA}
 var
   Module: IOTAModule;
+{$ENDIF}
 begin
   Result := False;
   // 显示处理窗口
@@ -372,8 +389,13 @@ begin
     chkSaveAndClose.Checked := FSaveAndClose;
     mmoIgnore.Lines.Assign(FIgnoreList);
     mmoClean.Lines.Assign(FCleanList);
+{$IFDEF DELPHI_OTA}
     Module := CnOtaGetCurrentModule;
     if (Module <> nil) and IsPas(Module.FileName) and (Module.OwnerCount > 0) then
+{$ENDIF}
+{$IFDEF LAZARUS}
+    if (CnOtaGetCurrentSourceEditor <> nil) and (LazarusIDE.ActiveProject <> nil) then
+{$ENDIF}
       rbCurrUnit.Checked := True
     else
     begin
@@ -423,6 +445,7 @@ begin
   end;
 end;
 
+{$IFDEF DELPHI_OTA}
 function TCnUsesToolsWizard.GetProjectFromModule(AModule: IOTAModule): IOTAProject;
 var
   I: Integer;
@@ -435,12 +458,15 @@ begin
       Break;
     end;
 end;
+{$ENDIF DELPHI_OTA}
 
 function TCnUsesToolsWizard.CompileUnits(AKind: TCnUsesCleanKind): Boolean;
 var
+{$IFDEF DELPHI_OTA}
   Module: IOTAModule;
   Project: IOTAProject;
   ProjectGroup: IOTAProjectGroup;
+{$ENDIF}
   I: Integer;
 
   function DoBuildProjectAction: Boolean;
@@ -486,6 +512,7 @@ var
   end;
 
 begin
+{$IFDEF DELPHI_OTA}
   Result := False;
   try
     case AKind of
@@ -535,10 +562,16 @@ begin
     on E: Exception do
       DoHandleException('Compile Units ' + E.Message);
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // TODO: Lazarus 下 Clean 流程暂未启用（见 CleanExecute 的降级说明），编译步骤随之禁用
+  Result := False;
+{$ENDIF}
 end;
 
 function TCnUsesToolsWizard.ProcessUnits(AKind: TCnUsesCleanKind;
   List: TObjectList): Boolean;
+{$IFDEF DELPHI_OTA}
 var
   Module: IOTAModule;
   Project: IOTAProject;
@@ -819,6 +852,14 @@ begin
       DoHandleException('Process Units ' + E.Message);
   end;
 end;
+{$ENDIF DELPHI_OTA}
+
+{$IFDEF LAZARUS}
+begin
+  // TODO: Lazarus 下的 Clean 流程暂未启用（见 CleanExecute 的降级说明）
+  Result := False;
+end;
+{$ENDIF}
 
 procedure TCnUsesToolsWizard.ParseUnitKind(const FileName: string;
   var Kinds: TCnUsesKinds);
@@ -829,7 +870,7 @@ var
 {$ELSE}
   Lex: TmwPasLex;
 {$ENDIF}
-  Token: TTokenKind;
+  Token, Proc: TTokenKind;
   RegDecl: Boolean;
 begin
   Stream := TMemoryStream.Create;
@@ -846,10 +887,15 @@ begin
 
     try
       RegDecl := False;
+{$IFDEF FPC}
+      Proc := mPasLex.tkProcedure;
+{$ELSE}
+      Proc := {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure;
+{$ENDIF}
       Token := Lex.TokenID;
       while not (Lex.TokenID in [tkImplementation, tkNull]) do
       begin
-        if (Lex.TokenID = tkRegister) and (Token = {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure) then
+        if (Lex.TokenID = tkRegister) and (Token = Proc) then
           RegDecl := True;
         Token := Lex.TokenID;
         Lex.NextNoJunk;
@@ -858,7 +904,7 @@ begin
       Token := Lex.TokenID;
       while Lex.TokenID <> tkNull do
       begin
-        if RegDecl and (Lex.TokenID = tkRegister) and (Token = {$IFDEF DELPHI2010_UP}TTokenKind.{$ENDIF}tkProcedure) then
+        if RegDecl and (Lex.TokenID = tkRegister) and (Token = Proc) then
           Include(Kinds, ukHasRegProc);
 
         // initialization 后是标识符或 begin 等才表示有效初始化节，不太严谨。
@@ -876,6 +922,8 @@ begin
     Stream.Free;
   end;
 end;
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnUsesToolsWizard.GetCompRefUnits(AModule: IOTAModule; AProject:
   IOTAProject; Units: TStrings);
@@ -974,8 +1022,10 @@ begin
   except
     on E: Exception do
       DoHandleException('Get CompRef Units ' + E.Message);
-  end;   
+  end;
 end;
+
+{$ENDIF}
 
 procedure TCnUsesToolsWizard.CheckUnits(List: TObjectList);
 var
@@ -1016,8 +1066,13 @@ begin
       if MatchInListWithExpr(FIgnoreList, UnitList[U]) then
         Include(Kinds, ukInIgnoreList);
 
+{$IFDEF DELPHI_OTA}
       FileName := GetFileNameFromModuleName(UnitList[U],
         IOTAProject(Pointer(UnitList.Objects[U])));
+{$ENDIF}
+{$IFDEF LAZARUS}
+      FileName := ''; // Lazarus 下 CheckUnits 属于 Clean 流程，不会被执行
+{$ENDIF}
     {$IFDEF DEBUG}
       CnDebugger.LogMsg('Check Unit ' + UnitList[U] + ': ' + FileName);
     {$ENDIF}
@@ -1068,6 +1123,7 @@ begin
   end;
 
   // 分析每个单元的组件引用单元
+{$IFDEF DELPHI_OTA}
   CompRef := TStringList.Create;
   try
     for I := 0 to List.Count - 1 do
@@ -1107,6 +1163,7 @@ begin
   finally
     CompRef.Free;
   end;
+{$ENDIF}
 end;
 
 type
@@ -1118,6 +1175,8 @@ type
     CommaAfterPos: Longint;  // Position of ',' after unit name
     SpaceAfter: Boolean;
   end;
+
+{$IFDEF DELPHI_OTA}
 
 function TCnUsesToolsWizard.DoCleanUnit(Buffer: IOTAEditBuffer; Intf, Impl:
   TStrings): Boolean;
@@ -1414,7 +1473,7 @@ begin
     end;
   except
     ;
-  end;          
+  end;
 end;
 
 procedure TCnUsesToolsWizard.CleanUnitUses(List: TObjectList);
@@ -1531,6 +1590,8 @@ begin
     Logs.Free;
   end;
 end;
+
+{$ENDIF}
 
 procedure TCnUsesToolsWizard.LoadSettings(Ini: TCustomIniFile);
 begin
@@ -1765,6 +1826,8 @@ begin
   end;
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnUsesToolsWizard.LoadSysUnitsToList(DataList: TStringList);
 var
   I, T, H: Integer;
@@ -1993,6 +2056,117 @@ begin
   end;
 end;
 
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+procedure TCnUsesToolsWizard.LoadSysUnitsToList(DataList: TStringList);
+var
+  I, T, H: Integer;
+  Info: TCnUnitUsesInfo;
+  S, V: string;
+  IdentPair: TCnIdentUnitInfo;
+  Dirs, Files: TStringList;
+  BaseDir, TargetDir: string;
+  DumpExe: string;
+
+  procedure SearchPpuDirs(const ADir: string);
+  var
+    Sr: TSearchRec;
+  begin
+    if FindFirst(MakePath(ADir) + '*.ppu', faAnyFile, Sr) = 0 then
+    begin
+      repeat
+        if (Sr.Attr and faDirectory) = 0 then
+          Files.Add(MakePath(ADir) + Sr.Name);
+      until FindNext(Sr) <> 0;
+      FindClose(Sr);
+    end;
+    if FindFirst(MakePath(ADir) + '*.*', faDirectory, Sr) = 0 then
+    begin
+      repeat
+        if ((Sr.Attr and faDirectory) <> 0) and (Sr.Name <> '.') and (Sr.Name <> '..') then
+          SearchPpuDirs(MakePath(ADir) + Sr.Name);
+      until FindNext(Sr) <> 0;
+      FindClose(Sr);
+    end;
+  end;
+
+begin
+  if DataList = nil then
+    Exit;
+
+  if FUnitNames = nil then
+    FUnitNames := TStringList.Create
+  else
+    FUnitNames.Clear;
+
+  Dirs := TStringList.Create;
+  Files := TStringList.Create;
+  try
+    // 系统单元的 PPU 来源：FPC 编译器同级的 units/<target> 目录树与 LibraryPath
+    DumpExe := GetPpuDumpFileName;
+    if DumpExe <> '' then
+    begin
+      BaseDir := ExtractFileDir(DumpExe);                    // .../bin/i386-win32
+      TargetDir := ExtractFileName(BaseDir);                 // i386-win32
+      BaseDir := MakePath(ExpandFileName(MakePath(ExtractFileDir(BaseDir)) + '..'));
+      if DirectoryExists(MakePath(BaseDir) + 'units' + PathDelim + TargetDir) then
+        Dirs.Add(MakePath(BaseDir) + 'units' + PathDelim + TargetDir);
+    end;
+    GetLibraryPath(Dirs, False);
+
+    for I := 0 to Dirs.Count - 1 do
+      SearchPpuDirs(Dirs[I]);
+
+    Files.Sort;
+    H := -1;
+    for I := 0 to Files.Count - 1 do
+    begin
+      T := (100 * I) div Files.Count;
+      if T <> H then
+      begin
+        H := T;
+        UpdateProgress(H);
+      end;
+
+      Info := TCnUnitUsesInfo.Create(Files[I]);
+      try
+        if Info.ExportedNames = nil then
+          Continue;
+
+        S := _CnChangeFileExt(ExtractFileName(Files[I]), '');
+        if FUnitNames.IndexOf(Files[I]) < 0 then
+          FUnitNames.Add(Files[I]);
+
+        for T := 0 to Info.ExportedNames.Count - 1 do
+        begin
+          V := Info.ExportedNames[T];
+          if (V = '') or IsInt(V) then
+            Continue;
+
+          // 去重：同一标识符只保留首个命中的单元（与 Delphi 行为一致）
+          if FUnitsMap.Find(V, S) then
+            Continue;
+          FUnitsMap.Add(V, Files[I]);
+
+          IdentPair := TCnIdentUnitInfo.Create;
+          IdentPair.Text := V;
+          IdentPair.FullNameWithPath := Files[I];
+          IdentPair.ImageIndex := 78; // Units
+          DataList.AddObject(V, IdentPair);
+        end;
+      finally
+        Info.Free;
+      end;
+    end;
+  finally
+    Files.Free;
+    Dirs.Free;
+  end;
+end;
+{$ENDIF}
+
 procedure TCnUsesToolsWizard.UsesEnumCallback(const AUnitFullName: string;
   Exists: Boolean; FileType: TCnUsesFileType;
   ModuleSearchType: TCnModuleSearchType);
@@ -2010,8 +2184,10 @@ var
 begin
   CheckReLoadUnitsMap;
   S := '';
+{$IFDEF DELPHI_OTA}
   if CurrentIsSource and CnOtaGeneralGetCurrPosToken(Token, Idx) then
     S := string(Token);
+{$ENDIF}
 
   with TCnUsesIdentForm.Create(Application, FUnitIdents) do
   begin
@@ -2057,6 +2233,7 @@ begin
 end;
 
 procedure TCnUsesToolsWizard.ProjImplExecute;
+{$IFDEF DELPHI_OTA}
 const
   DEF_UNIT = 'CnDebug';
 var
@@ -2208,6 +2385,12 @@ begin
     end;
   end;
 end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+begin
+  // TODO: Lazarus 下的 CnDebug 注入功能待编辑器深水区移植后实现
+end;
+{$ENDIF}
 
 { TCnUsesCleanerForm }
 

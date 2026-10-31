@@ -43,7 +43,7 @@ interface
 {$IFDEF CNWIZARDS_CNINIFILERWIZARD}
 
 uses
-  Windows, SysUtils, Classes, Forms, Controls, ToolsApi, Contnrs, IniFiles,
+  Windows, SysUtils, Classes, Forms, Controls, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} Contnrs, IniFiles,
   CnWizClasses, CnConsts, CnWizConsts, CnCommon, CnWizUtils, CnWizOptions,
   CnOTACreators;
 
@@ -104,6 +104,10 @@ type
     destructor Destroy; override;
     class procedure GetWizardInfo(var Name, Author, Email, Comment: string); override;
     procedure Execute; override;
+{$IFDEF LAZARUS}
+    function GetLazNewFileSource(const AFileName: string): string; override;
+    {* Lazarus 下 File>New 的入口：显示 INI 配置窗体后按模板生成单元源码}
+{$ENDIF}
 
     property IniSections: TObjectList read FIniSections;
     property IniClassName: string read FIniClassName write FIniClassName;
@@ -413,8 +417,105 @@ begin
     SlSecs.Free;
   end;
 
+{$IFDEF DELPHI_OTA}
   (BorlandIDEServices as IOTAModuleServices).CreateModule(ModuleCreator);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus 下经由 File>New 的 GetLazNewFileSource 管道生成文件，
+  // 菜单入口不再直接创建模块
+  if Assigned(ModuleCreator) then
+  begin
+    FreeAndNil(ModuleCreator);
+    InfoDlg('请通过 文件 > 新建工程/文件 > CnPack 分类 使用本向导。');
+  end;
+{$ENDIF}
 end;
+
+{$IFDEF LAZARUS}
+// Lazarus 下 File>New 的入口：显示 INI 配置窗体并按模板生成单元源码
+function TCnIniFilerWizard.GetLazNewFileSource(const AFileName: string): string;
+var
+  Creator: TCnIniFilerCreator;
+  IniFile: string;
+  Ini: TMemIniFile;
+  SlSecs: TStringList;
+  I: Integer;
+  Sec: TCnIniSection;
+  AFile: IOTAFile;
+  ModuleIdent: string;
+begin
+  Result := '';
+  FIniSections.Clear;
+  FIsDelphi := True; // Lazarus 下按 Pascal 模板生成
+
+  csBoolean := csPasBoolean;
+  csInteger := csPasInteger;
+  csString := csPasString;
+  csFloat := csPasFloat;
+  csDateTime := csPasDateTime;
+
+  with TCnIniFilerForm.Create(nil) do
+  try
+    IniClassName := Self.IniClassName;
+    ConstPrefix := Self.ConstPrefix;
+    IsAllStr := Self.IsAllStr;
+    CheckBool := Self.CheckBool;
+    SectionMode := Self.SectionMode;
+
+    if ShowModal = mrOK then
+    begin
+      Self.IniClassName := IniClassName;
+      Self.ConstPrefix := ConstPrefix;
+      Self.IsAllStr := IsAllStr;
+      Self.CheckBool := CheckBool;
+      Self.SectionMode := SectionMode;
+      IniFile := IniFileName;
+    end
+    else
+      Exit;
+  finally
+    Free;
+  end;
+
+  Ini := nil;
+  SlSecs := nil;
+  try
+    SlSecs := TStringList.Create;
+    Ini := TMemIniFile.Create(IniFile);
+
+    try
+      Ini.ReadSections(SlSecs);
+    except
+      ErrorDlg(SCnIniErrorReadIni);
+      Exit;
+    end;
+
+    for I := 0 to SlSecs.Count - 1 do
+    begin
+      Sec := TCnIniSection.Create;
+      Sec.RawSection := SlSecs.Strings[I];
+      Ini.ReadSectionValues(SlSecs.Strings[I], Sec.NameValues);
+      Sec.SynchronizeLines(CheckBool);
+      FIniSections.Add(Sec);
+    end;
+  finally
+    Ini.Free;
+    SlSecs.Free;
+  end;
+
+  Creator := TCnIniFilerCreator.Create;
+  try
+    Creator.IniWizard := Self;
+    Creator.SectionMode := Self.SectionMode;
+    ModuleIdent := _CnChangeFileExt(ExtractFileName(AFileName), '');
+    AFile := Creator.NewImplSource(ModuleIdent, '', '');
+    if AFile <> nil then
+      Result := AFile.GetSource;
+  finally
+    Creator.Free;
+  end;
+end;
+{$ENDIF}
 
 class procedure TCnIniFilerWizard.GetWizardInfo(var Name, Author, Email,
   Comment: string);

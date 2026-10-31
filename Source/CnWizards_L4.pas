@@ -31,7 +31,9 @@ uses
   CnSourceDiffWizard, CnSourceDiffFrm, CnDiffEditorFrm, CnExplore, 
   CnExploreDirectory, CnExploreFilter, CnExploreFilterEditor, CnRoWizard, 
   CnRoInterfaces, CnRoClasses, CnRoFilesList, CnRoFrmFileList, CnRoOptions, 
-  CnFilesSnapshot, CnFilesSnapshotManageFrm, LazarusPackageIntf;
+  CnFilesSnapshot, CnFilesSnapshotManageFrm, CnUsesToolsWizard, 
+  CnUsesCleanResultFrm, CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, 
+  CnRepositoryMenu, CnIniFilerFrm, CnIniFilerWizard, LazarusPackageIntf;
 
 implementation
 

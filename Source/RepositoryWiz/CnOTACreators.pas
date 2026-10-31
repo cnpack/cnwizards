@@ -39,7 +39,58 @@ interface
 {$I CnWizards.inc}
 
 uses
-  Classes, Windows, SysUtils, ToolsAPI, CnCommon, CnWizUtils;
+  Classes, Windows, SysUtils, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  CnCommon, CnWizUtils;
+
+{$IFDEF LAZARUS}
+const
+  sUnit = 'Unit'; // 与 ToolsAPI 的 sUnit 对应的桩常量
+
+type
+  {* Lazarus 下为复用模板生成框架而定义的 IOTA 等价最小接口桩，
+     仅保证本单元及其子类编译，不与 IDE 交互}
+  IOTAFormEditor = interface(IUnknown) end;
+
+  IOTAModule = interface(IUnknown) end;
+
+  IOTAProject = interface(IUnknown) end;
+
+  IOTAFile = interface(IUnknown)
+    function GetSource: string;
+    function GetAge: TDateTime;
+  end;
+
+  IOTACreator = interface(IUnknown)
+    function GetCreatorType: string;
+    function GetExisting: Boolean;
+    function GetFileSystem: string;
+    function GetOwner: IOTAModule;
+    function GetUnnamed: Boolean;
+  end;
+
+  IOTAModuleCreator = interface(IOTACreator)
+    function GetAncestorName: string;
+    function GetImplFileName: string;
+    function GetIntfFileName: string;
+    function GetFormName: string;
+    function GetMainForm: Boolean;
+    function GetShowForm: Boolean;
+    function GetShowSource: Boolean;
+    function NewImplSource(const ModuleIdent, FormIdent, AncestorIdent: string): IOTAFile;
+    function NewIntfSource(const ModuleIdent, FormIdent, AncestorIdent: string): IOTAFile;
+    function NewFormFile(const FormIdent, AncestorIdent: string): IOTAFile;
+    procedure FormCreated(const FormEditor: IOTAFormEditor);
+  end;
+
+  IOTAProjectCreator = interface(IOTACreator)
+    function GetFileName: string;
+    function GetOptionFileName: string;
+    function NewOptionSource(const ProjectName: string): IOTAFile;
+    procedure NewDefaultModule;
+    function NewProjectSource(const ProjectName: string): IOTAFile;
+    procedure NewProjectResource(const Project: IOTAProject);
+  end;
+{$ENDIF}
 
 type
   TCnCreatorType = (ctProject, ctPascalUnit, ctCppUnit, ctHppUnit, ctForm, ctDataModule);
@@ -528,7 +579,8 @@ end;
 
 function TCnTemplateProjectCreator.GetOwner: IOTAModule;
 begin
-  Result := CnOtaGetProjectGroup;
+{$IFDEF DELPHI_OTA} Result := CnOtaGetProjectGroup; {$ENDIF}
+{$IFDEF LAZARUS} Result := nil; {$ENDIF}
 end;
 
 function TCnTemplateProjectCreator.GetCreatorType: string;
@@ -641,7 +693,8 @@ end;
 
 function TCnRawCreator.GetOwner: IOTAModule;
 begin
-  Result := CnOtaGetCurrentProject;
+{$IFDEF DELPHI_OTA} Result := CnOtaGetCurrentProject; {$ENDIF}
+{$IFDEF LAZARUS} Result := nil; {$ENDIF}
 end;
 
 function TCnRawCreator.GetUnnamed: Boolean;

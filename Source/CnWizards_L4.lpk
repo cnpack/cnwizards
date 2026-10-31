@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;AIAgent;FavoriteWizard;ExplorerWizard;ReopenWizard;SourceDiff;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;AIAgent;FavoriteWizard;ExplorerWizard;ReopenWizard;SourceDiff;UsesWizard;RepositoryWiz;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -399,6 +399,38 @@
       <Item>
         <Filename Value="ReopenWizard\CnFilesSnapshotManageFrm.pas"/>
         <UnitName Value="CnFilesSnapshotManageFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="UsesWizard\CnUsesToolsWizard.pas"/>
+        <UnitName Value="CnUsesToolsWizard"/>
+      </Item>
+      <Item>
+        <Filename Value="UsesWizard\CnUsesCleanResultFrm.pas"/>
+        <UnitName Value="CnUsesCleanResultFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="UsesWizard\CnUsesInitTreeFrm.pas"/>
+        <UnitName Value="CnUsesInitTreeFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="UsesWizard\CnUsesIdentFrm.pas"/>
+        <UnitName Value="CnUsesIdentFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="RepositoryWiz\CnOTACreators.pas"/>
+        <UnitName Value="CnOTACreators"/>
+      </Item>
+      <Item>
+        <Filename Value="RepositoryWiz\CnRepositoryMenu.pas"/>
+        <UnitName Value="CnRepositoryMenu"/>
+      </Item>
+      <Item>
+        <Filename Value="RepositoryWiz\CnIniFilerFrm.pas"/>
+        <UnitName Value="CnIniFilerFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="RepositoryWiz\CnIniFilerWizard.pas"/>
+        <UnitName Value="CnIniFilerWizard"/>
       </Item>
     </Files>
     <RequiredPkgs>

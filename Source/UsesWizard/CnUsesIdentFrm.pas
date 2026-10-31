@@ -43,7 +43,7 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnProjectViewBaseFrm, ActnList, ComCtrls, ToolWin, StdCtrls, ExtCtrls,
-  Clipbrd, ToolsAPI, CnWizConsts, CnCommon, CnWizUtils, CnWizIdeUtils;
+  Clipbrd, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizConsts, CnCommon, CnWizUtils, CnWizIdeUtils;
 
 type
   TCnIdentUnitInfo = class(TCnBaseElementInfo)
@@ -138,6 +138,8 @@ begin
   StatusBar.Panels[1].Text := Format(SCnCountFmt, [lvList.Items.Count]);
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnUsesIdentForm.OpenSelect;
 var
   CharPos: TOTACharPos;
@@ -176,6 +178,49 @@ begin
     end;
   end;
 end;
+
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+// Lazarus 本地实现：把单元名列表拼成 uses 子句
+function LazJoinUses(Sl: TStrings): string;
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 0 to Sl.Count - 1 do
+  begin
+    if Result <> '' then
+      Result := Result + ', ';
+    Result := Result + Sl[I];
+  end;
+  if Result <> '' then
+    Result := 'uses ' + Result + ';';
+end;
+
+procedure TCnUsesIdentForm.OpenSelect;
+var
+  Sl: TStringList;
+begin
+  if lvList.Selected <> nil then
+  begin
+    ModalResult := mrOk;
+    Sl := TStringList.Create;
+    try
+      Sl.Text := lvList.Selected.SubItems[0];
+      // TODO: Lazarus 下自动插入 uses 待编辑器深水区移植后实现，
+      // 当前降级为复制到剪贴板，由用户手动粘贴
+      if Sl.Text <> '' then
+      begin
+        Clipbrd.Clipboard.AsText := LazJoinUses(Sl);
+        InfoDlg('单元名已复制到剪贴板，请手动加入 uses 子句。');
+      end;
+    finally
+      Sl.Free;
+    end;
+  end;
+end;
+{$ENDIF}
 
 procedure TCnUsesIdentForm.rbIntfDblClick(Sender: TObject);
 begin

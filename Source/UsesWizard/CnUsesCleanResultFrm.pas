@@ -42,14 +42,14 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, Contnrs, ToolsAPI, CnCommon, CnCheckTreeView, CnWizMultiLang,
-  CnDCU32, CnWizShareImages, CnWizConsts, Menus, Clipbrd, CnPopupMenu;
+  StdCtrls, ComCtrls, Contnrs, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnCommon, CnCheckTreeView, CnWizMultiLang,
+  CnDCU32, CnWizShareImages, CnWizConsts, Menus, Clipbrd, CnPopupMenu, CnWizUtils;
 
 type
 
   TCnProjectUsesInfo = class
   public
-    Project: IOTAProject;
+    Project: TCnIDEProjectInterface;
     Units: TObjectList;  // ÈÝÄÉ TCnEmptyUsesInfo
     constructor Create;
     destructor Destroy; override;
@@ -186,7 +186,8 @@ begin
     begin
       ProjectInfo := TCnProjectUsesInfo(List[I]);
       ProjNode := chktvResult.Items.AddChildObject(nil,
-        _CnExtractFileName(ProjectInfo.Project.FileName), ProjectInfo);
+        _CnExtractFileName(
+{$IFDEF DELPHI_OTA} ProjectInfo.Project.FileName {$ENDIF}{$IFDEF LAZARUS} ProjectInfo.Project.ProjectInfoFile {$ENDIF}), ProjectInfo);
       ProjNode.ImageIndex := IdxProject;
       ProjNode.SelectedIndex := IdxProject;
 

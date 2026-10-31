@@ -41,7 +41,7 @@ interface
 {$IFDEF CNWIZARDS_CNREPOSITORYMENUWIZARD}
 
 uses
-  SysUtils, Classes, ToolsApi, IniFiles,
+  SysUtils, Classes, {$IFDEF DELPHI_OTA} ToolsApi, {$ENDIF} IniFiles,
   CnConsts, CnWizClasses, CnWizManager, CnWizConsts;
 
 type
