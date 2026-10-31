@@ -107,7 +107,7 @@ end;
 
 constructor TCnPPUFile.Create(const PpuName: string);
 var
-  DumpExe, DumpFile: string;
+  DumpExe: string;
   AProcess: TProcess;
   MemStream: TMemoryStream;
   Sl: TStringList;
@@ -125,7 +125,6 @@ begin
   if DumpExe = '' then
     Exit;
 
-  DumpFile := GetTempDir + 'cnwiz_ppudump_' + IntToHex(GetTickCount, 8) + '.txt';
   AProcess := TProcess.Create(nil);
   try
     AProcess.Executable := DumpExe;
@@ -154,8 +153,6 @@ begin
     end;
   finally
     AProcess.Free;
-    if FileExists(DumpFile) then
-      SysUtils.DeleteFile(DumpFile);
   end;
 end;
 
