@@ -92,8 +92,6 @@ implementation
 uses
   CnRoWizard, CnRoFilesList, CnRoClasses;
 
-{******************************* TCnRoOptionsDlg ******************************}
-
 procedure TCnRoOptionsDlg.FormCreate(Sender: TObject);
 begin
   pcOption.ActivePageIndex := 0;
@@ -119,13 +117,12 @@ begin
       Files[SFavorite].Capacity := SpinEditFAV.Value;
       Files[SOther].Capacity := SpinEditOther.Value;
       Files[SUnt].Capacity := SpinEditPAS.Value;
-  //      ColumnPersistance := chkColumnPersistance.Checked;
       DefaultPage := cbDefaultPage.ItemIndex;
       IgnoreDefaultUnits := chkIgnoreDefault.Checked;
       LocalDate := chkLocalDate.Checked;
       SortPersistance := chkSortPersistance.Checked;
       SaveSetting;
-    end; //end with
+    end;
   end;
 end;
 
@@ -136,7 +133,6 @@ begin
     with Options do
     begin
       cbDefaultPage.ItemIndex      := DefaultPage;
-  //      chkColumnPersistance.Checked := ColumnPersistance;
       chkIgnoreDefault.Checked     := IgnoreDefaultUnits;
       chkLocalDate.Checked         := LocalDate;
       chkSortPersistance.Checked   := SortPersistance;
@@ -146,7 +142,7 @@ begin
       SpinEditFAV.Value := Files[SFavorite].Capacity;
       SpinEditOther.Value := Files[SOther].Capacity;
       SpinEditPAS.Value := Files[SUnt].Capacity;
-    end; //end with
+    end;
   end;
 end;
 

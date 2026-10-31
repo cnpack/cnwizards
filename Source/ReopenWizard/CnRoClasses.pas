@@ -35,15 +35,15 @@ unit CnRoClasses;
 * 开发平台：PWin2000Pro + Delphi 5.02
 * 兼容测试：PWin2000 + Delphi 5/6/7
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2019-05-04 by liuxiao
+* 修改记录：2019.05.04 by liuxiao
 *               修正高版本的 Delphi 下 Ini 读出的 Objects 里无 Strings 的问题
-*           2012-09-19 by shenloqi
+*           2012.09.19 by shenloqi
 *               移植到 Delphi XE3
-*           2004-12-12 V1.1
+*           2004.12.12 V1.1
 *               去除TMyStringList，改用TList来管理。
 *               添加节点管理器，以及提取接口的 Map
 *               将 TCnIniContainer 移动到此文件
-*           2004-03-02 V1.0
+*           2004.03.02 V1.0
 *               创建并移植单元
 ================================================================================
 |</PRE>}
@@ -67,10 +67,17 @@ const
   SPackge = 'dpk';
   SUnt = 'pas';
 {$ELSE}
+  {$IFDEF LAZARUS}
+  SCnRecentFile = 'RecentFiles_Laz.ini';
+  SProject = 'lpr';
+  SPackge = 'lpk';
+  SUnt = 'pas';
+  {$ELSE}
   SCnRecentFile = 'RecentFiles_BCB.ini';
   SProject = 'bpr';
   SPackge = 'bpk';
   SUnt = 'cpp';
+  {$ENDIF}
 {$ENDIF}
 
 type
@@ -292,7 +299,8 @@ begin
   if (FNodesPerPage > 1) then
   begin
     FPageSize := 1024;
-  end else
+  end
+  else
   begin
     FNodesPerPage := 1;
     FPagesize := aNodeSize + SizeOf(Pointer);
@@ -309,20 +317,20 @@ begin
     FreeMem(FPageHead, FPageSize);
     FPageHead := Temp;
   end;
-  inherited Destroy;
+  inherited;
 end;
 
 procedure TCnNodeManager.AllocNewPage;
 var
   NewPage: PAnsiChar;
-  index: Integer;
+  I: Integer;
 begin
   GetMem(NewPage, FPageSize);
   PCnGenericNode(NewPage)^.gnNext := FPageHead;
   FPageHead := NewPage;
-  
+
   Inc(NewPage, SizeOf(Pointer));
-  for index := FNodesPerPage - 1 downto 0 do
+  for I := FNodesPerPage - 1 downto 0 do
   begin
     FreeNode(NewPage);
     Inc(NewPage, FNodeSize);
@@ -338,7 +346,7 @@ end;
 
 function TCnNodeManager.AllocNodeClear: Pointer;
 begin
-  if (FFreeList = nil) then
+  if FFreeList = nil then
     AllocNewPage;
 
   Result := FFreeList;
@@ -364,7 +372,7 @@ end;
 destructor TCnBaseNode.Destroy;
 begin
   FNodeMgr := nil;
-  inherited Destroy;
+  inherited;
 end;
 
 constructor TCnStrIntfMap.Create(ANodeSize: Integer);
@@ -377,7 +385,7 @@ destructor TCnStrIntfMap.Destroy;
 begin
   Clear;
   FreeAndNil(FItems);
-  inherited Destroy;
+  inherited;
 end;
 
 procedure TCnStrIntfMap.Add(const Key: string; Value: IUnknown);
@@ -469,7 +477,7 @@ destructor TCnRoFiles.Destroy;
 begin
   Clear;
   FreeAndNil(FItems);
-  inherited Destroy;
+  inherited;
 end;
 
 procedure TCnRoFiles.AddFile(AFileName: string);
@@ -496,9 +504,7 @@ var
   I: Integer;
 begin
   for I := FItems.Count - 1 downto 0 do
-  begin
     Delete(I);
-  end;
 end;
 
 function TCnRoFiles.Count: Integer;
@@ -568,7 +574,7 @@ var
   AParam: array[0..2] of string;
   P, Start: PChar;
 begin
-  if (AnsiPos(SSeparator, AValue) = 0) then
+  if AnsiPos(SSeparator, AValue) = 0 then
     Exit;
   
   P := Pointer(AValue);
@@ -576,13 +582,15 @@ begin
   while P^ <> #0 do
   begin
     Start := P;
-    while not CharInSet(P^, [#0, SSeparator]) do Inc(P);
+    while not CharInSet(P^, [#0, SSeparator]) do
+      Inc(P);
     System.SetString(AParam[I], Start, P - Start);
     Inc(I);
-    if P^ = SSeparator then Inc(P);
+    if P^ = SSeparator then
+      Inc(P);
   end;
 
-  if (not FileExists(AParam[0])) then
+  if not FileExists(AParam[0]) then
     Exit;
   
   if (Index > Count - 1) or (Index < 0) then
@@ -604,19 +612,21 @@ end;
 
 procedure TCnRoFiles.UpdateTime(AIndex: Integer; AOpenedTime, AClosingTime: string);
 begin
-  if (AIndex < 0) then
+  if AIndex < 0 then
     Exit;
 
   with PCnRoFileEntry(FItems[AIndex])^ do
   begin
-    if (AOpenedTime <> '') then OpenedTime := AOpenedTime;
-    if (AClosingTime <> '') then ClosingTime := AClosingTime;
+    if (AOpenedTime <> '') then
+      OpenedTime := AOpenedTime;
+    if (AClosingTime <> '') then
+      ClosingTime := AClosingTime;
   end;
 end;
 
 constructor TCnIniContainer.Create;
 begin
-  inherited Create;
+  inherited;
   CheckForIni;
   FIniFile := TMemIniFile.Create(GetIniFileName);
   CreateRoFilesList;
@@ -628,7 +638,7 @@ begin
   SaveAll;
   FreeAndNil(FIniFile);
   DestroyRoFilesList;
-  inherited Destroy;
+  inherited;
 end;
 
 procedure TCnIniContainer.CheckForIni;
@@ -753,7 +763,8 @@ begin
     try
       Strings.Clear;
       I := Sections.IndexOf(ASection);
-      if I < 0 then Exit;
+      if I < 0 then
+        Exit;
 
       SectionStrings := TStringList.Create;
       try
@@ -852,9 +863,7 @@ begin
     else if vFiles.Capacity < vFiles.Count then
     begin
       for I := 0 to (vFiles.Count - vFiles.Capacity) do
-      begin
         vFiles.Delete(I);
-      end;
     end;
     SetTime(AFileName, vFiles.Count - 1);
   end;
@@ -942,14 +951,13 @@ begin
     WriteBool(SDefaults, SSortPersistance, GetSortPersistance);
     WriteBool(SDefaults, SLocalDate, GetLocalDate);
     WriteInteger(SDefaults, SAutoSaveInterval, FAutoSaveInterval);
-    //WriteBool(SDefaults, SColumnPersistance, GetColumnPersistance);
-    //WriteBool(SDefaults, SFormPersistance, GetFormPersistance);
+
     for I := LowFileType to HighFileType do
     begin
       WriteInteger(SCapacity, FileType[I], Files[FileType[I]].Capacity);
       WriteString(SPersistance, SColumnSorting + FileType[I], Files[FileType[I]].ColumnSorting);
     end;
-  end; //end with
+  end;
   UpdateIniFile;
 end;
 
@@ -996,9 +1004,7 @@ begin
   begin
     EraseSection(ASection);
     for I := 0 to Count - 1 do
-    begin
       WriteString(ASection, SFilePrefix + IntToStr(I), GetString(I));
-    end;
   end;
 end;
 
