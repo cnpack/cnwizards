@@ -359,36 +359,52 @@ begin
     Exit;
 
   IDEs := GetIDEImageList;
-  if IDEs <> nil then
-  begin
-    Cnt := IDEs.Count;
+  if IDEs = nil then
+    Exit;
+
 {$IFDEF DELPHI_OTA}
+  Cnt := IDEs.Count;
 {$IFDEF IDE_SUPPORT_HDPI}
-    if WizOptions.UseLargeIcon then
-    begin
-      // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了，而且由于分辨率变化，FLargeOffset 得另求
-      CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
-      FLargeIDEOffset := FIDELargeVirtualImages.Count;
-      FIDELargeVirtualImages.Clear;   // 这段只用来求 FIDELargeOffset
-    end;
-    CopyImageListToVirtual(Images, IDEs as TVirtualImageList, 'CnWizardsItem');
+  if WizOptions.UseLargeIcon then
+  begin
+    // D11 及其以后，IDE 的主 ImageList 变 VirtualImageList 了，而且由于分辨率变化，FLargeOffset 得另求
+    CopyVirtualImageList(IDEs as TVirtualImageList, FIDELargeVirtualImages);
+    FLargeIDEOffset := FIDELargeVirtualImages.Count;
+    FIDELargeVirtualImages.Clear;   // 这段只用来求 FIDELargeOffset
+  end;
+  CopyImageListToVirtual(Images, IDEs as TVirtualImageList, 'CnWizardsItem');
 {$IFDEF DEBUG}
-    CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d. LargeOffset %d', [Images.Count, Cnt, FLargeIDEOffset]);
+  CnDebugger.LogFmt('Add %d Images to IDE Main VirtualImageList. Offset %d. LargeOffset %d', [Images.Count, Cnt, FLargeIDEOffset]);
 {$ENDIF}
 {$ELSE}
-    if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
-    begin
-      IDEs.AddImages(Images);
+  if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+  begin
+    IDEs.AddImages(Images);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('Add %d Images to IDE Main 16x16 ImageList. Offset %d.', [Images.Count, Cnt]);
+    CnDebugger.LogFmt('Add %d Images to IDE Main 16x16 ImageList. Offset %d.', [Images.Count, Cnt]);
 {$ENDIF}
-    end;
+  end;
 {$ENDIF}
-{$ENDIF}
-
+  FIDEOffset := Cnt;
+  FCopied := True;
+{$ELSE}
+  // Lazarus：与 Delphi 一样，把 CnPack 图标追加到 IDE 主图列表，
+  // 实现 GetMixedImageList/CalcMixedImageIndex 的混合图列表机制。
+  // 之前此处未拷贝却置了 FCopied 与 FIDEOffset，导致工具栏/菜单全部
+  // 显示成 IDE 自带图标错位后的样子
+  if (IDEs.Width = Images.Width) and (IDEs.Height = Images.Height) then
+  begin
+    Cnt := IDEs.Count;
+    IDEs.AddImages(Images);
     FIDEOffset := Cnt;
     FCopied := True;
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('Add %d Images to IDE Main ImageList (Lazarus). Offset %d.', [Images.Count, Cnt]);
+{$ENDIF}
   end;
+  // 尺寸不符（如高分屏缩放）时不置 FCopied，GetMixedImageList 将回退到
+  // 自有的 Images 列表、CalcMixedImageIndex 不加偏移，图标依然正确
+{$ENDIF}
 end;
 
 {$IFNDEF STAND_ALONE}
