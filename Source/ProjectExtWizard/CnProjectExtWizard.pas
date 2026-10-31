@@ -77,7 +77,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
-  {$IFDEF LAZARUS} LCLProc, {$ENDIF}
+  {$IFDEF LAZARUS} LCLProc, IDECommands, MenuIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles, ShellAPI, Menus, FileCtrl,
   {$IFDEF BDS} Variants, {$ENDIF} ComCtrls, {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
@@ -127,6 +127,21 @@ type
     FCorIdeModule: HModule;
     FMethodHook: TCnMethodHook;
     FOldViewDialogExecute: Pointer;
+{$IFDEF LAZARUS}
+    // Lazarus 下的 IDE 命令挂接（取代机器码钩子，覆盖菜单/工具栏/快捷键三个入口）
+    FUnitsMenuCmd: TIDEMenuCommand;        // 工程菜单中的"查看单元"命令项
+    FFormsMenuCmd: TIDEMenuCommand;        // 工程菜单中的"查看窗体"命令项
+    FUnitsIDECommand: TIDECommand;         // 对应的 IDE 命令对象（工具栏按钮绑定）
+    FFormsIDECommand: TIDECommand;
+    FOldViewUnitsMenuClick: TNotifyEvent;  // 原 OnClick（TMainIDE.mnuViewUnitsClicked）
+    FOldViewFormsMenuClick: TNotifyEvent;
+    FOldUnitsCmdExecute: TNotifyEvent;     // 原 OnExecute（ec 命令通常为空）
+    FOldFormsCmdExecute: TNotifyEvent;
+    FOldUnitsCmdExecuteProc: TNotifyProcedure;
+    FOldFormsCmdExecuteProc: TNotifyProcedure;
+    FOldExecuteIDECommand: TExecuteIDECommand; // 原中央分发（快捷键路径）
+    FHooksInstalled: Boolean;
+{$ENDIF}
 {$IFNDEF LAZARUS} // 类型来自 CnInputSymbolList，Lazarus 侧暂未引入；列表本就未创建
     FPasUnitNameList: TCnUnitNameList;
     FCppUnitNameList: TCnUnitNameList;
@@ -141,6 +156,21 @@ type
     procedure ExploreExe;
     procedure FormsListActionOnExecute(Sender: TObject);
     procedure UnitsListActionOnExecute(Sender: TObject);
+{$IFDEF LAZARUS}
+    procedure LazInstallHooks;
+    {* 查找并替换 IDE 的查看单元/窗体命令入口（菜单 + 工具栏 + 中央分发）}
+    procedure LazUninstallHooks;
+    {* 还原全部挂接}
+    procedure LazViewUnitsExec(Sender: TObject);
+    {* 挂接后的"查看单元"执行体：按开关决定显示 CnPack 列表或调用原行为}
+    procedure LazViewFormsExec(Sender: TObject);
+    {* 挂接后的"查看窗体"执行体}
+    function LazExecuteIDECommand(Sender: TObject; Command: word): Boolean;
+    {* 中央分发包装器：拦截查看单元/窗体的命令字，其余透传}
+    function FindMenuCmd(ASection: TIDEMenuSection;
+      const AName: string): TIDEMenuCommand;
+    {* 在菜单 section 及其子 section 中递归查找指定名称的命令项}
+{$ENDIF}
   {$IFDEF SUPPORT_USE_UNIT}
     procedure UseUnitActionOnExecute(Sender: TObject);
   {$ENDIF}
@@ -245,6 +275,9 @@ end;
 
 destructor TCnProjectExtWizard.Destroy;
 begin
+{$IFDEF LAZARUS}
+  LazUninstallHooks;
+{$ENDIF}
   CnWizCmdNotifier.RemoveCmdNotifier(CommandNotify);
 
 {$IFNDEF LAZARUS}
@@ -320,6 +353,11 @@ begin
   // 更新对应 IDE 的 Action
   if Active then
     UpdateActionHook(UnitsListHookBtnChecked, FormsListHookBtnChecked, UseUnitsHookBtnChecked);
+
+{$IFDEF LAZARUS}
+  // Lazarus：挂接 IDE 的查看单元/窗体命令（菜单 + 工具栏 + 快捷键）
+  LazInstallHooks;
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -856,6 +894,188 @@ begin
   // FFormsListAction.OnExecute := FOldFormNotifyEvent;
   // FUseUnitAction.OnExecute := FOldUseUnitNotifyEvent;
 end;
+
+{$IFDEF LAZARUS}
+
+// 在菜单 section 及其子 section 中递归查找指定名称的命令项
+function TCnProjectExtWizard.FindMenuCmd(ASection: TIDEMenuSection;
+  const AName: string): TIDEMenuCommand;
+var
+  I: Integer;
+  Child: TIDEMenuItem;
+begin
+  Result := nil;
+  if ASection = nil then
+    Exit;
+
+  // 先查直接子命令项
+  if ASection.FindByName(AName) is TIDEMenuCommand then
+    Result := TIDEMenuCommand(ASection.FindByName(AName));
+
+  // 再递归查子 section
+  if Result = nil then
+    for I := 0 to ASection.Count - 1 do
+    begin
+      Child := ASection.Items[I];
+      if Child is TIDEMenuSection then
+      begin
+        Result := FindMenuCmd(TIDEMenuSection(Child), AName);
+        if Result <> nil then
+          Exit;
+      end;
+    end;
+end;
+
+// 查找并替换 IDE 的查看单元/窗体命令入口
+procedure TCnProjectExtWizard.LazInstallHooks;
+var
+  Section: TIDEMenuSection;
+begin
+  if FHooksInstalled then
+    Exit;
+
+  // 1. IDE 命令对象（工具栏按钮绑定的就是它）
+  FUnitsIDECommand := IDECommandList.FindIDECommand(ecViewProjectUnits);
+  FFormsIDECommand := IDECommandList.FindIDECommand(ecViewProjectForms);
+
+  // 2. 工程菜单中的命令项（递归查找，位置可能随 IDE 版本调整）
+  Section := IDEMenuRoots.FindByName('Project');
+  if Section <> nil then
+  begin
+    FUnitsMenuCmd := FindMenuCmd(Section, 'itmProjectViewUnits');
+    FFormsMenuCmd := FindMenuCmd(Section, 'itmProjectViewForms');
+  end;
+
+  // 3. 保存原值并替换。菜单 OnClick 与命令 OnExecute 都指向同一执行体，
+  //    执行体内部再按挂接开关决定显示 CnPack 列表还是回退原行为
+  if FUnitsIDECommand <> nil then
+  begin
+    FOldUnitsCmdExecute := FUnitsIDECommand.OnExecute;
+    FOldUnitsCmdExecuteProc := FUnitsIDECommand.OnExecuteProc;
+    FUnitsIDECommand.OnExecute := LazViewUnitsExec;
+  end;
+  if FFormsIDECommand <> nil then
+  begin
+    FOldFormsCmdExecute := FFormsIDECommand.OnExecute;
+    FOldFormsCmdExecuteProc := FFormsIDECommand.OnExecuteProc;
+    FFormsIDECommand.OnExecute := LazViewFormsExec;
+  end;
+
+  if FUnitsMenuCmd <> nil then
+  begin
+    FOldViewUnitsMenuClick := FUnitsMenuCmd.OnClick;
+    FUnitsMenuCmd.OnClick := LazViewUnitsExec;
+  end;
+  if FFormsMenuCmd <> nil then
+  begin
+    FOldViewFormsMenuClick := FFormsMenuCmd.OnClick;
+    FFormsMenuCmd.OnClick := LazViewFormsExec;
+  end;
+
+  // 4. 中央分发（快捷键等入口），包装器只拦截两个命令字、其余透传
+  FOldExecuteIDECommand := OnExecuteIDECommand;
+  OnExecuteIDECommand := LazExecuteIDECommand;
+
+  FHooksInstalled := (FUnitsMenuCmd <> nil) or (FUnitsIDECommand <> nil)
+    or (FFormsMenuCmd <> nil) or (FFormsIDECommand <> nil);
+
+{$IFDEF DEBUG}
+  if not FHooksInstalled then
+    CnDebugger.LogMsgError('ProjExt: Laz Hook Install Failed. No Entry Found.');
+{$ENDIF}
+end;
+
+// 还原全部挂接
+procedure TCnProjectExtWizard.LazUninstallHooks;
+begin
+  if not FHooksInstalled then
+    Exit;
+
+  if IdeClosing then
+  begin
+    // IDE 关闭阶段菜单与命令对象可能已随 IDE 释放，不触碰，放弃引用即可
+    FUnitsMenuCmd := nil;
+    FFormsMenuCmd := nil;
+    FUnitsIDECommand := nil;
+    FFormsIDECommand := nil;
+    FOldExecuteIDECommand := nil;
+    FHooksInstalled := False;
+    Exit;
+  end;
+
+  if FUnitsIDECommand <> nil then
+  begin
+    FUnitsIDECommand.OnExecute := FOldUnitsCmdExecute;
+    FUnitsIDECommand.OnExecuteProc := FOldUnitsCmdExecuteProc;
+  end;
+  if FFormsIDECommand <> nil then
+  begin
+    FFormsIDECommand.OnExecute := FOldFormsCmdExecute;
+    FFormsIDECommand.OnExecuteProc := FOldFormsCmdExecuteProc;
+  end;
+
+  if FUnitsMenuCmd <> nil then
+    FUnitsMenuCmd.OnClick := FOldViewUnitsMenuClick;
+  if FFormsMenuCmd <> nil then
+    FFormsMenuCmd.OnClick := FOldViewFormsMenuClick;
+
+  OnExecuteIDECommand := FOldExecuteIDECommand;
+
+  FUnitsMenuCmd := nil;
+  FFormsMenuCmd := nil;
+  FUnitsIDECommand := nil;
+  FFormsIDECommand := nil;
+  FOldExecuteIDECommand := nil;
+  FHooksInstalled := False;
+end;
+
+// 挂接后的"查看单元"执行体
+procedure TCnProjectExtWizard.LazViewUnitsExec(Sender: TObject);
+begin
+  if Active and UnitsListHookBtnChecked then
+    SubActionExecute(IdViewUnits)   // CnPack 列表对话框内部自行打开选中文件
+  else if Assigned(FOldViewUnitsMenuClick) then
+    FOldViewUnitsMenuClick(Sender)  // 原生"查看单元"对话框
+  else if Assigned(FOldUnitsCmdExecute) then
+    FOldUnitsCmdExecute(Sender)
+  else if Assigned(FOldUnitsCmdExecuteProc) then
+    FOldUnitsCmdExecuteProc(Sender);
+end;
+
+// 挂接后的"查看窗体"执行体
+procedure TCnProjectExtWizard.LazViewFormsExec(Sender: TObject);
+begin
+  if Active and FormsListHookBtnChecked then
+    SubActionExecute(IdViewForms)
+  else if Assigned(FOldViewFormsMenuClick) then
+    FOldViewFormsMenuClick(Sender)
+  else if Assigned(FOldFormsCmdExecute) then
+    FOldFormsCmdExecute(Sender)
+  else if Assigned(FOldFormsCmdExecuteProc) then
+    FOldFormsCmdExecuteProc(Sender);
+end;
+
+// 中央分发包装器：只拦截两个命令字，其余透传给 IDE 原处理器
+function TCnProjectExtWizard.LazExecuteIDECommand(Sender: TObject;
+  Command: word): Boolean;
+begin
+  if Command = ecViewProjectUnits then
+  begin
+    LazViewUnitsExec(Sender);
+    Result := True;
+  end
+  else if Command = ecViewProjectForms then
+  begin
+    LazViewFormsExec(Sender);
+    Result := True;
+  end
+  else if Assigned(FOldExecuteIDECommand) then
+    Result := FOldExecuteIDECommand(Sender, Command)
+  else
+    Result := False;
+end;
+
+{$ENDIF}
 
 // 处理挂接
 procedure TCnProjectExtWizard.UpdateMethodHook(HookUseUnit: Boolean);
