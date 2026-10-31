@@ -319,6 +319,10 @@ var
     end;
   end;
 {$ENDIF}
+{$IFDEF LAZARUS}
+  UnitFileName, ProjName, ProjFileName, Ext: string;
+  SlUnits: TStringList;
+{$ENDIF}
 begin
   ProjectInterfaceList := TCnIDEInterfaceList.Create;
   try
@@ -411,7 +415,69 @@ begin
       end;
 {$ENDIF}
 {$IFDEF LAZARUS}
-      // TODO: 从 ProjectInterfaceList 中拿东西
+      SlUnits := TStringList.Create;
+      try
+        for I := 0 to ProjectInterfaceList.Count - 1 do
+        begin
+          ProjName := CnOtaGetLazProjectDisplayName(ProjectInterfaceList[I]);
+          if ProjName = '' then
+            Continue;
+
+          ProjFileName := CnOtaGetLazProjectFileName(ProjectInterfaceList[I]);
+
+          ProjectInfo := TCnProjectInfo.Create;
+          ProjectInfo.Name := ProjName;
+          ProjectInfo.FileName := ProjFileName;
+
+          if CnOtaGetLazProjectFiles(ProjectInterfaceList[I], SlUnits) then
+          begin
+            for J := 0 to SlUnits.Count - 1 do
+            begin
+              UnitFileName := SlUnits[J];
+              if UnitFileName = '' then
+                Continue;
+
+              Ext := UpperCase(_CnExtractFileExt(UnitFileName));
+              if (Ext <> '.PAS') and (Ext <> '.PP') then
+                Continue;
+
+              FormFileName := _CnChangeFileExt(UnitFileName, '.lfm');
+              if not FileExists(FormFileName) then
+                Continue;
+
+              FormInfo := TCnFormInfo.Create;
+              with FormInfo do
+              begin
+                FileName := FormFileName;
+                Project := ProjName;
+                IsOpened := CnOtaIsFileOpen(UnitFileName);
+
+                if FileExists(FormFileName) then
+                begin
+                  Size := GetFileSize(FormFileName);
+                  // LFM 与 DFM 文本格式兼容，直接复用解析器取 Name/FormClass/Caption
+                  ParseDfmFile(FormFileName, FormInfo.DfmInfo);
+                end
+                else
+                begin
+                  Size := 0;
+                  FDfmInfo.Format := dfUnknown;
+                end;
+              end;
+
+              FormInfo.Text := FormInfo.DfmInfo.Name;
+              FillFormInfo(FormInfo);
+              FormInfo.ParentProject := ProjectInfo;
+              DataList.AddObject(FormInfo.DfmInfo.Name, FormInfo);
+            end;
+          end;
+
+          SlUnits.Clear;
+          ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
+        end;
+      finally
+        SlUnits.Free;
+      end;
 {$ENDIF}
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);

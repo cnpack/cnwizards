@@ -230,6 +230,29 @@ end;
 
 { TCnProjectFramesForm }
 
+{$IFDEF LAZARUS}
+function PasIsFrame(const APasFileName: string): Boolean;
+{* 判断 Pas 源码中是否声明了 TFrame 后代类（Lazarus 下的 Frame 判定）}
+var
+  Sl: TStringList;
+  K: Integer;
+begin
+  Result := False;
+  Sl := TStringList.Create;
+  try
+    Sl.LoadFromFile(APasFileName);
+    for K := 0 to Sl.Count - 1 do
+      if Pos('= class(TFrame)', Sl[K]) > 0 then
+      begin
+        Result := True;
+        Break;
+      end;
+  finally
+    Sl.Free;
+  end;
+end;
+{$ENDIF}
+
 procedure TCnProjectFramesForm.CreateList;
 var
   ProjectInfo: TCnProjectInfo;
@@ -237,6 +260,11 @@ var
   I, J: Integer;
   FormFileName: string;
   ProjectInterfaceList: TCnIDEInterfaceList;
+{$IFDEF LAZARUS}
+  UnitFileName, ProjName, ProjFileName, Ext: string;
+  SlUnits: TStringList;
+  IsFrame: Boolean;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
   IProject: IOTAProject;
   IModuleInfo: IOTAModuleInfo;
@@ -404,7 +432,73 @@ begin
       end;
 {$ENDIF}
 {$IFDEF LAZARUS}
-    // TODO: Lazarus 下从 ProjectInterfaceList 中取
+  // Lazarus：遍历各工程单元，源码声明了 TFrame 后代且有同名 .lfm 的即为 Frame
+  SlUnits := TStringList.Create;
+  try
+    for I := 0 to ProjectInterfaceList.Count - 1 do
+    begin
+      ProjName := CnOtaGetLazProjectDisplayName(ProjectInterfaceList[I]);
+      if ProjName = '' then
+        Continue;
+
+      ProjFileName := CnOtaGetLazProjectFileName(ProjectInterfaceList[I]);
+
+      ProjectInfo := TCnProjectInfo.Create;
+      ProjectInfo.Name := ProjName;
+      ProjectInfo.FileName := ProjFileName;
+
+      if CnOtaGetLazProjectFiles(ProjectInterfaceList[I], SlUnits) then
+      begin
+        for J := 0 to SlUnits.Count - 1 do
+        begin
+          UnitFileName := SlUnits[J];
+          if UnitFileName = '' then
+            Continue;
+
+          Ext := UpperCase(_CnExtractFileExt(UnitFileName));
+          if (Ext <> '.PAS') and (Ext <> '.PP') then
+            Continue;
+
+          FormFileName := _CnChangeFileExt(UnitFileName, '.lfm');
+          if not FileExists(FormFileName) then
+            Continue;
+
+          IsFrame := PasIsFrame(UnitFileName);
+          if not IsFrame then
+            Continue;
+
+          FormInfo := TCnFormInfo.Create;
+          with FormInfo do
+          begin
+            FileName := FormFileName;
+            Project := ProjName;
+            IsOpened := CnOtaIsFileOpen(UnitFileName);
+
+            if FileExists(FormFileName) then
+            begin
+              Size := GetFileSize(FormFileName);
+              ParseDfmFile(FormFileName, FormInfo.DfmInfo);
+            end
+            else
+            begin
+              Size := 0;
+              DfmInfo.Format := dfUnknown;
+            end;
+          end;
+
+          FormInfo.Text := FormInfo.DfmInfo.Name;
+          FillFormInfo(FormInfo);
+          FormInfo.ParentProject := ProjectInfo;
+          DataList.AddObject(FormInfo.DfmInfo.Name, FormInfo);
+        end;
+      end;
+
+      SlUnits.Clear;
+      ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
+    end;
+  finally
+    SlUnits.Free;
+  end;
 {$ENDIF}
     except
       raise Exception.Create(SCnProjExtCreatePrjListError);

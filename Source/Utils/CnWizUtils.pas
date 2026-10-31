@@ -609,6 +609,25 @@ function CnOtaGetBlockIndent: Integer;
 procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 {* 取得所有工程列表。Delphi 中是 IOTAProject 接口实例，Lazarus 中则不同}
 
+{$IFDEF LAZARUS}
+function CnOtaGetLazProjectFileName(Item: TObject): string;
+{* Lazarus 下取列表项对应工程的文件完整路径（.lpi 或 .lpk），
+   Item 可为 TLazProject 或 TPGCompileTarget，未知项返回空串}
+
+function CnOtaGetLazProjectDisplayName(Item: TObject): string;
+{* Lazarus 下取 CnOtaGetProjectList 列表项对应工程的显示名（.lpi/.lpk 文件名）。
+   Item 可为 TLazProject（无工程组时的当前活动工程）或 TPGCompileTarget
+   （有工程组时的 Target，类型为 Project 或 Package）}
+
+function CnOtaGetLazProjectFiles(Item: TObject; Files: TStrings;
+  OnlyPartOfProject: Boolean = True): Boolean;
+{* Lazarus 下取列表项对应工程的全部源文件。
+   Item 为 TLazProject 时直接遍历其内存文件表（OnlyPartOfProject 生效）；
+   Item 为 TPGCompileTarget 时走其 GetFileCount/GetFiles（惰性加载：活动工程
+   取内存，非活动工程自动解析其 .lpi/.lpk；此时 OnlyPartOfProject 不生效）。
+   返回 False 表示该项不提供文件列表}
+{$ENDIF}
+
 function CnOtaGetProjectCountFromGroup: Integer;
 {* 取当前工程组中工程数，无工程组返回 -1}
 
@@ -4953,6 +4972,65 @@ begin
   end;
 {$ENDIF}
 end;
+
+{$IFDEF LAZARUS}
+
+// Lazarus：取列表项对应工程的文件完整路径
+function CnOtaGetLazProjectFileName(Item: TObject): string;
+begin
+  Result := '';
+  if Item = nil then
+    Exit;
+
+  if Item is TLazProject then
+    Result := TLazProject(Item).ProjectInfoFile
+  else if Item is TPGCompileTarget then
+    Result := TPGCompileTarget(Item).Filename;
+end;
+
+// Lazarus：取列表项对应工程的显示名
+function CnOtaGetLazProjectDisplayName(Item: TObject): string;
+begin
+  Result := '';
+  if Item = nil then
+    Exit;
+
+  if Item is TLazProject then
+    Result := ExtractFileName(TLazProject(Item).ProjectInfoFile)
+  else if Item is TPGCompileTarget then
+    Result := ExtractFileName(TPGCompileTarget(Item).Filename);
+end;
+
+// Lazarus：取列表项对应工程的全部源文件
+function CnOtaGetLazProjectFiles(Item: TObject; Files: TStrings;
+  OnlyPartOfProject: Boolean): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  if (Item = nil) or (Files = nil) then
+    Exit;
+
+  if Item is TLazProject then
+  begin
+    // 无工程组：当前活动工程，直接遍历内存中的文件表
+    for I := 0 to TLazProject(Item).FileCount - 1 do
+      if (not OnlyPartOfProject
+        or TLazProject(Item).Files[I].IsPartOfProject) then
+        Files.Add(TLazProject(Item).Files[I].Filename);
+    Result := True;
+  end
+  else if Item is TPGCompileTarget then
+  begin
+    // 有工程组：走 Target 的文件表（惰性加载——活动工程取内存，
+    // 非活动工程由其解析 .lpi/.lpk 得到；返回的已是工程内文件）
+    for I := 0 to TPGCompileTarget(Item).FileCount - 1 do
+      Files.Add(TPGCompileTarget(Item).Files[I]);
+    Result := True;
+  end;
+end;
+
+{$ENDIF}
 
 // 取当前工程组中工程数，无工程组返回 -1
 function CnOtaGetProjectCountFromGroup: Integer;
