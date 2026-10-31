@@ -1,0 +1,107 @@
+object FormPPUInfo: TFormPPUInfo
+  Left = 200
+  Height = 520
+  Top = 120
+  Width = 580
+  Caption = 'Test CnPPUInfo - Parse PPU via ppudump (Intf/Impl Uses + Exported Idents)'
+  ClientHeight = 520
+  ClientWidth = 580
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Position = poScreenCenter
+  LCLVersion = '4.0.0.4'
+  object lblDump: TLabel
+    Left = 8
+    Height = 13
+    Top = 12
+    Width = 76
+    Caption = 'ppudump.exe'
+  end
+  object edtPpuDump: TEdit
+    Left = 88
+    Height = 21
+    Top = 8
+    Width = 400
+    TabOrder = 0
+  end
+  object btnFindDump: TButton
+    Left = 496
+    Height = 25
+    Top = 6
+    Width = 72
+    Caption = 'Find...'
+    OnClick = btnFindDumpClick
+    TabOrder = 1
+  end
+  object lbl1: TLabel
+    Left = 8
+    Height = 13
+    Top = 44
+    Width = 48
+    Caption = 'PPU File'
+  end
+  object edtPPUFile: TEdit
+    Left = 88
+    Height = 21
+    Top = 40
+    Width = 400
+    Text = '..\..\..\..\Source\lib\i386-win32\CnCommon.ppu'
+    TabOrder = 2
+  end
+  object btnOpen: TButton
+    Left = 496
+    Height = 25
+    Top = 38
+    Width = 72
+    Caption = 'Open...'
+    OnClick = btnOpenClick
+    TabOrder = 3
+  end
+  object btnDump: TButton
+    Left = 88
+    Height = 25
+    Top = 72
+    Width = 120
+    Caption = 'Parse PPU!'
+    OnClick = btnDumpClick
+    TabOrder = 4
+  end
+  object btnScanDir: TButton
+    Left = 216
+    Height = 25
+    Top = 72
+    Width = 120
+    Caption = 'Scan Dir...'
+    OnClick = btnScanDirClick
+    TabOrder = 5
+  end
+  object btnRTL: TButton
+    Left = 344
+    Height = 25
+    Top = 72
+    Width = 200
+    Caption = 'Parse FPC RTL sysutils.ppu'
+    OnClick = btnRTLClick
+    TabOrder = 6
+  end
+  object mmoPPU: TMemo
+    Left = 8
+    Height = 400
+    Top = 108
+    Width = 560
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    ScrollBars = ssAutoBoth
+    TabOrder = 7
+  end
+  object dlgOpen1: TOpenDialog
+    Filter = 'PPU Files|*.ppu|All Files|*.*'
+    Left = 500
+    Top = 120
+  end
+  object dlgScanDir: TSelectDirectoryDialog
+    Left = 500
+    Top = 180
+  end
+end

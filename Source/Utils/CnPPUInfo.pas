@@ -80,16 +80,25 @@ type
   end;
 
 function GetPpuDumpFileName: string;
-{* 从 IDE 环境选项中取得 FPC 编译器路径并推导同目录下 ppudump.exe 的位置，
-   找不到时返回空串}
+{* 取得 ppudump.exe 的完整路径：优先使用 CnPpuDumpExeName 的预设值（供独立
+   测试程序等 IDE 外环境使用），否则从 IDE 环境选项推导，找不到返回空串}
+
+var
+  {* 预设的 ppudump.exe 完整路径。IDE 内可不设置（自动从环境选项推导），
+     IDE 外的独立程序（如测试工程）必须设置，否则解析失败}
+  CnPpuDumpExeName: string = '';
 
 implementation
 
 uses
-  Process, LazIDEIntf, IDEOptionsIntf;
+  CnStdio, LazIDEIntf, IDEOptionsIntf;
 
 function GetPpuDumpFileName: string;
 begin
+  Result := Trim(CnPpuDumpExeName);
+  if (Result <> '') and FileExists(Result) then
+    Exit;
+
   Result := '';
   if (IDEEnvironmentOptions <> nil) then
   begin
@@ -108,9 +117,7 @@ end;
 constructor TCnPPUFile.Create(const PpuName: string);
 var
   DumpExe: string;
-  AProcess: TProcess;
-  MemStream: TMemoryStream;
-  Sl: TStringList;
+  Process: TCnStdioProcess;
 begin
   inherited Create;
   FFileName := PpuName;
@@ -125,34 +132,24 @@ begin
   if DumpExe = '' then
     Exit;
 
-  AProcess := TProcess.Create(nil);
+  // 用 cnvcl 的 CnStdio 执行 ppudump：其内部读线程持续收集输出，
+  // 天然避免了 poWaitOnExit + 管道方式在大输出下的死锁问题
+  Process := TCnStdioProcess.Create;
   try
-    AProcess.Executable := DumpExe;
-    AProcess.Parameters.Add(PpuName);
-    AProcess.Options := AProcess.Options + [poWaitOnExit, poUsePipes,
-      poNoConsole, poStderrToOutPut];
-    try
-      AProcess.Execute;
-    except
-      Exit; // 工具执行失败按解析失败处理
-    end;
+    Process.ApplicationName := DumpExe;
+    // 完整命令行须包含可执行文件本身，保证子进程 ParamStr(1) 为 PPU 路径
+    Process.CommandLine := '"' + DumpExe + '" "' + PpuName + '"';
+    Process.CreateNoWindow := True;
 
-    MemStream := TMemoryStream.Create;
-    try
-      MemStream.CopyFrom(AProcess.Output, AProcess.Output.NumBytesAvailable);
-      MemStream.Position := 0;
-      Sl := TStringList.Create;
-      try
-        Sl.LoadFromStream(MemStream);
-        ParseFromDump(Sl.Text);
-      finally
-        Sl.Free;
-      end;
-    finally
-      MemStream.Free;
-    end;
+    if not Process.Start then
+      Exit; // 工具启动失败按解析失败处理
+
+    // 输出由 CnStdio 的内部线程收集，这里只需等进程退出
+    Process.WaitFor(INFINITE);
+
+    ParseFromDump(Process.StdOutText);
   finally
-    AProcess.Free;
+    Process.Free;
   end;
 end;
 
@@ -199,6 +196,11 @@ begin
     begin
       Line := Trim(Sl[I]);
 
+      // ppudump 正常解析 PPU 时必然输出 "Module Name: xxx"，
+      // 据此判定输入确实是 PPU 文件（如误传 .pas 则 Valid 为 False）
+      if Pos('Module Name: ', Line) = 1 then
+        FValid := True;
+
       if Pos('Implementation section', Line) = 1 then
       begin
         InImpl := True;
@@ -242,7 +244,6 @@ begin
         end;
       end;
     end;
-    FValid := True;
   finally
     Sl.Free;
   end;
