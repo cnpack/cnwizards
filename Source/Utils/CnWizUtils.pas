@@ -608,7 +608,11 @@ function CnOtaGetBlockIndent: Integer;
 procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 {* 取得所有工程列表。Delphi 中是 IOTAProject 接口实例，Lazarus 中则不同}
 
+function CnOtaGetCurrentEditControl: TWinControl;
+{* 以 OTA 的方式取当前的 EditControl 控件。兼容 Lazarus，取得其 TSynEdit 编辑器控件}
+
 {$IFDEF LAZARUS}
+
 function CnOtaGetLazProjectFileName(Item: TObject): string;
 {* Lazarus 下取列表项对应工程的文件完整路径（.lpi 或 .lpk），
    Item 可为 TLazProject 或 TPGCompileTarget，未知项返回空串}
@@ -625,6 +629,20 @@ function CnOtaGetLazProjectFiles(Item: TObject; Files: TStrings;
    Item 为 TPGCompileTarget 时走其 GetFileCount/GetFiles（惰性加载：活动工程
    取内存，非活动工程自动解析其 .lpi/.lpk；此时 OnlyPartOfProject 不生效）。
    返回 False 表示该项不提供文件列表}
+
+function CnOtaGetOpenedLazPackages(Pkgs: TList): Integer;
+{* Lazarus 下取当前在包编辑器中打开的 lpk 包对象列表（TIDEPackage）。
+   经扫描类名为 TPackageEditorForm 的 IDE 窗体并经 RTTI 读取其 LazPackage
+   属性实现，避免直接引用 IDE 内部单元。Pkgs 为 nil 时仅返回数量}
+
+function CnOtaGetLazPackageFileName(Item: TObject): string;
+{* Lazarus 下取打开的 lpk 包对象（TIDEPackage）的 .lpk 文件完整路径}
+
+function CnOtaGetLazPackageFiles(Item: TObject; Files: TStrings): Boolean;
+{* Lazarus 下取打开的 lpk 包的文件列表，首项为 .lpk 自身，其后为包内实际
+   存在的单元与包含文件（LFM/LRS/虚拟单元等不列入）。
+   返回 False 表示 Item 不是 TIDEPackage}
+
 {$ENDIF}
 
 function CnOtaGetProjectCountFromGroup: Integer;
@@ -687,8 +705,6 @@ function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
 function CnOtaGetCurrentEditWindow(CheckScreen: Boolean = False): TCustomForm;
 {* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历 Screen 的 Form 们，但在有多个 EditWindow 的情况下可能不是最前端那个}
-function CnOtaGetCurrentEditControl: TWinControl;
-{* 以 OTA 的方式取当前的 EditControl 控件}
 function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
 {* 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器}
 function CnOtaGetCurrentEditWindowSubViewControl: TControl;
@@ -1554,6 +1570,7 @@ uses
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizEditFiler
+  {$IFDEF LAZARUS}, PackageIntf{$ENDIF}
   {$IFNDEF CNWIZARDS_MINIMUM}, CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage{$IFNDEF STAND_ALONE}
   , CnWizMultiLang, CnEditControlWrapper, CnIDEVersion
   {$IFDEF LAZARUS} {$ELSE}, CnWizScaler, CnWizDebuggerNotifier
@@ -4972,6 +4989,46 @@ begin
 {$ENDIF}
 end;
 
+// 取当前的 EditControl 控件
+function CnOtaGetCurrentEditControl: TWinControl;
+{$IFDEF DELPHI_OTA}
+var
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  CES: INTACodeEditorServices;
+{$ELSE}
+  EditWindow: TCustomForm;
+  Comp: TComponent;
+{$ENDIF}
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
+    Result := CES.GetTopEditor
+  else
+    Result := nil;
+{$ELSE}
+  EditWindow := CnOtaGetCurrentEditWindow;
+  if EditWindow <> nil then
+  begin
+    Comp := FindComponentByClassName(EditWindow, 'TEditControl', 'Editor');
+    if (Comp <> nil) and (Comp is TWinControl) then
+    begin
+      Result := TWinControl(Comp);
+      Exit;
+    end;
+  end;
+  Result := nil;
+{$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if (SourceEditorManagerIntf <> nil) and (SourceEditorManagerIntf.ActiveEditor <> nil) then
+    Result := SourceEditorManagerIntf.ActiveEditor.EditorControl
+  else
+    Result := nil;
+{$ENDIF}
+end;
+
 {$IFDEF LAZARUS}
 
 // Lazarus：取列表项对应工程的文件完整路径
@@ -5025,6 +5082,73 @@ begin
     // 非活动工程由其解析 .lpi/.lpk 得到；返回的已是工程内文件）
     for I := 0 to TPGCompileTarget(Item).FileCount - 1 do
       Files.Add(TPGCompileTarget(Item).Files[I]);
+    Result := True;
+  end;
+end;
+
+// Lazarus: Get the packages currently opened in package editors. The package
+// editor form class name is fixed to TPackageEditorForm and its LazPackage
+// property (a TLazPackage, TIDEPackage descendant) is read via RTTI to avoid
+// referencing IDE internal units.
+function CnOtaGetOpenedLazPackages(Pkgs: TList): Integer;
+var
+  I: Integer;
+  F: TCustomForm;
+  Pkg: TObject;
+begin
+  Result := 0;
+  if Pkgs = nil then
+    Exit;
+
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    F := Screen.CustomForms[I];
+    if (F <> nil) and F.ClassNameIs('TPackageEditorForm') and F.Visible then
+    begin
+      Pkg := GetObjectProp(F, 'LazPackage');
+      if (Pkg is TIDEPackage) and (TIDEPackage(Pkg).Filename <> '') then
+      begin
+        Pkgs.Add(Pkg);
+        Inc(Result);
+      end;
+    end;
+  end;
+end;
+
+// Lazarus: Get the .lpk file full path of an opened package object.
+function CnOtaGetLazPackageFileName(Item: TObject): string;
+begin
+  Result := '';
+  if Item is TIDEPackage then
+    Result := TIDEPackage(Item).Filename;
+end;
+
+// Lazarus: Get the file list of an opened package. The first item is the
+// .lpk file itself, followed by the real units and include files in the
+// package. LFM/LRS and virtual units are excluded.
+function CnOtaGetLazPackageFiles(Item: TObject; Files: TStrings): Boolean;
+var
+  I: Integer;
+  Pkg: TIDEPackage;
+  PkgFile: TLazPackageFile;
+begin
+  Result := False;
+  if (Item = nil) or (Files = nil) then
+    Exit;
+
+  if Item is TIDEPackage then
+  begin
+    Pkg := TIDEPackage(Item);
+    if Pkg.Filename <> '' then
+      Files.Add(Pkg.Filename);
+
+    for I := 0 to Pkg.FileCount - 1 do
+    begin
+      PkgFile := Pkg.Files[I];
+      if (PkgFile <> nil) and (PkgFile.Filename <> '') and
+        (PkgFile.FileType in [pftUnit, pftMainUnit, pftInclude]) then
+        Files.Add(PkgFile.Filename);
+    end;
     Result := True;
   end;
 end;
@@ -5540,36 +5664,6 @@ begin
     end;
   end;
   Result := nil;
-end;
-
-// 以 OTA 的方式取当前的 EditControl 控件
-function CnOtaGetCurrentEditControl: TWinControl;
-var
-{$IFDEF USE_CODEEDITOR_SERVICE}
-  CES: INTACodeEditorServices;
-{$ELSE}
-  EditWindow: TCustomForm;
-  Comp: TComponent;
-{$ENDIF}
-begin
-{$IFDEF USE_CODEEDITOR_SERVICE}
-  if Supports(BorlandIDEServices, INTACodeEditorServices, CES) then
-    Result := CES.GetTopEditor
-  else
-    Result := nil;
-{$ELSE}
-  EditWindow := CnOtaGetCurrentEditWindow;
-  if EditWindow <> nil then
-  begin
-    Comp := FindComponentByClassName(EditWindow, 'TEditControl', 'Editor');
-    if (Comp <> nil) and (Comp is TWinControl) then
-    begin
-      Result := TWinControl(Comp);
-      Exit;
-    end;
-  end;
-  Result := nil;
-{$ENDIF}
 end;
 
 // 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器
