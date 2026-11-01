@@ -72,7 +72,7 @@ uses
   ComCtrls, TypInfo, Forms, {$IFDEF DELPHI} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, {$ELSE} ToolsAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, {$ELSE} ToolsAPI, {$ENDIF}
   CnWizMethodHook, {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
@@ -2416,6 +2416,19 @@ end;
 
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+// Lazarus: 将 IDE 编辑器控件（TIDESynEditor，TSynEdit 子类）安全地转为 TSynEdit。
+// 注意 TSynEdit 的大量属性为 public 而非 published，无法经 TypInfo 的
+// GetOrdProp 等访问，只能直接引用 SynEdit 单元强转后使用
+function GetSynEditOfControl(EditControl: TControl): TSynEdit;
+begin
+  if (EditControl <> nil) and (EditControl is TSynEdit) then
+    Result := TSynEdit(EditControl)
+  else
+    Result := nil;
+end;
+{$ENDIF}
+
 function TCnEditControlWrapper.GetCharHeight: Integer;
 begin
   Result := GetCharSize.cy;
@@ -2427,6 +2440,10 @@ var
   CES: INTACodeEditorServices;
   Edit: TWinControl;
   State: INTACodeEditorState;
+{$ENDIF}
+{$IFDEF LAZARUS}
+var
+  SynEd: TSynEdit;
 {$ENDIF}
 begin
 {$IFDEF DELPHI_OTA}
@@ -2448,6 +2465,16 @@ begin
   UpdateCharSize;
   {$ENDIF}
 {$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus: 直接读取 TSynEdit 的字符宽高，不依赖 OTA 的 EditOptions，
+  // 每次取值即为当前状态，编辑器字体设置变化后自动生效
+  SynEd := GetSynEditOfControl(GetCurrentEditControl);
+  if SynEd <> nil then
+  begin
+    FCharSize.cx := SynEd.CharWidth;
+    FCharSize.cy := SynEd.LineHeight;
+  end;
+{$ENDIF}
   Result := FCharSize;
 end;
 
@@ -2458,14 +2485,43 @@ end;
 
 function TCnEditControlWrapper.GetEditControlInfo(EditControl: TControl):
   TCnEditControlInfo;
+{$IFDEF LAZARUS}
+var
+  SynEd: TSynEdit;
+{$ENDIF}
 begin
   try
+{$IFDEF LAZARUS}
+    // Lazarus: TSynEdit 的这些属性均为 public 而非 published，GetOrdProp 取不到，
+    // 改为强转 TSynEdit 后直接访问；行数取 Lines.Count
+    SynEd := GetSynEditOfControl(EditControl);
+    if SynEd <> nil then
+    begin
+      Result.TopLine := SynEd.TopLine;
+      Result.LinesInWindow := SynEd.LinesInWindow;
+      Result.LineCount := SynEd.Lines.Count;
+      Result.CaretX := SynEd.CaretX;
+      Result.CaretY := SynEd.CaretY;
+      // TSynEdit 无 CharXIndex 的直接对应属性，暂以光标逻辑列代替
+      Result.CharXIndex := SynEd.CaretX;
+    end
+    else
+    begin
+      Result.TopLine := 0;
+      Result.LinesInWindow := 0;
+      Result.LineCount := 0;
+      Result.CaretX := 0;
+      Result.CaretY := 0;
+      Result.CharXIndex := 0;
+    end;
+{$ELSE}
     Result.TopLine := GetOrdProp(EditControl, 'TopLine');
     Result.LinesInWindow := GetOrdProp(EditControl, 'LinesInWindow');
     Result.LineCount := GetOrdProp(EditControl, 'LineCount');
     Result.CaretX := GetOrdProp(EditControl, 'CaretX');
     Result.CaretY := GetOrdProp(EditControl, 'CaretY');
     Result.CharXIndex := GetOrdProp(EditControl, 'CharXIndex');
+{$ENDIF}
 {$IFDEF BDS}
     Result.LineDigit := GetLineDigit(Result.LineCount);
 {$ENDIF}

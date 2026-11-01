@@ -322,6 +322,8 @@ var
 {$IFDEF LAZARUS}
   UnitFileName, ProjName, ProjFileName, Ext: string;
   SlUnits: TStringList;
+  Pkgs: TList;
+  K: Integer;
 {$ENDIF}
 begin
   ProjectInterfaceList := TCnIDEInterfaceList.Create;
@@ -443,7 +445,11 @@ begin
 
               FormFileName := _CnChangeFileExt(UnitFileName, '.lfm');
               if not FileExists(FormFileName) then
-                Continue;
+              begin
+                FormFileName := _CnChangeFileExt(UnitFileName, '.dfm');
+                if not FileExists(FormFileName) then
+                  Continue;
+              end;
 
               FormInfo := TCnFormInfo.Create;
               with FormInfo do
@@ -474,6 +480,84 @@ begin
 
           SlUnits.Clear;
           ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
+        end;
+
+        // 追加当前在包编辑器中打开的 lpk 中带 LFM 的窗体单元
+        Pkgs := TList.Create;
+        try
+          if CnOtaGetOpenedLazPackages(Pkgs) > 0 then
+          begin
+            for I := 0 to Pkgs.Count - 1 do
+            begin
+              ProjFileName := CnOtaGetLazPackageFileName(TObject(Pkgs[I]));
+              if ProjFileName = '' then
+                Continue;
+
+              // 已在工程组 Target 中出现的 lpk 不重复加入
+              for K := 0 to ProjectList.Count - 1 do
+                if SameText(TCnProjectInfo(ProjectList[K]).FileName, ProjFileName) then
+                begin
+                  ProjFileName := '';
+                  Break;
+                end;
+              if ProjFileName = '' then
+                Continue;
+
+              ProjName := _CnExtractFileName(ProjFileName);
+
+              ProjectInfo := TCnProjectInfo.Create;
+              ProjectInfo.Name := ProjName;
+              ProjectInfo.FileName := ProjFileName;
+
+              if CnOtaGetLazPackageFiles(TObject(Pkgs[I]), SlUnits) then
+              begin
+                for J := 0 to SlUnits.Count - 1 do
+                begin
+                  UnitFileName := SlUnits[J];
+                  if UnitFileName = '' then
+                    Continue;
+
+                  Ext := UpperCase(_CnExtractFileExt(UnitFileName));
+                  if (Ext <> '.PAS') and (Ext <> '.PP') then
+                    Continue;
+
+                  FormFileName := _CnChangeFileExt(UnitFileName, '.lfm');
+                  if not FileExists(FormFileName) then
+                    Continue;
+
+                  FormInfo := TCnFormInfo.Create;
+                  with FormInfo do
+                  begin
+                    FileName := FormFileName;
+                    Project := ProjName;
+                    IsOpened := CnOtaIsFileOpen(UnitFileName);
+
+                    if FileExists(FormFileName) then
+                    begin
+                      Size := GetFileSize(FormFileName);
+                      // LFM 与 DFM 文本格式兼容，直接复用解析器取 Name/FormClass/Caption
+                      ParseDfmFile(FormFileName, FormInfo.DfmInfo);
+                    end
+                    else
+                    begin
+                      Size := 0;
+                      FDfmInfo.Format := dfUnknown;
+                    end;
+                  end;
+
+                  FormInfo.Text := FormInfo.DfmInfo.Name;
+                  FillFormInfo(FormInfo);
+                  FormInfo.ParentProject := ProjectInfo;
+                  DataList.AddObject(FormInfo.DfmInfo.Name, FormInfo);
+                end;
+              end;
+
+              SlUnits.Clear;
+              ProjectList.Add(ProjectInfo);  // ProjectList 中包含模块信息
+            end;
+          end;
+        finally
+          Pkgs.Free;
         end;
       finally
         SlUnits.Free;

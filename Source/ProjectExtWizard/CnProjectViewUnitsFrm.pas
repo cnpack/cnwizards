@@ -417,6 +417,8 @@ var
 {$IFDEF LAZARUS}
   ProjName, ProjFileName, Ext: string;
   SlUnits: TStringList;
+  Pkgs: TList;
+  K: Integer;
 {$ENDIF}
 begin
   ProjectInterfaceList := TCnIDEInterfaceList.Create;
@@ -592,6 +594,87 @@ begin
 
           SlUnits.Clear;
           ProjectList.Add(ProjectInfo);  // ProjectList 中只包含工程信息
+        end;
+
+        // 追加当前在包编辑器中打开的 lpk：每个包作为一个独立的"工程"条目，
+        // 其 .lpk 主文件与包内单元、窗体一并纳入文件列表
+        Pkgs := TList.Create;
+        try
+          if CnOtaGetOpenedLazPackages(Pkgs) > 0 then
+          begin
+            for I := 0 to Pkgs.Count - 1 do
+            begin
+              ProjFileName := CnOtaGetLazPackageFileName(TObject(Pkgs[I]));
+              if ProjFileName = '' then
+                Continue;
+
+              // 已在工程组 Target 中出现的 lpk 不重复加入
+              for K := 0 to ProjectList.Count - 1 do
+              begin
+                if SameText(TCnProjectInfo(ProjectList[K]).FileName, ProjFileName) then
+                begin
+                  ProjFileName := '';
+                  Break;
+                end;
+              end;
+              if ProjFileName = '' then
+                Continue;
+
+              ProjName := _CnExtractFileName(ProjFileName);
+
+              ProjectInfo := TCnProjectInfo.Create;
+              ProjectInfo.Name := ProjName;
+              ProjectInfo.FileName := ProjFileName;
+
+              if CnOtaGetLazPackageFiles(TObject(Pkgs[I]), SlUnits) then
+              begin
+                for J := 0 to SlUnits.Count - 1 do
+                begin
+                  UnitFileName := SlUnits[J];
+
+                  if UnitFileName = '' then
+                    Continue;
+
+                  Ext := UpperCase(_CnExtractFileExt(UnitFileName));
+                  if (Ext = '.RES') or (Ext = '.DCR') or (Ext = '.DCP') or
+                     (Ext = '.LFM') or (Ext = '.LRS') or (Ext = '.LPI') or
+                     (Ext = '.ORB') or (Ext = '.LRJ') then
+                    Continue;
+
+                  UnitInfo := TCnUnitInfo.Create;
+                  with UnitInfo do
+                  begin
+                    Text := _CnChangeFileExt(_CnExtractFileName(UnitFileName), '');
+                    FileName := UnitFileName;
+                    Project := ProjName;
+
+                    // 类型判定：lpk 主文件、有 LFM 的窗体、普通单元、其余保留扩展名
+                    if Ext = '.LPK' then
+                      UnitType := utPackage
+                    else if FileExists(_CnChangeFileExt(UnitFileName, '.lfm')) then
+                      UnitType := utForm
+                    else if IsPas(UnitFileName) or (Ext = '.PP') then
+                      UnitType := utUnit
+                    else
+                      UnitType := utUnknown;
+
+                    // 未知类型文件不隐藏扩展名
+                    if UnitType = utUnknown then
+                      Text := _CnExtractFileName(UnitFileName);
+                  end;
+
+                  FillUnitInfo(UnitInfo);
+                  UnitInfo.ParentProject := ProjectInfo;
+                  DataList.AddObject(UnitInfo.Text, UnitInfo);
+                end;
+              end;
+
+              SlUnits.Clear;
+              ProjectList.Add(ProjectInfo);  // ProjectList 中只包含工程信息
+            end;
+          end;
+        finally
+          Pkgs.Free;
         end;
       finally
         SlUnits.Free;

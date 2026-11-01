@@ -51,6 +51,11 @@ interface
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+  // Lazarus 下也整一个
+  {$DEFINE CN_INTERNAL_EVAL}
+{$ENDIF}
+
 uses
   Windows, Messages, SysUtils, Classes, IniFiles, Menus, Forms, Controls,
   {$IFDEF FPC} LCLProc, {$ENDIF}

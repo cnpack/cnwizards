@@ -5097,7 +5097,7 @@ var
   Pkg: TObject;
 begin
   Result := 0;
-  if Pkgs = nil then
+  if (Pkgs = nil) or (PackageEditingInterface = nil) then
     Exit;
 
   for I := 0 to Screen.CustomFormCount - 1 do
@@ -5105,7 +5105,7 @@ begin
     F := Screen.CustomForms[I];
     if (F <> nil) and F.ClassNameIs('TPackageEditorForm') and F.Visible then
     begin
-      Pkg := GetObjectProp(F, 'LazPackage');
+      Pkg := PackageEditingInterface.GetPackageOfEditorItem(F);
       if (Pkg is TIDEPackage) and (TIDEPackage(Pkg).Filename <> '') then
       begin
         Pkgs.Add(Pkg);
