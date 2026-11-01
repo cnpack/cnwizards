@@ -128,6 +128,15 @@ function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPO
 function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
 {* 获取一个 GeneralPasToken 的 AnsiCol，可以是 C/C++ 的 TCnGeneralCppToken}
 
+{$IFDEF LAZARUS}
+
+function CnLazCharIndexToLogicalCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
+{* Lazarus 下把解析器 Token 的 CharIndex（行内 0 基偏移，UTF16 口径）换算成
+   SynEdit 的逻辑列（1 基 UTF8 字符列）。这是解析器位置到编辑器位置的唯一换算点，
+   兼容 Tab 与行内多字节字符}
+
+{$ENDIF}
+
 procedure RemovePasMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
 {* 删除一 Pascal Token 列表中配对的小括号或中括号，IsSmall 表示小括号或中括号，
   IsReverse 为 False 表示左括号入栈，碰到右括号删，True 则反之}
@@ -170,6 +179,24 @@ begin
   Result := AToken.EditCol;
 {$ENDIF}
 end;
+
+{$IFDEF LAZARUS}
+
+// Lazarus：解析器 CharIndex（行内 0 基 UTF16 偏移）转 SynEdit 逻辑列（1 基 UTF8 字符列）
+function CnLazCharIndexToLogicalCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
+var
+  W: WideString;
+begin
+  W := CnUtf8DecodeToWideString(AnsiString(ALineUtf8));
+  if ACharIndex0 < 0 then
+    ACharIndex0 := 0;
+  if ACharIndex0 > Length(W) then
+    ACharIndex0 := Length(W);
+  // 前 ACharIndex0 个 UTF16 单元中的字符数（代理对算 1 个）即为 UTF8 字符列数
+  Result := GetCharLengthFromUtf16(PWideChar(Copy(W, 1, ACharIndex0))) + 1;
+end;
+
+{$ENDIF}
 
 procedure RemoveCppMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
 var

@@ -632,8 +632,9 @@ function CnOtaGetLazProjectFiles(Item: TObject; Files: TStrings;
 
 function CnOtaGetOpenedLazPackages(Pkgs: TList): Integer;
 {* Lazarus 下取当前在包编辑器中打开的 lpk 包对象列表（TIDEPackage）。
-   经扫描类名为 TPackageEditorForm 的 IDE 窗体并经 RTTI 读取其 LazPackage
-   属性实现，避免直接引用 IDE 内部单元。Pkgs 为 nil 时仅返回数量}
+   扫描类名为 TPackageEditorForm 的 IDE 窗体，经官方接口
+   PackageEditingInterface.GetPackageOfEditorItem 取其对应包对象（LazPackage
+   属性为 public 无 RTTI，不可经 TypInfo 读取）。Pkgs 为 nil 时仅返回数量}
 
 function CnOtaGetLazPackageFileName(Item: TObject): string;
 {* Lazarus 下取打开的 lpk 包对象（TIDEPackage）的 .lpk 文件完整路径}
@@ -1216,6 +1217,17 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: TCnEditViewSourceInte
    线性位置要求为 0 开始的 Ansi/Utf8/Utf8，Lazarus 下的线性位置也要求为 Utf8
    在 Delphi 下的 Unicode 环境下该位置之前有宽字符时传参没法靠谱，因而不推荐使用}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
+procedure CnOtaGotoEditPosAndRepaint(EditView:
+  {$IFDEF DELPHI_OTA} TCnEditViewSourceInterface {$ENDIF}
+  {$IFDEF LAZARUS} TControl {$ENDIF};
+  EditPosLine: Integer; EditPosCol: Integer = 0);
+{* 光标跳至指定的行与列并重画，行列均是 1 开始，Delphi 下传 IOTAEditView，
+  Lazarus 下传编辑器控件。EditPosCol 为 0 时也表示行首。}
+
+{$ENDIF}
+
 {$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
@@ -1316,13 +1328,6 @@ procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
   SourceEditor: IOTASourceEditor = nil);
 {* 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。
   Position 线性位置可由光标位置 ConvertPos 以及 CharPosToPos 转换而来，注意转换结果不会超过行尾。}
-{$ENDIF}
-
-{$IFNDEF CNWIZARDS_MINIMUM}
-
-procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer = 0);
-{* 光标跳至指定的行与列并重画，行列均是 1 开始。EditPosCol 为 0 时表示行首}
-
 {$ENDIF}
 
 function CnOtaGetEditPos(EditView: IOTAEditView = nil): TOTAEditPos;
@@ -1570,10 +1575,10 @@ uses
   CnFmxUtils,
 {$ENDIF}
   Math, CnWizOptions, CnGraphUtils, CnWizShortCut, CnWizIdeUtils, CnWizEditFiler
-  {$IFDEF LAZARUS}, PackageIntf{$ENDIF}
+  {$IFDEF LAZARUS}, PackageIntf {$ENDIF}
   {$IFNDEF CNWIZARDS_MINIMUM}, CnWizHelp, CnLangMgr, CnLangStorage, CnHashLangStorage{$IFNDEF STAND_ALONE}
   , CnWizMultiLang, CnEditControlWrapper, CnIDEVersion
-  {$IFDEF LAZARUS} {$ELSE}, CnWizScaler, CnWizDebuggerNotifier
+  {$IFDEF LAZARUS} , SynEdit {$ELSE}, CnWizScaler, CnWizDebuggerNotifier
   {$ENDIF} {$ENDIF} {$ENDIF}
   ;
 
@@ -5087,9 +5092,11 @@ begin
 end;
 
 // Lazarus: Get the packages currently opened in package editors. The package
-// editor form class name is fixed to TPackageEditorForm and its LazPackage
-// property (a TLazPackage, TIDEPackage descendant) is read via RTTI to avoid
-// referencing IDE internal units.
+// editor form class name is fixed to TPackageEditorForm. Its LazPackage
+// property is public (no RTTI), so the official interface method
+// PackageEditingInterface.GetPackageOfEditorItem is used instead: the IDE
+// itself checks the form type and returns the package. Note that the interface
+// method may return nil for non package editor forms.
 function CnOtaGetOpenedLazPackages(Pkgs: TList): Integer;
 var
   I: Integer;
@@ -9931,6 +9938,60 @@ begin
 {$ENDIF}
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
+procedure CnOtaGotoEditPosAndRepaint(EditView:
+  {$IFDEF DELPHI_OTA} TCnEditViewSourceInterface {$ENDIF}
+  {$IFDEF LAZARUS} TControl {$ENDIF}; EditPosLine: Integer; EditPosCol: Integer);
+var
+{$IFDEF DELPHI_OTA}
+  EditControl: TControl;
+  EditPos: TOTAEditPos; // 都是 1 开始
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SynEd: TSynEdit;
+{$ENDIF}
+begin
+  if EditView <> nil then
+  begin
+{$IFDEF DELPHI_OTA}
+    if EditPosLine > 0 then
+    begin
+      EditPos.Line := EditPosLine;
+      if EditPosCol <= 0 then
+        EditPos.Col := 1
+      else
+        EditPos.Col := EditPosCol;
+
+      EditView.CursorPos := EditPos;
+      if EditPosCol <= 0 then
+        EditView.Center(EditPosLine, 1);
+
+      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
+      EditView.MoveViewToCursor;
+      EditView.Paint;
+
+      EditControl := GetCurrentEditControl;
+      if (EditControl <> nil) and (EditControl is TWinControl) then
+        (EditControl as TWinControl).SetFocus;
+    end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  SynEd := GetSynEditOfControl(EditView);
+  if (SynEd <> nil) and (EditPosLine > 0) then
+  begin
+    if EditPosCol <= 0 then
+      EditPosCol := 1;
+    SynEd.CaretXY := Point(EditPosCol, EditPosLine);
+    SynEd.EnsureCursorPosVisible;
+  end;
+{$ENDIF}
+  end;
+end;
+
+{$ENDIF}
+
 {$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos;
@@ -10487,7 +10548,7 @@ end;
 
 // 在指定位置处插入文本，如果 SourceEditor 为空使用当前值，D2009 以上使用。
 procedure CnOtaInsertTextIntoEditorAtPosW(const Text: string; Position: Longint;
-  SourceEditor: IOTASourceEditor = nil);
+  SourceEditor: IOTASourceEditor);
 var
   EditWriter: IOTAEditWriter;
 begin
@@ -10499,40 +10560,6 @@ begin
     EditWriter.Insert(PAnsiChar(ConvertTextToEditorTextW((Text))));
   finally
     EditWriter := nil;
-  end;
-end;
-
-{$ENDIF}
-
-{$IFNDEF CNWIZARDS_MINIMUM}
-
-procedure CnOtaGotoEditPosAndRepaint(EditView: IOTAEditView; EditPosLine: Integer; EditPosCol: Integer);
-var
-  EditControl: TControl;
-  EditPos: TOTAEditPos; // 都是 1 开始
-begin
-  if EditView <> nil then
-  begin
-    if EditPosLine > 0 then
-    begin
-      EditPos.Line := EditPosLine;
-      if EditPosCol <= 0 then
-        EditPos.Col := 1
-      else
-        EditPos.Col := EditPosCol;
-
-      EditView.CursorPos := EditPos;
-      if EditPosCol <= 0 then
-        EditView.Center(EditPosLine, 1);
-
-      CnOtaMakeSourceVisible(EditView.Buffer.FileName);
-      EditView.MoveViewToCursor;
-      EditView.Paint;
-
-      EditControl := GetCurrentEditControl;
-      if (EditControl <> nil) and (EditControl is TWinControl) then
-        (EditControl as TWinControl).SetFocus;
-    end;
   end;
 end;
 

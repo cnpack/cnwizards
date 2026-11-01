@@ -676,6 +676,20 @@ function CodeEditorEventToStr(Event: TCodeEditorEvent): string;
 
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+
+function GetSynEditOfControl(EditControl: TControl): TSynEdit;
+{* Lazarus: 将编辑器控件安全转为 TSynEdit，非 TSynEdit 返回 nil}
+
+function GetSourceEditorOfControl(EditControl: TControl): TSourceEditorInterface;
+{* Lazarus: 按编辑器控件反查其 SourceEditor 接口，找不到返回 nil}
+
+function GetTextAtLineOfSourceEditor(Editor: TSourceEditorInterface;
+  Line: Integer): string;
+{* Lazarus: 取 SourceEditor 指定行的文本（行号 1 基），Tab 未扩展}
+
+{$ENDIF}
+
 function EditControlWrapper: TCnEditControlWrapper;
 {* 获取全局编辑器封装对象}
 
@@ -2417,6 +2431,7 @@ end;
 {$ENDIF}
 
 {$IFDEF LAZARUS}
+
 // Lazarus: 将 IDE 编辑器控件（TIDESynEditor，TSynEdit 子类）安全地转为 TSynEdit。
 // 注意 TSynEdit 的大量属性为 public 而非 published，无法经 TypInfo 的
 // GetOrdProp 等访问，只能直接引用 SynEdit 单元强转后使用
@@ -2427,6 +2442,35 @@ begin
   else
     Result := nil;
 end;
+
+// Lazarus: 按编辑器控件反查其 SourceEditor 接口，找不到返回 nil
+function GetSourceEditorOfControl(EditControl: TControl): TSourceEditorInterface;
+var
+  I: Integer;
+begin
+  Result := nil;
+  if (EditControl = nil) or (SourceEditorManagerIntf = nil) then
+    Exit;
+  for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+  begin
+    if SourceEditorManagerIntf.SourceEditors[I].EditorControl = EditControl then
+    begin
+      Result := SourceEditorManagerIntf.SourceEditors[I];
+      Exit;
+    end;
+  end;
+end;
+
+// Lazarus: 取 SourceEditor 指定行的文本（行号 1 基），对应 Delphi 侧
+// EditControlWrapper.GetTextAtLine，Tab 未扩展，UTF8 字符串
+function GetTextAtLineOfSourceEditor(Editor: TSourceEditorInterface;
+  Line: Integer): string;
+begin
+  Result := '';
+  if (Editor <> nil) and (Line >= 1) and (Line <= Editor.Lines.Count) then
+    Result := Editor.Lines[Line - 1];
+end;
+
 {$ENDIF}
 
 function TCnEditControlWrapper.GetCharHeight: Integer;
