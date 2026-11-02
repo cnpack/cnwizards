@@ -47,7 +47,9 @@ unit CnSourceHighlight;
 * 开发平台：PWin2000Pro + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该单元中的字符串支持本地化处理方式
-* 修改记录：2025.09.16
+* 修改记录：2026.11.02
+*               加入 Lazarus 下的 SynEdit 的 Markup 机制以备支持 Lazarus。
+*           2025.09.16
 *               将绘制机制逐步改造为新 API，Delphi 13 及以上才完整支持。
 *           2024.08.03
 *               Unicode下多处调用 DisplayLength 系列函数的场景指定 IDE 相关的宽度计算。
@@ -886,6 +888,86 @@ function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
 procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
   Param1, Param2, Param3, Param4: Cardinal);
 {$ENDIF}
+{$ENDIF}
+
+// ======== 以下是 Lazarus 下专用的与 SynEdit 配合绘制的 Markup 体系实现 =======
+
+{$IFDEF LAZARUS}
+
+  TCnSourceHighlightItem = record
+  {* 单条高亮数据：某行的某列区间，ColStart=1 且 ColEnd=MaxInt 时为整行 }
+    Row: Integer;          // 1-based 物理行号（非逻辑行，折叠由 SynEdit 处理）
+    ColStart: Integer;     // 1-based 逻辑列（UTF8 字符列），行首为 1
+    ColEnd: Integer;       // 逻辑列结束（不含），MaxInt 表示到行尾；整行高亮为 1..MaxInt
+    ColorFg: TColor;       // 前景色，clNone 表示不改变
+    ColorBk: TColor;       // 背景色，clNone 表示不改变
+    ColorFrame: TColor;    // 边框色，clNone 表示不绘制边框
+  end;
+  PCnSourceHighlightItem = ^TCnSourceHighlightItem;
+
+  TCnSourceHighlightMarkup = class(TSynEditMarkup)
+  {* 每个编辑器控件实例一个，经 AttachSourceHighlightMarkup 挂入 MarkupManager }
+  private
+    FItems: TList;             // PCnSrcHLItem，按 Row、ColStart 升序（同一行可有多条）
+    FUpdateCount: Integer;
+    FDirty: Boolean;           // 数据变化待失效
+    FRowFirstIdx: Integer;     // 当前行首个条目下标（PrepareMarkupForRow 时计算），-1 无
+    FOnCaretMoved: TNotifyEvent;
+    {* 光标移动通知，后续由 TCnSourceHighlight 挂接以触发 CheckBlockMatch }
+    FOnTextChanged: TNotifyEvent;
+    {* 文本修改通知，同上 }
+{$IFDEF DEBUG}
+    FDiagCount: Integer;       // 诊断日志限次
+{$ENDIF}
+    function GetCount: Integer;
+    function GetItem(Index: Integer): TCnSourceHighlightItem;
+  protected
+    procedure DoCaretChanged(Sender: TObject); override;
+    procedure DoTextChanged(StartLine, EndLine, ACountDiff: Integer); override;
+    function IndexOfRowFirst(aRow: Integer): Integer;
+    {* 二分查找行号对应的第一个条目下标（同行多条时取 ColStart 最小者），未命中返回 -1 }
+    function IndexOfExact(aRow, aColStart: Integer): Integer;
+    {* 精确查找 Row 与 ColStart 都相同的条目，未命中返回 -1 }
+    procedure InvalidateDirty;
+    {* 失效可视区，数据变化后重画；PaintLock 期间仅置脏 }
+  public
+    constructor Create(ASynEdit: TSynEditBase);
+    destructor Destroy; override;
+
+    procedure DecPaintLock; override;
+    procedure PrepareMarkupForRow(aRow: Integer); override;
+    function GetMarkupAttributeAtRowCol(const aRow: Integer;
+      const aStartCol: TLazSynDisplayTokenBound;
+      const AnRtlInfo: TLazSynDisplayRtlInfo): TSynSelectedColor; override;
+    procedure GetNextMarkupColAfterRowCol(const aRow: Integer;
+      const aStartCol: TLazSynDisplayTokenBound;
+      const AnRtlInfo: TLazSynDisplayRtlInfo;
+      out ANextPhys, ANextLog: Integer); override;
+
+    // 数据注入接口：批量更新时用 BeginUpdate/EndUpdate 包裹以减少重画
+    procedure BeginUpdate;
+    procedure EndUpdate;
+    procedure ClearItems;
+    procedure AddItem(aRow, aColStart, aColEnd: Integer;
+      aColorFg, aColorBk, aColorFrame: TColor);
+    {* 若该行同起始列已有条目则更新颜色，否则按序插入。整行高亮传 1 与 MaxInt }
+
+    property SynEdit; // 提升 TSynEditMarkup.SynEdit 的可见性
+    property Count: Integer read GetCount;
+    property Items[Index: Integer]: TCnSourceHighlightItem read GetItem;
+    property OnCaretMoved: TNotifyEvent read FOnCaretMoved write FOnCaretMoved;
+    property OnTextChanged: TNotifyEvent read FOnTextChanged write FOnTextChanged;
+  end;
+
+// 以下辅助函数用于将 Markup 挂接/摘离指定编辑器控件
+
+function GetSourceHighlightMarkup(ASynEdit: TSynEdit): TCnSourceHighlightMarkup;
+{* 取编辑器上已挂接的 Markup，未挂接返回 nil}
+function AttachSourceHighlightMarkup(ASynEdit: TSynEdit): TCnSourceHighlightMarkup;
+{* 挂接 Markup，已挂接则直接返回已有实例}
+procedure DetachSourceHighlightMarkup(ASynEdit: TSynEdit);
+{* 摘离并释放 Markup，未挂接则忽略}
+
 {$ENDIF}
 
 {$ENDIF CNWIZARDS_CNSOURCEHIGHLIGHT}
@@ -8242,6 +8324,317 @@ begin
     end;
   end;
 end;
+
+{$IFDEF LAZARUS}
+
+{ TCnSourceHighlightMarkup }
+
+constructor TCnSourceHighlightMarkup.Create(ASynEdit: TSynEditBase);
+begin
+  inherited Create(ASynEdit);
+  FItems := TList.Create;
+  // 注意：TSynEditMarkup.RealEnabled 要求 MarkupInfo.IsEnabled（至少一个非 clNone
+  // 的颜色/样式）否则管理器直接跳过本 Markup、永不查询（synedithighlighter.pp
+  // TSynHighlighterAttributes.IsEnabled）。这里放一个哨兵底色保证恒可查询；
+  // 命中时会被条目颜色覆盖，未命中时不返回本对象，哨兵不会外泄到绘制
+  MarkupInfo.Background := clFuchsia;
+  MarkupInfo.Foreground := clNone;
+  MarkupInfo.FrameColor := clNone;
+  MarkupInfo.Style := [];
+  MarkupInfo.StyleMask := [];
+  // 前景要覆盖高亮器的 token 颜色（关键字彩色），必须抬高优先级。
+  // 参照 syneditmarkupifdef.pp 的官方先例（ForePriority := 99999+1）
+  MarkupInfo.ForePriority := 99999 + 2;
+end;
+
+destructor TCnSourceHighlightMarkup.Destroy;
+begin
+  ClearItems;
+  FItems.Free;
+  inherited Destroy;
+end;
+
+procedure TCnSourceHighlightMarkup.DoCaretChanged(Sender: TObject);
+begin
+  inherited DoCaretChanged(Sender);
+  if Assigned(FOnCaretMoved) then
+    FOnCaretMoved(Self);
+end;
+
+procedure TCnSourceHighlightMarkup.DoTextChanged(StartLine, EndLine,
+  ACountDiff: Integer);
+begin
+  inherited DoTextChanged(StartLine, EndLine, ACountDiff);
+  // 行数据可能整体偏移，先失效可视区，由数据方（解析层）重新注入
+  InvalidateDirty;
+  if Assigned(FOnTextChanged) then
+    FOnTextChanged(Self);
+end;
+
+function TCnSourceHighlightMarkup.IndexOfRowFirst(aRow: Integer): Integer;
+var
+  L, R, M: Integer;
+begin
+  Result := -1;
+  if (FItems.Count = 0) or (aRow <= 0) then
+    Exit;
+  L := 0;
+  R := FItems.Count - 1;
+  while L <= R do
+  begin
+    M := (L + R) div 2;
+    if PCnSourceHighlightItem(FItems[M])^.Row = aRow then
+    begin
+      Result := M;
+      // 继续向前找同行的第一条（ColStart 最小）
+      while (Result > 0) and (PCnSourceHighlightItem(FItems[Result - 1])^.Row = aRow) do
+        Dec(Result);
+      Exit;
+    end
+    else if PCnSourceHighlightItem(FItems[M])^.Row < aRow then
+      L := M + 1
+    else
+      R := M - 1;
+  end;
+end;
+
+function TCnSourceHighlightMarkup.IndexOfExact(aRow, aColStart: Integer): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  I := IndexOfRowFirst(aRow);
+  while (I >= 0) and (I < FItems.Count)
+    and (PCnSourceHighlightItem(FItems[I])^.Row = aRow) do
+  begin
+    if PCnSourceHighlightItem(FItems[I])^.ColStart = aColStart then
+    begin
+      Result := I;
+      Exit;
+    end;
+    Inc(I);
+  end;
+end;
+
+procedure TCnSourceHighlightMarkup.InvalidateDirty;
+begin
+  if FUpdateCount > 0 then
+  begin
+    FDirty := True;
+    Exit;
+  end;
+  // 只失效可视区即可：滚动时 TopLine 变化会触发整屏重画并重新 Prepare
+  InvalidateSynLines(TopLine, TopLine + LinesInWindow);
+  FDirty := False;
+end;
+
+procedure TCnSourceHighlightMarkup.DecPaintLock;
+begin
+  inherited DecPaintLock;
+  if (FPaintLock = 0) and FDirty then
+    InvalidateDirty;
+end;
+
+procedure TCnSourceHighlightMarkup.PrepareMarkupForRow(aRow: Integer);
+begin
+  FRowFirstIdx := IndexOfRowFirst(aRow);
+{$IFDEF DEBUG}
+  if (FItems.Count > 0) and (FDiagCount < 40) then
+  begin
+    Inc(FDiagCount);
+    CnDebugger.LogFmt('SrcHLMarkup Prepare Row %d FirstIdx %d Items %d',
+      [aRow, FRowFirstIdx, FItems.Count]);
+  end;
+{$ENDIF}
+end;
+
+function TCnSourceHighlightMarkup.GetMarkupAttributeAtRowCol(
+  const aRow: Integer; const aStartCol: TLazSynDisplayTokenBound;
+  const AnRtlInfo: TLazSynDisplayRtlInfo): TSynSelectedColor;
+var
+  I: Integer;
+  Item: PCnSourceHighlightItem;
+  Col: Integer;
+begin
+  Result := nil;
+  if FRowFirstIdx < 0 then
+    Exit;
+
+{$IFDEF DEBUG}
+  if FDiagCount < 80 then
+  begin
+    Inc(FDiagCount);
+    CnDebugger.LogFmt('SrcHLMarkup Query Row %d LogCol %d Phys %d FirstIdx %d',
+      [aRow, aStartCol.Logical, aStartCol.Physical, FRowFirstIdx]);
+  end;
+{$ENDIF}
+
+  Col := aStartCol.Logical;
+  I := FRowFirstIdx;
+  while (I < FItems.Count) and (PCnSourceHighlightItem(FItems[I])^.Row = aRow) do
+  begin
+    Item := FItems[I];
+    if (Col >= Item^.ColStart) and (Col < Item^.ColEnd) then
+    begin
+      MarkupInfo.Foreground := Item^.ColorFg;
+      MarkupInfo.Background := Item^.ColorBk;
+      MarkupInfo.FrameColor := Item^.ColorFrame;
+      // 边框绘制范围（参照 TSynEditMarkupWordGroup 的做法）
+      MarkupInfo.SetFrameBoundsLog(Item^.ColStart, Item^.ColEnd);
+      Result := MarkupInfo;
+      Exit;
+    end;
+    Inc(I);
+  end;
+end;
+
+procedure TCnSourceHighlightMarkup.GetNextMarkupColAfterRowCol(
+  const aRow: Integer; const aStartCol: TLazSynDisplayTokenBound;
+  const AnRtlInfo: TLazSynDisplayRtlInfo; out ANextPhys, ANextLog: Integer);
+var
+  I: Integer;
+  Item: PCnSourceHighlightItem;
+  Col: Integer;
+begin
+  // 返回本行内下一个颜色变化边界，供管线分割 Token；参照 WordGroup 仅填 ANextLog
+  ANextLog := -1;
+  ANextPhys := -1;
+  if FRowFirstIdx < 0 then
+    Exit;
+
+  Col := aStartCol.Logical;
+  I := FRowFirstIdx;
+  while (I < FItems.Count) and (PCnSourceHighlightItem(FItems[I])^.Row = aRow) do
+  begin
+    Item := FItems[I];
+    if (Item^.ColStart > Col) and
+      ((ANextLog < 0) or (Item^.ColStart < ANextLog)) then
+      ANextLog := Item^.ColStart;
+    if (Item^.ColEnd > Col) and (Item^.ColEnd < MaxInt) and
+      ((ANextLog < 0) or (Item^.ColEnd < ANextLog)) then
+      ANextLog := Item^.ColEnd;
+    Inc(I);
+  end;
+end;
+
+function TCnSourceHighlightMarkup.GetCount: Integer;
+begin
+  Result := FItems.Count;
+end;
+
+function TCnSourceHighlightMarkup.GetItem(Index: Integer): TCnSourceHighlightItem;
+begin
+  if (Index >= 0) and (Index < FItems.Count) then
+    Result := PCnSourceHighlightItem(FItems[Index])^
+  else
+  begin
+    Result.Row := -1;
+    Result.ColStart := -1;
+    Result.ColEnd := -1;
+    Result.ColorFg := clNone;
+    Result.ColorBk := clNone;
+    Result.ColorFrame := clNone;
+  end;
+end;
+
+procedure TCnSourceHighlightMarkup.BeginUpdate;
+begin
+  Inc(FUpdateCount);
+end;
+
+procedure TCnSourceHighlightMarkup.EndUpdate;
+begin
+  if FUpdateCount > 0 then
+    Dec(FUpdateCount);
+  if FUpdateCount = 0 then
+    InvalidateDirty;
+end;
+
+procedure TCnSourceHighlightMarkup.ClearItems;
+var
+  I: Integer;
+begin
+  for I := 0 to FItems.Count - 1 do
+    Dispose(PCnSourceHighlightItem(FItems[I]));
+  FItems.Clear;
+  FRowFirstIdx := -1;
+  InvalidateDirty;
+end;
+
+procedure TCnSourceHighlightMarkup.AddItem(aRow, aColStart, aColEnd: Integer;
+  aColorFg, aColorBk, aColorFrame: TColor);
+var
+  Idx: Integer;
+  Item: PCnSourceHighlightItem;
+begin
+  if (aRow <= 0) or (aColStart <= 0) or (aColEnd <= aColStart) then
+    Exit;
+  Idx := IndexOfExact(aRow, aColStart);
+  if Idx >= 0 then
+  begin
+    Item := FItems[Idx];
+    Item^.ColEnd := aColEnd;
+    Item^.ColorFg := aColorFg;
+    Item^.ColorBk := aColorBk;
+    Item^.ColorFrame := aColorFrame;
+  end
+  else
+  begin
+    New(Item);
+    Item^.Row := aRow;
+    Item^.ColStart := aColStart;
+    Item^.ColEnd := aColEnd;
+    Item^.ColorFg := aColorFg;
+    Item^.ColorBk := aColorBk;
+    Item^.ColorFrame := aColorFrame;
+    // 保持 (Row, ColStart) 升序，插到第一个大于它的条目前
+    Idx := FItems.Count;
+    while (Idx > 0) do
+    begin
+      if (PCnSourceHighlightItem(FItems[Idx - 1])^.Row > aRow)
+        or ((PCnSourceHighlightItem(FItems[Idx - 1])^.Row = aRow)
+          and (PCnSourceHighlightItem(FItems[Idx - 1])^.ColStart > aColStart)) then
+        Dec(Idx)
+      else
+        Break;
+    end;
+    FItems.Insert(Idx, Item);
+  end;
+  InvalidateDirty;
+end;
+
+function GetSourceHighlightMarkup(ASynEdit: TSynEdit): TCnSourceHighlightMarkup;
+begin
+  if (ASynEdit <> nil) and (ASynEdit.MarkupManager <> nil) then
+    Result := TCnSourceHighlightMarkup(
+      ASynEdit.MarkupManager.MarkupByClass[TCnSourceHighlightMarkup])
+  else
+    Result := nil;
+end;
+
+function AttachSourceHighlightMarkup(ASynEdit: TSynEdit): TCnSourceHighlightMarkup;
+begin
+  Result := GetSourceHighlightMarkup(ASynEdit);
+  if Result = nil then
+  begin
+    Result := TCnSourceHighlightMarkup.Create(ASynEdit);
+    ASynEdit.MarkupManager.AddMarkup(Result);
+  end;
+end;
+
+procedure DetachSourceHighlightMarkup(ASynEdit: TSynEdit);
+var
+  Markup: TCnSourceHighlightMarkup;
+begin
+  Markup := GetSourceHighlightMarkup(ASynEdit);
+  if Markup <> nil then
+  begin
+    ASynEdit.MarkupManager.RemoveMarkup(Markup);
+    Markup.Free; // RemoveMarkup 只摘离不释放，所有权在调用方
+  end;
+end;
+
+{$ENDIF}
 
 initialization
 {$IFNDEF STAND_ALONE}
