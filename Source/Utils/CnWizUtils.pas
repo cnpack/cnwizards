@@ -655,6 +655,13 @@ function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string
 function CnOtaGetProjectOutputTarget(Project: TCnIDEProjectInterface): string;
 {* 获得项目的二进制文件输出完整路径，Lazarus 下通过 LazCompilerOptions.CreateTargetFilename 实现}
 
+function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = [] {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF}): Boolean;
+{* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
+  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上及 Lazarus 返回 UnicodeString
+  CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上及 Lazarus 返回 WideChar 偏移}
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -859,13 +866,6 @@ function CnOtaGetCurrPosNumberW(var Number: string; var CurrIndex: Integer;
   CurrIndex 0 开始。}
 
 {$ENDIF}
-
-function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
-  CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []; EditView: IOTAEditView = nil): Boolean;
-{* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
-  Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
-  CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移}
 
 function CnOtaGeneralGetCurrPosNumber(var Number: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; EditView: IOTAEditView = nil): Boolean;
@@ -5179,6 +5179,102 @@ begin
   end;
 end;
 
+// 封装的获取当前光标下的标识符以及索引号的函数
+function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
+  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet {$IFDEF DELPHI_OTA};
+  EditView: IOTAEditView {$ENDIF}): Boolean;
+{$IFDEF LAZARUS}
+var
+  View: TCnEditViewSourceInterface;
+  WT: WideString;
+  WPos, WStart, WEnd, X, Y, Cnt, BW: Integer;
+  P: PAnsiChar;
+
+  function IsIdentChar(C: WideChar; First: Boolean): Boolean;
+  begin
+    if Ord(C) <= 255 then
+    begin
+      if First then
+        Result := (C in ['A'..'Z', 'a'..'z', '_']) or (AnsiChar(C) in FirstSet)
+      else
+        Result := (C in ['A'..'Z', 'a'..'z', '_', '0'..'9']) or (AnsiChar(C) in CharSet);
+    end
+    else
+      Result := True; // 宽字符（汉字等）默认算标识符字符，同 Delphi 宽字符标识符语义
+  end;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+{$IFDEF UNICODE}
+  {$IFDEF DELPHI110_ALEXANDRIA_UP}
+  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, False); // D110 以上改成固定宽度了
+  {$ELSE}
+  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, True); // 使用精确模式来计算字符宽度
+{$ENDIF}
+{$ELSE}
+  {$IFDEF IDE_STRING_ANSI_UTF8}
+  Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True);
+  {$ELSE}
+  Result := CnOtaGetCurrPosToken(Token, CurrIndex, CheckCursorOutOfLineEnd,
+    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
+  {$ENDIF}
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  Result := False;
+  Token := '';
+  CurrIndex := 0;
+
+  View := CnOtaGetTopMostEditView;
+  if View = nil then
+    Exit;
+  Y := View.CursorTextXY.Y;
+  X := View.CursorTextXY.X; // 1 基 UTF8 逻辑列
+  if (Y < 1) or (Y > View.Lines.Count) or (X < 1) then
+    Exit;
+
+  // 行文本转 UTF16，再把光标列换算成行内 0 基 UTF16 偏移
+  WT := CnUtf8DecodeToWideString(AnsiString(View.Lines[Y - 1]));
+  if WT = '' then
+    Exit;
+
+  P := PAnsiChar(AnsiString(View.Lines[Y - 1]));
+  Cnt := 0;
+  WPos := 0;
+  while (P^ <> #0) and (Cnt < X) do
+  begin
+    BW := GetByteWidthFromUtf8(P);
+    if BW = 4 then
+      Inc(WPos, 2) // UTF8-MB4 对应 UTF16 代理对，占两个 WideChar
+    else
+      Inc(WPos);
+    Inc(P, BW);
+    Inc(Cnt);
+  end;
+  // WPos 为 0 基 UTF16 偏移；扫满 X 个字符后若已到行尾说明光标在行尾之后
+  if (WPos < 1) or (WPos > Length(WT)) then
+    Exit;
+
+  if not IsIdentChar(WT[WPos], True) then
+    Exit;
+
+  WStart := WPos;
+  while (WStart > 1) and IsIdentChar(WT[WStart - 1], False) do
+    Dec(WStart);
+  WEnd := WPos;
+  while (WEnd < Length(WT)) and IsIdentChar(WT[WEnd + 1], False) do
+    Inc(WEnd);
+
+  Token := Copy(WT, WStart, WEnd - WStart + 1);
+  CurrIndex := WPos - WStart;
+  Result := Token <> '';
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
 
@@ -7102,32 +7198,6 @@ begin
 end;
 
 {$ENDIF}
-
-// 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
-// Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
-// CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移
-function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
-  CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet;
-  EditView: IOTAEditView): Boolean;
-begin
-{$IFDEF UNICODE}
-  {$IFDEF DELPHI110_ALEXANDRIA_UP}
-  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, False); // D110 以上改成固定宽度了
-  {$ELSE}
-  Result := CnOtaGetCurrPosTokenW(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True, True); // 使用精确模式来计算字符宽度
-{$ENDIF}
-{$ELSE}
-  {$IFDEF IDE_STRING_ANSI_UTF8}
-  Result := CnOtaGetCurrPosTokenUtf8(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER, True);
-  {$ELSE}
-  Result := CnOtaGetCurrPosToken(Token, CurrIndex, CheckCursorOutOfLineEnd,
-    FirstSet, CharSet, EditView, _SUPPORT_WIDECHAR_IDENTIFIER);
-  {$ENDIF}
-{$ENDIF}
-end;
 
 function CnOtaGeneralGetCurrPosNumber(var Number: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; EditView: IOTAEditView): Boolean;
