@@ -135,7 +135,8 @@ uses
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWideStrings, CnWizClasses, CnWizShortCut, CnWizNotifier,
   {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
-  {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditTypes, CnSourceHighlightMarkup, {$ENDIF}
+  {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditTypes,
+  SynEditMarkup, SynEditMiscClasses, {$ENDIF}
   CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
   CnIni, CnCommon, CnConsts, CnWizConsts, CnEditControlWrapper, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
@@ -865,31 +866,6 @@ type
     property OnEnhConfig: TNotifyEvent read FOnEnhConfig write FOnEnhConfig;
   end;
 
-{$IFNDEF STAND_ALONE}
-
-function LoadIDEDefaultCurrentColor: TColor;
-{* 根据 IDE 配色方案自动调整的初始化高亮背景色}
-
-{$ENDIF}
-
-procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
-  AStyle: TCnLineStyle);
-{* 高亮专用的画线函数，TinyDot 时不画斜线}
-
-function CheckTokenMatch(const T1, T2: PCnIdeTokenChar; CaseSensitive: Boolean): Boolean;
-{* 判断是否俩 Identifer 相等}
-
-function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
-  NextToken: TCnGeneralPasToken = nil): Boolean;
-{* 判断是否是条件编译指令，NextToken 用于 #pragma region/end_region 的情形}
-
-{$IFNDEF STAND_ALONE}
-{$IFNDEF BDS}
-procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
-  Param1, Param2, Param3, Param4: Cardinal);
-{$ENDIF}
-{$ENDIF}
-
 // ======== 以下是 Lazarus 下专用的与 SynEdit 配合绘制的 Markup 体系实现 =======
 
 {$IFDEF LAZARUS}
@@ -958,6 +934,35 @@ procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
     property OnCaretMoved: TNotifyEvent read FOnCaretMoved write FOnCaretMoved;
     property OnTextChanged: TNotifyEvent read FOnTextChanged write FOnTextChanged;
   end;
+
+{$ENDIF}
+
+{$IFNDEF STAND_ALONE}
+
+function LoadIDEDefaultCurrentColor: TColor;
+{* 根据 IDE 配色方案自动调整的初始化高亮背景色}
+
+{$ENDIF}
+
+procedure HighlightCanvasLine(ACanvas: TCanvas; X1, Y1, X2, Y2: Integer;
+  AStyle: TCnLineStyle);
+{* 高亮专用的画线函数，TinyDot 时不画斜线}
+
+function CheckTokenMatch(const T1, T2: PCnIdeTokenChar; CaseSensitive: Boolean): Boolean;
+{* 判断是否俩 Identifer 相等}
+
+function CheckIsCompDirectiveToken(AToken: TCnGeneralPasToken; IsCpp: Boolean;
+  NextToken: TCnGeneralPasToken = nil): Boolean;
+{* 判断是否是条件编译指令，NextToken 用于 #pragma region/end_region 的情形}
+
+{$IFNDEF STAND_ALONE}
+{$IFNDEF BDS}
+procedure MyEditorsCustomEditControlSetForeAndBackColor(ASelf: TObject;
+  Param1, Param2, Param3, Param4: Cardinal);
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
 
 // 以下辅助函数用于将 Markup 挂接/摘离指定编辑器控件
 
