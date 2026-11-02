@@ -1199,6 +1199,11 @@ procedure CnGeneralSetSelectionOfView(const Str: TCnIdeTokenString;
   View: TCnEditViewSourceInterface = nil);
 {* 封装的一通用方法，设置选择区字符串，要求字符串格式 Ansi/Utf16/Utf16/Utf16}
 
+procedure ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} EditView: Pointer; {$ENDIF}
+  AToken: TCnGeneralPasToken);
+{* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos，支持 Delphi 和 Lazarus。
+  AToken 可以是 C/C++ 的 TCnGeneralCppToken。}
+
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean = True): string;
 {* 取得当前编辑器源代码}
 
@@ -1373,9 +1378,6 @@ procedure CnConvertGeneralTokenPositionToCharPos(EditViewPtr: Pointer;
   Token: TCnGeneralPasToken; out CharPos: TOTACharPos);
 {* 封装的把 Pascal Token 解析出来的 Ansi/Wide 位置参数转换成 IDE 所需的 CharPos 的过程
   输出 CharPos，以备让 EditView 转换成 EditPos。Token 可以是 C/C++ 的 TCnGeneralCppToken}
-
-procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
-{* 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos，可以是 C/C++ 的 TCnGeneralCppToken}
 
 procedure ParseUnitUsesFromFileName(const FileName: string; UsesList: TStrings);
 {* 分析源代码中引用的单元，FileName 是完整文件名}
@@ -9795,6 +9797,37 @@ begin
 {$ENDIF}
 end;
 
+// 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos
+procedure ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} EditView: Pointer; {$ENDIF}
+  AToken: TCnGeneralPasToken);
+{$IFDEF DELPHI_OTA}
+var
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+{$ENDIF}
+begin
+{$IFDEF DELPHI_OTA}
+  // 将解析器解析出来的字符偏移转换成 CharPos
+  CnConvertGeneralTokenPositionToCharPos(EditView, AToken, CharPos);
+  // 再把 CharPos 转换成 EditPos
+  CnOtaConvertEditViewCharPosToEditPos(EditView,
+    CharPos.Line, CharPos.CharIndex, EditPos);
+
+  AToken.EditCol := EditPos.Col;
+  AToken.EditLine := EditPos.Line;
+{$IFDEF IDE_STRING_ANSI_UTF8}
+  // D2005~2007 下 EditPos 的 Col 是 Utf8 的，但绘制需要 Ansi 的，
+  // 所以额外开个属性使用其 AnsiIndex
+  AToken.EditAnsiCol := AToken.AnsiIndex + 1;
+{$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus 下先这么简单转换
+  AToken.EditLine := AToken.LineNumber + 1;
+  AToken.EditCol := AToken.CharIndex + 1;
+{$ENDIF}
+end;
+
 // 取得当前编辑器源代码
 function CnOtaGetCurrentEditorSource(CheckUtf8: Boolean): string;
 var
@@ -10846,27 +10879,6 @@ begin
 //  CnDebugger.LogFmt('CnConvertPasTokenPositionToCharPos %d:%d/(A)%d to %d:%d - %s.',
 //    [Token.LineNumber, Token.CharIndex, {$IFDEF SUPPORT_WIDECHAR_IDENTIFIER}
 //     Token.AnsiIndex, {$ELSE} 0, {$ENDIF} CharPos.Line, CharPos.CharIndex, Token.Token])
-{$ENDIF}
-end;
-
-// 将解析器解析出来的 Token 的行列转换成 IDE 所需的 EditPos
-procedure ConvertGeneralTokenPos(EditView: Pointer; AToken: TCnGeneralPasToken);
-var
-  EditPos: TOTAEditPos;
-  CharPos: TOTACharPos;
-begin
-  // 将解析器解析出来的字符偏移转换成 CharPos
-  CnConvertGeneralTokenPositionToCharPos(EditView, AToken, CharPos);
-  // 再把 CharPos 转换成 EditPos
-  CnOtaConvertEditViewCharPosToEditPos(EditView,
-    CharPos.Line, CharPos.CharIndex, EditPos);
-
-  AToken.EditCol := EditPos.Col;
-  AToken.EditLine := EditPos.Line;
-{$IFDEF IDE_STRING_ANSI_UTF8}
-  // D2005~2007 下 EditPos 的 Col 是 Utf8 的，但绘制需要 Ansi 的，
-  // 所以额外开个属性使用其 AnsiIndex
-  AToken.EditAnsiCol := AToken.AnsiIndex + 1;
 {$ENDIF}
 end;
 

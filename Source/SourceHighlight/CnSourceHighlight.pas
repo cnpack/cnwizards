@@ -132,7 +132,9 @@ uses
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWideStrings, CnWizClasses, CnWizShortCut, CnWizNotifier,
-  {$IFNDEF STAND_ALONE} ToolsAPI, CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditTypes, CnSourceHighlightMarkup, {$ENDIF}
+  CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
   CnIni, CnCommon, CnConsts, CnWizConsts, CnEditControlWrapper, mPasLex, CnPasWideLex,
   mwBCBTokenList, CnBCBWideTokenList, CnPasCodeParser, CnWidePasParser,
   CnCppCodeParser, CnWideCppParser, CnGraphUtils, CnFastList, CnIDEStrings;
@@ -603,9 +605,13 @@ type
 {$IFDEF IDE_STRING_ANSI_UTF8}
     FCustomWideIdentfiers: TCnWideStringList;
 {$ENDIF}
+{$IFDEF LAZARUS}
+    FLazPaintEdits: TList;             // 已注册 peAfterPaint 连线绘制的 SynEdit
+{$ENDIF}
     function GetColorFg(ALayer: Integer): TColor;
 
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
     function EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
       {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
       var ARect: TRect): Boolean;
@@ -618,6 +624,7 @@ type
     function GetBracketMatch(EditView: IOTAEditView; EditBuffer: IOTAEditBuffer;
       EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
     procedure CheckBracketMatch(Editor: TCnEditorObject);
+{$ENDIF}
 {$ENDIF}
 
     function IndexOfBracket(EditControl: TControl): Integer;
@@ -646,11 +653,26 @@ type
     procedure BeginUpdateEditor(Editor: TCnEditorObject);
     procedure EndUpdateEditor(Editor: TCnEditorObject);
     procedure UpdateHighlight(Editor: TCnEditorObject; ChangeType: TCnEditorChangeTypes);
+{$IFDEF LAZARUS}
+    // Lazarus 下的 Markup 数据注入与连线绘制
+    procedure LazRegisterPaintEvent(ASynEdit: TSynEdit);
+    procedure LazUnregisterAllPaintEvents;
+    procedure LazAfterPaint(Sender: TObject; EventType: TSynPaintEvent; const rcClip: TRect);
+    procedure LazDrawPairLines(ASynEdit: TSynEdit);
+    function LazTokenLogicalCol(AControl: TControl; Token: TCnGeneralPasToken): Integer;
+    procedure LazAddTokenItem(AControl: TControl; Token: TCnGeneralPasToken;
+      AHighlight: Boolean);
+    procedure LazSetPairHighlight(AControl: TControl; Pair: TCnBlockLinePair;
+      AHighlight: Boolean);
+    procedure FeedBlockMatchMarkup(Info: TCnBlockMatchInfo);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
 {$IFNDEF USE_CODEEDITOR_SERVICE}
     procedure PaintBracketMatch(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
+{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
@@ -659,13 +681,17 @@ type
     procedure ClearHighlight(Editor: TCnEditorObject);
 
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
     procedure PaintBlockMatchKeyword(Editor: TCnEditorObject; // 其他非匹配的高亮都在里头画
       LineNum, LogicLineNum: Integer; AElided: Boolean);
 {$IFNDEF USE_CODEEDITOR_SERVICE}
     procedure PaintBlockMatchLine(Editor: TCnEditorObject;
       LineNum, LogicLineNum: Integer; AElided: Boolean);
 {$ENDIF}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     procedure PaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
@@ -681,12 +707,16 @@ type
     function GetBlockMatchHotkey: TShortCut;
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
+{$IFDEF DELPHI_OTA}
     procedure ReloadIDEFonts;
+{$ENDIF}
     procedure SetHilightSeparateLine(const Value: Boolean);
 {$IFNDEF BDS}
     // 当前行的底色功能仅针对 Delphi 567 等低版本
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
     procedure BeforePaintLine(Editor: TCnEditorObject; LineNum, LogicLineNum: Integer);
+{$ENDIF}
 {$ENDIF}
     procedure SetHighLightCurrentLine(const Value: Boolean);
     procedure SetHighLightLineColor(const Value: TColor);
@@ -1065,18 +1095,26 @@ function EqualIdeToken(S1, S2: PCnIdeTokenChar; CaseSensitive: Boolean = False):
 begin
   if CaseSensitive then
   begin
+{$IFDEF LAZARUS}
+    Result := WideCompareStr(S1, S2) = 0;
+{$ELSE}
 {$IFDEF BDS}
     Result := lstrcmpW(S1, S2) = 0;
 {$ELSE}
     Result := lstrcmpA(S1, S2) = 0;
 {$ENDIF}
+{$ENDIF}
   end
   else
   begin
+{$IFDEF LAZARUS}
+    Result := WideCompareText(S1, S2) = 0;
+{$ELSE}
 {$IFDEF BDS}
     Result := lstrcmpiW(S1, S2) = 0;
 {$ELSE}
     Result := lstrcmpiA(S1, S2) = 0;
+{$ENDIF}
 {$ENDIF}
   end;
 end;
@@ -1253,18 +1291,26 @@ function CheckTokenMatch(const T1, T2: PCnIdeTokenChar; CaseSensitive: Boolean):
 begin
   if CaseSensitive then
   begin
+{$IFDEF LAZARUS}
+    Result := WideCompareStr(T1, T2) = 0;
+{$ELSE}
 {$IFDEF BDS}
     Result := lstrcmpW(T1, T2) = 0;
 {$ELSE}
     Result := lstrcmpA(T1, T2) = 0;
 {$ENDIF}
+{$ENDIF}
   end
   else
   begin
+{$IFDEF LAZARUS}
+    Result := WideCompareText(T1, T2) = 0;
+{$ELSE}
 {$IFDEF BDS}
     Result := lstrcmpiW(T1, T2) = 0;
 {$ELSE}
     Result := lstrcmpiA(T1, T2) = 0;
+{$ENDIF}
 {$ENDIF}
   end;
 end;
@@ -1524,7 +1570,13 @@ end;
 // 分析检查本 EditControl 中的结构高亮信息
 function TCnBlockMatchInfo.CheckBlockMatch(BlockHighlightRange: TBlockHighlightRange): Boolean;
 var
+{$IFDEF DELPHI_OTA}
   EditView: IOTAEditView;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor: TSourceEditorInterface;
+  LineText: string;
+{$ENDIF}
   Stream: TMemoryStream;
   CharPos: TOTACharPos;
   I: Integer;
@@ -1596,6 +1648,7 @@ begin
     Exit;
   end;
 
+{$IFDEF DELPHI_OTA}
   try
     EditView := EditControlWrapper.GetEditView(Control);
   except
@@ -1612,7 +1665,27 @@ begin
   {$ENDIF}
     Exit;
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor := GetSourceEditorOfControl(Control);
+  if SourceEditor = nil then
+  begin
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('SrcHL: SourceEditor = nil');
+  {$ENDIF}
+    Exit;
+  end;
+  // Lazarus：暂只支持 Pascal 源文件（C++ 分支待移植）
+  if not (IsDprOrPas(SourceEditor.FileName) or IsInc(SourceEditor.FileName)) then
+  begin
+  {$IFDEF DEBUG}
+    CnDebugger.LogMsg('SrcHL: Not Pas Source: ' + SourceEditor.FileName);
+  {$ENDIF}
+    Exit;
+  end;
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
   if not IsDprOrPas(EditView.Buffer.FileName) and not IsInc(EditView.Buffer.FileName) then
   begin
 {$IFDEF DEBUG}
@@ -1673,7 +1746,7 @@ begin
           FKeyTokenList.Add(CppParser.Tokens[I]);
 
       for I := 0 to KeyCount - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), KeyTokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} KeyTokens[I]);
 
       // 记录大括号的层次
       UpdateCurTokenList;
@@ -1700,6 +1773,7 @@ begin
   end
   else  // 处理解析 Pascal 中的配对关键字
   begin
+{$ENDIF}
     if Modified or (PasParser.Source = '') then
     begin
       FIsCppSource := False;
@@ -1707,7 +1781,12 @@ begin
       Stream := TMemoryStream.Create;
       try
   {$IFDEF DEBUG}
-        CnDebugger.LogMsg('Parse Pascal Source file: ' + EditView.Buffer.FileName);
+        CnDebugger.LogMsg('Parse Pascal Source file: '
+{$IFDEF LAZARUS}
+          + SourceEditor.FileName);
+{$ELSE}
+          + EditView.Buffer.FileName);
+{$ENDIF}
   {$ENDIF}
 
         {$IFDEF BDS}
@@ -1715,11 +1794,20 @@ begin
         PasParser.TabWidth := FHighlight.FTabWidth;
         {$ENDIF}
 
+{$IFDEF LAZARUS}
+        CnGeneralSaveEditorToStream(SourceEditor, Stream);
+{$ELSE}
         CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+{$ENDIF}
 
         // 解析当前显示的源文件，需要高亮当前标识符时不设置 KeyOnly
+{$IFDEF LAZARUS}
+        CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(SourceEditor.FileName),
+          not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
+{$ELSE}
         CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName),
           not (FHighlight.CurrentTokenHighlight or FHighlight.HighlightFlowStatement));
+{$ENDIF}
       finally
         Stream.Free;
       end;
@@ -1780,7 +1868,7 @@ begin
     if Result then
     begin
       for I := 0 to KeyCount - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), KeyTokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} KeyTokens[I]);
 
       ConvertLineList;
     end;
@@ -1795,7 +1883,11 @@ begin
 
     if LineInfo <> nil then
     begin
+{$IFDEF LAZARUS}
+      CheckLineMatch(CharPos.Line, CharPos.CharIndex + 1, GlobalIgnoreClass, GlobalIgnoreNamespace);
+{$ELSE}
       CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, GlobalIgnoreClass, GlobalIgnoreNamespace);
+{$ENDIF}
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(LineInfo.Count, 'HighLight Pas LinePairs Count.');
     {$ENDIF}
@@ -1803,12 +1895,18 @@ begin
 
     if CompDirectiveInfo <> nil then
     begin
+{$IFDEF LAZARUS}
+      CheckCompDirectiveMatch(CharPos.Line, CharPos.CharIndex + 1);
+{$ELSE}
       CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
+{$ENDIF}
     {$IFDEF DEBUG}
       CnDebugger.LogInteger(CompDirectiveInfo.Count, 'HighLight Pas CompDirectivePairs Count.');
     {$ENDIF}
     end;
+{$IFDEF DELPHI_OTA}
   end;
+{$ENDIF}
 
   try
     Control.Invalidate;
@@ -1934,7 +2032,7 @@ begin
 
       // 无当前过程或高亮所有内容时搜索当前所有标识符，避免只高亮光标处于当前过程内的问题
       for I := 0 to PasParser.Count - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
 
       // 高亮整个单元时，或当前无块时，高亮整个单元
       if (FCurMethodStartToken = nil) or (FCurMethodCloseToken = nil) or
@@ -1967,7 +2065,7 @@ begin
 
     // 将解析出的流程控制的 Token 按范围规定加入 FFlowTokenList
     for I := 0 to CppParser.Count - 1 do
-      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+      ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
 
 {$IFDEF DEBUG}
     CnDebugger.LogFmt('CppParser.Count: %d', [CppParser.Count]);
@@ -2096,7 +2194,7 @@ begin
           if (AToken.TokenID = tkIdentifier) and // 此处判断支持双字节字符
             CheckTokenMatch(AToken.Token, PCnIdeTokenChar(FCurrentTokenName), CaseSensitive) then
           begin
-            ConvertGeneralTokenPos(Pointer(EditView), AToken);
+            ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} AToken);
 
             FCurTokenList.Add(AToken);
             FCurTokenListEditLine.Add(Pointer(AToken.EditLine));
@@ -2146,7 +2244,7 @@ begin
         if (AToken.CppTokenKind = ctkIdentifier) and
           CheckTokenMatch(AToken.Token, PCnIdeTokenChar(FCurrentTokenName), CaseSensitive) then
         begin
-          ConvertGeneralTokenPos(Pointer(EditView), AToken);
+          ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} AToken);
 
 //          CharPos := OTACharPos(AToken.CharIndex, AToken.LineNumber + 1);
 //          EditView.ConvertPos(False, EditPos, CharPos);
@@ -2221,7 +2319,7 @@ begin
         if not CheckIsCompDirectiveToken(PasParser.Tokens[I], FIsCppSource) then
           Continue;
 
-        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
         FCompDirectiveTokenList.Add(PasParser.Tokens[I]);
       end;
     end;
@@ -2243,7 +2341,7 @@ begin
       if not CheckIsCompDirectiveToken(CppParser.Tokens[I], FIsCppSource, NextToken) then
         Continue;
 
-      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+      ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
       FCompDirectiveTokenList.Add(CppParser.Tokens[I]);
     end;
   end;
@@ -3044,7 +3142,7 @@ begin
     begin
       // 搜索当前所有标识符，不受高亮范围控制
       for I := 0 to PasParser.Count - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
 
       for I := 0 to PasParser.Count - 1 do
       begin
@@ -3066,7 +3164,7 @@ begin
   else // 做 C/C++ 中的当前解析，将所需高亮的自定义标识符解析出来
   begin
     for I := 0 to CppParser.Count - 1 do
-      ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+      ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
 
     for I := 0 to CppParser.Count - 1 do
     begin
@@ -4475,6 +4573,268 @@ begin
   end;
 end;
 
+{$IFDEF LAZARUS}
+
+// 注册 peAfterPaint 绘制事件用于连线绘制，并挂接 Markup（重复注册无害）
+procedure TCnSourceHighlight.LazRegisterPaintEvent(ASynEdit: TSynEdit);
+begin
+  if ASynEdit = nil then
+    Exit;
+  AttachSourceHighlightMarkup(ASynEdit);
+  if FLazPaintEdits.IndexOf(ASynEdit) < 0 then
+  begin
+    ASynEdit.RegisterPaintEventHandler(LazAfterPaint, [peAfterPaint]);
+    FLazPaintEdits.Add(ASynEdit);
+  end;
+end;
+
+procedure TCnSourceHighlight.LazUnregisterAllPaintEvents;
+var
+  I: Integer;
+begin
+  if FLazPaintEdits <> nil then
+  begin
+    for I := 0 to FLazPaintEdits.Count - 1 do
+      TSynEdit(FLazPaintEdits[I]).UnRegisterPaintEventHandler(LazAfterPaint);
+    FLazPaintEdits.Clear;
+  end;
+end;
+
+procedure TCnSourceHighlight.LazAfterPaint(Sender: TObject;
+  EventType: TSynPaintEvent; const rcClip: TRect);
+begin
+  if (EventType = peAfterPaint) and FBlockMatchDrawLine and (Sender is TSynEdit) then
+    LazDrawPairLines(TSynEdit(Sender));
+end;
+
+// Token 的 CharIndex（行内 0 基 UTF16 偏移）转 SynEdit 逻辑列（1 基 UTF8 字符列）
+function TCnSourceHighlight.LazTokenLogicalCol(AControl: TControl;
+  Token: TCnGeneralPasToken): Integer;
+var
+  SynEd: TSynEdit;
+  LineText: string;
+begin
+  Result := 0;
+  if (Token = nil) or (Token.EditLine < 1) then
+    Exit;
+  SynEd := GetSynEditOfControl(AControl);
+  if (SynEd = nil) or (Token.EditLine > SynEd.Lines.Count) then
+    Exit;
+  LineText := SynEd.Lines[Token.EditLine - 1];
+  Result := CnLazCharIndexToLogicalCol(LineText, Token.CharIndex);
+end;
+
+// 将单个关键字的 Markup 条目写入（AddItem 对同行同列自动原地更新）
+procedure TCnSourceHighlight.LazAddTokenItem(AControl: TControl;
+  Token: TCnGeneralPasToken; AHighlight: Boolean);
+var
+  Markup: TCnSourceHighlightMarkup;
+  SynEd: TSynEdit;
+  Col, ColEnd: Integer;
+  ColorFg: TColor;
+begin
+  if (Token = nil) or (Token.EditLine < 1) then
+    Exit;
+  SynEd := GetSynEditOfControl(AControl);
+  if SynEd = nil then
+    Exit;
+  Markup := GetSourceHighlightMarkup(SynEd);
+  if Markup = nil then
+    Exit;
+
+  Col := LazTokenLogicalCol(AControl, Token);
+  if Col <= 0 then
+    Exit;
+  // 关键字均为 ASCII，逻辑列宽即字符串长度
+  ColEnd := Col + Length(Token.Token);
+
+  if FStructureHighlight then
+    ColorFg := GetColorFg(Token.ItemLayer - 1)
+  else
+    ColorFg := FKeywordHighlight.ColorFg;
+
+  if AHighlight then
+    Markup.AddItem(Token.EditLine, Col, ColEnd, ColorFg, FBlockMatchBackground, clNone)
+  else
+    Markup.AddItem(Token.EditLine, Col, ColEnd, ColorFg, clNone, clNone);
+end;
+
+// 设置/取消一组配对关键字（Start/End/Middle）的当前对背景高亮
+procedure TCnSourceHighlight.LazSetPairHighlight(AControl: TControl;
+  Pair: TCnBlockLinePair; AHighlight: Boolean);
+var
+  I: Integer;
+begin
+  if Pair = nil then
+    Exit;
+  if Pair.StartToken <> nil then
+    LazAddTokenItem(AControl, Pair.StartToken, AHighlight);
+  if Pair.EndToken <> nil then
+    LazAddTokenItem(AControl, Pair.EndToken, AHighlight);
+  for I := 0 to Pair.MiddleCount - 1 do
+    LazAddTokenItem(AControl, Pair.MiddleToken[I], AHighlight);
+end;
+
+// CheckBlockMatch 完成后整体重建该编辑器的 Markup 数据
+procedure TCnSourceHighlight.FeedBlockMatchMarkup(Info: TCnBlockMatchInfo);
+var
+  I: Integer;
+  Markup: TCnSourceHighlightMarkup;
+  SynEd: TSynEdit;
+  KeyPair: TCnBlockLinePair;
+  Token: TCnGeneralPasToken;
+  IsMember: Boolean;
+begin
+  if (Info = nil) or (Info.Control = nil) then
+    Exit;
+  SynEd := GetSynEditOfControl(Info.Control);
+  if SynEd = nil then
+    Exit;
+
+  LazRegisterPaintEvent(SynEd);
+  Markup := GetSourceHighlightMarkup(SynEd);
+  if Markup = nil then
+    Exit;
+
+  Markup.BeginUpdate;
+  try
+    Markup.ClearItems;
+
+    // 当前光标下的配对（CheckBlockMatch 中的 CheckLineMatch 已设置）
+    KeyPair := nil;
+    if Info.LineInfo <> nil then
+      KeyPair := Info.LineInfo.CurrentPair;
+
+    for I := 0 to Info.KeyCount - 1 do
+    begin
+      Token := Info.KeyTokens[I];
+      IsMember := (KeyPair <> nil) and ((KeyPair.StartToken = Token)
+        or (KeyPair.EndToken = Token) or (KeyPair.IndexOfMiddleToken(Token) >= 0));
+      // 与 PaintBlockMatchKeyword 一致：不层次高亮且无当前对背景时不用画
+      if FStructureHighlight or IsMember then
+        LazAddTokenItem(Info.Control, Token, IsMember);
+    end;
+  finally
+    Markup.EndUpdate;
+  end;
+end;
+
+// 绘制可视范围内已闭合配对的连线：竖线取前后关键字中靠左的列，
+// 顶/底行横线连接竖线与关键字；当前配对实线，其余虚线
+procedure TCnSourceHighlight.LazDrawPairLines(ASynEdit: TSynEdit);
+var
+  I, Index: Integer;
+  LineInfo: TCnBlockLineInfo;
+  Pair: TCnBlockLinePair;
+  Canvas: TCanvas;
+  P1, P2: TPoint;
+  Xv, Y1, Y2, Col: Integer;
+  SaveColor: TColor;
+  SaveStyle: TPenStyle;
+  SaveWidth: Integer;
+  FirstRow, LastRow: Integer;
+  EditControl: TControl;
+
+  function PixelOf(aCol, aRow: Integer): TPoint;
+  var
+    DispP: TPoint;
+  begin
+    // 原始(逻辑)行列 -> 折叠后的显示行列 -> 客户区像素；
+    // 处理代码折叠与横向滚动
+    DispP := ASynEdit.LogicalToPhysicalPos(Point(aCol, aRow));
+    Result := ASynEdit.ScreenXYToPixels(ASynEdit.TextXYToScreenXY(DispP));
+  end;
+
+begin
+  if (ASynEdit = nil) or (not ASynEdit.HandleAllocated) then
+    Exit;
+
+  EditControl := nil;
+  Index := -1;
+  for I := 0 to FBlockMatchList.Count - 1 do
+    if TCnBlockMatchInfo(FBlockMatchList[I]).Control is TSynEdit then
+      if GetSynEditOfControl(TCnBlockMatchInfo(FBlockMatchList[I]).Control) = ASynEdit then
+      begin
+        Index := I;
+        Break;
+      end;
+  if Index < 0 then
+    Exit;
+  EditControl := TCnBlockMatchInfo(FBlockMatchList[Index]).Control;
+
+  Index := IndexOfBlockLine(EditControl);
+  if Index < 0 then
+    Exit;
+  LineInfo := TCnBlockLineInfo(FBlockLineList[Index]);
+  if (LineInfo.Count = 0) or (LineInfo = nil) then
+    Exit;
+
+  FirstRow := ASynEdit.TopLine;
+  LastRow := ASynEdit.TopLine + ASynEdit.LinesInWindow;
+
+  Canvas := ASynEdit.Canvas;
+  SaveColor := Canvas.Pen.Color;
+  SaveStyle := Canvas.Pen.Style;
+  SaveWidth := Canvas.Pen.Width;
+  try
+    for I := 0 to LineInfo.Count - 1 do
+    begin
+      Pair := LineInfo.Pairs[I];
+      // 未闭合、同行（无跨行竖线）或不在可视范围的配对不画
+      if (Pair.EndToken = nil) or (Pair.Bottom <= Pair.Top) then
+        Continue;
+      if (Pair.Bottom < FirstRow) or (Pair.Top > LastRow) then
+        Continue;
+      Col := LazTokenLogicalCol(EditControl, Pair.StartToken);
+      if Col <= 0 then
+        Continue;
+      P1 := PixelOf(Col, Pair.Top);
+
+      Col := LazTokenLogicalCol(EditControl, Pair.EndToken);
+      if Col <= 0 then
+        Continue;
+      P2 := PixelOf(Col, Pair.Bottom);
+
+      // 横线与竖线端点画在行的底部（P.Y 为行顶，行高减 1 是本行最后一个像素行）
+      Y1 := P1.Y + ASynEdit.LineHeight - 1;
+      Y2 := P2.Y + ASynEdit.LineHeight - 1;
+      // 竖线取前后关键字中靠左的列，同 TCnBlockLinePair.Left 语义
+      Xv := P1.X;
+      if P2.X < Xv then
+        Xv := P2.X;
+
+      Canvas.Pen.Color := GetColorFg(Pair.Layer);
+      if FBlockMatchLineSolidCurrent and (LineInfo.CurrentPair = Pair) then
+        Canvas.Pen.Style := psSolid
+      else
+        Canvas.Pen.Style := psDot;
+      Canvas.Pen.Width := FBlockMatchLineWidth;
+
+      // 竖线
+      Canvas.MoveTo(Xv, Y1);
+      Canvas.LineTo(Xv, Y2);
+      // 顶行横线：连接竖线与起始关键字
+      if P1.X <> Xv then
+      begin
+        Canvas.MoveTo(Xv, Y1);
+        Canvas.LineTo(P1.X, Y1);
+      end;
+      // 底行横线：连接竖线与结束关键字
+      if P2.X <> Xv then
+      begin
+        Canvas.MoveTo(Xv, Y2);
+        Canvas.LineTo(P2.X, Y2);
+      end;
+    end;
+  finally
+    Canvas.Pen.Color := SaveColor;
+    Canvas.Pen.Style := SaveStyle;
+    Canvas.Pen.Width := SaveWidth;
+  end;
+end;
+
+{$ENDIF}
+
 {$ENDIF}
 
 // 上面的延时到时间了，开始解析
@@ -4576,6 +4936,8 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnSourceHighlight.PaintBlockMatchKeyword(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer; AElided: Boolean);
@@ -5567,6 +5929,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 通知事件
 //------------------------------------------------------------------------------
@@ -5712,7 +6076,7 @@ begin
     begin
       if ctFont in ChangeType then
       begin
-        ReloadIDEFonts;
+        {$IFDEF DELPHI_OTA} ReloadIDEFonts; {$ENDIF}
 {$IFNDEF STAND_ALONE}
 {$IFNDEF BDS}
         if FHighLightLineColor = FDefaultHighLightLineColor then
@@ -5773,6 +6137,8 @@ end;
 
 {$IFNDEF STAND_ALONE}
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnSourceHighlight.PaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
 var
@@ -5824,6 +6190,8 @@ begin
 {$ENDIF}
   end;
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 
@@ -6021,7 +6389,7 @@ begin
   else
   begin
     // 检查编辑器，可能编辑器的 Info 未创建
-    ReloadIDEFonts;
+    {$IFDEF DELPHI_OTA} ReloadIDEFonts; {$ENDIF}
     for I := 0 to EditControlWrapper.EditorCount - 1 do
     begin
       EditControl := EditControlWrapper.Editors[I].EditControl;
@@ -6117,6 +6485,8 @@ begin
     FDirtyList.Add(Pointer(LineNum));
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnSourceHighlight.ReloadIDEFonts;
 var
   AHighlight: TCnHighlightItem;
@@ -6184,6 +6554,8 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TCnBlockMatchInfo);
 var
   I: Integer;
@@ -6226,6 +6598,8 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnSourceHighlight.BeforePaintLine(Editor: TCnEditorObject;
   LineNum, LogicLineNum: Integer);
@@ -6288,6 +6662,8 @@ begin
 
   SetForeAndBackColorHook.HookMethod;
 end;
+
+{$ENDIF}
 
 {$ENDIF}
 

@@ -51,7 +51,8 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CnWizMultiLang, StdCtrls, ExtCtrls, Buttons, ComCtrls, Menus, IniFiles, CnCommon,
-  CnWizShareImages, CnSourceHighlight, CnWizOptions, CnSpin, CnLangMgr, CnIni;
+  CnWizShareImages, CnSourceHighlight, CnWizOptions, CnSpin, CnLangMgr, CnIni
+  {$IFDEF FPC}, CnHotKey {$ENDIF};
 
 type
   TCnSourceHighlightForm = class(TCnTranslateForm)

@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, CnSpin, CnLangMgr, CnWizMultiLang, ExtCtrls;
+  StdCtrls, {$IFDEF FPC} LCLType, {$ENDIF} CnSpin, CnLangMgr, CnWizMultiLang, ExtCtrls;
 
 type
   TCnHighlightSeparateLineForm = class(TCnTranslateForm)
