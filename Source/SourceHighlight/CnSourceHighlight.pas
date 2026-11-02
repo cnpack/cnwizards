@@ -3557,6 +3557,7 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
 
 function TCnSourceHighlight.EditorGetTextRect(Editor: TCnEditorObject; AnsiPos: TOTAEditPos;
   {$IFDEF BDS}const LineText: string; {$ENDIF} const AText: TCnIdeTokenString;
@@ -3733,6 +3734,8 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // 括号匹配高亮
 //------------------------------------------------------------------------------
@@ -3753,6 +3756,7 @@ begin
 end;
 
 {$IFNDEF STAND_ALONE}
+{$IFDEF DELPHI_OTA}
 
 // 以下代码使用 EditControlWrapper.GetTextAtLine 来取得某一行的代码，
 // 因为使用 EditView.CharPosToPos 转换线性位置在大文件时很慢
@@ -4279,6 +4283,8 @@ begin
     FIsChecking := False;
   end;
 end;
+
+{$ENDIF}
 
 {$IFNDEF USE_CODEEDITOR_SERVICE}
 

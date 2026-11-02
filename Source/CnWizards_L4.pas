@@ -20,22 +20,22 @@ uses
   CnFlatToolbarConfigFrm, CnComponentSelector, CnAsciiChart, 
   CnSelectionCodeTool, CnEditorSortLines, CnEditorFontZoom, 
   CnEditorInsertTime, CnEditorCodeIndent, CnEditorCodeDelBlank, 
-  CnEditorZoomFullScreen, CnEditorDuplicateUnit, CnEditorInsertColor, CnEditorCodeSwap, 
-  CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, CnCommentCropper, 
-  CnBookmarkWizard, CnWizNotifier, CnStatFrm, CnStatResultFrm, CnStatWizard, 
-  CnEditorCodeComment, CnPas2HtmlConfigFrm, CnPas2HtmlWizard, 
-  CnPasConvertTypeFrm, CnCodeFormatRules, CnCodeFormatterWizard, 
-  CnFormatterIntf, CnTabOrderWizard, CnEditorToggleUses, CnEditorToggleVar, 
-  CnProjectExtWizard, CnWizShareImages, CnWizBoot, CnWizCommentFrm, CnWizTipOfDayFrm, 
-  CnWizUpgradeFrm, CnWizFeedbackFrm, CnAIAgentTypes, CnAIAgentJsonRpc, 
-  CnAIAgentStdioTransport, CnAIAgentSession, CnAIAgentTools, CnAIAgentClient, 
-
-  CnSourceDiffWizard, CnSourceDiffFrm, CnDiffEditorFrm, CnExplore, 
-  CnExploreDirectory, CnExploreFilter, CnExploreFilterEditor, CnRoWizard, 
-  CnRoInterfaces, CnRoClasses, CnRoFilesList, CnRoFrmFileList, CnRoOptions, 
-  CnFilesSnapshot, CnFilesSnapshotManageFrm, CnUsesToolsWizard, 
-  CnUsesCleanResultFrm, CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, 
-  CnRepositoryMenu, CnIniFilerFrm, CnIniFilerWizard, LazarusPackageIntf;
+  CnEditorZoomFullScreen, CnEditorDuplicateUnit, CnEditorInsertColor, 
+  CnEditorCodeSwap, CnEditorCodeToString, CnSrcTemplate, CnSrcTemplateEditFrm, 
+  CnCommentCropper, CnBookmarkWizard, CnWizNotifier, CnStatFrm, 
+  CnStatResultFrm, CnStatWizard, CnEditorCodeComment, CnPas2HtmlConfigFrm, 
+  CnPas2HtmlWizard, CnPasConvertTypeFrm, CnCodeFormatRules, 
+  CnCodeFormatterWizard, CnFormatterIntf, CnTabOrderWizard, 
+  CnEditorToggleUses, CnEditorToggleVar, CnProjectExtWizard, CnWizShareImages, 
+  CnWizBoot, CnWizCommentFrm, CnWizTipOfDayFrm, CnWizUpgradeFrm, 
+  CnWizFeedbackFrm, CnAIAgentTypes, CnAIAgentJsonRpc, CnAIAgentStdioTransport, 
+  CnAIAgentSession, CnAIAgentTools, CnAIAgentClient, CnSourceDiffWizard, 
+  CnSourceDiffFrm, CnDiffEditorFrm, CnExplore, CnExploreDirectory, 
+  CnExploreFilter, CnExploreFilterEditor, CnRoWizard, CnRoInterfaces, 
+  CnRoClasses, CnRoFilesList, CnRoFrmFileList, CnRoOptions, CnFilesSnapshot, 
+  CnFilesSnapshotManageFrm, CnUsesToolsWizard, CnUsesCleanResultFrm, 
+  CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, CnRepositoryMenu, 
+  CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, LazarusPackageIntf;
 
 implementation
 
