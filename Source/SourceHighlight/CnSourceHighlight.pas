@@ -5031,7 +5031,7 @@ begin
         Continue;
       P2 := PixelOf(Col, Pair.Bottom);
 
-      // 横线与竖线端点画在行的底部（P.Y 为行顶，行高减 1 是本行最后一个像素行）
+      // 横线端点画在行的底部（P.Y 为行顶，行高减 1 是本行最后一个像素行）
       Y1 := P1.Y + ASynEdit.LineHeight - 1;
       Y2 := P2.Y + ASynEdit.LineHeight - 1;
       // 竖线取前后关键字中靠左的列，同 TCnBlockLinePair.Left 语义
@@ -5057,8 +5057,9 @@ begin
       else
         HoriStyle := FBlockMatchLineStyle;
 
-      // 竖线
-      HighlightCanvasLine(Canvas, Xv, Y1, Xv, Y2, VertStyle);
+      // 竖线：顶端止于起始行的行底，底端止于结束行的行顶，
+      // 不延伸进结束关键字所在行，否则虚线贴着关键字文字不好看
+      HighlightCanvasLine(Canvas, Xv, Y1, Xv, P2.Y, VertStyle);
       // 顶行横线：连接竖线与起始关键字
       if FBlockMatchLineHori and (P1.X <> Xv) then
         HighlightCanvasLine(Canvas, Xv, Y1, P1.X, Y1, HoriStyle);

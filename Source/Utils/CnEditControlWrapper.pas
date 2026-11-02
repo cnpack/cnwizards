@@ -72,7 +72,7 @@ uses
   ComCtrls, TypInfo, Forms, {$IFDEF DELPHI} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, CnIDEStrings, {$ELSE} ToolsAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditHighlighter, CnIDEStrings, {$ELSE} ToolsAPI, {$ENDIF}
   CnWizMethodHook, {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
@@ -358,6 +358,12 @@ type
 {$IFDEF LAZARUS}
     procedure OnBeforeEditControlMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
+  {$IFNDEF STAND_ALONE}
+    function LazCheckEditorFontChange: Boolean;
+    {* Lazarus: 惰性检测当前编辑器字体与高亮属性的变化并重新载入到
+       FEditorBaseFont/FFontArray/FHighlights/前景背景色，有变化返回 True，
+       由 OnIdle 调用，对应 Delphi 下的 LoadFontFromRegistry/CalcCharSize 路径 }
+  {$ENDIF}
 {$ENDIF}
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
     procedure OnCallWndProcRet(Handle: HWND; Control: TWinControl; Msg: TMessage);
@@ -1280,6 +1286,9 @@ end;
 constructor TCnEditControlWrapper.Create(AOwner: TComponent);
 var
   I: Integer;
+{$IFDEF LAZARUS}
+  AFont: TFont;
+{$ENDIF}
 begin
   inherited;
   FOptionChanged := True;
@@ -1322,6 +1331,20 @@ begin
     FFontArray[I] := TFont.Create;
   FBackgroundColor := clWhite;
   FForegroundColor := clBlack;
+
+{$IFDEF LAZARUS}
+  // Lazarus: 先按 Delphi LoadFontFromRegistry 的做法填一份缺省字体，
+  // 编辑器创建后由 OnIdle 的 LazCheckEditorFontChange 从 SynEdit 载入真实值
+  AFont := TFont.Create;
+  try
+    AFont.Name := 'Courier New';  {Do NOT Localize}
+    AFont.Size := 10;
+    FEditorBaseFont.Assign(AFont);
+    ResetFontsFromBasic(AFont);
+  finally
+    AFont.Free;
+  end;
+{$ENDIF}
 
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddSourceEditorNotifier(OnSourceEditorNotify);
@@ -2014,6 +2037,18 @@ begin
   end;
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+{$IFNDEF STAND_ALONE}
+  // Lazarus: Delphi 下字体来自注册表读取，这里改为从当前 SynEdit 惰性检测载入，
+  // 编辑器字体设置或高亮属性变化（含设置对话框确定、主题切换、语言切换）后自动生效
+  if LazCheckEditorFontChange then
+  begin
+    Include(OptionType, ctOptionChanged);
+    Include(OptionType, ctFont);
+  end;
+{$ENDIF}
+{$ENDIF}
+
   for I := 0 to EditorCount - 1 do
   begin
 {$IFDEF DEBUG}
@@ -2509,6 +2544,147 @@ begin
   if (Editor <> nil) and (Line >= 1) and (Line <= Editor.Lines.Count) then
     Result := Editor.Lines[Line - 1];
 end;
+
+// 以下字体读取实现需要引用 SynEdit 单元，故再以 STAND_ALONE 隔离，
+// 与 uses 中 SynEdit 的引入条件保持一致
+{$IFNDEF STAND_ALONE}
+
+// Lazarus: 高亮属性未设置前景色时回退为编辑器基础字体色，未设置背景色时回退为
+// 编辑器背景色，对应 IDE 颜色方案中"缺省"的语义（SynEdit 中未设置即 clNone）
+function LazAttriForegroundColor(Attr: TSynHighlighterAttributes;
+  SynEd: TSynEdit): TColor;
+begin
+  if Attr.Foreground = clNone then
+    Result := SynEd.Font.Color
+  else
+    Result := Attr.Foreground;
+end;
+
+function LazAttriBackgroundColor(Attr: TSynHighlighterAttributes;
+  SynEd: TSynEdit): TColor;
+begin
+  if Attr.Background = clNone then
+    Result := SynEd.Color
+  else
+    Result := Attr.Background;
+end;
+
+// Lazarus: 按高亮属性名映射到 FFontArray 下标，对应 Delphi LoadFontFromRegistry
+// 的 ArrRegItems，注意 Lazarus 的属性名叫 Space/Directive，Delphi 注册表里叫
+// Whitespace/Preprocessor，其余八项同名。0 为基本字体无对应属性，未匹配返回 -1
+function LazAttriNameToFontIndex(const AName: string): Integer;
+const
+  ArrAttriNames: array [1..9] of string = ('Assembler', 'Comment', 'Directive',
+    'Identifier', 'Reserved word', 'Number', 'Space', 'String', 'Symbol');
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := Low(ArrAttriNames) to High(ArrAttriNames) do
+    if SameText(AName, ArrAttriNames[I]) then
+    begin
+      Result := I;
+      Exit;
+    end;
+end;
+
+// Lazarus: 惰性检测当前编辑器字体与高亮属性较缓存有无变化，有则全部重新载入
+// FEditorBaseFont/FFontArray/FHighlights/前景背景色。载入来源是当前 SynEdit
+// 控件本身：IDE 的颜色设置直接写在共享高亮器实例的属性对象上，读取其
+// Attribute[] 即为用户当前生效设置，对应 Delphi 下的 LoadFontFromRegistry
+function TCnEditControlWrapper.LazCheckEditorFontChange: Boolean;
+var
+  SynEd: TSynEdit;
+  Hl: TSynCustomHighlighter;
+  I, J: Integer;
+  Dirty: Boolean;
+  Attr: TSynHighlighterAttributes;
+  Item: TCnHighlightItem;
+begin
+  Result := False;
+
+  SynEd := GetSynEditOfControl(GetCurrentEditControl);
+  if SynEd = nil then
+    Exit;
+
+  // 基础字体或编辑器背景变化，纯文本编辑器同样有效
+  Dirty := (FEditorBaseFont.Name <> SynEd.Font.Name)
+    or (FEditorBaseFont.Size <> SynEd.Font.Size)
+    or (FEditorBaseFont.Color <> SynEd.Font.Color)
+    or (FEditorBaseFont.Style <> SynEd.Font.Style)
+    or (FBackgroundColor <> SynEd.Color);
+
+  // 高亮属性变化：数量或逐项内容不同，捕捉设置对话框就地修改颜色的情况
+  Hl := SynEd.Highlighter;
+  if Hl <> nil then
+  begin
+    if not Dirty and (Hl.AttrCount <> FHighlights.Count) then
+      Dirty := True;
+
+    I := 0;
+    while not Dirty and (I < Hl.AttrCount) do
+    begin
+      Attr := Hl.Attribute[I];
+      Item := TCnHighlightItem(FHighlights.Objects[I]);
+      Dirty := not SameText(FHighlights[I], Attr.Name)
+        or (Item.ColorFg <> LazAttriForegroundColor(Attr, SynEd))
+        or (Item.ColorBk <> LazAttriBackgroundColor(Attr, SynEd))
+        or (Item.Bold <> (fsBold in Attr.Style))
+        or (Item.Italic <> (fsItalic in Attr.Style))
+        or (Item.Underline <> (fsUnderline in Attr.Style));
+      Inc(I);
+    end;
+  end;
+
+  if not Dirty then
+    Exit;
+
+  // 载入基础字体与背景色
+  FEditorBaseFont.Assign(SynEd.Font);
+  FBackgroundColor := SynEd.Color;
+  FForegroundColor := SynEd.Font.Color;
+
+  FFontArray[0].Assign(SynEd.Font);   // FontBasic
+  for I := 1 to High(FFontArray) do   // 先全部按基础字体，缺省的元素保持一致
+    FFontArray[I].Assign(SynEd.Font);
+
+  ClearHighlights;
+
+  // 按当前高亮器逐属性载入，FHighlights 直接使用高亮属性的原名
+  if Hl <> nil then
+  begin
+    for I := 0 to Hl.AttrCount - 1 do
+    begin
+      Attr := Hl.Attribute[I];
+
+      Item := TCnHighlightItem.Create;
+      Item.Bold := fsBold in Attr.Style;
+      Item.Italic := fsItalic in Attr.Style;
+      Item.Underline := fsUnderline in Attr.Style;
+      Item.ColorFg := LazAttriForegroundColor(Attr, SynEd);
+      Item.ColorBk := LazAttriBackgroundColor(Attr, SynEd);
+      FHighlights.AddObject(Attr.Name, Item);
+
+      J := LazAttriNameToFontIndex(Attr.Name);
+      if J > 0 then
+      begin
+        FFontArray[J].Color := Item.ColorFg;
+        FFontArray[J].Style := Attr.Style;
+        if J = 4 then   // Identifier 的前景色，对应 Delphi LoadFontFromRegistry
+          FForegroundColor := Item.ColorFg;
+      end;
+    end;
+  end;
+
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('EditControlWrapper Laz Font Loaded. Base %s %d, Highlights %d.',
+    [FEditorBaseFont.Name, FEditorBaseFont.Size, FHighlights.Count]);
+{$ENDIF}
+
+  Result := True;
+end;
+
+{$ENDIF}
 
 {$ENDIF}
 
