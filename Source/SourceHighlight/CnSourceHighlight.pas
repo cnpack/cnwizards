@@ -3458,6 +3458,9 @@ begin
   FLineMapList := TObjectList.Create;
   FViewChangedList := TList.Create;
   FViewFileNameIsPascalList := TList.Create;
+{$IFDEF LAZARUS}
+  FLazPaintEdits := TList.Create;
+{$ENDIF}
 {$IFNDEF BDS}
   FCurLineList := TObjectList.Create;
 {$ENDIF}
@@ -3539,6 +3542,11 @@ begin
   FCustomIdents.Free;
 {$IFDEF IDE_STRING_ANSI_UTF8}
   FCustomWideIdentfiers.Free;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  LazUnregisterAllPaintEvents;
+  FLazPaintEdits.Free;
 {$ENDIF}
   FViewFileNameIsPascalList.Free;
   FViewChangedList.Free;
@@ -4739,7 +4747,7 @@ end;
 // 注册 peAfterPaint 绘制事件用于连线绘制，并挂接 Markup（重复注册无害）
 procedure TCnSourceHighlight.LazRegisterPaintEvent(ASynEdit: TSynEdit);
 begin
-  if ASynEdit = nil then
+  if (ASynEdit = nil) or (ASynEdit.MarkupManager = nil) then
     Exit;
 
   AttachSourceHighlightMarkup(ASynEdit);
@@ -4946,7 +4954,7 @@ begin
 end;
 
 // 绘制可视范围内已闭合配对的连线：竖线取前后关键字中靠左的列，
-// 顶/底行横线连接竖线与关键字；当前配对实线，其余虚线
+// 顶/底行横线连接竖线与关键字；线型按设置，当前光标下配对块允许时实线
 procedure TCnSourceHighlight.LazDrawPairLines(ASynEdit: TSynEdit);
 var
   I, Index: Integer;
@@ -4960,6 +4968,8 @@ var
   SaveWidth: Integer;
   FirstRow, LastRow: Integer;
   EditControl: TControl;
+  PairIsInKeyPair: Boolean;
+  VertStyle, HoriStyle: TCnLineStyle;
 
   function PixelOf(aCol, aRow: Integer): TPoint;
   var
@@ -5030,27 +5040,31 @@ begin
         Xv := P2.X;
 
       Canvas.Pen.Color := GetColorFg(Pair.Layer);
-      if FBlockMatchLineSolidCurrent and (LineInfo.CurrentPair = Pair) then
-        Canvas.Pen.Style := psSolid
-      else
-        Canvas.Pen.Style := psDot;
       Canvas.Pen.Width := FBlockMatchLineWidth;
 
+      // 线型按设置走，与 Delphi 侧 PaintBlockMatchKeyword 的规则一致：
+      // 当前光标下的配对块（含其嵌套内部块）在允许时画实线，其余按设置的线型；
+      // 横向连线在设置 HoriDot 时用 TinyDot 虚线
+      PairIsInKeyPair := (LineInfo.CurrentPair <> nil) and CanSolidCurrentLineBlock and
+        (Pair.Top >= LineInfo.CurrentPair.Top) and (Pair.Bottom <= LineInfo.CurrentPair.Bottom)
+        and (Pair.Left = LineInfo.CurrentPair.Left);
+      if PairIsInKeyPair then
+        VertStyle := lsSolid
+      else
+        VertStyle := FBlockMatchLineStyle;
+      if FBlockMatchLineHoriDot then
+        HoriStyle := lsTinyDot
+      else
+        HoriStyle := FBlockMatchLineStyle;
+
       // 竖线
-      Canvas.MoveTo(Xv, Y1);
-      Canvas.LineTo(Xv, Y2);
+      HighlightCanvasLine(Canvas, Xv, Y1, Xv, Y2, VertStyle);
       // 顶行横线：连接竖线与起始关键字
-      if P1.X <> Xv then
-      begin
-        Canvas.MoveTo(Xv, Y1);
-        Canvas.LineTo(P1.X, Y1);
-      end;
+      if FBlockMatchLineHori and (P1.X <> Xv) then
+        HighlightCanvasLine(Canvas, Xv, Y1, P1.X, Y1, HoriStyle);
       // 底行横线：连接竖线与结束关键字
-      if P2.X <> Xv then
-      begin
-        Canvas.MoveTo(Xv, Y2);
-        Canvas.LineTo(P2.X, Y2);
-      end;
+      if FBlockMatchLineHori and (P2.X <> Xv) then
+        HighlightCanvasLine(Canvas, Xv, Y2, P2.X, Y2, HoriStyle);
     end;
   finally
     Canvas.Pen.Color := SaveColor;

@@ -72,7 +72,7 @@ uses
   ComCtrls, TypInfo, Forms, {$IFDEF DELPHI} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, {$ELSE} ToolsAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, CnIDEStrings, {$ELSE} ToolsAPI, {$ENDIF}
   CnWizMethodHook, {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
@@ -125,9 +125,7 @@ type
     TopRow: Integer;               // 视觉上第一行的行号
     BottomRow: Integer;            // 视觉上最下面一行的行号
     LeftColumn: Integer;
-{$IFDEF DELPHI_OTA}
-    CurPos: TOTAEditPos;
-{$ENDIF}
+    CurPos: TOTAEditPos;           // Delphi 来自 ToolsAPI，Lazarus 来自 CnIDEStrings
     LineCount: Integer;            // 记录编辑器里的文字总行数
     LineText: string;
     ModTime: TDateTime;
@@ -343,20 +341,20 @@ type
 
 {$IFDEF DELPHI_OTA}
     procedure CheckOptionDlg;
+{$ENDIF}
     function GetEditorContext(Editor: TCnEditorObject): TCnEditorContext;
 
     function CheckViewLinesChange(Editor: TCnEditorObject; Context: TCnEditorContext): Boolean;
     // 检查某个 View 中的具体行号分布有无改变，包括纵向滚动、纵向伸缩、折叠等，不包括单行内改动
 
     function CheckEditorChanges(Editor: TCnEditorObject): TCnEditorChangeTypes;
-{$ENDIF}
     procedure OnActiveFormChange(Sender: TObject);
     procedure AfterThemeChange(Sender: TObject);
 {$IFDEF DELPHI_OTA}
     procedure OnSourceEditorNotify(SourceEditor: IOTASourceEditor;
       NotifyType: TCnWizSourceEditorNotifyType; EditView: IOTAEditView);
-    procedure OnIdle(Sender: TObject);
 {$ENDIF}
+    procedure OnIdle(Sender: TObject);
 {$IFDEF LAZARUS}
     procedure OnBeforeEditControlMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
@@ -479,10 +477,10 @@ type
        2005~2007 是 UTF8 的字节位置（一个汉字跨 3 列），
        2009 以上要注意，EdPos 居然也要求是 UTF8 字节位置。而 2009 下 CursorPos 是 Ansi，
        不能直接拿 CursorPos 来作为 EdPos 参数，而必须经过一次 UTF8 转换 }
+{$ENDIF}
     function GetLineIsElided(EditControl: TControl; LineNum: Integer): Boolean;
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
-{$ENDIF}
 
 {$IFDEF IDE_EDITOR_ELIDE}
     procedure ElideLine(EditControl: TControl; LineNum: Integer);
@@ -1339,9 +1337,11 @@ begin
 
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
+{$ENDIF}
   CnWizNotifierServices.AddApplicationIdleNotifier(OnIdle);
 
   UpdateEditControlList;
+{$IFDEF DELPHI_OTA}
   GetHighlightFromReg;
   LoadFontFromRegistry;
 {$ENDIF}
@@ -1367,8 +1367,8 @@ begin
   CnWizNotifierServices.RemoveGetMsgNotifier(OnGetMsgProc);
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
-  CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
 {$ENDIF}
+  CnWizNotifierServices.RemoveApplicationIdleNotifier(OnIdle);
   FEditorBaseFont.Free;
   while FBpClickQueue.Count > 0 do
     TObject(FBpClickQueue.Pop).Free;
@@ -1677,12 +1677,16 @@ begin
   end;
 end;
 
-{$IFDEF DELPHI_OTA}
-
 function TCnEditControlWrapper.GetEditorContext(Editor: TCnEditorObject):
   TCnEditorContext;
+{$IFDEF LAZARUS}
+var
+  SynEd: TSynEdit;
+  BStart, BEnd: TPoint;
+{$ENDIF}
 begin
   FillChar(Result, SizeOf(TCnEditorContext), 0);
+{$IFDEF DELPHI_OTA}
   if (Editor <> nil) and (Editor.EditView <> nil) and (Editor.EditControl <> nil) then
   begin
     Result.TopRow := Editor.EditView.TopRow;
@@ -1703,9 +1707,36 @@ begin
     Result.LineDigit := GetLineDigit(Result.LineCount);
 {$ENDIF}
   end;
-end;
-
 {$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus：直接读取 SynEdit 的 public 属性（TSourceEditorInterface 未提供对应接口）
+  if (Editor <> nil) and (Editor.EditControl <> nil) then
+  begin
+    SynEd := GetSynEditOfControl(Editor.EditControl);
+    if SynEd <> nil then
+    begin
+      Result.TopRow := SynEd.TopLine;
+      Result.BottomRow := SynEd.TopLine + SynEd.LinesInWindow;
+      Result.LeftColumn := SynEd.LeftChar;
+      Result.CurPos.Col := SynEd.CaretXY.X;  // X=列，对应 TOTAEditPos.Col
+      Result.CurPos.Line := SynEd.CaretXY.Y; // Y=行，对应 TOTAEditPos.Line
+      // ModTime 保持 0：ctModified 由下方的 LineText/LineCount 变化分支负责，
+      // 若在此填 Now 会导致每次 Idle 都误报 ctModified
+      Result.LineCount := SynEd.Lines.Count;
+      BStart := SynEd.BlockBegin;
+      BEnd := SynEd.BlockEnd;
+      Result.BlockValid := (BStart.X <> BEnd.X) or (BStart.Y <> BEnd.Y);
+      Result.BlockSize := Abs(SynEd.SelEnd - SynEd.SelStart);
+      Result.BlockStartingColumn := BStart.X;
+      Result.BlockStartingRow := BStart.Y;
+      Result.BlockEndingColumn := BEnd.X;
+      Result.BlockEndingRow := BEnd.Y;
+      Result.EditView := Pointer(Editor.EditView);
+      Result.LineText := SynEd.LineText;
+    end;
+  end;
+{$ENDIF}
+end;
 
 function TCnEditControlWrapper.GetEditorCount: Integer;
 begin
@@ -1770,6 +1801,8 @@ begin
   end;
   Result := -1;
 end;
+
+{$ENDIF}
 
 function TCnEditControlWrapper.CheckViewLinesChange(Editor: TCnEditorObject;
   Context: TCnEditorContext): Boolean;
@@ -1947,13 +1980,16 @@ var
   I: Integer;
   OptionType: TCnEditorChangeTypes;
   ChangeType: TCnEditorChangeTypes;
+{$IFDEF DELPHI_OTA}
   Option: IOTAEditOptions;
 {$IFDEF IDE_HAS_ERRORINSIGHT}
   IsSmoothWave: Boolean;
 {$ENDIF}
+{$ENDIF}
 begin
   OptionType := [];
 
+{$IFDEF DELPHI_OTA}
   Option := CnOtaGetEditOptions;
   if Option <> nil then
   begin
@@ -1976,6 +2012,7 @@ begin
     LoadFontFromRegistry;              // 重新读取高亮字体
     FOptionChanged := False;
   end;
+{$ENDIF}
 
   for I := 0 to EditorCount - 1 do
   begin
@@ -2104,6 +2141,8 @@ end;
 //------------------------------------------------------------------------------
 // 字体及高亮计算
 //------------------------------------------------------------------------------
+
+{$IFDEF DELPHI_OTA}
 
 procedure TCnEditControlWrapper.GetHighlightFromReg;
 const
@@ -3013,17 +3052,23 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 function TCnEditControlWrapper.GetLineIsElided(EditControl: TControl;
   LineNum: Integer): Boolean;
 begin
   Result := False;
+{$IFDEF DELPHI_OTA}
   try
     if Assigned(LineIsElided) then
       Result := LineIsElided(EditControl, LineNum);
   except
     ;
   end;
+{$ENDIF}
 end;
+
+{$IFDEF DELPHI_OTA}
 
 {$IFDEF BDS}
 
