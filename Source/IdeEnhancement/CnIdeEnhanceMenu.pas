@@ -29,7 +29,9 @@ unit CnIdeEnhanceMenu;
 * 开发平台：Windows 2000 + Delphi 5
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串支持本地化处理方式
-* 修改记录：2005.09.05 V1.0
+* 修改记录：2026.11.03 V1.1
+*               移植到 Lazarus
+*           2005.09.05 V1.0
 *               创建单元
 ================================================================================
 |</PRE>}
@@ -41,7 +43,7 @@ interface
 {$IFDEF CNWIZARDS_CNIDEENHANCEMENUWIZARD}
 
 uses
-  SysUtils, Classes, ToolsApi, IniFiles,
+  SysUtils, Classes, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles,
   CnConsts, CnWizClasses, CnWizManager, CnWizConsts;
 
 type
