@@ -265,7 +265,15 @@ var
 {$IFDEF SUPPORT_FMX}
   ARect: TRect;
 {$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+  UnitFileName, ProjName, ProjFileName, Ext: string;
+  SlUnits: TStringList;
+  Pkgs: TList;
+  K: Integer;
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
   function GetDfmInfoFromIDE(const AFileName: string; AInfo: TCnFormInfo): Boolean;
   var
     IModule: IOTAModule;
@@ -318,12 +326,6 @@ var
       ;
     end;
   end;
-{$ENDIF}
-{$IFDEF LAZARUS}
-  UnitFileName, ProjName, ProjFileName, Ext: string;
-  SlUnits: TStringList;
-  Pkgs: TList;
-  K: Integer;
 {$ENDIF}
 begin
   ProjectInterfaceList := TCnIDEInterfaceList.Create;
@@ -382,7 +384,7 @@ begin
 
           if not Exists then
           begin
-            // todo: Get default form name
+            // TODO: Get default form name
             FormFileName := _CnChangeFileExt(IModuleInfo.FileName, '.dfm');
           end;
 
@@ -523,7 +525,11 @@ begin
 
                   FormFileName := _CnChangeFileExt(UnitFileName, '.lfm');
                   if not FileExists(FormFileName) then
-                    Continue;
+                  begin
+                    FormFileName := _CnChangeFileExt(UnitFileName, '.dfm');
+                    if not FileExists(FormFileName) then
+                      Continue;
+                  end;
 
                   FormInfo := TCnFormInfo.Create;
                   with FormInfo do
