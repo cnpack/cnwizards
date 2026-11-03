@@ -1422,16 +1422,16 @@ function HWndIsNonvisualComponent(hWnd: HWND): Boolean;
 function FileExists(const Filename: string): Boolean;
 {* Tests for file existence, a lot faster than the RTL implementation }
 
-procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
-{* 将一 EditView 中的书签信息保存至一 ObjectList 中}
-
-procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
-{* 从 ObjectList 中全部恢复一 EditView 中的书签}
-
-procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+procedure ReplaceBookMarksFromObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
 {* 从 ObjectList 中替换一部分 EditView 中的书签}
 
 {$ENDIF}
+
+procedure SaveBookMarksToObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
+{* 将一 EditView 中的书签信息保存至一 ObjectList 中}
+
+procedure LoadBookMarksFromObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
+{* 从 ObjectList 中全部恢复一 EditView 中的书签}
 
 function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;
   ExcludeForm: Boolean = True): Boolean;
@@ -1587,6 +1587,12 @@ uses
 const
   MAX_LINE_LENGTH = 2048;
   CNWIZARDDEFAULT_ICO = 'CnWizardDefault';
+
+{$IFDEF LAZARUS}
+  MAX_BOOKMARK_COUNT = 9;
+{$ELSE}
+  MAX_BOOKMARK_COUNT = 20; // 20 是因为 Toggle Var/Uses 曾经使用到了 19 和 20
+{$ENDIF}
 
 {$IFNDEF CNWIZARDS_MINIMUM}
   CN_SM4_KEY: TCnSM4Key = ($43, $6E, $50, $61, $63, $6B, $20, $41, $49, $20, $43, $72, $79, $70, $74, $21);
@@ -4182,7 +4188,8 @@ begin
   begin
     for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
     begin
-      if SourceEditorManagerIntf.SourceEditors[I].FileName = FileName then
+      // 用 AnsiCompareFileName 比较文件名，Windows 下不区分大小写、Linux 下区分
+      if AnsiCompareFileName(SourceEditorManagerIntf.SourceEditors[I].FileName, FileName) = 0 then
       begin
         Result := SourceEditorManagerIntf.SourceEditors[I];
         Exit;
@@ -11220,76 +11227,8 @@ end;
 
 {$ENDIF}
 
-const
-  MAX_BOOKMARK_COUNT = 20; // 20 是因为 Toggle Var/Uses 使用到了 19 和 20
-
-// 将一 EditView 中的书签信息保存至一 ObjectList 中
-procedure SaveBookMarksToObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
-var
-  I: Integer;
-  APos: TOTACharPos;
-  BookMarkObj: TCnBookmarkObject;
-begin
-  if (EditView = nil) or (BookMarkList = nil) then Exit;
-  BookMarkList.Clear;
-
-  for I := 0 to MAX_BOOKMARK_COUNT do
-  begin
-    APos := EditView.BookmarkPos[I];
-    if (APos.CharIndex <> 0) or (APos.Line <> 0) then
-    begin
-      BookMarkObj := TCnBookmarkObject.Create;
-      BookMarkObj.ID := I;
-      BookMarkObj.Line := APos.Line;
-      BookMarkObj.Col := APos.CharIndex;
-      BookMarkList.Add(BookMarkObj);
-    end;
-  end;
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('SaveBookMarksToObjectList Got %d Bookmarks.', [BookMarkList.Count]);
-{$ENDIF}
-end;
-
-// 从 ObjectList 中恢复一 EditView 中的书签
-procedure LoadBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
-var
-  I: Integer;
-  APos: TOTACharPos;
-  EditPos, SavePos: TOTAEditPos;
-  BookMarkObj: TCnBookmarkObject;
-begin
-  if (EditView = nil) or (BookMarkList = nil) then Exit;
-
-  if BookMarkList.Count > 0 then
-  begin
-    SavePos := EditView.CursorPos;
-    for I := 0 to MAX_BOOKMARK_COUNT do // 先清除以前的书签
-    begin
-      APos := EditView.BookmarkPos[I];
-      if (APos.Line <> 0) or (APos.CharIndex <> 0) then
-      begin
-        EditPos := EditView.CursorPos;
-        EditPos.Line := APos.Line;
-        EditView.CursorPos := EditPos;
-        EditView.BookmarkToggle(I);
-      end;
-    end;
-
-    for I := 0 to BookMarkList.Count - 1 do
-    begin
-      BookMarkObj := TCnBookmarkObject(BookMarkList.Extract(BookMarkList.First));
-      EditPos := EditView.CursorPos;
-      EditPos.Line := BookMarkObj.Line;
-      EditView.CursorPos := EditPos;
-      EditView.BookmarkToggle(BookMarkObj.ID);
-      BookMarkObj.Free;
-    end;
-    EditView.CursorPos := SavePos;
-  end;
-end;
-
 // 从 ObjectList 中替换一部分 EditView 中的书签
-procedure ReplaceBookMarksFromObjectList(EditView: IOTAEditView; BookMarkList: TObjectList);
+procedure ReplaceBookMarksFromObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
 var
   I: Integer;
   APos: TOTACharPos;
@@ -11346,6 +11285,108 @@ begin
 end;
 
 {$ENDIF}
+
+// 将一 EditView 中的书签信息保存至一 ObjectList 中
+procedure SaveBookMarksToObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
+var
+  I {$IFDEF LAZARUS}, X, Y {$ENDIF}: Integer;
+{$IFDEF DELPHI_OTA}
+  APos: TOTACharPos;
+{$ENDIF}
+  BookMarkObj: TCnBookmarkObject;
+begin
+  if (EditView = nil) or (BookMarkList = nil) then Exit;
+  BookMarkList.Clear;
+{$IFDEF DELPHI_OTA}
+  for I := 0 to MAX_BOOKMARK_COUNT do
+  begin
+    APos := EditView.BookmarkPos[I];
+    if (APos.CharIndex <> 0) or (APos.Line <> 0) then
+    begin
+      BookMarkObj := TCnBookmarkObject.Create;
+      BookMarkObj.ID := I;
+      BookMarkObj.Line := APos.Line;
+      BookMarkObj.Col := APos.CharIndex;
+      BookMarkList.Add(BookMarkObj);
+    end;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  for I := 0 to MAX_BOOKMARK_COUNT do
+  begin
+    if EditView.GetBookMark(I, X, Y) then
+    begin
+      BookMarkObj := TCnBookmarkObject.Create;
+      BookMarkObj.ID := I;
+      BookMarkObj.Line := Y;
+      BookMarkObj.Col := X;
+      BookMarkList.Add(BookMarkObj);
+    end;
+  end;
+{$ENDIF}
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('SaveBookMarksToObjectList Got %d Bookmarks.', [BookMarkList.Count]);
+{$ENDIF}
+end;
+
+// 从 ObjectList 中恢复一 EditView 中的书签
+procedure LoadBookMarksFromObjectList(EditView: TCnEditViewSourceInterface; BookMarkList: TObjectList);
+var
+  I: Integer;
+{$IFDEF DELPHI_OTA}
+  APos: TOTACharPos;
+  EditPos, SavePos: TOTAEditPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SynEd: TSynEdit;
+{$ENDIF}
+  BookMarkObj: TCnBookmarkObject;
+begin
+  if (EditView = nil) or (BookMarkList = nil) then Exit;
+
+{$IFDEF DELPHI_OTA}
+  if BookMarkList.Count > 0 then
+  begin
+    SavePos := EditView.CursorPos;
+    for I := 0 to MAX_BOOKMARK_COUNT do // 先清除以前的书签
+    begin
+      APos := EditView.BookmarkPos[I];
+      if (APos.Line <> 0) or (APos.CharIndex <> 0) then
+      begin
+        EditPos := EditView.CursorPos;
+        EditPos.Line := APos.Line;
+        EditView.CursorPos := EditPos;
+        EditView.BookmarkToggle(I);
+      end;
+    end;
+
+    for I := 0 to BookMarkList.Count - 1 do
+    begin
+      BookMarkObj := TCnBookmarkObject(BookMarkList.Extract(BookMarkList.First));
+      EditPos := EditView.CursorPos;
+      EditPos.Line := BookMarkObj.Line;
+      EditView.CursorPos := EditPos;
+      EditView.BookmarkToggle(BookMarkObj.ID);
+      BookMarkObj.Free;
+    end;
+    EditView.CursorPos := SavePos;
+  end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if EditView.EditorControl is TSynEdit then
+  begin
+    SynEd := TSynEdit(EditView.EditorControl);
+    for I := 0 to MAX_BOOKMARK_COUNT do // 先清除原有书签
+      SynEd.ClearBookMark(I);
+
+    for I := 0 to BookMarkList.Count - 1 do
+    begin
+      BookMarkObj := TCnBookmarkObject(BookMarkList[I]);
+      SynEd.SetBookMark(BookMarkObj.ID, BookMarkObj.Col, BookMarkObj.Line);
+    end;
+  end;
+{$ENDIF}
+end;
 
 // 取得当前设计的窗体及选择的组件列表，返回成功标志
 function CnOtaGetCurrDesignedForm(var AForm: TCustomForm; Selections: TList;

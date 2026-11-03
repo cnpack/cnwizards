@@ -35,7 +35,8 @@ uses
   CnRoClasses, CnRoFilesList, CnRoFrmFileList, CnRoOptions, CnFilesSnapshot, 
   CnFilesSnapshotManageFrm, CnUsesToolsWizard, CnUsesCleanResultFrm, 
   CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, CnRepositoryMenu, 
-  CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, LazarusPackageIntf;
+  CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, CnReplaceWizard, 
+  LazarusPackageIntf;
 
 implementation
 

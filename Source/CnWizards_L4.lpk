@@ -464,6 +464,10 @@
         <Filename Value="SourceHighlight\CnSourceHighlight.pas"/>
         <UnitName Value="CnSourceHighlight"/>
       </Item>
+      <Item>
+        <Filename Value="SimpleWizard\CnReplaceWizard.pas"/>
+        <UnitName Value="CnReplaceWizard"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

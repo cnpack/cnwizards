@@ -712,9 +712,7 @@ type
     function GetBlockMatchHotkey: TShortCut;
     procedure SetBlockMatchHotkey(const Value: TShortCut);
     procedure SetBlockMatchLineClass(const Value: Boolean);
-{$IFDEF DELPHI_OTA}
     procedure ReloadIDEFonts;
-{$ENDIF}
     procedure SetHilightSeparateLine(const Value: Boolean);
 {$IFNDEF BDS}
     // 当前行的底色功能仅针对 Delphi 567 等低版本
@@ -1018,6 +1016,9 @@ const
   {$ELSE}
   csCompDirective = 'Preprocessor'; // RegName of IDE Font for Compiler Directive
   {$ENDIF}
+{$ENDIF}
+{$IFDEF LAZARUS}
+  csLazCompDirective = 'Directive'; // Lazarus 高亮器中编译指令属性名，对应 Delphi 的 Preprocessor
 {$ENDIF}
 
   csWhiteSpace = 'Whitespace';
@@ -5057,9 +5058,12 @@ begin
       else
         HoriStyle := FBlockMatchLineStyle;
 
-      // 竖线：顶端止于起始行的行底，底端止于结束行的行顶，
-      // 不延伸进结束关键字所在行，否则虚线贴着关键字文字不好看
-      HighlightCanvasLine(Canvas, Xv, Y1, Xv, P2.Y, VertStyle);
+      // 竖线：顶端止于起始行的行底；底端在结束关键字同列时止于其行顶，
+      // 后者列更大时补画到行底与底行横线相接，否则接缝断开
+      if P2.X > Xv then
+        HighlightCanvasLine(Canvas, Xv, Y1, Xv, Y2, VertStyle)
+      else
+        HighlightCanvasLine(Canvas, Xv, Y1, Xv, P2.Y, VertStyle);
       // 顶行横线：连接竖线与起始关键字
       if FBlockMatchLineHori and (P1.X <> Xv) then
         HighlightCanvasLine(Canvas, Xv, Y1, P1.X, Y1, HoriStyle);
@@ -6340,7 +6344,7 @@ begin
     begin
       if ctFont in ChangeType then
       begin
-        {$IFDEF DELPHI_OTA} ReloadIDEFonts; {$ENDIF}
+        ReloadIDEFonts;
 {$IFNDEF STAND_ALONE}
 {$IFNDEF BDS}
         if FHighLightLineColor = FDefaultHighLightLineColor then
@@ -6655,7 +6659,7 @@ begin
   else
   begin
     // 检查编辑器，可能编辑器的 Info 未创建
-    {$IFDEF DELPHI_OTA} ReloadIDEFonts; {$ENDIF}
+    ReloadIDEFonts;
     for I := 0 to EditControlWrapper.EditorCount - 1 do
     begin
       EditControl := EditControlWrapper.Editors[I].EditControl;
@@ -6758,12 +6762,52 @@ begin
     FDirtyList.Add(Pointer(LineNum));
 end;
 
-{$IFDEF DELPHI_OTA}
-
 procedure TCnSourceHighlight.ReloadIDEFonts;
 var
   AHighlight: TCnHighlightItem;
 begin
+{$IFDEF LAZARUS}
+  // Lazarus: wrapper 已将当前编辑器高亮器的属性按原名载入 Highlights（属性
+  // 缺省时前景已回退为编辑器基础字体色）。属性名与 Delphi 注册表名一致的有
+  // Reserved word/Identifier，编译指令在 Lazarus 中叫 Directive，
+  // 随 OnIdle 的 ctFont 通知自动刷新
+  if EditControlWrapper.IndexOfHighlight(csReservedWord) >= 0 then
+  begin
+    AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csReservedWord)];
+
+    FKeywordHighlight.ColorFg := AHighlight.ColorFg;
+    FKeywordHighlight.ColorBk := AHighlight.ColorBk;
+    FKeywordHighlight.Bold := AHighlight.Bold;
+    FKeywordHighlight.Italic := AHighlight.Italic;
+    FKeywordHighlight.Underline := AHighlight.Underline;
+  end;
+
+  if EditControlWrapper.IndexOfHighlight(csIdentifier) >= 0 then
+  begin
+    AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csIdentifier)];
+
+    FIdentifierHighlight.ColorFg := AHighlight.ColorFg;
+    FIdentifierHighlight.ColorBk := AHighlight.ColorBk;
+    FIdentifierHighlight.Bold := AHighlight.Bold;
+    FIdentifierHighlight.Italic := AHighlight.Italic;
+    FIdentifierHighlight.Underline := AHighlight.Underline;
+  end;
+
+  if EditControlWrapper.IndexOfHighlight(csLazCompDirective) >= 0 then
+  begin
+    AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csLazCompDirective)];
+
+    FCompDirectiveHighlight.ColorFg := AHighlight.ColorFg;
+    FCompDirectiveHighlight.ColorBk := AHighlight.ColorBk;
+    FCompDirectiveHighlight.Bold := AHighlight.Bold;
+    FCompDirectiveHighlight.Italic := AHighlight.Italic;
+    FCompDirectiveHighlight.Underline := AHighlight.Underline;
+  end
+  else // 无 Directive 属性时回退为编辑器字体的前景色
+  begin
+    FCompDirectiveHighlight.ColorFg := EditControlWrapper.ForegroundColor;
+  end;
+{$ELSE}
   if EditControlWrapper.IndexOfHighlight(csReservedWord) >= 0 then
   begin
     AHighlight := EditControlWrapper.Highlights[EditControlWrapper.IndexOfHighlight(csReservedWord)];
@@ -6825,9 +6869,8 @@ begin
   {$ENDIF}
 {$ENDIF}
 {$ENDIF}
-end;
-
 {$ENDIF}
+end;
 
 procedure TCnSourceHighlight.RefreshCurrentTokens(Info: TCnBlockMatchInfo);
 var
@@ -8436,10 +8479,13 @@ var
 
   function _GeneralStrLen(const Text: PCnIdeTokenChar): Integer; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   begin
+{$IFDEF LAZARUS}
+    Result := lstrlenW(Text);
 {$IFDEF IDE_STRING_ANSI_UTF8}
     Result := lstrlenW(Text);
 {$ELSE}
     Result := StrLen(Text);
+{$ENDIF}
 {$ENDIF}
   end;
 

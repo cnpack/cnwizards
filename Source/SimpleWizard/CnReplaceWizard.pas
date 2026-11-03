@@ -44,9 +44,12 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, IniFiles, ToolsAPI, FileCtrl, Math, Contnrs, AsRegExpr,
+  StdCtrls, ExtCtrls, IniFiles, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
+  {$IFDEF LAZARUS} SrcEditorIntf, CnIDEStrings, {$ENDIF} FileCtrl, Math, Contnrs, AsRegExpr,
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizEditFiler, CnNative,
-  CnWizSearch, CnIni, CnWizMultiLang {$IFDEF IDE_WIDECONTROL}, CnWideStrings {$ENDIF};
+  CnWizSearch, CnIni, CnWizMultiLang
+  {$IFDEF IDE_WIDECONTROL}, CnWideStrings{$ENDIF}
+  {$IFDEF LAZARUS}, CnWideStrings{$ENDIF};
 
 type
 
@@ -81,8 +84,8 @@ type
     procedure DoNormalReplace(const FileName: string);
     procedure DoRegExprReplace(const FileName: string);
     procedure ReplaceFile(const FileName: string);
-    procedure ReplaceProject(Project: IOTAProject);
-    procedure ReplaceProjectGroup(ProjectGroup: IOTAProjectGroup);
+    procedure ReplaceProject(Project: TCnIDEProjectInterface);
+    procedure ReplaceProjectGroup(ProjectGroup: TCnIDEProjectGroupInterface);
     procedure ReplaceOpenUnits;
     procedure ReplaceDir(const Dir, FileMask: string; IncludeSubDirs: Boolean);
   public
@@ -197,6 +200,9 @@ procedure TCnReplaceWizardForm.FormCreate(Sender: TObject);
 var
   Sel: string;
   Idx: Integer;
+{$IFDEF LAZARUS}
+  Token: TCnIdeTokenString;
+{$ENDIF}
 begin
   LoadSettings;
   Sel := CnOtaGetCurrentSelection;         // 取当前选择的文本
@@ -204,7 +210,16 @@ begin
     Sel := Copy(Sel, 1, Min(Pos(#13, Sel), Pos(#10, Sel)) - 1);
 
   if Sel = '' then
+  begin
+{$IFDEF LAZARUS}
+    // Lazarus: 用通用取词接口，返回 UTF16 后显式转成 Utf8
+    Idx := 0;
+    if CnOtaGeneralGetCurrPosToken(Token, Idx, False, [], []) then
+      Sel := Utf8Encode(Token);            // 取当前光标下的标识符
+{$ELSE}
     CnOtaGetCurrPosToken(Sel, Idx, False); // 取当前光标下的标识符
+{$ENDIF}
+  end;
 
   if Sel <> '' then
     cbbSrc.Text := Sel;
@@ -259,7 +274,15 @@ begin
     FWizard.FUseRegExpr := rbRegExpr.Checked;
     FWizard.FUseSub := chkUseSub.Checked;
     if FWizard.FUseRegExpr then
+	begin
+{$IFDEF LAZARUS}
+      // 流内容为 Utf8，正则表达式需显式转成 UTF16 给引擎
+      FWizard.FRegExpr.Expression := CnUtf8DecodeToWideString(SourceText);
+{$ELSE}
       FWizard.FRegExpr.Expression := SourceText;
+{$ENDIF}
+    end;
+
     FWizard.FDestText := DestText;
     FWizard.FFoundCount := 0;
     FWizard.FCurrCount := 0;
@@ -284,7 +307,11 @@ begin
           FWizard.ReplaceDir(Dir, FileMask, IncludeSubDirs);
         end;
     else
+{$IFDEF LAZARUS}
+      FWizard.ReplaceFile(CnOtaGetCurrentSourceFileName); // rsUnit
+{$ELSE}
       FWizard.ReplaceFile(CnOtaGetFileNameOfCurrentModule(True)); // rsUnit
+{$ENDIF}
     end;
   finally
     Screen.Cursor := crDefault;
@@ -391,8 +418,14 @@ var
   NewDir: string;
 begin
   NewDir := cbbDir.Text;
+{$IFDEF LAZARUS}
+  // Lazarus: LCL 的目录选择对话框在 Dialogs 单元中
+  if SelectDirectory(SCnReplaceSelectDirCaption, '', NewDir) then
+    cbbDir.Text := NewDir;
+{$ELSE}
   if GetDirectory(SCnReplaceSelectDirCaption, NewDir) then
     cbbDir.Text := NewDir;
+{$ENDIF}
 end;
 
 procedure TCnReplaceWizardForm.rgReplaceStyleClick(Sender: TObject);
@@ -413,11 +446,15 @@ begin
 end;
 
 procedure TCnReplaceWizardForm.cbbDirDropDown(Sender: TObject);
+{$IFNDEF LAZARUS}
 var
   I: Integer;
   MaxWidth: Integer;
   Bitmap: Graphics.TBitmap;
+{$ENDIF}
 begin
+  // Lazarus: LCL 的 TComboBox 不支持 CB_SETDROPPEDWIDTH 调整下拉宽度，略过
+{$IFNDEF LAZARUS}
   MaxWidth := cbbDir.Width;
   Bitmap := Graphics.TBitmap.Create;
   try
@@ -434,6 +471,7 @@ begin
     SendMessage(cbbDir.Handle, CB_SETDROPPEDWIDTH, MaxWidth, 0)
   else
     SendMessage(cbbDir.Handle, CB_SETDROPPEDWIDTH, 0, 0);
+{$ENDIF}
 end;
 
 function TCnReplaceWizardForm.GetANSICompatible: Boolean;
@@ -529,11 +567,16 @@ end;
 procedure TCnReplaceWizard.ReplaceFile(const FileName: string);
 var
   Reader: TCnEditFiler;
+{$IFDEF DELPHI_OTA}
   IModule: IOTAModule;
   ISourceEditor: IOTASourceEditor;
   IWriter: IOTAEditWriter;
-  BookMarkList: TObjectList;
   EditView: IOTAEditView;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Editor: TSourceEditorInterface;
+{$ENDIF}
+  BookMarkList: TObjectList;
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$ENDIF}
@@ -542,8 +585,10 @@ begin
   try
     FInStream.Size := 0;
     try
-      Reader.SaveToStream(FInStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF});
-      // 拿到的 FInStream 确保为 Ansi
+      // Delphi 的 IDE_WIDECONTROL 下拿到的 FInStream 确保为 Ansi；
+      // Lazarus 下传 False，拿到的 FInStream 确保为 Utf8，后续替换均按字节进行
+      Reader.SaveToStream(FInStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF}
+        {$IFDEF LAZARUS}, False{$ENDIF});
     except
       on E: Exception do
       begin
@@ -571,6 +616,42 @@ begin
       CnDebugger.LogMsg('ReplaceFile is in IDE: ' + FileName);
 {$ENDIF}
       try
+{$IFDEF LAZARUS}
+        // Lazarus: 找到该文件对应的 SourceEditor，先保存书签，再去掉流尾部 #0
+        // 后用 ReadFromStream 写回，mmModule 模式下其内部走 Lines.Text
+        Editor := CnOtaGetEditor(FileName);
+        if Editor <> nil then
+        begin
+          BookMarkList := TObjectList.Create(True);
+          try
+            SaveBookMarksToObjectList(Editor, BookMarkList);
+
+            if PByte(TCnNativeUInt(FOutStream.Memory) + FOutStream.Size - 1)^ = 0 then
+              FOutStream.Size := FOutStream.Size - 1;
+            FOutStream.Position := 0;
+
+            Reader := TCnEditFiler.Create(FileName);
+            try
+              Reader.ReadFromStream(FOutStream, False);
+            finally
+              Reader.Free;
+            end;
+
+            Inc(FFileCount);
+            Inc(FFoundCount, FCurrCount);
+
+            // 替换完毕后还原书签
+            LoadBookMarksFromObjectList(Editor, BookMarkList);
+            Exit;
+          finally
+            FreeAndNil(BookMarkList);
+          end;
+        end;
+        QueryContinue(Format(SCnSaveEditFileError, [FileName]));
+
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
         IModule := CnOtaGetModule(FileName);
         if Assigned(IModule) then
         begin
@@ -612,6 +693,7 @@ begin
           end;
         end;
         QueryContinue(Format(SCnSaveEditFileError, [FileName]));
+{$ENDIF}
       except
         QueryContinue(Format(SCnSaveEditFileError, [FileName]));
       end;
@@ -628,7 +710,10 @@ begin
         try
           FOutStream.Position := 0;
           try
-            Reader.ReadFromStream(FOutStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF});
+            // Lazarus 下流内容是 Utf8，传 False 让 ReadFromStream 按 Utf8 读入，
+            // 写盘时按原文件编码保存
+            Reader.ReadFromStream(FOutStream{$IFDEF IDE_WIDECONTROL}, True{$ENDIF}
+              {$IFDEF LAZARUS}, False{$ENDIF});
           except
             on E: Exception do
             begin
@@ -650,18 +735,47 @@ begin
     Inc(FFileCount);
 end;
 
-procedure TCnReplaceWizard.ReplaceProject(Project: IOTAProject);
+procedure TCnReplaceWizard.ReplaceProject(Project: TCnIDEProjectInterface);
 var
   I: Integer;
   FileName: string;
+{$IFDEF LAZARUS}
+  Files: TStringList;
+{$ENDIF}
 begin
   if not Assigned(Project) then
     Exit;
 
+{$IFDEF LAZARUS}
+  Files := TStringList.Create;
+  try
+    // Lazarus: 工程主文件自身（.lpi/.lpk），对应 Delphi 侧的 dpr
+    FileName := CnOtaGetLazProjectFileName(Project);
+    if FileName <> '' then
+    begin
+      ReplaceFile(FileName);
+      if FAbort then Exit;
+    end;
+
+    if CnOtaGetLazProjectFiles(Project, Files) then
+    begin
+      for I := 0 to Files.Count - 1 do
+      begin
+        if IsSourceModule(Files[I]) then
+          ReplaceFile(Files[I]);
+        if FAbort then Exit;
+      end;
+    end;
+  finally
+    Files.Free;
+  end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   if IsDpr(Project.FileName) then
     ReplaceFile(Project.FileName);        // 处理 dpr 工程文件自身，但不处理 bdsproj/dproj 等
   if FAbort then Exit;
-  
+
   for I := 0 to Project.GetModuleCount - 1 do
   begin
     FileName := Project.GetModule(I).FileName;
@@ -677,13 +791,35 @@ begin
 {$ENDIF}
     if FAbort then Exit;
   end;
+{$ENDIF}
 end;
 
 procedure TCnReplaceWizard.ReplaceProjectGroup(
-  ProjectGroup: IOTAProjectGroup);
+  ProjectGroup: TCnIDEProjectGroupInterface);
 var
   I: Integer;
+{$IFDEF LAZARUS}
+  List: TCnIDEInterfaceList;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  // Lazarus: 遍历 CnOtaGetProjectList 的混合列表（TLazProject 或 TPGCompileTarget），
+  // 逐项取工程文件替换。列表项经硬转传入仅作 TObject 用，ReplaceProject 内部
+  // 调用的 CnOtaGetLazProjectFileName/Files 自会区分类型
+  List := TCnIDEInterfaceList.Create;
+  try
+    CnOtaGetProjectList(List);
+    for I := 0 to List.Count - 1 do
+    begin
+      ReplaceProject(TCnIDEProjectInterface(List[I]));
+      if FAbort then Exit;
+    end;
+  finally
+    List.Free;
+  end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   if not Assigned(ProjectGroup) then Exit;
 
   for I := 0 to ProjectGroup.ProjectCount - 1 do
@@ -691,14 +827,29 @@ begin
     ReplaceProject(ProjectGroup.Projects[I]);
     if FAbort then Exit;
   end;
+{$ENDIF}
 end;
 
 procedure TCnReplaceWizard.ReplaceOpenUnits;
 var
-  iModuleServices: IOTAModuleServices;
   I: Integer;
   FileName: string;
+{$IFDEF DELPHI_OTA}
+  iModuleServices: IOTAModuleServices;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  // Lazarus: 直接遍历 SourceEditorManager 中打开的编辑器
+  if SourceEditorManagerIntf <> nil then
+    for I := 0 to SourceEditorManagerIntf.SourceEditorCount - 1 do
+    begin
+      FileName := SourceEditorManagerIntf.SourceEditors[I].FileName;
+      ReplaceFile(FileName);
+      if FAbort then Exit;
+    end;
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
   QuerySvcs(BorlandIDEServices, IOTAModuleServices, iModuleServices);
 
   for I := 0 to iModuleServices.GetModuleCount - 1 do
@@ -707,6 +858,7 @@ begin
     ReplaceFile(FileName);
     if FAbort then Exit;
   end;
+{$ENDIF}
 end;
 
 procedure TCnReplaceWizard.OnFindFile(const FileName: string;
@@ -783,6 +935,18 @@ begin
   FOutStream.Size := 0;
   FLastInStreamPos := 0;
 
+{$IFDEF LAZARUS}
+  // Lazarus: 流内容为 Utf8，正则引擎的 RegExprString 是 WideString，
+  // 需显式按 Utf8 解码成 UTF16，替换后再显式编码回 Utf8
+  InStr := CnUtf8DecodeToWideString(PAnsiChar(FInStream.Memory));
+  OutStr := FRegExpr.ReplaceEx(InStr, OnRegExprReplace);
+
+  if FLastInStreamPos > 0 then
+  begin
+    MemStr := CnUtf8EncodeWideString(OutStr);
+    FOutStream.Write(PAnsiChar(MemStr)^, Length(MemStr) + 1);
+  end;
+{$ELSE}
   InStr := RegExprString(PAnsiChar(FInStream.Memory));
   OutStr := FRegExpr.ReplaceEx(InStr, OnRegExprReplace);
 
@@ -791,14 +955,23 @@ begin
     MemStr := AnsiString(OutStr);
     FOutStream.Write(PAnsiChar(MemStr)^, Length(MemStr) + 1);
   end;
+{$ENDIF}
 end;
 
 function TCnReplaceWizard.OnRegExprReplace(ARegExpr: TRegExpr): string;
 begin
+{$IFDEF LAZARUS}
+  // FDestText 为 Utf8，Substitute 需 UTF16 参数，返回值再转回 Utf8
+  if FUseSub then
+    Result := CnUtf8EncodeWideString(ARegExpr.Substitute(CnUtf8DecodeToWideString(FDestText)))
+  else
+    Result := FDestText;
+{$ELSE}
   if FUseSub then
     Result := ARegExpr.Substitute(FDestText)
   else
     Result := FDestText;
+{$ENDIF}
   FLastInStreamPos := ARegExpr.MatchPos[0] + ARegExpr.MatchLen[0];
   Inc(FCurrCount);
 end;
