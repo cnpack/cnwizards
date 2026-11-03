@@ -135,7 +135,7 @@ uses
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   CnWideStrings, CnWizClasses, CnWizShortCut, CnWizNotifier,
   {$IFNDEF STAND_ALONE} {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
-  {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditTypes,
+  {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditTypes, SynEditHighlighter,
   SynEditMarkup, SynEditMiscClasses, {$ENDIF}
   CnControlHook, CnWizUtils, CnWizIdeUtils, {$ENDIF}
   CnIni, CnCommon, CnConsts, CnWizConsts, CnEditControlWrapper, mPasLex, CnPasWideLex,
@@ -670,6 +670,13 @@ type
     procedure LazSetPairHighlight(AControl: TControl; Pair: TCnBlockLinePair;
       AHighlight: Boolean);
     procedure FeedBlockMatchMarkup(Info: TCnBlockMatchInfo);
+    procedure LazCheckBracketMatch(Editor: TCnEditorObject);
+    {* Lazarus: 检查光标附近括号配对并同步 Markup 条目，对应 Delphi 侧 CheckBracketMatch}
+    function LazGetBracketMatch(EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
+    {* Lazarus: 括号配对匹配算法，对应 Delphi 侧 GetBracketMatch，
+       位置结果使用 SynEdit 的 1 基逻辑列与 1 基物理行}
+    procedure LazAddBracketItems(EditControl: TControl);
+    {* Lazarus: 将当前括号配对信息按设置颜色注入 Markup}
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
     procedure SourceEditorNotify(SourceEditor: IOTASourceEditor;
@@ -878,6 +885,7 @@ type
     ColorFg: TColor;       // 前景色，clNone 表示不改变
     ColorBk: TColor;       // 背景色，clNone 表示不改变
     ColorFrame: TColor;    // 边框色，clNone 表示不绘制边框
+    StyleBold: Boolean;    // 是否加粗，用于括号配对高亮
   end;
   PCnSourceHighlightItem = ^TCnSourceHighlightItem;
 
@@ -925,8 +933,10 @@ type
     procedure EndUpdate;
     procedure ClearItems;
     procedure AddItem(aRow, aColStart, aColEnd: Integer;
-      aColorFg, aColorBk, aColorFrame: TColor);
+      aColorFg, aColorBk, aColorFrame: TColor; aBold: Boolean = False);
     {* 若该行同起始列已有条目则更新颜色，否则按序插入。整行高亮传 1 与 MaxInt }
+    procedure DeleteItem(aRow, aColStart: Integer);
+    {* 删除指定行指定起始列的条目，未命中则忽略}
 
     property SynEdit; // 提升 TSynEditMarkup.SynEdit 的可见性
     property Count: Integer read GetCount;
@@ -4949,6 +4959,9 @@ begin
       for I := 0 to Info.CustomIdentTokenCount - 1 do
         LazAddTokenItemEx(Info.Control, Info.CustomIdentTokens[I],
           FCustomIdentForeground, FCustomIdentBackground, clNone);
+
+    // 6、括号配对高亮：后写覆盖先写，需在所有 Token 条目之后注入
+    LazAddBracketItems(Info.Control);
   finally
     Markup.EndUpdate;
   end;
@@ -5075,6 +5088,480 @@ begin
     Canvas.Pen.Color := SaveColor;
     Canvas.Pen.Style := SaveStyle;
     Canvas.Pen.Width := SaveWidth;
+  end;
+end;
+
+// Lazarus: 0 基字节下标转 1 基逻辑列（跳过 UTF8 多字节的后续字节）
+function LazByteIdxToLogicalCol(const S: string; AByteIdx: Integer): Integer;
+var
+  I, Cnt: Integer;
+begin
+  Cnt := 0;
+  for I := 1 to AByteIdx do
+    if (Byte(S[I]) and $C0) <> $80 then
+      Inc(Cnt);
+  Result := Cnt + 1;
+end;
+
+// Lazarus: 1 基逻辑列转 0 基字节下标（该列字符首字节的下标）
+function LazLogicalColToByteIdx(const S: string; ALogicalCol: Integer): Integer;
+var
+  I, Cnt: Integer;
+begin
+  Cnt := 0;
+  I := 1;
+  while (I <= Length(S)) and (Cnt < ALogicalCol - 1) do
+  begin
+    if (Byte(S[I]) and $C0) <> $80 then
+      Inc(Cnt);
+    Inc(I);
+  end;
+  Result := I - 1;
+end;
+
+// Lazarus: 括号配对匹配，对应 Delphi 侧 GetBracketMatch 的三段算法：
+// 光标前后紧邻括号的直接配对、以及 FBracketMiddle 时从光标向两侧的中间查找。
+// 行内扫描在 UTF8 字节空间进行（括号均为 ASCII，多字节序列不会含 ASCII 字节），
+// 结果位置换算为 SynEdit 的 1 基逻辑列。注释/字符串内的括号用高亮器属性排除
+function TCnSourceHighlight.LazGetBracketMatch(EditControl: TControl;
+  AInfo: TCnBracketInfo): Boolean;
+var
+  SynEd: TSynEdit;
+  SrcEd: TSourceEditorInterface;
+  I: Integer;
+  BracketCount: Integer;
+  BracketChars: PBracketArray;
+  TopLine, BottomLine: Integer;
+  CaretLine, CaretCol, CaretByteIdx: Integer;
+  LineText: string;
+  CL, CR: AnsiChar;
+  TmpPos: TOTAEditPos;
+  Layers: array of Integer;
+
+  // 对应 Delphi 的 InCommentOrString，用 SynEdit 高亮器属性判断，
+  // X 为 1 基行内字节下标（与 GetHighlighterAttriAtRowColEx 的字节口径一致）
+  function InCommentOrString(ALine, AByteIdx0: Integer): Boolean;
+  var
+    Tok: string;
+    Attri: TSynHighlighterAttributes;
+    HL: TSynCustomHighlighter;
+  begin
+    Result := False;
+    HL := SynEd.Highlighter;
+    if (HL = nil) or (ALine < 1) or (ALine > SynEd.Lines.Count) then
+      Exit;
+    if SynEd.GetHighlighterAttriAtRowCol(Point(AByteIdx0 + 1, ALine), Tok, Attri) then
+      Result := (Attri = HL.CommentAttribute) or (Attri = HL.StringAttribute);
+  end;
+
+  // 向前找配对的右括号，对应 Delphi 的 ForwardFindMatchToken，扫描范围到可视区底
+  function ForwardFindMatchToken(const FindToken, MatchToken: AnsiChar;
+    AFromLine, AFromByteIdx0: Integer): TOTAEditPos;
+  var
+    I, J, L, Layer: Integer;
+    LineText: string;
+  begin
+    Result.Col := 0;
+    Result.Line := 0;
+    TopLine := AFromLine;
+    BottomLine := Min(SynEd.Lines.Count, SynEd.TopLine + SynEd.LinesInWindow);
+    if TopLine <= BottomLine then
+    begin
+      Layer := 1;
+      for I := TopLine to BottomLine do
+      begin
+        LineText := SynEd.Lines[I - 1];
+        if I = AFromLine then
+          L := AFromByteIdx0
+        else
+          L := 0;
+
+        for J := L to Length(LineText) - 1 do
+        begin
+          if (LineText[J + 1] = FindToken) and
+            not InCommentOrString(I, J) then
+            Inc(Layer)
+          else if (LineText[J + 1] = MatchToken) and
+            not InCommentOrString(I, J) then
+          begin
+            Dec(Layer);
+            if Layer = 0 then
+            begin
+              Result.Col := LazByteIdxToLogicalCol(LineText, J);
+              Result.Line := I;
+              Exit;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  // 向后找配对的左括号，对应 Delphi 的 BackFindMatchToken，扫描范围到可视区顶
+  function BackFindMatchToken(const FindToken, MatchToken: AnsiChar;
+    AFromLine, AFromByteIdx0: Integer): TOTAEditPos;
+  var
+    I, J, L, Layer: Integer;
+    LineText: string;
+  begin
+    Result.Col := 0;
+    Result.Line := 0;
+    TopLine := SynEd.TopLine;
+    BottomLine := AFromLine;
+    if TopLine <= BottomLine then
+    begin
+      Layer := 1;
+      for I := BottomLine downto TopLine do
+      begin
+        LineText := SynEd.Lines[I - 1];
+        if I = AFromLine then
+          L := AFromByteIdx0
+        else
+          L := Length(LineText) - 1;
+
+        for J := L downto 0 do
+        begin
+          if (LineText[J + 1] = FindToken) and
+            not InCommentOrString(I, J) then
+            Inc(Layer)
+          else if (LineText[J + 1] = MatchToken) and
+            not InCommentOrString(I, J) then
+          begin
+            Dec(Layer);
+            if Layer = 0 then
+            begin
+              Result.Col := LazByteIdxToLogicalCol(LineText, J);
+              Result.Line := I;
+              Exit;
+            end;
+          end;
+        end;
+      end;
+    end;
+  end;
+
+  // 查找光标所在括号中间的情形，对应 Delphi 的 FindMatchTokenFromMiddle，
+  // 从光标向前后各扫可视区范围内的行，向前找未闭合的左括号再向后找其配对
+  function FindMatchTokenFromMiddle: Boolean;
+  var
+    I, J, K, L, Cnt: Integer;
+    ML, MR: Integer;
+    TopLine, BottomLine: Integer;
+    LineText: string;
+  begin
+    Result := False;
+    SetLength(Layers, BracketCount);
+    for K := 0 to BracketCount - 1 do
+      Layers[K] := 0;
+
+    TopLine := Min(CaretLine, SynEd.TopLine);
+    BottomLine := Min(SynEd.Lines.Count, Max(CaretLine, SynEd.TopLine + SynEd.LinesInWindow));
+
+    // 向前查找左括号
+    Cnt := 0;
+    for I := CaretLine downto TopLine do
+    begin
+      LineText := SynEd.Lines[I - 1];
+      if I = CaretLine then
+        L := Min(CaretByteIdx, Length(LineText)) - 1 // 从光标前一字符（或行尾）往前找
+      else
+        L := Length(LineText) - 1;
+
+      for J := L downto 0 do
+      begin
+        for K := 0 to BracketCount - 1 do
+        begin
+          if (LineText[J + 1] = BracketChars^[K][0]) and
+            not InCommentOrString(I, J) then
+          begin
+            if Layers[K] = 0 then
+            begin
+              AInfo.TokenStr := BracketChars^[K][0];
+              TmpPos.Col := LazByteIdxToLogicalCol(LineText, J);
+              TmpPos.Line := I;
+              AInfo.TokenPos := TmpPos;
+              ML := K;
+              MR := K;
+              Break;
+            end
+            else
+              Dec(Layers[K]);
+          end
+          else if (LineText[J + 1] = BracketChars^[K][1]) and
+            not InCommentOrString(I, J) then
+            Inc(Layers[K]);
+        end;
+        if AInfo.TokenStr <> '' then
+          Break;
+      end;
+      if AInfo.TokenStr <> '' then
+        Break;
+
+      Inc(Cnt);
+      if Cnt > csMaxBracketMatchLines then
+        Break;
+    end;
+
+    if AInfo.TokenStr = '' then
+      Exit;
+
+    for K := 0 to BracketCount - 1 do
+      Layers[K] := 0;
+
+    // 向后查找右括号
+    Cnt := 0;
+    for I := CaretLine to BottomLine do
+    begin
+      LineText := SynEd.Lines[I - 1];
+      if I = CaretLine then
+        L := CaretByteIdx // 从光标处往后找
+      else
+        L := 0;
+
+      for J := L to Length(LineText) - 1 do
+      begin
+        for K := ML to MR do
+        begin
+          if (LineText[J + 1] = BracketChars^[K][1]) and
+            not InCommentOrString(I, J) then
+          begin
+            if Layers[K] = 0 then
+            begin
+              AInfo.TokenMatchStr := BracketChars^[K][1];
+              TmpPos.Col := LazByteIdxToLogicalCol(LineText, J);
+              TmpPos.Line := I;
+              AInfo.TokenMatchPos := TmpPos;
+              Break;
+            end
+            else
+              Dec(Layers[K]);
+          end
+          else if (LineText[J + 1] = BracketChars^[K][0]) and
+            not InCommentOrString(I, J) then
+            Inc(Layers[K]);
+        end;
+        if AInfo.TokenMatchStr <> '' then
+          Break;
+      end;
+      if AInfo.TokenMatchStr <> '' then
+        Break;
+
+      Inc(Cnt);
+      if Cnt > csMaxBracketMatchLines then
+        Break;
+    end;
+
+    Result := (AInfo.TokenStr <> '') or (AInfo.TokenMatchStr <> '');
+  end;
+
+begin
+  Result := False;
+  SynEd := GetSynEditOfControl(EditControl);
+  if (SynEd = nil) or (not SynEd.HandleAllocated) then
+    Exit;
+
+  // 按编辑器控件反查 SourceEditor 拿文件名，决定括号集合
+  SrcEd := GetSourceEditorOfControl(EditControl);
+  if SrcEd = nil then
+  begin
+{$IFDEF DEBUG}
+    CnDebugger.LogMsg('LazGetBracketMatch: SourceEditor not found for control');
+{$ENDIF}
+    Exit;
+  end;
+
+  try
+    TmpPos.Col := 0;
+    TmpPos.Line := 0;
+    AInfo.TokenStr := '';
+    AInfo.TokenLine := '';
+    AInfo.TokenPos := TmpPos;
+    AInfo.TokenMatchStr := '';
+    AInfo.TokenMatchLine := '';
+    AInfo.TokenMatchPos := TmpPos;
+
+    if IsDprOrPas(SrcEd.FileName) then
+    begin
+      BracketCount := csBracketCountPas;
+      BracketChars := @csBracketsPas;
+    end
+    else if IsCppSourceModule(SrcEd.FileName) then
+    begin
+      BracketCount := csBracketCountCpp;
+      BracketChars := @csBracketsCpp;
+    end
+    else
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsg('LazGetBracketMatch: not pas/cpp file: ' + SrcEd.FileName);
+{$ENDIF}
+      Exit;
+    end;
+
+    CaretLine := SynEd.CaretXY.Y;
+    CaretCol := SynEd.CaretXY.X;
+    if (CaretLine < 1) or (CaretLine > SynEd.Lines.Count) then
+      Exit;
+    LineText := SynEd.Lines[CaretLine - 1];
+    CaretByteIdx := LazLogicalColToByteIdx(LineText, CaretCol);
+
+    // 光标不落在注释或字符串上时，检查前后紧邻的括号
+    if (LineText <> '') and not InCommentOrString(CaretLine, CaretByteIdx) then
+    begin
+      if CaretByteIdx >= 1 then
+        CL := AnsiChar(LineText[CaretByteIdx])
+      else
+        CL := #0;
+      if CaretByteIdx < Length(LineText) then
+        CR := AnsiChar(LineText[CaretByteIdx + 1])
+      else
+        CR := #0;
+
+      for I := 0 to BracketCount - 1 do
+      begin
+        if CL = BracketChars^[I][0] then
+        begin
+          AInfo.TokenStr := BracketChars^[I][0];
+          TmpPos.Col := LazByteIdxToLogicalCol(LineText, CaretByteIdx - 1);
+          TmpPos.Line := CaretLine;
+          AInfo.TokenPos := TmpPos;
+          AInfo.TokenMatchStr := BracketChars^[I][1];
+          // 从括号后一字符开始向前找
+          AInfo.TokenMatchPos := ForwardFindMatchToken(CL,
+            BracketChars^[I][1], CaretLine, CaretByteIdx);
+          Result := True;
+          Break;
+        end
+        else if CR = BracketChars^[I][1] then
+        begin
+          AInfo.TokenStr := BracketChars^[I][1];
+          TmpPos.Col := LazByteIdxToLogicalCol(LineText, CaretByteIdx);
+          TmpPos.Line := CaretLine;
+          AInfo.TokenPos := TmpPos;
+          AInfo.TokenMatchStr := BracketChars^[I][0];
+          // 从括号前一字符开始向后找
+          AInfo.TokenMatchPos := BackFindMatchToken(CR,
+            BracketChars^[I][0], CaretLine, CaretByteIdx - 1);
+          Result := True;
+          Break;
+        end;
+      end;
+    end;
+
+    // 查找在括号中间的情形
+    if not Result and FBracketMiddle then
+      Result := FindMatchTokenFromMiddle;
+
+{$IFDEF DEBUG}
+    if Result then
+      CnDebugger.LogFmt('LazGetBracketMatch Matched: %s %d:%d - %s %d:%d',
+        [AInfo.TokenStr, AInfo.TokenPos.Line, AInfo.TokenPos.Col,
+         AInfo.TokenMatchStr, AInfo.TokenMatchPos.Line, AInfo.TokenMatchPos.Col]);
+{$ENDIF}
+  except
+    on E: Exception do
+    begin
+      Result := False;
+{$IFDEF DEBUG}
+      CnDebugger.LogFmt('LazGetBracketMatch Exception: %s', [E.Message]);
+{$ENDIF}
+    end;
+  end;
+  // 对应 Delphi 侧 GetBracketMatch 的 finally AInfo.IsMatch := Result，
+  // 缺了它 LazAddBracketItems 会因 IsMatch 恒 False 而从不注入
+  AInfo.IsMatch := Result;
+end;
+
+// Lazarus: 将当前括号配对信息按设置颜色注入 Markup（后写覆盖先写）
+procedure TCnSourceHighlight.LazAddBracketItems(EditControl: TControl);
+var
+  SynEd: TSynEdit;
+  Markup: TCnSourceHighlightMarkup;
+  Info: TCnBracketInfo;
+begin
+  if (EditControl = nil) or not FMatchedBracket then
+    Exit;
+  if IndexOfBracket(EditControl) < 0 then
+    Exit;
+  Info := TCnBracketInfo(FBracketList[IndexOfBracket(EditControl)]);
+  if not Info.IsMatch or (Info.TokenPos.Line <= 0) then
+    Exit;
+
+  SynEd := GetSynEditOfControl(EditControl);
+  if SynEd = nil then
+    Exit;
+  Markup := GetSourceHighlightMarkup(SynEd);
+  if Markup = nil then
+    Exit;
+
+  Markup.AddItem(Info.TokenPos.Line, Info.TokenPos.Col, Info.TokenPos.Col + 1,
+    FBracketColor, FBracketColorBk, FBracketColorBd, FBracketBold);
+  if Info.TokenMatchPos.Line > 0 then
+    Markup.AddItem(Info.TokenMatchPos.Line, Info.TokenMatchPos.Col,
+      Info.TokenMatchPos.Col + 1, FBracketColor, FBracketColorBk, FBracketColorBd,
+      FBracketBold);
+{$IFDEF DEBUG}
+  CnDebugger.LogFmt('LazAddBracketItems: %d:%d & %d:%d, Colors Fg=%x Bk=%x Fr=%x Bold=%s, Count=%d',
+    [Info.TokenPos.Line, Info.TokenPos.Col, Info.TokenMatchPos.Line,
+     Info.TokenMatchPos.Col, FBracketColor, FBracketColorBk, FBracketColorBd,
+     BoolToStr(FBracketBold, True), Markup.Count]);
+{$ENDIF}
+end;
+
+// Lazarus: 检查光标附近括号配对并同步 Markup 条目，对应 Delphi 侧 CheckBracketMatch
+procedure TCnSourceHighlight.LazCheckBracketMatch(Editor: TCnEditorObject);
+var
+  IsMatch: Boolean;
+  Info: TCnBracketInfo;
+  SynEd: TSynEdit;
+  Markup: TCnSourceHighlightMarkup;
+  ZeroPos: TOTAEditPos;
+begin
+  if FIsChecking then Exit;
+  FIsChecking := True;
+
+  with Editor do
+  try
+    if IndexOfBracket(EditControl) >= 0 then
+      Info := TCnBracketInfo(FBracketList[IndexOfBracket(EditControl)])
+    else
+    begin
+      Info := TCnBracketInfo.Create(EditControl);
+      FBracketList.Add(Info);
+    end;
+
+    ZeroPos.Col := 0;
+    ZeroPos.Line := 0;
+    Info.TokenPos := ZeroPos;
+    Info.TokenMatchPos := ZeroPos;
+    IsMatch := FMatchedBracket and (EditControl <> nil) and
+      LazGetBracketMatch(EditControl, Info);
+
+    SynEd := GetSynEditOfControl(EditControl);
+    Markup := GetSourceHighlightMarkup(SynEd);
+
+    // 删除上次注入的条目（用上次的位置），本次命中或位置变化都会重加
+    if Markup <> nil then
+    begin
+      if Info.LastPos.Line > 0 then
+        Markup.DeleteItem(Info.LastPos.Line, Info.LastPos.Col);
+      if Info.LastMatchPos.Line > 0 then
+        Markup.DeleteItem(Info.LastMatchPos.Line, Info.LastMatchPos.Col);
+    end;
+
+    if IsMatch then
+      LazAddBracketItems(EditControl);
+
+{$IFDEF DEBUG}
+    CnDebugger.LogFmt('LazCheckBracketMatch: Match %s Last %d:%d-%d:%d', [
+      BoolToStr(IsMatch, True), Info.LastPos.Line, Info.LastPos.Col,
+      Info.LastMatchPos.Line, Info.LastMatchPos.Col]);
+{$ENDIF}
+
+    Info.LastPos := Info.TokenPos;
+    Info.LastMatchPos := Info.TokenMatchPos;
+  finally
+    FIsChecking := False;
   end;
 end;
 
@@ -6396,6 +6883,9 @@ begin
       begin
         UpdateHighlight(Editor, ChangeType);
       end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+      LazCheckBracketMatch(Editor);
 {$ENDIF}
     finally
 {$IFNDEF STAND_ALONE}
@@ -8749,9 +9239,28 @@ begin
       MarkupInfo.Foreground := Item^.ColorFg;
       MarkupInfo.Background := Item^.ColorBk;
       MarkupInfo.FrameColor := Item^.ColorFrame;
+      if Item^.StyleBold then
+      begin
+        MarkupInfo.Style := [fsBold];
+        MarkupInfo.StyleMask := [fsBold];
+      end
+      else
+      begin
+        MarkupInfo.Style := [];
+        MarkupInfo.StyleMask := [];
+      end;
       // 边框绘制范围（参照 TSynEditMarkupWordGroup 的做法）
       MarkupInfo.SetFrameBoundsLog(Item^.ColStart, Item^.ColEnd);
       Result := MarkupInfo;
+{$IFDEF DEBUG}
+      if FDiagCount < 130 then
+      begin
+        Inc(FDiagCount);
+        CnDebugger.LogFmt('SrcHLMarkup Hit Row %d Col %d-%d Fg=%x Bk=%x Fr=%x Bold=%s',
+          [aRow, Item^.ColStart, Item^.ColEnd, Item^.ColorFg, Item^.ColorBk,
+           Item^.ColorFrame, BoolToStr(Item^.StyleBold, True)]);
+      end;
+{$ENDIF}
       Exit;
     end;
     Inc(I);
@@ -8804,6 +9313,7 @@ begin
     Result.ColorFg := clNone;
     Result.ColorBk := clNone;
     Result.ColorFrame := clNone;
+    Result.StyleBold := False;
   end;
 end;
 
@@ -8832,7 +9342,7 @@ begin
 end;
 
 procedure TCnSourceHighlightMarkup.AddItem(aRow, aColStart, aColEnd: Integer;
-  aColorFg, aColorBk, aColorFrame: TColor);
+  aColorFg, aColorBk, aColorFrame: TColor; aBold: Boolean);
 var
   Idx: Integer;
   Item: PCnSourceHighlightItem;
@@ -8847,6 +9357,7 @@ begin
     Item^.ColorFg := aColorFg;
     Item^.ColorBk := aColorBk;
     Item^.ColorFrame := aColorFrame;
+    Item^.StyleBold := aBold;
   end
   else
   begin
@@ -8857,6 +9368,7 @@ begin
     Item^.ColorFg := aColorFg;
     Item^.ColorBk := aColorBk;
     Item^.ColorFrame := aColorFrame;
+    Item^.StyleBold := aBold;
     // 保持 (Row, ColStart) 升序，插到第一个大于它的条目前
     Idx := FItems.Count;
     while (Idx > 0) do
@@ -8871,6 +9383,20 @@ begin
     FItems.Insert(Idx, Item);
   end;
   InvalidateDirty;
+end;
+
+procedure TCnSourceHighlightMarkup.DeleteItem(aRow, aColStart: Integer);
+var
+  Idx: Integer;
+begin
+  Idx := IndexOfExact(aRow, aColStart);
+  if Idx >= 0 then
+  begin
+    Dispose(PCnSourceHighlightItem(FItems[Idx]));
+    FItems.Delete(Idx);
+    FRowFirstIdx := -1;
+    InvalidateDirty;
+  end;
 end;
 
 function GetSourceHighlightMarkup(ASynEdit: TSynEdit): TCnSourceHighlightMarkup;
