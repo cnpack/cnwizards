@@ -2976,26 +2976,6 @@ begin
   inherited;
 end;
 
-//procedure TCnBlockMatchInfo.EditControlAfterMessage(Sender: TObject;
-//  Control: TControl; var Msg: TMessage; var Handled: Boolean);
-//var
-//  Obj: TEditorObject;
-//begin
-//  // 尝试修补第一次打开时绘制偏差的问题，不确定是否生效
-//  if Msg.Msg = WM_WINDOWPOSCHANGED then
-//  begin
-//{$IFDEF DEBUG}
-//    CnDebugger.LogMsg('EditControl Got WindowPosChanged Message.');
-//{$ENDIF}
-//    Obj := EditControlWrapper.GetEditorObject(Control);
-//    if Obj <> nil then
-//    begin
-//      Obj.NotifyIDEGutterChanged;
-//      Control.Invalidate;
-//    end;
-//  end;
-//end;
-
 function TCnBlockMatchInfo.GetKeyCount: Integer;
 begin
   Result := FKeyTokenList.Count;
@@ -4273,15 +4253,6 @@ begin
 //        AInfo.TokenMatchPos.Col))));
     end;
 {$ENDIF}
-
-{$IFDEF DEBUG}
-    if Result then
-    begin
-      CnDebugger.LogFmt('TCnSourceHighlight.GetBracketMatch Matched! %s at %d:%d and %s at %d:%d.',
-        [AInfo.TokenStr, AInfo.TokenPos.Line, AInfo.TokenPos.Col,
-        AInfo.TokenMatchStr, AInfo.TokenMatchPos.Line, AInfo.TokenMatchPos.Col]);
-    end;
-{$ENDIF}
   finally
     AInfo.IsMatch := Result;
   end;
@@ -5365,7 +5336,7 @@ begin
   if SrcEd = nil then
   begin
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('LazGetBracketMatch: SourceEditor not found for control');
+//    CnDebugger.LogMsg('LazGetBracketMatch: SourceEditor Not Found for Control');
 {$ENDIF}
     Exit;
   end;
@@ -5393,7 +5364,7 @@ begin
     else
     begin
 {$IFDEF DEBUG}
-      CnDebugger.LogMsg('LazGetBracketMatch: not pas/cpp file: ' + SrcEd.FileName);
+//      CnDebugger.LogMsg('LazGetBracketMatch: Not pas/c++ file: ' + SrcEd.FileName);
 {$ENDIF}
       Exit;
     end;
@@ -5451,13 +5422,6 @@ begin
     // 查找在括号中间的情形
     if not Result and FBracketMiddle then
       Result := FindMatchTokenFromMiddle;
-
-{$IFDEF DEBUG}
-    if Result then
-      CnDebugger.LogFmt('LazGetBracketMatch Matched: %s %d:%d - %s %d:%d',
-        [AInfo.TokenStr, AInfo.TokenPos.Line, AInfo.TokenPos.Col,
-         AInfo.TokenMatchStr, AInfo.TokenMatchPos.Line, AInfo.TokenMatchPos.Col]);
-{$ENDIF}
   except
     on E: Exception do
     begin
@@ -5496,16 +5460,11 @@ begin
 
   Markup.AddItem(Info.TokenPos.Line, Info.TokenPos.Col, Info.TokenPos.Col + 1,
     FBracketColor, FBracketColorBk, FBracketColorBd, FBracketBold);
+
   if Info.TokenMatchPos.Line > 0 then
     Markup.AddItem(Info.TokenMatchPos.Line, Info.TokenMatchPos.Col,
       Info.TokenMatchPos.Col + 1, FBracketColor, FBracketColorBk, FBracketColorBd,
       FBracketBold);
-{$IFDEF DEBUG}
-  CnDebugger.LogFmt('LazAddBracketItems: %d:%d & %d:%d, Colors Fg=%x Bk=%x Fr=%x Bold=%s, Count=%d',
-    [Info.TokenPos.Line, Info.TokenPos.Col, Info.TokenMatchPos.Line,
-     Info.TokenMatchPos.Col, FBracketColor, FBracketColorBk, FBracketColorBd,
-     BoolToStr(FBracketBold, True), Markup.Count]);
-{$ENDIF}
 end;
 
 // Lazarus: 检查光标附近括号配对并同步 Markup 条目，对应 Delphi 侧 CheckBracketMatch
@@ -5551,12 +5510,6 @@ begin
 
     if IsMatch then
       LazAddBracketItems(EditControl);
-
-{$IFDEF DEBUG}
-    CnDebugger.LogFmt('LazCheckBracketMatch: Match %s Last %d:%d-%d:%d', [
-      BoolToStr(IsMatch, True), Info.LastPos.Line, Info.LastPos.Col,
-      Info.LastMatchPos.Line, Info.LastMatchPos.Col]);
-{$ENDIF}
 
     Info.LastPos := Info.TokenPos;
     Info.LastMatchPos := Info.TokenMatchPos;
@@ -6685,7 +6638,7 @@ begin
     begin
       FBracketList.Delete(Idx);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('BracketList Index %d Deleted.', [Idx]);
+//      CnDebugger.LogFmt('BracketList Index %d Deleted.', [Idx]);
 {$ENDIF}
     end;
 
@@ -6694,7 +6647,7 @@ begin
     begin
       FBlockMatchList.Delete(Idx);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('BlockMatchList Index %d Deleted.', [Idx]);
+//      CnDebugger.LogFmt('BlockMatchList Index %d Deleted.', [Idx]);
 {$ENDIF}
     end;
 
@@ -6703,7 +6656,7 @@ begin
     begin
       FBlockLineList.Delete(Idx);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('BlockLineList Index %d Deleted.', [Idx]);
+//      CnDebugger.LogFmt('BlockLineList Index %d Deleted.', [Idx]);
 {$ENDIF}
     end;
 
@@ -6712,7 +6665,7 @@ begin
     begin
       FCompDirectiveList.Delete(Idx);
 {$IFDEF DEBUG}
-      CnDebugger.LogFmt('CompDirectiveList Index %d Deleted.', [Idx]);
+//      CnDebugger.LogFmt('CompDirectiveList Index %d Deleted.', [Idx]);
 {$ENDIF}
     end;
   end;
@@ -6769,7 +6722,7 @@ begin
       ;
     end;
 {$IFDEF DEBUG}
-    CnDebugger.LogMsg('SourceHighlight GutterChangeRepaint');
+//    CnDebugger.LogMsg('SourceHighlight GutterChangeRepaint');
 {$ENDIF}
   end;
 end;
@@ -9202,8 +9155,8 @@ begin
   if (FItems.Count > 0) and (FDiagCount < 40) then
   begin
     Inc(FDiagCount);
-    CnDebugger.LogFmt('SrcHLMarkup Prepare Row %d FirstIdx %d Items %d',
-      [aRow, FRowFirstIdx, FItems.Count]);
+//    CnDebugger.LogFmt('SrcHLMarkup Prepare Row %d FirstIdx %d Items %d',
+//      [aRow, FRowFirstIdx, FItems.Count]);
   end;
 {$ENDIF}
 end;
@@ -9219,15 +9172,6 @@ begin
   Result := nil;
   if FRowFirstIdx < 0 then
     Exit;
-
-{$IFDEF DEBUG}
-  if FDiagCount < 80 then
-  begin
-    Inc(FDiagCount);
-    CnDebugger.LogFmt('SrcHLMarkup Query Row %d LogCol %d Phys %d FirstIdx %d',
-      [aRow, aStartCol.Logical, aStartCol.Physical, FRowFirstIdx]);
-  end;
-{$ENDIF}
 
   Col := aStartCol.Logical;
   I := FRowFirstIdx;
@@ -9252,15 +9196,6 @@ begin
       // 边框绘制范围（参照 TSynEditMarkupWordGroup 的做法）
       MarkupInfo.SetFrameBoundsLog(Item^.ColStart, Item^.ColEnd);
       Result := MarkupInfo;
-{$IFDEF DEBUG}
-      if FDiagCount < 130 then
-      begin
-        Inc(FDiagCount);
-        CnDebugger.LogFmt('SrcHLMarkup Hit Row %d Col %d-%d Fg=%x Bk=%x Fr=%x Bold=%s',
-          [aRow, Item^.ColStart, Item^.ColEnd, Item^.ColorFg, Item^.ColorBk,
-           Item^.ColorFrame, BoolToStr(Item^.StyleBold, True)]);
-      end;
-{$ENDIF}
       Exit;
     end;
     Inc(I);
