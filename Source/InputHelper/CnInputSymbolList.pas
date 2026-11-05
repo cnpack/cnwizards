@@ -54,7 +54,8 @@ interface
 {$ENDIF}
 
 uses
-  Windows, SysUtils, Classes, Controls, IniFiles, ToolsApi, Psapi, Math,
+  Windows, SysUtils, Classes, Controls, IniFiles, {$IFDEF LAZARUS}
+  SrcEditorIntf, {$ELSE} ToolsAPI, Psapi, {$ENDIF} Math,
   Forms, Graphics, Contnrs, TypInfo,
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnCommon, CnWizConsts, CnWizOptions,
@@ -117,14 +118,14 @@ type
     {* 处理输入文本中的 | 号，返回第一个单独 | 号的偏移量，无则返回 -1。并将 S 中的连续 || 替换成单独 |}
   protected
     procedure CalcHashCode; virtual;
-    procedure OutputLines(Editor: IOTAEditBuffer; Lines: TStrings);
-    procedure OutputTemplate(Editor: IOTAEditBuffer; Icon: TIcon);
+    procedure OutputLines(Editor: TCnEditBufferInterface; Lines: TStrings);
+    procedure OutputTemplate(Editor: TCnEditBufferInterface; Icon: TIcon);
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
     procedure Assign(Source: TPersistent); override;
-    procedure Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
+    procedure Output(Editor: TCnEditBufferInterface; Icon: TIcon; KeywordStyle:
       TCnKeywordStyle); virtual;
     {* 输出文本到代码编辑器 }
     function GetKeywordText(KeywordStyle: TCnKeywordStyle): string;
@@ -196,7 +197,7 @@ type
     procedure Sort; virtual;
     procedure Reset; virtual;
     class function GetListName: string; virtual;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; virtual;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); virtual;
@@ -237,7 +238,7 @@ type
     procedure Load; override;
     procedure Save; override;
     procedure Reset; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
     function CanCustomize: Boolean; override;
     procedure RestoreDefault; override;
@@ -254,7 +255,7 @@ type
     function GetDataFileName: string; override;
   public
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
@@ -297,7 +298,7 @@ type
     function GetDataFileName: string; override;
   public
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet;
       PosInfo: TCodePosInfo); override;
@@ -314,7 +315,7 @@ type
     function GetDataFileName: string; override;
   public
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; PosInfo:
       TCodePosInfo); override;
@@ -333,11 +334,13 @@ type
     procedure Load; override;
     procedure Save; override;
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure GetValidCharSet(var FirstSet, CharSet: TAnsiCharSet; PosInfo:
       TCodePosInfo); override;
   end;
+
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 在 uses 中使用的单元名称列表
@@ -374,12 +377,14 @@ type
       LoadAfterCreate: Boolean); reintroduce; overload;
     destructor Destroy; override;
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
     procedure DoInternalLoad(IncludePath: Boolean = True);
     procedure ExportToStringList(Names, Paths: TStringList);
     // 将不包括扩展名的文件名以及带完整路径的文件名输出至外部列表
   end;
+
+{$ENDIF}
 
 //==============================================================================
 // 当前单元引用的单元名称列表
@@ -390,7 +395,7 @@ type
   TCnUnitUsesList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
@@ -409,7 +414,7 @@ type
     function GetReadFileName: string; virtual; abstract;
   public
     procedure Load; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
@@ -431,7 +436,7 @@ type
   TCnIDEModernCodeTemplateList = class(TCnSymbolList)
   public
     class function GetListName: string; override;
-    function Reload(Editor: IOTAEditBuffer; const InputText: string; PosInfo:
+    function Reload(Editor: TCnEditBufferInterface; const InputText: string; PosInfo:
       TCodePosInfo; Data: Integer = 0): Boolean; override;
   end;
 
@@ -646,11 +651,17 @@ begin
   end;
 end;
 
-procedure TCnSymbolItem.OutputLines(Editor: IOTAEditBuffer; Lines: TStrings);
+procedure TCnSymbolItem.OutputLines(Editor: TCnEditBufferInterface; Lines: TStrings);
 var
   Line: string;
+{$IFDEF LAZARUS}
+  OrgPos: TPoint;
+  EditPos: TPoint;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   OrgPos: TOTAEditPos;
   EditPos: TOTAEditPos;
+{$ENDIF}
   Relocate: Boolean;
   OffsetX, Idx: Integer;
   OffsetY: Integer;
@@ -665,14 +676,26 @@ begin
     OffsetX := 0;
     OffsetY := 0;
     Relocate := False;
+{$IFDEF LAZARUS}
+    OrgPos := Editor.CursorTextXY;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     OrgPos := Editor.TopView.CursorPos;
+{$ENDIF}
     for I := 0 to Lines.Count - 1 do
     begin
       if I > 0 then
       begin
+{$IFDEF LAZARUS}
+        EditPos.X := OrgPos.X;
+        EditPos.Y := OrgPos.Y + I;
+        Editor.CursorTextXY := EditPos;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         EditPos.Col := OrgPos.Col;
         EditPos.Line := OrgPos.Line + I;
         Editor.TopView.CursorPos := EditPos;
+{$ENDIF}
       end;
 
       Line := Lines[I];
@@ -691,16 +714,23 @@ begin
 
     if Relocate then
     begin
+{$IFDEF LAZARUS}
+      EditPos.X := OrgPos.X + OffsetX;
+      EditPos.Y := OrgPos.Y + OffsetY;
+      Editor.CursorTextXY := EditPos;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       EditPos.Col := OrgPos.Col + OffsetX;
       EditPos.Line := OrgPos.Line + OffsetY;
       Editor.TopView.CursorPos := EditPos;
       Application.ProcessMessages;
       Editor.TopView.Paint;
+{$ENDIF}
     end;
   end;
 end;
 
-procedure TCnSymbolItem.OutputTemplate(Editor: IOTAEditBuffer; Icon: TIcon);
+procedure TCnSymbolItem.OutputTemplate(Editor: TCnEditBufferInterface; Icon: TIcon);
 var
   OutText: string;
   Lines: TStringList;
@@ -708,7 +738,7 @@ var
   MacroText: TCnWizMacroText;
 begin
   OutText := Text;
-  if (OutText <> '') and Assigned(Editor) and Assigned(Editor.TopView) then
+  if (OutText <> '') and Assigned(Editor) {$IFDEF DELPHI_OTA} and Assigned(Editor.TopView) {$ENDIF} then
   begin
     // OutText := StringReplace(OutText, GetMacroEx(cwmCursor), '|', [rfReplaceAll]);
     MacroText := TCnWizMacroText.Create(OutText);
@@ -733,12 +763,38 @@ begin
   end;
 end;
 
-procedure TCnSymbolItem.Output(Editor: IOTAEditBuffer; Icon: TIcon; KeywordStyle:
+procedure TCnSymbolItem.Output(Editor: TCnEditBufferInterface; Icon: TIcon; KeywordStyle:
   TCnKeywordStyle);
 var
   S: string;
   Idx: Integer;
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  if Assigned(Editor) then
+  begin
+    if not AllowMultiLine then
+    begin
+      S := GetKeywordText(KeywordStyle);
+      Idx := PipesCursorPosition(S);
+      // || means an actual | and first single | means cursor position
+      P := Editor.CursorTextXY;
+      Editor.ReplaceText(P, P, ConvertTextToEditorText(S));
+      if Idx > 0 then
+      begin
+        Dec(P.X, Length(S) - Idx + 1);
+        if P.X < 1 then
+          P.X := 1;
+        Editor.CursorTextXY := P;
+      end;
+    end
+    else
+      OutputTemplate(Editor, Icon);
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   if Assigned(Editor) and Assigned(Editor.EditPosition) then
   begin
     if not AllowMultiLine then
@@ -761,6 +817,7 @@ begin
       OutputTemplate(Editor, Icon);
     end;
   end;
+{$ENDIF}
 end;
 
 destructor TCnSymbolItem.Destroy;
@@ -1109,7 +1166,7 @@ begin
   Result := RemoveClassPrefix(ClassName);
 end;
 
-function TCnSymbolList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnSymbolList.Reload(Editor: TCnEditBufferInterface; const InputText: string;
   PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := Count > 0;
@@ -1193,7 +1250,7 @@ begin
   AdjustSymbolListScope(Self);
 end;
 
-function TCnFileSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnFileSymbolList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -1235,7 +1292,7 @@ begin
   Result := SCnPreDefSymbolsFile;
 end;
 
-function TCnPreDefSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnPreDefSymbolList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := inherited Reload(Editor, InputText, PosInfo);
@@ -1336,7 +1393,7 @@ begin
   AdjustSymbolListScope(Self);
 end;
 
-function TCnCompDirectSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnCompDirectSymbolList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -1401,7 +1458,7 @@ begin
   CharSet := csCommentCharSet;
 end;
 
-function TCnXMLCommentSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnXMLCommentSymbolList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := PosInfo.PosKind in (csNormalPosKinds + [pkComment]);
@@ -1437,11 +1494,13 @@ begin
   CharSet := csJavaDocCharSet;
 end;
 
-function TCnJavaDocSymbolList.Reload(Editor: IOTAEditBuffer;
+function TCnJavaDocSymbolList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := PosInfo.PosKind in [pkComment, pkField]; // Pascal/C/C++
 end;
+
+{$IFDEF DELPHI_OTA}
 
 //==============================================================================
 // 在 uses 中使用的单元名称列表
@@ -1723,7 +1782,7 @@ begin
   end;
 end;
 
-function TCnUnitNameList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnUnitNameList.Reload(Editor: TCnEditBufferInterface; const InputText: string;
   PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   Result := False;
@@ -1762,6 +1821,8 @@ begin
     Paths.Assign(FUnitPaths);
 end;
 
+{$ENDIF}
+
 //==============================================================================
 // 当前单元引用的单元名称列表
 //==============================================================================
@@ -1773,12 +1834,12 @@ begin
   Result := SCnInputHelperUnitUsesList;
 end;
 
-function TCnUnitUsesList.Reload(Editor: IOTAEditBuffer; const InputText: string;
+function TCnUnitUsesList.Reload(Editor: TCnEditBufferInterface; const InputText: string;
   PosInfo: TCodePosInfo; Data: Integer): Boolean;
 const
   csMaxProcessLines = 30000;
 var
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   Stream: TMemoryStream;
   UsesList: TStringList;
   I: Integer;
@@ -1790,8 +1851,10 @@ begin
   try
     Clear;
     View := CnOtaGetTopMostEditView;
-    Result := (PosInfo.PosKind in csNormalPosKinds) and Assigned(View) and
-      (View.Buffer.GetLinesInBuffer <= csMaxProcessLines);
+    Result := (PosInfo.PosKind in csNormalPosKinds) and Assigned(View)
+      {$IFDEF DELPHI_OTA} and (View.Buffer.GetLinesInBuffer <= csMaxProcessLines) {$ENDIF}
+      {$IFDEF LAZARUS} and (View.LineCount <= csMaxProcessLines) {$ENDIF};
+
     if Result then
     begin
       Stream := TMemoryStream.Create;
@@ -1944,7 +2007,7 @@ begin
   end;
 end;
 
-function TCnCodeTemplateList.Reload(Editor: IOTAEditBuffer;
+function TCnCodeTemplateList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 begin
   if PosInfo.IsPascal then
@@ -2128,7 +2191,7 @@ begin
   Result := SCnInputHelperIDECodeTemplateList;
 end;
 
-function TCnIDEModernCodeTemplateList.Reload(Editor: IOTAEditBuffer;
+function TCnIDEModernCodeTemplateList.Reload(Editor: TCnEditBufferInterface;
   const InputText: string; PosInfo: TCodePosInfo; Data: Integer): Boolean;
 var
   I, Idx: Integer;
@@ -2177,8 +2240,10 @@ initialization
   RegisterSymbolList(TCnCompDirectSymbolList);
   RegisterSymbolList(TCnXMLCommentSymbolList);
   RegisterSymbolList(TCnJavaDocSymbolList);
+{$IFDEF DELPHI_OTA}
   RegisterSymbolList(TCnUnitNameList);
   RegisterSymbolList(TCnUnitUsesList);
+{$ENDIF}
 {$IFDEF OTA_CODE_TEMPLATE_API}
   RegisterSymbolList(TCnIDEModernCodeTemplateList);
 {$ELSE}

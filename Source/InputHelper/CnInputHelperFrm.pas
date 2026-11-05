@@ -43,8 +43,10 @@ interface
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   CheckLst, StdCtrls, ComCtrls, ExtCtrls, Menus, CnConsts, CnCommon, IniFiles,
-  ToolsAPI, CnStrings, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper,
-  CnInputSymbolList, CnInputIdeSymbolList, CnInputHelperEditFrm, CnWizMacroText,
+  {$IFNDEF LAZARUS} ToolsAPI, {$ENDIF}
+  {$IFDEF FPC} LCLType, CnHotKey, {$ENDIF}
+  CnStrings, CnWizMultiLang, CnSpin, CnWizConsts, CnInputHelper,
+  CnInputSymbolList, CnInputHelperEditFrm, CnWizMacroText,
   CnWizUtils, CnWizOptions;
 
 type
@@ -278,12 +280,14 @@ begin
   with InputHelper do
   begin
     chkUseEditorColor.Checked := UseEditorColor;
+{$IFDEF SUPPORT_IDESYMBOLLIST}
     chkUseCodeInsightMgr.Enabled := SupportMultiIDESymbolList;
     if SupportMultiIDESymbolList then
       chkUseCodeInsightMgr.Checked := UseCodeInsightMgr;
     chkUseKibitzCompileThread.Enabled := SupportKibitzCompileThread;
     if SupportKibitzCompileThread then
       chkUseKibitzCompileThread.Checked := UseKibitzCompileThread;
+{$ENDIF}
     chkAutoPopup.Checked := GetGeneralAutoPopup;
     seDispOnlyAtLeastKey.Value := DispOnlyAtLeastKey;
     tbDispDelay.Position := DispDelay;
@@ -396,10 +400,12 @@ begin
   with InputHelper do
   begin
     UseEditorColor := chkUseEditorColor.Checked;
+{$IFDEF SUPPORT_IDESYMBOLLIST}
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := chkUseCodeInsightMgr.Checked;
     if SupportKibitzCompileThread then
       UseKibitzCompileThread := chkUseKibitzCompileThread.Checked;
+{$ENDIF}
 {$IFDEF IDE_SUPPORT_LSP}
     AutoPopupLSP := chkAutoPopup.Checked;
 {$ELSE}
@@ -847,9 +853,12 @@ procedure TCnInputHelperForm.btnDisableCompletionClick(Sender: TObject);
 const
   SCnCodeCompletionKey = 'CodeCompletion';
   SCnCodeInsightAutoInvokeKey = 'CodeInsightAutoInvoke';
+{$IFDEF DELPHI_OTA}
 var
   Options: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   Options := CnOtaGetEnvironmentOptions;
   if Options = nil then
     Exit;
@@ -859,6 +868,7 @@ begin
   Options.SetOptionValue(SCnCodeInsightAutoInvokeKey, 0);
 {$ENDIF}
   InfoDlg(SCnInputHelperDisableCodeCompletionSucc);
+{$ENDIF}
 end;
 
 procedure TCnInputHelperForm.FormCreate(Sender: TObject);

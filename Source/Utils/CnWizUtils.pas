@@ -378,15 +378,20 @@ function IsCSharpRuntime: Boolean;
 
 function ScreenHasModalForm: Boolean;
 {* 存在模式窗口}
-{$IFNDEF LAZARUS}
-procedure SetFormNoTitle(Form: TForm);
-{* 去掉窗体的标题}
+
 procedure SendKey(vk: Word);
 {* 发送一个按键事件}
+
 function IMMIsActive: Boolean;
-{* 判断输入法是否打开}
+{* 判断输入法是否打开，Windows IMM32 API，Lazarus 下同样可用}
+
 function GetCaretPosition(var Pt: TPoint): Boolean;
 {* 取编辑光标在屏幕的坐标}
+
+{$IFNDEF LAZARUS}
+
+procedure SetFormNoTitle(Form: TForm);
+{* 去掉窗体的标题}
 procedure GetCursorList(List: TStrings);
 {* 取 Cursor 标识符列表 }
 procedure GetCharsetList(List: TStrings);
@@ -592,11 +597,6 @@ function CnOtaGetRootComponentFromEditor(Editor: TCnIDEFormEditor): TComponent;
 {* 返回窗体编辑器设计窗体组件，或 DataModule 设计器的实例。它应该是其上的设计期及运行期组件的 Owner}
 function CnOtaGetCurrentFormEditor: TCnIDEFormEditor;
 {* 取当前窗体编辑器，也即在编辑的源文件对应的设计器}
-
-function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; View: TCnEditViewSourceInterface = nil): Boolean;
-{* 取当前行源代码}
-
 procedure CnOtaEditBackspace(Many: Integer);
 {* 在编辑器中退格}
 procedure CnOtaEditDelete(Many: Integer);
@@ -610,6 +610,10 @@ procedure CnOtaGetProjectList(const List: TCnIDEInterfaceList);
 
 function CnOtaGetCurrentEditControl: TWinControl;
 {* 以 OTA 的方式取当前的 EditControl 控件。兼容 Lazarus，取得其 TSynEdit 编辑器控件}
+
+function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; View: TCnEditViewSourceInterface = nil): Boolean;
+{* 取当前行源代码}
 
 {$IFDEF LAZARUS}
 
@@ -661,6 +665,29 @@ function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex
 {* 封装的获取当前光标下的标识符以及索引号的函数，BDS 以上允许 Unicode 标识符，不存在 Unicode 转 Ansi 的丢字符的问题。
   Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上及 Lazarus 返回 UnicodeString
   CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上及 Lazarus 返回 WideChar 偏移}
+
+function CnOtaGetCurrChar(OffsetX: Integer = 0; View: TCnEditViewSourceInterface = nil): Char;
+{* 取当前光标下的字符，允许偏移量}
+
+function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+{* 删除当前光标下的标识符}
+function CnOtaDeleteCurrTokenLeft(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+{* 删除当前光标下的标识符左半部分}
+function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+{* 删除当前光标下的标识符右半部分}
+
+function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; ActualPosWhenEmpty: Boolean = False): Boolean;
+{* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
+   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
+   赋值给 EditPos.Col 即可。
+   ActualPosWhenEmpty 控制当前文本为空时，CharIndex 使用 0 还是光标的真实位置
+   D567 取到的是AnsiString，CharIndex 是当前光标在 Text 中的 Ansi 位置，0 开始。
+   BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是当前光标在 Text 中的 Utf8 位置，0 开始。
+   Unicode IDE 下取得的是 UTF16 字符串。CharIndex 是当前光标在 Text 中的 Utf16 位置，0 开始。}
 
 {$IFNDEF LAZARUS}
 {$IFDEF DELPHI_OTA}
@@ -797,15 +824,6 @@ function CnOtaReplaceCurrentSelectionUtf8(const Utf8Text: AnsiString; NoSelectio
 
 function CnOtaGetCurrentOuterBlock: string;
 {* 获取当前光标所在的类名或声明}
-function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; ActualPosWhenEmpty: Boolean = False): Boolean;
-{* 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
-   如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
-   赋值给 EditPos.Col 即可。
-   ActualPosWhenEmpty 控制当前文本为空时，CharIndex 使用 0 还是光标的真实位置
-   D567 取到的是AnsiString，CharIndex 是当前光标在 Text 中的 Ansi 位置，0 开始。
-   BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是当前光标在 Text 中的 Utf8 位置，0 开始。
-   Unicode IDE 下取得的是 UTF16 字符串。CharIndex 是当前光标在 Text 中的 Utf16 位置，0 开始。}
 
 {$IFDEF UNICODE}
 function CnNtaGetCurrLineTextW(var Text: string; var LineNo: Integer;
@@ -873,17 +891,6 @@ function CnOtaGeneralGetCurrPosNumber(var Number: TCnIdeTokenString; var CurrInd
   Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上返回 UnicodeString
   CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上返回 WideChar 偏移}
 
-function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
-{* 取当前光标下的字符，允许偏移量}
-function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-{* 删除当前光标下的标识符}
-function CnOtaDeleteCurrTokenLeft(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-{* 删除当前光标下的标识符左半部分}
-function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-{* 删除当前光标下的标识符右半部分}
 function CnOtaIsEditPosOutOfLine(EditPos: TOTAEditPos; View: IOTAEditView = nil): Boolean;
 {* 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有超过一个宽字符时可能会不准，慎用 }
 procedure CnOtaGetCurrentBreakpoints(Results: TList);
@@ -987,13 +994,6 @@ function CodeAutoWrap(Code: string; Width, Indent: Integer;
    IndentOnceOnly: Boolean - 是否仅在产生第二行时进行缩进
  |</PRE>}
 
-{$IFNDEF LAZARUS}
-
-{$IFDEF COMPILER6_UP}
-function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
-{* 快速转换 Utf8 到 Ansi 字符串，适用于长度短且主要是 Ansi 字符的字符串}
-{$ENDIF}
-
 {$IFDEF UNICODE}
 function ConvertTextToEditorUnicodeText(const Text: string): string;
 {* Unicode 环境下转换字符串为编辑器使用的字符串，避免 AnsiString 转换}
@@ -1004,6 +1004,13 @@ function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
 
 function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
 {* 转换编辑器使用的字符串为普通字符串}
+
+{$IFNDEF LAZARUS}
+
+{$IFDEF COMPILER6_UP}
+function FastUtf8ToAnsi(const Text: AnsiString): AnsiString;
+{* 快速转换 Utf8 到 Ansi 字符串，适用于长度短且主要是 Ansi 字符的字符串}
+{$ENDIF}
 
 {$IFDEF IDE_WIDECONTROL}
 
@@ -3371,26 +3378,6 @@ begin
   Result := False;
 end;
 
-{$IFNDEF LAZARUS}
-
-// 去掉窗体的标题
-procedure SetFormNoTitle(Form: TForm);
-var
-  Style: Integer;
-  H: Integer;
-  Max: boolean;                         // for refresh form
-begin
-  Max := Form.WindowState = wsMaximized;
-  if Max then Form.WindowState := wsNormal;
-  H := Form.Width;
-  Style := GetWindowLong(Form.Handle, GWL_STYLE);
-  SetWindowLong(Form.Handle, GWL_STYLE, Style and not WS_CAPTION);
-  // only for refresh form
-  Form.Width := H + 1;
-  Form.Width := H;
-  if Max then Form.WindowState := wsNormal;
-end;
-
 // 发送一个按键事件
 procedure SendKey(vk: Word);
 begin
@@ -3409,9 +3396,27 @@ function GetCaretPosition(var Pt: TPoint): Boolean;
 begin
   Result := Windows.GetCaretPos(Pt);
   if Result then
-  begin
     Windows.ClientToScreen(Windows.GetFocus(), Pt);
-  end;
+end;
+
+{$IFNDEF LAZARUS}
+
+// 去掉窗体的标题
+procedure SetFormNoTitle(Form: TForm);
+var
+  Style: Integer;
+  H: Integer;
+  Max: boolean;                         // for refresh form
+begin
+  Max := Form.WindowState = wsMaximized;
+  if Max then Form.WindowState := wsNormal;
+  H := Form.Width;
+  Style := GetWindowLong(Form.Handle, GWL_STYLE);
+  SetWindowLong(Form.Handle, GWL_STYLE, Style and not WS_CAPTION);
+  // only for refresh form
+  Form.Width := H + 1;
+  Form.Width := H;
+  if Max then Form.WindowState := wsNormal;
 end;
 
 type
@@ -4783,66 +4788,6 @@ begin
 {$ENDIF}
 end;
 
-// 取当前行源代码
-function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; View: TCnEditViewSourceInterface): Boolean;
-var
-  L1, L2: Integer;
-{$IFDEF DELPHI_OTA}
-  Reader: IOTAEditReader;
-  EditBuffer: IOTAEditBuffer;
-  EditPos: TOTAEditPos;
-  CharPos: TOTACharPos;
-  OutStr: AnsiString;
-{$ENDIF}
-{$IFDEF LAZARUS}
-  P: TPoint;
-{$ENDIF}
-begin
-  Result := False;
-  if not Assigned(View) then
-    View := CnOtaGetTopMostEditView;
-  if not Assigned(View) then Exit;
-
-{$IFDEF DELPHI_OTA}
-  EditPos := View.CursorPos;
-  View.ConvertPos(True, EditPos, CharPos);
-  LineNo := CharPos.Line;
-  CharIndex := CharPos.CharIndex;
-
-  EditBuffer := View.Buffer;
-  L1 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo), EditBuffer.TopView);
-  if (LineNo >= View.Buffer.GetLinesInBuffer) then
-    L2 := CnOtaEditPosToLinePos(OTAEditPos(High(SmallInt), LineNo + 1), EditBuffer.TopView)
-  else
-    L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView) - 2;
-  SetLength(OutStr, L2 - L1);
-  Reader := EditBuffer.CreateReader;
-  try
-    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
-  finally
-    Reader := nil;
-  end;
-  {$IFDEF UNICODE}
-  Text := TrimRight(ConvertEditorTextToTextW(OutStr));
-  {$ELSE}
-  Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
-  {$ENDIF}
-  Result := True;
-{$ENDIF}
-
-{$IFDEF LAZARUS}
-  P := View.CursorTextXY;
-  LineNo := P.Y;                 // 行号，1 开始
-  CharIndex := P.X - 1;          // 行内位置，0 开始，与 Delphi 版语义一致
-  if (LineNo >= 1) and (LineNo <= View.Lines.Count) then
-  begin
-    Text := TrimRight(View.Lines[LineNo - 1]);   // UTF-8，已去行尾空白
-    Result := True;
-  end;
-{$ENDIF}
-end;
-
 // 在编辑器中退格
 procedure CnOtaEditBackspace(Many: Integer);
 var
@@ -5040,6 +4985,66 @@ begin
     Result := SourceEditorManagerIntf.ActiveEditor.EditorControl
   else
     Result := nil;
+{$ENDIF}
+end;
+
+// 取当前行源代码
+function CnOtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; View: TCnEditViewSourceInterface): Boolean;
+var
+  L1, L2: Integer;
+{$IFDEF DELPHI_OTA}
+  Reader: IOTAEditReader;
+  EditBuffer: IOTAEditBuffer;
+  EditPos: TOTAEditPos;
+  CharPos: TOTACharPos;
+  OutStr: AnsiString;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
+begin
+  Result := False;
+  if not Assigned(View) then
+    View := CnOtaGetTopMostEditView;
+  if not Assigned(View) then Exit;
+
+{$IFDEF DELPHI_OTA}
+  EditPos := View.CursorPos;
+  View.ConvertPos(True, EditPos, CharPos);
+  LineNo := CharPos.Line;
+  CharIndex := CharPos.CharIndex;
+
+  EditBuffer := View.Buffer;
+  L1 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo), EditBuffer.TopView);
+  if (LineNo >= View.Buffer.GetLinesInBuffer) then
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(High(SmallInt), LineNo + 1), EditBuffer.TopView)
+  else
+    L2 := CnOtaEditPosToLinePos(OTAEditPos(1, LineNo + 1), EditBuffer.TopView) - 2;
+  SetLength(OutStr, L2 - L1);
+  Reader := EditBuffer.CreateReader;
+  try
+    Reader.GetText(L1, PAnsiChar(OutStr), L2 - L1);
+  finally
+    Reader := nil;
+  end;
+  {$IFDEF UNICODE}
+  Text := TrimRight(ConvertEditorTextToTextW(OutStr));
+  {$ELSE}
+  Text := TrimRight(string(ConvertEditorTextToText(OutStr)));
+  {$ENDIF}
+  Result := True;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  P := View.CursorTextXY;
+  LineNo := P.Y;                 // 行号，1 开始
+  CharIndex := P.X - 1;          // 行内位置，0 开始，与 Delphi 版语义一致
+  if (LineNo >= 1) and (LineNo <= View.Lines.Count) then
+  begin
+    Text := TrimRight(View.Lines[LineNo - 1]);   // UTF-8，已去行尾空白
+    Result := True;
+  end;
 {$ENDIF}
 end;
 
@@ -5279,6 +5284,195 @@ begin
   Token := Copy(WT, WStart, WEnd - WStart + 1);
   CurrIndex := WPos - WStart;
   Result := Token <> '';
+{$ENDIF}
+end;
+
+// 取当前光标下的字符，允许偏移量
+function CnOtaGetCurrChar(OffsetX: Integer; View: TCnEditViewSourceInterface): Char;
+var
+  CharIndex: Integer;
+  LineText: string;
+  LineNo: Integer;
+begin
+  Result := #0;
+  if (View = nil) or (View = CnOtaGetTopMostEditView) then
+  begin
+    if CnOtaGetCurrLineText(LineText, LineNo, CharIndex) then
+    begin
+      CharIndex := CharIndex + OffsetX + 1;
+      if (CharIndex > 0) and (CharIndex <= Length(LineText)) then
+        Result := LineText[CharIndex];
+    end;
+  end
+  else if CnOtaGetCurrLineText(LineText, LineNo, CharIndex, View) then
+  begin
+    CharIndex := CharIndex + OffsetX + 1;
+    if (CharIndex > 0) and (CharIndex <= Length(LineText)) then
+      Result := LineText[CharIndex];
+  end;
+end;
+
+function _DeleteCurrToken(DelLeft, DelRight: Boolean; FirstSet: TAnsiCharSet;
+  CharSet: TAnsiCharSet): Boolean;
+var
+  Token: TCnIdeTokenString; // Ansi/Wide/Wide
+  CurrIndex: Integer;       // Ansi/Wide/Wide
+  MoveToRightCount: Integer;    // 从光标处移至右端所需的 Col，不用移到左
+  BkspDelLeftCount, BkspDelRightCount: Integer;  // 从光标退格删到左与从右退格删到光标所需的字符数
+{$IFDEF DELPHI_OTA}
+  EditPos: IOTAEditPosition;
+{$ENDIF}
+begin
+  Result := False;
+  if CnOtaGeneralGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet
+    {$IFDEF DELPHI_OTA}, nil {$ENDIF}) then
+  begin
+{$IFDEF DELPHI_OTA}
+    EditPos := CnOtaGetEditPosition;
+    if not Assigned(EditPos) then
+      Exit;
+
+    // MoveRelative: 0  Ansi/Utf8/Utf8
+    // BackspaceDelete: Wide/Wide/Wide
+{$IFDEF BDS}
+    // 2005 以上的，包括 2009，移动光标都要求 UTF8 偏移量，删除字符都要求 WideChar 偏移量
+    MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Copy(Token, CurrIndex + 1, MaxInt)));
+{$ELSE}
+    // D567 下标识符无双字节字符，直接运算就行
+    MoveToRightCount := Length(Token) - CurrIndex;
+{$ENDIF}
+    BkspDelLeftCount := CurrIndex;
+    BkspDelRightCount := Length(Token) - CurrIndex;
+
+    if DelLeft and DelRight then
+    begin
+      EditPos.MoveRelative(0, MoveToRightCount);
+      EditPos.BackspaceDelete(BkspDelLeftCount + BkspDelRightCount);
+    end
+    else if DelLeft and (CurrIndex > 0) then
+      EditPos.BackspaceDelete(BkspDelLeftCount)
+    else if DelRight and (CurrIndex < Length(Token) - 1) then
+    begin
+      EditPos.MoveRelative(0, MoveToRightCount);
+      EditPos.BackspaceDelete(BkspDelRightCount);
+    end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    // TODO: Lazarus 下删除
+{$ENDIF}
+    Result := True;
+  end;
+end;
+
+// 删除当前光标下的标识符
+function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+begin
+  Result := _DeleteCurrToken(True, True, FirstSet, CharSet);
+end;
+
+// 删除当前光标下的标识符左半部分
+function CnOtaDeleteCurrTokenLeft(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+begin
+  Result := _DeleteCurrToken(True, False, FirstSet, CharSet);
+end;
+
+// 删除当前光标下的标识符右半部分
+function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
+  CharSet: TAnsiCharSet = []): Boolean;
+begin
+  Result := _DeleteCurrToken(False, True, FirstSet, CharSet);
+end;
+
+// 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
+// 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
+// 赋值给 EditPos.Col 即可
+// D7 及以下取到的是AnsiString，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col） - 1，一致。
+//   可以直接根据 CharIndex 处理 Text
+// BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是 CursorPos.Col（UTF8 格式的 Col） - 1，和编辑器中状态栏显示的 Ansi Col 对不上号
+//   也可以直接根据 CharIndex 处理 Text，但要注意双字节字符变成了仨字节
+// Unicode IDE 下取得的是 UTF16 字符串，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col）- 1，和编辑器中状态栏显示的一致
+//   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
+// AnsiString[CharIndex] 字符是光标左边那个字符
+{
+  以如下表格为准：
+                      获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   ConvertPos 得到的 TOTACharPos
+
+  Delphi5/6/7         Ansi               同左、一致                   同左、与 CursorPos 一致            Ansi
+
+  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致           Ansi、与 UTF8 不一致               Utf8
+
+  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 CursorPos 一致       Ansi？（混乱）
+                                                                      与 UTF16 不一致
+}
+function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
+  var CharIndex: Integer; ActualPosWhenEmpty: Boolean): Boolean;
+var
+{$IFDEF DELPHI_OTA}
+  EditControl: TControl;
+  View: IOTAEditView;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
+begin
+  Result := False;
+{$IFDEF DELPHI_OTA}
+  EditControl := GetCurrentEditControl;
+  View := CnOtaGetTopMostEditView;
+  if (EditControl <> nil) and (View <> nil) then
+  begin
+    Text := GetStrProp(EditControl, 'LineText');
+    // LineText 在 D5~D7 下为 AnsiString，CharIndex 也是 Ansi 位置。
+    // 在 D2005~2007 下是包含 UTF8 字符的 AnsiString，CursorPos.Col 是 Utf8 位置，
+    // 所以 CharIndex 在 D2005~2007 下也是 Utf8 偏移。
+    // 在 D2009 以上直接是 UnicodeString。但 CursorPos.Col 在 Unicode IDE 中是 Ansi 位置，
+    // 所以比较需要将 LineText 转成 Ansi 后才能进行
+
+    if ActualPosWhenEmpty and (Text = '') then
+    begin
+      CharIndex := View.CursorPos.Col - 1;
+      // 无文字时本来 CharIndex 为 0，但根据参数决定是否使用真实的光标位置
+    end
+    else
+    begin
+{$IFDEF UNICODE}
+      // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
+      CharIndex := Min(View.CursorPos.Col - 1,
+        CalcAnsiDisplayLengthFromWideString(PWideChar(Text), @IDEWideCharIsWideLength));
+{$ELSE}
+      CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
+{$ENDIF}
+    end;
+
+    LineNo := View.CursorPos.Line;
+    Result := True;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  Text := '';
+  LineNo := 0;
+  CharIndex := 0;
+  if (SourceEditorManagerIntf = nil) or (SourceEditorManagerIntf.ActiveEditor = nil) then
+    Exit;
+
+  P := SourceEditorManagerIntf.ActiveEditor.CursorTextXY;
+  LineNo := P.Y;
+  if (LineNo >= 1) and (LineNo <= SourceEditorManagerIntf.ActiveEditor.Lines.Count) then
+    Text := SourceEditorManagerIntf.ActiveEditor.Lines[LineNo - 1];
+
+  // CursorTextXY 的 X 是逻辑列（1 基），转 0 基字符位置
+  CharIndex := P.X - 1;
+  if (CharIndex < 0) and ActualPosWhenEmpty then
+    CharIndex := 0;
+  if (CharIndex < 0) and (Length(Text) = 0) then
+    CharIndex := 0;
+  if CharIndex > Length(Text) then
+    CharIndex := Length(Text);
+  Result := True;
 {$ENDIF}
 end;
 
@@ -5750,10 +5944,14 @@ end;
 function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
 var
   I: Integer;
-  EditView: IOTAEditView;
+  EditView: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
   EditWindow: INTAEditWindow;
+{$ENDIF}
 begin
   EditView := CnOtaGetTopMostEditView;
+
+{$IFDEF DELPHI_OTA}
   if Assigned(EditView) then
   begin
     EditWindow := EditView.GetEditWindow;
@@ -5763,6 +5961,16 @@ begin
       Exit;
     end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (EditView <> nil) and (EditView.EditorControl <> nil) and
+    (Editor.EditorControl is TWinControl) then
+  begin
+    Result := GetParentForm(TWinControl(Editor.EditorControl));
+    Exit;
+  end;
+{$ENDIF}
 
   if CheckScreen then
   begin
@@ -6560,66 +6768,6 @@ begin
   Parser.Free;
 end;
 
-// 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
-// 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
-// 赋值给 EditPos.Col 即可
-// D7 及以下取到的是AnsiString，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col） - 1，一致。
-//   可以直接根据 CharIndex 处理 Text
-// BDS 非 Unicode 下取到的是 UTF8 格式的 AnsiString，CharIndex 是 CursorPos.Col（UTF8 格式的 Col） - 1，和编辑器中状态栏显示的 Ansi Col 对不上号
-//   也可以直接根据 CharIndex 处理 Text，但要注意双字节字符变成了仨字节
-// Unicode IDE 下取得的是 UTF16 字符串，CharIndex 是 CursorPos.Col（编辑器中状态栏的 Col）- 1，和编辑器中状态栏显示的一致
-//   如果要根据 CharIndex 处理 Text，则需要将 Text 转换为 AnsiString
-// AnsiString[CharIndex] 字符是光标左边那个字符
-{
-  以如下表格为准：
-                      获取的 Text 格式   CharIndex(CursorPos.Col - 1) 编辑器状态栏的真实列状况（Ansi）   ConvertPos 得到的 TOTACharPos
-
-  Delphi5/6/7         Ansi               同左、一致                   同左、与 CursorPos 一致            Ansi
-
-  Delphi 2005~2007    Ansi with UTF8     同左、与 UTF8 一致           Ansi、与 UTF8 不一致               Utf8
-
-  Delphi 2009~        UTF16              Ansi、与 UTF16 不一致        同左 Ansi、与 CursorPos 一致       Ansi？（混乱）
-                                                                      与 UTF16 不一致
-}
-function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
-  var CharIndex: Integer; ActualPosWhenEmpty: Boolean): Boolean;
-var
-  EditControl: TControl;
-  View: IOTAEditView;
-begin
-  Result := False;
-  EditControl := GetCurrentEditControl;
-  View := CnOtaGetTopMostEditView;
-  if (EditControl <> nil) and (View <> nil) then
-  begin
-    Text := GetStrProp(EditControl, 'LineText');
-    // LineText 在 D5~D7 下为 AnsiString，CharIndex 也是 Ansi 位置。
-    // 在 D2005~2007 下是包含 UTF8 字符的 AnsiString，CursorPos.Col 是 Utf8 位置，
-    // 所以 CharIndex 在 D2005~2007 下也是 Utf8 偏移。
-    // 在 D2009 以上直接是 UnicodeString。但 CursorPos.Col 在 Unicode IDE 中是 Ansi 位置，
-    // 所以比较需要将 LineText 转成 Ansi 后才能进行
-
-    if ActualPosWhenEmpty and (Text = '') then
-    begin
-      CharIndex := View.CursorPos.Col - 1;
-      // 无文字时本来 CharIndex 为 0，但根据参数决定是否使用真实的光标位置
-    end
-    else
-    begin
-{$IFDEF UNICODE}
-      // 转换成 Ansi 长度来计算，不直接转 AnsiString 以避免英文平台丢字符
-      CharIndex := Min(View.CursorPos.Col - 1,
-        CalcAnsiDisplayLengthFromWideString(PWideChar(Text), @IDEWideCharIsWideLength));
-{$ELSE}
-      CharIndex := Min(View.CursorPos.Col - 1, Length(Text));
-{$ENDIF}
-    end;
-
-    LineNo := View.CursorPos.Line;
-    Result := True;
-  end;
-end;
-
 {$IFDEF UNICODE}
 
 var
@@ -7219,96 +7367,6 @@ begin
   Result := CnOtaGetCurrPosNumber(Number, CurrIndex, CheckCursorOutOfLineEnd, EditView);
   {$ENDIF}
 {$ENDIF}
-end;
-
-// 取当前光标下的字符，允许偏移量
-function CnOtaGetCurrChar(OffsetX: Integer = 0; View: IOTAEditView = nil): Char;
-var
-  CharIndex: Integer;
-  LineText: string;
-  LineNo: Integer;
-begin
-  Result := #0;
-  if (View = nil) or (View = CnOtaGetTopMostEditView) then
-  begin
-    if CnOtaGetCurrLineText(LineText, LineNo, CharIndex) then
-    begin
-      CharIndex := CharIndex + OffsetX + 1;
-      if (CharIndex > 0) and (CharIndex <= Length(LineText)) then
-        Result := LineText[CharIndex];
-    end;
-  end
-  else if CnOtaGetCurrLineText(LineText, LineNo, CharIndex, View) then
-  begin
-    CharIndex := CharIndex + OffsetX + 1;
-    if (CharIndex > 0) and (CharIndex <= Length(LineText)) then
-      Result := LineText[CharIndex];
-  end;
-end;
-
-function _DeleteCurrToken(DelLeft, DelRight: Boolean; FirstSet: TAnsiCharSet;
-  CharSet: TAnsiCharSet): Boolean;
-var
-  Token: TCnIdeTokenString; // Ansi/Wide/Wide
-  CurrIndex: Integer;       // Ansi/Wide/Wide
-  EditPos: IOTAEditPosition;
-  MoveToRightCount: Integer;    // 从光标处移至右端所需的 Col，不用移到左
-  BkspDelLeftCount, BkspDelRightCount: Integer;  // 从光标退格删到左与从右退格删到光标所需的字符数
-begin
-  Result := False;
-  if CnOtaGeneralGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet, nil) then
-  begin
-    EditPos := CnOtaGetEditPosition;
-    if not Assigned(EditPos) then
-      Exit;
-
-    // MoveRelative: 0  Ansi/Utf8/Utf8
-    // BackspaceDelete: Wide/Wide/Wide
-{$IFDEF BDS}
-    // 2005 以上的，包括 2009，移动光标都要求 UTF8 偏移量，删除字符都要求 WideChar 偏移量
-    MoveToRightCount := CalcUtf8LengthFromWideString(PWideChar(Copy(Token, CurrIndex + 1, MaxInt)));
-{$ELSE}
-    // D567 下标识符无双字节字符，直接运算就行
-    MoveToRightCount := Length(Token) - CurrIndex;
-{$ENDIF}
-    BkspDelLeftCount := CurrIndex;
-    BkspDelRightCount := Length(Token) - CurrIndex;
-
-    if DelLeft and DelRight then
-    begin
-      EditPos.MoveRelative(0, MoveToRightCount);
-      EditPos.BackspaceDelete(BkspDelLeftCount + BkspDelRightCount);
-    end
-    else if DelLeft and (CurrIndex > 0) then
-      EditPos.BackspaceDelete(BkspDelLeftCount)
-    else if DelRight and (CurrIndex < Length(Token) - 1) then
-    begin
-      EditPos.MoveRelative(0, MoveToRightCount);
-      EditPos.BackspaceDelete(BkspDelRightCount);
-    end;
-    Result := True;
-  end;
-end;
-
-// 删除当前光标下的标识符
-function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-begin
-  Result := _DeleteCurrToken(True, True, FirstSet, CharSet);
-end;
-
-// 删除当前光标下的标识符左半部分
-function CnOtaDeleteCurrTokenLeft(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-begin
-  Result := _DeleteCurrToken(True, False, FirstSet, CharSet);
-end;
-
-// 删除当前光标下的标识符右半部分
-function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
-  CharSet: TAnsiCharSet = []): Boolean;
-begin
-  Result := _DeleteCurrToken(False, True, FirstSet, CharSet);
 end;
 
 // 判断位置是否超出行尾了。此机制在 Unicode 环境下当前行含有宽字符时可能会不准，慎用
@@ -8585,6 +8643,39 @@ begin
   end;
 end;
 
+{$IFDEF UNICODE}
+
+// Unicode 环境下转换字符串为编辑器使用的字符串，避免 AnsiString 转换
+function ConvertTextToEditorUnicodeText(const Text: string): string;
+begin
+  Result := Text;
+end;
+
+{$ENDIF}
+
+// 转换字符串为编辑器使用的字符串
+function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
+begin
+{$IFDEF IDE_WIDECONTROL}
+  // 只适合于非 Unicode 环境的 BDS。
+  Result := CnAnsiToUtf8(Text);
+{$ELSE}
+  Result := Text;  // D567 及 Lazarus 环境下直接使用即可，但 Unicode 环境下，直接用其 string 似乎不行？存疑
+{$ENDIF}
+end;
+
+// 转换编辑器使用的字符串为普通字符串
+function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
+begin
+{$IFDEF IDE_WIDECONTROL}
+  // 只适合于非 Unicode 环境的 BDS。Unicode 环境下，直接用其 string 即可
+  Result := CnUtf8ToAnsi(Text);
+{$ELSE}
+  // 只适合于 D7 及以下及 Lazarus
+  Result := Text;
+{$ENDIF}
+end;
+
 {$IFNDEF LAZARUS}
 {$IFDEF COMPILER6_UP}
 // 快速转换Utf8到Ansi字符串，适用于长度短且主要是Ansi字符的字符串
@@ -8632,39 +8723,6 @@ begin
 end;
 
 {$ENDIF}
-
-{$IFDEF UNICODE}
-
-// Unicode 环境下转换字符串为编辑器使用的字符串，避免 AnsiString 转换
-function ConvertTextToEditorUnicodeText(const Text: string): string;
-begin
-  Result := Text;
-end;
-
-{$ENDIF}
-
-// 转换字符串为编辑器使用的字符串
-function ConvertTextToEditorText(const Text: AnsiString): AnsiString;
-begin
-{$IFDEF IDE_WIDECONTROL}
-  // 只适合于非 Unicode 环境的 BDS。
-  Result := CnAnsiToUtf8(Text);
-{$ELSE}
-  Result := Text;  // D567 环境下直接使用即可，但 Unicode 环境下，直接用其 string 似乎不行？存疑
-{$ENDIF}
-end;
-
-// 转换编辑器使用的字符串为普通字符串
-function ConvertEditorTextToText(const Text: AnsiString): AnsiString;
-begin
-{$IFDEF IDE_WIDECONTROL}
-  // 只适合于非 Unicode 环境的 BDS。Unicode 环境下，直接用其 string 即可
-  Result := CnUtf8ToAnsi(Text);
-{$ELSE}
-  // 只适合于 D7 及以下
-  Result := Text;
-{$ENDIF}
-end;
 
 {$IFDEF IDE_WIDECONTROL}
 

@@ -44,7 +44,7 @@ interface
 {$IFDEF CNWIZARDS_CNINPUTHELPER}
 
 uses
-  Windows, SysUtils, Classes, Controls, ToolsApi, Math, Dialogs, Contnrs, TypInfo,
+  Windows, SysUtils, Classes, Controls, ToolsAPI, Math, Dialogs, Contnrs, TypInfo,
   Forms, CnHashMap, CnCommon, CnWizConsts, CnWizCompilerConst, CnWizUtils, CnWizMethodHook,
   CnPasCodeParser, CnInputSymbolList, CnEditControlWrapper, CnWizNotifier, CnNative;
 

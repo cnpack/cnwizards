@@ -48,7 +48,9 @@ interface
 
 {$DEFINE SUPPORT_INPUTHELPER}
 
-{$DEFINE SUPPORT_IDESYMBOLLIST}
+{$IFDEF DELPHI_OTA}
+  {$DEFINE SUPPORT_IDESYMBOLLIST}
+{$ENDIF}
 
 {$IFDEF BDS}
   {$DEFINE ADJUST_CODEPARAMWINDOW}
@@ -56,11 +58,13 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus, ToolsApi, IniFiles, Math,
-  Buttons, TypInfo, mPasLex, AppEvnts, Contnrs, Clipbrd,
+  StdCtrls, ComCtrls, ExtCtrls, ImgList, Menus,
+  {$IFDEF DELPHI_OTA} ToolsAPI, AppEvnts, {$ENDIF} IniFiles, Math,
+  Buttons, TypInfo, mPasLex,  Contnrs, Clipbrd,
+  {$IFDEF LAZARUS} LCLType, LCLProc, SrcEditorIntf, CnIDEStrings, {$ENDIF}
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
-  CnInputSymbolList, CnInputIdeSymbolList, CnIni, CnWizMultiLang, CnWizNotifier,
+  CnInputSymbolList, {$IFDEF DELPHI_OTA} CnInputIdeSymbolList, {$ENDIF} CnIni, CnWizMultiLang, CnWizNotifier,
   CnPasCodeParser, CnCppCodeParser, CnEventBus,
   {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
   CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
@@ -182,7 +186,9 @@ type
     List: TCnInputListBox;
     FListFont: TFont;      // 供设置用的字体
     Timer: TTimer;
+{$IFDEF DELPHI_OTA}
     AppEvents: TApplicationEvents;
+{$ENDIF}
     Menu: TPopupMenu;
     AutoMenuItem: TMenuItem;
     DispBtnMenuItem: TMenuItem;
@@ -252,6 +258,13 @@ type
 {$ENDIF}
     function AcceptDisplay: Boolean;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
+{$IFDEF LAZARUS}
+    // Lazarus: ApplicationMessage 通知器无驱动源，改挂 wrapper 的编辑器键盘通知器
+    procedure EditorKeyDown(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    procedure EditorKeyUp(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
+    function KeyMsgFromParams(MsgType: Word; Key, ScanCode: Word;
+      Shift: TShiftState): TMsg;
+{$ENDIF}
     procedure ActiveControlChanged(Sender: TObject);
     procedure OnTimer(Sender: TObject);
     procedure OnAppDeactivate(Sender: TObject);
@@ -306,6 +319,11 @@ type
     function IsValidKeyQueue: Boolean;
     function CalcFirstSet(Orig: TAnsiCharSet; IsPascal: Boolean): TAnsiCharSet;
     function CalcCharSet(Orig: TAnsiCharSet; PosInfo: PCodePosInfo): TAnsiCharSet;
+    // 获取当前光标标识符的统一入口，Lazarus 下经 CnOtaGeneralGetCurrPosToken 做类型适配
+    function InnerGetCurrPosToken(var Token: string; var CurrIndex: Integer;
+      CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet): Boolean;
+    // 是否处于深色主题，Lazarus 下暂不支持主题判断，恒为 False
+    function UnderDarkTheme: Boolean;
     procedure AutoCompFunc(Sender: TObject);
     procedure ConfigChanged;
     // 以下函数用堆栈来重新实现 FKeyDownValid 的机制以避免用户敲快了导致
@@ -610,6 +628,7 @@ const
 //  );
 //{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
 
   TSCppKibitzManagerCCError = procedure (Rec: PResStringRec); // TResStringRec
@@ -620,6 +639,7 @@ begin
   Rec := Rec;
 end;
 
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF IDE_MAINFORM_EAT_MOUSEWHEEL}
@@ -817,6 +837,7 @@ begin
   else
     BtnForm.Visible := False;
 
+{$IFDEF SUPPORT_IDESYMBOLLIST}
   if KibitzCompileThreadRunning then
   begin
     HintForm.Visible := Visible;
@@ -826,6 +847,7 @@ begin
   end
   else
     HintForm.Visible := False;
+{$ENDIF}
 
   FHintTimer.Enabled := HintForm.Visible;
 end;
@@ -1154,8 +1176,10 @@ begin
   Timer.Enabled := False;
   FFilterSymbols := TStringList.Create;
   FAutoSymbols := TStringList.Create;
+{$IFDEF DELPHI_OTA}
   AppEvents := TApplicationEvents.Create(nil);
   AppEvents.OnDeactivate := OnAppDeactivate;
+{$ENDIF}
   FHitCountMgr := TCnSymbolHitCountMgr.Create;
   FSymbolListMgr := TCnSymbolListMgr.Create;
   FKeyDownValidStack := TStack.Create;
@@ -1173,6 +1197,7 @@ begin
   AutoPopup := True;
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
   DphIdeModule := LoadLibrary(DphIdeLibName);
@@ -1183,18 +1208,38 @@ begin
         (DphIdeModule, SCppKibitzManagerCCError)), @MyCCError);
   end;
 {$ENDIF}
+{$ENDIF}
 
+{$IFDEF LAZARUS}
+  // Lazarus 下 ApplicationMessage 通知器无驱动源（DoApplicationMessage 仅 Delphi 生效），
+  // 改挂 wrapper 的编辑器键盘通知器（经 TCnControlHook 分发，支持吞键）
+  EditControlWrapper.AddKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.AddKeyUpNotifier(EditorKeyUp);
+  // 替代 Delphi 的 TApplicationEvents.OnDeactivate，窗口失活时收起列表
+  Application.AddOnDeactivateHandler(OnAppDeactivate);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
+{$ENDIF}
   CnWizNotifierServices.AddActiveControlNotifier(ActiveControlChanged);
 end;
 
 destructor TCnInputHelper.Destroy;
 begin
   CnWizNotifierServices.RemoveActiveControlNotifier(ActiveControlChanged);
+{$IFDEF LAZARUS}
+  EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
+  EditControlWrapper.RemoveKeyUpNotifier(EditorKeyUp);
+  Application.RemoveOnDeactivateHandler(OnAppDeactivate);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
+{$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   FCCErrorHook.Free;
+{$ENDIF}
 {$ENDIF}
 
   WizShortCutMgr.DeleteShortCut(FPopupShortCut);
@@ -1203,7 +1248,9 @@ begin
   FSymbols.Free;
   SymbolListMgr.Free;
   HitCountMgr.Free;
+{$IFDEF DELPHI_OTA}
   AppEvents.Free;
+{$ENDIF}
   FFilterSymbols.Free;
   FAutoSymbols.Free;
   Timer.Free;
@@ -1250,27 +1297,39 @@ function TCnInputHelper.AcceptDisplay: Boolean;
   end;
 
   function IsReadOnly: Boolean;
+{$IFDEF DELPHI_OTA}
   var
     Buffer: IOTAEditBuffer;
+{$ENDIF}
   begin
+{$IFDEF DELPHI_OTA}
     Buffer := CnOtaGetEditBuffer;
     if Assigned(Buffer) then
       Result := Buffer.IsReadOnly
     else
       Result := True;
+{$ENDIF}
+{$IFDEF LAZARUS}
+    Result := (SourceEditorManagerIntf = nil) or
+      (SourceEditorManagerIntf.ActiveEditor = nil) or
+      SourceEditorManagerIntf.ActiveEditor.ReadOnly;
+{$ENDIF}
   end;
 
   function IsInIncreSearch: Boolean;
   begin
-    // todo: 检查在增量搜索状态
+    // TODO: 检查在增量搜索状态
     Result := False;
   end;
 
   function IsInMacroOp: Boolean;
+{$IFDEF DELPHI_OTA}
   var
     KeySvcs: IOTAKeyboardServices;
+{$ENDIF}
   begin
     Result := False;
+{$IFDEF DELPHI_OTA}
     KeySvcs := BorlandIDEServices as IOTAKeyboardServices;
     if Assigned(KeySvcs) then
     begin
@@ -1278,6 +1337,7 @@ function TCnInputHelper.AcceptDisplay: Boolean;
         Assigned(KeySvcs.CurrentRecord) and KeySvcs.CurrentRecord.IsRecording then
         Result := True;
     end;
+{$ENDIF}
   end;
 
   function CanPopupInCurrentSourceType: Boolean;
@@ -1296,8 +1356,8 @@ function TCnInputHelper.AcceptDisplay: Boolean;
 begin
   Result := Active and IsEditControl(Screen.ActiveControl) and
     (not CheckImmRun or not IMMIsActive) and CanPopupInCurrentSourceType and
-    not IsAutoCompleteActive and not IsReadOnly and not CnOtaIsDebugging and
-    not IsInIncreSearch and not IsInMacroOp and not GetCodeTemplateListBoxVisible;
+    not IsAutoCompleteActive and not IsReadOnly and {$IFDEF DELPHI_OTA} not CnOtaIsDebugging and {$ENDIF}
+    not IsInIncreSearch and not IsInMacroOp {$IFDEF DELPHI_OTA} and not GetCodeTemplateListBoxVisible {$ENDIF};
 end;
 
 procedure TCnInputHelper.ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
@@ -1365,9 +1425,96 @@ begin
     HideAndClearList;
 end;
 
+{$IFDEF LAZARUS}
+
+// 将 wrapper 键盘通知器的参数重构为 HandleKeyDown/HandleKeyUp 使用的 TMsg。
+// 注意 HandleKeyDown 内经 KeyDataToShiftState 取 Shift：LCL 的实现里
+// ssShift/ssCtrl 用 GetKeyState 的实时物理状态，ssAlt 用 KeyData 的 MK_ALT 位，
+// 因此此处只需将 Alt 编进 lParam
+function TCnInputHelper.KeyMsgFromParams(MsgType: Word; Key, ScanCode: Word;
+  Shift: TShiftState): TMsg;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  Result.message := MsgType;
+  Result.wParam := Key;
+  Result.lParam := DWord(ScanCode) shl 16;
+  if ssAlt in Shift then
+    Result.lParam := Result.lParam or MK_ALT;
+end;
+
+procedure TCnInputHelper.EditorKeyDown(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+var
+  Msg: TMsg;
+begin
+  Handled := False;
+  if not AcceptDisplay then
+  begin
+    if IsShowing then
+      HideAndClearList;
+    Exit;
+  end;
+
+  Msg := KeyMsgFromParams(WM_KEYDOWN, Key, ScanCode, Shift);
+  if HandleKeyDown(Msg) then
+    Handled := True;
+end;
+
+procedure TCnInputHelper.EditorKeyUp(Key, ScanCode: Word;
+  Shift: TShiftState; var Handled: Boolean);
+var
+  Msg: TMsg;
+begin
+  Handled := False;
+  if not AcceptDisplay then
+  begin
+    if IsShowing then
+      HideAndClearList;
+    Exit;
+  end;
+
+  Msg := KeyMsgFromParams(WM_KEYUP, Key, ScanCode, Shift);
+  if HandleKeyUp(Msg) then
+    Handled := True;
+end;
+
+{$ENDIF}
+
 procedure TCnInputHelper.OnAppDeactivate(Sender: TObject);
 begin
   HideAndClearList;
+end;
+
+// Lazarus 下 CnOtaGeneralGetCurrPosToken 要求 UnicodeString 的 var 参数，
+// 此处统一做 string <--> UnicodeString 的适配，避免各调用点重复分支
+function TCnInputHelper.InnerGetCurrPosToken(var Token: string;
+  var CurrIndex: Integer; CheckCursorOutOfLineEnd: Boolean;
+  FirstSet, CharSet: TAnsiCharSet): Boolean;
+{$IFDEF LAZARUS}
+var
+  UniToken: UnicodeString;
+{$ENDIF}
+begin
+{$IFDEF LAZARUS}
+  UniToken := Token;
+  Result := CnOtaGeneralGetCurrPosToken(UniToken, CurrIndex,
+    CheckCursorOutOfLineEnd, FirstSet, CharSet);
+  Token := UniToken;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+  Result := CnOtaGetCurrPosToken(Token, CurrIndex,
+    CheckCursorOutOfLineEnd, FirstSet, CharSet);
+{$ENDIF}
+end;
+
+// 是否处于深色主题
+function TCnInputHelper.UnderDarkTheme: Boolean;
+begin
+{$IFDEF LAZARUS}
+  Result := False; // Lazarus 下暂不支持 IDE 深色主题判断
+{$ELSE}
+  Result := CnThemeWrapper.IsUnderDarkTheme;
+{$ENDIF}
 end;
 
 function TCnInputHelper.IsValidSymbolChar(C: Char;
@@ -1409,7 +1556,7 @@ end;
 
 function TCnInputHelper.CurrBlockIsEmpty: Boolean;
 begin
-  Result := CnOtaIsPersistentBlocks or (CnOtaGetCurrentSelection = '');
+  Result := {$IFDEF DELPHI_OTA} CnOtaIsPersistentBlocks or {$ENDIF}(CnOtaGetCurrentSelection = '');
 end;
 
 function TCnInputHelper.IsValidDelelteKey(Key: Word): Boolean;
@@ -1432,9 +1579,12 @@ begin
 end;
 
 function TCnInputHelper.IsValidDotKey(Key: Word): Boolean;
+{$IFDEF DELPHI_OTA}
 var
   Option: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   Result := False;
   if DispOnIDECompDisabled and ((Key = VK_DECIMAL) or (Key = MY_VK_DOT_KEY)) then
   begin
@@ -1442,6 +1592,11 @@ begin
     if not Option.GetOptionValue(csKeyCodeCompletion) then
       Result := True;
   end;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  // Lazarus 下无 IOTAEnvironmentOptions，点号触发时先允许弹出本列表
+  Result := DispOnIDECompDisabled and ((Key = VK_DECIMAL) or (Key = MY_VK_DOT_KEY));
+{$ENDIF}
 end;
 
 function TCnInputHelper.IsValidKeyQueue: Boolean;
@@ -1788,7 +1943,7 @@ begin
     if (Key = VK_LEFT) or (Key = VK_RIGHT) then
     begin
       // 如果方向键导致光标下的标识符改变，则隐藏
-      CnOtaGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
+      InnerGetCurrPosToken(NewToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
       if not SameText(NewToken, FToken) then
       begin
         HideAndClearList;
@@ -1818,7 +1973,7 @@ const
   csParseBlockAdd = 80;
 var
   Stream: TMemoryStream;
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   StartPos, CurrPos: Integer;
   Element, LineFlag: Integer;
   P: PAnsiChar;
@@ -1828,11 +1983,21 @@ begin
   View := CnOtaGetTopMostEditView;
   if not Assigned(View) then Exit;
 
+{$IFDEF DELPHI_OTA}
   IsPascalFile := IsDelphiSourceModule(View.Buffer.FileName) or IsInc(View.Buffer.FileName);
   if not IsPascalFile then
     IsCppFile := IsCppSourceModule(View.Buffer.FileName)
   else
     IsCppFile := False;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  IsPascalFile := IsDelphiSourceModule(View.FileName) or IsInc(View.FileName);
+  if not IsPascalFile then
+    IsCppFile := IsCppSourceModule(View.FileName)
+  else
+    IsCppFile := False;
+{$ENDIF}
 
   Stream := TMemoryStream.Create;
   try
@@ -1924,6 +2089,7 @@ begin
         ' LastToken: ' + GetEnumName(TypeInfo(TTokenKind), Ord(LastNoSpace)) + #13#10 +
         ' Token: ' + string(Token));
 {$ENDIF}
+
   SymbolListMgr.GetValidCharSet(FirstSet, CharSet, FPosInfo);
   if IsPascalFile then
     Result := not (FPosInfo.AreaKind in [akUnknown, akEnd]) and
@@ -1969,10 +2135,13 @@ begin
 end;
 
 procedure TCnInputHelper.ShowIDECodeCompletion;
+{$IFDEF DELPHI_OTA}
 var
   Hook: TCnMethodHook;
   EditView: IOTAEditView;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   EditView := CnOtaGetTopMostEditView;
   if Assigned(EditView) then
   begin
@@ -1987,6 +2156,7 @@ begin
       Hook.Free;
     end;
   end;
+{$ENDIF}
 end;
 
 procedure TCnInputHelper.ShowList(ForcePopup: Boolean);
@@ -2004,7 +2174,7 @@ begin
   if AcceptDisplay and GetCaretPosition(Pt) then
   begin
     // 取得当前标识符及光标左边的部分，C/C++情况下，允许编译指令的 # 也作为标识符开头
-    if not CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
+    if not InnerGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
       CalcCharSet(CharSet, @FPosInfo)) then
     begin
 {$IFDEF DEBUG}
@@ -2101,7 +2271,7 @@ begin
             ShowIDECodeCompletion
           else
           begin
-            CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
+            InnerGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
             if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
               ShowIDECodeCompletion;
           end;
@@ -2414,7 +2584,7 @@ var
   Kinds: TCnSymbolKindSet;
   Item: TCnSymbolItem;
   SymbolList: TCnSymbolList;
-  Editor: IOTAEditBuffer;
+  Editor: TCnEditBufferInterface;
   HashList: TCnSymbolHashList;
 begin
   HashList := nil;
@@ -2736,7 +2906,7 @@ var
   AToken: string;
 {$ENDIF}
 begin
-  if CnOtaGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
+  if InnerGetCurrPosToken(FToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal),
     CalcCharSet(CharSet, @FPosInfo)) or ForcePopup
     or ParsePosInfo and (FPosInfo.PosKind in [pkFieldDot, pkField]) then
   begin
@@ -2777,7 +2947,7 @@ begin
           ShowIDECodeCompletion
         else
         begin
-          CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
+          InnerGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
           if (AToken <> '') and (CurrPos > 0) and  not (AToken[CurrPos] in ['+', '-', '*', '/']) then
             ShowIDECodeCompletion;
         end;
@@ -2798,9 +2968,14 @@ var
   Len, RL: Integer;
   Item: TCnSymbolItem;
   DelLeft: Boolean;
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
   C: Char;
+{$IFDEF LAZARUS}
+  P: TPoint;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   EditPos: IOTAEditPosition;
+{$ENDIF}
 {$IFDEF OTA_CODE_TEMPLATE_API}
   View: IOTAEditView;
   CTS: IOTACodeTemplateServices;
@@ -2930,17 +3105,51 @@ begin
 {$ENDIF}
         if C = '}' then
         begin
+{$IFDEF LAZARUS}
+          // Lazarus：光标右侧为 } 则删除之，对应 Delphi 的
+          // MoveRelative(0, 1) + BackspaceDelete(1)
+          Buffer := CnOtaGetEditBuffer;
+          if Buffer <> nil then
+          begin
+            P := Buffer.CursorTextXY;
+            Buffer.ReplaceText(Point(P.X, P.Y), Point(P.X + 1, P.Y), '');
+          end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
           EditPos := CnOtaGetEditPosition;
           if Assigned(EditPos) then
           begin
             EditPos.MoveRelative(0, 1);  // 退格删掉这个 }
             EditPos.BackspaceDelete(1);
           end;
+{$ENDIF}
         end;
       end;
 
       // 输出文本
       Buffer := CnOtaGetEditBuffer;
+{$IFDEF LAZARUS}
+      if Buffer <> nil then
+      begin
+        Item.Output(Buffer, Icon, KeywordStyle);
+        // 自动为函数插入括号及参数完成提示
+        if AutoCompParam and ItemHasParam(Item) and
+          (CnOtaGetCurrChar() <> '(') then
+        begin
+          Handled := Key in [' ', #13, '(', ';'];
+          P := Buffer.CursorTextXY;
+          FSavePos.Col := P.X;
+          FSavePos.Line := P.Y;
+
+          if ((Item.Kind in [skFunction]) or not CursorIsEOL) and (Key <> ';') then
+            FBracketText := '()'
+          else
+            FBracketText := '();';
+          CnWizNotifierServices.ExecuteOnApplicationIdle(AutoCompFunc);
+        end;
+      end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       if Assigned(Buffer) and Assigned(Buffer.TopView) and
         Assigned(Buffer.EditPosition) then
       begin
@@ -2959,6 +3168,7 @@ begin
           CnWizNotifierServices.ExecuteOnApplicationIdle(AutoCompFunc);
         end;
       end;
+{$ENDIF}
 
       // 如果完全匹配且为关键字则加上回车
       if AutoEnter and AutoInsertEnter and (CompareStr(FToken, S) = 0) and
@@ -2975,7 +3185,7 @@ end;
 
 procedure TCnInputHelper.AutoCompFunc(Sender: TObject);
 var
-  Buffer: IOTAEditBuffer;
+  Buffer: TCnEditBufferInterface;
 {$IFDEF EDITVIEW_SETCURSORPOS_BUG}
   EditControl: TControl;
   Text: string;
@@ -2984,6 +3194,17 @@ var
 {$ENDIF}
 begin
   Buffer := CnOtaGetEditBuffer;
+{$IFDEF LAZARUS}
+  // Lazarus：直接在光标处插入括号并移回括号内；暂不支持触发 IDE 参数提示
+  if Buffer <> nil then
+  begin
+    Buffer.CursorTextXY := Point(FSavePos.Col, FSavePos.Line);
+    Buffer.ReplaceText(Buffer.CursorTextXY, Buffer.CursorTextXY, FBracketText);
+    if not FNoActualParaminCpp then // C/C++ 函数必须括号，但如无参数，光标便不用移动回来
+      Buffer.CursorTextXY := Point(FSavePos.Col + 1, FSavePos.Line);
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   if Assigned(Buffer) and Assigned(Buffer.TopView) and
     Assigned(Buffer.EditPosition) then
   begin
@@ -3012,6 +3233,7 @@ begin
     Buffer.TopView.Paint;
     (Buffer.TopView as IOTAEditActions).CodeCompletion(csParamList or csManual);
   end;
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -3050,9 +3272,16 @@ var
       // Light 默认模式时，无论是否使用编辑器色，都额外整浅蓝的 Type 色
       // 不使用编辑器配色时，也用额外浅蓝的配色
       // 使用编辑器配色且是黑色模式时，用暗黑 Type 配色
+{$IFDEF LAZARUS}
+      // Lazarus 下暂不支持主题判断，按 Light 模式处理
+      if not FUseEditorColor then
+        Result := csTypeColor;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       if CnThemeWrapper.IsUnderLightTheme or not FUseEditorColor then
         Result := csTypeColor;
-      if FUseEditorColor and CnThemeWrapper.IsUnderDarkTheme then
+{$ENDIF}
+      if FUseEditorColor and UnderDarkTheme then
         Result := csDarkTypeColor;
       // 否则沿用 List.FontColor
 {$ELSE}
@@ -3111,7 +3340,7 @@ begin
     Canvas.Brush.Color := ColorBrush;
     if not (odSelected in State) then // 普通绘制描述文字，注意未选中时和 ColorFont 有不同不能直接套用
     begin
-      if CnThemeWrapper.IsUnderDarkTheme then
+      if UnderDarkTheme then
         Canvas.Font.Color := csDarkFontColor
       else
         Canvas.Font.Color := List.FontColor;
@@ -3479,10 +3708,12 @@ begin
 
   with CreateIniFile(True) do
   try
+{$IFDEF SUPPORT_IDESYMBOLLIST}
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := ReadBool('', csUseCodeInsightMgr, False);
     if SupportKibitzCompileThread then
       UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, False);
+{$ENDIF}
   finally
     Free;
   end;
@@ -3550,10 +3781,12 @@ begin
 
   with CreateIniFile(True) do
   try
+{$IFDEF SUPPORT_IDESYMBOLLIST}
     if SupportMultiIDESymbolList then
       WriteBool('', csUseCodeInsightMgr, UseCodeInsightMgr);
     if SupportKibitzCompileThread then
       WriteBool('', csUseKibitzCompileThread, UseKibitzCompileThread);
+{$ENDIF}
   finally
     Free;
   end;
@@ -3591,7 +3824,9 @@ var
   C: AnsiChar;
   AToken: string;
   CurrPos: Integer;
+{$IFDEF DELPHI_OTA}
   Option: IOTAEnvironmentOptions;
+{$ENDIF}
 begin
   Result := False;
   if not FPosInfo.IsPascal and DispOnIDECompDisabled then
@@ -3603,15 +3838,21 @@ begin
     if C = '>' then
     begin
       // 是 >，if 光标下的前一个标识符的最后一位是 -
-      CnOtaGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
+      InnerGetCurrPosToken(AToken, CurrPos, True, CalcFirstSet(FirstSet, FPosInfo.IsPascal), CharSet);
 {$IFDEF DEBUG}
       CnDebugger.LogMsg('Is Valid Cpp Popup Key: Token: ' + AToken);
 {$ENDIF}
       if (Length(AToken) >= 1) and (AToken[Length(AToken)] = '-') then
       begin
+{$IFDEF LAZARUS}
+        // Lazarus 下暂无环境设置接口，视为键码补全未启用
+        Result := True;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         Option := CnOtaGetEnvironmentOptions;
         if not Option.GetOptionValue(csKeyCodeCompletion) then
           Result := True;
+{$ENDIF}
       end;
     end
     else if C = '#' then
