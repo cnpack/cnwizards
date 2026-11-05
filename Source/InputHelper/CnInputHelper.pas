@@ -64,8 +64,9 @@ uses
   {$IFDEF LAZARUS} LCLType, LCLProc, SrcEditorIntf, CnIDEStrings, {$ENDIF}
   {$IFDEF OTA_CODE_TEMPLATE_API} CodeTemplateAPI, {$ENDIF}
   CnConsts, CnCommon, CnWizClasses, CnWizConsts, CnWizUtils, CnWizIdeUtils,
-  CnInputSymbolList, {$IFDEF DELPHI_OTA} CnInputIdeSymbolList, {$ENDIF} CnIni, CnWizMultiLang, CnWizNotifier,
-  CnPasCodeParser, CnCppCodeParser, CnEventBus,
+  CnInputSymbolList, {$IFDEF DELPHI_OTA} CnInputIdeSymbolList, {$ENDIF}
+  {$IFDEF LAZARUS} CnInputLazSymbolList, {$ENDIF}
+  CnIni, CnWizMultiLang, CnWizNotifier, CnPasCodeParser, CnCppCodeParser, CnEventBus,
   {$IFDEF UNICODE} CnWidePasParser, CnWideCppParser, {$ENDIF}
   CnWizShareImages, CnWizShortCut, CnWizOptions, CnFloatWindow,
   CnEditControlWrapper, CnWizMethodHook, CnPopupMenu, CnStrings, CnWideStrings;

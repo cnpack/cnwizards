@@ -488,10 +488,17 @@
         <Filename Value="InputHelper\CnInputSymbolList.pas"/>
         <UnitName Value="CnInputSymbolList"/>
       </Item>
+      <Item>
+        <Filename Value="InputHelper\CnInputLazSymbolList.pas"/>
+        <UnitName Value="CnInputLazSymbolList"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
         <PackageName Value="IDEIntf"/>
+      </Item>
+      <Item>
+        <PackageName Value="CodeTools"/>
       </Item>
       <Item>
         <PackageName Value="SynEdit"/>
