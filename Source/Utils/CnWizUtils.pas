@@ -112,6 +112,7 @@ type
   TCnIDEEditorInterface = Pointer;
   TCnSourceEditorInterface = Pointer;
   TCnEditBufferInterface = Pointer;
+  TCnEditReaderInterface = Pointer;
   TCnIDEProjectGroupInterface = Pointer;
   TCnIDEProjectInterface = Pointer;
   TCnIDEProjectOptionsInterface = Pointer;
@@ -126,6 +127,7 @@ type
   TCnIDEEditorInterface = TSourceEditorInterface;
   TCnSourceEditorInterface = TSourceEditorInterface;
   TCnEditBufferInterface = TSourceEditorInterface;
+  TCnEditReaderInterface = TSourceEditorInterface;
   TCnIDEProjectGroupInterface = TProjectGroup;
   TCnIDEProjectInterface = TLazProject;
   TCnIDEProjectOptionsInterface = TLazCompilerOptions;
@@ -139,6 +141,7 @@ type
   TCnIDEEditorInterface = IOTAEditor;
   TCnSourceEditorInterface = IOTASourceEditor;
   TCnEditBufferInterface = IOTAEditBuffer;
+  TCnEditReaderInterface = IOTAEditReader;
   TCnIDEProjectGroupInterface = IOTAProjectGroup;
   TCnIDEProjectInterface = IOTAProject;
   TCnIDEProjectOptionsInterface = IOTAProjectOptions;
@@ -738,8 +741,6 @@ function CnOtaGetModuleFromProjectByIndex(Project: IOTAProject; Index: Integer):
 {* 取当前工程中的第 Index 个模块信息，从 0 开始}
 function CnOtaGetFormDesignerGridOffset: TPoint;
 {* 返回窗体设计器的格点也就是 Grid 的横竖步进像素数}
-function CnOtaGetCurrentEditWindow(CheckScreen: Boolean = False): TCustomForm;
-{* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历 Screen 的 Form 们，但在有多个 EditWindow 的情况下可能不是最前端那个}
 function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
 {* 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器}
 function CnOtaGetCurrentEditWindowSubViewControl: TControl;
@@ -926,6 +927,11 @@ function CnOtaOpenUnSaveForm(const FormName: string): Boolean;
 {* 打开未保存的窗体}
 {$ENDIF}
 {$ENDIF}
+
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean = False): TCustomForm;
+{* 以 OTA 的方式取当前的 EditWindow，某些场合取不到则按 CheckScreen 要求去遍历
+   Screen 的 Form 们，但在有多个 EditWindow 的情况下可能不是最前端那个。
+   Lazarus 下经活动编辑器的 EditorControl 取宿主窗体}
 
 function CnOtaGetBlockOffsetForLineMode(var StartPos: TOTACharPos; var EndPos: TOTACharPos;
   View: TCnEditViewSourceInterface = nil): Boolean;
@@ -1240,6 +1246,19 @@ procedure CnOtaGotoEditPosAndRepaint(EditView:
 
 {$ENDIF}
 
+procedure CnOtaSaveReaderToStream(EditReader: TCnEditReaderInterface; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
+{* 保存 EditReader 内容到流中，流中的内容 CheckUtf8 为默认 True 时为 Ansi 格式，否则为 Ansi/Utf8/Utf8，均带末尾 #0 字符，
+   AlternativeWideChar 表示 CheckUtf8 为 True 时，在纯英文 OS 的 Unicode 环境下，
+   是否将转换成的 Ansi 中的每个宽字符手动替换成两个空格。此选项用于躲过纯英文 OS
+   的 Unicode 环境下 UnicodeString 直接转 Ansi 时的丢字符问题}
+
+procedure CnOtaSaveEditorToStreamEx(Editor: TCnSourceEditorInterface; Stream:
+  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
+  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
+{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
+
 {$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASourceEditor = nil): Integer;
@@ -1249,19 +1268,6 @@ function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos; SourceEditor: IOTASour
 
 function CnOtaGetCurrCharPos(SourceEditor: IOTASourceEditor = nil): TOTACharPos;
 {* 返回 SourceEditor 当前光标位置}
-
-procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-{* 保存 EditReader 内容到流中，流中的内容 CheckUtf8 为默认 True 时为 Ansi 格式，否则为 Ansi/Utf8/Utf8，均带末尾 #0 字符，
-   AlternativeWideChar 表示 CheckUtf8 为 True 时，在纯英文 OS 的 Unicode 环境下，
-   是否将转换成的 Ansi 中的每个宽字符手动替换成两个空格。此选项用于躲过纯英文 OS
-   的 Unicode 环境下 UnicodeString 直接转 Ansi 时的丢字符问题}
-
-procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-{* 保存编辑器文本到流中，CheckUtf8 为 True 时均为 Ansi 格式，否则为 Ansi/Utf8/Utf8}
 
 {$IFDEF IDE_STRING_ANSI_UTF8}
 
@@ -5940,52 +5946,6 @@ begin
   end;
 end;
 
-// 以 OTA 的方式取当前的 EditWindow
-function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
-var
-  I: Integer;
-  EditView: TCnEditViewSourceInterface;
-{$IFDEF DELPHI_OTA}
-  EditWindow: INTAEditWindow;
-{$ENDIF}
-begin
-  EditView := CnOtaGetTopMostEditView;
-
-{$IFDEF DELPHI_OTA}
-  if Assigned(EditView) then
-  begin
-    EditWindow := EditView.GetEditWindow;
-    if Assigned(EditWindow) then
-    begin
-      Result := EditWindow.Form;
-      Exit;
-    end;
-  end;
-{$ENDIF}
-
-{$IFDEF LAZARUS}
-  if (EditView <> nil) and (EditView.EditorControl <> nil) and
-    (Editor.EditorControl is TWinControl) then
-  begin
-    Result := GetParentForm(TWinControl(Editor.EditorControl));
-    Exit;
-  end;
-{$ENDIF}
-
-  if CheckScreen then
-  begin
-    for I := 0 to Screen.CustomFormCount - 1 do
-    begin
-      if IsIdeEditorForm(Screen.CustomForms[I]) then
-      begin
-        Result := Screen.CustomForms[I];
-        Exit;
-      end;
-    end;
-  end;
-  Result := nil;
-end;
-
 // 以 OTA 的方式取当前的 EditWindow 下的 SubView 们的容器
 function CnOtaGetCurrentEditWindowSubViewContainer: TWinControl;
 var
@@ -7796,6 +7756,52 @@ end;
 
 {$ENDIF}
 {$ENDIF}
+
+// 以 OTA 的方式取当前的 EditWindow
+function CnOtaGetCurrentEditWindow(CheckScreen: Boolean): TCustomForm;
+var
+  I: Integer;
+  EditView: TCnEditViewSourceInterface;
+{$IFDEF DELPHI_OTA}
+  EditWindow: INTAEditWindow;
+{$ENDIF}
+begin
+  EditView := CnOtaGetTopMostEditView;
+
+{$IFDEF DELPHI_OTA}
+  if Assigned(EditView) then
+  begin
+    EditWindow := EditView.GetEditWindow;
+    if Assigned(EditWindow) then
+    begin
+      Result := EditWindow.Form;
+      Exit;
+    end;
+  end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  if (EditView <> nil) and (EditView.EditorControl <> nil) and
+    (EditView.EditorControl is TWinControl) then
+  begin
+    Result := GetParentForm(TWinControl(EditView.EditorControl));
+    Exit;
+  end;
+{$ENDIF}
+
+  if CheckScreen then
+  begin
+    for I := 0 to Screen.CustomFormCount - 1 do
+    begin
+      if IsIdeEditorForm(Screen.CustomForms[I]) then
+      begin
+        Result := Screen.CustomForms[I];
+        Exit;
+      end;
+    end;
+  end;
+  Result := nil;
+end;
 
 // 获得项目的二进制文件输出目录
 function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string;
@@ -10160,6 +10166,125 @@ end;
 
 {$ENDIF}
 
+// 保存 EditReader 内容到流中，流中的内容 CheckUtf8 时默认为 Ansi，否则 Ansi/Utf8/Utf8 格式
+procedure CnOtaSaveReaderToStream(EditReader: TCnEditReaderInterface; Stream:
+  TMemoryStream; StartPos: Integer; EndPos: Integer;
+  PreSize: Integer; CheckUtf8: Boolean; AlternativeWideChar: Boolean);
+const
+  // Leave typed constant as is - needed for streaming code.
+  TerminatingNulChar: Char = #0;
+  BufferSize = 1024 * 24;
+var
+  Buffer: PAnsiChar;
+  EditReaderPos: Integer;
+  DataLen: Integer;
+  ReadDataSize: Integer;
+{$IFDEF IDE_WIDECONTROL}
+  Text: AnsiString;
+{$ENDIF}
+{$IFDEF UNICODE}
+  UniText: string;
+{$ENDIF}
+begin
+  Assert(EditReader <> nil);
+  Assert(Stream <> nil);
+
+{$IFDEF DEBUG}
+//  CnDebugger.LogFmt('CnOtaSaveReaderToStream. StartPos %d, EndPos %d, PreSize %d.',
+//    [StartPos, EndPos, PreSize]);
+{$ENDIF}
+
+{$IFDEF DELPHI_OTA}
+  if EndPos > 0 then
+  begin
+    DataLen := EndPos - StartPos;
+    Stream.Size := DataLen + 1;
+  end
+  else
+  begin
+    // 分配预计的内存以提高性能
+    DataLen := MaxInt;
+    Stream.Size := PreSize;
+  end;
+  Stream.Position := 0;
+  GetMem(Buffer, BufferSize);
+  try
+    EditReaderPos := StartPos;
+    ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+    Inc(EditReaderPos, ReadDataSize);
+    Dec(DataLen, ReadDataSize);
+    while (ReadDataSize = BufferSize) and (DataLen > 0) do
+    begin
+      Stream.Write(Buffer^, ReadDataSize);
+      ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
+      Inc(EditReaderPos, ReadDataSize);
+      Dec(DataLen, ReadDataSize);
+    end;
+    Stream.Write(Buffer^, ReadDataSize);
+    Stream.Write(TerminatingNulChar, SizeOf(TerminatingNulChar));
+    if Stream.Size > Stream.Position then
+      Stream.Size := Stream.Position;
+  finally
+    FreeMem(Buffer);
+  end;
+
+  // 此时读到的内容是 Ansi/Utf8/Utf8，CheckUtf8 如果是 True，则全转 Ansi
+
+{$IFDEF IDE_WIDECONTROL}
+  if CheckUtf8 then
+  begin
+    AlternativeWideChar := AlternativeWideChar and _UNICODE_STRING and CodePageOnlySupportsEnglish;
+
+    if AlternativeWideChar then
+    begin
+{$IFDEF UNICODE}
+      // Unicode 环境里在纯英文 OS 下不能按照后面的转 Ansi，以免丢字符。
+      // 需要转成 UTF16 的再硬替成 Ansi。
+      UniText := Utf8Decode(PAnsiChar(Stream.Memory));
+      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(UniText));
+{$ELSE}
+      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+{$ENDIF}
+    end
+    else
+    begin
+      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
+    end;
+    Stream.Size := Length(Text) + 1;
+    Stream.Position := 0;
+    Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
+  end;
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  // TODO:
+{$ENDIF}
+
+  Stream.Position := 0;
+end;
+
+// 保存编辑器文本到流中
+procedure CnOtaSaveEditorToStreamEx(Editor: TCnSourceEditorInterface; Stream:
+  TMemoryStream; StartPos: Integer; EndPos: Integer;
+  PreSize: Integer; CheckUtf8: Boolean; AlternativeWideChar: Boolean);
+begin
+{$IFDEF DELPHI_OTA}
+  if Editor = nil then
+  begin
+    Editor := CnOtaGetCurrentSourceEditor;
+    if Editor = nil then
+      Exit;
+  end;
+
+  CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
+{$ENDIF}
+{$IFDEF LAZARUS}
+  if Editor <> nil then
+    CnOtaSaveReaderToStream(Editor, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
+{$ENDIF}
+end;
+
 {$IFDEF DELPHI_OTA}
 
 function CnOtaGetLinePosFromEditPos(EditPos: TOTAEditPos;
@@ -10237,113 +10362,6 @@ begin
     Result.CharIndex := 0;
     Result.Line := 0;
   end;
-end;
-
-// 保存 EditReader 内容到流中，流中的内容 CheckUtf8 时默认为 Ansi，否则 Ansi/Utf8/Utf8 格式
-procedure CnOtaSaveReaderToStream(EditReader: IOTAEditReader; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-const
-  // Leave typed constant as is - needed for streaming code.
-  TerminatingNulChar: Char = #0;
-  BufferSize = 1024 * 24;
-var
-  Buffer: PAnsiChar;
-  EditReaderPos: Integer;
-  DataLen: Integer;
-  ReadDataSize: Integer;
-{$IFDEF IDE_WIDECONTROL}
-  Text: AnsiString;
-{$ENDIF}
-{$IFDEF UNICODE}
-  UniText: string;
-{$ENDIF}
-begin
-  Assert(EditReader <> nil);
-  Assert(Stream <> nil);
-
-{$IFDEF DEBUG}
-//  CnDebugger.LogFmt('CnOtaSaveReaderToStream. StartPos %d, EndPos %d, PreSize %d.',
-//    [StartPos, EndPos, PreSize]);
-{$ENDIF}
-
-  if EndPos > 0 then
-  begin
-    DataLen := EndPos - StartPos;
-    Stream.Size := DataLen + 1;
-  end
-  else
-  begin
-    // 分配预计的内存以提高性能
-    DataLen := MaxInt;
-    Stream.Size := PreSize;
-  end;
-  Stream.Position := 0;
-  GetMem(Buffer, BufferSize);
-  try
-    EditReaderPos := StartPos;
-    ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
-    Inc(EditReaderPos, ReadDataSize);
-    Dec(DataLen, ReadDataSize);
-    while (ReadDataSize = BufferSize) and (DataLen > 0) do
-    begin
-      Stream.Write(Buffer^, ReadDataSize);
-      ReadDataSize := EditReader.GetText(EditReaderPos, Buffer, Min(BufferSize, DataLen));
-      Inc(EditReaderPos, ReadDataSize);
-      Dec(DataLen, ReadDataSize);
-    end;
-    Stream.Write(Buffer^, ReadDataSize);
-    Stream.Write(TerminatingNulChar, SizeOf(TerminatingNulChar));
-    if Stream.Size > Stream.Position then
-      Stream.Size := Stream.Position;
-  finally
-    FreeMem(Buffer);
-  end;
-
-  // 此时读到的内容是 Ansi/Utf8/Utf8，CheckUtf8 如果是 True，则全转 Ansi
-
-{$IFDEF IDE_WIDECONTROL}
-  if CheckUtf8 then
-  begin
-    AlternativeWideChar := AlternativeWideChar and _UNICODE_STRING and CodePageOnlySupportsEnglish;
-
-    if AlternativeWideChar then
-    begin
-{$IFDEF UNICODE}
-      // Unicode 环境里在纯英文 OS 下不能按照后面的转 Ansi，以免丢字符。
-      // 需要转成 UTF16 的再硬替成 Ansi。
-      UniText := Utf8Decode(PAnsiChar(Stream.Memory));
-      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(UniText));
-{$ELSE}
-      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
-{$ENDIF}
-    end
-    else
-    begin
-      Text := CnUtf8ToAnsi(PAnsiChar(Stream.Memory));
-    end;
-    Stream.Size := Length(Text) + 1;
-    Stream.Position := 0;
-    Stream.Write(PAnsiChar(Text)^, Length(Text) + 1);
-  end;
-{$ENDIF}
-
-  Stream.Position := 0;
-end;
-
-// 保存编辑器文本到流中
-procedure CnOtaSaveEditorToStreamEx(Editor: IOTASourceEditor; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0; CheckUtf8: Boolean = True; AlternativeWideChar: Boolean = False);
-begin
-  if Editor = nil then
-  begin
-    Editor := CnOtaGetCurrentSourceEditor;
-    if Editor = nil then
-      Exit;
-  end;
-
-  CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
 end;
 
 {$IFDEF UNICODE}

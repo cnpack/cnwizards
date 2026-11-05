@@ -120,6 +120,12 @@ type
     Line: Longint;       // 1 开始
   end;
 
+const
+  // 对应 ToolsAPI 中高亮元素枚举里用到的两个成员，取值自洽即可：
+  // 仅在 CnEditControlWrapper.GetAttributeAtPos 的 Lazarus 实现与调用处之间约定
+  atComment = 1;
+  atString  = 2;
+
 {$ENDIF}
 
 function IDEWideCharIsWideLength(const AWChar: WideChar): Boolean; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}

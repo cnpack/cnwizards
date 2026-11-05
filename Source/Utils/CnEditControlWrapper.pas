@@ -476,14 +476,16 @@ type
     function GetEditViewFromTabs(TabControl: TXTabControl; Index: Integer):
       IOTAEditView;
     {* 返回 TabControl 指定页关联的 EditView }
+{$ENDIF}
     procedure GetAttributeAtPos(EditControl: TControl; const EdPos: TOTAEditPos;
       IncludeMargin: Boolean; var Element, LineFlag: Integer);
     {* 返回指定位置的高亮属性，用于替换 IOTAEditView 的函数，后者可能会导致编辑区问题。
        此指定位置在非 Unicode 环境里可由 CursorPos 而来，D5/6/7 是 Ansi 位置，
        2005~2007 是 UTF8 的字节位置（一个汉字跨 3 列），
        2009 以上要注意，EdPos 居然也要求是 UTF8 字节位置。而 2009 下 CursorPos 是 Ansi，
-       不能直接拿 CursorPos 来作为 EdPos 参数，而必须经过一次 UTF8 转换 }
-{$ENDIF}
+       不能直接拿 CursorPos 来作为 EdPos 参数，而必须经过一次 UTF8 转换。
+       Lazarus 下经 SynEdit 高亮器实现，Element 仅可能返回 atComment/atString/-1，
+       LineFlag 恒为 0（调试 EIP 行为 Delphi 专属语义）}
     function GetLineIsElided(EditControl: TControl; LineNum: Integer): Boolean;
     {* 返回指定行是否折叠，不包括折叠的头尾，也就是返回是否隐藏。
        只对 BDS 有效，其余情况返回 False}
@@ -3215,9 +3217,34 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 procedure TCnEditControlWrapper.GetAttributeAtPos(EditControl: TControl; const
   EdPos: TOTAEditPos; IncludeMargin: Boolean; var Element, LineFlag: Integer);
+{$IFDEF LAZARUS}
+var
+  SynEd: TSynEdit;
+  Token: string;
+  Attri: TSynHighlighterAttributes;
+{$ENDIF}
 begin
+{$IFDEF LAZARUS}
+  Element := -1;
+  LineFlag := 0;
+  // Lazarus：经 SynEdit 高亮器取指定位置的高亮属性，等价于 coreide 的
+  // TCustomEditControl.GetAttributeAtPos。XY 均 1 基且 X 为 UTF8 字节列，
+  // 与 CursorTextXY 口径一致；多行注释/字符串状态由 SynEdit 按行区间恢复
+  SynEd := GetSynEditOfControl(EditControl);
+  if (SynEd <> nil) and (SynEd.Highlighter <> nil) and
+    SynEd.GetHighlighterAttriAtRowCol(Point(EdPos.Col, EdPos.Line), Token, Attri) then
+  begin
+    if Attri = SynEd.Highlighter.CommentAttribute then
+      Element := atComment
+    else if Attri = SynEd.Highlighter.StringAttribute then
+      Element := atString;
+  end;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   if Assigned(DoGetAttributeAtPos) then
   begin
   {$IFDEF COMPILER7_UP}
@@ -3226,9 +3253,8 @@ begin
     DoGetAttributeAtPos(EditControl, EdPos, Element, LineFlag, IncludeMargin);
   {$ENDIF}
   end;
-end;
-
 {$ENDIF}
+end;
 
 function TCnEditControlWrapper.GetLineIsElided(EditControl: TControl;
   LineNum: Integer): Boolean;
