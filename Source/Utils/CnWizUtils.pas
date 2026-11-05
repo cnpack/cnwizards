@@ -10175,15 +10175,20 @@ const
   TerminatingNulChar: Char = #0;
   BufferSize = 1024 * 24;
 var
+{$IFDEF DELPHI_OTA}
   Buffer: PAnsiChar;
   EditReaderPos: Integer;
   DataLen: Integer;
   ReadDataSize: Integer;
+{$ENDIF}
 {$IFDEF IDE_WIDECONTROL}
   Text: AnsiString;
 {$ENDIF}
 {$IFDEF UNICODE}
   UniText: string;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  Utf8Text: string;
 {$ENDIF}
 begin
   Assert(EditReader <> nil);
@@ -10258,7 +10263,32 @@ begin
 {$ENDIF}
 
 {$IFDEF LAZARUS}
-  // TODO:
+  // Lazarus：直接取 SourceText（Utf8）按字节区间截取，StartPos/EndPos 与线性偏移
+  // 同为 Utf8 字节口径；EndPos 为 0 表示从 StartPos 取到结尾，PreSize 仅为预分配
+  // 提示，此处已知精确长度故无需使用。CheckUtf8 为 True 时转 Ansi——FPC 为 Ansi
+  // 编译器，不存在 Delphi Unicode 环境纯英文 OS 下的丢字符问题，故
+  // AlternativeWideChar 无需特判（与 Delphi 非 Unicode 编译器的行为一致）
+  if StartPos < 0 then
+    StartPos := 0;
+  Utf8Text := EditReader.SourceText;
+  if EndPos > 0 then
+  begin
+    if EndPos > StartPos then
+      Utf8Text := Copy(Utf8Text, StartPos + 1, EndPos - StartPos)
+    else
+      Utf8Text := '';
+  end
+  else
+    Utf8Text := Copy(Utf8Text, StartPos + 1, MaxInt);
+
+  if CheckUtf8 then
+    Utf8Text := CnUtf8ToAnsi(Utf8Text);
+
+  Stream.Size := Length(Utf8Text) + 1;
+  Stream.Position := 0;
+  if Length(Utf8Text) > 0 then
+    Stream.Write(Utf8Text[1], Length(Utf8Text));
+  Stream.Write(TerminatingNulChar, SizeOf(TerminatingNulChar));
 {$ENDIF}
 
   Stream.Position := 0;
@@ -10269,7 +10299,6 @@ procedure CnOtaSaveEditorToStreamEx(Editor: TCnSourceEditorInterface; Stream:
   TMemoryStream; StartPos: Integer; EndPos: Integer;
   PreSize: Integer; CheckUtf8: Boolean; AlternativeWideChar: Boolean);
 begin
-{$IFDEF DELPHI_OTA}
   if Editor = nil then
   begin
     Editor := CnOtaGetCurrentSourceEditor;
@@ -10277,11 +10306,11 @@ begin
       Exit;
   end;
 
+{$IFDEF DELPHI_OTA}
   CnOtaSaveReaderToStream(Editor.CreateReader, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
 {$ENDIF}
 {$IFDEF LAZARUS}
-  if Editor <> nil then
-    CnOtaSaveReaderToStream(Editor, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
+  CnOtaSaveReaderToStream(Editor, Stream, StartPos, EndPos, PreSize, CheckUtf8, AlternativeWideChar);
 {$ENDIF}
 end;
 
@@ -10368,8 +10397,7 @@ end;
 
 // 保存 EditReader 内容到流中，流中的内容默认为 Unicode 格式，2009 以上使用
 procedure CnOtaSaveReaderToStreamW(EditReader: IOTAEditReader; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0);
+  TMemoryStream; StartPos: Integer; EndPos: Integer; PreSize: Integer);
 const
   // Leave typed constant as is - needed for streaming code.
   TerminatingNulChar: AnsiChar = #0;
@@ -10433,8 +10461,7 @@ end;
 
 // 保存编辑器文本到流中，Unicode 版本，2009 以上使用
 procedure CnOtaSaveEditorToStreamWEx(Editor: IOTASourceEditor; Stream:
-  TMemoryStream; StartPos: Integer = 0; EndPos: Integer = 0;
-  PreSize: Integer = 0);
+  TMemoryStream; StartPos: Integer; EndPos: Integer; PreSize: Integer);
 begin
   if Editor = nil then
   begin
@@ -10448,7 +10475,7 @@ end;
 
 // 保存编辑器文本到流中，Unicode 版本，2009 以上使用
 function CnOtaSaveEditorToStreamW(Editor: IOTASourceEditor; Stream: TMemoryStream;
-  FromCurrPos: Boolean = False): Boolean;
+  FromCurrPos: Boolean): Boolean;
 var
   IPos: Integer;
   PreSize: Integer;

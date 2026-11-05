@@ -10,7 +10,7 @@
       <SearchPaths>
         <IncludeFiles Value="..\..\cnvcl\Source\Common"/>
         <Libraries Value="Framework;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\MultiLang;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;Utils;ThirdParty;Misc;MultiLang;DesignEditor"/>
-        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;AIAgent;FavoriteWizard;ExplorerWizard;ReopenWizard;SourceDiff;UsesWizard;RepositoryWiz;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command;SourceHighlight"/>
+        <OtherUnitFiles Value="Framework;Utils;ThirdParty;Misc;MultiLang;DesignEditor;SimpleWizard;Config;..\Test\Lazarus;AICoder;CodingToolset;ProjectExtWizard;..\..\cnvcl\Source\Common;..\..\cnvcl\Source\Crypto;..\..\cnvcl\Source\Graphic;..\..\cnvcl\Source\NonVisual;..\..\cnvcl\Source\NetComm;..\..\cnvcl\Source\ObjRep;..\..\cnvcl\Source\MultiLang;AIAgent;FavoriteWizard;ExplorerWizard;ReopenWizard;SourceDiff;UsesWizard;RepositoryWiz;SrcEditorEnhance;IdeEnhancement;..\Test\Lazarus\Wizard;SrcTemplate;SourceStat;CodeFormatter;Command;SourceHighlight;InputHelper"/>
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -471,6 +471,22 @@
       <Item>
         <Filename Value="IdeEnhancement\CnIdeEnhanceMenu.pas"/>
         <UnitName Value="CnIdeEnhanceMenu"/>
+      </Item>
+      <Item>
+        <Filename Value="InputHelper\CnInputHelper.pas"/>
+        <UnitName Value="CnInputHelper"/>
+      </Item>
+      <Item>
+        <Filename Value="InputHelper\CnInputHelperEditFrm.pas"/>
+        <UnitName Value="CnInputHelperEditFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="InputHelper\CnInputHelperFrm.pas"/>
+        <UnitName Value="CnInputHelperFrm"/>
+      </Item>
+      <Item>
+        <Filename Value="InputHelper\CnInputSymbolList.pas"/>
+        <UnitName Value="CnInputSymbolList"/>
       </Item>
     </Files>
     <RequiredPkgs>

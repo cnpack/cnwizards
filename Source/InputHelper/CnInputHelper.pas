@@ -1974,6 +1974,7 @@ const
 var
   Stream: TMemoryStream;
   View: TCnEditViewSourceInterface;
+  CurEdPos: TOTAEditPos;
   StartPos, CurrPos: Integer;
   Element, LineFlag: Integer;
   P: PAnsiChar;
@@ -1982,6 +1983,14 @@ begin
   Result := False;
   View := CnOtaGetTopMostEditView;
   if not Assigned(View) then Exit;
+
+{$IFDEF LAZARUS}
+  // Lazarus：CursorTextXY 与 TOTAEditPos 的 Col/Line 同为 1 基 UTF8 字节口径
+  CurEdPos.Col := View.CursorTextXY.X;
+  CurEdPos.Line := View.CursorTextXY.Y;
+{$ELSE}
+  CurEdPos := View.CursorPos;
+{$ENDIF}
 
 {$IFDEF DELPHI_OTA}
   IsPascalFile := IsDelphiSourceModule(View.Buffer.FileName) or IsInc(View.Buffer.FileName);
@@ -2001,13 +2010,24 @@ begin
 
   Stream := TMemoryStream.Create;
   try
+{$IFDEF DELPHI_OTA}
     CurrPos := CnOtaGetCurrLinearPos(View.Buffer); // 得到较为准确的线性偏移 Ansi/Utf8/Utf8
-    if View.CursorPos.Line > csMaxProcessLines then
+{$ENDIF}
+{$IFDEF LAZARUS}
+    CurrPos := CnOtaGetCurrLinearPos(View);        // Utf8
+{$ENDIF}
+    if CurEdPos.Line > csMaxProcessLines then
     begin
       // CnOtaEditPosToLinePos 在大文件时会很慢，此处直接使用线性位置来计算
       StartPos := Max(0, CurrPos - csParseBlockSize);
+{$IFDEF DELPHI_OTA}
       CnOtaSaveEditorToStreamEx(View.Buffer, Stream, StartPos, CurrPos +
         csParseBlockAdd, 0, False); // BDS 下不做 Utf8->Ansi 转换以免错位
+{$ENDIF}
+{$IFDEF LAZARUS}
+      CnOtaSaveEditorToStreamEx(View, Stream, StartPos, CurrPos +
+        csParseBlockAdd, 0, False); // BDS 下不做 Utf8->Ansi 转换以免错位
+{$ENDIF}
 
       // 从行首开始
       P := PAnsiChar(Stream.Memory);
@@ -2023,7 +2043,7 @@ begin
       begin
         ParsePasCodePosInfo(P, CurrPos - StartPos, FPosInfo, False, True);
         EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
-          View.CursorPos, False, Element, LineFlag);
+          CurEdPos, False, Element, LineFlag);
         case Element of
           atComment:
             if not (FPosInfo.PosKind in [pkComment, pkCompDirect]) then
@@ -2037,7 +2057,7 @@ begin
         // 解析 C++ 文件，判断光标所属的位置类型
         ParseCppCodePosInfo(P, CurrPos - StartPos, FPosInfo, False, True);
         EditControlWrapper.GetAttributeAtPos(CnOtaGetCurrentEditControl,
-          View.CursorPos, False, Element, LineFlag);
+          CurEdPos, False, Element, LineFlag);
         case Element of
           atComment:
             if not (FPosInfo.PosKind in [pkComment]) then
@@ -2920,6 +2940,7 @@ begin
 //    CnDebugger.LogFmt('InputHelper UpdateCurrList Returns %d', [Integer(Result)]);
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
   {$IFNDEF SUPPORT_IDESYMBOLLIST}
     // 如果不支持 IDE 符号列表，只有从前面匹配的才有效
     if Result then
@@ -2928,6 +2949,7 @@ begin
         Result := False;
     end;
   {$ENDIF}
+{$ENDIF}
   end
   else
     Result := False;
@@ -3403,10 +3425,15 @@ var
   end;
 
 begin
+{$IFDEF LAZARUS}
+  Menu.Images := dmCnSharedImages.SymbolImages;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
   Menu.Images := IdeGetVirtualImageListFromOrigin(dmCnSharedImages.SymbolImages, nil, True);
 {$ELSE}
   Menu.Images := dmCnSharedImages.SymbolImages;
+{$ENDIF}
 {$ENDIF}
   Menu.Items.Clear;
 

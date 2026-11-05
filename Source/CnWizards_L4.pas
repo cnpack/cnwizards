@@ -36,7 +36,8 @@ uses
   CnFilesSnapshotManageFrm, CnUsesToolsWizard, CnUsesCleanResultFrm, 
   CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, CnRepositoryMenu, 
   CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, CnReplaceWizard, 
-  CnIdeEnhanceMenu, LazarusPackageIntf;
+  CnIdeEnhanceMenu, CnInputHelper, CnInputHelperEditFrm, CnInputHelperFrm, 
+  CnInputSymbolList, LazarusPackageIntf;
 
 implementation
 
