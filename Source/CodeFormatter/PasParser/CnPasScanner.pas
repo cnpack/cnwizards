@@ -888,7 +888,6 @@ function TScanner.NextToken: TPascalToken;
 var
   BlankStr: string;
   S: string;
-  Idx: Integer;
   LocalJustWroteBlockComment: Boolean;
 
   procedure SkipTo(var P: PChar; TargetChar: Char);
@@ -921,6 +920,16 @@ var
         Exit;
     end;
     Result := True;
+  end;
+
+  // 删除字符串中全部的回车换行（兼容 #13#10、#10、#13 三种换行形式），保留其余字符
+  procedure DeleteLineBreaks(var S: string);
+  var
+    I: Integer;
+  begin
+    for I := Length(S) downto 1 do
+      if S[I] in [#13, #10] then
+        Delete(S, I, 1);
   end;
 
 var
@@ -1566,9 +1575,12 @@ begin
               // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
               // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
 
-              Idx := Pos(#13#10, BlankStr);
-              if Idx > 0 then
-                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              // 保留换行模式下 BlankStr 中的回车换行已由 OnLineBreak 事件在跳过空白时
+              // 逐一写出，此处必须删除 BlankStr 中全部的换行（兼容 #13#10、#10、#13
+              // 三种换行），只保留注释行原有的前导空格作缩进。原先只删除首个 #13#10，
+              // 注释前有空行时同一换行会被输出两次而多出空行，且多次格式化空行会越来
+              // 越多
+              DeleteLineBreaks(BlankStr);
               FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
             end
             else
@@ -1686,9 +1698,12 @@ begin
               // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
               // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
 
-              Idx := Pos(#13#10, BlankStr);
-              if Idx > 0 then
-                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              // 保留换行模式下 BlankStr 中的回车换行已由 OnLineBreak 事件在跳过空白时
+              // 逐一写出，此处必须删除 BlankStr 中全部的换行（兼容 #13#10、#10、#13
+              // 三种换行），只保留注释行原有的前导空格作缩进。原先只删除首个 #13#10，
+              // 注释前有空行时同一换行会被输出两次而多出空行，且多次格式化空行会越来
+              // 越多
+              DeleteLineBreaks(BlankStr);
               FCodeGen.WriteBlank(BlankStr);  // 省略前面的空格与回车
             end
             else
@@ -1778,9 +1793,12 @@ begin
               // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
               // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
 
-              Idx := Pos(#13#10, BlankStr);
-              if Idx > 0 then
-                Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+              // 保留换行模式下 BlankStr 中的回车换行已由 OnLineBreak 事件在跳过空白时
+              // 逐一写出，此处必须删除 BlankStr 中全部的换行（兼容 #13#10、#10、#13
+              // 三种换行），只保留注释行原有的前导空格作缩进。原先只删除首个 #13#10，
+              // 注释前有空行时同一换行会被输出两次而多出空行，且多次格式化空行会越来
+              // 越多
+              DeleteLineBreaks(BlankStr);
               FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
             end
             else
@@ -1826,9 +1844,12 @@ begin
                   // 另外，如果当前是语句内保留换行模式，且在开区间的语句内部，尤其是双目运算符后回车，
                   // 那么这个回车对应换行后，本次会写入换行与注释，导致多一行，也得删掉
 
-                  Idx := Pos(#13#10, BlankStr);
-                  if Idx > 0 then
-                    Delete(BlankStr, 1, Idx + 1); // -1 + #13#10 的长度 2
+                  // 保留换行模式下 BlankStr 中的回车换行已由 OnLineBreak 事件在跳过空白时
+                  // 逐一写出，此处必须删除 BlankStr 中全部的换行（兼容 #13#10、#10、#13
+                  // 三种换行），只保留注释行原有的前导空格作缩进。原先只删除首个 #13#10，
+                  // 注释前有空行时同一换行会被输出两次而多出空行，且多次格式化空行会越来
+                  // 越多
+                  DeleteLineBreaks(BlankStr);
                   FCodeGen.WriteBlank(BlankStr); // 省略前面的空格与回车
                 end
                 else

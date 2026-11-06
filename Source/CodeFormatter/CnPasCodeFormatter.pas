@@ -5193,6 +5193,7 @@ procedure TCnBasePascalFormatter.FormatFunctionDecl(PreSpaceCount: Byte;
 var
   IsExternal: Boolean;
   IsForward: Boolean;
+  SemiAfterDirective: Boolean;
   OldIdentBackupListRef: TObjectList;
   IdentBackupList: TObjectList;
 begin
@@ -5208,6 +5209,7 @@ begin
 
     IsExternal := False;
     IsForward := False;
+    SemiAfterDirective := True;
     while Scanner.Token in DirectiveTokens + ComplexTokens do
     begin
       if Scanner.Token = tokDirectiveExternal then
@@ -5222,8 +5224,20 @@ begin
        procedure Bar; external 'bar.dll' name '__bar'
       }
       if Scanner.Token = tokSemicolon then
+      begin
+        SemiAfterDirective := True;
         Match(tokSemicolon, 0, 0, True);
+      end
+      else
+        SemiAfterDirective := False;
     end;
+
+    // 指令后缺少分号时（见上 FIX A BUG 注释），保留换行选项会把声明行尾的换行与空
+    // 行写出，若不删掉，输出中的空行在下一次格式化时又成为源码换行而被再度写出，同
+    // 一位置多次格式化空行会越来越多。参照 FormatExportedHeading 在此补上一个硬动
+    // 作，删除最新的所有空行
+    if not SemiAfterDirective and CnPascalCodeForRule.KeepUserLineBreak then
+      CodeGen.BackSpaceEmptyLines;
 
     if (not IsExternal) and (not IsForward) then
     begin
@@ -5278,6 +5292,7 @@ procedure TCnBasePascalFormatter.FormatProcedureDecl(PreSpaceCount: Byte;
 var
   IsExternal: Boolean;
   IsForward: Boolean;
+  SemiAfterDirective: Boolean;
   OldIdentBackupListRef: TObjectList;
   IdentBackupList: TObjectList;
 begin
@@ -5293,6 +5308,7 @@ begin
 
     IsExternal := False;
     IsForward := False;
+    SemiAfterDirective := True;
     while Scanner.Token in DirectiveTokens + ComplexTokens do  // Use ComplexTokens for "local;"
     begin
       if Scanner.Token = tokDirectiveExternal then
@@ -5308,8 +5324,20 @@ begin
          procedure Bar; external 'bar.dll' name '__bar'
       }
       if Scanner.Token = tokSemicolon then
+      begin
+        SemiAfterDirective := True;
         Match(tokSemicolon, 0, 0, True);
+      end
+      else
+        SemiAfterDirective := False;
     end;
+
+    // 指令后缺少分号时（见上 FIX A BUG 注释），保留换行选项会把声明行尾的换行与空
+    // 行写出，若不删掉，输出中的空行在下一次格式化时又成为源码换行而被再度写出，同
+    // 一位置多次格式化空行会越来越多。参照 FormatExportedHeading 在此补上一个硬动
+    // 作，删除最新的所有空行
+    if not SemiAfterDirective and CnPascalCodeForRule.KeepUserLineBreak then
+      CodeGen.BackSpaceEmptyLines;
 
     if (not IsExternal) and (not IsForward) then
     begin
