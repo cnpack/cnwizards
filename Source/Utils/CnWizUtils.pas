@@ -1239,7 +1239,8 @@ function CnOtaLinePosToEditPos(LinePos: Integer; EditView: TCnEditViewSourceInte
 
 procedure CnOtaGotoEditPosAndRepaint(EditView:
   {$IFDEF DELPHI_OTA} TCnEditViewSourceInterface {$ENDIF}
-  {$IFDEF LAZARUS} TControl {$ENDIF};
+  {$IFDEF LAZARUS} TControl {$ENDIF}
+  {$IFDEF STAND_ALONE} Pointer {$ENDIF};
   EditPosLine: Integer; EditPosCol: Integer = 0);
 {* 光标跳至指定的行与列并重画，行列均是 1 开始，Delphi 下传 IOTAEditView，
   Lazarus 下传编辑器控件。EditPosCol 为 0 时也表示行首。}
@@ -5488,6 +5489,7 @@ end;
 }
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; ActualPosWhenEmpty: Boolean): Boolean;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF DELPHI_OTA}
   EditControl: TControl;
@@ -5495,6 +5497,7 @@ var
 {$ENDIF}
 {$IFDEF LAZARUS}
   P: TPoint;
+{$ENDIF}
 {$ENDIF}
 begin
   Result := False;
@@ -10189,7 +10192,10 @@ end;
 
 procedure CnOtaGotoEditPosAndRepaint(EditView:
   {$IFDEF DELPHI_OTA} TCnEditViewSourceInterface {$ENDIF}
-  {$IFDEF LAZARUS} TControl {$ENDIF}; EditPosLine: Integer; EditPosCol: Integer);
+  {$IFDEF LAZARUS} TControl {$ENDIF}
+  {$IFDEF STAND_ALONE} Pointer {$ENDIF};
+  EditPosLine: Integer; EditPosCol: Integer);
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF DELPHI_OTA}
   EditControl: TControl;
@@ -10197,6 +10203,7 @@ var
 {$ENDIF}
 {$IFDEF LAZARUS}
   SynEd: TSynEdit;
+{$ENDIF}
 {$ENDIF}
 begin
   if EditView <> nil then
@@ -10247,6 +10254,7 @@ const
   // Leave typed constant as is - needed for streaming code.
   TerminatingNulChar: Char = #0;
   BufferSize = 1024 * 24;
+{$IFNDEF STAND_ALONE}
 var
 {$IFDEF DELPHI_OTA}
   Buffer: PAnsiChar;
@@ -10262,6 +10270,7 @@ var
 {$ENDIF}
 {$IFDEF LAZARUS}
   Utf8Text: string;
+{$ENDIF}
 {$ENDIF}
 begin
   Assert(EditReader <> nil);
