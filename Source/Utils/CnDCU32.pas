@@ -200,8 +200,6 @@ uses
   CnWizEditFiler
   {$IFDEF LAZARUS}
   , StrUtils
-  {$ELSE}
-  {$IFDEF UNICODE}, CnWidePasParser {$ENDIF}
   {$ENDIF};
 {$ENDIF}
 
