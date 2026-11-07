@@ -1,6 +1,6 @@
 inherited CnInputHelperForm: TCnInputHelperForm
-  Left = 331
-  Top = 101
+  Left = 398
+  Top = 111
   BorderStyle = bsDialog
   Caption = 'Input Helper Settings'
   ClientHeight = 540
@@ -228,7 +228,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Top = 240
         Width = 583
         Height = 216
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'O&utput Settings'
         TabOrder = 1
         object lbl9: TLabel
@@ -493,7 +493,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Top = 214
         Width = 583
         Height = 242
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Conten&t Settings'
         TabOrder = 1
         object lbl11: TLabel
@@ -538,7 +538,7 @@ inherited CnInputHelperForm: TCnInputHelperForm
         Top = 8
         Width = 583
         Height = 448
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Anchors = [akLeft, akTop, akRight]
         Caption = 'Cus&tomize Symbols'
         TabOrder = 0
         object lbl12: TLabel

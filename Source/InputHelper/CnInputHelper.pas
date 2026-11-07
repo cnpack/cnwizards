@@ -1466,8 +1466,31 @@ begin
   end;
 
   Msg := KeyMsgFromParams(WM_KEYDOWN, Key, ScanCode, Shift);
-  if HandleKeyDown(Msg) then
-    Handled := True;
+  try
+    if HandleKeyDown(Msg) then
+    begin
+      Handled := True;
+      // 统一吞掉紧随的 WM_CHAR：SynEdit 的 KeyDown 未执行、sfIgnoreNextChar
+      // 未置位，若不拦截，回车等字符会经 SynEdit 的 ecChar 路径再次生效（如换行）。
+      // 不产生字符消息的键（方向键等）留下的标记会在下一个 WM_KEYDOWN 到达时清零
+      if Key <> VK_PROCESSKEY then
+        EditControlWrapper.SwallowNextCharMessage;
+    end;
+  except
+    // 列表弹出期间按键处理异常也吞键并标记吞字符，避免漏给编辑器产生换行
+    on E: Exception do
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsgError('InputHelper EditorKeyDown Exception: ' + E.ClassName + ' ' + E.Message);
+{$ENDIF}
+      if IsShowing then
+      begin
+        Handled := True;
+        if Key <> VK_PROCESSKEY then
+          EditControlWrapper.SwallowNextCharMessage;
+      end;
+    end;
+  end;
 end;
 
 procedure TCnInputHelper.EditorKeyUp(Key, ScanCode: Word;
@@ -1484,8 +1507,19 @@ begin
   end;
 
   Msg := KeyMsgFromParams(WM_KEYUP, Key, ScanCode, Shift);
-  if HandleKeyUp(Msg) then
-    Handled := True;
+  try
+    if HandleKeyUp(Msg) then
+      Handled := True;
+  except
+    on E: Exception do
+    begin
+{$IFDEF DEBUG}
+      CnDebugger.LogMsgError('InputHelper EditorKeyUp Exception: ' + E.Message);
+{$ENDIF}
+      if IsShowing then
+        Handled := True;
+    end;
+  end;
 end;
 
 {$ENDIF}
@@ -1710,6 +1744,9 @@ begin
     case Key of
       VK_RETURN:
         begin
+{$IFDEF DEBUG}
+          CnDebugger.LogMsg('InputHelper VK_RETURN Got. ItemIndex ' + IntToStr(List.ItemIndex));
+{$ENDIF}
           SendSymbolToIDE(False, True, False, #0, Result);
           Result := True;
         end;
@@ -3054,6 +3091,9 @@ var
   end;
 
 begin
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InputHelper SendSymbolToIDE Enter. MatchFirst ' + BoolToStr(MatchFirstOnly, True));
+{$ENDIF}
   HideList;
   if List.ItemIndex >= 0 then
   begin
@@ -3211,6 +3251,9 @@ begin
       if FAutoAdjustScope and (Item.HashCode <> 0) then
         HitCountMgr.IncHitCount(Item.HashCode);
     end;
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('InputHelper SendSymbolToIDE Done.');
+{$ENDIF}
   end;
   ClearList;
 end;

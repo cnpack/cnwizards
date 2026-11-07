@@ -72,7 +72,8 @@ uses
   ComCtrls, TypInfo, Forms, {$IFDEF DELPHI} Tabs, {$ENDIF} Registry, Contnrs,
   {$IFDEF COMPILER6_UP} Variants, {$ENDIF}
   {$IFDEF SUPPORT_ENHANCED_RTTI} Rtti, {$ENDIF} CnWizUtils, CnWizIdeUtils, CnControlHook,
-  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} SrcEditorIntf, SynEdit, SynEditHighlighter, CnIDEStrings, {$ELSE} ToolsAPI, {$ENDIF}
+  {$IFNDEF STAND_ALONE} {$IFDEF LAZARUS} LCLType, SrcEditorIntf, SynEdit,
+  SynEditHighlighter, CnIDEStrings, {$ELSE} ToolsAPI, {$ENDIF}
   CnWizMethodHook, {$IFDEF OTA_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF} CnIDEMirrorIntf, {$ENDIF}
   CnCommon, CnWizCompilerConst, CnWizNotifier, CnWizOptions;
   
@@ -276,6 +277,11 @@ type
     FKeyUpNotifiers: TList;
     FSysKeyDownNotifiers: TList;
     FSysKeyUpNotifiers: TList;
+{$IFDEF LAZARUS}
+    FSwallowCharCount: Integer; // 待吞掉的编辑器 WM_CHAR 条数，见 SwallowNextCharMessage
+    FKeySwallowedByCN: Boolean; // CN_KEYDOWN 阶段通知器已吞键，对应的 LM_ 二次分发需拦截
+    FKeyUpSwallowedByCN: Boolean; // CN_KEYUP 阶段通知器已吞键
+{$ENDIF}
     FCharSize: TSize;
     FHighlights: TStringList;
     FPaintNotifyAvailable: Boolean;
@@ -359,6 +365,9 @@ type
     procedure OnBeforeEditControlMessage(Sender: TObject; Control: TControl;
       var Msg: TMessage; var Handled: Boolean);
   {$IFNDEF STAND_ALONE}
+    procedure Utf8KeyBeforeHandler(Sender: TObject; var UTF8Key: TUTF8Char);
+    {* SynEdit 的 BeforeUtf8KeyPress 处理器：FSwallowCharCount 大于 0 时吞掉
+       该字符（置 UTF8Key 为空），拦截回车等经 ecChar 路径的重复处理 }
     function LazCheckEditorFontChange: Boolean;
     {* Lazarus: 惰性检测当前编辑器字体与高亮属性的变化并重新载入到
        FEditorBaseFont/FFontArray/FHighlights/前景背景色，有变化返回 True，
@@ -541,6 +550,24 @@ type
     {* 增加编辑器按键按下通知}
     procedure RemoveKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
     {* 删除编辑器按键按下通知}
+
+{$IFDEF LAZARUS}
+{$IFNDEF STAND_ALONE}
+    procedure HookEditorUtf8KeyPress(AEditor: TControl);
+    {* 为编辑器 SynEdit 注册 BeforeUtf8KeyPress 处理器，见 Utf8KeyBeforeHandler}
+    procedure UnHookEditorUtf8KeyPress(AEditor: TControl);
+    {* 反注册 Utf8KeyBeforeHandler}
+{$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+    procedure SwallowNextCharMessage;
+    {* 吞掉编辑器紧随的一条 WM_CHAR。LCL 下在 WindowProc 层吞掉 WM_KEYDOWN 后，
+       SynEdit 的 KeyDown 不会执行、sfIgnoreNextChar 标志也不会置位，系统
+       TranslateMessage 生成的 WM_CHAR 会经 HandleUnicodeChar 直达 SynEdit 的
+       UTF8KeyPress（该路径不经过控件 WindowProc，无法在消息层拦截），
+       故吞键方需调用本方法计数，由 Utf8KeyBeforeHandler 执行实际吞除}
+{$ENDIF}
 
     procedure AddSysKeyDownNotifier(Notifier: TCnKeyMessageNotifier);
     {* 增加编辑器系统按键按下通知，注意 Shift 里不会再有 ssAlt，而对应 VK_MENU}
@@ -799,12 +826,18 @@ begin
   FHook := TCnControlHook.Create(nil);
   FHook.BeforeMessage := EditControlWrapper.OnBeforeEditControlMessage;
   FHook.Hook(FEditControl);
+  {$IFNDEF STAND_ALONE}
+  EditControlWrapper.HookEditorUtf8KeyPress(FEditControl);
+  {$ENDIF}
 {$ENDIF}
 end;
 
 destructor TCnEditorObject.Destroy;
 begin
 {$IFDEF LAZARUS}
+  {$IFNDEF STAND_ALONE}
+  EditControlWrapper.UnHookEditorUtf8KeyPress(FEditControl);
+  {$ENDIF}
   FHook.Free;
 {$ENDIF}
   SetEditView(nil);
@@ -3600,6 +3633,45 @@ begin
   CnWizAddNotifier(FKeyDownNotifiers, TMethod(Notifier));
 end;
 
+{$IFDEF LAZARUS}
+{$IFNDEF STAND_ALONE}
+
+procedure TCnEditControlWrapper.Utf8KeyBeforeHandler(Sender: TObject;
+  var UTF8Key: TUTF8Char);
+begin
+  // CN_KEYDOWN 阶段通知器吞掉了会产生字符的按键，此处同步吞掉系统
+  // TranslateMessage 生成、经 HandleUnicodeChar 直达 SynEdit 的 UTF8KeyPress
+  // 的对应字符，防止其经 CommandProcessor(ecChar) 重复处理（如回车换行）
+  if FSwallowCharCount > 0 then
+  begin
+    Dec(FSwallowCharCount);
+    UTF8Key := '';
+  end;
+end;
+
+procedure TCnEditControlWrapper.HookEditorUtf8KeyPress(AEditor: TControl);
+begin
+  if (AEditor is TSynEdit) and (not (csDestroying in AEditor.ComponentState)) then
+    TSynEdit(AEditor).RegisterBeforeUtf8KeyPressHandler(Utf8KeyBeforeHandler);
+end;
+
+procedure TCnEditControlWrapper.UnHookEditorUtf8KeyPress(AEditor: TControl);
+begin
+  if AEditor is TSynEdit then
+    TSynEdit(AEditor).UnregisterBeforeUtf8KeyPressHandler(Utf8KeyBeforeHandler);
+end;
+
+{$ENDIF}
+
+procedure TCnEditControlWrapper.SwallowNextCharMessage;
+begin
+  // 计数封顶，防止调用方异常累积误吞后续正常输入
+  if FSwallowCharCount < 8 then
+    Inc(FSwallowCharCount);
+end;
+
+{$ENDIF}
+
 procedure TCnEditControlWrapper.AddSysKeyDownNotifier(
   Notifier: TCnKeyMessageNotifier);
 begin
@@ -3804,44 +3876,107 @@ var
   Shift: TShiftState;
   List: TList;
 begin
-  if ((Msg.msg = WM_KEYDOWN) or (Msg.msg = WM_KEYUP) or
-    (Msg.msg = WM_SYSKEYDOWN) or (Msg.msg = WM_SYSKEYUP)) and
-    IsEditControl(Control) then
-  begin
-    Key := Msg.wParam;
-    ScanCode := (Msg.lParam and $00FF0000) shr 16;
-    Shift := KeyDataToShiftState(Msg.lParam);
-
-    // 处理输入法送回的按键
-    if Key = VK_PROCESSKEY then
+  // LCL win32 层对键盘消息做两次分发：先把原生 WM_KEYDOWN/WM_KEYUP 转换成
+  // CN_KEYDOWN/CN_KEYUP（等 CN_ 形态，WParam 为 VK、LParam 为原始键盘数据）
+  // 发给控件 WindowProc，未被吃掉的键再以 LM_ 原生值（与 WM_ 同值）二次分发，
+  // 由 TWinControl.WMKeyDown 等触发 KeyDown 虚方法（SynEdit 的命令处理在此）。
+  // 因此键盘通知器统一只挂在 CN_ 形态上（此时命令处理尚未发生，可完整吞键）；
+  // CN 阶段吞掉的键以 LM_ 形态再次到达时直接拦截，阻止 SynEdit 命令处理
+  //（换行/移动光标）；未吞掉的键 LM_ 形态放行且不再重复分发，避免通知器双调用
+  case Msg.msg of
+    CN_KEYDOWN, CN_SYSKEYDOWN:
     begin
-      Key := MapVirtualKey(ScanCode, 1);
+      FSwallowCharCount := 0;     // 新按键到来，作废残留的吞字符标记
+      FKeySwallowedByCN := False;
+      if IsEditControl(Control) then
+      begin
+        Key := Msg.wParam;
+        ScanCode := (Msg.lParam and $00FF0000) shr 16;
+        Shift := KeyDataToShiftState(Msg.lParam);
+
+        // 处理输入法送回的按键
+        if Key = VK_PROCESSKEY then
+        begin
+          Key := MapVirtualKey(ScanCode, 1);
+        end;
+
+        if Msg.msg = CN_KEYDOWN then
+          List := FKeyDownNotifiers
+        else
+          List := FSysKeyDownNotifiers;
+
+        for I := 0 to List.Count - 1 do
+        begin
+          try
+            with PCnWizNotifierRecord(List[I])^ do
+              TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
+            if Handled then
+            begin
+              FKeySwallowedByCN := True;
+              Break;
+            end;
+          except
+            on E: Exception do
+              DoHandleException('TCnEditControlWrapper.BeforeKeyMessage[' + IntToStr(I) + ']', E);
+          end;
+        end;
+      end;
     end;
-
-    List := nil;
-    case Msg.msg of
-      WM_KEYDOWN:
-        List := FKeyDownNotifiers;
-      WM_KEYUP:
-        List := FKeyUpNotifiers;
-      WM_SYSKEYDOWN:
-        List := FSysKeyDownNotifiers;
-      WM_SYSKEYUP:
-        List := FSysKeyUpNotifiers;
-    end;
-
-    if List = nil then
-      Exit;
-
-    for I := 0 to List.Count - 1 do
+    CN_KEYUP, CN_SYSKEYUP:
     begin
-      try
-        with PCnWizNotifierRecord(List[I])^ do
-          TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
-        if Handled then Break;
-      except
-        on E: Exception do
-          DoHandleException('TCnEditControlWrapper.BeforeKeyMessage[' + IntToStr(I) + ']', E);
+      FKeyUpSwallowedByCN := False;
+      if IsEditControl(Control) then
+      begin
+        Key := Msg.wParam;
+        ScanCode := (Msg.lParam and $00FF0000) shr 16;
+        Shift := KeyDataToShiftState(Msg.lParam);
+
+        if Key = VK_PROCESSKEY then
+        begin
+          Key := MapVirtualKey(ScanCode, 1);
+        end;
+
+        if Msg.msg = CN_KEYUP then
+          List := FKeyUpNotifiers
+        else
+          List := FSysKeyUpNotifiers;
+
+        for I := 0 to List.Count - 1 do
+        begin
+          try
+            with PCnWizNotifierRecord(List[I])^ do
+              TCnKeyMessageNotifier(Notifier)(Key, ScanCode, Shift, Handled);
+            if Handled then
+            begin
+              FKeyUpSwallowedByCN := True;
+              Break;
+            end;
+          except
+            on E: Exception do
+              DoHandleException('TCnEditControlWrapper.BeforeKeyMessage[' + IntToStr(I) + ']', E);
+          end;
+        end;
+      end;
+    end;
+    WM_KEYDOWN, WM_SYSKEYDOWN, WM_KEYUP, WM_SYSKEYUP:
+    begin
+      // LM_ 原生值的二次分发：CN 阶段已吞键则拦截（不调原 WindowProc，
+      // SynEdit 的 KeyDown 不会执行）；未吞键则放行走 LCL 正常流程
+      if IsEditControl(Control) and
+        ((((Msg.msg = WM_KEYDOWN) or (Msg.msg = WM_SYSKEYDOWN)) and FKeySwallowedByCN) or
+         (((Msg.msg = WM_KEYUP) or (Msg.msg = WM_SYSKEYUP)) and FKeyUpSwallowedByCN)) then
+      begin
+        Handled := True;
+      end;
+    end;
+    WM_CHAR:
+    begin
+      if (FSwallowCharCount > 0) and IsEditControl(Control) then
+      begin
+        // 上层在 CN_KEYDOWN 阶段吞掉了会产生字符的按键，这里同步吞掉
+        // 系统 TranslateMessage 生成的对应 WM_CHAR
+        Dec(FSwallowCharCount);
+        Handled := True;
       end;
     end;
   end;
