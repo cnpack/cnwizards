@@ -5288,7 +5288,11 @@ begin
     Inc(WEnd);
 
   Token := Copy(WT, WStart, WEnd - WStart + 1);
-  CurrIndex := WPos - WStart;
+  // CurrIndex 为光标前 token 内的字符数（1 基计数，Delphi 版同语义，
+  // 供 BackspaceDelete/FMatchStr 等按字符数消费）：WPos 是光标左侧字符的
+  // 1 基索引（亦即 0 基偏移），WStart 是 token 首字符的 1 基索引，
+  // 故需要加 1 才是光标前的字符数，少 1 会导致删除区间/匹配串整体错位
+  CurrIndex := WPos - WStart + 1;
   Result := Token <> '';
 {$ENDIF}
 end;
@@ -5328,6 +5332,36 @@ var
 {$IFDEF DELPHI_OTA}
   EditPos: IOTAEditPosition;
 {$ENDIF}
+{$IFDEF LAZARUS}
+  View: TCnEditViewSourceInterface;
+  Utf8Line: AnsiString;
+  P: PAnsiChar;
+  Y, X, Cnt, BW: Integer;
+  WPos: Integer;            // 光标左侧字符的 1 基索引（亦即 0 基 UTF16 偏移）
+  WStartPos, WEndPos: Integer; // Token 起止的行内 0 基 UTF16 偏移
+  ColStart, ColEnd, ColCursor: Integer; // 对应的 1 基 UTF8 逻辑列
+
+  function Utf16OffToUtf8Col(const AUtf8Line: AnsiString; WOff: Integer): Integer;
+  {* 行内 0 基 UTF16 偏移转 1 基 UTF8 逻辑列，超出行尾则停在行尾后一列}
+  var
+    PP: PAnsiChar;
+    W: Integer;
+  begin
+    Result := 1;
+    PP := PAnsiChar(AUtf8Line);
+    W := 0;
+    while (PP^ <> #0) and (W < WOff) do
+    begin
+      BW := GetByteWidthFromUtf8(PP);
+      if BW = 4 then
+        Inc(W, 2) // UTF8-MB4 对应 UTF16 代理对，占两个 WideChar
+      else
+        Inc(W);
+      Inc(PP, BW);
+      Inc(Result);
+    end;
+  end;
+{$ENDIF}
 begin
   Result := False;
   if CnOtaGeneralGetCurrPosToken(Token, CurrIndex, True, FirstSet, CharSet
@@ -5365,7 +5399,46 @@ begin
 {$ENDIF}
 
 {$IFDEF LAZARUS}
-    // TODO: Lazarus 下删除
+    View := CnOtaGetTopMostEditView;
+    if View = nil then
+      Exit;
+    Y := View.CursorTextXY.Y;
+    X := View.CursorTextXY.X; // 1 基 UTF8 逻辑列
+    if (Y < 1) or (Y > View.Lines.Count) or (X < 1) then
+      Exit;
+
+    // 与 CnOtaGeneralGetCurrPosToken 同法，把光标列换算成行内 0 基 UTF16 偏移
+    Utf8Line := View.Lines[Y - 1];
+    WPos := 0;
+    Cnt := 0;
+    P := PAnsiChar(Utf8Line);
+    while (P^ <> #0) and (Cnt < X) do
+    begin
+      BW := GetByteWidthFromUtf8(P);
+      if BW = 4 then
+        Inc(WPos, 2)
+      else
+        Inc(WPos);
+      Inc(P, BW);
+      Inc(Cnt);
+    end;
+
+    // CurrIndex 为光标前 token 内字符数，token 起点 0 基偏移 = WPos - CurrIndex
+    WStartPos := WPos - CurrIndex;
+    WEndPos := WStartPos + Length(Token); // token 尾字符后一位置
+    if WStartPos < 0 then
+      Exit;
+    ColCursor := Utf16OffToUtf8Col(Utf8Line, WPos);
+    ColStart := Utf16OffToUtf8Col(Utf8Line, WStartPos);
+    ColEnd := Utf16OffToUtf8Col(Utf8Line, WEndPos);
+
+    // Token 必在单行内，按行列区间替换删除
+    if DelLeft and DelRight then
+      View.ReplaceText(Point(ColStart, Y), Point(ColEnd, Y), '')
+    else if DelLeft and (CurrIndex > 0) then
+      View.ReplaceText(Point(ColStart, Y), Point(ColCursor, Y), '')
+    else if DelRight and (CurrIndex < Length(Token) - 1) then
+      View.ReplaceText(Point(ColCursor, Y), Point(ColEnd, Y), '');
 {$ENDIF}
     Result := True;
   end;
@@ -11441,7 +11514,7 @@ var
   EditPos, SavePos: TOTAEditPos;
 {$ENDIF}
 {$IFDEF LAZARUS}
-  SynEd: TSynEdit;
+  {$IFNDEF CNWIZARDS_MINIMUM} SynEd: TSynEdit;{$ENDIF}
 {$ENDIF}
   BookMarkObj: TCnBookmarkObject;
 begin
@@ -11476,6 +11549,7 @@ begin
   end;
 {$ENDIF}
 {$IFDEF LAZARUS}
+{$IFNDEF CNWIZARDS_MINIMUM}
   if EditView.EditorControl is TSynEdit then
   begin
     SynEd := TSynEdit(EditView.EditorControl);
@@ -11488,6 +11562,7 @@ begin
       SynEd.SetBookMark(BookMarkObj.ID, BookMarkObj.Col, BookMarkObj.Line);
     end;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
