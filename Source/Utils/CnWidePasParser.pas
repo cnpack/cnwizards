@@ -1543,10 +1543,39 @@ var
   ProcStack: TStack;
   ProcIndent: Integer;
   SavePos: TCodePosKind;
+  CovTokenEnd: Integer;     // uses 内层扫描中当前覆盖态（注释/字符串）token 的结束位置
+  CursorLinear: Integer;    // 光标的 0 基线性位置，供覆盖态 token 的越界判断
   Lex: TCnPasWideLex;
   ExpandCol: Integer;
   MyTokenID: TTokenKind;
   Bookmark: TCnPasWideBookmark;
+
+  function CalcCursorLinear: Integer;
+  {* 光标 Line/Col（1 基）换算成 0 基线性位置，不展开 Tab，
+     与 LexStillBeforeCursor 的原始列比较语义保持一致}
+  var
+    I, L: Integer;
+  begin
+    Result := 0;
+    L := 1;
+    I := 1;
+    while (I <= Length(Source)) and (L < Line) do
+    begin
+      if Source[I] = #13 then
+      begin
+        if (I < Length(Source)) and (Source[I + 1] = #10) then
+          Inc(I);
+        Inc(L);
+      end
+      else if Source[I] = #10 then
+        Inc(L);
+      Inc(I);
+    end;
+    if L = Line then
+      Result := I - 1 + Col
+    else
+      Result := Length(Source); // 行数不足（光标在文件尾之后）
+  end;
 
   function LexStillBeforeCursor: Boolean;
   begin
@@ -1648,6 +1677,7 @@ begin
     IsAfterProcBegin := False;
     ProcIndent := 0;
     ExpandCol := Lex.ColumnNumber;
+    CursorLinear := CalcCursorLinear;
 
     // 编辑器光标所在的 Line/Col 参数从 1 开始，
     // 可和 Lex 解析出的 1 开始的 LineNumber/ColumnNumber 比较
@@ -1723,26 +1753,43 @@ begin
             end;
             if PosInfo.AreaKind in [akIntfUses, akImplUses] then
             begin
+              CovTokenEnd := -1;
               while LexStillBeforeCursor and not (Lex.TokenID in [tkNull, tkSemiColon]) do
               begin
                 if IsProgram and (Lex.TokenID = tkString) then
                 begin
                   if PosInfo.PosKind <> pkString then
                   begin
-                    SavePos := PosInfo.PosKind;
+                    if PosInfo.PosKind <> pkComment then
+                      SavePos := PosInfo.PosKind; // 注释态的底色不被字符串覆盖
                     PosInfo.PosKind := pkString;
                   end;
+                  CovTokenEnd := Lex.TokenPos + Lex.TokenLength;
                 end
                 else if Lex.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment] then
                 begin // uses 里碰到注释跳出时如不加这段，会认为不在注释里
                   if PosInfo.PosKind <> pkComment then
                   begin
-                    SavePos := PosInfo.PosKind;
+                    if PosInfo.PosKind <> pkString then
+                      SavePos := PosInfo.PosKind; // 字符串态的底色不被注释覆盖
                     PosInfo.PosKind := pkComment;
                   end;
+                  CovTokenEnd := Lex.TokenPos + Lex.TokenLength;
+                end
+                else if PosInfo.PosKind in [pkComment, pkString] then
+                begin
+                  // 注释/字符串之后的普通 token 要恢复底色（如 uses {} System 的 System），
+                  // 否则覆盖态一直滞留，光标处会被误报成 pkComment 导致列表弹不出
+                  PosInfo.PosKind := SavePos;
+                  CovTokenEnd := -1;
                 end;
                 DoNext;
               end;
+              // 与主循环 case else 的恢复语义对齐：若光标已越过覆盖态 token 的
+              // 结束位置，同样恢复底色；光标还在覆盖 token 内则保持覆盖态
+              if PosInfo.PosKind in [pkComment, pkString] then
+                if CursorLinear > CovTokenEnd then
+                  PosInfo.PosKind := SavePos;
               if LexStillBeforeCursor and (Lex.TokenID = tkSemiColon) then
               begin
                 if PosInfo.AreaKind = akIntfUses then

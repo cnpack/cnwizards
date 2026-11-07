@@ -1604,6 +1604,7 @@ var
   ProcStack: TStack;
   ProcIndent: Integer;
   SavePos: TCodePosKind;
+  CovTokenEnd: Integer;     // uses 内层扫描中当前覆盖态（注释/字符串）token 的结束位置
   Lex: TmwPasLex;
   Text: AnsiString;
   MyTokenID: TTokenKind;
@@ -1763,26 +1764,43 @@ begin
             end;
             if PosInfo.AreaKind in [akIntfUses, akImplUses] then
             begin
+              CovTokenEnd := -1;
               while (Lex.TokenPos < CurrPos) and not (Lex.TokenID in [tkNull, tkSemiColon]) do
               begin
                 if IsProgram and (Lex.TokenID = tkString) then
                 begin
                   if PosInfo.PosKind <> pkString then
                   begin
-                    SavePos := PosInfo.PosKind;
+                    if PosInfo.PosKind <> pkComment then
+                      SavePos := PosInfo.PosKind; // 注释态的底色不被字符串覆盖
                     PosInfo.PosKind := pkString;
                   end;
+                  CovTokenEnd := Lex.TokenPos + Length(Lex.Token);
                 end
                 else if Lex.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment] then
                 begin // uses 里碰到注释跳出时如不加这段，会认为不在注释里
                   if PosInfo.PosKind <> pkComment then
                   begin
-                    SavePos := PosInfo.PosKind;
+                    if PosInfo.PosKind <> pkString then
+                      SavePos := PosInfo.PosKind; // 字符串态的底色不被注释覆盖
                     PosInfo.PosKind := pkComment;
                   end;
+                  CovTokenEnd := Lex.TokenPos + Length(Lex.Token);
+                end
+                else if PosInfo.PosKind in [pkComment, pkString] then
+                begin
+                  // 注释/字符串之后的普通 token 要恢复底色（如 uses {} System 的 System），
+                  // 否则覆盖态一直滞留，光标处会被误报成 pkComment 导致列表弹不出
+                  PosInfo.PosKind := SavePos;
+                  CovTokenEnd := -1;
                 end;
                 DoNext;
               end;
+              // 与主循环 case else 的恢复语义对齐：若光标已越过覆盖态 token 的
+              // 结束位置，同样恢复底色；光标还在覆盖 token 内则保持覆盖态
+              if PosInfo.PosKind in [pkComment, pkString] then
+                if CurrPos > CovTokenEnd then
+                  PosInfo.PosKind := SavePos;
               if (Lex.TokenPos < CurrPos) and (Lex.TokenID = tkSemiColon) then
               begin
                 if PosInfo.AreaKind = akIntfUses then
