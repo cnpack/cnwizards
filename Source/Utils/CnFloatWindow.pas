@@ -315,7 +315,18 @@ end;
 
 procedure TCnFloatListBox.SetPos(X, Y: Integer);
 begin
+{$IFDEF FPC}
+  // LCL 下本控件在 CreateWnd 里被 Windows.SetParent(Handle, 0) 摘出到桌面层，
+  // 实测 LCL 布局系统不再为它下发移动（SetBounds 只改属性不动窗口），
+  // 而原生 SetWindowPos 移动后 Left/Top 属性也不回写（WMMove 因
+  // wcfBoundsRealized 未置位直接退出）。故先 SetBounds 同步 Left/Top
+  // （顺带让句柄首次创建就落在目标坐标），再用原生 API 做权威移动，
+  // 保证属性与真实窗口位置一致，按钮浮窗等按 Left/Top 定位不再失步
+  SetBounds(X, Y, Width, Height);
   SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+{$ELSE}
+  SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
+{$ENDIF}
 end;
 
 procedure TCnFloatListBox.SetUseEditorColor(const Value: Boolean);

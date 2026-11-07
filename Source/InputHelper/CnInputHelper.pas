@@ -50,10 +50,13 @@ interface
 
 {$IFDEF DELPHI_OTA}
   {$DEFINE SUPPORT_IDESYMBOLLIST}
+  {$IFDEF BDS}
+    {$DEFINE ADJUST_CODEPARAMWINDOW}
+  {$ENDIF}
 {$ENDIF}
 
-{$IFDEF BDS}
-  {$DEFINE ADJUST_CODEPARAMWINDOW}
+{$IFDEF LAZARUS}
+  {$DEFINE SUPPORT_IDESYMBOLLIST}
 {$ENDIF}
 
 uses
@@ -250,12 +253,14 @@ type
     FKeywordStyle: TCnKeywordStyle;
     FUseEditorColor: Boolean;
     FSymbolReloading: Boolean;
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
-    // 如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
+    // Delphi 下如果不支持 IDE 符号列表，需要挂掉 Cppcodcmplt::TCppKibitzManager::CCError
     FCCErrorHook: TCnMethodHook;
 {$ENDIF}
 {$IFDEF ADJUST_CODEPARAMWINDOW}
     FCodeWndProc: TWndMethod;
+{$ENDIF}
 {$ENDIF}
     function AcceptDisplay: Boolean;
     procedure ApplicationMessage(var Msg: TMsg; var Handled: Boolean);
@@ -838,6 +843,7 @@ begin
   else
     BtnForm.Visible := False;
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF SUPPORT_IDESYMBOLLIST}
   if KibitzCompileThreadRunning then
   begin
@@ -848,6 +854,7 @@ begin
   end
   else
     HintForm.Visible := False;
+{$ENDIF}
 {$ENDIF}
 
   FHintTimer.Enabled := HintForm.Visible;
@@ -1150,9 +1157,11 @@ end;
 { TCnInputHelper }
 
 constructor TCnInputHelper.Create;
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
 var
   DphIdeModule: HMODULE;
+{$ENDIF}
 {$ENDIF}
 begin
   inherited;
@@ -3574,6 +3583,8 @@ begin
   AutoMenuItem.Checked := Value;
   if not FAutoPopupLSP and IsShowing then
     HideAndClearList;
+
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
@@ -3582,6 +3593,7 @@ begin
     else
       FCCErrorHook.UnHookMethod;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -3594,6 +3606,8 @@ begin
   AutoMenuItem.Checked := Value;
   if not FAutoPopup and IsShowing then
     HideAndClearList;
+
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
@@ -3602,6 +3616,7 @@ begin
     else
       FCCErrorHook.UnHookMethod;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
@@ -3736,11 +3751,13 @@ begin
 
   with CreateIniFile(True) do
   try
+{$IFDEF DELPHI_OTA}
 {$IFDEF SUPPORT_IDESYMBOLLIST}
     if SupportMultiIDESymbolList then
       UseCodeInsightMgr := ReadBool('', csUseCodeInsightMgr, False);
     if SupportKibitzCompileThread then
       UseKibitzCompileThread := ReadBool('', csUseKibitzCompileThread, False);
+{$ENDIF}
 {$ENDIF}
   finally
     Free;
@@ -3809,11 +3826,13 @@ begin
 
   with CreateIniFile(True) do
   try
+{$IFDEF DELPHI_OTA}
 {$IFDEF SUPPORT_IDESYMBOLLIST}
     if SupportMultiIDESymbolList then
       WriteBool('', csUseCodeInsightMgr, UseCodeInsightMgr);
     if SupportKibitzCompileThread then
       WriteBool('', csUseKibitzCompileThread, UseKibitzCompileThread);
+{$ENDIF}
 {$ENDIF}
   finally
     Free;
@@ -3828,6 +3847,7 @@ end;
 procedure TCnInputHelper.SetActive(Value: Boolean);
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
 {$IFNDEF SUPPORT_IDESYMBOLLIST}
   if FCCErrorHook <> nil then
   begin
@@ -3836,6 +3856,7 @@ begin
     else
       FCCErrorHook.UnHookMethod;
   end;
+{$ENDIF}
 {$ENDIF}
 end;
 
