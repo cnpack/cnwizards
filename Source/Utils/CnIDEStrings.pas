@@ -142,6 +142,11 @@ function CnLazCharIndexToByteCol(const ALineUtf8: string; ACharIndex0: Integer):
    LogicalCaretXY 等 Logical 坐标均按 UTF8 字节口径工作，行内有多字节字符时与
    UTF8 字符列存在偏差，故写入 Markup 的列号必须用字节列而不是字符列}
 
+function CnLazByteColToCharCol(const ALineUtf8: string; AByteCol1: Integer): Integer;
+{* Lazarus 下把 1 基 UTF8 字节列（如 CursorTextXY.X）换算成解析器使用的 1 基字符列
+   （行内 UTF16 单元数加一，与 Token.CharIndex 的 UTF16 口径一致），
+   CnLazCharIndexToByteCol 的逆向换算}
+
 {$ENDIF}
 
 procedure RemovePasMatchedBraces(Tokens: TList; IsSmall, IsReverse: Boolean);
@@ -192,18 +197,43 @@ end;
 // Lazarus：解析器 CharIndex（行内 0 基 UTF16 偏移）转该字符所在的 1 基 UTF8 字节列
 function CnLazCharIndexToByteCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
 var
-  I, Cnt: Integer;
+  I, Cnt, BW: Integer;
 begin
-  // 顺序扫描 UTF8 字节，按非续字节统计码点，定位第 ACharIndex0 + 1 个码点的首字节
+  // 顺序按整字符扫描 UTF8，按 UTF16 单元数累计（四字节字符是代理对占两个单元），
+  // 定位行内 0 基 UTF16 偏移 ACharIndex0 处字符的首字节。必须整字符推进，
+  // 逐字节推进会在目标紧跟多字节字符时停在续字节上
   Cnt := 0;
   I := 1;
   while (I <= Length(ALineUtf8)) and (Cnt < ACharIndex0) do
   begin
-    if (Byte(ALineUtf8[I]) and $C0) <> $80 then
+    BW := GetByteWidthFromUtf8(@ALineUtf8[I]);
+    if BW = 4 then
+      Inc(Cnt, 2) // UTF8-MB4 对应 UTF16 代理对，占两个单元
+    else
       Inc(Cnt);
-    Inc(I);
+    Inc(I, BW);
   end;
   Result := I;
+end;
+
+// Lazarus：1 基 UTF8 字节列转解析器使用的 1 基字符列（行内 UTF16 单元数加一）
+function CnLazByteColToCharCol(const ALineUtf8: string; AByteCol1: Integer): Integer;
+var
+  I, Cnt, BW: Integer;
+begin
+  // 按整字符扫描光标左侧的字节，按 UTF16 单元数累计，与 CharIndex 的 UTF16 口径一致
+  Cnt := 0;
+  I := 1;
+  while (I <= Length(ALineUtf8)) and (I < AByteCol1) do
+  begin
+    BW := GetByteWidthFromUtf8(@ALineUtf8[I]);
+    if BW = 4 then
+      Inc(Cnt, 2) // UTF8-MB4 对应 UTF16 代理对，占两个单元
+    else
+      Inc(Cnt);
+    Inc(I, BW);
+  end;
+  Result := Cnt + 1;
 end;
 
 {$ENDIF}
