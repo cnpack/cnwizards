@@ -275,6 +275,85 @@ type
     Unsorted: TStringList;
   end;
 
+  { TCnMessageViewWrapper }
+
+  TCnMessageViewWrapper = class(TObject)
+  {* 封装了消息显示窗口的各个属性的类 }
+  private
+    FMessageViewForm: TCustomForm;
+    FTreeView: TXTreeView;
+{$IFDEF DELPHI_OTA}
+    FTabSet: TTabSet;
+{$ENDIF}
+    FEditMenuItem: TMenuItem;
+{$IFDEF DELPHI_OTA}
+{$IFDEF BDS}
+    procedure BDSNextMessageKey(Key: Word);
+    {* BDS 下模拟消息窗口方向键移动选中项，需临时屏蔽 KeyDataToShiftState}
+{$ELSE}
+    function GetMessageCount: Integer;
+    function GetSelectedIndex: Integer;
+    procedure SetSelectedIndex(const Value: Integer);
+    function GetCurrentMessage: string;
+{$ENDIF}
+{$ENDIF}
+    function GetTabCaption: string;
+    function GetTabCount: Integer;
+    function GetTabIndex: Integer;
+    procedure SetTabIndex(const Value: Integer);
+    function GetTabSetVisible: Boolean;
+  public
+    constructor Create;
+
+    procedure UpdateAllItems;
+
+    procedure EditMessageSource;
+    {* 双击信息窗口}
+{$IFDEF DELPHI_OTA}
+    procedure AddTitleMessage(const Msg: string);
+    {* 输出一个简单字符串信息}
+{$ENDIF}
+
+    function MessageWindowValid: Boolean;
+    {* 消息窗口是否可用：Delphi 下为消息窗体已找到，Lazarus 下为 IDEMessagesWindow 已创建}
+    procedure ShowMessageWindow;
+    {* 显示消息窗口}
+    procedure SelectNextMessage(Downwards: Boolean);
+    {* 选中下一条/上一条消息并保证可见：Lazarus 走 IDEMsgIntf 官方接口并回绕；
+       BDS 用钩子模拟方向键；D567 直接移动私有 TreeView 选中项并回绕}
+    procedure OpenSelectedMessage;
+    {* 跳转到当前选中的消息：Lazarus 走 OpenSelection，Delphi 走 EditMessageSource}
+
+    property MessageViewForm: TCustomForm read FMessageViewForm;
+    {* 信息窗口}
+    property TreeView: TXTreeView read FTreeView;
+    {* 信息树组件实例，BDS 下非 TreeView，因此只能返回 CustomControl}
+
+{$IFDEF DELPHI_OTA}
+{$IFNDEF BDS}
+    property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
+    {* 信息中选中的序号}
+    property MessageCount: Integer read GetMessageCount;
+    {* 现有的信息数}
+    property CurrentMessage: string read GetCurrentMessage;
+    {* 当前选中的信息，但似乎老是返回空}
+{$ENDIF}
+    property TabSet: TTabSet read FTabSet;
+    {* 返回分页组件的实例}
+{$ENDIF}
+
+    property TabSetVisible: Boolean read GetTabSetVisible;
+    {* 返回分页组件是否可见，D5 下默认不可见}
+    property TabIndex: Integer read GetTabIndex write SetTabIndex;
+    {* 返回/设置当前页序号}
+    property TabCount: Integer read GetTabCount;
+    {* 返回总页数}
+    property TabCaption: string read GetTabCaption;
+    {* 返回当前页的字符串}
+    property EditMenuItem: TMenuItem read FEditMenuItem;
+    {* '编辑'菜单项}
+  end;
+
 {$IFDEF DELPHI_OTA}
 
 //==============================================================================
@@ -678,63 +757,6 @@ type
     {* 控件板是否使能，支持高版本的新控件板 }
   end;
 
-{ TCnMessageViewWrapper }
-
-  TCnMessageViewWrapper = class(TObject)
-  {* 封装了消息显示窗口的各个属性的类 }
-  private
-    FMessageViewForm: TCustomForm;
-    FTreeView: TXTreeView;
-    FTabSet: TTabSet;
-    FEditMenuItem: TMenuItem;
-{$IFNDEF BDS}
-    function GetMessageCount: Integer;
-    function GetSelectedIndex: Integer;
-    procedure SetSelectedIndex(const Value: Integer);
-    function GetCurrentMessage: string;
-{$ENDIF}
-    function GetTabCaption: string;
-    function GetTabCount: Integer;
-    function GetTabIndex: Integer;
-    procedure SetTabIndex(const Value: Integer);
-    function GetTabSetVisible: Boolean;
-  public
-    constructor Create;
-
-    procedure UpdateAllItems;
-
-    procedure EditMessageSource;
-    {* 双击信息窗口}
-
-    procedure AddTitleMessage(const Msg: string);
-    {* 输出一个简单字符串信息}
-
-    property MessageViewForm: TCustomForm read FMessageViewForm;
-    {* 信息窗口}
-    property TreeView: TXTreeView read FTreeView;
-    {* 信息树组件实例，BDS 下非 TreeView，因此只能返回 CustomControl }
-{$IFNDEF BDS}
-    property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
-    {* 信息中选中的序号}
-    property MessageCount: Integer read GetMessageCount;
-    {* 现有的信息数}
-    property CurrentMessage: string read GetCurrentMessage;
-    {* 当前选中的信息，但似乎老是返回空}
-{$ENDIF}
-    property TabSet: TTabSet read FTabSet;
-    {* 返回分页组件的实例}
-    property TabSetVisible: Boolean read GetTabSetVisible;
-    {* 返回分页组件是否可见，D5 下默认不可见}
-    property TabIndex: Integer read GetTabIndex write SetTabIndex;
-    {* 返回/设置当前页序号}
-    property TabCount: Integer read GetTabCount;
-    {* 返回总页数}
-    property TabCaption: string read GetTabCaption;
-    {* 返回当前页的字符串}
-    property EditMenuItem: TMenuItem read FEditMenuItem;
-    {* '编辑'菜单项}
-  end;
-
   TCnThemeWrapper = class(TObject)
   {* 封装了主题信息的工具类}
   private
@@ -759,9 +781,6 @@ type
 function CnPaletteWrapper: TCnPaletteWrapper;
 {* 控件板封装处理}
 
-function CnMessageViewWrapper: TCnMessageViewWrapper;
-{* 消息栏封装处理}
-
 function CnThemeWrapper: TCnThemeWrapper;
 {* 主题封装处理}
 
@@ -772,6 +791,9 @@ procedure EnableWaitDialogShow;
 {* 以解除 Hook 方式启用 WaitDialog}
 
 {$ENDIF}
+
+function CnMessageViewWrapper: TCnMessageViewWrapper;
+{* 消息栏封装处理}
 
 function IdeGetScaledPixelsFromOrigin(APixels: Integer; AControl: TControl = nil): Integer;
 {* IDE 中根据 DPI 与缩放设置，计算原始像素数的真实所需像素数用于绘制
@@ -841,7 +863,9 @@ uses
 {$IFDEF DEBUG}
   CnDebug,
 {$ENDIF}
-  Registry, CnGraphUtils {$IFNDEF LAZARUS}, CnWizNotifier {$ENDIF};
+  Registry, CnGraphUtils {$IFNDEF LAZARUS}, CnWizNotifier {$ENDIF}
+  {$IFDEF LAZARUS}, IDEMsgIntf, IDEExternToolIntf {$ENDIF}
+  {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
 
 const
 {$IFDEF IDE_SUPPORT_HDPI}
@@ -3958,6 +3982,8 @@ begin
     FPalTab.Visible := Value;
 end;
 
+{$ENDIF}
+
 //==============================================================================
 // 消息输出窗口封装类
 //==============================================================================
@@ -3991,6 +4017,8 @@ begin
   end;
 end;
 
+{$IFDEF DELPHI_OTA}
+
 procedure TCnMessageViewWrapper.AddTitleMessage(const Msg: string);
 var
   Sv: IOTAMessageServices;
@@ -3999,6 +4027,126 @@ begin
     Sv.AddTitleMessage(Msg);
 end;
 
+{$IFDEF BDS}
+
+// BDS 的消息窗口非标准 TreeView 且 OTA 未暴露选中状态，通过模拟方向键移动
+// 选中项；需临时屏蔽 KeyDataToShiftState 合成出的 Shift 状态避免误多选
+function WrapperEmptyKeyDataToShiftState(KeyData: Longint): TShiftState;
+begin
+  Result := [];
+end;
+
+procedure TCnMessageViewWrapper.BDSNextMessageKey(Key: Word);
+var
+  Hook: TCnMethodHook;
+begin
+  Hook := TCnMethodHook.Create(GetBplMethodAddress(@KeyDataToShiftState), @WrapperEmptyKeyDataToShiftState);
+  try
+    TreeView.Perform(WM_KEYDOWN, Key, Integer($1500001));
+    TreeView.Perform(WM_KEYUP, Key, Integer($C1500001));
+  finally
+    Hook.Free;
+  end;
+end;
+
+{$ENDIF}
+
+{$ENDIF}
+
+function TCnMessageViewWrapper.MessageWindowValid: Boolean;
+begin
+{$IFDEF LAZARUS}
+  Result := IDEMessagesWindow <> nil;
+{$ELSE}
+  Result := MessageViewForm <> nil;
+{$ENDIF}
+end;
+
+procedure TCnMessageViewWrapper.ShowMessageWindow;
+begin
+{$IFDEF LAZARUS}
+  if (IDEMessagesWindow <> nil) and (not IDEMessagesWindow.Visible) then
+    IDEMessagesWindow.Show;
+{$ELSE}
+  if (MessageViewForm <> nil) and (not MessageViewForm.Visible) then
+    MessageViewForm.Show;
+{$ENDIF}
+end;
+
+procedure TCnMessageViewWrapper.SelectNextMessage(Downwards: Boolean);
+{$IFDEF LAZARUS}
+var
+  View: TExtToolView;
+  I, J: Integer;
+  Msg: TMessageLine;
+{$ENDIF}
+begin
+{$IFDEF LAZARUS}
+  if IDEMessagesWindow = nil then
+    Exit;
+  if IDEMessagesWindow.SelectNextUrgentMessage(mluNone, True, Downwards) then
+    Exit;
+
+  // 到达边界时回绕，对齐 Delphi 版行为：Next 重新跳到第一项，Prev 重新跳到末一项。
+  // Prev 的回绕经最后一个有内容的 View 从尾向前找第一条带源码位置的消息选中
+  if Downwards then
+    IDEMessagesWindow.SelectFirstUrgentMessage(mluNone, True)
+  else
+  begin
+    for I := IDEMessagesWindow.ViewCount - 1 downto 0 do
+    begin
+      View := IDEMessagesWindow.Views[I];
+      if (View <> nil) and (View.Lines.Count > 0) then
+      begin
+        for J := View.Lines.Count - 1 downto 0 do
+        begin
+          Msg := View.Lines[J];
+          if (Msg <> nil) and (Msg.Filename <> '') and (Msg.Line > 0) then
+          begin
+            IDEMessagesWindow.SelectMsgLine(Msg);
+            Exit;
+          end;
+        end;
+      end;
+    end;
+  end;
+{$ELSE}
+  {$IFDEF BDS}
+  if Downwards then
+    BDSNextMessageKey(VK_DOWN)
+  else
+    BDSNextMessageKey(VK_UP);
+  {$ELSE}
+  // D567：私有 TreeView 直接移动选中项，末条消息强制为空故按 -2 回绕
+  if Downwards then
+  begin
+    if SelectedIndex < MessageCount - 2 then
+      SelectedIndex := SelectedIndex + 1
+    else
+      SelectedIndex := 0; // 重新跳到第一项
+  end
+  else
+  begin
+    if SelectedIndex > 0 then
+      SelectedIndex := SelectedIndex - 1
+    else
+      SelectedIndex := MessageCount - 2; // 重新跳到末一项
+  end;
+  {$ENDIF}
+{$ENDIF}
+end;
+
+procedure TCnMessageViewWrapper.OpenSelectedMessage;
+begin
+{$IFDEF LAZARUS}
+  if IDEMessagesWindow <> nil then
+    IDEMessagesWindow.OpenSelection;
+{$ELSE}
+  EditMessageSource;
+{$ENDIF}
+end;
+
+{$IFDEF DELPHI_OTA}
 {$IFNDEF BDS}
 
 function TCnMessageViewWrapper.GetCurrentMessage: string;
@@ -4031,45 +4179,59 @@ begin
 end;
 
 {$ENDIF}
+{$ENDIF}
 
 function TCnMessageViewWrapper.GetTabCaption: string;
 begin
   Result := '';
+{$IFDEF DELPHI_OTA}
   if FTabSet <> nil then
     Result := FTabSet.Tabs[FTabSet.TabIndex];
+{$ENDIF}
 end;
 
 function TCnMessageViewWrapper.GetTabCount: Integer;
 begin
   Result := -1;
+{$IFDEF DELPHI_OTA}
   if FTabSet <> nil then
     Result := FTabSet.Tabs.Count;
+{$ENDIF}
 end;
 
 function TCnMessageViewWrapper.GetTabIndex: Integer;
 begin
   Result := -1;
+{$IFDEF DELPHI_OTA}
   if FTabSet <> nil then
     Result := FTabSet.TabIndex;
+{$ENDIF}
 end;
 
 function TCnMessageViewWrapper.GetTabSetVisible: Boolean;
 begin
   Result := False;
+{$IFDEF DELPHI_OTA}
   if FTabSet <> nil then
-    Result := FTabSet.Visible;;
+    Result := FTabSet.Visible;
+{$ENDIF}
 end;
 
 procedure TCnMessageViewWrapper.SetTabIndex(const Value: Integer);
 begin
+{$IFDEF DELPHI_OTA}
   if FTabSet <> nil then
     FTabSet.TabIndex := Value;
+{$ENDIF}
 end;
 
 procedure TCnMessageViewWrapper.UpdateAllItems;
+{$IFDEF DELPHI_OTA}
 var
   I, J: Integer;
+{$ENDIF}
 begin
+{$IFDEF DELPHI_OTA}
   try
     FMessageViewForm := nil;
     FEditMenuItem := nil;
@@ -4099,7 +4261,10 @@ begin
   except
     ;
   end;
+{$ENDIF}
 end;
+
+{$IFDEF DELPHI_OTA}
 
 var
   FThemeWrapper: TCnThemeWrapper = nil;

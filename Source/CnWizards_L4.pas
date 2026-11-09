@@ -37,7 +37,8 @@ uses
   CnUsesInitTreeFrm, CnUsesIdentFrm, CnOTACreators, CnRepositoryMenu, 
   CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, CnReplaceWizard, 
   CnIdeEnhanceMenu, CnInputHelper, CnInputHelperEditFrm, CnInputHelperFrm, 
-  CnInputSymbolList, CnInputLazSymbolList, LazarusPackageIntf;
+  CnInputSymbolList, CnInputLazSymbolList, CnEditorJumpMessage, 
+  LazarusPackageIntf;
 
 implementation
 

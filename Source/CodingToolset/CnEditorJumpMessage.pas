@@ -29,7 +29,18 @@ unit CnEditorJumpMessage;
 * 开发平台：PWinXP SP2 + Delphi 5.01
 * 兼容测试：PWin9X/2000/XP + Delphi 5/6/7 + C++Builder 5/6
 * 本 地 化：该窗体中的字符串均符合本地化处理方式
-* 修改记录：2026.06.29
+* 修改记录：2026.11.09
+*               移植 Lazarus：消息窗口跳转基于 IDEIntf 的 IDEMsgIntf 官方
+*               接口（IDEMessagesWindow 的 SelectNextUrgentMessage/
+*               OpenSelection）实现，替代 Delphi 私有 TreeView 方案
+*               消息跳转的平台差异收敛至 TCnMessageViewWrapper 通用方法
+*               MessageWindowValid/ShowMessageWindow/SelectNextMessage/
+*               OpenSelectedMessage，本单元调用点已平台无关
+*               跳至书签：Lazarus 经 TSourceEditorInterface.GetBookMark
+*               收集书签行，跳转传编辑器控件；跳至匹配关键字：Lazarus 下
+*               光标位置与 Token 列统一为解析器口径的 UTF16 字符列，
+*               ConvertGeneralTokenPos 等调用点按平台条件化
+*           2026.06.29
 *               加入跳至书签的功能
 *           2014.12.25
 *               加入跳至匹配的条件编译指令的功能
@@ -54,10 +65,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IniFiles, Menus, ToolsAPI, CnWizUtils, CnConsts, CnCommon, CnWizManager,
+  StdCtrls, IniFiles, Menus, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} CnWizUtils, CnConsts, CnCommon, CnWizManager,
   CnWizEditFiler, CnCodingToolsetWizard, CnWizConsts, CnSelectionCodeTool, CnWizIdeUtils,
   CnSourceHighlight, CnPasCodeParser, CnEditControlWrapper, mPasLex, CnIDEStrings,
-  CnCppCodeParser, mwBCBTokenList, CnFastList {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
+  CnCppCodeParser, mwBCBTokenList, CnFastList
+  {$IFDEF LAZARUS}, SrcEditorIntf, SynEdit, CnWizClasses{$ENDIF};
 
 type
 
@@ -246,13 +258,6 @@ uses
   CnDebug;
 {$ENDIF}
 
-{$IFDEF BDS}
-function EmptyKeyDataToShiftState(KeyData: Longint): TShiftState;
-begin
-  Result := [];
-end;
-{$ENDIF}
-
 { TCnEditorJumpMessage }
 
 constructor TCnEditorNextMessage.Create(AOwner: TCnCodingToolsetWizard);
@@ -279,7 +284,12 @@ end;
 
 function TCnEditorNextMessage.GetDefShortCut: TShortCut;
 begin
+{$IFDEF LAZARUS}
+  Result := ShortCut(VK_OEM_PERIOD, [ssAlt]);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Result := TextToShortCut('Alt+.');
+{$ENDIF}
 end;
 
 procedure TCnEditorNextMessage.GetToolsetInfo(var Name, Author, Email: string);
@@ -290,26 +300,11 @@ begin
 end;
 
 procedure TCnEditorNextMessage.Execute;
-{$IFDEF BDS}
-var
-  Hook: TCnMethodHook;
-{$ENDIF}
 begin
-  if CnMessageViewWrapper.MessageViewForm = nil then Exit;
-  if not CnMessageViewWrapper.MessageViewForm.Visible then
-    CnMessageViewWrapper.MessageViewForm.Show;
-{$IFDEF BDS}
-  Hook := TCnMethodHook.Create(GetBplMethodAddress(@KeyDataToShiftState), @EmptyKeyDataToShiftState);
-  CnMessageViewWrapper.TreeView.Perform(WM_KEYDOWN, VK_DOWN, Integer($1500001));
-  CnMessageViewWrapper.TreeView.Perform(WM_KEYUP, VK_DOWN, Integer($C1500001));
-  Hook.Free;
-{$ELSE}
-  if CnMessageViewWrapper.SelectedIndex < CnMessageViewWrapper.MessageCount - 2 then
-    CnMessageViewWrapper.SelectedIndex := CnMessageViewWrapper.SelectedIndex + 1
-  else
-    CnMessageViewWrapper.SelectedIndex := 0; // 重新跳到第一项
-{$ENDIF}
-  CnMessageViewWrapper.EditMessageSource;
+  if not CnMessageViewWrapper.MessageWindowValid then Exit;
+  CnMessageViewWrapper.ShowMessageWindow;
+  CnMessageViewWrapper.SelectNextMessage(True); // 往下一条，到末尾回绕到第一项
+  CnMessageViewWrapper.OpenSelectedMessage;
 end;
 
 { TCnEditorPrevMessage }
@@ -327,26 +322,11 @@ begin
 end;
 
 procedure TCnEditorPrevMessage.Execute;
-{$IFDEF BDS}
-var
-  Hook: TCnMethodHook;
-{$ENDIF}
 begin
-  if CnMessageViewWrapper.MessageViewForm = nil then Exit;
-  if not CnMessageViewWrapper.MessageViewForm.Visible then
-    CnMessageViewWrapper.MessageViewForm.Show;
-{$IFDEF BDS}
-  Hook := TCnMethodHook.Create(GetBplMethodAddress(@KeyDataToShiftState), @EmptyKeyDataToShiftState);
-  CnMessageViewWrapper.TreeView.Perform(WM_KEYDOWN, VK_UP, Integer($1500001));
-  CnMessageViewWrapper.TreeView.Perform(WM_KEYUP, VK_UP, Integer($C1500001));
-  Hook.Free;  
-{$ELSE}
-  if CnMessageViewWrapper.SelectedIndex > 0 then
-    CnMessageViewWrapper.SelectedIndex := CnMessageViewWrapper.SelectedIndex - 1
-  else
-    CnMessageViewWrapper.SelectedIndex := CnMessageViewWrapper.MessageCount - 2 ; // 重新跳到末一项
-{$ENDIF}
-  CnMessageViewWrapper.EditMessageSource;
+  if not CnMessageViewWrapper.MessageWindowValid then Exit;
+  CnMessageViewWrapper.ShowMessageWindow;
+  CnMessageViewWrapper.SelectNextMessage(False); // 往上一条，到开头回绕到末一项
+  CnMessageViewWrapper.OpenSelectedMessage;
 end;
 
 function TCnEditorPrevMessage.GetCaption: string;
@@ -356,7 +336,12 @@ end;
 
 function TCnEditorPrevMessage.GetDefShortCut: TShortCut;
 begin
+{$IFDEF LAZARUS}
+  Result := ShortCut(VK_OEM_COMMA, [ssAlt]);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Result := TextToShortCut('Alt+,');
+{$ENDIF}
 end;
 
 procedure TCnEditorPrevMessage.GetToolsetInfo(var Name, Author, Email: string);
@@ -375,7 +360,7 @@ end;
 procedure ParsePasAndGotoLine(TokenKind: TTokenKind; const ErrorMsg: string);
 var
   LineNum: Integer;
-  View: IOTAEditView;
+  View: TCnEditViewSourceInterface;
   Parser: TmwPasLex;
   MemStream: TMemoryStream;
   S: string;
@@ -401,7 +386,7 @@ begin
 
     Parser := TmwPasLex.Create;
     Parser.Origin := MemStream.Memory;
-    
+
     while Parser.TokenID <> tkNull do
     begin
       if Parser.TokenID = TokenKind then
@@ -419,7 +404,14 @@ begin
     end;
 
     if LineNum > 0 then
-      CnOtaGotoEditPosAndRepaint(View, LineNum)
+    begin
+{$IFDEF DELPHI_OTA}
+      CnOtaGotoEditPosAndRepaint(View, LineNum);
+{$ENDIF}
+{$IFDEF LAZARUS}
+      CnOtaGotoEditPosAndRepaint(View.EditorControl, LineNum);
+{$ENDIF}
+    end
     else
       ErrorDlg(ErrorMsg);
   finally
@@ -559,11 +551,17 @@ end;
 procedure JumpBookmarkNearby(Next: Boolean);
 var
   EditControl: TControl;
+{$IFDEF DELPHI_OTA}
   EditView: IOTAEditView;
   CharPos: TOTACharPos;
   EditPos: TOTAEditPos;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor: TCnSourceEditorInterface;
+  X, Y: Integer;
+{$ENDIF}
   CurLine, I: Integer;
-  Bookmarks: array[0..9] of TOTAEditPos;
+  BMLine, BMCol: array[0..9] of Integer;
   BookmarkCount: Integer;
   Found: Boolean;
   BestLine, BestIdx: Integer;
@@ -571,6 +569,10 @@ begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
     Exit;
+  CurLine := 0;
+  BookmarkCount := 0;
+
+{$IFDEF DELPHI_OTA}
   try
     EditView := EditControlWrapper.GetEditView(EditControl);
   except
@@ -581,7 +583,6 @@ begin
     Exit;
 
   CurLine := EditView.CursorPos.Line;
-  BookmarkCount := 0;
 
   // 收集 0 到 9 所有已设置的书签位置
   for I := 0 to 9 do
@@ -590,10 +591,31 @@ begin
     if (CharPos.CharIndex <> 0) or (CharPos.Line <> 0) then
     begin
       EditView.ConvertPos(False, EditPos, CharPos);
-      Bookmarks[BookmarkCount] := EditPos;
+      BMLine[BookmarkCount] := EditPos.Line;
+      BMCol[BookmarkCount] := EditPos.Col;
       Inc(BookmarkCount);
     end;
   end;
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+  SourceEditor := GetSourceEditorOfControl(EditControl);
+  if SourceEditor = nil then
+    Exit;
+
+  CurLine := SourceEditor.CursorTextXY.Y;
+
+  // 收集 0 到 9 所有已设置的书签位置，GetBookMark 返回 False 表示该号未设置
+  for I := 0 to 9 do
+  begin
+    if SourceEditor.GetBookMark(I, X, Y) then
+    begin
+      BMLine[BookmarkCount] := Y;
+      BMCol[BookmarkCount] := X;
+      Inc(BookmarkCount);
+    end;
+  end;
+{$ENDIF}
 
 {$IFDEF DEBUG}
   CnDebugger.LogFmt('Get %d Bookmarks for Current EditView.', [BookmarkCount]);
@@ -612,9 +634,9 @@ begin
     BestLine := MaxInt;
     for I := 0 to BookmarkCount - 1 do
     begin
-      if (Bookmarks[I].Line > CurLine) and (Bookmarks[I].Line < BestLine) then
+      if (BMLine[I] > CurLine) and (BMLine[I] < BestLine) then
       begin
-        BestLine := Bookmarks[I].Line;
+        BestLine := BMLine[I];
         BestIdx := I;
         Found := True;
       end;
@@ -626,9 +648,9 @@ begin
       BestLine := MaxInt;
       for I := 0 to BookmarkCount - 1 do
       begin
-        if Bookmarks[I].Line < BestLine then
+        if BMLine[I] < BestLine then
         begin
-          BestLine := Bookmarks[I].Line;
+          BestLine := BMLine[I];
           BestIdx := I;
           Found := True;
         end;
@@ -641,9 +663,9 @@ begin
     BestLine := 0;
     for I := 0 to BookmarkCount - 1 do
     begin
-      if (Bookmarks[I].Line < CurLine) and (Bookmarks[I].Line > BestLine) then
+      if (BMLine[I] < CurLine) and (BMLine[I] > BestLine) then
       begin
-        BestLine := Bookmarks[I].Line;
+        BestLine := BMLine[I];
         BestIdx := I;
         Found := True;
       end;
@@ -655,9 +677,9 @@ begin
       BestLine := 0;
       for I := 0 to BookmarkCount - 1 do
       begin
-        if Bookmarks[I].Line > BestLine then
+        if BMLine[I] > BestLine then
         begin
-          BestLine := Bookmarks[I].Line;
+          BestLine := BMLine[I];
           BestIdx := I;
           Found := True;
         end;
@@ -666,7 +688,14 @@ begin
   end;
 
   if Found then
-    CnOtaGotoEditPosAndRepaint(EditView, Bookmarks[BestIdx].Line, Bookmarks[BestIdx].Col);
+  begin
+{$IFDEF DELPHI_OTA}
+    CnOtaGotoEditPosAndRepaint(EditView, BMLine[BestIdx], BMCol[BestIdx]);
+{$ENDIF}
+{$IFDEF LAZARUS}
+    CnOtaGotoEditPosAndRepaint(EditControl, BMLine[BestIdx], BMCol[BestIdx]);
+{$ENDIF}
+  end;
 end;
 
 { TCnEditorJumpPrevBookmark }
@@ -832,7 +861,12 @@ var
   LineInfo: TCnBlockLineInfo;
   CompDirectiveInfo: TCnCompDirectiveInfo;
   EditControl: TControl;
+{$IFDEF DELPHI_OTA}
   EditView: IOTAEditView;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor: TCnSourceEditorInterface;
+{$ENDIF}
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
@@ -848,6 +882,7 @@ begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
     Exit;
+{$IFDEF DELPHI_OTA}
   try
     EditView := EditControlWrapper.GetEditView(EditControl);
   except
@@ -856,13 +891,25 @@ begin
 
   if EditView = nil then
     Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor := GetSourceEditorOfControl(EditControl);
+  if SourceEditor = nil then
+    Exit;
+{$ENDIF}
 
   HighlightWizard := TCnSourceHighlight(CnWizardMgr.WizardByClass(TCnSourceHighlight));
   if HighlightWizard = nil then
     Exit;
 
+{$IFDEF LAZARUS}
+  CurIsPas := IsDprOrPas(SourceEditor.FileName) or IsInc(SourceEditor.FileName);
+  CurIsCpp := IsCppSourceModule(SourceEditor.FileName);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   CurIsPas := IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName);
   CurIsCpp := IsCppSourceModule(EditView.Buffer.FileName);
+{$ENDIF}
   if (not CurIsCpp) and (not CurIsPas) then
     Exit;
 
@@ -888,14 +935,34 @@ begin
 
   Stream := TMemoryStream.Create;
   try
+{$IFDEF LAZARUS}
+    CnGeneralSaveEditorToStream(SourceEditor, Stream);
+    // Lazarus 下后续的 Cpp 解析起始列、CheckLineMatch/CheckCompDirectiveMatch
+    // 均使用该解析器口径的 UTF16 列，且无 EditView.CursorPos 可用，
+    // 故在解析前无条件取一次；纯查询，解析前后取值等价
+    CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+{$ENDIF}
 
     // 解析当前显示的源文件，确保括号都进来
     if CurIsPas then
+{$IFDEF LAZARUS}
+      CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(SourceEditor.FileName)
+        or IsInc(SourceEditor.FileName), False);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
         or IsInc(EditView.Buffer.FileName), False);
+{$ENDIF}
     if CurIsCpp then
+{$IFDEF LAZARUS}
+      CnGeneralCppParserParseSource(CppParser, Stream, CharPos.Line, CharPos.CharIndex + 1, False, True);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       CnGeneralCppParserParseSource(CppParser, Stream, EditView.CursorPos.Line, EditView.CursorPos.Col, False, True);
+{$ENDIF}
   finally
     Stream.Free;
   end;
@@ -903,7 +970,12 @@ begin
   if CurIsPas then
   begin
     // 解析后再查找当前光标所在的块，不直接使用 CursorPos，因为 Parser 所需偏移可能不同
+{$IFDEF LAZARUS}
+    // CharPos 已在解析前按 Lazarus 分支取得，此处直接使用
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     CnOtaGetCurrentCharPosFromCursorPosForParser(CharPos);
+{$ENDIF}
     PasParser.FindCurrentBlock(CharPos.Line, CharPos.CharIndex);
   end;
 
@@ -960,7 +1032,7 @@ begin
     if BlockMatchInfo.KeyCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.KeyCount - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.KeyTokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} BlockMatchInfo.KeyTokens[I]);
 
       BlockMatchInfo.ConvertLineList;
     end;
@@ -968,14 +1040,21 @@ begin
     if BlockMatchInfo.CompDirectiveTokenCount > 0 then
     begin
       for I := 0 to BlockMatchInfo.CompDirectiveTokenCount - 1 do
-        ConvertGeneralTokenPos(Pointer(EditView), BlockMatchInfo.CompDirectiveTokens[I]);
+        ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} BlockMatchInfo.CompDirectiveTokens[I]);
 
       BlockMatchInfo.ConvertCompDirectiveLineList;
     end;
 
     BlockMatchInfo.IsCppSource := CurIsCpp;
+{$IFDEF LAZARUS}
+    // Lazarus 下使用解析器口径的 UTF16 字符列，与 FindCurrentPair 一致
+    BlockMatchInfo.CheckLineMatch(CharPos.Line, CharPos.CharIndex + 1, False, False);
+    BlockMatchInfo.CheckCompDirectiveMatch(CharPos.Line, CharPos.CharIndex + 1);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     BlockMatchInfo.CheckLineMatch(EditView.CursorPos.Line, EditView.CursorPos.Col, False, False);
     BlockMatchInfo.CheckCompDirectiveMatch(EditView.CursorPos.Line, EditView.CursorPos.Col);
+{$ENDIF}
 
     // 解析完毕，准备定位
     DestToken := nil;
@@ -1043,12 +1122,23 @@ begin
         DestToken.EditCol, DestToken.Token]);
 {$ENDIF}
 
+{$IFDEF LAZARUS}
+      CnOtaGotoEditPosAndRepaint(EditControl, DestToken.EditLine, DestToken.EditCol);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+{$ENDIF}
       Exit;
     end;
 
     // 再找光标下是否括号，是的话再找括号配对
+{$IFDEF LAZARUS}
+    EditPos.Line := CharPos.Line;
+    EditPos.Col := CharPos.CharIndex + 1; // 1 基 UTF16 字符列，与 Token.EditCol 同口径
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     EditPos := EditView.CursorPos;
+{$ENDIF}
     CurToken := nil;
     if CurIsPas then
     begin
@@ -1056,7 +1146,7 @@ begin
       begin
         if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkRoundClose, tkSquareOpen, tkSquareClose] then
         begin
-          ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+          ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
           if (PasParser.Tokens[I].EditLine = EditPos.Line) and
             ((PasParser.Tokens[I].EditCol = EditPos.Col) or (PasParser.Tokens[I].EditEndCol = EditPos.Col)) then
           begin
@@ -1081,7 +1171,7 @@ begin
             begin
               if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkSquareOpen, tkRoundClose, tkSquareClose] then
               begin
-                ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+                ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
                 Braces.Add(PasParser.Tokens[I]);
               end;
             end;
@@ -1098,7 +1188,7 @@ begin
             begin
               if PasParser.Tokens[I].TokenID in [tkRoundOpen, tkSquareOpen, tkRoundClose, tkSquareClose] then
               begin
-                ConvertGeneralTokenPos(Pointer(EditView), PasParser.Tokens[I]);
+                ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} PasParser.Tokens[I]);
                 Braces.Add(PasParser.Tokens[I]);
               end;
             end;
@@ -1135,7 +1225,7 @@ begin
       begin
         if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctkroundclose, ctksquareopen, ctksquareclose] then
         begin
-          ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+          ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
           if (CppParser.Tokens[I].EditLine = EditPos.Line) and
             ((CppParser.Tokens[I].EditCol = EditPos.Col) or (CppParser.Tokens[I].EditEndCol = EditPos.Col)) then
           begin
@@ -1160,7 +1250,7 @@ begin
             begin
               if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctksquareopen, ctkroundclose, ctksquareclose] then
               begin
-                ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+                ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
                 Braces.Add(CppParser.Tokens[I]);
               end;
             end;
@@ -1177,7 +1267,7 @@ begin
             begin
               if CppParser.Tokens[I].CppTokenKind in [ctkroundopen, ctksquareopen, ctkroundclose, ctksquareclose] then
               begin
-                ConvertGeneralTokenPos(Pointer(EditView), CppParser.Tokens[I]);
+                ConvertGeneralTokenPos({$IFDEF DELPHI_OTA} Pointer(EditView), {$ENDIF} CppParser.Tokens[I]);
                 Braces.Add(CppParser.Tokens[I]);
               end;
             end;
@@ -1217,9 +1307,19 @@ begin
 
       if (CurIsPas and (DestToken.TokenID in [tkRoundOpen, tkSquareOpen]))
         or (CurIsCpp and (DestToken.CppTokenKind in [ctkroundopen, ctksquareopen])) then
-        CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol + 1) // 光标放左括号右边
+{$IFDEF LAZARUS}
+      CnOtaGotoEditPosAndRepaint(EditControl, DestToken.EditLine, DestToken.EditCol + 1) // 光标放左括号右边
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+      CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol + 1) // 光标放左括号右边
+{$ENDIF}
       else
-        CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+{$IFDEF LAZARUS}
+      CnOtaGotoEditPosAndRepaint(EditControl, DestToken.EditLine, DestToken.EditCol);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
+      CnOtaGotoEditPosAndRepaint(EditView, DestToken.EditLine, DestToken.EditCol);
+{$ENDIF}
       Exit;
     end;
   finally
@@ -1243,7 +1343,12 @@ end;
 
 function TCnEditorJumpMatchedKeyword.GetDefShortCut: TShortCut;
 begin
+{$IFDEF LAZARUS}
+  Result := ShortCut(VK_OEM_COMMA, [ssCtrl]);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   Result := TextToShortCut('Ctrl+,');
+{$ENDIF}
 end;
 
 procedure TCnEditorJumpMatchedKeyword.LoadSettings(Ini: TCustomIniFile);
@@ -1261,7 +1366,12 @@ end;
 procedure JumpIdentifierNearby(Prev: Boolean);
 var
   EditControl: TControl;
+{$IFDEF DELPHI_OTA}
   EditView: IOTAEditView;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor: TCnSourceEditorInterface;
+{$ENDIF}
   PasParser: TCnGeneralPasStructParser;
   CppParser: TCnGeneralCppStructParser;
   Stream: TMemoryStream;
@@ -1272,6 +1382,24 @@ var
   CurrentTokenName: TCnIdeTokenString;
   CurIsPas, CurIsCpp: Boolean;
   CurrentTokenIndex, StartIdx, EndIdx: Integer;
+{$IFDEF LAZARUS}
+  SynEd: TSynEdit;
+
+  procedure LazConvertTokenPos(Token: TCnGeneralPasToken);
+  begin
+    // Lazarus：解析器 CharIndex 为行内 0 基字符偏移，直接映射为编辑器行列
+    Token.EditLine := Token.LineNumber + 1;
+    Token.EditCol := Token.CharIndex + 1;
+  end;
+
+  function LazIsCurrentToken(Token: TCnGeneralPasToken): Boolean;
+  begin
+    // Lazarus：用 SynEdit 光标行列与 Token 行列直接比较，替代 IsGeneralCurrentToken
+    Result := (SourceEditor.CursorTextXY.Y = Token.LineNumber + 1) and
+      (SourceEditor.CursorTextXY.X >= Token.CharIndex + 1) and
+      (SourceEditor.CursorTextXY.X <= Token.CharIndex + 1 + Length(Token.Token));
+  end;
+{$ENDIF}
 
   procedure SetParseRange(MaxCount: Integer);
   begin
@@ -1291,6 +1419,7 @@ begin
   EditControl := CnOtaGetCurrentEditControl;
   if EditControl = nil then
     Exit;
+{$IFDEF DELPHI_OTA}
   try
     EditView := EditControlWrapper.GetEditView(EditControl);
   except
@@ -1299,9 +1428,21 @@ begin
 
   if EditView = nil then
     Exit;
+{$ENDIF}
+{$IFDEF LAZARUS}
+  SourceEditor := GetSourceEditorOfControl(EditControl);
+  if SourceEditor = nil then
+    Exit;
+{$ENDIF}
 
+{$IFDEF LAZARUS}
+  CurIsPas := IsDprOrPas(SourceEditor.FileName) or IsInc(SourceEditor.FileName);
+  CurIsCpp := IsCppSourceModule(SourceEditor.FileName);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   CurIsPas := IsDprOrPas(EditView.Buffer.FileName) or IsInc(EditView.Buffer.FileName);
   CurIsCpp := IsCppSourceModule(EditView.Buffer.FileName);
+{$ENDIF}
   if (not CurIsCpp) and (not CurIsPas) then
     Exit;
 
@@ -1329,16 +1470,31 @@ begin
   CurrentToken := nil;
   Stream := TMemoryStream.Create;
   try
+{$IFDEF LAZARUS}
+    CnGeneralSaveEditorToStream(SourceEditor, Stream);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
     CnGeneralSaveEditorToStream(EditView.Buffer, Stream);
+{$ENDIF}
 
     // 解析当前显示的源文件
     if CurIsPas then
     begin
+{$IFDEF LAZARUS}
+      CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(SourceEditor.FileName)
+        or IsInc(SourceEditor.FileName), False);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
       CnGeneralPasParserParseSource(PasParser, Stream, IsDpr(EditView.Buffer.FileName)
         or IsInc(EditView.Buffer.FileName), False);
+{$ENDIF}
 
       for I := 0 to PasParser.Count - 1 do
       begin
+{$IFDEF LAZARUS}
+        LazConvertTokenPos(PasParser.Tokens[I]);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         // 将解析器解析出来的字符偏移转换成 CharPos
         CnConvertGeneralTokenPositionToCharPos(Pointer(EditView), PasParser.Tokens[I], CharPos);
         // 再把 CharPos 转换成 EditPos
@@ -1347,9 +1503,15 @@ begin
 
         PasParser.Tokens[I].EditCol := EditPos.Col;
         PasParser.Tokens[I].EditLine := EditPos.Line;
+{$ENDIF}
 
         if (PasParser.Tokens[I].TokenID = tkIdentifier) and // 此处判断不支持双字节字符
+{$IFDEF LAZARUS}
+          LazIsCurrentToken(PasParser.Tokens[I]) then
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
           IsGeneralCurrentToken(Pointer(EditView), EditControl, PasParser.Tokens[I]) then
+{$ENDIF}
         begin
           if CurrentToken = nil then
           begin
@@ -1372,7 +1534,14 @@ begin
               CheckTokenMatch(PasParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), False) then
             begin
               // Found. Jump here and Exit;
+{$IFDEF LAZARUS}
+              SynEd := GetSynEditOfControl(EditControl);
+              SynEd.CaretXY := Point(PasParser.Tokens[I].EditCol, PasParser.Tokens[I].EditLine);
+              SynEd.EnsureCursorPosVisible;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
               CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
+{$ENDIF}
               Exit;
             end;
           end;
@@ -1385,7 +1554,14 @@ begin
               CheckTokenMatch(PasParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), False) then
             begin
               // Found. Jump here and Exit;
+{$IFDEF LAZARUS}
+              SynEd := GetSynEditOfControl(EditControl);
+              SynEd.CaretXY := Point(PasParser.Tokens[I].EditCol, PasParser.Tokens[I].EditLine);
+              SynEd.EnsureCursorPosVisible;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
               CnOtaGotoEditPosAndRepaint(EditView, PasParser.Tokens[I].EditLine, PasParser.Tokens[I].EditCol);
+{$ENDIF}
               Exit;
             end;
           end;
@@ -1402,6 +1578,10 @@ begin
 
       for I := 0 to CppParser.Count - 1 do
       begin
+{$IFDEF LAZARUS}
+        LazConvertTokenPos(CppParser.Tokens[I]);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
         // 将解析器解析出来的字符偏移转换成 CharPos
         CnConvertGeneralTokenPositionToCharPos(Pointer(EditView), CppParser.Tokens[I], CharPos);
         // 再把 CharPos 转换成 EditPos
@@ -1410,9 +1590,15 @@ begin
 
         CppParser.Tokens[I].EditCol := EditPos.Col;
         CppParser.Tokens[I].EditLine := EditPos.Line;
+{$ENDIF}
 
         if (CppParser.Tokens[I].CppTokenKind = ctkidentifier) and
+{$IFDEF LAZARUS}
+          LazIsCurrentToken(CppParser.Tokens[I]) then
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
           IsGeneralCurrentToken(Pointer(EditView), EditControl, CppParser.Tokens[I]) then
+{$ENDIF}
         begin
           if CurrentToken = nil then
           begin
@@ -1435,7 +1621,14 @@ begin
               CheckTokenMatch(CppParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), True) then
             begin
               // Found. Jump here and Exit;
+{$IFDEF LAZARUS}
+              SynEd := GetSynEditOfControl(EditControl);
+              SynEd.CaretXY := Point(CppParser.Tokens[I].EditCol, CppParser.Tokens[I].EditLine);
+              SynEd.EnsureCursorPosVisible;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
               CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);
+{$ENDIF}
               Exit;
             end;
           end;
@@ -1448,7 +1641,14 @@ begin
               CheckTokenMatch(CppParser.Tokens[I].Token, PCnIdeTokenChar(CurrentTokenName), True) then
             begin
               // Found. Jump here and Exit;
+{$IFDEF LAZARUS}
+              SynEd := GetSynEditOfControl(EditControl);
+              SynEd.CaretXY := Point(CppParser.Tokens[I].EditCol, CppParser.Tokens[I].EditLine);
+              SynEd.EnsureCursorPosVisible;
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
               CnOtaGotoEditPosAndRepaint(EditView, CppParser.Tokens[I].EditLine, CppParser.Tokens[I].EditCol);
+{$ENDIF}
               Exit;
             end;
           end;

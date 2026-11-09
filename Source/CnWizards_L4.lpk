@@ -492,6 +492,10 @@
         <Filename Value="InputHelper\CnInputLazSymbolList.pas"/>
         <UnitName Value="CnInputLazSymbolList"/>
       </Item>
+      <Item>
+        <Filename Value="CodingToolset\CnEditorJumpMessage.pas"/>
+        <UnitName Value="CnEditorJumpMessage"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>
