@@ -669,6 +669,8 @@ type
       AHighlight: Boolean);
     procedure LazSetPairHighlight(AControl: TControl; Pair: TCnBlockLinePair;
       AHighlight: Boolean);
+    procedure LazSetCompDirectiveHighlight(AControl: TControl;
+      Pair: TCnBlockLinePair; AHighlight: Boolean);
     procedure FeedBlockMatchMarkup(Info: TCnBlockMatchInfo);
     procedure LazCheckBracketMatch(Editor: TCnEditorObject);
     {* Lazarus: 检查光标附近括号配对并同步 Markup 条目，对应 Delphi 侧 CheckBracketMatch}
@@ -4694,6 +4696,16 @@ begin
           NewPair := CompDirective.CurrentPair;
           if OldPair <> NewPair then
           begin
+{$IFDEF LAZARUS}
+            // Lazarus：与关键字配对相同，原地更新 Markup 条目即可触发重画。
+            // 仅调 EditorMarkLineDirty 对静态的 Markup 数据无效，当前对的
+            // 黄底要等到全量重建（延迟定时器兜底）才出现，表现为光标需在
+            // 不同位置落点两次才见高亮
+            if OldPair <> nil then
+              LazSetCompDirectiveHighlight(EditControl, OldPair, False);
+            if NewPair <> nil then
+              LazSetCompDirectiveHighlight(EditControl, NewPair, True);
+{$ELSE}
             if OldPair <> nil then
             begin
               EditorMarkLineDirty(OldPair.Top);
@@ -4708,6 +4720,7 @@ begin
               for I := 0 to NewPair.MiddleCount - 1 do
                 EditorMarkLineDirty(NewPair.MiddleToken[I].EditLine);
             end;
+{$ENDIF}
           end;
         end;
       end;
@@ -4851,6 +4864,51 @@ begin
     LazAddTokenItem(AControl, Pair.EndToken, AHighlight);
   for I := 0 to Pair.MiddleCount - 1 do
     LazAddTokenItem(AControl, Pair.MiddleToken[I], AHighlight);
+end;
+
+// 设置/取消编译指令当前对的高亮条目，颜色用编译指令专用的前景/背景，
+// 与 FeedBlockMatchMarkup 的全量注入口径一致：编译指令仅在当前光标所在的
+// 配对上着色，非当前对不注入条目。故取消时前景背景均置 clNone
+// （AddItem 原地更新，合并时 clNone 被忽略，效果等同移除条目）
+procedure TCnSourceHighlight.LazSetCompDirectiveHighlight(AControl: TControl;
+  Pair: TCnBlockLinePair; AHighlight: Boolean);
+var
+  I: Integer;
+  Markup: TCnSourceHighlightMarkup;
+begin
+  if Pair = nil then
+    Exit;
+
+  Markup := GetSourceHighlightMarkup(GetSynEditOfControl(AControl));
+  if Markup = nil then
+    Exit;
+
+  if not AHighlight then
+  begin
+    // 取消：直接删除条目。若改成置 clNone 会残留全无色的条目，绘制命中时
+    // 会破坏 MarkupInfo 的哨兵底色导致整个 Markup 被禁用（见绘制函数内注释）
+    if Pair.StartToken <> nil then
+      Markup.DeleteItem(Pair.StartToken.EditLine,
+        LazTokenByteCol(AControl, Pair.StartToken));
+    if Pair.EndToken <> nil then
+      Markup.DeleteItem(Pair.EndToken.EditLine,
+        LazTokenByteCol(AControl, Pair.EndToken));
+    for I := 0 to Pair.MiddleCount - 1 do
+      Markup.DeleteItem(Pair.MiddleToken[I].EditLine,
+        LazTokenByteCol(AControl, Pair.MiddleToken[I]));
+  end
+  else
+  begin
+    if Pair.StartToken <> nil then
+      LazAddTokenItemEx(AControl, Pair.StartToken,
+        FCompDirectiveHighlight.ColorFg, FCompDirectiveBackground, clNone);
+    if Pair.EndToken <> nil then
+      LazAddTokenItemEx(AControl, Pair.EndToken,
+        FCompDirectiveHighlight.ColorFg, FCompDirectiveBackground, clNone);
+    for I := 0 to Pair.MiddleCount - 1 do
+      LazAddTokenItemEx(AControl, Pair.MiddleToken[I],
+        FCompDirectiveHighlight.ColorFg, FCompDirectiveBackground, clNone);
+  end;
 end;
 
 // CheckBlockMatch 完成后整体重建该编辑器的 Markup 数据，
@@ -8922,7 +8980,10 @@ var
   function _GeneralStrLen(const Text: PCnIdeTokenChar): Integer; {$IFDEF SUPPORT_INLINE} inline; {$ENDIF}
   begin
 {$IFDEF LAZARUS}
+    // Lazarus 下 PCnIdeTokenChar 是 PWideChar，必须取宽字符长度。
     Result := lstrlenW(Text);
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_STRING_ANSI_UTF8}
     Result := lstrlenW(Text);
 {$ELSE}
@@ -9239,6 +9300,13 @@ begin
     Item := FItems[I];
     if (Col >= Item^.ColStart) and (Col < Item^.ColEnd) then
     begin
+      // 取消态或未配置颜色的条目可能三色全 clNone：此时直接跳过并返回 nil，
+      // 绝不能写入 MarkupInfo，否则其哨兵底色（构造函数为保证 RealEnabled/
+      // IsEnabled 而设）被清成 clNone 后整个 Markup 会被管理器禁用，
+      // 之后注入的任何条目都不再被查询，表现为高亮永久失效
+      if (Item^.ColorFg = clNone) and (Item^.ColorBk = clNone)
+        and (Item^.ColorFrame = clNone) then
+        Exit;
       MarkupInfo.Foreground := Item^.ColorFg;
       MarkupInfo.Background := Item^.ColorBk;
       MarkupInfo.FrameColor := Item^.ColorFrame;
