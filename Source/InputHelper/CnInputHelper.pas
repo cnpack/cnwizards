@@ -270,6 +270,12 @@ type
     procedure EditorKeyUp(Key, ScanCode: Word; Shift: TShiftState; var Handled: Boolean);
     function KeyMsgFromParams(MsgType: Word; Key, ScanCode: Word;
       Shift: TShiftState): TMsg;
+    function LazMouseMessage(hwnd: HWND; Control: TWinControl;
+      Msg: TMessage): Boolean;
+    procedure ListMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure ListMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 {$ENDIF}
     procedure ActiveControlChanged(Sender: TObject);
     procedure OnTimer(Sender: TObject);
@@ -1176,6 +1182,11 @@ begin
   List.OnItemHint := ListItemHint;
   List.OnButtonClick := OnBtnClick;
   List.UseEditorColor := FUseEditorColor;
+{$IFDEF LAZARUS}
+  // LCL 下浮窗脱离父链，显式接管鼠标单击与滚轮交互
+  List.OnMouseDown := ListMouseDown;
+  List.OnMouseWheel := ListMouseWheel;
+{$ENDIF}
 
   Menu := TPopupMenu.Create(nil);
   Menu.OnPopup := OnPopupMenu;
@@ -1227,6 +1238,11 @@ begin
   EditControlWrapper.AddKeyUpNotifier(EditorKeyUp);
   // 替代 Delphi 的 TApplicationEvents.OnDeactivate，窗口失活时收起列表
   Application.AddOnDeactivateHandler(OnAppDeactivate);
+  // Delphi 的 ApplicationMessage 负责转发滚轮、拦截点击外部收起；Lazarus 下
+  // 该通知器无驱动源，改用现成的 WH_GETMESSAGE 钩子（wrapper 的鼠标通知器同样基于它）
+  CnWizNotifierServices.AddGetMsgNotifier(LazMouseMessage,
+    [WM_MOUSEWHEEL, WM_LBUTTONDOWN, WM_RBUTTONDOWN,
+      WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN]);
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
@@ -1241,6 +1257,7 @@ begin
   EditControlWrapper.RemoveKeyDownNotifier(EditorKeyDown);
   EditControlWrapper.RemoveKeyUpNotifier(EditorKeyUp);
   Application.RemoveOnDeactivateHandler(OnAppDeactivate);
+  CnWizNotifierServices.RemoveGetMsgNotifier(LazMouseMessage);
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.RemoveApplicationMessageNotifier(ApplicationMessage);
@@ -1431,6 +1448,14 @@ end;
 
 procedure TCnInputHelper.ActiveControlChanged(Sender: TObject);
 begin
+{$IFDEF LAZARUS}
+  // 点击浮动列表/按钮条会让它们成为 ActiveControl（或让 ActiveControl 变 nil），
+  // 此时不能收起列表，否则鼠标单击、双击还没生效列表就被关掉了；
+  // 列表显示期间的收起统一由 LazMouseMessage 的点击外部、失活与键盘通知器负责
+  if (Screen.ActiveControl = nil) or (Screen.ActiveControl = List) or
+    (Screen.ActiveControl = List.BtnForm) then
+    Exit;
+{$ENDIF}
   if not AcceptDisplay then
     HideAndClearList;
 end;
@@ -1520,6 +1545,61 @@ begin
         Handled := True;
     end;
   end;
+end;
+
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+function TCnInputHelper.LazMouseMessage(hwnd: HWND; Control: TWinControl;
+  Msg: TMessage): Boolean;
+var
+  Delta: Integer;
+begin
+  Result := False;
+  if not IsShowing then
+    Exit;
+
+  case Msg.Msg of
+    WM_MOUSEWHEEL:
+      begin
+        // 滚轮消息只投递给焦点窗口（编辑器），Delphi 下由 ApplicationMessage
+        // 转发给浮窗。这里直接驱动浮窗滚动并吞掉消息，避免编辑器跟着滚
+        Delta := Integer((Msg.WParam shr 16) and $FFFF);
+        if Delta >= $8000 then
+          Delta := Delta - $10000;
+        List.ScrollByWheel(Delta, FItems.Count);
+        Result := True;
+      end;
+    WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN:
+      // 点在浮窗或按钮条上不收起，点在其它地方收起，与 Delphi 行为一致
+      if (hwnd <> List.Handle) and (hwnd <> List.BtnForm.Handle) then
+        HideAndClearList;
+  end;
+end;
+
+procedure TCnInputHelper.ListMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
+begin
+  // 浮窗脱离父链后，LCL 下单击不一定能同步选中项（虚拟列表），
+  // 按鼠标坐标显式设置 ItemIndex；双击仍由 OnDblClick 选词
+  if (Button <> mbLeft) or not IsShowing then
+    Exit;
+  Idx := List.IndexFromPoint(X, Y, FItems.Count);
+  if (Idx >= 0) and (Idx < FItems.Count) then
+    List.SelectItem(Idx);
+end;
+
+procedure TCnInputHelper.ListMouseWheel(Sender: TObject; Shift: TShiftState;
+  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+  if not IsShowing then
+    Exit;
+  // 非 Win32 widgetset 可能把滚轮直接投递给鼠标下的浮窗，此处兜底
+  List.ScrollByWheel(WheelDelta, FItems.Count);
+  Handled := True;
 end;
 
 {$ENDIF}
@@ -3319,6 +3399,8 @@ procedure TCnInputHelper.ListDblClick(Sender: TObject);
 var
   Handled: Boolean;
 begin
+  if not IsShowing then
+    Exit;
   // 用鼠标选择单词
   SendSymbolToIDE(False, False, True, #0, Handled);
 end;

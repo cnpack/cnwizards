@@ -94,6 +94,11 @@ type
     procedure SetPos(X, Y: Integer); virtual;
     procedure CloseUp; virtual;
     procedure Popup; virtual;
+{$IFDEF FPC}
+    procedure ScrollByWheel(WheelDelta, ItemCount: Integer);
+    function IndexFromPoint(X, Y, ItemCount: Integer): Integer;
+    procedure SelectItem(Index: Integer);
+{$ENDIF}
 
     property UseEditorColor: Boolean read FUseEditorColor write SetUseEditorColor;
     {* 是否使用编辑器配色，也即是否自动将编辑器的配色设置同步到下面的属性中
@@ -120,6 +125,10 @@ uses
 const
   csMatchColor = clRed;
   csDarkMatchColor = $006060FF;   // 浅红
+{$IFDEF FPC}
+  csWheelScrollLines = 3;         // 浮窗列表一次滚轮滚动的行数
+  csLBSetCurSel = $0186;          // LB_SETCURSEL，避免依赖不同 widgetset 的常量定义
+{$ENDIF}
 
 type
   TControlHack = class(TControl);
@@ -328,6 +337,52 @@ begin
   SetWindowPos(Handle, HWND_TOPMOST, X, Y, 0, 0, SWP_NOACTIVATE or SWP_NOSIZE);
 {$ENDIF}
 end;
+
+{$IFDEF FPC}
+
+function TCnFloatListBox.IndexFromPoint(X, Y, ItemCount: Integer): Integer;
+begin
+  // 虚拟列表（LBS_NODATA）下 LCL 的 ItemAtPos 要走 WS 查询，浮窗被
+  // SetParent 摘出父链后结果不可靠，这里按行高与 TopIndex 直接换算条目序号。
+  // 条目数由调用方传入，不依赖可能与句柄不同步的 LCL Items.Count
+  Result := TopIndex + Y div Max(1, ItemHeight);
+  if (X < 0) or (X > ClientWidth) or (Y < 0) or (Y > ClientHeight) or
+    (Result < 0) or (Result >= ItemCount) then
+    Result := -1;
+end;
+
+procedure TCnFloatListBox.SelectItem(Index: Integer);
+begin
+  try
+    ItemIndex := Index;
+  except
+    // 虚拟列表下 LCL 的 FItems 可能与句柄不同步，退回原生消息
+    SendMessage(Handle, csLBSetCurSel, Index, 0);
+    Invalidate;
+  end;
+end;
+
+procedure TCnFloatListBox.ScrollByWheel(WheelDelta, ItemCount: Integer);
+var
+  VisibleCount, MaxTop, NewTop: Integer;
+begin
+  // LCL 默认把滚轮消息沿 Parent 链交给 IDE 主窗体，脱离父链的浮窗收不到滚动。
+  // 由消息钩子直接改 TopIndex，让原生 LISTBOX 自行滚动
+  if (not HandleAllocated) or (WheelDelta = 0) or (ItemCount <= 0) then
+    Exit;
+
+  VisibleCount := Max(1, ClientHeight div Max(1, ItemHeight));
+  MaxTop := Max(0, ItemCount - VisibleCount);
+  if WheelDelta > 0 then
+    NewTop := TopIndex - csWheelScrollLines
+  else
+    NewTop := TopIndex + csWheelScrollLines;
+  NewTop := Max(0, Min(NewTop, MaxTop));
+  if NewTop <> TopIndex then
+    TopIndex := NewTop;
+end;
+
+{$ENDIF}
 
 procedure TCnFloatListBox.SetUseEditorColor(const Value: Boolean);
 begin
