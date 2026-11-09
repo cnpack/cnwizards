@@ -136,10 +136,11 @@ function GetTokenAnsiEditCol(AToken: TCnGeneralPasToken): Integer;
 
 {$IFDEF LAZARUS}
 
-function CnLazCharIndexToLogicalCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
-{* Lazarus 下把解析器 Token 的 CharIndex（行内 0 基偏移，UTF16 口径）换算成
-   SynEdit 的逻辑列（1 基 UTF8 字符列）。这是解析器位置到编辑器位置的唯一换算点，
-   兼容 Tab 与行内多字节字符}
+function CnLazCharIndexToByteCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
+{* Lazarus 下把解析器 Token 的 CharIndex（行内 0 基偏移，UTF16 口径）换算成该字符
+   所在的 1 基 UTF8 字节列。注意 SynEdit 的 Markup 管线、LogicalToPhysicalPos 与
+   LogicalCaretXY 等 Logical 坐标均按 UTF8 字节口径工作，行内有多字节字符时与
+   UTF8 字符列存在偏差，故写入 Markup 的列号必须用字节列而不是字符列}
 
 {$ENDIF}
 
@@ -188,18 +189,21 @@ end;
 
 {$IFDEF LAZARUS}
 
-// Lazarus：解析器 CharIndex（行内 0 基 UTF16 偏移）转 SynEdit 逻辑列（1 基 UTF8 字符列）
-function CnLazCharIndexToLogicalCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
+// Lazarus：解析器 CharIndex（行内 0 基 UTF16 偏移）转该字符所在的 1 基 UTF8 字节列
+function CnLazCharIndexToByteCol(const ALineUtf8: string; ACharIndex0: Integer): Integer;
 var
-  W: WideString;
+  I, Cnt: Integer;
 begin
-  W := CnUtf8DecodeToWideString(AnsiString(ALineUtf8));
-  if ACharIndex0 < 0 then
-    ACharIndex0 := 0;
-  if ACharIndex0 > Length(W) then
-    ACharIndex0 := Length(W);
-  // 前 ACharIndex0 个 UTF16 单元中的字符数（代理对算 1 个）即为 UTF8 字符列数
-  Result := GetCharLengthFromUtf16(PWideChar(Copy(W, 1, ACharIndex0))) + 1;
+  // 顺序扫描 UTF8 字节，按非续字节统计码点，定位第 ACharIndex0 + 1 个码点的首字节
+  Cnt := 0;
+  I := 1;
+  while (I <= Length(ALineUtf8)) and (Cnt < ACharIndex0) do
+  begin
+    if (Byte(ALineUtf8[I]) and $C0) <> $80 then
+      Inc(Cnt);
+    Inc(I);
+  end;
+  Result := I;
 end;
 
 {$ENDIF}

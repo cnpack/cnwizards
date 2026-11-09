@@ -662,7 +662,7 @@ type
     procedure LazUnregisterAllPaintEvents;
     procedure LazAfterPaint(Sender: TObject; EventType: TSynPaintEvent; const rcClip: TRect);
     procedure LazDrawPairLines(ASynEdit: TSynEdit);
-    function LazTokenLogicalCol(AControl: TControl; Token: TCnGeneralPasToken): Integer;
+    function LazTokenByteCol(AControl: TControl; Token: TCnGeneralPasToken): Integer;
     procedure LazAddTokenItemEx(AControl: TControl; Token: TCnGeneralPasToken;
       ColorFg, ColorBk, ColorFrame: TColor);
     procedure LazAddTokenItem(AControl: TControl; Token: TCnGeneralPasToken;
@@ -674,7 +674,7 @@ type
     {* Lazarus: 检查光标附近括号配对并同步 Markup 条目，对应 Delphi 侧 CheckBracketMatch}
     function LazGetBracketMatch(EditControl: TControl; AInfo: TCnBracketInfo): Boolean;
     {* Lazarus: 括号配对匹配算法，对应 Delphi 侧 GetBracketMatch，
-       位置结果使用 SynEdit 的 1 基逻辑列与 1 基物理行}
+       位置结果使用 SynEdit 的 1 基 UTF8 字节列与 1 基物理行}
     procedure LazAddBracketItems(EditControl: TControl);
     {* Lazarus: 将当前括号配对信息按设置颜色注入 Markup}
 {$ENDIF}
@@ -880,8 +880,9 @@ type
   TCnSourceHighlightItem = record
   {* 单条高亮数据：某行的某列区间，ColStart=1 且 ColEnd=MaxInt 时为整行 }
     Row: Integer;          // 1-based 物理行号（非逻辑行，折叠由 SynEdit 处理）
-    ColStart: Integer;     // 1-based 逻辑列（UTF8 字符列），行首为 1
-    ColEnd: Integer;       // 逻辑列结束（不含），MaxInt 表示到行尾；整行高亮为 1..MaxInt
+    ColStart: Integer;     // 1-based UTF8 字节列（SynEdit Markup 管线的 Logical 口径），行首为 1
+    ColEnd: Integer;       // 字节列结束（不含），MaxInt 表示到行尾；整行高亮为 1..MaxInt
+    // 注意 SynEdit 的 Markup 管线按 UTF8 字节列比较与绘制，不能用 UTF8 字符列
     ColorFg: TColor;       // 前景色，clNone 表示不改变
     ColorBk: TColor;       // 背景色，clNone 表示不改变
     ColorFrame: TColor;    // 边框色，clNone 表示不绘制边框
@@ -4636,7 +4637,9 @@ begin
         begin
           OldPair := Line.CurrentPair;
           Line.FindCurrentPair({$IFDEF DELPHI_OTA} EditView.CursorPos.Line, EditView.CursorPos.Col {$ENDIF}
-            {$IFDEF LAZARUS} EditView.CursorTextXY.Y, EditView.CursorTextXY.X {$ENDIF}); // 暂时不处理 C/C++ 的情况
+            {$IFDEF LAZARUS} EditView.CursorTextXY.Y,
+            CnLazByteColToCharCol(EditView.Lines[EditView.CursorTextXY.Y - 1],
+              EditView.CursorTextXY.X) {$ENDIF}); // 暂时不处理 C/C++；字节列需转为解析器的字符列
           NewPair := Line.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -4683,7 +4686,9 @@ begin
         begin
           OldPair := CompDirective.CurrentPair;
           CompDirective.FindCurrentPair({$IFDEF DELPHI_OTA} EditView.CursorPos.Line, EditView.CursorPos.Col {$ENDIF}
-            {$IFDEF LAZARUS} EditView.CursorTextXY.Y, EditView.CursorTextXY.X {$ENDIF}); // 暂时不处理 C/C++ 的情况
+            {$IFDEF LAZARUS} EditView.CursorTextXY.Y,
+            CnLazByteColToCharCol(EditView.Lines[EditView.CursorTextXY.Y - 1],
+              EditView.CursorTextXY.X) {$ENDIF}); // 暂时不处理 C/C++；字节列需转为解析器的字符列
           NewPair := CompDirective.CurrentPair;
           if OldPair <> NewPair then
           begin
@@ -4759,8 +4764,9 @@ begin
     LazDrawPairLines(TSynEdit(Sender));
 end;
 
-// Token 的 CharIndex（行内 0 基 UTF16 偏移）转 SynEdit 逻辑列（1 基 UTF8 字符列）
-function TCnSourceHighlight.LazTokenLogicalCol(AControl: TControl;
+// Token 的 CharIndex（行内 0 基 UTF16 偏移）转该字符所在的 1 基 UTF8 字节列
+// （SynEdit 的 Markup 管线、LogicalToPhysicalPos 等均按字节列工作）
+function TCnSourceHighlight.LazTokenByteCol(AControl: TControl;
   Token: TCnGeneralPasToken): Integer;
 var
   SynEd: TSynEdit;
@@ -4775,7 +4781,7 @@ begin
     Exit;
 
   LineText := SynEd.Lines[Token.EditLine - 1];
-  Result := CnLazCharIndexToLogicalCol(LineText, Token.CharIndex);
+  Result := CnLazCharIndexToByteCol(LineText, Token.CharIndex);
 end;
 
 // 将单个 Token 的 Markup 条目以指定颜色写入（AddItem 对同行同列自动原地更新），
@@ -4798,12 +4804,13 @@ begin
   if Markup = nil then
     Exit;
 
-  Col := LazTokenLogicalCol(AControl, Token);
+  Col := LazTokenByteCol(AControl, Token);
   if Col <= 0 then
     Exit;
 
-  // Token 均为 ASCII（关键字/标识符/编译指令词），逻辑列宽即字符串长度
-  ColEnd := Col + Length(Token.Token);
+  // ColEnd 按 Token 内容的 UTF8 字节长度计算（SynEdit Markup 为字节口径，
+  // 标识符可能含多字节字符，不能直接用字符数）
+  ColEnd := Col + CalcUtf8LengthFromWideString(Token.Token);
   Markup.AddItem(Token.EditLine, Col, ColEnd, ColorFg, ColorBk, ColorFrame);
 end;
 
@@ -5006,12 +5013,12 @@ begin
         Continue;
       if (Pair.Bottom < FirstRow) or (Pair.Top > LastRow) then
         Continue;
-      Col := LazTokenLogicalCol(EditControl, Pair.StartToken);
+      Col := LazTokenByteCol(EditControl, Pair.StartToken);
       if Col <= 0 then
         Continue;
       P1 := PixelOf(Col, Pair.Top);
 
-      Col := LazTokenLogicalCol(EditControl, Pair.EndToken);
+      Col := LazTokenByteCol(EditControl, Pair.EndToken);
       if Col <= 0 then
         Continue;
       P2 := PixelOf(Col, Pair.Bottom);
@@ -5062,38 +5069,11 @@ begin
   end;
 end;
 
-// Lazarus: 0 基字节下标转 1 基逻辑列（跳过 UTF8 多字节的后续字节）
-function LazByteIdxToLogicalCol(const S: string; AByteIdx: Integer): Integer;
-var
-  I, Cnt: Integer;
-begin
-  Cnt := 0;
-  for I := 1 to AByteIdx do
-    if (Byte(S[I]) and $C0) <> $80 then
-      Inc(Cnt);
-  Result := Cnt + 1;
-end;
-
-// Lazarus: 1 基逻辑列转 0 基字节下标（该列字符首字节的下标）
-function LazLogicalColToByteIdx(const S: string; ALogicalCol: Integer): Integer;
-var
-  I, Cnt: Integer;
-begin
-  Cnt := 0;
-  I := 1;
-  while (I <= Length(S)) and (Cnt < ALogicalCol - 1) do
-  begin
-    if (Byte(S[I]) and $C0) <> $80 then
-      Inc(Cnt);
-    Inc(I);
-  end;
-  Result := I - 1;
-end;
-
 // Lazarus: 括号配对匹配，对应 Delphi 侧 GetBracketMatch 的三段算法：
 // 光标前后紧邻括号的直接配对、以及 FBracketMiddle 时从光标向两侧的中间查找。
 // 行内扫描在 UTF8 字节空间进行（括号均为 ASCII，多字节序列不会含 ASCII 字节），
-// 结果位置换算为 SynEdit 的 1 基逻辑列。注释/字符串内的括号用高亮器属性排除
+// 结果位置直接使用 1 基 UTF8 字节列（SynEdit Markup 管线口径）。
+// 注释/字符串内的括号用高亮器属性排除
 function TCnSourceHighlight.LazGetBracketMatch(EditControl: TControl;
   AInfo: TCnBracketInfo): Boolean;
 var
@@ -5103,7 +5083,7 @@ var
   BracketCount: Integer;
   BracketChars: PBracketArray;
   TopLine, BottomLine: Integer;
-  CaretLine, CaretCol, CaretByteIdx: Integer;
+  CaretLine, CaretByteIdx: Integer;
   LineText: string;
   CL, CR: AnsiChar;
   TmpPos: TOTAEditPos;
@@ -5158,7 +5138,7 @@ var
             Dec(Layer);
             if Layer = 0 then
             begin
-              Result.Col := LazByteIdxToLogicalCol(LineText, J);
+              Result.Col := J + 1;
               Result.Line := I;
               Exit;
             end;
@@ -5201,7 +5181,7 @@ var
             Dec(Layer);
             if Layer = 0 then
             begin
-              Result.Col := LazByteIdxToLogicalCol(LineText, J);
+              Result.Col := J + 1;
               Result.Line := I;
               Exit;
             end;
@@ -5248,7 +5228,7 @@ var
             if Layers[K] = 0 then
             begin
               AInfo.TokenStr := BracketChars^[K][0];
-              TmpPos.Col := LazByteIdxToLogicalCol(LineText, J);
+              TmpPos.Col := J + 1;
               TmpPos.Line := I;
               AInfo.TokenPos := TmpPos;
               ML := K;
@@ -5299,7 +5279,7 @@ var
             if Layers[K] = 0 then
             begin
               AInfo.TokenMatchStr := BracketChars^[K][1];
-              TmpPos.Col := LazByteIdxToLogicalCol(LineText, J);
+              TmpPos.Col := J + 1;
               TmpPos.Line := I;
               AInfo.TokenMatchPos := TmpPos;
               Break;
@@ -5370,11 +5350,12 @@ begin
     end;
 
     CaretLine := SynEd.CaretXY.Y;
-    CaretCol := SynEd.CaretXY.X;
     if (CaretLine < 1) or (CaretLine > SynEd.Lines.Count) then
       Exit;
     LineText := SynEd.Lines[CaretLine - 1];
-    CaretByteIdx := LazLogicalColToByteIdx(LineText, CaretCol);
+    // LogicalCaretXY.X 为 1 基 UTF8 字节列（CaretXY.X 是显示列，含 Tab 与多字节宽度，
+    // 不能直接当字符列或字节列用）
+    CaretByteIdx := SynEd.LogicalCaretXY.X - 1;
 
     // 光标不落在注释或字符串上时，检查前后紧邻的括号
     if (LineText <> '') and not InCommentOrString(CaretLine, CaretByteIdx) then
@@ -5393,7 +5374,7 @@ begin
         if CL = BracketChars^[I][0] then
         begin
           AInfo.TokenStr := BracketChars^[I][0];
-          TmpPos.Col := LazByteIdxToLogicalCol(LineText, CaretByteIdx - 1);
+          TmpPos.Col := CaretByteIdx;
           TmpPos.Line := CaretLine;
           AInfo.TokenPos := TmpPos;
           AInfo.TokenMatchStr := BracketChars^[I][1];
@@ -5406,7 +5387,7 @@ begin
         else if CR = BracketChars^[I][1] then
         begin
           AInfo.TokenStr := BracketChars^[I][1];
-          TmpPos.Col := LazByteIdxToLogicalCol(LineText, CaretByteIdx);
+          TmpPos.Col := CaretByteIdx + 1;
           TmpPos.Line := CaretLine;
           AInfo.TokenPos := TmpPos;
           AInfo.TokenMatchStr := BracketChars^[I][0];

@@ -5252,11 +5252,12 @@ begin
   if View = nil then
     Exit;
   Y := View.CursorTextXY.Y;
-  X := View.CursorTextXY.X; // 1 基 UTF8 逻辑列
+  X := View.CursorTextXY.X; // 1 基 UTF8 字节列
   if (Y < 1) or (Y > View.Lines.Count) or (X < 1) then
     Exit;
 
-  // 行文本转 UTF16，再把光标列换算成行内 0 基 UTF16 偏移
+  // 行文本转 UTF16，再把光标字节列换算成行内 0 基 UTF16 偏移
+  //（CursorTextXY.X 是 1 基 UTF8 字节列，见 srceditorintf 的注释）
   WT := CnUtf8DecodeToWideString(AnsiString(View.Lines[Y - 1]));
   if WT = '' then
     Exit;
@@ -5272,9 +5273,9 @@ begin
     else
       Inc(WPos);
     Inc(P, BW);
-    Inc(Cnt);
+    Inc(Cnt, BW); // 按字节累计，X 为字节列
   end;
-  // WPos 为 0 基 UTF16 偏移；扫满 X 个字符后若已到行尾说明光标在行尾之后
+  // WPos 为 0 基 UTF16 偏移；扫满 X 个字节后若已到行尾说明光标在行尾之后
   if (WPos < 1) or (WPos > Length(WT)) then
     Exit;
 
@@ -5404,11 +5405,11 @@ begin
     if View = nil then
       Exit;
     Y := View.CursorTextXY.Y;
-    X := View.CursorTextXY.X; // 1 基 UTF8 逻辑列
+    X := View.CursorTextXY.X; // 1 基 UTF8 字节列
     if (Y < 1) or (Y > View.Lines.Count) or (X < 1) then
       Exit;
 
-    // 与 CnOtaGeneralGetCurrPosToken 同法，把光标列换算成行内 0 基 UTF16 偏移
+    // 与 CnOtaGeneralGetCurrPosToken 同法，把光标字节列换算成行内 0 基 UTF16 偏移
     Utf8Line := View.Lines[Y - 1];
     WPos := 0;
     Cnt := 0;
@@ -5421,7 +5422,7 @@ begin
       else
         Inc(WPos);
       Inc(P, BW);
-      Inc(Cnt);
+      Inc(Cnt, BW);
     end;
 
     // CurrIndex 为光标前 token 内字符数，token 起点 0 基偏移 = WPos - CurrIndex
