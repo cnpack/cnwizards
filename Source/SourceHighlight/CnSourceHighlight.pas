@@ -9166,41 +9166,50 @@ end;
 function TCnSourceHighlightMarkup.SelectionIntersects(aRow, aColStart,
   aColEnd: Integer): Boolean;
 var
+  Ed: TSynEdit;
   B, E, SelS, SelE: Integer;
 begin
   // 本 Markup 的前景优先级远高于选中区（见构造函数，覆盖关键字彩色前景所需），
   // 条目前景会盖掉选中文字的白色前景；故条目与选区相交时，绘制方须返回
-  // clNone 把前景交还给选中区机制，否则选中词内文字颜色混乱难以辨认
+  // clNone 把前景交还给选中区机制，否则选中词内文字颜色混乱难以辨认。
+  // 注意 SynEdit 属性（TSynEditMarkup.SynEdit）是 TSynEditBase 类型，
+  // SelectionMode 仅在 TCustomSynEdit 及其子类上，须经强转访问
   Result := False;
-  if (SynEdit = nil) or (not SynEdit.SelAvail) then
+  if SynEdit = nil then
     Exit;
-  B := SynEdit.BlockBegin.Y;
-  E := SynEdit.BlockEnd.Y;
+
+  Ed := TSynEdit(SynEdit);
+  if not Ed.SelAvail then
+    Exit;
+
+  B := Ed.BlockBegin.Y;
+  E := Ed.BlockEnd.Y;
   if (aRow < B) or (aRow > E) then
     Exit;
-  if False {SynEdit.SelectionMode = smColumn 低版本未开放选择模式属性} then
+
+  if Ed.SelectionMode = smColumn then
   begin
     // 列选：每一行均为左右列界之间的区间
-    SelS := Min(SynEdit.BlockBegin.X, SynEdit.BlockEnd.X);
-    SelE := Max(SynEdit.BlockBegin.X, SynEdit.BlockEnd.X);
+    SelS := Min(Ed.BlockBegin.X, Ed.BlockEnd.X);
+    SelE := Max(Ed.BlockBegin.X, Ed.BlockEnd.X);
   end
   else
   begin
     // 行选时 BlockBegin/BlockEnd 的 X 分别在行首与行尾，同样适用
     if B = E then
     begin
-      SelS := SynEdit.BlockBegin.X;
-      SelE := SynEdit.BlockEnd.X;
+      SelS := Ed.BlockBegin.X;
+      SelE := Ed.BlockEnd.X;
     end
     else if aRow = B then
     begin
-      SelS := SynEdit.BlockBegin.X;
+      SelS := Ed.BlockBegin.X;
       SelE := MaxInt;
     end
     else if aRow = E then
     begin
       SelS := 1;
-      SelE := SynEdit.BlockEnd.X;
+      SelE := Ed.BlockEnd.X;
     end
     else
     begin
