@@ -913,6 +913,8 @@ type
     {* 二分查找行号对应的第一个条目下标（同行多条时取 ColStart 最小者），未命中返回 -1 }
     function IndexOfExact(aRow, aColStart: Integer): Integer;
     {* 精确查找 Row 与 ColStart 都相同的条目，未命中返回 -1 }
+    function SelectionIntersects(aRow, aColStart, aColEnd: Integer): Boolean;
+    {* 判断条目列区间是否与本行的选区相交（字节列口径）}
     procedure InvalidateDirty;
     {* 失效可视区，数据变化后重画；PaintLock 期间仅置脏 }
   public
@@ -9161,6 +9163,54 @@ begin
 {$ENDIF}
 end;
 
+function TCnSourceHighlightMarkup.SelectionIntersects(aRow, aColStart,
+  aColEnd: Integer): Boolean;
+var
+  B, E, SelS, SelE: Integer;
+begin
+  // 本 Markup 的前景优先级远高于选中区（见构造函数，覆盖关键字彩色前景所需），
+  // 条目前景会盖掉选中文字的白色前景；故条目与选区相交时，绘制方须返回
+  // clNone 把前景交还给选中区机制，否则选中词内文字颜色混乱难以辨认
+  Result := False;
+  if (SynEdit = nil) or (not SynEdit.SelAvail) then
+    Exit;
+  B := SynEdit.BlockBegin.Y;
+  E := SynEdit.BlockEnd.Y;
+  if (aRow < B) or (aRow > E) then
+    Exit;
+  if False {SynEdit.SelectionMode = smColumn 低版本未开放选择模式属性} then
+  begin
+    // 列选：每一行均为左右列界之间的区间
+    SelS := Min(SynEdit.BlockBegin.X, SynEdit.BlockEnd.X);
+    SelE := Max(SynEdit.BlockBegin.X, SynEdit.BlockEnd.X);
+  end
+  else
+  begin
+    // 行选时 BlockBegin/BlockEnd 的 X 分别在行首与行尾，同样适用
+    if B = E then
+    begin
+      SelS := SynEdit.BlockBegin.X;
+      SelE := SynEdit.BlockEnd.X;
+    end
+    else if aRow = B then
+    begin
+      SelS := SynEdit.BlockBegin.X;
+      SelE := MaxInt;
+    end
+    else if aRow = E then
+    begin
+      SelS := 1;
+      SelE := SynEdit.BlockEnd.X;
+    end
+    else
+    begin
+      SelS := 1;
+      SelE := MaxInt;
+    end;
+  end;
+  Result := (aColStart < SelE) and (aColEnd > SelS);
+end;
+
 function TCnSourceHighlightMarkup.GetMarkupAttributeAtRowCol(
   const aRow: Integer; const aStartCol: TLazSynDisplayTokenBound;
   const AnRtlInfo: TLazSynDisplayRtlInfo): TSynSelectedColor;
@@ -9183,6 +9233,9 @@ begin
       MarkupInfo.Foreground := Item^.ColorFg;
       MarkupInfo.Background := Item^.ColorBk;
       MarkupInfo.FrameColor := Item^.ColorFrame;
+      // 选区内交还前景，保证选中文字的白前景（SelectedColor.Foreground）生效
+      if SelectionIntersects(aRow, Item^.ColStart, Item^.ColEnd) then
+        MarkupInfo.Foreground := clNone;
       if Item^.StyleBold then
       begin
         MarkupInfo.Style := [fsBold];
