@@ -662,6 +662,8 @@ function CnOtaGetProjectOutputDirectory(Project: TCnIDEProjectInterface): string
 function CnOtaGetProjectOutputTarget(Project: TCnIDEProjectInterface): string;
 {* 获得项目的二进制文件输出完整路径，Lazarus 下通过 LazCompilerOptions.CreateTargetFilename 实现}
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean = True; FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = [] {$IFDEF DELPHI_OTA}; EditView: IOTAEditView = nil {$ENDIF}): Boolean;
@@ -669,8 +671,12 @@ function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex
   Token: D567 下返回 AnsiString，2005~2007 下返回 WideString，2009 或以上及 Lazarus 返回 UnicodeString
   CurrIndex: 0 开始，D567 下返回当前光标在 Token 内的 Ansi 偏移，2007 或以上及 Lazarus 返回 WideChar 偏移}
 
+{$ENDIF}
+
 function CnOtaGetCurrChar(OffsetX: Integer = 0; View: TCnEditViewSourceInterface = nil): Char;
 {* 取当前光标下的字符，允许偏移量}
+
+{$IFNDEF CNWIZARDS_MINIMUM}
 
 function CnOtaDeleteCurrToken(FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []): Boolean;
@@ -681,6 +687,8 @@ function CnOtaDeleteCurrTokenLeft(FirstSet: TAnsiCharSet = [];
 function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
   CharSet: TAnsiCharSet = []): Boolean;
 {* 删除当前光标下的标识符右半部分}
+
+{$ENDIF}
 
 function CnNtaGetCurrLineText(var Text: string; var LineNo: Integer;
   var CharIndex: Integer; ActualPosWhenEmpty: Boolean = False): Boolean;
@@ -5198,6 +5206,8 @@ begin
   end;
 end;
 
+{$IFNDEF CNWIZARDS_MINIMUM}
+
 // 封装的获取当前光标下的标识符以及索引号的函数
 function CnOtaGeneralGetCurrPosToken(var Token: TCnIdeTokenString; var CurrIndex: Integer;
   CheckCursorOutOfLineEnd: Boolean; FirstSet, CharSet: TAnsiCharSet {$IFDEF DELPHI_OTA};
@@ -5305,6 +5315,8 @@ begin
 {$ENDIF}
 end;
 
+{$ENDIF}
+
 // 取当前光标下的字符，允许偏移量
 function CnOtaGetCurrChar(OffsetX: Integer; View: TCnEditViewSourceInterface): Char;
 var
@@ -5329,6 +5341,8 @@ begin
       Result := LineText[CharIndex];
   end;
 end;
+
+{$IFNDEF CNWIZARDS_MINIMUM}
 
 function _DeleteCurrToken(DelLeft, DelRight: Boolean; FirstSet: TAnsiCharSet;
   CharSet: TAnsiCharSet): Boolean;
@@ -5473,6 +5487,8 @@ function CnOtaDeleteCurrTokenRight(FirstSet: TAnsiCharSet = [];
 begin
   Result := _DeleteCurrToken(False, True, FirstSet, CharSet);
 end;
+
+{$ENDIF}
 
 // 使用 NTA 方法取当前行源代码。速度快，但取回的文本是将 Tab 扩展成空格的。
 // 如果使用 ConvertPos 来转换成 EditPos 可能会有问题。直接将 CharIndex + 1
