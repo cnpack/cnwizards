@@ -8635,6 +8635,19 @@ begin
   inherited;
 end;
 
+{$IFDEF LAZARUS}
+
+// Lazarus：传给 ConvertUtf16ToAlterDisplayAnsi 的宽度计算器，恒返回 False，
+// 使每个 UTF16 码点（含汉字等宽字符）在替换文本中只占一个字符位。这样 FindCurrentPair
+// 里 Text 的索引才能与调用方传入的光标列以及 Token EditCol 的 UTF16 码点口径 1:1 对应；
+// 若用默认计算器，宽字符会被替换成两个字符，行内每多一个宽字符匹配窗口便错位一位
+function LazSingleCharWidthCalc(AWChar: WideChar): Boolean;
+begin
+  Result := False;
+end;
+
+{$ENDIF}
+
 procedure TCnBlockLineInfo.FindCurrentPair(ViewCursorPosLine: Integer;
   ViewCursorPosCol: SmallInt; IsCppModule: Boolean);
 var
@@ -8697,11 +8710,14 @@ begin
   begin
 {$IFDEF LAZARUS}
     // Lazarus：FControl 是 TSynEdit，其 LineText 非 published 不能用 GetStrProp，
-    // 按光标行取行文本转 UTF16 后同样做替换 Ansi 化，Text 的索引与 UTF16 码点列 1:1 对应，
-    // 与调用方传入的解析器口径列（CharPos.CharIndex + 1）自洽
+    // 按光标行取行文本转 UTF16 后做替换 Ansi 化。必须传 LazSingleCharWidthCalc 让
+    // 宽字符只占一个字符位，Text 的索引才与调用方传入的光标列及 Token EditCol
+    // 的 UTF16 码点口径 1:1 对应（默认计算器将宽字符替换成两个字符，行内每多一个
+    // 宽字符，光标窗口便错位一位，导致光标下关键字配对判断失败）
     SynEd := GetSynEditOfControl(FControl);
     if (SynEd <> nil) and (ViewCursorPosLine >= 1) and (ViewCursorPosLine <= SynEd.Lines.Count) then
-      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(CnUtf8DecodeToWideString(SynEd.Lines[ViewCursorPosLine - 1])), 'C');
+      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(CnUtf8DecodeToWideString(SynEd.Lines[ViewCursorPosLine - 1])), 'C',
+        LazSingleCharWidthCalc);
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}
@@ -8947,11 +8963,14 @@ begin
   begin
 {$IFDEF LAZARUS}
     // Lazarus：FControl 是 TSynEdit，其 LineText 非 published 不能用 GetStrProp，
-    // 按光标行取行文本转 UTF16 后同样做替换 Ansi 化，Text 的索引与 UTF16 码点列 1:1 对应，
-    // 与调用方传入的解析器口径列（CharPos.CharIndex + 1）自洽
+    // 按光标行取行文本转 UTF16 后做替换 Ansi 化。必须传 LazSingleCharWidthCalc 让
+    // 宽字符只占一个字符位，Text 的索引才与调用方传入的光标列及 Token EditCol
+    // 的 UTF16 码点口径 1:1 对应（默认计算器将宽字符替换成两个字符，行内每多一个
+    // 宽字符，光标窗口便错位一位，导致光标下关键字配对判断失败）
     SynEd := GetSynEditOfControl(FControl);
     if (SynEd <> nil) and (ViewCursorPosLine >= 1) and (ViewCursorPosLine <= SynEd.Lines.Count) then
-      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(CnUtf8DecodeToWideString(SynEd.Lines[ViewCursorPosLine - 1])), 'C');
+      Text := ConvertUtf16ToAlterDisplayAnsi(PWideChar(CnUtf8DecodeToWideString(SynEd.Lines[ViewCursorPosLine - 1])), 'C',
+        LazSingleCharWidthCalc);
 {$ENDIF}
 {$IFDEF DELPHI_OTA}
 {$IFDEF UNICODE}

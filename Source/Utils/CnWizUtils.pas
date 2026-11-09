@@ -5216,7 +5216,9 @@ var
       if First then
         Result := (C in ['A'..'Z', 'a'..'z', '_']) or (AnsiChar(C) in FirstSet)
       else
-        Result := (C in ['A'..'Z', 'a'..'z', '_', '0'..'9']) or (AnsiChar(C) in CharSet);
+        // 和 Delphi 扫描时统一用 FirstSet + CharSet，标识符中间字符两侧字符集都要认
+        Result := (C in ['A'..'Z', 'a'..'z', '_', '0'..'9']) or (AnsiChar(C) in CharSet)
+          or (AnsiChar(C) in FirstSet);
     end
     else
       Result := True; // 宽字符（汉字等）默认算标识符字符，同 Delphi 宽字符标识符语义
@@ -5257,15 +5259,16 @@ begin
     Exit;
 
   // 行文本转 UTF16，再把光标字节列换算成行内 0 基 UTF16 偏移
-  //（CursorTextXY.X 是 1 基 UTF8 字节列，见 srceditorintf 的注释）
+  //（CursorTextXY.X 是 1 基 UTF8 字节列，光标位于该列字节之前，见 srceditorintf 的注释）
   WT := CnUtf8DecodeToWideString(AnsiString(View.Lines[Y - 1]));
   if WT = '' then
     Exit;
 
+  // 光标左侧的字节数是 X - 1，按整字符累计得到光标左侧的 UTF16 字符数
   P := PAnsiChar(AnsiString(View.Lines[Y - 1]));
   Cnt := 0;
   WPos := 0;
-  while (P^ <> #0) and (Cnt < X) do
+  while (P^ <> #0) and (Cnt < X - 1) do
   begin
     BW := GetByteWidthFromUtf8(P);
     if BW = 4 then
@@ -5273,28 +5276,31 @@ begin
     else
       Inc(WPos);
     Inc(P, BW);
-    Inc(Cnt, BW); // 按字节累计，X 为字节列
+    Inc(Cnt, BW); // 按字节累计，X 为 1 基字节列
   end;
-  // WPos 为 0 基 UTF16 偏移；扫满 X 个字节后若已到行尾说明光标在行尾之后
-  if (WPos < 1) or (WPos > Length(WT)) then
+  // 未扫满光标左侧的字节数说明光标已越过行尾
+  if CheckCursorOutOfLineEnd and (Cnt < X - 1) then
     Exit;
 
-  if not IsIdentChar(WT[WPos], True) then
-    Exit;
-
-  WStart := WPos;
-  while (WStart > 1) and IsIdentChar(WT[WStart - 1], False) do
+  // 与 Delphi 的 CnOtaGetCurrPosTokenW 保持一致：以光标左侧字符为起点，
+  // 先向左、再向右按标识符字符扩展，最后校验整个词的首字符。
+  // 这样 ABC|（光标紧贴标识符末尾）与 FORM|1（左侧字母、右侧数字）都能正确识别
+  WStart := WPos; // 0 基：光标左侧的 UTF16 字符数
+  CurrIndex := 0;
+  while (WStart > 0) and IsIdentChar(WT[WStart], False) do
+  begin
     Dec(WStart);
-  WEnd := WPos;
-  while (WEnd < Length(WT)) and IsIdentChar(WT[WEnd + 1], False) do
+    Inc(CurrIndex);
+  end;
+  Inc(WStart); // 转成 1 基的 Token 起始索引
+  WEnd := WStart;
+  while (WEnd <= Length(WT)) and IsIdentChar(WT[WEnd], False) do
     Inc(WEnd);
 
-  Token := Copy(WT, WStart, WEnd - WStart + 1);
-  // CurrIndex 为光标前 token 内的字符数（1 基计数，Delphi 版同语义，
-  // 供 BackspaceDelete/FMatchStr 等按字符数消费）：WPos 是光标左侧字符的
-  // 1 基索引（亦即 0 基偏移），WStart 是 token 首字符的 1 基索引，
-  // 故需要加 1 才是光标前的字符数，少 1 会导致删除区间/匹配串整体错位
-  CurrIndex := WPos - WStart + 1;
+  Token := Copy(WT, WStart, WEnd - WStart);
+  // 词首必须是合法标识符起始字符（数字只能出现在中间），否则不当作标识符
+  if (Token <> '') and not IsIdentChar(Token[1], True) then
+    Token := '';
   Result := Token <> '';
 {$ENDIF}
 end;
@@ -5339,7 +5345,7 @@ var
   Utf8Line: AnsiString;
   P: PAnsiChar;
   Y, X, Cnt, BW: Integer;
-  WPos: Integer;            // 光标左侧字符的 1 基索引（亦即 0 基 UTF16 偏移）
+  WPos: Integer;            // 光标左侧的 UTF16 字符数（0 基偏移）
   WStartPos, WEndPos: Integer; // Token 起止的行内 0 基 UTF16 偏移
   ColStart, ColEnd, ColCursor: Integer; // 对应的 1 基 UTF8 逻辑列
 
@@ -5410,11 +5416,12 @@ begin
       Exit;
 
     // 与 CnOtaGeneralGetCurrPosToken 同法，把光标字节列换算成行内 0 基 UTF16 偏移
+    //（光标左侧的字节数是 X - 1）
     Utf8Line := View.Lines[Y - 1];
     WPos := 0;
     Cnt := 0;
     P := PAnsiChar(Utf8Line);
-    while (P^ <> #0) and (Cnt < X) do
+    while (P^ <> #0) and (Cnt < X - 1) do
     begin
       BW := GetByteWidthFromUtf8(P);
       if BW = 4 then
