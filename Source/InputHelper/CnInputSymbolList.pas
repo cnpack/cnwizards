@@ -533,6 +533,7 @@ const
   csCompD120A = 'D120A';
 
   csCompBCB = 'BCB';
+  csCompL4 = 'L4';
   csCompUser = 'User';
 
   csCompDirectScope = MaxInt div 100 * 35;
@@ -1385,6 +1386,8 @@ begin
   {$IFDEF DELPHI104_SYDNEY_UP} AddSection(Ini, csCompD104S); {$ENDIF}
   {$IFDEF DELPHI110_ALEXANDRIA_UP} AddSection(Ini, csCompD110A); {$ENDIF}
   {$IFDEF DELPHI120_ATHENS_UP} AddSection(Ini, csCompD120A); {$ENDIF}
+
+  {$IFDEF LAZARUS} AddSection(Ini, csCompL4);{$ENDIF}
 
    AddSection(Ini, csCompBCB); // 加进来并设为C/C++专用的再说
   finally
