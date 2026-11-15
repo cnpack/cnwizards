@@ -318,6 +318,7 @@ resourcestring
   SCnMenuExploreName = 'CnExplore';
   SCnCopyFileNameMenuName = 'CnCopyFileName';
   SCnEditorToolBarDataName = 'EditorToolBar.ini';
+  SCnEditorToolBarLazDataName = 'EditorToolBar_Laz.ini';
   SCnEditorDesignToolBarDataName = 'DesignToolBar.ini';
   SCnCodeWrapFile = 'CodeWrap.xml';
   SCnGroupReplaceFile = 'GroupReplace.xml';

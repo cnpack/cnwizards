@@ -50,6 +50,7 @@ interface
 uses
   Windows, Messages, Classes, SysUtils, Graphics, Menus, Forms, ActnList,
   {$IFDEF DELPHIXE3_UP} Actions, {$ENDIF}
+  {$IFDEF LAZARUS} MenuIntf, IDECommands, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$IFDEF IDE_SUPPORT_HDPI} Vcl.VirtualImageList, {$ENDIF} {$ENDIF}
   CnCommon, CnWizConsts, CnWizShortCut;
 
@@ -119,6 +120,21 @@ type
     property Menu: TMenuItem read FMenu;
     {* Action 关联的菜单项，可在其它地方使用}
   end;
+
+{$IFDEF LAZARUS}
+
+  TCnLazToolBarAction = class(TAction)
+  private
+    FWizAction: TCustomAction;
+    FMenuItem: TIDEMenuItem;
+    procedure DoExecute(Sender: TObject);
+    procedure DoUpdate(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent; const AName, ACategory: string;
+      AWizAction: TCustomAction; AMenuItem: TIDEMenuItem); overload;
+  end;
+
+{$ENDIF}
 
 //==============================================================================
 // CnWizards IDE Action 管理器类
@@ -896,6 +912,64 @@ begin
   if FWizActionMgr <> nil then
     FreeAndNil(FWizActionMgr);
 end;
+
+{$IFDEF LAZARUS}
+
+{ TCnLazToolBarAction }
+
+constructor TCnLazToolBarAction.Create(AOwner: TComponent;
+  const AName, ACategory: string; AWizAction: TCustomAction;
+  AMenuItem: TIDEMenuItem);
+begin
+  inherited Create(AOwner);
+  if AOwner is TCustomActionList then
+    ActionList := TCustomActionList(AOwner);
+  FWizAction := AWizAction;
+  FMenuItem := AMenuItem;
+  Name := AName;
+  Category := ACategory;
+  Caption := AName;
+  OnExecute := DoExecute;
+  OnUpdate := DoUpdate;
+  DoUpdate(Self);
+end;
+
+procedure TCnLazToolBarAction.DoExecute(Sender: TObject);
+begin
+  if FWizAction <> nil then
+    FWizAction.Execute
+  else if FMenuItem = nil then
+    Exit
+  else if Assigned(FMenuItem.OnClick) or Assigned(FMenuItem.OnClickProc) then
+    FMenuItem.DoOnClick
+  else if (FMenuItem is TIDEMenuCommand) and
+    (TIDEMenuCommand(FMenuItem).Command <> nil) then
+    TIDEMenuCommand(FMenuItem).Command.Execute(FMenuItem);
+end;
+
+procedure TCnLazToolBarAction.DoUpdate(Sender: TObject);
+begin
+  if FWizAction <> nil then
+  begin
+    FWizAction.Update;
+    Enabled := FWizAction.Enabled;
+    Caption := FWizAction.Caption;
+    Hint := FWizAction.Hint;
+    ImageIndex := FWizAction.ImageIndex;
+    Checked := FWizAction.Checked;
+    Visible := FWizAction.Visible;
+  end
+  else if FMenuItem <> nil then
+  begin
+    Enabled := FMenuItem.Enabled;
+    Caption := FMenuItem.Caption;
+    Hint := FMenuItem.Hint;
+    ImageIndex := FMenuItem.ImageIndex;
+    Checked := FMenuItem.Checked;
+  end;
+end;
+
+{$ENDIF}
 
 {$IFDEF STAND_ALONE}
 

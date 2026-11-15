@@ -44,6 +44,7 @@ uses
   Windows, Messages, Classes, Graphics, SysUtils, Controls, Menus, Forms, CnIni,
   ComCtrls, ToolWin, {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles,
   CnEditControlWrapper, CnWizNotifier, CnWizManager, CnWizMenuAction, CnWizClasses,
+  {$IFDEF LAZARUS} ActnList, {$ENDIF}
   CnWizIni, CnWizIdeUtils, CnPopupMenu, CnConsts, CnNative;
 
 type
@@ -72,6 +73,9 @@ type
     FIDEMenu: TPopupMenu;
     FLastTick: Cardinal;
     procedure OnPopup(Sender: TObject);
+{$IFDEF LAZARUS}
+    procedure OnLazPopup(Sender: TObject);
+{$ENDIF}
     procedure DoClick(Sender: TObject);
   public
     procedure InitiateAction; override;
@@ -91,6 +95,10 @@ type
     FMenu: TPopupMenu;
     FToolBarMgr: TCnSrcEditorToolBarMgr;
     FToolBarType: TCnSrcEditorToolBarType;
+{$IFDEF LAZARUS}
+    FLazActionList: TActionList;
+    function FindLazToolBarAction(const AName: string): TBasicAction;
+{$ENDIF}
     procedure OnConfig(Sender: TObject);
     procedure OnClose(Sender: TObject);
     procedure OnEnhConfig(Sender: TObject);
@@ -419,6 +427,25 @@ begin
   end;  
 end;
 
+{$IFDEF LAZARUS}
+
+procedure TCnSrcEditorToolButton.OnLazPopup(Sender: TObject);
+var
+  SrcMenu: TMenuItem;
+begin
+  if (Sender <> nil) and (Sender is TPopupMenu) then
+  begin
+    SrcMenu := TMenuItem(TCnNativeInt(TPopupMenu(Sender).Tag));
+    if (SrcMenu <> nil) and (FIDEMenu <> nil) then
+    begin
+      FIDEMenu.Items.Clear;
+      CloneMenuItem(SrcMenu, FIDEMenu.Items);
+    end;
+  end;
+end;
+
+{$ENDIF}
+
 { TCnSrcEditorToolBar }
 
 constructor TCnSrcEditorToolBar.Create(AOwner: TComponent);
@@ -426,6 +453,10 @@ begin
   inherited;
   FMenu := TPopupMenu.Create(Self);
   FMenu.Images := dmCnSharedImages.GetMixedImageList;
+{$IFDEF LAZARUS}
+  FLazActionList := TActionList.Create(Self);
+  FLazActionList.Images := GetIDEImageList;
+{$ENDIF}
 end;
 
 destructor TCnSrcEditorToolBar.Destroy;
@@ -485,6 +516,23 @@ begin
     Result := False;
 end;
   
+{$IFDEF LAZARUS}
+
+function TCnSrcEditorToolBar.FindLazToolBarAction(const AName: string): TBasicAction;
+var
+  Action: TContainedAction;
+begin
+  // CnWizards 自有的 Action 直接使用，保留图标、状态和子菜单
+  Action := FindCnWizardActionByActionName(AName);
+  if Action = nil then
+    Action := FindLazToolBarActionByName(FLazActionList, AName);
+  if Action = nil then
+    Action := CreateLazToolBarAction(FLazActionList, AName);
+  Result := Action;
+end;
+
+{$ENDIF}
+
 procedure TCnSrcEditorToolBar.RecreateButtons;
 var
   I: Integer;
@@ -530,6 +578,12 @@ begin
   for I := ButtonCount - 1 downto 0 do
     Buttons[I].Free;
 
+{$IFDEF LAZARUS}
+  FreeAndNil(FLazActionList);
+  FLazActionList := TActionList.Create(Self);
+  FLazActionList.Images := GetIDEImageList;
+{$ENDIF}
+
   if FToolBarType = tbtCode then
     Actions := FToolBarMgr.FToolBarActions
   else
@@ -556,7 +610,11 @@ begin
     end
     else
     begin
+{$IFDEF LAZARUS}
+      Act := FindLazToolBarAction(Actions[I]);
+{$ELSE}
       Act := FindIDEAction(Actions[I]);
+{$ENDIF}
       if Act <> nil then
       begin
         Btn := TCnSrcEditorToolButton.Create(Self);
@@ -568,6 +626,20 @@ begin
           Btn.Caption := Btn.Name;
         if Btn.Hint = '' then
           Btn.Hint := StripHotkey(Btn.Caption);
+
+{$IFDEF LAZARUS}
+        // 子菜单型 CnWizards Action 使用下拉按钮承载其子菜单
+        if (Act is TCnWizMenuAction) and (TCnWizMenuAction(Act).Menu <> nil) and
+          (TCnWizMenuAction(Act).Menu.Count > 0) then
+        begin
+          Btn.Style := tbsDropDown;
+          Btn.IDEMenu := TPopupMenu.Create(Btn);
+          Btn.IDEMenu.Images := GetIDEImageList;
+          Btn.IDEMenu.Tag := TCnNativeInt(TCnWizMenuAction(Act).Menu);
+          Btn.IDEMenu.OnPopup := Btn.OnLazPopup;
+          Btn.DropdownMenu := Btn.IDEMenu;
+        end;
+{$ENDIF}
 
         // 处理带下拉菜单的按钮
         IDEBtn := FindIDEToolButton(Act);
@@ -796,6 +868,16 @@ begin
   end;
 end;
 
+// 代码工具栏的数据文件名，Lazarus 下使用独立的配置文件
+function GetEditorToolBarDataFileName: string;
+begin
+{$IFDEF LAZARUS}
+  Result := SCnEditorToolBarLazDataName;
+{$ELSE}
+  Result := SCnEditorToolBarDataName;
+{$ENDIF}
+end;
+
 procedure TCnSrcEditorToolBarMgr.ConfigToolBar(AType: TCnSrcEditorToolBarType);
 var
   List: TStringList;
@@ -807,7 +889,7 @@ begin
     if AType = tbtCode then
     begin
       List := FToolBarActions;
-      FileName := SCnEditorToolBarDataName;
+      FileName := GetEditorToolBarDataFileName;
     end
     else
     begin
@@ -938,7 +1020,7 @@ begin
   ShowToolBar := Ini.ReadBool(csToolBar, csShowToolBar, True);
   ShowDesignToolBar := Ini.ReadBool(csToolBar, csShowDesignToolBar, True);
   Wrapable := Ini.ReadBool(csToolBar, csWrapable, True);
-  LoadToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, True));
+  LoadToolBarActions(FToolBarActions, WizOptions.GetUserFileName(GetEditorToolBarDataFileName, True));
   LoadToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, True));
 end;
 
@@ -947,15 +1029,15 @@ begin
   Ini.WriteBool(csToolBar, csShowToolBar, FShowToolBar);
   Ini.WriteBool(csToolBar, csShowDesignToolBar, FShowDesignToolBar);
   Ini.WriteBool(csToolBar, csWrapable, FWrapable);
-  SaveToolBarActions(FToolBarActions, WizOptions.GetUserFileName(SCnEditorToolBarDataName, False));
-  WizOptions.CheckUserFile(SCnEditorToolBarDataName);
+  SaveToolBarActions(FToolBarActions, WizOptions.GetUserFileName(GetEditorToolBarDataFileName, False));
+  WizOptions.CheckUserFile(GetEditorToolBarDataFileName);
   SaveToolBarActions(FDesignToolBarActions, WizOptions.GetUserFileName(SCnEditorDesignToolBarDataName, False));
   WizOptions.CheckUserFile(SCnEditorDesignToolBarDataName);
 end;
 
 procedure TCnSrcEditorToolBarMgr.ResetSettings(Ini: TCustomIniFile);
 begin
-  WizOptions.CleanUserFile(SCnEditorToolBarDataName);
+  WizOptions.CleanUserFile(GetEditorToolBarDataFileName);
   WizOptions.CleanUserFile(SCnEditorDesignToolBarDataName);
 end;
 

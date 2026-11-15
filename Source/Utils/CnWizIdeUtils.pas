@@ -62,7 +62,8 @@ interface
 uses
   Windows, Messages, Classes, Controls, SysUtils, Graphics, Forms, Contnrs,
   Menus, Buttons, ComCtrls, StdCtrls, ExtCtrls, TypInfo, ImgList,
-  {$IFDEF LAZARUS} PackageIntf, ComponentReg, IDEOptionsIntf, {$ENDIF}
+  {$IFDEF LAZARUS} PackageIntf, ComponentReg, IDEOptionsIntf, ActnList,
+  MenuIntf, IDECommands, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, CnWizEditFiler, {$IFDEF IDE_SUPPORT_HDPI}
   Vcl.VirtualImageList, Vcl.ImageCollection, {$ENDIF}
  {$IFDEF COMPILER6_UP}
@@ -73,8 +74,8 @@ uses
   {$IFNDEF STAND_ALONE} {$IFNDEF CNWIZARDS_MINIMUM} CnIDEVersion, {$ENDIF} {$ENDIF}
   {$IFDEF USE_CODEEDITOR_SERVICE} ToolsAPI.Editor, {$ENDIF}
   CnPasCodeParser, CnWidePasParser, CnWizMethodHook, mPasLex, CnPasWideLex,
-  mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnCommon,
-  CnWideStrings, CnWizOptions, CnWizCompilerConst, CnIDEStrings;
+  mwBCBTokenList, CnBCBWideTokenList, CnWizUtils, CnWizMenuAction, CnCommon,
+  CnWideStrings, CnWizOptions, CnWizConsts, CnWizCompilerConst, CnIDEStrings;
 
 //==============================================================================
 // IDE 中的常量定义
@@ -856,6 +857,23 @@ function JoinUsesOrInclude(IsCpp, FileHasUses: Boolean; IsHFromSystem: Boolean;
 
 {$ENDIF}
 {$ENDIF}
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+function FindLazIDEMenuItem(const AName: string): TIDEMenuItem;
+{* 在 Lazarus IDE 菜单中按 Name 递归查找菜单项}
+function FindCnWizardActionByActionName(const AName: string): TCustomAction;
+{* 按 CnWizards Action 名（act<Command>）查找 Action}
+function FindLazToolBarActionByName(ActionList: TCustomActionList;
+  const AName: string): TContainedAction;
+{* 在指定 ActionList 中按名称查找工具栏 Action}
+function CreateLazToolBarAction(AOwner: TComponent;
+  const AName: string): TContainedAction;
+{* 为 Lazarus 工具栏配置项创建代理 Action}
+procedure FillLazToolBarActionList(ActionList: TActionList);
+{* 收集 Lazarus 下可用于工具栏的 CnWizards Action 和 IDE 菜单命令}
+
 {$ENDIF}
 
 implementation
@@ -4838,17 +4856,179 @@ end;
 
 {$ENDIF}
 
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+function FindLazIDEMenuItem(const AName: string): TIDEMenuItem;
+var
+  I: Integer;
+
+  function FindInSection(Section: TIDEMenuSection): TIDEMenuItem;
+  var
+    J: Integer;
+    Item: TIDEMenuItem;
+  begin
+    Result := nil;
+    if Section = nil then
+      Exit;
+    for J := 0 to Section.Count - 1 do
+    begin
+      Item := Section.Items[J];
+      if SameText(Item.Name, AName) then
+      begin
+        Result := Item;
+        Exit;
+      end;
+      if Item is TIDEMenuSection then
+      begin
+        Result := FindInSection(TIDEMenuSection(Item));
+        if Result <> nil then
+          Exit;
+      end;
+    end;
+  end;
+
+begin
+  Result := nil;
+  if IDEMenuRoots = nil then
+    Exit;
+  for I := 0 to IDEMenuRoots.Count - 1 do
+  begin
+    Result := FindInSection(IDEMenuRoots[I]);
+    if Result <> nil then
+      Exit;
+  end;
+end;
+
+function FindCnWizardActionByActionName(const AName: string): TCustomAction;
+var
+  Command: string;
+  Idx: Integer;
+begin
+  Result := nil;
+  if not SameText(Copy(AName, 1, Length(SCnActionPrefix)), SCnActionPrefix) then
+    Exit;
+  Command := Copy(AName, Length(SCnActionPrefix) + 1, MaxInt);
+  Idx := WizActionMgr.IndexOfCommand(Command);
+  if Idx < 0 then
+  begin
+    // 兼容 Delphi 配置中带数字后缀的旧 Action 名
+    while (Command <> '') and (Command[Length(Command)] in ['0'..'9']) do
+      Delete(Command, Length(Command), 1);
+    if Command <> '' then
+      Idx := WizActionMgr.IndexOfCommand(Command);
+  end;
+  if Idx >= 0 then
+    Result := WizActionMgr.WizActions[Idx];
+end;
+
+function FindLazToolBarActionByName(ActionList: TCustomActionList;
+  const AName: string): TContainedAction;
+var
+  I: Integer;
+begin
+  Result := nil;
+  if (ActionList = nil) or (AName = '') then
+    Exit;
+  for I := 0 to ActionList.ActionCount - 1 do
+    if SameText(ActionList.Actions[I].Name, AName) then
+    begin
+      Result := ActionList.Actions[I];
+      Exit;
+    end;
+end;
+
+function CreateLazToolBarAction(AOwner: TComponent;
+  const AName: string): TContainedAction;
+var
+  WizAction: TCustomAction;
+  MenuItem: TIDEMenuItem;
+begin
+  Result := nil;
+  WizAction := FindCnWizardActionByActionName(AName);
+  MenuItem := nil;
+  if WizAction = nil then
+    MenuItem := FindLazIDEMenuItem(AName);
+  if (WizAction = nil) and (MenuItem = nil) then
+    Exit;
+  if WizAction <> nil then
+    Result := TCnLazToolBarAction.Create(AOwner, AName, SCnWizardsActionCategory,
+      WizAction, nil)
+  else
+    Result := TCnLazToolBarAction.Create(AOwner, AName, 'Lazarus IDE', nil, MenuItem);
+end;
+
+procedure FillLazToolBarActionList(ActionList: TActionList);
+var
+  I, J: Integer;
+  WizAction: TCnWizAction;
+  Names: TStringList;
+
+  procedure AddMenuSection(Section: TIDEMenuSection; const Category: string);
+  var
+    K: Integer;
+    Item: TIDEMenuItem;
+  begin
+    if Section = nil then
+      Exit;
+    for K := 0 to Section.Count - 1 do
+    begin
+      Item := Section.Items[K];
+      if Item is TIDEMenuCommand then
+      begin
+        if (Item.Name <> '') and (Names.IndexOf(Item.Name) < 0) then
+        begin
+          Names.Add(Item.Name);
+          TCnLazToolBarAction.Create(ActionList, Item.Name, Category, nil, Item);
+        end;
+      end
+      else if Item is TIDEMenuSection then
+        AddMenuSection(TIDEMenuSection(Item), Category);
+    end;
+  end;
+
+begin
+  if ActionList = nil then
+    Exit;
+  Names := TStringList.Create;
+  try
+    Names.CaseSensitive := False;
+    for I := 0 to WizActionMgr.WizActionCount - 1 do
+    begin
+      WizAction := WizActionMgr.WizActions[I];
+      if (WizAction.Command <> '') and
+        (Names.IndexOf(SCnActionPrefix + WizAction.Command) < 0) then
+      begin
+        Names.Add(SCnActionPrefix + WizAction.Command);
+        TCnLazToolBarAction.Create(ActionList, SCnActionPrefix + WizAction.Command,
+          SCnWizardsActionCategory, WizAction, nil);
+      end;
+    end;
+    if IDEMenuRoots <> nil then
+      for I := 0 to IDEMenuRoots.Count - 1 do
+        for J := 0 to IDEMenuRoots[I].Count - 1 do
+          if IDEMenuRoots[I].Items[J] is TIDEMenuSection then
+            AddMenuSection(TIDEMenuSection(IDEMenuRoots[I].Items[J]),
+              IDEMenuRoots[I].Items[J].Name);
+  finally
+    Names.Free;
+  end;
+end;
+
+{$ENDIF}
+
 initialization
 {$IFDEF DELPHI_OTA}
   // 使用此全局变量可以避免频繁调用 IdeGetIsEmbeddedDesigner 函数
   IdeIsEmbeddedDesigner := IdeGetIsEmbeddedDesigner;
   InitIdeAPIs;
-{$ENDIF}
 
 {$IFDEF IDE_SUPPORT_HDPI}
   FOriginImages := TObjectList.Create(False);
   FVirtualImages := TObjectList.Create(False);
   FImageCollections := TObjectList.Create(False);
+{$ENDIF}
 {$ENDIF}
 
 {$IFDEF DEBUG}
@@ -4860,6 +5040,7 @@ finalization
   CnDebugger.LogEnter('CnWizIdeUtils finalization.');
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
 {$IFDEF IDE_SUPPORT_HDPI}
   FImageCollections.Free;
   FVirtualImages.Free;
@@ -4870,7 +5051,6 @@ finalization
   FWaitDialogHook.Free;
 {$ENDIF}
 
-{$IFDEF DELPHI_OTA}
   if FCnPaletteWrapper <> nil then
     FreeAndNil(FCnPaletteWrapper);
 
@@ -4886,7 +5066,5 @@ finalization
 {$IFDEF DEBUG}
   CnDebugger.LogLeave('CnWizIdeUtils finalization.');
 {$ENDIF}
-{$ENDIF}
-
 end.
 

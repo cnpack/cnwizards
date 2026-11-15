@@ -130,6 +130,9 @@ type
     FSavedToolbarItemIndex: Integer;
     FTextOffset: Integer;
     FActionList: TCustomActionList;
+{$IFDEF LAZARUS}
+    FLazActionList: TActionList;
+{$ENDIF}
     procedure SetupActionListBoxes;
     function GetToolbarActions: TStrings;
     procedure SetToolbarActions(const Value: TStrings);
@@ -231,7 +234,11 @@ begin
   Assert(Assigned(FToolbarActionNames));
   for I := 0 to FToolbarActionNames.Count - 1 do
   begin
+{$IFDEF LAZARUS}
+    Action := FindLazToolBarActionByName(FActionList, FToolbarActionNames[I]);
+{$ELSE}
     Action := FindIDEAction(FToolbarActionNames[I]);
+{$ENDIF}
     if (FToolbarActionNames[I] = csSeparatorCaption) or Assigned(Action) then
       AddActionToListbox(Action, lbToolbar, False);
   end;
@@ -257,7 +264,14 @@ constructor TCnFlatToolbarConfigForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FToolbarActionNames := TStringList.Create;
+{$IFDEF LAZARUS}
+  FLazActionList := TActionList.Create(Self);
+  FLazActionList.Images := GetIDEImageList;
+  FillLazToolBarActionList(FLazActionList);
+  FActionList := FLazActionList;
+{$ELSE}
   FActionList := GetIDEActionList;
+{$ENDIF}
 end;
 
 destructor TCnFlatToolbarConfigForm.Destroy;
@@ -617,7 +631,11 @@ begin
 
     for I := 0 to FToolbarActionNames.Count - 1 do
     begin
+    {$IFDEF LAZARUS}
+      Action := FindLazToolBarActionByName(FActionList, FToolbarActionNames[I]);
+    {$ELSE}
       Action := FindIDEAction(FToolbarActionNames[I]);
+    {$ENDIF}
       if (FToolbarActionNames[I] = csSeparatorCaption) or Assigned(Action) then
         AddActionToListbox(Action, lbToolbar, False);
     end;
