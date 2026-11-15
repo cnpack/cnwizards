@@ -51,11 +51,13 @@ interface
 {$IFDEF CNWIZARDS_CNSRCEDITORENHANCE}
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs, ToolsAPI,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Dialogs,
+  {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF}
   IniFiles, Menus, CnCommon, CnWizUtils, CnConsts, CnWizClasses, CnWizConsts,
   CnWizManager, ComCtrls, ActnList, CnSpin, StdCtrls, ExtCtrls, CnWizMultiLang,
-  Forms, CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorToolBar, CnSrcEditorNav,
-  CnSrcEditorBlockTools, CnSrcEditorKey, CnSrcEditorThumbnail,
+  Forms, {$IFDEF LAZARUS} CnHotKey, {$ENDIF} CnSrcEditorToolBar,
+  {$IFDEF DELPHI_OTA}  CnSrcEditorMisc, CnSrcEditorGutter, CnSrcEditorNav,
+  CnSrcEditorBlockTools, CnSrcEditorKey, CnSrcEditorThumbnail, {$ENDIF}
   CnEditControlWrapper, CnWizNotifier;
 
 const
@@ -200,9 +202,12 @@ type
 
   TCnSrcEditorEnhance = class(TCnIDEEnhanceWizard)
   private
+{$IFDEF DELPHI_OTA}
     FEditorMisc: TCnSrcEditorMisc;
     FThumbnail: TCnSrcEditorThumbnail;
+{$ENDIF}
     FToolbarMgr: TCnSrcEditorToolBarMgr;
+{$IFDEF DELPHI_OTA}
     FGutterMgr: TCnSrcEditorGutterMgr;
     FNavMgr: TCnSrcEditorNavMgr;
     FBlockTools: TCnSrcEditorBlockTools;
@@ -212,6 +217,7 @@ type
     procedure EditControlNotify(EditControl: TControl; EditWindow: TCustomForm;
       Operation: TOperation);
     procedure CheckToolBarEnableOnIdle(Sender: TObject);
+{$ENDIF}
 {$ENDIF}
   protected
     procedure SetActive(Value: Boolean); override;
@@ -234,14 +240,17 @@ type
     procedure LanguageChanged(Sender: TObject); override;
 
   published
+{$IFDEF DELPHI_OTA}
     property GutterMgr: TCnSrcEditorGutterMgr read FGutterMgr;
     property NavMgr: TCnSrcEditorNavMgr read FNavMgr;
-
+{$ENDIF}
     property ToolBarMgr: TCnSrcEditorToolBarMgr read FToolbarMgr;
+{$IFDEF DELPHI_OTA}
     property EditorMisc: TCnSrcEditorMisc read FEditorMisc;
     property Thumbnail: TCnSrcEditorThumbnail read FThumbnail;
     property BlockTools: TCnSrcEditorBlockTools read FBlockTools;
     property EditorKey: TCnSrcEditorKey read FEditorKey;
+{$ENDIF}
   end;
 
 {$ENDIF CNWIZARDS_CNSRCEDITORENHANCE}
@@ -369,7 +378,11 @@ procedure TCnSrcEditorEnhanceForm.btnSelectDirClick(Sender: TObject);
 var
   NewDir: string;
 begin
+{$IFDEF DELPHI_OTA}
   NewDir := ReplaceToActualPath(edtDir.Text);
+{$ELSE}
+  NewDir := '';
+{$ENDIF}
   if GetDirectory(SCnSelectDir, NewDir) then
     edtDir.Text := NewDir;
 end;
@@ -447,14 +460,17 @@ end;
 constructor TCnSrcEditorEnhance.Create;
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
   FEditorMisc := TCnSrcEditorMisc.Create;
   FThumbnail := TCnSrcEditorThumbnail.Create;
+{$ENDIF}
   FToolbarMgr := TCnSrcEditorToolBarMgr.Create;
 
   if Assigned(CreateEditorToolBarServiceProc) then
     CreateEditorToolBarServiceProc();
 
   FToolbarMgr.OnEnhConfig := OnEnhConfig_1;
+{$IFDEF DELPHI_OTA}
   FGutterMgr := TCnSrcEditorGutterMgr.Create;
   FGutterMgr.OnEnhConfig := OnEnhConfig_1;
 
@@ -469,10 +485,12 @@ begin
   EditControlWrapper.AddEditorChangeNotifier(EditorChanged);
   EditControlWrapper.AddEditControlNotifier(EditControlNotify);
 {$ENDIF}
+{$ENDIF}
 end;
 
 destructor TCnSrcEditorEnhance.Destroy;
 begin
+{$IFDEF DELPHI_OTA}
 {$IFDEF BDS}
   EditControlWrapper.RemoveEditorChangeNotifier(EditorChanged);
   EditControlWrapper.RemoveEditControlNotifier(EditControlNotify);
@@ -480,26 +498,32 @@ begin
   FThumbnail.Free;
   FEditorMisc.Free;
   FToolbarMgr.Free;
-
+{$ENDIF}
   CnEditorToolBarService := nil;
+{$IFDEF DELPHI_OTA}
   FGutterMgr.Free;
   FNavMgr.Free;
   FBlockTools.Free;
   FEditorKey.Free;
+{$ENDIF}
   inherited;
 end;
 
 procedure TCnSrcEditorEnhance.LanguageChanged(Sender: TObject);
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
   FEditorMisc.LanguageChanged(Sender);
+{$ENDIF}
   FToolbarMgr.LanguageChanged(Sender);
   if CnEditorToolBarService <> nil then
     CnEditorToolBarService.LanguageChanged;
+{$IFDEF DELPHI_OTA}
   FGutterMgr.LanguageChanged(Sender);
   FNavMgr.LanguageChanged(Sender);
   FBlockTools.LanguageChanged(Sender);
   FEditorKey.LanguageChanged(Sender);
+{$ENDIF}
 end;
 
 //------------------------------------------------------------------------------
@@ -508,47 +532,63 @@ end;
 
 procedure TCnSrcEditorEnhance.LoadSettings(Ini: TCustomIniFile);
 begin
+{$IFDEF DELPHI_OTA}
   FEditorMisc.LoadSettings(Ini);
   FThumbnail.LoadSettings(Ini);
+{$ENDIF}
   FToolbarMgr.LoadSettings(Ini);
+{$IFDEF DELPHI_OTA}
   FGutterMgr.LoadSettings(Ini);
   FNavMgr.LoadSettings(Ini);
   FBlockTools.LoadSettings(Ini);
   FEditorKey.LoadSettings(Ini);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorEnhance.SaveSettings(Ini: TCustomIniFile);
 begin
+{$IFDEF DELPHI_OTA}
   FEditorMisc.SaveSettings(Ini);
   FThumbnail.SaveSettings(Ini);
+{$ENDIF}
   FToolbarMgr.SaveSettings(Ini);
+{$IFDEF DELPHI_OTA}
   FGutterMgr.SaveSettings(Ini);
   FNavMgr.SaveSettings(Ini);
   FBlockTools.SaveSettings(Ini);
   FEditorKey.SaveSettings(Ini);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorEnhance.ResetSettings(Ini: TCustomIniFile);
 begin
+{$IFDEF DELPHI_OTA}
   FEditorMisc.ResetSettings(Ini);
   FThumbnail.ResetSettings(Ini);
+{$ENDIF}
   FToolbarMgr.ResetSettings(Ini);
+{$IFDEF DELPHI_OTA}
   FGutterMgr.ResetSettings(Ini);
   FNavMgr.ResetSettings(Ini);
   FBlockTools.ResetSettings(Ini);
   FEditorKey.ResetSettings(Ini);
+{$ENDIF}
 end;
 
 procedure TCnSrcEditorEnhance.SetActive(Value: Boolean);
 begin
   inherited;
+{$IFDEF DELPHI_OTA}
   FEditorMisc.Active := Value;
   FThumbnail.Active := Value;
+{$ENDIF}
   FToolbarMgr.Active := Value;
+{$IFDEF DELPHI_OTA}
   FGutterMgr.Active := Value;
   FNavMgr.Active := Value;
   FBlockTools.Active := Value;
   FEditorKey.Active := Value;
+{$ENDIF}
 end;
 
 function TCnSrcEditorEnhance.GetHasConfig: Boolean;
@@ -566,6 +606,7 @@ begin
   with TCnSrcEditorEnhanceForm.Create(nil) do
   try
     pgc1.ActivePageIndex := APageIndex;
+{$IFDEF DELPHI_OTA}
     chkAddMenuCloseOtherPages.Checked := FEditorMisc.AddMenuCloseOtherPages;
     chkAddMenuSelAll.Checked := FEditorMisc.AddMenuSelAll;
     chkAddMenuExplore.Checked := FEditorMisc.AddMenuExplore;
@@ -587,10 +628,12 @@ begin
 
     chkDblClkClosePage.Checked := FEditorMisc.DblClickClosePage;
     chkRClickShellMenu.Checked := FEditorMisc.RClickShellMenu;
+{$ENDIF}
 
     chkShowToolBar.Checked := FToolbarMgr.ShowToolBar;
     chkToolBarWrap.Checked := FToolbarMgr.Wrapable;
 
+{$IFDEF DELPHI_OTA}
     chkShowLineNumber.Checked := FGutterMgr.ShowLineNumber;
     chkShowLineCount.Checked := FGutterMgr.ShowLineCount;
     chkRelativeNumber.Checked := FGutterMgr.RelativeNumber;
@@ -654,11 +697,13 @@ begin
   {$ENDIF}
 
     chkShowThumbnail.Checked := FThumbnail.ShowThumbnail;
+{$ENDIF}
 
     UpdateContent(nil);
 
     if ShowModal = mrOK then
     begin
+{$IFDEF DELPHI_OTA}
       FEditorMisc.AddMenuCloseOtherPages := chkAddMenuCloseOtherPages.Checked;
       FEditorMisc.AddMenuSelAll := chkAddMenuSelAll.Checked;
       FEditorMisc.AddMenuExplore := chkAddMenuExplore.Checked;
@@ -691,10 +736,10 @@ begin
       FEditorMisc.AddMenuBlockTools := chkAddMenuBlockTools.Checked;
       FEditorMisc.AutoSave := chkAutoSave.Checked;
       FEditorMisc.SaveInterval := seSaveInterval.Value;
-
+{$ENDIF}
       FToolbarMgr.ShowToolBar := chkShowToolBar.Checked;
       FToolbarMgr.Wrapable := chkToolBarWrap.Checked;
-
+{$IFDEF DELPHI_OTA}
       FGutterMgr.ShowLineNumber := chkShowLineNumber.Checked;
       FGutterMgr.ShowLineCount := chkShowLineCount.Checked;
       FGutterMgr.RelativeNumber := chkRelativeNumber.Checked;
@@ -744,6 +789,7 @@ begin
     {$ENDIF}
 
       FThumbnail.ShowThumbnail := chkShowThumbnail.Checked;
+{$ENDIF}
       DoSaveSettings;
     end;
   finally

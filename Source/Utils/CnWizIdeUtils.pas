@@ -498,7 +498,8 @@ function IsEditControl(AControl: TComponent): Boolean;
 
 function EnumEditControl(Proc: TEnumEditControlProc; Context: Pointer;
   EditorMustExists: Boolean = True): Integer;
-{* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数 }
+{* 枚举 IDE 中的代码编辑器窗口和 EditControl 控件，调用回调函数，返回总数。
+  其中回调中传的 EditWindow，Lazarus 中是 SourceNotebook: TSourceNotebook }
 
 {$IFDEF LAZARUS}
 

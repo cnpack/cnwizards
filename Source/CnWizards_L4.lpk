@@ -496,6 +496,10 @@
         <Filename Value="CodingToolset\CnEditorJumpMessage.pas"/>
         <UnitName Value="CnEditorJumpMessage"/>
       </Item>
+      <Item>
+        <Filename Value="SrcEditorEnhance\CnSrcEditorEnhance.pas"/>
+        <UnitName Value="CnSrcEditorEnhance"/>
+      </Item>
     </Files>
     <RequiredPkgs>
       <Item>

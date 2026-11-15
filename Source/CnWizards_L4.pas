@@ -38,7 +38,7 @@ uses
   CnIniFilerFrm, CnIniFilerWizard, CnSourceHighlight, CnReplaceWizard, 
   CnIdeEnhanceMenu, CnInputHelper, CnInputHelperEditFrm, CnInputHelperFrm, 
   CnInputSymbolList, CnInputLazSymbolList, CnEditorJumpMessage, 
-  LazarusPackageIntf;
+  CnSrcEditorEnhance, LazarusPackageIntf;
 
 implementation
 

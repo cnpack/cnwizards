@@ -4650,7 +4650,6 @@ end;
 
 procedure TCnProcListWizard.EditorToolBarEnable(const Value: Boolean);
 begin
-{$IFDEF DELPHI_OTA}
   if CnEditorToolBarService <> nil then
   begin
     if Value then
@@ -4678,7 +4677,6 @@ begin
     end;
   end
   else
-{$ENDIF}
     FUseEditorToolBar := False;
 end;
 

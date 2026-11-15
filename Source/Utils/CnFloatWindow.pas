@@ -189,8 +189,11 @@ function TCnFloatListBox.AdjustHeight(AHeight: Integer): Integer;
 var
   BorderSize: Integer;
 begin
-  BorderSize := Height - ClientHeight;
-  Result := Max((AHeight - BorderSize) div ItemHeight, 4) * ItemHeight + BorderSize;
+  if ItemHeight > 0 then
+  begin
+    BorderSize := Height - ClientHeight;
+    Result := Max((AHeight - BorderSize) div ItemHeight, 4) * ItemHeight + BorderSize;
+  end;
 end;
 
 {$IFNDEF FPC}

@@ -2917,7 +2917,7 @@ end;
 {$IFDEF DELPHI_OTA}
 
 // 将 $(DELPHI) 这样的符号替换为 Delphi 所在路径
-function ReplaceToActualPath(const Path: string; Project: IOTAProject = nil): string;
+function ReplaceToActualPath(const Path: string; Project: IOTAProject): string;
 {$IFDEF COMPILER6_UP}
 var
   Vars: TStringList;
