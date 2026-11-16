@@ -5130,6 +5130,13 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnProcListComboBox.DropDownListClick');
 {$ENDIF}
+
+{$IFNDEF LAZARUS}
+  // Lazarus 下浮窗列表被 SetParent 摘出到桌面层，键盘选中导致的
+  // LBN_SELCHANGE 通知发给桌面窗口而丢失，FDisableClickFlag 设了
+  // 也没有自动 Click 来消耗它，反而会吞掉用户的第一次真实点击。
+  // LCL 下 OnClick 只由真实鼠标点击触发，无需屏蔽。
+
   if FDropDownList.FDisableClickFlag then
   begin
     // 屏蔽一次单击下拉触发事件
@@ -5139,6 +5146,8 @@ begin
     FDropDownList.FDisableClickFlag := False;
     Exit;
   end;
+
+{$ENDIF}
 
   if FDropDownList.ItemIndex >= 0 then
     PostMessage(Handle, WM_KEYDOWN, VK_RETURN, 0);
